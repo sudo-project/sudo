@@ -2,7 +2,7 @@ dnl
 dnl Process this file with GNU autoconf to produce a configure script.
 dnl $Sudo$
 dnl
-dnl Copyright (c) 1994-1996,1998-1999 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2001 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_INIT(sudo.h)
 AC_CONFIG_HEADER(config.h pathnames.h)
@@ -1321,9 +1321,6 @@ case "$host" in
 		mansectform=4
 		;;
     *-*-irix*)
-		# configure may not think irix has stdc headers
-		# but it's good enough for sudo
-		AC_DEFINE(STDC_HEADERS)
 		CPPFLAGS="${CPPFLAGS} -D_BSD_TYPES"
 		if test -z "$NROFFPROG"; then
 		    MAN_POSTINSTALL='	/bin/rm -f $(mandir8)/sudo.$(mansect8).z $(mandir8)/visudo.$(mansect8).z $(mandir5)/sudoers.$(mansect5).z ; /usr/bin/pack $(mandir8)/sudo.$(mansect8) $(mandir8)/visudo.$(mansect8) $(mandir5)/sudoers.$(mansect5)'
