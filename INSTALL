@@ -14,9 +14,10 @@ INSTALL NOTES
    files betweem builds in this case.  Basically, you should do a
    "make realclean" before you run configure each time.
 
-   NOTE: if you use C2 security you need to use the --with-C2 flag to
-   configure.  Currently this only affects SunOS 4.x, hpux 9.x, ultrix 4.x,
-   Digital UNIX and ConvexOS with C2 security.  For hpux only, you can use
+   NOTE: if you use shadow passwords or C2 security you need to use the
+   --with-C2 flag to configure.  Currently this only works for SunOS 4.x,
+   hpux 9.x, ultrix 4.x, Digital UNIX (aka DEC OSF1), Irix 5.x and
+   ConvexOS with C2 security.  For hpux only, you can use
    --with-C2 if you are expecting to migrate to C2 security later but it
    makes password lookups about twice as slow.
 
@@ -25,6 +26,10 @@ INSTALL NOTES
    NOTE3: if you use kerberos version 4 you need to run configure
    with --with-kerb4.  This has only been tested with the Cygnus
    kerberos package (CNS) but should work for vanilla kerberos too.
+   If you use kerberos version 5 you need to run configure with --with-kerb5.
+   This enables the same code as --with-kerb4 but also adds in the
+   kerb4 compatibility libraries.  Kerb5 support is currently untested,
+   please let us know if it work for you.
 
 1) Read the OPTIONS file and then edit options.h to enable/disable the
    options you may or may not want.  You should not have to edit
