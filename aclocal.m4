@@ -326,7 +326,10 @@ fi
 
 dnl
 dnl check for "long long"
+dnl XXX cache
 dnl
 AC_DEFUN(SUDO_LONG_LONG, [AC_MSG_CHECKING(for long long support)
 AC_TRY_COMPILE(, [long long foo; foo = 1;], AC_DEFINE(HAVE_LONG_LONG)
+[AC_TRY_RUN([main() {if (sizeof(long long) == sizeof(long)) exit(0); else exit(1);}], AC_DEFINE(LONG_IS_QUAD))]
 AC_MSG_RESULT(yes), AC_MSG_RESULT(no))])
+

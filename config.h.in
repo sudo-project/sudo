@@ -99,6 +99,9 @@
 /* Define if your compiler supports the "long long" type.  */
 #undef HAVE_LONG_LONG
 
+/* Define if sizeof(long) == sizeof(long long).  */
+#undef LONG_IS_QUAD
+
 /* Solaris doesn't use const qualifiers in PAM. */
 #ifdef sun
 #define PAM_CONST

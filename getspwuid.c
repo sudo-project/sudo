@@ -36,36 +36,37 @@
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
-#include <stdlib.h>
+# include <stdlib.h>
 #endif /* STDC_HEADERS */
 #ifdef HAVE_STRING_H
-#include <string.h>
+# include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+# include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/param.h>
 #include <pwd.h>
 #ifdef HAVE_GETSPNAM
-#  include <shadow.h>
+# include <shadow.h>
 #endif /* HAVE_GETSPNAM */
 #ifdef HAVE_GETPRPWNAM
-#  ifdef __hpux
-#    include <hpsecurity.h>
-#  else
-#    include <sys/security.h>
-#  endif /* __hpux */
-#  include <prot.h>
+# ifdef __hpux
+#  undef MAXINT
+#  include <hpsecurity.h>
+# else
+#  include <sys/security.h>
+# endif /* __hpux */
+# include <prot.h>
 #endif /* HAVE_GETPRPWNAM */
 #ifdef HAVE_GETPWANAM
-#  include <sys/label.h>
-#  include <sys/audit.h>
-#  include <pwdadj.h>
+# include <sys/label.h>
+# include <sys/audit.h>
+# include <pwdadj.h>
 #endif /* HAVE_GETPWANAM */
 #ifdef HAVE_GETAUTHUID
-#  include <auth.h>
+# include <auth.h>
 #endif /* HAVE_GETAUTHUID */
 
 #include "sudo.h"

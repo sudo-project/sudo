@@ -51,6 +51,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 #ifdef __hpux
+#  undef MAXINT
 #  include <hpsecurity.h>
 #else
 #  include <sys/security.h>

@@ -86,10 +86,18 @@ static int xxxprintf	 __P((char **, size_t, int, const char *, va_list));
 #endif
 #ifdef HAVE_LONG_LONG
 # ifndef UQUAD_MAX
-#  define UQUAD_MAX	((unsigned long long)-1)
+#  ifdef ULONG_LONG_MAX
+#   define UQUAD_MAX	ULONG_LONG_MAX
+#  else
+#   define UQUAD_MAX	((unsigned long long)-1)
+#  endif
 # endif
 # ifndef QUAD_MAX
-#  define QUAD_MAX	(UQUAD_MAX / 2)
+#  ifdef LONG_LONG_MAX
+#   define QUAD_MAX	LONG_LONG_MAX
+#  else
+#   define QUAD_MAX	(UQUAD_MAX / 2)
+#  endif
 # endif
 #endif /* HAVE_LONG_LONG */
 
@@ -200,7 +208,7 @@ __ultoa(val, endp, base, octzero, xdigs)
 
 /* Identical to __ultoa, but for quads. */
 #ifdef HAVE_LONG_LONG
-# if UQUAD_MAX == ULONG_MAX
+# ifdef LONG_IS_QUAD
 #  define __uqtoa(v, e, b, o, x) __ultoa((unsigned long)(v), (e), (b), (o), (x))
 # else
 static char *
@@ -723,7 +731,7 @@ snprintf(str, n, fmt, va_alist)
 }
 #endif /* HAVE_SNPRINTF */
 
-#ifdef HAVE_VASPRINTF
+#ifndef HAVE_VASPRINTF
 int
 vasprintf(str, fmt, ap)
 	char **str;

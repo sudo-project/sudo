@@ -64,7 +64,13 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
-#include <prot.h>
+# ifdef __hpux
+#  undef MAXINT
+#  include <hpsecurity.h>
+# else
+#  include <sys/security.h>
+# endif /* __hpux */
+# include <prot.h>
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
 #include "sudo.h"
