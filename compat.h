@@ -30,9 +30,9 @@
 /* Deal with ansi stuff reasonably.  */
 #ifndef  __P
 #  if defined (__cplusplus) || defined (__STDC__)
-#    define __P(args)     args
+#    define __P(args)		args
 #  else
-#    define __P(args)     ()
+#    define __P(args)		()
 #  endif
 #endif /* __P */
 
@@ -85,21 +85,35 @@
 #endif /* S_IRWXU */
 
 /*
- * For alternate password schemes we need longer passwords
+ * We need to know how long the longest password may be.
+ * For alternate password schemes we need longer passwords.
+ * This is a bit, ummm, gross but necesary.
  */
 #if defined(HAVE_KERB4) || defined(HAVE_DCE) || defined(HAVE_SKEY)
 #  undef _PASSWD_LEN
-#  define _PASSWD_LEN	256
+#  define _PASSWD_LEN		256
+#else
+#  ifndef _PASSWD_LEN
+#    ifdef PASS_MAX
+#      define _PASSWD_LEN	PASS_MAX
+#    else
+#      ifdef HAVE_C2_SECURITY
+#        define _PASSWD_LEN	24
+#      else
+#        define _PASSWD_LEN	8
+#      endif /* HAVE_C2_SECURITY */
+#    endif /* PASS_MAX */
+#  endif /* !_PASSWD_LEN */
 #endif /* HAVE_KERB4 || HAVE_DCE || HAVE_SKEY */
 
 /*
  * Some OS's lack these
  */
 #ifndef UID_NO_CHANGE
-#  define UID_NO_CHANGE	((uid_t) -1)
+#  define UID_NO_CHANGE		((uid_t) -1)
 #endif /* UID_NO_CHANGE */
 #ifndef GID_NO_CHANGE
-#  define GID_NO_CHANGE	((gid_t) -1)
+#  define GID_NO_CHANGE		((gid_t) -1)
 #endif /* GID_NO_CHANGE */
 
 /*
