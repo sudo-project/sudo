@@ -109,10 +109,6 @@ int securid_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(0, "sia", \
 	    NULL, sia_setup, sia_verify, sia_cleanup)
-#elif defined(HAVE_DCE)
-#  define AUTH_STANDALONE \
-	AUTH_ENTRY(0, "dce", \
-	    NULL, NULL, dce_verify, NULL)
 #elif defined(HAVE_AUTHENTICATE)
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(0, "aixauth", \

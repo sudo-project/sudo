@@ -73,6 +73,9 @@ sudo_auth auth_switch[] = {
 #  ifdef HAVE_AFS
     AUTH_ENTRY(0, "afs", NULL, NULL, afs_verify, NULL)
 #  endif
+#  ifdef HAVE_DCE
+    AUTH_ENTRY(0, "dce", NULL, NULL, dce_verify, NULL)
+#  endif
 #  ifdef HAVE_KERB4
     AUTH_ENTRY(0, "kerb4", kerb4_init, NULL, kerb4_verify, NULL)
 #  endif
