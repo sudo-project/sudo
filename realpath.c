@@ -69,9 +69,9 @@ extern int lstat();
  * Prototypes
  */
 #ifdef HAVE_FCHDIR
-static char * realpath_ret	__P((char *, FILE *));
+static void realpath_restore	__P((FILE *));
 #else
-static char * realpath_ret	__P((char *, char *));
+static void realpath_restore	__P((char *));
 #endif /* HAVE_FCHDIR */
 
 
@@ -97,7 +97,7 @@ char * realpath(old, new)
 #ifdef HAVE_FCHDIR
     FILE * cwd;					/* current working dir */
 #else
-    static char cwd[MAXPATHLEN];		/* old working dir */
+    char cwd[MAXPATHLEN];			/* old working dir */
 #endif /* HAVE_FCHDIR */
     struct stat statbuf;			/* for lstat() */
     char * temp;				/* temporary ptr */
@@ -127,8 +127,10 @@ char * realpath(old, new)
     while (!lstat(new, &statbuf) && (statbuf.st_mode & _S_IFMT) == _S_IFLNK) {
 	/* it's a link */
 
-	if ((len = readlink(new, buf, sizeof(buf))) <= 0)
-	    return(realpath_ret(NULL, cwd));
+	if ((len = readlink(new, buf, sizeof(buf))) <= 0) {
+	    realpath_restore(cwd);
+	    return(NULL);
+	}
 	buf[len] = '\0';
 
 	/*
@@ -143,7 +145,8 @@ char * realpath(old, new)
 
 	    if (strlen(new) + strlen(buf) >= MAXPATHLEN ) {
 		errno = ENAMETOOLONG;
-		return(realpath_ret(NULL, cwd));
+		realpath_restore(cwd);
+		return(NULL);
 	    }
 
 	    (void) strcat(new, buf);
@@ -151,8 +154,10 @@ char * realpath(old, new)
     }
 
     /* did an lstat() fail? */
-    if (errno)
-	return(realpath_ret(NULL, cwd));
+    if (errno) {
+	realpath_restore(cwd);
+	return(NULL);
+    }
 
     /*
      * separate the last component from the rest of the path
@@ -161,7 +166,8 @@ char * realpath(old, new)
     if (!(temp = strrchr(new, '/'))) {
 	/* this should not happen */
 	errno = ENOTDIR;
-	return(realpath_ret(NULL, cwd));
+	realpath_restore(cwd);
+	return(NULL);
     }
 
     (void) strcpy(buf, ++temp);
@@ -171,11 +177,15 @@ char * realpath(old, new)
      * chdir() to new and go a getcwd() to find real path then
      * append buf * (last component of the path) and return.
      */
-    if (chdir(new))
-	return(realpath_ret(NULL, cwd));
+    if (chdir(new)) {
+	realpath_restore(cwd);
+	return(NULL);
+    }
 
-    if (!(getcwd(new, MAXPATHLEN)))
-	return(realpath_ret(NULL, cwd));
+    if (!(getcwd(new, MAXPATHLEN))) {
+	realpath_restore(cwd);
+	return(NULL);
+    }
 
     /* append "/" and buf to new but watch for double '/' */
     len = strlen(new);
@@ -189,7 +199,8 @@ char * realpath(old, new)
     }
     (void) strcat(new, buf);
 
-    return(realpath_ret(new, cwd));
+    realpath_restore(cwd);
+    return(new);
 }
 
 
@@ -201,21 +212,18 @@ char * realpath(old, new)
  */
 
 #ifdef HAVE_FCHDIR
-static char * realpath_ret(path, cwd)
-    char * path;
+static void realpath_restore(cwd)
     FILE * cwd;
 {
     int old_errno = errno;			/* so we can restore errno... */
 
-    (void) fchdir(cwd);
+    (void) fchdir(fileno(cwd));
     (void) fclose(cwd);
 
     errno = old_errno;
-    return(path);
 }
 #else
-static char * realpath_ret(path, cwd)
-    char * path;
+static void realpath_restore(cwd)
     char * cwd;
 {
     int old_errno = errno;			/* so we can restore errno... */
@@ -223,6 +231,5 @@ static char * realpath_ret(path, cwd)
     (void) chdir(cwd);
 
     errno = old_errno;
-    return(path);
 }
 #endif /* HAVE_FCHDIR */
