@@ -32,6 +32,10 @@ AC_WITH(C2, AC_DEFINE(HAVE_C2_SECURITY)
 C2=1
 echo 'Configuring for C2 security')
 dnl
+dnl --with-AFS
+AC_WITH(AFS, AC_DEFINE(HAVE_ AFS)
+echo 'Configuring for use with AFS')
+dnl
 dnl --with-csops
 AC_WITH(csops, OPTIONS="${OPTIONS} -DUSE_INSULTS -DENV_EDITOR -DSHORT_MESSAGE"
 echo 'CSOps--adding options: USE_INSULTS ENV_EDITOR SHORT_MESSAGE')
