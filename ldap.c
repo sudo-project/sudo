@@ -615,12 +615,11 @@ int pwflag;
 
   rc=ldap_search_s(ld,ldap_conf.base,LDAP_SCOPE_ONELEVEL,
              "cn=defaults",NULL,0,&result);
-  if (!rc) {
-    entry=ldap_first_entry(ld,result);
+  if (!rc && (entry=ldap_first_entry(ld,result))){
     if (ldap_conf.debug) printf("found:%s\n",ldap_get_dn(ld,entry));
     sudo_ldap_parse_options(ld,entry);
   } else {
-    if (ldap_conf.debug) printf("no options found\n");
+    if (ldap_conf.debug) printf("no default options found!\n");
   }
 
   if (result) ldap_msgfree(result);
