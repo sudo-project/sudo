@@ -420,7 +420,7 @@ reparse_sudoers(editor, strict, quiet)
 	if (parse_error) {
 	    /* Edit file with the parse error */
 	    for (sp = sudoerslist.first; sp != NULL; sp = sp->next) {
-		if (strcmp(sp->path, errorfile) == 0) {
+		if (errorfile == NULL || strcmp(sp->path, errorfile) == 0) {
 		    edit_sudoers(sp, editor, errorlineno);
 		    break;
 		}
