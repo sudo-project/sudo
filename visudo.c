@@ -55,6 +55,7 @@ static char rcsid[] = "$Id$";
 #include <sys/file.h>
 
 #include "sudo.h"
+#include "version.h"
 
 #ifndef STDC_HEADERS
 extern char *getenv();
@@ -66,6 +67,7 @@ extern int errno, yylineno;
 /*
  * Globals
  */
+char **Argv;
 char buffer[BUFSIZ];
 char *sudoers = _PATH_SUDO_SUDOERS;
 char *sudoers_tmp_file = _PATH_SUDO_STMP;
@@ -73,6 +75,12 @@ int  status = 0,
      err_line_no = 0;
 FILE *sudoers_tmp_fp=NULL,
      *sudoers_fp=NULL;
+
+/*
+ * local functions not visible outside visudo.c
+ */
+static void usage();
+
 
 static RETSIGTYPE Exit(sig)
     int sig;
@@ -94,6 +102,21 @@ main(argc, argv)
 #ifdef ENV_EDITOR
     char * Editor;
 #endif /* ENV_EDITOR */
+
+    Argv = argv;
+
+    if (argc > 1) {
+	/*
+	 * print version string and exit if we got -v
+	 */
+	if (!strcmp(argv[1], "-v")) {
+	    (void) printf("visudo version %s\n", version);
+	    exit(0);
+	} else {
+	    usage();
+	}
+
+    }
 
     /*
      * handle the signals
@@ -238,4 +261,18 @@ main(argc, argv)
 	    perror("chmod: failed");
 	exit(0);
     }
+}
+
+
+/**********************************************************************
+ *
+ * usage()
+ *
+ *  this function just gives you instructions and exits
+ */
+
+static void usage()
+{
+    (void) fprintf(stderr, "usage: %s [-v]\n", *Argv);
+    exit(1);
 }
