@@ -361,6 +361,8 @@ bindist:
 	      cp ../../$(srcdir)/$$i `basename $$i .binary` ; \
 	    fi ; \
 	  done ; \
+	  strip sudo ; \
+	  strip visudo ; \
 	  cd .. ; tar Ocf ../sudo-$(VERSION)-`arch -l`.tar sudo-$(VERSION) ; \
 	)  
 	gzip --best sudo-$(VERSION)-`arch -l`.tar
