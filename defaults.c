@@ -260,8 +260,11 @@ dump_defaults()
 		    }
 		    break;
 		case T_INT:
-		case T_MODE:
 		    (void) printf(cur->desc, cur->sd_un.ival);
+		    putchar('\n');
+		    break;
+		case T_MODE:
+		    (void) printf(cur->desc, cur->sd_un.mode);
 		    putchar('\n');
 		    break;
 	    }
@@ -665,7 +668,7 @@ store_mode(val, def, op)
     long l;
 
     if (op == FALSE) {
-	def->sd_un.mode = 0777;
+	def->sd_un.mode = (mode_t)0777;
     } else {
 	l = strtol(val, &endp, 8);
 	if (*endp != '\0' || l < 0 || l >= 0777)
