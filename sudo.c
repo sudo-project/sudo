@@ -149,20 +149,18 @@ extern int printmatches;
  * Table of "bad" envariables to remove and len for strncmp()
  */
 struct env_table badenv_table[] = {
+    { "IFS=", 4 },
     { "LD_", 3 },
+    { "_RLD_", 5 },
 #ifdef __hpux
     { "SHLIB_PATH=", 11 },
 #endif /* __hpux */
 #ifdef _AIX
     { "LIBPATH=", 8 },
 #endif /* _AIX */
-#if defined (__osf__) && defined(__alpha)
-    { "_RLD_", 5 },
-#endif /* __alpha && __alpha */
 #ifdef HAVE_KERB4
     { "KRB_CONF", 8 },
 #endif
-    { "IFS=", 4 },
     { (char *) NULL, 0 }
 };
 
