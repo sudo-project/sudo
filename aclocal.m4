@@ -229,7 +229,10 @@ if test -n "$UNAMEPROG"; then
     if test "$OS" = `$UNAMEPROG -n`; then
 	# evil hack for ISC unix (svr4)
 	if test "`$UNAMEPROG -m`" = "i386"; then
-	    OS="isc"
+	    case "`$UNAMEPROG -X`" in
+		"/"* | "uname"*)	OS="isc" ;;
+		*)			OS="sco" ;;
+	    esac
 	else
 	    OS=`$UNAMEPROG -v`
 	fi
