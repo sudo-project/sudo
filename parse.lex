@@ -69,8 +69,12 @@ static int arg_size = 0;
 static void fill		__P((char *, int));
 static void fill_cmnd		__P((char *, int));
 static void fill_args		__P((char *, int, int));
+static int buffer_frob		__P((const char *));
 extern void reset_aliases	__P((void));
-extern void yyerror		__P((char *));
+extern void yyerror		__P((const char *));
+
+#define	push_include(_p)	(buffer_frob((_p)))
+#define	pop_include()		(buffer_frob(NULL))
 
 /* realloc() to size + COMMANDARGINC to make room for command args */
 #define COMMANDARGINC	64
@@ -169,16 +173,33 @@ DEFVAR			[a-z_]+
 			}			/* a command line arg */
 }
 
-<INITIAL>^Defaults[:@>]? {
+<INITIAL>^#include[ \t]+.*\n {
+			    char *cp, *ep;
+			    /* pull out path from #include line */
+			    for (cp = yytext + 9; isspace(*cp); cp++)
+				continue;
+			    for (ep = cp; *ep != '\0' && !isspace(*ep); ep++)
+				continue;
+			    *ep = '\0';
+			    /* push current buffer and switch to include file */
+			    push_include(cp);
+			    LEXTRACE("INCLUDE\n");
+			    BEGIN INITIAL;
+			}
+
+<INITIAL>^Defaults([:@>]{WORD})? {
 			    BEGIN GOTDEFS;
 			    switch (yytext[8]) {
 				case ':':
+				    yyless(9);
 				    LEXTRACE("DEFAULTS_USER ");
 				    return(DEFAULTS_USER);
 				case '>':
+				    yyless(9);
 				    LEXTRACE("DEFAULTS_RUNAS ");
 				    return(DEFAULTS_RUNAS);
 				case '@':
+				    yyless(9);
 				    LEXTRACE("DEFAULTS_HOST ");
 				    return(DEFAULTS_HOST);
 				default:
@@ -373,7 +394,8 @@ sudoedit		{
 				LEXTRACE("ERROR ");
 				return(ERROR);
 			    }
-			    yyterminate();
+			    if (!pop_include())
+				yyterminate();
 			}
 
 %%
@@ -458,6 +480,37 @@ fill_args(s, len, addspace)
     if (strlcpy(p, s, arg_size - (p - yylval.command.args)) != len)
 	yyerror("fill_args: buffer overflow");	/* paranoia */
     arg_len = new_len;
+}
+
+int
+buffer_frob(path)
+    const char *path;
+{
+    static size_t maxbuf, nbuf;
+    static YY_BUFFER_STATE *bufstack;
+    FILE *fp;
+
+    if (path != NULL) {
+	/* XXX - have maxdepth */
+	/* push */
+	if (nbuf >= maxbuf) {
+	    maxbuf += 16;
+	    if ((bufstack = realloc(bufstack, maxbuf)) == NULL)
+		yyerror("unable to allocate memory");
+	}
+	if ((fp = open_sudoers(path)) == NULL)
+	    yyerror(path);
+	bufstack[nbuf++] = YY_CURRENT_BUFFER;
+	yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
+    } else {
+	/* pop */
+	if (nbuf == 0)
+	    return(FALSE);
+	fclose(YY_CURRENT_BUFFER->yy_input_file);
+	yy_delete_buffer(YY_CURRENT_BUFFER);
+	yy_switch_to_buffer(bufstack[--nbuf]);
+    }
+    return(TRUE);
 }
 
 int
