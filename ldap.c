@@ -273,6 +273,8 @@ int sudo_ldap_check_command(ld,entry)
       ret=1;
       if (safe_cmnd) free (safe_cmnd);
       safe_cmnd=estrdup(user_cmnd);
+      if (ldap_conf.debug>1) printf(" MATCH!\n");
+      continue;
     }
 
     /* check for !command */
