@@ -110,9 +110,9 @@ PROGS = @PROGS@
 
 SRCS = alloc.c check.c find_path.c getspwuid.c goodpath.c interfaces.c \
        logging.c parse.c parse.lex parse.yacc sudo.c sudo_setenv.c tgetpass.c \
-       visudo.c $(AUTH_SRCS)
+       version.c visudo.c $(AUTH_SRCS)
 
-AUTH_SRCS = auth/afs.c auth/authenticate.c auth/dce.c auth/fwtk.c auth/kerb4.c \
+AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/dce.c auth/fwtk.c auth/kerb4.c \
 	    auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
 	    auth/secureware.c auth/securid.c auth/sia.c auth/sudo_auth.c
 
@@ -121,7 +121,8 @@ AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 PARSEOBJS = sudo.tab.o lex.yy.o alloc.o
 
 SUDOBJS = check.o getspwuid.o goodpath.o find_path.o interfaces.o logging.o \
-	  parse.o sudo.o sudo_setenv.o tgetpass.o $(AUTH_OBJS) $(PARSEOBJS)
+	  parse.o sudo.o sudo_setenv.o tgetpass.o version.o \
+	  $(AUTH_OBJS) $(PARSEOBJS)
 
 VISUDOBJS = visudo.o $(PARSEOBJS)
 
@@ -188,7 +189,7 @@ sudo_auth.o: $(srcdir)/auth/sudo_auth.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 afs.o: $(srcdir)/auth/afs.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
-authenticate.o: $(srcdir)/auth/authenticate.c
+aix_auth.o: $(srcdir)/auth/aix_auth.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 dce.o: $(srcdir)/auth/dce.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
