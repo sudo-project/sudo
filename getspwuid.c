@@ -50,9 +50,6 @@ static char rcsid[] = "$Id$";
 #include <sys/param.h>
 #include <netinet/in.h>
 #include <pwd.h>
-#include "sudo.h"
-
-/* Shadow password includes */
 #ifdef HAVE_GETSPNAM
 #  include <shadow.h>
 #endif /* HAVE_GETSPNAM */
@@ -72,6 +69,8 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_GETAUTHUID
 #  include <auth.h>
 #endif /* HAVE_GETAUTHUID */
+
+#include "sudo.h"
 
 #ifndef STDC_HEADERS
 #ifndef __GNUC__                /* gcc has its own malloc */
@@ -145,11 +144,8 @@ static char *sudo_getepw(pw_ent)
 	if (spw_ent != NULL && spw_ent->ufld.fd_encrypt != NULL) {
 #  ifdef __alpha
 	    crypt_type = spw_ent -> ufld.fd_oldcrypt;
-#    ifdef AUTH_CRYPT_C1CRYPT
-	    if (crypt_type != AUTH_CRYPT_C1CRYPT)
-#    endif /* AUTH_CRYPT_C1CRYPT */
 #  endif /* __alpha */
-		return(spw_ent -> ufld.fd_encrypt);
+	    return(spw_ent -> ufld.fd_encrypt);
 	}
     }
 #endif /* HAVE_GETPRPWUID */

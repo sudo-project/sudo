@@ -59,55 +59,29 @@ static char rcsid[] = "$Id$";
 #include "sudo.h"
 
 
-/*
- * Globals
- */
-#ifdef __alpha
-extern int crypt_type;
-#endif /* __alpha */
-
 /********************************************************************
  *
  *  check_secureware()
  *
  *  This function checks a password against the user's encrypted one
- *  using the SecureWare crypt functions.
+ *  using the SecureWare crypt functions. Returns 1 on a match, else 0.
  */
 
 int check_secureware(pass)
     char *pass;
 {
-#ifndef __alpha
-#  ifdef HAVE_BIGCRYPT
+#ifdef __alpha
+    extern int crypt_type;
+
+    if (crypt_type != -1 &&
+	strcmp(user_passwd, dispcrypt(pass, user_passwd, crypt_type)) == 0)
+	return(1);
+#elif defined(HAVE_BIGCRYPT)
     if (strcmp(user_passwd, bigcrypt(pass, user_passwd)) == 0)
 	return(1);
-#  endif /* HAVE_BIGCRYPT */
-#else /* __alpha */
-    switch (crypt_type) {
-	case AUTH_CRYPT_BIGCRYPT:
-	    if (!strcmp(user_passwd, bigcrypt(pass, user_passwd)))
-		return(1);
-	    break;
-	case AUTH_CRYPT_CRYPT16:
-	    if (!strcmp(user_passwd, crypt16(pass, user_passwd)))
-		return(1);
-	    break;
-#  ifdef AUTH_CRYPT_OLDCRYPT
-	case AUTH_CRYPT_OLDCRYPT:
-	case AUTH_CRYPT_C1CRYPT:
-#  endif
-	case -1:
-	    if (!strcmp(user_passwd, crypt(pass, user_passwd)))
-		return(1);
-	    break;
-	default:
-	    (void) fprintf(stderr,
-		    "%s: Sorry, I don't know how to deal with crypt type %d.\n",
-		    Argv[0], crypt_type);
-	    exit(1);
-    }
-    return(0);
 #endif /* __alpha */
+
+	return(0);
 }
 
 #endif /* HAVE_GETPRPWUID */

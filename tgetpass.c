@@ -70,7 +70,12 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 #ifdef HAVE_GETPRPWUID
-#include <prot.h>			/* for AUTH_MAX_PASSWD_LENGTH */
+#  ifdef __hpux
+#    include <hpsecurity.h>
+#  else
+#    include <sys/security.h>
+#  endif /* __hpux */
+#  include <prot.h>			/* for AUTH_MAX_PASSWD_LENGTH */
 #endif /* HAVE_GETPRPWUID */
 
 #include <pathnames.h>
