@@ -174,7 +174,9 @@ int
 #ifdef __STDC__
 easprintf(char **ret, const char *fmt, ...)
 #else
-easprintf(va_alist)
+easprintf(ret, fmt, va_alist)
+    char **ret;
+    const char *fmt;
     va_dcl
 #endif
 {
@@ -183,12 +185,7 @@ easprintf(va_alist)
 #ifdef __STDC__
     va_start(ap, fmt);
 #else
-    char **ret;
-    const char *fmt;
-
     va_start(ap);
-    ret = va_arg(ap, char **);
-    fmt = va_arg(ap, const char *);
 #endif
     len = vasprintf(ret, fmt, ap);
     va_end(ap);
