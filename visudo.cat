@@ -1,7 +1,7 @@
 
 
 
-visudo(8)              MAINTENANCE COMMANDS             visudo(8)
+.::visudo(8)           MAINTENANCE COMMANDS          .::visudo(8)
 
 
 NNNNAAAAMMMMEEEE
@@ -61,13 +61,13 @@ FFFFIIIILLLLEEEESSSS
 
 
 
-28/Mar/99                      1.6                              1
+22/Jul/1999                    1.6                              1
 
 
 
 
 
-visudo(8)              MAINTENANCE COMMANDS             visudo(8)
+.::visudo(8)           MAINTENANCE COMMANDS          .::visudo(8)
 
 
 EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT VVVVAAAARRRRIIIIAAAABBBBLLLLEEEESSSS
@@ -94,13 +94,8 @@ DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
        This program is distributed in the hope that it will be
        useful, but WITHOUT ANY WARRANTY; without even the implied
        warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-       PURPOSE.  See the GNU General Public License for more
-       details.
-
-       You should have received a copy of the GNU General Public
-       License along with this program; if not, write to the Free
-       Software Foundation, Inc., 675 Mass Ave, Cambridge, MA
-       02139, USA.
+       PURPOSE.  See the LICENSE file distributed with sudo for
+       more details.
 
 CCCCAAAAVVVVEEEEAAAATTTTSSSS
        Due to the syntax of the _s_u_d_o_e_r_s file, there is no way for
@@ -127,18 +122,18 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-28/Mar/99                      1.6                              2
 
 
 
 
 
-visudo(8)              MAINTENANCE COMMANDS             visudo(8)
+22/Jul/1999                    1.6                              2
 
 
 
 
 
+.::visudo(8)           MAINTENANCE COMMANDS          .::visudo(8)
 
 
 
@@ -193,6 +188,11 @@ visudo(8)              MAINTENANCE COMMANDS             visudo(8)
 
 
 
-28/Mar/99                      1.6                              3
+
+
+
+
+
+22/Jul/1999                    1.6                              3
 
 

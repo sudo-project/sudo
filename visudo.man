@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.6  1999/04/05 20:57:24  millert
-''' Crank version to 1.6 and combine copyright statements
+''' Revision 1.7  1999/07/22 13:10:46  millert
+''' regen
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH visudo 8 "1.6" "28/Mar/99" "MAINTENANCE COMMANDS"
+.TH .::visudo 8 "1.6" "22/Jul/1999" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -259,12 +259,8 @@ Please send all bugs, comments, and changes to sudo-bugs@courtesan.com.
 .SH "DISCLAIMER"
 This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-General Public License for more details.
-.Sp
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-675 Mass Ave, Cambridge, MA 02139, USA.
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the LICENSE
+file distributed with sudo for more details.
 .SH "CAVEATS"
 Due to the syntax of the \fIsudoers\fR file, there is no way
 for \fBvisudo\fR to tell the difference between a mistyped
@@ -279,7 +275,7 @@ the individual \fBvisudo\fR program.
 \fIsudo\fR\|(8), \fIvipw\fR\|(8).
 
 .rn }` ''
-.IX Title "visudo 8"
+.IX Title ".::visudo 8"
 .IX Name "visudo - edit the sudoers file"
 
 .IX Header "NAME"

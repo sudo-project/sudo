@@ -1,11 +1,10 @@
-    <HTML> 
-	<HEAD> 
-	    <TITLE>sudo - execute a command as the superuser
+<HTML>
+<HEAD>
+<TITLE>Sudo Manual</TITLE>
+<LINK REV="made" HREF="mailto:root@localhost">
+</HEAD>
 
-</TITLE> 
-	</HEAD>
-
-	<BODY>
+<BODY>
 
 <!-- INDEX BEGIN -->
 
@@ -29,183 +28,117 @@
 <HR>
 <P>
 <HR>
-<H1><A NAME="NAME">NAME
-
-</A></H1>
+<H1><A NAME="NAME">NAME</A></H1>
+<P>
 sudo - execute a command as the superuser
 
-
 <P>
+<HR>
+<H1><A NAME="SYNOPSIS">SYNOPSIS</A></H1>
+<P>
+<STRONG>sudo</STRONG>  <STRONG>-V</STRONG> | <STRONG>-h</STRONG> | <STRONG>-l</STRONG> | <STRONG>-v</STRONG> | <STRONG>-k</STRONG> | <STRONG>-K</STRONG> | <STRONG>-s</STRONG> | <STRONG>-H</STRONG> | [ <STRONG>-b</STRONG> ] | [ <STRONG>-r</STRONG> realm ] | [ <STRONG>-p</STRONG> prompt ] [ <STRONG>-u</STRONG> username/#uid] <EM>command</EM>
+
+
 
 <P>
 <HR>
-<H1><A NAME="SYNOPSIS">SYNOPSIS
-
-</A></H1>
-<STRONG>sudo</STRONG>  <STRONG>-V</STRONG> | <STRONG>-h</STRONG> | <STRONG>-l</STRONG> | <STRONG>-v</STRONG> | <STRONG>-k</STRONG> | <STRONG>-s</STRONG> | <STRONG>-H</STRONG> | [ <STRONG>-b</STRONG> ] | [ <STRONG>-r</STRONG> realm ] | [ <STRONG>-p</STRONG> prompt ] [ <STRONG>-u</STRONG> username/#uid] <EM>command</EM>
-
-
-
-
+<H1><A NAME="DESCRIPTION">DESCRIPTION</A></H1>
 <P>
-
-<P>
-<HR>
-<H1><A NAME="DESCRIPTION">DESCRIPTION
-
-</A></H1>
 <STRONG>sudo</STRONG> allows a permitted user to execute a <EM>command</EM>
-as the superuser (real and effective uid and gid are set to <CODE></CODE> and root's group as set in the passwd file respectively).
-
+as the superuser (real and effective uid and gid are set to <CODE>0</CODE> and root's group as set in the passwd file respectively).
 
 <P>
-
 <STRONG>sudo</STRONG> determines who is an authorized user by consulting the file <EM>/etc/sudoers</EM>. By giving <STRONG>sudo</STRONG> the <CODE>-v</CODE> flag a user can update the time stamp without running a <EM>command.</EM>
 The password prompt itself will also time out if the user's password is not
 entered with N minutes (again, this is defined at installation time and
 defaults to 5 minutes).
 
-
 <P>
-
 If an unauthorized user executes <STRONG>sudo</STRONG>, mail will be sent from the user to the local authorities (defined at
 installation time).
 
-
 <P>
-
 <STRONG>sudo</STRONG> was designed to log via the 4.3 BSD <CODE>syslog(3)</CODE> facility but can
 log to a file instead if so desired (or to both syslog and a file).
 
-
-<P>
-
 <P>
 <HR>
-<H1><A NAME="OPTIONS">OPTIONS
-
-</A></H1>
+<H1><A NAME="OPTIONS">OPTIONS</A></H1>
+<P>
 <STRONG>sudo</STRONG> accepts the following command line options:
 
-
-<P>
-
 <DL>
-<DT><STRONG><A NAME="item__V">-V
-
-</A></STRONG><DD>
+<DT><STRONG><A NAME="item__V">-V</A></STRONG><DD>
+<P>
 The <CODE>-V</CODE> (<EM>version</EM>) option causes <STRONG>sudo</STRONG> to print the version number and exit.
 
-
+<DT><STRONG><A NAME="item__l">-l</A></STRONG><DD>
 <P>
-
-<DT><STRONG><A NAME="item__l">-l
-
-</A></STRONG><DD>
 The <CODE>-l</CODE> (<EM>list</EM>) option will list out the allowed and forbidden commands for the user on
 the current host.
 
-
+<DT><STRONG><A NAME="item__h">-h</A></STRONG><DD>
 <P>
-
-<DT><STRONG><A NAME="item__h">-h
-
-</A></STRONG><DD>
 The <CODE>-h</CODE> (<EM>help</EM>) option causes <STRONG>sudo</STRONG> to print the version of <STRONG>sudo</STRONG> and a usage message before exiting.
 
-
+<DT><STRONG><A NAME="item__v">-v</A></STRONG><DD>
 <P>
-
-<DT><STRONG><A NAME="item__v">-v
-
-</A></STRONG><DD>
 If given the <CODE>-v</CODE> (<EM>validate</EM>) option, <STRONG>sudo</STRONG> will update the user's timestamp file, prompting for the user's password if
 necessary. This extends the <STRONG>sudo</STRONG> timeout to for another N minutes (where N is defined at installation time
 and defaults to 5 minutes) but does not run a command.
 
-
+<DT><STRONG><A NAME="item__k">-k</A></STRONG><DD>
 <P>
+The <CODE>-k</CODE> (<EM>kill</EM>) option to <STRONG>sudo</STRONG> invalidates the user's timestamp file by setting the time on it to the
+epoch. The next time <STRONG>sudo</STRONG> is run a password will be required. This option does not require a password
+and was added to allow a user to revoke <STRONG>sudo</STRONG> permissions from a .logout file.
 
-<DT><STRONG><A NAME="item__k">-k
-
-</A></STRONG><DD>
-The <CODE>-k</CODE> (<EM>kill</EM>) option to <STRONG>sudo</STRONG> removes the user's timestamp file, thus requiring the user's password the
-next time <STRONG>sudo</STRONG> is run. This option does not require a password and was added to allow a
-user to revoke <STRONG>sudo</STRONG> permissions from a .logout file.
-
-
+<DT><STRONG><A NAME="item__K">-K</A></STRONG><DD>
 <P>
+The <CODE>-K</CODE> (sure <EM>kill</EM>) option to <STRONG>sudo</STRONG> removes the user's timestamp file entirely. This option does not require a
+password.
 
-<DT><STRONG><A NAME="item__b">-b
-
-</A></STRONG><DD>
+<DT><STRONG><A NAME="item__b">-b</A></STRONG><DD>
+<P>
 The <CODE>-b</CODE> (<EM>background</EM>) option tells <STRONG>sudo</STRONG> to run the given command in the background. Note that if you use the <CODE>-b</CODE>
 option you cannot use shell job control to manipulate the command.
 
-
+<DT><STRONG><A NAME="item__r">-r</A></STRONG><DD>
 <P>
-
-<DT><STRONG><A NAME="item__r">-r
-
-</A></STRONG><DD>
 The <CODE>-r</CODE> (<EM>realm</EM>) option is only available if <STRONG>sudo</STRONG> was configured with <STRONG>Kerberos</STRONG> version 5 support. It allows the user to specify a
 <STRONG>Kerberos</STRONG> realm other than the system default to use when authenticating the user via <STRONG>Kerberos</STRONG>.
 
-
+<DT><STRONG><A NAME="item__p">-p</A></STRONG><DD>
 <P>
-
-<DT><STRONG><A NAME="item__p">-p
-
-</A></STRONG><DD>
 The <CODE>-p</CODE> (<EM>prompt</EM>) option allows you to override the default password prompt and use a
 custom one. If the password prompt contains the <CODE>%u</CODE> escape, <CODE>%u</CODE> will be replaced by the user's login name. Similarly, <CODE>%h</CODE> will be replaced by the local hostname.
 
-
+<DT><STRONG><A NAME="item__u">-u</A></STRONG><DD>
 <P>
-
-<DT><STRONG><A NAME="item__u">-u
-
-</A></STRONG><DD>
 The <CODE>-u</CODE> (<EM>user</EM>) option causes sudo to run the specified command as a user other than <EM>root</EM>. To specify a <EM>uid</EM> instead of a
 <EM>username</EM>, use ``#uid''.
 
-
+<DT><STRONG><A NAME="item__s">-s</A></STRONG><DD>
 <P>
-
-<DT><STRONG><A NAME="item__s">-s
-
-</A></STRONG><DD>
 The <CODE>-s</CODE> (<EM>shell</EM>) option runs the shell specified by the <EM>SHELL</EM>
 environment variable if it is set or the shell as specified in
 <CODE>passwd(5).</CODE>
 
-
+<DT><STRONG><A NAME="item__H">-H</A></STRONG><DD>
 <P>
-
-<DT><STRONG><A NAME="item__H">-H
-
-</A></STRONG><DD>
 The <CODE>-H</CODE> (<EM>HOME</EM>) option sets the <EM>HOME</EM> environment variable to the homedir of the target user (root by default) as
 specified in <CODE>passwd(5).</CODE>
 
-
+<DT><STRONG><A NAME="item__">--</A></STRONG><DD>
 <P>
-
-<DT><STRONG><A NAME="item__">--
-
-</A></STRONG><DD>
 The <CODE>--</CODE> flag indicates that <STRONG>sudo</STRONG> should stop processing command line arguments. It is most useful in
 conjunction with the <CODE>-s</CODE> flag.
-
-
-<P>
 
 </DL>
 <P>
 <HR>
-<H1><A NAME="RETURN_VALUES">RETURN VALUES
-
-</A></H1>
+<H1><A NAME="RETURN_VALUES">RETURN VALUES</A></H1>
+<P>
 <STRONG>sudo</STRONG> quits with an exit value of 1 if there is a configuration/permission
 problem or if <STRONG>sudo</STRONG> cannot execute the given command. In the latter case the error string is
 printed to stderr via <CODE>perror(3).</CODE> If <STRONG>sudo</STRONG> cannot <CODE>stat(2)</CODE> one or more entries in the user's PATH the
@@ -216,39 +149,29 @@ The most common reason for <CODE>stat(3)</CODE> to return ``permission
 denied'' is if you are running an automounter and one of the directories in
 your PATH is on a machine that is currently unreachable.
 
-
-<P>
-
 <P>
 <HR>
-<H1><A NAME="SECURITY_NOTES">SECURITY NOTES
-
-</A></H1>
+<H1><A NAME="SECURITY_NOTES">SECURITY NOTES</A></H1>
+<P>
 <STRONG>sudo</STRONG> tries to be safe when executing external commands. Variables that control
 how dynamic loading and binding is done can be used to subvert the program
 that <STRONG>sudo</STRONG> runs. To combat this the
 <CODE>LD_*</CODE>, <CODE>_RLD_*</CODE>, <CODE>SHLIB_PATH</CODE> (HP-UX only), and <CODE>LIBPATH</CODE> (AIX only) environment variables are removed from the environment passed on
 to all commands executed.  <STRONG>sudo</STRONG> will also remove the <CODE>IFS</CODE>,
-<CODE>ENV</CODE>, <CODE>BASH_ENV</CODE>, <CODE>KRB_CONF</CODE> and <CODE>KRB5_CONFIG</CODE> variables as they too can pose a threat.
-
+<CODE>ENV</CODE>, <CODE>BASH_ENV</CODE>, <CODE>KRB_CONF</CODE>, <CODE>KRB5_CONFIG</CODE>, <CODE>LOCALDOMAIN</CODE>,
+<CODE>RES_OPTIONS</CODE> and <CODE>HOSTALIASES</CODE> variables as they too can pose a threat.
 
 <P>
-
 To prevent command spoofing, <STRONG>sudo</STRONG> checks ``.'' and ``'' (both denoting current directory) last when searching
 for a command in the user's PATH (if one or both are in the PATH). Note,
 however, that the actual PATH environment variable is <EM>not</EM> modified and is passed unchanged to the program that <STRONG>sudo</STRONG> executes.
 
+<P>
+For security reasons, if your OS supports shared libraries and does not
+disable user-defined library search paths for setuid programs (most do),
+you should either use a linker option that disables this behavior or link <STRONG>sudo</STRONG> statically.
 
 <P>
-
-For security reasons, if your OS supports shared libraries, <STRONG>sudo</STRONG>
-should always be statically linked unless the dynamic loader disables
-user-defined library search paths for setuid programs. (Most modern dynamic
-loaders do this.)
-
-
-<P>
-
 <STRONG>sudo</STRONG> will check the ownership of its timestamp directory (<EM>/var/run/sudo</EM> or <EM>/tmp/.odus</EM> by default) and ignore the directory's contents if it is not owned by root
 and only read, writable, and executable by root. On systems that allow
 users to give files away to root (via chown), if the timestamp directory is
@@ -258,35 +181,26 @@ done is to ``hide'' files by putting them in the timestamp dir. This is
 unlikely to happen since once the timestamp dir is owned by root and
 inaccessible by any other user the user placing files there would be unable
 to get them back out. To get around this issue you can use a directory that
-is not world-writable for the timestamps (<EM>/var/adm/sudo</EM> for instance).
-
+is not world-writable for the timestamps (<EM>/var/adm/sudo</EM> for instance) or create /tmp/.odus with the appropriate owner (root) and
+permissions (0700) in the system startup files.
 
 <P>
-
 <CODE>sudo</CODE> will not honor timestamp files set far in the future. Timestamp files with
 a date greater than current_time + 2 * <CODE>TIMEOUT</CODE>
-will be ignored and sudo complain about a ``preposterous stampfile date''.
-This is done to keep a user from creating his/her own timestamp file with a
-bogus date.
-
-
-<P>
+will be ignored and sudo will log and complain. This is done to keep a user
+from creating his/her own timestamp file with a bogus date on system that
+allow users to give away files.
 
 <P>
 <HR>
-<H1><A NAME="FILES">FILES
-
-</A></H1>
+<H1><A NAME="FILES">FILES</A></H1>
+<P>
 <PRE> /etc/sudoers           file of authorized users.
 </PRE>
-
-<P>
-
 <P>
 <HR>
-<H1><A NAME="ENVIRONMENT_VARIABLES">ENVIRONMENT VARIABLES
-
-</A></H1>
+<H1><A NAME="ENVIRONMENT_VARIABLES">ENVIRONMENT VARIABLES</A></H1>
+<P>
 <PRE> PATH                   Set to a sane value if SECURE_PATH is set
  SHELL                  Used to determine shell to run with -s option
  USER                   Set to the target user (root unless the -u option
@@ -300,92 +214,53 @@ bogus date.
  SUDO_GID               Set to the gid of the user who invoked sudo
  SUDO_PS1               If set, PS1 will be set to its value
 </PRE>
-
-<P>
-
 <P>
 <HR>
-<H1><A NAME="AUTHORS">AUTHORS
-
-</A></H1>
+<H1><A NAME="AUTHORS">AUTHORS</A></H1>
+<P>
 Many people have worked on <STRONG>sudo</STRONG> over the years, this version consists of code written primarily by:
 
-
 <P>
-
-<PRE>        Jeff Nieusma
-        David Hieb
-        Todd Miller
+<PRE>        Todd Miller
         Chris Jepeway
 </PRE>
+<P>
+See the HISTORY file in the <STRONG>sudo</STRONG> distribution for a short history of <STRONG>sudo</STRONG>.
 
 <P>
-
-See the HISTORY file in the <STRONG>sudo</STRONG> distribution for more details.
-
-
-<P>
-
 Please send all bugs, comments, and changes to <A
-HREF="MAILTO:sudo-bugs@courtesan.com.">sudo-bugs@courtesan.com.</A>
-
-
-<P>
+HREF="mailto:sudo-bugs@courtesan.com.">sudo-bugs@courtesan.com.</A>
 
 <P>
 <HR>
-<H1><A NAME="DISCLAIMER">DISCLAIMER
-
-</A></H1>
+<H1><A NAME="DISCLAIMER">DISCLAIMER</A></H1>
+<P>
 This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-more details.
-
-
-<P>
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc., 675
-Mass Ave, Cambridge, MA 02139, USA.
-
-
-<P>
+FITNESS FOR A PARTICULAR PURPOSE. See the LICENSE file distributed with
+sudo for more details.
 
 <P>
 <HR>
-<H1><A NAME="CAVEATS">CAVEATS
-
-</A></H1>
+<H1><A NAME="CAVEATS">CAVEATS</A></H1>
+<P>
 There is no easy way to prevent a user from gaining a root shell if that
 user has access to commands allowing shell escapes.
 
-
 <P>
-
 If users have sudo ALL there is nothing to prevent them from creating their
 own program that gives them a root shell regardless of any '!' elements in
 the user specification.
 
-
 <P>
-
 Running shell scripts via <STRONG>sudo</STRONG> can expose the same kernel bugs that make setuid shell scripts unsafe on
 some operating systems.
 
-
-<P>
-
 <P>
 <HR>
-<H1><A NAME="SEE_ALSO">SEE ALSO
-
-</A></H1>
-<CODE><A HREF="sudoers.html">sudoers(5)</A>,</CODE> <CODE><A HREF="visudo.html">visudo(8)</A>,</CODE> <CODE>su(1).</CODE>
-
+<H1><A NAME="SEE_ALSO">SEE ALSO</A></H1>
 <P>
+<CODE><A HREF="sudoers.html">sudoers(5)</A>,</CODE> <CODE><A HREF="visudo.html">visudo(8)</A>,</CODE> <CODE>su(1).</CODE>
+</BODY>
 
-</DL>
-    </BODY>
-
-    </HTML>
+</HTML>

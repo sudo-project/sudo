@@ -1,14 +1,14 @@
 
 
 
-sudo(8)                MAINTENANCE COMMANDS               sudo(8)
+.::sudo(8)             MAINTENANCE COMMANDS            .::sudo(8)
 
 
 NNNNAAAAMMMMEEEE
        sudo - execute a command as the superuser
 
 SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
-       ssssuuuuddddoooo ----VVVV | ----hhhh | ----llll | ----vvvv | ----kkkk | ----ssss | ----HHHH | [ ----bbbb ] | [ ----rrrr
+       ssssuuuuddddoooo ----VVVV | ----hhhh | ----llll | ----vvvv | ----kkkk | ----KKKK | ----ssss | ----HHHH | [ ----bbbb ] | [ ----rrrr
        realm ] | [ ----pppp prompt ] [ ----uuuu username/#uid] _c_o_m_m_a_n_d
 
 DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
@@ -50,26 +50,32 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
            installation time and defaults to 5 minutes) but does
            not run a command.
 
-       -k  The -k (_k_i_l_l) option to ssssuuuuddddoooo removes the user's
-           timestamp file, thus requiring the user's password the
-           next time ssssuuuuddddoooo is run.  This option does not require a
-           password and was added to allow a user to revoke ssssuuuuddddoooo
-           permissions from a .logout file.
+       -k  The -k (_k_i_l_l) option to ssssuuuuddddoooo invalidates the user's
+           timestamp file by setting the time on it to the epoch.
+           The next time ssssuuuuddddoooo is run a password will be required.
+           This option does not require a password and was added
+           to allow a user to revoke ssssuuuuddddoooo permissions from a
+           .logout file.
+
+
+
+
+
+22/Jul/1999                    1.6                              1
+
+
+
+
+
+.::sudo(8)             MAINTENANCE COMMANDS            .::sudo(8)
+
+
+       -K  The -K (sure _k_i_l_l) option to ssssuuuuddddoooo removes the user's
+           timestamp file entirely.  This option does not require
+           a password.
 
        -b  The -b (_b_a_c_k_g_r_o_u_n_d) option tells ssssuuuuddddoooo to run the given
            command in the background.  Note that if you use the
-
-
-
-17/Feb/99                      1.6                              1
-
-
-
-
-
-sudo(8)                MAINTENANCE COMMANDS               sudo(8)
-
-
            -b option you cannot use shell job control to
            manipulate the command.
 
@@ -118,23 +124,25 @@ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEES
 SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTEEEESSSS
        ssssuuuuddddoooo tries to be safe when executing external commands.
        Variables that control how dynamic loading and binding is
+
+
+
+22/Jul/1999                    1.6                              2
+
+
+
+
+
+.::sudo(8)             MAINTENANCE COMMANDS            .::sudo(8)
+
+
        done can be used to subvert the program that ssssuuuuddddoooo runs.
        To combat this the LD_*, _RLD_*, SHLIB_PATH (HP-UX only),
        and LIBPATH (AIX only) environment variables are removed
        from the environment passed on to all commands executed.
-       ssssuuuuddddoooo will also remove the IFS, ENV, BASH_ENV, KRB_CONF and
-       KRB5_CONFIG variables as they too can pose a threat.
-
-
-
-17/Feb/99                      1.6                              2
-
-
-
-
-
-sudo(8)                MAINTENANCE COMMANDS               sudo(8)
-
+       ssssuuuuddddoooo will also remove the IFS, ENV, BASH_ENV, KRB_CONF,
+       KRB5_CONFIG, LOCALDOMAIN, RES_OPTIONS and HOSTALIASES
+       variables as they too can pose a threat.
 
        To prevent command spoofing, ssssuuuuddddoooo checks "." and "" (both
        denoting current directory) last when searching for a
@@ -143,11 +151,11 @@ sudo(8)                MAINTENANCE COMMANDS               sudo(8)
        variable is _n_o_t modified and is passed unchanged to the
        program that ssssuuuuddddoooo executes.
 
-       For security reasons, if your OS supports shared
-       libraries, ssssuuuuddddoooo should always be statically linked unless
-       the dynamic loader disables user-defined library search
-       paths for setuid programs.  (Most modern dynamic loaders
-       do this.)
+       For security reasons, if your OS supports shared libraries
+       and does not disable user-defined library search paths for
+       setuid programs (most do), you should either use a linker
+       option that disables this behavior or link ssssuuuuddddoooo
+       statically.
 
        ssssuuuuddddoooo will check the ownership of its timestamp directory
        (_/_v_a_r_/_r_u_n_/_s_u_d_o or _/_t_m_p_/_._o_d_u_s by default) and ignore the
@@ -164,20 +172,36 @@ sudo(8)                MAINTENANCE COMMANDS               sudo(8)
        inaccessible by any other user the user placing files
        there would be unable to get them back out.  To get around
        this issue you can use a directory that is not world-
-       writable for the timestamps (_/_v_a_r_/_a_d_m_/_s_u_d_o for instance).
+       writable for the timestamps (_/_v_a_r_/_a_d_m_/_s_u_d_o for instance)
+       or create /tmp/.odus with the appropriate owner (root) and
+       permissions (0700) in the system startup files.
 
        sudo will not honor timestamp files set far in the future.
        Timestamp files with a date greater than current_time + 2
-       * TIMEOUT will be ignored and sudo complain about a
-       "preposterous stampfile date".  This is done to keep a
-       user from creating his/her own timestamp file with a bogus
-       date.
+       * TIMEOUT will be ignored and sudo will log and complain.
+       This is done to keep a user from creating his/her own
+       timestamp file with a bogus date on system that allow
+       users to give away files.
 
 FFFFIIIILLLLEEEESSSS
         /etc/sudoers           file of authorized users.
 
 
 EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT VVVVAAAARRRRIIIIAAAABBBBLLLLEEEESSSS
+
+
+
+
+
+22/Jul/1999                    1.6                              3
+
+
+
+
+
+.::sudo(8)             MAINTENANCE COMMANDS            .::sudo(8)
+
+
         PATH                   Set to a sane value if SECURE_PATH is set
         SHELL                  Used to determine shell to run with -s option
         USER                   Set to the target user (root unless the -u option
@@ -192,27 +216,15 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT V
         SUDO_PS1               If set, PS1 will be set to its value
 
 
-
-17/Feb/99                      1.6                              3
-
-
-
-
-
-sudo(8)                MAINTENANCE COMMANDS               sudo(8)
-
-
 AAAAUUUUTTTTHHHHOOOORRRRSSSS
        Many people have worked on ssssuuuuddddoooo over the years, this
        version consists of code written primarily by:
 
-               Jeff Nieusma
-               David Hieb
                Todd Miller
                Chris Jepeway
 
-       See the HISTORY file in the ssssuuuuddddoooo distribution for more
-       details.
+       See the HISTORY file in the ssssuuuuddddoooo distribution for a short
+       history of ssssuuuuddddoooo.
 
        Please send all bugs, comments, and changes to sudo-
        bugs@courtesan.com.
@@ -221,13 +233,8 @@ DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
        This program is distributed in the hope that it will be
        useful, but WITHOUT ANY WARRANTY; without even the implied
        warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-       PURPOSE.  See the GNU General Public License for more
-       details.
-
-       You should have received a copy of the GNU General Public
-       License along with this program; if not, write to the Free
-       Software Foundation, Inc., 675 Mass Ave, Cambridge, MA
-       02139, USA.
+       PURPOSE.  See the LICENSE file distributed with sudo for
+       more details.
 
 CCCCAAAAVVVVEEEEAAAATTTTSSSS
        There is no easy way to prevent a user from gaining a root
@@ -252,20 +259,20 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
+22/Jul/1999                    1.6                              4
 
 
 
 
 
+.::sudo(8)             MAINTENANCE COMMANDS            .::sudo(8)
 
 
-17/Feb/99                      1.6                              4
 
 
 
 
 
-sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
 
@@ -318,13 +325,6 @@ sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
 
-
-
-
-
-
-
-
-17/Feb/99                      1.6                              5
+22/Jul/1999                    1.6                              5
 
 
