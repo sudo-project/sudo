@@ -109,7 +109,6 @@ void load_interfaces()
     char ifconf_buf[sizeof(struct ifconf) + BUFSIZ];
     struct ifreq ifreq;
     struct sockaddr_in *sin;
-    char buf[BUFSIZ];
     int sock, n, i;
 #ifdef _ISC
     struct strioctl strioctl;
@@ -239,33 +238,6 @@ void load_interfaces()
 	    exit(1);
 	}
     }
-}
-
-
-
-/**********************************************************************
- *
- *  next_if()
- *
- *  This function returns a pointer to the next struct ifreq *
- *  in the list.
- */
-
-static struct ifreq *next_if(cur)
-    struct ifreq *cur;
-{
-    struct ifreq *next;
-    u_char sa_len;
-
-#ifdef HAVE_SA_LEN
-    sa_len = cur->ifr_addr.sa_len;
-    if (sa_len > sizeof(cur->ifr_ifru))
-	next = (struct ifreq *) ((caddr_t) cur + sizeof(cur->ifr_name) + sa_len);
-    else
-#endif /* HAVE_SA_LEN */
-	next = (struct ifreq *) ((caddr_t) cur + sizeof(cur->ifr_name) + sizeof(cur->ifr_ifru));
-
-    return(next);
 }
 
 #else /* SIOCGIFCONF */
