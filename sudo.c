@@ -287,8 +287,11 @@ int main(argc, argv)
 
 #ifdef SECURE_PATH
     /* replace the PATH envariable with a secure one */
-    if (!user_is_exempt())
-	sudo_setenv("PATH", SECURE_PATH);
+    if (!user_is_exempt() && sudo_setenv("PATH", SECURE_PATH)) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
 #endif /* SECURE_PATH */
 
     if ((sudo_mode & MODE_RUN)) {
@@ -892,6 +895,8 @@ void set_perms(perm)
 					perror("");
 					exit(1);
 				    }
+
+				    (void) sudo_setenv("HOME", pw_ent->pw_dir);
 				}
 
 				break;
