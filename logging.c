@@ -285,6 +285,7 @@ void log_error(code)
     if (code != VALIDATE_ERROR && !(code & GLOBAL_PROBLEM)) {
 
 	/* stuff the command into the logline */
+	/* XXX - this could be sped up */
 	strcat(logline, cmnd);
 	strcat(logline, " ");
 	if (cmnd_args) {
