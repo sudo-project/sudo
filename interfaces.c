@@ -106,12 +106,12 @@ extern char **Argv;
 void load_interfaces()
 {
     struct ifconf *ifconf;
-    struct ifreq ifreq, *ifr;
+    struct ifreq *ifr, ifr_tmp;
     struct sockaddr_in *sin;
     unsigned int localhost_mask;
     int sock, n, i;
     size_t len = sizeof(struct ifconf) + BUFSIZ;
-    char *ifconf_buf = NULL;
+    char *previfname, *ifconf_buf = NULL;
 #ifdef _ISC
     struct strioctl strioctl;
 #endif /* _ISC */
@@ -129,10 +129,7 @@ void load_interfaces()
      * get interface configuration or return (leaving interfaces NULL)
      */
     for (;;) {
-	if (ifconf_buf == NULL)
-	    ifconf_buf = (char *) malloc(len);
-	else
-	    ifconf_buf = (char *) realloc(ifconf_buf, len);
+	ifconf_buf = ifconf_buf ? realloc(ifconf_buf, len) : malloc(len);
 	if (ifconf_buf == NULL) {
 	    perror("malloc");
 	    exit(1);
@@ -174,58 +171,60 @@ void load_interfaces()
     }
 
     /*
-     * for each interface, get the ip address and netmask
+     * for each interface, store the ip address and netmask
      */
-    for (ifreq.ifr_name[0] = '\0', i = 0; i < ifconf->ifc_len; ) {
+    for (i = 0; i < ifconf->ifc_len; ) {
 	/* get a pointer to the current interface */
-	ifr = (struct ifreq *) ((caddr_t) ifconf->ifc_req + i);
+	ifr = (struct ifreq *) &ifconf->ifc_buf[i];
 
 	/* set i to the subscript of the next interface */
+	i += sizeof(struct ifreq);
 #ifdef HAVE_SA_LEN
 	if (ifr->ifr_addr.sa_len > sizeof(ifr->ifr_addr))
-	    i += sizeof(ifr->ifr_name) + ifr->ifr_addr.sa_len;
-	else
+	    i += ifr->ifr_addr.sa_len - sizeof(struct sockaddr);
 #endif /* HAVE_SA_LEN */
-	    i += sizeof(struct ifreq);
 
 	/* skip duplicates and interfaces with NULL addresses */
 	sin = (struct sockaddr_in *) &ifr->ifr_addr;
 	if (sin->sin_addr.s_addr == 0 ||
-	    strncmp(ifr->ifr_name, ifreq.ifr_name, sizeof(ifr->ifr_name)) == 0)
+	    strncmp(previfname, ifr->ifr_name, sizeof(ifr->ifr_name) - 1) == 0)
 	    continue;
 
-	/* make a working copy... */
-	ifreq = *ifr;
-
-	/* get the ip address */
-#ifdef _ISC
-	STRSET(SIOCGIFADDR, (caddr_t) &ifreq, sizeof(ifreq));
-	if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0) {
-#else
-	if (ioctl(sock, SIOCGIFADDR, (caddr_t) &ifreq)) {
-#endif /* _ISC */
-	    /* non-fatal error if interface is down or not supported */
-	    if (errno == EADDRNOTAVAIL || errno == ENXIO || errno == EAFNOSUPPORT)
+	/* skip non-ip things */
+	if (ifr->ifr_addr.sa_family != AF_INET)
 		continue;
 
-	    (void) fprintf(stderr, "%s: Error, ioctl: SIOCGIFADDR ", Argv[0]);
-	    perror("");
-	    exit(1);
-	}
-	sin = (struct sockaddr_in *) &ifreq.ifr_addr;
+	/*
+	 * make sure the interface is up, skip if not.
+	 */
+#ifdef SIOCGIFFLAGS
+	memset(&ifr_tmp, 0, sizeof(ifr_tmp));
+	strncpy(ifr_tmp.ifr_name, ifr->ifr_name, sizeof(ifr_tmp.ifr_name) - 1);
+	if (ioctl(sock, SIOCGIFFLAGS, (caddr_t) &ifr_tmp) < 0)
+#endif
+	    ifr_tmp = *ifr;
+	
+	/* skip interfaces marked "down" and "loopback" */
+	if (!(ifr_tmp.ifr_flags & IFF_UP) || (ifr_tmp.ifr_flags & IFF_LOOPBACK))
+		continue;
 
 	/* store the ip address */
+	sin = (struct sockaddr_in *) &ifr->ifr_addr;
 	interfaces[num_interfaces].addr.s_addr = sin->sin_addr.s_addr;
 
+	/* stash the name of the interface we saved */
+	previfname = ifr->ifr_name;
+
 	/* get the netmask */
+	(void) memset(&ifr_tmp, 0, sizeof(ifr_tmp));
 #ifdef SIOCGIFNETMASK
 #ifdef _ISC
-	STRSET(SIOCGIFNETMASK, (caddr_t) &ifreq, sizeof(ifreq));
+	STRSET(SIOCGIFNETMASK, (caddr_t) &ifr_tmp, sizeof(ifr_tmp));
 	if (ioctl(sock, I_STR, (caddr_t) &strioctl) == 0) {
 #else
-	if (ioctl(sock, SIOCGIFNETMASK, (caddr_t) &ifreq) == 0) {
+	if (ioctl(sock, SIOCGIFNETMASK, (caddr_t) &ifr_tmp) == 0) {
 #endif /* _ISC */
-	    sin = (struct sockaddr_in *) &ifreq.ifr_addr;
+	    sin = (struct sockaddr_in *) &ifr_tmp.ifr_addr;
 
 	    /* store the netmask */
 	    interfaces[num_interfaces].netmask.s_addr = sin->sin_addr.s_addr;
@@ -241,11 +240,7 @@ void load_interfaces()
 		interfaces[num_interfaces].netmask.s_addr = htonl(IN_CLASSA_NET);
 	}
 
-	/* avoid localhost and friends */
-	if ((interfaces[num_interfaces].addr.s_addr &
-	    interfaces[num_interfaces].netmask.s_addr) == localhost_mask)
-	    continue;
-
+	/* only now can we be sure it was a good/interesting interface */
 	num_interfaces++;
     }
 
