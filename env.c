@@ -319,19 +319,19 @@ rebuild_env(sudo_mode, envp)
 		    case 'H':
 			if (strncmp(*ep, "HOME=", 5) == 0)
 			    didvar |= DID_HOME;
-			    break;
+			break;
 		    case 'S':
 			if (strncmp(*ep, "SHELL=", 6) == 0)
 			    didvar |= DID_SHELL;
-			    break;
+			break;
 		    case 'L':
 			if (strncmp(*ep, "LOGNAME=", 8) == 0)
 			    didvar |= DID_LOGNAME;
-			    break;
+			break;
 		    case 'U':
 			if (strncmp(*ep, "USER=", 5) == 0)
 			    didvar |= DID_USER;
-			    break;
+			break;
 		}
 		insert_env(*ep, 0);
 	    } else {
