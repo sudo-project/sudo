@@ -37,8 +37,6 @@
 #ifndef _SUDO_INSULTS_H
 #define _SUDO_INSULTS_H
 
-#ifdef USE_INSULTS
-
 /*
  * Use one or more set of insults as determined by configure
  */
@@ -74,7 +72,5 @@ char *insults[] = {
  * return a pseudo-random insult.
  */
 #define INSULT		(insults[time(NULL) % NOFINSULTS])
-
-#endif /* USE_INSULTS */
 
 #endif /* _SUDO_INSULTS_H */
