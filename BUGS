@@ -1,13 +1,11 @@
-Known bugs in sudo version 1.4
+Known bugs in sudo version 1.5
 ==============================
 
-1) Sudo -l does not expand Command Aliases.
-
-2) "make install-man" should substitute correct paths into the
+1) "make install-man" should substitute correct paths into the
     man pages themselves.
 
-3) Sudo should log when removing "dangerous" envariables.
+2) Sudo should log when removing "dangerous" envariables.
 
-4) configure variables that have been cached cannot be overridden
+3) configure variables that have been cached cannot be overridden
    in subsequent configure runs, even if other --with-* options are
    given.  This is a flaw in GNU autoconf.
