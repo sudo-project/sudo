@@ -1826,7 +1826,10 @@ if test -n "$with_SecurID" -a "$with_SecurID" != "no"; then
     OLIBS="${LIBS}"
     LIBS="${LIBS} ${SD_LIB}"
     SUDO_LIBS="${SUDO_LIBS} ${SD_LIB}"
-    AC_CHECK_FUNC(SD_Init, [AUTH_OBJS="securid5.o"], [AUTH_OBJS="securid.o"])
+    AC_CHECK_FUNC(SD_Init,
+	[AUTH_OBJS="securid5.o"; SUDO_LIBS="${SUDO_LIBS} -lpthread"],
+	[AUTH_OBJS="securid.o"]
+    )
     LIBS="${OLIBS}"
 fi
 
