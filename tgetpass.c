@@ -26,6 +26,10 @@
  *  Todd C. Miller  Sun Jun  5 17:22:31 MDT 1994
  */
 
+#ifndef lint
+static char rcsid[] = "$Id$";
+#endif /* lint */
+
 #include "config.h"
 
 #include <stdio.h>
