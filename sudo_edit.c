@@ -70,12 +70,13 @@ int sudo_edit(argc, argv)
     const char *tmpdir;
     char **nargv, **ap, *editor, *cp;
     char buf[BUFSIZ];
-    int i, ac, ofd, tfd, nargc, rval;
+    int i, ac, ofd, nargc, rval;
     sigaction_t sa;
     struct stat sb;
     struct tempfile {
 	char *tfile;
 	char *ofile;
+	int tfd;
 	time_t omtime;		/* XXX - use st_mtimespec / st_mtim? */
 	off_t osize;
     } *tf;
@@ -93,13 +94,13 @@ int sudo_edit(argc, argv)
 	tmpdir = _PATH_TMP;
 
     /*
-     * For each file specified, by the user, make a tempoary version
+     * For each file specified by the user, make a temporary version
      * and copy the contents of the original to it.  We make these files
      * as root so the user can't steal them out from under us until we are
      * done writing (and at that point the user will be able to edit the
      * file anyway).
      * XXX - It would be nice to lock the original files but that means
-     *       keeping an fd open for each file.
+     *       keeping an extra fd open for each file.
      */
     tf = emalloc2(argc - 1, sizeof(*tf));
     memset(tf, 0, (argc - 1) * sizeof(*tf));
@@ -135,13 +136,13 @@ int sudo_edit(argc, argv)
 	else
 	    cp = tf[i].ofile;
 	easprintf(&tf[i].tfile, "%s%s.XXXXXXXX", tmpdir, cp);
-	if ((tfd = mkstemp(tf[i].tfile)) == -1) {
+	if ((tf[i].tfd = mkstemp(tf[i].tfile)) == -1) {
 	    warn("mkstemp");
 	    goto cleanup;
 	}
 	if (ofd != -1) {
 	    while ((nread = read(ofd, buf, sizeof(buf))) != 0) {
-		if ((nwritten = write(tfd, buf, nread)) != nread) {
+		if ((nwritten = write(tf[i].tfd, buf, nread)) != nread) {
 		    if (nwritten == -1)
 			warn("%s", tf[i].tfile);
 		    else
@@ -149,15 +150,13 @@ int sudo_edit(argc, argv)
 		    goto cleanup;
 		}
 	    }
+	    close(ofd);
 	}
 #ifdef HAVE_FCHOWN
-	fchown(tfd, user_uid, user_gid);
+	fchown(tf[i].tfd, user_uid, user_gid);
 #else
 	chown(tf[i].tfile, user_uid, user_gid);
 #endif
-	if (ofd != -1)
-	    close(ofd);
-	close(tfd);
 	touch(tf[i].tfile, tf[i].omtime);
     }
     if (argc == 1)
@@ -214,6 +213,7 @@ int sudo_edit(argc, argv)
 	(void) sigaction(SIGINT, &saved_sa_int, NULL);
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
+	closefrom(STDERR_FILENO + 1);
 	set_perms(PERM_FULL_USER);
 	execvp(nargv[0], nargv);
 	warn("unable to execute %s", nargv[0]);
@@ -247,21 +247,21 @@ int sudo_edit(argc, argv)
 
     /* Copy contents of temp files to real ones */
     for (i = 0; i < argc - 1; i++) {
-	/* XXX - open file with PERM_USER for nfs? */
-	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) == -1) {
-	    warn("unable to read edited file %s, cannot update %s",
+	if (lseek(tf[i].tfd, (off_t)0, SEEK_SET) != 0) {
+	    warn("unable to rewind edited file %s, cannot update %s",
 		tf[i].tfile, tf[i].ofile);
+	    close(tf[i].tfd);
 	    continue;
 	}
 #ifdef HAVE_FSTAT
-	if (fstat(tfd, &sb) == 0) {
+	if (fstat(tf[i].tfd, &sb) == 0) {
 #else
 	if (stat(tf[i].tfile, &sb) == 0) {
 #endif
 	    if (tf[i].osize == sb.st_size && tf[i].omtime == sb.st_mtime) {
 		warnx("%s unchanged", tf[i].ofile);
 		unlink(tf[i].tfile);
-		close(tfd);
+		close(tf[i].tfd);
 		continue;
 	    }
 	}
@@ -271,10 +271,10 @@ int sudo_edit(argc, argv)
 	if (ofd == -1) {
 	    warn("unable to write to %s", tf[i].ofile);
 	    warnx("contents of edit session left in %s", tf[i].tfile);
-	    close(tfd);
+	    close(tf[i].tfd);
 	    continue;
 	}
-	while ((nread = read(tfd, buf, sizeof(buf))) != 0) {
+	while ((nread = read(tf[i].tfd, buf, sizeof(buf))) != 0) {
 	    if ((nwritten = write(ofd, buf, nread)) != nread) {
 		if (nwritten == -1)
 		    warn("%s", tf[i].ofile);
@@ -290,7 +290,6 @@ int sudo_edit(argc, argv)
 	    warnx("contents of edit session left in %s", tf[i].tfile);
 	}
 	close(ofd);
-	close(tfd);
     }
 
     return(rval);
