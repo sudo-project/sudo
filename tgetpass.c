@@ -130,7 +130,7 @@ tgetpass(prompt, timeout, flags)
     int timeout;
     int flags;
 {
-    struct sigaction sa, saveint, savehup, savequit, saveterm, savetstp;
+    sigaction_t sa, saveint, savehup, savequit, saveterm, savetstp;
     static char buf[SUDO_PASS_MAX + 1];
     int input, output, save_errno;
     struct TERM term, oterm;
@@ -267,6 +267,7 @@ tgetline(fd, buf, bufsiz, timeout)
 	free(readfds);
     } else {
 	/* Keep reading until out of space, EOF, error, or newline */
+	n = -1;
 	while (--left && (n = read(fd, &c, 1)) == 1 && c != '\n' && c != '\r')
 	    *cp++ = c;
     }
