@@ -129,6 +129,7 @@ static void load_cmnd		__P((void));
 static void add_env		__P((void));
 static void rmenv		__P((char **, char *, int));
 static void clean_env		__P((char **));
+static char *uid2str		__P((uid_t));
 
 /*
  * Globals
@@ -278,7 +279,7 @@ static void load_globals()
      */
     set_perms(PERM_ROOT);
     if ((pw_ent = getpwuid(uid)) == NULL) {
-	(void) sprintf(user, "%u", uid);
+	user = uid2str(uid);
 	log_error(GLOBAL_NO_PW_ENT);
 	inform_user(GLOBAL_NO_PW_ENT);
 	exit(1);
@@ -510,17 +511,7 @@ static void add_env()
     }
 
     /* add the SUDO_UID envariable */
-    for (len = 2, n = uid; (int) (n = n / 10) != 0; )
-	++len;
-    
-    uidstr = (char *) malloc(len+1);
-    if (uidstr == NULL) {
-	perror("malloc");
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
-
-    (void) sprintf(uidstr, "%d", (int)uid);
+    uidstr = uid2str(uid);
     if (sudo_setenv("SUDO_UID", uidstr)) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
@@ -770,4 +761,33 @@ void set_perms(perm)
 
 			      	break;
     }
+}
+
+
+
+/**********************************************************************
+ *
+ * uid2str()
+ *
+ *  this function allocates memory for a strings version of uid,
+ *  then converts uid to a string and returns it.
+ */
+
+char *uid2str(uid)
+    uid_t uid;
+{
+    int len, n;
+    char *uidstr;
+
+    for (len = 1, n = uid; (int) (n = n / 10) != 0; )
+	++len;
+    
+    uidstr = (char *) malloc(len+1);
+    if (uidstr == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+
+    (void) sprintf(uidstr, "%u", (unsigned)uid);
 }
