@@ -180,8 +180,7 @@ Special features/options:
 
   --with-pam
 	Enable PAM support.  Tested on Redhat Linux 5.x but should work on
-	earlier versions too.  Not tested on Solaris 2.X but it is expected
-	to work.
+	earlier versions too.
 
   --with-AFS
 	Enable AFS support with kerberos authentication.  Should work under
