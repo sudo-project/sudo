@@ -108,20 +108,20 @@ OS=`echo $OS | $TRPROG '[[A-Z]]' '[[a-z]]'`
 case "$OS" in
     "sunos")	echo "Looks like SunOS 4.x"
 		if test -n "$C2"; then
-		    SHADOW_TYPE="SUNOS4"
+		    SHADOW_TYPE="SPW_SUNOS4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     "solaris")	echo "Looks like Solaris"
 		if test -n "$C2"; then
-		    SHADOW_TYPE="SVR4"
+		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     "aix")	echo "Looks like AIX"
 		AC_DEFINE(_ALL_SOURCE)
 		if test -n "$C2"; then
-		    SHADOW_TYPE="AIX"
+		    SHADOW_TYPE="SPW_AIX"
 		fi
 		LDFLAGS="${LDFLAGS} -Wl,-bI:./aixcrypt.exp"
 		;;
@@ -138,7 +138,7 @@ case "$OS" in
 		    LIBS="-lBSD ${LIBS}"
 		elif test "$OSREV" -eq 9 ; then
 		    if test -n "$C2"; then
-			SHADOW_TYPE="HPUX9"
+			SHADOW_TYPE="SPW_HPUX9"
 			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    fi
 		fi
@@ -148,14 +148,14 @@ case "$OS" in
 		# C2 security stuff
 		if test -n "$C2" ; then
 		    LIBS="${LIBS} -lsecurity -laud"
-		    SHADOW_TYPE="SECUREWARE"
+		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     "irix")	echo "Looks like IRIX"
 		# C2 security stuff
 		if test -n "$C2" ; then
-		    SHADOW_TYPE="SVR4"
+		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		# configure doesn't think irix has stdc headers
@@ -179,7 +179,7 @@ case "$OS" in
     "linux")	echo "Looks like linux"
 		# C2 security stuff
 		if test -n "$C2" ; then
-		    SHADOW_TYPE="SVR4"
+		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    OSDEFS="${OSDEFS} -DSHADOW_PWD"
 		    LIBS="${LIBS} -lshadow"
@@ -191,7 +191,7 @@ case "$OS" in
 		if test -n "$C2" ; then
 		    OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"
 		    LIBS="${LIBS} -lprot"
-		    SHADOW_TYPE="SECUREWARE"
+		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
@@ -199,7 +199,7 @@ case "$OS" in
 		# C2 security stuff
 		if test -n "$C2" ; then
 		    LIBS="${LIBS} -lauth"
-		    SHADOW_TYPE="ULTRIX4"
+		    SHADOW_TYPE="SPW_ULTRIX4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
@@ -212,14 +212,14 @@ case "$OS" in
 		LIBS="${LIBS} -linet"
 		if test -n "$C2" ; then
 		    LIBS="${LIBS} -lsec"
-		    SHADOW_TYPE="SVR4"
+		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		OSDEFS="${OSDEFS} -D_ISC"
 		;;
     "unix_sv")	echo "Looks like UnixWare"
 		if test -n "$C2" ; then
-		    SHADOW_TYPE="SVR4"
+		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
@@ -229,14 +229,14 @@ case "$OS" in
 		;;
     "bsd/386" | "bsd/os") echo "Looks like bsdi BSD/OS"
 		if test -n "$C2" ; then
-		    SHADOW_TYPE="BSD"
+		    SHADOW_TYPE="SPW_BSD"
 		fi
 		;;
     "mtxinu")	echo "Looks like mt Xinu MORE/BSD"
 		;;
     "4.3bsd")	echo "Looks like HP BSD"
 		if test -n "$C2" ; then
-		    SHADOW_TYPE="BSD"
+		    SHADOW_TYPE="SPW_BSD"
 		fi
 		;;
     *"bsd"*)	echo "Looks like some kind of BSD"
@@ -254,12 +254,12 @@ dnl
 if test -z "$AFS" -a -z "$KERB4" -a -z "$KERB5" -a -n "$C2" -a -z "$SHADOW_TYPE"
     then
     echo "checking for shadow password type..."
-    AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SVR4", AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SECUREWARE", [test -f /etc/master.passwd && SHADOW_TYPE="BSD"]))
+    AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SPW_SVR4", AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SPW_SECUREWARE", [test -f /etc/master.passwd && SHADOW_TYPE="SPW_BSD"]))
     case "$SHADOW_TYPE" in
-	"SVR4")	echo "shadow password type is getspnam (svr4)" ;
+	"SPW_SVR4")		echo "shadow password type is getspnam (svr4)" ;
 		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE) ;;
-	"BSD")	echo "shadow password type is /etc/master.passwd (BSD)" ;;
-	"SECUREWARE")	echo "shadow password type is etprpwuid (SecureWare)" ;
+	"SPW_BSD")		echo "shadow password type is /etc/master.passwd (BSD)" ;;
+	"SPW_SECUREWARE")	echo "shadow password type is etprpwuid (SecureWare)" ;
 		LIBS="${LIBS} -lprot -lx" ;
 		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE) ;;
 	*)	echo "unknown" ;
