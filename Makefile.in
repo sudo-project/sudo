@@ -100,7 +100,7 @@ SRCS = check.c getspwuid.c find_path.c logging.c parse.c sudo.c \
 
 PARSEOBJS = y.tab.o lex.yy.o
 
-SUDOBJS = check.o sudo_getpwuid.o find_path.o logging.o parse.o sudo.o \
+SUDOBJS = check.o getspwuid.o find_path.o logging.o parse.o sudo.o \
           goodpath.o sudo_setenv.o interfaces.o @DCE_OBJS@
 
 VISUDOBJS = visudo.o
