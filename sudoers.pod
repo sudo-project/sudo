@@ -41,17 +41,17 @@ sudoers - list of which users may execute what
 
 =head1 DESCRIPTION
 
-The I<sudoers> file is composed two types of entries:
+The I<sudoers> file is composed of two types of entries:
 aliases (basically variables) and user specifications
 (which specify who may run what).  The grammar of I<sudoers>
 will be described below in Extended Backus-Naur Form (EBNF).
-Don't despair if you don't know what EBNF is, it is fairly
-simple and the definitions below are annotated.
+Don't despair if you don't know what EBNF is; it is fairly
+simple, and the definitions below are annotated.
 
 =head2 Quick guide to EBNF
 
 EBNF is a concise and exact way of describing the grammar of a language.
-Each EBNF definition is made up of I<production rules>.  Eg.
+Each EBNF definition is made up of I<production rules>.  E.g.,
 
  symbol ::= definition | alternate1 | alternate2 ...
 
@@ -86,7 +86,7 @@ string (as opposed to a symbol name).
 
 =head2 Aliases
 
-There are four kinds of aliases: the C<User_Alias>, C<Runas_Alias>,
+There are four kinds of aliases: C<User_Alias>, C<Runas_Alias>,
 C<Host_Alias> and C<Cmnd_Alias>.
 
  Alias ::= 'User_Alias' = User_Alias (':' User_Alias)* |
@@ -112,7 +112,7 @@ where I<Alias_Type> is one of C<User_Alias>, C<Runas_Alias>, C<Host_Alias>,
 or C<Cmnd_Alias>.  A C<NAME> is a string of upper case letters, numbers,
 and the underscore characters ('_').  A C<NAME> B<must> start with an
 upper case letter.  It is possible to put several alias definitions
-of the same type on a single line, joined by a colon (':').  Eg.
+of the same type on a single line, joined by a colon (':').  E.g.,
 
  Alias_Type NAME = item1, item2, item3 : NAME = item4, item5
 
@@ -131,7 +131,7 @@ A C<User_List> is made up of one or more usernames, uids
 (prefixed with '#'), System groups (prefixed with '%'),
 netgroups (prefixed with '+') and other aliases.  Each list
 item may be prefixed with one or more '!' operators.  An odd number
-of '!' operators negates the value of the item; an even number
+of '!' operators negate the value of the item; an even number
 just cancel each other out.
 
  Runas_List ::= Runas_User |
@@ -336,7 +336,7 @@ default.
 =item fqdn
 
 Set this flag if you want to put fully qualified hostnames in the
-I<sudoers> file.  Ie: instead of myhost you would use myhost.mydomain.edu.
+I<sudoers> file.  I.e.: instead of myhost you would use myhost.mydomain.edu.
 You may still use the short form if you wish (and even mix the two).
 Beware that turning on I<fqdn> requires B<sudo> to make DNS lookups
 which may make B<sudo> unusable if DNS stops working (for example
@@ -448,7 +448,7 @@ C<@loglen@> (use 0 or negate the option to disable word wrap).
 =item timestamp_timeout
 
 Number of minutes that can elapse before B<sudo> will ask for a
-passwd again.  The default is C<@timeout@>, set this to C<0> to always
+passwd again.  The default is C<@timeout@>.  Set this to C<0> to always
 prompt for a password.
 
 =item passwd_timeout
@@ -531,7 +531,7 @@ B<Strings that can be used in a boolean context>:
 =item logfile
 
 Path to the B<sudo> log file (not the syslog log file).  Setting a path
-turns on logging to a file, negating this option turns it off.
+turns on logging to a file; negating this option turns it off.
 
 =item syslog
 
@@ -549,7 +549,7 @@ Flags to use when invoking mailer. Defaults to B<-t>.
 
 =item mailto
 
-Address to send warning and erorr mail to.  The address should
+Address to send warning and error mail to.  The address should
 be enclosed in double quotes (C<">) to protect against sudo
 interpreting the C<@> sign.  Defaults to C<@mailto@>.
 
@@ -632,7 +632,7 @@ B<err>, B<info>, B<notice>, and B<warning>.
 
 A B<user specification> determines which commands a user may run
 (and as what user) on specified hosts.  By default, commands are
-run as B<root> but this can be changed on a per-command basis.
+run as B<root>, but this can be changed on a per-command basis.
 
 Let's break that down into its constituent parts:
 
@@ -647,7 +647,7 @@ commands that follow it.  What this means is that for the entry:
  dgb	boulder = (operator) /bin/ls, /bin/kill, /usr/bin/who
 
 The user B<dgb> may run F</bin/ls>, F</bin/kill>, and
-F</usr/bin/lprm> -- but only as B<operator>.  Eg.
+F</usr/bin/lprm> -- but only as B<operator>.  E.g.,
 
     sudo -u operator /bin/ls.
 
@@ -677,7 +677,7 @@ run F</bin/kill> without a password the entry would be:
 
  ray	rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
 
-Note however, that the C<PASSWD> tag has no effect on users who are
+Note, however, that the C<PASSWD> tag has no effect on users who are
 in the group specified by the exempt_group option.
 
 By default, if the C<NOPASSWD> tag is applied to any of the entries
@@ -768,7 +768,7 @@ NOTES below).
 Long lines can be continued with a backslash ('\') as the last
 character on the line.
 
-Whitespace between elements in a list as well as specicial syntactic
+Whitespace between elements in a list as well as special syntactic
 characters in a I<User Specification> ('=', ':', '(', ')') is optional.
 
 The following characters must be escaped with a backslash ('\') when
@@ -936,7 +936,7 @@ web pages) or simply su(1) to www.
 
 Any user may mount or unmount a CD-ROM on the machines in the CDROM
 C<Host_Alias> (orion, perseus, hercules) without entering a password.
-This is a bit tedious for users to type, so it is a prime candiate
+This is a bit tedious for users to type, so it is a prime candidate
 for encapsulating in a shell script.
 
 =head1 SECURITY NOTES
