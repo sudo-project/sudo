@@ -79,7 +79,10 @@ option you cannot use shell job control to manipulate the command.
 =item -p
 
 The C<-p> (I<prompt>) option allows you to override the default
-password prompt and use a custom one.
+password prompt and use a custom one.  If the password prompt
+contains the C<%u> escape, C<%u> will be replaced by the user's
+login name.  Similarly, C<%h> will be replaced by the local
+hostname.
 
 =item -u
 
@@ -171,6 +174,7 @@ date.
  PATH			Set to a sane value if SECURE_PATH is set
  SHELL			Used to determine shell to run with -s option
  HOME			In -s mode, set to homedir of root (or runas user)
+			if built with the SHELL_SETS_HOME option.
  SUDO_COMMAND		Set to the command run by sudo
  SUDO_USER		Set to the login of the user who invoked sudo
  SUDO_UID		Set to the uid of the user who invoked sudo
