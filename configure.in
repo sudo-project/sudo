@@ -145,6 +145,16 @@ AC_ARG_WITH(AFS, [  --with-AFS              enable AFS support],
 		;;
 esac])
 
+AC_ARG_WITH(authenticate, [  --with-authenticate              enable AIX general authentication support],
+[case $with_authenticate in
+    yes)	AC_DEFINE(HAVE_AUTHENTICATE)
+		echo 'Configuring for use with AIX general authentication'
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-authenticate: $with_authenticate"
+		;;
+esac])
+
 AC_ARG_WITH(DCE, [  --with-DCE              enable DCE support],
 [case $with_DCE in
     yes)	AC_DEFINE(HAVE_DCE)
@@ -741,6 +751,9 @@ dnl (gcc includes its own alloca(3) but other compilers may not)
 dnl
 if test "$with_DCE" = "yes" -o "$ac_cv_prog_YACC" = "bison -y"; then
     AC_FUNC_ALLOCA
+    if test -n "$ALLOCA"; then
+	LIBOBJS="$LIBOBJS $ALLOCA"
+    fi
 fi
 dnl
 dnl library checks
@@ -887,6 +900,13 @@ dnl
 if test "$with_SecurID" = "yes"; then
     SUDO_LIBS="${SUDO_LIBS} /usr/ace/sdiclient.a"
     CPPFLAGS="${CPPFLAGS} -I/usr/ace"
+fi
+
+dnl
+dnl extra 'authenticate' lib (AIX only?)
+dnl
+if test "$with_authenticate" = "yes"; then
+    SUDO_LIBS="${SUDO_LIBS} -ls"
 fi
 
 dnl
