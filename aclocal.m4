@@ -121,7 +121,10 @@ dnl
 dnl Where the log file goes, use /var/log if it exists, else /{var,usr}/adm
 dnl
 AC_DEFUN(SUDO_LOGFILE, [AC_MSG_CHECKING(for log file location)
-if test -d "/var/log"; then
+if test -n "$with_logfile"; then
+    AC_MSG_RESULT($with_logfile)
+    AC_DEFINE(_CONFIG_PATH_LOGFILE, "$with_logfile")
+elif test -d "/var/log"; then
     AC_MSG_RESULT(/var/log/sudo.log)
     AC_DEFINE(_CONFIG_PATH_LOGFILE, "/var/log/sudo.log")
 elif test -d "/var/adm"; then
@@ -139,7 +142,10 @@ dnl
 dnl Where the log file goes, use /var/log if it exists, else /{var,usr}/adm
 dnl
 AC_DEFUN(SUDO_TIMEDIR, [AC_MSG_CHECKING(for timestamp file location)
-if test -d "/var/run"; then
+if test -n "$with_timedir"; then
+    AC_MSG_RESULT($with_timedir)
+    AC_DEFINE(_CONFIG_PATH_TIMEDIR, "$with_timedir")
+elif test -d "/var/run"; then
     AC_MSG_RESULT(/var/run/sudo)
     AC_DEFINE(_CONFIG_PATH_TIMEDIR, "/var/run/sudo")
 elif test -d "/tmp"; then
