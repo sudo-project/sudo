@@ -51,7 +51,7 @@ dnl Override default configure dirs...
 dnl
 test "$mandir" = '${prefix}/man' && mandir='$(prefix)/man'
 test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
-test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/etc'
+test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
 test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 
 dnl
@@ -92,8 +92,9 @@ AC_ARG_WITH(opie, [  --with-opie             enable OPIE support ],
 esac])
 
 AC_ARG_WITH(otp-only, [  --with-otp-only         validate user via OTP (skey/opie) only],
-[case $with_otp-only in
+[case $with_otp_only in
     yes)	AC_DEFINE(OTP_ONLY)
+		echo "Using OTP (S/Key or OPIE) as sole authentication method"
 		;;
     no)		;;
     *)		echo "Sorry, --with-otp-only does not take an argument."
@@ -102,8 +103,9 @@ AC_ARG_WITH(otp-only, [  --with-otp-only         validate user via OTP (skey/opi
 esac])
 
 AC_ARG_WITH(long-otp-prompt, [  --with-long-otp-prompt  use a two line OTP (skey/opie) prompt],
-[case $with_long-otp-prompt in
+[case $with_long_otp_prompt in
     yes)	AC_DEFINE(LONG_OTP_PROMPT)
+		echo "Using two line prompt for OTP authentication"
 		;;
     no)		;;
     *)		echo "Sorry, --with-long-otp-prompt does not take an argument."
@@ -143,7 +145,7 @@ esac])
 
 AC_ARG_WITH(pam, [  --with-pam              enable PAM support],
 [case $with_pam in
-    yes)       AC_DEFINE(HAVE_PAM)
+    yes)	AC_DEFINE(HAVE_PAM)
 		echo 'Configuring for use with PAM'
 		;;
     no)		;;
@@ -186,12 +188,14 @@ AC_ARG_WITH(message, [  --with-message          short, full, or none],
     yes|short)	AC_DEFINE(SHORT_MESSAGE)
 		;;
     no|none)	AC_DEFINE(NO_MESSAGE)
+		echo "Suppressing sudo message/lecture for new users"
 		;;
-    full)	;;
+    full)	echo "Using long sudo message/lecture for new users"
+		;;
     *)		echo "Unknown argument to --with-message: $with_message"
 		exit 1
 		;;
-esac])
+esac], AC_DEFINE(SHORT_MESSAGE))
 
 AC_ARG_WITH(logging, [  --with-logging          log via syslog, file, or both],
 [case $with_logging in  
@@ -202,15 +206,19 @@ AC_ARG_WITH(logging, [  --with-logging          log via syslog, file, or both],
 		exit 1
 		;;
     syslog)	AC_DEFINE(LOGGING, SLOG_SYSLOG)
+		echo "Logging via syslog"
 		;;
     file)	AC_DEFINE(LOGGING, SLOG_FILE)
+		echo "Logging to a file"
 		;;
     both)	AC_DEFINE(LOGGING, SLOG_BOTH)
+		echo "Logging to both syslog and a file"
 		;;
     *)		echo "Unknown argument to --with-logging: $with_logging"
 		exit 1
 		;;
-esac])
+esac], AC_DEFINE(LOGGING, SLOG_SYSLOG)
+echo "Logging via syslog")
 
 AC_ARG_WITH(logfac, [  --with-logfac           syslog facility to log with (default is LOG_LOCAL2)],
 [case $with_logfac in  
@@ -220,9 +228,10 @@ AC_ARG_WITH(logfac, [  --with-logfac           syslog facility to log with (defa
     no)		echo "Sorry, --without-logfac not supported."
 		exit 1
 		;;
-    *)		AC_DEFINE_UNQUOTED(PASSPROMPT, $with_logfac)
+    *)		AC_DEFINE_UNQUOTED(LOGFAC, $with_logfac)
+		echo "Logging using syslog facility $with_logfac"
 		;;
-esac])
+esac], AC_DEFINE(LOGFAC, LOG_LOCAL2))
 
 AC_ARG_WITH(logpath, [  --with-logpath          path to the sudo log file],
 [case $with_logpath in  
@@ -247,12 +256,13 @@ AC_ARG_WITH(loglen, [  --with-loglen           maximum length of a log file line
     *)		echo "You must enter a number, not $with_loglen"
 		exit 1
 		;;
-esac])
+esac], AC_DEFINE(MAXLOGFILELEN, 80))
 
 AC_ARG_WITH(root-sudo, [  --without-root-sudo     don't allow root to run sudo],
-[case $with_root-sudo in  
+[case $with_root_sudo in  
     yes)	;;
     no)		AC_DEFINE(NO_ROOT_SUDO)
+		echo "Restricting sudo to non-root users"
 		;;
     *)		echo "Sorry, --with-root-sudo does not take an argument."
 		exit 1
@@ -260,8 +270,9 @@ AC_ARG_WITH(root-sudo, [  --without-root-sudo     don't allow root to run sudo],
 esac])
 
 AC_ARG_WITH(ignore-dot, [  --with-ignore-dot       ignore '.' in the PATH],
-[case $with_ignore-dot in  
+[case $with_ignore_dot in  
     yes)	AC_DEFINE(IGNORE_DOT_PATH)
+		echo "Sudo will ignore '.' or '' in \$PATH"
 		;;
     no)		;;
     *)		echo "Sorry, --with-ignore-dot does not take an argument."
@@ -277,6 +288,7 @@ AC_ARG_WITH(alertmail, [  --with-alertmail        who should get sudo mail (defa
     no)		echo "Sorry, --without-alertmail not supported."
 		;;
     *)		AC_DEFINE_UNQUOTED(ALERTMAIL, "$with_alertmail")
+		echo "Sudo will send alert mail to $with_alertmail"
 		;;
 esac], AC_DEFINE(ALERTMAIL, "root"))
 
@@ -288,25 +300,28 @@ AC_ARG_WITH(mailsubject, [  --with-mailsubject      subject of sudo mail],
     no)		echo "Sorry, --without-mailsubject not supported."
 		;;
     *)		AC_DEFINE_UNQUOTED(MAILSUBJECT, "$with_mailsubject")
+		echo "Using alert mail subject: $with_mailsubject"
 		;;
 esac], AC_DEFINE(MAILSUBJECT, "*** SECURITY information for %h ***"))
 
 AC_ARG_WITH(mail-if-no-user, [  --without-mail-if-no-user Do not send mail if user not in sudoers],
-[case $with_mail-if-no-user in  
+[case $with_mail_if_no_user in  
     yes)	AC_DEFINE(SEND_MAIL_WHEN_NO_USER)
+		echo "Sudo will send mail if user not in sudoers"
 		;;
     no)		;;
-    *)		echo "Unknown argument to --with-mail-if-no-user: $with_mail-if-no-user"
+    *)		echo "Unknown argument to --with-mail-if-no-user: $with_mail_if_no_user"
 		exit 1
 		;;
 esac], AC_DEFINE(SEND_MAIL_WHEN_NO_USER))
 
 AC_ARG_WITH(mail-if-noperms, [  --with-mail-if-noperms  send mail if user not allowed to run command],
-[case $with_mail-if-noperms in  
+[case $with_mail_if_noperms in  
     yes)	AC_DEFINE(SEND_MAIL_WHEN_NOT_OK)
+		echo "Sudo will send mail if user allowed to run a command"
 		;;
     no)		;;
-    *)		echo "Unknown argument to --with-mail-if-noperms: $with_mail-if-noperms"
+    *)		echo "Unknown argument to --with-mail-if-noperms: $with_mail_if_noperms"
 		exit 1
 		;;
 esac])
@@ -319,23 +334,26 @@ AC_ARG_WITH(passprompt, [  --with-passprompt       default password prompt],
     no)		echo "Sorry, --without-passprompt not supported."
 		;;
     *)		AC_DEFINE_UNQUOTED(PASSPROMPT, "$with_passprompt")
+		echo "Setting default password prompt to: $with_passprompt"
 		;;
 esac], AC_DEFINE(PASSPROMPT, "Password:"))
 
 AC_ARG_WITH(badpass-message, [  --with-badpass-message  message the user sees when the password is wrong],
-[case $with_badpass-message in  
+[case $with_badpass_message in  
     yes)	echo "Must give --with-badpass-message an argument."
 		exit 1
 		;;
     no)		echo "Sorry, --without-badpass-message not supported."
 		;;
-    *)		AC_DEFINE_UNQUOTED(INCORRECT_PASSWORD, "$with_badpass-message")
+    *)		AC_DEFINE_UNQUOTED(INCORRECT_PASSWORD, "$with_badpass_message")
+		echo "Setting incorrect password string to: $with_badpass_message"
 		;;
 esac], AC_DEFINE(INCORRECT_PASSWORD, "Sorry, try again."))
 
 AC_ARG_WITH(fqdn, [  --with-fqdn             expect fully qualified hosts in sudoers],
 [case $with_fqdn in  
     yes)	AC_DEFINE(FQDN)
+		echo "Sudo will expect fully qualified hostname in the sudoers file"
 		;;
     no)		;;
     *)		echo "Sorry, --with-fqdn does not take an argument."
@@ -343,6 +361,7 @@ AC_ARG_WITH(fqdn, [  --with-fqdn             expect fully qualified hosts in sud
 		;;
 esac])
 
+dnl XXX - finish adding echos
 AC_ARG_WITH(timedir, [  --with-timedir          path to the sudo timestamp dir],
 [case $with_timedir in  
     yes)	echo "Must give --with-timedir an argument."
@@ -362,14 +381,14 @@ AC_ARG_WITH(sendmail, [  --with-sendmail=path    set path to sendmail],
 esac])
 
 AC_ARG_WITH(sudoers-mode, [  --with-sudoers-mode     mode of sudoers file (defaults to 0440)],
-[case $with_sudoers-mode in  
+[case $with_sudoers_mode in  
     yes)	echo "Must give --with-sudoers-mode an argument."
 		exit 1
 		;;
     no)		echo "Sorry, --without-sudoers-mode not supported."
 		exit 1
 		;;
-    [0-9]*)	SUDOERS_MODE=$with_sudoers-mode
+    [0-9]*)	SUDOERS_MODE=$with_sudoers_mode
 		;;
     *)		echo "You must use a numeric uid, not a name."
 		exit 1
@@ -377,14 +396,14 @@ AC_ARG_WITH(sudoers-mode, [  --with-sudoers-mode     mode of sudoers file (defau
 esac])
 
 AC_ARG_WITH(sudoers-uid, [  --with-sudoers-uid      uid that owns sudoers file (defaults to 0)],
-[case $with_sudoers-uid in  
+[case $with_sudoers_uid in  
     yes)	echo "Must give --with-sudoers-uid an argument."
 		exit 1
 		;;
     no)		echo "Sorry, --without-sudoers-uid not supported."
 		exit 1
 		;;
-    [0-9]*)	SUDOERS_UID=$with_sudoers-uid
+    [0-9]*)	SUDOERS_UID=$with_sudoers_uid
 		;;
     *)		echo "You must use a numeric uid, not a name."
 		exit 1
@@ -392,14 +411,14 @@ AC_ARG_WITH(sudoers-uid, [  --with-sudoers-uid      uid that owns sudoers file (
 esac])
 
 AC_ARG_WITH(sudoers-gid, [  --with-sudoers-gid      gid that owns sudoers file (defaults to 0)],
-[case $with_sudoers-gid in  
+[case $with_sudoers_gid in  
     yes)	echo "Must give --with-sudoers-gid an argument."
 		exit 1
 		;;
     no)		echo "Sorry, --without-sudoers-gid not supported."
 		exit 1
 		;;
-    [0-9]*)	SUDOERS_GID=$with_sudoers-gid
+    [0-9]*)	SUDOERS_GID=$with_sudoers_gid
 		;;
     *)		echo "You must use a numeric gid, not a name."
 		exit 1
@@ -421,12 +440,12 @@ AC_ARG_WITH(umask, [  --with-umask            umask with which the prog should r
 esac], AC_DEFINE(SUDO_UMASK, 0022))
 
 AC_ARG_WITH(runas-default, [  --with-runas-default    User to run commands as (default is "root"],
-[case $with_runas-default in  
+[case $with_runas_default in  
     yes)	AC_DEFINE(RUNAS_DEFAULT, "root")
 		;;
     no)		AC_DEFINE(RUNAS_DEFAULT, 0)
 		;;
-    *)		AC_DEFINE_UNQUOTED(RUNAS_DEFAULT, "$with_runas-default")
+    *)		AC_DEFINE_UNQUOTED(RUNAS_DEFAULT, "$with_runas_default")
 		;;
 esac], AC_DEFINE(RUNAS_DEFAULT, "root"))
 
@@ -455,7 +474,7 @@ AC_ARG_WITH(editor, [  --with-editor           Default editor for visudo (defaul
 esac], AC_DEFINE(EDITOR, _PATH_VI))
 
 AC_ARG_WITH(env-editor, [  --with-env-editor       Use the environment variable EDITOR for visudo],
-[case $with_env-editor in  
+[case $with_env_editor in  
     yes)	AC_DEFINE(ENV_EDITOR)
 		;;
     no)		;;
@@ -465,12 +484,12 @@ AC_ARG_WITH(env-editor, [  --with-env-editor       Use the environment variable 
 esac])
 
 AC_ARG_WITH(passwd-tries, [  --with-passwd-tries     number of tries to enter password (default is 3)],
-[case $with_passwd-tries in  
+[case $with_passwd_tries in  
     yes)	AC_DEFINE(TRIES_FOR_PASSWORD, 3)
 		;;
     no)		AC_DEFINE(TRIES_FOR_PASSWORD, 0)
 		;;
-    [0-9]*)	AC_DEFINE_UNQUOTED(TRIES_FOR_PASSWORD, $with_passwd-tries)
+    [0-9]*)	AC_DEFINE_UNQUOTED(TRIES_FOR_PASSWORD, $with_passwd_tries)
 		;;
     *)		echo "You must enter the numer of tries."
 		exit 1
@@ -491,12 +510,12 @@ AC_ARG_WITH(timeout, [  --with-timeout          minutes before sudo asks for pas
 esac], AC_DEFINE(TIMEOUT, 5))
 
 AC_ARG_WITH(password-timeout, [  --with-password-timeout passwd prompt timeout in minutes (default is 5)],
-[case $with_password-timeout in  
+[case $with_password_timeout in  
     yes)	AC_DEFINE(PASSWORD_TIMEOUT, 5)
 		;;
     no)		AC_DEFINE(PASSWORD_TIMEOUT, 0)
 		;;
-    [0-9]*)	AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $with_password-timeout)
+    [0-9]*)	AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $with_password_timeout)
 		;;
     *)		echo "You must enter the numer of minutes."
 		exit 1
@@ -514,7 +533,7 @@ AC_ARG_WITH(execv, [  --with-execv            use execv() instead of execvp()],
 esac])
 
 AC_ARG_WITH(tty-tickets, [  --with-tty-tickets      use a different ticket file for each tty],
-[case $with_tty-tickets in  
+[case $with_tty_tickets in  
     yes)	AC_DEFINE(USE_TTY_TICKETS)
 		;;
     no)		;;
@@ -534,7 +553,7 @@ AC_ARG_WITH(insults, [  --with-insults          insult the user for entering an 
 esac])
 
 AC_ARG_WITH(classic-insults, [  --with-classic-insults  include the insults from the "classic" sudo],
-[case $with_classic-insults in  
+[case $with_classic_insults in  
     yes)	AC_DEFINE(CLASSIC_INSULTS)
 		;;
     no)		;;
@@ -544,7 +563,7 @@ AC_ARG_WITH(classic-insults, [  --with-classic-insults  include the insults from
 esac])
 
 AC_ARG_WITH(csops-insults, [  --with-csops-insults    include CSOps insults],
-[case $with_csops-insults in  
+[case $with_csops_insults in  
     yes)	AC_DEFINE(CSOPS_INSULTS)
 		;;
     no)		;;
@@ -554,7 +573,7 @@ AC_ARG_WITH(csops-insults, [  --with-csops-insults    include CSOps insults],
 esac])
 
 AC_ARG_WITH(hal-insults, [  --with-hal-insults      include 2001-like insults],
-[case $with_hal-insults in  
+[case $with_hal_insults in  
     yes)	AC_DEFINE(HAL_INSULTS)
 		;;
     no)		;;
@@ -564,7 +583,7 @@ AC_ARG_WITH(hal-insults, [  --with-hal-insults      include 2001-like insults],
 esac])
 
 AC_ARG_WITH(goons-insults, [  --with-goons-insults    include the insults from the \"Goon Show\"],
-[case $with_goons-insults in  
+[case $with_goons_insults in  
     yes)	AC_DEFINE(GOONS_INSULTS)
 		;;
     no)		;;
@@ -574,11 +593,11 @@ AC_ARG_WITH(goons-insults, [  --with-goons-insults    include the insults from t
 esac])
 
 AC_ARG_WITH(secure-path, [  --with-secure-path      override the user's path with a builtin one],
-[case $with_secure-path in  
+[case $with_secure_path in  
     yes)	AC_DEFINE_UNQUOTED(SECURE_PATH, "/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc")
 		;;
     no)		;;
-    *)		AC_DEFINE_UNQUOTED(SECURE_PATH, "$with_secure-path")
+    *)		AC_DEFINE_UNQUOTED(SECURE_PATH, "$with_secure_path")
 		;;
 esac])
 
