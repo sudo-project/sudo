@@ -131,7 +131,7 @@ FILE *sudoers_fp = NULL;
 struct interface *interfaces;
 int num_interfaces;
 int tgetpass_flags;
-int timestamp_uid;
+uid_t timestamp_uid;
 extern int errorlineno;
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
@@ -315,8 +315,9 @@ main(argc, argv, envp)
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_flag(I_ROOT_SUDO)) {
-	(void) fputs("You are already root, you don't need to use sudo.\n",
-	    stderr);
+	(void) fprintf(stderr,
+	    "Sorry, %s has been configured to not allow root to run it.\n",
+	    Argv[0]);
 	exit(1);
     }
 
