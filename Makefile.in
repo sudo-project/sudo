@@ -56,9 +56,9 @@ CFLAGS = -I. -I$(srcdir) @CFLAGS@
 LDFLAGS = @LDFLAGS@
 
 # Where to install things...
-prefix = /usr/local
-exec_prefix = $(prefix)
-man_prefix = @MAN_PREFIX@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+man_prefix = @man_prefix@
 
 # Directory in which to install sudo.
 sudodir = $(exec_prefix)/bin
