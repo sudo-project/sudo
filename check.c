@@ -39,6 +39,14 @@
 static char rcsid[] = "$Id$";
 #endif /* lint */
 
+/* Shadow password types */
+#define SPW_NONE	0
+#define SPW_AUTH	1
+#define SPW_HPUX9	2
+#define SPW_SUNOS4	3
+#define SPW_SVR4	4
+#define SPW_ULTRIX4	5
+
 #include "config.h"
 
 #include <stdio.h>
@@ -65,39 +73,37 @@ static char rcsid[] = "$Id$";
 #include "sudo.h"
 #include "options.h"
 #include "insults.h"
-#ifdef __svr4__
-#include <shadow.h>
-#endif /* __svr4__ */
-#if defined(__osf__) && defined(HAVE_C2_SECURITY)
-#include <sys/security.h>
-#include <prot.h>
-#endif /* __osf__ && HAVE_C2_SECURITY */
-#if defined(ultrix) && defined(HAVE_C2_SECURITY)
-#include <auth.h>
-#endif /* ultrix && HAVE_C2_SECURITY */
-#if defined(__convex__) && defined(HAVE_C2_SECURITY)
-#include <sys/security.h>
-#include <prot.h>
-#endif /* __convex__ && HAVE_C2_SECURITY */
-#if defined(SUNOS4) && defined(HAVE_C2_SECURITY)
-#include <sys/label.h>
-#include <sys/audit.h>
-#include <pwdadj.h>
-#endif /* SUNOS4 && HAVE_C2_SECURITY */
+#ifdef SHADOW_TYPE
+#  if SHADOW_TYPE == SPW_SVR4
+#    include <shadow.h>
+#  endif /* SVR4 */
+#  if SHADOW_TYPE == SPW_AUTH
+#    include <sys/security.h>
+#    include <prot.h>
+#  endif /* AUTH */
+#  if SHADOW_TYPE == SPW_ULTRIX4
+#    include <auth.h>
+#  endif /* ULTRIX4 */
+#  if SHADOW_TYPE == SPW_SUNOS4
+#    include <sys/label.h>
+#    include <sys/audit.h>
+#    include <pwdadj.h>
+#  endif /* SUNOS4 */
+#endif /* SHADOW_TYPE */
 #ifdef HAVE_KERB4
-#include <krb.h>
+#  include <krb.h>
 #endif /* HAVE_KERB4 */
 #ifdef HAVE_AFS
-#include <usersec.h>
-#include <afs/kauth.h>
-#include <afs/kautils.h>
+  #include <usersec.h>
+  #include <afs/kauth.h>
+  #include <afs/kautils.h>
 #endif /* HAVE_AFS */
 #ifdef HAVE_UTIME
-#ifdef HAVE_UTIME_H
-#include <utime.h>
-#endif /* HAVE_UTIME_H */
+#  ifdef HAVE_UTIME_H
+#    include <utime.h>
+#  endif /* HAVE_UTIME_H */
 #else
-#include "utime.h"
+#  include "utime.h"
 #endif /* HAVE_UTIME */
 
 
@@ -355,26 +361,25 @@ static void check_passwd()
     long password_expires = -1;
     char *reason;
 #endif /* HAVE_AFS */
-#ifdef __svr4__
+#ifdef SHADOW_TYPE
+#  if SHADOW_TYPE == SPW_SVR4
     struct spwd *spw_ent;
-#endif /* __svr4__ */
-#if defined(__hpux) && defined(HAVE_C2_SECURITY)
+#  endif /* SVR4 */
+#  if SHADOW_TYPE == SPW_HPUX9
     struct s_passwd *spw_ent;
-#endif /* __hpux && HAVE_C2_SECURITY */
-#if defined(SUNOS4) && defined(HAVE_C2_SECURITY)
-    struct passwd_adjunct *pwa;
-#endif /* SUNOS4 && HAVE_C2_SECURITY */
-#if defined(__osf__) && defined(HAVE_C2_SECURITY)
-    struct pr_passwd *spw_ent;
-#endif /* __osf__ && HAVE_C2_SECURITY */
-#if defined(ultrix) && defined(HAVE_C2_SECURITY)
+#  endif /* HPUX9 */
+#  if SHADOW_TYPE == SPW_SUNOS4
+    struct passwd_adjunct *spw_ent;
+#  endif /* SUNOS4 */
+#  if SHADOW_TYPE == SPW_ULTRIX4
     AUTHORIZATION *spw_ent;
-#endif /* ultrix && HAVE_C2_SECURITY */
-#if defined(__convex__) && defined(HAVE_C2_SECURITY)
+#  endif /* CULTRIX4 */
+#  if SHADOW_TYPE == SPW_AUTH
     char salt[2];		/* Need the salt to perform the encryption */
     register int i;
     struct pr_passwd *spw_ent;
-#endif /* __convex__ && HAVE_C2_SECURITY */
+#  endif /* AUTH */
+#endif /* SHADOW_TYPE */
 #ifdef HAVE_SKEY
     int pw_ok = 1;
     struct passwd *pw_ent = getpwuid(uid);
@@ -386,7 +391,8 @@ static void check_passwd()
     char *pass;			/* this is what gets entered    */
     register int counter = TRIES_FOR_PASSWORD;
 
-#if defined(__hpux) && defined(HAVE_C2_SECURITY)
+#ifdef SHADOW_TYPE
+#  if SHADOW_TYPE == SPW_HPUX9
     /*
      * grab encrypted password from shadow pw file
      * or just use the regular one...
@@ -396,8 +402,8 @@ static void check_passwd()
     set_perms(PERM_USER);
     if (spw_ent && spw_ent -> pw_passwd)
 	encrypted = spw_ent -> pw_passwd;
-#endif /* __hpux && HAVE_C2_SECURITY */
-#if defined(__osf__) && defined(HAVE_C2_SECURITY)
+#  endif /* HPUX9 */
+#  if SHADOW_TYPE == SPW_AUTH
     /*
      * grab encrypted password from protected passwd file
      * or just use the regular one...
@@ -407,8 +413,8 @@ static void check_passwd()
     set_perms(PERM_USER);
     if (spw_ent)
 	encrypted = spw_ent -> ufld.fd_encrypt;
-#endif /* __osf__ && HAVE_C2_SECURITY */
-#if defined(ultrix) && defined(HAVE_C2_SECURITY)
+#  endif /* AUTH */
+#  if SHADOW_TYPE == SPW_ULTRIX4
     /*
      * grab encrypted password from /etc/auth
      * or just use the regular one...
@@ -418,52 +424,29 @@ static void check_passwd()
     set_perms(PERM_USER);
     if (spw_ent && spw_ent -> a_password)
 	encrypted = spw_ent -> a_password;
-#endif /* ultrix && HAVE_C2_SECURITY */
-#ifdef __svr4__
+#  endif /* ULTRIX4 */
+#  if SHADOW_TYPE == SPW_SVR4
     /*
-     * SVR4 should always have a shadow password file
-     * so if this fails it is a fatal error.
+     * grab encrypted password from protected passwd file
+     * or just use the regular one...
      */
     set_perms(PERM_ROOT);
     spw_ent = getspnam(user);
     set_perms(PERM_USER);
-    if (spw_ent == NULL) {
-	(void) sprintf(user, "%u", uid);
-	log_error(GLOBAL_NO_PW_ENT);
-	inform_user(GLOBAL_NO_PW_ENT);
-	exit(1);
-    }
-    encrypted = spw_ent -> sp_pwdp;
-#endif /* __svr4__ */
-#if defined(__convex__) && defined(HAVE_C2_SECURITY)
-    /*
-     * Convex with C2 security
-     */
-    set_perms(PERM_ROOT);
-    spw_ent = getprpwnam(pw_ent->pw_name);
-    set_perms(PERM_USER);
-    if (spw_ent == (struct pr_passwd *)NULL) {
-	(void) sprintf(user, "%u", uid);
-	log_error(GLOBAL_NO_AUTH_ENT);
-	inform_user(GLOBAL_NO_AUTH_ENT);
-	exit(1);
-    }
-    encrypted = spw_ent->ufld.fd_encrypt;
-#endif /* __convex__ && HAVE_C2_SECURITY */
-#if defined(SUNOS4) && (HAVE_C2_SECURITY)
+    if (spw_ent && spw_ent -> sp_pwdp)
+	encrypted = spw_ent -> sp_pwdp;
+#  endif /* SVR4 */
+#  if SHADOW_TYPE == SPW_SUNOS4
     /*
      * SunOS with C2 security
      */
     set_perms(PERM_ROOT);
-    pwa = getpwanam(user);
+    spw_ent = getpwanam(user);
     set_perms(PERM_USER);
-    if (pwa == (struct passwd_adjunct *)NULL) {
-	(void) sprintf(user, "%u", uid);
-	log_error(GLOBAL_NO_PW_ENT);
-	inform_user(GLOBAL_NO_PW_ENT);
-	exit(1);
-    }
-#endif /* SUNOS4 && HAVE_C2_SECURITY */
+    if (spw_ent && spw_ent -> pwa_passwd)
+	encrypted = spw_ent -> pwa_passwd;
+#  endif /* SUNOS4 */
+#endif /* SHADOW_TYPE */
 
     /*
      * you get TRIES_FOR_PASSWORD times to guess your password
@@ -472,36 +455,39 @@ static void check_passwd()
 #ifdef HAVE_SKEY
 	pass = skey_getpass(prompt, pw_ent, pw_ok);
 #else
-#ifdef USE_GETPASS
-#ifdef HAVE_KERB4
+#  ifdef USE_GETPASS
+#    ifdef HAVE_KERB4
 	(void) des_read_pw_string(kpass, sizeof(kpass) - 1, prompt, 0);
 	pass = kpass;
-#else
+#    else
 	pass = (char *) getpass(prompt);
-#endif /* HAVE_KERB4 */
-#else
+#    endif /* HAVE_KERB4 */
+#  else
 	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60);
-#endif /* USE_GETPASS */
+#  endif /* USE_GETPASS */
 #endif /* HAVE_SKEY */
 	if (!pass || *pass == '\0')
 	    if (counter == TRIES_FOR_PASSWORD)
 		exit(0);
 	    else
 		break;
-#if defined(__convex__) && defined(HAVE_C2_SECURITY)
+#ifdef SHADOW_TYPE
+#  if SHADOW_TYPE == SPW_ULTRIX4
+	if (spw_ent && !strcmp(encrypted, (char *) crypt16(pass, encrypted)))
+	    return;		/* if the passwd is correct return() */
+#  endif /* ULTRIX4 */
+#  if SHADOW_TYPE == SPW_AUTH && !defined(__alpha)
 	strncpy(salt, spw_ent->ufld.fd_encrypt, 2);
 	i = AUTH_SALT_SIZE + AUTH_CIPHERTEXT_SEG_CHARS;
 	if (strncmp(encrypted, crypt(pass, salt), i) == 0)
 	    return;           /* if the passwd is correct return() */
-#else
-#if defined(ultrix) && defined(HAVE_C2_SECURITY)
-	if (spw_ent && !strcmp(encrypted, (char *) crypt16(pass, encrypted)))
-	    return;		/* if the passwd is correct return() */
-#endif /* ultrix && HAVE_C2_SECURITY */
-#if defined(__osf__) && defined(HAVE_C2_SECURITY)
+#  endif /* AUTH && !__alpha */
+#  if SHADOW_TYPE == SPW_AUTH && defined(__alpha)
 	if (spw_ent && !strcmp(encrypted, osf_C2_crypt(pass,encrypted)))
 	    return;             /* if the passwd is correct return() */
-#endif /* __osf__ && HAVE_C2_SECURITY */
+#  endif /* AUTH && __alpha */
+#endif /* SHADOW_TYPE */
+
 #ifdef HAVE_SKEY
 	if (!strcmp(pw_ent->pw_passwd, skey_crypt(pass, pw_ent->pw_passwd,
 	    pw_ent, pw_ok)))
@@ -510,11 +496,12 @@ static void check_passwd()
 	if (!strcmp(encrypted, (char *) crypt(pass, encrypted)))
 	    return;		/* if the passwd is correct return() */
 #endif /* HAVE_SKEY */
-#endif /* __convex__ && HAVE_C2_SECURITY */
+
 #ifdef HAVE_KERB4
 	if (uid && sudo_krb_validate_user(user, pass) == 0)
 	    return;
 #endif /* HAVE_KERB4 */
+
 #ifdef HAVE_AFS
 	code = ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION+KA_USERAUTH_DOSETPAG,
                                           user,
@@ -528,6 +515,7 @@ static void check_passwd()
 	if (code == 0)
 	    return;
 #endif /* HAVE_AFS */
+
 	--counter;		/* otherwise, try again  */
 #ifdef USE_INSULTS
 	(void) fprintf(stderr, "%s\n", INSULT);
@@ -548,7 +536,7 @@ static void check_passwd()
 }
 
 
-#if defined(__osf__) && defined(HAVE_C2_SECURITY)
+#if defined(__alpha) && defined(SHADOW_TYPE) && SHADOW_TYPE == SPW_AUTH
 /********************************************************************
  * osf_C2_crypt()  - returns OSF/1 3.0 enhanced security encrypted
  *               password.  crypt() produces, given an eight
@@ -598,7 +586,7 @@ static char *osf_C2_crypt(pass, encrypt_salt)
 
     return(enpass);
 }
-#endif /* __osf__ && HAVE_C2_SECURITY */
+#endif /* __alpha && SHADOW_TYPE == SPW_AUTH */
 
 
 #ifdef HAVE_KERB4
