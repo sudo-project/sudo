@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "November 12, 2004" "1.6.9" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "November 19, 2004" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -354,12 +354,16 @@ a normal command does.
 Certain configuration options may be changed from their default
 values at runtime via one or more \f(CW\*(C`Default_Entry\*(C'\fR lines.  These
 may affect all users on any host, all users on a specific host, a
-specific user, or commands being run as a specific user.
+specific user, a specific command, or commands being run as a specific user.
+Note that per-command entries may not include command line arguments.
+If you need to specify arguments, define a \f(CW\*(C`Cmnd_Alias\*(C'\fR and reference
+that instead.
 .PP
-.Vb 4
+.Vb 5
 \& Default_Type ::= 'Defaults' |
 \&                  'Defaults' '@' Host |
 \&                  'Defaults' ':' User |
+\&                  'Defaults' '!' Cmnd |
 \&                  'Defaults' '>' RunasUser
 .Ve
 .PP
@@ -1131,7 +1135,7 @@ these are a bit contrived.  First, we define our \fIaliases\fR:
 \& Host_Alias     CDROM = orion, perseus, hercules
 .Ve
 .PP
-.Vb 12
+.Vb 13
 \& # Cmnd alias specification
 \& Cmnd_Alias     DUMPS = /usr/bin/mt, /usr/sbin/dump, /usr/sbin/rdump,\e
 \&                        /usr/sbin/restore, /usr/sbin/rrestore
@@ -1144,6 +1148,7 @@ these are a bit contrived.  First, we define our \fIaliases\fR:
 \&                         /usr/local/bin/tcsh, /usr/bin/rsh, \e
 \&                         /usr/local/bin/zsh
 \& Cmnd_Alias     SU = /usr/bin/su
+\& Cmnd_Alias     PAGERS = /usr/bin/more, /usr/bin/pg, /usr/bin/less
 .Ve
 .PP
 Here we override some of the compiled in default values.  We want
@@ -1154,15 +1159,18 @@ want to reset the \f(CW\*(C`LOGNAME\*(C'\fR or \f(CW\*(C`USER\*(C'\fR environmen
 running commands as root.  Additionally, on the machines in the
 \&\fI\s-1SERVERS\s0\fR \f(CW\*(C`Host_Alias\*(C'\fR, we keep an additional local log file and
 make sure we log the year in each log line since the log entries
-will be kept around for several years.
+will be kept around for several years.  Lastly, we disable shell
+escapes for the commands in the \s-1PAGERS\s0 \f(CW\*(C`Cmnd_Alias\*(C'\fR (/usr/bin/more,
+/usr/bin/pg and /usr/bin/less).
 .PP
-.Vb 6
+.Vb 7
 \& # Override built-in defaults
 \& Defaults               syslog=auth
 \& Defaults>root          !set_logname
 \& Defaults:FULLTIMERS    !lecture
 \& Defaults:millert       !authenticate
 \& Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
+\& Defaults!PAGERS        noexec
 .Ve
 .PP
 The \fIUser specification\fR is the part that actually determines who may
