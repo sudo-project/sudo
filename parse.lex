@@ -89,7 +89,8 @@ extern void yyerror		__P((char *));
 
 OCTET			[[:digit:]]{1,3}
 DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
-WORD			[[:alnum:]_-]+
+HOSTNAME		[[:alnum:]_-]+
+USERNAME		[^:,\) \t\n]+
 
 %e	4000
 %p	6000
@@ -159,10 +160,6 @@ WORD			[[:alnum:]_-]+
 			    return(':');
 			}			/* return ':' */
 
-\.			{
-			    return('.');
-			}
-
 NOPASSWD[[:blank:]]*:	{ 
 				/* cmnd does not require passwd for this user */
 			    	LEXTRACE("NOPASSWD ");
@@ -175,13 +172,13 @@ PASSWD[[:blank:]]*:	{
 			    	return(PASSWD);
 			}
 
-\+{WORD}		{
+\+{USERNAME}		{
 			    /* netgroup */
 			    fill(yytext, yyleng);
 			    return(NETGROUP);
 			}
 
-\%{WORD}		{
+\%{USERNAME}		{
 			    /* UN*X group */
 			    fill(yytext, yyleng);
 			    return(USERGROUP);
@@ -193,7 +190,7 @@ PASSWD[[:blank:]]*:	{
 			    return(NTWKADDR);
 			}
 
-[[:alpha:]][[:alnum:]_-]*(\.{WORD})+ {
+[[:alpha:]][[:alnum:]_-]*(\.{HOSTNAME})+ {
 			    fill(yytext, yyleng);
 			    LEXTRACE("FQHOST ");
 			    return(FQHOST);
@@ -217,7 +214,7 @@ PASSWD[[:blank:]]*:	{
 			    }
 			}
 
-<GOTRUNAS>#?{WORD}	{
+<GOTRUNAS>#?{USERNAME}	{
 			    /* username/uid that user can run command as */
 			    fill(yytext, yyleng);
 			    LEXTRACE("NAME ");
