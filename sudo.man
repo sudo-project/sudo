@@ -5,6 +5,8 @@ sudo, visudo \- execute a command as the superuser and edit the suoders file
 .SH SYNOPSIS
 .B sudo 
 .I command
+.sp
+.B visudo 
 
 .SH DESCRIPTION
 .I Sudo
