@@ -1021,3 +1021,5 @@ Sudo 1.5.8 released.
 320) Minor configure fixes.
 
 Sudo 1.5.8p1 released.
+
+321) Fixed a bug wrt quoting characters in command args.

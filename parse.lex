@@ -122,7 +122,7 @@ WORD			[[:alnum:]_-]+
 			    return(COMMENT);
 			}			/* return comments */
 
-<GOTCMND>[^:\, \t\n]+ {
+<GOTCMND>[^\\:, \t\n]+ {
 			    LEXTRACE("ARG ");
 			    fill_args(yytext, yyleng, sawspace);
 			    sawspace = FALSE;
