@@ -113,3 +113,15 @@
 #ifndef _PATH_BSHELL
 #undef _PATH_BSHELL
 #endif /* _PATH_BSHELL */
+
+#ifndef _PATH_TMP
+#define	_PATH_TMP	"/tmp/"
+#endif /* _PATH_TMP */
+
+#ifndef _PATH_VARTMP
+#define	_PATH_VARTMP	"/var/tmp/"
+#endif /* _PATH_VARTMP */
+
+#ifndef _PATH_USRTMP
+#define	_PATH_USRTMP	"/usr/tmp/"
+#endif /* _PATH_USRTMP */
