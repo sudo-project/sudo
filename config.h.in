@@ -275,3 +275,7 @@
 #ifndef _SUDO_PATH_LOGFILE
 #undef _SUDO_PATH_LOGFILE
 #endif /* _SUDO_PATH_LOGFILE */
+
+#ifndef _SUDO_PATH_TIMEDIR
+#undef _SUDO_PATH_TIMEDIR
+#endif /* _SUDO_PATH_TIMEDIR */
