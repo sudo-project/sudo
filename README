@@ -11,8 +11,8 @@ Where to find sudo
 ==================
 Before you try and build sudo, *please* make sure you have the current
 version.  The latest sudo may always be gotten via anonymous ftp
-from ftp.cs.colorado.edu in the directory /pub/sysadmin/utilities/.
-The distribution is cu-sudo.v1.M.m.tar.Z where `M' is the major
+from ftp.cs.colorado.edu in the directory /pub/sysadmin/sudo/.
+The distribution is cu-sudo.vM.m.tar.Z where `M' is the major
 version number and `m' is the minor version number.
 BETA versions of sudo may also be available.  If you join
 the `sudo-workers' mailing list you will get the BETA announcements
