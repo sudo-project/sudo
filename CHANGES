@@ -1148,3 +1148,16 @@ Sudo 1.5.9 released.
 359) Added real dependencies in Makefile.
 
 360) Deprecated --with-otp-only in favor of --without-passwd.
+
+361) Add --with-mail-if-no-host to send mail if a user tries to run sudo on
+     a host for which he/she is not authorized.
+
+362) Most of sudo now runs as root instead of the invoking user to
+     minimize the possibility of user control via signals or tracing.
+
+363) Now Support CIDR-style netmasks (ie: 128.138.0.0/16).
+
+364) In "sudo -l" mode, the type of the stored (expanded) alias was not
+     stored with the contents.  This could lead to incorrect output
+     if the sudoers file had different alias types with the same name.
+     Normal parsing (ie: not in '-l' mode) is unaffected.
