@@ -148,11 +148,18 @@ esac])
 AC_ARG_WITH(rpath, [  --with-rpath            pass -R flag in addition to -L for lib paths],
 [case $with_rpath in
     yes)	;;
-    no)		with_rpath=no
-		;;
+    no)		;;
     *)		AC_MSG_ERROR(["--with-rpath does not take an argument."])
 		;;
-esac], [with_rpath=no])
+esac])
+
+AC_ARG_WITH(blibpath, [  --with-blibpath[=PATH]  pass -blibpath flag to ld for additional lib paths],
+[case $with_blibpath in
+    yes)	;;
+    no)		;;
+    *)		AC_MSG_NOTICE([will pass -blibpath:${with_blibpath} to the loader.])
+		;;
+esac])
 
 AC_ARG_WITH(incpath, [  --with-incpath          additional places to look for include files],
 [case $with_incpath in  
@@ -1205,13 +1212,21 @@ case "$host" in
 		CPPFLAGS="${CPPFLAGS} -D_XOPEN_EXTENDED_SOURCE"
 		SUDO_DEFINE(_ALL_SOURCE)
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
-		AC_MSG_CHECKING([if linker accepts -Wl,-blibpath])
-		O_LDFLAGS="$LDFLAGS"
-		LDFLAGS="$LDFLAGS -Wl,-blibpath:/usr/lib:/lib"
-		AC_TRY_LINK([], [], [
-		    blibpath="/usr/lib:/lib"
-		    AC_MSG_RESULT(yes)
-		], [AC_MSG_RESULT(no)])
+		if test X"$with_blibpath" != X"no"; then
+		    AC_MSG_CHECKING([if linker accepts -Wl,-blibpath])
+		    O_LDFLAGS="$LDFLAGS"
+		    LDFLAGS="$LDFLAGS -Wl,-blibpath:/usr/lib:/lib"
+		    AC_TRY_LINK([], [], [
+			if test -n "$with_blibpath" -a "$with_blibpath" != "yes"; then
+			    blibpath="$with_blibpath"
+			elif test -n "$GCC"; then
+			    blibpath="/usr/lib:/lib:/usr/local/lib"
+			else
+			    blibpath="/usr/lib:/lib"
+			fi
+			AC_MSG_RESULT(yes)
+		    ], [AC_MSG_RESULT(no)])
+		fi
 		LDFLAGS="$O_LDFLAGS"
 		;;
     *-*-hiuxmpp*)
@@ -1957,9 +1972,16 @@ if test "$with_authenticate" = "yes"; then
 fi
 
 dnl
-dnl Add $blibpath to SUDO_LDFLAGS
+dnl Add $blibpath to SUDO_LDFLAGS if specified by the user or if we
+dnl added -L dirpaths to SUDO_LDFLAGS.
 dnl
-test X"$blibpath" != X"" && SUDO_LDFLAGS="$SUDO_LDFLAGS -Wl,-blibpath:$blibpath"
+if test -n "$blibpath"; then
+    if test -n "$blibpath_add"; then
+    	SUDO_LDFLAGS="$SUDO_LDFLAGS -Wl,-blibpath:${blibpath}${blibpath_add}"
+    elif test -n "$with_blibpath" -a "$with_blibpath" != "yes"; then
+    	SUDO_LDFLAGS="$SUDO_LDFLAGS -Wl,-blibpath:${blibpath}"
+    fi
+fi
 
 dnl
 dnl Check for log file and timestamp locations
