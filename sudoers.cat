@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.6.8                   September  6, 2004                      1
+1.6.9                   September 30, 2004                      1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                   September  6, 2004                      2
+1.6.9                   September 30, 2004                      2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                   September  6, 2004                      3
+1.6.9                   September 30, 2004                      3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                   September  6, 2004                      4
+1.6.9                   September 30, 2004                      4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                   September  6, 2004                      5
+1.6.9                   September 30, 2004                      5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                   September  6, 2004                      6
+1.6.9                   September 30, 2004                      6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                   September  6, 2004                      7
+1.6.9                   September 30, 2004                      7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                   September  6, 2004                      8
+1.6.9                   September 30, 2004                      8
 
 
 
@@ -547,6 +547,17 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    of _N_O_E_X_E_C _a_n_d _E_X_E_C below as well as the "PRE­
                    VENTING SHELL ESCAPES" section at the end of
                    this manual.  This flag is _o_f_f by default.
+
+       trace       If set, all commands run via sudo will behave
+                   as if the TRACE tag has been set, unless over­
+                   ridden by a NOTRACE tag.  See the description
+                   of _T_R_A_C_E _a_n_d _N_O_T_R_A_C_E below as well as the
+                   "PREVENTING SHELL ESCAPES" section at the end
+                   of this manual.  Be aware that tracing is only
+                   supported on certain operating systems.  On
+                   systems where it is not supported this flag
+                   will have no effect.  This flag is _o_f_f by
+                   default.
 
        ignore_local_sudoers
                    If set via LDAP, parsing of @sysconfdir@/sudo­
@@ -575,6 +586,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        loglinelen  Number of characters per line for the file
                    log.  This value is used to decide when to
                    wrap lines for nicer log files.  This has no
+
+
+
+1.6.9                   September 30, 2004                      9
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                    effect on the syslog log file, only the file
                    log.  The default is 80 (use 0 or negate the
                    option to disable word wrap).
@@ -586,18 +609,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    word.  If set to a value less than 0 the
                    user's timestamp will never expire.  This can
                    be used to allow users to create or delete
-
-
-
-1.6.8                   September  6, 2004                      9
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
                    their own timestamps via sudo -v and sudo -k
                    respectively.
 
@@ -641,6 +652,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
                    %U      expanded to the login name of the user
                            the command will be run as (defaults
+
+
+
+1.6.9                   September 30, 2004                     10
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                            to root)
 
                    %h      expanded to the local hostname without
@@ -651,20 +674,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                            machine's hostname is fully qualified
                            or the _f_q_d_n option is set)
 
-                   %%      two consecutive % characters are
-
-
-
-1.6.8                   September  6, 2004                     10
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
-                           collaped into a single % character
+                   %%      two consecutive % characters are col­
+                           laped into a single % character
 
                    The default value is Password:.
 
@@ -707,6 +718,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
                    never   Never lecture the user.
 
+
+
+
+1.6.9                   September 30, 2004                     11
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                    once    Only lecture the user the first time
                            they run ssuuddoo.
 
@@ -718,17 +741,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    Path to a file containing an alternate sudo
                    lecture that will be used in place of the
                    standard lecture if the named file exists.
-
-
-
-1.6.8                   September  6, 2004                     11
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
        logfile     Path to the ssuuddoo log file (not the syslog log
                    file).  Setting a path turns on logging to a
@@ -772,6 +784,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                            to use the --vv flag.
 
                    always  The user must always enter a password
+
+
+
+1.6.9                   September 30, 2004                     12
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                            to use the --vv flag.
 
                    The default value is `all'.
@@ -783,18 +807,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    all     All the user's _s_u_d_o_e_r_s entries for the
                            current host must have the NOPASSWD
                            flag set to avoid entering a password.
-
-
-
-
-1.6.8                   September  6, 2004                     12
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
                    any     At least one of the user's _s_u_d_o_e_r_s
                            entries for the current host must have
@@ -838,6 +850,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    dangerous variables from the environment of
                    any setuid process (such as ssuuddoo).
 
+
+
+
+1.6.9                   September 30, 2004                     13
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        env_keep    Environment variables to be preserved in the
                    user's environment when the _e_n_v___r_e_s_e_t option
                    is in effect.  This allows fine-grained con­
@@ -849,18 +873,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    abled by using the =, +=, -=, and ! operators
                    respectively.  This list has no default mem­
                    bers.
-
-
-
-
-1.6.8                   September  6, 2004                     13
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
        When logging via _s_y_s_l_o_g(3), ssuuddoo accepts the following
        values for the syslog facility (the value of the ssyysslloogg
@@ -882,7 +894,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
         Runas_Spec ::= '(' Runas_List ')'
 
-        Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:')
+        Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
+                      'TRACE' | 'NOTRACE')
 
        A uusseerr ssppeecciiffiiccaattiioonn determines which commands a user may
        run (and as what user) on specified hosts.  By default,
@@ -903,6 +916,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
         dgb    boulder = (operator) /bin/ls, /bin/kill, /usr/bin/lprm
 
        The user ddggbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m
+
+
+
+1.6.9                   September 30, 2004                     14
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        -- but only as ooppeerraattoorr.  E.g.,
 
         $ sudo -u operator /bin/ls.
@@ -915,27 +940,14 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        Then user ddggbb is now allowed to run _/_b_i_n_/_l_s as ooppeerraattoorr,
        but  _/_b_i_n_/_k_i_l_l and _/_u_s_r_/_b_i_n_/_l_p_r_m as rroooott.
 
-
-
-
-
-1.6.8                   September  6, 2004                     14
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
        TTaagg__SSppeecc
 
        A command may have zero or more tags associated with it.
        There are four possible tag values, NOPASSWD, PASSWD,
-       NOEXEC, EXEC.  Once a tag is set on a Cmnd, subsequent
-       Cmnds in the Cmnd_Spec_List, inherit the tag unless it is
-       overridden by the opposite tag (ie: PASSWD overrides
-       NOPASSWD and EXEC overrides NOEXEC).
+       NOEXEC, EXEC, TRACE and NOTRACE.  Once a tag is set on a
+       Cmnd, subsequent Cmnds in the Cmnd_Spec_List, inherit the
+       tag unless it is overridden by the opposite tag (ie:
+       PASSWD overrides NOPASSWD and NOTRACE overrides TRACE).
 
        _N_O_P_A_S_S_W_D _a_n_d _P_A_S_S_W_D
 
@@ -969,23 +981,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        _N_O_E_X_E_C _a_n_d _E_X_E_C
 
-       If sudo has been compiled with _n_o_e_x_e_c support and the
-       underlying operating system support it, the NOEXEC tag can
-       be used to prevent a dynamically-linked executable from
-       running further commands itself.
-
-       In the following example, user aaaarroonn may run _/_u_s_r_/_b_i_n_/_m_o_r_e
-       and _/_u_s_r_/_b_i_n_/_v_i but shell escapes will be disabled.
-
-        aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
-
-       See the "PREVENTING SHELL ESCAPES" section below for more
-       details on how _n_o_e_x_e_c works and whether or not it will
-       work on your system.
+       If ssuuddoo has been compiled with _n_o_e_x_e_c support and the
 
 
 
-1.6.8                   September  6, 2004                     15
+1.6.9                   September 30, 2004                     15
 
 
 
@@ -993,6 +993,38 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+       underlying operating system supports it, the NOEXEC tag
+       can be used to prevent a dynamically-linked executable
+       from running further commands itself.
+
+       In the following example, user aaaarroonn may run _/_u_s_r_/_b_i_n_/_m_o_r_e
+       and _/_u_s_r_/_b_i_n_/_v_i but shell escapes will be disabled.
+
+        aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+
+       See the "PREVENTING SHELL ESCAPES" section below for more
+       details on how NOEXEC works and whether or not it will
+       work on your system.
+
+       _T_R_A_C_E _a_n_d _N_O_T_R_A_C_E
+
+       If ssuuddoo has been configured with the --with-systrace
+       option, the TRACE tag can be used to cause programs
+       spawned by a command to be checked against _s_u_d_o_e_r_s and
+       logged just like they would be if run through ssuuddoo
+       directly.  This is useful in conjunction with commands
+       that allow shell escapes such as editors, shells and pagi­
+       nators.
+
+       In the following example, user cchhuucckk may run any command
+       on the machine research with tracing enabled.
+
+        chuck  research = TRACE: ALL
+
+       See the "PREVENTING SHELL ESCAPES" section below for more
+       details on how TRACE works and whether or not it will work
+       on your system.
 
        WWiillddccaarrddss
 
@@ -1016,6 +1048,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        Note that a forward slash ('/') will nnoott be matched by
        wildcards used in the pathname.  When matching the command
+
+
+
+1.6.9                   September 30, 2004                     16
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        line arguments, however, a slash ddooeess get matched by wild­
        cards.  This is to make a path like:
 
@@ -1047,19 +1091,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        This limitation will be removed in a future version of
        ssuuddoo.
 
-
-
-
-
-1.6.8                   September  6, 2004                     16
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
        EExxcceeppttiioonnss ttoo wwiillddccaarrdd rruulleess
 
        The following exceptions apply to the above rules:
@@ -1068,13 +1099,48 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                argument in the _s_u_d_o_e_r_s entry it means that com­
                mand is not allowed to be run with aannyy arguments.
 
+       IInncclluuddiinngg ootthheerr ffiilleess ffrroomm wwiitthhiinn ssuuddooeerrss
+
+       It is possible to include other _s_u_d_o_e_r_s files from within
+       the _s_u_d_o_e_r_s file currently being parsed using the #include
+       directive, similar to the one used by the C preprocessor.
+       This is useful, for example, for keeping a site-wide _s_u_d_o_­
+       _e_r_s file in addition to a per-machine local one.  For the
+       sake of this example the site-wide _s_u_d_o_e_r_s will be
+       _/_e_t_c_/_s_u_d_o_e_r_s and the per-machine one will be _/_e_t_c_/_s_u_d_o_­
+       _e_r_s_._l_o_c_a_l.  To include _/_e_t_c_/_s_u_d_o_e_r_s_._l_o_c_a_l from _/_e_t_c_/_s_u_d_o_­
+       _e_r_s we would use the following line in _/_e_t_c_/_s_u_d_o_e_r_s:
+
+        #include /etc/sudoers.local
+
+       When ssuuddoo reaches this line it will suspend processing of
+
+
+
+1.6.9                   September 30, 2004                     17
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
+       the current file (_/_e_t_c_/_s_u_d_o_e_r_s) and switch to _/_e_t_c_/_s_u_d_o_­
+       _e_r_s_._l_o_c_a_l.  Upon reaching the end of _/_e_t_c_/_s_u_d_o_e_r_s_._l_o_c_a_l,
+       the rest of _/_e_t_c_/_s_u_d_o_e_r_s will be processed.  Files that
+       are included may themselves include other files.  A hard
+       limit of 128 nested include files is enforced to prevent
+       include file loops.
+
        OOtthheerr ssppeecciiaall cchhaarraacctteerrss aanndd rreesseerrvveedd wwoorrddss
 
        The pound sign ('#') is used to indicate a comment (unless
-       it occurs in the context of a user name and is followed by
-       one or more digits, in which case it is treated as a uid).
-       Both the comment character and any text after it, up to
-       the end of the line, are ignored.
+       it is part of a #include directive or unless it occurs in
+       the context of a user name and is followed by one or more
+       digits, in which case it is treated as a uid).  Both the
+       comment character and any text after it, up to the end of
+       the line, are ignored.
 
        The reserved word AALLLL is a built-in _a_l_i_a_s that always
        causes a match to succeed.  It can be used wherever one
@@ -1117,7 +1183,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.6.8                   September  6, 2004                     17
+1.6.9                   September 30, 2004                     18
 
 
 
@@ -1183,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                   September  6, 2004                     18
+1.6.9                   September 30, 2004                     19
 
 
 
@@ -1249,7 +1315,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                   September  6, 2004                     19
+1.6.9                   September 30, 2004                     20
 
 
 
@@ -1315,7 +1381,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                   September  6, 2004                     20
+1.6.9                   September 30, 2004                     21
 
 
 
@@ -1359,29 +1425,29 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
        whatever it pleases, including run other programs.  This
        can be a security issue since it is not uncommon for a
        program to allow shell escapes, which lets a user bypass
-       ssuuddoo's restrictions.  Common programs that permit shell
-       escapes include shells (obviously), editors, paginators,
-       mail and terminal programs.
+       ssuuddoo's access control and logging.  Common programs that
+       permit shell escapes include shells (obviously), editors,
+       paginators, mail and terminal programs.
 
-       Many systems that support shared libraries have the abil­
-       ity to override default library functions by pointing an
-       environment variable (usually LD_PRELOAD) to an alternate
-       shared library.  On such systems, ssuuddoo's _n_o_e_x_e_c function­
-       ality can be used to prevent a program run by sudo from
-       executing any other programs.  Note, however, that this
-       applies only to native dynamically-linked executables.
-       Statically-linked executables and foreign executables run­
-       ning under binary emulation are not affected.
+       There are three basic approaches to this problem:
 
-       To tell whether or not ssuuddoo supports _n_o_e_x_e_c, you can run
-       the following as root:
+       restrict  Avoid giving users access to commands that allow
+                 the user to run arbitrary commands.  Many edi­
+                 tors have a restricted mode where shell escapes
+                 are disabled, though ssuuddooeeddiitt is a better solu­
+                 tion to running editors via sudo.  Due to the
+                 large number of programs that offer shell
+                 escapes, restricting users to the set of pro­
+                 grams that do not if often unworkable.
 
-           sudo -V | grep "dummy exec"
+       noexec    Many systems that support shared libraries have
+                 the ability to override default library func­
+                 tions by pointing an environment variable (usu­
+                 ally LD_PRELOAD) to an alternate shared library.
 
 
 
-
-1.6.8                   September  6, 2004                     21
+1.6.9                   September 30, 2004                     22
 
 
 
@@ -1390,38 +1456,95 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
-       If the resulting output contains a line that begins with:
+                 On such systems, ssuuddoo's _n_o_e_x_e_c functionality can
+                 be used to prevent a program run by sudo from
+                 executing any other programs.  Note, however,
+                 that this applies only to native dynamically-
+                 linked executables.  Statically-linked executa­
+                 bles and foreign executables running under
+                 binary emulation are not affected.
 
-           File containing dummy exec functions:
+                 To tell whether or not ssuuddoo supports _n_o_e_x_e_c, you
+                 can run the following as root:
 
-       then ssuuddoo may be able to replace the exec family of func­
-       tions in the standard library with its own that simply
-       return an error.  Unfortunately, there is no foolproof way
-       to know whether or not _n_o_e_x_e_c will work at compile-time.
-       _N_o_e_x_e_c should work on SunOS, Solaris, *BSD, Linux, IRIX,
-       Tru64 UNIX, MacOS X, and HP-UX 11.x.  It is known nnoott to
-       work on AIX and UnixWare.  _N_o_e_x_e_c is expected to work on
-       most operating systems that support the LD_PRELOAD envi­
-       ronment variable.  Check your operating system's manual
-       pages for the dynamic linker (usually ld.so, ld.so.1,
-       dyld, dld.sl, rld, or loader) to see if LD_PRELOAD is sup­
-       ported.
+                     sudo -V | grep "dummy exec"
 
-       To enable _n_o_e_x_e_c for a command, use the NOEXEC tag as doc­
-       umented in the User Specification section above.  Here is
-       that example again:
+                 If the resulting output contains a line that
+                 begins with:
 
-        aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+                     File containing dummy exec functions:
 
-       This allows user aaaarroonn to run _/_u_s_r_/_b_i_n_/_m_o_r_e and
-       _/_u_s_r_/_b_i_n_/_v_i with _n_o_e_x_e_c enabled.  This will prevent those
-       two commands from executing other commands (such as a
-       shell).  If you are unsure whether or not your system is
-       capable of supporting _n_o_e_x_e_c you can always just try it
-       out and see if it works.
+                 then ssuuddoo may be able to replace the exec family
+                 of functions in the standard library with its
+                 own that simply return an error.  Unfortunately,
+                 there is no foolproof way to know whether or not
+                 _n_o_e_x_e_c will work at compile-time.  _N_o_e_x_e_c should
+                 work on SunOS, Solaris, *BSD, Linux, IRIX, Tru64
+                 UNIX, MacOS X, and HP-UX 11.x.  It is known nnoott
+                 to work on AIX and UnixWare.  _N_o_e_x_e_c is expected
+                 to work on most operating systems that support
+                 the LD_PRELOAD environment variable.  Check your
+                 operating system's manual pages for the dynamic
+                 linker (usually ld.so, ld.so.1, dyld, dld.sl,
+                 rld, or loader) to see if LD_PRELOAD is sup­
+                 ported.
 
-       Note that disabling shell escapes is not a panacea.  Pro­
-       grams running as root are still capable of many poten­
+                 To enable _n_o_e_x_e_c for a command, use the NOEXEC
+                 tag as documented in the User Specification sec­
+                 tion above.  Here is that example again:
+
+                  aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+
+                 This allows user aaaarroonn to run _/_u_s_r_/_b_i_n_/_m_o_r_e and
+                 _/_u_s_r_/_b_i_n_/_v_i with _n_o_e_x_e_c enabled.  This will pre­
+                 vent those two commands from executing other
+                 commands (such as a shell).  If you are unsure
+                 whether or not your system is capable of sup­
+                 porting _n_o_e_x_e_c you can always just try it out
+                 and see if it works.
+
+       tracing   On operating systems that support the ssyyssttrraaccee
+                 pseudo-device, the --with-systrace configure
+                 option can be used to compile support for com­
+                 mand tracing in ssuuddoo.  With ssyyssttrraaccee support
+                 ssuuddoo can transparently intercept a new command,
+                 allow or deny it based on _s_u_d_o_e_r_s, and log the
+                 result.  This does require that ssuuddoo become a
+
+
+
+1.6.9                   September 30, 2004                     23
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
+                 daemon that persists until the command and all
+                 its descendents have finished.
+
+                 To enable tracing on a per-command basis, use
+                 the TRACE tag as documented in the User Specifi­
+                 cation section above.  Here is that example
+                 again:
+
+                  chuck  research = TRACE: ALL
+
+                 This allows user cchhuucckk to run any command on the
+                 machine research with tracing enabled.  Any com­
+                 mands run via shell escapes will be logged by
+                 sudo.
+
+                 At the time of this writing the ssyyssttrraaccee pseudo-
+                 device comes standard with OpenBSD and NetBSD
+                 and is available as patches to FreeBSD, MacOS X
+                 and Linux.  See <http://www.systrace.org/> for
+                 more information.
+
+       Note that restricting shell escapes is not a panacea.
+       Programs running as root are still capable of many poten­
        tially hazardous operations (such as changing or overwrit­
        ing files) that could lead to unintended privilege escala­
        tion.  In the specific case of an editor, a safer approach
@@ -1443,19 +1566,6 @@ CCAAVVEEAATTSS
        hostname be fully qualified as returned by the hostname
        command or use the _f_q_d_n option in _s_u_d_o_e_r_s.
 
-
-
-
-
-1.6.8                   September  6, 2004                     22
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
 BBUUGGSS
        If you feel you have found a bug in ssuuddoo, please submit a
        bug report at http://www.sudo.ws/sudo/bugs/
@@ -1465,9 +1575,21 @@ SSUUPPPPOORRTT
        http://www.sudo.ws/sudo/support.html for details.
 
        Limited free support is available via the sudo-users mail­
-       ing list, see http://www.sudo.ws/mail­
-       man/listinfo/sudo-users to subscribe or search the
-       archives.
+       ing list, see
+
+
+
+1.6.9                   September 30, 2004                     24
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
+       http://www.sudo.ws/mailman/listinfo/sudo-users to sub­
+       scribe or search the archives.
 
 DDIISSCCLLAAIIMMEERR
        SSuuddoo is provided ``AS IS'' and any express or implied war­
@@ -1513,6 +1635,16 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.6.8                   September  6, 2004                     23
+
+
+
+
+
+
+
+
+
+
+1.6.9                   September 30, 2004                     25
 
 

@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "September  8, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "September 30, 2004" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
@@ -452,14 +452,16 @@ will be ignored and sudo will log and complain.  This is done to
 keep a user from creating his/her own timestamp with a bogus
 date on systems that allow users to give away files.
 .PP
-Please note that \fBsudo\fR will only log the command it explicitly
-runs.  If a user runs a command such as \f(CW\*(C`sudo su\*(C'\fR or \f(CW\*(C`sudo sh\*(C'\fR,
-subsequent commands run from that shell will \fInot\fR be logged, nor
-will \fBsudo\fR's access control affect them.  The same is true for
-commands that offer shell escapes (including most editors).  Because
-of this, care must be taken when giving users access to commands
-via \fBsudo\fR to verify that the command does not inadvertently give
-the user an effective root shell.
+Please note that \fBsudo\fR will normally only log the command it
+explicitly runs.  If a user runs a command such as \f(CW\*(C`sudo su\*(C'\fR or
+\&\f(CW\*(C`sudo sh\*(C'\fR, subsequent commands run from that shell will \fInot\fR be
+logged, nor will \fBsudo\fR's access control affect them.  The same
+is true for commands that offer shell escapes (including most
+editors).  Because of this, care must be taken when giving users
+access to commands via \fBsudo\fR to verify that the command does not
+inadvertently give the user an effective root shell.  For more
+information, please see the \f(CW\*(C`PREVENTING SHELL ESCAPES\*(C'\fR section in
+sudoers(@mansectform@).
 .SH "ENVIRONMENT"
 .IX Header "ENVIRONMENT"
 \&\fBsudo\fR utilizes the following environment variables:

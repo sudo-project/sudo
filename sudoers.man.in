@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "September  6, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "September 30, 2004" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -589,6 +589,14 @@ the \-\-with\-logincap option.  This flag is \fIoff\fR by default.
 If set, all commands run via sudo will behave as if the \f(CW\*(C`NOEXEC\*(C'\fR
 tag has been set, unless overridden by a \f(CW\*(C`EXEC\*(C'\fR tag.  See the
 description of \fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR below as well as the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section at the end of this manual.  This flag is \fIoff\fR by default.
+.IP "trace" 12
+.IX Item "trace"
+If set, all commands run via sudo will behave as if the \f(CW\*(C`TRACE\*(C'\fR
+tag has been set, unless overridden by a \f(CW\*(C`NOTRACE\*(C'\fR tag.  See the
+description of \fI\s-1TRACE\s0 and \s-1NOTRACE\s0\fR below as well as the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section at the end of this manual.  Be aware that
+tracing is only supported on certain operating systems.  On systems
+where it is not supported this flag will have no effect.
+This flag is \fIoff\fR by default.
 .IP "ignore_local_sudoers" 12
 .IX Item "ignore_local_sudoers"
 If set via \s-1LDAP\s0, parsing of \f(CW@sysconfdir\fR@/sudoers will be skipped.
@@ -867,8 +875,9 @@ supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\fR, \fBerr\fR, \fBinfo
 \& Runas_Spec ::= '(' Runas_List ')'
 .Ve
 .PP
-.Vb 1
-\& Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:')
+.Vb 2
+\& Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
+\&               'TRACE' | 'NOTRACE')
 .Ve
 .PP
 A \fBuser specification\fR determines which commands a user may run
@@ -907,11 +916,12 @@ but  \fI/bin/kill\fR and \fI/usr/bin/lprm\fR as \fBroot\fR.
 .Sh "Tag_Spec"
 .IX Subsection "Tag_Spec"
 A command may have zero or more tags associated with it.  There are
-four possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR, \f(CW\*(C`EXEC\*(C'\fR.
+four possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR, \f(CW\*(C`EXEC\*(C'\fR,
+\&\f(CW\*(C`TRACE\*(C'\fR and \f(CW\*(C`NOTRACE\*(C'\fR.
 Once a tag is set on a \f(CW\*(C`Cmnd\*(C'\fR, subsequent \f(CW\*(C`Cmnd\*(C'\fRs in the
 \&\f(CW\*(C`Cmnd_Spec_List\*(C'\fR, inherit the tag unless it is overridden by the
-opposite tag (ie: \f(CW\*(C`PASSWD\*(C'\fR overrides \f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`EXEC\*(C'\fR
-overrides \f(CW\*(C`NOEXEC\*(C'\fR).
+opposite tag (ie: \f(CW\*(C`PASSWD\*(C'\fR overrides \f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`NOTRACE\*(C'\fR
+overrides \f(CW\*(C`TRACE\*(C'\fR).
 .PP
 \fI\s-1NOPASSWD\s0 and \s-1PASSWD\s0\fR
 .IX Subsection "NOPASSWD and PASSWD"
@@ -949,8 +959,8 @@ This behavior may be overridden via the verifypw and listpw options.
 \fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR
 .IX Subsection "NOEXEC and EXEC"
 .PP
-If sudo has been compiled with \fInoexec\fR support and the underlying
-operating system support it, the \f(CW\*(C`NOEXEC\*(C'\fR tag can be used to prevent
+If \fBsudo\fR has been compiled with \fInoexec\fR support and the underlying
+operating system supports it, the \f(CW\*(C`NOEXEC\*(C'\fR tag can be used to prevent
 a dynamically-linked executable from running further commands itself.
 .PP
 In the following example, user \fBaaron\fR may run \fI/usr/bin/more\fR
@@ -961,7 +971,27 @@ and \fI/usr/bin/vi\fR but shell escapes will be disabled.
 .Ve
 .PP
 See the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section below for more details
-on how \fInoexec\fR works and whether or not it will work on your system.
+on how \f(CW\*(C`NOEXEC\*(C'\fR works and whether or not it will work on your system.
+.PP
+\fI\s-1TRACE\s0 and \s-1NOTRACE\s0\fR
+.IX Subsection "TRACE and NOTRACE"
+.PP
+If \fBsudo\fR has been configured with the \f(CW\*(C`\-\-with\-systrace\*(C'\fR option,
+the \f(CW\*(C`TRACE\*(C'\fR tag can be used to cause programs spawned by a command
+to be checked against \fIsudoers\fR and logged just like they would
+be if run through \fBsudo\fR directly.  This is useful in conjunction
+with commands that allow shell escapes such as editors, shells and
+paginators.
+.PP
+In the following example, user \fBchuck\fR may run any command on the
+machine research with tracing enabled.
+.PP
+.Vb 1
+\& chuck  research = TRACE: ALL
+.Ve
+.PP
+See the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section below for more details
+on how \f(CW\*(C`TRACE\*(C'\fR works and whether or not it will work on your system.
 .Sh "Wildcards"
 .IX Subsection "Wildcards"
 \&\fBsudo\fR allows shell-style \fIwildcards\fR (aka meta or glob characters)
@@ -1037,13 +1067,34 @@ The following exceptions apply to the above rules:
 If the empty string \f(CW""\fR is the only command line argument in the
 \&\fIsudoers\fR entry it means that command is not allowed to be run
 with \fBany\fR arguments.
+.Sh "Including other files from within sudoers"
+.IX Subsection "Including other files from within sudoers"
+It is possible to include other \fIsudoers\fR files from within the
+\&\fIsudoers\fR file currently being parsed using the \f(CW\*(C`#include\*(C'\fR
+directive, similar to the one used by the C preprocessor.  This is
+useful, for example, for keeping a site-wide \fIsudoers\fR file in
+addition to a per-machine local one.  For the sake of this example
+the site-wide \fIsudoers\fR will be \fI/etc/sudoers\fR and the per-machine
+one will be \fI/etc/sudoers.local\fR.  To include \fI/etc/sudoers.local\fR
+from \fI/etc/sudoers\fR we would use the following line in \fI/etc/sudoers\fR:
+.PP
+.Vb 1
+\& #include /etc/sudoers.local
+.Ve
+.PP
+When \fBsudo\fR reaches this line it will suspend processing of the
+current file (\fI/etc/sudoers\fR) and switch to \fI/etc/sudoers.local\fR.
+Upon reaching the end of \fI/etc/sudoers.local\fR, the rest of
+\&\fI/etc/sudoers\fR will be processed.  Files that are included may
+themselves include other files.  A hard limit of 128 nested include
+files is enforced to prevent include file loops.
 .Sh "Other special characters and reserved words"
 .IX Subsection "Other special characters and reserved words"
-The pound sign ('#') is used to indicate a comment (unless it
-occurs in the context of a user name and is followed by one or
-more digits, in which case it is treated as a uid).  Both the
-comment character and any text after it, up to the end of the line,
-are ignored.
+The pound sign ('#') is used to indicate a comment (unless it is
+part of a #include directive or unless it occurs in the context of
+a user name and is followed by one or more digits, in which case
+it is treated as a uid).  Both the comment character and any text
+after it, up to the end of the line, are ignored.
 .PP
 The reserved word \fB\s-1ALL\s0\fR is a built-in \fIalias\fR that always causes
 a match to succeed.  It can be used wherever one might otherwise
@@ -1318,10 +1369,21 @@ advisory at best (and reinforced by policy).
 Once \fBsudo\fR executes a program, that program is free to do whatever
 it pleases, including run other programs.  This can be a security
 issue since it is not uncommon for a program to allow shell escapes,
-which lets a user bypass \fBsudo\fR's restrictions.  Common programs
-that permit shell escapes include shells (obviously), editors,
-paginators, mail and terminal programs.
+which lets a user bypass \fBsudo\fR's access control and logging.
+Common programs that permit shell escapes include shells (obviously),
+editors, paginators, mail and terminal programs.
 .PP
+There are three basic approaches to this problem:
+.IP "restrict" 10
+.IX Item "restrict"
+Avoid giving users access to commands that allow the user to run
+arbitrary commands.  Many editors have a restricted mode where shell
+escapes are disabled, though \fBsudoedit\fR is a better solution to
+running editors via sudo.  Due to the large number of programs that
+offer shell escapes, restricting users to the set of programs that
+do not if often unworkable.
+.IP "noexec" 10
+.IX Item "noexec"
 Many systems that support shared libraries have the ability to
 override default library functions by pointing an environment
 variable (usually \f(CW\*(C`LD_PRELOAD\*(C'\fR) to an alternate shared library.
@@ -1330,20 +1392,20 @@ prevent a program run by sudo from executing any other programs.
 Note, however, that this applies only to native dynamically-linked
 executables.  Statically-linked executables and foreign executables
 running under binary emulation are not affected.
-.PP
+.Sp
 To tell whether or not \fBsudo\fR supports \fInoexec\fR, you can run
 the following as root:
-.PP
+.Sp
 .Vb 1
 \&    sudo -V | grep "dummy exec"
 .Ve
-.PP
+.Sp
 If the resulting output contains a line that begins with:
-.PP
+.Sp
 .Vb 1
 \&    File containing dummy exec functions:
 .Ve
-.PP
+.Sp
 then \fBsudo\fR may be able to replace the exec family of functions
 in the standard library with its own that simply return an error.
 Unfortunately, there is no foolproof way to know whether or not
@@ -1354,25 +1416,52 @@ is expected to work on most operating systems that support the
 \&\f(CW\*(C`LD_PRELOAD\*(C'\fR environment variable.  Check your operating system's
 manual pages for the dynamic linker (usually ld.so, ld.so.1, dyld,
 dld.sl, rld, or loader) to see if \f(CW\*(C`LD_PRELOAD\*(C'\fR is supported.
-.PP
+.Sp
 To enable \fInoexec\fR for a command, use the \f(CW\*(C`NOEXEC\*(C'\fR tag as documented
 in the User Specification section above.  Here is that example again:
-.PP
+.Sp
 .Vb 1
 \& aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 .Ve
-.PP
+.Sp
 This allows user \fBaaron\fR to run \fI/usr/bin/more\fR and \fI/usr/bin/vi\fR
 with \fInoexec\fR enabled.  This will prevent those two commands from
 executing other commands (such as a shell).  If you are unsure
 whether or not your system is capable of supporting \fInoexec\fR you
 can always just try it out and see if it works.
+.IP "tracing" 10
+.IX Item "tracing"
+On operating systems that support the \fBsystrace\fR pseudo\-device,
+the \f(CW\*(C`\-\-with\-systrace\*(C'\fR configure option can be used to compile
+support for command tracing in \fBsudo\fR.  With \fBsystrace\fR support
+\&\fBsudo\fR can transparently intercept a new command, allow or deny
+it based on \fIsudoers\fR, and log the result.  This does require that
+\&\fBsudo\fR become a daemon that persists until the command and all its
+descendents have finished.
+.Sp
+To enable tracing on a per-command basis, use the \f(CW\*(C`TRACE\*(C'\fR tag as
+documented in the User Specification section above.  Here is that
+example again:
+.Sp
+.Vb 1
+\& chuck  research = TRACE: ALL
+.Ve
+.Sp
+This allows user \fBchuck\fR to run any command on the machine research
+with tracing enabled.  Any commands run via shell escapes will be
+logged by sudo.
+.Sp
+At the time of this writing the \fBsystrace\fR pseudo-device comes
+standard with OpenBSD and NetBSD and is available as patches to
+FreeBSD, MacOS X and Linux.  See <http://www.systrace.org/> for
+more information.
 .PP
-Note that disabling shell escapes is not a panacea.  Programs running
-as root are still capable of many potentially hazardous operations
-(such as changing or overwriting files) that could lead to unintended
-privilege escalation.  In the specific case of an editor, a safer
-approach is to give the user permission to run \fBsudoedit\fR.
+Note that restricting shell escapes is not a panacea.  Programs
+running as root are still capable of many potentially hazardous
+operations (such as changing or overwriting files) that could lead
+to unintended privilege escalation.  In the specific case of an
+editor, a safer approach is to give the user permission to run
+\&\fBsudoedit\fR.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), sudo(@mansectsu@), visudo(@mansectsu@)

@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.6.8                   September  8, 2004                      1
+1.6.9                   September 30, 2004                      1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.8                   September  8, 2004                      2
+1.6.9                   September 30, 2004                      2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.6.8                   September  8, 2004                      3
+1.6.9                   September 30, 2004                      3
 
 
 
@@ -259,7 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.6.8                   September  8, 2004                      4
+1.6.9                   September 30, 2004                      4
 
 
 
@@ -325,7 +325,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.6.8                   September  8, 2004                      5
+1.6.9                   September 30, 2004                      5
 
 
 
@@ -359,15 +359,17 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        timestamp with a bogus date on systems that allow users to
        give away files.
 
-       Please note that ssuuddoo will only log the command it explic­
-       itly runs.  If a user runs a command such as sudo su or
-       sudo sh, subsequent commands run from that shell will _n_o_t
-       be logged, nor will ssuuddoo's access control affect them.
-       The same is true for commands that offer shell escapes
-       (including most editors).  Because of this, care must be
-       taken when giving users access to commands via ssuuddoo to
-       verify that the command does not inadvertently give the
-       user an effective root shell.
+       Please note that ssuuddoo will normally only log the command
+       it explicitly runs.  If a user runs a command such as sudo
+       su or sudo sh, subsequent commands run from that shell
+       will _n_o_t be logged, nor will ssuuddoo's access control affect
+       them.  The same is true for commands that offer shell
+       escapes (including most editors).  Because of this, care
+       must be taken when giving users access to commands via
+       ssuuddoo to verify that the command does not inadvertently
+       give the user an effective root shell.  For more informa­
+       tion, please see the PREVENTING SHELL ESCAPES section in
+       sudoers(4).
 
 EENNVVIIRROONNMMEENNTT
        ssuuddoo utilizes the following environment variables:
@@ -386,12 +388,10 @@ EENNVVIIRROONNMMEENNTT
 
         SUDO_PROMPT            Used as the default password prompt
 
-        SUDO_COMMAND           Set to the command run by sudo
 
 
 
-
-1.6.8                   September  8, 2004                      6
+1.6.9                   September 30, 2004                      6
 
 
 
@@ -399,6 +399,8 @@ EENNVVIIRROONNMMEENNTT
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+        SUDO_COMMAND           Set to the command run by sudo
 
         SUDO_USER              Set to the login of the user who invoked sudo
 
@@ -455,9 +457,7 @@ AAUUTTHHOORRSS
 
 
 
-
-
-1.6.8                   September  8, 2004                      7
+1.6.9                   September 30, 2004                      7
 
 
 
@@ -523,7 +523,7 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.6.8                   September  8, 2004                      8
+1.6.9                   September 30, 2004                      8
 
 
 
@@ -589,6 +589,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.6.8                   September  8, 2004                      9
+1.6.9                   September 30, 2004                      9
 
 
