@@ -1,12 +1,17 @@
 INSTALL NOTES
 
-1) Run the configure script, ie: "./configure".  See the SUPPORTED file
+0) Run the configure script, ie: "./configure".  See the SUPPORTED file
    for a list of OS's sudo is known to work on.  Configure will generate
    config.h, pathnames.h, Makefile and visudoers/Makefile.  You shouldn't
    need to hand-edit the Makefiles but if you don't like configure's choice
    of C compiler, yacc or lex programs you may want to.  You can also
    use the --prefix flag to configure to install sudo/visudo in a place
    other than /usr/local (ie: --prefix=/opt).
+
+   NOTE: if you use C2 security you need to use the --with-C2 flag to
+   configure.  Currently this only affect hpux.  You can use --with-C2
+   if you are just expecting to migrate to C2 security later but it makes
+   password lookups about twice as slow.
 
 1) Read sudo.h to enable/disable the options you may or may not want.
 
