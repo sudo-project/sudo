@@ -156,7 +156,7 @@ dnl
 dnl If we don't have egrep we can't do anything...
 dnl
 AC_CHECK_PROG(EGREPPROG, egrep, egrep, )
-if test -z "$EGREPPROG" ; then
+if test -z "$EGREPPROG"; then
     echo "Sorry, configure requires egrep to run."
     exit
 fi
@@ -176,7 +176,7 @@ AC_CHECK_PROG(UNAMEPROG, uname, uname, )
 AC_CHECK_PROG(TRPROG, tr, tr, )
 AC_CHECK_PROG(SEDPROG, sed, sed, )
 AC_CHECK_PROG(NROFFPROG, nroff, nroff, )
-if test -z "$NROFFPROG" ; then
+if test -z "$NROFFPROG"; then
     MANTYPE="cat"
 fi
 
@@ -221,18 +221,18 @@ case "$OS" in
 		# (XXX - should be an option to configure)
 		#STATIC_SUDO=true
 
-		if test "$OSREV" -lt 9 ; then
+		if test "$OSREV" -lt 9; then
 		    AC_DEFINE(BROKEN_SYSLOG)
-		    if test -n "$GCC" ; then
+		    if test -n "$GCC"; then
 			SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
 		    else
 			SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
 		    fi
-		elif test "$OSREV" -eq 9 ; then
+		elif test "$OSREV" -eq 9; then
 		    AC_DEFINE(BROKEN_SYSLOG)
 
-		    if test -n "$STATIC_SUDO" ; then
-			if test -n "$GCC" ; then
+		    if test -n "$STATIC_SUDO"; then
+			if test -n "$GCC"; then
 			    SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
 			else
 			    SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
@@ -240,11 +240,11 @@ case "$OS" in
 		    fi
 
 		    # DCE support
-		    if test "$with_DCE" = "yes" ; then
+		    if test "$with_DCE" = "yes"; then
 			# order of libs in 9.X is important. -lc_r must be last
 			SUDO_LIBS="-ldce -lM -lc_r"
 
-			if test -n "$GCC" ; then
+			if test -n "$GCC"; then
 			    CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE -D_REENTRANT -I/usr/include/reentrant"
 			else
 			    CPPFLAGS="${CPPFLAGS} -Aa -D_HPUX_SOURCE -D_REENTRANT -I/usr/include/reentrant"
@@ -257,25 +257,20 @@ case "$OS" in
 			SHADOW_TYPE="SPW_HPUX9"
 			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    fi
-		elif test "$OSREV" -eq 10 ; then
-		    if test -n "$STATIC_SUDO" ; then
-			if test -n "$GCC" ; then
+		elif test "$OSREV" -eq 10; then
+		    if test -n "$STATIC_SUDO"; then
+			if test -n "$GCC"; then
 			    SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
 			else
 			    SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
 			fi
 		    fi
 
-		    # DCE support
-		    if test "$with_DCE" = "yes" ; then
-			# order of libs in 10.0 is important. -ldce must be last
-			# note that gcc has it's own alloca()
-			if test -n "$GCC" ; then
-			    SUDO_LIBS="-ldce"
+		    # DCE support (requires ANSI C compiler)
+		    if test "$with_DCE" = "yes"; then
+			if test -n "$GCC"; then
 			    CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE"
 			else
-			    SUDO_LIBS="-lPW -ldce"
-			    VISUDO_LIBS="-lPW"
 			    CPPFLAGS="${CPPFLAGS} -Aa -D_HPUX_SOURCE"
 			fi
 		    fi
@@ -289,7 +284,7 @@ case "$OS" in
 		fi
 
 		# AFS support
-		if test "$with_AFS" = "yes" ; then
+		if test "$with_AFS" = "yes"; then
 		    SUDO_LIBS="-lBSD ${SUDO_LIBS}"
 		fi
 		;;
@@ -311,15 +306,15 @@ case "$OS" in
 		# configure doesn't think irix has stdc headers
 		# but it's good enough for sudo
 		AC_DEFINE(STDC_HEADERS)
-		if test -z "$NROFFPROG" ; then
-		    MAN_POSTINSTALL='	/bin/rm -f $(mandir)/sudo.$(mansect).z ; /usr/bin/pack $(mandir)/sudo.$(mansect)'
+		if test -z "$NROFFPROG"; then
+		    MAN_POSTINSTALL='	/bin/rm -f $(mandir)/sudo.$(mansect).z; /usr/bin/pack $(mandir)/sudo.$(mansect)'
 		    if test -d /usr/share/catman/local; then
 			mandir="/usr/share/catman/local"
 		    else
 			mandir="/usr/catman/local"
 		    fi
 		else
-		    if test -d "/usr/share/man/local" ; then
+		    if test -d "/usr/share/man/local"; then
 			mandir="/usr/share/man/local"
 		    else
 			mandir="/usr/man/local"
@@ -337,7 +332,7 @@ case "$OS" in
 		;;
     "convex")	echo "Looks like ConvexOs"
 		AC_DEFINE(_CONVEX_SOURCE)
-		if test -z "$GCC" ; then
+		if test -z "$GCC"; then
 		    CFLAGS="${CFLAGS} -D__STDC__"
 		fi
 		# C2 security stuff
@@ -430,14 +425,14 @@ if test "$with_C2" = "yes" -a -z "$SHADOW_TYPE"; then
     echo "checking for shadow password type..."
     AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SPW_SVR4", AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SPW_SECUREWARE", [test -f /etc/master.passwd && SHADOW_TYPE="SPW_BSD"]))
     case "$SHADOW_TYPE" in
-	"SPW_SVR4")		echo "shadow password type is getspnam (svr4)" ;
-		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE) ;;
-	"SPW_BSD")		echo "shadow password type is /etc/master.passwd (BSD)" ;;
-	"SPW_SECUREWARE")	echo "shadow password type is etprpwuid (SecureWare)" ;
-		SUDO_LIBS="${SUDO_LIBS} -lprot -lx" ;
-		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE) ;;
-	*)	echo "unknown" ;
-		echo "Unable to determine shadow passwd type, sudo may not be able to verify passwords" ;;
+	"SPW_SVR4")		echo "shadow password type is getspnam (svr4)";
+		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE);;
+	"SPW_BSD")		echo "shadow password type is /etc/master.passwd (BSD)";;
+	"SPW_SECUREWARE")	echo "shadow password type is etprpwuid (SecureWare)";
+		SUDO_LIBS="${SUDO_LIBS} -lprot -lx";
+		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE);;
+	*)	echo "unknown";
+		echo "Unable to determine shadow passwd type, sudo may not be able to verify passwords";;
     esac
 fi
 
@@ -463,7 +458,7 @@ AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_CHECK_HEADERS(string.h strings.h unistd.h malloc.h paths.h utime.h sys/sockio.h sys/bsdtypes.h)
 dnl ultrix termio/termios are broken
-if test "$OS" != "ultrix" ; then
+if test "$OS" != "ultrix"; then
     AC_CHECK_HEADERS(termio.h)
     AC_CHECK_HEADERS(termios.h, AC_CHECK_FUNCS(tcgetattr))
 fi
@@ -491,7 +486,7 @@ AC_CHECK_FUNCS(strchr strrchr memcpy memset sysconf sigaction tzset strcasecmp)
 AC_CHECK_FUNC(innetgr, AC_DEFINE(HAVE_INNETGR) AC_CHECK_FUNCS(getdomainname))
 AC_CHECK_FUNC(getwd, AC_DEFINE(HAVE_GETWD), LIBOBJS="$LIBOBJS getwd.o")
 AC_CHECK_FUNC(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
-AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) SUDO_LIBS="${SUDO_LIBS} -lcompat" ; VISUDO_LIBS="${VISUDO_LIBS} -lcompat", LIBOBJS="$LIBOBJS lsearch.o"), LIBOBJS="$LIBOBJS lsearch.o"))
+AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) SUDO_LIBS="${SUDO_LIBS} -lcompat"; VISUDO_LIBS="${VISUDO_LIBS} -lcompat", LIBOBJS="$LIBOBJS lsearch.o"), LIBOBJS="$LIBOBJS lsearch.o"))
 AC_CHECK_FUNC(setenv, AC_DEFINE(HAVE_SETENV), AC_FUNC_CHECK(putenv, AC_DEFINE(HAVE_PUTENV), LIBOBJS="$LIBOBJS putenv.o"))
 AC_CHECK_FUNC(utime, AC_DEFINE(HAVE_UTIME)
 SUDO_FUNC_UTIME_POSIX
@@ -503,17 +498,27 @@ if test -z "$LIB_CRYPT"; then
     AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt", AC_CHECK_LIB(crypt_d, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt_d", AC_CHECK_LIB(crypt, ufc, SUDO_LIBS="${SUDO_LIBS} -lufc"))))
 fi
 dnl
+dnl Bison and DCE use alloca(3), if not in libc, look in -lPW
+dnl (gcc includes its own alloca(3) but other compilers may not)
+dnl
+if test "$with_DCE" = "yes" -o "$ac_cv_prog_YACC" = "bison -y"; then
+    AC_FUNC_ALLOCA
+    if test "$ALLOCA" = "alloca.o"; then
+	AC_CHECK_FUNC(alloca, ,AC_CHECK_LIB(PW, alloca, SUDO_LIBS="${SUDO_LIBS} -lPW"; VISUDO_LIBS="${VISUDO_LIBS} -lPW"))
+    fi
+fi
+dnl
 dnl library checks
 dnl
 dnl Irix doesn't want -lnsl or -lsocket (and Irix 4 needs -lsun)
-if test "$OS" != "irix" ; then
+if test "$OS" != "irix"; then
     if test -z "$LIB_NSL"; then
 	AC_CHECK_LIB(nsl, main, SUDO_LIBS="${SUDO_LIBS} -lnsl")
     fi
     if test -z "$LIB_SOCKET"; then
 	AC_CHECK_LIB(socket, main, SUDO_LIBS="${SUDO_LIBS} -lsocket")
     fi
-elif test "$OSREV" -lt 5 ; then
+elif test "$OSREV" -lt 5; then
     AC_CHECK_LIB(sun, getpwnam, [SUDO_LIBS="${SUDO_LIBS} -lsun"
 VISUDO_LIBS="${VISUDO_LIBS} -lsun"]
 )
@@ -522,31 +527,31 @@ AC_CHECK_LIB(inet, main, SUDO_LIBS="${SUDO_LIBS} -linet")
 dnl
 dnl Find kerberos includes and libs or complain
 dnl
-if test "$with_kerb4" = "yes" -o "$with_kerb5" = "yes" ; then
-    if test -f "/usr/include/kerberosIV/krb.h" ; then
+if test "$with_kerb4" = "yes" -o "$with_kerb5" = "yes"; then
+    if test -f "/usr/include/kerberosIV/krb.h"; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/include/kerberosIV"
-    elif test -f "/usr/local/include/kerberosIV/krb.h" ; then
+    elif test -f "/usr/local/include/kerberosIV/krb.h"; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/local/include/kerberosIV"
-    elif test -f "/usr/kerberos/include/krb.h" ; then
+    elif test -f "/usr/kerberos/include/krb.h"; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/kerberos/include"
-    elif test -f "/usr/local/kerberos/include/krb.h" ; then
+    elif test -f "/usr/local/kerberos/include/krb.h"; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/local/kerberos/include"
     else
 	echo 'Unable to locate kerberos include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS'
     fi
 
-    if test -d "/usr/kerberos/lib" ; then
+    if test -d "/usr/kerberos/lib"; then
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/kerberos/lib"
-    elif test -d "/usr/lib/kerberos" ; then
+    elif test -d "/usr/lib/kerberos"; then
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/lib/kerberos"
-    elif test -f "/usr/local/lib/libkrb.a" ; then
+    elif test -f "/usr/local/lib/libkrb.a"; then
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
-    elif test ! -f "/usr/lib/libkrb.a" ; then
+    elif test ! -f "/usr/lib/libkrb.a"; then
 	echo 'Unable to locate kerberos libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS'
     fi
 
     SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes"
-    if test "$with_kerb5" = "yes" ; then
+    if test "$with_kerb5" = "yes"; then
 	SUDO_LIBS="${SUDO_LIBS} -ldes425 -lkrb5 -lcrypto -lcom_err"
     fi
 fi
@@ -554,8 +559,8 @@ fi
 dnl
 dnl extra AFS libs
 dnl
-if test "$with_AFS" = "yes" ; then
-    if test -d "/usr/lib/afs" ; then
+if test "$with_AFS" = "yes"; then
+    if test -d "/usr/lib/afs"; then
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/lib/afs"
     else
 	echo 'Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDO_LDFLAGS'
@@ -565,16 +570,18 @@ if test "$with_AFS" = "yes" ; then
 fi
 
 dnl
-dnl extra DCE lib
+dnl extra DCE obj + lib
+dnl Order of libs in HP-UX 10.x is important, -ldce must be last.
 dnl
-if test "$with_DCE" = "yes" ; then
+if test "$with_DCE" = "yes"; then
     DCE_OBJS="${DCE_OBJS} dce_pwent.o"
+    SUDO_LIBS="${SUDO_LIBS} -ldce"
 fi
 
 dnl
 dnl extra Skey lib and includes
 dnl
-if test "$with_skey" = "yes" ; then
+if test "$with_skey" = "yes"; then
     SUDO_LIBS="${SUDO_LIBS} -lskey"
     if test -f /usr/include/skey.h -a -f /usr/lib/libskey.a; then
 	:
@@ -591,7 +598,8 @@ fi
 
 dnl
 dnl extra SecurID lib + includes
-if test "$with_SecurID" = "yes" ; then
+dnl
+if test "$with_SecurID" = "yes"; then
     SUDO_LIBS="${SUDO_LIBS} /usr/ace/sdiclient.a"
     CPPFLAGS="${CPPFLAGS} -I/usr/ace"
 fi
