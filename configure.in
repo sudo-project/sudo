@@ -117,7 +117,10 @@ dnl
 dnl Header file checks
 dnl
 AC_STDC_HEADERS
-AC_HAVE_HEADERS(string.h strings.h unistd.h malloc.h paths.h termio.h termios.h)
+AC_HAVE_HEADERS(string.h strings.h unistd.h malloc.h paths.h)
+if [ "$OS" != "ultrix" ]; then
+    AC_HAVE_HEADERS(termio.h termios.h)
+fi
 dnl
 dnl typedef checks
 dnl
