@@ -1,272 +1,258 @@
 /*
- * CU sudo version 1.3 (based on Root Group sudo version 1.1)
+ * Copyright (c) 1993-1996,1998-2003 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- * This software comes with no waranty whatsoever, use at your own risk.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * Please send bugs, changes, problems to sudo-bugs.cs.colorado.edu
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
  *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * 4. Products derived from this software may not be called "Sudo" nor
+ *    may "Sudo" appear in their names without specific prior written
+ *    permission from the author.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Sponsored in part by the Defense Advanced Research Projects
+ * Agency (DARPA) and Air Force Research Laboratory, Air Force
+ * Materiel Command, USAF, under agreement number F39502-99-1-0512.
+ *
+ * $Sudo$
  */
+
+#ifndef _SUDO_SUDO_H
+#define _SUDO_SUDO_H
+
+#include <pathnames.h>
+#include "compat.h"
+#include "defaults.h"
+#include "logging.h"
 
 /*
- *  sudo version 1.1 allows users to execute commands as root
- *  Copyright (C) 1991  The Root Group, Inc.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * Info pertaining to the invoking user.
  */
-
-/*        The following macros can be defined when compiling
-  
-          FQDN                   - if you have fully qualified hostnames
-                                   in your SUDOERS files
-  
-          SYSLOG                 - if you want to use syslog instead
-                                   of a log file
-				   ( This is a nice feature.  You can 
-				     collect all you sudo logs at a
-				     central host.  The default is for
-				     sudo to log at the local2 facility. )
-  
-          SEND_MAIL_WHEN_NOT_OK  - if you want a message sent to ALERTMAIL
-                                   when the user is in the SUDOERS but
-                                   does not have permission to execute
-                                   the command entered
-				   ( This can be used at paranoid sites )
-  
-          SEND_MAIL_WHEN_NO_USER - if you want a message sent to ALERTMAIL
-				   when the user is not in the SUDOERS file
-				   ( This is generally the case )
-  
-          BROKEN_GETPASS         - if your os has a broken version of getpass()
-				   sysV and variants are suspect.  Test by
-				   doing an rsh host "sudo echo hi" when
-				   the timestamp has expired and if it doesn't
-				   prompt for a passwd you need to defined this.
-				   HP-UX, AIX, and IRIX need this defined.
-				   You'll probably want it if you are a sysV
-				   based unix. To test, compile w/o it and try:
-				   rsh hostname "sudo whoami" and see if getpass
-				   will read from stdin as well as /dev/tty.
-				   If not, define BROKEN_GETPASS.
-  
-          USE_CWD                - if your os has getcwd() and not getwd()
-				   you should define this (done automatically
-				   for hpux)
-  
-          NEED_STRDUP            - if your os lacks strdup(3) you need to
-				   define this
-  
-          SHORT_MESSAGE          - if you don't want a copyright notice when
-				   someone runs sudo for the first time
-*/
-
-
-#ifndef TIMEDIR
-#define TIMEDIR			"/tmp/.odus"
-#endif
-
-#ifndef TIMEOUT
-#define TIMEOUT			5
-#endif
-
-#ifndef TRIES_FOR_PASSWORD
-#define TRIES_FOR_PASSWORD	3
-#endif
-
-#ifndef INCORRECT_PASSWORD
-#define INCORRECT_PASSWORD	"Sorry, try again."
-#endif
+struct sudo_user {
+    struct passwd *pw;
+    struct passwd *_runas_pw;
+    char *path;
+    char *shell;
+    char *tty;
+    char  cwd[MAXPATHLEN];
+    char *host;
+    char *shost;
+    char **runas;
+    char *prompt;
+    char *cmnd_safe;
+    char *cmnd;
+    char *cmnd_args;
+    char *class_name;
+};
 
 /*
- *  If the MAILER macro is changed make sure it will work in
- *  logging.c  --  there is some sendmail mail specific stuff in
- *  the send_mail() routine  ( e.g.  the argv for the execv() )
- *  MAILER should ALWAYS be fully quallified.
+ * Return values for sudoers_lookup(), also used as arguments for log_auth()
+ * Note: cannot use '0' as a value here.
  */
-
-#ifndef MAILER
-#define MAILER			"/usr/lib/sendmail"
-#endif
-
-#ifndef MAILSUBJECT
-#define MAILSUBJECT		"*** SECURITY information ***"
-#endif
-
-#ifndef ALERTMAIL
-#define ALERTMAIL		"root"
-#endif
-
-#ifndef SUDOERS
-#define SUDOERS			"/etc/sudoers"
-#endif
-
-#ifndef TMPSUDOERS
-#define TMPSUDOERS		"/etc/stmp"
-#endif
-
-#ifndef EDITOR
-#define EDITOR			"/usr/ucb/vi"
-#endif
-
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN		64
-#endif
-
-#define MAXCOMMANDLENGTH         MAXPATHLEN
-
-typedef union {
-    int int_val;
-    char char_val[MAXCOMMANDLENGTH];
-}   YYSTYPE;
-
-typedef struct list {
-    int type;
-    char op;
-    char *data;
-    struct list *next;
-}   LIST, *LINK;
-
-#ifndef hpux
-YYSTYPE yylval, yyval;
-#else
-YYSTYPE yylval;
-#endif
+/* XXX - VALIDATE_SUCCESS and VALIDATE_FAILURE instead? */
+#define VALIDATE_ERROR          0x01
+#define VALIDATE_OK		0x02
+#define VALIDATE_NOT_OK		0x04
+#define FLAG_NOPASS		0x10
+#define FLAG_NO_USER		0x20
+#define FLAG_NO_HOST		0x40
+#define FLAG_NO_CHECK		0x80
 
 /*
- * SYSLOG should be defined in the makefile
+ * Boolean values
  */
-#ifdef SYSLOG
-#include <syslog.h>
-#ifndef Syslog_ident
-#define Syslog_ident        "sudo"
-#endif
-#ifndef Syslog_options
-#define Syslog_options      LOG_PID
-#endif
-#ifndef Syslog_facility
-#define Syslog_facility     LOG_LOCAL2
-#endif
-#ifndef Syslog_priority_OK
-#define Syslog_priority_OK  LOG_NOTICE
-#endif
-#ifndef Syslog_priority_NO
-#define Syslog_priority_NO  LOG_ALERT
-#endif
-#else
-#ifndef LOGFILE
-#if defined(ultrix) || defined(sun)
-#define LOGFILE "/var/adm/sudo.log"
-#else
-#define LOGFILE "/usr/adm/sudo.log"
-#endif	/* /var vs. /usr */
-#endif	/* LOGFILE */
-#endif	/* SYSLOG  */
-
-/*
- * Maximum number of characters to log per entry.
- * The syslogger will log this much, after that,
- * it truncates the log line. We need this here
- * to make sure that we get ellipses when the log
- * line is longer than 990 characters.
- */
-#ifndef MAXLOGLEN
-#define MAXLOGLEN 990
-#endif
-
-#define VALIDATE_OK              0x00
-#define VALIDATE_NO_USER         0x01
-#define VALIDATE_NOT_OK          0x02
-#define VALIDATE_ERROR          -1
-
-/*
- *  the arguments passed to log_error() are ANDed with GLOBAL_PROBLEM
- *  If the result is TRUE, the argv is NOT logged with the error message
- */
-
-#define GLOBAL_PROBLEM           0x20
-#define GLOBAL_NO_PW_ENT         ( 0x01 | GLOBAL_PROBLEM )
-#define GLOBAL_NO_HOSTNAME       ( 0x02 | GLOBAL_PROBLEM )
-#define GLOBAL_HOST_UNREGISTERED ( 0x03 | GLOBAL_PROBLEM )
-#define PASSWORD_NOT_CORRECT     0x04
-#define ALL_SYSTEMS_GO           0x00
-#define NO_SUDOERS_FILE          ( 0x05 | GLOBAL_PROBLEM )
-
 #undef TRUE
-#define TRUE                     0x01
+#define TRUE                     1
 #undef FALSE
-#define FALSE                    0x00
+#define FALSE                    0
 
-#define TYPE1                    0x11
-#define TYPE2                    0x12
-#define TYPE3                    0x13
-
-#define FOUND_USER               0x14
-#define NOT_FOUND_USER           0x15
-#define MATCH                    0x16
-#define NO_MATCH                 0x17
-#define QUIT_NOW                 0x18
-#define PARSE_ERROR              0x19
-
-#define USER_LIST                0x00
-#define HOST_LIST                0x01
-#define CMND_LIST                0x02
-#define EXTRA_LIST               0x03
-
-/* These are the functions that are called in sudo */
-#ifdef NEED_STRDUP
-char *strdup();
-#endif
-char *find_path();
-void load_globals();
-void log_error();
-void inform_user();
-void check_user();
-void clean_envp();
-int validate();
-
-/* Most of these variables are declared in main() so they don't need
- * to be extern'ed here if this is main...
+/*
+ * find_path()/load_cmnd() return values
  */
-#ifndef MAIN
-#ifdef MULTIMAX
-extern unsigned short uid;
-#else
-extern uid_t uid;
+#define FOUND                    1
+#define NOT_FOUND                0
+#define NOT_FOUND_DOT		-1
+
+/*
+ * Various modes sudo can be in (based on arguments) in octal
+ */
+#define MODE_RUN                 000001
+#define MODE_VALIDATE            000002
+#define MODE_INVALIDATE          000004
+#define MODE_KILL                000010
+#define MODE_VERSION             000020
+#define MODE_HELP                000040
+#define MODE_LIST                000100
+#define MODE_LISTDEFS            000200
+#define MODE_BACKGROUND          000400
+#define MODE_SHELL               001000
+#define MODE_IMPLIED_SHELL       002000
+#define MODE_RESET_HOME          004000
+#define MODE_PRESERVE_GROUPS     010000
+
+/*
+ * Used with set_perms()
+ */
+#define PERM_ROOT                0x00
+#define PERM_FULL_ROOT           0x01
+#define PERM_USER                0x02
+#define PERM_FULL_USER           0x03
+#define PERM_SUDOERS             0x04
+#define PERM_RUNAS               0x05
+#define PERM_TIMESTAMP           0x06
+
+/*
+ * Shortcuts for sudo_user contents.
+ */
+#define user_name		(sudo_user.pw->pw_name)
+#define user_passwd		(sudo_user.pw->pw_passwd)
+#define user_uid		(sudo_user.pw->pw_uid)
+#define user_gid		(sudo_user.pw->pw_gid)
+#define user_dir		(sudo_user.pw->pw_dir)
+#define user_shell		(sudo_user.shell)
+#define user_tty		(sudo_user.tty)
+#define user_cwd		(sudo_user.cwd)
+#define user_runas		(sudo_user.runas)
+#define user_cmnd		(sudo_user.cmnd)
+#define user_args		(sudo_user.cmnd_args)
+#define user_path		(sudo_user.path)
+#define user_prompt		(sudo_user.prompt)
+#define user_host		(sudo_user.host)
+#define user_shost		(sudo_user.shost)
+#define safe_cmnd		(sudo_user.cmnd_safe)
+#define login_class		(sudo_user.class_name)
+#define runas_pw		(sudo_user._runas_pw)
+
+/*
+ * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
+ * but that caused problems with various alternate authentication
+ * methods.  So, we just define our own and assume that it is >= the
+ * system max.
+ */
+#define SUDO_PASS_MAX	256
+
+/*
+ * Flags for lock_file()
+ */
+#define SUDO_LOCK	1		/* lock a file */
+#define SUDO_TLOCK	2		/* test & lock a file (non-blocking) */
+#define SUDO_UNLOCK	4		/* unlock a file */
+
+/*
+ * Flags for sudoers_lookup:
+ *  PASSWD_NEVER:  user never has to give a passwd
+ *  PASSWD_ALL:    no passwd needed if all entries for host have NOPASSWD flag
+ *  PASSWD_ANY:    no passwd needed if any entry for host has a NOPASSWD flag
+ *  PASSWD_ALWAYS: passwd always needed
+ */
+#define PWCHECK_NEVER	0x01
+#define PWCHECK_ALL	0x02
+#define PWCHECK_ANY	0x04
+#define PWCHECK_ALWAYS	0x08
+
+/*
+ * Flags for tgetpass()
+ */
+#define TGP_ECHO	0x01		/* leave echo on when reading passwd */
+#define TGP_STDIN	0x02		/* read from stdin, not /dev/tty */
+
+/*
+ * Function prototypes
+ */
+#define YY_DECL int yylex __P((void))
+
+#ifndef HAVE_GETCWD
+char *getcwd		__P((char *, size_t size));
 #endif
-extern char *host;
-extern char *user;
-extern char *cmnd;
-extern int Argc;
-extern char **Argv;
-extern char **Envp;
+#ifndef HAVE_SNPRINTF
+int snprintf		__P((char *, size_t, const char *, ...));
+#endif
+#ifndef HAVE_VSNPRINTF
+int vsnprintf		__P((char *, size_t, const char *, va_list));
+#endif
+#ifndef HAVE_ASPRINTF
+int asprintf		__P((char **, const char *, ...));
+#endif
+#ifndef HAVE_VASPRINTF
+int vasprintf		__P((char **, const char *, va_list));
+#endif
+#ifndef HAVE_STRCASECMP
+int strcasecmp		__P((const char *, const char *));
+#endif
+#ifndef HAVE_STRLCAT
+size_t strlcat		__P((char *, const char *, size_t));
+#endif
+#ifndef HAVE_STRLCPY
+size_t strlcpy		__P((char *, const char *, size_t));
+#endif
+char *sudo_goodpath	__P((const char *));
+char *tgetpass		__P((const char *, int, int));
+int find_path		__P((char *, char **, char *));
+void check_user		__P((void));
+void verify_user	__P((struct passwd *, char *));
+int sudoers_lookup	__P((int));
+#ifdef HAVE_LDAP
+int sudo_ldap_check	__P((int));
+#endif
+void set_perms_nosuid	__P((int));
+void set_perms_posix	__P((int));
+void set_perms_suid	__P((int));
+void remove_timestamp	__P((int));
+int check_secureware	__P((char *));
+void sia_attempt_auth	__P((void));
+void pam_attempt_auth	__P((void));
+int yyparse		__P((void));
+void pass_warn		__P((FILE *));
+VOID *emalloc		__P((size_t));
+VOID *emalloc2		__P((size_t, size_t));
+VOID *erealloc		__P((VOID *, size_t));
+VOID *erealloc3		__P((VOID *, size_t, size_t));
+char *estrdup		__P((const char *));
+int easprintf		__P((char **, const char *, ...));
+int evasprintf		__P((char **, const char *, va_list));
+void dump_defaults	__P((void));
+void dump_auth_methods	__P((void));
+void init_envtables	__P((void));
+int lock_file		__P((int, int));
+int touch		__P((char *, time_t));
+int user_is_exempt	__P((void));
+void set_fqdn		__P((void));
+char *sudo_getepw	__P((struct passwd *));
+int pam_prep_user	__P((struct passwd *));
+YY_DECL;
+
+/* Only provide extern declarations outside of sudo.c. */
+#ifndef _SUDO_MAIN
+extern struct sudo_user sudo_user;
+extern struct passwd *auth_pw;
+
+extern FILE *sudoers_fp;
+extern int tgetpass_flags;
+extern uid_t timestamp_uid;
+
+extern void (*set_perms) __P((int));
 #endif
 extern int errno;
 
-/*
- * Emulate setruid() under linux
- */
-#ifdef linux
-#define setruid(__RUID) (setreuid((uid_t) (__RUID), (uid_t) -1))
-#endif /* linux */
-
-/*
- * This is to placate hpux
- */
-#ifdef hpux
-#define setruid(__RUID)  (setresuid((uid_t) (__RUID), (uid_t) -1, (uid_t) -1))
-#define getdtablesize()  (sysconf(_SC_OPEN_MAX))
-#ifndef USE_CWD
-#define USE_CWD
-#endif	/* USE_CWD */
-#endif	/* hpux */
+#endif /* _SUDO_SUDO_H */
