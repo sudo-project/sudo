@@ -113,7 +113,7 @@ bsdauth_verify(pw, prompt, auth)
 {
     char *s, *pass;
     size_t len;
-    int authok;
+    int authok = 0;
     sig_t childkiller;
     auth_session_t *as = (auth_session_t *) auth->data;
     extern int nil_pw;
@@ -154,7 +154,10 @@ bsdauth_verify(pw, prompt, auth)
     if (!pass || *pass == '\0')		/* ^C or empty password */
 	nil_pw = 1;
 
-    authok = pass ? auth_userresponse(as, pass, 1) : 0;
+    if (pass) {
+	authok = auth_userresponse(as, pass, 1);
+	memset(pass, 0, strlen(pass));
+    }
 
     /* restore old signal handler */
     (void)signal(SIGCHLD, childkiller);

@@ -203,6 +203,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
     struct pam_response *pr;
     PAM_CONST struct pam_message *pm;
     const char *p = def_prompt;
+    char *pass;
     extern int nil_pw;
 
     if ((*response = malloc(num_msg * sizeof(struct pam_response))) == NULL)
@@ -219,12 +220,13 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		    && (pm->msg[9] != ' ' || pm->msg[10] != '\0')))
 		    p = pm->msg;
 		/* Read the password. */
-		pr->resp = estrdup((char *) tgetpass(p,
-		    def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags));
-		if (pr->resp == NULL)
-		    pr->resp = "";
+		pass = tgetpass(p, def_ival(I_PASSWD_TIMEOUT) * 60,
+		    tgetpass_flags));
+		pr->resp = pass ? estrdup(pass) : "";
 		if (*pr->resp == '\0')
 		    nil_pw = 1;		/* empty password */
+		else
+		    memset(pass, 0, strlen(pass));
 		break;
 	    case PAM_TEXT_INFO:
 		if (pm->msg)

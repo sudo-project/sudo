@@ -72,10 +72,13 @@ aixauth_verify(pw, prompt, auth)
 {
     char *message, *pass;
     int reenter = 1;
+    int rval = AUTH_FAILURE;
 
     pass = tgetpass(prompt, def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags);
-    if (pass && authenticate(pw->pw_name, pass, &reenter, &message) == 0)
-	return(AUTH_SUCCESS);
-    else
-	return(AUTH_FAILURE);
+    if (pass) {
+	if (authenticate(pw->pw_name, pass, &reenter, &message) == 0)
+	    rval = AUTH_SUCCESS;
+	memset(pass, 0, strlen(pass));
+    }
+    return(rval);
 }
