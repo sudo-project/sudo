@@ -159,9 +159,9 @@ int validate(check_cmnd)
 	}
     else
 	while (top) {
-	    if (host_matches == TRUE)
-		if (cmnd_matches == TRUE)
-		   if (runas_matches == TRUE)
+	    if (host_matches == TRUE) {
+		if (cmnd_matches == TRUE) {
+		   if (runas_matches == TRUE) {
 		    	/*
 			 * User was granted access to cmnd on host.
 		    	 * If no passwd required return as such.
@@ -170,11 +170,12 @@ int validate(check_cmnd)
 			    return(VALIDATE_OK_NOPASS);
 		    	else
 			    return(VALIDATE_OK);
-		   else
-		        return(VALIDATE_NOT_OK);
-		else if (cmnd_matches == FALSE)
+		    }
+		} else if (cmnd_matches == FALSE) {
 		    /* User was explicitly denied acces to cmnd on host. */
 		    return(VALIDATE_NOT_OK);
+		}
+	    }
 	    top--;
 	}
 
