@@ -78,7 +78,7 @@ static void  update_timestamp	__P((char *, char *));
 
 /*
  * This function only returns if the user can successfully
- * verify who he/she is.  
+ * verify who he/she is.
  */
 void
 check_user(override)
@@ -498,7 +498,7 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 	    status = TS_CURRENT;
 	else {
 	    now = time(NULL);
-	    if (def_timestamp_timeout && 
+	    if (def_timestamp_timeout &&
 		now - sb.st_mtime < 60 * def_timestamp_timeout) {
 		/*
 		 * Check for bogus time on the stampfile.  The clock may
