@@ -18,13 +18,14 @@
 #include <sys/time.h>
 #include <time.h>
 #include <stdio.h>
+
+#include "config.h"
+
 #ifdef HAVE_UTIME_H
 # include <utime.h>
 #else
 # include <emul/utime.h>
 #endif
-
-#include "config.h"
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
