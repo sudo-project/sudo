@@ -123,7 +123,6 @@ void log_error(code)
     char *p;
     int count;
     time_t now;
-    char *tty;
 #if (LOGGING & SLOG_FILE)
     FILE *fp;
 #endif /* LOGGING & SLOG_FILE */
@@ -131,17 +130,6 @@ void log_error(code)
     int pri = Syslog_priority_NO;	/* syslog priority, assume the worst */
     char *tmp, save;
 #endif /* LOGGING & SLOG_SYSLOG */
-
-    /*
-     * Get our ttyname or set to "none"
-     */
-    if ((tty = (char *) ttyname(0)) == NULL)
-	tty = (char *) ttyname(1);
-
-    if (tty && (p = strrchr(tty, '/')))
-	tty = p + 1;
-    else
-	tty = "none";
 
     /*
      * Allocate enough memory for logline so we won't overflow it

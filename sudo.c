@@ -132,6 +132,7 @@ char **Argv;
 char *cmnd = NULL;
 char *cmnd_args = NULL;
 char *user = NULL;
+char *tty = NULL;
 char *epasswd = NULL;
 char *prompt = PASSPROMPT;
 char *shell = NULL;
@@ -366,6 +367,20 @@ static void load_globals(sudo_mode)
 #ifdef HAVE_TZSET
     (void) tzset();		/* set the timezone if applicable */
 #endif /* HAVE_TZSET */
+
+    /*
+     * Need to get tty early since it's used for logging
+     */
+    if ((tty = (char *) ttyname(0)) || (tty = (char *) ttyname(0))) {
+	if ((p = strrchr(tty, '/')))
+	    tty = p + 1;
+	if ((tty = strdup(tty)) == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+    } else
+	tty = "none";
 
     /*
      * loading the user & epasswd global variable from the passwd file
