@@ -125,7 +125,18 @@ systrace_attach(pid)
     case -1:
 	error(1, "can't fork");
     case 0:
-	/* tracer */
+	/* tracer, fork again to completely disassociate */
+	switch (fork()) {
+	    case -1:
+		warning("can't fork");
+		kill(pid, SIGKILL);
+		_exit(1);
+	    case 0:
+		break;
+	    default:
+		/* the main sudo process will wait for us */
+		_exit(0);
+	}
 	break;
     default:
 	/* tracee, sleep until the tracer process wakes us up. */
