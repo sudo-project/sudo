@@ -304,7 +304,7 @@ AC_BEFORE([$0], [AC_PROGRAM_CHECK])
 OS=""
 OSREV=0
 if test -n "$UNAMEPROG"; then
-    echo "checking OS based on uname(1)"
+    echo $ac_n "checking OS based on uname(1) $ac_c"
     OS="unknown"
     OS=`$UNAMEPROG -s`
     # some OS's set -s the same as -n (BROKEN!!!)
@@ -346,6 +346,17 @@ else
 	OS="unknown"
     fi
 fi
+if test -n "$sudo_cv_old_osname" -a "$sudo_cv_old_osname" != "${OS}${OSREV}"
+then
+    echo ""
+    echo ""
+    echo "Fatal Error: config.cache exists from another platform!"
+    echo "Please remove it and re-run configure."
+    echo ""
+    exit 1
+fi
+AC_CACHE_VAL(sudo_cv_old_osname, sudo_cv_old_osname="${OS}${OSREV}")
+echo ""
 ])dnl
 
 dnl
@@ -356,7 +367,7 @@ dnl
 dnl SUDO_CONVEX
 dnl
 AC_DEFUN(SUDO_CONVEX,
-[echo checking for ConvexOS 
+[echo $ac_n "checking for ConvexOS $ac_c"
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
 $0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 [#if defined(__convex__) || defined(convex)
@@ -369,7 +380,7 @@ dnl
 dnl SUDO_MTXINU
 dnl
 AC_DEFUN(SUDO_MTXINU,
-[echo checking for MORE/BSD
+[echo $ac_n "checking for MORE/BSD $ac_c"
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
 $0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 [#include <sys/param.h>
@@ -383,7 +394,7 @@ dnl
 dnl SUDO_NEXT
 dnl
 AC_DEFUN(SUDO_NEXT,
-[echo checking for NeXTstep 
+[echo $ac_n "checking for NeXTstep $ac_c"
 if test -r /usr/lib/NextStep/software_version; then
     OS=NeXT
     OSREV=`$SEDPROG -e 's/^[[ \.0A-z]]*//' -e 's/\..*//' -e 1q < /usr/lib/NextStep/software_version`
@@ -394,7 +405,7 @@ dnl
 dnl SUDO_BSD
 dnl
 AC_DEFUN(SUDO_BSD,
-[echo checking for BSD 
+[echo $ac_n "checking for BSD $ac_c"
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
 $0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 [#include <sys/param.h>
