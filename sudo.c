@@ -488,7 +488,6 @@ static int parse_args()
     int ret = MODE_RUN;			/* what mode is suod to be run in? */
     int excl = 0;			/* exclusive arg, no others allowed */
     char *progname = Argv[0];		/* so we can save Argv[0] */
-    int i;
 
 #ifdef SHELL_IF_NO_ARGS
     if (Argc < 2) {			/* no options and no command */
