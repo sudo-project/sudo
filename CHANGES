@@ -1678,3 +1678,7 @@ Sudo 1.6.7p5 released.
 
 527) A uid specified in sudoers now matches the user specified by the
      -u flag even if the -u flag specified a name, not a uid.
+
+528) /tmp/.odus is no longer used for timestamps by default.  One of
+     /var/run/sudo, /var/adm/sudo or /usr/adm/sudo is used depending
+     on what directories exist.
