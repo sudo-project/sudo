@@ -182,7 +182,11 @@ tgetline(fd, buf, bufsiz, timeout)
     int n;
     fd_set *readfds = NULL;
     struct timeval tv;
+    char c;
     char *cp;
+
+    if (bufsiz == 0)
+	return(NULL);			/* sanity */
 
     /*
      * Timeout of <= 0 means no timeout.
@@ -210,16 +214,12 @@ tgetline(fd, buf, bufsiz, timeout)
     if (readfds)
 	free(readfds);
 
-    /* Get a line of input */
-    left = bufsiz;
+    /* Keep reading until out of space, EOF, error, or newline */
     cp = buf;
-    do {
-	if ((n = read(fd, cp, left)) > 0) {
-	    cp += n;
-	    left -= n;
-	}
-    } while (n > 0 && left != 0 && *(cp - 1) != '\n');
-    *(cp - 1) = '\0';
+    left = bufsiz;
+    while (--left && (n = read(fd, &c, 1)) == 1 && c != '\n')
+	*cp++ = c;
+    *cp = '\0';
 
-    return(left == bufsiz ? NULL : buf);
+    return(cp == buf ? NULL : buf);
 }
