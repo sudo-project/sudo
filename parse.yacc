@@ -760,8 +760,8 @@ void list_matches()
 
 	/* Print the actual command or expanded Cmnd_Alias. */
 	key.alias = cm_list[i].cmnd;
-	if ((ca = lfind((VOID *)&key, (VOID *)&ca_list[0],
-	     &ca_list_len, sizeof(struct command_alias), cmndaliascmp)))
+	if ((ca = (struct command_alias *) lfind((VOID *) &key,
+	    (VOID *) &ca_list[0], &ca_list_len, sizeof(key), cmndaliascmp)))
 	    (void) puts(ca->entries);
 	else
 	    (void) puts(cm_list[i].cmnd);
