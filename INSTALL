@@ -159,11 +159,17 @@ Special features/options:
 	on the machine.
 
   --with-pam
-	Enable PAM support.  Tested on Redhat Linux 5.x, 6.0 and
-	Solaris 2.6, 7.
-	NOTE: on RedHat Linux (and perhaps others) you *must* install
-	an /etc/pam.d/sudo file.  You may either use the sample.pam
-	file included with sudo or use /etc/pam.d/su as a reference.
+	Enable PAM support.  Tested on:
+	    Redhat Linux 5.x, 6.0, and 6.1
+	    Solaris 2.6 and 7
+	    HP-UX 11.0
+        NOTE: on RedHat Linux you *must* install an /etc/pam.d/sudo file.
+	You may either use the sample.pam file included with sudo or use
+	/etc/pam.d/su as a reference.  On Solaris and HP-UX 11 systems
+	you should check (and understand) the contents of /etc/pam.conf.
+	Do a "man pam.conf" for more information and consider using the
+	"debug" option, if available, with your PAM libraries in
+	/etc/pam.conf to obtain syslog output for debugging purposes.
 
   --with-AFS
 	Enable AFS support with kerberos authentication.  Should work under
@@ -171,8 +177,14 @@ Special features/options:
 	link without it.
 
   --with-DCE
-	Enable DCE support.  Known to work on HP-UX 9.X and 10.0.  Other
-	platforms may require source code and/or `configure' changes.
+	Enable DCE support.  Known to work on HP-UX 9.X, 10.X, and 11.0.
+	The use of PAM is recommended for HP-UX 11.X systems, since PAM is
+	fully implemented (this is not true for 10.20 and earlier versions).
+	Check to see that your 11.X (or other) system uses DCE via PAM by
+	looking at /etc/pam.conf to see if "libpam_dce" libraries are 
+	referenced there.  Other platforms may require source code and/or 
+	`configure' changes; you should check to see if your platform can 
+	access DCE via PAM before using this option.
 
   --disable-sia
 	Disable SIA support.  This is the "Security Integration Architecture"
