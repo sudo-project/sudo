@@ -1,6 +1,7 @@
 INSTALL NOTES
 
-1) Run the configure script, ie: "./configure".  Configure will generate
+1) Run the configure script, ie: "./configure".  See the SUPPORTED file
+   for a list of OS's sudo is known to work on.  Configure will generate
    config.h, pathnames.h, Makefile and visudoers/Makefile.  You shouldn't
    need to hand-edit the Makefiles but if you don't like configure's choice
    of C compiler, yacc or lex programs you may want to.  You can also
