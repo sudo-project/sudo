@@ -1708,3 +1708,6 @@ Sudo 1.6.7p5 released.
 
 538) The sudoers file is now parsed as the runas user in all cases instead
      of root.  This fixes some issues with running NFS-mounted commands.
+
+539) Sudo now produces a sensible error message when the targetpw
+     Defaults option is set and a non-existent uid is specified via -u.
