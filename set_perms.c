@@ -306,6 +306,7 @@ set_perms_suid(perm)
 }
 
 # else
+#  ifdef HAVE_SETREUID
 
 /*
  * Set real and effective uids and gids based on perm.
@@ -375,6 +376,47 @@ set_perms_nosuid(perm)
 			      	break;
     }
 }
+
+#  else
+
+/*
+ * Set uids and gids based on perm via setuid() and setgid().
+ * NOTE: does not support the "stay_setuid" or timestampowner options.
+ *       Also, SUDOERS_UID and SUDOERS_GID are not used.
+ */
+void
+set_perms_nosuid(perm)
+    int perm;
+{
+
+    switch (perm) {
+	case PERM_FULL_ROOT:
+	case PERM_ROOT:
+				if (setuid(ROOT_UID))
+					fatal("setuid(ROOT_UID)", 1);
+				break;
+
+	case PERM_FULL_USER:
+    	    	    	        (void) setgid(user_gid);
+				if (setuid(user_uid))
+				    fatal("setuid(user_uid)", 1);
+			      	break;
+				
+	case PERM_FULL_RUNAS:
+				runas_setup();
+				if (setuid(runas_pw->pw_uid))
+				    fatal("unable to change to runas uid", 1);
+				break;
+
+	case PERM_USER:
+	case PERM_SUDOERS:
+	case PERM_RUNAS:
+	case PERM_TIMESTAMP:
+				/* Unsupported since we can't set euid. */
+				break;
+    }
+}
+#  endif /* HAVE_SETEUID */
 # endif /* HAVE_SETREUID */
 #endif /* HAVE_SETRESUID */
 
