@@ -171,8 +171,8 @@ return ( do_stat ( s, buf ) );
  *   do_stat()
  *
  *    This function takes a path and a file and stat()s the file
- *    If the file exists, the full path to that file is returned
- *    otherwise NULL is returned
+ *    If the file exists and is executable, the full path to that
+ *    file is returned otherwise NULL is returned.
  */
 
 static char *do_stat( path, file )
@@ -230,7 +230,7 @@ bzero ( buf, MAXPATHLEN+1 );
 if ( path ) strcat ( buf, path );
 if ( *file != '/' && path [strlen(path)-1] != '/' ) strcat ( buf, "/" );
 strcat ( buf, file );
-if ( ! stat ( buf, &s ) )
+if ( ! stat ( buf, &s ) && (s.st_mode & 0000111) >= 0000001 )
     return ( check_link ( buf ) );
 else
     return ( NULL );
