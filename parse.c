@@ -196,18 +196,19 @@ char *cmnd, *path;
 
 
 int
-ntwk_matches(n)
+addr_matches(n)
 char *n;
 {
     int i;
-    int ntwk;
+    struct in_addr addr;
 
-    ntwk = inet_network(n);
+    addr.s_addr = inet_addr(n);
 
     for (i = 0; i < num_interfaces; i++)
-	if (interfaces[i].addr.s_addr == ntwk ||
-	(interfaces[i].addr.s_addr & interfaces[i].netmask.s_addr) == ntwk)
-	return(TRUE);
+	if (interfaces[i].addr.s_addr == addr.s_addr ||
+	    (interfaces[i].addr.s_addr & interfaces[i].netmask.s_addr)
+	    == addr.s_addr)
+	    return(TRUE);
 
     return(FALSE);
 }
