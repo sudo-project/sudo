@@ -132,16 +132,6 @@
 #endif
 
 /*
- * Emulate seteuid() for AIX via setuidx() -- needed for some versions of AIX
- */
-#ifdef _AIX
-#  include <sys/id.h>
-#  define seteuid(_EUID)	(setuidx(ID_EFFECTIVE|ID_REAL, _EUID))
-#  undef HAVE_SETEUID
-#  define HAVE_SETEUID		1
-#endif /* _AIX */
-
-/*
  * Emulate seteuid() for HP-UX via setresuid(2) and seteuid(2) for others.
  */
 #ifndef HAVE_SETEUID
