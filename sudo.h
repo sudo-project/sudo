@@ -127,7 +127,7 @@
 /*
  *  If the MAILER macro is changed make sure it will work in
  *  logging.c  --  there is some sendmail mail specific stuff in
- *  the send_mail() routine  ( e.g.  the argv for the execv() )
+ *  the send_mail() routine  ( e.g.  the argv for the execvp() )
  *  MAILER should ALWAYS be fully quallified.
  */
 
@@ -291,7 +291,6 @@ extern char *user;
 extern char *cmnd;
 extern int Argc;
 extern char **Argv;
-extern char **Envp;
 #endif
 extern int errno;
 
