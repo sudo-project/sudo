@@ -112,10 +112,11 @@ static int has_meta	__P((char *));
  * allowed to run the specified command on this host as the target user.
  */
 int
-sudoers_lookup(pwflags)
-    int pwflags;
+sudoers_lookup(pwflag)
+    int pwflag;
 {
     int error;
+    int pwcheck;
 
     /* Become sudoers file owner */
     set_perms(PERM_SUDOERS, 0);
@@ -128,8 +129,8 @@ sudoers_lookup(pwflags)
     /* Allocate space for data structures in the parser. */
     init_parser();
 
-    /* For most pwflags to be useful we need to keep more state around. */
-    if (pwflags && pwflags != PWCHECK_NEVER && pwflags != PWCHECK_ALWAYS)
+    /* If pwcheck *could* be PWCHECK_ALL or PWCHECK_ANY, keep more state. */
+    if (pwflag > 0)
 	keepall = TRUE;
 
     /* Need to be root while stat'ing things in the parser. */
@@ -144,6 +145,15 @@ sudoers_lookup(pwflags)
 	return(VALIDATE_ERROR);
 
     /*
+     * The pw options may have changed during sudoers parse so we
+     * wait until now to set this.
+     */
+    if (pwflag)
+	pwcheck = (pwflag == -1) ? PWCHECK_NEVER : def_ival(pwflag);
+    else
+	pwcheck = 0;
+
+    /*
      * Assume the worst.  If the stack is empty the user was
      * not mentioned at all.
      */
@@ -151,7 +161,7 @@ sudoers_lookup(pwflags)
 	error = VALIDATE_NOT_OK;
     else
 	error = VALIDATE_NOT_OK | FLAG_NOPASS;
-    if (pwflags) {
+    if (pwcheck) {
 	error |= FLAG_NO_CHECK;
     } else {
 	error |= FLAG_NO_HOST;
@@ -160,14 +170,14 @@ sudoers_lookup(pwflags)
     }
 
     /*
-     * Only check the actual command if pwflags flag is not set.
+     * Only check the actual command if pwcheck flag is not set.
      * It is set for the "validate", "list" and "kill" pseudo-commands.
      * Always check the host and user.
      */
-    if (pwflags) {
+    if (pwcheck) {
 	int nopass, found;
 
-	if (pwflags == PWCHECK_NEVER || !def_flag(I_AUTHENTICATE))
+	if (pwcheck == PWCHECK_NEVER || !def_flag(I_AUTHENTICATE))
 	    nopass = FLAG_NOPASS;
 	else
 	    nopass = -1;
@@ -175,9 +185,9 @@ sudoers_lookup(pwflags)
 	while (top) {
 	    if (host_matches == TRUE) {
 		found = 1;
-		if (pwflags == PWCHECK_ANY && no_passwd == TRUE)
+		if (pwcheck == PWCHECK_ANY && no_passwd == TRUE)
 		    nopass = FLAG_NOPASS;
-		else if (pwflags == PWCHECK_ALL && nopass != 0)
+		else if (pwcheck == PWCHECK_ALL && nopass != 0)
 		    nopass = (no_passwd == TRUE) ? FLAG_NOPASS : 0;
 	    }
 	    top--;

@@ -61,6 +61,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/param.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #ifdef HAVE_SETRLIMIT
@@ -176,7 +177,7 @@ main(argc, argv)
     int fd;
     int cmnd_status;
     int sudo_mode;
-    int sudoers_flags;
+    int pwflag;
 #ifdef POSIX_SIGNALS
     sigset_t set, oset;
 #else
@@ -237,7 +238,7 @@ main(argc, argv)
     /* Load the list of local ip addresses and netmasks.  */
     load_interfaces();
 
-    sudoers_flags = 0;
+    pwflag = 0;
     if (sudo_mode & MODE_SHELL)
 	user_cmnd = "shell";
     else
@@ -257,12 +258,12 @@ main(argc, argv)
 		break;
 	    case MODE_VALIDATE:
 		user_cmnd = "validate";
-		sudoers_flags = def_ival(I_VERIFYPW);
+		pwflag = I_VERIFYPW;
 		break;
 	    case MODE_KILL:
 	    case MODE_INVALIDATE:
 		user_cmnd = "kill";
-		sudoers_flags = PWCHECK_NEVER;
+		pwflag = -1;
 		break;
 	    case MODE_LISTDEFS:
 		list_options();
@@ -270,8 +271,8 @@ main(argc, argv)
 		break;
 	    case MODE_LIST:
 		user_cmnd = "list";
+		pwflag = I_LISTPW;
 		printmatches = 1;
-		sudoers_flags = def_ival(I_LISTPW);
 		break;
 	}
 
@@ -288,7 +289,7 @@ main(argc, argv)
     add_env(!(sudo_mode & MODE_SHELL));	/* add in SUDO_* envariables */
 
     /* Validate the user but don't search for pseudo-commands. */
-    validated = sudoers_lookup(sudoers_flags);
+    validated = sudoers_lookup(pwflag);
 
     /* This goes after the sudoers parse since we honor sudoers options. */
     if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
