@@ -85,7 +85,7 @@ int parse_error = FALSE;
  * Prototypes for static (local) functions
  */
 static int has_meta	__P((char *));
-static int compare_args	__P((char *, char *));
+static int compare_args	__P((char **, char **));
 
 /*
  * this routine is called from the sudo.c module and tries to validate
@@ -168,8 +168,11 @@ int validate(check_cmnd)
  * If path doesn't end in /, return TRUE iff cmnd & path name the same inode;
  * otherwise, return TRUE if cmnd names one of the inodes in path
  */
-int path_matches(cmnd, path)
-    char *cmnd, *path;
+int path_matches(cmnd, user_args, path, sudoers_args)
+    char *cmnd;
+    char **user_args;
+    char *path;
+    char **sudoers_args;
 {
     int plen;
     struct stat pst;
@@ -177,7 +180,6 @@ int path_matches(cmnd, path)
     struct dirent *dent;
     char buf[MAXPATHLEN+1];
     static char *c;
-    char *args;
 
     /* don't bother with pseudo commands like "validate" */
     if (*cmnd != '/')
@@ -192,10 +194,6 @@ int path_matches(cmnd, path)
 	else
 	    c++;
     }
-
-    /* if the given path has command line args, split them out */
-    if ((args = strchr(path, ' ')))
-	*args++ = '\0';
 
     plen = strlen(path);
     if (path[plen - 1] != '/') {
@@ -214,21 +212,16 @@ int path_matches(cmnd, path)
 	if (stat(path, &pst) < 0)
 	    return(FALSE);
 
-	/* put things back the way we found 'em */
-	if (args)
-	    *(args - 1) = ' ';
-
 	/*
 	 * Return true if inode/device matches and there are no args
 	 * (in sudoers or command) or if the args match;
 	 * else return false.
 	 */
 	if (cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino) {
-	    if (!args) {
+	    if (!sudoers_args) {
 		return(TRUE);
-	    } else if (cmnd_args && args) {
-		/* return((strcmp(cmnd_args, args) == 0)); */
-		return(compare_args(args, cmnd_args));
+	    } else if (user_args && sudoers_args) {
+		return(compare_args(user_args, sudoers_args));
 	    } else {
 		return(FALSE);
 	    }
@@ -263,6 +256,10 @@ int path_matches(cmnd, path)
 
 
 
+/*
+ * Returns TRUE if "n" is one of our ip addresses or if
+ * "n" is a network that we are on, else returns FALSE.
+ */
 int addr_matches(n)
     char *n;
 {
@@ -282,6 +279,10 @@ int addr_matches(n)
 
 
 
+/*
+ *  Returns TRUE if the given user belongs to the named group,
+ *  else returns FALSE.
+ */
 int usergr_matches(group, user)
     char *group;
     char *user;
@@ -312,6 +313,11 @@ int usergr_matches(group, user)
 
 
 
+/*
+ * Returns TRUE if "host" and "user" belong to the netgroup "netgr",
+ * else return FALSE.  Either of "host" or "user" may be NULL
+ * in which case that argument is not checked...
+ */
 int netgr_matches(netgr, host, user)
     char *netgr;
     char *host;
@@ -353,7 +359,8 @@ int netgr_matches(netgr, host, user)
 
 
 /*
- * Does "s" have any meta characters in it?
+ * Returns TRUE if "s" has shell meta characters in it,
+ * else returns FALSE.
  */
 static int has_meta(s)
     char *s;
@@ -370,56 +377,30 @@ static int has_meta(s)
 
 
 /*
- *
+ * Compare two arguments lists and return TRUE if they are
+ * the same (inc. wildcard matches) or FALSE if they differ.
  */
-static int compare_args(sudoers_args, user_args)
-    char *sudoers_args, *user_args;
+static int compare_args(user_args, sudoers_args)
+    char **user_args;
+    char **sudoers_args;
 {
+    char **ua, **sa;
 
-    if (has_meta(sudoers_args)) {
-	register char *s_a, *u_a, *s_save, *u_save, *s_a_next, *u_a_next;
-
-	/* XXX - shouldn't need to copy strings */
-	s_save = s_a_next = strdup(sudoers_args);
-	u_save = u_a_next = strdup(user_args);
-
-	/* XXX - use a saner loop */
-	for (;;) {
-	    /* break if end of string */
-	    if (!s_a_next || !u_a_next)
-		break;
-
-	    /* go to next substring */
-	    s_a = s_a_next;
-	    u_a = u_a_next;
-
-	    /* null-terminate end of substring if necesary */
-	    if ((s_a_next = strchr(s_a_next, ' ')))
-		*s_a_next++ = '\0';
-	    if ((u_a_next = strchr(u_a_next, ' ')))
-		*u_a_next++ = '\0';
-
-	    /* XXX - split on non-escaped ',' to allow like: "*,!root"
-	     *       and keep longest match.
-	     */
-	    if (wildmat(u_a, s_a) != 1) {
-		(void) free(s_save);
-		(void) free(u_save);
-
+    for (ua=user_args, sudoers_args=sa; *ua && *sa; ua++, sa++) {
+	/* only do wildcard match if there are meta chars */
+	/* XXX - is this really any faster? */
+	if (has_meta(*sa)) {
+	    if (wildmat(*ua, *sa) != 1)
 		return(FALSE);
-	    }
+	} else {
+	    if (strcmp(*ua, *sa))
+		return(FALSE);
 	}
-
-	(void) free(s_save);
-	(void) free(u_save);
-
-	/* if full match both will be NULL */
-	if (s_a_next || u_a_next)
-	    return(FALSE);
-
-    } else {
-	return((strcmp(sudoers_args, user_args) == 0));
     }
 
-    return(TRUE);
+    /* return false unless we got to the end of each */
+    if (*ua || *sa)
+	return(FALSE);
+    else
+	return(TRUE);
 }
