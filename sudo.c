@@ -1,5 +1,5 @@
 /*
- * CU sudo version 1.5.5b1.5.5 (based on Root Group sudo version 1.1)
+ * CU sudo version 1.5.5b2 (based on Root Group sudo version 1.1)
  *
  * This software comes with no waranty whatsoever, use at your own risk.
  *
