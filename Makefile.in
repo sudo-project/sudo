@@ -378,6 +378,8 @@ bindist:
 	  if [ -f sudo_noexec.la ]; then \
 	    cp libtool $$tdir ; \
 	    $(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la `pwd`/$$tdir ; \
+	    ln $$tdir/sudo_noexec.la $$tdir/sudo_noexec.lai ; \
+	    ln -s . $$tdir/.libs ; \
 	  fi ; \
 	  cp $(srcdir)/INSTALL.binary $$tdir/INSTALL ; \
 	  sh ./config.status --file=Makefile.binary && cp Makefile.binary $$tdir/Makefile ; \
