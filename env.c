@@ -149,11 +149,9 @@ char **
 zero_env(envp)
     char **envp;
 {
-    char **ep, **nep;
     static char *newenv[8];
+    char **ep, **nep = newenv;
     extern char *prev_user;
-
-    nep = newenv;
 
     for (ep = envp; *ep; ep++) {
 	switch (**ep) {
