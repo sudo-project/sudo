@@ -34,10 +34,6 @@ MAXLOGFILELEN
     if you don't want any word wrapping in your log files.
     The default is 80.
 
-SUDOERS_OWNER
-    Who should own the sudoers file.  This must be a username, *not* a uid.
-    The default is "root" (remember the quotes).
-
 NO_ROOT_SUDO
     Don't let root run sudo.  This is historical from when doing "sudo sudo"
     would give you a root shell.  You probably don't want to define this.
@@ -186,3 +182,12 @@ FAST_MATCH
     If you want links to a command to be allowed then you should turn
     this off, but it will make things take a little longer.
     This is on by default.
+
+SUDOERS_OWNER
+    Who should own the sudoers file.  This must be a username, *not* a uid.
+    This is useful if you want to make the sudoers file NFS-mounted
+    but don't want to let the clients mount the filesystem with
+    root proviledges.  A good choice for SUDOERS_OWNER in this case is
+    "daemon", a bad choice would be nobody.  Note that this is usually
+    set in the Makefile.
+    The default is "root" (remember the quotes).
