@@ -236,7 +236,13 @@ int sudo_edit(argc, argv)
 	_exit(127);
     }
 
-    /* Anxious parent, waiting for letters home from camp... */
+    /*
+     * Wait for status from the child.  Most modern kernels
+     * will not let an unprivileged child process send a
+     * signal to its privileged parent to we have to request
+     * status when the child is stopped and then send the
+     * same signal to our own pid.
+     */
     do {
 #ifdef sudo_waitpid
         pid = sudo_waitpid(kidpid, &i, WUNTRACED);
