@@ -70,9 +70,12 @@ visudodir = $(exec_prefix)/etc
 sudoersdir = /etc
 
 # Directory in which to install the man page
+# set mansect5 to 4 on sysV machines.
 mantype = @MANTYPE@
-mansect = 8
-mandir = $(man_prefix)/$(mantype)$(mansect)
+mansect8 = 8
+mansect5 = 5
+mandir8 = $(man_prefix)/$(mantype)$(mansect8)
+mandir5 = $(man_prefix)/$(mantype)$(mansect5)
 
 # User and Group the installed file should be owned by
 owner = root
@@ -162,8 +165,9 @@ install-sudoers:
 	fi
 
 install-man:
-	$(INSTALL) -o $(owner) -g $(group) -m 0644 sudo.$(mantype) $(mandir)/sudo.$(mansect)
-	$(INSTALL) -o $(owner) -g $(group) -m 0644 visudo.$(mantype) $(mandir)/visudo.$(mansect)
+	$(INSTALL) -o $(owner) -g $(group) -m 0644 sudo.$(mantype) $(mandir8)/sudo.$(mansect8)
+	$(INSTALL) -o $(owner) -g $(group) -m 0644 visudo.$(mantype) $(mandir8)/visudo.$(mansect8)
+	$(INSTALL) -o $(owner) -g $(group) -m 0644 sudoers.$(mantype) $(mandir5)/sudoers.$(mansect5)
 	@MAN_POSTINSTALL@
 
 tags: $(SRCS)
