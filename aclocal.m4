@@ -186,7 +186,7 @@ if test -n "$UNAMEPROG"; then
     if test "`$UNAMEPROG -s`" = "SunOS"; then
 	SUNOS="`uname -r | cut -c1`"
 	if test "$SUNOS" -ge 5; then
-	    :
+	    AC_DEFINE(SVR4)
 	    [$1]
 	else
 	    :
