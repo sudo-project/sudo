@@ -241,6 +241,17 @@ privilege	:	hostspec '=' cmndspeclist {
 			}
 		;
 
+ophostspec	:	hostspec
+		|	'!' {
+			    push;
+			} ophostspec {
+			    pop;
+			    if (host_matched == TRUE)
+				host_matches = FALSE;
+			    else if (host_matched == FALSE)
+				host_matches = TRUE;
+			}
+
 hostspec	:	ALL {
 			    host_matches = TRUE;
 			}
@@ -529,8 +540,8 @@ hostalias	:	ALIAS { push; } '=' hostlist {
 			}
 		;
 
-hostlist	:	hostspec
-		|	hostlist ',' hostspec
+hostlist	:	ophostspec
+		|	hostlist ',' ophostspec
 		;
 
 cmndaliases	:	cmndalias
@@ -557,9 +568,8 @@ cmndalias	:	ALIAS {
 			}
 		;
 
-cmndlist	:	cmnd
-			    { ; }
-		|	cmndlist ',' cmnd
+cmndlist	:	opcmnd { ; }
+		|	cmndlist ',' opcmnd
 		;
 
 runasaliases	:	runasalias
@@ -599,10 +609,20 @@ useralias	:	ALIAS { push; }	'=' userlist {
 			}
 		;
 
-userlist	:	user
-			    { ; }
-		|	userlist ',' user
+userlist	:	opuser { ; }
+		|	userlist ',' opuser
 		;
+
+opuser		:	user
+		|	'!' {
+			    push;
+			} opuser {
+			    pop;
+			    if (user_matched == TRUE)
+				user_matches = FALSE;
+			    else if (user_matched == FALSE)
+				user_matches = TRUE;
+			}
 
 user		:	NAME {
 			    if (strcmp($1, user_name) == 0)

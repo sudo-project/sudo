@@ -1044,3 +1044,12 @@ Sudo 1.5.8p2 released.
 328) In visudo, shift return value of system() by 8 to get the real exit value.
 
 Sudo 1.5.9 released.
+
+329) The runas user and NOPASSWD tags are now persistent across entries
+     in a command list (ie: cmnd1,cmnd2,cmnd3).  A PASSWD tag has been
+     added to reverse NOPASSWD.  The runas user and *PASSWD tags can be
+     overridden on a per-command basis at which point they become the
+     new default for the rest of the list.
+
+330) It is now possible to use the '!' operator in a runas list as
+     well as in a Cmnd_Alias, Host_Alias and User_Alias.
