@@ -102,10 +102,10 @@ char * tgetpass(prompt, timeout)
 #else
     int oldmask;
 #endif
-#ifdef HAVE_TERMIO_H
+#ifdef HAVE_TERMIOS_H
     tcflag_t svflagval;
 #else
-    int svflagval;
+    unsigned short svflagval;
 #endif
     fd_set readfds;
     struct timeval tv;
