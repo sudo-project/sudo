@@ -233,7 +233,12 @@ void log_error(code)
 	send_mail();
 
 #ifdef SYSLOG
+#ifdef Syslog_facility
     openlog(Syslog_ident, Syslog_options, Syslog_facility);
+#else
+    openlog(Syslog_ident, Syslog_options);
+#endif /* Syslog_facility */
+
     /*
      * Log the full line, breaking into multiple syslog(3) calls if necesary
      */

@@ -222,6 +222,7 @@ typedef struct list {
 /*
  * Syslog(3) parameters
  */
+
 #ifdef SYSLOG
 #  include <syslog.h>
 #  ifndef Syslog_ident
@@ -230,7 +231,7 @@ typedef struct list {
 #  ifndef Syslog_options
 #    define Syslog_options	0
 #  endif
-#  ifndef Syslog_facility
+#  if !defined(Syslog_facility) && defined(LOG_LOCAL2)
 #    define Syslog_facility	LOG_LOCAL2
 #  endif
 #  ifndef Syslog_priority_OK
