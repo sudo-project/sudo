@@ -1033,10 +1033,15 @@ case "$host" in
 		# (XXX - should be an option to configure)
 		#STATIC_SUDO=true
 
-		# If using cc, run in ANSI mode (NOTE: bundled cc will warn)
+		# If using cc, run in ANSI mode if possible
 		if test -z "$GCC"; then
-		    CPPFLAGS="${CPPFLAGS} -Aa"
+		    $CC -Aa 2>&1 | grep 'A option is available only' >conftest.out
+		    if test ! -s conftest.out; then
+			CPPFLAGS="${CPPFLAGS} -Aa"
+		    fi
+		    rm -f conftest.out
 		fi
+
 		# Add -D_HPUX_SOURCE so we don't get strict ANSI headers
 		CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE"
 
@@ -1063,10 +1068,15 @@ case "$host" in
 		# (XXX - should be an option to configure)
 		#STATIC_SUDO=true
 
-		# If using cc, run in ANSI mode (NOTE: bundled cc will warn)
+		# If using cc, run in ANSI mode if possible
 		if test -z "$GCC"; then
-		    CPPFLAGS="${CPPFLAGS} -Aa"
+		    $CC -Aa 2>&1 | grep 'A option is available only' >conftest.out
+		    if test ! -s conftest.out; then
+			CPPFLAGS="${CPPFLAGS} -Aa"
+		    fi
+		    rm -f conftest.out
 		fi
+
 		# Add -D_HPUX_SOURCE so we don't get strict ANSI headers
 		CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE"
 
