@@ -109,6 +109,7 @@ struct env_table {
  */
 static int  parse_args			__P((void));
 static void usage			__P((int));
+static void usage_excl			__P((int));
 static void load_globals		__P((int));
 static int check_sudoers		__P((void));
 static int load_cmnd			__P((int));
@@ -594,9 +595,6 @@ static int parse_args()
 	    usage(1);
 	}
 
-	if (excl)
-	    usage(1);			/* only one -? option allowed */
-
 	switch (NewArgv[0][1]) {
 #ifdef HAVE_KERB5
 	    case 'r':
@@ -639,23 +637,33 @@ static int parse_args()
 		break;
 	    case 'v':
 		ret = MODE_VALIDATE;
-		excl++;
+		if (excl && excl != 'v')
+		    usage_excl(1);
+		excl = 'v';
 		break;
 	    case 'k':
 		ret = MODE_KILL;
-		excl++;
+		if (excl && excl != 'k')
+		    usage_excl(1);
+		excl = 'k';
 		break;
 	    case 'l':
 		ret = MODE_LIST;
-		excl++;
+		if (excl && excl != 'l')
+		    usage_excl(1);
+		excl = 'l';
 		break;
 	    case 'V':
 		ret = MODE_VERSION;
-		excl++;
+		if (excl && excl != 'V')
+		    usage_excl(1);
+		excl = 'V';
 		break;
 	    case 'h':
 		ret = MODE_HELP;
-		excl++;
+		if (excl && excl != 'h')
+		    usage_excl(1);
+		excl = 'h';
 		break;
 	    case 's':
 		ret |= MODE_SHELL;
@@ -695,6 +703,20 @@ static int parse_args()
 }
 
 
+
+/**********************************************************************
+ *
+ * usage_excl()
+ *
+ *  Tell which options are mutually exclusive and exit
+ */
+
+static void usage_excl(exit_val)
+    int exit_val;
+{
+    (void) fprintf(stderr, "Only one of the -v, -k, -l, -V and -h options may be used\n");
+    usage(exit_val);
+}
 
 /**********************************************************************
  *
