@@ -1169,7 +1169,7 @@ usage(exit_val)
     char **p;
     int linelen, linemax, ulen;
     static char *uvec[] = {
-	" [-HPSb]",
+	" [-bHPS]",
 #ifdef HAVE_BSD_AUTH_H
 	" [-a auth_type]",
 #endif
