@@ -34,8 +34,6 @@
 
 #include "config.h"
 
-#ifndef NO_PASSWD
-
 #include <stdio.h>
 #ifdef STDC_HEADERS
 #include <stdlib.h>
@@ -210,5 +208,3 @@ pass_warn(fp)
     (void) fprintf(fp, "%s\n", INCORRECT_PASSWORD);
 #endif /* USE_INSULTS */
 }
-
-#endif /* NO_PASSWD */

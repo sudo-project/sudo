@@ -380,9 +380,15 @@ Special features/options:
 	on some SysV-based OS's using STREAMS.
 
   --without-passwd
-	This option disables passwd/shadow file authentication.  If
-	no other authentication function is defined, sudo will not
-	prompt for a password at all.
+	This option authentication via the the passwd (or shadow) file.
+	It should only be used when another, alternate, authentication
+	scheme is in use.
+
+  --disable-authentication
+        By default, sudo requires the user to authenticate via a
+        password or similar means.  This options causes sudo to
+        *not* require authentication.  It is possible to turn
+        authentication back on in sudoers via the PASSWD attribute.
 
   --disable-shadow
 	Disable shadow password support.  Normally, sudo will compile in shadow

@@ -74,7 +74,6 @@ static const char rcsid[] = "$Sudo$";
        int   user_is_exempt	__P((void));
 static void  build_timestamp	__P((char **, char **));
 static int   timestamp_status	__P((char *, char *, char *, int));
-#ifndef NO_PASSWD
 static char *expand_prompt	__P((char *, char *, char *));
 static void  lecture		__P((void));
 static void  update_timestamp	__P((char *, char *));
@@ -219,18 +218,6 @@ expand_prompt(old_prompt, user, host)
 
     return(new_prompt);
 }
-
-#else /* NO_PASSWD */
-
-/*
- * Stub function, just returns.
- */
-void
-check_user()
-{
-    return;
-}
-#endif /* NO_PASSWD */
 
 /*
  * Checks if the user is exempt from supplying a password.

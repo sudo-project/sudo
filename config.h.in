@@ -362,11 +362,11 @@
 /* Define if your struct sockadr has an sa_len field.  */
 #undef HAVE_SA_LEN
 
-/* Define if you want to disable passwd/shadow file authentication.  */
+/* Define to avoid using the passwd/shadow file for authentication.  */
 #undef WITHOUT_PASSWD
 
-/* Define if you don't want sudo to prompt for a password at all.  */
-#undef NO_PASSWD
+/* Define if you don't want sudo to prompt for a password by default.  */
+#undef NO_AUTHENTICATION
 
 /* Define to void if your C compiler fully groks void, else char */
 #undef VOID

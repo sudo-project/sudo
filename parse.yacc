@@ -88,8 +88,14 @@ static const char rcsid[] = "$Sudo$";
  */
 extern int sudolineno, parse_error;
 int errorlineno = -1;
-int clearaliases = 1;
+int clearaliases = TRUE;
 int printmatches = FALSE;
+int pedantic = FALSE;
+#ifdef NO_AUTHENTICATION
+int pwdef = TRUE;
+#else
+int pwdef = -1;
+#endif
 
 /*
  * Alias types
@@ -115,7 +121,7 @@ int top = 0, stacksize = 0;
 	match[top].cmnd   = -1; \
 	match[top].host   = -1; \
 	match[top].runas  = -1; \
-	match[top].nopass = -1; \
+	match[top].nopass = pwdef; \
 	top++; \
     }
 
@@ -226,14 +232,14 @@ yyerror(s)
 %token <tok>	 CMNDALIAS		/* Cmnd_Alias keyword */
 %token <tok>	 USERALIAS		/* User_Alias keyword */
 %token <tok>	 RUNASALIAS		/* Runas_Alias keyword */
-%token <tok>	 ':' '=' ',' '!' '.'	/* union member tokens */
+%token <tok>	 ':' '=' ',' '!'	/* union member tokens */
 %token <tok>	 ERROR
 
 /*
  * NOTE: these are not true booleans as there are actually 3 possible values: 
- *        1) TRUE (item matched and user is allowed)
- *        0) FALSE (item matched and user is *not* allowed because of '!')
- *       -1) No change (don't change the value of *_matches)
+ *        1) TRUE (positive match)
+ *        0) FALSE (negative match due to a '!' somewhere)
+ *       -1) No match (don't change the value of *_matches)
  */
 %type <BOOLEAN>	 cmnd
 %type <BOOLEAN>	 hostspec
@@ -277,7 +283,7 @@ privilege	:	hostlist '=' cmndspeclist {
 			     */
 			    host_matches = -1;
 			    runas_matches = -1;
-			    no_passwd = -1;
+			    no_passwd = pwdef;
 			}
 		;
 
@@ -330,8 +336,12 @@ hostspec	:	ALL {
 				$$ = aip->val;
 			    else if (strcasecmp(user_shost, $1) == 0)
 				$$ = TRUE;
-			    else
+			    else {
+				if (pedantic)
+				    (void) fprintf(stderr,
+					"Warning: undeclared Host_Alias `%s' referenced near line %d\n", $1, sudolineno);
 				$$ = -1;
+			    }
 			    free($1);
 			}
 		;
@@ -476,8 +486,12 @@ runasuser	:	NAME {
 				$$ = aip->val;
 			    else if (strcmp($1, user_runas) == 0)
 				$$ = TRUE;
-			    else
+			    else {
+				if (pedantic)
+				    (void) fprintf(stderr,
+					"Warning: undeclared Runas_Alias `%s' referenced near line %d\n", $1, sudolineno);
 				$$ = -1;
+			    }
 			    free($1);
 			}
 		|	ALL {
@@ -550,8 +564,12 @@ cmnd		:	ALL {
 
 			    if ((aip = find_alias($1, CMND_ALIAS)))
 				$$ = aip->val;
-			    else
+			    else {
+				if (pedantic)
+				    (void) fprintf(stderr,
+					"Warning: undeclared Cmnd_Alias `%s' referenced near line %d", $1, sudolineno);
 				$$ = -1;
+			    }
 			    free($1);
 			}
 		|	 COMMAND {
@@ -705,8 +723,12 @@ user		:	NAME {
 				$$ = aip->val;
 			    else if (strcmp($1, user_name) == 0)
 				$$ = TRUE;
-			    else
+			    else {
+				if (pedantic)
+				    (void) fprintf(stderr,
+					"Warning: undeclared User_Alias `%s' referenced near line %d\n", $1, sudolineno);
 				$$ = -1;
+			    }
 			    free($1);
 			}
 		|	ALL {
@@ -897,8 +919,10 @@ list_matches()
 	}
 
 	/* Is a password required? */
-	if (cm_list[i].nopasswd == TRUE)
+	if (cm_list[i].nopasswd == TRUE && pwdef != TRUE)
 	    (void) fputs("NOPASSWD: ", stdout);
+	else if (cm_list[i].nopasswd == FALSE && pwdef == TRUE)
+	    (void) fputs("PASSWD: ", stdout);
 
 	/* Print the actual command or expanded Cmnd_Alias. */
 	key.alias = cm_list[i].cmnd;

@@ -85,16 +85,16 @@ print_version()
 	    _PATH_SUDOERS, SUDOERS_MODE, SUDOERS_UID, SUDOERS_GID);
 	(void) printf("Sudoers temp file: %s\n", _PATH_SUDOERS_TMP);
 
-#ifdef WITHOUT_PASSWD
-	(void) puts("No Authentication configured\n");
-#else
+#ifdef NO_AUTHENTICATION
+	(void) puts("No Authentication required by default.\n");
+#endif
+
 	(void) fputs("Authentication methods:", stdout);
 	for (auth = auth_switch; auth->name; auth++) {
 	    (void) putchar(' ');
 	    (void) fputs(auth->name, stdout);
 	}
 	(void) putchar('\n');
-#endif
 
 	(void) fputs("Logging:\n", stdout);
 #if (LOGGING & SLOG_SYSLOG)

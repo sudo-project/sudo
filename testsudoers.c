@@ -90,6 +90,7 @@ int num_interfaces;
 struct interface *interfaces;
 struct sudo_user sudo_user;
 extern int clearaliases;
+extern int pedantic;
 
 /*
  * Prototypes for external functions
@@ -339,8 +340,11 @@ main(argc, argv)
 	}
     }
 
+    /* Warn about aliases that are used before being defined. */
+    pedantic = TRUE;
+
     /* Need to keep aliases around for dumpaliases(). */
-    clearaliases = 0;
+    clearaliases = FALSE;
 
     /* Load ip addr/mask for each interface. */
     load_interfaces();

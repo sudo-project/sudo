@@ -102,6 +102,7 @@ void init_parser		__P((void));
  */
 extern FILE *yyin, *yyout;
 extern int errorlineno;
+extern int pedantic;
 
 /*
  * Globals
@@ -127,7 +128,6 @@ main(argc, argv)
     int n;				/* length parameter */
     time_t now;				/* time now */
     struct stat stmp_sb, sudoers_sb;	/* to check for changes */
-
 
     /*
      * Parse command line options
@@ -156,6 +156,9 @@ main(argc, argv)
 	    Argv[0]);
 	exit(1);
     }
+
+    /* Warn about aliases that are used before being defined. */
+    pedantic = TRUE;
 
 #ifdef ENV_EDITOR
     /*
