@@ -505,6 +505,16 @@ Defaults to C<@goodpri@>.
 Syslog priority to use when user authenticates unsuccessfully.
 Defaults to C<@badpri@>.
 
+=item env_delete
+
+A double-quoted, space-separated list of environment variables
+to be removed from the user's environment.  By default this list
+will B<replace> sudo's builtin list of environment variables to remove.
+To B<append> to the builtin list instead of replacing it, the argument
+to I<env_delete> should start with a I<+> (think "add").
+The default list of environment variable to remove is printed
+when B<sudo> is run by root with the I<-V> option.
+
 =item env_keep
 
 A double-quoted, space-separated list of environment variables
