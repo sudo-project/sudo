@@ -613,7 +613,7 @@ init_vars(sudo_mode)
 	    user_args = (char *) emalloc(size);
 	    for (to = user_args, from = NewArgv + 1; *from; from++) {
 		n = strlcpy(to, *from, size - (to - user_args));
-		if (n >= size) {
+		if (n >= size - (to - user_args)) {
 		    (void) fprintf(stderr,
 			"%s: internal error, init_vars() overflow\n", Argv[0]);
 		    exit(1);
