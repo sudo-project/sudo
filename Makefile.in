@@ -100,11 +100,11 @@ PROGS = @PROGS@
 
 SRCS = alloc.c alloca.c check.c closefrom.c def_data.c defaults.c env.c err.c \
        fileops.c find_path.c fnmatch.c getcwd.c getprogname.c getspwuid.c \
-       goodpath.c interfaces.c ldap.c lex.yy.c lsearch.c logging.c parse.c \
-       parse.lex parse.yacc set_perms.c sigaction.c snprintf.c strcasecmp.c \
-       strerror.c strlcat.c strlcpy.c sudo.c sudo_noexec.c sudo.tab.c \
-       sudo_edit.c testsudoers.c tgetpass.c utimes.c visudo.c zero_bytes.c \
-       $(AUTH_SRCS)
+       gettime.c goodpath.c interfaces.c ldap.c lex.yy.c lsearch.c logging.c \
+       parse.c parse.lex parse.yacc set_perms.c sigaction.c snprintf.c \
+       strcasecmp.c strerror.c strlcat.c strlcpy.c sudo.c sudo_noexec.c \
+       sudo.tab.c sudo_edit.c testsudoers.c tgetpass.c utimes.c visudo.c \
+       zero_bytes.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -120,11 +120,11 @@ AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
 PARSEOBJS = sudo.tab.o lex.yy.o alloc.o defaults.o
 
-SUDOBJS = check.o env.o getspwuid.o goodpath.o fileops.o find_path.o \
+SUDOBJS = check.o env.o getspwuid.o gettime.o goodpath.o fileops.o find_path.o \
 	  interfaces.o logging.o parse.o set_perms.o sudo.o sudo_edit.o \
 	  tgetpass.o zero_bytes.o @SUDO_OBJS@ $(AUTH_OBJS) $(PARSEOBJS)
 
-VISUDOBJS = visudo.o fileops.o goodpath.o find_path.o $(PARSEOBJS)
+VISUDOBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o $(PARSEOBJS)
 
 TESTOBJS = interfaces.o testsudoers.o $(PARSEOBJS)
 
