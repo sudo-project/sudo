@@ -665,6 +665,10 @@ static char *sudo_skeyprompt(user_skey, p)
     static char *orig_prompt, *new_prompt = NULL;
     static int op_len, np_size;
 
+    /* close old stream */
+    if (user_skey->keyfile)
+	(void) fclose(user_skey->keyfile);
+
     /* get the skey part of the prompt */
     if ((rval = skeychallenge(user_skey, user_name, challenge)) != 0) {
 #ifdef SKEY_ONLY
@@ -677,7 +681,6 @@ static char *sudo_skeyprompt(user_skey, p)
 	return(orig_prompt);
 #endif /* SKEY_ONLY */
     }
-    (void) fclose(user_skey->keyfile);
 
     /* get space for new prompt with embedded s/key challenge */
     if (new_prompt == NULL) {
