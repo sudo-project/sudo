@@ -556,7 +556,10 @@ static void check_passwd()
 	    return;
 #  endif /* HAVE_AFS */
 #  ifdef HAVE_DCE
-	/* dce_pwent() validates the user's pw as well */
+	/* 
+	 * consult the DCE registry for password validation
+	 * note that dce_pwent trashes pass upon return...
+	 */
 	if (dce_pwent(user_name, pass))
 	    return;
 #  endif /* HAVE_DCE */
