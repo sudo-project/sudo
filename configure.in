@@ -1354,10 +1354,13 @@ if test "$with_kerb4" = "yes" -o "$with_kerb5" = "yes"; then
 	echo 'Unable to locate kerberos libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS'
     fi
 
-    test "$OS" = "solaris" && echo "If you are using the Sun's Solaris kerberos you will need to remove -ldes from the SUDO_LIBS define in the Makefile"
-    SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes"
     if test "$with_kerb5" = "yes"; then
+	AC_HAVE_LIBRARY(krb4, SUDO_LIBS="${SUDO_LIBS} -lkrb4", SUDO_LIBS="${SUDO_LIBS} -lkrb")
+	AC_HAVE_LIBRARY(des, SUDO_LIBS="${SUDO_LIBS} -ldes")
 	SUDO_LIBS="${SUDO_LIBS} -ldes425 -lkrb5 -lcrypto -lcom_err"
+    else
+	# kerb4
+	AC_HAVE_LIBRARY(des, SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes", SUDO_LIBS="${SUDO_LIBS} -lkrb")
     fi
 fi
 
