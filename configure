@@ -30226,7 +30226,8 @@ _ACEOF
     if test "$with_systrace" = "yes"; then
 
 
-for ac_header in dev/systrace.h sys/systrace.h
+
+for ac_header in dev/systrace.h sys/systrace.h linux/systrace.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $ac_header" >&5
