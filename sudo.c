@@ -211,9 +211,11 @@ int main(argc, argv)
 	    break;
 	case MODE_VALIDATE:
 	    cmnd = "validate";
+	    NewArgc = 1;
 	    break;
     	case MODE_KILL:
 	    cmnd = "kill";
+	    NewArgc = 1;
 	    break;
 	case MODE_LIST:
 	    /*
@@ -225,6 +227,7 @@ int main(argc, argv)
 	     */
 	    cmnd = "list";
 	    printmatches = 1;
+	    NewArgc = 1;
 	    break;
     }
 
