@@ -49,7 +49,7 @@ LEX = flex
 YACC = @YACC@
 NROFF = nroff
 
-# Which install program?
+# Our install program supports extra flags...
 INSTALL = $(SHELL) $(srcdir)/install-sh -c
 
 # Libraries
@@ -288,27 +288,23 @@ sudoers.cat: sudoers.man
 install: install-dirs install-binaries install-sudoers install-man
 
 install-dirs:
-	$(SHELL) $(srcdir)/mkinstalldirs $(sudodir) $(visudodir) $(sudoersdir) $(mandirsu) $(mandirform)
+	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)/$(sudodir) \
+	    $(DESTDIR)/$(visudodir) $(DESTDIR)/$(sudoersdir) \
+	    $(DESTDIR)/$(mandirsu) $(DESTDIR)/$(mandirform)
 
 install-binaries: $(PROGS)
-	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 4111 -s sudo $(sudodir)/sudo
-	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0111 -s visudo $(visudodir)/visudo
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 -s sudo $(DESTDIR)/$(sudodir)/sudo
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s visudo $(DESTDIR)/$(visudodir)/visudo
 
 install-sudoers:
-	@if [ -f $(sudoersdir)/sudoers ]; then \
-	    echo "Setting user/group and mode on existing $(sudoersdir)/sudoers file."; \
-	    chown $(sudoers_uid) $(sudoersdir)/sudoers; \
-	    chgrp $(sudoers_gid) $(sudoersdir)/sudoers; \
-	    chmod $(sudoers_mode) $(sudoersdir)/sudoers; \
-	else \
-	    $(INSTALL) -o $(sudoers_uid) -g $(sudoers_gid) -m $(sudoers_mode) \
-		$(srcdir)/sudoers $(sudoersdir)/sudoers; \
-	fi
+	test -f $(DESTDIR)/$(sudoersdir)/sudoers || \
+	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
+		$(srcdir)/sudoers $(DESTDIR)/$(sudoersdir)/sudoers
 
 install-man:
-	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 @mansrcdir@/sudo.$(mantype) $(mandirsu)/sudo.$(mansectsu)
-	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 @mansrcdir@/visudo.$(mantype) $(mandirsu)/visudo.$(mansectsu)
-	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 @mansrcdir@/sudoers.$(mantype) $(mandirform)/sudoers.$(mansectform)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudo.$(mantype) $(DESTDIR)/$(mandirsu)/sudo.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/visudo.$(mantype) $(DESTDIR)/$(mandirsu)/visudo.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudoers.$(mantype) $(DESTDIR)/$(mandirform)/sudoers.$(mansectform)
 @MAN_POSTINSTALL@
 
 check:
