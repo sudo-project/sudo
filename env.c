@@ -273,7 +273,7 @@ rebuild_env(sudo_mode, envp)
 	/* XXX - set all to target user instead for -S */
 	*nep++ = format_env("HOME", user_dir);
 	*nep++ = format_env("SHELL", user_shell);
-	if (def_flag(I_LOGNAME) && runas_pw->pw_name) {
+	if (def_flag(I_SET_LOGNAME) && runas_pw->pw_name) {
 	    *nep++ = format_env("LOGNAME", runas_pw->pw_name);
 	    *nep++ = format_env("USER", runas_pw->pw_name);
 	} else {

@@ -181,7 +181,7 @@ do_logfile(msg)
     char *beg, *oldend, *end;
     FILE *fp;
     mode_t oldmask;
-    int maxlen = def_ival(I_LOGLEN);
+    int maxlen = def_ival(I_LOGLINELEN);
 
     oldmask = umask(077);
     fp = fopen(def_str(I_LOGFILE), "a");
@@ -197,7 +197,7 @@ do_logfile(msg)
 	send_mail(full_line);
 	free(full_line);
     } else {
-	if (def_ival(I_LOGLEN) == 0) {
+	if (def_ival(I_LOGLINELEN) == 0) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
 	    if (def_flag(I_LOG_HOST))
 		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n", get_timestr(),
@@ -325,7 +325,7 @@ log_auth(status, inform_user)
     /*
      * Log via syslog and/or a file.
      */
-    if (def_str(I_LOGFACSTR))
+    if (def_str(I_SYSLOG))
 	do_syslog(pri, logline);
     if (def_str(I_LOGFILE))
 	do_logfile(logline);
@@ -406,7 +406,7 @@ log_error(va_alist)
     /*
      * Log to syslog and/or a file.
      */
-    if (def_str(I_LOGFACSTR))
+    if (def_str(I_SYSLOG))
 	do_syslog(def_ival(I_BADPRI), logline);
     if (def_str(I_LOGFILE))
 	do_logfile(logline);
@@ -551,11 +551,11 @@ mail_auth(status, line)
 	    VALIDATE_ERROR|VALIDATE_OK|FLAG_NO_USER|FLAG_NO_HOST|VALIDATE_NOT_OK;
     else {
 	mail_mask = VALIDATE_ERROR;
-	if (def_flag(I_MAIL_NOUSER))
+	if (def_flag(I_MAIL_NO_USER))
 	    mail_mask |= FLAG_NO_USER;
-	if (def_flag(I_MAIL_NOHOST))
+	if (def_flag(I_MAIL_NO_HOST))
 	    mail_mask |= FLAG_NO_HOST;
-	if (def_flag(I_MAIL_NOPERMS))
+	if (def_flag(I_MAIL_NO_PERMS))
 	    mail_mask |= VALIDATE_NOT_OK;
     }
 

@@ -119,9 +119,9 @@ AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
 	    auth/secureware.c auth/securid.c auth/sia.c auth/sudo_auth.c
 
-HDRS = compat.h defaults.h ins_2001.h ins_classic.h ins_csops.h ins_goons.h \
-       insults.h interfaces.h logging.h parse.h sudo.h sudo.tab.h version.h \
-       auth/sudo_auth.h emul/fnmatch.h emul/search.h emul/utime.h
+HDRS = compat.h def_data.h defaults.h ins_2001.h ins_classic.h ins_csops.h \
+       ins_goons.h insults.h interfaces.h logging.h parse.h sudo.h sudo.tab.h \
+       version.h auth/sudo_auth.h emul/fnmatch.h emul/search.h emul/utime.h
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
@@ -156,7 +156,7 @@ BINFILES= BUGS CHANGES HISTORY LICENSE README TODO TROUBLESHOOTING \
 BINSPECIAL= INSTALL.binary Makefile.binary
 
 SUDODEP = $(srcdir)/sudo.h $(srcdir)/compat.h $(srcdir)/defaults.h \
-	  $(srcdir)/logging.h config.h pathnames.h
+	  $(srcdir)/logging.h config.h def_data.h pathnames.h
 
 AUTHDEP = $(SUDODEP) $(authdir)/sudo_auth.h
 
@@ -196,6 +196,10 @@ testsudoers: $(TESTOBJS) $(LIBOBJS)
 @DEV@	rm -f lex.yy.c
 @DEV@	$(LEX) $(srcdir)/parse.lex
 
+# Uncomment the following if you intend to modify def_data.in
+@DEV@def_data.h def_data.c: def_data.in
+@DEV@	$(srcdir)/mkdefaults -o def_data $(srcdir)/def_data.in
+
 # Dependencies (not counting auth functions)
 alloc.o: alloc.c $(SUDODEP)
 check.o: check.c $(SUDODEP)
@@ -214,7 +218,7 @@ testsudoers.o: testsudoers.c $(SUDODEP) parse.h interfaces.h
 parse.o: parse.c $(SUDODEP) parse.h interfaces.h
 lex.yy.o: lex.yy.c $(SUDODEP) parse.h sudo.tab.h
 sudo.tab.o: sudo.tab.c $(SUDODEP) parse.h
-defaults.o: defaults.c $(SUDODEP) auth/sudo_auth.h
+defaults.o: defaults.c $(SUDODEP) def_data.c auth/sudo_auth.h
 fnmatch.o: fnmatch.c config.h compat.h emul/fnmatch.h
 getcwd.o: getcwd.c config.h compat.h
 lsearch.o: lsearch.c config.h compat.h emul/search.h

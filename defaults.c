@@ -111,171 +111,7 @@ static int store_pwflag __P((char *, struct sudo_defs_types *, int));
 /*
  * Table describing compile-time and run-time options.
  */
-struct sudo_defs_types sudo_defs_table[] = {
-    {
-	"syslog_ifac", T_INT, NULL
-    }, {
-	"syslog_igoodpri", T_INT, NULL
-    }, {
-	"syslog_ibadpri", T_INT, NULL
-    }, {
-	"syslog", T_LOGFAC|T_BOOL,
-	"Syslog facility if syslog is being used for logging: %s"
-    }, {
-	"syslog_goodpri", T_LOGPRI,
-	"Syslog priority to use when user authenticates successfully: %s"
-    }, {
-	"syslog_badpri", T_LOGPRI,
-	"Syslog priority to use when user authenticates unsuccessfully: %s"
-    }, {
-	"long_otp_prompt", T_FLAG,
-	"Put OTP prompt on its own line"
-    }, {
-	"ignore_dot", T_FLAG,
-	"Ignore '.' in $PATH"
-    }, {
-	"mail_always", T_FLAG,
-	"Always send mail when sudo is run"
-    }, {
-	"mail_no_user", T_FLAG,
-	"Send mail if the user is not in sudoers"
-    }, {
-	"mail_no_host", T_FLAG,
-	"Send mail if the user is not in sudoers for this host"
-    }, {
-	"mail_no_perms", T_FLAG,
-	"Send mail if the user is not allowed to run a command"
-    }, {
-	"tty_tickets", T_FLAG,
-	"Use a separate timestamp for each user/tty combo"
-    }, {
-	"lecture", T_FLAG,
-	"Lecture user the first time they run sudo"
-    }, {
-	"authenticate", T_FLAG,
-	"Require users to authenticate by default"
-    }, {
-	"root_sudo", T_FLAG,
-	"Root may run sudo"
-    }, {
-	"log_host", T_FLAG,
-	"Log the hostname in the (non-syslog) log file"
-    }, {
-	"log_year", T_FLAG,
-	"Log the year in the (non-syslog) log file"
-    }, {
-	"shell_noargs", T_FLAG,
-	"If sudo is invoked with no arguments, start a shell"
-    }, {
-	"set_home", T_FLAG,
-	"Set $HOME to the target user when starting a shell with -s"
-    }, {
-	"always_set_home", T_FLAG,
-	"Always set $HOME to the target user's home directory"
-    }, {
-	"path_info", T_FLAG,
-	"Allow some information gathering to give useful error messages"
-    }, {
-	"fqdn", T_FLAG,
-	"Require fully-qualified hostnames in the sudoers file"
-    }, {
-	"insults", T_FLAG,
-	"Insult the user when they enter an incorrect password"
-    }, {
-	"requiretty", T_FLAG,
-	"Only allow the user to run sudo if they have a tty"
-    }, {
-	"env_editor", T_FLAG,
-	"Visudo will honor the EDITOR environment variable"
-    }, {
-	"rootpw", T_FLAG,
-	"Prompt for root's password, not the users's"
-    }, {
-	"runaspw", T_FLAG,
-	"Prompt for the runas_default user's password, not the users's"
-    }, {
-	"targetpw", T_FLAG,
-	"Prompt for the target user's password, not the users's"
-    }, {
-	"use_loginclass", T_FLAG,
-	"Apply defaults in the target user's login class if there is one"
-    }, {
-	"set_logname", T_FLAG,
-	"Set the LOGNAME and USER environment variables"
-    }, {
-	"stay_setuid", T_FLAG,
-	"Only set the effective uid to the target user, not the real uid"
-    }, {
-	"env_reset", T_FLAG,
-	"Reset the environment to a default set of variables"
-    }, {
-	"loglinelen", T_INT|T_BOOL,
-	"Length at which to wrap log file lines (0 for no wrap): %d"
-    }, {
-	"timestamp_timeout", T_INT|T_BOOL,
-	"Authentication timestamp timeout: %d minutes"
-    }, {
-	"passwd_timeout", T_INT|T_BOOL,
-	"Password prompt timeout: %d minutes"
-    }, {
-	"passwd_tries", T_INT,
-	"Number of tries to enter a password: %d"
-    }, {
-	"umask", T_MODE|T_BOOL,
-	"Umask to use or 0777 to use user's: 0%o"
-    }, {
-	"logfile", T_STR|T_BOOL|T_PATH,
-	"Path to log file: %s"
-    }, {
-	"mailerpath", T_STR|T_BOOL|T_PATH,
-	"Path to mail program: %s"
-    }, {
-	"mailerflags", T_STR|T_BOOL,
-	"Flags for mail program: %s"
-    }, {
-	"mailto", T_STR|T_BOOL,
-	"Address to send mail to: %s"
-    }, {
-	"mailsub", T_STR,
-	"Subject line for mail messages: %s"
-    }, {
-	"badpass_message", T_STR,
-	"Incorrect password message: %s"
-    }, {
-	"timestampdir", T_STR|T_PATH,
-	"Path to authentication timestamp dir: %s"
-    }, {
-	"exempt_group", T_STR|T_BOOL,
-	"Users in this group are exempt from password and PATH requirements: %s"
-    }, {
-	"passprompt", T_STR,
-	"Default password prompt: %s"
-    }, {
-	"runas_default", T_STR,
-	"Default user to run commands as: %s"
-    }, {
-	"secure_path", T_STR|T_BOOL,
-	"Value to override user's $PATH with: %s"
-    }, {
-	"editor", T_STR|T_PATH,
-	"Path to the editor for use by visudo: %s"
-    }, {
-	"env_keep", T_STR|T_BOOL,
-	"Environment variables to preserve: %s"
-    }, {
-	"listpw_i", T_INT, NULL
-    }, {
-	"verifypw_i", T_INT, NULL
-    }, {
-	"listpw", T_PWFLAG,
-	"When to require a password for 'list' pseudocommand: %s"
-    }, {
-	"verifypw", T_PWFLAG,
-	"When to require a password for 'verify' pseudocommand: %s"
-    }, {
-	NULL, 0, NULL
-    }
-};
+#include "def_data.c"
 
 /*
  * Print version and configure info.
@@ -522,13 +358,13 @@ init_defaults()
     def_flag(I_MAIL_ALWAYS) = TRUE;
 #endif
 #ifdef SEND_MAIL_WHEN_NO_USER
-    def_flag(I_MAIL_NOUSER) = TRUE;
+    def_flag(I_MAIL_NO_USER) = TRUE;
 #endif
 #ifdef SEND_MAIL_WHEN_NO_HOST
-    def_flag(I_MAIL_NOHOST) = TRUE;
+    def_flag(I_MAIL_NO_HOST) = TRUE;
 #endif
 #ifdef SEND_MAIL_WHEN_NOT_OK
-    def_flag(I_MAIL_NOPERMS) = TRUE;
+    def_flag(I_MAIL_NO_PERMS) = TRUE;
 #endif
 #ifdef USE_TTY_TICKETS
     def_flag(I_TTY_TICKETS) = TRUE;
@@ -563,18 +399,20 @@ init_defaults()
 #ifdef ENV_EDITOR
     def_flag(I_ENV_EDITOR) = TRUE;
 #endif
-    def_flag(I_LOGNAME) = TRUE;
+    def_flag(I_SET_LOGNAME) = TRUE;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)
-    (void) store_syslogfac(LOGFAC, &sudo_defs_table[I_LOGFACSTR], TRUE);
-    (void) store_syslogpri(PRI_SUCCESS, &sudo_defs_table[I_GOODPRISTR], TRUE);
-    (void) store_syslogpri(PRI_FAILURE, &sudo_defs_table[I_BADPRISTR], TRUE);
+    (void) store_syslogfac(LOGFAC, &sudo_defs_table[I_SYSLOG], TRUE);
+    (void) store_syslogpri(PRI_SUCCESS, &sudo_defs_table[I_SYSLOG_GOODPRI],
+	TRUE);
+    (void) store_syslogpri(PRI_FAILURE, &sudo_defs_table[I_SYSLOG_BADPRI],
+	TRUE);
 #endif
 
     /* Password flags also have a string and integer component. */
-    (void) store_pwflag("any", &sudo_defs_table[I_LISTPWSTR], TRUE);
-    (void) store_pwflag("all", &sudo_defs_table[I_VERIFYPWSTR], TRUE);
+    (void) store_pwflag("any", &sudo_defs_table[I_LISTPW], TRUE);
+    (void) store_pwflag("all", &sudo_defs_table[I_VERIFYPW], TRUE);
 
     /* Then initialize the int-like things. */
 #ifdef SUDO_UMASK
@@ -582,18 +420,18 @@ init_defaults()
 #else
     def_mode(I_UMASK) = 0777;
 #endif
-    def_ival(I_LOGLEN) = MAXLOGFILELEN;
-    def_ival(I_TS_TIMEOUT) = TIMEOUT;
-    def_ival(I_PW_TIMEOUT) = PASSWORD_TIMEOUT;
-    def_ival(I_PW_TRIES) = TRIES_FOR_PASSWORD;
+    def_ival(I_LOGLINELEN) = MAXLOGFILELEN;
+    def_ival(I_TIMESTAMP_TIMEOUT) = TIMEOUT;
+    def_ival(I_PASSWD_TIMEOUT) = PASSWORD_TIMEOUT;
+    def_ival(I_PASSWD_TRIES) = TRIES_FOR_PASSWORD;
 
     /* Finally do the strings */
     def_str(I_MAILTO) = estrdup(MAILTO);
     def_str(I_MAILSUB) = estrdup(MAILSUBJECT);
-    def_str(I_BADPASS_MSG) = estrdup(INCORRECT_PASSWORD);
+    def_str(I_BADPASS_MESSAGE) = estrdup(INCORRECT_PASSWORD);
     def_str(I_TIMESTAMPDIR) = estrdup(_PATH_SUDO_TIMEDIR);
     def_str(I_PASSPROMPT) = estrdup(PASSPROMPT);
-    def_str(I_RUNAS_DEF) = estrdup(RUNAS_DEFAULT);
+    def_str(I_RUNAS_DEFAULT) = estrdup(RUNAS_DEFAULT);
 #ifdef _PATH_SENDMAIL
     def_str(I_MAILERPATH) = estrdup(_PATH_SENDMAIL);
     def_str(I_MAILERFLAGS) = estrdup("-t");
@@ -602,7 +440,7 @@ init_defaults()
     def_str(I_LOGFILE) = estrdup(_PATH_SUDO_LOGFILE);
 #endif
 #ifdef EXEMPTGROUP
-    def_str(I_EXEMPT_GRP) = estrdup(EXEMPTGROUP);
+    def_str(I_EXEMPT_GROUP) = estrdup(EXEMPTGROUP);
 #endif
 #ifdef SECURE_PATH
     def_str(I_SECURE_PATH) = estrdup(SECURE_PATH);
@@ -615,7 +453,7 @@ init_defaults()
      * value changes we get the change.
      */
     if (user_runas == NULL)
-	user_runas = &def_str(I_RUNAS_DEF);
+	user_runas = &def_str(I_RUNAS_DEFAULT);
 
     firsttime = 0;
 }
@@ -704,9 +542,9 @@ store_syslogpri(val, def, op)
 
     if (op == FALSE || !val)
 	return(FALSE);
-    if (def == &sudo_defs_table[I_GOODPRISTR])
+    if (def == &sudo_defs_table[I_SYSLOG_GOODPRI])
 	idef = &sudo_defs_table[I_GOODPRI];
-    else if (def == &sudo_defs_table[I_BADPRISTR])
+    else if (def == &sudo_defs_table[I_SYSLOG_BADPRI])
 	idef = &sudo_defs_table[I_BADPRI];
     else
 	return(FALSE);
@@ -753,9 +591,9 @@ store_pwflag(val, def, op)
     int isub, flags;
 
     if (strcmp(def->name, "verifypw") == 0)
-	isub = I_VERIFYPW;
+	isub = I_VERIFYPW_I;
     else
-	isub = I_LISTPW;
+	isub = I_LISTPW_I;
 
     /* Handle !foo. */
     if (op == FALSE) {

@@ -81,75 +81,10 @@ struct sudo_defs_types {
 /*
  * Indexes into sudo_defs_table
  */
-
-/* Integer versions of syslog options.  */
-#define	I_LOGFAC	0	/* syslog facility */
-#define	I_GOODPRI	1	/* syslog priority for successful auth */
-#define	I_BADPRI	2	/* syslog priority for unsuccessful auth */
-
-/* String versions of syslog options.  */
-#define	I_LOGFACSTR	3	/* syslog facility */
-#define	I_GOODPRISTR	4	/* syslog priority for successful auth */
-#define	I_BADPRISTR	5	/* syslog priority for unsuccessful auth */
-
-/* Booleans */
-#define I_LONG_OTP_PROMPT	6
-#define I_IGNORE_DOT		7
-#define I_MAIL_ALWAYS		8
-#define I_MAIL_NOUSER		9
-#define I_MAIL_NOHOST		10
-#define I_MAIL_NOPERMS		11
-#define I_TTY_TICKETS		12
-#define I_LECTURE		13
-#define I_AUTHENTICATE		14
-#define I_ROOT_SUDO		15
-#define I_LOG_HOST		16
-#define I_LOG_YEAR		17
-#define I_SHELL_NOARGS		18
-#define I_SET_HOME		19
-#define I_ALWAYS_SET_HOME	20
-#define I_PATH_INFO		21
-#define I_FQDN			22
-#define I_INSULTS		23
-#define I_REQUIRETTY		24
-#define I_ENV_EDITOR		25
-#define I_ROOTPW		26
-#define I_RUNASPW		27
-#define I_TARGETPW		28
-#define I_LOGINCLASS		29
-#define I_LOGNAME		30
-#define I_STAY_SETUID		31
-#define I_ENV_RESET		32
-
-/* Integer values */
-#define	I_LOGLEN	33	/* wrap log file line after N chars */
-#define	I_TS_TIMEOUT	34	/* timestamp stale after N minutes */
-#define	I_PW_TIMEOUT	35	/* exit if pass not entered in N minutes */
-#define	I_PW_TRIES	36	/* exit after N bad password tries */
-#define	I_UMASK		37	/* umask to use or 0777 to use user's */
-
-/* Strings */
-#define	I_LOGFILE	38	/* path to logfile (or NULL for none) */
-#define	I_MAILERPATH	39	/* path to sendmail or other mailer */
-#define	I_MAILERFLAGS	40	/* flags to pass to the mailer */
-#define	I_MAILTO	41	/* who to send bitch mail to */
-#define	I_MAILSUB	42	/* subject line of mail msg */
-#define	I_BADPASS_MSG	43	/* what to say when passwd is wrong */
-#define	I_TIMESTAMPDIR	44	/* path to timestamp dir */
-#define	I_EXEMPT_GRP	45	/* no password or PATH override for these */
-#define	I_PASSPROMPT	46	/* password prompt */
-#define	I_RUNAS_DEF	47	/* default user to run commands as */
-#define	I_SECURE_PATH	48	/* set $PATH to this if not NULL */
-#define	I_EDITOR	49	/* path to editor used by visudo */
-#define	I_ENV_KEEP	50	/* list of env vars to preserve */
-
-/* Integer versions of list/verify options */
-#define I_LISTPW	51
-#define I_VERIFYPW	52
-
-/* String versions of list/verify options */
-#define I_LISTPWSTR	53
-#define I_VERIFYPWSTR	54
+#include "def_data.h"
+#define I_LOGFAC	I_SYSLOG_IFAC
+#define I_GOODPRI	I_SYSLOG_IGOODPRI
+#define I_BADPRI	I_SYSLOG_IBADPRI 
 
 /*
  * Macros for accessing sudo_defs_table.

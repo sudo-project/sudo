@@ -756,7 +756,7 @@ list_matches()
 	    } while ((p = strtok(NULL, ", ")));
 	    (void) fputs(") ", stdout);
 	} else {
-	    (void) printf("(%s) ", def_str(I_RUNAS_DEF));
+	    (void) printf("(%s) ", def_str(I_RUNAS_DEFAULT));
 	}
 
 	/* Is a password required? */
@@ -1379,7 +1379,7 @@ case 39:
 			     */
 			    if (runas_matches == -1)
 				runas_matches = (strcmp(*user_runas,
-				    def_str(I_RUNAS_DEF)) == 0);
+				    def_str(I_RUNAS_DEFAULT)) == 0);
 			}
 break;
 case 40:

@@ -276,7 +276,7 @@ runas_setup()
 
     if (runas_pw->pw_name != NULL) {
 #ifdef HAVE_LOGIN_CAP_H
-	if (def_flag(I_LOGINCLASS)) {
+	if (def_flag(I_USE_LOGINCLASS)) {
 	    /*
 	     * We don't have setusercontext()
 	     * set the user since we may only

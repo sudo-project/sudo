@@ -226,10 +226,10 @@ user_is_exempt()
     struct group *grp;
     char **gr_mem;
 
-    if (!def_str(I_EXEMPT_GRP))
+    if (!def_str(I_EXEMPT_GROUP))
 	return(FALSE);
 
-    if (!(grp = getgrnam(def_str(I_EXEMPT_GRP))))
+    if (!(grp = getgrnam(def_str(I_EXEMPT_GROUP))))
 	return(FALSE);
 
     if (getgid() == grp->gr_gid)
@@ -425,13 +425,13 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
      */
     if (status == TS_OLD) {
 	now = time(NULL);
-	if (def_ival(I_TS_TIMEOUT) && 
-	    now - sb.st_mtime < 60 * def_ival(I_TS_TIMEOUT)) {
+	if (def_ival(I_TIMESTAMP_TIMEOUT) && 
+	    now - sb.st_mtime < 60 * def_ival(I_TIMESTAMP_TIMEOUT)) {
 	    /*
 	     * Check for bogus time on the stampfile.  The clock may
 	     * have been set back or someone could be trying to spoof us.
 	     */
-	    if (sb.st_mtime > now + 60 * def_ival(I_TS_TIMEOUT) * 2) {
+	    if (sb.st_mtime > now + 60 * def_ival(I_TIMESTAMP_TIMEOUT) * 2) {
 		log_error(NO_EXIT,
 		    "timestamp too far in the future: %20.20s",
 		    4 + ctime(&sb.st_mtime));

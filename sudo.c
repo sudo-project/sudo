@@ -230,7 +230,7 @@ main(argc, argv, envp)
 		break;
 	    case MODE_VALIDATE:
 		user_cmnd = "validate";
-		pwflag = I_VERIFYPW;
+		pwflag = I_VERIFYPW_I;
 		break;
 	    case MODE_KILL:
 	    case MODE_INVALIDATE:
@@ -243,7 +243,7 @@ main(argc, argv, envp)
 		break;
 	    case MODE_LIST:
 		user_cmnd = "list";
-		pwflag = I_LISTPW;
+		pwflag = I_LISTPW_I;
 		printmatches = 1;
 		break;
 	}
@@ -632,7 +632,7 @@ parse_args()
 		    usage(1);
 
 		login_class = NewArgv[1];
-		def_flag(I_LOGINCLASS) = TRUE;
+		def_flag(I_USE_LOGINCLASS) = TRUE;
 
 		/* Shift Argv over and adjust Argc. */
 		NewArgc--;
@@ -946,9 +946,9 @@ get_authpw()
 	if ((pw = sudo_getpwuid(0)) == NULL)
 	    log_error(0, "uid 0 does not exist in the passwd file!");
     } else if (def_ival(I_RUNASPW)) {
-	if ((pw = sudo_getpwnam(def_str(I_RUNAS_DEF))) == NULL)
+	if ((pw = sudo_getpwnam(def_str(I_RUNAS_DEFAULT))) == NULL)
 	    log_error(0, "user %s does not exist in the passwd file!",
-		def_str(I_RUNAS_DEF));
+		def_str(I_RUNAS_DEFAULT));
     } else if (def_ival(I_TARGETPW)) {
 	if (**user_runas == '#') {
 	    if ((pw = sudo_getpwuid(atoi(*user_runas + 1))) == NULL)
