@@ -113,6 +113,7 @@ sudo_getpwnam(name)
     else if ((pwf = fopen(pwfile, "r")) == NULL)
 	return(NULL);
 
+    memset(&tpw, 0, sizeof(tpw));
     nlen = strlen(name);
     while (fgets(buf, sizeof(buf), pwf)) {
 	if (strncmp(buf, name, nlen) != 0 || buf[nlen] != ':')
@@ -182,6 +183,7 @@ sudo_getpwuid(uid)
     else if ((pwf = fopen(pwfile, "r")) == NULL)
 	return(NULL);
 
+    memset(&tpw, 0, sizeof(tpw));
     while (fgets(buf, sizeof(buf), pwf)) {
 	if ((tpw.pw_name = strtok(buf, ":")) == NULL)
 	    continue;
@@ -283,6 +285,7 @@ sudo_getgrnam(name)
 	return(NULL);
 
     nlen = strlen(name);
+    memset(&tgr, 0, sizeof(tgr));
     while (fgets(buf, sizeof(buf), grf)) {
 	if (strncmp(buf, name, nlen) != 0 || buf[nlen] != ':')
 	    continue;
@@ -358,6 +361,7 @@ sudo_getgrgid(gid)
     else if ((grf = fopen(grfile, "r")) == NULL)
 	return(NULL);
 
+    memset(&tgr, 0, sizeof(tgr));
     while (fgets(buf, sizeof(buf), grf)) {
 	if ((tgr.gr_name = strtok(buf, ":")) == NULL)
 	    continue;
