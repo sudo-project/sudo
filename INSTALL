@@ -14,6 +14,8 @@ INSTALL NOTES
    to migrate to C2 security later but it makes password lookups about
    twice as slow.
 
+   NOTE2: if you use AFS, you need to run configure with --with-AFS
+
 1) Read sudo.h to enable/disable the options you may or may not want.
 
 2) Type make.  If configure did its job correctly there won't be any
