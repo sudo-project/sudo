@@ -291,6 +291,10 @@ main(argc, argv, envp)
 	exit(1);
     }
 
+    /* If given the -P option, set the "preserve_groups" flag. */
+    if (sudo_mode & MODE_PRESERVE_GROUPS)
+	def_flag(I_PRESERVE_GROUPS) = TRUE;
+
     /* If no command line args and "set_home" is not set, error out. */
     if ((sudo_mode & MODE_IMPLIED_SHELL) && !def_flag(I_SHELL_NOARGS))
 	usage(1);
@@ -699,6 +703,9 @@ parse_args()
 	    case 'H':
 		rval |= MODE_RESET_HOME;
 		break;
+	    case 'P':
+		rval |= MODE_PRESERVE_GROUPS;
+		break;
 	    case 'S':
 		tgetpass_flags |= TGP_STDIN;
 		break;
@@ -990,7 +997,7 @@ usage(exit_val)
 {
 
     (void) fprintf(stderr, "usage: sudo -V | -h | -L | -l | -v | -k | -K | %s",
-	"[-H] [-S] [-b] [-p prompt]\n            [-u username/#uid] ");
+	"[-H] [-P] [-S] [-b] [-p prompt]\n            [-u username/#uid] ");
 #ifdef HAVE_LOGIN_CAP_H
     (void) fprintf(stderr, "[-c class] ");
 #endif

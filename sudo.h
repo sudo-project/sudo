@@ -93,18 +93,19 @@ struct sudo_user {
 /*
  * Various modes sudo can be in (based on arguments) in octal
  */
-#define MODE_RUN                 00001
-#define MODE_VALIDATE            00002
-#define MODE_INVALIDATE          00004
-#define MODE_KILL                00010
-#define MODE_VERSION             00020
-#define MODE_HELP                00040
-#define MODE_LIST                00100
-#define MODE_LISTDEFS            00200
-#define MODE_BACKGROUND          00400
-#define MODE_SHELL               01000
-#define MODE_IMPLIED_SHELL       02000
-#define MODE_RESET_HOME          04000
+#define MODE_RUN                 000001
+#define MODE_VALIDATE            000002
+#define MODE_INVALIDATE          000004
+#define MODE_KILL                000010
+#define MODE_VERSION             000020
+#define MODE_HELP                000040
+#define MODE_LIST                000100
+#define MODE_LISTDEFS            000200
+#define MODE_BACKGROUND          000400
+#define MODE_SHELL               001000
+#define MODE_IMPLIED_SHELL       002000
+#define MODE_RESET_HOME          004000
+#define MODE_PRESERVE_GROUPS     010000
 
 /*
  * Used with set_perms()

@@ -276,7 +276,7 @@ static void
 runas_setup()
 {
 #ifdef HAVE_LOGIN_CAP_H
-    int error;
+    int error, flags;
     extern login_cap_t *lc;
 #endif
 
@@ -284,13 +284,18 @@ runas_setup()
 #ifdef HAVE_LOGIN_CAP_H
 	if (def_flag(I_USE_LOGINCLASS)) {
 	    /*
-	     * We don't have setusercontext()
-	     * set the user since we may only
-	     * want to set the effective uid.
+             * We don't have setusercontext() set the user since we
+             * may only want to set the effective uid.  Depending on
+             * sudoers and/or command line arguments we may not want
+             * setusercontext() to call initgroups().
 	     */
+	    flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
+	    if (!def_flag(I_PRESERVE_GROUPS))
+		flags |= LOGIN_SETGROUP;
+	    else if (setgid(runas_pw->pw_gid))
+		perror("cannot set gid to runas gid");
 	    error = setusercontext(lc, runas_pw,
-		runas_pw->pw_uid,
-		LOGIN_SETGROUP|LOGIN_SETRESOURCES|LOGIN_SETPRIORITY);
+		runas_pw->pw_uid, flags);
 	    if (error)
 		perror("unable to set user context");
 	} else
@@ -300,10 +305,9 @@ runas_setup()
 		perror("cannot set gid to runas gid");
 #ifdef HAVE_INITGROUPS
 	    /*
-	     * Initialize group vector only if are
-	     * going to run as a non-root user.
+	     * Initialize group vector unless asked not to.
 	     */
-	    if (strcmp(*user_runas, "root") != 0 &&
+	    if (!def_flag(I_PRESERVE_GROUPS) &&
 		initgroups(*user_runas, runas_pw->pw_gid) < 0)
 		perror("cannot set group vector");
 #endif /* HAVE_INITGROUPS */

@@ -342,8 +342,16 @@ to disable this as it could be used to gather information on the
 location of executables that the normal user does not have access
 to.  The disadvantage is that if the executable is simply not in
 the user's C<PATH>, B<sudo> will tell the user that they are not
-allowed to run it, which can be confusing.  This flag is off by
+allowed to run it, which can be confusing.  This flag is I<off> by
 default.
+
+=item preserve_groups
+
+By default B<sudo> will initialize the group vector to the list of
+groups the target user is in.  When I<preserve_groups> is set, the
+user's existing group vector is left unaltered.  The real and
+effective group IDs, however, are still set to match the target
+user.  This flag is I<off> by default.
 
 =item fqdn
 

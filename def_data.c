@@ -102,6 +102,9 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"env_reset", T_FLAG,
 	"Reset the environment to a default set of variables"
     }, {
+	"preserve_groups", T_FLAG,
+	"Don't initialize the group vector to that of the target user"
+    }, {
 	"loglinelen", T_UINT|T_BOOL,
 	"Length at which to wrap log file lines (0 for no wrap): %d"
     }, {

@@ -42,8 +42,8 @@ sudo - execute a command as another user
 =head1 SYNOPSIS
 
 B<sudo> B<-V> | B<-h> | B<-l> | B<-L> | B<-v> | B<-k> | B<-K> | B<-s> |
-[ B<-H> ] [B<-S> ] [ B<-b> ] | [ B<-p> I<prompt> ] [ B<-c> I<class>|I<-> ]
-[ B<-a> I<auth_type> ]
+[ B<-H> ] [B<-P> ] [B<-S> ] [ B<-b> ] | [ B<-p> I<prompt> ]
+[ B<-c> I<class>|I<-> ] [ B<-a> I<auth_type> ]
 [ B<-u> I<username>|I<#uid> ] I<command>
 
 =head1 DESCRIPTION
@@ -182,6 +182,14 @@ in passwd(5).
 The B<-H> (I<HOME>) option sets the C<HOME> environment variable
 to the homedir of the target user (root by default) as specified
 in passwd(5).  By default, B<sudo> does not modify C<HOME>.
+
+=item -P
+
+The B<-P> (I<preserve group vector>) option causes B<sudo> to preserve
+the user's group vector unaltered.  By default, B<sudo> will initialize
+the group vector to the list of groups the target user is in.
+The real and effective group IDs, however, are still set to match
+the target user.
 
 =item -S
 
