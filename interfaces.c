@@ -32,6 +32,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * Supress a warning w/ gcc on Digital UN*X.
+ * The system headers should really do this....
+ */
+#if defined(__osf__) && !defined(__cplusplus)
+struct mbuf;
+struct rtentry;
+#endif
+
 #include "config.h"
 
 #include <stdio.h>

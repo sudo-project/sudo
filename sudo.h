@@ -151,6 +151,18 @@ char *getcwd		__P((char *, size_t size));
 #if !defined(HAVE_PUTENV) && !defined(HAVE_SETENV)
 int putenv		__P((const char *));
 #endif
+#ifndef HAVE_SNPRINTF
+int snprintf		__P((char *, size_t, const char *, ...));
+#endif
+#ifndef HAVE_VSNPRINTF
+int vsnprintf		__P((char *, size_t, const char *, va_list));
+#endif
+#ifndef HAVE_ASPRINTF
+int asprintf		__P((char **, const char *, ...));
+#endif
+#ifndef HAVE_VASPRINTF
+int vasprintf		__P((char **, const char *, va_list));
+#endif
 char *sudo_goodpath	__P((const char *));
 int sudo_setenv		__P((char *, char *));
 char *tgetpass		__P((const char *, int, int));

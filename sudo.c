@@ -57,11 +57,15 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <grp.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/param.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
+#include <prot.h>
+#endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
 #include "sudo.h"
 #include "interfaces.h"
@@ -1025,7 +1029,7 @@ usage(exit_val)
 {
     (void) fprintf(stderr,
 	"usage: %s -V | -h | -l | -v | -k | -K | -H | [-b] [-p prompt]\n%*s",
-	Argv[0], strlen(Argv[0]) + 8, " ");
+	Argv[0], (int) strlen(Argv[0]) + 8, " ");
 #ifdef HAVE_KERB5
     (void) fprintf(stderr, "[-r realm] ");
 #endif /* HAVE_KERB5 */

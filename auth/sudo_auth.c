@@ -50,6 +50,7 @@
 #include <sys/param.h>
 #include <sys/types.h>
 #include <pwd.h>
+#include <time.h>
 
 #include "sudo.h"
 #include "sudo_auth.h"

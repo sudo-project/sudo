@@ -75,7 +75,6 @@ enum format_flags {
 /*
  * Common state
  */
-
 struct state {
   unsigned char *str;
   unsigned char *s;
@@ -504,6 +503,34 @@ xyzprintf (state, char_format, ap)
   return 0;
 }
 
+#ifndef HAVE_VSNPRINTF
+int
+vsnprintf (str, sz, format, args)
+  char *str;
+  size_t sz;
+  const char *format;
+  va_list args;
+{
+  struct state state;
+  int ret;
+
+  state.max_sz = 0;
+  state.sz     = sz;
+  state.str    = (unsigned char *) str;
+  state.s      = (unsigned char *) str;
+  state.theend = (unsigned char *) str + sz - 1;
+  state.append_char = sn_append_char;
+  state.reserve     = sn_reserve;
+
+  ret = xyzprintf (&state, format, args);
+  *state.s = '\0';
+  if (ret)
+    return sz;
+  else
+    return state.s - state.str;
+}
+#endif
+
 #ifndef HAVE_SNPRINTF
 int
 #ifdef __STDC__
@@ -597,6 +624,17 @@ vasnprintf (ret, max_sz, format, args)
 }
 #endif
 
+#ifndef HAVE_VASPRINTF
+int
+vasprintf (ret, format, args)
+  char **ret;
+  const char *format;
+  va_list args;
+{
+  return vasnprintf (ret, 0, format, args);
+}
+#endif
+
 #ifndef HAVE_ASPRINTF
 int
 #ifdef __STDC__
@@ -684,45 +722,5 @@ asnprintf (va_alist)
 
   va_end(args);
   return val;
-}
-#endif
-
-#ifndef HAVE_VASPRINTF
-int
-vasprintf (ret, format, args)
-  char **ret;
-  const char *format;
-  va_list args;
-{
-  return vasnprintf (ret, 0, format, args);
-}
-#endif
-
-
-#ifndef HAVE_VSNPRINTF
-int
-vsnprintf (str, sz, format, args)
-  char *str;
-  size_t sz;
-  const char *format;
-  va_list args;
-{
-  struct state state;
-  int ret;
-
-  state.max_sz = 0;
-  state.sz     = sz;
-  state.str    = (unsigned char *) str;
-  state.s      = (unsigned char *) str;
-  state.theend = (unsigned char *) str + sz - 1;
-  state.append_char = sn_append_char;
-  state.reserve     = sn_reserve;
-
-  ret = xyzprintf (&state, format, args);
-  *state.s = '\0';
-  if (ret)
-    return sz;
-  else
-    return state.s - state.str;
 }
 #endif
