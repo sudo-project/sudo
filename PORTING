@@ -1,25 +1,26 @@
 sudo porting hints:
 
-Sudo should be fairly easy to port.  The most problematic part is how
-set*uid() functions.  If you have no seteuid() but do have setreuid()
+Sudo should be fairly easy to port.  In fact, now that it uses a configure
+script, most of the work should be done for you. The most problematic part
+is how set*uid() functions.  If you have no seteuid() but do have setreuid()
 you can emulate seteuid() with a macro like the following:
     #define seteuid(__EUID)	(setreuid((uid_t)-1, __EUID))
+This only affects the be*() functions.
 
-Another possible pitfall is getdtablesize() which is used to get the maximum
-number of open files the process can have.  For systems that have the
-Posix(?) sysconf() but no getdtablesize(), use the following macro:
-    #define getdtablesize()	(sysconf(_SC_OPEN_MAX))
-If all else fails you can use the value of NOFILE in <sys/param.h>.
+Another possible pitfall is getdtablesize(2) which is used to get the maximum
+number of open files the process can have.  If an OS has the POSIX sysconf(2)
+it will be used instead of getdtablesize(2).  ulimit(2) can also be used on
+some OS's.  If all else fails you can use the value of NOFILE in <sys/param.h>.
 
-If you are porting to a SysV-based OS, you should link in with a library
-that has BSD signals if possible, if not sudo will probably still work,
-but no promises.
+Sudo tries to clear the environment of dangerous envariables like LD_*
+to prevent shared library spoofing.  If you are porting sudo to a new
+OS that has shared libraries you'll want to mask out the variables that
+allow one to change the shared library path.  See clean_env() for examples
+for this for various OS's.
 
-One other thing is that sudo expects to be able to use the uid_t and mode_t
-type definitions.  Chances are you have uid_t, if not it is just what
-getuid(2) returns, you can add it in to sudo.h.  If you have an older
-libc, you probably don't have mode_t.  You can just compile with -DNO_MODE_T
-if umask(2) takes an int, if not, fix the definition in sudo.h.
+It is possible that on a really weird system, tgetpass() may not compile.
+If this is the case you can replace the call to tgetpass() in check.c
+with getpass().  You'll lose the timeout feature but gain a working sudo.
 
 If you port sudo to a new architecture, please send your changes to
     sudo-bugs@cs.colorado.edu
