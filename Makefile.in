@@ -74,11 +74,13 @@ SHELL = /bin/sh
 
 PROGS = @PROGS@
 
-SRCS = check.c find_path.c getpass.c logging.c parse.c sudo.c parse.yacc \
+SRCS = check.c find_path.c tgetpass.c logging.c parse.c sudo.c parse.yacc \
        parse.lex
 
-OBJS = check.o find_path.o getpass.o logging.o parse.o sudo.o y.tab.o \
+OBJS = check.o find_path.o tgetpass.o logging.o parse.o sudo.o y.tab.o \
        lex.yy.o
+
+LIBOBJS = @LIBOBJS@
 
 HDRS = sudo.h version.h insults.h
 
@@ -95,8 +97,8 @@ all: $(PROGS)
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) -I$(srcdir) $<
 
-sudo : $(OBJS)
-	$(CC) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
+sudo : $(OBJS) $(LIBOBJS)
+	$(CC) -o $@ $(OBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS)
 
 y.tab.o y.tab.h: parse.yacc $(HDRS)
 	$(YACC) -d parse.yacc
@@ -106,7 +108,7 @@ lex.yy.o: parse.lex y.tab.h $(HDRS)
 	$(LEX) parse.lex
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) -I$(srcdir) lex.yy.c
 
-$(OBJS) : $(HDRS)
+$(OBJS) $(LIBOBJS) : $(HDRS)
 
 visudo :
 	( cd visudoers && make "OPTIONS=$(OPTIONS)" $@ )
