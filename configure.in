@@ -428,7 +428,7 @@ AC_ARG_WITH(logging, [  --with-logging          log via syslog, file, or both],
 esac], [AC_DEFINE(LOGGING, SLOG_SYSLOG) AC_MSG_RESULT(syslog)])
 
 AC_MSG_CHECKING(which syslog facility sudo should log with)
-AC_ARG_WITH(logfac, [  --with-logfac           syslog facility to log with (default is \"local2\")],
+AC_ARG_WITH(logfac, [  --with-logfac           syslog facility to log with (default is "local2")],
 [case $with_logfac in  
     yes)	AC_MSG_ERROR(["must give --with-logfac an argument."])
 		;;
@@ -443,7 +443,7 @@ AC_DEFINE_UNQUOTED(LOGFAC, "$logfac")
 AC_MSG_RESULT($logfac)
 
 AC_MSG_CHECKING(at which syslog priority to log commands)
-AC_ARG_WITH(goodpri, [  --with-goodpri          syslog priority for commands (def is \"notice\")],
+AC_ARG_WITH(goodpri, [  --with-goodpri          syslog priority for commands (def is "notice")],
 [case $with_goodpri in  
     yes)	AC_MSG_ERROR(["must give --with-goodpri an argument."])
 		;;
@@ -459,7 +459,7 @@ AC_DEFINE_UNQUOTED(PRI_SUCCESS, "$goodpri")
 AC_MSG_RESULT($goodpri)
 
 AC_MSG_CHECKING(at which syslog priority to log failures)
-AC_ARG_WITH(badpri, [  --with-badpri           syslog priority for failures (def is cw\"alert\"badpri)],
+AC_ARG_WITH(badpri, [  --with-badpri           syslog priority for failures (def is "alert")],
 [case $with_badpri in  
     yes)	AC_MSG_ERROR(["must give --with-badpri an argument."])
 		;;
@@ -566,7 +566,7 @@ else
 fi
 
 AC_MSG_CHECKING(who should get the mail that sudo sends)
-AC_ARG_WITH(mailto, [  --with-mailto           who should get sudo mail (default is \"root\")],
+AC_ARG_WITH(mailto, [  --with-mailto           who should get sudo mail (default is "root")],
 [case $with_mailto in  
     yes)	AC_MSG_ERROR(["must give --with-mailto an argument."])
 		;;
@@ -713,7 +713,7 @@ else
 fi
 
 AC_MSG_CHECKING(for default user to run commands as)
-AC_ARG_WITH(runas-default, [  --with-runas-default    User to run commands as (default is \"root\")],
+AC_ARG_WITH(runas-default, [  --with-runas-default    User to run commands as (default is "root")],
 [case $with_runas_default in  
     yes)	AC_MSG_ERROR(["must give --with-runas-default an argument."])
 		;;
@@ -867,7 +867,7 @@ AC_ARG_WITH(all-insults, [  --with-all-insults      include all the sudo insult 
 		;;
 esac])
 
-AC_ARG_WITH(classic-insults, [  --with-classic-insults  include the insults from the \"classic\" sudo],
+AC_ARG_WITH(classic-insults, [  --with-classic-insults  include the insults from the "classic" sudo],
 [case $with_classic_insults in  
     yes)	AC_DEFINE(CLASSIC_INSULTS)
 		;;
@@ -894,7 +894,7 @@ AC_ARG_WITH(hal-insults, [  --with-hal-insults      include 2001-like insults],
 		;;
 esac])
 
-AC_ARG_WITH(goons-insults, [  --with-goons-insults    include the insults from the \"Goon Show\"],
+AC_ARG_WITH(goons-insults, [  --with-goons-insults    include the insults from the "Goon Show"],
 [case $with_goons_insults in  
     yes)	AC_DEFINE(GOONS_INSULTS)
 		;;
@@ -1021,7 +1021,7 @@ AC_ARG_ENABLE(noargs-shell,
 AC_MSG_CHECKING(whether to set \$HOME to target user in shell mode)
 AC_ARG_ENABLE(shell-sets-home,
 [  --enable-shell-sets-home
-                          set \$HOME to target user in shell mode],
+                          set $HOME to target user in shell mode],
 [ case "$enableval" in
     yes)	AC_MSG_RESULT(yes)
 		AC_DEFINE(SHELL_SETS_HOME)
