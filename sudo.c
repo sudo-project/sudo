@@ -58,6 +58,7 @@ extern char *malloc();
 
 int  Argc;
 char **Argv;
+char **Envp;
 char *host;
 char *user;
 char *cmnd;
@@ -76,8 +77,8 @@ uid_t uid;
  *  the driving force behind sudo...
  */
 
-main(argc, argv)
-int argc; char **argv;
+main(argc, argv, envp)
+int argc; char **argv; char **envp;
 {
 static void usage();
 int rtn;
@@ -95,6 +96,8 @@ for ( rtn = getdtablesize() - 1 ; rtn > 3; rtn -- )
     (void)close(rtn);
 
 load_globals();    /* load the user host cmnd and uid variables */
+
+clean_envp(envp);  /* build Envp based on envp (w/o LD_*) */
 
 if ( setuid(0) ) {
     perror("setuid(0)");
@@ -117,7 +120,7 @@ switch ( rtn ) {
 		perror("setuid(0)");
 		exit(1);
 		}
-            execv(cmnd, &Argv[1]);
+            execve(cmnd, &Argv[1], Envp);
 	    perror(cmnd);
 	    break;
 	    
@@ -136,7 +139,7 @@ switch ( rtn ) {
 
     }
 
-    return(-1);		/* If we get here it's an error (execv failed) */
+    return(-1);		/* If we get here it's an error (execve failed) */
 }
 
 
@@ -237,3 +240,37 @@ fprintf( stderr, "usage: %s command\n", *Argv);
 exit (1);
 }
 
+
+
+
+/**********************************************************************
+ *
+ *  clean_envp()
+ *
+ *  This function builds Envp, the environment pointer to be
+ *  used for all execve()'s and omits LD_* variables
+ */
+
+void clean_envp(envp)
+char **envp;
+{
+int envlen;
+char ** tenvp;
+
+for ( envlen=0; envp[envlen]; envlen++ )
+    ; /* noop */
+
+Envp = (char **) malloc ( sizeof (char **) * envlen );
+
+if ( Envp == NULL ) {
+    perror ("clean_envp:  malloc");
+    exit (1);
+}
+
+/* omit all LD_* environmental vars */
+for ( Envp=tenvp=envp; *envp; envp++ )
+    if ( strncmp ("LD_", *envp, 3) )
+	*tenvp++ = *envp;
+
+*tenvp = NULL;
+}
