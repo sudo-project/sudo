@@ -1635,8 +1635,6 @@ Sudo 1.6.7p5 released.
 512) Fixed a problem on FreeBSD when the user is only listed in NIS (not
      master.passwd) and netgroups are used in the master.passwd file.
 
-Sudo 1.6.7p6 released.
-
 513) BSD-style warn/err functions are now used throughout.
 
 514) Fixed the --with-stow configure option
