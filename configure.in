@@ -2,7 +2,7 @@ dnl
 dnl Process this file with GNU autoconf to produce a configure script.
 dnl $Sudo$
 dnl
-dnl Copyright (c) 1994-1996,1998-2003 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_INIT(sudo, 1.6.8)
 AC_CONFIG_HEADER(config.h pathnames.h)
@@ -13,6 +13,7 @@ AC_MSG_NOTICE([Configuring Sudo version 1.6.8])
 dnl
 dnl Variables that get substituted in the Makefile and man pages
 dnl
+AC_SUBST(LIBTOOL)
 AC_SUBST(CFLAGS)dnl
 AC_SUBST(PROGS)dnl
 AC_SUBST(CPPFLAGS)dnl
@@ -33,6 +34,8 @@ AC_SUBST(DEV)
 AC_SUBST(mansectsu)
 AC_SUBST(mansectform)
 AC_SUBST(mansrcdir)
+AC_SUBST(NOEXECDIR)
+AC_SUBST(INSTALL_NOEXEC)
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -86,6 +89,7 @@ env_editor=off
 passwd_tries=3
 tty_tickets=off
 insults=off
+INSTALL_NOEXEC=
 dnl
 dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
@@ -813,6 +817,7 @@ AC_ARG_WITH(noexec, [  --with-noexec           fully qualified pathname of sudo_
     *)		;;
 esac], [with_noexec="$libexecdir/sudo_noexec.so"])
 AC_MSG_RESULT($with_noexec)
+NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[[^/]]*:\1:'`"
 
 AC_ARG_WITH(execv, [  --with-execv            use execv() instead of execvp()],
 [case $with_execv in  
@@ -1143,6 +1148,14 @@ cross_compiling="no"
 AC_PROG_CPP
 
 dnl
+dnl Libtool magic; disable static lib since we require LD_PRELOAD to work
+dnl
+AC_CANONICAL_HOST
+AC_CANONICAL_SYSTEM
+AC_DISABLE_STATIC
+AM_PROG_LIBTOOL
+
+dnl
 dnl It is now safe to modify CFLAGS and CPPFLAGS
 dnl
 if test "$with_devel" = "yes" -a -n "$GCC"; then
@@ -1165,7 +1178,6 @@ dnl
 dnl What kind of beastie are we being run on?
 dnl Barf if config.cache was generated on another host.
 dnl
-AC_CANONICAL_HOST
 if test -n "$sudo_cv_prev_host"; then
     if test "$sudo_cv_prev_host" != "$host"; then
 	AC_MSG_ERROR([config.cache was created on a different host; remove it and re-run configure.])
@@ -2086,6 +2098,9 @@ dnl Defer setting _PATH_SUDO_NOEXEC until after exec_prefix is set
 dnl XXX - this is gross!
 dnl
 if test "$with_noexec" != "no"; then 
+    PROGS="${PROGS} sudo_noexec.la"
+    INSTALL_NOEXEC="install-noexec"
+
     oexec_prefix="$exec_prefix"
     if test "$exec_prefix" = '$(prefix)'; then
 	if test "$prefix" = "NONE"; then

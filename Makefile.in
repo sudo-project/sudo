@@ -45,6 +45,7 @@
 
 srcdir = @srcdir@
 authdir = $(srcdir)/auth
+top_builddir = .
 VPATH = @srcdir@
 
 # Compiler & tools to use
@@ -52,6 +53,7 @@ CC = @CC@
 LEX = flex
 YACC = @YACC@
 NROFF = nroff
+LIBTOOL = @LIBTOOL@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(srcdir)/install-sh -c
@@ -78,6 +80,7 @@ bindir = @bindir@
 sbindir = @sbindir@
 sysconfdir = @sysconfdir@
 mandir = @mandir@
+noexecdir = @NOEXECDIR@
 
 # Directory in which to install sudo.
 sudodir = $(bindir)
@@ -172,10 +175,13 @@ INSDEP = $(srcdir)/ins_2001.h $(srcdir)/ins_classic.h $(srcdir)/ins_csops.h \
 
 all: $(PROGS)
 
-.SUFFIXES: .o .c .h .lex .yacc .man .cat
+.SUFFIXES: .o .c .h .lex .yacc .man .cat .lo
 
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+
+.c.lo:
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 
 .man.cat:
 	@rm -f $(srcdir)/$@
@@ -189,6 +195,9 @@ visudo: $(VISUDOBJS) $(LIBOBJS)
 
 testsudoers: $(TESTOBJS) $(LIBOBJS)
 	$(CC) -o $@ $(TESTOBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS) $(NET_LIBS)
+
+sudo_noexec.la: sudo_noexec.lo
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -module -rpath $(noexecdir)
 
 # Uncomment the following if you want "make clean" to clean the parser
 @DEV@PARSESRCS = sudo.tab.h sudo.tab.c lex.yy.c
@@ -297,7 +306,7 @@ sudoers.man:: sudoers.man.in
 
 sudoers.cat: sudoers.man
 
-install: install-dirs install-binaries install-sudoers install-man
+install: install-dirs install-binaries @INSTALL_NOEXEC@ install-sudoers install-man
 
 install-dirs:
 	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)$(sudodir) \
@@ -307,6 +316,9 @@ install-dirs:
 install-binaries: $(PROGS)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 -s sudo $(DESTDIR)$(sudodir)/sudo
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s visudo $(DESTDIR)$(visudodir)/visudo
+
+install-noexec: sudo_noexec.la
+	$(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la $(noexecdir)
 
 install-sudoers:
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
