@@ -374,11 +374,7 @@ main(argc, argv)
 
 	/* Replace the PATH envariable with a secure one. */
 	if (def_str(I_SECURE_PATH) && !user_is_exempt())
-	    if (sudo_setenv("PATH", def_str(I_SECURE_PATH))) {
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n",
-		    Argv[0]);
-		exit(1);
-	    }
+	    sudo_setenv("PATH", def_str(I_SECURE_PATH));
 
 	/* Restore coredumpsize resource limit. */
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
@@ -390,7 +386,7 @@ main(argc, argv)
 
 	/* Set $HOME for `sudo -H'.  Only valid at PERM_RUNAS. */
 	if ((sudo_mode & MODE_RESET_HOME) && runas_homedir)
-	    (void) sudo_setenv("HOME", runas_homedir);
+	    sudo_setenv("HOME", runas_homedir);
 
 #ifndef PROFILING
 	if ((sudo_mode & MODE_BACKGROUND) && fork() > 0)
@@ -739,10 +735,7 @@ add_env(contiguous)
     } else {
 	buf = user_cmnd;
     }
-    if (sudo_setenv("SUDO_COMMAND", buf)) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
+    sudo_setenv("SUDO_COMMAND", buf);
     if (NewArgc > 1)
 	free(buf);
 
@@ -754,32 +747,16 @@ add_env(contiguous)
 	    user_args = NULL;
     }
 
-    /* Add the SUDO_USER environment variable. */
-    if (sudo_setenv("SUDO_USER", user_name)) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
-
-    /* Add the SUDO_UID environment variable. */
+    /* Add the SUDO_USER, SUDO_UID, SUDO_GID environment variables. */
+    sudo_setenv("SUDO_USER", user_name);
     (void) sprintf(idstr, "%ld", (long) user_uid);
-    if (sudo_setenv("SUDO_UID", idstr)) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
-
-    /* Add the SUDO_GID environment variable. */
+    sudo_setenv("SUDO_UID", idstr);
     (void) sprintf(idstr, "%ld", (long) user_gid);
-    if (sudo_setenv("SUDO_GID", idstr)) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
+    sudo_setenv("SUDO_GID", idstr);
 
     /* Set PS1 if SUDO_PS1 is set. */
     if ((buf = getenv("SUDO_PS1")))
-	if (sudo_setenv("PS1", buf)) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	sudo_setenv("PS1", buf);
 }
 
 /*
@@ -949,18 +926,8 @@ set_perms(perm, sudo_mode)
 
 				    /* Set $USER and $LOGNAME to target user */
 				    if (def_flag(I_LOGNAME)) {
-					if (sudo_setenv("USER", pw->pw_name)) {
-					    (void) fprintf(stderr,
-						"%s: cannot allocate memory!\n",
-						Argv[0]);
-					    exit(1);
-					}
-					if (sudo_setenv("LOGNAME", pw->pw_name)) {
-					    (void) fprintf(stderr,
-						"%s: cannot allocate memory!\n",
-						Argv[0]);
-					    exit(1);
-					}
+					sudo_setenv("USER", pw->pw_name);
+					sudo_setenv("LOGNAME", pw->pw_name);
 				    }
 
 				    if (def_flag(I_LOGINCLASS)) {
