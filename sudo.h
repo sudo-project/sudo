@@ -345,6 +345,7 @@ extern char cwd[];
 extern char *cmnd;
 extern int Argc;
 extern char **Argv;
+extern int validate_only;
 #endif
 extern int errno;
 extern char ** environ;

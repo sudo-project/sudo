@@ -488,7 +488,10 @@ int validate()
      */
     switch (return_code) {
     case FOUND_USER:
-	return_code = cmnd_check();
+	if (validate_only)
+	    return_code = VALIDATE_OK;
+	else
+	    return_code = cmnd_check();
 	delete_list(USER_LIST);
 	delete_list(HOST_LIST);
 	delete_list(CMND_LIST);

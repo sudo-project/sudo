@@ -110,6 +110,7 @@ char host[MAXHOSTNAMELEN + 1];
 char user[9];
 char cwd[MAXPATHLEN + 1];
 uid_t uid = -2;
+int validate_only = 0;
 
 
 /********************************************************************
@@ -135,13 +136,16 @@ main(argc, argv)
 	usage();
 
     /*
-     * print version string and exit if we got -v
+     * print version string and exit if we got -V
+     * or set validate flag if we got -v.
      * when we add other options getopt(3) will be used
      */
     if (*argv[1] == '-')
-	if (!strcmp(argv[1], "-v")) {
+	if (!strcmp(argv[1], "-V")) {
 	    (void) printf("CU Sudo version %s\n", version);
 	    exit(0);
+	} else if (!strcmp(argv[1], "-v")) {
+	    validate_only = 1;
 	} else {
 	    usage();
 	}
@@ -168,6 +172,8 @@ main(argc, argv)
     case VALIDATE_OK:
 	check_user();
 	log_error(ALL_SYSTEMS_GO);
+	if (validate_only)
+	    exit(0);
 	be_root();
 	EXEC(cmnd, &Argv[1]);
 	perror(cmnd);		/* exec failed! */
@@ -228,25 +234,6 @@ static void load_globals()
 	exit(1);
     }
 
-    /*
-     * loading the cmnd global variable from argv[1]
-     */
-    strncpy(path, Argv[1], MAXPATHLEN)[MAXPATHLEN] = 0;
-    /* become root for find_path() only */
-    be_root();
-    cmnd = find_path(path);	/* get the absolute path */
-    be_user();
-    if (cmnd == NULL) {
-	(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], Argv[1]);
-	exit(1);
-    }
-
-    if ((cmnd = strdup(cmnd)) == NULL)  {
-	perror("malloc");
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
-
 #ifdef NO_ROOT_SUDO
     if (uid == 0) {
 	(void) fprintf(stderr, "You are already root, you don't need to use sudo.\n");
@@ -291,6 +278,29 @@ static void load_globals()
 	*p = '\0';
 #endif /* FQDN */
 
+    /*
+     * loading the cmnd global variable from argv[1]
+     * unless they are just validating the time stamp
+     */
+    if (validate_only) {
+	cmnd = "validate";
+    } else {
+	strncpy(path, Argv[1], MAXPATHLEN)[MAXPATHLEN] = 0;
+	/* become root for find_path() only */
+	be_root();
+	cmnd = find_path(path);	/* get the absolute path */
+	be_user();
+	if (cmnd == NULL) {
+	    (void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], Argv[1]);
+	    exit(1);
+	}
+    }
+
+    if ((cmnd = strdup(cmnd)) == NULL)  {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
 }
 
 
@@ -304,7 +314,7 @@ static void load_globals()
 
 static void usage()
 {
-    (void) fprintf(stderr, "usage: %s [-v] [command]\n", *Argv);
+    (void) fprintf(stderr, "usage: %s [-V] [command]\n", *Argv);
     exit(1);
 }
 
