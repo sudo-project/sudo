@@ -1078,6 +1078,15 @@ case "$host" in
 
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_LIB(security, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"; SECUREWARE=1])
+		    AC_MSG_CHECKING([for broken /usr/include/prot.h])
+		    AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/security.h>
+#include <prot.h>
+		    ], [exit(0);], AC_MSG_RESULT(no),
+		    [AC_MSG_RESULT([yes, fixing locally])
+		    sed 's:<acl.h>:<sys/acl.h>:g' < /usr/include/prot.h > prot.h
+		    ])
 		    CHECKSHADOW="false"
 		fi
 		;;
