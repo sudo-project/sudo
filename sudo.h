@@ -195,6 +195,7 @@ extern int num_interfaces;
 extern char *user;
 extern char *epasswd;
 extern char *cmnd;
+extern char *prompt;
 extern int Argc;
 extern char **Argv;
 #endif
