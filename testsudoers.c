@@ -73,9 +73,9 @@ static const char rcsid[] = "$Sudo$";
  * Globals
  */
 int parse_error = FALSE;
+struct interface *interfaces;
+int num_interfaces;
 extern int clearaliases;
-extern struct interface *interfaces;
-extern int num_interfaces;
 
 char *cmnd = NULL;
 char *cmnd_args = NULL;
