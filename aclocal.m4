@@ -253,19 +253,14 @@ fi
 dnl
 dnl check for isblank(3)
 dnl
-AC_DEFUN(SUDO_FUNC_ISBLANK,
-[AC_MSG_CHECKING(for isblank)
-AC_CACHE_VAL(sudo_cv_func_isblank,
-[rm -f conftestdata; > conftestdata
-AC_TRY_RUN([#include <ctype.h>
-main() { (void)isblank(1); exit(0); }
-], sudo_cv_func_isblank=yes, sudo_cv_func_isblank=no,
-  sudo_cv_func_isblank=no)
-rm -f core core.* *.core])dnl
-AC_MSG_RESULT($sudo_cv_func_isblank)
-if test $sudo_cv_func_isblank = yes; then
-  AC_DEFINE(HAVE_ISBLANK)
-fi
+AC_DEFUN([SUDO_FUNC_ISBLANK],
+  [AC_CACHE_CHECK([for isblank], sudo_cv_func_isblank,
+    [AC_TRY_LINK([#include <ctype.h>], [(void)isblank(1);],
+    sudo_cv_func_isblank=yes, sudo_cv_func_isblank=no)])
+] [
+  if test "$sudo_cv_func_isblank" = "yes"; then
+    AC_DEFINE(HAVE_ISBLANK)
+  fi
 ])
 
 dnl
