@@ -89,7 +89,7 @@ int ntwk_matches		__P((char *));
  * External globals
  */
 extern FILE *yyin, *yyout;
-extern int errorlineno, sudolineno, top;
+extern int errorlineno, sudolineno;
 
 
 /*
