@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2001 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996,1998-2001,2003 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,84 +38,29 @@
  * $Sudo$
  */
 
-#ifndef _SUDO_DEFAULTS_H
-#define _SUDO_DEFAULTS_H
+#ifndef _SUDO_INTERFACES_H
+#define _SUDO_INTERFACES_H
 
-#include <def_data.h>
-
-struct list_member {
-    char *value;
-    struct list_member *next;
-};
-
-struct def_values {
-    char *sval;		/* string value */
-    int ival;		/* actually an enum */
-};
-
-enum list_ops {
-    add,
-    delete,
-    freeall
+/*
+ * IP address and netmask pairs for checking against local interfaces.
+ */
+struct interface {
+    struct in_addr addr;
+    struct in_addr netmask;
 };
 
 /*
- * Structure describing compile-time and run-time options.
+ * Prototypes for external functions.
  */
-struct sudo_defs_types {
-    char *name;
-    int type;
-    char *desc;
-    struct def_values *values;
-    int (*callback) __P((char *));
-    union {
-	int flag;
-	int ival;
-	enum def_tupple tuple;
-	char *str;
-	mode_t mode;
-	struct list_member *list;
-    } sd_un;
-};
+void load_interfaces	__P((void));
+void dump_interfaces	__P((void));
 
 /*
- * Four types of defaults: strings, integers, and flags.
- * Also, T_INT or T_STR may be ANDed with T_BOOL to indicate that
- * a value is not required.  Flags are boolean by nature...
+ * Definitions for external variables.
  */
-#undef T_INT
-#define T_INT		0x001
-#undef T_UINT
-#define T_UINT		0x002
-#undef T_STR
-#define T_STR		0x003
-#undef T_FLAG
-#define T_FLAG		0x004
-#undef T_MODE
-#define T_MODE		0x005
-#undef T_LIST
-#define T_LIST		0x006
-#undef T_LOGFAC
-#define T_LOGFAC	0x007
-#undef T_LOGPRI
-#define T_LOGPRI	0x008
-#undef T_TUPLE
-#define T_TUPLE		0x009
-#undef T_MASK
-#define T_MASK		0x0FF
-#undef T_BOOL
-#define T_BOOL		0x100
-#undef T_PATH
-#define T_PATH		0x200
+#ifndef _SUDO_MAIN
+extern struct interface *interfaces;
+extern int num_interfaces;
+#endif
 
-/*
- * Prototypes
- */
-void dump_default	__P((void));
-int set_default		__P((char *, char *, int));
-void init_defaults	__P((void));
-void list_options	__P((void));
-
-extern struct sudo_defs_types sudo_defs_table[];
-
-#endif /* _SUDO_DEFAULTS_H */
+#endif /* _SUDO_INTERFACES_H */

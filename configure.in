@@ -2,7 +2,7 @@ dnl
 dnl Process this file with GNU autoconf to produce a configure script.
 dnl $Sudo$
 dnl
-dnl Copyright (c) 1994-1996,1998-2003 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_INIT(sudo, 1.6.8)
 AC_CONFIG_HEADER(config.h pathnames.h)
@@ -13,6 +13,7 @@ AC_MSG_NOTICE([Configuring Sudo version 1.6.8])
 dnl
 dnl Variables that get substituted in the Makefile and man pages
 dnl
+AC_SUBST(LIBTOOL)
 AC_SUBST(CFLAGS)dnl
 AC_SUBST(PROGS)dnl
 AC_SUBST(CPPFLAGS)dnl
@@ -34,6 +35,9 @@ AC_SUBST(DEV)
 AC_SUBST(mansectsu)
 AC_SUBST(mansectform)
 AC_SUBST(mansrcdir)
+AC_SUBST(NOEXECDIR)
+AC_SUBST(noexec_file)
+AC_SUBST(INSTALL_NOEXEC)
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -61,6 +65,7 @@ AC_SUBST(env_editor)
 AC_SUBST(passwd_tries)
 AC_SUBST(tty_tickets)
 AC_SUBST(insults)
+AC_SUBST(root_sudo)
 dnl
 dnl Initial values for above
 dnl
@@ -87,6 +92,8 @@ env_editor=off
 passwd_tries=3
 tty_tickets=off
 insults=off
+root_sudo=on
+INSTALL_NOEXEC=
 dnl
 dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
@@ -911,6 +918,15 @@ AC_ARG_WITH(ldap, [  --with-ldap             enable LDAP support],
 		;;
 esac])
 
+AC_ARG_WITH(pc-insults, [  --with-pc-insults       replace politically incorrect insults with less offensive ones],
+[case $with_pc_insults in  
+    yes)	AC_DEFINE(PC_INSULTS, 1, [Define to replace politically incorrect insults with less offensive ones.])
+		;;
+    no)		;;
+    *)		AC_MSG_ERROR(["--with-pc-insults does not take an argument."])
+		;;
+esac])
+
 dnl include all insult sets on one line
 if test "$insults" = "on"; then
     AC_MSG_CHECKING(which insult sets to include)
@@ -1050,6 +1066,7 @@ AC_ARG_ENABLE(root-sudo,
 		;;
     no)		AC_DEFINE(NO_ROOT_SUDO, 1, [Define if root should not be allowed to use sudo.])
 		AC_MSG_RESULT(no)
+		root_sudo=off
 		;;
     *)		AC_MSG_ERROR(["--enable-root-sudo does not take an argument."])
 		;;
@@ -1145,6 +1162,34 @@ cross_compiling="no"
 AC_PROG_CPP
 
 dnl
+dnl Libtool magic; enable shared libs and disable static libs
+dnl
+AC_CANONICAL_HOST
+AC_CANONICAL_SYSTEM
+AC_ENABLE_SHARED
+AC_DISABLE_STATIC
+AC_PROG_LIBTOOL
+
+dnl
+dnl Defer with_noexec until after libtool magic runs
+dnl
+if test "$enable_shared" = "no"; then
+    with_noexec=no
+else
+    eval _shrext="$shrext"
+fi
+AC_MSG_CHECKING(path to sudo_noexec.so)
+AC_ARG_WITH(noexec, [  --with-noexec           fully qualified pathname of sudo_noexec.so],
+[case $with_noexec in  
+    yes)	with_noexec="$libexecdir/sudo_noexec$_shrext"
+		;;
+    no)		;;
+    *)		;;
+esac], [with_noexec="$libexecdir/sudo_noexec$_shrext"])
+AC_MSG_RESULT($with_noexec)
+NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[[^/]]*:\1:'`"
+
+dnl
 dnl It is now safe to modify CFLAGS and CPPFLAGS
 dnl
 if test "$with_devel" = "yes" -a -n "$GCC"; then
@@ -1156,7 +1201,6 @@ dnl Find programs we use
 dnl
 AC_CHECK_PROG(UNAMEPROG, uname, uname, )
 AC_CHECK_PROG(TRPROG, tr, tr, )
-AC_CHECK_PROG(SEDPROG, sed, sed, )
 AC_CHECK_PROG(NROFFPROG, nroff, nroff, )
 if test -z "$NROFFPROG"; then
     MANTYPE="cat"
@@ -1167,7 +1211,6 @@ dnl
 dnl What kind of beastie are we being run on?
 dnl Barf if config.cache was generated on another host.
 dnl
-AC_CANONICAL_HOST
 if test -n "$sudo_cv_prev_host"; then
     if test "$sudo_cv_prev_host" != "$host"; then
 	AC_MSG_ERROR([config.cache was created on a different host; remove it and re-run configure.])
@@ -1251,59 +1294,55 @@ case "$host" in
 		test -n "$mansectsu" || mansectsu=1m
 		test -n "$mansectform" || mansectform=4
 		;;
-    *-*-hpux1[[0-9]]*)
-		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) AC_CHECK_LIB(sec, iscomsec, AC_DEFINE(HAVE_ISCOMSEC, 1, [Define if you have the `iscomsec' function. (HP-UX >= 10.x check for shadow enabled)])) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1])
-		    CHECKSHADOW="false"
-		fi
-
-		# AFS support needs -lBSD
-		if test "$with_AFS" = "yes"; then
-		    AFS_LIBS="-lc -lBSD"
-		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		;;
-    *-*-hpux9*)
-		AC_DEFINE(BROKEN_SYSLOG, 1, [Define if the `syslog' function returns a non-zero int to denote failure.])
-
-		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_FUNCS(getspwuid)
-		    AH_TEMPLATE([HAVE_GETSPWUID], [Define if you have the `getspwuid' function. (HP-UX <= 9.X shadow passwords)])
-		    CHECKSHADOW="false"
-		fi
-
-		# DCE support (requires ANSI C compiler)
-		if test "$with_DCE" = "yes"; then
-		    # order of libs in 9.X is important. -lc_r must be last
-		    SUDO_LIBS="${SUDO_LIBS} -ldce -lM -lc_r"
-		    LIBS="${LIBS} -ldce -lM -lc_r"
-		    CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
-		fi
-
-		# AFS support needs -lBSD
-		if test "$with_AFS" = "yes"; then
-		    AFS_LIBS="-lc -lBSD"
-		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		;;
     *-*-hpux*)
-		AC_DEFINE(BROKEN_SYSLOG)
-
-		# Not sure if setuid binaries are safe in < 9.x
-		if test -n "$GCC"; then
-		    SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
-		else
-		    SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
-		fi
-
 		# AFS support needs -lBSD
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
 		fi
 		test -n "$mansectsu" || mansectsu=1m
 		test -n "$mansectform" || mansectform=4
+
+		case "$host" in
+			*-*-hpux[1-8].*)
+			    AC_DEFINE(BROKEN_SYSLOG)
+
+			    # Not sure if setuid binaries are safe in < 9.x
+			    if test -n "$GCC"; then
+				SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
+			    else
+				SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
+			    fi
+			;;
+			*-*-hpux9.*)
+			    AC_DEFINE(BROKEN_SYSLOG, 1, [Define if the `syslog' function returns a non-zero int to denote failure.])
+
+			    if test "$CHECKSHADOW" = "true"; then
+				AC_CHECK_FUNCS(getspwuid)
+				AH_TEMPLATE([HAVE_GETSPWUID], [Define if you have the `getspwuid' function. (HP-UX <= 9.X shadow passwords)])
+				CHECKSHADOW="false"
+			    fi
+
+			    # DCE support (requires ANSI C compiler)
+			    if test "$with_DCE" = "yes"; then
+				# order of libs in 9.X is important. -lc_r must be last
+				SUDO_LIBS="${SUDO_LIBS} -ldce -lM -lc_r"
+				LIBS="${LIBS} -ldce -lM -lc_r"
+				CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
+			    fi
+			;;
+			*-*-hpux10.*)
+			    if test "$CHECKSHADOW" = "true"; then
+				AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) AC_CHECK_LIB(sec, iscomsec, AC_DEFINE(HAVE_ISCOMSEC, 1, [Define if you have the `iscomsec' function. (HP-UX >= 10.x check for shadow enabled)])) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1])
+				CHECKSHADOW="false"
+			    fi
+			;;
+			*)
+			if test "$CHECKSHADOW" = "true"; then
+			    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
+			    CHECKSHADOW="false"
+			fi
+			;;
+		esac
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
@@ -1649,7 +1688,7 @@ dnl
 dnl Function checks
 dnl
 AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf tzset \
-	       strftime setrlimit initgroups fstat)
+	       strftime setrlimit initgroups fstat fchown)
 if test -z "$SKIP_SETRESUID"; then
     AC_CHECK_FUNCS(setresuid, [SKIP_SETREUID=yes])
 fi
@@ -1672,7 +1711,7 @@ AC_CHECK_FUNCS(lsearch, , [AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.
 AC_CHECK_FUNCS(utime, [SUDO_FUNC_UTIME_POSIX], [AC_LIBOBJ(utime)])
 SUDO_FUNC_FNMATCH(AC_DEFINE(HAVE_FNMATCH, 1, [Define if you have the `fnmatch' function.]), AC_LIBOBJ(fnmatch))
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(strerror strcasecmp sigaction strlcpy strlcat)
+AC_REPLACE_FUNCS(strerror strcasecmp sigaction strlcpy strlcat closefrom)
 AC_CHECK_FUNCS(snprintf vsnprintf asprintf vasprintf, , [NEED_SNPRINTF=1])
 dnl
 dnl If NEED_SNPRINTF is set, add snprintf.c to LIBOBJS
@@ -1850,10 +1889,18 @@ if test -n "$with_kerb5" -a -z "$KRB5CONFIG"; then
 fi
 
 dnl
-dnl PAM libs
+dnl Extra PAM foolishness
 dnl
 if test "$with_pam" = "yes"; then
+    dnl
+    dnl Linux may need this
+    dnl
     AC_HAVE_LIBRARY(dl, SUDO_LIBS="${SUDO_LIBS} -lpam -ldl", SUDO_LIBS="${SUDO_LIBS} -lpam")
+    dnl
+    dnl Some PAM implementations (MacOS X for example) put the PAM headers
+    dnl in /usr/include/pam instead of /usr/include/security...
+    dnl
+    AC_CHECK_HEADERS([pam/pam_appl.h])
 fi
 
 dnl
@@ -2059,7 +2106,7 @@ dnl
 dnl Use passwd (and secureware) auth modules?
 dnl
 if test "$with_passwd" = "no"; then
-    AC_DEFINE(WITHOUT_PASSWD, 1. [Define to avoid using the passwd/shadow file for authentication.])
+    AC_DEFINE(WITHOUT_PASSWD, 1, [Define to avoid using the passwd/shadow file for authentication.])
     if test -z "$AUTH_OBJS"; then
 	AC_MSG_ERROR([no authentication methods defined.])
     fi
@@ -2090,6 +2137,27 @@ dnl
 dnl Set exec_prefix
 dnl
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
+
+dnl
+dnl Defer setting _PATH_SUDO_NOEXEC until after exec_prefix is set
+dnl XXX - this is gross!
+dnl
+if test "$with_noexec" != "no"; then 
+    PROGS="${PROGS} sudo_noexec.la"
+    INSTALL_NOEXEC="install-noexec"
+
+    oexec_prefix="$exec_prefix"
+    if test "$exec_prefix" = '$(prefix)'; then
+	if test "$prefix" = "NONE"; then
+	    exec_prefix="$ac_default_prefix"
+	else
+	    exec_prefix="$prefix"
+	fi
+    fi
+    eval noexec_file="$with_noexec"
+    AC_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
+    exec_prefix="$oexec_prefix"
+fi
 
 dnl
 dnl Substitute into the Makefile and man pages
@@ -2149,18 +2217,19 @@ AH_BOTTOM([/*
 # define stat_sudoers	lstat
 #endif
 
-/* Solaris doesn't use const qualifiers in PAM. */
-#ifdef sun
-# define PAM_CONST
-#else
-# define PAM_CONST	const
-#endif
-
 #ifdef USE_EXECV
-# define EXEC	execv
+# define EXECV	execv
 #else
-# define EXEC	execvp
+# define EXECV	execvp
 #endif /* USE_EXECV */
+
+/* Macros to set/clear/test flags. */
+#undef SET
+#define SET(t, f)	((t) |= (f))
+#undef CLR
+#define CLR(t, f)	((t) &= ~(f))
+#undef ISSET
+#define ISSET(t, f)     ((t) & (f))
 
 /* New ANSI-style OS defs for HP-UX and ConvexOS. */
 #if defined(hpux) && !defined(__hpux)

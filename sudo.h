@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996,1998-2003 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996,1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,6 +79,7 @@ struct sudo_user {
 #define FLAG_NO_USER		0x040
 #define FLAG_NO_HOST		0x080
 #define FLAG_NO_CHECK		0x100
+#define FLAG_NOEXEC		0x200
 
 /*
  * Boolean values
@@ -108,9 +109,11 @@ struct sudo_user {
 #define MODE_LISTDEFS            000200
 #define MODE_BACKGROUND          000400
 #define MODE_SHELL               001000
-#define MODE_IMPLIED_SHELL       002000
-#define MODE_RESET_HOME          004000
-#define MODE_PRESERVE_GROUPS     010000
+#define MODE_LOGIN_SHELL         002000
+#define MODE_IMPLIED_SHELL       004000
+#define MODE_RESET_HOME          010000
+#define MODE_PRESERVE_GROUPS     020000
+#define MODE_EDIT                040000
 
 /*
  * Used with set_perms()
@@ -121,7 +124,8 @@ struct sudo_user {
 #define PERM_FULL_USER           0x03
 #define PERM_SUDOERS             0x04
 #define PERM_RUNAS               0x05
-#define PERM_TIMESTAMP           0x06
+#define PERM_FULL_RUNAS          0x06
+#define PERM_TIMESTAMP           0x07
 
 /*
  * Shortcuts for sudo_user contents.
@@ -171,6 +175,9 @@ struct sudo_user {
  */
 #define YY_DECL int yylex __P((void))
 
+#ifndef HAVE_CLOSEFROM
+void closefrom		__P((int));
+#endif
 #ifndef HAVE_GETCWD
 char *getcwd		__P((char *, size_t size));
 #endif
@@ -227,7 +234,8 @@ int lock_file		__P((int, int));
 int touch		__P((char *, time_t));
 int user_is_exempt	__P((void));
 void set_fqdn		__P((void));
-char *sudo_getepw	__P((struct passwd *));
+int set_runaspw		__P((char *));
+char *sudo_getepw	__P((const struct passwd *));
 int pam_prep_user	__P((struct passwd *));
 void zero_bytes		__P((volatile VOID *, size_t));
 YY_DECL;

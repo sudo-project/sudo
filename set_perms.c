@@ -119,6 +119,11 @@ set_perms_posix(perm)
 				break;
 				
 	case PERM_RUNAS:
+				if (seteuid(runas_pw->pw_uid))
+				    fatal("unable to change to runas uid", 1);
+			      	break;
+
+	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == 0 */
 				runas_setup();
 				if (def_stay_setuid)
@@ -192,6 +197,11 @@ set_perms_suid(perm)
 			      	break;
 				
 	case PERM_RUNAS:
+				if (setresuid(-1, runas_pw->pw_uid, -1))
+				    fatal("unable to change to runas uid", 1);
+			      	break;
+
+	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == 0 */
 				runas_setup();
 				error = setresuid(def_stay_setuid ?
@@ -246,8 +256,10 @@ set_perms_suid(perm)
     switch (perm) {
 	case PERM_FULL_ROOT:
 	case PERM_ROOT:
-				if (setreuid(0, 0))
-				    fatal("setreuid(0, 0) failed, your operating system may have a broken setreuid() function\nTry running configure with --disable-setreuid", 0);
+				if (setreuid(-1, 0))
+				    fatal("setreuid(-1, 0) failed, your operating system may have a broken setreuid() function\nTry running configure with --disable-setreuid", 0);
+				if (setuid(0))
+				    fatal("setuid(0)", 1);
 			      	break;
 
 	case PERM_USER:
@@ -264,6 +276,11 @@ set_perms_suid(perm)
 			      	break;
 				
 	case PERM_RUNAS:
+				if (setreuid(-1, runas_pw->pw_uid))
+				    fatal("unable to change to runas uid", 1);
+			      	break;
+
+	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == 0 */
 				runas_setup();
 				error = setreuid(def_stay_setuid ?
@@ -333,6 +350,11 @@ set_perms_nosuid(perm)
 			      	break;
 				
 	case PERM_RUNAS:
+				if (seteuid(runas_pw->pw_uid))
+				    fatal("unable to change to runas uid", 1);
+			      	break;
+
+	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == 0 */
 				runas_setup();
 				if (setuid(runas_pw->pw_uid))
@@ -391,7 +413,7 @@ runas_setup()
 	     */
 	    flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
 	    if (!def_preserve_groups)
-		flags |= LOGIN_SETGROUP;
+		SET(flags, LOGIN_SETGROUP);
 	    else if (setgid(runas_pw->pw_gid))
 		perror("cannot set gid to runas gid");
 	    error = setusercontext(lc, runas_pw,

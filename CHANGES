@@ -1641,4 +1641,34 @@ Sudo 1.6.7p6 released.
 
 514) Fixed the --with-stow configure option
 
-515) Merged in LDAP support from Aaron Spangler.
+515) Added a "sudo_lecture" option that points to a file containing a custom
+     lecture.
+
+516) The username in a log entry is no longer truncated at 8 characters.
+
+517) A new tag, NOEXEC, will prevent a dynamically-linked program being run
+     by sudo from executing another program (think shell escapes).
+     Because this uses LD_PRELOAD it has no effect on static binaries.
+     Idea from Reznic Valery.
+
+518) TIS fwtk authentication now supports fwtk 2.0 and higher.
+
+519) Sudo will now try to stat the command to be run as the user
+     specified by the -u flag if the stat fails as root.  Fixes
+     an NFS issue.
+
+520) Added Stan Lee / Uncle Ben quote to the lecture (from RedHat).
+
+521) Added a -i option to simulate an initial login similar to "su -".
+     Originally based on a patch from David J. MacKenzie.
+
+522) Added a -e option to edit files the with uid of the invoking user.
+     This prevents the user from editing other files or running commands
+     as the target user.  If sudo is run as "sudoedit" the -e flag is implied.
+
+523) If sudo is used to run as root shell, further sudo commands will
+     be logged as run by the user specified by the SUDO_USER environment
+     variable.  In -e mode (sudoedit), SUDO_USER is used to determine
+     what user to run the editor when the real uid is 0.
+
+524) Merged in LDAP support from Aaron Spangler.

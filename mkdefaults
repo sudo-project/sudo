@@ -16,7 +16,7 @@ if ($#ARGV > 0 && $ARGV[0] eq "-o") {
     $header .= '.h';
     $cfile .= '.c';
 }
-die "usage: $0 input_file" unless $#ARGV == 0;
+die "usage: $0 input_file\n" unless $#ARGV == 0;
 
 $infile = $ARGV[0];
 if (!defined($header)) {
@@ -42,19 +42,18 @@ while(<IN>) {
 
     if (/^\S/) {
 	# Store previous record and begin new one
-	$records[$count++] = [$var, $type, $desc, $values] if defined($var);
+	$records[$count++] = [$var, $type, $desc, $values, $callback] if defined($var);
 
 	$var = $_;
 	$type = '';
 	$desc = undef;
 	$values = undef;
+	$callback = undef;
 	$field = 0;
     } else {
 	$field++;
 	s/^\s+//;
 	s/\s+$//;
-	die "$0: syntax error near line $.\n" if
-	    $field > 2 + ($type =~ /^T_TUPLE/);
 	if ($field == 1) {
 	    # type
 	    $type = $_;
@@ -69,15 +68,22 @@ while(<IN>) {
 		s/"/\\"/g;
 		$desc = "\"$_\"";
 	    }
-	} elsif ($field == 3) {
-	    $values = [ split ];
-	    foreach $v (@$values) {
-		push(@tuple_values, $v) unless grep(/^$v$/, @tuple_values);
+	} elsif ($field == 3 || $field == 4) {
+	    if (s/^\*//) {
+		$callback = $_;
+	    } else {
+		die "$0: syntax error near line $.\n" if $type !~ /^T_TUPLE/;
+		$values = [ split ];
+		foreach $v (@$values) {
+		    push(@tuple_values, $v) unless grep(/^$v$/, @tuple_values);
+		}
 	    }
+	} else {
+	    die "$0: syntax error near line $.\n";
 	}
     }
 }
-$records[$count++] = [$var, $type, $desc, $values] if defined($var);
+$records[$count++] = [$var, $type, $desc, $values, $callback] if defined($var);
 
 # Print out value arrays
 for ($i = 0; $i < $count; $i++) {
@@ -139,6 +145,9 @@ sub print_record {
     print CFILE "\t\"$rec->[0]\", $rec->[1],\n\t$rec->[2],\n";
     if (defined($rec->[3])) {
 	printf CFILE "\tdef_data_$rec->[0],\n";
+    } else {
+	printf CFILE "\tNULL,\n";
     }
+    printf CFILE "\t$rec->[4],\n" if defined($rec->[4]);
     print CFILE "    }, {\n";
 }

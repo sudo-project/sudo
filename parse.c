@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2003 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * This code is derived from software contributed by Chris Jepeway.
@@ -171,11 +171,11 @@ sudoers_lookup(pwflag)
     else
 	error = VALIDATE_NOT_OK | FLAG_NOPASS;
     if (pwcheck) {
-	error |= FLAG_NO_CHECK;
+	SET(error, FLAG_NO_CHECK);
     } else {
-	error |= FLAG_NO_HOST;
+	SET(error, FLAG_NO_HOST);
 	if (!top)
-	    error |= FLAG_NO_USER;
+	    SET(error, FLAG_NO_USER);
     }
 
     /*
@@ -210,25 +210,22 @@ sudoers_lookup(pwflag)
     } else {
 	while (top) {
 	    if (host_matches == TRUE) {
-		error &= ~FLAG_NO_HOST;
+		CLR(error, FLAG_NO_HOST);
 		if (runas_matches == TRUE) {
 		    if (cmnd_matches == TRUE) {
 		    	/*
 			 * User was granted access to cmnd on host.
-		    	 * If no passwd required return as such.
 			 */
-		    	if (no_passwd == TRUE)
-			    return(VALIDATE_OK | FLAG_NOPASS);
-		    	else
-			    return(VALIDATE_OK);
+			return(VALIDATE_OK |
+			    (no_passwd == TRUE ? FLAG_NOPASS : 0) |
+			    (no_execve == TRUE ? FLAG_NOEXEC : 0));
 		    } else if (cmnd_matches == FALSE) {
 			/*
 			 * User was explicitly denied access to cmnd on host.
 			 */
-			if (no_passwd == TRUE)
-			    return(VALIDATE_NOT_OK | FLAG_NOPASS);
-			else
-			    return(VALIDATE_NOT_OK);
+			return(VALIDATE_NOT_OK |
+			    (no_passwd == TRUE ? FLAG_NOPASS : 0) |
+			    (no_execve == TRUE ? FLAG_NOEXEC : 0));
 		    }
 		}
 	    }
@@ -237,7 +234,7 @@ sudoers_lookup(pwflag)
     }
 
     /*
-     * The user was not explicitly granted nor denied access.
+     * The user was neither explicitly granted nor denied access.
      */
     if (nopass == -1)
 	nopass = 0;
@@ -255,7 +252,7 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
     char *path;
     char *sudoers_args;
 {
-    int plen;
+    int plen, error;
     static struct stat cst;
     struct stat pst;
     DIR *dirp;
@@ -263,16 +260,41 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
     char buf[MAXPATHLEN];
     static char *cmnd_base;
 
-    /* Don't bother with pseudo commands like "validate" */
-    if (strchr(cmnd, '/') == NULL)
-	return(FALSE);
+    /* Check for pseudo-commands */
+    if (*cmnd != '/') {
+	/*
+	 * Return true if cmnd is "sudoedit" AND
+	 *  a) there are no args in sudoers OR
+	 *  b) there are no args on command line and none req by sudoers OR
+	 *  c) there are args in sudoers and on command line and they match
+	 */
+	if (strcmp(cmnd, "sudoedit") != 0)
+	    return(FALSE);
+	if (!sudoers_args ||
+	    (!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
+	    (sudoers_args &&
+	     fnmatch(sudoers_args, cmnd_args ? cmnd_args : "", 0) == 0)) {
+	    if (safe_cmnd)
+		free(safe_cmnd);
+	    safe_cmnd = estrdup(path);
+	    return(TRUE);
+	} else
+	    return(FALSE);
+    }
 
     plen = strlen(path);
 
     /* Only need to stat cmnd once since it never changes */
     if (cst.st_dev == 0) {
-	if (stat(cmnd, &cst) == -1)
-	    return(FALSE);
+	if ((error = stat(cmnd, &cst))) {
+	    if (runas_pw->pw_uid != 0) {
+		set_perms(PERM_RUNAS);
+		error = stat(cmnd, &cst);
+		set_perms(PERM_ROOT);
+	    }
+	    if (error)
+		return(FALSE);
+	}
 	if ((cmnd_base = strrchr(cmnd, '/')) == NULL)
 	    cmnd_base = cmnd;
 	else
@@ -295,8 +317,8 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 	    return(FALSE);
 	if (!sudoers_args ||
 	    (!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
-	    (sudoers_args && fnmatch(sudoers_args, cmnd_args ? cmnd_args : "",
-	    0) == 0)) {
+	    (sudoers_args &&
+	     fnmatch(sudoers_args, cmnd_args ? cmnd_args : "", 0) == 0)) {
 	    if (safe_cmnd)
 		free(safe_cmnd);
 	    safe_cmnd = estrdup(user_cmnd);

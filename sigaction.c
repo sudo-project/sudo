@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2001 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2001 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,88 +34,126 @@
  * Sponsored in part by the Defense Advanced Research Projects
  * Agency (DARPA) and Air Force Research Laboratory, Air Force
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
- *
- * $Sudo$
  */
 
-#ifndef _SUDO_DEFAULTS_H
-#define _SUDO_DEFAULTS_H
+#include <signal.h>
+#include <errno.h>
 
-#include <def_data.h>
+#include <compat.h>
 
-struct list_member {
-    char *value;
-    struct list_member *next;
-};
+#ifndef lint
+static const char rcsid[] = "$Sudo$";
+#endif /* lint */
 
-struct def_values {
-    char *sval;		/* string value */
-    int ival;		/* actually an enum */
-};
+int
+sigaction(signo, sa, osa)
+    int signo;
+    const sigaction_t *sa;
+    sigaction_t *osa;
+{
+    sigaction_t nsa;
+    int error;
 
-enum list_ops {
-    add,
-    delete,
-    freeall
-};
+    /* We must reverse SV_INTERRUPT since it is the opposite of SA_RESTART */
+    if (sa) {
+	nsa = *sa;
+	nsa.sa_flags ^= SV_INTERRUPT;
+	sa = &nsa;
+    }
 
-/*
- * Structure describing compile-time and run-time options.
- */
-struct sudo_defs_types {
-    char *name;
-    int type;
-    char *desc;
-    struct def_values *values;
-    int (*callback) __P((char *));
-    union {
-	int flag;
-	int ival;
-	enum def_tupple tuple;
-	char *str;
-	mode_t mode;
-	struct list_member *list;
-    } sd_un;
-};
+    error = sigvec(signo, sa, osa);
+    if (!error && osa)
+	osa->sa_flags ^= SV_INTERRUPT;		/* flip SV_INTERRUPT as above */
 
-/*
- * Four types of defaults: strings, integers, and flags.
- * Also, T_INT or T_STR may be ANDed with T_BOOL to indicate that
- * a value is not required.  Flags are boolean by nature...
- */
-#undef T_INT
-#define T_INT		0x001
-#undef T_UINT
-#define T_UINT		0x002
-#undef T_STR
-#define T_STR		0x003
-#undef T_FLAG
-#define T_FLAG		0x004
-#undef T_MODE
-#define T_MODE		0x005
-#undef T_LIST
-#define T_LIST		0x006
-#undef T_LOGFAC
-#define T_LOGFAC	0x007
-#undef T_LOGPRI
-#define T_LOGPRI	0x008
-#undef T_TUPLE
-#define T_TUPLE		0x009
-#undef T_MASK
-#define T_MASK		0x0FF
-#undef T_BOOL
-#define T_BOOL		0x100
-#undef T_PATH
-#define T_PATH		0x200
+    return(error);
+}
 
-/*
- * Prototypes
- */
-void dump_default	__P((void));
-int set_default		__P((char *, char *, int));
-void init_defaults	__P((void));
-void list_options	__P((void));
+int
+sigemptyset(set)
+    sigset_t *set;
+{
 
-extern struct sudo_defs_types sudo_defs_table[];
+    *set = 0;
+    return(0);
+}
 
-#endif /* _SUDO_DEFAULTS_H */
+int
+sigfillset(set)
+    sigset_t *set;
+{
+
+    *set = ~0;;
+    return(0);
+}
+
+int
+sigaddset(set, signo)
+    sigset_t *set;
+    int signo;
+{
+
+    if (signo <= 0 || signo >= NSIG) {
+	errno = EINVAL;
+	return(-1);
+    }
+
+    SET(*set, sigmask(signo));
+    return(0);
+}
+
+int
+sigdelset(set, signo)
+    sigset_t *set;
+    int signo;
+{
+
+    if (signo <= 0 || signo >= NSIG) {
+	errno = EINVAL;
+	return(-1);
+    }
+
+    CLR(*set, sigmask(signo));
+    return(0);
+}
+
+int
+sigismember(set, signo)
+    sigset_t *set;
+    int signo;
+{
+
+    return(ISSET(*set, sigmask(signo)));
+}
+
+int
+sigprocmask(how, set, oset)
+    int how;
+    const sigset_t *set;
+    sigset_t *oset;
+{
+    int mask;
+
+    /* If 'set' is NULL the user just wants the current signal mask. */
+    if (set == 0)
+	mask = sigblock(0);
+    else
+	switch (how) {
+	    case SIG_BLOCK:
+		mask = sigblock(*set);
+		break;
+	    case SIG_UNBLOCK:
+		mask = sigsetmask(~*set);
+		break;
+	    case SIG_SETMASK:
+		mask = sigsetmask(*set);
+		break;
+	    default:
+		return(-1);
+	}
+
+    if (mask == -1)
+	return(-1);
+    if (oset)
+	*oset = mask;
+    return(0);
+}

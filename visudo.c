@@ -246,13 +246,13 @@ main(argc, argv)
 	(void) close(stmp_fd);
 
     /*
-     * Check EDITOR and VISUAL environment variables to see which editor
+     * Check VISUAL and EDITOR environment variables to see which editor
      * the user wants to use (we may not end up using it though).
      * If the path is not fully-qualified, make it so and check that
      * the specified executable actually exists.
      */
-    if ((UserEditor = getenv("EDITOR")) == NULL || *UserEditor == '\0')
-	UserEditor = getenv("VISUAL");
+    if ((UserEditor = getenv("VISUAL")) == NULL || *UserEditor == '\0')
+	UserEditor = getenv("EDITOR");
     if (UserEditor && *UserEditor == '\0')
 	UserEditor = NULL;
     else if (UserEditor) {
@@ -534,6 +534,13 @@ set_fqdn()
 }
 
 int
+set_runaspw(user)
+    char *user;
+{
+    return(TRUE);
+}
+
+int
 user_is_exempt()
 {
     return(TRUE);
@@ -631,8 +638,9 @@ run_command(path, argv)
 
     (void) sigprocmask(SIG_SETMASK, &oset, NULL);
 
-    /* XXX - should use WEXITSTATUS() */
-    return(pid == -1 ? -1 : (status >> 8));
+    if (pid == -1 || !WIFEXITED(status))
+	return(-1);
+    return(WEXITSTATUS(status));
 }
 
 static int

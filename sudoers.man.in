@@ -1,4 +1,4 @@
-.\" Copyright (c) 1994-1996,1998-2003 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 1994-1996,1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
 .\" All rights reserved.
 .\" 
 .\" Redistribution and use in source and binary forms, with or without
@@ -167,7 +167,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "December 30, 2003" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "February  1, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -333,9 +333,10 @@ to be useful.
 \&                 filename '""'
 .Ve
 .PP
-.Vb 3
+.Vb 4
 \& Cmnd ::= '!'* commandname |
 \&          '!'* directory |
+\&          '!'* "sudoedit" |
 \&          '!'* Cmnd_Alias
 .Ve
 .PP
@@ -354,7 +355,10 @@ If a \f(CW\*(C`Cmnd\*(C'\fR has associated command line arguments, then the argu
 in the \f(CW\*(C`Cmnd\*(C'\fR must match exactly those given by the user on the command line
 (or match the wildcards if there are any).  Note that the following
 characters must be escaped with a '\e' if they are used in command
-arguments: ',', ':', '=', '\e'.
+arguments: ',', ':', '=', '\e'.  The special command \f(CW"sudoedit"\fR
+is used to permit a user to run \fBsudo\fR with the \fB\-e\fR flag (or
+as \fBsudoedit\fR).  It may take command line arguments just as
+a normal command does.
 .Sh "Defaults"
 .IX Subsection "Defaults"
 Certain configuration options may be changed from their default
@@ -365,9 +369,9 @@ multiple entries match, they are applied in order.  Where there are
 conflicting values, the last value on a matching line takes effect.
 .PP
 .Vb 4
-\& Default_Type ::= 'Defaults' ||
-\&                  'Defaults' '@' Host ||
-\&                  'Defaults' ':' User ||
+\& Default_Type ::= 'Defaults' |
+\&                  'Defaults' '@' Host |
+\&                  'Defaults' ':' User |
 \&                  'Defaults' '>' RunasUser
 .Ve
 .PP
@@ -375,11 +379,16 @@ conflicting values, the last value on a matching line takes effect.
 \& Default_Entry ::= Default_Type Parameter_List
 .Ve
 .PP
+.Vb 2
+\& Parameter_List ::= Parameter |
+\&                    Parameter ',' Parameter_List
+.Ve
+.PP
 .Vb 4
-\& Parameter ::= Parameter '=' Value ||
-\&               Parameter '+=' Value ||
-\&               Parameter '-=' Value ||
-\&               '!'* Parameter ||
+\& Parameter ::= Parameter '=' Value |
+\&               Parameter '+=' Value |
+\&               Parameter '-=' Value |
+\&               '!'* Parameter
 .Ve
 .PP
 Parameters may be \fBflags\fR, \fBinteger\fR values, \fBstrings\fR, or \fBlists\fR.
@@ -410,7 +419,10 @@ by default.
 .IX Item "ignore_dot"
 If set, \fBsudo\fR will ignore '.' or '' (current dir) in the \f(CW\*(C`PATH\*(C'\fR
 environment variable; the \f(CW\*(C`PATH\*(C'\fR itself is not modified.  This
-flag is \fI@ignore_dot@\fR by default.
+flag is \fI@ignore_dot@\fR by default.  Currently, while it is possible
+to set \fIignore_dot\fR in \fIsudoers\fR, its value is not used.  This option
+should be considered read-only (it will be fixed in a future version
+of \fBsudo\fR).
 .IP "mail_always" 12
 .IX Item "mail_always"
 Send mail to the \fImailto\fR user every time a users runs \fBsudo\fR.
@@ -452,8 +464,11 @@ This flag is \fIon\fR by default.
 .IX Item "root_sudo"
 If set, root is allowed to run \fBsudo\fR too.  Disabling this prevents users
 from \*(L"chaining\*(R" \fBsudo\fR commands to get a root shell by doing something
-like \f(CW"sudo sudo /bin/sh"\fR.
-This flag is \fIon\fR by default.
+like \f(CW"sudo sudo /bin/sh"\fR.  Note, however, that turning off \fIroot_sudo\fR
+will also prevent root and from running \fBsudoedit\fR.
+Disabling \fIroot_sudo\fR provides no real additional security; it
+exists purely for historical reasons.
+This flag is \fI@root_sudo@\fR by default.
 .IP "log_host" 12
 .IX Item "log_host"
 If set, the hostname will be logged in the (non\-syslog) \fBsudo\fR log file.
@@ -541,8 +556,8 @@ of the invoking user.  This flag is \fIoff\fR by default.
 .IP "runaspw" 12
 .IX Item "runaspw"
 If set, \fBsudo\fR will prompt for the password of the user defined by the
-\&\fIrunas_default\fR option (defaults to \f(CW\*(C`root\*(C'\fR) instead of the password
-of the invoking user.  This flag is \fIoff\fR by default.
+\&\fIrunas_default\fR option (defaults to \f(CW\*(C`@runas_default@\*(C'\fR) instead of the
+password of the invoking user.  This flag is \fIoff\fR by default.
 .IP "targetpw" 12
 .IX Item "targetpw"
 If set, \fBsudo\fR will prompt for the password of the user specified by
@@ -583,6 +598,12 @@ Other variables may be preserved with the \fIenv_keep\fR option.
 If set, \fBsudo\fR will apply the defaults specified for the target user's
 login class if one exists.  Only available if \fBsudo\fR is configured with
 the \-\-with\-logincap option.  This flag is \fIoff\fR by default.
+.IP "noexec" 12
+.IX Item "noexec"
+If set, all commands run via sudo will behave as if the \f(CW\*(C`NOEXEC\*(C'\fR
+tag has been set, unless overridden by a \f(CW\*(C`EXEC\*(C'\fR tag.  See the
+description of \fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR below as well as the \fB\s-1PREVENTING\s0 \s-1SHELL\s0
+\&\s-1ESCAPES\s0\fR section at the end of this manual.  This flag is \fIoff\fR by default.
 .PP
 \&\fBIntegers\fR:
 .IP "passwd_tries" 12
@@ -685,6 +706,12 @@ A colon (':') separated list of editors allowed to be used with
 \&\s-1USER\s0 environment variable if possible, or the first editor in the
 list that exists and is executable.  The default is the path to vi
 on your system.
+.IP "noexec_file" 12
+.IX Item "noexec_file"
+Path to a shared library containing dummy versions of the \fIexecv()\fR,
+\&\fIexecve()\fR and \fIfexecve()\fR library functions that just return an error.
+This is used to implement the \fInoexec\fR functionality on systems that
+support \f(CW\*(C`LD_PRELOAD\*(C'\fR or its equivalent.  Defaults to \fI@noexec_file@\fR.
 .PP
 \&\fBStrings that can be used in a boolean context\fR:
 .IP "lecture" 12
@@ -706,6 +733,10 @@ Always lecture the user.
 .Sp
 The default value is \fI@lecture@\fR.
 .RE
+.IP "lecture_file" 12
+.IX Item "lecture_file"
+Path to a file containing an alternate sudo lecture that will
+be used in place of the standard lecture if the named file exists.
 .IP "logfile" 12
 .IX Item "logfile"
 Path to the \fBsudo\fR log file (not the syslog log file).  Setting a path
@@ -831,11 +862,15 @@ syslog priorities are supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\
 .Ve
 .PP
 .Vb 1
-\& Cmnd_Spec ::= Runas_Spec? ('NOPASSWD:' | 'PASSWD:')? Cmnd
+\& Cmnd_Spec ::= Runas_Spec? Tag_Spec* Cmnd
 .Ve
 .PP
 .Vb 1
 \& Runas_Spec ::= '(' Runas_List ')'
+.Ve
+.PP
+.Vb 1
+\& Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:')
 .Ve
 .PP
 A \fBuser specification\fR determines which commands a user may run
@@ -871,8 +906,18 @@ entry.  If we modify the entry like so:
 .PP
 Then user \fBdgb\fR is now allowed to run \fI/bin/ls\fR as \fBoperator\fR,
 but  \fI/bin/kill\fR and \fI/usr/bin/lprm\fR as \fBroot\fR.
-.Sh "\s-1NOPASSWD\s0 and \s-1PASSWD\s0"
+.Sh "Tag_Spec"
+.IX Subsection "Tag_Spec"
+A command may have zero or more tags associated with it.  There are
+four possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR, \f(CW\*(C`EXEC\*(C'\fR.
+Once a tag is set on a \f(CW\*(C`Cmnd\*(C'\fR, subsequent \f(CW\*(C`Cmnd\*(C'\fRs in the
+\&\f(CW\*(C`Cmnd_Spec_List\*(C'\fR, inherit the tag unless it is overridden by the
+opposite tag (ie: \f(CW\*(C`PASSWD\*(C'\fR overrides \f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`EXEC\*(C'\fR
+overrides \f(CW\*(C`NOEXEC\*(C'\fR).
+.PP
+\fI\s-1NOPASSWD\s0 and \s-1PASSWD\s0\fR
 .IX Subsection "NOPASSWD and PASSWD"
+.PP
 By default, \fBsudo\fR requires that a user authenticate him or herself
 before running a command.  This behavior can be modified via the
 \&\f(CW\*(C`NOPASSWD\*(C'\fR tag.  Like a \f(CW\*(C`Runas_Spec\*(C'\fR, the \f(CW\*(C`NOPASSWD\*(C'\fR tag sets
@@ -902,6 +947,23 @@ for a user on the current host, he or she will be able to run
 \&\f(CW\*(C`sudo \-v\*(C'\fR without a password if the \f(CW\*(C`NOPASSWD\*(C'\fR tag is present
 for all a user's entries that pertain to the current host.
 This behavior may be overridden via the verifypw and listpw options.
+.PP
+\fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR
+.IX Subsection "NOEXEC and EXEC"
+.PP
+If sudo has been compiled with \fInoexec\fR support and the underlying
+operating system support it, the \f(CW\*(C`NOEXEC\*(C'\fR tag can be used to prevent
+a dynamically-linked executable from running further commands itself.
+.PP
+In the following example, user \fBaaron\fR may run \fI/usr/bin/more\fR
+and \fI/usr/bin/vi\fR but shell escapes will be disabled.
+.PP
+.Vb 1
+\& aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+.Ve
+.PP
+See the \fB\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\fR section below for more details
+on how \fInoexec\fR works and whether or not it will work on your system.
 .Sh "Wildcards (aka meta characters):"
 .IX Subsection "Wildcards (aka meta characters):"
 \&\fBsudo\fR allows shell-style \fIwildcards\fR to be used in pathnames
@@ -939,7 +1001,7 @@ wildcards.  This is to make a path like:
 \&    /usr/bin/*
 .Ve
 .PP
-match \f(CW\*(C`/usr/bin/who\*(C'\fR but not \f(CW\*(C`/usr/bin/X11/xterm\*(C'\fR.
+match \fI/usr/bin/who\fR but not \fI/usr/bin/X11/xterm\fR.
 .Sh "Exceptions to wildcard rules:"
 .IX Subsection "Exceptions to wildcard rules:"
 The following exceptions apply to the above rules:
@@ -1211,6 +1273,59 @@ Doesn't really prevent \fBbill\fR from running the commands listed in
 different name, or use a shell escape from an editor or other
 program.  Therefore, these kind of restrictions should be considered
 advisory at best (and reinforced by policy).
+.SH "PREVENTING SHELL ESCAPES"
+.IX Header "PREVENTING SHELL ESCAPES"
+Once \fBsudo\fR executes a program, that program is free to do whatever
+it pleases, including run other programs.  This can be a security
+issue since it is not uncommon for a program to allow shell escapes,
+which lets a user bypass \fBsudo\fR's restrictions.  Common programs
+that permit shell escapes include shells (obviously), editors,
+paginators, mail and terminal programs.
+.PP
+Many systems that support shared libraries have the ability to
+override default library functions by pointing an environment
+variable (usually \f(CW\*(C`LD_PRELOAD\*(C'\fR) to an alternate shared library.
+On such systems, \fBsudo\fR's \fInoexec\fR functionality can be used to
+prevent a program run by sudo from executing any other programs.
+Note, however, that this applies only to native dynamically-linked
+executables.  Statically-linked executables and foreign executables
+running under binary emulation are not affected.
+.PP
+To tell whether or not \fBsudo\fR supports \fInoexec\fR, you can run
+the following as root:
+.PP
+.Vb 1
+\&    # sudo -V | grep "dummy exec"
+.Ve
+.PP
+If the resulting output contains a line that begins with:
+.PP
+.Vb 1
+\&    File containing dummy exec functions:
+.Ve
+.PP
+then \fBsudo\fR may be able to replace the exec family of functions
+in the standard library with its own that simply return an error.
+Unfortunately, there is no foolproof way to know whether or not
+\&\fInoexec\fR will work at compile\-time.  \fINoexec\fR should work on
+SunOS, Solaris, *BSD, Linux, \s-1IRIX\s0, Tru64 \s-1UNIX\s0, MacOS X, and HP-UX
+11.x.  It is known \fBnot\fR to work on \s-1AIX\s0 and UnixWare.  \fINoexec\fR
+is expected to work on most operating systems that support the
+\&\f(CW\*(C`LD_PRELOAD\*(C'\fR environment variable.  Check your operating system's
+manual pages for the dynamic linker (usually ld.so, ld.so.1, dyld,
+dld.sl, rld, or loader) to see if \f(CW\*(C`LD_PRELOAD\*(C'\fR is supported.
+.PP
+To enable \fInoexec\fR for a command, use the \f(CW\*(C`NOEXEC\*(C'\fR tag as documented
+in the User Specification section above.  If you are unsure whether
+or not your system is capable of supporting \fInoexec\fR you can always
+just try it out and see if it works.
+.PP
+Note that disabling shell escapes is not a panacea.  Programs running
+as root are still capable of many potentially hazardous operations
+(such as chaning or overwriting files) that could lead to unintended
+privilege escalation.  In the specific case of an editor, a safer
+approach is to give the user permission to run the \fBsudoedit\fR
+program.
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 The \fIsudoers\fR file should \fBalways\fR be edited by the \fBvisudo\fR

@@ -65,6 +65,9 @@
 /* Define if you use BSD authentication. */
 #undef HAVE_BSD_AUTH_H
 
+/* Define to 1 if you have the `closefrom' function. */
+#undef HAVE_CLOSEFROM
+
 /* Define if you use OSF DCE. */
 #undef HAVE_DCE
 
@@ -77,6 +80,9 @@
 
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
+
+/* Define to 1 if you have the `fchown' function. */
+#undef HAVE_FCHOWN
 
 /* Define to 1 if you have the `flock' function. */
 #undef HAVE_FLOCK
@@ -203,6 +209,9 @@
 
 /* Define if you use PAM. */
 #undef HAVE_PAM
+
+/* Define to 1 if you have the <pam/pam_appl.h> header file. */
+#undef HAVE_PAM_PAM_APPL_H
 
 /* Define to 1 if you have the <paths.h> header file. */
 #undef HAVE_PATHS_H
@@ -401,6 +410,9 @@
 /* The passwd prompt timeout (in minutes). */
 #undef PASSWORD_TIMEOUT
 
+/* Define to replace politically incorrect insults with less offensive ones. */
+#undef PC_INSULTS
+
 /* The syslog priority sudo will use for unsuccessful attempts/errors. */
 #undef PRI_FAILURE
 
@@ -540,18 +552,19 @@
 # define stat_sudoers	lstat
 #endif
 
-/* Solaris doesn't use const qualifiers in PAM. */
-#ifdef sun
-# define PAM_CONST
-#else
-# define PAM_CONST	const
-#endif
-
 #ifdef USE_EXECV
-# define EXEC	execv
+# define EXECV	execv
 #else
-# define EXEC	execvp
+# define EXECV	execvp
 #endif /* USE_EXECV */
+
+/* Macros to set/clear/test flags. */
+#undef SET
+#define SET(t, f)	((t) |= (f))
+#undef CLR
+#define CLR(t, f)	((t) &= ~(f))
+#undef ISSET
+#define ISSET(t, f)     ((t) & (f))
 
 /* New ANSI-style OS defs for HP-UX and ConvexOS. */
 #if defined(hpux) && !defined(__hpux)

@@ -44,6 +44,9 @@ lecture
 	T_TUPLE|T_BOOL
 	"Lecture user the first time they run sudo"
 	never once always
+lecture_file
+	T_STR|T_PATH|T_BOOL
+	"File containing the sudo lecture: %s"
 authenticate
 	T_FLAG
 	"Require users to authenticate by default"
@@ -152,9 +155,24 @@ passprompt
 runas_default
 	T_STR
 	"Default user to run commands as: %s"
+	*set_runaspw
 editor
 	T_STR|T_PATH
 	"Path to the editor for use by visudo: %s"
+listpw
+	T_TUPLE|T_BOOL
+	"When to require a password for 'list' pseudocommand: %s"
+	never any all always
+verifypw
+	T_TUPLE|T_BOOL
+	"When to require a password for 'verify' pseudocommand: %s"
+	never any all always
+noexec
+	T_FLAG
+	"Preload the dummy exec functions contained in 'noexec_file'"
+noexec_file
+	T_STR|T_PATH
+	"File containing dummy exec functions: %s"
 env_check
 	T_LIST|T_BOOL
 	"Environment variables to check for sanity:"
@@ -164,14 +182,6 @@ env_delete
 env_keep
 	T_LIST|T_BOOL
 	"Environment variables to preserve:"
-listpw
-	T_TUPLE|T_BOOL
-	"When to require a password for 'list' pseudocommand: %s"
-	never any all always
-verifypw
-	T_TUPLE|T_BOOL
-	"When to require a password for 'verify' pseudocommand: %s"
-	never any all always
 ignore_local_sudoers
 	T_FLAG
 	"If LDAP directory is up, do we ignore local sudoers file: %s"

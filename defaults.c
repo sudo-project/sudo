@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2001, 2003 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2001, 2003-2004 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,7 @@
 # ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <pwd.h>
 #ifdef HAVE_ERR_H
 # include <err.h>
 #else
@@ -278,13 +279,13 @@ set_default(var, val, op)
 	case T_STR:
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
-		if (!(cur->type & T_BOOL) || op != FALSE) {
+		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warnx("no value specified for `%s' on line %d",
 			var, sudolineno);
 		    return(FALSE);
 		}
 	    }
-	    if ((cur->type & T_PATH) && val && *val != '/') {
+	    if (ISSET(cur->type, T_PATH) && val && *val != '/') {
 		warnx("values for `%s' must start with a '/'", var);
 		return(FALSE);
 	    }
@@ -296,7 +297,7 @@ set_default(var, val, op)
 	case T_INT:
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
-		if (!(cur->type & T_BOOL) || op != FALSE) {
+		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warnx("no value specified for `%s' on line %d",
 			var, sudolineno);
 		    return(FALSE);
@@ -310,7 +311,7 @@ set_default(var, val, op)
 	case T_UINT:
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
-		if (!(cur->type & T_BOOL) || op != FALSE) {
+		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warnx("no value specified for `%s' on line %d",
 			var, sudolineno);
 		    return(FALSE);
@@ -324,7 +325,7 @@ set_default(var, val, op)
 	case T_MODE:
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
-		if (!(cur->type & T_BOOL) || op != FALSE) {
+		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warnx("no value specified for `%s' on line %d",
 			var, sudolineno);
 		    return(FALSE);
@@ -350,7 +351,7 @@ set_default(var, val, op)
 	case T_LIST:
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
-		if (!(cur->type & T_BOOL) || op != FALSE) {
+		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warnx("no value specified for `%s' on line %d",
 			var, sudolineno);
 		    return(FALSE);
@@ -364,7 +365,7 @@ set_default(var, val, op)
 	case T_TUPLE:
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
-		if (!(cur->type & T_BOOL) || op != FALSE) {
+		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warnx("no value specified for `%s' on line %d",
 			var, sudolineno);
 		    return(FALSE);
@@ -502,6 +503,9 @@ init_defaults()
     def_exempt_group = estrdup(EXEMPTGROUP);
 #endif
     def_editor = estrdup(EDITOR);
+#ifdef _PATH_SUDO_NOEXEC
+    def_noexec_file = estrdup(_PATH_SUDO_NOEXEC);
+#endif
 
     /* Finally do the lists (currently just environment tables). */
     init_envtables();
@@ -535,6 +539,8 @@ store_int(val, def, op)
 	/* XXX - should check against INT_MAX */
 	def->sd_un.ival = (unsigned int)l;
     }
+    if (def->callback)
+	return(def->callback(val));
     return(TRUE);
 }
 
@@ -556,6 +562,8 @@ store_uint(val, def, op)
 	/* XXX - should check against INT_MAX */
 	def->sd_un.ival = (unsigned int)l;
     }
+    if (def->callback)
+	return(def->callback(val));
     return(TRUE);
 }
 
@@ -586,6 +594,8 @@ store_tuple(val, def, op)
 	if (v == NULL)
 	    return(FALSE);
     }
+    if (def->callback)
+	return(def->callback(val));
     return(TRUE);
 }
 
@@ -602,6 +612,8 @@ store_str(val, def, op)
 	def->sd_un.str = NULL;
     else
 	def->sd_un.str = estrdup(val);
+    if (def->callback)
+	return(def->callback(val));
     return(TRUE);
 }
 
@@ -726,6 +738,8 @@ store_mode(val, def, op)
 	    return(FALSE);
 	def->sd_un.mode = (mode_t)l;
     }
+    if (def->callback)
+	return(def->callback(val));
     return(TRUE);
 }
 

@@ -167,7 +167,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "December 30, 2003" "1.6.8" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "February  3, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 visudo \- edit the sudoers file
 .SH "SYNOPSIS"
@@ -185,13 +185,13 @@ There is a hard-coded list of editors that \fBvisudo\fR will use set
 at compile-time that may be overridden via the \fIeditor\fR \fIsudoers\fR
 \&\f(CW\*(C`Default\*(C'\fR variable.  This list defaults to the path to \fIvi\fR\|(1) on
 your system, as determined by the \fIconfigure\fR script.  Normally,
-\&\fBvisudo\fR does not honor the \f(CW\*(C`EDITOR\*(C'\fR or \f(CW\*(C`VISUAL\*(C'\fR environment
+\&\fBvisudo\fR does not honor the \f(CW\*(C`VISUAL\*(C'\fR or \f(CW\*(C`EDITOR\*(C'\fR environment
 variables unless they contain an editor in the aforementioned editors
 list.  However, if \fBvisudo\fR is configured with the \fI\-\-with\-enveditor\fR
 flag or the \fIenveditor\fR \f(CW\*(C`Default\*(C'\fR variable is set in \fIsudoers\fR,
-\&\fBvisudo\fR will use any the editor defines by \f(CW\*(C`EDITOR\*(C'\fR or \f(CW\*(C`VISUAL\*(C'\fR.
+\&\fBvisudo\fR will use any the editor defines by \f(CW\*(C`VISUAL\*(C'\fR or \f(CW\*(C`EDITOR\*(C'\fR.
 Note that this can be a security hole since it allows the user to
-execute any program they wish simply by setting \f(CW\*(C`EDITOR\*(C'\fR or \f(CW\*(C`VISUAL\*(C'\fR.
+execute any program they wish simply by setting \f(CW\*(C`VISUAL\*(C'\fR or \f(CW\*(C`EDITOR\*(C'\fR.
 .PP
 \&\fBvisudo\fR parses the \fIsudoers\fR file after the edit and will
 not save the changes if there is a syntax error.  Upon finding
@@ -264,8 +264,8 @@ The following environment variables are used only if \fBvisudo\fR
 was configured with the \fI\-\-with\-env\-editor\fR option:
 .PP
 .Vb 2
-\& EDITOR                 Invoked by visudo as the editor to use
-\& VISUAL                 Used by visudo if EDITOR is not set
+\& VISUAL                 Invoked by visudo as the editor to use
+\& EDITOR                 Used by visudo if VISUAL is not set
 .Ve
 .SH "FILES"
 .IX Header "FILES"

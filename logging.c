@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996,1998-2003 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996,1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -171,9 +171,9 @@ do_syslog(pri, msg)
 	    *tmp = '\0';
 
 	    if (count == 0)
-		mysyslog(pri, "%8.8s : %s", user_name, p);
+		mysyslog(pri, "%8s : %s", user_name, p);
 	    else
-		mysyslog(pri, "%8.8s : (command continued) %s", user_name, p);
+		mysyslog(pri, "%8s : (command continued) %s", user_name, p);
 
 	    *tmp = save;			/* restore saved character */
 
@@ -182,9 +182,9 @@ do_syslog(pri, msg)
 		;
 	} else {
 	    if (count == 0)
-		mysyslog(pri, "%8.8s : %s", user_name, p);
+		mysyslog(pri, "%8s : %s", user_name, p);
 	    else
-		mysyslog(pri, "%8.8s : (command continued) %s", user_name, p);
+		mysyslog(pri, "%8s : (command continued) %s", user_name, p);
 	}
     }
 }
@@ -298,19 +298,19 @@ log_auth(status, inform_user)
     char *logline;
     int pri;
 
-    if (status & VALIDATE_OK)
+    if (ISSET(status, VALIDATE_OK))
 	pri = def_syslog_goodpri;
     else
 	pri = def_syslog_badpri;
 
     /* Set error message, if any. */
-    if (status & VALIDATE_OK)
+    if (ISSET(status, VALIDATE_OK))
 	message = "";
-    else if (status & FLAG_NO_USER)
+    else if (ISSET(status, FLAG_NO_USER))
 	message = "user NOT in sudoers ; ";
-    else if (status & FLAG_NO_HOST)
+    else if (ISSET(status, FLAG_NO_HOST))
 	message = "user NOT authorized on host ; ";
-    else if (status & VALIDATE_NOT_OK)
+    else if (ISSET(status, VALIDATE_NOT_OK))
 	message = "command not allowed ; ";
     else
 	message = "unknown error ; ";
@@ -322,14 +322,14 @@ log_auth(status, inform_user)
     mail_auth(status, logline);		/* send mail based on status */
 
     /* Inform the user if they failed to authenticate.  */
-    if (inform_user && (status & VALIDATE_NOT_OK)) {
-	if (status & FLAG_NO_USER)
+    if (inform_user && ISSET(status, VALIDATE_NOT_OK)) {
+	if (ISSET(status, FLAG_NO_USER))
 	    (void) fprintf(stderr, "%s is not in the sudoers file.  %s",
 		user_name, "This incident will be reported.\n");
-	else if (status & FLAG_NO_HOST)
+	else if (ISSET(status, FLAG_NO_HOST))
 	    (void) fprintf(stderr, "%s is not allowed to run sudo on %s.  %s",
 		user_name, user_shost, "This incident will be reported.\n");
-	else if (status & FLAG_NO_CHECK)
+	else if (ISSET(status, FLAG_NO_CHECK))
 	    (void) fprintf(stderr, "Sorry, user %s may not run sudo on %s.\n",
 		user_name, user_shost);
 	else
@@ -573,11 +573,11 @@ mail_auth(status, line)
     else {
 	mail_mask = VALIDATE_ERROR;
 	if (def_mail_no_user)
-	    mail_mask |= FLAG_NO_USER;
+	    SET(mail_mask, FLAG_NO_USER);
 	if (def_mail_no_host)
-	    mail_mask |= FLAG_NO_HOST;
+	    SET(mail_mask, FLAG_NO_HOST);
 	if (def_mail_no_perms)
-	    mail_mask |= VALIDATE_NOT_OK;
+	    SET(mail_mask, VALIDATE_NOT_OK);
     }
 
     if ((status & mail_mask) != 0)
