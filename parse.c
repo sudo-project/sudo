@@ -95,7 +95,6 @@ extern FILE *yyin, *yyout;
  * Prototypes for static (local) functions
  */
 static int has_meta	__P((char *));
-static int compare_args	__P((char **, char **));
 
 /*
  * this routine is called from the sudo.c module and tries to validate
@@ -195,9 +194,9 @@ int validate(check_cmnd)
  */
 int command_matches(cmnd, user_args, path, sudoers_args)
     char *cmnd;
-    char **user_args;
+    char *user_args;
     char *path;
-    char **sudoers_args;
+    char *sudoers_args;
 {
     int plen;
     struct stat pst;
@@ -234,11 +233,10 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 	    return(FALSE);
 	if (!sudoers_args)
 	    return(TRUE);
-	else if (user_args && sudoers_args)
-	    return(compare_args(user_args, sudoers_args));
-	else if (!user_args && sudoers_args && sudoers_args[0][0] == '\0' &&
-		 sudoers_args[1] == NULL)
+	else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
 	    return(TRUE);
+	else if (user_args && sudoers_args)
+	    return((fnmatch(sudoers_args, user_args, FNM_PATHNAME) == 0));
 	else
 	    return(FALSE);
     } else {
@@ -268,11 +266,10 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 		return(FALSE);
 	    if (!sudoers_args)
 		return(TRUE);
-	    else if (user_args && sudoers_args)
-		return(compare_args(user_args, sudoers_args));
-	    else if (!user_args && sudoers_args && sudoers_args[0][0] == '\0' &&
-		     sudoers_args[1] == NULL)
+	    else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
 		return(TRUE);
+	    else if (user_args && sudoers_args)
+		return((fnmatch(sudoers_args, user_args, FNM_PATHNAME) == 0));
 	    else
 		return(FALSE);
 	}
@@ -434,32 +431,4 @@ static int has_meta(s)
 	    return(TRUE);
     }
     return(FALSE);
-}
-
-
-
-/*
- * Compare two arguments lists and return TRUE if they are
- * the same (inc. wildcard matches) or FALSE if they differ.
- */
-static int compare_args(user_args, sudoers_args)
-    char **user_args;
-    char **sudoers_args;
-{
-    char **ua, **sa;
-
-    for (ua=user_args, sa=sudoers_args; *ua && *sa; ua++, sa++) {
-	/* Match and honor wildcards */
-	if (fnmatch(*sa, *ua, FNM_PATHNAME) != 0)
-	    return(FALSE);
-    }
-
-    /*
-     * Return false unless we got to the end of each or the
-     * last part of sudoers_args we looked at consists of '*'
-     */
-    if (*sa-- || (*ua && **sa != '*' && *(*sa + 1) != '\0'))
-	return(FALSE);
-    else
-	return(TRUE);
 }

@@ -57,8 +57,8 @@ extern YYSTYPE yylval;
 extern int clearaliases;
 int sudolineno = 1;
 static int sawspace = 0;
-static int max_args;
-static int num_args;
+static int arg_len = 0;
+static int arg_size = 0;
 
 static void fill		__P((char *, int));
 static void fill_cmnd		__P((char *, int));
@@ -121,13 +121,6 @@ WORD			[[:alnum:]_-]+
 			    LEXTRACE("\n");
 			    return(COMMENT);
 			}			/* return comments */
-
-<GOTCMND>\"[^\n]*\"	{
-			    /* XXX - this should go away */
-			    LEXTRACE("ARG ");
-			    fill_args(yytext+1, yyleng-2, sawspace);
-			    sawspace = FALSE;
-			}			/* quoted command line arg */
 
 <GOTCMND>[^:\,= \t\n]+ {
 			    LEXTRACE("ARG ");
@@ -288,7 +281,7 @@ static void fill_cmnd(s, len)
     char *s;
     int len;
 {
-    num_args = max_args = 0;
+    arg_len = arg_size = 0;
 
     yylval.command.cmnd = (char *) malloc(len + 1);
     if (yylval.command.cmnd == NULL)
@@ -302,34 +295,33 @@ static void fill_cmnd(s, len)
 }
 
 
-static void fill_args(s, len, startnew)
+static void fill_args(s, len, addspace)
     char *s;
     int len;
-    int startnew;
+    int addspace;
 {
-    num_args += startnew;
+    int new_len = arg_len + len + addspace;
+    char *p;
 
-    if (num_args >= max_args) {
-	max_args += COMMANDARGINC;
-	if (yylval.command.args == NULL)
-	    yylval.command.args = (char **) malloc(max_args);
-	else
-	    yylval.command.args = (char **) realloc(yylval.command.args,
-						    max_args);
+    /*
+     * If we don't have enough space realloc() some more
+     */
+    if (new_len >= arg_size) {
+	/* Allocate more space than we need for subsequent args */
+	while (new_len >= (arg_size += COMMANDARGINC))
+	    ;
+
+	yylval.command.args = (char *) realloc(yylval.command.args, arg_size);
 	if (yylval.command.args == NULL)
 	    yyerror("unable to allocate memory");
     }
 
-    yylval.command.args[num_args-1] = (char *) malloc(len + 1);
-    if (yylval.command.args[num_args-1] == NULL)
-	yyerror("unable to allocate memory");
-
-    /* copy the string and NULL-terminate it */
-    (void) strncpy(yylval.command.args[num_args-1], s, len);
-    yylval.command.args[num_args-1][len] = '\0';
-
-    /* NULL-terminate the argument vector */
-    yylval.command.args[num_args] = (char *)NULL;
+    /* Efficiently append the arg (with a leading space) */
+    p = yylval.command.args + arg_len;
+    if (addspace)
+	*p++ = ' ';
+    (void) strcpy(p, s);
+    arg_len = new_len;
 }
 
 
