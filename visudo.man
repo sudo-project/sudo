@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.4  1999/01/17 22:40:55  millert
-''' crank version and regen files
+''' Revision 1.5  1999/03/29 04:05:14  millert
+''' ++version
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH visudo 8 "1.5.8" "17/Oct/98" "MAINTENANCE COMMANDS"
+.TH visudo 8 "1.5.9" "17/Jan/99" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na

@@ -1,4 +1,4 @@
-Installation instructions for CU sudo 1.5.8
+Installation instructions for CU sudo 1.5.9
 ===========================================
 
 Sudo uses a `configure' script to probe the capabilities and type
@@ -63,11 +63,11 @@ significantly as compared to previous versions.  All options are
 now set via the configure script.  See below for a list of all the
 configure options and their meanings.
 
-By default, sudo 1.5.8 expects the sudoers file to be mode 0440 and
+By default, sudo 1.5.9 expects the sudoers file to be mode 0440 and
 to be owned by user and group 0.  This differs from version 1.4 and
 below which expected the sudoers file to be mode 0400 and to be
 owned by root.  Doing a `make install' will set the sudoers file
-to the new mode and group.  If sudo 1.5.8 encounters a sudoers file
+to the new mode and group.  If sudo 1.5.9 encounters a sudoers file
 with the old permissions it will attempt to update it to the new
 scheme.  You cannot, however, use a sudoers file with the new
 permissions with an old sudo binary.  It is suggested that if have

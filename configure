@@ -645,7 +645,7 @@ fi
 
 
 
-echo "Configuring CU Sudo version 1.5.8"
+echo "Configuring CU Sudo version 1.5.9"
 PROGS="sudo visudo"
 SUDO_LDFLAGS=""
 VISUDO_LDFLAGS=""

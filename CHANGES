@@ -1033,3 +1033,7 @@ Sudo 1.5.8p2 released.
 
 324) Fixed a parse bug wrt the ! operator and runas specs.  Noted by
      David A Beck <BKD@payserv.telekurs.com>.
+
+325) Use new emalloc/erealloc/estrdup functions (catch errors and exit).
+
+Sudo 1.5.9 released.

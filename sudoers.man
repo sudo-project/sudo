@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.5  1999/01/17 22:40:53  millert
-''' crank version and regen files
+''' Revision 1.6  1999/03/29 04:05:13  millert
+''' ++version
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers 5 "1.5.8" "6/Feb/98" "FILE FORMATS"
+.TH sudoers 5 "1.5.9" "17/Jan/99" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na

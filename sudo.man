@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.30  1999/02/17 16:40:55  millert
-''' fix grammar; espie@openbsd.org
+''' Revision 1.31  1999/03/29 04:05:13  millert
+''' ++version
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudo 8 "1.5.8" "17/Feb/99" "MAINTENANCE COMMANDS"
+.TH sudo 8 "1.5.9" "17/Feb/99" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na

@@ -19,7 +19,7 @@ static char yyrcsid[]
 #line 2 "parse.yacc"
 
 /*
- *  CU sudo version 1.5.8
+ *  CU sudo version 1.5.9
  *  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  *  This program is free software; you can redistribute it and/or modify

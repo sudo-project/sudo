@@ -7,7 +7,7 @@ AC_CONFIG_HEADER(config.h pathnames.h)
 dnl
 dnl This won't work before AC_INIT()
 dnl
-echo "Configuring CU Sudo version 1.5.8"
+echo "Configuring CU Sudo version 1.5.9"
 dnl
 dnl Variables that get substituted in the Makefile
 dnl

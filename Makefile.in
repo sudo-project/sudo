@@ -1,5 +1,5 @@
 #
-#  CU sudo version 1.5.8
+#  CU sudo version 1.5.9
 #  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
 # 
 #  This program is free software; you can redistribute it and/or modify
@@ -113,7 +113,7 @@ LIBOBJS = @LIBOBJS@ @ALLOCA@
 HDRS = sudo.h compat.h version.h insults.h \
        ins_2001.h ins_classic.h ins_goons.h ins_csops.h sudo.tab.h
 
-VERSION = 1.5.8
+VERSION = 1.5.9
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL \
             INSTALL.configure TODO PORTING README RUNSON \
