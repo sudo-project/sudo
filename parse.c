@@ -121,12 +121,12 @@ sudoers_lookup(pwflag)
 	for (us = userspecs; us != NULL; us = us->next) {
 	    if (user_matches(sudo_user.pw, us->user) == TRUE) {
 		priv = us->privileges;
-		if (host_matches(user_shost, user_host, priv->hostlist) == TRUE) {
+		if (host_matches(priv->hostlist) == TRUE) {
 		    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
 			/* Only check the command when listing another user. */
 			if (user_uid == 0 || list_pw == NULL ||
 			    user_uid == list_pw->pw_uid ||
-			    cmnd_matches(user_cmnd, user_args, cs->cmnd) == TRUE)
+			    cmnd_matches(cs->cmnd) == TRUE)
 				matched = TRUE;
 			if ((pwcheck == any && nopass != TRUE) ||
 			    (pwcheck == all && nopass == TRUE))
@@ -155,11 +155,11 @@ sudoers_lookup(pwflag)
 	if (user_matches(sudo_user.pw, us->user) == TRUE) {
 	    CLR(validated, FLAG_NO_USER);
 	    priv = us->privileges;
-	    if (host_matches(user_shost, user_host, priv->hostlist) == TRUE) {
+	    if (host_matches(priv->hostlist) == TRUE) {
 		CLR(validated, FLAG_NO_HOST);
 		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
-		    if (runas_matches(runas_pw, cs->runaslist) == TRUE) {
-			rval = cmnd_matches(user_cmnd, user_args, cs->cmnd);
+		    if (runas_matches(cs->runaslist) == TRUE) {
+			rval = cmnd_matches(cs->cmnd);
 			if (rval != UNSPEC) {
 			    matched = rval;
 			    tags = &cs->tags;
@@ -205,7 +205,7 @@ display_privs(pw)
 
     for (us = userspecs; us != NULL; us = us->next) {
 	if (user_matches(pw, us->user) != TRUE ||
-	  host_matches(user_shost, user_host, us->privileges->hostlist) != TRUE)
+	  host_matches(us->privileges->hostlist) != TRUE)
 	    continue;
 
 	priv = us->privileges;

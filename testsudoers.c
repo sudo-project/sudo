@@ -224,12 +224,12 @@ main(argc, argv)
 	    putchar('\n');
 	    print_privilege(priv);
 	    putchar('\n');
-	    if (host_matches(user_shost, user_host, priv->hostlist) == TRUE) {
+	    if (host_matches(priv->hostlist) == TRUE) {
 		puts("\thost  matched");
 		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
-		    if (runas_matches(runas_pw, cs->runaslist) == TRUE) {
+		    if (runas_matches(cs->runaslist) == TRUE) {
 			puts("\trunas matched");
-			rval = cmnd_matches(user_cmnd, user_args, cs->cmnd);
+			rval = cmnd_matches(cs->cmnd);
 			if (rval != UNSPEC)
 			    matched = rval;
 			printf("\tcommand %s\n", rval == ALLOW ? "allowed" :

@@ -146,8 +146,7 @@ user_matches(pw, list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-runas_matches(pw, list)
-    struct passwd *pw;
+runas_matches(list)
     struct member *list;
 {
     struct member *m;
@@ -155,7 +154,7 @@ runas_matches(pw, list)
     int rval, matched = UNSPEC;
 
     if (list == NULL)
-	return(userpw_matches(def_runas_default, pw->pw_name, pw));
+	return(userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw));
 
     for (m = list; m != NULL; m = m->next) {
 	switch (m->type) {
@@ -163,23 +162,23 @@ runas_matches(pw, list)
 		matched = !m->negated;
 		break;
 	    case NETGROUP:
-		if (netgr_matches(m->name, NULL, NULL, pw->pw_name))
+		if (netgr_matches(m->name, NULL, NULL, runas_pw->pw_name))
 		    matched = !m->negated;
 		break;
 	    case USERGROUP:
-		if (usergr_matches(m->name, pw->pw_name, pw))
+		if (usergr_matches(m->name, runas_pw->pw_name, runas_pw))
 		    matched = !m->negated;
 		break;
 	    case ALIAS:
 		if ((a = find_alias(m->name, RUNASALIAS)) != NULL) {
-		    rval = runas_matches(pw, a->first_member);
+		    rval = runas_matches(a->first_member);
 		    if (rval != UNSPEC)
 			matched = m->negated ? !rval : rval;
 		    break;
 		}
 		/* FALLTHROUGH */
 	    case WORD:
-		if (userpw_matches(m->name, pw->pw_name, pw))
+		if (userpw_matches(m->name, runas_pw->pw_name, runas_pw))
 		    matched = !m->negated;
 		break;
 	}
@@ -192,8 +191,7 @@ runas_matches(pw, list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-host_matches(shost, lhost, list)
-    char *shost, *lhost;
+host_matches(list)
     struct member *list;
 {
     struct member *m;
@@ -206,7 +204,7 @@ host_matches(shost, lhost, list)
 		matched = !m->negated;
 		break;
 	    case NETGROUP:
-		if (netgr_matches(m->name, lhost, shost, NULL))
+		if (netgr_matches(m->name, user_host, user_shost, NULL))
 		    matched = !m->negated;
 		break;
 	    case NTWKADDR:
@@ -215,14 +213,14 @@ host_matches(shost, lhost, list)
 		break;
 	    case ALIAS:
 		if ((a = find_alias(m->name, HOSTALIAS)) != NULL) {
-		    rval = host_matches(shost, lhost, a->first_member);
+		    rval = host_matches(a->first_member);
 		    if (rval != UNSPEC)
 			matched = m->negated ? !rval : rval;
 		    break;
 		}
 		/* FALLTHROUGH */
 	    case WORD:
-		if (hostname_matches(shost, lhost, m->name))
+		if (hostname_matches(user_shost, user_host, m->name))
 		    matched = !m->negated;
 		break;
 	}
@@ -235,8 +233,7 @@ host_matches(shost, lhost, list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-cmnd_matches(cmnd, args, list)
-    char *cmnd, *args;
+cmnd_matches(list)
     struct member *list;
 {
     struct sudo_command *c;
@@ -251,7 +248,7 @@ cmnd_matches(cmnd, args, list)
 		break;
 	    case ALIAS:
 		if ((a = find_alias(m->name, CMNDALIAS)) != NULL) {
-		    rval = cmnd_matches(cmnd, args, a->first_member);
+		    rval = cmnd_matches(a->first_member);
 		    if (rval != UNSPEC)
 			matched = m->negated ? !rval : rval;
 		}

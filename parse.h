@@ -158,13 +158,13 @@ struct defaults {
 char *alias_add		__P((char *, int, struct member *));
 int addr_matches	__P((char *));
 int alias_remove	__P((char *, int));
-int cmnd_matches	__P((char *, char *, struct member *));
+int cmnd_matches	__P((struct member *));
 int command_matches	__P((char *, char *));
-int host_matches	__P((char *, char *, struct member *));
+int host_matches	__P((struct member *));
 int hostname_matches	__P((char *, char *, char *));
 int netgr_matches	__P((char *, char *, char *, char *));
 int no_aliases		__P((void));
-int runas_matches	__P((struct passwd *, struct member *));
+int runas_matches	__P((struct member *));
 int user_matches	__P((struct passwd *, struct member *));
 int usergr_matches	__P((char *, char *, struct passwd *));
 int userpw_matches	__P((char *, char *, struct passwd *));

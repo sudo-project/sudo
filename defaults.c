@@ -513,12 +513,12 @@ update_defaults()
 		    return(FALSE);
 		break;
 	    case DEFAULTS_RUNAS:
-		if (user_matches(runas_pw, def->binding) &&
+		if (runas_matches(def->binding) &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 		break;
 	    case DEFAULTS_HOST:
-		if (host_matches(user_shost, user_host, def->binding) &&
+		if (host_matches(def->binding) &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 		break;
@@ -526,7 +526,6 @@ update_defaults()
     }
     return(TRUE);
 }
-
 
 static int
 store_int(val, def, op)
