@@ -88,6 +88,7 @@ define(SUDO_OSTYPE,
 AC_BEFORE([$0], [AC_PROGRAM_CHECK])
 [echo trying to figure out what OS you are running
 if test -n "$UNAMEPROG"; then
+    echo "checking OS based on uname(1)"
     OS=`$UNAMEPROG -s`
     OSREV=`$UNAMEPROG -r`
 
