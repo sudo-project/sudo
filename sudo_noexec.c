@@ -44,7 +44,14 @@ static const char rcsid[] = "$Sudo$";
  * Dummy replacement for libc execve(2)
  */
 int
+#ifdef __STDC__
 execve(const char *path, char *const argv[], char *const envp[])
+#else
+execve(path, argv, envp)
+    const char *path;
+    char *const argv[];
+    char *const envp[];
+#endif
 {
     extern int errno;
 
