@@ -629,7 +629,7 @@ init_vars(sudo_mode)
 static int
 parse_args()
 {
-    int rval = MODE_RUN;		/* what mode is suod to be run in? */
+    int rval = MODE_RUN;		/* what mode is sudo to be run in? */
     int excl = 0;			/* exclusive arg, no others allowed */
 
     NewArgv = Argv + 1;
