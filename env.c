@@ -431,7 +431,7 @@ rebuild_env(sudo_mode, envp)
 
     /* Add the SUDO_COMMAND envariable (cmnd + args). */
     if (user_args) {
-	cp = emalloc(strlen(user_cmnd) + strlen(user_args) + 14);
+	cp = emalloc(strlen(user_cmnd) + strlen(user_args) + 15);
 	sprintf(cp, "SUDO_COMMAND=%s %s", user_cmnd, user_args);
 	insert_env(newenvp, cp);
     } else
