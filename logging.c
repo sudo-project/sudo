@@ -350,10 +350,10 @@ void log_error(code)
  *
  */
 
-const char *mail_argv[] = {"sendmail",
-		     "-t",
-		     ALERTMAIL,
-		     (char *) NULL};
+static char *mail_argv[] = { "sendmail",
+			     "-t",
+			     ALERTMAIL,
+			     (char *) NULL };
 
 static void send_mail()
 {
@@ -399,18 +399,10 @@ static void send_mail()
 
     if (!fork()) {		/* child */
 	(void) close(1);
-#ifdef USE_EXECV
-	execv(mailer, mail_argv);
-#else /* USE_EXECV */
-	execvp(mailer, mail_argv);
-#endif /* USE_EXECV */
+	EXEC(mailer, mail_argv);
 
 	/* this should not happen */
-#ifdef USE_EXECV
-	perror("execv");
-#else /* USE_EXECV */
-	perror("execvp");
-#endif /* USE_EXECV */
+	perror(mailer);
 	exit(1);
     } else {			/* parent */
 	(void) close(0);
