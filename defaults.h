@@ -57,14 +57,23 @@ struct sudo_defs_types {
  * Also, T_INT or T_STR may be ANDed with T_BOOL to indicate that
  * a value is not required.  Flags are boolean by nature...
  */
+#undef T_INT
 #define T_INT		0x001
+#undef T_STR
 #define T_STR		0x002
+#undef T_FLAG
 #define T_FLAG		0x003
+#undef T_MODE
 #define T_MODE		0x004
+#undef T_LOGFAC
 #define T_LOGFAC	0x005
+#undef T_LOGPRI
 #define T_LOGPRI	0x006
+#undef T_MASK
 #define T_MASK		0x0FF
+#undef T_BOOL
 #define T_BOOL		0x100
+#undef T_PATH
 #define T_PATH		0x200
 
 /*
