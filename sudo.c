@@ -585,8 +585,10 @@ static void load_interfaces()
 {
     struct ifconf ifconf;
     struct ifreq ifreq;
+    struct in_addr *inptr;
     char buf[BUFSIZ];
-    int sock, len, i;
+    int sock, len;
+    int i, j;
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
@@ -607,31 +609,45 @@ static void load_interfaces()
     }
 
     /*
-     * malloc() space for interfaces array
+     * find out how many interfaces exist, skipping bogus ones.
      */
     len = num_interfaces = ifconf.ifc_len / sizeof(struct ifreq);
-    interfaces = (struct interface *) malloc(sizeof(struct interface) * len);
+    for (i = 0; i < len; i++) {
+	inptr = &(((struct sockaddr_in *)&ifconf.ifc_req[i].ifr_addr)->sin_addr);
+	if (inptr->s_addr == inet_addr("127.0.0.1") ||
+	    inptr->s_addr == inet_addr("255.255.255.255") ||
+	    inptr->s_addr == inet_addr("0.0.0.0"))
+	    --num_interfaces;
+    }
+
+    /*
+     * malloc() space for interfaces array
+     */
+    interfaces = (struct interface *) malloc(sizeof(struct interface) *
+	num_interfaces);
     if (interfaces == NULL) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
 
-    /* XXX - do two passes.  one to build up num_interfaces, one to copy */
     /*
      * for each interface, get the ip address and netmask
      */
-    for (i = 0; i < len; i++) {
+    for (i = 0, j = 0; i < len; i++) {
+
+	inptr = &(((struct sockaddr_in *)&ifconf.ifc_req[i].ifr_addr)->sin_addr);
 
 	/* get the ip address */
-	/* XXX check for 127.0.0.1, 255.255.255.255 and 0.0.0.0 */
-	(void) memcpy(&interfaces[i].addr,
-	    &(((struct sockaddr_in *)&ifconf.ifc_req[i].ifr_addr)->sin_addr),
-	    sizeof(struct in_addr));
+	if (inptr->s_addr == inet_addr("127.0.0.1") ||
+	    inptr->s_addr == inet_addr("255.255.255.255") ||
+	    inptr->s_addr == inet_addr("0.0.0.0"))
+	    continue;
+
+	(void) memcpy(&interfaces[j].addr, inptr, sizeof(struct in_addr));
 
 	/* get the netmask */
-/* #ifdef SIOCGIFNETMASK */
-#if 0
+#ifdef SIOCGIFNETMASK
 	(void) strcpy(ifreq.ifr_name, ifconf.ifc_req[i].ifr_name);
 	if (ioctl(sock, SIOCGIFNETMASK, (char *)(&ifreq)) < 0) {
 	    (void) free(interfaces);
@@ -639,16 +655,17 @@ static void load_interfaces()
 	    perror("");
 	    return;
 	}
-	(void) memcpy(&interfaces[i].netmask,
+	(void) memcpy(&interfaces[j].netmask,
 	    &(((struct sockaddr_in *)&ifreq.ifr_addr)->sin_addr),
 	    sizeof(struct in_addr));
 #else
-	if (IN_CLASSC(interfaces[i].addr.s_addr))
-	    interfaces[i].netmask.s_addr = htonl(IN_CLASSC_NET);
-	else if (IN_CLASSB(interfaces[i].addr.s_addr))
-	    interfaces[i].netmask.s_addr = htonl(IN_CLASSB_NET);
+	if (IN_CLASSC(interfaces[j].addr.s_addr))
+	    interfaces[j].netmask.s_addr = htonl(IN_CLASSC_NET);
+	else if (IN_CLASSB(interfaces[j].addr.s_addr))
+	    interfaces[j].netmask.s_addr = htonl(IN_CLASSB_NET);
 	else
-	    interfaces[i].netmask.s_addr = htonl(IN_CLASSA_NET);
+	    interfaces[j].netmask.s_addr = htonl(IN_CLASSA_NET);
 #endif /* SIOCGIFNETMASK */
+	++j;
     }
 }
