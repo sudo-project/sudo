@@ -1385,7 +1385,7 @@ Sudo 1.6.3p7 released.
      environment.
 
 433) Added env_check and env_delete Defaults options to allow the admin
-     to modify the builtin list of environment variables to remove.
+     to modify the built-in list of environment variables to remove.
 
 434) If timestamp_timeout < 0 then the timestamp never expires.  This
      allows users to manage their own timestamps and create or delete
@@ -1619,3 +1619,24 @@ Sudo 1.6.7p2 released.
 507) Kerberos V support should work on latest MIT Kerberos V and Heimdal.
 
 Sudo 1.6.7p3 released.
+
+508) Fixed remaining Kerberos V issues with MIT Kerberos V and old Heimdal.
+
+Sudo 1.6.7p4 released.
+
+509) Fixed a typo that caused a compilation error on Heimdal.
+
+510) Darwin (MacOS X) doesn't have a real setreuid() system call.
+
+511) Fixed a problem with large numbers of environment variables.
+
+Sudo 1.6.7p5 released.
+
+512) Fixed a problem on FreeBSD when the user is only listed in NIS (not
+     master.passwd) and netgroups are used in the master.passwd file.
+
+Sudo 1.6.7p6 released.
+
+513) BSD-style warn/err functions are now used throughout.
+
+514) Fixed the --with-stow configure option
