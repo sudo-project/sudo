@@ -507,7 +507,15 @@ Digital UNIX:
     By default, sudo will use SIA (Security Integration Architecture)
     to validate a user.  If you want to use an alternate authentication
     method that does not go through SIA, you need to use the
-    --disable-sia option to configure.
+    --disable-sia option to configure.  If you use gcc to compile
+    you will get warnings when building interfaces.c.  These are
+    harmless but if they really bug you, you can edit
+    /usr/include/net/if.h around line 123, right after the comment:
+	/* forward decls for C++ */
+    change the line:
+	#ifdef __cplusplus
+    to:
+	#if defined(__cplusplus) || defined(__GNUC__)
 
 Linux:
     One person reported that he needed to run configure with
