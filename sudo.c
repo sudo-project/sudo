@@ -136,6 +136,7 @@ char **Argv;
 int NewArgc = 0;
 char **NewArgv = NULL;
 struct passwd *user_pw_ent;
+char *runas_user = NULL;
 char *cmnd = NULL;
 char *tty = NULL;
 char *prompt = PASSPROMPT;
@@ -198,23 +199,30 @@ int main(argc, argv)
      * parse our arguments
      */
     sudo_mode = parse_args();
-
-    switch(sudo_mode) {
-	case MODE_VERSION :
-	case MODE_HELP :
+ 
+    switch (sudo_mode) {
+	case MODE_VERSION:
+	case MODE_HELP:
 	    (void) printf("CU Sudo version %s\n", version);
 	    if (sudo_mode == MODE_VERSION)
 		exit(0);
 	    else
 		usage(0);
 	    break;
-	case MODE_VALIDATE :
+	case MODE_VALIDATE:
 	    cmnd = "validate";
 	    break;
-    	case MODE_KILL :
+    	case MODE_KILL:
 	    cmnd = "kill";
 	    break;
-	case MODE_LIST :
+	case MODE_LIST:
+	    /*
+	     * XXX - want to require a password for -l
+	     * since people can be exempt we need to stuff
+	     * normal output of "sudo -l" into an array and
+	     * grow it as is required, then print out after
+	     * the user has been authenticated.
+	     */
 	    cmnd = "list";
 	    printmatches = 1;
 	    break;
@@ -291,9 +299,6 @@ int main(argc, argv)
 	remove_timestamp();	/* remove the timestamp ticket file */
 	exit(0);
     } else if (sudo_mode == MODE_LIST) {
-#ifndef NO_PASSWD
-	check_user();
-#endif /* NO_PASSWD */
 	log_error(ALL_SYSTEMS_GO);
 	(void) validate(FALSE);
 	exit(0);
@@ -306,9 +311,9 @@ int main(argc, argv)
     switch (rtn) {
 
 	case VALIDATE_OK:
-#ifndef NO_PASSWD
-	    check_user();
-#endif /* NO_PASSWD */
+	case VALIDATE_OK_NOPASS:
+	    if (rtn != VALIDATE_OK_NOPASS) 
+		check_user();
 	    log_error(ALL_SYSTEMS_GO);
 	    if (sudo_mode == MODE_VALIDATE)
 		exit(0);
@@ -339,7 +344,8 @@ int main(argc, argv)
 			exit(1);
 		    }
 		}
-
+		if (runas_matches == TRUE)
+			set_perms(PERM_RUN_AS);
 		EXEC(cmnd, NewArgv);	/* run the command */
 	    }
 #else
@@ -537,6 +543,17 @@ static int parse_args()
 		NewArgc--;
 		NewArgv++;
 		break;
+	    case 'u':
+		/* must have an associated runas user */
+		if (NewArgv[1] == NULL)
+		    usage(1);
+
+		runas_user = NewArgv[1];
+
+		/* shift Argv over and adjust Argc */
+		NewArgc--;
+		NewArgv++;
+		break;
 	    case 'b':
 		ret |= MODE_BACKGROUND;
 		break;
@@ -599,7 +616,7 @@ static int parse_args()
 static void usage(exit_val)
     int exit_val;
 {
-    (void) fprintf(stderr, "usage: %s -V | -h | -l | -v | -k | [-b] [-p prompt] -s | <command>\n", Argv[0]);
+    (void) fprintf(stderr, "usage: %s -V | -h | -l | -v | -k | [-b] [-p prompt] [-u username] -s | <command>\n", Argv[0]);
     exit(exit_val);
 }
 
@@ -682,20 +699,16 @@ static void load_cmnd(sudo_mode)
  *
  *  check_sudoers()
  *
- *  This function check to see that the sudoers file is readable,
- *  owned by SUDOERS_OWNER, and not writable by anyone else.
+ *  This function check to see that the sudoers file is owned by
+ *  uid SUDOERS_UID, gid SUDOERS_GID and is mode SUDOERS_MODE.
  */
 
 static int check_sudoers()
 {
     struct stat statbuf;
-    struct passwd *pw_ent;
     int fd;
     char c;
     int rtn = ALL_SYSTEMS_GO;
-
-    if (!(pw_ent = getpwnam(SUDOERS_OWNER)))
-	return(SUDOERS_NO_OWNER);
 
     set_perms(PERM_SUDOERS);
 
@@ -705,10 +718,10 @@ static int check_sudoers()
 	rtn = NO_SUDOERS_FILE;
     else if (!S_ISREG(statbuf.st_mode))
 	rtn = SUDOERS_NOT_FILE;
-    else if (statbuf.st_uid != pw_ent -> pw_uid)
+    else if (statbuf.st_uid != SUDOERS_UID || statbuf.st_gid != SUDOERS_GID)
 	rtn = SUDOERS_WRONG_OWNER;
-    else if ((statbuf.st_mode & 0000066))
-	rtn = SUDOERS_RW_OTHER;
+    else if ((statbuf.st_mode & 0007777) != SUDOERS_MODE)
+	rtn = SUDOERS_WRONG_MODE;
 
     (void) close(fd);
 
@@ -732,15 +745,15 @@ void set_perms(perm)
 {
     struct passwd *pw_ent;
 
-    switch(perm) {
-	case        PERM_ROOT :
+    switch (perm) {
+	case PERM_ROOT:
 				if (setuid(0)) {
 				    perror("setuid(0)");
 				    exit(1);
 				}
 			      	break;
 
-	case   PERM_FULL_ROOT :
+	case PERM_FULL_ROOT:
 				if (setuid(0)) {  
 				    perror("setuid(0)");
 				    exit(1);
@@ -753,14 +766,14 @@ void set_perms(perm)
     	    	    	    	}
 			      	break;
 
-	case        PERM_USER : 
+	case PERM_USER: 
     	    	    	        if (seteuid(user_uid)) {
     	    	    	            perror("seteuid(user_uid)");
     	    	    	            exit(1); 
     	    	    	        }
 			      	break;
 				
-	case   PERM_FULL_USER : 
+	case PERM_FULL_USER: 
 				if (setuid(0)) {
 				    perror("setuid(0)");
 				    exit(1);
@@ -772,22 +785,57 @@ void set_perms(perm)
 				}
 
 			      	break;
+	case PERM_RUN_AS:
+				/* XXX - add group/gid support */
+				if (*runas_user == '#') {
+				    if (setuid(atoi(runas_user + 1))) {
+					(void) fprintf(stderr,
+					    "%s: cannot set uid to %s: ",
+					    Argv[0], runas_user);
+					perror("");
+					exit(1);
+				    }
+				} else {
+				    if (!(pw_ent = getpwnam(runas_user))) {
+					(void) fprintf(stderr,
+					    "%s: no passwd entry for %s!\n",
+					    Argv[0], runas_user);
+					exit(1);
+				    }
 
-	case   PERM_SUDOERS : 
+				    if (setgid(pw_ent->pw_gid)) {
+					(void) fprintf(stderr,
+					    "%s: cannot set gid to %d: ",  
+					    Argv[0], pw_ent->pw_gid);
+					perror("");
+					exit(1);
+				    }
+
+				    if (setuid(pw_ent->pw_uid)) {
+					(void) fprintf(stderr,
+					    "%s: cannot set uid to %d: ",  
+					    Argv[0], pw_ent->pw_uid);
+					perror("");
+					exit(1);
+				    }
+				}
+
+				break;
+	case PERM_SUDOERS: 
 				if (setuid(0)) {
 				    perror("setuid(0)");
 				    exit(1);
 				}
 
-				if (!(pw_ent = getpwnam(SUDOERS_OWNER))) {
-				    (void) fprintf(stderr, "%s: no passwd entry for sudoers file owner (%s)\n", Argv[0], SUDOERS_OWNER);
+				if (seteuid(SUDOERS_UID)) {
+				    perror("seteuid(SUDOERS_UID)");
 				    exit(1);
-				} else if (seteuid(pw_ent->pw_uid)) {
-				    (void) fprintf(stderr, "%s: ",
-							   SUDOERS_OWNER);
-				    perror("");
+				}
+
+				if (setegid(SUDOERS_GID)) {
+				    perror("setegid(SUDOERS_GID)");
 				    exit(1);
-    	    	    	    	}
+				}
 
 			      	break;
     }
