@@ -182,7 +182,10 @@ line arguments.  It is most useful in conjunction with the C<-s> flag.
 
 =head1 RETURN VALUES
 
-B<sudo> quits with an exit value of 1 if there is a
+Upon successful execution of a program, the return value from B<sudo>
+will simply be the return value of the program that was executed.
+
+Otherwise, B<sudo> quits with an exit value of 1 if there is a
 configuration/permission problem or if B<sudo> cannot execute the
 given command.  In the latter case the error string is printed to
 stderr.  If B<sudo> cannot stat(2) one or more entries in the user's

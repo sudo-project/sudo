@@ -61,7 +61,7 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-26/Mar/2000                   1.6.3                             1
+28/Mar/2000                   1.6.3                             1
 
 
 
@@ -127,7 +127,7 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
 
-26/Mar/2000                   1.6.3                             2
+28/Mar/2000                   1.6.3                             2
 
 
 
@@ -149,18 +149,22 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
            conjunction with the -s flag.
 
 RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEESSSS
-       ssssuuuuddddoooo quits with an exit value of 1 if there is a
-       configuration/permission problem or if ssssuuuuddddoooo cannot execute
-       the given command.  In the latter case the error string is
-       printed to stderr.  If ssssuuuuddddoooo cannot _s_t_a_t(2) one or more
-       entries in the user's PATH an error is printed on stderr.
-       (If the directory does not exist or if it is not really a
-       directory, the entry is ignored and no error is printed.)
-       This should not happen under normal circumstances.  The
-       most common reason for _s_t_a_t(2) to return "permission
-       denied" is if you are running an automounter and one of
-       the directories in your PATH is on a machine that is
-       currently unreachable.
+       Upon successful execution of a program, the return value
+       from ssssuuuuddddoooo will simply be the return value of the program
+       that was executed.
+
+       Otherwise, ssssuuuuddddoooo quits with an exit value of 1 if there is
+       a configuration/permission problem or if ssssuuuuddddoooo cannot
+       execute the given command.  In the latter case the error
+       string is printed to stderr.  If ssssuuuuddddoooo cannot _s_t_a_t(2) one
+       or more entries in the user's PATH an error is printed on
+       stderr.  (If the directory does not exist or if it is not
+       really a directory, the entry is ignored and no error is
+       printed.)  This should not happen under normal
+       circumstances.  The most common reason for _s_t_a_t(2) to
+       return "permission denied" is if you are running an
+       automounter and one of the directories in your PATH is on
+       a machine that is currently unreachable.
 
 SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTEEEESSSS
        ssssuuuuddddoooo tries to be safe when executing external commands.
@@ -186,14 +190,10 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
        option that disables this behavior or link ssssuuuuddddoooo
        statically.
 
-       ssssuuuuddddoooo will check the ownership of its timestamp directory
-       (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's
-       contents if it is not owned by root and only writable by
-       root.  On systems that allow non-root users to give away
 
 
 
-26/Mar/2000                   1.6.3                             3
+28/Mar/2000                   1.6.3                             3
 
 
 
@@ -202,6 +202,10 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
+       ssssuuuuddddoooo will check the ownership of its timestamp directory
+       (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's
+       contents if it is not owned by root and only writable by
+       root.  On systems that allow non-root users to give away
        files via _c_h_o_w_n(2), if the timestamp directory is located
        in a directory writable by anyone (eg: _/_t_m_p), it is
        possible for a user to create the timestamp directory
@@ -253,13 +257,9 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
         % sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 
 
-EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
-       ssssuuuuddddoooo utilizes the following environment variables:
 
 
-
-
-26/Mar/2000                   1.6.3                             4
+28/Mar/2000                   1.6.3                             4
 
 
 
@@ -267,6 +267,9 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
 
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
+
+EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
+       ssssuuuuddddoooo utilizes the following environment variables:
 
         PATH                   Set to a sane value if SECURE_PATH is set
         SHELL                  Used to determine shell to run with -s option
@@ -319,13 +322,10 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        shell regardless of any '!'  elements in the user
        specification.
 
-       Running shell scripts via ssssuuuuddddoooo can expose the same kernel
-       bugs that make setuid shell scripts unsafe on some
-       operating systems (if your OS supports the /dev/fd/
 
 
 
-26/Mar/2000                   1.6.3                             5
+28/Mar/2000                   1.6.3                             5
 
 
 
@@ -334,6 +334,9 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
+       Running shell scripts via ssssuuuuddddoooo can expose the same kernel
+       bugs that make setuid shell scripts unsafe on some
+       operating systems (if your OS supports the /dev/fd/
        directory, setuid shell scripts are generally safe).
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
@@ -388,9 +391,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-
-
-26/Mar/2000                   1.6.3                             6
+28/Mar/2000                   1.6.3                             6
 
 
