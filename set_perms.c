@@ -119,6 +119,11 @@ set_perms_posix(perm)
 				break;
 				
 	case PERM_RUNAS:
+				if (seteuid(runas_pw->pw_uid))
+				    fatal("unable to change to runas uid", 1);
+			      	break;
+
+	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == 0 */
 				runas_setup();
 				if (def_stay_setuid)
@@ -192,6 +197,11 @@ set_perms_suid(perm)
 			      	break;
 				
 	case PERM_RUNAS:
+				if (seteuid(runas_pw->pw_uid))
+				    fatal("unable to change to runas uid", 1);
+			      	break;
+
+	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == 0 */
 				runas_setup();
 				error = setresuid(def_stay_setuid ?
@@ -264,6 +274,11 @@ set_perms_suid(perm)
 			      	break;
 				
 	case PERM_RUNAS:
+				if (seteuid(runas_pw->pw_uid))
+				    fatal("unable to change to runas uid", 1);
+			      	break;
+
+	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == 0 */
 				runas_setup();
 				error = setreuid(def_stay_setuid ?
@@ -333,6 +348,11 @@ set_perms_nosuid(perm)
 			      	break;
 				
 	case PERM_RUNAS:
+				if (seteuid(runas_pw->pw_uid))
+				    fatal("unable to change to runas uid", 1);
+			      	break;
+
+	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == 0 */
 				runas_setup();
 				if (setuid(runas_pw->pw_uid))
