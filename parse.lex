@@ -190,6 +190,12 @@ PASSWD[[:blank:]]*:	{
 			    return(NTWKADDR);
 			}
 
+{DOTTEDQUAD}\/([12][0-9]*|3[0-2]*) {
+			    fill(yytext, yyleng);
+			    LEXTRACE("NTWKADDR ");
+			    return(NTWKADDR);
+			}
+
 [[:alpha:]][[:alnum:]_-]*(\.{HOSTNAME})+ {
 			    fill(yytext, yyleng);
 			    LEXTRACE("FQHOST ");

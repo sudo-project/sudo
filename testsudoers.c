@@ -184,11 +184,14 @@ addr_matches(n)
     char *m;
     struct in_addr addr, mask;
 
-    /* If there's an explicate netmask, use it. */
+    /* If there's an explicit netmask, use it. */
     if ((m = strchr(n, '/'))) {
 	*m++ = '\0';
-	mask.s_addr = inet_addr(m);
 	addr.s_addr = inet_addr(n);
+	if (strchr(m, '.'))
+	    mask.s_addr = inet_addr(m);
+	else
+	    mask.s_addr = (1 << atoi(m)) - 1;	/* XXX - better way? */
 	*(m - 1) = '/';               
 
 	for (i = 0; i < num_interfaces; i++)
