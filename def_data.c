@@ -61,7 +61,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	def_data_lecture,
     }, {
 	"lecture_file", T_STR|T_PATH|T_BOOL,
-	"Path to a file containing the sudo lecture: %s",
+	"File containing the sudo lecture: %s",
     }, {
 	"authenticate", T_FLAG,
 	"Require users to authenticate by default",
@@ -174,15 +174,6 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"editor", T_STR|T_PATH,
 	"Path to the editor for use by visudo: %s",
     }, {
-	"env_check", T_LIST|T_BOOL,
-	"Environment variables to check for sanity:",
-    }, {
-	"env_delete", T_LIST|T_BOOL,
-	"Environment variables to remove:",
-    }, {
-	"env_keep", T_LIST|T_BOOL,
-	"Environment variables to preserve:",
-    }, {
 	"listpw", T_TUPLE|T_BOOL,
 	"When to require a password for 'list' pseudocommand: %s",
 	def_data_listpw,
@@ -195,7 +186,16 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Preload the dummy execve() function contained in 'noexec_file'",
     }, {
 	"noexec_file", T_STR|T_PATH,
-	"Path to a file containing a dummy execve() function: %s",
+	"File containing a dummy execve() function: %s",
+    }, {
+	"env_check", T_LIST|T_BOOL,
+	"Environment variables to check for sanity:",
+    }, {
+	"env_delete", T_LIST|T_BOOL,
+	"Environment variables to remove:",
+    }, {
+	"env_keep", T_LIST|T_BOOL,
+	"Environment variables to preserve:",
     }, {
 	NULL, 0, NULL
     }
