@@ -1354,6 +1354,12 @@ case "$host" in
 		test -n "$mansectsu" || mansectsu=1m
 		test -n "$mansectform" || mansectform=4
 		;;
+    m88k-motorola-sysv*)
+		# motorolla's cc (a variant of gcc) does -O but not -O2
+		CFLAGS=`echo $CFLAGS | sed 's/-O2/-O/g'`
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
+		;;
     *-sequent-sysv*)
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
