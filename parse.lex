@@ -93,7 +93,7 @@ extern void yyerror		__P((char *));
 OCTET			(1?[0-9]{1,2})|(2[0-4][0-9])|(25[0-5])
 DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
 HOSTNAME		[[:alnum:]_-]+
-WORD			[^@!=:,\(\) \t\n\\]+
+WORD			([^@!=:,\(\) \t\n\\]|\\[^\n])+
 
 %e	4000
 %p	6000
@@ -114,14 +114,13 @@ WORD			[^@!=:,\(\) \t\n\\]+
 			    LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
 
-<GOTCMND>\\[@:\,=\\ \t]	{
+<GOTCMND>\\[:\,=\\ \t]	{
 			    LEXTRACE("QUOTEDCHAR ");
 			    fill_args(yytext + 1, 1, sawspace);
 			    sawspace = FALSE;
 			}
 
-<GOTDEFS>\"[^\"]+\"	{
-			    /* XXX - should allow " to be quoted */
+<GOTDEFS>\"([^\"]|\\\")+\"	{
 			    LEXTRACE("WORD(1) ");
 			    fill(yytext + 1, yyleng - 2);
 			    return(WORD);
@@ -262,8 +261,7 @@ PASSWD[[:blank:]]*:	{
 			    }
 			}
 
-<GOTDEFS>[^ \t\n,=!]+	{
-			    /* XXX - should allow [!=,] to be quoted */
+<GOTDEFS>{WORD}	{
 			    LEXTRACE("WORD(3) ");
 			    fill(yytext, yyleng);
 			    return(WORD);
@@ -337,13 +335,20 @@ fill(s, len)
     char *s;
     int len;
 {
+    int i, j;
+
     yylval.string = (char *) malloc(len + 1);
     if (yylval.string == NULL)
 	yyerror("unable to allocate memory");
 
-    /* copy the string and NULL-terminate it */
-    (void) strncpy(yylval.string, s, len);
-    yylval.string[len] = '\0';
+    /* Copy the string and collapse any escaped characters. */
+    for (i = 0, j = 0; i < len; i++, j++) {
+	if (s[i] == '\\' && i != len - 1)
+	    yylval.string[j] = s[++i];
+	else
+	    yylval.string[j] = s[i];
+    }
+    yylval.string[j] = '\0';
 }
 
 static void
