@@ -1,4 +1,4 @@
-Installation instructions for CU sudo 1.5.2
+Installation instructions for CU sudo 1.5.3
 ===========================================
 
 Sudo uses a `configure' script to probe the capabilities and type
@@ -62,11 +62,11 @@ For most systems and configurations it is possible simply to:
 
 Notes on upgrading from an older release
 ========================================
-Sudo 1.5.2 expects the sudoers file to have different permissions
+Sudo 1.5.3 expects the sudoers file to have different permissions
 (mode 0440) and be owned by user and group 0.  This differs from
 version 1.4 and below which expected the sudoers file to be owned
 by root and mode 0400.  Doing a `make install' will set the sudoers
-file to the new mode and group.  If sudo 1.5.2 encounters a sudoers
+file to the new mode and group.  If sudo 1.5.3 encounters a sudoers
 file with the old permissions it will attempt to update it to the
 new scheme.  You cannot, however, use a sudoers file with the new
 permissions with an old sudo binary.  It is suggested that if have
