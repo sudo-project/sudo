@@ -101,13 +101,13 @@ SRCS = check.c getspwuid.c find_path.c logging.c parse.c sudo.c \
 PARSEOBJS = y.tab.o lex.yy.o
 
 SUDOBJS = check.o getspwuid.o find_path.o logging.o parse.o sudo.o \
-          goodpath.o sudo_setenv.o interfaces.o @DCE_OBJS@
+          goodpath.o sudo_setenv.o interfaces.o @DCE_OBJS@ @TGETPASS@
 
 VISUDOBJS = visudo.o
 
 TESTOBJS = interfaces.o testsudoers.o
 
-LIBOBJS = @TGETPASS@ @LIBOBJS@
+LIBOBJS = @LIBOBJS@
 
 HDRS = sudo.h pathnames.h options.h compat.h version.h insults.h \
        ins_2001.h ins_classic.h ins_goons.h ins_csops.h
