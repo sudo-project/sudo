@@ -38,6 +38,12 @@ MANTYPE="man"
 AC_SUBST(MANTYPE)dnl
 MAN_POSTINSTALL=""
 AC_SUBST(MAN_POSTINSTALL)dnl
+SUDOERS_MODE=0440
+AC_SUBST(SUDOERS_MODE)dnl
+SUDOERS_UID=0
+AC_SUBST(SUDOERS_UID)dnl
+SUDOERS_GID=0
+AC_SUBST(SUDOERS_GID)dnl
 CHECKSHADOW="true"
 
 dnl
@@ -218,6 +224,16 @@ AC_ARG_WITH(logfac, [  --with-logfac           syslog facility to log with (defa
 		;;
 esac])
 
+AC_ARG_WITH(logpath, [  --with-logpath          path to the sudo log file],
+[case $with_logpath in  
+    yes)	echo "Must give --with-logpath an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-logpath not supported."
+		exit 1
+		;;
+esac])
+
 AC_ARG_WITH(loglen, [  --with-loglen           maximum length of a log file line (default is 80)],
 [case $with_loglen in  
     yes)	echo "Must give --with-loglen an argument."
@@ -229,16 +245,6 @@ AC_ARG_WITH(loglen, [  --with-loglen           maximum length of a log file line
     [0-9]*)	AC_DEFINE_UNQUOTED(MAXLOGFILELEN, $with_loglen)
 		;;
     *)		echo "You must enter a number, not $with_loglen"
-		exit 1
-		;;
-esac])
-
-AC_ARG_WITH(logpath, [  --with-logpath          path to the sudo log file],
-[case $with_logpath in  
-    yes)	echo "Must give --with-logpath an argument."
-		exit 1
-		;;
-    no)		echo "Sorry, --without-logpath not supported."
 		exit 1
 		;;
 esac])
@@ -285,7 +291,7 @@ AC_ARG_WITH(mailsubject, [  --with-mailsubject      subject of sudo mail],
 		;;
 esac], AC_DEFINE(MAILSUBJECT, "*** SECURITY information for %h ***"))
 
-AC_ARG_WITH(mail-if-no-user, [  --with-mail-if-no-user  send mail if user not in sudoers (default)],
+AC_ARG_WITH(mail-if-no-user, [  --without-mail-if-no-user Do not send mail if user not in sudoers],
 [case $with_mail-if-no-user in  
     yes)	AC_DEFINE(SEND_MAIL_WHEN_NO_USER)
 		;;
@@ -363,9 +369,12 @@ AC_ARG_WITH(sudoers-mode, [  --with-sudoers-mode     mode of sudoers file (defau
     no)		echo "Sorry, --without-sudoers-mode not supported."
 		exit 1
 		;;
-    *)		AC_DEFINE_UNQUOTED(SUDOERS_MODE, "$with_sudoers-mode")
+    [0-9]*)	SUDOERS_MODE=$with_sudoers-mode
 		;;
-esac], AC_DEFINE(SUDOERS_MODE, 0440))
+    *)		echo "You must use a numeric uid, not a name."
+		exit 1
+		;;
+esac])
 
 AC_ARG_WITH(sudoers-uid, [  --with-sudoers-uid      uid that owns sudoers file (defaults to 0)],
 [case $with_sudoers-uid in  
@@ -375,12 +384,12 @@ AC_ARG_WITH(sudoers-uid, [  --with-sudoers-uid      uid that owns sudoers file (
     no)		echo "Sorry, --without-sudoers-uid not supported."
 		exit 1
 		;;
-    [0-9]*)	AC_DEFINE_UNQUOTED(SUDOERS_UID, "$with_sudoers-uid")
+    [0-9]*)	SUDOERS_UID=$with_sudoers-uid
 		;;
     *)		echo "You must use a numeric uid, not a name."
 		exit 1
 		;;
-esac], AC_DEFINE(SUDOERS_UID, 0))
+esac])
 
 AC_ARG_WITH(sudoers-gid, [  --with-sudoers-gid      gid that owns sudoers file (defaults to 0)],
 [case $with_sudoers-gid in  
@@ -390,14 +399,15 @@ AC_ARG_WITH(sudoers-gid, [  --with-sudoers-gid      gid that owns sudoers file (
     no)		echo "Sorry, --without-sudoers-gid not supported."
 		exit 1
 		;;
-    [0-9]*)	AC_DEFINE_UNQUOTED(SUDOERS_GID, "$with_sudoers-gid")
+    [0-9]*)	SUDOERS_GID=$with_sudoers-gid
 		;;
     *)		echo "You must use a numeric gid, not a name."
 		exit 1
 		;;
-esac], AC_DEFINE(SUDOERS_GID, 0))
+esac])
 
-AC_ARG_WITH(umask, [  --with-umask            umask with which the prog should run (default is 0022)],
+AC_ARG_WITH(umask, [  --with-umask            umask with which the prog should run (default is 0022)
+  --without-sudo-umask    Preserves the umask of the user invoking sudo.],
 [case $with_umask in  
     yes)	echo "Must give --with-umask an argument."
 		exit 1
@@ -420,15 +430,15 @@ AC_ARG_WITH(runas-default, [  --with-runas-default    User to run commands as (d
 		;;
 esac], AC_DEFINE(RUNAS_DEFAULT, "root"))
 
-AC_ARG_WITH(exempt-group, [  --with-exempt-group     no passwd needed for users in this group],
-[case $with_exempt-group in  
-    yes)	echo "Must give --with-exempt-group an argument."
+AC_ARG_WITH(exempt, [  --with-exempt=group     no passwd needed for users in this group],
+[case $with_exempt in  
+    yes)	echo "Must give --with-exempt an argument."
 		exit 1
 		;;
-    no)		echo "Sorry, --without-exempt-group not supported."
+    no)		echo "Sorry, --without-exempt not supported."
 		exit 1
 		;;
-    *)		AC_DEFINE_UNQUOTED(EXEMPTGROUP, "$with_exempt-group")
+    *)		AC_DEFINE_UNQUOTED(EXEMPTGROUP, "$with_exempt")
 		;;
 esac])
 
@@ -533,6 +543,16 @@ AC_ARG_WITH(classic-insults, [  --with-classic-insults  include the insults from
 		;;
 esac])
 
+AC_ARG_WITH(csops-insults, [  --with-csops-insults    include CSOps insults],
+[case $with_csops-insults in  
+    yes)	AC_DEFINE(CSOPS_INSULTS)
+		;;
+    no)		;;
+    *)		echo "Sorry, --with-csops-insults does not take an argument."
+		exit 1
+		;;
+esac])
+
 AC_ARG_WITH(hal-insults, [  --with-hal-insults      include 2001-like insults],
 [case $with_hal-insults in  
     yes)	AC_DEFINE(HAL_INSULTS)
@@ -549,16 +569,6 @@ AC_ARG_WITH(goons-insults, [  --with-goons-insults    include the insults from t
 		;;
     no)		;;
     *)		echo "Sorry, --with-goons-insults does not take an argument."
-		exit 1
-		;;
-esac])
-
-AC_ARG_WITH(csops-insults, [  --with-csops-insults    include CSOps insults],
-[case $with_csops-insults in  
-    yes)	AC_DEFINE(CSOPS_INSULTS)
-		;;
-    no)		;;
-    *)		echo "Sorry, --with-csops-insults does not take an argument."
 		exit 1
 		;;
 esac])
