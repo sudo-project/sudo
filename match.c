@@ -539,17 +539,18 @@ usergr_matches(group, user, pw)
     if (grp->gr_gid == pw_gid)
 	return(TRUE);
 
-    /* check the user's group vector */
-    n = user_ngroups;
-    while (n--)
-	if (grp->gr_gid == user_groups[n])
-	    return(TRUE);
-
-    /* check to see if user is explicitly listed in the group */
-    /* XXX - skip if group vector is set? */
-    for (cur = grp->gr_mem; *cur; cur++) {
-	if (strcmp(*cur, user) == 0)
-	    return(TRUE);
+    /*
+     * If the user has a supplementary group vector, check it.
+     * Otherwise, check the member list in struct group for the user name.
+     */
+    if ((n = user_ngroups) > 0) {
+	while (n--)
+	    if (grp->gr_gid == user_groups[n])
+		return(TRUE);
+    } else {
+	for (cur = grp->gr_mem; *cur; cur++)
+	    if (strcmp(*cur, user) == 0)
+		return(TRUE);
     }
 
     return(FALSE);
