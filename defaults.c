@@ -182,6 +182,9 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"requiretty", T_FLAG,
 	"Only allow the user to run sudo if they have a tty"
     }, {
+	"enveditor", T_FLAG,
+	"Visudo will honor the EDITOR environment variable"
+    }, {
 	"loglinelen", T_INT|T_BOOL,
 	"Length at which to wrap log file lines (0 for no wrap): %d"
     }, {
@@ -229,6 +232,9 @@ struct sudo_defs_types sudo_defs_table[] = {
     }, {
 	"secure_path", T_STR|T_BOOL,
 	"Value to override user's $PATH with: %s"
+    }, {
+	"editor", T_STR|T_PATH,
+	"Path to the editor for use by visudo: %s"
     }, {
 	"listpw_i", T_INT, NULL
     }, {
@@ -279,12 +285,6 @@ dump_defaults()
 	    }
 	}
     }
-
-#ifdef ENV_EDITOR
-    (void) printf("Default editor for visudo: %s\n", EDITOR);
-#else
-    (void) printf("Editor for visudo: %s\n", EDITOR);
-#endif
 }
 
 /*
@@ -533,6 +533,9 @@ init_defaults()
 #ifdef USE_INSULTS
     def_flag(I_INSULTS) = TRUE;
 #endif
+#ifdef ENV_EDITOR
+    def_flag(I_ENVEDITOR) = TRUE;
+#endif
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)
@@ -576,6 +579,7 @@ init_defaults()
 #ifdef SECURE_PATH
     def_str(I_SECURE_PATH) = estrdup(SECURE_PATH);
 #endif
+    def_str(I_EDITOR) = estrdup(EDITOR);
 
     /*
      * The following depend on the above values.

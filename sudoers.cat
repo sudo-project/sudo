@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-26/Jan/2000                   1.6.2                             1
+15/Feb/2000                   1.6.2                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-26/Jan/2000                   1.6.2                             2
+15/Feb/2000                   1.6.2                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-26/Jan/2000                   1.6.2                             3
+15/Feb/2000                   1.6.2                             3
 
 
 
@@ -259,7 +259,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-26/Jan/2000                   1.6.2                             4
+15/Feb/2000                   1.6.2                             4
 
 
 
@@ -325,7 +325,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-26/Jan/2000                   1.6.2                             5
+15/Feb/2000                   1.6.2                             5
 
 
 
@@ -374,6 +374,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                    flag to prevent a user from entering a visible
                    password.  This flag is off by default.
 
+       enveditor   If set, visudo will use the value of the
+                   EDITOR or VISUAL environment falling back on
+                   the default editor.  Note that this may create
+                   a security hole as most editors allow a user
+                   to get a shell (which would be a root shell
+                   and not be logged).
+
        IIIInnnntttteeeeggggeeeerrrrssss:
 
        passwd_tries
@@ -381,17 +388,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                    his/her password before sudo logs the failure
                    and exits.  The default is 3.
 
-       IIIInnnntttteeeeggggeeeerrrrssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
-
-       loglinelen  Number of characters per line for the file
-                   log.  This value is used to decide when to
-                   wrap lines for nicer log files.  This has no
-                   effect on the syslog log file, only the file
-                   log.  The default is 80 (use 0 or negate to
 
 
 
-26/Jan/2000                   1.6.2                             6
+15/Feb/2000                   1.6.2                             6
 
 
 
@@ -400,6 +400,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
+       IIIInnnntttteeeeggggeeeerrrrssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
+
+       loglinelen  Number of characters per line for the file
+                   log.  This value is used to decide when to
+                   wrap lines for nicer log files.  This has no
+                   effect on the syslog log file, only the file
+                   log.  The default is 80 (use 0 or negate to
                    disable word wrap).
 
        timestamp_timeout
@@ -447,6 +454,18 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                    flag is not specified on the command line.
                    This defaults to "root".
 
+
+
+
+15/Feb/2000                   1.6.2                             7
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        syslog_goodpri
                    Syslog priority to use when user authenticates
                    successfully.  Defaults to "notice".
@@ -455,16 +474,8 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                    Syslog priority to use when user authenticates
                    unsuccessfully.  Defaults to "alert".
 
-
-
-26/Jan/2000                   1.6.2                             7
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
+       editor      Path to the editor to be used by visudo.  The
+                   default is the path to vi on your system.
 
        SSSSttttrrrriiiinnnnggggssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
 
@@ -510,6 +521,17 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                        never       The user need never enter a password to use
                                    the B<-v> flag.
 
+
+
+15/Feb/2000                   1.6.2                             8
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
                        always      The user must always enter a password to use
                                    the B<-v> flag.
 
@@ -518,19 +540,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        listpw      This option controls when a password will be
                    required when a user runs sudo with the ----llll.
                    It has the following possible values:
-
-
-
-
-
-26/Jan/2000                   1.6.2                             8
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
 
                        all         All the user's I<sudoers> entries for the
                                    current host must have the C<NOPASSWD>
@@ -577,6 +586,18 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        Let's break that down into its constituent parts:
 
+
+
+
+15/Feb/2000                   1.6.2                             9
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        RRRRuuuunnnnaaaassss____SSSSppppeeeecccc
 
        A Runas_Spec is simply a Runas_List (as defined above)
@@ -585,18 +606,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        of rrrrooooooootttt will be used.  A Runas_Spec sets the default for
        commands that follow it.  What this means is that for the
        entry:
-
-
-
-
-26/Jan/2000                   1.6.2                             9
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
 
         dgb    boulder = (operator) /bin/ls, /bin/kill, /usr/bin/who
 
@@ -643,6 +652,18 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        pertain to the current host.  This behavior may be
        overridden via the verifypw and listpw options.
 
+
+
+
+15/Feb/2000                   1.6.2                            10
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        WWWWiiiillllddddccccaaaarrrrddddssss ((((aaaakkkkaaaa mmmmeeeettttaaaa cccchhhhaaaarrrraaaacccctttteeeerrrrssss))))::::
 
        ssssuuuuddddoooo allows shell-style _w_i_l_d_c_a_r_d_s to be used in pathnames
@@ -651,18 +672,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        routine.  Note that these are _n_o_t regular expressions.
 
        *       Matches any set of zero or more characters.
-
-
-
-
-26/Jan/2000                   1.6.2                            10
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
 
        ?       Matches any single character.
 
@@ -709,6 +718,18 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        dangerous since in a command context, it allows the user
        to run aaaannnnyyyy command on the system.
 
+
+
+
+15/Feb/2000                   1.6.2                            11
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        An exclamation point ('!') can be used as a logical _n_o_t
        operator both in an _a_l_i_a_s and in front of a Cmnd.  This
        allows one to exclude certain values.  Note, however, that
@@ -718,17 +739,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        Long lines can be continued with a backslash ('\') as the
        last character on the line.
-
-
-
-26/Jan/2000                   1.6.2                            11
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
 
        Whitespace between elements in a list as well as specicial
        syntactic characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n ('=', ':',
@@ -774,6 +784,18 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
                                 /usr/local/bin/zsh
         Cmnd_Alias     SU = /usr/bin/su
 
+
+
+
+15/Feb/2000                   1.6.2                            12
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        Here we override some of the compiled in default values.
        We want sudo to log via _s_y_s_l_o_g(3) using the _a_u_t_h facility
        in all cases.  We don't want to subject the full time
@@ -782,19 +804,6 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
        Host_Alias, we keep an additional local log file and make
        sure we log the year in each log line since the log
        entries will be kept around for several years.
-
-
-
-
-
-26/Jan/2000                   1.6.2                            12
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
 
         # Override builtin defaults
         Defaults               syslog=auth
@@ -841,6 +850,18 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                        /usr/oper/bin/
 
        The ooooppppeeeerrrraaaattttoooorrrr user may run commands limited to simple
+
+
+
+15/Feb/2000                   1.6.2                            13
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        maintenance.  Here, those are commands related to backups,
        killing processes, the printing system, shutting down the
        system, and any commands in the directory _/_u_s_r_/_o_p_e_r_/_b_i_n_/.
@@ -850,17 +871,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        The user jjjjooooeeee may only _s_u(1) to operator.
 
         pete           HPPA = /usr/bin/passwd [A-z]*, !/usr/bin/passwd root
-
-
-
-26/Jan/2000                   1.6.2                            13
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
 
        The user ppppeeeetttteeee is allowed to change anyone's password
        except for root on the _H_P_P_A machines.  Note that this
@@ -907,6 +917,17 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        any commands in the directory /usr/bin/ except for those
        commands belonging to the _S_U and _S_H_E_L_L_S Cmnd_Aliases.
 
+
+
+15/Feb/2000                   1.6.2                            14
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
         steve          CSNETS = (operator) /usr/local/op_commands/
 
        The user sssstttteeeevvvveeee may run any command in the directory
@@ -916,17 +937,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        On his personal workstation, valkyrie, mmmmaaaatttttttt needs to be
        able to kill hung processes.
-
-
-
-26/Jan/2000                   1.6.2                            14
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
 
         WEBMASTERS     www = (www) ALL, (root) /usr/bin/su www
 
@@ -971,6 +981,19 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        hostname be fully-qualified as returned by the hostname
        command or use the _f_q_d_n option in _s_u_d_o_e_r_s.
 
+
+
+
+
+15/Feb/2000                   1.6.2                            15
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
 FFFFIIIILLLLEEEESSSS
         /etc/sudoers           List of who can run what
         /etc/group             Local groups file
@@ -985,7 +1008,50 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-26/Jan/2000                   1.6.2                            15
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+15/Feb/2000                   1.6.2                            16
 
 
 
@@ -1051,6 +1117,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-26/Jan/2000                   1.6.2                            16
+15/Feb/2000                   1.6.2                            17
 
 

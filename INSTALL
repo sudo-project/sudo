@@ -229,17 +229,6 @@ Special features/options:
 	It should only be used when another, alternate, authentication
 	scheme is in use.
 
-  --with-editor=path
-	Specify the default editor used by visudo (and the only editor used
-	unless --with-env-editor is specified).  The default is the path
-	to vi on your system.
-
-  --with-env-editor
-	Makes visudo consult the EDITOR and VISUAL environment variables before
-	falling back on the default editor.  Note that this may create a
-	security hole as most editors allow a user to get a shell (which would
-	be a root shell and hence, no logging).
-
   --with-otp-only
 	This option is now just an alias for --without-passwd.
 
@@ -414,6 +403,17 @@ The following options are also configurable at runtime:
 
   --without-lecture
 	Don't print the lecture the first time a user runs sudo.
+
+  --with-editor=path
+	Specify the default editor used by visudo (and the only editor used
+	unless --with-env-editor is specified).  The default is the path
+	to vi on your system.
+
+  --with-env-editor
+	Makes visudo consult the EDITOR and VISUAL environment variables before
+	falling back on the default editor.  Note that this may create a
+	security hole as most editors allow a user to get a shell (which would
+	be a root shell and hence, no logging).
 
   --disable-authentication
         By default, sudo requires the user to authenticate via a

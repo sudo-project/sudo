@@ -2,8 +2,12 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.23  2000/01/26 21:21:28  millert
-''' Expanded docs on sudoers 'defaults' options based on INSTALL file info.
+''' Revision 1.24  2000/02/16 00:03:44  millert
+''' Add 'editor' and 'enveditor' sudoers defaults and make visudo honor them.
+''' This means that visudo will now parse the sudoers file *before* it is
+''' edited so a bogus sudoers file will cause a warning to go to stderr.
+''' Also, visudo checks the variables once--it does not check them after
+''' each editor run since that could be confusing.
 '''
 '''
 .de Sh
@@ -96,7 +100,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers 5 "1.6.2" "26/Jan/2000" "FILE FORMATS"
+.TH sudoers 5 "1.6.2" "15/Feb/2000" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
@@ -464,6 +468,11 @@ tty.  This will disallow things like \f(CW"rsh somehost sudo ls"\fR since
 of echo when there is no tty present, some sites may with to set
 this flag to prevent a user from entering a visible password.  This
 flag is off by default.
+.Ip "enveditor" 12
+If set, visudo will use the value of the \s-1EDITOR\s0 or \s-1VISUAL\s0 environment
+falling back on the default editor.  Note that this may create a
+security hole as most editors allow a user to get a shell (which
+would be a root shell and not be logged).
 .PP
 \fBIntegers\fR:
 .Ip "passwd_tries" 12
@@ -511,6 +520,9 @@ Defaults to \*(L"notice\*(R".
 .Ip "syslog_badpri" 12
 Syslog priority to use when user authenticates unsuccessfully.
 Defaults to \*(L"alert\*(R".
+.Ip "editor" 12
+Path to the editor to be used by visudo.  The default is the path
+to vi on your system.
 .PP
 \fBStrings that can be used in a boolean context\fR:
 .Ip "syslog" 12
@@ -999,6 +1011,8 @@ as returned by the \f(CWhostname\fR command or use the \fIfqdn\fR option in
 
 .IX Item "requiretty"
 
+.IX Item "enveditor"
+
 .IX Item "passwd_tries"
 
 .IX Item "loglinelen"
@@ -1022,6 +1036,8 @@ as returned by the \f(CWhostname\fR command or use the \fIfqdn\fR option in
 .IX Item "syslog_goodpri"
 
 .IX Item "syslog_badpri"
+
+.IX Item "editor"
 
 .IX Item "syslog"
 

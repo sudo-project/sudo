@@ -346,6 +346,13 @@ of echo when there is no tty present, some sites may with to set
 this flag to prevent a user from entering a visible password.  This
 flag is off by default.
 
+=item enveditor
+
+If set, visudo will use the value of the EDITOR or VISUAL environment
+falling back on the default editor.  Note that this may create a
+security hole as most editors allow a user to get a shell (which
+would be a root shell and not be logged).
+
 =back
 
 B<Integers>:
@@ -428,6 +435,11 @@ Defaults to "notice".
 
 Syslog priority to use when user authenticates unsuccessfully.
 Defaults to "alert".
+
+=item editor
+
+Path to the editor to be used by visudo.  The default is the path
+to vi on your system.
 
 =back 12
 
