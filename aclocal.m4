@@ -221,23 +221,31 @@ AC_DEFUN(SUDO_UID_T_LEN,
 [AC_REQUIRE([AC_TYPE_UID_T])
 AC_MSG_CHECKING(max length of uid_t)
 AC_CACHE_VAL(sudo_cv_uid_t_len,
-[AC_TRY_RUN(
+[rm -f conftestdata
+AC_TRY_RUN(
 [#include <stdio.h>
 #include <pwd.h>
 #include <sys/types.h>
 #include <sys/param.h>
 main() {
-#ifdef MAXUID
+  FILE *f;
   char b[BUFSIZ];
-  (void) sprintf(b, "%ld", MAXUID);
-  exit(strlen(b)+1);	/* add one just in case it is signed... */
+#ifdef MAXUID
+  uid_t u = MAXUID;
 #else
-  uid_t u = (uid_t) -1; char b[BUFSIZ];
-  (void) sprintf(b, "%u", u);
-  exit(strlen(b));
+  uid_t u = (uid_t) -1;
 #endif
-}], sudo_cv_uid_t_len=10, sudo_cv_uid_t_len=$?)
+
+  if ((f = fopen("conftestdata", "w")) == NULL)
+    exit(1);
+
+  (void) sprintf(b, "%u", u);
+  (void) fprintf(f, "%d\n", strlen(b));
+  (void) fclose(f);
+  exit(0);
+}], sudo_cv_uid_t_len=`cat conftestdata`, sudo_cv_uid_t_len=10)
 ])
+rm -f conftestdata
 AC_MSG_RESULT($sudo_cv_uid_t_len)
 AC_DEFINE_UNQUOTED(MAX_UID_T_LEN, $sudo_cv_uid_t_len)
 ])
