@@ -233,7 +233,7 @@ fi
 dnl
 dnl C compiler checks
 dnl
-ac_cv_c_cross="no"
+ac_cv_prog_cc_cross="no"
 cross_compiling="no"
 AC_PROG_CC
 AC_PROG_CPP
