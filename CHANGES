@@ -83,3 +83,10 @@ CHANGES between sudo 1.3
 26) Umask that sudo runs with may now be specified.
 
 27) There is now a "configure" script.
+
+28) Sudo will use ultra fast crypt (ufc) if it finds it for systems w/o
+    a real crypt(3) (non-US ConvexOs/Secure for instance).
+
+29) _BSD_COMPAT is now defined for Irix.
+
+30) The global variable uid is now initialized to -2 because I'm paranoid.
