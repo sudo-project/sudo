@@ -74,10 +74,6 @@ struct sudo_user {
 #define TRUE                     1
 #undef FALSE
 #define FALSE                    0
-#undef NOMATCH
-#define NOMATCH                 -1
-#undef UNSPEC
-#define UNSPEC                  -2
 
 /*
  * find_path()/load_cmnd() return values
@@ -206,9 +202,12 @@ int find_path		__P((char *, char **, struct stat *, char *));
 void check_user		__P((int));
 void verify_user	__P((struct passwd *, char *));
 int sudoers_lookup	__P((int));
+int parse_sudoers	__P((const char *));
 #ifdef HAVE_LDAP
-int sudo_ldap_check	__P((int));
-void sudo_ldap_list_matches __P((void));
+int sudo_ldap_check	__P((VOID *, int));
+void sudo_ldap_display_privs __P((void));
+void sudo_ldap_update_defaults __P((VOID *));
+VOID *sudo_ldap_open	__P((void));
 #endif
 void set_perms		__P((int));
 void remove_timestamp	__P((int));
@@ -237,17 +236,17 @@ int pam_prep_user	__P((struct passwd *));
 void zero_bytes		__P((volatile VOID *, size_t));
 int gettime		__P((struct timespec *));
 FILE *open_sudoers	__P((const char *, int *));
-YY_DECL;
+void display_privs      __P((struct passwd *));
 #ifdef HAVE_SYSTRACE
 void systrace_attach	__P((pid_t));
 #endif
+YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
 extern struct passwd *auth_pw;
 
-extern FILE *sudoers_fp;
 extern int tgetpass_flags;
 extern uid_t timestamp_uid;
 #endif
