@@ -592,7 +592,7 @@ static int sudo_krb_validate_user(user, pass)
     char *user, *pass;
 {
     char realm[REALM_SZ];
-    char tkfile[13 + sizeof(_PATH_SUDO_TIMEDIR)];	/* uid is 10 char max */
+    char tkfile[MAX_UID_T_LEN + sizeof(_PATH_SUDO_TIMEDIR)];
     int k_errno;
 
     /* Get the local realm */
