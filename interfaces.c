@@ -30,8 +30,6 @@
 static char rcsid[] = "$Id$";
 #endif /* lint */
 
-#define MAIN
-
 #include "config.h"
 
 #include <stdio.h>
@@ -87,6 +85,11 @@ extern char *malloc	__P((size_t));
 #endif /* !STDC_HEADERS && !__GNUC__ */
 
 /*
+ * Local prototypes
+ */
+static struct ifreq *next_if	__P((struct ifreq *));
+
+/*
  * Globals
  */
 struct interface *interfaces;
@@ -108,10 +111,10 @@ void load_interfaces()
     unsigned long localhost_mask;
     struct ifconf *ifconf;
     char ifconf_buf[sizeof(struct ifconf) + BUFSIZ];
-    struct ifreq ifreq;
+    struct ifreq ifreq, *cur;
     struct sockaddr_in *sin;
     char buf[BUFSIZ];
-    int sock, i, j;
+    int sock, n;
 #ifdef _ISC
     struct strioctl strioctl;
 #endif /* _ISC */
@@ -145,15 +148,14 @@ void load_interfaces()
 #endif /* _ISC */
 
     /*
-     * find out how many interfaces exist
+     * get the maximum number of interfaces that *could* exist.
      */
-    num_interfaces = ifconf->ifc_len / sizeof(struct ifreq);
+    n = ifconf->ifc_len / sizeof(struct ifreq);
 
     /*
      * malloc() space for interfaces array
      */
-    interfaces = (struct interface *) malloc(sizeof(struct interface) *
-	num_interfaces);
+    interfaces = (struct interface *) malloc(sizeof(struct interface) * n);
     if (interfaces == NULL) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
@@ -163,9 +165,11 @@ void load_interfaces()
     /*
      * for each interface, get the ip address and netmask
      */
-    for (i = 0, j = 0; i < num_interfaces; i++) {
-	(void) strncpy(ifreq.ifr_name, ifconf->ifc_req[i].ifr_name,
-	    sizeof(ifreq.ifr_name));
+
+    cur = ifconf->ifc_req;
+    do {
+	/* setup ifreq struct */
+	ifreq = *cur;
 
 	/* get the ip address */
 #ifdef _ISC
@@ -185,18 +189,15 @@ void load_interfaces()
 	sin = (struct sockaddr_in *) &ifreq.ifr_addr;
 
 	/* make sure we don't have a dupe (usually consecutive) */
-	if (j > 0 && memcmp(&interfaces[j-1].addr, &(sin->sin_addr),
-	    sizeof(sin->sin_addr)) == 0)
+	if (num_interfaces && interfaces[num_interfaces - 1].addr.s_addr ==
+	    sin->sin_addr.s_addr)
 	    continue;
 
 	/* store the ip address */
-	(void) memcpy(&interfaces[j].addr, &(sin->sin_addr),
-	    sizeof(struct in_addr));
+	interfaces[num_interfaces].addr.s_addr = sin->sin_addr.s_addr;
 
 	/* get the netmask */
 #ifdef SIOCGIFNETMASK
-	(void) strncpy(ifreq.ifr_name, ifconf->ifc_req[i].ifr_name,
-	    sizeof(ifreq.ifr_name));
 #ifdef _ISC
 	STRSET(SIOCGIFNETMASK, (caddr_t) &ifreq, sizeof(ifreq));
 	if (ioctl(sock, I_STR, (caddr_t) &strioctl) == 0) {
@@ -204,31 +205,30 @@ void load_interfaces()
 	if (ioctl(sock, SIOCGIFNETMASK, (caddr_t) &ifreq) == 0) {
 #endif /* _ISC */
 	    /* store the netmask */
-	    (void) memcpy(&interfaces[j].netmask, &(sin->sin_addr),
-		sizeof(struct in_addr));
+	    interfaces[num_interfaces].netmask.s_addr = sin->sin_addr.s_addr;
 	} else {
 #else
 	{
 #endif /* SIOCGIFNETMASK */
-	    if (IN_CLASSC(interfaces[j].addr.s_addr))
-		interfaces[j].netmask.s_addr = htonl(IN_CLASSC_NET);
-	    else if (IN_CLASSB(interfaces[j].addr.s_addr))
-		interfaces[j].netmask.s_addr = htonl(IN_CLASSB_NET);
+	    if (IN_CLASSC(interfaces[num_interfaces].addr.s_addr))
+		interfaces[num_interfaces].netmask.s_addr = htonl(IN_CLASSC_NET);
+	    else if (IN_CLASSB(interfaces[num_interfaces].addr.s_addr))
+		interfaces[num_interfaces].netmask.s_addr = htonl(IN_CLASSB_NET);
 	    else
-		interfaces[j].netmask.s_addr = htonl(IN_CLASSA_NET);
+		interfaces[num_interfaces].netmask.s_addr = htonl(IN_CLASSA_NET);
 	}
 
 	/* avoid localhost and friends */
-	if ((interfaces[j].addr.s_addr & interfaces[j].netmask.s_addr) ==
-	    localhost_mask)
+	if ((interfaces[num_interfaces].addr.s_addr &
+	    interfaces[num_interfaces].netmask.s_addr) == localhost_mask)
 	    continue;
 
-	++j;
-    }
+	num_interfaces++;
+    } while ((cur = next_if(cur)) &&
+	     (caddr_t) cur < (caddr_t) ifconf->ifc_req + ifconf->ifc_len);
 
     /* if there were bogus entries, realloc the array */
-    if (i != j) {
-	num_interfaces = j;
+    if (n != num_interfaces) {
 	interfaces = (struct interface *) realloc(interfaces,
 	    sizeof(struct interface) * num_interfaces);
 	if (interfaces == NULL) {
@@ -237,4 +237,31 @@ void load_interfaces()
 	    exit(1);
 	}
     }
+}
+
+
+
+/**********************************************************************
+ *
+ *  next_if()
+ *
+ *  This function returns a pointer to the next struct ifreq *
+ *  in the list.
+ */
+
+static struct ifreq *next_if(cur)
+    struct ifreq *cur;
+{
+    struct ifreq *next;
+    u_char sa_len;
+
+#ifdef HAVE_SA_LEN
+    sa_len = cur->ifr_addr.sa_len;
+    if (sa_len > sizeof(cur->ifr_ifru))
+	next = (struct ifreq *) ((caddr_t) cur + sizeof(cur->ifr_name) + sa_len);
+    else
+#endif /* HAVE_SA_LEN */
+	next = (struct ifreq *) ((caddr_t) cur + sizeof(cur->ifr_name) + sizeof(cur->ifr_ifru));
+
+    return(next);
 }
