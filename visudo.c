@@ -107,8 +107,8 @@ int parse_error = FALSE;
  * For the parsing routines
  */
 char host[] = "";
-char *user = "";
 char *cmnd = "";
+struct passwd *sudo_pw_ent;
 
 
 /********************************************************************
@@ -123,7 +123,7 @@ int main(argc, argv)
     char **argv;
 {
     char buf[BUFSIZ];			/* buffer used for copying files */
-    char * Editor = EDITOR;		/* Editor to use (default is EDITOR */
+    char * Editor = EDITOR;		/* editor to use (default is EDITOR */
     int sudoers_fd;			/* sudoers file descriptor */
     int stmp_fd;			/* stmp file descriptor */
     int n;				/* length parameter */
@@ -169,6 +169,9 @@ int main(argc, argv)
 		       Argv[0], SUDOERS_OWNER);
 	exit(1);
     }
+
+    /* sudo_pw_ent needs to be defined to _something_, this will do */
+    sudo_pw_ent = pwd;
 
     /*
      * Copy sudoers file to stmp
