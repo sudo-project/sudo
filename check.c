@@ -554,8 +554,8 @@ static void check_passwd()
 	if (ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION,
                                        user_name,	/* name */
                                        NULL,		/* instance */
-                                       NULL		/* realm */
-                                       pass		/* password */
+                                       NULL,		/* realm */
+                                       pass,		/* password */
                                        0,		/* lifetime */
                                        0, 0,		/* spare */
                                        NULL) == 0)	/* reason */
