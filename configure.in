@@ -62,9 +62,6 @@ case "$OS" in
 		fi
 		;;
     "irix")	echo "Looks like IRIX"
-		# need bsd signals to get sigmask()
-		AC_DEFINE(_BSD_SIGNALS)
-		AC_DEFINE(RETSIGTYPE, int)
 		# configure doesn't think irix has stdc headers
 		# but it's good enough for sudo
 		AC_DEFINE(STDC_HEADERS)
