@@ -58,17 +58,6 @@ extern int stat		__P((const char *, struct stat *));
 #endif /* !STDC_HEADERS */
 
 
-/*
- * Posix versions for those without
- */
-#ifndef _S_IFMT
-#define _S_IFMT		S_IFMT
-#endif /* _S_IFMT */
-#ifndef _S_ISREG
-#define _S_ISREG	S_ISREG
-#endif /* _S_ISREG */
-
-
 /******************************************************************
  *
  *  sudo_goodpath()
