@@ -279,7 +279,7 @@ void log_error(code)
 #ifdef _PATH_SUDO_LOGFILE
 
     /* become root */
-    be_root();
+    set_perms(PERM_ROOT);
 
     oldmask = umask(077);
     fp = fopen(_PATH_SUDO_LOGFILE, "a");
@@ -343,7 +343,7 @@ void log_error(code)
     }
 
     /* relinquish root */
-    be_user();
+    set_perms(PERM_USER);
 #endif /* _PATH_SUDO_LOGFILE */
 
     /* send mail if appropriate */
@@ -398,7 +398,7 @@ static void send_mail()
     /*
      * we don't want any security problems ...
      */
-    be_full_user();
+    set_perms(PERM_FULL_USER);
     
 #ifdef POSIX_SIGNALS
     action.sa_handler = SIG_IGN;

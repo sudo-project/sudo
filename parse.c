@@ -532,7 +532,7 @@ int validate()
     int i, return_code;
 
     /* become root */
-    be_root();
+    set_perms(PERM_ROOT);
 
     if ((sudoers_fp = fopen(_PATH_SUDO_SUDOERS, "r")) == NULL) {
 	perror(_PATH_SUDO_SUDOERS);
@@ -558,7 +558,7 @@ int validate()
     (void) fclose(sudoers_fp);
 
     /* relinquish root */
-    be_user();
+    set_perms(PERM_USER);
 
     /*
      * if a parsing error occurred, set return_code accordingly
