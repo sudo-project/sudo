@@ -577,23 +577,30 @@ case "$host" in
 esac
 
 dnl
-dnl Search for various shadow password type unless we already know
-dnl XXX - need a better default case (define SHADOW_TYPE to *something*)
+dnl Guess shadow password type unless we already know it.
 dnl
 if test "$with_C2" = "yes" -a -z "$SHADOW_TYPE"; then
-    echo "checking for shadow password type..."
-    AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SPW_SVR4", AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SPW_SECUREWARE", [test -f /etc/master.passwd && SHADOW_TYPE="SPW_BSD"]))
+    AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SPW_SECUREWARE", [AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SPW_SVR4", [test -f /etc/master.passwd && SHADOW_TYPE="SPW_BSD"])])
+    echo $ac_n "checking for shadow password type... $ac_c"
     case "$SHADOW_TYPE" in
-	"SPW_SVR4")		echo "shadow password type is getspnam (svr4)";
-		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE);;
-	"SPW_BSD")		echo "shadow password type is /etc/master.passwd (BSD)";;
-	"SPW_SECUREWARE")	echo "shadow password type is etprpwuid (SecureWare)";
-		SUDO_LIBS="${SUDO_LIBS} -lprot -lx";
-		LIBS="${LIBS} -lprot -lx";
-		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE);;
-	*)	echo "unknown";
-		echo "Unable to determine shadow passwd type, sudo may not be able to verify passwords";;
+	"SPW_SVR4")
+		echo "SVR4"
+		;;
+	"SPW_BSD")
+		echo "BSD"
+		;;
+	"SPW_SECUREWARE")
+		echo "SecureWare"
+		SUDO_LIBS="${SUDO_LIBS} -lprot -lx"
+		LIBS="${LIBS} -lprot -lx"
+		;;
+	*)
+		SHADOW_TYPE="SPW_NONE"
+		echo "unknown"
+		echo "Unable to determine shadow passwd type, sudo may not be able to verify passwords"
+		;;
     esac
+    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 fi
 
 dnl
