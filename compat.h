@@ -85,6 +85,13 @@
 #endif /* S_IRWXU */
 
 /*
+ * Some OS's may not have this.
+ */
+#ifndef howmany
+#define howmany(x, y)	(((x) + ((y) - 1)) / (y))
+#endif
+
+/*
  * We need to know how long the longest password may be.
  * For alternate password schemes we need longer passwords.
  * This is a bit, ummm, gross but necesary.
