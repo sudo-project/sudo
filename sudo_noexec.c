@@ -41,20 +41,33 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
- * Dummy replacement for libc execve(2)
+ * Dummy versions of the execve() family of syscalls.  We don't need
+ * to stub out all of them, just the ones that correspond to actual
+ * system calls (which varies by OS).  Note that it is still possible
+ * to access the real syscalls via the syscall() interface but very
+ * few programs actually do that.
  */
-int
-#ifdef __STDC__
-execve(const char *path, char *const argv[], char *const envp[])
-#else
-execve(path, argv, envp)
-    const char *path;
-    char *const argv[];
-    char *const envp[];
-#endif
-{
-    extern int errno;
 
-    errno = EACCES;
-    return(-1);
+extern int errno;
+
+#define DUMMY(fn, args, atypes)	\
+int				\
+fn args				\
+    atypes			\
+{				\
+    errno = EACCES;		\
+    return(-1);			\
 }
+
+DUMMY(execve, (path, argv, envp),
+      const char *path; char *const argv[]; char *const envp[];)
+DUMMY(_execve, (path, argv, envp),
+      const char *path; char *const argv[]; char *const envp[];)
+DUMMY(execv, (path, argv, envp),
+      const char *path; char *const argv[];)
+DUMMY(_execv, (path, argv, envp),
+      const char *path; char *const argv[];)
+DUMMY(fexecve, (fd, argv, envp),
+      int fd; char *const argv[]; char *const envp[];)
+DUMMY(_fexecve, (fd, argv, envp),
+      int fd; char *const argv[]; char *const envp[];)
