@@ -1,0 +1,107 @@
+.\" Copyright (c) 1989, 1991, 1993
+.\"	The Regents of the University of California.  All rights reserved.
+.\"
+.\" This code is derived from software contributed to Berkeley by
+.\" Guido van Rossum.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.\"     @(#)fnmatch.3	8.3 (Berkeley) 4/28/95
+.\"
+.TH FNMATCH 3 "April 28, 1995"
+.UC 7
+.SH NAME
+fnmatch \- match filename or pathname
+.SH SYNOPSIS
+.nf
+#include <fnmatch.h>
+
+int fnmatch(const char *pattern, const char *string, int flags);
+.fi
+.SH DESCRIPTION
+.I Fnmatch
+matches patterns according to the rules used by the shell.
+It checks the string specified by the
+.I string
+argument to see if it matches the pattern specified by the
+.I pattern
+argument.
+.PP
+The
+.I flags
+argument modifies the interpretation of
+.I pattern
+and
+.I string.
+The value of
+.I flags
+is the bitwise inclusive OR of any of the following
+constants, which are defined in the include file
+.IR fnmatch.h .
+.TP
+FNM_NOESCAPE
+Normally, every occurrence of a backslash (`\e') followed by a character in
+.I pattern
+is replaced by that character.
+This is done to negate any special meaning for the character.
+If the
+.I FNM_NOESCAPE
+flag is set, a backslash character is treated as an ordinary character.
+.TP
+FNM_PATHNAME
+Slash characters in
+.I string
+must be explicitly matched by slashes in
+.IR pattern .
+If this flag is not set, then slashes are treated as regular characters.
+.TP
+FNM_PERIOD
+Leading periods in strings match periods in patterns.
+The definition of ``leading'' is related to the specification of
+.I FNM_PATHNAME.
+A period is always ``leading'' if it is the first character in
+.I string .
+Additionally, if
+.I FNM_PATHNAME
+is set,
+a period is ``leading'' if it immediately follows a slash.
+.SH RETURN VALUES
+The
+.I fnmatch
+function returns zero if
+.I string
+matches the pattern specified by
+.I pattern ,
+otherwise, it returns the value
+.I FNM_NOMATCH .
+.SH SEE ALSO
+sh(1), glob(3), regex(3), regexp(3).
+.SH BUGS
+The pattern ``*'' matches the empty string, even if
+.I FNM_PATHNAME
+is specified.
