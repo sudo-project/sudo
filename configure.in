@@ -6,6 +6,7 @@ dnl
 dnl Variables that get substituted in the Makefile
 dnl
 PROGS="sudo visudo"
+AC_SUBST(CFLAGS)dnl
 AC_SUBST(PROGS)dnl
 LDFLAGS=""
 AC_SUBST(LDFLAGS)dnl
@@ -45,6 +46,12 @@ AC_ARG_WITH(SKEY, [  --with-SKEY             enable Skey support (untested)], AC
 SKEY=1
 echo 'Configuring for use with Skey')
 
+dnl --with-SecurID
+AC_ARG_WITH(SECURID, [  --with-SecurID        enable SecurID support], AC_DEFINE(HAVE_SECURID)
+SECURID=1
+echo 'Configuring for use with SecurID')
+
+
 dnl --with-kerb4
 AC_ARG_WITH(kerb4, [  --with-kerb4            enable kerberos v4 support], AC_DEFINE(HAVE_KERB4)
 KERB4=1
@@ -61,8 +68,8 @@ AFS=1
 echo 'Configuring for use with AFS')
 
 dnl --with-csops
-AC_ARG_WITH(csops, [  --with-csops            add CSops standard options], OPTIONS="${OPTIONS} -DUSE_INSULTS -DENV_EDITOR"
-echo 'CSOps--adding options: USE_INSULTS ENV_EDITOR')
+AC_ARG_WITH(csops, [  --with-csops            add CSops standard options], OPTIONS="${OPTIONS} -DUSE_INSULTS -DCLASSIC_INSULTS -DCSOPS_INSULTS -DENV_EDITOR"
+echo 'CSOps--adding options: USE_INSULTS CLASSIC_INSULTS CSOPS_INSULTS ENV_EDITOR')
 
 dnl
 dnl If we don't have egrep we can't do anything...
@@ -258,7 +265,7 @@ dnl
 dnl search for various shadow password types unless we already know
 dnl XXX - need to ACDEFINE *something* right???
 dnl
-if test -z "$AFS" -a -z "$KERB4" -a -z "$KERB5" -a -n "$C2" -a -z "$SHADOW_TYPE"
+if test -z "$SKEY" -a -z "$SECURID" -a -z "$AFS" -a -z "$KERB4" -a -z "$KERB5" -a -n "$C2" -a -z "$SHADOW_TYPE"
     then
     echo "checking for shadow password type..."
     AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SPW_SVR4", AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SPW_SECUREWARE", [test -f /etc/master.passwd && SHADOW_TYPE="SPW_BSD"]))
@@ -386,9 +393,16 @@ if test -n "$AFS" ; then
 fi
 
 dnl
-dnl extra Skey lib
+dnl extra Skey lib + includes
 if test -n "$SKEY" ; then
     LIBS="${LIBS} -lskey"
+fi
+
+dnl
+dnl extra SecurID lib + includes
+if test -n "$SECURID" ; then
+    LIBS="${LIBS} /usr/ace/sdiclient.a"
+    CPPFLAGS="${CPPFLAGS} -I/usr/ace"
 fi
 
 dnl
