@@ -269,6 +269,12 @@ void log_error(code)
 		tty, cwd, runas_user);
 	    break;
 
+	case NO_CMND_SAFE:
+	    (void) sprintf(p,
+		"internal error, cmnd_safe never got set for %s; %s", cmnd,
+		"please report this error to sudo-bugs@courtesan.com");
+	    break;
+
 #ifdef HAVE_KERB5
 	case GLOBAL_KRB5_INIT_ERR:
 	    (void) sprintf(p, "Could not initialize Kerberos V");
@@ -662,6 +668,11 @@ void inform_user(code)
 		"Resource allocation failure.\n");
 	    break;
 
+	case NO_CMND_SAFE:
+	    (void) fprintf(stderr,
+		"Internal error, cmnd_safe never got set for %s\n", cmnd);
+	    break;
+
 	default:
 	    (void) fprintf(stderr,
 		"Something weird happened.\n\n");
@@ -720,6 +731,7 @@ static int appropriate(code)
     case BAD_STAMPDIR:
     case BAD_STAMPFILE:
     case BAD_ALLOCATION:
+    case NO_CMND_SAFE:
     default:
 	return (1);
 	break;

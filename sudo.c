@@ -333,6 +333,11 @@ int main(argc, argv)
 	    if ((sudo_mode & MODE_RESET_HOME) && runas_homedir)
 		(void) sudo_setenv("HOME", runas_homedir);
 
+	    /* this *must* have been set if we got a match but... */
+	    if (cmnd_safe == NULL) {
+		inform_user(NO_CMND_SAFE);
+		exit(1);
+	    }
 #ifndef PROFILING
 	    if ((sudo_mode & MODE_BACKGROUND) && fork() > 0)
 		exit(0);
