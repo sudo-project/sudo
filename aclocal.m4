@@ -209,5 +209,5 @@ $0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 #ifdef sgi
   yes
 #endif
-], AC_DEFINE(_BSD_COMPAT) [$1], [$2])
+], AC_DEFINE(_BSD_COMPAT) AC_DEFINE(RETSIGTYPE, int) AC_DEFINE(STDC_HEADERS) [$1], [$2])
 ])dnl
