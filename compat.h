@@ -245,4 +245,12 @@ typedef struct sigaction sigaction_t;
 # endif
 #endif
 
+/*
+ * HP-UX 9.x has RLIMIT_* but no RLIM_INFINITY.
+ * Using -1 works because we only check for RLIM_INFINITY and do not set it.
+ */
+#ifndef RLIM_INFINITY
+# define RLIM_INFINITY	(-1)
+#endif
+
 #endif /* _SUDO_COMPAT_H */
