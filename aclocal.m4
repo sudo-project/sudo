@@ -225,15 +225,20 @@ AC_CACHE_VAL(sudo_cv_uid_t_len,
 AC_TRY_RUN(
 [#include <stdio.h>
 #include <pwd.h>
+#include <limits.h>
 #include <sys/types.h>
 #include <sys/param.h>
 main() {
   FILE *f;
   char b[BUFSIZ];
-#ifdef MAXUID
-  uid_t u = MAXUID;
+#ifdef UID_MAX
+  uid_t u = UID_MAX;
 #else
+# ifdef MAXUID
+  uid_t u = MAXUID;
+# else
   uid_t u = (uid_t) -1;
+# endif
 #endif
 
   if ((f = fopen("conftestdata", "w")) == NULL)
