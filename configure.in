@@ -1059,6 +1059,13 @@ if test -z "$EGREPPROG"; then
 fi
 
 dnl
+dnl Prevent configure from adding the -g flag unless in devel mode
+dnl
+if test "$with_devel" != "yes"; then
+    ac_cv_prog_cc_g=no
+fi
+
+dnl
 dnl C compiler checks
 dnl XXX - the cross-compiler check gets false positives so we override it
 dnl
