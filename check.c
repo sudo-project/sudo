@@ -678,9 +678,9 @@ static int sudo_krb_validate_user(pw_ent, pass)
     char tkfile[sizeof(_PATH_SUDO_TIMEDIR) + 4 + MAX_UID_T_LEN];
     int k_errno;
 
-    /* Get the local realm */
+    /* Get the local realm, or retrun failure (no krb.conf) */
     if (krb_get_lrealm(realm, 1) != KSUCCESS)
-	(void) fprintf(stderr, "Warning: Unable to get local kerberos realm\n");
+	return(-1);
 
     /*
      * Set the ticket file to be in sudo sudo timedir so we don't
