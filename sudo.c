@@ -131,6 +131,7 @@ FILE *sudoers_fp = NULL;
 struct interface *interfaces;
 int num_interfaces;
 int tgetpass_flags;
+int timestamp_uid;
 extern int errorlineno;
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
@@ -285,6 +286,22 @@ main(argc, argv, envp)
 	runas_pw = sudo_getpwnam(*user_runas);
 	if (runas_pw == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, "no passwd entry for %s!", *user_runas);
+    }
+
+    /*
+     * Look up the timestamp dir owner if one is specified.
+     */
+    if (def_str(I_TIMESTAMPOWNER)) {
+	struct passwd *pw;
+
+	if (*def_str(I_TIMESTAMPOWNER) == '#')
+	    pw = getpwuid(atoi(def_str(I_TIMESTAMPOWNER) + 1));
+	else
+	    pw = getpwnam(def_str(I_TIMESTAMPOWNER));
+	if (!pw)
+	    log_error(0, "timestamp owner (%s): No such user",
+		def_str(I_TIMESTAMPOWNER));
+	timestamp_uid = pw->pw_uid;
     }
 
     /* This goes after the sudoers parse since we honor sudoers options. */

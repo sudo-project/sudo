@@ -145,6 +145,7 @@ update_timestamp(timestampdir, timestampfile)
     char *timestampfile;
 {
 
+    set_perms(PERM_TIMESTAMP, 0);
     if (touch(timestampfile ? timestampfile : timestampdir, time(NULL)) == -1) {
 	if (timestampfile) {
 	    int fd = open(timestampfile, O_WRONLY|O_CREAT|O_TRUNC, 0600);
@@ -158,6 +159,7 @@ update_timestamp(timestampdir, timestampfile)
 		log_error(NO_EXIT|USE_ERRNO, "Can't mkdir %s", timestampdir);
 	}
     }
+    set_perms(PERM_ROOT, 0);
 }
 
 /*
@@ -307,6 +309,8 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
     char *dirparent = def_str(I_TIMESTAMPDIR);
     int status = TS_ERROR;		/* assume the worst */
 
+    set_perms(PERM_TIMESTAMP, 0);
+
     /*
      * Sanity check dirparent and make it if it doesn't already exist.
      * We start out assuming the worst (that the dir is not sane) and
@@ -318,9 +322,9 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 	if (!S_ISDIR(sb.st_mode))
 	    log_error(NO_EXIT, "%s exists but is not a directory (0%o)",
 		dirparent, sb.st_mode);
-	else if (sb.st_uid != 0)
-	    log_error(NO_EXIT, "%s owned by uid %ld, should be owned by root",
-		dirparent, (long) sb.st_uid);
+	else if (sb.st_uid != timestamp_uid)
+	    log_error(NO_EXIT, "%s owned by uid %ld, should be uid %ld",
+		dirparent, (long) sb.st_uid, (long) timestamp_uid);
 	else if ((sb.st_mode & 0000022))
 	    log_error(NO_EXIT,
 		"%s writable by non-owner (0%o), should be mode 0700",
@@ -342,8 +346,10 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 		status = TS_MISSING;
 	}
     }
-    if (status == TS_ERROR)
+    if (status == TS_ERROR) {
+	set_perms(PERM_ROOT, 0);
 	return(status);
+    }
 
     /*
      * Sanity check the user's ticket dir.  We start by downgrading
@@ -361,9 +367,9 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 	    } else
 		log_error(NO_EXIT, "%s exists but is not a directory (0%o)",
 		    timestampdir, sb.st_mode);
-	} else if (sb.st_uid != 0)
-	    log_error(NO_EXIT, "%s owned by uid %ld, should be owned by root",
-		timestampdir, (long) sb.st_uid);
+	} else if (sb.st_uid != timestamp_uid)
+	    log_error(NO_EXIT, "%s owned by uid %ld, should be uid %ld",
+		timestampdir, (long) sb.st_uid, (long) timestamp_uid);
 	else if ((sb.st_mode & 0000022))
 	    log_error(NO_EXIT,
 		"%s writable by non-owner (0%o), should be mode 0700",
@@ -402,10 +408,10 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 		    timestampfile, sb.st_mode);
 	    } else {
 		/* If bad uid or file mode, complain and kill the bogus file. */
-		if (sb.st_uid != 0) {
+		if (sb.st_uid != timestamp_uid) {
 		    log_error(NO_EXIT,
-			"%s owned by uid %ld, should be owned by root",
-			timestampfile, (long) sb.st_uid);
+			"%s owned by uid %ld, should be uid %ld",
+			timestampfile, (long) sb.st_uid, (long) timestamp_uid);
 		    (void) unlink(timestampfile);
 		} else if ((sb.st_mode & 0000022)) {
 		    log_error(NO_EXIT,
@@ -456,6 +462,7 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 	}
     }
 
+    set_perms(PERM_ROOT, 0);
     return(status);
 }
 

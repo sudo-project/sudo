@@ -116,6 +116,7 @@ struct sudo_user {
 #define PERM_FULL_USER           0x03
 #define PERM_SUDOERS             0x04
 #define PERM_RUNAS               0x05
+#define PERM_TIMESTAMP           0x06
 
 /*
  * Shortcuts for sudo_user contents.
@@ -235,6 +236,7 @@ extern int Argc;
 extern char **Argv;
 extern FILE *sudoers_fp;
 extern int tgetpass_flags;
+extern int timestamp_uid;
 
 extern void (*set_perms) __P((int, int));
 #endif

@@ -145,6 +145,11 @@ set_perms_posix(perm, sudo_mode)
 					fatal("seteuid(SUDOERS_UID)", 1);
 				}
 			      	break;
+	case PERM_TIMESTAMP:
+				if (seteuid(timestamp_uid))
+				    fatal("seteuid(timestamp_uid)", 1);
+			      	break;
+
     }
 }
 #endif /* !NO_SAVED_IDS && _SC_SAVED_IDS && _SC_VERSION */
@@ -213,6 +218,10 @@ set_perms_fallback(perm, sudo_mode)
 					fatal("setreuid(0, SUDOERS_UID)", 1);
 				}
 			      	break;
+	case PERM_TIMESTAMP:
+				if (setreuid(0, timestamp_uid))
+				    fatal("setreuid(0, timestamp_uid)", 1);
+			      	break;
     }
 }
 
@@ -275,6 +284,10 @@ set_perms_fallback(perm, sudo_mode)
 				    if (seteuid(SUDOERS_UID))
 					fatal("seteuid(SUDOERS_UID)", 1);
 				}
+			      	break;
+	case PERM_TIMESTAMP:
+				if (seteuid(timestamp_uid))
+				    fatal("seteuid(timestamp_uid)", 1);
 			      	break;
     }
 }
