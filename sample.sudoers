@@ -27,7 +27,7 @@ Host_Alias	SPARC = bigtime, eclipse, moet, anchor:\
 		ALPHA = widget, thalamus, foobar:\
 		HPPA = boa, nag, python
 Host_Alias	CUNETS = 128.138.0.0/255.255.0.0
-Host_Alias	CSNETS = 128.138.243.0, 128.138.204.0, 128.138.242.0
+Host_Alias	CSNETS = 128.138.243.0, 128.138.204.0/24, 128.138.242.0
 Host_Alias	SERVERS = master, mail, www, ns
 Host_Alias	CDROM = orion, perseus, hercules
 
