@@ -1765,50 +1765,63 @@ Sudo 1.6.8p4 released.
 
 Sudo 1.6.8p5 released.
 
-557) New monitor functionality for systems with systrace(4).  When tracing
+557) Added a set of missing braces needed for MacOS X / Darwin.
+
+558) Define LDAP_OPT_SUCCESS for those without it.
+
+Sudo 1.6.8p6 released.
+
+559) New monitor functionality for systems with systrace(4).  When tracing
      is enabled sudo will fork a daemon that traces the command and
      intercepts and execve() calls and allows/denies the call based on
      a sudoers lookup.  Also updates the command's environment with
      the SUDO_* variables if supported by the version of systrace(4).
 
-558) Added support for multiple sudoers file via #include.
+560) Added support for multiple sudoers file via #include.
 
-559) An empty sudoers file is no longer a parse error.
+561) An empty sudoers file is no longer a parse error.
 
-560) Fixed error handling if the lexer runs out of memory.
+562) Fixed error handling if the lexer runs out of memory.
 
-561) Optimized lexer slightly by removing use of unput() and removing
+563) Optimized lexer slightly by removing use of unput() and removing
      some ambiguity with the Default keyword.
 
-562) Wildcard matches on commands now use glob() and stat() so 
+564) Wildcard matches on commands now use glob() and stat() so 
      that relative paths work correctly in conjunction with wildcards.
 
-563) Rewritten parser that converts sudoers into a set of data structures.
+565) Rewritten parser that converts sudoers into a set of data structures.
      This eliminates ordering issues and makes it possible to apply
      sudoers Defaults entries before searching for the command.
 
-564) Visudo will now warn about aliases that are defined but not used.
+566) Visudo will now warn about aliases that are defined but not used.
 
-565) The new -U option can now be used with "sudo -l" to let root
+567) The new -U option can now be used with "sudo -l" to let root
      (or a user with "sudo ALL) see another user's privs.
 
-566) The "secure_path" run-time Defaults option has been restored.
+568) The "secure_path" run-time Defaults option has been restored.
 
-567) Password and group data is now cached for fast lookup.
+569) Password and group data is now cached for fast lookup.
 
-568) Sudo will use the supplemental group vector if it is present
-     instead of doing string comparisons of the group members.  This
+570) Sudo will use the supplemental group vector if it is present
+     in addition to doing string comparisons of the group members.  This
      is useful for systems with nsswitch.conf where group data can be in
      either /etc/group or some other database (NIS, NIS+, LDAP, etc)
      and getgrnam() only returns data from one source.
 
-569) Visudo can now handle VISUAL or EDITOR environment variables
+571) Visudo can now handle VISUAL or EDITOR environment variables
      that contain command line arguments.
 
-570) Added support for per-command defaults enties.
+572) Added support for per-command defaults enties.
 
-571) "sudo -l" now takes an optional 'command' argument to check whether
+573) "sudo -l" now takes an optional 'command' argument to check whether
      a specific command is allowed.
 
-572) The file descriptor at which sudo starts closing all open files
+574) The file descriptor at which sudo starts closing all open files
      is now configurable via sudoers and, optionally, the command line.
+
+575) "sudo -l" now includes Defaults info and wraps lines based on the
+     screen width.
+
+576) testsudoers can now be passed fake passwd and group files.
+
+577) Fixed Makefile depencies when generating the parser.
