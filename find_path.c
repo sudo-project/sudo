@@ -230,7 +230,9 @@ bzero ( buf, MAXPATHLEN+1 );
 if ( path ) strcat ( buf, path );
 if ( *file != '/' && path [strlen(path)-1] != '/' ) strcat ( buf, "/" );
 strcat ( buf, file );
-if ( ! stat ( buf, &s ) && (s.st_mode & 0000111) >= 0000001 )
+
+/* make sure file exists and is executable */
+if ( ! stat ( buf, &s ) && (s.st_mode & 0000111) )
     return ( check_link ( buf ) );
 else
     return ( NULL );
