@@ -114,15 +114,17 @@ HDRS = sudo.h pathnames.h options.h compat.h version.h insults.h \
 
 VERSION = 1.5.6
 
-DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
-            PORTING README RUNSON FAQ TROUBLESHOOTING Makefile.in acsite.m4 \
-            aixcrypt.exp config.h.in configure configure.in config.guess \
-	    config.sub getcwd.c strdup.c indent.pro install-sh mkinstalldirs \
-	    lsearch.c putenv.c sudo.tab.c tgetpass.c emul/search.h \
-	    emul/utime.h utime.c fnmatch.c emul/fnmatch.h fnmatch.3 \
-	    testsudoers.c sample.sudoers sudo.pod sudo.man sudo.cat visudo.pod \
-	    visudo.man visudo.cat sudoers.pod sudoers.man sudoers.cat lex.yy.c \
-	    sudo-lex.yy.c sudoers dce_pwent.c alloca.c INSTALL.configure
+DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL \
+            INSTALL.configure OPTIONS TODO PORTING README RUNSON \
+            FAQ TROUBLESHOOTING Makefile.in acsite.m4 aixcrypt.exp \
+            config.h.in configure configure.in config.guess config.sub \
+            getcwd.c strdup.c indent.pro install-sh mkinstalldirs \
+            lsearch.c putenv.c sudo.tab.c tgetpass.c emul/search.h \
+            emul/utime.h utime.c fnmatch.c emul/fnmatch.h fnmatch.3 \
+            testsudoers.c sample.pam sample.sudoers sudo.pod sudo.man \
+            sudo.cat visudo.pod visudo.man visudo.cat sudoers.pod \
+            sudoers.man sudoers.cat lex.yy.c sudo-lex.yy.c sudoers \
+            dce_pwent.c alloca.c \
 
 VERSIONFILES = emul/utime.h check.c compat.h config.h.in dce_pwent.c \
 	       find_path.c getspwuid.c getcwd.c goodpath.c ins_2001.h \
