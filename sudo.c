@@ -255,7 +255,7 @@ int main(argc, argv)
     if ((sudo_mode & MODE_SHELL)) {
 	char **dst, **src = NewArgv;
 
-	NewArgv = (char **) malloc (sizeof(char *) * (++NewArgc));
+	NewArgv = (char **) malloc (sizeof(char *) * (++NewArgc + 1));
 	if (NewArgv == NULL) {
 	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
@@ -272,11 +272,8 @@ int main(argc, argv)
 	}
 
 	/* copy the args from Argv */
-	dst = NewArgv + 1;
-	*dst = (char *) NULL;
-	while (*src) {
-	    *dst++ = *src++;
-	}
+	for (dst = NewArgv + 1; (*dst = *src) != NULL; ++src, ++dst)
+	    ;
     }
 
     rtn = check_sudoers();	/* check mode/owner on _PATH_SUDO_SUDOERS */
@@ -351,7 +348,11 @@ int main(argc, argv)
 #else
 	    exit(0);
 #endif /* PROFILING */
-	    perror(cmnd);		/* exec failed! */
+	    /*
+	     * If we got here then the exec() failed...
+	     */
+	    (void) fprintf(stderr, "%s: ", Argv[0]);
+	    perror(cmnd);
 	    exit(-1);
 	    break;
 
@@ -667,7 +668,7 @@ static void add_env()
  *
  *  load_cmnd()
  *
- *  This function sets the cmnd global variable based on Argv
+ *  This function sets the cmnd global variable
  */
 
 static void load_cmnd(sudo_mode)
@@ -703,7 +704,7 @@ static void load_cmnd(sudo_mode)
 static int check_sudoers()
 {
     struct stat statbuf;
-    int fd;
+    int fd = -1;
     char c;
     int rtn = ALL_SYSTEMS_GO;
 
@@ -732,7 +733,8 @@ static int check_sudoers()
 	}
     }
 
-    (void) close(fd);
+    if (fd != -1)
+	(void) close(fd);
 
     set_perms(PERM_ROOT);
     set_perms(PERM_USER);
