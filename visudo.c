@@ -58,7 +58,7 @@ static char rcsid[] = "$Id$";
 #include "version.h"
 
 #ifndef STDC_HEADERS
-extern char *getenv();
+extern char *getenv	__P((const char *));
 #endif /* !STDC_HEADERS */
 
 extern FILE *yyin, *yyout;
