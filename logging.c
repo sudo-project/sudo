@@ -286,13 +286,21 @@ void log_error(code)
     if (code != VALIDATE_ERROR && !(code & GLOBAL_PROBLEM)) {
 
 	/* stuff the command into the logline */
-	/* XXX - this could be sped up */
-	strcat(logline, cmnd);
-	strcat(logline, " ");
+	p = logline + strlen(logline);
+	strcpy(p, cmnd);
+
+	/* add a trailing space */
+	p += strlen(cmnd);
+	*p++ = ' ';
+	*p = '\0';
+
+	/* cat on command args if they exist */
 	if (NewArgc > 1)
 	    for (a = &NewArgv[1]; *a; a++) {
-		strcat(logline, *a);
-		strcat(logline, " ");
+		strcpy(p, *a);
+		p += strlen(*a);
+		*p++ = ' ';
+		*p = '\0';
 	    }
     }
 
