@@ -78,6 +78,13 @@ struct ldap_config {
   char *bindpw;
   char *base;
   char *ssl;
+  int  tls_checkpeer;
+  char *tls_cacertfile;
+  char *tls_cacertdir;
+  char *tls_random_file;
+  char *tls_cipher_suite;
+  char *tls_certfile;
+  char *tls_keyfile;
   int debug;
 } ldap_conf;
 
@@ -460,6 +467,19 @@ sudo_ldap_build_pass1()
   return b ;
 }
 
+/*
+ * Map yes/true/on to 1, no/false/off to 0, else -1
+ */
+int
+_atobool(s)
+  char *s;
+{
+  if (!strcasecmp(s,"yes") || !strcasecmp(s,"true")  || !strcasecmp(s,"on"))
+    return 1;
+  if (!strcasecmp(s,"no")  || !strcasecmp(s,"false") || !strcasecmp(s,"off"))
+    return 0;
+  return -1;
+}
 
 int
 sudo_ldap_read_config()
@@ -469,6 +489,8 @@ sudo_ldap_read_config()
   char *c;
   char *keyword;
   char *value;
+
+  ldap_conf.tls_checkpeer=-1; /* default */
 
   f=fopen(_PATH_LDAP_CONF,"r");
   if (!f) return 0;
@@ -502,6 +524,7 @@ sudo_ldap_read_config()
 #define MATCH_S(x,y) if (!strcasecmp(keyword,x)) \
     { if (y) free(y); y=estrdup(value); }
 #define MATCH_I(x,y) if (!strcasecmp(keyword,x)) { y=atoi(value); }
+#define MATCH_B(x,y) if (!strcasecmp(keyword,x)) { y=_atobool(value); }
 
 
 
@@ -510,6 +533,13 @@ sudo_ldap_read_config()
          MATCH_S("host",    ldap_conf.host)
     else MATCH_I("port",    ldap_conf.port)
     else MATCH_S("ssl",     ldap_conf.ssl)
+    else MATCH_B("tls_checkpeer",   ldap_conf.tls_checkpeer)
+    else MATCH_S("tls_cacertfile",  ldap_conf.tls_cacertfile)
+    else MATCH_S("tls_cacertdir",   ldap_conf.tls_cacertdir)
+    else MATCH_S("tls_randfile",    ldap_conf.tls_random_file)
+    else MATCH_S("tls_ciphers",     ldap_conf.tls_cipher_suite)
+    else MATCH_S("tls_cert",        ldap_conf.tls_certfile)
+    else MATCH_S("tls_key",         ldap_conf.tls_keyfile)
     else MATCH_I("ldap_version", ldap_conf.version)
     else MATCH_S("uri",     ldap_conf.uri)
     else MATCH_S("binddn",  ldap_conf.binddn)
@@ -682,6 +712,61 @@ int pwflag;
 
   if (!sudo_ldap_read_config())  return VALIDATE_ERROR;
 
+  /* macro to set option, error on failure plus consistent debugging */
+#define SET_OPT(opt,optname,val) \
+  if (ldap_conf.val!=NULL) { \
+    if (ldap_conf.debug>1) fprintf(stderr, \
+           "ldap_set_option(LDAP_OPT_%s,\"%s\")\n",optname,ldap_conf.val); \
+    rc=ldap_set_option(ld,opt,ldap_conf.val); \
+    if(rc != LDAP_OPT_SUCCESS){ \
+      fprintf(stderr,"ldap_set_option(LDAP_OPT_%s,\"%s\")=%d: %s\n", \
+           optname, ldap_conf.val, rc, ldap_err2string(rc)); \
+      return VALIDATE_ERROR ; \
+    } \
+  } \
+
+  /* like above, but assumes val is in int */
+#define SET_OPTI(opt,optname,val) \
+    if (ldap_conf.debug>1) fprintf(stderr, \
+           "ldap_set_option(LDAP_OPT_%s,0x%02x)\n",optname,ldap_conf.val); \
+    rc=ldap_set_option(ld,opt,&ldap_conf.val); \
+    if(rc != LDAP_OPT_SUCCESS){ \
+      fprintf(stderr,"ldap_set_option(LDAP_OPT_%s,0x%02x)=%d: %s\n", \
+           optname, ldap_conf.val, rc, ldap_err2string(rc)); \
+      return VALIDATE_ERROR ; \
+    } \
+
+  /* attempt to setup ssl options */
+#ifdef    LDAP_OPT_X_TLS_CACERTFILE
+  SET_OPT(LDAP_OPT_X_TLS_CACERTFILE,   "X_TLS_CACERTFILE",   tls_cacertfile);
+#endif /* LDAP_OPT_X_TLS_CACERTFILE */
+
+#ifdef    LDAP_OPT_X_TLS_CACERTDIR
+  SET_OPT(LDAP_OPT_X_TLS_CACERTDIR,    "X_TLS_CACERTDIR",    tls_cacertdir);
+#endif /* LDAP_OPT_X_TLS_CACERTDIR */
+
+#ifdef    LDAP_OPT_X_TLS_CERTFILE
+  SET_OPT(LDAP_OPT_X_TLS_CERTFILE,     "X_TLS_CERTFILE",     tls_certfile);
+#endif /* LDAP_OPT_X_TLS_CERTFILE */
+
+#ifdef    LDAP_OPT_X_TLS_KEYFILE
+  SET_OPT(LDAP_OPT_X_TLS_KEYFILE,      "X_TLS_KEYFILE",      tls_keyfile);
+#endif /* LDAP_OPT_X_TLS_KEYFILE */
+
+#ifdef    LDAP_OPT_X_TLS_CIPHER_SUITE
+  SET_OPT(LDAP_OPT_X_TLS_CIPHER_SUITE, "X_TLS_CIPHER_SUITE", tls_cipher_suite);
+#endif /* LDAP_OPT_X_TLS_CIPHER_SUITE */
+
+#ifdef    LDAP_OPT_X_TLS_RANDOM_FILE
+  SET_OPT(LDAP_OPT_X_TLS_RANDOM_FILE,  "X_TLS_RANDOM_FILE",  tls_random_file);
+#endif /* LDAP_OPT_X_TLS_RANDOM_FILE */
+
+#ifdef    LDAP_OPT_X_TLS_REQUIRE_CERT
+  /* check the server certificate? */
+  if (ldap_conf.tls_checkpeer!=-1){
+   SET_OPTI(LDAP_OPT_X_TLS_REQUIRE_CERT,"X_TLS_REQUIRE_CERT",tls_checkpeer);
+  }
+#endif /* LDAP_OPT_X_TLS_REQUIRE_CERT */
 
   /* attempt connect */
 #ifdef HAVE_LDAP_INITIALIZE
@@ -714,13 +799,7 @@ int pwflag;
 #ifdef LDAP_OPT_PROTOCOL_VERSION
 
   /* Set the LDAP Protocol version */
-
-  rc=ldap_set_option(ld,LDAP_OPT_PROTOCOL_VERSION,&ldap_conf.version);
-  if(rc){
-    fprintf(stderr,"ldap_set_option(protocol=%d)=%d : %s\n",
-           ldap_conf.version, rc, ldap_err2string(rc));
-    return VALIDATE_ERROR ;
-  }
+  SET_OPTI(LDAP_OPT_PROTOCOL_VERSION,"PROTOCOL_VERSION", version);
 
 #endif /* LDAP_OPT_PROTOCOL_VERSION */
 
