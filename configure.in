@@ -26,8 +26,8 @@ AC_PROG_CPP
 dnl
 dnl find "uname"
 dnl
-AC_PROGRAM_CHECK(UNAMEPROG, uname, uname ,)
-AC_PROGRAM_CHECK(TRPROG, tr, tr ,)
+AC_PROGRAM_CHECK(UNAMEPROG, uname, uname, )
+AC_PROGRAM_CHECK(TRPROG, tr, tr, )
 dnl
 dnl what architecture are we on?
 dnl
@@ -141,14 +141,12 @@ AC_HAVE_FUNCS(getcwd strdup strchr strrchr sysconf)
 dnl
 dnl library checks
 dnl
+AC_HAVE_LIBRARY(nsl)
 AC_HAVE_LIBRARY(shadow)
 AC_HAVE_LIBRARY(ufc)
 dnl
 dnl OS-dependent libraries
 dnl
-if test -n "$OS" -a "$OS" != "sunos"; then
-    AC_HAVE_LIBRARY(nsl)
-fi
 if test -n "$OS" -a "$OS" = "irix" ; then
     AC_IRIX_SUN
 fi
