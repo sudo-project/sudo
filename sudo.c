@@ -284,6 +284,8 @@ main(argc, argv, envp)
     if (!def_ignore_local_sudoers && !ISSET(validated, VALIDATE_OK))
 #endif
 	validated = sudoers_lookup(pwflag);
+    if (safe_cmnd == NULL)
+	safe_cmnd = estrdup(user_cmnd);
 
     /*
      * Look up the timestamp dir owner if one is specified.
@@ -365,14 +367,6 @@ main(argc, argv, envp)
 	    sudo_ldap_display_privs();	/* XXX - use list_pw */
 #endif
 	    exit(0);
-	}
-
-	/* This *must* have been set if we got a match but... */
-	if (safe_cmnd == NULL) {
-	    log_error(MSG_ONLY,
-		"internal error, safe_cmnd never got set for %s; %s",
-		user_cmnd,
-		"please report this error at http://courtesan.com/sudo/bugs/");
 	}
 
 #ifdef HAVE_SYSTRACE 

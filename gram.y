@@ -382,9 +382,6 @@ cmndtag		:	/* empty */ {
 
 cmnd		:	ALL {
 			    NEW_MEMBER($$, NULL, ALL);
-			    if (safe_cmnd)
-				free(safe_cmnd);
-			    safe_cmnd = estrdup(user_cmnd);
 			}
 		|	ALIAS {
 			    NEW_MEMBER($$, $1, ALIAS);
