@@ -276,6 +276,7 @@ static void load_globals()
      * loading the user & epasswd global variable from the passwd file
      * (must be done as root to get real passwd on some systems)
      */
+    set_perms(PERM_ROOT);
     if ((pw_ent = getpwuid(uid)) == NULL) {
 	(void) sprintf(user, "%u", uid);
 	log_error(GLOBAL_NO_PW_ENT);
@@ -293,9 +294,9 @@ static void load_globals()
 
     /*
      * We only want to be root when we absolutely need it.
-     * This will effectively do setreuid(0, uid) but for portability...
+     * Since we set euid and ruid to 0 above, this will set the euid
+     * to the * uid of the caller so (ruid, euid) == (0, user's uid).
      */
-    set_perms(PERM_ROOT);
     set_perms(PERM_USER);
 
 #ifdef UMASK
