@@ -304,7 +304,6 @@ static void check_passwd()
      * or just use the regular one...
      */
     be_root();
-    (void) set_auth_parameters();
     spw_ent = getprpwuid(uid);
     be_user();
     if (spw_ent)
