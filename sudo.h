@@ -291,6 +291,7 @@ extern int Argc;
 extern char **Argv;
 #endif
 extern int errno;
+extern char ** environ;
 
 /*
  * This is to placate hpux
