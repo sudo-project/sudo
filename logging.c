@@ -122,23 +122,25 @@ void log_error(code)
     int argc;
     char **argv;
     mode_t oldmask;
-    register char *p;
-    register int count;
+    char *p;
+    int count;
     time_t now;
     char *tty;
 #if (LOGGING & SLOG_FILE)
-    register FILE *fp;
+    FILE *fp;
 #endif /* LOGGING & SLOG_FILE */
 #if (LOGGING & SLOG_SYSLOG)
-    register int pri;		/* syslog priority */
+    int pri = Syslog_priority_NO;	/* syslog priority, assume the worst */
     char *tmp, save;
 #endif /* LOGGING & SLOG_SYSLOG */
 
     /*
      * Get our ttyname or set to "none"
      */
-    if (isatty(0))
-	tty = (char *) ttyname(0);
+    tty = (char *) ttyname(0);
+    if (tty)
+	if ((p = strrchr(tty, '/')))
+	    tty = p + 1;
     else
 	tty = "none";
 
@@ -150,9 +152,9 @@ void log_error(code)
     (void) sprintf(logline, "%19.19s : %8.8s : ", ctime(&now), user);
 
     /*
-     * we need a pointer to the end of logline
+     * we need a pointer to the end of logline (XXX - use a #define not 33)
      */
-    p = logline + strlen(logline);
+    p = logline + 33;
 
     switch (code) {
 
@@ -166,57 +168,36 @@ void log_error(code)
 	case VALIDATE_NO_USER:
 	    (void) sprintf(p,
 		"user NOT in sudoers ; TTY=%s ; PWD=%s ; COMMAND=", tty, cwd);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case VALIDATE_NOT_OK:
 	    (void) sprintf(p,
 		"command not allowed ; TTY=%s ; PWD=%s ; COMMAND=", tty, cwd);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case VALIDATE_ERROR:
 	    (void) sprintf(p, "error in %s, line %d ; TTY=%s ; PWD=%s.  ",
 		_PATH_SUDO_SUDOERS, errorlineno, tty, cwd);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case GLOBAL_NO_PW_ENT:
 	    (void) sprintf(p,
 		"There is no passwd entry for uid %d (TTY=%s).  ", uid, tty);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case PASSWORD_NOT_CORRECT:
 	    (void) sprintf(p,
 		"password incorrect ; TTY=%s ; PWD=%s ; COMMAND=", tty, cwd);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case PASSWORDS_NOT_CORRECT:
 	    (void) sprintf(p,
 		"%d incorrect passwords ; TTY=%s ; PWD=%s ; COMMAND=",
 		    TRIES_FOR_PASSWORD, tty, cwd);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case GLOBAL_NO_HOSTNAME:
 	    strcat(p, "This machine does not have a hostname ");
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case NO_SUDOERS_FILE:
@@ -234,81 +215,51 @@ void log_error(code)
 			_PATH_SUDO_SUDOERS);
 		    break;
 	    }
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case GLOBAL_HOST_UNREGISTERED:
 	    (void) sprintf(p, "gethostbyname() cannot find host %s ", host);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case SUDOERS_NO_OWNER:
 	    (void) sprintf(p, "no passwd entry for sudoers file owner (%s) ",
 		SUDOERS_OWNER);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case SUDOERS_NOT_FILE:
 	    (void) sprintf(p, "%s is not a regular file ", _PATH_SUDO_SUDOERS);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case SUDOERS_WRONG_OWNER:
 	    (void) sprintf(p, "%s is not owned by %s ", _PATH_SUDO_SUDOERS,
 		SUDOERS_OWNER);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case SUDOERS_RW_OTHER:
 	    (void) sprintf(p, "%s is readable or writeable by other than %s ",
 		_PATH_SUDO_SUDOERS, SUDOERS_OWNER);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case SPOOF_ATTEMPT:
 	    (void) sprintf(p,
 		"probable spoofing attempt; TTY=%s ; PWD=%s ; COMMAND=",
 		tty, cwd);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case BAD_STAMPDIR:
 	    (void) sprintf(p,
 	    "%s owned by non-root or not mode 0700; TTY=%s ; PWD=%s ; COMMAND=",
 	    _PATH_SUDO_TIMEDIR, tty, cwd);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case BAD_STAMPFILE:
 	    (void) sprintf(p,
 		"preposterous stampfile date; TTY=%s ; PWD=%s ; COMMAND=",
 		tty, cwd);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	default:
 	    strcat(p, "found a wierd error : ");
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_NO;
-#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
     }
 
@@ -400,7 +351,7 @@ void log_error(code)
 	send_mail();
     } else {
 	char *beg, *oldend, *end;
-	register int maxlen = MAXLOGFILELEN;
+	int maxlen = MAXLOGFILELEN;
 
 	/*
 	 * Print out logline with word wrap
@@ -483,7 +434,6 @@ static void send_mail()
     char *mailer = MAILER;
     char *subject = MAILSUBJECT;
     int fd[2];
-    char buf[MAXLOGLEN + BUFSIZ];
 #ifdef POSIX_SIGNALS
     struct sigaction action;
 
@@ -537,10 +487,10 @@ static void send_mail()
 	(void) close(0);
 
 	/* feed the data to sendmail */
-	(void) sprintf(buf, "To: %s\nSubject: %s\n\n%s : %s\n\n",
+	/* XXX - do we need to fdopen this fd #1 to a new stream??? */
+	(void) fprintf(stdout, "To: %s\nSubject: %s\n\n%s : %s\n\n",
 		ALERTMAIL, subject, host, logline);
-	write(1, buf, strlen(buf));
-	close(1);
+	fclose(stdout);
 
 	exit(0);
     }
