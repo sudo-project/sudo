@@ -101,7 +101,7 @@ char * find_path(file)
     char *result = NULL;	/* result of path/file lookup */
     int checkdot = 0;		/* check current dir? */
 
-    command[0] = NULL;
+    command[0] = '\0';
 
     if (strlen(file) > MAXPATHLEN) {
 	errno = ENAMETOOLONG;
