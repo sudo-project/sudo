@@ -43,9 +43,12 @@ static char rcsid[] = "$Id$";
 #include "sudo.h"
 
 #ifndef STDC_HEADERS
+#ifdef HAVE_PUTENV
 extern int putenv();
+#endif /* HAVE_PUTENV */
+#ifdef HAVE_SETENV
 extern int setenv();
-extern char *getenv();
+#endif /* HAVE_SETENV */
 #endif /* !STDC_HEADERS */
 
 
@@ -66,7 +69,6 @@ int sudo_setenv(var, val)
 #ifdef HAVE_SETENV
     return(setenv(var, val, 1));
 #else
-#ifdef HAVE_PUTENV
     char *envstring, *tmp;
 
     envstring = tmp = (char *) malloc(strlen(var) + strlen(val) + 2);
@@ -82,9 +84,5 @@ int sudo_setenv(var, val)
 	;
 
     return(putenv(envstring));
-#else
-    /* XXX - implement */
-    return(0);
-#endif /* HAVE_PUTENV */
 #endif /* HAVE_SETENV */
 }
