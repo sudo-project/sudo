@@ -337,7 +337,7 @@ int main(argc, argv)
 	}
 
     /*
-     * Make the new sudoers file readable only by owner.
+     * Set the mode on the new sudoers file.
      * If this fail it is ok since the file is only least rw owner.
      */
     if (chmod(sudoers, SUDOERS_MODE)) {
