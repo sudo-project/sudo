@@ -302,13 +302,17 @@
 /* Define if you have the <paths.h> header file.  */
 #undef HAVE_PATHS_H
 
+/* Define if you have the <memory.h> header file.  */
+#undef HAVE_MEMORY_H
+
+/* Define if you have the <stdlib.h> header file.  */
+#undef HAVE_STDLIB_H
+
 /* Define if you have the <string.h> header file.  */
 #undef HAVE_STRING_H
 
-/* Define if you have the <strings.h> header file but no <string.h>.  */
-#ifndef HAVE_STRING_H
+/* Define if you have the <strings.h> header file.  */
 #undef HAVE_STRINGS_H
-#endif /* !HAVE_STRING_H */
 
 /* Define your flavor of dir entry header file.  */
 #undef HAVE_DIRENT_H
