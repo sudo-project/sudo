@@ -195,7 +195,7 @@ DEFVAR			[a-z_]+
 			    if (!push_include(cp))
 				yyterminate();
 			    LEXTRACE("INCLUDE\n");
-			    BEGIN INITIAL;
+			    return(COMMENT);
 			}
 
 <INITIAL>^Defaults([:@>]{WORD})? {
