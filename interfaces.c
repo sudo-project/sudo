@@ -173,7 +173,7 @@ void load_interfaces()
 	STRSET(SIOCGIFADDR, (caddr_t)ifr, sizeof(ifreq));
 	if (ioctl(sock, I_STR, &strioctl) < 0) {
 	    /* non-fatal error if interface is down or not supported */
-	    if (errno == EADDRNOTAVAIL || errno == EAFNOSUPPORT)
+	    if (errno == EADDRNOTAVAIL || errno == ENXIO || errno == EAFNOSUPPORT)
 		continue;
 
 	    (void) fprintf(stderr, "%s: Error, ioctl: SIOCGIFADDR ", Argv[0]);
@@ -189,7 +189,7 @@ void load_interfaces()
 	/* get the ip address */
 	if (ioctl(sock, SIOCGIFADDR, (caddr_t)(&ifreq))) {
 	    /* non-fatal error if interface is down or not supported */
-	    if (errno == EADDRNOTAVAIL || errno == EAFNOSUPPORT)
+	    if (errno == EADDRNOTAVAIL || errno == ENXIO || errno == EAFNOSUPPORT)
 		continue;
 
 	    (void) fprintf(stderr, "%s: Error, ioctl: SIOCGIFADDR ", Argv[0]);
