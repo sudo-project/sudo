@@ -42,6 +42,7 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <pwd.h>
 #include <sys/types.h>
 #ifdef _AIX
 #include <sys/select.h>
