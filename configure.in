@@ -647,7 +647,7 @@ AC_ARG_WITH(password-timeout, [  --with-password-timeout passwd prompt timeout i
 		AC_MSG_RESULT([no timeout])
 		;;
     [[0-9]]*)	AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $with_password_timeout)
-		AC_MSG_RESULT([$with_timeout])
+		AC_MSG_RESULT([$with_password_timeout])
 		;;
     *)		echo "You must enter the numer of minutes."
 		exit 1
