@@ -493,7 +493,8 @@ static void rmenv(envp, s, len)
 static void add_env()
 {
     char *uidstr;
-    int len, n;
+    int len;
+    uid_t n;
 
     /* add the SUDO_USER envariable */
     if (sudo_setenv("SUDO_USER", user)) {
@@ -503,7 +504,7 @@ static void add_env()
     }
 
     /* add the SUDO_UID envariable */
-    for (len = 1 + ((int)uid < 0), n = (int)uid; (n = n / 10) != 0; )
+    for (len = 2, n = uid; (int) (n = n / 10) != 0; )
 	++len;
     
     uidstr = (char *) malloc(len+1);
