@@ -34,16 +34,28 @@
 #include <sys/param.h>
 #include "y.tab.h"
 #include "sudo.h"
+
+#ifdef FLEX_SCANNER
+int yylineno = 0;
+#endif /* flex */
 %}
 
 %%
 [ \t]+			{ ; }                     /* throw away space/tabs */
-\\\n			{ ; }                     /* throw away EOL after \ */
+\\\n			{ 
+#ifdef FLEX_SCANNER
+			++yylineno
+#endif /* flex */
+			  ; }                     /* throw away EOL after \ */
 \,			{ return ','; }           /* return ',' */
 \!			{ return '!'; }           /* return '!' */
 =			{ return '='; }           /* return '=' */
 :			{ return ':'; }           /* return ':' */
-\n			{ return COMMENT; }       /* return newline */
+\n			{ 
+#ifdef FLEX_SCANNER
+			++yylineno; 
+#endif /* flex */
+			  return COMMENT; }       /* return newline */
 #.*\n			{ return COMMENT; }       /* return comments */
 [@$%^&*()"'`/_+]*	{ return ERROR; }         /* return error */
 [?;<>\[\]{}|~.-]*	{ return ERROR; }         /* return error */
