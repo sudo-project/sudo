@@ -1,4 +1,13 @@
 /*
+ * CU sudo version 1.3 (based on Root Group sudo version 1.1)
+ *
+ * This software comes with no waranty whatsoever, use at your own risk.
+ *
+ * Please send bugs, changes, problems to sudo-bugs.cs.colorado.edu
+ *
+ */
+
+/*
  *  sudo version 1.1 allows users to execute commands as root
  *  Copyright (C) 1991  The Root Group, Inc.
  *
@@ -15,12 +24,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  If you make modifications to the source, we would be happy to have
- *  them to include in future releases.  Feel free to send them to:
- *      Jeff Nieusma                       nieusma@rootgroup.com
- *      3959 Arbol CT                      (303) 447-8093
- *      Boulder, CO 80301-1752
  *
  *******************************************************************
  *
@@ -40,6 +43,10 @@
  *
  *  Todd C. Miller (millert@colorado.edu) Sat Sep  4 12:22:04 MDT 1993
  */
+
+#ifndef lint
+static char rcsid[] = "$Id$";
+#endif /* lint */
 
 #include <stdio.h>
 #include <strings.h>
