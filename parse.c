@@ -182,7 +182,7 @@ int validate(check_cmnd)
 
 /*
  * If path doesn't end in /, return TRUE iff cmnd & path name the same inode;
- * otherwise, return TRUE if cmnd names one of the inodes in path
+ * otherwise, return TRUE if cmnd names one of the inodes in path.
  */
 int command_matches(cmnd, user_args, path, sudoers_args)
     char *cmnd;
@@ -227,6 +227,9 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 	    return(TRUE);
 	else if (user_args && sudoers_args)
 	    return(compare_args(user_args, sudoers_args));
+	else if (!user_args && sudoers_args && sudoers_args[0][0] == '\0' &&
+		 sudoers_args[1] == NULL)
+	    return(TRUE);
 	else
 	    return(FALSE);
     } else {
@@ -252,15 +255,16 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 	     * (in sudoers or command) or if the args match;
 	     * else return false.
 	     */
-	    if (cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino) {
-		if (!sudoers_args) {
-		    return(TRUE);
-		} else if (user_args && sudoers_args) {
-		    return(compare_args(user_args, sudoers_args));
-		} else {
-		    return(FALSE);
-		}
-	    } else
+	    if (cmnd_st.st_dev != pst.st_dev || cmnd_st.st_ino != pst.st_ino)
+		return(FALSE);
+	    if (!sudoers_args)
+		return(TRUE);
+	    else if (user_args && sudoers_args)
+		return(compare_args(user_args, sudoers_args));
+	    else if (!user_args && sudoers_args && sudoers_args[0][0] == '\0' &&
+		     sudoers_args[1] == NULL)
+		return(TRUE);
+	    else
 		return(FALSE);
 	}
 
