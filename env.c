@@ -79,7 +79,7 @@ static char *format_env		__P((char *, char *));
 /*
  * Table of "bad" envariables to remove and len for strncmp()
  */
-static struct env_table badenv_table[] = {
+static struct env_table sudo_badenv_table[] = {
     { "IFS=", 4, 0 },
     { "LOCALDOMAIN=", 12, 0 },
     { "RES_OPTIONS=", 12, 0 },
@@ -118,6 +118,7 @@ static struct env_table badenv_table[] = {
     { "LANGUAGE=", 5, 1 },
     { (char *) NULL, 0, 0 }
 };
+static struct env_table *badenv_table;
 
 
 /*
@@ -235,11 +236,10 @@ rebuild_env(sudo_mode, envp)
 {
     char **newenvp, **ep, **nep, **ek, *cp;
     char *ekflat, *ps1, **env_keep;
-    int okvar;
+    int okvar, iswild;
     size_t env_size, eklen;
     struct env_table *entry;
 
-    okvar = 0;
     eklen = 0;
     ekflat = ps1 = NULL;
     env_keep = NULL;
@@ -260,6 +260,70 @@ rebuild_env(sudo_mode, envp)
 	}
 	env_keep[eklen] = NULL;
     }
+
+    /*
+     * If sudoers overrides or adds to the badenv_table, rebuild it.
+     */
+    if ((cp = def_str(I_ENV_DELETE))) {
+	int i;
+	size_t len;
+	char *env_delete, *end;
+
+	env_delete = def_str(I_ENV_DELETE);
+	if (*env_delete == '+')
+	    env_delete++;
+
+	/*
+	 * Calculate number of entries in new badenv_table.
+	 * If defined we have at least two entries (including a NULL entry).
+	 */
+	for (i = 2, cp = env_delete; (cp = strpbrk(cp, " \t")); i++) {
+	    while (*cp == ' ' || *cp == '\t')
+		cp++;
+	}
+	if (*def_str(I_ENV_DELETE) == '+') {
+	    for (entry = sudo_badenv_table; entry->name; entry++, i++)
+		;
+	}
+	badenv_table = emalloc(sizeof(struct env_table) * i);
+
+	/*
+	 * Copy in user entries.
+	 */
+	for (i = 0, cp = env_delete; cp; i++) {
+	    while (*cp == ' ' || *cp == '\t')
+		cp++;
+	    end = strpbrk(cp, " \t");
+	    if (end == NULL)
+		len = strlen(cp);
+	    else
+		len = end - cp;
+	    if ((iswild = cp[len - 1] == '*'))		/* wildcard */
+		len--;
+	    entry = &badenv_table[i];
+	    entry->name = emalloc(len + 1 + !iswild);
+	    memcpy(entry->name, cp, len);
+	    if (!iswild)
+		entry->name[len++] = '=';
+	    entry->name[len] = '\0';
+	    entry->len = len;
+	    entry->check = 0;
+	    cp = end;
+	}
+
+	/*
+	 * Copy in default entries if user is appending.
+	 */
+	if (*def_str(I_ENV_DELETE) == '+') {
+	    for (entry = sudo_badenv_table; entry->name; entry++, i++) {
+		badenv_table[i].name = entry->name;
+		badenv_table[i].len = entry->len;
+		badenv_table[i].check = entry->check;
+	    }
+	}
+	memset(&badenv_table[i], 0, sizeof(badenv_table[i]));
+    } else
+	badenv_table = sudo_badenv_table;
 
     /*
      * Either clean out the environment or reset to a safe default.
@@ -288,7 +352,14 @@ rebuild_env(sudo_mode, envp)
 	    if (env_keep) {
 		for (ek = env_keep; *ek; ek++) {
 		    eklen = strlen(*ek);
-		    if (strncmp(*ek, *ep, eklen) == 0 && (*ep)[eklen] == '=') {
+		    /* Deal with '*' wildcard */
+		    if ((*ek)[eklen - 1] == '*') {
+			eklen--;
+			iswild = 1;
+		    } else
+			iswild = 0;
+		    if (strncmp(*ek, *ep, eklen) == 0 &&
+			(iswild || (*ep)[eklen] == '=')) {
 			*nep++ = *ep;
 			break;
 		    }
@@ -323,6 +394,7 @@ rebuild_env(sudo_mode, envp)
 	 * (unless excepted by env_keep).
 	 */
 	for (ep = envp; *ep; ep++) {
+	    okvar = 0;
 	    /* env_keep overrides badenv_table */
 	    if (env_keep) {
 		for (ek = env_keep; *ek; ek++) {
