@@ -8,6 +8,12 @@ INSTALL NOTES
    use the --prefix flag to configure to install sudo/visudo in a place
    other than /usr/local (ie: --prefix=/opt).
 
+   BEWARE: configure caches values in config.cache.  This will cause
+   problems if you are building for different architectures.  You
+   *must* do a "make realclean" to remove the configure-generated
+   files betweem builds in this case.  Basically, you should do a
+   "make realclean" before you run configure each time.
+
    NOTE: if you use C2 security you need to use the --with-C2 flag to
    configure.  Currently this only affects hpux, ultrix, DEF OSF/1 and
    ConvexOS with C2 security.  For hpux only, you can use --with-C2 if
