@@ -1,0 +1,204 @@
+=cut
+$Id$
+=pod
+
+=head1 NAME
+
+sudo - execute a command as the superuser
+
+=head1 SYNOPSIS
+
+B<sudo> B<-V> | B<-h> | B<-l> | B<-v> | B<-k> | B<-s> | [ B<-b> ]
+[ B<-p> prompt ] I<command>
+
+=head1 DESCRIPTION
+
+B<sudo> allows a permitted user to execute a I<command> 
+as the superuser (real and effective uid and gid are set
+to 0 and root's group as set in the passwd file respectively).
+
+B<sudo> determines who is an authorized user by consulting the
+file I</etc/sudoers>.  By giving B<sudo> the I<-v> flag a user
+can update the time stamp without running a I<command.>
+The password prompt itself will also time out if the password is
+not entered with N minutes (again, this is defined at installation
+time and defaults to 5 minutes).
+
+If an unauthorized user executes sudo, mail will be sent from the
+user to the local authorities (defined at installation time).
+
+B<sudo> was designed to log via the 4.3 BSD syslog(3) facility but
+can log to a file instead if so desired (or to both syslog and a file).
+
+All preferences are defined at installation time and are derived from
+the options.h and pathnames.h include files as well as as well as the
+Makefile.
+
+=head1 OPTIONS
+
+B<sudo> accepts the following command line options:
+
+=over 4
+
+=item -V
+
+The -V (version) option causes B<sudo> to print the
+version number and exit.
+
+=item -l
+
+The -l (list) option will list out the allowed and
+forbidden commands for the user on the current host.
+Note that Command Aliases are currently not expanded.
+
+=item -h
+
+The -h (help) option causes B<sudo> to print the version
+of sudo and a usage message before exiting.
+
+=item -v
+
+If given the -v (validate) option, B<sudo> will update the
+user's timestamp file, prompting for a password if necessary.
+This extends the B<sudo> timeout to for another N minutes
+(where N is defined at installation time and defaults to 5
+minutes) but does not run a command.
+
+=item -k
+
+The -k (kill) option to B<sudo> removes the user's timestamp
+file, thus requiring a password the next time B<sudo> is run.
+This option does not require and password and was added to
+allow a user to revoke B<sudo> permissions from a .logout file.
+
+=item -b
+
+The -b (background) option tells B<sudo> to run the given
+command in the background.  Note that if you use the -b
+option you cannot use shell job control to manipulate the command.
+
+=item -p
+
+The -p (prompt) option allows you to override the default
+password prompt and use a custom one.
+
+=item -s
+
+The -s (shell) option runs the shell specified by the I<SHELL>
+environmental variable if it is set or the shell as specified
+in passwd(5).
+
+=item --
+
+The -- flag indicates that B<sudo> should stop processing command
+line arguments.  It is most useful in conjunction with the -s flag.
+
+=head1 RETURN VALUES
+
+B<sudo> quits with an exit value of 1 if there is a
+configuration/permission problem or if B<sudo> cannot execute
+the given command.  In the latter case the error string is
+printed to stdout via perror(3).  If B<sudo> cannot stat(3)
+one or more entries in the user's PATH the error is printed
+on stdout via perror(3).  (If the directory does not exist
+or if it is not really a directory, the entry is ignored and
+no error is printed.)  This should not happen under normal
+circumstances.  The most common reason for stat(3) to return
+"permission denied" is if you are running an automounter and
+one of the directories in your PATH is on a machine that is
+currently unreachable.
+
+=head1 SECURITY NOTES
+
+B<sudo> tries to be safe when executing external commands.
+To this end the IFS, LD_*, SHLIB_PATH (HP-UX only),
+LIBPATH (AIX only), and _RLD_* (Digital UNIX only) environmental
+variables are removed from the environment passed on to all
+commands executed.
+
+To prevent command spoofing, B<sudo> checks '.' and '' (both
+denoting current directory) last when searching for a command
+in the user's PATH (if one or both are in the PATH).
+Note, however, that the actual PATH environmental variable
+is I<not> modified and is passed unchanged to the program that
+B<sudo> executes.
+
+For security reasons, if your OS supports shared libraries,
+B<sudo> should always be statically linked unless the
+dynamic loader disables user-defined library search paths
+for setuid programs.
+
+B<sudo> will check the ownership of its timestamp directory
+(/tmp/.odus by default) and ignore the directory's contents
+if it is not owned by root and only read, writable, and
+executable by root.  On systems that allow users to give
+files away to root (via chown) it is possible for a user
+to create the timestamp directory before B<sudo> is run.
+However, because B<sudo> checks the ownership & mode of
+the directory, the only damage that can be done is to "hide"
+files by putting them in the timestamp dir.  This is unlikely
+to happen since once the timestamp dir is owned by root and
+inaccessible by any other user the user placing files there
+would be unable to get them back out.  To get around this
+issue you can use a directory that is not world-writable
+for the timestamps (/var/sudo for instance).
+
+To keep users from creating their own timestamp files
+(by creating the timestamp directory before B<sudo>
+is first run and then using chmod and chown to set
+the ownership and mode to a combination B<sudo>
+will accept) with timestamps far in the future B<sudo>
+will not honor any timestamp with a date greater than
+current_time + 2 * TIMEOUT.
+
+=head1 FILES
+
+ /etc/sudoers		file of authorized users.
+
+=head1 ENVIRONMENT VARIABLES
+
+ PATH			Set to a sane value if SECURE_PATH is set
+ SHELL			Used to determine shell to run with -s option
+ SUDO_COMMAND		Set to the command run by sudo
+ SUDO_USER		Set to the login of the user who invoked sudo
+ SUDO_UID		Set to the uid of the user who invoked sudo
+ SUDO_GID		Set to the gid of the user who invoked sudo
+
+=head1 AUTHORS
+
+Many people have worked on B<sudo> over the years, this
+version consists of code written primarily by:
+
+ Jeff Nieusma		<nieusma@FirstLink.com>
+ David Hieb		<davehieb@internetone.com>
+ Todd Miller		<Todd.Miller@cs.colorado.edu>
+ Chris Jepeway		<jepeway@cs.utk.edu>
+
+See the HISTORY file in the sudo distribution for more details.
+
+Please send all bugs, comments, and changes to sudo-bugs@cs.colorado.edu.
+
+=head1 BUGS
+
+The -l (list) option should expand Command Aliases.
+
+=head1 DISCLAIMER
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+675 Mass Ave, Cambridge, MA 02139, USA.
+
+=head1 CAVEATS
+
+There is no easy way to prevent a user from gaining a root shell if 
+that user has access to commands that are shell scripts or that 
+allow shell escapes.
+
+=head1 SEE ALSO
+
+sudoers(5), visudo(8), su(1).

@@ -1,0 +1,99 @@
+=cut
+$Id$
+=pod
+
+=head1 NAME
+
+visudo - edit the sudoers file
+
+=head1 SYNOPSIS
+
+B<visudo> [ B<-V> ]
+
+=head1 DESCRIPTION
+
+B<visudo> edits the I<sudoers> file in a safe fashion, analogous to
+vipw(8).  B<visudo> locks the I<sudoers> file against multiple
+simultaneous edits, provides basic sanity checks, and checks
+for parse errors.  If the I<sudoers> file is currently being
+edited you will receive a message to try again later.  In the
+default configuration, the vi(1) editor is used, but there is
+a compile time option to allow use of whatever editor the
+environmental variables EDITOR or VISUAL are set to.
+
+B<visudo> parses the I<sudoers> file after the edit and will
+not save the changes if there is a syntax error.  Upon finding
+an error, a message will be printed stating the line number(s)
+that the error occurred on and the user will receive the
+"What now?" prompt.  At this point the user may enter "e"
+to re-edit the I<sudoers> file, enter "x" to exit without
+saving the changes, or "q" to quit and save changes.  The
+"q" option should be used with extreme care because if B<visudo>
+believes there to be a parse error, so will B<sudo> and no one
+will be able to execute B<sudo> again until the error is fixed.
+Any other command at this prompt will print a short help message.
+When editing the I<sudoers> file after a parse error has been
+detected the cursor will be placed on the line where the error
+occurred (if the editor supports this feature).
+
+=head1 OPTIONS
+
+B<visudo> accepts the following command line option:
+
+=over 4
+
+=item -V
+
+The B<-V> (version) option causes visudo to print the version number
+and exit.
+
+=back
+
+=head1 FILES
+
+ /etc/sudoers			file of authorized users.
+ /etc/stmp			lock file for visudo.
+
+=head1 ENVIRONMENT VARIABLES
+
+The following are used only if B<visudo> was compiled with the
+ENV_EDITOR option:
+
+ EDITOR				Used by visudo as the editor to use.
+ VISUAL				Used by visudo if EDITOR is not set.
+
+=head1 AUTHOR
+
+Many people have worked on I<sudo> over the years, this version of
+I<visudo> was written by:
+
+ Todd Miller                   <Todd.Miller@cs.colorado.edu>
+
+See the HISTORY file in the sudo distribution for more details.
+
+Please send all bugs, comments, and changes to sudo-bugs@cs.colorado.edu.
+
+=head1 DISCLAIMER
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+675 Mass Ave, Cambridge, MA 02139, USA.
+
+=head1 CAVEATS
+
+There is no easy way to prevent a user from gaining a root shell if 
+the editor used by visudo allows shell escapes.
+
+=head1 BUGS
+
+The I<-V> flag gives the version of the I<sudo> package rather than
+the individual I<visudo> program.
+
+=head1 SEE ALSO
+
+sudo(8), vipw(8).
