@@ -78,14 +78,16 @@ struct childinfo {
 };
 struct syscallhandler {
     int num;
-    int (*handler) __P((int, int *, struct str_message *));
+    void (*handler)
+	__P((int, int *, struct str_msg_ask *, struct systrace_answer *));
     struct syscallhandler *next;
 };
 
-int check_exec		__P((int, int *, struct str_message *));
-int check_syscall	__P((int, int *, int, struct str_message *,
-			    struct listhead *));
-int decode_args		__P((int, struct str_message *));
+void check_exec		__P((int, int *, struct str_msg_ask *,
+			     struct systrace_answer *));
+void check_syscall	__P((int, int *, struct str_msg_ask *,
+			     struct systrace_answer *, struct listhead *));
+int decode_args		__P((int, pid_t, struct str_msg_ask *));
 int set_policy		__P((int, pid_t, struct listhead *));
 int systrace_open	__P((void));
 int systrace_read	__P((int, pid_t, void *, void *, size_t));
@@ -93,7 +95,8 @@ int systrace_run	__P((char *, char **, int));
 ssize_t read_string	__P((int, pid_t, void *, char *, size_t));
 void new_child		__P((struct listhead *, pid_t, uid_t));
 void new_handler	__P((struct listhead *, int,
-			    int (*)(int, int *, struct str_message *)));
+			     void (*)(int, int *, struct str_msg_ask *,
+				     struct systrace_answer *)));
 void rm_child		__P((struct listhead *, pid_t));
 void update_child	__P((struct listhead *, pid_t, uid_t));
 
@@ -256,8 +259,12 @@ systrace_attach(pid)
 		memset(&ans, 0, sizeof(ans));
 		ans.stra_pid = msg.msg_pid;
 		ans.stra_seqnr = msg.msg_seqnr;
+		check_syscall(fd, &initialized, &msg.msg_data.msg_ask,
+		    &ans, &handlers);
+#if 0
 		ans.stra_policy = check_syscall(fd, &initialized,
 		    msg.msg_data.msg_ask.code, &msg, &handlers);
+#endif
 		if ((ioctl(fd, STRIOCANSWER, &ans)) == -1)
 		    goto fail;
 		break;
@@ -291,7 +298,7 @@ void
 new_handler(head, num, handler)
     struct listhead *head;
     int num;
-    int (*handler) __P((int, int *, struct str_message *));
+    void (*handler) __P((int, int *, struct str_msg_ask *, struct systrace_answer *));
 {
     struct syscallhandler *entry;
 
@@ -477,21 +484,23 @@ read_string(fd, pid, addr, buf, bufsiz)
     return(cp - buf);
 }
 
-int
-check_syscall(fd, initialized, num, msgp, handlers)
+void
+check_syscall(fd, initialized, askp, ansp, handlers)
     int fd;
     int *initialized;
-    int num;
-    struct str_message *msgp;
+    struct str_msg_ask *askp;
+    struct systrace_answer *ansp;
     struct listhead *handlers;
 {
     struct syscallhandler *h;
 
     for (h = handlers->first; h != NULL; h = h->next) {
-	if (h->num == num)
-	    return(h->handler(fd, initialized, msgp));
+	if (h->num == askp->code) {
+	    h->handler(fd, initialized, askp, ansp);
+	    return;
+	}
     }
-    return(SYSTR_POLICY_PERMIT);	/* accept unhandled syscalls */
+    ansp->stra_policy = SYSTR_POLICY_PERMIT;	/* accept unhandled syscalls */
 }
 
 /*
@@ -499,17 +508,17 @@ check_syscall(fd, initialized, num, msgp, handlers)
  * user_base and user_args.
  */
 int
-decode_args(fd, msgp)
+decode_args(fd, pid, askp)
     int fd;
-    struct str_message *msgp;
+    pid_t pid;
+    struct str_msg_ask *askp;
 {
     size_t len;
     char *off, *ap, *cp, *ep;
     static char pbuf[PATH_MAX], abuf[ARG_MAX];
 
     memset(pbuf, 0, sizeof(pbuf));
-    if (read_string(fd, msgp->msg_pid, (void *)msgp->msg_data.msg_ask.args[0],
-	pbuf, sizeof(pbuf)) == -1)
+    if (read_string(fd, pid, (void *)askp->args[0], pbuf, sizeof(pbuf)) == -1)
 	return(-1);
     if ((user_base = strrchr(user_cmnd = pbuf, '/')) != NULL)
 	user_base++;
@@ -521,9 +530,9 @@ decode_args(fd, msgp)
      * Loop through argv, collapsing it into a single string and reading
      * until we hit the terminating NULL.  We skip argv[0].
      */
-    off = (char *)msgp->msg_data.msg_ask.args[1];
+    off = (char *)askp->args[1];
     for (cp = abuf, ep = abuf + sizeof(abuf); cp < ep; off += sizeof(char *)) {
-	if (systrace_read(fd, msgp->msg_pid, off, &ap, sizeof(ap)) != 0) {
+	if (systrace_read(fd, pid, off, &ap, sizeof(ap)) != 0) {
 	    warn("STRIOCIO");
 	    return(-1);
 	}
@@ -534,9 +543,9 @@ decode_args(fd, msgp)
 	    }
 	    break;
 	}
-	if (off == (char *)msgp->msg_data.msg_ask.args[1])
+	if (off == (char *)askp->args[1])
 	    continue;			/* skip argv[0] */
-	if ((len = read_string(fd, msgp->msg_pid, ap, cp, ep - cp)) == -1) {
+	if ((len = read_string(fd, pid, ap, cp, ep - cp)) == -1) {
 	    warn("STRIOCIO");
 	    return(-1);
 	}
@@ -550,27 +559,32 @@ decode_args(fd, msgp)
 /*
  * Decode the args to exec and check the command in sudoers.
  */
-int
-check_exec(fd, initialized, msgp)
+void
+check_exec(fd, initialized, askp, ansp)
     int fd;
     int *initialized;
-    struct str_message *msgp;
+    struct str_msg_ask *askp;
+    struct systrace_answer *ansp;
 {
     int validated;
 
     /* We're not really initialized until the first exec finishes. */
     if (*initialized == 0) {
 	*initialized = 1;
-	return(SYSTR_POLICY_PERMIT);
+	ansp->stra_policy = SYSTR_POLICY_PERMIT;
+	return;
     }
 
     /* Fill in user_cmnd, user_base, user_args and user_stat.  */
-    decode_args(fd, msgp);
-    if (user_cmnd[0] != '/' || !sudo_goodpath(user_cmnd, user_stat))
-	return(SYSTR_POLICY_NEVER);
+    decode_args(fd, ansp->stra_pid, askp);
+    if (user_cmnd[0] != '/' || !sudo_goodpath(user_cmnd, user_stat)) {
+	ansp->stra_policy = SYSTR_POLICY_NEVER;
+	ansp->stra_error = EACCES;
+	return;
+    }
 
     /* Get processes's cwd. */
-    if (ioctl(fd, STRIOCGETCWD, &msgp->msg_pid) == -1 ||
+    if (ioctl(fd, STRIOCGETCWD, &ansp->stra_pid) == -1 ||
 	!getcwd(user_cwd, sizeof(user_cwd))) {
 	warnx("cannot get working directory");
 	(void) strlcpy(user_cwd, "unknown", sizeof(user_cwd));
@@ -587,8 +601,10 @@ check_exec(fd, initialized, msgp)
     warnx("intercepted: %s %s in %s -> 0x%x", user_cmnd, user_args, user_cwd, validated);
 #endif
     log_auth(validated, 1);
-    if (ISSET(validated, VALIDATE_OK))
-	return(SYSTR_POLICY_PERMIT);
-    else
-	return(SYSTR_POLICY_NEVER);
+    if (ISSET(validated, VALIDATE_OK)) {
+	ansp->stra_policy = SYSTR_POLICY_PERMIT;
+    } else {
+	ansp->stra_policy = SYSTR_POLICY_NEVER;
+	ansp->stra_error = EACCES;
+    }
 }
