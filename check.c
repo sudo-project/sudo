@@ -260,9 +260,18 @@ static int check_timestamp()
 static void update_timestamp()
 {
 #if defined(HAVE_UTIME) && !defined(HAVE_UTIME_NULL)
+#ifdef HAVE_UTIME_H
+    struct utimbuf ut;
+    struct utimbuf *utp;
+
+    ut.actime = ut.modtime = time(NULL);
+    utp = &ut;
+#else
+    /* old BSD <= 4.3 has no struct utimbuf */
     time_t utp[2];
 
     utp[0] = utp[1] = time(NULL);
+#endif /* HAVE_UTIME_H */
 #else
     struct utimbuf *utp = (utimbuf *) NULL;
 #endif /* HAVE_UTIME && !HAVE_UTIME_NULL */
