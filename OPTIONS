@@ -147,7 +147,9 @@ MAILSUBJECT
 
 PASSPROMPT
     Default prompt to use when asking for a password.  Can be overridden
-    via the -p option.  Default is "Password:".
+    via the -p option.  Supports two escapes: "%u" expands to the
+    user's login name and "%h" expands to the local hostname.
+    Default is "Password:".
 
 SECURE_PATH
     Path used for every command run from sudo(8).  If you don't trust
