@@ -64,6 +64,10 @@ extern char *getenv();
 extern FILE *yyin, *yyout;
 extern int errno, yylineno;
 
+#ifndef SA_RESETHAND
+#define SA_RESETHAND	0
+#endif /* SA_RESETHAND */
+
 /*
  * Globals
  */
