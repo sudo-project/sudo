@@ -440,7 +440,7 @@ static void check_passwd()
     struct SD_CLIENT sd_dat, *sd;		/* SecurID data block */
     register int counter = TRIES_FOR_PASSWORD;
 
-    (void) memset ((VOID *)&sd_dat, 0, sizeof(sd_dat));
+    (void) memset((VOID *)&sd_dat, 0, sizeof(sd_dat));
     sd = &sd_dat;
 
     /* Initialize SecurID. */
