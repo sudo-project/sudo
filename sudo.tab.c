@@ -696,7 +696,8 @@ list_matches()
     char *p;
     struct generic_alias *ga, key;
 
-    (void) puts("You may run the following commands on this host:");
+    (void) printf("User %s may run the following commands on this host:\n",
+	user_name);
     for (i = 0; i < cm_list_len; i++) {
 
 	/* Print the runas list. */
@@ -882,7 +883,7 @@ init_parser()
     if (printmatches == TRUE)
 	expand_match_list();
 }
-#line 886 "sudo.tab.c"
+#line 887 "sudo.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || __STDC__
 static int yygrowstack(void)
@@ -1668,7 +1669,7 @@ case 74:
 			    yyval.BOOLEAN = TRUE;
 			}
 break;
-#line 1672 "sudo.tab.c"
+#line 1673 "sudo.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

@@ -925,7 +925,8 @@ list_matches()
     char *p;
     struct generic_alias *ga, key;
 
-    (void) puts("You may run the following commands on this host:");
+    (void) printf("User %s may run the following commands on this host:\n",
+	user_name);
     for (i = 0; i < cm_list_len; i++) {
 
 	/* Print the runas list. */
