@@ -128,7 +128,7 @@ int main(argc, argv)
     int argc;
     char **argv;
 {
-    char buf[BUFSIZ];			/* buffer used for copying files */
+    char buf[MAXPATHLEN*2];		/* buffer used for copying files */
     char * Editor = EDITOR;		/* editor to use (default is EDITOR */
     int sudoers_fd;			/* sudoers file descriptor */
     int stmp_fd;			/* stmp file descriptor */
@@ -215,6 +215,11 @@ int main(argc, argv)
 	/*
 	 * Build up a buffer to execute
 	 */
+	if (strlen(Editor) + strlen(stmp) + 30 > sizeof(buf)) {
+	    (void) fprintf(stderr, "%s: Buffer too short (line %d).\n",
+			   __LINE__, Argv[0]);
+	    Exit(-1);
+	}
 	if (parse_error == TRUE)
 	    (void) sprintf(buf, "%s +%d %s", Editor, errorlineno, stmp);
 	else
@@ -261,11 +266,11 @@ int main(argc, argv)
 	    init_parser();
 
 	    /* parse the sudoers file */
-	    if (yyparse()) {
+	    if (yyparse() && parse_error != TRUE) {
 		(void) fprintf(stderr,
-		    "%s: Failed to parse temporary file (%s), %s unchanged.\n",
+		    "%s: Failed to parse temporary file (%s), unknown error.\n",
 		    Argv[0], stmp, sudoers);
-		Exit(-1);
+		parse_error = TRUE;
 	    }
 	} else {
 	    (void) fprintf(stderr, "%s: Editor (%s) failed, %s unchanged.\n",
@@ -416,10 +421,8 @@ static RETSIGTYPE Exit(sig)
 
     if (sig > 0)
 	(void) fprintf(stderr, "%s exiting, caught signal %d.\n", Argv[0], sig);
-    else
-	sig = -sig;
 
-    exit(sig);
+    exit(-sig);
 }
 
 
@@ -438,16 +441,12 @@ static char whatnow()
 
     do {
 	ok = FALSE;
-	(void) printf("What now? ");
-	if ((choice = fgetc(stdin)) != '\n')
-	    while (fgetc(stdin) != '\n')
+	(void) fputs("What now? ", stdout);
+	if ((choice = getchar()) != '\n')
+	    while (getchar() != '\n')
 		;
 
-	/* safely force to lower case */
-	if (isupper(choice))
-	    choice = tolower(choice);
-
-	if (choice == 'e' || choice == 'x' || choice == 'q')
+	if (choice == 'e' || choice == 'x' || choice == 'Q')
 	    ok = TRUE;
 
 	/* help message if they gavce us garbage */
@@ -472,7 +471,7 @@ static void whatnow_help()
     (void) printf("Options are:\n");
     (void) printf("  (e)dit sudoers file again\n");
     (void) printf("  e(x)it without saving changes to sudoers file\n");
-    (void) printf("  (q)uit and save changes to sudoers file (DANGER!)\n\n");
+    (void) printf("  (Q)uit and save changes to sudoers file (DANGER!)\n\n");
 }
 
 
