@@ -174,6 +174,7 @@ void check_user		__P((void));
 int validate		__P((void));
 void set_perms		__P((int));
 void remove_timestamp	__P((void));
+void load_interfaces	__P((void));
 #ifdef HAVE_SKEY
 char *skey_getpass	__P((char *, struct passwd *, int));
 char *skey_crypt	__P((char *, char *, struct passwd *, int));
