@@ -14,13 +14,15 @@
 #define PASSWD 270
 #define NOEXEC 271
 #define EXEC 272
-#define ALL 273
-#define COMMENT 274
-#define HOSTALIAS 275
-#define CMNDALIAS 276
-#define USERALIAS 277
-#define RUNASALIAS 278
-#define ERROR 279
+#define TRACE 273
+#define NOTRACE 274
+#define ALL 275
+#define COMMENT 276
+#define HOSTALIAS 277
+#define CMNDALIAS 278
+#define USERALIAS 279
+#define RUNASALIAS 280
+#define ERROR 281
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
