@@ -1587,6 +1587,7 @@ dnl
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_CHECK_HEADERS(malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h)
+AC_CHECK_HEADERS(err.h, , [AC_LIBOBJ(err)])
 dnl ultrix termio/termios are broken
 if test "$OS" != "ultrix"; then
     AC_SYS_POSIX_TERMIOS
@@ -1692,7 +1693,21 @@ dnl
 if test "$with_DCE" = "yes" -o "$ac_cv_prog_YACC" = "bison -y"; then
     AC_FUNC_ALLOCA
 fi
-
+dnl
+dnl Check for getprogname() or __progname
+dnl
+AC_CHECK_FUNCS(getprogname, , [
+    AC_MSG_CHECKING([for __progname])
+    AC_CACHE_VAL(sudo_cv___progname, [
+    AC_TRY_LINK(, [extern char *__progname; (void)puts(__progname);],
+    [sudo_cv___progname=yes], [sudo_cv___progname=no])])
+    if test "$sudo_cv___progname" = "yes"; then
+	AC_DEFINE(HAVE___PROGNAME, 1, [Define if your crt0.o defines the __progname symbol for you.])
+    else
+	AC_LIBOBJ(getprogname)
+    fi
+    AC_MSG_RESULT($sudo_cv___progname)
+])
 dnl
 dnl Kerberos IV
 dnl
