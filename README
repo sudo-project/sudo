@@ -62,12 +62,19 @@ Please refer to the `LICENSE' file included with the release for details.
 
 Mailing lists
 =============
-There is a mailing list that receives announcements whenever a new
-version of sudo is released.  You can subscribe to it by sending a
-message to "majordomo@cs.colorado.edu" that includes the line
-"subscribe sudo-announce".
-There is also a list for people working on and porting sudo.  The
-command to add yourself is "subscribe sudo-workers".
+sudo-announce	This list receives announcements whenever a new version
+		of sudo is released.
+
+sudo-users	This list is for questions and general discussion about sudo.
+
+sudo-workers	This list is for people working on and porting sudo.
+
+To subscribe to a list, send a mail message to "majordomo@cs.colorado.edu"
+with a line in the message body (_not_ the subject) of "subscribe listname"
+where "listname" is one of sudo-announce, sudo-users, or sudo-workers.
+
+Currently all the lists are fairly low-volume so there hasn't been a
+need for digest versions.
 
 Web page
 ========
