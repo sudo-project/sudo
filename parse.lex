@@ -94,6 +94,8 @@ WORD			([^#>@!=:,\(\) \t\n\\]|\\[^\n])+
 ENVAR			([^#!=, \t\n\\]|\\[^\n])([^#=, \t\n\\]|\\[^\n])*
 DEFVAR			[a-z_]+
 
+%option nounput
+
 /* XXX - convert GOTRUNAS to exclusive state (GOTDEFS cannot be) */
 %s	GOTRUNAS
 %s	GOTDEFS
@@ -168,7 +170,7 @@ DEFVAR			[a-z_]+
 
     [#:\,=\n]		{
 			    BEGIN INITIAL;
-			    unput(*yytext);
+			    yyless(1);
 			    return(COMMAND);
 			}			/* end of command line args */
 
