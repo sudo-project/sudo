@@ -387,6 +387,9 @@ log_error(va_alist)
     free(logline);
     if (message != logline);
 	free(message);
+
+    if (!(flags & NO_EXIT))
+	exit(1);
 }
 
 #define MAX_MAILFLAGS	63
