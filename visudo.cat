@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.8                      May 17, 2004                         1
+1.6.8                     June  8, 2004                         1
 
 
 
@@ -71,8 +71,8 @@ VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
            file of your choice, instead of the default,
-           @sysconfdir@/sudoers.  The lock file used is the spec­
-           ified _s_u_d_o_e_r_s file with ".tmp" appended to it.
+           _/_e_t_c_/_s_u_d_o_e_r_s.  The lock file used is the specified
+           _s_u_d_o_e_r_s file with ".tmp" appended to it.
 
        -q  Enable qquuiieett mode.  In this mode details about syntax
            errors are not printed.  This option is only useful
@@ -107,9 +107,34 @@ EERRRROORRSS
            plain).  In --ss (strict) mode these are errors, not
            warnings.
 
+       Warning: runas_default set after old value is in use ...
+           You have a _r_u_n_a_s___d_e_f_a_u_l_t Defaults setting listed in
+           the _s_u_d_o_e_r_s file after its value has already been
+           used.  This means that entries prior to the
+           _r_u_n_a_s___d_e_f_a_u_l_t setting will match based on the default
+           value of _r_u_n_a_s___d_e_f_a_u_l_t (root) whereas entries aafftteerr
+           the _r_u_n_a_s___d_e_f_a_u_l_t setting will match based on the new
+           value.  This is usually unintentional and in most
+           cases the <runas_default> setting should be placed
+           before any Runas_Alias or User specifications.  In --ss
+           (strict) mode this is an error, not a warning.
+
 EENNVVIIRROONNMMEENNTT
        The following environment variables are used only if
        vviissuuddoo was configured with the _-_-_w_i_t_h_-_e_n_v_-_e_d_i_t_o_r option:
+
+
+
+
+
+1.6.8                     June  8, 2004                         2
+
+
+
+
+
+VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
+
 
         VISUAL                 Invoked by visudo as the editor to use
         EDITOR                 Used by visudo if VISUAL is not set
@@ -123,18 +148,6 @@ AAUUTTHHOORR
        sion of vviissuuddoo was written by:
 
         Todd Miller
-
-
-
-
-1.6.8                      May 17, 2004                         2
-
-
-
-
-
-VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
-
 
        See the HISTORY file in the sudo distribution or visit
        http://www.sudo.ws/sudo/history.html for more details.
@@ -180,19 +193,6 @@ SSEEEE AALLSSOO
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.6.8                      May 17, 2004                         3
+1.6.8                     June  8, 2004                         3
 
 

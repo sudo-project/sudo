@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "May 17, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "June  8, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 visudo \- edit the sudoers file
 .SH "SYNOPSIS"
@@ -203,7 +203,7 @@ exit with a value of 0.  If a syntax error is encountered,
 .IX Item "-f"
 Specify and alternate \fIsudoers\fR file location.  With this option
 \&\fBvisudo\fR will edit (or check) the \fIsudoers\fR file of your choice,
-instead of the default, \f(CW@sysconfdir\fR@/sudoers.  The lock file used
+instead of the default, \fI@sysconfdir@/sudoers\fR.  The lock file used
 is the specified \fIsudoers\fR file with \*(L".tmp\*(R" appended to it.
 .IP "\-q" 4
 .IX Item "-q"
@@ -240,6 +240,17 @@ consists solely of uppercase letters, digits, and the
 underscore ('_') character.  If the latter, you can ignore
 the warnings (\fBsudo\fR will not complain).  In \fB\-s\fR (strict)
 mode these are errors, not warnings.
+.IP "Warning: runas_default set after old value is in use ..." 4
+.IX Item "Warning: runas_default set after old value is in use ..."
+You have a \fIrunas_default\fR Defaults setting listed in the \fIsudoers\fR
+file after its value has already been used.  This means that entries
+prior to the \fIrunas_default\fR setting will match based on the default
+value of \fIrunas_default\fR (\f(CW\*(C`@runas_default@\*(C'\fR) whereas entries
+\&\fBafter\fR the \fIrunas_default\fR setting will match based on the new
+value.  This is usually unintentional and in most cases the
+<runas_default> setting should be placed before any \f(CW\*(C`Runas_Alias\*(C'\fR
+or User specifications.  In \fB\-s\fR (strict) mode this is an error,
+not a warning.
 .SH "ENVIRONMENT"
 .IX Header "ENVIRONMENT"
 The following environment variables are used only if \fBvisudo\fR
