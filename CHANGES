@@ -366,7 +366,7 @@ CHANGES from sudo 1.3.1pl4
 
 120) Now log tty user is on as well as pwd in sudo logs.
 
-CHANGES from sudo 1.3.2
+CHANGES from sudo 1.3.2 BETA
 
 121) Fixed a bug in the anti-spoofing check.
 
@@ -389,7 +389,7 @@ CHANGES from sudo 1.3.2
      time.  Based on a suggestion by Larry Auton <lda@research.AT&T.com>
      and Navjot Singh <singh@research.AT&T.com>.
 
-CHANGES from sudo 1.3.3
+CHANGES from sudo 1.3.3 BETA
 
 127) Cleaned up interfaces.c so that it is more readable.
 
@@ -428,7 +428,7 @@ CHANGES from sudo 1.3.3
 
 139) Updated testsudoers.c to grok netgroups.
 
-CHANGES from sudo 1.3.4
+CHANGES from sudo 1.3.4 BETA
 
 140) Added SecurID support from Giles Todd <giles@gt.demon.co.uk>.
 
@@ -508,12 +508,12 @@ CHANGES from sudo 1.3.4
 161) Upgraded to GNU autoconf version 1.5.  There are now even
      *more* options.
 
-CHANGES from sudo 1.3.5
+CHANGES from sudo 1.3.5 BETA
 
 162) Fixed S/Key support.
 
 163) Cleaned up shadow password support further by moving much of
-     it to sudo_getpwuid.c.
+     it to getspwuid.c.
 
 164) First cut at DCE support. [needs work to be functional]
 
@@ -545,7 +545,20 @@ CHANGES from sudo 1.3.5
      arithmetic to compute the length.  Kind of sneaky but it
      works (and is relatively fast).
 
-CHANGES from sudo 1.3.6
+CHANGES from sudo 1.3.6 BETA
 
 171) Added support for UN*X groups in sudoers based on code from
      Dougal Scott <dwagon@aaii.oz.au>.
+
+172) interfaces.c should work on ISC UN*X again.
+
+173) All source files are <= 14 characters for old SYSV filesystems.
+
+CHANGES from sudo 1.3.7 GAMMA
+
+174) Minor configure[.in] fixes.
+
+175) tgetpass.c now compiles on OS's that put the definition of
+     fd_set in <sys/bsdtypes.h>
+
+CHANGES from sudo 1.4
