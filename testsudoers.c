@@ -61,8 +61,9 @@ extern int clearaliases;
 extern struct interface *interfaces;
 extern int num_interfaces;
 
-char *cmnd;
-char *user;
+char *cmnd = NULL;
+char *cmnd_args = NULL;
+char *user = NULL;
 char host[MAXHOSTNAMELEN+1];
 char cwd[MAXPATHLEN+1];
 char *epasswd = NULL;
@@ -79,26 +80,39 @@ int path_matches(cmnd, path)
     char *cmnd, *path;
 {
     int clen, plen;
+    char *args;
 
     if (cmnd == NULL)
-	return FALSE;
+	return(FALSE);
+
+    if ((args = strchr(path, ' ')))  
+	*args++ = '\0';
 
     plen = strlen(path);
-    if (path[plen] != '/')
-	return strcmp(cmnd, path) == 0;
+    if (path[plen - 1] != '/') {
+	if (strcmp(cmnd, path) == 0) {
+	    if (!cmnd_args && !args)
+		return(TRUE);
+	    else if (cmnd_args && args)
+		return((strcmp(cmnd_args, args) == 0));
+	    else
+		return(FALSE);
+	} else
+	    return(FALSE);
+    }
 
     clen = strlen(cmnd);
     if (clen < plen + 1)
 	/* path cannot be the parent dir of cmnd */
-	return FALSE;
+	return(FALSE);
 
     if (strchr(cmnd + plen + 1, '/') != NULL)
 	/* path could only be an anscestor of cmnd -- */
 	/* ignoring, of course, things like // & /./  */
-	return FALSE;
+	return(FALSE);
 
     /* see whether path is the prefix of cmnd */
-    return strncmp(cmnd, path, plen) == 0;
+    return((strncmp(cmnd, path, plen) == 0));
 }
 
 
