@@ -23,9 +23,10 @@ Cmnd_Alias	VIPW=/usr/etc/vipw,/etc/vipw,/bin/passwd
 # Host alias specification
 Host_Alias	SUN4=bruno,eclipse,moet,anchor
 Host_Alias	SUN3=brazil,columbine
-Host_Alias	DECSTATION=wilkinson,soma,dendrite,nordsieck
-Host_Alias 	DECALPHA=widget,thalamus
+Host_Alias	DECSTATION=wilkinson,soma,dendrite,thang
+Host_Alias 	DECALPHA=widget,thalamus,foobar
 Host_Alias	HPSNAKE=boa,nag,python
+Host_Alias	CSNETS=128.138.243.0,128.138.204.0,128.138.242.0
 
 # User specification
 root		ALL=ALL
@@ -33,7 +34,7 @@ root		ALL=ALL
 millert		ALL=ALL
 barb		ALL=ALL
 bostley		ALL=ALL,!SU,!SHELLS
-lp		All=LPC
-operator	ALL=DUMPS,KILL,LPC,SHUTDOWN,HALT,REBOOT
+rodney		CSNETS=ALL,!SU,!SHELLS
+operator	ALL=DUMPS,KILL,LPC,SHUTDOWN,HALT,REBOOT,/usr/oper/
 bob		SUN4=ALL,!SU,!SHELLS:\
 		SUN3=ALL,!SU,!SHELLS
