@@ -641,6 +641,8 @@ Always lecture the user.
 
 =back
 
+If no value is specified, a value of I<once> is implied.
+Negating the option results in a value of I<never> being used.
 The default value is I<@lecture@>.
 
 =item lecture_file
@@ -714,7 +716,9 @@ The user must always enter a password to use the B<-v> flag.
 
 =back
 
-The default value is `all'.
+If no value is specified, a value of I<all> is implied.
+Negating the option results in a value of I<never> being used.
+The default value is I<all>.
 
 =item listpw
 
@@ -743,7 +747,9 @@ The user must always enter a password to use the B<-l> flag.
 
 =back
 
-The default value is `any'.
+If no value is specified, a value of I<any> is implied.
+Negating the option results in a value of I<never> being used.
+The default value is I<any>.
 
 =back
 
