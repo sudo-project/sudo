@@ -162,11 +162,14 @@ CHANGES from sudo 1.3
 56) Moved code to send error mail to be after the log message.
     From rouilj@cs.umb.edu.
 
-57) Added -k and -h options and rearranged some of the code to be
+57) Added SUDO_USER and SUDO_UID envars.  Suggested by John P. Rouillard
+   (<rouilj@cs.umb.edu).
+
+58) Added -k and -h options and rearranged some of the code to be
     more modular and less braindamaged.  This introduces the concept
     of "run modes" to sudo.
 
-58) Fixed visudo and flex.  visudo now calls yyrestart() if you are using
+59) Fixed visudo and flex.  visudo now calls yyrestart() if you are using
     flex instead of lex.  From bostley@cs.colorado.edu.
 
-59) Added a "cat page" for systems w/o nroff.
+60) Added a "cat page" for systems w/o nroff.
