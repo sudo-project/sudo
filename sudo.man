@@ -223,6 +223,8 @@ over the years, this version is done by:
 
 Jeff Nieusma                 <nieusma@csn.org>
 David Hieb                   <davehieb@csn.org>
+
+See the HISTORY file in the sudo distribution for more details.
 .fi
 
 Please send all bugs, comments, and changes to sudo-bugs@cs.colorado.edu.
