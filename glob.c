@@ -97,7 +97,7 @@
 #include <limits.h>
 #include <pwd.h>
 
-#include "compat.h"
+#include <compat.h>
 #include "emul/glob.h"
 
 #define	DOLLAR		'$'

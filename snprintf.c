@@ -73,7 +73,7 @@
 # include <varargs.h>
 #endif
 
-#include "compat.h"
+#include <compat.h>
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";

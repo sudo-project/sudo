@@ -47,7 +47,7 @@
 # endif
 #endif /* HAVE_STRING_H */
 
-#include "compat.h"
+#include <compat.h>
 #include "emul/fnmatch.h"
 
 #undef	EOS

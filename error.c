@@ -20,7 +20,7 @@
 #include <string.h>
 
 #include <config.h>
-#include "compat.h"
+#include <compat.h>
 #include "error.h"
 
 #ifndef lint
