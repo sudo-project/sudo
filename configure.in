@@ -1,4 +1,7 @@
+dnl
 dnl Process this file with GNU autoconf to produce a configure script.
+dnl $Id$
+dnl
 AC_INIT(sudo.h)
 AC_CONFIG_HEADER(config.h)
 dnl
@@ -682,6 +685,7 @@ if test "$OS" != "irix"; then
     if test -z "$LIB_NSL"; then
 	AC_CHECK_LIB(nsl, main, SUDO_LIBS="${SUDO_LIBS} -lnsl")
     fi
+    AC_CHECK_LIB(socket, main, SUDO_LIBS="${SUDO_LIBS} -lsocket")
 elif test "$OSREV" -lt 5; then
     AC_CHECK_LIB(sun, getpwnam, [SUDO_LIBS="${SUDO_LIBS} -lsun"
 VISUDO_LIBS="${VISUDO_LIBS} -lsun"]
