@@ -1705,8 +1705,15 @@ AC_CHECK_FUNCS(lsearch, , [AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.
 AC_CHECK_FUNCS(utime, [SUDO_FUNC_UTIME_POSIX], [AC_LIBOBJ(utime)])
 SUDO_FUNC_FNMATCH(AC_DEFINE(HAVE_FNMATCH, 1, [Define if you have the `fnmatch' function.]), AC_LIBOBJ(fnmatch))
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(strerror strcasecmp sigaction strlcpy strlcat closefrom dirfd)
+AC_REPLACE_FUNCS(strerror strcasecmp sigaction strlcpy strlcat closefrom)
 AC_CHECK_FUNCS(snprintf vsnprintf asprintf vasprintf, , [NEED_SNPRINTF=1])
+dnl
+dnl Check for the dirfd function/macro.  If not found, look for dd_fd in DIR.
+dnl
+AC_TRY_LINK([#include <sys/types.h>
+#include <$ac_header_dirent>], [DIR d; (void)dirfd(&d);], [AC_DEFINE(HAVE_DIRFD, 1, [Define if you have the `fnmatch' function or macro.])], [AC_TRY_LINK([#include <sys/types.h>
+#include <$ac_header_dirent>], [DIR d; (void)&d.dd_fd;], [AC_DEFINE(HAVE_DD_FD,
+ 1, [Define to 1 if your `DIR' contains dd_fd.])], [])])
 dnl
 dnl If NEED_SNPRINTF is set, add snprintf.c to LIBOBJS
 dnl (it contains snprintf, vsnprintf, asprintf, and vasprintf)
