@@ -423,18 +423,20 @@ AC_FUNC_UTIME_NULL, LIBOBJS="$LIBOBJS utime.o")
 dnl
 dnl if crypt(3) not in libc, look elsewhere
 dnl
-AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, , AC_CHECK_LIB(crypt_d, crypt, , AC_CHECK_LIB(crypt, ufc))))
+AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt", AC_CHECK_LIB(crypt_d, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt_d", AC_CHECK_LIB(crypt, ufc, SUDO_LIBS="${SUDO_LIBS} -lufc"))))
 dnl
 dnl library checks
 dnl
 dnl Irix doesn't want -lnsl or -lsocket (and Irix 4 needs -lsun)
 if test "$OS" != "irix" ; then
-    AC_CHECK_LIB(nsl, main)
-    AC_CHECK_LIB(socket, main)
+    AC_CHECK_LIB(nsl, main, SUDO_LIBS="${SUDO_LIBS} -lnsl")
+    AC_CHECK_LIB(socket, main, SUDO_LIBS="${SUDO_LIBS} -lsocket")
 elif test "$OSREV" -lt 5 ; then
-    AC_CHECK_LIB(sun, getpwnam)
+    AC_CHECK_LIB(sun, getpwnam, [SUDO_LIBS="${SUDO_LIBS} -lsun"
+VISUDO_LIBS="${VISUDO_LIBS} -lsun"]
+)
 fi
-AC_CHECK_LIB(inet, main)
+AC_CHECK_LIB(inet, main, SUDO_LIBS="${SUDO_LIBS} -linet")
 dnl
 dnl Find kerberos includes and libs or complain
 dnl
