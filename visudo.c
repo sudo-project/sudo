@@ -954,7 +954,7 @@ check_aliases(strict)
     return (strict ? 1 : 0);
 }
 
-int
+static int
 print_unused(v1, v2)
     VOID *v1;
     VOID *v2;
