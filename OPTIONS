@@ -93,6 +93,11 @@ USE_INSULTS
     just like the original sudo(8).
     This is off by default.
 
+CLASSIC_INSULTS
+    Uses insults from sudo "classic."  If you just define USE_INSULTS
+    you will get the classic insults.
+    This is on by default if USE_INSULTS is defined.
+
 HAL_INSULTS
     Uses 2001-like insults when an incorrect password is entered.  You must
     define USE_INSULTS as well for this to have any effect.
@@ -102,6 +107,11 @@ GOONS_INSULTS
     Insults the user with lines from the "Goon Show" when an incorrect
     password is entered.  You must define USE_INSULTS as well for this
     to have any effect.
+    This is off by default.
+
+CSOPS_INSULTS
+    Insults the user with an extra set of insults from a sysadmin group at CU
+    (CSOps).  You must define USE_INSULTS as well for this to have any effect.
     This is off by default.
 
 EDITOR
@@ -139,7 +149,7 @@ SECURE_PATH
     have the "root path" be separate from the "user path."  You will
     need to customize the path for your site.
     NOTE: SECURE_PATH is not applied to users in the EXEMPTGROUP.
-    This is turned off by default.
+    This is off by default.
 
 USE_EXECV
     Use execv() to exec the command instead of execvp().  I can't think of
@@ -147,6 +157,13 @@ USE_EXECV
     pathname but someone might thoroughly distrust execvp().  Note that if
     you define this you lose the ability to exec scripts that are missing the
     '#!/bin/sh' cookie (like /bin/kill on sunos and /etc/fastboot on 4.3BSD).
+    This is off by default.
+
+SHELL_IF_NO_ARGS
+    If sudo is invoked with no arguments it acts as if the "-s" flag
+    had been given.  Namely, it runs a shell as root (the shell is
+    determined by the SHELL envariable, falling back on the shell listed
+    in the invoking user's /etc/passwd entry).
     This is off by default.
 
 FAST_MATCH
