@@ -1228,7 +1228,7 @@ case "$host" in
 
 		# system headers lack prototypes but gcc helps...
 		if test -n "$GCC"; then
-		    CPPFLAGS="${CPPFLAGS} -D__USE_FIXED_PROTOTYPES__"
+		    OSDEFS="${OSDEFS} -D__USE_FIXED_PROTOTYPES__"
 		fi
 
 		# check for password adjunct functions (shadow passwords)
@@ -1239,7 +1239,7 @@ case "$host" in
 		;;
     *-*-solaris2*)
 		# To get the crypt(3) prototype (so we pass -Wall)
-		CPPFLAGS="${CPPFLAGS} -D__EXTENSIONS__"
+		OSDEFS="${OSDEFS} -D__EXTENSIONS__"
 		# AFS support needs -lucb
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lucb"
@@ -1251,7 +1251,7 @@ case "$host" in
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
-		CPPFLAGS="${CPPFLAGS} -D_XOPEN_EXTENDED_SOURCE -D_ALL_SOURCE"
+		OSDEFS="${OSDEFS} -D_XOPEN_EXTENDED_SOURCE -D_ALL_SOURCE"
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 		if test X"$with_blibpath" != X"no"; then
 		    AC_MSG_CHECKING([if linker accepts -Wl,-blibpath])
@@ -1389,7 +1389,7 @@ case "$host" in
 		: ${mansectform='4'}
 		;;
     *-*-irix*)
-		CPPFLAGS="${CPPFLAGS} -D_BSD_TYPES"
+		OSDEFS="${OSDEFS} -D_BSD_TYPES"
 		if test -z "$NROFFPROG"; then
 		    MAN_POSTINSTALL='	/bin/rm -f $(mandirsu)/sudo.$(mansectsu).z $(mandirsu)/visudo.$(mansectsu).z $(mandirform)/sudoers.$(mansectform).z ; /usr/bin/pack $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudoers.$(mansectform)'
 		    if test "$prefix" = "/usr/local" -a "$mandir" = '$(prefix)/man'; then
@@ -1416,7 +1416,7 @@ case "$host" in
 		: ${mansectform='4'}
 		;;
     *-*-linux*)
-		CPPFLAGS="${CPPFLAGS} -D_GNU_SOURCE"
+		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
 		# Some Linux versions need to link with -lshadow
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_FUNCS(getspnam, , [AC_CHECK_LIB(shadow, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lshadow"; LIBS="${LIBS} -lshadow"])])
@@ -1425,7 +1425,7 @@ case "$host" in
 		: ${with_pam='maybe'}
 		;;
     *-convex-bsd*)
-		CPPFLAGS="${CPPFLAGS} -D_CONVEX_SOURCE"
+		OSDEFS="${OSDEFS} -D_CONVEX_SOURCE"
 		if test -z "$GCC"; then
 		    CFLAGS="${CFLAGS} -D__STDC__"
 		fi
@@ -1593,7 +1593,7 @@ case "$host" in
 		: ${mansectform='4'}
 		;;
     *-gnu*)
-		CPPFLAGS="${CPPFLAGS} -D_GNU_SOURCE"
+		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
 		;;
 esac
 
