@@ -31,6 +31,9 @@ static char rcsid[] = "$Id$";
 #include "config.h"
 
 #include <stdio.h>
+#ifdef STDC_HEADERS
+#  include <stdlib.h>
+#endif /* STDC_HEADERS */
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif /* HAVE_UNISTD_H */
