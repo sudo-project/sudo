@@ -278,11 +278,11 @@ cmndspec	:	{   /* Push a new entry onto the stack if needed */
 				no_passwd = -1;
 			    }
 			} runasspec nopasswd opcmnd {
-			    if ($2 > 0 && $4 == TRUE) {
+			    if ($2 > 0)
 				runas_matches = TRUE;
-				if ($3 == TRUE)
-				    no_passwd = TRUE;
-			    } else if (printmatches == TRUE) {
+			    if ($3 == TRUE)
+				no_passwd = TRUE;
+			    if (($2 == -1 || $4 == -1) && printmatches == TRUE) {
 				cm_list[cm_list_len].runas_len = 0;
 				cm_list[cm_list_len].cmnd_len = 0;
 				cm_list[cm_list_len].nopasswd = FALSE;

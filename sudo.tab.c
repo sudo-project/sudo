@@ -1134,11 +1134,11 @@ break;
 case 23:
 #line 280 "parse.yacc"
 {
-			    if (yyvsp[-2].BOOLEAN > 0 && yyvsp[0].BOOLEAN == TRUE) {
+			    if (yyvsp[-2].BOOLEAN > 0)
 				runas_matches = TRUE;
-				if (yyvsp[-1].BOOLEAN == TRUE)
-				    no_passwd = TRUE;
-			    } else if (printmatches == TRUE) {
+			    if (yyvsp[-1].BOOLEAN == TRUE)
+				no_passwd = TRUE;
+			    if ((yyvsp[-2].BOOLEAN == -1 || yyvsp[0].BOOLEAN == -1) && printmatches == TRUE) {
 				cm_list[cm_list_len].runas_len = 0;
 				cm_list[cm_list_len].cmnd_len = 0;
 				cm_list[cm_list_len].nopasswd = FALSE;
