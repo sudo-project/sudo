@@ -239,7 +239,7 @@ void log_error(code)
 			_PATH_SUDO_SUDOERS);
 		    break;
 		case EACCES:
-		    (void) sprintf(p, "Can't read %s.  ", Argv[0]);
+		    (void) sprintf(p, "Can't read %s.  ", _PATH_SUDO_SUDOERS);
 		    break;
 		default:
 		    (void) sprintf(p, "There is a problem opening %s ",
