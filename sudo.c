@@ -301,6 +301,9 @@ static void clean_env(envp)
 #ifdef hpux
     rmenv(envp, "SHLIB_PATH", 10);
 #endif /* hpux */
+#ifdef _AIX
+    rmenv(envp, "LIBPATH", 7);
+#endif /* _AIX */
 #ifdef __alpha
     rmenv(envp, "_RLD_", 5);
 #endif /* __alpha */
