@@ -44,7 +44,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pwd.h>
-#include <sys/time.h>
 #include <dce/rpc.h>
 #include <dce/sec_login.h>
 #include <dce/dce_error.h> /* required to call dce_error_inq_text routine   */
