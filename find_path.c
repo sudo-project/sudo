@@ -106,7 +106,7 @@ find_path(infile, outfile, path)
 
 	/*
 	 * Search current dir last if it is in PATH This will miss sneaky
-	 * things like using './' or './/' 
+	 * things like using './' or './/'
 	 */
 	if (*path == '\0' || (*path == '.' && *(path + 1) == '\0')) {
 	    checkdot = 1;
