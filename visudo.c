@@ -85,7 +85,7 @@ static char whatnow		__P((void));
 static RETSIGTYPE Exit		__P((int));
 static void setup_signals	__P((void));
 static int run_command		__P((char *, char **));
-static int check_syntax		__P((char *, int));
+static int check_syntax		__P((char *));
 static int edit_sudoers		__P((char *, char *));
 int command_matches		__P((char *, char *));
 int addr_matches		__P((char *));
@@ -186,7 +186,7 @@ main(argc, argv)
     init_defaults();
 
     if (checkonly)
-	exit(check_syntax(sudoers.path, quiet));
+	exit(check_syntax(sudoers.path));
 
     /*
      * Check VISUAL and EDITOR environment variables to see which editor
@@ -280,6 +280,9 @@ main(argc, argv)
 	}
     }
 
+    /* Install signal handlers to clean up stmp if we are killed. */
+    setup_signals();
+
     for (sp = sudoerslist.first; sp != NULL; sp = sp->next) {
 	/* XXX - ask whether user wants to edit included files */
 	edit_sudoers(sp->path, Editor);
@@ -329,9 +332,6 @@ edit_sudoers(sudoers_path, editor)
     stmp_fd = open(stmp, O_WRONLY | O_CREAT | O_TRUNC, 0600);
     if (stmp_fd < 0)
 	err(1, "%s", stmp);
-
-    /* Install signal handlers to clean up stmp if we are killed. */
-    setup_signals();
 
     /* Copy sudoers_path -> stmp and reset the mtime */
     if (sudoers_size) {
@@ -694,9 +694,8 @@ run_command(path, argv)
 }
 
 static int
-check_syntax(sudoers_path, quiet)
+check_syntax(sudoers_path)
     char *sudoers_path;
-    int quiet;
 {
 
     if ((yyin = fopen(sudoers_path, "r")) == NULL) {
