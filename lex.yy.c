@@ -11,6 +11,7 @@
 #define YY_FLEX_MINOR_VERSION 5
 
 #include <stdio.h>
+#include <errno.h>
 
 
 /* cfront 1.2 defines "c_plusplus" instead of "__cplusplus" */
@@ -1302,7 +1303,7 @@ extern void yyerror		__P((char *));
 
 #define GOTDEFS 3
 
-#line 1306 "lex.yy.c"
+#line 1307 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -1458,7 +1459,7 @@ YY_DECL
 
 #line 102 "parse.lex"
 
-#line 1462 "lex.yy.c"
+#line 1463 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -1858,7 +1859,7 @@ YY_RULE_SETUP
 #line 324 "parse.lex"
 ECHO;
 	YY_BREAK
-#line 1862 "lex.yy.c"
+#line 1863 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(GOTCMND):
 case YY_STATE_EOF(GOTRUNAS):
@@ -2443,6 +2444,8 @@ FILE *file;
 
 
 	{
+	int oerrno = errno;
+
 	yy_flush_buffer( b );
 
 	b->yy_input_file = file;
@@ -2457,6 +2460,7 @@ FILE *file;
 	b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
 #endif
 #endif
+	errno = oerrno;
 	}
 
 
