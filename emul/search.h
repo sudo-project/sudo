@@ -26,19 +26,16 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * static char rcsid[] = "$Id$
  */
-
-#ifndef lint
-static char rcsid[] = "$Id$
-";
-#endif /* lint */
 
 #ifndef _SEARCH_H_
 #define _SEARCH_H_
 
-extern void	*lfind __P((const void *, const void *, size_t *, size_t,
-			      int (*)(const void *, const void *)));
-extern void	*lsearch __P((const void *, const void *, size_t *, size_t,
-			      int (*)(const void *, const void *)));
+extern VOID	*lfind __P((const VOID *, VOID *, size_t *, size_t,
+			      int (*)(const VOID *, const VOID *)));
+extern VOID	*lsearch __P((const VOID *, VOID *, size_t *, size_t,
+			      int (*)(const VOID *, const VOID *)));
 
 #endif
