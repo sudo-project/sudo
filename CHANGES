@@ -127,3 +127,7 @@ CHANGES from sudo 1.3
 43) find_path() now uses realpath(3)
 
 44) wrote versions of realpath(3) and getcwd(3) for those without
+
+45) wrote tgetpass()--a getpass() that times out via select(2)
+
+46) sudo now uses posix signals if available
