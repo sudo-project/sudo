@@ -1,4 +1,5 @@
-This file explains how to use the optional LDAP functionality of SUDO.
+This file explains how to use the optional LDAP functionality of SUDO to
+store /etc/sudoers information.  This feature is separate from LDAP passwords.
 
 LDAP philosophy
 ===============
@@ -51,8 +52,8 @@ Design Features
       the same way the global 'Defaults' line in /etc/sudoers is parsed.
 
       If on the second or third query, a response containing a sudoRole
-      which matches agains the user, host, and command, then the matched
-      object is scanned for a additional options to override the toplevel
+      which matches against the user, host, and command, then the matched
+      object is scanned for a additional options to override the top-level
       defaults.  See the Example LDAP content below for more information.
 
   * Visudo is no longer needed.  Visudo provides locking and syntax checking
@@ -87,13 +88,13 @@ Design Features
       BUG: THIS OPTION IS NOT IMPLEMENTED YET.
 
   * The sudo binary compiled with LDAP support should be totally
-      backware compatable and be syntactically and source code equivilent
-      to its non ldap-enabled build.
+      backward compatible and be syntactically and source code equivalent
+      to its non LDAP-enabled build.
 
 
 Build instructions
 ==================
-The most simplest way to build sudo with ldap support is to include the
+The most simplest way to build sudo with LDAP support is to include the
 '--with-ldap' option.  I recommend including the '--with-pam' option on those
 system with PAM so that if you decide to use LDAP for authentication, you won't
 need to recompile sudo.
@@ -127,7 +128,7 @@ we can improve sudo.
 Schema Changes
 ==============
 Add the following schema to your LDAP server so that it may contain sudoer
-content.  In openldap, simply place this into a new file and 'include' it
+content.  In OpenLDAP, simply place this into a new file and 'include' it
 in your slapd.conf and restart slapd.  For other LDAP servers, provide this
 to your LDAP Administrator.  Make sure to index the attribute 'sudoUser'.
 
@@ -200,7 +201,7 @@ Administrator.  An example is shown below.
 
 Example sudoers Entries in LDAP
 ===============================
-The equivilent of a sudoer in LDAP is a 'sudoRole'.  It contains sudoUser(s),
+The equivalent of a sudoer in LDAP is a 'sudoRole'.  It contains sudoUser(s),
 sudoHost, sudoCommand and optional sudoOption(s) and sudoRunAs(s).
 <put an example here>
 
@@ -212,7 +213,7 @@ and re-add objects.  (You can, but this is tedious).
 
 I recommend using any of the following LDAP browsers to administer your SUDOers.
   * GQ - The gentleman's LDAP client - Open Source - I use this a lot on
-         linux and since it is Schema aware, I don't need to create a sudoRole
+         Linux and since it is Schema aware, I don't need to create a sudoRole
       template.
     http://biot.com/gq/
 
