@@ -1,7 +1,7 @@
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
 NNAAMMEE
@@ -61,13 +61,13 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.6.8                      May 17, 2004                         1
+1.6.8                      May 27, 2004                         1
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
         Host_Alias ::= NAME '=' Host_List
@@ -127,13 +127,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                         2
+1.6.8                      May 27, 2004                         2
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
         Host_List ::= Host |
@@ -193,13 +193,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                         3
+1.6.8                      May 27, 2004                         3
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
        arguments: ',', ':', '=', '\'.  The special command
@@ -259,13 +259,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                         4
+1.6.8                      May 27, 2004                         4
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
                    pretty as the default but some people find it
@@ -304,8 +304,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    If set, mail will be sent to the _m_a_i_l_t_o user
                    if the invoking user is allowed to use ssuuddoo
                    but the command they are trying is not listed
-                   in their _s_u_d_o_e_r_s file entry.  This flag is _o_f_f
-                   by default.
+                   in their _s_u_d_o_e_r_s file entry or is explicitly
+                   denied.  This flag is _o_f_f by default.
 
        tty_tickets If set, users must authenticate on a per-tty
                    basis.  Normally, ssuuddoo uses a directory in the
@@ -325,13 +325,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                         5
+1.6.8                      May 27, 2004                         5
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
        root_sudo   If set, root is allowed to run ssuuddoo too.  Dis­
@@ -391,13 +391,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                         6
+1.6.8                      May 27, 2004                         6
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
        preserve_groups
@@ -457,13 +457,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                         7
+1.6.8                      May 27, 2004                         7
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
                    This flag is _o_f_f by default.
@@ -523,13 +523,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                         8
+1.6.8                      May 27, 2004                         8
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
                    exists.  Only available if ssuuddoo is configured
@@ -589,13 +589,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                         9
+1.6.8                      May 27, 2004                         9
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
        badpass_message
@@ -655,13 +655,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                        10
+1.6.8                      May 27, 2004                        10
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
                    choose the editor that matches the user's USER
@@ -721,13 +721,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                        11
+1.6.8                      May 27, 2004                        11
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
        exempt_group
@@ -787,13 +787,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                        12
+1.6.8                      May 27, 2004                        12
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
                    argument may be a double-quoted, space-sepa­
@@ -853,13 +853,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                        13
+1.6.8                      May 27, 2004                        13
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
         Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:')
@@ -919,13 +919,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                        14
+1.6.8                      May 27, 2004                        14
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
        _/_u_s_r_/_b_i_n_/_l_p_r_m as root on the machine rushmore as rroooott
@@ -985,13 +985,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                        15
+1.6.8                      May 27, 2004                        15
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
        Note that a forward slash ('/') will nnoott be matched by
@@ -1051,13 +1051,13 @@ EEXXAAMMPPLLEESS
 
 
 
-1.6.8                      May 17, 2004                        16
+1.6.8                      May 27, 2004                        16
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
        these are a bit contrived.  First, we define our _a_l_i_a_s_e_s:
@@ -1117,13 +1117,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                        17
+1.6.8                      May 27, 2004                        17
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
         root           ALL = (ALL) ALL
@@ -1183,13 +1183,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                        18
+1.6.8                      May 27, 2004                        18
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
        and ooppeerraattoorr).
@@ -1249,13 +1249,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                      May 17, 2004                        19
+1.6.8                      May 27, 2004                        19
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
        Any user may mount or unmount a CD-ROM on the machines in
@@ -1315,13 +1315,13 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.6.8                      May 17, 2004                        20
+1.6.8                      May 27, 2004                        20
 
 
 
 
 
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
        Tru64 UNIX, MacOS X, and HP-UX 11.x.  It is known nnoott to
@@ -1381,6 +1381,6 @@ SSEEEE AALLSSOO
 
 
 
-1.6.8                      May 17, 2004                        21
+1.6.8                      May 27, 2004                        21
 
 

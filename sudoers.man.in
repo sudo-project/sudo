@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "May 17, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "May 27, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -430,8 +430,8 @@ commands on the current host.  This flag is \fI@mail_no_host@\fR by default.
 .IX Item "mail_no_perms"
 If set, mail will be sent to the \fImailto\fR user if the invoking
 user is allowed to use \fBsudo\fR but the command they are trying is not
-listed in their \fIsudoers\fR file entry.  This flag is \fI@mail_no_perms@\fR
-by default.
+listed in their \fIsudoers\fR file entry or is explicitly denied.
+This flag is \fI@mail_no_perms@\fR by default.
 .IP "tty_tickets" 12
 .IX Item "tty_tickets"
 If set, users must authenticate on a per-tty basis.  Normally,
