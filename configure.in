@@ -24,6 +24,8 @@ prefix='/usr/local'
 exec_prefix='$(prefix)'
 man_prefix='$(prefix)/man'
 AC_SUBST(man_prefix)dnl
+sbin_dir='$(exec_prefix)/etc'
+AC_SUBST(sbin_dir)dnl
 MANTYPE="man"
 MAN_POSTINSTALL=""
 AC_SUBST(MAN_POSTINSTALL)dnl
@@ -71,6 +73,7 @@ echo 'Configuring for use with AFS')
 
 dnl --with-csops
 AC_ARG_WITH(csops, [  --with-csops            add CSops standard options], OPTIONS="${OPTIONS} -DUSE_INSULTS -DCLASSIC_INSULTS -DCSOPS_INSULTS -DENV_EDITOR"
+sbin_dir='$(exec_prefix)/sbin'
 echo 'CSOps--adding options: USE_INSULTS CLASSIC_INSULTS CSOPS_INSULTS ENV_EDITOR')
 
 dnl
