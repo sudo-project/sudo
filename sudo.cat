@@ -26,19 +26,19 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        time (five minutes by default).
 
        ssssuuuuddddoooo determines who is an authorized user by consulting
-       the file _/_e_t_c_/_s_u_d_o_e_r_s.  By giving ssssuuuuddddoooo the -v flag a user
-       can update the time stamp without running a _c_o_m_m_a_n_d_.  The
-       password prompt itself will also time out if the user's
-       password is not entered with N minutes (again, this is
-       defined at configure time and defaults to 5 minutes).
+       the file _/_e_t_c_/_s_u_d_o_e_r_s.  By giving ssssuuuuddddoooo the `-v' flag a
+       user can update the time stamp without running a _c_o_m_m_a_n_d_.
+       The password prompt itself will also time out if the
+       user's password is not entered with N minutes (again, this
+       is defined at configure time and defaults to 5 minutes).
 
        If a user that is not listed in the _s_u_d_o_e_r_s file tries to
-       run a command via ssssuuuuddddoooo, mail is sent to the proper
-       authorities, as defined at configure time (defaults to
-       root).  Note that the mail will not be sent if an
-       unauthorized user tries to run sudo with the -l or -v
-       flags.  This allows users to determine for themselves
-       whether or not they are allowed to use ssssuuuuddddoooo.
+       run a command via ssssuuuuddddoooo, mail is sent to the proper author­
+       ities, as defined at configure time (defaults to root).
+       Note that the mail will not be sent if an unauthorized
+       user tries to run sudo with the `-l' or `-v' flags.  This
+       allows users to determine for themselves whether or not
+       they are allowed to use ssssuuuuddddoooo.
 
        ssssuuuuddddoooo can log both successful an unsuccessful attempts (as
        well as errors) to _s_y_s_l_o_g(3), a log file, or both.  By
@@ -48,20 +48,20 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 OOOOPPPPTTTTIIIIOOOONNNNSSSS
        ssssuuuuddddoooo accepts the following command line options:
 
-       -V  The -V (_v_e_r_s_i_o_n) option causes ssssuuuuddddoooo to print the
+       -V  The `-V' (_v_e_r_s_i_o_n) option causes ssssuuuuddddoooo to print the
            version number and exit.
 
-       -l  The -l (_l_i_s_t) option will list out the allowed (and
+       -l  The `-l' (_l_i_s_t) option will list out the allowed (and
            forbidden) commands for the user on the current host.
 
-       -L  The -L (_l_i_s_t defaults) option will list out the
+       -L  The `-L' (_l_i_s_t defaults) option will list out the
            parameters that may be set in a _D_e_f_a_u_l_t_s line along
            with a short description for each.  This option is
            useful in conjunction with _g_r_e_p(1).
 
 
 
-28/Mar/2000                   1.6.3                             1
+April  7, 2000                1.6.3                             1
 
 
 
@@ -70,42 +70,42 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
-       -h  The -h (_h_e_l_p) option causes ssssuuuuddddoooo to print a usage
+       -h  The `-h' (_h_e_l_p) option causes ssssuuuuddddoooo to print a usage
            message and exit.
 
-       -v  If given the -v (_v_a_l_i_d_a_t_e) option, ssssuuuuddddoooo will update
-           the user's timestamp, prompting for the user's
-           password if necessary.  This extends the ssssuuuuddddoooo timeout
-           to for another N minutes (where N is defined at
-           installation time and defaults to 5 minutes) but does
-           not run a command.
+       -v  If given the `-v' (_v_a_l_i_d_a_t_e) option, ssssuuuuddddoooo will update
+           the user's timestamp, prompting for the user's pass­
+           word if necessary.  This extends the ssssuuuuddddoooo timeout to
+           for another N minutes (where N is defined at installa­
+           tion time and defaults to 5 minutes) but does not run
+           a command.
 
-       -k  The -k (_k_i_l_l) option to ssssuuuuddddoooo invalidates the user's
+       -k  The `-k' (_k_i_l_l) option to ssssuuuuddddoooo invalidates the user's
            timestamp by setting the time on it to the epoch.  The
            next time ssssuuuuddddoooo is run a password will be required.
            This option does not require a password and was added
            to allow a user to revoke ssssuuuuddddoooo permissions from a
            .logout file.
 
-       -K  The -K (sure _k_i_l_l) option to ssssuuuuddddoooo removes the user's
+       -K  The `-K' (sure _k_i_l_l) option to ssssuuuuddddoooo removes the user's
            timestamp entirely.  This option does not require a
            password.
 
-       -b  The -b (_b_a_c_k_g_r_o_u_n_d) option tells ssssuuuuddddoooo to run the given
-           command in the background.  Note that if you use the
-           -b option you cannot use shell job control to
+       -b  The `-b' (_b_a_c_k_g_r_o_u_n_d) option tells ssssuuuuddddoooo to run the
+           given command in the background.  Note that if you use
+           the `-b' option you cannot use shell job control to
            manipulate the command.
 
-       -p  The -p (_p_r_o_m_p_t) option allows you to override the
+       -p  The `-p' (_p_r_o_m_p_t) option allows you to override the
            default password prompt and use a custom one.  If the
-           password prompt contains the %u escape, %u will be
-           replaced with the user's login name.  Similarly, %h
+           password prompt contains the `%u' escape, `%u' will be
+           replaced with the user's login name.  Similarly, `%h'
            will be replaced with the local hostname.
 
-       -c  The -c (_c_l_a_s_s) option causes ssssuuuuddddoooo to run the specified
-           command with resources limited by the specified login
-           class.  The _c_l_a_s_s argument can be either a class name
-           as defined in /etc/login.conf, or a single '-'
+       -c  The `-c' (_c_l_a_s_s) option causes ssssuuuuddddoooo to run the speci­
+           fied command with resources limited by the specified
+           login class.  The _c_l_a_s_s argument can be either a class
+           name as defined in /etc/login.conf, or a single '-'
            character.  Specifying the _c_l_a_s_s as '-' means that the
            command should be run restricted by the default login
            capibilities of the user the command is run as.  If
@@ -116,18 +116,18 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
            classes where ssssuuuuddddoooo has been configured with the
            --with-logincap option.
 
-       -u  The -u (_u_s_e_r) option causes ssssuuuuddddoooo to run the specified
-           command as a user other than _r_o_o_t.  To specify a _u_i_d
-           instead of a _u_s_e_r_n_a_m_e, use "#uid".
+       -u  The `-u' (_u_s_e_r) option causes ssssuuuuddddoooo to run the speci­
+           fied command as a user other than _r_o_o_t.  To specify a
+           _u_i_d instead of a _u_s_e_r_n_a_m_e, use "#uid".
 
-       -s  The -s (_s_h_e_l_l) option runs the shell specified by the
-           _S_H_E_L_L environment variable if it is set or the shell
-           as specified in _p_a_s_s_w_d(4).
-
-
+       -s  The `-s' (_s_h_e_l_l) option runs the shell specified by
+           the _S_H_E_L_L environment variable if it is set or the
+           shell as specified in _p_a_s_s_w_d(4).
 
 
-28/Mar/2000                   1.6.3                             2
+
+
+April  7, 2000                1.6.3                             2
 
 
 
@@ -136,17 +136,18 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
-       -H  The -H (_H_O_M_E) option sets the _H_O_M_E environment
-           variable to the homedir of the target user (root by
+       -H  The `-H' (_H_O_M_E) option sets the _H_O_M_E environment vari­
+           able to the homedir of the target user (root by
            default) as specified in _p_a_s_s_w_d(4).  By default, ssssuuuuddddoooo
            does not modify _H_O_M_E.
 
-       -S  The -S (_s_t_d_i_n) option causes ssssuuuuddddoooo to read the password
-           from standard input instead of the terminal device.
+       -S  The `-S' (_s_t_d_i_n) option causes ssssuuuuddddoooo to read the pass­
+           word from standard input instead of the terminal
+           device.
 
-       --  The -- flag indicates that ssssuuuuddddoooo should stop processing
-           command line arguments.  It is most useful in
-           conjunction with the -s flag.
+       --  The `--' flag indicates that ssssuuuuddddoooo should stop process­
+           ing command line arguments.  It is most useful in con­
+           junction with the `-s' flag.
 
 RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEESSSS
        Upon successful execution of a program, the return value
@@ -154,46 +155,45 @@ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEES
        that was executed.
 
        Otherwise, ssssuuuuddddoooo quits with an exit value of 1 if there is
-       a configuration/permission problem or if ssssuuuuddddoooo cannot
-       execute the given command.  In the latter case the error
+       a configuration/permission problem or if ssssuuuuddddoooo cannot exe­
+       cute the given command.  In the latter case the error
        string is printed to stderr.  If ssssuuuuddddoooo cannot _s_t_a_t(2) one
-       or more entries in the user's PATH an error is printed on
-       stderr.  (If the directory does not exist or if it is not
-       really a directory, the entry is ignored and no error is
-       printed.)  This should not happen under normal
-       circumstances.  The most common reason for _s_t_a_t(2) to
-       return "permission denied" is if you are running an
-       automounter and one of the directories in your PATH is on
-       a machine that is currently unreachable.
+       or more entries in the user's `PATH' an error is printed
+       on stderr.  (If the directory does not exist or if it is
+       not really a directory, the entry is ignored and no error
+       is printed.)  This should not happen under normal circum­
+       stances.  The most common reason for _s_t_a_t(2) to return
+       "permission denied" is if you are running an automounter
+       and one of the directories in your `PATH' is on a machine
+       that is currently unreachable.
 
 SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTEEEESSSS
        ssssuuuuddddoooo tries to be safe when executing external commands.
        Variables that control how dynamic loading and binding is
        done can be used to subvert the program that ssssuuuuddddoooo runs.
-       To combat this the LD_*, _RLD_*, SHLIB_PATH (HP-UX only),
-       and LIBPATH (AIX only) environment variables are removed
-       from the environment passed on to all commands executed.
-       ssssuuuuddddoooo will also remove the IFS, ENV, BASH_ENV, KRB_CONF,
-       KRB5_CONFIG, LOCALDOMAIN, RES_OPTIONS and HOSTALIASES
-       variables as they too can pose a threat.
+       To combat this the `LD_*', `_RLD_*', `SHLIB_PATH' (HP-UX
+       only), and `LIBPATH' (AIX only) environment variables are
+       removed from the environment passed on to all commands
+       executed.  ssssuuuuddddoooo will also remove the `IFS', `ENV',
+       `BASH_ENV', `KRB_CONF', `KRB5_CONFIG', `LOCALDOMAIN',
+       `RES_OPTIONS' and `HOSTALIASES' variables as they too can
+       pose a threat.
 
        To prevent command spoofing, ssssuuuuddddoooo checks "." and "" (both
-       denoting current directory) last when searching for a
-       command in the user's PATH (if one or both are in the
-       PATH).  Note, however, that the actual PATH environment
-       variable is _n_o_t modified and is passed unchanged to the
-       program that ssssuuuuddddoooo executes.
+       denoting current directory) last when searching for a com­
+       mand in the user's PATH (if one or both are in the PATH).
+       Note, however, that the actual `PATH' environment variable
+       is _n_o_t modified and is passed unchanged to the program
+       that ssssuuuuddddoooo executes.
 
        For security reasons, if your OS supports shared libraries
        and does not disable user-defined library search paths for
        setuid programs (most do), you should either use a linker
        option that disables this behavior or link ssssuuuuddddoooo
-       statically.
 
 
 
-
-28/Mar/2000                   1.6.3                             3
+April  7, 2000                1.6.3                             3
 
 
 
@@ -202,28 +202,30 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
+       statically.
+
        ssssuuuuddddoooo will check the ownership of its timestamp directory
-       (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's
-       contents if it is not owned by root and only writable by
+       (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's con­
+       tents if it is not owned by root and only writable by
        root.  On systems that allow non-root users to give away
        files via _c_h_o_w_n(2), if the timestamp directory is located
-       in a directory writable by anyone (eg: _/_t_m_p), it is
-       possible for a user to create the timestamp directory
-       before ssssuuuuddddoooo is run.  However, because ssssuuuuddddoooo checks the
-       ownership and mode of the directory and its contents, the
-       only damage that can be done is to "hide" files by putting
-       them in the timestamp dir.  This is unlikely to happen
-       since once the timestamp dir is owned by root and
-       inaccessible by any other user the user placing files
-       there would be unable to get them back out.  To get around
-       this issue you can use a directory that is not world-
-       writable for the timestamps (_/_v_a_r_/_a_d_m_/_s_u_d_o for instance)
-       or create _/_v_a_r_/_r_u_n_/_s_u_d_o with the appropriate owner (root)
-       and permissions (0700) in the system startup files.
+       in a directory writable by anyone (eg: _/_t_m_p), it is possi­
+       ble for a user to create the timestamp directory before
+       ssssuuuuddddoooo is run.  However, because ssssuuuuddddoooo checks the ownership
+       and mode of the directory and its contents, the only dam­
+       age that can be done is to "hide" files by putting them in
+       the timestamp dir.  This is unlikely to happen since once
+       the timestamp dir is owned by root and inaccessible by any
+       other user the user placing files there would be unable to
+       get them back out.  To get around this issue you can use a
+       directory that is not world-writable for the timestamps
+       (_/_v_a_r_/_a_d_m_/_s_u_d_o for instance) or create _/_v_a_r_/_r_u_n_/_s_u_d_o with
+       the appropriate owner (root) and permissions (0700) in the
+       system startup files.
 
        ssssuuuuddddoooo will not honor timestamps set far in the future.
        Timestamps with a date greater than current_time + 2 *
-       TIMEOUT will be ignored and sudo will log and complain.
+       `TIMEOUT' will be ignored and sudo will log and complain.
        This is done to keep a user from creating his/her own
        timestamp with a bogus date on system that allow users to
        give away files.
@@ -252,20 +254,21 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
        To make a usage listing of the directories in the /home
        partition.  Note that this runs the commands in a sub-
-       shell to make the cd and file redirection work.
-
-        % sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
+       shell to make the `cd' and file redirection work.
 
 
 
 
-28/Mar/2000                   1.6.3                             4
+April  7, 2000                1.6.3                             4
 
 
 
 
 
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
+
+
+        % sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 
 
 EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
@@ -292,8 +295,8 @@ FFFFIIIILLLLEEEESSSS
 
 
 AAAAUUUUTTTTHHHHOOOORRRRSSSS
-       Many people have worked on ssssuuuuddddoooo over the years, this
-       version consists of code written primarily by:
+       Many people have worked on ssssuuuuddddoooo over the years, this ver­
+       sion consists of code written primarily by:
 
                Todd Miller
                Chris Jepeway
@@ -306,9 +309,9 @@ BBBBUUUUGGGGSSSS
        bug report at http://www.courtesan.com/sudo/bugs/
 
 DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
-       SSSSuuuuddddoooo is provided ``AS IS'' and any express or implied
-       warranties, including, but not limited to, the implied
-       warranties of merchantability and fitness for a particular
+       SSSSuuuuddddoooo is provided ``AS IS'' and any express or implied war­
+       ranties, including, but not limited to, the implied war­
+       ranties of merchantability and fitness for a particular
        purpose are disclaimed.  See the LICENSE file distributed
        with ssssuuuuddddoooo for complete details.
 
@@ -317,15 +320,12 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        shell if that user has access to commands allowing shell
        escapes.
 
-       If users have sudo ALL there is nothing to prevent them
+       If users have sudo `ALL' there is nothing to prevent them
        from creating their own program that gives them a root
-       shell regardless of any '!'  elements in the user
-       specification.
 
 
 
-
-28/Mar/2000                   1.6.3                             5
+April  7, 2000                1.6.3                             5
 
 
 
@@ -334,10 +334,13 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
+       shell regardless of any '!'  elements in the user specifi­
+       cation.
+
        Running shell scripts via ssssuuuuddddoooo can expose the same kernel
-       bugs that make setuid shell scripts unsafe on some
-       operating systems (if your OS supports the /dev/fd/
-       directory, setuid shell scripts are generally safe).
+       bugs that make setuid shell scripts unsafe on some operat­
+       ing systems (if your OS supports the /dev/fd/ directory,
+       setuid shell scripts are generally safe).
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
        _l_o_g_i_n___c_a_p(3), _s_u_d_o_e_r_s(4), _v_i_s_u_d_o(1m), _s_u(1).
@@ -388,9 +391,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-
-
-28/Mar/2000                   1.6.3                             6
+April  7, 2000                1.6.3                             6
 
 

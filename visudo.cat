@@ -12,14 +12,14 @@ SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
 
 DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        vvvviiiissssuuuuddddoooo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous
-       to _v_i_p_w(1m).  vvvviiiissssuuuuddddoooo locks the _s_u_d_o_e_r_s file against
-       multiple simultaneous edits, provides basic sanity checks,
-       and checks for parse errors.  If the _s_u_d_o_e_r_s file is
-       currently being edited you will receive a message to try
-       again later.  In the default configuration, the _v_i(1)
-       editor is used, but there is a compile time option to
-       allow use of whatever editor the environment variables
-       EDITOR or VISUAL are set to.
+       to _v_i_p_w(1m).  vvvviiiissssuuuuddddoooo locks the _s_u_d_o_e_r_s file against multi­
+       ple simultaneous edits, provides basic sanity checks, and
+       checks for parse errors.  If the _s_u_d_o_e_r_s file is currently
+       being edited you will receive a message to try again
+       later.  In the default configuration, the _v_i(1) editor is
+       used, but there is a compile time option to allow use of
+       whatever editor the environment variables `EDITOR' or
+       `VISUAL' are set to.
 
        vvvviiiissssuuuuddddoooo parses the _s_u_d_o_e_r_s file after the edit and will not
        save the changes if there is a syntax error.  Upon finding
@@ -41,14 +41,13 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
        vvvviiiissssuuuuddddoooo accepts the following command line option:
 
        -s  Enable ssssttttrrrriiiicccctttt checking of the _s_u_d_o_e_r_s file.  If an
-           alias is used before it is defined, vvvviiiissssuuuuddddoooo will
-           consider this a parse error.  Note that it is not
-           possible to differentiate between an alias and a
-           hostname or username that consists solely of upper
-           case letters, digits, and the underscore ('_')
-           character.
+           alias is used before it is defined, vvvviiiissssuuuuddddoooo will con­
+           sider this a parse error.  Note that it is not possi­
+           ble to differentiate between an alias and a hostname
+           or username that consists solely of upper case let­
+           ters, digits, and the underscore ('_') character.
 
-       -V  The -V (version) option causes vvvviiiissssuuuuddddoooo to print the
+       -V  The `-V' (version) option causes vvvviiiissssuuuuddddoooo to print the
            version number and exit.
 
 EEEERRRRRRRROOOORRRRSSSS
@@ -61,7 +60,8 @@ EEEERRRRRRRROOOORRRRSSSS
 
 
 
-26/Mar/2000                   1.6.3                             1
+
+April  7, 2000                1.6.3                             1
 
 
 
@@ -96,8 +96,8 @@ FFFFIIIILLLLEEEESSSS
 
 
 AAAAUUUUTTTTHHHHOOOORRRR
-       Many people have worked on _s_u_d_o over the years, this
-       version of vvvviiiissssuuuuddddoooo was written by:
+       Many people have worked on _s_u_d_o over the years, this ver­
+       sion of vvvviiiissssuuuuddddoooo was written by:
 
         Todd Miller            <Todd.Miller@courtesan.com>
 
@@ -120,79 +120,13 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        shell if the editor used by vvvviiiissssuuuuddddoooo allows shell escapes.
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
-       _s_u_d_o(1m), _v_i_p_w(1m).
+       _s_u_d_o(1m), _v_i_p_w(8).
 
 
 
 
 
 
-26/Mar/2000                   1.6.3                             2
-
-
-
-
-
-visudo(1m)             MAINTENANCE COMMANDS            visudo(1m)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-26/Mar/2000                   1.6.3                             3
+April  7, 2000                1.6.3                             2
 
 
