@@ -64,6 +64,7 @@ static char rcsid[] = "$Id$";
 #endif /* !NeXT */
 #endif /* STD_HEADERS */
 #include <string.h>
+#include <strings.h>
 #include <pwd.h>
 #include <netdb.h>
 #include <sys/param.h>
