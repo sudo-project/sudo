@@ -108,7 +108,7 @@ int top = 0, stacksize = 0;
 	match[top].user   = -1; \
 	match[top].cmnd   = -1; \
 	match[top].host   = -1; \
-	match[top].runas  = -1; \
+	match[top].runas  = -2; \
 	match[top].nopass = def_authenticate ? -1 : TRUE; \
 	match[top].noexec = def_noexec ? TRUE : -1; \
 	top++; \
@@ -351,7 +351,7 @@ privilege	:	hostlist '=' cmndspeclist {
 			     * the next 'privilege' gets a clean slate.
 			     */
 			    host_matches = -1;
-			    runas_matches = -1;
+			    runas_matches = -2;
 			    no_passwd = def_authenticate ? -1 : TRUE;
 			    no_execve = def_noexec ? TRUE : -1;
 			}
@@ -434,7 +434,7 @@ cmndspec	:	runasspec cmndtag opcmnd {
 			     * we need to keep entries around too...
 			     */
 			    if (user_matches != -1 && host_matches != -1 &&
-				cmnd_matches != -1 && runas_matches != -1)
+				cmnd_matches != -1 && runas_matches > -1)
 				pushcp;
 			    else if (user_matches != -1 && (top == 1 ||
 				(top == 2 && host_matches != -1 &&
@@ -467,7 +467,7 @@ opcmnd		:	cmnd {
 runasspec	:	/* empty */ {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
-				if (runas_matches == -1) {
+				if (runas_matches == -2) {
 				    cm_list[cm_list_len].runas_len = 0;
 				} else {
 				    /* Inherit runas data. */
@@ -483,14 +483,14 @@ runasspec	:	/* empty */ {
 			     * If this is the first entry in a command list
 			     * then check against default runas user.
 			     */
-			    if (runas_matches == -1) {
+			    if (runas_matches == -2) {
 				runas_matches =
 				    userpw_matches(def_runas_default,
 					*user_runas, runas_pw);
 			    }
 			}
 		|	RUNAS runaslist {
-			    runas_matches = ($2 == TRUE ? TRUE : FALSE);
+			    runas_matches = $2;
 			}
 		;
 
