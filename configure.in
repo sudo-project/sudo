@@ -146,7 +146,7 @@ AC_ARG_WITH(devel, [  --with-devel            add developement options],
 		DEV=""
 		;;
     no)		;;
-    *)		echo "Ignoring unknown argument to --with-devel: $with_csops"
+    *)		echo "Ignoring unknown argument to --with-devel: $with_devel"
 		;;
 esac])
 

@@ -797,7 +797,7 @@ if test "${with_devel+set}" = set; then
 		DEV=""
 		;;
     no)		;;
-    *)		echo "Ignoring unknown argument to --with-devel: $with_csops"
+    *)		echo "Ignoring unknown argument to --with-devel: $with_devel"
 		;;
 esac
 fi
