@@ -284,7 +284,7 @@ main(argc, argv, envp)
     /* Check for -C overriding def_closefrom. */
     if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
 	if (!def_closefrom_override)
-	    errorx(1, "you are not permitted to use the -O option");
+	    errorx(1, "you are not permitted to use the -C option");
 	else
 	    def_closefrom = user_closefrom;
     }
@@ -768,7 +768,7 @@ parse_args(argc, argv)
 		if (NewArgv[1] == NULL)
 		    usage(1);
 		if ((user_closefrom = atoi(NewArgv[1])) < 3) {
-		    warningx("the argument to -O must be at least 3");
+		    warningx("the argument to -C must be at least 3");
 		    usage(1);
 		}
 		NewArgc--;

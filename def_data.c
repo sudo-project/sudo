@@ -257,7 +257,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"closefrom_override", T_FLAG,
-	"If set, users may override the value of `closefrom' with the -O option",
+	"If set, users may override the value of `closefrom' with the -C option",
 	NULL,
     }, {
 	"env_check", T_LIST|T_BOOL,

@@ -479,7 +479,7 @@ section.  This flag is I<off> by default.
 
 =item closefrom_override
 
-If set, the user may use B<sudo>'s B<-O> option which
+If set, the user may use B<sudo>'s B<-C> option which
 overrides the default starting point at which B<sudo> begins
 closing open file descriptors.  This flag is I<off> by default.
 

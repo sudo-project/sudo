@@ -190,7 +190,7 @@ closefrom
 	"File descriptors >= %d will be closed before executing a command"
 closefrom_override
 	T_FLAG
-	"If set, users may override the value of `closefrom' with the -O option"
+	"If set, users may override the value of `closefrom' with the -C option"
 env_check
 	T_LIST|T_BOOL
 	"Environment variables to check for sanity:"
