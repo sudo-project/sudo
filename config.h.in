@@ -1,0 +1,69 @@
+/*
+ * config.h -- You shouldn't edit this by hand unless you are
+ *             NOT using configure.
+ */
+
+/* Define if on AIX 3.
+   System headers sometimes define this.
+   We just want to avoid a redefinition error message.  */
+#ifndef _ALL_SOURCE
+#undef _ALL_SOURCE
+#endif
+
+/* Define if on ConvexOs.
+   System headers sometimes define this.
+   We just want to avoid a redefinition error message.  */
+#ifndef _CONVEX_SOURCE
+#undef _CONVEX_SOURCE
+#endif
+
+/* Define if you have a broken getpass(3) that doesn't
+   take input from stdin. */
+#ifndef BROKEN_GETPASS
+#undef BROKEN_GETPASS
+#endif
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef uid_t
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef gid_t
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef mode_t
+
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
+
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define on System V Release 4 or Soloris 2.x.  */
+#undef SVR4
+#if defined(SVR4) && !defined(__svr4__)
+#  define __svr4__
+#endif /* SVR4 */
+
+/* Define if you have getcwd.  */
+#undef HAVE_GETCWD
+
+/* Define if you have strdup.  */
+#undef HAVE_STRDUP
+
+/* Define if you have the <malloc.h> header file.  */
+#undef HAVE_MALLOC_H
+
+/* Define if you have the <paths.h> header file.  */
+#undef HAVE_PATHS_H
+
+/* Define if you have the <string.h> header file.  */
+#undef HAVE_STRING_H
+
+/* Define if you have the <strings.h> header file.  */
+#undef HAVE_STRINGS_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H

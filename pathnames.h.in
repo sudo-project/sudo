@@ -1,0 +1,33 @@
+/*
+ * insert gnu header here - XXX
+ *
+ * Pathnames to programs and files used by sudo
+ */
+
+#ifdef HAVE_PATHS_H
+#include <paths.h>
+#endif /* HAVE_PATHS_H */
+
+#ifndef _PATH_SENDMAIL
+#undef _PATH_SENDMAIL
+#endif /* _PATH_SENDMAIL */
+
+#ifndef _PATH_SUDO_TIMEDIR
+#define _PATH_SUDO_TIMEDIR	"/tmp/.odus"
+#endif /* _PATH_SUDO_TIMEDIR */
+
+#ifndef _PATH_SUDO_SUDOERS
+#define _PATH_SUDO_SUDOERS	"/etc/sudoers"
+#endif /* _PATH_SUDO_SUDOERS */
+
+#ifndef _PATH_SUDO_LOGFILE
+#define _PATH_SUDO_LOGFILE	"/var/adm/sudo.log"
+#endif /* _PATH_SUDO_LOGFILE */
+
+#ifndef _PATH_SUDO_STMP
+#define _PATH_SUDO_STMP		"/etc/stmp"
+#endif /* _PATH_SUDO_STMP */
+
+#ifndef _PATH_VI
+#undef _PATH_VI
+#endif /* _PATH_VI */
