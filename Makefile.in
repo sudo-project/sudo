@@ -184,6 +184,9 @@ visudo: $(VISUDO_OBJS) $(LIB_OBJS)
 testsudoers: $(TEST_OBJS) $(LIB_OBJS)
 	$(CC) -o $@ $(TEST_OBJS) $(LIB_OBJS) $(LDFLAGS) $(LIBS) $(NET_LIBS)
 
+sudo_noexec.lo: $(srcdir)/sudo_noexec.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_noexec.c
+
 sudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
