@@ -6763,7 +6763,7 @@ fi
 
 fi
 
-for ac_header in string.h strings.h unistd.h malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h
+for ac_header in malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h
 do
 ac_ac_Header=`echo "ac_cv_header_$ac_header" | $ac_tr_sh`
 echo "$as_me:6769: checking for $ac_header" >&5
