@@ -124,3 +124,8 @@ TODO list (most will be addressed in sudo 2.0)
 44) Split $EDITOR/$VISUAL in visudo into an argument vector based on whitespace
 
 45) Use proper links in .pod files
+
+46) Parse gids like %#0
+
+47) Don't assume usernames are limited to 8 chars, look at ut_name/ut_user
+    in struct utmp or just trust what getpw* returned.
