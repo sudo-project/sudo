@@ -8,14 +8,22 @@ dnl
 PROGS="sudo visudo"
 AC_SUBST(CFLAGS)dnl
 AC_SUBST(PROGS)dnl
-LDFLAGS=""
-AC_SUBST(LDFLAGS)dnl
+SUDO_LDFLAGS=""
+AC_SUBST(SUDO_LDFLAGS)dnl
+VISUDO_LDFLAGS=""
+AC_SUBST(VISUDO_LDFLAGS)dnl
+SUDO_LIBS=""
+AC_SUBST(SUDO_LIBS)dnl
+VISUDO_LIBS=""
+AC_SUBST(VISUDO_LIBS)dnl
 CPPFLAGS=""
 AC_SUBST(CPPFLAGS)dnl
 OSDEFS=""
 AC_SUBST(OSDEFS)dnl
 OPTIONS=""
 AC_SUBST(OPTIONS)dnl
+DCE_OBJS=""
+AC_SUBST(DCE_OBJS)dnl
 LIBOBJS=""
 AC_SUBST(LIBOBJS)dnl
 TGETPASS="tgetpass.o"
@@ -142,45 +150,92 @@ case "$OS" in
 		if test -n "$C2"; then
 		    SHADOW_TYPE="SPW_AIX"
 		fi
-		LDFLAGS="${LDFLAGS} -Wl,-bI:./aixcrypt.exp"
+		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:./aixcrypt.exp"
 		;;
-    "hp-ux")	echo "Looks like HP-UX"
-		AC_DEFINE(BROKEN_SYSLOG)
+    "hp-ux")	echo "Looks like HP-UX $OSREV"
+		
+		# uncomment this for a statically linked sudo
+		# (XXX - should be an option to configure)
+		#STATIC_SUDO=true
+
 		if test "$OSREV" -lt 9 ; then
+		    AC_DEFINE(BROKEN_SYSLOG)
 		    if test -n "$GCC" ; then
-			LDFLAGS="${LDFLAGS} -static"
+			SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
 		    else
-			LDFLAGS="${LDFLAGS} -Wl,-a,archive"
+			SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
 		    fi
 		elif test "$OSREV" -eq 9 ; then
+		    AC_DEFINE(BROKEN_SYSLOG)
+
+		    if test -n "$STATIC_SUDO" ; then
+			if test -n "$GCC" ; then
+			    SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
+			else
+			    SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
+			fi
+		    fi
+
+		    # DCE support
+		    if test -n "$DCE" ; then
+			# order of libs in 9.X is important. -lc_r must be last
+			SUDO_LIBS="-ldce -lM -lc_r"
+
+			if test -n "$GCC" ; then
+			    CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE -D_REENTRANT -I/usr/include/reentrant"
+			else
+			    CPPFLAGS="${CPPFLAGS} -Aa -D_HPUX_SOURCE -D_REENTRANT -I/usr/include/reentrant"
+			fi
+		    fi
+
+		    # shadow pw support
 		    if test -n "$C2"; then
 			SHADOW_TYPE="SPW_HPUX9"
 			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    fi
 		elif test "$OSREV" -eq 10 ; then
+		    AC_DEFINE(BROKEN_SYSLOG)
+
+		    if test -n "$STATIC_SUDO" ; then
+			if test -n "$GCC" ; then
+			    SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
+			else
+			    SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
+			fi
+		    fi
+
 		    # DCE support
 		    if test -n "$DCE" ; then
-			# HP-UX cc needs -lPW for alloca()
-			test -z "$GCC" && LIBS="${LIBS} -lPW"
-			CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
+			# order of libs in 10.0 is important. -ldce must be last
+			# note that gcc has it's own alloca()
+			if test -n "$GCC" ; then
+			    SUDO_LIBS="-ldce"
+			    CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE"
+			else
+			    SUDO_LIBS="-lPW -ldce"
+			    VISUDO_LIBS="-lPW"
+			    CPPFLAGS="${CPPFLAGS} -Aa -D_HPUX_SOURCE"
+			fi
+		    fi
+
 		    # shadow pw support
-		    elif test -n "$C2"; then
+		    if test -n "$C2"; then
 			SHADOW_TYPE="SPW_HPUX9"
 			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-			LIBS="${LIBS} /usr/lib/libsec.1"
+			SUDO_LIBS="${SUDO_LIBS} /usr/lib/libsec.1"
 		    fi
 		fi
 
 		# AFS support
 		if test -n "$AFS" ; then
-		    LIBS="-lBSD ${LIBS}"
+		    SUDO_LIBS="-lBSD ${SUDO_LIBS}"
 		fi
 		;;
     "osf1")	echo "Looks like OSF/1"
-		LDFLAGS="${LDFLAGS} -Wl,-no_library_replacement"
+		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
 		# C2 security stuff
 		if test -n "$C2" ; then
-		    LIBS="${LIBS} -lsecurity -laud"
+		    SUDO_LIBS="${SUDO_LIBS} -lsecurity -laud"
 		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
@@ -215,7 +270,7 @@ case "$OS" in
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    OSDEFS="${OSDEFS} -DSHADOW_PWD"
-		    LIBS="${LIBS} -lshadow"
+		    SUDO_LIBS="${SUDO_LIBS} -lshadow"
 		fi
 		;;
     "convex")	echo "Looks like ConvexOs"
@@ -226,7 +281,7 @@ case "$OS" in
 		# C2 security stuff
 		if test -n "$C2" ; then
 		    OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"
-		    LIBS="${LIBS} -lprot"
+		    SUDO_LIBS="${SUDO_LIBS} -lprot"
 		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
@@ -234,20 +289,20 @@ case "$OS" in
     "ultrix"*)	echo "Looks like ultrix"
 		# C2 security stuff
 		if test -n "$C2" ; then
-		    LIBS="${LIBS} -lauth"
+		    SUDO_LIBS="${SUDO_LIBS} -lauth"
 		    SHADOW_TYPE="SPW_ULTRIX4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     "riscos")	echo "Looks like RISCos"
-		LIBS="${LIBS} -lsun -lbsd"
+		SUDO_LIBS="${SUDO_LIBS} -lsun -lbsd"
 		CPPFLAGS="${CPPFLAGS} -I/usr/include -I/usr/include/bsd"
 		OSDEFS="${OSDEFS} -D_MIPS"
 		;;
     "isc")	echo "Looks like INTERACTIVE"
-		LIBS="${LIBS} -linet"
+		SUDO_LIBS="${SUDO_LIBS} -linet"
 		if test -n "$C2" ; then
-		    LIBS="${LIBS} -lsec"
+		    SUDO_LIBS="${SUDO_LIBS} -lsec"
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
@@ -263,7 +318,7 @@ case "$OS" in
 		if test -n "$C2" ; then
 		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		    LIBS="${LIBS} -lprot -lx"
+		    SUDO_LIBS="${SUDO_LIBS} -lprot -lx"
 		fi
 		;;
     "ksr"*)	echo "Looks like a KSR (wow, yours is still running?!?)"
@@ -303,7 +358,7 @@ if test -z "$SKEY" -a -z "$SECURID" -a -z "$AFS" -a -z "$KERB4" -a -z "$KERB5" -
 		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE) ;;
 	"SPW_BSD")		echo "shadow password type is /etc/master.passwd (BSD)" ;;
 	"SPW_SECUREWARE")	echo "shadow password type is etprpwuid (SecureWare)" ;
-		LIBS="${LIBS} -lprot -lx" ;
+		SUDO_LIBS="${SUDO_LIBS} -lprot -lx" ;
 		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE) ;;
 	*)	echo "unknown" ;
 		echo "Unable to determine shadow passwd type, sudo may not be able to verify passwords" ;;
@@ -395,18 +450,18 @@ if test -n "$KERB4" -o -n "$KERB5" ; then
     fi
 
     if test -d "/usr/kerberos/lib" ; then
-	LDFLAGS="${LDFLAGS} -L/usr/kerberos/lib"
+	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/kerberos/lib"
     elif test -d "/usr/lib/kerberos" ; then
-	LDFLAGS="${LDFLAGS} -L/usr/lib/kerberos"
+	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/lib/kerberos"
     elif test -f "/usr/local/lib/libkrb.a" ; then
-	LDFLAGS="${LDFLAGS} -L/usr/local/lib"
+	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
     elif test ! -f "/usr/lib/libkrb.a" ; then
-	echo "Unable to locate kerberos libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to LDFLAGS"
+	echo "Unable to locate kerberos libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS"
     fi
 
-    LIBS="${LIBS} -lkrb -ldes"
+    SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes"
     if test -n "$KERB5" ; then
-	LIBS="${LIBS} -ldes425 -lkrb5 -lcrypto -lcom_err"
+	SUDO_LIBS="${SUDO_LIBS} -ldes425 -lkrb5 -lcrypto -lcom_err"
     fi
 fi
 
@@ -415,33 +470,32 @@ dnl extra AFS libs
 dnl
 if test -n "$AFS" ; then
     if test -d "/usr/lib/afs" ; then
-	LDFLAGS="${LDFLAGS} -L/usr/lib/afs"
+	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/lib/afs"
     else
-	echo "Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to LDFLAGS"
+	echo "Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDO_LDFLAGS"
     fi
 
-    LIBS="${LIBS} -lkauth -lprot -lauth -lubik -lrxkad -lsys -ldes -lrx -llwp -lcom_err -laudit -lutil"
+    SUDO_LIBS="${SUDO_LIBS} -lkauth -lprot -lauth -lubik -lrxkad -lsys -ldes -lrx -llwp -lcom_err -laudit -lutil"
 fi
 
 dnl
 dnl extra DCE lib
 dnl
 if test -n "$DCE" ; then
-    LIBS="${LIBS} -ldce"
-    LIBOBJS="${LIBOBJS} dce_pwent.o"
+	DCE_OBJS="${DCE_OBJS} dce_pwent.o"
 fi
 
 dnl
 dnl extra Skey lib and includes
 dnl
 if test -n "$SKEY" ; then
-    LIBS="${LIBS} -lskey"
+    SUDO_LIBS="${SUDO_LIBS} -lskey"
     if test -f /usr/local/include/skey.h -a -f /usr/local/lib/libskey.a; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
-	LDFLAGS="${LDFLAGS} -L/usr/local/lib"
+	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
     elif test -n "$CSOPS" -a -f /tools/cs/skey/include/skey.h -a -f /tools/cs/skey/lib/libskey.a; then
 	CPPFLAGS="${CPPFLAGS} -I/tools/cs/skey/include"
-	LDFLAGS="${LDFLAGS} -L/tools/cs/skey/lib"
+	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/tools/cs/skey/lib"
     else
 	echo 'Can't find libskey.a and skey.h, you'll have to edit the Makefile'
     fi
@@ -450,7 +504,7 @@ fi
 dnl
 dnl extra SecurID lib + includes
 if test -n "$SECURID" ; then
-    LIBS="${LIBS} /usr/ace/sdiclient.a"
+    SUDO_LIBS="${SUDO_LIBS} /usr/ace/sdiclient.a"
     CPPFLAGS="${CPPFLAGS} -I/usr/ace"
 fi
 
