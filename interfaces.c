@@ -128,7 +128,7 @@ void load_interfaces()
 #else
 	if (ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0) {
 #endif /* _ISC */
-	    (void) free(ifconf_buf);
+	    free(ifconf_buf);
 	    (void) close(sock);
 	    return;
 	}
@@ -231,9 +231,9 @@ void load_interfaces()
 	    interfaces = (struct interface *) erealloc(interfaces,
 		sizeof(struct interface) * num_interfaces);
 	else
-	    (void) free(interfaces);
+	    free(interfaces);
     }
-    (void) free(ifconf_buf);
+    free(ifconf_buf);
     (void) close(sock);
 }
 

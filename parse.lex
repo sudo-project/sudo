@@ -330,7 +330,7 @@ static void fill_args(s, len, addspace)
 		;
 
 	    if ((p = (char *) realloc(yylval.command.args, arg_size)) == NULL) {
-		(void) free(yylval.command.args);
+		free(yylval.command.args);
 		yyerror("unable to allocate memory");
 	    } else
 		yylval.command.args = p;

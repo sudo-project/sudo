@@ -259,29 +259,29 @@ hostspec	:	ALL {
 		|	NTWKADDR {
 			    if (addr_matches($1))
 				host_matches = TRUE;
-			    (void) free($1);
+			    free($1);
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, host, NULL))
 				host_matches = TRUE;
-			    (void) free($1);
+			    free($1);
 			}
 		|	NAME {
 			    if (strcasecmp(shost, $1) == 0)
 				host_matches = TRUE;
-			    (void) free($1);
+			    free($1);
 			}
 		|	FQHOST {
 			    if (strcasecmp(host, $1) == 0)
 				host_matches = TRUE;
-			    (void) free($1);
+			    free($1);
 			}
 		|	ALIAS {
 			    /* could be an all-caps hostname */
 			    if (find_alias($1, HOST_ALIAS) == TRUE ||
 				strcasecmp(shost, $1) == 0)
 				host_matches = TRUE;
-			    (void) free($1);
+			    free($1);
 			}
 		;
 
@@ -382,7 +382,7 @@ runasuser	:	NAME {
 				append($1, &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
-			    (void) free($1);
+			    free($1);
 			}
 		|	USERGROUP {
 			    runas_matches = usergr_matches($1, runas_user);
@@ -396,7 +396,7 @@ runasuser	:	NAME {
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
 			    }
-			    (void) free($1);
+			    free($1);
 			}
 		|	NETGROUP {
 			    runas_matches = netgr_matches($1, NULL, runas_user);
@@ -410,7 +410,7 @@ runasuser	:	NAME {
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
 			    }
-			    (void) free($1);
+			    free($1);
 			}
 		|	ALIAS {
 			    /* could be an all-caps username */
@@ -428,7 +428,7 @@ runasuser	:	NAME {
 				append($1, &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
-			    (void) free($1);
+			    free($1);
 			}
 		|	ALL {
 			    runas_matches = TRUE;
@@ -497,7 +497,7 @@ cmnd		:	ALL {
 				cmnd_matches = TRUE;
 				$$ = TRUE;
 			    }
-			    (void) free($1);
+			    free($1);
 			}
 		|	 COMMAND {
 			    if (printmatches == TRUE && in_alias == TRUE) {
@@ -528,9 +528,9 @@ cmnd		:	ALL {
 				$$ = TRUE;
 			    }
 
-			    (void) free($1.cmnd);
+			    free($1.cmnd);
 			    if ($1.args)
-				(void) free($1.args);
+				free($1.args);
 			}
 		;
 
@@ -567,7 +567,7 @@ cmndalias	:	ALIAS {
 				add_alias($1, CMND_ALIAS) == FALSE)
 				YYERROR;
 			    pop;
-			    (void) free($1);
+			    free($1);
 
 			    if (printmatches == TRUE)
 				in_alias = FALSE;
@@ -595,7 +595,7 @@ runasalias	:	ALIAS {
 				add_alias($1, RUNAS_ALIAS) == FALSE)
 				YYERROR;
 			    pop;
-			    (void) free($1);
+			    free($1);
 
 			    if (printmatches == TRUE)
 				in_alias = FALSE;
@@ -611,7 +611,7 @@ useralias	:	ALIAS { push; }	'=' userlist {
 				add_alias($1, USER_ALIAS) == FALSE)
 				YYERROR;
 			    pop;
-			    (void) free($1);
+			    free($1);
 			}
 		;
 
@@ -633,24 +633,24 @@ opuser		:	user
 user		:	NAME {
 			    if (strcmp($1, user_name) == 0)
 				user_matches = TRUE;
-			    (void) free($1);
+			    free($1);
 			}
 		|	USERGROUP {
 			    if (usergr_matches($1, user_name))
 				user_matches = TRUE;
-			    (void) free($1);
+			    free($1);
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, NULL, user_name))
 				user_matches = TRUE;
-			    (void) free($1);
+			    free($1);
 			}
 		|	ALIAS {
 			    /* could be an all-caps username */
 			    if (find_alias($1, USER_ALIAS) == TRUE ||
 				strcmp($1, user_name) == 0)
 				user_matches = TRUE;
-			    (void) free($1);
+			    free($1);
 			}
 		|	ALL {
 			    user_matches = TRUE;
@@ -885,17 +885,17 @@ void list_matches()
 
     /* Be nice and free up space now that we are done. */
     for (i = 0; i < ga_list_len; i++) {
-	(void) free(ga_list[i].alias);
-	(void) free(ga_list[i].entries);
+	free(ga_list[i].alias);
+	free(ga_list[i].entries);
     }
-    (void) free(ga_list);
+    free(ga_list);
     ga_list = NULL;
 
     for (i = 0; i < cm_list_len; i++) {
-	(void) free(cm_list[i].runas);
-	(void) free(cm_list[i].cmnd);
+	free(cm_list[i].runas);
+	free(cm_list[i].cmnd);
     }
-    (void) free(cm_list);
+    free(cm_list);
     cm_list = NULL;
     cm_list_len = 0;
     cm_list_size = 0;
@@ -956,7 +956,7 @@ static void append(src, dstp, dst_len, dst_size, separator)
 void reset_aliases()
 {
     if (aliases) {
-	(void) free(aliases);
+	free(aliases);
 	aliases = NULL;
     }
     naliases = nslots = 0;
@@ -1018,7 +1018,7 @@ void init_parser()
 {
     /* Free up old data structures if we run the parser more than once. */
     if (match) {
-	(void) free(match);
+	free(match);
 	match = NULL;
 	top = 0;
 	parse_error = FALSE;

@@ -210,7 +210,7 @@ char * tgetpass(prompt, timeout)
 	    if (buf[n - 1] == '\n')
 		buf[n - 1] = '\0';
 	}
-	(void) free(readfds);
+	free(readfds);
     } else {
 	buf[0] = '\0';
 	if (fgets(buf, sizeof(buf), input)) {

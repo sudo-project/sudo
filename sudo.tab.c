@@ -725,17 +725,17 @@ void list_matches()
 
     /* Be nice and free up space now that we are done. */
     for (i = 0; i < ga_list_len; i++) {
-	(void) free(ga_list[i].alias);
-	(void) free(ga_list[i].entries);
+	free(ga_list[i].alias);
+	free(ga_list[i].entries);
     }
-    (void) free(ga_list);
+    free(ga_list);
     ga_list = NULL;
 
     for (i = 0; i < cm_list_len; i++) {
-	(void) free(cm_list[i].runas);
-	(void) free(cm_list[i].cmnd);
+	free(cm_list[i].runas);
+	free(cm_list[i].cmnd);
     }
-    (void) free(cm_list);
+    free(cm_list);
     cm_list = NULL;
     cm_list_len = 0;
     cm_list_size = 0;
@@ -796,7 +796,7 @@ static void append(src, dstp, dst_len, dst_size, separator)
 void reset_aliases()
 {
     if (aliases) {
-	(void) free(aliases);
+	free(aliases);
 	aliases = NULL;
     }
     naliases = nslots = 0;
@@ -858,7 +858,7 @@ void init_parser()
 {
     /* Free up old data structures if we run the parser more than once. */
     if (match) {
-	(void) free(match);
+	free(match);
 	match = NULL;
 	top = 0;
 	parse_error = FALSE;
@@ -1130,7 +1130,7 @@ case 18:
 {
 			    if (addr_matches(yyvsp[0].string))
 				host_matches = TRUE;
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 19:
@@ -1138,7 +1138,7 @@ case 19:
 {
 			    if (netgr_matches(yyvsp[0].string, host, NULL))
 				host_matches = TRUE;
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 20:
@@ -1146,7 +1146,7 @@ case 20:
 {
 			    if (strcasecmp(shost, yyvsp[0].string) == 0)
 				host_matches = TRUE;
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 21:
@@ -1154,7 +1154,7 @@ case 21:
 {
 			    if (strcasecmp(host, yyvsp[0].string) == 0)
 				host_matches = TRUE;
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 22:
@@ -1164,7 +1164,7 @@ case 22:
 			    if (find_alias(yyvsp[0].string, HOST_ALIAS) == TRUE ||
 				strcasecmp(shost, yyvsp[0].string) == 0)
 				host_matches = TRUE;
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 25:
@@ -1280,7 +1280,7 @@ case 36:
 				append(yyvsp[0].string, &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 37:
@@ -1297,7 +1297,7 @@ case 37:
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
 			    }
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 38:
@@ -1314,7 +1314,7 @@ case 38:
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
 			    }
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 39:
@@ -1335,7 +1335,7 @@ case 39:
 				append(yyvsp[0].string, &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 40:
@@ -1418,7 +1418,7 @@ case 45:
 				cmnd_matches = TRUE;
 				yyval.BOOLEAN = TRUE;
 			    }
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 46:
@@ -1452,9 +1452,9 @@ case 46:
 				yyval.BOOLEAN = TRUE;
 			    }
 
-			    (void) free(yyvsp[0].command.cmnd);
+			    free(yyvsp[0].command.cmnd);
 			    if (yyvsp[0].command.args)
-				(void) free(yyvsp[0].command.args);
+				free(yyvsp[0].command.args);
 			}
 break;
 case 49:
@@ -1489,7 +1489,7 @@ case 56:
 				add_alias(yyvsp[-3].string, CMND_ALIAS) == FALSE)
 				YYERROR;
 			    pop;
-			    (void) free(yyvsp[-3].string);
+			    free(yyvsp[-3].string);
 
 			    if (printmatches == TRUE)
 				in_alias = FALSE;
@@ -1518,7 +1518,7 @@ case 62:
 				add_alias(yyvsp[-3].string, RUNAS_ALIAS) == FALSE)
 				YYERROR;
 			    pop;
-			    (void) free(yyvsp[-3].string);
+			    free(yyvsp[-3].string);
 
 			    if (printmatches == TRUE)
 				in_alias = FALSE;
@@ -1535,7 +1535,7 @@ case 66:
 				add_alias(yyvsp[-3].string, USER_ALIAS) == FALSE)
 				YYERROR;
 			    pop;
-			    (void) free(yyvsp[-3].string);
+			    free(yyvsp[-3].string);
 			}
 break;
 case 67:
@@ -1563,7 +1563,7 @@ case 72:
 {
 			    if (strcmp(yyvsp[0].string, user_name) == 0)
 				user_matches = TRUE;
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 73:
@@ -1571,7 +1571,7 @@ case 73:
 {
 			    if (usergr_matches(yyvsp[0].string, user_name))
 				user_matches = TRUE;
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 74:
@@ -1579,7 +1579,7 @@ case 74:
 {
 			    if (netgr_matches(yyvsp[0].string, NULL, user_name))
 				user_matches = TRUE;
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 75:
@@ -1589,7 +1589,7 @@ case 75:
 			    if (find_alias(yyvsp[0].string, USER_ALIAS) == TRUE ||
 				strcmp(yyvsp[0].string, user_name) == 0)
 				user_matches = TRUE;
-			    (void) free(yyvsp[0].string);
+			    free(yyvsp[0].string);
 			}
 break;
 case 76:

@@ -763,7 +763,7 @@ static void add_env(contiguous)
 	exit(1);
     }
     if (NewArgc > 1)
-	(void) free(buf);
+	free(buf);
 
     /* grab a pointer to the flat arg string from the environment */
     if (NewArgc > 1 && (cmnd_args = getenv("SUDO_COMMAND"))) {

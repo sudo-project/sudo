@@ -152,7 +152,7 @@ int find_path(infile, outfile)
 	path = n + 1;
 
     } while (n);
-    (void) free(origpath);
+    free(origpath);
 
     /*
      * Check current dir if dot was in the PATH

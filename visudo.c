@@ -350,7 +350,7 @@ int main(argc, argv)
 			       Argv[0], tmpbuf, sudoers);
 		Exit(-1);
 	    }
-	    (void) free(tmpbuf);
+	    free(tmpbuf);
 	} else {
 	    (void) fprintf(stderr, "%s: Error renaming %s, %s unchanged: ",
 				   Argv[0], stmp, sudoers);

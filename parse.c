@@ -425,7 +425,7 @@ int netgr_matches(netgr, host, user)
     if (domain == (char *) -1) {
 	domain = (char *) emalloc(MAXHOSTNAMELEN);
 	if (getdomainname(domain, MAXHOSTNAMELEN) == -1 || *domain == '\0') {
-	    (void) free(domain);
+	    free(domain);
 	    domain = NULL;
 	}
     }
