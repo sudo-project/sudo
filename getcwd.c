@@ -129,7 +129,7 @@ char * getcwd(path, len)
     }
 
     if (path == NULL) {
-	if (!(path = (char *) malloc(MAXPATHLEN))) {
+	if (!(path = (char *) malloc(MAXPATHLEN+1))) {
 	    errno = ENOMEM;
 	    return(NULL);
 	}
