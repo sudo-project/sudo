@@ -158,11 +158,12 @@ Mixing password authentication schemes
 ======================================
 
 It is possible to build sudo with support for several authentication
-schemes, including shadow passwords, kerberos, s/key, AFS, DCE,
-and normal UN*X passwords into a single binary.  User validation
-will take slightly longer, of course, but it may be valuable
-to have a single sudo binary that is distributed among systems
-with varying authentication mechanisms.
+schemes, including shadow passwords, kerberos, s/key, AFS, DCE and
+normal UN*X passwords into a single binary.  User validation will
+take slightly longer, of course, but it may be valuable to have a
+single sudo binary that is distributed among systems with varying
+authentication mechanisms.  The exception to this rule is SecurID
+which must be the only authentication mechanism used.
 
 OS dependent notes
 ==================
