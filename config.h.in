@@ -173,6 +173,9 @@
 /* Define if you have utime(2). */
 #undef HAVE_UTIME
 
+/* Define if you have a POSIX utime() (uses struct utimbuf) */
+#undef HAVE_UTIME_POSIX
+
 /* Define if utime(file, NULL) sets timestamp to current */
 #undef HAVE_UTIME_NULL
 
