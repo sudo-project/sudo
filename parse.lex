@@ -44,6 +44,7 @@ static char rcsid[] = "$Id$";
 #include "sudo.h"
 #include "y.tab.h"
 
+extern YYSTYPE yylval;
 #ifdef FLEX_SCANNER
 int yylineno = 0;
 #endif /* flex */
