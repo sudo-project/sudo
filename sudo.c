@@ -332,9 +332,9 @@ static void clean_env(envp)
      * omit all LD_* environmental vars
      */
     rmenv(envp, "LD_", 3);
-#ifdef hpux
+#ifdef __hpux
     rmenv(envp, "SHLIB_PATH", 10);
-#endif /* hpux */
+#endif /* __hpux */
 #ifdef _AIX
     rmenv(envp, "LIBPATH", 7);
 #endif /* _AIX */
