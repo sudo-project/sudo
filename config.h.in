@@ -37,12 +37,6 @@
 #undef _CONVEX_SOURCE
 #endif
 
-/* Define if you have a broken getpass(3) that doesn't
-   take input from stdin. */
-#ifndef BROKEN_GETPASS
-#undef BROKEN_GETPASS
-#endif
-
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef uid_t
 
