@@ -77,7 +77,8 @@ char *find_path(file)
     register char *n;			/* for traversing path */
     char *path = NULL;			/* contents of PATH env var */
     char fn[MAXPATHLEN+1];		/* filename (path + file) */
-    struct stat statbuf;		/* for stat() */
+    struct stat statbuf;		/* for stat(2) */
+    int statfailed;			/* stat(2) return value */
     char *qualify();
 
     if (strlen(file) > MAXPATHLEN) {
@@ -105,9 +106,10 @@ char *find_path(file)
 	strcat(fn, file);
 
 	/* stat the file to make sure it exists and is executable */
-	if (!stat(fn, &statbuf) && (statbuf.st_mode & 0000111))
+	statfailed = stat(fn, &statbuf);
+	if (!statfailed && (statbuf.st_mode & 0000111))
 	    return (qualify(fn));
-	else if (errno == ENOENT || errno == ENOTDIR)
+	else if (!statfailed || errno == ENOENT || errno == ENOTDIR)
 	    path=n+1;
 	else {
 	    perror("find_path:  stat");
