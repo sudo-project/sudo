@@ -157,19 +157,22 @@ char * tgetpass(prompt, timeout)
 
     /* return NULL if nothing to read by timeout */
 #ifdef HAVE_SYSCONF
-    if (select(sysconf(_SC_OPEN_MAX), &readfds, NULL, NULL, &tv) <= 0)
+    if (select(sysconf(_SC_OPEN_MAX), &readfds, NULL, NULL, &tv) <= 0) {
 #else
-    if (select(getdtablesize(), &readfds, NULL, NULL, &tv) <= 0)
+    if (select(getdtablesize(), &readfds, NULL, NULL, &tv) <= 0) {
 #endif /* HAVE_SYSCONF */
-	return(NULL);
+	buf[0] = '\0';
+	goto cleanup;
+    }
 
     /* get the password */
-    (void) ioctl(fileno(input), FIONBIO, 1);
     if (!fgets(buf, sizeof(buf), input))
-	return(NULL);
-    (void) ioctl(fileno(input), FIONBIO, 0);
+	buf[0] = '\0';
+
     if (*(tmp = &buf[strlen(buf)-1]) == '\n')
 	*tmp = '\0';
+
+cleanup:
 
      /* turn on echo */
 #ifdef HAVE_TERMIOS_H
@@ -203,8 +206,5 @@ char * tgetpass(prompt, timeout)
     if (input != stdin)
 	(void) fclose(input);
 
-    if (buf[0])
-	return(buf);
-    else
-	return(NULL);
+    return(buf);
 }
