@@ -96,7 +96,7 @@ struct sudoersfile {
 /*
  * Function prototypes
  */
-static RETSIGTYPE quit		__P((int)) __attribute__((__noreturn__));
+static RETSIGTYPE quit		__P((int));
 static char *get_args		__P((char *));
 static char *get_editor		__P((char **));
 static char whatnow		__P((void));
