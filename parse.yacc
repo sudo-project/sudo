@@ -107,7 +107,6 @@ extern int usergr_matches	__P((char *, char *));
 static int find_alias		__P((char *, int));
 static int add_alias		__P((char *, int));
 static int more_aliases		__P((size_t));
-static char *dotcat		__P((char *, char *));
        void yyerror		__P((char *));
 
 void yyerror(s)
@@ -135,8 +134,9 @@ void yyerror(s)
 %start file				/* special start symbol */
 %token <string>	ALIAS			/* an UPPERCASE alias name */
 %token <string> NTWKADDR		/* w.x.y.z */
+%token <string> FQHOST			/* foo.bar.com */
 %token <string> NETGROUP		/* a netgroup (+NAME) */
-%token <string> USERGROUP		/* a usergroup (*NAME) */
+%token <string> USERGROUP		/* a usergroup (%NAME) */
 %token <string> NAME			/* a mixed-case name */
 %token <command> COMMAND		/* an absolute pathname */
 %token <tok>	COMMENT			/* comment and/or carriage return */
@@ -147,7 +147,7 @@ void yyerror(s)
 %token <tok>	':' '=' ',' '!' '.'	/* union member tokens */
 %token <tok>	ERROR
 
-%type <string>	fqdn cmnd
+%type <string>	cmnd
 
 %%
 
@@ -203,26 +203,15 @@ hostspec	:	ALL {
 				host_matches = TRUE;
 			    (void) free($1);
 			}
+		|	FQHOST {
+			    if (strcasecmp(host, $1) == 0)
+				host_matches = TRUE;
+			    (void) free($1);
+			}
 		|	ALIAS {
 			    if (find_alias($1, HOST))
 				host_matches = TRUE;
 			    (void) free($1);
-			}
-		|	fqdn {
-			    if (strcasecmp($1, host) == 0)
-				host_matches = TRUE;
-			    (void) free($1);
-			}
-		;
-
-fqdn		:	NAME '.' NAME {
-			    $$ = dotcat($1, $3);
-			    (void) free($1);
-			    (void) free($3);
-			}
-		|	fqdn '.' NAME {
-			    $$ = dotcat($1, $3);
-			    (void) free($3);
 			}
 		;
 
@@ -479,30 +468,4 @@ void reset_aliases()
     if (aliases)
 	(void) free(aliases);
     naliases = nslots = 0;
-}
-
-
-static char *dotcat(s1, s2)
-    char *s1;
-    char *s2;
-{
-    int len1;				/* length of param 1 */
-    int fulllen;			/* length of params 1, 2, '.' */
-    char *s;				/* string to return */
-
-    /* how much space do we need? */
-    len1 = strlen(s1);
-    fulllen = len1 + 1 + strlen(s2);
-
-    /* allocate the space */
-    s = (char *) malloc(fulllen + 1);
-    if (s == NULL)
-	yyerror("unable to allocate memory");
-
-    /* cat s1.s2 -> s efficient */
-    (void) strcpy(s, s1);
-    *(s + len1) = '.';
-    (void) strcpy(s + len1 + 1, s2);
-
-    return(s);
 }
