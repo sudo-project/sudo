@@ -1321,8 +1321,9 @@ fi
 dnl
 dnl If socket(2) not in libc, check -lsocket and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
+dnl In this case we look for main(), not socket() to avoid using a cached value
 dnl
-AC_CHECK_FUNC(socket, ,AC_CHECK_LIB(socket, socket, [SUDO_LIBS="${SUDO_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(inet, socket, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find socket() trying -lsocket -lnsl) AC_CHECK_LIB(socket, socket, [SUDO_LIBS="${SUDO_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl))))
+AC_CHECK_FUNC(socket, ,AC_CHECK_LIB(socket, socket, [SUDO_LIBS="${SUDO_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(inet, socket, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find socket() trying -lsocket -lnsl) AC_CHECK_LIB(socket, main, [SUDO_LIBS="${SUDO_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl))))
 dnl
 dnl If inet_addr(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
