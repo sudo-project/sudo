@@ -53,9 +53,9 @@ static char rcsid[] = "$Id$";
 #include "sudo.h"
 
 #ifndef STDC_HEADERS
-extern char *strcpy();
-extern int readlink();
-extern int lstat();
+extern char *strcpy	__P((char *, char *));
+extern int readlink	__P((char *, char *, int));
+extern int lstat	__P((char *, struct stat *));
 #endif /* !STDC_HEADERS */
 
 
@@ -76,12 +76,6 @@ extern int lstat();
 static void realpath_restore	__P((char *));
 
 
-/*
- * Since we can't count on this being defined...
- */
-extern int errno;
-
-
 /******************************************************************
  *
  *  sudo_realpath()
@@ -100,7 +94,7 @@ char * sudo_realpath(old, new)
     int len;					/* length parameter */
 
     /* check for brain damage */
-    if (old == NULL || old[0] == NULL)
+    if (old == NULL || old[0] == '\0')
 	return(NULL);
 
     new[MAXPATHLEN] = '\0';
