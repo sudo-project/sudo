@@ -3,7 +3,7 @@
  *
  * This software comes with no waranty whatsoever, use at your own risk.
  *
- * Please send bugs, changes, problems to sudo-bugs.cs.colorado.edu
+ * Please send bugs, changes, problems to sudo-bugs@cs.colorado.edu
  *
  */
 
