@@ -1,25 +1,33 @@
 /*
- *  CU sudo version 1.6
- *  Copyright (c) 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
+
+#ifndef NO_PASSWD
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -50,15 +58,11 @@ sudo_auth auth_switch[] = {
 #ifdef AUTH_STANDALONE
     AUTH_STANDALONE
 #else
+#  ifndef WITHOUT_PASSWD
     AUTH_ENTRY(0, "passwd", NULL, passwd_verify, NULL)
-#  ifdef HAVE_SECUREWARE
+#  endif
+#  if defined(HAVE_SECUREWARE) && !defined(WITHOUT_PASSWD)
     AUTH_ENTRY(0, "secureware", secureware_setup, secureware_verify, NULL)
-#  endif
-#  ifdef HAVE_SKEY
-    AUTH_ENTRY(1, "skey", skey_setup, skey_verify, NULL)
-#  endif
-#  ifdef HAVE_OPIE
-    AUTH_ENTRY(1, "opie", opie_setup, opie_verify, NULL)
 #  endif
 #  ifdef HAVE_AFS
     AUTH_ENTRY(1, "afs", NULL, afs_verify, NULL)
@@ -69,15 +73,17 @@ sudo_auth auth_switch[] = {
 #  ifdef HAVE_KERB5
     AUTH_ENTRY(1, "kerb5", kerb5_setup, kerb5_verify, NULL)
 #  endif
+#  if defined(HAVE_SKEY)  || defined(HAVE_OPIE)
+    AUTH_ENTRY(1, "skey", rfc1938_setup, rfc1938_verify, NULL)
+#  endif
 #endif /* AUTH_STANDALONE */
     AUTH_ENTRY(0, NULL, NULL, NULL, NULL)
 };
 
-int nil_pw; /* bad global, bad (oh well) */
+int nil_pw;		/* I hate resorting to globals like this... */
 
 void
-/* verify_user() */
-check_passwd()
+verify_user()
 {
     int counter = TRIES_FOR_PASSWORD + 1;
     int status, success = AUTH_FAILURE;
@@ -91,7 +97,7 @@ check_passwd()
 		if (auth->need_root)
 		    set_perms(PERM_ROOT, 0);
 
-		status = (auth->setup)(user_pw_ent, &prompt, &auth->data);
+		status = (auth->setup)(sudo_user.pw, &user_prompt, &auth->data);
 		if (status == AUTH_FAILURE)
 		    auth->configured = 0;
 		else if (status == AUTH_FATAL)	/* XXX log */
@@ -107,7 +113,7 @@ check_passwd()
 #if defined(AUTH_STANDALONE) && !defined(AUTH_STANDALONE_GETPASS)
 	p = prompt;
 #else
-	p = (char *) tgetpass(prompt, PASSWORD_TIMEOUT * 60, 1);
+	p = (char *) tgetpass(user_prompt, PASSWORD_TIMEOUT * 60, 1);
 	if (!p || *p == '\0')
 	    nil_pw = 1;
 #endif /* AUTH_STANDALONE */
@@ -120,7 +126,8 @@ check_passwd()
 	    if (auth->need_root)
 		set_perms(PERM_ROOT, 0);
 
-	    success = auth->status = (auth->verify)(user_pw_ent, p, &auth->data);
+	    success = auth->status = (auth->verify)(sudo_user.pw, p,
+		&auth->data);
 
 	    if (auth->need_root)
 		set_perms(PERM_USER, 0);
@@ -147,7 +154,7 @@ cleanup:
 	    if (auth->need_root)
 		set_perms(PERM_ROOT, 0);
 
-	    status = (auth->cleanup)(user_pw_ent, auth->status, &auth->data);
+	    status = (auth->cleanup)(sudo_user.pw, auth->status, &auth->data);
 	    if (status == AUTH_FATAL)	/* XXX log */
 		exit(1);		/* assume error msg already printed */
 
@@ -160,8 +167,9 @@ cleanup:
 	case AUTH_SUCCESS:
 	    return;
 	case AUTH_FAILURE:
-	    log_error(counter ? PASSWORD_NOT_CORRECT : PASSWORDS_NOT_CORRECT);
-	    inform_user(counter ? PASSWORD_NOT_CORRECT : PASSWORDS_NOT_CORRECT);
+	    log_error(NO_MAIL, "%d incorrect password attempt%s",
+		TRIES_FOR_PASSWORD - counter,
+		(TRIES_FOR_PASSWORD - counter == 1) ? "" : "s");
 	case AUTH_FATAL:
 	    exit(1);
     }
@@ -178,3 +186,5 @@ pass_warn(fp)
     (void) fprintf(fp, "%s\n", INCORRECT_PASSWORD);
 #endif /* USE_INSULTS */
 }
+
+#endif /* NO_PASSWD */
