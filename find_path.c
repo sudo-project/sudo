@@ -157,7 +157,7 @@ char *find_path(file)
 	if (!statfailed && (statbuf.st_mode & 0000111))
 	    return (qualify(fn));
 	else if (statfailed && errno != ENOENT && errno != ENOTDIR &&
-		 errno != EINVAL && errno != EPERM) {
+		 errno != EINVAL && errno != EPERM && errno != EACCES) {
 	    fprintf(stderr, "sudo: Can't stat %s: ", fn);
 	    perror("");
 	}
@@ -179,7 +179,7 @@ char *find_path(file)
 	if (!statfailed && (statbuf.st_mode & 0000111))
 	    return (qualify(fn));
 	else if (statfailed && errno != ENOENT && errno != ENOTDIR &&
-		 errno != EINVAL && errno != EPERM) {
+		 errno != EINVAL && errno != EPERM && errno != EACCES) {
 	    fprintf(stderr, "sudo: Can't stat %s: ", fn);
 	    perror("");
 	    return (NULL);
@@ -211,7 +211,7 @@ char *qualify(n)
      * is it a bogus path?
      */
     if (stat(n, &statbuf)) {
-	if (errno != ENOENT && errno != EPERM) {
+	if (errno != ENOENT && errno != EPERM && errno != EACCES) {
 	    fprintf(stderr, "sudo: Can't stat %s: ", n);
 	    perror("");
 	}
