@@ -251,9 +251,6 @@
 /* Define if you have flock(2).  */
 #undef HAVE_FLOCK
 
-/* Define if you have ftruncate(2).  */
-#undef HAVE_FTRUNCATE
-
 /* Define if you have setrlimit(2).  */
 #undef HAVE_SETRLIMIT
 
