@@ -73,11 +73,6 @@ SUDO_OSTYPE()
 OS=`echo $OS | $TRPROG '[[A-Z]]' '[[a-z]]'`
 case "$OS" in
     "sunos")	echo "Looks like SunOS 4.x"
-		if test -n "$GCC"; then
-		    STATIC_FLAGS="-static"
-		else
-		    STATIC_FLAGS="-Bstatic"
-		fi
 		;;
     "solaris")	echo "Looks like Solaris"
 		AC_DEFINE(SVR4)
@@ -127,7 +122,8 @@ case "$OS" in
     "linux")	echo "Looks like linux"
 		# C2 security stuff
 		if test -n "$C2"; then
-		    OSDEFS="${OSDEFS} -DSHADOW_PWD -D__svr4__"
+		    AC_DEFINE(SVR4)
+		    OSDEFS="${OSDEFS} -DSHADOW_PWD"
 		    LIBS="${LIBS} -lshadow"
 		fi
 		;;
