@@ -139,13 +139,14 @@ WORD			[[:alnum:]_-]+
 			    sawspace = FALSE;
 			  }			/* a command line arg */
 
-\,			{
+,			{
 			    LEXTRACE(", ");
 			    return(',');
 			}			/* return ',' */
 
-\!			{
-			    return('!');		/* return '!' */
+!+			{
+			    if (yyleng % 2 == 1)
+				return('!');	/* return '!' */
 			}
 
 =			{
@@ -244,9 +245,10 @@ PASSWD[[:blank:]]*:	{
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
 				return(ALL);
+			    } else {
+				LEXTRACE("ALIAS ");
+				return(ALIAS);
 			    }
-			    LEXTRACE("ALIAS ");
-			    return(ALIAS);
 			}
 
 [[:alnum:]][[:alnum:]_-]*	{
