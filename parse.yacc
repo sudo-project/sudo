@@ -101,9 +101,10 @@ static int find_alias		__P((char *, int));
 static int add_alias		__P((char *, int));
 static int more_aliases		__P((size_t));
 static char *dotcat		__P((char *, char *));
+       void yyerror		__P((char *));
 
-int yyerror(s)
-char *s;
+void yyerror(s)
+    char *s;
 {
     /* save the line the first error occured on */
     if (errorlineno == -1)
@@ -448,7 +449,7 @@ static int more_aliases(nslots)
 }
 
 
-int dumpaliases()
+void dumpaliases()
 {
     size_t n;
 
