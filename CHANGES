@@ -1731,3 +1731,14 @@ Sudo 1.6.8 released.
 547) Updated sample.pam to a current version.
 
 548) Better detection of unchanged files in sudoedit.
+
+Sudo 1.6.8p1 released.
+
+549) New trace functionality for systems with systrace(4).  When tracing
+     is enabled sudo will fork a daemon that traces the command and
+     intercepts and execve() calls and allows/denies the call based on
+     a sudoers lookup.
+
+550) Added support for multiple sudoers file via #include.
+
+551) An empty sudoers file is no longer a parse error.
