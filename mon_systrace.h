@@ -20,6 +20,7 @@ typedef int (*schandler_t)
     __P((int, pid_t, struct str_msg_ask *, int, int *, int *));
 
 struct childinfo;
+struct listhead;
 
 extern struct passwd *sudo_pwdup __P((const struct passwd *, int));
 extern struct passwd *sudo_getpwuid __P((uid_t));
@@ -37,6 +38,7 @@ static void new_child		__P((pid_t, pid_t));
 static void rm_child		__P((pid_t));
 static void update_child	__P((pid_t, uid_t));
 static struct childinfo *find_child __P((pid_t));
+static void killall		__P((struct listhead *, int));
 
 static struct listhead children;	/* list of children being traced */
 static int initialized;			/* set to true when we are inited */

@@ -55,7 +55,6 @@ static const char rcsid[] = "$Sudo$";
 
 /*
  * Open the systrace device and return the fd or -1 on failure.
- * XXX - warn here on error or in caller?
  */
 static int
 systrace_open()
@@ -192,7 +191,7 @@ systrace_attach(pid)
 	if (nread != sizeof(msg)) {
 	    if (nread == -1 && (errno == EINTR || errno == EAGAIN))
 		continue;
-	    kill(pid, SIGKILL);	/* XXX - kill all pids in list */
+	    killall(&children, SIGKILL);
 	    _exit(nread != 0);	/* shouldn't happen */
 	}
 
@@ -226,9 +225,9 @@ systrace_attach(pid)
 		handler = find_handler(msg.msg_pid, msg.msg_data.msg_ask.code);
 		if (handler != NULL) {
 		    /*
-		     * handler is run twice, once before we answer and once
-		     * after.  We only want to log attempts when our answer
-		     * is accepted; otherwise we can get dupes.
+		     * The handler is run twice, once before we answer and
+		     * once after.  We only want to log attempts when our
+		     * answer is accepted; otherwise we can get dupes.
 		     */
 		    cookie = handler(fd, msg.msg_pid, &msg.msg_data.msg_ask, -1,
 			&ans.stra_policy, &ans.stra_error);
@@ -273,7 +272,7 @@ systrace_attach(pid)
     }
 
 fail:
-    kill(pid, SIGKILL);	/* XXX - kill all pids in list */
+    killall(&children, SIGKILL);
     _exit(1);
 }
 
@@ -461,9 +460,8 @@ systrace_read(fd, pid, addr, buf, bufsiz)
 /*
  * Read up to bufsiz bytes from addr into buf, stopping when we hit
  * a NUL byte.  Reads are done in chunks since STRIOCIO cannot
- * handle a strio_len > the actual kernel buffer.
- * XXX - could pass a hint for chunksiz
- * XXX - need to indicate oflow
+ * handle a strio_len > the actual kernel buffer.  It might be nice
+ * to pass a starting chunksize though.
  */
 static ssize_t
 read_string(fd, pid, addr, buf, bufsiz)
@@ -492,7 +490,7 @@ read_string(fd, pid, addr, buf, bufsiz)
 	}
     }
     *cp = '\0';
-    return(cp - buf);
+    return(bufsiz >= chunksiz ? cp - buf : -1);
 }
 
 static schandler_t
@@ -556,10 +554,8 @@ decode_args(fd, pid, askp)
 	}
 	if (off == (char *)askp->args[1])
 	    continue;			/* skip argv[0] */
-	if ((len = read_string(fd, pid, ap, cp, ep - cp)) == -1) {
-	    warn("STRIOCIO");
+	if ((len = read_string(fd, pid, ap, cp, ep - cp)) == -1)
 	    return(-1);
-	}
 	cp += len;
 	*cp++ = ' ';		/* replace NUL with a space */
     }
@@ -633,4 +629,18 @@ check_exec(fd, pid, askp, cookie, policyp, errorp)
 	*errorp = EACCES;
     }
     return(validated);
+}
+
+/*
+ * Kill all pids in the list
+ */
+static void
+killall(head, sig)
+    struct listhead *head;
+    int sig;
+{
+    struct childinfo *child;
+
+    for (child = head->first; child != NULL; child = child->next)
+	(void) kill(child->pid, sig);
 }
