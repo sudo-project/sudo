@@ -126,7 +126,8 @@ SECURE_PATH
     Path used for every command run from sudo(8).  If you don't trust
     the people running sudo to have a sane PATH environmental variable
     you may want to define SECURE_PATH.  Another use is if you want to
-    have the "root path" be separate from the "user path."
+    have the "root path" be separate from the "user path."  You will
+    need to customize the path for your site.
     NOTE: SECURE_PATH is not applied to users in the EXEMPTGROUP.
     This is turned off by default.
 
