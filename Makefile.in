@@ -44,9 +44,6 @@ INSTALL = $(srcdir)/install-sh -c
 SUDO_LIBS = @SUDO_LIBS@ @AFS_LIBS@
 VISUDO_LIBS = @VISUDO_LIBS@
 
-# OS defines
-OSDEFS = @OSDEFS@
-
 # C preprocessor flags
 CPPFLAGS = -I. -I$(srcdir) @CPPFLAGS@
 
@@ -86,8 +83,13 @@ mandir5 = $(mandir)/$(mantype)$(mansect5)
 install_uid = 0
 install_gid = 0
 
-# XXX - should go away
-OPTIONS = @OPTIONS@ -D_PATH_SUDO_SUDOERS=\"$(sudoersdir)/sudoers\" -D_PATH_SUDO_STMP=\"$(sudoersdir)/stmp\" -DSUDOERS_UID=$(install_uid) -DSUDOERS_GID=$(install_gid)
+# User, group, and mode the sudoers file should be "owned" by (configure)
+sudoers_uid = @SUDOERS_UID@
+sudoers_gid = @SUDOERS_GID@
+sudoers_mode = @SUDOERS_MODE@
+
+# Pass in paths and uid/gid + OS dependent defined
+DEFS = @OSDEFS@ -D_PATH_SUDO_SUDOERS=\"$(sudoersdir)/sudoers\" -D_PATH_SUDO_STMP=\"$(sudoersdir)/stmp\" -DSUDOERS_UID=$(install_uid) -DSUDOERS_GID=$(install_gid)
 
 #### End of system configuration section. ####
 
@@ -138,7 +140,7 @@ all: $(PROGS)
 .SUFFIXES: .o .c .h .lex .yacc .man .cat
 
 .c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 
 .man.cat:
 	@rm -f $(srcdir)/$@
@@ -218,11 +220,12 @@ install-binaries: $(PROGS)
 install-sudoers:
 	@ if [ -f $(sudoersdir)/sudoers ]; then  \
 	    echo "Setting user/group and mode on existing $(sudoersdir)/sudoers file."; \
-	    chown $(install_uid) $(sudoersdir)/sudoers; \
-	    chgrp $(install_gid) $(sudoersdir)/sudoers; \
-	    chmod 0440 $(sudoersdir)/sudoers; \
+	    chown $(sudoers_uid) $(sudoersdir)/sudoers; \
+	    chgrp $(sudoers_gid) $(sudoersdir)/sudoers; \
+	    chmod $(sudoers_mode) $(sudoersdir)/sudoers; \
 	else \
-	    $(INSTALL) -o $(install_uid) -g $(install_gid) -m 0440 $(srcdir)/sudoers $(sudoersdir)/sudoers; \
+	    $(INSTALL) -o $(sudoers_uid) -g $(sudoers_gid) -m $(sudoers_mode) \
+		$(srcdir)/sudoers $(sudoersdir)/sudoers; \
 	fi
 
 install-man:
