@@ -101,14 +101,12 @@ if ( setuid(0) ) {
     exit(1);
     }
 rtn=validate();
-#ifdef _AIX
-setruid(uid);
-#else
 if ( setruid(uid) ) {
+#ifndef _AIX
     perror("setruid(uid)");
     exit(1);
-    }
 #endif
+    }
 
 switch ( rtn ) {
 
