@@ -76,21 +76,12 @@ int  status = 0,
 FILE *sudoers_tmp_fp=NULL,
      *sudoers_fp=NULL;
 
+
 /*
  * local functions not visible outside visudo.c
  */
-static void usage();
-
-
-static RETSIGTYPE Exit(sig)
-    int sig;
-{
-    if (sudoers_tmp_fp)
-	(void) fclose(sudoers_tmp_fp);
-
-    (void) unlink(sudoers_tmp_file);
-    exit(1);
-}
+static void usage	__P((void));
+static RETSIGTYPE Exit	__P((int));
 
 
 main(argc, argv)
@@ -274,5 +265,23 @@ main(argc, argv)
 static void usage()
 {
     (void) fprintf(stderr, "usage: %s [-v]\n", *Argv);
+    exit(1);
+}
+
+
+/**********************************************************************
+ *
+ * Exit()
+ *
+ *  this function cleans up and exits
+ */
+
+static RETSIGTYPE Exit(sig)
+    int sig;
+{
+    if (sudoers_tmp_fp)
+	(void) fclose(sudoers_tmp_fp);
+
+    (void) unlink(sudoers_tmp_file);
     exit(1);
 }
