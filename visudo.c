@@ -110,9 +110,7 @@ int parse_error = FALSE;
  * For the parsing routines
  */
 char host[] = "";
-#ifdef FQDN
-char shost[] = "";
-#endif /* FQDN */
+char *shost = "";
 char *cmnd = "";
 struct passwd *user_pw_ent;
 

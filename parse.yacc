@@ -199,11 +199,7 @@ hostspec	:	ALL {
 			    (void) free($1);
 			}
 		|	NAME {
-#ifdef FQDN
 			    if (strcasecmp(shost, $1) == 0)
-#else
-			    if (strcasecmp(host, $1) == 0)
-#endif /* FQDN */
 				host_matches = TRUE;
 			    (void) free($1);
 			}

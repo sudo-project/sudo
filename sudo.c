@@ -140,9 +140,7 @@ char *cmnd = NULL;
 char *tty = NULL;
 char *prompt = PASSPROMPT;
 char host[MAXHOSTNAMELEN + 1];
-#ifdef FQDN
-char shost[MAXHOSTNAMELEN + 1];
-#endif /*FQDN */
+char *shost;
 char cwd[MAXPATHLEN + 1];
 struct stat cmnd_st;
 extern struct interface *interfaces;
@@ -448,37 +446,37 @@ static void load_globals(sudo_mode)
     }
 
     /*
-     * load the host global variable from gethostname()
-     * and use gethostbyname() if we want it to be fully qualified.
+     * load the host global variable from gethostname() and use
+     * gethostbyname() if we want to be sure it is fully qualified.
      */
     if ((gethostname(host, MAXHOSTNAMELEN))) {
 	strcpy(host, "localhost");
 	log_error(GLOBAL_NO_HOSTNAME);
 	inform_user(GLOBAL_NO_HOSTNAME);
+	exit(2);
+    }
 #ifdef FQDN
-    } else {
-	if ((h_ent = gethostbyname(host)) == NULL) {
-	    log_error(GLOBAL_HOST_UNREGISTERED);
-	} else {
-	    strcpy(host, h_ent -> h_name);
-	    if ((p = strchr(host, '.'))) {
-		*p = '\0';
-		strcpy(shost, host);
-		*p = '.';
-	    } else {
-		strcpy(shost, host);
-	    }
-	}    
-    }
-#else
-    }
+    if ((h_ent = gethostbyname(host)) == NULL)
+	log_error(GLOBAL_HOST_UNREGISTERED);
+    else
+	strcpy(host, h_ent -> h_name);
+#endif /* FQDN */
 
     /*
-     * We don't want to return the fully quallified name unless FQDN is set
+     * "host" is the (possibly fully-qualified) hostname and
+     * "shost" is the unqualified form of the hostname.
      */
-    if ((p = strchr(host, '.')))
+    if ((p = strchr(host, '.'))) {
 	*p = '\0';
-#endif /* FQDN */
+	if ((shost = strdup(host)) == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+	*p = '.';
+    } else {
+	shost = &host[0];
+    }
 
     /*
      * load a list of ip addresses and netmasks into
