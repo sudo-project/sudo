@@ -42,10 +42,10 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 #ifdef HAVE_STRING_H
 #include <string.h>
-#endif
-#ifdef HAVE_MALLOC_H
+#endif /* HAVE_STRING_H */
+#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 #include <malloc.h>
-#endif
+#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #ifdef HAVE_LSEARCH
 #include <search.h>
 #endif /* HAVE_LSEARCH */

@@ -31,12 +31,18 @@ static char rcsid[] = "$Id$";
 
 #include "config.h"
 
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif /* STDC_HEADERS */
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif /* HAVE_STRING_H */
+#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
+#include <malloc.h>
+#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/param.h>

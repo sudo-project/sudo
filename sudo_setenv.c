@@ -35,9 +35,9 @@ static char rcsid[] = "$Id$";
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #endif /* STDC_HEADERS */
-#ifdef HAVE_MALLOC_H
+#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 #include <malloc.h>
-#endif /* HAVE_MALLOC_H */
+#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
