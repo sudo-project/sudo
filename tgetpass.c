@@ -125,7 +125,7 @@ char * tgetpass(prompt, timeout)
      * open /dev/tty for reading/writing if possible or use
      * stdin and stderr instead.
      */
-    if ((input = open(_PATH_TTY, O_RDWR) < 0)) {
+    if ((input = open(_PATH_TTY, O_RDWR)) < 0) {
 	input = fileno(stdin);
 	output = fileno(stderr);
     } else {
