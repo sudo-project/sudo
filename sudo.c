@@ -572,8 +572,10 @@ init_vars(sudo_mode)
 
     /* Resolve the path and return. */
     if ((sudo_mode & MODE_RUN)) {
-	/* XXX - should call this as runas user, not root. */
+	/* XXX - default_runas may be modified during parsing of sudoers */
+	set_perms(PERM_RUNAS);
 	rval = find_path(NewArgv[0], &user_cmnd, user_path);
+	set_perms(PERM_ROOT);
 	if (rval != FOUND) {
 	    /* Failed as root, try as invoking user. */
 	    set_perms(PERM_USER);
