@@ -105,7 +105,7 @@ SUDOBJS = check.o getspwuid.o find_path.o logging.o parse.o sudo.o goodpath.o \
 
 VISUDOBJS = visudo.o
 
-TESTOBJS = interfaces.o testsudoers.o
+TESTOBJS = interfaces.o testsudoers.o wildmat.o
 
 LIBOBJS = @LIBOBJS@
 
