@@ -11,38 +11,16 @@ TODO list
 
 05) Add default options to sudoers file (umask, def uid, def gids, dir, PATH).
 
-06) Add a whatnow-style prompt to visudo.
+06) Add a SHELLS reserved word that checks against /etc/shells.
 
-07) Add a SHELLS reserved word that checks against /etc/shells.
+07) Make the sudoers file accessible via NIS, Hesiod, and maybe NetInfo.
 
-08) Make the sudoers file accessible via NIS, Hesiod, and maybe NetInfo.
+08) Add a %h field to MAILSUBJECT for the hostname.
 
-09) Add a %h field to MAILSUBJECT for the hostname.
+09) Add a -h flag to sudo for a history mechanism.
 
-10) Add a -h flag to sudo for a history mechanism.
+10) Fully integrate riscos and isc support
 
-11) Fully integrate riscos and isc support
+11) Make parse.lex in the same coding style as everything else...
 
-12) Make parse.lex in the same coding style as everything else...
-
-13) Fix the logging that happens when there is a sudoers parse error.
-    "error in /etc/sudoers ; PWD=/usr/local/src/millert/sudo.v1.3.1 ; command:"
-    and make sure it sends informative mail to root.
-
-16) Sudo.log should go in /var/log if it exists...
-
-17) configure should check for egrep before blindly using it
-
-18) reorder options.h and OPTIONS
-
-19) configure should check for type stuff in unistd.h as well
-
-20) write visudo.man
-
-21) fix testsudoers
-
-22) Test setting SUDOERS_OWNER to non-root and try sudo & visudo
-
-23) New copyright for parse.*
-
-24) Make -l work in sudo.
+12) Make -l work in sudo.

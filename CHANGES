@@ -251,3 +251,21 @@ CHANGES from sudo 1.3.1pl4
 85) Converted configure.in and acsite.m4 to autoconf 2.1.
 
 86) Added lsearch.c and search.h for os's w/o lsearch()/lfind().
+
+87) Fixed a problem on HP-UX trusted systems with getpwuid() returning "*"
+    unless the real uid is 0.  Reported by Brian Cunnie (cunnie@nyc.hp.com).
+
+88) configure now checks for size_t and ssize_t in unistd.h as well
+    as sys/types.h.
+
+89) configure now checks for egrep before actually using it.
+
+90) Added support for SunOS 4.x C2 security (shadow passwords) from
+    Kendall Libby (fubar@shore.net)
+
+91) Changed all occurences of bzero() to memset() and bcopy() to
+    memmove().
+
+92) Fixed a bug in sudo.c.  If a user has no passwd entry sudo would
+    dump core (writing to a garbage pointer).  Pointed out by
+    Stephen Schaefer <sps@gateway.bsis.com>.
