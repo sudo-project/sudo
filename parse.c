@@ -157,8 +157,7 @@ int validate(check_cmnd)
  * If path doesn't end in /, return TRUE iff cmnd & path name the same inode;
  * otherwise, return TRUE if cmnd names one of the inodes in path
  */
-int
-path_matches(cmnd, path)
+int path_matches(cmnd, path)
     char *cmnd, *path;
 {
     int plen;
@@ -168,6 +167,10 @@ path_matches(cmnd, path)
     char buf[MAXCOMMANDLENGTH+1];
     static char *c;
     char *args;
+
+    /* don't bother with pseudo commands like "validate" */
+    if (*cmnd != '/')
+	return(FALSE);
 
     /* only need to stat cmnd once since it never changes */
     if (cmnd_st.st_dev == 0) {
@@ -180,9 +183,8 @@ path_matches(cmnd, path)
     }
 
     /* if the given path has command line args, split them out */
-    if ((args = strchr(path, ' '))) {
+    if ((args = strchr(path, ' ')))
 	*args++ = '\0';
-    }
 
     plen = strlen(path);
     if (path[plen - 1] != '/') {
@@ -201,10 +203,15 @@ path_matches(cmnd, path)
 	if (stat(path, &pst) < 0)
 	    return(FALSE);
 
-	/* XXX - clean up this monstrosity! */
+	/* put things back the way we found 'em */
 	if (args)
 	    *(args - 1) = ' ';
 
+	/*
+	 * Return true if inode/device matches and there are no args
+	 * (in sudoers or command) or if the args match;
+	 * else return false.
+	 */
 	if (cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino) {
 	    if (!cmnd_args && !args)
 		return(TRUE);
@@ -216,7 +223,9 @@ path_matches(cmnd, path)
 	    return(FALSE);
     }
 
-    /* grot through path's directory entries, looking for cmnd */
+    /*
+     * Grot through path's directory entries, looking for cmnd.
+     */
     dirp = opendir(path);
     if (dirp == NULL)
 	return(FALSE);
@@ -241,8 +250,7 @@ path_matches(cmnd, path)
 
 
 
-int
-addr_matches(n)
+int addr_matches(n)
     char *n;
 {
     int i;
@@ -261,8 +269,7 @@ addr_matches(n)
 
 
 
-int
-netgr_matches(netgr, host, user)
+int netgr_matches(netgr, host, user)
     char *netgr;
     char *host;
     char *user;
