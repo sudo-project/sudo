@@ -359,10 +359,14 @@ sudo_endpwent()
 {
     endpwent();
     sudo_endspent();
-    rbdestroy(pwcache_byuid, pw_free);
-    pwcache_byuid = NULL;
-    rbdestroy(pwcache_byname, NULL);
-    pwcache_byname = NULL;
+    if (pwcache_byuid != NULL) {
+	rbdestroy(pwcache_byuid, pw_free);
+	pwcache_byuid = NULL;
+    }
+    if (pwcache_byname != NULL) {
+	rbdestroy(pwcache_byname, NULL);
+	pwcache_byname = NULL;
+    }
 }
 
 static void
@@ -551,8 +555,12 @@ void
 sudo_endgrent()
 {
     endgrent();
-    rbdestroy(grcache_bygid, free);
-    grcache_bygid = NULL;
-    rbdestroy(grcache_byname, NULL);
-    grcache_byname = NULL;
+    if (grcache_bygid != NULL) {
+	rbdestroy(grcache_bygid, free);
+	grcache_bygid = NULL;
+    }
+    if (grcache_byname != NULL) {
+	rbdestroy(grcache_byname, NULL);
+	grcache_byname = NULL;
+    }
 }
