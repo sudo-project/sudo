@@ -32,7 +32,7 @@ For most systems and configurations it is possible simply to:
        or need.
 
     4) Edit the configure-generated Makefile if you wish to
-       change any of the default paths (alternately you could
+       change any of the default paths (alternatively, you could
        have changed the paths via options to `configure'.
 
     5) Type `make' to compile sudo.  If you are building sudo
@@ -301,7 +301,7 @@ Special features/options:
 
   --without-passwd
 	This option excludes authentication via the passwd (or
-	shadow) file.  It should only be used when another, alternate,
+	shadow) file.  It should only be used when another, alternative,
 	authentication scheme is in use.
 
   --with-otp-only
@@ -629,7 +629,7 @@ Ultrix 4.x:
 
 Digital UNIX:
     By default, sudo will use SIA (Security Integration Architecture)
-    to validate a user.  If you want to use an alternate authentication
+    to validate a user.  If you want to use an alternative authentication
     method that does not go through SIA, you need to use the
     --disable-sia option to configure.  If you use gcc to compile
     you will get warnings when building interfaces.c.  These are
