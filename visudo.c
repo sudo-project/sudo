@@ -180,7 +180,7 @@ int main(argc, argv)
 	}
 	(void) fprintf(stderr, "%s: ", Argv[0]);
 	perror(stmp);
-	Exit(1);
+	Exit(-1);
     }
 
     /* install signal handler to clean up stmp */
@@ -190,7 +190,7 @@ int main(argc, argv)
     if (sudoers_fd < 0 && errno != ENOENT) {
 	(void) fprintf(stderr, "%s: ", Argv[0]);
 	perror(sudoers);
-	Exit(1);
+	Exit(-1);
     }
 
     /*
@@ -201,7 +201,7 @@ int main(argc, argv)
 	    if (write(stmp_fd, buf, n) != n) {
 		(void) fprintf(stderr, "%s: Write failed: ", Argv[0]);
 		perror("");
-		Exit(1);
+		Exit(-1);
 	    }
 
 	(void) close(sudoers_fd);
@@ -230,7 +230,7 @@ int main(argc, argv)
 		(void) fprintf(stderr,
 		    "%s: Can't stat temporary file (%s), %s unchanged.\n",
 		    Argv[0], stmp, sudoers);
-		Exit(1);
+		Exit(-1);
 	    }
 
 	    /* check for zero length file */
@@ -238,7 +238,7 @@ int main(argc, argv)
 		(void) fprintf(stderr,
 		    "%s: Zero length temporary file (%s), %s unchanged.\n",
 		    Argv[0], stmp, sudoers);
-		Exit(1);
+		Exit(-1);
 	    }
 
 	    /*
@@ -254,7 +254,7 @@ int main(argc, argv)
 		(void) fprintf(stderr,
 		    "%s: Can't re-open temporary file (%s), %s unchanged.\n",
 		    Argv[0], stmp, sudoers);
-		Exit(1);
+		Exit(-1);
 	    }
 
 	    /* clean slate for each parse */
@@ -265,12 +265,12 @@ int main(argc, argv)
 		(void) fprintf(stderr,
 		    "%s: Failed to parse temporary file (%s), %s unchanged.\n",
 		    Argv[0], stmp, sudoers);
-		Exit(1);
+		Exit(-1);
 	    }
 	} else {
 	    (void) fprintf(stderr, "%s: Editor (%s) failed, %s unchanged.\n",
 		Argv[0], Editor, sudoers);
-	    Exit(1);
+	    Exit(-1);
 	}
 
 	/*
@@ -295,14 +295,14 @@ int main(argc, argv)
 	    "%s: Unable to set (uid, gid) of %s to (%d, %d): ",
 	    Argv[0], stmp, SUDOERS_UID, SUDOERS_GID);
 	perror("");
-	Exit(1);
+	Exit(-1);
     }
     if (chmod(stmp, SUDOERS_MODE)) {
 	(void) fprintf(stderr,
 	    "%s: Unable to change mode of %s to %o: ",
 	    Argv[0], stmp, SUDOERS_MODE);
 	perror("");
-	Exit(1);
+	Exit(-1);
     }
 
     /*
@@ -326,7 +326,7 @@ int main(argc, argv)
 			      "%s: Cannot alocate memory, %s unchanged: ",
 			      Argv[0], sudoers);
 		perror("");
-		Exit(1);
+		Exit(-1);
 	    }
 
 	    /* Build up command and execute it */
@@ -335,14 +335,14 @@ int main(argc, argv)
 		(void) fprintf(stderr,
 			       "%s: Command failed: '%s', %s unchanged.\n",
 			       Argv[0], tmpbuf, sudoers);
-		Exit(1);
+		Exit(-1);
 	    }
 	    (void) free(tmpbuf);
 	} else {
 	    (void) fprintf(stderr, "%s: Error renaming %s, %s unchanged: ",
 				   Argv[0], stmp, sudoers);
 	    perror("");
-	    Exit(1);
+	    Exit(-1);
 	}
 
     return(0);
@@ -396,7 +396,7 @@ int netgr_matches(n, h, u)
 static void usage()
 {
     (void) fprintf(stderr, "usage: %s [-V]\n", Argv[0]);
-    Exit(1);
+    Exit(-1);
 }
 
 
@@ -406,12 +406,19 @@ static void usage()
  *
  *  Unlinks the sudoers temp file (if it exists) and exits.
  *  Used in place of a normal exit() and as a signal handler.
+ *  A positive parameter is considered to be a signal and is reported.
  */
 
 static RETSIGTYPE Exit(sig)
     int sig;
 {
     (void) unlink(stmp);
+
+    if (sig > 0)
+	(void) fprintf(stderr, "%s exiting, caught signal %d.\n", Argv[0], sig);
+    else
+	sig = -sig;
+
     exit(sig);
 }
 
