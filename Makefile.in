@@ -199,7 +199,7 @@ testsudoers: $(TESTOBJS) $(LIBOBJS)
 
 # Uncomment the following if you intend to modify def_data.in
 @DEV@def_data.h def_data.c: def_data.in
-@DEV@	$(srcdir)/mkdefaults -o def_data $(srcdir)/def_data.in
+@DEV@	perl $(srcdir)/mkdefaults -o def_data $(srcdir)/def_data.in
 
 # Dependencies (not counting auth functions)
 alloc.o: alloc.c $(SUDODEP)
