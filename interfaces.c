@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2001 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,47 +43,48 @@ struct rtentry;
 
 #include "config.h"
 
-#include <stdio.h>
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#endif /* STDC_HEADERS */
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif /* HAVE_STRINGS_H */
-#include <netdb.h>
-#include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/param.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #if defined(HAVE_SYS_SOCKIO_H) && !defined(SIOCGIFCONF)
-#include <sys/sockio.h>
+# include <sys/sockio.h>
 #endif
+#include <stdio.h>
+#ifdef HAVE_STRING_H
+# if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
+#  include <memory.h>
+# endif
+# include <string.h>
+#else
+# ifdef HAVE_STRINGS_H
+#  include <strings.h>
+# endif
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#include <netdb.h>
+#include <errno.h>
 #ifdef _ISC
-#include <sys/stream.h>
-#include <sys/sioctl.h>
-#include <sys/stropts.h>
-#include <net/errno.h>
-#define STRSET(cmd, param, len)	{strioctl.ic_cmd=(cmd);\
+# include <sys/stream.h>
+# include <sys/sioctl.h>
+# include <sys/stropts.h>
+# include <net/errno.h>
+# define STRSET(cmd, param, len) {strioctl.ic_cmd=(cmd);\
 				 strioctl.ic_dp=(param);\
 				 strioctl.ic_timout=0;\
 				 strioctl.ic_len=(len);}
 #endif /* _ISC */
 #ifdef _MIPS
-#include <net/soioctl.h>
+# include <net/soioctl.h>
 #endif /* _MIPS */
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/if.h>
 #ifdef HAVE_GETIFADDRS
-#include <ifaddrs.h>
+# include <ifaddrs.h>
 #endif
 
 #include "sudo.h"
