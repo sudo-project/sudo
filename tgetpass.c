@@ -166,8 +166,10 @@ char * tgetpass(prompt, timeout)
     }
 
     /* get the password */
-    if (!fgets(buf, sizeof(buf), input))
+    if (!fgets(buf, sizeof(buf), input)) {
 	buf[0] = '\0';
+	goto cleanup;
+    }
 
     if (*(tmp = &buf[strlen(buf)-1]) == '\n')
 	*tmp = '\0';
