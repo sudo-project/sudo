@@ -1019,6 +1019,7 @@ init_parser()
 	match = NULL;
 	top = 0;
 	parse_error = FALSE;
+	used_runas = FALSE;
 	errorlineno = -1;
 	sudolineno = 1;
     }
@@ -1031,7 +1032,7 @@ init_parser()
     if (printmatches == TRUE)
 	expand_match_list();
 }
-#line 983 "sudo.tab.c"
+#line 984 "sudo.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1967,7 +1968,7 @@ case 91:
 			    yyval.BOOLEAN = TRUE;
 			}
 break;
-#line 1919 "sudo.tab.c"
+#line 1920 "sudo.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
