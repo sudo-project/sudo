@@ -19,88 +19,164 @@
 #ifndef _SUDO_PARSE_H
 #define _SUDO_PARSE_H
 
-/*
- * Data structure used in parsing sudoers;
- * top of stack values are the ones that
- * apply when parsing is done & can be
- * accessed by *_matches macros
- */
-#define STACKINCREMENT (32)
-struct matchstack {
-	int user;
-	int cmnd;
-	int host;
-	int runas;
-	int nopass;
-	int noexec;
-	int monitor;
-};
+#undef ALLOW
+#define ALLOW	1
+#undef DENY
+#define DENY	0
+#undef UNSPEC
+#define UNSPEC	-1
+/* XXX - use NOTFOUND instead? */
 
 /*
- * Data structure describing a command in the
- * sudoers file.
+ * A command with args. XXX - merge into struct member.
  */
 struct sudo_command {
     char *cmnd;
     char *args;
 };
 
-#define user_matches	(match[top-1].user)
-#define cmnd_matches	(match[top-1].cmnd)
-#define host_matches	(match[top-1].host)
-#define runas_matches	(match[top-1].runas)
-#define no_passwd	(match[top-1].nopass)
-#define no_execve	(match[top-1].noexec)
-#define monitor_cmnd	(match[top-1].monitor)
-
 /*
- * Structure containing command matches if "sudo -l" is used.
+ * Tags associated with a command.
+ * Possible valus: TRUE, FALSE, UNSPEC.
  */
-struct command_match {
-    char *runas;
-    size_t runas_len;
-    size_t runas_size;
-    char *cmnd;
-    size_t cmnd_len;
-    size_t cmnd_size;
-    int nopasswd;
-    int noexecve;
-    int monitor;
+struct cmndtag {
+    char nopasswd;
+    char noexec;
+    char monitor;
+    char extra;
 };
 
 /*
- * Structure describing an alias match in parser.
+ * The parses sudoers file is stored as a collection of linked lists,
+ * modelled after the yacc grammar.
+ *
+ * There is no separate head struct, the first entry acts as the list head.
+ * Because of this, the "last" field is only valid in the first entry.
+ * The lack of a separate list head structure allows us to avoid keeping
+ * static state in the parser and makes it easy to append sublists.
  */
-typedef struct {
-    int type;
-    char *name;
-    int val;
-} aliasinfo;
 
 /*
- * Structure containing Cmnd_Alias's if "sudo -l" is used.
+ * Structure describing a user specification and list thereof.
  */
-struct generic_alias {
-    int type;
-    char *alias;
-    char *entries;
-    size_t entries_size;
-    size_t entries_len;
+struct userspec {
+    struct member *user;		/* list of users */
+    struct privilege *privileges;	/* list of privileges */
+    struct userspec *last, *next;
 };
 
-/* The matching stack and number of entries on it. */
-extern struct matchstack *match;
-extern int top;
+/*
+ * Structure describing a privilege specification.
+ */
+struct privilege {
+    struct member *hostlist;		/* list of hosts */
+    struct cmndspec *cmndlist;		/* list of Cmnd_Specs */
+    struct privilege *last, *next;
+};
+
+/*
+ * Structure describing a linked list of Cmnd_Specs.
+ */
+struct cmndspec {
+    struct member *runaslist;		/* list of runas users */
+    struct member *cmnd;		/* command to allow/deny */
+    struct cmndtag tags;		/* tag specificaion */
+    struct cmndspec *last, *next;
+};
+
+/*
+ * Generic structure to hold users, hosts, commands.
+ */
+struct member {
+    char *name;				/* member name */
+    short type;				/* type (see gram.h) */
+    short negated;			/* negated via '!'? */
+    struct member *last, *next;
+};
+
+/*
+ * Generic structure to hold {User,Host,Runas,Cmnd}_Alias
+ */
+struct alias {
+    char *name;				/* alias name */
+    int type; 				/* {USER,HOST,RUNAS,CMND}ALIAS */
+    struct member *first_member;	/* list of alias members */
+    struct alias *last, *next;
+};
+
+/*
+ * Structure describing a Defaults entry and a list thereof.
+ */
+struct defaults {
+    char *var;				/* variable name */
+    char *val;				/* variable value */
+    struct member *binding;		/* user/host/runas binding */
+    int type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
+    int op;				/* TRUE, FALSE, '+', '-' */
+    struct defaults *last, *next;
+};
+
+/*
+ * Allocat space for a struct alias and populate it.
+ */
+#define NEW_ALIAS(r, n, t, m) do {			\
+    (r)               = emalloc(sizeof(struct alias));	\
+    (r)->name         = (n);				\
+    (r)->type         = (t);				\
+    (r)->first_member = (m);				\
+    (r)->last         = NULL;				\
+    (r)->next         = NULL;				\
+} while (0)
+
+/*
+ * Allocat space for a defaults entry and populate it.
+ */
+#define NEW_DEFAULT(r, v1, v2, o) do {			\
+    (r)       = emalloc(sizeof(struct defaults));	\
+    (r)->var  = (v1);					\
+    (r)->val  = (v2);					\
+    (r)->op   = (o);					\
+    (r)->last = NULL;					\
+    (r)->next = NULL;					\
+} while (0)
+
+/*
+ * Allocat space for a member and populate it.
+ */
+#define NEW_MEMBER(r, n, t) do {			\
+    (r)       = emalloc(sizeof(struct member));		\
+    (r)->name = (n);					\
+    (r)->type = (t);					\
+    (r)->last = NULL;					\
+    (r)->next = NULL;					\
+} while (0)
+
+/*
+ * Append an entry to the tail of a list.
+ */
+#define LIST_APPEND(h, e) do {				\
+    if ((h)->last != NULL)				\
+	(h)->last->next = (e);				\
+    else /* if ((h)->next == NULL) */			\
+	(h)->next = (e);				\
+    (h)->last = (e);					\
+} while (0)
 
 /*
  * Prototypes
  */
 int addr_matches	__P((char *));
+int alias_matches	__P((char *, int, VOID *, VOID *));
+int cmnd_matches	__P((char *, char *, struct member *));
 int command_matches	__P((char *, char *));
+int host_matches	__P((char *, char *, struct member *));
 int hostname_matches	__P((char *, char *, char *));
 int netgr_matches	__P((char *, char *, char *, char *));
-int userpw_matches	__P((char *, char *, struct passwd *));
+int runas_matches	__P((struct passwd *, struct member *));
+int user_matches	__P((struct passwd *, struct member *));
 int usergr_matches	__P((char *, char *, struct passwd *));
-void init_parser	__P((char *));
+int userpw_matches	__P((char *, char *, struct passwd *));
+void init_parser	__P((char *, int));
+void print_member	__P((struct member *m));
 
 #endif /* _SUDO_PARSE_H */

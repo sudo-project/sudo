@@ -26,9 +26,14 @@
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
-    char *string;
-    int BOOLEAN;
+    struct alias *alias;
+    struct cmndspec *cmndspec;
+    struct defaults *defaults;
+    struct member *member;
+    struct privilege *privilege;
     struct sudo_command command;
+    struct cmndtag tag;
+    char *string;
     int tok;
 } YYSTYPE;
 #endif /* YYSTYPE_DEFINED */
