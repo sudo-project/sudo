@@ -149,6 +149,12 @@ int top = 0, stacksize = 0;
 	    top--; \
     } while (0)
 
+
+/*
+ * For testing if foo_matches variable was set to TRUE or FALSE
+ */
+#define	MATCHED(_v)	((_v) >= 0)
+
 /*
  * Shortcuts for append()
  */
@@ -444,12 +450,14 @@ cmndspec	:	runasspec cmndtag opcmnd {
 			     * If keepall is set and the user matches then
 			     * we need to keep entries around too...
 			     */
-			    if (user_matches >= 0 && host_matches >= 0 &&
-				cmnd_matches >= 0 && runas_matches >= 0)
+			    if (MATCHED(user_matches) &&
+				MATCHED(host_matches) &&
+				MATCHED(cmnd_matches) &&
+				MATCHED(runas_matches))
 				pushcp;
-			    else if (user_matches >= 0 && (top == 1 ||
-				(top == 2 && host_matches >= 0 &&
-				match[0].host < 0)))
+			    else if (MATCHED(user_matches) && (top == 1 ||
+				(top == 2 && MATCHED(host_matches) &&
+				!MATCHED(match[0].host))))
 				pushcp;
 			    else if (user_matches == TRUE && keepall)
 				pushcp;
@@ -730,7 +738,7 @@ hostaliases	:	hostalias
 		;
 
 hostalias	:	ALIAS { push; } '=' hostlist {
-			    if ((host_matches >= 0 || pedantic) &&
+			    if ((MATCHED(host_matches) || pedantic) &&
 				!add_alias($1, HOST_ALIAS, host_matches)) {
 				yyerror(NULL);
 				YYERROR;
@@ -757,7 +765,7 @@ cmndalias	:	ALIAS {
 				ga_list[ga_list_len-1].alias = estrdup($1);
 			     }
 			} '=' cmndlist {
-			    if ((cmnd_matches >= 0 || pedantic) &&
+			    if ((MATCHED(cmnd_matches) || pedantic) &&
 				!add_alias($1, CMND_ALIAS, cmnd_matches)) {
 				yyerror(NULL);
 				YYERROR;
@@ -804,7 +812,7 @@ useraliases	:	useralias
 		;
 
 useralias	:	ALIAS { push; }	'=' userlist {
-			    if ((user_matches >= 0 || pedantic) &&
+			    if ((MATCHED(user_matches) || pedantic) &&
 				!add_alias($1, USER_ALIAS, user_matches)) {
 				yyerror(NULL);
 				YYERROR;
