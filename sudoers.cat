@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.6.9                   September 30, 2004                      1
+1.6.9                    October  4, 2004                       1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                      2
+1.6.9                    October  4, 2004                       2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                      3
+1.6.9                    October  4, 2004                       3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                      4
+1.6.9                    October  4, 2004                       4
 
 
 
@@ -288,7 +288,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        mail_badpass
                    Send mail to the _m_a_i_l_t_o user if the user run­
-                   ning sudo does not enter the correct password.
+                   ning ssuuddoo does not enter the correct password.
                    This flag is _o_f_f by default.
 
        mail_no_user
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                      5
+1.6.9                    October  4, 2004                       5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                      6
+1.6.9                    October  4, 2004                       6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                      7
+1.6.9                    October  4, 2004                       7
 
 
 
@@ -503,7 +503,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    can be useful on systems that disable some
                    potentially dangerous functionality when a
                    program is run setuid.  Note, however, that
-                   this means that sudo will run with the real
+                   this means that ssuuddoo will run with the real
                    uid of the invoking user which may allow that
                    user to kill ssuuddoo before it can log a failure,
                    depending on how your OS defines the interac­
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                      8
+1.6.9                    October  4, 2004                       8
 
 
 
@@ -541,23 +541,23 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    with the --with-logincap option.  This flag is
                    _o_f_f by default.
 
-       noexec      If set, all commands run via sudo will behave
+       noexec      If set, all commands run via ssuuddoo will behave
                    as if the NOEXEC tag has been set, unless
                    overridden by a EXEC tag.  See the description
                    of _N_O_E_X_E_C _a_n_d _E_X_E_C below as well as the "PRE­
                    VENTING SHELL ESCAPES" section at the end of
                    this manual.  This flag is _o_f_f by default.
 
-       trace       If set, all commands run via sudo will behave
-                   as if the TRACE tag has been set, unless over­
-                   ridden by a NOTRACE tag.  See the description
-                   of _T_R_A_C_E _a_n_d _N_O_T_R_A_C_E below as well as the
-                   "PREVENTING SHELL ESCAPES" section at the end
-                   of this manual.  Be aware that tracing is only
-                   supported on certain operating systems.  On
-                   systems where it is not supported this flag
-                   will have no effect.  This flag is _o_f_f by
-                   default.
+       monitor     If set, all commands run via ssuuddoo will behave
+                   as if the MONITOR tag has been set, unless
+                   overridden by a NOMONITOR tag.  See the
+                   description of _M_O_N_I_T_O_R _a_n_d _N_O_M_O_N_I_T_O_R below as
+                   well as the "PREVENTING SHELL ESCAPES" section
+                   at the end of this manual.  Be aware that
+                   tracing is only supported on certain operating
+                   systems.  On systems where it is not supported
+                   this flag will have no effect.  This flag is
+                   _o_f_f by default.
 
        ignore_local_sudoers
                    If set via LDAP, parsing of @sysconfdir@/sudo­
@@ -568,7 +568,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    who would attempt to add roles to
                    @sysconfdir@/sudoers.  When this option is
                    present, @sysconfdir@/sudoers does not even
-                   need to exist.  Since this options tells sudo
+                   need to exist.  Since this options tells ssuuddoo
                    how to behave when no specific LDAP entries
                    have been matched, this sudoOption is only
                    meaningful for the cn=defaults section.  This
@@ -589,7 +589,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                      9
+1.6.9                    October  4, 2004                       9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                     10
+1.6.9                    October  4, 2004                      10
 
 
 
@@ -721,7 +721,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                     11
+1.6.9                    October  4, 2004                      11
 
 
 
@@ -738,7 +738,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    The default value is _o_n_c_e.
 
        lecture_file
-                   Path to a file containing an alternate sudo
+                   Path to a file containing an alternate ssuuddoo
                    lecture that will be used in place of the
                    standard lecture if the named file exists.
 
@@ -759,7 +759,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        mailto      Address to send warning and error mail to.
                    The address should be enclosed in double
-                   quotes (") to protect against sudo interpret­
+                   quotes (") to protect against ssuuddoo interpret­
                    ing the @ sign.  Defaults to root.
 
        exempt_group
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                     12
+1.6.9                    October  4, 2004                      12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                     13
+1.6.9                    October  4, 2004                      13
 
 
 
@@ -895,7 +895,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
         Runas_Spec ::= '(' Runas_List ')'
 
         Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-                      'TRACE' | 'NOTRACE')
+                      'MONITOR' | 'NOMONITOR')
 
        A uusseerr ssppeecciiffiiccaattiioonn determines which commands a user may
        run (and as what user) on specified hosts.  By default,
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                     14
+1.6.9                    October  4, 2004                      14
 
 
 
@@ -944,10 +944,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        A command may have zero or more tags associated with it.
        There are four possible tag values, NOPASSWD, PASSWD,
-       NOEXEC, EXEC, TRACE and NOTRACE.  Once a tag is set on a
-       Cmnd, subsequent Cmnds in the Cmnd_Spec_List, inherit the
-       tag unless it is overridden by the opposite tag (ie:
-       PASSWD overrides NOPASSWD and NOTRACE overrides TRACE).
+       NOEXEC, EXEC, MONITOR and NOMONITOR.  Once a tag is set on
+       a Cmnd, subsequent Cmnds in the Cmnd_Spec_List, inherit
+       the tag unless it is overridden by the opposite tag (ie:
+       PASSWD overrides NOPASSWD and NOMONITOR overrides MONI­
+       TOR).
 
        _N_O_P_A_S_S_W_D _a_n_d _P_A_S_S_W_D
 
@@ -981,11 +982,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        _N_O_E_X_E_C _a_n_d _E_X_E_C
 
-       If ssuuddoo has been compiled with _n_o_e_x_e_c support and the
 
 
 
-1.6.9                   September 30, 2004                     15
+1.6.9                    October  4, 2004                      15
 
 
 
@@ -994,6 +994,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       If ssuuddoo has been compiled with _n_o_e_x_e_c support and the
        underlying operating system supports it, the NOEXEC tag
        can be used to prevent a dynamically-linked executable
        from running further commands itself.
@@ -1007,10 +1008,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        details on how NOEXEC works and whether or not it will
        work on your system.
 
-       _T_R_A_C_E _a_n_d _N_O_T_R_A_C_E
+       _M_O_N_I_T_O_R _a_n_d _N_O_M_O_N_I_T_O_R
 
        If ssuuddoo has been configured with the --with-systrace
-       option, the TRACE tag can be used to cause programs
+       option, the MONITOR tag can be used to cause programs
        spawned by a command to be checked against _s_u_d_o_e_r_s and
        logged just like they would be if run through ssuuddoo
        directly.  This is useful in conjunction with commands
@@ -1018,13 +1019,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        nators.
 
        In the following example, user cchhuucckk may run any command
-       on the machine research with tracing enabled.
+       on the machine research in monitor mode.
 
-        chuck  research = TRACE: ALL
+        chuck  research = MONITOR: ALL
 
        See the "PREVENTING SHELL ESCAPES" section below for more
-       details on how TRACE works and whether or not it will work
-       on your system.
+       details on how MONITOR works and whether or not it will
+       work on your system.
 
        WWiillddccaarrddss
 
@@ -1047,11 +1048,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                "?", "[", and "}".
 
        Note that a forward slash ('/') will nnoott be matched by
-       wildcards used in the pathname.  When matching the command
 
 
 
-1.6.9                   September 30, 2004                     16
+1.6.9                    October  4, 2004                      16
 
 
 
@@ -1060,6 +1060,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       wildcards used in the pathname.  When matching the command
        line arguments, however, a slash ddooeess get matched by wild­
        cards.  This is to make a path like:
 
@@ -1113,11 +1114,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
         #include /etc/sudoers.local
 
-       When ssuuddoo reaches this line it will suspend processing of
 
 
 
-1.6.9                   September 30, 2004                     17
+1.6.9                    October  4, 2004                      17
 
 
 
@@ -1126,6 +1126,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       When ssuuddoo reaches this line it will suspend processing of
        the current file (_/_e_t_c_/_s_u_d_o_e_r_s) and switch to _/_e_t_c_/_s_u_d_o_­
        _e_r_s_._l_o_c_a_l.  Upon reaching the end of _/_e_t_c_/_s_u_d_o_e_r_s_._l_o_c_a_l,
        the rest of _/_e_t_c_/_s_u_d_o_e_r_s will be processed.  Files that
@@ -1179,11 +1180,10 @@ EEXXAAMMPPLLEESS
        is important.  In general, you should structure _s_u_d_o_e_r_s
        such that the Host_Alias, User_Alias, and Cmnd_Alias spec­
        ifications come first, followed by any Default_Entry
-       lines, and finally the Runas_Alias and user
 
 
 
-1.6.9                   September 30, 2004                     18
+1.6.9                    October  4, 2004                      18
 
 
 
@@ -1192,8 +1192,9 @@ EEXXAAMMPPLLEESS
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
-       specifications.  The basic rule of thumb is you cannot
-       reference an Alias that has not already been defined.
+       lines, and finally the Runas_Alias and user specifica­
+       tions.  The basic rule of thumb is you cannot reference an
+       Alias that has not already been defined.
 
        Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of
        these are a bit contrived.  First, we define our _a_l_i_a_s_e_s:
@@ -1248,8 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-
-1.6.9                   September 30, 2004                     19
+1.6.9                    October  4, 2004                      19
 
 
 
@@ -1315,7 +1315,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                     20
+1.6.9                    October  4, 2004                      20
 
 
 
@@ -1381,7 +1381,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                   September 30, 2004                     21
+1.6.9                    October  4, 2004                      21
 
 
 
@@ -1435,7 +1435,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
                  the user to run arbitrary commands.  Many edi­
                  tors have a restricted mode where shell escapes
                  are disabled, though ssuuddooeeddiitt is a better solu­
-                 tion to running editors via sudo.  Due to the
+                 tion to running editors via ssuuddoo.  Due to the
                  large number of programs that offer shell
                  escapes, restricting users to the set of pro­
                  grams that do not if often unworkable.
@@ -1447,7 +1447,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.6.9                   September 30, 2004                     22
+1.6.9                    October  4, 2004                      22
 
 
 
@@ -1457,7 +1457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
                  On such systems, ssuuddoo's _n_o_e_x_e_c functionality can
-                 be used to prevent a program run by sudo from
+                 be used to prevent a program run by ssuuddoo from
                  executing any other programs.  Note, however,
                  that this applies only to native dynamically-
                  linked executables.  Statically-linked executa­
@@ -1503,17 +1503,17 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                  porting _n_o_e_x_e_c you can always just try it out
                  and see if it works.
 
-       tracing   On operating systems that support the ssyyssttrraaccee
+       monitor   On operating systems that support the ssyyssttrraaccee
                  pseudo-device, the --with-systrace configure
-                 option can be used to compile support for com­
-                 mand tracing in ssuuddoo.  With ssyyssttrraaccee support
-                 ssuuddoo can transparently intercept a new command,
-                 allow or deny it based on _s_u_d_o_e_r_s, and log the
-                 result.  This does require that ssuuddoo become a
+                 option can be used to compile support for proc­
+                 cess monitoring in ssuuddoo.  In monitor mode ssuuddoo
+                 can transparently intercept a new command, allow
+                 or deny it based on _s_u_d_o_e_r_s, and log the result.
+                 This does require that ssuuddoo become a daemon that
 
 
 
-1.6.9                   September 30, 2004                     23
+1.6.9                    October  4, 2004                      23
 
 
 
@@ -1522,20 +1522,19 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
-                 daemon that persists until the command and all
-                 its descendents have finished.
+                 persists until the command and all its descen­
+                 dents have exited.
 
-                 To enable tracing on a per-command basis, use
-                 the TRACE tag as documented in the User Specifi­
-                 cation section above.  Here is that example
-                 again:
+                 To enable monitor mode on a per-command basis,
+                 use the MONITOR tag as documented in the User
+                 Specification section above.  Here is that exam­
+                 ple again:
 
-                  chuck  research = TRACE: ALL
+                  chuck  research = MONITOR: ALL
 
                  This allows user cchhuucckk to run any command on the
-                 machine research with tracing enabled.  Any com­
-                 mands run via shell escapes will be logged by
-                 sudo.
+                 machine research in monitor mode.  Any commands
+                 run via shell escapes will be logged by ssuuddoo.
 
                  At the time of this writing the ssyyssttrraaccee pseudo-
                  device comes standard with OpenBSD and NetBSD
@@ -1575,11 +1574,12 @@ SSUUPPPPOORRTT
        http://www.sudo.ws/sudo/support.html for details.
 
        Limited free support is available via the sudo-users mail­
-       ing list, see
+       ing list, see http://www.sudo.ws/mail­
+       man/listinfo/sudo-users to subscribe or search the
 
 
 
-1.6.9                   September 30, 2004                     24
+1.6.9                    October  4, 2004                      24
 
 
 
@@ -1588,8 +1588,7 @@ SSUUPPPPOORRTT
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
-       http://www.sudo.ws/mailman/listinfo/sudo-users to sub­
-       scribe or search the archives.
+       archives.
 
 DDIISSCCLLAAIIMMEERR
        SSuuddoo is provided ``AS IS'' and any express or implied war­
@@ -1645,6 +1644,7 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.6.9                   September 30, 2004                     25
+
+1.6.9                    October  4, 2004                      25
 
 

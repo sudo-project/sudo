@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "September 30, 2004" "1.6.9" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "October  4, 2004" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -413,7 +413,7 @@ Send mail to the \fImailto\fR user every time a users runs \fBsudo\fR.
 This flag is \fIoff\fR by default.
 .IP "mail_badpass" 12
 .IX Item "mail_badpass"
-Send mail to the \fImailto\fR user if the user running sudo does not
+Send mail to the \fImailto\fR user if the user running \fBsudo\fR does not
 enter the correct password.  This flag is \fIoff\fR by default.
 .IP "mail_no_user" 12
 .IX Item "mail_no_user"
@@ -564,7 +564,7 @@ changes that behavior such that the real \s-1UID\s0 is left as the invoking
 user's \s-1UID\s0.  In other words, this makes \fBsudo\fR act as a setuid
 wrapper.  This can be useful on systems that disable some potentially
 dangerous functionality when a program is run setuid.  Note, however,
-that this means that sudo will run with the real uid of the invoking
+that this means that \fBsudo\fR will run with the real uid of the invoking
 user which may allow that user to kill \fBsudo\fR before it can log a
 failure, depending on how your \s-1OS\s0 defines the interaction between
 signals and setuid processes.
@@ -586,14 +586,14 @@ login class if one exists.  Only available if \fBsudo\fR is configured with
 the \-\-with\-logincap option.  This flag is \fIoff\fR by default.
 .IP "noexec" 12
 .IX Item "noexec"
-If set, all commands run via sudo will behave as if the \f(CW\*(C`NOEXEC\*(C'\fR
+If set, all commands run via \fBsudo\fR will behave as if the \f(CW\*(C`NOEXEC\*(C'\fR
 tag has been set, unless overridden by a \f(CW\*(C`EXEC\*(C'\fR tag.  See the
 description of \fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR below as well as the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section at the end of this manual.  This flag is \fIoff\fR by default.
-.IP "trace" 12
-.IX Item "trace"
-If set, all commands run via sudo will behave as if the \f(CW\*(C`TRACE\*(C'\fR
-tag has been set, unless overridden by a \f(CW\*(C`NOTRACE\*(C'\fR tag.  See the
-description of \fI\s-1TRACE\s0 and \s-1NOTRACE\s0\fR below as well as the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section at the end of this manual.  Be aware that
+.IP "monitor" 12
+.IX Item "monitor"
+If set, all commands run via \fBsudo\fR will behave as if the \f(CW\*(C`MONITOR\*(C'\fR
+tag has been set, unless overridden by a \f(CW\*(C`NOMONITOR\*(C'\fR tag.  See the
+description of \fI\s-1MONITOR\s0 and \s-1NOMONITOR\s0\fR below as well as the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section at the end of this manual.  Be aware that
 tracing is only supported on certain operating systems.  On systems
 where it is not supported this flag will have no effect.
 This flag is \fIoff\fR by default.
@@ -604,7 +604,7 @@ This is intended for an Enterprises that wish to prevent the usage of local
 sudoers files so that only \s-1LDAP\s0 is used.  This thwarts the efforts of
 rogue operators who would attempt to add roles to \f(CW@sysconfdir\fR@/sudoers.
 When this option is present, \f(CW@sysconfdir\fR@/sudoers does not even need to exist. 
-Since this options tells sudo how to behave when no specific \s-1LDAP\s0 entries
+Since this options tells \fBsudo\fR how to behave when no specific \s-1LDAP\s0 entries
 have been matched, this sudoOption is only meaningful for the cn=defaults
 section.  This flag is \fIoff\fR by default.
 .PP
@@ -740,7 +740,7 @@ The default value is \fI@lecture@\fR.
 .RE
 .IP "lecture_file" 12
 .IX Item "lecture_file"
-Path to a file containing an alternate sudo lecture that will
+Path to a file containing an alternate \fBsudo\fR lecture that will
 be used in place of the standard lecture if the named file exists.
 .IP "logfile" 12
 .IX Item "logfile"
@@ -760,7 +760,7 @@ Flags to use when invoking mailer. Defaults to \fB\-t\fR.
 .IP "mailto" 12
 .IX Item "mailto"
 Address to send warning and error mail to.  The address should
-be enclosed in double quotes (\f(CW\*(C`"\*(C'\fR) to protect against sudo
+be enclosed in double quotes (\f(CW\*(C`"\*(C'\fR) to protect against \fBsudo\fR
 interpreting the \f(CW\*(C`@\*(C'\fR sign.  Defaults to \f(CW\*(C`@mailto@\*(C'\fR.
 .IP "exempt_group" 12
 .IX Item "exempt_group"
@@ -877,7 +877,7 @@ supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\fR, \fBerr\fR, \fBinfo
 .PP
 .Vb 2
 \& Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-\&               'TRACE' | 'NOTRACE')
+\&               'MONITOR' | 'NOMONITOR')
 .Ve
 .PP
 A \fBuser specification\fR determines which commands a user may run
@@ -917,11 +917,11 @@ but  \fI/bin/kill\fR and \fI/usr/bin/lprm\fR as \fBroot\fR.
 .IX Subsection "Tag_Spec"
 A command may have zero or more tags associated with it.  There are
 four possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR, \f(CW\*(C`EXEC\*(C'\fR,
-\&\f(CW\*(C`TRACE\*(C'\fR and \f(CW\*(C`NOTRACE\*(C'\fR.
+\&\f(CW\*(C`MONITOR\*(C'\fR and \f(CW\*(C`NOMONITOR\*(C'\fR.
 Once a tag is set on a \f(CW\*(C`Cmnd\*(C'\fR, subsequent \f(CW\*(C`Cmnd\*(C'\fRs in the
 \&\f(CW\*(C`Cmnd_Spec_List\*(C'\fR, inherit the tag unless it is overridden by the
-opposite tag (ie: \f(CW\*(C`PASSWD\*(C'\fR overrides \f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`NOTRACE\*(C'\fR
-overrides \f(CW\*(C`TRACE\*(C'\fR).
+opposite tag (ie: \f(CW\*(C`PASSWD\*(C'\fR overrides \f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`NOMONITOR\*(C'\fR
+overrides \f(CW\*(C`MONITOR\*(C'\fR).
 .PP
 \fI\s-1NOPASSWD\s0 and \s-1PASSWD\s0\fR
 .IX Subsection "NOPASSWD and PASSWD"
@@ -973,25 +973,25 @@ and \fI/usr/bin/vi\fR but shell escapes will be disabled.
 See the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section below for more details
 on how \f(CW\*(C`NOEXEC\*(C'\fR works and whether or not it will work on your system.
 .PP
-\fI\s-1TRACE\s0 and \s-1NOTRACE\s0\fR
-.IX Subsection "TRACE and NOTRACE"
+\fI\s-1MONITOR\s0 and \s-1NOMONITOR\s0\fR
+.IX Subsection "MONITOR and NOMONITOR"
 .PP
 If \fBsudo\fR has been configured with the \f(CW\*(C`\-\-with\-systrace\*(C'\fR option,
-the \f(CW\*(C`TRACE\*(C'\fR tag can be used to cause programs spawned by a command
+the \f(CW\*(C`MONITOR\*(C'\fR tag can be used to cause programs spawned by a command
 to be checked against \fIsudoers\fR and logged just like they would
 be if run through \fBsudo\fR directly.  This is useful in conjunction
 with commands that allow shell escapes such as editors, shells and
 paginators.
 .PP
 In the following example, user \fBchuck\fR may run any command on the
-machine research with tracing enabled.
+machine research in monitor mode.
 .PP
 .Vb 1
-\& chuck  research = TRACE: ALL
+\& chuck  research = MONITOR: ALL
 .Ve
 .PP
 See the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section below for more details
-on how \f(CW\*(C`TRACE\*(C'\fR works and whether or not it will work on your system.
+on how \f(CW\*(C`MONITOR\*(C'\fR works and whether or not it will work on your system.
 .Sh "Wildcards"
 .IX Subsection "Wildcards"
 \&\fBsudo\fR allows shell-style \fIwildcards\fR (aka meta or glob characters)
@@ -1379,7 +1379,7 @@ There are three basic approaches to this problem:
 Avoid giving users access to commands that allow the user to run
 arbitrary commands.  Many editors have a restricted mode where shell
 escapes are disabled, though \fBsudoedit\fR is a better solution to
-running editors via sudo.  Due to the large number of programs that
+running editors via \fBsudo\fR.  Due to the large number of programs that
 offer shell escapes, restricting users to the set of programs that
 do not if often unworkable.
 .IP "noexec" 10
@@ -1388,7 +1388,7 @@ Many systems that support shared libraries have the ability to
 override default library functions by pointing an environment
 variable (usually \f(CW\*(C`LD_PRELOAD\*(C'\fR) to an alternate shared library.
 On such systems, \fBsudo\fR's \fInoexec\fR functionality can be used to
-prevent a program run by sudo from executing any other programs.
+prevent a program run by \fBsudo\fR from executing any other programs.
 Note, however, that this applies only to native dynamically-linked
 executables.  Statically-linked executables and foreign executables
 running under binary emulation are not affected.
@@ -1429,27 +1429,27 @@ with \fInoexec\fR enabled.  This will prevent those two commands from
 executing other commands (such as a shell).  If you are unsure
 whether or not your system is capable of supporting \fInoexec\fR you
 can always just try it out and see if it works.
-.IP "tracing" 10
-.IX Item "tracing"
+.IP "monitor" 10
+.IX Item "monitor"
 On operating systems that support the \fBsystrace\fR pseudo\-device,
 the \f(CW\*(C`\-\-with\-systrace\*(C'\fR configure option can be used to compile
-support for command tracing in \fBsudo\fR.  With \fBsystrace\fR support
+support for proccess monitoring in \fBsudo\fR.  In monitor mode
 \&\fBsudo\fR can transparently intercept a new command, allow or deny
 it based on \fIsudoers\fR, and log the result.  This does require that
 \&\fBsudo\fR become a daemon that persists until the command and all its
-descendents have finished.
+descendents have exited.
 .Sp
-To enable tracing on a per-command basis, use the \f(CW\*(C`TRACE\*(C'\fR tag as
-documented in the User Specification section above.  Here is that
-example again:
+To enable monitor mode on a per-command basis, use the \f(CW\*(C`MONITOR\*(C'\fR
+tag as documented in the User Specification section above.  Here
+is that example again:
 .Sp
 .Vb 1
-\& chuck  research = TRACE: ALL
+\& chuck  research = MONITOR: ALL
 .Ve
 .Sp
 This allows user \fBchuck\fR to run any command on the machine research
-with tracing enabled.  Any commands run via shell escapes will be
-logged by sudo.
+in monitor mode.  Any commands run via shell escapes will be logged
+by \fBsudo\fR.
 .Sp
 At the time of this writing the \fBsystrace\fR pseudo-device comes
 standard with OpenBSD and NetBSD and is available as patches to
