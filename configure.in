@@ -574,7 +574,7 @@ case "$host" in
     *-sequent-sysv*)
 		# XXX - this needs to be tested.
 		LIBS="${LIBS} -lsocket -lnsl"
-		SUDO_LIBS="${LIBS} -lsocket -lnsl"
+		SUDO_LIBS="${SUDO_LIBS} -lsocket -lnsl"
 		LIB_SOCKET=1
 		LIB_NSL=1                                    
 
@@ -586,6 +586,20 @@ case "$host" in
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    SUDO_LIBS="${SUDO_LIBS} -lsec"
 		    LIBS="${LIBS} -lsec"
+		fi
+		;;
+    *-ccur-sysv4|*-ccur-sysvr4)
+		LIBS="${LIBS} -lgen -lsocket -lnsl"
+		SUDO_LIBS="${SUDO_LIBS} -lgen -lsocket -lnsl"
+		LIB_SOCKET=1
+		LIB_NSL=1                                    
+
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		fi
+		if test "$with_C2" = "yes"; then
+		    SHADOW_TYPE="SPW_SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     *-*-bsdi*)
@@ -617,7 +631,7 @@ case "$host" in
 		;;
     *-*-svr4*|-*-sysv4*)
 		LIBS="${LIBS} -lsocket -lnsl"
-		SUDO_LIBS="${LIBS} -lsocket -lnsl"
+		SUDO_LIBS="${SUDO_LIBS} -lsocket -lnsl"
 		LIB_SOCKET=1
 		LIB_NSL=1                                    
 
