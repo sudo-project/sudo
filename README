@@ -70,7 +70,7 @@ sudo-users	This list is for questions and general discussion about sudo.
 
 sudo-workers	This list is for people working on and porting sudo.
 
-To subscribe to a list, send a mail message to "majordomo@cs.colorado.edu"
+To subscribe to a list, send a mail message to "majordomo@courtesan.com"
 with a line in the message body (_not_ the subject) of "subscribe listname"
 where "listname" is one of sudo-announce, sudo-users, or sudo-workers.
 
