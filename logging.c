@@ -86,7 +86,7 @@ sprintf( logline, "%8.8s : ", user );
 #endif
 
 p = logline + strlen(logline);  /* we need a pointer to the end of logline */
-#ifdef hpux        
+#ifdef USE_CWD
 getcwd(cwd, (size_t)(MAXPATHLEN+1));    /* so we know where we are... */
 #else
 getwd(cwd);                     /* so we know where we are... */
@@ -285,9 +285,9 @@ if ( ! fork () ) {
     /*      child                                parent     */
 
     (void) close(1);
-    execv ( mailer, exec_argv );
+    execve ( mailer, exec_argv, Envp );
     /* this should not happen */
-    perror( "execv");
+    perror ("execve");
     exit (1);
 
     }
