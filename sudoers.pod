@@ -110,7 +110,7 @@ Each I<alias> definition is of the form
 
 where I<Alias_Type> is one of C<User_Alias>, C<Runas_Alias>, C<Host_Alias>,
 or C<Cmnd_Alias>.  A C<NAME> is a string of uppercase letters, numbers,
-and the underscore characters ('_').  A C<NAME> B<must> start with an
+and underscore characters ('_').  A C<NAME> B<must> start with an
 uppercase letter.  It is possible to put several alias definitions
 of the same type on a single line, joined by a colon (':').  E.g.,
 
@@ -275,7 +275,7 @@ commands on the current host.  This flag is I<@mail_no_host@> by default.
 =item mail_no_perms
 
 If set, mail will be sent to the I<mailto> user if the invoking
-user allowed to use B<sudo> but the command they are trying is not
+user is allowed to use B<sudo> but the command they are trying is not
 listed in their I<sudoers> file entry.  This flag is I<@mail_no_perms@>
 by default.
 
@@ -360,7 +360,7 @@ user.  This flag is I<off> by default.
 =item fqdn
 
 Set this flag if you want to put fully qualified hostnames in the
-I<sudoers> file.  I.e.: instead of myhost you would use myhost.mydomain.edu.
+I<sudoers> file.  I.e., instead of myhost you would use myhost.mydomain.edu.
 You may still use the short form if you wish (and even mix the two).
 Beware that turning on I<fqdn> requires B<sudo> to make DNS lookups
 which may make B<sudo> unusable if DNS stops working (for example
@@ -382,7 +382,7 @@ password.  This flag is I<@insults@> by default.
 If set, B<sudo> will only run when the user is logged in to a real
 tty.  This will disallow things like C<"rsh somehost sudo ls"> since
 rsh(1) does not allocate a tty.  Because it is not possible to turn
-of echo when there is no tty present, some sites may with to set
+off echo when there is no tty present, some sites may with to set
 this flag to prevent a user from entering a visible password.  This
 flag is I<off> by default.
 
@@ -649,7 +649,7 @@ The default value is `all'.
 =item listpw
 
 This option controls when a password will be required when a
-user runs B<sudo> with the B<-l>.  It has the following possible values:
+user runs B<sudo> with the B<-l> flag.  It has the following possible values:
 
 =over 8
 
@@ -685,12 +685,12 @@ B<Lists that can be used in a boolean context>:
 
 Environment variables to be removed from the user's environment if
 the variable's value contains C<%> or C</> characters.  This can
-be used to guard against printf-style format vulnerabilties in
+be used to guard against printf-style format vulnerabilities in
 poorly-written programs.  The argument may be a double-quoted,
 space-separated list or a single value without double-quotes.  The
 list can be replaced, added to, deleted from, or disabled by using
 the C<=>, C<+=>, C<-=>, and C<!> operators respectively.  The default
-list of environment variable to check is printed when B<sudo> is
+list of environment variables to check is printed when B<sudo> is
 run by root with the I<-V> option.
 
 =item env_delete
@@ -700,7 +700,7 @@ The argument may be a double-quoted, space-separated list or a
 single value without double-quotes.  The list can be replaced, added
 to, deleted from, or disabled by using the C<=>, C<+=>, C<-=>, and
 C<!> operators respectively.  The default list of environment
-variable to remove is printed when B<sudo> is run by root with the
+variables to remove is printed when B<sudo> is run by root with the
 I<-V> option.  Note that many operating systems will remove potentially
 dangerous variables from the environment of any setuid process (such
 as B<sudo>).
@@ -750,7 +750,7 @@ C<Runas_Spec> in the user specification, a default C<Runas_Spec>
 of B<root> will be used.  A C<Runas_Spec> sets the default for
 commands that follow it.  What this means is that for the entry:
 
- dgb	boulder = (operator) /bin/ls, /bin/kill, /usr/bin/who
+ dgb	boulder = (operator) /bin/ls, /bin/kill, /usr/bin/lprm
 
 The user B<dgb> may run F</bin/ls>, F</bin/kill>, and
 F</usr/bin/lprm> -- but only as B<operator>.  E.g.,
@@ -827,7 +827,7 @@ escape special characters such as: "*", "?", "[", and "}".
 
 Note that a forward slash ('/') will B<not> be matched by
 wildcards used in the pathname.  When matching the command
-line arguments, however, as slash B<does> get matched by
+line arguments, however, a slash B<does> get matched by
 wildcards.  This is to make a path like:
 
     /usr/bin/*
@@ -1084,4 +1084,4 @@ I<sudoers>.
 
 =head1 SEE ALSO
 
-rsh(1), sudo(8), visudo(8), su(1), fnmatch(3).
+rsh(1), su(1), fnmatch(3), sudo(8), visudo(8)

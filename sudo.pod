@@ -398,4 +398,4 @@ are generally safe).
 
 =head1 SEE ALSO
 
-stat(2), login_cap(3), sudoers(5), passwd(5), visudo(8), grep(1), su(1).
+grep(1), su(1), stat(2), login_cap(3), sudoers(5), passwd(5), visudo(8)
