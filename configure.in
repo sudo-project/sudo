@@ -1770,8 +1770,18 @@ fi
 
 dnl
 dnl Kerberos V
+dnl There is an easy way and a hard way...
 dnl
-if test -n "$with_kerb5"; then
+if test "$with_kerb5" = "yes"; then
+    AC_CHECK_PROG(KRB5CONFIG, krb5-config, yes, "")
+    if test -n "$KRB5CONFIG"; then
+	AC_DEFINE(HAVE_KERB5, 1, [Define if you use Kerberos V.])
+	AUTH_OBJS="${AUTH_OBJS} kerb5.o"
+	CPPFLAGS="$CPPFLAGS `krb5-config --cflags`"
+	SUDO_LIBS="$SUDO_LIBS `krb5-config --libs`"
+    fi
+fi
+if test -n "$with_kerb5" -a -z "$KRB5CONFIG"; then
     AC_DEFINE(HAVE_KERB5, 1, [Define if you use Kerberos V.])
     dnl
     dnl Use the specified directory, if any, else search for correct inc dir
