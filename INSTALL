@@ -41,7 +41,7 @@ A few notes:
 a) To use syslog with the ultrix version you may want to grab
    and install pub/DEC/jtkohl-syslog-complete.tar.Z available from
    gatekeeper.dec.com via anonymous ftp.  If you don't I'd suggest
-   logging to a separate file rather thang using the 4.2BSD syslog()
+   logging to a separate file rather than using the 4.2BSD syslog()
    that comes with ultrix.  The jtkohl syslog is a nice port of the
    4.3 syslogd that is backwards compatible with the ultrix version.
    I recommend it highly.
