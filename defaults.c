@@ -476,6 +476,9 @@ init_defaults()
 #ifdef EXEMPTGROUP
     def_exempt_group = estrdup(EXEMPTGROUP);
 #endif
+#ifdef SECURE_PATH
+    def_secure_path = estrdup(SECURE_PATH);
+#endif
     def_editor = estrdup(EDITOR);
 #ifdef _PATH_SUDO_NOEXEC
     def_noexec_file = estrdup(_PATH_SUDO_NOEXEC);

@@ -467,10 +467,9 @@ rebuild_env(envp, sudo_mode, noexec)
     if (!ISSET(didvar, DID_PATH))
 	insert_env(format_env("PATH", _PATH_DEFPATH, VNULL), 0);
 
-#ifdef SECURE_PATH
     /* Replace the PATH envariable with a secure one. */
-    insert_env(format_env("PATH", SECURE_PATH, VNULL), 1);
-#endif
+    if (def_secure_path && !user_is_exempt())
+	insert_env(format_env("PATH", def_secure_path, VNULL), 1);
 
     /* Set $USER and $LOGNAME to target if "set_logname" is true. */
     if (def_set_logname && runas_pw->pw_name) {

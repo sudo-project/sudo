@@ -220,6 +220,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
 	set_runaspw,
     }, {
+	"secure_path", T_STR|T_BOOL,
+	"Value to override user's $PATH with: %s",
+	NULL,
+    }, {
 	"editor", T_STR|T_PATH,
 	"Path to the editor for use by visudo: %s",
 	NULL,

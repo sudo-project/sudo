@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "October 26, 2004" "1.6.9" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "November 12, 2004" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -570,9 +570,8 @@ following variables: \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(
 and \f(CW\*(C`USER\*(C'\fR (in addition to the \f(CW\*(C`SUDO_*\*(C'\fR variables).
 Of these, only \f(CW\*(C`TERM\*(C'\fR is copied unaltered from the old environment.
 The other variables are set to default values (possibly modified
-by the value of the \fIset_logname\fR option).  If \fBsudo\fR was compiled
-with the \f(CW\*(C`SECURE_PATH\*(C'\fR option, its value will be used for the \f(CW\*(C`PATH\*(C'\fR
-environment variable.
+by the value of the \fIset_logname\fR option).  If the \fIsecure_path\fR
+option is set, its value will be used for the \f(CW\*(C`PATH\*(C'\fR environment variable.
 Other variables may be preserved with the \fIenv_keep\fR option.
 .IP "use_loginclass" 12
 .IX Item "use_loginclass"
@@ -761,6 +760,14 @@ interpreting the \f(CW\*(C`@\*(C'\fR sign.  Defaults to \f(CW\*(C`@mailto@\*(C'\
 .IX Item "exempt_group"
 Users in this group are exempt from password and \s-1PATH\s0 requirements.
 This is not set by default.
+.IP "secure_path" 12
+.IX Item "secure_path"
+Path used for every command run from \fBsudo\fR.  If you don't trust the
+people running \fBsudo\fR to have a sane \f(CW\*(C`PATH\*(C'\fR environment variable you may
+want to use this.  Another use is if you want to have the \*(L"root path\*(R"
+be separate from the \*(L"user path.\*(R"  Users in the group specified by the
+\&\fIexempt_group\fR option are not affected by \fIsecure_path\fR.
+This is not set by default.
 .IP "verifypw" 12
 .IX Item "verifypw"
 This option controls when a password will be required when a user runs
@@ -942,7 +949,7 @@ run \fI/bin/kill\fR without a password the entry would be:
 .Ve
 .PP
 Note, however, that the \f(CW\*(C`PASSWD\*(C'\fR tag has no effect on users who are
-in the group specified by the exempt_group option.
+in the group specified by the \fIexempt_group\fR option.
 .PP
 By default, if the \f(CW\*(C`NOPASSWD\*(C'\fR tag is applied to any of the entries
 for a user on the current host, he or she will be able to run

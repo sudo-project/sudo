@@ -528,6 +528,13 @@ init_envtables()
     return;
 }
 
+/* STUB */
+int
+user_is_exempt()
+{
+    return(FALSE);
+}
+
 /*
  * Assuming a parse error occurred, prompt the user for what they want
  * to do now.  Returns the first letter of their choice.
