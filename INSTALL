@@ -55,6 +55,10 @@ For most systems and configurations it is possible simply to:
        site.  You will probably want to refer the sample.sudoers
        file and sudoers man page included with the sudo package.
 
+    8) If you want to use syslogd(8) to do the logging, you'll need
+       to update your /etc/syslog.conf file.  See the sample.syslog.conf
+       file included in the distribution for an example.
+
 Available configure options
 ===========================
 
@@ -208,7 +212,8 @@ Special features/options:
   --with-loglen
 	Number of characters per line for the file log.  This is only used if
 	you are to "file" or "both".  This value is used to decide when to wrap
-	lines for nicer log files.  The default is 80.
+	lines for nicer log files.  The default is 80.  Setting this to 0
+	will disable the wrapping.
 
   --with-ignore-dot
 	If set, sudo will ignore '.' or '' (current dir) in $PATH.
@@ -403,9 +408,6 @@ Special features/options:
 
   --enable-log-host
 	Log the hostname in the log file.
-
-  --disable-log-wrap
-	Do not wrap long lines in the log file.
 
   --enable-noargs-shell
 	If sudo is invoked with no arguments it acts as if the "-s" flag had

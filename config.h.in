@@ -397,9 +397,6 @@
 /* Define if you want the hostname to be entered into the log file */
 #undef HOST_IN_LOG
 
-/* Define if you want the log file line to be wrapped */
-#undef WRAP_LOG
-
 /* Define to be the number of minutes before sudo asks for passwd again.  */
 #undef TIMEOUT
 
@@ -453,9 +450,6 @@
 
 /* Define to be the max chars per log line (for line wrapping).  */
 #undef MAXLOGFILELEN
-
-/* Define if your syslog.h has the prioritynames and facilitynames tables.  */
-#undef HAVE_SYSLOG_NAMES
 
 /* Define if you want to ignore '.' and '' in $PATH */
 #undef IGNORE_DOT_PATH

@@ -68,3 +68,7 @@ TODO list (most will be addressed in sudo 2.0)
     user.
 
 24) Use strtol() and strtoul(), not atoi()?
+
+25) In parse.yacc get rid on unneeded '{ ; }'
+
+26) Look into %e, %p, %k in parse.lex

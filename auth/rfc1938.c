@@ -93,6 +93,9 @@ rfc1938_setup(pw, promptp, auth)
 	/* Ignore trailing colon (we will add our own) */
 	if (orig_prompt[op_len - 1] == ':')
 	    op_len--;
+	else if (op_len >= 2 && orig_prompt[op_len - 1] == ' '
+	    && orig_prompt[op_len - 2] == ':')
+	    op_len -= 2;
     }
 
 #ifdef HAVE_SKEY
@@ -123,11 +126,11 @@ rfc1938_setup(pw, promptp, auth)
 	new_prompt = (char *) erealloc(new_prompt, np_size);
     }
 
-#ifdef LONG_OTP_PROMPT
-    (void) sprintf(new_prompt, "%s\n%s", challenge, orig_prompt);
-#else
-    (void) sprintf(new_prompt, "%.*s [ %s ]:", op_len, orig_prompt, challenge);
-#endif /* LONG_OTP_PROMPT */
+    if (sudo_flag_set(FL_LONG_OTP_PROMPT))
+	(void) sprintf(new_prompt, "%s\n%s", challenge, orig_prompt);
+    else
+	(void) sprintf(new_prompt, "%.*s [ %s ]:", op_len, orig_prompt,
+	    challenge);
 
     *promptp = new_prompt;
     return(AUTH_SUCCESS);

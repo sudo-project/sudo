@@ -39,6 +39,7 @@
 
 #include <pathnames.h>
 #include "compat.h"
+#include "defaults.h"
 #include "logging.h"
 
 /*
@@ -50,7 +51,7 @@ struct sudo_user {
     char  cwd[MAXPATHLEN];
     char *host;
     char *shost;
-    char *runas;
+    char **runas;
     char *prompt;
     char *cmnd_safe;
     char *cmnd;
@@ -95,9 +96,10 @@ struct sudo_user {
 #define MODE_VERSION             00020
 #define MODE_HELP                00040
 #define MODE_LIST                00100
-#define MODE_BACKGROUND          00200
-#define MODE_SHELL               00400
-#define MODE_RESET_HOME          01000
+#define MODE_LISTDEFS            00200
+#define MODE_BACKGROUND          00400
+#define MODE_SHELL               01000
+#define MODE_RESET_HOME          02000
 
 /*
  * Used with set_perms()
@@ -173,7 +175,7 @@ int sudo_setenv		__P((char *, char *));
 char *tgetpass		__P((const char *, int, int));
 int find_path		__P((char *, char **));
 void check_user		__P((void));
-void verify_user	__P((void));
+void verify_user	__P((char *));
 int sudoers_lookup	__P((int));
 void set_perms		__P((int, int));
 void remove_timestamp	__P((int));
@@ -187,7 +189,8 @@ VOID *erealloc		__P((VOID *, size_t));
 char *estrdup		__P((const char *));
 void easprintf		__P((char **, const char *, ...));
 void evasprintf		__P((char **, const char *, va_list));
-void print_version	__P((void));
+void dump_defaults	__P((void));
+void dump_auth_methods	__P((void));
 int lock_file		__P((int, int));
 int touch		__P((char *, time_t));
 YY_DECL;

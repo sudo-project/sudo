@@ -150,7 +150,6 @@ main(argc, argv)
     }
 
     /* Mock up a fake sudo_user struct. */
-    user_runas = RUNAS_DEFAULT;
     user_host = user_shost = user_cmnd = "";
     if ((sudo_user.pw = getpwuid(getuid())) == NULL) {
 	(void) fprintf(stderr, "%s: Can't find you in the passwd database.\n",
@@ -273,6 +272,7 @@ main(argc, argv)
 	    }
 
 	    /* Clean slate for each parse */
+	    init_defaults();
 	    init_parser();
 
 	    /* Parse the sudoers file */

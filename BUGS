@@ -11,3 +11,7 @@ Known bugs in sudo version 1.6
    given.  This is a flaw in GNU autoconf.
 
 4) On DUNIX in sia mode, hitting return at the prompt does not quit.
+
+5) In parse.lex, '@" should not need to be a special character.
+   For some reason, if it is not excluded from WORD, Defaults@ doesn't
+   match.

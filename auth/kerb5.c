@@ -103,7 +103,7 @@ kerb5_init(pw, promptp, auth)
 	realm = lrealm;
 
     /* Only rewrite prompt if user didn't specify their own. */
-    if (!strcmp(prompt, PASSPROMPT))
+    if (user_prompt == NULL)
 	easprintf(promptp, "Password for %s@%s: ", pw->pw_name, realm);
     return(AUTH_SUCCESS);
 }

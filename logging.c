@@ -62,19 +62,14 @@
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-#if (LOGGING & SLOG_SYSLOG)
 static void do_syslog		__P((int, char *));
-#endif
-#if (LOGGING & SLOG_FILE)
 static void do_logfile		__P((char *));
-#endif
 static void send_mail		__P((char *));
 static void mail_auth		__P((int, char *));
 
-#if (LOGGING & SLOG_SYSLOG)
-# ifdef BROKEN_SYSLOG
-#  define MAXSYSLOGTRIES	16	/* num of retries for broken syslogs */
-#  define SYSLOG		syslog_wrapper
+#ifdef BROKEN_SYSLOG
+# define MAXSYSLOGTRIES	16	/* num of retries for broken syslogs */
+# define SYSLOG		syslog_wrapper
 
 static void syslog_wrapper	__P((int, char *, char *, char *));
 
@@ -95,9 +90,9 @@ syslog_wrapper(pri, fmt, ap)
 	if (vsyslog(pri, fmt, ap) == 0)
 	    break;
 }
-# else
-#  define SYSLOG		syslog
-# endif /* BROKEN_SYSLOG */
+#else
+# define SYSLOG		syslog
+#endif /* BROKEN_SYSLOG */
 
 /*
  * Log a message to syslog, pre-pending the username and splitting the
@@ -149,9 +144,7 @@ do_syslog(pri, msg)
 	}
     }
 }
-#endif /* LOGGING & SLOG_SYSLOG */
 
-#if (LOGGING & SLOG_FILE)
 static void
 do_logfile(msg)
     char *msg;
@@ -161,96 +154,94 @@ do_logfile(msg)
     FILE *fp;
     mode_t oldmask;
     time_t now;
-    int maxlen = MAXLOGFILELEN;
+    int maxlen = sudo_inttable[I_LOGLEN];
 
     now = time((time_t) 0);
 
     oldmask = umask(077);
-    fp = fopen(_PATH_SUDO_LOGFILE, "a");
+    fp = fopen(sudo_strtable[I_LOGFILE], "a");
     (void) umask(oldmask);
     if (fp == NULL) {
 	easprintf(&full_line, "Can't open log file: %s: %s",
-	    _PATH_SUDO_LOGFILE, strerror(errno));
+	    sudo_strtable[I_LOGFILE], strerror(errno));
 	send_mail(full_line);
 	free(full_line);
     } else if (!lock_file(fileno(fp), SUDO_LOCK)) {
 	easprintf(&full_line, "Can't lock log file: %s: %s",
-	    _PATH_SUDO_LOGFILE, strerror(errno));
+	    sudo_strtable[I_LOGFILE], strerror(errno));
 	send_mail(full_line);
 	free(full_line);
     } else {
-# ifndef WRAP_LOG
-#  ifdef HOST_IN_LOG
-	(void) fprintf(fp, "%15.15s : %s : HOST=%s : %s\n", ctime(&now) + 4,
-	    user_name, user_shost, msg);
-#  else
-	(void) fprintf(fp, "%15.15s : %s : %s\n", ctime(&now) + 4, user_name,
-	    msg);
-#  endif
-# else
-#  ifdef HOST_IN_LOG
-	easprintf(&full_line, "%15.15s : %s : HOST=%s : %s",
-	    ctime(&now) + 4, user_name, user_shost, msg);
-#  else
-	easprintf(&full_line, "%15.15s : %s : %s", ctime(&now) + 4,
-	    user_name, msg);
-#  endif
+	if (sudo_inttable[I_LOGLEN] == 0) {
+	    /* Don't pretty-print long log file lines (hard to grep) */
+	    if (sudo_flag_set(FL_LOG_HOST))
+		(void) fprintf(fp, "%15.15s : %s : HOST=%s : %s\n",
+		    ctime(&now) + 4, user_name, user_shost, msg);
+	    else
+		(void) fprintf(fp, "%15.15s : %s : %s\n", ctime(&now) + 4,
+		    user_name, msg);
+	} else {
+	    if (sudo_flag_set(FL_LOG_HOST))
+		easprintf(&full_line, "%15.15s : %s : HOST=%s : %s",
+		    ctime(&now) + 4, user_name, user_shost, msg);
+	    else
+		easprintf(&full_line, "%15.15s : %s : %s", ctime(&now) + 4,
+		    user_name, msg);
 
-	/*
-	 * Print out full_line with word wrap
-	 */
-	beg = end = full_line;
-	while (beg) {
-	    oldend = end;
-	    end = strchr(oldend, ' ');
+	    /*
+	     * Print out full_line with word wrap
+	     */
+	    beg = end = full_line;
+	    while (beg) {
+		oldend = end;
+		end = strchr(oldend, ' ');
 
-	    if (maxlen > 0 && end) {
-		*end = '\0';
-		if (strlen(beg) > maxlen) {
-		    /* too far, need to back up & print the line */
+		if (maxlen > 0 && end) {
+		    *end = '\0';
+		    if (strlen(beg) > maxlen) {
+			/* too far, need to back up & print the line */
 
-		    if (beg == (char *)full_line)
-			maxlen -= 4;		/* don't indent first line */
+			if (beg == (char *)full_line)
+			    maxlen -= 4;	/* don't indent first line */
 
-		    *end = ' ';
-		    if (oldend != beg) {
-			/* rewind & print */
-		    	end = oldend-1;
-			while (*end == ' ')
-			    --end;
-			*(++end) = '\0';
-			(void) fprintf(fp, "%s\n    ", beg);
 			*end = ' ';
+			if (oldend != beg) {
+			    /* rewind & print */
+			    end = oldend-1;
+			    while (*end == ' ')
+				--end;
+			    *(++end) = '\0';
+			    (void) fprintf(fp, "%s\n    ", beg);
+			    *end = ' ';
+			} else {
+			    (void) fprintf(fp, "%s\n    ", beg);
+			}
+
+			/* reset beg to point to the start of the new substr */
+			beg = end;
+			while (*beg == ' ')
+			    ++beg;
 		    } else {
-			(void) fprintf(fp, "%s\n    ", beg);
+			/* we still have room */
+			*end = ' ';
 		    }
 
-		    /* reset beg to point to the start of the new substring */
-		    beg = end;
-		    while (*beg == ' ')
-			++beg;
+		    /* remove leading whitespace */
+		    while (*end == ' ')
+			++end;
 		} else {
-		    /* we still have room */
-		    *end = ' ';
+		    /* final line */
+		    (void) fprintf(fp, "%s\n", beg);
+		    beg = NULL;			/* exit condition */
 		}
-
-		/* remove leading whitespace */
-		while (*end == ' ')
-		    ++end;
-	    } else {
-		/* final line */
-		(void) fprintf(fp, "%s\n", beg);
-		beg = NULL;			/* exit condition */
 	    }
+	    free(full_line);
 	}
-	free(full_line);
-# endif
 	(void) fflush(fp);
 	(void) lock_file(fileno(fp), SUDO_UNLOCK);
 	(void) fclose(fp);
     }
 }
-#endif /* LOGGING & SLOG_FILE */
 
 /*
  * Two main functions, log_error() to log errors and log_auth() to
@@ -263,14 +254,12 @@ log_auth(status, inform_user)
 {
     char *message;
     char *logline;
-#if (LOGGING & SLOG_SYSLOG)
     int pri;
 
     if (status & VALIDATE_OK)
 	pri = PRI_SUCCESS;
     else
 	pri = PRI_FAILURE;
-#endif /* LOGGING & SLOG_SYSLOG */
 
     /* Set error message, if any. */
     if (status & VALIDATE_OK)
@@ -285,7 +274,7 @@ log_auth(status, inform_user)
 	message = "unknown error ; ";
 
     easprintf(&logline, "%sTTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s%s%s",
-	message, user_tty, user_cwd, user_runas, user_cmnd,
+	message, user_tty, user_cwd, *user_runas, user_cmnd,
 	user_args ? " " : "", user_args ? user_args : "");
 
     mail_auth(status, logline);		/* send mail based on status */
@@ -305,18 +294,16 @@ log_auth(status, inform_user)
 	    (void) fprintf(stderr,
 		"Sorry, user %s is not allowed to execute '%s%s%s' as %s on %s.\n",
 		user_name, user_cmnd, user_args ? " " : "",
-		user_args ? user_args : "", user_runas, user_host);
+		user_args ? user_args : "", *user_runas, user_host);
     }
 
     /*
      * Log via syslog and/or a file.
      */
-#if (LOGGING & SLOG_SYSLOG)
-    do_syslog(pri, logline);
-#endif
-#if (LOGGING & SLOG_FILE)
-    do_logfile(logline);
-#endif
+    if (sudo_inttable[I_LOGFAC] != (unsigned int)-1)
+	do_syslog(pri, logline);
+    if (sudo_strtable[I_LOGFILE])
+	do_logfile(logline);
 
     free(logline);
 }
@@ -358,22 +345,22 @@ log_error(va_alist)
 	if (user_args) {
 	    easprintf(&logline,
 		"%s: %s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s %s",
-		message, strerror(serrno), user_tty, user_cwd, user_runas,
+		message, strerror(serrno), user_tty, user_cwd, *user_runas,
 		user_cmnd, user_args);
 	} else {
 	    easprintf(&logline,
 		"%s: %s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s", message,
-		strerror(serrno), user_tty, user_cwd, user_runas, user_cmnd);
+		strerror(serrno), user_tty, user_cwd, *user_runas, user_cmnd);
 	}
     } else {
 	if (user_args) {
 	    easprintf(&logline,
 		"%s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s %s", message,
-		user_tty, user_cwd, user_runas, user_cmnd, user_args);
+		user_tty, user_cwd, *user_runas, user_cmnd, user_args);
 	} else {
 	    easprintf(&logline,
 		"%s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s", message,
-		user_tty, user_cwd, user_runas, user_cmnd);
+		user_tty, user_cwd, *user_runas, user_cmnd);
 	}
     }
 
@@ -394,12 +381,10 @@ log_error(va_alist)
     /*
      * Log to syslog and/or a file.
      */
-#if (LOGGING & SLOG_SYSLOG)
-    do_syslog(PRI_FAILURE, logline);
-#endif
-#if (LOGGING & SLOG_FILE)
-    do_logfile(logline);
-#endif
+    if (sudo_inttable[I_LOGFAC] != (unsigned int)-1)
+	do_syslog(PRI_FAILURE, logline);
+    if (sudo_strtable[I_LOGFILE])
+	do_logfile(logline);
 
     free(logline);
     if (message != logline);
@@ -409,7 +394,6 @@ log_error(va_alist)
 /*
  * Send a message to ALERTMAIL
  */
-#ifdef _PATH_SENDMAIL
 static void
 send_mail(line)
     char *line;
@@ -418,6 +402,10 @@ send_mail(line)
     char *p;
     int pfd[2], pid;
     time_t now;
+
+    /* Just return if mailer is disabled. */
+    if (!sudo_strtable[I_MAILERPATH])
+	return;
 
     if ((pid = fork()) > 0) {	/* Child. */
 
@@ -456,9 +444,9 @@ send_mail(line)
 	(void) close(pfd[0]);
 
 	/* Pipes are all setup, send message via sendmail. */
-	(void) fprintf(mail, "To: %s\nFrom: %s\nSubject: ", ALERTMAIL,
-	    user_name);
-	for (p = MAILSUBJECT; *p; p++) {
+	(void) fprintf(mail, "To: %s\nFrom: %s\nSubject: ",
+	    sudo_strtable[I_ALERTMAIL], user_name);
+	for (p = sudo_strtable[I_MAILSUB]; *p; p++) {
 	    /* Expand escapes in the subject */
 	    if (*p == '%' && *(p+1) != '%') {
 		switch (*(++p)) {
@@ -491,14 +479,6 @@ send_mail(line)
 	}
     }
 }
-#else
-static void
-send_mail(line)
-    char *line;
-{
-    return;
-}
-#endif
 
 /*
  * Send mail based on the value of "status" and compile-time options.
@@ -511,19 +491,18 @@ mail_auth(status, line)
     int mail_mask;
 
     /* If any of these bits are set in status, we send mail. */
-    mail_mask = VALIDATE_ERROR;
-#ifdef SEND_MAIL_WHEN_OK
-    mail_mask |= VALIDATE_OK;
-#endif
-#ifdef SEND_MAIL_WHEN_NO_USER
-    mail_mask |= FLAG_NO_USER;
-#endif
-#ifdef SEND_MAIL_WHEN_NO_HOST
-    mail_mask |= FLAG_NO_HOST;
-#endif
-#ifdef SEND_MAIL_WHEN_NOT_OK
-    mail_mask |= VALIDATE_NOT_OK;
-#endif
+    if (sudo_flag_set(FL_MAIL_ALWAYS))
+	mail_mask =
+	    VALIDATE_ERROR|VALIDATE_OK|FLAG_NO_USER|FLAG_NO_HOST|VALIDATE_NOT_OK;
+    else {
+	mail_mask = VALIDATE_ERROR;
+	if (sudo_flag_set(FL_MAIL_IF_NOUSER))
+	    mail_mask |= FLAG_NO_USER;
+	if (sudo_flag_set(FL_MAIL_IF_NOHOST))
+	    mail_mask |= FLAG_NO_HOST;
+	if (sudo_flag_set(FL_MAIL_IF_NOPERMS))
+	    mail_mask |= VALIDATE_NOT_OK;
+    }
 
     if ((status & mail_mask) != 0)
 	send_mail(line);

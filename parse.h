@@ -104,4 +104,12 @@ struct generic_alias {
 extern struct matchstack *match;
 extern int top;
 
+/*
+ * Prototypes
+ */
+int addr_matches	__P((char *));
+int command_matches	__P((char *, char *, char *, char *));
+int netgr_matches	__P((char *, char *, char *));
+int usergr_matches	__P((char *, char *));
+
 #endif /* _SUDO_PARSE_H */

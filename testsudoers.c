@@ -296,9 +296,8 @@ main(argc, argv)
     Argv = argv;
     Argc = argc;
 
-    user_runas = RUNAS_DEFAULT;
     if (Argc >= 6 && strcmp(Argv[1], "-u") == 0) {
-	user_runas = Argv[2];
+	user_runas = &Argv[2];
 	pw.pw_name = Argv[3];
 	user_host = Argv[4];
 	user_cmnd = Argv[5];
@@ -343,6 +342,9 @@ main(argc, argv)
 	}
     }
 
+    /* Initialize default values. */
+    init_defaults();
+
     /* Warn about aliases that are used before being defined. */
     pedantic = TRUE;
 
@@ -368,7 +370,7 @@ main(argc, argv)
 	    (void) printf("cmnd_match : %d\n", cmnd_matches);
 	    (void) printf("no_passwd  : %d\n", no_passwd);
 	    (void) printf("runas_match: %d\n", runas_matches);
-	    (void) printf("runas      : %s\n", user_runas);
+	    (void) printf("runas      : %s\n", *user_runas);
 	    top--;
 	}
     }

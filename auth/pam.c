@@ -143,7 +143,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		if (strcmp(p, "Password: ") && strcmp(p, "Password:"))
 		    p = (char *) pm->msg;
 		pr->resp = estrdup((char *) tgetpass(p,
-		    PASSWORD_TIMEOUT * 60, !echo));
+		    sudo_inttable[I_PW_TIMEOUT] * 60, !echo));
 		if (*pr->resp == '\0')
 		    nil_pw = 1;		/* empty password */
 		break;

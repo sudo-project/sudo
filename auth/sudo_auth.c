@@ -95,9 +95,10 @@ sudo_auth auth_switch[] = {
 int nil_pw;		/* I hate resorting to globals like this... */
 
 void
-verify_user()
+verify_user(prompt)
+    char *prompt;
 {
-    short counter = TRIES_FOR_PASSWORD + 1;
+    short counter = sudo_inttable[I_PW_TRIES] + 1;
     short success = AUTH_FAILURE;
     short status;
     char *p;
@@ -120,7 +121,7 @@ verify_user()
 	    if (NEEDS_USER(auth))
 		set_perms(PERM_USER, 0);
 
-	    status = (auth->init)(sudo_user.pw, &user_prompt, auth);
+	    status = (auth->init)(sudo_user.pw, &prompt, auth);
 	    if (status == AUTH_FAILURE)
 		auth->flags &= ~FLAG_CONFIGURED;
 	    else if (status == AUTH_FATAL)	/* XXX log */
@@ -138,7 +139,7 @@ verify_user()
 		if (NEEDS_USER(auth))
 		    set_perms(PERM_USER, 0);
 
-		status = (auth->setup)(sudo_user.pw, &user_prompt, auth);
+		status = (auth->setup)(sudo_user.pw, &prompt, auth);
 		if (status == AUTH_FAILURE)
 		    auth->flags &= ~FLAG_CONFIGURED;
 		else if (status == AUTH_FATAL)	/* XXX log */
@@ -152,9 +153,9 @@ verify_user()
 	/* Get the password unless the auth function will do it for us */
 	nil_pw = 0;
 #ifdef AUTH_STANDALONE
-	p = user_prompt;
+	p = prompt;
 #else
-	p = (char *) tgetpass(user_prompt, PASSWORD_TIMEOUT * 60, 1);
+	p = (char *) tgetpass(prompt, sudo_inttable[I_PW_TIMEOUT] * 60, 1);
 	if (!p || *p == '\0')
 	    nil_pw = 1;
 #endif /* AUTH_STANDALONE */
@@ -181,7 +182,7 @@ verify_user()
 
 	/* Exit loop on nil password, but give it a chance to match first. */
 	if (nil_pw) {
-	    if (counter == TRIES_FOR_PASSWORD)
+	    if (counter == sudo_inttable[I_PW_TRIES])
 		exit(1);
 	    else
 		break;
@@ -211,8 +212,8 @@ cleanup:
 	    return;
 	case AUTH_FAILURE:
 	    log_error(NO_MAIL, "%d incorrect password attempt%s",
-		TRIES_FOR_PASSWORD - counter,
-		(TRIES_FOR_PASSWORD - counter == 1) ? "" : "s");
+		sudo_inttable[I_PW_TRIES] - counter,
+		(sudo_inttable[I_PW_TRIES] - counter == 1) ? "" : "s");
 	case AUTH_FATAL:
 	    exit(1);
     }
@@ -226,6 +227,17 @@ pass_warn(fp)
 #ifdef USE_INSULTS
     (void) fprintf(fp, "%s\n", INSULT);
 #else
-    (void) fprintf(fp, "%s\n", INCORRECT_PASSWORD);
+    (void) fprintf(fp, "%s\n", sudo_strtable[I_BADPASS_MSG]);
 #endif /* USE_INSULTS */
+}
+
+void
+dump_auth_methods()
+{
+    sudo_auth *auth;
+
+    (void) fputs("Authentication methods:", stdout);
+    for (auth = auth_switch; auth->name; auth++)
+        (void) printf(" '%s'", auth->name);
+    (void) putchar('\n');
 }

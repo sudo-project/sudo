@@ -117,9 +117,9 @@ fwtk_verify(pw, prompt, auth)
     /* Get the password/response from the user. */
     if (strncmp(resp, "challenge ", 10) == 0) {
 	(void) snprintf(buf, sizeof(buf), "%s\nResponse: ", &resp[10]);
-	pass = tgetpass(buf, PASSWORD_TIMEOUT * 60, 0);
+	pass = tgetpass(buf, sudo_inttable[I_PW_TIMEOUT] * 60, 0);
     } else if (strncmp(resp, "password", 8) == 0) {
-	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60, 1);
+	pass = tgetpass(prompt, sudo_inttable[I_PW_TIMEOUT] * 60, 1);
     } else {
 	(void) fprintf(stderr, "%s: %s\n", Argv[0], resp);
 	return(AUTH_FATAL);

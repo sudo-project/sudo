@@ -93,7 +93,7 @@ extern void yyerror		__P((char *));
 OCTET			(1?[0-9]{1,2})|(2[0-4][0-9])|(25[0-5])
 DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
 HOSTNAME		[[:alnum:]_-]+
-USERNAME		[^:,\) \t\n]+
+WORD			[^@!=:,\(\) \t\n\\]+
 
 %e	4000
 %p	6000
@@ -101,22 +101,37 @@ USERNAME		[^:,\) \t\n]+
 
 %s	GOTCMND
 %s	GOTRUNAS
+%s	GOTDEFS
 
 %%
 [ \t]+			{			/* throw away space/tabs */
 			    sawspace = TRUE;	/* but remember for fill_args */
 			}
 
-\\[ \t]*\n		{ 
+\\[ \t]*\n		{
 			    sawspace = TRUE;	/* remember for fill_args */
 			    ++sudolineno;
 			    LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
 
-<GOTCMND>\\[:\,=\\ \t] {
+<GOTCMND>\\[@:\,=\\ \t]	{
 			    LEXTRACE("QUOTEDCHAR ");
 			    fill_args(yytext + 1, 1, sawspace);
 			    sawspace = FALSE;
+			}
+
+<GOTDEFS>\"[^\"]+\"	{
+			    /* XXX - should allow " to be quoted */
+			    LEXTRACE("WORD(1) ");
+			    fill(yytext + 1, yyleng - 2);
+			    return(WORD);
+			}
+
+<GOTDEFS>(#.*)?\n	{
+			    BEGIN INITIAL;
+			    ++sudolineno;
+			    LEXTRACE("\n");
+			    return(COMMENT);
 			}
 
 <GOTCMND>[:\,=\n]	{
@@ -125,8 +140,8 @@ USERNAME		[^:,\) \t\n]+
 			    return(COMMAND);
 			}			/* end of command line args */
 
-\n			{ 
-			    ++sudolineno; 
+\n			{
+			    ++sudolineno;
 			    LEXTRACE("\n");
 			    return(COMMENT);
 			}			/* return newline */
@@ -163,27 +178,29 @@ USERNAME		[^:,\) \t\n]+
 			    return(':');
 			}			/* return ':' */
 
-NOPASSWD[[:blank:]]*:	{ 
+NOPASSWD[[:blank:]]*:	{
 				/* cmnd does not require passwd for this user */
 			    	LEXTRACE("NOPASSWD ");
 			    	return(NOPASSWD);
 			}
 
-PASSWD[[:blank:]]*:	{ 
+PASSWD[[:blank:]]*:	{
 				/* cmnd requires passwd for this user */
 			    	LEXTRACE("PASSWD ");
 			    	return(PASSWD);
 			}
 
-\+{USERNAME}		{
+\+{WORD}		{
 			    /* netgroup */
 			    fill(yytext, yyleng);
+			    LEXTRACE("NETGROUP ");
 			    return(NETGROUP);
 			}
 
-\%{USERNAME}		{
+\%{WORD}		{
 			    /* UN*X group */
 			    fill(yytext, yyleng);
+			    LEXTRACE("GROUP ");
 			    return(USERGROUP);
 			}
 
@@ -223,15 +240,71 @@ PASSWD[[:blank:]]*:	{
 			    }
 			}
 
-<GOTRUNAS>#?{USERNAME}	{
+<GOTRUNAS>#?{WORD}	{
 			    /* username/uid that user can run command as */
 			    fill(yytext, yyleng);
-			    LEXTRACE("NAME ");
-			    return(NAME);
+			    LEXTRACE("WORD(2) ");
+			    return(WORD);
 			}
 
-<GOTRUNAS>\)		BEGIN INITIAL;
+<GOTRUNAS>\)		{
+			    BEGIN INITIAL;
+			}
 
+[[:upper:]][[:upper:][:digit:]_]*	{
+			    if (strcmp(yytext, "ALL") == 0) {
+				LEXTRACE("ALL ");
+				return(ALL);
+			    } else {
+				fill(yytext, yyleng);
+				LEXTRACE("ALIAS ");
+				return(ALIAS);
+			    }
+			}
+
+<GOTDEFS>[^ \t\n,=!]+	{
+			    /* XXX - should allow [!=,] to be quoted */
+			    LEXTRACE("WORD(3) ");
+			    fill(yytext, yyleng);
+			    return(WORD);
+			}
+
+<INITIAL>^Defaults[:@]?	{
+			    BEGIN GOTDEFS;
+			    if (yyleng == 9) {
+				switch (yytext[8]) {
+				    case ':' :
+					LEXTRACE("DEFAULTS_USER ");
+					return(DEFAULTS_USER);
+				    case '@' :
+					LEXTRACE("DEFAULTS_HOST ");
+					return(DEFAULTS_HOST);
+				}
+			    } else {
+				LEXTRACE("DEFAULTS ");
+				return(DEFAULTS);
+			    }
+			}
+
+<INITIAL>^(Host|Cmnd|User|Runas)_Alias	{
+			    fill(yytext, yyleng);
+			    if (*yytext == 'H') {
+				LEXTRACE("HOSTALIAS ");
+				return(HOSTALIAS);
+			    }
+			    if (*yytext == 'C') {
+				LEXTRACE("CMNDALIAS ");
+				return(CMNDALIAS);
+			    }
+			    if (*yytext == 'U') {
+				LEXTRACE("USERALIAS ");
+				return(USERALIAS);
+			    }
+			    if (*yytext == 'R') {
+				LEXTRACE("RUNASALIAS ");
+				return(RUNASALIAS);
+			    }
+			}
 
 \/[^\,:=\\ \t\n#]+	{
 			    /* directories can't have args... */
@@ -246,42 +319,15 @@ PASSWD[[:blank:]]*:	{
 			    }
 			}			/* a pathname */
 
-[[:upper:]][[:upper:][:digit:]_]*	{
-			    if (strcmp(yytext, "ALL") == 0) {
-				LEXTRACE("ALL ");
-				return(ALL);
-			    } else {
-				fill(yytext, yyleng);
-				LEXTRACE("ALIAS ");
-				return(ALIAS);
-			    }
-			}
-
-[[:alnum:]][[:alnum:]_-]*	{
+{WORD}			{
+			    /* a word */
 			    fill(yytext, yyleng);
-			    if (strcmp(yytext, "Host_Alias") == 0) {
-				LEXTRACE("HOSTALIAS ");
-				return(HOSTALIAS);
-			    }
-			    if (strcmp(yytext, "Cmnd_Alias") == 0) {
-				LEXTRACE("CMNDALIAS ");
-				return(CMNDALIAS);
-			    }
-			    if (strcmp(yytext, "User_Alias") == 0) {
-				LEXTRACE("USERALIAS ");
-				return(USERALIAS);
-			    }
-			    if (strcmp(yytext, "Runas_Alias") == 0) {
-				LEXTRACE("RUNASALIAS ");
-				return(RUNASALIAS);
-			    }
-
-			    /* NAME is what RFC1034 calls a label */
-			    LEXTRACE("NAME ");
-			    return(NAME);
+			    LEXTRACE("WORD(4) ");
+			    return(WORD);
 			}
 
 .			{
+			    LEXTRACE("ERROR ");
 			    return(ERROR);
 			}	/* parse error */
 

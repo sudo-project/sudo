@@ -932,24 +932,6 @@ AC_ARG_ENABLE(log-host,
   esac
 ], AC_MSG_RESULT(no))
 
-AC_MSG_CHECKING(whether to wrap long lines in the log file)
-AC_ARG_ENABLE(log-wrap,
-[  --disable-log-wrap      Do not wrap long lines in the log file],
-[ case "$enableval" in
-    yes)	AC_MSG_RESULT(yes)
-		AC_DEFINE(WRAP_LOG)
-		;;
-    no)		AC_MSG_RESULT(no)
-		;;
-    *)		AC_MSG_RESULT(yes)
-		AC_DEFINE(WRAP_LOG)
-		echo "Ignoring unknown argument to --enable-log-wrap: $enableval"
-		;;
-  esac
-], AC_MSG_RESULT(yes)
-  AC_DEFINE(WRAP_LOG)
-)
-
 AC_MSG_CHECKING(whether to invoke a shell if sudo is given no arguments)
 AC_ARG_ENABLE(noargs-shell,
 [  --enable-noargs-shell   If sudo is given no arguments run a shell],
@@ -1469,11 +1451,6 @@ dnl
 if test "$with_DCE" = "yes" -o "$ac_cv_prog_YACC" = "bison -y"; then
     AC_FUNC_ALLOCA
 fi
-
-dnl
-dnl Check to see if the facility and priority names live in syslog.h
-dnl
-SUDO_SYSLOG_NAMES
 
 dnl
 dnl Kerberos 5

@@ -72,7 +72,7 @@ static const char rcsid[] = "$Sudo$";
  * stores it in a statically allocated array, filling in a pointer
  * to the array.  Returns FOUND if the command was found, NOT_FOUND
  * if it was not found, or NOT_FOUND_DOT if it would have been found
- * but it is in '.' and IGNORE_DOT_PATH is in effect.
+ * but it is in '.' and FL_IGNORE_DOT is set.
  */
 int
 find_path(infile, outfile)
@@ -105,9 +105,12 @@ find_path(infile, outfile)
     }
 
     /*
-     * Grab PATH out of environment and make a local copy
+     * Grab PATH out of the environment (or from the string table
+     * if SECURE_PATH is in effect) and make a local copy.
      */
-    if ((path = getenv("PATH")) == NULL)
+    if (sudo_strtable[I_SECURE_PATH])
+	path = sudo_strtable[I_SECURE_PATH];
+    else if ((path = getenv("PATH")) == NULL)
 	return(NOT_FOUND);
     path = estrdup(path);
     origpath = path;
@@ -147,10 +150,8 @@ find_path(infile, outfile)
      */
     if (!result && checkdot) {
 	result = sudo_goodpath(infile);
-#ifdef IGNORE_DOT_PATH
-	if (result)
+	if (result && sudo_flag_set(FL_IGNORE_DOT))
 	    return(NOT_FOUND_DOT);
-#endif /* IGNORE_DOT_PATH */
     }
 
     if (result) {

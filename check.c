@@ -87,6 +87,7 @@ check_user()
 {
     char *timestampdir = NULL;
     char *timestampfile = NULL;
+    char *prompt;
     int status;
 
     if (user_uid == 0 || user_is_exempt())
@@ -99,9 +100,9 @@ check_user()
 	    lecture();		/* first time through they get a lecture */
 
 	/* Expand any escapes in the prompt. */
-	user_prompt = expand_prompt(user_prompt, user_name, user_shost);
+	prompt = expand_prompt(user_prompt ? user_prompt : sudo_strtable[I_PASSPROMPT], user_name, user_shost);
 
-	verify_user();
+	verify_user(prompt);
     }
     if (status != TS_ERROR)
 	update_timestamp(timestampdir, timestampfile);
@@ -112,20 +113,21 @@ check_user()
 
 /*
  * Standard sudo lecture.
- * TODO: allow the user to specify a file name instead at compile time.
+ * TODO: allow the user to specify a file name instead.
  */
 static void
 lecture()
 {
-#ifndef NO_LECTURE
-    (void) fputs("\n\
+
+    if (sudo_flag_set(FL_LECTURE)) {
+	(void) fputs("\n\
 We trust you have received the usual lecture from the local System\n\
 Administrator. It usually boils down to these two things:\n\
 \n\
 	#1) Respect the privacy of others.\n\
 	#2) Think before you type.\n\n",
 	stderr);
-#endif /* NO_LECTURE */
+    }
 }
 
 /*
@@ -188,7 +190,7 @@ expand_prompt(old_prompt, user, host)
 
     if (subst) {
 	new_prompt = (char *) emalloc(len + 1);
-	for (p = user_prompt, np = new_prompt; *p; p++) {
+	for (p = old_prompt, np = new_prompt; *p; p++) {
 	    if (lastchar == '%' && (*p == 'h' || *p == 'u' || *p == '%')) {
 		/* substiture user/host name */
 		if (*p == 'h') {
@@ -210,7 +212,7 @@ expand_prompt(old_prompt, user, host)
 	}
 	*np = '\0';
     } else
-	new_prompt = user_prompt;
+	new_prompt = old_prompt;
 
     return(new_prompt);
 }
@@ -221,11 +223,13 @@ expand_prompt(old_prompt, user, host)
 int
 user_is_exempt()
 {
-#ifdef EXEMPTGROUP
     struct group *grp;
     char **gr_mem;
 
-    if (!(grp = getgrnam(EXEMPTGROUP)))
+    if (!sudo_strtable[I_EXEMPT_GRP])
+	return(FALSE);
+
+    if (!(grp = getgrnam(sudo_strtable[I_EXEMPT_GRP])))
 	return(FALSE);
 
     if (getgid() == grp->gr_gid)
@@ -235,7 +239,6 @@ user_is_exempt()
 	if (strcmp(user_name, *gr_mem) == 0)
 	    return(TRUE);
     }
-#endif
 
     return(FALSE);
 }
@@ -248,26 +251,26 @@ build_timestamp(timestampdir, timestampfile)
     char **timestampdir;
     char **timestampfile;
 {
-#ifdef USE_TTY_TICKETS
-    char *p;
+    char *dirparent = sudo_strtable[I_TIMESTAMPDIR];
 
-    if ((p = strrchr(user_tty, '/')))
-	p++;
-    else
-	p = user_tty;
-    if (sizeof(_PATH_SUDO_TIMEDIR) + strlen(user_name) + strlen(p) + 2 >
-	MAXPATHLEN)
-	log_error(0, "timestamp path too long: %s/%s/%s", _PATH_SUDO_TIMEDIR,
-	    user_name, p);
-    easprintf(timestampdir, "%s/%s", _PATH_SUDO_TIMEDIR, user_name);
-    easprintf(timestampfile, "%s/%s/%s", _PATH_SUDO_TIMEDIR, user_name, p);
-#else
-    if (sizeof(_PATH_SUDO_TIMEDIR) + strlen(user_name) + 1 > MAXPATHLEN)
-	log_error(0, "timestamp path too long: %s/%s", _PATH_SUDO_TIMEDIR,
-	    user_name);
-    easprintf(timestampdir, "%s/%s", _PATH_SUDO_TIMEDIR, user_name);
-    *timestampfile = NULL;
-#endif /* USE_TTY_TICKETS */
+    if (sudo_flag_set(FL_TTY_TICKETS)) {
+	char *p;
+
+	if ((p = strrchr(user_tty, '/')))
+	    p++;
+	else
+	    p = user_tty;
+	if (strlen(dirparent) + strlen(user_name) + strlen(p) + 3 > MAXPATHLEN)
+	    log_error(0, "timestamp path too long: %s/%s/%s", dirparent,
+		user_name, p);
+	easprintf(timestampdir, "%s/%s", dirparent, user_name);
+	easprintf(timestampfile, "%s/%s/%s", dirparent, user_name, p);
+    } else {
+	if (strlen(dirparent) + strlen(user_name) + 2 > MAXPATHLEN)
+	    log_error(0, "timestamp path too long: %s/%s", dirparent, user_name);
+	easprintf(timestampdir, "%s/%s", dirparent, user_name);
+	*timestampfile = NULL;
+    }
 }
 
 /*
@@ -282,39 +285,40 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 {
     struct stat sb;
     time_t now;
+    char *dirparent = sudo_strtable[I_TIMESTAMPDIR];
     int status = TS_ERROR;		/* assume the worst */
 
     /*
-     * Sanity check _PATH_SUDO_TIMEDIR and make it if it doesn't already exist.
+     * Sanity check dirparent and make it if it doesn't already exist.
      * We start out assuming the worst (that the dir is not sane) and
      * if it is ok upgrade the status to ``no timestamp file''.
-     * Note that we don't check the parent(s) of _PATH_SUDO_TIMEDIR for
+     * Note that we don't check the parent(s) of dirparent for
      * sanity since the sudo dir is often just located in /tmp.
      */
-    if (lstat(_PATH_SUDO_TIMEDIR, &sb) == 0) {
+    if (lstat(dirparent, &sb) == 0) {
 	if (!S_ISDIR(sb.st_mode))
 	    log_error(NO_EXIT, "%s exists but is not a directory (0%o)",
-		_PATH_SUDO_TIMEDIR, sb.st_mode);
+		dirparent, sb.st_mode);
 	else if (sb.st_uid != 0)
 	    log_error(NO_EXIT, "%s owned by uid %ld, should be owned by root",
-		_PATH_SUDO_TIMEDIR, (long) sb.st_uid);
+		dirparent, (long) sb.st_uid);
 	else if ((sb.st_mode & 0000022))
 	    log_error(NO_EXIT,
 		"%s writable by non-owner (0%o), should be mode 0700",
-		_PATH_SUDO_TIMEDIR, sb.st_mode);
+		dirparent, sb.st_mode);
 	else {
 	    if ((sb.st_mode & 0000777) != 0700)
-		(void) chmod(_PATH_SUDO_TIMEDIR, 0700);
+		(void) chmod(dirparent, 0700);
 	    status = TS_MISSING;
 	}
     } else if (errno != ENOENT) {
-	log_error(NO_EXIT|USE_ERRNO, "can't stat %s", _PATH_SUDO_TIMEDIR);
+	log_error(NO_EXIT|USE_ERRNO, "can't stat %s", dirparent);
     } else {
-	/* No _PATH_SUDO_TIMEDIR, try to make one. */
+	/* No dirparent, try to make one. */
 	if (make_dirs) {
-	    if (mkdir(_PATH_SUDO_TIMEDIR, S_IRWXU))
+	    if (mkdir(dirparent, S_IRWXU))
 		log_error(NO_EXIT|USE_ERRNO, "can't mkdir %s",
-		    _PATH_SUDO_TIMEDIR);
+		    dirparent);
 	    else
 		status = TS_MISSING;
 	}
@@ -408,12 +412,13 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
      */
     if (status == TS_OLD) {
 	now = time(NULL);
-	if (TIMEOUT && now - sb.st_mtime < 60 * TIMEOUT) {
+	if (sudo_inttable[I_TS_TIMEOUT] && 
+	    now - sb.st_mtime < 60 * sudo_inttable[I_TS_TIMEOUT]) {
 	    /*
 	     * Check for bogus time on the stampfile.  The clock may
 	     * have been set back or someone could be trying to spoof us.
 	     */
-	    if (sb.st_mtime > now + 60 * TIMEOUT * 2) {
+	    if (sb.st_mtime > now + 60 * sudo_inttable[I_TS_TIMEOUT] * 2) {
 		log_error(NO_EXIT,
 		    "timestamp too far in the future: %20.20s",
 		    4 + ctime(&sb.st_mtime));

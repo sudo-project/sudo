@@ -90,11 +90,6 @@ int errorlineno = -1;
 int clearaliases = TRUE;
 int printmatches = FALSE;
 int pedantic = FALSE;
-#ifdef NO_AUTHENTICATION
-int pwdef = TRUE;
-#else
-int pwdef = -1;
-#endif
 
 /*
  * Alias types
@@ -120,7 +115,7 @@ int top = 0, stacksize = 0;
 	match[top].cmnd   = -1; \
 	match[top].host   = -1; \
 	match[top].runas  = -1; \
-	match[top].nopass = pwdef; \
+	match[top].nopass = sudo_flag_set(FL_AUTHENTICATE) ? -1 : TRUE; \
 	top++; \
     } while (0)
 
@@ -173,12 +168,13 @@ static size_t ga_list_len = 0, ga_list_size = 0;
 static struct generic_alias *ga_list = NULL;
 
 /*
- * Protoypes
+ * Does this Defaults list pertain to this user?
  */
-extern int  addr_matches	__P((char *));
-extern int  command_matches	__P((char *, char *, char *, char *));
-extern int  netgr_matches	__P((char *, char *, char *));
-extern int  usergr_matches	__P((char *, char *));
+static int defaults_matches = 0;
+
+/*
+ * Local protoypes
+ */
 static int  add_alias		__P((char *, int, int));
 static void append		__P((char *, char **, size_t *, size_t *, char *));
 static void expand_ga_list	__P((void));
@@ -221,7 +217,10 @@ yyerror(s)
 %token <string>  FQHOST			/* foo.bar.com */
 %token <string>  NETGROUP		/* a netgroup (+NAME) */
 %token <string>  USERGROUP		/* a usergroup (%NAME) */
-%token <string>  NAME			/* a mixed-case name */
+%token <string>  WORD			/* a word */
+%token <tok>	 DEFAULTS		/* Defaults entry */
+%token <tok>	 DEFAULTS_HOST		/* Host-specific defaults entry */
+%token <tok>	 DEFAULTS_USER		/* User-specific defaults entry */
 %token <tok> 	 RUNAS			/* ( runas_list ) */
 %token <tok> 	 NOPASSWD		/* no passwd req for command */
 %token <tok> 	 PASSWD			/* passwd req for command (default) */
@@ -267,8 +266,51 @@ entry		:	COMMENT
 			    { ; }
 		|	RUNASALIAS runasaliases
 			    { ; }
+		|	defaults_line
+			    { ; }
 		;
-		
+
+defaults_line	:	defaults_type defaults_list
+
+defaults_type	:	DEFAULTS {
+			    defaults_matches = TRUE;
+			}
+		|	DEFAULTS_USER { push; } userlist {
+			    defaults_matches = user_matches;
+			    pop;
+			}
+		|	DEFAULTS_HOST { push; } hostlist {
+			    defaults_matches = host_matches;
+			    pop;
+			}
+		;
+
+defaults_list	:	defaults_entry
+		|	defaults_entry ',' defaults_list
+
+defaults_entry	:	WORD {
+			    if (defaults_matches && !set_default($1, NULL, 1)) {
+				yyerror(NULL);
+				YYERROR;
+			    }
+			    free($1);
+			}
+		|	'!' WORD {
+			    if (defaults_matches && !set_default($2, NULL, 0)) {
+				yyerror(NULL);
+				YYERROR;
+			    }
+			    free($2);
+			}
+		|	WORD '=' WORD {
+			    /* XXX - need to support quoted values */
+			    if (defaults_matches && !set_default($1, $3, 1)) {
+				yyerror(NULL);
+				YYERROR;
+			    }
+			    free($1);
+			    free($3);
+			}
 
 privileges	:	privilege
 		|	privileges ':' privilege
@@ -282,7 +324,10 @@ privilege	:	hostlist '=' cmndspeclist {
 			     */
 			    host_matches = -1;
 			    runas_matches = -1;
-			    no_passwd = pwdef;
+			    if (sudo_flag_set(FL_AUTHENTICATE))
+				no_passwd = -1;
+			    else
+				no_passwd = TRUE;
 			}
 		;
 
@@ -312,7 +357,7 @@ host		:	ALL {
 				$$ = -1;
 			    free($1);
 			}
-		|	NAME {
+		|	WORD {
 			    if (strcasecmp(user_shost, $1) == 0)
 				$$ = TRUE;
 			    else
@@ -411,11 +456,11 @@ runasspec	:	/* empty */ {
 			    }
 			    /*
 			     * If this is the first entry in a command list
-			     * then check against RUNAS_DEFAULT.
+			     * then check against default runas user.
 			     */
 			    if (runas_matches == -1)
-				runas_matches =
-				    (strcmp(RUNAS_DEFAULT, user_runas) == 0);
+				runas_matches = (strcmp(*user_runas,
+				    sudo_strtable[I_RUNAS_DEF]) == 0);
 			}
 		|	RUNAS runaslist { ; }
 		;
@@ -441,7 +486,7 @@ oprunasuser	:	runasuser {
 				runas_matches = ! $3;
 			}
 
-runasuser	:	NAME {
+runasuser	:	WORD {
 			    if (printmatches == TRUE) {
 				if (in_alias == TRUE)
 				    append_entries($1, ", ");
@@ -449,7 +494,7 @@ runasuser	:	NAME {
 				    user_matches == TRUE)
 				    append_runas($1, ", ");
 			    }
-			    if (strcmp($1, user_runas) == 0)
+			    if (strcmp($1, *user_runas) == 0)
 				$$ = TRUE;
 			    else
 				$$ = -1;
@@ -463,7 +508,7 @@ runasuser	:	NAME {
 				    user_matches == TRUE)
 				    append_runas($1, ", ");
 			    }
-			    if (usergr_matches($1, user_runas))
+			    if (usergr_matches($1, *user_runas))
 				$$ = TRUE;
 			    else
 				$$ = -1;
@@ -477,7 +522,7 @@ runasuser	:	NAME {
 				    user_matches == TRUE)
 				    append_runas($1, ", ");
 			    }
-			    if (netgr_matches($1, NULL, user_runas))
+			    if (netgr_matches($1, NULL, *user_runas))
 				$$ = TRUE;
 			    else
 				$$ = -1;
@@ -496,7 +541,7 @@ runasuser	:	NAME {
 			    /* could be an all-caps username */
 			    if (aip)
 				$$ = aip->val;
-			    else if (strcmp($1, user_runas) == 0)
+			    else if (strcmp($1, *user_runas) == 0)
 				$$ = TRUE;
 			    else {
 				if (pedantic) {
@@ -705,7 +750,7 @@ useralias	:	ALIAS { push; }	'=' userlist {
 			}
 		;
 
-userlist	:	opuser { ; }
+userlist	:	opuser
 		|	userlist ',' opuser
 		;
 
@@ -718,7 +763,7 @@ opuser		:	user {
 				user_matches = ! $2;
 			}
 
-user		:	NAME {
+user		:	WORD {
 			    if (strcmp($1, user_name) == 0)
 				$$ = TRUE;
 			    else
@@ -951,13 +996,13 @@ list_matches()
 	    } while ((p = strtok(NULL, ", ")));
 	    (void) fputs(") ", stdout);
 	} else {
-	    (void) printf("(%s) ", RUNAS_DEFAULT);
+	    (void) printf("(%s) ", sudo_strtable[I_RUNAS_DEF]);
 	}
 
 	/* Is a password required? */
-	if (cm_list[i].nopasswd == TRUE && pwdef != TRUE)
+	if (cm_list[i].nopasswd == TRUE && sudo_flag_set(FL_AUTHENTICATE))
 	    (void) fputs("NOPASSWD: ", stdout);
-	else if (cm_list[i].nopasswd == FALSE && pwdef == TRUE)
+	else if (cm_list[i].nopasswd == FALSE && !sudo_flag_set(FL_AUTHENTICATE))
 	    (void) fputs("PASSWD: ", stdout);
 
 	/* Print the actual command or expanded Cmnd_Alias. */
