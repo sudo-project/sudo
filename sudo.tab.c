@@ -63,30 +63,37 @@ static char yyrcsid[]
  */
 
 #include "config.h"
-#include <stdio.h>
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#endif /* STDC_HEADERS */
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-#include <pwd.h>
+
 #include <sys/types.h>
 #include <sys/param.h>
+#include <stdio.h>
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif /* STDC_HEADERS */
 #ifdef HAVE_STRING_H
-#include <string.h>
+# include <string.h>
+#else
+# ifdef HAVE_STRINGS_H
+#  include <strings.h>
+# endif
 #endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#include <pwd.h>
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-#include <malloc.h>
+# include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #if defined(YYBISON) && defined(HAVE_ALLOCA_H) && !defined(__GNUC__)
-#include <alloca.h>
+# include <alloca.h>
 #endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
 #ifdef HAVE_LSEARCH
-#include <search.h>
+# include <search.h>
 #endif /* HAVE_LSEARCH */
 
 #include "sudo.h"
@@ -221,14 +228,14 @@ yyerror(s)
     }
     parse_error = TRUE;
 }
-#line 208 "parse.yacc"
+#line 215 "parse.yacc"
 typedef union {
     char *string;
     int BOOLEAN;
     struct sudo_command command;
     int tok;
 } YYSTYPE;
-#line 232 "sudo.tab.c"
+#line 239 "sudo.tab.c"
 #define COMMAND 257
 #define ALIAS 258
 #define DEFVAR 259
@@ -588,7 +595,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 841 "parse.yacc"
+#line 848 "parse.yacc"
 
 #define MOREALIASES (32)
 aliasinfo *aliases = NULL;
@@ -939,7 +946,7 @@ init_parser()
     if (printmatches == TRUE)
 	expand_match_list();
 }
-#line 934 "sudo.tab.c"
+#line 941 "sudo.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || __STDC__
 static int yygrowstack(void)
@@ -1133,74 +1140,74 @@ yyreduce:
     switch (yyn)
     {
 case 3:
-#line 258 "parse.yacc"
+#line 265 "parse.yacc"
 { ; }
 break;
 case 4:
-#line 260 "parse.yacc"
+#line 267 "parse.yacc"
 { yyerrok; }
 break;
 case 5:
-#line 261 "parse.yacc"
+#line 268 "parse.yacc"
 { push; }
 break;
 case 6:
-#line 261 "parse.yacc"
+#line 268 "parse.yacc"
 {
 			    while (top && user_matches != TRUE)
 				pop;
 			}
 break;
 case 7:
-#line 266 "parse.yacc"
+#line 273 "parse.yacc"
 { ; }
 break;
 case 8:
-#line 268 "parse.yacc"
+#line 275 "parse.yacc"
 { ; }
 break;
 case 9:
-#line 270 "parse.yacc"
+#line 277 "parse.yacc"
 { ; }
 break;
 case 10:
-#line 272 "parse.yacc"
+#line 279 "parse.yacc"
 { ; }
 break;
 case 11:
-#line 274 "parse.yacc"
+#line 281 "parse.yacc"
 { ; }
 break;
 case 13:
-#line 279 "parse.yacc"
+#line 286 "parse.yacc"
 {
 			    defaults_matches = TRUE;
 			}
 break;
 case 14:
-#line 282 "parse.yacc"
+#line 289 "parse.yacc"
 { push; }
 break;
 case 15:
-#line 282 "parse.yacc"
+#line 289 "parse.yacc"
 {
 			    defaults_matches = user_matches;
 			    pop;
 			}
 break;
 case 16:
-#line 286 "parse.yacc"
+#line 293 "parse.yacc"
 { push; }
 break;
 case 17:
-#line 286 "parse.yacc"
+#line 293 "parse.yacc"
 {
 			    defaults_matches = host_matches;
 			    pop;
 			}
 break;
 case 20:
-#line 295 "parse.yacc"
+#line 302 "parse.yacc"
 {
 			    if (defaults_matches == TRUE &&
 				!set_default(yyvsp[0].string, NULL, TRUE)) {
@@ -1211,7 +1218,7 @@ case 20:
 			}
 break;
 case 21:
-#line 303 "parse.yacc"
+#line 310 "parse.yacc"
 {
 			    if (defaults_matches == TRUE &&
 				!set_default(yyvsp[0].string, NULL, FALSE)) {
@@ -1222,7 +1229,7 @@ case 21:
 			}
 break;
 case 22:
-#line 311 "parse.yacc"
+#line 318 "parse.yacc"
 {
 			    /* XXX - need to support quoted values */
 			    if (defaults_matches == TRUE &&
@@ -1235,7 +1242,7 @@ case 22:
 			}
 break;
 case 23:
-#line 321 "parse.yacc"
+#line 328 "parse.yacc"
 {
 			    /* XXX - need to support quoted values */
 			    if (defaults_matches == TRUE &&
@@ -1248,7 +1255,7 @@ case 23:
 			}
 break;
 case 24:
-#line 331 "parse.yacc"
+#line 338 "parse.yacc"
 {
 			    /* XXX - need to support quoted values */
 			    if (defaults_matches == TRUE &&
@@ -1261,7 +1268,7 @@ case 24:
 			}
 break;
 case 27:
-#line 346 "parse.yacc"
+#line 353 "parse.yacc"
 {
 			    /*
 			     * We already did a push if necessary in
@@ -1277,27 +1284,27 @@ case 27:
 			}
 break;
 case 28:
-#line 361 "parse.yacc"
+#line 368 "parse.yacc"
 {
 			    if (yyvsp[0].BOOLEAN != -1)
 				host_matches = yyvsp[0].BOOLEAN;
 			}
 break;
 case 29:
-#line 365 "parse.yacc"
+#line 372 "parse.yacc"
 {
 			    if (yyvsp[0].BOOLEAN != -1)
 				host_matches = ! yyvsp[0].BOOLEAN;
 			}
 break;
 case 30:
-#line 370 "parse.yacc"
+#line 377 "parse.yacc"
 {
 			    yyval.BOOLEAN = TRUE;
 			}
 break;
 case 31:
-#line 373 "parse.yacc"
+#line 380 "parse.yacc"
 {
 			    if (addr_matches(yyvsp[0].string))
 				yyval.BOOLEAN = TRUE;
@@ -1307,7 +1314,7 @@ case 31:
 			}
 break;
 case 32:
-#line 380 "parse.yacc"
+#line 387 "parse.yacc"
 {
 			    if (netgr_matches(yyvsp[0].string, user_host, user_shost, NULL))
 				yyval.BOOLEAN = TRUE;
@@ -1317,7 +1324,7 @@ case 32:
 			}
 break;
 case 33:
-#line 387 "parse.yacc"
+#line 394 "parse.yacc"
 {
 			    if (hostname_matches(user_shost, user_host, yyvsp[0].string) == 0)
 				yyval.BOOLEAN = TRUE;
@@ -1327,7 +1334,7 @@ case 33:
 			}
 break;
 case 34:
-#line 394 "parse.yacc"
+#line 401 "parse.yacc"
 {
 			    aliasinfo *aip = find_alias(yyvsp[0].string, HOST_ALIAS);
 
@@ -1352,7 +1359,7 @@ case 34:
 			}
 break;
 case 37:
-#line 422 "parse.yacc"
+#line 429 "parse.yacc"
 {
 			    /*
 			     * Push the entry onto the stack if it is worth
@@ -1380,14 +1387,14 @@ case 37:
 			}
 break;
 case 38:
-#line 449 "parse.yacc"
+#line 456 "parse.yacc"
 {
 			    if (yyvsp[0].BOOLEAN != -1)
 				cmnd_matches = yyvsp[0].BOOLEAN;
 			}
 break;
 case 39:
-#line 453 "parse.yacc"
+#line 460 "parse.yacc"
 {
 			    if (printmatches == TRUE) {
 				if (in_alias == TRUE)
@@ -1399,14 +1406,14 @@ case 39:
 			}
 break;
 case 40:
-#line 461 "parse.yacc"
+#line 468 "parse.yacc"
 {
 			    if (yyvsp[0].BOOLEAN != -1)
 				cmnd_matches = ! yyvsp[0].BOOLEAN;
 			}
 break;
 case 41:
-#line 467 "parse.yacc"
+#line 474 "parse.yacc"
 {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
@@ -1432,17 +1439,17 @@ case 41:
 			}
 break;
 case 42:
-#line 490 "parse.yacc"
+#line 497 "parse.yacc"
 {
 			    runas_matches = (yyvsp[0].BOOLEAN == TRUE ? TRUE : FALSE);
 			}
 break;
 case 43:
-#line 495 "parse.yacc"
+#line 502 "parse.yacc"
 { ; }
 break;
 case 44:
-#line 496 "parse.yacc"
+#line 503 "parse.yacc"
 {
 			    /* Later entries override earlier ones. */
 			    if (yyvsp[0].BOOLEAN != -1)
@@ -1452,11 +1459,11 @@ case 44:
 			}
 break;
 case 45:
-#line 505 "parse.yacc"
+#line 512 "parse.yacc"
 { ; }
 break;
 case 46:
-#line 506 "parse.yacc"
+#line 513 "parse.yacc"
 {
 			    if (printmatches == TRUE) {
 				if (in_alias == TRUE)
@@ -1468,14 +1475,14 @@ case 46:
 			}
 break;
 case 47:
-#line 514 "parse.yacc"
+#line 521 "parse.yacc"
 {
 			    /* Set $$ to the negation of runasuser */
 			    yyval.BOOLEAN = (yyvsp[0].BOOLEAN == -1 ? -1 : ! yyvsp[0].BOOLEAN);
 			}
 break;
 case 48:
-#line 519 "parse.yacc"
+#line 526 "parse.yacc"
 {
 			    if (printmatches == TRUE) {
 				if (in_alias == TRUE)
@@ -1492,7 +1499,7 @@ case 48:
 			}
 break;
 case 49:
-#line 533 "parse.yacc"
+#line 540 "parse.yacc"
 {
 			    if (printmatches == TRUE) {
 				if (in_alias == TRUE)
@@ -1509,7 +1516,7 @@ case 49:
 			}
 break;
 case 50:
-#line 547 "parse.yacc"
+#line 554 "parse.yacc"
 {
 			    if (printmatches == TRUE) {
 				if (in_alias == TRUE)
@@ -1526,7 +1533,7 @@ case 50:
 			}
 break;
 case 51:
-#line 561 "parse.yacc"
+#line 568 "parse.yacc"
 {
 			    aliasinfo *aip = find_alias(yyvsp[0].string, RUNAS_ALIAS);
 
@@ -1558,7 +1565,7 @@ case 51:
 			}
 break;
 case 52:
-#line 590 "parse.yacc"
+#line 597 "parse.yacc"
 {
 			    if (printmatches == TRUE) {
 				if (in_alias == TRUE)
@@ -1571,7 +1578,7 @@ case 52:
 			}
 break;
 case 53:
-#line 602 "parse.yacc"
+#line 609 "parse.yacc"
 {
 			    /* Inherit NOPASSWD/PASSWD status. */
 			    if (printmatches == TRUE && host_matches == TRUE &&
@@ -1584,7 +1591,7 @@ case 53:
 			}
 break;
 case 54:
-#line 612 "parse.yacc"
+#line 619 "parse.yacc"
 {
 			    no_passwd = TRUE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
@@ -1593,7 +1600,7 @@ case 54:
 			}
 break;
 case 55:
-#line 618 "parse.yacc"
+#line 625 "parse.yacc"
 {
 			    no_passwd = FALSE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
@@ -1602,7 +1609,7 @@ case 55:
 			}
 break;
 case 56:
-#line 626 "parse.yacc"
+#line 633 "parse.yacc"
 {
 			    if (printmatches == TRUE) {
 				if (in_alias == TRUE)
@@ -1622,7 +1629,7 @@ case 56:
 			}
 break;
 case 57:
-#line 643 "parse.yacc"
+#line 650 "parse.yacc"
 {
 			    aliasinfo *aip;
 
@@ -1654,7 +1661,7 @@ case 57:
 			}
 break;
 case 58:
-#line 672 "parse.yacc"
+#line 679 "parse.yacc"
 {
 			    if (printmatches == TRUE) {
 				if (in_alias == TRUE) {
@@ -1683,11 +1690,11 @@ case 58:
 			}
 break;
 case 61:
-#line 704 "parse.yacc"
+#line 711 "parse.yacc"
 { push; }
 break;
 case 62:
-#line 704 "parse.yacc"
+#line 711 "parse.yacc"
 {
 			    if ((host_matches != -1 || pedantic) &&
 				!add_alias(yyvsp[-3].string, HOST_ALIAS, host_matches))
@@ -1696,7 +1703,7 @@ case 62:
 			}
 break;
 case 67:
-#line 720 "parse.yacc"
+#line 727 "parse.yacc"
 {
 			    push;
 			    if (printmatches == TRUE) {
@@ -1709,7 +1716,7 @@ case 67:
 			}
 break;
 case 68:
-#line 729 "parse.yacc"
+#line 736 "parse.yacc"
 {
 			    if ((cmnd_matches != -1 || pedantic) &&
 				!add_alias(yyvsp[-3].string, CMND_ALIAS, cmnd_matches))
@@ -1722,11 +1729,11 @@ case 68:
 			}
 break;
 case 69:
-#line 741 "parse.yacc"
+#line 748 "parse.yacc"
 { ; }
 break;
 case 73:
-#line 749 "parse.yacc"
+#line 756 "parse.yacc"
 {
 			    if (printmatches == TRUE) {
 				in_alias = TRUE;
@@ -1738,7 +1745,7 @@ case 73:
 			}
 break;
 case 74:
-#line 757 "parse.yacc"
+#line 764 "parse.yacc"
 {
 			    if ((yyvsp[0].BOOLEAN != -1 || pedantic) &&
 				!add_alias(yyvsp[-3].string, RUNAS_ALIAS, yyvsp[0].BOOLEAN))
@@ -1750,11 +1757,11 @@ case 74:
 			}
 break;
 case 77:
-#line 772 "parse.yacc"
+#line 779 "parse.yacc"
 { push; }
 break;
 case 78:
-#line 772 "parse.yacc"
+#line 779 "parse.yacc"
 {
 			    if ((user_matches != -1 || pedantic) &&
 				!add_alias(yyvsp[-3].string, USER_ALIAS, user_matches))
@@ -1764,21 +1771,21 @@ case 78:
 			}
 break;
 case 81:
-#line 785 "parse.yacc"
+#line 792 "parse.yacc"
 {
 			    if (yyvsp[0].BOOLEAN != -1)
 				user_matches = yyvsp[0].BOOLEAN;
 			}
 break;
 case 82:
-#line 789 "parse.yacc"
+#line 796 "parse.yacc"
 {
 			    if (yyvsp[0].BOOLEAN != -1)
 				user_matches = ! yyvsp[0].BOOLEAN;
 			}
 break;
 case 83:
-#line 794 "parse.yacc"
+#line 801 "parse.yacc"
 {
 			    if (strcmp(yyvsp[0].string, user_name) == 0)
 				yyval.BOOLEAN = TRUE;
@@ -1788,7 +1795,7 @@ case 83:
 			}
 break;
 case 84:
-#line 801 "parse.yacc"
+#line 808 "parse.yacc"
 {
 			    if (usergr_matches(yyvsp[0].string, user_name))
 				yyval.BOOLEAN = TRUE;
@@ -1798,7 +1805,7 @@ case 84:
 			}
 break;
 case 85:
-#line 808 "parse.yacc"
+#line 815 "parse.yacc"
 {
 			    if (netgr_matches(yyvsp[0].string, NULL, NULL, user_name))
 				yyval.BOOLEAN = TRUE;
@@ -1808,7 +1815,7 @@ case 85:
 			}
 break;
 case 86:
-#line 815 "parse.yacc"
+#line 822 "parse.yacc"
 {
 			    aliasinfo *aip = find_alias(yyvsp[0].string, USER_ALIAS);
 
@@ -1831,12 +1838,12 @@ case 86:
 			}
 break;
 case 87:
-#line 835 "parse.yacc"
+#line 842 "parse.yacc"
 {
 			    yyval.BOOLEAN = TRUE;
 			}
 break;
-#line 1831 "sudo.tab.c"
+#line 1838 "sudo.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
