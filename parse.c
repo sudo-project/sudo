@@ -79,7 +79,6 @@ int parse_error = FALSE;
  * this routine is called from the sudo.c module and tries to validate
  * the user, host and command triplet.
  */
-
 int validate()
 {
     FILE *sudoers_fp;
@@ -135,39 +134,7 @@ int validate()
     return(VALIDATE_NOT_OK);
 }
 
-/*
- * return TRUE if cmnd matches, in the sudo sense,
- * the pathname in path; otherwise, return FALSE
- */
-#ifdef USE_REALPATH
-int
-path_matches(cmnd, path)
-char *cmnd, *path;
-{
-	int clen, plen;
 
-	if (cmnd == NULL)
-		return(FALSE);
-
-	plen = strlen(path);
-	if (path[plen] != '/')
-	    return(strcmp(cmnd, path) == 0);
-
-	clen = strlen(cmnd);
-	if (clen < plen + 1)
-	    /* path cannot be the parent dir of cmnd */
-	    return(FALSE);
-
-	if (strchr(cmnd + plen + 1, '/') != NULL)
-	    /* path could only be an ancestor of cmnd -- */
-	    /* ignoring, of course, things like // & /./  */
-	    return(FALSE);
-
-	/* see whether path is the prefix of cmnd */
-	return(strncmp(cmnd, path, plen) == 0);
-}
-
-#else
 
 /*
  * If path doesn't end in /, return TRUE iff cmnd & path name the same inode;
@@ -215,7 +182,7 @@ char *cmnd, *path;
     return(dent != NULL);
 }
 
-#endif /* USE_REALPATH */
+
 
 int
 ntwk_matches(n)

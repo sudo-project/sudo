@@ -53,7 +53,6 @@
 #define INCORRECT_PASSWORD "Sorry, try again." /* message for bad passwd */
 #define MAILSUBJECT "*** SECURITY information ***" /* subject of mail sent */
 /*#define SECURE_PATH	"/bin:/usr/ucb:/usr/bin:/usr/etc:/etc" /* secure path */
-/*#define USE_REALPATH		/* use sudo_realpath() to expand paths */
 
 /**********  You probably don't want to modify anything below here  ***********/
 
