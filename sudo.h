@@ -343,6 +343,9 @@ char *strdup		__P((const char *));
 #ifndef HAVE_GETCWD
 char *getcwd		__P((char *, size_t));
 #endif
+#if !defined(HAVE_PUTENV) && !defined(HAVE_SETENV)
+int putenv		__P((const char *));
+#endif
 char *sudo_realpath	__P((const char *, char *));
 int sudo_setenv		__P((char *, char *));
 char *tgetpass		__P((char *, int));
@@ -372,7 +375,6 @@ extern int Argc;
 extern char **Argv;
 #endif
 extern int errno;
-extern char ** environ;
 
 
 /*
