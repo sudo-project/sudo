@@ -86,7 +86,7 @@ static void syslog_wrapper	__P((int, char *, char *, char *));
  */
 static char *logline;
 extern int errorlineno;
-
+extern char *runas_user;
 
 /*
  * length of syslog-like header info used for mail and file logs
@@ -242,23 +242,18 @@ void log_error(code)
 	    (void) sprintf(p, "gethostbyname() cannot find host %s ", host);
 	    break;
 
-	case SUDOERS_NO_OWNER:
-	    (void) sprintf(p, "no passwd entry for sudoers file owner (%s) ",
-		SUDOERS_OWNER);
-	    break;
-
 	case SUDOERS_NOT_FILE:
 	    (void) sprintf(p, "%s is not a regular file ", _PATH_SUDO_SUDOERS);
 	    break;
 
 	case SUDOERS_WRONG_OWNER:
-	    (void) sprintf(p, "%s is not owned by %s ", _PATH_SUDO_SUDOERS,
-		SUDOERS_OWNER);
+	    (void) sprintf(p, "%s is not owned by uid %d and gid %d ",
+		_PATH_SUDO_SUDOERS, SUDOERS_UID, SUDOERS_GID);
 	    break;
 
-	case SUDOERS_RW_OTHER:
-	    (void) sprintf(p, "%s is readable or writeable by other than %s ",
-		_PATH_SUDO_SUDOERS, SUDOERS_OWNER);
+	case SUDOERS_WRONG_MODE:
+	    (void) sprintf(p, "%s is not mode %o ", _PATH_SUDO_SUDOERS,
+		SUDOERS_MODE);
 	    break;
 
 	case SPOOF_ATTEMPT:
@@ -561,14 +556,17 @@ void inform_user(code)
 	    (void) fprintf(stderr,
 		"Sorry, user %s is not allowed to execute \"%s",
 		user_name, cmnd);
-
+	
 	    if (NewArgc > 1)
 		for (a = &NewArgv[1]; *a; a++) {
 		    fputc(' ', stderr);
 		    fputs(*a, stderr);
 		}
 
-	    (void) fprintf(stderr, "\" on %s.\n\n", host);
+	    if (runas_user != NULL)
+	    	(void) fprintf(stderr, "\" as %s on %s.\n\n", runas_user, host);
+	    else
+	    	(void) fprintf(stderr, "\" on %s.\n\n", host);
 	    break;
 
 	case VALIDATE_ERROR:
@@ -605,11 +603,6 @@ void inform_user(code)
 		TRIES_FOR_PASSWORD);
 	    break;
 
-	case SUDOERS_NO_OWNER:
-	    (void) fprintf(stderr,
-		"No passwd entry for sudoers file owner (%s)\n", SUDOERS_OWNER);
-	    break;
-
 	case NO_SUDOERS_FILE:
 	    switch (errno) {
 		case ENOENT:
@@ -630,14 +623,13 @@ void inform_user(code)
 	    break;
 
 	case SUDOERS_WRONG_OWNER:
-	    (void) fprintf(stderr, "%s is not owned by %s!\n",
-		_PATH_SUDO_SUDOERS, SUDOERS_OWNER);
+	    (void) fprintf(stderr, "%s is not owned by uid %d and gid %d!\n",
+		_PATH_SUDO_SUDOERS, SUDOERS_UID, SUDOERS_GID);
 	    break;
 
-	case SUDOERS_RW_OTHER:
-	    (void) fprintf(stderr,
-		"%s is readable or writeable by other than %s!\n",
-		_PATH_SUDO_SUDOERS, SUDOERS_OWNER);
+	case SUDOERS_WRONG_MODE:
+	    (void) fprintf(stderr, "%s must be mode %o!\n", _PATH_SUDO_SUDOERS,
+		SUDOERS_MODE);
 	    break;
 
 	case SPOOF_ATTEMPT:
@@ -682,6 +674,7 @@ static int appropriate(code)
      * these will NOT send mail
      */
     case VALIDATE_OK:
+    case VALIDATE_OK_NOPASS:
     case PASSWORD_NOT_CORRECT:
     case PASSWORDS_NOT_CORRECT:
 /*  case ALL_SYSTEMS_GO:               this is the same as OK */
