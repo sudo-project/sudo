@@ -11,6 +11,11 @@ you can emulate seteuid() with a macro like the following:
     #define seteuid(__EUID)	(setreuid((uid_t)-1, __EUID))
 This only affects the set_perms() function.
 
+If your OS is an SVR4 derivative (or some approximation thereof), it may
+be sufficient to tell configure you are runnng SVR4, something like:
+    configure foo-bar-sysv4
+where foo is the hardware architecture and bar is the vendor.
+
 Another possible pitfall is getdtablesize(2) which is used to get the maximum
 number of open files the process can have.  If an OS has the POSIX sysconf(2)
 it will be used instead of getdtablesize(2).  ulimit(2) or getrlimit(2) can
@@ -30,7 +35,9 @@ header file where "fd_set" is typedef'd, have tgetpass.c include
 it and send in a bug report.)
 Alternately, it may compile but not work (nothing happens at Password: prompt).
 It is possible that your C library contains a broken or unusable crypt()
-function--try linking with -lcrypt if that exists.  If all else fails
+function--try linking with -lcrypt if that exists.  Another possibility
+is that select() is not fully functional; setting PASSWORD_TIMEOUT to
+0 in options.h will disable the use of select().  If all else fails
 you can run configure with the --with-getpass flag to use the system getpass().
 You'll lose the timeout feature but gain a working sudo.
 NOTE: s/key support will not work with most OS's getpass(3) routine.
