@@ -19,33 +19,26 @@ STRIP=strip
 WHOAMI=whoami
 
 ##  Some systems don't support -x, so we have to use -f.
-if [ ${CHOWN} = chown ] ; then
-    if [ -f /sbin/chown ] ; then
-	CHOWN=/sbin/chown
-    elif [ -f /etc/chown ] ; then
-	CHOWN=/etc/chown
-    elif [ -f /usr/sbin/chown ] ; then
-	CHOWN=/usr/sbin/chown
-    elif [ -f /usr/etc/chown ] ; then
-	CHOWN=/usr/etc/chown
+for d in /sbin /etc /usr/sbin /usr/etc; do
+    if [ -f $d/chown ]; then
+	CHOWN=${d}/chown
+	break
     fi
-fi
+done
 
-if [ ${WHOAMI} = whoami ] ; then
-    if [ -f /usr/ucb/whoami ] ; then
-	WHOAMI=/usr/ucb/whoami
-    elif [ -f /usr/bin/whoami ] ; then
-	WHOAMI=/usr/bin/whoami
+for d in /usr/bin /usr/ucb /usr/bsd; do
+    if [ -f $d/whoami ]; then
+	WHOAMI=${d}/whoami
+	break
     fi
-fi
+done
 
-if [ ${STRIP} = strip ] ; then
-    if [ -f /usr/ccs/bin/strip ] ; then
-	STRIP=/usr/ccs/bin/strip
-    elif [ -f /usr/bin/strip ] ; then
-	STRIP=/usr/bin/strip
+for d in /usr/ccs/bin /usr/bin; do
+    if [ -f $d/strip ]; then
+	STRIP=${d}/strip
+	break
     fi
-fi
+done
 
 ##  Defaults.
 CHOWNIT=false
