@@ -215,6 +215,11 @@ which must be the only authentication mechanism used.
 OS dependent notes
 ==================
 
+OpenBSD and NetBSD:
+    The fdesc filesystem has a bug wrt /dev/tty handling that
+    causes sudo to hang at the password prompt.  The workaround
+    is to set PASSWORD_TIMEOUT (in options.h) to 0.
+
 Solaris 2.x:
     You need to have a C compiler in order to build sudo.
     Since Solaris 2.x does not come with one by default this
