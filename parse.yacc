@@ -374,7 +374,7 @@ ophost		:	host {
 			    SETMATCH(host_matches, $1);
 			}
 		|	'!' host {
-			    SETNMATCH(host_matches, $1);
+			    SETNMATCH(host_matches, $2);
 			}
 		;
 
@@ -469,7 +469,7 @@ opcmnd		:	cmnd {
 				    append_cmnd("!", NULL);
 			    }
 			} cmnd {
-			    SETNMATCH(cmnd_matches, $1);
+			    SETNMATCH(cmnd_matches, $3);
 			}
 		;
 
@@ -822,7 +822,7 @@ opuser		:	user {
 			    SETMATCH(user_matches, $1);
 			}
 		|	'!' user {
-			    SETNMATCH(user_matches, $1);
+			    SETNMATCH(user_matches, $2);
 			}
 		;
 
