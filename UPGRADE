@@ -34,6 +34,12 @@ o Upgrading from a version prior to 1.6:
 	millert ALL=(daemon) NOPASSWD:/usr/bin/whoami, \
 	    (root) PASSWD:/bin/ls, /sbin/dump
 
+    Additionally, sudo now uses a per-user timestamp directory
+    instead of a timestamp file.  This allows tty timestamps to
+    simply be files within the user's timestamp dir.  For the
+    default, non-tty case, the timestamp on the directory itself
+    is used.
+
 o Upgrading from a version prior to 1.5:
 
     By default, sudo expects the sudoers file to be mode 0440 and
