@@ -306,6 +306,25 @@ Here is an example:
   sudoCommand: !/bin/sh
   sudoCommand: ALL
 
+Another difference is that negations on the Host are User (or Runas) are
+currently ignorred.  For example, these attributes do not work how they first
+seem.  If you desperately want this to be changed, contact Aaron Spangler
+(aaron@spangler.ods.org).
+
+  # does not match all but joe
+  # rather, does not match anyone
+  sudoUser: !joe
+
+  # does not match all but joe
+  # rather, matches everyone including Joe
+  sudoUser: ALL
+  sudoUser: !joe
+
+  # does not match all but web01
+  # rather, matches all hosts including web01
+  sudoHost: ALL
+  sudoHost: !web01
+
 
 Configure your /etc/nsswitch.conf
 =================================
