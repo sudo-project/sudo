@@ -313,7 +313,8 @@ main(argc, argv)
 	usage(1);
 
     /* May need to set $HOME to target user. */
-    if ((sudo_mode & MODE_SHELL) && def_flag(I_SET_HOME))
+    if (def_flag(I_ALWAYS_SET_HOME) ||
+	((sudo_mode & MODE_SHELL) && def_flag(I_SET_HOME)))
 	sudo_mode |= MODE_RESET_HOME;
 
     /* Bail if a tty is required and we don't have one.  */

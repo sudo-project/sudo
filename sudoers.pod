@@ -315,6 +315,13 @@ environment variable will be set to the home directory of the target
 user (which is root unless the B<-u> option is used).  This effectively
 makes the B<-s> flag imply B<-H>.  This flag is I<off> by default.
 
+=item always_set_home
+
+If set, B<sudo> will set the C<HOME> environment variable to the home
+directory of the target user (which is root unless the B<-u> option is used).
+This effectively means that the B<-H> flag is always implied.
+This flag is I<off> by default.
+
 =item path_info
 
 Normally, B<sudo> will tell the user when a command could not be

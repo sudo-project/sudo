@@ -170,6 +170,9 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"set_home", T_FLAG,
 	"Set $HOME to the target user when starting a shell with -s"
     }, {
+	"always_set_home", T_FLAG,
+	"Always set $HOME to the target user's home directory"
+    }, {
 	"path_info", T_FLAG,
 	"Allow some information gathering to give useful error messages"
     }, {

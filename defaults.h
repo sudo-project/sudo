@@ -107,45 +107,46 @@ struct sudo_defs_types {
 #define I_LOG_YEAR		17
 #define I_SHELL_NOARGS		18
 #define I_SET_HOME		19
-#define I_PATH_INFO		20
-#define I_FQDN			21
-#define I_INSULTS		22
-#define I_REQUIRETTY		23
-#define I_ENV_EDITOR		24
-#define I_ROOTPW		25
-#define I_RUNASPW		26
-#define I_TARGETPW		27
-#define I_LOGINCLASS		28
-#define I_LOGNAME		29
+#define I_ALWAYS_SET_HOME	20
+#define I_PATH_INFO		21
+#define I_FQDN			22
+#define I_INSULTS		23
+#define I_REQUIRETTY		24
+#define I_ENV_EDITOR		25
+#define I_ROOTPW		26
+#define I_RUNASPW		27
+#define I_TARGETPW		28
+#define I_LOGINCLASS		29
+#define I_LOGNAME		30
 
 /* Integer values */
-#define	I_LOGLEN	30	/* wrap log file line after N chars */
-#define	I_TS_TIMEOUT	31	/* timestamp stale after N minutes */
-#define	I_PW_TIMEOUT	32	/* exit if pass not entered in N minutes */
-#define	I_PW_TRIES	33	/* exit after N bad password tries */
-#define	I_UMASK		34	/* umask to use or 0777 to use user's */
+#define	I_LOGLEN	31	/* wrap log file line after N chars */
+#define	I_TS_TIMEOUT	32	/* timestamp stale after N minutes */
+#define	I_PW_TIMEOUT	33	/* exit if pass not entered in N minutes */
+#define	I_PW_TRIES	34	/* exit after N bad password tries */
+#define	I_UMASK		35	/* umask to use or 0777 to use user's */
 
 /* Strings */
-#define	I_LOGFILE	35	/* path to logfile (or NULL for none) */
-#define	I_MAILERPATH	36	/* path to sendmail or other mailer */
-#define	I_MAILERFLAGS	37	/* flags to pass to the mailer */
-#define	I_MAILTO	38	/* who to send bitch mail to */
-#define	I_MAILSUB	39	/* subject line of mail msg */
-#define	I_BADPASS_MSG	40	/* what to say when passwd is wrong */
-#define	I_TIMESTAMPDIR	41	/* path to timestamp dir */
-#define	I_EXEMPT_GRP	42	/* no password or PATH override for these */
-#define	I_PASSPROMPT	43	/* password prompt */
-#define	I_RUNAS_DEF	44	/* default user to run commands as */
-#define	I_SECURE_PATH	45	/* set $PATH to this if not NULL */
-#define	I_EDITOR	46	/* path to editor used by visudo */
+#define	I_LOGFILE	36	/* path to logfile (or NULL for none) */
+#define	I_MAILERPATH	37	/* path to sendmail or other mailer */
+#define	I_MAILERFLAGS	38	/* flags to pass to the mailer */
+#define	I_MAILTO	39	/* who to send bitch mail to */
+#define	I_MAILSUB	40	/* subject line of mail msg */
+#define	I_BADPASS_MSG	41	/* what to say when passwd is wrong */
+#define	I_TIMESTAMPDIR	42	/* path to timestamp dir */
+#define	I_EXEMPT_GRP	43	/* no password or PATH override for these */
+#define	I_PASSPROMPT	44	/* password prompt */
+#define	I_RUNAS_DEF	45	/* default user to run commands as */
+#define	I_SECURE_PATH	46	/* set $PATH to this if not NULL */
+#define	I_EDITOR	47	/* path to editor used by visudo */
 
 /* Integer versions of list/verify options */
-#define I_LISTPW	47
-#define I_VERIFYPW	48
+#define I_LISTPW	48
+#define I_VERIFYPW	49
 
 /* String versions of list/verify options */
-#define I_LISTPWSTR	49
-#define I_VERIFYPWSTR	50
+#define I_LISTPWSTR	50
+#define I_VERIFYPWSTR	51
 
 /*
  * Macros for accessing sudo_defs_table.
