@@ -331,7 +331,7 @@ void be_root()
  *  this function sets the effective uid to the value of uid
  */
 
-#ifdef _AIX
+#ifdef _AIX */
 void be_user()
 {
     if (setuidx(ID_EFFECTIVE|ID_REAL, uid)) {
@@ -339,7 +339,16 @@ void be_user()
         exit(1); 
     }
 }
-#else /* _AIX */
+#else
+#ifdef HAS_SAVED_UID
+void be_user()
+{
+    if (setreuid(uid, uid)) {
+        perror("setreuid(uid)");
+        exit(1); 
+    }
+}
+#else
 void be_user()
 {
     if (seteuid(uid)) {
@@ -347,6 +356,7 @@ void be_user()
         exit(1); 
     }
 }
+#endif /* HAS_SAVED_UID */
 #endif /* _AIX */
 
 
