@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996,1998,1999,2004 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,6 +22,10 @@ struct	utimbuf {
 	time_t	modtime;	/* mod time */
 };
 
-int utime	__P((const char *, const struct utimbuf *));
+#ifdef __STDC__
+int utime(const char *, const struct utimbuf *);
+#else
+int utime();
+#endif
 
 #endif	/* _UTIME_H */
