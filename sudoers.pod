@@ -57,6 +57,14 @@ will be used.
             path ::= a fully qualified pathname.
        arg[1..n] ::= optional command line arguments.
 
+Note that arguments in double quotes (") are treated as
+a single argument, whis is similar to most shells.
+Ie, given C<sh -c "cd /src; ls">, the C<"cd /src; ls">
+is treated as a single argument, just as it would be
+in a shell.  If you don't want double quotes to be
+interpreted this way, you can escape them with a
+backslash (\).
+
 =head2 wildcards (aka meta characters):
 
 B<sudo> allows shell-style I<wildcards> along with command arguments
