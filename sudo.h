@@ -220,7 +220,7 @@ int putenv		__P((const char *));
 #endif
 char *sudo_goodpath	__P((const char *));
 int sudo_setenv		__P((char *, char *));
-char *tgetpass		__P((char *, int, char *, char *));
+char *tgetpass		__P((char *, int));
 char * find_path	__P((char *));
 void log_error		__P((int));
 void inform_user	__P((int));
