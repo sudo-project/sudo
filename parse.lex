@@ -47,7 +47,7 @@ extern YYSTYPE yylval;
 int sudolineno = 1;
 
 static int fill	__P((void));
-extern void parser_cleanup __P((void));
+extern void reset_aliases __P((void));
 
 #ifdef TRACELEXER
 #define LEXTRACE(msg)	fputs(msg, stderr)
@@ -146,6 +146,6 @@ int yywrap()
     YY_NEW_FILE;
 #endif /* YY_NEW_FILE */
 
-    parser_cleanup();
+    reset_aliases();
     return(1);
 }
