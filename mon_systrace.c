@@ -47,7 +47,7 @@
 #endif
 
 #include "sudo.h"
-#include "trace_systrace.h"
+#include "mon_systrace.h"
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
