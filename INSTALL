@@ -387,7 +387,7 @@ Special features/options:
 	on some SysV-based OS's using STREAMS.
 
   --without-passwd
-	This option authentication via the the passwd (or shadow) file.
+	This option authentication via the passwd (or shadow) file.
 	It should only be used when another, alternate, authentication
 	scheme is in use.
 
