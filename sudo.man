@@ -172,26 +172,25 @@ Have visudo do more extensive checking on the sudoers file.
 .fi
 
 .SH ENVIRONMENT VARIABLES
+The following are used only if
+.I visudo
+was compiled with the ENV_EDITOR option:
 .nf
-EDITOR                       Used by visudo to determine the editor to use.
+
+EDITOR                       Used by visudo as the editor to use.
 VISUAL                       Used by visudo if EDITOR is not set.
 .fi
 
 .SH AUTHORS
-.nf
-Jeff Nieusma                 <nieusma@rootgroup.com>
-David Hieb                   <davehieb@rootgroup.com>
-.fi
-
-.SH MAINTAINER
-The CU version of
+Many people have worked on
 .I sudo
-is being maintained internally by
+over the years, this version is done by:
 .nf
 
-Todd Miller                  <millert@cs.colorado.edu>
-
+Jeff Nieusma                 <nieusma@csn.org>
+David Hieb                   <davehieb@csn.org>
 .fi
+
 Please send all bugs, comments, and changes to sudo-bugs@cs.colorado.edu.
 
 .SH DISCLAIMER
