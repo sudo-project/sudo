@@ -88,10 +88,8 @@ print_version()
 #endif
 
 	(void) fputs("Authentication methods:", stdout);
-	for (auth = auth_switch; auth->name; auth++) {
-	    (void) putchar(' ');
-	    (void) fputs(auth->name, stdout);
-	}
+	for (auth = auth_switch; auth->name; auth++)
+	    (void) printf(" '%s'", auth->name);
 	(void) putchar('\n');
 
 	(void) fputs("Logging:\n", stdout);
