@@ -228,10 +228,10 @@ Special features/options:
 	security hole as most editors allow a user to get a shell (which would
 	be a root shell and hence, no logging).
 
-The following options are also configurable at runtime:
-
   --with-otp-only
 	This option is now just an alias for --without-passwd.
+
+The following options are also configurable at runtime:
 
   --with-long-otp-prompt
 	When validating with a One Time Password scheme (S/Key or OPIE), a
@@ -286,7 +286,7 @@ The following options are also configurable at runtime:
 	Default is "*** SECURITY information for %h ***".
 
   --without-mail-if-no-user
-	Normally, sudo will mail to the "alermail" user if the user invoking
+	Normally, sudo will mail to the "alertmail" user if the user invoking
 	sudo is not in the sudoers file.  This option disables that behavior.
 
   --with-mail-if-no-host
@@ -357,8 +357,8 @@ The following options are also configurable at runtime:
 	The default is 5, set this to 0 for no password timeout.
 
   --with-tty-tickets
-	This makes sudo use a different ticket file for each tty (per user).
-	Ie: instead of the ticket file being "username" it is "username:tty".
+	This makes sudo use a different ticket file for each user/tty combo.
+	Ie: instead of the ticket path being "username" it is "username/tty".
 	This is useful for "shared" accounts like "operator".  Note that this
 	means that there will be more files in the timestamp dir.  This is not
 	a problem if your system has a cron job to remove of files from /tmp
