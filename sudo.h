@@ -218,7 +218,7 @@ YYSTYPE yylval;
 #define EXTRA_LIST               0x03
 
 /* These are the functions that are called in sudo */
-#ifdef NEED_STRDUP
+#ifndef NEED_STRDUP
 char *strdup();
 #endif
 char *find_path();
@@ -226,7 +226,6 @@ void load_globals();
 void log_error();
 void inform_user();
 void check_user();
-void clean_envp();
 int validate();
 
 /* Most of these variables are declared in main() so they don't need
@@ -241,9 +240,8 @@ extern uid_t uid;
 extern char *host;
 extern char *user;
 extern char *cmnd;
-extern int  Argc;
 extern char **Argv;
-extern char **Envp;
+extern int  Argc;
 #endif
 extern int errno;
 
