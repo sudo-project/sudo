@@ -106,8 +106,9 @@ static void clean_env		__P((char **));
 int Argc;
 char **Argv;
 char *cmnd;
+char *user;
+char *epasswd;
 char host[MAXHOSTNAMELEN + 1];
-char user[9];
 char cwd[MAXPATHLEN + 1];
 uid_t uid = -2;
 int validate_only = 0;
@@ -211,6 +212,29 @@ static void load_globals()
 
     uid = getuid();		/* we need to tuck this away for safe keeping */
 
+#ifdef HAVE_TZSET
+    (void) tzset();		/* set the timezone if applicable */
+#endif /* HAVE_TZSET */
+
+    /*
+     * loading the user & epasswd global variable from the passwd file
+     * (must be done as root to get real passwd on some systems)
+     */
+    if ((pw_ent = getpwuid(uid)) == NULL) {
+	(void) sprintf(user, "%u", uid);
+	log_error(GLOBAL_NO_PW_ENT);
+	inform_user(GLOBAL_NO_PW_ENT);
+	exit(1);
+    }
+
+    user = strdup(pw_ent -> pw_name);
+    epasswd = strdup(pw_ent -> pw_passwd);
+    if (user == NULL || epasswd == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+
     /*
      * We only want to be root when we absolutely need it.
      * This will effectively do setreuid(0, uid) but for portability...
@@ -236,18 +260,6 @@ static void load_globals()
 	exit(1);
     }
 #endif
-
-    /*
-     * loading the user global variable from the passwd file
-     */
-    if ((pw_ent = getpwuid(uid)) == NULL) {
-	(void) sprintf(user, "%u", uid);
-	log_error(GLOBAL_NO_PW_ENT);
-	inform_user(GLOBAL_NO_PW_ENT);
-	exit(1);
-    }
-    strncpy(user, pw_ent -> pw_name, 8)[8] = '\0';
-
 
     /*
      * load the host global variable from gethostname()
@@ -327,7 +339,6 @@ static void usage()
 static void clean_env(envp)
     char **envp;
 {
-
     /*
      * omit all LD_* environmental vars
      */
@@ -413,6 +424,8 @@ void be_full_user()
         exit(1); 
     }
 }
+
+
 
 /**********************************************************************
  *
