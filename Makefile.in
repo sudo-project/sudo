@@ -95,13 +95,13 @@ SHELL = /bin/sh
 
 PROGS = @PROGS@
 
-SRCS = check.c getspwuid.c find_path.c logging.c parse.c sudo.c \
+SRCS = check.c getspwuid.c find_path.c logging.c parse.c sudo.c wildmat.c \
        goodpath.c sudo_setenv.c parse.yacc parse.lex visudo.c interfaces.c
 
 PARSEOBJS = y.tab.o lex.yy.o
 
-SUDOBJS = check.o getspwuid.o find_path.o logging.o parse.o sudo.o \
-          goodpath.o sudo_setenv.o interfaces.o @DCE_OBJS@ @TGETPASS@
+SUDOBJS = check.o getspwuid.o find_path.o logging.o parse.o sudo.o goodpath.o \
+          sudo_setenv.o interfaces.o wildmat.o @DCE_OBJS@ @TGETPASS@
 
 VISUDOBJS = visudo.o
 
@@ -120,7 +120,7 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
             indent.pro install-sh lsearch.c putenv.c tgetpass.c emul/search.h \
 	    emul/utime.h utime.c testsudoers.c sudoers sample.sudoers \
 	    sudo.cat sudo.man visudo.cat visudo.man sudoers.cat sudoers.man \
-	    lex.yy.c sudo-lex.yy.c dce_pwent.c wildmat.3  wildmat.c
+	    lex.yy.c sudo-lex.yy.c dce_pwent.c wildmat.3
 
 all: $(PROGS)
 
