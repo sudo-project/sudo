@@ -1204,3 +1204,6 @@ Sudo 1.6 released.
      runas specs, the latter ones may not be applied.
 
 379) #uid now works in a RunasAlias
+
+380) Don't ask the user for a password if the user is not allowed to run
+     the command and the authenticate flag (in sudoers) is false.

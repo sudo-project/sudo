@@ -142,7 +142,10 @@ sudoers_lookup(check_cmnd)
      * Assume the worst.  If the stack is empty the user was
      * not mentioned at all.
      */
-    error = VALIDATE_NOT_OK;
+    if (def_flag(I_AUTHENTICATE))
+	error = VALIDATE_NOT_OK;
+    else
+	error = VALIDATE_NOT_OK | FLAG_NOPASS;
     if (check_cmnd == TRUE) {
 	error |= FLAG_NO_HOST;
 	if (!top)
