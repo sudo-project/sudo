@@ -131,9 +131,9 @@ main(argc, argv, envp)
 	exit(1);
     }
     rtn = validate();
-    if (setruid(uid)) {
+    if (setreuid(uid, (uid_t)-1)) {
 #ifndef _AIX
-	perror("setruid(uid)");
+	perror("setreuid()");
 	exit(1);
 #endif
     }

@@ -290,18 +290,11 @@ extern char **Envp;
 extern int errno;
 
 /*
- * Emulate setruid() under linux
- */
-#ifdef linux
-#define setruid(__RUID) (setreuid((uid_t) (__RUID), (uid_t) -1))
-#endif /* linux */
-
-/*
  * This is to placate hpux
  */
 #ifdef hpux
-#define setruid(__RUID)  (setresuid((uid_t) (__RUID), (uid_t) -1, (uid_t) -1))
-#define getdtablesize()  (sysconf(_SC_OPEN_MAX))
+#define setreuid(__RUID, __EUID)	(setresuid(__RUID, __EUID, (uid_t) -1))
+#define getdtablesize()	(sysconf(_SC_OPEN_MAX))
 #ifndef USE_CWD
 #define USE_CWD
 #endif	/* USE_CWD */

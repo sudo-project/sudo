@@ -82,10 +82,10 @@ void check_user()
 	exit(1);
     }
     rtn = check_timestamp();
-    if (setruid(uid)) {		/* don't want to be root longer than
-				 * necessary */
+    /* don't want to be root longer than necessary */
+    if (setreuid(uid, (uid_t)-1)) {
 #ifndef _AIX
-	perror("setruid(uid)");
+	perror("setreuid()");
 	exit(1);
 #endif
     }
@@ -97,10 +97,10 @@ void check_user()
 	exit(1);
     }
     update_timestamp();
-    if (setruid(uid)) {		/* don't want to be root longer than
-				 * necessary */
+    /* don't want to be root longer than necessary */
+    if (setreuid(uid, (uid_t)-1)) {
 #ifndef _AIX
-	perror("setruid(uid)");
+	perror("setreuid()");
 	exit(1);
 #endif
     }
