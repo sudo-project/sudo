@@ -167,7 +167,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "January 18, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "January 21, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo \- execute a command as another user
 .SH "SYNOPSIS"
@@ -175,8 +175,12 @@ sudo \- execute a command as another user
 \&\fBsudo\fR \fB\-K\fR | \fB\-L\fR | \fB\-V\fR | \fB\-h\fR | \fB\-k\fR | \fB\-l\fR | \fB\-v\fR
 .PP
 \&\fBsudo\fR [\fB\-HPSb\fR] [\fB\-a\fR\ \fIauth_type\fR] [\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
-s<[\fB\-p\fR \fIprompt\fR]> [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
-{\fB\-i\fR\ |\ \fB\-s\fR\ |\ \fIcommand\fR}
+[\fB\-p\fR\ \fIprompt\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
+{\fB\-e\fR\ file\ [...]\ |\ \fB\-i\fR\ |\ \fB\-s\fR\ |\ \fIcommand\fR}
+.PP
+\&\fBsudoedit\fR [\fB\-S\fR] [\fB\-a\fR\ \fIauth_type\fR]
+[\fB\-p\fR\ \fIprompt\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
+file [...]
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 \&\fBsudo\fR allows a permitted user to execute a \fIcommand\fR as the
@@ -189,6 +193,9 @@ also initialized when the target user is not root).  By default,
 Once a user has been authenticated, a timestamp is updated and the
 user may then use sudo without a password for a short period of
 time (\f(CW\*(C`@timeout@\*(C'\fR minutes unless overridden in \fIsudoers\fR).
+.PP
+When invoked as \fBsudoedit\fR, the \fB\-e\fR option (described below),
+is implied.
 .PP
 \&\fBsudo\fR determines who is an authorized user by consulting the file
 \&\fI@sysconfdir@/sudoers\fR.  By giving \fBsudo\fR the \fB\-v\fR flag a user
@@ -204,6 +211,13 @@ Note that the mail will not be sent if an unauthorized user tries
 to run sudo with the \fB\-l\fR or \fB\-v\fR flags.  This allows users to
 determine for themselves whether or not they are allowed to use
 \&\fBsudo\fR.
+.PP
+If \fBsudo\fR is run by root and the \f(CW\*(C`SUDO_USER\*(C'\fR environment variable
+is set, \fBsudo\fR will use this value to determine who the actual
+user is.  This can be used by a user to log commands through sudo
+even when a root shell has been invoked.  It also allows the \fB\-e\fR
+flag to remain useful even when being run via a sudo-run script or
+program.
 .PP
 \&\fBsudo\fR can log both successful and unsuccessful attempts (as well
 as errors) to \fIsyslog\fR\|(3), a log file, or both.  By default \fBsudo\fR
@@ -269,6 +283,35 @@ argument specifies an existing user class, the command must be run
 as root, or the \fBsudo\fR command must be run from a shell that is already
 root.  This option is only available on systems with \s-1BSD\s0 login classes
 where \fBsudo\fR has been configured with the \-\-with\-logincap option.
+.IP "\-e" 4
+.IX Item "-e"
+The \fB\-e\fR (\fIedit\fR) option indicates that, instead of running
+a command, the user wishes to edit one or more files.  In lieu
+of a command, the string \fI\*(L"sudoedit\*(R"\fR is used when consulting
+the \fIsudoers\fR file.  If the user is authorized by \fIsudoers\fR
+the following steps are taken:
+.RS 4
+.IP "1." 8
+Temporary copies are made of the files to be edited, owned by the
+invoking user.
+.IP "2." 8
+The editor specified by the \f(CW\*(C`VISUAL\*(C'\fR or \f(CW\*(C`EDITOR\*(C'\fR environment
+variables is run to edit the temporary files.  If neither \f(CW\*(C`VISUAL\*(C'\fR
+nor \f(CW\*(C`EDITOR\*(C'\fR are set, the program listed in the \fIeditor\fR \fIsudoers\fR
+variable is used.
+.IP "3." 8
+If they have been modified, the temporary files are copied back to
+their original location and the temporary versions are removed.
+.RE
+.RS 4
+.Sp
+If the specified file does not exist, it will be created.  Note
+that unlike most commands run by \fBsudo\fR, the editor is run with
+the invoking user's environment unmodified.  If, for some reason,
+\&\fBsudo\fR is unable to update a file with its edited version, the
+user will receive a warning and the edited copy will remain in a
+temporary file.
+.RE
 .IP "\-h" 4
 .IX Item "-h"
 The \fB\-h\fR (\fIhelp\fR) option causes \fBsudo\fR to print a usage message and exit.
@@ -325,7 +368,7 @@ sudoers option is set)
 .ie n .IP "\*(C`%%\*(C'" 8
 .el .IP "\f(CW\*(C`%%\*(C'\fR" 8
 .IX Item "%%"
-two consecutive \f(CW\*(C`%\*(C'\fR characters are collaped into a single \f(CW\*(C`%\*(C'\fR character
+two consecutive \f(CW\*(C`%\*(C'\fR characters are collasped into a single \f(CW\*(C`%\*(C'\fR character
 .RE
 .RS 4
 .RE
@@ -467,23 +510,59 @@ to make the \f(CW\*(C`cd\*(C'\fR and file redirection work.
 .IX Header "ENVIRONMENT"
 \&\fBsudo\fR utilizes the following environment variables:
 .PP
-.Vb 13
-\& PATH                   Set to a sane value if SECURE_PATH is set
-\& SHELL                  Used to determine shell to run with -s option
-\& USER                   Set to the target user (root unless the -u option
-\&                        is specified)
+.Vb 2
+\& EDITOR                 Default editor to use in -e (sudoedit) mode if
+\&                        VISUAL is not set
+.Ve
+.PP
+.Vb 3
 \& HOME                   In -s or -H mode (or if sudo was configured with
 \&                        the --enable-shell-sets-home option), set to
-\&                        homedir of the target user.
+\&                        homedir of the target user
+.Ve
+.PP
+.Vb 1
+\& PATH                   Set to a sane value if SECURE_PATH is set
+.Ve
+.PP
+.Vb 1
+\& SHELL                  Used to determine shell to run with -s option
+.Ve
+.PP
+.Vb 1
 \& SUDO_PROMPT            Used as the default password prompt
+.Ve
+.PP
+.Vb 1
 \& SUDO_COMMAND           Set to the command run by sudo
+.Ve
+.PP
+.Vb 1
 \& SUDO_USER              Set to the login of the user who invoked sudo
+.Ve
+.PP
+.Vb 1
 \& SUDO_UID               Set to the uid of the user who invoked sudo
+.Ve
+.PP
+.Vb 1
 \& SUDO_GID               Set to the gid of the user who invoked sudo
+.Ve
+.PP
+.Vb 1
 \& SUDO_PS1               If set, PS1 will be set to its value
 .Ve
-.SH "FILES"
-.IX Header "FILES"
+.PP
+.Vb 2
+\& USER                   Set to the target user (root unless the -u option
+\&                        is specified)
+.Ve
+.PP
+.Vb 2
+\& VISUAL                 Default editor to use in -e (sudoedit) mode
+\&=head1 FILES
+.Ve
+.PP
 .Vb 2
 \& @sysconfdir@/sudoers           List of who can run what
 \& @timedir@              Directory containing timestamps

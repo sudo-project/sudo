@@ -167,7 +167,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "January 18, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "January 21, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -333,9 +333,10 @@ to be useful.
 \&                 filename '""'
 .Ve
 .PP
-.Vb 3
+.Vb 4
 \& Cmnd ::= '!'* commandname |
 \&          '!'* directory |
+\&          '!'* "sudoedit" |
 \&          '!'* Cmnd_Alias
 .Ve
 .PP
@@ -354,7 +355,10 @@ If a \f(CW\*(C`Cmnd\*(C'\fR has associated command line arguments, then the argu
 in the \f(CW\*(C`Cmnd\*(C'\fR must match exactly those given by the user on the command line
 (or match the wildcards if there are any).  Note that the following
 characters must be escaped with a '\e' if they are used in command
-arguments: ',', ':', '=', '\e'.
+arguments: ',', ':', '=', '\e'.  The special command \f(CW"sudoedit"\fR
+is used to permit a user to run \fBsudo\fR with the \fB\-e\fR flag (or
+as \fBsudoedit\fR).  It may take command line arguments just as
+a normal command does.
 .Sh "Defaults"
 .IX Subsection "Defaults"
 Certain configuration options may be changed from their default

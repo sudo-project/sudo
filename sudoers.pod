@@ -180,6 +180,7 @@ to be useful.
 
  Cmnd ::= '!'* commandname |
 	  '!'* directory |
+	  '!'* "sudoedit" |
 	  '!'* Cmnd_Alias
 
 A C<Cmnd_List> is a list of one or more commandnames, directories, and other
@@ -197,7 +198,10 @@ If a C<Cmnd> has associated command line arguments, then the arguments
 in the C<Cmnd> must match exactly those given by the user on the command line
 (or match the wildcards if there are any).  Note that the following
 characters must be escaped with a '\' if they are used in command
-arguments: ',', ':', '=', '\'.
+arguments: ',', ':', '=', '\'.  The special command C<"sudoedit">
+is used to permit a user to run B<sudo> with the B<-e> flag (or
+as B<sudoedit>).  It may take command line arguments just as
+a normal command does.
 
 =head2 Defaults
 
