@@ -118,7 +118,7 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
             indent.pro install-sh lsearch.c putenv.c tgetpass.c emul/search.h \
 	    emul/utime.h utime.c testsudoers.c sudoers sample.sudoers \
 	    sudo.cat sudo.man visudo.cat visudo.man sudoers.cat sudoers.man \
-	    lex.yy.c sudo-lex.yy.c
+	    lex.yy.c sudo-lex.yy.c dce_pwent.c
 
 all: $(PROGS)
 
