@@ -272,6 +272,9 @@
 /* Define if you have vasprintf(3).  */
 #undef HAVE_VASPRINTF
 
+/* Define if you have getifaddrs(3).  */
+#undef HAVE_GETIFADDRS
+
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
 

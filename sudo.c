@@ -234,6 +234,9 @@ main(argc, argv)
     /* Setup defaults data structures. */
     init_defaults();
 
+    /* Load the list of local ip addresses and netmasks.  */
+    load_interfaces();
+
     sudoers_flags = 0;
     if (sudo_mode & MODE_SHELL)
 	user_cmnd = "shell";
@@ -245,6 +248,7 @@ main(argc, argv)
 		    putchar('\n');
 		    dump_auth_methods();
 		    dump_defaults();
+		    dump_interfaces();
 		}
 		exit(0);
 		break;
@@ -520,12 +524,6 @@ init_vars(sudo_mode)
 	}
     } else
 	set_perms(PERM_ROOT, sudo_mode);
-
-    /*
-     * Load the list of local ip addresses and netmasks into
-     * the interfaces array.
-     */
-    load_interfaces();
 
     /*
      * If we were given the '-s' option (run shell) we need to redo

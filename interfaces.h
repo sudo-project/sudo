@@ -49,6 +49,7 @@ struct interface {
  * Prototypes for external functions.
  */
 void load_interfaces	__P((void));
+void dump_interfaces	__P((void));
 
 /*
  * Definitions for external variables.

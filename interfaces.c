@@ -82,6 +82,9 @@ struct rtentry;
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/if.h>
+#ifdef HAVE_GETIFADDRS
+#include <ifaddrs.h>
+#endif
 
 #include "sudo.h"
 #include "interfaces.h"
@@ -91,7 +94,65 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 
-#if defined(SIOCGIFCONF) && !defined(STUB_LOAD_INTERFACES)
+#ifdef HAVE_GETIFADDRS
+
+/*
+ * Allocate and fill in the interfaces global variable with the
+ * machine's ip addresses and netmasks.
+ */
+void
+load_interfaces()
+{
+    struct ifaddrs *ifa, *ifaddrs;
+    /* XXX - sockaddr_in6 sin6; */
+    struct sockaddr_in *sin;
+    int i;
+
+    if (getifaddrs(&ifaddrs))
+	return;
+
+    /* Allocate space for the interfaces list. */
+    for (ifa = ifaddrs; ifa -> ifa_next; ifa = ifa -> ifa_next) {
+	/* Skip interfaces marked "down" and "loopback". */
+	if (ifa->ifa_addr == NULL || !(ifa->ifa_flags & IFF_UP) ||
+	    (ifa->ifa_flags & IFF_LOOPBACK))
+	    continue;
+
+	switch(ifa->ifa_addr->sa_family) {
+	    /* XXX - AF_INET6 */
+	    case AF_INET:
+		num_interfaces++;
+		break;
+	}
+    }
+    interfaces =
+	(struct interface *) emalloc(sizeof(struct interface) * num_interfaces);
+
+    /* Store the ip addr / netmask pairs. */
+    for (ifa = ifaddrs, i = 0; ifa -> ifa_next; ifa = ifa -> ifa_next) {
+	/* Skip interfaces marked "down" and "loopback". */
+	if (ifa->ifa_addr == NULL || !(ifa->ifa_flags & IFF_UP) ||
+	    (ifa->ifa_flags & IFF_LOOPBACK))
+		continue;
+
+	switch(ifa->ifa_addr->sa_family) {
+	    /* XXX - AF_INET6 */
+	    case AF_INET:
+		sin = (struct sockaddr_in *)ifa->ifa_addr;
+		memcpy(&interfaces[i].addr, &sin->sin_addr,
+		    sizeof(struct in_addr));
+		sin = (struct sockaddr_in *)ifa->ifa_netmask;
+		memcpy(&interfaces[i].netmask, &sin->sin_addr,
+		    sizeof(struct in_addr));
+		i++;
+		break;
+	}
+    }
+    freeifaddrs(ifaddrs);
+}
+
+#elif defined(SIOCGIFCONF) && !defined(STUB_LOAD_INTERFACES)
+
 /*
  * Allocate and fill in the interfaces global variable with the
  * machine's ip addresses and netmasks.
@@ -238,3 +299,14 @@ load_interfaces()
 }
 
 #endif /* SIOCGIFCONF && !STUB_LOAD_INTERFACES */
+
+void
+dump_interfaces()
+{
+    int i;
+
+    puts("Local IP address and netmask pairs:");
+    for (i = 0; i < num_interfaces; i++)
+	printf("\t%s / 0x%x\n", inet_ntoa(interfaces[i].addr),
+	    ntohl(interfaces[i].netmask.s_addr));
+}
