@@ -229,11 +229,9 @@ hostspec	:	ALL {
 			}
 		;
 
-opcmndlist	:	{
-			    cmnd_matches = no_passwd = runas_matches = -1;
-			} opcmnd
+opcmndlist	:	{ no_passwd = runas_matches = -1; } opcmnd
 		|	opcmndlist ',' {
-			    cmnd_matches = no_passwd = runas_matches = -1;
+			    no_passwd = runas_matches = -1;
 			} opcmnd
 		;
 
