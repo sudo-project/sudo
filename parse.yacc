@@ -1231,6 +1231,7 @@ init_parser()
 	match = NULL;
 	top = 0;
 	parse_error = FALSE;
+	used_runas = FALSE;
 	errorlineno = -1;
 	sudolineno = 1;
     }
