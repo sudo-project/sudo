@@ -48,6 +48,7 @@ struct interface {
  * apply when parsing is done & can be
  * accessed by *_matches macros
  */
+#define MATCHSTACKSIZE (40)
 struct matchstack {
 	int user;
 	int cmnd;
@@ -74,6 +75,19 @@ extern int top;
 #define host_matches	(match[top-1].host)
 #define runas_matches	(match[top-1].runas)
 #define no_passwd	(match[top-1].nopass)
+
+/*
+ * Structure containing matches if "sudo -l" is used.
+ */
+struct sudo_match {
+    char *runas;
+    size_t runas_len;
+    size_t runas_size;
+    char *cmnd;
+    size_t cmnd_len;
+    size_t cmnd_size;
+    int nopasswd;
+};
 
 /*
  * Maximum number of characters to log per entry.  The syslogger
