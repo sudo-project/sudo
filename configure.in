@@ -48,51 +48,98 @@ dnl
 dnl Options for --with
 dnl
 
-dnl --with-getpass
-AC_ARG_WITH(getpass, [  --with-getpass          use system getpass(3)], AC_DEFINE(USE_GETPASS)
-echo 'Using system getpass'
-TGETPASS="")
+AC_ARG_WITH(getpass, [  --with-getpass          use system getpass(3)],
+[case $with_getpass in
+    yes)	AC_DEFINE(USE_GETPASS)
+		echo 'Using system getpass'
+		TGETPASS=""
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-getpass: $with_getpass"
+		;;
+esac])
 
-dnl --with-C2
-AC_ARG_WITH(C2, [  --with-C2               enable C2 security (shadow password) support], AC_DEFINE(HAVE_C2_SECURITY)
-C2=1
-echo 'Configuring for C2 security')
+AC_ARG_WITH(C2, [  --with-C2               enable C2 security (shadow password) support],
+[case $with_C2 in
+    yes)	AC_DEFINE(HAVE_C2_SECURITY)
+		echo 'Configuring for C2 security (shadow passwords)'
+		TGETPASS=""
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-C2: $with_C2"
+		;;
+esac])
 
-dnl --with-skey
-AC_ARG_WITH(skey, [  --with-skey             enable S/Key support ], AC_DEFINE(HAVE_SKEY)
-SKEY=1
-echo 'Configuring for use with S/Key')
+AC_ARG_WITH(skey, [  --with-skey             enable S/Key support ],
+[case $with_skey in
+    yes)	AC_DEFINE(HAVE_SKEY)
+		echo 'Configuring for use with S/Key'
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-skey: $with_skey"
+		;;
+esac])
 
-dnl --with-SecurID
-AC_ARG_WITH(SecurID, [  --with-SecurID          enable SecurID support], AC_DEFINE(HAVE_SECURID)
-SECURID=1
-echo 'Configuring for use with SecurID')
+AC_ARG_WITH(SecurID, [  --with-SecurID          enable SecurID support],
+[case $with_SecurID in
+    yes)	AC_DEFINE(HAVE_SECURID)
+		echo 'Configuring for use with SecurID'
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-SecurID: $with_SecurID"
+		;;
+esac])
 
-dnl --with-kerb4
-AC_ARG_WITH(kerb4, [  --with-kerb4            enable kerberos v4 support], AC_DEFINE(HAVE_KERB4)
-KERB4=1
-echo 'Configuring for use with Kerberos version 4')
+AC_ARG_WITH(kerb4, [  --with-kerb4            enable kerberos v4 support],
+[case $with_kerb4 in
+    yes)	AC_DEFINE(HAVE_KERB4)
+		echo 'Configuring for use with Kerberos version 4'
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-kerb4: $with_kerb4"
+		;;
+esac])
 
-dnl --with-kerb5
-AC_ARG_WITH(kerb5, [  --with-kerb5            enable kerberos v5 support], AC_DEFINE(HAVE_KERB5)
-KERB4=1
-echo 'Configuring for use with Kerberos version 5')
+AC_ARG_WITH(kerb5, [  --with-kerb5            enable kerberos v5 support],
+[case $with_kerb5 in
+    yes)	AC_DEFINE(HAVE_KERB5)
+		echo 'Configuring for use with Kerberos version 5'
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-kerb5: $with_kerb5"
+		;;
+esac])
 
-dnl --with-AFS
-AC_ARG_WITH(AFS, [  --with-AFS              enable AFS support], AC_DEFINE(HAVE_AFS)
-AFS=1
-echo 'Configuring for use with AFS')
+AC_ARG_WITH(AFS, [  --with-AFS            enable AFS support],
+[case $with_AFS in
+    yes)	AC_DEFINE(HAVE_AFS)
+		echo 'Configuring for use with AFS'
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-AFS: $with_AFS"
+		;;
+esac])
 
-dnl --with-DCE
-AC_ARG_WITH(DCE, [  --with-DCE              enable DCE support], AC_DEFINE(HAVE_DCE)
-DCE=1
-echo 'Configuring for use with DCE')
+AC_ARG_WITH(DCE, [  --with-DCE            enable DCE support],
+[case $with_DCE in
+    yes)	AC_DEFINE(HAVE_DCE)
+		echo 'Configuring for use with DCE'
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-DCE: $with_DCE"
+		;;
+esac])
 
-dnl --with-csops
-AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options], OPTIONS="${OPTIONS} -DIGNORE_DOT_PATH -DUSE_INSULTS -DCLASSIC_INSULTS -DCSOPS_INSULTS -DENV_EDITOR"
-sbindir='$(exec_prefix)/sbin'
-CSOPS=1
-echo 'CSOps--adding options: IGNORE_DOT_PATH USE_INSULTS CLASSIC_INSULTS CSOPS_INSULTS ENV_EDITOR')
+AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
+[case $with_csops in  
+    yes)	OPTIONS="${OPTIONS} -DIGNORE_DOT_PATH -DUSE_INSULTS -DCLASSIC_INSULTS -DCSOPS_INSULTS -DENV_EDITOR"
+		sbindir='$(exec_prefix)/sbin'
+		echo 'CSOps--adding options: IGNORE_DOT_PATH USE_INSULTS CLASSIC_INSULTS CSOPS_INSULTS ENV_EDITOR'
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-csops: $with_csops"
+		;;
+esac])
 
 dnl
 dnl If we don't have egrep we can't do anything...
@@ -106,6 +153,7 @@ fi
 dnl
 dnl C compiler checks
 dnl
+cross_compiling="no"
 AC_PROG_CC
 AC_PROG_CPP
 AC_ISC_POSIX
@@ -125,11 +173,11 @@ dnl
 dnl Is this OS using shadow passwords?
 dnl (Cannot auto-check for C2 if using non-passwd based authentication)
 dnl
-if test -z "$C2" -a -z "$SKEY" -a -z "$SECURID" -a -z "$AFS" -a -z "$DCE" -a -z "$KERB4" -a -z "$KERB5"; then
+if test -z "$with_C2" -a "$with_skey" != "yes" -a "$with_SecurID" != "yes" -a "$with_AFS" != "yes" -a "$with_DCE" != "yes" -a "$with_kerb4" != "yes" -a "$with_kerb5" != "yes"; then
     SUDO_CHECK_SHADOW(AC_DEFINE(HAVE_C2_SECURITY)
-    C2=1)
-elif test -z "$C2"; then
-    echo "Unable to check for shadow passwords. If you have them you should use --with-C2"
+    with_C2="yes")
+elif test -z "$with_C2"; then
+    echo "Unable to check for shadow passwords. If you have them you should use --with-C2 (unless they are on by default for your OS, see INSTALL)."
 fi
 
 dnl
@@ -140,21 +188,20 @@ OS=`echo $OS | $TRPROG '[[A-Z]]' '[[a-z]]'`
 case "$OS" in
     "sunos")	echo "Looks like SunOS 4.x"
 		LIB_NSL=1
-		if test -n "$C2"; then
+		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SUNOS4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     "solaris")	echo "Looks like Solaris"
-		C2=1
-		SHADOW_TYPE="SPW_SVR4"
-		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		if test "$with_C2" != "no"; then
+		    with_C2="yes"
+		    SHADOW_TYPE="SPW_SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		fi
 		;;
     "aix")	echo "Looks like AIX"
 		AC_DEFINE(_ALL_SOURCE)
-		if test -n "$C2"; then
-		    SHADOW_TYPE="SPW_AIX"
-		fi
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 		;;
     "hp-ux")	echo "Looks like HP-UX $OSREV"
@@ -182,7 +229,7 @@ case "$OS" in
 		    fi
 
 		    # DCE support
-		    if test -n "$DCE" ; then
+		    if test "$with_DCE" = "yes" ; then
 			# order of libs in 9.X is important. -lc_r must be last
 			SUDO_LIBS="-ldce -lM -lc_r"
 
@@ -195,7 +242,7 @@ case "$OS" in
 
 		    # shadow pw support
 		    # XXX - can't hpux 10 use svr4-style shadow?
-		    if -n "$C2"; then
+		    if test "$with_C2" = "yes"; then
 			SHADOW_TYPE="SPW_HPUX9"
 			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    fi
@@ -209,7 +256,7 @@ case "$OS" in
 		    fi
 
 		    # DCE support
-		    if test -n "$DCE" ; then
+		    if test "$with_DCE" = "yes" ; then
 			# order of libs in 10.0 is important. -ldce must be last
 			# note that gcc has it's own alloca()
 			if test -n "$GCC" ; then
@@ -223,7 +270,7 @@ case "$OS" in
 		    fi
 
 		    # shadow pw support
-		    if test -n "$C2"; then
+		    if test "$with_C2" = "yes"; then
 			SHADOW_TYPE="SPW_HPUX9"
 			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 			SUDO_LIBS="${SUDO_LIBS} /usr/lib/libsec.1"
@@ -231,14 +278,14 @@ case "$OS" in
 		fi
 
 		# AFS support
-		if test -n "$AFS" ; then
+		if test "$with_AFS" = "yes" ; then
 		    SUDO_LIBS="-lBSD ${SUDO_LIBS}"
 		fi
 		;;
     "osf1")	echo "Looks like OSF/1"
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
 		# C2 security stuff
-		if test -n "$C2" ; then
+		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lsecurity -laud"
 		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -246,7 +293,7 @@ case "$OS" in
 		;;
     "irix")	echo "Looks like IRIX"
 		# C2 security stuff
-		if test -n "$C2" ; then
+		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
@@ -270,7 +317,7 @@ case "$OS" in
 		;;
     "linux")	echo "Looks like linux"
 		# C2 security stuff
-		if test -n "$C2" ; then
+		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    OSDEFS="${OSDEFS} -DSHADOW_PWD"
@@ -283,7 +330,7 @@ case "$OS" in
 		    CFLAGS="${CFLAGS} -D__STDC__"
 		fi
 		# C2 security stuff
-		if test -n "$C2" ; then
+		if test "$with_C2" = "yes"; then
 		    OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"
 		    SUDO_LIBS="${SUDO_LIBS} -lprot"
 		    SHADOW_TYPE="SPW_SECUREWARE"
@@ -292,7 +339,7 @@ case "$OS" in
 		;;
     "ultrix"*)	echo "Looks like ultrix"
 		# C2 security stuff
-		if test -n "$C2" ; then
+		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lauth"
 		    SHADOW_TYPE="SPW_ULTRIX4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -306,7 +353,7 @@ case "$OS" in
     "isc")	echo "Looks like INTERACTIVE"
 		LIB_CRYPT=1
 		SUDO_LIBS="${SUDO_LIBS} -lcrypt"
-		if test -n "$C2" ; then
+		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lsec"
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -317,20 +364,24 @@ case "$OS" in
 		LIB_SOCKET=1
 		SUDO_LIBS="${SUDO_LIBS} -lsocket"
 
-		C2=1
-		SHADOW_TYPE="SPW_SVR4"
-		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		if test "$with_C2" != "no"; then
+		    with_C2="yes"
+		    SHADOW_TYPE="SPW_SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		fi
 		;;
     "unix_sv")	echo "Looks like UnixWare"
 		LIB_SOCKET=1
 		SUDO_LIBS="${SUDO_LIBS} -lsocket"
 
-		C2=1
-		SHADOW_TYPE="SPW_SVR4"
-		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		if test "$with_C2" != "no"; then
+		    with_C2="yes"
+		    SHADOW_TYPE="SPW_SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		fi
 		;;
     "sco")	echo "Looks like SCO"
-		if test -n "$C2" ; then
+		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    SUDO_LIBS="${SUDO_LIBS} -lprot -lx"
@@ -341,14 +392,14 @@ case "$OS" in
     "next")	echo "Looks like NeXTstep"
 		;;
     "bsd/386" | "bsd/os") echo "Looks like bsdi BSD/OS"
-		if test -n "$C2" ; then
+		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_BSD"
 		fi
 		;;
     "mtxinu")	echo "Looks like mt Xinu MORE/BSD"
 		;;
     "4.3bsd")	echo "Looks like HP BSD"
-		if test -n "$C2" ; then
+		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_BSD"
 		fi
 		;;
@@ -364,7 +415,7 @@ dnl
 dnl search for various shadow password types unless we already know
 dnl XXX - need a better default case (define SHADOW_TYPE to *something*)
 dnl
-if test -n "$C2" -a -z "$SHADOW_TYPE"; then
+if test "$with_C2" = "yes" -a -z "$SHADOW_TYPE"; then
     echo "checking for shadow password type..."
     AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SPW_SVR4", AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SPW_SECUREWARE", [test -f /etc/master.passwd && SHADOW_TYPE="SPW_BSD"]))
     case "$SHADOW_TYPE" in
@@ -460,7 +511,7 @@ AC_CHECK_LIB(inet, main, SUDO_LIBS="${SUDO_LIBS} -linet")
 dnl
 dnl Find kerberos includes and libs or complain
 dnl
-if test -n "$KERB4" -o -n "$KERB5" ; then
+if test "$with_kerb4" = "yes" -o "$with_kerb5" = "yes" ; then
     if test -f "/usr/include/kerberosIV/krb.h" ; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/include/kerberosIV"
     elif test -f "/usr/local/include/kerberosIV/krb.h" ; then
@@ -484,7 +535,7 @@ if test -n "$KERB4" -o -n "$KERB5" ; then
     fi
 
     SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes"
-    if test -n "$KERB5" ; then
+    if test "$with_kerb5" = "yes" ; then
 	SUDO_LIBS="${SUDO_LIBS} -ldes425 -lkrb5 -lcrypto -lcom_err"
     fi
 fi
@@ -492,7 +543,7 @@ fi
 dnl
 dnl extra AFS libs
 dnl
-if test -n "$AFS" ; then
+if test "$with_AFS" = "yes" ; then
     if test -d "/usr/lib/afs" ; then
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/lib/afs"
     else
@@ -505,21 +556,21 @@ fi
 dnl
 dnl extra DCE lib
 dnl
-if test -n "$DCE" ; then
-	DCE_OBJS="${DCE_OBJS} dce_pwent.o"
+if test "$with_DCE" = "yes" ; then
+    DCE_OBJS="${DCE_OBJS} dce_pwent.o"
 fi
 
 dnl
 dnl extra Skey lib and includes
 dnl
-if test -n "$SKEY" ; then
+if test "$with_skey" = "yes" ; then
     SUDO_LIBS="${SUDO_LIBS} -lskey"
     if test -f /usr/include/skey.h -a -f /usr/lib/libskey.a; then
 	:
     elif test -f /usr/local/include/skey.h; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
-    elif test -n "$CSOPS" -a -f /tools/cs/skey/include/skey.h -a -f /tools/cs/skey/lib/libskey.a; then
+    elif test "$CSOPS" = "yes" -a -f /tools/cs/skey/include/skey.h -a -f /tools/cs/skey/lib/libskey.a; then
 	CPPFLAGS="${CPPFLAGS} -I/tools/cs/skey/include"
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/tools/cs/skey/lib"
     else
@@ -529,7 +580,7 @@ fi
 
 dnl
 dnl extra SecurID lib + includes
-if test -n "$SECURID" ; then
+if test "$with_SecurID" = "yes" ; then
     SUDO_LIBS="${SUDO_LIBS} /usr/ace/sdiclient.a"
     CPPFLAGS="${CPPFLAGS} -I/usr/ace"
 fi
