@@ -43,15 +43,16 @@ static const char rcsid[] = "$Sudo$";
  * Update the access and modify times on an fd or file.
  */
 int
-touch(fd, path, when)
+touch(fd, path, sec, nsec)
     int fd;
     char *path;
-    time_t when;
+    time_t sec;
+    long nsec;
 {
     struct timeval times[2];
 
-    times[0].tv_sec = times[1].tv_sec = when;
-    times[0].tv_usec = times[1].tv_usec = 0;
+    times[0].tv_sec = times[1].tv_sec = sec;
+    times[0].tv_usec = times[1].tv_usec = nsec;
 
 #if defined(HAVE_FUTIME) || defined(HAVE_FUTIMES)
     if (fd != -1)

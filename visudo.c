@@ -220,7 +220,7 @@ main(argc, argv)
 	    write(stmp_fd, buf, 1);
 	}
 
-	(void) touch(stmp_fd, stmp, sudoers_sb.st_mtime);
+	(void) touch(stmp_fd, stmp, sudoers_sb.st_mtime, 0);
 	(void) close(stmp_fd);
 
 	/* Parse sudoers to pull in editor and env_editor conf values. */

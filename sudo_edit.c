@@ -159,7 +159,7 @@ int sudo_edit(argc, argv)
 	 * file's mtime.  It is better than nothing and we only use the info
 	 * to determine whether or not a file has been modified.
 	 */
-	if (touch(tf[i].tfd, NULL, tf[i].omtime) == -1) {
+	if (touch(tf[i].tfd, NULL, tf[i].omtime, 0) == -1) {
 	    if (fstat(tf[i].tfd, &sb) == 0)
 		tf[i].omtime = sb.st_mtime;
 	}

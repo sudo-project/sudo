@@ -153,7 +153,7 @@ update_timestamp(timestampdir, timestampfile)
 
     if (timestamp_uid != 0)
 	set_perms(PERM_TIMESTAMP);
-    if (touch(-1, timestampfile ? timestampfile : timestampdir, now) == -1) {
+    if (touch(-1, timestampfile ? timestampfile : timestampdir, now, 0) == -1) {
 	if (timestampfile) {
 	    int fd = open(timestampfile, O_WRONLY|O_CREAT|O_TRUNC, 0600);
 
@@ -552,7 +552,7 @@ remove_timestamp(remove)
 		remove = FALSE;
 	    }
 	}
-	if (!remove && touch(-1, ts, 0) == -1)
+	if (!remove && touch(-1, ts, 0, 0) == -1)
 	    err(1, "can't reset %s to Epoch", ts);
     }
 
