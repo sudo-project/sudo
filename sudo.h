@@ -65,13 +65,13 @@ extern struct matchstack *match;
 extern int top;
 
 #define user_matches	(match[top-1].user)
-#define user_matched	(match[top-2].user)
+#define user_matched	(match[top].user)
 #define cmnd_matches	(match[top-1].cmnd)
-#define cmnd_matched	(match[top-2].cmnd)
+#define cmnd_matched	(match[top].cmnd)
 #define host_matches	(match[top-1].host)
-#define host_matched	(match[top-2].host)
+#define host_matched	(match[top].host)
 #define runas_matches	(match[top-1].runas)
-#define runas_matched	(match[top-2].runas)
+#define runas_matched	(match[top].runas)
 #define no_passwd	(match[top-1].nopass)
 
 /*
