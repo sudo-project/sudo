@@ -74,6 +74,11 @@ emalloc(size)
 {
     VOID *ptr;
 
+    if (size == 0) {
+	(void) fprintf(stderr, "%s: internal error, tried to malloc(0)\n",
+	    Argv[0]);
+	exit(1);
+    }
     if ((ptr = (VOID *) malloc(size)) == NULL) {
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
@@ -92,6 +97,11 @@ erealloc(ptr, size)
     size_t size;
 {
 
+    if (size == 0) {
+	(void) fprintf(stderr, "%s: internal error, tried to realloc(0)\n",
+	    Argv[0]);
+	exit(1);
+    }
     ptr = ptr ? (VOID *) realloc(ptr, size) : (VOID *) malloc(size);
     if (ptr == NULL) {
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
