@@ -667,7 +667,7 @@ AC_ARG_WITH(sudoers-mode, [  --with-sudoers-mode     mode of sudoers file (defau
 		;;
     0*)		SUDOERS_MODE=$with_sudoers_mode
 		;;
-    *)		AC_MSG_ERROR(["you must use a numeric uid, not a name."])
+    *)		AC_MSG_ERROR(["you must use an octal mode, not a name."])
 		;;
 esac])
 
@@ -679,7 +679,7 @@ AC_ARG_WITH(sudoers-uid, [  --with-sudoers-uid      uid that owns sudoers file (
 		;;
     [[0-9]]*)	SUDOERS_UID=$with_sudoers_uid
 		;;
-    *)		AC_MSG_ERROR(["you must use a numeric uid, not a name."])
+    *)		AC_MSG_ERROR(["you must use an unsigned numeric uid, not a name."])
 		;;
 esac])
 
@@ -691,7 +691,7 @@ AC_ARG_WITH(sudoers-gid, [  --with-sudoers-gid      gid that owns sudoers file (
 		;;
     [[0-9]]*)	SUDOERS_GID=$with_sudoers_gid
 		;;
-    *)		AC_MSG_ERROR(["you must use a numeric gid, not a name."])
+    *)		AC_MSG_ERROR(["you must use an unsigned numeric gid, not a name."])
 		;;
 esac])
 
