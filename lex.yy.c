@@ -1245,9 +1245,9 @@ static int sawspace = 0;
 static int arg_len = 0;
 static int arg_size = 0;
 
-static void fill		__P((char *, int));
-static void fill_cmnd		__P((char *, int));
-static void fill_args		__P((char *, int, int));
+static int fill			__P((char *, int));
+static int fill_cmnd		__P((char *, int));
+static int fill_args		__P((char *, int, int));
 static int buffer_frob		__P((const char *));
 extern void reset_aliases	__P((void));
 extern void yyerror		__P((const char *));
@@ -1525,14 +1525,15 @@ YY_RULE_SETUP
 {
 			    BEGIN INDEFS;
 			    LEXTRACE("DEFVAR ");
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    return(DEFVAR);
 			}
 	YY_BREAK
 
 case 3:
 YY_RULE_SETUP
-#line 114 "parse.lex"
+#line 115 "parse.lex"
 {
 			    BEGIN STARTDEFS;
 			    LEXTRACE(", ");
@@ -1541,7 +1542,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 120 "parse.lex"
+#line 121 "parse.lex"
 {
 			    LEXTRACE("= ");
 			    return('=');
@@ -1549,7 +1550,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 125 "parse.lex"
+#line 126 "parse.lex"
 {
 			    LEXTRACE("+= ");
 			    return('+');
@@ -1557,7 +1558,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 130 "parse.lex"
+#line 131 "parse.lex"
 {
 			    LEXTRACE("-= ");
 			    return('-');
@@ -1565,19 +1566,21 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 135 "parse.lex"
+#line 136 "parse.lex"
 {
 			    LEXTRACE("WORD(1) ");
-			    fill(yytext + 1, yyleng - 2);
+			    if (!fill(yytext + 1, yyleng - 2))
+				yyterminate();
 			    return(WORD);
 			}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 141 "parse.lex"
+#line 143 "parse.lex"
 {
 			    LEXTRACE("WORD(2) ");
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    return(WORD);
 			}
 	YY_BREAK
@@ -1585,27 +1588,29 @@ YY_RULE_SETUP
 
 case 9:
 YY_RULE_SETUP
-#line 149 "parse.lex"
+#line 152 "parse.lex"
 {
 			    /* quoted fnmatch glob char, pass verbatim */
 			    LEXTRACE("QUOTEDCHAR ");
-			    fill_args(yytext, 2, sawspace);
+			    if (!fill_args(yytext, 2, sawspace))
+				yyterminate();
 			    sawspace = FALSE;
 			}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 156 "parse.lex"
+#line 160 "parse.lex"
 {
 			    /* quoted sudoers special char, strip backslash */
 			    LEXTRACE("QUOTEDCHAR ");
-			    fill_args(yytext + 1, 1, sawspace);
+			    if (!fill_args(yytext + 1, 1, sawspace))
+				yyterminate();
 			    sawspace = FALSE;
 			}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 163 "parse.lex"
+#line 168 "parse.lex"
 {
 			    BEGIN INITIAL;
 			    unput(*yytext);
@@ -1614,17 +1619,18 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 169 "parse.lex"
+#line 174 "parse.lex"
 {
 			    LEXTRACE("ARG ");
-			    fill_args(yytext, yyleng, sawspace);
+			    if (!fill_args(yytext, yyleng, sawspace))
+				yyterminate();
 			    sawspace = FALSE;
 			}			/* a command line arg */
 	YY_BREAK
 
 case 13:
 YY_RULE_SETUP
-#line 176 "parse.lex"
+#line 182 "parse.lex"
 {
 			    char *cp, *ep;
 			    /* pull out path from #include line */
@@ -1634,14 +1640,15 @@ YY_RULE_SETUP
 				continue;
 			    *ep = '\0';
 			    /* push current buffer and switch to include file */
-			    push_include(cp);
+			    if (!push_include(cp))
+				yyterminate();
 			    LEXTRACE("INCLUDE\n");
 			    BEGIN INITIAL;
 			}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 190 "parse.lex"
+#line 197 "parse.lex"
 {
 			    BEGIN GOTDEFS;
 			    switch (yytext[8]) {
@@ -1665,9 +1672,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 211 "parse.lex"
+#line 218 "parse.lex"
 {
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    switch (*yytext) {
 				case 'H':
 				    LEXTRACE("HOSTALIAS ");
@@ -1687,7 +1695,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 230 "parse.lex"
+#line 238 "parse.lex"
 {
 				/* cmnd does not require passwd for this user */
 			    	LEXTRACE("NOPASSWD ");
@@ -1696,7 +1704,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 236 "parse.lex"
+#line 244 "parse.lex"
 {
 				/* cmnd requires passwd for this user */
 			    	LEXTRACE("PASSWD ");
@@ -1705,7 +1713,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 242 "parse.lex"
+#line 250 "parse.lex"
 {
 			    	LEXTRACE("NOEXEC ");
 			    	return(NOEXEC);
@@ -1713,7 +1721,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 247 "parse.lex"
+#line 255 "parse.lex"
 {
 			    	LEXTRACE("EXEC ");
 			    	return(EXEC);
@@ -1721,7 +1729,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 252 "parse.lex"
+#line 260 "parse.lex"
 {
 			    	LEXTRACE("NOTRACE ");
 			    	return(NOTRACE);
@@ -1729,7 +1737,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 257 "parse.lex"
+#line 265 "parse.lex"
 {
 			    	LEXTRACE("TRACE ");
 			    	return(TRACE);
@@ -1737,45 +1745,49 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 262 "parse.lex"
+#line 270 "parse.lex"
 {
 			    /* netgroup */
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    LEXTRACE("NETGROUP ");
 			    return(NETGROUP);
 			}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 269 "parse.lex"
+#line 278 "parse.lex"
 {
 			    /* UN*X group */
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    LEXTRACE("GROUP ");
 			    return(USERGROUP);
 			}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 276 "parse.lex"
+#line 286 "parse.lex"
 {
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    LEXTRACE("NTWKADDR ");
 			    return(NTWKADDR);
 			}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 282 "parse.lex"
+#line 293 "parse.lex"
 {
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    LEXTRACE("NTWKADDR ");
 			    return(NTWKADDR);
 			}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 288 "parse.lex"
+#line 300 "parse.lex"
 {
 				BEGIN GOTRUNAS;
 				LEXTRACE("RUNAS ");
@@ -1784,13 +1796,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 294 "parse.lex"
+#line 306 "parse.lex"
 {
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
 				return(ALL);
 			    } else {
-				fill(yytext, yyleng);
+				if (!fill(yytext, yyleng))
+				    yyterminate();
 				LEXTRACE("ALIAS ");
 				return(ALIAS);
 			    }
@@ -1798,59 +1811,64 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 305 "parse.lex"
+#line 318 "parse.lex"
 {
 			    /* username/uid that user can run command as */
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    LEXTRACE("WORD(3) ");
 			    return(WORD);
 			}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 312 "parse.lex"
+#line 326 "parse.lex"
 {
 			    BEGIN INITIAL;
 			}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 316 "parse.lex"
+#line 330 "parse.lex"
 {
 			    BEGIN GOTCMND;
 			    LEXTRACE("COMMAND ");
-			    fill_cmnd(yytext, yyleng);
+			    if (!fill_cmnd(yytext, yyleng))
+				yyterminate();
 			}			/* sudo -e */
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 322 "parse.lex"
+#line 337 "parse.lex"
 {
 			    /* directories can't have args... */
 			    if (yytext[yyleng - 1] == '/') {
 				LEXTRACE("COMMAND ");
-				fill_cmnd(yytext, yyleng);
+				if (!fill_cmnd(yytext, yyleng))
+				    yyterminate();
 				return(COMMAND);
 			    } else {
 				BEGIN GOTCMND;
 				LEXTRACE("COMMAND ");
-				fill_cmnd(yytext, yyleng);
+				if (!fill_cmnd(yytext, yyleng))
+				    yyterminate();
 			    }
 			}			/* a pathname */
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 335 "parse.lex"
+#line 352 "parse.lex"
 {
 			    /* a word */
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    LEXTRACE("WORD(4) ");
 			    return(WORD);
 			}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 342 "parse.lex"
+#line 360 "parse.lex"
 {
 			    LEXTRACE(", ");
 			    return(',');
@@ -1858,7 +1876,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 347 "parse.lex"
+#line 365 "parse.lex"
 {
 			    LEXTRACE("= ");
 			    return('=');
@@ -1866,7 +1884,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 352 "parse.lex"
+#line 370 "parse.lex"
 {
 			    LEXTRACE(": ");
 			    return(':');
@@ -1874,7 +1892,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 357 "parse.lex"
+#line 375 "parse.lex"
 {
 			    if (yyleng % 2 == 1)
 				return('!');	/* return '!' */
@@ -1882,7 +1900,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 362 "parse.lex"
+#line 380 "parse.lex"
 {
 			    BEGIN INITIAL;
 			    ++sudolineno;
@@ -1892,14 +1910,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 369 "parse.lex"
+#line 387 "parse.lex"
 {			/* throw away space/tabs */
 			    sawspace = TRUE;	/* but remember for fill_args */
 			}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 373 "parse.lex"
+#line 391 "parse.lex"
 {
 			    sawspace = TRUE;	/* remember for fill_args */
 			    ++sudolineno;
@@ -1908,7 +1926,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 379 "parse.lex"
+#line 397 "parse.lex"
 {
 			    BEGIN INITIAL;
 			    ++sudolineno;
@@ -1918,7 +1936,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 386 "parse.lex"
+#line 404 "parse.lex"
 {
 			    LEXTRACE("ERROR ");
 			    return(ERROR);
@@ -1930,7 +1948,7 @@ case YY_STATE_EOF(GOTDEFS):
 case YY_STATE_EOF(GOTCMND):
 case YY_STATE_EOF(STARTDEFS):
 case YY_STATE_EOF(INDEFS):
-#line 391 "parse.lex"
+#line 409 "parse.lex"
 {
 			    if (YY_START != INITIAL) {
 			    	BEGIN INITIAL;
@@ -1943,10 +1961,10 @@ case YY_STATE_EOF(INDEFS):
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 401 "parse.lex"
+#line 419 "parse.lex"
 ECHO;
 	YY_BREAK
-#line 1950 "lex.yy.c"
+#line 1968 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2835,9 +2853,9 @@ int main()
 	return 0;
 	}
 #endif
-#line 401 "parse.lex"
+#line 419 "parse.lex"
 
-static void
+static int
 fill(s, len)
     char *s;
     int len;
@@ -2847,7 +2865,7 @@ fill(s, len)
     yylval.string = (char *) malloc(len + 1);
     if (yylval.string == NULL) {
 	yyerror("unable to allocate memory");
-	return;
+	return(FALSE);
     }
 
     /* Copy the string and collapse any escaped characters. */
@@ -2858,9 +2876,10 @@ fill(s, len)
 	    yylval.string[j] = s[i];
     }
     yylval.string[j] = '\0';
+    return(TRUE);
 }
 
-static void
+static int
 fill_cmnd(s, len)
     char *s;
     int len;
@@ -2870,16 +2889,17 @@ fill_cmnd(s, len)
     yylval.command.cmnd = (char *) malloc(++len);
     if (yylval.command.cmnd == NULL) {
 	yyerror("unable to allocate memory");
-	return;
+	return(FALSE);
     }
 
     /* copy the string and NULL-terminate it (escapes handled by fnmatch) */
     (void) strlcpy(yylval.command.cmnd, s, len);
 
     yylval.command.args = NULL;
+    return(TRUE);
 }
 
-static void
+static int
 fill_args(s, len, addspace)
     char *s;
     int len;
@@ -2906,7 +2926,7 @@ fill_args(s, len, addspace)
 	    if (yylval.command.args != NULL)
 		free(yylval.command.args);
 	    yyerror("unable to allocate memory");
-	    return;
+	    return(FALSE);
 	} else
 	    yylval.command.args = p;
     }
@@ -2915,38 +2935,49 @@ fill_args(s, len, addspace)
     p = yylval.command.args + arg_len;
     if (addspace)
 	*p++ = ' ';
-    if (strlcpy(p, s, arg_size - (p - yylval.command.args)) != len)
+    if (strlcpy(p, s, arg_size - (p - yylval.command.args)) != len) {
 	yyerror("fill_args: buffer overflow");	/* paranoia */
+	return(FALSE);
+    }
     arg_len = new_len;
+    return(TRUE);
 }
 
+#define MAX_INCLUDE_DEPTH	128
 int
 buffer_frob(path)
     const char *path;
 {
-    static size_t maxbuf, nbuf;
+    static size_t stacksize, depth;
     static YY_BUFFER_STATE *bufstack;
     FILE *fp;
 
     if (path != NULL) {
-	/* XXX - have maxdepth */
 	/* push */
-	if (nbuf >= maxbuf) {
-	    maxbuf += 16;
-	    if ((bufstack = realloc(bufstack, maxbuf)) == NULL)
+	if (depth >= stacksize) {
+	    if (depth > MAX_INCLUDE_DEPTH) {
+		yyerror("too many levels of includes");
+		return(FALSE);
+	    }
+	    stacksize += 16;
+	    if ((bufstack = realloc(bufstack, stacksize)) == NULL) {
 		yyerror("unable to allocate memory");
+		return(FALSE);
+	    }
 	}
-	if ((fp = open_sudoers(path)) == NULL)
+	if ((fp = open_sudoers(path)) == NULL) {
 	    yyerror(path);
-	bufstack[nbuf++] = YY_CURRENT_BUFFER;
+	    return(FALSE);
+	}
+	bufstack[depth++] = YY_CURRENT_BUFFER;
 	yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
     } else {
 	/* pop */
-	if (nbuf == 0)
+	if (depth == 0)
 	    return(FALSE);
 	fclose(YY_CURRENT_BUFFER->yy_input_file);
 	yy_delete_buffer(YY_CURRENT_BUFFER);
-	yy_switch_to_buffer(bufstack[--nbuf]);
+	yy_switch_to_buffer(bufstack[--depth]);
     }
     return(TRUE);
 }
