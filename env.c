@@ -434,19 +434,16 @@ rebuild_env(sudo_mode, envp)
 
     /* Add the SUDO_COMMAND envariable (cmnd + args). */
     if (user_args) {
-	cp = emalloc(strlen(user_cmnd) + strlen(user_args) + 15);
-	sprintf(cp, "SUDO_COMMAND=%s %s", user_cmnd, user_args);
+	easprintf(&cp, "SUDO_COMMAND=%s %s", user_cmnd, user_args);
 	insert_env(newenvp, cp);
     } else
 	insert_env(newenvp, format_env("SUDO_COMMAND", user_cmnd));
 
     /* Add the SUDO_USER, SUDO_UID, SUDO_GID environment variables. */
     insert_env(newenvp, format_env("SUDO_USER", user_name));
-    cp = emalloc(MAX_UID_T_LEN + 10);
-    sprintf(cp, "SUDO_UID=%ld", (long) user_uid);
+    easprintf(&cp, "SUDO_UID=%ld", (long) user_uid);
     insert_env(newenvp, cp);
-    cp = emalloc(MAX_UID_T_LEN + 10);
-    sprintf(cp, "SUDO_GID=%ld", (long) user_gid);
+    easprintf(&cp, "SUDO_GID=%ld", (long) user_gid);
     insert_env(newenvp, cp);
 
     return(newenvp);
