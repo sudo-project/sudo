@@ -1742,35 +1742,49 @@ Sudo 1.6.8p2 released.
 550) The CDPATH variable is now stripped from the environment passed
      to the program to be executed.
 
+551) Fix temp file generation on systems where the _PATH_VARTMP macro
+     lacks a trailing slash.
+
 Sudo 1.6.8p3 released.
 
-551) New monitor functionality for systems with systrace(4).  When tracing
+552) The KRB5CCNAME environment variable is preserved during sudo
+     execution for password lookups that use GSSAPI.
+
+Sudo 1.6.8p4 released.
+
+553) New monitor functionality for systems with systrace(4).  When tracing
      is enabled sudo will fork a daemon that traces the command and
      intercepts and execve() calls and allows/denies the call based on
      a sudoers lookup.  Also updates the command's environment with
      the SUDO_* variables if supported by the version of systrace(4).
 
-552) Added support for multiple sudoers file via #include.
+554) Added support for multiple sudoers file via #include.
 
-553) An empty sudoers file is no longer a parse error.
+555) An empty sudoers file is no longer a parse error.
 
-554) Fixed error handling if the lexer runs out of memory.
+556) Fixed error handling if the lexer runs out of memory.
 
-555) Optimized lexer slightly by removing use of unput() and removing
+557) Optimized lexer slightly by removing use of unput() and removing
      some ambiguity with the Default keyword.
 
-556) Wildcard matches on commands now use glob() and stat() so 
+558) Wildcard matches on commands now use glob() and stat() so 
      that relative paths work correctly in conjunction with wildcards.
 
-557) Rewritten parser that converts sudoers into a set of data structures.
+559) Rewritten parser that converts sudoers into a set of data structures.
      This eliminates ordering issues and makes it possible to apply
      sudoers Defaults entries before searching for the command.
 
-558) Visudo will now warn about aliases that are defined but not used.
+560) Visudo will now warn about aliases that are defined but not used.
 
-559) "sudo -l" now takes an optional username which lets root see other
+561) "sudo -l" now takes an optional username which lets root see other
      users' privs.
 
-560) The "secure_path" run-time Defaults option has been restored.
+562) The "secure_path" run-time Defaults option has been restored.
 
-561) Password and group data is now cached for fast lookup.
+563) Password and group data is now cached for fast lookup.
+
+564) Sudo will use the supplemental group vector if it is present
+     instead of doing string comparisons of the group members.  This
+     is useful for systems with nsswitch.conf where group data can be in
+     either /etc/group or some other database (NIS, NIS+, LDAP, etc)
+     and getgrnam() only returns data from one source.
