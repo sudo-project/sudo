@@ -67,7 +67,7 @@ aixauth_verify(pw, prompt, data)
     char *message, *pass;
     int reenter = 1;
 
-    pass = GETPASS(prompt, PASSWORD_TIMEOUT * 60, 1);
+    pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60, 1);
     if (authenticate(pw->pw_name, pass, &reenter, &message) == 0)
 	return(AUTH_SUCCESS);
     else
