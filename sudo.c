@@ -737,21 +737,16 @@ void set_perms(perm)
 static char *uid2str(uid)
     uid_t uid;
 {
-    int len;
-    unsigned n;
     char *uidstr;
 
-    for (len = 1, n = (unsigned) uid; (unsigned) (n = n / 10) != 0; )
-	++len;
-    
-    uidstr = (char *) malloc(len+1);
+    uidstr = (char *) malloc(MAX_UID_T_LEN + 1);
     if (uidstr == NULL) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
 
-    (void) sprintf(uidstr, "%u", (unsigned) uid);
+    (void) sprintf(uidstr, "%ld", uid);
 
     return(uidstr);
 }
