@@ -178,7 +178,7 @@ char *cmnd, *path;
 
     while ((dent = readdir(dirp)) != NULL) {
 	strcpy(buf, path);
-	strcat(buf, NAMLEN(dent));
+	strcat(buf, (char *) NAMLEN(dent));
 	if (stat(buf, &pst) < 0)
 	    continue;
 	if (cst.st_dev == pst.st_dev && cst.st_ino == pst.st_ino)
