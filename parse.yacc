@@ -156,6 +156,8 @@ void yyerror(s)
 %token <tok>	 ':' '=' ',' '!' '.'	/* union member tokens */
 %token <tok>	 ERROR
 
+%type <BOOLEAN>	 cmnd
+%type <BOOLEAN>	 opcmnd
 %type <BOOLEAN>	 runasspec
 %type <BOOLEAN>	 runaslist
 %type <BOOLEAN>	 runasuser
@@ -235,7 +237,7 @@ cmndspeclist	:	cmndspec
 		;
 
 cmndspec	:	runasspec nopasswd opcmnd {
-			    if ($1 > 0 && cmnd_matches == TRUE) {
+			    if ($1 > 0 && $3 == TRUE) {
 				runas_matches = TRUE;
 				if ($2 == TRUE)
 				    no_passwd = TRUE;
@@ -261,6 +263,7 @@ opcmnd		:	cmnd { ; }
 				cmnd_matches = FALSE;
 			    else if (cmnd_matched == FALSE)
 				cmnd_matches = TRUE;
+			    $$ = cmnd_matches;
 			}
 		;
 
@@ -315,6 +318,7 @@ cmnd		:	ALL {
 				(void) puts("ALL");
 
 			    cmnd_matches = TRUE;
+			    $$ = TRUE;
 			}
 		|	ALIAS {
 			    if (printmatches == TRUE && host_matches == TRUE &&
@@ -322,6 +326,7 @@ cmnd		:	ALL {
 				(void) puts($1);
 			    if (find_alias($1, CMND)) {
 				cmnd_matches = TRUE;
+				$$ = TRUE;
 			    }
 			    (void) free($1);
 			}
@@ -340,6 +345,7 @@ cmnd		:	ALL {
 			    if (command_matches(cmnd, (NewArgc > 1) ?
 				    &NewArgv[1] : NULL, $1.cmnd, $1.args)) {
 				cmnd_matches = TRUE;
+				$$ = TRUE;
 			    }
 
 			    (void) free($1.cmnd);
