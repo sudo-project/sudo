@@ -24,7 +24,6 @@ AC_SUBST(NET_LIBS)dnl
 AC_SUBST(AFS_LIBS)dnl
 AC_SUBST(OSDEFS)dnl
 AC_SUBST(AUTH_OBJS)dnl
-AC_SUBST(LIBOBJS)dnl
 AC_SUBST(MANTYPE)dnl
 AC_SUBST(MAN_POSTINSTALL)dnl
 AC_SUBST(SUDOERS_MODE)dnl
@@ -1548,7 +1547,7 @@ if test "$with_logincap" = "yes"; then
     AC_CHECK_HEADERS(login_cap.h)
 fi
 if test "$with_bsdauth" = "yes"; then
-    AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H, 1, [Define if you use BSD authentication.]) [with_passwd=no; AUTH_OBJS=bsdauth.o])
+    AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H, 1, [Define if you use BSD authentication.]) [with_passwd=no; AUTH_OBJS=bsdauth.o], -)
 fi
 dnl
 dnl typedef checks
@@ -1594,7 +1593,7 @@ fi
 AC_CHECK_FUNCS(lockf flock, [break])
 AC_CHECK_FUNCS(waitpid wait3, [break])
 AC_CHECK_FUNCS(innetgr _innetgr, AC_CHECK_FUNCS(getdomainname) [break])
-AC_CHECK_FUNCS(lsearch, , [AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) [LIBS="${LIBS} -lcompat"], AC_LIBOBJ(lsearch)), AC_LIBOBJ(lsearch))])
+AC_CHECK_FUNCS(lsearch, , [AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) [LIBS="${LIBS} -lcompat"], AC_LIBOBJ(lsearch), -), AC_LIBOBJ(lsearch))])
 AC_CHECK_FUNCS(utime, SUDO_FUNC_UTIME_POSIX, AC_LIBOBJ(utime))
 SUDO_FUNC_FNMATCH(AC_DEFINE(HAVE_FNMATCH, 1, [Define if you have the `fnmatch' function.]), AC_LIBOBJ(fnmatch))
 SUDO_FUNC_ISBLANK
