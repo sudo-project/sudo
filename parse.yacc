@@ -117,7 +117,7 @@ int top = 0, stacksize = 0;
     do { \
 	if (top >= stacksize) { \
 	    while ((stacksize += STACKINCREMENT) < top); \
-	    match = (struct matchstack *) erealloc(match, sizeof(struct matchstack) * stacksize); \
+	    match = (struct matchstack *) erealloc3(match, stacksize, sizeof(struct matchstack)); \
 	} \
 	match[top].user   = -1; \
 	match[top].cmnd   = -1; \
@@ -131,7 +131,7 @@ int top = 0, stacksize = 0;
     do { \
 	if (top >= stacksize) { \
 	    while ((stacksize += STACKINCREMENT) < top); \
-	    match = (struct matchstack *) erealloc(match, sizeof(struct matchstack) * stacksize); \
+	    match = (struct matchstack *) erealloc3(match, stacksize, sizeof(struct matchstack)); \
 	} \
 	match[top].user   = match[top-1].user; \
 	match[top].cmnd   = match[top-1].cmnd; \
@@ -1160,7 +1160,7 @@ expand_ga_list()
 	while ((ga_list_size += STACKINCREMENT) < ga_list_len)
 	    ;
 	ga_list = (struct generic_alias *)
-	    erealloc(ga_list, sizeof(struct generic_alias) * ga_list_size);
+	    erealloc3(ga_list, ga_list_size, sizeof(struct generic_alias));
     }
 
     ga_list[ga_list_len - 1].entries = NULL;
@@ -1179,7 +1179,7 @@ expand_match_list()
 	if (cm_list == NULL)
 	    cm_list_len = 0;		/* start at 0 since it is a subscript */
 	cm_list = (struct command_match *)
-	    erealloc(cm_list, sizeof(struct command_match) * cm_list_size);
+	    erealloc3(cm_list, cm_list_size, sizeof(struct command_match));
     }
 
     cm_list[cm_list_len].runas = cm_list[cm_list_len].cmnd = NULL;
@@ -1206,7 +1206,7 @@ init_parser()
 
     /* Allocate space for the matching stack. */
     stacksize = STACKINCREMENT;
-    match = (struct matchstack *) emalloc(sizeof(struct matchstack) * stacksize);
+    match = (struct matchstack *) emalloc2(stacksize, sizeof(struct matchstack));
 
     /* Allocate space for the match list (for `sudo -l'). */
     if (printmatches == TRUE)
