@@ -49,13 +49,13 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 #include "sudo.h"
 
-extern int yylineno;
+extern int sudolineno;
 extern int parse_error, found_user;
 
 yyerror(s)
 char *s;
 {
-fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s, yylineno);
+fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s, sudolineno);
 parse_error = TRUE;
 }
 
@@ -78,6 +78,7 @@ file		:	entry
 		;
 
 entry		:	COMMENT
+			{ ; }
                 |       error COMMENT
 			{ yyerrok; }
 		|	IDENT1 access_series COMMENT
