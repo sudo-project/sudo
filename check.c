@@ -66,6 +66,7 @@ static char rcsid[] = "$Id$";
 #include "sudo.h"
 #include <options.h>
 #include "insults.h"
+#include "version.h"
 #if (SHADOW_TYPE == SPW_SECUREWARE)
 #  ifdef __hpux
 #    include <hpsecurity.h>
@@ -947,9 +948,9 @@ static void reminder()
 #ifdef SHORT_MESSAGE
     (void) fprintf(stderr, "\n%s\n%s\n\n%s\n%s\n\n",
 #else
-    (void) fprintf(stderr, "\n%s\n%s\n%s\n%s\n\n%s\n%s\n\n%s\n%s\n\n",
-	"    CU sudo version 1.5.6, based on Root Group sudo version 1.1",
-	"    sudo version 1.1, Copyright (C) 1991 The Root Group, Inc.",
+    (void) fprintf(stderr, "\n%s%s%s\n%s\n%s\n%s\n\n%s\n%s\n\n%s\n%s\n\n",
+	"    CU sudo version ", version, ", based on Root Group sudo version 1.1",
+	"    sudo version 1.1 is Copyright (C) 1991 The Root Group, Inc.",
 	"    sudo comes with ABSOLUTELY NO WARRANTY.  This is free software,",
 	"    and you are welcome to redistribute it under certain conditions.",
 #endif
