@@ -159,6 +159,9 @@ case "$OS" in
 		LIBS="${LIBS} -lsec -linet"
 		OSDEFS="${OSDEFS} -D_ISC"
 		;;
+    "unix_sv")	echo "Looks like UnixWare"
+		AC_DEFINE(SVR4)
+		;;
     "ksr"*)	echo "Looks like a KSR"
 		;;
     "next")	echo "Looks like NeXTstep"
