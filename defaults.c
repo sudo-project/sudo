@@ -177,7 +177,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Allow some information gathering to give useful error messages"
     }, {
 	"fqdn", T_FLAG,
-	"Require fully-qualified hsotnames in the sudoers file"
+	"Require fully-qualified hostnames in the sudoers file"
     }, {
 	"insults", T_FLAG,
 	"Insult the user when they enter an incorrect password"

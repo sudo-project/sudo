@@ -108,7 +108,7 @@ The B<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
 
 If given the B<-v> (I<validate>) option, B<sudo> will update the
 user's timestamp, prompting for the user's password if necessary.
-This extends the B<sudo> timeout to for another C<@timeout@> minutes
+This extends the B<sudo> timeout for another C<@timeout@> minutes
 (or whatever the timeout is set to in I<sudoers>) but does not run
 a command.
 
@@ -297,7 +297,7 @@ B<sudo> utilizes the following environment variables:
 
 =head1 AUTHORS
 
-Many people have worked on B<sudo> over the years, this
+Many people have worked on B<sudo> over the years; this
 version consists of code written primarily by:
 
 	Todd Miller
