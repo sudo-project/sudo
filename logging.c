@@ -370,7 +370,7 @@ static char *mail_argv[] = { "sendmail",
 
 static void send_mail()
 {
-    char *mailer = MAILER;
+    char *mailer;
     char *subject = MAILSUBJECT;
     int fd[2];
     char buf[MAXLOGLEN + 1024];
@@ -380,8 +380,8 @@ static void send_mail()
     (void) bzero((char *)(&action), sizeof(action));
 #endif /* POSIX_SIGNALS */
 
-    if ((mailer = find_path(mailer)) == NULL) {
-	(void) fprintf(stderr, "%s: mailer (%s) not found\n", Argv[0], mailer);
+    if (find_path(MAILER, &mailer, NULL) == FALSE) {
+	(void) fprintf(stderr, "%s: mailer (%s) not found\n", Argv[0], MAILER);
 	exit(1);
     }
 
