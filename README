@@ -82,4 +82,5 @@ Bug reports
 ===========
 A list of known bugs may be found in the `BUGS' file.
 Please send (new) bugs, problems, comments, features, ports, etc
-to sudo-bugs@courtesan.com.
+to sudo-bugs@courtesan.com.  Also, please read over the `TROUBLESHOOTING'
+file before submitting a bug report.
