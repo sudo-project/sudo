@@ -66,14 +66,14 @@ static char rcsid[] = "$Id$";
 #include "sudo.h"
 #include <options.h>
 #include "insults.h"
-#if defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
+#if (SHADOW_TYPE == SPW_SECUREWARE)
 #  ifdef __hpux
 #    include <hpsecurity.h>
 #  else
 #    include <sys/security.h>
 #  endif /* __hpux */
 #  include <prot.h>
-#endif /* SHADOW_TYPE == SPW_SECUREWARE */
+#endif /* SPW_SECUREWARE */
 #ifdef HAVE_KERB4
 #  include <krb.h>
 #endif /* HAVE_KERB4 */
@@ -505,7 +505,7 @@ static void check_passwd()
 	 * If we use shadow passwords with a different crypt(3)
 	 * check that here, else use standard crypt(3).
 	 */
-#  ifdef SHADOW_TYPE
+#  if (SHADOW_TYPE != SPW_NONE) && (SHADOW_TYPE != SPW_BSD)
 #    if (SHADOW_TYPE == SPW_ULTRIX4)
 	if (!strcmp(user_passwd, (char *) crypt16(pass, user_passwd)))
 	    return;		/* if the passwd is correct return() */
@@ -536,7 +536,7 @@ static void check_passwd()
 	    exit(1);
 	}
 #    endif /* SECUREWARE && __alpha */
-#  endif /* SHADOW_TYPE */
+#  endif /* SHADOW_TYPE != SPW_NONE && SHADOW_TYPE != SPW_BSD */
 
 	/* Normal UN*X password check */
 	if (!strcmp(user_passwd, (char *) crypt(pass, user_passwd)))
