@@ -203,6 +203,19 @@ AC_ARG_WITH(devel, [  --with-devel            add developement options],
 		;;
 esac])
 
+AC_ARG_WITH(efence, [  --with-efence           link with -lefence for malloc() debugging],
+[case $with_efence in  
+    yes)	echo 'Sudo will link with -lefence (Electric Fence)'
+		LIBS="${LIBS} -lefence"
+		if test -f /usr/local/lib/libefence.a; then
+		    LDFLAGS="${LDFLAGS} -L/usr/local/lib"
+		fi
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-efence: $with_efence"
+		;;
+esac])
+
 AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
 [case $with_csops in  
     yes)	echo 'Adding CSOps standard options'
