@@ -195,7 +195,7 @@ host_matches(shost, lhost, list)
 	switch (m->type) {
 	    case ALIAS:
 		rval = alias_matches(m->name, HOSTALIAS, shost, lhost);
-		if (rval != UNSPEC || hostname_matches(shost, lhost, m->name))
+		if (rval != UNSPEC || (rval = hostname_matches(shost, lhost, m->name)))
 		    matched = rval;
 		break;
 	    case ALL:
@@ -483,7 +483,7 @@ addr_matches(n)
 }
 
 /*
- * Returns 0 if the hostname matches the pattern and non-zero otherwise.
+ * Returns TRUE if the hostname matches the pattern, else FALSE
  */
 int
 hostname_matches(shost, lhost, pattern)
@@ -493,14 +493,14 @@ hostname_matches(shost, lhost, pattern)
 {
     if (has_meta(pattern)) {
 	if (strchr(pattern, '.'))
-	    return(fnmatch(pattern, lhost, FNM_CASEFOLD));
+	    return(!fnmatch(pattern, lhost, FNM_CASEFOLD));
 	else
-	    return(fnmatch(pattern, shost, FNM_CASEFOLD));
+	    return(!fnmatch(pattern, shost, FNM_CASEFOLD));
     } else {
 	if (strchr(pattern, '.'))
-	    return(strcasecmp(lhost, pattern));
+	    return(!strcasecmp(lhost, pattern));
 	else
-	    return(strcasecmp(shost, pattern));
+	    return(!strcasecmp(shost, pattern));
     }
 }
 
