@@ -141,16 +141,16 @@ dnl
 AC_DEFUN(SUDO_CHECK_TYPE,
 [AC_REQUIRE([AC_HEADER_STDC])dnl
 AC_MSG_CHECKING(for $1)
-AC_CACHE_VAL(ac_cv_type_$1,
+AC_CACHE_VAL(sudo_cv_type_$1,
 [AC_EGREP_CPP($1, [#include <sys/types.h>
 #if STDC_HEADERS
 #include <stdlib.h>
 #endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
-#endif], ac_cv_type_$1=yes, ac_cv_type_$1=no)])dnl
-AC_MSG_RESULT($ac_cv_type_$1)
-if test $ac_cv_type_$1 = no; then
+#endif], sudo_cv_type_$1=yes, sudo_cv_type_$1=no)])dnl
+AC_MSG_RESULT($sudo_cv_type_$1)
+if test $sudo_cv_type_$1 = no; then
   AC_DEFINE($1, $2)
 fi
 ])
@@ -213,6 +213,36 @@ fi
 ])
 
 dnl
+dnl check for max length of uid_t in string representation.
+dnl if MAXUID exists there is no real way to see if uid_t is
+dnl signed or not so we add one on the off chance that it is.
+dnl
+AC_DEFUN(SUDO_UID_T_LEN,
+[AC_REQUIRE([AC_TYPE_UID_T])
+AC_MSG_CHECKING(max length of uid_t)
+AC_CACHE_VAL(sudo_cv_uid_t_len,
+[AC_TRY_RUN(
+[#include <stdio.h>
+#include <pwd.h>
+#include <sys/types.h>
+#include <sys/param.h>
+main() {
+#ifdef MAXUID
+  char b[BUFSIZ];
+  (void) sprintf(b, "%ld", MAXUID);
+  exit(strlen(b)+1);	/* add one just in case it is signed... */
+#else
+  uid_t u = (uid_t) -1; char b[BUFSIZ];
+  (void) sprintf(b, "%u", u);
+  exit(strlen(b));
+#endif
+}], sudo_cv_uid_t_len=10, sudo_cv_uid_t_len=$?)
+])
+AC_MSG_RESULT($sudo_cv_uid_t_len)
+AC_DEFINE_UNQUOTED(MAX_UID_T_LEN, $sudo_cv_uid_t_len)
+])
+
+dnl
 dnl check for known UNIX variants
 dnl XXX - check to see that uname was checked first
 dnl
@@ -227,12 +257,13 @@ if test -n "$UNAMEPROG"; then
     OS=`$UNAMEPROG -s`
     # some OS's set -s the same as -n (BROKEN!!!)
     if test "$OS" = `$UNAMEPROG -n`; then
-	# evil hack for ISC unix (svr4)
+	# evil hack for ISC unix (svr4) and SCO
 	if test "`$UNAMEPROG -m`" = "i386"; then
-	    case "`$UNAMEPROG -X`" in
-		"/"* | "uname"*)	OS="isc" ;;
-		*)			OS="sco" ;;
-	    esac
+	    if test -d /usr/admin; then
+		OS="isc"
+	    else
+		OS="sco"
+	    fi
 	else
 	    OS=`$UNAMEPROG -v`
 	fi
