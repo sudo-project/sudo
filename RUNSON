@@ -46,6 +46,8 @@ DEC UNIX 3.x	alpha	bundled cc	1.3.4	Tina Yang	 --with-C2
 AIX	3.2.X	rs6000	bundled cc	1.4	Todd Miller	 none
 AIX	4.1.X	rs6000	bundled cc	1.4	Todd Miller	 none
 AIX	4.1.3	PowerPC	gcc-2.7.0	1.4	Bob Shair	 none
+AIX	4.1.X	rs6000	bundled cc	1.5.3	Robin Jackson	 --with-AFS
+AIX	4.1.X	PowerPC	bundled cc	1.5.3	Robin Jackson	 --with-AFS
 BSD	4.3	hp300	gcc2.5.6	1.4	Todd Miller	 none
 ConvexOS 9.1	convex	bundled cc	1.3.6	Todd Miller	 none
 ConvexOS 9.1	convex	gcc2.4.5	1.3.6	Todd Miller	 none
@@ -62,7 +64,11 @@ ATT	SVR4.x	i486	Metaware CC	1.4	Chris Ellington	 none
 SINIX	5.42	R4000	bundled cc	1.4	Paul Tuininga	 none
 NCR	2.03	3400	bundled cc	1.4	Mark Rauschkolb	 --with-getpass
 NCR	3.00	5100	bundled cc	1.4	Mark Rauschkolb	 --with-getpass
-Unicos	9.0.1ai	C90	bundled cc	1.5	Sunit Nangia	none
+Unicos	9.0.1ai	C90	bundled cc	1.5	Sunit Nangia	 none
+DGUNIX	R4.11MU03 i686	gcc		1.5.3	Ramesh Vasudevan none
+NetBSD  1.2[A-G] x86    gcc-2.7.2.{1,2} 1.5.3   Jason R. Thorpe  none
+NetBSD  1.2[A-G] m68k   gcc-2.7.2.{1,2} 1.5.3   Jason R. Thorpe  none
+NetBSD  1.2[A-G] sparc  gcc-2.7.2.{1,2} 1.5.3   Jason R. Thorpe  none
 
 Systems on which CU sudo is expected to run on but hasn't been tested.
 If you can verify any of these, please send mail to sudo-bugs@courtesan.com
@@ -70,7 +76,6 @@ If you can verify any of these, please send mail to sudo-bugs@courtesan.com
  Op. System	CPU	Compilers	Sudo	Reported	 Special
 Name	Rev	Arch	Used		Version	By		 Options
 =======	=======	=======	===============	======= ===============  ===============
-AIX	3.2.X	rs6000	bundled cc	1.5.3	YOUR NAME HERE	 --with-AFS
 ConvexOS 9.1	convex	cc or gcc	1.5.3	YOUR NAME HERE	 --with-C2
 Ultrix	4.x	mips	cc or gcc	1.5.3	YOUR NAME HERE	 --with-C2
 IRIX	6.x	mips	cc or gcc	1.5.3	YOUR NAME HERE	 --with-C2
