@@ -72,6 +72,13 @@
 #endif /* S_ISREG */
 
 /*
+ * Some OS's may not have this.
+ */
+#ifndef S_IRWXU
+#  define S_IRWXU		0000700		/* rwx for owner */
+#endif /* S_IRWXU */
+
+/*
  * For kerberos, max password len is 128
  */
 #ifdef HAVE_KERB4
