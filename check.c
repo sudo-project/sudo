@@ -67,14 +67,14 @@ static char rcsid[] = "$Id$";
 #include <options.h>
 #include "insults.h"
 #include "version.h"
-#if (SHADOW_TYPE == SPW_SECUREWARE)
+#ifdef HAVE_GETPRPWUID
 #  ifdef __hpux
 #    include <hpsecurity.h>
 #  else
 #    include <sys/security.h>
 #  endif /* __hpux */
 #  include <prot.h>
-#endif /* SPW_SECUREWARE */
+#endif /* HAVE_GETPRPWUID */
 #ifdef HAVE_KERB4
 #  include <krb.h>
 #endif /* HAVE_KERB4 */
@@ -141,9 +141,9 @@ struct skey skey;
 #ifdef HAVE_OPIE
 struct opie opie;
 #endif
-#if (SHADOW_TYPE == SPW_SECUREWARE) && defined(__alpha)
-extern uchar_t crypt_type;
-#endif /* SPW_SECUREWARE && __alpha */
+#if defined(HAVE_GETPRPWUID) && defined(__alpha)
+extern int crypt_type;
+#endif /* HAVE_GETPRPWUID && __alpha */
 
 
 
@@ -585,42 +585,44 @@ static void check_passwd()
 	/*
 	 * If we use shadow passwords with a different crypt(3)
 	 * check that here, else use standard crypt(3).
+	 * XXX - break out into separate functions.
 	 */
-#    if (SHADOW_TYPE != SPW_NONE) && (SHADOW_TYPE != SPW_BSD)
-#      if (SHADOW_TYPE == SPW_ULTRIX4)
+#    ifdef HAVE_GETAUTHUID
 	if (!strcmp(user_passwd, (char *) crypt16(pass, user_passwd)))
 	    return;		/* if the passwd is correct return() */
-#      endif /* ULTRIX4 */
-#      if (SHADOW_TYPE == SPW_SECUREWARE) && !defined(__alpha)
+#    endif /* HAVE_GETAUTHUID */
+#    ifdef HAVE_GETPRPWUID
+#      ifndef __alpha
 #        ifdef HAVE_BIGCRYPT
 	if (strcmp(user_passwd, (char *) bigcrypt(pass, user_passwd)) == 0)
 	    return;           /* if the passwd is correct return() */
-#        else
-	if (strcmp(user_passwd, crypt(pass, user_passwd)) == 0)
-	    return;           /* if the passwd is correct return() */
 #        endif /* HAVE_BIGCRYPT */
-#      endif /* SECUREWARE && !__alpha */
-#      if (SHADOW_TYPE == SPW_SECUREWARE) && defined(__alpha)
-	if (crypt_type == AUTH_CRYPT_BIGCRYPT) {
-	    if (!strcmp(user_passwd, bigcrypt(pass, user_passwd)))
-		return;             /* if the passwd is correct return() */
-	} else if (crypt_type == AUTH_CRYPT_CRYPT16) {
-	    if (!strcmp(user_passwd, crypt16(pass, user_passwd)))
-		return;             /* if the passwd is correct return() */
+#      else /* !__alpha */
+	switch (crypt_type) {
+	    case AUTH_CRYPT_BIGCRYPT:
+		if (!strcmp(user_passwd, bigcrypt(pass, user_passwd)))
+		    return;		/* if the passwd is correct return() */
+		break;
+	    case AUTH_CRYPT_CRYPT16:
+		if (!strcmp(user_passwd, crypt16(pass, user_passwd)))
+		    return;		/* if the passwd is correct return() */
+		break;
 #        ifdef AUTH_CRYPT_OLDCRYPT
-	} else if (crypt_type == AUTH_CRYPT_OLDCRYPT ||
-		   crypt_type == AUTH_CRYPT_C1CRYPT) {
-	    if (!strcmp(user_passwd, crypt(pass, user_passwd)))
-		return;             /* if the passwd is correct return() */
+	    case AUTH_CRYPT_OLDCRYPT:
+	    case AUTH_CRYPT_C1CRYPT:
 #        endif
-	} else {
-	    (void) fprintf(stderr,
-                    "%s: Sorry, I don't know how to deal with crypt type %d.\n",
-                    Argv[0], crypt_type);
-	    exit(1);
+	    case -1:
+		if (!strcmp(user_passwd, crypt(pass, user_passwd)))
+		    return;		/* if the passwd is correct return() */
+		break;
+	    default:
+		(void) fprintf(stderr,
+			"%s: Sorry, I don't know how to deal with crypt type %d.\n",
+			Argv[0], crypt_type);
+		exit(1);
 	}
-#      endif /* SECUREWARE && __alpha */
-#    endif /* SHADOW_TYPE != SPW_NONE && SHADOW_TYPE != SPW_BSD */
+#      endif /* __alpha */
+#    endif /* HAVE_GETPRPWUID */
 
 	/* Normal UN*X password check */
 	if (!strcmp(user_passwd, (char *) crypt(pass, user_passwd)))

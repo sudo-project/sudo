@@ -201,6 +201,21 @@
 /* Define if you have set_auth_parameters(3). */
 #undef HAVE_SET_AUTH_PARAMETERS
 
+/* Define if you have getspnam(3).  [SVR4-style shadow passwords] */
+#undef HAVE_GETSPNAM
+
+/* Define if you have getprpwuid(3).  [SecureWare-style shadow passwords] */
+#undef HAVE_GETPRPWUID
+
+/* Define if you have getspwuid(3).  [HP-UX <= 9.X shadow passwords] */
+#undef HAVE_GETSPWUID
+
+/* Define if you have getpwanam(3).  [SunOS 4.x shadow passwords] */
+#undef HAVE_GETPWANAM
+
+/* Define if you have getauthuid(3).  [ULTRIX 4.x shadow passwords] */
+#undef HAVE_GETAUTHUID
+
 /* Define if you have seteuid(3). */
 #undef HAVE_SETEUID
 
@@ -265,18 +280,6 @@
 /* Define if your struct sockadr has an sa_len field. */
 #undef HAVE_SA_LEN
 
-/* Supported shadow password types */
-#define SPW_NONE		0x00
-#define SPW_SECUREWARE		0x01
-#define SPW_HPUX9		0x02
-#define SPW_SUNOS4		0x03
-#define SPW_SVR4		0x04
-#define SPW_ULTRIX4		0x05
-#define SPW_BSD			0x06
-
-/* Define to the variety of shadow passwords supported on your OS */
-#undef SHADOW_TYPE
-
 /* Define to void if your C compiler fully groks void, else char */
 #undef VOID
 
@@ -303,36 +306,3 @@
 
 /* Define if you want the log file line to be wrapped */
 #undef WRAP_LOG
-
-/*
- * Paths to commands used by sudo.  There are used by pathnames.h.
- * If you want to override these values, do so in pathnames.h, not here!
- */
-
-#ifndef _CONFIG_PATH_SENDMAIL  
-#undef _CONFIG_PATH_SENDMAIL
-#endif /* _CONFIG_PATH_SENDMAIL */
-
-#ifndef _CONFIG_PATH_VI
-#undef _CONFIG_PATH_VI
-#endif /* _CONFIG_PATH_VI */
-  
-#ifndef _CONFIG_PATH_PWD
-#undef _CONFIG_PATH_PWD
-#endif /* _CONFIG_PATH_PWD */
-
-#ifndef _CONFIG_PATH_MV
-#undef _CONFIG_PATH_MV
-#endif /* _CONFIG_PATH_MV */
-
-#ifndef _CONFIG_PATH_BSHELL
-#undef _CONFIG_PATH_BSHELL
-#endif /* _CONFIG_PATH_BSHELL */
-
-#ifndef _CONFIG_PATH_LOGFILE
-#undef _CONFIG_PATH_LOGFILE
-#endif /* _CONFIG_PATH_LOGFILE */
-
-#ifndef _CONFIG_PATH_TIMEDIR
-#undef _CONFIG_PATH_TIMEDIR
-#endif /* _CONFIG_PATH_TIMEDIR */

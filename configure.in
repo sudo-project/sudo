@@ -40,6 +40,7 @@ MANTYPE="man"
 AC_SUBST(MANTYPE)dnl
 MAN_POSTINSTALL=""
 AC_SUBST(MAN_POSTINSTALL)dnl
+CHECKSHADOW="true"
 
 dnl
 dnl Override default configure dirs...
@@ -52,6 +53,22 @@ test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 dnl
 dnl Options for --enable
 dnl
+
+AC_MSG_CHECKING(whether to disable shadow password support)
+AC_ARG_ENABLE(tgetpass,
+[  --enable-shadow         Use shadow passwords if they exist (default)
+  --disable-shadow        Never use shadow passwords],
+[ case "$enableval" in
+    yes)	AC_MSG_RESULT(no)
+		;;
+    no)		AC_MSG_RESULT(yes)
+		CHECKSHADOW="false"
+		;;
+    *)		AC_MSG_RESULT(no)
+    		echo "Ignoring unknown argument to --enable-tgetpass: $enableval"
+		;;
+  esac
+], AC_MSG_RESULT(no))
 
 AC_MSG_CHECKING(whether to use the system getpass function)
 AC_ARG_ENABLE(tgetpass,
@@ -376,24 +393,13 @@ case "$host" in
 		# getcwd(3) opens a pipe to getpwd(1)!?!
 		BROKEN_GETCWD=1
 
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SUNOS4(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_SUNOS4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		# check for password adjunct functions (shadow passwords)
+		if test "$CHECKSHADOW" = "true"; then
+		    AC_CHECK_FUNCS(getpwanam)
+		    CHECKSHADOW="false"
 		fi
 		;;
     *-*-solaris2*)
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
-		fi
-		if test "$with_C2" != "no"; then
-		    with_C2="yes"
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
-
 		# AFS support needs -lucb
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lucb"
@@ -404,8 +410,9 @@ case "$host" in
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 		;;
     *-*-hiuxmpp*)
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
+		if test "$CHECKSHADOW" = "true"; then
+		    AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsec"], AC_CHECK_LIB(security, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"]))
+		    CHECKSHADOW="false"
 		fi
 		;;
     *-*-hpux1[[0-9]]*)
@@ -413,14 +420,9 @@ case "$host" in
 		# (XXX - should be an option to configure)
 		#STATIC_SUDO=true
 
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_SECUREWARE"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		    SUDO_LIBS="${SUDO_LIBS} -lsec"
-		    LIBS="${LIBS} -lsec"
+		if test "$CHECKSHADOW" = "true"; then
+		    AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsec"])
+		    CHECKSHADOW="false"
 		fi
 
 		if test -n "$STATIC_SUDO"; then
@@ -452,12 +454,9 @@ case "$host" in
 
 		AC_DEFINE(BROKEN_SYSLOG)
 
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_HPUX9(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_HPUX9"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		if test "$CHECKSHADOW" = "true"; then
+		    AC_CHECK_FUNCS(getspwuid)
+		    CHECKSHADOW="false"
 		fi
 
 		if test -n "$STATIC_SUDO"; then
@@ -508,26 +507,12 @@ case "$host" in
 		# ignore envariables wrt dynamic lib path
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
 
-		# C2 security stuff
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_DUNIX(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SUDO_LIBS="${SUDO_LIBS} -lsecurity -laud"
-		    LIBS="${LIBS} -lsecurity -laud"
-		    SHADOW_TYPE="SPW_SECUREWARE"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		if test "$CHECKSHADOW" = "true"; then
+		    AC_CHECK_LIB(security, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"])
+		    CHECKSHADOW="false"
 		fi
 		;;
     *-*-irix*)
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
-
 		# configure may not think irix has stdc headers
 		# but it's good enough for sudo
 		AC_DEFINE(STDC_HEADERS)
@@ -547,16 +532,10 @@ case "$host" in
 		fi
 		;;
     *-*-linux*)
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		    OSDEFS="${OSDEFS} -DSHADOW_PWD"
-		    AC_CHECK_FUNC(getspnam, ,
-			SUDO_LIBS="${SUDO_LIBS} -lshadow"
-			LIBS="${LIBS} -lshadow")
+		# Some Linux versions need to link with -lshadow
+		if test "$CHECKSHADOW" = "true"; then
+		    AC_CHECK_FUNC(getspnam, AC_DEFINE(HAVE_GETSPNAM), AC_CHECK_LIB(shadow, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lshadow"]))
+		    CHECKSHADOW="false"
 		fi
 		;;
     *-convex-bsd*)
@@ -565,38 +544,19 @@ case "$host" in
 		    CFLAGS="${CFLAGS} -D__STDC__"
 		fi
 
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"
-		    SUDO_LIBS="${SUDO_LIBS} -lprot"
-		    LIBS="${LIBS} -lprot"
-		    SHADOW_TYPE="SPW_SECUREWARE"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		if test "$CHECKSHADOW" = "true"; then
+		    AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lprot"; OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"])
+		    CHECKSHADOW="false"
 		fi
 		;;
     *-*-ultrix*)
 		OS="ultrix"
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_ULTRIX4(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SUDO_LIBS="${SUDO_LIBS} -lauth"
-		    LIBS="${LIBS} -lauth"
-		    SHADOW_TYPE="SPW_ULTRIX4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		if test "$CHECKSHADOW" = "true"; then
+		    AC_CHECK_LIB(auth, getauthuid, AC_DEFINE(HAVE_GETAUTHUID) [SUDO_LIBS="${SUDO_LIBS} -lauth"])
+		    CHECKSHADOW="false"
 		fi
 		;;
     *-*-riscos*)
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
-
 		SUDO_LIBS="${SUDO_LIBS} -lsun -lbsd"
 		LIBS="${LIBS} -lsun -lbsd"
 		CPPFLAGS="${CPPFLAGS} -I/usr/include -I/usr/include/bsd"
@@ -608,25 +568,15 @@ case "$host" in
 		SUDO_LIBS="${SUDO_LIBS} -lcrypt"
 		LIBS="${LIBS} -lcrypt"
 
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SUDO_LIBS="${SUDO_LIBS} -lsec"
-		    LIBS="${LIBS} -lsec"
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		if test "$CHECKSHADOW" = "true"; then
+		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"])
+		    CHECKSHADOW="false"
 		fi
 		;;
     *-*-sco*)
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_SECUREWARE"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		    SUDO_LIBS="${SUDO_LIBS} -lprot -lx"
-		    LIBS="${LIBS} -lprot -lx"
+		if test "$CHECKSHADOW" = "true"; then
+		    AC_CHECK_LIB(prot, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lprot -lx"])
+		    CHECKSHADOW="false"
 		fi
 		;;
     *-*-unicos*)
@@ -638,14 +588,9 @@ case "$host" in
 		# we don't want -linet
 		LIB_INET=0
 
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		    SUDO_LIBS="${SUDO_LIBS} -lsec"
-		    LIBS="${LIBS} -lsec"
+		if test "$CHECKSHADOW" = "true"; then
+		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"])
+		    CHECKSHADOW="false"
 		fi
 		;;
     *-ccur-sysv4|*-ccur-sysvr4)
@@ -653,14 +598,6 @@ case "$host" in
 		SUDO_LIBS="${SUDO_LIBS} -lgen -lsocket -lnsl"
 		LIB_SOCKET=1
 		LIB_NSL=1                                    
-
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
 		;;
     *-*-bsdi*)
 		# Use shlicc for BSD/OS 2.x unless asked to do otherwise
@@ -670,23 +607,10 @@ case "$host" in
 		    ac_cv_prog_CC=shlicc
 		    CC="$ac_cv_prog_CC"
 		fi
-
-		# This should always be true but why not be careful...
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_BSD(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_BSD"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
 		;;
     *-*-*bsd*)
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_BSD(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_BSD"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		if test "$CHECKSHADOW" = "true"; then
+		    CHECKSHADOW="false"
 		fi
 		;;
     *-*-svr4*|*-*-sysv4*)
@@ -694,85 +618,18 @@ case "$host" in
 		SUDO_LIBS="${SUDO_LIBS} -lsocket -lnsl"
 		LIB_SOCKET=1
 		LIB_NSL=1                                    
-
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
-		;;
-    *-*-sysv*)
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
-		fi
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
-		;;
-    *)
-		if test -z "$host"; then
-		    echo "Unable to guess system type, you may need to specify on the command line."
-		fi
-
-		dnl
-		dnl Is this OS using shadow passwords?
-		dnl Just check the most common schemes.
-		dnl
-		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_GENERIC(with_C2="yes")
-		    AC_MSG_CHECKING(for shadow passwords and type)
-		    case "$SHADOW_TYPE" in
-			"SPW_SVR4")
-			    echo "SVR4"
-			    ;;
-			"SPW_BSD")
-			    echo "BSD"
-			    ;;
-			"SPW_SECUREWARE")
-			    echo "SecureWare"
-			    SUDO_LIBS="${SUDO_LIBS} -lprot -lx"
-			    LIBS="${LIBS} -lprot -lx"
-			    ;;
-			"SPW_NONE")
-			    echo "none"
-		    esac
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
 		;;
 esac
 
 dnl
-dnl Guess shadow password type unless we already know it.
-dnl This is used when the user specified --with-C2 option.
+dnl Check for shadow password routines if we have not already done so.
+dnl We check for SVR4-style first and then SecureWare-style.
 dnl
-if test "$with_C2" = "yes" -a -z "$SHADOW_TYPE"; then
-    AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SPW_SECUREWARE", [AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SPW_SVR4", [test -f /etc/master.passwd && SHADOW_TYPE="SPW_BSD"])])
-    AC_MSG_CHECKING(for shadow password type)
-    case "$SHADOW_TYPE" in
-	"SPW_SVR4")
-		echo "SVR4"
-		;;
-	"SPW_BSD")
-		echo "BSD"
-		;;
-	"SPW_SECUREWARE")
-		echo "SecureWare"
-		SUDO_LIBS="${SUDO_LIBS} -lprot -lx"
-		LIBS="${LIBS} -lprot -lx"
-		;;
-	*)
-		SHADOW_TYPE="SPW_NONE"
-		echo "unknown"
-		echo "Unable to determine shadow passwd type, sudo may not be able to verify passwords"
-		;;
-    esac
-    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-elif test -z "$SHADOW_TYPE"; then
-    SHADOW_TYPE="SPW_NONE"
-    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+if test "$CHECKSHADOW" = "true"; then
+    AC_CHECK_FUNC(getspnam, AC_DEFINE(HAVE_GETSPNAM) [CHECKSHADOW="false"])
+fi
+if test "$CHECKSHADOW" = "true"; then
+    AC_CHECK_FUNC(getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"], AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SUDO_LIBS="${SUDO_LIBS} -lsec"], AC_CHECK_LIB(security, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SUDO_LIBS="${SUDO_LIBS} -lsecurity"], AC_CHECK_LIB(prot, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SUDO_LIBS="${SUDO_LIBS} -lprot"]))))
 fi
 
 dnl

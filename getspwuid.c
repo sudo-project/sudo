@@ -52,27 +52,27 @@ static char rcsid[] = "$Id$";
 #include <pwd.h>
 #include "sudo.h"
 #include <options.h>
-#if (SHADOW_TYPE != SPW_NONE) && (SHADOW_TYPE != SPW_BSD)
-#  if (SHADOW_TYPE == SPW_SVR4)
-#    include <shadow.h>
-#  endif /* SVR4 */
-#  if (SHADOW_TYPE == SPW_SECUREWARE)
-#    ifdef __hpux
-#      include <hpsecurity.h>
-#    else
-#      include <sys/security.h>
-#    endif /* __hpux */
-#    include <prot.h>
-#  endif /* SECUREWARE */
-#  if (SHADOW_TYPE == SPW_ULTRIX4)
-#    include <auth.h>
-#  endif /* ULTRIX4 */
-#  if (SHADOW_TYPE == SPW_SUNOS4)
-#    include <sys/label.h>
-#    include <sys/audit.h>
-#    include <pwdadj.h>
-#  endif /* SUNOS4 */
-#endif /* SHADOW_TYPE != SPW_NONE && SHADOW_TYPE != SPW_BSD */
+
+/* Shadow password includes */
+#ifdef HAVE_GETSPNAM
+#  include <shadow.h>
+#endif /* HAVE_GETSPNAM */
+#ifdef HAVE_GETPRPWUID
+#  ifdef __hpux
+#    include <hpsecurity.h>
+#  else
+#    include <sys/security.h>
+#  endif /* __hpux */
+#  include <prot.h>
+#endif /* HAVE_GETPRPWUID */
+#ifdef HAVE_GETPWANAM
+#  include <sys/label.h>
+#  include <sys/audit.h>
+#  include <pwdadj.h>
+#endif /* HAVE_GETPWANAM */
+#ifdef HAVE_GETAUTHUID
+#  include <auth.h>
+#endif /* HAVE_GETAUTHUID */
 
 #ifndef STDC_HEADERS
 #ifndef __GNUC__                /* gcc has its own malloc */
@@ -87,16 +87,16 @@ extern char *strdup     __P((const char *));
 /*
  * Global variables (yuck)
  */
-#if (SHADOW_TYPE == SPW_SECUREWARE) && defined(__alpha)
-uchar_t crypt_type;
-#endif /* SPW_SECUREWARE && __alpha */
+#if defined(HAVE_GETPRPWUID) && defined(__alpha)
+int crypt_type = -1;
+#endif /* HAVE_GETPRPWUID && __alpha */
 
 
 /*
  * Local functions not visible outside getspwuid.c
  */
 static char *sudo_getshell	__P((struct passwd *));
-static char *sudo_getspwd	__P((struct passwd *));
+static char *sudo_getepw	__P((struct passwd *));
 
 
 
@@ -128,78 +128,68 @@ static char *sudo_getshell(pw_ent)
 
 /**********************************************************************
  *
- *  sudo_getspwd()
+ *  sudo_getepw()
  *
- *  This function returns the shadow password for the user described
- *  by pw_ent.  If there is no shadow password the normal UN*X password
- *  is returned instead.
+ *  This function returns the encrypted password for the user described
+ *  by pw_ent.  If there is a shadow password it is returned, else the
+ *  normal UN*X password is returned instead.
  */
 
-static char *sudo_getspwd(pw_ent)
+static char *sudo_getepw(pw_ent)
     struct passwd *pw_ent;
-#if (SHADOW_TYPE != SPW_NONE) && (SHADOW_TYPE != SPW_BSD)
-#  if (SHADOW_TYPE == SPW_SVR4)
 {
-    struct spwd *spw_ent;
+#ifdef HAVE_GETPRPWUID
+    {
+	struct pr_passwd *spw_ent;
 
-    if ((spw_ent = getspnam(pw_ent -> pw_name)) && spw_ent -> sp_pwdp)
-	return(spw_ent -> sp_pwdp);
-    else
-	return(pw_ent -> pw_passwd);
-}
-#  endif /* SVR4 */
-#  if (SHADOW_TYPE == SPW_HPUX9)
-{
-    struct s_passwd *spw_ent;
+	spw_ent = getprpwuid(pw_ent->pw_uid);
+	if (spw_ent != NULL && spw_ent->ufld.fd_encrypt != NULL) {
+#  ifdef __alpha
+	    crypt_type = spw_ent -> ufld.fd_oldcrypt;
+#    ifdef AUTH_CRYPT_C1CRYPT
+	    if (crypt_type != AUTH_CRYPT_C1CRYPT)
+#    endif /* AUTH_CRYPT_C1CRYPT */
+#  endif /* __alpha */
+		return(spw_ent -> ufld.fd_encrypt);
+	}
+    }
+#endif /* HAVE_GETPRPWUID */
+#ifdef HAVE_GETSPNAM
+    {
+	struct spwd *spw_ent;
 
-    if ((spw_ent = getspwuid(pw_ent -> pw_uid)) && spw_ent -> pw_passwd)
-	return(spw_ent -> pw_passwd);
-    else
-	return(pw_ent -> pw_passwd);
-}
-#  endif /* HPUX9 */
-#  if (SHADOW_TYPE == SPW_SUNOS4)
-{
-    struct passwd_adjunct *spw_ent;
+	if ((spw_ent = getspnam(pw_ent -> pw_name)) && spw_ent -> sp_pwdp)
+	    return(spw_ent -> sp_pwdp);
+    }
+#endif /* HAVE_GETSPNAM */
+#ifdef HAVE_GETSPWUID
+    {
+	struct s_passwd *spw_ent;
 
-    if ((spw_ent = getpwanam(pw_ent -> pw_name)) && spw_ent -> pwa_passwd)
-	return(spw_ent -> pwa_passwd);
-    else
-	return(pw_ent -> pw_passwd);
-}
-#  endif /* SUNOS4 */
-#  if (SHADOW_TYPE == SPW_ULTRIX4)
-{
-    AUTHORIZATION *spw_ent;
+	if ((spw_ent = getspwuid(pw_ent -> pw_uid)) && spw_ent -> pw_passwd)
+	    return(spw_ent -> pw_passwd);
+    }
+#endif /* HAVE_GETSPWUID */
+#ifdef HAVE_GETPWANAM
+    {
+	struct passwd_adjunct *spw_ent;
 
-    if ((spw_ent = getauthuid(pw_ent -> pw_uid)) && spw_ent -> a_password)
-	return(spw_ent -> a_password);
-    else
-	return(pw_ent -> pw_passwd);
-}
-#  endif /* ULTRIX4 */
-#  if (SHADOW_TYPE == SPW_SECUREWARE)
-{
-    struct pr_passwd *spw_ent;
+	if ((spw_ent = getpwanam(pw_ent -> pw_name)) && spw_ent -> pwa_passwd)
+	    return(spw_ent -> pwa_passwd);
+    }
+#endif /* HAVE_GETPWANAM */
+#ifdef HAVE_GETAUTHUID
+    {
+	AUTHORIZATION *spw_ent;
 
-    if ((spw_ent = getprpwuid(pw_ent->pw_uid)) && spw_ent->ufld.fd_encrypt) {
-#    ifdef __alpha
-	crypt_type = spw_ent -> ufld.fd_oldcrypt;
-#      ifdef AUTH_CRYPT_C1CRYPT
-        if (crypt_type == AUTH_CRYPT_C1CRYPT)
-	    return(pw_ent -> pw_passwd);
-#      endif /* AUTH_CRYPT_C1CRYPT */
-#    endif /* __alpha */
-	return(spw_ent -> ufld.fd_encrypt);
-    } else
-	return(pw_ent -> pw_passwd);
-}
-#  endif /* SECUREWARE */
-#else
-{
+	if ((spw_ent = getauthuid(pw_ent -> pw_uid)) && spw_ent -> a_password)
+	    return(spw_ent -> a_password);
+    }
+#endif /* HAVE_GETAUTHUID */
+
+    /* Fall back on normal passwd */
     return(pw_ent->pw_passwd);
 }
-#endif /* SHADOW_TYPE != SPW_NONE && SHADOW_TYPE != SPW_BSD */
 
 
 /**********************************************************************
@@ -255,7 +245,7 @@ struct passwd *sudo_getpwuid(uid)
     }
 
     /* pw_passwd gets a shadow password if applicable */
-    local_pw_ent->pw_passwd = (char *) strdup(sudo_getspwd(pw_ent));
+    local_pw_ent->pw_passwd = (char *) strdup(sudo_getepw(pw_ent));
     if (local_pw_ent->pw_passwd == NULL) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);

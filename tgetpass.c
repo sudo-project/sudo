@@ -68,14 +68,9 @@ static char rcsid[] = "$Id$";
 #include <sys/ioctl.h>
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
-#if (SHADOW_TYPE == SPW_SECUREWARE)
-#  ifdef __hpux
-#    include <hpsecurity.h>
-#  else
-#    include <sys/security.h>
-#  endif /* __hpux */ 
-#  include <prot.h>
-#endif /* SPW_SECUREWARE */
+#ifdef HAVE_GETPRPWUID
+#include <prot.h>			/* for AUTH_MAX_PASSWD_LENGTH */
+#endif /* HAVE_GETPRPWUID */
 
 #include <pathnames.h>
 #include "compat.h"
