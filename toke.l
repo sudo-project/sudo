@@ -184,10 +184,12 @@ DEFVAR			[a-z_]+
 			    char *cp, *ep;
 			    ++sudolineno;
 			    /* pull out path from #include line */
-			    for (cp = yytext + 9; isblank(*cp); cp++)
-				continue;
-			    for (ep = cp; *ep != '\0' && !isspace(*ep); ep++)
-				continue;
+			    cp = yytext + 9;
+			    while (isblank((unsigned char) *cp))
+				cp++;
+			    ep = cp;
+			    while (*ep != '\0' && !isspace((unsigned char) *ep))
+				ep++;
 			    *ep = '\0';
 			    /* push current buffer and switch to include file */
 			    if (!push_include(cp))

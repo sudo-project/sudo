@@ -1440,10 +1440,12 @@ YY_RULE_SETUP
 			    char *cp, *ep;
 			    ++sudolineno;
 			    /* pull out path from #include line */
-			    for (cp = yytext + 9; isblank(*cp); cp++)
-				continue;
-			    for (ep = cp; *ep != '\0' && !isspace(*ep); ep++)
-				continue;
+			    cp = yytext + 9;
+			    while (isblank((unsigned char) *cp))
+				cp++;
+			    ep = cp;
+			    while (*ep != '\0' && !isspace((unsigned char) *ep))
+				ep++;
 			    *ep = '\0';
 			    /* push current buffer and switch to include file */
 			    if (!push_include(cp))
@@ -1454,7 +1456,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 199 "toke.l"
+#line 201 "toke.l"
 {
 			    BEGIN GOTDEFS;
 			    switch (yytext[8]) {
@@ -1482,7 +1484,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 224 "toke.l"
+#line 226 "toke.l"
 {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
@@ -1505,7 +1507,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 244 "toke.l"
+#line 246 "toke.l"
 {
 				/* cmnd does not require passwd for this user */
 			    	LEXTRACE("NOPASSWD ");
@@ -1514,7 +1516,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 250 "toke.l"
+#line 252 "toke.l"
 {
 				/* cmnd requires passwd for this user */
 			    	LEXTRACE("PASSWD ");
@@ -1523,7 +1525,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 256 "toke.l"
+#line 258 "toke.l"
 {
 			    	LEXTRACE("NOEXEC ");
 			    	return(NOEXEC);
@@ -1531,7 +1533,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 261 "toke.l"
+#line 263 "toke.l"
 {
 			    	LEXTRACE("EXEC ");
 			    	return(EXEC);
@@ -1539,7 +1541,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 266 "toke.l"
+#line 268 "toke.l"
 {
 			    	LEXTRACE("NOMONITOR ");
 			    	return(NOMONITOR);
@@ -1547,7 +1549,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 271 "toke.l"
+#line 273 "toke.l"
 {
 			    	LEXTRACE("MONITOR ");
 			    	return(MONITOR);
@@ -1555,7 +1557,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 276 "toke.l"
+#line 278 "toke.l"
 {
 			    /* netgroup */
 			    if (!fill(yytext, yyleng))
@@ -1566,7 +1568,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 284 "toke.l"
+#line 286 "toke.l"
 {
 			    /* UN*X group */
 			    if (!fill(yytext, yyleng))
@@ -1577,7 +1579,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 292 "toke.l"
+#line 294 "toke.l"
 {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
@@ -1587,7 +1589,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 299 "toke.l"
+#line 301 "toke.l"
 {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
@@ -1597,7 +1599,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 306 "toke.l"
+#line 308 "toke.l"
 {
 				BEGIN GOTRUNAS;
 				LEXTRACE("RUNAS ");
@@ -1606,7 +1608,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 312 "toke.l"
+#line 314 "toke.l"
 {
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
@@ -1621,7 +1623,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 324 "toke.l"
+#line 326 "toke.l"
 {
 			    /* username/uid that user can run command as */
 			    if (!fill(yytext, yyleng))
@@ -1632,14 +1634,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 332 "toke.l"
+#line 334 "toke.l"
 {
 			    BEGIN INITIAL;
 			}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 336 "toke.l"
+#line 338 "toke.l"
 {
 			    /* no command args allowed for Defaults!/path */
 			    if (!fill_cmnd(yytext, yyleng))
@@ -1650,7 +1652,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 344 "toke.l"
+#line 346 "toke.l"
 {
 			    BEGIN GOTCMND;
 			    LEXTRACE("COMMAND ");
@@ -1660,7 +1662,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 351 "toke.l"
+#line 353 "toke.l"
 {
 			    /* directories can't have args... */
 			    if (yytext[yyleng - 1] == '/') {
@@ -1678,7 +1680,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 366 "toke.l"
+#line 368 "toke.l"
 {
 			    /* a word */
 			    if (!fill(yytext, yyleng))
@@ -1689,7 +1691,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 374 "toke.l"
+#line 376 "toke.l"
 {
 			    LEXTRACE(", ");
 			    return(',');
@@ -1697,7 +1699,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 379 "toke.l"
+#line 381 "toke.l"
 {
 			    LEXTRACE("= ");
 			    return('=');
@@ -1705,7 +1707,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 384 "toke.l"
+#line 386 "toke.l"
 {
 			    LEXTRACE(": ");
 			    return(':');
@@ -1713,7 +1715,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 389 "toke.l"
+#line 391 "toke.l"
 {
 			    if (yyleng % 2 == 1)
 				return('!');	/* return '!' */
@@ -1721,7 +1723,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 394 "toke.l"
+#line 396 "toke.l"
 {
 			    BEGIN INITIAL;
 			    ++sudolineno;
@@ -1731,14 +1733,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 401 "toke.l"
+#line 403 "toke.l"
 {			/* throw away space/tabs */
 			    sawspace = TRUE;	/* but remember for fill_args */
 			}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 405 "toke.l"
+#line 407 "toke.l"
 {
 			    sawspace = TRUE;	/* remember for fill_args */
 			    ++sudolineno;
@@ -1747,7 +1749,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 411 "toke.l"
+#line 413 "toke.l"
 {
 			    BEGIN INITIAL;
 			    ++sudolineno;
@@ -1757,7 +1759,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 418 "toke.l"
+#line 420 "toke.l"
 {
 			    LEXTRACE("ERROR ");
 			    return(ERROR);
@@ -1769,7 +1771,7 @@ case YY_STATE_EOF(GOTDEFS):
 case YY_STATE_EOF(GOTCMND):
 case YY_STATE_EOF(STARTDEFS):
 case YY_STATE_EOF(INDEFS):
-#line 423 "toke.l"
+#line 425 "toke.l"
 {
 			    if (YY_START != INITIAL) {
 			    	BEGIN INITIAL;
@@ -1782,10 +1784,10 @@ case YY_STATE_EOF(INDEFS):
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 433 "toke.l"
+#line 435 "toke.l"
 ECHO;
 	YY_BREAK
-#line 1789 "toke.c"
+#line 1791 "toke.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2674,7 +2676,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 433 "toke.l"
+#line 435 "toke.l"
 
 static int
 fill(s, len)
