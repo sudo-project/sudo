@@ -108,7 +108,7 @@ int parse_error = FALSE;
  */
 char host[] = "";
 char *cmnd = "";
-struct passwd *sudo_pw_ent;
+struct passwd *user_pw_ent;
 
 
 /********************************************************************
@@ -170,8 +170,8 @@ int main(argc, argv)
 	exit(1);
     }
 
-    /* sudo_pw_ent needs to be defined to _something_, this will do */
-    sudo_pw_ent = pwd;
+    /* user_pw_ent needs to be defined to _something_, this will do */
+    user_pw_ent = pwd;
 
     /*
      * Copy sudoers file to stmp

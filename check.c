@@ -139,7 +139,7 @@ void check_user()
     oldmask = umask(077);	/* make sure the timestamp files are private */
 
     rtn = check_timestamp();
-    if (rtn && sudo_pw_ent->pw_uid) {	/* if timestamp is not current... */
+    if (rtn && user_uid) {	/* if timestamp is not current... */
 	if (rtn == 2)
 	    reminder();		/* do the reminder if ticket file is new */
 	check_passwd();
@@ -172,7 +172,7 @@ int user_is_exempt()
 	return(TRUE);
 
     for (gr_mem = grp->gr_mem; *gr_mem; gr_mem++) {
-	if (strcmp(sudo_pw_ent->pw_name, *gr_mem) == 0)
+	if (strcmp(user_name, *gr_mem) == 0)
 	    return(TRUE);
     }
 
@@ -205,11 +205,9 @@ static int check_timestamp()
     else
 	p = tty;
 
-    (void) sprintf(timestampfile, "%s/%s.%s", _PATH_SUDO_TIMEDIR,
-		   sudo_pw_ent->pw_name, p);
+    (void) sprintf(timestampfile, "%s/%s.%s", _PATH_SUDO_TIMEDIR, user_name, p);
 #else
-    (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR,
-		   sudo_pw_ent->pw_name);
+    (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR, user_name);
 #endif /* USE_TTY_TICKETS */
 
     timedir_is_good = 1;	/* now there's an assumption for ya... */
@@ -364,11 +362,9 @@ void remove_timestamp()
     else
 	p = tty;
 
-    (void) sprintf(timestampfile, "%s/%s.%s", _PATH_SUDO_TIMEDIR,
-		   sudo_pw_ent->pw_name, p);
+    (void) sprintf(timestampfile, "%s/%s.%s", _PATH_SUDO_TIMEDIR, user_name, p);
 #else
-    (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR,
-		   sudo_pw_ent->pw_name);
+    (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR, user_name);
 #endif /* USE_TTY_TICKETS */
 
     /* become root */
@@ -462,7 +458,7 @@ static void check_passwd()
     /* get a password from the user */
 #ifdef HAVE_SKEY
 	set_perms(PERM_ROOT);
-	pass = skey_getpass(prompt, sudo_pw_ent, TRUE);
+	pass = skey_getpass(prompt, user_pw_ent, TRUE);
 	set_perms(PERM_USER);
 #else
 #  ifdef USE_GETPASS
@@ -491,24 +487,21 @@ static void check_passwd()
 	 */
 #ifdef SHADOW_TYPE
 #  if (SHADOW_TYPE == SPW_ULTRIX4)
-	if (!strcmp(sudo_pw_ent->pw_passwd,
-	    (char *) crypt16(pass, sudo_pw_ent->pw_passwd)))
+	if (!strcmp(user_passwd, (char *)crypt16(pass, user_passwd)))
 	    return;		/* if the passwd is correct return() */
 #  endif /* ULTRIX4 */
 #  if (SHADOW_TYPE == SPW_SECUREWARE) && !defined(__alpha)
-	strncpy(salt, sudo_pw_ent->pw_passwd, 2);
+	strncpy(salt, user_passwd, 2);
 	i = AUTH_SALT_SIZE + AUTH_CIPHERTEXT_SEG_CHARS;
-	if (strncmp(sudo_pw_ent->pw_passwd, crypt(pass, salt), i) == 0)
+	if (strncmp(user_passwd, crypt(pass, salt), i) == 0)
 	    return;           /* if the passwd is correct return() */
 #  endif /* SECUREWARE && !__alpha */
 #  if (SHADOW_TYPE == SPW_SECUREWARE) && defined(__alpha)
 	if (crypt_type == AUTH_CRYPT_BIGCRYPT) {
-	    if (!strcmp(sudo_pw_ent->pw_passwd,
-		bigcrypt(pass, sudo_pw_ent->pw_passwd)))
+	    if (!strcmp(user_passwd, bigcrypt(pass, user_passwd)))
 		return;             /* if the passwd is correct return() */
 	} else if (crypt_type == AUTH_CRYPT_CRYPT16) {
-	    if (!strcmp(sudo_pw_ent->pw_passwd,
-		crypt16(pass, sudo_pw_ent->pw_passwd)))
+	    if (!strcmp(user_passwd, crypt16(pass, user_passwd)))
 		return;             /* if the passwd is correct return() */
 	} else {
 	    (void) fprintf(stderr,
@@ -521,26 +514,25 @@ static void check_passwd()
 
 #ifdef HAVE_SKEY
 	set_perms(PERM_ROOT);
-	if (!strcmp(sudo_pw_ent->pw_passwd,
-	    skey_crypt(pass, sudo_pw_ent->pw_passwd, sudo_pw_ent, TRUE))) {
+	if (!strcmp(user_passwd,
+	    skey_crypt(pass, user_passwd, user_pw_ent, TRUE))) {
 	    set_perms(PERM_USER);
 	    return;             /* if the passwd is correct return() */
 	}
 	set_perms(PERM_USER);
 #else
-	if (!strcmp(sudo_pw_ent->pw_passwd,
-	    (char *) crypt(pass, sudo_pw_ent->pw_passwd)))
+	if (!strcmp(user_passwd, (char *) crypt(pass, user_passwd)))
 	    return;		/* if the passwd is correct return() */
 #endif /* HAVE_SKEY */
 
 #ifdef HAVE_KERB4
-	if (sudo_pw_ent->pw_uid && sudo_krb_validate_user(sudo_pw_ent, pass) == 0)
+	if (user_uid && sudo_krb_validate_user(user_pw_ent, pass) == 0)
 	    return;
 #endif /* HAVE_KERB4 */
 
 #ifdef HAVE_AFS
 	code = ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION+KA_USERAUTH_DOSETPAG,
-                                          sudo_pw_ent->pw_name,
+                                          user_name,
                                           (char *) 0, 
                                           (char *) 0,
                                           pass,
@@ -553,7 +545,7 @@ static void check_passwd()
 #endif /* HAVE_AFS */
 #ifdef HAVE_DCE
 	/* XXX - this seems wrong... */
-	if (dce_pwent(sudo_pw_ent->pw_name, pass))
+	if (dce_pwent(user_name, pass))
 	    return;
 #endif /* HAVE_DCE */
 

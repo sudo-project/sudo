@@ -66,7 +66,7 @@ char *cmnd = NULL;
 char *cmnd_args = NULL;
 char host[MAXHOSTNAMELEN+1];
 char cwd[MAXPATHLEN+1];
-struct passwd *sudo_pw_ent;
+struct passwd *user_pw_ent;
 char **Argv;
 int  Argc;
 uid_t uid;
@@ -198,7 +198,7 @@ main(argc, argv)
     Argv = argv;
     Argc = argc;
 
-    sudo_pw_ent = &pw_ent;		/* need sudo_pw_ent->pw_name defined */
+    user_pw_ent = &pw_ent;		/* need user_pw_ent->pw_name defined */
 
     cmnd = argv[1];
     pw_ent.pw_name = argv[2];

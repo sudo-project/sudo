@@ -132,6 +132,16 @@ extern int top;
 #define PERM_SUDOERS             0x04
 
 /*
+ * Shortcuts for user_pw_ent
+ */
+#define user_name		(user_pw_ent -> pw_name)
+#define user_passwd		(user_pw_ent -> pw_passwd)
+#define user_uid		(user_pw_ent -> pw_uid)
+#define user_gid		(user_pw_ent -> pw_gid)
+#define user_shell		(user_pw_ent -> pw_shell)
+#define user_dir		(user_pw_ent -> pw_dir)
+
+/*
  * Prototypes
  */
 
@@ -170,7 +180,7 @@ extern char host[];
 extern char cwd[];
 extern struct interface *interfaces;
 extern int num_interfaces;
-extern struct passwd *sudo_pw_ent;
+extern struct passwd *user_pw_ent;
 extern char *tty;
 extern char *cmnd;
 extern char *cmnd_args;

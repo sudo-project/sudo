@@ -329,13 +329,13 @@ userlist	:	user
 		;
 
 user		:	NAME {
-			    if (strcmp($1, sudo_pw_ent->pw_name) == 0)
+			    if (strcmp($1, user_name) == 0)
 				user_matches = TRUE;
 			    (void) free($1);
 			    $1 = NULL; /* XXX */
 			}
 		|	NETGROUP {
-			    if (netgr_matches($1, NULL, sudo_pw_ent->pw_name))
+			    if (netgr_matches($1, NULL, user_name))
 				user_matches = TRUE;
 			    (void) free($1);
 			    $1 = NULL; /* XXX */

@@ -129,7 +129,7 @@ extern int user_is_exempt	__P((void));
  */
 int Argc;
 char **Argv;
-struct passwd *sudo_pw_ent;
+struct passwd *user_pw_ent;
 char *cmnd = NULL;
 char *cmnd_args = NULL;
 char *tty = NULL;
@@ -310,9 +310,9 @@ int main(argc, argv)
 		    }
 
 		    /* replace "-s" with the shell's name */
-		    if ((NewArgv[0] = strrchr(sudo_pw_ent->pw_shell, '/') + 1)
+		    if ((NewArgv[0] = strrchr(user_shell, '/') + 1)
 			== (char *) 1)
-			NewArgv[0] = sudo_pw_ent->pw_shell;
+			NewArgv[0] = user_shell;
 
 		    for (i = 1; i < Argc; i++)
 			NewArgv[i] = Argv[i];
@@ -349,7 +349,7 @@ int main(argc, argv)
  *  load_globals()
  *
  *  This function primes these important global variables:
- *  sudo_pw_ent, host, cwd, interfaces.
+ *  user_pw_ent, host, cwd, interfaces.
  */
 
 static void load_globals(sudo_mode)
@@ -366,11 +366,11 @@ static void load_globals(sudo_mode)
      * if necesary.  It is assumed that euid is 0 at this point so we
      * can read the shadow passwd file if necesary.
      */
-    sudo_pw_ent = sudo_getpwuid(getuid());
+    user_pw_ent = sudo_getpwuid(getuid());
     set_perms(PERM_ROOT);
     set_perms(PERM_USER);
-    if (sudo_pw_ent == NULL) {
-	/* need to make a fake sudo_pw_ent */
+    if (user_pw_ent == NULL) {
+	/* need to make a fake user_pw_ent */
 	struct passwd pw_ent;
 	char pw_name[MAX_UID_T_LEN+1];
 
@@ -378,7 +378,7 @@ static void load_globals(sudo_mode)
 	pw_ent.pw_uid = getuid();
 	(void) sprintf(pw_name, "%ld", pw_ent.pw_uid);
 	pw_ent.pw_name = pw_name;
-	sudo_pw_ent = &pw_ent;
+	user_pw_ent = &pw_ent;
 
 	/* complain, log, and die */
 	log_error(GLOBAL_NO_PW_ENT);
@@ -409,7 +409,7 @@ static void load_globals(sudo_mode)
 #endif /* UMASK */
 
 #ifdef NO_ROOT_SUDO
-    if (sudo_pw_ent -> pw_uid == 0) {
+    if (user_uid == 0) {
 	(void) fprintf(stderr,
 		       "You are already root, you don't need to use sudo.\n");
 	exit(1);
@@ -603,14 +603,14 @@ static void add_env()
     }
 
     /* add the SUDO_USER envariable */
-    if (sudo_setenv("SUDO_USER", sudo_pw_ent -> pw_name)) {
+    if (sudo_setenv("SUDO_USER", user_name)) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
 
     /* add the SUDO_UID envariable */
-    (void) sprintf(idstr, "%ld", (long) sudo_pw_ent -> pw_uid);
+    (void) sprintf(idstr, "%ld", (long) user_uid);
     if (sudo_setenv("SUDO_UID", idstr)) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
@@ -645,8 +645,8 @@ static void load_cmnd(sudo_mode)
 
     /* If we are running a shell command args start at position 1 */
     if ((sudo_mode & MODE_SHELL)) {
-	if (sudo_pw_ent->pw_shell && *sudo_pw_ent->pw_shell) {
-	    old_cmnd = sudo_pw_ent->pw_shell;
+	if (user_shell && *user_shell) {
+	    old_cmnd = user_shell;
 	    arg_start = 1;
 	} else {
 	    (void) fprintf(stderr, "%s: Unable to determine shell.", Argv[0]);
@@ -794,8 +794,8 @@ void set_perms(perm)
 			      	break;
 
 	case        PERM_USER : 
-    	    	    	        if (seteuid(sudo_pw_ent -> pw_uid)) {
-    	    	    	            perror("seteuid(sudo_pw_ent -> pw_uid)");
+    	    	    	        if (seteuid(user_uid)) {
+    	    	    	            perror("seteuid(user_uid)");
     	    	    	            exit(1); 
     	    	    	        }
 			      	break;
@@ -806,7 +806,7 @@ void set_perms(perm)
 				    exit(1);
 				}
 
-				if (setuid(sudo_pw_ent -> pw_uid)) {
+				if (setuid(user_uid)) {
 				    perror("setuid(uid)");
 				    exit(1);
 				}
