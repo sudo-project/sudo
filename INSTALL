@@ -7,11 +7,15 @@ INSTALL NOTES
    "make ostype" where ostype one of the ones listed (ie "make sunos").
 
    If your os is not listed, you can try "make generic" and see if it
-   works.  You may have to add your own OS entry to the Makefile
-   but it's not hard to do.
+   works.  You may have to add your own OS entry to the config directory.
+   Take a look at the entries in config/ for an idea of how to do so.
+   The way things work is that Makefile creates Makefile.real by cat'ing
+   config/os-type (architecture dependent portion) and Makefile.ind
+   (architecture independent portion).  It should be fairly straight-
+   forward.
 
-3) Do a make install to install sudo.  If you get an error about
-   setuid(0) failing, something went wrong with the install and
+3) Do a make install (as root) to install sudo.  If you get an error
+   about setuid(0) failing, something went wrong with the install and
    the permissions on sudo are wrong.  Sudo needs to run setuid root.
    If you get this message, chances are it's not running setuid root.
 
@@ -25,23 +29,33 @@ A few notes:
 a) To use syslog with the ultrix version you *may* need to grab
    and install pub/DEC/jtkohl-syslog-complete.tar.Z available from
    gatekeeper.dec.com via anonymous ftp.  All our decs have this installed
-   so I'm not really sure if it's necesary or not.  Regardless, it's
+   so I'm not really sure if it's necessary or not.  Regardless, it's
    a nice port of the 4.3 syslogd that backwards compatible with the
    ultrix version.  Highly recommended.
 
-b) By default, visudo will use the editor referred to by the EDITOR and
-   VISUAL environmental variables.  If you have EDITOR set to something
+b) visudo will *NOT* use the editor referred to by the EDITOR or
+   VISUAL environmental variables unless you define ENV_EDITOR in
+   Makefile.ind.  I like the feature, but it can be a security hole
+   if you don't know about it.  If you have EDITOR set to something
    secure (ie: no shells or external commands) in the Makefile or
-   sudo.h you'll want to define STATICEDITOR so that visudo doesn't
-   look at EDITOR or VISUAL.  Note that vi (the default editor) is
-   anything *but* secure in this respect (and no, setting the editor to
-   a wrapper that sets the SHELL envar to /bin/true does *not* make vi
-   secure--you can change shell from within vi).
+   sudo.h you don't want to define ENV_EDITOR.  Note that vi (the default
+   editor) is anything *but* secure in this respect (and no, setting the
+   editor to a wrapper that sets the SHELL envar to /bin/true does *not*
+   make vi secure--you can change your shell from within vi).  If you
+   leave the default of vi, you really don't stand to lose anything by
+   defining ENV_EDITOR.
 
-c) If you have a sense of humor you may want to defined USE_INSULTS to
+c) If you have a sense of humor you may want to define USE_INSULTS to
    get the insults from the "old" sudo when you enter an incorrect
    password.  Beware, this feature causes some people to want to throw
    their machine across the room and dash it to tiny pieces.
+
+d) When creating a config file for a new os type, you should use the loader
+   options that cause sudo to be statically linked.  That way, you're
+   immune from a user with limited sudo changing libc in such a way as
+   to get a root shell.  Some shared library implementations don't
+   let you do this if the executable is setuid (solaris 2.x for example).
+   In those cases it's unnecessary to link statically.
 
 Please send changes, bugs, security holes, and gripes to:
     sudo-bugs@cs.colorado.edu
