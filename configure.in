@@ -28,6 +28,7 @@ dnl find "uname"
 dnl
 AC_PROGRAM_CHECK(UNAMEPROG, uname, uname, )
 AC_PROGRAM_CHECK(TRPROG, tr, tr, )
+AC_PROGRAM_CHECK(SEDPROG, sed, sed, )
 dnl
 dnl what architecture are we on?
 dnl
