@@ -1,30 +1,28 @@
 /*
- *  CU sudo version 1.6
- *  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
- *
- *******************************************************************
- *
- *  This module contains load_interfaces() a function that
- *  fills the interfaces global with a list of active ip
- *  addresses and their associated netmasks.
- *
- *  Todd C. Miller  Mon May  1 20:48:43 MDT 1995
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -78,14 +76,10 @@ static const char rcsid[] = "$Sudo$";
 
 
 #if defined(SIOCGIFCONF) && !defined(STUB_LOAD_INTERFACES)
-/**********************************************************************
- *
- *  load_interfaces()
- *
- *  This function sets the interfaces global variable
- *  and sets the constituent ip addrs and netmasks.
+/*
+ * Allocate and fill in the interfaces global variable with the
+ * machine's ip addresses and netmasks.
  */
-
 void
 load_interfaces()
 {
@@ -101,12 +95,13 @@ load_interfaces()
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
-	perror("socket");
+	(void) fprintf(stderr, "%s: cannot open socket: %s\n",
+	    Argv[0], strerror(errno));
 	exit(1);
     }
 
     /*
-     * get interface configuration or return (leaving interfaces NULL)
+     * Get interface configuration or return (leaving num_interfaces 0)
      */
     for (;;) {
 	ifconf_buf = erealloc(ifconf_buf, len);
@@ -114,7 +109,7 @@ load_interfaces()
 	ifconf->ifc_len = len - sizeof(struct ifconf);
 	ifconf->ifc_buf = (caddr_t) (ifconf_buf + sizeof(struct ifconf));
 
-	/* networking may not be installed in kernel */
+	/* Networking may not be installed in kernel... */
 #ifdef _ISC
 	STRSET(SIOCGIFCONF, (caddr_t) ifconf, len);
 	if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0) {
@@ -126,49 +121,37 @@ load_interfaces()
 	    return;
 	}
 
-	/* break out of loop if we have a big enough buffer */
+	/* Break out of loop if we have a big enough buffer. */
 	if (ifconf->ifc_len + sizeof(struct ifreq) < len)
 	    break;
 	len += BUFSIZ;
     }
 
-    /*
-     * get the maximum number of interfaces that *could* exist.
-     */
+    /* Allocate space for the maximum number of interfaces that could exist. */
     n = ifconf->ifc_len / sizeof(struct ifreq);
-
-    /*
-     * allocate space for interfaces array
-     */
     interfaces = (struct interface *) emalloc(sizeof(struct interface) * n);
 
-    /*
-     * for each interface, store the ip address and netmask
-     */
+    /* For each interface, store the ip address and netmask. */
     for (i = 0; i < ifconf->ifc_len; ) {
-	/* get a pointer to the current interface */
+	/* Get a pointer to the current interface. */
 	ifr = (struct ifreq *) &ifconf->ifc_buf[i];
 
-	/* set i to the subscript of the next interface */
+	/* Set i to the subscript of the next interface. */
 	i += sizeof(struct ifreq);
 #ifdef HAVE_SA_LEN
 	if (ifr->ifr_addr.sa_len > sizeof(ifr->ifr_addr))
 	    i += ifr->ifr_addr.sa_len - sizeof(struct sockaddr);
 #endif /* HAVE_SA_LEN */
 
-	/* skip duplicates and interfaces with NULL addresses */
+	/* Skip duplicates and interfaces with NULL addresses. */
 	sin = (struct sockaddr_in *) &ifr->ifr_addr;
 	if (sin->sin_addr.s_addr == 0 ||
 	    strncmp(previfname, ifr->ifr_name, sizeof(ifr->ifr_name) - 1) == 0)
 	    continue;
 
-	/* skip non-ip things */
 	if (ifr->ifr_addr.sa_family != AF_INET)
 		continue;
 
-	/*
-	 * make sure the interface is up, skip if not.
-	 */
 #ifdef SIOCGIFFLAGS
 	memset(&ifr_tmp, 0, sizeof(ifr_tmp));
 	strncpy(ifr_tmp.ifr_name, ifr->ifr_name, sizeof(ifr_tmp.ifr_name) - 1);
@@ -176,18 +159,17 @@ load_interfaces()
 #endif
 	    ifr_tmp = *ifr;
 	
-	/* skip interfaces marked "down" and "loopback" */
+	/* Skip interfaces marked "down" and "loopback". */
 	if (!(ifr_tmp.ifr_flags & IFF_UP) || (ifr_tmp.ifr_flags & IFF_LOOPBACK))
 		continue;
 
-	/* store the ip address */
 	sin = (struct sockaddr_in *) &ifr->ifr_addr;
 	interfaces[num_interfaces].addr.s_addr = sin->sin_addr.s_addr;
 
-	/* stash the name of the interface we saved */
+	/* Stash the name of the interface we saved. */
 	previfname = ifr->ifr_name;
 
-	/* get the netmask */
+	/* Get the netmask. */
 	(void) memset(&ifr_tmp, 0, sizeof(ifr_tmp));
 	strncpy(ifr_tmp.ifr_name, ifr->ifr_name, sizeof(ifr_tmp.ifr_name) - 1);
 #ifdef SIOCGIFNETMASK
@@ -199,7 +181,6 @@ load_interfaces()
 #endif /* _ISC */
 	    sin = (struct sockaddr_in *) &ifr_tmp.ifr_addr;
 
-	    /* store the netmask */
 	    interfaces[num_interfaces].netmask.s_addr = sin->sin_addr.s_addr;
 	} else {
 #else
@@ -213,13 +194,12 @@ load_interfaces()
 		interfaces[num_interfaces].netmask.s_addr = htonl(IN_CLASSA_NET);
 	}
 
-	/* only now can we be sure it was a good/interesting interface */
+	/* Only now can we be sure it was a good/interesting interface. */
 	num_interfaces++;
     }
 
-    /* if there were bogus entries, realloc the array */
+    /* If the expected size < real size, realloc the array. */
     if (n != num_interfaces) {
-	/* it is unlikely that num_interfaces will be 0 but who knows... */
 	if (num_interfaces != 0)
 	    interfaces = (struct interface *) erealloc(interfaces,
 		sizeof(struct interface) * num_interfaces);
@@ -232,13 +212,9 @@ load_interfaces()
 
 #else /* !SIOCGIFCONF || STUB_LOAD_INTERFACES */
 
-/**********************************************************************
- *
- *  load_interfaces()
- *
- *  Stub function for those without SIOCGIFCONF
+/*
+ * Stub function for those without SIOCGIFCONF
  */
-
 void
 load_interfaces()
 {

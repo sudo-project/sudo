@@ -1,32 +1,28 @@
 /*
- *  CU sudo version 1.6
- *  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
- *
- *******************************************************************
- *
- *  This module contains the find_path() function that returns
- *  TRUE if the command was found and FALSE if not.
- *  If find_path() returns TRUE, the copyin paramters command and
- *  ocommand contain the resolved and unresolved pathnames respectively.
- *  NOTE: if "." or "" exists in PATH it will be searched last.
- *
- *  Todd C. Miller <Todd.Miller@courtesan.com> Sat Mar 25 21:50:36 MST 1995
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -48,6 +44,7 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+
 #include "sudo.h"
 
 #ifndef STDC_HEADERS
@@ -59,51 +56,37 @@ extern int stat		__P((const char *, struct stat *));
 extern int lstat	__P((const char *, struct stat *));
 #endif /* !STDC_HEADERS */
 
-#ifndef _S_IFMT
-#define _S_IFMT		S_IFMT
-#endif /* _S_IFMT */
-#ifndef _S_IFLNK
-#define _S_IFLNK	S_IFLNK
-#endif /* _S_IFLNK */
-
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-/*******************************************************************
- *
- *  find_path()
- *
- *  this function finds the full pathname for a command and
- *  stores it in a statically allocated array, filling in a pointer
- *  to the array.  Returns FOUND if the command was found, NOT_FOUND
- *  if it was not found, or NOT_FOUND_DOT if it would have been found
- *  but it is in '.' and IGNORE_DOT_PATH is in effect.
+/*
+ * This function finds the full pathname for a command and
+ * stores it in a statically allocated array, filling in a pointer
+ * to the array.  Returns FOUND if the command was found, NOT_FOUND
+ * if it was not found, or NOT_FOUND_DOT if it would have been found
+ * but it is in '.' and IGNORE_DOT_PATH is in effect.
  */
-
 int
 find_path(infile, outfile)
     char *infile;		/* file to find */
     char **outfile;		/* result parameter */
 {
     static char command[MAXPATHLEN]; /* qualified filename */
-    register char *n;		/* for traversing path */
+    char *n;			/* for traversing path */
     char *path = NULL;		/* contents of PATH env var */
     char *origpath;		/* so we can free path later */
     char *result = NULL;	/* result of path/file lookup */
     int checkdot = 0;		/* check current dir? */
 
-    command[0] = '\0';
-
     if (strlen(infile) >= MAXPATHLEN) {
-	errno = ENAMETOOLONG;
 	(void) fprintf(stderr, "%s: path too long: %s\n", Argv[0], infile);
 	exit(1);
     }
 
     /*
      * If we were given a fully qualified or relative path
-     * there is no need to look at PATH.
+     * there is no need to look at $PATH.
      */
     if (strchr(infile, '/')) {
 	(void) strcpy(command, infile);
@@ -115,11 +98,10 @@ find_path(infile, outfile)
     }
 
     /*
-     * grab PATH out of environment and make a local copy
+     * Grab PATH out of environment and make a local copy
      */
     if ((path = getenv("PATH")) == NULL)
 	return(NOT_FOUND);
-
     path = estrdup(path);
     origpath = path;
 
@@ -129,7 +111,7 @@ find_path(infile, outfile)
 	    *n = '\0';
 
 	/*
-	 * search current dir last if it is in PATH This will miss sneaky
+	 * Search current dir last if it is in PATH This will miss sneaky
 	 * things like using './' or './/' 
 	 */
 	if (*path == '\0' || (*path == '.' && *(path + 1) == '\0')) {
@@ -139,7 +121,7 @@ find_path(infile, outfile)
 	}
 
 	/*
-	 * resolve the path and exit the loop if found
+	 * Resolve the path and exit the loop if found.
 	 */
 	if (strlen(path) + strlen(infile) + 1 >= MAXPATHLEN) {
 	    (void) fprintf(stderr, "%s: path too long: %s\n", Argv[0], infile);

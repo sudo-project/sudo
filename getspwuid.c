@@ -1,31 +1,28 @@
 /*
- *  CU sudo version 1.6
- *  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
- *
- *******************************************************************
- *
- *  This module contains sudo_getpwuid(), a function that
- *  Makes a dynamic copy of the struct passwd returned by
- *  getpwuid() and substitutes the shadow password if
- *  necessary.
- *
- *  Todd C. Miller  Mon Nov 20 13:53:06 MST 1995
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -89,15 +86,10 @@ static char *sudo_getshell	__P((struct passwd *));
 static char *sudo_getepw	__P((struct passwd *));
 
 
-
-/**********************************************************************
- *
- * sudo_getshell()
- *
- *  This function returns the user's shell based on either the
- *  SHELL evariable or the passwd(5) entry (in that order).
+/*
+ * Return the user's shell based on either the SHELL
+ * environment variable or the passwd(5) entry (in that order).
  */
-
 static char *
 sudo_getshell(pw)
     struct passwd *pw;
@@ -116,22 +108,16 @@ sudo_getshell(pw)
     return(pw_shell);
 }
 
-
-/**********************************************************************
- *
- *  sudo_getepw()
- *
- *  This function returns the encrypted password for the user described
- *  by pw.  If there is a shadow password it is returned, else the
- *  normal UN*X password is returned instead.
+/*
+ * Return the encrypted password for the user described by pw.  If shadow
+ * passwords are in use, look in the shadow file.
  */
-
 static char *
 sudo_getepw(pw)
     struct passwd *pw;
 {
 
-    /* if there is a function to check for shadow enabled, use it... */
+    /* If there is a function to check for shadow enabled, use it... */
 #ifdef HAVE_ISCOMSEC
     if (!iscomsec())
 	return(pw->pw_passwd);
@@ -187,20 +173,14 @@ sudo_getepw(pw)
     }
 #endif /* HAVE_GETAUTHUID */
 
-    /* Fall back on normal passwd */
+    /* Fall back on normal password. */
     return(pw->pw_passwd);
 }
 
-
-/**********************************************************************
- *
- *  sudo_getpwuid()
- *
- *  This function dynamically allocates space for a struct password
- *  and the constituent parts that we care about.  If shadow passwords
- *  are in use, it substitutes the shadow password for pw_passwd.
+/*
+ * Dynamically allocate space for a struct password and the constituent parts
+ * that we care about.  Fills in pw_passwd from shadow file if necessary.
  */
-
 struct passwd *
 sudo_getpwuid(uid)
     uid_t uid;
@@ -210,7 +190,7 @@ sudo_getpwuid(uid)
     if ((pw = getpwuid(uid)) == NULL)
 	return(NULL);
 
-    /* allocate space for a local copy of pw */
+    /* Allocate space for a local copy of pw. */
     local_pw = (struct passwd *) emalloc(sizeof(struct passwd));
 
     /*

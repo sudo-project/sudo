@@ -1,32 +1,28 @@
 /*
- *  CU sudo version 1.6
- *  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
- *
- *******************************************************************
- *
- *  This module contains sudo_goodpath(3)
- *
- *  sudo_goodpath(3) takes a path to check and returns its argument
- *  if the path is stat(2)'able, a regular file, and executable by
- *  root.  The string's size should be <= MAXPATHLEN.
- *
- *  Todd C. Miller <Todd.Miller@courtesan.com> Sat Mar 25 21:58:17 MST 1995
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -56,43 +52,34 @@ extern int stat		__P((const char *, struct stat *));
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-/******************************************************************
- *
- *  sudo_goodpath()
- *
- *  this function takes a path and makes sure it describes a a file
- *  that is a normal file and executable by root.
+/*
+ * Verify that path is a normal file and executable by root.
  */
-
 char *
 sudo_goodpath(path)
-    const char * path;
+    const char *path;
 {
-    struct stat statbuf;		/* for stat(2) */
-    int err;				/* if stat(2) got an error */
+    struct stat sb;
+    int err;
 
-    /* check for brain damage */
+    /* Check for brain damage */
     if (path == NULL || path[0] == '\0')
 	return(NULL);
 
-    /* we need to be root for the stat */
+    /* Do the stat() as root. */
     set_perms(PERM_ROOT, 0);
-
-    err = stat(path, &statbuf);
-
-    /* discard root perms */
+    err = stat(path, &sb);
     set_perms(PERM_USER, 0);
 
-    /* stat(3) failed */
+    /* stat() failed */
     if (err)
 	return(NULL);
 
-    /* make sure path describes an executable regular file */
-    if (S_ISREG(statbuf.st_mode) && (statbuf.st_mode & 0000111)) {
-	return((char *)path);
-    } else {
-	/* file is not executable/regular */
+    /* Make sure path describes an executable regular file. */
+    if (!S_ISREG(sb.st_mode) || !(sb.st_mode & 0000111)) {
 	errno = EACCES;
 	return(NULL);
     }
+
+    return((char *)path);
 }
