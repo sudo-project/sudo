@@ -42,6 +42,7 @@
 /*#define EXEMPTGROUP "sudo"	/* no passwd needed for users in this group */
 /*#define ENV_EDITOR		/* visudo honors EDITOR and VISUAL envars */
 #define SHORT_MESSAGE		/* short sudo message, no copyright printed */
+/*#define NO_MESSAGE		/* no sudo "lecture" message */
 #define TIMEOUT 5		/* minutes before sudo asks for passwd again */
 #define PASSWORD_TIMEOUT 5	/* passwd prompt timeout (in minutes) */
 #define TRIES_FOR_PASSWORD 3	/* number of tries to enter passwd correctly */

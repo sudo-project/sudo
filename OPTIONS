@@ -76,6 +76,11 @@ SHORT_MESSAGE
     sudo for the first time on a machine.
     This is on by default.
 
+NO_MESSAGE
+    Omits the "lecture" one gets when running sudo for the first time
+    on a machine.
+    This is off by default.
+
 TIMEOUT
     Number of minutes that can elapse before sudo will ask for a passwd again.
     The default is 5, set this to 0 to always prompt for a password.

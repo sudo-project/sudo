@@ -151,8 +151,10 @@ void check_user()
 
     rtn = check_timestamp();
     if (rtn && user_uid) {	/* if timestamp is not current... */
+#ifndef NO_MESSAGE
 	if (rtn == 2)
 	    reminder();		/* do the reminder if ticket file is new */
+#endif /* NO_MESSAGE */
 	check_passwd();
     }
 
@@ -731,6 +733,7 @@ static char *sudo_skeyprompt(user_skey, p)
 #endif /* HAVE_SKEY */
 
 
+#ifndef NO_MESSAGE
 /********************************************************************
  *
  *  reminder()
@@ -757,3 +760,4 @@ static void reminder()
     
     (void) fflush(stderr);
 }
+#endif /* NO_MESSAGE */
