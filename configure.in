@@ -95,6 +95,16 @@ AC_ARG_WITH(skey, [  --with-skey             enable S/Key support ],
 		;;
 esac])
 
+AC_ARG_WITH(opie, [  --with-opie             enable OPIE support ],
+[case $with_opie in
+    yes)	AC_DEFINE(HAVE_OPIE)
+		echo 'Configuring for use with NRL OPIE'
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-opie: $with_opie"
+		;;
+esac])
+
 AC_ARG_WITH(SecurID, [  --with-SecurID          enable SecurID support],
 [case $with_SecurID in
     yes)	AC_DEFINE(HAVE_SECURID)
@@ -807,7 +817,7 @@ if test "$with_DCE" = "yes"; then
 fi
 
 dnl
-dnl extra Skey lib and includes
+dnl extra S/Key lib and includes
 dnl
 if test "$with_skey" = "yes"; then
     SUDO_LIBS="${SUDO_LIBS} -lskey"
@@ -821,6 +831,21 @@ if test "$with_skey" = "yes"; then
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/tools/cs/skey/lib"
     else
 	echo 'Unable to locate libskey.a and/or skey.h, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS and/or -I/path/to/skey.h to CPPFLAGS'
+    fi
+fi
+
+dnl
+dnl extra OPIE lib and includes
+dnl
+if test "$with_opie" = "yes"; then
+    SUDO_LIBS="${SUDO_LIBS} -lopie"
+    if test -f /usr/include/opie.h -a -f /usr/lib/libopie.a; then
+	:
+    elif test -f /usr/local/include/opie.h; then
+	CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
+	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
+    else
+	echo 'Unable to locate libopie.a and/or opie.h, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDO_LDFLAGS and/or -I/path/to/opie.h to CPPFLAGS'
     fi
 fi
 
