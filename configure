@@ -1716,8 +1716,8 @@ cat >>confdefs.h <<EOF
 #define PRI_FAILURE "$badpri"
 EOF
 
-echo "$as_me:1719: result: badpri" >&5
-echo "${ECHO_T}badpri" >&6
+echo "$as_me:1719: result: $badpri" >&5
+echo "${ECHO_T}$badpri" >&6
 
 # Check whether --with-logpath or --without-logpath was given.
 if test "${with_logpath+set}" = set; then
@@ -2290,7 +2290,7 @@ echo $ECHO_N "checking time in minutes after which sudo will ask for a password 
 # Check whether --with-timeout or --without-timeout was given.
 if test "${with_timeout+set}" = set; then
   withval="$with_timeout"
-  echo $with_timeout; case $with_timeout in
+  case $with_timeout in
     yes)	;;
     no)		timeout=0
 		;;
