@@ -416,7 +416,10 @@ static void check_passwd()
 #endif /* USE_GETPASS */
 #endif /* HAVE_SKEY */
 	if (!pass || *pass == '\0')
-	    exit(0);
+	    if (counter == 0)
+		exit(0);
+	    else
+		break;
 #if defined(__convex__) && defined(HAVE_C2_SECURITY)
 	strncpy(salt, spw_ent->ufld.fd_encrypt, 2);
 	i = AUTH_SALT_SIZE + AUTH_CIPHERTEXT_SEG_CHARS;
@@ -457,8 +460,13 @@ static void check_passwd()
 #endif /* USE_INSULTS */
     }
 
-    log_error(PASSWORD_NOT_CORRECT);
-    inform_user(PASSWORD_NOT_CORRECT);
+    if (counter > 0) {
+	log_error(PASSWORD_NOT_CORRECT);
+	inform_user(PASSWORD_NOT_CORRECT);
+    } else {
+	log_error(PASSWORDS_NOT_CORRECT);
+	inform_user(PASSWORDS_NOT_CORRECT);
+    }
 
     exit(1);
 }
