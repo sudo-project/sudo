@@ -35,6 +35,7 @@ AC_SUBST(mansectsu)
 AC_SUBST(mansectform)
 AC_SUBST(mansrcdir)
 AC_SUBST(NOEXECDIR)
+AC_SUBST(noexec_file)
 AC_SUBST(INSTALL_NOEXEC)
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
@@ -2121,8 +2122,8 @@ if test "$with_noexec" != "no"; then
 	    exec_prefix="$prefix"
 	fi
     fi
-    eval with_noexec="$with_noexec"
-    AC_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$with_noexec", [The fully qualified pathname of sudo_noexec.so])
+    eval noexec_file="$with_noexec"
+    AC_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
     exec_prefix="$oexec_prefix"
 fi
 
