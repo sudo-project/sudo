@@ -256,6 +256,21 @@ main(argc, argv, envp)
     validated = sudoers_lookup(pwflag);
 
     /*
+     * If we have POSIX saved uids and the stay_setuid flag was not set,
+     * set the real, effective and saved uids to 0 and use set_perms_fallback()
+     * instead of set_perms_posix().
+     */
+#if defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
+    if (!def_flag(I_STAY_SETUID) && set_perms == set_perms_posix) {
+	if (setuid(0)) {
+	    perror("setuid(0)");
+	    exit(1);
+	}
+	set_perms = set_perms_fallback;
+    }
+#endif
+
+    /*
      * Look up runas user passwd struct.  If we are given a uid then
      * there may be no corresponding passwd(5) entry (which is OK).
      */
