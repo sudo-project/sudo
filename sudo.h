@@ -199,6 +199,7 @@ extern int num_interfaces;
 extern char *user;
 extern char *epasswd;
 extern char *cmnd;
+extern char *cmnd_args;
 extern char *prompt;
 extern char *shell;
 extern struct stat cmnd_st;
