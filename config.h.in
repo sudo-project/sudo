@@ -66,6 +66,9 @@
 /* Define to `unsigned' if <sys/types.h> doesn't define.  */
 #undef size_t
 
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef ssize_t
+
 /* Define to be nil if C compiler doesn't support "const."  */
 #undef const
 
