@@ -299,6 +299,7 @@ static int check_timestamp()
 		    timestamp_is_old = 2;	/* bogus time value */
 		    log_error(BAD_STAMPFILE);
 		    inform_user(BAD_STAMPFILE);
+		    remove_timestamp();
 		} else {
 		    timestamp_is_old = 0;	/* time value is reasonable */
 		}
