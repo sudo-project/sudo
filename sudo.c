@@ -76,6 +76,7 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <pwd.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -737,28 +738,40 @@ static void load_cmnd(sudo_mode)
  *
  *  check_sudoers()
  *
- *  This function check to see that the sudoers file is owned by
- *  SUDOERS_OWNER and not writable by anyone else.
+ *  This function check to see that the sudoers file is readable,
+ *  owned by SUDOERS_OWNER, and not writable by anyone else.
+ *  It should really check for a zero length sudoers file too.  (XXX)
  */
 
 static int check_sudoers()
 {
     struct stat statbuf;
     struct passwd *pw_ent;
+    int fd;
+    char c;
+    int rtn = ALL_SYSTEMS_GO;
 
     if (!(pw_ent = getpwnam(SUDOERS_OWNER)))
 	return(SUDOERS_NO_OWNER);
 
-    if (lstat(_PATH_SUDO_SUDOERS, &statbuf))
-	return(NO_SUDOERS_FILE);
-    else if (!S_ISREG(statbuf.st_mode))
-	return(SUDOERS_NOT_FILE);
-    else if (statbuf.st_uid != pw_ent -> pw_uid)
-        return(SUDOERS_WRONG_OWNER);
-    else if ((statbuf.st_mode & 0000066))
-        return(SUDOERS_RW_OTHER); 
+    set_perms(PERM_SUDOERS);
 
-    return(ALL_SYSTEMS_GO);
+    if ((fd = open(_PATH_SUDO_SUDOERS, O_RDONLY)) < 0 || read(fd, &c, 1) != 1)
+	rtn = NO_SUDOERS_FILE;
+    else if (lstat(_PATH_SUDO_SUDOERS, &statbuf))
+	rtn = NO_SUDOERS_FILE;
+    else if (!S_ISREG(statbuf.st_mode))
+	rtn = SUDOERS_NOT_FILE;
+    else if (statbuf.st_uid != pw_ent -> pw_uid)
+	rtn = SUDOERS_WRONG_OWNER;
+    else if ((statbuf.st_mode & 0000066))
+	rtn = SUDOERS_RW_OTHER;
+
+    (void) close(fd);
+
+    set_perms(PERM_USER);
+
+    return(rtn);
 }
 
 
