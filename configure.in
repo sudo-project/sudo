@@ -1659,6 +1659,7 @@ if test -n "$with_kerb4"; then
     dnl
     dnl Use the specified directory, if any, else search for correct inc dir
     dnl
+    O_LDFLAGS="$LDFLAGS"
     if test "$with_kerb4" = "yes"; then
 	found=no
 	O_CPPFLAGS="$CPPFLAGS"
@@ -1668,7 +1669,8 @@ if test -n "$with_kerb4"; then
 	done
 	test X"$found" = X"no" && CPPFLAGS="$O_CPPFLAGS"
     else
-	SUDO_LDFLAGS="$LDFLAGS -L${with_kerb4}/lib"
+	LDFLAGS="$LDFLAGS -L${with_kerb4}/lib"
+	SUDO_LDFLAGS="$SUDO_LDFLAGS -L${with_kerb4}/lib"
 	CPPFLAGS="$CPPFLAGS -I${with_kerb4}/include"
 	AC_CHECK_HEADER([krb.h], [found=yes], [found=no])
     fi
@@ -1688,6 +1690,7 @@ if test -n "$with_kerb4"; then
 	    [AC_MSG_WARN([Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS and possibly add Kerberos libs to SUDO_LIBS])]
 	, [$K4LIBS])
     ], [$K4LIBS])
+    LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} $K4LIBS"
     AUTH_OBJS="${AUTH_OBJS} kerb4.o"
 fi
@@ -1713,7 +1716,7 @@ if test -n "$with_kerb5"; then
 	fi
     else
 	dnl XXX - try to include krb5.h here too
-	SUDO_LDFLAGS="$LDFLAGS -L${with_kerb5}/lib"
+	SUDO_LDFLAGS="$SUDO_LDFLAGS -L${with_kerb5}/lib"
 	CPPFLAGS="$CPPFLAGS -I${with_kerb5}/include"
     fi
 
