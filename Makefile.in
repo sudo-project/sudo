@@ -93,8 +93,10 @@ LIBOBJS = @TGETPASS@ @LIBOBJS@
 
 HDRS = sudo.h version.h insults.h
 
+VERSION = 1.3.1pl1
+
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING INSTALL Makefile.in PORTING \
-            README README.v1.3.1 SUPPORTED TODO HISTORY aclocal.m4 getcwd.c \
+            README SUPPORTED TODO HISTORY aclocal.m4 getcwd.c \
             putenv.c strdup.c tgetpass.c config.h.in configure configure.in \
             indent.pro installbsd pathnames.h.in sample.sudoers sudo.man \
             sudo.cat sudoers aixcrypt.exp visudoers/Makefile.in \
@@ -168,8 +170,9 @@ realclean: distclean
 	( cd visudoers && rm -f TAGS tags )
 
 dist: $(DISTFILES)
-	rm -f ../cu-sudo.v1.3.1.tar.Z
+	rm -f ../cu-sudo.v$(VERSION).tar.Z
 	( cd .. ; TF="/tmp/sudo.dist$$" ; rm -f $$TF ; for i in $(DISTFILES) ; \
-	  do echo sudo.v1.3.1/$$i >> $$TF ; done ; tar cf cu-sudo.v1.3.1.tar \
-	  `cat $$TF` && compress cu-sudo.v1.3.1.tar )
-	ls -l ../cu-sudo.v1.3.1.tar.Z
+	  do echo sudo.v$(VERSION)/$$i >> $$TF ; done ; \
+	  tar cf cu-sudo.v$(VERSION).tar \
+	  `cat $$TF` && compress cu-sudo.v$(VERSION).tar )
+	ls -l ../cu-sudo.v$(VERSION).tar.Z
