@@ -110,8 +110,8 @@ static void usage_excl			__P((int))
 					    __attribute__((__noreturn__));
 static struct passwd *get_authpw	__P((void));
 extern int sudo_edit			__P((int, char **));
-extern char **rebuild_env		__P((char **, int, int));
-extern char **zero_env			__P((char **));
+extern char **rebuild_env		__P((char **, char **, int, int));
+extern char **clean_env			__P((char **));
 
 /*
  * Globals
@@ -142,17 +142,16 @@ sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
 
 
 int
-main(argc, argv, envp)
+main(argc, argv)
     int argc;
     char **argv;
-    char **envp;
 {
     int validated = 0;
     int fd;
     int cmnd_status;
     int sudo_mode;
     int pwflag;
-    char **new_environ;
+    char **new_environ, **pruned_environ;
     sigaction_t sa;
 #ifdef HAVE_LDAP
     VOID *ld;
@@ -174,9 +173,6 @@ main(argc, argv, envp)
     initprivs();
 # endif
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
-
-    /* Zero out the environment. */
-    environ = zero_env(envp);
 
     if (geteuid() != 0)
 	errorx(1, "must be setuid root");
@@ -310,6 +306,9 @@ main(argc, argv, envp)
     if (safe_cmnd == NULL)
 	safe_cmnd = estrdup(user_cmnd);
 
+    /* Clean out the environment. */
+    pruned_environ = clean_env(environ);
+
     /*
      * Look up the timestamp dir owner if one is specified.
      */
@@ -365,11 +364,11 @@ main(argc, argv, envp)
 	}
     }
 
-    /* Build a new environment that avoids any nasty bits if we have a cmnd. */
+    /* Build a new environment based on the rules in sudoers. */
     if (ISSET(sudo_mode, MODE_RUN))
-	new_environ = rebuild_env(envp, sudo_mode, def_noexec);
+	new_environ = rebuild_env(pruned_environ, environ, sudo_mode, def_noexec);
     else
-	new_environ = envp;
+	new_environ = environ;
 
     if (ISSET(validated, VALIDATE_OK)) {
 	/* Finally tell the user if the command did not exist. */
@@ -630,7 +629,7 @@ init_vars(sudo_mode)
 
 	/* copy the args from NewArgv */
 	for (dst = NewArgv + 1; (*dst = *src) != NULL; ++src, ++dst)
-	    ;
+	    continue;
     }
 
     /* Set login class if applicable. */
