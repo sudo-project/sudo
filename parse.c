@@ -344,7 +344,7 @@ display_bound_defaults(dtype)
 	default:
 	    return;
     }
-    print_def4("\n", "Per-", dname, "Defaults entries:");
+    print_def4("\n", "Per-", dname, " Defaults entries:");
     for (d = defaults, binding = NULL; d != NULL; d = d->next) {
 	if (d->type != dtype)
 	    continue;
