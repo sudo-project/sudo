@@ -121,7 +121,7 @@ load_interfaces()
 	return;
 
     /* Allocate space for the interfaces list. */
-    for (ifa = ifaddrs; ifa -> ifa_next; ifa = ifa -> ifa_next) {
+    for (ifa = ifaddrs; ifa != NULL; ifa = ifa -> ifa_next) {
 	/* Skip interfaces marked "down" and "loopback". */
 	if (ifa->ifa_addr == NULL || !(ifa->ifa_flags & IFF_UP) ||
 	    (ifa->ifa_flags & IFF_LOOPBACK))
@@ -134,11 +134,13 @@ load_interfaces()
 		break;
 	}
     }
+    if (num_interfaces == 0)
+	return;
     interfaces =
 	(struct interface *) emalloc2(num_interfaces, sizeof(struct interface));
 
     /* Store the ip addr / netmask pairs. */
-    for (ifa = ifaddrs, i = 0; ifa -> ifa_next; ifa = ifa -> ifa_next) {
+    for (ifa = ifaddrs, i = 0; ifa != NULL; ifa = ifa -> ifa_next) {
 	/* Skip interfaces marked "down" and "loopback". */
 	if (ifa->ifa_addr == NULL || !(ifa->ifa_flags & IFF_UP) ||
 	    (ifa->ifa_flags & IFF_LOOPBACK))
@@ -191,7 +193,7 @@ load_interfaces()
     }
 
     /*
-     * Get interface configuration or return (leaving num_interfaces 0)
+     * Get interface configuration or return (leaving num_interfaces == 0)
      */
     for (;;) {
 	ifconf_buf = erealloc(ifconf_buf, len);
@@ -216,6 +218,8 @@ load_interfaces()
 	    break;
 	len += BUFSIZ;
     }
+    if (n == 0)
+	return;
 
     /* Allocate space for the maximum number of interfaces that could exist. */
     n = ifconf->ifc_len / sizeof(struct ifreq);
