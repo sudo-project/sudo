@@ -1707,4 +1707,4 @@ Sudo 1.6.7p5 released.
     (from Brian Farrell).
 
 538) The sudoers file is now parsed as the runas user in all cases instead
-     of not root.  This fixes some issues with running NFS-mounted commands.
+     of root.  This fixes some issues with running NFS-mounted commands.
