@@ -49,6 +49,19 @@
 #endif
 
 /*
+ * Posix versions for those without...
+ */
+#ifndef _S_IFMT
+#  define _S_IFMT		S_IFMT
+#endif /* _S_IFMT */
+#ifndef _S_IFREG
+#  define _S_IFREG		S_IFREG
+#endif /* _S_IFREG */
+#ifndef S_ISREG
+#  define S_ISREG(m)		(((m) & _S_IFMT) == _S_IFREG)
+#endif /* S_ISREG */
+
+/*
  * Emulate seteuid() and setegid() for HP-UX
  */
 #ifdef __hpux
