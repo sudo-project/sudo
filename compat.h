@@ -55,7 +55,6 @@
 #  define seteuid(__EUID)	(setresuid((uid_t)-1, __EUID, (uid_t)-1))
 #  define setegid(__EGID)	(setresgid((gid_t)-1, __EGID, (gid_t)-1))
 #endif	/* __hpux */
-#endif	/* __hpux */
 
 /*
  * Emulate seteuid() and setegid() for AIX
