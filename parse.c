@@ -82,6 +82,12 @@ extern FILE *yyin, *yyout;
 int parse_error = FALSE;
 
 /*
+ * Prototypes for static (local) functions
+ */
+static int has_meta	__P((char *));
+static int compare_args	__P((char *, char *));
+
+/*
  * this routine is called from the sudo.c module and tries to validate
  * the user, host and command triplet.
  */
@@ -218,12 +224,14 @@ int path_matches(cmnd, path)
 	 * else return false.
 	 */
 	if (cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino) {
-	    if (!args)
+	    if (!args) {
 		return(TRUE);
-	    else if (cmnd_args && args)
-		return((strcmp(cmnd_args, args) == 0));
-	    else
+	    } else if (cmnd_args && args) {
+		/* return((strcmp(cmnd_args, args) == 0)); */
+		return(compare_args(args, cmnd_args));
+	    } else {
 		return(FALSE);
+	    }
 	} else
 	    return(FALSE);
     }
@@ -340,4 +348,78 @@ int netgr_matches(netgr, host, user)
 #else
     return(FALSE);
 #endif /* HAVE_INNETGR */
+}
+
+
+
+/*
+ * Does "s" have any meta characters in it?
+ */
+static int has_meta(s)
+    char *s;
+{
+    register char *t;
+    
+    for (t = s; *t; t++) {
+	if (*t == '\\' || *t == '?' || *t == '*' || *t == '[' || *t == ']')
+	    return(TRUE);
+    }
+    return(FALSE);
+}
+
+
+
+/*
+ *
+ */
+static int compare_args(sudoers_args, user_args)
+    char *sudoers_args, *user_args;
+{
+
+    if (has_meta(sudoers_args)) {
+	register char *s_a, *u_a, *s_save, *u_save, *s_a_next, *u_a_next;
+
+	/* XXX - shouldn't need to copy strings */
+	s_save = s_a_next = strdup(sudoers_args);
+	u_save = u_a_next = strdup(user_args);
+
+	/* XXX - use a saner loop */
+	for (;;) {
+	    /* break if end of string */
+	    if (!s_a_next || !u_a_next)
+		break;
+
+	    /* go to next substring */
+	    s_a = s_a_next;
+	    u_a = u_a_next;
+
+	    /* null-terminate end of substring if necesary */
+	    if ((s_a_next = strchr(s_a_next, ' ')))
+		*s_a_next++ = '\0';
+	    if ((u_a_next = strchr(u_a_next, ' ')))
+		*u_a_next++ = '\0';
+
+	    /* XXX - split on non-escaped ',' to allow like: "*,!root"
+	     *       and keep longest match.
+	     */
+	    if (wildmat(u_a, s_a) != 1) {
+		(void) free(s_save);
+		(void) free(u_save);
+
+		return(FALSE);
+	    }
+	}
+
+	(void) free(s_save);
+	(void) free(u_save);
+
+	/* if full match both will be NULL */
+	if (s_a_next || u_a_next)
+	    return(FALSE);
+
+    } else {
+	return((strcmp(sudoers_args, user_args) == 0));
+    }
+
+    return(TRUE);
 }
