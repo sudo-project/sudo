@@ -21,11 +21,8 @@ will be allowed to run the command.
 
   user access_group [: access_group] ...
 
-    access_group ::= host_type = [(runas-list)] [NOPASSWD:] [op]cmnd_type
+    access_group ::= host-list = [(runas-list)] [NOPASSWD:] [op]cmnd_type
 		     [,[(user-list)] [NOPASSWD|PASSWD:] [op]cmnd_type] ... 
-       host_type ::= a lower-case hostname, netgroup, ip address,
-                     network number, network number/netmask,
-		     or host alias.
        cmnd_type ::= a command OR a command alias.
               op ::= the logical "!" NOT operator.
 

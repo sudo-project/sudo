@@ -2,8 +2,10 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.8  1999/04/07 00:24:35  millert
-''' runas-lists and NOPASSWD/PASSWD modifiers are now sticky and you can use "!" most everywhere
+''' Revision 1.9  1999/04/07 23:18:51  millert
+''' You can now specifiy a host list instead of just a host or alias.
+''' Ie: user = host1,host2,ALIAS,!host3 my_command
+''' now works.
 '''
 '''
 .de Sh
@@ -96,7 +98,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers 5 "1.6" "6/Apr/99" "FILE FORMATS"
+.TH sudoers 5 "1.6" "7/Apr/99" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
@@ -206,12 +208,9 @@ will be allowed to run the command.
 .Vb 1
 \&  user access_group [: access_group] ...
 .Ve
-.Vb 7
-\&    access_group ::= host_type = [(runas-list)] [NOPASSWD:] [op]cmnd_type
+.Vb 4
+\&    access_group ::= host-list = [(runas-list)] [NOPASSWD:] [op]cmnd_type
 \&                     [,[(user-list)] [NOPASSWD|PASSWD:] [op]cmnd_type] ... 
-\&       host_type ::= a lower-case hostname, netgroup, ip address,
-\&                     network number, network number/netmask,
-\&                     or host alias.
 \&       cmnd_type ::= a command OR a command alias.
 \&              op ::= the logical "!" NOT operator.
 .Ve

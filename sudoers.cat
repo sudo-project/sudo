@@ -24,11 +24,8 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
          user access_group [: access_group] ...
 
-           access_group ::= host_type = [(runas-list)] [NOPASSWD:] [op]cmnd_type
+           access_group ::= host-list = [(runas-list)] [NOPASSWD:] [op]cmnd_type
                             [,[(user-list)] [NOPASSWD|PASSWD:] [op]cmnd_type] ...
-              host_type ::= a lower-case hostname, netgroup, ip address,
-                            network number, network number/netmask,
-                            or host alias.
               cmnd_type ::= a command OR a command alias.
                      op ::= the logical "!" NOT operator.
 
@@ -57,11 +54,14 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
                             of these.
 
 
+       rrrruuuunnnnaaaassss aaaalllliiiiaaaassss sssseeeeccccttttiiiioooonnnn ffffoooorrrrmmmmaaaatttt::::
+
+
+         Runas_Alias RUNASALIAS = runas-list
 
 
 
-
-6/Apr/99                       1.6                              1
+7/Apr/99                       1.6                              1
 
 
 
@@ -69,11 +69,6 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
-
-       rrrruuuunnnnaaaassss aaaalllliiiiaaaassss sssseeeeccccttttiiiioooonnnn ffffoooorrrrmmmmaaaatttt::::
-
-
-         Runas_Alias RUNASALIAS = runas-list
 
              Runas_Alias ::= a keyword.
               RUNASALIAS ::= an upper-case alias name.
@@ -124,10 +119,15 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        an _a_c_c_e_s_s___g_r_o_u_p. For example given:
            oper bigserver = NOPASSWD: /usr/bin/kill, /bin/rm,
        /bin/rmdir User oper will be able to run /usr/bin/kill,
+       /bin/rm, and /bin/rmdir as rrrrooooooootttt without a password.  If we
+       change that to:
+           oper bigserver = NOPASSWD: /usr/bin/kill, PASSWD:
+       /bin/rm, /bin/rmdir User oper can still run /usr/bin/kill
+       without a password but must give a password to run /bin/rm
 
 
 
-6/Apr/99                       1.6                              2
+7/Apr/99                       1.6                              2
 
 
 
@@ -136,11 +136,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
-       /bin/rm, and /bin/rmdir as rrrrooooooootttt without a password.  If we
-       change that to:
-           oper bigserver = NOPASSWD: /usr/bin/kill, PASSWD:
-       /bin/rm, /bin/rmdir User oper can still run /usr/bin/kill
-       without a password but must give a password to run /bin/rm
        and /bin/rmdir.
 
        wwwwiiiillllddddccccaaaarrrrddddssss ((((aaaakkkkaaaa mmmmeeeettttaaaa cccchhhhaaaarrrraaaacccctttteeeerrrrssss))))::::
@@ -191,9 +186,14 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        elements from the universe by using the syntax:
           user  host=ALL,!ALIAS1,!/sbin/halt...
 
+       Commands may have optional command line arguments.  If
+       they do, then the arguments in the _s_u_d_o_e_r_s file must
+       exactly match those on the command line.  It is also
+       possible to have a command's arguments span multiple lines
 
 
-6/Apr/99                       1.6                              3
+
+7/Apr/99                       1.6                              3
 
 
 
@@ -202,10 +202,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
-       Commands may have optional command line arguments.  If
-       they do, then the arguments in the _s_u_d_o_e_r_s file must
-       exactly match those on the command line.  It is also
-       possible to have a command's arguments span multiple lines
        as long as the line continuance character "\" is used.
        The following characters must be escaped with a "\" if
        used in command arguments: ",", ":", "=", "\".
@@ -256,10 +252,14 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
        three machines merlin, kodiakthorn and spirit.  Similarly,
        SERVERS is set to the machines houdini, merlin,
        kodiakthorn and spirit.  The CSNETS alias will match any
+       host on the 128.138.243.0, 128.138.204.0, or
+       128.138.205.192 nets.  The CUNETS alias will match any
+       host on the 128.138.0.0 (class B) network.  Note that
+       these are nnnneeeettttwwwwoooorrrrkkkk addresses, not ip addresses.  Unless an
 
 
 
-6/Apr/99                       1.6                              4
+7/Apr/99                       1.6                              4
 
 
 
@@ -268,10 +268,6 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
-       host on the 128.138.243.0, 128.138.204.0, or
-       128.138.205.192 nets.  The CUNETS alias will match any
-       host on the 128.138.0.0 (class B) network.  Note that
-       these are nnnneeeettttwwwwoooorrrrkkkk addresses, not ip addresses.  Unless an
        explicit netmask is given, the local _n_e_t_m_a_s_k is used to
        determine whether or not the current host belongs to a
        network.
@@ -322,10 +318,14 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        jill            The user jill may run /sbin/shutdown -h
                        now or /sbin/shutdown -r now as well as
+                       the commands in the MISC alias on houdini.
+
+       markm           The user markm may run any command on the
+                       HUB machines except _/_s_b_i_n_/_s_h_u_t_d_o_w_n,
 
 
 
-6/Apr/99                       1.6                              5
+7/Apr/99                       1.6                              5
 
 
 
@@ -334,10 +334,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
-                       the commands in the MISC alias on houdini.
-
-       markm           The user markm may run any command on the
-                       HUB machines except _/_s_b_i_n_/_s_h_u_t_d_o_w_n,
                        _/_s_b_i_n_/_h_a_l_t, and commands listed in the
                        MISC alias.
 
@@ -391,7 +387,11 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-6/Apr/99                       1.6                              6
+
+
+
+
+7/Apr/99                       1.6                              6
 
 
 
@@ -457,6 +457,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-6/Apr/99                       1.6                              7
+7/Apr/99                       1.6                              7
 
 

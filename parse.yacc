@@ -230,7 +230,7 @@ privileges	:	privilege
 		|	privileges ':' privilege
 		;
 
-privilege	:	hostspec '=' cmndspeclist {
+privilege	:	hostlist '=' cmndspeclist {
 			    /*
 			     * We already did a push if necessary in
 			     * cmndspec so just reset some values so
