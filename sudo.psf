@@ -1,0 +1,71 @@
+# PSF file for sudo
+#
+# See http://www.software.hp.com/products/SD_AT_HP/docs/cookbook.html
+# for details.
+#
+# To create sudo.depot, run:
+#
+#	swpackage -x target_type=tape -d sudo.depot -s sudo.psf
+#
+# TODO:
+#	script to make sudoedit bin and man links
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+vendor
+        tag GratiSoft
+        title "GratiSoft, Inc."
+        description "GratiSoft, Inc., http://www.gratisoft.us/"
+end
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+product
+        tag sudo
+        title "Sudo"
+        description "execute a command as another user"
+        revision @VERSION@
+        #
+        architecture S700/S800_HPUX_10/11
+        machine_type 9000/[78]*
+        os_name HP-UX
+        os_release ?.10.*|?.11.*
+        os_version *
+        #
+        fileset
+                tag bin
+                title "sudo binaries"
+                revision @VERSION@
+
+                file -m 4111 -o root -g root sudo /usr/local/bin/sudo
+                file -m  111 -o root -g bin visudo /usr/local/sbin/visudo
+
+		postinstall sudo-exec.postinstall
+        end
+        #
+        fileset
+                tag libexec
+                title "sudo noexec library"
+                revision @VERSION@
+
+                file -m 555 -o root -g bin sudo_noexec.sl /usr/local/libexec/sudo_noexec.sl
+        end
+        #
+        fileset
+                tag manpages
+                title "sudo manpages"
+                revision @VERSION@
+
+                file -m 444 -g bin -o root sudo.man /usr/local/man/man1m/sudo.1m
+                file -m 444 -g bin -o root sudoers.man /usr/local/man/man4/sudoers.4
+                file -m 444 -g bin -o root visudo.man /usr/local/man/man1m/visudo.1m
+
+		postinstall sudo-man.postinstall
+        end
+        fileset
+                tag config
+                title "sudo config files"
+                revision @VERSION@
+                file -m 440 -g root -o root sudoers /etc/sudoers
+	end
+end

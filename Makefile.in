@@ -385,9 +385,42 @@ bindist:
 	  fi ; \
 	  cp $(srcdir)/INSTALL.binary $$tdir/INSTALL ; \
 	  sh ./config.status --file=Makefile.binary && cp Makefile.binary $$tdir/Makefile ; \
-	  strip sudo ; \
-	  strip visudo ; \
+	  strip $$tdir/sudo ; \
+	  strip $$tdir/visudo ; \
 	  cd tmp.$$ARCH && tar Ocf ../sudo-$(VERSION)-$$ARCH.tar sudo-$(VERSION) && cd .. ; \
 	  gzip --best sudo-$(VERSION)-$$ARCH.tar ; \
 	  rm -rf tmp.$$ARCH ; \
+	)
+
+depot:
+	( \
+	  tdir=tmp.depot ; \
+	  mkdir $$tdir ; \
+	  for i in sudo visudo sudo.man visudo.man sudoers.man sudoers; do \
+	    if [ -f $$i ]; then \
+	      cp $$i $$tdir ; \
+	    elif [ -f $(srcdir)/$$i ]; then \
+	      cp $(srcdir)/$$i $$tdir ; \
+	    else \
+	      echo cannot find $$i ; \
+	      exit 1 ; \
+	    fi ; \
+	  done ; \
+	  if [ -f sudo_noexec.la ]; then \
+	    cp libtool $$tdir ; \
+	    $(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la `pwd`/$$tdir ; \
+	  fi ; \
+	  sed 's/@VERSION@/$(VERSION)/g' <$(srcdir)/sudo.psf >$$tdir/sudo.psf ; \
+	  printf '#!/sbin/sh\nrm -f /usr/local/bin/sudoedit\nln /usr/local/bin/sudo /usr/local/bin/sudoedit\n' > $$tdir/sudo-exec.postinstall ; \
+	  chmod 755 $$tdir/sudo-exec.postinstall ; \
+	  printf '#!/sbin/sh\nrm -f /usr/local/man/man1m/sudoedit.1m\nln /usr/local/man/man1m/sudo /usr/local/man/man1m/sudoedit.1m\n' > $$tdir/sudo-man.postinstall ; \
+	  chmod 755 $$tdir/sudo-man.postinstall ; \
+EOS ; \
+	  strip $$tdir/sudo ; \
+	  strip $$tdir/visudo ; \
+	  cd $$tdir ; \
+	  swpackage -x target_type=tape -d ../sudo-$(VERSION).depot -s sudo.psf ; \
+	  cd .. ; \
+	  gzip --best sudo-$(VERSION).depot; \
+	  rm -rf tmp.depot ; \
 	)
