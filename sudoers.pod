@@ -574,7 +574,7 @@ more digits, in which case it is treated as a uid).  Both the
 comment character and any text after it, up to the end of the line,
 are ignored.
 
-The reserved word B<ALL> is a a built in I<alias> that always causes
+The reserved word B<ALL> is a built in I<alias> that always causes
 a match to succeed.  It can be used wherever one might otherwise
 use a C<Cmnd_Alias>, C<User_Alias>, C<Runas_Alias>, or C<Host_Alias>.
 You should not try to define your own I<alias> called B<ALL> as the

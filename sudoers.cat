@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-17/Jan/2000                   1.6.2                             1
+18/Jan/2000                   1.6.2                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-17/Jan/2000                   1.6.2                             2
+18/Jan/2000                   1.6.2                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-17/Jan/2000                   1.6.2                             3
+18/Jan/2000                   1.6.2                             3
 
 
 
@@ -259,7 +259,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-17/Jan/2000                   1.6.2                             4
+18/Jan/2000                   1.6.2                             4
 
 
 
@@ -325,7 +325,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-17/Jan/2000                   1.6.2                             5
+18/Jan/2000                   1.6.2                             5
 
 
 
@@ -391,7 +391,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-17/Jan/2000                   1.6.2                             6
+18/Jan/2000                   1.6.2                             6
 
 
 
@@ -457,7 +457,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-17/Jan/2000                   1.6.2                             7
+18/Jan/2000                   1.6.2                             7
 
 
 
@@ -523,7 +523,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-17/Jan/2000                   1.6.2                             8
+18/Jan/2000                   1.6.2                             8
 
 
 
@@ -564,7 +564,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        Both the comment character and any text after it, up to
        the end of the line, are ignored.
 
-       The reserved word AAAALLLLLLLL is a a built in _a_l_i_a_s that always
+       The reserved word AAAALLLLLLLL is a built in _a_l_i_a_s that always
        causes a match to succeed.  It can be used wherever one
        might otherwise use a Cmnd_Alias, User_Alias, Runas_Alias,
        or Host_Alias.  You should not try to define your own
@@ -589,7 +589,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-17/Jan/2000                   1.6.2                             9
+18/Jan/2000                   1.6.2                             9
 
 
 
@@ -655,7 +655,7 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
 
 
-17/Jan/2000                   1.6.2                            10
+18/Jan/2000                   1.6.2                            10
 
 
 
@@ -721,7 +721,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-17/Jan/2000                   1.6.2                            11
+18/Jan/2000                   1.6.2                            11
 
 
 
@@ -787,7 +787,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-17/Jan/2000                   1.6.2                            12
+18/Jan/2000                   1.6.2                            12
 
 
 
@@ -853,7 +853,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-17/Jan/2000                   1.6.2                            13
+18/Jan/2000                   1.6.2                            13
 
 
 
@@ -919,6 +919,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-17/Jan/2000                   1.6.2                            14
+18/Jan/2000                   1.6.2                            14
 
 
