@@ -196,7 +196,7 @@ char *qualify(n)
      * is it a bogus path?
      */
     if (stat(n, &statbuf)) {
-	if (errno != ENOENT) {
+	if (errno != ENOENT && errno != EPERM) {
 	    fprintf(stderr, "sudo: Can't stat %s: ", n);
 	    perror("");
 	}
