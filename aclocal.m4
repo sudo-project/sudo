@@ -158,7 +158,7 @@ dnl
 dnl SUDO_SUNOS
 dnl
 define(SUDO_SUNOS,
-[echo checking for SunOS
+[echo checking for SunOS 4.x
 AC_BEFORE([$0], [AC_PROGRAM_CHECK])
 if test -n "$UNAMEPROG"; then
     if test "`$UNAMEPROG -s`" = "SunOS"; then
