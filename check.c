@@ -196,9 +196,9 @@ expand_prompt(old_prompt, user, host)
 
     if (subst) {
 	new_prompt = (char *) emalloc(len + 1);
-	for (p = old_prompt, np = new_prompt; *p; p++) {
+	for (p = old_prompt, np = new_prompt, lastchar = '\0'; *p; p++) {
 	    if (lastchar == '%' && (*p == 'h' || *p == 'u' || *p == '%')) {
-		/* substiture user/host name */
+		/* substitute user/host name */
 		if (*p == 'h') {
 		    np--;
 		    strcpy(np, user_shost);
