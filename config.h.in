@@ -98,6 +98,9 @@
 /* Define if you use AFS.  */
 #undef HAVE_AFS
 
+/* Define if you use OSF DCE.  */
+#undef HAVE_DCE
+
 /* Define if you have POSIX signals.  */
 #undef HAVE_SIGACTION
 #ifdef HAVE_SIGACTION

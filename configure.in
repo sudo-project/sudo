@@ -72,6 +72,11 @@ AC_ARG_WITH(AFS, [  --with-AFS              enable AFS support], AC_DEFINE(HAVE_
 AFS=1
 echo 'Configuring for use with AFS')
 
+dnl --with-DCE
+AC_ARG_WITH(AFS, [  --with-DCE              enable DCE support], AC_DEFINE(HAVE_DCE)
+DCE=1
+echo 'Configuring for use with DCE')
+
 dnl --with-csops
 AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options], OPTIONS="${OPTIONS} -DUSE_INSULTS -DCLASSIC_INSULTS -DCSOPS_INSULTS -DENV_EDITOR"
 sbindir='$(exec_prefix)/sbin'
@@ -146,14 +151,27 @@ case "$OS" in
 		    else
 			LDFLAGS="${LDFLAGS} -Wl,-a,archive"
 		    fi
-		fi
-		if test -n "$AFS" ; then
-		    LIBS="-lBSD ${LIBS}"
 		elif test "$OSREV" -eq 9 ; then
 		    if test -n "$C2"; then
 			SHADOW_TYPE="SPW_HPUX9"
 			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    fi
+		elif test "$OSREV" -eq 10 ; then
+		    # DCE support
+		    if test -n "$DCE" ; then
+			# HP-UX cc needs -lPW for alloca()
+			test -z "$GCC" && LIBS="${LIBS} -lPW"
+			CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
+		    # shadow pw support
+		    elif test -n "$C2"; then
+			SHADOW_TYPE="SPW_SVR4"
+			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		    fi
+		fi
+
+		# AFS support
+		if test -n "$AFS" ; then
+		    LIBS="-lBSD ${LIBS}"
 		fi
 		;;
     "osf1")	echo "Looks like OSF/1"
@@ -274,7 +292,7 @@ dnl
 dnl search for various shadow password types unless we already know
 dnl XXX - need to ACDEFINE *something* right???
 dnl
-if test -z "$SKEY" -a -z "$SECURID" -a -z "$AFS" -a -z "$KERB4" -a -z "$KERB5" -a -n "$C2" -a -z "$SHADOW_TYPE"
+if test -z "$SKEY" -a -z "$SECURID" -a -z "$AFS" -a -z "$KERB4" -a -z "$KERB5" -a -n "$DCE" -a -n "$C2" -a -z "$SHADOW_TYPE"
     then
     echo "checking for shadow password type..."
     AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SPW_SVR4", AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SPW_SECUREWARE", [test -f /etc/master.passwd && SHADOW_TYPE="SPW_BSD"]))
@@ -403,7 +421,16 @@ if test -n "$AFS" ; then
 fi
 
 dnl
-dnl extra Skey lib + includes
+dnl extra DCE lib
+dnl
+if test -n "$DCE" ; then
+    LIBS="${LIBS} -dce"
+    LIBOBJS="${LIBOBJS} dce_pwent.o"
+fi
+
+dnl
+dnl extra Skey lib and includes
+dnl
 if test -n "$SKEY" ; then
     LIBS="${LIBS} -lskey"
     if test -f /usr/local/include/skey.h -a -f /usr/local/lib/libskey.a; then
