@@ -431,8 +431,8 @@ static void send_mail()
 	(void) close(0);
 
 	/* feed the data to sendmail */
-	(void) sprintf(buf, "To: %s\nSubject: %s\n\n%s\n\n",
-		ALERTMAIL, subject, logline);
+	(void) sprintf(buf, "To: %s\nSubject: %s\n\n%s : %s\n\n",
+		ALERTMAIL, subject, host, logline);
 	write(1, buf, strlen(buf));
 	close(1);
 
