@@ -684,9 +684,17 @@ static char *sudo_skeyprompt(user_skey, p)
 	exit(1);
     }
 
+#ifdef LONG_SKEY_PROMPT
+    /* separate s/key challenge and prompt for easy snarfing */
+    if (skeyprompt[0] == 's' && skeyprompt[1] == '/')
+	(void) sprintf(new_prompt, "%s\n%s", &skeyprompt[2], old_prompt);
+    else
+	(void) sprintf(new_prompt, "%s\n%s", skeyprompt, old_prompt);
+#else
     /* embed the s/key challenge into the new password prompt */
     (void) strncpy(new_prompt, old_prompt, plen);
     (void) sprintf(new_prompt + plen, " [%s]:", skeyprompt);
+#endif /* LONG_SKEY_PROMPT */
 
     return(new_prompt);
 }
