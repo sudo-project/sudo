@@ -184,6 +184,9 @@ int user_is_exempt()
     if ((grp = getgrnam(EXEMPTGROUP)) == NULL)
 	return(FALSE);
 
+    if (getgid() == grp->gr_gid)
+	return(TRUE);
+
     for (gr_mem = grp->gr_mem; *gr_mem; gr_mem++) {
 	if (strcmp(user, *gr_mem) == 0)
 	    return(TRUE);
