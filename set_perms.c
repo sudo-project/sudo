@@ -197,7 +197,7 @@ set_perms_suid(perm)
 			      	break;
 				
 	case PERM_RUNAS:
-				if (seteuid(runas_pw->pw_uid))
+				if (setresuid(-1, runas_pw->pw_uid, -1))
 				    fatal("unable to change to runas uid", 1);
 			      	break;
 
@@ -274,7 +274,7 @@ set_perms_suid(perm)
 			      	break;
 				
 	case PERM_RUNAS:
-				if (seteuid(runas_pw->pw_uid))
+				if (setreuid(-1, runas_pw->pw_uid))
 				    fatal("unable to change to runas uid", 1);
 			      	break;
 
