@@ -218,6 +218,9 @@
 /* Define to void if your C compiler fully groks void, else char */
 #undef VOID
 
+/* Define to the max length of a uid_t in string context (excluding the NULL */
+#undef MAX_UID_T_LEN
+
 /* Define if your syslog(3) does not guarantee the message will be logged */
 /* and syslog(3) returns non-zero to denote failure */
 #undef BROKEN_SYSLOG
