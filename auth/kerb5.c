@@ -75,12 +75,12 @@ kerb5_init(pw, promptp, auth)
     sudo_auth *auth;
 {
     char *lrealm;
-    krb5_error_code retval;
+    krb5_error_code error;
     extern int arg_prompt;
 
     /* XXX - make these errors non-fatal for better fallback? */
-    if (retval = krb5_init_context(&sudo_context)) {
-	/* XXX - how to map retval to error string? */
+    if (error = krb5_init_context(&sudo_context)) {
+	/* XXX - map error to error string? */
 	log_error(NO_EXIT|NO_MAIL, 
 	    "unable to initialize Kerberos V context");
 	return(AUTH_FATAL);
@@ -89,7 +89,7 @@ kerb5_init(pw, promptp, auth)
 
     krb5_init_ets(sudo_context);
 
-    if (retval = krb5_get_default_realm(sudo_context, &lrealm)) {
+    if (error = krb5_get_default_realm(sudo_context, &lrealm)) {
 	log_error(NO_EXIT|NO_MAIL, 
 	    "unable to get default Kerberos V realm");
 	return(AUTH_FATAL);
@@ -97,7 +97,7 @@ kerb5_init(pw, promptp, auth)
 
     if (realm) {
 	if (strcmp(realm, lrealm) != 0)
-	    xrealm = 1; /* User supplied realm is not the system default */
+	    xrealm = 1;	/* User supplied realm is not the system default */
 	free(lrealm);
     } else
 	realm = lrealm;
@@ -108,13 +108,14 @@ kerb5_init(pw, promptp, auth)
     return(AUTH_SUCCESS);
 }
 
+/* XXX - some of this should move into the init or setup function. */
 int
 kerb5_verify(pw, pass, auth)
     struct passwd *pw;
     char *pass;
     sudo_auth *auth;
 {
-    krb5_error_code	retval;
+    krb5_error_code	error;
     krb5_principal	princ;
     krb5_creds		creds;
     krb5_ccache		ccache;
@@ -131,7 +132,7 @@ kerb5_verify(pw, pass, auth)
 	return(AUTH_FAILURE);
 
     /* Set the ticket file to be in /tmp so we don't need to change perms. */
-    /* XXX - potential /tmp race */
+    /* XXX - potential /tmp race? */
     (void) snprintf(cache_name, sizeof(cache_name), "FILE:/tmp/sudocc_%ld",
 	(long) getpid());
     if (krb5_cc_resolve(sudo_context, cache_name, &ccache)
@@ -149,9 +150,9 @@ kerb5_verify(pw, pass, auth)
 	return(AUTH_FAILURE);
     }
 
-    retval = verify_krb_v5_tgt(ccache);
+    error = verify_krb_v5_tgt(ccache);
     (void) krb5_cc_destroy(sudo_context, ccache);
-    return (retval ? AUTH_FAILURE : AUTH_SUCCESS);
+    return (error ? AUTH_FAILURE : AUTH_SUCCESS);
 }
 
 /*
@@ -163,14 +164,14 @@ kerb5_verify(pw, pass, auth)
  * supposedly our KDC).  If the host/<host> service is unknown (i.e.,
  * the local keytab doesn't have it), let her in.
  *
- * Returns 1 for confirmation, -1 for failure, 0 for uncertainty.
+ * Returns 0 for successful authentication, non-zero for failure.
  */
 static int
 verify_krb_v5_tgt(ccache)
     krb5_ccache		ccache;
 {
     char		phost[BUFSIZ];
-    krb5_error_code	retval;
+    krb5_error_code	error;
     krb5_principal	princ;
     krb5_keyblock *	keyblock = 0;
     krb5_data		packet;
@@ -184,54 +185,41 @@ verify_krb_v5_tgt(ccache)
      */
     if (krb5_sname_to_principal(sudo_context, NULL, NULL,
 				KRB5_NT_SRV_HST, &princ))
-	return -1;
+	return(-1);
 
     /* Extract the name directly. */
-    strncpy(phost, krb5_princ_component(c, princ, 1)->data, BUFSIZ);
-    phost[BUFSIZ - 1] = '\0';
+    strncpy(phost, krb5_princ_component(c, princ, 1)->data, sizeof(phost) - 1);
+    phost[sizeof(phost) - 1] = '\0';
 
     /*
      * Do we have host/<host> keys?
      * (use default keytab, kvno IGNORE_VNO to get the first match,
      * and enctype is currently ignored anyhow.)
      */
-    if (retval = krb5_kt_read_service_key(sudo_context, NULL, princ, 0,
-					  ENCTYPE_DES_CBC_MD5, &keyblock)) {
-	/* Keytab or service key does not exist */
-	if (xrealm)
-	    retval = -1;
-	else
-	    retval = 0;
+    if (error = krb5_kt_read_service_key(sudo_context, NULL, princ, 0,
+					 ENCTYPE_DES_CBC_MD5, &keyblock)) {
+	/* Keytab or service key does not exist. */
 	goto cleanup;
     }
     if (keyblock)
 	krb5_free_keyblock(sudo_context, keyblock);
 
     /* Talk to the kdc and construct the ticket. */
-    retval = krb5_mk_req(sudo_context, &auth_context, 0, "host", phost,
-			 NULL, ccache, &packet);
+    error = krb5_mk_req(sudo_context, &auth_context, 0, "host", phost,
+			NULL, ccache, &packet);
     if (auth_context) {
 	krb5_auth_con_free(sudo_context, auth_context);
-	auth_context = NULL; /* setup for rd_req */
-    }
-    if (retval) {
-	retval = -1;
-	goto cleanup;
+	auth_context = NULL;	/* setup for rd_req */
     }
 
     /* Try to use the ticket. */
-    retval = krb5_rd_req(sudo_context, &auth_context, &packet, princ,
-			 NULL, NULL, NULL);
-    if (retval) {
-	retval = -1;
-    } else {
-	retval = 1;
-    }
-
+    if (!error)
+	error = krb5_rd_req(sudo_context, &auth_context, &packet, princ,
+			    NULL, NULL, NULL);
 cleanup:
     if (packet.data)
 	krb5_free_data_contents(sudo_context, &packet);
     krb5_free_principal(sudo_context, princ);
-    return retval;
 
+    return(error);
 }
