@@ -30,12 +30,10 @@ CPPFLAGS=""
 AC_SUBST(CPPFLAGS)dnl
 OSDEFS=""
 AC_SUBST(OSDEFS)dnl
-DCE_OBJS=""
-AC_SUBST(DCE_OBJS)dnl
+AUTH_OBJS="passwd.o"
+AC_SUBST(AUTH_OBJS)dnl
 LIBOBJS=""
 AC_SUBST(LIBOBJS)dnl
-TGETPASS="tgetpass.o"
-AC_SUBST(TGETPASS)dnl
 MANTYPE="man"
 AC_SUBST(MANTYPE)dnl
 MAN_POSTINSTALL=""
@@ -143,11 +141,32 @@ AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
 		;;
 esac])
 
+dnl
+dnl Must be the first thing to modify ${AUTH_OBJS}
+dnl
+AC_ARG_WITH(passwd, [  --without-passwd        no passwd/shadow file authentication],
+[case $with_passwd in
+    yes)	;;
+    no)		AC_DEFINE(WITHOUT_PASSWD)
+		AC_MSG_CHECKING(whether to check shadow/passwd file)
+		AC_MSG_RESULT(no)
+		AUTH_OBJS=""
+		;;
+    *)		echo "Sorry, --with-passwd does not take an argument."
+		exit 1
+		;;
+esac])
+
 AC_ARG_WITH(skey, [  --with-skey             enable S/Key support ],
 [case $with_skey in
-    yes)	AC_DEFINE(HAVE_SKEY)
+    yes)	if test -n "$with_opie"; then
+		    AC_MSG_WARN(cannot use both S/Key and OPIE)
+		    exit 1
+		fi
+    		AC_DEFINE(HAVE_SKEY)
 		AC_MSG_CHECKING(whether to try S/Key authentication)
 		AC_MSG_RESULT(yes)
+		AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
 		;;
     no)		;;
     *)		echo "Ignoring unknown argument to --with-skey: $with_skey"
@@ -156,9 +175,14 @@ esac])
 
 AC_ARG_WITH(opie, [  --with-opie             enable OPIE support ],
 [case $with_opie in
-    yes)	AC_DEFINE(HAVE_OPIE)
+    yes)	if test -n "$with_skey"; then
+		    AC_MSG_WARN(cannot use both S/Key and OPIE)
+		    exit 1
+		fi
+		AC_DEFINE(HAVE_OPIE)
 		AC_MSG_CHECKING(whether to try NRL OPIE authentication)
 		AC_MSG_RESULT(yes)
+		AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
 		;;
     no)		;;
     *)		echo "Ignoring unknown argument to --with-opie: $with_opie"
@@ -195,21 +219,25 @@ AC_ARG_WITH(SecurID, [  --with-SecurID          enable SecurID support],
     *)		AC_DEFINE(HAVE_SECURID)
 		AC_MSG_CHECKING(whether to use SecurID for authentication)
 		AC_MSG_RESULT(yes)
+		AUTH_OBJS="securid.o"
 		;;
 esac])
 
-AC_ARG_WITH(AuthSRV, [  --with-AuthSRV          enable FWTK AuthSRV support],
-[case $with_AuthSRV in
-    yes)	AC_DEFINE(HAVE_AUTHSRV)
+AC_ARG_WITH(fwtk, [  --with-fwtk             enable FWTK AuthSRV support],
+[case $with_fwtk in
+    yes)	AC_DEFINE(HAVE_FWTK)
 		AC_MSG_CHECKING(whether to use FWTK AuthSRV for authentication)
 		AC_MSG_RESULT(yes)
+		AUTH_OBJS="fwtk.o"
 		;;
     no)		;;
-    *)		AC_DEFINE(HAVE_AUTHSRV)
+    *)		AC_DEFINE(HAVE_FWTK)
 		AC_MSG_CHECKING(whether to use FWTK AuthSRV for authentication)
 		AC_MSG_RESULT(yes)
-		SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with-AuthSRV}"
-    		CPPFLAGS="${CPPFLAGS} -I${with-AuthSRV}"
+		SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_fwtk}"
+    		CPPFLAGS="${CPPFLAGS} -I${with_fwtk}"
+		AUTH_OBJS="fwtk.o"
+		with_fwtk=yes
 		;;
 esac])
 
@@ -240,6 +268,7 @@ AC_ARG_WITH(authenticate, [  --with-authenticate     enable AIX general authenti
     yes)	AC_DEFINE(HAVE_AUTHENTICATE)
 		AC_MSG_CHECKING(whether to use AIX general authentication)
 		AC_MSG_RESULT(yes)
+		AUTH_OBJS="authenticate.o"
 		;;
     no)		;;
     *)		echo "Sorry, --with-authenticate does not take an argument."
@@ -252,6 +281,7 @@ AC_ARG_WITH(pam, [  --with-pam              enable PAM support],
     yes)	AC_DEFINE(HAVE_PAM)
 		AC_MSG_CHECKING(whether to use PAM authentication)
 		AC_MSG_RESULT(yes)
+		AUTH_OBJS="pam.o"
 		;;
     no)		;;
     *)		echo "Sorry, --with-pam does not take an argument."
@@ -264,6 +294,7 @@ AC_ARG_WITH(AFS, [  --with-AFS              enable AFS support],
     yes)	AC_DEFINE(HAVE_AFS)
 		AC_MSG_CHECKING(whether to try AFS (kerberos) authentication)
 		AC_MSG_RESULT(yes)
+		AUTH_OBJS="${AUTH_OBJS} afs.o"
 		;;
     no)		;;
     *)		echo "Sorry, --with-AFS does not take an argument."
@@ -276,6 +307,7 @@ AC_ARG_WITH(DCE, [  --with-DCE              enable DCE support],
     yes)	AC_DEFINE(HAVE_DCE)
 		AC_MSG_CHECKING(whether to try DCE (kerberos) authentication)
 		AC_MSG_RESULT(yes)
+		AUTH_OBJS="${AUTH_OBJS} dce.o"
 		;;
     no)		;;
     *)		echo "Sorry, --with-DCE does not take an argument."
@@ -820,22 +852,6 @@ AC_ARG_ENABLE(root-sudo,
   esac
 ], AC_MSG_RESULT(yes))
 
-AC_MSG_CHECKING(whether to use the system getpass function)
-AC_ARG_ENABLE(tgetpass,
-[  --disable-tgetpass      Use the system getpass() instead of sudo's version],
-[ case "$enableval" in
-    yes)	AC_MSG_RESULT(no)
-		;;
-    no)		AC_MSG_RESULT(yes)
-		AC_DEFINE(USE_GETPASS)
-		TGETPASS=""
-		;;
-    *)		AC_MSG_RESULT(no)
-    		echo "Ignoring unknown argument to --enable-tgetpass: $enableval"
-		;;
-  esac
-], AC_MSG_RESULT(no))
-
 AC_MSG_CHECKING(whether to log the hostname in the log file)
 AC_ARG_ENABLE(log-host,
 [  --enable-log-host       Log the hostname in the log file],
@@ -1118,7 +1134,7 @@ case "$host" in
 		# unless overridden on the command line
 		if test "$CHECKSIA" = "true"; then
 		    AC_CHECK_FUNC(sia_ses_init, AC_DEFINE(HAVE_SIA) [
-		    if test -n "$with_skey" -o -n "$with_opie" -o -n "$with_otp_only" -o -n "$with_long_otp_prompt" -o -n "$with_SecurID" -o -n "$with_AuthSRV" -o -n "$with_kerb4" -o -n "$with_kerb5" -o -n "$with_pam" -o -n "$with_AFS" -o -n "$with_DCE"; then
+		    if test -n "$with_skey" -o -n "$with_opie" -o -n "$with_otp_only" -o -n "$with_long_otp_prompt" -o -n "$with_SecurID" -o -n "$with_fwtk" -o -n "$with_kerb4" -o -n "$with_kerb5" -o -n "$with_pam" -o -n "$with_AFS" -o -n "$with_DCE"; then
 			echo "Sorry, you cannot mix SIA and other authentication schemes.  You can turn off SIA support via the --disable-sia option"
 			exit 1
 		    fi]; CHECKSHADOW=false)
@@ -1129,6 +1145,8 @@ case "$host" in
 		fi
 
 		if test -n "$SECUREWARE"; then
+		    AUTH_OBJS="${AUTH_OBJS} secureware.o"
+		    AC_DEFINE(HAVE_GETPRPWNAM)
 		    # 4.x and higher need -ldb too...
 		    AC_CHECK_LIB(db, dbopen, [SUDO_LIBS="${SUDO_LIBS} -lsecurity -ldb -laud -lm"; LIBS="${LIBS} -lsecurity -ldb -laud -lm"], [SUDO_LIBS="${SUDO_LIBS} -lsecurity -ldb -laud -lm"; LIBS="${LIBS} -lsecurity -ldb -laud -lm"])
 		    AC_CHECK_FUNCS(dispcrypt)
@@ -1141,6 +1159,8 @@ case "$host" in
 		    [AC_MSG_RESULT([yes, fixing locally])
 		    sed 's:<acl.h>:<sys/acl.h>:g' < /usr/include/prot.h > prot.h
 		    ])
+		else
+		    AUTH_OBJS="sia.o"
 		fi
 		;;
     *-*-irix*)
@@ -1318,9 +1338,20 @@ AC_CHECK_FUNC(innetgr, AC_DEFINE(HAVE_INNETGR) AC_CHECK_FUNCS(getdomainname))
 AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) [SUDO_LIBS="${SUDO_LIBS} -lcompat"; VISUDO_LIBS="${VISUDO_LIBS} -lcompat"; LIBS="${LIBS} -lcompat"], LIBOBJS="$LIBOBJS lsearch.o"), LIBOBJS="$LIBOBJS lsearch.o"))
 AC_CHECK_FUNC(setenv, AC_DEFINE(HAVE_SETENV), AC_FUNC_CHECK(putenv, AC_DEFINE(HAVE_PUTENV), LIBOBJS="$LIBOBJS putenv.o"))
 AC_CHECK_FUNC(utime, AC_DEFINE(HAVE_UTIME)
-SUDO_FUNC_UTIME_POSIX
-AC_FUNC_UTIME_NULL, LIBOBJS="$LIBOBJS utime.o")
+SUDO_FUNC_UTIME_POSIX, LIBOBJS="$LIBOBJS utime.o")
 SUDO_FUNC_FNMATCH(AC_DEFINE(HAVE_FNMATCH), LIBOBJS="$LIBOBJS fnmatch.o")
+AC_REPLACE_FUNCS(strerror)
+AC_CHECK_FUNC(snprintf, AC_DEFINE(HAVE_SNPRINTF), NEED_SNPRINTF=1)
+AC_CHECK_FUNC(vsnprintf, AC_DEFINE(HAVE_VSNPRINTF), NEED_SNPRINTF=1)
+AC_CHECK_FUNC(asprintf, AC_DEFINE(HAVE_ASPRINTF), NEED_SNPRINTF=1)
+AC_CHECK_FUNC(vasprintf, AC_DEFINE(HAVE_VASPRINTF), NEED_SNPRINTF=1)
+dnl
+dnl If NEED_SNPRINTF is set, add snprintf.c to LIBOBJS
+dnl (it contains snprintf, vsnprintf, asprintf, and vasprintf)
+dnl
+if test -n "$NEED_SNPRINTF"; then
+    LIBOBJS="$LIBOBJS snprintf.o"
+fi
 dnl
 dnl if crypt(3) not in libc, look elsewhere
 dnl
@@ -1363,6 +1394,7 @@ if test "$with_kerb5" = "yes"; then
     AC_CHECK_LIB(krb5, krb5_get_init_creds_opt, [
 	AC_DEFINE(HAVE_KERB5)
 	SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
+	AUTH_OBJS="${AUTH_OBJS} kerb5.o"
     ], with_kerb4=yes)
 fi
 
@@ -1399,6 +1431,7 @@ if test "$with_kerb4" = "yes"; then
 	SUDO_LIBS="${SUDO_LIBS} -ldes425 -lkrb5 -lcrypto -lcom_err"
     else
 	AC_HAVE_LIBRARY(des, SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes", SUDO_LIBS="${SUDO_LIBS} -lkrb")
+    AUTH_OBJS="${AUTH_OBJS} kerb4.o"
     fi
 fi
 
@@ -1513,9 +1546,9 @@ if test -n "$with_SecurID" -a "$with_SecurID" != "no"; then
 fi
 
 dnl
-dnl extra AuthSRV lib + includes
+dnl extra FWTK libs + includes
 dnl
-if test "$with_AuthSRV" = "yes"; then
+if test "$with_fwtk" = "yes"; then
     SUDO_LIBS="${SUDO_LIBS} -lauth -lfwall"
 fi
 
@@ -1531,6 +1564,15 @@ dnl Check for log file and timestamp locations
 dnl
 SUDO_LOGFILE
 SUDO_TIMEDIR
+
+dnl
+dnl If ${AUTH_OBJS} is empty, define NO_PASSWD
+dnl The meaning of --without-passwd is overloaded...
+dnl
+if test -z "$AUTH_OBJS"; then
+    AC_DEFINE(NO_PASSWD)
+    AC_MSG_WARN(no user authentication will be performed)
+fi
 
 dnl
 dnl Set exec_prefix
