@@ -112,9 +112,9 @@ dnl
 dnl Where the log file goes, use /var/log if it exists, else /{var,usr}/adm
 dnl
 AC_DEFUN(SUDO_LOGFILE, [AC_MSG_CHECKING(for log file location)
-if test -n "$with_logfile"; then
-    AC_MSG_RESULT($with_logfile)
-    AC_DEFINE_UNQUOTED(_PATH_SUDO_LOGFILE, "$with_logfile")
+if test -n "$with_logpath"; then
+    AC_MSG_RESULT($with_logpath)
+    AC_DEFINE_UNQUOTED(_PATH_SUDO_LOGFILE, "$with_logpath")
 elif test -d "/var/log"; then
     AC_MSG_RESULT(/var/log/sudo.log)
     AC_DEFINE(_PATH_SUDO_LOGFILE, "/var/log/sudo.log")
