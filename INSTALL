@@ -9,8 +9,8 @@ INSTALL NOTES
    other than /usr/local (ie: --prefix=/opt).
 
    NOTE: if you use C2 security you need to use the --with-C2 flag to
-   configure.  Currently this only affects hpux and ConvexOS with
-   C@ security.  For hpux only, you can use --with-C2 if you are expecting
+   configure.  Currently this only affects hpux, ultrix, and ConvexOS with
+   C2 security.  For hpux only, you can use --with-C2 if you are expecting
    to migrate to C2 security later but it makes password lookups about
    twice as slow.
 
@@ -38,12 +38,13 @@ INSTALL NOTES
 
 A few notes:
 
-a) To use syslog with the ultrix version you *may* need to grab
+a) To use syslog with the ultrix version you may want to grab
    and install pub/DEC/jtkohl-syslog-complete.tar.Z available from
-   gatekeeper.dec.com via anonymous ftp.  All our decs have this installed
-   so I'm not really sure if it's necessary or not.  Regardless, it's
-   a nice port of the 4.3 syslogd that backwards compatible with the
-   ultrix version.  Highly recommended.
+   gatekeeper.dec.com via anonymous ftp.  If you don't I'd suggest
+   logging to a separate file rather thang using the 4.2BSD syslog()
+   that comes with ultrix.  The jtkohl syslog is a nice port of the
+   4.3 syslogd that is backwards compatible with the ultrix version.
+   I recommend it highly.
 
 b) visudo will *NOT* use the editor referred to by the EDITOR or
    VISUAL environmental variables unless you define ENV_EDITOR in
