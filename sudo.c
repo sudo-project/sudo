@@ -48,7 +48,6 @@
 #ifdef hpux
 #include <unistd.h>
 #endif
-#include <errno.h>
 #include <string.h>
 #include <strings.h>
 #include <pwd.h>
