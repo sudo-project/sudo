@@ -50,6 +50,7 @@ static char rcsid[] = "$Id$";
 #include <sys/file.h>
 #include <pwd.h>
 #include "sudo.h"
+#include "insults.h"
 
 char *getpass();
 
@@ -238,7 +239,11 @@ static void check_passwd()
 	if (!strcmp(encrypted, crypt(pass, encrypted)))
 	    return;		/* if the passwd is correct return() */
 	--counter;		/* otherwise, try again  */
+#ifdef USE_INSULTS
+	(void) fprintf(stderr, "%s\n", INSULT);
+#else
 	(void) fprintf(stderr, "%s\n", INCORRECT_PASSWORD);
+#endif /* USE_INSULTS */
     }
 
     log_error(PASSWORD_NOT_CORRECT);
