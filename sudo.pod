@@ -127,14 +127,16 @@ B<sudo> executes.
 For security reasons, if your OS supports shared libraries,
 B<sudo> should always be statically linked unless the
 dynamic loader disables user-defined library search paths
-for setuid programs.
+for setuid programs.  (Most modern dynamic loaders do this.)
 
 B<sudo> will check the ownership of its timestamp directory
-(F</tmp/.odus> by default) and ignore the directory's contents
-if it is not owned by root and only read, writable, and
-executable by root.  On systems that allow users to give
-files away to root (via chown) it is possible for a user
-to create the timestamp directory before B<sudo> is run.
+(F</var/run/.odus> or F</tmp/.odus> by default) and ignore
+the directory's contents if it is not owned by root and
+only read, writable, and executable by root.  On systems
+that allow users to give files away to root (via chown),
+if the timestamp directory is located in a directory writable
+by anyone (ie: F</tmp>), it is possible for a user to create
+the timestamp directory before B<sudo> is run.
 However, because B<sudo> checks the ownership and mode of
 the directory, the only damage that can be done is to "hide"
 files by putting them in the timestamp dir.  This is unlikely
@@ -142,7 +144,7 @@ to happen since once the timestamp dir is owned by root and
 inaccessible by any other user the user placing files there
 would be unable to get them back out.  To get around this
 issue you can use a directory that is not world-writable
-for the timestamps (F</var/sudo> for instance).
+for the timestamps (F</var/adm/sudo> for instance).
 
 To keep users from creating their own timestamp files
 (by creating the timestamp directory before B<sudo>
