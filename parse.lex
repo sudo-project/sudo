@@ -32,8 +32,8 @@
 *******************************************************************************/
 #include <sys/types.h>
 #include <sys/param.h>
-#include "y.tab.h"
 #include "sudo.h"
+#include "y.tab.h"
 
 #ifdef FLEX_SCANNER
 int yylineno = 0;
