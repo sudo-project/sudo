@@ -120,7 +120,7 @@ int   user_is_exempt			__P((void));
  * Globals
  */
 static int   timedir_is_good;
-static char *timestampfile_p;
+static char  timestampfile[MAXPATHLEN + 1];
 #ifdef HAVE_SECURID
 union config_record configure;
 #endif /* HAVE_SECURID */
@@ -194,7 +194,6 @@ int user_is_exempt()
 
 static int check_timestamp()
 {
-    static char timestampfile[MAXPATHLEN + 1];
     register char *p;
     struct stat statbuf;
     register int timestamp_is_old = -1;
@@ -210,7 +209,6 @@ static int check_timestamp()
 #else
     (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR, user);
 #endif /* USE_TTY_TICKETS */
-    timestampfile_p = timestampfile;
 
     timedir_is_good = 1;	/* now there's an assumption for ya... */
 
@@ -332,8 +330,8 @@ static void update_timestamp()
 	/* become root */
 	set_perms(PERM_ROOT);
 
-	if (touch(timestampfile_p) < 0) {
-	    int fd = open(timestampfile_p, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+	if (touch(timestampfile) < 0) {
+	    int fd = open(timestampfile, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 
 	    if (fd < 0)
 		perror("update_timestamp: open");
@@ -356,7 +354,6 @@ static void update_timestamp()
 
 void remove_timestamp()
 {
-    char timestampfile[MAXPATHLEN + 1];
     char *p;
 
 #ifdef USE_TTY_TICKETS
