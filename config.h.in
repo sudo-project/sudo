@@ -418,27 +418,4 @@
 #  define EXEC	execvp
 #endif /* USE_EXECV */
 
-/*
- * syslog(3) parameters
- */
-
-#if (LOGGING & SLOG_SYSLOG)
-#  include <syslog.h>
-#  ifndef Syslog_ident
-#    define Syslog_ident	"sudo"
-#  endif
-#  ifndef Syslog_options
-#    define Syslog_options	0
-#  endif
-#  if !defined(Syslog_facility) && defined(LOG_NFACILITIES)
-#    define Syslog_facility	LOGFAC
-#  endif
-#  ifndef Syslog_priority_OK
-#    define Syslog_priority_OK	LOG_NOTICE
-#  endif
-#  ifndef Syslog_priority_NO
-#    define Syslog_priority_NO	LOG_ALERT
-#  endif
-#endif	/* LOGGING & SLOG_SYSLOG */
-
 #endif /* _SUDO_CONFIG_H */
