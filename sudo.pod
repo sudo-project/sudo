@@ -8,7 +8,7 @@ sudo - execute a command as the superuser
 
 =head1 SYNOPSIS
 
-B<sudo> B<-V> | B<-h> | B<-l> | B<-v> | B<-k> | B<-s> | B<-H> |
+B<sudo> B<-V> | B<-h> | B<-l> | B<-v> | B<-k> | B<-K> | B<-s> | B<-H> |
 [ B<-b> ] | [ B<-r> realm ] | [ B<-p> prompt ] [ B<-u> username/#uid] I<command>
 
 =head1 DESCRIPTION
@@ -61,10 +61,16 @@ minutes) but does not run a command.
 
 =item -k
 
-The C<-k> (I<kill>) option to B<sudo> removes the user's timestamp
-file, thus requiring the user's password the next time B<sudo> is run.
-This option does not require a password and was added to
-allow a user to revoke B<sudo> permissions from a .logout file.
+The C<-k> (I<kill>) option to B<sudo> invalidates the user's timestamp
+file by setting the time on it to the epoch.  The next time B<sudo> is
+run a password will be required.  This option does not require a password
+and was added to allow a user to revoke B<sudo> permissions from a .logout
+file.
+
+=item -K
+
+The C<-K> (sure I<kill>) option to B<sudo> removes the user's timestamp
+file entirely.  This option does not require a password.
 
 =item -b
 
@@ -134,8 +140,8 @@ to subvert the program that B<sudo> runs.  To combat this the
 C<LD_*>, C<_RLD_*>, C<SHLIB_PATH> (HP-UX only), and C<LIBPATH> (AIX
 only) environment variables are removed from the environment passed
 on to all commands executed.  B<sudo> will also remove the C<IFS>,
-C<ENV>, C<BASH_ENV>, C<KRB_CONF> and C<KRB5_CONFIG> variables as
-they too can pose a threat.
+C<ENV>, C<BASH_ENV>, C<KRB_CONF>, C<KRB5_CONFIG>, C<LOCALDOMAIN>,
+C<RES_OPTIONS> and C<HOSTALIASES> variables as they too can pose a threat.
 
 To prevent command spoofing, B<sudo> checks "." and "" (both denoting
 current directory) last when searching for a command in the user's
@@ -143,10 +149,10 @@ PATH (if one or both are in the PATH).  Note, however, that the
 actual PATH environment variable is I<not> modified and is passed
 unchanged to the program that B<sudo> executes.
 
-For security reasons, if your OS supports shared libraries, B<sudo>
-should always be statically linked unless the dynamic loader disables
-user-defined library search paths for setuid programs.  (Most modern
-dynamic loaders do this.)
+For security reasons, if your OS supports shared libraries and does
+not disable user-defined library search paths for setuid programs
+(most do), you should either use a linker option that disables this
+behavior or link B<sudo> statically.
 
 B<sudo> will check the ownership of its timestamp directory
 (F</var/run/sudo> or F</tmp/.odus> by default) and ignore the
@@ -162,13 +168,14 @@ since once the timestamp dir is owned by root and inaccessible by
 any other user the user placing files there would be unable to get
 them back out.  To get around this issue you can use a directory
 that is not world-writable for the timestamps (F</var/adm/sudo> for
-instance).
+instance) or create /tmp/.odus with the appropriate owner (root) and
+permissions (0700) in the system startup files.
 
 C<sudo> will not honor timestamp files set far in the future.
 Timestamp files with a date greater than current_time + 2 * C<TIMEOUT>
-will be ignored and sudo complain about a "preposterous stampfile
-date".  This is done to keep a user from creating his/her own
-timestamp file with a bogus date.
+will be ignored and sudo will log and complain.  This is done to
+keep a user from creating his/her own timestamp file with a bogus
+date on system that allow users to give away files.
 
 =head1 FILES
 
@@ -194,12 +201,11 @@ timestamp file with a bogus date.
 Many people have worked on B<sudo> over the years, this
 version consists of code written primarily by:
 
-	Jeff Nieusma
-	David Hieb
 	Todd Miller
 	Chris Jepeway
 
-See the HISTORY file in the B<sudo> distribution for more details.
+See the HISTORY file in the B<sudo> distribution for a short history
+of B<sudo>.
 
 Please send all bugs, comments, and changes to sudo-bugs@courtesan.com.
 
@@ -207,12 +213,8 @@ Please send all bugs, comments, and changes to sudo-bugs@courtesan.com.
 
 This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-675 Mass Ave, Cambridge, MA 02139, USA.
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the LICENSE
+file distributed with sudo for more details.
 
 =head1 CAVEATS
 
