@@ -181,8 +181,8 @@ testsudoers: $(TESTOBJS) $(LIBOBJS)
 sudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
-# Uncomment the following if you want "make clean" to clean the parser
-@DEV@PARSESRCS = sudo.tab.h sudo.tab.c lex.yy.c
+# Uncomment the following if you want "make distclean" to clean the parser
+@DEV@PARSESRCS = sudo.tab.h sudo.tab.c lex.yy.c def_data.c def_data.h
 
 # Uncomment the following if you intend to modify parse.yacc
 @DEV@sudo.tab.c sudo.tab.h: parse.yacc
@@ -333,8 +333,9 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -f Makefile *.man pathnames.h config.h config.status config.cache \
-	       config.log $(PARSESRCS)
+	-rm -rf Makefile pathnames.h config.h config.status config.cache \
+		config.log libtool sudo_noexec.lo .libs $(PARSESRCS) \
+		sudo.man sudoers.man visudo.man
 
 clobber: distclean
 
