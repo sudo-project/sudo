@@ -1,0 +1,90 @@
+/*
+ *  CU sudo version 1.3.1
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 1, or (at your option)
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ *  Please send bugs, changes, problems to sudo-bugs.cs.colorado.edu
+ *
+ *******************************************************************
+ *
+ *  This module contains sudo_setenv().
+ *  sudo_setenv(3) adds a string of the form "var=val" to the environment.
+ *
+ *  Todd C. Miller (millert@colorado.edu) Fri Jun  3 18:32:19 MDT 1994
+ */
+
+#ifndef lint
+static char rcsid[] = "$Id$";
+#endif /* lint */
+
+#include "config.h"
+
+#include <stdio.h>
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif /* STDC_HEADERS */
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif /* HAVE_MALLOC_H */
+#include <sys/param.h>
+
+#include "sudo.h"
+
+#ifndef STDC_HEADERS
+extern int putenv();
+extern int setenv();
+extern char *getenv();
+#endif /* !STDC_HEADERS */
+
+
+/**********************************************************************
+ *
+ * sudo_setenv()
+ *
+ *  sudo_setenv() adds a string of the form "var=val" to the environment.
+ *  If it is unable to expand the current environent it returns -1,
+ *  else it returns 0.
+ */
+
+int sudo_setenv(var, val)
+    char *var;
+    char *val;
+{
+
+#ifdef HAVE_SETENV
+    return(setenv(var, val, 1));
+#else
+#ifdef HAVE_PUTENV
+    char *envstring, *tmp;
+
+    envstring = tmp = (char *) malloc(strlen(var) + strlen(val) + 2);
+    if (envstring == NULL)
+	return(-1);
+
+    while ((*tmp++ = *var++))
+	;
+
+    *(tmp-1) = '=';
+
+    while ((*tmp++ = *val++))
+	;
+
+    return(putenv(envstring));
+#else
+    /* XXX - implement */
+    return(0);
+#endif /* HAVE_PUTENV */
+#endif /* HAVE_SETENV */
+}
