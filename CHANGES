@@ -215,7 +215,8 @@ CHANGES from sudo 1.3.1pl4
 
 72) Sudo now sets IFS to be SPACE, TAB, NEWLINE.
 
-73) Sudo now sets the effective gid to root's group (based on passwd file)
+73) Sudo now sets the real and effective gid to root's group
+    (based on passwd file).
 
 74) Sudo now checks that the sudoers file is owned by a certain user
     and not readable or writable by anyone else.
@@ -246,34 +247,50 @@ CHANGES from sudo 1.3.1pl4
 
 83) Fixed bison warnings from new parse.yacc.
 
-84) Added a case to parse.lex to error on tokens beginning with [0-9_].
+84) Added a default case to parse.lex to error on unmatched tokens as Chris
+    sugggested.
 
 85) Converted configure.in and acsite.m4 to autoconf 2.1.
 
 86) Added lsearch.c and search.h for os's w/o lsearch()/lfind().
 
-87) Fixed a problem on HP-UX trusted systems with getpwuid() returning "*"
+87) Sudo now checks to see that the file it is executing is a regular file
+    (was just checking the execute bit so dirs slipped through).
+    Pointed out by Barb Dijker <barb@labyrinth.com>.
+
+88) Fixed a problem on HP-UX trusted systems with getpwuid() returning "*"
     unless the real uid is 0.  Reported by Brian Cunnie (cunnie@nyc.hp.com).
 
-88) configure now checks for size_t and ssize_t in unistd.h as well
+89) configure now checks for size_t and ssize_t in unistd.h as well
     as sys/types.h.
 
-89) configure now checks for egrep before actually using it.
+90) configure now checks for egrep before actually using it.
 
-90) Added support for SunOS 4.x C2 security (shadow passwords) from
+91) configure now checks for a working void implementation (ie: void * as
+    a generic pointer) and sets VOID to void or char accordingly.
+
+92) Added support for SunOS 4.x C2 security (shadow passwords) from
     Kendall Libby (fubar@shore.net)
 
-91) Changed all occurences of bzero() to memset() and bcopy() to
+93) Changed all occurences of bzero() to memset() and bcopy() to
     memmove().
 
-92) Fixed a bug in sudo.c.  If a user has no passwd entry sudo would
+94) Fixed a bug in sudo.c.  If a user has no passwd entry sudo would
     dump core (writing to a garbage pointer).  Pointed out by
     Stephen Schaefer <sps@gateway.bsis.com>.
 
-93) Worked around a bug in AIX's lex in parse.c.  AIX lex doesn't seem
+95) Worked around a bug in AIX's lex in parse.c.  AIX lex doesn't seem
     to handle {x,y} range notation correctly.  Bleah.
 
-94) Sudo would not report a failed attempt if the user entered <return>
+96) Sudo would not report a failed attempt if the user entered <return>
     at the 2nd password: prompt so someone trying to guess a password
     could just invoked sudo multiple times and try one passwd at a time.
     Reported by Jonathan Adams <jonathan@smada.com>.
+
+97) Added User_Alias facility.
+
+98) Rewrote most of the ip address / network support.  Now works on all
+    systems sudo has currently been tested on.
+
+99) Sudo now sets SUDO_COMMAND and SUDO_GID envariables in addition to
+    SUDO_USER and SUDO_UID.
