@@ -89,10 +89,10 @@ string (as opposed to a symbol name).
 There are four kinds of aliases: C<User_Alias>, C<Runas_Alias>,
 C<Host_Alias> and C<Cmnd_Alias>.
 
- Alias ::= 'User_Alias' = User_Alias (':' User_Alias)* |
-	   'Runas_Alias' = Runas_Alias (':' Runas_Alias)* |
-	   'Host_Alias' = Host_Alias (':' Host_Alias)* |
-	   'Cmnd_Alias' = Cmnd_Alias (':' Cmnd_Alias)*
+ Alias ::= 'User_Alias'  User_Alias (':' User_Alias)* |
+	   'Runas_Alias' Runas_Alias (':' Runas_Alias)* |
+	   'Host_Alias'  Host_Alias (':' Host_Alias)* |
+	   'Cmnd_Alias'  Cmnd_Alias (':' Cmnd_Alias)*
 
  User_Alias ::= NAME '=' User_List
 
