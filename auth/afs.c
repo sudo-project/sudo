@@ -59,7 +59,7 @@ afs_verify(pw, pass, data)
 
     /* Try to just check the password */
     ka_StringToKey(pass, NULL, &afs_key);
-    if (ka_GetAdminToken(user_name,		/* name */
+    if (ka_GetAdminToken(pw->pw_name,		/* name */
 			 NULL,			/* instance */
 			 NULL,			/* realm */
 			 &afs_key,		/* key (contains password) */
@@ -71,7 +71,7 @@ afs_verify(pw, pass, data)
     /* Fall back on old method XXX - needed? */
     setpag();
     if (ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION+KA_USERAUTH_DOSETPAG,
-				   user_name,	/* name */
+				   pw->pw_name,	/* name */
 				   NULL,	/* instance */
 				   NULL,	/* realm */
 				   pass,	/* password */

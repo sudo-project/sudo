@@ -66,7 +66,7 @@ pam_setup(pw, promptp, data)
     /* Initial PAM setup */
     pam_conv.conv = sudo_conv;
     PAM_nullpw = 0;
-    if (pam_start("sudo", user_name, &pam_conv, &pamh) != PAM_SUCCESS) {
+    if (pam_start("sudo", pw->pw_name, &pam_conv, &pamh) != PAM_SUCCESS) {
 	set_perms(PERM_USER, 0);
 	log_error(BAD_AUTH_INIT);
 	inform_user(BAD_AUTH_INIT);
