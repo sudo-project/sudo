@@ -389,7 +389,7 @@ static int add_alias(alias, type)
     ok = FALSE;			/* assume failure */
     ai.type = type;
     (void) strcpy(ai.name, alias);
-    if (lfind((const VOID *)&ai, (const VOID *)aliases, &naliases, sizeof(ai),
+    if (lfind((VOID *)&ai, (VOID *)aliases, &naliases, sizeof(ai),
 	aliascmp) != NULL) {
 	(void) sprintf(s, "Alias `%s' already defined", alias);
 	yyerror(s);
@@ -399,7 +399,7 @@ static int add_alias(alias, type)
 	    yyerror(s);
 	}
 
-	aip = (aliasinfo *) lsearch((const VOID *)&ai, (VOID *)aliases,
+	aip = (aliasinfo *) lsearch((VOID *)&ai, (VOID *)aliases,
 				    &naliases, sizeof(ai), aliascmp);
 
 	if (aip != NULL) {
@@ -423,7 +423,7 @@ static int find_alias(alias, type)
     (void) strcpy(ai.name, alias);
     ai.type = type;
 
-    return(lfind((const VOID *)&ai, (const VOID *)aliases, &naliases,
+    return(lfind((VOID *)&ai, (VOID *)aliases, &naliases,
 		 sizeof(ai), aliascmp) != NULL);
 }
 
