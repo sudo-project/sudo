@@ -523,6 +523,7 @@ buffer_frob(path)
 {
     static size_t stacksize, depth;
     static struct sudoers_state *state;
+    static int keepopen;
     FILE *fp;
 
     if (path != NULL) {
@@ -542,7 +543,7 @@ buffer_frob(path)
 		return(FALSE);
 	    }
 	}
-	if ((fp = open_sudoers(path)) == NULL) {
+	if ((fp = open_sudoers(path, &keepopen)) == NULL) {
 	    yyerror(path);
 	    return(FALSE);
 	}
@@ -558,12 +559,14 @@ buffer_frob(path)
 	if (depth == 0)
 	    return(FALSE);
 	depth--;
-	fclose(YY_CURRENT_BUFFER->yy_input_file);
+	if (!keepopen)
+	    fclose(YY_CURRENT_BUFFER->yy_input_file);
 	yy_delete_buffer(YY_CURRENT_BUFFER);
 	yy_switch_to_buffer(state[depth].bs);
 	free(sudoers);
 	sudoers = state[depth].path;
 	sudolineno = state[depth].lineno;
+	keepopen = FALSE;
     }
     return(TRUE);
 }

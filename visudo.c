@@ -722,8 +722,9 @@ check_syntax(sudoers_path)
 }
 
 FILE *
-open_sudoers(path)
+open_sudoers(path, keepopen)
     const char *path;
+    int *keepopen;
 {
     FILE *fp;
     struct sudoersfile *newfile;

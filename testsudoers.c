@@ -336,8 +336,9 @@ set_runaspw(user)
 }
 
 FILE *
-open_sudoers(path)
+open_sudoers(path, keepopen)
     const char *path;
+    int *keepopen;
 {
     return(fopen(path, "r"));
 }

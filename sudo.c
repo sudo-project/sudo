@@ -259,7 +259,7 @@ main(argc, argv, envp)
     else if (ISSET(validated, VALIDATE_OK) && !printmatches); /* skips */
     else if (ISSET(validated, VALIDATE_OK) && printmatches)
     {
-	sudoers_fp = open_sudoers(_PATH_SUDOERS);
+	sudoers_fp = open_sudoers(_PATH_SUDOERS, NULL);
 
 	/* User is found in LDAP and we want a list of all sudo commands the
 	 * user can do, so consult sudoers but throw away result.
@@ -269,7 +269,7 @@ main(argc, argv, envp)
     else
 #endif
     {
-	sudoers_fp = open_sudoers(_PATH_SUDOERS);
+	sudoers_fp = open_sudoers(_PATH_SUDOERS, NULL);
 
 	/* Validate the user but don't search for pseudo-commands. */
 	validated = sudoers_lookup(pwflag);
@@ -852,8 +852,9 @@ parse_args(argc, argv)
  * Returns a handle to the sudoers file.
  */
 FILE *
-open_sudoers(sudoers)
+open_sudoers(sudoers, keepopen)
     const char *sudoers;
+    int *keepopen;
 {
     struct stat statbuf;
     FILE *fp = NULL;
