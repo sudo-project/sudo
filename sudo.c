@@ -97,6 +97,7 @@ extern char *malloc	__P((size_t));
 #ifdef HAVE_STRDUP
 extern char *strdup	__P((const char *));
 #endif /* HAVE_STRDUP */
+extern char *getenv	__P((char *));
 #endif /* STDC_HEADERS */
 
 
@@ -114,11 +115,12 @@ struct env_table {
  */
 static int  parse_args		__P((void));
 static void usage		__P((int));
-static void load_globals	__P((void));
+static void load_globals	__P((int));
 static int check_sudoers	__P((void));
-static void load_cmnd		__P((void));
+static void load_cmnd		__P((int));
 static void add_env		__P((void));
 static void clean_env		__P((char **, struct env_table *));
+static char *getshell		__P((struct passwd *));
 extern int user_is_exempt	__P((void));
 
 /*
@@ -130,6 +132,7 @@ char *cmnd = NULL;
 char *user = NULL;
 char *epasswd = NULL;
 char *prompt = PASSPROMPT;
+char *shell = NULL;
 char host[MAXHOSTNAMELEN + 1];
 char cwd[MAXPATHLEN + 1];
 uid_t uid = (uid_t)-2;
@@ -205,11 +208,11 @@ main(argc, argv)
 	    cmnd = "list";
 	    printmatches = 1;
 	    break;
-	case MODE_BACKGROUND :
-	    if (Argc == 1)
-		usage(1);
-	    break;
     }
+
+    /* XXX - clean up */
+    if (Argc == 1 && (sudo_mode & MODE_BACKGROUND) && !(sudo_mode & MODE_SHELL))
+	usage(1);
 
     /*
      * Close all file descriptors to make sure we have a nice
@@ -225,7 +228,7 @@ main(argc, argv)
 
     clean_env(environ, badenv_table);
 
-    load_globals();		/* load the user host cmnd and uid variables */
+    load_globals(sudo_mode);	/* load the user host cmnd and uid variables */
 
     rtn = check_sudoers();	/* check mode/owner on _PATH_SUDO_SUDOERS */
     if (rtn != ALL_SYSTEMS_GO) {
@@ -235,8 +238,8 @@ main(argc, argv)
 	exit(1);
     }
 
-    if (sudo_mode == MODE_RUN || sudo_mode == MODE_BACKGROUND) {
-	load_cmnd();		/* load the cmnd global variable */
+    if ((sudo_mode & MODE_RUN)) {
+	load_cmnd(sudo_mode);	/* load the cmnd global variable */
     } else if (sudo_mode == MODE_KILL) {
 	remove_timestamp();	/* remove the timestamp ticket file */
 	exit(0);
@@ -259,8 +262,8 @@ main(argc, argv)
 	    if (sudo_mode == MODE_VALIDATE)
 		exit(0);
 	    set_perms(PERM_FULL_ROOT);
-#ifndef GPROF
-	    if (sudo_mode == MODE_BACKGROUND && fork() > 0) {
+#ifndef PROFILING
+	    if ((sudo_mode & MODE_BACKGROUND) && fork() > 0) {
 		exit(0);
 	    } else {
 		/*
@@ -286,11 +289,38 @@ main(argc, argv)
 		    }
 		}
 
-		EXEC(cmnd, &Argv[1]);
+		/*
+		 * If invoking a shell, replace "-s" with shell to exec.
+		 * For this to work we need to malloc() a new argv...
+		 */
+		if (shell) {
+		    char **NewArgv;
+		    int i;
+
+		    NewArgv = (char **) malloc (sizeof(char *) * (Argc));
+		    if (NewArgv == NULL) {
+			perror("malloc");
+			(void) fprintf(stderr, "%s: cannot allocate memory!\n",
+				       Argv[0]);
+			exit(1);
+		    }
+
+		    /* replace "-s" with the shell's name */
+		    if ((NewArgv[0] = strrchr(shell, '/') + 1) == (char *) 1)
+			NewArgv[0] = shell;
+
+		    for (i = 1; i < Argc - 1; i++)
+			NewArgv[i] = Argv[i + 1];
+
+		    NewArgv[i] = (char *) NULL;
+
+		    EXEC(cmnd, NewArgv);
+		} else 
+		    EXEC(cmnd, &Argv[1]);
 	    }
 #else
 	    exit(0);
-#endif /* GPROF */
+#endif /* PROFILING */
 	    perror(cmnd);		/* exec failed! */
 	    exit(-1);
 	    break;
@@ -317,7 +347,8 @@ main(argc, argv)
  *  user, host, cwd, uid
  */
 
-static void load_globals()
+static void load_globals(sudo_mode)
+    int sudo_mode;
 {
     struct passwd *pw_ent;
 #ifdef FQDN
@@ -356,6 +387,14 @@ static void load_globals()
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
+
+    /* get shell if we need it */
+    if ((sudo_mode & MODE_SHELL) && (shell = getshell(pw_ent)))
+	if ((shell = strdup(shell)) == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
 
     /*
      * We only want to be root when we absolutely need it.
@@ -456,7 +495,7 @@ static int parse_args()
 		Argv++;
 		break;
 	    case 'b':
-		ret = MODE_BACKGROUND;
+		ret |= MODE_BACKGROUND;
 		break;
 	    case 'v':
 		ret = MODE_VALIDATE;
@@ -478,6 +517,15 @@ static int parse_args()
 		ret = MODE_HELP;
 		excl++;
 		break;
+	    /* -s or -- means end of args.  XXX - better way? */
+	    case 's':
+		ret |= MODE_SHELL;
+		return(ret);
+	    case '-':
+		Argc--;
+		Argv++;
+		Argv[0] = progname;
+		return(ret);
 	    case '\0':
 		(void) fprintf(stderr, "%s: '-' requires an argument\n",
 		    progname);
@@ -507,7 +555,7 @@ static int parse_args()
 static void usage(exit_val)
     int exit_val;
 {
-    (void) fprintf(stderr, "usage: %s -V | -h | -l | -b | -v | -k | [-p prompt] <command>\n", Argv[0]);
+    (void) fprintf(stderr, "usage: %s -V | -h | -l | -v | -k | [-b] [-p prompt] -s | <command>\n", Argv[0]);
     exit(exit_val);
 }
 
@@ -570,8 +618,19 @@ static void add_env()
  *  This function sets the cmnd global variable based on Argv[1]
  */
 
-static void load_cmnd()
+static void load_cmnd(sudo_mode)
+    int sudo_mode;
 {
+    if ((sudo_mode & MODE_SHELL)) {
+	if (shell) {
+	    cmnd = shell;
+	    return;
+	} else {
+	    (void) fprintf(stderr, "%s: Unable to determine shell.", Argv[0]);
+	    exit(1);
+	}
+    }
+
     if (strlen(Argv[1]) > MAXPATHLEN) {
 	errno = ENAMETOOLONG;
 	(void) fprintf(stderr, "%s: %s: Pathname too long\n", Argv[0], Argv[1]);
@@ -728,4 +787,25 @@ static void clean_env(envp, badenv_table)
 	    }
 	}
     }
+}
+
+
+
+/**********************************************************************
+ *
+ * getshell()
+ *
+ *  This function returns the user's shell based on either the
+ *  SHELL evariable or the passwd(5) entry (in that order).
+ */
+
+static char *getshell(pw_ent)
+    struct passwd *pw_ent;
+{
+    char *s;
+
+    if ((s = getenv("SHELL")) == NULL)
+	s = pw_ent -> pw_shell;
+
+    return(s);
 }
