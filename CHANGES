@@ -1725,3 +1725,9 @@ Sudo 1.6.8 released.
 544) Added SSL tls_* certificate checking options when using LDAP.
 
 545) Sudoedit will now only attempt to edit regular files or links.
+
+546) Sudo now uses futime() or futimes() where possible.
+
+547) Updated sample.pam to a current version.
+
+548) Better detection of unchanged files in sudoedit.
