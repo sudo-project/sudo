@@ -80,7 +80,6 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_KERB4 */
 #ifdef HAVE_PAM
 #  include <security/pam_appl.h>
-#  include <security/pam_misc.h>
 #endif /* HAVE_PAM */
 #ifdef HAVE_AFS
 #  include <afs/stds.h>
@@ -138,12 +137,6 @@ union config_record configure;
 #endif /* HAVE_SECURID */
 #ifdef HAVE_SKEY
 struct skey skey;
-#endif
-#ifdef HAVE_PAM
-static struct pam_conv conv = {
-	misc_conv,
-	NULL
-};
 #endif
 #ifdef HAVE_OPIE
 struct opie opie;
@@ -745,6 +738,10 @@ static void pam_attempt_auth()
     pam_handle_t *pamh=NULL;
     int retval;
     register int counter = TRIES_FOR_PASSWORD;
+    struct pam_conv conv = {
+	    misc_conv,
+	    NULL
+    };
 
     set_perms(PERM_ROOT, 0);
     retval = pam_start("sudo", user_name, &conv, &pamh);
