@@ -20,15 +20,16 @@ NOFILE in <sys/param.h>.
 Sudo tries to clear the environment of dangerous envariables like LD_*
 to prevent shared library spoofing.  If you are porting sudo to a new
 OS that has shared libraries you'll want to mask out the variables that
-allow one to change the shared library path.  See clean_env() for examples
-for this for various OS's.
+allow one to change the shared library path.  See badenv_table() in
+sudo.c to see how this is done for various OS's.
 
 It is possible that on a really weird system, tgetpass() may not compile.
 Alternately, it may compile but not work (nothing happens at Password: prompt).
 If this is the case you can run configure with the --with-getpass flag
 to use the system getpass().  You'll lose the timeout feature but gain a
 working sudo.  Alternately, you can define USE_GETPASS in config.h and
-remove tgetpass.o from LIBS in the Makefile.
+remove tgetpass.o from LIBS in the Makefile.  NOTE: s/key support will
+not work with most OS's getpass(3) routine.
 
 If you port sudo to a new architecture, please send your changes to
     sudo-bugs@cs.colorado.edu
