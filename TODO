@@ -10,3 +10,5 @@ TODO list
 04) Deal with host aliases rationally.
 
 05) Nestable command aliases
+
+06) POSIX signals (plus emulation where they are lacking)
