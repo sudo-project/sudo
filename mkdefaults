@@ -9,7 +9,7 @@
 #	description (or NULL)
 
 # Deal with optional -o (output) argument
-if ($#ARGV == 1 && $ARGV[0] eq "-o") {
+if ($#ARGV > 0 && $ARGV[0] eq "-o") {
     shift;
     $header = $cfile = shift;
     $header .= '.h';
