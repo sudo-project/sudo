@@ -80,6 +80,7 @@ echo 'Configuring for use with DCE')
 dnl --with-csops
 AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options], OPTIONS="${OPTIONS} -DUSE_INSULTS -DCLASSIC_INSULTS -DCSOPS_INSULTS -DENV_EDITOR"
 sbindir='$(exec_prefix)/sbin'
+CSOPS=1
 echo 'CSOps--adding options: USE_INSULTS CLASSIC_INSULTS CSOPS_INSULTS ENV_EDITOR')
 
 dnl
@@ -436,6 +437,9 @@ if test -n "$SKEY" ; then
     if test -f /usr/local/include/skey.h -a -f /usr/local/lib/libskey.a; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
 	LDFLAGS="${LDFLAGS} -L/usr/local/lib"
+    elif test -n "$CSOPS" -a -f /tools/cs/skey/include/skey.h -a -f /tools/cs/skey/lib/libskey.a; then
+	CPPFLAGS="${CPPFLAGS} -I/tools/cs/skey/include"
+	LDFLAGS="${LDFLAGS} -L/tools/cs/skey/lib"
     else
 	echo 'Can't find libskey.a and skey.h, you'll have to edit the Makefile'
     fi
