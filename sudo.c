@@ -90,6 +90,7 @@ static char rcsid[] = "$Id$";
 #include <sys/stream.h>
 #include <sys/sioctl.h>
 #include <sys/stropts.h>
+#include <net/errno.h>
 #endif /* _ISC */
 #ifdef _MIPS
 #include <net/soioctl.h>
@@ -130,6 +131,7 @@ static void add_env		__P((void));
 static void rmenv		__P((char **, char *, int));
 static void clean_env		__P((char **));
 static char *uid2str		__P((uid_t));
+extern int user_is_exempt	__P((void));
 
 /*
  * Globals
@@ -466,6 +468,7 @@ static void clean_env(envp)
     sudo_setenv("IFS", " \t\n");
 
 #ifdef SECURE_PATH
+    if (!user_is_exempt())
     sudo_setenv("PATH", SECURE_PATH);
 #endif /* SECURE_PATH */
 }
@@ -599,7 +602,11 @@ static void load_interfaces()
     /* so we can skip localhost and its ilk */
     localhost_mask = inet_addr("127.0.0.0");
 
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    #ifdef _ISC
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+    #else
+	sock = socket(AF_INET, SOCK_DGRAM, 0);
+    #endif /* _ISC */
     if (sock < 0) {
 	perror("socket");
 	exit(1);
@@ -618,18 +625,25 @@ static void load_interfaces()
 	/* networking probably not installed in kernel */
 	return;
     }
+
+    /*
+     * Still can't get any more than the loopback interface out
+     * of the INTERACTIVE ioctl :-(
+     */
+     num_interfaces = 1;
+
 #else
     if (ioctl(sock, SIOCGIFCONF, (char *)(&ifconf)) < 0) {
 	/* networking probably not installed in kernel */
 	return;
     }
-#endif /* _ISC */
 
     /*
      * find out how many interfaces exist
      */
     num_interfaces = ifconf.ifc_len / sizeof(struct ifreq);
 
+#endif /* _ISC */
     /*
      * malloc() space for interfaces array
      */
@@ -649,12 +663,19 @@ static void load_interfaces()
 	    sizeof(ifreq.ifr_name));
 
 	/* get the ip address */
+#ifdef _ISC
+	strioctl.ic_cmd = SIOCGIFADDR;
+	strioctl.ic_dp = (char *)&ifreq;
+	strioctl.ic_len = sizeof(ifreq);
+	if (ioctl(sock, I_STR, &strioctl) < 0) {
+#else
 	if (ioctl(sock, SIOCGIFADDR, (caddr_t)(&ifreq))) {
+#endif /* _ISC */
 	    /* non-fatal error if interface is down or not supported */
 	    if (errno == EADDRNOTAVAIL || errno == EAFNOSUPPORT)
 		continue;
 
-	    (void) fprintf(stderr, "%s: Error, ioctl: SIOCGIFADDR", Argv[0]);
+	    (void) fprintf(stderr, "%s: Error, ioctl: SIOCGIFADDR ", Argv[0]);
 	    perror("");
 	    exit(1);
 	}
