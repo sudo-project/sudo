@@ -1707,6 +1707,10 @@ fi
 if test -z "$BROKEN_GETCWD"; then
     AC_REPLACE_FUNCS(getcwd)
 fi
+AC_CHECK_FUNCS(glob, [AC_MSG_CHECKING(for GLOB_BRACE and GLOB_TILDE in glob.h)
+AC_TRY_COMPILE([#include <glob.h>], [int i = GLOB_BRACE | GLOB_TILDE; (void)i;],
+    [AC_MSG_RESULT(yes)], [AC_LIBOBJ(glob)]
+    [AC_MSG_RESULT(no)])], [AC_LIBOBJ(glob)])
 AC_CHECK_FUNCS(lockf flock, [break])
 AC_CHECK_FUNCS(waitpid wait3, [break])
 AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])

@@ -75,6 +75,9 @@
 /* Define to 1 if your `DIR' contains dd_fd. */
 #undef HAVE_DD_FD
 
+/* Define to 1 if you have the <dev/systrace.h> header file. */
+#undef HAVE_DEV_SYSTRACE_H
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
@@ -146,6 +149,9 @@
 
 /* Define to 1 if you have the `getttimeofday' function. */
 #undef HAVE_GETTTIMEOFDAY
+
+/* Define to 1 if you have the `glob' function. */
+#undef HAVE_GLOB
 
 /* Define to 1 if your Kerberos is Heimdal. */
 #undef HAVE_HEIMDAL
@@ -248,6 +254,9 @@
 /* Define to 1 if you have the `seteuid' function. */
 #undef HAVE_SETEUID
 
+/* Define to 1 if you have the `setproctitle' function. */
+#undef HAVE_SETPROCTITLE
+
 /* Define to 1 if you have the `setresuid' function. */
 #undef HAVE_SETRESUID
 
@@ -256,9 +265,6 @@
 
 /* Define to 1 if you have the `setrlimit' function. */
 #undef HAVE_SETRLIMIT
-
-/* Define to 1 if you have the `setproctitle' function. */
-#undef HAVE_SETPROCTITLE
 
 /* Define to 1 if you have the `set_auth_parameters' function. */
 #undef HAVE_SET_AUTH_PARAMETERS
@@ -323,17 +329,11 @@
 /* Define to 1 if your struct stat has an st_mtimespec member */
 #undef HAVE_ST_MTIMESPEC
 
-/* Define to 1 to build support for tracing subprocesses using systrace(4) */
-#undef HAVE_SYSTRACE
-
-/* Define to 1 if you have the <dev/systrace.h> header file. */
-#undef HAVE_DEV_SYSTRACE_H
-
-/* Define to 1 if you have the <sys/systrace.h> header file. */
-#undef HAVE_SYS_SYSTRACE_H
-
 /* Define to 1 if you have the `sysconf' function. */
 #undef HAVE_SYSCONF
+
+/* Define to 1 to build support for tracing subprocesses using systrace(4) */
+#undef HAVE_SYSTRACE
 
 /* Define to 1 if you have the <sys/bsdtypes.h> header file. */
 #undef HAVE_SYS_BSDTYPES_H
@@ -354,6 +354,9 @@
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/systrace.h> header file. */
+#undef HAVE_SYS_SYSTRACE_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
@@ -492,9 +495,9 @@
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
    automatically deduced at run-time.
-        STACK_DIRECTION > 0 => grows toward higher addresses
-        STACK_DIRECTION < 0 => grows toward lower addresses
-        STACK_DIRECTION = 0 => direction of growth unknown */
+	STACK_DIRECTION > 0 => grows toward higher addresses
+	STACK_DIRECTION < 0 => grows toward lower addresses
+	STACK_DIRECTION = 0 => direction of growth unknown */
 #undef STACK_DIRECTION
 
 /* Define to 1 if you have the ANSI C header files. */
