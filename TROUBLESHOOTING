@@ -110,5 +110,12 @@ A) configure caches the results of its tests in a file called
    Note that "make realclean" will also remove any object files
    and configure temp files that are laying around as well.
 
+Q) I built sudo on a Solaris 2.5 machine but the resulting binary
+   doesn't work on Solaris 2.4.  Why?
+A) Sun added many of the BSD library functions from -lucb into
+   libc for Solaris 2.5.  To generate a sudo binary on Solaris 2.5
+   that will run on Solaris 2.4 just add "getwd.o" to LIBOBJS
+   in the Makefile and recompile.
+
 Q) How do you pronounce `sudo'?
 A) soo-doo (for superuser do).
