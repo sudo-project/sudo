@@ -77,6 +77,7 @@ static char rcsid[] = "$Id$";
 #include <pwd.h>
 #include <netdb.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/socket.h>
 #ifdef HAVE_SYS_SOCKIO_H
@@ -115,6 +116,7 @@ extern char *strdup	__P((const char *));
 static int  parse_args		__P((void));
 static void usage		__P((int));
 static void load_globals	__P((void));
+static void check_sudoers	__P((void));
 static void load_interfaces	__P((void));
 static void load_cmnd		__P((void));
 static void add_env		__P((void));
@@ -192,6 +194,8 @@ main(argc, argv)
 	(void) close(rtn);
 #endif /* HAVE_SYSCONF */
 
+    check_sudoers();		/* check mode/owner on _PATH_SUDO_SUDOERS */
+
     clean_env(environ);		/* clean up the environment (no LD_*) */
 
     load_globals();		/* load the user host cmnd and uid variables */
@@ -216,7 +220,7 @@ main(argc, argv)
 	    log_error(ALL_SYSTEMS_GO);
 	    if (sudo_mode == MODE_VALIDATE)
 		exit(0);
-	    be_root();
+	    set_perms(PERM_FULL_ROOT);
 	    EXEC(cmnd, &Argv[1]);
 	    perror(cmnd);		/* exec failed! */
 	    exit(-1);
@@ -227,7 +231,7 @@ main(argc, argv)
 	case VALIDATE_ERROR:
 	default:
 	    log_error(rtn);
-	    be_full_user();
+	    set_perms(PERM_FULL_USER);
 	    inform_user(rtn);
 	    exit(1);
 	    break;
@@ -279,8 +283,8 @@ static void load_globals()
      * We only want to be root when we absolutely need it.
      * This will effectively do setreuid(0, uid) but for portability...
      */
-    be_root();
-    be_user();
+    set_perms(PERM_ROOT);
+    set_perms(PERM_USER);
 
 #ifdef UMASK
     (void) umask((mode_t)UMASK);
@@ -435,73 +439,6 @@ static void clean_env(envp)
 #ifdef SECURE_PATH
     sudo_setenv("PATH", SECURE_PATH);
 #endif /* SECURE_PATH */
-}
-
-
-
-/**********************************************************************
- *
- * be_root()
- *
- *  this function sets the real and effective uids to 0
- */
-
-void be_root()
-{
-    if (setuid(0)) {
-        perror("setuid(0)");
-        exit(1); 
-    }
-}
-
-
-
-/**********************************************************************
- *
- * be_user()
- *
- *  this function sets the effective uid to the value of uid.
- *  Naturally, we need to do something completely different for AIX.
- */
-
-#ifdef _AIX
-void be_user()
-{
-    if (setuidx(ID_EFFECTIVE|ID_REAL, uid)) {
-        perror("setuidx(ID_EFFECTIVE|ID_REAL, uid)");
-        exit(1); 
-    }
-}
-#else /* _AIX */
-void be_user()
-{
-    if (seteuid(uid)) {
-        perror("seteuid(uid)");
-        exit(1); 
-    }
-}
-#endif /* _AIX */
-
-
-
-/**********************************************************************
- *
- * be_full_user()
- *
- *  this function sets the real and effective uids to the value of uid
- *  since our euid is probably already uid we need to setuid(0) first
- */
-
-void be_full_user()
-{
-    if (setuid(0)) {
-        perror("setuid(0)");
-        exit(1); 
-    }
-    if (setuid(uid)) {
-        perror("setuid(uid)");
-        exit(1); 
-    }
 }
 
 
@@ -695,5 +632,92 @@ static void load_interfaces()
 		interfaces[j].netmask.s_addr = htonl(IN_CLASSA_NET);
 	}
 	++j;
+    }
+}
+
+
+
+/**********************************************************************
+ *
+ *  check_sudoers()
+ *
+ *  This function check to see that the sudoers file is owned by
+ *  root and not writable by anyone else.
+ */
+
+static void check_sudoers()
+{
+    struct stat statbuf;
+
+    if (lstat(_PATH_SUDO_SUDOERS, &statbuf)) {
+	(void) fprintf(stderr, "Can't stat %s: ", _PATH_SUDO_SUDOERS);
+	perror("");
+	exit(1);
+    } else if (!S_ISREG(statbuf.st_mode)) {
+	(void) fprintf(stderr, "%s is not a regular file!\n", _PATH_SUDO_SUDOERS);
+	exit(1);
+    } else if (statbuf.st_uid != 0) {
+	(void) fprintf(stderr, "%s is not owned by root!\n", _PATH_SUDO_SUDOERS);
+	exit(1);
+    } else if (statbuf.st_mode & (0000066)) {
+	(void) fprintf(stderr, "%s is readable or writeable by other than root!\n", _PATH_SUDO_SUDOERS);
+	exit(1);
+    }
+}
+
+
+
+/**********************************************************************
+ *
+ * set_perms()
+ *
+ *  this function sets real and effective uids and gids based on perm.
+ */
+
+void set_perms(perm)
+    int perm;
+{
+    struct passwd *pw_ent;
+
+    switch(perm) {
+	case        PERM_ROOT :
+				if (setuid(0)) {
+				    perror("setuid(0)");
+				    exit(1);
+				}
+			      	break;
+
+	case   PERM_FULL_ROOT :
+				if (setuid(0)) {  
+				    perror("setuid(0)");
+				    exit(1);
+				}
+
+				if (!(pw_ent = getpwuid(0))) {
+				    perror("getpwuid(0)");
+				} else if (setegid(pw_ent->pw_gid)) {
+				    perror("setegid");
+    	    	    	    	}
+			      	break;
+
+	case        PERM_USER : 
+    	    	    	        if (seteuid(uid)) {
+    	    	    	            perror("seteuid(uid)");
+    	    	    	            exit(1); 
+    	    	    	        }
+			      	break;
+				
+	case   PERM_FULL_USER : 
+				if (setuid(0)) {
+				    perror("setuid(0)");
+				    exit(1);
+				}
+
+				if (setuid(uid)) {
+				    perror("setuid(uid)");
+				    exit(1);
+				}
+
+			      	break;
     }
 }
