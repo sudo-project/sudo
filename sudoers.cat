@@ -85,7 +85,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        upper case letters, numbers, and the underscore characters
        ('_').  A `NAME' mmmmuuuusssstttt start with an upper case letter.  It
        is possible to put several alias definitions of the same
-       type on a single line, joined by a semicolon (':').  Eg.
+       type on a single line, joined by a colon (':').  Eg.
 
         Alias_Type NAME = item1, item2, item3 : NAME = item4, item5
 

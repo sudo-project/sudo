@@ -214,7 +214,7 @@ where \fIAlias_Type\fR is one of \f(CW\*(C`User_Alias\*(C'\fR, \f(CW\*(C`Runas_A
 or \f(CW\*(C`Cmnd_Alias\*(C'\fR.  A \f(CW\*(C`NAME\*(C'\fR is a string of upper case letters, numbers,
 and the underscore characters ('_').  A \f(CW\*(C`NAME\*(C'\fR \fBmust\fR start with an
 upper case letter.  It is possible to put several alias definitions
-of the same type on a single line, joined by a semicolon (':').  Eg.
+of the same type on a single line, joined by a colon (':').  Eg.
 .PP
 .Vb 1
 \& Alias_Type NAME = item1, item2, item3 : NAME = item4, item5
