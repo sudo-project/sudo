@@ -266,9 +266,15 @@ main(argc, argv)
 
     user_pw_ent = &pw_ent;		/* need user_pw_ent->pw_name defined */
 
-    cmnd = argv[1];
-    pw_ent.pw_name = argv[2];
-    strcpy(host, argv[3]);
+    if (argc == 6) {
+	cmnd = argv[3];
+	pw_ent.pw_name = argv[4];
+	strcpy(host, argv[5]);
+    } else {
+	cmnd = argv[1];
+	pw_ent.pw_name = argv[2];
+	strcpy(host, argv[3]);
+    }
     if ((p = strchr(host, '.'))) {
 	*p = '\0';
 	if ((shost = strdup(host)) == NULL) {
