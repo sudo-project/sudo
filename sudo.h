@@ -74,8 +74,8 @@
  
            EDITOR                   the location of the editor
  
-           STATICEDITOR             if this variable is defined then the
-                                    EDITOR and VISUAL envariables are ignored
+           ENV_EDITOR               if this variable is defined then the
+                                    EDITOR and VISUAL envariables are consulted
  
            LOGFILE                  log file location IF NOT USING SYSLOG
  
