@@ -157,19 +157,40 @@ int validate()
  */
 int
 path_matches(cmnd, path)
-char *cmnd, *path;
+    char *cmnd, *path;
 {
     int plen;
-    struct stat cst, pst;
+    static struct stat cst;
+    struct stat pst;
     DIR *dirp;
     struct dirent *dent;
     char buf[MAXCOMMANDLENGTH+1];
+    static char *c;
 
-    if (stat(cmnd, &cst) < 0)
-	return(FALSE);
+    /* only need to stat cmnd once since it never changes */
+    if (cst.st_dev == 0) {
+	if (stat(cmnd, &cst) < 0)
+	    return(FALSE);
+	if ((c = strrchr(cmnd, '/')) == NULL)
+	    c = cmnd;
+	else
+	    c++;
+    }
 
     plen = strlen(path);
     if (path[plen - 1] != '/') {
+#ifdef FAST_MATCH
+	char *p;
+
+	/* only proceed if the basenames of cmnd and path are the same */
+	if ((p = strrchr(path, '/')) == NULL)
+	    p = path;
+	else
+	    p++;
+	if (strcmp(c, p))
+	    return(FALSE);
+#endif /* FAST_MATCH */
+
 	if (stat(path, &pst) < 0)
 	    return(FALSE);
 	return(cst.st_dev == pst.st_dev && cst.st_ino == pst.st_ino);
@@ -183,6 +204,11 @@ char *cmnd, *path;
     while ((dent = readdir(dirp)) != NULL) {
 	strcpy(buf, path);
 	strcat(buf, dent->d_name);
+#ifdef FAST_MATCH
+	/* only stat if basenames are not the same */
+	if (strcmp(c, dent->d_name))
+	    continue;
+#endif /* FAST_MATCH */
 	if (stat(buf, &pst) < 0)
 	    continue;
 	if (cst.st_dev == pst.st_dev && cst.st_ino == pst.st_ino)
@@ -197,7 +223,7 @@ char *cmnd, *path;
 
 int
 addr_matches(n)
-char *n;
+    char *n;
 {
     int i;
     struct in_addr addr;
