@@ -141,6 +141,9 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"timestampdir", T_STR|T_PATH,
 	"Path to authentication timestamp dir: %s"
     }, {
+	"timestampowner", T_STR,
+	"Owner of the authentication timestamp dir: %s"
+    }, {
 	"exempt_group", T_STR|T_BOOL,
 	"Users in this group are exempt from password and PATH requirements: %s"
     }, {
