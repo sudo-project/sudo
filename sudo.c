@@ -965,6 +965,7 @@ open_sudoers(sudoers, keepopen)
 static void
 initial_setup()
 {
+    int miss[3], devnull = -1;
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
     struct rlimit rl;
 
@@ -977,6 +978,23 @@ initial_setup()
     (void) setrlimit(RLIMIT_CORE, &rl);
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
 
+    /*
+     * stdin, stdout and stderr must be open; set them to /dev/null
+     * if they are closed and close all other fds.
+     */
+    miss[STDIN_FILENO] = fcntl(STDIN_FILENO, F_GETFL, 0) != 0;
+    miss[STDOUT_FILENO] = fcntl(STDOUT_FILENO, F_GETFL, 0) != 0;
+    miss[STDERR_FILENO] = fcntl(STDERR_FILENO, F_GETFL, 0) != 0;
+    if ((miss[STDIN_FILENO] || miss[STDOUT_FILENO] || miss[STDERR_FILENO])) {
+	if ((devnull = open(_PATH_DEVNULL, O_RDWR, 0644)) != -1) {
+	    if (miss[STDIN_FILENO])
+		(void) dup2(devnull, STDIN_FILENO);
+	    if (miss[STDOUT_FILENO])
+		(void) dup2(devnull, STDOUT_FILENO);
+	    if (miss[STDERR_FILENO])
+		(void) dup2(devnull, STDERR_FILENO);
+	}
+    }
     closefrom(STDERR_FILENO + 1);
 }
 
