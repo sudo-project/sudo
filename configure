@@ -8582,47 +8582,47 @@ echo $ECHO_N "checking for isblank... $ECHO_C" >&6
 if test "${sudo_cv_func_isblank+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  rm -f conftestdata; > conftestdata
-if test "$cross_compiling" = yes; then
-  sudo_cv_func_isblank=no
-else
   cat >conftest.$ac_ext <<_ACEOF
-#line 8590 "configure"
+#line 8586 "configure"
 #include "confdefs.h"
 #include <ctype.h>
-main() { (void)isblank(1); exit(0); }
-
+int
+main ()
+{
+(void)isblank(1);
+  ;
+  return 0;
+}
 _ACEOF
-rm -f conftest$ac_exeext
-if { (eval echo "$as_me:8597: \"$ac_link\"") >&5
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:8598: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
-  echo "$as_me:8600: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
-  { (eval echo "$as_me:8602: \"$ac_try\"") >&5
+  echo "$as_me:8601: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:8604: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
-  echo "$as_me:8605: \$? = $ac_status" >&5
+  echo "$as_me:8607: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
   sudo_cv_func_isblank=yes
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
 sudo_cv_func_isblank=no
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_ext
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 fi
-rm -f core core.* *.core
-fi
-echo "$as_me:8618: result: $sudo_cv_func_isblank" >&5
+echo "$as_me:8617: result: $sudo_cv_func_isblank" >&5
 echo "${ECHO_T}$sudo_cv_func_isblank" >&6
-if test $sudo_cv_func_isblank = yes; then
-  cat >>confdefs.h <<\EOF
+
+  if test "$sudo_cv_func_isblank" = "yes"; then
+    cat >>confdefs.h <<\EOF
 #define HAVE_ISBLANK 1
 EOF
 
-fi
+  fi
 
 for ac_func in strerror strcasecmp sigaction
 do
@@ -10248,6 +10248,62 @@ if test "$with_skey" = "yes"; then
     else
 	echo 'Unable to locate libskey.a and/or skey.h, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS and/or -I/path/to/skey.h to CPPFLAGS'
     fi
+    echo "$as_me:10251: checking for skeyaccess in -lskey" >&5
+echo $ECHO_N "checking for skeyaccess in -lskey... $ECHO_C" >&6
+if test "${ac_cv_lib_skey_skeyaccess+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lskey  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+#line 10259 "configure"
+#include "confdefs.h"
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char skeyaccess ();
+int
+main ()
+{
+skeyaccess ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:10278: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:10281: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:10284: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:10287: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_skey_skeyaccess=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ac_cv_lib_skey_skeyaccess=no
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:10298: result: $ac_cv_lib_skey_skeyaccess" >&5
+echo "${ECHO_T}$ac_cv_lib_skey_skeyaccess" >&6
+if test $ac_cv_lib_skey_skeyaccess = yes; then
+  cat >>confdefs.h <<\EOF
+#define HAVE_SKEYACCESS 1
+EOF
+
+fi
+
 fi
 
 if test "$with_opie" = "yes"; then
@@ -10283,45 +10339,45 @@ if test "$with_authenticate" = "yes"; then
     SUDO_LIBS="${SUDO_LIBS} -ls"
 fi
 
-echo "$as_me:10286: checking for log file location" >&5
+echo "$as_me:10342: checking for log file location" >&5
 echo $ECHO_N "checking for log file location... $ECHO_C" >&6
 if test -n "$with_logpath"; then
-    echo "$as_me:10289: result: $with_logpath" >&5
+    echo "$as_me:10345: result: $with_logpath" >&5
 echo "${ECHO_T}$with_logpath" >&6
     cat >>confdefs.h <<EOF
 #define _PATH_SUDO_LOGFILE "$with_logpath"
 EOF
 
 elif test -d "/var/log"; then
-    echo "$as_me:10296: result: /var/log/sudo.log" >&5
+    echo "$as_me:10352: result: /var/log/sudo.log" >&5
 echo "${ECHO_T}/var/log/sudo.log" >&6
     cat >>confdefs.h <<\EOF
 #define _PATH_SUDO_LOGFILE "/var/log/sudo.log"
 EOF
 
 elif test -d "/var/adm"; then
-    echo "$as_me:10303: result: /var/adm/sudo.log" >&5
+    echo "$as_me:10359: result: /var/adm/sudo.log" >&5
 echo "${ECHO_T}/var/adm/sudo.log" >&6
     cat >>confdefs.h <<\EOF
 #define _PATH_SUDO_LOGFILE "/var/adm/sudo.log"
 EOF
 
 elif test -d "/usr/adm"; then
-    echo "$as_me:10310: result: /usr/adm/sudo.log" >&5
+    echo "$as_me:10366: result: /usr/adm/sudo.log" >&5
 echo "${ECHO_T}/usr/adm/sudo.log" >&6
     cat >>confdefs.h <<\EOF
 #define _PATH_SUDO_LOGFILE "/usr/adm/sudo.log"
 EOF
 
 else
-    echo "$as_me:10317: result: unknown" >&5
+    echo "$as_me:10373: result: unknown" >&5
 echo "${ECHO_T}unknown" >&6
 fi
 
-echo "$as_me:10321: checking for timestamp file location" >&5
+echo "$as_me:10377: checking for timestamp file location" >&5
 echo $ECHO_N "checking for timestamp file location... $ECHO_C" >&6
 if test -n "$with_timedir"; then
-    echo "$as_me:10324: result: $with_timedir" >&5
+    echo "$as_me:10380: result: $with_timedir" >&5
 echo "${ECHO_T}$with_timedir" >&6
     cat >>confdefs.h <<EOF
 #define _PATH_SUDO_TIMEDIR "$with_timedir"
@@ -10329,7 +10385,7 @@ EOF
 
     timedir="$with_timedir"
 elif test -d "/var/run"; then
-    echo "$as_me:10332: result: /var/run/sudo" >&5
+    echo "$as_me:10388: result: /var/run/sudo" >&5
 echo "${ECHO_T}/var/run/sudo" >&6
     cat >>confdefs.h <<\EOF
 #define _PATH_SUDO_TIMEDIR "/var/run/sudo"
@@ -10337,7 +10393,7 @@ EOF
 
     timedir="/var/run/sudo"
 else
-    echo "$as_me:10340: result: /tmp/.odus" >&5
+    echo "$as_me:10396: result: /tmp/.odus" >&5
 echo "${ECHO_T}/tmp/.odus" >&6
     cat >>confdefs.h <<\EOF
 #define _PATH_SUDO_TIMEDIR "/tmp/.odus"
@@ -10352,7 +10408,7 @@ if test "$with_passwd" = "no"; then
 EOF
 
     if test -z "$AUTH_OBJS"; then
-	{ { echo "$as_me:10355: error: no authentication methods defined." >&5
+	{ { echo "$as_me:10411: error: no authentication methods defined." >&5
 echo "$as_me: error: no authentication methods defined." >&2;}
    { (exit 1); exit 1; }; }
     fi
@@ -10458,7 +10514,7 @@ DEFS=-DHAVE_CONFIG_H
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
 ac_clean_files="$ac_clean_files $CONFIG_STATUS"
-{ echo "$as_me:10461: creating $CONFIG_STATUS" >&5
+{ echo "$as_me:10517: creating $CONFIG_STATUS" >&5
 echo "$as_me: creating $CONFIG_STATUS" >&6;}
 cat >$CONFIG_STATUS <<_ACEOF
 #! $SHELL
@@ -10630,7 +10686,7 @@ cat >>$CONFIG_STATUS <<\EOF
     echo "$ac_cs_version"; exit 0 ;;
   --he | --h)
     # Conflict between --help and --header
-    { { echo "$as_me:10633: error: ambiguous option: $1
+    { { echo "$as_me:10689: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&2;}
@@ -10657,12 +10713,12 @@ Try \`$0 --help' for more information." >&2;}
   'pathnames.h' ) CONFIG_HEADERS="$CONFIG_HEADERS pathnames.h" ;;
 
   # This is an error.
-  -*) { { echo "$as_me:10660: error: unrecognized option: $1
+  -*) { { echo "$as_me:10716: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&2;}
    { (exit 1); exit 1; }; } ;;
-  *) { { echo "$as_me:10665: error: invalid argument: $1" >&5
+  *) { { echo "$as_me:10721: error: invalid argument: $1" >&5
 echo "$as_me: error: invalid argument: $1" >&2;}
    { (exit 1); exit 1; }; };;
   esac
@@ -10929,7 +10985,7 @@ done; }
   esac
 
   if test x"$ac_file" != x-; then
-    { echo "$as_me:10932: creating $ac_file" >&5
+    { echo "$as_me:10988: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
     rm -f "$ac_file"
   fi
@@ -10947,7 +11003,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]*)
          # Absolute (can't be DOS-style, as IFS=:)
-         test -f "$f" || { { echo "$as_me:10950: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:11006: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -10960,7 +11016,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:10963: error: cannot find input file: $f" >&5
+           { { echo "$as_me:11019: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;
@@ -11020,7 +11076,7 @@ for ac_file in : $CONFIG_HEADERS; do test "x$ac_file" = x: && continue
   * )   ac_file_in=$ac_file.in ;;
   esac
 
-  test x"$ac_file" != x- && { echo "$as_me:11023: creating $ac_file" >&5
+  test x"$ac_file" != x- && { echo "$as_me:11079: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
 
   # First look for the input files in the build tree, otherwise in the
@@ -11031,7 +11087,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]*)
          # Absolute (can't be DOS-style, as IFS=:)
-         test -f "$f" || { { echo "$as_me:11034: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:11090: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -11044,7 +11100,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:11047: error: cannot find input file: $f" >&5
+           { { echo "$as_me:11103: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;
@@ -11161,7 +11217,7 @@ cat >>$CONFIG_STATUS <<\EOF
   rm -f $tmp/in
   if test x"$ac_file" != x-; then
     if cmp -s $ac_file $tmp/config.h 2>/dev/null; then
-      { echo "$as_me:11164: $ac_file is unchanged" >&5
+      { echo "$as_me:11220: $ac_file is unchanged" >&5
 echo "$as_me: $ac_file is unchanged" >&6;}
     else
       ac_dir=`$as_expr X"$ac_file" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
