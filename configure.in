@@ -43,10 +43,10 @@ AC_ARG_WITH(SKEY, [  --with-SKEY             enable Skey support (untested)], AC
 SKEY=1
 echo 'Configuring for use with Skey')
 dnl
-dnl --with-kerberos
-AC_ARG_WITH(kerberos, [  --with-kerberos         enable kerberos support], AC_DEFINE(HAVE_KERBEROS)
-KERBEROS=1
-echo 'Configuring for use with KERBEROS')
+dnl --with-kerb4
+AC_ARG_WITH(kerb4, [  --with-kerb4            enable kerberos v4 support], AC_DEFINE(HAVE_KERB4)
+KERB4=1
+echo 'Configuring for use with Kerberos version 4')
 dnl
 dnl --with-AFS
 AC_ARG_WITH(AFS, [  --with-AFS              enable AFS support], AC_DEFINE(HAVE_AFS)
@@ -187,7 +187,7 @@ esac
 dnl
 dnl extra kerberos libs
 dnl
-if test -n "$KERBEROS" ; then
+if test -n "$KERB4" ; then
     LIBS="${LIBS} -L/usr/kerberos/lib -lkrb -ldes"
     INC_FLAGS="${INC_FLAGS} -I/usr/kerberos/include"
 fi
@@ -246,6 +246,7 @@ dnl
 dnl Function checks
 dnl
 AC_CHECK_FUNCS(strchr strrchr memcpy memmove memset sysconf sigaction tzset tcsetattr strcasecmp getcwd)
+AC_CHECK_FUNC(setreuid, AC_DEFINE(HAVE_SETREUID), AC_CHECK_FUNC(setresuid))
 AC_CHECK_FUNC(getwd, AC_DEFINE(HAVE_GETWD), LIBOBJS="$LIBOBJS getwd.o")
 AC_CHECK_FUNC(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
 AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), LIBOBJS="$LIBOBJS lsearch.o")
