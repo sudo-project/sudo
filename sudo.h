@@ -183,16 +183,20 @@ int utimes		__P((const char *, const struct timeval *));
 int futimes		__P((int, const struct timeval *));
 #endif
 #ifndef HAVE_SNPRINTF
-int snprintf		__P((char *, size_t, const char *, ...));
+int snprintf		__P((char *, size_t, const char *, ...))
+			    __printflike(3, 4);
 #endif
 #ifndef HAVE_VSNPRINTF
-int vsnprintf		__P((char *, size_t, const char *, va_list));
+int vsnprintf		__P((char *, size_t, const char *, va_list))
+			    __printflike(3, 0);
 #endif
 #ifndef HAVE_ASPRINTF
-int asprintf		__P((char **, const char *, ...));
+int asprintf		__P((char **, const char *, ...))
+			    __printflike(2, 3);
 #endif
 #ifndef HAVE_VASPRINTF
-int vasprintf		__P((char **, const char *, va_list));
+int vasprintf		__P((char **, const char *, va_list))
+			    __printflike(2, 0);
 #endif
 #ifndef HAVE_STRCASECMP
 int strcasecmp		__P((const char *, const char *));
@@ -229,8 +233,10 @@ VOID *emalloc2		__P((size_t, size_t));
 VOID *erealloc		__P((VOID *, size_t));
 VOID *erealloc3		__P((VOID *, size_t, size_t));
 char *estrdup		__P((const char *));
-int easprintf		__P((char **, const char *, ...));
-int evasprintf		__P((char **, const char *, va_list));
+int easprintf		__P((char **, const char *, ...))
+			    __printflike(2, 3);
+int evasprintf		__P((char **, const char *, va_list))
+			    __printflike(2, 0);
 void dump_defaults	__P((void));
 void dump_auth_methods	__P((void));
 void init_envtables	__P((void));

@@ -50,6 +50,15 @@
 # endif
 #endif
 
+/* For catching format string mismatches */
+#ifndef __printflike
+# if defined(__GNUC__) && (__GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+#  define __printflike(f, v) 	__attribute__((__format__ (__printf__, f, v)))
+# else
+#  define __printflike(f, v)
+# endif
+#endif
+
 /*
  * Some systems lack full limit definitions.
  */
