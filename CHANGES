@@ -1292,3 +1292,6 @@ Sudo 1.6.2 released.
 
 407) Wildcards are now allowed in the hostnames specified in sudoers.
      The 'fqdn' option is often required for this to be useful.
+
+408) Fixed a bug where host and user qualifiers in a Defaults entry were
+     not being used correctly and the entry was being applied globally.
