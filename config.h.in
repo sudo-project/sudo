@@ -70,6 +70,9 @@
 #  define __svr4__
 #endif /* SVR4 */
 
+/* Define if you have realpath(3).  */
+#undef HAVE_REALPATH
+
 /* Define if you have getcwd(3).  */
 #undef HAVE_GETCWD
 
