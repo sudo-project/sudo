@@ -291,7 +291,9 @@ int main(argc, argv)
 	remove_timestamp();	/* remove the timestamp ticket file */
 	exit(0);
     } else if (sudo_mode == MODE_LIST) {
+#ifndef NO_PASSWD
 	check_user();
+#endif /* NO_PASSWD */
 	log_error(ALL_SYSTEMS_GO);
 	(void) validate(FALSE);
 	exit(0);
@@ -304,7 +306,9 @@ int main(argc, argv)
     switch (rtn) {
 
 	case VALIDATE_OK:
+#ifndef NO_PASSWD
 	    check_user();
+#endif /* NO_PASSWD */
 	    log_error(ALL_SYSTEMS_GO);
 	    if (sudo_mode == MODE_VALIDATE)
 		exit(0);

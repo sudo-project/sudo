@@ -64,6 +64,12 @@ EXEMPTGROUP
     a password but where Jr. sysadmins need to.
     This is off by default.
 
+NO_PASSWD
+    If this is defined then sudo will *never* ask for a password.
+    It should only be used in an environment where machines are
+    physically secure.  It would be a very bad idea for an open
+    lab.
+
 ENV_EDITOR
     Makes visudo consult the EDITOR and VISUAL environmental variables
     before falling back on the default editor.  Note that this may create

@@ -40,6 +40,7 @@
 #define SEND_MAIL_WHEN_NO_USER	/* send mail when user not in sudoers file */
 /*#define SEND_MAIL_WHEN_NOT_OK	/* send mail if no permissions to run command */
 /*#define EXEMPTGROUP "sudo"	/* no passwd needed for users in this group */
+/*#define NO_PASSWD		/* no passwds are required */
 /*#define ENV_EDITOR		/* visudo honors EDITOR and VISUAL envars */
 #define SHORT_MESSAGE		/* short sudo message, no copyright printed */
 #define TIMEOUT 5		/* minutes before sudo asks for passwd again */
