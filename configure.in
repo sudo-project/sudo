@@ -1811,26 +1811,20 @@ dnl extra SecurID lib + includes
 dnl
 if test -n "$with_SecurID" -a "$with_SecurID" != "no"; then
     if test "$with_SecurID" != "yes"; then
-	SD_LIB="${with_SecurID}/sdiclient.a"
-	CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
-    elif test -f /usr/ace/examples/sdiclient.a; then
-	SD_LIB=/usr/ace/examples/sdiclient.a
-	CPPFLAGS="${CPPFLAGS} -I/usr/ace/examples"
+	:
+    elif test -d /usr/ace/examples; then
+	with_SecurID=/usr/ace/examples
     else
-	SD_LIB=/usr/ace/sdiclient.a
-	CPPFLAGS="${CPPFLAGS} -I/usr/ace"
+	with_SecurID=/usr/ace
     fi
+    CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
+    _LDFLAGS="${LDFLAGS}"
+    LDFLAGS="${LDFLAGS} -L${with_SecurID}"
     #
     # Determine whether to use the new or old SecurID API
     #
-    OLIBS="${LIBS}"
-    LIBS="${LIBS} ${SD_LIB}"
-    SUDO_LIBS="${SUDO_LIBS} ${SD_LIB}"
-    AC_CHECK_FUNC(SD_Init,
-	[AUTH_OBJS="securid5.o"; SUDO_LIBS="${SUDO_LIBS} -lpthread"],
-	[AUTH_OBJS="securid.o"]
-    )
-    LIBS="${OLIBS}"
+    AC_CHECK_LIB(aceclnt, SD_Init, [AUTH_OBJS="securid5.o"; SUDO_LIBS="${SUDO_LIBS} -laceclnt -lpthread"; SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_SecurID}"], [AUTH_OBJS="securid.o"; SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"], [-lpthread])
+    LDFLAGS="${_LDFLAGS}"
 fi
 
 dnl
