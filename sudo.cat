@@ -21,11 +21,14 @@ DDEESSCCRRIIPPTTIIOONN
        superuser or another user, as specified in the _s_u_d_o_e_r_s
        file.  The real and effective uid and gid are set to match
        those of the target user as specified in the passwd file
-       (the group vector is also initialized when the target user
-       is not root).  By default, ssuuddoo requires that users
-       authenticate themselves with a password (NOTE: by default
-       this is the user's password, not the root password).  Once
-       a user has been authenticated, a timestamp is updated and
+       and the group vector is initialized based on the group
+       file (unless the --PP option was specified).  If the invok­
+       ing user is root or if the target user is the same as the
+       invoking user, no password is required.  Otherwise, ssuuddoo
+       requires that users authenticate themselves with a pass­
+       word by default (NOTE: in the default configuration this
+       is the user's password, not the root password).  Once a
+       user has been authenticated, a timestamp is updated and
        the user may then use sudo without a password for a short
        period of time (5 minutes unless overridden in _s_u_d_o_e_r_s).
 
@@ -41,7 +44,7 @@ DDEESSCCRRIIPPTTIIOONN
 
        If a user who is not listed in the _s_u_d_o_e_r_s file tries to
        run a command via ssuuddoo, mail is sent to the proper author­
-       ities, as defined at configure time or the _s_u_d_o_e_r_s file
+       ities, as defined at configure time or in the _s_u_d_o_e_r_s file
        (defaults to root).  Note that the mail will not be sent
        if an unauthorized user tries to run sudo with the --ll or
        --vv flags.  This allows users to determine for themselves
@@ -56,12 +59,9 @@ DDEESSCCRRIIPPTTIIOONN
        however, that the sudoers lookup is still done for root,
        not the user specified by SUDO_USER.
 
-       ssuuddoo can log both successful and unsuccessful attempts (as
-       well as errors) to _s_y_s_l_o_g(3), a log file, or both.  By
 
 
-
-1.6.8                      May 17, 2004                         1
+1.6.8                     June 10, 2004                         1
 
 
 
@@ -70,6 +70,8 @@ DDEESSCCRRIIPPTTIIOONN
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       ssuuddoo can log both successful and unsuccessful attempts (as
+       well as errors) to _s_y_s_l_o_g(3), a log file, or both.  By
        default ssuuddoo will log via _s_y_s_l_o_g(3) but this is changeable
        at configure time or via the _s_u_d_o_e_r_s file.
 
@@ -79,11 +81,12 @@ OOPPTTIIOONNSS
        -H  The --HH (_H_O_M_E) option sets the HOME environment vari­
            able to the homedir of the target user (root by
            default) as specified in passwd(4).  By default, ssuuddoo
-           does not modify HOME.
+           does not modify HOME (see _s_e_t___h_o_m_e and _a_l_w_a_y_s___s_e_t___h_o_m_e
+           in sudoers(4)).
 
-       -K  The --KK (sure _k_i_l_l) option to ssuuddoo removes the user's
-           timestamp entirely.  Likewise, this option does not
-           require a password.
+       -K  The --KK (sure _k_i_l_l) option is like --kk except that it
+           removes the user's timestamp entirely.  Like --kk, this
+           option does not require a password.
 
        -L  The --LL (_l_i_s_t defaults) option will list out the param­
            eters that may be set in a _D_e_f_a_u_l_t_s line along with a
@@ -91,14 +94,15 @@ OOPPTTIIOONNSS
            conjunction with _g_r_e_p(1).
 
        -P  The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssuuddoo to
-           preserve the user's group vector unaltered.  By
-           default, ssuuddoo will initialize the group vector to the
-           list of groups the target user is in.  The real and
-           effective group IDs, however, are still set to match
-           the target user.
+           preserve the invoking user's group vector unaltered.
+           By default, ssuuddoo will initialize the group vector to
+           the list of groups the target user is in.  The real
+           and effective group IDs, however, are still set to
+           match the target user.
 
        -S  The --SS (_s_t_d_i_n) option causes ssuuddoo to read the password
-           from standard input instead of the terminal device.
+           from the standard input instead of the terminal
+           device.
 
        -V  The --VV (_v_e_r_s_i_o_n) option causes ssuuddoo to print the ver­
            sion number and exit.  If the invoking user is already
@@ -120,14 +124,10 @@ OOPPTTIIOONNSS
            --bb option you cannot use shell job control to manipu­
            late the process.
 
-       -c  The --cc (_c_l_a_s_s) option causes ssuuddoo to run the specified
-           command with resources limited by the specified login
-           class.  The _c_l_a_s_s argument can be either a class name
-           as defined in /etc/login.conf, or a single '-'
 
 
 
-1.6.8                      May 17, 2004                         2
+1.6.8                     June 10, 2004                         2
 
 
 
@@ -136,8 +136,12 @@ OOPPTTIIOONNSS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-           character.  Specifying a _c_l_a_s_s of - indicates that the
-           command should be run restricted by the default login
+       -c  The --cc (_c_l_a_s_s) option causes ssuuddoo to run the specified
+           command with resources limited by the specified login
+           class.  The _c_l_a_s_s argument can be either a class name
+           as defined in /etc/login.conf, or a single '-' charac­
+           ter.  Specifying a _c_l_a_s_s of - indicates that the com­
+           mand should be run restricted by the default login
            capabilities for the user the command is run as.  If
            the _c_l_a_s_s argument specifies an existing user class,
            the command must be run as root, or the ssuuddoo command
@@ -153,7 +157,8 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            authorized by _s_u_d_o_e_r_s the following steps are taken:
 
            1.      Temporary copies are made of the files to be
-                   edited, owned by the invoking user.
+                   edited with the owner set to the invoking
+                   user.
 
            2.      The editor specified by the VISUAL or EDITOR
                    environment variables is run to edit the tem­
@@ -185,15 +190,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            It also initializes the environment, leaving _T_E_R_M
            unchanged, setting _H_O_M_E, _S_H_E_L_L, _U_S_E_R, _L_O_G_N_A_M_E, and
            _P_A_T_H, and unsetting all other environment variables.
-           Note that because the shell to use is determined
-           before the _s_u_d_o_e_r_s file is parsed, a _r_u_n_a_s___d_e_f_a_u_l_t
-           setting in _s_u_d_o_e_r_s will specify the user to run the
-           shell as but will not affect which shell is actually
-           run.
 
 
 
-1.6.8                      May 17, 2004                         3
+1.6.8                     June 10, 2004                         3
 
 
 
@@ -201,6 +201,12 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+           Note that because the shell to use is determined
+           before the _s_u_d_o_e_r_s file is parsed, a _r_u_n_a_s___d_e_f_a_u_l_t
+           setting in _s_u_d_o_e_r_s will specify the user to run the
+           shell as but will not affect which shell is actually
+           run.
 
        -k  The --kk (_k_i_l_l) option to ssuuddoo invalidates the user's
            timestamp by setting the time on it to the epoch.  The
@@ -250,16 +256,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            command line arguments.  It is most useful in conjunc­
            tion with the --ss flag.
 
-RREETTUURRNN VVAALLUUEESS
-       Upon successful execution of a program, the return value
-       from ssuuddoo will simply be the return value of the program
-       that was executed.
-
-       Otherwise, ssuuddoo quits with an exit value of 1 if there is
 
 
 
-1.6.8                      May 17, 2004                         4
+1.6.8                     June 10, 2004                         4
 
 
 
@@ -268,6 +268,12 @@ RREETTUURRNN VVAALLUUEESS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+RREETTUURRNN VVAALLUUEESS
+       Upon successful execution of a program, the return value
+       from ssuuddoo will simply be the return value of the program
+       that was executed.
+
+       Otherwise, ssuuddoo quits with an exit value of 1 if there is
        a configuration/permission problem or if ssuuddoo cannot exe­
        cute the given command.  In the latter case the error
        string is printed to stderr.  If ssuuddoo cannot _s_t_a_t(2) one
@@ -316,16 +322,10 @@ SSEECCUURRIITTYY NNOOTTEESS
        (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's con­
        tents if it is not owned by root and only writable by
        root.  On systems that allow non-root users to give away
-       files via _c_h_o_w_n(2), if the timestamp directory is located
-       in a directory writable by anyone (e.g.: _/_t_m_p), it is pos­
-       sible for a user to create the timestamp directory before
-       ssuuddoo is run.  However, because ssuuddoo checks the ownership
-       and mode of the directory and its contents, the only dam­
-       age that can be done is to "hide" files by putting them in
 
 
 
-1.6.8                      May 17, 2004                         5
+1.6.8                     June 10, 2004                         5
 
 
 
@@ -334,6 +334,12 @@ SSEECCUURRIITTYY NNOOTTEESS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       files via _c_h_o_w_n(2), if the timestamp directory is located
+       in a directory writable by anyone (e.g.: _/_t_m_p), it is pos­
+       sible for a user to create the timestamp directory before
+       ssuuddoo is run.  However, because ssuuddoo checks the ownership
+       and mode of the directory and its contents, the only dam­
+       age that can be done is to "hide" files by putting them in
        the timestamp dir.  This is unlikely to happen since once
        the timestamp dir is owned by root and inaccessible by any
        other user the user placing files there would be unable to
@@ -366,32 +372,26 @@ EEXXAAMMPPLLEESS
 
        To get a file listing of an unreadable directory:
 
-        % sudo ls /usr/local/protected
+        $ sudo ls /usr/local/protected
 
        To list the home directory of user yazza on a machine
        where the file system holding ~yazza is not exported as
        root:
 
-        % sudo -u yazza ls ~yazza
+        $ sudo -u yazza ls ~yazza
 
        To edit the _i_n_d_e_x_._h_t_m_l file as user www:
 
-        % sudo -u www vi ~www/htdocs/index.html
+        $ sudo -u www vi ~www/htdocs/index.html
 
        To shutdown a machine:
 
-        % sudo shutdown -r +15 "quick reboot"
-
-       To make a usage listing of the directories in the /home
-       partition.  Note that this runs the commands in a sub-
-       shell to make the cd and file redirection work.
-
-        % sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
+        $ sudo shutdown -r +15 "quick reboot"
 
 
 
 
-1.6.8                      May 17, 2004                         6
+1.6.8                     June 10, 2004                         6
 
 
 
@@ -399,6 +399,12 @@ EEXXAAMMPPLLEESS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       To make a usage listing of the directories in the /home
+       partition.  Note that this runs the commands in a sub-
+       shell to make the cd and file redirection work.
+
+        $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 
 EENNVVIIRROONNMMEENNTT
        ssuuddoo utilizes the following environment variables:
@@ -448,16 +454,10 @@ AAUUTTHHOORRSS
 
 BBUUGGSS
        If you feel you have found a bug in sudo, please submit a
-       bug report at http://www.sudo.ws/sudo/bugs/
-
-DDIISSCCLLAAIIMMEERR
-       SSuuddoo is provided ``AS IS'' and any express or implied war­
-       ranties, including, but not limited to, the implied war­
-       ranties of merchantability and fitness for a particular
 
 
 
-1.6.8                      May 17, 2004                         7
+1.6.8                     June 10, 2004                         7
 
 
 
@@ -466,6 +466,12 @@ DDIISSCCLLAAIIMMEERR
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       bug report at http://www.sudo.ws/sudo/bugs/
+
+DDIISSCCLLAAIIMMEERR
+       SSuuddoo is provided ``AS IS'' and any express or implied war­
+       ranties, including, but not limited to, the implied war­
+       ranties of merchantability and fitness for a particular
        purpose are disclaimed.  See the LICENSE file distributed
        with ssuuddoo for complete details.
 
@@ -478,9 +484,18 @@ CCAAVVEEAATTSS
        prevent shell escapes with ssuuddoo's _n_o_e_x_e_c functionality.
        See the sudoers(4) manual for details.
 
+       It is not meaningful to run the cd command directly via
+       sudo, e.g.
+
+        $ sudo cd /usr/local/protected
+
+       since when whe command exits the parent process (your
+       shell) will still be the same.  Please see the EXAMPLES
+       section for more information.
+
        If users have sudo ALL there is nothing to prevent them
        from creating their own program that gives them a root
-       shell regardless of any '!'  elements in the user specifi­
+       shell regardless of any '!' elements in the user specifi­
        cation.
 
        Running shell scripts via ssuuddoo can expose the same kernel
@@ -508,21 +523,6 @@ SSEEEE AALLSSOO
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.6.8                      May 17, 2004                         8
+1.6.8                     June 10, 2004                         8
 
 

@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "May 17, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "June 10, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
@@ -168,13 +168,16 @@ file [...]
 \&\fBsudo\fR allows a permitted user to execute a \fIcommand\fR as the
 superuser or another user, as specified in the \fIsudoers\fR file.
 The real and effective uid and gid are set to match those of the
-target user as specified in the passwd file (the group vector is
-also initialized when the target user is not root).  By default,
+target user as specified in the passwd file and the group vector
+is initialized based on the group file (unless the \fB\-P\fR option was
+specified).  If the invoking user is root or if the target user is
+the same as the invoking user, no password is required.  Otherwise,
 \&\fBsudo\fR requires that users authenticate themselves with a password
-(\s-1NOTE:\s0 by default this is the user's password, not the root password).
-Once a user has been authenticated, a timestamp is updated and the
-user may then use sudo without a password for a short period of
-time (\f(CW\*(C`@timeout@\*(C'\fR minutes unless overridden in \fIsudoers\fR).
+by default (\s-1NOTE:\s0 in the default configuration this is the user's
+password, not the root password).  Once a user has been authenticated,
+a timestamp is updated and the user may then use sudo without a
+password for a short period of time (\f(CW\*(C`@timeout@\*(C'\fR minutes unless
+overridden in \fIsudoers\fR).
 .PP
 When invoked as \fBsudoedit\fR, the \fB\-e\fR option (described below),
 is implied.
@@ -188,11 +191,11 @@ entered within \f(CW\*(C`@password_timeout@\*(C'\fR minutes (unless overridden v
 .PP
 If a user who is not listed in the \fIsudoers\fR file tries to run a
 command via \fBsudo\fR, mail is sent to the proper authorities, as
-defined at configure time or the \fIsudoers\fR file (defaults to root).
-Note that the mail will not be sent if an unauthorized user tries
-to run sudo with the \fB\-l\fR or \fB\-v\fR flags.  This allows users to
-determine for themselves whether or not they are allowed to use
-\&\fBsudo\fR.
+defined at configure time or in the \fIsudoers\fR file (defaults to
+\&\f(CW\*(C`@mailto@\*(C'\fR).  Note that the mail will not be sent if an unauthorized
+user tries to run sudo with the \fB\-l\fR or \fB\-v\fR flags.  This allows
+users to determine for themselves whether or not they are allowed
+to use \fBsudo\fR.
 .PP
 If \fBsudo\fR is run by root and the \f(CW\*(C`SUDO_USER\*(C'\fR environment variable
 is set, \fBsudo\fR will use this value to determine who the actual
@@ -213,11 +216,13 @@ or via the \fIsudoers\fR file.
 .IX Item "-H"
 The \fB\-H\fR (\fI\s-1HOME\s0\fR) option sets the \f(CW\*(C`HOME\*(C'\fR environment variable
 to the homedir of the target user (root by default) as specified
-in passwd(@mansectform@).  By default, \fBsudo\fR does not modify \f(CW\*(C`HOME\*(C'\fR.
+in passwd(@mansectform@).  By default, \fBsudo\fR does not modify \f(CW\*(C`HOME\*(C'\fR
+(see \fIset_home\fR and \fIalways_set_home\fR in sudoers(@mansectform@)).
 .IP "\-K" 4
 .IX Item "-K"
-The \fB\-K\fR (sure \fIkill\fR) option to \fBsudo\fR removes the user's timestamp
-entirely.  Likewise, this option does not require a password.
+The \fB\-K\fR (sure \fIkill\fR) option is like \fB\-k\fR except that it removes
+the user's timestamp entirely.  Like \fB\-k\fR, this option does not
+require a password.
 .IP "\-L" 4
 .IX Item "-L"
 The \fB\-L\fR (\fIlist\fR defaults) option will list out the parameters
@@ -225,21 +230,21 @@ that may be set in a \fIDefaults\fR line along with a short description
 for each.  This option is useful in conjunction with \fIgrep\fR\|(1).
 .IP "\-P" 4
 .IX Item "-P"
-The \fB\-P\fR (\fIpreserve group vector\fR) option causes \fBsudo\fR to preserve
-the user's group vector unaltered.  By default, \fBsudo\fR will initialize
-the group vector to the list of groups the target user is in.
-The real and effective group IDs, however, are still set to match
-the target user.
+The \fB\-P\fR (\fIpreserve group vector\fR) option causes \fBsudo\fR to
+preserve the invoking user's group vector unaltered.  By default,
+\&\fBsudo\fR will initialize the group vector to the list of groups the
+target user is in.  The real and effective group IDs, however, are
+still set to match the target user.
 .IP "\-S" 4
 .IX Item "-S"
 The \fB\-S\fR (\fIstdin\fR) option causes \fBsudo\fR to read the password from
-standard input instead of the terminal device.
+the standard input instead of the terminal device.
 .IP "\-V" 4
 .IX Item "-V"
-The \fB\-V\fR (\fIversion\fR) option causes \fBsudo\fR to print the
-version number and exit.  If the invoking user is already root
-the \fB\-V\fR option will print out a list of the defaults \fBsudo\fR
-was compiled with as well as the machine's local network addresses.
+The \fB\-V\fR (\fIversion\fR) option causes \fBsudo\fR to print the version
+number and exit.  If the invoking user is already root the \fB\-V\fR
+option will print out a list of the defaults \fBsudo\fR was compiled
+with as well as the machine's local network addresses.
 .IP "\-a" 4
 .IX Item "-a"
 The \fB\-a\fR (\fIauthentication type\fR) option causes \fBsudo\fR to use the
@@ -275,8 +280,8 @@ the \fIsudoers\fR file.  If the user is authorized by \fIsudoers\fR
 the following steps are taken:
 .RS 4
 .IP "1." 8
-Temporary copies are made of the files to be edited, owned by the
-invoking user.
+Temporary copies are made of the files to be edited with the owner
+set to the invoking user.
 .IP "2." 8
 The editor specified by the \f(CW\*(C`VISUAL\*(C'\fR or \f(CW\*(C`EDITOR\*(C'\fR environment
 variables is run to edit the temporary files.  If neither \f(CW\*(C`VISUAL\*(C'\fR
@@ -460,26 +465,26 @@ Note: the following examples assume suitable sudoers(@mansectform@) entries.
 To get a file listing of an unreadable directory:
 .PP
 .Vb 1
-\& % sudo ls /usr/local/protected
+\& $ sudo ls /usr/local/protected
 .Ve
 .PP
 To list the home directory of user yazza on a machine where the
 file system holding ~yazza is not exported as root:
 .PP
 .Vb 1
-\& % sudo -u yazza ls ~yazza
+\& $ sudo -u yazza ls ~yazza
 .Ve
 .PP
 To edit the \fIindex.html\fR file as user www:
 .PP
 .Vb 1
-\& % sudo -u www vi ~www/htdocs/index.html
+\& $ sudo -u www vi ~www/htdocs/index.html
 .Ve
 .PP
 To shutdown a machine:
 .PP
 .Vb 1
-\& % sudo shutdown -r +15 "quick reboot"
+\& $ sudo shutdown -r +15 "quick reboot"
 .Ve
 .PP
 To make a usage listing of the directories in the /home
@@ -487,7 +492,7 @@ partition.  Note that this runs the commands in a sub-shell
 to make the \f(CW\*(C`cd\*(C'\fR and file redirection work.
 .PP
 .Vb 1
-\& % sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
+\& $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 .Ve
 .SH "ENVIRONMENT"
 .IX Header "ENVIRONMENT"
@@ -580,11 +585,21 @@ if that user is allowed to run arbitrary commands via \fBsudo\fR.
 Also, many programs (such as editors) allow the user to run commands
 via shell escapes, thus avoiding \fBsudo\fR's checks.  However, on
 most systems it is possible to prevent shell escapes with \fBsudo\fR's
-\&\fInoexec\fR functionality.  See the sudoers(@mansectform@) manual for details.
+\&\fInoexec\fR functionality.  See the sudoers(@mansectform@) manual
+for details.
 .PP
-If users have sudo \f(CW\*(C`ALL\*(C'\fR there is nothing to prevent them from creating
-their own program that gives them a root shell regardless of any '!'
-elements in the user specification.
+It is not meaningful to run the \f(CW\*(C`cd\*(C'\fR command directly via sudo, e.g.
+.PP
+.Vb 1
+\& $ sudo cd /usr/local/protected
+.Ve
+.PP
+since when whe command exits the parent process (your shell) will
+still be the same.  Please see the \s-1EXAMPLES\s0 section for more information.
+.PP
+If users have sudo \f(CW\*(C`ALL\*(C'\fR there is nothing to prevent them from
+creating their own program that gives them a root shell regardless
+of any '!' elements in the user specification.
 .PP
 Running shell scripts via \fBsudo\fR can expose the same kernel bugs
 that make setuid shell scripts unsafe on some operating systems
