@@ -57,7 +57,7 @@ sigaction(signo, sa, osa)
 	sa = &nsa;
     }
 
-    error = sigvec(signo, sa, osa)
+    error = sigvec(signo, sa, osa);
     if (!error && osa)
 	osa->sa_flags ^= SV_INTERRUPT;		/* flip SV_INTERRUPT as above */
 
@@ -130,7 +130,7 @@ sigprocmask(how, set, oset)
     int mask;
 
     /* If 'set' is NULL the user just wants the current signal mask. */
-    if (set == NULL)
+    if (set == 0)
 	mask = sigblock(0);
     else
 	switch (how) {
