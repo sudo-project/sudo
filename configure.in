@@ -344,7 +344,7 @@ AC_ARG_WITH(loglen, [  --with-loglen           maximum length of a log file line
     no)		echo "Sorry, --without-loglen not supported."
 		exit 1
 		;;
-    [0-9]*)	AC_DEFINE_UNQUOTED(MAXLOGFILELEN, $with_loglen)
+    [[0-9]]*)	AC_DEFINE_UNQUOTED(MAXLOGFILELEN, $with_loglen)
 		AC_MSG_RESULT([$with_loglen])
 		;;
     *)		echo "You must enter a number, not $with_loglen"
@@ -482,7 +482,7 @@ AC_ARG_WITH(sudoers-mode, [  --with-sudoers-mode     mode of sudoers file (defau
     no)		echo "Sorry, --without-sudoers-mode not supported."
 		exit 1
 		;;
-    [0-9]*)	SUDOERS_MODE=$with_sudoers_mode
+    [[0-9]]*)	SUDOERS_MODE=$with_sudoers_mode
 		;;
     *)		echo "You must use a numeric uid, not a name."
 		exit 1
@@ -497,7 +497,7 @@ AC_ARG_WITH(sudoers-uid, [  --with-sudoers-uid      uid that owns sudoers file (
     no)		echo "Sorry, --without-sudoers-uid not supported."
 		exit 1
 		;;
-    [0-9]*)	SUDOERS_UID=$with_sudoers_uid
+    [[0-9]]*)	SUDOERS_UID=$with_sudoers_uid
 		;;
     *)		echo "You must use a numeric uid, not a name."
 		exit 1
@@ -512,7 +512,7 @@ AC_ARG_WITH(sudoers-gid, [  --with-sudoers-gid      gid that owns sudoers file (
     no)		echo "Sorry, --without-sudoers-gid not supported."
 		exit 1
 		;;
-    [0-9]*)	SUDOERS_GID=$with_sudoers_gid
+    [[0-9]]*)	SUDOERS_GID=$with_sudoers_gid
 		;;
     *)		echo "You must use a numeric gid, not a name."
 		exit 1
@@ -528,7 +528,7 @@ AC_ARG_WITH(umask, [  --with-umask            umask with which the prog should r
 		;;
     no)		AC_MSG_RESULT(user)
 		;;
-    [0-9]*)	AC_DEFINE_UNQUOTED(SUDO_UMASK, "$with_umask")
+    [[0-9]]*)	AC_DEFINE_UNQUOTED(SUDO_UMASK, "$with_umask")
 		AC_MSG_RESULT([$with_umask])
 		;;
     *)		echo "You must enter a numeric mask."
@@ -600,7 +600,7 @@ AC_ARG_WITH(passwd-tries, [  --with-passwd-tries     number of tries to enter pa
     no)		echo "Sorry, --without-editor not supported."
 		exit 1
 		;;
-    [1-9]*)	AC_DEFINE_UNQUOTED(TRIES_FOR_PASSWORD, $with_passwd_tries)
+    [[1-9]]*)	AC_DEFINE_UNQUOTED(TRIES_FOR_PASSWORD, $with_passwd_tries)
 		AC_MSG_RESULT([$with_passwd_tries])
 		;;
     *)		echo "You must enter the numer of tries, > 0"
@@ -610,14 +610,14 @@ esac], [AC_DEFINE(TRIES_FOR_PASSWORD, 3) AC_MSG_RESULT(3)])
 
 AC_MSG_CHECKING(time in minutes after which sudo will ask for a password again)
 AC_ARG_WITH(timeout, [  --with-timeout          minutes before sudo asks for passwd again (def is 5)],
-[case $with_timeout in  
+[echo $with_timeout; case $with_timeout in  
     yes)	AC_DEFINE(TIMEOUT, 5)
 		AC_MSG_RESULT(5)
 		;;
     no)		AC_DEFINE(TIMEOUT, 0)
 		AC_MSG_RESULT([no timeout])
 		;;
-    [0-9]*)	AC_DEFINE_UNQUOTED(TIMEOUT, $with_timeout)
+    [[0-9]]*)	AC_DEFINE_UNQUOTED(TIMEOUT, $with_timeout)
 		AC_MSG_RESULT([$with_timeout])
 		;;
     *)		echo "You must enter the numer of minutes."
@@ -634,7 +634,7 @@ AC_ARG_WITH(password-timeout, [  --with-password-timeout passwd prompt timeout i
     no)		AC_DEFINE(PASSWORD_TIMEOUT, 0)
 		AC_MSG_RESULT([no timeout])
 		;;
-    [0-9]*)	AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $with_password_timeout)
+    [[0-9]]*)	AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $with_password_timeout)
 		AC_MSG_RESULT([$with_timeout])
 		;;
     *)		echo "You must enter the numer of minutes."
