@@ -89,7 +89,7 @@ check_user(override)
     char *prompt;
     int status;
 
-    if (user_uid == 0 || user_is_exempt())
+    if (user_uid == 0 || user_uid == runas_pw->pw_uid || user_is_exempt())
 	return;
 
     build_timestamp(&timestampdir, &timestampfile);
