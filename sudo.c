@@ -220,7 +220,7 @@ int main(argc, argv)
     }
 
     /* must have a command to run unless got -s */
-    if (cmnd == NULL && Argc == 1 && !(sudo_mode & MODE_SHELL))
+    if (cmnd == NULL && NewArgc == 0 && !(sudo_mode & MODE_SHELL))
 	usage(1);
 
     /*
