@@ -145,7 +145,7 @@
 #endif
 
 /*
- * Emulate seteuid() for HP-UX via setresuid(2) and seteuid(2) for others.
+ * Emulate sete[ug]id() via setres[ug]id(2) or setre[ug]id(2)
  */
 #ifndef HAVE_SETEUID
 # ifdef __hpux
@@ -154,6 +154,13 @@
 #  define seteuid(_EUID)	(setreuid((uid_t) -1, _EUID))
 # endif /* __hpux */
 #endif /* HAVE_SETEUID */
+#ifndef HAVE_SETEGID
+# ifdef __hpux
+#  define setegid(_EGID)	(setresgid((gid_t) -1, _EGID, (gid_t) -1))
+# else
+#  define setegid(_EGID)	(setregid((gid_t) -1, _EGID))
+# endif /* __hpux */
+#endif /* HAVE_SETEGID */
 
 /*
  * Emulate setreuid() for HP-UX via setresuid(2)

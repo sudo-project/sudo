@@ -5630,7 +5630,7 @@ EOF
 
 ;;
 esac
-for ac_func in strchr strrchr memchr memcpy memset sysconf sigaction tzset seteuid strftime setrlimit initgroups fstat
+for ac_func in strchr strrchr memchr memcpy memset sysconf sigaction tzset seteuid setegig strftime setrlimit initgroups fstat
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:5637: checking for $ac_func" >&5

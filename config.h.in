@@ -239,6 +239,9 @@
 /* Define if you have setreuid(3).  */
 #undef HAVE_SETREUID
 
+/* Define if you have setegid(3).  */
+#undef HAVE_SETEGID
+
 /* Define if you have waitpid(2).  */
 #undef HAVE_WAITPID
 

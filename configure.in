@@ -1545,7 +1545,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset seteuid strftime setrlimit initgroups fstat)
+AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset seteuid setegig strftime setrlimit initgroups fstat)
 if test -z "$BROKEN_SETREUID"; then
     AC_CHECK_FUNCS(setreuid)
 fi
