@@ -168,7 +168,7 @@ int main(argc, argv)
     if (argc == 2)
 	if (!strcmp(Argv[1], "-V")) {
 	    (void) printf("visudo version %s\n", version);
-	    Exit(0);
+	    exit(0);
 	} else {
 	    usage();
 	}
@@ -192,7 +192,7 @@ int main(argc, argv)
 	(void) fprintf(stderr,
 		       "%s:  no passwd entry for sudoers file owner (%s)\n",
 		       Argv[0], SUDOERS_OWNER);
-	Exit(1);
+	exit(1);
     }
 
     /*
@@ -201,8 +201,9 @@ int main(argc, argv)
     stmp_fd = open(stmp, O_WRONLY | O_CREAT | O_EXCL, 0600);
     if (stmp_fd < 0) {
 	if (errno == EEXIST) {
-	    (void) fprintf(stderr, "%s: sudoers file busy\n", Argv[0]);
-	    Exit(1);
+	    (void) fprintf(stderr, "%s: sudoers file busy, try again later.\n",
+		Argv[0]);
+	    exit(1);
 	}
 	(void) fprintf(stderr, "%s: ", Argv[0]);
 	perror(stmp);
