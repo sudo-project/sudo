@@ -55,9 +55,13 @@ static char rcsid[] = "$Id$";
 #include <sys/param.h>
 
 #ifndef STDC_HEADERS
-extern char *strcpy();
-extern int readlink();
-extern int lstat();
+extern char *strcpy	__P((char *, char *));
+extern int   strlen	__P((char *));
+extern char *getwd	__P((char *));
+extern char *malloc	__P((unsigned));
+extern FILE *popen	__P((char *, char *);
+extern int   pclose	__P((FILE *));
+extern char *fgets	__P((char *, int, FILE *));
 #endif /* !STDC_HEADERS */
 
 

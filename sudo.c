@@ -85,9 +85,9 @@ static char rcsid[] = "$Id$";
 #include "version.h"
 
 #ifndef STDC_HEADERS
-extern char *malloc();
+extern char *malloc	__P((unsigned));
 #ifdef HAVE_STRDUP
-extern char *strdup();
+extern char *strdup	__P((char *));
 #endif /* HAVE_STRDUP */
 #endif /* STDC_HEADERS */
 
@@ -129,6 +129,7 @@ main(argc, argv)
 {
     int rtn;
     int sudo_mode = MODE_RUN;
+    extern char ** environ;
 
     Argv = argv;
     Argc = argc;
