@@ -42,17 +42,20 @@ static char rcsid[] = "$Id$";
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <stdio.h>
-#ifdef STD_HEADERS
+#ifdef STDC_HEADERS
 #include <stdlib.h>
-#endif /* STD_HEADERS */
+#endif /* STDC_HEADERS */
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* HAVE_UNISTD_H */
 #include <errno.h>
 #include <signal.h>
 
 #include "sudo.h"
 
-#ifndef STD_HEADERS
+#ifndef STDC_HEADERS
 extern char *getenv();
-#endif /* !STD_HEADERS */
+#endif /* !STDC_HEADERS */
 
 extern FILE *yyin, *yyout;
 extern int errno, yylineno;
@@ -63,7 +66,7 @@ int status = 0, err_line_no = 0;
 char *sudoers_tmp_file = TMPSUDOERS;
 FILE *sudoers_tmp_fp=NULL, *sudoers_fp=NULL;
 
-void Exit()
+RETSIGTYPE Exit()
 {
     if (sudoers_tmp_fp)
 	(void) fclose(sudoers_tmp_fp);
