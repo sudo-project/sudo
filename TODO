@@ -24,3 +24,7 @@ TODO list
 11) Make parse.lex in the same coding style as everything else...
 
 12) Make -l work in sudo.
+
+13) Cleanup check.c and logging.c.
+
+14) Fixed network address support.
