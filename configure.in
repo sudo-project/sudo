@@ -1532,6 +1532,8 @@ AC_TYPE_MODE_T
 AC_TYPE_UID_T
 AC_CHECK_TYPES([sig_atomic_t], , [AC_DEFINE(sig_atomic_t, int)], [#include <sys/types.h>
 #include <signal.h>])
+AC_CHECK_TYPES([sigaction_t], , [AC_DEFINE(HAVE_SIGACTION_T)], [#include <sys/types.h>
+#include <signal.h>])
 SUDO_TYPE_SIZE_T
 SUDO_TYPE_SSIZE_T
 SUDO_TYPE_DEV_T
