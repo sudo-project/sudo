@@ -167,7 +167,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "January 17, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "January 18, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -546,8 +546,8 @@ of the invoking user.  This flag is \fIoff\fR by default.
 .IP "runaspw" 12
 .IX Item "runaspw"
 If set, \fBsudo\fR will prompt for the password of the user defined by the
-\&\fIrunas_default\fR option (defaults to \f(CW\*(C`root\*(C'\fR) instead of the password
-of the invoking user.  This flag is \fIoff\fR by default.
+\&\fIrunas_default\fR option (defaults to \f(CW\*(C`@runas_default@\*(C'\fR) instead of the
+password of the invoking user.  This flag is \fIoff\fR by default.
 .IP "targetpw" 12
 .IX Item "targetpw"
 If set, \fBsudo\fR will prompt for the password of the user specified by

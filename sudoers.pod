@@ -407,8 +407,8 @@ of the invoking user.  This flag is I<off> by default.
 =item runaspw
 
 If set, B<sudo> will prompt for the password of the user defined by the
-I<runas_default> option (defaults to C<root>) instead of the password
-of the invoking user.  This flag is I<off> by default.
+I<runas_default> option (defaults to C<@runas_default@>) instead of the
+password of the invoking user.  This flag is I<off> by default.
 
 =item targetpw
 
