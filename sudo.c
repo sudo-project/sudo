@@ -116,6 +116,7 @@ extern char **zero_env			__P((char **));
 int Argc, NewArgc;
 char **Argv, **NewArgv;
 char *prev_user;
+static int user_closefrom = -1;
 struct sudo_user sudo_user;
 struct passwd *auth_pw, *list_pw;
 struct interface *interfaces;
@@ -189,7 +190,7 @@ main(argc, argv, envp)
     (void) sigaction(SIGCHLD, &sa, &saved_sa_chld);
 
     /*
-     * Turn off core dumps and close open files.
+     * Turn off core dumps and make sure fds 0-2 are open.
      */
     initial_setup();
     sudo_setpwent();
@@ -278,6 +279,14 @@ main(argc, argv, envp)
 	    "Sorry, %s has been configured to not allow root to run it.\n",
 	    getprogname());
 	exit(1);
+    }
+
+    /* Check for -C overriding def_closefrom. */
+    if (user_closefrom >= 0 && user_closefrom != def_closefrom) {
+	if (!def_closefrom_override)
+	    errorx(1, "you are not permitted to use the -O option");
+	else
+	    def_closefrom = user_closefrom;
     }
 
     cmnd_status = set_cmnd(sudo_mode);
@@ -425,6 +434,8 @@ main(argc, argv, envp)
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	(void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
 	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
+
+	closefrom(def_closefrom + 1);
 
 #ifndef PROFILING
 	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0)
@@ -753,6 +764,16 @@ parse_args(argc, argv)
 		NewArgv++;
 		break;
 #endif
+	    case 'C':
+		if (NewArgv[1] == NULL)
+		    usage(1);
+		if ((user_closefrom = atoi(NewArgv[1])) < 3) {
+		    warningx("the argument to -O must be at least 3");
+		    usage(1);
+		}
+		NewArgc--;
+		NewArgv++;
+		break;
 	    case 'b':
 		SET(rval, MODE_BACKGROUND);
 		break;
@@ -993,9 +1014,10 @@ initial_setup()
 		(void) dup2(devnull, STDOUT_FILENO);
 	    if (miss[STDERR_FILENO])
 		(void) dup2(devnull, STDERR_FILENO);
+	    if (devnull > STDERR_FILENO)
+		close(devnull);
 	}
     }
-    closefrom(STDERR_FILENO + 1);
 }
 
 #ifdef HAVE_LOGIN_CAP_H
@@ -1151,6 +1173,7 @@ usage(exit_val)
 #ifdef HAVE_BSD_AUTH_H
 	" [-a auth_type]",
 #endif
+	" [-C fd]",
 #ifdef HAVE_LOGIN_CAP_H
 	" [-c class|-]",
 #endif

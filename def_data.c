@@ -244,6 +244,22 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"File containing dummy exec functions: %s",
 	NULL,
     }, {
+	"ignore_local_sudoers", T_FLAG,
+	"If LDAP directory is up, do we ignore local sudoers file",
+	NULL,
+    }, {
+	"monitor", T_FLAG,
+	"Monitor children of cmnd and apply sudoers restrictions to them",
+	NULL,
+    }, {
+	"closefrom", T_INT,
+	"File descriptors >= %d will be closed before executing a command",
+	NULL,
+    }, {
+	"closefrom_override", T_FLAG,
+	"If set, users may override the value of `closefrom' with the -O option",
+	NULL,
+    }, {
 	"env_check", T_LIST|T_BOOL,
 	"Environment variables to check for sanity:",
 	NULL,
@@ -254,14 +270,6 @@ struct sudo_defs_types sudo_defs_table[] = {
     }, {
 	"env_keep", T_LIST|T_BOOL,
 	"Environment variables to preserve:",
-	NULL,
-    }, {
-	"ignore_local_sudoers", T_FLAG,
-	"If LDAP directory is up, do we ignore local sudoers file",
-	NULL,
-    }, {
-	"monitor", T_FLAG,
-	"Monitor children of cmnd and apply sudoers restrictions to them",
 	NULL,
     }, {
 	NULL, 0, NULL

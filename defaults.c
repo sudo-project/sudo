@@ -428,6 +428,7 @@ init_defaults()
     def_env_editor = TRUE;
 #endif
     def_set_logname = TRUE;
+    def_closefrom = STDERR_FILENO + 1;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)

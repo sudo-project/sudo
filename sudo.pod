@@ -31,8 +31,8 @@ B<sudo> B<-K> | B<-L> | B<-V> | B<-h> | B<-k> | B<-v>
 
 B<sudo> S<[B<-U> I<username>]> S<[B<-u> I<username>|I<#uid>]> B<-l> [I<command>]
 
-B<sudo> [B<-HPSb>] S<[B<-a> I<auth_type>]> S<[B<-c> I<class>|I<->]>
-S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
+B<sudo> [B<-HPSb>] S<[B<-a> I<auth_type>]> S<[B<-C> I<fd>]>
+S<[B<-c> I<class>|I<->]> S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
 S<{B<-e> file [...] | B<-i> | B<-s> | I<command>}>
 
 B<sudoedit> [B<-S>] S<[B<-a> I<auth_type>]>
@@ -91,6 +91,16 @@ or via the I<sudoers> file.
 B<sudo> accepts the following command line options:
 
 =over 4
+
+=item -C fd
+
+Normally, B<sudo> will close all open file descriptors other than
+standard input, standard output and standard error.  The B<-C>
+(I<close from>) option allows the user to specify a starting point
+above the standard error (file descriptor three).  Values less than
+three are not permitted.  This option is only available if the
+administrator has enabled the I<closefrom_override> option in
+L<sudoers(@mansectform@)>.
 
 =item -H
 

@@ -490,9 +490,10 @@ send_mail(line)
 		}
 		argv[i] = NULL;
 
-		/* Close password and group files so we don't leak fds. */
+		/* Close password, group and other fds so we don't leak. */
 		sudo_endpwent();
 		sudo_endgrent();
+		closefrom(STDERR_FILENO + 1);
 
 		/*
 		 * Depending on the config, either run the mailer as root
