@@ -155,6 +155,7 @@ passprompt
 runas_default
 	T_STR
 	"Default user to run commands as: %s"
+	*set_runaspw
 editor
 	T_STR|T_PATH
 	"Path to the editor for use by visudo: %s"
