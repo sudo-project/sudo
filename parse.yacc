@@ -31,6 +31,9 @@ static char rcsid[] = "$Id$";
 
 #include "config.h"
 #include <stdio.h>
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif /* STDC_HEADERS */
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
@@ -335,10 +338,10 @@ int nslots;
 {
     aliasinfo *aip;
     if (nslots == 0)
-	aip = (aliasinfo *) malloc(MOREALIASES * sizeof(*aip));
+	aip = (aliasinfo *) malloc(MOREALIASES * sizeof(aliasinfo));
     else
 	aip = (aliasinfo *) realloc(aliases,
-				    (nslots + MOREALIASES) * sizeof(*aip));
+				    (nslots + MOREALIASES) * sizeof(aliasinfo));
 
     if (aip != NULL) {
 	aliases = aip;
