@@ -37,6 +37,8 @@
 #ifndef _SUDO_INSULTS_H
 #define _SUDO_INSULTS_H
 
+#if defined(HAL_INSULTS) || defined(GOONS_INSULTS) || defined(CLASSIC_INSULTS) || defined(CSOPS_INSULTS)
+
 /*
  * Use one or more set of insults as determined by configure
  */
@@ -72,5 +74,7 @@ char *insults[] = {
  * return a pseudo-random insult.
  */
 #define INSULT		(insults[time(NULL) % NOFINSULTS])
+
+#endif /* HAL_INSULTS || GOONS_INSULTS || CLASSIC_INSULTS || CSOPS_INSULTS */
 
 #endif /* _SUDO_INSULTS_H */
