@@ -123,9 +123,6 @@
 /* Define if you have getcwd(3).  */
 #undef HAVE_GETCWD
 
-/* Define if you have getwd(3).  */
-#undef HAVE_GETWD
-
 /* Define if you have strdup(3).  */
 #undef HAVE_STRDUP
 
