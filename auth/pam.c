@@ -90,15 +90,21 @@ pam_verify(pw, prompt, auth)
     char *prompt;
     sudo_auth *auth;
 {
+    int error;
+    const char *s;
     pam_handle_t *pamh = (pam_handle_t *) auth->data;
 
     def_prompt = prompt;	/* for sudo_conv */
 
     /* PAM_SILENT prevents error messages from going to syslog(3) */
-    if (pam_authenticate(pamh, PAM_SILENT) == PAM_SUCCESS)
+    if ((error = pam_authenticate(pamh, PAM_SILENT)) == PAM_SUCCESS)
 	return(AUTH_SUCCESS);
-    else
-	return(AUTH_FAILURE);
+
+    if (error != PAM_PERM_DENIED) {
+	if ((s = pam_strerror(pamh, error)))
+	    log_error(NO_EXIT|NO_MAIL, "pam_authenticate: %s\n", s);
+    }
+    return(AUTH_FAILURE);
 }
 
 int
@@ -125,7 +131,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
     VOID *appdata_ptr;
 {
     struct pam_response *pr;
-    struct pam_message *pm;
+    PAM_CONST struct pam_message *pm;
     char *p = def_prompt;
     int echo = 0;
     extern int nil_pw;
