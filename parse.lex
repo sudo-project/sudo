@@ -57,16 +57,17 @@ extern YYSTYPE yylval;
 extern int clearaliases;
 int sudolineno = 1;
 static int sawspace = 0;
-static register int string_len = 0;
-static register int string_size = 0;
+static int max_args;
+static int num_args;
 
 static void fill		__P((char *, int));
-static void append		__P((char *, int, int));
+static void fill_cmnd		__P((char *, int));
+static void fill_args		__P((char *, int, int));
 extern void reset_aliases	__P((void));
 extern void yyerror		__P((char *));
 
 /* realloc() to size + COMMANDARGINC to make room for command args */
-#define COMMANDARGINC	256
+#define COMMANDARGINC	64
 
 #ifdef TRACELEXER
 #define LEXTRACE(msg)	fputs(msg, stderr)
@@ -86,18 +87,18 @@ N			[0-9][0-9]?[0-9]?
 
 %%
 [ \t]+			{			/* throw away space/tabs */
-			    sawspace = TRUE;	/* but remember for append */
+			    sawspace = TRUE;	/* but remember for fill_args */
 			}
 
 \\\n			{ 
-			    sawspace = TRUE;	/* remember for append */
+			    sawspace = TRUE;	/* remember for fill_args */
 			    ++sudolineno;
 			    LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
 
 <QUOTEDCMND>\\\"	{
 			    LEXTRACE("QUOTEDCHAR ");
-			    append("\"", 1, sawspace);      
+			    fill_args("\"", 1, sawspace);      
 			    sawspace = FALSE;
 			}
 
@@ -108,7 +109,7 @@ N			[0-9][0-9]?[0-9]?
 
 <GOTCMND>\\[:\,=\\]	{
 			    LEXTRACE("QUOTEDCHAR ");
-			    append(yytext + 1, 1, sawspace);
+			    fill_args(yytext + 1, 1, sawspace);
 			    sawspace = FALSE;
 			}
 
@@ -130,15 +131,15 @@ N			[0-9][0-9]?[0-9]?
 			    return(COMMENT);
 			}			/* return comments */
 
-<QUOTEDCMND>[^\"\\ \t\n#]+ {
+<QUOTEDCMND>[^\" \t\n#]+ {
 			    LEXTRACE("ARG ");
-			    append(yytext, yyleng, sawspace);
+			    fill_args(yytext, yyleng, sawspace);
 			    sawspace = FALSE;
 			  }			/* a command line arg */
 
 <GOTCMND>[^\,:=\\ \t\n#]+ {
 			    LEXTRACE("ARG ");
-			    append(yytext, yyleng, sawspace);
+			    fill_args(yytext, yyleng, sawspace);
 			    sawspace = FALSE;
 			  }			/* a command line arg */
 
@@ -187,23 +188,23 @@ N			[0-9][0-9]?[0-9]?
 				if (yytext[yyleng - 1] == '"' &&
 				    yytext[yyleng - 2] != '\\') {
 				    LEXTRACE("COMMAND ");
-				    fill(yytext + 1, yyleng - 2);
+				    fill_cmnd(yytext + 1, yyleng - 2);
 				    return(COMMAND);
 				} else {
 				    BEGIN QUOTEDCMND;
 				    LEXTRACE("COMMAND ");
-				    fill(yytext + 1, yyleng - 1);
+				    fill_cmnd(yytext + 1, yyleng - 1);
 				}
 			    } else {
 				/* directories can't have args... */
 				if (yytext[yyleng - 1] == '/') {
 				    LEXTRACE("COMMAND ");
-				    fill(yytext, yyleng);
+				    fill_cmnd(yytext, yyleng);
 				    return(COMMAND);
 				} else {
 				    BEGIN GOTCMND;
 				    LEXTRACE("COMMAND ");
-				    fill(yytext, yyleng);
+				    fill_cmnd(yytext, yyleng);
 				}
 			    }
 			}			/* a pathname */
@@ -254,49 +255,62 @@ static void fill(s, len)
     char *s;
     int len;
 {
-
-    string_len = len;		/* length of copied string */
-    string_size = len + 1;	/* leave room for the NULL */
-
-    yylval.string = (char *) malloc(string_size);
+    yylval.string = (char *) malloc(len + 1);
     if (yylval.string == NULL)
 	yyerror("unable to allocate memory");
 
     /* copy the string and NULL-terminate it */
-    (void) strncpy(yylval.string, s, string_len);
-    yylval.string[string_len] = '\0';
+    (void) strncpy(yylval.string, s, len);
+    yylval.string[len] = '\0';
 }
 
 
-static void append(s, len, addspace)
+static void fill_cmnd(s, len)
     char *s;
     int len;
-    int addspace;
 {
-    char *p;
-    int new_len;
+    num_args = max_args = 0;
 
-    new_len = string_len + len + addspace;
+    yylval.command.cmnd = (char *) malloc(len + 1);
+    if (yylval.command.cmnd == NULL)
+	yyerror("unable to allocate memory");
 
-    /*
-     * If we don't have enough space realloc() some more
-     */
-    if (new_len >= string_size) {
-	/* Allocate more space than we need for subsequent args */
-	while (new_len >= (string_size += COMMANDARGINC))
-	    ;
+    /* copy the string and NULL-terminate it */
+    (void) strncpy(yylval.command.cmnd, s, len);
+    yylval.command.cmnd[len] = '\0';
 
-	yylval.string = (char *) realloc(yylval.string, string_size);
-	if (yylval.string == NULL )
+    yylval.command.args = NULL;
+}
+
+
+static void fill_args(s, len, startnew)
+    char *s;
+    int len;
+    int startnew;
+{
+    num_args += startnew;
+
+    if (num_args >= max_args) {
+	max_args += COMMANDARGINC;
+	if (yylval.command.args == NULL)
+	    yylval.command.args = (char **) malloc(max_args);
+	else
+	    yylval.command.args = (char **) realloc(yylval.command.args,
+						    max_args);
+	if (yylval.command.args == NULL)
 	    yyerror("unable to allocate memory");
     }
 
-    /* Efficiently append the arg (with a leading space) */
-    p = yylval.string + string_len;
-    if (addspace)
-	*p++ = ' ';
-    (void) strcpy(p, s);
-    string_len = new_len;
+    yylval.command.args[num_args-1] = (char *) malloc(len + 1);
+    if (yylval.command.args[num_args-1] == NULL)
+	yyerror("unable to allocate memory");
+
+    /* copy the string and NULL-terminate it */
+    (void) strncpy(yylval.command.args[num_args-1], s, len);
+    yylval.command.args[num_args-1][len] = '\0';
+
+    /* NULL-terminate the argument vector */
+    yylval.command.args[num_args] = (char *)NULL;
 }
 
 
