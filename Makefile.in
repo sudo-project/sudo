@@ -145,6 +145,18 @@ visudo: $(PARSEOBJS) $(VISUDOBJS) $(LIBOBJS)
 testsudoers: $(PARSEOBJS) $(TESTOBJS)
 	$(CC) -o $@ $(PARSEOBJS) $(TESTOBJS) $(VISUDO_LDFLAGS) $(VISUDO_LIBS)
 
+# Update version strings based on version specified in version.h
+update_version: Makefile.in emul/utime.h check.c check.c compat.h config.h.in dce_pwent.c find_path.c getspwuid.c getwd.c goodpath.c ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c lex.yy.c logging.c options.h parse.c parse.lex parse.yacc pathnames.h putenv.c strdup.c sudo-lex.yy.c sudo.c sudo.h sudo_setenv.c testsudoers.c tgetpass.c utime.c visudo.c
+	:
+
+Makefile.in : version.h
+	co -l -q $@
+	( VERSION=`sed -n 's/static char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h` ; sed -e 's/\(VERSION =\) [0-9]\.[0-9][0-9]*\.[0-9][0-9]*/\1 '$$VERSION'/' -e 's/\(CU sudo version\) [0-9]\.[0-9][0-9]*\.[0-9][0-9]*/\1 '$$VERSION'/' < $@ > $@.$$$$ ; mv -f $@.$$$$ $@ ; chmod 644 $@ )
+
+emul/utime.h check.c check.c compat.h config.h.in dce_pwent.c find_path.c getspwuid.c getwd.c goodpath.c ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c lex.yy.c logging.c options.h parse.c parse.lex parse.yacc pathnames.h putenv.c strdup.c sudo-lex.yy.c sudo.c sudo.h sudo_setenv.c testsudoers.c tgetpass.c utime.c visudo.c: version.h
+	co -l -q $@
+	( VERSION=`sed -n 's/static char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h` ; sed 's/\(CU sudo version\) [0-9]\.[0-9][0-9]*\.[0-9][0-9]*/\1 '$$VERSION'/' < $@ > $@.$$$$ ; mv -f $@.$$$$ $@ ; chmod 644 $@ )
+
 y.tab.c y.tab.h: parse.yacc
 	$(YACC) -d $(srcdir)/parse.yacc
 
