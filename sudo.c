@@ -76,6 +76,8 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_MALLOC_H */ 
 #include <pwd.h>
 #include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <sys/param.h>
 #ifdef _AIX
 #include <sys/id.h>
@@ -114,6 +116,7 @@ char *cmnd;
 char *user;
 char *epasswd;
 char host[MAXHOSTNAMELEN + 1];
+struct in_addr *ip_addrs;
 char cwd[MAXPATHLEN + 1];
 uid_t uid = -2;
 
@@ -283,10 +286,12 @@ static void load_globals()
 	inform_user(GLOBAL_NO_HOSTNAME);
 #ifdef FQDN
     } else {
-	if ((h_ent = gethostbyname(host)) == NULL)
+	if ((h_ent = gethostbyname(host)) == NULL) {
 	    log_error(GLOBAL_HOST_UNREGISTERED);
-	else
+	} else {
 	    strcpy(host, h_ent -> h_name);
+	    load_ip_addrs(h_ent);
+	}
     }
 #else
     }
@@ -553,4 +558,44 @@ static void load_cmnd()
 	(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], Argv[1]);
 	exit(1);
     }
+}
+
+
+
+/**********************************************************************
+ *
+ *  load_ip_addrs()
+ *
+ *  This function sets the ip_addrs global variable
+ */
+
+void load_ip_addrs(h_ent)
+    struct hostent *h_ent;
+{
+    char **addr;			/* to walk addr list in h_ent */
+    int i;				/* counter */
+
+    /* set h_ent if not already set */
+    if (h_ent == NULL && (h_ent = gethostbyname(host)) == NULL) {
+	log_error(GLOBAL_HOST_UNREGISTERED);
+
+	return;
+    }
+
+    /* malloc space for ip_addrs array */
+    for (addr = h_ent -> h_addr_list, i = 0; *addr; addr++, i++)
+	;
+    if (i) {
+	ip_addrs = malloc(sizeof(struct in_addr) * (i));
+	if (ip_addrs == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+    }
+
+    /* copy ip addrs to ip_addrs array */
+    for (addr = h_ent -> h_addr_list, i = 0; *addr; addr++, i++)
+	(void) memcpy(&ip_addrs[i], *addr, h_ent -> h_length);
+    ip_addrs[i].s_addr = 0;
 }
