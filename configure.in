@@ -33,7 +33,7 @@ C2=1
 echo 'Configuring for C2 security')
 dnl
 dnl --with-AFS
-AC_WITH(AFS, AC_DEFINE(HAVE_ AFS)
+AC_WITH(AFS, AC_DEFINE(HAVE_AFS)
 echo 'Configuring for use with AFS')
 dnl
 dnl --with-csops
