@@ -318,6 +318,9 @@ case "$host" in
 		# Don't really need -lnsl
 		LIB_NSL=1
 
+		# getcwd(3) opens a pipe to getpwd(1)!?!
+		BROKEN_GETCWD=1
+
 		if test -z "$with_C2"; then
 		    SUDO_CHECK_SHADOW_SUNOS4(with_C2="yes")
 		fi
@@ -763,9 +766,11 @@ AC_CHECK_FUNCS(strchr strrchr memcpy memset sysconf sigaction tzset strcasecmp s
 if test "$SHADOW_TYPE" = "SPW_SECUREWARE"; then
     AC_CHECK_FUNCS(bigcrypt)
 fi
+if test -z "$BROKEN_GETCWD"; then
+    AC_CHECK_FUNC(getcwd, AC_DEFINE(HAVE_GETCWD), LIBOBJS="$LIBOBJS getcwd.o")
+fi
 AC_CHECK_FUNC(waitpid, AC_DEFINE(HAVE_WAITPID) AC_CHECK_FUNCS(wait3))
 AC_CHECK_FUNC(innetgr, AC_DEFINE(HAVE_INNETGR) AC_CHECK_FUNCS(getdomainname))
-AC_CHECK_FUNC(getcwd, AC_DEFINE(HAVE_GETCWD), LIBOBJS="$LIBOBJS getcwd.o")
 AC_CHECK_FUNC(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
 AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) SUDO_LIBS="${SUDO_LIBS} -lcompat"; VISUDO_LIBS="${VISUDO_LIBS} -lcompat", LIBOBJS="$LIBOBJS lsearch.o"), LIBOBJS="$LIBOBJS lsearch.o"))
 AC_CHECK_FUNC(setenv, AC_DEFINE(HAVE_SETENV), AC_FUNC_CHECK(putenv, AC_DEFINE(HAVE_PUTENV), LIBOBJS="$LIBOBJS putenv.o"))
