@@ -265,112 +265,102 @@ main(argc, argv)
     add_env(!(sudo_mode & MODE_SHELL));	/* add in SUDO_* envariables */
 
     /* Validate the user but don't search for pseudo-commands. */
-    validated = sudoers_lookup((sudo_mode != MODE_VALIDATE && sudo_mode != MODE_LIST));
+    validated =
+	sudoers_lookup((sudo_mode != MODE_VALIDATE && sudo_mode != MODE_LIST));
 
-    switch (validated) {
-	case VALIDATE_OK:
-	    check_user();
-	    /* fallthrough */
+    /* Require a password unless the NOPASS tag was set.  */
+    if (!(validated & FLAG_NOPASS))
+	check_user();
 
-	case VALIDATE_OK_NOPASS:
-	    /* Finally tell the user if the command did not exist. */
-	    if (cmnd_status == NOT_FOUND_DOT) {
-		(void) fprintf(stderr, "%s: ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.\n", Argv[0], user_cmnd, user_cmnd, user_cmnd);
-		exit(1);
-	    } else if (cmnd_status == NOT_FOUND) {
-		(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0],
-		    user_cmnd);
-		exit(1);
-	    }
+    if (validated & VALIDATE_ERROR)
+	log_error(0, "parse error in %s near line %d", _PATH_SUDOERS,
+	    errorlineno);
+    else if (validated & VALIDATE_OK) {
+	/* Finally tell the user if the command did not exist. */
+	if (cmnd_status == NOT_FOUND_DOT) {
+	    (void) fprintf(stderr, "%s: ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.\n", Argv[0], user_cmnd, user_cmnd, user_cmnd);
+	    exit(1);
+	} else if (cmnd_status == NOT_FOUND) {
+	    (void) fprintf(stderr, "%s: %s: command not found\n", Argv[0],
+		user_cmnd);
+	    exit(1);
+	}
 
-	    log_auth(validated, 1);
-	    if (sudo_mode == MODE_VALIDATE)
-		exit(0);
-	    else if (sudo_mode == MODE_LIST) {
-		list_matches();
-		exit(0);
-	    }
+	log_auth(validated, 1);
+	if (sudo_mode == MODE_VALIDATE)
+	    exit(0);
+	else if (sudo_mode == MODE_LIST) {
+	    list_matches();
+	    exit(0);
+	}
 
-	    /* Become specified user or root. */
-	    set_perms(PERM_RUNAS, sudo_mode);
+	/* Become specified user or root. */
+	set_perms(PERM_RUNAS, sudo_mode);
 
-	    /* Set $HOME for `sudo -H' */
-	    if ((sudo_mode & MODE_RESET_HOME) && runas_homedir)
-		(void) sudo_setenv("HOME", runas_homedir);
+	/* Set $HOME for `sudo -H' */
+	if ((sudo_mode & MODE_RESET_HOME) && runas_homedir)
+	    (void) sudo_setenv("HOME", runas_homedir);
 
-	    /* This *must* have been set if we got a match but... */
-	    if (safe_cmnd == NULL) {
-		log_error(MSG_ONLY,
-		    "internal error, cmnd_safe never got set for %s; %s",
-		    user_cmnd,
-		    "please report this error to sudo-bugs@courtesan.com");
-	    }
+	/* This *must* have been set if we got a match but... */
+	if (safe_cmnd == NULL) {
+	    log_error(MSG_ONLY,
+		"internal error, cmnd_safe never got set for %s; %s",
+		user_cmnd,
+		"please report this error to sudo-bugs@courtesan.com");
+	}
 
 #if (LOGGING & SLOG_SYSLOG)
-	    closelog();
+	closelog();
 #endif
 
-	    /* Reset signal mask. */
+	/* Reset signal mask. */
 #ifdef POSIX_SIGNALS
-	    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
+	(void) sigprocmask(SIG_SETMASK, &oset, NULL);
 #else
-	    (void) sigsetmask(omask);
+	(void) sigsetmask(omask);
 #endif /* POSIX_SIGNALS */
 
 #ifndef PROFILING
-	    if ((sudo_mode & MODE_BACKGROUND) && fork() > 0)
-		exit(0);
-	    else
-		EXEC(safe_cmnd, NewArgv);	/* run the command */
-#else
+	if ((sudo_mode & MODE_BACKGROUND) && fork() > 0)
 	    exit(0);
+	else
+	    EXEC(safe_cmnd, NewArgv);	/* run the command */
+#else
+	exit(0);
 #endif /* PROFILING */
-	    /*
-	     * If we got here then the exec() failed...
-	     */
-	    (void) fprintf(stderr, "%s: unable to exec %s: %s\n",
-		Argv[0], safe_cmnd, strerror(errno));
-	    exit(-1);
-	    break;
-
-	case VALIDATE_NO_USER:
-	    check_user();
-	    log_auth(validated, 1);
-	    exit(1);
-	    break;
-
-	case VALIDATE_NOT_OK:
-	    check_user();
-
-	case VALIDATE_NOT_OK_NOPASS:
-	    /*
-	     * We'd like to not leak path info at all here, but that can
-	     * *really* confuse the users.  To really close the leak we'd
-	     * have to say "not allowed to run foo" even when the problem
-	     * is just "no foo in path" since the user can trivially set
-	     * their path to just contain a single dir.
-	     */
+	/*
+	 * If we got here then the exec() failed...
+	 */
+	(void) fprintf(stderr, "%s: unable to exec %s: %s\n",
+	    Argv[0], safe_cmnd, strerror(errno));
+	exit(-1);
+    } else if ((validated & FLAG_NO_USER) || (validated & FLAG_NO_HOST)) {
+	log_auth(validated, 1);
+	exit(1);
+    } else if (validated & VALIDATE_NOT_OK) {
 #ifndef DONT_LEAK_PATH_INFO
-	    log_auth(validated,
-		!(cmnd_status == NOT_FOUND_DOT || cmnd_status == NOT_FOUND));
-	    if (cmnd_status == NOT_FOUND)
-		(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0],
-		    user_cmnd);
-	    else if (cmnd_status == NOT_FOUND_DOT)
-		(void) fprintf(stderr, "%s: ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.\n", Argv[0], user_cmnd, user_cmnd, user_cmnd);
-	    exit(1);
-	    break;
+	/*
+	 * We'd like to not leak path info at all here, but that can
+	 * *really* confuse the users.  To really close the leak we'd
+	 * have to say "not allowed to run foo" even when the problem
+	 * is just "no foo in path" since the user can trivially set
+	 * their path to just contain a single dir.
+	 */
+	log_auth(validated,
+	    !(cmnd_status == NOT_FOUND_DOT || cmnd_status == NOT_FOUND));
+	if (cmnd_status == NOT_FOUND)
+	    (void) fprintf(stderr, "%s: %s: command not found\n", Argv[0],
+		user_cmnd);
+	else if (cmnd_status == NOT_FOUND_DOT)
+	    (void) fprintf(stderr, "%s: ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.\n", Argv[0], user_cmnd, user_cmnd, user_cmnd);
+#else
+	log_auth(validated, 1);
 #endif /* DONT_LEAK_PATH_INFO */
-
-	case VALIDATE_ERROR:
-	    log_error(0, "parse error in %s around line %d", _PATH_SUDOERS,
-		errorlineno);
-	    break;
-
-	default:
-	    log_auth(validated, 1);
-	    exit(1);
-	    break;
+	exit(1);
+    } else {
+	/* should never get here */
+	log_auth(validated, 1);
+	exit(1);
     }
     exit(0);	/* not reached */
 }

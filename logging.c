@@ -69,6 +69,7 @@ static void do_syslog		__P((int, char *));
 static void do_logfile		__P((char *));
 #endif
 static void send_mail		__P((char *));
+static void mail_auth		__P((int, char *));
 
 #if (LOGGING & SLOG_SYSLOG)
 # ifdef BROKEN_SYSLOG
@@ -271,80 +272,51 @@ log_auth(status, inform_user)
     char *message;
     char *logline;
 #if (LOGGING & SLOG_SYSLOG)
-    int pri = PRI_FAILURE;
+    int pri;
+
+    if (status & VALIDATE_OK)
+	pri = PRI_SUCCESS;
+    else
+	pri = PRI_FAILURE;
 #endif /* LOGGING & SLOG_SYSLOG */
 
     /* Set error message, if any. */
-    switch (status) {
-	case VALIDATE_OK:
-	case VALIDATE_OK_NOPASS:
-	    message = "";
-	    break;
-	case VALIDATE_NO_USER:
-	    message = "user NOT in sudoers ; ";
-	    break;
-	case VALIDATE_NOT_OK:
-	case VALIDATE_NOT_OK_NOPASS:
-	    message = "command not allowed ; ";
-	    break;
-	default:
-	    message = "unknown error ; ";
-    }
-
-    if (user_args)
-	easprintf(&logline, "%sTTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s %s",
-	    message, user_tty, user_cwd, user_runas, user_cmnd, user_args);
+    if (status & VALIDATE_OK)
+	message = "";
+    else if (status & FLAG_NO_USER)
+	message = "user NOT in sudoers ; ";
+    else if (status & FLAG_NO_HOST)
+	message = "user NOT authorized on host ; ";
+    else if (status & VALIDATE_NOT_OK)
+	message = "command not allowed ; ";
     else
-	easprintf(&logline, "%sTTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s",
-	    message, user_tty, user_cwd, user_runas, user_cmnd);
+	message = "unknown error ; ";
 
-    /*
-     * Inform the user if they failed to authenticate and send a
-     * copy of the error via mail if compiled with the appropriate option.
-     */
-    switch (status) {
-	case VALIDATE_OK:
-	case VALIDATE_OK_NOPASS:
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = PRI_SUCCESS;
-#endif /* LOGGING & SLOG_SYSLOG */
-#ifdef SEND_MAIL_WHEN_OK
-	    send_mail(logline);
-#endif
-	    break;
-	case VALIDATE_NO_USER:
-#ifdef SEND_MAIL_WHEN_NO_USER
-	    send_mail(logline);
-#endif
-	    if (inform_user)
-		(void) fprintf(stderr, "%s is not in the sudoers file.  %s",
-		    user_name, "This incident will be reported.\n");
-	    break;
-	case VALIDATE_NOT_OK:
-	case VALIDATE_NOT_OK_NOPASS:
-#ifdef SEND_MAIL_WHEN_NOT_OK
-	    send_mail(logline);
-#endif
-	    if (inform_user) {
-		(void) fprintf(stderr,
-		    "Sorry, user %s is not allowed to execute '%s",
-		    user_name, user_cmnd);
-		if (user_args) {
-		    fputc(' ', stderr);
-		    fputs(user_args, stderr);
-		}
-		(void) fprintf(stderr, "' as %s on %s.\n", user_runas, user_host);
-	    }
-	    break;
-	default:
-	    send_mail(logline);
-	    if (inform_user)
-		(void) fprintf(stderr, "An unknown error has occurred.\n");
-	    break;
+    easprintf(&logline, "%sTTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s%s%s",
+	message, user_tty, user_cwd, user_runas, user_cmnd,
+	user_args ? " " : "", user_args ? user_args : "");
+
+    mail_auth(status, logline);		/* send mail based on status */
+
+    /* Inform the user if they failed to authenticate.  */
+    if (inform_user) {
+	if (status & FLAG_NO_USER)
+	    (void) fprintf(stderr, "%s is not in the sudoers file.  %s",
+		user_name, "This incident will be reported.\n");
+	else if (status & FLAG_NO_HOST)
+	    (void) fprintf(stderr, "%s is not allowed to run sudo on %s.  %s",
+		user_name, user_shost, "This incident will be reported.\n");
+	else if (status & VALIDATE_NOT_OK)
+	    (void) fprintf(stderr,
+		"Sorry, user %s is not allowed to execute '%s%s%s' as %s on %s.\n",
+		user_name, user_cmnd, user_args ? " " : "",
+		user_args ? user_args : "", user_runas, user_host);
+	else
+	    (void) fprintf(stderr, "An unknown error has occurred.\n");
     }
 
     /*
-     * Log to syslog and/or a file.
+     * Log via syslog and/or a file.
      */
 #if (LOGGING & SLOG_SYSLOG)
     do_syslog(pri, logline);
@@ -549,6 +521,34 @@ send_mail(line)
     return;
 }
 #endif
+
+/*
+ * Send mail based on the value of "status" and compile-time options.
+ */
+static void
+mail_auth(status, line)
+    int status;
+    char *line;
+{
+    int mail_mask;
+
+    mail_mask = VALIDATE_ERROR;
+#ifdef SEND_MAIL_WHEN_OK
+    mail_mask |= VALIDATE_OK;
+#endif
+#ifdef SEND_MAIL_WHEN_NO_USER
+    mail_mask |= FLAG_NO_USER;
+#endif
+#ifdef SEND_MAIL_WHEN_NO_HOST
+    mail_mask |= FLAG_NO_HOST;
+#endif
+#ifdef SEND_MAIL_WHEN_NOT_OK
+    mail_mask |= VALIDATE_NOT_OK;
+#endif
+
+    if ((status & mail_mask) != 0)
+	send_mail(line);
+}
 
 /*
  * SIGCHLD sig handler--wait for children as they die.

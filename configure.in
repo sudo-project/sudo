@@ -474,7 +474,7 @@ AC_ARG_WITH(mailsubject, [  --with-mailsubject      subject of sudo mail],
 esac], AC_DEFINE(MAILSUBJECT, "*** SECURITY information for %h ***"))
 
 AC_MSG_CHECKING(whether to send mail when a user is not in sudoers)
-AC_ARG_WITH(mail-if-no-user, [  --without-mail-if-no-user Do not send mail if user not in sudoers],
+AC_ARG_WITH(mail-if-no-user, [  --without-mail-if-no-user do not send mail if user not in sudoers],
 [case $with_mail_if_no_user in  
     yes)	AC_DEFINE(SEND_MAIL_WHEN_NO_USER)
 		AC_MSG_RESULT(yes)
@@ -485,6 +485,19 @@ AC_ARG_WITH(mail-if-no-user, [  --without-mail-if-no-user Do not send mail if us
 		exit 1
 		;;
 esac], [AC_DEFINE(SEND_MAIL_WHEN_NO_USER) AC_MSG_RESULT(yes)])
+
+AC_MSG_CHECKING(whether to send mail when user listed but not for this host)
+AC_ARG_WITH(mail-if-no-host, [  --with-mail-if-no-host  send mail if user in sudoers but not for this host],
+[case $with_mail_if_no_host in  
+    yes)	AC_DEFINE(SEND_MAIL_WHEN_NO_HOST)
+		AC_MSG_RESULT(yes)
+		;;
+    no)		AC_MSG_RESULT(no)
+		;;
+    *)		echo "Unknown argument to --with-mail-if-no-host: $with_mail_if_no_host"
+		exit 1
+		;;
+esac], AC_MSG_RESULT(no))
 
 AC_MSG_CHECKING(whether to send mail when a user tries a disallowed command)
 AC_ARG_WITH(mail-if-noperms, [  --with-mail-if-noperms  send mail if user not allowed to run command],

@@ -112,7 +112,7 @@ struct matchstack *match;
 int top = 0, stacksize = 0;
 
 #define push \
-    { \
+    do { \
 	if (top >= stacksize) { \
 	    while ((stacksize += STACKINCREMENT) < top); \
 	    match = (struct matchstack *) erealloc(match, sizeof(struct matchstack) * stacksize); \
@@ -123,10 +123,10 @@ int top = 0, stacksize = 0;
 	match[top].runas  = -1; \
 	match[top].nopass = pwdef; \
 	top++; \
-    }
+    } while (0)
 
 #define pushcp \
-    { \
+    do { \
 	if (top >= stacksize) { \
 	    while ((stacksize += STACKINCREMENT) < top); \
 	    match = (struct matchstack *) erealloc(match, sizeof(struct matchstack) * stacksize); \
@@ -137,7 +137,7 @@ int top = 0, stacksize = 0;
 	match[top].runas  = match[top-1].runas; \
 	match[top].nopass = match[top-1].nopass; \
 	top++; \
-    }
+    } while (0)
 
 #define pop \
     { \
@@ -358,12 +358,20 @@ cmndspeclist	:	cmndspec
 cmndspec	:	runasspec nopasswd opcmnd {
 			    /*
 			     * Push the entry onto the stack if it is worth
-			     * saving (or if nothing else is on the stack)
-			     * and clear match status.
+			     * saving and clear cmnd_matches for next cmnd.
+			     *
+			     * We need to save at least one entry on
+			     * the stack so sudoers_lookup() can tell that
+			     * the user was listed in sudoers.  Also, we
+			     * need to be able to tell whether or not a
+			     * user was listed for this specific host.
 			     */
-			    if (user_matches == TRUE && host_matches == TRUE &&
-				((cmnd_matches != -1 && runas_matches != -1) ||
-				top == 1))
+			    if (user_matches != -1 && host_matches != -1 &&
+				cmnd_matches != -1 && runas_matches != -1)
+				pushcp;
+			    else if (user_matches != -1 && (top == 1 ||
+				(top == 2 && host_matches != -1 &&
+				match[0].host == -1)))
 				pushcp;
 			    cmnd_matches = -1;
 			}

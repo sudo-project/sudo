@@ -227,6 +227,10 @@ Special features/options:
 	Normally, sudo will mail to the "alermail" user if the user invoking
 	sudo is not in the sudoers file.  This option disables that behavior.
 
+  --with-mail-if-no-host
+	Send mail to the "alermail" user if the user exists in the sudoers
+	file, but is not allowed to run commands on the current host.
+
   --with-mail-if-noperms
 	Send mail to the "alermail" user if the user is allowed to use sudo but
 	the command they are trying is not listed in their sudoers file entry.

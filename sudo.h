@@ -58,15 +58,16 @@ struct sudo_user {
 };
 
 /*
- * Return values for sudoers_lookup()
- * Also arguments for log_auth()
+ * Return values for sudoers_lookup(), also used as arguments for log_auth()
+ * Note: cannot use '0' as a value here.
  */
-#define VALIDATE_OK              0x00
-#define VALIDATE_OK_NOPASS       0x01
-#define VALIDATE_NO_USER         0x02
-#define VALIDATE_NOT_OK          0x03
-#define VALIDATE_NOT_OK_NOPASS   0x04
-#define VALIDATE_ERROR          -1
+/* XXX - VALIDATE_SUCCESS and VALIDATE_FAILURE instead? */
+#define VALIDATE_ERROR          0x01
+#define VALIDATE_OK		0x02
+#define VALIDATE_NOT_OK		0x04
+#define FLAG_NOPASS		0x10
+#define FLAG_NO_USER		0x20
+#define FLAG_NO_HOST		0x40
 
 /*
  * Boolean values

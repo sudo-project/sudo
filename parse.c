@@ -114,7 +114,7 @@ int
 sudoers_lookup(check_cmnd)
     int check_cmnd;
 {
-    int return_code;
+    int error;
 
     /* Become sudoers file owner */
     set_perms(PERM_SUDOERS, 0);
@@ -133,7 +133,7 @@ sudoers_lookup(check_cmnd)
      * Need to be root while stat'ing things in the parser.
      */
     set_perms(PERM_ROOT, 0);
-    return_code = yyparse();
+    error = yyparse();
 
     /*
      * Don't need to keep this open...
@@ -144,18 +144,18 @@ sudoers_lookup(check_cmnd)
     /* relinquish extra privs */
     set_perms(PERM_USER, 0);
 
-    if (return_code || parse_error)
+    if (error || parse_error)
 	return(VALIDATE_ERROR);
 
     /*
-     * Nothing on the top of the stack => user doesn't appear in sudoers.
-     * Allow anyone to try the psuedo commands "list" and "validate".
+     * Assume the worst.  If the stack is empty the user was
+     * not mentioned at all.
      */
-    if (top == 0) {
-	if (check_cmnd == TRUE)
-	    return(VALIDATE_NO_USER);
-	else
-	    return(VALIDATE_NOT_OK);
+    error = VALIDATE_NOT_OK;
+    if (check_cmnd == TRUE) {
+	error |= FLAG_NO_HOST;
+	if (!top)
+	    error |= FLAG_NO_USER;
     }
 
     /*
@@ -167,9 +167,9 @@ sudoers_lookup(check_cmnd)
     if (check_cmnd == FALSE)
 	while (top) {
 	    if (host_matches == TRUE) {
-		/* user may always do validate or list on allowed hosts */
+		/* User may always validate or list on allowed hosts */
 		if (no_passwd == TRUE)
-		    return(VALIDATE_OK_NOPASS);
+		    return(VALIDATE_OK | FLAG_NOPASS);
 		else
 		    return(VALIDATE_OK);
 	    }
@@ -178,6 +178,7 @@ sudoers_lookup(check_cmnd)
     else
 	while (top) {
 	    if (host_matches == TRUE) {
+		error &= ~FLAG_NO_HOST;
 		if (runas_matches == TRUE) {
 		    if (cmnd_matches == TRUE) {
 		    	/*
@@ -185,13 +186,15 @@ sudoers_lookup(check_cmnd)
 		    	 * If no passwd required return as such.
 			 */
 		    	if (no_passwd == TRUE)
-			    return(VALIDATE_OK_NOPASS);
+			    return(VALIDATE_OK | FLAG_NOPASS);
 		    	else
 			    return(VALIDATE_OK);
 		    } else if (cmnd_matches == FALSE) {
-			/* User was explicitly denied acces to cmnd on host. */
+			/*
+			 * User was explicitly denied acces to cmnd on host.
+			 */
 			if (no_passwd == TRUE)
-			    return(VALIDATE_NOT_OK_NOPASS);
+			    return(VALIDATE_NOT_OK | FLAG_NOPASS);
 			else
 			    return(VALIDATE_NOT_OK);
 		    }
@@ -201,10 +204,9 @@ sudoers_lookup(check_cmnd)
 	}
 
     /*
-     * We popped everything off the stack and the user was mentioned, but
-     * not explicitly granted nor denied access.
+     * The user was not explicitly granted nor denied access.
      */
-    return(VALIDATE_NOT_OK);
+    return(error);
 }
 
 /*

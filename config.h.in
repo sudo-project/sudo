@@ -453,6 +453,9 @@
 /* Define SEND_MAIL_WHEN_NO_USER to send mail when user not in sudoers file */
 #undef SEND_MAIL_WHEN_NO_USER
 
+/* Define SEND_MAIL_WHEN_NO_HOST to send mail when not allowed on this host */
+#undef SEND_MAIL_WHEN_NO_HOST
+
 /* Define SEND_MAIL_WHEN_NOT_OK to send mail when not allowed to run command */
 #undef SEND_MAIL_WHEN_NOT_OK
 
