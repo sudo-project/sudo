@@ -44,6 +44,7 @@
 #endif /* HAVE_ERR_H */
 
 #include "sudo.h"
+#include "trace_systrace.h"
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
@@ -55,28 +56,20 @@ struct listhead {
 struct childinfo {
     pid_t pid;
     struct passwd *pw;
+    struct syscallaction *action;
     struct childinfo *next;
 };
-struct syscallhandler {
-    int num;
-    void (*handler) __P((int, struct str_msg_ask *, struct systrace_answer *));
-    struct syscallhandler *next;
-};
 
-void check_exec		__P((int, struct str_msg_ask *,
-			     struct systrace_answer *));
 void check_syscall	__P((int, struct str_msg_ask *,
-			     struct systrace_answer *, struct listhead *));
+			     struct systrace_answer *));
 int decode_args		__P((int, pid_t, struct str_msg_ask *));
-int set_policy		__P((int, pid_t, struct listhead *));
+int set_policy		__P((int, struct childinfo *));
 int systrace_open	__P((void));
 int systrace_read	__P((int, pid_t, void *, void *, size_t));
 int systrace_run	__P((char *, char **, int));
+int switch_emulation	__P((int, struct str_message *));
 ssize_t read_string	__P((int, pid_t, void *, char *, size_t));
 void new_child		__P((pid_t, pid_t));
-void new_handler	__P((struct listhead *, int,
-			     void (*)(int, struct str_msg_ask *,
-				     struct systrace_answer *)));
 void rm_child		__P((pid_t));
 void update_child	__P((pid_t, uid_t));
 struct childinfo *find_child __P((pid_t));
@@ -140,7 +133,6 @@ systrace_attach(pid)
 {
     struct systrace_answer ans;
     struct str_message msg;
-    struct listhead handlers;
     sigaction_t sa, osa;
     sigset_t set, oset;
     ssize_t nread;
@@ -207,10 +199,10 @@ systrace_attach(pid)
 	goto fail;
     }
 
-    if (set_policy(fd, pid, &handlers) != 0)
+    new_child(-1, pid);
+    if (set_policy(fd, children.first) != 0)
 	goto fail;
 
-    new_child(-1, pid);
     if (kill(pid, SIGUSR1) != 0) {
 	warn("unable to wake up sleeping child");
 	_exit(1);
@@ -256,25 +248,27 @@ systrace_attach(pid)
 		memset(&ans, 0, sizeof(ans));
 		ans.stra_pid = msg.msg_pid;
 		ans.stra_seqnr = msg.msg_seqnr;
-		check_syscall(fd, &msg.msg_data.msg_ask, &ans, &handlers);
+		check_syscall(fd, &msg.msg_data.msg_ask, &ans);
 		if ((ioctl(fd, STRIOCANSWER, &ans)) == -1)
 		    goto fail;
 		break;
 
 	    case SYSTR_MSG_EMUL:
-		/*
-		 * XXX - need to redo policy if we change emulation.
-		 *       that means we need to know in advance what
-		 *       the various emulations are.
-		 */
-		warnx("change in emul");
+		/* Change in emulation. */
 		memset(&ans, 0, sizeof(ans));
 		ans.stra_pid = msg.msg_pid;
 		ans.stra_seqnr = msg.msg_seqnr;
-		ans.stra_policy = SYSTR_POLICY_PERMIT;
+		if (switch_emulation(fd, &msg) == 0)
+		    ans.stra_policy = SYSTR_POLICY_PERMIT;
+		else {
+		    warnx("unsupported emulation \"%s\"",
+			msg.msg_data.msg_emul.emul);
+		    ans.stra_policy = SYSTR_POLICY_NEVER;
+		}
 		if ((ioctl(fd, STRIOCANSWER, &ans)) == -1)
 		    goto fail;
 		break;
+
 	    case SYSTR_MSG_POLICYFREE:
 		break;
 
@@ -299,26 +293,8 @@ fail:
 }
 
 /*
- * Push a new handler to the head of the list.
- */
-void
-new_handler(head, num, handler)
-    struct listhead *head;
-    int num;
-    void (*handler) __P((int, struct str_msg_ask *, struct systrace_answer *));
-{
-    struct syscallhandler *entry;
-
-    entry = (struct syscallhandler *) emalloc(sizeof(*entry));
-    entry->num = num;
-    entry->handler = handler;
-    entry->next = head->first;
-    head->first = entry;
-}
-
-/*
  * Push a new child to the head of the list, inheriting the struct pw
- * of its parent.  XXX - do ref counting on pw instead of copying.
+ * of its parent.
  */
 void
 new_child(ppid, pid)
@@ -327,16 +303,46 @@ new_child(ppid, pid)
 {
     struct childinfo *entry;
     struct passwd *pw;
+    struct syscallaction *action;
+    struct emulation *emul;
 
-    if (ppid != -1 && (entry = find_child(ppid)) != NULL)
+    if (ppid != -1 && (entry = find_child(ppid)) != NULL) {
 	pw = entry->pw;
-    else
+	action = entry->action;
+    } else {
 	pw = runas_pw;
+	for (emul = emulations; emul != NULL; emul++)
+	    if (strcmp(emul->name, "native") == 0) {
+		action = emul->action;
+		break;
+	    }
+	if (emul == NULL)
+	    errx(1, "unable to find native emulation!");
+    }
     entry = (struct childinfo *) emalloc(sizeof(*entry));
     entry->pid = pid;
     entry->pw = sudo_pwdup(pw, 0);
+    entry->action = action;
     entry->next = children.first;
     children.first = entry;
+}
+
+int
+switch_emulation(fd, msgp)
+    int fd;
+    struct str_message *msgp;
+{
+    struct childinfo *entry;
+    struct emulation *emul;
+
+    if ((entry = find_child(msgp->msg_pid)) == NULL)
+	return(-1);
+    for (emul = emulations; emul != NULL; emul++)
+	if (strcmp(emul->name, msgp->msg_data.msg_emul.emul) == 0) {
+	    entry->action = emul->action;
+	    return(set_policy(fd, entry));
+	}
+    return(-1);
 }
 
 /*
@@ -409,13 +415,13 @@ update_child(pid, uid)
  * Create a policy that intercepts execve and lets all others go free.
  */
 int
-set_policy(fd, pid, handlers)
+set_policy(fd, child)
     int fd;
-    pid_t pid;
-    struct listhead *handlers;
+    struct childinfo *child;
 {
-    int i;
+    struct syscallaction *sca;
     struct systrace_policy pol;
+    int i;
 
     pol.strp_op = SYSTR_POLICY_NEW;
     pol.strp_num = -1;
@@ -423,55 +429,20 @@ set_policy(fd, pid, handlers)
     if (ioctl(fd, STRIOCPOLICY, &pol) == -1)
 	return(-1);
 
-    handlers->first = NULL;
     for (i = 0; i < SYS_MAXSYSCALL; i++) {
 	pol.strp_op = SYSTR_POLICY_ASSIGN;
-	pol.strp_pid = pid;
+	pol.strp_pid = child->pid;
 	if (ioctl(fd, STRIOCPOLICY, &pol) == -1)
 	    return(-1);
 
 	pol.strp_op = SYSTR_POLICY_MODIFY;
-	switch (pol.strp_code = i) {
-#ifdef SYS_exec
-	    case SYS_exec:
-		pol.strp_policy = SYSTR_POLICY_ASK;
-		new_handler(handlers, i, check_exec);
+	pol.strp_policy = SYSTR_POLICY_PERMIT;
+	pol.strp_code = i;
+	for (sca = child->action; sca->code != -1; sca++) {
+	    if (sca->code == i) {
+		pol.strp_policy = sca->policy;
 		break;
-#endif
-#ifdef SYS_execv
-	    case SYS_execv:
-		pol.strp_policy = SYSTR_POLICY_ASK;
-		new_handler(handlers, i, check_exec);
-		break;
-#endif
-#ifdef SYS_execve
-	    case SYS_execve:
-		pol.strp_policy = SYSTR_POLICY_ASK;
-		new_handler(handlers, i, check_exec);
-		break;
-#endif
-#ifdef SYS_fexecve
-	    case SYS_fexecve:
-		pol.strp_policy = SYSTR_POLICY_NEVER;	/* not checkable */
-		break;
-#endif
-#ifdef SYS_setuid
-	    case SYS_setuid:
-#endif
-#ifdef SYS_seteuid
-	    case SYS_seteuid:
-#endif
-#ifdef SYS_setreuid
-	    case SYS_setreuid:
-#endif
-#ifdef SYS_setresuid
-	    case SYS_setresuid:
-#endif
-		pol.strp_policy = SYSTR_POLICY_ASK;
-		break;
-	    default:
-		pol.strp_policy = SYSTR_POLICY_PERMIT;
-		break;
+	    }
 	}
 	if (ioctl(fd, STRIOCPOLICY, &pol) == -1)
 	    return(-1);
@@ -540,21 +511,27 @@ read_string(fd, pid, addr, buf, bufsiz)
 }
 
 void
-check_syscall(fd, askp, ansp, handlers)
+check_syscall(fd, askp, ansp)
     int fd;
     struct str_msg_ask *askp;
     struct systrace_answer *ansp;
-    struct listhead *handlers;
 {
-    struct syscallhandler *h;
+    struct syscallaction *sca;
+    struct childinfo *child;
 
-    for (h = handlers->first; h != NULL; h = h->next) {
-	if (h->num == askp->code) {
-	    h->handler(fd, askp, ansp);
-	    return;
+    if ((child = find_child(ansp->stra_pid)) == NULL) {
+	warnx("unable to find child with pid %d", ansp->stra_pid);
+	ansp->stra_policy = SYSTR_POLICY_NEVER;
+	return;
+    }
+    ansp->stra_policy = SYSTR_POLICY_PERMIT;	/* accept by default */
+    for (sca = child->action; sca->code != -1; sca++) {
+	if (sca->code == askp->code) {
+	    if (sca->handler != NULL)
+		sca->handler(fd, askp, ansp);
+	    break;
 	}
     }
-    ansp->stra_policy = SYSTR_POLICY_PERMIT;	/* accept unhandled syscalls */
 }
 
 /*
