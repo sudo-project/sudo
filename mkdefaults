@@ -128,7 +128,7 @@ sub print_record {
 	elsif (/^T_TUPLE/)  { $v = "tuple"; }
 	else { die "$0: unknown defaults type: $type\n"; }
     }
-    printf HEADER "#define %-24s(sudo_defs_table[$recnum].sd_un.${v})\n",
+    printf HEADER "#define %-23s (sudo_defs_table[$recnum].sd_un.${v})\n",
 	"def_$rec->[0]";
 
     $defname = "I_" . uc($rec->[0]);
