@@ -37,6 +37,10 @@
 #define _PATH_TTY		"/dev/tty"
 #endif /* _PATH_TTY */
 
+#ifndef _PATH_DEVNULL
+#define _PATH_DEVNULL		"/dev/null"
+#endif /* _PATH_DEVNULL */
+
 #ifndef _PATH_DEFPATH
 #define _PATH_DEFPATH		"/usr/bin:/bin"
 #endif /* _PATH_DEFPATH */
