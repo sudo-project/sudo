@@ -74,15 +74,14 @@ extern struct interface *interfaces;
 extern int num_interfaces;
 
 char *cmnd = NULL;
+char *cmnd_args = NULL;
 char *runas_user = "root";
 char host[MAXHOSTNAMELEN+1];
 char *shost;
 char cwd[MAXPATHLEN+1];
 struct passwd *user_pw_ent;
-char **Argv;
-int  Argc;
-char **NewArgv;
-int  NewArgc;
+char **Argv, **NewArgv;
+int  Argc, NewArgc;
 uid_t uid;
 
 
@@ -92,9 +91,9 @@ uid_t uid;
  */
 int command_matches(cmnd, user_args, path, sudoers_args)
     char *cmnd;
-    char **user_args;
+    char *user_args;
     char *path;
-    char **sudoers_args;
+    char *sudoers_args;
 {
     int clen, plen;
     char *args;
@@ -110,11 +109,10 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 	    return(FALSE);
 	if (!sudoers_args)
 	    return(TRUE);
-	else if (user_args && sudoers_args)
-	    return(compare_args(user_args, sudoers_args));
-	else if (!user_args && sudoers_args && sudoers_args[0][0] == '\0' &&
-		 sudoers_args[1] == NULL)
+	else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
 	    return(TRUE);
+	else if (user_args && sudoers_args)
+	    return((fnmatch(sudoers_args, user_args, FNM_PATHNAME) == 0));
 	else
 	    return(FALSE);
     } else {
@@ -124,11 +122,10 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 		return(FALSE);
 	    if (!sudoers_args)
 		return(TRUE);
-	    else if (user_args && sudoers_args)
-		return(compare_args(user_args, sudoers_args));
-	    else if (!user_args && sudoers_args && sudoers_args[0][0] == '\0' &&
-		     sudoers_args[1] == NULL)
+	    else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
 		return(TRUE);
+	    else if (user_args && sudoers_args)
+		return((fnmatch(sudoers_args, user_args, FNM_PATHNAME) == 0));
 	    else
 		return(FALSE);
 	}
@@ -253,28 +250,31 @@ main(argc, argv)
     yydebug = 1;
 #endif
 
-    if (argc == 6 && strcmp(argv[1], "-u") == 0) {
-	runas_user = argv[2];
-    } else if (argc != 4) {
-	(void) fprintf(stderr, "usage: %s [-u user] <command> <user> <host>\n", argv[0]);
-	exit(1);
-    }
-
-    /* XXX - need to set NewArgv and NewArgc */
     Argv = argv;
     Argc = argc;
 
+    if (Argc >= 6 && strcmp(Argv[1], "-u") == 0) {
+	runas_user = Argv[2];
+	pw_ent.pw_name = Argv[3];
+	strcpy(host, Argv[4]);
+	cmnd = Argv[5];
+
+	NewArgv = &Argv[5];
+	NewArgc = Argc - 5;
+    } else if (Argc >= 4) {
+	pw_ent.pw_name = Argv[1];
+	strcpy(host, Argv[2]);
+	cmnd = Argv[3];
+
+	NewArgv = &Argv[3];
+	NewArgc = Argc - 3;
+    } else {
+	(void) fprintf(stderr, "usage: %s [-u user] <user> <host> <command> [args]\n", Argv[0]);
+	exit(1);
+    }
+
     user_pw_ent = &pw_ent;		/* need user_pw_ent->pw_name defined */
 
-    if (argc == 6) {
-	cmnd = argv[3];
-	pw_ent.pw_name = argv[4];
-	strcpy(host, argv[5]);
-    } else {
-	cmnd = argv[1];
-	pw_ent.pw_name = argv[2];
-	strcpy(host, argv[3]);
-    }
     if ((p = strchr(host, '.'))) {
 	*p = '\0';
 	if ((shost = strdup(host)) == NULL) {
@@ -287,8 +287,29 @@ main(argc, argv)
 	shost = &host[0];
     }
 
+    /* fill in cmnd_args from NewArgv */
+    if (NewArgc > 1) {
+	size_t size;
+	char *to, **from;
+
+	size = (size_t) NewArgv[NewArgc-1] + strlen(NewArgv[NewArgc-1]) -
+	       (size_t) NewArgv[1] + 1;
+	if ((cmnd_args = (char *) malloc(size)) == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);  
+	    exit(1);
+	}
+	for (to = cmnd_args, from = &NewArgv[1]; *from; from++) {
+	    *to++ = ' ';
+	    (void) strcpy(to, *from);
+	    to += strlen(*from);
+	}
+    }
+
+    /* need to keep aliases around for dumpaliases() */
     clearaliases = 0;
 
+    /* load ip addr/mask for each interface */
     load_interfaces();
 
     if (yyparse() || parse_error) {
@@ -329,34 +350,4 @@ int has_meta(s)
 	    return(TRUE);
     }
     return(FALSE);
-}
-
-
-/*
- * Compare two arguments lists and return TRUE if they are
- * the same (inc. wildcard matches) or FALSE if they differ.
- */
-int compare_args(user_args, sudoers_args)
-    char **user_args;
-    char **sudoers_args;
-{
-    char **ua, **sa;
-
-    for (ua=user_args, sa=sudoers_args; *ua && *sa; ua++, sa++) {
-	/* only do wildcard match if there are meta chars */
-	/* XXX - is this really any faster than fnmatch() for all? */
-	if (has_meta(*sa)) {
-	    if (fnmatch(*sa, *ua, FNM_PATHNAME))
-		return(FALSE);
-	} else {
-	    if (strcmp(*ua, *sa))
-		return(FALSE);
-	}
-    }
-
-    /* return false unless we got to the end of each */
-    if (*ua || *sa)
-	return(FALSE);
-    else
-	return(TRUE);
 }
