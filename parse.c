@@ -197,7 +197,7 @@ char *cmnd, *path;
 
 int
 ntwk_matches(n)
-char* n;
+char *n;
 {
     int i;
     int ntwk;
