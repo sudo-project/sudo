@@ -203,7 +203,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_HAVE_FUNCS(getwd strchr strrchr memcpy sysconf sigaction bzero tzset)
+AC_HAVE_FUNCS(getwd strchr strrchr memcpy sysconf sigaction bzero tzset tcsetattr)
 AC_FUNC_CHECK(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
 AC_FUNC_CHECK(getcwd, AC_DEFINE(HAVE_GETCWD), LIBOBJS="$LIBOBJS getcwd.o")
 AC_FUNC_CHECK(setenv, AC_DEFINE(HAVE_SETENV), AC_FUNC_CHECK(putenv, AC_DEFINE(HAVE_PUTENV), LIBOBJS="$LIBOBJS putenv.o"))
