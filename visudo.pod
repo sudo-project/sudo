@@ -88,7 +88,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 Due to the syntax of the I<sudoers> file, there is no way
 for B<visudo> to tell the difference between a mistyped
-{Host,User,Cmnd}_Alias and a username.
+{Host,User,Cmnd}_Alias and a user or host name.
 
 There is no easy way to prevent a user from gaining a root shell if 
 the editor used by B<visudo> allows shell escapes.
