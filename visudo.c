@@ -239,7 +239,7 @@ main(argc, argv)
     if (UserEditor && *UserEditor == '\0')
 	UserEditor = NULL;
     else if (UserEditor) {
-	if (find_path(UserEditor, &Editor) == FOUND) {
+	if (find_path(UserEditor, &Editor, getenv("PATH")) == FOUND) {
 	    UserEditor = Editor;
 	} else {
 	    if (def_flag(I_ENV_EDITOR)) {

@@ -1448,6 +1448,18 @@ case "$host" in
 		    CHECKSHADOW="false"
 		fi
 		;;
+    *-*-*openbsd*)
+		BROKEN_SETREUID=yes
+		if test "$CHECKSHADOW" = "true"; then
+		    CHECKSHADOW="false"
+		fi
+		;;
+    *-*-*netbsd*)
+		BROKEN_SETREUID=yes
+		if test "$CHECKSHADOW" = "true"; then
+		    CHECKSHADOW="false"
+		fi
+		;;
     *-*-*bsd*)
 		if test "$CHECKSHADOW" = "true"; then
 		    CHECKSHADOW="false"
@@ -1534,6 +1546,9 @@ dnl
 dnl Function checks
 dnl
 AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset seteuid strftime setrlimit initgroups fstat)
+if test -z "$BROKEN_SETREUID"; then
+    AC_CHECK_FUNCS(setreuid)
+fi
 if test X"$with_interfaces" != X"no"; then
     AC_CHECK_FUNCS(getifaddrs)
 fi
@@ -1549,7 +1564,6 @@ AC_CHECK_FUNC(lockf, AC_DEFINE(HAVE_LOCKF), AC_CHECK_FUNCS(flock))
 AC_CHECK_FUNC(waitpid, AC_DEFINE(HAVE_WAITPID), AC_CHECK_FUNCS(wait3))
 AC_CHECK_FUNC(innetgr, AC_DEFINE(HAVE_INNETGR) AC_CHECK_FUNCS(getdomainname), [AC_CHECK_FUNC(_innetgr, AC_DEFINE(HAVE__INNETGR) AC_CHECK_FUNCS(getdomainname))])
 AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) [LIBS="${LIBS} -lcompat"], LIBOBJS="$LIBOBJS lsearch.o"), LIBOBJS="$LIBOBJS lsearch.o"))
-AC_CHECK_FUNC(setenv, AC_DEFINE(HAVE_SETENV), AC_FUNC_CHECK(putenv, AC_DEFINE(HAVE_PUTENV), LIBOBJS="$LIBOBJS putenv.o"))
 AC_CHECK_FUNC(utime, AC_DEFINE(HAVE_UTIME)
 SUDO_FUNC_UTIME_POSIX, LIBOBJS="$LIBOBJS utime.o")
 SUDO_FUNC_FNMATCH(AC_DEFINE(HAVE_FNMATCH), LIBOBJS="$LIBOBJS fnmatch.o")

@@ -64,161 +64,56 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
- * It might be better to use sysconf(_SC_SAVED_IDS) instead but
- * I'm * not aware of any system where this would be necessary.
+ * Prototypes
  */
-#ifdef _POSIX_SAVED_IDS
-# define TOGGLE_ROOT							\
-	if (seteuid(0)) {						\
-	    log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,			\
-		"seteuid(0)");						\
-	}
-# define TOGGLE_USER							\
-	if (seteuid(user_uid)) {					\
-	    log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,			\
-		"seteuid(%ld)", (long) user_uid);			\
-	}
-#else
-# ifdef HAVE_SETREUID
-#  define TOGGLE_ROOT							\
-	if (setreuid(user_uid, 0)) {					\
-	    log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,			\
-		"setreuid(%ld, 0)", (long) user_uid);			\
-	}
-#  define TOGGLE_USER							\
-	if (setreuid(0, user_uid)) {					\
-	    log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,			\
-		"setreuid(0, %ld)", (long) user_uid);			\
-	}
-# else /* !_POSIX_SAVED_IDS && !HAVE_SETREUID */
-#  define TOGGLE_ROOT							\
-	;
-# define TOGGLE_USER							\
-	if (seteuid(user_uid)) {					\
-	    log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,			\
-		"seteuid(%ld)", (long) user_uid);			\
-	}
-# endif /* HAVE_SETREUID */
-#endif /* _POSIX_SAVED_IDS */
+static void runas_setup		__P((void));
+static void fatal		__P((char *));
 
 /*
  * Set real and effective uids and gids based on perm.
- * If we have POSIX saved IDs or setreuid(2) we can get away with only
+ * Since we have POSIX saved IDs we can get away with just
  * toggling the effective uid/gid unless we are headed for an exec().
  */
 void
-set_perms(perm, sudo_mode)
+set_perms_saved_uid(perm, sudo_mode)
     int perm;
     int sudo_mode;
 {
-    struct passwd *pw;
     int error;
-#ifdef HAVE_LOGIN_CAP_H
-    extern login_cap_t *lc;
-#endif
-    extern char *runas_homedir;
-
-    /*
-     * If we only have setuid() and seteuid() we have to set both to root
-     * initially.
-     */
-#if !defined(_POSIX_SAVED_IDS) && !defined(HAVE_SETREUID)
-    if (setuid(0)) {
-	perror("setuid(0)");
-	exit(1);
-    }
-#endif
 
     switch (perm) {
 	case PERM_ROOT:
-				TOGGLE_ROOT;
+				if (seteuid(0))
+				    fatal("seteuid(0)");
 			      	break;
 	case PERM_USER:
     	    	    	        (void) setegid(user_gid);
-				TOGGLE_USER;
+				if (seteuid(user_uid))
+				    fatal("seteuid(user_uid)");
 			      	break;
 				
 	case PERM_FULL_USER:
 				/* headed for exec() */
     	    	    	        (void) setgid(user_gid);
-				if (setuid(user_uid)) {
-				    perror("setuid(user_uid)");
-				    exit(1);
-				}
+				if (setuid(user_uid))
+				    fatal("setuid(user_uid)");
 			      	break;
 
 	case PERM_RUNAS:
 				/* headed for exec(), assume euid == 0 */
-				/* XXX - add group/gid support */
-				if (**user_runas == '#') {
-				    if (def_flag(I_STAY_SETUID))
-					error = seteuid(atoi(*user_runas + 1));
-				    else
-					error = setuid(atoi(*user_runas + 1));
-				    if (error)
-					log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,
-					    "cannot set uid to %s", *user_runas);
-				} else {
-				    if (!(pw = getpwnam(*user_runas)))
-					log_error(NO_MAIL|MSG_ONLY,
-					    "no passwd entry for %s!",
-					    *user_runas);
-
-				    /* Set $USER and $LOGNAME to target user */
-				    if (def_flag(I_LOGNAME)) {
-					sudo_setenv("USER", pw->pw_name);
-					sudo_setenv("LOGNAME", pw->pw_name);
-				    }
-
-#ifdef HAVE_LOGIN_CAP_H
-				    if (def_flag(I_LOGINCLASS)) {
-					/*
-					 * We don't have setusercontext()
-					 * set the user since we may only
-					 * want to set the effective uid.
-					 */
-					error = setusercontext(lc, pw, pw->pw_uid,
-					    LOGIN_SETGROUP|LOGIN_SETRESOURCES|LOGIN_SETPRIORITY);
-					if (error)
-					    log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,
-						"setusercontext() failed for login class %s",
-						login_class);
-				    } else
-#endif /* HAVE_LOGIN_CAP_H */
-				    {
-					if (setgid(pw->pw_gid))
-					    log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,
-						"cannot set gid to %ld: %s",
-						(long) pw->pw_gid);
-#ifdef HAVE_INITGROUPS
-					/*
-					 * Initialize group vector only if are
-					 * going to run as a non-root user.
-					 */
-					if (strcmp(*user_runas, "root") != 0 &&
-					    initgroups(*user_runas, pw->pw_gid) < 0)
-					    log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,
-						"cannot set group vector");
-#endif /* HAVE_INITGROUPS */
-				    }
-				    if (def_flag(I_STAY_SETUID))
-					error = seteuid(pw->pw_uid);
-				    else
-					error = setuid(pw->pw_uid);
-				    if (error)
-					log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,
-					    "cannot set uid to %ld",
-					    (long) pw->pw_uid);
-				    if (sudo_mode & MODE_RESET_HOME)
-					runas_homedir = pw->pw_dir;
-				}
+				runas_setup();
+				if (def_flag(I_STAY_SETUID))
+				    error = seteuid(runas_pw->pw_uid);
+				else
+				    error = setuid(runas_pw->pw_uid);
+				if (error)
+				    fatal("unable to change to runas uid");
 				break;
 
 	case PERM_SUDOERS:
 				/* assume euid == 0, ruid == user */
 				if (setegid(SUDOERS_GID))
-				    log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,
-					"setegid(SUDOERS_GID)");
+				    fatal("unable to change to sudoers gid");
 
 				/*
 				 * If SUDOERS_UID == 0 and SUDOERS_MODE
@@ -227,27 +122,191 @@ set_perms(perm, sudo_mode)
 				 * Using uid 1 is a bit bogus but should
 				 * work on all OS's.
 				 */
-#if defined(HAVE_SETREUID) && !defined(_POSIX_SAVED_IDS)
-				if (SUDOERS_UID == 0) {
-				    if ((SUDOERS_MODE & 040) && setreuid(0, 1))
-					log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,
-					    "setreuid(0, 1)");
-				} else {
-				    if (setreuid(0, SUDOERS_UID))
-					log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,
-					    "setreuid(0, SUDOERS_UID)");
-				}
-#else
 				if (SUDOERS_UID == 0) {
 				    if ((SUDOERS_MODE & 040) && seteuid(1))
-					log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,
-					    "seteuid(1)");
+					fatal("seteuid(1)");
 				} else {
 				    if (seteuid(SUDOERS_UID))
-					log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,
-					    "seteuid(SUDOERS_UID)");
+					fatal("seteuid(SUDOERS_UID)");
 				}
-#endif /* HAVE_SETREUID && !_POSIX_SAVED_IDS */
 			      	break;
     }
+}
+
+/*
+ * Set real and effective uids and gids based on perm.
+ * We always retain a real or effective uid of 0 unless
+ * we are headed for an exec().
+ */
+void
+set_perms_setreuid(perm, sudo_mode)
+    int perm;
+    int sudo_mode;
+{
+    int error;
+
+    switch (perm) {
+	case PERM_ROOT:
+				if (setuid(0))
+				    fatal("setuid(0)");
+			      	break;
+	case PERM_USER:
+    	    	    	        (void) setegid(user_gid);
+				if (setreuid(0, user_uid))
+				    fatal("setreuid(0, user_uid)");
+			      	break;
+				
+	case PERM_FULL_USER:
+				/* headed for exec() */
+    	    	    	        (void) setgid(user_gid);
+				if (setuid(user_uid)) {
+				    fatal("setuid(user_uid)");
+				    exit(1);
+				}
+			      	break;
+
+	case PERM_RUNAS:
+				/* headed for exec(), assume euid == 0 */
+				runas_setup();
+				if (def_flag(I_STAY_SETUID))
+				    error = setreuid(user_uid, runas_pw->pw_uid);
+				else
+				    error = setuid(runas_pw->pw_uid);
+				if (error)
+				    fatal("unable to change to runas uid");
+				break;
+
+	case PERM_SUDOERS:
+				/* assume euid == 0, ruid == user */
+				if (setegid(SUDOERS_GID))
+				    fatal("unable to change to sudoers gid");
+
+				/*
+				 * If SUDOERS_UID == 0 and SUDOERS_MODE
+				 * is group readable we use a non-zero
+				 * uid in order to avoid NFS lossage.
+				 * Using uid 1 is a bit bogus but should
+				 * work on all OS's.
+				 */
+				if (SUDOERS_UID == 0) {
+				    if ((SUDOERS_MODE & 040) && setreuid(0, 1))
+					fatal("setreuid(0, 1)");
+				} else {
+				    if (setreuid(0, SUDOERS_UID))
+					fatal("setreuid(0, SUDOERS_UID)");
+				}
+			      	break;
+    }
+}
+
+#ifndef HAVE_SETREUID
+/*
+ * Set real and effective uids and gids based on perm.
+ * NOTE: does not support the "stay_setuid" option.
+ */
+void
+set_perms_fallback(perm, sudo_mode)
+    int perm;
+    int sudo_mode;
+{
+
+    /*
+     * Since we only have setuid() and seteuid() we have to set
+     * real and effective uidss to 0 initially.
+     */
+    if (setuid(0))
+	fatal("setuid(0)");
+
+    switch (perm) {
+	case PERM_USER:
+    	    	    	        (void) setegid(user_gid);
+				if (seteuid(user_uid))
+				    fatal("seteuid(user_uid)");
+			      	break;
+				
+	case PERM_FULL_USER:
+				/* headed for exec() */
+    	    	    	        (void) setgid(user_gid);
+				if (setuid(user_uid))
+				    fatal("setuid(user_uid)");
+			      	break;
+
+	case PERM_RUNAS:
+				/* headed for exec(), assume euid == 0 */
+				runas_setup();
+				if (setuid(runas_pw->pw_uid))
+				    fatal("unable to change to runas uid");
+				break;
+
+	case PERM_SUDOERS:
+				/* assume euid == 0, ruid == user */
+				if (setegid(SUDOERS_GID))
+				    fatal("unable to change to sudoers gid");
+
+				/*
+				 * If SUDOERS_UID == 0 and SUDOERS_MODE
+				 * is group readable we use a non-zero
+				 * uid in order to avoid NFS lossage.
+				 * Using uid 1 is a bit bogus but should
+				 * work on all OS's.
+				 */
+				if (SUDOERS_UID == 0) {
+				    if ((SUDOERS_MODE & 040) && seteuid(1))
+					fatal("seteuid(1)");
+				} else {
+				    if (seteuid(SUDOERS_UID))
+					fatal("seteuid(SUDOERS_UID)");
+				}
+			      	break;
+    }
+}
+#endif /* HAVE_SETREUID */
+
+static void
+runas_setup()
+{
+#ifdef HAVE_LOGIN_CAP_H
+    int error;
+    extern login_cap_t *lc;
+#endif
+
+    if (runas_pw->pw_name != NULL) {
+#ifdef HAVE_LOGIN_CAP_H
+	if (def_flag(I_LOGINCLASS)) {
+	    /*
+	     * We don't have setusercontext()
+	     * set the user since we may only
+	     * want to set the effective uid.
+	     */
+	    error = setusercontext(lc, runas_pw,
+		runas_pw->pw_uid,
+		LOGIN_SETGROUP|LOGIN_SETRESOURCES|LOGIN_SETPRIORITY);
+	    if (error)
+		perror("unable to set user context");
+	} else
+#endif /* HAVE_LOGIN_CAP_H */
+	{
+	    if (setgid(runas_pw->pw_gid))
+		perror("cannot set gid to runas gid");
+#ifdef HAVE_INITGROUPS
+	    /*
+	     * Initialize group vector only if are
+	     * going to run as a non-root user.
+	     */
+	    if (strcmp(*user_runas, "root") != 0 &&
+		initgroups(*user_runas, runas_pw->pw_gid) < 0)
+		perror("cannot set group vector");
+#endif /* HAVE_INITGROUPS */
+	}
+    }
+}
+
+static void
+fatal(str)
+    char *str;
+{
+
+    if (str)
+	perror(str);
+    exit(1);
 }

@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-September  6, 2000            1.6.4                             1
+December 29, 2000             1.6.4                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-September  6, 2000            1.6.4                             2
+December 29, 2000             1.6.4                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-September  6, 2000            1.6.4                             3
+December 29, 2000             1.6.4                             3
 
 
 
@@ -259,7 +259,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-September  6, 2000            1.6.4                             4
+December 29, 2000             1.6.4                             4
 
 
 
@@ -325,7 +325,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-September  6, 2000            1.6.4                             5
+December 29, 2000             1.6.4                             5
 
 
 
@@ -375,7 +375,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    get all aliases from DNS.  If your machine's
                    hostname (as returned by the `hostname' com­
                    mand) is already fully qualified you shouldn't
-                   need to set _f_q_f_n.  This flag is _o_f_f by
+                   need to set _f_q_d_n.  This flag is _o_f_f by
                    default.
 
        insults     If set, ssssuuuuddddoooo will insult users when they enter
@@ -391,7 +391,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-September  6, 2000            1.6.4                             6
+December 29, 2000             1.6.4                             6
 
 
 
@@ -440,6 +440,36 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    this behavior.  This can be done by negating
                    the set_logname option.
 
+       stay_setuid Normally, when ssssuuuuddddoooo executes a command the
+                   real and effective UIDs are set to the target
+                   user (root by default).  This option changes
+                   that behavior such that the real UID is left
+                   as the invoking user's UID.  In other words,
+                   this makes ssssuuuuddddoooo act as a setuid wrapper.  This
+                   can be useful on systems that disable some
+                   potentially dangerous functionality when a
+                   program is run setuid.
+
+       env_reset   If set, ssssuuuuddddoooo will reset the environment to
+                   only contain the following variables: `HOME',
+                   `SHELL', `LOGNAME', and `USER' (in addition to
+                   the `SUDO_*' variables).  The `PATH'
+
+
+
+December 29, 2000             1.6.4                             7
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
+
+                   environment variable is preserved unaltered.
+                   Other specific variables may be preserved with
+                   the i<env_keep> option.
+
        use_loginclass
                    If set, ssssuuuuddddoooo will apply the defaults specified
                    for the target user's login class if one
@@ -453,18 +483,6 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    The number of tries a user gets to enter
                    his/her password before ssssuuuuddddoooo logs the failure
                    and exits.  The default is `3'.
-
-
-
-
-September  6, 2000            1.6.4                             7
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
 
        IIIInnnntttteeeeggggeeeerrrrssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
 
@@ -486,9 +504,9 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    prompt times out.  The default is `5', set
                    this to `0' for no password timeout.
 
-       umask       Umask to use when running the root command.
-                   Set this to 0777 to not override the user's
-                   umask.  The default is `0022'.
+       umask       Umask to use when running the command.  Negate
+                   this option or set it to 0777 to preserve the
+                   user's umask.  The default is `0022'.
 
        SSSSttttrrrriiiinnnnggggssss:
 
@@ -501,6 +519,18 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    Message that is displayed if a user enters an
                    incorrect password.  The default is `Sorry,
                    try again.' unless insults are enabled.
+
+
+
+
+December 29, 2000             1.6.4                             8
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
 
        timestampdir
                    The directory in which ssssuuuuddddoooo stores its times­
@@ -519,19 +549,6 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    flag is not specified on the command line.
                    This defaults to `root'.
 
-
-
-
-
-September  6, 2000            1.6.4                             8
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
-
        syslog_goodpri
                    Syslog priority to use when user authenticates
                    successfully.  Defaults to `notice'.
@@ -539,6 +556,16 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        syslog_badpri
                    Syslog priority to use when user authenticates
                    unsuccessfully.  Defaults to `alert'.
+
+       env_keep    A double-quoted, space-separated list of envi­
+                   ronment variables to be preserved in the
+                   user's environment.  When used in conjuction
+                   with the _e_n_v___r_e_s_e_t option, this allows fine
+                   control over the environment ssssuuuuddddoooo-spawned pro­
+                   cesses will get.  If the _e_n_v___r_e_s_e_t option is
+                   not used, _e_n_v___k_e_e_p can be used to make excep­
+                   tions to the built in list of "dangerous"
+                   environment variables.
 
        editor      A colon (':') separated list of editors
                    allowed to be used with vvvviiiissssuuuuddddoooo.  vvvviiiissssuuuuddddoooo will
@@ -558,6 +585,19 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    logging (negate to disable syslog logging).
                    Defaults to `local2'.
 
+
+
+
+
+December 29, 2000             1.6.4                             9
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
+
        mailerpath  Path to mail program used to send warning
                    mail.  Defaults to the path to sendmail found
                    at configure time.
@@ -566,7 +606,9 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    ----tttt.
 
        mailto      Address to send warning and erorr mail to.
-                   Defaults to `root'.
+                   The address should be enclosed in double
+                   quotes (`"') to protect against sudo inter­
+                   preting the `@' sign.  Defaults to `root'.
 
        exempt_group
                    Users in this group are exempt from password
@@ -583,20 +625,6 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        verifypw    This option controls when a password will be
                    required when a user runs ssssuuuuddddoooo with the ----vvvv
                    flag.  It has the following possible values:
-
-
-
-
-
-
-September  6, 2000            1.6.4                             9
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
 
                        all         All the user's I<sudoers> entries for the
                                    current host must have the C<NOPASSWD>
@@ -622,6 +650,19 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                        all         All the user's I<sudoers> entries for the
                                    current host must have the C<NOPASSWD>
                                    flag set to avoid entering a password.
+
+
+
+
+
+December 29, 2000             1.6.4                            10
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
 
                        any         At least one of the user's I<sudoers> entries
                                    for the current host must have the
@@ -652,18 +693,6 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
         Cmnd_Spec_List ::= Cmnd_Spec |
                            Cmnd_Spec ',' Cmnd_Spec_List
 
-
-
-
-September  6, 2000            1.6.4                            10
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
-
         Cmnd_Spec ::= Runas_Spec? ('NOPASSWD:' | 'PASSWD:')? Cmnd
 
         Runas_Spec ::= '(' Runas_List ')'
@@ -688,6 +717,18 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
        The user ddddggggbbbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m
        -- but only as ooooppppeeeerrrraaaattttoooorrrr.  Eg.
+
+
+
+
+December 29, 2000             1.6.4                            11
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
 
            sudo -u operator /bin/ls.
 
@@ -718,18 +759,6 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
         ray    rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
 
-
-
-
-September  6, 2000            1.6.4                            11
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
-
        Note however, that the `PASSWD' tag has no effect on users
        who are in the group specified by the exempt_group option.
 
@@ -753,6 +782,19 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        `?'     Matches any single character.
 
        `[...]' Matches any character in the specified range.
+
+
+
+
+
+December 29, 2000             1.6.4                            12
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
 
        `[!...]'
                Matches any character nnnnooootttt in the specified range.
@@ -784,18 +826,6 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        it occurs in the context of a user name and is followed by
        one or more digits, in which case it is treated as a uid).
        Both the comment character and any text after it, up to
-
-
-
-September  6, 2000            1.6.4                            12
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
-
        the end of the line, are ignored.
 
        The reserved word AAAALLLLLLLL is a built in _a_l_i_a_s that always
@@ -820,6 +850,17 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        Whitespace between elements in a list as well as specicial
        syntactic characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n ('=', ':',
        '(', ')') is optional.
+
+
+
+December 29, 2000             1.6.4                            13
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
 
        The following characters must be escaped with a backslash
        ('\') when used as part of a word (eg. a username or host­
@@ -848,20 +889,6 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
         Host_Alias     SERVERS = master, mail, www, ns
         Host_Alias     CDROM = orion, perseus, hercules
 
-
-
-
-
-
-September  6, 2000            1.6.4                            13
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
-
         # Cmnd alias specification
         Cmnd_Alias     DUMPS = /usr/bin/mt, /usr/sbin/dump, /usr/sbin/rdump,\
                                /usr/sbin/restore, /usr/sbin/rrestore
@@ -884,11 +911,22 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        make sure we log the year in each log line since the log
        entries will be kept around for several years.
 
-        # Override builtin defaults
+        # Override built in defaults
         Defaults               syslog=auth
         Defaults:FULLTIMERS    !lecture
         Defaults:millert       !authenticate
         Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
+
+
+
+December 29, 2000             1.6.4                            14
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
 
        The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually deter­
        mines who may run what.
@@ -916,18 +954,6 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        _C_S_N_E_T_S alias (the networks `128.138.243.0',
        `128.138.204.0', and `128.138.242.0').  Of those networks,
        only <128.138.204.0> has an explicit netmask (in CIDR
-
-
-
-September  6, 2000            1.6.4                            14
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
-
        notation) indicating it is a class C network.  For the
        other networks in _C_S_N_E_T_S, the local machine's netmask will
        be used during matching.
@@ -956,6 +982,18 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        assumes _p_a_s_s_w_d(1) does not take multiple usernames on the
        command line.
 
+
+
+
+December 29, 2000             1.6.4                            15
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
+
         bob            SPARC = (OP) ALL : SGI = (OP) ALL
 
        The user bbbboooobbbb may run anything on the _S_P_A_R_C and _S_G_I
@@ -981,18 +1019,6 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        word.
 
         john           ALPHA = /usr/bin/su [!-]*, !/usr/bin/su *root*
-
-
-
-
-September  6, 2000            1.6.4                            15
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
 
        On the _A_L_P_H_A machines, user jjjjoooohhhhnnnn may su to anyone except
        root but he is not allowed to give _s_u(1) any flags.
@@ -1022,6 +1048,18 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
         WEBMASTERS     www = (www) ALL, (root) /usr/bin/su www
 
        On the host www, any user in the _W_E_B_M_A_S_T_E_R_S `User_Alias'
+
+
+
+December 29, 2000             1.6.4                            16
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
+
        (will, wendy, and wim), may run any command as user www
        (which owns the web pages) or simply _s_u(1) to www.
 
@@ -1048,17 +1086,6 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
        editor or other program.  Therefore, these kind of
        restrictions should be considered advisory at best (and
        reinforced by policy).
-
-
-
-September  6, 2000            1.6.4                            16
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
 
 CCCCAAAAVVVVEEEEAAAATTTTSSSS
        The _s_u_d_o_e_r_s file should aaaallllwwwwaaaayyyyssss be edited by the vvvviiiissssuuuuddddoooo
@@ -1090,33 +1117,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-September  6, 2000            1.6.4                            17
+December 29, 2000             1.6.4                            17
 
 

@@ -156,6 +156,14 @@
 #endif /* HAVE_SETEUID */
 
 /*
+ * Emulate setreuid() for HP-UX via setresuid(2)
+ */
+#if !defined(HAVE_SETREUID) && defined(__hpux)
+# define setreuid(_RUID, _EUID)	(setresuid(_RUID, _EUID, (uid_t) -1))
+# define HAVE_SETREUID
+#endif /* !HAVE_SETEUID && __hpux */
+
+/*
  * NCR's SVr4 has _innetgr(3) instead of innetgr(3) for some reason.
  */
 #ifdef HAVE__INNETGR

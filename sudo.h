@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996,1998-2000 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996,1998-2000 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,9 @@
  */
 struct sudo_user {
     struct passwd *pw;
+    struct passwd *_runas_pw;
+    char *path;
+    char *shell;
     char *tty;
     char  cwd[MAXPATHLEN];
     char *host;
@@ -119,18 +122,20 @@ struct sudo_user {
 #define user_passwd		(sudo_user.pw->pw_passwd)
 #define user_uid		(sudo_user.pw->pw_uid)
 #define user_gid		(sudo_user.pw->pw_gid)
-#define user_shell		(sudo_user.pw->pw_shell)
 #define user_dir		(sudo_user.pw->pw_dir)
+#define user_shell		(sudo_user.shell)
 #define user_tty		(sudo_user.tty)
 #define user_cwd		(sudo_user.cwd)
 #define user_runas		(sudo_user.runas)
 #define user_cmnd		(sudo_user.cmnd)
 #define user_args		(sudo_user.cmnd_args)
+#define user_path		(sudo_user.path)
 #define user_prompt		(sudo_user.prompt)
 #define user_host		(sudo_user.host)
 #define user_shost		(sudo_user.shost)
 #define safe_cmnd		(sudo_user.cmnd_safe)
 #define login_class		(sudo_user.class_name)
+#define runas_pw		(sudo_user._runas_pw)
 
 /*
  * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
@@ -173,9 +178,6 @@ struct sudo_user {
 #ifndef HAVE_GETCWD
 char *getcwd		__P((char *, size_t size));
 #endif
-#if !defined(HAVE_PUTENV) && !defined(HAVE_SETENV)
-int putenv		__P((const char *));
-#endif
 #ifndef HAVE_SNPRINTF
 int snprintf		__P((char *, size_t, const char *, ...));
 #endif
@@ -192,13 +194,14 @@ int vasprintf		__P((char **, const char *, va_list));
 int strcasecmp		__P((const char *, const char *));
 #endif
 char *sudo_goodpath	__P((const char *));
-void sudo_setenv	__P((char *, char *));
 char *tgetpass		__P((const char *, int, int));
-int find_path		__P((char *, char **));
+int find_path		__P((char *, char **, char *));
 void check_user		__P((void));
 void verify_user	__P((struct passwd *, char *));
 int sudoers_lookup	__P((int));
-void set_perms		__P((int, int));
+void set_perms_saved_uid __P((int, int));
+void set_perms_setreuid	__P((int, int));
+void set_perms_fallback	__P((int, int));
 void remove_timestamp	__P((int));
 int check_secureware	__P((char *));
 void sia_attempt_auth	__P((void));
@@ -228,6 +231,8 @@ extern int Argc;
 extern char **Argv;
 extern FILE *sudoers_fp;
 extern int tgetpass_flags;
+
+extern void (*set_perms) __P((int, int));
 #endif
 extern int errno;
 

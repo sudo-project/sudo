@@ -218,9 +218,15 @@ to subvert the program that B<sudo> runs.  To combat this the
 C<LD_*>, C<_RLD_*>, C<SHLIB_PATH> (HP-UX only), and C<LIBPATH> (AIX
 only) environment variables are removed from the environment passed
 on to all commands executed.  B<sudo> will also remove the C<IFS>,
-C<ENV>, C<BASH_ENV>, C<KRB_CONF>, C<KRB5_CONFIG>, C<LOCALDOMAIN>,
-C<RES_OPTIONS> and C<HOSTALIASES> variables as they too can pose a
-threat.
+C<ENV>, C<BASH_ENV>, C<KRB_CONF>, C<KRBCONFDIR>, C<KRBTKFILE>,
+C<KRB5_CONFIG>, C<LOCALDOMAIN>, C<RES_OPTIONS>, C<HOSTALIASES>,
+C<NLSPATH>, C<PATH_LOCALE>, C<TERMINFO>, C<TERMINFO_DIRS> and
+C<TERMPATH> variables as they too can pose a threat.  If the
+C<TERMCAP> variable is set and is a pathname, it too is ignored.
+Additionally, if the C<LC_*> or C<LANGUAGE> variables contain the
+C</> or C<%> characters, they are ignored.  If B<sudo> has been
+compiled with SecurID support, the C<VAR_ACE>, C<USR_ACE> and
+C<DLC_ACE> variables are cleared as well.
 
 To prevent command spoofing, B<sudo> checks "." and "" (both denoting
 current directory) last when searching for a command in the user's

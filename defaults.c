@@ -206,6 +206,9 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"stay_setuid", T_FLAG,
 	"Only set the effective uid to the target user, not the real uid"
     }, {
+	"env_reset", T_FLAG,
+	"Reset the environment to a default set of variables"
+    }, {
 	"loglinelen", T_INT|T_BOOL,
 	"Length at which to wrap log file lines (0 for no wrap): %d"
     }, {
@@ -256,6 +259,9 @@ struct sudo_defs_types sudo_defs_table[] = {
     }, {
 	"editor", T_STR|T_PATH,
 	"Path to the editor for use by visudo: %s"
+    }, {
+	"env_keep", T_STR|T_BOOL,
+	"Environment variables to preserve: %s"
     }, {
 	"listpw_i", T_INT, NULL
     }, {

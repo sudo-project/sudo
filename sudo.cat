@@ -40,7 +40,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        ----vvvv flags.  This allows users to determine for themselves
        whether or not they are allowed to use ssssuuuuddddoooo.
 
-       ssssuuuuddddoooo can log both successful an unsuccessful attempts (as
+       ssssuuuuddddoooo can log both successful and unsuccessful attempts (as
        well as errors) to _s_y_s_l_o_g(3), a log file, or both.  By
        default ssssuuuuddddoooo will log via _s_y_s_l_o_g(3) but this is changeable
        at configure time or via the _s_u_d_o_e_r_s file.
@@ -61,7 +61,7 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-October 26, 2000              1.6.4                             1
+December 29, 2000             1.6.4                             1
 
 
 
@@ -107,7 +107,7 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
            as defined in /etc/login.conf, or a single '-' charac­
            ter.  Specifying a _c_l_a_s_s of `-' indicates that the
            command should be run restricted by the default login
-           capibilities for the user the command is run as.  If
+           capabilities for the user the command is run as.  If
            the _c_l_a_s_s argument specifies an existing user class,
            the command must be run as root, or the ssssuuuuddddoooo command
            must be run from a shell that is already root.  This
@@ -127,7 +127,7 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
 
-October 26, 2000              1.6.4                             2
+December 29, 2000             1.6.4                             2
 
 
 
@@ -182,18 +182,18 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
        only), and `LIBPATH' (AIX only) environment variables are
        removed from the environment passed on to all commands
        executed.  ssssuuuuddddoooo will also remove the `IFS', `ENV',
-       `BASH_ENV', `KRB_CONF', `KRB5_CONFIG', `LOCALDOMAIN',
-       `RES_OPTIONS' and `HOSTALIASES' variables as they too can
-       pose a threat.
+       `BASH_ENV', `KRB_CONF', `KRBCONFDIR', `KRBTKFILE',
+       `KRB5_CONFIG', `LOCALDOMAIN', `RES_OPTIONS', `HOSTAL­
+       IASES', `NLSPATH', `PATH_LOCALE', `TERMINFO', `TER­
+       MINFO_DIRS' and `TERMPATH' variables as they too can pose
+       a threat.  If the `TERMCAP' variable is set and is a path­
+       name, it too is ignored.  Additionally, if the `LC_*' or
+       `LANGUAGE' variables contain the `/' or `%' characters,
+       they are ignored.  If ssssuuuuddddoooo has been compiled with SecurID
 
-       To prevent command spoofing, ssssuuuuddddoooo checks "." and "" (both
-       denoting current directory) last when searching for a com­
-       mand in the user's PATH (if one or both are in the PATH).
-       Note, however, that the actual `PATH' environment variable
 
 
-
-October 26, 2000              1.6.4                             3
+December 29, 2000             1.6.4                             3
 
 
 
@@ -202,6 +202,13 @@ October 26, 2000              1.6.4                             3
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
+       support, the `VAR_ACE', `USR_ACE' and `DLC_ACE' variables
+       are cleared as well.
+
+       To prevent command spoofing, ssssuuuuddddoooo checks "." and "" (both
+       denoting current directory) last when searching for a com­
+       mand in the user's PATH (if one or both are in the PATH).
+       Note, however, that the actual `PATH' environment variable
        is _n_o_t modified and is passed unchanged to the program
        that ssssuuuuddddoooo executes.
 
@@ -216,8 +223,8 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
        tents if it is not owned by root and only writable by
        root.  On systems that allow non-root users to give away
        files via _c_h_o_w_n(2), if the timestamp directory is located
-       in a directory writable by anyone (eg: _/_t_m_p), it is possi­
-       ble for a user to create the timestamp directory before
+       in a directory writable by anyone (e.g.: _/_t_m_p), it is pos­
+       sible for a user to create the timestamp directory before
        ssssuuuuddddoooo is run.  However, because ssssuuuuddddoooo checks the ownership
        and mode of the directory and its contents, the only dam­
        age that can be done is to "hide" files by putting them in
@@ -249,17 +256,10 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
        where the filesystem holding ~yazza is not exported as
        root:
 
-        % sudo -u yazza ls ~yazza
-
-       To edit the _i_n_d_e_x_._h_t_m_l file as user www:
-
-        % sudo -u www vi ~www/htdocs/index.html
-
-       To shutdown a machine:
 
 
 
-October 26, 2000              1.6.4                             4
+December 29, 2000             1.6.4                             4
 
 
 
@@ -267,6 +267,14 @@ October 26, 2000              1.6.4                             4
 
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
+
+        % sudo -u yazza ls ~yazza
+
+       To edit the _i_n_d_e_x_._h_t_m_l file as user www:
+
+        % sudo -u www vi ~www/htdocs/index.html
+
+       To shutdown a machine:
 
         % sudo shutdown -r +15 "quick reboot"
 
@@ -315,17 +323,9 @@ BBBBUUUUGGGGSSSS
        If you feel you have found a bug in sudo, please submit a
        bug report at http://www.courtesan.com/sudo/bugs/
 
-DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
-       SSSSuuuuddddoooo is provided ``AS IS'' and any express or implied war­
-       ranties, including, but not limited to, the implied war­
-       ranties of merchantability and fitness for a particular
-       purpose are disclaimed.  See the LICENSE file distributed
-       with ssssuuuuddddoooo for complete details.
 
 
-
-
-October 26, 2000              1.6.4                             5
+December 29, 2000             1.6.4                             5
 
 
 
@@ -333,6 +333,13 @@ October 26, 2000              1.6.4                             5
 
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
+
+DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
+       SSSSuuuuddddoooo is provided ``AS IS'' and any express or implied war­
+       ranties, including, but not limited to, the implied war­
+       ranties of merchantability and fitness for a particular
+       purpose are disclaimed.  See the LICENSE file distributed
+       with ssssuuuuddddoooo for complete details.
 
 CCCCAAAAVVVVEEEEAAAATTTTSSSS
        There is no easy way to prevent a user from gaining a root
@@ -384,13 +391,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-
-
-
-
-
-
-October 26, 2000              1.6.4                             6
+December 29, 2000             1.6.4                             6
 
 

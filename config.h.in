@@ -173,12 +173,6 @@
 /* Define if you have sysconf(3c).  */
 #undef HAVE_SYSCONF
 
-/* Define if you have putenv(3).  */
-#undef HAVE_PUTENV
-
-/* Define if you have setenv(3).  */
-#undef HAVE_SETENV
-
 /* Define if you have strcasecmp(3).  */
 #undef HAVE_STRCASECMP
 
@@ -241,6 +235,9 @@
 
 /* Define if you have seteuid(3).  */
 #undef HAVE_SETEUID
+
+/* Define if you have setreuid(3).  */
+#undef HAVE_SETREUID
 
 /* Define if you have waitpid(2).  */
 #undef HAVE_WAITPID

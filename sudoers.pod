@@ -398,6 +398,23 @@ However, since some programs (including the RCS revision control system)
 use C<LOGNAME> to determine the real identity of the user, it may be desirable
 to change this behavior.  This can be done by negating the set_logname option.
 
+=item stay_setuid
+
+Normally, when B<sudo> executes a command the real and effective
+UIDs are set to the target user (root by default).  This option
+changes that behavior such that the real UID is left as the invoking
+user's UID.  In other words, this makes B<sudo> act as a setuid
+wrapper.  This can be useful on systems that disable some potentially
+dangerous functionality when a program is run setuid.
+
+=item env_reset
+
+If set, B<sudo> will reset the environment to only contain the
+following variables: C<HOME>, C<SHELL>, C<LOGNAME>, and C<USER>
+(in addition to the C<SUDO_*> variables).  The C<PATH> environment
+variable is preserved unaltered.  Other specific variables
+may be preserved with the i<env_keep> option.
+
 =item use_loginclass
 
 If set, B<sudo> will apply the defaults specified for the target user's
@@ -488,6 +505,15 @@ Defaults to C<@goodpri@>.
 Syslog priority to use when user authenticates unsuccessfully.
 Defaults to C<@badpri@>.
 
+=item env_keep
+
+A double-quoted, space-separated list of environment variables
+to be preserved in the user's environment.  When used in conjuction
+with the I<env_reset> option, this allows fine control over the
+environment B<sudo>-spawned processes will get.  If the I<env_reset>
+option is not used, I<env_keep> can be used to make exceptions to
+the built in list of "dangerous" environment variables.
+
 =item editor
 
 A colon (':') separated list of editors allowed to be used with
@@ -523,7 +549,9 @@ Flags to use when invoking mailer. Defaults to B<-t>.
 
 =item mailto
 
-Address to send warning and erorr mail to.  Defaults to C<@mailto@>.
+Address to send warning and erorr mail to.  The address should
+be enclosed in double quotes (C<">) to protect against sudo
+interpreting the C<@> sign.  Defaults to C<@mailto@>.
 
 =item exempt_group
 
@@ -792,7 +820,7 @@ machines in the I<SERVERS> C<Host_Alias>, we keep an additional
 local log file and make sure we log the year in each log line since
 the log entries will be kept around for several years.
 
- # Override builtin defaults
+ # Override built in defaults
  Defaults		syslog=auth
  Defaults:FULLTIMERS	!lecture
  Defaults:millert	!authenticate

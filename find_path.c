@@ -55,7 +55,6 @@
 #include "sudo.h"
 
 #ifndef STDC_HEADERS
-extern char *getenv	__P((const char *));
 extern char *strcpy	__P((char *, const char *));
 extern int fprintf	__P((FILE *, const char *, ...));
 extern ssize_t readlink	__P((const char *, VOID *, size_t));
@@ -75,13 +74,13 @@ static const char rcsid[] = "$Sudo$";
  * but it is in '.' and IGNORE_DOT is set.
  */
 int
-find_path(infile, outfile)
+find_path(infile, outfile, path)
     char *infile;		/* file to find */
     char **outfile;		/* result parameter */
+    char *path;			/* path to search */
 {
     static char command[MAXPATHLEN]; /* qualified filename */
     char *n;			/* for traversing path */
-    char *path = NULL;		/* contents of PATH env var */
     char *origpath;		/* so we can free path later */
     char *result = NULL;	/* result of path/file lookup */
     int checkdot = 0;		/* check current dir? */
@@ -104,13 +103,10 @@ find_path(infile, outfile)
 	    return(NOT_FOUND);
     }
 
-    /*
-     * Grab PATH out of the environment (or from the string table
-     * if SECURE_PATH is in effect) and make a local copy.
-     */
+    /* Use PATH passed in unless SECURE_PATH is in effect.  */
     if (def_str(I_SECURE_PATH) && !user_is_exempt())
 	path = def_str(I_SECURE_PATH);
-    else if ((path = getenv("PATH")) == NULL)
+    else if (path == NULL)
 	return(NOT_FOUND);
     path = estrdup(path);
     origpath = path;

@@ -78,10 +78,6 @@
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-#ifndef STDC_HEADERS
-extern char *getenv     __P((const char *));
-#endif /* !STDC_HEADERS */
-
 /*
  * Global variables (yuck)
  */
@@ -98,8 +94,8 @@ static struct passwd *sudo_pwdup	__P((struct passwd *));
 
 
 /*
- * Return the user's shell based on either the SHELL
- * environment variable or the passwd(5) entry (in that order).
+ * Return the user's shell based on either the SHELL environment variable
+ * (already assigned to user_shell) or, failing that, the passwd(5) entry.
  */
 static char *
 sudo_getshell(pw)
@@ -107,14 +103,12 @@ sudo_getshell(pw)
 {
     char *pw_shell;
 
-    if ((pw_shell = getenv("SHELL")) == NULL)
+    if ((pw_shell = user_shell) == NULL)
 	pw_shell = pw->pw_shell;
 
-#ifdef _PATH_BSHELL
     /* empty string "" means bourne shell */
     if (*pw_shell == '\0')
 	pw_shell = _PATH_BSHELL;
-#endif /* _PATH_BSHELL */
 
     return(pw_shell);
 }
