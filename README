@@ -24,4 +24,11 @@ Also note that sudo options are now configured in sudo.h instead of the Makefile
 desire).  For more info see the INSTALL file.  If you need to make changes,
 please send them to sudo-bugs@cs.colorado.edu
 
+MAILING LISTS:
+
 Please send bugs, problems, comments, etc to sudo-bugs@cs.colorado.edu
+There is a mailing list that receives announcements whenever a new
+version of sudo is released.  You can subscribe to it by sending a
+message to "majordomo@cs.colorado.edu" that includes the line
+"subscribe sudo-announce".  There is also a list for people working
+on sudo.  The command to add yourself is "subscribe sudo-workers".
