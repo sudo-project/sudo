@@ -1,6 +1,6 @@
 %{
 /*
- * CU sudo version 1.3 (based on Root Group sudo version 1.1)
+ * CU sudo version 1.3.1 (based on Root Group sudo version 1.1)
  *
  * This software comes with no waranty whatsoever, use at your own risk.
  *
