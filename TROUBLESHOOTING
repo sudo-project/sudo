@@ -19,8 +19,8 @@ A) Make sure you have an entry in your syslog.conf file to save
     depending whether you want to forward the messages to another
     host or keep them locally.  Don't forget to send a SIGHUP to
     your syslogd so that it re-reads its conf file.  Also, remember
-    that syslogd does not create log files, you need to create the
-    file before syslogd will log to it (ie: touch /var/adm/sudo.log).
+    that syslogd does *not* create log files, you need to create the
+    file before syslogd will log to it (ie: touch /var/log/sudo.log).
     Note:  the facility ("local2.debug") must be separated from the 
 	   destination ("/var/adm/sudo.log" or "@loghost") by
 	   tabs, *not* spaces.  This is a common error.
@@ -64,6 +64,9 @@ A) Sudo removes the following "dangerous" environment variables
    to guard against shared library spoofing, shell voodoo, and
    kerberos server spoofing.
      IFS
+     LOCALDOMAIN
+     RES_OPTIONS
+     HOSTALIASES
      ENV
      BASH_ENV
      LD_*
@@ -73,17 +76,11 @@ A) Sudo removes the following "dangerous" environment variables
      KRB_CONF (kerb4 only)
      KRB5_CONFIG (kerb5 only)
 
-Q) I modified parse.lex but the Makefile is not generating a new
-   lex.yy.c.
-A) You need to uncomment the rule in Makefile (or Makefile.in)
-   that generates lex.yy.c from parse.lex.  This is not enable
-   by default since sudo comes with a pre-flex'd parse.lex.
-   May sure you are using flex version 2.5.2 or higher--the
-   lex that came with your OS may not like parse.lex.
-
 Q) How can I keep sudo from asking for a password?
-A) Use the 'NOPASSWD' reserved word right before the command list in
-   sudoers.  See the sudoers man page and sample.sudoers for details.
+A) To specify this on a per-user (and per-command) basis, use the 'NOPASSWD'
+   tag right before the command list in sudoers.  See the sudoers man page
+   and sample.sudoers for details.  To disable passwords completely,
+   run configure with the --without-passwd option.
 
 Q) When I run configure, it dies with the following error:
    "no acceptable cc found in $PATH".
@@ -104,19 +101,14 @@ A) configure caches the results of its tests in a file called
    Note that "make realclean" will also remove any object files
    and configure temp files that are laying around as well.
 
-Q) I built sudo on a Solaris 2.5 machine but the resulting binary
-   doesn't work on Solaris 2.4.  Why?
-A) Sun added many of the BSD library functions from -lucb into
-   libc for Solaris 2.5.  To generate a sudo binary on Solaris 2.5
-   that will run on Solaris 2.4 just add "getwd.o" to LIBOBJS
-   in the Makefile and recompile.
-
-Q) When I compile sudo on Solaris with gcc I get:
-    logging.c: In function `send_mail':
-    logging.c:448: storage size of `action' isn't known
-    *** Error code 1
-A) You probably didn't install the gcc-fixed include files.
-   Try adding -D__EXTENSIONS__ to CFLAGS in the Makefile.
+Q) I built sudo on a Solaris >= 2.6 machine but the resulting binary
+   doesn't work on Solaris <= 2.5.1.  Why?
+A) Starting with Solaris 2.6, snprintf(3) is included in the standard
+   C library.  To build a version of sudo on a >= 2.6 machine that
+   will run on a <= 2.5.1 machine, edit config.h and comment out the lines:
+	#define HAVE_SNPRINTF 1
+	#define HAVE_VSNPRINTF 1
+   and run make.
 
 Q) When I run "visudo" it says "sudoers file busy, try again later."
    and doesn't do anything.

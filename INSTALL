@@ -435,34 +435,23 @@ support is now compiled in by default (it doesn't hurt anything if you
 don't have them configured).  To disable the shadow password support,
 use the --disable-shadow option to configure.
 
-Shadow passwords are supported on the following platforms:
+Shadow passwords are known to work on the following platforms:
 
     SunOS 4.x
     Solaris 2.x
     HP-UX >= 9.x
     Ultrix 4.x
-    Digital UNIX 3.x and 4.x
-    IRIX 5.x and 6.x
-    AIX 3.2.x ad 4.x
+    Digital UNIX
+    IRIX >= 5.x
+    AIX >= 3.2.x
     ConvexOS with C2 security (not tested recently)
     Linux
-    SCO 3.2.2
+    SCO >= 3.2.2
     Pyramid DC/OSx
     UnixWare
     SVR4 (and variants using standard SVR4 shadow passwords)
     4.4BSD based systems (including OpenBSD, NetBSD, FreeBSD, and BSD/OS)
     OS's using SecureWare's C2 security.
-
-Mixing password authentication schemes
-======================================
-
-It is possible to build sudo with support for several authentication
-schemes, including shadow passwords, kerberos, s/key, AFS, DCE and
-normal UN*X passwords into a single binary.  User validation will
-take slightly longer, of course, but it may be valuable to have a
-single sudo binary that is distributed among systems with varying
-authentication mechanisms.  The exception to this rule is SecurID
-which must be the only authentication mechanism used.
 
 OS dependent notes
 ==================

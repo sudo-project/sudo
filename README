@@ -11,7 +11,7 @@ Where to find sudo
 Before you try and build sudo, *please* make sure you have the current
 version.  The latest sudo may always be gotten via anonymous ftp
 from ftp.courtesan.com in the directory /pub/sudo/.
-The distribution is cu-sudo.vM.m.tar.Z where `M' is the major
+The distribution is sudo-M.m.tar.gz where `M' is the major
 version number and `m' is the minor version number.
 BETA versions of sudo may also be available.  If you join
 the `sudo-workers' mailing list you will get the BETA announcements
@@ -36,7 +36,7 @@ NOTE: Starting with sudo 1.5.7 the configuration method has changed
 System requirements
 ===================
 Sudo requires a machine running UN*X (most flavors of BSD, SYSV,
-or POSIX will do), a C compiler, and the make utility.
+or POSIX will do), a working C compiler, and the make utility.
 
 If you wish to modify the parser then you will need flex version
 2.5.2 or later and a version of bison or yacc (sudo comes with a
@@ -47,11 +47,10 @@ any GNU mirror.  You can get GNU bison from
 ftp://prep.ai.mit.edu/pub/gnu/bison* or any GNU mirror.
 
 Building the release
-===================
+====================
 Please read the installation guide in the `INSTALL' file before
-trying to build sudo.  Things have changed quite a bit from the
-previous release (1.5.6).  The `RUNSON' file contains a list of
-of platforms that this version of sudo is known to work on.  If you
+trying to build sudo.  The `RUNSON' file contains a list of of
+platforms that this version of sudo is known to work on.  If you
 can add to this list, please send mail to sudo-bugs@courtesan.com.
 If something goes wrong you may want to refer to the `TROUBLESHOOTING'
 file.
@@ -80,5 +79,7 @@ Bug reports
 ===========
 A list of known bugs may be found in the `BUGS' file.
 Please send (new) bugs, problems, comments, features, ports, etc to
-sudo-bugs@courtesan.com.  Also, please read over the `TROUBLESHOOTING'
-file before submitting a bug report.
+sudo-bugs@courtesan.com.  Please read over the `TROUBLESHOOTING'
+file *before* submitting a bug report.  When reporting bugs, please
+be sure to include the version of sudo you are using as well as the
+platform you are running it on.
