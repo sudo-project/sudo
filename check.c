@@ -746,7 +746,7 @@ static void pam_attempt_auth()
     int retval;
     register int counter = TRIES_FOR_PASSWORD;
 
-    /* printf("PAM Authentication\n"); */
+    set_perms(PERM_ROOT, 0);
     retval = pam_start("sudo", user_name, &conv, &pamh);
     if (retval != PAM_SUCCESS) {
         pam_end(pamh, retval);
