@@ -108,7 +108,6 @@ static int init_vars			__P((int));
 static void add_env			__P((int));
 static void clean_env			__P((char **, struct env_table *));
 static void initial_setup		__P((void));
-extern int  user_is_exempt		__P((void));
 extern struct passwd *sudo_getpwuid	__P((uid_t));
 extern void list_matches		__P((void));
 

@@ -71,7 +71,6 @@ static const char rcsid[] = "$Sudo$";
 #define TS_NOFILE		3
 #define TS_ERROR		4
 
-       int   user_is_exempt	__P((void));
 static void  build_timestamp	__P((char **, char **));
 static int   timestamp_status	__P((char *, char *, char *, int));
 static char *expand_prompt	__P((char *, char *, char *));
