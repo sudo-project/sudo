@@ -13,6 +13,8 @@ INC_FLAGS=""
 AC_SUBST(INC_FLAGS)dnl
 OPTIONS=""
 AC_SUBST(OPTIONS)dnl
+LIBOBJS=""
+AC_SUBST(LIBOBJS)dnl
 dnl
 dnl did they say --with-csops?
 dnl
@@ -45,13 +47,11 @@ case "$OS" in
 		;;
     "aix")	echo "Looks like AIX"
 		AC_DEFINE(_ALL_SOURCE)
-		OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
 		if test -n "$GCC"; then
 		    STATIC_FLAGS="-bnso -bI:/lib/syscalls.exp -bI:./aixcrypt.exp -liconv -bnodelcsect"
 		fi
 		;;
     "hp-ux")	echo "Looks like HP-UX"
-		OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
 		if test -n "$GCC"; then
 		    STATIC_FLAGS="-Wl,-a,archive"
 		fi
@@ -62,7 +62,6 @@ case "$OS" in
 		fi
 		;;
     "irix")	echo "Looks like IRIX"
-		OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
 		# need bsd signals to get sigmask()
 		AC_DEFINE(_BSD_SIGNALS)
 		AC_DEFINE(RETSIGTYPE, int)
@@ -141,11 +140,11 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_HAVE_FUNCS(getcwd getwd strchr strrchr sysconf)
+AC_HAVE_FUNCS(getwd strchr strrchr sysconf sigaction)
 dnl
 dnl Function checks w/ replacements
 dnl
-AC_REPLACES_FUNCS(strdup realpath getcwd)
+AC_REPLACE_FUNCS(strdup realpath getcwd)
 dnl
 dnl library checks
 dnl
