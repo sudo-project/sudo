@@ -130,6 +130,7 @@ int validate(check_cmnd)
      * Don't need to keep this open...
      */
     (void) fclose(sudoers_fp);
+    sudoers_fp = NULL;
 
     /* relinquish extra privs */
     set_perms(PERM_USER, 0);
