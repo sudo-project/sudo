@@ -46,8 +46,8 @@ struct sudo_defs_types {
     char *desc;
     union {
 	int flag;
+	int ival;
 	char *str;
-	unsigned int ival;
 	mode_t mode;
     } sd_un;
 };
@@ -59,18 +59,20 @@ struct sudo_defs_types {
  */
 #undef T_INT
 #define T_INT		0x001
+#undef T_UINT
+#define T_UINT		0x002
 #undef T_STR
-#define T_STR		0x002
+#define T_STR		0x003
 #undef T_FLAG
-#define T_FLAG		0x003
+#define T_FLAG		0x004
 #undef T_MODE
-#define T_MODE		0x004
+#define T_MODE		0x005
 #undef T_LOGFAC
-#define T_LOGFAC	0x005
+#define T_LOGFAC	0x006
 #undef T_LOGPRI
-#define T_LOGPRI	0x006
+#define T_LOGPRI	0x007
 #undef T_PWFLAG
-#define T_PWFLAG	0x007
+#define T_PWFLAG	0x008
 #undef T_MASK
 #define T_MASK		0x0FF
 #undef T_BOOL

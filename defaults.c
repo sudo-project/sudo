@@ -102,6 +102,7 @@ extern int sudolineno;
  * Local prototypes.
  */
 static int store_int __P((char *, struct sudo_defs_types *, int));
+static int store_uint __P((char *, struct sudo_defs_types *, int));
 static int store_str __P((char *, struct sudo_defs_types *, int));
 static int store_syslogfac __P((char *, struct sudo_defs_types *, int));
 static int store_syslogpri __P((char *, struct sudo_defs_types *, int));
@@ -137,6 +138,7 @@ dump_defaults()
 			putchar('\n');
 		    }
 		    break;
+		case T_UINT:
 		case T_INT:
 		    (void) printf(cur->desc, cur->sd_un.ival);
 		    putchar('\n');
@@ -280,6 +282,23 @@ set_default(var, val, op)
 		}
 	    }
 	    if (!store_int(val, cur, op)) {
+		(void) fprintf(stderr,
+		    "%s: value '%s' is invalid for option '%s'\n", Argv[0],
+		    val, var);
+		return(FALSE);
+	    }
+	    break;
+	case T_UINT:
+	    if (!val) {
+		/* Check for bogus boolean usage or lack of a value. */
+		if (!(cur->type & T_BOOL) || op != FALSE) {
+		    (void) fprintf(stderr,
+			"%s: no value specified for `%s' on line %d\n", Argv[0],
+			var, sudolineno);
+		    return(FALSE);
+		}
+	    }
+	    if (!store_uint(val, cur, op)) {
 		(void) fprintf(stderr,
 		    "%s: value '%s' is invalid for option '%s'\n", Argv[0],
 		    val, var);
@@ -460,6 +479,27 @@ init_defaults()
 
 static int
 store_int(val, def, op)
+    char *val;
+    struct sudo_defs_types *def;
+    int op;
+{
+    char *endp;
+    long l;
+
+    if (op == FALSE) {
+	def->sd_un.ival = 0;
+    } else {
+	l = strtol(val, &endp, 10);
+	if (*endp != '\0')
+	    return(FALSE);
+	/* XXX - should check against INT_MAX */
+	def->sd_un.ival = (unsigned int)l;
+    }
+    return(TRUE);
+}
+
+static int
+store_uint(val, def, op)
     char *val;
     struct sudo_defs_types *def;
     int op;

@@ -424,24 +424,29 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
      * If the file/dir exists, check its mtime.
      */
     if (status == TS_OLD) {
-	now = time(NULL);
-	if (def_ival(I_TIMESTAMP_TIMEOUT) && 
-	    now - sb.st_mtime < 60 * def_ival(I_TIMESTAMP_TIMEOUT)) {
-	    /*
-	     * Check for bogus time on the stampfile.  The clock may
-	     * have been set back or someone could be trying to spoof us.
-	     */
-	    if (sb.st_mtime > now + 60 * def_ival(I_TIMESTAMP_TIMEOUT) * 2) {
-		log_error(NO_EXIT,
-		    "timestamp too far in the future: %20.20s",
-		    4 + ctime(&sb.st_mtime));
-		if (timestampfile)
-		    (void) unlink(timestampfile);
-		else
-		    (void) rmdir(timestampdir);
-		status = TS_MISSING;
-	    } else
-		status = TS_CURRENT;
+	/* Negative timeouts only expire manually (sudo -k). */
+	if (def_ival(I_TS_TIMEOUT) < 0 && sb.st_mtime != 0)
+	    status = TS_CURRENT;
+	else {
+	    now = time(NULL);
+	    if (def_ival(I_TIMESTAMP_TIMEOUT) && 
+		now - sb.st_mtime < 60 * def_ival(I_TIMESTAMP_TIMEOUT)) {
+		/*
+		 * Check for bogus time on the stampfile.  The clock may
+		 * have been set back or someone could be trying to spoof us.
+		 */
+		if (sb.st_mtime > now + 60 * def_ival(I_TIMESTAMP_TIMEOUT) * 2) {
+		    log_error(NO_EXIT,
+			"timestamp too far in the future: %20.20s",
+			4 + ctime(&sb.st_mtime));
+		    if (timestampfile)
+			(void) unlink(timestampfile);
+		    else
+			(void) rmdir(timestampdir);
+		    status = TS_MISSING;
+		} else
+		    status = TS_CURRENT;
+	    }
 	}
     }
 
