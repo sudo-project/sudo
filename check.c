@@ -176,49 +176,79 @@ expand_prompt(old_prompt, user, host)
 {
     size_t len;
     int subst;
-    char *p, *np, *new_prompt, lastchar;
+    char *p, *np, *new_prompt;
 
     /* How much space do we need to malloc for the prompt? */
     subst = 0;
-    for (p = old_prompt, len = strlen(old_prompt), lastchar = '\0'; *p; p++) {
-	if (lastchar == '%') {
-	    if (*p == 'h') {
-		len += strlen(user_shost) - 2;
-		subst = 1;
-	    } else if (*p == 'u') {
-		len += strlen(user_name) - 2;
-		subst = 1;
+    for (p = old_prompt, len = strlen(old_prompt); *p; p++) {
+	if (p[0] =='%') {
+	    switch (p[1]) {
+		case 'h':
+		    p++;
+		    len += strlen(user_shost) - 2;
+		    subst = 1;
+		    break;
+		case 'H':
+		    p++;
+		    len += strlen(user_host) - 2;
+		    subst = 1;
+		    break;
+		case 'u':
+		    p++;
+		    len += strlen(user_name) - 2;
+		    subst = 1;
+		    break;
+		case 'U':
+		    p++;
+		    len += strlen(*user_runas) - 2;
+		    subst = 1;
+		    break;
+		case '%':
+		    p++;
+		    len--;
+		    subst = 1;
+		    break;
+		default:
+		    break;
 	    }
 	}
-
-	if (lastchar == '%' && *p == '%') {
-	    lastchar = '\0';
-	    len--;
-	} else
-	    lastchar = *p;
     }
 
     if (subst) {
 	new_prompt = (char *) emalloc(len + 1);
-	for (p = old_prompt, np = new_prompt, lastchar = '\0'; *p; p++) {
-	    if (lastchar == '%' && (*p == 'h' || *p == 'u' || *p == '%')) {
-		/* substitute user/host name */
-		if (*p == 'h') {
-		    np--;
-		    strcpy(np, user_shost);
-		    np += strlen(user_shost);
-		} else if (*p == 'u') {
-		    np--;
-		    strcpy(np, user_name);
-		    np += strlen(user_name);
+	for (p = old_prompt, np = new_prompt; *p; p++) {
+	    if (p[0] =='%') {
+		switch (p[1]) {
+		    case 'h':
+			p++;
+			strcpy(np, user_shost);
+			np += strlen(user_shost);
+			continue;
+		    case 'H':
+			p++;
+			strcpy(np, user_host);
+			np += strlen(user_host);
+			continue;
+		    case 'u':
+			p++;
+			strcpy(np, user_name);
+			np += strlen(user_name);
+			continue;
+		    case 'U':
+			p++;
+			strcpy(np, *user_runas);
+			np += strlen(*user_runas);
+			continue;
+		    case '%':
+			/* convert %% -> % */
+			p++;
+			break;
+		    default:
+			/* no conversion */
+			break;
 		}
-	    } else
-		*np++ = *p;
-
-	    if (lastchar == '%' && *p == '%')
-		lastchar = '\0';
-	    else
-		lastchar = *p;
+	    }
+	    *np++ = *p;
 	}
 	*np = '\0';
     } else
