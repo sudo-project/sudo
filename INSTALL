@@ -135,11 +135,15 @@ Special features/options:
   --with-csops
 	Add CSOps standard options.  You probably aren't interested in this.
 
-  --with-skey
-	Enable S/Key OTP (One Time Password) support.
+  --with-skey[=DIR]
+        Enable S/Key OTP (One Time Password) support.  If specified,
+        DIR should contain include and lib directories with skey.h
+        and libskey.a respectively.
 
-  --with-opie
-	Enable NRL OPIE OTP (One Time Password) support.
+  --with-opie[=DIR]
+	Enable NRL OPIE OTP (One Time Password) support.  If specified,
+	DIR should contain include and lib directories with opie.h
+	and libopie.a respectively.
 
   --with-SecurID[=DIR]
 	Enable SecurID support.  If specified, DIR is directory containing

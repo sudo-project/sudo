@@ -238,9 +238,10 @@ AC_ARG_WITH(passwd, [  --without-passwd        don't use passwd/shadow file for 
 		;;
 esac])
 
-AC_ARG_WITH(skey, [  --with-skey             enable S/Key support ],
+AC_ARG_WITH(skey, [  --with-skey[=DIR]       enable S/Key support ],
 [case $with_skey in
-    yes)	if test -n "$with_opie"; then
+    no)		with_skey="";;
+    *)		if test -n "$with_opie"; then
 		    AC_MSG_ERROR(["cannot use both S/Key and OPIE"])
 		fi
     		AC_DEFINE(HAVE_SKEY, 1, [Define if you use S/Key.])
@@ -248,23 +249,18 @@ AC_ARG_WITH(skey, [  --with-skey             enable S/Key support ],
 		AC_MSG_RESULT(yes)
 		AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
 		;;
-    no)		;;
-    *)		AC_MSG_WARN([Ignoring unknown argument to --with-skey: $with_skey])
-		;;
 esac])
 
-AC_ARG_WITH(opie, [  --with-opie             enable OPIE support ],
+AC_ARG_WITH(opie, [  --with-opie[=DIR]       enable OPIE support ],
 [case $with_opie in
-    yes)	if test -n "$with_skey"; then
+    no)		with_opie="";;
+    *)		if test -n "$with_skey"; then
 		    AC_MSG_ERROR(["cannot use both S/Key and OPIE"])
 		fi
 		AC_DEFINE(HAVE_OPIE, 1, [Define if you use NRL OPIE.])
 		AC_MSG_CHECKING(whether to try NRL OPIE authentication)
 		AC_MSG_RESULT(yes)
 		AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
-		;;
-    no)		;;
-    *)		AC_MSG_WARN([Ignoring unknown argument to --with-opie: $with_opie])
 		;;
 esac])
 
@@ -1514,12 +1510,12 @@ test -n "$mansectform" || mansectform=5
 dnl
 dnl Add in any libpaths or libraries specified via configure
 dnl
-if test -n ${with_libpath}; then
+if test -n "$with_libpath"; then
     for i in ${with_libpath}; do
 	SUDO_APPEND_LIBPATH(LDFLAGS, [$i])
     done
 fi
-if test -n ${with_libraries}; then
+if test -n "$with_libraries"; then
     for i in ${with_libraries}; do
 	case $i in
 	    -l*)	;;
@@ -1795,7 +1791,7 @@ if test "$with_AFS" = "yes"; then
 	fi
     done
     if test -z "$FOUND_AFSLIBDIR"; then
-	echo 'Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDO_LDFLAGS or rerun configure with the --with-libpath options.'
+	AC_MSG_WARN([Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDO_LDFLAGS or rerun configure with the --with-libpath options.])
     fi
 
     # Order is important here.  Note that we build AFS_LIBS from right to left
@@ -1822,7 +1818,7 @@ if test "$with_AFS" = "yes"; then
     done
 
     if test -z "$FOUND_AFSLIBDIR"; then
-	echo 'Unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options.'
+	AC_MSG_WARN([Unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options.])
     fi
 fi
 
@@ -1838,35 +1834,64 @@ fi
 dnl
 dnl extra S/Key lib and includes
 dnl
-if test "$with_skey" = "yes"; then
-    SUDO_LIBS="${SUDO_LIBS} -lskey"
-    if test -f /usr/include/skey.h -a -f /usr/lib/libskey.a; then
-	:
-    elif test -f /usr/local/include/skey.h; then
-	CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
-	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [/usr/local/lib])
-    elif test "$with_csops" = "yes" -a -f /tools/cs/skey/include/skey.h -a -f /tools/cs/skey/lib/libskey.a; then
-	CPPFLAGS="${CPPFLAGS} -I/tools/cs/skey/include"
-	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [/tools/cs/skey/lib])
+if test -n "$with_skey"; then
+    O_LDFLAGS="$LDFLAGS"
+    if test "$with_skey" != "yes"; then
+	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
+	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_skey}/lib])
+	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_skey}/lib])
+	AC_PREPROC_IFELSE([#include <skey.h>], [found=yes], [found=no])
     else
-	echo 'Unable to locate libskey.a and/or skey.h, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS and/or -I/path/to/skey.h to CPPFLAGS'
+	found=no
+	O_CPPFLAGS="$CPPFLAGS"
+	for dir in "" "/usr/local" "/usr/contrib"; do
+	    test -n "$dir" && CPPFLAGS="$O_CPPFLAGS -I${dir}/include"
+	    AC_PREPROC_IFELSE([#include <skey.h>], [found=yes; break], )
+	done
+	if test "$found" = "no" -o -z "$dir"; then
+	    CPPFLAGS="$O_CPPFLAGS"
+	else
+	    SUDO_APPEND_LIBPATH(LDFLAGS, [${dir}/lib])
+	    SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${dir}/lib])
+	fi
     fi
+    if test "$found" = "no"; then
+	AC_MSG_WARN([Unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS])
+    fi
+    AC_CHECK_LIB(skey, main, , [AC_MSG_WARN([Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS])])
     AC_CHECK_LIB(skey, skeyaccess, AC_DEFINE(HAVE_SKEYACCESS, 1, [Define if your S/Key library has skeyaccess().]))
+    LDFLAGS="$O_LDFLAGS"
 fi
 
 dnl
 dnl extra OPIE lib and includes
 dnl
-if test "$with_opie" = "yes"; then
-    SUDO_LIBS="${SUDO_LIBS} -lopie"
-    if test -f /usr/include/opie.h -a -f /usr/lib/libopie.a; then
-	:
-    elif test -f /usr/local/include/opie.h; then
-	CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
-	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [/usr/local/lib])
+if test -n "$with_opie"; then
+    O_LDFLAGS="$LDFLAGS"
+    if test "$with_opie" != "yes"; then
+	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
+	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_opie}/lib])
+	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_opie}/lib])
+	AC_PREPROC_IFELSE([#include <opie.h>], [found=yes], [found=no])
     else
-	echo 'Unable to locate libopie.a and/or opie.h, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDO_LDFLAGS and/or -I/path/to/opie.h to CPPFLAGS'
+	found=no
+	O_CPPFLAGS="$CPPFLAGS"
+	for dir in "" "/usr/local" "/usr/contrib"; do
+	    test -n "$dir" && CPPFLAGS="$O_CPPFLAGS -I${dir}/include"
+	    AC_PREPROC_IFELSE([#include <opie.h>], [found=yes; break], )
+	done
+	if test "$found" = "no" -o -z "$dir"; then
+	    CPPFLAGS="$O_CPPFLAGS"
+	else
+	    SUDO_APPEND_LIBPATH(LDFLAGS, [${dir}/lib])
+	    SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${dir}/lib])
+	fi
     fi
+    if test "$found" = "no"; then
+	AC_MSG_WARN([Unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS])
+    fi
+    AC_CHECK_LIB(opie, main, , [AC_MSG_WARN([Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDO_LDFLAGS])])
+    LDFLAGS="$O_LDFLAGS"
 fi
 
 dnl
@@ -1974,13 +1999,11 @@ dnl
 dnl Spew any text the user needs to know about
 dnl
 if test "$with_pam" = "yes"; then
-    echo ""
     case $host in
 	*-*-linux*)
-	    echo "You will need to customize sample.pam and install it as /etc/pam.d/sudo"
+	    AC_MSG_NOTICE([You will need to customize sample.pam and install it as /etc/pam.d/sudo])
 	    ;;
     esac
-    echo ""
 fi
 
 dnl
