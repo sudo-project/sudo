@@ -1239,3 +1239,6 @@ Sudo 1.6.1 released.
 
 391) Locking in visudo was broken.  We now lock the sudoers file, not the
      sudoers temp file, which should be safe.
+
+392) PAM fixups: custom prompts now work correctly and errors are
+     dealt with more sanely.  Patches from Cloyce D. Spradling.
