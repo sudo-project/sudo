@@ -93,11 +93,6 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
- * Parsed sudoers info.
- */
-extern struct alias *aliases;
-
-/*
  * Prototypes
  */
 static int has_meta	__P((char *));
@@ -230,11 +225,9 @@ cmnd_matches(cmnd, args, list)
 }
 
 /*
- * Looks through the aliases list for one with a matching name and type
+ * Looks through the alias list for one with a matching name and type
  * and calls {host,cmnd,user}_matches() with the aliases.
  * Returns ALLOW, DENY or UNSPEC.
- * XXX - need a way to tell caller that there is no such alias
- *	 maybe use a NOALIAS return value;
  */
 int
 alias_matches(name, type, v1, v2)
@@ -245,17 +238,15 @@ alias_matches(name, type, v1, v2)
 {
     struct alias *a;
 
-    for (a = aliases; a != NULL; a = a->next) {
-	if (a->type == type && strcmp(a->name, name) == 0) {
-	    switch (type) {
-		case HOSTALIAS:
-		    return(host_matches(v1, v2, a->first_member));
-		case CMNDALIAS:
-		    return(cmnd_matches(v1, v2, a->first_member));
-		case USERALIAS:
-		case RUNASALIAS:
-		    return(user_matches(v1, a->first_member));
-	    }
+    if ((a = find_alias(name, type)) != NULL) {
+	switch (type) {
+	    case HOSTALIAS:
+		return(host_matches(v1, v2, a->first_member));
+	    case CMNDALIAS:
+		return(cmnd_matches(v1, v2, a->first_member));
+	    case USERALIAS:
+	    case RUNASALIAS:
+		return(user_matches(v1, a->first_member));
 	}
     }
     return(UNSPEC);

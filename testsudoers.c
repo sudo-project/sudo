@@ -93,12 +93,11 @@ extern int parse_error;
 extern char *optarg;
 extern int optind;
 
-extern struct alias *aliases;
 extern struct defaults *defaults;
 extern struct userspec *userspecs;
 
+int  print_alias __P((VOID *, VOID *));
 void dump_sudoers __P((void));
-void print_aliases __P((void));
 void print_defaults __P((void));
 void print_privilege __P((struct privilege *));
 void print_userspecs __P((void));
@@ -335,40 +334,40 @@ print_defaults()
     }
 }
 
-void
-print_aliases()
+int
+print_alias(v1, v2)
+    VOID *v1, *v2;
 {
-    struct alias *a;
+    struct alias *a = (struct alias *)v1;
     struct member *m;
     struct sudo_command *c;
 
-    for (a = aliases; a != NULL; a = a->next) {
-	switch (a->type) {
-	    case HOSTALIAS:
-		(void) printf("Host_Alias\t%s = ", a->name);
-		break;
-	    case CMNDALIAS:
-		(void) printf("Cmnd_Alias\t%s = ", a->name);
-		break;
-	    case USERALIAS:
-		(void) printf("User_Alias\t%s = ", a->name);
-		break;
-	    case RUNASALIAS:
-		(void) printf("Runas_Alias\t%s = ", a->name);
-		break;
-	}
-	for (m = a->first_member; m != NULL; m = m->next) {
-	    if (m != a->first_member)
-		fputs(", ", stdout);
-	    if (m->type == COMMAND) {
-		c = (struct sudo_command *) m->name;
-		printf("%s%s%s", c->cmnd, c->args ? " " : "",
-		    c->args ? c->args : "");
-	    } else
-		fputs(m->name, stdout);
-	}
-	putchar('\n');
+    switch (a->type) {
+	case HOSTALIAS:
+	    (void) printf("Host_Alias\t%s = ", a->name);
+	    break;
+	case CMNDALIAS:
+	    (void) printf("Cmnd_Alias\t%s = ", a->name);
+	    break;
+	case USERALIAS:
+	    (void) printf("User_Alias\t%s = ", a->name);
+	    break;
+	case RUNASALIAS:
+	    (void) printf("Runas_Alias\t%s = ", a->name);
+	    break;
     }
+    for (m = a->first_member; m != NULL; m = m->next) {
+	if (m != a->first_member)
+	    fputs(", ", stdout);
+	if (m->type == COMMAND) {
+	    c = (struct sudo_command *) m->name;
+	    printf("%s%s%s", c->cmnd, c->args ? " " : "",
+		c->args ? c->args : "");
+	} else
+	    fputs(m->name, stdout);
+    }
+    putchar('\n');
+    return(0);
 }
 
 void
@@ -438,7 +437,7 @@ dump_sudoers()
     print_defaults();
 
     putchar('\n');
-    print_aliases();
+    alias_apply(print_alias, NULL);
 
     putchar('\n');
     print_userspecs();

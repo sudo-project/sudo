@@ -26,7 +26,6 @@
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
-    struct alias *alias;
     struct cmndspec *cmndspec;
     struct defaults *defaults;
     struct member *member;

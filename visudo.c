@@ -106,13 +106,13 @@ static char whatnow		__P((void));
 static int check_aliases	__P((int));
 static int check_syntax		__P((char *, int));
 static int edit_sudoers		__P((struct sudoersfile *, char *, int));
-static struct alias *find_alias	__P((char *, int));
-static int remove_alias		__P((char *, int));
 static int install_sudoers	__P((struct sudoersfile *));
+static int print_unused		__P((VOID *, VOID *));
 static int reparse_sudoers	__P((char *, int, int));
 static int run_command		__P((char *, char **));
 static void setup_signals	__P((void));
 static void usage		__P((void)) __attribute__((__noreturn__));
+    VOID *v2;
 
 void yyerror			__P((const char *));
 void yyrestart			__P((FILE *));
@@ -131,7 +131,6 @@ extern int errorlineno, parse_error;
 extern char *optarg;
 extern int optind;
 
-extern struct alias *aliases;
 extern struct defaults *defaults;
 extern struct userspec *userspecs;
 
@@ -811,7 +810,6 @@ static int
 check_aliases(strict)
     int strict;
 {
-    struct alias *a;
     struct cmndspec *cs;
     struct member *m;
     struct privilege *priv;
@@ -868,75 +866,43 @@ check_aliases(strict)
     for (us = userspecs; us != NULL; us = us->next) {
 	for (m = us->user; m != NULL; m = m->next) {
 	    if (m->type == USERALIAS)
-		(void)remove_alias(m->name, m->type);
+		(void) alias_remove(m->name, m->type);
 	}
 	for (priv = us->privileges; priv != NULL; priv = priv->next) {
 	    for (m = priv->hostlist; m != NULL; m = m->next) {
 		if (m->type == HOSTALIAS)
-		    (void)remove_alias(m->name, m->type);
+		    (void) alias_remove(m->name, m->type);
 	    }
 	    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
 		for (m = cs->runaslist; m != NULL; m = m->next) {
 		    if (m->type == RUNASALIAS)
-			(void)remove_alias(m->name, m->type);
+			(void) alias_remove(m->name, m->type);
 		}
 		if ((m = cs->cmnd)->type == CMNDALIAS)
-		    (void)remove_alias(m->name, m->type);
+		    (void) alias_remove(m->name, m->type);
 	    }
 	}
     }
-    for (a = aliases; a != NULL; a = a->next) {
-	fprintf(stderr, "%s: unused %s_Alias %s\n",
-	    strict ? "Error" : "Warning", a->type == HOSTALIAS ? "Host" :
-	    a->type == CMNDALIAS ? "Cmnd" : a->type == USERALIAS ? "User" :
-	    a->type == RUNASALIAS ? "Runas" : "Unknown", a->name);
-	error++;
-    }
-    return (strict ? error : 0);
+    /* If all aliases were referenced we will have an empty tree. */
+    if (no_aliases())
+	return(0);
+    alias_apply(print_unused, strict ? "Error" : "Warning");
+    return (strict ? 1 : 0);
 }
 
-/*
- * Find the specified alias.
- */
-static struct alias *
-find_alias(name, type)
-    char *name;
-    int type;
+int
+print_unused(v1, v2)
+    VOID *v1;
+    VOID *v2;
 {
-    struct alias *a;
+    struct alias *a = (struct alias *)v1;
+    char *prefix = (char *)v2;
 
-    for (a = aliases; a != NULL; a = a->next) {
-	if (a->type == type && strcmp(a->name, name) == 0)
-	    return(a);
-    }
-    return(NULL);
-}
-
-/*
- * Remove the specified alias.
- */
-static int
-remove_alias(name, type)
-    char *name;
-    int type;
-{
-    struct alias *a, *prev;
-
-    for (a = prev = aliases; a != NULL; a = a->next) {
-	if (a->type == type && strcmp(a->name, name) == 0) {
-	    if (a == aliases)
-		aliases = a->next;	/* remove head */
-	    else {
-		prev->next = a->next;
-		if (aliases->last == a)
-		    aliases->last = prev;
-	    }
-	    free(a->name);
-	    free(a);
-	    return(TRUE);
-	}
-    }
-    return(FALSE);
+    fprintf(stderr, "%s: unused %s_Alias %s\n", prefix,
+	a->type == HOSTALIAS ? "Host" : a->type == CMNDALIAS ? "Cmnd" :
+	a->type == USERALIAS ? "User" : a->type == RUNASALIAS ? "Runas" :
+	"Unknown", a->name);
+    return(0);
 }
 
 /*

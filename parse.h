@@ -101,7 +101,6 @@ struct alias {
     char *name;				/* alias name */
     int type; 				/* {USER,HOST,RUNAS,CMND}ALIAS */
     struct member *first_member;	/* list of alias members */
-    struct alias *last, *next;
 };
 
 /*
@@ -117,19 +116,7 @@ struct defaults {
 };
 
 /*
- * Allocat space for a struct alias and populate it.
- */
-#define NEW_ALIAS(r, n, t, m) do {			\
-    (r)               = emalloc(sizeof(struct alias));	\
-    (r)->name         = (n);				\
-    (r)->type         = (t);				\
-    (r)->first_member = (m);				\
-    (r)->last         = NULL;				\
-    (r)->next         = NULL;				\
-} while (0)
-
-/*
- * Allocat space for a defaults entry and populate it.
+ * Allocate space for a defaults entry and populate it.
  */
 #define NEW_DEFAULT(r, v1, v2, o) do {			\
     (r)       = emalloc(sizeof(struct defaults));	\
@@ -141,7 +128,7 @@ struct defaults {
 } while (0)
 
 /*
- * Allocat space for a member and populate it.
+ * Allocate space for a member and populate it.
  */
 #define NEW_MEMBER(r, n, t) do {			\
     (r)       = emalloc(sizeof(struct member));		\
@@ -168,15 +155,19 @@ struct defaults {
  */
 int addr_matches	__P((char *));
 int alias_matches	__P((char *, int, VOID *, VOID *));
+int alias_remove	__P((char *, int));
 int cmnd_matches	__P((char *, char *, struct member *));
 int command_matches	__P((char *, char *));
 int host_matches	__P((char *, char *, struct member *));
 int hostname_matches	__P((char *, char *, char *));
 int netgr_matches	__P((char *, char *, char *, char *));
+int no_aliases		__P((void));
 int runas_matches	__P((struct passwd *, struct member *));
 int user_matches	__P((struct passwd *, struct member *));
 int usergr_matches	__P((char *, char *, struct passwd *));
 int userpw_matches	__P((char *, char *, struct passwd *));
+struct alias *find_alias __P((char *, int));
+void alias_apply	__P((int (*)(VOID *, VOID *), VOID *));
 void init_parser	__P((char *, int));
 void print_member	__P((struct member *m));
 
