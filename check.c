@@ -66,7 +66,6 @@
 #endif /* HAVE_UTIME */
 
 #include "sudo.h"
-#include "version.h"
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
