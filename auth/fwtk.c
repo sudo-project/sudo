@@ -1,22 +1,28 @@
 /*
- *  CU sudo version 1.6
- *  Copyright (c) 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -60,24 +66,25 @@ fwtk_setup(pw, promptp, data)
 	return(AUTH_SUCCESS);		/* Already initialized */
 
     if ((confp = cfg_read("sudo")) == (Cfg *)-1) {
-	fprintf(stderr, "%s: cannot read fwtk config.\n", Argv[0]);
+	(void) fprintf(stderr, "%s: cannot read fwtk config.\n", Argv[0]);
 	return(AUTH_FATAL);
     }
 
     if (auth_open(confp)) {
-	fprintf(stderr, "%s: cannot connect to authentication server.\n",
+	(void) fprintf(stderr, "%s: cannot connect to authentication server.\n",
 	    Argv[0]);
 	return(AUTH_FATAL);
     }
 
     /* Get welcome message from auth server */
     if (auth_recv(resp, sizeof(resp))) {
-	fprintf(stderr, "%s: lost connection to authentication server.\n",
-	    Argv[0]);
+	(void) fprintf(stderr,
+	    "%s: lost connection to authentication server.\n", Argv[0]);
 	return(AUTH_FATAL);
     }
     if (strncmp(resp, "Authsrv ready", 13) != 0) {
-	fprintf(stderr, "%s: authentication server error.\n%s\n", Argv[0], resp);
+	(void) fprintf(stderr,
+	    "%s: authentication server error.\n%s\n", Argv[0], resp);
 	return(AUTH_FATAL);
     }
 
@@ -96,31 +103,31 @@ fwtk_verify(pw, prompt, data)
     extern int nil_pw;
 
     /* Send username to authentication server. */
-    (void) sprintf(buf,"authorize %s 'sudo'", pw->pw_name);
+    (void) snprintf(buf, sizeof(buf), "authorize %s 'sudo'", pw->pw_name);
     if (auth_send(buf) || auth_recv(resp, sizeof(resp))) {
-	fprintf(stderr, "%s: lost connection to authentication server.\n",
-	    Argv[0]);
+	(void) fprintf(stderr,
+	    "%s: lost connection to authentication server.\n", Argv[0]);
 	return(AUTH_FATAL);
     }
 
     /* Get the password/response from the user. */
     if (strncmp(resp, "challenge ", 10) == 0) {
-	sprintf(buf, "%s\nResponse: ", &resp[10]);
+	(void) snprintf(buf, sizeof(buf), "%s\nResponse: ", &resp[10]);
 	pass = tgetpass(buf, PASSWORD_TIMEOUT * 60, 0);
     } else if (strncmp(resp, "password", 8) == 0) {
 	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60, 1);
     } else {
-	fprintf(stderr, "%s: %s\n", Argv[0], resp);
+	(void) fprintf(stderr, "%s: %s\n", Argv[0], resp);
 	return(AUTH_FATAL);
     }
     if (!pass || *pass == '\0')
 	nil_pw = 1;			/* empty password */
 
     /* Send the user's response to the server */
-    sprintf(buf, "response '%s'", pass);
+    (void) snprintf(buf, sizeof(buf), "response '%s'", pass);
     if (auth_send(buf) || auth_recv(resp, sizeof(resp))) {
-	fprintf(stderr, "%s: lost connection to authentication server.\n",
-	    Argv[0]);
+	(void) fprintf(stderr,
+	    "%s: lost connection to authentication server.\n", Argv[0]);
 	return(AUTH_FATAL);
     }
 
