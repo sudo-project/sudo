@@ -1177,9 +1177,6 @@ case "$host" in
 		    CHECKSHADOW="false"
 		fi
 		;;
-    *-*-unicos*)
-		# XXX do we need to do anything special anymore?
-		;;
     *-sequent-sysv*)
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
@@ -1203,9 +1200,6 @@ case "$host" in
 		if test "$CHECKSHADOW" = "true"; then
 		    CHECKSHADOW="false"
 		fi
-		;;
-    *-*-svr4*|*-*-sysv4*)
-		# XXX do we need to do anything special anymore?
 		;;
 esac
 
