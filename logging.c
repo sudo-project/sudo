@@ -137,7 +137,7 @@ do_syslog(pri, msg)
     int pri;
     char *msg;
 {
-    int count;
+    size_t count;
     char *p;
     char *tmp;
     char save;
@@ -188,9 +188,10 @@ do_logfile(msg)
     char *beg, *oldend, *end;
     FILE *fp;
     mode_t oldmask;
-    int maxlen = def_ival(I_LOGLINELEN);
+    size_t maxlen;
 
     oldmask = umask(077);
+    maxlen = def_ival(I_LOGLINELEN) > 0 ? def_ival(I_LOGLINELEN) : 0;
     fp = fopen(def_str(I_LOGFILE), "a");
     (void) umask(oldmask);
     if (fp == NULL) {
