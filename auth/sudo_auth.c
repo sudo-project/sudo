@@ -67,7 +67,7 @@ sudo_auth auth_switch[] = {
 #  ifndef WITHOUT_PASSWD
     AUTH_ENTRY(0, "passwd", NULL, NULL, passwd_verify, NULL)
 #  endif
-#  if defined(HAVE_SECUREWARE) && !defined(WITHOUT_PASSWD)
+#  if defined(HAVE_GETPRPWNAM) && !defined(WITHOUT_PASSWD)
     AUTH_ENTRY(0, "secureware", secureware_init, NULL, secureware_verify, NULL)
 #  endif
 #  ifdef HAVE_AFS
