@@ -66,7 +66,7 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
- * Flags used in env_reset()
+ * Flags used in rebuild_env()
  */
 #undef DID_TERM
 #define DID_TERM	0x01
