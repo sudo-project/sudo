@@ -362,7 +362,7 @@ B<sudo> will check the ownership of its timestamp directory
 (F<@timedir@> by default) and ignore the directory's contents if
 it is not owned by root and only writable by root.  On systems that
 allow non-root users to give away files via L<chown(2)>, if the timestamp
-directory is located in a directory writable by anyone (e.g.: F</tmp>),
+directory is located in a directory writable by anyone (e.g., F</tmp>),
 it is possible for a user to create the timestamp directory before
 B<sudo> is run.  However, because B<sudo> checks the ownership and
 mode of the directory and its contents, the only damage that can
@@ -483,7 +483,7 @@ most systems it is possible to prevent shell escapes with B<sudo>'s
 I<noexec> functionality.  See the L<sudoers(@mansectform@)> manual
 for details.
 
-It is not meaningful to run the C<cd> command directly via sudo, e.g.
+It is not meaningful to run the C<cd> command directly via sudo, e.g.,
 
  $ sudo cd /usr/local/protected
 
