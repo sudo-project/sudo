@@ -225,11 +225,7 @@ static void load_globals()
     /*
      * so we know where we are... (do as user)
      */
-#ifdef HAVE_GETCWD
     if (!getcwd(cwd, (size_t) (MAXPATHLEN + 1))) {
-#else
-    if (!getwd(cwd)) {
-#endif /* HAVE_GETCWD */
     	(void) fprintf(stderr, "%s:  Can't get working directory!\n", Argv[0]);
 	exit(1);
     }
