@@ -54,6 +54,7 @@ static char rcsid[] = "$Id$";
 #  include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <ctype.h>
+#include <pwd.h>
 #include <grp.h>
 #include <sys/param.h>
 #include <sys/types.h>
@@ -340,7 +341,7 @@ int usergr_matches(group, user)
     /*
      * Check against user's real gid as well as group's user list
      */
-    if (getgid() == grpent->gr_gid)
+    if (grpent->gr_gid == user_gid)
 	return(TRUE);
 
     for (cur=grpent->gr_mem; *cur; cur++) {
