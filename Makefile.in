@@ -344,19 +344,25 @@ dist:
 bindist:
 	@mkdir tmp.`arch -l`
 	@mkdir tmp.`arch -l`/sudo-$(VERSION)
-	( cd tmp.`arch -l`/sudo-$(VERSION) ; \
+	( \
+	  tdir=tmp.`arch -l`/sudo-$(VERSION) ; \
 	  for i in $(BINFILES) ; do \
-	    if [ -f ../../$$i ]; then \
-	      cp ../../$$i . ; \
+	    if [ -f $$i ]; then \
+	      cp $$i $$tdir ; \
 	    elif [ -f $(srcdir)/$$i ]; then \
-	      cp $(srcdir)/$$i . ; \
+	      cp $(srcdir)/$$i $$tdir ; \
 	    else \
-	      cp ../../$(srcdir)/$$i . ; \
+	      echo cannot find $$i ; \
+	      exit 1 ; \
 	    fi ; \
 	  done ; \
-	  strip sudo ; \
-	  strip visudo ; \
-	  cd .. ; tar Ocf ../sudo-$(VERSION)-`arch -l`.tar sudo-$(VERSION) ; \
+	  for i in $(BINSPECIAL) ; do \
+	    cp $(srcdir)/$$i $$tdir/`echo $$i | sed 's/\.binary$$//'` || \
+	      exit 1 ; \
+	  done \
 	)  
+	strip sudo
+	strip visudo
+	( cd tmp.`arch -l` && tar Ocf ../sudo-$(VERSION)-`arch -l`.tar sudo-$(VERSION) )
 	gzip --best sudo-$(VERSION)-`arch -l`.tar
 	rm -rf tmp.`arch -l`
