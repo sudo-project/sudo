@@ -82,11 +82,11 @@
 #endif
  
 /*
- *  Define SHORT_MESSAGE if you don't want the full copyright message
+ *  Change the "define" to "undef" if you want the full copyright message
  *  along with the "we expect you have..." banner.
  */
 #ifndef SHORT_MESSAGE
-#  undef SHORT_MESSAGE
+#  define SHORT_MESSAGE
 #endif
  
 /*
