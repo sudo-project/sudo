@@ -95,7 +95,13 @@ dnl
 AC_MODE_T
 AC_UID_T
 AC_SIZE_T
-AC_RETSIGTYPE
+dnl
+dnl only set RETSIGTYPE if it is not set already
+dnl
+case "$DEFS" in
+    *"RETSIGTYPE"*)	;;
+    *)			AC_RETSIGTYPE;;
+esac
 dnl
 dnl Function checks
 dnl
