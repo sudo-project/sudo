@@ -74,9 +74,10 @@ int printmatches = FALSE;
 /*
  * Alias types
  */
-#define HOST			 1
-#define CMND			 2
-#define USER			 3
+#define HOST_ALIAS		 1
+#define CMND_ALIAS		 2
+#define USER_ALIAS		 3
+#define RUNAS_ALIAS		 4
 
 /*
  * The matching stack, initial space allocated in init_parser().
@@ -178,6 +179,7 @@ void yyerror(s)
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
 %token <tok>	 CMNDALIAS		/* Cmnd_Alias keyword */
 %token <tok>	 USERALIAS		/* User_Alias keyword */
+%token <tok>	 RUNASALIAS		/* Runas_Alias keyword */
 %token <tok>	 ':' '=' ',' '!' '.'	/* union member tokens */
 %token <tok>	 ERROR
 
@@ -208,6 +210,8 @@ entry		:	COMMENT
 		|	HOSTALIAS hostaliases
 			    { ; }
 		|	CMNDALIAS cmndaliases
+			    { ; }
+		|	RUNASALIAS runasaliases
 			    { ; }
 		;
 		
@@ -252,7 +256,8 @@ hostspec	:	ALL {
 			}
 		|	ALIAS {
 			    /* could be an all-caps hostname */
-			    if (find_alias($1, HOST) || !strcasecmp(shost, $1))
+			    if (find_alias($1, HOST_ALIAS) == TRUE ||
+				strcasecmp(shost, $1) == 0)
 				host_matches = TRUE;
 			    (void) free($1);
 			}
@@ -353,7 +358,8 @@ runasuser	:	NAME {
 			}
 		|	ALIAS {
 			    /* could be an all-caps username */
-			    if (find_alias($1, USER) || !strcmp($1, runas_user))
+			    if (find_alias($1, RUNAS_ALIAS) == TRUE ||
+				strcmp($1, runas_user) == 0)
 				$$ = TRUE;
 			    else
 				$$ = FALSE;
@@ -415,7 +421,7 @@ cmnd		:	ALL {
 				       &cm_list[cm_list_len].cmnd_size, 0);
 				expand_match_list();
 			    }
-			    if (find_alias($1, CMND)) {
+			    if (find_alias($1, CMND_ALIAS) == TRUE) {
 				cmnd_matches = TRUE;
 				$$ = TRUE;
 			    }
@@ -461,7 +467,8 @@ hostaliases	:	hostalias
 		;
 
 hostalias	:	ALIAS { push; } '=' hostlist {
-			    if (host_matches == TRUE && !add_alias($1, HOST))
+			    if (host_matches == TRUE &&
+				add_alias($1, HOST_ALIAS) == FALSE)
 				YYERROR;
 			    pop;
 			}
@@ -489,7 +496,8 @@ cmndalias	:	ALIAS {
 				 }
 			     }
 			} '=' cmndlist {
-			    if (cmnd_matches == TRUE && !add_alias($1, CMND))
+			    if (cmnd_matches == TRUE &&
+				add_alias($1, CMND_ALIAS) == FALSE)
 				YYERROR;
 			    pop;
 			    (void) free($1);
@@ -504,12 +512,25 @@ cmndlist	:	cmnd
 		|	cmndlist ',' cmnd
 		;
 
+runasaliases	:	runasalias
+		|	runasaliases ':' runasalias
+		;
+
+runasalias	:	ALIAS { push; }	'=' runaslist {
+			    if (add_alias($1, RUNAS_ALIAS) == FALSE)
+				YYERROR;
+			    pop;
+			    (void) free($1);
+			}
+		;
+
 useraliases	:	useralias
 		|	useraliases ':' useralias
 		;
 
 useralias	:	ALIAS { push; }	'=' userlist {
-			    if (!add_alias($1, USER))
+			    if (user_matches == TRUE &&
+				add_alias($1, USER_ALIAS) == FALSE)
 				YYERROR;
 			    pop;
 			    (void) free($1);
@@ -538,7 +559,8 @@ user		:	NAME {
 			}
 		|	ALIAS {
 			    /* could be an all-caps username */
-			    if (find_alias($1, USER) || !strcmp($1, user_name))
+			    if (find_alias($1, USER_ALIAS) == TRUE ||
+				strcmp($1, user_name) == 0)
 				user_matches = TRUE;
 			    (void) free($1);
 			}
@@ -706,16 +728,20 @@ void dumpaliases()
 
     for (n = 0; n < naliases; n++) {
 	switch (aliases[n].type) {
-	case HOST:
-	    (void) puts("HOST");
+	case HOST_ALIAS:
+	    (void) puts("HOST_ALIAS");
 	    break;
 
-	case CMND:
-	    (void) puts("CMND");
+	case CMND_ALIAS:
+	    (void) puts("CMND_ALIAS");
 	    break;
 
-	case USER:
-	    (void) puts("USER");
+	case USER_ALIAS:
+	    (void) puts("USER_ALIAS");
+	    break;
+
+	case RUNAS_ALIAS:
+	    (void) puts("RUNAS_ALIAS");
 	    break;
 	}
 	(void) printf("\t%s\n", aliases[n].name);
