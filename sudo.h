@@ -26,6 +26,7 @@
 #include <pathnames.h>
 #include <limits.h>
 #include "compat.h"
+#include "error.h"
 #include "defaults.h"
 #include "logging.h"
 
@@ -239,6 +240,7 @@ FILE *open_sudoers	__P((const char *, int *));
 void display_privs      __P((struct passwd *));
 void sudo_setpwent	__P((void));
 void sudo_endpwent	__P((void));
+void cleanup		__P((void));
 #ifdef HAVE_SYSTRACE
 void systrace_attach	__P((pid_t));
 #endif

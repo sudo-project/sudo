@@ -59,11 +59,6 @@ struct rtentry;
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_ERR_H
-# include <err.h>
-#else
-# include "emul/err.h"
-#endif /* HAVE_ERR_H */
 #include <netdb.h>
 #ifdef _ISC
 # include <sys/stream.h>
@@ -176,7 +171,7 @@ load_interfaces()
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0)
-	err(1, "cannot open socket");
+	error(1, "cannot open socket");
 
     /*
      * Get interface configuration or return (leaving num_interfaces == 0)

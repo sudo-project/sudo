@@ -59,11 +59,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_ERR_H
-# include <err.h>
-#else
-# include "emul/err.h"
-#endif /* HAVE_ERR_H */
 #include <pwd.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -177,7 +172,7 @@ main(argc, argv, envp)
     environ = zero_env(envp);
 
     if (geteuid() != 0)
-	errx(1, "must be setuid root");
+	errorx(1, "must be setuid root");
 
     /*
      * Signal setup:
@@ -356,10 +351,10 @@ main(argc, argv, envp)
     if (ISSET(validated, VALIDATE_OK)) {
 	/* Finally tell the user if the command did not exist. */
 	if (cmnd_status == NOT_FOUND_DOT) {
-	    warnx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
+	    warningx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
 	    exit(1);
 	} else if (cmnd_status == NOT_FOUND) {
-	    warnx("%s: command not found", user_cmnd);
+	    warningx("%s: command not found", user_cmnd);
 	    exit(1);
 	}
 
@@ -418,7 +413,7 @@ main(argc, argv, envp)
 
 	    /* Change to target user's homedir. */
 	    if (chdir(runas_pw->pw_dir) == -1)
-		warn("unable to change directory to %s", runas_pw->pw_dir);
+		warning("unable to change directory to %s", runas_pw->pw_dir);
 	}
 
 	if (ISSET(sudo_mode, MODE_EDIT))
@@ -441,7 +436,7 @@ main(argc, argv, envp)
 	/*
 	 * If we got here then the exec() failed...
 	 */
-	warn("unable to execute %s", safe_cmnd);
+	warning("unable to execute %s", safe_cmnd);
 	exit(127);
     } else if (ISSET(validated, FLAG_NO_USER) || (validated & FLAG_NO_HOST)) {
 	log_auth(validated, 1);
@@ -458,9 +453,9 @@ main(argc, argv, envp)
 	    log_auth(validated,
 		!(cmnd_status == NOT_FOUND_DOT || cmnd_status == NOT_FOUND));
 	    if (cmnd_status == NOT_FOUND)
-		warnx("%s: command not found", user_cmnd);
+		warningx("%s: command not found", user_cmnd);
 	    else if (cmnd_status == NOT_FOUND_DOT)
-		warnx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
+		warningx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
 	} else {
 	    /* Just tell the user they are not allowed to run foo. */
 	    log_auth(validated, 1);
@@ -487,7 +482,7 @@ init_vars(sudo_mode)
 
     /* Sanity check command from user. */
     if (user_cmnd == NULL && strlen(NewArgv[0]) >= PATH_MAX)
-	errx(1, "%s: File name too long", NewArgv[0]);
+	errorx(1, "%s: File name too long", NewArgv[0]);
 
 #ifdef HAVE_TZSET
     (void) tzset();		/* set the timezone if applicable */
@@ -552,7 +547,7 @@ init_vars(sudo_mode)
 	 * be run during reboot after the YP/NIS/NIS+/LDAP/etc daemon has died.
 	 */
 	if (sudo_mode & (MODE_INVALIDATE|MODE_KILL))
-	    errx(1, "uid %s does not exist in the passwd file!", pw_name);
+	    errorx(1, "uid %s does not exist in the passwd file!", pw_name);
 	log_error(0, "uid %s does not exist in the passwd file!", pw_name);
     }
     if (user_shell == NULL || *user_shell == '\0')
@@ -577,7 +572,7 @@ init_vars(sudo_mode)
     if (!getcwd(user_cwd, sizeof(user_cwd))) {
 	set_perms(PERM_ROOT);
 	if (!getcwd(user_cwd, sizeof(user_cwd))) {
-	    warnx("cannot get working directory");
+	    warningx("cannot get working directory");
 	    (void) strlcpy(user_cwd, "unknown", sizeof(user_cwd));
 	}
     } else
@@ -598,7 +593,7 @@ init_vars(sudo_mode)
 	else if (user_shell && *user_shell)
 	    NewArgv[0] = user_shell;
 	else
-	    errx(1, "unable to determine shell");
+	    errorx(1, "unable to determine shell");
 
 	/* copy the args from NewArgv */
 	for (dst = NewArgv + 1; (*dst = *src) != NULL; ++src, ++dst)
@@ -653,7 +648,7 @@ set_cmnd(sudo_mode)
 	    for (to = user_args, from = NewArgv + 1; *from; from++) {
 		n = strlcpy(to, *from, size - (to - user_args));
 		if (n >= size - (to - user_args))
-		    errx(1, "internal error, init_vars() overflow");
+		    errorx(1, "internal error, init_vars() overflow");
 		to += n;
 		*to++ = ' ';
 	    }
@@ -696,7 +691,7 @@ parse_args(argc, argv)
 
     while (NewArgc > 0 && NewArgv[0][0] == '-') {
 	if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0')
-	    warnx("please use single character options");
+	    warningx("please use single character options");
 
 	switch (NewArgv[0][1]) {
 	    case 'p':
@@ -824,10 +819,10 @@ parse_args(argc, argv)
 		    SET(rval, (MODE_IMPLIED_SHELL | MODE_SHELL));
 		return(rval);
 	    case '\0':
-		warnx("'-' requires an argument");
+		warningx("'-' requires an argument");
 		usage(1);
 	    default:
-		warnx("illegal option `%s'", NewArgv[0]);
+		warningx("illegal option `%s'", NewArgv[0]);
 		usage(1);
 	}
 	NewArgc--;
@@ -837,10 +832,10 @@ parse_args(argc, argv)
     if (user_runas != NULL) {
 	if (rval == MODE_LIST) {
 	    if ((list_pw = sudo_getpwnam(*user_runas)) == NULL)
-		errx(1, "unknown user %s", *user_runas);
+		errorx(1, "unknown user %s", *user_runas);
 	    user_runas = NULL;
 	} else if (!ISSET(rval, (MODE_EDIT|MODE_RUN))) {
-	    warnx("the `-u' and '-%c' options may not be used together", excl);
+	    warningx("the `-u' and '-%c' options may not be used together", excl);
 	    usage(1);
 	}
     }
@@ -874,17 +869,17 @@ open_sudoers(sudoers, keepopen)
 	(statbuf.st_mode & 0007777) == 0400) {
 
 	if (chmod(sudoers, SUDOERS_MODE) == 0) {
-	    warnx("fixed mode on %s", sudoers);
+	    warningx("fixed mode on %s", sudoers);
 	    SET(statbuf.st_mode, SUDOERS_MODE);
 	    if (statbuf.st_gid != SUDOERS_GID) {
 		if (!chown(sudoers, (uid_t) -1, SUDOERS_GID)) {
-		    warnx("set group on %s", sudoers);
+		    warningx("set group on %s", sudoers);
 		    statbuf.st_gid = SUDOERS_GID;
 		} else
-		    warn("unable to set group on %s", sudoers);
+		    warning("unable to set group on %s", sudoers);
 	    }
 	} else
-	    warn("unable to fix mode on %s", sudoers);
+	    warning("unable to fix mode on %s", sudoers);
     }
 
     /*
@@ -973,7 +968,7 @@ set_loginclass(pw)
 
     if (login_class && strcmp(login_class, "-") != 0) {
 	if (strcmp(*user_runas, "root") != 0 && user_uid != 0)
-	    errx(1, "only root can use -c %s", login_class);
+	    errorx(1, "only root can use -c %s", login_class);
     } else {
 	login_class = pw->pw_class;
 	if (!login_class || !*login_class)
@@ -1074,13 +1069,22 @@ get_authpw()
 }
 
 /*
+ * Stub for error()/errorx()
+ */
+void
+cleanup()
+{
+    return;
+}
+
+/*
  * Tell which options are mutually exclusive and exit.
  */
 static void
 usage_excl(exit_val)
     int exit_val;
 {
-    warnx("Only one of the -e, -h, -k, -K, -l, -s, -v or -V options may be used");
+    warningx("Only one of the -e, -h, -k, -K, -l, -s, -v or -V options may be used");
     usage(exit_val);
 }
 

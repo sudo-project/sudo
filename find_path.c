@@ -42,11 +42,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_ERR_H
-# include <err.h>
-#else
-# include "emul/err.h"
-#endif /* HAVE_ERR_H */
 
 #include "sudo.h"
 
@@ -76,7 +71,7 @@ find_path(infile, outfile, sbp, path)
     int len;			/* length parameter */
 
     if (strlen(infile) >= PATH_MAX)
-	errx(1, "%s: File name too long", infile);
+	errorx(1, "%s: File name too long", infile);
 
     /*
      * If we were given a fully qualified or relative path
@@ -118,7 +113,7 @@ find_path(infile, outfile, sbp, path)
 	 */
 	len = snprintf(command, sizeof(command), "%s/%s", path, infile);
 	if (len <= 0 || len >= sizeof(command))
-	    errx(1, "%s: File name too long", infile);
+	    errorx(1, "%s: File name too long", infile);
 	if ((result = sudo_goodpath(command, sbp)))
 	    break;
 

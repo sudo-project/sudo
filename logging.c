@@ -47,11 +47,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_ERR_H
-# include <err.h>
-#else
-# include "emul/err.h"
-#endif /* HAVE_ERR_H */
 #include <pwd.h>
 #include <grp.h>
 #include <signal.h>
@@ -399,9 +394,9 @@ log_error(va_alist)
      */
     if (!ISSET(flags, NO_STDERR)) {
 	if (ISSET(flags, USE_ERRNO))
-	    warn("%s", message);
+	    warning("%s", message);
 	else
-	    warnx("%s", message);
+	    warningx("%s", message);
     }
 
     /*
@@ -459,12 +454,12 @@ send_mail(line)
     (void) sigprocmask(SIG_BLOCK, &set, &oset);
 
     if (pipe(pfd) == -1)
-	err(1, "cannot open pipe");
+	error(1, "cannot open pipe");
 
     switch (pid = fork()) {
 	case -1:
 	    /* Error. */
-	    err(1, "cannot fork");
+	    error(1, "cannot fork");
 	    break;
 	case 0:
 	    {

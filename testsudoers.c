@@ -53,11 +53,6 @@
 #ifdef HAVE_NETGROUP_H
 # include <netgroup.h>
 #endif /* HAVE_NETGROUP_H */
-#ifdef HAVE_ERR_H
-# include <err.h>
-#else
-# include "emul/err.h"
-#endif /* HAVE_ERR_H */
 #include <ctype.h>
 #include <pwd.h>
 #include <grp.h>
@@ -161,7 +156,7 @@ main(argc, argv)
 
     if (user_host == NULL) {
 	if (gethostname(hbuf, sizeof(hbuf)) != 0)
-	    err(1, "gethostname");
+	    error(1, "gethostname");
 	user_host = hbuf;
     }
     if ((p = strchr(user_host, '.'))) {
@@ -183,7 +178,7 @@ main(argc, argv)
 	for (to = user_args, from = NewArgv + 1; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
 	    if (n >= size - (to - user_args))
-		    errx(1, "internal error, init_vars() overflow");
+		    errorx(1, "internal error, init_vars() overflow");
 	    to += n;
 	    *to++ = ' ';
 	}
@@ -276,6 +271,12 @@ init_envtables()
 void
 set_perms(perm)
     int perm;
+{
+    return;
+}
+
+void
+cleanup()
 {
     return;
 }

@@ -41,11 +41,6 @@
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 # include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
-#ifdef HAVE_ERR_H
-# include <err.h>
-#else
-# include "emul/err.h"
-#endif /* HAVE_ERR_H */
 
 #include "sudo.h"
 
@@ -78,10 +73,10 @@ emalloc(size)
     VOID *ptr;
 
     if (size == 0)
-	errx(1, "internal error, tried to emalloc(0)");
+	errorx(1, "internal error, tried to emalloc(0)");
 
     if ((ptr = (VOID *) malloc(size)) == NULL)
-	errx(1, "unable to allocate memory");
+	errorx(1, "unable to allocate memory");
     return(ptr);
 }
 
@@ -97,13 +92,13 @@ emalloc2(nmemb, size)
     VOID *ptr;
 
     if (nmemb == 0 || size == 0)
-	errx(1, "internal error, tried to emalloc2(0)");
+	errorx(1, "internal error, tried to emalloc2(0)");
     if (nmemb > SIZE_MAX / size)
-	errx(1, "internal error, emalloc2() overflow");
+	errorx(1, "internal error, emalloc2() overflow");
 
     size *= nmemb;
     if ((ptr = (VOID *) malloc(size)) == NULL)
-	errx(1, "unable to allocate memory");
+	errorx(1, "unable to allocate memory");
     return(ptr);
 }
 
@@ -119,11 +114,11 @@ erealloc(ptr, size)
 {
 
     if (size == 0)
-	errx(1, "internal error, tried to erealloc(0)");
+	errorx(1, "internal error, tried to erealloc(0)");
 
     ptr = ptr ? (VOID *) realloc(ptr, size) : (VOID *) malloc(size);
     if (ptr == NULL)
-	errx(1, "unable to allocate memory");
+	errorx(1, "unable to allocate memory");
     return(ptr);
 }
 
@@ -141,14 +136,14 @@ erealloc3(ptr, nmemb, size)
 {
 
     if (nmemb == 0 || size == 0)
-	errx(1, "internal error, tried to erealloc3(0)");
+	errorx(1, "internal error, tried to erealloc3(0)");
     if (nmemb > SIZE_MAX / size)
-	errx(1, "internal error, erealloc3() overflow");
+	errorx(1, "internal error, erealloc3() overflow");
 
     size *= nmemb;
     ptr = ptr ? (VOID *) realloc(ptr, size) : (VOID *) malloc(size);
     if (ptr == NULL)
-	errx(1, "unable to allocate memory");
+	errorx(1, "unable to allocate memory");
     return(ptr);
 }
 
@@ -199,7 +194,7 @@ easprintf(va_alist)
     va_end(ap);
 
     if (len == -1)
-	errx(1, "unable to allocate memory");
+	errorx(1, "unable to allocate memory");
     return(len);
 }
 
@@ -216,6 +211,6 @@ evasprintf(ret, format, args)
     int len;
 
     if ((len = vasprintf(ret, format, args)) == -1)
-	errx(1, "unable to allocate memory");
+	errorx(1, "unable to allocate memory");
     return(len);
 }

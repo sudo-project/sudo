@@ -42,11 +42,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_ERR_H
-# include <err.h>
-#else
-# include "emul/err.h"
-#endif /* HAVE_ERR_H */
 #include <pwd.h>
 
 #include "sudo.h"
@@ -244,7 +239,7 @@ format_env(var, va_alist)
     if (strlcpy(estring, var, esize) >= esize ||
 	strlcat(estring, "=", esize) >= esize) {
 
-	errx(1, "internal error, format_env() overflow");
+	errorx(1, "internal error, format_env() overflow");
     }
 
     /* Now store the variable's value (if any) */
@@ -255,7 +250,7 @@ format_env(var, va_alist)
 #endif
     while ((val = va_arg(ap, char *)) != NULL) {
 	if (strlcat(estring, val, esize) >= esize)
-	    errx(1, "internal error, format_env() overflow");
+	    errorx(1, "internal error, format_env() overflow");
     }
     va_end(ap);
 

@@ -41,11 +41,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_ERR_H
-# include <err.h>
-#else
-# include "emul/err.h"
-#endif /* HAVE_ERR_H */
 #include <ctype.h>
 #include <pwd.h>
 #include <signal.h>
@@ -122,9 +117,9 @@ int sudo_edit(argc, argv)
 	set_perms(PERM_ROOT);
 	if (error || !S_ISREG(sb.st_mode)) {
 	    if (error)
-		warn("%s", *ap);
+		warning("%s", *ap);
 	    else
-		warnx("%s: not a regular file", *ap);
+		warningx("%s: not a regular file", *ap);
 	    if (ofd != -1)
 		close(ofd);
 	    argc--;
@@ -144,16 +139,16 @@ int sudo_edit(argc, argv)
 	tfd = mkstemp(tf[i].tfile);
 	set_perms(PERM_ROOT);
 	if (tfd == -1) {
-	    warn("mkstemp");
+	    warning("mkstemp");
 	    goto cleanup;
 	}
 	if (ofd != -1) {
 	    while ((nread = read(ofd, buf, sizeof(buf))) != 0) {
 		if ((nwritten = write(tfd, buf, nread)) != nread) {
 		    if (nwritten == -1)
-			warn("%s", tf[i].tfile);
+			warning("%s", tf[i].tfile);
 		    else
-			warnx("%s: short write", tf[i].tfile);
+			warningx("%s: short write", tf[i].tfile);
 		    goto cleanup;
 		}
 	    }
@@ -225,7 +220,7 @@ int sudo_edit(argc, argv)
     gettime(&ts1);
     kidpid = fork();
     if (kidpid == -1) {
-	warn("fork");
+	warning("fork");
 	goto cleanup;
     } else if (kidpid == 0) {
 	/* child */
@@ -234,7 +229,7 @@ int sudo_edit(argc, argv)
 	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
 	set_perms(PERM_FULL_USER);
 	execvp(nargv[0], nargv);
-	warn("unable to execute %s", nargv[0]);
+	warning("unable to execute %s", nargv[0]);
 	_exit(127);
     }
 
@@ -278,10 +273,10 @@ int sudo_edit(argc, argv)
 	set_perms(PERM_ROOT);
 	if (error || !S_ISREG(sb.st_mode)) {
 	    if (error)
-		warn("%s", tf[i].tfile);
+		warning("%s", tf[i].tfile);
 	    else
-		warnx("%s: not a regular file", tf[i].tfile);
-	    warnx("%s left unmodified", tf[i].ofile);
+		warningx("%s: not a regular file", tf[i].tfile);
+	    warningx("%s left unmodified", tf[i].ofile);
 	    if (tfd != -1)
 		close(tfd);
 	    continue;
@@ -294,7 +289,7 @@ int sudo_edit(argc, argv)
 	     */
 	    timespecsub(&ts1, &ts2, &ts2);
 	    if (timespecisset(&ts2)) {
-		warnx("%s unchanged", tf[i].ofile);
+		warningx("%s unchanged", tf[i].ofile);
 		unlink(tf[i].tfile);
 		close(tfd);
 		continue;
@@ -304,17 +299,17 @@ int sudo_edit(argc, argv)
 	ofd = open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
 	set_perms(PERM_ROOT);
 	if (ofd == -1) {
-	    warn("unable to write to %s", tf[i].ofile);
-	    warnx("contents of edit session left in %s", tf[i].tfile);
+	    warning("unable to write to %s", tf[i].ofile);
+	    warningx("contents of edit session left in %s", tf[i].tfile);
 	    close(tfd);
 	    continue;
 	}
 	while ((nread = read(tfd, buf, sizeof(buf))) > 0) {
 	    if ((nwritten = write(ofd, buf, nread)) != nread) {
 		if (nwritten == -1)
-		    warn("%s", tf[i].ofile);
+		    warning("%s", tf[i].ofile);
 		else
-		    warnx("%s: short write", tf[i].ofile);
+		    warningx("%s: short write", tf[i].ofile);
 		break;
 	    }
 	}
@@ -322,11 +317,11 @@ int sudo_edit(argc, argv)
 	    /* success, got EOF */
 	    unlink(tf[i].tfile);
 	} else if (nread < 0) {
-	    warn("unable to read temporary file");
-	    warnx("contents of edit session left in %s", tf[i].tfile);
+	    warning("unable to read temporary file");
+	    warningx("contents of edit session left in %s", tf[i].tfile);
 	} else {
-	    warn("unable to write to %s", tf[i].ofile);
-	    warnx("contents of edit session left in %s", tf[i].tfile);
+	    warning("unable to write to %s", tf[i].ofile);
+	    warningx("contents of edit session left in %s", tf[i].tfile);
 	}
 	close(ofd);
     }

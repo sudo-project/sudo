@@ -45,11 +45,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_ERR_H
-# include <err.h>
-#else
-# include "emul/err.h"
-#endif /* HAVE_ERR_H */
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -273,7 +268,7 @@ expand_prompt(old_prompt, user, host)
 
 oflow:
     /* We pre-allocate enough space, so this should never happen. */
-    errx(1, "internal error, expand_prompt() overflow");
+    errorx(1, "internal error, expand_prompt() overflow");
 }
 
 /*
@@ -552,7 +547,7 @@ remove_timestamp(remove)
 	} else {
 	    timespecclear(&ts);
 	    if (touch(-1, path, &ts) == -1)
-		err(1, "can't reset %s to Epoch", path);
+		error(1, "can't reset %s to Epoch", path);
 	}
     }
 

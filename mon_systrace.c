@@ -27,11 +27,6 @@
 #include <pwd.h>
 #include <signal.h>
 #include <fcntl.h>
-#ifdef HAVE_ERR_H
-# include <err.h>
-#else
-# include "emul/err.h"
-#endif /* HAVE_ERR_H */
 #ifdef HAVE_DEV_SYSTRACE_H
 # include <dev/systrace.h>
 #else
@@ -110,7 +105,7 @@ systrace_attach(pid)
     int fd, cookie;
 
     if ((fd = systrace_open()) == -1)
-	err(1, "unable to open systrace");
+	error(1, "unable to open systrace");
     fflush(stdout);
 
     /*
@@ -119,16 +114,16 @@ systrace_attach(pid)
      */ 
     sigfillset(&set);
     if (sigprocmask(SIG_BLOCK, &set, &oset) != 0)
-	err(1, "sigprocmask");
+	error(1, "sigprocmask");
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     sa.sa_handler = catchsig;
     if (sigaction(SIGUSR1, &sa, &osa) != 0)
-	err(1, "sigaction");
+	error(1, "sigaction");
 
     switch (fork()) {
     case -1:
-	err(1, "can't fork");
+	error(1, "can't fork");
     case 0:
 	/* tracer */
 	break;
@@ -138,7 +133,7 @@ systrace_attach(pid)
 	sigdelset(&set, SIGUSR1);
 	(void) sigsuspend(&set);
 	if (sigprocmask(SIG_SETMASK, &oset, NULL) != 0) {
-	    warn("sigprocmask");
+	    warning("sigprocmask");
 	    exit(1);
 	}
 	return;
@@ -154,14 +149,14 @@ systrace_attach(pid)
 	sigaction(SIGINT, &sa, NULL) != 0 ||
 	sigaction(SIGTERM, &sa, NULL) != 0 ||
 	sigprocmask(SIG_SETMASK, &oset, NULL) != 0) {
-	warn("unable to setup signals for %s", user_cmnd);
+	warning("unable to setup signals for %s", user_cmnd);
 	goto fail;
     }
 
     /* become a daemon */
     set_perms(PERM_FULL_ROOT);
     if (setsid() == -1) {
-	warn("setsid");
+	warning("setsid");
 	kill(pid, SIGKILL);
 	_exit(1);
     }
@@ -177,18 +172,18 @@ systrace_attach(pid)
 	    (void) kill(pid, SIGUSR1);
 	    _exit(0);
 	}
-	warn("unable to systrace %s", user_cmnd);
+	warning("unable to systrace %s", user_cmnd);
 	goto fail;
     }
 
     new_child(-1, pid);
     if (set_policy(fd, children.first) != 0) {
-	warn("failed to set policy for %s", user_cmnd);
+	warning("failed to set policy for %s", user_cmnd);
 	goto fail;
     }
 
     if (kill(pid, SIGUSR1) != 0) {
-	warn("unable to wake up sleeping child");
+	warning("unable to wake up sleeping child");
 	_exit(1);
     }
 
@@ -259,7 +254,7 @@ systrace_attach(pid)
 		if (switch_emulation(fd, &msg) == 0)
 		    ans.stra_policy = SYSTR_POLICY_PERMIT;
 		else {
-		    warnx("unsupported emulation \"%s\"",
+		    warningx("unsupported emulation \"%s\"",
 			msg.msg_data.msg_emul.emul);
 		    ans.stra_policy = SYSTR_POLICY_NEVER;
 		}
@@ -273,7 +268,7 @@ systrace_attach(pid)
 
 	    default:
 #ifdef SUDO_DEVEL
-		warnx("unexpected message type %d", msg.msg_type);
+		warningx("unexpected message type %d", msg.msg_type);
 #endif
 		memset(&ans, 0, sizeof(ans));
 		ans.stra_pid = msg.msg_pid;
@@ -314,7 +309,7 @@ new_child(ppid, pid)
 		break;
 	    }
 	if (emul == NULL)
-	    errx(1, "unable to find native emulation!");
+	    errorx(1, "unable to find native emulation!");
     }
     entry = (struct childinfo *) emalloc(sizeof(*entry));
     entry->pid = pid;
@@ -507,7 +502,7 @@ find_handler(pid, code)
     struct childinfo *child;
 
     if ((child = find_child(pid)) == NULL) {
-	warnx("unable to find child with pid %d", pid);
+	warningx("unable to find child with pid %d", pid);
 	return(NULL);
     }
     for (sca = child->action; sca->code != -1; sca++) {
@@ -572,7 +567,7 @@ update_env(fd, pid, seqnr, askp)
     envep = envbuf + (sizeof(envbuf) / sizeof(char *));
     for (envp = envbuf; envp < envep; envp++, off += sizeof(char *)) {
 	if (systrace_read(fd, pid, off, &ap, sizeof(ap)) != 0) {
-	    warn("STRIOCIO");
+	    warning("STRIOCIO");
 	    return(-1);
 	}
 	if ((*envp = ap) == NULL)
@@ -703,7 +698,7 @@ update_env(fd, pid, seqnr, askp)
 		    continue;
 		ap = inject.stri_addr + (replace[n] - buf);
 		if (systrace_write(fd, pid, offsets[n], &ap, sizeof(ap)) != 0) {
-		    warn("STRIOCIO");
+		    warning("STRIOCIO");
 		    return(-1);
 		}
 	    }
@@ -782,7 +777,7 @@ decode_args(fd, pid, askp)
     off = (char *)askp->args[1];
     for (cp = abuf, ep = abuf + sizeof(abuf); cp < ep; off += sizeof(char *)) {
 	if (systrace_read(fd, pid, off, &ap, sizeof(ap)) != 0) {
-	    warn("STRIOCIO");
+	    warning("STRIOCIO");
 	    return(-1);
 	}
 	if (ap == NULL) {
@@ -848,7 +843,7 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
     /* Get processes's cwd. */
     error = ioctl(fd, STRIOCGETCWD, &pid);
     if (error == -1 || !getcwd(user_cwd, sizeof(user_cwd))) {
-	warnx("cannot get working directory");
+	warningx("cannot get working directory");
 	(void) strlcpy(user_cwd, "unknown", sizeof(user_cwd));
     }
 
