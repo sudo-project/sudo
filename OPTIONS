@@ -110,8 +110,9 @@ GOONS_INSULTS
     This is off by default.
 
 CSOPS_INSULTS
-    Insults the user with an extra set of insults from a sysadmin group at CU
-    (CSOps).  You must define USE_INSULTS as well for this to have any effect.
+    Insults the user with an extra set of insults (some quotes, some original)
+    from a sysadmin group at CU (CSOps).  You must define USE_INSULTS as well
+    for this to have any effect.
     This is off by default.
 
 EDITOR
