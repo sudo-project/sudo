@@ -88,6 +88,7 @@ static char *format_env		__P((char *, ...));
  */
 static const char *initial_badenv_table[] = {
     "IFS",
+    "CDPATH",
     "LOCALDOMAIN",
     "RES_OPTIONS",
     "HOSTALIASES",
