@@ -23,14 +23,6 @@
  *             NOT using configure.
  */
 
-/* Deal with ansi stuff reasonably.  */
-#undef  __P
-#if defined (__cplusplus) || defined (__STDC__)
-#  define __P(args)	args
-#else
-#  define __P(args)	()
-#endif
-
 /* New ANSI-style OS defs.  */
 #if defined(hpux) && !defined(__hpux)
 #  define __hpux	1
