@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.3  1999/01/17 21:31:37  millert
-''' regen based on sudo.pod, sudoers.pod, and visudo.pod
+''' Revision 1.4  1999/01/17 22:40:55  millert
+''' crank version and regen files
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH visudo 8 "1.5.7" "17/Oct/98" "MAINTENANCE COMMANDS"
+.TH visudo 8 "1.5.8" "17/Oct/98" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na

@@ -1,5 +1,5 @@
 #*
-#* CU sudo version 1.5.7 (based on Root Group sudo version 1.1)
+#* CU sudo version 1.5.8 (based on Root Group sudo version 1.1)
 #*
 #* This software comes with no waranty whatsoever, use at your own risk.
 #*
@@ -116,7 +116,7 @@ LIBOBJS = @LIBOBJS@ @ALLOCA@
 HDRS = sudo.h compat.h version.h insults.h \
        ins_2001.h ins_classic.h ins_goons.h ins_csops.h sudo.tab.h
 
-VERSION = 1.5.7
+VERSION = 1.5.8
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL \
             INSTALL.configure TODO PORTING README RUNSON \

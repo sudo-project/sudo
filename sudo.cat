@@ -8,8 +8,8 @@ NNNNAAAAMMMMEEEE
        sudo - execute a command as the superuser
 
 SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
-       ssssuuuuddddoooo ----VVVV | ----hhhh | ----llll | ----vvvv | ----kkkk | ----ssss | ----HHHH | [ ----bbbb ] | [ ----pppp
-       prompt ] [ ----uuuu username/#uid] _c_o_m_m_a_n_d
+       ssssuuuuddddoooo ----VVVV | ----hhhh | ----llll | ----vvvv | ----kkkk | ----ssss | ----HHHH | [ ----bbbb ] | [ ----rrrr
+       realm ] | [ ----pppp prompt ] [ ----uuuu username/#uid] _c_o_m_m_a_n_d
 
 DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        ssssuuuuddddoooo allows a permitted user to execute a _c_o_m_m_a_n_d as the
@@ -61,7 +61,7 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-5/Nov/98                      1.5.7                             1
+17/Jan/99                     1.5.8                             1
 
 
 
@@ -72,6 +72,12 @@ sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
            -b option you cannot use shell job control to
            manipulate the command.
+
+       -r  The -r (_r_e_a_l_m) option is only available if ssssuuuuddddoooo was
+           configured with KKKKeeeerrrrbbbbeeeerrrroooossss version 5 support.  It allows
+           the user to specify a KKKKeeeerrrrbbbbeeeerrrroooossss realm other than the
+           system default to use when authenticating the user via
+           KKKKeeeerrrrbbbbeeeerrrroooossss.
 
        -p  The -p (_p_r_o_m_p_t) option allows you to override the
            default password prompt and use a custom one.  If the
@@ -119,15 +125,9 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
        ssssuuuuddddoooo will also remove the IFS, ENV, BASH_ENV and KRB_CONF
        variables as they too can pose a threat.
 
-       To prevent command spoofing, ssssuuuuddddoooo checks "." and "" (both
-       denoting current directory) last when searching for a
-       command in the user's PATH (if one or both are in the
-       PATH).  Note, however, that the actual PATH environment
-       variable is _n_o_t modified and is passed unchanged to the
 
 
-
-5/Nov/98                      1.5.7                             2
+17/Jan/99                     1.5.8                             2
 
 
 
@@ -136,6 +136,11 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
+       To prevent command spoofing, ssssuuuuddddoooo checks "." and "" (both
+       denoting current directory) last when searching for a
+       command in the user's PATH (if one or both are in the
+       PATH).  Note, however, that the actual PATH environment
+       variable is _n_o_t modified and is passed unchanged to the
        program that ssssuuuuddddoooo executes.
 
        For security reasons, if your OS supports shared
@@ -186,14 +191,9 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT V
         SUDO_PS1               If set, PS1 will be set to its value
 
 
-AAAAUUUUTTTTHHHHOOOORRRRSSSS
-       Many people have worked on ssssuuuuddddoooo over the years, this
-       version consists of code written primarily by:
 
 
-
-
-5/Nov/98                      1.5.7                             3
+17/Jan/99                     1.5.8                             3
 
 
 
@@ -201,6 +201,10 @@ AAAAUUUUTTTTHHHHOOOORRRRSSSS
 
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
+
+AAAAUUUUTTTTHHHHOOOORRRRSSSS
+       Many people have worked on ssssuuuuddddoooo over the years, this
+       version consists of code written primarily by:
 
                Jeff Nieusma
                David Hieb
@@ -255,11 +259,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-
-
-
-5/Nov/98                      1.5.7                             4
+17/Jan/99                     1.5.8                             4
 
 
 
@@ -325,6 +325,6 @@ sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
 
-5/Nov/98                      1.5.7                             5
+17/Jan/99                     1.5.8                             5
 
 

@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.26  1999/01/17 21:31:37  millert
-''' regen based on sudo.pod, sudoers.pod, and visudo.pod
+''' Revision 1.27  1999/01/17 22:40:53  millert
+''' crank version and regen files
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudo 8 "1.5.7" "5/Nov/98" "MAINTENANCE COMMANDS"
+.TH sudo 8 "1.5.8" "17/Jan/99" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -194,7 +194,7 @@
 sudo \- execute a command as the superuser
 .SH "SYNOPSIS"
 \fBsudo\fR \fB\-V\fR | \fB\-h\fR | \fB\-l\fR | \fB\-v\fR | \fB\-k\fR | \fB\-s\fR | \fB\-H\fR |
-[ \fB\-b\fR ] | [ \fB\-p\fR prompt ] [ \fB\-u\fR username/#uid] \fIcommand\fR
+[ \fB\-b\fR ] | [ \fB\-r\fR realm ] | [ \fB\-p\fR prompt ] [ \fB\-u\fR username/#uid] \fIcommand\fR
 .SH "DESCRIPTION"
 \fBsudo\fR allows a permitted user to execute a \fIcommand\fR
 as the superuser (real and effective uid and gid are set
@@ -238,6 +238,11 @@ allow a user to revoke \fBsudo\fR permissions from a .logout file.
 The \f(CW-b\fR (\fIbackground\fR) option tells \fBsudo\fR to run the given
 command in the background.  Note that if you use the \f(CW-b\fR
 option you cannot use shell job control to manipulate the command.
+.Ip "-r" 4
+The \f(CW-r\fR (\fIrealm\fR) option is only available if \fBsudo\fR was configured
+with \fBKerberos\fR version 5 support.  It allows the user to specify a
+\fBKerberos\fR realm other than the system default to use when authenticating
+the user via \fBKerberos\fR.
 .Ip "-p" 4
 The \f(CW-p\fR (\fIprompt\fR) option allows you to override the default
 password prompt and use a custom one.  If the password prompt
@@ -396,6 +401,8 @@ that make setuid shell scripts unsafe on some operating systems.
 .IX Item "-k"
 
 .IX Item "-b"
+
+.IX Item "-r"
 
 .IX Item "-p"
 

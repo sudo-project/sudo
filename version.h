@@ -1,5 +1,5 @@
 /*
- *  CU sudo version 1.5.7
+ *  CU sudo version 1.5.8
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,6 @@
 #ifndef _SUDO_VERSION_H
 #define _SUDO_VERSION_H
 
-static const char version[] = "1.5.7";
+static const char version[] = "1.5.8";
 
 #endif /* _SUDO_VERSION_H */
