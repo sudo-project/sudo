@@ -1072,9 +1072,9 @@ Sudo 1.5.9 released.
      to anything real.  Instead, we just use a max password size of 256
      everywhere.
 
-337) Block all signals during startup (for non-POSIX signals we only block
-     some of them) and restore signal mask before exec'ing the program.
-     We don't want the user to be able to simply kill us and avoid logging.
+337) Block keyboard-generated signals during startup and restore signal
+     mask before exec'ing the program.  We don't want the user to be
+     able to simply kill us and avoid logging.
 
 338) Rewrote timestamp handling.  For the default case, a directory is used
      instead of a file.  For the tty-based case, the timestamp is just a
@@ -1126,7 +1126,7 @@ Sudo 1.5.9 released.
 352) Fixed crypt() check in libufc.
 
 353) It is now possible to put a list of users as the first thing in a
-     user specification.  I don't suggest ths but it makes the grammar
+     user specification.  I don't suggest this but it makes the grammar
      more uniform.
 
 354) Visudo will now warn about what it thinks are undefined aliases.
@@ -1163,3 +1163,15 @@ Sudo 1.5.9 released.
      Normal parsing (ie: not in '-l' mode) is unaffected.
 
 365) Now include strcasecmp() for those without it.
+
+366) Most compile-time options are now changable at runtime via
+     the 'Defaults' specification in the sudoers file.
+
+367) Added a -L flag to printout all the possible 'Defaults' parameters.
+
+368) It is now possible to escape "special" characters in usernames, hostnames,
+     etc with a backslash.
+
+369) Sudo will now accept a hostname/username/netgroupname that contains
+     almost any character in it.  It seems many people want to use '.'
+     and other non-alphanumberics in usernames.
