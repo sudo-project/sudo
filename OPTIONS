@@ -96,7 +96,7 @@ USE_INSULTS
 
 CLASSIC_INSULTS
     Uses insults from sudo "classic."  If you just define USE_INSULTS
-    you will get the classic insults.
+    you will get the classic and CSOps insults.
     This is on by default if USE_INSULTS is defined.
 
 HAL_INSULTS
@@ -114,7 +114,7 @@ CSOPS_INSULTS
     Insults the user with an extra set of insults (some quotes, some original)
     from a sysadmin group at CU (CSOps).  You must define USE_INSULTS as well
     for this to have any effect.
-    This is off by default.
+    This is on by default if USE_INSULTS is defined.
 
 EDITOR
     This is the default editor used by visudo (and the only editor used unless
