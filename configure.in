@@ -108,6 +108,7 @@ dnl C compiler checks
 dnl
 AC_PROG_CC
 AC_PROG_CPP
+AC_ISC_POSIX
 
 dnl
 dnl find programs we use
