@@ -337,6 +337,9 @@ AC_DEFUN(SUDO_APPEND_LIBPATH, [
     else
 	$1="${$1} -L$2"
     fi
+    if test X"$blibpath" != X"" -a "$1" = "SUDO_LDFLAGS"; then
+	blibpath_add="${blibpath_add}:$2"
+    fi
 ])
 
 dnl
