@@ -1257,7 +1257,8 @@ expand_match_list()
  * for various data structures.
  */
 void
-init_parser(char *path)
+init_parser(path)
+    char *path;
 {
 
     /* Free up old data structures if we run the parser more than once. */

@@ -1020,7 +1020,8 @@ expand_match_list()
  * for various data structures.
  */
 void
-init_parser(char *path)
+init_parser(path)
+    char *path;
 {
 
     /* Free up old data structures if we run the parser more than once. */
@@ -1045,7 +1046,7 @@ init_parser(char *path)
 
     sudoers = estrdup(path);
 }
-#line 997 "sudo.tab.c"
+#line 998 "sudo.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -2008,7 +2009,7 @@ case 95:
 			    yyval.BOOLEAN = TRUE;
 			}
 break;
-#line 1960 "sudo.tab.c"
+#line 1961 "sudo.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
