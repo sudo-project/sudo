@@ -159,7 +159,11 @@ Special features/options:
 	on the machine.
 
   --with-pam
-	Enable PAM support.  Tested on Redhat Linux 5.x and Solaris 2.6.
+	Enable PAM support.  Tested on Redhat Linux 5.x, 6.0 and
+	Solaris 2.6, 7.
+	NOTE: on RedHat Linux (and perhaps others) you *must* install
+	an /etc/pam.d/sudo file.  You may either use the sample.pam
+	file included with sudo or use /etc/pam.d/su as a reference.
 
   --with-AFS
 	Enable AFS support with kerberos authentication.  Should work under
