@@ -5,6 +5,10 @@ code actually readable by my standards, it won't even diff usefully against
 their source.  Sorry (but if you've seen the previous coding style...)
 The indent.pro in this directory is what was used to format the source.
 
+CU sudo 1.3 is mostly a cleanup of the sudo 1.2 code including bug fixes,
+portability changes with a few extra features.  See the CHANGES file for
+the full scoop.
+
 Note that the Makefile has changed significantly.  Type make and choose
 whichever OS type is appropriate.  If there is nothing close, try generic.
 For more info see the INSTALL file.  If you need to make changes, please
