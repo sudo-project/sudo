@@ -54,7 +54,7 @@ static char rcsid[] = "$Id$";
 #include "options.h"
 
 #ifndef HAVE_LSEARCH
-#include "search.h"
+#include "emul/search.h"
 #endif /* HAVE_LSEARCH */
 
 extern int sudolineno, parse_error;
