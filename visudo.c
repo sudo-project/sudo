@@ -30,6 +30,7 @@
 * edit, lock and parse the sudoers file in a fashion similiar to /etc/vipw.
 *******************************************************************************/
 #include <sys/types.h>
+#include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <stdio.h>
