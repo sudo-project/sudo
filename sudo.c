@@ -553,7 +553,7 @@ init_vars(sudo_mode)
     /* It is now safe to use log_error() and set_perms() */
 
 #ifdef HAVE_GETGROUPS
-    if (list_pw == NULL && (user_ngroups = getgroups(0, NULL)) > 0) {
+    if ((user_ngroups = getgroups(0, NULL)) > 0) {
 	user_groups = emalloc2(user_ngroups, sizeof(gid_t));
 	if (getgroups(user_ngroups, user_groups) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
@@ -828,6 +828,10 @@ parse_args(argc, argv)
 		    usage(1);
 		if ((list_pw = sudo_getpwnam(NewArgv[1])) == NULL)
 		    errorx(1, "unknown user %s", NewArgv[1]);
+#ifdef HAVE_INITGROUPS
+		/* Set group vector so group matching works correctly. */
+		(void) initgroups(list_pw->pw_name, list_pw->pw_gid);
+#endif
 		NewArgc--;
 		NewArgv++;
 		break;
