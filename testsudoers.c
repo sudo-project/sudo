@@ -293,7 +293,7 @@ int main(argc, argv)
 
     if ((p = strchr(host, '.'))) {
 	*p = '\0';
-	if ((shost = strdup(host)) == NULL) {
+	if ((shost = (char *) strdup(host)) == NULL) {
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}

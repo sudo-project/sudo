@@ -511,7 +511,7 @@ cmndalias	:	ALIAS {
 				in_alias = TRUE;
 				/* Allocate space for ga_list if necesary. */
 				expand_ga_list();
-				if (!(ga_list[ga_list_len-1].alias = strdup($1))){
+				if (!(ga_list[ga_list_len-1].alias = (char *) strdup($1))){
 				    (void) fprintf(stderr,
 				      "%s: cannot allocate memory!\n", Argv[0]);
 				    exit(1);
@@ -544,7 +544,7 @@ runasalias	:	ALIAS {
 				in_alias = TRUE;
 				/* Allocate space for ga_list if necesary. */
 				expand_ga_list();
-				if (!(ga_list[ga_list_len-1].alias = strdup($1))){
+				if (!(ga_list[ga_list_len-1].alias = (char *) strdup($1))){
 				    (void) fprintf(stderr,
 				      "%s: cannot allocate memory!\n", Argv[0]);
 				    exit(1);
