@@ -1470,7 +1470,7 @@ Sudo 1.6.4 released.
 
 Sudo 1.6.4p1 released.
 
-460) Some special characters were not being escaped properly (e..g '\,')
+460) Some special characters were not being escaped properly (e.g. '\,')
      in command line arguments and would cause a syntax error instead.
 
 461) "sudo -l" would not work if the always_set_home option was set.
@@ -1711,3 +1711,10 @@ Sudo 1.6.7p5 released.
 
 539) Sudo now produces a sensible error message when the targetpw
      Defaults option is set and a non-existent uid is specified via -u.
+
+Sudo 1.6.8 released.
+
+540) Find the command base and fill in struct stat earlier.
+
+541) sudoedit now keeps the temp file open instead of re-opening after
+     the editor has exited.
