@@ -158,7 +158,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_HAVE_FUNCS(getwd strchr strrchr sysconf sigaction bzero fchdir)
+AC_HAVE_FUNCS(getwd strchr strrchr sysconf sigaction bzero fchdir tzset)
 AC_FUNC_CHECK(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
 AC_FUNC_CHECK(realpath, AC_DEFINE(HAVE_REALPATH), LIBOBJS="$LIBOBJS realpath.o")
 AC_FUNC_CHECK(getcwd, AC_DEFINE(HAVE_GETCWD), LIBOBJS="$LIBOBJS getcwd.o")
