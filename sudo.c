@@ -399,6 +399,11 @@ main(argc, argv, envp)
 		"please report this error at http://courtesan.com/sudo/bugs/");
 	}
 
+#ifdef HAVE_SYSTRACE 
+	if (ISSET(validated, FLAG_TRACE))
+	    systrace_attach(getpid());
+#endif
+
 	/* Override user's umask if configured to do so. */
 	if (def_umask != 0777)
 	    (void) umask(def_umask);

@@ -239,6 +239,9 @@ int pam_prep_user	__P((struct passwd *));
 void zero_bytes		__P((volatile VOID *, size_t));
 int gettime		__P((struct timespec *));
 YY_DECL;
+#ifdef HAVE_SYSTRACE
+void systrace_attach	__P((pid_t));
+#endif
 
 /* Only provide extern declarations outside of sudo.c. */
 #ifndef _SUDO_MAIN
