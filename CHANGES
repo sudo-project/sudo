@@ -121,3 +121,9 @@ CHANGES from sudo 1.3
 
 41) added -v (validate) flag to sudo to update a timestamp w/o running
     a command
+
+42) now use tgetpass() (getpass with a timeout)
+
+43) find_path() now uses realpath(3)
+
+44) wrote versions of realpath(3) and getcwd(3) for those without

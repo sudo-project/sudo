@@ -4,7 +4,7 @@ TODO list
 
 02) Add groups of users to the config file.
 
-03) Deal with host aliases rationally.
+03) Deal with host aliases (CNAME records) rationally.
 
 04) Nestable command aliases
 
@@ -19,6 +19,4 @@ TODO list
 
 09) Add default options to sudoers file (umask, def uid, def gids, dir, PATH)
 
-10) put BROKEN_GETPASS in sudo.h?  Need it somewhere...
-
-11) clean up aclocal.m4 & configure.in (use uname...)
+10) make sudo.c use getopt(3)
