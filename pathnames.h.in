@@ -32,8 +32,12 @@
 #define _PATH_DEV		"/dev/"
 #endif /* _PATH_DEV */
 
+#ifndef _PATH_TTY
+#define _PATH_TTY		"/dev/tty"
+#endif /* _PATH_TTY */
+
 /*
- * NOTE: _PATH_SUDO_SUDOERS is usually overriden by the Makefile
+ * NOTE: _PATH_SUDO_SUDOERS is usually overriden by the Makefile.
  */
 #ifndef _PATH_SUDO_SUDOERS
 #define _PATH_SUDO_SUDOERS	"/etc/sudoers"
@@ -48,43 +52,38 @@
 #define _PATH_SUDO_STMP		"/etc/stmp"
 #endif /* _PATH_SUDO_STMP */
 
+/*
+ * The following paths are controlled via the configure script.
+ */
+
+/*
+ * Where to put the timestamp files.  Defaults to /var/run/sudo if
+ * /var/run exists, else /tmp/.odus.
+ */
 #ifndef _PATH_SUDO_TIMEDIR
-#define _PATH_SUDO_TIMEDIR	_CONFIG_PATH_TIMEDIR
+#undef _PATH_SUDO_TIMEDIR
 #endif /* _PATH_SUDO_TIMEDIR */
 
-#ifndef _PATH_TTY
-#define _PATH_TTY		"/dev/tty"
-#endif /* _PATH_TTY */
-
 /*
- * The following paths are gleaned via configure but you can override
- * configure's values here if you want.
- */
-
-/*
- * Where to put the sudo log file when logging to a file this
- * is /var/log/sudo.log if /var/log exists, else /var/adm/sudo.log
+ * Where to put the sudo log file when logging to a file.  Defaults to
+ * /var/log/sudo.log if /var/log exists, else /var/adm/sudo.log.
  */
 #ifndef _PATH_SUDO_LOGFILE
-#define _PATH_SUDO_LOGFILE	_CONFIG_PATH_LOGFILE
+#undef _PATH_SUDO_LOGFILE
 #endif /* _PATH_SUDO_LOGFILE */
 
 #ifndef _PATH_SENDMAIL
-#define _PATH_SENDMAIL		_CONFIG_PATH_SENDMAIL
+#undef _PATH_SENDMAIL
 #endif /* _PATH_SENDMAIL */
 
 #ifndef _PATH_VI
-#define _PATH_VI		_CONFIG_PATH_VI
+#undef _PATH_VI
 #endif /* _PATH_VI */
 
-#ifndef _PATH_PWD
-#define _PATH_PWD		_CONFIG_PATH_PWD
-#endif /* _PATH_PWD */
-
 #ifndef _PATH_MV
-#define _PATH_MV		_CONFIG_PATH_MV
+#undef _PATH_MV
 #endif /* _PATH_MV */
 
 #ifndef _PATH_BSHELL
-#define _PATH_BSHELL		_CONFIG_PATH_BSHELL
+#undef _PATH_BSHELL
 #endif /* _PATH_BSHELL */
