@@ -23,6 +23,6 @@
 #ifndef _SUDO_VERSION_H
 #define _SUDO_VERSION_H
 
-static char version[] = "1.4.1";
+static char version[] = "1.4.2";
 
 #endif /* _SUDO_VERSION_H */
