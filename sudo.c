@@ -246,6 +246,12 @@ int main(argc, argv)
 	exit(1);
     }
 
+#ifdef SECURE_PATH
+    /* replace the PATH envariable with a secure one */
+    if (!user_is_exempt())
+	sudo_setenv("PATH", SECURE_PATH);
+#endif /* SECURE_PATH */
+
     if ((sudo_mode & MODE_RUN)) {
 	load_cmnd(sudo_mode);	/* load the cmnd global variable */
     } else if (sudo_mode == MODE_KILL) {
@@ -592,12 +598,6 @@ static void usage(exit_val)
 static void add_env()
 {
     char idstr[MAX_UID_T_LEN + 1];
-
-#ifdef SECURE_PATH
-    /* replace the PATH envariable with a secure one */
-    if (!user_is_exempt())
-	sudo_setenv("PATH", SECURE_PATH);
-#endif /* SECURE_PATH */
 
     /* add the SUDO_COMMAND envariable */
     if (sudo_setenv("SUDO_COMMAND", cmnd)) {
