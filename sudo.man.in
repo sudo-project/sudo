@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "August  5, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "August  6, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
@@ -369,7 +369,9 @@ in passwd(@mansectform@).
 .IX Item "-u"
 The \fB\-u\fR (\fIuser\fR) option causes \fBsudo\fR to run the specified command
 as a user other than \fIroot\fR.  To specify a \fIuid\fR instead of a
-\&\fIusername\fR, use \fI#uid\fR.
+\&\fIusername\fR, use \fI#uid\fR.  Note that if the \fItargetpw\fR Defaults
+option is set (see sudoers(@mansectform@)) it is not possible
+to run commands with a uid not listed in the password database.
 .IP "\-v" 4
 .IX Item "-v"
 If given the \fB\-v\fR (\fIvalidate\fR) option, \fBsudo\fR will update the
