@@ -1,23 +1,47 @@
 INSTALL NOTES
 
-    Installation should be trivial for supported architectures.  Type "make" to
-find out what is supported and then "make os-type" to build.  Ie: you
-would type "make sunos" to build sudo for SunOS 4.x.  If your OS is not
-in the list try the generic entry.  You may have to add your own OS entry
-in the Makefile, it's not hard to do.
+1) Read the Makefile and sudo.h to enable/disable the options you may
+   or may now want.
 
-    You should read the Makefile and sudo.h carefully and determine which
-options are applicable to your site and your needs.  (Although USE_INSULTS
-is not defined by default it is highly recommended :-)
+2) Type make and see if your OS is on the list.  If it is just do
+   "make ostype" where ostype one of the ones listed (ie "make sunos").
 
-    To install sudo on your system type "make install" -- this will install
-sudo and visudo binaries, the sudo man page, and a sample sudoers file
-(if one does not already exist).  You can also install various pieces of
-the package via install-binaries, install-man, install-sudoers.
+   If your os is not listed, you can try "make generic" and see if it
+   works.  You may have to add your own OS entry to the Makefile
+   but it's not hard to do.
 
-    Note that to use syslog with the ultrix version you may need to grab
-and install pub/DEC/jtkohl-syslog-complete.tar.Z available from
-gatekeeper.dec.com via anonymous ftp.  All our decs have this installed.
+3) Do a make install to install sudo.  If you get an error about
+   setuid(0) failing, something went wrong with the install and
+   the permissions on sudo are wrong.  Sudo needs to run setuid root.
+   If you get this message, chances are it's not running setuid root.
+
+   You can also install various pieces the package via install-binaries,
+   install-man, install-sudoers.
+
+4) You're done.
+
+A few notes:
+
+a) To use syslog with the ultrix version you *may* need to grab
+   and install pub/DEC/jtkohl-syslog-complete.tar.Z available from
+   gatekeeper.dec.com via anonymous ftp.  All our decs have this installed
+   so I'm not really sure if it's necesary or not.  Regardless, it's
+   a nice port of the 4.3 syslogd that backwards compatible with the
+   ultrix version.  Highly recommended.
+
+b) By default, visudo will use the editor referred to by the EDITOR and
+   VISUAL environmental variables.  If you have EDITOR set to something
+   secure (ie: no shells or external commands) in the Makefile or
+   sudo.h you'll want to define STATICEDITOR so that visudo doesn't
+   look at EDITOR or VISUAL.  Note that vi (the default editor) is
+   anything *but* secure in this respect (and no, setting the editor to
+   a wrapper that sets the SHELL envar to /bin/true does *not* make vi
+   secure--you can change shell from within vi).
+
+c) If you have a sense of humor you may want to defined USE_INSULTS to
+   get the insults from the "old" sudo when you enter an incorrect
+   password.  Beware, this feature causes some people to want to throw
+   their machine across the room and dash it to tiny pieces.
 
 Please send changes, bugs, security holes, and gripes to:
     sudo-bugs@cs.colorado.edu
