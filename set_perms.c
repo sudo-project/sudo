@@ -281,6 +281,10 @@ runas_setup()
 #endif
 
     if (runas_pw->pw_name != NULL) {
+#ifdef HAVE_PAM
+	pam_prep_user(runas_pw);
+#endif /* HAVE_PAM */
+
 #ifdef HAVE_LOGIN_CAP_H
 	if (def_flag(I_USE_LOGINCLASS)) {
 	    /*
