@@ -109,9 +109,6 @@ sudoers_lookup(pwflag)
     int error, nopass;
     enum def_tupple pwcheck;
 
-    /* Become sudoers file owner */
-    set_perms(PERM_SUDOERS);
-
     /* We opened _PATH_SUDOERS in check_sudoers() so just rewind it. */
     rewind(sudoers_fp);
     yyin = sudoers_fp;
@@ -124,16 +121,18 @@ sudoers_lookup(pwflag)
     if (pwflag > 0)
 	keepall = TRUE;
 
-    /* Need to be root while stat'ing things in the parser. */
-    set_perms(PERM_ROOT);
+    /* Need to be runas user while stat'ing things in the parser. */
+    set_perms(PERM_RUNAS);
     error = yyparse();
 
     /* Close the sudoers file now that we are done with it. */
     (void) fclose(sudoers_fp);
     sudoers_fp = NULL;
 
-    if (error || parse_error)
+    if (error || parse_error) {
+	set_perms(PERM_ROOT);
 	return(VALIDATE_ERROR);
+    }
 
     /*
      * The pw options may have changed during sudoers parse so we
@@ -185,6 +184,7 @@ sudoers_lookup(pwflag)
 	    top--;
 	}
 	if (found) {
+	    set_perms(PERM_ROOT);
 	    if (nopass == -1)
 		nopass = 0;
 	    return(VALIDATE_OK | nopass);
@@ -197,6 +197,7 @@ sudoers_lookup(pwflag)
 		    /*
 		     * User was granted access to cmnd on host as user.
 		     */
+		    set_perms(PERM_ROOT);
 		    return(VALIDATE_OK |
 			(no_passwd == TRUE ? FLAG_NOPASS : 0) |
 			(no_execve == TRUE ? FLAG_NOEXEC : 0));
@@ -205,6 +206,7 @@ sudoers_lookup(pwflag)
 		    /*
 		     * User was explicitly denied access to cmnd on host.
 		     */
+		    set_perms(PERM_ROOT);
 		    return(VALIDATE_NOT_OK |
 			(no_passwd == TRUE ? FLAG_NOPASS : 0) |
 			(no_execve == TRUE ? FLAG_NOEXEC : 0));
@@ -213,6 +215,7 @@ sudoers_lookup(pwflag)
 	    top--;
 	}
     }
+    set_perms(PERM_ROOT);
 
     /*
      * The user was neither explicitly granted nor denied access.
@@ -233,7 +236,7 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
     char *path;
     char *sudoers_args;
 {
-    int plen, error;
+    int plen;
     static struct stat cst;
     struct stat pst;
     DIR *dirp;
@@ -267,15 +270,8 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 
     /* Only need to stat cmnd once since it never changes */
     if (cst.st_dev == 0) {
-	if ((error = stat(cmnd, &cst))) {
-	    if (runas_pw->pw_uid != 0) {
-		set_perms(PERM_RUNAS);
-		error = stat(cmnd, &cst);
-		set_perms(PERM_ROOT);
-	    }
-	    if (error)
-		return(FALSE);
-	}
+	if (stat(cmnd, &cst) == -1)
+	    return(FALSE);
 	if ((cmnd_base = strrchr(cmnd, '/')) == NULL)
 	    cmnd_base = cmnd;
 	else
