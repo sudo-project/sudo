@@ -96,14 +96,11 @@ char * tgetpass(prompt, timeout)
 {
 #ifdef HAVE_TERMIOS_H
     struct termios term;
-    tcflag_t svflagval;
 #else
 #ifdef HAVE_TERMIO_H
     struct termio term;
-    unsigned short svflagval;
 #else
     struct sgttyb ttyb;
-    int svflagval;
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 #ifdef POSIX_SIGNALS
@@ -112,7 +109,7 @@ char * tgetpass(prompt, timeout)
 #else
     int oldmask;
 #endif /* POSIX_SIGNALS */
-    int n;
+    int n, echo;
     FILE *input, *output;
     static char buf[_PASSWD_LEN + 1];
     fd_set readfds;
@@ -122,7 +119,7 @@ char * tgetpass(prompt, timeout)
      * mask out SIGINT and SIGTSTP, should probably just catch and deal.
      */
 #ifdef POSIX_SIGNALS
-    (void) memset((VOID *)&mask, 0, sizeof(mask));
+    (void) sigemptyset(&mask);
     (void) sigaddset(&mask, SIGINT);
     (void) sigaddset(&mask, SIGTSTP);
     (void) sigprocmask(SIG_BLOCK, &mask, &oldmask);
@@ -147,20 +144,23 @@ char * tgetpass(prompt, timeout)
      */
 #ifdef HAVE_TERMIOS_H
     (void) tcgetattr(fileno(input), &term);
-    svflagval = term.c_lflag;
-    term.c_lflag &= ~ECHO;
-    (void) tcsetattr(fileno(input), TCSAFLUSH|TCSASOFT, &term);
+    if (echo = (term.c_lflag & ECHO)) {
+	term.c_lflag &= ~ECHO;
+	(void) tcsetattr(fileno(input), TCSAFLUSH|TCSASOFT, &term);
+    }
 #else
 #ifdef HAVE_TERMIO_H
     (void) ioctl(fileno(input), TCGETA, &term);
-    svflagval = term.c_lflag;
-    term.c_lflag &= ~ECHO;
-    (void) ioctl(fileno(input), TCSETA, &term);
+    if (echo = (term.c_lflag & ECHO)) {
+	term.c_lflag &= ~ECHO;
+	(void) ioctl(fileno(input), TCSETA, &term);
+    }
 #else
     (void) ioctl(fileno(input), TIOCGETP, &ttyb);
-    svflagval = ttyb.sg_flags;
-    ttyb.sg_flags &= ~ECHO;
-    (void) ioctl(fileno(input), TIOCSETP, &ttyb);
+    if (echo = (ttyb.sg_flags & ECHO)) {
+	ttyb.sg_flags &= ~ECHO;
+	(void) ioctl(fileno(input), TIOCSETP, &ttyb);
+    }
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
@@ -212,15 +212,21 @@ char * tgetpass(prompt, timeout)
 
      /* turn on echo */
 #ifdef HAVE_TERMIOS_H
-    term.c_lflag = svflagval;
-    (void) tcsetattr(fileno(input), TCSAFLUSH|TCSASOFT, &term);
+    if (echo) {
+	term.c_lflag |= ECHO;
+	(void) tcsetattr(fileno(input), TCSAFLUSH|TCSASOFT, &term);
+    }
 #else
 #ifdef HAVE_TERMIO_H
-    term.c_lflag = svflagval;
-    (void) ioctl(fileno(input), TCSETA, &term);
+    if (echo) {
+	term.c_lflag |= ECHO;
+	(void) ioctl(fileno(input), TCSETA, &term);
+    }
 #else
-    ttyb.sg_flags = svflagval;
-    (void) ioctl(fileno(input), TIOCSETP, &ttyb);
+    if (echo) {
+	ttyb.sg_flags |= ECHO;
+	(void) ioctl(fileno(input), TIOCSETP, &ttyb);
+    }
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
