@@ -4,7 +4,7 @@ static char yyrcsid[]
 #if __GNUC__ == 2
   __attribute__ ((unused))
 #endif /* __GNUC__ == 2 */
-  = "$OpenBSD: skeleton.c,v 1.14 2000/01/26 22:37:24 deraadt Exp $";
+  = "$OpenBSD: skeleton.c,v 1.15 2000/01/27 21:34:23 deraadt Exp $";
 #endif
 #include <stdlib.h>
 #define YYBYACC 1
@@ -967,7 +967,8 @@ bail:
             free(yyss);
     if (yyvs)
             free(yyvs);
-    yyss = yyssp = yyvs = yyvsp = NULL;
+    yyss = yyssp = NULL;
+    yyvs = yyvsp = NULL;
     yystacksize = 0;
     return -1;
 }
@@ -1801,7 +1802,7 @@ case 86:
 			    yyval.BOOLEAN = TRUE;
 			}
 break;
-#line 1805 "sudo.tab.c"
+#line 1806 "sudo.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
