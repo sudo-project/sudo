@@ -127,7 +127,7 @@ define(SUDO_CONVEX,
 [echo checking for ConvexOS 
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
 $0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
-[#ifdef __convex__
+[#if defined(__convex__) || defined(convex)
   yes
 #endif
 ], AC_DEFINE(_CONVEX_SOURCE) [$1], [$2])
