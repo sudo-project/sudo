@@ -107,6 +107,7 @@ case "$OS" in
 		LDFLAGS="${LDFLAGS} -Wl,-bI:./aixcrypt.exp"
 		;;
     "hp-ux")	echo "Looks like HP-UX"
+		AC_DEFINE(BROKEN_SYSLOG)
 		if test "$OSREV" -lt 9 ; then
 		    if test -n "$GCC" ; then
 			LDFLAGS="${LDFLAGS} -static"
@@ -176,6 +177,7 @@ case "$OS" in
 		OSDEFS="${OSDEFS} -D_MIPS"
 		;;
     "isc")	echo "Looks like INTERACTIVE"
+		AC_DEFINE(SVR4)
 		LIBS="${LIBS} -lsec -linet"
 		OSDEFS="${OSDEFS} -D_ISC"
 		;;
@@ -244,7 +246,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_CHECK_FUNCS(strchr strrchr memcpy memmove memset sysconf sigaction tzset tcsetattr strcasecmp)
+AC_CHECK_FUNCS(strchr strrchr memcpy memset sysconf sigaction tzset tcsetattr strcasecmp)
 AC_CHECK_FUNC(getwd, AC_DEFINE(HAVE_GETWD), LIBOBJS="$LIBOBJS getwd.o")
 AC_CHECK_FUNC(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
 AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), LIBOBJS="$LIBOBJS lsearch.o")
