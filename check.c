@@ -64,7 +64,7 @@ static char rcsid[] = "$Id$";
 #include <shadow.h>
 #endif /* __svr4__ */
 
-extern char *getpass		__P((char *));
+
 
 /*
  * Prototypes for local functions
@@ -221,9 +221,6 @@ static void update_timestamp()
 
 static void check_passwd()
 {
-#if !(defined (linux) && defined (HAVE_LIBSHADOW))
-    char *crypt	__P((char *, char *));
-#endif /* linux */
     struct passwd *pw_ent;
 #ifdef __svr4__
     struct spwd *spw_ent;
@@ -261,10 +258,10 @@ static void check_passwd()
      * you get TRIES_FOR_PASSWORD times to guess your password
      */
     while (counter > 0) {
-	pass = getpass("Password:");
+	pass = (char *) getpass("Password:");
 	if (*pass == '\0')
 	    exit(0);
-	if (!strcmp(encrypted, crypt(pass, encrypted)))
+	if (!strcmp(encrypted, (char *) crypt(pass, encrypted)))
 	    return;		/* if the passwd is correct return() */
 	--counter;		/* otherwise, try again  */
 #ifdef USE_INSULTS
