@@ -203,18 +203,18 @@ FAST_MATCH
     this off, but it will make things take a little longer.
     This is on by default.
 
-SKEY_ONLY
-    When validating the user, only allow an s/key passkey.  Do not
-    compare against the passwd file or use any other authentication
-    scheme.  This is only useful if you want to force people to
-    use s/key.
+OTP_ONLY
+    When validating the user, only allow a One Time Password (OTP)
+    passkey.  Do not compare against the passwd file or use any
+    other authentication scheme.  This is only useful if you want
+    to force people to use s/key or opie.
     This feature is off by default.
 
-LONG_SKEY_PROMPT
-    When validating with s/key a two-line prompt is used to make
-    it easier to cut and paste the s/key challenge to a local
-    window.  It's not as pretty as the default but some people
-    find it more convenient.
+LONG_OTP_PROMPT
+    When validating with a One Time Password scheme (s/key or opie)
+    a two-line prompt is used to make it easier to cut and paste
+    the challenge to a local window.  It's not as pretty as the
+    default but some people find it more convenient.
     This feature is off by default.
 
 SUDOERS_MODE
