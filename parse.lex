@@ -47,8 +47,10 @@ extern YYSTYPE yylval;
 extern int clearaliases;
 int sudolineno = 1;
 
-static int fill	__P((void));
-extern void reset_aliases __P((void));
+static void fill		__P((void));
+static void append		__P((void));
+static char chop		__P((void));
+extern void reset_aliases	__P((void));
 
 #ifdef TRACELEXER
 #define LEXTRACE(msg)	fputs(msg, stderr)
@@ -63,33 +65,59 @@ N			[0-9][0-9]?[0-9]?
 %p	6000
 %k	3500
 
+%s	GOTCMND
+
 %%
 [ \t]+			{ ; }			/* throw away space/tabs */
+
 \\\n			{ 
 			  ++sudolineno;
 			  LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
-\,			{ return ','; }		/* return ',' */
-\!			{ return '!'; }		/* return '!' */
-=			{
-			  LEXTRACE("= ");
-			  return '=';
-			}			/* return '=' */
-:			{
-			  LEXTRACE(": ");
-			  return ':';
-			}			/* return ':' */
-\.			{ return '.'; }
+
 \n			{ 
 			  ++sudolineno; 
 			  LEXTRACE("\n");
 			  return COMMENT;
 			}			/* return newline */
+
 #.*\n			{
 			  ++sudolineno;
 			  LEXTRACE("\n");
 			  return COMMENT;
 			}			/* return comments */
+
+<GOTCMND>[^\,:=\\ \t\n#]+[:,=\n]	{
+				  BEGIN 0;
+				  LEXTRACE("ARG");
+				  append();
+				  unput(chop());
+				  return(PATH);
+				} /* the last command line arg */
+
+<GOTCMND>[^\,:=\\ \t\n#]+	{
+			  LEXTRACE("ARG ");
+			  append();
+			} /* a command line arg */
+
+\,			{
+			  LEXTRACE(", ");
+			  return ',';
+			}			/* return ',' */
+
+\!			{ return '!'; }		/* return '!' */
+
+=			{
+			  LEXTRACE("= ");
+			  return '=';
+			}			/* return '=' */
+
+:			{
+			  LEXTRACE(": ");
+			  return ':';
+			}			/* return ':' */
+
+\.			{ return '.'; }
 
 \+[a-zA-Z][a-zA-Z0-9_-]* {
 			  fill();
@@ -101,10 +129,17 @@ N			[0-9][0-9]?[0-9]?
 			  return NTWKADDR;
 			}
 
-\/([a-zA-Z0-9_.+-]+\/?)+ {
+\/[^\,:=\\ \t\n#]+[:,=\n]	{
 			  LEXTRACE("PATH ");
 			  fill();
-			  return PATH;
+			  unput(chop());
+			  return(PATH);
+			}			/* a pathname with no args */
+
+\/[^\,:=\\ \t\n#]+	{
+			  BEGIN GOTCMND;
+			  LEXTRACE("PATH ");
+			  fill();
 			}			/* a pathname */
 
 [A-Z][A-Z0-9_]*		{
@@ -147,8 +182,24 @@ N			[0-9][0-9]?[0-9]?
 .			{ return ERROR; }	/* return error */
 
 %%
-static int fill() {
+static void fill() {
     (void) strcpy(yylval.string, yytext);
+}
+
+static void append() {
+    (void) strcat(yylval.string, " ");
+    (void) strcat(yylval.string, yytext);
+}
+
+static char chop() {
+    int len;
+    char c;
+
+    len = strlen(yylval.string);
+    c = yylval.string[--len];
+    yylval.string[len] = '\0';
+    
+    return(c);
 }
 
 int yywrap()
