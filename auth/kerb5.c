@@ -17,6 +17,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
+ *
+ *  This code is derived from software contributed by Frank Cusack
+ *  <fcusack@iconnet.net>.
  */
 
 #include "config.h"
@@ -46,32 +49,33 @@
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-char *realm = 0
-static int xrealm = 0
-static krb5_context sudo_context = 0
+char *realm = NULL;
+static int xrealm = 0;
+static krb5_context sudo_context = NULL;
 
 static int verify_krb_v5_tgt __P((krb5_ccache));
 
-/* XXX - not done yet, need changes to sudo.c */
 int
 kerb5_setup(pw, promptp, data)
     struct passwd *pw;
     char **promptp;
     void **data;
 {
+    char *p, *lrealm;
     krb5_error_code retval;
-    static char *lrealm;
+    extern int arg_prompt;
 
-    if (lrealm)
+    if (*data)
 	return(AUTH_SUCCESS);		/* Already initialized */
 
-    /* XXX - make these errors non-fatal? */
+    /* XXX - make these errors non-fatal for better fallback? */
     if (retval = krb5_init_context(&sudo_context)) {
 	set_perms(PERM_USER, 0);
 	log_error(GLOBAL_KRB5_INIT_ERR);
 	inform_user(GLOBAL_KRB5_INIT_ERR);
 	return(AUTH_FATAL);
     }
+    *data = (void *) &sudo_context;	/* save a pointer to the context */
 
     krb5_init_ets(sudo_context);
 
@@ -89,7 +93,13 @@ kerb5_setup(pw, promptp, data)
     } else
 	realm = lrealm;
 
-    /* XXX - different default prompt for kerb5 */
+    /* Only rewrite prompt if user didn't specify their own. */
+    if (!strcmp(prompt, PASSPROMPT)) {
+	p = emalloc(strlen(pw->pw_name) + strlen(realm) + 17);
+	sprintf(p, "Password for %s@%s: ", pw->pw_name, realm);
+	*promptp = p;
+    }
+    return(AUTH_SUCCESS);
 }
 
 int
@@ -107,8 +117,6 @@ kerb5_verify(pw, pass, data)
     krb5_get_init_creds_opt opts;
 
     /* Initialize */
-    if (!sudo_context)
-	return -1;
     krb5_get_init_creds_opt_init(&opts);
 
     princ_name = emalloc(strlen(pw->pw_name) + strlen(realm) + 2);
@@ -117,6 +125,7 @@ kerb5_verify(pw, pass, data)
 	return(AUTH_FAILURE);
 
     /* Set the ticket file to be in /tmp so we don't need to change perms. */
+    /* XXX - potential /tmp race */
     (void) sprintf(cache_name, "FILE:/tmp/sudocc_%ld", getpid());
     if (krb5_cc_resolve(sudo_context, cache_name, &ccache)
 	return(AUTH_FAILURE);
