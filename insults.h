@@ -47,6 +47,10 @@ char *insults[] = {
 #  include "ins_classic.h"
 # endif
 
+# ifdef CSOPS_INSULTS
+#  include "ins_csops.h"
+# endif
+
     (char *) 0
 
 };
