@@ -157,7 +157,7 @@ DEFVAR			[a-z_]+
 }
 
 <GOTCMND>{
-    \\[:\,= \t#]	{
+    \\[:\\,= \t#]	{
 			    LEXTRACE("QUOTEDCHAR ");
 			    fill_args(yytext + 1, 1, sawspace);
 			    sawspace = FALSE;
@@ -169,7 +169,7 @@ DEFVAR			[a-z_]+
 			    return(COMMAND);
 			}			/* end of command line args */
 
-    [^:, \t\n]+ 	{
+    [^\\:, \t\n]+ 	{
 			    LEXTRACE("ARG ");
 			    fill_args(yytext, yyleng, sawspace);
 			    sawspace = FALSE;
