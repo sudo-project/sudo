@@ -1,0 +1,137 @@
+The following options may be used to configure sudo 1.3.1
+
+FQDN
+    Define this if you want to put fully qualified hostnames in the sudoers
+    file.  Ie: instead of myhost you would use myhost.mydomain.edu.
+    Beware that turning FQDN on requires sudo to make DNS lookups which
+    may make sudo unusable if your DNS is totally hosed.
+    This is off by default.
+
+LOGGING
+    How you want to do your logging.  Your choices are SLOG_SYSLOG, SLOG_FILE,
+    or SLOG_BOTH.  Setting this to SYSLOG is nice because you can keep all
+    your sudo logs in one place.  If you don't have syslog or if your syslog
+    is of an ancient vintage (4.2BSD, SunOS 3.x and all versions of Ultrix)
+    you should probably use FILE logging (the pathname for the log file is
+    in pathnames.h).  If you are really serious about security you may want
+    to set LOGGING to SLOG_BOTH (to keep people from killing your syslog with
+    a denial of service attack while they do something nasty).
+    The default is to use SLOG_SYSLOG.
+
+LOGFAC
+    What syslog facility to log to.  This requires a 4.3BSD or later
+    version of syslog.  You can still set this for ancient syslogs
+    but it will have no effect.
+    The default is to use LOG_LOCAL2 but you may want to use LOG_AUTH.
+
+MAXLOGFILELEN
+    Number of characters per line for the file log.  This is only
+    used if you are LOGGING to FILE or BOTH.  MAXLOGFILELEN is used to
+    decide when to wrap lines for nicer log files.  You can set it to MAXLOGLEN
+    if you don't want any word wrapping in your log files.
+    The default is 80.
+
+NO_ROOT_SUDO
+    Don't let root run sudo.  This is historical from when doing "sudo sudo"
+    would give you a root shell.  You probably don't want to define this.
+    This is off by default.
+
+SUDOERS_OWNER
+    Who should own the sudoers file.  This must be a username, *not* a uid.
+    The default is "root" (remember the quotes).
+
+EXEMPTGROUP
+    If this is defined then the gid EXEMPTGROUP is set to doesn't need
+    to enter a password when running sudo.  This may be useful for sites
+    that don't want their "core" sysadmins to have to enter a password
+    but where Jr. sysadmins need to.
+    This is of by default.
+
+ALERTMAIL
+    User that mail from sudo is sent to.  This should go to a sysadmin
+    at your site.
+    The default is "root".
+
+SEND_MAIL_WHEN_NO_USER
+    Send mail to ALERMAIL if the user invoking sudo is not in the sudoers file.
+    You probably want this on so you can yell at people trying to use sudo
+    when they are not allowed to.
+    This is on by default.
+
+SEND_MAIL_WHEN_NOT_OK
+    Send mail to ALERMAIL if the user is allowed to use sudo but the
+    command they are trying is not listed in their sudoers file entry.
+    This is off by default.
+
+ENV_EDITOR
+    Makes visudo consult the EDITOR and VISUAL environmental variables
+    before falling back on the default editor.  Note that this may create
+    a security hole as most editors allow a user to get a shell (which would
+    be a root shell and hence, no logging).
+    This is off by default.
+
+SHORT_MESSAGE
+    Omits the copyright message from the "lecture" one gets when running
+    sudo for the first time on a machine.
+    This is on by default.
+
+TIMEOUT
+    Number of minutes that can elapse before sudo will ask for a passwd again.
+    The default is 5.
+
+PASSWORD_TIMEOUT
+    Number of minutes before the sudo password prompt times out.
+    The default is 5.
+
+TRIES_FOR_PASSWORD
+    Number of tries a user gets to enter his/her password before sudo
+    logs the failure and exits.
+    The default is 3.
+
+USE_INSULTS
+    Define this if you want to be insulted for typing an incorrect password
+    just like the original sudo(8).
+    This is off by default.
+
+HAL
+    Uses 2001-like insults when an incorrect password is entered.  You must
+    define USE_INSULTS as well for this to have any effect.
+    This is off by default.
+
+USE_EXECV
+    Use execv() to exec the command instead of execvp().  I can't think of
+    a reason to actually do this since execvp() is passed a fully qualified
+    pathname but someone might thoroughly distrust execvp().  Note that if
+    you define this you lose the ability to exec scripts that are missing the
+    '#!/bin/sh' cookie (like /bin/kill on sunos and /etc/fastboot on 4.3BSD).
+    This is off by default.
+
+EDITOR
+    This is the default editor used by visudo (and the only editor used unless
+    ENV_EDITOR is defined).
+    The default is _PATH_VI (where vi lives).
+
+MAILER
+    Mailer used to send mail when someone tries to sudo and access is denied.
+    As such, this should not be /usr/ucb/Mail or mailx.  Sudo is setup to
+    use sendmail, but it should be possible to use smail as well.
+    The default is _PATH_SENDMAIL (where sendmail lives).
+
+UMASK
+    Umask to use when running the root command.  If you do not define this
+    sudo will preserve the umask of the user invoking sudo.
+    The default is 0022.
+
+INCORRECT_PASSWORD
+    Message that is displayed if a user enters an incorrect password.
+    The default is "Sorry, try again."
+
+MAILSUBJECT
+    Subject of the mail sent to the ALERTMAIL user.
+    Default is "*** SECURITY information ***".
+
+SECURE_PATH
+    Path used for every command run from sudo(8).  If you don't trust
+    the people running sudo to have a sane PATH environmental variable
+    you may want to define SECURE_PATH.
+    This is turned off by default.
