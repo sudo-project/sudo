@@ -126,6 +126,7 @@ char *prompt = PASSPROMPT;
 char host[MAXHOSTNAMELEN + 1];
 char cwd[MAXPATHLEN + 1];
 uid_t uid = (uid_t)-2;
+struct stat cmnd_st;
 extern struct interface *interfaces;
 extern int num_interfaces;
 extern int printmatches;
@@ -234,10 +235,30 @@ main(argc, argv)
 		exit(0);
 	    set_perms(PERM_FULL_ROOT);
 #ifndef GPROF
-	    if (sudo_mode == MODE_BACKGROUND && fork() > 0)
+	    if (sudo_mode == MODE_BACKGROUND && fork() > 0) {
 		exit(0);
-	    else
+	    } else {
+		struct stat st;
+
+		/*
+		 * Make sure we are not being spoofed.  The stat should
+		 * be cheap enough to make this almost bulletproof.
+		 */
+		if (stat(cmnd, &st) < 0) {
+		    fprintf(stderr, "%s: unable to stat %s:", Argv[0], cmnd);
+		    perror("");
+		    exit(1);
+		}
+
+		if (st.st_dev != cmnd_st.st_dev || st.st_ino != cmnd_st.st_ino) {
+		    /* log and send mail, then bitch */
+		    log_error(SPOOF_ATTEMPT);
+		    inform_user(SPOOF_ATTEMPT);
+		    exit(1);
+		}
+
 		EXEC(cmnd, &Argv[1]);
+	    }
 #else
 	    exit(0);
 #endif /* GPROF */
