@@ -122,6 +122,7 @@ fwtk_verify(pw, prompt, auth)
 
     /* Send username to authentication server. */
     (void) snprintf(buf, sizeof(buf), "authorize %s 'sudo'", pw->pw_name);
+restart:
     if (auth_send(buf) || auth_recv(resp, sizeof(resp))) {
 	warnx("lost connection to authentication server");
 	return(AUTH_FATAL);
@@ -135,9 +136,15 @@ fwtk_verify(pw, prompt, auth)
 	    pass = tgetpass("Response [echo on]: ",
 		def_passwd_timeout * 60, tgetpass_flags | TGP_ECHO);
 	}
+    } else if (strncmp(resp, "chalnecho ", 10) == 0) {
+	pass = tgetpass(&resp[10], def_passwd_timeout * 60, tgetpass_flags);
     } else if (strncmp(resp, "password", 8) == 0) {
 	pass = tgetpass(prompt, def_passwd_timeout * 60,
 	    tgetpass_flags);
+    } else if (strncmp(resp, "display ", 8) == 0) {
+	fprintf(stderr, "%s\n", &resp[8]);
+	strlcpy(buf, "response dummy", sizeof(buf));
+	goto restart;
     } else {
 	warnx("%s", resp);
 	return(AUTH_FATAL);
