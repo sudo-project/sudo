@@ -696,7 +696,7 @@ static char *sudo_skeyprompt(user_skey, p)
 
 #ifdef LONG_SKEY_PROMPT
     /* separate s/key challenge and prompt for easy snarfing */
-    (void) printf("key %d %s\n", user_skey->n - 1, user_skey->seed);
+    (void) fprintf(stderr, "key %d %s\n", user_skey->n - 1, user_skey->seed);
 
     /* return old prompt unmolested */
     return(p);
