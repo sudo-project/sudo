@@ -57,15 +57,15 @@ dnl check for sendmail
 dnl
 define(SUDO_PROG_SENDMAIL,
 [if test -f "/usr/sbin/sendmail"; then
-    AC_DEFINE(_PATH_SENDMAIL, "/usr/sbin/sendmail")
+    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/sbin/sendmail")
 elif test -f "/usr/lib/sendmail"; then
-    AC_DEFINE(_PATH_SENDMAIL, "/usr/lib/sendmail")
+    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/lib/sendmail")
 elif test -f "/usr/etc/sendmail"; then
-    AC_DEFINE(_PATH_SENDMAIL, "/usr/etc/sendmail")
+    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/etc/sendmail")
 elif test -f "/usr/local/lib/sendmail"; then
-    AC_DEFINE(_PATH_SENDMAIL, "/usr/local/lib/sendmail")
+    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/local/lib/sendmail")
 elif test -f "/usr/local/bin/sendmail"; then
-    AC_DEFINE(_PATH_SENDMAIL, "/usr/local/bin/sendmail")
+    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/local/bin/sendmail")
 fi
 ])dnl
 dnl
@@ -73,11 +73,11 @@ dnl check for vi
 dnl
 define(SUDO_PROG_VI,
 [if test -f "/usr/bin/vi"; then
-    AC_DEFINE(_PATH_VI, "/usr/bin/vi")
+    AC_DEFINE(_SUDO_PATH_VI, "/usr/bin/vi")
 elif test -f "/usr/ucb/vi"; then
-    AC_DEFINE(_PATH_VI, "/usr/ucb/vi")
+    AC_DEFINE(_SUDO_PATH_VI, "/usr/ucb/vi")
 elif test -f "/usr/local/bin/vi"; then
-    AC_DEFINE(_PATH_VI, "/usr/local/bin/vi")
+    AC_DEFINE(_SUDO_PATH_VI, "/usr/local/bin/vi")
 fi
 ])dnl
 dnl
@@ -85,13 +85,13 @@ dnl check for pwd
 dnl
 define(SUDO_PROG_PWD,
 [if test -f "/usr/bin/pwd"; then
-    AC_DEFINE(_PATH_PWD, "/usr/bin/pwd")
+    AC_DEFINE(_SUDO_PATH_PWD, "/usr/bin/pwd")
 elif test -f "/bin/pwd"; then
-    AC_DEFINE(_PATH_PWD, "/bin/pwd")
+    AC_DEFINE(_SUDO_PATH_PWD, "/bin/pwd")
 elif test -f "/usr/ucb/pwd"; then
-    AC_DEFINE(_PATH_PWD, "/usr/ucb/pwd")
+    AC_DEFINE(_SUDO_PATH_PWD, "/usr/ucb/pwd")
 elif test -f "/usr/sbin/pwd"; then
-    AC_DEFINE(_PATH_PWD, "/usr/sbin/pwd")
+    AC_DEFINE(_SUDO_PATH_PWD, "/usr/sbin/pwd")
 fi
 ])dnl
 dnl
@@ -99,13 +99,13 @@ dnl check for mv
 dnl
 define(SUDO_PROG_MV,
 [if test -f "/usr/bin/mv"; then
-    AC_DEFINE(_PATH_MV, "/usr/bin/mv")
+    AC_DEFINE(_SUDO_PATH_MV, "/usr/bin/mv")
 elif test -f "/bin/mv"; then
-    AC_DEFINE(_PATH_MV, "/bin/mv")
+    AC_DEFINE(_SUDO_PATH_MV, "/bin/mv")
 elif test -f "/usr/ucb/mv"; then
-    AC_DEFINE(_PATH_MV, "/usr/ucb/mv")
+    AC_DEFINE(_SUDO_PATH_MV, "/usr/ucb/mv")
 elif test -f "/usr/sbin/mv"; then
-    AC_DEFINE(_PATH_MV, "/usr/sbin/mv")
+    AC_DEFINE(_SUDO_PATH_MV, "/usr/sbin/mv")
 fi
 ])dnl
 dnl
