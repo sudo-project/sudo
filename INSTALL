@@ -204,6 +204,12 @@ Ultrix 4.x:
     I recommend it highly.  If you do not do this you probably want
     to set `LOGGING' to SLOG_FILE in options.h.
 
+Linux:
+    One person reported that he needed to run configure with
+    the --with-getpass flag to get a working sudo.  Other people
+    haven't had that problem so it may only affect certain
+    distributions.
+
 SCO ODT:
     You'll probably need libcrypt_i.a available via anonymous ftp
     from sosco.sco.com.  The necesary files are /SLS/lng225b.Z
