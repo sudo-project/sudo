@@ -1606,7 +1606,16 @@ Sudo 1.6.7 released.
 
 Sudo 1.6.7p1 released.
 
-504) BSD-style warn/err functions are used throughout.
+504) An unterminated comment broke Kerberos V authentication.
 
 505) The krb5-config script is used to determine Kerberos V CPPFLAGS
      and LDFLAGS/LIBS if it exists.
+
+506) Backed out changes to mkinstalldirs from autoconf 2.57 that
+     caused problems on Tru64 Unix.
+
+Sudo 1.6.7p2 released.
+
+507) Kerberos V support should work on latest MIT Kerberos V and Heimdal.
+
+Sudo 1.6.7p3 released.
