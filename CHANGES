@@ -798,4 +798,13 @@ CHANGES from sudo 1.4.5
      being set too early; an editor could change them and change
      the owner/group of the resulting sudoers file.
 
-Sudo 1.5 released.
+CHANGES from sudo 1.5
+
+245) Added SHELL_SETS_HOME option.
+
+246) Added NO_MESSAGE option.
+
+247) Added %u and %h escapes in PASSPROMPT to expand to user's name
+     and host.
+
+Sudo 1.5.1 released.
