@@ -111,6 +111,13 @@ char *user = "";
 char *cmnd = "";
 
 
+/********************************************************************
+ *
+ *  main()
+ *
+ *  where it all begins...
+ */
+
 int main(argc, argv)
     int argc;
     char **argv;
@@ -341,9 +348,13 @@ int main(argc, argv)
 }
 
 
-/*
- * dummy *_matches routines
+/********************************************************************
+ *
+ *  dummy *_matches routines
+ *
+ *  These exist to allow us to use the same parser as sudo(8).
  */
+
 int path_matches(cmnd, path)
     char *cmnd, *path;
 {
@@ -365,9 +376,13 @@ int netgr_matches(n, h, u)
 }
 
 
-/*
- * usage() -- prints a help message and exits.
+/********************************************************************
+ *
+ *  usage()
+ *
+ *  Prints a help message and exits w/ exit value of 1.
  */
+
 static void usage()
 {
     (void) fprintf(stderr, "usage: %s [-V]\n", Argv[0]);
@@ -375,10 +390,14 @@ static void usage()
 }
 
 
-/*
- * Exit() -- unlinks the sudoers temp file (if there) and exits.
- *           Used in place of a normal exit() and as a signal handler.
+/********************************************************************
+ *
+ *  Exit()
+ *
+ *  Unlinks the sudoers temp file (if it exists) and exits.
+ *  Used in place of a normal exit() and as a signal handler.
  */
+
 static RETSIGTYPE Exit(sig)
     int sig;
 {
@@ -387,11 +406,14 @@ static RETSIGTYPE Exit(sig)
 }
 
 
-/*
- * whatnow() -- assuming a parse error occurred, prompt the user for
- *              what they want to do now.  Returns first letter
- *              of their choice (always lowercase).
+/********************************************************************
+ *
+ *  whatnow()
+ *
+ *  Assuming a parse error occurred, prompt the user for what they want
+ *  to do now.  Returns first letter of their choice (always lowercase).
  */
+
 static char whatnow()
 {
     char choice;
@@ -421,9 +443,13 @@ static char whatnow()
 }
 
 
-/*
- * whatnow_help() -- print out a help message for whatnow().
+/********************************************************************
+ *
+ *  whatnow_help()
+ *
+ *  Print out a help message for whatnow().
  */
+
 static void whatnow_help()
 {
     (void) printf("Options are:\n");
@@ -433,9 +459,13 @@ static void whatnow_help()
 }
 
 
-/*
- * setup_signals() -- install signal handlers for visudo.
+/********************************************************************
+ *
+ *  setup_signals()
+ *
+ *  Install signal handlers for visudo.
  */
+
 static void setup_signals()
 {
 #ifdef POSIX_SIGNALS
