@@ -227,8 +227,20 @@ static int check_timestamp()
     else
 	p = tty;
 
+    if (sizeof(_PATH_SUDO_TIMEDIR) + strlen(user_name) + strlen(p) + 2 >
+	sizeof(timestampfile)) {
+	(void) fprintf(stderr, "%s:  path too long:  %s/%s.%s\n", Argv[0],
+		       _PATH_SUDO_TIMEDIR, user_name, p);
+	exit(1);                                              
+    }
     (void) sprintf(timestampfile, "%s/%s.%s", _PATH_SUDO_TIMEDIR, user_name, p);
 #else
+    if (sizeof(_PATH_SUDO_TIMEDIR) + strlen(user_name) + 1 >
+	sizeof(timestampfile)) {
+	(void) fprintf(stderr, "%s:  path too long:  %s/%s\n", Argv[0],
+		       _PATH_SUDO_TIMEDIR, user_name);
+	exit(1);                                              
+    }
     (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR, user_name);
 #endif /* USE_TTY_TICKETS */
 
@@ -385,8 +397,20 @@ void remove_timestamp()
     else
 	p = tty;
 
+    if (sizeof(_PATH_SUDO_TIMEDIR) + strlen(user_name) + strlen(p) + 2 >
+	sizeof(timestampfile)) {
+	(void) fprintf(stderr, "%s:  path too long:  %s/%s.%s\n", Argv[0],
+		       _PATH_SUDO_TIMEDIR, user_name, p);
+	exit(1);                                              
+    }
     (void) sprintf(timestampfile, "%s/%s.%s", _PATH_SUDO_TIMEDIR, user_name, p);
 #else
+    if (sizeof(_PATH_SUDO_TIMEDIR) + strlen(user_name) + 1 >
+	sizeof(timestampfile)) {
+	(void) fprintf(stderr, "%s:  path too long:  %s/%s\n", Argv[0],
+		       _PATH_SUDO_TIMEDIR, user_name);
+	exit(1);                                              
+    }
     (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR, user_name);
 #endif /* USE_TTY_TICKETS */
 
