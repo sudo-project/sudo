@@ -72,11 +72,30 @@
 #endif /* S_ISREG */
 
 /*
+ * Some OS's lack these
+ */
+#ifndef UID_NO_CHANGE
+#  define UID_NO_CHANGE	((uid_t) -1)
+#endif /* UID_NO_CHANGE */
+#ifndef GID_NO_CHANGE
+#  define GID_NO_CHANGE	((gid_t) -1)
+#endif /* GID_NO_CHANGE */
+
+/*
+ * Emulate setreuid(2) with setresuid(2)
+ */
+#if defined(HAVE_SETRESUID) && !defined(HAVE_SETREUID)
+#  undef setreuid
+#  define setreuid(__R, __E)	(setresuid(__R, __E, UID_NO_CHANGE))
+#  define HAVE_SETREUID
+#endif /* HAVE_SETRESUID && !HAVE_SETREUID */
+
+/*
  * Emulate seteuid() and setegid() for HP-UX
  */
 #ifdef __hpux
-#  define seteuid(__EUID)	(setresuid((uid_t)-1, __EUID, (uid_t)-1))
-#  define setegid(__EGID)	(setresgid((gid_t)-1, __EGID, (gid_t)-1))
+#  define seteuid(_EUID)	(setresuid(UID_NO_CHANGE, _EUID, UID_NO_CHANGE))
+#  define setegid(_EGID)	(setresgid(GID_NO_CHANGE, _EGID, GID_NO_CHANGE))
 #endif	/* __hpux */
 
 /*
@@ -84,8 +103,8 @@
  */
 #ifdef _AIX
 #  include <sys/id.h>
-#  define seteuid(__EUID)	(setuidx(ID_EFFECTIVE|ID_REAL, __EUID))
-#  define setegid(__EGID)	(setgidx(ID_EFFECTIVE|ID_REAL, __EGID))
+#  define seteuid(_EUID)	(setuidx(ID_EFFECTIVE|ID_REAL, _EUID))
+#  define setegid(_EGID)	(setgidx(ID_EFFECTIVE|ID_REAL, _EGID))
 #endif	/* _AIX */
 
 #endif /* _SUDO_COMPAT_H */
