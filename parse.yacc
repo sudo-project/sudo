@@ -475,8 +475,10 @@ cmnd		:	ALL {
 				expand_match_list();
 			    }
 
-			    cmnd_matches = TRUE;
-			    $$ = TRUE;
+			    $$ = cmnd_matches = TRUE;
+			    if (cmnd_safe)
+				free(cmnd_safe);
+			    cmnd_safe = estrdup(cmnd);
 			}
 		|	ALIAS {
 			    if (printmatches == TRUE && in_alias == TRUE) {

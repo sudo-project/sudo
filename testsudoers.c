@@ -78,6 +78,7 @@ extern int num_interfaces;
 
 char *cmnd = NULL;
 char *cmnd_args = NULL;
+char *cmnd_safe = NULL;
 char *runas_user = RUNAS_DEFAULT;
 char host[MAXHOSTNAMELEN];
 char *shost;

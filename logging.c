@@ -251,12 +251,6 @@ void log_error(code)
 		SUDOERS_MODE);
 	    break;
 
-	case SPOOF_ATTEMPT:
-	    (void) sprintf(p,
-		"probable spoofing attempt; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
-		tty, cwd, runas_user);
-	    break;
-
 	case BAD_STAMPDIR:
 	    (void) sprintf(p,
 	    "%s owned by non-root or not mode 0700; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
@@ -653,12 +647,6 @@ void inform_user(code)
 		SUDOERS_MODE);
 	    break;
 
-	case SPOOF_ATTEMPT:
-	    (void) fprintf(stderr,
-		"%s is not the same command that was validated, disallowing.\n",
-		cmnd);
-	    break;
-
 	case BAD_STAMPDIR:
 	    (void) fprintf(stderr,
 		"Timestamp directory has wrong permissions, ignoring.\n");
@@ -729,7 +717,6 @@ static int appropriate(code)
      */
     case VALIDATE_ERROR:
     case NO_SUDOERS_FILE:
-    case SPOOF_ATTEMPT:
     case BAD_STAMPDIR:
     case BAD_STAMPFILE:
     case BAD_ALLOCATION:

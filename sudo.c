@@ -122,6 +122,7 @@ char **NewArgv = NULL;
 struct passwd *user_pw_ent;
 char *runas_user = RUNAS_DEFAULT;
 char *cmnd = NULL;
+char *cmnd_safe = NULL;
 char *cmnd_args = NULL;
 char *tty = "unknown";
 char *prompt;
@@ -129,7 +130,6 @@ char host[MAXHOSTNAMELEN];
 char *shost;
 char cwd[MAXPATHLEN];
 FILE *sudoers_fp = NULL;
-struct stat cmnd_st;
 static char *runas_homedir = NULL;
 extern struct interface *interfaces;
 extern int num_interfaces;
@@ -334,33 +334,10 @@ int main(argc, argv)
 		(void) sudo_setenv("HOME", runas_homedir);
 
 #ifndef PROFILING
-	    if ((sudo_mode & MODE_BACKGROUND) && fork() > 0) {
+	    if ((sudo_mode & MODE_BACKGROUND) && fork() > 0)
 		exit(0);
-	    } else {
-		/*
-		 * Make sure we are not being spoofed.  The stat should
-		 * be cheap enough to make this almost bulletproof.
-		 */
-		if (cmnd_st.st_dev) {
-		    struct stat st;
-
-		    if (stat(cmnd, &st) < 0) {
-			(void) fprintf(stderr, "%s: unable to stat %s: ",
-					Argv[0], cmnd);
-			perror("");
-			exit(1);
-		    }
-
-		    if (st.st_dev != cmnd_st.st_dev ||
-			st.st_ino != cmnd_st.st_ino) {
-			/* log and send mail, then bitch */
-			log_error(SPOOF_ATTEMPT);
-			inform_user(SPOOF_ATTEMPT);
-			exit(1);
-		    }
-		}
-		EXEC(cmnd, NewArgv);	/* run the command */
-	    }
+	    else
+		EXEC(cmnd_safe, NewArgv);	/* run the command */
 #else
 	    exit(0);
 #endif /* PROFILING */

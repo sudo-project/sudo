@@ -209,26 +209,27 @@ int command_matches(cmnd, user_args, path, sudoers_args)
     char *sudoers_args;
 {
     int plen;
+    static struct stat cst;
     struct stat pst;
     DIR *dirp;
     struct dirent *dent;
     char buf[MAXPATHLEN];
-    static char *c;
+    static char *cmnd_base;
 
-    /* don't bother with pseudo commands like "validate" */
+    /* Don't bother with pseudo commands like "validate" */
     if (strchr(cmnd, '/') == NULL)
 	return(FALSE);
 
     plen = strlen(path);
 
-    /* only need to stat cmnd once since it never changes */
-    if (cmnd_st.st_dev == 0) {
-	if (stat(cmnd, &cmnd_st) < 0)
+    /* Only need to stat cmnd once since it never changes */
+    if (cst.st_dev == 0) {
+	if (stat(cmnd, &cst) == -1)
 	    return(FALSE);
-	if ((c = strrchr(cmnd, '/')) == NULL)
-	    c = cmnd;
+	if ((cmnd_base = strrchr(cmnd, '/')) == NULL)
+	    cmnd_base = cmnd;
 	else
-	    c++;
+	    cmnd_base++;
     }
 
     /*
@@ -237,21 +238,29 @@ int command_matches(cmnd, user_args, path, sudoers_args)
      */
     if (has_meta(path)) {
 	/*
-	 * Return true if fnmatch(3) succeeds and there are no args
-	 * (in sudoers or command) or if the args match;
+	 * Return true if fnmatch(3) succeeds AND
+	 *  a) there are no args in sudoers OR
+	 *  b) there are no args on command line and none required by sudoers OR
+	 *  c) there are args in sudoers and on command line and they match
 	 * else return false.
 	 */
-	if (fnmatch(path, cmnd, FNM_PATHNAME))
+	if (fnmatch(path, cmnd, FNM_PATHNAME) != 0)
 	    return(FALSE);
-	if (!sudoers_args)
+	if (!sudoers_args ||
+	    (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
+	    (sudoers_args && fnmatch(sudoers_args, user_args ? user_args : "",
+	    0) == 0)) {
+	    if (cmnd_safe)
+		free(cmnd_safe);
+	    cmnd_safe = estrdup(cmnd);
 	    return(TRUE);
-	else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
-	    return(TRUE);
-	else if (sudoers_args)
-	    return((fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0));
-	else
+	} else
 	    return(FALSE);
     } else {
+	/*
+	 * No meta characters
+	 * Check to make sure this is not a directory spec (doesn't end in '/')
+	 */
 	if (path[plen - 1] != '/') {
 	    char *p;
 
@@ -260,26 +269,26 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 		p = path;
 	    else
 		p++;
-	    if (strcmp(c, p))
-		return(FALSE);
-
-	    if (stat(path, &pst) < 0)
+	    if (strcmp(cmnd_base, p) != 0 || stat(path, &pst) == -1)
 		return(FALSE);
 
 	    /*
-	     * Return true if inode/device matches and there are no args
-	     * (in sudoers or command) or if the args match;
-	     * else return false.
+	     * Return true if inode/device matches AND
+	     *  a) there are no args in sudoers OR
+	     *  b) there are no args on command line and none req by sudoers OR
+	     *  c) there are args in sudoers and on command line and they match
 	     */
-	    if (cmnd_st.st_dev != pst.st_dev || cmnd_st.st_ino != pst.st_ino)
+	    if (cst.st_dev != pst.st_dev || cst.st_ino != pst.st_ino)
 		return(FALSE);
-	    if (!sudoers_args)
+	    if (!sudoers_args ||
+		(!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
+		(sudoers_args &&
+		 fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
+		if (cmnd_safe)
+		    free(cmnd_safe);
+		cmnd_safe = estrdup(path);
 		return(TRUE);
-	    else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
-		return(TRUE);
-	    else if (sudoers_args)
-		return((fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0));
-	    else
+	    } else
 		return(FALSE);
 	}
 
@@ -298,12 +307,16 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 	    strcat(buf, dent->d_name);
 
 	    /* only stat if basenames are not the same */
-	    if (strcmp(c, dent->d_name))
+	    if (strcmp(cmnd_base, dent->d_name))
 		continue;
-	    if (stat(buf, &pst) < 0)
+	    if (stat(buf, &pst) == -1)
 		continue;
-	    if (cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino)
+	    if (cst.st_dev == pst.st_dev && cst.st_ino == pst.st_ino) {
+		if (cmnd_safe)
+		    free(cmnd_safe);
+		cmnd_safe = estrdup(buf);
 		break;
+	    }
 	}
 
 	closedir(dirp);
@@ -411,7 +424,7 @@ int netgr_matches(netgr, host, user)
     /* get the domain name (if any) */
     if (domain == (char *) -1) {
 	domain = (char *) emalloc(MAXHOSTNAMELEN);
-	if (getdomainname(domain, MAXHOSTNAMELEN) != 0 || *domain == '\0') {
+	if (getdomainname(domain, MAXHOSTNAMELEN) == -1 || *domain == '\0') {
 	    (void) free(domain);
 	    domain = NULL;
 	}

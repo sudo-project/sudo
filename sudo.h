@@ -158,12 +158,11 @@ struct generic_alias {
 #define SUDOERS_WRONG_OWNER      ( 0x09 | GLOBAL_PROBLEM )
 #define SUDOERS_WRONG_MODE       ( 0x0A | GLOBAL_PROBLEM )
 #define SUDOERS_NOT_FILE         ( 0x0B | GLOBAL_PROBLEM )
-#define SPOOF_ATTEMPT            0x0C
-#define BAD_STAMPDIR             0x0D
-#define BAD_STAMPFILE            0x0E
-#define BAD_ALLOCATION           0x0F
+#define BAD_STAMPDIR             0x0C
+#define BAD_STAMPFILE            0x0D
+#define BAD_ALLOCATION           0x0E
 #ifdef HAVE_KERB5
-#define GLOBAL_KRB5_INIT_ERR     ( 0x10 | GLOBAL_PROBLEM )
+#define GLOBAL_KRB5_INIT_ERR     ( 0x0F | GLOBAL_PROBLEM )
 #endif /* HAVE_KERB5 */
 
 /*
@@ -268,9 +267,9 @@ extern struct passwd *user_pw_ent;
 extern char *runas_user;
 extern char *tty;
 extern char *cmnd;
+extern char *cmnd_safe;
 extern char *cmnd_args;
 extern char *prompt;
-extern struct stat cmnd_st;
 extern int Argc;
 extern char **Argv;
 extern int NewArgc;

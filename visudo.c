@@ -113,6 +113,7 @@ char *runas_user = RUNAS_DEFAULT;
 char host[] = "";
 char *shost = "";
 char *cmnd = "";
+char *cmnd_safe = NULL;
 char *cmnd_args = NULL;
 struct passwd *user_pw_ent;
 

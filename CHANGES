@@ -1060,3 +1060,6 @@ Sudo 1.5.9 released.
 
 332) You can now specifiy a host list instead of just a host or alias
      in a privilege list.  Ie: user=host1,host2,ALIAS,!host3 /bin/ls
+
+333)  Stash the "safe" path to the command instead of stashing the struct
+     stat.  Should be safer.
