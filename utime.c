@@ -39,7 +39,7 @@ static char rcsid[] = "$Id$";
 #include <sys/types.h>
 #include <sys/time.h>
 
-#include "pathnames.h"
+#include <pathnames.h>
 #include "compat.h"
 #include "emul/utime.h"
 

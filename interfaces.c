@@ -77,7 +77,7 @@ static char rcsid[] = "$Id$";
 #include <net/if.h>
 
 #include "sudo.h"
-#include "options.h"
+#include <options.h>
 #include "version.h"
 
 #if !defined(STDC_HEADERS) && !defined(__GNUC__)

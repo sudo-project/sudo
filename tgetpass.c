@@ -61,7 +61,7 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
-#include "pathnames.h"
+#include <pathnames.h>
 #include "compat.h"
 
 #ifndef _PASSWD_LEN

@@ -68,7 +68,7 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 
 #include "sudo.h"
-#include "options.h"
+#include <options.h>
 
 /*
  * Prototypes for local functions

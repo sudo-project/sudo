@@ -31,8 +31,8 @@
 #ifndef _SUDO_SUDO_H
 #define _SUDO_SUDO_H
 
+#include <pathnames.h>
 #include "compat.h"
-#include "pathnames.h"
 
 /*
  * IP address and netmask pairs for checking against local interfaces.
