@@ -95,9 +95,10 @@ extern char *strdup();
  */
 int Argc;
 char **Argv;
-char *host;
-char *user;
 char *cmnd;
+char host[MAXHOSTNAMELEN + 1];
+char user[9];
+char cwd[MAXPATHLEN + 1];
 uid_t uid = -2;
 
 
@@ -190,7 +191,7 @@ main(argc, argv)
  *  load_globals()
  *
  *  This function primes the important global variables:
- *  user, host, cmnd, uid
+ *  user, host, cwd, cmnd, uid
  */
 
 static void load_globals()
@@ -200,21 +201,23 @@ static void load_globals()
     char path[MAXPATHLEN + 1];
     char *p;
 
-
-    if ((user = (char *) malloc(9)) == NULL) {
-	perror("malloc");
-	exit(1);
-    }
-    if ((host = (char *) malloc(MAXHOSTNAMELEN + 1)) == NULL) {
-	perror("malloc");
-	exit(1);
-    }
     uid = getuid();		/* we need to tuck this away for safe keeping */
 
 #ifdef UMASK
     (void) umask((mode_t)UMASK);
 #endif /* UMASK */
 
+    /*
+     * so we know where we are... (do as user)
+     */
+#ifdef HAVE_GETCWD
+    if (!getcwd(cwd, (size_t) (MAXPATHLEN + 1))) {
+#else
+    if (!getwd(cwd)) {
+#endif /* HAVE_GETCWD */
+    	(void) fprintf(stderr, "%s:  Can't get working directory!\n", Argv[0]);
+	exit(1);
+    }
 
     /*
      * loading the cmnd global variable from argv[1]
@@ -228,11 +231,16 @@ static void load_globals()
 	(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], Argv[1]);
 	exit(1);
     }
-    cmnd = strdup(cmnd);
+
+    if ((cmnd = strdup(cmnd)) == NULL)  {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
 
 #ifdef NO_ROOT_SUDO
     if (uid == 0) {
-	(void) fprintf(stderr, "You are already root, you don\'t need to use sudo.\n");
+	(void) fprintf(stderr, "You are already root, you don't need to use sudo.\n");
 	exit(1);
     }
 #endif
