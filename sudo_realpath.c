@@ -204,8 +204,6 @@ char * sudo_realpath(old, new)
 static void realpath_restore(cwd)
     char * cwd;
 {
-    int old_errno = errno;			/* so we can restore errno... */
-
     /* relinquish root privs and chdir to where we started... */
     be_user();
     if (chdir(cwd)) {
@@ -213,6 +211,4 @@ static void realpath_restore(cwd)
 			cwd);
 	exit(1);
     }
-
-    errno = old_errno;
 }
