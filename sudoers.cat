@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-December 14, 2001             1.6.4                             1
+December 15, 2001             1.6.4                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                             2
+December 15, 2001             1.6.4                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                             3
+December 15, 2001             1.6.4                             3
 
 
 
@@ -259,7 +259,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                             4
+December 15, 2001             1.6.4                             4
 
 
 
@@ -325,7 +325,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                             5
+December 15, 2001             1.6.4                             5
 
 
 
@@ -391,7 +391,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                             6
+December 15, 2001             1.6.4                             6
 
 
 
@@ -457,7 +457,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                             7
+December 15, 2001             1.6.4                             7
 
 
 
@@ -490,8 +490,8 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    _s_e_t___l_o_g_n_a_m_e option).  If ssssuuuuddddoooo was compiled
                    with the SECURE_PATH option, its value will be
                    used for the PATH environment variable.  Other
-                   variables may be preserved with the
-                   i<env_keep> option.
+                   variables may be preserved with the _e_n_v___k_e_e_p
+                   option.
 
        use_loginclass
                    If set, ssssuuuuddddoooo will apply the defaults specified
@@ -523,7 +523,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                             8
+December 15, 2001             1.6.4                             8
 
 
 
@@ -589,7 +589,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                             9
+December 15, 2001             1.6.4                             9
 
 
 
@@ -655,7 +655,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                            10
+December 15, 2001             1.6.4                            10
 
 
 
@@ -694,8 +694,8 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    to guard against printf-style format vulnera­
                    bilties in poorly-written programs.  The list
                    can be replaced, added to, deleted from, or
-                   disabled by using the =, +=, -=, and <!> oper­
-                   ators respectively.  The default list of envi­
+                   disabled by using the =, +=, -=, and ! opera­
+                   tors respectively.  The default list of envi­
                    ronment variable to check is printed when ssssuuuuddddoooo
                    is run by root with the _-_V option.
 
@@ -703,7 +703,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    ronment variables to be removed from the
                    user's environment.  The list can be replaced,
                    added to, deleted from, or disabled by using
-                   the =, +=, -=, and <!> operators respectively.
+                   the =, +=, -=, and ! operators respectively.
                    The default list of environment variable to
                    remove is printed when ssssuuuuddddoooo is run by root
                    with the _-_V option.
@@ -715,13 +715,13 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    trol over the environment ssssuuuuddddoooo-spawned pro­
                    cesses will get.  The list can be replaced,
                    added to, deleted from, or disabled by using
-                   the =, +=, -=, and <!> operators respectively.
+                   the =, +=, -=, and ! operators respectively.
                    This list has no default members.
 
 
 
 
-December 14, 2001             1.6.4                            11
+December 15, 2001             1.6.4                            11
 
 
 
@@ -787,7 +787,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                            12
+December 15, 2001             1.6.4                            12
 
 
 
@@ -853,7 +853,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                            13
+December 15, 2001             1.6.4                            13
 
 
 
@@ -919,7 +919,7 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
 
 
-December 14, 2001             1.6.4                            14
+December 15, 2001             1.6.4                            14
 
 
 
@@ -985,7 +985,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                            15
+December 15, 2001             1.6.4                            15
 
 
 
@@ -1051,7 +1051,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                            16
+December 15, 2001             1.6.4                            16
 
 
 
@@ -1117,7 +1117,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 14, 2001             1.6.4                            17
+December 15, 2001             1.6.4                            17
 
 
 
@@ -1183,6 +1183,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-December 14, 2001             1.6.4                            18
+December 15, 2001             1.6.4                            18
 
 
