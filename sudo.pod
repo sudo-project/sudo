@@ -250,7 +250,7 @@ sudoers option is set)
 
 =item C<%%>
 
-two consecutive C<%> characters are collasped into a single C<%> character
+two consecutive C<%> characters are collapsed into a single C<%> character
 
 =back 8
 
@@ -370,7 +370,7 @@ To get a file listing of an unreadable directory:
  % sudo ls /usr/local/protected
 
 To list the home directory of user yazza on a machine where the
-filesystem holding ~yazza is not exported as root:
+file system holding ~yazza is not exported as root:
 
  % sudo -u yazza ls ~yazza
 

@@ -151,7 +151,7 @@ If you do not specify a netmask with a network number, the netmask
 of the host's ethernet interface(s) will be used when matching.
 The netmask may be specified either in dotted quad notation (e.g.
 255.255.255.0) or CIDR notation (number of bits, e.g. 24).  A hostname
-may include shell-style wildcards (see `Wildcards' section below),
+may include shell-style wildcards (see the L<Wildcards> section below),
 but unless the C<hostname> command on your machine returns the fully
 qualified hostname, you'll need to use the I<fqdn> option for wildcards
 to be useful.
@@ -170,7 +170,7 @@ to be useful.
 
 A C<Cmnd_List> is a list of one or more commandnames, directories, and other
 aliases.  A commandname is a fully qualified filename which may include
-shell-style wildcards (see `Wildcards' section below).  A simple
+shell-style wildcards (see the L<Wildcards> section below).  A simple
 filename allows the user to run the command with any arguments he/she
 wishes.  However, you may also specify command line arguments (including
 wildcards).  Alternately, you can specify C<""> to indicate that the command
@@ -454,7 +454,7 @@ the --with-logincap option.  This flag is I<off> by default.
 
 If set, all commands run via sudo will behave as if the C<NOEXEC>
 tag has been set, unless overridden by a C<EXEC> tag.  See the
-description of I<NOEXEC and EXEC> below as well as the B<PREVENTING SHELL
+description of I<NOEXEC and EXEC> below as well as the L<PREVENTING SHELL
 ESCAPES> section at the end of this manual.  This flag is I<off> by default.
 
 =back
@@ -797,7 +797,7 @@ commands that follow it.  What this means is that for the entry:
 The user B<dgb> may run F</bin/ls>, F</bin/kill>, and
 F</usr/bin/lprm> -- but only as B<operator>.  E.g.,
 
-    sudo -u operator /bin/ls.
+ $ sudo -u operator /bin/ls.
 
 It is also possible to override a C<Runas_Spec> later on in an
 entry.  If we modify the entry like so:
@@ -855,15 +855,15 @@ and F</usr/bin/vi> but shell escapes will be disabled.
 
  aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 
-See the B<PREVENTING SHELL ESCAPES> section below for more details
+See the L<PREVENTING SHELL ESCAPES> section below for more details
 on how I<noexec> works and whether or not it will work on your system.
 
-=head2 Wildcards (aka meta characters):
+=head2 Wildcards
 
-B<sudo> allows shell-style I<wildcards> to be used in pathnames
-as well as command line arguments in the I<sudoers> file.  Wildcard
-matching is done via the B<POSIX> L<fnmatch(3)> routine.  Note that
-these are I<not> regular expressions.
+B<sudo> allows shell-style I<wildcards> (aka meta or glob characters)
+to be used in pathnames as well as command line arguments in the
+I<sudoers> file.  Wildcard matching is done via the B<POSIX>
+L<fnmatch(3)> routine.  Note that these are I<not> regular expressions.
 
 =over 8
 
@@ -899,7 +899,7 @@ wildcards.  This is to make a path like:
 
 match F</usr/bin/who> but not F</usr/bin/X11/xterm>.
 
-=head2 Exceptions to wildcard rules:
+=head2 Exceptions to wildcard rules
 
 The following exceptions apply to the above rules:
 
@@ -913,7 +913,7 @@ with B<any> arguments.
 
 =back
 
-=head2 Other special characters and reserved words:
+=head2 Other special characters and reserved words
 
 The pound sign ('#') is used to indicate a comment (unless it
 occurs in the context of a user name and is followed by one or
@@ -1149,7 +1149,7 @@ running under binary emulation are not affected.
 To tell whether or not B<sudo> supports I<noexec>, you can run
 the following as root:
 
-    # sudo -V | grep "dummy exec"
+    \# sudo -V | grep "dummy exec"
 
 If the resulting output contains a line that begins with:
 
@@ -1173,7 +1173,7 @@ just try it out and see if it works.
 
 Note that disabling shell escapes is not a panacea.  Programs running
 as root are still capable of many potentially hazardous operations
-(such as chaning or overwriting files) that could lead to unintended
+(such as changing or overwriting files) that could lead to unintended
 privilege escalation.  In the specific case of an editor, a safer
 approach is to give the user permission to run the B<sudoedit>
 program.
