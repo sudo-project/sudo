@@ -114,7 +114,7 @@ char * tgetpass(prompt, timeout, user, host)
     int n, echo;
     FILE *input, *output;
     static char buf[_PASSWD_LEN + 1];
-    fd_set readfds;
+    fd_set *readfds;
     struct timeval tv;
     char *p;
 
@@ -199,8 +199,14 @@ char * tgetpass(prompt, timeout, user, host)
      */
     if (timeout > 0) {
 	/* setup for select(2) */
-	FD_ZERO(&readfds);
-	FD_SET(fileno(input), &readfds);
+	n = howmany(fileno(input) + 1, NFDBITS) * sizeof(fd_mask);
+	if ((readfds = (fd_set *) malloc(n)) == NULL) {
+	    (void) fprintf(stderr, "Cannot allocate memory: ");
+	    perror("");
+	    return(NULL);
+	}
+	(void) memset((VOID *)readfds, 0, n);
+	FD_SET(fileno(input), readfds);
 
 	/* set timeout for select */
 	tv.tv_sec = timeout;
@@ -210,12 +216,13 @@ char * tgetpass(prompt, timeout, user, host)
 	 * get password or return empty string if nothing to read by timeout
 	 */
 	buf[0] = '\0';
-	if (select(fileno(input) + 1, &readfds, 0, 0, &tv) > 0 &&
+	if (select(fileno(input) + 1, readfds, 0, 0, &tv) > 0 &&
 	    fgets(buf, sizeof(buf), input)) {
 	    n = strlen(buf);
 	    if (buf[n - 1] == '\n')
 		buf[n - 1] = '\0';
 	}
+	(void) free(readfds);
     } else {
 	buf[0] = '\0';
 	if (fgets(buf, sizeof(buf), input)) {
