@@ -154,3 +154,10 @@ CHANGES from sudo 1.3
 
 54) No longer create a static binary on AIX since it reportedly
     causes problem on newer versions on AIX 3.x.
+
+55) If sudo_realpath cannot chdir() back to cwd sudo will print
+    and error and exit.  Previously it would either fail silently
+    or print an incorrect error message.
+
+56) Moved code to send error mail to be after the log message.
+    From rouilj@cs.umb.edu.
