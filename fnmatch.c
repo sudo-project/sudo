@@ -43,7 +43,8 @@ static char sccsid[] = "@(#)fnmatch.c	8.2 (Berkeley) 4/16/94";
  * Compares a filename or pathname to a pattern.
  */
 
-#include "emul/fnmatch.h"
+#include "config.h"
+
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif /* HAVE_STRING_H */
@@ -51,6 +52,9 @@ static char sccsid[] = "@(#)fnmatch.c	8.2 (Berkeley) 4/16/94";
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <string.h>
+
+#include "compat.h"
+#include "emul/fnmatch.h"
 
 #undef	EOS
 #define	EOS	'\0'
