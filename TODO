@@ -13,4 +13,6 @@ TODO list
 06) Redo parsing to be more like op(8) with true command aliases where
     can specify uid, gid(s) and part/all of the environment.
 
-07) Add default options to sudoers file (umask, def uid, def gids, dir, PATH)
+07) Add default options to sudoers file (umask, def uid, def gids, dir, PATH).
+
+08) Add a whatnow-style prompt to visudo.
