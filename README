@@ -32,12 +32,16 @@ see the web page, http://www.courtesan.com/sudo/.
 System requirements
 ===================
 
-Sudo requires a machine running UN*X (most flavors of BSD, SYSV, or
-POSIX will do), a C compiler, and a yacc-compatible parser generator
-(yacc, byacc, bison).  If you wish to modify the tokenizer then you
-will need flex version 2.5.2 or later.  (sudo comes with a pre-flex'd
-tokenizer).  You can get flex via anonymous ftp from
-ftp://ftp.ee.lbl.gov/pub/flex* as well as any GNU mirror.
+Sudo requires a machine running UN*X (most flavors of BSD, SYSV,
+or POSIX will do), a C compiler, and the make utility.
+
+If you wish to modify the parser then you will need flex version
+2.5.2 or later and a version of bison or yacc (sudo comes with a
+pre-flex'd tokenizer and pre-yacc'd grammar parser).  You'll also
+have to uncomment a few lines from the Makefile.  You can get flex
+via anonymous ftp from ftp://ftp.ee.lbl.gov/pub/flex* as well as
+any GNU mirror.  You can get GNU bison from
+ftp://prep.ai.mit.edu/pub/gnu/bison* or any GNU mirror.
 
 Building the release
 ===================
