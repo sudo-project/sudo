@@ -30,9 +30,13 @@ static char rcsid[] = "$Id$";
 #endif /* lint */
 
 #include "config.h"
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif /* HAVE_STRING_H */
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/param.h>
@@ -46,6 +50,7 @@ static char rcsid[] = "$Id$";
 extern YYSTYPE yylval;
 extern int clearaliases;
 int sudolineno = 1;
+static int string_len = 0;
 
 static void fill		__P((void));
 static void append		__P((void));
@@ -165,7 +170,7 @@ N			[0-9][0-9]?[0-9]?
 			      return USERALIAS;
 			  }
 
-			  l = strlen(yytext) - 1;
+			  l = yyleng - 1;
 			  if (isalpha(yytext[l]) || isdigit(yytext[l])) {
 			      /* NAME is what RFC1034 calls a label */
 			      LEXTRACE("NAME ");
@@ -179,12 +184,29 @@ N			[0-9][0-9]?[0-9]?
 
 %%
 static void fill() {
-    (void) strcpy(yylval.string, yytext);
+
+    if (yyleng > MAXCOMMANDLENGTH) {
+	yyerror("command too long, recompile with a larger MAXCOMMANDLENGTH");
+    } else {
+	(void) strcpy(yylval.string, yytext);
+	string_len = yyleng;
+    }
 }
 
 static void append() {
-    (void) strcat(yylval.string, " ");
-    (void) strcat(yylval.string, yytext);
+    char *s;
+
+    /*
+     * Make sure we have enough space...
+     */
+    s = yylval.string + string_len;
+    string_len += yyleng + 1;
+    if (string_len > MAXCOMMANDLENGTH) {
+	yyerror("command too long, recompile with a larger MAXCOMMANDLENGTH");
+    } else {
+	*s++ = ' ';
+	(void) strcpy(s, yytext);
+    }
 }
 
 int yywrap()
