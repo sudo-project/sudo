@@ -1570,6 +1570,7 @@ AC_CHECK_FUNCS(innetgr _innetgr, AC_CHECK_FUNCS(getdomainname) [break])
 AC_CHECK_FUNCS(lsearch, , [AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) [LIBS="${LIBS} -lcompat"], AC_LIBOBJ(lsearch)), AC_LIBOBJ(lsearch))])
 AC_CHECK_FUNCS(utime, SUDO_FUNC_UTIME_POSIX, AC_LIBOBJ(utime))
 SUDO_FUNC_FNMATCH(AC_DEFINE(HAVE_FNMATCH), AC_LIBOBJ(fnmatch))
+SUDO_FUNC_ISBLANK
 AC_REPLACE_FUNCS(strerror strcasecmp sigaction)
 AC_CHECK_FUNCS(snprintf vsnprintf asprintf vasprintf, , [NEED_SNPRINTF=1])
 dnl

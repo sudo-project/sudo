@@ -125,6 +125,12 @@
 /* Define if you want to use execv() instead of execvp().  */
 #undef USE_EXECV
 
+/* Define if you have isblank(3).  */
+#undef HAVE_ISBLANK
+#ifndef HAVE_ISBLANK
+#  define isblank(_x)	((_x) == ' ' || (_x) == '\t')
+#endif
+
 /* Define if you have tzset(3).  */
 #undef HAVE_TZSET
 
