@@ -1071,3 +1071,29 @@ Sudo 1.5.9 released.
 336) Don't use _PASSWD_LEN or PASS_MAX as we can't rely on them corresponding
      to anything real.  Instead, we just use a max password size of 256
      everywhere.
+
+337) Block many signals during startup and restore signal mask before exec'ing
+     the program.  We don't want the user to be able to simply kill us and
+     avoid logging.
+
+338) Rewrote timestamp handling.  Tty-based stamps are now sane and are of
+     the form /var/run/sudo/username/tty.  This means you only get the
+     lecture once, not once per tty.  The meaning of -k has changed to
+     mean "invalidate the timestamp".  There is a new -K option to really
+     remove the file.
+
+339) New modular authentication API.  This fixes the nest of #ifdefs that
+     was the old auth code.
+
+340) New logging functions.  log_error() now takes a variable number of
+     args ala printf() and log_auth() reacts to the return value of validate().
+
+341) If a user is not in the sudoers file they are still asked for a password.
+     This keeps someone who finds a user logged in to a terminal from being
+     able to tell whether or not the user is allowed to use sudo.
+
+342) New PAM code again, this time it should be correct.
+
+343) tgetpass() now has a flag to specify whether or not to turn
+     off echo while reading the password.  Used by the new PAM and
+     fwtk code.
