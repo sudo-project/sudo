@@ -105,7 +105,8 @@ extern char **Argv;
 void load_interfaces()
 {
     unsigned long localhost_mask;
-    struct ifconf ifconf;
+    struct ifconf *ifconf;
+    char ifconf_buf[sizeof(struct ifconf) + BUFSIZ];
     struct ifreq ifreq;
     struct sockaddr_in *sin;
     char buf[BUFSIZ];
@@ -126,16 +127,17 @@ void load_interfaces()
     /*
      * get interface configuration or return (leaving interfaces NULL)
      */
-    ifconf.ifc_len = sizeof(buf);
-    ifconf.ifc_buf = buf;
+    ifconf = (struct ifconf *) ifconf_buf;
+    ifconf->ifc_buf = (caddr_t) (ifconf_buf + sizeof(struct ifconf));
+    ifconf->ifc_len = sizeof(ifconf_buf) - sizeof(struct ifconf);
 #ifdef _ISC
-    STRSET(SIOCGIFCONF, (caddr_t) &ifconf, sizeof(ifconf));
+    STRSET(SIOCGIFCONF, (caddr_t) ifconf, sizeof(ifconf_buf));
     if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0) {
 	/* networking probably not installed in kernel */
 	return;
     }
 #else
-    if (ioctl(sock, SIOCGIFCONF, (caddr_t) &ifconf) < 0) {
+    if (ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0) {
 	/* networking probably not installed in kernel */
 	return;
     }
@@ -144,7 +146,7 @@ void load_interfaces()
     /*
      * find out how many interfaces exist
      */
-    num_interfaces = ifconf.ifc_len / sizeof(struct ifreq);
+    num_interfaces = ifconf->ifc_len / sizeof(struct ifreq);
 
     /*
      * malloc() space for interfaces array
@@ -161,7 +163,7 @@ void load_interfaces()
      * for each interface, get the ip address and netmask
      */
     for (i = 0, j = 0; i < num_interfaces; i++) {
-	(void) strncpy(ifreq.ifr_name, ifconf.ifc_req[i].ifr_name,
+	(void) strncpy(ifreq.ifr_name, ifconf->ifc_req[i].ifr_name,
 	    sizeof(ifreq.ifr_name));
 
 	/* get the ip address */
@@ -192,7 +194,7 @@ void load_interfaces()
 
 	/* get the netmask */
 #ifdef SIOCGIFNETMASK
-	(void) strncpy(ifreq.ifr_name, ifconf.ifc_req[i].ifr_name,
+	(void) strncpy(ifreq.ifr_name, ifconf->ifc_req[i].ifr_name,
 	    sizeof(ifreq.ifr_name));
 #ifdef _ISC
 	STRSET(SIOCGIFNETMASK, (caddr_t) &ifreq, sizeof(ifreq));
