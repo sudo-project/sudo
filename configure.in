@@ -979,6 +979,15 @@ AC_ARG_ENABLE(root-mailer,
   esac
 ], AC_MSG_RESULT(no))
 
+AC_ARG_ENABLE(setreuid,
+[  --disable-setreuid      Don't try to use the setreuid() function],
+[ case "$enableval" in
+    no)		BROKEN_SETREUID=1
+		;;
+    *)		;;
+  esac
+])
+
 AC_MSG_CHECKING(whether to disable use of POSIX saved ids)
 AC_ARG_ENABLE(saved-ids,
 [  --disable-saved-ids     Don't try to use POSIX saved ids],
