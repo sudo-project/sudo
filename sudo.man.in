@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "June 10, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "July 30, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
@@ -509,8 +509,9 @@ to make the \f(CW\*(C`cd\*(C'\fR and file redirection work.
 \&                        homedir of the target user
 .Ve
 .PP
-.Vb 1
-\& PATH                   Set to a sane value if SECURE_PATH is set
+.Vb 2
+\& PATH                   Set to a sane value if SECURE_PATH has been
+\&                        defined at configure time
 .Ve
 .PP
 .Vb 1

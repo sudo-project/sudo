@@ -404,7 +404,8 @@ B<sudo> utilizes the following environment variables:
 			the --enable-shell-sets-home option), set to
 			homedir of the target user
 
- PATH			Set to a sane value if SECURE_PATH is set
+ PATH			Set to a sane value if SECURE_PATH has been
+ 			defined at configure time
 
  SHELL			Used to determine shell to run with -s option
 
