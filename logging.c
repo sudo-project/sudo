@@ -107,7 +107,7 @@ void log_error(code)
      * Get our ttyname or set to "none"
      */
     if (isatty(0))
-	tty = ttyname(0);
+	tty = (char *) ttyname(0);
     else
 	tty = "none";
 
