@@ -102,7 +102,7 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING INSTALL Makefile.in PORTING \
             sudo.man sudo.cat sudoers aixcrypt.exp visudoers/Makefile.in \
             visudoers/config.h visudoers/pathnames.h visudoers/sudo.h \
             visudoers/version.h visudoers/visudo.c visudoers/visudo.lex \
-            visudoers/visudo.yacc visudoers/aixcrypt.exp
+            visudoers/visudo.yacc visudoers/aixcrypt.exp visudoers/options.h
 
 all: $(PROGS)
 
