@@ -167,7 +167,7 @@ else
 	SUDO_MTXINU(OS="mtxinu")
     fi
     if test -z "$OS"; then
-	SUDO_NEXT(OS="NeXT")
+	SUDO_NEXT
     fi
     if test -z "$OS"; then
 	SUDO_BSD(OS="bsd")
@@ -209,12 +209,10 @@ dnl SUDO_NEXT
 dnl
 AC_DEFUN(SUDO_NEXT,
 [echo checking for NeXTstep 
-AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
-$0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
-[#ifdef NeXT
-  yes
-#endif
-], [$1], [$2])
+if test -r /usr/lib/NextStep/software_version; then
+    OS=NeXT
+    OSREV=`$SEDPROG -e 's/^[[ \.0A-z]]*//' -e 's/\..*//' -e 1q < /usr/lib/NextStep/software_version`
+fi
 ])dnl
 dnl
 dnl SUDO_BSD
