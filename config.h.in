@@ -167,5 +167,5 @@
 /* Define if you have the <termios.h> header file.  */
 #undef HAVE_TERMIOS_H
 
-/* Define if you have the -lshadow library.  */
-#undef HAVE_LIBSHADOW
+/* Define if you have the <sys/sockio.h> header file.  */
+#undef HAVE_SYS_SOCKIO_H
