@@ -75,7 +75,12 @@ char * tgetpass(prompt, timeout)
 #endif /* HAVE_TERMIOS_H */
     int input, output;
     static char buf[_PASSWD_LEN + 1];
+#ifdef POSIX_SIGNALS
+    sigset_t oldmask;
+    sigset_t mask;
+#else
     int oldmask;
+#endif
     fd_set readfds;
     struct timeval tv;
 #ifdef HAVE_TERMIO_H
@@ -88,7 +93,14 @@ char * tgetpass(prompt, timeout)
     /*
      * mask out SIGINT
      */
+#ifdef POSIX_SIGNALS
+    (void) bzero(&mask, sizeof(mask));
+    (void) bzero(&oldmask, sizeof(oldmask));
+    (void) sigaddset(&mask, SIGINT);
+    (void) sigprocmask(SIG_BLOCK, &mask, &oldmask);
+#else
     oldmask = sigblock(sigmask(SIGINT));
+#endif
 
     /*
      * open /dev/tty for reading/writing if possible or use
@@ -167,7 +179,11 @@ char * tgetpass(prompt, timeout)
 #endif /* HAVE_TERMIOS_H */
 
     /* restore old signal mask */
+#ifdef POSIX_SIGNALS
+    (void) sigprocmask(SIG_SETMASK, &oldmask, NULL);
+#else
     (void) sigsetmask(oldmask);
+#endif
 
     /* close /dev/tty if that's what we opened */
     if (input != fileno(stdin))
