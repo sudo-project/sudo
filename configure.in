@@ -221,6 +221,7 @@ fi
 dnl
 dnl C compiler checks
 dnl
+ac_cv_c_cross="no"
 cross_compiling="no"
 AC_PROG_CC
 AC_PROG_CPP
@@ -238,12 +239,24 @@ if test -z "$NROFFPROG"; then
 fi
 
 dnl
-dnl what architecture are we on?
+dnl What kind of beastie are we being run on?
+dnl Barf if config.cache was generated on another host.
 dnl
-SUDO_OSTYPE
-OS=`echo $OS | $TRPROG '[[A-Z]]' '[[a-z]]'`
-case "$OS" in
-    "sunos")	echo "Looks like SunOS 4.x"
+AC_CANONICAL_HOST
+
+dnl
+dnl We want to be able to differentiate between different rev's
+dnl
+if test -n "$host_os"; then
+    OS=`echo $host_os | sed 's/[[0-9]].*//'`
+    OSREV=`echo $host_os | sed 's/^[[^0-9]]*\([[0-9]][[0-9]]*\).*$/\1/'`
+else
+    OS="unknown"
+    OSREV=0
+fi
+
+case "$host" in
+    *-*-sunos4*)
 		dnl Don't really need -lnsl
 		LIB_NSL=1
 
@@ -256,7 +269,7 @@ case "$OS" in
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
-    "solaris")	echo "Looks like Solaris"
+    *-*-solaris2*)
 		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
 		    AC_DEFINE(HAVE_C2_SECURITY)
 		    with_C2="yes"
@@ -272,86 +285,40 @@ case "$OS" in
 		    AFS_LIBS="-lc -lucb"
 		fi
 		;;
-    "aix")	echo "Looks like AIX"
+    *-*-aix*)
 		AC_DEFINE(_ALL_SOURCE)
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 		;;
-    "hp-ux")	echo "Looks like HP-UX $OSREV"
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_HPUX9(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
-		
+    *-*-hpux10*)
 		# uncomment this for a statically linked sudo
 		# (XXX - should be an option to configure)
 		#STATIC_SUDO=true
 
-		if test "$OSREV" -lt 9; then
-		    AC_DEFINE(BROKEN_SYSLOG)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(
+		    AC_DEFINE(HAVE_C2_SECURITY)
+		    with_C2="yes"
+		)
+		if test "$with_C2" = "yes"; then
+		    SHADOW_TYPE="SPW_SECUREWARE"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		    SUDO_LIBS="${SUDO_LIBS} -lsec"
+		    LIBS="${LIBS} -lsec"
+		fi
 
+		if test -n "$STATIC_SUDO"; then
 		    if test -n "$GCC"; then
 			SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
 		    else
 			SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
 		    fi
-		elif test "$OSREV" -eq 9; then
-		    AC_DEFINE(BROKEN_SYSLOG)
+		fi
 
-		    test -z "$with_C2" && SUDO_CHECK_SHADOW_HPUX9(
-			AC_DEFINE(HAVE_C2_SECURITY)
-			with_C2="yes"
-		    )
-		    if test "$with_C2" = "yes"; then
-			SHADOW_TYPE="SPW_HPUX9"
-			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		    fi
-
-		    if test -n "$STATIC_SUDO"; then
-			if test -n "$GCC"; then
-			    SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
-			else
-			    SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
-			fi
-		    fi
-
-		    # DCE support
-		    if test "$with_DCE" = "yes"; then
-			# order of libs in 9.X is important. -lc_r must be last
-			SUDO_LIBS="-ldce -lM -lc_r"
-
-			if test -n "$GCC"; then
-			    CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE -D_REENTRANT -I/usr/include/reentrant"
-			else
-			    CPPFLAGS="${CPPFLAGS} -Aa -D_HPUX_SOURCE -D_REENTRANT -I/usr/include/reentrant"
-			fi
-		    fi
-		elif test "$OSREV" -ge 10; then
-		    test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(
-			AC_DEFINE(HAVE_C2_SECURITY)
-			with_C2="yes"
-		    )
-		    if test "$with_C2" = "yes"; then
-			SHADOW_TYPE="SPW_SECUREWARE"
-			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-			SUDO_LIBS="${SUDO_LIBS} -lsec"
-			LIBS="${LIBS} -lsec"
-		    fi
-
-		    if test -n "$STATIC_SUDO"; then
-			if test -n "$GCC"; then
-			    SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
-			else
-			    SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
-			fi
-		    fi
-
-		    # DCE support (requires ANSI C compiler)
-		    if test "$with_DCE" = "yes"; then
-			if test -n "$GCC"; then
-			    CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE"
-			else
-			    CPPFLAGS="${CPPFLAGS} -Aa -D_HPUX_SOURCE"
-			fi
+		# DCE support (requires ANSI C compiler)
+		if test "$with_DCE" = "yes"; then
+		    if test -n "$GCC"; then
+			CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE"
+		    else
+			CPPFLAGS="${CPPFLAGS} -Aa -D_HPUX_SOURCE"
 		    fi
 		fi
 
@@ -360,13 +327,71 @@ case "$OS" in
 		    AFS_LIBS="-lc -lBSD"
 		fi
 		;;
-    "osf1")	echo "Looks like OSF/1"
+    *-*-hpux9*)
+		# uncomment this for a statically linked sudo
+		# (XXX - should be an option to configure)
+		#STATIC_SUDO=true
+
+		AC_DEFINE(BROKEN_SYSLOG)
+
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_HPUX9(
+		    AC_DEFINE(HAVE_C2_SECURITY)
+		    with_C2="yes"
+		)
+		if test "$with_C2" = "yes"; then
+		    SHADOW_TYPE="SPW_HPUX9"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		fi
+
+		if test -n "$STATIC_SUDO"; then
+		    if test -n "$GCC"; then
+			SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
+		    else
+			SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
+		    fi
+		fi
+
+		# DCE support (requires ANSI C compiler)
+		if test "$with_DCE" = "yes"; then
+		    # order of libs in 9.X is important. -lc_r must be last
+		    SUDO_LIBS="-ldce -lM -lc_r"
+
+		    if test -n "$GCC"; then
+			CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE -D_REENTRANT -I/usr/include/reentrant"
+		    else
+			CPPFLAGS="${CPPFLAGS} -Aa -D_HPUX_SOURCE -D_REENTRANT -I/usr/include/reentrant"
+		    fi
+		fi
+
+		# AFS support needs -lBSD
+		if test "$with_AFS" = "yes"; then
+		    AFS_LIBS="-lc -lBSD"
+		fi
+		;;
+    *-*-hpux*)
+
+		AC_DEFINE(BROKEN_SYSLOG)
+
+		# Not sure if setuid binaries are safe in < 9.x
+		if test -n "$GCC"; then
+		    SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
+		else
+		    SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
+		fi
+
+		# AFS support needs -lBSD
+		if test "$with_AFS" = "yes"; then
+		    AFS_LIBS="-lc -lBSD"
+		fi
+		;;
+    *-dec-osf*)
+		# ignore envariables wrt dynamic lib path
+		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
+
 		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(
 		    AC_DEFINE(HAVE_C2_SECURITY)
 		    with_C2="yes"
 		)
-
-		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
 		# C2 security stuff
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lsecurity -laud"
@@ -375,18 +400,17 @@ case "$OS" in
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
-    "irix")	echo "Looks like IRIX"
+    *-*-irix*)
 		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
 		    AC_DEFINE(HAVE_C2_SECURITY)
 		    with_C2="yes"
 		)
-
-		# C2 security stuff
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
-		# configure doesn't think irix has stdc headers
+
+		# configure may not think irix has stdc headers
 		# but it's good enough for sudo
 		AC_DEFINE(STDC_HEADERS)
 		if test -z "$NROFFPROG"; then
@@ -404,13 +428,11 @@ case "$OS" in
 		    fi
 		fi
 		;;
-    "linux")	echo "Looks like linux"
+    *-*-linux*)
 		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
 		    AC_DEFINE(HAVE_C2_SECURITY)
 		    with_C2="yes"
 		)
-
-		# C2 security stuff
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -420,17 +442,16 @@ case "$OS" in
 			LIBS="${LIBS} -lshadow")
 		fi
 		;;
-    "convex")	echo "Looks like ConvexOs"
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
-
+    *-convex-bsd*)
 		AC_DEFINE(_CONVEX_SOURCE)
 		if test -z "$GCC"; then
 		    CFLAGS="${CFLAGS} -D__STDC__"
 		fi
-		# C2 security stuff
+
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(
+		    AC_DEFINE(HAVE_C2_SECURITY)
+		    with_C2="yes"
+		)
 		if test "$with_C2" = "yes"; then
 		    OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"
 		    SUDO_LIBS="${SUDO_LIBS} -lprot"
@@ -439,13 +460,12 @@ case "$OS" in
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
-    "ultrix"*)	echo "Looks like Ultrix"
+    *-*-ultrix*)
+		OS="ultrix"
 		test -z "$with_C2" && SUDO_CHECK_SHADOW_ULTRIX4(
 		    AC_DEFINE(HAVE_C2_SECURITY)
 		    with_C2="yes"
 		)
-
-		# C2 security stuff
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lauth"
 		    LIBS="${LIBS} -lauth"
@@ -453,19 +473,14 @@ case "$OS" in
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
-    "riscos")	echo "Looks like RISCos"
-		dnl
-		dnl Is this OS using shadow passwords?
-		dnl (Cannot auto-check for C2 if using non-passwd based authentication)
-		dnl
-		if test -z "$with_C2" -a "$with_skey" != "yes" -a \
-			   "$with_SecurID" != "yes" -a "$with_AFS" != "yes" -a \
-			   "$with_DCE" != "yes" -a "$with_kerb4" != "yes" -a \
-			   "$with_kerb5" != "yes"; then
-		    SUDO_CHECK_SHADOW_GENERIC(AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes")
-		elif test -z "$with_C2"; then
-		    echo "Unable to check for shadow passwords. If you have them you should use --with-C2 (unless they are on by default for your OS, see INSTALL)."
+    *-*-riscos*)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
+		    AC_DEFINE(HAVE_C2_SECURITY)
+		    with_C2="yes"
+		)
+		if test "$with_C2" = "yes"; then
+		    SHADOW_TYPE="SPW_SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 
 		SUDO_LIBS="${SUDO_LIBS} -lsun -lbsd"
@@ -473,85 +488,28 @@ case "$OS" in
 		CPPFLAGS="${CPPFLAGS} -I/usr/include -I/usr/include/bsd"
 		OSDEFS="${OSDEFS} -D_MIPS"
 		;;
-    "isc")	echo "Looks like INTERACTIVE"
+    *-*-isc*)
+		OSDEFS="${OSDEFS} -D_ISC"
+		LIB_CRYPT=1
+		SUDO_LIBS="${SUDO_LIBS} -lcrypt"
+		LIBS="${LIBS} -lcrypt"
+
 		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
 		    AC_DEFINE(HAVE_C2_SECURITY)
 		    with_C2="yes"
 		)
-
-		LIB_CRYPT=1
-		SUDO_LIBS="${SUDO_LIBS} -lcrypt"
-		LIBS="${LIBS} -lcrypt"
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lsec"
 		    LIBS="${LIBS} -lsec"
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
-		OSDEFS="${OSDEFS} -D_ISC"
 		;;
-    "sinix"*)	echo "Looks like SINIX"
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
-
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
-		;;
-    "smp_dc.osx") echo "Looks like Pyramid DC/OSx"
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
-
-		LIB_SOCKET=1
-		SUDO_LIBS="${SUDO_LIBS} -lsocket"
-
-		if test "$with_C2" != "no"; then
-		    with_C2="yes"
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
-		;;
-    "ncr") echo "Looks like an NCR"
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
-
-		LIB_SOCKET=1
-		SUDO_LIBS="${SUDO_LIBS} -lsocket"
-
-		if test "$with_C2" != "no"; then
-		    with_C2="yes"
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
-		;;
-    "unix_sv")	echo "Looks like UnixWare"
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
-
-		LIB_SOCKET=1
-		SUDO_LIBS="${SUDO_LIBS} -lsocket -lgen"
-
-		if test "$with_C2" != "no"; then
-		    with_C2="yes"
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
-		;;
-    "sco")	echo "Looks like SCO"
+    *-*-sco*)
 		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(
 		    AC_DEFINE(HAVE_C2_SECURITY)
 		    with_C2="yes"
 		)
-
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -559,67 +517,50 @@ case "$OS" in
 		    LIBS="${LIBS} -lprot -lx"
 		fi
 		;;
-    "ksr"*)	echo "Looks like a KSR (wow, yours is still running?!?)"
-		;;
-    "next")	echo "Looks like NeXTstep"
-		;;
-    "bsd/386" | "bsd/os") echo "Looks like BSDi BSD/OS"
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_BSD(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
-
-		# Use shlicc unless asked to do otherwise
+    *-*-bsdi*)
+		# Use shlicc for BSD/OS 2.x unless asked to do otherwise
 		if test "$OSREV" -ge 2 -a "${with_CC+set}" != set -a \
 			"$ac_cv_prog_CC" = "gcc"; then
 		    echo 'using shlicc as CC'
 		    ac_cv_prog_CC=shlicc
 		    CC="$ac_cv_prog_CC"
-		fi  
+		fi
+
 		# This should always be true but why not be careful...
-		if test "$with_C2" = "yes"; then
-		    SHADOW_TYPE="SPW_BSD"
-		fi
-		;;
-    "mtxinu")	echo "Looks like mt Xinu MORE/BSD"
-		;;
-    "4.3bsd")	echo "Looks like HP BSD"
 		test -z "$with_C2" && SUDO_CHECK_SHADOW_BSD(
 		    AC_DEFINE(HAVE_C2_SECURITY)
 		    with_C2="yes"
 		)
-
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_BSD"
 		fi
 		;;
-    *"bsd"*)	echo "Looks like some kind of BSD, that's just fine"
+    *-*-*bsd*)
 		test -z "$with_C2" && SUDO_CHECK_SHADOW_BSD(
 		    AC_DEFINE(HAVE_C2_SECURITY)
 		    with_C2="yes"
 		)
-
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_BSD"
 		fi
 		;;
-    "unknown")	echo "I don't recognize your OS, but that's ok"
-		dnl
-		dnl Is this OS using shadow passwords?
-		dnl (Cannot auto-check for C2 if using non-passwd based authentication)
-		dnl
-		if test -z "$with_C2" -a "$with_skey" != "yes" -a \
-			   "$with_SecurID" != "yes" -a "$with_AFS" != "yes" -a \
-			   "$with_DCE" != "yes" -a "$with_kerb4" != "yes" -a \
-			   "$with_kerb5" != "yes"; then
-		    SUDO_CHECK_SHADOW_GENERIC(AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes")
-		elif test -z "$with_C2"; then
-		    echo "Unable to check for shadow passwords. If you have them you should use --with-C2 (unless they are on by default for your OS, see INSTALL)."
+    *-*-sysv*)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
+		    AC_DEFINE(HAVE_C2_SECURITY)
+		    with_C2="yes"
+		)
+		if test "$with_C2" = "yes"; then
+		    SHADOW_TYPE="SPW_SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
-    *)		echo "Hmmm, I don't recognize $OS offhand, but that's ok"
+    *)
+		if test -z "$host"; then
+		    echo "Unable to guess system type, you may need to specify on the command line."
+		fi
+
 		dnl
+		dnl XXX - this should just check for svr4, bsd, or secureware
 		dnl Is this OS using shadow passwords?
 		dnl (Cannot auto-check for C2 if using non-passwd based authentication)
 		dnl
@@ -636,7 +577,7 @@ case "$OS" in
 esac
 
 dnl
-dnl search for various shadow password types unless we already know
+dnl Search for various shadow password type unless we already know
 dnl XXX - need a better default case (define SHADOW_TYPE to *something*)
 dnl
 if test "$with_C2" = "yes" -a -z "$SHADOW_TYPE"; then
@@ -733,9 +674,6 @@ dnl Irix doesn't want -lnsl or -lsocket (and Irix 4 needs -lsun)
 if test "$OS" != "irix"; then
     if test -z "$LIB_NSL"; then
 	AC_CHECK_LIB(nsl, main, SUDO_LIBS="${SUDO_LIBS} -lnsl")
-    fi
-    if test -z "$LIB_SOCKET"; then
-	AC_CHECK_LIB(socket, main, SUDO_LIBS="${SUDO_LIBS} -lsocket")
     fi
 elif test "$OSREV" -lt 5; then
     AC_CHECK_LIB(sun, getpwnam, [SUDO_LIBS="${SUDO_LIBS} -lsun"
