@@ -40,9 +40,9 @@ static char rcsid[] = "$Id$";
 #endif /* lint */
 
 #include "config.h"
-#ifdef HAVE_UNISTD_H
+#if defined(HAVE_UNISTD_H) && defined(linux)
 #include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#endif /* HAVE_UNISTD_H && linux */
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif /* HAVE_STRING_H */
