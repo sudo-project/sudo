@@ -1,6 +1,6 @@
 /*
  *  CU sudo version 1.6
- *  Copyright (c) 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ *  Copyright (c) 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
