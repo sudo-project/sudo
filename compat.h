@@ -184,4 +184,39 @@
 # define O_NOCTTY	0
 #endif /* O_NOCTTY */
 
+/*
+ * Emulate POSIX signals via sigvec(2)
+ */
+#ifndef HAVE_SIGACTION
+# define SA_ONSTACK	SV_ONSTACK
+# define SA_RESTART	SV_INTERRUPT		/* opposite effect */
+# define SA_RESETHAND	SV_RESETHAND
+# define sa_handler	sv_handler
+# define sa_mask	sv_mask
+# define sa_flags	sv_flags
+typedef struct sigvec sigaction_t;
+typedef int sigset_t;
+int sigaction __P((int sig, const sigaction_t *act, sigaction_t *oact));
+int sigemptyset __P((sigset_t *));
+int sigfillset __P((sigset_t *));
+int sigaddset __P((sigset_t *, int));
+int sigdelset __P((sigset_t *, int));
+int sigismember __P((sigset_t *, int));
+int sigprocmask __P((int, const sigset_t *, sigset_t *));
+#endif
+
+/*
+ * Extra sugar for POSIX signals to deal with the above emulation
+ * as well as the fact that SunOS has a SA_INTERRUPT flag.
+ */
+#ifdef HAVE_SIGACTION
+typedef struct sigaction sigaction_t;
+# ifndef SA_INTERRUPT 
+#  define SA_INTERRUPT	0
+# endif
+# ifndef SA_RESTART 
+#  define SA_RESTART	0
+# endif
+#endif
+
 #endif /* _SUDO_COMPAT_H */
