@@ -43,6 +43,11 @@ AC_ARG_WITH(SKEY, [  --with-SKEY             enable Skey support (untested)], AC
 SKEY=1
 echo 'Configuring for use with Skey')
 dnl
+dnl --with-kerberos
+AC_ARG_WITH(kerberos, [  --with-kerberos         enable kerberos support], AC_DEFINE(HAVE_KERBEROS)
+KERBEROS=1
+echo 'Configuring for use with KERBEROS')
+dnl
 dnl --with-AFS
 AC_ARG_WITH(AFS, [  --with-AFS              enable AFS support], AC_DEFINE(HAVE_AFS)
 AFS=1
@@ -179,6 +184,13 @@ case "$OS" in
     *)		echo "Hmmm, I don't recognize $OS offhand, but that's ok"
 		;;
 esac
+dnl
+dnl extra kerberos libs
+dnl
+if test -n "$KERBEROS" ; then
+    LIBS="${LIBS} -L/usr/kerberos/lib -lkrb -ldes"
+    INC_FLAGS="${INC_FLAGS} -I/usr/kerberos/include"
+fi
 dnl
 dnl extra AFS libs
 dnl
