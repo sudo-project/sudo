@@ -595,13 +595,8 @@ void inform_user(code)
 		    (void) fprintf(stderr, "There is no %s file.\n",
 			_PATH_SUDO_SUDOERS);
 		    break;
-		case EACCES:
-		    (void) fprintf(stderr, "Can't read %s: ",
-			_PATH_SUDO_SUDOERS);
-		    perror("");
-		    break;
 		default:
-		    (void) fprintf(stderr, "Can't stat %s: ",
+		    (void) fprintf(stderr, "Can't read %s: ",
 			_PATH_SUDO_SUDOERS);
 		    perror("");
 		    break;
