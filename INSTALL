@@ -132,15 +132,6 @@ Special features/options:
   --with-opie
 	Enable NRL OPIE OTP (One Time Password) support.
 
-  --with-otp-only
-	This option is now just an alias for --without-passwd.
-
-  --with-long-otp-prompt
-	When validating with a One Time Password scheme (S/Key or OPIE), a
-	two-line prompt is used to make it easier to cut and paste the
-	challenge to a local window.  It's not as pretty as the default but
-	some people find it more convenient.
-
   --with-SecurID=DIR
 	Enable SecurID support.  If specified, DIR is directory containing
 	sdiclient.a, sdi_athd.h, sdconf.h, and sdacmvls.h.
@@ -179,30 +170,92 @@ Special features/options:
 	Enable DCE support.  Known to work on HP-UX 9.X and 10.0.  Other
 	platforms may require source code and/or `configure' changes.
 
+  --disable-sia
+	Disable SIA support.  This is the "Security Integration Architecture"
+	on Digital UNIX. If you disable SIA sudo will use its own
+	authentication routines.
+
+  --disable-shadow
+	Disable shadow password support.  Normally, sudo will compile in shadow
+	password support and use a shadow password if it exists.
+
+  --with-sudoers-mode=mode
+	File mode for the sudoers file (octal).  Note that if you wish to
+	NFS-mount the sudoers file this must be group readable.  Also note
+	that this is actually set in the Makefile.  The default mode is 0440.
+
+  --with-sudoers-uid
+	User id that "owns" the sudoers file.  Note that this is the numeric
+	id, *not* the symbolic name.  Also note that this is actually set in
+	the Makefile.  The default is 0.
+
+  --with-sudoers-gid
+	Group id that "owns" the sudoers file.  Note that this is the numeric
+	id, *not* the symbolic name.  Also note that this is actually set in
+	the Makefile.  The default is 0.
+
+  --with-execv
+	Use execv() to exec the command instead of execvp().  I can't think of
+	a reason to actually do this since execvp() is passed a fully qualified
+	pathname but someone might thoroughly distrust execvp().  Note that if
+	you define this you lose the ability to exec scripts that are missing
+	the '#!/bin/sh' cookie (like /bin/kill on SunOS and /etc/fastboot on
+	4.3BSD).  This is off by default.
+
+  --without-interfaces
+	This option keeps sudo from trying to glean the ip address from each
+	attached ethernet interface.  It is only useful on a machine where
+	sudo's interface reading support does not work, which may be the case
+	on some SysV-based OS's using STREAMS.
+
+  --without-passwd
+	This option authentication via the passwd (or shadow) file.
+	It should only be used when another, alternate, authentication
+	scheme is in use.
+
+  --with-editor=path
+	Specify the default editor used by visudo (and the only editor used
+	unless --with-env-editor is specified).  The default is the path
+	to vi on your system.
+
+  --with-env-editor
+	Makes visudo consult the EDITOR and VISUAL environment variables before
+	falling back on the default editor.  Note that this may create a
+	security hole as most editors allow a user to get a shell (which would
+	be a root shell and hence, no logging).
+
+The following options are also configurable at runtime:
+
+  --with-otp-only
+	This option is now just an alias for --without-passwd.
+
+  --with-long-otp-prompt
+	When validating with a One Time Password scheme (S/Key or OPIE), a
+	two-line prompt is used to make it easier to cut and paste the
+	challenge to a local window.  It's not as pretty as the default but
+	some people find it more convenient.
+
   --with-logging=TYPE
 	How you want to do your logging.  You may choose "syslog", "file",
 	or "both".  Setting this to "syslog" is nice because you can keep all
-	of your sudo logs in one place.  If you don't have syslog or if your
-	syslog is of an ancient vintage (4.2BSD, SunOS 3.x and all versions
-	of Ultrix) you should probably use "file" logging.
-	The default is "syslog".
+	of your sudo logs in one place (see the FAQ).  The default is "syslog".
 
   --with-logfac=FACILITY
-	Determines which syslog facility to log to.  This This requires a
-	4.3BSD or later version of syslog.  You can still set this for ancient
-	syslogs but it will have no effect.  A list of possible values may be
-	found in /usr/include/syslog.h.  The default is to use LOG_LOCAL2 but
-	some sites may wish to use LOG_AUTH instead.
+	Determines which syslog facility to log to.  This requires a 4.3BSD
+	or later version of syslog.  You can still set this for ancient
+	syslogs but it will have no effect.  The following facilities are
+	supported: authpriv (if your OS supports it), auth, daemon, user,
+	local0, local1, local2, local3, local4, local5, local6, and local7.
 
   --with-goodpri=PRIORITY
 	Determines which syslog priority to log successfully authenticated
-	commands.  A list of possible values may be found in
-	/usr/include/syslog.h.  The default is LOG_NOTICE.
+	commands.  The following priorities are supported: alert, crit,
+	debug, emerg, err, info, notice, and warning.
 
   --with-badpri=PRIORITY
 	Determines which syslog priority to log unauthenticated commands
-	and errors.  A list of possible values may be found in
-	/usr/include/syslog.h.  The default is LOG_ALERT.
+	and errors.  The following priorities are supported: alert, crit,
+	debug, emerg, err, info, notice, and warning.
 
   --with-logpath=path
 	Override the default location of the sudo log file and use "path"
@@ -271,21 +324,6 @@ Special features/options:
 	Do not use sendmail to mail messages to the "mailto" user.
 	Use only if don't run sendmail or the equivalent.
 
-  --with-sudoers-mode=mode
-	File mode for the sudoers file (octal).  Note that if you wish to
-	NFS-mount the sudoers file this must be group readable.  Also note
-	that this is actually set in the Makefile.  The default mode is 0440.
-
-  --with-sudoers-uid
-	User id that "owns" the sudoers file.  Note that this is the numeric
-	id, *not* the symbolic name.  Also note that this is actually set in
-	the Makefile.  The default is 0.
-
-  --with-sudoers-gid
-	Group id that "owns" the sudoers file.  Note that this is the numeric
-	id, *not* the symbolic name.  Also note that this is actually set in
-	the Makefile.  The default is 0.
-
   --with-umask
 	Umask to use when running the root command.  The default is 0022.
 
@@ -302,17 +340,6 @@ Special features/options:
 	"core" sysadmins to have to enter a password but where Jr. sysadmins
 	need to.  You should probably use NOPASSWD in sudoers instead.
 
-  --with-editor=path
-	Specify the default editor used by visudo (and the only editor used
-	unless --with-env-editor is specified).  The default is the path
-	to vi on your system.
-
-  --with-env-editor
-	Makes visudo consult the EDITOR and VISUAL environment variables before
-	falling back on the default editor.  Note that this may create a
-	security hole as most editors allow a user to get a shell (which would
-	be a root shell and hence, no logging).
-
   --with-passwd-tries=tries
 	Number of tries a user gets to enter his/her password before sudo logs
 	the failure and exits.  The default is 3.
@@ -324,14 +351,6 @@ Special features/options:
   --with-password-timeout=minutes
 	Number of minutes before the sudo password prompt times out.
 	The default is 5, set this to 0 for no password timeout.
-
-  --with-execv
-	Use execv() to exec the command instead of execvp().  I can't think of
-	a reason to actually do this since execvp() is passed a fully qualified
-	pathname but someone might thoroughly distrust execvp().  Note that if
-	you define this you lose the ability to exec scripts that are missing
-	the '#!/bin/sh' cookie (like /bin/kill on SunOS and /etc/fastboot on
-	4.3BSD).  This is off by default.
 
   --with-tty-tickets
 	This makes sudo use a different ticket file for each tty (per user).
@@ -380,26 +399,11 @@ Special features/options:
   --without-lecture
 	Don't print the lecture the first time a user runs sudo.
 
-  --without-interfaces
-	This option keeps sudo from trying to glean the ip address from each
-	attached ethernet interface.  It is only useful on a machine where
-	sudo's interface reading support does not work, which may be the case
-	on some SysV-based OS's using STREAMS.
-
-  --without-passwd
-	This option authentication via the passwd (or shadow) file.
-	It should only be used when another, alternate, authentication
-	scheme is in use.
-
   --disable-authentication
         By default, sudo requires the user to authenticate via a
         password or similar means.  This options causes sudo to
         *not* require authentication.  It is possible to turn
         authentication back on in sudoers via the PASSWD attribute.
-
-  --disable-shadow
-	Disable shadow password support.  Normally, sudo will compile in shadow
-	password support and use a shadow password if it exists.
 
   --disable-root-sudo
 	Don't let root run sudo.  This can be used to prevent people from
@@ -428,11 +432,6 @@ Special features/options:
 	the normal user does not have access to.  The disadvantage is that
 	if the executable is simply not in the user's path, sudo will tell
 	the user that they are not allowed to run it, which can be confusing.
-
-  --disable-sia
-	Disable SIA support.  This is the "Security Integration Architecture"
-	on Digital UNIX. If you disable SIA sudo will use its own
-	authentication routines.
 
 Shadow password and C2 support
 ==============================
@@ -549,6 +548,12 @@ Linux:
     This is due to a bug in the Linux client-side NFS implementation.
     It has been fixed in the developement kernel but, as of Aug 27, 1999,
     the fixes have not made it into the mainstream kernel.
+
+Mac OS X:
+    It has been reported that for sudo to work on Mac OS X it must
+    either be built with the --with-password-timeout=0 option or the
+    password timeout must be disabled in the Defaults line in the
+    sudoers file.
 
 SCO ODT:
     You'll probably need libcrypt_i.a available via anonymous ftp
