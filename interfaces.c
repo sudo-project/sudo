@@ -51,8 +51,8 @@ static char rcsid[] = "$Id$";
 #include <netdb.h>
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/time.h>
 #include <sys/socket.h>
+#include <sys/param.h>
 #ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #else
@@ -73,8 +73,9 @@ static char rcsid[] = "$Id$";
 #endif /* _MIPS */
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/time.h>
+#include <net/route.h>
 #include <net/if.h>
-#include <sys/param.h>
 
 #include "sudo.h"
 #include "options.h"
@@ -83,11 +84,6 @@ static char rcsid[] = "$Id$";
 #if !defined(STDC_HEADERS) && !defined(__GNUC__)
 extern char *malloc	__P((size_t));
 #endif /* !STDC_HEADERS && !__GNUC__ */
-
-/*
- * Local prototypes
- */
-static struct ifreq *next_if	__P((struct ifreq *));
 
 /*
  * Globals
@@ -112,10 +108,10 @@ void load_interfaces()
     unsigned long localhost_mask;
     struct ifconf *ifconf;
     char ifconf_buf[sizeof(struct ifconf) + BUFSIZ];
-    struct ifreq ifreq, *cur;
+    struct ifreq ifreq;
     struct sockaddr_in *sin;
     char buf[BUFSIZ];
-    int sock, n;
+    int sock, n, i;
 #ifdef _ISC
     struct strioctl strioctl;
 #endif /* _ISC */
@@ -166,11 +162,18 @@ void load_interfaces()
     /*
      * for each interface, get the ip address and netmask
      */
-
-    cur = ifconf->ifc_req;
-    do {
+    for (i = 0; i < ifconf->ifc_len; ) {
 	/* setup ifreq struct */
-	ifreq = *cur;
+	ifreq = *((struct ifreq *) &ifconf->ifc_buf[i]);
+
+	/* set i to the subscript of the next interface */
+#ifdef HAVE_SA_LEN
+	if (ifreq.ifr_addr.sa_len > sizeof(ifreq.ifr_addr))
+	    i += sizeof(ifreq.ifr_name) + ifreq.ifr_addr.sa_len;
+	else
+#endif /* HAVE_SA_LEN */
+	    i += sizeof(ifreq);
+
 
 	/* get the ip address */
 #ifdef _ISC
@@ -189,7 +192,7 @@ void load_interfaces()
 	}
 	sin = (struct sockaddr_in *) &ifreq.ifr_addr;
 
-	/* make sure we don't have a dupe (usually consecutive) */
+	/* make sure we don't have a dup (usually consecutive) */
 	if (num_interfaces && interfaces[num_interfaces - 1].addr.s_addr ==
 	    sin->sin_addr.s_addr)
 	    continue;
@@ -225,8 +228,7 @@ void load_interfaces()
 	    continue;
 
 	num_interfaces++;
-    } while ((cur = next_if(cur)) &&
-	     (caddr_t) cur < (caddr_t) ifconf->ifc_req + ifconf->ifc_len);
+    }
 
     /* if there were bogus entries, realloc the array */
     if (n != num_interfaces) {
