@@ -204,7 +204,7 @@ print_version()
 #endif
 
 #ifdef SHELL_IF_NO_ARGS
-	puts("When invoked with no arguments sudo will start a shell")
+	puts("When invoked with no arguments sudo will start a shell");
 #endif
 
 #ifdef SHELL_SETS_HOME
