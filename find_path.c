@@ -110,11 +110,11 @@ char * find_path(file)
     }
 
     /*
-     * Don't search PATH if we don't need to...
+     * If we were given a fully qualified or relative path just accept for now
      */
     if (strchr(file, '/')) {
 	(void) strcpy(command, file);
-	return(sudo_goodpath(command));
+	return(command);
     }
 
     /*
