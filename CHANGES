@@ -1305,3 +1305,5 @@ Sudo 1.6.3 released.
      allowable editors.  If the user has $EDITOR set and it matches
      one of the allowed editors that editor will be used.  If not,
      the first editor that actually exists is used.
+
+411) Visudo now does its own fork/exec instead of calling system(3).

@@ -64,6 +64,7 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/file.h>
+#include <sys/wait.h>
 
 #include "sudo.h"
 #include "version.h"
@@ -91,6 +92,7 @@ static void usage		__P((void));
 static char whatnow		__P((void));
 static RETSIGTYPE Exit		__P((int));
 static void setup_signals	__P((void));
+static int run_command		__P((char *, char **));
 int command_matches		__P((char *, char *, char *, char *));
 int addr_matches		__P((char *));
 int hostname_matches		__P((char *, char *, char *));
@@ -125,6 +127,7 @@ main(argc, argv)
     char *Editor;			/* editor to use */
     char *UserEditor;			/* editor user wants to use */
     char *EditorPath;			/* colon-separated list of editors */
+    char *av[4];			/* argument vector for run_command */
     int sudoers_fd;			/* sudoers file descriptor */
     int stmp_fd;			/* stmp file descriptor */
     int n;				/* length parameter */
@@ -325,22 +328,24 @@ main(argc, argv)
      * Edit the temp file and parse it (for sanity checking)
      */
     do {
-	/*
-	 * Build up a buffer to execute
-	 */
-	if (strlen(Editor) + strlen(stmp) + 30 > sizeof(buf)) {
-	    (void) fprintf(stderr, "%s: Buffer too short (line %d).\n",
-			   Argv[0], __LINE__);
-	    Exit(-1);
-	}
-	if (parse_error == TRUE)
-	    (void) sprintf(buf, "%s +%d %s", Editor, errorlineno, stmp);
+	char linestr[64];
+
+	/* Build up argument vector for the command */
+	if ((av[0] = strrchr(Editor, '/')) != NULL)
+	    av[0]++;
 	else
-	    (void) sprintf(buf, "%s %s", Editor, stmp);
+	    av[0] = Editor;
+	n = 1;
+	if (parse_error == TRUE) {
+	    (void) snprintf(linestr, sizeof(linestr), "%d", errorlineno);
+	    av[n++] = linestr;
+	}
+	av[n++] = stmp;
+	av[n++] = NULL;
 
 	/* Do the edit -- some SYSV editors exit with 1 instead of 0 */
 	now = time(NULL);
-	n = system(buf);
+	n = run_command(Editor, av);
 	if (n != -1 && ((n >> 8) == 0 || (n >> 8) == 1)) {
 	    /*
 	     * Sanity checks.
@@ -439,31 +444,26 @@ main(argc, argv)
      */
     if (rename(stmp, sudoers)) {
 	if (errno == EXDEV) {
-	    char *tmpbuf;
-
 	    (void) fprintf(stderr,
 	      "%s: %s and %s not on the same filesystem, using mv to rename.\n",
 	      Argv[0], stmp, sudoers);
 
-	    /* Allocate just enough space for tmpbuf */
-	    n = sizeof(char) * (strlen(_PATH_MV) + strlen(stmp) +
-		  strlen(sudoers) + 4);
-	    if ((tmpbuf = (char *) malloc(n)) == NULL) {
-		(void) fprintf(stderr,
-			      "%s: Cannot alocate memory, %s unchanged: %s\n",
-			      Argv[0], sudoers, strerror(errno));
-		Exit(-1);
-	    }
+	    /* Build up argument vector for the command */
+	    if ((av[0] = strrchr(_PATH_MV, '/')) != NULL)
+		av[0]++;
+	    else
+		av[0] = _PATH_MV;
+	    av[1] = stmp;
+	    av[2] = sudoers;
+	    av[3] = NULL;
 
-	    /* Build up command and execute it */
-	    (void) sprintf(tmpbuf, "%s %s %s", _PATH_MV, stmp, sudoers);
-	    if (system(tmpbuf)) {
+	    /* And run it... */
+	    if (run_command(_PATH_MV, av)) {
 		(void) fprintf(stderr,
-			       "%s: Command failed: '%s', %s unchanged.\n",
-			       Argv[0], tmpbuf, sudoers);
+			       "%s: Command failed: '%s %s %s', %s unchanged.\n",
+			       Argv[0], _PATH_MV, stmp, sudoers, sudoers);
 		Exit(-1);
 	    }
-	    free(tmpbuf);
 	} else {
 	    (void) fprintf(stderr, "%s: Error renaming %s, %s unchanged: %s\n",
 				   Argv[0], stmp, sudoers, strerror(errno));
@@ -587,6 +587,59 @@ setup_signals()
 	(void) signal(SIGINT, Exit);
 	(void) signal(SIGQUIT, Exit);
 #endif /* POSIX_SIGNALS */
+}
+
+static int
+run_command(path, argv)
+    char *path;
+    char **argv;
+{
+    int status;
+    pid_t pid;
+#ifndef POSIX_SIGNALS
+    int omask = sigblock(sigmask(SIGCHLD));
+#else
+    sigset_t set, oset;
+
+    (void) sigemptyset(&set);
+    (void) sigaddset(&set, SIGCHLD);
+    (void) sigprocmask(SIG_BLOCK, &set, &oset);
+#endif /* POSIX_SIGNALS */
+
+    switch (pid = fork()) {
+	case -1:
+	    (void) fprintf(stderr,
+		"%s: unable to run %s: %s\n", Argv[0], path, strerror(errno));
+	    Exit(-1);
+	    break;	/* NOTREACHED */
+	case 0:
+#ifdef POSIX_SIGNALS
+	    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
+#else
+	    (void) sigsetmask(omask);
+#endif /* POSIX_SIGNALS */
+	    execv(path, argv);
+	    (void) fprintf(stderr,
+		"%s: unable to run %s: %s\n", Argv[0], path, strerror(errno));
+	    _exit(-1);
+	    break;	/* NOTREACHED */
+    }
+
+#ifdef sudo_waitpid
+    pid = sudo_waitpid(pid, &status, 0);
+#else
+    pid = wait(&status);
+#endif
+
+#ifdef POSIX_SIGNALS
+    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
+#else
+    (void) sigsetmask(omask);
+#endif /* POSIX_SIGNALS */
+
+    if (pid == -1)
+	status = -1;
+    return(status);
 }
 
 /*
