@@ -19,6 +19,10 @@ LIBOBJS=""
 AC_SUBST(LIBOBJS)dnl
 TGETPASS="tgetpass.o"
 AC_SUBST(TGETPASS)dnl
+MAN_PREFIX='$(prefix)/man'
+AC_SUBST(MAN_PREFIX)dnl
+MANTYPE="man"
+AC_SUBST(MANTYPE)dnl
 dnl
 dnl Options for --with(out)
 dnl
@@ -51,6 +55,10 @@ dnl
 AC_PROGRAM_CHECK(UNAMEPROG, uname, uname, )
 AC_PROGRAM_CHECK(TRPROG, tr, tr, )
 AC_PROGRAM_CHECK(SEDPROG, sed, sed, )
+AC_PROGRAM_CHECK(NROFFPROG, nroff, nroff, )
+if test -z "$NROFFPROG"; then
+    MANTYPE="cat"
+fi
 dnl
 dnl what architecture are we on?
 dnl
@@ -82,6 +90,11 @@ case "$OS" in
 		# configure doesn't think irix has stdc headers
 		# but it's good enough for sudo
 		AC_DEFINE(STDC_HEADERS)
+		if test -z "$NROFFPROG"; then
+		    MAN_PREFIX="/usr/catman/local"
+		else
+		    MAN_PREFIX="/usr/man/local"
+		fi
 		;;
     "linux")	echo "Looks like linux"
 		;;
@@ -138,6 +151,9 @@ dnl Program checks
 dnl
 AC_PROG_YACC
 AC_PROG_LEX
+if test "$LEX" = "flex"; then
+    AC_DEFINE(HAVE_FLEX)
+fi
 SUDO_PROG_INSTALL
 SUDO_PROG_SENDMAIL
 SUDO_PROG_PWD
