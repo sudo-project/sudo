@@ -104,7 +104,8 @@ char * tgetpass(prompt, timeout)
 #else
     int oldmask;
 #endif /* POSIX_SIGNALS */
-    int input, output, n;
+    int n;
+    FILE *input, *output;
     static char buf[_PASSWD_LEN + 1];
     fd_set readfds;
     struct timeval tv;
@@ -125,9 +126,10 @@ char * tgetpass(prompt, timeout)
      * open /dev/tty for reading/writing if possible or use
      * stdin and stderr instead.
      */
-    if ((input = open(_PATH_TTY, O_RDWR)) < 0) {
-	input = fileno(stdin);
-	output = fileno(stderr);
+    if ((input = fopen(_PATH_TTY, "r+")) == NULL) {
+	input = stdin;
+	output = stderr;
+	(void) fflush(output);
     } else {
 	output = input;
     }
@@ -136,30 +138,36 @@ char * tgetpass(prompt, timeout)
      * turn off echo
      */
 #ifdef HAVE_TERMIOS_H
-    (void) tcgetattr(input, &term);
+    (void) tcgetattr(fileno(input), &term);
     svflagval = term.c_lflag;
     term.c_lflag &= ~ECHO;
-    (void) tcsetattr(input, TCSAFLUSH|TCSASOFT, &term);
+    (void) tcsetattr(fileno(input), TCSAFLUSH|TCSASOFT, &term);
 #else
 #ifdef HAVE_TERMIO_H
-    (void) ioctl(input, TCGETA, &term);
+    (void) ioctl(fileno(input), TCGETA, &term);
     svflagval = term.c_lflag;
     term.c_lflag &= ~ECHO;
-    (void) ioctl(input, TCSETA, &term);
+    (void) ioctl(fileno(input), TCSETA, &term);
 #else
-    (void) ioctl(input, TIOCGETP, &ttyb);
+    (void) ioctl(fileno(input), TIOCGETP, &ttyb);
     svflagval = ttyb.sg_flags;
     ttyb.sg_flags &= ~ECHO;
-    (void) ioctl(input, TIOCSETP, &ttyb);
+    (void) ioctl(fileno(input), TIOCSETP, &ttyb);
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
     /* print the prompt */
-    (void) write(output, prompt, strlen(prompt));
+    (void) fputs(prompt, output);
+
+    /* rewind if necesary */
+    if (input == output) {
+	(void) fflush(output);
+	(void) rewind(output);
+    }
 
     /* setup for select(2) */
     FD_ZERO(&readfds);
-    FD_SET(input, &readfds);
+    FD_SET(fileno(input), &readfds);
 
     /* set timeout for select */
     tv.tv_sec = timeout;
@@ -176,27 +184,34 @@ char * tgetpass(prompt, timeout)
      * get password or return empty string if nothing to read by timeout
      */
     buf[0] = '\0';
-    if (select(n, &readfds, NULL, NULL, &tv) > 0 &&
-	(n = read(input, buf, sizeof(buf))) > 0) {
-	buf[n - 1] = '\0';
+    if (select(n, &readfds, 0, 0, &tv) > 0 && fgets(buf, sizeof(buf), input)) {
+	n = strlen(buf);
+	if (buf[n - 1] == '\n')
+	    buf[n - 1] = '\0';
     }
 
      /* turn on echo */
 #ifdef HAVE_TERMIOS_H
     term.c_lflag = svflagval;
-    (void) tcsetattr(input, TCSAFLUSH|TCSASOFT, &term);
+    (void) tcsetattr(fileno(input), TCSAFLUSH|TCSASOFT, &term);
 #else
 #ifdef HAVE_TERMIO_H
     term.c_lflag = svflagval;
-    (void) ioctl(input, TCSETA, &term);
+    (void) ioctl(fileno(input), TCSETA, &term);
 #else
     ttyb.sg_flags = svflagval;
-    (void) ioctl(input, TIOCSETP, &ttyb);
+    (void) ioctl(fileno(input), TIOCSETP, &ttyb);
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
+    /* rewind if necesary */
+    if (input == output) {
+	(void) fflush(output);
+	(void) rewind(output);
+    }
+
     /* print a newline since echo is turned off */
-    (void) write(output, "\n", 1);
+    (void) fputc('\n', output);
 
     /* restore old signal mask */
 #ifdef POSIX_SIGNALS
@@ -206,8 +221,8 @@ char * tgetpass(prompt, timeout)
 #endif
 
     /* close /dev/tty if that's what we opened */
-    if (input != fileno(stdin))
-	(void) close(input);
+    if (input != stdin)
+	(void) fclose(input);
 
     return(buf);
 }
