@@ -233,7 +233,6 @@ host_matches(shost, lhost, list)
 /*
  * Check for cmnd and args in a list of members.
  * Returns ALLOW, DENY or UNSPEC.
- * XXX - never called in list context
  */
 int
 cmnd_matches(cmnd, args, list)
