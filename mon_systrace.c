@@ -872,8 +872,14 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
     def_authenticate = FALSE;
     runas_pw = info->pw;
     user_runas = &info->pw->pw_name;
-    rewind(sudoers_fp);
-    validated = sudoers_lookup(0);
+#ifdef HAVE_LDAP
+    validated = sudo_ldap_check(pwflag);
+    if (!def_ignore_local_sudoers && !ISSET(validated, VALIDATE_OK))
+#endif
+    {
+	rewind(sudoers_fp);
+	validated = sudoers_lookup(0);
+    }
     if (ISSET(validated, VALIDATE_OK)) {
 	*policyp = SYSTR_POLICY_PERMIT;
     } else {
