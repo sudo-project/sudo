@@ -1453,6 +1453,7 @@ openbsd*)
   #finish_cmds='PATH="\$PATH:/sbin" ldconfig -m $libdir'
   shlibpath_var=LD_LIBRARY_PATH
   if test -z "`echo __ELF__ | $CC -E - | grep __ELF__`" || test "$host_os-$host_cpu" = "openbsd2.8-powerpc"; then
+    dynamic_linker='OpenBSD (ELF) ld.so'
     case $host_os in
       openbsd2.[[89]] | openbsd2.[[89]].*)
 	shlibpath_overrides_runpath=no
@@ -1462,6 +1463,7 @@ openbsd*)
 	;;
       esac
   else
+    dynamic_linker='OpenBSD (a.out) ld.so'
     shlibpath_overrides_runpath=yes
   fi
   ;;
