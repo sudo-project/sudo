@@ -25,30 +25,12 @@
 #include <config.h>
 #endif
 
-#ifdef emacs
-#include "blockinput.h"
-#endif
-
 /* If compiling with GCC 2, this file's not needed.  */
 #if !defined (__GNUC__) || __GNUC__ < 2
 
 /* If someone has defined alloca as a macro,
    there must be some other way alloca is supposed to work.  */
 #ifndef alloca
-
-#ifdef emacs
-#ifdef static
-/* actually, only want this if static is defined as ""
-   -- this is for usg, in which emacs must undefine static
-   in order to make unexec workable
-   */
-#ifndef STACK_DIRECTION
-you
-lose
--- must know STACK_DIRECTION at compile-time
-#endif /* STACK_DIRECTION undefined */
-#endif /* static */
-#endif /* emacs */
 
 /* If your stack is a linked list of frames, you have to
    provide an "address metric" ADDRESS_FUNCTION macro.  */
@@ -66,21 +48,10 @@ typedef void *pointer;
 typedef char *pointer;
 #endif
 
+#ifndef NULL
 #define	NULL	0
-
-/* Different portions of Emacs need to call different versions of
-   malloc.  The Emacs executable needs alloca to call xmalloc, because
-   ordinary malloc isn't protected from input signals.  On the other
-   hand, the utilities in lib-src need alloca to call malloc; some of
-   them are very simple, and don't have an xmalloc routine.
-
-   Non-Emacs programs expect this to call use xmalloc.
-
-   Callers below should use malloc.  */
-
-#ifndef emacs
-#define malloc xmalloc
 #endif
+
 extern pointer malloc ();
 
 /* Define STACK_DIRECTION if you know the direction of stack
@@ -176,10 +147,6 @@ alloca (size)
   {
     register header *hp;	/* Traverses linked list.  */
 
-#ifdef emacs
-    BLOCK_INPUT;
-#endif
-
     for (hp = last_alloca_header; hp != NULL;)
       if ((STACK_DIR > 0 && hp->h.deep > depth)
 	  || (STACK_DIR < 0 && hp->h.deep < depth))
@@ -194,10 +161,6 @@ alloca (size)
 	break;			/* Rest are not deeper.  */
 
     last_alloca_header = hp;	/* -> last valid storage.  */
-
-#ifdef emacs
-    UNBLOCK_INPUT;
-#endif
   }
 
   if (size == 0)
