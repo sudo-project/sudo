@@ -936,6 +936,20 @@ void set_perms(perm, sudo_mode)
 					exit(1);
 				    }
 
+				    /*
+				     * Initialize group vector only if
+				     * we are going to be a non-root user.
+				     */
+				    if (strcmp(runas_user, "root") != 0 &&
+					initgroups(runas_user, pw_ent->pw_gid)
+					== -1) {
+					(void) fprintf(stderr,
+					    "%s: cannot set group vector ",
+					    Argv[0]);
+					perror("");
+					exit(1);
+				    }
+
 				    if (setuid(pw_ent->pw_uid)) {
 					(void) fprintf(stderr,
 					    "%s: cannot set uid to %d: ",  
