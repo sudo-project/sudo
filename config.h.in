@@ -389,10 +389,10 @@
 /* Define to override the user's path with a builtin one. */
 #undef SECURE_PATH
 
-/* Define to send mail when the user is not not allowed to run a command. */
+/* Define to send mail when the user is not allowed to run a command. */
 #undef SEND_MAIL_WHEN_NOT_OK
 
-/* Define to send mail when the user is not not allowed to run sudo on this
+/* Define to send mail when the user is not allowed to run sudo on this
    host. */
 #undef SEND_MAIL_WHEN_NO_HOST
 

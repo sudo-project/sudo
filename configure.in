@@ -559,7 +559,7 @@ AC_ARG_WITH(mail-if-no-host, [  --with-mail-if-no-host  send mail if user in sud
 		;;
 esac])
 if test "$mail_no_host" = "on"; then
-    AC_DEFINE(SEND_MAIL_WHEN_NO_HOST, 1, [Define to send mail when the user is not not allowed to run sudo on this host.])
+    AC_DEFINE(SEND_MAIL_WHEN_NO_HOST, 1, [Define to send mail when the user is not allowed to run sudo on this host.])
     AC_MSG_RESULT(yes)
 else
     AC_MSG_RESULT(no)
@@ -576,7 +576,7 @@ AC_ARG_WITH(mail-if-noperms, [  --with-mail-if-noperms  send mail if user not al
 		;;
 esac])
 if test "$mail_noperms" = "on"; then
-    AC_DEFINE(SEND_MAIL_WHEN_NOT_OK, 1, [Define to send mail when the user is not not allowed to run a command.])
+    AC_DEFINE(SEND_MAIL_WHEN_NOT_OK, 1, [Define to send mail when the user is not allowed to run a command.])
     AC_MSG_RESULT(yes)
 else
     AC_MSG_RESULT(no)
