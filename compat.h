@@ -227,4 +227,17 @@ typedef struct sigaction sigaction_t;
 # define RLIM_INFINITY	(-1)
 #endif
 
+/*
+ * If we lack getprogname(), emulate with __progname if possible.
+ * Otherwise, add a prototype for use with our own getprogname.c.
+ */
+#ifndef HAVE_GETPROGNAME
+# ifdef HAVE___PROGNAME
+extern const char *__progname;
+#  define getprogname()          (__progname)
+# else
+const char *getprogname __P((void));
+#endif /* HAVE___PROGNAME */
+#endif /* !HAVE_GETPROGNAME */
+
 #endif /* _SUDO_COMPAT_H */

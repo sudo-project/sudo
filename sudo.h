@@ -236,12 +236,10 @@ int pam_prep_user	__P((struct passwd *));
 YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */
-#ifndef _SUDO_SUDO_C
+#ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
 extern struct passwd *auth_pw;
 
-extern int Argc;
-extern char **Argv;
 extern FILE *sudoers_fp;
 extern int tgetpass_flags;
 extern uid_t timestamp_uid;

@@ -56,7 +56,11 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#include <errno.h>
+#ifdef HAVE_ERR_H
+# include <err.h>
+#else
+# include "emul/err.h"
+#endif /* HAVE_ERR_H */
 
 #include "sudo.h"
 
@@ -84,10 +88,8 @@ find_path(infile, outfile, path)
     int checkdot = 0;		/* check current dir? */
     int len;			/* length parameter */
 
-    if (strlen(infile) >= MAXPATHLEN) {
-	(void) fprintf(stderr, "%s: path too long: %s\n", Argv[0], infile);
-	exit(1);
-    }
+    if (strlen(infile) >= MAXPATHLEN)
+	errx(1, "%s: File name too long", infile);
 
     /*
      * If we were given a fully qualified or relative path
@@ -130,10 +132,8 @@ find_path(infile, outfile, path)
 	 * Resolve the path and exit the loop if found.
 	 */
 	len = snprintf(command, sizeof(command), "%s/%s", path, infile);
-	if (len <= 0 || len >= sizeof(command)) {
-	    (void) fprintf(stderr, "%s: path too long: %s\n", Argv[0], infile);
-	    exit(1);
-	}
+	if (len <= 0 || len >= sizeof(command))
+	    errx(1, "%s: File name too long", infile);
 	if ((result = sudo_goodpath(command)))
 	    break;
 

@@ -60,7 +60,7 @@
 #endif /* HAVE_UNISTD_H */
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
-#endif /* HAVE_FNMATCH_H */
+#endif /* HAVE_FNMATCH */
 #ifdef HAVE_NETGROUP_H
 # include <netgroup.h>
 #endif /* HAVE_NETGROUP_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2001 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2001, 2003 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * This code is derived from software contributed by Spider Boardman
@@ -111,6 +111,8 @@ sia_setup(pw, promptp, auth)
     sudo_auth *auth;
 {
     SIAENTITY *siah = NULL;
+    extern int Argc;
+    extern char **Argv;
 
     if (sia_ses_init(&siah, Argc, Argv, NULL, pw->pw_name, ttyname(0), 1, NULL)
 	!= SIASUCCESS) {

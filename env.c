@@ -56,8 +56,12 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_ERR_H
+# include <err.h>
+#else
+# include "emul/err.h"
+#endif /* HAVE_ERR_H */
 #include <pwd.h>
-#include <errno.h>
 
 #include "sudo.h"
 
@@ -113,7 +117,7 @@ static const char *initial_badenv_table[] = {
 #endif
 #ifdef HAVE_KERB4
     "KRB_CONF*",
-    "KRBCONFDIR"
+    "KRBCONFDIR",
     "KRBTKFILE",
 #endif /* HAVE_KERB4 */
 #ifdef HAVE_KERB5
@@ -223,9 +227,8 @@ format_env(var, val)
     if (strlcpy(estring, var, esize) >= esize ||
 	strlcat(estring, "=", esize) >= esize ||
 	strlcat(estring, val, esize) >= esize) {
-	(void) fprintf(stderr, "%s: internal error, format_env() overflow\n",
-	    Argv[0]);
-	exit(1);
+
+	errx(1, "internal error, format_env() overflow");
     }
 
     return(estring);
