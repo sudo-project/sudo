@@ -57,6 +57,8 @@
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
+#include "compat.h"
+
 #ifndef _PASSWD_LEN
 #ifdef HAVE_C2_SECURITY
 #define	_PASSWD_LEN	24
