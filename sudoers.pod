@@ -1152,7 +1152,7 @@ running under binary emulation are not affected.
 To tell whether or not B<sudo> supports I<noexec>, you can run
 the following as root:
 
-    \# sudo -V | grep "dummy exec"
+    sudo -V | grep "dummy exec"
 
 If the resulting output contains a line that begins with:
 
@@ -1170,9 +1170,15 @@ manual pages for the dynamic linker (usually ld.so, ld.so.1, dyld,
 dld.sl, rld, or loader) to see if C<LD_PRELOAD> is supported.
 
 To enable I<noexec> for a command, use the C<NOEXEC> tag as documented
-in the User Specification section above.  If you are unsure whether
-or not your system is capable of supporting I<noexec> you can always
-just try it out and see if it works.
+in the User Specification section above.  Here is that example again:
+
+ aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+
+This allows user B<aaron> to run F</usr/bin/more> and F</usr/bin/vi>
+with I<noexec> enabled.  This will prevent those two commands from
+executing other commands (such as a shell).  If you are unsure
+whether or not your system is capable of supporting I<noexec> you
+can always just try it out and see if it works.
 
 Note that disabling shell escapes is not a panacea.  Programs running
 as root are still capable of many potentially hazardous operations
