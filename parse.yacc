@@ -649,6 +649,7 @@ cmndalias	:	ALIAS {
 				in_alias = TRUE;
 				/* Allocate space for ga_list if necessary. */
 				expand_ga_list();
+				ga_list[ga_list_len-1].type = CMND_ALIAS;
 				ga_list[ga_list_len-1].alias = estrdup($1);
 			     }
 			} '=' cmndlist {
@@ -677,6 +678,7 @@ runasalias	:	ALIAS {
 				in_alias = TRUE;
 				/* Allocate space for ga_list if necessary. */
 				expand_ga_list();
+				ga_list[ga_list_len-1].type = RUNAS_ALIAS;
 				ga_list[ga_list_len-1].alias = estrdup($1);
 			    }
 			} '=' runaslist {
@@ -784,8 +786,7 @@ aliascmp(a1, a2)
 
     ai1 = (aliasinfo *) a1;
     ai2 = (aliasinfo *) a2;
-    r = strcmp(ai1->name, ai2->name);
-    if (r == 0)
+    if ((r = strcmp(ai1->name, ai2->name)) == 0)
 	r = ai1->type - ai2->type;
 
     return(r);
@@ -798,10 +799,15 @@ static int
 genaliascmp(entry, key)
     const VOID *entry, *key;
 {
-    struct generic_alias *ga1 = (struct generic_alias *) key;
-    struct generic_alias *ga2 = (struct generic_alias *) entry;
+    int r;
+    struct generic_alias *ga1, *ga2;
 
-    return(strcmp(ga1->alias, ga2->alias));
+    ga1 = (struct generic_alias *) key;
+    ga2 = (struct generic_alias *) entry;
+    if ((r = strcmp(ga1->alias, ga2->alias)) == 0)
+	r = ga1->type - ga2->type;
+
+    return(r);
 }
 
 
@@ -936,6 +942,7 @@ list_matches()
 		    (void) fputs(", ", stdout);
 
 		key.alias = p;
+		key.type = RUNAS_ALIAS;
 		if ((ga = (struct generic_alias *) lfind((VOID *) &key,
 		    (VOID *) &ga_list[0], &ga_list_len, sizeof(key), genaliascmp)))
 		    (void) fputs(ga->entries, stdout);
@@ -955,6 +962,7 @@ list_matches()
 
 	/* Print the actual command or expanded Cmnd_Alias. */
 	key.alias = cm_list[i].cmnd;
+	key.type = CMND_ALIAS;
 	if ((ga = (struct generic_alias *) lfind((VOID *) &key,
 	    (VOID *) &ga_list[0], &ga_list_len, sizeof(key), genaliascmp)))
 	    (void) puts(ga->entries);

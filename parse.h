@@ -93,6 +93,7 @@ typedef struct {
  * Structure containing Cmnd_Alias's if "sudo -l" is used.
  */
 struct generic_alias {
+    int type;
     char *alias;
     char *entries;
     size_t entries_size;
