@@ -27,7 +27,9 @@ sudo, sudoedit - execute a command as another user
 
 =head1 SYNOPSIS
 
-B<sudo> B<-K> | B<-L> | B<-V> | B<-h> | B<-k> | B<-l> | B<-v>
+B<sudo> B<-K> | B<-L> | B<-V> | B<-h> | B<-k> | B<-v>
+
+B<sudo> S<[B<-U> I<username>]> S<[B<-u> I<username>|I<#uid>]> B<-l> [I<command>]
 
 B<sudo> [B<-HPSb>] S<[B<-a> I<auth_type>]> S<[B<-c> I<class>|I<->]>
 S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
@@ -121,6 +123,13 @@ still set to match the target user.
 
 The B<-S> (I<stdin>) option causes B<sudo> to read the password from
 the standard input instead of the terminal device.
+
+=item -U
+
+The B<-U> (I<other user>) option is used in conjunction with the B<-l>
+option to specify the user whose privileges should be listed.  Only
+root or a user with B<sudo> C<ALL> on the current host may use this
+option.
 
 =item -V
 
@@ -217,12 +226,15 @@ run a password will be required.  This option does not require a password
 and was added to allow a user to revoke B<sudo> permissions from a .logout
 file.
 
-=item -l
+=item -l [I<command>]
 
-The B<-l> (I<list>) option will list out the allowed (and forbidden)
-commands for the user on the current host.  If the B<-u> flag is
-specified and the invoking user has B<sudo> C<ALL> on the current host,
-the information listed will be for the user specified by the B<-u> flag.
+If no I<command> is specified, the B<-l> (I<list>) option will list
+the allowed (and forbidden) commands for the invoking user (or the
+user specified by the B<-U> option) on the current host.  If a
+I<command> is specified and is permitted by I<sudoers>, the
+fully-qualified path to the command is displayed along with any
+command line arguments.  If I<command> is not allowed, B<sudo> will
+exit with a return value of 1.
 
 =item -p
 

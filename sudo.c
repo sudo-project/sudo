@@ -239,6 +239,9 @@ main(argc, argv, envp)
 		user_cmnd = "list";
 		pwflag = I_LISTPW;
 		break;
+	    case MODE_CHECK:
+		pwflag = I_LISTPW;
+		break;
 	}
 
     /* Must have a command to run... */
@@ -361,6 +364,8 @@ main(argc, argv, envp)
 	log_auth(validated, 1);
 	if (sudo_mode == MODE_VALIDATE)
 	    exit(0);
+	else if (sudo_mode == MODE_CHECK)
+	    exit(display_cmnd(list_pw ? list_pw : sudo_user.pw));
 	else if (sudo_mode == MODE_LIST) {
 	    display_privs(list_pw ? list_pw : sudo_user.pw);
 #ifdef HAVE_LDAP
@@ -548,7 +553,7 @@ init_vars(sudo_mode)
     /* It is now safe to use log_error() and set_perms() */
 
 #ifdef HAVE_GETGROUPS
-    if ((user_ngroups = getgroups(0, NULL)) > 0) {
+    if (list_pw == NULL && (user_ngroups = getgroups(0, NULL)) > 0) {
 	user_groups = emalloc2(user_ngroups, sizeof(gid_t));
 	if (getgroups(user_ngroups, user_groups) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
@@ -618,8 +623,8 @@ set_cmnd(sudo_mode)
     /* Resolve the path and return. */
     rval = FOUND;
     user_stat = emalloc(sizeof(struct stat));
-    if (sudo_mode & (MODE_RUN | MODE_EDIT)) {
-	if (ISSET(sudo_mode, MODE_RUN)) {
+    if (sudo_mode & (MODE_RUN | MODE_EDIT | MODE_CHECK)) {
+	if (ISSET(sudo_mode, MODE_RUN | MODE_CHECK)) {
 	    set_perms(PERM_RUNAS);
 	    rval = find_path(NewArgv[0], &user_cmnd, user_stat, user_path);
 	    set_perms(PERM_ROOT);
@@ -817,6 +822,15 @@ parse_args(argc, argv)
 	    case 'S':
 		SET(tgetpass_flags, TGP_STDIN);
 		break;
+	    case 'U':
+		/* Must have an associated list user. */
+		if (NewArgv[1] == NULL)
+		    usage(1);
+		if ((list_pw = sudo_getpwnam(NewArgv[1])) == NULL)
+		    errorx(1, "unknown user %s", NewArgv[1]);
+		NewArgc--;
+		NewArgv++;
+		break;
 	    case '-':
 		NewArgc--;
 		NewArgv++;
@@ -833,19 +847,23 @@ parse_args(argc, argv)
 	NewArgc--;
 	NewArgv++;
     }
+    if (NewArgc > 0 && rval == MODE_LIST)
+	rval = MODE_CHECK;
 
-    if (user_runas != NULL) {
-	if (rval == MODE_LIST) {
-	    if ((list_pw = sudo_getpwnam(*user_runas)) == NULL)
-		errorx(1, "unknown user %s", *user_runas);
-	    user_runas = NULL;
-	} else if (!ISSET(rval, (MODE_EDIT|MODE_RUN))) {
-	    warningx("the `-u' and '-%c' options may not be used together", excl);
-	    usage(1);
-	}
+    if (user_runas != NULL && !ISSET(rval, (MODE_EDIT|MODE_RUN|MODE_CHECK))) {
+	if (excl != '\0')
+	    warningx("the `-u' and '-%c' options may not be used together",
+		excl);
+	usage(1);
+    }
+    if (list_pw != NULL && rval != MODE_LIST && rval != MODE_CHECK) {
+	if (excl != '\0')
+	    warningx("the `-U' and '-%c' options may not be used together",
+		excl);
+	usage(1);
     }
     if ((NewArgc == 0 && (rval & MODE_EDIT)) ||
-	(NewArgc > 0 && !(rval & (MODE_RUN | MODE_EDIT))))
+	(NewArgc > 0 && !(rval & (MODE_RUN | MODE_EDIT | MODE_CHECK))))
 	usage(1);
 
     return(rval);
@@ -1126,7 +1144,10 @@ usage(exit_val)
 	    continue;
 	*p = " file [...]";
     } else {
-	fprintf(stderr, "usage: %s -K | -L | -V | -h | -k | -l | -v\n",
+	fprintf(stderr, "usage: %s -K | -L | -V | -h | -k | -v\n",
+	    getprogname());
+	fprintf(stderr,
+	    "usage: %s [-U username] [-u username|#uid] -l [command]\n",
 	    getprogname());
     }
 

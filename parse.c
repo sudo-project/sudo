@@ -135,7 +135,7 @@ sudoers_lookup(pwflag)
 		}
 	    }
 	}
-	if (matched == TRUE) {
+	if (matched == TRUE || user_uid == 0) {
 	    /* User has an entry for this host. */
 	    CLR(validated, VALIDATE_NOT_OK);
 	    SET(validated, VALIDATE_OK);
@@ -236,6 +236,42 @@ display_privs(pw)
 	    }
 	}
     }
+}
+
+/*
+ * Check user_cmnd against sudoers and print the matching entry if the
+ * command is allowed.
+ */
+int
+display_cmnd(pw)
+    struct passwd *pw;
+{
+    struct cmndspec *cs;
+    struct member *match, *runas;
+    struct privilege *priv;
+    struct userspec *us;
+
+    for (match = NULL, us = userspecs; us != NULL; us = us->next) {
+	if (user_matches(pw, us->user) != TRUE ||
+	  host_matches(us->privileges->hostlist) != TRUE)
+	    continue;
+
+	for (priv = us->privileges; priv != NULL; priv = priv->next) {
+	    runas = NULL;
+	    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
+		if (cs->runaslist != NULL)
+		    runas = cs->runaslist;
+		if (runas_matches(runas) == TRUE &&
+		  cmnd_matches(cs->cmnd) != UNSPEC) 
+		    match = cs->cmnd;
+	    }
+	}
+    }
+    if (match == NULL || match->negated)
+	return(1);
+    printf("%s%s%s\n", safe_cmnd, user_args ? " " : "",
+	user_args ? user_args : "");
+    return(0);
 }
 
 /*

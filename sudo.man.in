@@ -149,12 +149,14 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "November 11, 2004" "1.6.9" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "November 24, 2004" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBsudo\fR \fB\-K\fR | \fB\-L\fR | \fB\-V\fR | \fB\-h\fR | \fB\-k\fR | \fB\-l\fR | \fB\-v\fR
+\&\fBsudo\fR \fB\-K\fR | \fB\-L\fR | \fB\-V\fR | \fB\-h\fR | \fB\-k\fR | \fB\-v\fR
+.PP
+\&\fBsudo\fR [\fB\-U\fR\ \fIusername\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR] \fB\-l\fR [\fIcommand\fR]
 .PP
 \&\fBsudo\fR [\fB\-HPSb\fR] [\fB\-a\fR\ \fIauth_type\fR] [\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
 [\fB\-p\fR\ \fIprompt\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
@@ -239,6 +241,12 @@ still set to match the target user.
 .IX Item "-S"
 The \fB\-S\fR (\fIstdin\fR) option causes \fBsudo\fR to read the password from
 the standard input instead of the terminal device.
+.IP "\-U" 4
+.IX Item "-U"
+The \fB\-U\fR (\fIother user\fR) option is used in conjunction with the \fB\-l\fR
+option to specify the user whose privileges should be listed.  Only
+root or a user with \fBsudo\fR \f(CW\*(C`ALL\*(C'\fR on the current host may use this
+option.
 .IP "\-V" 4
 .IX Item "-V"
 The \fB\-V\fR (\fIversion\fR) option causes \fBsudo\fR to print the version
@@ -320,12 +328,15 @@ by setting the time on it to the epoch.  The next time \fBsudo\fR is
 run a password will be required.  This option does not require a password
 and was added to allow a user to revoke \fBsudo\fR permissions from a .logout
 file.
-.IP "\-l" 4
-.IX Item "-l"
-The \fB\-l\fR (\fIlist\fR) option will list out the allowed (and forbidden)
-commands for the user on the current host.  If the \fB\-u\fR flag is
-specified and the invoking user has \fBsudo\fR \f(CW\*(C`ALL\*(C'\fR on the current host,
-the information listed will be for the user specified by the \fB\-u\fR flag.
+.IP "\-l [\fIcommand\fR]" 4
+.IX Item "-l [command]"
+If no \fIcommand\fR is specified, the \fB\-l\fR (\fIlist\fR) option will list
+the allowed (and forbidden) commands for the invoking user (or the
+user specified by the \fB\-U\fR option) on the current host.  If a
+\&\fIcommand\fR is specified and is permitted by \fIsudoers\fR, the
+fully-qualified path to the command is displayed along with any
+command line arguments.  If \fIcommand\fR is not allowed, \fBsudo\fR will
+exit with a return value of 1.
 .IP "\-p" 4
 .IX Item "-p"
 The \fB\-p\fR (\fIprompt\fR) option allows you to override the default

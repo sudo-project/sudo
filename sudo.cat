@@ -8,7 +8,9 @@ NNAAMMEE
        sudo, sudoedit - execute a command as another user
 
 SSYYNNOOPPSSIISS
-       ssuuddoo --KK | --LL | --VV | --hh | --kk | --ll | --vv
+       ssuuddoo --KK | --LL | --VV | --hh | --kk | --vv
+
+       ssuuddoo [--UU _u_s_e_r_n_a_m_e] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] --ll [_c_o_m_m_a_n_d]
 
        ssuuddoo [--HHPPSSbb] [--aa _a_u_t_h___t_y_p_e] [--cc _c_l_a_s_s|_-] [--pp _p_r_o_m_p_t]
        [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] {--ee file [...] | --ii | --ss | _c_o_m_m_a_n_d}
@@ -56,12 +58,10 @@ DDEESSCCRRIIPPTTIIOONN
        mands through sudo even when a root shell has been
        invoked.  It also allows the --ee flag to remain useful even
        when being run via a sudo-run script or program.  Note
-       however, that the sudoers lookup is still done for root,
-       not the user specified by SUDO_USER.
 
 
 
-1.6.9                   November 11, 2004                       1
+1.6.9                   November 24, 2004                       1
 
 
 
@@ -69,6 +69,9 @@ DDEESSCCRRIIPPTTIIOONN
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       however, that the sudoers lookup is still done for root,
+       not the user specified by SUDO_USER.
 
        ssuuddoo can log both successful and unsuccessful attempts (as
        well as errors) to _s_y_s_l_o_g(3), a log file, or both.  By
@@ -104,6 +107,11 @@ OOPPTTIIOONNSS
            from the standard input instead of the terminal
            device.
 
+       -U  The --UU (_o_t_h_e_r _u_s_e_r) option is used in conjunction with
+           the --ll option to specify the user whose privileges
+           should be listed.  Only root or a user with ssuuddoo ALL
+           on the current host may use this option.
+
        -V  The --VV (_v_e_r_s_i_o_n) option causes ssuuddoo to print the ver­
            sion number and exit.  If the invoking user is already
            root the --VV option will print out a list of the
@@ -116,18 +124,10 @@ OOPPTTIIOONNSS
            administrator may specify a list of sudo-specific
            authentication methods by adding an "auth-sudo" entry
            in /etc/login.conf.  This option is only available on
-           systems that support BSD authentication where ssuuddoo has
-           been configured with the --with-bsdauth option.
-
-       -b  The --bb (_b_a_c_k_g_r_o_u_n_d) option tells ssuuddoo to run the given
-           command in the background.  Note that if you use the
-           --bb option you cannot use shell job control to manipu­
-           late the process.
 
 
 
-
-1.6.9                   November 11, 2004                       2
+1.6.9                   November 24, 2004                       2
 
 
 
@@ -135,6 +135,14 @@ OOPPTTIIOONNSS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+           systems that support BSD authentication where ssuuddoo has
+           been configured with the --with-bsdauth option.
+
+       -b  The --bb (_b_a_c_k_g_r_o_u_n_d) option tells ssuuddoo to run the given
+           command in the background.  Note that if you use the
+           --bb option you cannot use shell job control to manipu­
+           late the process.
 
        -c  The --cc (_c_l_a_s_s) option causes ssuuddoo to run the specified
            command with resources limited by the specified login
@@ -182,6 +190,18 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            sage and exit.
 
        -i  The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
+
+
+
+1.6.9                   November 24, 2004                       3
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
            specified in the passwd(4) entry of the user that the
            command is being run as.  The command name argument
            given to the shell begins with a `-' to tell the shell
@@ -191,17 +211,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            unchanged, setting _H_O_M_E, _S_H_E_L_L, _U_S_E_R, _L_O_G_N_A_M_E, and
            _P_A_T_H, and unsetting all other environment variables.
 
-
-
-1.6.9                   November 11, 2004                       3
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        -k  The --kk (_k_i_l_l) option to ssuuddoo invalidates the user's
            timestamp by setting the time on it to the epoch.  The
            next time ssuuddoo is run a password will be required.
@@ -209,11 +218,15 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            to allow a user to revoke ssuuddoo permissions from a
            .logout file.
 
-       -l  The --ll (_l_i_s_t) option will list out the allowed (and
-           forbidden) commands for the user on the current host.
-           If the --uu flag is specified and the invoking user has
-           ssuuddoo ALL on the current host, the information listed
-           will be for the user specified by the --uu flag.
+       -l [_c_o_m_m_a_n_d]
+           If no _c_o_m_m_a_n_d is specified, the --ll (_l_i_s_t) option will
+           list the allowed (and forbidden) commands for the
+           invoking user (or the user specified by the --UU option)
+           on the current host.  If a _c_o_m_m_a_n_d is specified and is
+           permitted by _s_u_d_o_e_r_s, the fully-qualified path to the
+           command is displayed along with any command line argu­
+           ments.  If _c_o_m_m_a_n_d is not allowed, ssuuddoo will exit with
+           a return value of 1.
 
        -p  The --pp (_p_r_o_m_p_t) option allows you to override the
            default password prompt and use a custom one.  The
@@ -243,6 +256,18 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            command as a user other than _r_o_o_t.  To specify a _u_i_d
            instead of a _u_s_e_r_n_a_m_e, use _#_u_i_d.  Note that if the
            _t_a_r_g_e_t_p_w Defaults option is set (see sudoers(4)) it is
+
+
+
+1.6.9                   November 24, 2004                       4
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
            not possible to run commands with a uid not listed in
            the password database.
 
@@ -255,18 +280,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        --  The ---- flag indicates that ssuuddoo should stop processing
            command line arguments.  It is most useful in conjunc­
            tion with the --ss flag.
-
-
-
-
-1.6.9                   November 11, 2004                       4
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
 RREETTUURRNN VVAALLUUEESS
        Upon successful execution of a program, the return value
@@ -309,6 +322,18 @@ SSEECCUURRIITTYY NNOOTTEESS
        as root.
 
        To prevent command spoofing, ssuuddoo checks "." and "" (both
+
+
+
+1.6.9                   November 24, 2004                       5
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
        denoting current directory) last when searching for a com­
        mand in the user's PATH (if one or both are in the PATH).
        Note, however, that the actual PATH environment variable
@@ -322,18 +347,6 @@ SSEECCUURRIITTYY NNOOTTEESS
        cally.
 
        ssuuddoo will check the ownership of its timestamp directory
-
-
-
-1.6.9                   November 11, 2004                       5
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's con­
        tents if it is not owned by root and only writable by
        root.  On systems that allow non-root users to give away
@@ -374,6 +387,19 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 EENNVVIIRROONNMMEENNTT
        ssuuddoo utilizes the following environment variables:
 
+
+
+
+
+1.6.9                   November 24, 2004                       6
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
         EDITOR                 Default editor to use in -e (sudoedit) mode if
                                VISUAL is not set
 
@@ -387,18 +413,6 @@ EENNVVIIRROONNMMEENNTT
         SHELL                  Used to determine shell to run with -s option
 
         SUDO_PROMPT            Used as the default password prompt
-
-
-
-
-1.6.9                   November 11, 2004                       6
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
         SUDO_COMMAND           Set to the command run by sudo
 
@@ -441,6 +455,17 @@ EEXXAAMMPPLLEESS
 
         $ sudo shutdown -r +15 "quick reboot"
 
+
+
+1.6.9                   November 24, 2004                       7
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
        To make a usage listing of the directories in the /home
        partition.  Note that this runs the commands in a sub-
        shell to make the cd and file redirection work.
@@ -454,17 +479,6 @@ SSEEEE AALLSSOO
 AAUUTTHHOORRSS
        Many people have worked on ssuuddoo over the years; this ver­
        sion consists of code written primarily by:
-
-
-
-1.6.9                   November 11, 2004                       7
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
                Todd Miller
                Chris Jepeway
@@ -505,6 +519,19 @@ BBUUGGSS
        If you feel you have found a bug in ssuuddoo, please submit a
        bug report at http://www.sudo.ws/sudo/bugs/
 
+
+
+
+
+1.6.9                   November 24, 2004                       8
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
 SSUUPPPPOORRTT
        Commercial support is available for ssuuddoo, see
        http://www.sudo.ws/sudo/support.html for details.
@@ -519,20 +546,18 @@ DDIISSCCLLAAIIMMEERR
        ranties, including, but not limited to, the implied war­
        ranties of merchantability and fitness for a particular
        purpose are disclaimed.  See the LICENSE file distributed
-       with ssuuddoo or http://www.sudo.ws/sudo/license.html for
+       with ssuuddoo or http://www.sudo.ws/sudo/license.html for com­
+       plete details.
 
 
 
-1.6.9                   November 11, 2004                       8
 
 
 
 
 
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-       complete details.
 
 
 
@@ -564,31 +589,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.6.9                   November 11, 2004                       9
+1.6.9                   November 24, 2004                       9
 
 
