@@ -49,7 +49,7 @@
 #endif /* _PATH_SUDO_STMP */
 
 #ifndef _PATH_SUDO_TIMEDIR
-#define _PATH_SUDO_TIMEDIR	"/tmp/.odus"
+#define _PATH_SUDO_TIMEDIR	_SUDO_PATH_TIMEDIR
 #endif /* _PATH_SUDO_TIMEDIR */
 
 #ifndef _PATH_TTY
