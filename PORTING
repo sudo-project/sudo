@@ -1,16 +1,21 @@
 sudo porting hints:
 
+Before trying to port sudo to a new architecture, please join the
+sudo-workers mailing list (see the README) and ask if anyone has
+a port working or in-progress.
+
 Sudo should be fairly easy to port.  In fact, now that it uses a configure
 script, most of the work should be done for you. The most problematic part
 is how set*uid() functions.  If you have no seteuid() but do have setreuid()
 you can emulate seteuid() with a macro like the following:
     #define seteuid(__EUID)	(setreuid((uid_t)-1, __EUID))
-This only affects the be*() functions.
+This only affects the set_perms() function.
 
 Another possible pitfall is getdtablesize(2) which is used to get the maximum
 number of open files the process can have.  If an OS has the POSIX sysconf(2)
-it will be used instead of getdtablesize(2).  ulimit(2) can also be used on
-some OS's.  If all else fails you can use the value of NOFILE in <sys/param.h>.
+it will be used instead of getdtablesize(2).  ulimit(2) or getrlimit(2) can
+also be used on some OS's.  If all else fails you can use the value of
+NOFILE in <sys/param.h>.
 
 Sudo tries to clear the environment of dangerous envariables like LD_*
 to prevent shared library spoofing.  If you are porting sudo to a new
@@ -19,6 +24,7 @@ allow one to change the shared library path.  See clean_env() for examples
 for this for various OS's.
 
 It is possible that on a really weird system, tgetpass() may not compile.
+Alternately, it may compile but not work (nothing happens at Password: prompt).
 If this is the case you can run configure with the --with-getpass flag
 to use the system getpass().  You'll lose the timeout feature but gain a
 working sudo.  Alternately, you can define USE_GETPASS in config.h and
