@@ -263,7 +263,7 @@ __uqtoa(val, endp, base, octzero, xdigs)
 	}
 	return (cp);
 }
-#endif /* !(UQUAD_MAX == ULONG_MAX) */
+# endif /* !LONG_IS_QUAD */
 #endif /* HAVE_LONG_LONG */
 
 /*
