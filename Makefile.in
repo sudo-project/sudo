@@ -114,7 +114,8 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
             aixcrypt.exp config.h.in configure configure.in getwd.c strdup.c \
             indent.pro install-sh lsearch.c putenv.c tgetpass.c emul/search.h \
 	    emul/utime.h utime.c testsudoers.c sudoers sample.sudoers \
-	    sudo.cat sudo.man visudo.cat visudo.man sudoers.cat sudoers.man
+	    sudo.cat sudo.man visudo.cat visudo.man sudoers.cat sudoers.man \
+	    lex.yy.c sudo-lex.yy.c
 
 all: $(PROGS)
 
@@ -132,17 +133,17 @@ sudo: $(PARSEOBJS) $(SUDOBJS) $(LIBOBJS)
 visudo: $(PARSEOBJS) $(VISUDOBJS)
 	$(CC) -o $@ $(PARSEOBJS) $(VISUDOBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS)
 
-y.tab.o: $(HDRS) y.tab.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) y.tab.c
-
 y.tab.c y.tab.h: parse.yacc
 	$(YACC) -d $(srcdir)/parse.yacc
 
-lex.yy.o: lex.yy.c y.tab.h $(HDRS)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) lex.yy.c
+y.tab.o: $(HDRS) y.tab.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) y.tab.c
 
 lex.yy.c: parse.lex
+	rm -f lex.yy.c
 	$(LEX) $(srcdir)/parse.lex
+
+lex.yy.o: lex.yy.c y.tab.h $(HDRS)
 
 testsudoers: $(PARSEOBJS) $(TESTOBJS)
 	$(CC) -o $@ $(PARSEOBJS) $(TESTOBJS) $(LDFLAGS) $(LIBS)
@@ -179,7 +180,7 @@ TAGS: $(SRCS)
 	etags $(SRCS)
 
 clean:
-	-rm -f lex.yy.* y.tab.* *.o $(PROGS) testsudoers core
+	-rm -f lex.yy.o y.tab.* *.o $(PROGS) testsudoers core
 
 mostlyclean: clean
 
