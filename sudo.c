@@ -333,6 +333,14 @@ main(argc, argv, envp)
 		"please report this error at http://courtesan.com/sudo/bugs/");
 	}
 
+	/* Reset signal handlers before we exec. */
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART;
+	sa.sa_handler = SIG_DFL;
+	(void) sigaction(SIGINT, &sa, NULL);
+	(void) sigaction(SIGQUIT, &sa, NULL);
+	(void) sigaction(SIGTSTP, &sa, NULL);
+
 	/* Close the password file */
 	endpwent();
 
