@@ -338,13 +338,15 @@ main(argc, argv, envp)
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
     /* XXX - causes confusion when root is not listed in sudoers */
-    if (user_uid == 0 && prev_user != NULL && strcmp(prev_user, "root") != 0) {
-	    struct passwd *pw;
+    if (sudo_mode & (MODE_RUN | MODE_EDIT) && prev_user != NULL) {
+	if (user_uid == 0 && strcmp(prev_user, "root") != 0) {
+		struct passwd *pw;
 
-	    if ((pw = sudo_getpwnam(prev_user)) != NULL) {
-		    free(sudo_user.pw);
-		    sudo_user.pw = pw;
-	    }
+		if ((pw = sudo_getpwnam(prev_user)) != NULL) {
+			free(sudo_user.pw);
+			sudo_user.pw = pw;
+		}
+	}
     }
 
     /* Build a new environment that avoids any nasty bits if we have a cmnd. */
