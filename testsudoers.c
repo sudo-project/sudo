@@ -137,7 +137,7 @@ main(argc, argv)
 #endif
 
     if (argc != 4) {
-	fprintf(stderr, "usage: %s <command> <user> <host>\n", argv[0]);
+	(void) fprintf(stderr, "usage: %s <command> <user> <host>\n", argv[0]);
 	exit(1);
     }
 
@@ -153,21 +153,21 @@ main(argc, argv)
     load_interfaces();
 
     if (yyparse() || parse_error) {
-	printf("doesn't parse.\n");
+	(void) printf("doesn't parse.\n");
     } else {
-	printf("parses OK.\n\n");
+	(void) printf("parses OK.\n\n");
 	if (top == 0)
-	    printf("User %s not found\n", user);
+	    (void) printf("User %s not found\n", user);
 	else while (top) {
-	    printf("[%d]\n", top-1);
-	    printf("user_match: %d\n", user_matches);
-	    printf("host_match: %d\n", host_matches);
-	    printf("cmnd_match: %d\n", cmnd_matches);
+	    (void) printf("[%d]\n", top-1);
+	    (void) printf("user_match: %d\n", user_matches);
+	    (void) printf("host_match: %d\n", host_matches);
+	    (void) printf("cmnd_match: %d\n", cmnd_matches);
 	    top--;
 	}
     }
 
     /* dump aliases */
-    printf("Matching Aliases --\n");
+    (void) printf("Matching Aliases --\n");
     dumpaliases();
 }

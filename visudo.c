@@ -391,7 +391,7 @@ static char whatnow()
 
     do {
 	ok = FALSE;
-	printf("What now? ");
+	(void) printf("What now? ");
 	if ((choice = fgetc(stdin)) != '\n')
 	    while (fgetc(stdin) != '\n')
 		;
@@ -418,10 +418,10 @@ static char whatnow()
  */
 static void whatnow_help()
 {
-    printf("Options are:\n");
-    printf("  (e)dit sudoers file again\n");
-    printf("  e(x)it without saving changes to sudoers file\n");
-    printf("  (q)uit and save changes to sudoers file (DANGER!)\n\n");
+    (void) printf("Options are:\n");
+    (void) printf("  (e)dit sudoers file again\n");
+    (void) printf("  e(x)it without saving changes to sudoers file\n");
+    (void) printf("  (q)uit and save changes to sudoers file (DANGER!)\n\n");
 }
 
 
