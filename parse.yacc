@@ -93,6 +93,7 @@ int top = 0;
 
 extern int path_matches		__P((char *, char *));
 extern int addr_matches		__P((char *));
+extern int netgr_matches	__P((char *));
 static int find_alias		__P((char *, int));
 static int add_alias		__P((char *, int));
 static int more_aliases		__P((size_t));
@@ -358,7 +359,7 @@ static int add_alias(alias, type)
     ok = FALSE;			/* assume failure */
     ai.type = type;
     (void) strcpy(ai.name, alias);
-    if (lfind((const VOID *)&ai, (VOID *)aliases, &naliases, sizeof(ai),
+    if (lfind((const VOID *)&ai, (const VOID *)aliases, &naliases, sizeof(ai),
 	aliascmp) != NULL) {
 	(void) sprintf(s, "Alias `%s' already defined", alias);
 	yyerror(s);
@@ -391,8 +392,8 @@ static int find_alias(alias, type)
     (void) strcpy(ai.name, alias);
     ai.type = type;
 
-    return(lfind((const VOID *)&ai, (VOID *)aliases, &naliases, sizeof(ai),
-		 aliascmp) != NULL);
+    return(lfind((const VOID *)&ai, (const VOID *)aliases, &naliases,
+		 sizeof(ai), aliascmp) != NULL);
 }
 
 static int more_aliases(nslots)
