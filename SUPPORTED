@@ -13,4 +13,4 @@ NextStep 2.x and 3.x
 DEC OSF/1 1.x and 2.0
 SunOS 3.5 and 4.x
 Solaris 2.x
-Ultrix 4.x
+Ultrix 4.x (w/ or w/o enhanced security, see INSTALL)
