@@ -46,3 +46,6 @@ CHANGES between sudo 1.2 (unofficial version)
     update_timestamp() since they are unnecesary and setruid() is
     broken on systems without a setreuid(2) or setresuid(2) system call.
     (Ie: AIX and Solaris 2.x).
+
+17) The bulk of sudo now runs with the caller's real uid.  Grep for
+    be_root() to find the exceptions.
