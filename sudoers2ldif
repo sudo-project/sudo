@@ -101,6 +101,8 @@ sub expand{
     # if NOPASSWD: directive found, mark entire entry as not requiring
     s/NOPASSWD:\s*// && push @options,"!authenticate";
     s/PASSWD:\s*// && push @options,"authenticate";
+    s/NOEXEC:\s*// && push @options,"noexec";
+    s/EXEC:\s*// && push @options,"!noexec";
     s/\w+://; # silently remove other directives
     s/\s+$//; # right trim
   }

@@ -845,6 +845,8 @@ int pwflag;
     /* We have a match.  Should we check the password? */
     /* Note: This could be the global or a rule specific option */
     if (!def_authenticate) SET(ret,FLAG_NOPASS);
+    /* Same logic with noexec */
+    if (def_noexec)        SET(ret,FLAG_NOEXEC);
   } else {
     /* we do not have a match */   
     ret=VALIDATE_NOT_OK;
