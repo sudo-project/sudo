@@ -44,10 +44,10 @@ static char rcsid[] = "$Id$";
 
 #ifndef STDC_HEADERS
 #ifdef HAVE_PUTENV
-extern int putenv();
+extern int putenv	__P((const char *));
 #endif /* HAVE_PUTENV */
 #ifdef HAVE_SETENV
-extern int setenv();
+extern int setenv	__P((char *, char *, int));
 #endif /* HAVE_SETENV */
 #endif /* !STDC_HEADERS */
 

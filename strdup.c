@@ -53,8 +53,8 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_MALLOC_H */
 
 #ifndef STDC_HEADERS
-extern char *malloc	__P((unsigned));
-extern char *strcpy	__P((char *, char *));
+extern char *malloc	__P((size_t));
+extern char *strcpy	__P((char *, const char *));
 #endif /* !STDC_HEADERS */
 
 

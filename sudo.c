@@ -85,9 +85,9 @@ static char rcsid[] = "$Id$";
 #include "version.h"
 
 #ifndef STDC_HEADERS
-extern char *malloc	__P((unsigned));
+extern char *malloc	__P((size_t));
 #ifdef HAVE_STRDUP
-extern char *strdup	__P((char *));
+extern char *strdup	__P((const char *));
 #endif /* HAVE_STRDUP */
 #endif /* STDC_HEADERS */
 

@@ -56,15 +56,15 @@ static char rcsid[] = "$Id$";
 #include "sudo.h"
 
 #ifndef STDC_HEADERS
-extern char *malloc	__P((unsigned));
-extern char *getenv	__P((char *));
-extern char *strcpy	__P((char *, char *));
+extern char *malloc	__P((size_t));
+extern char *getenv	__P((const char *));
+extern char *strcpy	__P((char *, const char *));
 extern int fprintf	__P((FILE *, const char *, ...));
-extern int readlink	__P((char *, char *, int));
-extern int stat		__P((char *, struct stat *));
-extern int lstat	__P((char *, struct stat *));
+extern int readlink	__P((const char *, char *, size_t));
+extern int stat		__P((const char *, struct stat *));
+extern int lstat	__P((const char *, struct stat *));
 #ifdef HAVE_STRDUP
-extern char *strdup	__P((char *));
+extern char *strdup	__P((const char *));
 #endif /* HAVE_STRDUP */
 #endif /* !STDC_HEADERS */
 

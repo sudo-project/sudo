@@ -47,7 +47,7 @@ static char rcsid[] = "$Id$";
 #include <sys/param.h>
 
 #ifndef STDC_HEADERS
-extern char *malloc	__P((unsigned));
+extern char *malloc	__P((size_t));
 #endif /* !STDC_HEADERS */
 
 
