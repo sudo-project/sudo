@@ -91,18 +91,18 @@ OBJS = check.o find_path.o logging.o parse.o sudo.o sudo_realpath.o \
 
 LIBOBJS = @TGETPASS@ @LIBOBJS@
 
-HDRS = sudo.h version.h insults.h
+HDRS = sudo.h pathnames.h options.h compat.h version.h insults.h
 
 VERSION = 1.3.1pl5
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING INSTALL Makefile.in PORTING \
-            README SUPPORTED TODO OPTIONS HISTORY aclocal.m4 getcwd.c \
-            putenv.c strdup.c tgetpass.c config.h.in options.h configure.in \
-            configure indent.pro installbsd pathnames.h.in sample.sudoers \
-            sudo.man sudo.cat sudoers aixcrypt.exp visudoers/Makefile.in \
-            visudoers/config.h visudoers/pathnames.h visudoers/sudo.h \
-            visudoers/version.h visudoers/visudo.c visudoers/visudo.lex \
-            visudoers/visudo.yacc visudoers/aixcrypt.exp visudoers/options.h
+            README SUPPORTED TODO OPTIONS HISTORY aclocal.m4 getcwd.c putenv.c \
+            strdup.c tgetpass.c config.h.in configure.in configure indent.pro \
+	    installbsd sample.sudoers sudo.man sudo.cat sudoers aixcrypt.exp \
+	    visudoers/Makefile.in visudoers/config.h visudoers/pathnames.h \
+	    visudoers/sudo.h visudoers/version.h visudoers/visudo.c \
+	    visudoers/visudo.lex visudoers/visudo.yacc visudoers/aixcrypt.exp \
+	    visudoers/options.h
 
 all: $(PROGS)
 
@@ -117,15 +117,15 @@ all: $(PROGS)
 sudo : $(OBJS) $(LIBOBJS)
 	$(CC) -o $@ $(OBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS)
 
-y.tab.o y.tab.h: parse.yacc $(HDRS)
+y.tab.o y.tab.h: parse.yacc $(HDRS) config.h
 	$(YACC) -d parse.yacc
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) -I$(srcdir) y.tab.c
 
-lex.yy.o: parse.lex y.tab.h $(HDRS)
+lex.yy.o: parse.lex y.tab.h $(HDRS) config.h
 	$(LEX) parse.lex
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) -I$(srcdir) lex.yy.c
 
-$(OBJS) $(LIBOBJS) : $(HDRS)
+$(OBJS) $(LIBOBJS) : $(HDRS) config.h
 
 sudo.cat: sudo.man
 
@@ -166,7 +166,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	rm -f Makefile config.h pathnames.h config.status
+	rm -f Makefile config.h config.status
 	( cd visudoers && rm -f Makefile )
 
 realclean: distclean
