@@ -162,7 +162,7 @@ where B<sudo> has been configured with the --with-logincap option.
 
 The B<-e> (I<edit>) option indicates that, instead of running
 a command, the user wishes to edit one or more files.  In lieu
-of a command, the string I<"sudoedit"> is used when consulting
+of a command, the string "sudoedit" is used when consulting
 the I<sudoers> file.  If the user is authorized by I<sudoers>
 the following steps are taken:
 
