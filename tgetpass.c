@@ -195,10 +195,12 @@ tgetline(fd, buf, bufsiz, timeout)
 
 	    /* Make sure there is something to read (or timeout) */
 	    while ((n = select(fd + 1, readfds, 0, 0, &tv)) == -1 &&
-		errno == EINTR)
+		(errno == EINTR || errno == EAGAIN))
 		;
-	    if (n == 0)
+	    if (n == 0) {
+		free(readfds);
 		return(NULL);		/* timeout */
+	    }
 
 	    /* Read a character, exit loop on error, EOF or EOL */
 	    n = read(fd, &c, 1);
