@@ -63,8 +63,8 @@
 /*#define SHELL_IF_NO_ARGS	/* if sudo is given no arguments run a shell */
 /*#define SHELL_SETS_HOME	/* -s sets $HOME to runas user's homedir */
 /*#define USE_TTY_TICKETS	/* have a different ticket file for each tty */
-/*#define SKEY_ONLY		/* validate user via s/key only */
-/*#define LONG_SKEY_PROMPT	/* use a two line s/key prompt */
+/*#define OTP_ONLY		/* validate user via OTP (skey/opie) only */
+/*#define LONG_OTP_PROMPT	/* use a two line OTP (skey/opie) prompt */
 #define FAST_MATCH		/* command check fails if basenames not same */
 #ifndef SUDOERS_MODE
 #define SUDOERS_MODE 0440	/* file mode for sudoers (octal) */
