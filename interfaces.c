@@ -42,9 +42,6 @@
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-#include <malloc.h>   
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <netdb.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -74,11 +71,6 @@
 
 #include "sudo.h"
 #include "version.h"
-
-#if !defined(STDC_HEADERS) && !defined(__GNUC__)
-extern char *malloc	__P((size_t));
-extern char *realloc	__P((VOID *, size_t));
-#endif /* !STDC_HEADERS && !__GNUC__ */
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
@@ -124,11 +116,7 @@ void load_interfaces()
      * get interface configuration or return (leaving interfaces NULL)
      */
     for (;;) {
-	ifconf_buf = ifconf_buf ? realloc(ifconf_buf, len) : malloc(len);
-	if (ifconf_buf == NULL) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	ifconf_buf = erealloc(ifconf_buf, len);
 	ifconf = (struct ifconf *) ifconf_buf;
 	ifconf->ifc_len = len - sizeof(struct ifconf);
 	ifconf->ifc_buf = (caddr_t) (ifconf_buf + sizeof(struct ifconf));
@@ -157,13 +145,9 @@ void load_interfaces()
     n = ifconf->ifc_len / sizeof(struct ifreq);
 
     /*
-     * malloc() space for interfaces array
+     * allocate space for interfaces array
      */
-    interfaces = (struct interface *) malloc(sizeof(struct interface) * n);
-    if (interfaces == NULL) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
+    interfaces = (struct interface *) emalloc(sizeof(struct interface) * n);
 
     /*
      * for each interface, store the ip address and netmask
@@ -243,17 +227,11 @@ void load_interfaces()
     /* if there were bogus entries, realloc the array */
     if (n != num_interfaces) {
 	/* it is unlikely that num_interfaces will be 0 but who knows... */
-	if (num_interfaces != 0) {
-	    interfaces = (struct interface *) realloc(interfaces,
+	if (num_interfaces != 0)
+	    interfaces = (struct interface *) erealloc(interfaces,
 		sizeof(struct interface) * num_interfaces);
-	    if (interfaces == NULL) {
-		perror("realloc");
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-		exit(1);
-	    }
-	} else {
+	else
 	    (void) free(interfaces);
-	}
     }
     (void) free(ifconf_buf);
     (void) close(sock);

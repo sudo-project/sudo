@@ -26,7 +26,7 @@
  *  if the path is stat(2)'able, a regular file, and executable by
  *  root.  The string's size should be <= MAXPATHLEN.
  *
- *  Todd C. Miller (millert@colorado.edu) Sat Mar 25 21:58:17 MST 1995
+ *  Todd C. Miller <Todd.Miller@courtesan.com> Sat Mar 25 21:58:17 MST 1995
  */
 
 #include "config.h"

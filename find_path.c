@@ -26,7 +26,7 @@
  *  ocommand contain the resolved and unresolved pathnames respectively.
  *  NOTE: if "." or "" exists in PATH it will be searched last.
  *
- *  Todd C. Miller (millert@colorado.edu) Sat Mar 25 21:50:36 MST 1995
+ *  Todd C. Miller <Todd.Miller@courtesan.com> Sat Mar 25 21:50:36 MST 1995
  */
 
 #include "config.h"
@@ -44,9 +44,6 @@
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-#include <malloc.h>
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/param.h>
@@ -55,18 +52,12 @@
 #include "sudo.h"
 
 #ifndef STDC_HEADERS
-#ifndef __GNUC__		/* gcc has its own malloc */
-extern char *malloc	__P((size_t));
-#endif /* __GNUC__ */
 extern char *getenv	__P((const char *));
 extern char *strcpy	__P((char *, const char *));
 extern int fprintf	__P((FILE *, const char *, ...));
 extern ssize_t readlink	__P((const char *, VOID *, size_t));
 extern int stat		__P((const char *, struct stat *));
 extern int lstat	__P((const char *, struct stat *));
-#ifdef HAVE_STRDUP
-extern char *strdup	__P((const char *));
-#endif /* HAVE_STRDUP */
 #endif /* !STDC_HEADERS */
 
 #ifndef _S_IFMT
@@ -129,10 +120,7 @@ int find_path(infile, outfile)
     if ((path = getenv("PATH")) == NULL)
 	return(NOT_FOUND);
 
-    if ((path = (char *) strdup(path)) == NULL) {
-	(void) fprintf(stderr, "%s: out of memory!\n", Argv[0]);
-	exit(1);
-    }
+    path = estrdup(path);
     origpath = path;
 
     /* XXX use strtok() */

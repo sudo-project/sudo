@@ -22,7 +22,7 @@
  *
  *  This module contains putenv(3) for those systems that lack it.
  *
- *  Todd C. Miller (millert@colorado.edu) Sun Aug  7 20:30:17 MDT 1994
+ *  Todd C. Miller <Todd.Miller@courtesan.com> Sun Aug  7 20:30:17 MDT 1994
  */
 
 #include "config.h"
@@ -44,7 +44,7 @@
 #include "compat.h"
 
 #if !defined(STDC_HEADERS) && !defined(__GNUC__)
-extern char *malloc	__P((size_t));
+extern VOID *malloc	__P((size_t));
 #endif /* !STDC_HEADERS && !gcc */
 
 #ifndef lint

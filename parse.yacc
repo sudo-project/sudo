@@ -92,11 +92,7 @@ int top = 0, stacksize = 0;
     { \
 	if (top >= stacksize) { \
 	    while ((stacksize += STACKINCREMENT) < top); \
-	    match = (struct matchstack *) realloc(match, sizeof(struct matchstack) * stacksize); \
-	    if (match == NULL) { \
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]); \
-		exit(1); \
-	    } \
+	    match = (struct matchstack *) erealloc(match, sizeof(struct matchstack) * stacksize); \
 	} \
 	match[top].user   = -1; \
 	match[top].cmnd   = -1; \
@@ -522,11 +518,7 @@ cmndalias	:	ALIAS {
 				in_alias = TRUE;
 				/* Allocate space for ga_list if necesary. */
 				expand_ga_list();
-				if (!(ga_list[ga_list_len-1].alias = (char *) strdup($1))){
-				    (void) fprintf(stderr,
-				      "%s: cannot allocate memory!\n", Argv[0]);
-				    exit(1);
-				 }
+				ga_list[ga_list_len-1].alias = estrdup($1);
 			     }
 			} '=' cmndlist {
 			    if (cmnd_matches == TRUE &&
@@ -555,11 +547,7 @@ runasalias	:	ALIAS {
 				in_alias = TRUE;
 				/* Allocate space for ga_list if necesary. */
 				expand_ga_list();
-				if (!(ga_list[ga_list_len-1].alias = (char *) strdup($1))){
-				    (void) fprintf(stderr,
-				      "%s: cannot allocate memory!\n", Argv[0]);
-				    exit(1);
-				}
+				ga_list[ga_list_len-1].alias = estrdup($1);
 			    }
 			} '=' runaslist {
 			    if ($4 > 0 && add_alias($1, RUNAS_ALIAS) == FALSE)
@@ -857,6 +845,8 @@ void list_matches()
     }
     (void) free(cm_list);
     cm_list = NULL;
+    cm_list_len = 0;
+    cm_list_size = 0;
 }
 
 
@@ -879,11 +869,7 @@ static void append(src, dstp, dst_len, dst_size, separator)
 
     /* Assumes dst will be NULL if not set. */
     if (dst == NULL) {
-	if ((dst = (char *) malloc(BUFSIZ)) == NULL) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
-
+	dst = (char *) emalloc(BUFSIZ);
 	*dst_size = BUFSIZ;
 	*dst_len = 0;
 	*dstp = dst;
@@ -894,10 +880,7 @@ static void append(src, dstp, dst_len, dst_size, separator)
 	while (*dst_size <= *dst_len + src_len)
 	    *dst_size += BUFSIZ;
 
-	if (!(dst = (char *) realloc(dst, *dst_size))) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	dst = (char *) erealloc(dst, *dst_size);
 	*dstp = dst;
     }
 
@@ -920,8 +903,10 @@ static void append(src, dstp, dst_len, dst_size, separator)
 
 void reset_aliases()
 {
-    if (aliases)
+    if (aliases) {
 	(void) free(aliases);
+	aliases = NULL;
+    }
     naliases = nslots = 0;
 }
 
@@ -936,20 +921,10 @@ void reset_aliases()
 static void expand_ga_list()
 {
     if (++ga_list_len >= ga_list_size) {
-	while ((ga_list_size += STACKINCREMENT) < ga_list_len);
-	if (ga_list == NULL) {
-	    if ((ga_list = (struct generic_alias *)
-		malloc(sizeof(struct generic_alias) * ga_list_size)) == NULL) {
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-		exit(1);
-	    }
-	} else {
-	    if ((ga_list = (struct generic_alias *) realloc(ga_list,
-		sizeof(struct generic_alias) * ga_list_size)) == NULL) {
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-		exit(1);
-	    }
-	}
+	while ((ga_list_size += STACKINCREMENT) < ga_list_len)
+	    ;
+	ga_list = (struct generic_alias *)
+	    erealloc(ga_list, sizeof(struct generic_alias) * ga_list_size);
     }
 
     ga_list[ga_list_len - 1].entries = NULL;
@@ -966,21 +941,10 @@ static void expand_ga_list()
 static void expand_match_list()
 {
     if (++cm_list_len >= cm_list_size) {
-	while ((cm_list_size += STACKINCREMENT) < cm_list_len);
-	if (cm_list == NULL) {
-	    if ((cm_list = (struct command_match *)
-		malloc(sizeof(struct command_match) * cm_list_size)) == NULL) {
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-		exit(1);
-	    }
-	    cm_list_len = 0;
-	} else {
-	    if ((cm_list = (struct command_match *) realloc(cm_list,
-		sizeof(struct command_match) * cm_list_size)) == NULL) {
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-		exit(1);
-	    }
-	}
+	while ((cm_list_size += STACKINCREMENT) < cm_list_len)
+	    ;
+	cm_list = (struct command_match *)
+	    erealloc(cm_list, sizeof(struct command_match) * cm_list_size);
     }
 
     cm_list[cm_list_len].runas = cm_list[cm_list_len].cmnd = NULL;
@@ -1010,11 +974,7 @@ void init_parser()
 
     /* Allocate space for the matching stack. */
     stacksize = STACKINCREMENT;
-    match = (struct matchstack *) malloc(sizeof(struct matchstack) * stacksize);
-    if (match == NULL) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
+    match = (struct matchstack *) emalloc(sizeof(struct matchstack) * stacksize);
 
     /* Allocate space for the match list (for `sudo -l'). */
     if (printmatches == TRUE)

@@ -23,7 +23,7 @@
  *  visudo.c -- locks the sudoers file for safe editing and check
  *  for parse errors.
  *
- *  Todd C. Miller (millert@colorado.edu) Sat Mar 25 21:50:36 MST 1995
+ *  Todd C. Miller <Todd.Miller@courtesan.com> Sat Mar 25 21:50:36 MST 1995
  */
 
 #include "config.h"

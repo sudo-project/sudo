@@ -24,7 +24,7 @@
  *  lack utime(2).
  *  utime(3) sets the access and mod times of the named file.
  *
- *  Todd C. Miller (millert@colorado.edu) Sat Jun 17 16:42:41 MDT 1995
+ *  Todd C. Miller <Todd.Miller@courtesan.com> Sat Jun 17 16:42:41 MDT 1995
  */
 
 #include "config.h"

@@ -818,11 +818,7 @@ static int sudo_krb5_validate_user(pw, pass)
 	return -1;
     krb5_get_init_creds_opt_init(&opts);
 
-    princ_name = malloc(strlen(pw->pw_name) + strlen(realm) + 2);
-    if (!princ_name) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
+    princ_name = emalloc(strlen(pw->pw_name) + strlen(realm) + 2);
 
     sprintf(princ_name, "%s@%s", pw->pw_name, realm);
     if (retval = krb5_parse_name(sudo_context, princ_name, &princ))
@@ -955,23 +951,19 @@ static int PAM_conv(num_msg, msg, resp, appdata_ptr)
     int replies = 0;
     struct pam_response *reply = NULL;
 
-/* XXX - replace with estrdup() */
-#define COPY_STRING(s) (s) ? strdup(s) : NULL
-
-    reply = malloc(sizeof(struct pam_response) * num_msg);
-    if (reply == NULL)
+    if ((reply = malloc(sizeof(struct pam_response) * num_msg)) == NULL)
 	return(PAM_CONV_ERR);
 
     for (replies = 0; replies < num_msg; replies++) {
 	switch (msg[replies]->msg_style) {
 	case PAM_PROMPT_ECHO_ON:
 	    reply[replies].resp_retcode = PAM_SUCCESS;
-	    reply[replies].resp = COPY_STRING(PAM_username);
+	    reply[replies].resp = estrdup(PAM_username);
 	    /* PAM frees resp */
 	    break;
 	case PAM_PROMPT_ECHO_OFF:
 	    reply[replies].resp_retcode = PAM_SUCCESS;
-	    reply[replies].resp = COPY_STRING(PAM_password);
+	    reply[replies].resp = estrdup(PAM_password);
 	    /* PAM frees resp */
 	    break;
 	case PAM_TEXT_INFO:
@@ -1102,19 +1094,12 @@ static char *sudo_skeyprompt(user_skey, p)
     if (new_prompt == NULL) {
 	/* allocate space for new prompt */
 	np_size = op_len + strlen(challenge) + 7;
-	if (!(new_prompt = (char *) malloc(np_size))) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	new_prompt = (char *) emalloc(np_size);
     } else {
 	/* already have space allocated, is it enough? */
 	if (np_size < op_len + strlen(challenge) + 7) {
 	    np_size = op_len + strlen(challenge) + 7;
-	    if (!(new_prompt = (char *) realloc(new_prompt, np_size))) {
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n",
-			       Argv[0]);
-		exit(1);
-	    }
+	    new_prompt = (char *) erealloc(new_prompt, np_size);
 	}
     }
 
@@ -1175,19 +1160,12 @@ static char *sudo_opieprompt(user_opie, p)
     if (new_prompt == NULL) {
 	/* allocate space for new prompt */
 	np_size = op_len + strlen(challenge) + 7;
-	if (!(new_prompt = (char *) malloc(np_size))) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	new_prompt = (char *) emalloc(np_size);
     } else {
 	/* already have space allocated, is it enough? */
 	if (np_size < op_len + strlen(challenge) + 7) {
 	    np_size = op_len + strlen(challenge) + 7;
-	    if (!(new_prompt = (char *) realloc(new_prompt, np_size))) {
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n",
-			       Argv[0]);
-		exit(1);
-	    }
+	    new_prompt = (char *) erealloc(new_prompt, np_size);
 	}
     }
 
@@ -1288,10 +1266,7 @@ static char *expand_prompt(old_prompt, user, host)
     }
 
     if (subst) {
-	if ((new_prompt = (char *) malloc(len + 1)) == NULL) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	new_prompt = (char *) emalloc(len + 1);
 	for (p = prompt, np = new_prompt; *p; p++) {
 	    if (lastchar == '%' && (*p == 'h' || *p == 'u' || *p == '%')) {
 		/* substiture user/host name */

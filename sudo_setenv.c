@@ -23,7 +23,7 @@
  *  This module contains sudo_setenv().
  *  sudo_setenv(3) adds a string of the form "var=val" to the environment.
  *
- *  Todd C. Miller (millert@colorado.edu) Fri Jun  3 18:32:19 MDT 1994
+ *  Todd C. Miller <Todd.Miller@courtesan.com> Fri Jun  3 18:32:19 MDT 1994
  */
 
 #include "config.h"

@@ -34,9 +34,6 @@
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #endif /* STDC_HEADERS */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-#include <malloc.h>   
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif /* HAVE_STRING_H */
@@ -75,13 +72,7 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 #ifndef STDC_HEADERS
-#ifndef __GNUC__                /* gcc has its own malloc */
-extern char *malloc     __P((size_t));
-#endif /* __GNUC__ */
 extern char *getenv     __P((const char *));
-#ifdef HAVE_STRDUP
-extern char *strdup     __P((const char *));
-#endif /* HAVE_STRDUP */
 #endif /* !STDC_HEADERS */
 
 /*
@@ -218,42 +209,20 @@ struct passwd *sudo_getpwuid(uid)
 	return(NULL);
 
     /* allocate space for a local copy of pw */
-    local_pw = (struct passwd *) malloc(sizeof(struct passwd));
-    if (local_pw == NULL) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
+    local_pw = (struct passwd *) emalloc(sizeof(struct passwd));
 
     /*
      * Copy the struct passwd and the interesting strings...
      */
     (void) memcpy(local_pw, pw, sizeof(struct passwd));
-
-    local_pw->pw_name = (char *) strdup(pw->pw_name);
-    if (local_pw->pw_name == NULL) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
-
-    local_pw->pw_dir = (char *) strdup(pw->pw_dir);
-    if (local_pw->pw_dir == NULL) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
+    local_pw->pw_name = estrdup(pw->pw_name);
+    local_pw->pw_dir = estrdup(pw->pw_dir);
 
     /* pw_shell is a special case since we overide with $SHELL */
-    local_pw->pw_shell = (char *) strdup(sudo_getshell(pw));
-    if (local_pw->pw_shell == NULL) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
+    local_pw->pw_shell = estrdup(sudo_getshell(pw));
 
     /* pw_passwd gets a shadow password if applicable */
-    local_pw->pw_passwd = (char *) strdup(sudo_getepw(pw));
-    if (local_pw->pw_passwd == NULL) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
+    local_pw->pw_passwd = estrdup(sudo_getepw(pw));
 
     return(local_pw);
 }

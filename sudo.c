@@ -68,9 +68,6 @@
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-#include <malloc.h>   
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <pwd.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -90,12 +87,6 @@
 #include "version.h"
 
 #ifndef STDC_HEADERS
-#ifndef __GNUC__		/* gcc has its own malloc */
-extern char *malloc	__P((size_t));
-#endif /* __GNUC__ */
-#ifdef HAVE_STRDUP
-extern char *strdup	__P((const char *));
-#endif /* HAVE_STRDUP */
 extern char *getenv	__P((char *));
 #endif /* STDC_HEADERS */
 
@@ -271,11 +262,7 @@ int main(argc, argv)
     if ((sudo_mode & MODE_SHELL)) {
 	char **dst, **src = NewArgv;
 
-	NewArgv = (char **) malloc (sizeof(char *) * (++NewArgc + 1));
-	if (NewArgv == NULL) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	NewArgv = (char **) emalloc (sizeof(char *) * (++NewArgc + 1));
 
 	/* add the shell as argv[0] */
 	if (user_shell && *user_shell) {
@@ -488,11 +475,7 @@ static void load_globals(sudo_mode)
 	realm = lrealm;
 
     if (!arg_prompt) {
-	p = malloc(strlen(user_name) + strlen(realm) + 17);
-	if (p == NULL) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	p = emalloc(strlen(user_name) + strlen(realm) + 17);
 	sprintf(p, "Password for %s@%s: ", user_name, realm);
 	prompt = p;
     }
@@ -512,10 +495,7 @@ static void load_globals(sudo_mode)
     if ((p = (char *) ttyname(0)) || (p = (char *) ttyname(1))) {
 	if (strncmp(p, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
 	    p += sizeof(_PATH_DEV) - 1;
-	if ((tty = (char *) strdup(p)) == NULL) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	tty = estrdup(p);
     }
 
 #ifdef SUDO_UMASK
@@ -567,10 +547,7 @@ static void load_globals(sudo_mode)
      */
     if ((p = strchr(host, '.'))) {
 	*p = '\0';
-	if ((shost = (char *) strdup(host)) == NULL) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	shost = estrdup(host);
 	*p = '.';
     } else {
 	shost = &host[0];
@@ -768,10 +745,7 @@ static void add_env(contiguous)
 		size += strlen(*from) + 1;
 	}
 
-	if ((buf = (char *) malloc(size)) == NULL) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	buf = (char *) emalloc(size);
 
 	/*
 	 * Copy the command and it's arguments info buf

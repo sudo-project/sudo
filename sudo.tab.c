@@ -110,11 +110,7 @@ int top = 0, stacksize = 0;
     { \
 	if (top >= stacksize) { \
 	    while ((stacksize += STACKINCREMENT) < top); \
-	    match = (struct matchstack *) realloc(match, sizeof(struct matchstack) * stacksize); \
-	    if (match == NULL) { \
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]); \
-		exit(1); \
-	    } \
+	    match = (struct matchstack *) erealloc(match, sizeof(struct matchstack) * stacksize); \
 	} \
 	match[top].user   = -1; \
 	match[top].cmnd   = -1; \
@@ -175,14 +171,14 @@ void yyerror(s)
 #endif
     parse_error = TRUE;
 }
-#line 162 "parse.yacc"
+#line 158 "parse.yacc"
 typedef union {
     char *string;
     int BOOLEAN;
     struct sudo_command command;
     int tok;
 } YYSTYPE;
-#line 186 "sudo.tab.c"
+#line 182 "sudo.tab.c"
 #define ALIAS 257
 #define NTWKADDR 258
 #define FQHOST 259
@@ -467,7 +463,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 621 "parse.yacc"
+#line 609 "parse.yacc"
 
 
 typedef struct {
@@ -707,6 +703,8 @@ void list_matches()
     }
     (void) free(cm_list);
     cm_list = NULL;
+    cm_list_len = 0;
+    cm_list_size = 0;
 }
 
 
@@ -729,11 +727,7 @@ static void append(src, dstp, dst_len, dst_size, separator)
 
     /* Assumes dst will be NULL if not set. */
     if (dst == NULL) {
-	if ((dst = (char *) malloc(BUFSIZ)) == NULL) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
-
+	dst = (char *) emalloc(BUFSIZ);
 	*dst_size = BUFSIZ;
 	*dst_len = 0;
 	*dstp = dst;
@@ -744,10 +738,7 @@ static void append(src, dstp, dst_len, dst_size, separator)
 	while (*dst_size <= *dst_len + src_len)
 	    *dst_size += BUFSIZ;
 
-	if (!(dst = (char *) realloc(dst, *dst_size))) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	dst = (char *) erealloc(dst, *dst_size);
 	*dstp = dst;
     }
 
@@ -770,8 +761,10 @@ static void append(src, dstp, dst_len, dst_size, separator)
 
 void reset_aliases()
 {
-    if (aliases)
+    if (aliases) {
 	(void) free(aliases);
+	aliases = NULL;
+    }
     naliases = nslots = 0;
 }
 
@@ -786,20 +779,10 @@ void reset_aliases()
 static void expand_ga_list()
 {
     if (++ga_list_len >= ga_list_size) {
-	while ((ga_list_size += STACKINCREMENT) < ga_list_len);
-	if (ga_list == NULL) {
-	    if ((ga_list = (struct generic_alias *)
-		malloc(sizeof(struct generic_alias) * ga_list_size)) == NULL) {
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-		exit(1);
-	    }
-	} else {
-	    if ((ga_list = (struct generic_alias *) realloc(ga_list,
-		sizeof(struct generic_alias) * ga_list_size)) == NULL) {
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-		exit(1);
-	    }
-	}
+	while ((ga_list_size += STACKINCREMENT) < ga_list_len)
+	    ;
+	ga_list = (struct generic_alias *)
+	    erealloc(ga_list, sizeof(struct generic_alias) * ga_list_size);
     }
 
     ga_list[ga_list_len - 1].entries = NULL;
@@ -816,21 +799,10 @@ static void expand_ga_list()
 static void expand_match_list()
 {
     if (++cm_list_len >= cm_list_size) {
-	while ((cm_list_size += STACKINCREMENT) < cm_list_len);
-	if (cm_list == NULL) {
-	    if ((cm_list = (struct command_match *)
-		malloc(sizeof(struct command_match) * cm_list_size)) == NULL) {
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-		exit(1);
-	    }
-	    cm_list_len = 0;
-	} else {
-	    if ((cm_list = (struct command_match *) realloc(cm_list,
-		sizeof(struct command_match) * cm_list_size)) == NULL) {
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-		exit(1);
-	    }
-	}
+	while ((cm_list_size += STACKINCREMENT) < cm_list_len)
+	    ;
+	cm_list = (struct command_match *)
+	    erealloc(cm_list, sizeof(struct command_match) * cm_list_size);
     }
 
     cm_list[cm_list_len].runas = cm_list[cm_list_len].cmnd = NULL;
@@ -860,17 +832,13 @@ void init_parser()
 
     /* Allocate space for the matching stack. */
     stacksize = STACKINCREMENT;
-    match = (struct matchstack *) malloc(sizeof(struct matchstack) * stacksize);
-    if (match == NULL) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
+    match = (struct matchstack *) emalloc(sizeof(struct matchstack) * stacksize);
 
     /* Allocate space for the match list (for `sudo -l'). */
     if (printmatches == TRUE)
 	expand_match_list();
 }
-#line 874 "sudo.tab.c"
+#line 842 "sudo.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || __STDC__
 static int yygrowstack(void)
@@ -1051,19 +1019,19 @@ yyreduce:
     switch (yyn)
     {
 case 3:
-#line 203 "parse.yacc"
+#line 199 "parse.yacc"
 { ; }
 break;
 case 4:
-#line 205 "parse.yacc"
+#line 201 "parse.yacc"
 { yyerrok; }
 break;
 case 5:
-#line 206 "parse.yacc"
+#line 202 "parse.yacc"
 { push; }
 break;
 case 6:
-#line 206 "parse.yacc"
+#line 202 "parse.yacc"
 {
 			    while (top && user_matches != TRUE) {
 				pop;
@@ -1071,23 +1039,23 @@ case 6:
 			}
 break;
 case 7:
-#line 212 "parse.yacc"
+#line 208 "parse.yacc"
 { ; }
 break;
 case 8:
-#line 214 "parse.yacc"
+#line 210 "parse.yacc"
 { ; }
 break;
 case 9:
-#line 216 "parse.yacc"
+#line 212 "parse.yacc"
 { ; }
 break;
 case 10:
-#line 218 "parse.yacc"
+#line 214 "parse.yacc"
 { ; }
 break;
 case 13:
-#line 226 "parse.yacc"
+#line 222 "parse.yacc"
 {
 			    if (user_matches == TRUE) {
 				push;
@@ -1099,13 +1067,13 @@ case 13:
 			}
 break;
 case 14:
-#line 237 "parse.yacc"
+#line 233 "parse.yacc"
 {
 			    host_matches = TRUE;
 			}
 break;
 case 15:
-#line 240 "parse.yacc"
+#line 236 "parse.yacc"
 {
 			    if (addr_matches(yyvsp[0].string))
 				host_matches = TRUE;
@@ -1113,7 +1081,7 @@ case 15:
 			}
 break;
 case 16:
-#line 245 "parse.yacc"
+#line 241 "parse.yacc"
 {
 			    if (netgr_matches(yyvsp[0].string, host, NULL))
 				host_matches = TRUE;
@@ -1121,7 +1089,7 @@ case 16:
 			}
 break;
 case 17:
-#line 250 "parse.yacc"
+#line 246 "parse.yacc"
 {
 			    if (strcasecmp(shost, yyvsp[0].string) == 0)
 				host_matches = TRUE;
@@ -1129,7 +1097,7 @@ case 17:
 			}
 break;
 case 18:
-#line 255 "parse.yacc"
+#line 251 "parse.yacc"
 {
 			    if (strcasecmp(host, yyvsp[0].string) == 0)
 				host_matches = TRUE;
@@ -1137,7 +1105,7 @@ case 18:
 			}
 break;
 case 19:
-#line 260 "parse.yacc"
+#line 256 "parse.yacc"
 {
 			    /* could be an all-caps hostname */
 			    if (find_alias(yyvsp[0].string, HOST_ALIAS) == TRUE ||
@@ -1147,7 +1115,7 @@ case 19:
 			}
 break;
 case 22:
-#line 273 "parse.yacc"
+#line 269 "parse.yacc"
 {   /* Push a new entry onto the stack if needed */
 			    if (user_matches == TRUE && host_matches == TRUE &&
 				cmnd_matches == TRUE && runas_matches == TRUE) {
@@ -1162,7 +1130,7 @@ case 22:
 			}
 break;
 case 23:
-#line 284 "parse.yacc"
+#line 280 "parse.yacc"
 {
 			    if (yyvsp[-2].BOOLEAN > 0 && yyvsp[0].BOOLEAN == TRUE) {
 				runas_matches = TRUE;
@@ -1176,11 +1144,11 @@ case 23:
 			}
 break;
 case 24:
-#line 297 "parse.yacc"
+#line 293 "parse.yacc"
 { ; }
 break;
 case 25:
-#line 298 "parse.yacc"
+#line 294 "parse.yacc"
 {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
@@ -1196,7 +1164,7 @@ case 25:
 			}
 break;
 case 26:
-#line 310 "parse.yacc"
+#line 306 "parse.yacc"
 {
 			    int cmnd_matched = cmnd_matches;
 			    pop;
@@ -1208,31 +1176,31 @@ case 26:
 			}
 break;
 case 27:
-#line 321 "parse.yacc"
+#line 317 "parse.yacc"
 {
 			    yyval.BOOLEAN = (strcmp(RUNAS_DEFAULT, runas_user) == 0);
 			}
 break;
 case 28:
-#line 324 "parse.yacc"
+#line 320 "parse.yacc"
 {
 			    yyval.BOOLEAN = yyvsp[0].BOOLEAN;
 			}
 break;
 case 29:
-#line 329 "parse.yacc"
+#line 325 "parse.yacc"
 {
 			    yyval.BOOLEAN = yyvsp[0].BOOLEAN;
 			}
 break;
 case 30:
-#line 332 "parse.yacc"
+#line 328 "parse.yacc"
 {
 			    yyval.BOOLEAN = yyvsp[-2].BOOLEAN + yyvsp[0].BOOLEAN;
 			}
 break;
 case 31:
-#line 338 "parse.yacc"
+#line 334 "parse.yacc"
 {
 			    yyval.BOOLEAN = (strcmp(yyvsp[0].string, runas_user) == 0);
 			    if (printmatches == TRUE && in_alias == TRUE)
@@ -1248,7 +1216,7 @@ case 31:
 			}
 break;
 case 32:
-#line 351 "parse.yacc"
+#line 347 "parse.yacc"
 {
 			    yyval.BOOLEAN = usergr_matches(yyvsp[0].string, runas_user);
 			    if (printmatches == TRUE && in_alias == TRUE)
@@ -1268,7 +1236,7 @@ case 32:
 			}
 break;
 case 33:
-#line 368 "parse.yacc"
+#line 364 "parse.yacc"
 {
 			    yyval.BOOLEAN = netgr_matches(yyvsp[0].string, NULL, runas_user);
 			    if (printmatches == TRUE && in_alias == TRUE)
@@ -1288,7 +1256,7 @@ case 33:
 			}
 break;
 case 34:
-#line 385 "parse.yacc"
+#line 381 "parse.yacc"
 {
 			    /* could be an all-caps username */
 			    if (find_alias(yyvsp[0].string, RUNAS_ALIAS) == TRUE ||
@@ -1309,7 +1277,7 @@ case 34:
 			}
 break;
 case 35:
-#line 403 "parse.yacc"
+#line 399 "parse.yacc"
 {
 			    yyval.BOOLEAN = TRUE;
 			    if (printmatches == TRUE && in_alias == TRUE)
@@ -1324,13 +1292,13 @@ case 35:
 			}
 break;
 case 36:
-#line 417 "parse.yacc"
+#line 413 "parse.yacc"
 {
 			    yyval.BOOLEAN = FALSE;
 			}
 break;
 case 37:
-#line 420 "parse.yacc"
+#line 416 "parse.yacc"
 {
 			    yyval.BOOLEAN = TRUE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
@@ -1339,7 +1307,7 @@ case 37:
 			}
 break;
 case 38:
-#line 428 "parse.yacc"
+#line 424 "parse.yacc"
 {
 			    if (printmatches == TRUE && in_alias == TRUE) {
 				append("ALL", &ga_list[ga_list_len-1].entries,
@@ -1359,7 +1327,7 @@ case 38:
 			}
 break;
 case 39:
-#line 445 "parse.yacc"
+#line 441 "parse.yacc"
 {
 			    if (printmatches == TRUE && in_alias == TRUE) {
 				append(yyvsp[0].string, &ga_list[ga_list_len-1].entries,
@@ -1381,7 +1349,7 @@ case 39:
 			}
 break;
 case 40:
-#line 464 "parse.yacc"
+#line 460 "parse.yacc"
 {
 			    if (printmatches == TRUE && in_alias == TRUE) {
 				append(yyvsp[0].command.cmnd, &ga_list[ga_list_len-1].entries,
@@ -1417,11 +1385,11 @@ case 40:
 			}
 break;
 case 43:
-#line 503 "parse.yacc"
+#line 499 "parse.yacc"
 { push; }
 break;
 case 44:
-#line 503 "parse.yacc"
+#line 499 "parse.yacc"
 {
 			    if (host_matches == TRUE &&
 				add_alias(yyvsp[-3].string, HOST_ALIAS) == FALSE)
@@ -1430,23 +1398,19 @@ case 44:
 			}
 break;
 case 49:
-#line 519 "parse.yacc"
+#line 515 "parse.yacc"
 {
 			    push;
 			    if (printmatches == TRUE) {
 				in_alias = TRUE;
 				/* Allocate space for ga_list if necesary. */
 				expand_ga_list();
-				if (!(ga_list[ga_list_len-1].alias = (char *) strdup(yyvsp[0].string))){
-				    (void) fprintf(stderr,
-				      "%s: cannot allocate memory!\n", Argv[0]);
-				    exit(1);
-				 }
+				ga_list[ga_list_len-1].alias = estrdup(yyvsp[0].string);
 			     }
 			}
 break;
 case 50:
-#line 531 "parse.yacc"
+#line 523 "parse.yacc"
 {
 			    if (cmnd_matches == TRUE &&
 				add_alias(yyvsp[-3].string, CMND_ALIAS) == FALSE)
@@ -1459,27 +1423,23 @@ case 50:
 			}
 break;
 case 51:
-#line 544 "parse.yacc"
+#line 536 "parse.yacc"
 { ; }
 break;
 case 55:
-#line 552 "parse.yacc"
+#line 544 "parse.yacc"
 {
 			    push;
 			    if (printmatches == TRUE) {
 				in_alias = TRUE;
 				/* Allocate space for ga_list if necesary. */
 				expand_ga_list();
-				if (!(ga_list[ga_list_len-1].alias = (char *) strdup(yyvsp[0].string))){
-				    (void) fprintf(stderr,
-				      "%s: cannot allocate memory!\n", Argv[0]);
-				    exit(1);
-				}
+				ga_list[ga_list_len-1].alias = estrdup(yyvsp[0].string);
 			    }
 			}
 break;
 case 56:
-#line 564 "parse.yacc"
+#line 552 "parse.yacc"
 {
 			    if (yyvsp[0].BOOLEAN > 0 && add_alias(yyvsp[-3].string, RUNAS_ALIAS) == FALSE)
 				YYERROR;
@@ -1491,11 +1451,11 @@ case 56:
 			}
 break;
 case 59:
-#line 579 "parse.yacc"
+#line 567 "parse.yacc"
 { push; }
 break;
 case 60:
-#line 579 "parse.yacc"
+#line 567 "parse.yacc"
 {
 			    if (user_matches == TRUE &&
 				add_alias(yyvsp[-3].string, USER_ALIAS) == FALSE)
@@ -1505,11 +1465,11 @@ case 60:
 			}
 break;
 case 61:
-#line 589 "parse.yacc"
+#line 577 "parse.yacc"
 { ; }
 break;
 case 63:
-#line 593 "parse.yacc"
+#line 581 "parse.yacc"
 {
 			    if (strcmp(yyvsp[0].string, user_name) == 0)
 				user_matches = TRUE;
@@ -1517,7 +1477,7 @@ case 63:
 			}
 break;
 case 64:
-#line 598 "parse.yacc"
+#line 586 "parse.yacc"
 {
 			    if (usergr_matches(yyvsp[0].string, user_name))
 				user_matches = TRUE;
@@ -1525,7 +1485,7 @@ case 64:
 			}
 break;
 case 65:
-#line 603 "parse.yacc"
+#line 591 "parse.yacc"
 {
 			    if (netgr_matches(yyvsp[0].string, NULL, user_name))
 				user_matches = TRUE;
@@ -1533,7 +1493,7 @@ case 65:
 			}
 break;
 case 66:
-#line 608 "parse.yacc"
+#line 596 "parse.yacc"
 {
 			    /* could be an all-caps username */
 			    if (find_alias(yyvsp[0].string, USER_ALIAS) == TRUE ||
@@ -1543,12 +1503,12 @@ case 66:
 			}
 break;
 case 67:
-#line 615 "parse.yacc"
+#line 603 "parse.yacc"
 {
 			    user_matches = TRUE;
 			}
 break;
-#line 1552 "sudo.tab.c"
+#line 1512 "sudo.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

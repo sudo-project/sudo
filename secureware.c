@@ -22,7 +22,7 @@
  *
  *  secureware.c -- check a user's password when using SecureWare C2
  *
- *  Todd C. Miller (millert@colorado.edu) Sat Oct 17 14:42:44 MDT 1998
+ *  Todd C. Miller <Todd.Miller@courtesan.com> Sat Oct 17 14:42:44 MDT 1998
  */
 
 #include "config.h"

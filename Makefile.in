@@ -96,9 +96,9 @@ PROGS = @PROGS@
 
 SRCS = check.c getspwuid.c find_path.c logging.c parse.c sudo.c secureware.c \
        goodpath.c sudo_setenv.c parse.yacc parse.lex visudo.c interfaces.c \
-       check_sia.c
+       check_sia.c alloc.c
 
-PARSEOBJS = sudo.tab.o lex.yy.o
+PARSEOBJS = sudo.tab.o lex.yy.o alloc.o
 
 SUDOBJS = check.o getspwuid.o find_path.o logging.o parse.o sudo.o \
           secureware.o goodpath.o sudo_setenv.o interfaces.o \
@@ -132,7 +132,7 @@ VERSIONFILES = emul/utime.h check.c compat.h config.h.in dce_pwent.c \
 	       ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c \
 	       logging.c parse.c parse.lex parse.yacc pathnames.h.in \
 	       putenv.c strdup.c sudo.c sudo.h sudo_setenv.c testsudoers.c \
-	       tgetpass.c utime.c visudo.c secureware.c check_sia.c
+	       tgetpass.c utime.c visudo.c secureware.c check_sia.c alloc.c
 
 all: $(PROGS)
 

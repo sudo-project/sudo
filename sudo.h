@@ -229,9 +229,6 @@ struct generic_alias {
  */
 #define YY_DECL int yylex __P((void))
 
-#ifndef HAVE_STRDUP
-char *strdup		__P((const char *));
-#endif
 #ifndef HAVE_GETCWD
 char *getcwd		__P((char *, size_t size));
 #endif
@@ -253,6 +250,9 @@ int check_secureware	__P((char *));
 void sia_attempt_auth	__P((void));
 int yyparse		__P((void));
 void pass_warn		__P((FILE *));
+VOID *emalloc		__P((size_t));
+VOID *erealloc		__P((VOID *, size_t));
+VOID *estrdup		__P((char *));
 YY_DECL;
 
 

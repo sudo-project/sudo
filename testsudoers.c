@@ -47,9 +47,6 @@
 #    include "emul/fnmatch.h"
 #  endif /* HAVE_FNMATCH */
 #endif /* HAVE_FNMATCH_H */
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-#  include <malloc.h>
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #ifdef HAVE_NETGROUP_H
 #  include <netgroup.h>
 #endif /* HAVE_NETGROUP_H */
@@ -228,10 +225,7 @@ int netgr_matches(netgr, host, user)
 #ifdef HAVE_GETDOMAINNAME
     /* get the domain name (if any) */
     if (domain == (char *) -1) {
-	if ((domain = (char *) malloc(MAXHOSTNAMELEN)) == NULL) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	domain = (char *) emalloc(MAXHOSTNAMELEN);
 
 	if (getdomainname(domain, MAXHOSTNAMELEN) != 0 || *domain == '\0') {
 	    (void) free(domain);
@@ -293,10 +287,7 @@ int main(argc, argv)
 
     if ((p = strchr(host, '.'))) {
 	*p = '\0';
-	if ((shost = (char *) strdup(host)) == NULL) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+	shost = estrdup(host);
 	*p = '.';
     } else {
 	shost = &host[0];
@@ -309,10 +300,7 @@ int main(argc, argv)
 
 	size = (size_t) NewArgv[NewArgc-1] + strlen(NewArgv[NewArgc-1]) -
 	       (size_t) NewArgv[1] + 1;
-	if ((cmnd_args = (char *) malloc(size)) == NULL) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);  
-	    exit(1);
-	}
+	cmnd_args = (char *) emalloc(size);
 	for (to = cmnd_args, from = &NewArgv[1]; *from; from++) {
 	    *to++ = ' ';
 	    (void) strcpy(to, *from);

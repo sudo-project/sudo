@@ -53,7 +53,7 @@
 
 #ifndef STDC_HEADERS
 #ifndef __GNUC__		/* gcc has its own malloc */
-extern char *malloc	__P((size_t));
+extern VOID *malloc	__P((size_t));
 #endif /* __GNUC__ */
 extern char *strcpy	__P((char *, const char *));
 #endif /* !STDC_HEADERS */
