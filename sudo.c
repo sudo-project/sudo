@@ -956,8 +956,11 @@ int
 set_runaspw(user)
     char *user;
 {
-    if (runas_pw != NULL)
+    if (runas_pw != NULL) {
+	if (user_runas != &def_runas_default)
+	    return(TRUE);		/* don't override -u option */
 	free(runas_pw);
+    }
     if (*user == '#') {
 	runas_pw = sudo_getpwuid(atoi(user + 1));
 	if (runas_pw == NULL) {
@@ -975,7 +978,8 @@ set_runaspw(user)
 
 /*
  * Get passwd entry for the user we are going to authenticate as.
- * By default, this is the user invoking sudo...
+ * By default, this is the user invoking sudo.  In the most common
+ * case, this matches sudo_user.pw or runas_pw.
  */
 static struct passwd *
 get_authpw()
@@ -983,23 +987,19 @@ get_authpw()
     struct passwd *pw;
 
     if (def_rootpw) {
-	if ((pw = sudo_getpwuid(0)) == NULL)
+	if (runas_pw->pw_uid == 0)
+	    pw = runas_pw;
+	else if ((pw = sudo_getpwuid(0)) == NULL)
 	    log_error(0, "uid 0 does not exist in the passwd file!");
     } else if (def_runaspw) {
-	if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
+	if (strcmp(def_runas_default, *user_runas) == 0)
+	    pw = runas_pw;
+	else if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
 	    log_error(0, "user %s does not exist in the passwd file!",
 		def_runas_default);
-    } else if (def_targetpw) {
-	if (**user_runas == '#') {
-	    if ((pw = sudo_getpwuid(atoi(*user_runas + 1))) == NULL)
-		log_error(0, "uid %s does not exist in the passwd file!",
-		    user_runas);
-	} else {
-	    if ((pw = sudo_getpwnam(*user_runas)) == NULL)
-		log_error(0, "user %s does not exist in the passwd file!",
-		    user_runas);
-	}
-    } else
+    } else if (def_targetpw)
+	pw = runas_pw;
+    else
 	pw = sudo_user.pw;
 
     return(pw);
