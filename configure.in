@@ -277,7 +277,7 @@ case "$OS" in
 
 		    # shadow pw support
 		    if test "$with_C2" = "yes"; then
-			SHADOW_TYPE="SPW_HPUX9"
+			SHADOW_TYPE="SPW_HPUX10"
 			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 			SUDO_LIBS="${SUDO_LIBS} /usr/lib/libsec.1"
 		    fi
