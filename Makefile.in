@@ -237,7 +237,7 @@ TAGS: $(SRCS)
 	etags $(SRCS)
 
 clean:
-	-rm -f sudo.tab.[ch] *.o $(PROGS) testsudoers core sudo.core visudo.core
+	-rm -f *.o $(PROGS) testsudoers core sudo.core visudo.core
 
 mostlyclean: clean
 
