@@ -68,6 +68,7 @@
 #endif /* HAVE_GETAUTHUID */
 
 #include "sudo.h"
+#include "redblack.h"
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
@@ -79,6 +80,37 @@ static const char rcsid[] = "$Sudo$";
 #if defined(HAVE_GETPRPWNAM) && defined(__alpha)
 int crypt_type = INT_MAX;
 #endif /* HAVE_GETPRPWNAM && __alpha */
+static struct rbtree *cache_byuid;
+static struct rbtree *cache_byname;
+
+static int cmp_byuid	__P((const VOID *, const VOID *));
+static int cmp_byname	__P((const VOID *, const VOID *));
+
+/*
+ * Compare by uid.
+ */
+static int
+cmp_byuid(v1, v2)
+    const VOID *v1;
+    const VOID *v2;
+{
+    const struct passwd *pw1 = (const struct passwd *) v1;
+    const struct passwd *pw2 = (const struct passwd *) v2;
+    return(pw1->pw_uid - pw2->pw_uid);
+}
+
+/*
+ * Compare by user name.
+ */
+static int
+cmp_byname(v1, v2)
+    const VOID *v1;
+    const VOID *v2;
+{
+    const struct passwd *pw1 = (const struct passwd *) v1;
+    const struct passwd *pw2 = (const struct passwd *) v2;
+    return(strcmp(pw1->pw_name, pw2->pw_name));
+}
 
 /*
  * Return a copy of the encrypted password for the user described by pw.
@@ -162,12 +194,11 @@ sudo_getepw(pw)
 
 /*
  * Dynamically allocate space for a struct password and the constituent parts
- * that we care about.  Fills in pw_passwd from shadow file if necessary.
+ * that we care about.  Fills in pw_passwd from shadow file.
  */
 struct passwd *
-sudo_pwdup(pw, checkshadow)
+sudo_pwdup(pw)
     const struct passwd *pw;
-    int checkshadow;
 {
     char *cp;
     const char *pw_passwd, *pw_shell;
@@ -175,7 +206,7 @@ sudo_pwdup(pw, checkshadow)
     struct passwd *newpw;
 
     /* Get shadow password if available. */
-    pw_passwd = checkshadow ? sudo_getepw(pw) : pw->pw_passwd;
+    pw_passwd = sudo_getepw(pw);
 
     /* If shell field is empty, expand to _PATH_BSHELL. */
     pw_shell = (pw->pw_shell == NULL || pw->pw_shell[0] == '\0')
@@ -264,12 +295,19 @@ struct passwd *
 sudo_getpwuid(uid)
     uid_t uid;
 {
-    struct passwd *pw;
+    struct passwd key, *pw;
+    struct rbnode *node;
 
+    key.pw_uid = uid;
+    if ((node = rbfind(cache_byuid, &key)) != NULL)
+	return((struct passwd *) node->data);
     if ((pw = getpwuid(uid)) == NULL)
 	return(NULL);
     else
-	return(sudo_pwdup(pw, 1));
+	pw = sudo_pwdup(pw);
+    rbinsert(cache_byname, (VOID *) pw);
+    rbinsert(cache_byuid, (VOID *) pw);
+    return(pw);
 }
 
 /*
@@ -280,12 +318,60 @@ struct passwd *
 sudo_getpwnam(name)
     const char *name;
 {
-    struct passwd *pw;
+    struct passwd key, *pw;
+    struct rbnode *node;
 
+    key.pw_name = (char *) name;
+    if ((node = rbfind(cache_byname, &key)) != NULL)
+	return((struct passwd *) node->data);
     if ((pw = getpwnam(name)) == NULL)
 	return(NULL);
     else
-	return(sudo_pwdup(pw, 1));
+	pw = sudo_pwdup(pw);
+    rbinsert(cache_byname, (VOID *) pw);
+    rbinsert(cache_byuid, (VOID *) pw);
+    return(pw);
+}
+
+/*
+ * Take a uid and return a faked up passwd struct.
+ */
+struct passwd *
+sudo_fakepwuid(uid)
+    uid_t uid;
+{
+    struct passwd *pw;
+
+    pw = emalloc(sizeof(struct passwd) + MAX_UID_T_LEN + 1);
+    memset(pw, 0, sizeof(struct passwd));
+    pw->pw_uid = uid;
+    pw->pw_name = (char *)pw + sizeof(struct passwd);
+    (void) snprintf(pw->pw_name, MAX_UID_T_LEN + 1, "#%lu",
+	(unsigned long) uid);
+    rbinsert(cache_byname, (VOID *) pw);
+    rbinsert(cache_byuid, (VOID *) pw);
+    return(pw);
+}
+
+/*
+ * Take a uid in string form "#123" and return a faked up passwd struct.
+ */
+struct passwd *
+sudo_fakepwnam(user)
+    char *user;
+{
+    struct passwd *pw;
+    size_t len;
+
+    len = strlen(user);
+    pw = emalloc(sizeof(struct passwd) + len + 1);
+    memset(pw, 0, sizeof(struct passwd));
+    pw->pw_uid = (uid_t) atoi(user + 1);
+    pw->pw_name = (char *)pw + sizeof(struct passwd);
+    strlcpy(pw->pw_name, user, len + 1);
+    rbinsert(cache_byname, (VOID *) pw);
+    rbinsert(cache_byuid, (VOID *) pw);
+    return(pw);
 }
 
 void
@@ -307,6 +393,8 @@ sudo_setpwent()
 #ifdef HAVE_GETAUTHUID
     setauthent();
 #endif
+    cache_byuid = rbcreate(cmp_byuid);
+    cache_byname = rbcreate(cmp_byname);
 }
 
 void
@@ -328,4 +416,8 @@ sudo_endpwent()
 #ifdef HAVE_GETAUTHUID
     endauthent();
 #endif
+    rbdestroy(cache_byuid, (void (*)__P((VOID *))) free);
+    cache_byuid = NULL;
+    rbdestroy(cache_byname, NULL);
+    cache_byname = NULL;
 }

@@ -112,6 +112,7 @@ static struct passwd *get_authpw	__P((void));
 extern int sudo_edit			__P((int, char **));
 extern char **rebuild_env		__P((char **, int, int));
 extern char **zero_env			__P((char **));
+extern struct passwd *sudo_fakepwnam	__P((const char *));
 extern struct passwd *sudo_getpwnam	__P((const char *));
 extern struct passwd *sudo_getpwuid	__P((uid_t));
 
@@ -339,12 +340,10 @@ main(argc, argv, envp)
     /* XXX - causes confusion when root is not listed in sudoers */
     if (sudo_mode & (MODE_RUN | MODE_EDIT) && prev_user != NULL) {
 	if (user_uid == 0 && strcmp(prev_user, "root") != 0) {
-		struct passwd *pw;
+	    struct passwd *pw;
 
-		if ((pw = sudo_getpwnam(prev_user)) != NULL) {
-			free(sudo_user.pw);
-			sudo_user.pw = pw;
-		}
+	    if ((pw = sudo_getpwnam(prev_user)) != NULL)
+		    sudo_user.pw = pw;
 	}
     }
 
@@ -568,7 +567,7 @@ init_vars(sudo_mode)
 	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
 
     set_runaspw(*user_runas);		/* may call log_error() */
-    if (*user_runas[0] == '#' && runas_pw->pw_name && runas_pw->pw_name[0])
+    if (*user_runas[0] == '#' && runas_pw->pw_name[0] != '#')
 	*user_runas = estrdup(runas_pw->pw_name);
 
     /*
@@ -1035,18 +1034,12 @@ set_runaspw(user)
     if (runas_pw != NULL) {
 	if (user_runas != &def_runas_default)
 	    return(TRUE);		/* don't override -u option */
-	free(runas_pw);
     }
     if (*user == '#') {
-	runas_pw = sudo_getpwuid(atoi(user + 1));
-	if (runas_pw == NULL) {
-	    runas_pw = emalloc(sizeof(struct passwd));
-	    (void) memset((VOID *)runas_pw, 0, sizeof(struct passwd));
-	    runas_pw->pw_uid = atoi(user + 1);
-	}
+	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
+	    runas_pw = sudo_fakepwnam(user);
     } else {
-	runas_pw = sudo_getpwnam(user);
-	if (runas_pw == NULL)
+	if ((runas_pw = sudo_getpwnam(user)) == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, "no passwd entry for %s!", user);
     }
     return(TRUE);
@@ -1063,14 +1056,10 @@ get_authpw()
     struct passwd *pw;
 
     if (def_rootpw) {
-	if (runas_pw->pw_uid == 0)
-	    pw = runas_pw;
-	else if ((pw = sudo_getpwuid(0)) == NULL)
+	if ((pw = sudo_getpwuid(0)) == NULL)
 	    log_error(0, "uid 0 does not exist in the passwd file!");
     } else if (def_runaspw) {
-	if (strcmp(def_runas_default, *user_runas) == 0)
-	    pw = runas_pw;
-	else if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
+	if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
 	    log_error(0, "user %s does not exist in the passwd file!",
 		def_runas_default);
     } else if (def_targetpw) {

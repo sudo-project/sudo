@@ -318,7 +318,7 @@ new_child(ppid, pid)
     }
     entry = (struct childinfo *) emalloc(sizeof(*entry));
     entry->pid = pid;
-    entry->pw = sudo_pwdup(pw, 0);
+    entry->pw = pw;
     entry->action = action;
     entry->next = children.first;
     children.first = entry;
@@ -357,7 +357,6 @@ rm_child(pid)
 		prev->next = cur->next;
 	    else
 		children.first = cur->next;
-	    free(cur->pw);
 	    free(cur);
 	    break;
 	}
@@ -395,16 +394,9 @@ update_child(pid, uid)
 	return;		/* cannot happen */
 
     if (child->pw->pw_uid != uid) {
-	free(child->pw);
-	/* lookup uid in passwd db, using a stub on failure */
-	if ((child->pw = sudo_getpwuid(uid)) == NULL) {
-	    child->pw = emalloc(sizeof(struct passwd) + MAX_UID_T_LEN + 1);
-	    memset(child->pw, 0, sizeof(struct passwd));
-	    child->pw->pw_uid = uid;
-	    child->pw->pw_name = (char *)child->pw + sizeof(struct passwd);
-	    (void) snprintf(child->pw->pw_name, MAX_UID_T_LEN + 1, "%lu",
-		(unsigned long) uid);
-	}
+	/* look up uid in passwd db, using a stub on failure */
+	if ((child->pw = sudo_getpwuid(uid)) == NULL)
+	    child->pw = sudo_fakepwuid(uid);
     }
 }
 

@@ -22,8 +22,8 @@ typedef int (*schandler_t)
 struct childinfo;
 struct listhead;
 
-extern struct passwd *sudo_pwdup __P((const struct passwd *, int));
 extern struct passwd *sudo_getpwuid __P((uid_t));
+extern struct passwd *sudo_fakepwuid __P((uid_t));
 
 static int check_execv		__P((int, pid_t, u_int16_t,
 				    struct str_msg_ask *, int, int *, int *));
