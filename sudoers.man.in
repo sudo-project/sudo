@@ -167,7 +167,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "January 22, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "February  1, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -419,7 +419,10 @@ by default.
 .IX Item "ignore_dot"
 If set, \fBsudo\fR will ignore '.' or '' (current dir) in the \f(CW\*(C`PATH\*(C'\fR
 environment variable; the \f(CW\*(C`PATH\*(C'\fR itself is not modified.  This
-flag is \fI@ignore_dot@\fR by default.
+flag is \fI@ignore_dot@\fR by default.  Currently, while it is possible
+to set \fIignore_dot\fR in \fIsudoers\fR, its value is not used.  This option
+should be considered read-only (it will be fixed in a future version
+of \fBsudo\fR).
 .IP "mail_always" 12
 .IX Item "mail_always"
 Send mail to the \fImailto\fR user every time a users runs \fBsudo\fR.
@@ -461,8 +464,11 @@ This flag is \fIon\fR by default.
 .IX Item "root_sudo"
 If set, root is allowed to run \fBsudo\fR too.  Disabling this prevents users
 from \*(L"chaining\*(R" \fBsudo\fR commands to get a root shell by doing something
-like \f(CW"sudo sudo /bin/sh"\fR.
-This flag is \fIon\fR by default.
+like \f(CW"sudo sudo /bin/sh"\fR.  Note, however, that turning off \fIroot_sudo\fR
+will also prevent root and from running \fBsudoedit\fR.
+Disabling \fIroot_sudo\fR provides no real additional security; it
+exists purely for historical reasons.
+This flag is \fI@root_sudo@\fR by default.
 .IP "log_host" 12
 .IX Item "log_host"
 If set, the hostname will be logged in the (non\-syslog) \fBsudo\fR log file.
@@ -1295,7 +1301,7 @@ the following as root:
 If the resulting output contains a line that begins with:
 .PP
 .Vb 1
-\&    File containing dummy exec functions
+\&    File containing dummy exec functions:
 .Ve
 .PP
 then \fBsudo\fR may be able to replace the exec family of functions
@@ -1313,6 +1319,13 @@ To enable \fInoexec\fR for a command, use the \f(CW\*(C`NOEXEC\*(C'\fR tag as do
 in the User Specification section above.  If you are unsure whether
 or not your system is capable of supporting \fInoexec\fR you can always
 just try it out and see if it works.
+.PP
+Note that disabling shell escapes is not a panacea.  Programs running
+as root are still capable of many potentially hazardous operations
+(such as chaning or overwriting files) that could lead to unintended
+privilege escalation.  In the specific case of an editor, a safer
+approach is to give the user permission to run the \fBsudoedit\fR
+program.
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 The \fIsudoers\fR file should \fBalways\fR be edited by the \fBvisudo\fR

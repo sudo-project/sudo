@@ -167,9 +167,9 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "January 29, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "February  1, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
-sudo \- execute a command as another user
+sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 \&\fBsudo\fR \fB\-K\fR | \fB\-L\fR | \fB\-V\fR | \fB\-h\fR | \fB\-k\fR | \fB\-l\fR | \fB\-v\fR
