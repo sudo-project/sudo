@@ -146,7 +146,7 @@ main(argc, argv, envp)
     int cmnd_status;
     int sudo_mode;
     int pwflag;
-    sigset_t set, oset;
+    sigaction_t sa;
     extern int printmatches;
     extern char **environ;
 
@@ -170,14 +170,15 @@ main(argc, argv, envp)
     }
 
     /*
-     * Block signals so the user cannot interrupt us at some point and
-     * avoid the logging.
+     * Ignore keyboard-generated signals so the user cannot interrupt
+     * us at some point and avoid the logging.
      */
-    (void) sigemptyset(&set);
-    (void) sigaddset(&set, SIGINT);
-    (void) sigaddset(&set, SIGQUIT);
-    (void) sigaddset(&set, SIGTSTP);
-    (void) sigprocmask(SIG_BLOCK, &set, &oset);
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = SIG_IGN;
+    (void) sigaction(SIGINT, &sa, NULL);
+    (void) sigaction(SIGQUIT, &sa, NULL);
+    (void) sigaction(SIGTSTP, &sa, NULL);
 
     /*
      * Setup signal handlers, turn off core dumps, and close open files.
@@ -334,9 +335,6 @@ main(argc, argv, envp)
 
 	/* Close the password file */
 	endpwent();
-
-	/* Reset signal mask before we exec. */
-	(void) sigprocmask(SIG_SETMASK, &oset, NULL);
 
 	/* Override user's umask if configured to do so. */
 	if (def_ival(I_UMASK) != 0777)
