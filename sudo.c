@@ -67,6 +67,9 @@
 #if TIME_WITH_SYS_TIME
 # include <time.h>
 #endif
+#ifdef HAVE_SETLOCALE
+# include <locale.h>
+#endif
 #include <netinet/in.h>
 #include <netdb.h>
 #if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
@@ -155,6 +158,10 @@ main(argc, argv, envp)
     VOID *ld;
 #endif
     extern char **environ;
+
+#ifdef HAVE_SETLOCALE
+    setlocale(LC_ALL, "C");
+#endif
 
     Argv = argv;
     if ((Argc = argc) < 1)
