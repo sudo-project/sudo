@@ -5,6 +5,9 @@ FQDN
     file.  Ie: instead of myhost you would use myhost.mydomain.edu.
     Beware that turning FQDN on requires sudo to make DNS lookups which
     may make sudo unusable if your DNS is totally hosed.
+    Also note that you must use the host's official name as DNS knows it.
+    That is, you may not use a host alias (CNAME entry) due to performance
+    issues and the fact that there is no way to get all aliases from DNS.
     This is off by default.
 
 LOGGING
