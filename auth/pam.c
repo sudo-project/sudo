@@ -100,9 +100,10 @@ pam_verify(pw, prompt, auth)
     if ((error = pam_authenticate(pamh, PAM_SILENT)) == PAM_SUCCESS)
 	return(AUTH_SUCCESS);
 
-    if (error != PAM_PERM_DENIED) {
-	if ((s = pam_strerror(pamh, error)))
-	    log_error(NO_EXIT|NO_MAIL, "pam_authenticate: %s\n", s);
+    /* Any error other than PAM_PERM_DENIED may indicate a config problem. */
+    if (error != PAM_PERM_DENIED && (s = pam_strerror(pamh, error))) {
+	log_error(NO_EXIT|NO_MAIL, "pam_authenticate: %s\n", s);
+	return(AUTH_FATAL);
     }
     return(AUTH_FAILURE);
 }
