@@ -354,7 +354,7 @@ host		:	ALL {
 			    free($1);
 			}
 		|	NETGROUP {
-			    if (netgr_matches($1, user_host, NULL))
+			    if (netgr_matches($1, user_host, user_shost, NULL))
 				$$ = TRUE;
 			    else
 				$$ = -1;
@@ -535,7 +535,7 @@ runasuser	:	WORD {
 				    user_matches == TRUE)
 				    append_runas($1, ", ");
 			    }
-			    if (netgr_matches($1, NULL, *user_runas))
+			    if (netgr_matches($1, NULL, NULL, *user_runas))
 				$$ = TRUE;
 			    else
 				$$ = -1;
@@ -789,7 +789,7 @@ user		:	WORD {
 			    free($1);
 			}
 		|	NETGROUP {
-			    if (netgr_matches($1, NULL, user_name))
+			    if (netgr_matches($1, NULL, NULL, user_name))
 				$$ = TRUE;
 			    else
 				$$ = -1;

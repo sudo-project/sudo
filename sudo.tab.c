@@ -1256,7 +1256,7 @@ break;
 case 30:
 #line 356 "parse.yacc"
 {
-			    if (netgr_matches(yyvsp[0].string, user_host, NULL))
+			    if (netgr_matches(yyvsp[0].string, user_host, user_shost, NULL))
 				yyval.BOOLEAN = TRUE;
 			    else
 				yyval.BOOLEAN = -1;
@@ -1475,7 +1475,7 @@ case 49:
 				    user_matches == TRUE)
 				    append_runas(yyvsp[0].string, ", ");
 			    }
-			    if (netgr_matches(yyvsp[0].string, NULL, *user_runas))
+			    if (netgr_matches(yyvsp[0].string, NULL, NULL, *user_runas))
 				yyval.BOOLEAN = TRUE;
 			    else
 				yyval.BOOLEAN = -1;
@@ -1757,7 +1757,7 @@ break;
 case 84:
 #line 791 "parse.yacc"
 {
-			    if (netgr_matches(yyvsp[0].string, NULL, user_name))
+			    if (netgr_matches(yyvsp[0].string, NULL, NULL, user_name))
 				yyval.BOOLEAN = TRUE;
 			    else
 				yyval.BOOLEAN = -1;

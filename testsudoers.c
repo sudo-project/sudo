@@ -240,9 +240,10 @@ usergr_matches(group, user)
 }
 
 int
-netgr_matches(netgr, host, user)
+netgr_matches(netgr, host, shost, user)
     char *netgr;
     char *host;
+    char *shost;
     char *user;
 {
 #ifdef HAVE_GETDOMAINNAME
@@ -268,10 +269,13 @@ netgr_matches(netgr, host, user)
 #endif /* HAVE_GETDOMAINNAME */
 
 #ifdef HAVE_INNETGR
-    return(innetgr(netgr, host, user, domain));
-#else
-    return(FALSE);
+    if (innetgr(netgr, host, user, domain))
+	return(TRUE);
+    else if (host != shost && innetgr(netgr, shost, user, domain))
+	return(TRUE);
 #endif /* HAVE_INNETGR */
+
+    return(FALSE);
 }
 
 void

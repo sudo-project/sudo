@@ -93,7 +93,7 @@ static RETSIGTYPE Exit		__P((int));
 static void setup_signals	__P((void));
 int command_matches		__P((char *, char *, char *, char *));
 int addr_matches		__P((char *));
-int netgr_matches		__P((char *, char *, char *));
+int netgr_matches		__P((char *, char *, char *, char *));
 int usergr_matches		__P((char *, char *));
 void init_parser		__P((void));
 void yyrestart			__P((FILE *));
@@ -401,8 +401,8 @@ usergr_matches(g, u)
 }
 
 int
-netgr_matches(n, h, u)
-    char *n, *h, *u;
+netgr_matches(n, h, sh, u)
+    char *n, *h, *sh, *u;
 {
     return(TRUE);
 }

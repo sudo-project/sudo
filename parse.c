@@ -426,13 +426,14 @@ usergr_matches(group, user)
 
 /*
  * Returns TRUE if "host" and "user" belong to the netgroup "netgr",
- * else return FALSE.  Either of "host" or "user" may be NULL
+ * else return FALSE.  Either of "host", "shost" or "user" may be NULL
  * in which case that argument is not checked...
  */
 int
-netgr_matches(netgr, host, user)
+netgr_matches(netgr, host, shost, user)
     char *netgr;
     char *host;
+    char *shost;
     char *user;
 {
 #ifdef HAVE_GETDOMAINNAME
@@ -457,10 +458,13 @@ netgr_matches(netgr, host, user)
 #endif /* HAVE_GETDOMAINNAME */
 
 #ifdef HAVE_INNETGR
-    return(innetgr(netgr, host, user, domain));
-#else
-    return(FALSE);
+    if (innetgr(netgr, host, user, domain))
+	return(TRUE);
+    else if (host != shost && innetgr(netgr, shost, user, domain))
+	return(TRUE);
 #endif /* HAVE_INNETGR */
+
+    return(FALSE);
 }
 
 /*
