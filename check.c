@@ -76,6 +76,11 @@ static char rcsid[] = "$Id$";
 #include <sys/security.h>
 #include <prot.h>
 #endif /* __convex__ && HAVE_C2_SECURITY */
+#if defined(SUNOS4) && defined(HAVE_C2_SECURITY)
+#include <sys/label.h>
+#include <sys/audit.h>
+#include <pwdadj.h>
+#endif /* SUNOS4 && HAVE_C2_SECURITY */
 #ifdef HAVE_AFS
 #include <usersec.h>
 #include <afs/kauth.h>
@@ -296,6 +301,9 @@ static void check_passwd()
 #if defined(__hpux) && defined(HAVE_C2_SECURITY)
     struct s_passwd *spw_ent;
 #endif /* __hpux && HAVE_C2_SECURITY */
+#if defined(SUNOS4) && defined(HAVE_C2_SECURITY)
+    struct passwd_adjunct *pwa;
+#endif /* SUNOS4 && HAVE_C2_SECURITY */
 #if defined(__osf__) && defined(HAVE_C2_SECURITY)
     struct pr_passwd *spw_ent;
 #endif /* __osf__ && HAVE_C2_SECURITY */
@@ -379,6 +387,20 @@ static void check_passwd()
     }
     encrypted = spw_ent->ufld.fd_encrypt;
 #endif /* __convex__ && HAVE_C2_SECURITY */
+#if defined(SUNOS4) && (HAVE_C2_SECURITY)
+    /*
+     * SunOS with C2 security
+     */
+    set_perms(PERM_ROOT);
+    pwa = getpwanam(user);
+    set_perms(PERM_USER);
+    if (pwa == (struct passwd_adjunct *)NULL) {
+	(void) sprintf(user, "%u", uid);
+	log_error(GLOBAL_NO_PW_ENT);
+	inform_user(GLOBAL_NO_PW_ENT);
+	exit(1);
+    }
+#endif /* SUNOS4 && HAVE_C2_SECURITY */
 
     /*
      * you get TRIES_FOR_PASSWORD times to guess your password
