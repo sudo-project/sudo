@@ -403,11 +403,14 @@ Special features/options:
 	Normally, sudo will tell the user when a command could not be found
 	in their $PATH.  Some sites may wish to disable this as it could
 	be used to gather information on the location of executables that
-	the normal user does not have access to.
+	the normal user does not have access to.  The disadvantage is that
+	if the executable is simply not in the user's path, sudo will tell
+	the user that they are not allowed to run it, which can be confusing.
 
   --disable-sia
 	Disable SIA support.  This is the "Security Integration Architecture"
-	on Digital UNIX.
+	on Digital UNIX. If you disable SIA sudo will use its own
+	authentication routines.
 
 Shadow password and C2 support
 ==============================
