@@ -863,3 +863,11 @@ Sudo 1.5.3 released.
      Noted by Alex Parchkov <alexp@ind.tansu.com.au>.
 
 Sudo 1.5.4 released.
+
+268) Newer versions of Irix use _RLDN32_* envariables for 32-bit binaries
+     so ignore _RLD* instead of _RLD_*.  From tarrall@bamboo.Colorado.EDU.
+
+269) Only open sudoers file once as opposed to once for sanity checks and
+     once for the parser.  Also try to open ten times if we get EAGAIN.
+
+Sudo 1.5.5 released.
