@@ -1688,3 +1688,5 @@ Sudo 1.6.7p5 released.
 530) A negated user/uid in a runas list was not treated the same as a
      negated command (it did not override a previously allowed entry).
      Now it does.
+
+531) Added support for Tandem NSK and other systems w/o seteuid().
