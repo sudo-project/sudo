@@ -473,8 +473,7 @@ static void check_passwd()
 #  endif /* SECUREWARE */
 #endif /* SHADOW_TYPE */
 #ifdef HAVE_SKEY
-    int pw_ok = 1;
-    struct passwd *pw_ent = getpwuid(uid);
+    struct passwd *pw_ent;
 #endif /* HAVE_SKEY */
     char *encrypted=epasswd;	/* this comes from /etc/passwd  */
 #if defined(HAVE_KERB4) && defined(USE_GETPASS)
@@ -543,9 +542,14 @@ static void check_passwd()
     /*
      * you get TRIES_FOR_PASSWORD times to guess your password
      */
+#ifdef HAVE_SKEY
+    pw_ent = getpwuid(uid);
+#endif /* HAVE_SKEY */
     while (counter > 0) {
 #ifdef HAVE_SKEY
-	pass = skey_getpass(prompt, pw_ent, pw_ok);
+	set_perms(PERM_ROOT);
+	pass = skey_getpass(prompt, pw_ent, 1);
+	set_perms(PERM_USER);
 #else
 #  ifdef USE_GETPASS
 #    ifdef HAVE_KERB4
@@ -581,9 +585,13 @@ static void check_passwd()
 #endif /* SHADOW_TYPE */
 
 #ifdef HAVE_SKEY
+	set_perms(PERM_ROOT);
 	if (!strcmp(pw_ent->pw_passwd, skey_crypt(pass, pw_ent->pw_passwd,
-	    pw_ent, pw_ok)))
+	    pw_ent, 0))) {
+	    set_perms(PERM_USER);
 	    return;             /* if the passwd is correct return() */
+	}
+	set_perms(PERM_USER);
 #else
 	if (!strcmp(encrypted, (char *) crypt(pass, encrypted)))
 	    return;		/* if the passwd is correct return() */
