@@ -413,7 +413,7 @@ static void send_mail()
     char *mailer;
     char *subject = MAILSUBJECT;
     int fd[2];
-    char buf[MAXLOGLEN + 1024];
+    char buf[MAXLOGLEN + BUFSIZ];
 #ifdef POSIX_SIGNALS
     struct sigaction action;
 

@@ -300,7 +300,7 @@ user		:	NAME {
 
 typedef struct {
     int type;
-    char name[1024];
+    char name[BUFSIZ];
 } aliasinfo;
 
 #define MOREALIASES (32)
