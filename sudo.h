@@ -145,6 +145,8 @@
  *  there is some sendmail mail specific stuff in the send_mail() routine
  *  ( e.g.  the argv for the execvp() ).  MAILER should ALWAYS be fully
  *  quallified.  (_PATH_SENDMAIL defined in pathanmes.h)
+ *  If you do *not* run sendmail or another mailer, comment out the
+ *  #define MAILER below.
  */
 #ifndef MAILER
 #  define MAILER		_PATH_SENDMAIL
@@ -183,6 +185,12 @@
 #ifndef UMASK
 #  define UMASK			022
 #endif /* UMASK */
+
+/*
+ *  Uncomment if you use AFS
+ */
+/* #define AFS */
+
 
 /**********  You probably don't want to modify anything below here  ***********/
 
