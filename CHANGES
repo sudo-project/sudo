@@ -202,3 +202,11 @@ CHANGES from sudo 1.3.1pl2
     Pointed out by alfie@dcs.warwick.ac.uk (Nick Holloway).
 
 CHANGES from sudo 1.3.1pl3
+
+69) Sudo will now exit with an error if the command to be run is > MAXPATHLEN.
+
+70) Test in configure for termios support was insufficient.  It thought
+    Nextstep 3.2 had termios just because it as termios.h (need to link
+    with -posix for termios on NeXT's)
+
+CHANGES from sudo 1.3.1pl4
