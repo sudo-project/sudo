@@ -75,7 +75,6 @@ int sia_setup __P((struct passwd *pw, char **prompt, sudo_auth *auth));
 int sia_verify __P((struct passwd *pw, char *prompt, sudo_auth *auth));
 int sia_cleanup __P((struct passwd *pw, sudo_auth *auth));
 int aixauth_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
-int dce_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
 
 /* Prototypes for normal methods */
 int passwd_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
@@ -84,6 +83,7 @@ int secureware_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
 int rfc1938_setup __P((struct passwd *pw, char **prompt, sudo_auth *auth));
 int rfc1938_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
 int afs_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
+int dce_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
 int kerb4_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
 int kerb4_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
 int kerb5_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
