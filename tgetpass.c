@@ -203,7 +203,7 @@ restart:
      * now that we have restored the signal handlers.
      */
     if (signo) {
-	kill(getpid(), signo); 
+	kill(getpid(), signo);
 	switch (signo) {
 	    case SIGTSTP:
 	    case SIGTTIN:
