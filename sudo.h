@@ -154,6 +154,8 @@ void pass_warn		__P((FILE *));
 VOID *emalloc		__P((size_t));
 VOID *erealloc		__P((VOID *, size_t));
 char *estrdup		__P((const char *));
+void easprintf		__P((char **, const char *, ...));
+void evasprintf		__P((char **, const char *, va_list));
 YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */

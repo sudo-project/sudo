@@ -40,8 +40,10 @@
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 #include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
+#include <sys/param.h>
+#include <sys/types.h>
 
-#include "compat.h"
+#include "sudo.h"
 
 #ifndef STDC_HEADERS
 #if !defined(__GNUC__) && !defined(HAVE_MALLOC_H)
@@ -106,4 +108,54 @@ estrdup(src)
 	(void) strcpy(dst, src);
     }
     return(dst);
+}
+
+/*
+ * easprintf() calls vasprintf() and exits with an error if vasprintf()
+ * returns -1 (out of memory).
+ */
+void
+#ifdef __STDC__
+easprintf(char **ret, const char *fmt, ...)
+#else
+easprintf(va_alist)
+    va_dcl
+#endif
+{
+    int len;
+    va_list ap;
+#ifdef __STDC__
+    va_start(ap, fmt);
+#else
+    char **ret;
+    const char *fmt;
+
+    va_start(ap);
+    ret = va_arg(ap, char **);
+    fmt = va_arg(ap, const char *);
+#endif
+    len = vasprintf(ret, fmt, ap);
+    va_end(ap);
+
+    if (len == -1) {
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+}
+
+/*
+ * evasprintf() calls vasprintf() and exits with an error if vasprintf()
+ * returns -1 (out of memory).
+ */
+void
+evasprintf(ret, format, args)
+    char **ret;
+    const char *format;
+    va_list args;
+{
+
+    if (vasprintf(ret, format, args) == -1) {
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
 }
