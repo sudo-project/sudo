@@ -77,7 +77,7 @@ SHORT_MESSAGE
 
 TIMEOUT
     Number of minutes that can elapse before sudo will ask for a passwd again.
-    The default is 5.
+    The default is 5, set this to 0 to always prompt for a password.
 
 PASSWORD_TIMEOUT
     Number of minutes before the sudo password prompt times out.
