@@ -31,7 +31,7 @@ LOGFAC
 MAXLOGFILELEN
     Number of characters per line for the file log.  This is only
     used if you are LOGGING to FILE or BOTH.  MAXLOGFILELEN is used to
-    decide when to wrap lines for nicer log files.  You can set it to MAXLOGLEN
+    decide when to wrap lines for nicer log files.  You can set it to 0
     if you don't want any word wrapping in your log files.
     The default is 80.
 
