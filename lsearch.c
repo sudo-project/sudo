@@ -66,7 +66,7 @@ lsearch(key, base, nelp, width, compar)
 VOID *
 lfind(key, base, nelp, width, compar)
 	const VOID *key;
-	VOID *base;
+	const VOID *base;
 	size_t *nelp, width;
 	int (*compar) __P((const VOID *, const VOID *));
 {
