@@ -35,7 +35,6 @@
 #define LOGGING SLOG_SYSLOG	/* log via SLOG_SYSLOG, SLOG_FILE, SLOG_BOTH */
 #define LOGFAC LOG_LOCAL2	/* syslog facility for sudo to use */
 #define MAXLOGFILELEN 80	/* max chars per log line (for line wrapping) */
-#define SUDOERS_OWNER "root"	/* sudoers file owner (usually root) */
 /*#define NO_ROOT_SUDO		/* root is not allowed to use sudo */
 #define ALERTMAIL "root"	/* user that gets sudo mail */
 #define SEND_MAIL_WHEN_NO_USER	/* send mail when user not in sudoers file */
@@ -62,6 +61,9 @@
 /*#define SHELL_IF_NO_ARGS	/* if sudo is given no arguments run a shell */
 /*#define USE_TTY_TICKETS	/* have a different ticket file for each tty */
 #define FAST_MATCH		/* command check fails if basenames not same */
+#ifndef SUDOERS_OWNER
+#define SUDOERS_OWNER "root"	/* sudoers file owner (usually root) */
+#endif /* SUDOERS_OWNER */
 
 /**********  You probably don't want to modify anything below here  ***********/
 
