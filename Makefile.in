@@ -33,6 +33,7 @@ VPATH = @srcdir@
 CC = @CC@
 LEX = @LEX@
 YACC = @YACC@
+NROFF = nroff
 
 # Which install program?
 INSTALL = @INSTALL@
@@ -52,7 +53,7 @@ LDFLAGS = @STATIC_FLAGS@
 # Where to install things...
 prefix = /usr/local
 exec_prefix = $(prefix)
-man_prefix = $(prefix)
+man_prefix = @MAN_PREFIX@
 
 # Directory in which to install sudo.
 sudodir = $(exec_prefix)/bin
@@ -64,8 +65,10 @@ visudodir = $(exec_prefix)/etc
 sudoersdir = /etc
 
 # Directory in which to install the man page
-mandir = $(man_prefix)/man/man8
-manext = 8
+mantype = @MANTYPE@
+manpage = sudo.$(mantype)
+mansect = 8
+mandir = $(man_prefix)/$(mantype)$(mansect)
 
 # User and Group the installed file should be owned by
 owner = root
@@ -94,15 +97,20 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING INSTALL Makefile.in PORTING \
 	    README README.v1.3.1 SUPPORTED TODO aclocal.m4 getcwd.c \
 	    sudo_realpath.c strdup.c tgetpass.c config.h.in configure \
 	    configure.in indent.pro installbsd pathnames.h.in sample.sudoers \
-	    sudo.man sudoers aixcrypt.exp visudoers/Makefile.in \
+	    sudo.man sudo.cat sudoers aixcrypt.exp visudoers/Makefile.in \
 	    visudoers/config.h visudoers/pathnames.h visudoers/sudo.h \
 	    visudoers/version.h visudoers/visudo.c visudoers/visudo.lex \
 	    visudoers/visudo.yacc visudoers/aixcrypt.exp
 
 all: $(PROGS)
 
+.SUFFIXES: .o .c .h .lex .yacc .man .cat
+
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) -I$(srcdir) $<
+
+.man.cat:
+	$(NROFF) -man $< > $@
 
 sudo : $(OBJS) $(LIBOBJS)
 	$(CC) -o $@ $(OBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS)
@@ -116,6 +124,8 @@ lex.yy.o: parse.lex y.tab.h $(HDRS)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) -I$(srcdir) lex.yy.c
 
 $(OBJS) $(LIBOBJS) : $(HDRS)
+
+sudo.cat: sudo.man
 
 visudo :
 	( cd visudoers && make "OPTIONS=$(OPTIONS)" $@ )
@@ -134,7 +144,7 @@ install-sudoers:
 	fi
 
 install-man:
-	$(INSTALL) -o $(owner) -g $(group) -m 0644 sudo.man $(mandir)/sudo.$(manext)
+	$(INSTALL) -o $(owner) -g $(group) -m 0644 $(manpage) $(mandir)/sudo.$(mansect)
 
 tags: $(SRCS)
 	ctags $(SRCS)
