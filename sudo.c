@@ -23,6 +23,10 @@
 
 #define _SUDO_MAIN
 
+#ifdef __TANDEM
+# include <floss.h>
+#endif
+
 #include "config.h"
 
 #include <sys/types.h>

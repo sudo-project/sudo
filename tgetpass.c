@@ -18,6 +18,10 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
+#ifdef __TANDEM
+# include <floss.h>
+#endif
+
 #include "config.h"
 
 #include <sys/types.h>
