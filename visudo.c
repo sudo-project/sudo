@@ -39,10 +39,6 @@ static char rcsid[] = "$Id$";
 
 #include "config.h"
 
-#include <sys/types.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-#include <sys/file.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 #include <stdlib.h>
@@ -52,6 +48,11 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_UNISTD_H */
 #include <errno.h>
 #include <signal.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/param.h>
+#include <sys/stat.h>
+#include <sys/file.h>
 
 #include "sudo.h"
 
@@ -62,11 +63,16 @@ extern char *getenv();
 extern FILE *yyin, *yyout;
 extern int errno, yylineno;
 
+/*
+ * Globals
+ */
 char buffer[BUFSIZ];
 char *sudoers = _PATH_SUDO_SUDOERS;
-int status = 0, err_line_no = 0;
 char *sudoers_tmp_file = _PATH_SUDO_STMP;
-FILE *sudoers_tmp_fp=NULL, *sudoers_fp=NULL;
+int  status = 0,
+     err_line_no = 0;
+FILE *sudoers_tmp_fp=NULL,
+     *sudoers_fp=NULL;
 
 RETSIGTYPE Exit()
 {
