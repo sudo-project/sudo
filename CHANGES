@@ -176,3 +176,6 @@ CHANGES from sudo 1.3
 
 61) Fixed a bug whereby only the last directory specified in a Cmnd_Alias
     was checked.  Reported by "James R. Hendrick" <hendrick@ctron.com>.
+
+62) All .{c,lex,yacc} files now include both sys/types.h and unistd.h so
+    we are sure to get the typedef of uid_t.
