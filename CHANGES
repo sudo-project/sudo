@@ -51,3 +51,13 @@ CHANGES between sudo 1.2 (unofficial version)
     be_root() to find the exceptions.
 
 18) Added SECURE_PATH as suggested by russells@ccu1.auckland.ac.nz.
+
+19) Reworked clean_envp() to modify environ (not envp) so we can use
+    execvp() safely.
+
+20) Now use execvp() instead of execve() so sudo /bin/kill works under
+    broken solaris.  This also fixed sudo /etc/fastboot under stock
+    4.3 BSD.  Basically, this means that any executable shell script that
+    lacks a '#!/bin/sh' magic number will now work with sudo.  Personally
+    I think that the broken scripts should be fixed rather than changing
+    sudo, but vendors will be broken.  Sigh.
