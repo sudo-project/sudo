@@ -510,14 +510,6 @@ Ultrix 4.x:
     I recommend it highly.  If you do not do this you probably want
     to run configure with --with-logging=file
 
-Digital UNIX:
-    Digital UNIX 4.0 shipped with /usr/include/prot.h including acl.h,
-    but there is no /usr/include/acl.h.  This was fixed in version 4.0D.
-    If you are running a version of 4.0 before 4.0D, Digital recommends
-    that you just:
-	cd /usr/include
-	ln -s sys/acl.h acl.h
-
 Linux:
     One person reported that he needed to run configure with
     the --with-getpass flag to get a working sudo.  Other people
