@@ -348,6 +348,16 @@ main(argc, argv, envp)
     if (!(validated & FLAG_NOPASS))
 	check_user(validated & FLAG_CHECK_USER);
 
+    /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
+    if (user_uid == 0 && prev_user != NULL && strcmp(prev_user, "root") != 0) {
+	    struct passwd *pw;
+
+	    if ((pw = sudo_getpwnam(prev_user)) != NULL) {
+		    free(sudo_user.pw);
+		    sudo_user.pw = pw;
+	    }
+    }
+
     /* Build a new environment that avoids any nasty bits if we have a cmnd. */
     if (sudo_mode & MODE_RUN)
 	new_environ = rebuild_env(envp, sudo_mode, (validated & FLAG_NOEXEC));
@@ -526,16 +536,9 @@ init_vars(sudo_mode)
     /*
      * Get a local copy of the user's struct passwd with the shadow password
      * if necessary.  It is assumed that euid is 0 at this point so we
-     * can read the shadow passwd file if necessary.  If we are being run
-     * as root and the user is chaining sudo commands, use the SUDO_USER
-     * environment variable to determine the user's real identity.
-     * It is not safe to trust SUDO_USER if the real uid != 0.
+     * can read the shadow passwd file if necessary.
      */
-    if (getuid() == 0 && prev_user != NULL)
-	sudo_user.pw = sudo_getpwnam(prev_user);
-    else
-	sudo_user.pw = sudo_getpwuid(getuid());
-    if (sudo_user.pw == NULL) {
+    if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL) {
 	/* Need to make a fake struct passwd for logging to work. */
 	struct passwd pw;
 	char pw_name[MAX_UID_T_LEN + 1];
