@@ -90,6 +90,7 @@ sudoers_lookup(pwflag)
     enum def_tupple pwcheck = 0;
     struct cmndspec *cs;
     struct cmndtag *tags = NULL;
+    struct member *runas;
     struct privilege *priv;
     struct userspec *us;
 
@@ -118,17 +119,18 @@ sudoers_lookup(pwflag)
 	matched = FALSE;
 	for (us = userspecs; us != NULL; us = us->next) {
 	    if (user_matches(sudo_user.pw, us->user) == TRUE) {
-		priv = us->privileges;
-		if (host_matches(priv->hostlist) == TRUE) {
-		    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
-			/* Only check the command when listing another user. */
-			if (user_uid == 0 || list_pw == NULL ||
-			    user_uid == list_pw->pw_uid ||
-			    cmnd_matches(cs->cmnd) == TRUE)
-				matched = TRUE;
-			if ((pwcheck == any && nopass != TRUE) ||
-			    (pwcheck == all && nopass == TRUE))
-			    nopass = cs->tags.nopasswd;
+		for (priv = us->privileges; priv != NULL; priv = priv->next) {
+		    if (host_matches(priv->hostlist) == TRUE) {
+			for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
+			    /* Only check the command when listing another user. */
+			    if (user_uid == 0 || list_pw == NULL ||
+				user_uid == list_pw->pw_uid ||
+				cmnd_matches(cs->cmnd) == TRUE)
+				    matched = TRUE;
+			    if ((pwcheck == any && nopass != TRUE) ||
+				(pwcheck == all && nopass == TRUE))
+				nopass = cs->tags.nopasswd;
+			}
 		    }
 		}
 	    }
@@ -152,15 +154,19 @@ sudoers_lookup(pwflag)
     for (us = userspecs; us != NULL; us = us->next) {
 	if (user_matches(sudo_user.pw, us->user) == TRUE) {
 	    CLR(validated, FLAG_NO_USER);
-	    priv = us->privileges;
-	    if (host_matches(priv->hostlist) == TRUE) {
-		CLR(validated, FLAG_NO_HOST);
-		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
-		    if (runas_matches(cs->runaslist) == TRUE) {
-			rval = cmnd_matches(cs->cmnd);
-			if (rval != UNSPEC) {
-			    matched = rval;
-			    tags = &cs->tags;
+	    for (priv = us->privileges; priv != NULL; priv = priv->next) {
+		if (host_matches(priv->hostlist) == TRUE) {
+		    CLR(validated, FLAG_NO_HOST);
+		    runas = NULL;
+		    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
+			if (cs->runaslist != NULL)
+			    runas = cs->runaslist;
+			if (runas_matches(runas) == TRUE) {
+			    rval = cmnd_matches(cs->cmnd);
+			    if (rval != UNSPEC) {
+				matched = rval;
+				tags = &cs->tags;
+			    }
 			}
 		    }
 		}
@@ -203,30 +209,31 @@ display_privs(pw)
 	  host_matches(us->privileges->hostlist) != TRUE)
 	    continue;
 
-	priv = us->privileges;
-	runas = NULL;
-	for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
-	    fputs("    ", stdout);
-	    if (cs->runaslist != NULL)
-		runas = cs->runaslist;
-	    if (runas != NULL) {
-		fputs("(", stdout);
-		for (m = runas; m != NULL; m = m->next) {
-		    if (m != runas)
-			fputs(", ", stdout);
-		    print_member(m->name, m->type, m->negated, RUNASALIAS);
+	for (priv = us->privileges; priv != NULL; priv = priv->next) {
+	    runas = NULL;
+	    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
+		if (cs->runaslist != NULL)
+		    runas = cs->runaslist;
+		fputs("    ", stdout);
+		if (runas != NULL) {
+		    fputs("(", stdout);
+		    for (m = runas; m != NULL; m = m->next) {
+			if (m != runas)
+			    fputs(", ", stdout);
+			print_member(m->name, m->type, m->negated, RUNASALIAS);
+		    }
+		    fputs(") ", stdout);
 		}
-		fputs(") ", stdout);
+		if (cs->tags.monitor != UNSPEC && cs->tags.monitor != def_monitor)
+		    printf("%sMONITOR: ", cs->tags.monitor ? "" : "NO");
+		if (cs->tags.noexec != UNSPEC && cs->tags.noexec != def_noexec)
+		    printf("%sEXEC: ", cs->tags.noexec ? "NO" : "");
+		if (cs->tags.nopasswd != UNSPEC && cs->tags.nopasswd != !def_authenticate)
+		    printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
+		m = cs->cmnd;
+		print_member(m->name, m->type, m->negated, CMNDALIAS);
+		putchar('\n');
 	    }
-	    if (cs->tags.monitor != UNSPEC && cs->tags.monitor != def_monitor)
-		printf("%sMONITOR: ", cs->tags.monitor ? "" : "NO");
-	    if (cs->tags.noexec != UNSPEC && cs->tags.noexec != def_noexec)
-		printf("%sEXEC: ", cs->tags.noexec ? "NO" : "");
-	    if (cs->tags.nopasswd != UNSPEC && cs->tags.nopasswd != !def_authenticate)
-		printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
-	    m = cs->cmnd;
-	    print_member(m->name, m->type, m->negated, CMNDALIAS);
-	    putchar('\n');
 	}
     }
 }
