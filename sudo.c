@@ -982,10 +982,10 @@ initial_setup()
      * stdin, stdout and stderr must be open; set them to /dev/null
      * if they are closed and close all other fds.
      */
-    miss[STDIN_FILENO] = fcntl(STDIN_FILENO, F_GETFL, 0) != 0;
-    miss[STDOUT_FILENO] = fcntl(STDOUT_FILENO, F_GETFL, 0) != 0;
-    miss[STDERR_FILENO] = fcntl(STDERR_FILENO, F_GETFL, 0) != 0;
-    if ((miss[STDIN_FILENO] || miss[STDOUT_FILENO] || miss[STDERR_FILENO])) {
+    miss[STDIN_FILENO] = fcntl(STDIN_FILENO, F_GETFL, 0) == -1;
+    miss[STDOUT_FILENO] = fcntl(STDOUT_FILENO, F_GETFL, 0) == -1;
+    miss[STDERR_FILENO] = fcntl(STDERR_FILENO, F_GETFL, 0) == -1;
+    if (miss[STDIN_FILENO] || miss[STDOUT_FILENO] || miss[STDERR_FILENO]) {
 	if ((devnull = open(_PATH_DEVNULL, O_RDWR, 0644)) != -1) {
 	    if (miss[STDIN_FILENO])
 		(void) dup2(devnull, STDIN_FILENO);
