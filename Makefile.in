@@ -74,23 +74,22 @@ SHELL = /bin/sh
 
 PROGS = @PROGS@
 
-SRCS = check.c find_path.c logging.c parse.c sudo.c parse.yacc \
-       parse.lex
+SRCS = check.c find_path.c logging.c parse.c sudo.c parse.yacc parse.lex
 
-OBJS = check.o find_path.o logging.o parse.o sudo.o y.tab.o \
-       lex.yy.o
+OBJS = check.o find_path.o logging.o parse.o sudo.o y.tab.o lex.yy.o
 
-LIBOBJS = @LIBOBJS@
+LIBOBJS = @TGETPASS@ @LIBOBJS@
 
 HDRS = sudo.h version.h insults.h
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING INSTALL Makefile.in PORTING \
 	    README README.v1.3.1 SUPPORTED TODO aclocal.m4 getcwd.c realpath.c \
-	    strdup.c config.h.in configure configure.in indent.pro installbsd \
-	    pathnames.h.in sample.sudoers sudo.man sudoers aixcrypt.exp \
-	    visudoers/Makefile.in  visudoers/config.h visudoers/pathnames.h \
-	    visudoers/sudo.h visudoers/version.h visudoers/visudo.c \
-	    visudoers/visudo.lex visudoers/visudo.yacc visudoers/aixcrypt.exp
+	    strdup.c tgetpass.c config.h.in configure configure.in indent.pro \
+	    installbsd pathnames.h.in sample.sudoers sudo.man sudoers \
+	    aixcrypt.exp visudoers/Makefile.in visudoers/config.h \
+	    visudoers/pathnames.h visudoers/sudo.h visudoers/version.h \
+	    visudoers/visudo.c visudoers/visudo.lex visudoers/visudo.yacc \
+	    visudoers/aixcrypt.exp
 
 all: $(PROGS)
 
