@@ -112,12 +112,11 @@ The definitions of what constitutes a valid I<alias> member follow.
 	  '!'* '+'netgroup |
 	  '!'* User_Alias
 
-A C<User_List> is made up of one or more usernames, uids
-(prefixed with '#'), System groups (prefixed with '%'),
-netgroups (prefixed with '+') and other aliases.  Each list
-item may be prefixed with one or more '!' operators.  An odd number
-of '!' operators negate the value of the item; an even number
-just cancel each other out.
+A C<User_List> is made up of one or more usernames, system groups
+(prefixed with '%'), netgroups (prefixed with '+') and other aliases.
+Each list item may be prefixed with one or more '!' operators.
+An odd number of '!' operators negate the value of the item; an even
+number just cancel each other out.
 
  Runas_List ::= Runas_User |
 		Runas_User ',' Runas_List
@@ -130,7 +129,11 @@ just cancel each other out.
 
 A C<Runas_List> is similar to a C<User_List> except that it can
 also contain uids (prefixed with '#') and instead of C<User_Alias>es
-it can contain C<Runas_Alias>es.
+it can contain C<Runas_Alias>es.  Note that usernames and groups
+are matched as strings.  In other words, two users (groups) with
+the same uid (gid) are considered to be distinct.  If you wish to
+match all usernames with the same uid (e.g. root and toor), you
+can use a uid instead (#0 in the example given).
 
  Host_List ::= Host |
 	       Host ',' Host_List
