@@ -374,7 +374,7 @@ void log_error(code)
 	    oldend = end;
 	    end = strchr(oldend, ' ');
 
-	    if (end) {
+	    if (maxlen > 0 && end) {
 		*end = '\0';
 		if (strlen(beg) > maxlen) {
 		    /* too far, need to back up & print the line */
