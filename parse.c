@@ -151,11 +151,10 @@ int validate(check_cmnd)
     if (return_code || parse_error)
 	return(VALIDATE_ERROR);
 
+    /*
+     * Nothing on the top of the stack => user doesn't appear in sudoers.
+     */
     if (top == 0)
-	/*
-	 * nothing on the top of the stack =>
-	 * user doesn't appear in sudoers
-	 */
 	return(VALIDATE_NO_USER);
 
     /*
