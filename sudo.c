@@ -915,6 +915,7 @@ check_sudoers()
 	if (sudoers_fp == NULL)
 	    log_error(USE_ERRNO, "can't open %s", _PATH_SUDOERS);
     }
+    (void) fcntl(fileno(sudoers_fp), F_SETFD, 1);
 
     set_perms(PERM_ROOT);		/* change back to root */
 }

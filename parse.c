@@ -125,10 +125,6 @@ sudoers_lookup(pwflag)
     set_perms(PERM_RUNAS);
     error = yyparse();
 
-    /* Close the sudoers file now that we are done with it. */
-    (void) fclose(sudoers_fp);
-    sudoers_fp = NULL;
-
     if (error || parse_error) {
 	set_perms(PERM_ROOT);
 	return(VALIDATE_ERROR);
