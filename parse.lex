@@ -76,8 +76,8 @@ extern void yyerror		__P((char *));
 #endif
 %}
 
-OCTET			[0-9][0-9]?[0-9]?
-WORD			[a-zA-Z0-9_-]+
+OCTET			[[:digit:]]{1,3}
+WORD			[[:alnum:]_-]+
 
 %e	4000
 %p	6000
@@ -182,7 +182,7 @@ NOPASSWD:		{
 			    return(NTWKADDR);
 			}
 
-[a-zA-Z][a-zA-Z0-9_-]*(\.{WORD})+ {
+[[:alpha:]][[:alnum:]_-]*(\.{WORD})+ {
 			    fill(yytext, yyleng);
 			    LEXTRACE("FQHOST ");
 			    return(FQHOST);
@@ -195,7 +195,7 @@ NOPASSWD:		{
 				return (RUNAS);
 			}
 
-<GOTRUNAS>[A-Z][A-Z0-9_]* {
+<GOTRUNAS>[[:upper:]][[:upper:][:digit:]_]* {
 			    /* User_Alias that user can run command as or ALL */
 			    fill(yytext, yyleng);
 			    if (strcmp(yytext, "ALL") == 0) {
@@ -230,7 +230,7 @@ NOPASSWD:		{
 			    }
 			}			/* a pathname */
 
-[A-Z][A-Z0-9_]*		{
+[[:upper:]][[:upper:][:digit:]_]*	{
 			    fill(yytext, yyleng);
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
@@ -240,7 +240,7 @@ NOPASSWD:		{
 			    return(ALIAS);
 			}
 
-[a-zA-Z][a-zA-Z0-9_-]*	{
+[[:alpha:]][[:alnum:]_-]*	{
 			    int l;
 
 			    fill(yytext, yyleng);
