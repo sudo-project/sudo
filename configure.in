@@ -1137,17 +1137,18 @@ cross_compiling="no"
 AC_PROG_CPP
 
 dnl
-dnl Libtool magic; disable static lib since we require LD_PRELOAD to work
+dnl Libtool magic; enable shared libs and disable static libs
 dnl
 AC_CANONICAL_HOST
 AC_CANONICAL_SYSTEM
+AC_ENABLE_SHARED
 AC_DISABLE_STATIC
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 
 dnl
 dnl Defer with_noexec until after libtool magic runs
 dnl
-test "$can_build_shared" = "no" && with_noexec=no
+test "$enable_shared" = "no" && with_noexec=no
 AC_MSG_CHECKING(path to sudo_noexec.so)
 AC_ARG_WITH(noexec, [  --with-noexec           fully qualified pathname of sudo_noexec.so],
 [case $with_noexec in  
