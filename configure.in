@@ -145,6 +145,15 @@ AC_ARG_WITH(CC, [  --with-CC               C compiler to use],
 		;;
 esac])
 
+AC_ARG_WITH(rpath, [  --with-rpath            pass -R flag in addition to -L for lib paths],
+[case $with_rpath in
+    yes)	;;
+    no)		with_rpath=no
+		;;
+    *)		AC_MSG_ERROR(["--with-rpath does not take an argument."])
+		;;
+esac], [with_rpath=no])
+
 AC_ARG_WITH(incpath, [  --with-incpath          additional places to look for include files],
 [case $with_incpath in  
     yes)	AC_MSG_ERROR(["must give --with-incpath an argument."])
@@ -165,9 +174,6 @@ AC_ARG_WITH(libpath, [  --with-libpath          additional places to look for li
     no)		AC_MSG_ERROR(["--without-libpath not supported."])
 		;;
     *)		AC_MSG_NOTICE([Adding ${with_libpath} to LDFLAGS])
-		for i in ${with_libpath}; do
-		    LDFLAGS="${LDFLAGS} -L${i}"
-		done
 		;;
 esac])
 
@@ -178,15 +184,6 @@ AC_ARG_WITH(libraries, [  --with-libraries        additional libraries to link w
     no)		AC_MSG_ERROR(["--without-libraries not supported."])
 		;;
     *)		AC_MSG_NOTICE([Adding ${with_libraries} to LIBS])
-		for i in ${with_libraries}; do
-		    case $i in
-			-l*)	;;
-			*.a)	;;
-			*.o)	;;
-			*)	i="-l${i}";;
-		    esac
-		    LIBS="${LIBS} ${i}"
-		done
 		;;
 esac])
 
@@ -207,7 +204,7 @@ AC_ARG_WITH(efence, [  --with-efence           link with -lefence for malloc() d
     yes)	AC_MSG_NOTICE([Sudo will link with -lefence (Electric Fence)])
 		LIBS="${LIBS} -lefence"
 		if test -f /usr/local/lib/libefence.a; then
-		    LDFLAGS="${LDFLAGS} -L/usr/local/lib"
+		    with_libpath="${with_libpath} /usr/local/lib"
 		fi
 		;;
     no)		;;
@@ -302,11 +299,6 @@ AC_ARG_WITH(fwtk, [  --with-fwtk[[=DIR]]       enable FWTK AuthSRV support],
 		AC_MSG_RESULT(yes)
 		with_passwd=no
 		AUTH_OBJS="fwtk.o"
-		if test "$with_fwtk" != "yes"; then
-		    SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_fwtk}"
-		    CPPFLAGS="${CPPFLAGS} -I${with_fwtk}"
-		    with_fwtk=yes
-		fi
 		;;
 esac])
 
@@ -1210,6 +1202,7 @@ case "$host" in
 		fi
 		test -n "$mansectsu" || mansectsu=1m
 		test -n "$mansectform" || mansectform=4
+		test -n "$with_rpath" || with_rpath=yes
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
@@ -1429,17 +1422,20 @@ case "$host" in
 		fi
 		test -n "$mansectsu" || mansectsu=1m
 		test -n "$mansectform" || mansectform=4
+		test -n "$with_rpath" || with_rpath=yes
 		;;
     *-ncr-sysv4*|*-ncr-sysvr4*)
 		AC_CHECK_LIB(c89, strcasecmp, AC_DEFINE(HAVE_STRCASECMP) [LIBS="${LIBS} -lc89"; ac_cv_func_strcasecmp=yes])
 		test -n "$mansectsu" || mansectsu=1m
 		test -n "$mansectform" || mansectform=4
+		test -n "$with_rpath" || with_rpath=yes
 		;;
     *-ccur-sysv4*|*-ccur-sysvr4*)
 		LIBS="${LIBS} -lgen"
 		SUDO_LIBS="${SUDO_LIBS} -lgen"
 		test -n "$mansectsu" || mansectsu=1m
 		test -n "$mansectform" || mansectform=4
+		test -n "$with_rpath" || with_rpath=yes
 		;;
     *-*-bsdi*)
 		SKIP_SETREUID=yes
@@ -1498,6 +1494,11 @@ case "$host" in
 		ac_cv_func_lockf=no
 		ac_cv_func_flock=yes
 		;;
+    *-*-*sysv4*)
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
+		test -n "$with_rpath" || with_rpath=yes
+		;;
     *-*-sysv*)
 		test -n "$mansectsu" || mansectsu=1m
 		test -n "$mansectform" || mansectform=4
@@ -1509,6 +1510,26 @@ dnl Use BSD-style man sections by default
 dnl
 test -n "$mansectsu" || mansectsu=8
 test -n "$mansectform" || mansectform=5
+
+dnl
+dnl Add in any libpaths or libraries specified via configure
+dnl
+if test -n ${with_libpath}; then
+    for i in ${with_libpath}; do
+	SUDO_APPEND_LIBPATH(LDFLAGS, [$i])
+    done
+fi
+if test -n ${with_libraries}; then
+    for i in ${with_libraries}; do
+	case $i in
+	    -l*)	;;
+	    *.a)	;;
+	    *.o)	;;
+	    *)	i="-l${i}";;
+	esac
+	LIBS="${LIBS} ${i}"
+    done
+fi
 
 dnl
 dnl Check for shadow password routines if we have not already done so.
@@ -1669,8 +1690,8 @@ if test -n "$with_kerb4"; then
 	done
 	test X"$found" = X"no" && CPPFLAGS="$O_CPPFLAGS"
     else
-	LDFLAGS="$LDFLAGS -L${with_kerb4}/lib"
-	SUDO_LDFLAGS="$SUDO_LDFLAGS -L${with_kerb4}/lib"
+	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_kerb4}/lib])
+	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_kerb4}/lib])
 	CPPFLAGS="$CPPFLAGS -I${with_kerb4}/include"
 	AC_CHECK_HEADER([krb.h], [found=yes], [found=no])
     fi
@@ -1716,7 +1737,7 @@ if test -n "$with_kerb5"; then
 	fi
     else
 	dnl XXX - try to include krb5.h here too
-	SUDO_LDFLAGS="$SUDO_LDFLAGS -L${with_kerb5}/lib"
+	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_kerb5}/lib])
 	CPPFLAGS="$CPPFLAGS -I${with_kerb5}/include"
     fi
 
@@ -1752,7 +1773,7 @@ if test "$with_AFS" = "yes"; then
     AFSLIBDIRS="/usr/lib/afs /usr/afsws/lib /usr/afsws/lib/afs"
     for i in $AFSLIBDIRS; do
 	if test -d ${i}; then
-	    SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${i}"
+	    SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [$i])
 	    FOUND_AFSLIBDIR=true
 	fi
     done
@@ -1806,10 +1827,10 @@ if test "$with_skey" = "yes"; then
 	:
     elif test -f /usr/local/include/skey.h; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
+	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [/usr/local/lib])
     elif test "$with_csops" = "yes" -a -f /tools/cs/skey/include/skey.h -a -f /tools/cs/skey/lib/libskey.a; then
 	CPPFLAGS="${CPPFLAGS} -I/tools/cs/skey/include"
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/tools/cs/skey/lib"
+	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [/tools/cs/skey/lib])
     else
 	echo 'Unable to locate libskey.a and/or skey.h, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS and/or -I/path/to/skey.h to CPPFLAGS'
     fi
@@ -1825,7 +1846,7 @@ if test "$with_opie" = "yes"; then
 	:
     elif test -f /usr/local/include/opie.h; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
+	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [/usr/local/lib])
     else
 	echo 'Unable to locate libopie.a and/or opie.h, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDO_LDFLAGS and/or -I/path/to/opie.h to CPPFLAGS'
     fi
@@ -1844,18 +1865,37 @@ if test -n "$with_SecurID" -a "$with_SecurID" != "no"; then
     fi
     CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
     _LDFLAGS="${LDFLAGS}"
-    LDFLAGS="${LDFLAGS} -L${with_SecurID}"
+    SUDO_APPEND_LIBPATH(LDFLAGS, [${with_SecurID}])
     #
     # Determine whether to use the new or old SecurID API
     #
-    AC_CHECK_LIB(aceclnt, SD_Init, [AUTH_OBJS="securid5.o"; SUDO_LIBS="${SUDO_LIBS} -laceclnt -lpthread"; SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_SecurID}"], [AUTH_OBJS="securid.o"; SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"], [-lpthread])
+    AC_CHECK_LIB(aceclnt, SD_Init,
+	[
+	    AUTH_OBJS="securid5.o"
+	    SUDO_LIBS="${SUDO_LIBS} -laceclnt -lpthread"
+	]
+	[
+	    SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_SecurID}])
+	], [
+	    AUTH_OBJS="securid.o"
+	    SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"
+	],
+	[
+	    -lpthread
+	]
+    )
     LDFLAGS="${_LDFLAGS}"
 fi
 
 dnl
 dnl extra FWTK libs + includes
 dnl
-if test "$with_fwtk" = "yes"; then
+if test -n "$with_fwtk"; then
+    if test "$with_fwtk" != "yes"; then
+	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_fwtk}])
+	CPPFLAGS="${CPPFLAGS} -I${with_fwtk}"
+	with_fwtk=yes
+    fi
     SUDO_LIBS="${SUDO_LIBS} -lauth -lfwall"
 fi
 

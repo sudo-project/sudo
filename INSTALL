@@ -116,10 +116,14 @@ Special features/options:
 	Eg: --with-incpath="/usr/local/include /opt/include"
 
   --with-libpath=DIR
-        Adds the specified directory (or directories_ to SUDO_LDFLAGS
-        and VISUDO_LDFLAGS so configure and the compiler will look
-        there for libraries.  Multiple directories may be specified
-        as with --with-incpath.
+        Adds the specified directory (or directories) to LDFLAGS
+        so configure and the compiler will look there for libraries.
+        Multiple directories may be specified as with --with-incpath.
+
+  --with-rpath
+	Tells configure to use -Rpath in addition to -Lpath when
+	passing library paths to the loader.  This option is on
+	by default for Solaris and SVR4.
 
   --with-libraries=LIBRARY
         Adds the specified library (or libaries) to SUDO_LIBS and
