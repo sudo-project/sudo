@@ -175,6 +175,8 @@ date.
 
  PATH			Set to a sane value if SECURE_PATH is set
  SHELL			Used to determine shell to run with -s option
+ USER			Set to the target user (root unless the -u option
+			is specified)
  HOME			In -s mode, set to homedir of root (or runas user)
 			if built with the SHELL_SETS_HOME option
  SUDO_PROMPT		Replaces the default password prompt
