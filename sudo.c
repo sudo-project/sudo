@@ -670,45 +670,30 @@ static void load_cmnd(sudo_mode)
      * Find the length of cmnd_args and allocate space, then fill it in.
      */
     if (Argc > arg_start) {
-	int len;			/* length of an arg */
-	int args_size;			/* size of cmnd_args */
-	int args_remainder;		/* how much of cmnd_args is left */
+	int len=0;			/* sum length of all args */
 	char **cur_arg;			/* current command line arg */
 	char *pos;			/* position in the cmnd_args string */
 
-	pos = cmnd_args = (char *) malloc(ARG_INC);
-	*cmnd_args = '\0';
-	args_size = args_remainder = ARG_INC;
-
+	/* how much space do we need? */
 	for (cur_arg = &Argv[arg_start]; *cur_arg; cur_arg++) {
-	    /* make sure we have enough room (remeber trailing space/NULL */
-	    len = strlen(*cur_arg);
-	    if (len >= args_remainder) {
-		do {
-		    args_size += ARG_INC;
-		    args_remainder += ARG_INC;
-		} while (len >= args_remainder);
-		if ((cmnd_args = realloc(cmnd_args, args_size)) == NULL) {
-		    perror("malloc");
-		    (void) fprintf(stderr, "%s: cannot allocate memory!\n",
-				   Argv[0]);
-		    exit(1);
-		}
-	    }
-
-	    /* now copy in the argument */
-	    (void) strcpy(pos, *cur_arg);
-	    pos += len;
-	    *pos++ = ' ';
-
-	    /* and update args_remainder */
-	    args_remainder -= len + 1;
+	    len += strlen(*cur_arg) + 1;
 	}
-	*(pos - 1) = '\0';
 
-	/* Let's not be wasteful with our memory... */
-	if ((pos = realloc(cmnd_args, args_size - args_remainder)))
-	    cmnd_args = pos;
+	if ((pos = cmnd_args = (char *) malloc(len)) == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+
+	/*
+	 * It would be quicker to store the result of strlen() in
+	 * an array when it is computed the first time (above).
+	 * Then we wouldn't need to duplicate the effort... XXX
+	 */
+	for (cur_arg = &Argv[arg_start]; *cur_arg; cur_arg++) {
+	    (void) strcpy(pos, *cur_arg);
+	    pos += strlen(*cur_arg);
+	}
     }
 
     /*
