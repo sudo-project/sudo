@@ -96,7 +96,7 @@ WORD			[a-zA-Z0-9_-]+
 			    LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
 
-<GOTCMND>\\[:\,=\\ \t]	{
+<GOTCMND>\\[:\,=\\\" \t] {
 			    LEXTRACE("QUOTEDCHAR ");
 			    fill_args(yytext + 1, 1, sawspace);
 			    sawspace = FALSE;
@@ -119,6 +119,13 @@ WORD			[a-zA-Z0-9_-]+
 			    LEXTRACE("\n");
 			    return(COMMENT);
 			}			/* return comments */
+
+<GOTCMND>\"[^\n]*\"	{
+			    /* XXX - should be able to span lines? */
+			    LEXTRACE("ARG ");
+			    fill_args(yytext+1, yyleng-2, sawspace);
+			    sawspace = FALSE;
+			}			/* quoted command line arg */
 
 <GOTCMND>[^:\,= \t\n#]+ {
 			    LEXTRACE("ARG ");
