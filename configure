@@ -918,6 +918,7 @@ Optional Packages:
   --with-passwd-tries     number of tries to enter password (default is 3)
   --with-timeout          minutes before sudo asks for passwd again (def is 5 minutes)
   --with-password-timeout passwd prompt timeout in minutes (default is 5 minutes)
+  --with-noexec           fully qualified pathname of sudo_noexec.so
   --with-execv            use execv() instead of execvp()
   --with-tty-tickets      use a different ticket file for each tty
   --with-insults          insult the user for entering an incorrect password
@@ -2717,6 +2718,24 @@ _ACEOF
 
 echo "$as_me:$LINENO: result: $password_timeout" >&5
 echo "${ECHO_T}$password_timeout" >&6
+
+echo "$as_me:$LINENO: checking path to sudo_noexec.so" >&5
+echo $ECHO_N "checking path to sudo_noexec.so... $ECHO_C" >&6
+
+# Check whether --with-noexec or --without-noexec was given.
+if test "${with_noexec+set}" = set; then
+  withval="$with_noexec"
+  case $with_noexec in
+    yes)	with_noexec="$libexecdir/sudo_noexec.so"
+		;;
+    no)		;;
+    *)		;;
+esac
+else
+  with_noexec="$libexecdir/sudo_noexec.so"
+fi;
+echo "$as_me:$LINENO: result: $with_noexec" >&5
+echo "${ECHO_T}$with_noexec" >&6
 
 
 # Check whether --with-execv or --without-execv was given.
@@ -14341,6 +14360,24 @@ if test -n "$LIBS"; then
 fi
 
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
+
+if test "$with_noexec" != "no"; then
+    oexec_prefix="$exec_prefix"
+    if test "$exec_prefix" = '$(prefix)'; then
+	if test "$prefix" = "NONE"; then
+	    exec_prefix="$ac_default_prefix"
+	else
+	    exec_prefix="$prefix"
+	fi
+    fi
+    eval with_noexec="$with_noexec"
+
+cat >>confdefs.h <<_ACEOF
+#define _PATH_SUDO_NOEXEC "$with_noexec"
+_ACEOF
+
+    exec_prefix="$oexec_prefix"
+fi
 
                                         ac_config_files="$ac_config_files Makefile sudo.man visudo.man sudoers.man"
 cat >confcache <<\_ACEOF

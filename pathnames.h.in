@@ -98,6 +98,10 @@
 #undef _PATH_SUDO_SENDMAIL
 #endif /* _PATH_SUDO_SENDMAIL */
 
+#ifndef _PATH_SUDO_NOEXEC
+#undef _PATH_SUDO_NOEXEC
+#endif /* _PATH_SUDO_NOEXEC */
+
 #ifndef _PATH_VI
 #undef _PATH_VI
 #endif /* _PATH_VI */

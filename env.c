@@ -439,7 +439,7 @@ rebuild_env(envp, reset_home, noexec)
 
     /* Point LD_PRELOAD to noexec_file? */
     /* XXX - what to use for HP-UX and AIX? */
-    if (noexec)
+    if (noexec && def_noexec_file != NULL)
 	insert_env(format_env("LD_PRELOAD", def_noexec_file), 1);
 
     /* Set PS1 if SUDO_PS1 is set. */

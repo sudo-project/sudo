@@ -804,6 +804,16 @@ esac])
 AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $password_timeout, [The passwd prompt timeout (in minutes).])
 AC_MSG_RESULT($password_timeout)
 
+AC_MSG_CHECKING(path to sudo_noexec.so)
+AC_ARG_WITH(noexec, [  --with-noexec           fully qualified pathname of sudo_noexec.so],
+[case $with_noexec in  
+    yes)	with_noexec="$libexecdir/sudo_noexec.so"
+		;;
+    no)		;;
+    *)		;;
+esac], [with_noexec="$libexecdir/sudo_noexec.so"])
+AC_MSG_RESULT($with_noexec)
+
 AC_ARG_WITH(execv, [  --with-execv            use execv() instead of execvp()],
 [case $with_execv in  
     yes)	AC_MSG_CHECKING(whether to use execvp or execv)
@@ -2070,6 +2080,24 @@ dnl
 dnl Set exec_prefix
 dnl
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
+
+dnl
+dnl Defer setting _PATH_SUDO_NOEXEC until after exec_prefix is set
+dnl XXX - this is gross!
+dnl
+if test "$with_noexec" != "no"; then 
+    oexec_prefix="$exec_prefix"
+    if test "$exec_prefix" = '$(prefix)'; then
+	if test "$prefix" = "NONE"; then
+	    exec_prefix="$ac_default_prefix"
+	else
+	    exec_prefix="$prefix"
+	fi
+    fi
+    eval with_noexec="$with_noexec"
+    AC_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$with_noexec", [The fully qualified pathname of sudo_noexec.so])
+    exec_prefix="$oexec_prefix"
+fi
 
 dnl
 dnl Substitute into the Makefile and man pages
