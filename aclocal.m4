@@ -95,6 +95,11 @@ elif test -f "/usr/sbin/pwd"; then
 fi
 ])dnl
 dnl
+dnl Check for ssize_t declation
+define(SUDO_SSIZE_T,
+[AC_CHECKING(for ssize_t in sys/types.h)
+AC_HEADER_EGREP(ssize_t, sys/types.h, , AC_DEFINE(ssize_t, int))])dnl
+dnl
 dnl check for known UNIX variants
 dnl XXX - check to see that uname was checked first
 dnl
