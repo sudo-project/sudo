@@ -412,9 +412,9 @@ log_error(va_alist)
     if (def_str(I_LOGFILE))
 	do_logfile(logline);
 
-    free(logline);
-    if (message != logline)
-	free(message);
+    free(message);
+    if (logline != message)
+	free(logline);
 
     if (!(flags & NO_EXIT))
 	exit(1);
