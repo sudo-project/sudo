@@ -278,7 +278,7 @@ int nslots = 0;
 
 static int
 aliascmp(a1, a2)
-char *a1, *a2;
+const VOID *a1, *a2;
 {
     int r;
     aliasinfo *ai1, *ai2;
