@@ -215,8 +215,7 @@ esac])
 
 AC_ARG_WITH(kerb4, [  --with-kerb4            enable kerberos v4 support],
 [case $with_kerb4 in
-    yes)	AC_DEFINE(HAVE_KERB4)
-		AC_MSG_CHECKING(whether to try Kerberos 4 authentication)
+    yes)	AC_MSG_CHECKING(whether to try Kerberos 4 authentication)
 		AC_MSG_RESULT(yes)
 		;;
     no)		;;
@@ -227,8 +226,7 @@ esac])
 
 AC_ARG_WITH(kerb5, [  --with-kerb5            enable kerberos v5 support],
 [case $with_kerb5 in
-    yes)	AC_DEFINE(HAVE_KERB5)
-		AC_MSG_CHECKING(whether to try Kerberos 5 authentication)
+    yes)	AC_MSG_CHECKING(whether to try Kerberos 5 authentication)
 		AC_MSG_RESULT(yes)
 		;;
     no)		;;
@@ -1350,9 +1348,24 @@ if test "$with_DCE" = "yes" -o "$ac_cv_prog_YACC" = "bison -y"; then
 fi
 
 dnl
+dnl Kerberos 5
+dnl
+if test "$with_kerb5" = "yes"; then
+    dnl
+    dnl Starting with Kerberos 5, 1.1 we use the new creds API
+    dnl Otherwise, just use the old Kerberos 4 stuff.
+    dnl
+    AC_CHECK_LIB(krb5, krb5_get_init_creds_opt, [
+	AC_DEFINE(HAVE_KERB5)
+	SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
+    ], with_kerb4=yes)
+fi
+
+dnl
 dnl Find kerberos 4 includes and libs or complain
 dnl
 if test "$with_kerb4" = "yes"; then
+    AC_DEFINE(HAVE_KERB4)
     if test -f "/usr/include/kerberosIV/krb.h"; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/include/kerberosIV"
     elif test -f "/usr/local/include/kerberosIV/krb.h"; then
@@ -1375,14 +1388,13 @@ if test "$with_kerb4" = "yes"; then
 	echo 'Unable to locate kerberos 4 libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS'
     fi
 
-    AC_HAVE_LIBRARY(des, SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes", SUDO_LIBS="${SUDO_LIBS} -lkrb")
-fi
-
-dnl
-dnl Kerberos 5
-dnl
-if test "$with_kerb5" = "yes"; then
-    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
+    if test "$with_kerb5" = "yes"; then
+	AC_HAVE_LIBRARY(krb4, SUDO_LIBS="${SUDO_LIBS} -lkrb4", SUDO_LIBS="${SUDO_LIBS} -lkrb")
+	AC_HAVE_LIBRARY(des, SUDO_LIBS="${SUDO_LIBS} -ldes")
+	SUDO_LIBS="${SUDO_LIBS} -ldes425 -lkrb5 -lcrypto -lcom_err"
+    else
+	AC_HAVE_LIBRARY(des, SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes", SUDO_LIBS="${SUDO_LIBS} -lkrb")
+    fi
 fi
 
 dnl

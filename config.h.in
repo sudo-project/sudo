@@ -141,10 +141,10 @@
 /* Define if you use AIX general authentication.  */
 #undef HAVE_AUTHENTICATE
 
-/* Define if you use Kerberos.  */
+/* Define if you use Kerberos IV or Kerberos V < 1.1.  */
 #undef HAVE_KERB4
-
-/* Define if you use Kerberos.  */
+  
+/* Define if you use Kerberos V version 1.1 or higher.  */
 #undef HAVE_KERB5
 
 /* Define if you use SIA.  */
