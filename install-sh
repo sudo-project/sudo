@@ -1,0 +1,47 @@
+#! /bin/sh
+#
+# bsdinstall
+# acts much like the 4.2BSD `install' shell script
+
+cmd=mv
+strip=false
+
+# The following 3 lines are hardcoded; you may generalize it yourself.
+own=root
+grp=staff
+mode=755
+
+while :; do
+	case "$1" in
+	-s)	strip=true;;
+	-c)	cmd=cp;;
+	-o)	own="$2"; shift;;
+	-g)	grp="$2"; shift;;
+	-m)	mode="$2"; shift;;
+	*)	break;;
+	esac
+	shift
+done
+
+case $# in
+2)	;;
+*)	echo "usage: install [-s] [-c] [-o owner] [-g group] [-m mode] file destination" 1>&2
+	exit 1;;
+esac
+
+case "$cmd" in
+  mv) $cmd -f  "$1" "$2";;
+  cp) $cmd "$1" "$2";;
+  esac
+
+if [ -d "$2" ]; then
+	file="$2/$1"
+else
+	file="$2"
+fi
+chmod "$mode" "$file"
+if $strip; then
+	strip "$file"
+fi
+chown "$own" "$file"
+chgrp "$grp" "$file"
