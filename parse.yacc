@@ -271,8 +271,12 @@ yyerror(s)
 
 %%
 
-file		:	entry
-		|	file entry
+file		:	{ ; }
+		|	line
+		;
+
+line		:	entry
+		|	line entry
 		;
 
 entry		:	COMMENT
