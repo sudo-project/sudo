@@ -58,6 +58,8 @@ static char rcsid[] = "$Id$";
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/errno.h>
+#include <netinet/in.h>
+
 #include "sudo.h"
 
 /*

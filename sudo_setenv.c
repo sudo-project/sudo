@@ -39,6 +39,7 @@ static char rcsid[] = "$Id$";
 #include <malloc.h>
 #endif /* HAVE_MALLOC_H */
 #include <sys/param.h>
+#include <netinet/in.h>
 
 #include "sudo.h"
 
