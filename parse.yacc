@@ -90,7 +90,7 @@ int top = 0, stacksize = 0;
 
 #define push \
     { \
-	if (top > stacksize) { \
+	if (top >= stacksize) { \
 	    while ((stacksize += STACKINCREMENT) < top); \
 	    match = (struct matchstack *) realloc(match, sizeof(struct matchstack) * stacksize); \
 	    if (match == NULL) { \
