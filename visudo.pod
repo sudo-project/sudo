@@ -106,7 +106,20 @@ and exit.
 
 =back
 
-=head1 ERRORS
+=head1 ENVIRONMENT
+
+The following environment variables are used only if B<visudo>
+was configured with the I<--with-env-editor> option:
+
+ VISUAL			Invoked by visudo as the editor to use
+ EDITOR			Used by visudo if VISUAL is not set
+
+=head1 FILES
+
+ @sysconfdir@/sudoers		List of who can run what
+ @sysconfdir@/sudoers.tmp	Lock file for visudo
+
+=head1 DIAGNOSTICS
 
 =over 4
 
@@ -145,18 +158,9 @@ not a warning.
 
 =back
 
-=head1 ENVIRONMENT
+=head1 SEE ALSO
 
-The following environment variables are used only if B<visudo>
-was configured with the I<--with-env-editor> option:
-
- VISUAL			Invoked by visudo as the editor to use
- EDITOR			Used by visudo if VISUAL is not set
-
-=head1 FILES
-
- @sysconfdir@/sudoers		List of who can run what
- @sysconfdir@/sudoers.tmp	Lock file for visudo
+L<vi(1)>, L<sudoers(@mansectform@)>, L<sudo(@mansectsu@)>, L<vipw(@mansectsu@)>
 
 =head1 AUTHOR
 
@@ -168,23 +172,29 @@ B<visudo> was written by:
 See the HISTORY file in the sudo distribution or visit
 http://www.sudo.ws/sudo/history.html for more details.
 
-=head1 BUGS
-
-If you feel you have found a bug in sudo, please submit a bug report
-at http://www.sudo.ws/sudo/bugs/
-
-=head1 DISCLAIMER
-
-B<Visudo> is provided ``AS IS'' and any express or implied warranties,
-including, but not limited to, the implied warranties of merchantability
-and fitness for a particular purpose are disclaimed.
-See the LICENSE file distributed with B<sudo> for complete details.
-
 =head1 CAVEATS
 
 There is no easy way to prevent a user from gaining a root shell if 
 the editor used by B<visudo> allows shell escapes.
 
-=head1 SEE ALSO
+=head1 BUGS
 
-L<vi(1)>, L<sudoers(@mansectform@)>, L<sudo(@mansectsu@)>, L<vipw(@mansectsu@)>
+If you feel you have found a bug in B<visudo>, please submit a bug report
+at http://www.sudo.ws/sudo/bugs/
+
+=head1 SUPPORT
+
+Commercial support is available for B<sudo>, see
+http://www.sudo.ws/sudo/support.html for details.
+
+Limited free support is available via the sudo-users mailing list,
+see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+search the archives.
+
+=head1 DISCLAIMER
+
+B<Visudo> is provided ``AS IS'' and any express or implied warranties,
+including, but not limited to, the implied warranties of merchantability
+and fitness for a particular purpose are disclaimed.  See the LICENSE
+file distributed with B<sudo> or http://www.sudo.ws/sudo/license.html
+for complete details.

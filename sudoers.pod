@@ -982,6 +982,12 @@ The following characters must be escaped with a backslash ('\') when
 used as part of a word (e.g. a username or hostname):
 '@', '!', '=', ':', ',', '(', ')', '\'.
 
+=head1 FILES
+
+ @sysconfdir@/sudoers		List of who can run what
+ /etc/group		Local groups file
+ /etc/netgroup		List of network groups
+
 =head1 EXAMPLES
 
 Since the I<sudoers> file is parsed in a single pass, order is
@@ -1226,6 +1232,10 @@ as root are still capable of many potentially hazardous operations
 privilege escalation.  In the specific case of an editor, a safer
 approach is to give the user permission to run B<sudoedit>.
 
+=head1 SEE ALSO
+
+L<rsh(1)>, L<su(1)>, L<fnmatch(3)>, L<sudo(@mansectsu@)>, L<visudo(@mansectsu@)>
+
 =head1 CAVEATS
 
 The I<sudoers> file should B<always> be edited by the B<visudo>
@@ -1239,12 +1249,24 @@ case), you either need to have the machine's hostname be fully qualified
 as returned by the C<hostname> command or use the I<fqdn> option in
 I<sudoers>.
 
-=head1 FILES
+=head1 BUGS
 
- @sysconfdir@/sudoers		List of who can run what
- /etc/group		Local groups file
- /etc/netgroup		List of network groups
+If you feel you have found a bug in B<sudo>, please submit a bug report
+at http://www.sudo.ws/sudo/bugs/
 
-=head1 SEE ALSO
+=head1 SUPPORT
 
-L<rsh(1)>, L<su(1)>, L<fnmatch(3)>, L<sudo(@mansectsu@)>, L<visudo(@mansectsu@)>
+Commercial support is available for B<sudo>, see
+http://www.sudo.ws/sudo/support.html for details.
+
+Limited free support is available via the sudo-users mailing list,
+see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+search the archives.
+
+=head1 DISCLAIMER
+
+B<Sudo> is provided ``AS IS'' and any express or implied warranties,
+including, but not limited to, the implied warranties of merchantability
+and fitness for a particular purpose are disclaimed.  See the LICENSE
+file distributed with B<sudo> or http://www.sudo.ws/sudo/license.html
+for complete details.

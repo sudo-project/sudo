@@ -373,33 +373,6 @@ of this, care must be taken when giving users access to commands
 via B<sudo> to verify that the command does not inadvertently give
 the user an effective root shell.
 
-=head1 EXAMPLES
-
-Note: the following examples assume suitable L<sudoers(@mansectform@)> entries.
-
-To get a file listing of an unreadable directory:
-
- $ sudo ls /usr/local/protected
-
-To list the home directory of user yazza on a machine where the
-file system holding ~yazza is not exported as root:
-
- $ sudo -u yazza ls ~yazza
-
-To edit the F<index.html> file as user www:
-
- $ sudo -u www vi ~www/htdocs/index.html
-
-To shutdown a machine:
-
- $ sudo shutdown -r +15 "quick reboot"
-
-To make a usage listing of the directories in the /home
-partition.  Note that this runs the commands in a sub-shell
-to make the C<cd> and file redirection work.
-
- $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
-
 =head1 ENVIRONMENT
 
 B<sudo> utilizes the following environment variables:
@@ -438,6 +411,38 @@ B<sudo> utilizes the following environment variables:
  @sysconfdir@/sudoers		List of who can run what
  @timedir@		Directory containing timestamps
 
+=head1 EXAMPLES
+
+Note: the following examples assume suitable L<sudoers(@mansectform@)> entries.
+
+To get a file listing of an unreadable directory:
+
+ $ sudo ls /usr/local/protected
+
+To list the home directory of user yazza on a machine where the
+file system holding ~yazza is not exported as root:
+
+ $ sudo -u yazza ls ~yazza
+
+To edit the F<index.html> file as user www:
+
+ $ sudo -u www vi ~www/htdocs/index.html
+
+To shutdown a machine:
+
+ $ sudo shutdown -r +15 "quick reboot"
+
+To make a usage listing of the directories in the /home
+partition.  Note that this runs the commands in a sub-shell
+to make the C<cd> and file redirection work.
+
+ $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
+
+=head1 SEE ALSO
+
+L<grep(1)>, L<su(1)>, L<stat(2)>, L<login_cap(3)>, L<sudoers(@mansectform@)>,
+L<passwd(@mansectform@)>, L<visudo(@mansectsu@)>
+
 =head1 AUTHORS
 
 Many people have worked on B<sudo> over the years; this
@@ -449,18 +454,6 @@ version consists of code written primarily by:
 See the HISTORY file in the B<sudo> distribution or visit
 http://www.sudo.ws/sudo/history.html for a short history
 of B<sudo>.
-
-=head1 BUGS
-
-If you feel you have found a bug in sudo, please submit a bug report
-at http://www.sudo.ws/sudo/bugs/
-
-=head1 DISCLAIMER
-
-B<Sudo> is provided ``AS IS'' and any express or implied warranties,
-including, but not limited to, the implied warranties of merchantability
-and fitness for a particular purpose are disclaimed.
-See the LICENSE file distributed with B<sudo> for complete details.
 
 =head1 CAVEATS
 
@@ -487,7 +480,24 @@ Running shell scripts via B<sudo> can expose the same kernel bugs that
 make setuid shell scripts unsafe on some operating systems (if your OS
 has a /dev/fd/ directory, setuid shell scripts are generally safe).
 
-=head1 SEE ALSO
+=head1 BUGS
 
-L<grep(1)>, L<su(1)>, L<stat(2)>, L<login_cap(3)>, L<sudoers(@mansectform@)>,
-L<passwd(@mansectform@)>, L<visudo(@mansectsu@)>
+If you feel you have found a bug in B<sudo>, please submit a bug report
+at http://www.sudo.ws/sudo/bugs/
+
+=head1 SUPPORT
+
+Commercial support is available for B<sudo>, see
+http://www.sudo.ws/sudo/support.html for details.
+
+Limited free support is available via the sudo-users mailing list,
+see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+search the archives.
+
+=head1 DISCLAIMER
+
+B<Sudo> is provided ``AS IS'' and any express or implied warranties,
+including, but not limited to, the implied warranties of merchantability
+and fitness for a particular purpose are disclaimed.  See the LICENSE
+file distributed with B<sudo> or http://www.sudo.ws/sudo/license.html
+for complete details.
