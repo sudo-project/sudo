@@ -28,52 +28,78 @@
 
 /*        The following macros can be defined when compiling
   
-          FQDN                   - if you have fully qualified hostnames
-                                   in your SUDOERS files
+           FQDN                   - if you have fully qualified hostnames
+                                    in your SUDOERS files
+ 
+           SYSLOG                 - if you want to use syslog instead
+                                    of a log file
+                                    ( This is a nice feature.  You can
+                                      collect all your sudo logs at a
+                                      single host)
+ 
+           NO_ROOT_SUDO           - sudo will exit if called by root
   
-          SYSLOG                 - if you want to use syslog instead
-                                   of a log file
-				   ( This is a nice feature.  You can 
-				     collect all you sudo logs at a
-				     central host.  The default is for
-				     sudo to log at the local2 facility. )
-  
-          SEND_MAIL_WHEN_NOT_OK  - if you want a message sent to ALERTMAIL
-                                   when the user is in the SUDOERS but
-                                   does not have permission to execute
-                                   the command entered
-				   ( This can be used at paranoid sites )
-  
-          SEND_MAIL_WHEN_NO_USER - if you want a message sent to ALERTMAIL
-				   when the user is not in the SUDOERS file
-				   ( This is generally the case )
-  
-          BROKEN_GETPASS         - if your os has a broken version of getpass()
-				   sysV and variants are suspect.  Test by
-				   doing an rsh host "sudo echo hi" when
-				   the timestamp has expired and if it doesn't
-				   prompt for a passwd you need to defined this.
-				   HP-UX, AIX, and IRIX need this defined.
-				   You'll probably want it if you are a sysV
-				   based unix. To test, compile w/o it and try:
-				   rsh hostname "sudo whoami" and see if getpass
-				   will read from stdin as well as /dev/tty.
-				   If not, define BROKEN_GETPASS.
-  
-          USE_CWD                - if your os has getcwd() and not getwd()
-				   you should define this (done automatically
-				   for hpux)
-  
-          NEED_STRDUP            - if your os lacks strdup(3) you need to
-				   define this
-  
-          SHORT_MESSAGE          - if you don't want a copyright notice when
-				   someone runs sudo for the first time
-  
-          USE_INSULTS            - if you want to be insulted for typing an
-                                   incorrect password like the original sudo(8)
-
-          STD_HEADERS            - if you have ansi-compliant header files
+           MULTIMAX               - define if installing on Encore Multimax
+                                    Also change the LIBS macro to "LIBS=-ll"
+ 
+           SEND_MAIL_WHEN_NOT_OK  - if you want a message sent to ALERTMAIL
+                                    when the user is in the SUDOERS but
+                                    does not have permission to execute
+                                    the command entered
+                                    ( This can be used at paranoid sites )
+ 
+           SEND_MAIL_WHEN_NO_USER - if you want a message sent to ALERTMAIL
+                                    when the user is not in the SUDOERS file
+                                    ( This is generally the case )
+ 
+           TIMEDIR                  the directory where the timestamp 
+                                    files are kept.
+ 
+           TIMEOUT                  the number of minutes that can elapse
+                                    before sudo will ask for a passwd again
+ 
+           TRIES_FOR_PASSWORD       the number of times sudo will let you
+                                    guess are you password before screaming
+ 
+           INCORRECT_PASSWORD       the message that is displayed if you 
+                                    incorrectly enter your password
+ 
+           MAILSUBJECT              the subject of the mail sent to ALERTMAIL
+ 
+           ALERTMAIL                the recipient of mail from sudo
+ 
+           SUDOERS                  the location of the sudoers file
+ 
+           TMPSUDOERS               the location of the lock file for visudo
+ 
+           EDITOR                   the location of the editor
+ 
+           STATICEDITOR             if this variable is defined then the
+                                    EDITOR and VISUAL envariables are ignored
+ 
+           LOGFILE                  log file location IF NOT USING SYSLOG
+ 
+           SYSLOG                   if this variable is defined, sudo will log
+                                    using the 4.3 BSD style syslog facility
+ 
+           BROKEN_GETPASS           if using a os with a broken getpass()
+                                    hpux,aix,irix need this, sudo.h has details
+ 
+           NEED_STRDUP              if your os lacks strdup(3)
+ 
+           USE_CWD                  if you have getcwd() and not getwd()
+                                    (defined by default for hpux)
+ 
+           USE_TERMIO               if you have sysV terminal control
+                                    (defined by default for hpux and irix)
+ 
+           SHORT_MESSAGE            if you don't want the full copyright message
+                                    with the "we expect you have..." banner
+ 
+           USE_INSULTS              if you want to be insulted for typing an
+                                    incorrect password like the original sudo(8)
+ 
+           STD_HEADERS              if you have ansi-compliant header files
 */
 
 
