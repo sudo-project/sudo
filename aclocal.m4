@@ -53,6 +53,14 @@ AC_SUBST(INSTALL_DATA)dnl
 test -n "$verbose" && echo "	setting INSTALL_DATA to $INSTALL_DATA"
 ])dnl
 dnl
+dnl check for fullly working void
+dnl
+AC_DEFUN(SUDO_FULL_VOID, [AC_MSG_CHECKING(checking for full void implementation)
+AC_TRY_COMPILE(, [void *foo;
+foo = 0;], AC_DEFINE(VOID, void)
+AC_MSG_RESULT(yes), AC_DEFINE(VOID, char)
+AC_MSG_RESULT(no))])
+dnl
 dnl check for sendmail
 dnl
 define(SUDO_PROG_SENDMAIL,
@@ -111,9 +119,8 @@ fi
 dnl
 dnl Check for ssize_t declation
 dnl
-define(SUDO_SSIZE_T,
-[AC_CHECKING(for ssize_t in sys/types.h)
-AC_HEADER_EGREP(ssize_t, sys/types.h, , AC_DEFINE(ssize_t, int))])dnl
+AC_DEFUN(SUDO_SSIZE_T,
+[AC_CHECK_TYPE(ssize_t, int)])
 dnl
 dnl check for known UNIX variants
 dnl XXX - check to see that uname was checked first
@@ -158,7 +165,7 @@ dnl
 define(SUDO_CONVEX,
 [echo checking for ConvexOS 
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
-$0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
+$0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 [#if defined(__convex__) || defined(convex)
   yes
 #endif
@@ -170,7 +177,7 @@ dnl
 define(SUDO_MTXINU,
 [echo checking for MORE/BSD
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
-$0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
+$0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 [#include <sys/param.h>
 #ifdef MORE_BSD
   yes
@@ -183,7 +190,7 @@ dnl
 define(SUDO_NEXT,
 [echo checking for NeXTstep 
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
-$0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
+$0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 [#ifdef NeXT
   yes
 #endif
@@ -195,7 +202,7 @@ dnl
 define(SUDO_BSD,
 [echo checking for BSD 
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
-$0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
+$0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 [#include <sys/param.h>
 #ifdef BSD
   yes
