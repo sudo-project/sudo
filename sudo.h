@@ -112,19 +112,19 @@
 
 
 #ifndef TIMEDIR
-#define TIMEDIR			"/tmp/.odus"
+#  define TIMEDIR		"/tmp/.odus"
 #endif
 
 #ifndef TIMEOUT
-#define TIMEOUT			5
+#  define TIMEOUT		5
 #endif
 
 #ifndef TRIES_FOR_PASSWORD
-#define TRIES_FOR_PASSWORD	3
+#  define TRIES_FOR_PASSWORD	3
 #endif
 
 #ifndef INCORRECT_PASSWORD
-#define INCORRECT_PASSWORD	"Sorry, try again."
+#  define INCORRECT_PASSWORD	"Sorry, try again."
 #endif
 
 /*
@@ -135,39 +135,39 @@
  */
 
 #ifndef MAILER
-#define MAILER			"/usr/lib/sendmail"
+#  define MAILER		"/usr/lib/sendmail"
 #endif
 
 #ifndef MAILSUBJECT
-#define MAILSUBJECT		"*** SECURITY information ***"
+#  define MAILSUBJECT		"*** SECURITY information ***"
 #endif
 
 #ifndef ALERTMAIL
-#define ALERTMAIL		"root"
+#  define ALERTMAIL		"root"
 #endif
 
 #ifndef SUDOERS
-#define SUDOERS			"/etc/sudoers"
+#  define SUDOERS		"/etc/sudoers"
 #endif
 
 #ifndef TMPSUDOERS
-#define TMPSUDOERS		"/etc/stmp"
+#  define TMPSUDOERS		"/etc/stmp"
 #endif
 
 #ifndef EDITOR
-#if defined(hpux) || defined(__alpha) || defined(_AIX) || defined(__ksr__) || \
-    defined(sgi)
-#define EDITOR			"/usr/bin/vi"
+#  if defined(hpux) || defined(__alpha) || defined(_AIX) || defined(__ksr__) \
+   || defined(sgi)
+#    define EDITOR		"/usr/bin/vi"
 #else
-#define EDITOR			"/usr/ucb/vi"
-#endif
+#    define EDITOR		"/usr/ucb/vi"
+#  endif
 #endif
 
 #ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN		64
+#  define MAXHOSTNAMELEN	64
 #endif
 
-#define MAXCOMMANDLENGTH         MAXPATHLEN
+#define MAXCOMMANDLENGTH	MAXPATHLEN
 
 /*#define SECURE_PATH		"/bin:/usr/ucb/:/usr/bin:/usr/etc:/etc" /**/
 
@@ -193,41 +193,59 @@ YYSTYPE yylval;
  * SYSLOG should be defined in the makefile
  */
 #ifdef SYSLOG
-#include <syslog.h>
-#ifndef Syslog_ident
-#define Syslog_ident        "sudo"
-#endif
-#ifndef Syslog_options
-#define Syslog_options      LOG_PID
-#endif
-#ifndef Syslog_facility
-#define Syslog_facility     LOG_LOCAL2
-#endif
-#ifndef Syslog_priority_OK
-#define Syslog_priority_OK  LOG_NOTICE
-#endif
-#ifndef Syslog_priority_NO
-#define Syslog_priority_NO  LOG_ALERT
-#endif
+#  include <syslog.h>
+#  ifndef Syslog_ident
+#    define Syslog_ident	"sudo"
+#  endif
+#  ifndef Syslog_options
+#    define Syslog_options	LOG_PID
+#  endif
+#  ifndef Syslog_facility
+#    define Syslog_facility	LOG_LOCAL2
+#  endif
+#  ifndef Syslog_priority_OK
+#    define Syslog_priority_OK	LOG_NOTICE
+#  endif
+#  ifndef Syslog_priority_NO
+#    define Syslog_priority_NO	LOG_ALERT
+#  endif
 #else
-#ifndef LOGFILE
-#if defined(ultrix) || defined(sun)
-#define LOGFILE "/var/adm/sudo.log"
-#else
-#define LOGFILE "/usr/adm/sudo.log"
-#endif	/* /var vs. /usr */
-#endif	/* LOGFILE */
+#  ifndef LOGFILE
+#    if defined(ultrix) || defined(sun)
+#      define LOGFILE		"/var/adm/sudo.log"
+#    else
+#      define LOGFILE		"/usr/adm/sudo.log"
+#    endif	/* /var vs. /usr */
+#  endif	/* LOGFILE */
 #endif	/* SYSLOG  */
 
 /*
+ * Maximum number of characters to log per entry.  The syslogger
+ * will log this much, after that, it truncates the log line.
+ * We need this here to make sure that we continue with another
+ * syslog(3) call if the internal buffer is moe than 1023 characters.
+ */
+#ifndef MAXSYSLOGLEN
+#  define MAXSYSLOGLEN 960
+#endif
+
+/*
  * Maximum number of characters to log per entry.
- * The syslogger will log this much, after that,
- * it truncates the log line. We need this here
- * to make sure that we get ellipses when the log
- * line is longer than 990 characters.
+ * This is the largest possible line length (worst case)
  */
 #ifndef MAXLOGLEN
-#define MAXLOGLEN 990
+#  ifndef ARG_MAX
+#    ifdef NCARGS
+#      define ARG_MAX		NCARGS
+#    else
+#      ifdef _POSIX_ARG_MAX
+#        define ARG_MAX		_POSIX_ARG_MAX
+#      else
+#        define ARG_MAX		4096
+#      endif
+#    endif
+#  endif
+#  define MAXLOGLEN		(49 + MAXPATHLEN + MAXPATHLEN + ARG_MAX)
 #endif
 
 #define VALIDATE_OK              0x00
@@ -300,13 +318,13 @@ extern char ** environ;
  * This is to placate hpux
  */
 #ifdef hpux
-# define getdtablesize()	(sysconf(_SC_OPEN_MAX))
-# define seteuid(__EUID)	(setresuid((uid_t)-1, __EUID, (uid_t)-1))
+#  define getdtablesize()	(sysconf(_SC_OPEN_MAX))
+#  define seteuid(__EUID)	(setresuid((uid_t)-1, __EUID, (uid_t)-1))
 #endif	/* hpux */
 
 /*
  * Sun's cpp doesn't define this but it should
  */
 #if defined(SOLARIS) && !defined(__svr4__)
-# define __svr4__
+#  define __svr4__
 #endif /* SOLARIS */
