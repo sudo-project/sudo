@@ -148,6 +148,13 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES FAQ HISTORY INSTALL INSTALL.configure \
 	    sudo.man sudo.pod sudoers sudoers.cat sudoers.man sudoers.pod \
 	    visudo.cat visudo.man visudo.pod auth/API
 
+BINFILES= BUGS CHANGES FAQ HISTORY LICENSE README TODO TROUBLESHOOTING \
+	  UPGRADE install-sh mkinstalldirs sample.sudoers sudo sudo.cat \
+	  sudo.man sudo.pod sudoers sudoers.cat sudoers.man sudoers.pod \
+	  visudo visudo.cat visudo.man visudo.pod
+
+BINSPECIAL= INSTALL.binary Makefile.binary
+
 SUDODEP = $(srcdir)/sudo.h $(srcdir)/compat.h $(srcdir)/defaults.h \
 	  $(srcdir)/logging.h config.h pathnames.h
 
@@ -330,3 +337,30 @@ dist: $(DISTFILES)
 	  tar Ocf sudo-$(VERSION).tar \
 	  `cat $$TF` && gzip --best sudo-$(VERSION).tar && rm -f $$TF)
 	ls -l ../sudo-$(VERSION).tar.gz
+
+bindist:
+	@mkdir tmp.`arch -l`
+	@mkdir tmp.`arch -l`/sudo-$(VERSION)
+	( cd tmp.`arch -l`/sudo-$(VERSION) ; \
+	  for i in $(BINFILES) ; do \
+	    if [ -f ../../$$i ]; then \
+	      cp ../../$$i . ; \
+	    elif [ -f $(srcdir)/$$i ]; then \
+	      cp $(srcdir)/$$i . ; \
+	    else \
+	      cp ../../$(srcdir)/$$i . ; \
+	    fi ; \
+	  done ; \
+	  for i in $(BINSPECIAL) ; do \
+	    if [ -f ../../$$i ]; then \
+	      cp ../../$$i `basename $$i .binary` ; \
+	    elif [ -f $(srcdir)/$$i ]; then \
+	      cp $(srcdir)/$$i `basename $$i .binary` ; \
+	    else \
+	      cp ../../$(srcdir)/$$i `basename $$i .binary` ; \
+	    fi ; \
+	  done ; \
+	  cd .. ; tar Ocf ../sudo-$(VERSION)-`arch -l`.tar sudo-$(VERSION) ; \
+	)  
+	gzip --best sudo-$(VERSION)-`arch -l`.tar
+	rm -rf tmp.`arch -l`
