@@ -302,7 +302,6 @@ AC_ARG_WITH(SecurID, [  --with-SecurID          enable SecurID support],
 		AC_MSG_CHECKING(whether to use SecurID for authentication)
 		AC_MSG_RESULT(yes)
 		with_passwd=no
-		AUTH_OBJS="securid.o"
 		;;
 esac])
 
@@ -1812,15 +1811,23 @@ dnl extra SecurID lib + includes
 dnl
 if test -n "$with_SecurID" -a "$with_SecurID" != "no"; then
     if test "$with_SecurID" != "yes"; then
-	SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"
+	SD_LIB="${with_SecurID}/sdiclient.a"
 	CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
     elif test -f /usr/ace/examples/sdiclient.a; then
-	SUDO_LIBS="${SUDO_LIBS} /usr/ace/examples/sdiclient.a"
+	SD_LIB=/usr/ace/examples/sdiclient.a
 	CPPFLAGS="${CPPFLAGS} -I/usr/ace/examples"
     else
-	SUDO_LIBS="${SUDO_LIBS} /usr/ace/sdiclient.a"
+	SD_LIB=/usr/ace/sdiclient.a
 	CPPFLAGS="${CPPFLAGS} -I/usr/ace"
     fi
+    #
+    # Determine whether to use the new or old SecurID API
+    #
+    OLIBS="${LIBS}"
+    LIBS="${LIBS} ${SD_LIB}"
+    SUDO_LIBS="${SUDO_LIBS} ${SD_LIB}"
+    AC_CHECK_FUNC(SD_Init, [AUTH_OBJS="securid5.o"], [AUTH_OBJS="securid.o"])
+    LIBS="${OLIBS}"
 fi
 
 dnl
