@@ -149,12 +149,12 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "September 30, 2004" "1.6.9" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "October 26, 2004" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBsudo\fR \fB\-K\fR | \fB\-L\fR | \fB\-V\fR | \fB\-h\fR | \fB\-k\fR | \fB\-l\fR | \fB\-v\fR
+\&\fBsudo\fR \fB\-K\fR | \fB\-L\fR | \fB\-V\fR | \fB\-h\fR | \fB\-k\fR | \fB\-l\fR [\fIusername\fR] | \fB\-v\fR
 .PP
 \&\fBsudo\fR [\fB\-HPSb\fR] [\fB\-a\fR\ \fIauth_type\fR] [\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
 [\fB\-p\fR\ \fIprompt\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
@@ -308,15 +308,11 @@ The \fB\-h\fR (\fIhelp\fR) option causes \fBsudo\fR to print a usage message and
 The \fB\-i\fR (\fIsimulate initial login\fR) option runs the shell specified
 in the passwd(@mansectform@) entry of the user that the command is
 being run as.  The command name argument given to the shell begins
-with a \f(CW\*(C`\-\*(C'\fR to tell the shell to run as a login shell.  \fBsudo\fR
+with a `\f(CW\*(C`\-\*(C'\fR' to tell the shell to run as a login shell.  \fBsudo\fR
 attempts to change to that user's home directory before running the
 shell.  It also initializes the environment, leaving \fI\s-1TERM\s0\fR
 unchanged, setting \fI\s-1HOME\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR, \fI\s-1LOGNAME\s0\fR, and
-\&\fI\s-1PATH\s0\fR, and unsetting all other environment variables.  Note that
-because the shell to use is determined before the \fIsudoers\fR file
-is parsed, a \fIrunas_default\fR setting in \fIsudoers\fR will specify
-the user to run the shell as but will not affect which shell is
-actually run.
+\&\fI\s-1PATH\s0\fR, and unsetting all other environment variables.
 .IP "\-k" 4
 .IX Item "-k"
 The \fB\-k\fR (\fIkill\fR) option to \fBsudo\fR invalidates the user's timestamp
@@ -324,10 +320,12 @@ by setting the time on it to the epoch.  The next time \fBsudo\fR is
 run a password will be required.  This option does not require a password
 and was added to allow a user to revoke \fBsudo\fR permissions from a .logout
 file.
-.IP "\-l" 4
-.IX Item "-l"
-The \fB\-l\fR (\fIlist\fR) option will list out the allowed (and
-forbidden) commands for the user on the current host.
+.IP "\-l [\fIusername\fR]" 4
+.IX Item "-l [username]"
+The \fB\-l\fR (\fIlist\fR) option will list out the allowed (and forbidden)
+commands for \fIusername\fR on the current host.  If \fIusername\fR is
+ommitted, the information listed will be for the invoking user.
+Only the superuser may list other user's commands.
 .IP "\-p" 4
 .IX Item "-p"
 The \fB\-p\fR (\fIprompt\fR) option allows you to override the default

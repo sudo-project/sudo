@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.8p1                 September 27, 2004                      1
+1.6.9                    October 26, 2004                       1
 
 
 
@@ -109,25 +109,25 @@ DDIIAAGGNNOOSSTTIICCSS
        Can't find you in the passwd database
            Your userid does not appear in the system passwd file.
 
-       Warning: undeclared Alias referenced near ...
-           Either you are using a {User,Runas,Host,Cmnd}_Alias
-           before defining it or you have a user or hostname
-           listed that consists solely of uppercase letters, dig­
-           its, and the underscore ('_') character.  If the lat­
-           ter, you can ignore the warnings (ssuuddoo will not com­
-           plain).  In --ss (strict) mode these are errors, not
-           warnings.
+       Warning: {User,Runas,Host,Cmnd}_Alias referenced but not
+       defined
+           Either you are trying to use an undeclare
+           {User,Runas,Host,Cmnd}_Alias or you have a user or
+           hostname listed that consists solely of uppercase let­
+           ters, digits, and the underscore ('_') character.  In
+           the latter case, you can ignore the warnings (ssuuddoo
+           will not complain).  In --ss (strict) mode these are
+           errors, not warnings.
 
-       Warning: runas_default set after old value is in use ...
-           You have a _r_u_n_a_s___d_e_f_a_u_l_t Defaults setting listed in
-           the _s_u_d_o_e_r_s file after its value has already been
-           used.  This means that entries prior to the
-           _r_u_n_a_s___d_e_f_a_u_l_t setting will match based on the default
-           value of _r_u_n_a_s___d_e_f_a_u_l_t (root) whereas entries aafftteerr
+       Warning: unused {User,Runas,Host,Cmnd}_Alias
+           The specified {User,Runas,Host,Cmnd}_Alias was defined
+           but never used.  You may wish to comment out or remove
+           the unused alias.  In --ss (strict) mode this is an
+           error, not a warning.
 
 
 
-1.6.8p1                 September 27, 2004                      2
+1.6.9                    October 26, 2004                       2
 
 
 
@@ -135,12 +135,6 @@ DDIIAAGGNNOOSSTTIICCSS
 
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
-
-           the _r_u_n_a_s___d_e_f_a_u_l_t setting will match based on the new
-           value.  This is usually unintentional and in most
-           cases the <runas_default> setting should be placed
-           before any Runas_Alias or User specifications.  In --ss
-           (strict) mode this is an error, not a warning.
 
 SSEEEE AALLSSOO
        _v_i(1), sudoers(4), sudo(1m), vipw(1m)
@@ -193,6 +187,12 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.6.8p1                 September 27, 2004                      3
+
+
+
+
+
+
+1.6.9                    October 26, 2004                       3
 
 

@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "September 27, 2004" "1.6.8p1" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "October 26, 2004" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 visudo \- edit the sudoers file
 .SH "SYNOPSIS"
@@ -247,25 +247,18 @@ You didn't run \fBvisudo\fR as root.
 .IP "Can't find you in the passwd database" 4
 .IX Item "Can't find you in the passwd database"
 Your userid does not appear in the system passwd file.
-.IP "Warning: undeclared Alias referenced near ..." 4
-.IX Item "Warning: undeclared Alias referenced near ..."
-Either you are using a {User,Runas,Host,Cmnd}_Alias before
-defining it or you have a user or hostname listed that
-consists solely of uppercase letters, digits, and the
-underscore ('_') character.  If the latter, you can ignore
-the warnings (\fBsudo\fR will not complain).  In \fB\-s\fR (strict)
-mode these are errors, not warnings.
-.IP "Warning: runas_default set after old value is in use ..." 4
-.IX Item "Warning: runas_default set after old value is in use ..."
-You have a \fIrunas_default\fR Defaults setting listed in the \fIsudoers\fR
-file after its value has already been used.  This means that entries
-prior to the \fIrunas_default\fR setting will match based on the default
-value of \fIrunas_default\fR (\f(CW\*(C`@runas_default@\*(C'\fR) whereas entries
-\&\fBafter\fR the \fIrunas_default\fR setting will match based on the new
-value.  This is usually unintentional and in most cases the
-<runas_default> setting should be placed before any \f(CW\*(C`Runas_Alias\*(C'\fR
-or User specifications.  In \fB\-s\fR (strict) mode this is an error,
-not a warning.
+.IP "Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined" 4
+.IX Item "Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined"
+Either you are trying to use an undeclare {User,Runas,Host,Cmnd}_Alias
+or you have a user or hostname listed that consists solely of
+uppercase letters, digits, and the underscore ('_') character.  In
+the latter case, you can ignore the warnings (\fBsudo\fR will not
+complain).  In \fB\-s\fR (strict) mode these are errors, not warnings.
+.IP "Warning: unused {User,Runas,Host,Cmnd}_Alias" 4
+.IX Item "Warning: unused {User,Runas,Host,Cmnd}_Alias"
+The specified {User,Runas,Host,Cmnd}_Alias was defined but never
+used.  You may wish to comment out or remove the unused alias.  In
+\&\fB\-s\fR (strict) mode this is an error, not a warning.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIvi\fR\|(1), sudoers(@mansectform@), sudo(@mansectsu@), vipw(@mansectsu@)

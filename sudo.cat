@@ -8,7 +8,7 @@ NNAAMMEE
        sudo, sudoedit - execute a command as another user
 
 SSYYNNOOPPSSIISS
-       ssuuddoo --KK | --LL | --VV | --hh | --kk | --ll | --vv
+       ssuuddoo --KK | --LL | --VV | --hh | --kk | --ll [_u_s_e_r_n_a_m_e] | --vv
 
        ssuuddoo [--HHPPSSbb] [--aa _a_u_t_h___t_y_p_e] [--cc _c_l_a_s_s|_-] [--pp _p_r_o_m_p_t]
        [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] {--ee file [...] | --ii | --ss | _c_o_m_m_a_n_d}
@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.6.9                   September 30, 2004                      1
+1.6.9                    October 26, 2004                       1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.9                   September 30, 2004                      2
+1.6.9                    October 26, 2004                       2
 
 
 
@@ -184,7 +184,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        -i  The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
            specified in the passwd(4) entry of the user that the
            command is being run as.  The command name argument
-           given to the shell begins with a - to tell the shell
+           given to the shell begins with a `-' to tell the shell
            to run as a login shell.  ssuuddoo attempts to change to
            that user's home directory before running the shell.
            It also initializes the environment, leaving _T_E_R_M
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.6.9                   September 30, 2004                      3
+1.6.9                    October 26, 2004                       3
 
 
 
@@ -202,12 +202,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-           Note that because the shell to use is determined
-           before the _s_u_d_o_e_r_s file is parsed, a _r_u_n_a_s___d_e_f_a_u_l_t
-           setting in _s_u_d_o_e_r_s will specify the user to run the
-           shell as but will not affect which shell is actually
-           run.
-
        -k  The --kk (_k_i_l_l) option to ssuuddoo invalidates the user's
            timestamp by setting the time on it to the epoch.  The
            next time ssuuddoo is run a password will be required.
@@ -215,8 +209,12 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            to allow a user to revoke ssuuddoo permissions from a
            .logout file.
 
-       -l  The --ll (_l_i_s_t) option will list out the allowed (and
-           forbidden) commands for the user on the current host.
+       -l [_u_s_e_r_n_a_m_e]
+           The --ll (_l_i_s_t) option will list out the allowed (and
+           forbidden) commands for _u_s_e_r_n_a_m_e on the current host.
+           If _u_s_e_r_n_a_m_e is ommitted, the information listed will
+           be for the invoking user.  Only the superuser may list
+           other user's commands.
 
        -p  The --pp (_p_r_o_m_p_t) option allows you to override the
            default password prompt and use a custom one.  The
@@ -256,10 +254,12 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            in _s_u_d_o_e_r_s) but does not run a command.
 
        --  The ---- flag indicates that ssuuddoo should stop processing
+           command line arguments.  It is most useful in conjunc­
+           tion with the --ss flag.
 
 
 
-1.6.9                   September 30, 2004                      4
+1.6.9                    October 26, 2004                       4
 
 
 
@@ -267,9 +267,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
-
-           command line arguments.  It is most useful in conjunc­
-           tion with the --ss flag.
 
 RREETTUURRNN VVAALLUUEESS
        Upon successful execution of a program, the return value
@@ -322,10 +319,13 @@ SSEECCUURRIITTYY NNOOTTEESS
        cally.
 
        ssuuddoo will check the ownership of its timestamp directory
+       (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's con­
+       tents if it is not owned by root and only writable by
+       root.  On systems that allow non-root users to give away
 
 
 
-1.6.9                   September 30, 2004                      5
+1.6.9                    October 26, 2004                       5
 
 
 
@@ -334,9 +334,6 @@ SSEECCUURRIITTYY NNOOTTEESS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-       (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's con­
-       tents if it is not owned by root and only writable by
-       root.  On systems that allow non-root users to give away
        files via _c_h_o_w_n(2), if the timestamp directory is located
        in a directory writable by anyone (e.g.: _/_t_m_p), it is pos­
        sible for a user to create the timestamp directory before
@@ -388,10 +385,13 @@ EENNVVIIRROONNMMEENNTT
 
         SUDO_PROMPT            Used as the default password prompt
 
+        SUDO_COMMAND           Set to the command run by sudo
+
+        SUDO_USER              Set to the login of the user who invoked sudo
 
 
 
-1.6.9                   September 30, 2004                      6
+1.6.9                    October 26, 2004                       6
 
 
 
@@ -399,10 +399,6 @@ EENNVVIIRROONNMMEENNTT
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
-
-        SUDO_COMMAND           Set to the command run by sudo
-
-        SUDO_USER              Set to the login of the user who invoked sudo
 
         SUDO_UID               Set to the uid of the user who invoked sudo
 
@@ -455,9 +451,13 @@ AAUUTTHHOORRSS
        Many people have worked on ssuuddoo over the years; this ver­
        sion consists of code written primarily by:
 
+               Todd Miller
+               Chris Jepeway
 
 
-1.6.9                   September 30, 2004                      7
+
+
+1.6.9                    October 26, 2004                       7
 
 
 
@@ -465,9 +465,6 @@ AAUUTTHHOORRSS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
-
-               Todd Miller
-               Chris Jepeway
 
        See the HISTORY file in the ssuuddoo distribution or visit
        http://www.sudo.ws/sudo/history.html for a short history
@@ -519,76 +516,13 @@ DDIISSCCLLAAIIMMEERR
        ranties, including, but not limited to, the implied war­
        ranties of merchantability and fitness for a particular
        purpose are disclaimed.  See the LICENSE file distributed
-       with ssuuddoo or http://www.sudo.ws/sudo/license.html for
+       with ssuuddoo or http://www.sudo.ws/sudo/license.html for com­
+       plete details.
 
 
 
-1.6.9                   September 30, 2004                      8
 
 
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
-       complete details.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.6.9                   September 30, 2004                      9
+1.6.9                    October 26, 2004                       8
 
 

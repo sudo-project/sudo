@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "October 13, 2004" "1.6.9" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "October 26, 2004" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -159,8 +159,8 @@ The \fIsudoers\fR file is composed of two types of entries: aliases
 may run what).
 .PP
 When multiple entries match for a user, they are applied in order.
-Where there are conflicting values, the last match is used (which
-is not necessarily the most specific match).
+Where there are multiple matches, the last match is used (which is
+not necessarily the most specific match).
 .PP
 The \fIsudoers\fR grammar will be described below in Extended Backus-Naur
 Form (\s-1EBNF\s0).  Don't despair if you don't know what \s-1EBNF\s0 is; it is
@@ -403,10 +403,7 @@ by default.
 .IX Item "ignore_dot"
 If set, \fBsudo\fR will ignore '.' or '' (current dir) in the \f(CW\*(C`PATH\*(C'\fR
 environment variable; the \f(CW\*(C`PATH\*(C'\fR itself is not modified.  This
-flag is \fI@ignore_dot@\fR by default.  Currently, while it is possible
-to set \fIignore_dot\fR in \fIsudoers\fR, its value is not used.  This option
-should be considered read-only (it will be fixed in a future version
-of \fBsudo\fR).
+flag is \fI@ignore_dot@\fR by default.
 .IP "mail_always" 12
 .IX Item "mail_always"
 Send mail to the \fImailto\fR user every time a users runs \fBsudo\fR.
@@ -1099,13 +1096,6 @@ used as part of a word (e.g. a username or hostname):
 .Ve
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
-Since the \fIsudoers\fR file is parsed in a single pass, order is
-important.  In general, you should structure \fIsudoers\fR such that
-the \f(CW\*(C`Host_Alias\*(C'\fR, \f(CW\*(C`User_Alias\*(C'\fR, and \f(CW\*(C`Cmnd_Alias\*(C'\fR specifications
-come first, followed by any \f(CW\*(C`Default_Entry\*(C'\fR lines, and finally the
-\&\f(CW\*(C`Runas_Alias\*(C'\fR and user specifications.  The basic rule of thumb
-is you cannot reference an Alias that has not already been defined.
-.PP
 Below are example \fIsudoers\fR entries.  Admittedly, some of
 these are a bit contrived.  First, we define our \fIaliases\fR:
 .PP
