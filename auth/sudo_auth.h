@@ -119,12 +119,12 @@ int securid_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
 	    NULL, NULL, aixauth_verify, NULL)
 #elif defined(HAVE_FWTK)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(0, "fwtk", fwtk_init, \
-	    NULL, fwtk_verify, fwtk_cleanup)
+	AUTH_ENTRY(0, "fwtk", \
+	    fwtk_init, NULL, fwtk_verify, fwtk_cleanup)
 #elif defined(HAVE_BSD_AUTH_H)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(0, "bsdauth", bsdauth_init, \
-	    NULL, bsdauth_verify, bsdauth_cleanup)
+	AUTH_ENTRY(0, "bsdauth", \
+	    bsdauth_init, NULL, bsdauth_verify, bsdauth_cleanup)
 #endif
 
 #endif /* SUDO_AUTH_H */

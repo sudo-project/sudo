@@ -106,7 +106,7 @@ pam_verify(pw, prompt, auth)
     /* Any error other than PAM_AUTH_ERR or PAM_MAXTRIES is probably fatal.  */
     if (error != PAM_AUTH_ERR && error != PAM_MAXTRIES) {
 	if ((s = pam_strerror(pamh, error)))
-	    log_error(NO_EXIT|NO_MAIL, "pam_authenticate: %s\n", s);
+	    log_error(NO_EXIT|NO_MAIL, "pam_authenticate: %s", s);
 	return(AUTH_FATAL);
     }
     return(AUTH_FAILURE);
