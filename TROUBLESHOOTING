@@ -49,11 +49,11 @@ Q) When I run visudo it uses vi as the editor and I hate vi.  How
    can I make it use another editor?
 A) Your best bet is to run configure with the --with-env-editor switch.
    This will make visudo use the editor specified by the user's
-   EDITOR environmental variable.  Alternately, you can run configure
+   EDITOR environment variable.  Alternately, you can run configure
    with the --with-editor=path_to_your_editor.
 
 Q) Sudo appears to be removing some variables from my environment, why?
-A) Sudo removes the following "dangerous" environmental variables
+A) Sudo removes the following "dangerous" environment variables
    to guard against shared library spoofing, shell voodoo, and
    kerberos server spoofing.
      IFS

@@ -89,12 +89,12 @@ I<username>, use "#uid".
 =item -s
 
 The C<-s> (I<shell>) option runs the shell specified by the I<SHELL>
-environmental variable if it is set or the shell as specified
+environment variable if it is set or the shell as specified
 in passwd(5).
 
 =item -H
 
-The C<-H> (I<HOME>) option sets the I<HOME> environmental variable
+The C<-H> (I<HOME>) option sets the I<HOME> environment variable
 to the homedir of the target user (root by default) as specified
 in passwd(5).
 
@@ -126,7 +126,7 @@ B<sudo> tries to be safe when executing external commands.
 Variables that control how dynamic loading and binding is
 done can be used to subvert the program that B<sudo> runs.
 To combat this the C<LD_*>, C<SHLIB_PATH> (HP-UX only),
-C<LIBPATH> (AIX only), and C<_RLD_*> environmental variables are
+C<LIBPATH> (AIX only), and C<_RLD_*> environment variables are
 removed from the environment passed on to all commands executed.
 B<sudo> will also remove the C<IFS>, C<ENV>, C<BASH_ENV>
 and C<KRB_CONF> variables as they too can pose a threat.
@@ -134,7 +134,7 @@ and C<KRB_CONF> variables as they too can pose a threat.
 To prevent command spoofing, B<sudo> checks "." and "" (both
 denoting current directory) last when searching for a command
 in the user's PATH (if one or both are in the PATH).
-Note, however, that the actual PATH environmental variable
+Note, however, that the actual PATH environment variable
 is I<not> modified and is passed unchanged to the program that
 B<sudo> executes.
 
