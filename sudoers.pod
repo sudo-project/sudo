@@ -22,7 +22,8 @@ will be used.
     access_group ::= host_type = [(user_list)] [NOPASSWD:] [op]cmnd_type
 		     [,[(user_list)] [NOPASSWD:] [op]cmnd_type] ... 
        host_type ::= a lower-case hostname, netgroup, ip address,
-                     network number, or host alias.
+                     network number, network number/netmask,
+		     or host alias.
        user_list ::= comma-separated list of users, uids, or
                      User_Aliases the user may run commands as
                      (default is root).
@@ -152,6 +153,7 @@ with a "\" if used in command arguments: ",", ":", "=", "\", """.
     Host_Alias  HUB=houdini:\
                 REMOTE=merlin,kodiakthorn,spirit
     Host_Alias  SERVERS=houdini,merlin,kodiakthorn,spirit
+    Host_Alias  CUNETS=128.138.0.0/255.255.0.0
     Host_Alias  CSNETS=128.138.243.0,128.138.204.0,\
                        128.138.205.192
 
@@ -172,7 +174,7 @@ with a "\" if used in command arguments: ",", ":", "=", "\", """.
     PARTTIME    ALL=ALL,!SHELLS,!SU
     +interns    +openlabs=ALL,!SHELLS,!SU
     britt       REMOTE=SHUTDOWN:ALL=LPCS
-    jimbo	CSNETS=/bin/su *,!/bin/su root
+    jimbo	CUNETS=/bin/su *,!/bin/su root
     nieusma     SERVERS=SHUTDOWN,/etc/reboot:\
                 HUB=ALL,!SHELLS
     jill        houdini=/etc/shutdown -[hr] now,MISC
@@ -189,9 +191,10 @@ to the three machines C<merlin>, C<kodiakthorn> and C<spirit>.
 Similarly, C<SERVERS> is set to the machines C<houdini>, C<merlin>,
 C<kodiakthorn> and C<spirit>.  The C<CSNETS> alias will match
 any host on the 128.138.243.0, 128.138.204.0, or 128.138.205.192
-nets.  Note that these are B<network> addresses, not ip addresses.
-The local I<netmask> is used to determine whether or not the
-current host belongs to a network.
+nets.  The C<CUNETS> alias will match any host on the 128.138.0.0
+(class B) network.  Note that these are B<network> addresses, not ip
+addresses.  Unless an explicate netmask is given, the local I<netmask>
+is used to determine whether or not the current host belongs to a network.
 
 =head2 User Alias specifications:
 
@@ -238,7 +241,8 @@ on any machine.
 =item jimbo
 
 The user C<jimbo> may C<su> to any user save root on the
-machines on C<CSNETS>.
+machines on C<CUNETS> (which is explicately listed as a class
+B network).
 
 =item nieusma
 
