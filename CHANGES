@@ -1011,3 +1011,9 @@ Sudo 1.5.7 released.
 317) If the check for socket() or inet_addr() fails, retry, this time
      linking with both -lsocket and -lnsl for those systems that
      have interlibrary dependencies.
+
+Sudo 1.5.8 released.
+
+318) Add dirfd() macro for systems without it.
+
+319) Better check for socket() in -lsocket -lnsl.
