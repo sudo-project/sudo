@@ -192,6 +192,12 @@
 /* Define if you have seteuid(3). */
 #undef HAVE_SETEUID
 
+/* Define if you have waitpid(2). */
+#undef HAVE_WAITPID
+
+/* Define if you have wait3(2). */
+#undef HAVE_WAIT3
+
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
 
@@ -268,6 +274,17 @@
 /* Define if your syslog(3) does not guarantee the message will be logged */
 /* and syslog(3) returns non-zero to denote failure */
 #undef BROKEN_SYSLOG
+
+/*
+ * Emulate a subset of waitpid() if we don't have it.
+ */
+#ifdef HAVE_WAITPID
+#define sudo_waitpid(p, s, o)	waitpid(p, s, o)
+#else
+#ifdef HAVE_WAIT3
+#define sudo_waitpid(p, s, o)	wait3(s, o, NULL)
+#endif
+#endif
 
 /*
  * Paths to commands used by sudo.  There are used by pathnames.h.
