@@ -607,7 +607,7 @@ static void check_passwd()
 
 #ifdef HAVE_AUTHENTICATE
 	/* use AIX authenticate() function */
-	pass = GETPASS(buf, PASSWORD_TIMEOUT * 60);
+	pass = GETPASS(prompt, PASSWORD_TIMEOUT * 60);
 	reenter = 1;
 	if (authenticate(user_name, pass, &reenter, &message) == 0)
 	    return;		/* valid password */
