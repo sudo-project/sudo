@@ -67,6 +67,11 @@ static char rcsid[] = "$Id$";
 #include <sys/security.h>
 #include <prot.h>
 #endif /* __convex__ && HAVE_C2_SECURITY */
+#ifdef HAVE_AFS
+#include <usersec.h>
+#include <afs/kauth.h>
+#include <afs/kautils.h>
+#endif /* HAVE_AFS */
 
 
 /*
@@ -225,6 +230,12 @@ static void update_timestamp()
 static void check_passwd()
 {
     struct passwd *pw_ent;
+#ifdef HAVE_AFS
+    int code;
+    long password_expires = -1;
+    char *reason;
+    char username[20];
+#endif /* HAVE_AFS */
 #ifdef __svr4__
     struct spwd *spw_ent;
 #endif /* __svr4__ */
@@ -305,6 +316,20 @@ static void check_passwd()
 	if (!strcmp(encrypted, (char *) crypt(pass, encrypted)))
 	    return;		/* if the passwd is correct return() */
 #endif /* __convex__ && HAVE_C2_SECURITY */
+#ifdef HAVE_AFS
+	strcpy(username, IDtouser(uid));
+	code = ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION+KA_USERAUTH_DOSETPAG,
+                                          username,
+                                          (char *) 0, 
+                                          (char *) 0,
+                                          pass,
+                                          0,
+                                          &password_expires,
+                                          0,
+                                          &reason);
+	if (code == 0)
+	    return;
+#endif /* HAVE_AFS */
 	--counter;		/* otherwise, try again  */
 #ifdef USE_INSULTS
 	(void) fprintf(stderr, "%s\n", INSULT);
