@@ -717,8 +717,20 @@ static int check_sudoers()
 	rtn = SUDOERS_NOT_FILE;
     else if (statbuf.st_uid != SUDOERS_UID || statbuf.st_gid != SUDOERS_GID)
 	rtn = SUDOERS_WRONG_OWNER;
-    else if ((statbuf.st_mode & 0007777) != SUDOERS_MODE)
-	rtn = SUDOERS_WRONG_MODE;
+    else if ((statbuf.st_mode & 0007777) != SUDOERS_MODE) {
+	if ((statbuf.st_mode & 0007777) == 0400) {
+	    if (chmod(_PATH_SUDO_SUDOERS, SUDOERS_MODE) == 0) {
+		fprintf(stderr, "%s: fixed mode on %s\n", Argv[0],
+		    _PATH_SUDO_SUDOERS);
+	    } else {
+		fprintf(stderr, "%s: Unable to fix mode on %s: ", Argv[0],
+		    _PATH_SUDO_SUDOERS);
+		perror("");
+	    }
+	} else {
+	    rtn = SUDOERS_WRONG_MODE;
+	}
+    }
 
     (void) close(fd);
 
