@@ -346,7 +346,7 @@ you may not use a host alias (C<CNAME> entry) due to performance
 issues and the fact that there is no way to get all aliases from
 DNS.  If your machine's hostname (as returned by the C<hostname>
 command) is already fully qualified you shouldn't need to set
-I<fqfn>.  This flag is I<@fqdn@> by default.
+I<fqdn>.  This flag is I<@fqdn@> by default.
 
 =item insults
 
