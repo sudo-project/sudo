@@ -32,7 +32,7 @@
 #ifdef HAL
 char *insults[] = {
     "Just what do you think you're doing Dave?",
-    "It can only be attribuited to human error.",
+    "It can only be attributed to human error.",
     "That's something I cannot allow to happen.",
     "My mind is going. I can feel it.",
     "Sorry about this, I know it's a bit silly.",
