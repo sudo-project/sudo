@@ -31,7 +31,6 @@ static char rcsid[] = "$Id$";
 #endif /* lint */
 
 #include "config.h"
-#include "compat.h"
 #include "pathnames.h"
 
 #include <stdio.h>
@@ -55,6 +54,8 @@ static char rcsid[] = "$Id$";
 #include <sys/stat.h>
 #include <sys/param.h>
 #include <netinet/in.h>
+
+#include "compat.h"
 
 #ifndef STDC_HEADERS
 #ifndef __GNUC__		/* gcc has its own malloc */
