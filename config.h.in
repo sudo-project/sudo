@@ -132,6 +132,12 @@
 /* Define if you have sysconf(3c). */
 #undef HAVE_SYSCONF
 
+/* Define if you have putenv(3). */
+#undef HAVE_PUTENV
+
+/* Define if you have setenv(3). */
+#undef HAVE_SETENV
+
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
 
