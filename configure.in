@@ -1415,7 +1415,12 @@ case "$host" in
 		mansectsu=1m
 		mansectform=4
 		;;
-    *-ccur-sysv4|*-ccur-sysvr4)
+    *-ncr-sysv4*|*-ncr-sysvr4*)
+		AC_CHECK_LIB(c89, strcasecmp, [SUDO_LIBS="${SUDO_LIBS} -lc89"; LIBS="${LIBS} -lc89"])
+		mansectsu=1m
+		mansectform=4
+		;;
+    *-ccur-sysv4*|*-ccur-sysvr4*)
 		LIBS="${LIBS} -lgen"
 		SUDO_LIBS="${SUDO_LIBS} -lgen"
 		mansectsu=1m
