@@ -56,9 +56,9 @@ static char rcsid[] = "$Id$";
 extern YYSTYPE yylval;
 extern int clearaliases;
 int sudolineno = 1;
-static int string_len = 0;
-static int string_size = 0;
 static int sawspace = 0;
+static register int string_len = 0;
+static register int string_size = 0;
 
 static void fill		__P((char *, int));
 static void append		__P((char *, int, int));
@@ -82,6 +82,7 @@ N			[0-9][0-9]?[0-9]?
 %k	3500
 
 %s	GOTCMND
+%s	QUOTEDCMND
 
 %%
 [ \t]+			{			/* throw away space/tabs */
@@ -93,6 +94,17 @@ N			[0-9][0-9]?[0-9]?
 			    ++sudolineno;
 			    LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
+
+<QUOTEDCMND>\\\"	{
+			    LEXTRACE("QUOTEDCHAR ");
+			    append("\"", 1, sawspace);      
+			    sawspace = FALSE;
+			}
+
+<QUOTEDCMND>\"		{
+			    BEGIN 0;
+			    return(COMMAND);
+			}			/* end of command line args */
 
 <GOTCMND>\\[:\,=\\]	{
 			    LEXTRACE("QUOTEDCHAR ");
@@ -117,6 +129,12 @@ N			[0-9][0-9]?[0-9]?
 			    LEXTRACE("\n");
 			    return(COMMENT);
 			}			/* return comments */
+
+<QUOTEDCMND>[^\"\\ \t\n#]+ {
+			    LEXTRACE("ARG ");
+			    append(yytext, yyleng, sawspace);
+			    sawspace = FALSE;
+			  }			/* a command line arg */
 
 <GOTCMND>[^\,:=\\ \t\n#]+ {
 			    LEXTRACE("ARG ");
@@ -162,16 +180,31 @@ N			[0-9][0-9]?[0-9]?
 			    return(NTWKADDR);
 			}
 
-\/[^\,:=\\ \t\n#]+	{
-			    /* directories can't have args... */
-			    if (yytext[yyleng - 1] == '/') {
-				LEXTRACE("COMMAND ");
-				fill(yytext, yyleng);
-				return(COMMAND);
+\"?\/[^\,:=\\ \t\n#]+	{
+			    /* command may be quoted */
+			    if (yytext[0] == '"') {
+				/* may not have args so has endquote */
+				if (yytext[yyleng - 1] == '"' &&
+				    yytext[yyleng - 2] != '\\') {
+				    LEXTRACE("COMMAND ");
+				    fill(yytext + 1, yyleng - 2);
+				    return(COMMAND);
+				} else {
+				    BEGIN QUOTEDCMND;
+				    LEXTRACE("COMMAND ");
+				    fill(yytext + 1, yyleng - 1);
+				}
 			    } else {
-				BEGIN GOTCMND;
-				LEXTRACE("COMMAND ");
-				fill(yytext, yyleng);
+				/* directories can't have args... */
+				if (yytext[yyleng - 1] == '/') {
+				    LEXTRACE("COMMAND ");
+				    fill(yytext, yyleng);
+				    return(COMMAND);
+				} else {
+				    BEGIN GOTCMND;
+				    LEXTRACE("COMMAND ");
+				    fill(yytext, yyleng);
+				}
 			    }
 			}			/* a pathname */
 
@@ -228,7 +261,10 @@ static void fill(s, len)
     yylval.string = (char *) malloc(string_size);
     if (yylval.string == NULL)
 	yyerror("unable to allocate memory");
-    (void) strcpy(yylval.string, s);
+
+    /* copy the string and NULL-terminate it */
+    (void) strncpy(yylval.string, s, string_len);
+    yylval.string[string_len] = '\0';
 }
 
 
