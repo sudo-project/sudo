@@ -124,7 +124,7 @@ int   user_is_exempt			__P((void));
  * Globals
  */
 static int   timedir_is_good;
-static char  timestampfile[MAXPATHLEN + 1];
+static char  timestampfile[MAXPATHLEN];
 #ifdef HAVE_SECURID
 union config_record configure;
 #endif /* HAVE_SECURID */

@@ -76,9 +76,9 @@ extern int num_interfaces;
 char *cmnd = NULL;
 char *cmnd_args = NULL;
 char *runas_user = "root";
-char host[MAXHOSTNAMELEN+1];
+char host[MAXHOSTNAMELEN];
 char *shost;
-char cwd[MAXPATHLEN+1];
+char cwd[MAXPATHLEN];
 struct passwd *user_pw_ent;
 char **Argv, **NewArgv;
 int  Argc, NewArgc;
@@ -224,13 +224,13 @@ int netgr_matches(netgr, host, user)
 #ifdef HAVE_GETDOMAINNAME
     /* get the domain name (if any) */
     if (domain == (char *) -1) {
-	if ((domain = (char *) malloc(MAXHOSTNAMELEN + 1)) == NULL) {
+	if ((domain = (char *) malloc(MAXHOSTNAMELEN)) == NULL) {
 	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
 
-	if (getdomainname(domain, MAXHOSTNAMELEN + 1) != 0 || *domain == '\0') {
+	if (getdomainname(domain, MAXHOSTNAMELEN) != 0 || *domain == '\0') {
 	    (void) free(domain);
 	    domain = NULL;
 	}

@@ -94,7 +94,7 @@ extern char *strdup	__P((const char *));
 char * find_path(file)
     char *file;			/* file to find */
 {
-    static char command[MAXPATHLEN + 1];	/* qualified filename */
+    static char command[MAXPATHLEN]; /* qualified filename */
     register char *n;		/* for traversing path */
     char *path = NULL;		/* contents of PATH env var */
     char *origpath;		/* so we can free path later */
@@ -105,7 +105,7 @@ char * find_path(file)
 
     command[0] = '\0';
 
-    if (strlen(file) > MAXPATHLEN) {
+    if (strlen(file) >= MAXPATHLEN) {
 	errno = ENAMETOOLONG;
 	(void) fprintf(stderr, "%s:  path too long:  %s\n", Argv[0], file);
 	exit(1);

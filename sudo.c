@@ -146,9 +146,9 @@ char *cmnd = NULL;
 char *cmnd_args = NULL;
 char *tty = "unknown";
 char *prompt;
-char host[MAXHOSTNAMELEN + 1];
+char host[MAXHOSTNAMELEN];
 char *shost;
-char cwd[MAXPATHLEN + 1];
+char cwd[MAXPATHLEN];
 FILE *sudoers_fp = NULL;
 struct stat cmnd_st;
 static char *runas_homedir = NULL;
@@ -409,7 +409,7 @@ static void load_globals(sudo_mode)
     if ((user_pw_ent = sudo_getpwuid(getuid())) == NULL) {
 	/* need to make a fake user_pw_ent */
 	struct passwd pw_ent;
-	char pw_name[MAX_UID_T_LEN+1];
+	char pw_name[MAX_UID_T_LEN + 1];
 
 	/* fill in uid and name fields with the uid */
 	pw_ent.pw_uid = getuid();
@@ -459,10 +459,10 @@ static void load_globals(sudo_mode)
     /*
      * so we know where we are... (do as user)
      */
-    if (!getwd(cwd)) {
+    if (!getcwd(cwd, sizeof(cwd))) {
 	/* try as root... */
 	set_perms(PERM_ROOT, sudo_mode);
-	if (!getwd(cwd)) {
+	if (!getcwd(cwd), sizeof(cwd)) {
 	    (void) fprintf(stderr, "%s:  Can't get working directory!\n",
 			   Argv[0]);
 	    (void) strcpy(cwd, "unknown");
@@ -474,7 +474,7 @@ static void load_globals(sudo_mode)
      * load the host global variable from gethostname() and use
      * gethostbyname() if we want to be sure it is fully qualified.
      */
-    if ((gethostname(host, MAXHOSTNAMELEN))) {
+    if ((gethostname(host, sizeof(host)))) {
 	strcpy(host, "localhost");
 	log_error(GLOBAL_NO_HOSTNAME);
 	inform_user(GLOBAL_NO_HOSTNAME);
@@ -754,7 +754,7 @@ static void add_env(contiguous)
 static void load_cmnd(sudo_mode)
     int sudo_mode;
 {
-    if (strlen(NewArgv[0]) > MAXPATHLEN) {
+    if (strlen(NewArgv[0]) >= MAXPATHLEN) {
 	errno = ENAMETOOLONG;
 	(void) fprintf(stderr, "%s: %s: Pathname too long\n", Argv[0],
 		       NewArgv[0]);
