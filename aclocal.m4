@@ -153,11 +153,23 @@ if test -n "$UNAMEPROG"; then
     echo "checking OS based on uname(1)"
     OS="unknown"
     OS=`$UNAMEPROG -s`
+    # some OS's set -s the same as -n (BROKEN!!!)
+    if test "$OS" = `$UNAMEPROG -n`; then
+	# evil hack for ISC unix (svr4)
+	if test "`$UNAMEPROG -m`" = "i386"; then
+	    OS="isc"
+	else
+	    OS=`$UNAMEPROG -v`
+	fi
+    fi
+
     # this is yucky but we want to make sure $OSREV is an int...
     OSREV=`$UNAMEPROG -r | $SEDPROG -e 's/^[[ \.0A-z]]*//' -e 's/\..*//'`
 
     if test "$OS" = "SunOS" -a "$OSREV" -ge 5 ; then
 	OS="solaris"
+    elif test "$OS" = "UMIPS"
+	OS="riscos"
     fi
 else
     if test -z "$OS"; then
