@@ -749,16 +749,13 @@ static int check_sudoers()
     char c;
     int rtn = ALL_SYSTEMS_GO;
 
-    set_perms(PERM_SUDOERS);
-
-    if ((fd = open(_PATH_SUDO_SUDOERS, O_RDONLY)) < 0 || read(fd, &c, 1) == -1)
-	rtn = NO_SUDOERS_FILE;
-    else if (lstat(_PATH_SUDO_SUDOERS, &statbuf))
-	rtn = NO_SUDOERS_FILE;
-    else if (!S_ISREG(statbuf.st_mode))
-	rtn = SUDOERS_NOT_FILE;
-    else if ((statbuf.st_mode & 0007777) != SUDOERS_MODE) {
-	if ((statbuf.st_mode & 0007777) == 0400) {
+    /*
+     * Fix the mode and group on sudoers file from old default.
+     * Only works if filesystem is readable/writable by root.
+     */
+    set_perms(PERM_ROOT);
+    if (!lstat(_PATH_SUDO_SUDOERS, &statbuf) && SUDOERS_UID == statbuf.st_uid) {
+	if (SUDOERS_MODE != 0400 && (statbuf.st_mode & 0007777) == 0400) {
 	    if (chmod(_PATH_SUDO_SUDOERS, SUDOERS_MODE) == 0) {
 		(void) fprintf(stderr, "%s: fixed mode on %s\n",
 		    Argv[0], _PATH_SUDO_SUDOERS);
@@ -778,10 +775,20 @@ static int check_sudoers()
 		    Argv[0], _PATH_SUDO_SUDOERS);
 		perror("");
 	    }
-	} else {
-	    rtn = SUDOERS_WRONG_MODE;
 	}
-    } else if (statbuf.st_uid != SUDOERS_UID || statbuf.st_gid != SUDOERS_GID)
+    }
+
+    set_perms(PERM_SUDOERS);
+
+    if ((fd = open(_PATH_SUDO_SUDOERS, O_RDONLY)) < 0 || read(fd, &c, 1) == -1)
+	rtn = NO_SUDOERS_FILE;
+    else if (lstat(_PATH_SUDO_SUDOERS, &statbuf))
+	rtn = NO_SUDOERS_FILE;
+    else if (!S_ISREG(statbuf.st_mode))
+	rtn = SUDOERS_NOT_FILE;
+    else if ((statbuf.st_mode & 0007777) != SUDOERS_MODE)
+	rtn = SUDOERS_WRONG_MODE;
+    else if (statbuf.st_uid != SUDOERS_UID || statbuf.st_gid != SUDOERS_GID)
 	rtn = SUDOERS_WRONG_OWNER;
 
     if (fd != -1)
