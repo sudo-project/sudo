@@ -54,6 +54,7 @@
 #define UMASK 0022		/* umask that the root-run prog should use */
 #define INCORRECT_PASSWORD "Sorry, try again." /* message for bad passwd */
 #define MAILSUBJECT "*** SECURITY information ***" /* subject of mail sent */
+#define PASSPROMPT "Password:"	/* default password prompt */
 /*#define SECURE_PATH	"/bin:/usr/ucb:/usr/bin:/usr/etc:/etc" /* secure path */
 /*#define USE_EXECV		/* use execv() instead of execvp() */
 #define FAST_MATCH		/* command check fails if basenames not same */
