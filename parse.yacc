@@ -149,6 +149,7 @@ file		:	entry
 		;
 
 entry		:	COMMENT
+			{ ; }
                 |       error COMMENT
 			{ yyerrok; }
 		|	NAME { push; } privileges {
@@ -157,7 +158,9 @@ entry		:	COMMENT
 				pop;
 			}
 		|	HOSTALIAS hostaliases
+			{ ; }
 		|	CMNDALIAS cmndaliases
+			{ ; }
 		;
 		
 
@@ -206,6 +209,7 @@ opcmndlist	:	opcmnd
 		;
 
 opcmnd		:	cmnd
+			{ ; }
 		|	'!' { push; } opcmnd {
 			    int cmnd_matched = cmnd_matches;
 			    pop;
@@ -254,6 +258,7 @@ cmndalias	:	ALIAS { push; }	'=' cmndlist {
 		;
 
 cmndlist	:	cmnd
+			{ ; }
 		|	cmndlist ',' cmnd
 		;
 
