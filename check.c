@@ -660,75 +660,62 @@ static char *sudo_skeyprompt(user_skey, p)
     struct skey *user_skey;
     char *p;
 {
-#ifndef LONG_SKEY_PROMPT
-    char buf[32];
-    char *new_prompt;
-    static char *old_prompt = NULL;
-    static int plen;
-#endif /* LONG_SKEY_PROMPT */
+    char challenge[256];
+    int rval;
+    static char *orig_prompt, *new_prompt = NULL;
+    static int op_len, np_size;
 
-    /* close the key file if necesary */
-    if (user_skey->keyfile != NULL)
-	(void) fclose(user_skey->keyfile);
-
-    /* return the old prompt if we cannot get s/key info */
-    if (skeylookup(user_skey, user_name)) {
-	if (user_skey->keyfile != NULL) {
-	    (void) fclose(user_skey->keyfile);
-	    user_skey->keyfile = NULL;
-	}
+    /* get the skey part of the prompt */
+    if ((rval = skeychallenge(user_skey, user_name, challenge)) != 0) {
 #ifdef SKEY_ONLY
-	(void) fprintf(stderr, "%s: You do not exist in the s/key database.\n",
+	(void) fprintf(stderr,
+		       "%s: You do not exist in the s/key database.\n",
 		       Argv[0]);
 	exit(1);
 #else
-#  ifdef LONG_SKEY_PROMPT
-	return(p);
-#  else
-	if (old_prompt == NULL) {
-	    return(p);
-	} else {
-	    return(old_prompt);
-	}
-#  endif /* LONG_SKEY_PROMPT */
+	/* return the original prompt if we cannot get s/key info */
+	return(orig_prompt);
 #endif /* SKEY_ONLY */
     }
+    (void) fclose(user_skey->keyfile);
 
-#ifdef LONG_SKEY_PROMPT
-    /* separate s/key challenge and prompt for easy snarfing */
-    (void) fprintf(stderr, "key %d %s\n", user_skey->n - 1, user_skey->seed);
+    /* get space for new prompt with embedded s/key challenge */
+    if (new_prompt == NULL) {
+	orig_prompt = p;
+	op_len = strlen(p);
 
-    /* return old prompt unmolested */
-    return(p);
+	/* ignore trailing colon */
+	if (p[op_len - 1] == ':')
+	    op_len--;
 
-#else
-
-    /* keep a pointer to the original prompt around for future reference */
-    if (old_prompt == NULL) {
-	old_prompt = p;
-	plen = strlen(p);
-
-	/* ignore trailing colon's */
-	if (p[plen - 1] == ':')
-	    plen--;
+	/* allocate space for new prompt */
+	np_size = op_len + strlen(challenge) + 7;
+	if (!(new_prompt = (char *) malloc(np_size))) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
     } else {
-	(void) free(p);
-    }
-
-    (void) sprintf(buf, "%d", user_skey->n - 1);
-    if ((new_prompt = (char *)
-	malloc(plen + strlen(buf) + strlen(user_skey->seed) + 12)) == NULL) {
-	perror("malloc");
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
+	/* already have space allocated, is it enough? */
+	if (np_size < op_len + strlen(challenge) + 7) {
+	    np_size = op_len + strlen(challenge) + 7;
+	    if (!(new_prompt = (char *) realloc(new_prompt, np_size))) {
+		perror("malloc");
+		(void) fprintf(stderr, "%s: cannot allocate memory!\n",
+			       Argv[0]);
+		exit(1);
+	    }
+	}
     }
 
     /* embed the s/key challenge into the new password prompt */
-    (void) sprintf(new_prompt, "%.*s [s/key %d %s]:", plen, old_prompt,
-	user_skey->n - 1, user_skey->seed);
+#ifdef LONG_SKEY_PROMPT
+    (void) sprintf(new_prompt, "%s\n%s", challenge, orig_prompt);
+#else
+    (void) sprintf(new_prompt, "%.*s [ %s ]:", op_len, orig_prompt, challenge);
+#endif /* LONG_SKEY_PROMPT */
 
     return(new_prompt);
-#endif /* LONG_SKEY_PROMPT */
 }
 #endif /* HAVE_SKEY */
 
