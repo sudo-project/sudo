@@ -211,6 +211,18 @@ addr_matches(n)
 }
 
 int
+hostname_matches(host, pattern)
+    char *host;
+    char *pattern;
+{
+ 
+    if (has_meta(pattern)) 
+	return(fnmatch(pattern, host, FNM_CASEFOLD));
+    else
+	return(strcasecmp(host, pattern));
+}
+
+int
 usergr_matches(group, user)
     char *group;
     char *user;

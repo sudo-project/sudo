@@ -361,14 +361,14 @@ host		:	ALL {
 			    free($1);
 			}
 		|	WORD {
-			    if (strcasecmp(user_shost, $1) == 0)
+			    if (hostname_matches(user_shost, $1) == 0)
 				$$ = TRUE;
 			    else
 				$$ = -1;
 			    free($1);
 			}
 		|	FQHOST {
-			    if (strcasecmp(user_host, $1) == 0)
+			    if (hostname_matches(user_host, $1) == 0)
 				$$ = TRUE;
 			    else
 				$$ = -1;
@@ -380,7 +380,7 @@ host		:	ALL {
 			    /* could be an all-caps hostname */
 			    if (aip)
 				$$ = aip->val;
-			    else if (strcasecmp(user_shost, $1) == 0)
+			    else if (hostname_matches(user_shost, $1) == 0)
 				$$ = TRUE;
 			    else {
 				if (pedantic) {

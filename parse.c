@@ -386,6 +386,21 @@ addr_matches(n)
 }
 
 /*
+ * Returns 0 if the hostname matches the pattern and non-zero otherwise.
+ */
+int
+hostname_matches(host, pattern)
+    char *host;
+    char *pattern;
+{
+
+    if (has_meta(pattern))
+	return(fnmatch(pattern, host, FNM_CASEFOLD));
+    else
+	return(strcasecmp(host, pattern));
+}
+
+/*
  *  Returns TRUE if the given user belongs to the named group,
  *  else returns FALSE.
  */

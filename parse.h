@@ -109,6 +109,7 @@ extern int top;
  */
 int addr_matches	__P((char *));
 int command_matches	__P((char *, char *, char *, char *));
+int hostname_matches	__P((char *, char *));
 int netgr_matches	__P((char *, char *, char *, char *));
 int usergr_matches	__P((char *, char *));
 

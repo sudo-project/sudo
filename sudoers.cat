@@ -150,7 +150,11 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        ethernet _i_n_t_e_r_f_a_c_e(s) will be used when matching.  The
        netmask may be specified either in dotted quad notation
        (eg.  255.255.255.0) or CIDR notation (number of bits, eg.
-       24).
+       24).  A hostname may include shell-style wildcards (see
+       `Wildcards' section below), but unless the hostname
+       command on your machine returns the fully qualified
+       hostname, you'll need to use the _f_q_d_n option for wildcards
+       to be useful.
 
         Cmnd_List ::= Cmnd |
                       Cmnd ',' Cmnd_List
@@ -164,7 +168,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                  '!'* Cmnd_Alias
 
        A Cmnd_List is a list of one or more commandnames,
-       directories, and other aliases.  A commandname is a fully-
+       directories, and other aliases.  A commandname is a fully
        qualified filename which may include shell-style wildcards
        (see `Wildcards' section below).  A simple filename allows
        the user to run the command with any arguments he/she
@@ -183,13 +187,9 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        be escaped with a '\' if they are used in command
        arguments: ',', ':', '=', '\'.
 
-       DDDDeeeeffffaaaauuuullllttttssss
 
-       Certain configuration options may be changed from their
-       default values at runtime via one or more Default_Entry
-       lines.  These may affect all users on any host, all users
-       on a specific host, or just a specific user.  When
-       multiple entries match, they are applied in order.  Where
+
+
 
 
 
@@ -202,6 +202,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
+       DDDDeeeeffffaaaauuuullllttttssss
+
+       Certain configuration options may be changed from their
+       default values at runtime via one or more Default_Entry
+       lines.  These may affect all users on any host, all users
+       on a specific host, or just a specific user.  When
+       multiple entries match, they are applied in order.  Where
        there are conflicting values, the last value on a matching
        line takes effect.
 
@@ -249,13 +256,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                    if the invoking user exists in the _s_u_d_o_e_r_s
                    file, but is not allowed to run commands on
                    the current host.  This flag is off by
-                   default.
-
-       mail_no_perms
-                   If set, mail will be sent to the _m_a_i_l_t_o user
-                   if the invoking user allowed to use ssssuuuuddddoooo but
-                   the command they are trying is not listed in
-                   their _s_u_d_o_e_r_s file entry.  This flag is off by
 
 
 
@@ -268,6 +268,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
+                   default.
+
+       mail_no_perms
+                   If set, mail will be sent to the _m_a_i_l_t_o user
+                   if the invoking user allowed to use ssssuuuuddddoooo but
+                   the command they are trying is not listed in
+                   their _s_u_d_o_e_r_s file entry.  This flag is off by
                    default.
 
        tty_tickets If set, users must authenticate on a per-tty
@@ -315,13 +322,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        set_home    If set and ssssuuuuddddoooo is invoked with the -s flag
                    the HOME environment variable will be set to
                    the home directory of the target user (which
-                   is root unless the -u option is used).  This
-                   effectively makes the -s flag imply -H.  This
-                   flag is off by default.
-
-       path_info   Normally, ssssuuuuddddoooo will tell the user when a
-                   command could not be found in their $PATH.
-                   Some sites may wish to disable this as it
 
 
 
@@ -334,6 +334,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
+                   is root unless the -u option is used).  This
+                   effectively makes the -s flag imply -H.  This
+                   flag is off by default.
+
+       path_info   Normally, ssssuuuuddddoooo will tell the user when a
+                   command could not be found in their $PATH.
+                   Some sites may wish to disable this as it
                    could be used to gather information on the
                    location of executables that the normal user
                    does not have access to.  The disadvantage is
@@ -381,13 +388,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                    to get a shell (which would be a root shell
                    and not be logged).
 
-       rootpw      If set, ssssuuuuddddoooo will prompt for the root password
-                   instead of the password of the invoking user.
-
-       runaspw     If set, ssssuuuuddddoooo will prompt for the password of
-                   the user defined by the _r_u_n_a_s___d_e_f_a_u_l_t option
-                   (defaults to root) instead of the password of
-                   the invoking user.
 
 
 
@@ -399,6 +399,14 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+       rootpw      If set, ssssuuuuddddoooo will prompt for the root password
+                   instead of the password of the invoking user.
+
+       runaspw     If set, ssssuuuuddddoooo will prompt for the password of
+                   the user defined by the _r_u_n_a_s___d_e_f_a_u_l_t option
+                   (defaults to root) instead of the password of
+                   the invoking user.
 
        targetpw    If set, ssssuuuuddddoooo will prompt for the password of
                    the user specified by the -u flag (defaults to
@@ -446,14 +454,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        passwd_timeout
                    Number of minutes before the ssssuuuuddddoooo password
                    prompt times out.  The default is 5, set this
-                   to 0 for no password timeout.
-
-       umask       Umask to use when running the root command.
-                   Set this to 0777 to not override the user's
-                   umask.  The default is 0022.
-
-       SSSSttttrrrriiiinnnnggggssss:
-
 
 
 
@@ -465,6 +465,14 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+                   to 0 for no password timeout.
+
+       umask       Umask to use when running the root command.
+                   Set this to 0777 to not override the user's
+                   umask.  The default is 0022.
+
+       SSSSttttrrrriiiinnnnggggssss:
 
        mailsub     Subject of the mail sent to the _m_a_i_l_t_o user.
                    The escape %h will expand to the hostname of
@@ -512,14 +520,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        syslog      Syslog facility if syslog is being used for
                    logging (negate to disable syslog logging).
-                   Defaults to "local2".
-
-       mailerpath  Path to mail program used to send warning
-                   mail.  Defaults to the path to sendmail found
-                   at configure time.
-
-       mailerflags Flags to use when invoking mailer. Defaults to
-                   -t.
 
 
 
@@ -531,6 +531,15 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+                   Defaults to "local2".
+
+       mailerpath  Path to mail program used to send warning
+                   mail.  Defaults to the path to sendmail found
+                   at configure time.
+
+       mailerflags Flags to use when invoking mailer. Defaults to
+                   -t.
 
        mailto      Address to send warning and erorr mail to.
                    Defaults to "root".
@@ -576,16 +585,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                                    current host must have the C<NOPASSWD>
                                    flag set to avoid entering a password.
 
-                       any         At least one of the user's I<sudoers> entries
-                                   for the current host must have the
-                                   C<NOPASSWD> flag set to avoid entering a
-                                   password.
 
-                       never       The user need never enter a password to use
-                                   the B<-l> flag.
-
-                       always      The user must always enter a password to use
-                                   the B<-l> flag.
 
 
 
@@ -597,6 +597,17 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+                       any         At least one of the user's I<sudoers> entries
+                                   for the current host must have the
+                                   C<NOPASSWD> flag set to avoid entering a
+                                   password.
+
+                       never       The user need never enter a password to use
+                                   the B<-l> flag.
+
+                       always      The user must always enter a password to use
+                                   the B<-l> flag.
 
                    The default value is `any'.
 
@@ -642,17 +653,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        The user ddddggggbbbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m
        -- but only as ooooppppeeeerrrraaaattttoooorrrr.  Eg.
 
-           sudo -u operator /bin/ls.
-
-       It is also possible to override a Runas_Spec later on in
-       an entry.  If we modify the entry like so:
-
-        dgb    boulder = (operator) /bin/ls, (root) /bin/kill, /usr/bin/lprm
-
-       Then user ddddggggbbbb is now allowed to run _/_b_i_n_/_l_s as ooooppppeeeerrrraaaattttoooorrrr,
-       but  _/_b_i_n_/_k_i_l_l and _/_u_s_r_/_b_i_n_/_l_p_r_m as rrrrooooooootttt.
-
-
 
 
 22/Mar/2000                   1.6.3                            10
@@ -663,6 +663,16 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+           sudo -u operator /bin/ls.
+
+       It is also possible to override a Runas_Spec later on in
+       an entry.  If we modify the entry like so:
+
+        dgb    boulder = (operator) /bin/ls, (root) /bin/kill, /usr/bin/lprm
+
+       Then user ddddggggbbbb is now allowed to run _/_b_i_n_/_l_s as ooooppppeeeerrrraaaattttoooorrrr,
+       but  _/_b_i_n_/_k_i_l_l and _/_u_s_r_/_b_i_n_/_l_p_r_m as rrrrooooooootttt.
 
        NNNNOOOOPPPPAAAASSSSSSSSWWWWDDDD aaaannnndddd PPPPAAAASSSSSSSSWWWWDDDD
 
@@ -707,16 +717,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        [...]   Matches any character in the specified range.
 
-       [!...]  Matches any character nnnnooootttt in the specified range.
-
-       \x      For any character "x", evaluates to "x".  This is
-               used to escape special characters such as: "*",
-               "?", "[", and "}".
-
-       Note that a forward slash ('/') will nnnnooootttt be matched by
-       wildcards used in the pathname.  When matching the command
-       line arguments, however, as slash ddddooooeeeessss get matched by
-       wildcards.  This is to make a path like:
 
 
 
@@ -729,6 +729,17 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+       [!...]  Matches any character nnnnooootttt in the specified range.
+
+       \x      For any character "x", evaluates to "x".  This is
+               used to escape special characters such as: "*",
+               "?", "[", and "}".
+
+       Note that a forward slash ('/') will nnnnooootttt be matched by
+       wildcards used in the pathname.  When matching the command
+       line arguments, however, as slash ddddooooeeeessss get matched by
+       wildcards.  This is to make a path like:
 
            /usr/bin/*
 
@@ -774,17 +785,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        syntactic characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n ('=', ':',
        '(', ')') is optional.
 
-       The following characters must be escaped with a backslash
-       ('\') when used as part of a word (eg. a username or
-       hostname): '@', '!', '=', ':', ',', '(', ')', '\'.
-
-EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
-       Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of
-       these are a bit contrived.  First, we define our _a_l_i_a_s_e_s:
-
-
-
-
 
 
 22/Mar/2000                   1.6.3                            12
@@ -795,6 +795,14 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+       The following characters must be escaped with a backslash
+       ('\') when used as part of a word (eg. a username or
+       hostname): '@', '!', '=', ':', ',', '(', ')', '\'.
+
+EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
+       Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of
+       these are a bit contrived.  First, we define our _a_l_i_a_s_e_s:
 
         # User alias specification
         User_Alias     FULLTIMERS = millert, mikef, dowdy
@@ -843,14 +851,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
         Defaults:millert       !authenticate
         Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
 
-       The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually
-       determines who may run what.
-
-        root           ALL = (ALL) ALL
-        %wheel         ALL = (ALL) ALL
-
-       We let rrrrooooooootttt and any user in group wwwwhhhheeeeeeeellll run any command on
-
 
 
 22/Mar/2000                   1.6.3                            13
@@ -862,6 +862,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
+       The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually
+       determines who may run what.
+
+        root           ALL = (ALL) ALL
+        %wheel         ALL = (ALL) ALL
+
+       We let rrrrooooooootttt and any user in group wwwwhhhheeeeeeeellll run any command on
        any host as any user.
 
         FULLTIMERS     ALL = NOPASSWD: ALL
@@ -909,13 +916,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        assumes _p_a_s_s_w_d(1) does not take multiple usernames on the
        command line.
 
-        bob            SPARC = (OP) ALL : SGI = (OP) ALL
-
-       The user bbbboooobbbb may run anything on the _S_P_A_R_C and _S_G_I
-       machines as any user listed in the _O_P Runas_Alias (rrrrooooooootttt
-       and ooooppppeeeerrrraaaattttoooorrrr).
-
-        jim            +biglab = ALL
 
 
 
@@ -927,6 +927,14 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+        bob            SPARC = (OP) ALL : SGI = (OP) ALL
+
+       The user bbbboooobbbb may run anything on the _S_P_A_R_C and _S_G_I
+       machines as any user listed in the _O_P Runas_Alias (rrrrooooooootttt
+       and ooooppppeeeerrrraaaattttoooorrrr).
+
+        jim            +biglab = ALL
 
        The user jjjjiiiimmmm may run any command on machines in the _b_i_g_l_a_b
        netgroup.  SSSSuuuuddddoooo knows that "biglab" is a netgroup due to
@@ -974,14 +982,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        On the host www, any user in the _W_E_B_M_A_S_T_E_R_S User_Alias
        (will, wendy, and wim), may run any command as user www
-       (which owns the web pages) or simply _s_u(1) to www.
-
-        ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
-                       /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
-
-       Any user may mount or unmount a CD-ROM on the machines in
-       the CDROM Host_Alias (orion, perseus, hercules) without
-       entering a password.  This is a bit tedious for users to
 
 
 
@@ -994,6 +994,14 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
+       (which owns the web pages) or simply _s_u(1) to www.
+
+        ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
+                       /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
+
+       Any user may mount or unmount a CD-ROM on the machines in
+       the CDROM Host_Alias (orion, perseus, hercules) without
+       entering a password.  This is a bit tedious for users to
        type, so it is a prime candiate for encapsulating in a
        shell script.
 
@@ -1020,9 +1028,9 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        incorrect _s_u_d_o_e_r_s file.
 
        When using netgroups of machines (as opposed to users), if
-       you store fully-qualified hostnames in the netgroup (as is
+       you store fully qualified hostnames in the netgroup (as is
        usually the case), you either need to have the machine's
-       hostname be fully-qualified as returned by the hostname
+       hostname be fully qualified as returned by the hostname
        command or use the _f_q_d_n option in _s_u_d_o_e_r_s.
 
 FFFFIIIILLLLEEEESSSS
@@ -1033,14 +1041,6 @@ FFFFIIIILLLLEEEESSSS
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
        _s_u_d_o(8), _v_i_s_u_d_o(8), _s_u(1), _f_n_m_a_t_c_h(3).
-
-
-
-
-
-
-
-
 
 
 

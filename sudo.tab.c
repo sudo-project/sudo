@@ -1275,7 +1275,7 @@ break;
 case 31:
 #line 363 "parse.yacc"
 {
-			    if (strcasecmp(user_shost, yyvsp[0].string) == 0)
+			    if (hostname_matches(user_shost, yyvsp[0].string) == 0)
 				yyval.BOOLEAN = TRUE;
 			    else
 				yyval.BOOLEAN = -1;
@@ -1285,7 +1285,7 @@ break;
 case 32:
 #line 370 "parse.yacc"
 {
-			    if (strcasecmp(user_host, yyvsp[0].string) == 0)
+			    if (hostname_matches(user_host, yyvsp[0].string) == 0)
 				yyval.BOOLEAN = TRUE;
 			    else
 				yyval.BOOLEAN = -1;
@@ -1300,7 +1300,7 @@ case 33:
 			    /* could be an all-caps hostname */
 			    if (aip)
 				yyval.BOOLEAN = aip->val;
-			    else if (strcasecmp(user_shost, yyvsp[0].string) == 0)
+			    else if (hostname_matches(user_shost, yyvsp[0].string) == 0)
 				yyval.BOOLEAN = TRUE;
 			    else {
 				if (pedantic) {

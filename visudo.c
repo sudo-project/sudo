@@ -93,6 +93,7 @@ static RETSIGTYPE Exit		__P((int));
 static void setup_signals	__P((void));
 int command_matches		__P((char *, char *, char *, char *));
 int addr_matches		__P((char *));
+int hostname_matches		__P((char *, char *));
 int netgr_matches		__P((char *, char *, char *, char *));
 int usergr_matches		__P((char *, char *));
 void init_parser		__P((void));
@@ -401,6 +402,13 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 int
 addr_matches(n)
     char *n;
+{
+    return(TRUE);
+}
+
+int
+hostname_matches(h, p)
+    char *h, *p;
 {
     return(TRUE);
 }

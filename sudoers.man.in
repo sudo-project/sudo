@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.3  2000/03/23 03:20:57  millert
-''' Document set_logname option and enbolden refs to sudo and visudo.
+''' Revision 1.4  2000/03/23 04:09:53  millert
+''' Add support for wildcards in the hostname.
 '''
 '''
 .de Sh
@@ -315,7 +315,11 @@ Again, the value of an item may be negated with the \*(L'!\*(R' operator.
 If you do not specify a netmask with a network number, the netmask
 of the host's ethernet \fIinterface\fR\|(s) will be used when matching.
 The netmask may be specified either in dotted quad notation (eg.
-255.255.255.0) or \s-1CIDR\s0 notation (number of bits, eg. 24).
+255.255.255.0) or \s-1CIDR\s0 notation (number of bits, eg. 24).  A hostname
+may include shell-style wildcards (see `Wildcards\*(R' section below),
+but unless the \f(CWhostname\fR command on your machine returns the fully
+qualified hostname, you'll need to use the \fIfqdn\fR option for wildcards
+to be useful.
 .PP
 .Vb 2
 \& Cmnd_List ::= Cmnd |
@@ -332,7 +336,7 @@ The netmask may be specified either in dotted quad notation (eg.
 \&          '!'* Cmnd_Alias
 .Ve
 A \f(CWCmnd_List\fR is a list of one or more commandnames, directories, and other
-aliases.  A commandname is a fully-qualified filename which may include
+aliases.  A commandname is a fully qualified filename which may include
 shell-style wildcards (see `Wildcards\*(R' section below).  A simple
 filename allows the user to run the command with any arguments he/she
 wishes.  However, you may also command line arguments (including wildcards).
@@ -961,8 +965,8 @@ imperative that \fIsudoers\fR be free of syntax errors since \fBsudo\fR
 will not run with a syntactically incorrect \fIsudoers\fR file.
 .PP
 When using netgroups of machines (as opposed to users), if you
-store fully-qualified hostnames in the netgroup (as is usually the
-case), you either need to have the machine's hostname be fully-qualified
+store fully qualified hostnames in the netgroup (as is usually the
+case), you either need to have the machine's hostname be fully qualified
 as returned by the \f(CWhostname\fR command or use the \fIfqdn\fR option in
 \fIsudoers\fR.
 .SH "FILES"
