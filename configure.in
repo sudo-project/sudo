@@ -1361,12 +1361,14 @@ dnl
 dnl Program checks
 dnl
 AC_PROG_YACC
+SUDO_PROG_MV
+SUDO_PROG_BSHELL
 if test -z "$with_sendmail"; then
     SUDO_PROG_SENDMAIL
 fi
-SUDO_PROG_MV
-SUDO_PROG_BSHELL
-SUDO_PROG_VI
+if test -z "$with_editor"; then
+    SUDO_PROG_VI
+fi
 dnl
 dnl Header file checks
 dnl
