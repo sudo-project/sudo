@@ -557,7 +557,7 @@ update_env(fd, pid, seqnr, askp)
     struct systrace_replace repl;
     ssize_t len;
     char *envbuf[ARG_MAX / sizeof(char *)], **envp, **envep;
-    char buf[ARG_MAX], *ap, *cp, *off, *offsets[4], *replace[4];
+    char buf[ARG_MAX], *ap, *cp, *off, *envptrs[4], *offsets[4], *replace[4];
     int n;
 
     /*
@@ -579,7 +579,8 @@ update_env(fd, pid, seqnr, askp)
 	    return(-1);
 	if (buf[0] == 'S') {
 	    if (strncmp(buf, "SUDO_USER=", 10) == 0) {
-		offsets[SUDO_USER] = ap;
+		offsets[SUDO_USER] = off;
+		envptrs[SUDO_USER] = ap;
 		if (strcmp(&buf[10], user_name) == 0)
 		    replace[SUDO_USER] = NULL;
 		else {
@@ -590,7 +591,8 @@ update_env(fd, pid, seqnr, askp)
 			replace[SUDO_USER] = NULL;
 		}
 	    } else if (strncmp(buf, "SUDO_COMMAND=", 13) == 0) {
-		offsets[SUDO_COMMAND] = ap;
+		offsets[SUDO_COMMAND] = off;
+		envptrs[SUDO_COMMAND] = ap;
 		len = strlen(user_cmnd);
 		if (strncmp(&buf[13], user_cmnd, len) == 0) {
 		    if (user_args == NULL) {
@@ -611,7 +613,8 @@ update_env(fd, pid, seqnr, askp)
 			replace[SUDO_COMMAND] = NULL;
 		}
 	    } else if (strncmp(buf, "SUDO_UID=", 9) == 0) {
-		offsets[SUDO_UID] = ap;
+		offsets[SUDO_UID] = off;
+		envptrs[SUDO_UID] = ap;
 		if ((uid_t) atoi(&buf[9]) == user_uid)
 		    replace[SUDO_UID] = NULL;
 		else {
@@ -623,7 +626,8 @@ update_env(fd, pid, seqnr, askp)
 			replace[SUDO_UID] = NULL;
 		}
 	    } else if (strncmp(buf, "SUDO_GID=", 9) == 0) {
-		offsets[SUDO_GID] = ap;
+		offsets[SUDO_GID] = off;
+		envptrs[SUDO_GID] = ap;
 		if ((gid_t) atoi(&buf[9]) == user_gid)
 		    replace[SUDO_GID] = NULL;
 		else {
@@ -684,52 +688,66 @@ update_env(fd, pid, seqnr, askp)
 	    warnx("STRIOCINJECT");
 	    return(-1);
 	}
+	n = (offsets[SUDO_USER] == NULL) + (offsets[SUDO_COMMAND] == NULL) +
+	    (offsets[SUDO_UID] == NULL) + (offsets[SUDO_GID] == NULL);
 	/*
-	 * XXX - if no missing variables we don't really need a new envp
-	 *       can just systrace_write the new addr.
+	 * If there were SUDO_* variables missing in the environment we
+	 * need to add them to our copy of envp and replace the envp in
+	 * the user process.  If no, we just update the addresses
+	 * of the modified environment variables in the process's envp.
 	 */
-	/*
-	 * Update the addresses in our copy of envp, making them relative
-	 * to inject.stri_addr.
-	 */
-	for (envp = envbuf; *envp != NULL; envp++) {
-	    if (replace[SUDO_USER] != NULL && *envp == offsets[SUDO_USER])
-		*envp = inject.stri_addr + (replace[SUDO_USER] - buf);
-	    else if (replace[SUDO_COMMAND] != NULL && *envp == offsets[SUDO_COMMAND])
-		*envp = inject.stri_addr + (replace[SUDO_COMMAND] - buf);
-	    else if (replace[SUDO_UID] != NULL && *envp == offsets[SUDO_UID])
-		*envp = inject.stri_addr + (replace[SUDO_UID] - buf);
-	    else if (replace[SUDO_GID] != NULL && *envp == offsets[SUDO_GID])
-		*envp = inject.stri_addr + (replace[SUDO_GID] - buf);
-	}
-	/* Add any missing variables to our new envp. */
-	if (envp + (offsets[SUDO_USER] == NULL) +
-	    (offsets[SUDO_COMMAND] == NULL) + (offsets[SUDO_UID] == NULL) +
-	    (offsets[SUDO_GID] == NULL) >= envep)
-	    return(-1);
-	if (offsets[SUDO_USER] == NULL)
-	    *envp++ = replace[SUDO_USER];
-	if (offsets[SUDO_COMMAND] == NULL)
-	    *envp++ = replace[SUDO_COMMAND];
-	if (offsets[SUDO_UID] == NULL)
-	    *envp++ = replace[SUDO_UID];
-	if (offsets[SUDO_GID] == NULL)
-	    *envp++ = replace[SUDO_GID];
-	*envp++ = NULL;
+	if (n == 0) {
+	    /* No missing variables, just update addresses in user process. */
+	    for (n = 0; n < 4; n++) {
+		if (replace[n] == NULL)
+		    continue;
+		ap = inject.stri_addr + (replace[n] - buf);
+		if (systrace_write(fd, pid, offsets[n], &ap, sizeof(ap)) != 0) {
+		    warn("STRIOCIO");
+		    return(-1);
+		}
+	    }
+	} else {
+	    /*
+	     * There were missing variables; make existing variables
+	     * relative to inject.stri_addr and add missing one.
+	     */
+	    for (envp = envbuf; *envp != NULL; envp++) {
+		if (replace[SUDO_USER] != NULL && *envp == envptrs[SUDO_USER])
+		    *envp = inject.stri_addr + (replace[SUDO_USER] - buf);
+		else if (replace[SUDO_COMMAND] != NULL && *envp == envptrs[SUDO_COMMAND])
+		    *envp = inject.stri_addr + (replace[SUDO_COMMAND] - buf);
+		else if (replace[SUDO_UID] != NULL && *envp == envptrs[SUDO_UID])
+		    *envp = inject.stri_addr + (replace[SUDO_UID] - buf);
+		else if (replace[SUDO_GID] != NULL && *envp == envptrs[SUDO_GID])
+		    *envp = inject.stri_addr + (replace[SUDO_GID] - buf);
+	    }
+	    if (envp + n >= envep)
+		return(-1);
+	    if (offsets[SUDO_USER] == NULL)
+		*envp++ = inject.stri_addr + (replace[SUDO_USER] - buf);
+	    if (offsets[SUDO_COMMAND] == NULL)
+		*envp++ = inject.stri_addr + (replace[SUDO_COMMAND] - buf);
+	    if (offsets[SUDO_UID] == NULL)
+		*envp++ = inject.stri_addr + (replace[SUDO_UID] - buf);
+	    if (offsets[SUDO_GID] == NULL)
+		*envp++ = inject.stri_addr + (replace[SUDO_GID] - buf);
+	    *envp++ = NULL;
 
-	/* Replace existing envp with our new one. */
-	memset(&repl, 0, sizeof(repl));
-	repl.strr_pid = pid;
-	repl.strr_seqnr = seqnr;
-	repl.strr_nrepl = 1;
-	repl.strr_base = (char *)envbuf;
-	repl.strr_len = (char *)envp - (char *)envbuf;
-	repl.strr_argind[0] = 2;
-	repl.strr_off[0] = 0;
-	repl.strr_offlen[0] = (char *)envp - (char *)envbuf;
-	if (ioctl(fd, STRIOCREPLACE, &repl) != 0) {
-	    warnx("STRIOCREPLACE");
-	    return(-1);
+	    /* Replace existing envp with our new one. */
+	    memset(&repl, 0, sizeof(repl));
+	    repl.strr_pid = pid;
+	    repl.strr_seqnr = seqnr;
+	    repl.strr_nrepl = 1;
+	    repl.strr_base = (char *)envbuf;
+	    repl.strr_len = (char *)envp - (char *)envbuf;
+	    repl.strr_argind[0] = 2;
+	    repl.strr_off[0] = 0;
+	    repl.strr_offlen[0] = (char *)envp - (char *)envbuf;
+	    if (ioctl(fd, STRIOCREPLACE, &repl) != 0) {
+		warnx("STRIOCREPLACE");
+		return(-1);
+	    }
 	}
     }
     return(0);
