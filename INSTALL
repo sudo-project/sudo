@@ -10,9 +10,9 @@ INSTALL NOTES
    works.  You may have to add your own OS entry to the config directory.
    Take a look at the entries in config/ for an idea of how to do so.
    The way things work is that Makefile creates Makefile.real by cat'ing
-   config/os-type (architecture dependent portion) and Makefile.ind
+   config/os-type (architecture dependent portion) and Makefile.common
    (architecture independent portion).  It should be fairly straight-
-   forward.
+   forward.  See the file PORTING for hints.
 
 3) Do a make install (as root) to install sudo.  If you get an error
    about setuid(0) failing, something went wrong with the install and
