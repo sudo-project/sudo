@@ -104,8 +104,6 @@ sudoers_lookup(pwflag)
     validated = VALIDATE_NOT_OK | FLAG_NO_HOST | FLAG_NO_USER;
     if (pwflag && list_pw == NULL)
 	SET(validated, FLAG_NO_CHECK);
-    else if (!def_authenticate)
-	validated |= FLAG_NOPASS;
 
     /*
      * Only check the actual command if pwflag is not set.
@@ -141,8 +139,8 @@ sudoers_lookup(pwflag)
 	    SET(validated, VALIDATE_OK);
 	    if (pwcheck == always && def_authenticate)
 		SET(validated, FLAG_CHECK_USER);
-	    else if (pwcheck == never || !def_authenticate || nopass == TRUE)
-		SET(validated, FLAG_NOPASS);
+	    else if (pwcheck == never || nopass == TRUE)
+		def_authenticate = FALSE;
 	}
 	return(validated);
     }
@@ -173,15 +171,12 @@ sudoers_lookup(pwflag)
 	CLR(validated, VALIDATE_NOT_OK);
 	SET(validated, VALIDATE_OK);
 	if (tags != NULL) {
-	    if (tags->nopasswd == TRUE ||
-		(tags->nopasswd == UNSPEC && !def_authenticate))
-		SET(validated, FLAG_NOPASS);
-	    if (tags->noexec == TRUE ||
-		(tags->noexec == UNSPEC && def_noexec))
-		SET(validated, FLAG_NOEXEC);
-	    if (tags->monitor == TRUE ||
-		(tags->monitor == UNSPEC && def_monitor))
-		SET(validated, FLAG_MONITOR);
+	    if (tags->nopasswd != UNSPEC)
+		def_authenticate = !tags->nopasswd;
+	    if (tags->noexec != UNSPEC)
+		def_noexec = tags->noexec;
+	    if (tags->monitor != UNSPEC)
+		def_monitor = tags->monitor;
 	}
     }
     set_perms(PERM_ROOT);

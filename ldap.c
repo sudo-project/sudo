@@ -951,23 +951,23 @@ int pwflag;
      * is "never". (example verifypw=never or listpw=never)
      *
      */
-    if (pwflag<0) { /* -k */
-      ret=VALIDATE_OK; SET(ret,FLAG_NOPASS);
-    } else if (sudo_defs_table[pwflag].sd_un.tuple == never){ /* see note above */
-      ret=VALIDATE_OK; SET(ret,FLAG_NOPASS);
-    } else {
-      ret=VALIDATE_OK; /* extra paranoid */
+    ret=VALIDATE_OK;
+    if (pwflag != -1) {
+      switch (sudo_defs_table[pwflag].sd_un.tuple) {
+	case never:
+          def_authenticate = FALSE;
+	  break;
+	case always:
+	  if (def_authenticate)
+	    SET(ret, FLAG_CHECK_USER);
+	  break;
+	default:
+	  break;
+      }
     }
   }
 
-  if (ISSET(ret,VALIDATE_OK)) {
-    /* We have a match.  Should we check the password? */
-    /* Note: This could be the global or a rule specific option */
-    if (!def_authenticate) SET(ret,FLAG_NOPASS);
-    /* Same logic with noexec and monitor */
-    if (def_noexec)        SET(ret,FLAG_NOEXEC);
-    if (def_monitor)       SET(ret,FLAG_MONITOR);
-  } else {
+  if (!ISSET(ret,VALIDATE_OK)) {
     /* we do not have a match */
     ret=VALIDATE_NOT_OK;
     if (pwflag) SET(ret,FLAG_NO_CHECK);

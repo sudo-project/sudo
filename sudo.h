@@ -63,12 +63,9 @@ struct sudo_user {
 #define VALIDATE_OK		0x002
 #define VALIDATE_NOT_OK		0x004
 #define FLAG_CHECK_USER		0x010
-#define FLAG_NOPASS		0x020
-#define FLAG_NO_USER		0x040
-#define FLAG_NO_HOST		0x080
-#define FLAG_NO_CHECK		0x100
-#define FLAG_NOEXEC		0x200
-#define FLAG_MONITOR		0x400
+#define FLAG_NO_USER		0x020
+#define FLAG_NO_HOST		0x040
+#define FLAG_NO_CHECK		0x080
 
 /*
  * Pseudo-boolean values

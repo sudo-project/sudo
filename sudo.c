@@ -326,7 +326,7 @@ main(argc, argv, envp)
     auth_pw = get_authpw();
 
     /* Require a password if sudoers says so.  */
-    if (!ISSET(validated, FLAG_NOPASS))
+    if (def_authenticate)
 	check_user(ISSET(validated, FLAG_CHECK_USER));
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
@@ -342,7 +342,7 @@ main(argc, argv, envp)
 
     /* Build a new environment that avoids any nasty bits if we have a cmnd. */
     if (ISSET(sudo_mode, MODE_RUN))
-	new_environ = rebuild_env(envp, sudo_mode, ISSET(validated, FLAG_NOEXEC));
+	new_environ = rebuild_env(envp, sudo_mode, def_noexec);
     else
 	new_environ = envp;
 
@@ -376,7 +376,7 @@ main(argc, argv, envp)
 	}
 
 #ifdef HAVE_SYSTRACE 
-	if (ISSET(validated, FLAG_MONITOR))
+	if (def_monitor)
 	    systrace_attach(getpid());
 #endif
 
