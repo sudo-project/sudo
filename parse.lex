@@ -43,6 +43,12 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif /* HAVE_STRINGS_H */
 #include <sys/types.h>
 #include <sys/param.h>
 #include <netinet/in.h>
@@ -70,5 +76,5 @@ int sudolineno = 0;
 (\/[a-zA-Z0-9_.+-]+)+\/? { fill(); return IDENT3;} /* absolute command path */
 %%
 fill() {
-strcpy(yylval.char_val, yytext);
+(void) strcpy(yylval.char_val, yytext);
 }
