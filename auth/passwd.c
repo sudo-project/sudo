@@ -58,6 +58,9 @@
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
+#define DESLEN			13
+#define HAS_AGEINFO(p, l)	(l == 18 && p[DESLEN] == ',')
+
 int
 passwd_verify(pw, pass, auth)
     struct passwd *pw;
@@ -65,7 +68,10 @@ passwd_verify(pw, pass, auth)
     sudo_auth *auth;
 {
     char sav, *epass;
+    size_t pw_len;
     int error;
+
+    pw_len = strlen(pw->pw_passwd);
 
 #ifdef HAVE_GETAUTHUID
     /* Ultrix shadow passwords may use crypt16() */
@@ -79,20 +85,20 @@ passwd_verify(pw, pass, auth)
      * If this turns out not to be safe we will have to use OS #ifdef's (sigh).
      */
     sav = pass[8];
-    if (strlen(pw->pw_passwd) == 13)
+    if (pw_len == DESLEN || HAS_AGEINFO(pw->pw_passwd, pw_len))
 	pass[8] = '\0';
 
     /*
      * Normal UN*X password check.
-     * HP-UX adds extra info at the end for password aging so we only
-     * compare the first len(epass) bytes *unless* pass is the empty string.
+     * HP-UX may add aging info (separated by a ',') at the end so
+     * only compare the first DESLEN characters in that case.
      */
     epass = (char *) crypt(pass, pw->pw_passwd);
-    if (*pass)
-	error = strncmp(pw->pw_passwd, epass, strlen(epass));
+    pass[8] = sav;
+    if (HAS_AGEINFO(pw->pw_passwd, pw_len) && strlen(epass) == DESLEN)
+	error = strncmp(pw->pw_passwd, epass, DESLEN);
     else
 	error = strcmp(pw->pw_passwd, epass);
-    pass[8] = sav;
 
     return(error ? AUTH_FAILURE : AUTH_SUCCESS);
 }
