@@ -357,30 +357,30 @@ rebuild_env(envp, sudo_mode, noexec)
 		switch (**ep) {
 		    case 'H':
 			if (strncmp(*ep, "HOME=", 5) == 0)
-			    didvar |= DID_HOME;
+			    SET(didvar, DID_HOME);
 			break;
 		    case 'S':
 			if (strncmp(*ep, "SHELL=", 6) == 0)
-			    didvar |= DID_SHELL;
+			    SET(didvar, DID_SHELL);
 			break;
 		    case 'L':
 			if (strncmp(*ep, "LOGNAME=", 8) == 0)
-			    didvar |= DID_LOGNAME;
+			    SET(didvar, DID_LOGNAME);
 			break;
 		    case 'U':
 			if (strncmp(*ep, "USER=", 5) == 0)
-			    didvar |= DID_USER;
+			    SET(didvar, DID_USER);
 			break;
 		}
 		insert_env(*ep, 0);
 	    } else {
 		/* Preserve TERM and PATH, ignore anything else. */
-		if (!(didvar & DID_TERM) && !strncmp(*ep, "TERM=", 5)) {
+		if (!ISSET(didvar, DID_TERM) && strncmp(*ep, "TERM=", 5) == 0) {
 		    insert_env(*ep, 0);
-		    didvar |= DID_TERM;
-		} else if (!(didvar & DID_PATH) && !strncmp(*ep, "PATH=", 5)) {
+		    SET(didvar, DID_TERM);
+		} else if (!ISSET(didvar, DID_PATH) && strncmp(*ep, "PATH=", 5) == 0) {
 		    insert_env(*ep, 0);
-		    didvar |= DID_PATH;
+		    SET(didvar, DID_PATH);
 		}
 	    }
 	}
@@ -390,19 +390,19 @@ rebuild_env(envp, sudo_mode, noexec)
 	 * otherwise they may be from the user's environment (depends
 	 * on sudoers options).
 	 */
-	if (sudo_mode & MODE_LOGIN_SHELL) {
+	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	    insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), 0);
 	    insert_env(format_env("SHELL", runas_pw->pw_shell, VNULL), 0);
 	    insert_env(format_env("LOGNAME", runas_pw->pw_name, VNULL), 0);
 	    insert_env(format_env("USER", runas_pw->pw_name, VNULL), 0);
 	} else {
-	    if (!(didvar & DID_HOME))
+	    if (!ISSET(didvar, DID_HOME))
 		insert_env(format_env("HOME", user_dir, VNULL), 0);
-	    if (!(didvar & DID_SHELL))
+	    if (!ISSET(didvar, DID_SHELL))
 		insert_env(format_env("SHELL", sudo_user.pw->pw_shell, VNULL), 0);
-	    if (!(didvar & DID_LOGNAME))
+	    if (!ISSET(didvar, DID_LOGNAME))
 		insert_env(format_env("LOGNAME", user_name, VNULL), 0);
-	    if (!(didvar & DID_USER))
+	    if (!ISSET(didvar, DID_USER))
 		insert_env(format_env("USER", user_name, VNULL), 0);
 	}
     } else {
@@ -448,17 +448,17 @@ rebuild_env(envp, sudo_mode, noexec)
 		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
 		    ps1 = *ep + 5;
 		else if (strncmp(*ep, "PATH=", 5) == 0)
-		    didvar |= DID_PATH;
+		    SET(didvar, DID_PATH);
 		else if (strncmp(*ep, "TERM=", 5) == 0)
-		    didvar |= DID_TERM;
+		    SET(didvar, DID_TERM);
 		insert_env(*ep, 0);
 	    }
 	}
     }
     /* Provide default values for $TERM and $PATH if they are not set. */
-    if (!(didvar & DID_TERM))
+    if (!ISSET(didvar, DID_TERM))
 	insert_env("TERM=unknown", 0);
-    if (!(didvar & DID_PATH))
+    if (!ISSET(didvar, DID_PATH))
 	insert_env(format_env("PATH", _PATH_DEFPATH, VNULL), 0);
 
 #ifdef SECURE_PATH
@@ -473,7 +473,7 @@ rebuild_env(envp, sudo_mode, noexec)
     }
 
     /* Set $HOME for `sudo -H'.  Only valid at PERM_FULL_RUNAS. */
-    if ((sudo_mode & MODE_RESET_HOME) && runas_pw->pw_dir)
+    if (ISSET(sudo_mode, MODE_RESET_HOME) && runas_pw->pw_dir)
 	insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), 1);
 
     /*

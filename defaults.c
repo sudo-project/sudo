@@ -279,13 +279,13 @@ set_default(var, val, op)
 	case T_STR:
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
-		if (!(cur->type & T_BOOL) || op != FALSE) {
+		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warnx("no value specified for `%s' on line %d",
 			var, sudolineno);
 		    return(FALSE);
 		}
 	    }
-	    if ((cur->type & T_PATH) && val && *val != '/') {
+	    if (ISSET(cur->type, T_PATH) && val && *val != '/') {
 		warnx("values for `%s' must start with a '/'", var);
 		return(FALSE);
 	    }
@@ -297,7 +297,7 @@ set_default(var, val, op)
 	case T_INT:
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
-		if (!(cur->type & T_BOOL) || op != FALSE) {
+		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warnx("no value specified for `%s' on line %d",
 			var, sudolineno);
 		    return(FALSE);
@@ -311,7 +311,7 @@ set_default(var, val, op)
 	case T_UINT:
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
-		if (!(cur->type & T_BOOL) || op != FALSE) {
+		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warnx("no value specified for `%s' on line %d",
 			var, sudolineno);
 		    return(FALSE);
@@ -325,7 +325,7 @@ set_default(var, val, op)
 	case T_MODE:
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
-		if (!(cur->type & T_BOOL) || op != FALSE) {
+		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warnx("no value specified for `%s' on line %d",
 			var, sudolineno);
 		    return(FALSE);
@@ -351,7 +351,7 @@ set_default(var, val, op)
 	case T_LIST:
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
-		if (!(cur->type & T_BOOL) || op != FALSE) {
+		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warnx("no value specified for `%s' on line %d",
 			var, sudolineno);
 		    return(FALSE);
@@ -365,7 +365,7 @@ set_default(var, val, op)
 	case T_TUPLE:
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
-		if (!(cur->type & T_BOOL) || op != FALSE) {
+		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
 		    warnx("no value specified for `%s' on line %d",
 			var, sudolineno);
 		    return(FALSE);
