@@ -119,7 +119,7 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL \
             INSTALL.configure TODO PORTING README RUNSON \
             FAQ TROUBLESHOOTING Makefile.in acsite.m4 aixcrypt.exp \
             config.h.in configure configure.in config.guess config.sub \
-            pathnames.h.in getcwd.c strdup.c indent.pro install-sh \
+            pathnames.h.in getcwd.c indent.pro install-sh \
             mkinstalldirs lsearch.c putenv.c sudo.tab.c tgetpass.c \
             emul/search.h emul/utime.h utime.c fnmatch.c emul/fnmatch.h \
             fnmatch.3 testsudoers.c sample.pam sample.sudoers \
@@ -131,7 +131,7 @@ VERSIONFILES = emul/utime.h check.c compat.h config.h.in dce_pwent.c \
 	       find_path.c getspwuid.c getcwd.c goodpath.c ins_2001.h \
 	       ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c \
 	       logging.c parse.c parse.lex parse.yacc pathnames.h.in \
-	       putenv.c strdup.c sudo.c sudo.h sudo_setenv.c testsudoers.c \
+	       putenv.c sudo.c sudo.h sudo_setenv.c testsudoers.c \
 	       tgetpass.c utime.c visudo.c secureware.c check_sia.c alloc.c
 
 all: $(PROGS)

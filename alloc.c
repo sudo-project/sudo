@@ -47,7 +47,6 @@
 #ifndef __GNUC__		/ *gcc has its own malloc */
 extern VOID *malloc	__P((size_t));
 #endif /* __GNUC__ */
-extern char *strdup	__P((const char *));
 #endif /* !STDC_HEADERS */
 
 extern char **Argv;		/* from sudo.c */
@@ -68,13 +67,13 @@ static const char rcsid[] = "$Sudo$";
 VOID *emalloc(size)
     size_t size;
 {
-    VOID *ret;
+    VOID *ptr;
 
-    if ((ret = malloc(size)) == NULL) {
+    if ((ptr = malloc(size)) == NULL) {
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
-    return(ret);
+    return(ptr);
 }
 
 /**********************************************************************
@@ -82,7 +81,8 @@ VOID *emalloc(size)
  * erealloc()
  *
  *  erealloc() calls the system realloc(3) and exits with an error if
- *  realloc(3) fails.
+ *  realloc(3) fails.  You can call erealloc() with a NULL pointer even
+ *  if the system realloc(3) does not support this.
  */
 
 VOID *erealloc(ptr, size)
@@ -101,17 +101,18 @@ VOID *erealloc(ptr, size)
  *
  * estrdup()
  *
- *  estrdup() calls the system strdup(3) and exits with an error if
- *  strdup(3) fails.  NOTE: unlike strdup(3), estrdup(NULL) is legal.
+ *  estrdup() is like strdup(3) except that it exits with an error if
+ *  malloc(3) fails.  NOTE: unlike strdup(3), estrdup(NULL) is legal.
  */
 
-char *estrdup(str)
-    char *str;
+char *estrdup(src)
+    const char *src;
 {
+    char *dst = NULL;
 
-    if (str != NULL && (str = (char *)strdup(str)) == NULL) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
+    if (src != NULL) {
+	dst = (char *) emalloc(strlen(src) + 1);
+	(void) strcpy(dst, src);
     }
-    return(str);
+    return(dst);
 }

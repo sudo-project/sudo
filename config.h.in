@@ -171,9 +171,6 @@
 /* Define if you have getcwd(3).  */
 #undef HAVE_GETCWD
 
-/* Define if you have strdup(3).  */
-#undef HAVE_STRDUP
-
 /* Define if you have fnmatch(3).  */
 #undef HAVE_FNMATCH
 

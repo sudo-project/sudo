@@ -1053,3 +1053,7 @@ Sudo 1.5.9 released.
 
 330) It is now possible to use the '!' operator in a runas list as
      well as in a Cmnd_Alias, Host_Alias and User_Alias.
+
+331) In estrdup(), do the malloc ourselves so we don't need to rely on the
+     system strdup(3) which may or may not exist.  There is now no need to
+     provide strdup() for those w/o it.

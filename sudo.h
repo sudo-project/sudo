@@ -250,7 +250,7 @@ int yyparse		__P((void));
 void pass_warn		__P((FILE *));
 VOID *emalloc		__P((size_t));
 VOID *erealloc		__P((VOID *, size_t));
-VOID *estrdup		__P((char *));
+char *estrdup		__P((const char *));
 YY_DECL;
 
 
