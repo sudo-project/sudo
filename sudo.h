@@ -292,6 +292,7 @@ typedef struct list {
 #define PASSWORD_NOT_CORRECT     0x04
 #define ALL_SYSTEMS_GO           0x00
 #define NO_SUDOERS_FILE          ( 0x05 | GLOBAL_PROBLEM )
+#define GLOBAL_NO_AUTH_ENT       ( 0x06 | GLOBAL_PROBLEM )
 
 #undef TRUE
 #define TRUE                     0x01
@@ -360,8 +361,8 @@ extern char ** environ;
 /*
  * Emulate seteuid() for HP-UX
  */
-#ifdef hpux
+#ifdef __hpux
 #  define seteuid(__EUID)	(setresuid((uid_t)-1, __EUID, (uid_t)-1))
-#endif	/* hpux */
+#endif	/* __hpux */
 
 #endif /* _SUDO_SUDO_H */
