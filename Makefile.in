@@ -149,9 +149,9 @@ testsudoers: $(PARSEOBJS) $(TESTOBJS)
 
 $(SUDOBJS) $(LIBOBJS) : $(HDRS) config.h
 
-sudo.cat: sudo.man
+sudo.cat: $(srcdir)/sudo.man
 
-visudo.cat: visudo.man
+visudo.cat: $(srcdir)/visudo.man
 
 install: install-binaries install-sudoers install-man
 
@@ -163,13 +163,13 @@ install-sudoers:
 	@ if [ -f $(sudoersdir)/sudoers ]; then  \
 	    echo "Will not overwrite existing $(sudoersdir)/sudoers file."; \
 	else \
-	    $(INSTALL) -o $(owner) -g $(group) -m 0400 sudoers $(sudoersdir)/sudoers; \
+	    $(INSTALL) -o $(owner) -g $(group) -m 0400 $(srcdir)/sudoers $(sudoersdir)/sudoers; \
 	fi
 
 install-man:
-	$(INSTALL) -o $(owner) -g $(group) -m 0644 sudo.$(mantype) $(mandir8)/sudo.$(mansect8)
-	$(INSTALL) -o $(owner) -g $(group) -m 0644 visudo.$(mantype) $(mandir8)/visudo.$(mansect8)
-	$(INSTALL) -o $(owner) -g $(group) -m 0644 sudoers.$(mantype) $(mandir5)/sudoers.$(mansect5)
+	$(INSTALL) -o $(owner) -g $(group) -m 0644 $(srcdir)/sudo.$(mantype) $(mandir8)/sudo.$(mansect8)
+	$(INSTALL) -o $(owner) -g $(group) -m 0644 $(srcdir)/visudo.$(mantype) $(mandir8)/visudo.$(mansect8)
+	$(INSTALL) -o $(owner) -g $(group) -m 0644 $(srcdir)/sudoers.$(mantype) $(mandir5)/sudoers.$(mansect5)
 	@MAN_POSTINSTALL@
 
 tags: $(SRCS)
