@@ -25,10 +25,6 @@
  *  Todd C. Miller (millert@colorado.edu) Sat Mar 25 21:50:36 MST 1995
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -72,6 +68,10 @@ extern int stat		__P((const char *, struct stat *));
 #if defined(POSIX_SIGNALS) && !defined(SA_RESETHAND)
 #define SA_RESETHAND    0
 #endif /* POSIX_SIGNALS && !SA_RESETHAND */
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 /*
  * Function prototypes

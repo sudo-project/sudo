@@ -24,10 +24,6 @@
  *  Todd C. Miller (millert@colorado.edu) Sat Oct 17 14:42:44 MDT 1998
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #ifdef HAVE_GETPRPWNAM
@@ -57,6 +53,10 @@ static const char rcsid[] = "$Id$";
 #include <prot.h>
 
 #include "sudo.h"
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 
 /********************************************************************

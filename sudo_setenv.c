@@ -25,10 +25,6 @@
  *  Todd C. Miller (millert@colorado.edu) Fri Jun  3 18:32:19 MDT 1994
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -55,6 +51,10 @@ extern int putenv	__P((const char *));
 extern int setenv	__P((char *, char *, int));
 #endif /* HAVE_SETENV */
 #endif /* !STDC_HEADERS */
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 
 /**********************************************************************

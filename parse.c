@@ -24,10 +24,6 @@
  * Chris Jepeway <jepeway@cs.utk.edu>
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -83,6 +79,10 @@ static const char rcsid[] = "$Id$";
 #endif
 
 #include "sudo.h"
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 /*
  * Globals

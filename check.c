@@ -35,10 +35,6 @@
  *  Jeff Nieusma  Thu Mar 21 22:39:07 MST 1991
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -97,6 +93,9 @@ static const char rcsid[] = "$Id$";
 #include "insults.h"
 #include "version.h"
 
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 /*
  * Prototypes for local functions

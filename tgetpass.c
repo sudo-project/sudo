@@ -26,10 +26,6 @@
  *  Todd C. Miller  Sun Jun  5 17:22:31 MDT 1994
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -84,6 +80,10 @@ static const char rcsid[] = "$Id$";
 #ifndef TCSASOFT
 #define TCSASOFT	0
 #endif /* TCSASOFT */
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 
 /******************************************************************

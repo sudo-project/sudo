@@ -26,10 +26,6 @@
  *  Todd C. Miller (millert@colorado.edu) Sat Jun 17 16:42:41 MDT 1995
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -42,6 +38,10 @@ static const char rcsid[] = "$Id$";
 #include <pathnames.h>
 #include "compat.h"
 #include "emul/utime.h"
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 
 /******************************************************************

@@ -24,10 +24,6 @@
  *  Todd C. Miller (millert@colorado.edu) Sun Aug  7 20:30:17 MDT 1994
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -49,6 +45,10 @@ static const char rcsid[] = "$Id$";
 #if !defined(STDC_HEADERS) && !defined(__GNUC__)
 extern char *malloc	__P((size_t));
 #endif /* !STDC_HEADERS && !gcc */
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 
 /******************************************************************

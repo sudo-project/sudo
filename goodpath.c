@@ -28,10 +28,6 @@
  *  Todd C. Miller (millert@colorado.edu) Sat Mar 25 21:58:17 MST 1995
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -56,6 +52,9 @@ static const char rcsid[] = "$Id$";
 extern int stat		__P((const char *, struct stat *));
 #endif /* !STDC_HEADERS */
 
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 /******************************************************************
  *

@@ -26,10 +26,6 @@
  *  Todd C. Miller  Mon May  1 20:48:43 MDT 1995
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -53,11 +49,7 @@ static const char rcsid[] = "$Id$";
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/param.h>
-#ifdef HAVE_SYS_SOCKIO_H
-#include <sys/sockio.h>
-#else
 #include <sys/ioctl.h>
-#endif /* HAVE_SYS_SOCKIO_H */
 #ifdef _ISC
 #include <sys/stream.h>
 #include <sys/sioctl.h>
@@ -82,6 +74,10 @@ static const char rcsid[] = "$Id$";
 extern char *malloc	__P((size_t));
 extern char *realloc	__P((VOID *, size_t));
 #endif /* !STDC_HEADERS && !__GNUC__ */
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 /*
  * Globals

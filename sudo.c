@@ -50,10 +50,6 @@
  *		Todd Miller  <Todd.Miller@courtesan.com>
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #define MAIN
 
 #include "config.h"
@@ -98,6 +94,10 @@ extern char *strdup	__P((const char *));
 #endif /* HAVE_STRDUP */
 extern char *getenv	__P((char *));
 #endif /* STDC_HEADERS */
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 
 /*

@@ -32,10 +32,6 @@
  *  Jeff Nieusma  Thu Mar 21 23:11:23 MST 1991
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -60,6 +56,10 @@ extern char *malloc	__P((size_t));
 #endif /* __GNUC__ */
 extern char *strcpy	__P((char *, const char *));
 #endif /* !STDC_HEADERS */
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 
 /******************************************************************

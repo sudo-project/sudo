@@ -26,10 +26,6 @@
  * Chris Jepeway <jepeway@cs.utk.edu>
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -64,6 +60,10 @@ static const char rcsid[] = "$Id$";
 #ifndef HAVE_STRCASECMP
 #define strcasecmp(a,b)		strcmp(a,b)
 #endif /* !HAVE_STRCASECMP */
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 /*
  * Globals

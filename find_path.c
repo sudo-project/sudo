@@ -28,10 +28,6 @@
  *  Todd C. Miller (millert@colorado.edu) Sat Mar 25 21:50:36 MST 1995
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -72,7 +68,6 @@ extern char *strdup	__P((const char *));
 #endif /* HAVE_STRDUP */
 #endif /* !STDC_HEADERS */
 
-
 #ifndef _S_IFMT
 #define _S_IFMT		S_IFMT
 #endif /* _S_IFMT */
@@ -80,6 +75,9 @@ extern char *strdup	__P((const char *));
 #define _S_IFLNK	S_IFLNK
 #endif /* _S_IFLNK */
 
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 /*******************************************************************
  *

@@ -27,10 +27,6 @@
  *  Todd C. Miller  Mon Nov 20 13:53:06 MST 1995
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #include <stdio.h>
@@ -72,6 +68,10 @@ static const char rcsid[] = "$Id$";
 #endif /* HAVE_GETAUTHUID */
 
 #include "sudo.h"
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 #ifndef STDC_HEADERS
 #ifndef __GNUC__                /* gcc has its own malloc */

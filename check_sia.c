@@ -25,10 +25,6 @@
  *  Spider Boardman Sep 26, 1998
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #ifdef HAVE_SIA
@@ -53,6 +49,10 @@ static const char rcsid[] = "$Id$";
 #include <siad.h>
 
 #include "sudo.h"
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 /*
  * Prototypes for local functions

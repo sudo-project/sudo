@@ -25,10 +25,6 @@
  * Chris Jepeway <jepeway@cs.utk.edu>
  */
 
-#ifndef lint
-static const char rcsid[] = "$Id$";
-#endif /* lint */
-
 #include "config.h"
 
 #ifdef STDC_HEADERS
@@ -49,6 +45,10 @@ static const char rcsid[] = "$Id$";
 #include <netinet/in.h>
 #include "sudo.h"
 #include "sudo.tab.h"
+
+#ifndef lint
+static const char rcsid[] = "$Id$";
+#endif /* lint */
 
 #undef yywrap		/* guard against a yywrap macro */
 
