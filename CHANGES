@@ -1122,3 +1122,20 @@ Sudo 1.5.9 released.
      temp files but it does *require* that you not try to put the
      temp file in a world-writable directory.  This shoud not be
      an issue as the temp file should live in the same dir as sudoers.
+
+352) Fixed crypt() check in libufc.
+
+353) It is now possible to put a list of users as the first thing in a
+     user specification.  I don't suggest ths but it makes the grammar
+     more uniform.
+
+354) Visudo will now warn about what it thinks are undefined aliases.
+     Since it can't be 100% sure these are just warnings, not errors.
+
+355) Add a --without-passwd option to configure that turns off
+     passwd/shadow file authentication.  Only usable with an alternate
+     authentication scheme.
+
+356) Add a --disable-authentication option to configure that causes sudo
+     to not require authentication by default.  The PASSWD tag can be
+     used to require authentication for an entry.

@@ -10,7 +10,4 @@ Known bugs in sudo version 1.6
    in subsequent configure runs, even if other --with-* options are
    given.  This is a flaw in GNU autoconf.
 
-4) Cmnd_Alias's need to precede permissions specs.  At the very least,
-   visudo should give an error if you get this wrong.
-
-5) On DUNIX in sia mode, hitting return at the prompt does not quit.
+4) On DUNIX in sia mode, hitting return at the prompt does not quit.
