@@ -1304,15 +1304,14 @@ case "$host" in
 		mansectform=4
 		;;
     *-*-bsdi*)
-		# Use shlicc for BSD/OS 2.x unless asked to do otherwise
-		if test "$OSREV" -ge 2 -a "${with_CC+set}" != set -a \
-			"$ac_cv_prog_CC" = "gcc"; then
-		    echo 'using shlicc as CC'
-		    ac_cv_prog_CC=shlicc
-		    CC="$ac_cv_prog_CC"
-		fi
-		if test "$CHECKSHADOW" = "true"; then
-		    CHECKSHADOW="false"
+		# Use shlicc for BSD/OS [23].x unless asked to do otherwise
+		if test "${with_CC+set}" != set -a "$ac_cv_prog_CC" = gcc; then
+		    case "$OSREV" in
+			2|3)	echo 'using shlicc as CC'
+				ac_cv_prog_CC=shlicc
+				CC="$ac_cv_prog_CC"
+				;;
+		    esac
 		fi
 		;;
     *-*-freebsd*)
