@@ -303,12 +303,6 @@ extern int errno;
 #ifdef hpux
 # define getdtablesize()	(sysconf(_SC_OPEN_MAX))
 # define setreuid(__RUID, __EUID)	(setresuid(__RUID, __EUID, (uid_t)-1))
-# ifndef USE_CWD
-#  define USE_CWD
-# endif	/* USE_CWD */
-# ifndef HAS_SAVED_UID
-#  define HAS_SAVED_UID
-# endif	/* HAS_SAVED_UID */
 #endif	/* hpux */
 
 /*
