@@ -42,10 +42,6 @@
 #define _PATH_SUDO_TIMEDIR	"/tmp/.odus"
 #endif /* _PATH_SUDO_TIMEDIR */
 
-#ifndef _PATH_SUDO_LOGFILE
-#define _PATH_SUDO_LOGFILE	"/var/adm/sudo.log"
-#endif /* _PATH_SUDO_LOGFILE */
-
 #ifndef _PATH_TTY
 #define _PATH_TTY		"/dev/tty"
 #endif /* _PATH_TTY */
@@ -54,6 +50,14 @@
  * The following paths are gleaned via configure but you can override
  * configure's values here if you want.
  */
+
+/*
+ * Where to put the sudo log file when logging to a file this
+ * is /var/log/sudo.log if /var/log exists, else /var/adm/sudo.log
+ */
+#ifndef _PATH_SUDO_LOGFILE
+#define _PATH_SUDO_LOGFILE	_SUDO_PATH_LOGFILE
+#endif /* _PATH_SUDO_LOGFILE */
 
 #ifndef _PATH_SENDMAIL
 #define _PATH_SENDMAIL		_SUDO_PATH_SENDMAIL
