@@ -151,7 +151,7 @@ sudo: $(PARSEOBJS) $(SUDOBJS) $(LIBOBJS)
 visudo: $(PARSEOBJS) $(VISUDOBJS) $(LIBOBJS)
 	$(CC) -o $@ $(PARSEOBJS) $(VISUDOBJS) $(LIBOBJS) $(VISUDO_LDFLAGS) $(VISUDO_LIBS)
 
-testsudoers: $(PARSEOBJS) $(TESTOBJS)
+testsudoers: $(PARSEOBJS) $(TESTOBJS) $(LIBOBJS)
 	$(CC) -o $@ $(PARSEOBJS) $(TESTOBJS) $(VISUDO_LDFLAGS) $(VISUDO_LIBS)
 
 # Uncomment the following if you intend to modify parse.yacc
