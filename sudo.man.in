@@ -167,7 +167,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "January 21, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "January 29, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo \- execute a command as another user
 .SH "SYNOPSIS"
@@ -217,7 +217,8 @@ is set, \fBsudo\fR will use this value to determine who the actual
 user is.  This can be used by a user to log commands through sudo
 even when a root shell has been invoked.  It also allows the \fB\-e\fR
 flag to remain useful even when being run via a sudo-run script or
-program.
+program.  Note however, that the sudoers lookup is still done for
+root, not the user specified by \f(CW\*(C`SUDO_USER\*(C'\fR.
 .PP
 \&\fBsudo\fR can log both successful and unsuccessful attempts (as well
 as errors) to \fIsyslog\fR\|(3), a log file, or both.  By default \fBsudo\fR
