@@ -101,6 +101,6 @@ linear_base(key, base, nelp, width, compar, add_flag)
 	 * manual.
 	 */
 	++*nelp;
-	(void) memmove(end, key, (size_t)width);
+	(void) memcpy(end, key, width);
 	return(end);
 }
