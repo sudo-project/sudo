@@ -93,7 +93,8 @@ struct ldap_config {
 } ldap_conf;
 
 /*
- * Walk through search results and return true if we have a matching netgroup.
+ * Walk through search results and return TRUE if we have a matching
+ * netgroup, else FALSE.
  */
 int
 sudo_ldap_check_user_netgroup(ld, entry)
@@ -101,7 +102,7 @@ sudo_ldap_check_user_netgroup(ld, entry)
     LDAPMessage *entry;
 {
     char **v = NULL, **p = NULL;
-    int ret = 0;
+    int ret = FALSE;
 
     if (!entry)
 	return ret;
@@ -116,7 +117,7 @@ sudo_ldap_check_user_netgroup(ld, entry)
 
 	/* match any */
 	if (netgr_matches(*p, NULL, NULL, user_name))
-	    ret = 1;
+	    ret = TRUE;
 
 	if (ldap_conf.debug > 1)
 	    printf(" %s\n", ret ? "MATCH!" : "not");
@@ -129,7 +130,8 @@ sudo_ldap_check_user_netgroup(ld, entry)
 }
 
 /*
- * Walk through search results and return true if we have a host match.
+ * Walk through search results and return TRUE if we have a
+ * host match, else FALSE.
  */
 int
 sudo_ldap_check_host(ld, entry)
@@ -137,7 +139,7 @@ sudo_ldap_check_host(ld, entry)
     LDAPMessage *entry;
 {
     char **v = NULL, **p = NULL;
-    int ret = 0;
+    int ret = FALSE;
 
     if (!entry)
 	return ret;
@@ -154,7 +156,7 @@ sudo_ldap_check_host(ld, entry)
 	if (!strcasecmp(*p, "ALL") || addr_matches(*p) ||
 	    netgr_matches(*p, user_host, user_shost, NULL) ||
 	    !hostname_matches(user_shost, user_host, *p))
-	    ret = 1;
+	    ret = TRUE;
 
 	if (ldap_conf.debug > 1)
 	    printf(" %s\n", ret ? "MATCH!" : "not");
@@ -167,7 +169,8 @@ sudo_ldap_check_host(ld, entry)
 }
 
 /*
- * Walk through search results and return true if we have a runas match.
+ * Walk through search results and return TRUE if we have a runas match,
+ * else FALSE.
  * Since the runas directive in /etc/sudoers is optional, so is sudoRunAs.
  */
 int
@@ -176,7 +179,7 @@ sudo_ldap_check_runas(ld, entry)
     LDAPMessage *entry;
 {
     char **v = NULL, **p = NULL;
-    int ret = 0;
+    int ret = FALSE;
 
     if (!entry)
 	return ret;
@@ -221,7 +224,7 @@ sudo_ldap_check_runas(ld, entry)
 	    printf("ldap sudoRunAs '%s' ...", *p);
 
 	if (!strcasecmp(*p, *user_runas) || !strcasecmp(*p, "ALL")) 
-	    ret = 1;
+	    ret = TRUE;
 
 	if (ldap_conf.debug > 1)
 	    printf(" %s\n", ret ? "MATCH!" : "not");
@@ -234,7 +237,7 @@ sudo_ldap_check_runas(ld, entry)
 }
 
 /*
- * Walk through search results and return true if we have a command match.
+ * Walk through search results and return TRUE if we have a command match.
  */
 int
 sudo_ldap_check_command(ld, entry)
@@ -242,7 +245,7 @@ sudo_ldap_check_command(ld, entry)
     LDAPMessage *entry;
 {
     char *allowed_cmnd, *allowed_args, **v = NULL, **p = NULL;
-    int foundbang, ret = 0;
+    int foundbang, ret = FALSE;
 
     if (!entry)
 	return ret;
@@ -256,7 +259,7 @@ sudo_ldap_check_command(ld, entry)
 
 	/* Match against ALL ? */
 	if (!strcasecmp(*p, "ALL")) {
-	    ret = 1;
+	    ret = TRUE;
 	    if (safe_cmnd)
 		free(safe_cmnd);
 	    safe_cmnd = estrdup(user_cmnd);
@@ -267,10 +270,10 @@ sudo_ldap_check_command(ld, entry)
 
 	/* check for !command */
 	if (**p == '!') {
-	    foundbang = 1;
+	    foundbang = TRUE;
 	    allowed_cmnd = estrdup(1 + *p);	/* !command */
 	} else {
-	    foundbang = 0;
+	    foundbang = FALSE;
 	    allowed_cmnd = estrdup(*p);		/* command */
 	}
 
@@ -285,7 +288,7 @@ sudo_ldap_check_command(ld, entry)
 	     * If allowed (no bang) set ret but keep on checking.
 	     * If disallowed (bang), exit loop.
 	     */
-	    ret = foundbang ? -1 : 1;
+	    ret = foundbang ? -1 : TRUE;
 	    if (ldap_conf.debug > 1)
 		printf(" MATCH!\n");
 	} else if (ldap_conf.debug > 1) {
@@ -298,7 +301,7 @@ sudo_ldap_check_command(ld, entry)
     if (v)
 	ldap_value_free(v);	/* more cleanup */
 
-    /* return true if we found at least one ALLOW and no DENY */
+    /* return TRUE if we found at least one ALLOW and no DENY */
     return ret > 0;
 }
 
@@ -439,16 +442,16 @@ sudo_ldap_build_pass1()
 }
 
 /*
- * Map yes/true/on to 1, no/false/off to 0, else -1
+ * Map yes/true/on to TRUE, no/false/off to FALSE, else -1
  */
 int
 _atobool(s)
     const char *s;
 {
     if (!strcasecmp(s, "yes") || !strcasecmp(s, "true") || !strcasecmp(s, "on"))
-	return 1;
+	return TRUE;
     if (!strcasecmp(s, "no") || !strcasecmp(s, "false") || !strcasecmp(s, "off"))
-	return 0;
+	return FALSE;
     return -1;
 }
 
@@ -461,7 +464,7 @@ sudo_ldap_read_config()
     ldap_conf.tls_checkpeer = -1;	/* default */
 
     if ((f = fopen(_PATH_LDAP_CONF, "r")) == NULL)
-	return 0;
+	return FALSE;
     while (fgets(buf, sizeof(buf), f)) {
 	c = buf;
 	if (*c == '#')
@@ -583,8 +586,8 @@ sudo_ldap_read_config()
 	printf("===================\n");
     }
     if (!ldap_conf.base)
-	return 0;		/* if no base is defined, ignore LDAP */
-    return 1;
+	return FALSE;		/* if no base is defined, ignore LDAP */
+    return TRUE;
 }
 
 /*
@@ -619,7 +622,7 @@ size_t sudo_ldap_cm_list_size;
 
 #define SAVE_LIST(x) ncat(&sudo_ldap_cm_list,&sudo_ldap_cm_list_size,(x))
 /*
- * Walks through search result and returns true if we have a
+ * Walks through search result and returns TRUE if we have a
  * command match
  */
 int
@@ -632,7 +635,7 @@ sudo_ldap_add_match(ld, entry, pwflag)
 
     /* if we are not collecting matches, then don't save them */
     if (pwflag != I_LISTPW)
-	return 1;
+	return TRUE;
 
     /* collect the dn, only show the rdn */
     dn = ldap_get_dn(ld, entry);
@@ -667,7 +670,7 @@ sudo_ldap_add_match(ld, entry, pwflag)
     if (v)
 	ldap_value_free(v);
 
-    return 0;			/* Don't stop at the first match */
+    return FALSE;		/* Don't stop at the first match */
 }
 #undef SAVE_LIST
 
@@ -843,8 +846,8 @@ sudo_ldap_check(v, pwflag)
     LDAP *ld = (LDAP *) v;
     LDAPMessage *entry = NULL, *result = NULL;	/* used for searches */
     char *filt;					/* used to parse attributes */
-    int rc = 0, ret = 0, pass = 0;		/* temp/final return values */
-    int ldap_user_matches = 0, ldap_host_matches = 0; /* flags */
+    int rc = FALSE, ret = FALSE, pass = FALSE;	/* temp/final return values */
+    int ldap_user_matches = FALSE, ldap_host_matches = FALSE; /* flags */
 
     /*
      * Okay - time to search for anything that matches this user
