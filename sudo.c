@@ -261,7 +261,7 @@ int main(argc, argv)
     add_env();			/* add in SUDO_* envariables */
 
     /* validate the user but don't search for "validate" */
-    rtn = validate(sudo_mode != MODE_VALIDATE);
+    rtn = validate((sudo_mode != MODE_VALIDATE));
     switch (rtn) {
 
 	case VALIDATE_OK:
@@ -282,7 +282,7 @@ int main(argc, argv)
 		    struct stat st;
 
 		    if (stat(cmnd, &st) < 0) {
-			(void) fprintf(stderr, "%s: unable to stat %s:",
+			(void) fprintf(stderr, "%s: unable to stat %s: ",
 					Argv[0], cmnd);
 			perror("");
 			exit(1);
