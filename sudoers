@@ -13,6 +13,8 @@
 
 # Defaults specification
 
+# Runas alias specification
+
 # User privilege specification
 root	ALL=(ALL) ALL
 
@@ -25,4 +27,3 @@ root	ALL=(ALL) ALL
 # Samples
 # %users  ALL=/sbin/mount /cdrom,/sbin/umount /cdrom
 # %users  localhost=/sbin/shutdown -h now
-
