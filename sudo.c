@@ -138,6 +138,7 @@ char **NewArgv = NULL;
 struct passwd *user_pw_ent;
 char *runas_user = "root";
 char *cmnd = NULL;
+char *cmnd_args = NULL;
 char *tty = NULL;
 char *prompt = PASSPROMPT;
 char host[MAXHOSTNAMELEN + 1];
@@ -678,6 +679,14 @@ static void add_env(contiguous)
     }
     if (NewArgc > 1)
 	(void) free(buf);
+
+    /* grab a pointer to the flat arg string from the environment */
+    if (NewArgc > 1 && (cmnd_args = getenv("SUDO_COMMAND"))) {
+	if ((cmnd_args = strchr(cmnd_args, ' ')))
+	    cmnd_args++;
+	else
+	    cmnd_args = NULL;
+    }
 
     /* add the SUDO_USER envariable */
     if (sudo_setenv("SUDO_USER", user_name)) {
