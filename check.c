@@ -603,7 +603,7 @@ static int sudo_krb_validate_user(user, pass)
      * Set the ticket file to be in sudo sudo timedir so we don't
      * wipe out other kerberos tickets.
      */
-    (void) sprintf(tkfile, "%s/tkt%d", _PATH_SUDO_TIMEDIR, uid);
+    (void) sprintf(tkfile, "%s/tkt%ld", _PATH_SUDO_TIMEDIR, (long) uid);
     (void) krb_set_tkt_string(tkfile);
 
     /*
