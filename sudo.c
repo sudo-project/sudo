@@ -48,6 +48,7 @@
 #ifdef hpux
 #include <unistd.h>
 #endif
+#include <errno.h>
 #include <string.h>
 #include <strings.h>
 #include <pwd.h>
@@ -120,6 +121,7 @@ switch ( rtn ) {
 		exit(1);
 		}
             execv(cmnd, &Argv[1]);
+	    perror(cmnd);
 	    break;
 	    
     case VALIDATE_NO_USER:
@@ -137,7 +139,7 @@ switch ( rtn ) {
 
     }
 
-
+    return(-1);		/* If we get here it's an error (execv failed) */
 }
 
 
