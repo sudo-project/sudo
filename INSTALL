@@ -118,6 +118,26 @@ Special features/options:
   --with-CC=path
 	Specifies path to C compiler you wish to use.
 
+  --with-incpath
+	Adds the specified directories to CPPFLAGS so configure and the
+	compiler will look there for include files.  Multiple directories
+	may be specified as long as they are space separated.
+	Eg: --with-incpath="/usr/local/include /opt/include"
+
+  --with-libpath
+	Adds the specified directories to SUDO_LDFLAGS and VISUDO_LDFLAGS so
+	configure and the compiler will look there for libraries.  Multiple
+	directories may be specified as with --with-incpath.
+
+  --with-libraries
+	Adds the specified libaries to SUDO_LIBS and and VISUDO_LIBS so sudo
+	will link against them.  If the library doesn't start with `-l' or end
+	in `.a' or `.o' a `-l' will be prepended to it.  Multiple libraries may
+	be specified as long as they are space separated.
+
+  --with-csops
+	Add CSOps standard options.  You probably aren't interested in this.
+
   --with-skey
 	Enable S/Key OTP (One Time Password) support.
 
@@ -149,6 +169,15 @@ Special features/options:
 	compatibility libraries.  This uses kerberos passphrases for
 	authentication but does not use the kerberos cookie scheme.
 
+  --with-authenticate
+	Enable support for the AIX 4.x general authentication function.
+	This will use the authentication scheme specified for the user
+	on the machine.
+
+  --with-sia
+	Enable SIA support.  This is the "Security Integration Architecture"
+	on Digital UN*X.
+
   --with-pam
 	Enable PAM support.  Tested on Redhat Linux 5.x but should work on
 	earlier versions too.  Not tested on Solaris 2.X but it is expected
@@ -158,11 +187,6 @@ Special features/options:
 	Enable AFS support with kerberos authentication.  Should work under
 	AFS 3.3.  If your AFS doesn't have -laudit you should be able to
 	link without it.
-
-  --with-authenticate
-	Enable support for the AIX 4.x general authentication function.
-	This will use the authentication scheme specified for the user
-	on the machine.
 
   --with-DCE
 	Enable DCE support.  Known to work on HP-UX 9.X and 10.0.  Other
@@ -196,11 +220,6 @@ Special features/options:
 	Number of characters per line for the file log.  This is only used if
 	you are to "file" or "both".  This value is used to decide when to wrap
 	lines for nicer log files.  The default is 80.
-
-  --without-root-sudo
-	Don't let root run sudo.  This can be used to prevent people from
-	"chaining" sudo commands to get a root shell by doing something
-	like "sudo sudo /bin/sh".
 
   --with-ignore-dot
 	If set, sudo will ignore '.' or '' (current dir) in $PATH.
@@ -328,6 +347,9 @@ Special features/options:
 	Define this if you want to be insulted for typing an incorrect password
 	just like the original sudo(8).  This is off by default.
 
+  --with-all-insults
+	Include all the insult sets listed below.
+
   --with-classic-insults
 	Uses insults from sudo "classic."  If you just specify --with-insults
 	you will get the classic and CSOps insults.  This is on by default if
@@ -357,26 +379,6 @@ Special features/options:
 	specified by --with-exemptgroup.  If you do not specify a path,
 	"/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc" is used.
 
-  --with-incpath
-	Adds the specified directories to CPPFLAGS so configure and the
-	compiler will look there for include files.  Multiple directories
-	may be specified as long as they are space separated.
-	Eg: --with-incpath="/usr/local/include /opt/include"
-
-  --with-libpath
-	Adds the specified directories to SUDO_LDFLAGS and VISUDO_LDFLAGS so
-	configure and the compiler will look there for libraries.  Multiple
-	directories may be specified as with --with-incpath.
-
-  --with-libraries
-	Adds the specified libaries to SUDO_LIBS and and VISUDO_LIBS so sudo
-	will link against them.  If the library doesn't start with `-l' or end
-	in `.a' or `.o' a `-l' will be prepended to it.  Multiple libraries may
-	be specified as long as they are space separated.
-
-  --with-csops
-	Add CSOps standard options.  You probably aren't interested in this.
-
   --without-interfaces
 	This option keeps sudo from trying to glean the ip address from each
 	attached ethernet interface.  It is only useful on a machine where
@@ -386,6 +388,11 @@ Special features/options:
   --disable-shadow
 	Disable shadow password support.  Normally, sudo will compile in shadow
 	password support and use a shadow password if it exists.
+
+  --disable-root-sudo
+	Don't let root run sudo.  This can be used to prevent people from
+	"chaining" sudo commands to get a root shell by doing something
+	like "sudo sudo /bin/sh".
 
   --disable-tgetpass
 	Use system getpass(3) instead of sudo-supplied tgetpass().  For systems
