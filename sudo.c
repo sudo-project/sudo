@@ -377,7 +377,7 @@ int main(argc, argv)
 
 #ifndef DONT_LEAK_PATH_INFO
 	    if (cmnd_status == NOT_FOUND_DOT)
-		(void) fprintf(stderr, "%s: ignoring %s found in '.'\nUse `sudo ./%s' if this is the %s you wish to run.\n", Argv[0], cmnd, cmnd);
+		(void) fprintf(stderr, "%s: ignoring %s found in '.'\nUse `sudo ./%s' if this is the %s you wish to run.\n", Argv[0], cmnd, cmnd, cmnd);
 	    else if (cmnd_status == NOT_FOUND)
 		(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0],
 		    cmnd);
