@@ -343,9 +343,8 @@ char *strdup		__P((const char *));
 #ifndef HAVE_GETCWD
 char *getcwd		__P((char *, size_t));
 #endif
-#ifndef HAVE_REALPATH
-char *realpath		__P((const char *, char *));
-#endif
+char *sudo_realpath	__P((const char *, char *));
+int sudo_setenv		__P((char *, char *));
 char *tgetpass		__P((char *, int));
 char *find_path		__P((char *));
 void log_error		__P((int));
