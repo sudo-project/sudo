@@ -51,16 +51,13 @@
 #include <ctype.h>
 #include "sudo.h"
 #include "parse.h"
-#include <sudo.tab.h>
+#include "gram.h"
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-#undef yywrap		/* guard against a yywrap macro */
-
 extern YYSTYPE yylval;
-extern int clearaliases;
 int sudolineno = 1;
 char *sudoers;
 static int sawspace = 0;
@@ -70,12 +67,11 @@ static int arg_size = 0;
 static int fill			__P((char *, int));
 static int fill_cmnd		__P((char *, int));
 static int fill_args		__P((char *, int, int));
-static int buffer_frob		__P((char *));
-extern void reset_aliases	__P((void));
+static int switch_buffer	__P((char *));
 extern void yyerror		__P((const char *));
 
-#define	push_include(_p)	(buffer_frob((_p)))
-#define	pop_include()		(buffer_frob(NULL))
+#define	push_include(_p)	(switch_buffer((_p)))
+#define	pop_include()		(switch_buffer(NULL))
 
 /* realloc() to size + COMMANDARGINC to make room for command args */
 #define COMMANDARGINC	64
@@ -90,11 +86,12 @@ extern void yyerror		__P((const char *));
 OCTET			(1?[0-9]{1,2})|(2[0-4][0-9])|(25[0-5])
 DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
 HOSTNAME		[[:alnum:]_-]+
-WORD			([^#>@!=:,\(\) \t\n\\]|\\[^\n])+
+WORD			([^#>!=:,\(\) \t\n\\]|\\[^\n])+
 ENVAR			([^#!=, \t\n\\]|\\[^\n])([^#=, \t\n\\]|\\[^\n])*
 DEFVAR			[a-z_]+
 
 %option nounput
+%option noyywrap
 
 /* XXX - convert GOTRUNAS to exclusive state (GOTDEFS cannot be) */
 %s	GOTRUNAS
@@ -283,7 +280,7 @@ MONITOR[[:blank:]]*:	{
 			    /* UN*X group */
 			    if (!fill(yytext, yyleng))
 				yyterminate();
-			    LEXTRACE("GROUP ");
+			    LEXTRACE("USERGROUP ");
 			    return(USERGROUP);
 			}
 
@@ -516,9 +513,10 @@ struct sudoers_state {
 };
 
 #define MAX_SUDOERS_DEPTH	128
+#define SUDOERS_STACK_INCREMENT	16
 
 static int
-buffer_frob(path)
+switch_buffer(path)
     char *path;
 {
     static size_t stacksize, depth;
@@ -537,8 +535,10 @@ buffer_frob(path)
 		yyerror("too many levels of includes");
 		return(FALSE);
 	    }
-	    stacksize += 16;
-	    if ((state = realloc(state, sizeof(state) * stacksize)) == NULL) {
+	    stacksize += SUDOERS_STACK_INCREMENT;
+	    state = (struct sudoers_state *) realloc(state,
+		sizeof(state) * stacksize);
+	    if (state == NULL) {
 		yyerror("unable to allocate memory");
 		return(FALSE);
 	    }
@@ -568,16 +568,5 @@ buffer_frob(path)
 	sudolineno = state[depth].lineno;
 	keepopen = FALSE;
     }
-    return(TRUE);
-}
-
-int
-yywrap()
-{
-
-    /* Free space used by the aliases unless called by testsudoers. */
-    if (clearaliases)
-	reset_aliases();
-
     return(TRUE);
 }
