@@ -114,6 +114,10 @@ dnl Other vaiables
 dnl
 CHECKSHADOW=true
 CHECKSIA=true
+shadow_defs=
+shadow_funcs=
+shadow_libs=
+shadow_libs_optional=
 
 dnl
 dnl Override default configure dirs...
@@ -1231,11 +1235,7 @@ case "$host" in
 		    OSDEFS="${OSDEFS} -D__USE_FIXED_PROTOTYPES__"
 		fi
 
-		# check for password adjunct functions (shadow passwords)
-		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_FUNCS(getpwanam issecure, , [break])
-		    CHECKSHADOW="false"
-		fi
+		shadow_funcs="getpwanam issecure"
 		;;
     *-*-solaris2*)
 		# To get the crypt(3) prototype (so we pass -Wall)
@@ -1276,10 +1276,6 @@ case "$host" in
 		fi
 		;;
     *-*-hiuxmpp*)
-		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1], AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"; SECUREWARE=1]))
-		    CHECKSHADOW="false"
-		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		;;
@@ -1305,10 +1301,7 @@ case "$host" in
 			*-*-hpux9.*)
 			    AC_DEFINE(BROKEN_SYSLOG)
 
-			    if test "$CHECKSHADOW" = "true"; then
-				AC_CHECK_FUNCS(getspwuid)
-				CHECKSHADOW="false"
-			    fi
+			    shadow_funcs="getspwuid"
 
 			    # DCE support (requires ANSI C compiler)
 			    if test "$with_DCE" = "yes"; then
@@ -1319,17 +1312,13 @@ case "$host" in
 			    fi
 			;;
 			*-*-hpux10.*)
-			    if test "$CHECKSHADOW" = "true"; then
-				AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) AC_CHECK_LIB(sec, iscomsec, AC_DEFINE(HAVE_ISCOMSEC)) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1])
-				CHECKSHADOW="false"
-			    fi
+			    shadow_funcs="getprpwnam iscomsec"
+			    shadow_libs="-lsec"
 			;;
 			*)
-			if test "$CHECKSHADOW" = "true"; then
-			    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
-			    CHECKSHADOW="false"
-			fi
-			: ${with_pam='maybe'}
+			    shadow_funcs="getspnam iscomsec"
+			    shadow_libs="-lsec"
+			    : ${with_pam='maybe'}
 			;;
 		esac
 		;;
@@ -1352,24 +1341,29 @@ case "$host" in
 		  esac
 		], AC_MSG_RESULT(no))
 
-		# use SIA by default, if we have it, else SecureWare
-		# unless overridden on the command line
+		shadow_funcs="getprpwnam dispcrypt"
+		# OSF/1 4.x and higher need -ldb too
+		if test $OSMAJOR -lt 4; then
+		    shadow_libs="-lsecurity -laud -lm"
+		else
+		    shadow_libs="-lsecurity -ldb -laud -lm"
+		fi
+
+		# use SIA by default, if we have it
 		if test "$CHECKSIA" = "true"; then
-		    AC_CHECK_FUNC(sia_ses_init, [AC_DEFINE(HAVE_SIA)] [CHECKSHADOW=false])
+		    AC_CHECK_FUNCS(sia_ses_init, [found=true], [found=false])
+		    if test "$found" = "true"; then
+			if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+			    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+			    AC_MSG_ERROR(["cannot mix SIA with other authentication methods (such as $_AUTH)"])
+			fi
+			AUTH_OBJS="sia.o"
+			CHECKSHADOW=false
+		    fi
 		fi
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(security, getprpwnam, SECUREWARE=1)
-		    CHECKSHADOW="false"
-		fi
-		if test -n "$SECUREWARE"; then
-		    AC_DEFINE(HAVE_GETPRPWNAM)
-		    # -ldb includes bogus versions of snprintf/vsnprintf
-		    AC_CHECK_FUNCS(snprintf, , [NEED_SNPRINTF=1])
-		    AC_CHECK_FUNCS(vsnprintf, , [NEED_SNPRINTF=1])
-		    # 4.x and higher need -ldb too...
-		    AC_CHECK_LIB(db, dbopen, [SUDO_LIBS="${SUDO_LIBS} -lsecurity -ldb -laud -lm"; LIBS="${LIBS} -lsecurity -ldb -laud -lm"], [SUDO_LIBS="${SUDO_LIBS} -lsecurity -ldb -laud -lm"; LIBS="${LIBS} -lsecurity -ldb -laud -lm"])
-		    AC_CHECK_FUNCS(dispcrypt)
-		    AC_MSG_CHECKING([for broken /usr/include/prot.h])
+		    # prot.h is included when using shadow passwords
+		    AC_MSG_CHECKING([for broken prot.h])
 		    AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/security.h>
@@ -1378,12 +1372,6 @@ case "$host" in
 		    [AC_MSG_RESULT([yes, fixing locally])
 		    sed 's:<acl.h>:<sys/acl.h>:g' < /usr/include/prot.h > prot.h
 		    ])
-		elif test "$CHECKSIA" = "true"; then
-		    if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-			_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-			AC_MSG_ERROR(["cannot mix SIA with other authentication methods (such as $_AUTH)"])
-		    fi
-		    AUTH_OBJS="sia.o"
 		fi
 		: ${mansectsu='8'}
 		: ${mansectform='4'}
@@ -1418,10 +1406,8 @@ case "$host" in
     *-*-linux*)
 		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
 		# Some Linux versions need to link with -lshadow
-		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_FUNCS(getspnam, , [AC_CHECK_LIB(shadow, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lshadow"; LIBS="${LIBS} -lshadow"])])
-		    CHECKSHADOW="false"
-		fi
+		shadow_funcs="getspnam"
+		shadow_libs_optional="-lshadow"
 		: ${with_pam='maybe'}
 		;;
     *-convex-bsd*)
@@ -1430,17 +1416,14 @@ case "$host" in
 		    CFLAGS="${CFLAGS} -D__STDC__"
 		fi
 
-		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lprot"; LIBS="${LIBS} -lprot"; OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"; SECUREWARE=1])
-		    CHECKSHADOW="false"
-		fi
+		shadow_defs="-D_AUDIT -D_ACL -DSecureWare"
+		shadow_funcs="getprpwnam"
+		shadow_libs="-lprot"
 		;;
     *-*-ultrix*)
 		OS="ultrix"
-		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(auth, getauthuid, AC_DEFINE(HAVE_GETAUTHUID) [SUDO_LIBS="${SUDO_LIBS} -lauth"; LIBS="${LIBS} -lauth"])
-		    CHECKSHADOW="false"
-		fi
+		shadow_funcs="getauthuid"
+		shadow_libs="-lauth"
 		;;
     *-*-riscos*)
 		LIBS="${LIBS} -lsun -lbsd"
@@ -1455,19 +1438,15 @@ case "$host" in
 		SUDO_LIBS="${SUDO_LIBS} -lcrypt"
 		LIBS="${LIBS} -lcrypt"
 
-		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
-		    CHECKSHADOW="false"
-		fi
+		shadow_funcs="getspnam"
+		shadow_libs="-lsec"
+
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		;;
     *-*-sco*|*-sco-*)
-		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(prot, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lprot -lx"; LIBS="${LIBS} -lprot -lx"; SECUREWARE=1], , -lx)
-		    AC_CHECK_LIB(gen, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lgen"; LIBS="${LIBS} -lgen"])
-		    CHECKSHADOW="false"
-		fi
+		shadow_funcs="getprpwnam"
+		shadow_libs="-lprot -lx"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		;;
@@ -1478,10 +1457,8 @@ case "$host" in
 		: ${mansectform='4'}
 		;;
     *-sequent-sysv*)
-		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
-		    CHECKSHADOW="false"
-		fi
+		shadow_funcs="getspnam"
+		shadow_libs="-lsec"
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		: ${with_rpath='yes'}
@@ -1624,17 +1601,6 @@ if test -n "$with_libraries"; then
 fi
 
 dnl
-dnl Check for shadow password routines if we have not already done so.
-dnl We check for SVR4-style first and then SecureWare-style.
-dnl
-if test "$CHECKSHADOW" = "true"; then
-    AC_CHECK_FUNCS(getspnam, [CHECKSHADOW="false"], [AC_CHECK_LIB(gen, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lgen"; LIBS="${LIBS} -lgen"])])
-fi
-if test "$CHECKSHADOW" = "true"; then
-    AC_CHECK_FUNC(getprpwnam, [AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1], AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"], AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"], AC_CHECK_LIB(prot, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lprot"; LIBS="${LIBS} -lprot"])))])
-fi
-
-dnl
 dnl C compiler checks (to be done after os checks)
 dnl
 AC_PROG_GCC_TRADITIONAL
@@ -1724,9 +1690,6 @@ if test -z "$SKIP_SETREUID"; then
 fi
 if test X"$with_interfaces" != X"no"; then
     AC_CHECK_FUNCS(getifaddrs, [AC_CHECK_FUNCS(freeifaddrs)])
-fi
-if test -n "$SECUREWARE"; then
-    AC_CHECK_FUNCS(bigcrypt set_auth_parameters initprivs)
 fi
 if test -z "$BROKEN_GETCWD"; then
     AC_REPLACE_FUNCS(getcwd)
@@ -2008,7 +1971,48 @@ if test ${with_pam-'no'} != "no"; then
 	    AC_MSG_ERROR(["cannot mix PAM with other authentication methods (such as $_AUTH)"])
 	fi
 	AUTH_OBJS="pam.o"
+	CHECKSHADOW=false
     fi
+fi
+
+dnl
+dnl Check for shadow password routines if we have not already done so.
+dnl If there is a specific list of functions to check we do that first.
+dnl Otherwise, we check for SVR4-style and then SecureWare-style.
+dnl
+if test "$CHECKSHADOW" = "true" -a -n "$shadow_funcs"; then
+    _LIBS="$LIBS"
+    LIBS="$LIBS $shadow_libs"
+    found=no
+    AC_CHECK_FUNCS($shadow_funcs, [found=yes])
+    if test "$found" = "yes"; then
+	SUDO_LIBS="$SUDO_LIBS $shadow_libs"
+    elif test -n "$shadow_libs_optional"; then
+	LIBS="$LIBS $shadow_libs_optional"
+	AC_CHECK_FUNCS($shadow_funcs, [found=yes])
+	if test "$found" = "yes"; then
+	    SUDO_LIBS="$SUDO_LIBS $shadow_libs $shadow_libs_optional"
+	fi
+    fi
+    if test "$found" = "yes"; then
+	case "$shadow_funcs" in
+	    *getprpwnam*) SECUREWARE=1;;
+	esac
+	test -n "$shadow_defs" && OSDEFS="${OSDEFS} $shadow_defs"
+    else
+	LIBS="$_LIBS"
+    fi
+    CHECKSHADOW=false
+fi
+if test "$CHECKSHADOW" = "true"; then
+    AC_CHECK_FUNCS(getspnam, [CHECKSHADOW="false"], [AC_CHECK_LIB(gen, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lgen"; LIBS="${LIBS} -lgen"])])
+fi
+if test "$CHECKSHADOW" = "true"; then
+    AC_CHECK_FUNC(getprpwnam, [AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1], AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"], AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"], AC_CHECK_LIB(prot, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lprot"; LIBS="${LIBS} -lprot"])))])
+fi
+if test -n "$SECUREWARE"; then
+    AC_CHECK_FUNCS(bigcrypt set_auth_parameters initprivs)
+    AUTH_OBJS="${AUTH_OBJS} secureware.o"
 fi
 
 dnl
@@ -2249,9 +2253,6 @@ dnl Use passwd (and secureware) auth modules?
 dnl
 case "$AUTH_OBJS" in
 *passwd.o*)
-    if test -n "$SECUREWARE"; then
-	AUTH_OBJS="${AUTH_OBJS} secureware.o"
-    fi
     ;;
 *)
     AC_DEFINE(WITHOUT_PASSWD)
