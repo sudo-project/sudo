@@ -183,8 +183,8 @@ A C<Cmnd_List> is a list of one or more commandnames, directories, and other
 aliases.  A commandname is a fully qualified filename which may include
 shell-style wildcards (see `Wildcards' section below).  A simple
 filename allows the user to run the command with any arguments he/she
-wishes.  However, you may also command line arguments (including wildcards).
-Alternately, you can specify C<""> to indicate that the command
+wishes.  However, you may also specify command line arguments (including
+wildcards).  Alternately, you can specify C<""> to indicate that the command
 may only be run B<without> command line arguments.  A directory is a
 fully qualified pathname ending in a '/'.  When you specify a directory
 in a C<Cmnd_List>, the user will be able to run any file within that directory
