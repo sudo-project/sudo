@@ -115,6 +115,8 @@ underscore ('_') character.  If the latter, you can ignore
 the warnings (B<sudo> will not complain).  In B<-s> (strict)
 mode these are errors not warnings.
 
+=back
+
 =head1 ENVIRONMENT
 
 The following environment variables are used only if B<visudo>
@@ -140,7 +142,7 @@ See the HISTORY file in the sudo distribution for more details.
 =head1 BUGS
 
 If you feel you have found a bug in sudo, please submit a bug report
-at http://www.courtesan.com/sudo/bugs/.
+at http://www.courtesan.com/sudo/bugs/
 
 =head1 DISCLAIMER
 

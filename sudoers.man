@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.15  1999/11/16 05:23:41  millert
-''' Add warning about using ALL in a command context.
+''' Revision 1.16  1999/11/29 01:57:04  millert
+''' fix some syntactic goofs
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers 5 "1.6" "15/Nov/1999" "FILE FORMATS"
+.TH sudoers 5 "1.6" "28/Nov/1999" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na

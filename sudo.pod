@@ -307,7 +307,7 @@ of B<sudo>.
 =head1 BUGS
 
 If you feel you have found a bug in sudo, please submit a bug report
-at http://www.courtesan.com/sudo/bugs/.
+at http://www.courtesan.com/sudo/bugs/
 
 =head1 DISCLAIMER
 

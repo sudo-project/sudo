@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.40  1999/11/23 05:43:16  millert
-''' Be very clear that the password required is the user's not root's
+''' Revision 1.41  1999/11/29 01:57:04  millert
+''' fix some syntactic goofs
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudo 8 "1.6" "22/Nov/1999" "MAINTENANCE COMMANDS"
+.TH sudo 8 "1.6" "28/Nov/1999" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -425,7 +425,7 @@ See the HISTORY file in the \fBsudo\fR distribution for a short history
 of \fBsudo\fR.
 .SH "BUGS"
 If you feel you have found a bug in sudo, please submit a bug report
-at http://www.courtesan.com/sudo/bugs/.
+at http://www.courtesan.com/sudo/bugs/
 .SH "DISCLAIMER"
 \fBSudo\fR is provided ``AS IS'\*(R' and any express or implied warranties,
 including, but not limited to, the implied warranties of merchantability
