@@ -188,7 +188,7 @@ NOPASSWD[[:blank:]]*:	{
 			}
 
 <GOTRUNAS>[[:upper:]][[:upper:][:digit:]_]* {
-			    /* User_Alias that user can run command as or ALL */
+			    /* Runas_Alias that user can run command as or ALL */
 			    fill(yytext, yyleng);
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
@@ -233,8 +233,6 @@ NOPASSWD[[:blank:]]*:	{
 			}
 
 [[:alnum:]][[:alnum:]_-]*	{
-			    int l;
-
 			    fill(yytext, yyleng);
 			    if (strcmp(yytext, "Host_Alias") == 0) {
 				LEXTRACE("HOSTALIAS ");
@@ -248,14 +246,14 @@ NOPASSWD[[:blank:]]*:	{
 				LEXTRACE("USERALIAS ");
 				return(USERALIAS);
 			    }
-			    l = yyleng - 1;
-			    if (isalpha(yytext[l]) || isdigit(yytext[l])) {
-				/* NAME is what RFC1034 calls a label */
-				LEXTRACE("NAME ");
-				return(NAME);
+			    if (strcmp(yytext, "Runas_Alias") == 0) {
+				LEXTRACE("RUNASALIAS ");
+				return(RUNASALIAS);
 			    }
 
-			    return(ERROR);
+			    /* NAME is what RFC1034 calls a label */
+			    LEXTRACE("NAME ");
+			    return(NAME);
 			}
 
 .			{
