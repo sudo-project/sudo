@@ -1,8 +1,1 @@
-1) Multiple entries per user doesn't work.  Only the first one is
-   used.
-
-2) A syntax error on the first line of the sudoers file may not be caught
-   by visudo.
-
-3) Common syntax errors cause visudo to catch the error on the wrong
-   line.
+1) Sudo -l does not work with the new parser (yet).
