@@ -19,9 +19,9 @@
  *
  *******************************************************************
  *
- *  This module contains getcwd(3) for those systems that lack it.
- *  getcwd(3) returns a pointer to the current working dir.  It uses
- *  path as a copy-out parameter and malloc(3)s space if path is NULL.
+ *  This module contains getwd(3) for those systems that lack it.
+ *  getwd(3) returns a pointer to the current working dir.  It uses
+ *  path as a copy-out parameter.
  *
  *  Todd C. Miller (millert@colorado.edu) Fri Jun  3 18:32:19 MDT 1994
  */
@@ -45,9 +45,6 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif /* HAVE_MALLOC_H */
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -58,9 +55,6 @@ static char rcsid[] = "$Id$";
 #include "compat.h"
 
 #ifndef STDC_HEADERS
-#ifndef __GNUC__		/* gcc has its own malloc */
-extern char *malloc	__P((size_t));
-#endif /* __GNUC__ */
 extern char *strcpy	__P((char *, const char *));
 extern int   strlen	__P((const char *));
 extern char *getwd	__P((char *));
@@ -83,30 +77,28 @@ extern int errno;
 
 /******************************************************************
  *
- *  getcwd()
+ *  getwd()
  *
- *  getcwd() returns a pointer to the current working dir.  It uses
- *  path as a copy-out parameter and malloc(3)s space if path is NULL.
- *  getcwd() will use getwd() if available, else it will use pwd(1).
+ *  getwd() returns a pointer to the current working dir.  It uses
+ *  path as a copy-out parameter.
+ *  getwd() will use getcwd() if available, else it will use pwd(1).
  */
 
-char * getcwd(path, len)
+char * getwd(path)
     char * path;				/* path to copy into */
-    size_t len;					/* length of path */
 {
+#ifndef HAVE_GETCWD
     char buf[MAXPATHLEN+1];			/* temp buffer */
-#ifndef HAVE_GETWD
     FILE * pwd;					/* for popen */
-#endif /* HAVE_GETWD */
+#endif /* HAVE_GETCWD */
 
-    if (path && len <= 0) {
+    if (path == NULL) {
 	errno = EINVAL;
 	return(NULL);
     }
 
-#ifdef HAVE_GETWD
-    if (!getwd(buf))
-	return(NULL);
+#ifdef HAVE_GETCWD
+    return(getcwd(path, MAXPATHLEN));
 #else
     /*
      * open a pipe to pwd and read a line
@@ -122,20 +114,8 @@ char * getcwd(path, len)
     pclose(pwd); 
 
     buf[strlen(buf)-1] = '\0';			/* remove newline */
-#endif /* HAVE_GETWD */
-
-    if (len < strlen(buf) + 1) {
-	errno = ERANGE;
-	return(NULL);
-    }
-
-    if (path == NULL) {
-	if (!(path = (char *) malloc(MAXPATHLEN+1))) {
-	    errno = ENOMEM;
-	    return(NULL);
-	}
-    }
 
     (void) strcpy(path, buf);
     return(path);
+#endif /* HAVE_GETCWD */
 }
