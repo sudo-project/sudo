@@ -118,9 +118,13 @@ currently unreachable.
 =head1 SECURITY NOTES
 
 B<sudo> tries to be safe when executing external commands.
-To this end the C<IFS>, C<LD_*>, C<SHLIB_PATH> (HP-UX only),
+Variables that control how dynamic loading and binding is
+done can be used to subvert the program that B<sudo> runs.
+To combat this the C<LD_*>, C<SHLIB_PATH> (HP-UX only),
 C<LIBPATH> (AIX only), and C<_RLD_*> environmental variables are
 removed from the environment passed on to all commands executed.
+B<sudo> will also remove the C<IFS>, C<ENV>, C<BASH_ENV>
+and C<KRB_CONF> variables as they too can pose a threat.
 
 To prevent command spoofing, B<sudo> checks "." and "" (both
 denoting current directory) last when searching for a command
@@ -151,13 +155,12 @@ would be unable to get them back out.  To get around this
 issue you can use a directory that is not world-writable
 for the timestamps (F</var/adm/sudo> for instance).
 
-To keep users from creating their own timestamp files
-(by creating the timestamp directory before B<sudo>
-is first run and then using chmod and chown to set
-the ownership and mode to a combination B<sudo>
-will accept) with timestamps far in the future B<sudo>
-will not honor any timestamp with a date greater than
-current_time + 2 * C<TIMEOUT>.
+C<sudo> will not honor timestamp files set far in the
+future.  Timestamp files with a date greater than
+current_time + 2 * C<TIMEOUT> will be ignored and
+sudo will log the anomaly.  This is done to keep a user
+from creating his/her own timestamp file with a bogus
+date.
 
 =head1 FILES
 
