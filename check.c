@@ -229,7 +229,6 @@ static void update_timestamp()
 
 static void check_passwd()
 {
-    struct passwd *pw_ent;
 #ifdef HAVE_AFS
     int code;
     long password_expires = -1;
@@ -245,28 +244,30 @@ static void check_passwd()
 #if defined (__convex__) && defined(HAVE_C2_SECURITY)
     char salt[2];		/* Need the salt to perform the encryption */
     register int i;
-    struct pr_passwd *secure_pw_ent;
+    struct pr_passwd *spw_ent;
 #endif /* __convex__ && HAVE_C2_SECURITY */
-    char *encrypted;		/* this comes from /etc/passwd  */
+    char *encrypted=epasswd;	/* this comes from /etc/passwd  */
     char *pass;			/* this is what gets entered    */
     register int counter = TRIES_FOR_PASSWORD;
 
-    /* some os's need to be root to get at shadow password */
-    be_root();
 #if defined (__hpux) && defined(HAVE_C2_SECURITY)
-    spw_ent = getspwuid(uid);
-#endif /* __hpux && HAVE_C2_SECURITY */
-    pw_ent = getpwuid(uid);
-    be_user();
-    if (pw_ent == NULL) {
-	(void) sprintf(user, "%u", uid);
-	log_error(GLOBAL_NO_PW_ENT);
-	inform_user(GLOBAL_NO_PW_ENT);
-	exit(1);
-    }
-#ifdef __svr4__
+    /*
+     * grab encrypted password from shadow pw file
+     * or just use the regular one...
+     */
     be_root();
-    spw_ent = getspnam(pw_ent->pw_name);
+    spw_ent = getspwuid(uid);
+    be_user();
+    if (spw_ent && spw_ent -> pw_passwd)
+	encrypted = spw_ent -> pw_passwd;
+#endif /* __hpux && HAVE_C2_SECURITY */
+#ifdef __svr4__
+    /*
+     * SVR4 should always have a shadow password file
+     * so if this fails it is a fatal error.
+     */
+    be_root();
+    spw_ent = getspnam(user);
     be_user();
     if (spw_ent == NULL) {
 	(void) sprintf(user, "%u", uid);
@@ -275,26 +276,22 @@ static void check_passwd()
 	exit(1);
     }
     encrypted = spw_ent -> sp_pwdp;
-#else
+#endif /* __svr4__ */
 #if defined (__convex__) && defined(HAVE_C2_SECURITY)
+    /*
+     * Convex with C2 security
+     */
     be_root();
-    secure_pw_ent = getprpwnam(pw_ent->pw_name);
+    spw_ent = getprpwnam(pw_ent->pw_name);
     be_user();
-    if (secure_pw_ent == (struct pr_passwd *)NULL) {
+    if (spw_ent == (struct pr_passwd *)NULL) {
 	(void) sprintf(user, "%u", uid);
 	log_error(GLOBAL_NO_AUTH_ENT);
 	inform_user(GLOBAL_NO_AUTH_ENT);
 	exit(1);
     }
-    encrypted = secure_pw_ent->ufld.fd_encrypt;
+    encrypted = spw_ent->ufld.fd_encrypt;
 #endif /* __convex__ && HAVE_C2_SECURITY */
-#if defined (__hpux) && defined(HAVE_C2_SECURITY)
-    if (spw_ent && spw_ent -> pw_passwd)
-	encrypted = spw_ent -> pw_passwd;
-    else
-#endif /* __hpux && HAVE_C2_SECURITY */
-	encrypted = pw_ent -> pw_passwd;
-#endif /* __svr4__ */
 
     /*
      * you get TRIES_FOR_PASSWORD times to guess your password
@@ -308,7 +305,7 @@ static void check_passwd()
 	if (!pass || *pass == '\0')
 	    exit(0);
 #if defined (__convex__) && defined(HAVE_C2_SECURITY)
-	strncpy(salt, secure_pw_ent->ufld.fd_encrypt, 2);
+	strncpy(salt, spw_ent->ufld.fd_encrypt, 2);
 	i = AUTH_SALT_SIZE + AUTH_CIPHERTEXT_SEG_CHARS;
 	if (strncmp(encrypted, crypt(pass, salt), i) == 0)
 	    return;           /* if the passwd is correct return() */
