@@ -1734,11 +1734,17 @@ Sudo 1.6.8 released.
 
 Sudo 1.6.8p1 released.
 
-549) New trace functionality for systems with systrace(4).  When tracing
+549) New monitor functionality for systems with systrace(4).  When tracing
      is enabled sudo will fork a daemon that traces the command and
      intercepts and execve() calls and allows/denies the call based on
-     a sudoers lookup.
+     a sudoers lookup.  Also updates the command's environment with
+     the SUDO_* variables if supported by the version of systrace(4).
 
 550) Added support for multiple sudoers file via #include.
 
 551) An empty sudoers file is no longer a parse error.
+
+552) Fixed error handling if the lexer runs out of memory.
+
+553) Optimize lexer slightly by removing use of unput() and remove
+     some ambiguity with the Default keyword.
