@@ -110,7 +110,7 @@ char *find_path(file)
      */
     /* XXX - check return val here? */
     if (strchr(file, '/'))
-	return((char *) realpath(file, command));
+	return((char *) sudo_realpath(file, command));
 
     /*
      * grab PATH out of environment and make a local copy
@@ -180,7 +180,7 @@ static char * realpath_exec(path, file, command)
 
     /* resolve the path */
     errno = 0;
-    if (realpath(fn, command)) {
+    if (sudo_realpath(fn, command)) {
 	/* stat the file to make sure it is executable */
 	if (stat(command, &statbuf) == 0 && (statbuf.st_mode & 0000111))
 	    return(command);
