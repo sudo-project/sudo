@@ -667,7 +667,7 @@ AC_ARG_WITH(execv, [  --with-execv            use execv() instead of execvp()],
 		;;
 esac], AC_MSG_RESULT(execvp))
 
-AC_MSG_CHECKING(whether to use per-tty ficket files)
+AC_MSG_CHECKING(whether to use per-tty ticket files)
 AC_ARG_WITH(tty-tickets, [  --with-tty-tickets      use a different ticket file for each tty],
 [case $with_tty_tickets in  
     yes)	AC_DEFINE(USE_TTY_TICKETS)
