@@ -214,7 +214,6 @@ path_matches(cmnd, path)
 		return(FALSE);
 	} else
 	    return(FALSE);
-	return(cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino);
     }
 
     /* grot through path's directory entries, looking for cmnd */
