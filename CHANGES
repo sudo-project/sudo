@@ -1207,3 +1207,8 @@ Sudo 1.6 released.
 
 380) Don't ask the user for a password if the user is not allowed to run
      the command and the authenticate flag (in sudoers) is false.
+
+381) Added configure check for initgroups(3).
+
+382) Use our own fnmatch() if there is no fnmatch.h, even if there is an
+     fnmatch() in libc.
