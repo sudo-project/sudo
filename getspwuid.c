@@ -57,7 +57,11 @@ static char rcsid[] = "$Id$";
 #    include <shadow.h>
 #  endif /* SVR4 */
 #  if (SHADOW_TYPE == SPW_SECUREWARE)
-#    include <sys/security.h>
+#    ifndef __hpux
+#      include <hpsecurity.h>
+#    else
+#      include <sys/security.h>
+#    endif /* __hpux */
 #    include <prot.h>
 #  endif /* SECUREWARE */
 #  if (SHADOW_TYPE == SPW_ULTRIX4)
@@ -144,7 +148,7 @@ static char *sudo_getspwd(pw_ent)
 	return(pw_ent -> pw_passwd);
 }
 #  endif /* SVR4 */
-#  if (SHADOW_TYPE == SPW_HPUX9 || SHADOW_TYPE == SPW_HPUX10)
+#  if (SHADOW_TYPE == SPW_HPUX9)
 {
     struct s_passwd *spw_ent;
 
@@ -153,7 +157,7 @@ static char *sudo_getspwd(pw_ent)
     else
 	return(pw_ent -> pw_passwd);
 }
-#  endif /* HPUX9 || HPUX10 */
+#  endif /* HPUX9 */
 #  if (SHADOW_TYPE == SPW_SUNOS4)
 {
     struct passwd_adjunct *spw_ent;
