@@ -113,6 +113,23 @@ cmp_pwnam(v1, v2)
     return(strcmp(pw1->pw_name, pw2->pw_name));
 }
 
+#define PW_SIZE(name, size)				\
+do {							\
+	if (pw->name) {					\
+		size = strlen(pw->name) + 1;		\
+		total += size;				\
+	}                                               \
+} while (0)
+
+#define PW_COPY(name, size)				\
+do {							\
+	if (pw->name) {					\
+		memcpy(cp, pw->name, size);		\
+		newpw->name = cp;			\
+		cp += size;				\
+	}						\
+} while (0)
+
 /*
  * Dynamically allocate space for a struct password and the constituent parts
  * that we care about.  Fills in pw_passwd from shadow file.
@@ -133,74 +150,33 @@ sudo_pwdup(pw)
     /* Allocate in one big chunk for easy freeing. */
     nsize = psize = csize = gsize = dsize = ssize = 0;
     total = sizeof(struct passwd);
-    if (pw->pw_name) {
-	    nsize = strlen(pw->pw_name) + 1;
-	    total += nsize;
-    }
-    if (pw->pw_passwd) {
-	    psize = strlen(pw->pw_passwd) + 1;
-	    total += psize;
-    }
+    PW_SIZE(pw_name, nsize);
+    PW_SIZE(pw_passwd, psize);
 #ifdef HAVE_LOGIN_CAP_H
-    if (pw->pw_class) {
-	    csize = strlen(pw->pw_class) + 1;
-	    total += csize;
-    }
+    PW_SIZE(pw_class, csize);
 #endif
-    if (pw->pw_gecos) {
-	    gsize = strlen(pw->pw_gecos) + 1;
-	    total += gsize;
-    }
-    if (pw->pw_dir) {
-	    dsize = strlen(pw->pw_dir) + 1;
-	    total += dsize;
-    }
-    if (pw_shell) {
-	    ssize = strlen(pw_shell) + 1;
-	    total += ssize;
-    }
+    PW_SIZE(pw_gecos, gsize);
+    PW_SIZE(pw_dir, dsize);
+    PW_SIZE(pw_shell, ssize);
+
     if ((cp = malloc(total)) == NULL)
 	    return(NULL);
-    newpw = (struct passwd *)cp;
+    newpw = (struct passwd *) cp;
 
     /*
      * Copy in passwd contents and make strings relative to space
      * at the end of the buffer.
      */
-    (void)memcpy(newpw, pw, sizeof(struct passwd));
+    memcpy(newpw, pw, sizeof(struct passwd));
     cp += sizeof(struct passwd);
-    if (nsize) {
-	    (void)memcpy(cp, pw->pw_name, nsize);
-	    newpw->pw_name = cp;
-	    cp += nsize;
-    }
-    if (psize) {
-	    (void)memcpy(cp, pw->pw_passwd, psize);
-	    newpw->pw_passwd = cp;
-	    cp += psize;
-    }
+    PW_COPY(pw_name, nsize);
+    PW_COPY(pw_passwd, psize);
 #ifdef HAVE_LOGIN_CAP_H
-    if (csize) {
-	    (void)memcpy(cp, pw->pw_class, csize);
-	    newpw->pw_class = cp;
-	    cp += csize;
-    }
+    PW_COPY(pw_class, csize);
 #endif
-    if (gsize) {
-	    (void)memcpy(cp, pw->pw_gecos, gsize);
-	    newpw->pw_gecos = cp;
-	    cp += gsize;
-    }
-    if (dsize) {
-	    (void)memcpy(cp, pw->pw_dir, dsize);
-	    newpw->pw_dir = cp;
-	    cp += dsize;
-    }
-    if (ssize) {
-	    (void)memcpy(cp, pw_shell, ssize);
-	    newpw->pw_shell = cp;
-	    cp += ssize;
-    }
+    PW_COPY(pw_gecos, gsize);
+    PW_COPY(pw_dir, dsize);
+    PW_COPY(pw_shell, ssize);
 
     return(newpw);
 }
