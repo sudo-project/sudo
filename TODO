@@ -22,3 +22,5 @@ TODO list
 10) Make the sudoers file accessible via NIS, Hesiod, and maybe NetInfo.
 
 11) Flag to sudo to show what a user is allowed to run.
+
+12) Add a %h field to MAILSUBJECT for the hostname.
