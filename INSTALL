@@ -174,10 +174,6 @@ Special features/options:
 	This will use the authentication scheme specified for the user
 	on the machine.
 
-  --with-sia
-	Enable SIA support.  This is the "Security Integration Architecture"
-	on Digital UNIX.
-
   --with-pam
 	Enable PAM support.  Tested on Redhat Linux 5.x but should work on
 	earlier versions too.
@@ -416,6 +412,10 @@ Special features/options:
 	unless the "-u" option is used).  This option effectively makes the
 	"-s" flag imply "-H".
 
+  --disable-sia
+	Disable SIA support.  This is the "Security Integration Architecture"
+	on Digital UNIX.
+
 Shadow password and C2 support
 ==============================
 
@@ -509,6 +509,12 @@ Ultrix 4.x:
     syslog/syslogd that is backwards compatible with the Ultrix version.
     I recommend it highly.  If you do not do this you probably want
     to run configure with --with-logging=file
+
+Digital UNIX:
+    By default, sudo will use SIA (Security Integration Architecture)
+    to validate a user.  If you want to use an alternate authentication
+    method that does not go through SIA, you need to use the
+    --disable-sia option to configure.
 
 Linux:
     One person reported that he needed to run configure with
