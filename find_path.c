@@ -97,11 +97,21 @@ char *find_path(file)
     char *path = NULL;		/* contents of PATH env var */
     char *oldpath;		/* so we can free path later */
     char *result = NULL;	/* result of path/file lookup */
-    static char command[MAXPATHLEN+1];	/* resolved pathname */
+    char *command;		/* resolved pathname */
     int checkdot = 0;		/* check current dir? */
 
     if (strlen(file) > MAXPATHLEN) {
 	(void) fprintf(stderr, "%s:  path too long:  %s\n", Argv[0], file);
+	exit(1);
+    }
+
+    /*
+     * allocate memory for command
+     */
+    command = (char *) malloc(MAXPATHLEN + 1);
+    if (command == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
 
