@@ -2,8 +2,10 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.18  1999/12/05 02:18:47  millert
-''' crank version to 1.6
+''' Revision 1.19  2000/01/17 03:57:26  millert
+''' o Fix some typos/omissions
+''' o Add section on verifypw and listpw
+''' o Define how NOPASSWD interacts with the -v and -l flags
 '''
 '''
 .de Sh
@@ -96,7 +98,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers 5 "1.6.1" "4/Dec/1999" "FILE FORMATS"
+.TH sudoers 5 "1.6.1" "16/Jan/2000" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
@@ -230,9 +232,9 @@ There are four kinds of aliases: the \f(CWUser_Alias\fR, \f(CWRunas_Alias\fR,
 .PP
 .Vb 4
 \& Alias ::= 'User_Alias' = User_Alias (':' User_Alias)* |
-\&           'Runas_Alias' (':' Runas_Alias)* |
-\&           'Host_Alias' (':' Host_Alias)* |
-\&           'Cmnd_Alias' (':' Cmnd_Alias)*
+\&           'Runas_Alias' = Runas_Alias (':' Runas_Alias)* |
+\&           'Host_Alias' = Host_Alias (':' Host_Alias)* |
+\&           'Cmnd_Alias' = Cmnd_Alias (':' Cmnd_Alias)*
 .Ve
 .Vb 1
 \& User_Alias ::= NAME '=' User_List
@@ -453,6 +455,54 @@ Address to send mail to
 Users in this group are exempt from password and \s-1PATH\s0 requirements
 .Ip "secure_path" 12
 Value to override user's \f(CW$PATH\fR with
+.Ip "verifypw" 12
+This option controls when a password will be required when a
+user runs sudo with the \fB\-v\fR.  It has the following possible values:
+.Sp
+.Vb 3
+\&    all         All the user's sudoers entries for the
+\&                current host must have the C<NOPASSWD>
+\&                flag set to avoid entering a password.
+.Ve
+.Vb 4
+\&    any         At least one of the user's sudoers entries
+\&                for the current host must have the
+\&                C<NOPASSWD> flag set to avoid entering a
+\&                password.
+.Ve
+.Vb 2
+\&    never       The user need never enter a password to use
+\&                the B<-v> flag.
+.Ve
+.Vb 2
+\&    always      The user must always enter a password to use
+\&                the B<-v> flag.
+.Ve
+The default value is `all\*(R'.
+.Ip "listpw" 12
+This option controls when a password will be required when a
+user runs sudo with the \fB\-l\fR.  It has the following possible values:
+.Sp
+.Vb 3
+\&    all         All the user's sudoers entries for the
+\&                current host must have the C<NOPASSWD>
+\&                flag set to avoid entering a password.
+.Ve
+.Vb 4
+\&    any         At least one of the user's sudoers entries
+\&                for the current host must have the
+\&                C<NOPASSWD> flag set to avoid entering a
+\&                password.
+.Ve
+.Vb 2
+\&    never       The user need never enter a password to use
+\&                the B<-l> flag.
+.Ve
+.Vb 2
+\&    always      The user must always enter a password to use
+\&                the B<-l> flag.
+.Ve
+The default value is `any\*(R'.
 .PP
 When logging via \fIsyslog\fR\|(3), sudo accepts the following values for the syslog
 facility (the value of the \fBsyslog\fR Parameter): \fBauthpriv\fR (if your \s-1OS\s0
@@ -462,18 +512,19 @@ syslog priorities are supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\
 \fBerr\fR, \fBinfo\fR, \fBnotice\fR, and \fBwarning\fR.
 .Sh "User Specification"
 .PP
-.Vb 1
-\& Runas_Spec ::= '(' Runas_List ')'
-.Ve
-.Vb 1
-\& Cmnd_Spec ::= Runas_Spec? ('NOPASSWD:' | 'PASSWD:')? Cmnd
+.Vb 2
+\& User_Spec ::= User_list Host_List '=' User_List Cmnd_Spec_List \e
+\&               (':' User_Spec)*
 .Ve
 .Vb 2
 \& Cmnd_Spec_List ::= Cmnd_Spec |
 \&                    Cmnd_Spec ',' Cmnd_Spec_List
 .Ve
 .Vb 1
-\& User_Spec ::= User_list Cmnd_Spec_List (':' User_Spec)*
+\& Cmnd_Spec ::= Runas_Spec? ('NOPASSWD:' | 'PASSWD:')? Cmnd
+.Ve
+.Vb 1
+\& Runas_Spec ::= '(' Runas_List ')'
 .Ve
 A \fBuser specification\fR determines which commands a user may run
 (and as what user) on specified hosts.  By default, commands are
@@ -523,6 +574,15 @@ run \fI/bin/kill\fR without a password the entry would be:
 .Vb 1
 \& ray    rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
 .Ve
+Note however, that the \f(CWPASSWD\fR tag has no effect on users who are
+in the group specified by the exempt_group option.
+.PP
+By default, if the \f(CWNOPASSWD\fR tag is applied to any of the entries
+for a user on the current host, he or she will be able to run
+\f(CWsudo -l\fR without a password.  Additionally, a user may only run
+\f(CWsudo -v\fR without a password if the \f(CWNOPASSWD\fR tag is present
+for all a user's entries that pertain to the current host.
+This behavior may be overridden via the verifypw and listpw options.
 .Sh "Wildcards (aka meta characters):"
 \fBsudo\fR allows shell-style \fIwildcards\fR to be used in pathnames
 as well as command line arguments in the \fIsudoers\fR file.  Wildcard
@@ -891,6 +951,10 @@ will not run with a syntactically incorrect \fIsudoers\fR file.
 
 .IX Item "secure_path"
 
+.IX Item "verifypw"
+
+.IX Item "listpw"
+
 .IX Subsection "User Specification"
 
 .IX Subsection "Runas_Spec"
@@ -911,7 +975,7 @@ will not run with a syntactically incorrect \fIsudoers\fR file.
 
 .IX Subsection "Exceptions to wildcard rules:"
 
-.IX Item \f(CW""\fR
+.IX Item "\f(CW""\fR"
 
 .IX Subsection "Other special characters and reserved words:"
 

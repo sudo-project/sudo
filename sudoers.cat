@@ -50,9 +50,9 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        Runas_Alias, Host_Alias and Cmnd_Alias.
 
         Alias ::= 'User_Alias' = User_Alias (':' User_Alias)* |
-                  'Runas_Alias' (':' Runas_Alias)* |
-                  'Host_Alias' (':' Host_Alias)* |
-                  'Cmnd_Alias' (':' Cmnd_Alias)*
+                  'Runas_Alias' = Runas_Alias (':' Runas_Alias)* |
+                  'Host_Alias' = Host_Alias (':' Host_Alias)* |
+                  'Cmnd_Alias' = Cmnd_Alias (':' Cmnd_Alias)*
 
         User_Alias ::= NAME '=' User_List
 
@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-4/Dec/1999                    1.6.1                             1
+16/Jan/2000                   1.6.1                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-4/Dec/1999                    1.6.1                             2
+16/Jan/2000                   1.6.1                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-4/Dec/1999                    1.6.1                             3
+16/Jan/2000                   1.6.1                             3
 
 
 
@@ -259,7 +259,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-4/Dec/1999                    1.6.1                             4
+16/Jan/2000                   1.6.1                             4
 
 
 
@@ -325,7 +325,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-4/Dec/1999                    1.6.1                             5
+16/Jan/2000                   1.6.1                             5
 
 
 
@@ -353,6 +353,61 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        secure_path Value to override user's $PATH with
 
+       verifypw    This option controls when a password will be
+                   required when a user runs sudo with the ----vvvv.
+                   It has the following possible values:
+
+                       all         All the user's sudoers entries for the
+                                   current host must have the C<NOPASSWD>
+                                   flag set to avoid entering a password.
+
+                       any         At least one of the user's sudoers entries
+                                   for the current host must have the
+                                   C<NOPASSWD> flag set to avoid entering a
+                                   password.
+
+                       never       The user need never enter a password to use
+                                   the B<-v> flag.
+
+                       always      The user must always enter a password to use
+                                   the B<-v> flag.
+
+                   The default value is `all'.
+
+       listpw      This option controls when a password will be
+                   required when a user runs sudo with the ----llll.
+                   It has the following possible values:
+
+                       all         All the user's sudoers entries for the
+                                   current host must have the C<NOPASSWD>
+                                   flag set to avoid entering a password.
+
+                       any         At least one of the user's sudoers entries
+                                   for the current host must have the
+                                   C<NOPASSWD> flag set to avoid entering a
+                                   password.
+
+
+
+
+
+16/Jan/2000                   1.6.1                             6
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
+                       never       The user need never enter a password to use
+                                   the B<-l> flag.
+
+                       always      The user must always enter a password to use
+                                   the B<-l> flag.
+
+                   The default value is `any'.
+
        When logging via _s_y_s_l_o_g(3), sudo accepts the following
        values for the syslog facility (the value of the ssssyyyysssslllloooogggg
        Parameter): aaaauuuutttthhhhpppprrrriiiivvvv (if your OS supports it), aaaauuuutttthhhh,
@@ -364,14 +419,15 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        UUUUsssseeeerrrr SSSSppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnn
 
 
-        Runas_Spec ::= '(' Runas_List ')'
-
-        Cmnd_Spec ::= Runas_Spec? ('NOPASSWD:' | 'PASSWD:')? Cmnd
+        User_Spec ::= User_list Host_List '=' User_List Cmnd_Spec_List \
+                      (':' User_Spec)*
 
         Cmnd_Spec_List ::= Cmnd_Spec |
                            Cmnd_Spec ',' Cmnd_Spec_List
 
-        User_Spec ::= User_list Cmnd_Spec_List (':' User_Spec)*
+        Cmnd_Spec ::= Runas_Spec? ('NOPASSWD:' | 'PASSWD:')? Cmnd
+
+        Runas_Spec ::= '(' Runas_List ')'
 
        A uuuusssseeeerrrr ssssppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnn determines which commands a user may
        run (and as what user) on specified hosts.  By default,
@@ -389,17 +445,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        commands that follow it.  What this means is that for the
        entry:
 
-
-
-4/Dec/1999                    1.6.1                             6
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
-
         dgb    boulder = (operator) /bin/ls, /bin/kill, /usr/bin/who
 
        The user ddddggggbbbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m
@@ -409,6 +454,17 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        It is also possible to override a Runas_Spec later on in
        an entry.  If we modify the entry like so:
+
+
+
+16/Jan/2000                   1.6.1                             7
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
 
         dgb    boulder = (operator) /bin/ls, (root) /bin/kill, /usr/bin/lprm
 
@@ -434,6 +490,16 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
         ray    rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
 
+       Note however, that the PASSWD tag has no effect on users
+       who are in the group specified by the exempt_group option.
+
+       By default, if the NOPASSWD tag is applied to any of the
+       entries for a user on the current host, he or she will be
+       able to run sudo -l without a password.  Additionally, a
+       user may only run sudo -v without a password if the
+       NOPASSWD tag is present for all a user's entries that
+       pertain to the current host.  This behavior may be
+       overridden via the verifypw and listpw options.
 
        WWWWiiiillllddddccccaaaarrrrddddssss ((((aaaakkkkaaaa mmmmeeeettttaaaa cccchhhhaaaarrrraaaacccctttteeeerrrrssss))))::::
 
@@ -457,7 +523,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-4/Dec/1999                    1.6.1                             7
+16/Jan/2000                   1.6.1                             8
 
 
 
@@ -523,7 +589,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-4/Dec/1999                    1.6.1                             8
+16/Jan/2000                   1.6.1                             9
 
 
 
@@ -589,7 +655,7 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
 
 
-4/Dec/1999                    1.6.1                             9
+16/Jan/2000                   1.6.1                            10
 
 
 
@@ -655,7 +721,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-4/Dec/1999                    1.6.1                            10
+16/Jan/2000                   1.6.1                            11
 
 
 
@@ -721,7 +787,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-4/Dec/1999                    1.6.1                            11
+16/Jan/2000                   1.6.1                            12
 
 
 
@@ -787,7 +853,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-4/Dec/1999                    1.6.1                            12
+16/Jan/2000                   1.6.1                            13
 
 
 
@@ -853,6 +919,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-4/Dec/1999                    1.6.1                            13
+16/Jan/2000                   1.6.1                            14
 
 

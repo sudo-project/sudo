@@ -90,9 +90,9 @@ There are four kinds of aliases: the C<User_Alias>, C<Runas_Alias>,
 C<Host_Alias> and C<Cmnd_Alias>.
 
  Alias ::= 'User_Alias' = User_Alias (':' User_Alias)* |
-	   'Runas_Alias' (':' Runas_Alias)* |
-	   'Host_Alias' (':' Host_Alias)* |
-	   'Cmnd_Alias' (':' Cmnd_Alias)*
+	   'Runas_Alias' = Runas_Alias (':' Runas_Alias)* |
+	   'Host_Alias' = Host_Alias (':' Host_Alias)* |
+	   'Cmnd_Alias' = Cmnd_Alias (':' Cmnd_Alias)*
 
  User_Alias ::= NAME '=' User_List
 
@@ -385,6 +385,50 @@ Users in this group are exempt from password and PATH requirements
 
 Value to override user's $PATH with
 
+=item verifypw
+
+This option controls when a password will be required when a
+user runs sudo with the B<-v>.  It has the following possible values:
+
+    all		All the user's sudoers entries for the
+		current host must have the C<NOPASSWD>
+		flag set to avoid entering a password.
+
+    any		At least one of the user's sudoers entries
+		for the current host must have the
+		C<NOPASSWD> flag set to avoid entering a
+		password.
+
+    never	The user need never enter a password to use
+		the B<-v> flag.
+
+    always	The user must always enter a password to use
+		the B<-v> flag.
+
+The default value is `all'.
+
+=item listpw
+
+This option controls when a password will be required when a
+user runs sudo with the B<-l>.  It has the following possible values:
+
+    all		All the user's sudoers entries for the
+		current host must have the C<NOPASSWD>
+		flag set to avoid entering a password.
+
+    any		At least one of the user's sudoers entries
+		for the current host must have the
+		C<NOPASSWD> flag set to avoid entering a
+		password.
+
+    never	The user need never enter a password to use
+		the B<-l> flag.
+
+    always	The user must always enter a password to use
+		the B<-l> flag.
+
+The default value is `any'.
+
 =back 12
 
 When logging via syslog(3), sudo accepts the following values for the syslog
@@ -396,14 +440,15 @@ B<err>, B<info>, B<notice>, and B<warning>.
 
 =head2 User Specification
 
- Runas_Spec ::= '(' Runas_List ')'
-
- Cmnd_Spec ::= Runas_Spec? ('NOPASSWD:' | 'PASSWD:')? Cmnd
+ User_Spec ::= User_list Host_List '=' User_List Cmnd_Spec_List \
+	       (':' User_Spec)*
 
  Cmnd_Spec_List ::= Cmnd_Spec |
 		    Cmnd_Spec ',' Cmnd_Spec_List
 
- User_Spec ::= User_list Cmnd_Spec_List (':' User_Spec)*
+ Cmnd_Spec ::= Runas_Spec? ('NOPASSWD:' | 'PASSWD:')? Cmnd
+
+ Runas_Spec ::= '(' Runas_List ')'
 
 A B<user specification> determines which commands a user may run
 (and as what user) on specified hosts.  By default, commands are
@@ -451,6 +496,16 @@ authenticating himself.  If we only want B<ray> to be able to
 run F</bin/kill> without a password the entry would be:
 
  ray	rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
+
+Note however, that the C<PASSWD> tag has no effect on users who are
+in the group specified by the exempt_group option.
+
+By default, if the C<NOPASSWD> tag is applied to any of the entries
+for a user on the current host, he or she will be able to run
+C<sudo -l> without a password.  Additionally, a user may only run
+C<sudo -v> without a password if the C<NOPASSWD> tag is present
+for all a user's entries that pertain to the current host.
+This behavior may be overridden via the verifypw and listpw options.
 
 =head2 Wildcards (aka meta characters):
 
