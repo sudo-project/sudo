@@ -64,6 +64,7 @@ AC_SUBST(env_editor)
 AC_SUBST(passwd_tries)
 AC_SUBST(tty_tickets)
 AC_SUBST(insults)
+AC_SUBST(root_sudo)
 dnl
 dnl Initial values for above
 dnl
@@ -90,6 +91,7 @@ env_editor=off
 passwd_tries=3
 tty_tickets=off
 insults=off
+root_sudo=on
 INSTALL_NOEXEC=
 dnl
 dnl Initial values for Makefile variables listed above
@@ -1043,6 +1045,7 @@ AC_ARG_ENABLE(root-sudo,
 		;;
     no)		AC_DEFINE(NO_ROOT_SUDO, 1, [Define if root should not be allowed to use sudo.])
 		AC_MSG_RESULT(no)
+		root_sudo=off
 		;;
     *)		AC_MSG_ERROR(["--enable-root-sudo does not take an argument."])
 		;;
