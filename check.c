@@ -39,9 +39,18 @@
 static char rcsid[] = "$Id$";
 #endif /* lint */
 
+#include "config.h"
+
 #include <stdio.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
 #include <strings.h>
+#endif /* HAVE_STRINGS_H */
 #include <fcntl.h>
 #include <sys/param.h>
 #include <sys/types.h>
@@ -109,7 +118,7 @@ static int check_timestamp()
     register int timestamp_is_old = -1;
     time_t now;
 
-    (void) sprintf(timestampfile, "%s/%s", TIMEDIR, user);
+    (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR, user);
     timestampfile_p = timestampfile;
 
     timedir_is_good = 1;	/* now there's an assumption for ya... */
@@ -120,10 +129,10 @@ static int check_timestamp()
     /*
      * walk through the path one directory at a time
      */
-    for (p = timestampfile + 1; p = index(p, '/'); *p++ = '/') {
+    for (p = timestampfile + 1; p = strchr(p, '/'); *p++ = '/') {
 	*p = '\0';
 	if (stat(timestampfile, &statbuf) < 0) {
-	    if (strcmp(timestampfile, TIMEDIR))
+	    if (strcmp(timestampfile, _PATH_SUDO_TIMEDIR))
 		(void) fprintf(stderr, "Cannot stat() %s\n", timestampfile);
 	    timedir_is_good = 0;
 	    *p = '/';
@@ -152,11 +161,11 @@ static int check_timestamp()
      */
     else {
 	timestamp_is_old = 1;	/* user has to enter password */
-	if (mkdir(TIMEDIR, 0700)) {	/* make the TIMEDIR directory */
+	if (mkdir(_PATH_SUDO_TIMEDIR, 0700)) {	/* make the TIMEDIR directory */
 	    perror("check_timestamp: mkdir");
 	    timedir_is_good = 0;
 	} else {
-	    timedir_is_good = 1;/* TIMEDIR now exists         */
+	    timedir_is_good = 1;/* _PATH_SUDO_TIMEDIR now exists         */
 	    reminder();
 	}
     }
@@ -206,7 +215,7 @@ static void update_timestamp()
 
 static void check_passwd()
 {
-#if !(defined (linux) && defined (SHADOW_PWD))
+#if !(defined (linux) && defined (HAVE_LIBSHADOW))
     char *crypt();
 #endif /* linux */
     struct passwd *pw_ent;

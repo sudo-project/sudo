@@ -38,8 +38,21 @@
 static char rcsid[] = "$Id$";
 #endif /* lint */
 
+#include "config.h"
+
 #include <stdio.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif /* HAVE_STRINGS_H */
+#ifdef HAVE_MALLOC_H 
+#include <malloc.h>
+#endif /* HAVE_MALLOC_H */ 
 #include <ctype.h>
 #include <sys/param.h>
 #include <sys/types.h>
@@ -430,8 +443,8 @@ int validate()
     /* become root */
     be_root();
 
-    if ((sudoers_fp = fopen(SUDOERS, "r")) == NULL) {
-	perror(SUDOERS);
+    if ((sudoers_fp = fopen(_PATH_SUDO_SUDOERS, "r")) == NULL) {
+	perror(_PATH_SUDO_SUDOERS);
 	log_error(NO_SUDOERS_FILE);
 	exit(1);
     }

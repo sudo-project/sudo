@@ -40,8 +40,18 @@
 static char rcsid[] = "$Id$";
 #endif /* lint */
 
+#include "config.h"
+
 #include <stdio.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif /* HAVE_STRINGS_H */
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/time.h>
@@ -53,7 +63,7 @@ static char rcsid[] = "$Id$";
 void log_error();
 void readchild();
 static void send_mail();
-static void reapchild();
+static RETSIGTYPE reapchild();
 static int appropriate();
 
 static char logline[MAXLOGLEN + 8];
@@ -99,11 +109,11 @@ void log_error(code)
     /*
      * so we know where we are...
      */
-#ifdef USE_CWD
+#ifdef HAVE_GETCWD
     getcwd(cwd, (size_t) (MAXPATHLEN + 1));
 #else
     getwd(cwd);
-#endif
+#endif /* HAVE_GETCWD */
 
     switch (code) {
 
@@ -129,7 +139,8 @@ void log_error(code)
 	    break;
 
 	case VALIDATE_ERROR:
-	    (void) sprintf(p, "error in %s ; PWD=%s ; command: ", SUDOERS, cwd);
+	    (void) sprintf(p, "error in %s ; PWD=%s ; command: ",
+		_PATH_SUDO_SUDOERS, cwd);
 #ifdef SYSLOG
 	    pri = Syslog_priority_NO;
 #endif
@@ -161,7 +172,8 @@ void log_error(code)
 	case NO_SUDOERS_FILE:
 	    switch (errno) {
 		case ENOENT:
-		    (void) sprintf(p, "There is no %s file.  ", SUDOERS);
+		    (void) sprintf(p, "There is no %s file.  ",
+			_PATH_SUDO_SUDOERS);
 		    break;
 		case EACCES:
 		    (void) sprintf(p, "%s needs to run setuid root.  ",
@@ -169,7 +181,7 @@ void log_error(code)
 		    break;
 		default:
 		    (void) sprintf(p, "There is a problem opening %s ",
-			SUDOERS);
+			_PATH_SUDO_SUDOERS);
 		    break;
 	    }
 #ifdef SYSLOG
@@ -268,10 +280,10 @@ void log_error(code)
     be_root();
 
     oldmask = umask(077);
-    fp = fopen(LOGFILE, "a");
+    fp = fopen(_PATH_SUDO_LOGFILE, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
-	(void) sprintf(logline, "Can\'t open log file: %s", LOGFILE);
+	(void) sprintf(logline, "Can\'t open log file: %s", _PATH_SUDO_LOGFILE);
 	send_mail();
     } else {
 	char *beg, *oldend, *end;
@@ -283,7 +295,7 @@ void log_error(code)
 	beg = end = logline;
 	while (beg) {
 	    oldend = end;
-	    end = index(oldend, ' ');
+	    end = strchr(oldend, ' ');
 
 	    if (end) {
 		*end = '\0';
@@ -427,7 +439,7 @@ static void send_mail()
  *  This function gets rid fo all the ugly zombies
  */
 
-static void reapchild()
+static RETSIGTYPE reapchild()
 {
         (void) wait(NULL);
 }

@@ -27,17 +27,10 @@
 static char sccsid[] = "@(#)getpass.c	based on 5.3 (Berkeley) 9/22/88";
 #endif				/* LIBC_SCCS and not lint */
 
-/*
- * HP-UX and Irix defines
-*/
-#if defined(sgi) || defined(hpux)
-#ifndef USE_TERMIO
-#define USE_TERMIO
-#endif /* USE_TERMIO */
-#endif /* sgi || hpux */
+#include "config.h"
 
 #include <fcntl.h>
-#ifdef USE_TERMIO
+#ifdef HAVE_TERMIO_H
 #include <termio.h>
 #else
 #include <sgtty.h>
@@ -50,7 +43,7 @@ char *
     getpass(prompt)
     char *prompt;
 {
-#ifdef USE_TERMIO
+#ifdef HAVE_TERMIO_H
     struct termio ttyb;
 #else
     struct sgttyb ttyb;
@@ -60,7 +53,7 @@ char *
     FILE *fp, *outfp;
     long omask;
     int fd_tmp;
-#ifdef USE_TERMIO
+#ifdef HAVE_TERMIO_H
     tcflag_t svflagval;
 #else
     int svflagval;
@@ -77,7 +70,7 @@ char *
 	outfp = stderr;
 	fp = stdin;
     }
-#ifdef USE_TERMIO
+#ifdef HAVE_TERMIO_H
     (void) ioctl(fileno(fp), TCGETA, &ttyb);
     svflagval = ttyb.c_lflag;
     ttyb.c_lflag &= ~ECHO;
@@ -99,7 +92,7 @@ char *
     *p = '\0';
     (void) write(fileno(outfp), "\n", 1);
 
-#ifdef USE_TERMIO
+#ifdef HAVE_TERMIO_H
     ttyb.c_lflag = svflagval;
     (void) ioctl(fileno(fp), TCSETA, &ttyb);
 #else

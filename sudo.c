@@ -56,15 +56,24 @@ static char rcsid[] = "$Id$";
 
 #define MAIN
 
+#include "config.h"
+
 #include <stdio.h>
-#ifdef STD_HEADERS
+#ifdef STDC_HEADERS
 #include <stdlib.h>
-#ifndef NeXT
+#endif /* STDC_HEADERS */
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif /* !NeXT */
-#endif /* STD_HEADERS */
+#endif /* HAVE_UNISTD_H */
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
 #include <strings.h>
+#endif /* HAVE_STRINGS_H */
+#ifdef HAVE_MALLOC_H 
+#include <malloc.h>   
+#endif /* HAVE_MALLOC_H */ 
 #include <pwd.h>
 #include <netdb.h>
 #include <sys/param.h>
@@ -72,12 +81,13 @@ static char rcsid[] = "$Id$";
 #include <sys/id.h>
 #endif /* _AIX */
 #include "sudo.h"
-#ifndef STD_HEADERS
+
+#ifndef STDC_HEADERS
 extern char *malloc();
-#ifndef NEED_STRDUP
+#ifdef HAVE_STRDUP
 extern char *strdup();
-#endif
-#endif
+#endif /* HAVE_STRDUP */
+#endif /* STDC_HEADERS */
 
 
 int Argc;
@@ -248,7 +258,7 @@ static void load_globals()
      * We don't want to return the fully quallified name all the time...
      */
 #ifndef FQDN
-	if ((p = index(host, '.')))
+	if ((p = strchr(host, '.')))
 	    *p = '\0';
 #endif
     }

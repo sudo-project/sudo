@@ -48,19 +48,31 @@
 static char rcsid[] = "$Id$";
 #endif /* lint */
 
+#include "config.h"
+
 #include <stdio.h>
-#ifdef STD_HEADERS
+#ifdef STDC_HEADERS
 #include <stdlib.h>
-#endif /* STD_HEADERS */
+#endif /* STDC_HEADERS */
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
 #include <strings.h>
+#endif /* HAVE_STRINGS_H */
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif /* HAVE_MALLOC_H */
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #include "sudo.h"
 
-#ifndef STD_HEADERS
+#ifndef STDC_HEADERS
 extern char *malloc();
 extern char *getenv();
 extern char *strcpy();
@@ -68,15 +80,15 @@ extern int fprintf();
 extern int readlink();
 extern int stat();
 extern int lstat();
-#ifdef USE_CWD
+#ifdef HAVE_GETCWD
 extern char *getcwd();
 #else
 extern char *getwd();
-#endif
-#ifndef NEED_STRDUP
+#endif /* HAVE_GETCWD */
+#ifdef HAVE_STRDUP
 extern char *strdup();
-#endif
-#endif /* !STD_HEADERS */
+#endif /* HAVE_STRDUP */
+#endif /* !STDC_HEADERS */
 
 
 /*******************************************************************
@@ -105,7 +117,7 @@ char *find_path(file)
     /*
      * do we need to search the path?
      */
-    if (index(file, '/'))
+    if (strchr(file, '/'))
 	return (qualify(file));
 
     /*
@@ -120,7 +132,7 @@ char *find_path(file)
     }
 
     do {
-	if ((n = index(path, ':')))
+	if ((n = strchr(path, ':')))
 	    *n = '\0';
 
 	/*
@@ -207,11 +219,11 @@ char *qualify(n)
      * if n is relative, fill full with working dir
      */
     if (*n != '/') {
-#ifdef USE_CWD
+#ifdef HAVE_GETCWD
 	if (!getcwd(full, (size_t) (MAXPATHLEN + 1))) {
 #else
 	if (!getwd(full)) {
-#endif
+#endif /* HAVE_GETCWD */
 	    (void) fprintf(stderr, "%s:  Can't get working directory!\n",
 	        Argv[0]);
 	    exit(1);
@@ -230,14 +242,14 @@ char *qualify(n)
 	/*
 	 * find and terminate end of path component
 	 */
-	if ((end = index(beg, '/')))
+	if ((end = strchr(beg, '/')))
 	    *end = '\0';
 
 	if (beg == end)
 	    continue;
 	else if (!strcmp(beg, "."));	/* ignore "." */
 	else if (!strcmp(beg, "..")) {
-	    if ((tmp = rindex(full, '/')))
+	    if ((tmp = strrchr(full, '/')))
 		*tmp = '\0';
 	} else {
 	    strcat(full, "/");
@@ -280,8 +292,8 @@ char *qualify(n)
 	    }
 	    if (newname[0] == '/')	/* reset full if necesary */
 		full[0] = '\0';
-	    else if ((tmp = rindex(full, '/')))	/* remove component from full */
-		*tmp = '\0';
+	    else if ((tmp = strrchr(full, '/')))
+		*tmp = '\0';		/* remove component from full */
 
 	    strcpy(name, newname);	/* reset name with new path */
 	    beg = NULL;		/* since we have a new name */
@@ -298,7 +310,7 @@ char *qualify(n)
 }
 
 
-#ifdef NEED_STRDUP
+#ifndef HAVE_STRDUP
 /******************************************************************
  *
  *  strdup()
@@ -318,4 +330,4 @@ char *strdup(s1)
     (void) strcpy(s, s1);
     return (s);
 }
-#endif
+#endif /* !HAVE_STRDUP */
