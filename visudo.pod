@@ -59,13 +59,13 @@ There is a hard-coded list of editors that B<visudo> will use set
 at compile-time that may be overridden via the I<editor> I<sudoers>
 C<Default> variable.  This list defaults to the path to vi(1) on
 your system, as determined by the I<configure> script.  Normally,
-B<visudo> does not honor the C<EDITOR> or C<VISUAL> environment
+B<visudo> does not honor the C<VISUAL> or C<EDITOR> environment
 variables unless they contain an editor in the aforementioned editors
 list.  However, if B<visudo> is configured with the I<--with-enveditor>
 flag or the I<enveditor> C<Default> variable is set in I<sudoers>,
-B<visudo> will use any the editor defines by C<EDITOR> or C<VISUAL>.
+B<visudo> will use any the editor defines by C<VISUAL> or C<EDITOR>.
 Note that this can be a security hole since it allows the user to
-execute any program they wish simply by setting C<EDITOR> or C<VISUAL>.
+execute any program they wish simply by setting C<VISUAL> or C<EDITOR>.
 
 B<visudo> parses the I<sudoers> file after the edit and will
 not save the changes if there is a syntax error.  Upon finding
@@ -156,8 +156,8 @@ mode these are errors, not warnings.
 The following environment variables are used only if B<visudo>
 was configured with the I<--with-env-editor> option:
 
- EDITOR			Invoked by visudo as the editor to use
- VISUAL			Used by visudo if EDITOR is not set
+ VISUAL			Invoked by visudo as the editor to use
+ EDITOR			Used by visudo if VISUAL is not set
 
 =head1 FILES
 

@@ -246,13 +246,13 @@ main(argc, argv)
 	(void) close(stmp_fd);
 
     /*
-     * Check EDITOR and VISUAL environment variables to see which editor
+     * Check VISUAL and EDITOR environment variables to see which editor
      * the user wants to use (we may not end up using it though).
      * If the path is not fully-qualified, make it so and check that
      * the specified executable actually exists.
      */
-    if ((UserEditor = getenv("EDITOR")) == NULL || *UserEditor == '\0')
-	UserEditor = getenv("VISUAL");
+    if ((UserEditor = getenv("VISUAL")) == NULL || *UserEditor == '\0')
+	UserEditor = getenv("EDITOR");
     if (UserEditor && *UserEditor == '\0')
 	UserEditor = NULL;
     else if (UserEditor) {
