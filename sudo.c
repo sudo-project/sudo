@@ -556,9 +556,6 @@ parse_args()
 {
     int rval = MODE_RUN;		/* what mode is suod to be run in? */
     int excl = 0;			/* exclusive arg, no others allowed */
-#ifdef HAVE_KERB5
-    extern char *realm;			/* kerb5 realm (may be user-specified */
-#endif /* HAVE_KERB5 */
 
     NewArgv = Argv + 1;
     NewArgc = Argc - 1;
@@ -578,19 +575,6 @@ parse_args()
 	}
 
 	switch (NewArgv[0][1]) {
-#ifdef HAVE_KERB5
-	    case 'r':
-		/* Must have an associated realm. */
-		if (NewArgv[1] == NULL)
-		    usage(1);
-
-		realm = NewArgv[1];
-
-		/* Shift Argv over and adjust Argc. */
-		NewArgc--;
-		NewArgv++;
-		break;
-#endif /* HAVE_KERB5 */
 	    case 'p':
 		/* Must have an associated prompt. */
 		if (NewArgv[1] == NULL)
@@ -1035,9 +1019,6 @@ usage(exit_val)
     (void) fprintf(stderr,
 	"usage: %s -V | -h | -L | -l | -v | -k | -K | -H | [-b] [-p prompt]\n%*s",
 	Argv[0], (int) strlen(Argv[0]) + 8, " ");
-#ifdef HAVE_KERB5
-    (void) fprintf(stderr, "[-r realm] ");
-#endif /* HAVE_KERB5 */
     (void) fprintf(stderr, "[-u username/#uid] -s | <command>\n");
     exit(exit_val);
 }

@@ -80,7 +80,7 @@ sudo_auth auth_switch[] = {
     AUTH_ENTRY(0, "kerb4", kerb4_init, NULL, kerb4_verify, NULL)
 #  endif
 #  ifdef HAVE_KERB5
-    AUTH_ENTRY(0, "kerb5", kerb5_init, NULL, kerb5_verify, NULL)
+    AUTH_ENTRY(0, "kerb5", kerb5_init, NULL, kerb5_verify, kerb5_cleanup)
 #  endif
 #  ifdef HAVE_SKEY
     AUTH_ENTRY(0, "S/Key", NULL, rfc1938_setup, rfc1938_verify, NULL)

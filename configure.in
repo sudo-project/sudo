@@ -1467,15 +1467,29 @@ dnl
 dnl Kerberos 5
 dnl
 if test "$with_kerb5" = "yes"; then
-    dnl
-    dnl Starting with Kerberos 5, 1.1 we use the new creds API
-    dnl Otherwise, just use the old Kerberos 4 stuff.
-    dnl
-    AC_CHECK_LIB(krb5, krb5_get_init_creds_opt, [
-	AC_DEFINE(HAVE_KERB5)
-	SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
-	AUTH_OBJS="${AUTH_OBJS} kerb5.o"
-    ], with_kerb4=yes)
+    AC_DEFINE(HAVE_KERB5)
+    if test -f "/usr/local/include/krb5.h"; then
+	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
+    elif test -f "/usr/local/kerberos/include/krb5.h"; then
+	CPPFLAGS="$CPPFLAGS -I/usr/local/kerberos/include"
+    elif test -f "/usr/local/krb5/include/krb5.h"; then
+	CPPFLAGS="$CPPFLAGS -I/usr/local/krb5/include"
+    else
+	echo 'Unable to locate kerberos 5 include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS'
+    fi
+
+    if test -f "/usr/local/lib/libkrb5.a"; then
+	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
+    elif test -f "/usr/local/kerberos/lib/libkrb5.a"; then
+	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/kerberos/lib"
+    elif test -f "/usr/local/krb5/lib/libkrb5.a"; then
+	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/krb5/lib"
+    else
+	echo 'Unable to locate kerberos 5 libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS'
+    fi
+
+    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
+    AUTH_OBJS="${AUTH_OBJS} kerb5.o"
 fi
 
 dnl
@@ -1505,14 +1519,8 @@ if test "$with_kerb4" = "yes"; then
 	echo 'Unable to locate kerberos 4 libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS'
     fi
 
-    if test "$with_kerb5" = "yes"; then
-	AC_HAVE_LIBRARY(krb4, SUDO_LIBS="${SUDO_LIBS} -lkrb4", SUDO_LIBS="${SUDO_LIBS} -lkrb")
-	AC_HAVE_LIBRARY(des, SUDO_LIBS="${SUDO_LIBS} -ldes")
-	SUDO_LIBS="${SUDO_LIBS} -ldes425 -lkrb5 -lcrypto -lcom_err"
-    else
-	AC_HAVE_LIBRARY(des, SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes", SUDO_LIBS="${SUDO_LIBS} -lkrb")
+    AC_HAVE_LIBRARY(des, SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes", SUDO_LIBS="${SUDO_LIBS} -lkrb")
     AUTH_OBJS="${AUTH_OBJS} kerb4.o"
-    fi
 fi
 
 dnl

@@ -3,7 +3,7 @@
  * All rights reserved.
  *
  * This code is derived from software contributed by Frank Cusack
- * <fcusack@iconnet.net>.
+ * <fcusack@fcusack.com>.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -62,11 +62,15 @@
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-char *realm = NULL;
-static int xrealm = 0;
-static krb5_context sudo_context = NULL;
+static int verify_krb_v5_tgt __P((krb5_context, krb5_ccache, char *));
+static struct _sudo_krb5_data {
+    krb5_context	sudo_context;
+    krb5_principal	princ;
+    krb5_ccache		ccache;
+} sudo_krb5_data = { NULL, NULL, NULL };
+typedef struct _sudo_krb5_data *sudo_krb5_datap;
 
-static int verify_krb_v5_tgt __P((krb5_ccache));
+extern krb5_cc_ops krb5_mcc_ops;
 
 int
 kerb5_init(pw, promptp, auth)
@@ -74,85 +78,151 @@ kerb5_init(pw, promptp, auth)
     char **promptp;
     sudo_auth *auth;
 {
-    char *lrealm;
-    krb5_error_code error;
-    extern int arg_prompt;
+    krb5_context	sudo_context;
+    krb5_ccache		ccache;
+    krb5_principal	princ;
+    krb5_error_code 	error;
+    char		cache_name[64];
+    char		*pname;
 
-    /* XXX - make these errors non-fatal for better fallback? */
-    if (error = krb5_init_context(&sudo_context)) {
-	/* XXX - map error to error string? */
+    auth->data = (VOID *) &sudo_krb5_data; /* Stash all our data here */
+
+    if (error = krb5_init_context(&(sudo_krb5_data.sudo_context))) {
 	log_error(NO_EXIT|NO_MAIL, 
-	    "unable to initialize Kerberos V context");
-	return(AUTH_FATAL);
+		  "%s: unable to initialize context: %s", auth->name,
+		  error_message(error));
+	return(AUTH_FAILURE);
     }
-    auth->data = (VOID *) &sudo_context; /* save a pointer to the context */
+    sudo_context = sudo_krb5_data.sudo_context;
 
-    krb5_init_ets(sudo_context);
-
-    if (error = krb5_get_default_realm(sudo_context, &lrealm)) {
+    if (error = krb5_parse_name(sudo_context, pw->pw_name,
+	&(sudo_krb5_data.princ))) {
 	log_error(NO_EXIT|NO_MAIL, 
-	    "unable to get default Kerberos V realm");
-	return(AUTH_FATAL);
+		  "%s: unable to parse '%s': %s", auth->name, pw->pw_name,
+		  error_message(error));
+	return(AUTH_FAILURE);
     }
+    princ = sudo_krb5_data.princ;
 
-    if (realm) {
-	if (strcmp(realm, lrealm) != 0)
-	    xrealm = 1;	/* User supplied realm is not the system default */
-	free(lrealm);
-    } else
-	realm = lrealm;
+    /*
+     * Really, we need to tell the caller not to prompt for password.
+     * The API does not currently provide this unless the auth is standalone.
+     */
+#if 1
+    if (error = krb5_unparse_name(sudo_context, princ, &pname)) {
+	log_error(NO_EXIT|NO_MAIL,
+		  "%s: unable to unparse princ ('%s'): %s", auth->name,
+		  pw->pw_name, error_message(error));
+	return(AUTH_FAILURE);
+    }
 
     /* Only rewrite prompt if user didn't specify their own. */
-    if (user_prompt == NULL)
-	easprintf(promptp, "Password for %s@%s: ", pw->pw_name, realm);
+    /*if (!strcmp(prompt, PASSPROMPT)) { */
+	easprintf(promptp, "Password for %s: ", pname);
+    /*}*/
+    free(pname);
+#endif
+
+    /* For CNS compatibility */
+    if (error = krb5_cc_register(sudo_context, &krb5_mcc_ops, FALSE)) {
+	if (error != KRB5_CC_TYPE_EXISTS) {
+	    log_error(NO_EXIT|NO_MAIL, 
+		      "%s: unable to use Memory ccache: %s", auth->name,
+		      error_message(error));
+	    return(AUTH_FAILURE);
+	}
+    }
+
+    (void) snprintf(cache_name, sizeof(cache_name), "MEMORY:sudocc_%ld",
+		    (long) getpid());
+    if (error = krb5_cc_resolve(sudo_context, cache_name,
+	&(sudo_krb5_data.ccache))) {
+	log_error(NO_EXIT|NO_MAIL, 
+		  "%s: unable to resolve ccache: %s", auth->name,
+		  error_message(error));
+	return(AUTH_FAILURE);
+    }
+    ccache = sudo_krb5_data.ccache;
+
+    if (error = krb5_cc_initialize(sudo_context, ccache, princ)) {
+	log_error(NO_EXIT|NO_MAIL, 
+		  "%s: unable to initialize ccache: %s", auth->name,
+		  error_message(error));
+	return(AUTH_FAILURE);
+    }
+
     return(AUTH_SUCCESS);
 }
 
-/* XXX - some of this should move into the init or setup function. */
 int
 kerb5_verify(pw, pass, auth)
     struct passwd *pw;
     char *pass;
     sudo_auth *auth;
 {
-    krb5_error_code	error;
+    krb5_context	sudo_context;
     krb5_principal	princ;
-    krb5_creds		creds;
     krb5_ccache		ccache;
-    char		cache_name[64];
-    char		*princ_name;
+    krb5_creds		creds;
+    krb5_error_code	error;
     krb5_get_init_creds_opt opts;
+    char		cache_name[64];
 
-    /* Initialize */
+    sudo_context = ((sudo_krb5_datap) auth->data)->sudo_context;
+    princ = ((sudo_krb5_datap) auth->data)->princ;
+    ccache = ((sudo_krb5_datap) auth->data)->ccache;
+
+    /* Initialize options to defaults */
     krb5_get_init_creds_opt_init(&opts);
 
-    princ_name = emalloc(strlen(pw->pw_name) + strlen(realm) + 2);
-    (void) sprintf(princ_name, "%s@%s", pw->pw_name, realm);
-    if (krb5_parse_name(sudo_context, princ_name, &princ))
-	return(AUTH_FAILURE);
-
-    /* Set the ticket file to be in /tmp so we don't need to change perms. */
-    /* XXX - potential /tmp race? */
-    (void) snprintf(cache_name, sizeof(cache_name), "FILE:/tmp/sudocc_%ld",
-	(long) getpid());
-    if (krb5_cc_resolve(sudo_context, cache_name, &ccache)
-	return(AUTH_FAILURE);
-
-    if (krb5_get_init_creds_password(sudo_context, &creds, princ, pass,
-	krb5_prompter_posix, NULL, 0, NULL, &opts))
-	return(AUTH_FAILURE);
-
-    /* Stash the TGT so we can verify it. */
-    if (krb5_cc_initialize(sudo_context, ccache, princ))
-	return(AUTH_FAILURE);
-    if (krb5_cc_store_cred(sudo_context, ccache, &creds)) {
-	(void) krb5_cc_destroy(sudo_context, ccache);
+    /* Note that we always obtain a new TGT to verify the user */
+    if (error = krb5_get_init_creds_password(sudo_context, &creds, princ,
+					     pass, krb5_prompter_posix,
+					     NULL, 0, NULL, &opts)) {
+	if (error == KRB5KRB_AP_ERR_BAD_INTEGRITY) /* Bad password */
+	    return(AUTH_FAILURE);
+	/* Some other error */
+	log_error(NO_EXIT|NO_MAIL, 
+		  "%s: unable to get credentials: %s", auth->name,
+		  error_message(error));
 	return(AUTH_FAILURE);
     }
 
-    error = verify_krb_v5_tgt(ccache);
-    (void) krb5_cc_destroy(sudo_context, ccache);
+    /* Stash the TGT so we can verify it. */
+    if (error = krb5_cc_store_cred(sudo_context, ccache, &creds)) {
+	log_error(NO_EXIT|NO_MAIL, 
+		  "%s: unable to store credentials: %s", auth->name,
+		  error_message(error));
+    } else {
+	error = verify_krb_v5_tgt(sudo_context, ccache, auth->name);
+    }
+
+    krb5_free_cred_contents(sudo_context, &creds);
     return (error ? AUTH_FAILURE : AUTH_SUCCESS);
+}
+
+int
+kerb5_cleanup(pw, auth)
+    struct passwd *pw;
+    sudo_auth *auth;
+{
+    krb5_context	sudo_context;
+    krb5_principal	princ;
+    krb5_ccache		ccache;
+
+    sudo_context = ((sudo_krb5_datap) auth->data)->sudo_context;
+    princ = ((sudo_krb5_datap) auth->data)->princ;
+    ccache = ((sudo_krb5_datap) auth->data)->ccache;
+
+    if (sudo_context) {
+	if (ccache)
+	    krb5_cc_destroy(sudo_context, ccache);
+	if (princ)
+	    krb5_free_principal(sudo_context, princ);
+	krb5_free_context(sudo_context);
+    }
+
+    return(AUTH_SUCCESS);
 }
 
 /*
@@ -161,20 +231,24 @@ kerb5_verify(pw, pass, auth)
  * Verify the Kerberos ticket-granting ticket just retrieved for the
  * user.  If the Kerberos server doesn't respond, assume the user is
  * trying to fake us out (since we DID just get a TGT from what is
- * supposedly our KDC).  If the host/<host> service is unknown (i.e.,
- * the local keytab doesn't have it), let her in.
+ * supposedly our KDC). If the host/<host> service is unknown (i.e.,
+ * the local keytab doesn't have it), return success but log the error.
+ *
+ * This needs to run as root (to read the host service ticket).
  *
  * Returns 0 for successful authentication, non-zero for failure.
  */
 static int
-verify_krb_v5_tgt(ccache)
+verify_krb_v5_tgt(sudo_context, ccache, auth_name)
+    krb5_context	sudo_context;
     krb5_ccache		ccache;
+    char		*auth_name; /* For error reporting */
 {
     char		phost[BUFSIZ];
     krb5_error_code	error;
     krb5_principal	princ;
-    krb5_keyblock *	keyblock = 0;
     krb5_data		packet;
+    krb5_keyblock	*keyblock = 0;
     krb5_auth_context	auth_context = NULL;
 
     packet.data = 0;
@@ -183,12 +257,17 @@ verify_krb_v5_tgt(ccache)
      * Get the server principal for the local host.
      * (Use defaults of "host" and canonicalized local name.)
      */
-    if (krb5_sname_to_principal(sudo_context, NULL, NULL,
-				KRB5_NT_SRV_HST, &princ))
+    if (error = krb5_sname_to_principal(sudo_context, NULL, NULL,
+					KRB5_NT_SRV_HST, &princ)) {
+	log_error(NO_EXIT|NO_MAIL, 
+		  "%s: unable to get host principal: %s", auth_name,
+		  error_message(error));
 	return(-1);
+    }
 
-    /* Extract the name directly. */
-    strncpy(phost, krb5_princ_component(c, princ, 1)->data, sizeof(phost) - 1);
+    /* Extract the name directly. Yow. */
+    strncpy(phost, krb5_princ_component(sudo_context, princ, 1)->data,
+	    sizeof(phost) - 1);
     phost[sizeof(phost) - 1] = '\0';
 
     /*
@@ -199,6 +278,10 @@ verify_krb_v5_tgt(ccache)
     if (error = krb5_kt_read_service_key(sudo_context, NULL, princ, 0,
 					 ENCTYPE_DES_CBC_MD5, &keyblock)) {
 	/* Keytab or service key does not exist. */
+	log_error(NO_EXIT,
+		  "%s: host service key not found: %s", auth_name,
+		  error_message(error));
+	error = 0;
 	goto cleanup;
     }
     if (keyblock)
@@ -221,5 +304,9 @@ cleanup:
 	krb5_free_data_contents(sudo_context, &packet);
     krb5_free_principal(sudo_context, princ);
 
+    if (error)
+	log_error(NO_EXIT|NO_MAIL, 
+		  "%s: Cannot verify TGT! Possible attack!: %s", auth_name,
+		  error_message(error));
     return(error);
 }

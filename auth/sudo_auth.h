@@ -88,6 +88,7 @@ int kerb4_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
 int kerb4_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
 int kerb5_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
 int kerb5_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
+int kerb5_cleanup __P((struct passwd *pw, sudo_auth *auth));
 int securid_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
 int securid_setup __P((struct passwd *pw, char **prompt, sudo_auth *auth));
 int securid_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
