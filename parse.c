@@ -248,11 +248,10 @@ netgr_matches(netgr, host, user)
     char *host;
     char *user;
 {
-    /* XXX - all these statics make me want to puke! */
-    static char *domain = NULL;
 #ifdef HAVE_GETDOMAINNAME
-    static int firsttime = 1;
-    static char d[MAXHOSTNAMELEN];
+    static char *domain = (char *) -1;
+#else
+    static char *domain = NULL;
 #endif /* HAVE_GETDOMAINNAME */
 
     /* make sure we have a valid netgroup, sudo style */
@@ -261,10 +260,17 @@ netgr_matches(netgr, host, user)
 
 #ifdef HAVE_GETDOMAINNAME
     /* get the domain name (if any) */
-    if (firsttime) {
-	firsttime = 0;
-	if (getdomainname(d, sizeof(d)) == 0 && d[0])
-	    domain = d;
+    if (domain == (char *) -1) {
+	if ((domain = (char *) malloc(MAXHOSTNAMELEN + 1)) == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+
+	if (getdomainname(domain, MAXHOSTNAMELEN + 1) != 0 || *domain == '\0') {
+	    (void) free(domain);
+	    domain = NULL;
+	}
     }
 #endif /* HAVE_GETDOMAINNAME */
 
