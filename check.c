@@ -222,7 +222,7 @@ static void update_timestamp()
 static void check_passwd()
 {
 #if !(defined (linux) && defined (HAVE_LIBSHADOW))
-    char *crypt();
+    char *crypt	__P((char *, char *));
 #endif /* linux */
     struct passwd *pw_ent;
 #ifdef __svr4__
