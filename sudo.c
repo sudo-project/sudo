@@ -45,7 +45,7 @@
 #define MAIN
 
 #include <stdio.h>
-#ifdef hpux
+#if defined(hpux) || defined(linux)
 #include <unistd.h>
 #endif
 #include <string.h>
@@ -280,7 +280,11 @@ void clean_envp(envp)
      * omit all LD_* environmental vars
      */
     for (tenvp = Envp; *envp; envp++)
+#ifdef hpux
+	if (strncmp("LD_", *envp, 3) && strcmp("SHLIB_PATH", *envp))
+#else
 	if (strncmp("LD_", *envp, 3))
+#endif /* hpux */
 	    *tenvp++ = *envp;
 
     *tenvp = NULL;
