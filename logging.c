@@ -265,7 +265,7 @@ log_auth(status, inform_user)
     char *message;
     char *logline;
 #if (LOGGING & SLOG_SYSLOG)
-    int pri = Syslog_priority_NO;
+    int pri = PRI_FAILURE;
 #endif /* LOGGING & SLOG_SYSLOG */
 
     /* Set error message, if any. */
@@ -300,7 +300,7 @@ log_auth(status, inform_user)
 	case VALIDATE_OK:
 	case VALIDATE_OK_NOPASS:
 #if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_OK;
+	    pri = PRI_SUCCESS;
 #endif /* LOGGING & SLOG_SYSLOG */
 #ifdef SEND_MAIL_WHEN_OK
 	    send_mail(logline);
@@ -420,7 +420,7 @@ log_error(va_alist)
      * Log to syslog and/or a file.
      */
 #if (LOGGING & SLOG_SYSLOG)
-    do_syslog(Syslog_priority_NO, logline);
+    do_syslog(PRI_FAILURE, logline);
 #endif
 #if (LOGGING & SLOG_FILE)
     do_logfile(logline);

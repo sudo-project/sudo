@@ -65,7 +65,6 @@
 
 #include "sudo.h"
 #include "interfaces.h"
-#include "version.h"
 
 #ifndef STDC_HEADERS
 extern char *getenv	__P((char *));
@@ -174,11 +173,11 @@ main(argc, argv)
 
     /* Initialize syslog(3) if we are using it. */
 #if (LOGGING & SLOG_SYSLOG)
-# ifdef Syslog_facility
-    openlog(Syslog_ident, Syslog_options, Syslog_facility);
+# ifdef LOG_NFACILITIES
+    openlog("sudo", 0, LOGFAC);
 # else
-    openlog(Syslog_ident, Syslog_options);
-# endif /* Syslog_facility */
+    openlog("sudo", 0);
+# endif /* LOG_NFACILITIES */
 #endif /* LOGGING & SLOG_SYSLOG */
 
     /*
@@ -220,12 +219,11 @@ main(argc, argv)
 
     switch (sudo_mode) {
 	case MODE_VERSION:
+	    print_version();
+	    exit(0);
+	    break;
 	case MODE_HELP:
-	    (void) printf("Sudo version %s\n", version);
-	    if (sudo_mode == MODE_VERSION)
-		exit(0);
-	    else
-		usage(0);
+	    usage(0);
 	    break;
 	case MODE_VALIDATE:
 	    user_cmnd = "validate";

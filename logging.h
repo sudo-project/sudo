@@ -65,25 +65,11 @@
 #define SLOG_FILE		0x02
 #define SLOG_BOTH		0x03
 
-/* XXX - priority should be configure flag */
-/*       these should all get renamed */
+/* XXX - PRI_SUCCESS and PRI_FAILURE should be configure options */
 #if (LOGGING & SLOG_SYSLOG)
 # include <syslog.h>
-# ifndef Syslog_ident
-#  define Syslog_ident		"sudo"
-# endif
-# ifndef Syslog_options
-#  define Syslog_options	0
-# endif
-# if !defined(Syslog_facility) && defined(LOG_NFACILITIES)
-#  define Syslog_facility	LOGFAC
-# endif
-# ifndef Syslog_priority_OK
-#  define Syslog_priority_OK	LOG_NOTICE
-# endif
-# ifndef Syslog_priority_NO
-#  define Syslog_priority_NO	LOG_ALERT
-# endif
+# define PRI_SUCCESS		LOG_NOTICE
+# define PRI_FAILURE		LOG_ALERT
 #endif /* LOGGING & SLOG_SYSLOG */
 
 void log_auth			__P((int, int));

@@ -163,6 +163,7 @@ VOID *erealloc		__P((VOID *, size_t));
 char *estrdup		__P((const char *));
 void easprintf		__P((char **, const char *, ...));
 void evasprintf		__P((char **, const char *, va_list));
+void print_version	__P((void));
 YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */
