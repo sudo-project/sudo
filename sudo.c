@@ -270,8 +270,8 @@ main(argc, argv, envp)
 
     /* Skip reading /etc/sudoers if LDAP told us to */
     if (def_ignore_local_sudoers); /* skips */
-    else if ((validated & VALIDATE_OK) && !printmatches); /* skips */
-    else if ((validated & VALIDATE_OK) && printmatches)
+    else if (ISSET(validated, VALIDATE_OK) && !printmatches); /* skips */
+    else if (ISSET(validated, VALIDATE_OK) && printmatches)
     {
 	check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
 
