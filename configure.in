@@ -161,7 +161,7 @@ AC_ARG_WITH(rpath, [  --with-rpath            pass -R flag in addition to -L for
 		;;
 esac])
 
-AC_ARG_WITH(blibpath, [  --with-blibpath[=PATH]  pass -blibpath flag to ld for additional lib paths],
+AC_ARG_WITH(blibpath, [  --with-blibpath[=PATH]    pass -blibpath flag to ld for additional lib paths],
 [case $with_blibpath in
     yes)	;;
     no)		;;
@@ -255,7 +255,7 @@ AC_ARG_WITH(passwd, [  --without-passwd        don't use passwd/shadow file for 
 		;;
 esac])
 
-AC_ARG_WITH(skey, [  --with-skey[=DIR]       enable S/Key support ],
+AC_ARG_WITH(skey, [  --with-skey[=DIR]         enable S/Key support ],
 [case $with_skey in
     no)		with_skey="";;
     *)		if test -n "$with_opie"; then
@@ -268,7 +268,7 @@ AC_ARG_WITH(skey, [  --with-skey[=DIR]       enable S/Key support ],
 		;;
 esac])
 
-AC_ARG_WITH(opie, [  --with-opie[=DIR]       enable OPIE support ],
+AC_ARG_WITH(opie, [  --with-opie[=DIR]         enable OPIE support ],
 [case $with_opie in
     no)		with_opie="";;
     *)		if test -n "$with_skey"; then
@@ -914,7 +914,7 @@ AC_ARG_WITH(goons-insults, [  --with-goons-insults    include the insults from t
 		;;
 esac])
 
-AC_ARG_WITH(ldap, [  --with-ldap[[=DIR]]     enable LDAP support],
+AC_ARG_WITH(ldap, [  --with-ldap[[=DIR]]       enable LDAP support],
 [case $with_ldap in
     no)		with_ldap="";;
     *)		AC_DEFINE(HAVE_LDAP)
@@ -1027,7 +1027,7 @@ AC_ARG_ENABLE(setreuid,
 ])
 
 AC_ARG_ENABLE(setresuid,
-[  --disable-setresuid      Don't try to use the setresuid() function],
+[  --disable-setresuid     Don't try to use the setresuid() function],
 [ case "$enableval" in
     no)		SKIP_SETRESUID=yes
 		;;
@@ -1181,7 +1181,7 @@ else
     eval _shrext="$shrext"
 fi
 AC_MSG_CHECKING(path to sudo_noexec.so)
-AC_ARG_WITH(noexec, [  --with-noexec[=PATH]    fully qualified pathname of sudo_noexec.so],
+AC_ARG_WITH(noexec, [  --with-noexec[=PATH]      fully qualified pathname of sudo_noexec.so],
 [case $with_noexec in
     yes)	with_noexec="$libexecdir/sudo_noexec$_shrext"
 		;;
