@@ -50,7 +50,7 @@ echo 'Configuring for use with AFS')
 dnl
 dnl --with-csops
 AC_WITH(csops, OPTIONS="${OPTIONS} -DUSE_INSULTS -DENV_EDITOR"
-echo 'CSOps--adding options: USE_INSULTS ENV_EDITOR SHORT_MESSAGE')
+echo 'CSOps--adding options: USE_INSULTS ENV_EDITOR')
 dnl
 dnl C compiler checks
 dnl
