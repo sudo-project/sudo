@@ -64,6 +64,10 @@ static char rcsid[] = "$Id$";
 #ifdef __svr4__
 #include <shadow.h>
 #endif /* __svr4__ */
+#if defined(__osf__) && defined(HAVE_C2_SECURITY)
+#include <sys/security.h>
+#include <prot.h>
+#endif /* __osf__ && HAVE_C2_SECURITY */
 #if defined(ultrix) && defined(HAVE_C2_SECURITY)
 #include <auth.h>
 #endif /* ultrix && HAVE_C2_SECURITY */
@@ -265,13 +269,16 @@ static void check_passwd()
 #ifdef __svr4__
     struct spwd *spw_ent;
 #endif /* __svr4__ */
-#if defined (__hpux) && defined(HAVE_C2_SECURITY)
+#if defined(__hpux) && defined(HAVE_C2_SECURITY)
     struct s_passwd *spw_ent;
 #endif /* __hpux && HAVE_C2_SECURITY */
-#if defined (ultrix) && defined(HAVE_C2_SECURITY)
+#if defined(__osf__) && defined(HAVE_C2_SECURITY)
+    struct pr_passwd *spw_ent;
+#endif /* __osf__ && HAVE_C2_SECURITY */
+#if defined(ultrix) && defined(HAVE_C2_SECURITY)
     AUTHORIZATION *spw_ent;
 #endif /* ultrix && HAVE_C2_SECURITY */
-#if defined (__convex__) && defined(HAVE_C2_SECURITY)
+#if defined(__convex__) && defined(HAVE_C2_SECURITY)
     char salt[2];		/* Need the salt to perform the encryption */
     register int i;
     struct pr_passwd *spw_ent;
@@ -280,7 +287,7 @@ static void check_passwd()
     char *pass;			/* this is what gets entered    */
     register int counter = TRIES_FOR_PASSWORD;
 
-#if defined (__hpux) && defined(HAVE_C2_SECURITY)
+#if defined(__hpux) && defined(HAVE_C2_SECURITY)
     /*
      * grab encrypted password from shadow pw file
      * or just use the regular one...
@@ -291,7 +298,19 @@ static void check_passwd()
     if (spw_ent && spw_ent -> pw_passwd)
 	encrypted = spw_ent -> pw_passwd;
 #endif /* __hpux && HAVE_C2_SECURITY */
-#if defined (ultrix) && defined(HAVE_C2_SECURITY)
+#if defined(__osf__) && defined(HAVE_C2_SECURITY)
+    /*
+     * grab encrypted password from protected passwd file
+     * or just use the regular one...
+     */
+    be_root();
+    (void) set_auth_parameters();
+    spw_ent = getprpwuid(uid);
+    be_user();
+    if (spw_ent && spw_ent -> ufld)
+	encrypted = spw_ent -> ufld.fd_encrypt;
+#endif /* __osf__ && HAVE_C2_SECURITY */
+#if defined(ultrix) && defined(HAVE_C2_SECURITY)
     /*
      * grab encrypted password from /etc/auth
      * or just use the regular one...
@@ -318,7 +337,7 @@ static void check_passwd()
     }
     encrypted = spw_ent -> sp_pwdp;
 #endif /* __svr4__ */
-#if defined (__convex__) && defined(HAVE_C2_SECURITY)
+#if defined(__convex__) && defined(HAVE_C2_SECURITY)
     /*
      * Convex with C2 security
      */
@@ -345,13 +364,13 @@ static void check_passwd()
 #endif /* USE_GETPASS */
 	if (!pass || *pass == '\0')
 	    exit(0);
-#if defined (__convex__) && defined(HAVE_C2_SECURITY)
+#if defined(__convex__) && defined(HAVE_C2_SECURITY)
 	strncpy(salt, spw_ent->ufld.fd_encrypt, 2);
 	i = AUTH_SALT_SIZE + AUTH_CIPHERTEXT_SEG_CHARS;
 	if (strncmp(encrypted, crypt(pass, salt), i) == 0)
 	    return;           /* if the passwd is correct return() */
 #else
-#if defined (ultrix) && defined(HAVE_C2_SECURITY)
+#if defined(ultrix) && defined(HAVE_C2_SECURITY)
 	if (spw_ent && !strcmp(encrypted, (char *) crypt16(pass, encrypted)))
 	    return;		/* if the passwd is correct return() */
 #endif /* ultrix && HAVE_C2_SECURITY */
