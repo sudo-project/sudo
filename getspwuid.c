@@ -544,7 +544,7 @@ sudo_grdup(gr)
  * Get a group entry by gid and allocate space for it.
  */
 struct group *
-sudo_getgruid(gid)
+sudo_getgrgid(gid)
     gid_t gid;
 {
     struct group key, *gr;
@@ -583,4 +583,3 @@ sudo_getgrnam(name)
     rbinsert(grcache_bygid, (VOID *) gr);
     return(gr);
 }
-
