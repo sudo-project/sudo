@@ -11,7 +11,7 @@ Simple sudo installation
 For most systems and configurations it is possible simply to:
 
     0) If you previously ran `configure' on a different host
-       you will probably want to do a `make clean' to remove
+       you will probably want to do a `make distclean' to remove
        the old `config.cache' file.  Otherwise, `configure'
        will use the cached values which is probably not
        what you want unless the two hosts are running the
