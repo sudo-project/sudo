@@ -147,10 +147,11 @@ dnl
 AC_DEFUN(SUDO_OSTYPE,
 AC_BEFORE([$0], [AC_PROGRAM_CHECK])
 [echo trying to figure out what OS you are running...
-OS="unknown"
+OS=""
 OSREV=0
 if test -n "$UNAMEPROG"; then
     echo "checking OS based on uname(1)"
+    OS="unknown"
     OS=`$UNAMEPROG -s`
     # this is yucky but we want to make sure $OSREV is an int...
     OSREV=`$UNAMEPROG -r | $SEDPROG -e 's/^[[ \.0A-z]]*//' -e 's/\..*//'`
