@@ -93,7 +93,7 @@ static RETSIGTYPE Exit		__P((int));
 static void setup_signals	__P((void));
 int command_matches		__P((char *, char *, char *, char *));
 int addr_matches		__P((char *));
-int hostname_matches		__P((char *, char *));
+int hostname_matches		__P((char *, char *, char *));
 int netgr_matches		__P((char *, char *, char *, char *));
 int usergr_matches		__P((char *, char *));
 void init_parser		__P((void));
@@ -407,8 +407,8 @@ addr_matches(n)
 }
 
 int
-hostname_matches(h, p)
-    char *h, *p;
+hostname_matches(s, l, p)
+    char *s, *l, *p;
 {
     return(TRUE);
 }
