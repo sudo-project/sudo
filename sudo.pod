@@ -9,7 +9,7 @@ sudo - execute a command as the superuser
 =head1 SYNOPSIS
 
 B<sudo> B<-V> | B<-h> | B<-l> | B<-v> | B<-k> | B<-s> | [ B<-b> ]
-[ B<-p> prompt ] I<command>
+[ B<-p> prompt ] [ B<-u> username/#uid] I<command>
 
 =head1 DESCRIPTION
 
@@ -81,6 +81,12 @@ option you cannot use shell job control to manipulate the command.
 
 The C<-p> (I<prompt>) option allows you to override the default
 password prompt and use a custom one.
+
+=item -u
+
+The C<-u> (I<user>) option causes sudo to run the specified command
+as a user other than I<root>.  To specify a I<uid> instead of a
+I<username>, use "#uid".
 
 =item -s
 
@@ -199,8 +205,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 =head1 CAVEATS
 
 There is no easy way to prevent a user from gaining a root shell if 
-that user has access to commands that are shell scripts or that 
-allow shell escapes.
+that user has access to commands allow shell escapes.
+Running shell scripts via B<sudo> can expose the same kernel bugs
+that make setuid shell scripts unsafe on some operating systems.
 
 =head1 SEE ALSO
 
