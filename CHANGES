@@ -1442,3 +1442,8 @@ Sudo 1.6.3p7 released.
 
 451) Wrap each call to syslog() with openlog()/closelog() since some
      things (such as PAM) may call closelog(3) behind sudo's back.
+
+452) The LOGNAME and USER environment variables are now set if the user
+     specified a target uid and that uid exists in the password database.
+
+453) configure will no longer add the -g flag to CFLAGS by default.
