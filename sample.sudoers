@@ -60,6 +60,9 @@ operator	ALL=DUMPS,KILL,PRINTING,SHUTDOWN,HALT,REBOOT,/usr/oper/bin/
 # joe may su only to operator
 joe		/usr/bin/su operator
 
+# pete may change passwords for anyone but root
+pete		/bin/passwd [A-z]*,!/bin/passwd root
+
 # bob may run anything except root shells or su on the sun3 and sun4 machines
 bob		SUN4=ALL,!SU,!SHELLS:\
 		SUN3=ALL,!SU,!SHELLS
