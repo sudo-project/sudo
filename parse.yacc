@@ -118,6 +118,19 @@ int nummatches;
     }
 
 /*
+ * The list of cmndaliases for MODE_LIST
+ */
+int in_alias = FALSE, num_command_aliases = 0;
+/* XXX - dynamically size me! */
+struct command_alias command_aliases[1024] = { NULL, NULL, 0, 0 };
+
+#define command_alias_push \
+    if (num_command_aliases++ > 1024) \
+	yyerror("command_alias stack overflow"); \
+    else \
+	command_aliases[num_command_aliases].entries = NULL;
+
+/*
  * Protoypes
  */
 extern int  command_matches	__P((char *, char *, char *, char *));
@@ -127,8 +140,7 @@ extern int  usergr_matches	__P((char *, char *));
 static int  find_alias		__P((char *, int));
 static int  add_alias		__P((char *, int));
 static int  more_aliases	__P((size_t));
-static void append_runas	__P((struct sudo_match *, char *));
-static void append_cmnd		__P((struct sudo_match *, char *));
+static void append		__P((char *, char **, size_t *, size_t *, int));
        void yyerror		__P((char *));
 
 void yyerror(s)
@@ -268,9 +280,17 @@ cmndspec	:	runasspec nopasswd opcmnd {
 
 opcmnd		:	cmnd { ; }
 		|	'!' {
-			    if (printmatches == TRUE && host_matches == TRUE
-				&& user_matches == TRUE) {
-				append_cmnd(&matches[nummatches], "!");
+			    if (printmatches == TRUE && in_alias == TRUE) {
+				/* XXX - want a space before first '!' */
+				append("!", &command_aliases[num_command_aliases].entries,
+				       &command_aliases[num_command_aliases].entries_len,
+				       &command_aliases[num_command_aliases].entries_size, 0);
+			    }
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE) {
+				append("!", &matches[nummatches].cmnd,
+				       &matches[nummatches].cmnd_len,
+				       &matches[nummatches].cmnd_size, 0);
 				push;
 				user_matches = TRUE;
 				host_matches = TRUE;
@@ -307,26 +327,36 @@ runaslist	:	runasuser {
 
 runasuser	:	NAME {
 			    $$ = (strcmp($1, runas_user) == 0);
-			    if (printmatches == TRUE && host_matches == TRUE
-				&& user_matches == TRUE)
-				append_runas(&matches[nummatches], $1);
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				append($1, &matches[nummatches].runas,
+				       &matches[nummatches].runas_len,
+				       &matches[nummatches].runas_size, ':');
 			    (void) free($1);
 			}
 		|	USERGROUP {
 			    $$ = usergr_matches($1, runas_user);
-			    if (printmatches == TRUE && host_matches == TRUE
-				&& user_matches == TRUE) {
-				append_runas(&matches[nummatches], "%");
-				append_runas(&matches[nummatches], $1);
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE) {
+				append("%", &matches[nummatches].runas,
+				       &matches[nummatches].runas_len,
+				       &matches[nummatches].runas_size, ':');
+				append($1, &matches[nummatches].runas,
+				       &matches[nummatches].runas_len,
+				       &matches[nummatches].runas_size, 0);
 			    }
 			    (void) free($1);
 			}
 		|	NETGROUP {
 			    $$ = netgr_matches($1, NULL, runas_user);
-			    if (printmatches == TRUE && host_matches == TRUE
-				&& user_matches == TRUE) {
-				append_runas(&matches[nummatches], "+");
-				append_runas(&matches[nummatches], $1);
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE) {
+				append("+", &matches[nummatches].runas,
+				       &matches[nummatches].runas_len,
+				       &matches[nummatches].runas_size, ':');
+				append($1, &matches[nummatches].runas,
+				       &matches[nummatches].runas_len,
+				       &matches[nummatches].runas_size, 0);
 			    }
 			    (void) free($1);
 			}
@@ -336,16 +366,20 @@ runasuser	:	NAME {
 				$$ = TRUE;
 			    else
 				$$ = FALSE;
-			    if (printmatches == TRUE && host_matches == TRUE
-				&& user_matches == TRUE)
-				append_runas(&matches[nummatches], $1);
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				append($1, &matches[nummatches].runas,
+				       &matches[nummatches].runas_len,
+				       &matches[nummatches].runas_size, ':');
 			    (void) free($1);
 			}
 		|	ALL {
 			    $$ = TRUE;
-			    if (printmatches == TRUE && host_matches == TRUE
-				&& user_matches == TRUE)
-				append_runas(&matches[nummatches], "ALL");
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				append("ALL", &matches[nummatches].runas,
+				       &matches[nummatches].runas_len,
+				       &matches[nummatches].runas_size, ':');
 			}
 		;
 
@@ -361,9 +395,16 @@ nopasswd	:	/* empty */ {
 		;
 
 cmnd		:	ALL {
+			    if (printmatches == TRUE && in_alias == TRUE) {
+				append("ALL", &command_aliases[num_command_aliases].entries,
+				       &command_aliases[num_command_aliases].entries_len,
+				       &command_aliases[num_command_aliases].entries_size, ',');
+			    }
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
-				append_cmnd(&matches[nummatches], "ALL");
+				append("ALL", &matches[nummatches].cmnd,
+				       &matches[nummatches].cmnd_len,
+				       &matches[nummatches].cmnd_size, 0);
 				cmndpush;
 			    }
 
@@ -371,9 +412,16 @@ cmnd		:	ALL {
 			    $$ = TRUE;
 			}
 		|	ALIAS {
+			    if (printmatches == TRUE && in_alias == TRUE) {
+				append($1, &command_aliases[num_command_aliases].entries,
+				       &command_aliases[num_command_aliases].entries_len,
+				       &command_aliases[num_command_aliases].entries_size, ',');
+			    }
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
-				append_cmnd(&matches[nummatches], $1);
+				append($1, &matches[nummatches].cmnd,
+				       &matches[nummatches].cmnd_len,
+				       &matches[nummatches].cmnd_size, 0);
 				cmndpush;
 			    }
 			    if (find_alias($1, CMND)) {
@@ -383,12 +431,21 @@ cmnd		:	ALL {
 			    (void) free($1);
 			}
 		|	 COMMAND {
+			    if (printmatches == TRUE && in_alias == TRUE) {
+				append($1.cmnd, &command_aliases[num_command_aliases].entries,
+				       &command_aliases[num_command_aliases].entries_len,
+				       &command_aliases[num_command_aliases].entries_size, ',');
+				/* XXX - ignores args */
+			    }
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)  {
-				append_cmnd(&matches[nummatches], $1.cmnd);
+				append($1.cmnd, &matches[nummatches].cmnd,
+				       &matches[nummatches].cmnd_len,
+				       &matches[nummatches].cmnd_size, 0);
 				if ($1.args) {
-				    append_cmnd(&matches[nummatches], " ");
-				    append_cmnd(&matches[nummatches], $1.args);
+				    append($1.args, &matches[nummatches].cmnd,
+					   &matches[nummatches].cmnd_len,
+					   &matches[nummatches].cmnd_size, ' ');
 				}
 				cmndpush;
 			    }
@@ -425,11 +482,29 @@ cmndaliases	:	cmndalias
 		|	cmndaliases ':' cmndalias
 		;
 
-cmndalias	:	ALIAS { push; }	'=' cmndlist {
+cmndalias	:	ALIAS {
+			    push;
+			    if (printmatches) {
+				in_alias = TRUE;
+				if ((command_aliases[num_command_aliases].alias
+				     = strdup($1)) == NULL) {
+
+				    perror("malloc");
+				    (void) fprintf(stderr,
+					"%s: cannot allocate memory!\n", Argv[0]);
+				    exit(1);
+				 }
+			     }
+			} '=' cmndlist {
 			    if (cmnd_matches == TRUE && !add_alias($1, CMND))
 				YYERROR;
 			    pop;
 			    (void) free($1);
+
+			    if (printmatches) {
+				in_alias = FALSE;
+				command_alias_push;
+			    }
 			}
 		;
 
@@ -508,6 +583,16 @@ static int aliascmp(a1, a2)
 	r = ai1->type - ai2->type;
 
     return(r);
+}
+
+
+static int cmndaliascmp(entry, key)
+    const VOID *entry, *key;
+{
+    struct command_alias *ca1 = (struct command_alias *) key;
+    struct command_alias *ca2 = (struct command_alias *) entry;
+
+    return(strcmp(ca1->alias, ca2->alias));
 }
 
 
@@ -608,6 +693,7 @@ void list_matches()
 {
     int i; 
     char *p;
+    struct command_alias *ca, key;
 
     for (i = 0; i < nummatches; i++) {
 
@@ -629,9 +715,61 @@ void list_matches()
 	if (matches[i].nopasswd == TRUE)
 	    (void) fputs("NOPASSWD: ", stdout);
 
-	/* Print the actual command. */
-	(void) puts(matches[i].cmnd);
+	/* XXX - this could be faster (check for all upcase) */
+	/* Print the actual command or expanded Cmnd_Alias. */
+	key.alias = matches[i].cmnd;
+	if ((ca = lfind((VOID *)&key, (VOID *)&command_aliases[0],
+	     &num_command_aliases, sizeof(struct command_alias), cmndaliascmp)))
+	    (void) puts(ca->entries);
+	else
+	    (void) puts(matches[i].cmnd);
     }
+
+    /* XXX - free up space */
+}
+
+
+static void append(src, dstp, dst_len, dst_size, separator)
+    char *src, **dstp;
+    size_t *dst_len, *dst_size;
+    int separator;
+{
+    /* Only add the separator if *dstp is non-NULL. */
+    size_t src_len = strlen(src) + ((separator && *dstp) ? 1 : 0);
+    char *dst = *dstp;
+
+    /* Assumes dst will be NULL if not set. */
+    if (dst == NULL) {
+	if ((dst = (char *) malloc(BUFSIZ)) == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+
+	*dst_size = BUFSIZ;
+	*dst_len = 0;
+	*dstp = dst;
+    }
+
+    /* Allocate more space if necesary. */
+    if (*dst_size <= *dst_len + src_len) {
+	while (*dst_size <= *dst_len + src_len)
+	    *dst_size += BUFSIZ;
+
+	if (!(dst = (char *) realloc(dst, *dst_size))) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+	*dstp = dst;
+    }
+
+    /* Copy src -> dst adding a separator char if appropriate and adjust len. */
+    dst += *dst_len;
+    if (separator && *dst_len)
+	*dst++ = (char) separator;
+    (void) strcpy(dst, src);
+    *dst_len += src_len;
 }
 
 
@@ -640,74 +778,4 @@ void reset_aliases()
     if (aliases)
 	(void) free(aliases);
     naliases = nslots = 0;
-}
-
-
-/* XXX - merge into one function? (note: one always adds a ':' */
-static void append_runas(match, runas)
-    struct sudo_match *match;
-    char *runas;
-{
-    size_t len = strlen(runas) + 1;
-
-    if (match->runas == NULL) {
-	if (!(match->runas = (char *) malloc(BUFSIZ))) {
-	    perror("malloc");
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
-
-	/* Assumes BUFSIZ > max username length */
-	match->runas_size = BUFSIZ;
-	match->runas_len = len - 1;
-	(void) strcpy(match->runas, runas);
-    } else {
-	/* Allocate more space if necesary. */
-	while (match->runas_size <= match->runas_len + len) {
-	    match->runas_size += BUFSIZ;
-	    if (!(match->runas = (char *) realloc(match->runas, match->runas_size))) {
-		perror("malloc");
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-		exit(1);
-	    }
-	}
-
-	*(match->runas + match->runas_len) = ':';
-	(void) strcpy(match->runas + match->runas_len + 1, runas);
-	match->runas_len += len;
-    }
-}
-
-
-static void append_cmnd(match, cmnd)
-    struct sudo_match *match;
-    char *cmnd;
-{
-    size_t len = strlen(cmnd);
-
-    if (match->cmnd == NULL) {
-	if (!(match->cmnd = (char *) malloc(BUFSIZ))) {
-	    perror("malloc");
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
-
-	/* Assumes BUFSIZ > max username length */
-	match->cmnd_size = BUFSIZ;
-	match->cmnd_len = len;
-	(void) strcpy(match->cmnd, cmnd);
-    } else {
-	/* Allocate more space if necesary. */
-	while (match->cmnd_size <= match->cmnd_len + len) {
-	    match->cmnd_size += BUFSIZ;
-	    if (!(match->cmnd = (char *) realloc(match->cmnd, match->cmnd_size))) {
-		perror("malloc");
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-		exit(1);
-	    }
-	}
-
-	(void) strcpy(match->cmnd + match->cmnd_len, cmnd);
-	match->cmnd_len += len;
-    }
 }
