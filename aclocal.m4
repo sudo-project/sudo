@@ -11,7 +11,7 @@ define(SUDO_PROG_INSTALL,
 # `staff'.  On most BSDish systems install is in /usr/bin, not /usr/ucb
 # anyway.  Sigh.  We can always use the installbsd in $srcdir.
 if test "z${INSTALL}" = "z" ; then
-  echo checking for BSD compatible install
+  echo checking for BSD compatible install...
   savepath="$PATH"
   PATH="${PATH}:${srcdir}"
   IFS="${IFS= 	}"; saveifs="$IFS"; IFS="${IFS}:"
@@ -120,7 +120,9 @@ dnl XXX - check to see that uname was checked first
 dnl
 define(SUDO_OSTYPE,
 AC_BEFORE([$0], [AC_PROGRAM_CHECK])
-[echo trying to figure out what OS you are running
+[echo trying to figure out what OS you are running...
+OS="unknown"
+OSREV=0
 if test -n "$UNAMEPROG"; then
     echo "checking OS based on uname(1)"
     OS=`$UNAMEPROG -s`
