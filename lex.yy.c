@@ -2958,12 +2958,6 @@ int
 yywrap()
 {
 
-    /* Flush any buffers that might still exist. */
-    YY_FLUSH_BUFFER;
-
-    /* Set file pointer to the beginning so we can re-run the parser. */
-    yyrestart(yyin);
-
     /* Free space used by the aliases unless called by testsudoers. */
     if (clearaliases)
 	reset_aliases();
