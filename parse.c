@@ -64,7 +64,6 @@ static char rcsid[] = "$Id$";
  */
 #define NUM_LISTS 3+1
 
-extern char *user, *host, *cmnd;
 extern FILE *yyin, *yyout;
 
 int user_list_found = FALSE;
