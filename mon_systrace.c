@@ -17,17 +17,7 @@
 #include "config.h"
 
 #include <sys/param.h>
-#include <sys/syscall.h>
 #include <sys/ioctl.h>
-#ifdef HAVE_DEV_SYSTRACE_H
-# include <dev/systrace.h>
-#else
-# ifdef HAVE_SYS_SYSTRACE_H
-#  include <sys/systrace.h>
-# else
-#  include <systrace.h>
-# endif
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -42,6 +32,19 @@
 #else
 # include "emul/err.h"
 #endif /* HAVE_ERR_H */
+#ifdef HAVE_DEV_SYSTRACE_H
+# include <dev/systrace.h>
+#else
+# ifdef HAVE_SYS_SYSTRACE_H
+#  include <sys/systrace.h>
+# else
+#  ifdef HAVE_LINUX_SYSTRACE_H
+#   include <linux/systrace.h>
+#  else
+#   include <systrace.h>
+#  endif
+# endif
+#endif
 
 #include "sudo.h"
 #include "trace_systrace.h"
@@ -100,12 +103,13 @@ void
 systrace_attach(pid)
     pid_t pid;
 {
+    schandler_t handler;
     struct systrace_answer ans;
     struct str_message msg;
     sigaction_t sa, osa;
     sigset_t set, oset;
     ssize_t nread;
-    int fd;
+    int fd, cookie;
 
     if ((fd = systrace_open()) == -1)
 	err(1, "unable to open systrace");
@@ -144,8 +148,10 @@ systrace_attach(pid)
 
     /* reset signal state for tracer */
     if (sigaction(SIGUSR1, &osa, NULL) != 0 ||
-	sigprocmask(SIG_SETMASK, &oset, NULL) != 0)
+	sigprocmask(SIG_SETMASK, &oset, NULL) != 0) {
+	warn("unable to setup signals for %s", user_cmnd);
 	goto fail;
+    }
 
     /* become a daemon */
     if (setsid() == -1) {
@@ -165,12 +171,15 @@ systrace_attach(pid)
 	    (void) kill(pid, SIGUSR1);
 	    _exit(0);
 	}
+	warn("unable to systrace %s", user_cmnd);
 	goto fail;
     }
 
     new_child(-1, pid);
-    if (set_policy(fd, children.first) != 0)
+    if (set_policy(fd, children.first) != 0) {
+	warn("failed to set policy for %s", user_cmnd);
 	goto fail;
+    }
 
     if (kill(pid, SIGUSR1) != 0) {
 	warn("unable to wake up sleeping child");
@@ -201,25 +210,33 @@ systrace_attach(pid)
 
 	    case SYSTR_MSG_UGID:
 		/* uid/gid change */
-#ifdef DEBUG
-		warnx("new uid %d for %d", msg.msg_data.msg_ugid.uid, msg.msg_pid);
-#endif
-		update_child(msg.msg_pid, msg.msg_data.msg_ugid.uid);
 		memset(&ans, 0, sizeof(ans));
 		ans.stra_pid = msg.msg_pid;
 		ans.stra_seqnr = msg.msg_seqnr;
 		ans.stra_policy = SYSTR_POLICY_PERMIT;
-		if ((ioctl(fd, STRIOCANSWER, &ans)) == -1)
-		    goto fail;
+		if ((ioctl(fd, STRIOCANSWER, &ans)) == 0)
+		    update_child(msg.msg_pid, msg.msg_data.msg_ugid.uid);
 		break;
 
 	    case SYSTR_MSG_ASK:
 		memset(&ans, 0, sizeof(ans));
 		ans.stra_pid = msg.msg_pid;
 		ans.stra_seqnr = msg.msg_seqnr;
-		check_syscall(fd, &msg.msg_data.msg_ask, &ans);
-		if ((ioctl(fd, STRIOCANSWER, &ans)) == -1)
-		    goto fail;
+		ans.stra_policy = SYSTR_POLICY_PERMIT;
+		handler = find_handler(msg.msg_pid, msg.msg_data.msg_ask.code);
+		if (handler != NULL) {
+		    /*
+		     * handler is run twice, once before we answer and once
+		     * after.  We only want to log attempts when our answer
+		     * is accepted; otherwise we can get dupes.
+		     */
+		    cookie = handler(fd, msg.msg_pid, &msg.msg_data.msg_ask, -1,
+			&ans.stra_policy, &ans.stra_error);
+			if (ioctl(fd, STRIOCANSWER, &ans) == 0)
+			    handler(fd, msg.msg_pid, &msg.msg_data.msg_ask,
+				cookie, &ans.stra_policy, &ans.stra_error);
+		} else
+		    (void) ioctl(fd, STRIOCANSWER, &ans);
 		break;
 
 	    case SYSTR_MSG_EMUL:
@@ -234,12 +251,13 @@ systrace_attach(pid)
 			msg.msg_data.msg_emul.emul);
 		    ans.stra_policy = SYSTR_POLICY_NEVER;
 		}
-		if ((ioctl(fd, STRIOCANSWER, &ans)) == -1)
-		    goto fail;
+		(void) ioctl(fd, STRIOCANSWER, &ans);
 		break;
 
+#ifdef SYSTR_MSG_POLICYFREE
 	    case SYSTR_MSG_POLICYFREE:
 		break;
+#endif
 
 	    default:
 #ifdef SUDO_DEVEL
@@ -249,14 +267,12 @@ systrace_attach(pid)
 		ans.stra_pid = msg.msg_pid;
 		ans.stra_seqnr = msg.msg_seqnr;
 		ans.stra_policy = SYSTR_POLICY_PERMIT;
-		if ((ioctl(fd, STRIOCANSWER, &ans)) == -1)
-		    goto fail;
+		(void) ioctl(fd, STRIOCANSWER, &ans);
 		break;
 	}
     }
 
 fail:
-    warn("unable to systrace %s", user_cmnd);
     kill(pid, SIGKILL);	/* XXX - kill all pids in list */
     _exit(1);
 }
@@ -394,16 +410,16 @@ set_policy(fd, child)
 
     pol.strp_op = SYSTR_POLICY_NEW;
     pol.strp_num = -1;
-    pol.strp_maxents = SYS_MAXSYSCALL;
+    pol.strp_maxents = SYSTRACE_MAXENTS;
     if (ioctl(fd, STRIOCPOLICY, &pol) == -1)
 	return(-1);
 
-    for (i = 0; i < SYS_MAXSYSCALL; i++) {
-	pol.strp_op = SYSTR_POLICY_ASSIGN;
-	pol.strp_pid = child->pid;
-	if (ioctl(fd, STRIOCPOLICY, &pol) == -1)
-	    return(-1);
+    pol.strp_op = SYSTR_POLICY_ASSIGN;
+    pol.strp_pid = child->pid;
+    if (ioctl(fd, STRIOCPOLICY, &pol) == -1)
+	return(-1);
 
+    for (i = 0; i < SYSTRACE_MAXENTS; i++) {
 	pol.strp_op = SYSTR_POLICY_MODIFY;
 	pol.strp_policy = SYSTR_POLICY_PERMIT;
 	pol.strp_code = i;
@@ -479,28 +495,23 @@ read_string(fd, pid, addr, buf, bufsiz)
     return(cp - buf);
 }
 
-static void
-check_syscall(fd, askp, ansp)
-    int fd;
-    struct str_msg_ask *askp;
-    struct systrace_answer *ansp;
+static schandler_t
+find_handler(pid, code)
+    pid_t pid;
+    int code;
 {
     struct syscallaction *sca;
     struct childinfo *child;
 
-    if ((child = find_child(ansp->stra_pid)) == NULL) {
-	warnx("unable to find child with pid %d", ansp->stra_pid);
-	ansp->stra_policy = SYSTR_POLICY_NEVER;
-	return;
+    if ((child = find_child(pid)) == NULL) {
+	warnx("unable to find child with pid %d", pid);
+	return(NULL);
     }
-    ansp->stra_policy = SYSTR_POLICY_PERMIT;	/* accept by default */
     for (sca = child->action; sca->code != -1; sca++) {
-	if (sca->code == askp->code) {
-	    if (sca->handler != NULL)
-		sca->handler(fd, askp, ansp);
-	    break;
-	}
+	if (sca->code == code)
+	    return(sca->handler);
     }
+    return(NULL);
 }
 
 /*
@@ -559,39 +570,49 @@ decode_args(fd, pid, askp)
 /*
  * Decode the args to exec and check the command in sudoers.
  */
-static void
-check_exec(fd, askp, ansp)
+static int
+check_exec(fd, pid, askp, cookie, policyp, errorp)
     int fd;
+    pid_t pid;
     struct str_msg_ask *askp;
-    struct systrace_answer *ansp;
+    int cookie;
+    int *policyp;
+    int *errorp;
 {
     int validated;
     struct childinfo *info;
 
+    /* If we have a cookie we take special action. */
+    if (cookie != -1) {
+	if (cookie != 0)
+	    log_auth(cookie, 1);
+	return(0);
+    }
+
     /* We're not really initialized until the first exec finishes. */
     if (initialized == 0) {
 	initialized = 1;
-	ansp->stra_policy = SYSTR_POLICY_PERMIT;
-	return;
+	*policyp = SYSTR_POLICY_PERMIT;
+	return(0);
     }
 
     /* Failure should not be possible. */
-    if ((info = find_child(ansp->stra_pid)) == NULL) {
-	ansp->stra_policy = SYSTR_POLICY_NEVER;
-	ansp->stra_error = ECHILD;
-	return;
+    if ((info = find_child(pid)) == NULL) {
+	*policyp = SYSTR_POLICY_NEVER;
+	*errorp = ECHILD;
+	return(0);
     }
 
     /* Fill in user_cmnd, user_base, user_args and user_stat.  */
-    decode_args(fd, ansp->stra_pid, askp);
+    decode_args(fd, pid, askp);
     if (user_cmnd[0] != '/' || !sudo_goodpath(user_cmnd, user_stat)) {
-	ansp->stra_policy = SYSTR_POLICY_NEVER;
-	ansp->stra_error = EACCES;
-	return;
+	*policyp = SYSTR_POLICY_NEVER;
+	*errorp = EACCES;
+	return(0);
     }
 
     /* Get processes's cwd. */
-    if (ioctl(fd, STRIOCGETCWD, &ansp->stra_pid) == -1 ||
+    if (ioctl(fd, STRIOCGETCWD, &pid) == -1 ||
 	!getcwd(user_cwd, sizeof(user_cwd))) {
 	warnx("cannot get working directory");
 	(void) strlcpy(user_cwd, "unknown", sizeof(user_cwd));
@@ -605,14 +626,11 @@ check_exec(fd, askp, ansp)
     user_runas = &info->pw->pw_name;
     rewind(sudoers_fp);
     validated = sudoers_lookup(0);
-#ifdef DEBUG
-    warnx("intercepted: %s %s in %s -> 0x%x", user_cmnd, user_args, user_cwd, validated);
-#endif
-    log_auth(validated, 1);
     if (ISSET(validated, VALIDATE_OK)) {
-	ansp->stra_policy = SYSTR_POLICY_PERMIT;
+	*policyp = SYSTR_POLICY_PERMIT;
     } else {
-	ansp->stra_policy = SYSTR_POLICY_NEVER;
-	ansp->stra_error = EACCES;
+	*policyp = SYSTR_POLICY_NEVER;
+	*errorp = EACCES;
     }
+    return(validated);
 }

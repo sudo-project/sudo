@@ -14,16 +14,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define	SYSTRACE_MAXENTS	1024
+
+typedef int (*schandler_t)
+    __P((int, pid_t, struct str_msg_ask *, int, int *, int *));
 
 struct childinfo;
 
 extern struct passwd *sudo_pwdup __P((const struct passwd *, int));
 extern struct passwd *sudo_getpwuid __P((uid_t));
 
-static void check_exec		__P((int, struct str_msg_ask *,
-				     struct systrace_answer *));
-static void check_syscall	__P((int, struct str_msg_ask *,
-				     struct systrace_answer *));
+static int check_exec		__P((int, pid_t, struct str_msg_ask *, int,
+				     int *, int *));
+static schandler_t find_handler	__P((pid_t, int));
 static int decode_args		__P((int, pid_t, struct str_msg_ask *));
 static int set_policy		__P((int, struct childinfo *));
 static int systrace_open	__P((void));
@@ -55,7 +58,7 @@ struct childinfo {
 struct syscallaction {
     int code;
     int policy;
-    void (*handler) __P((int, struct str_msg_ask *, struct systrace_answer *));
+    schandler_t handler;
 };
 
 static struct syscallaction syscalls_openbsd[] = {
@@ -93,7 +96,7 @@ static struct syscallaction syscalls_netbsd[] = {
 };
  
 static struct syscallaction syscalls_hpux[] = {
-	{ 11, SYSTR_POLICY_ASK, NULL},		/* HPUX_SYS_execv */
+	{ 11, SYSTR_POLICY_ASK, check_exec},	/* HPUX_SYS_execv */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* HPUX_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* HPUX_SYS_execve */
 	{ 126, SYSTR_POLICY_ASK, NULL},		/* HPUX_SYS_setresuid */
@@ -101,12 +104,13 @@ static struct syscallaction syscalls_hpux[] = {
 };
  
 static struct syscallaction syscalls_ibsc2[] = {
-	{ 11, SYSTR_POLICY_ASK, NULL},		/* ISCS2_SYS_execv */
+	{ 11, SYSTR_POLICY_ASK, check_exec},	/* ISCS2_SYS_execv */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* ISCS2_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* ISCS2_SYS_execve */
 	{ -1, -1, NULL} 
 };
  
+/* XXX - deny fexecve */
 static struct syscallaction syscalls_linux[] = {
 	{ 11, SYSTR_POLICY_ASK, check_exec},	/* LINUX_SYS_execve */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* LINUX_SYS_setuid16 */
@@ -128,7 +132,7 @@ static struct syscallaction syscalls_osf1[] = {
 };
  
 static struct syscallaction syscalls_sunos[] = {
-	{ 11, SYSTR_POLICY_ASK, NULL},		/* SUNOS_SYS_execv */
+	{ 11, SYSTR_POLICY_ASK, check_exec},	/* SUNOS_SYS_execv */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* SUNOS_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* SUNOS_SYS_execve */
 	{ 126, SYSTR_POLICY_ASK, NULL},		/* SUNOS_SYS_setreuid */
@@ -136,7 +140,7 @@ static struct syscallaction syscalls_sunos[] = {
 };
  
 static struct syscallaction syscalls_svr4[] = {
-	{ 11, SYSTR_POLICY_ASK, NULL},		/* SVR4_SYS_execv */
+	{ 11, SYSTR_POLICY_ASK, check_exec},	/* SVR4_SYS_execv */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* SVR4_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* SVR4_SYS_execve */
 	{ 141, SYSTR_POLICY_ASK, NULL},		/* SVR4_SYS_seteuid */
@@ -145,7 +149,7 @@ static struct syscallaction syscalls_svr4[] = {
 };
 
 static struct syscallaction syscalls_ultrix[] = {
-	{ 11, SYSTR_POLICY_ASK, NULL},		/* ULTRIX_SYS_execv */
+	{ 11, SYSTR_POLICY_ASK, check_exec},	/* ULTRIX_SYS_execv */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* ULTRIX_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* ULTRIX_SYS_execve */
 	{ 126, SYSTR_POLICY_ASK, NULL},		/* ULTRIX_SYS_setreuid */
@@ -153,7 +157,7 @@ static struct syscallaction syscalls_ultrix[] = {
 };
  
 static struct syscallaction syscalls_irix[] = {
-	{ 11, SYSTR_POLICY_ASK, NULL},		/* IRIX_SYS_execv */
+	{ 11, SYSTR_POLICY_ASK, check_exec},	/* IRIX_SYS_execv */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* IRIX_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* IRIX_SYS_execve */
 	{ 124, SYSTR_POLICY_ASK, NULL},		/* IRIX_SYS_setreuid */
