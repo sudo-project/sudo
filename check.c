@@ -41,7 +41,7 @@ static char rcsid[] = "$Id$";
 
 /* Shadow password types */
 #define SPW_NONE	0
-#define SPW_AUTH	1
+#define SPW_SECUREWARE	1
 #define SPW_HPUX9	2
 #define SPW_SUNOS4	3
 #define SPW_SVR4	4
@@ -77,10 +77,10 @@ static char rcsid[] = "$Id$";
 #  if SHADOW_TYPE == SPW_SVR4
 #    include <shadow.h>
 #  endif /* SVR4 */
-#  if SHADOW_TYPE == SPW_AUTH
+#  if SHADOW_TYPE == SPW_SECUREWARE
 #    include <sys/security.h>
 #    include <prot.h>
-#  endif /* AUTH */
+#  endif /* SECUREWARE */
 #  if SHADOW_TYPE == SPW_ULTRIX4
 #    include <auth.h>
 #  endif /* ULTRIX4 */
@@ -374,11 +374,11 @@ static void check_passwd()
 #  if SHADOW_TYPE == SPW_ULTRIX4
     AUTHORIZATION *spw_ent;
 #  endif /* CULTRIX4 */
-#  if SHADOW_TYPE == SPW_AUTH
+#  if SHADOW_TYPE == SPW_SECUREWARE
     char salt[2];		/* Need the salt to perform the encryption */
     register int i;
     struct pr_passwd *spw_ent;
-#  endif /* AUTH */
+#  endif /* SECUREWARE */
 #endif /* SHADOW_TYPE */
 #ifdef HAVE_SKEY
     int pw_ok = 1;
@@ -403,7 +403,7 @@ static void check_passwd()
     if (spw_ent && spw_ent -> pw_passwd)
 	encrypted = spw_ent -> pw_passwd;
 #  endif /* HPUX9 */
-#  if SHADOW_TYPE == SPW_AUTH
+#  if SHADOW_TYPE == SPW_SECUREWARE
     /*
      * grab encrypted password from protected passwd file
      * or just use the regular one...
@@ -413,7 +413,7 @@ static void check_passwd()
     set_perms(PERM_USER);
     if (spw_ent)
 	encrypted = spw_ent -> ufld.fd_encrypt;
-#  endif /* AUTH */
+#  endif /* SECUREWARE */
 #  if SHADOW_TYPE == SPW_ULTRIX4
     /*
      * grab encrypted password from /etc/auth
@@ -476,16 +476,16 @@ static void check_passwd()
 	if (spw_ent && !strcmp(encrypted, (char *) crypt16(pass, encrypted)))
 	    return;		/* if the passwd is correct return() */
 #  endif /* ULTRIX4 */
-#  if SHADOW_TYPE == SPW_AUTH && !defined(__alpha)
+#  if SHADOW_TYPE == SPW_SECUREWARE && !defined(__alpha)
 	strncpy(salt, spw_ent->ufld.fd_encrypt, 2);
 	i = AUTH_SALT_SIZE + AUTH_CIPHERTEXT_SEG_CHARS;
 	if (strncmp(encrypted, crypt(pass, salt), i) == 0)
 	    return;           /* if the passwd is correct return() */
-#  endif /* AUTH && !__alpha */
-#  if SHADOW_TYPE == SPW_AUTH && defined(__alpha)
+#  endif /* SECUREWARE && !__alpha */
+#  if SHADOW_TYPE == SPW_SECUREWARE && defined(__alpha)
 	if (spw_ent && !strcmp(encrypted, osf_C2_crypt(pass,encrypted)))
 	    return;             /* if the passwd is correct return() */
-#  endif /* AUTH && __alpha */
+#  endif /* SECUREWARE && __alpha */
 #endif /* SHADOW_TYPE */
 
 #ifdef HAVE_SKEY
@@ -536,7 +536,7 @@ static void check_passwd()
 }
 
 
-#if defined(__alpha) && defined(SHADOW_TYPE) && SHADOW_TYPE == SPW_AUTH
+#if defined(__alpha) && defined(SHADOW_TYPE) && SHADOW_TYPE == SPW_SECUREWARE
 /********************************************************************
  * osf_C2_crypt()  - returns OSF/1 3.0 enhanced security encrypted
  *               password.  crypt() produces, given an eight
@@ -586,7 +586,7 @@ static char *osf_C2_crypt(pass, encrypt_salt)
 
     return(enpass);
 }
-#endif /* __alpha && SHADOW_TYPE == SPW_AUTH */
+#endif /* __alpha && SHADOW_TYPE == SPW_SECUREWARE */
 
 
 #ifdef HAVE_KERB4
