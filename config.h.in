@@ -368,6 +368,9 @@
 /* Define to the path of the editor visudo should use. */
 #undef EDITOR
 
+/* Define if root should not be allowed to use sudo.  */
+#undef NO_ROOT_SUDO
+
 /* Define to be the user that gets sudo mail.  */
 #undef ALERTMAIL
 
