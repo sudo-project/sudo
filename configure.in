@@ -97,6 +97,10 @@ case "$OS" in
 		fi
 		;;
     "ultrix"*)	echo "Looks like ultrix"
+		# C2 security stuff
+		if test -n "$C2"; then
+		    LIBS="${LIBS} -lauth"
+		fi
 		;;
     "ksr"*)	echo "Looks like a KSR"
 		;;
@@ -165,9 +169,8 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_HAVE_FUNCS(getwd strchr strrchr sysconf sigaction bzero fchdir tzset)
+AC_HAVE_FUNCS(getwd strchr strrchr sysconf sigaction bzero tzset)
 AC_FUNC_CHECK(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
-AC_FUNC_CHECK(realpath, AC_DEFINE(HAVE_REALPATH), LIBOBJS="$LIBOBJS realpath.o")
 AC_FUNC_CHECK(getcwd, AC_DEFINE(HAVE_GETCWD), LIBOBJS="$LIBOBJS getcwd.o")
 dnl
 dnl Function checks w/ replacements - XXX
