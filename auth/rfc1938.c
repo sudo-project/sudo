@@ -42,11 +42,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_ERR_H
-# include <err.h>
-#else
-# include "emul/err.h"
-#endif /* HAVE_ERR_H */
 #include <pwd.h>
 
 #if defined(HAVE_SKEY)
@@ -113,7 +108,7 @@ rfc1938_setup(pw, promptp, auth)
      */
     if (rfc1938challenge(&rfc1938, pw->pw_name, challenge, sizeof(challenge))) {
 	if (IS_ONEANDONLY(auth)) {
-	    warnx("you do not exist in the %s database", auth->name);
+	    warningx("you do not exist in the %s database", auth->name);
 	    return(AUTH_FATAL);
 	} else {
 	    return(AUTH_FAILURE);

@@ -45,11 +45,6 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#ifdef HAVE_ERR_H
-# include <err.h>
-#else
-# include "emul/err.h"
-#endif /* HAVE_ERR_H */
 #include <pwd.h>
 
 /* Needed for SecurID v5.0 Authentication on UNIX */
@@ -90,7 +85,7 @@ securid_init(pw, promptp, auth)
     if (AceInitialize() != SD_FALSE)
 	return(AUTH_SUCCESS);
 
-    warnx("failed to initialise the ACE API library");
+    warningx("failed to initialise the ACE API library");
     return(AUTH_FATAL);
 }
 
@@ -118,7 +113,7 @@ securid_setup(pw, promptp, auth)
 
     /* Re-initialize SecurID every time. */
     if (SD_Init(sd) != ACM_OK) {
-	warnx("unable to contact the SecurID server");
+	warningx("unable to contact the SecurID server");
 	return(AUTH_FATAL);
     }
 
@@ -127,19 +122,19 @@ securid_setup(pw, promptp, auth)
 
     switch (retval) {
         case ACE_UNDEFINED_USERNAME:
-		warnx("invalid username length for SecurID");
+		warningx("invalid username length for SecurID");
 		return(AUTH_FATAL);
 
 	case ACE_ERR_INVALID_HANDLE:
-		warnx("invalid Authentication Handle for SecurID");
+		warningx("invalid Authentication Handle for SecurID");
 		return(AUTH_FATAL);
 
 	case ACM_ACCESS_DENIED:
-		warnx("SecurID communication failed");
+		warningx("SecurID communication failed");
 		return(AUTH_FATAL);
 
 	case ACM_OK:
-		warnx("User ID locked for SecurID Authentication");
+		warningx("User ID locked for SecurID Authentication");
 		return(AUTH_SUCCESS);
 	}
 }
@@ -171,17 +166,17 @@ securid_verify(pw, pass, auth)
     /* Have ACE verify password */
     switch (SD_Check(*sd, pass, pw->pw_name)) {
 	case ACE_UNDEFINED_PASSCODE:
-		warnx("invalid passcode length for SecurID");
+		warningx("invalid passcode length for SecurID");
 		rval = AUTH_FATAL;
 		break;
 
 	case ACE_UNDEFINED_USERNAME:
-		warnx("invalid username length for SecurID");
+		warningx("invalid username length for SecurID");
 		rval = AUTH_FATAL;
 		break;
 
 	case ACE_ERR_INVALID_HANDLE:
-		warnx("invalid Authentication Handle for SecurID");
+		warningx("invalid Authentication Handle for SecurID");
 		rval = AUTH_FATAL;
 
 	case ACM_ACCESS_DENIED:
