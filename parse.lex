@@ -150,16 +150,17 @@ N			[0-9][0-9]?[0-9]?
 			    return(NTWKADDR);
 			}
 
-\/[^\,:=\\ \t\n#]+\/	{
-			    LEXTRACE("COMMAND ");
-			    fill(yytext, yyleng);
-			    return(COMMAND);
-			}			/* a directory */
-
 \/[^\,:=\\ \t\n#]+	{
-			    BEGIN GOTCMND;
-			    LEXTRACE("COMMAND ");
-			    fill(yytext, yyleng);
+			    /* directories can't have args... */
+			    if (yytext[yyleng - 1] == '/') {
+				LEXTRACE("COMMAND ");
+				fill(yytext, yyleng);
+				return(COMMAND);
+			    } else {
+				BEGIN GOTCMND;
+				LEXTRACE("COMMAND ");
+				fill(yytext, yyleng);
+			    }
 			}			/* a pathname */
 
 [A-Z][A-Z0-9_]*		{
