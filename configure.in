@@ -38,6 +38,11 @@ AC_WITH(C2, AC_DEFINE(HAVE_C2_SECURITY)
 C2=1
 echo 'Configuring for C2 security')
 dnl
+dnl --with-Skey
+AC_WITH(SKEY, AC_DEFINE(HAVE_SKEY)
+SKEY=1
+echo 'Configuring for use with Skey')
+dnl
 dnl --with-AFS
 AC_WITH(AFS, AC_DEFINE(HAVE_AFS)
 AFS=1
@@ -160,6 +165,11 @@ dnl extra AFS libs
 dnl
 if test -n "$AFS" ; then
     LIBS="${LIBS} -L/usr/lib/afs -lkauth -lprot -lauth -lubik -lrxkad -lsys -ldes -lrx -llwp -lcom_err -laudit -lutil"
+fi
+dnl
+dnl extra Skey lib
+if test -n "$SKEY" ; then
+    LIBS="${LIBS} -lskey"
 fi
 dnl
 dnl C compiler checks (to be done after os checks)
