@@ -64,7 +64,11 @@
 #endif /* HAVE_UNISTD_H */
 #include <pwd.h>
 
-#include <security/pam_appl.h>
+#ifdef HAVE_PAM_PAM_APPL_H
+# include <pam/pam_appl.h>
+#else
+# include <security/pam_appl.h>
+#endif
 
 #include "sudo.h"
 #include "sudo_auth.h"

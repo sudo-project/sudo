@@ -1864,10 +1864,18 @@ if test -n "$with_kerb5" -a -z "$KRB5CONFIG"; then
 fi
 
 dnl
-dnl PAM libs
+dnl Extra PAM foolishness
 dnl
 if test "$with_pam" = "yes"; then
+    dnl
+    dnl Linux may need this
+    dnl
     AC_HAVE_LIBRARY(dl, SUDO_LIBS="${SUDO_LIBS} -lpam -ldl", SUDO_LIBS="${SUDO_LIBS} -lpam")
+    dnl
+    dnl Some PAM implementations (MacOS X for example) put the PAM headers
+    dnl in /usr/include/pam instead of /usr/include/security...
+    dnl
+    AC_CHECK_HEADERS([pam/pam_appl.h])
 fi
 
 dnl
