@@ -1,5 +1,5 @@
 /*
- *  CU sudo version 1.3.8
+ *  CU sudo version 1.4
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ extern int Argc;
 extern char **Argv;
 
 
-#ifdef SIOCGIFCONF
+#if defined(SIOCGIFCONF) && !defined(STUB_LOAD_INTERFACES)
 /**********************************************************************
  *
  *  load_interfaces()
@@ -247,7 +247,7 @@ void load_interfaces()
     }
 }
 
-#else /* SIOCGIFCONF */
+#else /* !SIOCGIFCONF || STUB_LOAD_INTERFACES */
 
 /**********************************************************************
  *
@@ -261,4 +261,4 @@ void load_interfaces()
     return;
 }
 
-#endif /* SIOCGIFCONF */
+#endif /* SIOCGIFCONF && !STUB_LOAD_INTERFACES */
