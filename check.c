@@ -526,10 +526,13 @@ static void check_passwd()
 	} else if (crypt_type == AUTH_CRYPT_CRYPT16) {
 	    if (!strcmp(user_passwd, crypt16(pass, user_passwd)))
 		return;             /* if the passwd is correct return() */
+	} else if (crypt_type == AUTH_CRYPT_OLDCRYPT) {
+	    if (!strcmp(user_passwd, crypt(pass, user_passwd)))
+		return;             /* if the passwd is correct return() */
 	} else {
 	    (void) fprintf(stderr,
                     "%s: Sorry, I don't know how to deal with crypt type %d.\n",
-                    Argv[0]);
+                    Argv[0], crypt_type);
 	    exit(1);
 	}
 #    endif /* SECUREWARE && __alpha */
