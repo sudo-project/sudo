@@ -24,9 +24,22 @@ dnl
 AC_PROG_CC
 AC_PROG_CPP
 dnl
+dnl find "uname"
+dnl
+AC_PROGRAM_CHECK(UNAMEPROG, uname, uname ,)
+dnl
 dnl what architecture are we on?
 dnl
-AC_HEADER_CHECK(elf.h, AC_DEFINE(SVR4) [SVR4="1"])
+SUDO_SUNOS(echo "Looks like SunOS"
+[if test -n "$GCC"; then
+STATIC_FLAGS="-static"
+else
+STATIC_FLAGS="-Bstatic"
+fi
+])dnl
+dnl
+SUDO_SOLARIS(echo "Looks like Solaris")
+dnl
 SUDO_AIX(echo "Looks like AIX"
 OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
 [if test -n "$GCC"; then
@@ -35,26 +48,6 @@ else
 STATIC_FLAGS="-bnoso -bI:/lib/syscalls.exp"
 fi
 ])dnl
-dnl
-dnl do we need to add -I/usr/ucbinclude to $CPP?
-dnl
-if test -n "$SVR4"; then
-    echo checking for /usr/ucbinclude
-    if test -d "/usr/ucbinclude"; then
-	INC_FLAGS="${INC_FLAGS} -I/usr/ucbinclude"
-	CPP="${CPP} -I/usr/ucbinclude"
-    fi
-fi
-dnl
-if test -z "$SVR4"; then
-SUDO_SUNOS(echo "Looks like SunOS"
-[if test -n "$GCC"; then
-STATIC_FLAGS="-static"
-else
-STATIC_FLAGS="-Bstatic"
-fi
-])dnl
-fi
 dnl
 SUDO_HPUX(echo "Looks like HP-UX"
 OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
@@ -81,9 +74,9 @@ SUDO_LINUX(echo "Looks like linux"
 dnl
 SUDO_CONVEX(echo "Looks like ConvexOS")
 dnl
-SUDO_KSR(echo "Looks a KSR")
+SUDO_KSR(echo "Looks like a KSR")
 dnl
-dnl program checks
+dnl Program checks
 dnl
 AC_GCC_TRADITIONAL
 AC_PROG_YACC
@@ -95,13 +88,7 @@ dnl
 dnl Header file checks
 dnl
 AC_STDC_HEADERS
-AC_HAVE_HEADERS(string.h)
-AC_HAVE_HEADERS(strings.h)
-AC_HAVE_HEADERS(unistd.h)
-AC_HAVE_HEADERS(malloc.h)
-AC_HAVE_HEADERS(paths.h)
-AC_HAVE_HEADERS(termio.h)
-AC_HAVE_HEADERS(termios.h)
+AC_HAVE_HEADERS(string.h strings.h unistd.h malloc.h paths.h termio.h termios.h)
 dnl
 dnl typedef checks
 dnl
@@ -110,36 +97,22 @@ AC_UID_T
 AC_SIZE_T
 AC_RETSIGTYPE
 dnl
-dnl function checks
+dnl Function checks
 dnl
-AC_HAVE_FUNCS(getcwd)
-AC_HAVE_FUNCS(strdup)
-AC_HAVE_FUNCS(strchr)
-AC_HAVE_FUNCS(strrchr)
+AC_HAVE_FUNCS(getcwd strdup strchr strrchr sysconf)
 dnl
 dnl library checks
+dnl
+AC_HAVE_LIBRARY(nsl)
+AC_HAVE_LIBRARY(shadow)
+AC_HAVE_LIBRARY(ufc)
+dnl
+dnl These are os-dependent, they should probably go with the os checks
 dnl
 AC_IRIX_SUN
 AC_HAVE_LIBRARY(bsd)
 AC_HAVE_LIBRARY(BSD)
-AC_HAVE_LIBRARY(socket)
-AC_HAVE_LIBRARY(nsl)
-AC_HAVE_LIBRARY(elf)
-AC_HAVE_LIBRARY(malloc)
-AC_HAVE_LIBRARY(shadow)
-AC_HAVE_LIBRARY(ucb)
-AC_HAVE_LIBRARY(ufc)
-dnl SVR4 (or at least solaris 2.x) has -lucb in /usr/ucblib
-if test -n "$SVR4"; then
-    echo checking for /usr/ucblib
-    if test -d "/usr/ucblib"; then
-	LIBS="-L/usr/ucblib ${LIBS}"
-	if test -r "/usr/ucblib/libucb.a" -a ! -r "/lib/libucb.a"; then
-	    LIBS="${LIBS} -lucb"
-	fi
-    fi
-fi
 dnl
-dnl Makefiles to substitute
+dnl Substitute into the Makefiles
 dnl
 AC_OUTPUT(Makefile visudoers/Makefile)
