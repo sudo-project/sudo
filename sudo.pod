@@ -27,7 +27,7 @@ sudo, sudoedit - execute a command as another user
 
 =head1 SYNOPSIS
 
-B<sudo> B<-K> | B<-L> | B<-V> | B<-h> | B<-k> | B<-l> [I<username>] | B<-v>
+B<sudo> B<-K> | B<-L> | B<-V> | B<-h> | B<-k> | B<-l> | B<-v>
 
 B<sudo> [B<-HPSb>] S<[B<-a> I<auth_type>]> S<[B<-c> I<class>|I<->]>
 S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
@@ -217,12 +217,12 @@ run a password will be required.  This option does not require a password
 and was added to allow a user to revoke B<sudo> permissions from a .logout
 file.
 
-=item -l [I<username>]
+=item -l
 
 The B<-l> (I<list>) option will list out the allowed (and forbidden)
-commands for I<username> on the current host.  If I<username> is
-ommitted, the information listed will be for the invoking user.
-Only the superuser may list other user's commands.
+commands for the user on the current host.  If the B<-u> flag is
+specified and the invoking user has B<sudo> C<ALL> on the current host,
+the information listed will be for the user specified by the B<-u> flag.
 
 =item -p
 
@@ -311,13 +311,15 @@ to subvert the program that B<sudo> runs.  To combat this the
 C<LD_*>, C<_RLD_*>, C<SHLIB_PATH> (HP-UX only), and C<LIBPATH> (AIX
 only) environment variables are removed from the environment passed
 on to all commands executed.  B<sudo> will also remove the C<IFS>,
-C<ENV>, C<BASH_ENV>, C<KRB_CONF>, C<KRBCONFDIR>, C<KRBTKFILE>,
+C<CDPATH>, C<ENV>, C<BASH_ENV>, C<KRB_CONF>, C<KRBCONFDIR>, C<KRBTKFILE>,
 C<KRB5_CONFIG>, C<LOCALDOMAIN>, C<RES_OPTIONS>, C<HOSTALIASES>,
 C<NLSPATH>, C<PATH_LOCALE>, C<TERMINFO>, C<TERMINFO_DIRS> and
 C<TERMPATH> variables as they too can pose a threat.  If the
 C<TERMCAP> variable is set and is a pathname, it too is ignored.
 Additionally, if the C<LC_*> or C<LANGUAGE> variables contain the
-C</> or C<%> characters, they are ignored.  If B<sudo> has been
+C</> or C<%> characters, they are ignored.  Environment variables
+with a value beginning with C<()> are also removed as they could
+be interpreted as B<bash> functions.  If B<sudo> has been
 compiled with SecurID support, the C<VAR_ACE>, C<USR_ACE> and
 C<DLC_ACE> variables are cleared as well.  The list of environment
 variables that B<sudo> clears is contained in the output of
