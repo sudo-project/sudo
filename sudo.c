@@ -245,6 +245,12 @@ main(argc, argv, envp)
     /* Validate the user but don't search for pseudo-commands. */
     validated = sudoers_lookup(pwflag);
 
+    /* Exempt users aren't affected by secure paths. */
+    if (user_is_exempt() && def_str(I_SECURE_PATH)) {
+	free(def_str(I_SECURE_PATH));
+	def_str(I_SECURE_PATH) = NULL;
+    }
+
     /*
      * Look up runas user passwd struct.  If we are given a uid then
      * there may be no corresponding passwd(5) entry (which is OK).

@@ -104,7 +104,7 @@ find_path(infile, outfile, path)
     }
 
     /* Use PATH passed in unless SECURE_PATH is in effect.  */
-    if (def_str(I_SECURE_PATH) && !user_is_exempt())
+    if (def_str(I_SECURE_PATH))
 	path = def_str(I_SECURE_PATH);
     else if (path == NULL)
 	return(NOT_FOUND);
