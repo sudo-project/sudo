@@ -141,9 +141,9 @@ void check_user()
 static int user_is_exempt()
 {
 #ifdef EXEMPTGROUP
-    return ((getgid() == EXEMPTGROUP));
+    return((getgid() == EXEMPTGROUP));
 #else
-    return (1);
+    return(0);
 #endif
 }
 
