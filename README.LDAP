@@ -242,6 +242,10 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
   # Either specify a uri or host & port
   #host          ldapserver
   #port          389
+  #
+  # URI will override host & port settings
+  # but only works with LDAP SDK's that support
+  # ldap_initialize() such as OpenLDAP
   uri            ldap://ldapserver
   #
   # must be set or sudo will ignore LDAP
@@ -256,6 +260,10 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
   #
   # LDAP Protocol Version defaults to 3
   #ldap_version 3
+  #
+  # Define if you want to use port 389 and switch to
+  # encryption before the bind credentials are sent
+  #ssl start_tls
   #
 
 Debugging your LDAP configuration
