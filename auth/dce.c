@@ -66,7 +66,7 @@
 #include "sudo_auth.h"
 
 #ifndef lint
-static const char rcsid[] = "$Sudo$";
+__unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 static int check_dce_status __P((error_status_t, char *));

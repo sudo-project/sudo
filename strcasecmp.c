@@ -14,11 +14,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <config.h>
 #include <sys/types.h>
+#include <config.h>
+#include <compat.h>
 
 #ifndef lint
-static const char rcsid[] = "$Sudo$";
+__unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*

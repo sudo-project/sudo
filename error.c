@@ -24,7 +24,7 @@
 #include "error.h"
 
 #ifndef lint
-static const char rcsid[] = "$Sudo$";
+__unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 static void _warning	__P((int, const char *, va_list));

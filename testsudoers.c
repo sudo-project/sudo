@@ -70,7 +70,7 @@
 #endif /* HAVE_FNMATCH */
 
 #ifndef lint
-static const char rcsid[] = "$Sudo$";
+__unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 

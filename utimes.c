@@ -22,6 +22,7 @@
 #endif
 
 #include <config.h>
+#include <compat.h>
 
 #ifdef HAVE_UTIME_H
 # include <utime.h>
@@ -30,7 +31,7 @@
 #endif
 
 #ifndef lint
-static const char rcsid[] = "$Sudo$";
+__unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 #ifndef HAVE_UTIMES

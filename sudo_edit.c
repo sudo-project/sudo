@@ -53,7 +53,7 @@
 #include "sudo.h"
 
 #ifndef lint
-static const char rcsid[] = "$Sudo$";
+__unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 extern sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;

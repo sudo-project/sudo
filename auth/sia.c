@@ -50,7 +50,7 @@
 #include "sudo_auth.h"
 
 #ifndef lint
-static const char rcsid[] = "$Sudo$";
+__unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 static int sudo_collect	__P((int, int, uchar_t *, int, prompt_t *));

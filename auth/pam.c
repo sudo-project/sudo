@@ -63,7 +63,7 @@
 #endif
 
 #ifndef lint
-static const char rcsid[] = "$Sudo$";
+__unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 static int sudo_conv __P((int, PAM_CONST struct pam_message **,

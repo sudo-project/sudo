@@ -79,7 +79,7 @@
 	    (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
 
 #ifndef lint
-static const char rcsid[] = "$Sudo$";
+__unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 char *
