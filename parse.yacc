@@ -122,7 +122,7 @@ char *s;
 %token <string>	ALIAS			/* an UPPERCASE alias name */
 %token <string> NTWKADDR		/* w.x.y.z */
 %token <string> NETGROUP		/* +NAME */
-%token <string> PATH			/* an absolute pathname */
+%token <string> COMMAND			/* an absolute pathname + args */
 %token <string> NAME			/* a mixed-case name */
 %token <tok>	COMMENT			/* comment and/or carriage return */
 %token <tok>	ALL			/* ALL keyword */
@@ -248,7 +248,7 @@ cmnd		:	ALL {
 			    if (find_alias($1, CMND))
 				cmnd_matches = TRUE;
 			}
-		|	PATH {
+		|	COMMAND {
 			    if (path_matches(cmnd, $1))
 				cmnd_matches = TRUE;
 			}
