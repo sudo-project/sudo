@@ -69,9 +69,11 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 #ifdef HAVE_HEIMDAL
+# define extract_name(c, p)		krb5_principal_get_comp_string(c, p, 0);
 # define krb5_free_data_contents(c, d)	krb5_data_free(d)
+# define ENCTYPE_DES_CBC_MD5		ETYPE_DES_CBC_MD5	/* XXX */
 #else
-# define krb5_principal_get_realm(c, p)	(krb5_princ_realm(c, p)->data)
+# define extract_name(c, p)		(krb5_princ_component(c, p, 1)->data)
 #endif
 
 static int verify_krb_v5_tgt __P((krb5_context, krb5_ccache, char *));
@@ -272,9 +274,8 @@ verify_krb_v5_tgt(sudo_context, ccache, auth_name)
 	return(-1);
     }
 
-    /* Extract the name directly. */
-    strlcpy(phost, krb5_principal_get_realm(sudo_context, princ),
-	    sizeof(phost));
+    /* Extract the name directly. Yow. */
+    strlcpy(phost, extract_name(sudo_context, princ), sizeof(phost));
 
     /*
      * Do we have host/<host> keys?
