@@ -33,8 +33,8 @@ dnl
 dnl what architecture are we on?
 dnl
 SUDO_OSTYPE()
-OS=`echo $OS | $TRPROG '[A-Z]' '[a-z]'`
-case `echo $OS | $TRPROG '[A-Z]' '[a-z]'` in
+OS=`echo $OS | $TRPROG '[[A-Z]]' '[[a-z]]'`
+case "$OS" in
     "sunos")	echo "Looks like SunOS 4.x"
 		if test -n "$GCC"; then
 		    STATIC_FLAGS="-static"
