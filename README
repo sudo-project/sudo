@@ -27,7 +27,7 @@ do not bother them with bugs in CU sudo.  Bug reports for this sudo
 should be sent to sudo-bugs@courtesan.com.
 
 For a complete list of changes, see the CHANGES file.  For a summary,
-see the web page, http://www.courtesan.com/courtesan/products/sudo/.
+see the web page, http://www.courtesan.com/sudo/.
 
 System requirements
 ===================
@@ -70,7 +70,7 @@ command to add yourself is "subscribe sudo-workers".
 Web page
 ========
 
-There is a sudo `web page' at http://www.courtesan.com/courtesan/products/sudo/
+There is a sudo `web page' at http://www.courtesan.com/sudo/
 that contains an overview of sudo as well as pointers to BETA versions
 and other useful info.
 
