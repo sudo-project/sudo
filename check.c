@@ -257,11 +257,19 @@ static int check_timestamp()
 
 static void update_timestamp()
 {
+    struct utimbuf *utp = NULL;
+#if defined(HAVE_UTIME) && !defined(HAVE_UTIME_NULL)
+    struct utimbuf ut;
+
+    ut.actime = ut.modtime = time(NULL);
+    utp = &ut;
+#endif /* HAVE_UTIME && !HAVE_UTIME_NULL */
+
     /* become root */
     set_perms(PERM_ROOT);
 
     if (timedir_is_good) {
-	if (utime(timestampfile_p, NULL) < 0) {
+	if (utime(timestampfile_p, utp) < 0) {
 	    int fd = open(timestampfile_p, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 
 	    if (fd < 0)
