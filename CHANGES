@@ -1684,3 +1684,7 @@ Sudo 1.6.7p5 released.
      on what directories exist.
 
 529) Quoting globbing characters with a backslash now works as documented.
+
+530) A negated user/uid in a runas list was not treated the same as a
+     negated command (it did not override a previously allowed entry).
+     Now it does.
