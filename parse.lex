@@ -99,7 +99,7 @@ extern void yyerror		__P((char *));
 OCTET			(1?[0-9]{1,2})|(2[0-4][0-9])|(25[0-5])
 DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
 HOSTNAME		[[:alnum:]_-]+
-WORD			([^#@!=:,\(\) \t\n\\]|\\[^\n])+
+WORD			([^#>@!=:,\(\) \t\n\\]|\\[^\n])+
 ENVAR			([^#!=, \t\n\\]|\\[^\n])([^#=, \t\n\\]|\\[^\n])*
 DEFVAR			[a-z_]+
 
@@ -175,12 +175,15 @@ DEFVAR			[a-z_]+
 			}			/* a command line arg */
 }
 
-<INITIAL>^Defaults[:@]?	{
+<INITIAL>^Defaults[:@>]? {
 			    BEGIN GOTDEFS;
 			    switch (yytext[8]) {
 				case ':':
 				    LEXTRACE("DEFAULTS_USER ");
 				    return(DEFAULTS_USER);
+				case '>':
+				    LEXTRACE("DEFAULTS_RUNAS ");
+				    return(DEFAULTS_RUNAS);
 				case '@':
 				    LEXTRACE("DEFAULTS_HOST ");
 				    return(DEFAULTS_HOST);

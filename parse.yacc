@@ -229,6 +229,7 @@ yyerror(s)
 %token <tok>	 DEFAULTS		/* Defaults entry */
 %token <tok>	 DEFAULTS_HOST		/* Host-specific defaults entry */
 %token <tok>	 DEFAULTS_USER		/* User-specific defaults entry */
+%token <tok>	 DEFAULTS_RUNAS		/* Runas-specific defaults entry */
 %token <tok> 	 RUNAS			/* ( runas_list ) */
 %token <tok> 	 NOPASSWD		/* no passwd req for command */
 %token <tok> 	 PASSWD			/* passwd req for command (default) */
@@ -287,6 +288,10 @@ defaults_type	:	DEFAULTS {
 			}
 		|	DEFAULTS_USER { push; } userlist {
 			    defaults_matches = user_matches;
+			    pop;
+			}
+		|	DEFAULTS_RUNAS { push; } runaslist {
+			    defaults_matches = $3 == TRUE;
 			    pop;
 			}
 		|	DEFAULTS_HOST { push; } hostlist {

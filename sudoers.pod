@@ -199,14 +199,15 @@ arguments: ',', ':', '=', '\'.
 
 Certain configuration options may be changed from their default
 values at runtime via one or more C<Default_Entry> lines.  These
-may affect all users on any host, all users on a specific host,
-or just a specific user.  When multiple entries match, they are
-applied in order.  Where there are conflicting values, the last
-value on a matching line takes effect.
+may affect all users on any host, all users on a specific host, a
+specific user, or commands being run as a specific user.  When
+multiple entries match, they are applied in order.  Where there are
+conflicting values, the last value on a matching line takes effect.
 
  Default_Type ::= 'Defaults' ||
+		  'Defaults' '@' Host ||
 		  'Defaults' ':' User ||
-		  'Defaults' '@' Host
+		  'Defaults' '>' RunasUser
 
  Default_Entry ::= Default_Type Parameter_List
 
@@ -918,15 +919,18 @@ these are a bit contrived.  First, we define our I<aliases>:
  Cmnd_Alias	SU = /usr/bin/su
 
 Here we override some of the compiled in default values.  We want
-B<sudo> to log via syslog(3) using the I<auth> facility in all cases.
-We don't want to subject the full time staff to the B<sudo> lecture,
-and user B<millert> need not give a password.  In addition, on the
-machines in the I<SERVERS> C<Host_Alias>, we keep an additional
-local log file and make sure we log the year in each log line since
-the log entries will be kept around for several years.
+B<sudo> to log via syslog(3) using the I<auth> facility in all
+cases.  We don't want to subject the full time staff to the B<sudo>
+lecture, user B<millert> need not give a password, and we don't
+want to set the C<LOGNAME> or C<USER> environment variables when
+running commands as root.  Additionally, on the machines in the
+I<SERVERS> C<Host_Alias>, we keep an additional local log file and
+make sure we log the year in each log line since the log entries
+will be kept around for several years.
 
  # Override built in defaults
  Defaults		syslog=auth
+ Defaults>root		!set_logname
  Defaults:FULLTIMERS	!lecture
  Defaults:millert	!authenticate
  Defaults@SERVERS	log_year, logfile=/var/log/sudo.log
