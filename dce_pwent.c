@@ -1,16 +1,40 @@
 /*
- * Contributed by Jeff Earickson, Colby College, Waterville, ME
- * (jaearick@colby.edu)
- *    The code below basically comes from the examples supplied on
- * the OSF DCE 1.0.3 manpages for the sec_login routines, with 
- * enough additional polishing to make the routine work with the
- * rest of sudo.  
- *   This code is known to work on HP 700 and 800 series systems
- * running HP-UX 9.X and 10.X, with either HP's version 1.2.1 of DCE.
- * (aka, OSF DCE 1.0.3) or with HP's version 1.4 of DCE (aka, OSF
- * DCE 1.1).
+ *  CU sudo version 1.3.8
  *
- * Use at your own risk!!!  (But I would like to hear about bugs.)
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 1, or (at your option)
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ *  Please send bugs, changes, problems to sudo-bugs@cs.colorado.edu
+ *
+ *******************************************************************
+ *
+ *  Contributed by Jeff Earickson, Colby College, Waterville, ME
+ *  (jaearick@colby.edu)
+ *
+ *  The code below basically comes from the examples supplied on
+ *  the OSF DCE 1.0.3 manpages for the sec_login routines, with 
+ *  enough additional polishing to make the routine work with the
+ *  rest of sudo.  
+ *
+ *  This code is known to work on HP 700 and 800 series systems
+ *  running HP-UX 9.X and 10.X, with either HP's version 1.2.1 of DCE.
+ *  (aka, OSF DCE 1.0.3) or with HP's version 1.4 of DCE (aka, OSF
+ *  DCE 1.1).
+ *
+ *  Use at your own risk!!!  (But I would like to hear about bugs.)
+ *
+ *  $Id$
  */
 
 #include "config.h"
