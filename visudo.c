@@ -428,17 +428,21 @@ whatnow()
 	for (c = choice; c != '\n' && c != EOF;)
 	    c = getchar();
 
-	if (choice == 'e' || choice == 'x' || choice == 'Q')
-	    break;
-	else {
-	    (void) puts("Options are:");
-	    (void) puts("  (e)dit sudoers file again");
-	    (void) puts("  e(x)it without saving changes to sudoers file");
-	    (void) puts("  (Q)uit and save changes to sudoers file (DANGER!)\n");
+	switch (choice) {
+	    case EOF:
+		choice = 'x';
+		/* FALLTHROUGH */
+	    case 'e':
+	    case 'x':
+	    case 'Q':
+		return(choice);
+	    default:
+		(void) puts("Options are:");
+		(void) puts("  (e)dit sudoers file again");
+		(void) puts("  e(x)it without saving changes to sudoers file");
+		(void) puts("  (Q)uit and save changes to sudoers file (DANGER!)\n");
 	}
     }
-
-    return(choice);
 }
 
 /*
