@@ -1081,7 +1081,7 @@ case "$host" in
 		;;
     *-*-solaris2*)
 		# To get the crypt(3) prototype (so we pass -Wall)
-		CFLAGS="${CFLAGS} -D__EXTENSIONS__"
+		CPPFLAGS="${CPPFLAGS} -D__EXTENSIONS__"
 		# AFS support needs -lucb
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lucb"
@@ -1267,6 +1267,9 @@ case "$host" in
 		fi
 		;;
     *-*-linux*)
+		# To get crypt(3) and vasprintf() prototypes (so we pass -Wall)
+		AC_DEFINE(_GNU_SOURCE)
+
 		# Some Linux versions need to link with -lshadow
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_FUNC(getspnam, AC_DEFINE(HAVE_GETSPNAM), AC_CHECK_LIB(shadow, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lshadow"; LIBS="${LIBS} -lshadow"]))
