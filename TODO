@@ -1,6 +1,6 @@
 TODO list
 
-01) FIx bison warning on parse.yacc.
+01) Fix bison warnings on parse.yacc.
 
 02) Add groups of users to the config file.
 
