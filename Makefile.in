@@ -147,7 +147,7 @@ BINFILES= BUGS CHANGES HISTORY LICENSE README TODO TROUBLESHOOTING \
 	  sudo sudo.cat sudo.man sudo.pod sudoers sudoers.cat sudoers.man \
 	  sudoers.pod visudo visudo.cat visudo.man visudo.pod
 
-BINSPECIAL= INSTALL.binary Makefile.binary
+BINSPECIAL= INSTALL.binary Makefile.binary libtool
 
 SUDODEP = $(srcdir)/sudo.h $(srcdir)/compat.h $(srcdir)/defaults.h \
 	  $(srcdir)/logging.h config.h def_data.h pathnames.h
@@ -309,6 +309,9 @@ install-binaries: $(PROGS)
 install-noexec: sudo_noexec.la
 	$(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la $(DESTDIR)$(noexecdir)
 
+bininst-noexec: sudo_noexec.la
+	$(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la $(DESTDIR)$(noexecdir)
+
 install-sudoers:
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
 	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
@@ -356,10 +359,11 @@ dist:
 	ls -l ../sudo-$(VERSION).tar.gz
 
 bindist:
-	@mkdir tmp.`arch -l`
-	@mkdir tmp.`arch -l`/sudo-$(VERSION)
 	( \
-	  tdir=tmp.`arch -l`/sudo-$(VERSION) ; \
+	  ARCH=`uname -m`+`uname -sr|sed 's/ /_/g'` ; \
+	  mkdir tmp.$$ARCH ; \
+	  tdir=tmp.$$ARCH/sudo-$(VERSION) ; \
+	  mkdir $$tdir ; \
 	  for i in $(BINFILES) ; do \
 	    if [ -f $$i ]; then \
 	      cp $$i $$tdir ; \
@@ -370,13 +374,15 @@ bindist:
 	      exit 1 ; \
 	    fi ; \
 	  done ; \
+	  if [ -f sudo_noexec.la ]; then \
+	    cp libtool $$tdir ; \
+	    $(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la `pwd`/$$tdir ; \
+	  fi ; \
 	  cp $(srcdir)/INSTALL.binary $$tdir/INSTALL ; \
-	  sed -e 's/@_MANTYPE@/$(mantype)/g' -e 's/@_mansectsu@/$(mansectsu)/g' \
-	      -e 's/@_mansectform@/$(mansectform)/g' $(srcdir)/Makefile.binary \
-	      > $$tdir/Makefile ; \
-	)  
-	strip sudo
-	strip visudo
-	( cd tmp.`arch -l` && tar Ocf ../sudo-$(VERSION)-`arch -l`.tar sudo-$(VERSION) )
-	gzip --best sudo-$(VERSION)-`arch -l`.tar
-	rm -rf tmp.`arch -l`
+	  sh ./config.status --file=Makefile.binary && cp Makefile.binary $$tdir/Makefile ; \
+	  strip sudo ; \
+	  strip visudo ; \
+	  cd tmp.$$ARCH && tar Ocf ../sudo-$(VERSION)-$$ARCH.tar sudo-$(VERSION) && cd .. ; \
+	  gzip --best sudo-$(VERSION)-$$ARCH.tar ; \
+	  rm -rf tmp.$$ARCH ; \
+	)
