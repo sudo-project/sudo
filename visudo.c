@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
 #include <sys/time.h>
 #ifndef __TANDEM
 # include <sys/file.h>
@@ -68,6 +69,9 @@
 #include <signal.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 #ifdef __STDC__
 # include <stdarg.h>
 #else
@@ -75,7 +79,9 @@
 #endif
 
 #include "sudo.h"
+#include "interfaces.h"
 #include "parse.h"
+#include "gram.h"
 #include "version.h"
 
 #ifndef lint
@@ -94,24 +100,20 @@ struct sudoersfile {
 /*
  * Function prototypes
  */
-static void usage		__P((void))
-				    __attribute__((__noreturn__));
-static char whatnow		__P((void));
-static RETSIGTYPE Exit		__P((int))
-				    __attribute__((__noreturn__));
-static void setup_signals	__P((void));
-static int run_command		__P((char *, char **));
-static int check_syntax		__P((char *));
-static int edit_sudoers		__P((struct sudoersfile *, char *, int));
-static int reparse_sudoers	__P((char *editor));
-static int install_sudoers	__P((struct sudoersfile *));
+static RETSIGTYPE Exit		__P((int)) __attribute__((__noreturn__));
 static char *get_editor		__P((void));
-int command_matches		__P((char *, char *));
-int addr_matches		__P((char *));
-int hostname_matches		__P((char *, char *, char *));
-int netgr_matches		__P((char *, char *, char *, char *));
-int usergr_matches		__P((char *, char *, struct passwd *));
-int userpw_matches		__P((char *, char *, struct passwd *));
+static char whatnow		__P((void));
+static int check_aliases	__P((int));
+static int check_syntax		__P((char *, int));
+static int edit_sudoers		__P((struct sudoersfile *, char *, int));
+static struct alias *find_alias	__P((char *, int));
+static int remove_alias		__P((char *, int));
+static int install_sudoers	__P((struct sudoersfile *));
+static int reparse_sudoers	__P((char *, int, int));
+static int run_command		__P((char *, char **));
+static void setup_signals	__P((void));
+static void usage		__P((void)) __attribute__((__noreturn__));
+
 void yyerror			__P((const char *));
 void yyrestart			__P((FILE *));
 void Err			__P((int, const char *, ...))
@@ -122,28 +124,28 @@ void Errx			__P((int, const char *, ...))
 /*
  * External globals exported by the parser
  */
-extern FILE *yyin, *yyout;
-extern char *sudoers;
-extern char *errorfile;
-extern int errorlineno;
-extern int pedantic;
-extern int quiet;
+extern FILE *yyin;
+extern char *sudoers, *errorfile;
+extern int errorlineno, parse_error;
 /* For getopt(3) */
 extern char *optarg;
 extern int optind;
 
+extern struct alias *aliases;
+extern struct defaults *defaults;
+extern struct userspec *userspecs;
+
 /*
  * Globals
  */
+int Argc;
 char **Argv;
+int num_interfaces;
+struct interface *interfaces;
 struct sudo_user sudo_user;
-int Argc, parse_error = FALSE;
-
 static struct sudoerslist {
-    struct sudoersfile *first;
-    struct sudoersfile *last;
+    struct sudoersfile *first, *last;
 } sudoerslist;
-
 
 int
 main(argc, argv)
@@ -152,10 +154,7 @@ main(argc, argv)
 {
     struct sudoersfile *sp;
     char *editor, *sudoers_path;
-    int ch, checkonly;
-
-    /* Warn about aliases that are used before being defined. */
-    pedantic = 1;
+    int ch, checkonly, quiet, strict;
 
     Argv = argv;
     if ((Argc = argc) < 1)
@@ -164,7 +163,7 @@ main(argc, argv)
     /*
      * Arg handling.
      */
-    checkonly = 0;
+    checkonly = quiet = strict = 0;
     sudoers_path = _PATH_SUDOERS;
     while ((ch = getopt(argc, argv, "Vcf:sq")) != -1) {
 	switch (ch) {
@@ -178,7 +177,7 @@ main(argc, argv)
 		sudoers_path = optarg;	/* sudoers file path */
 		break;
 	    case 's':
-		pedantic++;		/* strict mode */
+		strict++;		/* strict mode */
 		break;
 	    case 'q':
 		quiet++;		/* quiet mode */
@@ -201,7 +200,7 @@ main(argc, argv)
     init_defaults();
 
     if (checkonly)
-	exit(check_syntax(sudoers_path));
+	exit(check_syntax(sudoers_path, quiet));
 
     /*
      * Parse the existing sudoers file(s) in quiet mode to highlight any
@@ -211,13 +210,9 @@ main(argc, argv)
 	Err(1, "%s", sudoers_path);
     if (!lock_file(fileno(yyin), SUDO_TLOCK))
 	Errx(1, "%s busy, try again later", sudoers_path);
-    yyout = stdout;
-    ch = quiet;
-    quiet = 1;
-    init_parser(sudoers_path);
+    init_parser(sudoers_path, 0);
     yyparse();
-    parse_error = FALSE;
-    quiet = ch;
+    (void) update_defaults();
 
     editor = get_editor();
 
@@ -235,7 +230,7 @@ main(argc, argv)
     }
 
     /* Check edited files for a parse error and re-edit any that fail. */
-    reparse_sudoers(editor);
+    reparse_sudoers(editor, strict, quiet);
 
     /* Install the sudoers temp files. */
     for (sp = sudoerslist.first; sp != NULL; sp = sp->next) {
@@ -374,8 +369,9 @@ edit_sudoers(sp, editor, lineno)
  * Returns TRUE on success, else FALSE.
  */
 static int
-reparse_sudoers(editor)
+reparse_sudoers(editor, strict, quiet)
     char *editor;
+    int strict, quiet;
 {
     struct sudoersfile *sp, *last;
     FILE *fp;
@@ -397,10 +393,9 @@ reparse_sudoers(editor)
 	/* Clean slate for each parse */
 	user_runas = NULL;
 	init_defaults();
-	init_parser(sp->path);
+	init_parser(sp->path, quiet);
 
 	/* Parse the sudoers temp file */
-	yyout = stdout;
 	yyrestart(fp);
 	if (yyparse() && parse_error != TRUE) {
 	    warnx("unabled to parse temporary file (%s), unknown error",
@@ -408,6 +403,8 @@ reparse_sudoers(editor)
 	    parse_error = TRUE;
 	}
 	fclose(yyin);
+	if (check_aliases(strict) != 0)
+	    parse_error = TRUE;
 
 	/*
 	 * Got an error, prompt the user for what to do now
@@ -509,83 +506,22 @@ install_sudoers(sp)
     return(TRUE);
 }
 
-/*
- * Dummy *_matches routines.
- * These exist to allow us to use the same parser as sudo(8).
- */
-int
-command_matches(path, sudoers_args)
-    char *path;
-    char *sudoers_args;
-{
-    return(TRUE);
-}
-
-int
-addr_matches(n)
-    char *n;
-{
-    return(TRUE);
-}
-
-int
-hostname_matches(s, l, p)
-    char *s, *l, *p;
-{
-    return(TRUE);
-}
-
-int
-usergr_matches(g, u, pw)
-    char *g, *u;
-    struct passwd *pw;
-{
-    return(TRUE);
-}
-
-int
-userpw_matches(s, u, pw)
-    char *s, *u;
-    struct passwd *pw;
-{
-    return(TRUE);
-}
-
-int
-netgr_matches(n, h, sh, u)
-    char *n, *h, *sh, *u;
-{
-    return(TRUE);
-}
-
+/* STUB */
 void
 set_fqdn()
 {
     return;
 }
 
+/* STUB */
 int
 set_runaspw(user)
     char *user;
 {
-    extern int sudolineno, used_runas;
-
-    if (used_runas) {
-	(void) fprintf(stderr,
-	    "%s: runas_default set after old value is in use near line %d\n",
-	    pedantic > 1 ? "Error" : "Warning", sudolineno);
-	if (pedantic > 1)
-	    yyerror(NULL);
-    }
     return(TRUE);
 }
 
-int
-user_is_exempt()
-{
-    return(TRUE);
-}
-
+/* STUB */
 void
 init_envtables()
 {
@@ -684,8 +620,9 @@ run_command(path, argv)
 }
 
 static int
-check_syntax(sudoers_path)
+check_syntax(sudoers_path, quiet)
     char *sudoers_path;
+    int quiet;
 {
 
     if ((yyin = fopen(sudoers_path, "r")) == NULL) {
@@ -693,8 +630,7 @@ check_syntax(sudoers_path)
 	    warn("unable to open %s", sudoers_path);
 	exit(1);
     }
-    yyout = stdout;
-    init_parser(sudoers_path);
+    init_parser(sudoers_path, quiet);
     if (yyparse() && parse_error != TRUE) {
 	if (!quiet)
 	    warnx("failed to parse %s file, unknown error", sudoers_path);
@@ -858,6 +794,142 @@ get_editor()
 	}
     }
     return(Editor);
+}
+
+/*
+ * Iterate through the sudoers datastructures looking for undefined
+ * aliases or unused aliases.
+ */
+static int
+check_aliases(strict)
+    int strict;
+{
+    struct alias *a;
+    struct cmndspec *cs;
+    struct member *m;
+    struct privilege *priv;
+    struct userspec *us;
+    int error = 0;
+
+    /* Forward check. */
+    for (us = userspecs; us != NULL; us = us->next) {
+	for (m = us->user; m != NULL; m = m->next) {
+	    if (m->type == USERALIAS) {
+		if (find_alias(m->name, m->type) == NULL) {
+		    fprintf(stderr,
+			"%s: User_Alias `%s' referenced but not defined\n",
+			strict ? "Error" : "Warning", m->name);
+		    error++;
+		}
+	    }
+	}
+	for (priv = us->privileges; priv != NULL; priv = priv->next) {
+	    for (m = priv->hostlist; m != NULL; m = m->next) {
+		if (m->type == HOSTALIAS) {
+		    if (find_alias(m->name, m->type) == NULL) {
+			fprintf(stderr,
+			    "%s: Host_Alias `%s' referenced but not defined\n",
+			    strict ? "Error" : "Warning", m->name);
+			error++;
+		    }
+		}
+	    }
+	    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
+		for (m = cs->runaslist; m != NULL; m = m->next) {
+		    if (m->type == RUNASALIAS) {
+			if (find_alias(m->name, m->type) == NULL) {
+			    fprintf(stderr,
+				"%s: Runas_Alias `%s' referenced but not defined\n",
+				strict ? "Error" : "Warning", m->name);
+			    error++;
+			}
+		    }
+		}
+		if ((m = cs->cmnd)->type == CMNDALIAS) {
+		    if (find_alias(m->name, m->type) == NULL) {
+			fprintf(stderr,
+			    "%s: Cmnd_Alias `%s' referenced but not defined\n",
+			    strict ? "Error" : "Warning", m->name);
+			error++;
+		    }
+		}
+	    }
+	}
+    }
+
+    /* Reverse check (destructive) */
+    for (us = userspecs; us != NULL; us = us->next) {
+	for (m = us->user; m != NULL; m = m->next) {
+	    if (m->type == USERALIAS)
+		(void)remove_alias(m->name, m->type);
+	}
+	for (priv = us->privileges; priv != NULL; priv = priv->next) {
+	    for (m = priv->hostlist; m != NULL; m = m->next) {
+		if (m->type == HOSTALIAS)
+		    (void)remove_alias(m->name, m->type);
+	    }
+	    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
+		for (m = cs->runaslist; m != NULL; m = m->next) {
+		    if (m->type == RUNASALIAS)
+			(void)remove_alias(m->name, m->type);
+		}
+		if ((m = cs->cmnd)->type == CMNDALIAS)
+		    (void)remove_alias(m->name, m->type);
+	    }
+	}
+    }
+    for (a = aliases; a != NULL; a = a->next) {
+	fprintf(stderr, "%s: unused %s_Alias %s\n",
+	    strict ? "Error" : "Warning", a->type == HOSTALIAS ? "Host" :
+	    a->type == CMNDALIAS ? "Cmnd" : a->type == USERALIAS ? "User" :
+	    a->type == RUNASALIAS ? "Runas" : "Unknown", a->name);
+	error++;
+    }
+    return (strict ? error : 0);
+}
+
+/*
+ * Find the specified alias.
+ */
+static struct alias *
+find_alias(name, type)
+    char *name;
+    int type;
+{
+    struct alias *a;
+
+    for (a = aliases; a != NULL; a = a->next) {
+	if (a->type == type && strcmp(a->name, name) == 0)
+	    return(a);
+    }
+    return(NULL);
+}
+
+/*
+ * Remove the specified alias.
+ */
+static int
+remove_alias(name, type)
+    char *name;
+    int type;
+{
+    struct alias *a, *prev;
+
+    for (a = prev = aliases; a != NULL; a = a->next) {
+	if (a->type == type && strcmp(a->name, name) == 0) {
+	    if (a == aliases)
+		aliases = a->next;	/* remove head */
+	    else {
+		prev->next = a->next;
+		if (aliases->last == a)
+		    aliases->last = prev;
+	    }
+	    free(a->name);
+	    free(a);
+	    return(TRUE);
+	}
+    }
+    return(FALSE);
 }
 
 /*
