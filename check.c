@@ -589,7 +589,7 @@ static char *osf_C2_crypt(pass, encrypt_salt)
  *
  *  Validate a user via kerberos.
  */
-int sudo_krb_validate_user(user, pass)
+static int sudo_krb_validate_user(user, pass)
     char *user, *pass;
 {
     char realm[REALM_SZ];
