@@ -423,6 +423,12 @@
 /* Define to be the syslog facility to use.  */
 #undef LOGFAC
 
+/* Define to be the syslog priority to use for successful attemps.  */
+#undef PRI_SUCCESS
+
+/* Define to be the syslog priority to use for unsuccessful attemps/errors.  */
+#undef PRI_FAILURE
+
 /* Define to be the max chars per log line (for line wrapping).  */
 #undef MAXLOGFILELEN
 
