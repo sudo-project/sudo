@@ -145,6 +145,9 @@ entry		:	COMMENT
 		|	NAME {
 			    user_matched = strcmp($1, user) == 0;
 			} privileges
+		|	ALIAS {
+			    user_matched = find_alias($1, USER) != 0;
+			} privileges
 		|	USERALIAS useraliases
 			{ ; }
 		|	HOSTALIAS hostaliases
@@ -220,7 +223,9 @@ opcmnd		:	cmnd
 			}
 		;
 
-cmnd		:	ALL { cmnd_matches = TRUE; }
+cmnd		:	ALL {
+			    cmnd_matches = TRUE;
+			}
 		|	ALIAS {
 			    if (find_alias($1, CMND))
 				cmnd_matches = TRUE;
@@ -267,7 +272,7 @@ useraliases	:	useralias
 		;
 
 useralias	:	ALIAS { push; }	'=' userlist {
-			    if (user_matches == TRUE && !add_alias($1, CMND))
+			    if (user_matches == TRUE && !add_alias($1, USER))
 				YYERROR;
 			    pop;
 			}
@@ -279,8 +284,8 @@ userlist	:	user
 		;
 
 user		:	NAME {
-			    /* XXX need to set user_matched */
-			    user_matches = strcmp($1, user) == 0;
+			    if (strcmp($1, user) == 0)
+				user_matches = TRUE;
 			}
 		;
 
