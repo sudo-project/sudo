@@ -51,7 +51,7 @@
  */
 
 #ifndef lint
-static char rcsid[] = "$Id$";
+static const char rcsid[] = "$Id$";
 #endif /* lint */
 
 #define MAIN

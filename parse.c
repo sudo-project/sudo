@@ -25,7 +25,7 @@
  */
 
 #ifndef lint
-static char rcsid[] = "$Id$";
+static const char rcsid[] = "$Id$";
 #endif /* lint */
 
 #include "config.h"
@@ -156,12 +156,13 @@ int validate(check_cmnd)
      */
     if (check_cmnd == FALSE)
 	while (top) {
-	    if (host_matches == TRUE)
+	    if (host_matches == TRUE) {
 		/* user may always do validate or list on allowed hosts */
 		if (no_passwd == TRUE)
 		    return(VALIDATE_OK_NOPASS);
 		else
 		    return(VALIDATE_OK);
+	    }
 	    top--;
 	}
     else

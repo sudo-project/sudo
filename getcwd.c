@@ -32,7 +32,7 @@
  */
 
 #if defined(LIBC_SCCS) && !defined(lint)
-static char rcsid[] = "$OpenBSD: getcwd.c,v 1.5 1998/08/14 21:39:26 deraadt Exp $";
+static const char rcsid[] = "$OpenBSD: getcwd.c,v 1.5 1998/08/14 21:39:26 deraadt Exp $";
 #endif /* LIBC_SCCS and not lint */
 
 #include "config.h"

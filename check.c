@@ -36,7 +36,7 @@
  */
 
 #ifndef lint
-static char rcsid[] = "$Id$";
+static const char rcsid[] = "$Id$";
 #endif /* lint */
 
 #include "config.h"
@@ -290,7 +290,7 @@ static int check_timestamp()
 	} else {
 	    /* check the time against the timestamp file */
 	    now = time((time_t *) NULL);
-	    if (TIMEOUT && now - statbuf.st_mtime < 60 * TIMEOUT)
+	    if (TIMEOUT && now - statbuf.st_mtime < 60 * TIMEOUT) {
 		/* check for bogus time on the stampfile */
 		if (statbuf.st_mtime > now + 60 * TIMEOUT * 2) {
 		    timestamp_is_old = 2;	/* bogus time value */
@@ -300,8 +300,9 @@ static int check_timestamp()
 		} else {
 		    timestamp_is_old = 0;	/* time value is reasonable */
 		}
-	    else
+	    } else {
 		timestamp_is_old = 1;	/* else make 'em enter password */
+	    }
 	}
     }
     /*

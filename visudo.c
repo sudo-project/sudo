@@ -26,7 +26,7 @@
  */
 
 #ifndef lint
-static char rcsid[] = "$Id$";
+static const char rcsid[] = "$Id$";
 #endif /* lint */
 
 #include "config.h"
@@ -144,15 +144,16 @@ int main(argc, argv)
      * If passesd -V then print version, else print usage
      * if any other option...
      */
-    if (argc == 2)
+    if (argc == 2) {
 	if (!strcmp(Argv[1], "-V")) {
 	    (void) printf("visudo version %s\n", version);
 	    exit(0);
 	} else {
 	    usage();
 	}
-    else if (argc != 1)
+    } else if (argc != 1) {
 	usage();
+    }
 
     /* user_pw_ent needs to point to something... */
     if ((user_pw_ent = getpwuid(getuid())) == NULL) {
@@ -319,7 +320,7 @@ int main(argc, argv)
      * rename(2)'d to sudoers.  If the rename(2) fails we try using
      * mv(1) in case stmp and sudoers are on different filesystems.
      */
-    if (rename(stmp, sudoers))
+    if (rename(stmp, sudoers)) {
 	if (errno == EXDEV) {
 	    char *tmpbuf;
 
@@ -353,6 +354,7 @@ int main(argc, argv)
 	    perror("");
 	    Exit(-1);
 	}
+    }
 
     return(0);
 }
