@@ -80,6 +80,9 @@
  
            SYSLOG                   if this variable is defined, sudo will log
                                     using the 4.3 BSD style syslog facility
+
+           SECURE_PATH              if this variable is set, its value is
+				    used as the PATH variable
  
            BROKEN_GETPASS           if using a os with a broken getpass()
                                     hpux,aix,irix need this, sudo.h has details
