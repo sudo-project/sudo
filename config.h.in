@@ -90,6 +90,9 @@
 /* Define if you use Skey.  */
 #undef HAVE_SKEY
 
+/* Define if you use Kerberos.  */
+#undef HAVE_KERBEROS
+
 /* Define if you use AFS.  */
 #undef HAVE_AFS
 
