@@ -169,11 +169,15 @@ fnmatch(pattern, string, flags)
 }
 
 static int
+#ifdef __STDC__
+rangematch(const char *pattern, char test, int flags, char **newp)
+#else
 rangematch(pattern, test, flags, newp)
 	const char *pattern;
 	char test;
 	int flags;
 	char **newp;
+#endif
 {
 	int negate, ok;
 	char c, c2;
