@@ -90,7 +90,7 @@ int top = 0;
 	top--;
 
 extern int path_matches		__P((char *, char *));
-extern int ntwk_matches		__P((char *));
+extern int addr_matches		__P((char *));
 static int find_alias		__P((char *, int));
 static int add_alias		__P((char *, int));
 static int more_aliases		__P((int));
@@ -166,7 +166,7 @@ hostspec	:	ALL {
 			    host_matches = TRUE;
 			}
 		|	NTWKADDR {
-			    if (ntwk_matches($1))
+			    if (addr_matches($1))
 				host_matches = TRUE;
 			}
 		|	NAME {
