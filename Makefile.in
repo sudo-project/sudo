@@ -248,12 +248,12 @@ realclean: distclean
 cleandir: realclean
 
 dist: $(DISTFILES)
-	rm -f ../cu-sudo.v$(VERSION).tar.Z
+	rm -f ../cu-sudo.v$(VERSION).tar.gz
 	( cd .. ; TF="/tmp/sudo.dist$$$$" ; rm -f $$TF ; for i in $(DISTFILES) ; \
 	  do echo sudo.v$(VERSION)/$$i >> $$TF ; done ; \
 	  tar Ocf cu-sudo.v$(VERSION).tar \
-	  `cat $$TF` && compress cu-sudo.v$(VERSION).tar && rm -f $$TF)
-	ls -l ../cu-sudo.v$(VERSION).tar.Z
+	  `cat $$TF` && gzip --best cu-sudo.v$(VERSION).tar && rm -f $$TF)
+	ls -l ../cu-sudo.v$(VERSION).tar.gz
 
 # Update version strings based on version specified in version.h
 # This is ugly but it works...
