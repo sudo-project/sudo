@@ -147,9 +147,9 @@ main(argc, argv)
     int sudo_mode = MODE_RUN;
     extern char ** environ;
 
-#if defined(__osf__) && defined(HAVE_C2_SECURITY)
-    (void) set_auth_parameters();
-#endif /* __osf__ && HAVE_C2_SECURITY */
+#if defined(SHADOW_TYPE) && SHADOW_TYPE == SPW_AUTH
+    (void) set_auth_parameters(argc, argv);
+#endif /* SHADOW_TYPE && SPW_AUTH */
 
     Argv = argv;
     Argc = argc;
