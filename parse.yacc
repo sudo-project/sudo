@@ -167,9 +167,9 @@ privileges	:	privilege
 		;
 
 privilege	:	hostspec '=' opcmndlist {
-			    if (!user_matches)
+			    if (!user_matches) {
 				pop;
-			    else {
+			    } else {
 				push;
 				user_matches = TRUE;
 			    }
