@@ -59,15 +59,18 @@ LDFLAGS = @LDFLAGS@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 man_prefix = @man_prefix@
+etc_dir =  /etc
+bin_dir =  $(exec_prefix)/bin
+sbin_dir =  @sbin_dir@
 
 # Directory in which to install sudo.
-sudodir = $(exec_prefix)/bin
+sudodir = $(bin_dir)
 
 # Directory in which to install visudo
-visudodir = $(exec_prefix)/etc
+visudodir = $(sbin_dir)
 
 # Directory in which to install the sudoers file
-sudoersdir = /etc
+sudoersdir = $(etc_dir)
 
 # Directory in which to install the man page
 # set mansect5 to 4 on sysV machines.
