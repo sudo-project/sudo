@@ -148,6 +148,9 @@ struct sudo_defs_types {
 	"log_host", T_FLAG, FL_LOG_HOST, NULL,
 	"Log the hostname in the (non-syslog) log file"
     }, { 
+	"log_year", T_FLAG, FL_LOG_YEAR, NULL,
+	"Log the year in the (non-syslog) log file"
+    }, { 
 	"shell_noargs", T_FLAG, FL_SHELL_NOARGS, NULL,
 	"If sudo is invoked with no arguments, start a shell"
     }, { 

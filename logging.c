@@ -149,7 +149,7 @@ static void
 do_logfile(msg)
     char *msg;
 {
-    char *full_line;
+    char *full_line, *timestr;
     char *beg, *oldend, *end;
     FILE *fp;
     mode_t oldmask;
@@ -172,21 +172,25 @@ do_logfile(msg)
 	send_mail(full_line);
 	free(full_line);
     } else {
+	timestr = ctime(&now) + 4;		/* skip day of the week */
+	if (sudo_flag_set(FL_LOG_YEAR))
+	    timestr[20] = '\0';			/* avoid the newline */
+	else
+	    timestr[15] = '\0';			/* don't care about year */
+
 	if (sudo_inttable[I_LOGLEN] == 0) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
 	    if (sudo_flag_set(FL_LOG_HOST))
-		(void) fprintf(fp, "%15.15s : %s : HOST=%s : %s\n",
-		    ctime(&now) + 4, user_name, user_shost, msg);
+		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n", timestr,
+		    user_name, user_shost, msg);
 	    else
-		(void) fprintf(fp, "%15.15s : %s : %s\n", ctime(&now) + 4,
-		    user_name, msg);
+		(void) fprintf(fp, "%s : %s : %s\n", timestr, user_name, msg);
 	} else {
 	    if (sudo_flag_set(FL_LOG_HOST))
-		easprintf(&full_line, "%15.15s : %s : HOST=%s : %s",
-		    ctime(&now) + 4, user_name, user_shost, msg);
+		easprintf(&full_line, "%s : %s : HOST=%s : %s", timestr,
+		    user_name, user_shost, msg);
 	    else
-		easprintf(&full_line, "%15.15s : %s : %s", ctime(&now) + 4,
-		    user_name, msg);
+		easprintf(&full_line, "%s : %s : %s", timestr, user_name, msg);
 
 	    /*
 	     * Print out full_line with word wrap
@@ -465,7 +469,11 @@ send_mail(line)
 	}
 	now = time((time_t) 0);
 	p = ctime(&now) + 4;
-	(void) fprintf(mail, "\n\n%s : %15.15s : %s : %s\n\n", user_host, p,
+	if (sudo_flag_set(FL_LOG_YEAR))
+	    p[20] = '\0';			/* avoid the newline */
+	else
+	    p[15] = '\0';			/* don't care about year */
+	(void) fprintf(mail, "\n\n%s : %s : %s : %s\n\n", user_host, p,
 	    user_name, line);
 	fclose(mail);
 	reapchild(0);

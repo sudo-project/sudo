@@ -68,6 +68,7 @@
 #define FL_PATH_INFO		0x02000
 #define FL_FQDN			0x04000
 #define FL_INSULTS		0x08000
+#define FL_LOG_YEAR		0x10000
 #define FL_MAX			0xFFFFF
 
 /*
