@@ -77,7 +77,9 @@ static char rcsid[] = "$Id$";
 static void send_mail		__P((void));
 static RETSIGTYPE reapchild	__P((int));
 static int appropriate		__P((int));
+#ifdef BROKEN_SYSLOG
 static void syslog_wrapper	__P((int, char *, char *, char *));
+#endif /* BROKEN_SYSLOG */
 
 /*
  * Globals
@@ -88,6 +90,7 @@ extern int errorlineno;
 
 #ifdef BROKEN_SYSLOG
 #define MAXSYSLOGTRIES		16	/* num of retries for broken syslogs */
+#define SYSLOG(a,b,c,d)		syslog_wrapper(a,b,c,d)
 
 /****************************************************************
  *
@@ -110,8 +113,8 @@ static void syslog_wrapper(pri, fmt, arg1, arg2)
 	if (syslog(pri, fmt, arg1, arg2) == 0)
 	    break;
 }
-
-#define syslog			syslog_wrapper
+#else
+#define SYSLOG(a,b,c,d)		syslog(a,b,c,d)
 #endif /* BROKEN_SYSLOG */
 
 
@@ -318,9 +321,9 @@ void log_error(code)
 	    *tmp = '\0';
 
 	    if (count == 0)
-		syslog(pri, "%8.8s : %s", user_name, p);
+		SYSLOG(pri, "%8.8s : %s", user_name, p);
 	    else
-		syslog(pri, "%8.8s : (command continued) %s", user_name, p);
+		SYSLOG(pri, "%8.8s : (command continued) %s", user_name, p);
 
 	    *tmp = save;			/* restore saved character */
 
@@ -329,9 +332,9 @@ void log_error(code)
 		;
 	} else {
 	    if (count == 0)
-		syslog(pri, "%8.8s : %s", user_name, p);
+		SYSLOG(pri, "%8.8s : %s", user_name, p);
 	    else
-		syslog(pri, "%8.8s : (command continued) %s", user_name, p);
+		SYSLOG(pri, "%8.8s : (command continued) %s", user_name, p);
 	}
     }
     closelog();
