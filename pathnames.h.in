@@ -62,8 +62,8 @@
  */
 
 /*
- * Where to put the timestamp files.  Defaults to /var/run/sudo if
- * /var/run exists, else /tmp/.odus.
+ * Where to put the timestamp files.  Defaults to /var/run/sudo,
+ * /var/adm/sudo or /usr/adm/sudo depending on what exists.
  */
 #ifndef _PATH_SUDO_TIMEDIR
 #undef _PATH_SUDO_TIMEDIR
