@@ -505,23 +505,23 @@ sudo_ldap_read_config()
     if (!*c)        continue; /* incomplete last line */
 
     /* skip whitespace before keyword */
-    while (isspace(*c)) c++;
+    while (isspace((unsigned char)*c)) c++;
     keyword=c;
 
     /* properly terminate keyword string */
-    while (*c && !isspace(*c)) c++;
+    while (*c && !isspace((unsigned char)*c)) c++;
     if (*c) {
       *c='\0'; /* terminate keyword */
       c++;
     }
 
     /* skip whitespace before value */
-    while (isspace(*c)) c++;
+    while (isspace((unsigned char)*c)) c++;
     value=c;
 
     /* trim whitespace after value */
     while (*c) c++; /* wind to end */
-    while (--c > value && isspace(*c)) *c='\0';
+    while (--c > value && isspace((unsigned char)*c)) *c='\0';
 
     /* The following macros make the code much more readable */
 
