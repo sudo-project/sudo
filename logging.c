@@ -303,10 +303,18 @@ static void send_mail()
 
     if (!fork()) {		/* child */
 	(void) close(1);
-	execve(mailer, exec_argv, Envp);
+#ifdef USE_EXECVE
+	execve(mailer, exec_argv, environ);
+#else /* USE_EXECVE */
+	execvp(mailer, exec_argv);
+#endif /* USE_EXECVE */
 
 	/* this should not happen */
+#ifdef USE_EXECVE
 	perror("execve");
+#else /* USE_EXECVE */
+	perror("execvp");
+#endif /* USE_EXECVE */
 	exit(1);
     } else {			/* parent */
 	(void) close(0);
