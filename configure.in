@@ -73,7 +73,7 @@ AFS=1
 echo 'Configuring for use with AFS')
 
 dnl --with-DCE
-AC_ARG_WITH(AFS, [  --with-DCE              enable DCE support], AC_DEFINE(HAVE_DCE)
+AC_ARG_WITH(DCE, [  --with-DCE              enable DCE support], AC_DEFINE(HAVE_DCE)
 DCE=1
 echo 'Configuring for use with DCE')
 
@@ -425,7 +425,7 @@ dnl
 dnl extra DCE lib
 dnl
 if test -n "$DCE" ; then
-    LIBS="${LIBS} -dce"
+    LIBS="${LIBS} -ldce"
     LIBOBJS="${LIBOBJS} dce_pwent.o"
 fi
 
