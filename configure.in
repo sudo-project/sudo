@@ -446,7 +446,7 @@ if test -n "$KERB4" -o -n "$KERB5" ; then
     elif test -d "/usr/kerberos/include" ; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/kerberos/include"
     else
-	echo "Unable to locate kerberos include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS"
+	echo 'Unable to locate kerberos include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS'
     fi
 
     if test -d "/usr/kerberos/lib" ; then
@@ -456,7 +456,7 @@ if test -n "$KERB4" -o -n "$KERB5" ; then
     elif test -f "/usr/local/lib/libkrb.a" ; then
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
     elif test ! -f "/usr/lib/libkrb.a" ; then
-	echo "Unable to locate kerberos libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS"
+	echo 'Unable to locate kerberos libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS'
     fi
 
     SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes"
@@ -472,7 +472,7 @@ if test -n "$AFS" ; then
     if test -d "/usr/lib/afs" ; then
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/lib/afs"
     else
-	echo "Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDO_LDFLAGS"
+	echo 'Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDO_LDFLAGS'
     fi
 
     SUDO_LIBS="${SUDO_LIBS} -lkauth -lprot -lauth -lubik -lrxkad -lsys -ldes -lrx -llwp -lcom_err -laudit -lutil"
@@ -497,7 +497,7 @@ if test -n "$SKEY" ; then
 	CPPFLAGS="${CPPFLAGS} -I/tools/cs/skey/include"
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/tools/cs/skey/lib"
     else
-	echo 'Can't find libskey.a and skey.h, you'll have to edit the Makefile'
+	echo 'Unable to locate libskey.a and/or skey.h, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS and/or -I/path/to/skey.h to CPPFLAGS'
     fi
 fi
 
