@@ -54,7 +54,7 @@ struct listhead {
 };
 struct childinfo {
     pid_t pid;
-    uid_t uid;
+    struct passwd *pw;
     struct childinfo *next;
 };
 struct syscallhandler {
@@ -73,14 +73,19 @@ int systrace_open	__P((void));
 int systrace_read	__P((int, pid_t, void *, void *, size_t));
 int systrace_run	__P((char *, char **, int));
 ssize_t read_string	__P((int, pid_t, void *, char *, size_t));
-void new_child		__P((struct listhead *, pid_t, uid_t));
+void new_child		__P((pid_t, pid_t));
 void new_handler	__P((struct listhead *, int,
 			     void (*)(int, struct str_msg_ask *,
 				     struct systrace_answer *)));
-void rm_child		__P((struct listhead *, pid_t));
-void update_child	__P((struct listhead *, pid_t, uid_t));
+void rm_child		__P((pid_t));
+void update_child	__P((pid_t, uid_t));
+struct childinfo *find_child __P((pid_t));
 
-static int initialized;
+extern struct passwd *sudo_pwdup __P((const struct passwd *, int));
+extern struct passwd *sudo_getpwuid __P((uid_t));
+
+static struct listhead children;	/* list of children being traced */
+static int initialized;			/* set to true when we are inited */
 
 /*
  * Open the systrace device and return the fd or -1 on failure.
@@ -135,7 +140,7 @@ systrace_attach(pid)
 {
     struct systrace_answer ans;
     struct str_message msg;
-    struct listhead children, handlers;
+    struct listhead handlers;
     sigaction_t sa, osa;
     sigset_t set, oset;
     ssize_t nread;
@@ -205,8 +210,7 @@ systrace_attach(pid)
     if (set_policy(fd, pid, &handlers) != 0)
 	goto fail;
 
-    children.first = NULL;
-    new_child(&children, pid, runas_pw->pw_uid);
+    new_child(-1, pid);
     if (kill(pid, SIGUSR1) != 0) {
 	warn("unable to wake up sleeping child");
 	_exit(1);
@@ -226,11 +230,9 @@ systrace_attach(pid)
 	    case SYSTR_MSG_CHILD:
 		/* either a fork or an exit */
 		if (msg.msg_data.msg_child.new_pid != -1) {
-			/* XXX - runas_pw->pw_uid may be wrong */
-			new_child(&children, msg.msg_data.msg_child.new_pid,
-			    runas_pw->pw_uid);
+			new_child(msg.msg_pid, msg.msg_data.msg_child.new_pid);
 		} else {
-			rm_child(&children, msg.msg_pid);
+			rm_child(msg.msg_pid);
 			if (children.first == NULL)
 			    _exit(0);
 		}
@@ -238,8 +240,10 @@ systrace_attach(pid)
 
 	    case SYSTR_MSG_UGID:
 		/* uid/gid change */
-		warn("new uid %d", msg.msg_data.msg_ugid.uid);
-		update_child(&children, msg.msg_pid, msg.msg_data.msg_ugid.uid);
+#ifdef DEBUG
+		warnx("new uid %d for %d", msg.msg_data.msg_ugid.uid, msg.msg_pid);
+#endif
+		update_child(msg.msg_pid, msg.msg_data.msg_ugid.uid);
 		memset(&ans, 0, sizeof(ans));
 		ans.stra_pid = msg.msg_pid;
 		ans.stra_seqnr = msg.msg_seqnr;
@@ -271,7 +275,6 @@ systrace_attach(pid)
 		if ((ioctl(fd, STRIOCANSWER, &ans)) == -1)
 		    goto fail;
 		break;
-
 	    case SYSTR_MSG_POLICYFREE:
 		break;
 
@@ -314,39 +317,44 @@ new_handler(head, num, handler)
 }
 
 /*
- * Push a new child to the head of the list.
+ * Push a new child to the head of the list, inheriting the struct pw
+ * of its parent.  XXX - do ref counting on pw instead of copying.
  */
 void
-new_child(head, pid, uid)
-    struct listhead *head;
+new_child(ppid, pid)
+    pid_t ppid;
     pid_t pid;
-    uid_t uid;
 {
     struct childinfo *entry;
+    struct passwd *pw;
 
+    if (ppid != -1 && (entry = find_child(ppid)) != NULL)
+	pw = entry->pw;
+    else
+	pw = runas_pw;
     entry = (struct childinfo *) emalloc(sizeof(*entry));
     entry->pid = pid;
-    entry->uid = uid;
-    entry->next = head->first;
-    head->first = entry;
+    entry->pw = sudo_pwdup(pw, 0);
+    entry->next = children.first;
+    children.first = entry;
 }
 
 /*
  * Remove the named pid from the list.
  */
 void
-rm_child(head, pid)
-    struct listhead *head;
+rm_child(pid)
     pid_t pid;
 {
     struct childinfo *cur, *prev;
 
-    for (prev = NULL, cur = head->first; cur != NULL; cur = cur->next) {
+    for (prev = NULL, cur = children.first; cur != NULL; cur = cur->next) {
 	if (cur->pid == pid) {
 	    if (prev != NULL)
 		prev->next = cur->next;
 	    else
-		head->first = cur->next;
+		children.first = cur->next;
+	    free(cur->pw);
 	    free(cur);
 	    break;
 	}
@@ -355,20 +363,44 @@ rm_child(head, pid)
 }
 
 /*
- * Update the uid associated with a pid.
+ * Find a child by pid.
  */
-void
-update_child(head, pid, uid)
-    struct listhead *head;
+struct childinfo *
+find_child(pid)
     pid_t pid;
-    uid_t uid;
 {
     struct childinfo *cur;
 
-    for (cur = head->first; cur != NULL; cur = cur->next) {
-	if (cur->pid == pid) {
-	    cur->uid = uid;
-	    break;
+    for (cur = children.first; cur != NULL; cur = cur->next) {
+	if (cur->pid == pid)
+	    return(cur);
+    }
+    return(NULL);
+}
+
+/*
+ * Update the uid associated with a pid.
+ */
+void
+update_child(pid, uid)
+    pid_t pid;
+    uid_t uid;
+{
+    struct childinfo *child;
+
+    if ((child = find_child(pid)) == NULL)
+	return;		/* cannot happen */
+
+    if (child->pw->pw_uid != uid) {
+	free(child->pw);
+	/* lookup uid in passwd db, using a stub on failure */
+	if ((child->pw = sudo_getpwuid(uid)) == NULL) {
+	    child->pw = emalloc(sizeof(struct passwd) + MAX_UID_T_LEN + 1);
+	    memset(child->pw, 0, sizeof(struct passwd));
+	    child->pw->pw_uid = uid;
+	    child->pw->pw_name = (char *)child->pw + sizeof(struct passwd);
+	    (void) snprintf(child->pw->pw_name, MAX_UID_T_LEN + 1, "%lu",
+		(unsigned long) uid);
 	}
     }
 }
@@ -391,6 +423,7 @@ set_policy(fd, pid, handlers)
     if (ioctl(fd, STRIOCPOLICY, &pol) == -1)
 	return(-1);
 
+    handlers->first = NULL;
     for (i = 0; i < SYS_MAXSYSCALL; i++) {
 	pol.strp_op = SYSTR_POLICY_ASSIGN;
 	pol.strp_pid = pid;
@@ -398,31 +431,48 @@ set_policy(fd, pid, handlers)
 	    return(-1);
 
 	pol.strp_op = SYSTR_POLICY_MODIFY;
-	pol.strp_code = i;
+	switch (pol.strp_code = i) {
 #ifdef SYS_exec
-	if (i == SYS_exec) {
-	    pol.strp_policy = SYSTR_POLICY_ASK;
-	    new_handler(handlers, i, check_exec);
-	} else
+	    case SYS_exec:
+		pol.strp_policy = SYSTR_POLICY_ASK;
+		new_handler(handlers, i, check_exec);
+		break;
 #endif
 #ifdef SYS_execv
-	if (i == SYS_execv) {
-	    pol.strp_policy = SYSTR_POLICY_ASK;
-	    new_handler(handlers, i, check_exec);
-	} else
+	    case SYS_execv:
+		pol.strp_policy = SYSTR_POLICY_ASK;
+		new_handler(handlers, i, check_exec);
+		break;
 #endif
 #ifdef SYS_execve
-	if (i == SYS_execve) {
-	    pol.strp_policy = SYSTR_POLICY_ASK;
-	    new_handler(handlers, i, check_exec);
-	} else
+	    case SYS_execve:
+		pol.strp_policy = SYSTR_POLICY_ASK;
+		new_handler(handlers, i, check_exec);
+		break;
 #endif
 #ifdef SYS_fexecve
-	if (i == SYS_fexecve)
-	    pol.strp_policy = SYSTR_POLICY_NEVER;	/* not checkable */
-	else
+	    case SYS_fexecve:
+		pol.strp_policy = SYSTR_POLICY_NEVER;	/* not checkable */
+		break;
 #endif
-	    pol.strp_policy = SYSTR_POLICY_PERMIT;
+#ifdef SYS_setuid
+	    case SYS_setuid:
+#endif
+#ifdef SYS_seteuid
+	    case SYS_seteuid:
+#endif
+#ifdef SYS_setreuid
+	    case SYS_setreuid:
+#endif
+#ifdef SYS_setresuid
+	    case SYS_setresuid:
+#endif
+		pol.strp_policy = SYSTR_POLICY_ASK;
+		break;
+	    default:
+		pol.strp_policy = SYSTR_POLICY_PERMIT;
+		break;
+	}
 	if (ioctl(fd, STRIOCPOLICY, &pol) == -1)
 	    return(-1);
     }
@@ -517,7 +567,7 @@ decode_args(fd, pid, askp)
     pid_t pid;
     struct str_msg_ask *askp;
 {
-    size_t len;
+    ssize_t len;
     char *off, *ap, *cp, *ep;
     static char pbuf[PATH_MAX], abuf[ARG_MAX];
 
@@ -570,11 +620,19 @@ check_exec(fd, askp, ansp)
     struct systrace_answer *ansp;
 {
     int validated;
+    struct childinfo *info;
 
     /* We're not really initialized until the first exec finishes. */
     if (initialized == 0) {
 	initialized = 1;
 	ansp->stra_policy = SYSTR_POLICY_PERMIT;
+	return;
+    }
+
+    /* Failure should not be possible. */
+    if ((info = find_child(ansp->stra_pid)) == NULL) {
+	ansp->stra_policy = SYSTR_POLICY_NEVER;
+	ansp->stra_error = ECHILD;
 	return;
     }
 
@@ -594,11 +652,11 @@ check_exec(fd, askp, ansp)
     } else
 	(void) ioctl(fd, STRIOCRESCWD, 0);
 
-    /* XXX - should update user_runas and _runas_pw too! */
-
     /* Check sudoers and log the result. */
     init_defaults();
     def_authenticate = FALSE;
+    runas_pw = info->pw;
+    user_runas = &info->pw->pw_name;
     validated = sudoers_lookup(0);
 #ifdef DEBUG
     warnx("intercepted: %s %s in %s -> 0x%x", user_cmnd, user_args, user_cwd, validated);
