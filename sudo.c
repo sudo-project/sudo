@@ -1074,7 +1074,7 @@ get_authpw()
 		def_runas_default);
     } else if (def_targetpw) {
 	if (runas_pw->pw_name == NULL)
-	    log_error(0, "user %lu does not exist in the passwd file!",
+	    log_error(NO_MAIL|MSG_ONLY, "no passwd entry for %lu!",
 		runas_pw->pw_uid);
 	pw = runas_pw;
     } else
