@@ -978,13 +978,33 @@ with B<any> arguments.
 
 =back
 
+=head2 Including other files from within sudoers
+
+It is possible to include other I<sudoers> files from within the
+I<sudoers> file currently being parsed using the C<#include>
+directive, similar to the one used by the C preprocessor.  This is
+useful, for example, for keeping a site-wide I<sudoers> file in
+addition to a per-machine local one.  For the sake of this example
+the site-wide I<sudoers> will be F</etc/sudoers> and the per-machine
+one will be F</etc/sudoers.local>.  To include F</etc/sudoers.local>
+from F</etc/sudoers> we would use the following line in F</etc/sudoers>:
+
+ #include /etc/sudoers.local
+
+When B<sudo> reaches this line it will suspend processing of the
+current file (F</etc/sudoers>) and switch to F</etc/sudoers.local>.
+Upon reaching the end of F</etc/sudoers.local>, the rest of
+F</etc/sudoers> will be processed.  Files that are included may
+themselves include other files.  A hard limit of 128 nested include
+files is enforced to prevent include file loops.
+
 =head2 Other special characters and reserved words
 
-The pound sign ('#') is used to indicate a comment (unless it
-occurs in the context of a user name and is followed by one or
-more digits, in which case it is treated as a uid).  Both the
-comment character and any text after it, up to the end of the line,
-are ignored.
+The pound sign ('#') is used to indicate a comment (unless it is
+part of a #include directive or unless it occurs in the context of
+a user name and is followed by one or more digits, in which case
+it is treated as a uid).  Both the comment character and any text
+after it, up to the end of the line, are ignored.
 
 The reserved word B<ALL> is a built-in I<alias> that always causes
 a match to succeed.  It can be used wherever one might otherwise
