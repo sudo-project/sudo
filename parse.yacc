@@ -59,7 +59,6 @@ static char rcsid[] = "$Id$";
 
 extern int sudolineno, parse_error;
 int errorlineno = -1;
-static int user_matched;
 
 /*
  * Alias types
@@ -71,7 +70,7 @@ static int user_matched;
 /*
  * the matching stack
  */
-#define MATCHSTACKSIZE (20)
+#define MATCHSTACKSIZE (40)
 struct matchstack match[MATCHSTACKSIZE];
 int top = 0;
 
@@ -143,13 +142,16 @@ entry		:	COMMENT
                 |       error COMMENT
 			{ yyerrok; }
 		|	NAME {
-			    user_matched = strcmp($1, user) == 0;
+			    push;
+			    user_matches = strcmp(user, $1) == 0;
 			} privileges
 		|	ALIAS {
-			    user_matched = find_alias($1, USER) != 0;
+			    push;
+			    user_matches = find_alias($1, USER) != 0;
 			} privileges
 		|	ALL {
-			    user_matched = TRUE;
+			    push;
+			    user_matches = TRUE;
 			} privileges
 		|	USERALIAS useraliases
 			{ ; }
@@ -164,11 +166,13 @@ privileges	:	privilege
 		|	privileges ':' privilege
 		;
 
-privilege	:	{ push; } hostspec '=' opcmndlist {
-			    if (user_matched)
-				user_matches = TRUE;
-			    else
+privilege	:	hostspec '=' opcmndlist {
+			    if (!user_matches)
 				pop;
+			    else {
+				push;
+				user_matches = TRUE;
+			    }
 			}
 		;
 
