@@ -413,7 +413,7 @@ static void clean_env(envp)
 #endif /* __alpha */
 
 #ifdef SECURE_PATH
-    setenv("PATH", SECURE_PATH);
+    sudo_setenv("PATH", SECURE_PATH);
 #endif /* SECURE_PATH */
 }
 
