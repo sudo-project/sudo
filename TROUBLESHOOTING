@@ -105,3 +105,14 @@ A) /usr/ucb/cc was the only C compiler that configure could find.
    via the --with-CC option.  On Solaris, the path is probably
    something like "/opt/SUNWspro/SC4.0/bin/cc".  If you have gcc
    that will also work.
+
+Q) When I run configure, it dies with the following error:
+   Fatal Error: config.cache exists from another platform!
+   Please remove it and re-run configure.
+A) configure caches the results of its tests in a file called
+   config.cache to make re-running configure speedy.  However,
+   if you are building sudo for a different platform the results
+   in config.cache will be wrong so you need to remove config.cache.
+   You can do this by "rm config.cache" or "make realclean".
+   Note that "make realclean" will also remove any object files
+   and configure temp files that are laying around as well.
