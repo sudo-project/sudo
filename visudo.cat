@@ -12,7 +12,7 @@ SSYYNNOOPPSSIISS
 
 DDEESSCCRRIIPPTTIIOONN
        vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous
-       to _v_i_p_w(1m).  vviissuuddoo locks the _s_u_d_o_e_r_s file against multi­
+       to vipw(1m).  vviissuuddoo locks the _s_u_d_o_e_r_s file against multi­
        ple simultaneous edits, provides basic sanity checks, and
        checks for parse errors.  If the _s_u_d_o_e_r_s file is currently
        being edited you will receive a message to try again
@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.8                   February 13, 2004                       1
+1.6.8                      May 17, 2004                         1
 
 
 
@@ -122,12 +122,12 @@ AAUUTTHHOORR
        Many people have worked on _s_u_d_o over the years; this ver­
        sion of vviissuuddoo was written by:
 
-        Todd Miller            <Todd.Miller@courtesan.com>
+        Todd Miller
 
 
 
 
-1.6.8                   February 13, 2004                       2
+1.6.8                      May 17, 2004                         2
 
 
 
@@ -155,7 +155,7 @@ CCAAVVEEAATTSS
        shell if the editor used by vviissuuddoo allows shell escapes.
 
 SSEEEE AALLSSOO
-       _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(8)
+       _v_i(1), sudoers(4), sudo(1m), vipw(1m)
 
 
 
@@ -193,6 +193,6 @@ SSEEEE AALLSSOO
 
 
 
-1.6.8                   February 13, 2004                       3
+1.6.8                      May 17, 2004                         3
 
 

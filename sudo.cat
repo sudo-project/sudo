@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.6.8                   February 13, 2004                       1
+1.6.8                      May 17, 2004                         1
 
 
 
@@ -78,7 +78,7 @@ OOPPTTIIOONNSS
 
        -H  The --HH (_H_O_M_E) option sets the HOME environment vari­
            able to the homedir of the target user (root by
-           default) as specified in _p_a_s_s_w_d(4).  By default, ssuuddoo
+           default) as specified in passwd(4).  By default, ssuuddoo
            does not modify HOME.
 
        -K  The --KK (sure _k_i_l_l) option to ssuuddoo removes the user's
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.8                   February 13, 2004                       2
+1.6.8                      May 17, 2004                         2
 
 
 
@@ -176,7 +176,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        -h  The --hh (_h_e_l_p) option causes ssuuddoo to print a usage mes­
            sage and exit.
 
-       -i  The -i (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
+       -i  The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
            specified in the passwd(4) entry of the user that the
            command is being run as.  The command name argument
            given to the shell begins with a - to tell the shell
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.6.8                   February 13, 2004                       3
+1.6.8                      May 17, 2004                         3
 
 
 
@@ -229,12 +229,12 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    fully qualified or the _f_q_d_n sudoers option is
                    set)
 
-           %%      two consecutive % characters are collasped
+           %%      two consecutive % characters are collapsed
                    into a single % character
 
        -s  The --ss (_s_h_e_l_l) option runs the shell specified by the
            _S_H_E_L_L environment variable if it is set or the shell
-           as specified in _p_a_s_s_w_d(4).
+           as specified in passwd(4).
 
        -u  The --uu (_u_s_e_r) option causes ssuuddoo to run the specified
            command as a user other than _r_o_o_t.  To specify a _u_i_d
@@ -259,7 +259,7 @@ RREETTUURRNN VVAALLUUEESS
 
 
 
-1.6.8                   February 13, 2004                       4
+1.6.8                      May 17, 2004                         4
 
 
 
@@ -325,7 +325,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.6.8                   February 13, 2004                       5
+1.6.8                      May 17, 2004                         5
 
 
 
@@ -361,7 +361,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        user an effective root shell.
 
 EEXXAAMMPPLLEESS
-       Note: the following examples assume suitable _s_u_d_o_e_r_s(4)
+       Note: the following examples assume suitable sudoers(4)
        entries.
 
        To get a file listing of an unreadable directory:
@@ -369,7 +369,7 @@ EEXXAAMMPPLLEESS
         % sudo ls /usr/local/protected
 
        To list the home directory of user yazza on a machine
-       where the filesystem holding ~yazza is not exported as
+       where the file system holding ~yazza is not exported as
        root:
 
         % sudo -u yazza ls ~yazza
@@ -391,7 +391,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.6.8                   February 13, 2004                       6
+1.6.8                      May 17, 2004                         6
 
 
 
@@ -430,8 +430,8 @@ EENNVVIIRROONNMMEENNTT
                                is specified)
 
         VISUAL                 Default editor to use in -e (sudoedit) mode
-       =head1 FILES
 
+FFIILLEESS
         /etc/sudoers           List of who can run what
         /var/run/sudo              Directory containing timestamps
 
@@ -457,7 +457,7 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.6.8                   February 13, 2004                       7
+1.6.8                      May 17, 2004                         7
 
 
 
@@ -476,7 +476,7 @@ CCAAVVEEAATTSS
        user to run commands via shell escapes, thus avoiding
        ssuuddoo's checks.  However, on most systems it is possible to
        prevent shell escapes with ssuuddoo's _n_o_e_x_e_c functionality.
-       See the _s_u_d_o_e_r_s(4) manual for details.
+       See the sudoers(4) manual for details.
 
        If users have sudo ALL there is nothing to prevent them
        from creating their own program that gives them a root
@@ -489,8 +489,8 @@ CCAAVVEEAATTSS
        setuid shell scripts are generally safe).
 
 SSEEEE AALLSSOO
-       _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), _s_u_d_o_e_r_s(4),
-       _p_a_s_s_w_d(5), _v_i_s_u_d_o(1m)
+       _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), sudoers(4),
+       passwd(4), visudo(1m)
 
 
 
@@ -523,6 +523,6 @@ SSEEEE AALLSSOO
 
 
 
-1.6.8                   February 13, 2004                       8
+1.6.8                      May 17, 2004                         8
 
 

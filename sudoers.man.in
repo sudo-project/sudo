@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "May 16, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "May 17, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -302,7 +302,7 @@ If you do not specify a netmask with a network number, the netmask
 of the host's ethernet interface(s) will be used when matching.
 The netmask may be specified either in dotted quad notation (e.g.
 255.255.255.0) or \s-1CIDR\s0 notation (number of bits, e.g. 24).  A hostname
-may include shell-style wildcards (see `Wildcards' section below),
+may include shell-style wildcards (see the Wildcards section below),
 but unless the \f(CW\*(C`hostname\*(C'\fR command on your machine returns the fully
 qualified hostname, you'll need to use the \fIfqdn\fR option for wildcards
 to be useful.
@@ -327,7 +327,7 @@ to be useful.
 .PP
 A \f(CW\*(C`Cmnd_List\*(C'\fR is a list of one or more commandnames, directories, and other
 aliases.  A commandname is a fully qualified filename which may include
-shell-style wildcards (see `Wildcards' section below).  A simple
+shell-style wildcards (see the Wildcards section below).  A simple
 filename allows the user to run the command with any arguments he/she
 wishes.  However, you may also specify command line arguments (including
 wildcards).  Alternately, you can specify \f(CW""\fR to indicate that the command
@@ -587,8 +587,7 @@ the \-\-with\-logincap option.  This flag is \fIoff\fR by default.
 .IX Item "noexec"
 If set, all commands run via sudo will behave as if the \f(CW\*(C`NOEXEC\*(C'\fR
 tag has been set, unless overridden by a \f(CW\*(C`EXEC\*(C'\fR tag.  See the
-description of \fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR below as well as the \fB\s-1PREVENTING\s0 \s-1SHELL\s0
-\&\s-1ESCAPES\s0\fR section at the end of this manual.  This flag is \fIoff\fR by default.
+description of \fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR below as well as the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section at the end of this manual.  This flag is \fIoff\fR by default.
 .PP
 \&\fBIntegers\fR:
 .IP "passwd_tries" 12
@@ -828,12 +827,13 @@ single value without double\-quotes.  The list can be replaced, added
 to, deleted from, or disabled by using the \f(CW\*(C`=\*(C'\fR, \f(CW\*(C`+=\*(C'\fR, \f(CW\*(C`\-=\*(C'\fR, and
 \&\f(CW\*(C`!\*(C'\fR operators respectively.  This list has no default members.
 .PP
-When logging via \fIsyslog\fR\|(3), \fBsudo\fR accepts the following values for the syslog
-facility (the value of the \fBsyslog\fR Parameter): \fBauthpriv\fR (if your \s-1OS\s0
-supports it), \fBauth\fR, \fBdaemon\fR, \fBuser\fR, \fBlocal0\fR, \fBlocal1\fR, \fBlocal2\fR,
-\&\fBlocal3\fR, \fBlocal4\fR, \fBlocal5\fR, \fBlocal6\fR, and \fBlocal7\fR.  The following
-syslog priorities are supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\fR,
-\&\fBerr\fR, \fBinfo\fR, \fBnotice\fR, and \fBwarning\fR.
+When logging via \fIsyslog\fR\|(3), \fBsudo\fR accepts the following values
+for the syslog facility (the value of the \fBsyslog\fR Parameter):
+\&\fBauthpriv\fR (if your \s-1OS\s0 supports it), \fBauth\fR, \fBdaemon\fR, \fBuser\fR,
+\&\fBlocal0\fR, \fBlocal1\fR, \fBlocal2\fR, \fBlocal3\fR, \fBlocal4\fR, \fBlocal5\fR,
+\&\fBlocal6\fR, and \fBlocal7\fR.  The following syslog priorities are
+supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\fR, \fBerr\fR, \fBinfo\fR,
+\&\fBnotice\fR, and \fBwarning\fR.
 .Sh "User Specification"
 .IX Subsection "User Specification"
 .Vb 2
@@ -879,7 +879,7 @@ The user \fBdgb\fR may run \fI/bin/ls\fR, \fI/bin/kill\fR, and
 \&\fI/usr/bin/lprm\fR \*(-- but only as \fBoperator\fR.  E.g.,
 .PP
 .Vb 1
-\&    sudo -u operator /bin/ls.
+\& $ sudo -u operator /bin/ls.
 .Ve
 .PP
 It is also possible to override a \f(CW\*(C`Runas_Spec\*(C'\fR later on in an
@@ -947,14 +947,14 @@ and \fI/usr/bin/vi\fR but shell escapes will be disabled.
 \& aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 .Ve
 .PP
-See the \fB\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\fR section below for more details
+See the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section below for more details
 on how \fInoexec\fR works and whether or not it will work on your system.
-.Sh "Wildcards (aka meta characters):"
-.IX Subsection "Wildcards (aka meta characters):"
-\&\fBsudo\fR allows shell-style \fIwildcards\fR to be used in pathnames
-as well as command line arguments in the \fIsudoers\fR file.  Wildcard
-matching is done via the \fB\s-1POSIX\s0\fR \f(CWfnmatch(3)\fR routine.  Note that
-these are \fInot\fR regular expressions.
+.Sh "Wildcards"
+.IX Subsection "Wildcards"
+\&\fBsudo\fR allows shell-style \fIwildcards\fR (aka meta or glob characters)
+to be used in pathnames as well as command line arguments in the
+\&\fIsudoers\fR file.  Wildcard matching is done via the \fB\s-1POSIX\s0\fR
+\&\fIfnmatch\fR\|(3) routine.  Note that these are \fInot\fR regular expressions.
 .ie n .IP "\*(C`*\*(C'" 8
 .el .IP "\f(CW\*(C`*\*(C'\fR" 8
 .IX Item "*"
@@ -987,8 +987,8 @@ wildcards.  This is to make a path like:
 .Ve
 .PP
 match \fI/usr/bin/who\fR but not \fI/usr/bin/X11/xterm\fR.
-.Sh "Exceptions to wildcard rules:"
-.IX Subsection "Exceptions to wildcard rules:"
+.Sh "Exceptions to wildcard rules"
+.IX Subsection "Exceptions to wildcard rules"
 The following exceptions apply to the above rules:
 .ie n .IP """""" 8
 .el .IP "\f(CW``''\fR" 8
@@ -996,8 +996,8 @@ The following exceptions apply to the above rules:
 If the empty string \f(CW""\fR is the only command line argument in the
 \&\fIsudoers\fR entry it means that command is not allowed to be run
 with \fBany\fR arguments.
-.Sh "Other special characters and reserved words:"
-.IX Subsection "Other special characters and reserved words:"
+.Sh "Other special characters and reserved words"
+.IX Subsection "Other special characters and reserved words"
 The pound sign ('#') is used to indicate a comment (unless it
 occurs in the context of a user name and is followed by one or
 more digits, in which case it is treated as a uid).  Both the
@@ -1065,8 +1065,8 @@ these are a bit contrived.  First, we define our \fIaliases\fR:
 \& Cmnd_Alias     KILL = /usr/bin/kill
 \& Cmnd_Alias     PRINTING = /usr/sbin/lpc, /usr/bin/lprm
 \& Cmnd_Alias     SHUTDOWN = /usr/sbin/shutdown
-\& Cmnd_Alias     HALT = /usr/sbin/halt, /usr/sbin/fasthalt
-\& Cmnd_Alias     REBOOT = /usr/sbin/reboot, /usr/sbin/fastboot
+\& Cmnd_Alias     HALT = /usr/sbin/halt
+\& Cmnd_Alias     REBOOT = /usr/sbin/reboot
 \& Cmnd_Alias     SHELLS = /usr/bin/sh, /usr/bin/csh, /usr/bin/ksh, \e
 \&                         /usr/local/bin/tcsh, /usr/bin/rsh, \e
 \&                         /usr/local/bin/zsh
@@ -1137,8 +1137,8 @@ The user \fBlisa\fR may run any command on any host in the \fI\s-1CUNETS\s0\fR a
 (the class B network \f(CW128.138.0.0\fR).
 .PP
 .Vb 2
-\& operator       ALL = DUMPS, KILL, PRINTING, SHUTDOWN, HALT, REBOOT,\e
-\&                /usr/oper/bin/
+\& operator       ALL = DUMPS, KILL, SHUTDOWN, HALT, REBOOT, PRINTING,\e
+\&                sudoedit /etc/printcap, /usr/oper/bin/
 .Ve
 .PP
 The \fBoperator\fR user may run commands limited to simple maintenance.
@@ -1280,7 +1280,7 @@ To tell whether or not \fBsudo\fR supports \fInoexec\fR, you can run
 the following as root:
 .PP
 .Vb 1
-\&    # sudo -V | grep "dummy exec"
+\&    \e# sudo -V | grep "dummy exec"
 .Ve
 .PP
 If the resulting output contains a line that begins with:
@@ -1307,10 +1307,9 @@ just try it out and see if it works.
 .PP
 Note that disabling shell escapes is not a panacea.  Programs running
 as root are still capable of many potentially hazardous operations
-(such as chaning or overwriting files) that could lead to unintended
+(such as changing or overwriting files) that could lead to unintended
 privilege escalation.  In the specific case of an editor, a safer
-approach is to give the user permission to run the \fBsudoedit\fR
-program.
+approach is to give the user permission to run \fBsudoedit\fR.
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 The \fIsudoers\fR file should \fBalways\fR be edited by the \fBvisudo\fR
@@ -1332,4 +1331,4 @@ as returned by the \f(CW\*(C`hostname\*(C'\fR command or use the \fIfqdn\fR opti
 .Ve
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(8)
+\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), sudo(@mansectsu@), visudo(@mansectsu@)
