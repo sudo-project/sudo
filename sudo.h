@@ -186,6 +186,9 @@ void load_interfaces	__P((void));
  */
 #ifndef MAIN
 extern char host[];
+#ifdef FQDN
+extern char shost[];
+#endif /* FQDN */
 extern char cwd[];
 extern struct interface *interfaces;
 extern int num_interfaces;

@@ -140,6 +140,9 @@ char *cmnd = NULL;
 char *tty = NULL;
 char *prompt = PASSPROMPT;
 char host[MAXHOSTNAMELEN + 1];
+#ifdef FQDN
+char shost[MAXHOSTNAMELEN + 1];
+#endif /*FQDN */
 char cwd[MAXPATHLEN + 1];
 struct stat cmnd_st;
 extern struct interface *interfaces;
@@ -454,10 +457,18 @@ static void load_globals(sudo_mode)
 	inform_user(GLOBAL_NO_HOSTNAME);
 #ifdef FQDN
     } else {
-	if ((h_ent = gethostbyname(host)) == NULL)
+	if ((h_ent = gethostbyname(host)) == NULL) {
 	    log_error(GLOBAL_HOST_UNREGISTERED);
-	else
+	} else {
 	    strcpy(host, h_ent -> h_name);
+	    if ((p = strchr(host, '.'))) {
+		*p = '\0';
+		strcpy(shost, host);
+		*p = '.';
+	    } else {
+		strcpy(shost, host);
+	    }
+	}    
     }
 #else
     }
