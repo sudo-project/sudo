@@ -108,7 +108,6 @@ char *find_path(file)
     /*
      * do we need to search the path?
      */
-    /* XXX - check return val here? */
     if (strchr(file, '/'))
 	return((char *) sudo_realpath(file, command));
 
