@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2003 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -51,13 +51,6 @@
 #endif
 
 /*
- * 4.2BSD lacks FD_* macros (we only need FD_SET)
- */
-#ifndef FD_SET
-# define FD_SET(fd, fds)	((fds) -> fds_bits[0] |= (1 << (fd)))
-#endif /* !FD_SET */
-
-/*
  * Posix versions for those without...
  */
 #ifndef _S_IFMT
@@ -85,17 +78,6 @@
 #ifndef S_IRWXU
 # define S_IRWXU		0000700		/* rwx for owner */
 #endif /* S_IRWXU */
-
-/*
- * In case these are not defined in <sys/types.h> or <sys/select.h>
- */
-#ifndef howmany
-# define howmany(x, y)	(((x) + ((y) - 1)) / (y))
-#endif
-#ifndef NFDBITS
-# define NFDBITS	32
-# define fd_mask	int
-#endif
 
 /*
  * These should be defined in <unistd.h> but not everyone has them.
