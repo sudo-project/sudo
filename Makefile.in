@@ -141,8 +141,8 @@ VERSION = 1.6.4
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES HISTORY INSTALL INSTALL.configure \
 	    LICENSE Makefile.in PORTING README RUNSON TODO TROUBLESHOOTING \
-	    UPGRADE acsite.m4 aixcrypt.exp config.guess config.h.in config.sub \
-	    configure configure.in fnmatch.3 indent.pro install-sh \
+	    UPGRADE aclocal.m4 aixcrypt.exp config.guess config.h.in \
+	    config.sub configure configure.in fnmatch.3 indent.pro install-sh \
 	    mkinstalldirs pathnames.h.in sample.pam sample.syslog.conf \
 	    sample.sudoers sudo.cat sudo.man.in sudo.pod sudoers sudoers.cat \
 	    sudoers.man.in sudoers.pod visudo.cat visudo.man.in visudo.pod \
