@@ -54,7 +54,7 @@ static char rcsid[] = "$Id$";
 extern YYSTYPE yylval;
 int sudolineno = 1;
 
-static int fill(void);
+static int fill	__P((void));
 
 #ifdef TRACELEXER
 #define LEXTRACE(msg)	fputs(msg, stderr)
