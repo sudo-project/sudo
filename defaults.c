@@ -106,6 +106,7 @@ static int store_str __P((char *, struct sudo_defs_types *, int));
 static int store_syslogfac __P((char *, struct sudo_defs_types *, int));
 static int store_syslogpri __P((char *, struct sudo_defs_types *, int));
 static int store_mode __P((char *, struct sudo_defs_types *, int));
+static int store_pwflag __P((char *, struct sudo_defs_types *, int));
 
 /*
  * Table describing compile-time and run-time options.
@@ -226,6 +227,16 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"secure_path", T_STR|T_BOOL,
 	"Value to override user's $PATH with: %s"
     }, {
+	"listpw_i", T_INT, NULL
+    }, {
+	"verifypw_i", T_INT, NULL
+    }, {
+	"listpw", T_PWFLAG,
+	"When to require a password for 'list' pseudocommand: %s"
+    }, {
+	"verifypw", T_PWFLAG,
+	"When to require a password for 'verify' pseudocommand: %s"
+    }, {
 	NULL, 0, NULL
     }
 };
@@ -248,6 +259,7 @@ dump_defaults()
 		case T_STR:
 		case T_LOGFAC:
 		case T_LOGPRI:
+		case T_PWFLAG:
 		    if (cur->sd_un.str) {
 			(void) printf(cur->desc, cur->sd_un.str);
 			putchar('\n');
@@ -355,6 +367,19 @@ set_default(var, val, op)
 		return(FALSE);
 	    }
 	    break;
+	case T_PWFLAG:
+	    if (!store_pwflag(val, cur, op)) {
+		if (val)
+		    (void) fprintf(stderr,
+			"%s: value '%s' is invalid for option '%s'\n", Argv[0],
+			val, var);
+		else
+		    (void) fprintf(stderr,
+			"%s: no value specified for `%s' on line %d\n", Argv[0],
+			var, sudolineno);
+		return(FALSE);
+	    }
+	    break;
 	case T_STR:
 	    if (!val) {
 		/* Check for bogus boolean usage or lack of a value. */
@@ -447,6 +472,7 @@ init_defaults()
 		case T_STR:
 		case T_LOGFAC:
 		case T_LOGPRI:
+		case T_PWFLAG:
 		    if (def->sd_un.str) {
 			free(def->sd_un.str);
 			def->sd_un.str = NULL;
@@ -508,6 +534,10 @@ init_defaults()
     (void) store_syslogpri(PRI_SUCCESS, &sudo_defs_table[I_GOODPRISTR], TRUE);
     (void) store_syslogpri(PRI_FAILURE, &sudo_defs_table[I_BADPRISTR], TRUE);
 #endif
+
+    /* Password flags also have a string and integer component. */
+    (void) store_pwflag("any", &sudo_defs_table[I_LISTPWSTR], TRUE);
+    (void) store_pwflag("all", &sudo_defs_table[I_VERIFYPWSTR], TRUE);
 
     /* Then initialize the int-like things. */
 #ifdef SUDO_UMASK
@@ -598,8 +628,10 @@ store_syslogfac(val, def, op)
     struct strmap *fac;
 
     if (op == FALSE) {
-	free(def->sd_un.str);
-	def->sd_un.str = NULL;
+	if (def->sd_un.str) {
+	    free(def->sd_un.str);
+	    def->sd_un.str = NULL;
+	}
 	return(TRUE);
     }
 #ifdef LOG_NFACILITIES
@@ -677,5 +709,52 @@ store_mode(val, def, op)
 	    return(FALSE);
 	def->sd_un.mode = (mode_t)l;
     }
+    return(TRUE);
+}
+
+static int
+store_pwflag(val, def, op)
+    char *val;
+    struct sudo_defs_types *def;
+    int op;
+{
+    int isub, flags;
+
+    if (strcmp(def->name, "verifypw") == 0)
+	isub = I_VERIFYPW;
+    else
+	isub = I_LISTPW;
+
+    /* Handle !foo. */
+    if (op == FALSE) {
+	if (def->sd_un.str) {
+	    free(def->sd_un.str);
+	    def->sd_un.str = NULL;
+	}
+	def->sd_un.str = estrdup("never");
+	sudo_defs_table[isub].sd_un.ival = PWCHECK_NEVER;
+	return(TRUE);
+    }
+    if (!val)
+	return(FALSE);
+
+    /* Convert strings to integer values. */
+    if (strcmp(val, "all") == 0)
+	flags = PWCHECK_ALL;
+    else if (strcmp(val, "any") == 0)
+	flags = PWCHECK_ANY;
+    else if (strcmp(val, "never") == 0)
+	flags = PWCHECK_NEVER;
+    else if (strcmp(val, "always") == 0)
+	flags = PWCHECK_ALWAYS;
+    else
+	return(FALSE);
+
+    /* Store both name and number. */
+    if (def->sd_un.str)
+	free(def->sd_un.str);
+    def->sd_un.str = estrdup(val);
+    sudo_defs_table[isub].sd_un.ival = flags;
+
     return(TRUE);
 }

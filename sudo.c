@@ -237,7 +237,7 @@ main(argc, argv)
 		break;
 	    case MODE_VALIDATE:
 		user_cmnd = "validate";
-		sudoers_flags = PWCHECK_ALL | PWCHECK_RUNAS;
+		sudoers_flags = def_ival(I_VERIFYPW);
 		break;
 	    case MODE_KILL:
 	    case MODE_INVALIDATE:
@@ -251,7 +251,7 @@ main(argc, argv)
 	    case MODE_LIST:
 		user_cmnd = "list";
 		printmatches = 1;
-		sudoers_flags = PWCHECK_ANY;
+		sudoers_flags = def_ival(I_LISTPW);
 		break;
 	}
 

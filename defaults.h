@@ -69,6 +69,8 @@ struct sudo_defs_types {
 #define T_LOGFAC	0x005
 #undef T_LOGPRI
 #define T_LOGPRI	0x006
+#undef T_PWFLAG
+#define T_PWFLAG	0x007
 #undef T_MASK
 #define T_MASK		0x0FF
 #undef T_BOOL
@@ -128,6 +130,14 @@ struct sudo_defs_types {
 #define	I_PASSPROMPT	36	/* password prompt */
 #define	I_RUNAS_DEF	37	/* default user to run commands as */
 #define	I_SECURE_PATH	38	/* set $PATH to this if not NULL */
+
+/* Integer versions of list/verify options */
+#define I_LISTPW	39
+#define I_VERIFYPW	40
+
+/* String versions of list/verify options */
+#define I_LISTPWSTR	41
+#define I_VERIFYPWSTR	42
 
 /*
  * Macros for accessing sudo_defs_table.

@@ -149,12 +149,12 @@ struct sudo_user {
  *  PASSWD_NEVER:  user never has to give a passwd
  *  PASSWD_ALL:    no passwd needed if all entries for host have NOPASSWD flag
  *  PASSWD_ANY:    no passwd needed if any entry for host has a NOPASSWD flag
- *  PWCHECK_RUNAS: require that runas_matches be TRUE
+ *  PASSWD_ALWAYS: passwd always needed
  */
-#define PWCHECK_NEVER	001
-#define PWCHECK_ALL	002
-#define PWCHECK_ANY	004
-#define PWCHECK_RUNAS	010
+#define PWCHECK_NEVER	0x01
+#define PWCHECK_ALL	0x02
+#define PWCHECK_ANY	0x04
+#define PWCHECK_ALWAYS	0x08
 
 /*
  * Function prototypes

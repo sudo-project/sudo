@@ -129,7 +129,7 @@ sudoers_lookup(pwflags)
     init_parser();
 
     /* For most pwflags to be useful we need to keep more state around. */
-    if (pwflags && !(pwflags & PWCHECK_NEVER))
+    if (pwflags && pwflags != PWCHECK_NEVER && pwflags != PWCHECK_ALWAYS)
 	keepall = TRUE;
 
     /* Need to be root while stat'ing things in the parser. */
@@ -167,7 +167,7 @@ sudoers_lookup(pwflags)
     if (pwflags) {
 	int nopass, found;
 
-	if ((pwflags & PWCHECK_NEVER) || !def_flag(I_AUTHENTICATE))
+	if (pwflags == PWCHECK_NEVER || !def_flag(I_AUTHENTICATE))
 	    nopass = FLAG_NOPASS;
 	else
 	    nopass = -1;
@@ -175,12 +175,10 @@ sudoers_lookup(pwflags)
 	while (top) {
 	    if (host_matches == TRUE) {
 		found = 1;
-		if (!(pwflags & PWCHECK_RUNAS) || runas_matches == TRUE) {
-		    if ((pwflags & PWCHECK_ANY) && no_passwd == TRUE)
-			nopass = FLAG_NOPASS;
-		    else if ((pwflags & PWCHECK_ALL) && nopass != 0)
-			nopass = (no_passwd == TRUE) ? FLAG_NOPASS : 0;
-		}
+		if (pwflags == PWCHECK_ANY && no_passwd == TRUE)
+		    nopass = FLAG_NOPASS;
+		else if (pwflags == PWCHECK_ALL && nopass != 0)
+		    nopass = (no_passwd == TRUE) ? FLAG_NOPASS : 0;
 	    }
 	    top--;
 	}
