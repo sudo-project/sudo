@@ -738,10 +738,10 @@ dnl include all insult sets on one line
 if test "$with_insults" = "yes"; then
     AC_MSG_CHECKING(which insult sets to include)
     i=""
-    test "$with_classic_insults" = "yes" && i="classic ${i}"
-    test "$with_csops_insults" = "yes" && i="csops ${i}"
-    test "$with_hal_insults" = "yes" && i="hal ${i}"
     test "$with_goons_insults" = "yes" && i="goons ${i}"
+    test "$with_hal_insults" = "yes" && i="hal ${i}"
+    test "$with_csops_insults" = "yes" && i="csops ${i}"
+    test "$with_classic_insults" = "yes" && i="classic ${i}"
     AC_MSG_RESULT([$i])
 fi
 
@@ -949,9 +949,6 @@ fi
 
 case "$host" in
     *-*-sunos4*)
-		# Don't really need -lnsl
-		LIB_NSL=1
-
 		# getcwd(3) opens a pipe to getpwd(1)!?!
 		BROKEN_GETCWD=1
 
@@ -1063,9 +1060,6 @@ case "$host" in
 		fi
 		;;
     *-dec-osf*)
-		# Don't really need -lnsl (DUNIX 4.x has it, < 4.x does not)
-		LIB_NSL=1
-
 		# ignore envariables wrt dynamic lib path
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
 
@@ -1142,24 +1136,17 @@ case "$host" in
 		fi
 		;;
     *-*-unicos*)
-		# configure thinks we have -lsocket and -linet but we don't
-		LIB_INET=1
-		LIB_SOCKET=1
+		# XXX do we need to do anything special anymore?
 		;;
     *-sequent-sysv*)
-		# we don't want -linet
-		LIB_INET=0
-
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"])
 		    CHECKSHADOW="false"
 		fi
 		;;
     *-ccur-sysv4|*-ccur-sysvr4)
-		LIBS="${LIBS} -lgen -lsocket -lnsl"
-		SUDO_LIBS="${SUDO_LIBS} -lgen -lsocket -lnsl"
-		LIB_SOCKET=1
-		LIB_NSL=1                                    
+		LIBS="${LIBS} -lgen"
+		SUDO_LIBS="${SUDO_LIBS} -lgen"
 		;;
     *-*-bsdi*)
 		# Use shlicc for BSD/OS 2.x unless asked to do otherwise
@@ -1176,10 +1163,7 @@ case "$host" in
 		fi
 		;;
     *-*-svr4*|*-*-sysv4*)
-		LIBS="${LIBS} -lsocket -lnsl"
-		SUDO_LIBS="${SUDO_LIBS} -lsocket -lnsl"
-		LIB_SOCKET=1
-		LIB_NSL=1                                    
+		# XXX do we need to do anything special anymore?
 		;;
 esac
 
@@ -1266,30 +1250,28 @@ if test -z "$LIB_CRYPT"; then
     AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt", AC_CHECK_LIB(crypt_d, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt_d", AC_CHECK_LIB(crypt, ufc, SUDO_LIBS="${SUDO_LIBS} -lufc"))))
 fi
 dnl
+dnl If socket(2) not in libc, check -lsocket and -linet
+dnl
+AC_CHECK_FUNC(socket, ,AC_CHECK_LIB(socket, socket, SUDO_LIBS="${SUDO_LIBS} -lsocket", AC_CHECK_LIB(inet, socket, SUDO_LIBS="${SUDO_LIBS} -linet")))
+dnl
+dnl If inet_addr(3) not in libc, check -lnsl and -linet
+dnl
+AC_CHECK_FUNC(inet_addr, ,AC_CHECK_LIB(nsl, inet_addr, SUDO_LIBS="${SUDO_LIBS} -lnsl", AC_CHECK_LIB(inet, inet_addr, SUDO_LIBS="${SUDO_LIBS} -linet")))
+dnl
 dnl Bison and DCE use alloca(3), if not in libc, use the sudo one (from gcc)
 dnl (gcc includes its own alloca(3) but other compilers may not)
 dnl
 if test "$with_DCE" = "yes" -o "$ac_cv_prog_YACC" = "bison -y"; then
     AC_FUNC_ALLOCA
 fi
+
 dnl
 dnl library checks
 dnl
-dnl Irix doesn't want -lnsl or -lsocket (and Irix 4 needs -lsun)
-if test "$OS" != "irix"; then
-    if test -z "$LIB_NSL"; then
-	AC_CHECK_LIB(nsl, main, SUDO_LIBS="${SUDO_LIBS} -lnsl")
-    fi
-    if test -z "$LIB_SOCKET"; then
-	AC_CHECK_LIB(socket, main, SUDO_LIBS="${SUDO_LIBS} -lsocket")
-    fi
-elif test "$OSREV" -lt 5; then
+dnl IRIX 4 needs -lsun)
+if test "$OS" = "irix"; then
     AC_CHECK_LIB(sun, getpwnam, [SUDO_LIBS="${SUDO_LIBS} -lsun"
-VISUDO_LIBS="${VISUDO_LIBS} -lsun"]
-)
-fi
-if test -z "$LIB_INET"; then
-    AC_CHECK_LIB(inet, main, SUDO_LIBS="${SUDO_LIBS} -linet")
+VISUDO_LIBS="${VISUDO_LIBS} -lsun"])
 fi
 dnl
 dnl Find kerberos includes and libs or complain
