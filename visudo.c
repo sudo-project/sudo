@@ -70,6 +70,7 @@
 #include <fcntl.h>
 
 #include "sudo.h"
+#include "parse.h"
 #include "version.h"
 
 #ifndef lint
@@ -84,14 +85,14 @@ static char whatnow		__P((void));
 static RETSIGTYPE Exit		__P((int));
 static void setup_signals	__P((void));
 static int run_command		__P((char *, char **));
-static int check_syntax		__P((int));
+static int check_syntax		__P((char *, int));
+static int edit_sudoers		__P((char *, char *));
 int command_matches		__P((char *, char *));
 int addr_matches		__P((char *));
 int hostname_matches		__P((char *, char *, char *));
 int netgr_matches		__P((char *, char *, char *, char *));
 int usergr_matches		__P((char *, char *, struct passwd *));
 int userpw_matches		__P((char *, char *, struct passwd *));
-void init_parser		__P((void));
 void yyerror			__P((const char *));
 void yyrestart			__P((FILE *));
 
@@ -111,30 +112,33 @@ extern int optind;
  * Globals
  */
 char **Argv;
-char *sudoers = _PATH_SUDOERS;
-char *stmp = _PATH_SUDOERS_TMP;
 struct sudo_user sudo_user;
 int Argc, parse_error = FALSE;
+static char *stmp;
+
+struct sudoersfile {
+    char *path;
+    struct sudoersfile *next;
+};
+
+static struct sudoerslist {
+    struct sudoersfile *first;
+    struct sudoersfile *last;
+} sudoerslist;
+
 
 int
 main(argc, argv)
     int argc;
     char **argv;
 {
-    char buf[PATH_MAX*2];		/* buffer used for copying files */
-    char *Editor;			/* editor to use */
-    char *UserEditor;			/* editor user wants to use */
-    char *EditorPath;			/* colon-separated list of editors */
-    char *av[4];			/* argument vector for run_command */
-    int checkonly;			/* only check existing file? */
-    int sudoers_fd;			/* sudoers file descriptor */
-    int stmp_fd;			/* stmp file descriptor */
-    int n;				/* length parameter */
-    int ch;				/* getopt char */
-    struct timespec ts1, ts2;		/* time before and after edit */
-    struct timespec sudoers_mtim;	/* starting mtime of sudoers file */
-    off_t sudoers_size;			/* starting size of sudoers file */
-    struct stat sb;			/* stat buffer */
+    struct sudoersfile sudoers, *sp;
+    char *Editor, *UserEditor, *EditorPath;
+    int ch, checkonly;
+
+    sudoers.path = _PATH_SUDOERS;
+    sudoers.next = NULL;
+    sudoerslist.first = sudoerslist.last = &sudoers;
 
     /* Warn about aliases that are used before being defined. */
     pedantic = 1;
@@ -156,8 +160,7 @@ main(argc, argv)
 		checkonly++;		/* check mode */
 		break;
 	    case 'f':
-		sudoers = optarg;	/* sudoers file path */
-		easprintf(&stmp, "%s.tmp", optarg);
+		sudoers.path = optarg;	/* sudoers file path */
 		break;
 	    case 's':
 		pedantic++;		/* strict mode */
@@ -183,65 +186,7 @@ main(argc, argv)
     init_defaults();
 
     if (checkonly)
-	exit(check_syntax(quiet));
-
-    /*
-     * Open sudoers, lock it and stat it.
-     * sudoers_fd must remain open throughout in order to hold the lock.
-     */
-    sudoers_fd = open(sudoers, O_RDWR | O_CREAT, SUDOERS_MODE);
-    if (sudoers_fd == -1)
-	err(1, "%s", sudoers);
-    if (!lock_file(sudoers_fd, SUDO_TLOCK))
-	errx(1, "sudoers file busy, try again later");
-#ifdef HAVE_FSTAT
-    if (fstat(sudoers_fd, &sb) == -1)
-#else
-    if (stat(sudoers, &sb) == -1)
-#endif
-	err(1, "can't stat %s", sudoers);
-    sudoers_size = sb.st_size;
-    sudoers_mtim.tv_sec = mtim_getsec(sb);
-    sudoers_mtim.tv_nsec = mtim_getnsec(sb);
-
-    /*
-     * Open sudoers temp file.
-     */
-    stmp_fd = open(stmp, O_WRONLY | O_CREAT | O_TRUNC, 0600);
-    if (stmp_fd < 0)
-	err(1, "%s", stmp);
-
-    /* Install signal handlers to clean up stmp if we are killed. */
-    setup_signals();
-
-    /* Copy sudoers -> stmp and reset the mtime */
-    if (sudoers_size) {
-	while ((n = read(sudoers_fd, buf, sizeof(buf))) > 0)
-	    if (write(stmp_fd, buf, n) != n)
-		err(1, "write error");
-
-	/* Add missing newline at EOF if needed. */
-	if (n > 0 && buf[n - 1] != '\n') {
-	    buf[0] = '\n';
-	    write(stmp_fd, buf, 1);
-	}
-
-	(void) touch(stmp_fd, stmp, &sudoers_mtim);
-	(void) close(stmp_fd);
-
-	/* Parse sudoers to pull in editor and env_editor conf values. */
-	if ((yyin = fopen(stmp, "r"))) {
-	    yyout = stdout;
-	    n = quiet;
-	    quiet = 1;
-	    init_parser();
-	    yyparse();
-	    parse_error = FALSE;
-	    quiet = n;
-	    fclose(yyin);
-	}
-    } else
-	(void) close(stmp_fd);
+	exit(check_syntax(sudoers.path, quiet));
 
     /*
      * Check VISUAL and EDITOR environment variables to see which editor
@@ -335,6 +280,88 @@ main(argc, argv)
 	}
     }
 
+    for (sp = sudoerslist.first; sp != NULL; sp = sp->next) {
+	/* XXX - ask whether user wants to edit included files */
+	edit_sudoers(sp->path, Editor);
+    }
+
+    exit(0);
+}
+
+static int
+edit_sudoers(sudoers_path, editor)
+    char *sudoers_path;
+    char *editor;
+{
+    int sudoers_fd;			/* sudoers file descriptor */
+    int stmp_fd;			/* stmp file descriptor */
+    int n;				/* length parameter */
+    char buf[PATH_MAX*2];		/* buffer used for copying files */
+    char *av[4];			/* argument vector for run_command */
+    struct timespec ts1, ts2;		/* time before and after edit */
+    struct timespec sudoers_mtim;	/* starting mtime of sudoers file */
+    off_t sudoers_size;			/* starting size of sudoers file */
+    struct stat sb;			/* stat buffer */
+
+    /*
+     * Open sudoers_path, lock it and stat it.
+     * sudoers_fd must remain open throughout in order to hold the lock.
+     */
+    sudoers_fd = open(sudoers_path, O_RDWR | O_CREAT, SUDOERS_MODE);
+    if (sudoers_fd == -1)
+	err(1, "%s", sudoers_path);
+    if (!lock_file(sudoers_fd, SUDO_TLOCK))
+	errx(1, "sudoers file busy, try again later");
+#ifdef HAVE_FSTAT
+    if (fstat(sudoers_fd, &sb) == -1)
+#else
+    if (stat(sudoers_path, &sb) == -1)
+#endif
+	err(1, "can't stat %s", sudoers_path);
+    sudoers_size = sb.st_size;
+    sudoers_mtim.tv_sec = mtim_getsec(sb);
+    sudoers_mtim.tv_nsec = mtim_getnsec(sb);
+
+    /*
+     * Open sudoers temp file.
+     */
+    easprintf(&stmp, "%s.tmp", sudoers_path);
+    stmp_fd = open(stmp, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    if (stmp_fd < 0)
+	err(1, "%s", stmp);
+
+    /* Install signal handlers to clean up stmp if we are killed. */
+    setup_signals();
+
+    /* Copy sudoers_path -> stmp and reset the mtime */
+    if (sudoers_size) {
+	while ((n = read(sudoers_fd, buf, sizeof(buf))) > 0)
+	    if (write(stmp_fd, buf, n) != n)
+		err(1, "write error");
+
+	/* Add missing newline at EOF if needed. */
+	if (n > 0 && buf[n - 1] != '\n') {
+	    buf[0] = '\n';
+	    write(stmp_fd, buf, 1);
+	}
+
+	(void) touch(stmp_fd, stmp, &sudoers_mtim);
+	(void) close(stmp_fd);
+
+	/* Parse sudoers_path to pull in editor and env_editor conf values. */
+	if ((yyin = fopen(stmp, "r"))) {
+	    yyout = stdout;
+	    n = quiet;
+	    quiet = 1;
+	    init_parser(sudoers_path);
+	    yyparse();
+	    parse_error = FALSE;
+	    quiet = n;
+	    fclose(yyin);
+	}
+    } else
+	(void) close(stmp_fd);
+
     /*
      * Edit the temp file and parse it (for sanity checking)
      */
@@ -342,10 +369,10 @@ main(argc, argv)
 	char linestr[64];
 
 	/* Build up argument vector for the command */
-	if ((av[0] = strrchr(Editor, '/')) != NULL)
+	if ((av[0] = strrchr(editor, '/')) != NULL)
 	    av[0]++;
 	else
-	    av[0] = Editor;
+	    av[0] = editor;
 	n = 1;
 	if (parse_error == TRUE) {
 	    (void) snprintf(linestr, sizeof(linestr), "+%d", errorlineno);
@@ -361,19 +388,19 @@ main(argc, argv)
 	 *  number of errors during editing (?!?!).
 	 */
 	gettime(&ts1);
-	if (run_command(Editor, av) != -1) {
+	if (run_command(editor, av) != -1) {
 	    gettime(&ts2);
 	    /*
 	     * Sanity checks.
 	     */
 	    if (stat(stmp, &sb) < 0) {
 		warnx("cannot stat temporary file (%s), %s unchanged",
-		    stmp, sudoers);
+		    stmp, sudoers_path);
 		Exit(-1);
 	    }
 	    if (sb.st_size == 0) {
 		warnx("zero length temporary file (%s), %s unchanged",
-		    stmp, sudoers);
+		    stmp, sudoers_path);
 		Exit(-1);
 	    }
 
@@ -385,19 +412,19 @@ main(argc, argv)
 	    yyin = fopen(stmp, "r+");
 	    if (yyin == NULL) {
 		warnx("can't re-open temporary file (%s), %s unchanged.",
-		    stmp, sudoers);
+		    stmp, sudoers_path);
 		Exit(-1);
 	    }
 
 	    /* Add missing newline at EOF if needed. */
-	    if (fseek(yyin, -1, SEEK_END) == 0 && (ch = fgetc(yyin)) != '\n')
+	    if (fseek(yyin, -1, SEEK_END) == 0 && (n = fgetc(yyin)) != '\n')
 		fputc('\n', yyin);
 	    rewind(yyin);
 
 	    /* Clean slate for each parse */
 	    user_runas = NULL;
 	    init_defaults();
-	    init_parser();
+	    init_parser(sudoers_path);
 
 	    /* Parse the sudoers temp file */
 	    yyrestart(yyin);
@@ -408,7 +435,7 @@ main(argc, argv)
 	    }
 	    fclose(yyin);
 	} else {
-	    warnx("editor (%s) failed, %s unchanged", Editor, sudoers);
+	    warnx("editor (%s) failed, %s unchanged", editor, sudoers_path);
 	    Exit(-1);
 	}
 
@@ -420,7 +447,7 @@ main(argc, argv)
 		case 'Q' :	parse_error = FALSE;	/* ignore parse error */
 				break;
 		case 'x' :	if (sudoers_size == 0)
-				    unlink(sudoers);
+				    unlink(sudoers_path);
 				Exit(0);
 				break;
 	    }
@@ -439,14 +466,14 @@ main(argc, argv)
 	 */
 	timespecsub(&ts1, &ts2, &ts2);
 	if (timespecisset(&ts2)) {
-	    warnx("sudoers file unchanged");
+	    warnx("%s unchanged", sudoers_path);
 	    Exit(0);
 	}
     }
 
     /*
      * Change mode and ownership of temp file so when
-     * we move it to sudoers things are kosher.
+     * we move it to sudoers_path things are kosher.
      */
     if (chown(stmp, SUDOERS_UID, SUDOERS_GID)) {
 	warn("unable to set (uid, gid) of %s to (%d, %d)",
@@ -460,13 +487,13 @@ main(argc, argv)
 
     /*
      * Now that we have a sane stmp file (parses ok) it needs to be
-     * rename(2)'d to sudoers.  If the rename(2) fails we try using
-     * mv(1) in case stmp and sudoers are on different file systems.
+     * rename(2)'d to sudoers_path.  If the rename(2) fails we try using
+     * mv(1) in case stmp and sudoers_path are on different file systems.
      */
-    if (rename(stmp, sudoers)) {
+    if (rename(stmp, sudoers_path)) {
 	if (errno == EXDEV) {
 	    warnx("%s and %s not on the same file system, using mv to rename",
-	      stmp, sudoers);
+	      stmp, sudoers_path);
 
 	    /* Build up argument vector for the command */
 	    if ((av[0] = strrchr(_PATH_MV, '/')) != NULL)
@@ -474,22 +501,22 @@ main(argc, argv)
 	    else
 		av[0] = _PATH_MV;
 	    av[1] = stmp;
-	    av[2] = sudoers;
+	    av[2] = sudoers_path;
 	    av[3] = NULL;
 
 	    /* And run it... */
 	    if (run_command(_PATH_MV, av)) {
 		warnx("command failed: '%s %s %s', %s unchanged",
-		    _PATH_MV, stmp, sudoers, sudoers);
+		    _PATH_MV, stmp, sudoers_path, sudoers_path);
 		Exit(-1);
 	    }
 	} else {
-	    warn("error renaming %s, %s unchanged", stmp, sudoers);
+	    warn("error renaming %s, %s unchanged", stmp, sudoers_path);
 	    Exit(-1);
 	}
     }
-
-    exit(0);
+    free(stmp);
+    stmp = NULL;
 }
 
 /*
@@ -667,28 +694,29 @@ run_command(path, argv)
 }
 
 static int
-check_syntax(quiet)
+check_syntax(sudoers_path, quiet)
+    char *sudoers_path;
     int quiet;
 {
 
-    if ((yyin = fopen(sudoers, "r")) == NULL) {
+    if ((yyin = fopen(sudoers_path, "r")) == NULL) {
 	if (!quiet)
-	    warn("unable to open %s", sudoers);
+	    warn("unable to open %s", sudoers_path);
 	exit(1);
     }
     yyout = stdout;
-    init_parser();
+    init_parser(sudoers_path);
     if (yyparse() && parse_error != TRUE) {
 	if (!quiet)
-	    warnx("failed to parse %s file, unknown error", sudoers);
+	    warnx("failed to parse %s file, unknown error", sudoers_path);
 	parse_error = TRUE;
     }
     if (!quiet){
 	if (parse_error)
-	    (void) printf("parse error in %s near line %d\n", sudoers,
+	    (void) printf("parse error in %s near line %d\n", sudoers_path,
 		errorlineno);
 	else
-	    (void) printf("%s file parsed OK\n", sudoers);
+	    (void) printf("%s file parsed OK\n", sudoers_path);
     }
 
     return(parse_error == TRUE);
@@ -698,7 +726,16 @@ FILE *
 open_sudoers(path)
     const char *path;
 {
-    return(fopen(path, "r"));
+    FILE *fp;
+    struct sudoersfile *newfile;
+
+    if ((fp = fopen(path, "r")) != NULL) {
+	newfile = emalloc(sizeof(*newfile));
+	newfile->path = estrdup(path);
+	newfile->next = NULL;
+	sudoerslist.last->next = newfile;
+    }
+    return(fp);
 }
 
 /*
@@ -712,7 +749,8 @@ Exit(sig)
 {
 #define	emsg	 " exiting due to signal.\n"
 
-    (void) unlink(stmp);
+    if (stmp != NULL)
+	(void) unlink(stmp);
 
     if (sig > 0) {
 	write(STDERR_FILENO, getprogname(), strlen(getprogname()));
