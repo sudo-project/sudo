@@ -96,7 +96,8 @@ sigusr1(signo)
  * Fork a process that traces the command to be run and its descendents.
  *
  * TODO:
- *	set SUDO_* env variables for sub-execs
+ *	should the tracing process catch signals and detach?
+ *	(right now "sudo reboot" fails due to tracing)
  */
 void
 systrace_attach(pid)
@@ -229,11 +230,13 @@ systrace_attach(pid)
 		     * once after.  We only want to log attempts when our
 		     * answer is accepted; otherwise we can get dupes.
 		     */
-		    cookie = handler(fd, msg.msg_pid, &msg.msg_data.msg_ask, -1,
-			&ans.stra_policy, &ans.stra_error);
+		    cookie = handler(fd, msg.msg_pid, msg.msg_seqnr,
+			&msg.msg_data.msg_ask, -1, &ans.stra_policy,
+			&ans.stra_error);
 			if (ioctl(fd, STRIOCANSWER, &ans) == 0)
-			    handler(fd, msg.msg_pid, &msg.msg_data.msg_ask,
-				cookie, &ans.stra_policy, &ans.stra_error);
+			    handler(fd, msg.msg_pid, msg.msg_seqnr,
+				&msg.msg_data.msg_ask, cookie,
+				&ans.stra_policy, &ans.stra_error);
 		} else
 		    (void) ioctl(fd, STRIOCANSWER, &ans);
 		break;
@@ -512,6 +515,227 @@ find_handler(pid, code)
     return(NULL);
 }
 
+#define SUDO_USER	0
+#define SUDO_COMMAND	1
+#define SUDO_UID	2
+#define SUDO_GID	3
+
+#ifdef STRIOCINJECT
+/*
+ * Write buf to a kernel address.
+ * XXX - should deal with EBUSY from STRIOCIO
+ */
+static int
+systrace_write(fd, pid, addr, buf, len)
+    int fd;
+    pid_t pid;
+    void *addr;
+    void *buf;
+    size_t len;
+{
+    struct systrace_io io;
+
+    memset(&io, 0, sizeof(io));
+    io.strio_pid = pid;
+    io.strio_addr = buf;
+    io.strio_len = len;
+    io.strio_offs = addr;
+    io.strio_op = SYSTR_WRITE;
+    return(ioctl(fd, STRIOCIO, &io));
+}
+
+/*
+ * Update SUDO_* variables in the process's environment.
+ */
+static int
+update_env(fd, pid, seqnr, askp)
+    int fd;
+    pid_t pid;
+    u_int16_t seqnr;
+    struct str_msg_ask *askp;
+{
+    struct systrace_replace repl;
+    ssize_t len;
+    char *envbuf[ARG_MAX / sizeof(char *)], **envp, **envep;
+    char buf[ARG_MAX], *ap, *cp, *off, *offsets[4], *replace[4];
+    int n;
+
+    /*
+     * Iterate through the environment, copying the data pointers and
+     * attempting to update the SUDO_* variables (space permitting).
+     */
+    memset(offsets, 0, sizeof(offsets));
+    memset(replace, 1, sizeof(replace));
+    off = (char *)askp->args[2];
+    envep = envbuf + (sizeof(envbuf) / sizeof(char *));
+    for (envp = envbuf; envp < envep; envp++, off += sizeof(char *)) {
+	if (systrace_read(fd, pid, off, &ap, sizeof(ap)) != 0) {
+	    warn("STRIOCIO");
+	    return(-1);
+	}
+	if ((*envp = ap) == NULL)
+	    break;
+	if ((len = read_string(fd, pid, ap, buf, sizeof(buf))) == -1)
+	    return(-1);
+	if (buf[0] == 'S') {
+	    if (strncmp(buf, "SUDO_USER=", 10) == 0) {
+		offsets[SUDO_USER] = ap;
+		if (strcmp(&buf[10], user_name) == 0)
+		    replace[SUDO_USER] = NULL;
+		else {
+		    len = strlen(buf);
+		    n = snprintf(buf, len + 1, "SUDO_USER=%s", user_name);
+		    if (n > 0 && n <= len &&
+			systrace_write(fd, pid, ap, buf, len + 1) == 0)
+			replace[SUDO_USER] = NULL;
+		}
+	    } else if (strncmp(buf, "SUDO_COMMAND=", 13) == 0) {
+		offsets[SUDO_COMMAND] = ap;
+		len = strlen(user_cmnd);
+		if (strncmp(&buf[13], user_cmnd, len) == 0) {
+		    if (user_args == NULL) {
+			if (buf[13 + len] == '\0')
+			    replace[SUDO_COMMAND] = NULL;
+		    } else if (buf[13 + len] == ' ') {
+			if (strcmp(&buf[14 + len], user_args) == 0)
+			    replace[SUDO_COMMAND] = NULL;
+		    }
+		}
+		if (replace[SUDO_COMMAND] != NULL) {
+		    len = strlen(buf);
+		    n = snprintf(buf, len + 1, "SUDO_COMMAND=%s%s%s",
+			user_cmnd, user_args ? " " : "",
+			user_args ? user_args : "");
+		    if (n > 0 && n <= len &&
+			systrace_write(fd, pid, ap, buf, len + 1) == 0)
+			replace[SUDO_COMMAND] = NULL;
+		}
+	    } else if (strncmp(buf, "SUDO_UID=", 9) == 0) {
+		offsets[SUDO_UID] = ap;
+		if ((uid_t) atoi(&buf[9]) == user_uid)
+		    replace[SUDO_UID] = NULL;
+		else {
+		    len = strlen(buf);
+		    n = snprintf(buf, len + 1,
+			"SUDO_UID=%lu", (unsigned long) user_uid);
+		    if (n > 0 && n <= len &&
+			systrace_write(fd, pid, ap, buf, len + 1) == 0)
+			replace[SUDO_UID] = NULL;
+		}
+	    } else if (strncmp(buf, "SUDO_GID=", 9) == 0) {
+		offsets[SUDO_GID] = ap;
+		if ((gid_t) atoi(&buf[9]) == user_gid)
+		    replace[SUDO_GID] = NULL;
+		else {
+		    len = strlen(buf);
+		    n = snprintf(buf, len + 1,
+			"SUDO_GID=%lu", (unsigned long) user_gid);
+		    if (n > 0 && n <= len &&
+			systrace_write(fd, pid, ap, buf, len + 1) == 0)
+			replace[SUDO_GID] = NULL;
+		}
+	    }
+	}
+    }
+
+    /*
+     * Allocate space for any SUDO_* variables we didn't have room for
+     * or that weren't present.
+     */
+    cp = buf;
+    if (replace[SUDO_USER]) {
+	n = snprintf(cp, sizeof(buf) - (cp - buf), "SUDO_USER=%s", user_name);
+	if (n < 0 || n >= sizeof(buf) - (cp - buf))
+	    return(-1);
+	replace[SUDO_USER] = cp;
+	cp += n + 1;
+    }
+    if (replace[SUDO_COMMAND]) {
+	n = snprintf(cp, sizeof(buf) - (cp - buf), "SUDO_COMMAND=%s%s%s",
+	    user_cmnd, user_args ? " " : "", user_args ? user_args : "");
+	if (n < 0 || n >= sizeof(buf) - (cp - buf))
+	    return(-1);
+	replace[SUDO_COMMAND] = cp;
+	cp += n + 1;
+    }
+    if (replace[SUDO_UID]) {
+	n = snprintf(cp, sizeof(buf) - (cp - buf), "SUDO_UID=%lu",
+	    (unsigned long) user_uid);
+	if (n < 0 || n >= sizeof(buf) - (cp - buf))
+	    return(-1);
+	replace[SUDO_UID] = cp;
+	cp += n + 1;
+    }
+    if (replace[SUDO_GID]) {
+	n = snprintf(cp, sizeof(buf) - (cp - buf), "SUDO_GID=%lu",
+	    (unsigned long) user_gid);
+	if (n < 0 || n >= sizeof(buf) - (cp - buf))
+	    return(-1);
+	replace[SUDO_GID] = cp;
+	cp += n + 1;
+    }
+    if (cp != buf) {
+	struct systrace_inject inject;
+	memset(&inject, 0, sizeof(inject));
+	inject.stri_pid = pid;
+	inject.stri_addr = buf;
+	inject.stri_len = cp - buf;
+	if (ioctl(fd, STRIOCINJECT, &inject) != 0) {
+	    warnx("STRIOCINJECT");
+	    return(-1);
+	}
+	/*
+	 * XXX - if no missing variables we don't really need a new envp
+	 *       can just systrace_write the new addr.
+	 */
+	/*
+	 * Update the addresses in our copy of envp, making them relative
+	 * to inject.stri_addr.
+	 */
+	for (envp = envbuf; *envp != NULL; envp++) {
+	    if (replace[SUDO_USER] != NULL && *envp == offsets[SUDO_USER])
+		*envp = inject.stri_addr + (replace[SUDO_USER] - buf);
+	    else if (replace[SUDO_COMMAND] != NULL && *envp == offsets[SUDO_COMMAND])
+		*envp = inject.stri_addr + (replace[SUDO_COMMAND] - buf);
+	    else if (replace[SUDO_UID] != NULL && *envp == offsets[SUDO_UID])
+		*envp = inject.stri_addr + (replace[SUDO_UID] - buf);
+	    else if (replace[SUDO_GID] != NULL && *envp == offsets[SUDO_GID])
+		*envp = inject.stri_addr + (replace[SUDO_GID] - buf);
+	}
+	/* Add any missing variables to our new envp. */
+	if (envp + (offsets[SUDO_USER] == NULL) +
+	    (offsets[SUDO_COMMAND] == NULL) + (offsets[SUDO_UID] == NULL) +
+	    (offsets[SUDO_GID] == NULL) >= envep)
+	    return(-1);
+	if (offsets[SUDO_USER] == NULL)
+	    *envp++ = replace[SUDO_USER];
+	if (offsets[SUDO_COMMAND] == NULL)
+	    *envp++ = replace[SUDO_COMMAND];
+	if (offsets[SUDO_UID] == NULL)
+	    *envp++ = replace[SUDO_UID];
+	if (offsets[SUDO_GID] == NULL)
+	    *envp++ = replace[SUDO_GID];
+	*envp++ = NULL;
+
+	/* Replace existing envp with our new one. */
+	memset(&repl, 0, sizeof(repl));
+	repl.strr_pid = pid;
+	repl.strr_seqnr = seqnr;
+	repl.strr_nrepl = 1;
+	repl.strr_base = (char *)envbuf;
+	repl.strr_len = (char *)envp - (char *)envbuf;
+	repl.strr_argind[0] = 2;
+	repl.strr_off[0] = 0;
+	repl.strr_offlen[0] = (char *)envp - (char *)envbuf;
+	if (ioctl(fd, STRIOCREPLACE, &repl) != 0) {
+	    warnx("STRIOCREPLACE");
+	    return(-1);
+	}
+    }
+    return(0);
+}
+#endif
+
 /*
  * Decode path and argv from systrace and fill in user_cmnd,
  * user_base and user_args.
@@ -559,7 +783,6 @@ decode_args(fd, pid, askp)
 	cp += len;
 	*cp++ = ' ';		/* replace NUL with a space */
     }
-    /* XXX - detect cp >= ep */
     return(0);
 }
 
@@ -567,9 +790,10 @@ decode_args(fd, pid, askp)
  * Decode the args to exec and check the command in sudoers.
  */
 static int
-check_exec(fd, pid, askp, cookie, policyp, errorp)
+check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
     int fd;
     pid_t pid;
+    u_int16_t seqnr;
     struct str_msg_ask *askp;
     int cookie;
     int *policyp;
@@ -629,6 +853,32 @@ check_exec(fd, pid, askp, cookie, policyp, errorp)
 	*errorp = EACCES;
     }
     return(validated);
+}
+
+/*
+ * Call check_execv() and, if the command it permitted, set
+ * the SUDO_* environment variables.
+ */
+static int
+check_execve(fd, pid, seqnr, askp, cookie, policyp, errorp)
+    int fd;
+    u_int16_t seqnr;
+    pid_t pid;
+    struct str_msg_ask *askp;
+    int cookie;
+    int *policyp;
+    int *errorp;
+{
+    int rval;
+
+    rval = check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp);
+#ifdef STRIOCINJECT
+    if (rval > 0 && *policyp == SYSTR_POLICY_PERMIT) {
+	/* read environment into buf, munge, and bung it back */
+	update_env(fd, pid, seqnr, askp);
+    }
+#endif
+    return(rval);
 }
 
 /*
