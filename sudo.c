@@ -121,11 +121,14 @@ int NewArgc = 0;
 char **NewArgv = NULL;
 struct sudo_user sudo_user;
 FILE *sudoers_fp = NULL;
-static char *runas_homedir = NULL;	/* XXX */
 struct interface *interfaces;
 int num_interfaces;
 int tgetpass_flags;
 extern int errorlineno;
+static char *runas_homedir = NULL;	/* XXX */
+#if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
+static struct rlimit corelimit;
+#endif /* RLIMIT_CORE */
 
 /*
  * Table of "bad" envariables to remove and len for strncmp()
@@ -332,9 +335,6 @@ main(argc, argv)
 	    exit(0);
 	}
 
-	/* Become specified user or root. */
-	set_perms(PERM_RUNAS, sudo_mode);
-
 	/* Set $HOME for `sudo -H' */
 	if ((sudo_mode & MODE_RESET_HOME) && runas_homedir)
 	    (void) sudo_setenv("HOME", runas_homedir);
@@ -368,6 +368,14 @@ main(argc, argv)
 		    Argv[0]);
 		exit(1);
 	    }
+
+	/* Restore coredumpsize resource limit. */
+#if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
+	(void) setrlimit(RLIMIT_CORE, &corelimit);
+#endif /* RLIMIT_CORE */
+
+	/* Become specified user or root. */
+	set_perms(PERM_RUNAS, sudo_mode);
 
 #ifndef PROFILING
 	if ((sudo_mode & MODE_BACKGROUND) && fork() > 0)
@@ -1009,6 +1017,7 @@ initial_setup()
     /*
      * Turn off core dumps.
      */
+    (void) getrlimit(RLIMIT_CORE, &corelimit);
     rl.rlim_cur = rl.rlim_max = 0;
     (void) setrlimit(RLIMIT_CORE, &rl);
 #endif /* RLIMIT_CORE */
