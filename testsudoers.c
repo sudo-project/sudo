@@ -336,6 +336,13 @@ set_runaspw(user)
     return(TRUE);
 }
 
+FILE *
+open_sudoers(path)
+    const char *path;
+{
+    return(fopen(path, "r"));
+}
+
 void
 init_envtables()
 {

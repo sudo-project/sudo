@@ -92,7 +92,7 @@ int netgr_matches		__P((char *, char *, char *, char *));
 int usergr_matches		__P((char *, char *, struct passwd *));
 int userpw_matches		__P((char *, char *, struct passwd *));
 void init_parser		__P((void));
-void yyerror			__P((char *));
+void yyerror			__P((const char *));
 void yyrestart			__P((FILE *));
 
 /*
@@ -692,6 +692,13 @@ check_syntax(quiet)
     }
 
     return(parse_error == TRUE);
+}
+
+FILE *
+open_sudoers(path)
+    const char *path;
+{
+    return(fopen(path, "r"));
 }
 
 /*
