@@ -16,10 +16,10 @@ released the new code under the GNU general license.
 
 In 1996, Todd Miller, who had been maintaining sudo
 for several years in his spare time, brought sudo
-developement under the umbrella of his consulting firm,
+development under the umbrella of his consulting firm,
 Courtesan Consulting.  Courtesan remains committed to
 a free sudo and is sponsoring another sudo rewrite
-as well as continued developement of the sudo 1.x
+as well as continued development of the sudo 1.x
 code base.
 
 sudo, in its current form, is maintained by:

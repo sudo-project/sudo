@@ -19,7 +19,7 @@
  *
  *******************************************************************
  *
- *  testsudoers.c -- frontend for parser testing and developement.
+ *  testsudoers.c -- frontend for parser testing and development.
  *
  *  Chris Jepeway <jepeway@cs.utk.edu>
  */
