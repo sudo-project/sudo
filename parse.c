@@ -83,7 +83,6 @@ static char rcsid[] = "$Id$";
 #endif
 
 #include "sudo.h"
-#include <options.h>
 
 /*
  * Globals

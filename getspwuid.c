@@ -51,7 +51,6 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 #include <pwd.h>
 #include "sudo.h"
-#include <options.h>
 
 /* Shadow password includes */
 #ifdef HAVE_GETSPNAM

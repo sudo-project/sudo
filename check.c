@@ -64,7 +64,6 @@ static char rcsid[] = "$Id$";
 #include <pwd.h>
 #include <grp.h>
 #include "sudo.h"
-#include <options.h>
 #include "insults.h"
 #include "version.h"
 #ifdef HAVE_GETPRPWUID

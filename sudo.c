@@ -90,7 +90,6 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_DCE */
 
 #include "sudo.h"
-#include <options.h>
 #include "version.h"
 
 #ifndef STDC_HEADERS

@@ -30,10 +30,6 @@ user to the local authorities (defined at installation time).
 B<sudo> was designed to log via the 4.3 BSD syslog(3) facility but
 can log to a file instead if so desired (or to both syslog and a file).
 
-All preferences are defined at installation time and are derived from
-the options.h and pathnames.h include files as well as as well as the
-Makefile.
-
 =head1 OPTIONS
 
 B<sudo> accepts the following command line options:

@@ -55,7 +55,6 @@ static char rcsid[] = "$Id$";
 #include <search.h>
 #endif /* HAVE_LSEARCH */
 
-#include <options.h>
 #include "sudo.h"
 
 #ifndef HAVE_LSEARCH

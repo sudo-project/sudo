@@ -48,7 +48,6 @@ static char rcsid[] = "$Id$";
 #include <sys/param.h>
 #include <netinet/in.h>
 #include "sudo.h"
-#include <options.h>
 #include "sudo.tab.h"
 
 #undef yywrap		/* guard against a yywrap macro */

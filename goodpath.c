@@ -51,7 +51,6 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 
 #include "sudo.h"
-#include <options.h>
 
 #ifndef STDC_HEADERS
 extern int stat		__P((const char *, struct stat *));

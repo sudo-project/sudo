@@ -59,7 +59,6 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 
 #include "sudo.h"
-#include <options.h>
 #include "version.h"
 
 #ifndef STDC_HEADERS
