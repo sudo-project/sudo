@@ -726,8 +726,7 @@ cmnd		:	ALL {
 				}
 			    }
 
-			    if (command_matches(user_cmnd, user_args,
-				$1.cmnd, $1.args))
+			    if (command_matches($1.cmnd, $1.args))
 				$$ = TRUE;
 			    else
 				$$ = NOMATCH;
