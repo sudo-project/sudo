@@ -80,3 +80,5 @@ TODO list (most will be addressed in sudo 2.0)
 29) Implement date_format and log_format options.
 
 30) Add support for: Default:user@host
+
+31) Add -S flag to force password read from stdin
