@@ -803,7 +803,7 @@ check_sudoers()
      * Fix the mode and group on sudoers file from old default.
      * Only works if filesystem is readable/writable by root.
      */
-    if ((rootstat = lstat(_PATH_SUDOERS, &statbuf)) == 0 &&
+    if ((rootstat = stat_sudoers(_PATH_SUDOERS, &statbuf)) == 0 &&
 	SUDOERS_UID == statbuf.st_uid && SUDOERS_MODE != 0400 &&
 	(statbuf.st_mode & 0007777) == 0400) {
 
@@ -834,7 +834,7 @@ check_sudoers()
      */
     set_perms(PERM_SUDOERS);
 
-    if (rootstat != 0 && lstat(_PATH_SUDOERS, &statbuf) != 0)
+    if (rootstat != 0 && stat_sudoers(_PATH_SUDOERS, &statbuf) != 0)
 	log_error(USE_ERRNO, "can't stat %s", _PATH_SUDOERS);
     else if (!S_ISREG(statbuf.st_mode))
 	log_error(0, "%s is not a regular file", _PATH_SUDOERS);
