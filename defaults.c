@@ -96,6 +96,8 @@ static struct strmap priorities[] = {
 	{ NULL,		-1 }
 };
 
+extern int sudolineno;
+
 /*
  * Local prototypes.
  */
@@ -316,7 +318,6 @@ set_default(var, val, op)
     int op;     /* TRUE or FALSE */
 {
     struct sudo_defs_types *cur;
-    extern int sudolineno;
 
     for (cur = sudo_defs_table; cur->name; cur++) {
 	if (strcmp(var, cur->name) == 0)
@@ -332,17 +333,27 @@ set_default(var, val, op)
     switch (cur->type & T_MASK) {
 	case T_LOGFAC:
 	    if (!store_syslogfac(val, cur, op)) {
-		(void) fprintf(stderr,
-		    "%s: value '%s' is invalid for option '%s'\n", Argv[0],
-		    val, var);
+		if (val)
+		    (void) fprintf(stderr,
+			"%s: value '%s' is invalid for option '%s'\n", Argv[0],
+			val, var);
+		else
+		    (void) fprintf(stderr,
+			"%s: no value specified for `%s' on line %d\n", Argv[0],
+			var, sudolineno);
 		return(FALSE);
 	    }
 	    break;
 	case T_LOGPRI:
 	    if (!store_syslogpri(val, cur, op)) {
-		(void) fprintf(stderr,
-		    "%s: value '%s' is invalid for option '%s'\n", Argv[0],
-		    val, var);
+		if (val)
+		    (void) fprintf(stderr,
+			"%s: value '%s' is invalid for option '%s'\n", Argv[0],
+			val, var);
+		else
+		    (void) fprintf(stderr,
+			"%s: no value specified for `%s' on line %d\n", Argv[0],
+			var, sudolineno);
 		return(FALSE);
 	    }
 	    break;
@@ -592,8 +603,9 @@ store_syslogfac(val, def, op)
 	def->sd_un.str = NULL;
 	return(TRUE);
     }
-
 #ifdef LOG_NFACILITIES
+    if (!val)
+	return(FALSE);
     for (fac = facilities; fac->name && strcmp(val, fac->name); fac++)
 	;
     if (fac->name == NULL)
@@ -604,6 +616,10 @@ store_syslogfac(val, def, op)
 	free(def->sd_un.str);
     def->sd_un.str = estrdup(fac->name);
     sudo_defs_table[I_LOGFAC].sd_un.ival = fac->num;
+#else
+    if (def->sd_un.str)
+	free(def->sd_un.str);
+    def->sd_un.str = estrdup("default");
 #endif /* LOG_NFACILITIES */
     return(TRUE);
 }
@@ -617,7 +633,7 @@ store_syslogpri(val, def, op)
     struct strmap *pri;
     struct sudo_defs_types *idef;
 
-    if (op == FALSE)
+    if (op == FALSE || !val)
 	return(FALSE);
     if (def == &sudo_defs_table[I_GOODPRISTR])
 	idef = &sudo_defs_table[I_GOODPRI];
