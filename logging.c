@@ -367,9 +367,9 @@ log_error(va_alist)
     evasprintf(&message, fmt, ap);
     va_end(ap);
 
-    if (flags & MSG_ONLY)
+    if (ISSET(flags, MSG_ONLY))
 	logline = message;
-    else if (flags & USE_ERRNO) {
+    else if (ISSET(flags, USE_ERRNO)) {
 	if (user_args) {
 	    easprintf(&logline,
 		"%s: %s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s %s",
@@ -396,7 +396,7 @@ log_error(va_alist)
      * Tell the user.
      */
     if (!ISSET(flags, NO_STDERR)) {
-	if (flags & USE_ERRNO)
+	if (ISSET(flags, USE_ERRNO))
 	    warn("%s", message);
 	else
 	    warnx("%s", message);
@@ -405,7 +405,7 @@ log_error(va_alist)
     /*
      * Send a copy of the error via mail.
      */
-    if (!(flags & NO_MAIL))
+    if (!ISSET(flags, NO_MAIL))
 	send_mail(logline);
 
     /*
@@ -420,7 +420,7 @@ log_error(va_alist)
     if (logline != message)
 	free(logline);
 
-    if (!(flags & NO_EXIT))
+    if (!ISSET(flags, NO_EXIT))
 	exit(1);
 }
 
