@@ -94,6 +94,14 @@ A) In sudo, a string consisting of all caps and numbers is
    it as a username (or a hostname).  There is no way to fix
    this will the current sudoers syntax.
 
-Q) How keep sudo from asking for a password?
+Q) How can I keep sudo from asking for a password?
 A) Use the 'NOPASSWD' reserved word right before the command list in
    sudoers.  See the sudoers man page and sample.sudoers for details.
+
+Q) When I run configure, it dies with the following error:
+   "no acceptable cc found in $PATH".
+A) /usr/ucb/cc was the only C compiler that configure could find.
+   You need to tell configure the path to the "real" C compiler
+   via the --with-CC option.  On Solaris, the path is probably
+   something like "/opt/SUNWspro/SC4.0/bin/cc".  If you have gcc
+   that will also work.
