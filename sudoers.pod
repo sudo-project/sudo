@@ -235,7 +235,7 @@ the C<$PATH> itself is not modified.  This flag is off by default.
 
 =item mail_always
 
-Send mail to the I<mailto> user every time a users runs sudo.
+Send mail to the I<mailto> user every time a users runs B<sudo>.
 This flag is off by default.
 
 =item mail_no_user
@@ -252,7 +252,7 @@ commands on the current host.  This flag is off by default.
 =item mail_no_perms
 
 If set, mail will be sent to the I<mailto> user if the invoking
-user allowed to use sudo but the command they are trying is not
+user allowed to use B<sudo> but the command they are trying is not
 listed in their I<sudoers> file entry.  This flag is off by default.
 
 =item tty_tickets
@@ -277,8 +277,8 @@ This flag is on by default.
 
 =item root_sudo
 
-If set, root is allowed to run sudo too.  Disabling this prevents users
-from "chaining" sudo commands to get a root shell by doing something
+If set, root is allowed to run B<sudo> too.  Disabling this prevents users
+from "chaining" B<sudo> commands to get a root shell by doing something
 like C<"sudo sudo /bin/sh">.
 This flag is on by default.
 
@@ -322,7 +322,7 @@ be confusing.  This flag is off by default.
 Set this flag if you want to put fully qualified hostnames in the
 I<sudoers> file.  Ie: instead of myhost you would use myhost.mydomain.edu.
 You may still use the short form if you wish (and even mix the two).
-Beware that turning on I<fqdn> requires sudo to make DNS lookups
+Beware that turning on I<fqdn> requires B<sudo> to make DNS lookups
 which may make B<sudo> unusable if DNS stops working (for example
 if the machine is not plugged into the network).  Also note that
 you must use the host's official name as DNS knows it.  That is,
@@ -334,12 +334,12 @@ I<fqfn>.  This flag is off by default.
 
 =item insults
 
-If set, sudo will insult users when they enter an incorrect
+If set, B<sudo> will insult users when they enter an incorrect
 password.  This flag is off by default.
 
 =item requiretty
 
-If set, sudo will only run when the user is logged in to a real
+If set, B<sudo> will only run when the user is logged in to a real
 tty.  This will disallow things like C<"rsh somehost sudo ls"> since
 rsh(1) does not allocate a tty.  Because it is not possible to turn
 of echo when there is no tty present, some sites may with to set
@@ -348,32 +348,40 @@ flag is off by default.
 
 =item env_editor
 
-If set, visudo will use the value of the EDITOR or VISUAL environment
+If set, B<visudo> will use the value of the EDITOR or VISUAL environment
 falling back on the default editor.  Note that this may create a
 security hole as most editors allow a user to get a shell (which
 would be a root shell and not be logged).
 
 =item rootpw
 
-If set, sudo will prompt for the root password instead of the password
+If set, B<sudo> will prompt for the root password instead of the password
 of the invoking user.
 
 =item runaspw
 
-If set, sudo will prompt for the password of the user defined by the
+If set, B<sudo> will prompt for the password of the user defined by the
 I<runas_default> option (defaults to root) instead of the password
 of the invoking user.
 
 =item targetpw
 
-If set, sudo will prompt for the password of the user specified by
+If set, B<sudo> will prompt for the password of the user specified by
 the C<-u> flag (defaults to root) instead of the password of the
 invoking user.
 
+=item set_logname
+
+Normally, B<sudo> will set the C<LOGNAME> and C<USER> environment variables
+to the name of the target user (usually root unless the C<-u> flag is given).
+However, since some programs (including the RCS revision control system)
+use C<LOGNAME> to determine the real identity of the user, it may be desirable
+to change this behavior.  This can be done by negating the set_logname option.
+
 =item use_loginclass
 
-If set, sudo will apply the defaults specified for the target user's
-login class if one exists.  Only available if sudo is configured with
+If set, B<sudo> will apply the defaults specified for the target user's
+login class if one exists.  Only available if B<sudo> is configured with
 the --with-logincap option.
 
 =back
@@ -385,7 +393,7 @@ B<Integers>:
 =item passwd_tries
 
 The number of tries a user gets to enter his/her password before
-sudo logs the failure and exits.  The default is 3.
+B<sudo> logs the failure and exits.  The default is 3.
 
 =back
 
@@ -407,7 +415,7 @@ again.  The default is 5, set this to 0 to always prompt for a password.
 
 =item passwd_timeout
 
-Number of minutes before the sudo password prompt times out.
+Number of minutes before the B<sudo> password prompt times out.
 The default is 5, set this to 0 for no password timeout.
 
 =item umask
@@ -461,7 +469,7 @@ Defaults to "alert".
 
 =item editor
 
-Path to the editor to be used by visudo.  The default is the path
+Path to the editor to be used by B<visudo>.  The default is the path
 to vi on your system.
 
 =back 12
@@ -472,7 +480,7 @@ B<Strings that can be used in a boolean context>:
 
 =item logfile
 
-Path to the sudo log file (not the syslog log file).  Setting a path
+Path to the B<sudo> log file (not the syslog log file).  Setting a path
 turns on logging to a file, negating this option turns it off.
 
 =item syslog
@@ -501,14 +509,14 @@ This is not set by default.
 =item secure_path
 
 Path used for every command run from B<sudo>.  If you don't trust the
-people running sudo to have a sane C<PATH> environment variable you may
+people running B<sudo> to have a sane C<PATH> environment variable you may
 want to use this.  Another use is if you want to have the "root path"
 be separate from the "user path."  This is not set by default.
 
 =item verifypw
 
 This option controls when a password will be required when a
-user runs sudo with the B<-v>.  It has the following possible values:
+user runs B<sudo> with the B<-v>.  It has the following possible values:
 
     all		All the user's I<sudoers> entries for the
 		current host must have the C<NOPASSWD>
@@ -530,7 +538,7 @@ The default value is `all'.
 =item listpw
 
 This option controls when a password will be required when a
-user runs sudo with the B<-l>.  It has the following possible values:
+user runs B<sudo> with the B<-l>.  It has the following possible values:
 
     all		All the user's I<sudoers> entries for the
 		current host must have the C<NOPASSWD>
@@ -551,7 +559,7 @@ The default value is `any'.
 
 =back 12
 
-When logging via syslog(3), sudo accepts the following values for the syslog
+When logging via syslog(3), B<sudo> accepts the following values for the syslog
 facility (the value of the B<syslog> Parameter): B<authpriv> (if your OS
 supports it), B<auth>, B<daemon>, B<user>, B<local0>, B<local1>, B<local2>,
 B<local3>, B<local4>, B<local5>, B<local6>, and B<local7>.  The following
@@ -753,7 +761,7 @@ these are a bit contrived.  First, we define our I<aliases>:
  Cmnd_Alias	SU = /usr/bin/su
 
 Here we override some of the compiled in default values.  We want
-sudo to log via syslog(3) using the I<auth> facility in all cases.
+B<sudo> to log via syslog(3) using the I<auth> facility in all cases.
 We don't want to subject the full time staff to the B<sudo> lecture,
 and user B<millert> need not give a password.  In addition, on the
 machines in the I<SERVERS> C<Host_Alias>, we keep an additional
