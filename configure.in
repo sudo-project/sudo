@@ -1782,7 +1782,7 @@ dnl
 if test -n "$with_systrace"; then
     AC_DEFINE(HAVE_SYSTRACE)
     if test "$with_systrace" = "yes"; then
-	AC_CHECK_HEADERS(dev/systrace.h sys/systrace.h, [break])
+	AC_CHECK_HEADERS(dev/systrace.h sys/systrace.h, [break], [], [#include <sys/param.h>])
     else
 	CPPFLAGS="$CPPFLAGS -I${with_systrace}"
     fi
