@@ -270,7 +270,7 @@ static void send_mail()
     be_root();
 
     if ((mailer = find_path(mailer)) == NULL) {
-	(void) fprintf(stderr, "%s not found\n", mailer);
+	(void) fprintf(stderr, "%s: mailer (%s) not found\n", Argv[0], mailer);
 	exit(1);
     }
 
