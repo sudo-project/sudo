@@ -8,8 +8,6 @@ Known bugs in sudo version 1.4
 
 3) Sudo should log when removing "dangerous" envariables.
 
-4) User or host names that contain only uppercase alpha, numbers, and '_'
-   will be parsed as Aliases (Cmnd_Alias, Host_Alias, User_Alias).
-   There is no way to fix this in the current sudo.
-
-5) '*' by itself in sudoers should not match an empty command list?
+4) configure variables that have been cached cannot be overridden
+   in subsequent configure runs, even if other --with-* options are
+   given.  This is a flaw in GNU autoconf.
