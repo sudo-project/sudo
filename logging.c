@@ -60,8 +60,8 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <pwd.h>
 #include <signal.h>
+#include <time.h>
 #include <sys/types.h>
-#include <sys/time.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/wait.h>

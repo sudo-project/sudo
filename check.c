@@ -55,10 +55,10 @@ static char rcsid[] = "$Id$";
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <fcntl.h>
+#include <time.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <sys/file.h>
 #include <netinet/in.h>
 #include <pwd.h>
