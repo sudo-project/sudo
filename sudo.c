@@ -602,11 +602,11 @@ static void load_interfaces()
     /* so we can skip localhost and its ilk */
     localhost_mask = inet_addr("127.0.0.0");
 
-    #ifdef _ISC
+#ifdef _ISC
 	sock = socket(AF_INET, SOCK_STREAM, 0);
-    #else
+#else
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
-    #endif /* _ISC */
+#endif /* _ISC */
     if (sock < 0) {
 	perror("socket");
 	exit(1);
