@@ -1014,3 +1014,12 @@ dnl
 dnl Substitute into the Makefiles
 dnl
 AC_OUTPUT(Makefile)
+
+dnl
+dnl Spew any text the user needs to know about
+dnl
+if test "$with_pam" = "yes"; then
+    echo ""
+    echo "You will need to customize sample.pam and install it as /etc/pam.d/sudo"
+    echo ""
+fi
