@@ -80,3 +80,6 @@ jim		+biglab=ALL
 # fred can run /bin/ls as oracle by specifying -u oracle on command line;
 # he can also run /bin/date as uid -2 without entering a password
 fred		ALL=(oracle) /bin/ls,(#-2) NOPASSWD:/bin/date
+
+# somedude may su to anyone but root and must give su an argument
+somedude	ALL=/usr/bin/su ?*, !/usr/bin/su root
