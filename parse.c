@@ -507,7 +507,7 @@ static int hostcmp(target)
 {
 
     /* if target an  ip address/network or a hostname? */
-    if (isdigit(*target)) {
+    if (interfaces != NULL && isdigit(*target)) {
 	struct in_addr target_addr;	/* inet addr version of target */
 	int i;				/* loop counter */
 
