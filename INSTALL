@@ -553,7 +553,9 @@ Mac OS X:
     It has been reported that for sudo to work on Mac OS X it must
     either be built with the --with-password-timeout=0 option or the
     password timeout must be disabled in the Defaults line in the
-    sudoers file.
+    sudoers file.  If sudo just hangs when you try to enter a password,
+    you need to disable the password timeout (Note: this is not a bug
+    in sudo).
 
 SCO ODT:
     You'll probably need libcrypt_i.a available via anonymous ftp
