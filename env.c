@@ -153,7 +153,6 @@ static const char *initial_keepenv_table[] = {
 /*
  * Remove potentially dangerous variables from the environment
  * and returns a vector of what was pruned out.
- * Sets user_path, user_prompt and prev_user as side effects.
  */
 char **
 clean_env(envp)
@@ -161,7 +160,6 @@ clean_env(envp)
 {
     char **ep, **end;
     struct environment pruned_env;
-    extern char *prev_user;
 
     /* Find the end of the environment. */
     for (end = envp; *end; end++)
@@ -173,20 +171,6 @@ clean_env(envp)
      */
     memset(&pruned_env, 0, sizeof(pruned_env));
     for (ep = envp; *ep; ) {
-	switch (**ep) {
-	    case 'P':
-		if (strncmp("PATH=", *ep, 5) == 0)
-		    user_path = *ep + 5;
-		break;
-	    case 'S':
-		if (strncmp("SHELL=", *ep, 6) == 0)
-		    user_shell = *ep + 6;
-		else if (!user_prompt && strncmp("SUDO_PROMPT=", *ep, 12) == 0)
-		    user_prompt = *ep + 12;
-		else if (strncmp("SUDO_USER=", *ep, 10) == 0)
-		    prev_user = *ep + 10;
-		break;
-	}
 	if (var_ok(*ep)) {
 	    ep++;
 	} else {

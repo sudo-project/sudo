@@ -99,7 +99,7 @@ __unused static const char rcsid[] = "$Sudo$";
 /*
  * Prototypes
  */
-static void init_vars			__P((int));
+static void init_vars			__P((int, char **));
 static int set_cmnd			__P((int));
 static int parse_args			__P((int, char **));
 static void initial_setup		__P((void));
@@ -254,7 +254,7 @@ main(argc, argv)
     if (user_cmnd == NULL && NewArgc == 0)
 	usage(1);
 
-    init_vars(sudo_mode);	/* XXX - move this? */
+    init_vars(sudo_mode, environ);	/* XXX - move this? */
 
 #ifdef HAVE_LDAP
     if ((ld = sudo_ldap_open()) != NULL)
@@ -292,6 +292,8 @@ main(argc, argv)
 	    def_closefrom = user_closefrom;
     }
 
+    pruned_environ = clean_env(environ);
+
     cmnd_status = set_cmnd(sudo_mode);
 
 #ifdef HAVE_LDAP
@@ -305,9 +307,6 @@ main(argc, argv)
 	validated = sudoers_lookup(pwflag);
     if (safe_cmnd == NULL)
 	safe_cmnd = estrdup(user_cmnd);
-
-    /* Clean out the environment. */
-    pruned_environ = clean_env(environ);
 
     /*
      * Look up the timestamp dir owner if one is specified.
@@ -495,10 +494,11 @@ main(argc, argv)
  * load the ``interfaces'' array.
  */
 static void
-init_vars(sudo_mode)
+init_vars(sudo_mode, envp)
     int sudo_mode;
+    char **envp;
 {
-    char *p, thost[MAXHOSTNAMELEN];
+    char *p, **ep, thost[MAXHOSTNAMELEN];
     int nohostname;
 
     /* Sanity check command from user. */
@@ -545,6 +545,24 @@ init_vars(sudo_mode)
 	user_tty = estrdup(p);
     } else
 	user_tty = "unknown";
+
+    for (ep = envp; *ep; ep++) {
+	switch (**ep) {
+	    case 'P':
+		if (strncmp("PATH=", *ep, 5) == 0)
+		    user_path = *ep + 5;
+		break;
+	    case 'S':
+		if (strncmp("SHELL=", *ep, 6) == 0)
+		    user_shell = *ep + 6;
+		else if (!user_prompt && strncmp("SUDO_PROMPT=", *ep, 12) == 0)
+		    user_prompt = *ep + 12;
+		else if (strncmp("SUDO_USER=", *ep, 10) == 0)
+		    prev_user = *ep + 10;
+		break;
+
+	    }
+    }
 
     /*
      * Get a local copy of the user's struct passwd with the shadow password
