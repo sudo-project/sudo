@@ -305,6 +305,7 @@ int main(argc, argv)
 
     /* validate the user but don't search for "validate" */
     rtn = validate((sudo_mode != MODE_VALIDATE));
+
     switch (rtn) {
 
 	case VALIDATE_OK:
@@ -815,6 +816,8 @@ void set_perms(perm)
 			      	break;
 
 	case PERM_USER: 
+    	    	    	        (void) setgid(user_gid);
+
     	    	    	        if (seteuid(user_uid)) {
     	    	    	            perror("seteuid(user_uid)");
     	    	    	            exit(1); 
@@ -827,8 +830,10 @@ void set_perms(perm)
 				    exit(1);
 				}
 
+    	    	    	        (void) setgid(user_gid);
+
 				if (setuid(user_uid)) {
-				    perror("setuid(uid)");
+				    perror("setuid(user_uid)");
 				    exit(1);
 				}
 
@@ -880,14 +885,29 @@ void set_perms(perm)
 				    exit(1);
 				}
 
-				if (seteuid(SUDOERS_UID)) {
-				    perror("seteuid(SUDOERS_UID)");
+				if (setgid(SUDOERS_GID)) {
+				    perror("setgid(SUDOERS_GID)");
 				    exit(1);
 				}
 
-				if (setegid(SUDOERS_GID)) {
-				    perror("setegid(SUDOERS_GID)");
-				    exit(1);
+				/*
+				 * If SUDOERS_UID == 0 we need to use
+				 * a different uid in order to avoid
+				 * NFS lossage.  Sigh.
+				 */
+				if (SUDOERS_UID) {
+				    if (seteuid(SUDOERS_UID)) {
+					perror("seteuid(SUDOERS_UID)");
+					exit(1);
+				    }
+				} else {
+				    if (!(pw_ent = getpwnam("nobody")))
+					pw_ent->pw_uid = (uid_t) -2;
+
+				    if (seteuid(pw_ent->pw_uid)) {
+					perror("seteuid(nobody)");
+					exit(1);
+				    }
 				}
 
 			      	break;
