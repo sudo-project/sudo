@@ -233,11 +233,11 @@ struct sudo_defs_types sudo_defs_table[] = {
 	def_data_verifypw,
     }, {
 	"noexec", T_FLAG,
-	"Preload the dummy execve() function contained in 'noexec_file'",
+	"Preload the dummy exec functions contained in 'noexec_file'",
 	NULL,
     }, {
 	"noexec_file", T_STR|T_PATH,
-	"File containing a dummy execve() function: %s",
+	"File containing dummy exec functions: %s",
 	NULL,
     }, {
 	"env_check", T_LIST|T_BOOL,

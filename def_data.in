@@ -169,10 +169,10 @@ verifypw
 	never any all always
 noexec
 	T_FLAG
-	"Preload the dummy execve() function contained in 'noexec_file'"
+	"Preload the dummy exec functions contained in 'noexec_file'"
 noexec_file
 	T_STR|T_PATH
-	"File containing a dummy execve() function: %s"
+	"File containing dummy exec functions: %s"
 env_check
 	T_LIST|T_BOOL
 	"Environment variables to check for sanity:"
