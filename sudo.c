@@ -446,9 +446,9 @@ static void load_globals(sudo_mode)
 	}
     }
 
-#ifdef UMASK
-    (void) umask((mode_t)UMASK);
-#endif /* UMASK */
+#ifdef SUDO_UMASK
+    (void) umask((mode_t)SUDO_UMASK);
+#endif /* SUDO_UMASK */
 
 #ifdef NO_ROOT_SUDO
     if (user_uid == 0) {
