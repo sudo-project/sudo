@@ -544,6 +544,7 @@ init_vars(sudo_mode)
 
     /* Resolve the path and return. */
     if ((sudo_mode & MODE_RUN)) {
+	/* XXX - should call this as runas user, not root. */
 	rval = find_path(NewArgv[0], &user_cmnd, user_path);
 	if (rval != FOUND) {
 	    /* Failed as root, try as invoking user. */
