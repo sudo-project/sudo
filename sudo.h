@@ -271,11 +271,9 @@ YYSTYPE yylval;
 char *strdup();
 #endif
 char *find_path();
-void load_globals();
 void log_error();
 void inform_user();
 void check_user();
-void clean_envp();
 int validate();
 void be_root();
 void be_user();
