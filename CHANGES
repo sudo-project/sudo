@@ -812,3 +812,17 @@ CHANGES from sudo 1.5
 249) Usernames may now begin with a digit.  Gross, but people do it.
 
 Sudo 1.5.1 released.
+
+250) Added `opie' support.
+
+251) Added check to make sure fnmatch() really works.
+
+252) Now use the prompt S/Key gives us instead of rolling our own.
+
+253) Added -H flag from Danny Barron <dcbarro@nppd.com>.
+
+254) Add SUDO_PS1 envariable support.
+
+255) Attempt at sequent support.
+
+Sudo 1.5.2 released.
