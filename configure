@@ -27820,7 +27820,12 @@ cat >>conftest.$ac_ext <<_ACEOF
 int
 main ()
 {
-struct timespec ts1, ts2; ts1.tv_sec = 1; ts1.tv_nsec = 0; ts2.tv_sec = 0; ts2.tv_nsec = 0; timespecsub(&ts1, &ts2);
+struct timespec ts1, ts2;
+ts1.tv_sec = 1; ts1.tv_nsec = 0; ts2.tv_sec = 0; ts2.tv_nsec = 0;
+#ifndef timespecsub
+#error missing timespecsub
+#endif
+timespecsub(&ts1, &ts2);
   ;
   return 0;
 }
