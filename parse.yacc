@@ -78,6 +78,7 @@ static const char rcsid[] = "$Sudo$";
  * Globals
  */
 extern int sudolineno, parse_error;
+extern char *sudoers;
 int errorlineno = -1;
 int clearaliases = TRUE;
 int printmatches = FALSE;
@@ -198,7 +199,6 @@ static void expand_ga_list	__P((void));
 static void expand_match_list	__P((void));
 static aliasinfo *find_alias	__P((char *, int));
 static int  more_aliases	__P((void));
-       void init_parser		__P((void));
        void yyerror		__P((const char *));
 
 void
@@ -210,7 +210,7 @@ yyerror(s)
 	errorlineno = sudolineno ? sudolineno - 1 : 0;
     if (s && !quiet) {
 #ifndef TRACELEXER
-	(void) fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s,
+	(void) fprintf(stderr, ">>> %s: %s, line %d <<<\n", sudoers, s,
 	    sudolineno ? sudolineno - 1 : 0);
 #else
 	(void) fprintf(stderr, "<*> ");
@@ -1250,7 +1250,7 @@ expand_match_list()
  * for various data structures.
  */
 void
-init_parser()
+init_parser(char *path)
 {
 
     /* Free up old data structures if we run the parser more than once. */
@@ -1262,6 +1262,7 @@ init_parser()
 	used_runas = FALSE;
 	errorlineno = -1;
 	sudolineno = 1;
+	free(sudoers);
     }
 
     /* Allocate space for the matching stack. */
@@ -1271,4 +1272,6 @@ init_parser()
     /* Allocate space for the match list (for `sudo -l'). */
     if (printmatches == TRUE)
 	expand_match_list();
+
+    sudoers = estrdup(path);
 }

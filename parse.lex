@@ -62,6 +62,7 @@ static const char rcsid[] = "$Sudo$";
 extern YYSTYPE yylval;
 extern int clearaliases;
 int sudolineno = 1;
+char *sudoers;
 static int sawspace = 0;
 static int arg_len = 0;
 static int arg_size = 0;
@@ -69,7 +70,7 @@ static int arg_size = 0;
 static int fill			__P((char *, int));
 static int fill_cmnd		__P((char *, int));
 static int fill_args		__P((char *, int, int));
-static int buffer_frob		__P((const char *));
+static int buffer_frob		__P((char *));
 extern void reset_aliases	__P((void));
 extern void yyerror		__P((const char *));
 
@@ -181,6 +182,7 @@ DEFVAR			[a-z_]+
 
 <INITIAL>^#include[ \t]+.*\n {
 			    char *cp, *ep;
+			    ++sudolineno;
 			    /* pull out path from #include line */
 			    for (cp = yytext + 9; isspace(*cp); cp++)
 				continue;
@@ -505,24 +507,35 @@ fill_args(s, len, addspace)
     return(TRUE);
 }
 
-#define MAX_INCLUDE_DEPTH	128
-int
+struct sudoers_state {
+    YY_BUFFER_STATE bs;
+    char *path;
+    int lineno;
+};
+
+#define MAX_SUDOERS_DEPTH	128
+
+static int
 buffer_frob(path)
-    const char *path;
+    char *path;
 {
     static size_t stacksize, depth;
-    static YY_BUFFER_STATE *bufstack;
+    static struct sudoers_state *state;
     FILE *fp;
 
     if (path != NULL) {
-	/* push */
+	/* push current state */
+	if ((path = strdup(path)) == NULL) {
+	    yyerror("unable to allocate memory");
+	    return(FALSE);
+	}
 	if (depth >= stacksize) {
-	    if (depth > MAX_INCLUDE_DEPTH) {
+	    if (depth > MAX_SUDOERS_DEPTH) {
 		yyerror("too many levels of includes");
 		return(FALSE);
 	    }
 	    stacksize += 16;
-	    if ((bufstack = realloc(bufstack, stacksize)) == NULL) {
+	    if ((state = realloc(state, sizeof(state) * stacksize)) == NULL) {
 		yyerror("unable to allocate memory");
 		return(FALSE);
 	    }
@@ -531,15 +544,24 @@ buffer_frob(path)
 	    yyerror(path);
 	    return(FALSE);
 	}
-	bufstack[depth++] = YY_CURRENT_BUFFER;
+	state[depth].bs = YY_CURRENT_BUFFER;
+	state[depth].path = sudoers;
+	state[depth].lineno = sudolineno;
+	depth++;
+	sudolineno = 1;
+	sudoers = path;
 	yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
     } else {
 	/* pop */
 	if (depth == 0)
 	    return(FALSE);
+	depth--;
 	fclose(YY_CURRENT_BUFFER->yy_input_file);
 	yy_delete_buffer(YY_CURRENT_BUFFER);
-	yy_switch_to_buffer(bufstack[--depth]);
+	yy_switch_to_buffer(state[depth].bs);
+	free(sudoers);
+	sudoers = state[depth].path;
+	sudolineno = state[depth].lineno;
     }
     return(TRUE);
 }

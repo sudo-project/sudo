@@ -101,5 +101,6 @@ int hostname_matches	__P((char *, char *, char *));
 int netgr_matches	__P((char *, char *, char *, char *));
 int userpw_matches	__P((char *, char *, struct passwd *));
 int usergr_matches	__P((char *, char *, struct passwd *));
+void init_parser	__P((char *));
 
 #endif /* _SUDO_PARSE_H */

@@ -96,7 +96,6 @@ extern FILE *yyin, *yyout;
  * Prototypes
  */
 static int has_meta	__P((char *));
-       void init_parser	__P((void));
 
 /*
  * Look up the user in the sudoers file and check to see if they are
@@ -113,7 +112,7 @@ sudoers_lookup(pwflag)
     yyout = stdout;
 
     /* Allocate space for data structures in the parser. */
-    init_parser();
+    init_parser(_PATH_SUDOERS);
 
     /* If pwcheck *could* be "all" or "any", keep more state. */
     if (pwflag > 0)
