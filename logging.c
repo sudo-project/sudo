@@ -322,6 +322,7 @@ void log_error(code)
 	strcat(logline, cmnd);	/* stuff the command into the logline */
 	strcat(logline, " ");
 
+	/* XXX - clean up this abonimation and just set count sanely */
 	if (Argc > 1) {
 	    argc = Argc - 2;
 	    argv = Argv + 1;
@@ -330,22 +331,14 @@ void log_error(code)
 	    argv = Argv;
 	}
 
-	p = logline + strlen(logline);
-	count = (int) (logline + MAXLOGLEN - p);
-
 	/*
-	 * Now stuff as much of the rest of the line as will fit
-	 * Do word wrap if logging to a file.
+	 * We have defined MAXLOGLEN to be bigger than argv[] can be
+	 * so do not need to do bounds checking.
 	 */
-	while (count > 0 && argc--) {
-	    strncpy(p, *(++argv), count);
-	    strcat(p, " ");
-	    p += 1 + (count < strlen(*argv) ? count : strlen(*argv));
-	    count = (int) (logline + MAXLOGLEN - p);
+	for (count = 0; count < argc; count++) {
+	    strcat(logline, argv[count]);
+	    strcat(logline, " ");
 	}
-	if (count <= 0)		/* if the line is too long, */
-	    strcat(p, " ... ");	/* add an elipsis to the end */
-
     }
 
 #if (LOGGING & SLOG_SYSLOG)
@@ -359,11 +352,12 @@ void log_error(code)
      * Log the full line, breaking into multiple syslog(3) calls if necesary
      */
     p = &logline[33];			/* skip past the date and user */
-    for (count=0; count < (strlen(logline) / MAXSYSLOGLEN) + 1; count++) {
+    for (count = 0; count < strlen(logline) / MAXSYSLOGLEN + 1; count++) {
 	if (strlen(p) > MAXSYSLOGLEN) {
 	    /*
 	     * Break up the line into what will fit on one syslog(3) line
 	     * Try to break on a word boundary if possible.
+	     * XXX - speed this up!
 	     */
 	    for (tmp = p + MAXSYSLOGLEN; tmp > p && *tmp != ' '; tmp--)
 		;
