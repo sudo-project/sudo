@@ -586,7 +586,12 @@ static void load_cmnd()
 {
     char path[MAXPATHLEN + 1];
 
-    strncpy(path, Argv[1], MAXPATHLEN)[MAXPATHLEN] = 0;
+    if (strlen(Argv[1]) >= sizeof(path)) {
+	(void) fprintf(stderr, "%s: %s: Pathname too long\n", Argv[0], Argv[1]);
+	exit(1);
+    }
+
+    (void) strcpy(path, Argv[1]);
 
     cmnd = find_path(path);	/* get the absolute path */
     if (cmnd == NULL) {
