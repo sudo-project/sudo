@@ -47,6 +47,7 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif /* HAVE_MALLOC_H */
+#include <ctype.h>
 #include <pwd.h>
 #include <signal.h>
 #include <errno.h>
