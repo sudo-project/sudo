@@ -122,6 +122,7 @@ AC_HAVE_LIBRARY(elf)
 AC_HAVE_LIBRARY(malloc)
 AC_HAVE_LIBRARY(shadow)
 AC_HAVE_LIBRARY(ucb)
+AC_HAVE_LIBRARY(ufc)
 dnl SVR4 (or at least solaris 2.x) has -lucb in /usr/ucblib
 if test -n "$SVR4"; then
     echo checking for /usr/ucblib
