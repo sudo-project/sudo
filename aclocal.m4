@@ -153,7 +153,7 @@ fi
 dnl
 dnl check for shadow passwords
 dnl
-AC_DEFUN(SUDO_CHECK_SHADOW, [AC_MSG_CHECKING(for shadow passwords)
+AC_DEFUN(SUDO_CHECK_SHADOW_GENERIC, [AC_MSG_CHECKING(for shadow passwords)
 AC_TRY_RUN([#include <pwd.h>
 int main() {
 struct passwd *pwd;
@@ -162,6 +162,66 @@ return(!(pwd->pw_passwd == (char *) 0 || (pwd->pw_passwd[0] && pwd->pw_passwd [1
 ], AC_MSG_RESULT(yes)
 [$1], AC_MSG_RESULT(no)
 [$2])])
+
+AC_DEFUN(SUDO_CHECK_SHADOW_SUNOS4, [AC_MSG_CHECKING(for shadow passwords)
+if test -s /etc/security/passwd.adjunct; then
+    AC_MSG_RESULT(yes)
+    [$1]
+else
+    AC_MSG_RESULT(no)
+    [$2]
+fi
+])
+
+AC_DEFUN(SUDO_CHECK_SHADOW_ULTRIX4, [AC_MSG_CHECKING(for shadow passwords)
+if test -s /etc/auth.pag; then
+    AC_MSG_RESULT(yes)
+    [$1]
+else
+    AC_MSG_RESULT(no)
+    [$2]
+fi
+])
+
+AC_DEFUN(SUDO_CHECK_SHADOW_BSD, [AC_MSG_CHECKING(for shadow passwords)
+if test -s /etc/master.passwd; then
+    AC_MSG_RESULT(yes)
+    [$1]
+else
+    AC_MSG_RESULT(no)
+    [$2]
+fi
+])
+
+AC_DEFUN(SUDO_CHECK_SHADOW_HPUX9, [AC_MSG_CHECKING(for shadow passwords)
+if test -s /.secure/etc/passwd; then
+    AC_MSG_RESULT(yes)
+    [$1]
+else
+    AC_MSG_RESULT(no)
+    [$2]
+fi
+])
+
+AC_DEFUN(SUDO_CHECK_SHADOW_SVR4, [AC_MSG_CHECKING(for shadow passwords)
+if test -s /etc/master; then
+    AC_MSG_RESULT(yes)
+    [$1]
+else
+    AC_MSG_RESULT(no)
+    [$2]
+fi
+])
+
+AC_DEFUN(SUDO_CHECK_SHADOW_SECUREWARE, [AC_MSG_CHECKING(for shadow passwords)
+if test -d /tcb/files/auth; then
+    AC_MSG_RESULT(yes)
+    [$1]
+else
+    AC_MSG_RESULT(no)
+    [$2]
+fi
+])
 
 dnl
 dnl
