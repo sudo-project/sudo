@@ -42,12 +42,12 @@ Host_Alias	CSNETS=128.138.243.0,128.138.204.0,128.138.242.0
 # User specification
 ##
 
-# root and users in group wheel can run anything on any machine
-root		ALL=ALL
-%wheel		ALL=ALL
+# root and users in group wheel can run anything on any machine as any user
+root		ALL=ALL (ALL)
+%wheel		ALL=ALL (ALL)
 
-# full time sysadmins can run anything on any machine
-FULLTIMERS	ALL=ALL
+# full time sysadmins can run anything on any machine without a password
+FULLTIMERS	ALL=NOPASSWD:ALL
 # part time sysadmins may run anything except root shells or su
 PARTTIMERS	ALL=ALL,!SU,!SHELLS
 
@@ -73,8 +73,6 @@ jim		+biglab=ALL
 # users in the secretaries netgroup need to help manage the printers
 +secretaries	ALL=PRINTING
 
-#  Additional options
-# fred can run /bin/ls as oracle by specifying -u oracle on command line
-# he can also run command /bin/date as uid -2 without entering passwd
-
+# fred can run /bin/ls as oracle by specifying -u oracle on command line;
+# he can also run /bin/date as uid -2 without entering a password
 fred		ALL=(oracle) /bin/ls,(#-2) NOPASSWD:/bin/date
