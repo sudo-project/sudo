@@ -451,7 +451,7 @@ AC_ARG_WITH(badpass-message, [  --with-badpass-message  message the user sees wh
     *)		AC_DEFINE_UNQUOTED(INCORRECT_PASSWORD, "$with_badpass_message")
 		AC_MSG_RESULT([$with_badpass_message])
 		;;
-esac], [AC_DEFINE(INCORRECT_PASSWORD, "Sorry, try again.") AC_MSG_RESULT([Sorry, try again.])])
+esac], [AC_DEFINE(INCORRECT_PASSWORD, ["Sorry, try again."]) AC_MSG_RESULT([Sorry, try again.])])
 
 AC_MSG_CHECKING(whether to expect fully qualified hosts in sudoers)
 AC_ARG_WITH(fqdn, [  --with-fqdn             expect fully qualified hosts in sudoers],
@@ -982,7 +982,7 @@ case "$host" in
 		;;
     *-*-hiuxmpp*)
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsec"], AC_CHECK_LIB(security, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"]))
+		    AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1], AC_CHECK_LIB(security, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"; SECUREWARE=1]))
 		    CHECKSHADOW="false"
 		fi
 		;;
@@ -992,7 +992,7 @@ case "$host" in
 		#STATIC_SUDO=true
 
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsec"])
+		    AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1])
 		    CHECKSHADOW="false"
 		fi
 
@@ -1041,7 +1041,8 @@ case "$host" in
 		# DCE support (requires ANSI C compiler)
 		if test "$with_DCE" = "yes"; then
 		    # order of libs in 9.X is important. -lc_r must be last
-		    SUDO_LIBS="-ldce -lM -lc_r"
+		    SUDO_LIBS="${SUDO_LIBS} -ldce -lM -lc_r"
+		    LIBS="${LIBS} -ldce -lM -lc_r"
 
 		    if test -n "$GCC"; then
 			CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE -D_REENTRANT -I/usr/include/reentrant"
@@ -1076,7 +1077,7 @@ case "$host" in
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
 
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(security, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"])
+		    AC_CHECK_LIB(security, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"; SECUREWARE=1])
 		    CHECKSHADOW="false"
 		fi
 		;;
@@ -1102,7 +1103,7 @@ case "$host" in
     *-*-linux*)
 		# Some Linux versions need to link with -lshadow
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_FUNC(getspnam, AC_DEFINE(HAVE_GETSPNAM), AC_CHECK_LIB(shadow, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lshadow"]))
+		    AC_CHECK_FUNC(getspnam, AC_DEFINE(HAVE_GETSPNAM), AC_CHECK_LIB(shadow, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lshadow"; LIBS="${LIBS} -lshadow"]))
 		    CHECKSHADOW="false"
 		fi
 		;;
@@ -1113,14 +1114,14 @@ case "$host" in
 		fi
 
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lprot"; OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"])
+		    AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lprot"; LIBS="${LIBS} -lprot"; OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"; SECUREWARE=1])
 		    CHECKSHADOW="false"
 		fi
 		;;
     *-*-ultrix*)
 		OS="ultrix"
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(auth, getauthuid, AC_DEFINE(HAVE_GETAUTHUID) [SUDO_LIBS="${SUDO_LIBS} -lauth"])
+		    AC_CHECK_LIB(auth, getauthuid, AC_DEFINE(HAVE_GETAUTHUID) [SUDO_LIBS="${SUDO_LIBS} -lauth"; LIBS="${LIBS} -lauth"])
 		    CHECKSHADOW="false"
 		fi
 		;;
@@ -1137,13 +1138,13 @@ case "$host" in
 		LIBS="${LIBS} -lcrypt"
 
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"])
+		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
 		    CHECKSHADOW="false"
 		fi
 		;;
     *-*-sco*)
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(prot, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lprot -lx"])
+		    AC_CHECK_LIB(prot, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lprot -lx"; LIBS="${LIBS} -lprot -lx"; SECUREWARE=1])
 		    CHECKSHADOW="false"
 		fi
 		;;
@@ -1152,7 +1153,7 @@ case "$host" in
 		;;
     *-sequent-sysv*)
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"])
+		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
 		    CHECKSHADOW="false"
 		fi
 		;;
@@ -1187,7 +1188,7 @@ if test "$CHECKSHADOW" = "true"; then
     AC_CHECK_FUNC(getspnam, AC_DEFINE(HAVE_GETSPNAM) [CHECKSHADOW="false"])
 fi
 if test "$CHECKSHADOW" = "true"; then
-    AC_CHECK_FUNC(getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"], AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SUDO_LIBS="${SUDO_LIBS} -lsec"], AC_CHECK_LIB(security, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SUDO_LIBS="${SUDO_LIBS} -lsecurity"], AC_CHECK_LIB(prot, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SUDO_LIBS="${SUDO_LIBS} -lprot"]))))
+    AC_CHECK_FUNC(getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SECUREWARE=1], AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"], AC_CHECK_LIB(security, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"], AC_CHECK_LIB(prot, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lprot"; LIBS="${LIBS} -lprot"]))))
 fi
 
 dnl
@@ -1239,9 +1240,10 @@ dnl
 dnl Function checks
 dnl
 AC_CHECK_FUNCS(strchr strrchr memcpy memset sysconf sigaction tzset strcasecmp seteuid)
-if test "$SHADOW_TYPE" = "SPW_SECUREWARE"; then
+if test -n "$SECUREWARE"; then
     AC_CHECK_FUNCS(bigcrypt)
     AC_CHECK_FUNCS(set_auth_parameters)
+    AC_CHECK_FUNCS(initprivs)
 fi
 if test -z "$BROKEN_GETCWD"; then
     AC_CHECK_FUNC(getcwd, AC_DEFINE(HAVE_GETCWD), LIBOBJS="$LIBOBJS getcwd.o")
@@ -1249,7 +1251,7 @@ fi
 AC_CHECK_FUNC(waitpid, AC_DEFINE(HAVE_WAITPID), AC_CHECK_FUNCS(wait3))
 AC_CHECK_FUNC(innetgr, AC_DEFINE(HAVE_INNETGR) AC_CHECK_FUNCS(getdomainname))
 AC_CHECK_FUNC(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
-AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) SUDO_LIBS="${SUDO_LIBS} -lcompat"; VISUDO_LIBS="${VISUDO_LIBS} -lcompat", LIBOBJS="$LIBOBJS lsearch.o"), LIBOBJS="$LIBOBJS lsearch.o"))
+AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) [SUDO_LIBS="${SUDO_LIBS} -lcompat"; VISUDO_LIBS="${VISUDO_LIBS} -lcompat"; LIBS="${LIBS} -lcompat"], LIBOBJS="$LIBOBJS lsearch.o"), LIBOBJS="$LIBOBJS lsearch.o"))
 AC_CHECK_FUNC(setenv, AC_DEFINE(HAVE_SETENV), AC_FUNC_CHECK(putenv, AC_DEFINE(HAVE_PUTENV), LIBOBJS="$LIBOBJS putenv.o"))
 AC_CHECK_FUNC(utime, AC_DEFINE(HAVE_UTIME)
 SUDO_FUNC_UTIME_POSIX
@@ -1259,16 +1261,16 @@ dnl
 dnl if crypt(3) not in libc, look elsewhere
 dnl
 if test -z "$LIB_CRYPT"; then
-    AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt", AC_CHECK_LIB(crypt_d, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt_d", AC_CHECK_LIB(crypt, ufc, SUDO_LIBS="${SUDO_LIBS} -lufc"))))
+    AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, [SUDO_LIBS="${SUDO_LIBS} -lcrypt"; LIBS="${LIBS} -lcrypt"], AC_CHECK_LIB(crypt_d, crypt, [SUDO_LIBS="${SUDO_LIBS} -lcrypt_d"; LIBS="${LIBS} -lcrypt_d"], AC_CHECK_LIB(crypt, ufc, [SUDO_LIBS="${SUDO_LIBS} -lufc"; LIBS="${LIBS} -lufc"]))))
 fi
 dnl
 dnl If socket(2) not in libc, check -lsocket and -linet
 dnl
-AC_CHECK_FUNC(socket, ,AC_CHECK_LIB(socket, socket, SUDO_LIBS="${SUDO_LIBS} -lsocket", AC_CHECK_LIB(inet, socket, SUDO_LIBS="${SUDO_LIBS} -linet")))
+AC_CHECK_FUNC(socket, ,AC_CHECK_LIB(socket, socket, [SUDO_LIBS="${SUDO_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(inet, socket, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"])))
 dnl
 dnl If inet_addr(3) not in libc, check -lnsl and -linet
 dnl
-AC_CHECK_FUNC(inet_addr, ,AC_CHECK_LIB(nsl, inet_addr, SUDO_LIBS="${SUDO_LIBS} -lnsl", AC_CHECK_LIB(inet, inet_addr, SUDO_LIBS="${SUDO_LIBS} -linet")))
+AC_CHECK_FUNC(inet_addr, ,AC_CHECK_LIB(nsl, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"])))
 dnl
 dnl Bison and DCE use alloca(3), if not in libc, use the sudo one (from gcc)
 dnl (gcc includes its own alloca(3) but other compilers may not)
@@ -1282,8 +1284,7 @@ dnl library checks
 dnl
 dnl IRIX 4 needs -lsun)
 if test "$OS" = "irix"; then
-    AC_CHECK_LIB(sun, getpwnam, [SUDO_LIBS="${SUDO_LIBS} -lsun"
-VISUDO_LIBS="${VISUDO_LIBS} -lsun"])
+    AC_CHECK_LIB(sun, getpwnam, [SUDO_LIBS="${SUDO_LIBS} -lsun"; VISUDO_LIBS="${VISUDO_LIBS} -lsun"; LIBS="${LIBS} -lsun"])
 fi
 dnl
 dnl Find kerberos includes and libs or complain
@@ -1319,7 +1320,7 @@ if test "$with_kerb4" = "yes" -o "$with_kerb5" = "yes"; then
 fi
 
 dnl
-dnl PAM libs and includes
+dnl PAM libs
 dnl
 if test "$with_pam" = "yes"; then
     SUDO_LIBS="${SUDO_LIBS} -ldl -lpam -lpam_misc"
