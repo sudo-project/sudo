@@ -90,9 +90,11 @@ static char rcsid[] = "$Id$";
  *  and input will time out based on the value of timeout.
  */
 
-char * tgetpass(prompt, timeout)
+char * tgetpass(prompt, timeout, user, host)
     const char *prompt;
     int timeout;
+    char *user;
+    char *host;
 {
 #ifdef HAVE_TERMIOS_H
     struct termios term;
@@ -114,6 +116,7 @@ char * tgetpass(prompt, timeout)
     static char buf[_PASSWD_LEN + 1];
     fd_set readfds;
     struct timeval tv;
+    char *p;
 
     /*
      * mask out SIGINT and SIGTSTP, should probably just catch and deal.
@@ -165,7 +168,25 @@ char * tgetpass(prompt, timeout)
 #endif /* HAVE_TERMIOS_H */
 
     /* print the prompt */
-    (void) fputs(prompt, output);
+    if (prompt) {
+	p = (char *) prompt;
+	do {
+	    /* expand %u -> username, %h -> host */
+	    switch (*p) {
+		case '%':   if (user && *(p+1) == 'u') {
+				(void) fputs(user, output);
+				p++;
+				break;
+			    } else if (host && *(p+1) == 'h') {
+				(void) fputs(host, output);
+				p++;
+				break;
+			    }
+
+		default:    (void) fputc(*p, output);
+	    }
+	} while (*(++p));
+    }
 
     /* rewind if necesary */
     if (input == output) {
