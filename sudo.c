@@ -128,6 +128,7 @@ char cwd[MAXPATHLEN + 1];
 uid_t uid = (uid_t)-2;
 extern struct interface *interfaces;
 extern int num_interfaces;
+extern int printmatches;
 
 
 /********************************************************************
@@ -176,6 +177,7 @@ main(argc, argv)
 	    break;
 	case MODE_LIST :
 	    cmnd = "list";
+	    printmatches = 1;
 	    break;
 	case MODE_BACKGROUND :
 	    if (Argc == 1)
@@ -213,18 +215,16 @@ main(argc, argv)
 	remove_timestamp();	/* remove the timestamp ticket file */
 	exit(0);
     } else if (sudo_mode == MODE_LIST) {
-#ifdef notyet
-	(void) validate();	/* list the user's available commands */
-#else
-	(void) fprintf(stderr,
-	    "Sorry, the list command is not currently implemented.\n");
-#endif
+	check_user();
+	log_error(ALL_SYSTEMS_GO);
+	(void) validate(FALSE);
 	exit(0);
     }
 
     add_env();			/* add in SUDO_* envariables */
 
-    rtn = validate();		/* validate the user */
+    /* validate the user but don't search for "validate" */
+    rtn = validate(sudo_mode != MODE_VALIDATE);
     switch (rtn) {
 
 	case VALIDATE_OK:
