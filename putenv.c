@@ -43,23 +43,12 @@ static char rcsid[] = "$Id$";
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 #include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
-#include <errno.h>
-#include <sys/param.h>
 
 #include "compat.h"
 
 #if !defined(STDC_HEADERS) && !defined(__GNUC__)
 extern char *malloc	__P((size_t));
 #endif /* !STDC_HEADERS && !gcc */
-
-
-/*
- * Since we can't count on this being defined...
- */
-extern int errno;
-
-
-int putenv              __P((const char *));
 
 
 /******************************************************************
@@ -84,7 +73,7 @@ int putenv(str)
      * find out how much of str to match when searching
      * for a string to replace.
      */
-    if ((tmp = index(str, '=')) == NULL || tmp == str)
+    if ((tmp = strchr(str, '=')) == NULL || tmp == str)
 	matchlen = strlen(str);
     else
 	matchlen = (int) (tmp - str);
