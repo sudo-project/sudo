@@ -79,10 +79,10 @@ Design Features
 
   * The /etc/sudoers file can be disabled.  Paranoid security administrators
     can now disallow parsing of any local /etc/sudoers file by an LDAP
-    sudoOption '!local_sudoers'.  This way all sudoers can be controlled and
-    audited in one place because local entries are not allowed.
-    In the future, this file may not be present.
-      BUG: THIS OPTION IS NOT IMPLEMENTED YET.
+    sudoOption 'ignore_local_sudoers'.  This way all sudoers can be controlled
+    and audited in one place because local entries are not allowed.
+    In fact, if this option is included in the cn=defaults object of LDAP,
+    sudo won't even look for a /etc/sudoers file.
 
   * The sudo binary compiled with LDAP support should be totally backward
     compatible and be syntactically and source code equivalent to its non
@@ -265,6 +265,47 @@ it should.  A value of 1 shows moderate debugging.  A value of 2 shows the
 results of the matches themselves.  Make sure to set the value back to zero
 so that other users don't get confused by the debugging messages.  This value
 is 'sudoers_debug' in the /etc/ldap.conf.
+
+Parsing Differences between /etc/sudoers and LDAP
+=================================================
+There are some subtle differences in the way sudoers is handled once in LDAP.
+Probably the biggest is that according to the RFC, LDAP's ordering is
+arbitrary and you cannot expect that Attributes & Entries are returned in
+any order.  If there are conflicting command rules on an entry, the negative
+takes precedence.  This is called paranoid behavior (not necessarily the
+most specific match).
+
+Here is an example:
+
+  # /etc/sudoers:
+  # Allow all commands except shell
+  johnny  ALL=(root) ALL,!/bin/sh
+  # Always allows all commands because ALL is matched last
+  puddles ALL=(root) !/bin/sh,ALL
+
+  # LDAP equivalent of Johnny
+  # Allows all commands except shell
+  dn: cn=role1,ou=Sudoers,dc=my-domain,dc=com
+  objectClass: sudoRole
+  objectClass: top
+  cn: role1
+  sudoUser: johnny
+  sudoHost: ALL
+  sudoCommand: ALL
+  sudoCommand: !/bin/sh
+
+  # LDAP equivalent of Puddles
+  # Notice that even though ALL comes last, it still behaves like
+  # role1 since the LDAP code assumes the more paranoid configuration
+  dn: cn=role2,ou=Sudoers,dc=my-domain,dc=com
+  objectClass: sudoRole
+  objectClass: top
+  cn: role2
+  sudoUser: puddles
+  sudoHost: ALL
+  sudoCommand: !/bin/sh
+  sudoCommand: ALL
+
 
 Configure your /etc/nsswitch.conf
 =================================
