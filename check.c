@@ -42,6 +42,9 @@ static char rcsid[] = "$Id$";
 #include "config.h"
 
 #include <stdio.h>
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif /* STDC_HEADERS */
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
@@ -81,6 +84,9 @@ static char rcsid[] = "$Id$";
 #include <sys/audit.h>
 #include <pwdadj.h>
 #endif /* SUNOS4 && HAVE_C2_SECURITY */
+#ifdef HAVE_KERBEROS
+#include <krb.h>
+#endif /* HAVE_KERBEROS */
 #ifdef HAVE_AFS
 #include <usersec.h>
 #include <afs/kauth.h>
@@ -91,12 +97,13 @@ static char rcsid[] = "$Id$";
 /*
  * Prototypes for local functions
  */
-static int   check_timestamp	__P((void));
-static void  check_passwd	__P((void));
-static void  update_timestamp	__P((void));
-static void  reminder		__P((void));
-static char *osf_C2_crypt	__P((char *, char *));
-int   user_is_exempt		__P((void));
+static int   check_timestamp		__P((void));
+static void  check_passwd		__P((void));
+static void  update_timestamp		__P((void));
+static void  reminder			__P((void));
+static char *osf_C2_crypt		__P((char *, char *));
+static int   sudo_krb_validate_user	__P((char *, char *));
+int   user_is_exempt			__P((void));
 
 /*
  * Globals
@@ -328,7 +335,11 @@ static void check_passwd()
     struct passwd *pw_ent = getpwuid(uid);
 #endif /* HAVE_SKEY */
     char *encrypted=epasswd;	/* this comes from /etc/passwd  */
+#if defined(HAVE_KERBEROS) && defined(USE_GETPASS)
+    char pass[128];
+#else
     char *pass;			/* this is what gets entered    */
+#endif /* HAVE_KERBEROS && USE_GETPASS */
     register int counter = TRIES_FOR_PASSWORD;
 
 #if defined(__hpux) && defined(HAVE_C2_SECURITY)
@@ -418,7 +429,11 @@ static void check_passwd()
 	pass = skey_getpass("Password:", pw_ent, pw_ok);
 #else
 #ifdef USE_GETPASS
+#ifdef HAVE_KERBEROS
+	(void) des_read_pw_string(pass, sizeof(pass) - 1, "Password: ", 0);
+#else
 	pass = (char *) getpass("Password:");
+#endif /* HAVE_KERBEROS */
 #else
 	pass = tgetpass("Password:", PASSWORD_TIMEOUT * 60);
 #endif /* USE_GETPASS */
@@ -451,6 +466,10 @@ static void check_passwd()
 	    return;		/* if the passwd is correct return() */
 #endif /* HAVE_SKEY */
 #endif /* __convex__ && HAVE_C2_SECURITY */
+#ifdef HAVE_KERBEROS
+	if (sudo_krb_validate_user(user, pass) == 0)
+	    return;
+#endif /* HAVE_KERBEROS */
 #ifdef HAVE_AFS
 	code = ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION+KA_USERAUTH_DOSETPAG,
                                           user,
@@ -484,6 +503,7 @@ static void check_passwd()
 }
 
 
+#if defined(__osf__) && defined(HAVE_C2_SECURITY)
 /********************************************************************
  * osf_C2_crypt()  - returns OSF/1 3.0 enhanced security encrypted
  *               password.  crypt() produces, given an eight
@@ -533,6 +553,66 @@ static char *osf_C2_crypt(pass, encrypt_salt)
 
     return(enpass);
 }
+#endif /* __osf__ && HAVE_C2_SECURITY */
+
+
+#ifdef HAVE_KERBEROS
+/********************************************************************
+ *
+ *  sudo_krb_validate_user()
+ *
+ *  Validate a user via kerberos.
+ */
+int sudo_krb_validate_user(user, pass)
+    char *user, *pass;
+{
+    char realm[REALM_SZ];
+    char *env;
+    int k_errno;
+
+    /* Get the local realm */
+    if (krb_get_lrealm(realm, 1) != KSUCCESS) {
+	/* XXX - use logging functions */
+	(void) fprintf(stderr, "%s: Unable to get local realm\n", Argv[0]);
+	exit(1);
+    }
+
+    /* Need to set the ticket file based on the effective uid */
+    if (env = getenv("KRBTKFILE")) {
+	krb_set_tkt_string(env);
+    } else {
+	char tkfile[MAXPATHLEN];
+
+	(void) sprintf(tkfile, "%s%d", TKT_ROOT, geteuid());
+	krb_set_tkt_string(tkfile);
+    }
+
+    /*
+     * Need to chown the ticket file to root for stupid in_tkt()
+     * which makes some nasty assumptions.  How broken.
+     */
+    set_perms(PERM_ROOT);
+    (void) chown(tkt_string(), 0, GID_NO_CHANGE);
+
+    /* Update the ticket if password is ok */
+    k_errno = krb_get_pw_in_tkt(user, "", realm, "krbtgt", realm,
+	DEFAULT_TKT_LIFE, pass);
+
+    /* Set the owner back on the ticket file and relinquish root perms */
+    (void) chown(tkt_string(), uid, GID_NO_CHANGE);
+    set_perms(PERM_USER);
+
+    /* Exit if we got a kerberos error */
+    if (k_errno != INTK_OK && k_errno != INTK_BADPW) {
+	/* XXX - use logging functions */
+	(void) fprintf(stderr, "%s: Kerberos error: %s\n", Argv[0],
+	    krb_err_txt[k_errno]);
+	exit(1);
+    }
+
+    return(!(k_errno == INTK_OK));
+}
+#endif /* HAVE_KERBEROS */
 
 
 /********************************************************************
