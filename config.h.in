@@ -72,15 +72,6 @@
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
-/* Define on System V Release 4 or Solaris 2.x.  */
-#undef SVR4
-#if defined(SVR4) && !defined(__svr4__)
-#  define __svr4__
-#endif /* SVR4 */
-
-/* Define on SunOS 4.x */
-#undef SUNOS4
-
 /* Define if you want to use the system getpass().  */
 #undef USE_GETPASS
 
@@ -212,6 +203,9 @@
 
 /* Define if your struct sockadr has an sa_len field. */
 #undef HAVE_SA_LEN
+
+/* Define to the variety of shadow passwords supported on your OS */
+#undef SHADOW_TYPE
 
 /* Define to void if your C compiler fully groks void, else char */
 #undef VOID
