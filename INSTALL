@@ -242,6 +242,14 @@ Special features/options:
         is to compile noexec support if libtool supports building
         shared objects on your OS.
 
+  --with-systrace[=DIR]
+	Enable support for the systrace(4) tracing facility.  This
+	allows sudo to control execution of further commands by
+	the program being run through sudo.  On systems with
+	systrace(4) support this is a better option than the
+	"noexec" facility.  If DIR is specified it indicates the
+	directory in which to find the systrace.h include file.
+
   --disable-root-mailer
         By default sudo will run the mailer as root when tattling
         on a user so as to prevent that user from killing the mailer.
