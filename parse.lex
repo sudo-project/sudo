@@ -122,6 +122,10 @@ N			[0-9][0-9]?[0-9]?
 			      LEXTRACE("CMNDALIAS ");
 			      return CMNDALIAS;
 			  }
+			  if (strcmp(yytext, "User_Alias") == 0) {
+			      LEXTRACE("USERALIAS ");
+			      return USERALIAS;
+			  }
 
 			  l = strlen(yytext) - 1;
 			  if (isalpha(yytext[l]) || isdigit(yytext[l])) {
