@@ -39,6 +39,8 @@
  
            NO_ROOT_SUDO           - sudo will exit if called by root
   
+           SOLARIS                - define if using Solaris 2.x
+
            MULTIMAX               - define if installing on Encore Multimax
                                     Also change the LIBS macro to "LIBS=-ll"
  
@@ -293,9 +295,15 @@ extern int errno;
  * This is to placate hpux
  */
 #ifdef hpux
-#define setreuid(__RUID, __EUID)	(setresuid(__RUID, __EUID, (uid_t) -1))
 #define getdtablesize()	(sysconf(_SC_OPEN_MAX))
 #ifndef USE_CWD
 #define USE_CWD
 #endif	/* USE_CWD */
 #endif	/* hpux */
+
+/*
+ * Sun's cpp doesn't define this but it should
+ */
+#if defined(SOLARIS) && !defined(__svr4__)
+#define __svr4__
+#endif /* SOLARIS */
