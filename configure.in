@@ -118,6 +118,7 @@ AC_PROG_YACC
 AC_PROG_LEX
 SUDO_PROG_INSTALL
 SUDO_PROG_SENDMAIL
+SUDO_PROG_PWD
 SUDO_PROG_VI
 dnl
 dnl Header file checks
@@ -140,7 +141,11 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_HAVE_FUNCS(getcwd strdup strchr strrchr sysconf)
+AC_HAVE_FUNCS(getcwd getwd strchr strrchr sysconf)
+dnl
+dnl Function checks w/ replacements
+dnl
+AC_REPLACES_FUNCS(strdup realpath getcwd)
 dnl
 dnl library checks
 dnl
