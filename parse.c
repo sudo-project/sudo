@@ -168,7 +168,7 @@ int validate(check_cmnd)
  * If path doesn't end in /, return TRUE iff cmnd & path name the same inode;
  * otherwise, return TRUE if cmnd names one of the inodes in path
  */
-int path_matches(cmnd, user_args, path, sudoers_args)
+int command_matches(cmnd, user_args, path, sudoers_args)
     char *cmnd;
     char **user_args;
     char *path;

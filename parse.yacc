@@ -96,7 +96,7 @@ int top = 0;
 /*
  * Protoypes
  */
-extern int path_matches		__P((char *, char **, char *, char **));
+extern int command_matches		__P((char *, char **, char *, char **));
 extern int addr_matches		__P((char *));
 extern int netgr_matches	__P((char *, char *, char *));
 extern int usergr_matches	__P((char *, char *));
@@ -268,8 +268,8 @@ cmnd		:	ALL {
 			    char **t;
 
 			    /* if NewArgc > 1 pass ptr to 1st arg, else NULL */
-			    if (path_matches(cmnd, (NewArgc > 1) ? &NewArgv[1]
-					     : NULL, $1.cmnd, $1.args))
+			    if (command_matches(cmnd, (NewArgc > 1) ?
+				    &NewArgv[1] : NULL, $1.cmnd, $1.args))
 				cmnd_matches = TRUE;
 
 			    (void) free($1.cmnd);
