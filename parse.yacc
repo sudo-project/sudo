@@ -338,10 +338,10 @@ int nslots;
 {
     aliasinfo *aip;
     if (nslots == 0)
-	aip = (aliasinfo *) malloc(MOREALIASES * sizeof(aliasinfo));
+	aip = (aliasinfo *) malloc(MOREALIASES * sizeof(*aip));
     else
 	aip = (aliasinfo *) realloc(aliases,
-				    (nslots + MOREALIASES) * sizeof(aliasinfo));
+				    (nslots + MOREALIASES) * sizeof(*aip));
 
     if (aip != NULL) {
 	aliases = aip;
