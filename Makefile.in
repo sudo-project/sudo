@@ -217,7 +217,7 @@ sudo.html: $(srcdir)/sudo.pod
 
 sudo.man: $(srcdir)/sudo.pod
 	@rm -f $(srcdir)/$@
-	pod2man --section=$(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" $> > $(srcdir)/$@
+	(cd $(srcdir); pod2man --section=$(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" $> > $@)
 
 sudo.cat: sudo.man
 
@@ -227,7 +227,7 @@ visudo.html: $(srcdir)/visudo.pod
 
 visudo.man: $(srcdir)/visudo.pod
 	@rm -f $(srcdir)/$@
-	pod2man --section=$(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" $> > $(srcdir)/$@
+	(cd $(srcdir); pod2man --section=$(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" $> > $@)
 
 visudo.cat: visudo.man
 
@@ -237,7 +237,7 @@ sudoers.html: $(srcdir)/sudoers.pod
 
 sudoers.man: $(srcdir)/sudoers.pod
 	@rm -f $(srcdir)/$@
-	pod2man --section=$(mansect5) --release=$(VERSION) --center="FILE FORMATS" $> > $(srcdir)/$@
+	(cd $(srcdir); pod2man --section=$(mansect5) --release=$(VERSION) --center="FILE FORMATS" $> > $@)
 
 sudoers.cat: sudoers.man
 
