@@ -49,13 +49,14 @@ static char rcsid[] = "$Id$";
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <pwd.h>
-#include "sudo.h"
 #ifdef __hpux
 #  include <hpsecurity.h>
 #else
 #  include <sys/security.h>
 #endif /* __hpux */
 #include <prot.h>
+
+#include "sudo.h"
 
 
 /*
