@@ -1,4 +1,3 @@
-#ifdef USE_INSULTS
 /*
  *  CU sudo version 1.3.1
  *
@@ -18,6 +17,11 @@
  *
  *  Please send bugs, changes, problems to sudo-bugs.cs.colorado.edu
  */
+
+#ifdef USE_INSULTS
+
+#ifndef _SUDO_INSULTS_H
+#define _SUDO_INSULTS_H
 
 /*
  * To add insult to injury, just add to the following strings and
@@ -60,5 +64,7 @@ char *insults[] = {
  */
 
 #define INSULT		(insults[time(NULL) % NOFINSULTS])
+
+#endif /* _SUDO_INSULTS_H */
 
 #endif /* USE_INSULTS */

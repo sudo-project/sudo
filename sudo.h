@@ -26,6 +26,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#ifndef _SUDO_SUDO_h
+#define _SUDO_SUDO_h
+
 #include "pathnames.h"
 
 /* Configurable OPTIONS--these can be overridden from the Makefile */
@@ -335,3 +338,5 @@ extern char ** environ;
 #ifdef hpux
 #  define seteuid(__EUID)	(setresuid((uid_t)-1, __EUID, (uid_t)-1))
 #endif	/* hpux */
+
+#endif /* _SUDO_SUDO_H */
