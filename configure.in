@@ -751,9 +751,6 @@ dnl (gcc includes its own alloca(3) but other compilers may not)
 dnl
 if test "$with_DCE" = "yes" -o "$ac_cv_prog_YACC" = "bison -y"; then
     AC_FUNC_ALLOCA
-    if test -n "$ALLOCA"; then
-	LIBOBJS="$LIBOBJS $ALLOCA"
-    fi
 fi
 dnl
 dnl library checks
