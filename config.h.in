@@ -433,4 +433,8 @@
 #  define EXEC	execvp
 #endif /* USE_EXECV */
 
+#ifdef __svr4__
+#  define BSD_COMP
+#endif /* __svr4__ */
+
 #endif /* _SUDO_CONFIG_H */
