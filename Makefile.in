@@ -26,6 +26,7 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
+devdir = @devdir@
 authdir = $(srcdir)/auth
 top_builddir = .
 VPATH = @srcdir@
@@ -187,7 +188,7 @@ sudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
 # Uncomment the following if you want "make distclean" to clean the parser
-@DEV@PARSESRCS = gram.h gram.c toke.c def_data.c def_data.h
+@DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h
 
 # Uncomment the $(YACC) and mv lines if you intend to modify gram.y
 gram.c gram.h: gram.y
@@ -220,16 +221,16 @@ goodpath.o: goodpath.c $(SUDODEP)
 logging.o: logging.c $(SUDODEP)
 set_perms.o: set_perms.c $(SUDODEP)
 tgetpass.o: tgetpass.c $(SUDODEP)
-visudo.o: visudo.c $(SUDODEP) version.h gram.h
+visudo.o: visudo.c $(SUDODEP) version.h $(devdir)/gram.h
 sudo.o: sudo.c $(SUDODEP) interfaces.h version.h
 interfaces.o: interfaces.c $(SUDODEP) interfaces.h
-testsudoers.o: testsudoers.c $(SUDODEP) parse.h interfaces.h gram.h
-match.o: match.c $(SUDODEP) parse.h interfaces.h gram.h
-parse.o: parse.c $(SUDODEP) parse.h gram.h
+testsudoers.o: testsudoers.c $(SUDODEP) parse.h interfaces.h $(devdir)/gram.h
+match.o: match.c $(SUDODEP) parse.h interfaces.h $(devdir)/gram.h
+parse.o: parse.c $(SUDODEP) parse.h $(devdir)/gram.h
 pwutil.o: pwutil.c $(SUDODEP)
-toke.o: toke.c $(SUDODEP) parse.h gram.h
-gram.o: gram.c $(SUDODEP) parse.h gram.c gram.h redblack.h
-defaults.o: defaults.c $(SUDODEP) def_data.c auth/sudo_auth.h gram.h
+toke.o: $(devdir)/toke.c $(SUDODEP) parse.h $(devdir)/gram.h
+gram.o: $(devdir)/gram.c $(SUDODEP) parse.h $(devdir)/gram.h redblack.h
+defaults.o: defaults.c $(SUDODEP) def_data.c auth/sudo_auth.h $(devdir)/gram.h
 fnmatch.o: fnmatch.c config.h compat.h emul/fnmatch.h
 getcwd.o: getcwd.c config.h compat.h
 snprintf.o: snprintf.c config.h compat.h
@@ -354,7 +355,7 @@ mostlyclean: clean
 
 distclean: clean
 	-rm -rf Makefile pathnames.h config.h config.status config.cache \
-		config.log libtool sudo_noexec.lo .libs $(PARSESRCS) \
+		config.log libtool sudo_noexec.lo .libs $(GENERATED) \
 		sudo.man sudoers.man visudo.man Makefile.binary
 
 clobber: distclean
