@@ -104,9 +104,9 @@ char *s;
     if (errorlineno == -1)
 	errorlineno = sudolineno;
 #ifndef TRACELEXER
-    fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s, sudolineno);
+    (void) fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s, sudolineno);
 #else
-    fprintf(stderr, "<*> ");
+    (void) fprintf(stderr, "<*> ");
 #endif
     parse_error = TRUE;
 }
@@ -140,20 +140,20 @@ file		:	entry
 		;
 
 entry		:	COMMENT
-			{ ; }
+			    { ; }
                 |       error COMMENT
-			{ yyerrok; }
+			    { yyerrok; }
 		|	{ push; } user privileges {
 			    while (top && user_matches != TRUE) {
 				pop;
 			    }
 			}
 		|	USERALIAS useraliases
-			{ ; }
+			    { ; }
 		|	HOSTALIAS hostaliases
-			{ ; }
+			    { ; }
 		|	CMNDALIAS cmndaliases
-			{ ; }
+			    { ; }
 		;
 		
 
@@ -196,14 +196,14 @@ hostspec	:	ALL {
 		;
 
 fqdn		:	NAME '.' NAME {
-			    strcpy($$, $1);
-			    strcat($$, ".");
-			    strcat($$, $3);
+			    (void) strcpy($$, $1);
+			    (void) strcat($$, ".");
+			    (void) strcat($$, $3);
 			}
 		|	fqdn '.' NAME {
-			    strcpy($$, $1);
-			    strcat($$, ".");
-			    strcat($$, $3);
+			    (void) strcpy($$, $1);
+			    (void) strcat($$, ".");
+			    (void) strcat($$, $3);
 			}
 		;
 
@@ -215,10 +215,10 @@ opcmnd		:	cmnd {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				(void) puts($1);
-			     }
+			}
 		|	'!' {
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE) {
+			    if (printmatches == TRUE && host_matches == TRUE
+				&& user_matches == TRUE) {
 				(void) putchar('!');
 				push;
 				user_matches = TRUE;
@@ -226,7 +226,7 @@ opcmnd		:	cmnd {
 			    } else {
 				push;
 			    }
-			    } opcmnd {
+			} opcmnd {
 			    int cmnd_matched = cmnd_matches;
 			    pop;
 			    if (cmnd_matched == TRUE)
@@ -276,7 +276,7 @@ cmndalias	:	ALIAS { push; }	'=' cmndlist {
 		;
 
 cmndlist	:	cmnd
-			{ ; }
+			    { ; }
 		|	cmndlist ',' cmnd
 		;
 
@@ -292,7 +292,7 @@ useralias	:	ALIAS { push; }	'=' userlist {
 		;
 
 userlist	:	user
-			{ ; }
+			    { ; }
 		|	userlist ',' user
 		;
 
@@ -322,9 +322,8 @@ aliasinfo *aliases;
 size_t naliases = 0;
 size_t nslots = 0;
 
-static int
-aliascmp(a1, a2)
-const VOID *a1, *a2;
+static int aliascmp(a1, a2)
+    const VOID *a1, *a2;
 {
     int r;
     aliasinfo *ai1, *ai2;
@@ -338,10 +337,10 @@ const VOID *a1, *a2;
     return(r);
 }
 
-static int
-add_alias(alias, type)
-char *alias;
-int type;
+
+static int add_alias(alias, type)
+    char *alias;
+    int type;
 {
     aliasinfo ai, *aip;
     char s[512];
@@ -349,9 +348,10 @@ int type;
 
     ok = FALSE;			/* assume failure */
     ai.type = type;
-    strcpy(ai.name, alias);
-    if (lfind((const VOID *)&ai, (VOID *)aliases, &naliases, sizeof(ai), aliascmp) != NULL) {
-	sprintf(s, "Alias `%s' already defined", alias);
+    (void) strcpy(ai.name, alias);
+    if (lfind((const VOID *)&ai, (VOID *)aliases, &naliases, sizeof(ai),
+	aliascmp) != NULL) {
+	(void) sprintf(s, "Alias `%s' already defined", alias);
 	yyerror(s);
     } else {
 	if (naliases == nslots && !more_aliases(nslots)) {
@@ -359,8 +359,8 @@ int type;
 	    yyerror(s);
 	}
 
-	aip = (aliasinfo *) lsearch((const VOID *)&ai, (VOID *)aliases, &naliases, sizeof(ai),
-	    aliascmp);
+	aip = (aliasinfo *) lsearch((const VOID *)&ai, (VOID *)aliases,
+				    &naliases, sizeof(ai), aliascmp);
 
 	if (aip != NULL) {
 	    ok = TRUE;
@@ -373,24 +373,24 @@ int type;
     return(ok);
 }
 
-static int
-find_alias(alias, type)
-char *alias;
-int type;
+static int find_alias(alias, type)
+    char *alias;
+    int type;
 {
     aliasinfo ai;
 
-    strcpy(ai.name, alias);
+    (void) strcpy(ai.name, alias);
     ai.type = type;
 
-    return(lfind((const VOID *)&ai, (VOID *)aliases, &naliases, sizeof(ai), aliascmp) != NULL);
+    return(lfind((const VOID *)&ai, (VOID *)aliases, &naliases, sizeof(ai),
+		 aliascmp) != NULL);
 }
 
-static int
-more_aliases(nslots)
-size_t nslots;
+static int more_aliases(nslots)
+    size_t nslots;
 {
     aliasinfo *aip;
+
     if (nslots == 0)
 	aip = (aliasinfo *) malloc(MOREALIASES * sizeof(*aip));
     else
@@ -405,31 +405,29 @@ size_t nslots;
     return(aip != NULL);
 }
 
-int
-dumpaliases()
+int dumpaliases()
 {
     size_t n;
 
     for (n = 0; n < naliases; n++) {
 	switch (aliases[n].type) {
 	case HOST:
-	    puts("HOST");
+	    (void) puts("HOST");
 	    break;
 
 	case CMND:
-	    puts("CMND");
+	    (void) puts("CMND");
 	    break;
 
 	case USER:
-	    puts("USER");
+	    (void) puts("USER");
 	    break;
 	}
-	printf("\t%s\n", aliases[n].name);
+	(void) printf("\t%s\n", aliases[n].name);
     }
 }
 
-void
-reset_aliases()
+void reset_aliases()
 {
     (void) free(aliases);
     naliases = nslots = 0;
