@@ -12,6 +12,9 @@ use strict;
 #   Does not yet handle multiple lines with : in them
 #   Does not yet handle runas (xxx) syntax.
 #   Does not yet remove quotation marks from options
+#   Does not yet escape + at the beginning of a dn
+#   Does not yet handle line wraps correctly
+#   Does not yet handle multiple roles with same name (needs tiebreaker)
 
 my %UA;
 my %HA;
