@@ -467,8 +467,8 @@ static void clean_env(envp)
     rmenv(envp, "_RLD_", 5);
 #endif /* __alpha */
 
-    /* set IFS to a sane default (same as sh(1) */
-    sudo_setenv("IFS", " \t\n");
+    /* remove IFS variable to prevent /bin/sh spoofing */
+    rmenv(envp, "IFS", 3);
 
 #ifdef SECURE_PATH
     if (!user_is_exempt())
