@@ -252,6 +252,12 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
+/* Define to 1 if you have the `strlcat' function. */
+#undef HAVE_STRLCAT
+
+/* Define to 1 if you have the `strlcpy' function. */
+#undef HAVE_STRLCPY
+
 /* Define to 1 if you have the `strrchr' function. */
 #undef HAVE_STRRCHR
 
@@ -392,8 +398,8 @@
 /* Define to send mail when the user is not allowed to run a command. */
 #undef SEND_MAIL_WHEN_NOT_OK
 
-/* Define to send mail when the user is not allowed to run sudo on this
-   host. */
+/* Define to send mail when the user is not allowed to run sudo on this host.
+   */
 #undef SEND_MAIL_WHEN_NO_HOST
 
 /* Define to send mail when the user is not in the sudoers file. */
