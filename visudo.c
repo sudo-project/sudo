@@ -573,7 +573,7 @@ setup_signals()
 	 */
 #ifdef POSIX_SIGNALS
 	(void) memset((VOID *)&action, 0, sizeof(action));
-	sigemptyset(&sact.sa_mask);
+	sigemptyset(&action.sa_mask);
 	action.sa_flags = 0;
 	action.sa_handler = Exit;
 	(void) sigaction(SIGTERM, &action, NULL);
