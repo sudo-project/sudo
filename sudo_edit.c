@@ -73,7 +73,7 @@ int sudo_edit(argc, argv)
     const char *tmpdir;
     char **nargv, **ap, *editor, *cp;
     char buf[BUFSIZ];
-    int i, ac, ofd, nargc, rval;
+    int i, ac, ofd, tfd, nargc, rval;
     sigaction_t sa;
     struct stat sb;
     struct timespec ts1, ts2;
@@ -82,7 +82,6 @@ int sudo_edit(argc, argv)
 	char *ofile;
 	struct timespec ots;
 	off_t osize;
-	int tfd;
     } *tf;
 
     /*
@@ -138,15 +137,15 @@ int sudo_edit(argc, argv)
 	    cp = tf[i].ofile;
 	easprintf(&tf[i].tfile, "%s%s.XXXXXXXX", tmpdir, cp);
 	set_perms(PERM_USER);
-	tf[i].tfd = mkstemp(tf[i].tfile);
+	tfd = mkstemp(tf[i].tfile);
 	set_perms(PERM_ROOT);
-	if (tf[i].tfd == -1) {
+	if (tfd == -1) {
 	    warn("mkstemp");
 	    goto cleanup;
 	}
 	if (ofd != -1) {
 	    while ((nread = read(ofd, buf, sizeof(buf))) != 0) {
-		if ((nwritten = write(tf[i].tfd, buf, nread)) != nread) {
+		if ((nwritten = write(tfd, buf, nread)) != nread) {
 		    if (nwritten == -1)
 			warn("%s", tf[i].tfile);
 		    else
@@ -163,14 +162,15 @@ int sudo_edit(argc, argv)
 	 * file's mtime.  It is better than nothing and we only use the info
 	 * to determine whether or not a file has been modified.
 	 */
-	if (touch(tf[i].tfd, NULL, &tf[i].ots) == -1) {
-	    if (fstat(tf[i].tfd, &sb) == 0) {
+	if (touch(tfd, NULL, &tf[i].ots) == -1) {
+	    if (fstat(tfd, &sb) == 0) {
 		tf[i].ots.tv_sec = mtim_getsec(sb);
 		tf[i].ots.tv_nsec = mtim_getnsec(sb);
 	    }
 	    /* XXX - else error? */
 	}
 #endif
+	close(tfd);
     }
     if (argc == 1)
 	return(1);			/* no files readable, you lose */
@@ -215,7 +215,7 @@ int sudo_edit(argc, argv)
     (void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
 
     /*
-     * Fork and exec the editor as with the invoking user's creds,
+     * Fork and exec the editor with the invoking user's creds,
      * keeping track of the time spent in the editor.
      */
     gettime(&ts1);
@@ -228,8 +228,6 @@ int sudo_edit(argc, argv)
 	(void) sigaction(SIGINT, &saved_sa_int, NULL);
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
-	for (i = 0; i < argc - 1; i++)
-	    close(tf[i].tfd);
 	set_perms(PERM_FULL_USER);
 	execvp(nargv[0], nargv);
 	warn("unable to execute %s", nargv[0]);
@@ -264,14 +262,16 @@ int sudo_edit(argc, argv)
 
     /* Copy contents of temp files to real ones */
     for (i = 0; i < argc - 1; i++) {
-	if (lseek(tf[i].tfd, (off_t)0, SEEK_SET) != 0) {
-	    warn("unable to rewind edited file %s, cannot update %s",
-		tf[i].tfile, tf[i].ofile);
-	    close(tf[i].tfd);
+	set_perms(PERM_USER);
+	tfd = open(tf[i].tfile, O_RDONLY, 0644);
+	set_perms(PERM_ROOT);
+	if (tfd < 0) {
+	    warn("unable to read %s", tf[i].tfile);
+	    warnx("%s left unmodified", tf[i].ofile);
 	    continue;
 	}
 #ifdef HAVE_FSTAT
-	if (fstat(tf[i].tfd, &sb) == 0) {
+	if (fstat(tfd, &sb) == 0) {
 	    if (tf[i].osize == sb.st_size &&
 		tf[i].ots.tv_sec == mtim_getsec(sb) &&
 		tf[i].ots.tv_nsec == mtim_getnsec(sb)) {
@@ -283,7 +283,7 @@ int sudo_edit(argc, argv)
 		if (timespecisset(&ts2)) {
 		    warnx("%s unchanged", tf[i].ofile);
 		    unlink(tf[i].tfile);
-		    close(tf[i].tfd);
+		    close(tfd);
 		    continue;
 		}
 	    }
@@ -295,10 +295,10 @@ int sudo_edit(argc, argv)
 	if (ofd == -1) {
 	    warn("unable to write to %s", tf[i].ofile);
 	    warnx("contents of edit session left in %s", tf[i].tfile);
-	    close(tf[i].tfd);
+	    close(tfd);
 	    continue;
 	}
-	while ((nread = read(tf[i].tfd, buf, sizeof(buf))) > 0) {
+	while ((nread = read(tfd, buf, sizeof(buf))) > 0) {
 	    if ((nwritten = write(ofd, buf, nread)) != nread) {
 		if (nwritten == -1)
 		    warn("%s", tf[i].ofile);
