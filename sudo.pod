@@ -27,16 +27,16 @@ sudo, sudoedit - execute a command as another user
 
 =head1 SYNOPSIS
 
-B<sudo> B<-K> | B<-L> | B<-V> | B<-h> | B<-k> | B<-v>
+B<sudo> B<-K> | B<-k> | B<-h> | B<-L> | B<-V> | B<-v>
 
-B<sudo> S<[B<-U> I<username>]> S<[B<-u> I<username>|I<#uid>]> B<-l> [I<command>]
+B<sudo> B<-l> S<[B<-U> I<username>]> S<[B<-u> I<username>|I<#uid>]> [I<command>]
 
-B<sudo> [B<-HPSb>] S<[B<-a> I<auth_type>]> S<[B<-C> I<fd>]>
+B<sudo> [B<-bHPS>] S<[B<-a> I<auth_type>]> S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]> S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
 S<{B<-e> file [...] | B<-i> | B<-s> | I<command>}>
 
-B<sudoedit> [B<-S>] S<[B<-a> I<auth_type>]>
-S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
+B<sudoedit> S<[B<-a> I<auth_type>]>
+S<[B<-p> I<prompt>]> [B<-S>] S<[B<-u> I<username>|I<#uid>]>
 file [...]
 
 =head1 DESCRIPTION
@@ -92,62 +92,6 @@ B<sudo> accepts the following command line options:
 
 =over 4
 
-=item -C fd
-
-Normally, B<sudo> will close all open file descriptors other than
-standard input, standard output and standard error.  The B<-C>
-(I<close from>) option allows the user to specify a starting point
-above the standard error (file descriptor three).  Values less than
-three are not permitted.  This option is only available if the
-administrator has enabled the I<closefrom_override> option in
-L<sudoers(@mansectform@)>.
-
-=item -H
-
-The B<-H> (I<HOME>) option sets the C<HOME> environment variable
-to the homedir of the target user (root by default) as specified
-in passwd(@mansectform@).  By default, B<sudo> does not modify C<HOME>
-(see I<set_home> and I<always_set_home> in L<sudoers(@mansectform@)>).
-
-=item -K
-
-The B<-K> (sure I<kill>) option is like B<-k> except that it removes
-the user's timestamp entirely.  Like B<-k>, this option does not
-require a password.
-
-=item -L
-
-The B<-L> (I<list> defaults) option will list out the parameters
-that may be set in a I<Defaults> line along with a short description
-for each.  This option is useful in conjunction with grep(1).
-
-=item -P
-
-The B<-P> (I<preserve group vector>) option causes B<sudo> to
-preserve the invoking user's group vector unaltered.  By default,
-B<sudo> will initialize the group vector to the list of groups the
-target user is in.  The real and effective group IDs, however, are
-still set to match the target user.
-
-=item -S
-
-The B<-S> (I<stdin>) option causes B<sudo> to read the password from
-the standard input instead of the terminal device.
-
-=item -U
-
-The B<-U> (I<other user>) option is used in conjunction with the B<-l>
-option to specify the user whose privileges should be listed.  Only
-root or a user with B<sudo> C<ALL> on the current host may use this
-option.
-
-=item -V
-
-The B<-V> (I<version>) option causes B<sudo> to print the version
-number and exit.  If the invoking user is already root the B<-V>
-option will print out a list of the defaults B<sudo> was compiled
-with as well as the machine's local network addresses.
-
 =item -a
 
 The B<-a> (I<authentication type>) option causes B<sudo> to use the
@@ -163,6 +107,16 @@ with the --with-bsdauth option.
 The B<-b> (I<background>) option tells B<sudo> to run the given
 command in the background.  Note that if you use the B<-b>
 option you cannot use shell job control to manipulate the process.
+
+=item -C fd
+
+Normally, B<sudo> will close all open file descriptors other than
+standard input, standard output and standard error.  The B<-C>
+(I<close from>) option allows the user to specify a starting point
+above the standard error (file descriptor three).  Values less than
+three are not permitted.  This option is only available if the
+administrator has enabled the I<closefrom_override> option in
+L<sudoers(@mansectform@)>.
 
 =item -c
 
@@ -213,6 +167,13 @@ B<sudo> is unable to update a file with its edited version, the
 user will receive a warning and the edited copy will remain in a
 temporary file.
 
+=item -H
+
+The B<-H> (I<HOME>) option sets the C<HOME> environment variable
+to the homedir of the target user (root by default) as specified
+in passwd(@mansectform@).  By default, B<sudo> does not modify C<HOME>
+(see I<set_home> and I<always_set_home> in L<sudoers(@mansectform@)>).
+
 =item -h
 
 The B<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
@@ -228,6 +189,12 @@ shell.  It also initializes the environment, leaving I<TERM>
 unchanged, setting I<HOME>, I<SHELL>, I<USER>, I<LOGNAME>, and
 I<PATH>, and unsetting all other environment variables.
 
+=item -K
+
+The B<-K> (sure I<kill>) option is like B<-k> except that it removes
+the user's timestamp entirely.  Like B<-k>, this option does not
+require a password.
+
 =item -k
 
 The B<-k> (I<kill>) option to B<sudo> invalidates the user's timestamp
@@ -235,6 +202,12 @@ by setting the time on it to the epoch.  The next time B<sudo> is
 run a password will be required.  This option does not require a password
 and was added to allow a user to revoke B<sudo> permissions from a .logout
 file.
+
+=item -L
+
+The B<-L> (I<list> defaults) option will list out the parameters
+that may be set in a I<Defaults> line along with a short description
+for each.  This option is useful in conjunction with grep(1).
 
 =item -l [I<command>]
 
@@ -245,6 +218,14 @@ I<command> is specified and is permitted by I<sudoers>, the
 fully-qualified path to the command is displayed along with any
 command line arguments.  If I<command> is not allowed, B<sudo> will
 exit with a return value of 1.
+
+=item -P
+
+The B<-P> (I<preserve group vector>) option causes B<sudo> to
+preserve the invoking user's group vector unaltered.  By default,
+B<sudo> will initialize the group vector to the list of groups the
+target user is in.  The real and effective group IDs, however, are
+still set to match the target user.
 
 =item -p
 
@@ -279,11 +260,23 @@ two consecutive C<%> characters are collapsed into a single C<%> character
 
 =back
 
+=item -S
+
+The B<-S> (I<stdin>) option causes B<sudo> to read the password from
+the standard input instead of the terminal device.
+
 =item -s
 
 The B<-s> (I<shell>) option runs the shell specified by the I<SHELL>
 environment variable if it is set or the shell as specified
 in L<passwd(@mansectform@)>.
+
+=item -U
+
+The B<-U> (I<other user>) option is used in conjunction with the B<-l>
+option to specify the user whose privileges should be listed.  Only
+root or a user with B<sudo> C<ALL> on the current host may use this
+option.
 
 =item -u
 
@@ -292,6 +285,13 @@ as a user other than I<root>.  To specify a I<uid> instead of a
 I<username>, use I<#uid>.  Note that if the I<targetpw> Defaults
 option is set (see L<sudoers(@mansectform@)>) it is not possible
 to run commands with a uid not listed in the password database.
+
+=item -V
+
+The B<-V> (I<version>) option causes B<sudo> to print the version
+number and exit.  If the invoking user is already root the B<-V>
+option will print out a list of the defaults B<sudo> was compiled
+with as well as the machine's local network addresses.
 
 =item -v
 
