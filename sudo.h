@@ -229,13 +229,14 @@ void dump_defaults	__P((void));
 void dump_auth_methods	__P((void));
 void init_envtables	__P((void));
 int lock_file		__P((int, int));
-int touch		__P((int, char *, time_t, long));
+int touch		__P((int, char *, struct timespec *));
 int user_is_exempt	__P((void));
 void set_fqdn		__P((void));
 int set_runaspw		__P((char *));
 char *sudo_getepw	__P((const struct passwd *));
 int pam_prep_user	__P((struct passwd *));
 void zero_bytes		__P((volatile VOID *, size_t));
+int gettime		__P((struct timespec *));
 YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */

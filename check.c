@@ -149,11 +149,9 @@ update_timestamp(timestampdir, timestampfile)
     char *timestampdir;
     char *timestampfile;
 {
-    time_t now = time(NULL);
-
     if (timestamp_uid != 0)
 	set_perms(PERM_TIMESTAMP);
-    if (touch(-1, timestampfile ? timestampfile : timestampdir, now, 0) == -1) {
+    if (touch(-1, timestampfile ? timestampfile : timestampdir, NULL) == -1) {
 	if (timestampfile) {
 	    int fd = open(timestampfile, O_WRONLY|O_CREAT|O_TRUNC, 0600);
 
@@ -498,6 +496,7 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 	if (def_timestamp_timeout < 0 && sb.st_mtime != 0)
 	    status = TS_CURRENT;
 	else {
+	    /* XXX - should use timespec here */
 	    now = time(NULL);
 	    if (def_timestamp_timeout &&
 		now - sb.st_mtime < 60 * def_timestamp_timeout) {
@@ -532,15 +531,14 @@ void
 remove_timestamp(remove)
     int remove;
 {
-    char *timestampdir;
-    char *timestampfile;
-    char *ts;
+    struct timespec ts;
+    char *timestampdir, *timestampfile, *path;
     int status;
 
     build_timestamp(&timestampdir, &timestampfile);
     status = timestamp_status(timestampdir, timestampfile, user_name, FALSE);
     if (status == TS_OLD || status == TS_CURRENT) {
-	ts = timestampfile ? timestampfile : timestampdir;
+	path = timestampfile ? timestampfile : timestampdir;
 	if (remove) {
 	    if (timestampfile)
 		status = unlink(timestampfile);
@@ -548,12 +546,14 @@ remove_timestamp(remove)
 		status = rmdir(timestampdir);
 	    if (status == -1 && errno != ENOENT) {
 		log_error(NO_EXIT, "can't remove %s (%s), will reset to Epoch",
-		    ts, strerror(errno));
+		    path, strerror(errno));
 		remove = FALSE;
 	    }
+	} else {
+	    timespecclear(&ts);
+	    if (touch(-1, path, &ts) == -1)
+		err(1, "can't reset %s to Epoch", path);
 	}
-	if (!remove && touch(-1, ts, 0, 0) == -1)
-	    err(1, "can't reset %s to Epoch", ts);
     }
 
     free(timestampdir);

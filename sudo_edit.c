@@ -76,6 +76,7 @@ int sudo_edit(argc, argv)
     int i, ac, ofd, nargc, rval;
     sigaction_t sa;
     struct stat sb;
+    struct timespec ts1, ts2;
     struct tempfile {
 	char *tfile;
 	char *ofile;
@@ -162,11 +163,12 @@ int sudo_edit(argc, argv)
 	 * file's mtime.  It is better than nothing and we only use the info
 	 * to determine whether or not a file has been modified.
 	 */
-	if (touch(tf[i].tfd, NULL, tf[i].ots.tv_sec, tf[i].ots.tv_nsec) == -1) {
+	if (touch(tf[i].tfd, NULL, &tf[i].ots) == -1) {
 	    if (fstat(tf[i].tfd, &sb) == 0) {
 		tf[i].ots.tv_sec = mtim_getsec(sb);
 		tf[i].ots.tv_nsec = mtim_getnsec(sb);
 	    }
+	    /* XXX - else error? */
 	}
 #endif
     }
@@ -213,8 +215,10 @@ int sudo_edit(argc, argv)
     (void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
 
     /*
-     * Fork and exec the editor as with the invoking user's creds.
+     * Fork and exec the editor as with the invoking user's creds,
+     * keeping track of the time spent in the editor.
      */
+    gettime(&ts1);
     kidpid = fork();
     if (kidpid == -1) {
 	warn("fork");
@@ -252,6 +256,7 @@ int sudo_edit(argc, argv)
 		break;
 	}
     } while (pid != -1 || errno == EINTR);
+    gettime(&ts2);
     if (pid == -1 || !WIFEXITED(i))
 	rval = 1;
     else
@@ -270,10 +275,17 @@ int sudo_edit(argc, argv)
 	    if (tf[i].osize == sb.st_size &&
 		tf[i].ots.tv_sec == mtim_getsec(sb) &&
 		tf[i].ots.tv_nsec == mtim_getnsec(sb)) {
-		warnx("%s unchanged", tf[i].ofile);
-		unlink(tf[i].tfile);
-		close(tf[i].tfd);
-		continue;
+		/*
+		 * If mtime and size match but the user spent no measurable
+		 * time in the editor we can't tell if the file was changed.
+		 */
+		timespecsub(&ts1, &ts2, &ts2);
+		if (timespecisset(&ts2)) {
+		    warnx("%s unchanged", tf[i].ofile);
+		    unlink(tf[i].tfile);
+		    close(tf[i].tfd);
+		    continue;
+		}
 	    }
 	}
 #endif

@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #ifndef __TANDEM
 # include <sys/file.h>
 #endif
@@ -130,8 +131,10 @@ main(argc, argv)
     int stmp_fd;			/* stmp file descriptor */
     int n;				/* length parameter */
     int ch;				/* getopt char */
-    time_t now;				/* time now */
-    struct stat stmp_sb, sudoers_sb;	/* to check for changes */
+    struct timespec ts1, ts2;		/* time before and after edit */
+    struct timespec sudoers_mtim;	/* starting mtime of sudoers file */
+    off_t sudoers_size;			/* starting size of sudoers file */
+    struct stat sb;			/* stat buffer */
 
     /* Warn about aliases that are used before being defined. */
     pedantic = 1;
@@ -192,11 +195,14 @@ main(argc, argv)
     if (!lock_file(sudoers_fd, SUDO_TLOCK))
 	errx(1, "sudoers file busy, try again later");
 #ifdef HAVE_FSTAT
-    if (fstat(sudoers_fd, &sudoers_sb) == -1)
+    if (fstat(sudoers_fd, &sb) == -1)
 #else
-    if (stat(sudoers, &sudoers_sb) == -1)
+    if (stat(sudoers, &sb) == -1)
 #endif
 	err(1, "can't stat %s", sudoers);
+    sudoers_size = sb.st_size;
+    sudoers_mtim.tv_sec = mtim_getsec(sb);
+    sudoers_mtim.tv_nsec = mtim_getnsec(sb);
 
     /*
      * Open sudoers temp file.
@@ -209,7 +215,7 @@ main(argc, argv)
     setup_signals();
 
     /* Copy sudoers -> stmp and reset the mtime */
-    if (sudoers_sb.st_size) {
+    if (sudoers_size) {
 	while ((n = read(sudoers_fd, buf, sizeof(buf))) > 0)
 	    if (write(stmp_fd, buf, n) != n)
 		err(1, "write error");
@@ -220,7 +226,7 @@ main(argc, argv)
 	    write(stmp_fd, buf, 1);
 	}
 
-	(void) touch(stmp_fd, stmp, sudoers_sb.st_mtime, 0);
+	(void) touch(stmp_fd, stmp, &sudoers_mtim);
 	(void) close(stmp_fd);
 
 	/* Parse sudoers to pull in editor and env_editor conf values. */
@@ -354,17 +360,18 @@ main(argc, argv)
 	 *  XPG4 specifies that vi's exit value is a function of the
 	 *  number of errors during editing (?!?!).
 	 */
-	now = time(NULL);
+	gettime(&ts1);
 	if (run_command(Editor, av) != -1) {
+	    gettime(&ts2);
 	    /*
 	     * Sanity checks.
 	     */
-	    if (stat(stmp, &stmp_sb) < 0) {
+	    if (stat(stmp, &sb) < 0) {
 		warnx("cannot stat temporary file (%s), %s unchanged",
 		    stmp, sudoers);
 		Exit(-1);
 	    }
-	    if (stmp_sb.st_size == 0) {
+	    if (sb.st_size == 0) {
 		warnx("zero length temporary file (%s), %s unchanged",
 		    stmp, sudoers);
 		Exit(-1);
@@ -412,7 +419,7 @@ main(argc, argv)
 	    switch (whatnow()) {
 		case 'Q' :	parse_error = FALSE;	/* ignore parse error */
 				break;
-		case 'x' :	if (sudoers_sb.st_size == 0)
+		case 'x' :	if (sudoers_size == 0)
 				    unlink(sudoers);
 				Exit(0);
 				break;
@@ -423,10 +430,18 @@ main(argc, argv)
     /*
      * If the user didn't change the temp file, just unlink it.
      */
-    if (sudoers_sb.st_mtime != now && sudoers_sb.st_mtime == stmp_sb.st_mtime &&
-	sudoers_sb.st_size == stmp_sb.st_size) {
-	warnx("sudoers file unchanged");
-	Exit(0);
+    if (sudoers_size == sb.st_size &&
+	sudoers_mtim.tv_sec == mtim_getsec(sb) &&
+	sudoers_mtim.tv_nsec == mtim_getnsec(sb)) {
+	/*
+	 * If mtime and size match but the user spent no measurable
+	 * time in the editor we can't tell if the file was changed.
+	 */
+	timespecsub(&ts1, &ts2, &ts2);
+	if (timespecisset(&ts2)) {
+	    warnx("sudoers file unchanged");
+	    Exit(0);
+	}
     }
 
     /*
