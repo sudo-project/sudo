@@ -545,6 +545,12 @@ init_vars(sudo_mode)
     /* Resolve the path and return. */
     if ((sudo_mode & MODE_RUN)) {
 	rval = find_path(NewArgv[0], &user_cmnd, user_path);
+	if (rval != FOUND) {
+	    /* Failed as root, try as invoking user. */
+	    set_perms(PERM_USER, sudo_mode);
+	    rval = find_path(NewArgv[0], &user_cmnd, user_path);
+	    set_perms(PERM_ROOT, sudo_mode);
+	}
 
 	/* set user_args */
 	if (NewArgc > 1) {
