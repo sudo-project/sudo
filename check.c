@@ -570,7 +570,7 @@ static void check_passwd()
 	    set_perms(PERM_USER, 0);
 	}
 #  endif /* HAVE_OPIE */
-#  if !defined(HAVE_SKEY) || !defined(SKEY_ONLY)
+#  if !defined(OTP_ONLY) || (!defined(HAVE_SKEY) && !defined(HAVE_OPIE))
 	/*
 	 * If we use shadow passwords with a different crypt(3)
 	 * check that here, else use standard crypt(3).
@@ -639,7 +639,7 @@ static void check_passwd()
 	if (dce_pwent(user_name, pass))
 	    return;
 #    endif /* HAVE_DCE */
-#  endif /* !HAVE_SKEY || !SKEY_ONLY */
+#  endif /* !OTP_ONLY || (!HAVE_SKEY && !HAVE_OPIE) */
 #endif /* HAVE_AUTHENTICATE */
 
 	--counter;		/* otherwise, try again  */
@@ -827,16 +827,16 @@ static char *sudo_opieprompt(user_opie, p)
     if ((rval = opiechallenge(user_opie, user_name, challenge)) != 0) {
 #ifdef OTP_ONLY
 	(void) fprintf(stderr,
-		       "%s: You do not exist in the s/key database.\n",
+		       "%s: You do not exist in the opie database.\n",
 		       Argv[0]);
 	exit(1);
 #else
-	/* return the original prompt if we cannot get s/key info */
+	/* return the original prompt if we cannot get opie info */
 	return(orig_prompt);
 #endif /* OTP_ONLY */
     }
 
-    /* get space for new prompt with embedded s/key challenge */
+    /* get space for new prompt with embedded opie challenge */
     if (new_prompt == NULL) {
 	/* allocate space for new prompt */
 	np_size = op_len + strlen(challenge) + 7;
