@@ -201,15 +201,17 @@ main(argc, argv)
 #endif /* POSIX_SIGNALS */
 
     /*
-     * Block signals so the user cannot kill us at some point and
+     * Block signals so the user cannot interrupt us at some point and
      * avoid the logging.
      */
 #ifdef POSIX_SIGNALS
-    (void) sigfillset(&set);
-    (void) sigdelset(&set, SIGCHLD);
+    (void) sigemptyset(&set);
+    (void) sigaddset(&set, SIGINT);
+    (void) sigaddset(&set, SIGQUIT);
+    (void) sigaddset(&set, SIGTSTP);
     (void) sigprocmask(SIG_BLOCK, &set, &oset);
 #else
-    omask = sigblock(sigmask(SIGHUP)|sigmask(SIGINT)|sigmask(SIGQUIT)|sigmask(SIGILL)|sigmask(SIGTSTP));
+    omask = sigblock(sigmask(SIGINT)|sigmask(SIGQUIT)|sigmask(SIGTSTP));
 #endif /* POSIX_SIGNALS */
 
     /*
