@@ -186,6 +186,9 @@
 /* Define if utime(file, NULL) sets timestamp to current */
 #undef HAVE_UTIME_NULL
 
+/* Define if you have bigcrypt(3). */
+#undef HAVE_BIGCRYPT
+
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
 
@@ -242,10 +245,9 @@
 #define SPW_NONE		0x00
 #define SPW_SECUREWARE		0x01
 #define SPW_HPUX9		0x02
-#define SPW_HPUX10		0x03
-#define SPW_SUNOS4		0x04
-#define SPW_SVR4		0x05
-#define SPW_ULTRIX4		0x06
+#define SPW_SUNOS4		0x03
+#define SPW_SVR4		0x04
+#define SPW_ULTRIX4		0x05
 
 /* Define to the variety of shadow passwords supported on your OS */
 #undef SHADOW_TYPE
