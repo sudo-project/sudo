@@ -133,15 +133,16 @@ extern int top;
 #define FALSE                    0x00
 
 /*
- * Various modes sudo can be in (based on arguments)
+ * Various modes sudo can be in (based on arguments) in octal
  */
-#define MODE_RUN                 0x00
-#define MODE_VALIDATE            0x01
-#define MODE_KILL                0x02
-#define MODE_VERSION             0x03
-#define MODE_HELP                0x04
-#define MODE_LIST                0x05
-#define MODE_BACKGROUND          0x06
+#define MODE_RUN                 00001
+#define MODE_VALIDATE            00002
+#define MODE_KILL                00004
+#define MODE_VERSION             00010
+#define MODE_HELP                00020
+#define MODE_LIST                00040
+#define MODE_BACKGROUND          00100
+#define MODE_SHELL               00200
 
 /*
  * Used with set_perms()
@@ -199,6 +200,7 @@ extern char *user;
 extern char *epasswd;
 extern char *cmnd;
 extern char *prompt;
+extern char *shell;
 extern struct stat cmnd_st;
 extern int Argc;
 extern char **Argv;
