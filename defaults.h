@@ -37,6 +37,17 @@
 #ifndef _SUDO_DEFAULTS_H
 #define _SUDO_DEFAULTS_H
 
+struct list_member {
+    char *value;
+    struct list_member *next;
+};
+
+enum list_ops {
+    add,
+    delete,
+    freeall
+};
+
 /*
  * Structure describing compile-time and run-time options.
  */
@@ -49,6 +60,7 @@ struct sudo_defs_types {
 	int ival;
 	char *str;
 	mode_t mode;
+	struct list_member *list;
     } sd_un;
 };
 
@@ -67,12 +79,14 @@ struct sudo_defs_types {
 #define T_FLAG		0x004
 #undef T_MODE
 #define T_MODE		0x005
+#undef T_LIST
+#define T_LIST		0x006
 #undef T_LOGFAC
-#define T_LOGFAC	0x006
+#define T_LOGFAC	0x007
 #undef T_LOGPRI
-#define T_LOGPRI	0x007
+#define T_LOGPRI	0x008
 #undef T_PWFLAG
-#define T_PWFLAG	0x008
+#define T_PWFLAG	0x009
 #undef T_MASK
 #define T_MASK		0x0FF
 #undef T_BOOL
@@ -83,7 +97,7 @@ struct sudo_defs_types {
 /*
  * Indexes into sudo_defs_table
  */
-#include "def_data.h"
+#include <def_data.h>
 #define I_LOGFAC	I_SYSLOG_IFAC
 #define I_GOODPRI	I_SYSLOG_IGOODPRI
 #define I_BADPRI	I_SYSLOG_IBADPRI 
@@ -94,6 +108,7 @@ struct sudo_defs_types {
 #define def_flag(_i)	(sudo_defs_table[(_i)].sd_un.flag)
 #define def_ival(_i)	(sudo_defs_table[(_i)].sd_un.ival)
 #define def_str(_i)	(sudo_defs_table[(_i)].sd_un.str)
+#define def_list(_i)	(sudo_defs_table[(_i)].sd_un.list)
 #define def_mode(_i)	(sudo_defs_table[(_i)].sd_un.mode)
 
 /*

@@ -34,6 +34,7 @@
 
 #include "config.h"
 
+#include <ctype.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 #include <stdlib.h>
@@ -108,11 +109,13 @@ static int store_syslogfac __P((char *, struct sudo_defs_types *, int));
 static int store_syslogpri __P((char *, struct sudo_defs_types *, int));
 static int store_mode __P((char *, struct sudo_defs_types *, int));
 static int store_pwflag __P((char *, struct sudo_defs_types *, int));
+static int store_list __P((char *, struct sudo_defs_types *, int));
+static void list_op __P((char *, size_t, struct sudo_defs_types *, enum list_ops));
 
 /*
  * Table describing compile-time and run-time options.
  */
-#include "def_data.c"
+#include <def_data.c>
 
 /*
  * Print version and configure info.
@@ -121,6 +124,7 @@ void
 dump_defaults()
 {
     struct sudo_defs_types *cur;
+    struct list_member *item;
 
     for (cur = sudo_defs_table; cur->name; cur++) {
 	if (cur->desc) {
@@ -146,6 +150,13 @@ dump_defaults()
 		case T_MODE:
 		    (void) printf(cur->desc, cur->sd_un.mode);
 		    putchar('\n');
+		    break;
+		case T_LIST:
+		    if (cur->sd_un.list) {
+			puts(cur->desc);
+			for (item = cur->sd_un.list; item; item = item->next)
+			    printf("\t%s\n", item->value);
+		    }
 		    break;
 	    }
 	}
@@ -335,6 +346,22 @@ set_default(var, val, op)
 	    if (num == I_FQDN && op)
 		set_fqdn();
 	    break;
+	case T_LIST:
+	    if (!val) {
+		/* Check for bogus boolean usage or lack of a value. */
+		if (!(cur->type & T_BOOL) || op != FALSE) {
+		    (void) fprintf(stderr,
+			"%s: no value specified for `%s' on line %d\n", Argv[0],
+			var, sudolineno);
+		    return(FALSE);
+		}
+	    }
+	    if (!store_list(val, cur, op)) {
+		(void) fprintf(stderr,
+		    "%s: value '%s' is invalid for option '%s'\n", Argv[0],
+		    val, var);
+		return(FALSE);
+	    }
     }
 
     return(TRUE);
@@ -362,6 +389,9 @@ init_defaults()
 			free(def->sd_un.str);
 			def->sd_un.str = NULL;
 		    }
+		    break;
+		case T_LIST:
+		    list_op(NULL, 0, def, freeall);
 		    break;
 	    }
     }
@@ -444,7 +474,7 @@ init_defaults()
     def_ival(I_PASSWD_TIMEOUT) = PASSWORD_TIMEOUT;
     def_ival(I_PASSWD_TRIES) = TRIES_FOR_PASSWORD;
 
-    /* Finally do the strings */
+    /* Now do the strings */
     def_str(I_MAILTO) = estrdup(MAILTO);
     def_str(I_MAILSUB) = estrdup(MAILSUBJECT);
     def_str(I_BADPASS_MESSAGE) = estrdup(INCORRECT_PASSWORD);
@@ -465,6 +495,9 @@ init_defaults()
     def_str(I_SECURE_PATH) = estrdup(SECURE_PATH);
 #endif
     def_str(I_EDITOR) = estrdup(EDITOR);
+
+    /* Finally do the lists (currently just environment tables). */
+    init_envtables();
 
     /*
      * The following depend on the above values.
@@ -532,6 +565,34 @@ store_str(val, def, op)
 	def->sd_un.str = NULL;
     else
 	def->sd_un.str = estrdup(val);
+    return(TRUE);
+}
+
+static int
+store_list(str, def, op)
+    char *str;
+    struct sudo_defs_types *def;
+    int op;
+{
+    char *start, *end;
+
+    /* Remove all old members. */
+    if (op == FALSE || op == TRUE)
+	list_op(NULL, 0, def, freeall);
+
+    /* Split str into multiple space-separated words and act on each one. */
+    if (op != FALSE) {
+	for (start = str; isblank(*start); start++)
+	    ;
+	while ((end = strpbrk(start, " \t"))) {
+	    list_op(start, end - start, def, op == '-' ? delete : add);
+	    start = end;
+	    for (; isblank(*start); start++)
+		;
+	}
+	if (*start)
+	    list_op(start, strlen(start), def, op == '-' ? delete : add);
+    }
     return(TRUE);
 }
 
@@ -667,4 +728,50 @@ store_pwflag(val, def, op)
     sudo_defs_table[isub].sd_un.ival = flags;
 
     return(TRUE);
+}
+
+static void
+list_op(val, len, def, op)
+    char *val;
+    size_t len;
+    struct sudo_defs_types *def;
+    enum list_ops op;
+{
+    struct list_member *cur, *prev, *tmp;
+
+    if (op == freeall) {
+	for (cur = def->sd_un.list; cur; ) {
+	    tmp = cur;
+	    cur = tmp->next;
+	    free(tmp->value);
+	    free(tmp);
+	}
+	def->sd_un.list = NULL;
+	return;
+    }
+
+    for (cur = def->sd_un.list, prev = NULL; cur; prev = cur, cur = cur->next) {
+	if ((strncmp(cur->value, val, len) == 0 && cur->value[len] == '\0')) {
+
+	    if (op == add)
+		return;			/* already exists */
+
+	    /* Delete node */
+	    if (prev != NULL)
+		prev->next = cur->next;
+	    else
+		def->sd_un.list = cur->next;
+	    free(cur->value);
+	    free(cur);
+	    break;
+	}
+    }
+
+    /* Add new node to the head of the list. */
+    if (op == add) {
+	cur = emalloc(sizeof(struct list_member));
+	cur->value = estrdup(val);
+	cur->next = def->sd_un.list;
+	def->sd_un.list = cur;
+    }
 }
