@@ -217,8 +217,7 @@ void log_error(code)
 			_PATH_SUDO_SUDOERS);
 		    break;
 		case EACCES:
-		    (void) sprintf(p, "%s needs to run setuid root.  ",
-			Argv[0]);
+		    (void) sprintf(p, "Can't read %s.  ", Argv[0]);
 		    break;
 		default:
 		    (void) sprintf(p, "There is a problem opening %s ",
@@ -591,8 +590,22 @@ void inform_user(code)
 	    break;
 
 	case NO_SUDOERS_FILE:
-	    (void) fprintf(stderr, "Can't stat %s: ", _PATH_SUDO_SUDOERS);
-	    perror("");
+	    switch (errno) {
+		case ENOENT:
+		    (void) fprintf(stderr, "There is no %s file.\n",
+			_PATH_SUDO_SUDOERS);
+		    break;
+		case EACCES:
+		    (void) fprintf(stderr, "Can't read %s: ",
+			_PATH_SUDO_SUDOERS);
+		    perror("");
+		    break;
+		default:
+		    (void) fprintf(stderr, "Can't stat %s: ",
+			_PATH_SUDO_SUDOERS);
+		    perror("");
+		    break;
+	    }
 	    break;
 
 	case SUDOERS_NOT_FILE:
