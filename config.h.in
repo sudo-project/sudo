@@ -48,7 +48,7 @@
 #undef _CONVEX_SOURCE
 #endif
 
-/* Define if nneded to get POSIX functionality.
+/* Define if needed to get POSIX functionality.
    System headers sometimes define this.
    We just want to avoid a redefinition error message.  */
 #ifndef _POSIX_SOURCE
