@@ -215,6 +215,7 @@ int evasprintf		__P((char **, const char *, va_list));
 void dump_badenv	__P((void));
 void dump_defaults	__P((void));
 void dump_auth_methods	__P((void));
+void init_envtables	__P((void));
 int lock_file		__P((int, int));
 int touch		__P((char *, time_t));
 int user_is_exempt	__P((void));
