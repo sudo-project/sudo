@@ -74,7 +74,8 @@ int  status = 0,
 FILE *sudoers_tmp_fp=NULL,
      *sudoers_fp=NULL;
 
-RETSIGTYPE Exit()
+static RETSIGTYPE Exit(sig)
+    int sig;
 {
     if (sudoers_tmp_fp)
 	(void) fclose(sudoers_tmp_fp);
