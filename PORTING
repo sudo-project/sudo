@@ -1,0 +1,10 @@
+Sudo should be fairly easy to port.  The most problematic part is how
+set*uid() functions.  For systems that support saved uids you should
+define HAS_SAVED_UID.  This means that for most of sudo, it is running
+with the effective and real uids set to the uid of the caller.  The saved
+uid of 0 is used to do a setuid(0) before exec'ing the command.  If saved
+uids are not supported, only the effective uid is set the the uid of the
+caller.  If you have saved uids, sudo needs a setreuid() function, otherwise
+it uses seteuid().  If you have no setreuid() or seteuid() but do have
+setresuid() you can emulate setreuid() with a macro like the one in
+sudo.h used for HP-UX.
