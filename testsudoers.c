@@ -32,16 +32,23 @@ static char rcsid[] = "$Id$";
 
 #include <stdio.h>
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#  include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #ifdef HAVE_STRING_H
-#include <string.h>
+#  include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
-#include <strings.h>
+#  include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#ifdef HAVE_FNMATCH_H
+#  include <fnmatch.h>
+#else
+#  ifndef HAVE_FNMATCH
+#    include "emul/fnmatch.h"
+#  endif /* HAVE_FNMATCH */
+#endif /* HAVE_FNMATCH_H */
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-#include <malloc.h>
+#  include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <ctype.h>
 #include <pwd.h>
@@ -95,32 +102,47 @@ int command_matches(cmnd, user_args, path, sudoers_args)
     if ((args = strchr(path, ' ')))  
 	*args++ = '\0';
 
-    plen = strlen(path);
-    if (path[plen - 1] != '/') {
-	if (strcmp(cmnd, path) == 0) {
-	    if (!sudoers_args) {
-		return(TRUE);
-	    } else if (user_args && sudoers_args) {
-		return(compare_args(user_args, sudoers_args));
-	    } else {
-		return(FALSE);
-	    }
-	} else
+    if (has_meta(path)) {
+	if (fnmatch(path, cmnd, FNM_PATHNAME))
 	    return(FALSE);
+	if (!sudoers_args)
+	    return(TRUE);
+	else if (user_args && sudoers_args)
+	    return(compare_args(user_args, sudoers_args));
+	else if (!user_args && sudoers_args && sudoers_args[0][0] == '\0' &&
+		 sudoers_args[1] == NULL)
+	    return(TRUE);
+	else
+	    return(FALSE);
+    } else {
+	plen = strlen(path);
+	if (path[plen - 1] != '/') {
+	    if (strcmp(cmnd, path))
+		return(FALSE);
+	    if (!sudoers_args)
+		return(TRUE);
+	    else if (user_args && sudoers_args)
+		return(compare_args(user_args, sudoers_args));
+	    else if (!user_args && sudoers_args && sudoers_args[0][0] == '\0' &&
+		     sudoers_args[1] == NULL)
+		return(TRUE);
+	    else
+		return(FALSE);
+	}
+
+	clen = strlen(cmnd);
+	if (clen < plen + 1)
+	    /* path cannot be the parent dir of cmnd */
+	    return(FALSE);
+
+	if (strchr(cmnd + plen + 1, '/') != NULL)
+	    /* path could only be an anscestor of cmnd -- */
+	    /* ignoring, of course, things like // & /./  */
+	    return(FALSE);
+
+	/* see whether path is the prefix of cmnd */
+	return((strncmp(cmnd, path, plen) == 0));
     }
-
-    clen = strlen(cmnd);
-    if (clen < plen + 1)
-	/* path cannot be the parent dir of cmnd */
-	return(FALSE);
-
-    if (strchr(cmnd + plen + 1, '/') != NULL)
-	/* path could only be an anscestor of cmnd -- */
-	/* ignoring, of course, things like // & /./  */
-	return(FALSE);
-
-    /* see whether path is the prefix of cmnd */
-    return((strncmp(cmnd, path, plen) == 0));
 }
 
 
@@ -311,9 +333,9 @@ int compare_args(user_args, sudoers_args)
 
     for (ua=user_args, sa=sudoers_args; *ua && *sa; ua++, sa++) {
 	/* only do wildcard match if there are meta chars */
-	/* XXX - is this really any faster than wildmat() for all? */
+	/* XXX - is this really any faster than fnmatch() for all? */
 	if (has_meta(*sa)) {
-	    if (wildmat(*ua, *sa) != 1)
+	    if (fnmatch(*sa, *ua, FNM_PATHNAME))
 		return(FALSE);
 	} else {
 	    if (strcmp(*ua, *sa))
