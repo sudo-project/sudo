@@ -72,6 +72,8 @@
   
           USE_INSULTS            - if you want to be insulted for typing an
                                    incorrect password like the original sudo(8)
+
+          STD_HEADERS            - if you have ansi-compliant header files
 */
 
 
