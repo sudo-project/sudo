@@ -122,7 +122,8 @@ static int   verify_krb_v5_tgt		__P((krb5_ccache));
 #ifdef HAVE_PAM
 static void pam_attempt_auth            __P((void));
 static int pam_auth            		__P((char *, char *));
-static int PAM_conv			__P((int, struct pam_message **,
+static int PAM_conv			__P((int,
+					     PAM_CONST struct pam_message **,
 					     struct pam_response **, void *));
 #endif /* HAVE_PAM */
 #ifdef HAVE_SKEY
@@ -940,14 +941,14 @@ cleanup:
  *
  *  Try to authenticate the user using Pluggable Authentication
  *  Modules (PAM). Added 9/11/98 by Gary J. Calvin
- *  Reworked for stock PAM by Amos Elberg based on samba code.
+ *  Reworked for stock PAM by Amos Elberg and Todd Miller
  */
 static char *PAM_username;
 static char *PAM_password;
 
 static int PAM_conv(num_msg, msg, resp, appdata_ptr)
     int num_msg;
-    struct pam_message **msg;
+    PAM_CONST struct pam_message **msg;
     struct pam_response **resp;
     void *appdata_ptr;
 {
@@ -982,7 +983,7 @@ static int PAM_conv(num_msg, msg, resp, appdata_ptr)
 	    break;
 	default:
 	    /* Must be an error of some sort... */
-	    free (reply);
+	    free(reply);
 	    return(PAM_CONV_ERR);
 	}
     }
@@ -996,24 +997,15 @@ static int pam_auth(user, password)
     char *user;
     char *password;
 {
+    struct pam_conv PAM_conversation;
     pam_handle_t *pamh;
-    int pam_error;
-    static struct pam_conv PAM_conversation = {
-	&PAM_conv,
-	NULL
-    };
 
-    /*
-     * Now use PAM to do authentication.  For now, we won't worry about
-     * session logging, only authentication.  Bail out if there are any
-     * errors.
-     */
-#define PAM_BAIL if (pam_error != PAM_SUCCESS) { pam_end(pamh, 0); return(0); }
-
+    /* Initialize our variables for PAM */
+    PAM_conversation.conv = PAM_conv;
+    PAM_conversation.appdata_ptr = NULL;
     PAM_password = password;
     PAM_username = user;
-    pam_error = pam_start("sudo", user, &PAM_conversation, &pamh);
-    PAM_BAIL;
+
     /*
      * Setting PAM_SILENT stops generation of error messages to syslog
      * to enable debugging on Red Hat Linux set:
@@ -1021,20 +1013,15 @@ static int pam_auth(user, password)
      *      auth required /lib/security/pam_pwdb.so shadow nullok audit
      * _OR_ change PAM_SILENT to 0 to force detailed reporting (logging)
      */
-    pam_error = pam_authenticate(pamh, PAM_SILENT);
-    PAM_BAIL;
-#if 0
-    /*
-     * It is not clear to me that account management is the right thing
-     * to do, but it is not clear that it isn't, either.  This can be
-     * removed if no account management should be done.  Alternately,
-     * put a pam_allow.so entry in /etc/pam.conf for account handling.
-     */
-    pam_error = pam_acct_mgmt(pamh, PAM_SILENT);
-    PAM_BAIL;
-#endif
+    if (pam_start("sudo", user, &PAM_conversation, &pamh) != PAM_SUCCESS ||
+	pam_authenticate(pamh, PAM_SILENT) != PAM_SUCCESS) {
+	pam_end(pamh, 0);
+	return(0);
+    }
+
+    /* User authenticated successfully */
     pam_end(pamh, PAM_SUCCESS);
-    /* If this point is reached, the user has been authenticated. */
+
     return(1);
 }
 

@@ -83,6 +83,13 @@
 /* Define to be nil if C compiler doesn't support "const."  */
 #undef const
 
+/* Solaris doesn't use const qualifiers in PAM. */
+#ifdef sun
+#define PAM_CONST
+#else
+#define PAM_CONST	const
+#endif
+
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
 
