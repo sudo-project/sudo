@@ -100,6 +100,7 @@ extern int netgr_matches	__P((char *, char *, char *));
 static int find_alias		__P((char *, int));
 static int add_alias		__P((char *, int));
 static int more_aliases		__P((size_t));
+static char *dotcat		__P((char *, char *));
 
 int yyerror(s)
 char *s;
@@ -117,7 +118,7 @@ char *s;
 %}
 
 %union {
-    char string[MAXCOMMANDLENGTH+1];
+    char *string;
     int tok;
 }
 
@@ -125,7 +126,7 @@ char *s;
 %start file				/* special start symbol */
 %token <string>	ALIAS			/* an UPPERCASE alias name */
 %token <string> NTWKADDR		/* w.x.y.z */
-%token <string> NETGROUP		/* +NAME */
+%token <string> NETGROUP		/* a netgroup (+NAME) */
 %token <string> COMMAND			/* an absolute pathname + args */
 %token <string> NAME			/* a mixed-case name */
 %token <tok>	COMMENT			/* comment and/or carriage return */
@@ -180,18 +181,26 @@ hostspec	:	ALL {
 		|	NTWKADDR {
 			    if (addr_matches($1))
 				host_matches = TRUE;
+			    (void) free($1);
+			    $1 = NULL; /* XXX */
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, host, NULL))
 				host_matches = TRUE;
+			    (void) free($1);
+			    $1 = NULL; /* XXX */
 			}
 		|	NAME {
 			    if (strcmp(host, $1) == 0)
 				host_matches = TRUE;
+			    (void) free($1);
+			    $1 = NULL; /* XXX */
 			}
 		|	ALIAS {
 			    if (find_alias($1, HOST))
 				host_matches = TRUE;
+			    (void) free($1);
+			    $1 = NULL; /* XXX */
 			}
 		|	fqdn {
 #ifdef HAVE_STRCASECMP
@@ -201,18 +210,21 @@ hostspec	:	ALL {
 			    if (strcmp($1, host) == 0)
 				host_matches = TRUE;
 #endif /* HAVE_STRCASECMP */
+			    (void) free($1);
+			    $1 = NULL; /* XXX */
 			}
 		;
 
 fqdn		:	NAME '.' NAME {
-			    (void) strcpy($$, $1);
-			    (void) strcat($$, ".");
-			    (void) strcat($$, $3);
+			    $$ = dotcat($1, $3);
+			    (void) free($1);
+			    (void) free($3);
+			    $1 = $3 = NULL; /* XXX */
 			}
 		|	fqdn '.' NAME {
-			    (void) strcpy($$, $1);
-			    (void) strcat($$, ".");
-			    (void) strcat($$, $3);
+			    $$ = dotcat($1, $3);
+			    (void) free($3);
+			    $3 = NULL; /* XXX */
 			}
 		;
 
@@ -251,10 +263,14 @@ cmnd		:	ALL {
 		|	ALIAS {
 			    if (find_alias($1, CMND))
 				cmnd_matches = TRUE;
+			    (void) free($1);
+			    $1 = NULL; /* XXX */
 			}
 		|	COMMAND {
 			    if (path_matches(cmnd, $1))
 				cmnd_matches = TRUE;
+			    (void) free($1);
+			    $1 = NULL; /* XXX */
 			}
 		;
 
@@ -281,6 +297,8 @@ cmndalias	:	ALIAS { push; }	'=' cmndlist {
 			    if (cmnd_matches == TRUE && !add_alias($1, CMND))
 				YYERROR;
 			    pop;
+			    (void) free($1);
+			    $1 = NULL; /* XXX */
 			}
 		;
 
@@ -297,6 +315,8 @@ useralias	:	ALIAS { push; }	'=' userlist {
 			    if (user_matches == TRUE && !add_alias($1, USER))
 				YYERROR;
 			    pop;
+			    (void) free($1);
+			    $1 = NULL; /* XXX */
 			}
 		;
 
@@ -308,14 +328,20 @@ userlist	:	user
 user		:	NAME {
 			    if (strcmp($1, user) == 0)
 				user_matches = TRUE;
+			    (void) free($1);
+			    $1 = NULL; /* XXX */
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, NULL, user))
 				user_matches = TRUE;
+			    (void) free($1);
+			    $1 = NULL; /* XXX */
 			}
 		|	ALIAS {
 			    if (find_alias($1, USER))
 				user_matches = TRUE;
+			    (void) free($1);
+			    $1 = NULL; /* XXX */
 			}
 		|	ALL {
 			    user_matches = TRUE;
@@ -334,6 +360,7 @@ typedef struct {
 aliasinfo *aliases = NULL;
 size_t naliases = 0;
 size_t nslots = 0;
+
 
 static int aliascmp(a1, a2)
     const VOID *a1, *a2;
@@ -386,6 +413,7 @@ static int add_alias(alias, type)
     return(ok);
 }
 
+
 static int find_alias(alias, type)
     char *alias;
     int type;
@@ -398,6 +426,7 @@ static int find_alias(alias, type)
     return(lfind((const VOID *)&ai, (const VOID *)aliases, &naliases,
 		 sizeof(ai), aliascmp) != NULL);
 }
+
 
 static int more_aliases(nslots)
     size_t nslots;
@@ -417,6 +446,7 @@ static int more_aliases(nslots)
 
     return(aip != NULL);
 }
+
 
 int dumpaliases()
 {
@@ -440,9 +470,36 @@ int dumpaliases()
     }
 }
 
+
 void reset_aliases()
 {
     if (aliases)
 	(void) free(aliases);
     naliases = nslots = 0;
+}
+
+
+static char *dotcat(s1, s2)
+    char *s1;
+    char *s2;
+{
+    int len1;				/* length of param 1 */
+    int fulllen;			/* length of params 1, 2, '.' */
+    char *s;				/* string to return */
+
+    /* how much space do we need? */
+    len1 = strlen(s1);
+    fulllen = len1 + 1 + strlen(s2);
+
+    /* allocate the space */
+    s = (char *) malloc(fulllen + 1);
+    if (s == NULL)
+	yyerror("unable to allocate memory");
+
+    /* cat s1.s2 -> s effeciently */
+    (void) strcpy(s, s1);
+    *(s + len1) = '.';
+    (void) strcpy(s + len1 + 1, s2);
+
+    return(s);
 }
