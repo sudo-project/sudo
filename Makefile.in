@@ -93,13 +93,13 @@ SHELL = /bin/sh
 
 PROGS = @PROGS@
 
-SRCS = check.c find_path.c logging.c parse.c sudo.c goodpath.c \
-       sudo_setenv.c parse.yacc parse.lex visudo.c interfaces.c
+SRCS = check.c sudo_getpwuid.c find_path.c logging.c parse.c sudo.c \
+       goodpath.c sudo_setenv.c parse.yacc parse.lex visudo.c interfaces.c
 
 PARSEOBJS = y.tab.o lex.yy.o
 
-SUDOBJS = check.o find_path.o logging.o parse.o sudo.o goodpath.o \
-          sudo_setenv.o interfaces.o
+SUDOBJS = check.o sudo_getpwuid.o find_path.o logging.o parse.o sudo.o \
+          goodpath.o sudo_setenv.o interfaces.o
 
 VISUDOBJS = visudo.o
 
