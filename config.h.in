@@ -88,9 +88,6 @@
 /* Define if you use AFS.  */
 #undef HAVE_AFS
 
-/* Define if you use flex instead of lex.  */
-#undef HAVE_FLEX
-
 /* Define if you have POSIX signals.  */
 #undef HAVE_SIGACTION
 #ifdef HAVE_SIGACTION
@@ -108,6 +105,9 @@
 
 /* Define if you have strdup(3).  */
 #undef HAVE_STRDUP
+
+/* Define if you have lsearch(3).  */
+#undef HAVE_LSEARCH
 
 /* Define if you have strchr(3).  */
 #undef HAVE_STRCHR
@@ -142,6 +142,9 @@
 /* Define if you have setenv(3). */
 #undef HAVE_SETENV
 
+/* Define if you have strcasecmp(3). */
+#undef HAVE_STRCASECMP
+
 /* Define if you have tcgetattr(3). */
 #undef HAVE_TCGETATTR
 
@@ -159,8 +162,11 @@
 #undef HAVE_STRINGS_H
 #endif /* convex */
 
-/* Define if you have the <dirent.h> header file.  */
+/* Define your flavor of dir entry header file.  */
 #undef HAVE_DIRENT_H
+#undef HAVE_SYS_NDIR_H
+#undef HAVE_SYS_DIR_H
+#undef HAVE_NDIR_H
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
@@ -175,6 +181,9 @@
 
 /* Define if you have the <sys/sockio.h> header file.  */
 #undef HAVE_SYS_SOCKIO_H
+
+/* Define to void if your C compiler fully groks void, else char */
+#undef VOID
 
 /*
  * Paths to commands used by sudo.  There are used by pathnames.h.
