@@ -51,7 +51,6 @@ static char sccsid[] = "@(#)fnmatch.c	8.2 (Berkeley) 4/16/94";
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#include <string.h>
 
 #include "compat.h"
 #include "emul/fnmatch.h"
