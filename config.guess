@@ -518,7 +518,7 @@ EOF
     SM[BE]S:UNIX_SV:*:*)
 	echo mips-dde-sysv${UNAME_RELEASE}
 	exit 0 ;;
-    RM*:SINIX-*:*:*)
+    RM*:SINIX-*:*:* | RM*:ReliantUNIX-*:*:*)
 	echo mips-sni-sysv4
 	exit 0 ;;
     *:SINIX-*:*:*)
