@@ -222,6 +222,10 @@ Special features/options:
         where it is broken.  4.4BSD has setreuid() but it doesn't
         really work.
 
+  --disable-setresuid
+        Disable use of the setresuid() function for operating systems
+        where it is broken (none currently known).
+
   --disable-sia
         Disable SIA support.  This is the "Security Integration
         Architecture" on Digital UNIX. If you disable SIA sudo will
