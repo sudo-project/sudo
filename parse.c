@@ -59,11 +59,22 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/stat.h>
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
+#if HAVE_DIRENT_H
+# include <dirent.h>
+# define NAMLEN(dirent) strlen((dirent)->d_name)
 #else
-#include <sys/dir.h>
-#endif /* HAVE_DIRENT_H */
+# define dirent direct
+# define NAMLEN(dirent) (dirent)->d_namlen
+# if HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# if HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# if HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
 
 #include "sudo.h"
 #include "options.h"
@@ -147,11 +158,7 @@ char *cmnd, *path;
     int plen;
     struct stat cst, pst;
     DIR *dirp;
-#ifdef HAVE_DIRENT_H
     struct dirent *dent;
-#else
-    struct direct *dent;
-#endif /* HAVE_DIRENT_H */
     char buf[MAXCOMMANDLENGTH+1];
 
     if (stat(cmnd, &cst) < 0)
@@ -171,7 +178,7 @@ char *cmnd, *path;
 
     while ((dent = readdir(dirp)) != NULL) {
 	strcpy(buf, path);
-	strcat(buf, dent->d_name);
+	strcat(buf, NAMLEN(dent));
 	if (stat(buf, &pst) < 0)
 	    continue;
 	if (cst.st_dev == pst.st_dev && cst.st_ino == pst.st_ino)
