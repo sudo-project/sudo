@@ -38,7 +38,6 @@
  */
 
 #include "config.h"
-#include "compat.h"
 
 #ifdef HAVE_DCE
 
@@ -49,6 +48,8 @@
 #include <dce/rpc.h>
 #include <dce/sec_login.h>
 #include <dce/dce_error.h> /* required to call dce_error_inq_text routine   */
+
+#include "compat.h"
 
 /*
  * Prototypes
