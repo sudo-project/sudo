@@ -1550,7 +1550,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset \
+AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf tzset \
 	       seteuid setegid strftime setrlimit initgroups fstat)
 if test -z "$BROKEN_SETREUID"; then
     AC_CHECK_FUNCS(setreuid)
@@ -1570,7 +1570,7 @@ AC_CHECK_FUNCS(innetgr _innetgr, AC_CHECK_FUNCS(getdomainname) [break])
 AC_CHECK_FUNCS(lsearch, , [AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) [LIBS="${LIBS} -lcompat"], AC_LIBOBJ(lsearch)), AC_LIBOBJ(lsearch))])
 AC_CHECK_FUNCS(utime, SUDO_FUNC_UTIME_POSIX, AC_LIBOBJ(utime))
 SUDO_FUNC_FNMATCH(AC_DEFINE(HAVE_FNMATCH), AC_LIBOBJ(fnmatch))
-AC_REPLACE_FUNCS(strerror strcasecmp)
+AC_REPLACE_FUNCS(strerror strcasecmp sigaction)
 AC_CHECK_FUNCS(snprintf vsnprintf asprintf vasprintf, , [NEED_SNPRINTF=1])
 dnl
 dnl If NEED_SNPRINTF is set, add snprintf.c to LIBOBJS

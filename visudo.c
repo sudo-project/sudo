@@ -568,28 +568,18 @@ whatnow()
 static void
 setup_signals()
 {
-#ifdef POSIX_SIGNALS
-	struct sigaction action;		/* POSIX signal structure */
-#endif /* POSIX_SIGNALS */
+	sigaction_t sa;
 
 	/*
 	 * Setup signal handlers to cleanup nicely.
 	 */
-#ifdef POSIX_SIGNALS
-	(void) memset((VOID *)&action, 0, sizeof(action));
-	sigemptyset(&action.sa_mask);
-	action.sa_flags = 0;
-	action.sa_handler = Exit;
-	(void) sigaction(SIGTERM, &action, NULL);
-	(void) sigaction(SIGHUP, &action, NULL);
-	(void) sigaction(SIGINT, &action, NULL);
-	(void) sigaction(SIGQUIT, &action, NULL);
-#else
-	(void) signal(SIGTERM, Exit);
-	(void) signal(SIGHUP, Exit);
-	(void) signal(SIGINT, Exit);
-	(void) signal(SIGQUIT, Exit);
-#endif /* POSIX_SIGNALS */
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART;
+	sa.sa_handler = Exit;
+	(void) sigaction(SIGTERM, &sa, NULL);
+	(void) sigaction(SIGHUP, &sa, NULL);
+	(void) sigaction(SIGINT, &sa, NULL);
+	(void) sigaction(SIGQUIT, &sa, NULL);
 }
 
 static int
@@ -599,15 +589,11 @@ run_command(path, argv)
 {
     int status;
     pid_t pid;
-#ifndef POSIX_SIGNALS
-    int omask = sigblock(sigmask(SIGCHLD));
-#else
     sigset_t set, oset;
 
     (void) sigemptyset(&set);
     (void) sigaddset(&set, SIGCHLD);
     (void) sigprocmask(SIG_BLOCK, &set, &oset);
-#endif /* POSIX_SIGNALS */
 
     switch (pid = fork()) {
 	case -1:
@@ -616,11 +602,7 @@ run_command(path, argv)
 	    Exit(-1);
 	    break;	/* NOTREACHED */
 	case 0:
-#ifdef POSIX_SIGNALS
 	    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
-#else
-	    (void) sigsetmask(omask);
-#endif /* POSIX_SIGNALS */
 	    execv(path, argv);
 	    (void) fprintf(stderr,
 		"%s: unable to run %s: %s\n", Argv[0], path, strerror(errno));
@@ -634,11 +616,7 @@ run_command(path, argv)
     pid = wait(&status);
 #endif
 
-#ifdef POSIX_SIGNALS
     (void) sigprocmask(SIG_SETMASK, &oset, NULL);
-#else
-    (void) sigsetmask(omask);
-#endif /* POSIX_SIGNALS */
 
     /* XXX - should use WEXITSTATUS() */
     return(pid == -1 ? -1 : (status >> 8));

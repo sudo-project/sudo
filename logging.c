@@ -432,23 +432,15 @@ send_mail(line)
     FILE *mail;
     char *p;
     int pfd[2], pid, status;
-#ifdef POSIX_SIGNALS
     sigset_t set, oset;
-#else
-    int omask;
-#endif /* POSIX_SIGNALS */
 
     /* Just return if mailer is disabled. */
     if (!def_str(I_MAILERPATH) || !def_str(I_MAILTO))
 	return;
 
-#ifdef POSIX_SIGNALS
     (void) sigemptyset(&set);
     (void) sigaddset(&set, SIGCHLD);
     (void) sigprocmask(SIG_BLOCK, &set, &oset);
-#else
-    omask = sigblock(sigmask(SIGCHLD));
-#endif /* POSIX_SIGNALS */
 
     if (pipe(pfd) == -1) {
 	(void) fprintf(stderr, "%s: cannot open pipe: %s\n",
@@ -534,11 +526,7 @@ send_mail(line)
 #ifdef sudo_waitpid
     (void) sudo_waitpid(pid, &status, WNOHANG);
 #endif
-#ifdef POSIX_SIGNALS
     (void) sigprocmask(SIG_SETMASK, &oset, NULL);
-#else
-    (void) sigsetmask(omask);
-#endif /* POSIX_SIGNALS */
 }
 
 /*
@@ -584,9 +572,6 @@ reapchild(sig)
 #else
     (void) wait(&status);
 #endif
-#ifndef POSIX_SIGNALS
-    (void) signal(SIGCHLD, reapchild);
-#endif /* POSIX_SIGNALS */
     errno = serrno;
 }
 

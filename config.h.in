@@ -125,12 +125,6 @@
 /* Define if you want to use execv() instead of execvp().  */
 #undef USE_EXECV
 
-/* Define if you have POSIX signals.  */
-#undef HAVE_SIGACTION
-#ifdef HAVE_SIGACTION
-#  define POSIX_SIGNALS
-#endif /* HAVE_SIGACTION */
-
 /* Define if you have tzset(3).  */
 #undef HAVE_TZSET
 

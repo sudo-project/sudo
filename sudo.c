@@ -146,11 +146,7 @@ main(argc, argv, envp)
     int cmnd_status;
     int sudo_mode;
     int pwflag;
-#ifdef POSIX_SIGNALS
     sigset_t set, oset;
-#else
-    int omask;
-#endif /* POSIX_SIGNALS */
     extern int printmatches;
     extern char **environ;
 
@@ -177,15 +173,11 @@ main(argc, argv, envp)
      * Block signals so the user cannot interrupt us at some point and
      * avoid the logging.
      */
-#ifdef POSIX_SIGNALS
     (void) sigemptyset(&set);
     (void) sigaddset(&set, SIGINT);
     (void) sigaddset(&set, SIGQUIT);
     (void) sigaddset(&set, SIGTSTP);
     (void) sigprocmask(SIG_BLOCK, &set, &oset);
-#else
-    omask = sigblock(sigmask(SIGINT)|sigmask(SIGQUIT)|sigmask(SIGTSTP));
-#endif /* POSIX_SIGNALS */
 
     /*
      * Setup signal handlers, turn off core dumps, and close open files.
@@ -344,11 +336,7 @@ main(argc, argv, envp)
 	endpwent();
 
 	/* Reset signal mask before we exec. */
-#ifdef POSIX_SIGNALS
 	(void) sigprocmask(SIG_SETMASK, &oset, NULL);
-#else
-	(void) sigsetmask(omask);
-#endif /* POSIX_SIGNALS */
 
 	/* Override user's umask if configured to do so. */
 	if (def_ival(I_UMASK) != 0777)
@@ -809,9 +797,7 @@ initial_setup()
 #ifdef HAVE_SETRLIMIT
     struct rlimit rl;
 #endif
-#ifdef POSIX_SIGNALS
-    struct sigaction sa;
-#endif
+    sigaction_t sa;
 
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
     /*
@@ -841,13 +827,10 @@ initial_setup()
 	(void) close(fd);
 
     /* Catch children as they die... */
-#ifdef POSIX_SIGNALS
-    (void) memset((VOID *)&sa, 0, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
     sa.sa_handler = reapchild;
     (void) sigaction(SIGCHLD, &sa, NULL);
-#else
-    (void) signal(SIGCHLD, reapchild);
-#endif /* POSIX_SIGNALS */
 
     /* Set set_perms pointer to the correct function */
 #if defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
