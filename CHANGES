@@ -1192,9 +1192,13 @@ Sudo 1.6 released.
 374) Killed shell_noargs option, it cannot work since the command needs to
      be set before sudoers is parsed.
 
-375) Fixed the following Defaults options: set_home, fqdn, syslog
+375) Fixed the following Defaults options: set_home, fqdn, syslog, tty_tickets,
+     ticket_dir.
 
 376) When using select() in tgetpass(), do a separate select before
      each read to be sure we can timeout correctly.
 
 377) Hopefully fix SecurID support.
+
+378) Fixed a bug parsing runas modifiers.  If a user spec contained multiple
+     runas specs, the latter ones may not be applied.
