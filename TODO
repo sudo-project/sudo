@@ -16,3 +16,5 @@ TODO list
 07) Add default options to sudoers file (umask, def uid, def gids, dir, PATH).
 
 08) Add a whatnow-style prompt to visudo.
+
+09) Add a SHELLS reserved word that checks against /etc/shells.
