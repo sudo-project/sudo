@@ -300,23 +300,38 @@ static void fill_args(s, len, addspace)
     int len;
     int addspace;
 {
-    int new_len = arg_len + len + addspace;
+    int new_len;
     char *p;
 
     /*
-     * If we don't have enough space realloc() some more
+     * If first arg, malloc() some room, else if we don't
+     * have enough space realloc() some more.
      */
-    if (new_len >= arg_size) {
-	/* Allocate more space than we need for subsequent args */
+    if (yylval.command.args == NULL) {
+	addspace = 0;
+	new_len = len;
+
 	while (new_len >= (arg_size += COMMANDARGINC))
 	    ;
 
-	yylval.command.args = (char *) realloc(yylval.command.args, arg_size);
+	yylval.command.args = (char *) malloc(arg_size);
 	if (yylval.command.args == NULL)
 	    yyerror("unable to allocate memory");
+    } else {
+	new_len = arg_len + len + addspace;
+
+	if (new_len >= arg_size) {
+	    /* Allocate more space than we need for subsequent args */
+	    while (new_len >= (arg_size += COMMANDARGINC))
+		;
+
+	    yylval.command.args = (char *) realloc(yylval.command.args, arg_size);
+	    if (yylval.command.args == NULL)
+		yyerror("unable to allocate memory");
+	}
     }
 
-    /* Efficiently append the arg (with a leading space) */
+    /* Efficiently append the arg (with a leading space if needed). */
     p = yylval.command.args + arg_len;
     if (addspace)
 	*p++ = ' ';
