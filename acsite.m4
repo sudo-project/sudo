@@ -5415,24 +5415,31 @@ EOF
       ;;
 
     openbsd*)
-      _LT_AC_TAGVAR(hardcode_direct, $1)=yes
-      _LT_AC_TAGVAR(hardcode_shlibpath_var, $1)=no
-      if test -z "`echo __ELF__ | $CC -E - | grep __ELF__`" || test "$host_os-$host_cpu" = "openbsd2.8-powerpc"; then
-	_LT_AC_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags'
-	_LT_AC_TAGVAR(hardcode_libdir_flag_spec, $1)='${wl}-rpath,$libdir'
-	_LT_AC_TAGVAR(export_dynamic_flag_spec, $1)='${wl}-E'
-      else
-       case $host_os in
-	 openbsd[[01]].* | openbsd2.[[0-7]] | openbsd2.[[0-7]].*)
-	   _LT_AC_TAGVAR(archive_cmds, $1)='$LD -Bshareable -o $lib $libobjs $deplibs $linker_flags'
-	   _LT_AC_TAGVAR(hardcode_libdir_flag_spec, $1)='-R$libdir'
-	   ;;
-	 *)
-	   _LT_AC_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags'
-	   _LT_AC_TAGVAR(hardcode_libdir_flag_spec, $1)='${wl}-rpath,$libdir'
-	   ;;
-       esac
-      fi
+      case "$host_cpu" in
+	m88k|hppa|vax)
+	  _LT_AC_TAGVAR(ld_shlibs, $1)=no
+	  ;;
+	*)
+	  _LT_AC_TAGVAR(hardcode_direct, $1)=yes
+	  _LT_AC_TAGVAR(hardcode_shlibpath_var, $1)=no
+	  if test -z "`echo __ELF__ | $CC -E - | grep __ELF__`" || test "$host_os-$host_cpu" = "openbsd2.8-powerpc"; then
+	    _LT_AC_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags'
+	    _LT_AC_TAGVAR(hardcode_libdir_flag_spec, $1)='${wl}-rpath,$libdir'
+	    _LT_AC_TAGVAR(export_dynamic_flag_spec, $1)='${wl}-E'
+	  else
+	    case $host_os in
+	      openbsd[[01]].* | openbsd2.[[0-7]] | openbsd2.[[0-7]].*)
+	        _LT_AC_TAGVAR(archive_cmds, $1)='$LD -Bshareable -o $lib $libobjs $deplibs $linker_flags'
+	        _LT_AC_TAGVAR(hardcode_libdir_flag_spec, $1)='-R$libdir'
+	        ;;
+	      *)
+	        _LT_AC_TAGVAR(archive_cmds, $1)='$CC -shared $pic_flag -o $lib $libobjs $deplibs $compiler_flags'
+	        _LT_AC_TAGVAR(hardcode_libdir_flag_spec, $1)='${wl}-rpath,$libdir'
+	        ;;
+	    esac
+	  fi
+          ;;
+      esac
       ;;
 
     os2*)
