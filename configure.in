@@ -246,6 +246,15 @@ dnl What kind of beastie are we being run on?
 dnl Barf if config.cache was generated on another host.
 dnl
 AC_CANONICAL_HOST
+if test -n "$sudo_cv_oldhost" -a "$sudo_cv_oldhost" != "$host"; then
+    echo ""
+    echo "Fatal Error: config.cache exists from another platform!"
+    echo "Please remove it and re-run configure."
+    echo ""
+    exit 1
+fi
+AC_MSG_CHECKING(host type against cached value (if any))
+AC_CACHE_VAL(sudo_cv_oldhost, sudo_cv_oldhost="$host")
 
 dnl
 dnl We want to be able to differentiate between different rev's
