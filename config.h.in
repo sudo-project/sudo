@@ -47,11 +47,23 @@
 #  define __svr4__
 #endif /* SVR4 */
 
-/* Define if you have getcwd.  */
+/* Define if you have getcwd(3).  */
 #undef HAVE_GETCWD
 
-/* Define if you have strdup.  */
+/* Define if you have strdup(3).  */
 #undef HAVE_STRDUP
+
+/* Define if you have strchr(3).  */
+#undef HAVE_STRCHR
+#ifndef HAVE_STRCHR
+#  define strchr	index
+#endif
+
+/* Define if you have strrchr(3).  */
+#undef HAVE_STRRCHR
+#ifndef HAVE_STRRCHR
+#  define strrchr	rindex
+#endif
 
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
@@ -67,3 +79,9 @@
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
+
+/* Define if you have the <termio.h> header file.  */
+#undef HAVE_TERMIO_H
+
+/* Define if you have the <termios.h> header file.  */
+#undef HAVE_TERMIOS_H
