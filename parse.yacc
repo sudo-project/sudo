@@ -76,7 +76,7 @@ int top = 0;
 
 #define push \
     if (top > MATCHSTACKSIZE) \
-	yyerror("matching stack overflow\n"); \
+	yyerror("matching stack overflow"); \
     else {\
 	match[top].user = -1; \
 	match[top].cmnd = -1; \
@@ -85,7 +85,7 @@ int top = 0;
     }
 #define pop \
     if (top == 0) \
-	yyerror("matching stack underflow\n"); \
+	yyerror("matching stack underflow"); \
     else \
 	top--;
 
@@ -141,18 +141,11 @@ entry		:	COMMENT
 			{ ; }
                 |       error COMMENT
 			{ yyerrok; }
-		|	NAME {
-			    push;
-			    user_matches = strcmp(user, $1) == 0;
-			} privileges
-		|	ALIAS {
-			    push;
-			    user_matches = find_alias($1, USER) != 0;
-			} privileges
-		|	ALL {
-			    push;
-			    user_matches = TRUE;
-			} privileges
+		|	{ push; } user privileges {
+			    while (top && user_matches != TRUE) {
+				pop;
+			    }
+			}
 		|	USERALIAS useraliases
 			{ ; }
 		|	HOSTALIAS hostaliases
@@ -167,9 +160,7 @@ privileges	:	privilege
 		;
 
 privilege	:	hostspec '=' opcmndlist {
-			    if (!user_matches) {
-				pop;
-			    } else {
+			    if (user_matches == TRUE) {
 				push;
 				user_matches = TRUE;
 			    }
@@ -199,7 +190,7 @@ hostspec	:	ALL {
 			    if (strcmp($1, host) == 0)
 				host_matches = TRUE;
 #endif /* HAVE_STRCASECMP */
-		}
+			}
 		;
 
 fqdn		:	NAME '.' NAME {
@@ -292,6 +283,10 @@ userlist	:	user
 
 user		:	NAME {
 			    if (strcmp($1, user) == 0)
+				user_matches = TRUE;
+			}
+		|	ALIAS {
+			    if (find_alias($1, USER))
 				user_matches = TRUE;
 			}
 		|	ALL {
@@ -400,10 +395,22 @@ dumpaliases()
 {
     size_t n;
 
-    for (n = 0; n < naliases; n++)
-	printf("%s\t%s\n", aliases[n].type == HOST ? "HOST" : "CMND",
-                           aliases[n].name);
+    for (n = 0; n < naliases; n++) {
+	switch (aliases[n].type) {
+	case HOST:
+	    puts("HOST");
+	    break;
 
+	case CMND:
+	    puts("CMND");
+	    break;
+
+	case USER:
+	    puts("USER");
+	    break;
+	}
+	printf("\t%s\n", aliases[n].name);
+    }
 }
 
 void
