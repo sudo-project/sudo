@@ -251,6 +251,8 @@ version consists of code written primarily by:
 See the HISTORY file in the B<sudo> distribution for a short history
 of B<sudo>.
 
+=head1 BUGS
+
 Please send all bugs, comments, and changes to sudo-bugs@courtesan.com.
 Be sure to include the version of B<sudo> you are using and the platform
 you are running it on.

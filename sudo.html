@@ -19,6 +19,7 @@
 	<LI><A HREF="#FILES">FILES</A>
 	<LI><A HREF="#ENVIRONMENT_VARIABLES">ENVIRONMENT VARIABLES</A>
 	<LI><A HREF="#AUTHORS">AUTHORS</A>
+	<LI><A HREF="#BUGS">BUGS</A>
 	<LI><A HREF="#DISCLAIMER">DISCLAIMER</A>
 	<LI><A HREF="#CAVEATS">CAVEATS</A>
 	<LI><A HREF="#SEE_ALSO">SEE ALSO</A>
@@ -30,7 +31,7 @@
 <HR>
 <H1><A NAME="NAME">NAME</A></H1>
 <P>
-sudo - execute a command as the superuser
+sudo - execute a command as another user
 
 <P>
 <HR>
@@ -44,22 +45,28 @@ sudo - execute a command as the superuser
 <HR>
 <H1><A NAME="DESCRIPTION">DESCRIPTION</A></H1>
 <P>
-<STRONG>sudo</STRONG> allows a permitted user to execute a <EM>command</EM>
-as the superuser (real and effective uid and gid are set to <CODE>0</CODE> and root's group as set in the passwd file respectively).
+<STRONG>sudo</STRONG> allows a permitted user to execute a <EM>command</EM> as the superuser or another user, as specified in the sudoers file. The
+real and effective uid and gid are set to match those of the target user as
+specified in the passwd file (the group vector is also initialized when the
+target user is not root).
 
 <P>
 <STRONG>sudo</STRONG> determines who is an authorized user by consulting the file <EM>/etc/sudoers</EM>. By giving <STRONG>sudo</STRONG> the <CODE>-v</CODE> flag a user can update the time stamp without running a <EM>command.</EM>
 The password prompt itself will also time out if the user's password is not
-entered with N minutes (again, this is defined at installation time and
+entered with N minutes (again, this is defined at configure time and
 defaults to 5 minutes).
 
 <P>
-If an unauthorized user executes <STRONG>sudo</STRONG>, mail will be sent from the user to the local authorities (defined at
-installation time).
+If a user that is not listed in the <EM>sudoers</EM> file tries to run a command via <STRONG>sudo</STRONG>, mail is sent to the proper authorities, as defined at configure time
+(defaults to root). Note that the mail will not be sent if an unauthorized
+user tries to run sudo with the <CODE>-l</CODE> or <CODE>-v</CODE> flags. This allows users to determine for themselves whether or not they
+are allowed to use <STRONG>sudo</STRONG>.
 
 <P>
-<STRONG>sudo</STRONG> was designed to log via the 4.3 BSD <CODE>syslog(3)</CODE> facility but can
-log to a file instead if so desired (or to both syslog and a file).
+<STRONG>sudo</STRONG> can log both successful an unsuccessful attempts (as well as errors) to
+<CODE>syslog(3),</CODE> a log file, or both. By default <STRONG>sudo</STRONG>
+will log via <CODE>syslog(3)</CODE> but this is changeable at configure
+time.
 
 <P>
 <HR>
@@ -83,7 +90,7 @@ The <CODE>-h</CODE> (<EM>help</EM>) option causes <STRONG>sudo</STRONG> to print
 
 <DT><STRONG><A NAME="item__v">-v</A></STRONG><DD>
 <P>
-If given the <CODE>-v</CODE> (<EM>validate</EM>) option, <STRONG>sudo</STRONG> will update the user's timestamp file, prompting for the user's password if
+If given the <CODE>-v</CODE> (<EM>validate</EM>) option, <STRONG>sudo</STRONG> will update the user's timestamp, prompting for the user's password if
 necessary. This extends the <STRONG>sudo</STRONG> timeout to for another N minutes (where N is defined at installation time
 and defaults to 5 minutes) but does not run a command.
 
@@ -111,7 +118,7 @@ The <CODE>-r</CODE> (<EM>realm</EM>) option is only available if <STRONG>sudo</S
 <DT><STRONG><A NAME="item__p">-p</A></STRONG><DD>
 <P>
 The <CODE>-p</CODE> (<EM>prompt</EM>) option allows you to override the default password prompt and use a
-custom one. If the password prompt contains the <CODE>%u</CODE> escape, <CODE>%u</CODE> will be replaced by the user's login name. Similarly, <CODE>%h</CODE> will be replaced by the local hostname.
+custom one. If the password prompt contains the <CODE>%u</CODE> escape, <CODE>%u</CODE> will be replaced with the user's login name. Similarly, <CODE>%h</CODE> will be replaced with the local hostname.
 
 <DT><STRONG><A NAME="item__u">-u</A></STRONG><DD>
 <P>
@@ -127,7 +134,7 @@ environment variable if it is set or the shell as specified in
 <DT><STRONG><A NAME="item__H">-H</A></STRONG><DD>
 <P>
 The <CODE>-H</CODE> (<EM>HOME</EM>) option sets the <EM>HOME</EM> environment variable to the homedir of the target user (root by default) as
-specified in <CODE>passwd(5).</CODE>
+specified in <CODE>passwd(5).</CODE> By default, <STRONG>sudo</STRONG> does not modify <EM>HOME</EM>.
 
 <DT><STRONG><A NAME="item__">--</A></STRONG><DD>
 <P>
@@ -141,13 +148,12 @@ conjunction with the <CODE>-s</CODE> flag.
 <P>
 <STRONG>sudo</STRONG> quits with an exit value of 1 if there is a configuration/permission
 problem or if <STRONG>sudo</STRONG> cannot execute the given command. In the latter case the error string is
-printed to stderr via <CODE>perror(3).</CODE> If <STRONG>sudo</STRONG> cannot <CODE>stat(2)</CODE> one or more entries in the user's PATH the
-error is printed on stderr via <CODE>perror(3).</CODE> (If the directory
-does not exist or if it is not really a directory, the entry is ignored and
-no error is printed.) This should not happen under normal circumstances.
-The most common reason for <CODE>stat(3)</CODE> to return ``permission
-denied'' is if you are running an automounter and one of the directories in
-your PATH is on a machine that is currently unreachable.
+printed to stderr. If <STRONG>sudo</STRONG> cannot <CODE>stat(2)</CODE> one or more entries in the user's
+<CODE>PATH</CODE> an error is printed on stderr. (If the directory does not exist or if it is
+not really a directory, the entry is ignored and no error is printed.) This
+should not happen under normal circumstances. The most common reason for
+<CODE>stat(2)</CODE> to return ``permission denied'' is if you are running
+an automounter and one of the directories in your <CODE>PATH</CODE> is on a machine that is currently unreachable.
 
 <P>
 <HR>
@@ -164,7 +170,7 @@ to all commands executed.  <STRONG>sudo</STRONG> will also remove the <CODE>IFS<
 <P>
 To prevent command spoofing, <STRONG>sudo</STRONG> checks ``.'' and ``'' (both denoting current directory) last when searching
 for a command in the user's PATH (if one or both are in the PATH). Note,
-however, that the actual PATH environment variable is <EM>not</EM> modified and is passed unchanged to the program that <STRONG>sudo</STRONG> executes.
+however, that the actual <CODE>PATH</CODE> environment variable is <EM>not</EM> modified and is passed unchanged to the program that <STRONG>sudo</STRONG> executes.
 
 <P>
 For security reasons, if your OS supports shared libraries and does not
@@ -173,29 +179,30 @@ you should either use a linker option that disables this behavior or link <STRON
 
 <P>
 <STRONG>sudo</STRONG> will check the ownership of its timestamp directory (<EM>/var/run/sudo</EM> or <EM>/tmp/.odus</EM> by default) and ignore the directory's contents if it is not owned by root
-and only read, writable, and executable by root. On systems that allow
-users to give files away to root (via chown), if the timestamp directory is
-located in a directory writable by anyone (ie: <EM>/tmp</EM>), it is possible for a user to create the timestamp directory before <STRONG>sudo</STRONG>
-is run. However, because <STRONG>sudo</STRONG> checks the ownership and mode of the directory, the only damage that can be
-done is to ``hide'' files by putting them in the timestamp dir. This is
-unlikely to happen since once the timestamp dir is owned by root and
-inaccessible by any other user the user placing files there would be unable
-to get them back out. To get around this issue you can use a directory that
-is not world-writable for the timestamps (<EM>/var/adm/sudo</EM> for instance) or create /tmp/.odus with the appropriate owner (root) and
+and only writable by root. On systems that allow non-root users to give
+away files via <CODE>chown(2),</CODE> if the timestamp directory is located
+in a directory writable by anyone (ie: <EM>/tmp</EM>), it is possible for a user to create the timestamp directory before <STRONG>sudo</STRONG> is run. However, because <STRONG>sudo</STRONG> checks the ownership and mode of the directory and its contents, the only
+damage that can be done is to ``hide'' files by putting them in the
+timestamp dir. This is unlikely to happen since once the timestamp dir is
+owned by root and inaccessible by any other user the user placing files
+there would be unable to get them back out. To get around this issue you
+can use a directory that is not world-writable for the timestamps (<EM>/var/adm/sudo</EM> for instance) or create /tmp/.odus with the appropriate owner (root) and
 permissions (0700) in the system startup files.
 
 <P>
-<CODE>sudo</CODE> will not honor timestamp files set far in the future. Timestamp files with
-a date greater than current_time + 2 * <CODE>TIMEOUT</CODE>
+<CODE>sudo</CODE> will not honor timestamps set far in the future. Timestamps with a date
+greater than current_time + 2 * <CODE>TIMEOUT</CODE>
 will be ignored and sudo will log and complain. This is done to keep a user
-from creating his/her own timestamp file with a bogus date on system that
-allow users to give away files.
+from creating his/her own timestamp with a bogus date on system that allow
+users to give away files.
 
 <P>
 <HR>
 <H1><A NAME="FILES">FILES</A></H1>
 <P>
-<PRE> /etc/sudoers           file of authorized users.
+<PRE> /etc/sudoers           List of who can run what
+ /var/run/sudo          Directory containing timestamps
+ /tmp/.odus             Same as above if no /var/run exists
 </PRE>
 <P>
 <HR>
@@ -205,9 +212,10 @@ allow users to give away files.
  SHELL                  Used to determine shell to run with -s option
  USER                   Set to the target user (root unless the -u option
                         is specified)
- HOME                   In -s mode, set to homedir of root (or runas user)
-                        if built with the SHELL_SETS_HOME option
- SUDO_PROMPT            Replaces the default password prompt
+ HOME                   In -s or -H mode (or if sudo was configured with
+                        the --enable-shell-sets-home option), set to
+                        homedir of the target user.
+ SUDO_PROMPT            Used as the default password prompt
  SUDO_COMMAND           Set to the command run by sudo
  SUDO_USER              Set to the login of the user who invoked sudo
  SUDO_UID               Set to the uid of the user who invoked sudo
@@ -228,17 +236,20 @@ Many people have worked on <STRONG>sudo</STRONG> over the years, this version co
 See the HISTORY file in the <STRONG>sudo</STRONG> distribution for a short history of <STRONG>sudo</STRONG>.
 
 <P>
+<HR>
+<H1><A NAME="BUGS">BUGS</A></H1>
+<P>
 Please send all bugs, comments, and changes to <A
-HREF="mailto:sudo-bugs@courtesan.com.">sudo-bugs@courtesan.com.</A>
+HREF="mailto:sudo-bugs@courtesan.com.">sudo-bugs@courtesan.com.</A> Be sure
+to include the version of <STRONG>sudo</STRONG> you are using and the platform you are running it on.
 
 <P>
 <HR>
 <H1><A NAME="DISCLAIMER">DISCLAIMER</A></H1>
 <P>
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE. See the LICENSE file distributed with
-sudo for more details.
+<STRONG>Sudo</STRONG> is provided ``AS IS'' and any express or implied warranties, including, but
+not limited to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed. See the LICENSE file distributed with <STRONG>sudo</STRONG> for complete details.
 
 <P>
 <HR>
