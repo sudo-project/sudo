@@ -965,9 +965,10 @@ static char *expand_prompt(old_prompt, user, host)
 	    }
 	}
 
-	if (lastchar == '%' && *p == '%')
+	if (lastchar == '%' && *p == '%') {
 	    lastchar = '\0';
-	else
+	    len--;
+	} else
 	    lastchar = *p;
     }
 
@@ -977,12 +978,14 @@ static char *expand_prompt(old_prompt, user, host)
 	    exit(1);
 	}
 	for (p = prompt, np = new_prompt; *p; p++) {
-	    if (lastchar == '%' && (*p == 'h' || *p == 'u')) {
+	    if (lastchar == '%' && (*p == 'h' || *p == 'u' || *p == '%')) {
 		/* substiture user/host name */
 		if (*p == 'h') {
+		    np--;
 		    strcpy(np, shost);
 		    np += strlen(shost);
 		} else if (*p == 'u') {
+		    np--;
 		    strcpy(np, user_name);
 		    np += strlen(user_name);
 		}
@@ -994,6 +997,7 @@ static char *expand_prompt(old_prompt, user, host)
 	    else
 		lastchar = *p;
 	}
+	*np = '\0';
     } else
 	new_prompt = prompt;
 
