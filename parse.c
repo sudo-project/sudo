@@ -182,7 +182,7 @@ sudoers_lookup(check_cmnd)
 			    return(VALIDATE_OK);
 		    } else if (cmnd_matches == FALSE) {
 			/*
-			 * User was explicitly denied acces to cmnd on host.
+			 * User was explicitly denied access to cmnd on host.
 			 */
 			if (no_passwd == TRUE)
 			    return(VALIDATE_NOT_OK | FLAG_NOPASS);
