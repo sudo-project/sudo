@@ -244,6 +244,6 @@ dist: $(DISTFILES)
 	rm -f ../cu-sudo.v$(VERSION).tar.Z
 	( cd .. ; TF="/tmp/sudo.dist$$$$" ; rm -f $$TF ; for i in $(DISTFILES) ; \
 	  do echo sudo.v$(VERSION)/$$i >> $$TF ; done ; \
-	  tar cf cu-sudo.v$(VERSION).tar \
+	  tar Ocf cu-sudo.v$(VERSION).tar \
 	  `cat $$TF` && compress cu-sudo.v$(VERSION).tar && rm -f $$TF)
 	ls -l ../cu-sudo.v$(VERSION).tar.Z
