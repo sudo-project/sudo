@@ -218,7 +218,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	rm -f Makefile config.status
+	rm -f Makefile config.h pathnames.h config.status
 	( cd visudoers && make $@ )
 
 realclean: distclean
