@@ -38,7 +38,7 @@ YACC = @YACC@
 INSTALL = @INSTALL@
 
 # Libraries
-LIBS = @LIBS@
+LIBS = @LIBS@ @LEXLIB@
 
 # Usually -g or -O
 CFLAGS = -O @INC_FLAGS@
@@ -141,11 +141,11 @@ mostlyclean: clean
 
 distclean: clean
 	rm -f Makefile config.h pathnames.h config.status
-	( cd visudoers && make $@ )
+	( cd visudoers && rm -f Makefile )
 
 realclean: distclean
 	rm -f TAGS tags
-	( cd visudoers && make $@ )
+	( cd visudoers && rm -f TAGS tags )
 
 dist: $(DISTFILES)
 	rm -f ../cu-sudo.v1.3.1.tar.Z
