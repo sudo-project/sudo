@@ -41,10 +41,13 @@ static char rcsid[] = "$Id$";
 #include "options.h"
 #include "y.tab.h"
 
+#undef yywrap		/* guard against a yywrap macro */
+
 extern YYSTYPE yylval;
 int sudolineno = 1;
 
 static int fill	__P((void));
+extern void parser_cleanup __P((void));
 
 #ifdef TRACELEXER
 #define LEXTRACE(msg)	fputs(msg, stderr)
@@ -87,11 +90,10 @@ N			{D}{1,3}
 			  LEXTRACE("\n");
 			  return COMMENT;
 			}			/* return comments */
-[@$%^&*()"'`/_+.]*	{ return ERROR; }	/* return error */
-[?;<>\[\]{}|~-]*	{ return ERROR; }	/* return error */
-[0-9_]+			{ return ERROR; }	/* return error */
-
-{N}\.{N}\.{N}\.{N}	{ fill(); return NTWKADDR; }
+{N}\.{N}\.{N}\.{N}	{
+			  fill();
+			  return NTWKADDR;
+			}
 
 \/([a-zA-Z0-9_.+-]+\/?)+ {
 			  LEXTRACE("PATH ");
@@ -132,7 +134,19 @@ N			{D}{1,3}
 			  return ERROR;
 			}
 
+.			{ return ERROR; }	/* return error */
+
 %%
 static int fill() {
     (void) strcpy(yylval.string, yytext);
+}
+
+int yywrap()
+{
+#ifdef YY_NEW_FILE
+    YY_NEW_FILE;
+#endif /* YY_NEW_FILE */
+
+    parser_cleanup();
+    return(1);
 }
