@@ -19,8 +19,11 @@
  *
  *******************************************************************
  *
- *  This module contains realpath(3) for those systems that lack it.
- *  realpath(3) takes a path to qualify and a pointer to a string
+ *  This module contains sudo_realpath(3), a customized version of
+ *  realpath(3).  It is necesary to do the final chdir(2) as the
+ *  uid of the invoking user.
+ *
+ *  sudo_realpath(3) takes a path to qualify and a pointer to a string
  *  as a copyout parameter.  This string should be of size MAXPATHLEN.
  *
  *  Todd C. Miller (millert@colorado.edu) Fri Jun  3 18:32:19 MDT 1994
@@ -47,6 +50,8 @@ static char rcsid[] = "$Id$";
 #include <sys/stat.h>
 #include <sys/param.h>
 
+#include "sudo.h"
+
 #ifndef STDC_HEADERS
 extern char *strcpy();
 extern int readlink();
@@ -68,11 +73,7 @@ extern int lstat();
 /*
  * Prototypes
  */
-#ifdef HAVE_FCHDIR
-static void realpath_restore	__P((FILE *));
-#else
 static void realpath_restore	__P((char *));
-#endif /* HAVE_FCHDIR */
 
 
 /*
@@ -83,22 +84,17 @@ extern int errno;
 
 /******************************************************************
  *
- *  realpath()
+ *  sudo_realpath()
  *
  *  this function takes a path and makes it fully qualified and resolves
  *  all symbolic links, returning the fully qualfied path.
  */
 
-char * realpath(old, new)
+char * sudo_realpath(old, new)
     const char * old;
           char * new;
 {
     char buf[MAXPATHLEN];			/* generic path buffer */
-#ifdef HAVE_FCHDIR
-    FILE * cwd;					/* current working dir */
-#else
-    char cwd[MAXPATHLEN];			/* old working dir */
-#endif /* HAVE_FCHDIR */
     struct stat statbuf;			/* for lstat() */
     char * temp;				/* temporary ptr */
     int len;					/* length parameter */
@@ -107,17 +103,11 @@ char * realpath(old, new)
     if (old == NULL || old[0] == NULL)
 	return(NULL);
 
-    /* save old cwd so we can get back */
-#ifdef HAVE_FCHDIR
-    if (!(cwd = fopen(".", "r")))
-	return(NULL);
-#else
-    if (!getcwd(cwd, sizeof(cwd)))
-	return(NULL);
-#endif /* HAVE_FCHDIR */
-
     new[MAXPATHLEN - 1] = '\0';
     (void) strncpy(new, old, MAXPATHLEN - 1);
+
+    /* we need to be root for this section */
+    be_root();
 
     /*
      * Resolve the last component of the path if it is a link
@@ -211,25 +201,14 @@ char * realpath(old, new)
  *  this function cd's to cwd, closes it, and returns path.
  */
 
-#ifdef HAVE_FCHDIR
-static void realpath_restore(cwd)
-    FILE * cwd;
-{
-    int old_errno = errno;			/* so we can restore errno... */
-
-    (void) fchdir(fileno(cwd));
-    (void) fclose(cwd);
-
-    errno = old_errno;
-}
-#else
 static void realpath_restore(cwd)
     char * cwd;
 {
     int old_errno = errno;			/* so we can restore errno... */
 
+    /* relinquish root privs and chdir to where we started... */
+    be_user();
     (void) chdir(cwd);
 
     errno = old_errno;
 }
-#endif /* HAVE_FCHDIR */
