@@ -316,6 +316,8 @@ install-dirs:
 
 install-binaries: $(PROGS)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 -s sudo $(DESTDIR)$(sudodir)/sudo
+	ln -f $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
+
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s visudo $(DESTDIR)$(visudodir)/visudo
 
 install-noexec: sudo_noexec.la

@@ -665,6 +665,15 @@ parse_args(argc, argv)
     NewArgv = argv + 1;
     NewArgc = argc - 1;
 
+    /* Check to see if we were invoked as "sudoedit". */
+    if (strcmp(getprogname(), "sudoedit") == 0) {
+	rval = MODE_EDIT;
+	if (NewArgc == 0 || NewArgv[0][0] == '-')
+	    usage(1);
+	return(rval);
+    }
+
+    rval = MODE_RUN;
     if (NewArgc == 0) {			/* no options and no command */
 	rval |= (MODE_IMPLIED_SHELL | MODE_SHELL);
 	return(rval);
@@ -1072,18 +1081,22 @@ static void
 usage(exit_val)
     int exit_val;
 {
+    if (strcmp(getprogname(), "sudoedit") == 0) {
+	fprintf(stderr, "usage: sudoedit file [...]\n");
+	exit(exit_val);
+    }
 
-    (void) fprintf(stderr, "usage: sudo -K | -L | -V | -h | -k | -l | -v\n");
-    (void) fprintf(stderr, "usage: sudo [-HPSb]%s%s [-p prompt] [-u username|#uid]\n            { -e file [...] | -i | -s | <command> }\n",
+    fprintf(stderr, "usage: sudo -K | -L | -V | -h | -k | -l | -v\n");
+    fprintf(stderr, "usage: sudo [-HPSb]%s%s [-p prompt] [-u username|#uid]\n            { -e file [...] | -i | -s | <command> }\n",
 #ifdef HAVE_BSD_AUTH_H
-    " [-a auth_type]",
+	" [-a auth_type]",
 #else
-    "",
+	"",
 #endif
 #ifdef HAVE_LOGIN_CAP_H
-    " [-c class|-]");
+	" [-c class|-]");
 #else
-    "");
+	"");
 #endif
     exit(exit_val);
 }
