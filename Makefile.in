@@ -82,12 +82,12 @@ mansect5 = 5
 mandir8 = $(mandir)/$(mantype)$(mansect8)
 mandir5 = $(mandir)/$(mantype)$(mansect5)
 
-# User and Group the installed file should be owned by
-owner = root
-group = staff
+# User and group ids the installed files should be "owned" by
+install_uid = 0
+install_gid = 0
 
 # See options.h and OPTIONS for a list of options
-OPTIONS = @OPTIONS@ -D_PATH_SUDO_SUDOERS=\"$(sudoersdir)/sudoers\" -D_PATH_SUDO_STMP=\"$(sudoersdir)/stmp\" -DSUDOERS_OWNER=\"$(owner)\"
+OPTIONS = @OPTIONS@ -D_PATH_SUDO_SUDOERS=\"$(sudoersdir)/sudoers\" -D_PATH_SUDO_STMP=\"$(sudoersdir)/stmp\" -DSUDOERS_UID=$(install_uid) -DSUDOERS_GID=$(install_gid)
 
 #### End of system configuration section. ####
 
@@ -201,20 +201,20 @@ install-dirs:
 	$(srcdir)/mkinstalldirs $(sudodir) $(visudodir) $(sudoersdir) $(mandir8) $(mandir5)
 
 install-binaries: $(PROGS)
-	$(INSTALL) -o $(owner) -g $(group) -m 4111 -s sudo $(sudodir)/sudo
-	$(INSTALL) -o $(owner) -g $(group) -m 0111 -s visudo $(visudodir)/visudo
+	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 4111 -s sudo $(sudodir)/sudo
+	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0111 -s visudo $(visudodir)/visudo
 
 install-sudoers:
 	@ if [ -f $(sudoersdir)/sudoers ]; then  \
 	    echo "Will not overwrite existing $(sudoersdir)/sudoers file."; \
 	else \
-	    $(INSTALL) -o $(owner) -g $(group) -m 0400 $(srcdir)/sudoers $(sudoersdir)/sudoers; \
+	    $(INSTALL) -o $(install_uid) -g $(install_gid) -m 0440 $(srcdir)/sudoers $(sudoersdir)/sudoers; \
 	fi
 
 install-man:
-	$(INSTALL) -o $(owner) -g $(group) -m 0644 $(srcdir)/sudo.$(mantype) $(mandir8)/sudo.$(mansect8)
-	$(INSTALL) -o $(owner) -g $(group) -m 0644 $(srcdir)/visudo.$(mantype) $(mandir8)/visudo.$(mansect8)
-	$(INSTALL) -o $(owner) -g $(group) -m 0644 $(srcdir)/sudoers.$(mantype) $(mandir5)/sudoers.$(mansect5)
+	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 $(srcdir)/sudo.$(mantype) $(mandir8)/sudo.$(mansect8)
+	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 $(srcdir)/visudo.$(mantype) $(mandir8)/visudo.$(mansect8)
+	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 $(srcdir)/sudoers.$(mantype) $(mandir5)/sudoers.$(mansect5)
 @MAN_POSTINSTALL@
 
 tags: $(SRCS)
