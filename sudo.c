@@ -93,6 +93,14 @@ extern char *strdup();
 
 
 /*
+ * local functions not visible outside sudo.c
+ */
+static void usage		__P((void));
+static void load_globals	__P((void));
+static void rmenv		__P((char **, char *, int));
+static void clean_env		__P((char **));
+
+/*
  * Globals
  */
 int Argc;
@@ -102,15 +110,6 @@ char host[MAXHOSTNAMELEN + 1];
 char user[9];
 char cwd[MAXPATHLEN + 1];
 uid_t uid = -2;
-
-
-/*
- * local functions not visible outside sudo.c
- */
-static void usage();
-static void load_globals();
-static void rmenv();
-static void clean_env();
 
 
 /********************************************************************
@@ -275,7 +274,7 @@ static void load_globals()
      * loading the host global variable from gethostname() & gethostbyname()
      */
     if ((gethostname(host, MAXHOSTNAMELEN))) {
-	strcpy(host, "amnesiac");
+	strcpy(host, "localhost");
 	log_error(GLOBAL_NO_HOSTNAME);
 	inform_user(GLOBAL_NO_HOSTNAME);
     } else {

@@ -60,13 +60,18 @@ static char rcsid[] = "$Id$";
 #include <sys/errno.h>
 #include "sudo.h"
 
-void log_error();
-void readchild();
-static void send_mail();
-static RETSIGTYPE reapchild();
-static int appropriate();
+/*
+ * Prototypes for local functions
+ */
+static void send_mail		__P((void));
+static RETSIGTYPE reapchild	__P((int));
+static int appropriate		__P((int));
 
+/*
+ * Globals
+ */
 static char logline[MAXLOGLEN + 8];
+
 
 /**********************************************************************
  *

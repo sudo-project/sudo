@@ -64,15 +64,21 @@ static char rcsid[] = "$Id$";
 #include <shadow.h>
 #endif /* __svr4__ */
 
-extern char *getpass();
+extern char *getpass		__P((char *));
 
-static int check_timestamp();
-static void check_passwd();
-static void update_timestamp();
-static void reminder();
+/*
+ * Prototypes for local functions
+ */
+static int   check_timestamp	__P((void));
+static void  check_passwd	__P((void));
+static void  update_timestamp	__P((void));
+static void  reminder		__P((void));
+
+/*
+ * Globals
+ */
+static int   timedir_is_good;
 static char *timestampfile_p;
-
-static int timedir_is_good;
 
 
 /********************************************************************
