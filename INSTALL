@@ -1,18 +1,18 @@
 INSTALL NOTES
 
-1) Read the Makefile and sudo.h to enable/disable the options you may
-   or may now want.
+1) Run the configure script, ie: "./configure".  Configure will generate
+   config.h, pathnames.h, Makefile and visudoers/Makefile.  You shouldn't
+   need to hand-edit the Makefiles but if you don't like configure's choice
+   of C compiler, yacc or lex programs you may want to.  You can also
+   use the --prefix flag to configure to install sudo/visudo in a place
+   other than /usr/local (ie: --prefix=/opt).
 
-2) Type make and see if your OS is on the list.  If it is just do
-   "make ostype" where ostype one of the ones listed (ie "make sunos").
+1) Read sudo.h to enable/disable the options you may or may not want.
 
-   If your os is not listed, you can try "make generic" and see if it
-   works.  You may have to add your own OS entry to the config directory.
-   Take a look at the entries in config/ for an idea of how to do so.
-   The way things work is that Makefile creates Makefile.real by cat'ing
-   config/os-type (architecture dependent portion) and Makefile.common
-   (architecture independent portion).  It should be fairly straight-
-   forward.  See the file PORTING for hints.
+2) Type make.  If configure did its job correctly there won't be any
+   problems.  If this doesn't work, take a look at the file PORTING for
+   tips on what might have gone wrong.  Please mail us if you have a
+   fix or if you are unable to come up with a fix (address at EOF).
 
 3) Do a make install (as root) to install sudo.  If you get an error
    about setuid(0) failing, something went wrong with the install and
@@ -38,7 +38,7 @@ a) To use syslog with the ultrix version you *may* need to grab
 
 b) visudo will *NOT* use the editor referred to by the EDITOR or
    VISUAL environmental variables unless you define ENV_EDITOR in
-   Makefile.ind.  I like the feature, but it can be a security hole
+   sudo.h.  I like the feature, but it can be a security hole
    if you don't know about it.  If you have EDITOR set to something
    secure (ie: no shells or external commands) in the Makefile or
    sudo.h you don't want to define ENV_EDITOR.  Note that vi (the default
@@ -53,13 +53,6 @@ c) If you have a sense of humor you may want to define USE_INSULTS to
    password.  Beware, this feature causes some people to want to throw
    their machine across the room and dash it to tiny pieces.
    Sci fi fans may want to define HAL as well (see insults.h).
-
-d) When creating a config file for a new os type, you should use the loader
-   options that cause sudo to be statically linked.  That way, you're
-   immune from a user with limited sudo changing libc in such a way as
-   to get a root shell.  Some shared library implementations don't
-   let you do this if the executable is setuid (solaris 2.x for example).
-   In those cases it's unnecessary to link statically.
 
 Please send changes, bugs, security holes, and gripes to:
     sudo-bugs@cs.colorado.edu
