@@ -233,6 +233,13 @@ else
 fi
 ])
 
+AC_DEFUN(SUDO_CHECK_SHADOW_DUNIX, [AC_MSG_CHECKING(for shadow passwords)
+    AC_TRY_RUN([int main() {
+	int security_is_on();
+	exit(!(security_is_on() > 0));
+    }], AC_MSG_RESULT(yes) [$1], AC_MSG_RESULT(no), [$2])
+])
+
 dnl
 dnl
 dnl check for fullly working void
