@@ -72,6 +72,12 @@
 #  define __svr4__
 #endif /* SVR4 */
 
+/* Define if you want to use the system getpass().  */
+#undef USE_GETPASS
+
+/* Define if you have C2 security.  */
+#undef HAVE_C2_SECURITY
+
 /* Define if you have POSIX signals.  */
 #undef HAVE_SIGACTION
 #ifdef HAVE_SIGACTION
