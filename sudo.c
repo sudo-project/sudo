@@ -668,8 +668,8 @@ static void add_env(contiguous)
 	char *to, **from;
 
 	if (contiguous) {
-	    size += (size_t) NewArgv[NewArgc-1] + strlen(NewArgv[NewArgc-1]) -
-		    (size_t) NewArgv[1] + 1;
+	    size += (size_t) (NewArgv[NewArgc-1] - NewArgv[1]) +
+		    strlen(NewArgv[NewArgc-1]) + 1;
 	} else {
 	    for (from = &NewArgv[1]; *from; from++)
 		size += strlen(*from) + 1;
