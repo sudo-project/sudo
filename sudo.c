@@ -379,7 +379,6 @@ static void load_globals(sudo_mode)
     int sudo_mode;
 {
     char *p;
-    struct passwd *pw_ent;
 #ifdef FQDN
     struct hostent *h_ent;
 #endif /* FQDN */
@@ -399,7 +398,7 @@ static void load_globals(sudo_mode)
 
 	/* fill in uid and name fields with the uid */
 	pw_ent.pw_uid = getuid();
-	(void) sprintf(pw_name, "%ld", pw_ent.pw_uid);
+	(void) sprintf(pw_name, "%ld", (long) pw_ent.pw_uid);
 	pw_ent.pw_name = pw_name;
 	user_pw_ent = &pw_ent;
 
