@@ -1767,3 +1767,5 @@ Sudo 1.6.8p2 released.
      users' privs.
 
 559) The "secure_path" run-time Defaults option has been restored.
+
+560) Password data is now cached for fast lookup.

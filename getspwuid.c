@@ -83,8 +83,9 @@ int crypt_type = INT_MAX;
 static struct rbtree *cache_byuid;
 static struct rbtree *cache_byname;
 
-static int cmp_byuid	__P((const VOID *, const VOID *));
-static int cmp_byname	__P((const VOID *, const VOID *));
+static int  cmp_byuid	__P((const VOID *, const VOID *));
+static int  cmp_byname	__P((const VOID *, const VOID *));
+static void pw_free	__P((VOID *));
 
 /*
  * Compare by uid.
@@ -416,8 +417,18 @@ sudo_endpwent()
 #ifdef HAVE_GETAUTHUID
     endauthent();
 #endif
-    rbdestroy(cache_byuid, (void (*)__P((VOID *))) free);
+    rbdestroy(cache_byuid, pw_free);
     cache_byuid = NULL;
     rbdestroy(cache_byname, NULL);
     cache_byname = NULL;
+}
+
+static void
+pw_free(v)
+    VOID *v;
+{
+    struct passwd *pw = (struct passwd *) v;
+
+    zero_bytes(pw->pw_passwd, strlen(pw->pw_passwd));
+    free(pw);
 }
