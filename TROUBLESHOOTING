@@ -1,0 +1,15 @@
+Troubleshooting tips for CU sudo.
+
+Q) Sudo compiles but when I run it I get "setuid(0): Not owner" and sudo
+   quits.
+A) Sudo must be setuid root to do its work.  You need to do something like
+   "chmod 4111 /usr/local/bin/sudo".
+
+Q) When sudo asks me for my password it never accepts what I enter even
+   though I know I entered my password correctly.
+A) Try running configure with the --with-getpass option.  After this
+   when you build sudo it will use the system's getpass() routine instead
+   of sudo's own version.  If that doesn't work, make sure that you
+   gave configure the --with-C2 option if your OS uses shadow passwords
+   (see the INSTALL doc for a list of OS's that sudo knows how to get
+   shadow password info for).
