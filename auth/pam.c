@@ -100,10 +100,7 @@ pam_verify(pw, prompt, auth)
     if ((error = pam_authenticate(pamh, PAM_SILENT)) == PAM_SUCCESS)
 	return(AUTH_SUCCESS);
 
-    /*
-     * Any error other than PAM_AUTH_ERR or PAM_MAXTRIES may indicate
-     * a config problem.
-     */
+    /* Any error other than PAM_AUTH_ERR or PAM_MAXTRIES is probably fatal.  */
     if (error != PAM_AUTH_ERR && error != PAM_MAXTRIES) {
 	if ((s = pam_strerror(pamh, error)))
 	    log_error(NO_EXIT|NO_MAIL, "pam_authenticate: %s\n", s);
