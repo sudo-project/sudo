@@ -282,7 +282,7 @@ CHANGES from sudo 1.3.1pl4
 95) Worked around a bug in AIX's lex in parse.c.  AIX lex doesn't seem
     to handle {x,y} range notation correctly.  Bleah.
 
-96) Sudo would not report a failed attempt if the user entered <return>
+96) Sudo would not report a failed attempt if the user entered return
     at the 2nd password: prompt so someone trying to guess a password
     could just invoked sudo multiple times and try one passwd at a time.
     Reported by Jonathan Adams <jonathan@smada.com>.
