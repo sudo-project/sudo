@@ -416,7 +416,7 @@ static void check_passwd()
 #endif /* USE_GETPASS */
 #endif /* HAVE_SKEY */
 	if (!pass || *pass == '\0')
-	    if (counter == 0)
+	    if (counter == TRIES_FOR_PASSWORD)
 		exit(0);
 	    else
 		break;
