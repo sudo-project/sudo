@@ -88,7 +88,9 @@ B<sudo> accepts the following command line options:
 =item -V
 
 The B<-V> (I<version>) option causes B<sudo> to print the
-version number and exit.
+version number and exit.  If the invoking user is already root
+the B<-V> option will print out a list of the defaults B<sudo>
+was compiled with as well as the machine's local network addresses.
 
 =item -l
 
@@ -226,7 +228,9 @@ C<TERMCAP> variable is set and is a pathname, it too is ignored.
 Additionally, if the C<LC_*> or C<LANGUAGE> variables contain the
 C</> or C<%> characters, they are ignored.  If B<sudo> has been
 compiled with SecurID support, the C<VAR_ACE>, C<USR_ACE> and
-C<DLC_ACE> variables are cleared as well.
+C<DLC_ACE> variables are cleared as well.  The list of environment
+variables that B<sudo> clears is contained in the output of
+C<sudo -V> when run as root.
 
 To prevent command spoofing, B<sudo> checks "." and "" (both denoting
 current directory) last when searching for a command in the user's
