@@ -232,6 +232,7 @@ void load_interfaces	__P((void));
 int check_secureware	__P((char *));
 void sia_attempt_auth	__P((void));
 int yyparse		__P((void));
+void pass_warn		__P((FILE *));
 YY_DECL;
 
 

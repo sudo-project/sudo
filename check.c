@@ -464,11 +464,7 @@ static void check_passwd()
 	}
 
 	--counter;		/* otherwise, try again  */
-#ifdef USE_INSULTS
-	(void) fprintf(stderr, "%s\n", INSULT);
-#else
-	(void) fprintf(stderr, "%s\n", INCORRECT_PASSWORD);
-#endif /* USE_INSULTS */
+	pass_warn(stderr);
     }
     set_perms(PERM_USER, 0);
 
@@ -620,11 +616,7 @@ static void check_passwd()
 #endif /* HAVE_AUTHENTICATE */
 
 	--counter;		/* otherwise, try again  */
-#ifdef USE_INSULTS
-	(void) fprintf(stderr, "%s\n", INSULT);
-#else
-	(void) fprintf(stderr, "%s\n", INCORRECT_PASSWORD);
-#endif /* USE_INSULTS */
+	pass_warn(stderr);
     }
 
     if (counter > 0) {
@@ -724,11 +716,7 @@ static void pam_attempt_auth()
         }
 
         --counter;
-#ifdef USE_INSULTS
-        (void) fprintf(stderr, "%s\n", INSULT);
-#else
-        (void) fprintf(stderr, "%s\n", INCORRECT_PASSWORD);
-#endif /* USE_INSULTS */
+        pass_warn(stderr);
     }
     set_perms(PERM_USER, 0);
 
@@ -924,3 +912,23 @@ static void reminder()
     );
 }
 #endif /* NO_MESSAGE */
+
+
+/********************************************************************
+ *
+ *  pass_warn()
+ *
+ *  warn the user that the password was incorrect
+ *  (and insult them if insults are configured).
+ */
+
+void pass_warn(fp)
+    FILE *fp;
+{
+
+#ifdef USE_INSULTS
+    (void) fprintf(fp, "%s\n", INSULT);
+#else
+    (void) fprintf(fp, "%s\n", INCORRECT_PASSWORD);
+#endif /* USE_INSULTS */
+}

@@ -114,11 +114,7 @@ void sia_attempt_auth()
 	}
 
 	--counter;
-#ifdef USE_INSULTS
-	(void) fprintf(stderr, "%s\n", INSULT);
-#else
-	(void) fprintf(stderr, "%s\n", INCORRECT_PASSWORD);
-#endif /* USE_INSULTS */
+	pass_warn(stderr);
     }
     set_perms(PERM_USER, 0);
 
