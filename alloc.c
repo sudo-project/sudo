@@ -55,12 +55,25 @@
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 # include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
+#include <limits.h>
 
 #include "sudo.h"
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
+
+#ifndef SIZE_MAX
+# ifdef SIZE_T_MAX
+#  define SIZE_MAX	SIZE_T_MAX
+# else
+#  ifdef ULONG_MAX
+#   define SIZE_MAX	ULONG_MAX
+#  else
+#   define SIZE_MAX	((unsigned long)-1)
+#  endif /* ULONG_MAX */
+# endif /* SIZE_T_MAX */
+#endif /* SIZE_MAX */
 
 extern char **Argv;		/* from sudo.c */
 
@@ -80,6 +93,34 @@ emalloc(size)
 	exit(1);
     }
     if ((ptr = (VOID *) malloc(size)) == NULL) {
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+    return(ptr);
+}
+
+/*
+ * emalloc2() allocates nmemb * size bytes and exits with an error
+ * if overflow would occur or if the system malloc(3) fails.
+ */
+VOID *
+emalloc2(nmemb, size)
+    size_t nmemb;
+    size_t size;
+{
+    VOID *ptr;
+
+    if (nmemb == 0 || size == 0) {
+	(void) fprintf(stderr, "%s: internal error, tried to malloc(0)\n",
+	    Argv[0]);
+	exit(1);
+    }
+    if (nmemb >= SIZE_MAX / size) {
+	(void) fprintf(stderr, "%s: internal error, emalloc2() overflow\n",
+	    Argv[0]);
+	exit(1);
+    }
+    if ((ptr = (VOID *) malloc(nmemb * size)) == NULL) {
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }

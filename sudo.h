@@ -212,6 +212,7 @@ void pam_attempt_auth	__P((void));
 int yyparse		__P((void));
 void pass_warn		__P((FILE *));
 VOID *emalloc		__P((size_t));
+VOID *emalloc2		__P((size_t, size_t));
 VOID *erealloc		__P((VOID *, size_t));
 char *estrdup		__P((const char *));
 int easprintf		__P((char **, const char *, ...));
