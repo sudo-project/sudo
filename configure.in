@@ -496,7 +496,9 @@ dnl extra Skey lib and includes
 dnl
 if test -n "$SKEY" ; then
     SUDO_LIBS="${SUDO_LIBS} -lskey"
-    if test -f /usr/local/include/skey.h -a -f /usr/local/lib/libskey.a; then
+    if test -f /usr/include/skey.h -a -f /usr/lib/libskey.a; then
+	:
+    elif test -f /usr/local/include/skey.h; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
     elif test -n "$CSOPS" -a -f /tools/cs/skey/include/skey.h -a -f /tools/cs/skey/lib/libskey.a; then
