@@ -422,10 +422,14 @@ dangerous functionality when a program is run setuid.
 =item env_reset
 
 If set, B<sudo> will reset the environment to only contain the
-following variables: C<HOME>, C<SHELL>, C<LOGNAME>, and C<USER>
-(in addition to the C<SUDO_*> variables).  The C<PATH> and C<TERM>
-environment variables are preserved unaltered.  Other specific variables
-may be preserved with the i<env_keep> option.
+following variables: C<HOME>, C<LOGNAME>, C<PATH>, C<SHELL>, C<TERM>,
+and C<USER> (in addition to the C<SUDO_*> variables).
+Of these, only C<TERM> is copied unaltered from the old environment.
+The other variables are set to default values (possibly modified
+by the value of the I<set_logname> option).  If B<sudo> was compiled
+with the C<SECURE_PATH> option, its value will be used for the C<PATH>
+environment variable.
+Other variables may be preserved with the i<env_keep> option.
 
 =item use_loginclass
 
@@ -563,13 +567,6 @@ interpreting the C<@> sign.  Defaults to C<@mailto@>.
 
 Users in this group are exempt from password and PATH requirements.
 This is not set by default.
-
-=item secure_path
-
-Path used for every command run from B<sudo>.  If you don't trust the
-people running B<sudo> to have a sane C<PATH> environment variable you may
-want to use this.  Another use is if you want to have the "root path"
-be separate from the "user path."  This is not set by default.
 
 =item verifypw
 

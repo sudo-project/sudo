@@ -104,9 +104,11 @@ find_path(infile, outfile, path)
     }
 
     /* Use PATH passed in unless SECURE_PATH is in effect.  */
-    if (def_str(I_SECURE_PATH))
-	path = def_str(I_SECURE_PATH);
-    else if (path == NULL)
+#ifdef SECURE_PATH
+    if (!user_is_exempt())
+	path = SECURE_PATH;
+#endif /* SECURE_PATH */
+    if (path == NULL)
 	return(NOT_FOUND);
     path = estrdup(path);
     origpath = path;

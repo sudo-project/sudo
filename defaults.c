@@ -491,9 +491,6 @@ init_defaults()
 #ifdef EXEMPTGROUP
     def_str(I_EXEMPT_GROUP) = estrdup(EXEMPTGROUP);
 #endif
-#ifdef SECURE_PATH
-    def_str(I_SECURE_PATH) = estrdup(SECURE_PATH);
-#endif
     def_str(I_EDITOR) = estrdup(EDITOR);
 
     /* Finally do the lists (currently just environment tables). */

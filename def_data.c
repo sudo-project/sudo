@@ -147,9 +147,6 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"runas_default", T_STR,
 	"Default user to run commands as: %s"
     }, {
-	"secure_path", T_STR|T_BOOL,
-	"Value to override user's $PATH with: %s"
-    }, {
 	"editor", T_STR|T_PATH,
 	"Path to the editor for use by visudo: %s"
     }, {

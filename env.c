@@ -366,9 +366,10 @@ rebuild_env(sudo_mode, envp)
      * Access via 'nep' is not allowed (since we must check for dupes).
      */
 
+#ifdef SECURE_PATH
     /* Replace the PATH envariable with a secure one. */
-    if (def_str(I_SECURE_PATH))
-	insert_env(newenvp, format_env("PATH", def_str(I_SECURE_PATH)));
+    insert_env(newenvp, format_env("PATH", SECURE_PATH));
+#endif
 
     /* Set $HOME for `sudo -H'.  Only valid at PERM_RUNAS. */
     if ((sudo_mode & MODE_RESET_HOME) && runas_pw->pw_dir)
