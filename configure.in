@@ -275,7 +275,7 @@ fi
 
 case "$host" in
     *-*-sunos4*)
-		dnl Don't really need -lnsl
+		# Don't really need -lnsl
 		LIB_NSL=1
 
 		if test -z "$with_C2"; then
@@ -399,13 +399,16 @@ case "$host" in
 		fi
 		;;
     *-dec-osf*)
+		# Don't really need -lnsl (DUNIX 4.x has it, < 4.x does not)
+		LIB_NSL=1
+
 		# ignore envariables wrt dynamic lib path
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
 
+		# C2 security stuff
 		if test -z "$with_C2"; then
 		    SUDO_CHECK_SHADOW_DUNIX(with_C2="yes")
 		fi
-		# C2 security stuff
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lsecurity -laud"
 		    LIBS="${LIBS} -lsecurity -laud"
