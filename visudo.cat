@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.8                     June  8, 2004                         1
+1.6.8                   September  6, 2004                      1
 
 
 
@@ -88,7 +88,18 @@ VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
        -V  The --VV (version) option causes vviissuuddoo to print its
            version number and exit.
 
-EERRRROORRSS
+EENNVVIIRROONNMMEENNTT
+       The following environment variables are used only if
+       vviissuuddoo was configured with the _-_-_w_i_t_h_-_e_n_v_-_e_d_i_t_o_r option:
+
+        VISUAL                 Invoked by visudo as the editor to use
+        EDITOR                 Used by visudo if VISUAL is not set
+
+FFIILLEESS
+        /etc/sudoers           List of who can run what
+        /etc/sudoers.tmp       Lock file for visudo
+
+DDIIAAGGNNOOSSTTIICCSS
        sudoers file busy, try again later.
            Someone else is currently editing the _s_u_d_o_e_r_s file.
 
@@ -113,21 +124,10 @@ EERRRROORRSS
            used.  This means that entries prior to the
            _r_u_n_a_s___d_e_f_a_u_l_t setting will match based on the default
            value of _r_u_n_a_s___d_e_f_a_u_l_t (root) whereas entries aafftteerr
-           the _r_u_n_a_s___d_e_f_a_u_l_t setting will match based on the new
-           value.  This is usually unintentional and in most
-           cases the <runas_default> setting should be placed
-           before any Runas_Alias or User specifications.  In --ss
-           (strict) mode this is an error, not a warning.
-
-EENNVVIIRROONNMMEENNTT
-       The following environment variables are used only if
-       vviissuuddoo was configured with the _-_-_w_i_t_h_-_e_n_v_-_e_d_i_t_o_r option:
 
 
 
-
-
-1.6.8                     June  8, 2004                         2
+1.6.8                   September  6, 2004                      2
 
 
 
@@ -136,12 +136,14 @@ EENNVVIIRROONNMMEENNTT
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
-        VISUAL                 Invoked by visudo as the editor to use
-        EDITOR                 Used by visudo if VISUAL is not set
+           the _r_u_n_a_s___d_e_f_a_u_l_t setting will match based on the new
+           value.  This is usually unintentional and in most
+           cases the <runas_default> setting should be placed
+           before any Runas_Alias or User specifications.  In --ss
+           (strict) mode this is an error, not a warning.
 
-FFIILLEESS
-        /etc/sudoers           List of who can run what
-        /etc/sudoers.tmp       Lock file for visudo
+SSEEEE AALLSSOO
+       _v_i(1), sudoers(4), sudo(1m), vipw(1m)
 
 AAUUTTHHOORR
        Many people have worked on _s_u_d_o over the years; this ver­
@@ -152,23 +154,30 @@ AAUUTTHHOORR
        See the HISTORY file in the sudo distribution or visit
        http://www.sudo.ws/sudo/history.html for more details.
 
+CCAAVVEEAATTSS
+       There is no easy way to prevent a user from gaining a root
+       shell if the editor used by vviissuuddoo allows shell escapes.
+
 BBUUGGSS
-       If you feel you have found a bug in sudo, please submit a
-       bug report at http://www.sudo.ws/sudo/bugs/
+       If you feel you have found a bug in vviissuuddoo, please submit
+       a bug report at http://www.sudo.ws/sudo/bugs/
+
+SSUUPPPPOORRTT
+       Commercial support is available for ssuuddoo, see
+       http://www.sudo.ws/sudo/support.html for details.
+
+       Limited free support is available via the sudo-users mail­
+       ing list, see http://www.sudo.ws/mail­
+       man/listinfo/sudo-users to subscribe or search the
+       archives.
 
 DDIISSCCLLAAIIMMEERR
        VViissuuddoo is provided ``AS IS'' and any express or implied
        warranties, including, but not limited to, the implied
        warranties of merchantability and fitness for a particular
        purpose are disclaimed.  See the LICENSE file distributed
-       with ssuuddoo for complete details.
-
-CCAAVVEEAATTSS
-       There is no easy way to prevent a user from gaining a root
-       shell if the editor used by vviissuuddoo allows shell escapes.
-
-SSEEEE AALLSSOO
-       _v_i(1), sudoers(4), sudo(1m), vipw(1m)
+       with ssuuddoo or http://www.sudo.ws/sudo/license.html for com­
+       plete details.
 
 
 
@@ -184,15 +193,6 @@ SSEEEE AALLSSOO
 
 
 
-
-
-
-
-
-
-
-
-
-1.6.8                     June  8, 2004                         3
+1.6.8                   September  6, 2004                      3
 
 

@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "August  6, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "September  6, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -1069,6 +1069,13 @@ characters in a \fIUser Specification\fR ('=', ':', '(', ')') is optional.
 The following characters must be escaped with a backslash ('\e') when
 used as part of a word (e.g. a username or hostname):
 \&'@', '!', '=', ':', ',', '(', ')', '\e'.
+.SH "FILES"
+.IX Header "FILES"
+.Vb 3
+\& @sysconfdir@/sudoers           List of who can run what
+\& /etc/group             Local groups file
+\& /etc/netgroup          List of network groups
+.Ve
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Since the \fIsudoers\fR file is parsed in a single pass, order is
@@ -1366,6 +1373,9 @@ as root are still capable of many potentially hazardous operations
 (such as changing or overwriting files) that could lead to unintended
 privilege escalation.  In the specific case of an editor, a safer
 approach is to give the user permission to run \fBsudoedit\fR.
+.SH "SEE ALSO"
+.IX Header "SEE ALSO"
+\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), sudo(@mansectsu@), visudo(@mansectsu@)
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 The \fIsudoers\fR file should \fBalways\fR be edited by the \fBvisudo\fR
@@ -1378,13 +1388,22 @@ store fully qualified hostnames in the netgroup (as is usually the
 case), you either need to have the machine's hostname be fully qualified
 as returned by the \f(CW\*(C`hostname\*(C'\fR command or use the \fIfqdn\fR option in
 \&\fIsudoers\fR.
-.SH "FILES"
-.IX Header "FILES"
-.Vb 3
-\& @sysconfdir@/sudoers           List of who can run what
-\& /etc/group             Local groups file
-\& /etc/netgroup          List of network groups
-.Ve
-.SH "SEE ALSO"
-.IX Header "SEE ALSO"
-\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), sudo(@mansectsu@), visudo(@mansectsu@)
+.SH "BUGS"
+.IX Header "BUGS"
+If you feel you have found a bug in \fBsudo\fR, please submit a bug report
+at http://www.sudo.ws/sudo/bugs/
+.SH "SUPPORT"
+.IX Header "SUPPORT"
+Commercial support is available for \fBsudo\fR, see
+http://www.sudo.ws/sudo/support.html for details.
+.PP
+Limited free support is available via the sudo-users mailing list,
+see http://www.sudo.ws/mailman/listinfo/sudo\-users to subscribe or
+search the archives.
+.SH "DISCLAIMER"
+.IX Header "DISCLAIMER"
+\&\fBSudo\fR is provided ``\s-1AS\s0 \s-1IS\s0'' and any express or implied warranties,
+including, but not limited to, the implied warranties of merchantability
+and fitness for a particular purpose are disclaimed.  See the \s-1LICENSE\s0
+file distributed with \fBsudo\fR or http://www.sudo.ws/sudo/license.html
+for complete details.

@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "August 17, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "September  6, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
@@ -299,6 +299,11 @@ the invoking user's environment unmodified.  If, for some reason,
 \&\fBsudo\fR is unable to update a file with its edited version, the
 user will receive a warning and the edited copy will remain in a
 temporary file.
+.Sp
+Please note that the editor used must make its changes to the
+original file (really the original inode).  If the editor makes
+changes to a temporary file and then just renames this to the
+original file name it will not work with \fBsudoedit\fR.
 .RE
 .IP "\-h" 4
 .IX Item "-h"
@@ -460,42 +465,6 @@ commands that offer shell escapes (including most editors).  Because
 of this, care must be taken when giving users access to commands
 via \fBsudo\fR to verify that the command does not inadvertently give
 the user an effective root shell.
-.SH "EXAMPLES"
-.IX Header "EXAMPLES"
-Note: the following examples assume suitable sudoers(@mansectform@) entries.
-.PP
-To get a file listing of an unreadable directory:
-.PP
-.Vb 1
-\& $ sudo ls /usr/local/protected
-.Ve
-.PP
-To list the home directory of user yazza on a machine where the
-file system holding ~yazza is not exported as root:
-.PP
-.Vb 1
-\& $ sudo -u yazza ls ~yazza
-.Ve
-.PP
-To edit the \fIindex.html\fR file as user www:
-.PP
-.Vb 1
-\& $ sudo -u www vi ~www/htdocs/index.html
-.Ve
-.PP
-To shutdown a machine:
-.PP
-.Vb 1
-\& $ sudo shutdown -r +15 "quick reboot"
-.Ve
-.PP
-To make a usage listing of the directories in the /home
-partition.  Note that this runs the commands in a sub-shell
-to make the \f(CW\*(C`cd\*(C'\fR and file redirection work.
-.PP
-.Vb 1
-\& $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
-.Ve
 .SH "ENVIRONMENT"
 .IX Header "ENVIRONMENT"
 \&\fBsudo\fR utilizes the following environment variables:
@@ -558,6 +527,46 @@ to make the \f(CW\*(C`cd\*(C'\fR and file redirection work.
 \& @sysconfdir@/sudoers           List of who can run what
 \& @timedir@              Directory containing timestamps
 .Ve
+.SH "EXAMPLES"
+.IX Header "EXAMPLES"
+Note: the following examples assume suitable sudoers(@mansectform@) entries.
+.PP
+To get a file listing of an unreadable directory:
+.PP
+.Vb 1
+\& $ sudo ls /usr/local/protected
+.Ve
+.PP
+To list the home directory of user yazza on a machine where the
+file system holding ~yazza is not exported as root:
+.PP
+.Vb 1
+\& $ sudo -u yazza ls ~yazza
+.Ve
+.PP
+To edit the \fIindex.html\fR file as user www:
+.PP
+.Vb 1
+\& $ sudo -u www vi ~www/htdocs/index.html
+.Ve
+.PP
+To shutdown a machine:
+.PP
+.Vb 1
+\& $ sudo shutdown -r +15 "quick reboot"
+.Ve
+.PP
+To make a usage listing of the directories in the /home
+partition.  Note that this runs the commands in a sub-shell
+to make the \f(CW\*(C`cd\*(C'\fR and file redirection work.
+.PP
+.Vb 1
+\& $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
+.Ve
+.SH "SEE ALSO"
+.IX Header "SEE ALSO"
+\&\fIgrep\fR\|(1), \fIsu\fR\|(1), \fIstat\fR\|(2), \fIlogin_cap\fR\|(3), sudoers(@mansectform@),
+passwd(@mansectform@), visudo(@mansectsu@)
 .SH "AUTHORS"
 .IX Header "AUTHORS"
 Many people have worked on \fBsudo\fR over the years; this
@@ -571,16 +580,6 @@ version consists of code written primarily by:
 See the \s-1HISTORY\s0 file in the \fBsudo\fR distribution or visit
 http://www.sudo.ws/sudo/history.html for a short history
 of \fBsudo\fR.
-.SH "BUGS"
-.IX Header "BUGS"
-If you feel you have found a bug in sudo, please submit a bug report
-at http://www.sudo.ws/sudo/bugs/
-.SH "DISCLAIMER"
-.IX Header "DISCLAIMER"
-\&\fBSudo\fR is provided ``\s-1AS\s0 \s-1IS\s0'' and any express or implied warranties,
-including, but not limited to, the implied warranties of merchantability
-and fitness for a particular purpose are disclaimed.
-See the \s-1LICENSE\s0 file distributed with \fBsudo\fR for complete details.
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 There is no easy way to prevent a user from gaining a root shell
@@ -604,11 +603,25 @@ If users have sudo \f(CW\*(C`ALL\*(C'\fR there is nothing to prevent them from
 creating their own program that gives them a root shell regardless
 of any '!' elements in the user specification.
 .PP
-Running shell scripts via \fBsudo\fR can expose the same kernel bugs
-that make setuid shell scripts unsafe on some operating systems
-(if your \s-1OS\s0 supports the /dev/fd/ directory, setuid shell scripts
-are generally safe).
-.SH "SEE ALSO"
-.IX Header "SEE ALSO"
-\&\fIgrep\fR\|(1), \fIsu\fR\|(1), \fIstat\fR\|(2), \fIlogin_cap\fR\|(3), sudoers(@mansectform@),
-passwd(@mansectform@), visudo(@mansectsu@)
+Running shell scripts via \fBsudo\fR can expose the same kernel bugs that
+make setuid shell scripts unsafe on some operating systems (if your \s-1OS\s0
+has a /dev/fd/ directory, setuid shell scripts are generally safe).
+.SH "BUGS"
+.IX Header "BUGS"
+If you feel you have found a bug in \fBsudo\fR, please submit a bug report
+at http://www.sudo.ws/sudo/bugs/
+.SH "SUPPORT"
+.IX Header "SUPPORT"
+Commercial support is available for \fBsudo\fR, see
+http://www.sudo.ws/sudo/support.html for details.
+.PP
+Limited free support is available via the sudo-users mailing list,
+see http://www.sudo.ws/mailman/listinfo/sudo\-users to subscribe or
+search the archives.
+.SH "DISCLAIMER"
+.IX Header "DISCLAIMER"
+\&\fBSudo\fR is provided ``\s-1AS\s0 \s-1IS\s0'' and any express or implied warranties,
+including, but not limited to, the implied warranties of merchantability
+and fitness for a particular purpose are disclaimed.  See the \s-1LICENSE\s0
+file distributed with \fBsudo\fR or http://www.sudo.ws/sudo/license.html
+for complete details.

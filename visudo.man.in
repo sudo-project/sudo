@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "June  8, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "September  6, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 visudo \- edit the sudoers file
 .SH "SYNOPSIS"
@@ -221,8 +221,23 @@ letters, digits, and the underscore ('_') character.
 .IX Item "-V"
 The \fB\-V\fR (version) option causes \fBvisudo\fR to print its version number
 and exit.
-.SH "ERRORS"
-.IX Header "ERRORS"
+.SH "ENVIRONMENT"
+.IX Header "ENVIRONMENT"
+The following environment variables are used only if \fBvisudo\fR
+was configured with the \fI\-\-with\-env\-editor\fR option:
+.PP
+.Vb 2
+\& VISUAL                 Invoked by visudo as the editor to use
+\& EDITOR                 Used by visudo if VISUAL is not set
+.Ve
+.SH "FILES"
+.IX Header "FILES"
+.Vb 2
+\& @sysconfdir@/sudoers           List of who can run what
+\& @sysconfdir@/sudoers.tmp       Lock file for visudo
+.Ve
+.SH "DIAGNOSTICS"
+.IX Header "DIAGNOSTICS"
 .IP "sudoers file busy, try again later." 4
 .IX Item "sudoers file busy, try again later."
 Someone else is currently editing the \fIsudoers\fR file.
@@ -251,21 +266,9 @@ value.  This is usually unintentional and in most cases the
 <runas_default> setting should be placed before any \f(CW\*(C`Runas_Alias\*(C'\fR
 or User specifications.  In \fB\-s\fR (strict) mode this is an error,
 not a warning.
-.SH "ENVIRONMENT"
-.IX Header "ENVIRONMENT"
-The following environment variables are used only if \fBvisudo\fR
-was configured with the \fI\-\-with\-env\-editor\fR option:
-.PP
-.Vb 2
-\& VISUAL                 Invoked by visudo as the editor to use
-\& EDITOR                 Used by visudo if VISUAL is not set
-.Ve
-.SH "FILES"
-.IX Header "FILES"
-.Vb 2
-\& @sysconfdir@/sudoers           List of who can run what
-\& @sysconfdir@/sudoers.tmp       Lock file for visudo
-.Ve
+.SH "SEE ALSO"
+.IX Header "SEE ALSO"
+\&\fIvi\fR\|(1), sudoers(@mansectform@), sudo(@mansectsu@), vipw(@mansectsu@)
 .SH "AUTHOR"
 .IX Header "AUTHOR"
 Many people have worked on \fIsudo\fR over the years; this version of
@@ -277,20 +280,26 @@ Many people have worked on \fIsudo\fR over the years; this version of
 .PP
 See the \s-1HISTORY\s0 file in the sudo distribution or visit
 http://www.sudo.ws/sudo/history.html for more details.
-.SH "BUGS"
-.IX Header "BUGS"
-If you feel you have found a bug in sudo, please submit a bug report
-at http://www.sudo.ws/sudo/bugs/
-.SH "DISCLAIMER"
-.IX Header "DISCLAIMER"
-\&\fBVisudo\fR is provided ``\s-1AS\s0 \s-1IS\s0'' and any express or implied warranties,
-including, but not limited to, the implied warranties of merchantability
-and fitness for a particular purpose are disclaimed.
-See the \s-1LICENSE\s0 file distributed with \fBsudo\fR for complete details.
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 There is no easy way to prevent a user from gaining a root shell if 
 the editor used by \fBvisudo\fR allows shell escapes.
-.SH "SEE ALSO"
-.IX Header "SEE ALSO"
-\&\fIvi\fR\|(1), sudoers(@mansectform@), sudo(@mansectsu@), vipw(@mansectsu@)
+.SH "BUGS"
+.IX Header "BUGS"
+If you feel you have found a bug in \fBvisudo\fR, please submit a bug report
+at http://www.sudo.ws/sudo/bugs/
+.SH "SUPPORT"
+.IX Header "SUPPORT"
+Commercial support is available for \fBsudo\fR, see
+http://www.sudo.ws/sudo/support.html for details.
+.PP
+Limited free support is available via the sudo-users mailing list,
+see http://www.sudo.ws/mailman/listinfo/sudo\-users to subscribe or
+search the archives.
+.SH "DISCLAIMER"
+.IX Header "DISCLAIMER"
+\&\fBVisudo\fR is provided ``\s-1AS\s0 \s-1IS\s0'' and any express or implied warranties,
+including, but not limited to, the implied warranties of merchantability
+and fitness for a particular purpose are disclaimed.  See the \s-1LICENSE\s0
+file distributed with \fBsudo\fR or http://www.sudo.ws/sudo/license.html
+for complete details.

@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.6.8                    August  6, 2004                        1
+1.6.8                   September  6, 2004                      1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                        2
+1.6.8                   September  6, 2004                      2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                        3
+1.6.8                   September  6, 2004                      3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                        4
+1.6.8                   September  6, 2004                      4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                        5
+1.6.8                   September  6, 2004                      5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                        6
+1.6.8                   September  6, 2004                      6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                        7
+1.6.8                   September  6, 2004                      7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                        8
+1.6.8                   September  6, 2004                      8
 
 
 
@@ -589,7 +589,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                        9
+1.6.8                   September  6, 2004                      9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                       10
+1.6.8                   September  6, 2004                     10
 
 
 
@@ -721,7 +721,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                       11
+1.6.8                   September  6, 2004                     11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                       12
+1.6.8                   September  6, 2004                     12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                       13
+1.6.8                   September  6, 2004                     13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                       14
+1.6.8                   September  6, 2004                     14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                       15
+1.6.8                   September  6, 2004                     15
 
 
 
@@ -1051,7 +1051,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                    August  6, 2004                       16
+1.6.8                   September  6, 2004                     16
 
 
 
@@ -1103,21 +1103,21 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        ('\') when used as part of a word (e.g. a username or
        hostname): '@', '!', '=', ':', ',', '(', ')', '\'.
 
+FFIILLEESS
+        /etc/sudoers           List of who can run what
+        /etc/group             Local groups file
+        /etc/netgroup          List of network groups
+
 EEXXAAMMPPLLEESS
        Since the _s_u_d_o_e_r_s file is parsed in a single pass, order
        is important.  In general, you should structure _s_u_d_o_e_r_s
        such that the Host_Alias, User_Alias, and Cmnd_Alias spec­
        ifications come first, followed by any Default_Entry
-       lines, and finally the Runas_Alias and user specifica­
-       tions.  The basic rule of thumb is you cannot reference an
-       Alias that has not already been defined.
-
-       Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of
-       these are a bit contrived.  First, we define our _a_l_i_a_s_e_s:
+       lines, and finally the Runas_Alias and user
 
 
 
-1.6.8                    August  6, 2004                       17
+1.6.8                   September  6, 2004                     17
 
 
 
@@ -1125,6 +1125,12 @@ EEXXAAMMPPLLEESS
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+       specifications.  The basic rule of thumb is you cannot
+       reference an Alias that has not already been defined.
+
+       Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of
+       these are a bit contrived.  First, we define our _a_l_i_a_s_e_s:
 
         # User alias specification
         User_Alias     FULLTIMERS = millert, mikef, dowdy
@@ -1169,6 +1175,23 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        the year in each log line since the log entries will be
        kept around for several years.
 
+
+
+
+
+
+
+
+
+1.6.8                   September  6, 2004                     18
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
         # Override built-in defaults
         Defaults               syslog=auth
         Defaults>root          !set_logname
@@ -1178,19 +1201,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually deter­
        mines who may run what.
-
-
-
-
-
-1.6.8                    August  6, 2004                       18
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
         root           ALL = (ALL) ALL
         %wheel         ALL = (ALL) ALL
@@ -1237,6 +1247,17 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
         pete           HPPA = /usr/bin/passwd [A-z]*, !/usr/bin/passwd root
 
+
+
+1.6.8                   September  6, 2004                     19
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        The user ppeettee is allowed to change anyone's password
        except for root on the _H_P_P_A machines.  Note that this
        assumes _p_a_s_s_w_d(1) does not take multiple usernames on the
@@ -1246,18 +1267,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        The user bboobb may run anything on the _S_P_A_R_C and _S_G_I
        machines as any user listed in the _O_P Runas_Alias (rroooott
-
-
-
-1.6.8                    August  6, 2004                       19
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
        and ooppeerraattoorr).
 
         jim            +biglab = ALL
@@ -1304,6 +1313,17 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        On his personal workstation, valkyrie, mmaatttt needs to be
        able to kill hung processes.
 
+
+
+1.6.8                   September  6, 2004                     20
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
         WEBMASTERS     www = (www) ALL, (root) /usr/bin/su www
 
        On the host www, any user in the _W_E_B_M_A_S_T_E_R_S User_Alias
@@ -1312,17 +1332,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
         ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
                        /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
-
-
-
-1.6.8                    August  6, 2004                       20
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
        Any user may mount or unmount a CD-ROM on the machines in
        the CDROM Host_Alias (orion, perseus, hercules) without
@@ -1369,6 +1378,18 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
            sudo -V | grep "dummy exec"
 
+
+
+
+1.6.8                   September  6, 2004                     21
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        If the resulting output contains a line that begins with:
 
            File containing dummy exec functions:
@@ -1378,18 +1399,6 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
        return an error.  Unfortunately, there is no foolproof way
        to know whether or not _n_o_e_x_e_c will work at compile-time.
        _N_o_e_x_e_c should work on SunOS, Solaris, *BSD, Linux, IRIX,
-
-
-
-1.6.8                    August  6, 2004                       21
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
        Tru64 UNIX, MacOS X, and HP-UX 11.x.  It is known nnoott to
        work on AIX and UnixWare.  _N_o_e_x_e_c is expected to work on
        most operating systems that support the LD_PRELOAD envi­
@@ -1418,6 +1427,9 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        tion.  In the specific case of an editor, a safer approach
        is to give the user permission to run ssuuddooeeddiitt.
 
+SSEEEE AALLSSOO
+       _r_s_h(1), _s_u(1), _f_n_m_a_t_c_h(3), sudo(1m), visudo(1m)
+
 CCAAVVEEAATTSS
        The _s_u_d_o_e_r_s file should aallwwaayyss be edited by the vviissuuddoo
        command which locks the file and does grammatical check­
@@ -1431,22 +1443,76 @@ CCAAVVEEAATTSS
        hostname be fully qualified as returned by the hostname
        command or use the _f_q_d_n option in _s_u_d_o_e_r_s.
 
-FFIILLEESS
-        /etc/sudoers           List of who can run what
-        /etc/group             Local groups file
-        /etc/netgroup          List of network groups
 
-SSEEEE AALLSSOO
-       _r_s_h(1), _s_u(1), _f_n_m_a_t_c_h(3), sudo(1m), visudo(1m)
+
+
+
+1.6.8                   September  6, 2004                     22
 
 
 
 
 
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
+BBUUGGSS
+       If you feel you have found a bug in ssuuddoo, please submit a
+       bug report at http://www.sudo.ws/sudo/bugs/
+
+SSUUPPPPOORRTT
+       Commercial support is available for ssuuddoo, see
+       http://www.sudo.ws/sudo/support.html for details.
+
+       Limited free support is available via the sudo-users mail­
+       ing list, see http://www.sudo.ws/mail­
+       man/listinfo/sudo-users to subscribe or search the
+       archives.
+
+DDIISSCCLLAAIIMMEERR
+       SSuuddoo is provided ``AS IS'' and any express or implied war­
+       ranties, including, but not limited to, the implied war­
+       ranties of merchantability and fitness for a particular
+       purpose are disclaimed.  See the LICENSE file distributed
+       with ssuuddoo or http://www.sudo.ws/sudo/license.html for com­
+       plete details.
 
 
 
 
-1.6.8                    August  6, 2004                       22
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.6.8                   September  6, 2004                     23
 
 

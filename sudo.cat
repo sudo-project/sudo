@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.6.8                    August 17, 2004                        1
+1.6.8                   September  6, 2004                      1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.8                    August 17, 2004                        2
+1.6.8                   September  6, 2004                      2
 
 
 
@@ -178,22 +178,22 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            receive a warning and the edited copy will remain in a
            temporary file.
 
+           Please note that the editor used must make its changes
+           to the original file (really the original inode).  If
+           the editor makes changes to a temporary file and then
+           just renames this to the original file name it will
+           not work with ssuuddooeeddiitt.
+
        -h  The --hh (_h_e_l_p) option causes ssuuddoo to print a usage mes­
            sage and exit.
 
        -i  The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
            specified in the passwd(4) entry of the user that the
            command is being run as.  The command name argument
-           given to the shell begins with a - to tell the shell
-           to run as a login shell.  ssuuddoo attempts to change to
-           that user's home directory before running the shell.
-           It also initializes the environment, leaving _T_E_R_M
-           unchanged, setting _H_O_M_E, _S_H_E_L_L, _U_S_E_R, _L_O_G_N_A_M_E, and
-           _P_A_T_H, and unsetting all other environment variables.
 
 
 
-1.6.8                    August 17, 2004                        3
+1.6.8                   September  6, 2004                      3
 
 
 
@@ -202,6 +202,12 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+           given to the shell begins with a - to tell the shell
+           to run as a login shell.  ssuuddoo attempts to change to
+           that user's home directory before running the shell.
+           It also initializes the environment, leaving _T_E_R_M
+           unchanged, setting _H_O_M_E, _S_H_E_L_L, _U_S_E_R, _L_O_G_N_A_M_E, and
+           _P_A_T_H, and unsetting all other environment variables.
            Note that because the shell to use is determined
            before the _s_u_d_o_e_r_s file is parsed, a _r_u_n_a_s___d_e_f_a_u_l_t
            setting in _s_u_d_o_e_r_s will specify the user to run the
@@ -250,16 +256,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            the password database.
 
        -v  If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update
-           the user's timestamp, prompting for the user's pass­
-           word if necessary.  This extends the ssuuddoo timeout for
-           another 5 minutes (or whatever the timeout is set to
-           in _s_u_d_o_e_r_s) but does not run a command.
-
-       --  The ---- flag indicates that ssuuddoo should stop processing
 
 
 
-1.6.8                    August 17, 2004                        4
+1.6.8                   September  6, 2004                      4
 
 
 
@@ -268,6 +268,12 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+           the user's timestamp, prompting for the user's pass­
+           word if necessary.  This extends the ssuuddoo timeout for
+           another 5 minutes (or whatever the timeout is set to
+           in _s_u_d_o_e_r_s) but does not run a command.
+
+       --  The ---- flag indicates that ssuuddoo should stop processing
            command line arguments.  It is most useful in conjunc­
            tion with the --ss flag.
 
@@ -316,16 +322,10 @@ SSEECCUURRIITTYY NNOOTTEESS
        that ssuuddoo executes.
 
        For security reasons, if your OS supports shared libraries
-       and does not disable user-defined library search paths for
-       setuid programs (most do), you should either use a linker
-       option that disables this behavior or link ssuuddoo stati­
-       cally.
-
-       ssuuddoo will check the ownership of its timestamp directory
 
 
 
-1.6.8                    August 17, 2004                        5
+1.6.8                   September  6, 2004                      5
 
 
 
@@ -334,6 +334,12 @@ SSEECCUURRIITTYY NNOOTTEESS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       and does not disable user-defined library search paths for
+       setuid programs (most do), you should either use a linker
+       option that disables this behavior or link ssuuddoo stati­
+       cally.
+
+       ssuuddoo will check the ownership of its timestamp directory
        (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's con­
        tents if it is not owned by root and only writable by
        root.  On systems that allow non-root users to give away
@@ -369,45 +375,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        verify that the command does not inadvertently give the
        user an effective root shell.
 
-EEXXAAMMPPLLEESS
-       Note: the following examples assume suitable sudoers(4)
-       entries.
-
-       To get a file listing of an unreadable directory:
-
-        $ sudo ls /usr/local/protected
-
-       To list the home directory of user yazza on a machine
-       where the file system holding ~yazza is not exported as
-       root:
-
-        $ sudo -u yazza ls ~yazza
-
-       To edit the _i_n_d_e_x_._h_t_m_l file as user www:
-
-        $ sudo -u www vi ~www/htdocs/index.html
-
-       To shutdown a machine:
-
-
-
-1.6.8                    August 17, 2004                        6
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
-        $ sudo shutdown -r +15 "quick reboot"
-
-       To make a usage listing of the directories in the /home
-       partition.  Note that this runs the commands in a sub-
-       shell to make the cd and file redirection work.
-
-        $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
-
 EENNVVIIRROONNMMEENNTT
        ssuuddoo utilizes the following environment variables:
 
@@ -420,6 +387,18 @@ EENNVVIIRROONNMMEENNTT
 
         PATH                   Set to a sane value if sudo was configured with
                                the --with-secure-path option
+
+
+
+
+1.6.8                   September  6, 2004                      6
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
 
         SHELL                  Used to determine shell to run with -s option
 
@@ -444,6 +423,49 @@ FFIILLEESS
         /etc/sudoers           List of who can run what
         /var/run/sudo              Directory containing timestamps
 
+EEXXAAMMPPLLEESS
+       Note: the following examples assume suitable sudoers(4)
+       entries.
+
+       To get a file listing of an unreadable directory:
+
+        $ sudo ls /usr/local/protected
+
+       To list the home directory of user yazza on a machine
+       where the file system holding ~yazza is not exported as
+       root:
+
+        $ sudo -u yazza ls ~yazza
+
+       To edit the _i_n_d_e_x_._h_t_m_l file as user www:
+
+        $ sudo -u www vi ~www/htdocs/index.html
+
+       To shutdown a machine:
+
+        $ sudo shutdown -r +15 "quick reboot"
+
+       To make a usage listing of the directories in the /home
+       partition.  Note that this runs the commands in a sub-
+       shell to make the cd and file redirection work.
+
+        $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
+
+SSEEEE AALLSSOO
+       _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), sudoers(4),
+       passwd(4), visudo(1m)
+
+
+
+1.6.8                   September  6, 2004                      7
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
 AAUUTTHHOORRSS
        Many people have worked on ssuuddoo over the years; this ver­
        sion consists of code written primarily by:
@@ -454,28 +476,6 @@ AAUUTTHHOORRSS
        See the HISTORY file in the ssuuddoo distribution or visit
        http://www.sudo.ws/sudo/history.html for a short history
        of ssuuddoo.
-
-
-
-1.6.8                    August 17, 2004                        7
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
-BBUUGGSS
-       If you feel you have found a bug in sudo, please submit a
-       bug report at http://www.sudo.ws/sudo/bugs/
-
-DDIISSCCLLAAIIMMEERR
-       SSuuddoo is provided ``AS IS'' and any express or implied war­
-       ranties, including, but not limited to, the implied war­
-       ranties of merchantability and fitness for a particular
-       purpose are disclaimed.  See the LICENSE file distributed
-       with ssuuddoo for complete details.
 
 CCAAVVEEAATTSS
        There is no easy way to prevent a user from gaining a root
@@ -502,12 +502,41 @@ CCAAVVEEAATTSS
 
        Running shell scripts via ssuuddoo can expose the same kernel
        bugs that make setuid shell scripts unsafe on some operat­
-       ing systems (if your OS supports the /dev/fd/ directory,
-       setuid shell scripts are generally safe).
+       ing systems (if your OS has a /dev/fd/ directory, setuid
+       shell scripts are generally safe).
 
-SSEEEE AALLSSOO
-       _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), sudoers(4),
-       passwd(4), visudo(1m)
+BBUUGGSS
+       If you feel you have found a bug in ssuuddoo, please submit a
+       bug report at http://www.sudo.ws/sudo/bugs/
+
+SSUUPPPPOORRTT
+       Commercial support is available for ssuuddoo, see
+       http://www.sudo.ws/sudo/support.html for details.
+
+       Limited free support is available via the sudo-users mail­
+       ing list, see http://www.sudo.ws/mail­
+       man/listinfo/sudo-users to subscribe or search the
+       archives.
+
+DDIISSCCLLAAIIMMEERR
+       SSuuddoo is provided ``AS IS'' and any express or implied
+
+
+
+1.6.8                   September  6, 2004                      8
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
+       warranties, including, but not limited to, the implied
+       warranties of merchantability and fitness for a particular
+       purpose are disclaimed.  See the LICENSE file distributed
+       with ssuuddoo or http://www.sudo.ws/sudo/license.html for com­
+       plete details.
 
 
 
@@ -523,6 +552,43 @@ SSEEEE AALLSSOO
 
 
 
-1.6.8                    August 17, 2004                        8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.6.8                   September  6, 2004                      9
 
 
