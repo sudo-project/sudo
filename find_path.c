@@ -183,7 +183,10 @@ struct stat s;
 register char type;
 
 
-if ( *file == '.' && *(file+1) == '/' ) 
+if (index(file, '/') && *file != '/' && strncmp(file, "./", 2)
+    && strncmp(file, "../", 3))
+    type=3;
+else if ( *file == '.' && *(file+1) == '/' ) 
     type=1;
 else  if ( *file == '/' )
     type=2;
