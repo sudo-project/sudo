@@ -1007,3 +1007,7 @@ Sudo 1.5.7 released.
 315) FWTK 'authsrv' support from Kevin Kadow <kadow@MSG.NET>.
 
 316) Fixed handling and documentation of -with-umask.
+
+317) If the check for socket() or inet_addr() fails, retry, this time
+     linking with both -lsocket and -lnsl for those systems that
+     have interlibrary dependencies.
