@@ -252,6 +252,10 @@ AC_CHECK_FUNC(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
 AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), LIBOBJS="$LIBOBJS lsearch.o")
 AC_CHECK_FUNC(setenv, AC_DEFINE(HAVE_SETENV), AC_FUNC_CHECK(putenv, AC_DEFINE(HAVE_PUTENV), LIBOBJS="$LIBOBJS putenv.o"))
 dnl
+dnl if crypt(3) not in libc, look elsewhere
+dnl
+AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, ,AC_CHECK_LIB(ufc, crypt)))
+dnl
 dnl library checks
 dnl
 dnl Irix 5.2 (at least) has bugs in -lnsl and -lsocket
@@ -259,8 +263,6 @@ if test "$OS" != "irix" -o $OSREV -ne 5 ; then
     AC_CHECK_LIB(nsl, main)
     AC_CHECK_LIB(socket, main)
 fi
-dnl For those w/o crypt(3) in libc.a
-AC_CHECK_LIB(crypt, crypt, ,AC_CHECK_LIB(ufc, crypt))
 dnl
 dnl OS-dependent libraries
 dnl
