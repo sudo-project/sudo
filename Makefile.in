@@ -41,7 +41,7 @@ NROFF = nroff
 INSTALL = $(srcdir)/install-sh -c
 
 # Libraries
-SUDO_LIBS = @SUDO_LIBS@
+SUDO_LIBS = @SUDO_LIBS@ @AFS_LIBS@
 VISUDO_LIBS = @VISUDO_LIBS@
 
 # OS defines
