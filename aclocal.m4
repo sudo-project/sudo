@@ -1,5 +1,8 @@
 dnl Local m4 macors for autoconf (used by sudo)
-snl XXX - should cache values in all cases!!!
+dnl
+dnl Copyright (c) 1994,1996,1998,1999 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl
+dnl XXX - should cache values in all cases!!!
 dnl
 dnl checks for programs
 
