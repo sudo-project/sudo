@@ -934,4 +934,4 @@ I<sudoers>.
 
 =head1 SEE ALSO
 
-sudo(@mansectsu@), visudo(@mansectsu@), su(1), fnmatch(3).
+sudo(8), visudo(8), su(1), fnmatch(3).
