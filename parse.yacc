@@ -268,7 +268,7 @@ cmndspeclist	:	cmndspec
 
 cmndspec	:	{   /* Push a new entry onto the stack if needed */
 			    if (user_matches == TRUE && host_matches == TRUE &&
-				cmnd_matches == TRUE && runas_matches == TRUE) {
+				cmnd_matches != -1 && runas_matches == TRUE) {
 				push;
 				user_matches = TRUE;
 				host_matches = TRUE;
