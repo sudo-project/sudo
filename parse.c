@@ -120,6 +120,7 @@ sudoers_lookup(pwflag)
 		    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
 			/* Only check the command when listing another user. */
 			if (user_uid == 0 || list_pw == NULL ||
+			    user_uid == list_pw->pw_uid ||
 			    cmnd_matches(user_cmnd, user_args, cs->cmnd) == TRUE)
 				matched = TRUE;
 			if ((pwcheck == any && nopass != TRUE) ||

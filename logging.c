@@ -322,7 +322,8 @@ log_auth(status, inform_user)
 	    (void) fprintf(stderr,
 		"Sorry, user %s is not allowed to execute '%s%s%s' as %s on %s.\n",
 		user_name, user_cmnd, user_args ? " " : "",
-		user_args ? user_args : "", *user_runas, user_host);
+		user_args ? user_args : "",
+		list_pw ? list_pw->pw_name : *user_runas, user_host);
     }
 
     /*
