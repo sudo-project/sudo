@@ -355,23 +355,27 @@ int usergr_matches(group, user)
     char *group;
     char *user;
 {
-    struct group *grpent;
+    struct group *grp;
+    struct passwd *pw;
     char **cur;
 
     /* make sure we have a valid usergroup, sudo style */
     if (*group++ != '%')
 	return(FALSE);
 
-    if ((grpent = getgrnam(group)) == NULL) 
+    if ((grp = getgrnam(group)) == NULL) 
 	return(FALSE);
 
     /*
      * Check against user's real gid as well as group's user list
      */
-    if (grpent->gr_gid == user_gid)
+    if ((pw = getpwnam(user)) == NULL)
+	return(FALSE);
+
+    if (grp->gr_gid == pw->pw_gid)
 	return(TRUE);
 
-    for (cur=grpent->gr_mem; *cur; cur++) {
+    for (cur=grp->gr_mem; *cur; cur++) {
 	if (strcmp(*cur, user) == 0)
 	    return(TRUE);
     }
@@ -405,7 +409,6 @@ int netgr_matches(netgr, host, user)
     /* get the domain name (if any) */
     if (domain == (char *) -1) {
 	if ((domain = (char *) malloc(MAXHOSTNAMELEN)) == NULL) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
