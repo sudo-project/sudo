@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.13  1999/10/20 15:23:42  millert
-''' change ital to bold
+''' Revision 1.14  1999/11/09 00:00:29  millert
+''' Mention what characters need to be escaped in names.
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH SUDOERS 5 "1.6" "11/Oct/1999" "FILE FORMATS"
+.TH sudoers 5 "1.6" "8/Nov/1999" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
@@ -346,7 +346,7 @@ If a \f(CWCmnd\fR has associated command line arguments, then the arguments
 in the \f(CWCmnd\fR must match exactly those given by the user on the command line
 (or match the wildcards if there are any).  Note that the following
 characters must be escaped with a \*(L'\e\*(R' if they are used in command
-arguments: \*(L',\*(R', \*(L':\*(R', \*(L'=\*(R', \*(L'\e\e\*(R'.
+arguments: \*(L',\*(R', \*(L':\*(R', \*(L'=\*(R', \*(L'\e\*(R'.
 .Sh "Defaults"
 Certain configuration options may be changed from their default
 values at runtime via one or more \f(CWDefault_Entry\fR lines.  These
@@ -577,11 +577,15 @@ conjunction with the built in \f(CWALL\fR alias to allow a user to
 run \*(L"all but a few\*(R" commands rarely works as intended (see \s-1SECURITY\s0
 \s-1NOTES\s0 below).
 .PP
-Long lines can be continued with a backslash (\*(R'\e\e') as the last
+Long lines can be continued with a backslash (\*(R'\e') as the last
 character on the line.
 .PP
 Whitespace between elements in a list as well as specicial syntactic
 characters in a \fIUser Specification\fR ('=\*(R', \*(L':\*(R', \*(L'(\*(R', \*(L')') is optional.
+.PP
+The following characters must be escaped with a backslash (\*(R'\e') when
+used as part of a word (eg. a username or hostname):
+\&'@\*(R', \*(L'!\*(R', \*(L'=\*(R', \*(L':\*(R', \*(L',\*(R', \*(L'(\*(R', \*(L')\*(R', \*(L'\e\*(R'.
 .SH "EXAMPLES"
 Below are example \fIsudoers\fR entries.  Admittedly, some of
 these are a bit contrived.  First, we define our \fIaliases\fR:
@@ -798,7 +802,7 @@ will not run with a syntactically incorrect \fIsudoers\fR file.
 \fIsudo\fR\|(8), \fIvisudo\fR\|(8), \fIsu\fR\|(1), \fIfnmatch\fR\|(3).
 
 .rn }` ''
-.IX Title "SUDOERS 5"
+.IX Title "sudoers 5"
 .IX Name "sudoers - list of which users may execute what"
 
 .IX Header "NAME"

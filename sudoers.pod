@@ -190,7 +190,7 @@ If a C<Cmnd> has associated command line arguments, then the arguments
 in the C<Cmnd> must match exactly those given by the user on the command line
 (or match the wildcards if there are any).  Note that the following
 characters must be escaped with a '\' if they are used in command
-arguments: ',', ':', '=', '\\'.
+arguments: ',', ':', '=', '\'.
 
 =head2 Defaults
 
@@ -532,11 +532,15 @@ conjunction with the built in C<ALL> alias to allow a user to
 run "all but a few" commands rarely works as intended (see SECURITY
 NOTES below).
 
-Long lines can be continued with a backslash ('\\') as the last
+Long lines can be continued with a backslash ('\') as the last
 character on the line.
 
 Whitespace between elements in a list as well as specicial syntactic
 characters in a I<User Specification> ('=', ':', '(', ')') is optional.
+
+The following characters must be escaped with a backslash ('\') when
+used as part of a word (eg. a username or hostname):
+'@', '!', '=', ':', ',', '(', ')', '\'.
 
 =head1 EXAMPLES
 

@@ -1,7 +1,7 @@
 
 
 
-SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
+sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 NNNNAAAAMMMMEEEE
@@ -61,13 +61,13 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-11/Oct/1999                    1.6                              1
+8/Nov/1999                     1.6                              1
 
 
 
 
 
-SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
+sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
         Host_Alias ::= NAME '=' Host_List
@@ -127,13 +127,13 @@ SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
 
-11/Oct/1999                    1.6                              2
+8/Nov/1999                     1.6                              2
 
 
 
 
 
-SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
+sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
         Host ::= '!'* hostname |
@@ -181,7 +181,7 @@ SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
        the user on the command line (or match the wildcards if
        there are any).  Note that the following characters must
        be escaped with a '\' if they are used in command
-       arguments: ',', ':', '=', '\\'.
+       arguments: ',', ':', '=', '\'.
 
        DDDDeeeeffffaaaauuuullllttttssss
 
@@ -193,13 +193,13 @@ SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
 
-11/Oct/1999                    1.6                              3
+8/Nov/1999                     1.6                              3
 
 
 
 
 
-SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
+sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
        there are conflicting values, the last value on a matching
@@ -259,13 +259,13 @@ SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
 
-11/Oct/1999                    1.6                              4
+8/Nov/1999                     1.6                              4
 
 
 
 
 
-SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
+sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
        shell_noargs
@@ -325,13 +325,13 @@ SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
 
-11/Oct/1999                    1.6                              5
+8/Nov/1999                     1.6                              5
 
 
 
 
 
-SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
+sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
                    successfully
@@ -391,13 +391,13 @@ SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
 
-11/Oct/1999                    1.6                              6
+8/Nov/1999                     1.6                              6
 
 
 
 
 
-SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
+sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
        Runas_Spec in the user specification, a default Runas_Spec
@@ -457,13 +457,13 @@ SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
 
-11/Oct/1999                    1.6                              7
+8/Nov/1999                     1.6                              7
 
 
 
 
 
-SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
+sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
        [!...]  Matches any character nnnnooootttt in the specified range.
@@ -512,25 +512,28 @@ SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
        allow a user to run "all but a few" commands rarely works
        as intended (see SECURITY NOTES below).
 
-       Long lines can be continued with a backslash ('\\') as the
+       Long lines can be continued with a backslash ('\') as the
        last character on the line.
 
        Whitespace between elements in a list as well as specicial
        syntactic characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n ('=', ':',
        '(', ')') is optional.
 
+       The following characters must be escaped with a backslash
+
+
+
+8/Nov/1999                     1.6                              8
 
 
 
 
-11/Oct/1999                    1.6                              8
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
-
-
-
-SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
-
+       ('\') when used as part of a word (eg. a username or
+       hostname): '@', '!', '=', ':', ',', '(', ')', '\'.
 
 EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
        Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of
@@ -583,20 +586,20 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
         Defaults:millert       !authenticate
         Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
 
+
+
+
+8/Nov/1999                     1.6                              9
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually
        determines who may run what.
-
-
-
-
-11/Oct/1999                    1.6                              9
-
-
-
-
-
-SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
-
 
         root           ALL = (ALL) ALL
         %wheel         ALL = (ALL) ALL
@@ -649,21 +652,21 @@ SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
        assumes _p_a_s_s_w_d(1) does not take multiple usernames on the
        command line.
 
+
+
+
+8/Nov/1999                     1.6                             10
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
         bob            SPARC = (OP) ALL : SGI = (OP) ALL
 
        The user bbbboooobbbb may run anything on the _S_P_A_R_C and _S_G_I
-
-
-
-11/Oct/1999                    1.6                             10
-
-
-
-
-
-SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
-
-
        machines as any user listed in the _O_P Runas_Alias (rrrrooooooootttt
        and ooooppppeeeerrrraaaattttoooorrrr).
 
@@ -715,20 +718,19 @@ SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
        On the host www, any user in the _W_E_B_M_A_S_T_E_R_S User_Alias
        (will, wendy, and wim), may run any command as user www
+
+
+
+8/Nov/1999                     1.6                             11
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        (which owns the web pages) or simply _s_u(1) to www.
-
-
-
-
-
-11/Oct/1999                    1.6                             11
-
-
-
-
-
-SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
-
 
         ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
                        /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
@@ -785,15 +787,15 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
+8/Nov/1999                     1.6                             12
 
 
-11/Oct/1999                    1.6                             12
 
 
 
+sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
-SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
 
@@ -851,8 +853,6 @@ SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
 
-
-
-11/Oct/1999                    1.6                             13
+8/Nov/1999                     1.6                             13
 
 

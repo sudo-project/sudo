@@ -214,7 +214,7 @@ any subdirectories therein).
 If a <CODE>Cmnd</CODE> has associated command line arguments, then the arguments in the <CODE>Cmnd</CODE> must match exactly those given by the user on the command line (or match
 the wildcards if there are any). Note that the following characters must be
 escaped with a '\' if they are used in command arguments: ',', ':', '=',
-'\\'.
+'\'.
 
 <P>
 <HR>
@@ -562,12 +562,17 @@ An exclamation point ('!') can be used as a logical <EM>not</EM> operator both i
 intended (see SECURITY NOTES below).
 
 <P>
-Long lines can be continued with a backslash ('\\') as the last character
-on the line.
+Long lines can be continued with a backslash ('\') as the last character on
+the line.
 
 <P>
 Whitespace between elements in a list as well as specicial syntactic
 characters in a <EM>User Specification</EM> ('=', ':', '(', ')') is optional.
+
+<P>
+The following characters must be escaped with a backslash ('\') when used
+as part of a word (eg. a username or hostname): '@', '!', '=', ':', ',',
+'(', ')', '\'.
 
 <P>
 <HR>
