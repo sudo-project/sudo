@@ -251,9 +251,14 @@ void log_error(code)
 	strcat(logline, cmnd);	/* stuff the command into the logline */
 	strcat(logline, " ");
 
-	argc = Argc - 2;
-	argv = Argv;
-	argv++;
+	if (Argc > 1) {
+	    argc = Argc - 2;
+	    argv = Argv + 1;
+	} else {
+	    argc = Argc - 1;
+	    argv = Argv;
+	}
+
 	p = logline + strlen(logline);
 	count = (int) (logline + MAXLOGLEN - p);
 
