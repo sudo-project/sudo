@@ -162,6 +162,15 @@
 /* Define if you use Kerberos V. */
 #undef HAVE_KERB5
 
+/* Define if you use LDAP. */
+#undef HAVE_LDAP
+
+/* Define if your LDAP needs <lber.h>. (OpenLDAP does not) */
+#undef HAVE_LBER_H
+
+/* Define if your LDAP Supports URLs. (OpenLDAP does) */
+#define HAVE_LDAP_INITIALIZE
+
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF
 

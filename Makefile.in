@@ -118,7 +118,7 @@ PROGS = @PROGS@
 
 SRCS = alloc.c alloca.c check.c closefrom.c def_data.c defaults.c env.c err.c \
        fileops.c find_path.c fnmatch.c getcwd.c getprogname.c getspwuid.c \
-       goodpath.c interfaces.c lex.yy.c lsearch.c logging.c parse.c parse.lex \
+       goodpath.c interfaces.c ldap.c lex.yy.c lsearch.c logging.c parse.c parse.lex \
        parse.yacc set_perms.c sigaction.c snprintf.c strcasecmp.c strerror.c \
        strlcat.c strlcpy.c sudo.c sudo.tab.c sudo_edit.c testsudoers.c \
        tgetpass.c utime.c visudo.c zero_bytes.c $(AUTH_SRCS)
@@ -139,7 +139,7 @@ PARSEOBJS = sudo.tab.o lex.yy.o alloc.o defaults.o
 
 SUDOBJS = check.o env.o getspwuid.o goodpath.o fileops.o find_path.o \
 	  interfaces.o logging.o parse.o set_perms.o sudo.o sudo_edit.o \
-	  tgetpass.o zero_bytes.o $(AUTH_OBJS) $(PARSEOBJS)
+	  tgetpass.o zero_bytes.o @SUDO_OBJS@ $(AUTH_OBJS) $(PARSEOBJS)
 
 VISUDOBJS = visudo.o fileops.o goodpath.o find_path.o $(PARSEOBJS)
 
@@ -247,6 +247,7 @@ strlcat.o: strlcat.c config.h
 strlcpy.o: strlcpy.c config.h
 strerror.o: strerror.c config.h
 utime.o: utime.c config.h pathnames.h compat.h emul/utime.h
+ldap.o: ldap.c $(SUDODEP) parse.h
 
 # Authentication functions live in "auth" dir and so need extra care
 sudo_auth.o: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)

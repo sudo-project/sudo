@@ -1670,3 +1670,5 @@ Sudo 1.6.7p6 released.
      be logged as run by the user specified by the SUDO_USER environment
      variable.  In -e mode (sudoedit), SUDO_USER is used to determine
      what user to run the editor when the real uid is 0.
+
+524) Merged in LDAP support from Aaron Spangler.
