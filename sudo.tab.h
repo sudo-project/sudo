@@ -21,10 +21,13 @@
 #define USERALIAS 277
 #define RUNASALIAS 278
 #define ERROR 279
+#ifndef YYSTYPE_DEFINED
+#define YYSTYPE_DEFINED
 typedef union {
     char *string;
     int BOOLEAN;
     struct sudo_command command;
     int tok;
 } YYSTYPE;
+#endif /* YYSTYPE_DEFINED */
 extern YYSTYPE yylval;
