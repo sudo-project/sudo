@@ -240,6 +240,8 @@ clobber: distclean
 realclean: distclean
 	rm -f TAGS tags
 
+cleandir: realclean
+
 dist: $(DISTFILES)
 	rm -f ../cu-sudo.v$(VERSION).tar.Z
 	( cd .. ; TF="/tmp/sudo.dist$$$$" ; rm -f $$TF ; for i in $(DISTFILES) ; \
@@ -250,12 +252,10 @@ dist: $(DISTFILES)
 
 # Update version strings based on version specified in version.h
 # This is ugly but it works...
-update_version: Makefile.in emul/utime.h check.c compat.h config.h.in dce_pwent.c find_path.c getspwuid.c getwd.c goodpath.c ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c lex.yy.c logging.c options.h parse.c parse.lex parse.yacc pathnames.h putenv.c strdup.c sudo-lex.yy.c sudo.c sudo.h sudo_setenv.c testsudoers.c tgetpass.c utime.c visudo.c
-	:
+update_version: Makefile.in emul/utime.h check.c compat.h config.h.in dce_pwent.c find_path.c getspwuid.c getwd.c goodpath.c ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c logging.c options.h parse.c parse.lex parse.yacc pathnames.h putenv.c strdup.c sudo.c sudo.h sudo_setenv.c testsudoers.c tgetpass.c utime.c visudo.c
 
 Makefile.in : version.h
-	( if `co -l -q $@` ; then CHECKIN=1; else CHECKIN=0 ; fi ;  VERSION=`sed -n 's/static char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h` ; sed -e 's/\(VERSION =\) [0-9]\.[0-9][0-9]*\.[0-9][0-9]*/\1 '$$VERSION'/' -e 's/\(CU sudo version\) [0-9]\.[0-9][0-9]*\.[0-9][0-9]*/\1 '$$VERSION'/' < $@ > $@.$$$$ ; mv -f $@.$$$$ $@ ; chmod 644 $@ ; if test $$CHECKIN -eq 1 ; then ci -u -m"updated version" $@ ; fi )
+	( if `co -l -q $@` ; then CHECKIN=1; else CHECKIN=0 ; fi ;  VERSION=`sed -n 's/static char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h` ; sed -e 's/\(VERSION =\) [^ ][^ ]*/\1 '$$VERSION'/' -e 's/\(CU sudo version\) [^ ][^ ]*/\1 '$$VERSION'/' < $@ > $@.$$$$ ; mv -f $@.$$$$ $@ ; chmod 644 $@ ; if test $$CHECKIN -eq 1 ; then ci -u -m"updated version" $@ ; fi )
 
-emul/utime.h check.c compat.h config.h.in dce_pwent.c find_path.c getspwuid.c getwd.c goodpath.c ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c lex.yy.c logging.c options.h parse.c parse.lex parse.yacc pathnames.h putenv.c strdup.c sudo-lex.yy.c sudo.c sudo.h sudo_setenv.c testsudoers.c tgetpass.c utime.c visudo.c: version.h
-	co -l -q $@ || true
-	( if `co -l -q $@` ; then CHECKIN=1; else CHECKIN=0 ; fi ; VERSION=`sed -n 's/static char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h` ; sed 's/\(CU sudo version\) [0-9]\.[0-9][0-9]*\.[0-9][0-9]*/\1 '$$VERSION'/' < $@ > $@.$$$$ ; mv -f $@.$$$$ $@ ; chmod 644 $@ ; if test $$CHECKIN -eq 1 ; then ci -u -m"updated version" $@ ; fi )
+emul/utime.h check.c compat.h config.h.in dce_pwent.c find_path.c getspwuid.c getwd.c goodpath.c ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c logging.c options.h parse.c parse.lex parse.yacc pathnames.h putenv.c strdup.c sudo.c sudo.h sudo_setenv.c testsudoers.c tgetpass.c utime.c visudo.c: version.h
+	( if `co -l -q $@` ; then CHECKIN=1; else CHECKIN=0 ; fi ; VERSION=`sed -n 's/static char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h` ; sed 's/\(CU sudo version\) [^ ][^ ]*/\1 '$$VERSION'/' < $@ > $@.$$$$ ; mv -f $@.$$$$ $@ ; chmod 644 $@ ; if test $$CHECKIN -eq 1 ; then ci -u -m"updated version" $@ ; fi )
