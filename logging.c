@@ -536,10 +536,13 @@ static void send_mail()
 static RETSIGTYPE reapchild(sig)
     int sig;
 {
+    int save_errno = errno;
+
     (void) wait(NULL);
 #ifndef POSIX_SIGNALS
     (void) signal(SIGCHLD, reapchild);
 #endif /* POSIX_SIGNALS */
+    errno = save_errno;
 }
 
 
