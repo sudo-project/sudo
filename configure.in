@@ -110,7 +110,7 @@ dnl
 test "$mandir" = '${prefix}/man' && mandir='$(prefix)/man'
 test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
 test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
-test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
+test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
 dnl
 dnl Deprecated --with options (these all warn or generate an error)
@@ -941,6 +941,18 @@ AC_ARG_WITH(interfaces, [  --without-interfaces    don't try to read the ip addr
     *)		AC_MSG_ERROR(["--with-interfaces does not take an argument."])
 		;;
 esac], AC_MSG_RESULT(yes))
+
+AC_MSG_CHECKING(whether stow should be used)
+AC_ARG_WITH(stow, [  --with-stow             properly handle GNU stow packaging],
+[case $with_stow in
+    yes)	AC_MSG_RESULT(yes)
+		AC_DEFINE(USE_STOW, 1, [Define if you use stow packaging.])
+		;;
+    no)		AC_MSG_RESULT(no)
+		;;
+    *)		AC_MSG_ERROR(["--with-stow does not take an argument."])
+		;;
+esac], AC_MSG_RESULT(no))
 
 dnl
 dnl Options for --enable
@@ -1935,6 +1947,13 @@ AH_BOTTOM([/*
 # ifdef HAVE_WAIT3
 #  define sudo_waitpid(p, s, o)	wait3(s, o, NULL)
 # endif
+#endif
+
+/* GNU stow needs /etc/sudoers to be a symlink. */
+#ifdef HAVE_STOW
+# define stat_sudoers	stat
+#else
+# define stat_sudoers	lstat
 #endif
 
 /* Solaris doesn't use const qualifiers in PAM. */

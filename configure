@@ -926,6 +926,7 @@ Optional Packages:
   --with-goons-insults    include the insults from the "Goon Show"
   --with-secure-path      override the user's path with a builtin one
   --without-interfaces    don't try to read the ip addr of ether interfaces
+  --with-stow             properly handle GNU stow packaging
 
 Some influential environment variables:
   CC          C compiler command
@@ -1419,14 +1420,7 @@ CHECKSIA=true
 test "$mandir" = '${prefix}/man' && mandir='$(prefix)/man'
 test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
 test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
-
-if test "$sysconfdir" = '${prefix}/etc'; then
-    if test "$prefix" = "NONE"; then
-	sysconfdir='/etc'
-    else
-	sysconfdir='$(prefix)/etc'
-    fi
-fi
+test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
 
 
 
@@ -2957,6 +2951,34 @@ esac
 else
   echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
+fi;
+
+echo "$as_me:$LINENO: checking whether stow should be used" >&5
+echo $ECHO_N "checking whether stow should be used... $ECHO_C" >&6
+
+# Check whether --with-stow or --without-stow was given.
+if test "${with_stow+set}" = set; then
+  withval="$with_stow"
+  case $with_stow in
+    yes)	echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+cat >>confdefs.h <<\_ACEOF
+#define USE_STOW 1
+_ACEOF
+
+		;;
+    no)		echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+		;;
+    *)		{ { echo "$as_me:$LINENO: error: \"--with-stow does not take an argument.\"" >&5
+echo "$as_me: error: \"--with-stow does not take an argument.\"" >&2;}
+   { (exit 1); exit 1; }; }
+		;;
+esac
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
 fi;
 
 

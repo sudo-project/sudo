@@ -442,6 +442,9 @@
    */
 #undef USE_INSULTS
 
+/* Define if you use stow packaging. */
+#undef USE_STOW
+
 /* Define if you want a different ticket file for each tty. */
 #undef USE_TTY_TICKETS
 
@@ -507,6 +510,13 @@
 # ifdef HAVE_WAIT3
 #  define sudo_waitpid(p, s, o)	wait3(s, o, NULL)
 # endif
+#endif
+
+/* GNU stow needs /etc/sudoers to be a symlink. */
+#ifdef HAVE_STOW
+# define stat_sudoers	stat
+#else
+# define stat_sudoers	lstat
 #endif
 
 /* Solaris doesn't use const qualifiers in PAM. */
