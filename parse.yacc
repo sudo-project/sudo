@@ -93,6 +93,18 @@ int quiet = FALSE;
 #define USER_ALIAS		 3
 #define RUNAS_ALIAS		 4
 
+#define SETMATCH(_var, _val)	do { \
+	if ((_var) == UNSPEC || (_val) != NOMATCH) \
+	    (_var) = (_val); \
+} while (0)
+
+#define SETNMATCH(_var, _val)	do { \
+	if ((_val) != NOMATCH) \
+	    (_var) = ! (_val); \
+	else if ((_var) == UNSPEC) \
+	    (_var) = NOMATCH; \
+} while (0)
+
 /*
  * The matching stack, initial space allocated in init_parser().
  */
@@ -105,12 +117,12 @@ int top = 0, stacksize = 0;
 	    while ((stacksize += STACKINCREMENT) < top); \
 	    match = (struct matchstack *) erealloc3(match, stacksize, sizeof(struct matchstack)); \
 	} \
-	match[top].user   = -1; \
-	match[top].cmnd   = -1; \
-	match[top].host   = -1; \
-	match[top].runas  = -2; \
-	match[top].nopass = def_authenticate ? -1 : TRUE; \
-	match[top].noexec = def_noexec ? TRUE : -1; \
+	match[top].user   = UNSPEC; \
+	match[top].cmnd   = UNSPEC; \
+	match[top].host   = UNSPEC; \
+	match[top].runas  = UNSPEC; \
+	match[top].nopass = def_authenticate ? UNSPEC : TRUE; \
+	match[top].noexec = def_noexec ? TRUE : UNSPEC; \
 	top++; \
     } while (0)
 
@@ -166,7 +178,7 @@ static struct generic_alias *ga_list = NULL;
 /*
  * Does this Defaults list pertain to this user?
  */
-static int defaults_matches = 0;
+static int defaults_matches = FALSE;
 
 /*
  * Local protoypes
@@ -233,10 +245,11 @@ yyerror(s)
 %token <tok>	 ERROR
 
 /*
- * NOTE: these are not true booleans as there are actually 3 possible values: 
+ * NOTE: these are not true booleans as there are actually 4 possible values: 
  *        1) TRUE (positive match)
  *        0) FALSE (negative match due to a '!' somewhere)
- *       -1) No match (don't change the value of *_matches)
+ *       -1) NOMATCH (don't change the value of *_matches)
+ *       -2) UNSPEC (uninitialized value)
  */
 %type <BOOLEAN>	 cmnd
 %type <BOOLEAN>	 host
@@ -350,20 +363,18 @@ privilege	:	hostlist '=' cmndspeclist {
 			     * cmndspec so just reset some values so
 			     * the next 'privilege' gets a clean slate.
 			     */
-			    host_matches = -1;
-			    runas_matches = -2;
-			    no_passwd = def_authenticate ? -1 : TRUE;
-			    no_execve = def_noexec ? TRUE : -1;
+			    host_matches = UNSPEC;
+			    runas_matches = UNSPEC;
+			    no_passwd = def_authenticate ? UNSPEC : TRUE;
+			    no_execve = def_noexec ? TRUE : UNSPEC;
 			}
 		;
 
 ophost		:	host {
-			    if ($1 != -1)
-				host_matches = $1;
+			    SETMATCH(host_matches, $1);
 			}
 		|	'!' host {
-			    if ($2 != -1)
-				host_matches = ! $2;
+			    SETNMATCH(host_matches, $1);
 			}
 		;
 
@@ -374,21 +385,21 @@ host		:	ALL {
 			    if (addr_matches($1))
 				$$ = TRUE;
 			    else
-				$$ = -1;
+				$$ = NOMATCH;
 			    free($1);
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, user_host, user_shost, NULL))
 				$$ = TRUE;
 			    else
-				$$ = -1;
+				$$ = NOMATCH;
 			    free($1);
 			}
 		|	WORD {
 			    if (hostname_matches(user_shost, user_host, $1) == 0)
 				$$ = TRUE;
 			    else
-				$$ = -1;
+				$$ = NOMATCH;
 			    free($1);
 			}
 		|	ALIAS {
@@ -409,7 +420,7 @@ host		:	ALL {
 					YYERROR;
 				    }
 				}
-				$$ = -1;
+				$$ = NOMATCH;
 			    }
 			    free($1);
 			}
@@ -433,22 +444,21 @@ cmndspec	:	runasspec cmndtag opcmnd {
 			     * If keepall is set and the user matches then
 			     * we need to keep entries around too...
 			     */
-			    if (user_matches != -1 && host_matches != -1 &&
-				cmnd_matches != -1 && runas_matches > -1)
+			    if (user_matches >= 0 && host_matches >= 0 &&
+				cmnd_matches >= 0 && runas_matches >= 0)
 				pushcp;
-			    else if (user_matches != -1 && (top == 1 ||
-				(top == 2 && host_matches != -1 &&
-				match[0].host == -1)))
+			    else if (user_matches >= 0 && (top == 1 ||
+				(top == 2 && host_matches >= 0 &&
+				match[0].host >= 0)))
 				pushcp;
 			    else if (user_matches == TRUE && keepall)
 				pushcp;
-			    cmnd_matches = -1;
+			    cmnd_matches = NOMATCH;
 			}
 		;
 
 opcmnd		:	cmnd {
-			    if ($1 != -1)
-				cmnd_matches = $1;
+			    SETMATCH(cmnd_matches, $1);
 			}
 		|	'!' {
 			    if (printmatches == TRUE) {
@@ -459,15 +469,14 @@ opcmnd		:	cmnd {
 				    append_cmnd("!", NULL);
 			    }
 			} cmnd {
-			    if ($3 != -1)
-				cmnd_matches = ! $3;
+			    SETNMATCH(cmnd_matches, $1);
 			}
 		;
 
 runasspec	:	/* empty */ {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
-				if (runas_matches == -2) {
+				if (runas_matches == UNSPEC) {
 				    cm_list[cm_list_len].runas_len = 0;
 				} else {
 				    /* Inherit runas data. */
@@ -483,7 +492,7 @@ runasspec	:	/* empty */ {
 			     * If this is the first entry in a command list
 			     * then check against default runas user.
 			     */
-			    if (runas_matches == -2) {
+			    if (runas_matches == UNSPEC) {
 				runas_matches =
 				    userpw_matches(def_runas_default,
 					*user_runas, runas_pw);
@@ -497,7 +506,7 @@ runasspec	:	/* empty */ {
 runaslist	:	oprunasuser { ; }
 		|	runaslist ',' oprunasuser {
 			    /* Later entries override earlier ones. */
-			    if ($3 != -1)
+			    if ($3 != NOMATCH)
 				$$ = $3;
 			    else
 				$$ = $1;
@@ -515,7 +524,7 @@ oprunasuser	:	runasuser { ; }
 			    }
 			} runasuser {
 			    /* Set $$ to the negation of runasuser */
-			    $$ = ($3 == -1 ? -1 : ! $3);
+			    $$ = ($3 == NOMATCH ? NOMATCH : ! $3);
 			}
 		;
 
@@ -530,7 +539,7 @@ runasuser	:	WORD {
 			    if (userpw_matches($1, *user_runas, runas_pw))
 				$$ = TRUE;
 			    else
-				$$ = -1;
+				$$ = NOMATCH;
 			    free($1);
 			}
 		|	USERGROUP {
@@ -544,7 +553,7 @@ runasuser	:	WORD {
 			    if (usergr_matches($1, *user_runas, runas_pw))
 				$$ = TRUE;
 			    else
-				$$ = -1;
+				$$ = NOMATCH;
 			    free($1);
 			}
 		|	NETGROUP {
@@ -558,7 +567,7 @@ runasuser	:	WORD {
 			    if (netgr_matches($1, NULL, NULL, *user_runas))
 				$$ = TRUE;
 			    else
-				$$ = -1;
+				$$ = NOMATCH;
 			    free($1);
 			}
 		|	ALIAS {
@@ -586,7 +595,7 @@ runasuser	:	WORD {
 					YYERROR;
 				    }
 				}
-				$$ = -1;
+				$$ = NOMATCH;
 			    }
 			    free($1);
 			}
@@ -684,7 +693,7 @@ cmnd		:	ALL {
 					YYERROR;
 				    }
 				}
-				$$ = -1;
+				$$ = NOMATCH;
 			    }
 			    free($1);
 			}
@@ -708,7 +717,7 @@ cmnd		:	ALL {
 				$1.cmnd, $1.args))
 				$$ = TRUE;
 			    else
-				$$ = -1;
+				$$ = NOMATCH;
 
 			    free($1.cmnd);
 			    if ($1.args)
@@ -721,7 +730,7 @@ hostaliases	:	hostalias
 		;
 
 hostalias	:	ALIAS { push; } '=' hostlist {
-			    if ((host_matches != -1 || pedantic) &&
+			    if ((host_matches >= 0 || pedantic) &&
 				!add_alias($1, HOST_ALIAS, host_matches)) {
 				yyerror(NULL);
 				YYERROR;
@@ -748,7 +757,7 @@ cmndalias	:	ALIAS {
 				ga_list[ga_list_len-1].alias = estrdup($1);
 			     }
 			} '=' cmndlist {
-			    if ((cmnd_matches != -1 || pedantic) &&
+			    if ((cmnd_matches >= 0 || pedantic) &&
 				!add_alias($1, CMND_ALIAS, cmnd_matches)) {
 				yyerror(NULL);
 				YYERROR;
@@ -778,7 +787,7 @@ runasalias	:	ALIAS {
 				ga_list[ga_list_len-1].alias = estrdup($1);
 			    }
 			} '=' runaslist {
-			    if (($4 != -1 || pedantic) &&
+			    if (($4 != NOMATCH || pedantic) &&
 				!add_alias($1, RUNAS_ALIAS, $4)) {
 				yyerror(NULL);
 				YYERROR;
@@ -795,7 +804,7 @@ useraliases	:	useralias
 		;
 
 useralias	:	ALIAS { push; }	'=' userlist {
-			    if ((user_matches != -1 || pedantic) &&
+			    if ((user_matches >= 0 || pedantic) &&
 				!add_alias($1, USER_ALIAS, user_matches)) {
 				yyerror(NULL);
 				YYERROR;
@@ -810,12 +819,10 @@ userlist	:	opuser
 		;
 
 opuser		:	user {
-			    if ($1 != -1)
-				user_matches = $1;
+			    SETMATCH(user_matches, $1);
 			}
 		|	'!' user {
-			    if ($2 != -1)
-				user_matches = ! $2;
+			    SETNMATCH(user_matches, $1);
 			}
 		;
 
@@ -823,21 +830,21 @@ user		:	WORD {
 			    if (userpw_matches($1, user_name, sudo_user.pw))
 				$$ = TRUE;
 			    else
-				$$ = -1;
+				$$ = NOMATCH;
 			    free($1);
 			}
 		|	USERGROUP {
 			    if (usergr_matches($1, user_name, sudo_user.pw))
 				$$ = TRUE;
 			    else
-				$$ = -1;
+				$$ = NOMATCH;
 			    free($1);
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, NULL, NULL, user_name))
 				$$ = TRUE;
 			    else
-				$$ = -1;
+				$$ = NOMATCH;
 			    free($1);
 			}
 		|	ALIAS {
@@ -858,7 +865,7 @@ user		:	WORD {
 					YYERROR;
 				    }
 				}
-				$$ = -1;
+				$$ = NOMATCH;
 			    }
 			    free($1);
 			}
