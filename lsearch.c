@@ -32,10 +32,10 @@
 
 #include "config.h"
 
-#include <stdio.h>
 #include <sys/types.h>
+#include <stdio.h>
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+# include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
 #include "compat.h"
