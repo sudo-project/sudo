@@ -127,6 +127,7 @@ int num_interfaces;
 int tgetpass_flags;
 uid_t timestamp_uid;
 extern int errorlineno;
+extern char *errorfile;
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
@@ -313,8 +314,7 @@ main(argc, argv, envp)
     }
 
     if (ISSET(validated, VALIDATE_ERROR))
-	log_error(0, "parse error in %s near line %d", _PATH_SUDOERS,
-	    errorlineno);
+	log_error(0, "parse error in %s near line %d", errorfile, errorlineno);
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {

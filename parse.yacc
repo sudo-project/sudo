@@ -79,13 +79,14 @@ static const char rcsid[] = "$Sudo$";
  */
 extern int sudolineno, parse_error;
 extern char *sudoers;
-int errorlineno = -1;
 int clearaliases = TRUE;
 int printmatches = FALSE;
 int pedantic = FALSE;
 int keepall = FALSE;
 int quiet = FALSE;
 int used_runas = FALSE;
+int errorlineno = -1;
+char *errorfile = NULL;
 
 /*
  * Alias types
@@ -206,8 +207,10 @@ yyerror(s)
     const char *s;
 {
     /* Save the line the first error occurred on. */
-    if (errorlineno == -1)
+    if (errorlineno == -1) {
 	errorlineno = sudolineno ? sudolineno - 1 : 0;
+	errorfile = estrdup(sudoers);
+    }
     if (s && !quiet) {
 #ifndef TRACELEXER
 	(void) fprintf(stderr, ">>> %s: %s, line %d <<<\n", sudoers, s,
