@@ -827,7 +827,7 @@ dumpaliases()
 void
 list_matches()
 {
-    size_t count; 
+    size_t count;
     char *p;
     struct generic_alias *ga, key;
 
@@ -1012,8 +1012,8 @@ init_parser()
 	match = NULL;
 	top = 0;
 	parse_error = FALSE;
-	errorlineno = -1;   
-	sudolineno = 1;     
+	errorlineno = -1;
+	sudolineno = 1;
     }
 
     /* Allocate space for the matching stack. */
