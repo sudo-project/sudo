@@ -51,79 +51,8 @@ test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/etc'
 test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 
 dnl
-dnl Options for --enable
-dnl
-
-AC_MSG_CHECKING(whether to disable shadow password support)
-AC_ARG_ENABLE(tgetpass,
-[  --enable-shadow         Use shadow passwords if they exist (default)
-  --disable-shadow        Never use shadow passwords],
-[ case "$enableval" in
-    yes)	AC_MSG_RESULT(no)
-		;;
-    no)		AC_MSG_RESULT(yes)
-		CHECKSHADOW="false"
-		;;
-    *)		AC_MSG_RESULT(no)
-    		echo "Ignoring unknown argument to --enable-tgetpass: $enableval"
-		;;
-  esac
-], AC_MSG_RESULT(no))
-
-AC_MSG_CHECKING(whether to use the system getpass function)
-AC_ARG_ENABLE(tgetpass,
-[  --enable-tgetpass       Use sudo's getpass() that times out (default)
-  --disable-tgetpass      Use the system getpass() instead of sudo's version],
-[ case "$enableval" in
-    yes)	AC_MSG_RESULT(no)
-		;;
-    no)		AC_MSG_RESULT(yes)
-		AC_DEFINE(USE_GETPASS)
-		TGETPASS=""
-		;;
-    *)		AC_MSG_RESULT(no)
-    		echo "Ignoring unknown argument to --enable-tgetpass: $enableval"
-		;;
-  esac
-], AC_MSG_RESULT(no))
-
-AC_MSG_CHECKING(whether to log the hostname in the log file)
-AC_ARG_ENABLE(log-host,
-[  --enable-log-host       Log the hostname in the log file
-  --disable-log-host      Do not log hostname in the log file (default)],
-[ case "$enableval" in
-    yes)	AC_MSG_RESULT(yes)
-		AC_DEFINE(HOST_IN_LOG)
-		;;
-    no)		AC_MSG_RESULT(no)
-		;;
-    *)		AC_MSG_RESULT(no)
-    		echo "Ignoring unknown argument to --enable-log-host: $enableval"
-		;;
-  esac
-], AC_MSG_RESULT(no))
-
-AC_MSG_CHECKING(whether to wrap long lines in the log file)
-AC_ARG_ENABLE(log-wrap,
-[  --enable-log-wrap       Wrap long lines in the log file (default)
-  --disable-log-wrap      Do not wrap long lines in the log file],
-[ case "$enableval" in
-    yes)	AC_MSG_RESULT(yes)
-		AC_DEFINE(WRAP_LOG)
-		;;
-    no)		AC_MSG_RESULT(no)
-		;;
-    *)		AC_MSG_RESULT(yes)
-		AC_DEFINE(WRAP_LOG)
-		echo "Ignoring unknown argument to --enable-log-wrap: $enableval"
-		;;
-  esac
-], AC_MSG_RESULT(yes)
-  AC_DEFINE(WRAP_LOG)
-)
-
-dnl
 dnl Options for --with
+dnl XXX - should echo stuff in all cases
 dnl
 
 AC_ARG_WITH(CC, [  --with-CC               C compiler to use],
@@ -155,6 +84,16 @@ AC_ARG_WITH(opie, [  --with-opie             enable OPIE support ],
 		;;
     no)		;;
     *)		echo "Ignoring unknown argument to --with-opie: $with_opie"
+		;;
+esac])
+
+AC_ARG_WITH(long_otp_prompt, [  --with-long_otp_prompt  use a two line OTP (skey/opie) prompt],
+[case $long_otp_prompt in
+    yes)	AC_DEFINE(LONG_OTP_PROMPT)
+		;;
+    no)		;;
+    *)		echo "Sorry, --with-long_otp_prompt does not take an argument."
+		exit 1
 		;;
 esac])
 
@@ -238,6 +177,59 @@ AC_ARG_WITH(logfile, [  --with-logfile          path to the sudo log file],
 		;;
 esac])
 
+AC_ARG_WITH(root-sudo, [  --without-root-sudo     don't allow root to run sudo],
+[case $with_root-sudo in  
+    yes)	;;
+    no)		AC_DEFINE(NO_ROOT_SUDO)
+		;;
+    *)		echo "Sorry, --with-root-sudo does not take an argument."
+		exit 1
+		;;
+esac])
+
+AC_ARG_WITH(alertmail, [  --with-alertmail        who should get sudo mail (default is "root")],
+[case $with_alertmail in  
+    yes)	echo "Must give --with-alertmail an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-alertmail not supported."
+		;;
+    *)		AC_DEFINE_UNQUOTED(ALERTMAIL, "$with_alertmail")
+		;;
+esac], AC_DEFINE(ALERTMAIL, "root"))
+
+AC_ARG_WITH(passprompt, [  --with-passprompt       default password prompt],
+[case $with_passprompt in  
+    yes)	echo "Must give --with-passprompt an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-passprompt not supported."
+		;;
+    *)		AC_DEFINE_UNQUOTED(PASSPROMPT, "$with_passprompt")
+		;;
+esac], AC_DEFINE(PASSPROMPT, "Password:"))
+
+AC_ARG_WITH(badpass-message, [  --with-badpass-message  message the user sees when the password is wrong],
+[case $with_badpass-message in  
+    yes)	echo "Must give --with-badpass-message an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-badpass-message not supported."
+		;;
+    *)		AC_DEFINE_UNQUOTED(INCORRECT_PASSWORD, "$with_badpass-message")
+		;;
+esac], AC_DEFINE(INCORRECT_PASSWORD, "Sorry, try again."))
+
+AC_ARG_WITH(fqdn, [  --with-fqdn             expect fully qualified hosts in sudoers],
+[case $with_fqdn in  
+    yes)	AC_DEFINE(FQDN)
+		;;
+    no)		;;
+    *)		echo "Sorry, --with-fqdn does not take an argument."
+		exit 1
+		;;
+esac])
+
 AC_ARG_WITH(timedir, [  --with-timedir          path to the sudo timestamp dir],
 [case $with_timedir in  
     yes)	echo "Must give --with-timedir an argument."
@@ -245,6 +237,231 @@ AC_ARG_WITH(timedir, [  --with-timedir          path to the sudo timestamp dir],
 		;;
     no)		echo "Sorry, --without-timedir not supported."
 		exit 1
+		;;
+esac])
+
+AC_ARG_WITH(sendmail, [  --with-sendmail=path    set path to sendmail],
+[case $with_sendmail in  
+    yes)	with_sendmail=""
+		;;
+    *)		AC_DEFINE_UNQUOTED(_PATH_SENDMAIL, "$with_sendmail")
+		;;
+esac])
+
+AC_ARG_WITH(sudoers_mode, [  --with-sudoers_mode     mode of sudoers file (defaults to 0440)],
+[case $with_sudoers_mode in  
+    yes)	echo "Must give --with-sudoers_mode an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-sudoers_mode not supported."
+		exit 1
+		;;
+    *)		AC_DEFINE_UNQUOTED(SUDOERS_MODE, "$with_sudoers_mode")
+		;;
+esac], AC_DEFINE(SUDOERS_MODE, 0440))
+
+AC_ARG_WITH(sudoers_uid, [  --with-sudoers_uid      uid that owns sudoers file (defaults to 0)],
+[case $with_sudoers_uid in  
+    yes)	echo "Must give --with-sudoers_uid an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-sudoers_uid not supported."
+		exit 1
+		;;
+    [0-9]*)	AC_DEFINE_UNQUOTED(SUDOERS_UID, "$with_sudoers_uid")
+		;;
+    *)		echo "You must use a numeric uid, not a name."
+		exit 1
+		;;
+esac], AC_DEFINE(SUDOERS_UID, 0))
+
+AC_ARG_WITH(sudoers_gid, [  --with-sudoers_gid      gid that owns sudoers file (defaults to 0)],
+[case $with_sudoers_gid in  
+    yes)	echo "Must give --with-sudoers_gid an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-sudoers_gid not supported."
+		exit 1
+		;;
+    [0-9]*)	AC_DEFINE_UNQUOTED(SUDOERS_GID, "$with_sudoers_gid")
+		;;
+    *)		echo "You must use a numeric gid, not a name."
+		exit 1
+		;;
+esac], AC_DEFINE(SUDOERS_GID, 0))
+
+AC_ARG_WITH(umask, [  --with-umask            umask with which the prog should run (default is 0022)],
+[case $with_umask in  
+    yes)	echo "Must give --with-umask an argument."
+		exit 1
+		;;
+    no)		;;
+    [0-9]*)	AC_DEFINE_UNQUOTED(SUDO_UMASK, "$with_umask")
+		;;
+    *)		echo "You must enter a numeric mask."
+		exit 1
+		;;
+esac], AC_DEFINE(SUDO_UMASK, 0022))
+
+AC_ARG_WITH(runas-default, [  --with-runas-default    User to run commands as (default is "root"],
+[case $with_runas-default in  
+    yes)	AC_DEFINE(RUNAS_DEFAULT, "root")
+		;;
+    no)		AC_DEFINE(RUNAS_DEFAULT, 0)
+		;;
+    *)		AC_DEFINE_UNQUOTED(RUNAS_DEFAULT, "$with_runas-default")
+		;;
+esac], AC_DEFINE(RUNAS_DEFAULT, "root"))
+
+AC_ARG_WITH(exempt-group, [  --with-exempt-group     no passwd needed for users in this group],
+[case $with_exempt-group in  
+    yes)	echo "Must give --with-exempt-group an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-exempt-group not supported."
+		exit 1
+		;;
+    *)		AC_DEFINE_UNQUOTED(EXEMPTGROUP, "$with_exempt-group")
+		;;
+esac])
+
+AC_ARG_WITH(editor, [  --with-editor           Default editor for visudo (defaults to vi)],
+[case $with_editor in  
+    yes)	echo "Must give --with-editor an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-editor not supported."
+		exit 1
+		;;
+    *)		AC_DEFINE_UNQUOTED(TRIES_FOR_PASSWORD, $with_editor)
+		;;
+esac], AC_DEFINE(EDITOR, _PATH_VI))
+
+AC_ARG_WITH(env-editor, [  --with-env-editor       Use the environment variable EDITOR for visudo],
+[case $with_editor in  
+    yes)	AC_DEFINE(ENV_EDITOR)
+		;;
+    no)		;;
+    *)		echo "Sorry, --with-env-editor does not take an argument."
+		exit 1
+		;;
+esac])
+
+AC_ARG_WITH(passwd-tries, [  --with-passwd-tries     number of tries to enter password (default is 3)],
+[case $with_passwd-tries in  
+    yes)	AC_DEFINE(TRIES_FOR_PASSWORD, 3)
+		;;
+    no)		AC_DEFINE(TRIES_FOR_PASSWORD, 0)
+		;;
+    [0-9]*)	AC_DEFINE_UNQUOTED(TRIES_FOR_PASSWORD, $with_passwd-tries)
+		;;
+    *)		echo "You must enter the numer of tries."
+		exit 1
+		;;
+esac], AC_DEFINE(TRIES_FOR_PASSWORD, 3))
+
+AC_ARG_WITH(timeout, [  --with-timeout          minutes before sudo asks for passwd again (def is 5)],
+[case $with_timeout in  
+    yes)	AC_DEFINE(TIMEOUT, 5)
+		;;
+    no)		AC_DEFINE(TIMEOUT, 0)
+		;;
+    [0-9]*)	AC_DEFINE_UNQUOTED(TIMEOUT, $with_timeout)
+		;;
+    *)		echo "You must enter the numer of minutes."
+		exit 1
+		;;
+esac], AC_DEFINE(TIMEOUT, 5))
+
+AC_ARG_WITH(password_timeout, [  --with-password_timeout passwd prompt timeout in minutes (default is 5)],
+[case $with_password_timeout in  
+    yes)	AC_DEFINE(PASSWORD_TIMEOUT, 5)
+		;;
+    no)		AC_DEFINE(PASSWORD_TIMEOUT, 0)
+		;;
+    [0-9]*)	AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $with_password_timeout)
+		;;
+    *)		echo "You must enter the numer of minutes."
+		exit 1
+		;;
+esac], AC_DEFINE(PASSWORD_TIMEOUT, 5))
+
+AC_ARG_WITH(execv, [  --with-execv            use execv() instead of execvp()],
+[case $with_execv in  
+    yes)	AC_DEFINE(USE_EXECV)
+		;;
+    no)		;;
+    *)		echo "Sorry, --with-execv does not take an argument."
+		exit 1
+		;;
+esac])
+
+AC_ARG_WITH(tty_tickets, [  --with-tty_tickets      use a different ticket file for each tty],
+[case $with_tty_tickets in  
+    yes)	AC_DEFINE(USE_TTY_TICKETS)
+		;;
+    no)		;;
+    *)		echo "Sorry, --with-tty_tickets does not take an argument."
+		exit 1
+		;;
+esac])
+
+AC_ARG_WITH(insults, [  --with-insults          insult the user for entering an incorrect password],
+[case $with_insults in  
+    yes)	AC_DEFINE(USE_INSULTS)
+		;;
+    no)		;;
+    *)		echo "Sorry, --with-insults does not take an argument."
+		exit 1
+		;;
+esac])
+
+AC_ARG_WITH(classic_insults, [  --with-classic_insults  include the insults from the "classic" sudo],
+[case $with_classic_insults in  
+    yes)	AC_DEFINE(CLASSIC_INSULTS)
+		;;
+    no)		;;
+    *)		echo "Sorry, --with-classic_insults does not take an argument."
+		exit 1
+		;;
+esac])
+
+AC_ARG_WITH(hal_insults, [  --with-hal_insults      include 2001-like insults],
+[case $with_hal_insults in  
+    yes)	AC_DEFINE(HAL_INSULTS)
+		;;
+    no)		;;
+    *)		echo "Sorry, --with-hal_insults does not take an argument."
+		exit 1
+		;;
+esac])
+
+AC_ARG_WITH(goons_insults, [  --with-goons_insults    include the insults from the \"Goon Show\"],
+[case $with_goons_insults in  
+    yes)	AC_DEFINE(GOONS_INSULTS)
+		;;
+    no)		;;
+    *)		echo "Sorry, --with-goons_insults does not take an argument."
+		exit 1
+		;;
+esac])
+
+AC_ARG_WITH(csops_insults, [  --with-csops_insults    include CSOps insults],
+[case $with_csops_insults in  
+    yes)	AC_DEFINE(CSOPS_INSULTS)
+		;;
+    no)		;;
+    *)		echo "Sorry, --with-csops_insults does not take an argument."
+		exit 1
+		;;
+esac])
+
+AC_ARG_WITH(secure_path, [  --with-secure_path      override the user's path with a builtin one],
+[case $with_secure_path in  
+    yes)	AC_DEFINE_UNQUOTED(SECURE_PATH, "/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc")
+		;;
+    no)		;;
+    *)		AC_DEFINE_UNQUOTED(SECURE_PATH, "$with_secure_path")
 		;;
 esac])
 
@@ -303,6 +520,7 @@ AC_ARG_WITH(libraries, [  --with-libraries        additional libraries to link w
 		;;
 esac])
 
+dnl XXX - AC_DEFINE these now
 AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
 [case $with_csops in  
     yes)	OPTIONS="${OPTIONS} -DIGNORE_DOT_PATH -DUSE_INSULTS -DCLASSIC_INSULTS -DCSOPS_INSULTS -DENV_EDITOR"
@@ -313,6 +531,78 @@ AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
     *)		echo "Ignoring unknown argument to --with-csops: $with_csops"
 		;;
 esac])
+
+dnl
+dnl Options for --enable
+dnl
+
+AC_MSG_CHECKING(whether to disable shadow password support)
+AC_ARG_ENABLE(tgetpass,
+[  --enable-shadow         Use shadow passwords if they exist (default)
+  --disable-shadow        Never use shadow passwords],
+[ case "$enableval" in
+    yes)	AC_MSG_RESULT(no)
+		;;
+    no)		AC_MSG_RESULT(yes)
+		CHECKSHADOW="false"
+		;;
+    *)		AC_MSG_RESULT(no)
+    		echo "Ignoring unknown argument to --enable-tgetpass: $enableval"
+		;;
+  esac
+], AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(whether to use the system getpass function)
+AC_ARG_ENABLE(tgetpass,
+[  --enable-tgetpass       Use sudo's getpass() that times out (default)
+  --disable-tgetpass      Use the system getpass() instead of sudo's version],
+[ case "$enableval" in
+    yes)	AC_MSG_RESULT(no)
+		;;
+    no)		AC_MSG_RESULT(yes)
+		AC_DEFINE(USE_GETPASS)
+		TGETPASS=""
+		;;
+    *)		AC_MSG_RESULT(no)
+    		echo "Ignoring unknown argument to --enable-tgetpass: $enableval"
+		;;
+  esac
+], AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(whether to log the hostname in the log file)
+AC_ARG_ENABLE(log-host,
+[  --enable-log-host       Log the hostname in the log file
+  --disable-log-host      Do not log hostname in the log file (default)],
+[ case "$enableval" in
+    yes)	AC_MSG_RESULT(yes)
+		AC_DEFINE(HOST_IN_LOG)
+		;;
+    no)		AC_MSG_RESULT(no)
+		;;
+    *)		AC_MSG_RESULT(no)
+    		echo "Ignoring unknown argument to --enable-log-host: $enableval"
+		;;
+  esac
+], AC_MSG_RESULT(no))
+
+AC_MSG_CHECKING(whether to wrap long lines in the log file)
+AC_ARG_ENABLE(log-wrap,
+[  --enable-log-wrap       Wrap long lines in the log file (default)
+  --disable-log-wrap      Do not wrap long lines in the log file],
+[ case "$enableval" in
+    yes)	AC_MSG_RESULT(yes)
+		AC_DEFINE(WRAP_LOG)
+		;;
+    no)		AC_MSG_RESULT(no)
+		;;
+    *)		AC_MSG_RESULT(yes)
+		AC_DEFINE(WRAP_LOG)
+		echo "Ignoring unknown argument to --enable-log-wrap: $enableval"
+		;;
+  esac
+], AC_MSG_RESULT(yes)
+  AC_DEFINE(WRAP_LOG)
+)
 
 dnl
 dnl If we don't have egrep we can't do anything...
@@ -632,7 +922,9 @@ dnl
 dnl Program checks
 dnl
 AC_PROG_YACC
-SUDO_PROG_SENDMAIL
+if test -z "$with_sendmail"; then
+    SUDO_PROG_SENDMAIL
+fi
 SUDO_PROG_MV
 SUDO_PROG_BSHELL
 SUDO_PROG_VI
