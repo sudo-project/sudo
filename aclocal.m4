@@ -144,10 +144,14 @@ elif test -d "/var/run"; then
     AC_MSG_RESULT(/var/run/sudo)
     SUDO_DEFINE(_PATH_SUDO_TIMEDIR, "/var/run/sudo")
     timedir="/var/run/sudo"
+elif test -d "/var/adm"; then
+    AC_MSG_RESULT(/var/adm/sudo)
+    SUDO_DEFINE(_PATH_SUDO_TIMEDIR, "/var/adm/sudo")
+    timedir="/var/adm/sudo"
 else
-    AC_MSG_RESULT(/tmp/.odus)
-    SUDO_DEFINE(_PATH_SUDO_TIMEDIR, "/tmp/.odus")
-    timedir="/tmp/.odus"
+    AC_MSG_RESULT(/usr/adm/sudo)
+    SUDO_DEFINE(_PATH_SUDO_TIMEDIR, "/usr/adm/sudo")
+    timedir="/usr/adm/sudo"
 fi
 ])dnl
 
