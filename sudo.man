@@ -26,6 +26,9 @@ to 5 minutes).  By giving
 the
 .I -v
 flag a user can update the time stamp without running a command.
+The password prompt itself will also time out if the password is
+not entered with N minutes (again, this is defined at installation
+time and defaults to 5 minutes).
 
 The
 .I sudoers
