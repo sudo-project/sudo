@@ -261,11 +261,20 @@ main(argc, argv, envp)
 
 #ifdef HAVE_LDAP
     validated = sudo_ldap_check(pwflag);
-    /*
-     * If we did not find it in ldap and we are not disallowed from reading
-     * the local sudoers, then go ahead and read the sudoers file.
-     */
-    if (!(validated & VALIDATE_OK) && (!def_flag(I_IGNORE_LOCAL_SUDOERS)))
+
+    /* Skip reading /etc/sudoers if LDAP told us to */
+    if (def_flag(I_IGNORE_LOCAL_SUDOERS)); /* skips */
+    else if ((validated & VALIDATE_OK) && !printmatches); /* skips */
+    else if ((validated & VALIDATE_OK) && printmatches)
+    {
+	check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
+
+	/* User is found in LDAP and we want a list of all sudo commands the
+	 * user can do, so consult sudoers but throw away result.
+	 */
+	sudoers_lookup(pwflag);
+    }
+    else
 #endif
     {
 	check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
@@ -387,6 +396,9 @@ main(argc, argv, envp)
 	    exit(0);
 	else if (sudo_mode == MODE_LIST) {
 	    list_matches();
+#ifdef HAVE_LDAP
+	    sudo_ldap_list_matches();
+#endif
 	    exit(0);
 	}
 

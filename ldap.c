@@ -84,7 +84,11 @@ static const char rcsid[] = "$Sudo$";
 #define LDAP_CONFIG "/etc/ldap.conf"
 #endif
 
+#ifndef BUF_SIZ
 #define BUF_SIZ 1024
+#endif
+
+extern int printmatches;
 
 /* ldap configuration structure */
 struct ldap_config {
@@ -365,49 +369,75 @@ sudo_ldap_parse_options(ld,entry)
 }
 
 /*
- * Like strcat, only prevents buffer overflows
+ * Concatenate strings, dynamically growing them as necessary.
+ * Strings can be arbitrarily long and are allocated/reallocated on
+ * the fly.  Make sure to free them when you are done.
+ *
+ * Usage:
+ *
+ * char *s=NULL;
+ * size_t sz;
+ *
+ * ncat(&s,&sz,"This ");
+ * ncat(&s,&sz,"is ");
+ * ncat(&s,&sz,"an ");
+ * ncat(&s,&sz,"arbitrarily ");
+ * ncat(&s,&sz,"long ");
+ * ncat(&s,&sz,"string!");
+ *
+ * printf("String Value='%s', but has %d bytes allocated\n",s,sz);
+ *
  */
 void
-_scatn(buf,bufsize,src)
-  char *buf;
-  size_t bufsize;
+ncat(s,sz,src)
+  char **s;
+  size_t *sz;
   char *src;
 {
+  size_t nsz;
 
-  /* make sure we have enough space,plus null at end */
-  /* or silently truncate the string */
-  if (bufsize>strlen(buf)+strlen(src)+1)
-    strcat(buf,src);
+  /* handle initial alloc */
+  if (*s == NULL){
+    *s=estrdup(src);
+    *sz=strlen(src)+1;
+    return;
+  }
+
+  /* handle realloc */
+  nsz= strlen(*s) + strlen(src) + 1;
+  if (*sz < nsz) *s=erealloc( (void *)*s , *sz=nsz*2);
+  strlcat(*s,src,*sz);
 }
 
-/* builds together a filte to check against ldap
+
+/*
+ * builds together a filter to check against ldap
  */
 char *
 sudo_ldap_build_pass1()
 {
-  static char b[1024];
   struct group *grp;
   gid_t *grplist=NULL;
   int ngrps;
   int i;
 
-  b[0]='\0'; /* empty string */
-
+  char *b=NULL;
+  size_t sz;
 
   /* global OR */
-  _scatn(b,sizeof(b),"(|");
+  ncat(&b,&sz,"(|");
 
   /* build filter sudoUser=user_name */
-  _scatn(b,sizeof(b),"(sudoUser=");
-  _scatn(b,sizeof(b),user_name);
-  _scatn(b,sizeof(b),")");
+  ncat(&b,&sz,"(sudoUser=");
+  ncat(&b,&sz,user_name);
+  ncat(&b,&sz,")");
 
   /* Append primary group */
   grp=getgrgid(getgid());
   if (grp!=NULL){
-    _scatn(b,sizeof(b),"(sudoUser=%");
-    _scatn(b,sizeof(b),grp->gr_name);
-    _scatn(b,sizeof(b),")");
+    ncat(&b,&sz,"(sudoUser=%");
+    ncat(&b,&sz,grp->gr_name);
+    ncat(&b,&sz,")");
   }
 
   /* handle arbitrary number of groups */
@@ -415,20 +445,20 @@ sudo_ldap_build_pass1()
     grplist=calloc(ngrps,sizeof(gid_t));
     if (grplist!=NULL && (0<getgroups(ngrps,grplist)))
       for(i=0;i<ngrps;i++){
-     if((grp=getgrgid(grplist[i]))!=NULL){
-          _scatn(b,sizeof(b),"(sudoUser=%");
-          _scatn(b,sizeof(b),grp->gr_name);
-          _scatn(b,sizeof(b),")");
-     }
+        if((grp=getgrgid(grplist[i]))!=NULL){
+          ncat(&b,&sz,"(sudoUser=%");
+          ncat(&b,&sz,grp->gr_name);
+          ncat(&b,&sz,")");
+        }
       }
   }
 
 
   /* Add ALL to list */
-  _scatn(b,sizeof(b),"(sudoUser=ALL)");
+  ncat(&b,&sz,"(sudoUser=ALL)");
 
   /* End of OR List */
-  _scatn(b,sizeof(b),")");
+  ncat(&b,&sz,")");
   return b ;
 }
 
@@ -531,6 +561,93 @@ sudo_ldap_read_config()
 }
 
 /*
+  like perl's join(sep,@ARGS)
+*/
+char * 
+_ldap_join_values(sep,v)
+  char *sep;
+  char **v;
+{
+  char **p=NULL;
+  char *b=NULL;
+  size_t sz=0;
+
+  /* paste values together */
+  for (p=v; p && *p;p++){
+    if (p!=v && sep!=NULL) ncat(&b,&sz,sep); /* append seperator */
+    ncat(&b,&sz,*p); /* append value */
+  }
+
+  /* sanity check */
+  if (b[0]=='\0'){
+    /* something went wrong, put something here */
+    ncat(&b,&sz,"(empty list)"); /* append value */
+  }
+
+  /* all done */
+  return b;
+}
+
+char * sudo_ldap_cm_list=NULL;
+size_t sudo_ldap_cm_list_size;
+
+#define SAVE_LIST(x) ncat(&sudo_ldap_cm_list,&sudo_ldap_cm_list_size,(x))
+/*
+ * Walks through search result and returns true if we have a
+ * command match
+ */
+int 
+sudo_ldap_add_match(ld,entry)
+  LDAP *ld;
+  LDAPMessage *entry;
+{
+  char **v=NULL;
+  char *dn;
+  char **edn;
+
+  /* if we are not collecting matches, then don't print them */
+  if (printmatches != TRUE) return 1;
+ 
+  /* collect the dn, only show the rdn */
+  dn=ldap_get_dn(ld,entry);
+  if (dn) edn=ldap_explode_dn(dn,1);
+  SAVE_LIST("\nLDAP Role: ");
+  SAVE_LIST((edn && *edn) ? *edn : "UNKNOWN");
+  SAVE_LIST("\n");
+  if (dn)  ldap_memfree(dn);
+  if (edn) ldap_value_free(edn);
+
+  /* get the Runas Values from the entry */
+  v=ldap_get_values(ld,entry,"sudoRunAs");
+  if (v && *v){
+    SAVE_LIST("  RunAs: (");
+    SAVE_LIST(_ldap_join_values(", ",v));
+    SAVE_LIST(")\n");
+  }
+  if (v) ldap_value_free(v);
+
+  /* get the Command Values from the entry */
+  v=ldap_get_values(ld,entry,"sudoCommand");
+  if (v && *v){
+    SAVE_LIST("  Commands:\n    ");
+    SAVE_LIST(_ldap_join_values("\n    ",v));
+    SAVE_LIST("\n");
+  } else {
+    SAVE_LIST("  Commands: NONE\n");
+  }
+  if (v) ldap_value_free(v);
+
+  return 0; /* Don't stop at the first match */
+}
+#undef SAVE_LIST
+
+void
+sudo_ldap_list_matches()
+{
+  if (sudo_ldap_cm_list!=NULL) printf("%s",sudo_ldap_cm_list);
+}
+
+/*
  * like sudoers_lookup() - only LDAP style
  *
  */
@@ -546,7 +663,7 @@ int pwflag;
   LDAPMessage *result=NULL;
   LDAPMessage *entry=NULL;
   /* used to parse attributes */
-  char *f;
+  char *filt;
   /* temp/final return values */
   int rc=0;
   int ret=0;
@@ -645,17 +762,18 @@ int pwflag;
 
     if (pass==1) {
       /* Want the entries that match our usernames or groups */
-      f=sudo_ldap_build_pass1();
+      filt=sudo_ldap_build_pass1();
     } else { /* pass=2 */
       /* Want the entries that have user netgroups in them. */
-      f="sudoUser=+*";
+      filt=strdup("sudoUser=+*");
     }
-    if (ldap_conf.debug) printf("ldap search '%s'\n",f);
+    if (ldap_conf.debug) printf("ldap search '%s'\n",filt);
     rc=ldap_search_s(ld,ldap_conf.base,LDAP_SCOPE_ONELEVEL,
-               f,NULL,0,&result);
+               filt,NULL,0,&result);
     if (rc) {
-      if (ldap_conf.debug) printf("nothing found for '%s'\n",f);
+      if (ldap_conf.debug) printf("nothing found for '%s'\n",filt);
     }
+    if (filt) free (filt);
     /* parse each entry returned from this most recent search */
     for(
         entry=rc ? NULL : ldap_first_entry(ld,result);
@@ -672,6 +790,8 @@ int pwflag;
           sudo_ldap_check_host(ld,entry) &&
        /* remember that host matched */
        (ldap_host_matches=-1) &&
+          /* add matches for listing later */
+          sudo_ldap_add_match(ld,entry) &&
           /* verify command match */
           sudo_ldap_check_command(ld,entry) &&
           /* verify runas match */
@@ -701,48 +821,38 @@ int pwflag;
   if (ldap_conf.debug) printf("user_matches=%d\n",ldap_user_matches);
   if (ldap_conf.debug) printf("host_matches=%d\n",ldap_host_matches);
 
-  /*  I am not sure of the rest of the logic from here down */
-  if (ret==0) {
+  /* Check for special case for -v, -k, -l options */
+  if (pwflag && ldap_user_matches && ldap_host_matches){
+    /*
+     * Handle verifypw & listpw
+     * 
+     * To be extra paranoid, since we haven't read any NOPASSWD options
+     * in /etc/sudoers yet, but we have to make the decission now, lets
+     * assume the worst and prefer to prompt for password unless the setting
+     * is NEVER. (example verifypw=never or listpw=never)
+     *
+     */
+    if (pwflag<0) { /* -k */
+      ret=VALIDATE_OK | FLAG_NOPASS;
+    } else if ((def_ival(pwflag) == PWCHECK_NEVER)){ /* see note above */
+      ret=VALIDATE_OK | FLAG_NOPASS;
+    } else {
+      ret=VALIDATE_OK; /* extra paranoid */
+    }
+  }
+
+  if (ret & VALIDATE_OK) {
+    /* We have a match.  Should we check the password? */
+    /* Note: This could be the global or a rule specific option */
+    if (!def_flag(I_AUTHENTICATE)) ret|=FLAG_NOPASS;
+  } else {
+    /* we do not have a match */   
     ret=VALIDATE_NOT_OK;
     if (!ldap_user_matches) ret|=FLAG_NO_USER;
-    if (!ldap_host_matches) ret|=FLAG_NO_HOST;
+    else if (!ldap_host_matches) ret|=FLAG_NO_HOST;
   }
 
-  /* Fixme - is this the right logic? */
-  if (pwflag || !def_flag(I_AUTHENTICATE)) {
-    ret|=FLAG_NOPASS;
-  }
-
-  if (ldap_conf.debug) printf("sudo_ldap_check()=0x%02x\n",ret);
+  if (ldap_conf.debug) printf("sudo_ldap_check(%d)=0x%02x\n",pwflag,ret);
 
   return ret ;
 }
-
-/*
- * Explicityly denied
- * VALIDATE_NOT_OK
- * VALIDATE_NOT_OK | FLAG_NOPASS
- * Explicitly Granted
- * VALIDATE_OK
- * VALIDATE_OK | FLAG_NOPASS
- * VALIDATE_OK |  -1 if found
- *
- * remove FLAG_NO_HOST
- * VALIDATE_ERROR  if could not connect to LDAP server
- *
- * FLAG_NO_CHECK
- * FLAG_NO_HOST
- * FLAG_NO_USER
- *
- *
- * Checked against
- * |VALIDATE_ERROR - complains of parse and dies
- * |FLAG_NOPASS - dont ask for password
- * |VALIDATE_OK - life is good - may be used with |FLAG_NOPASS
- *
- * |FLAG_NO_USER or |FLAG_NO_HOST - logs and dies
- * |VALIDATE_NOT_OK (! FLAG_NO_USER && ! FLAG_NO_HOST)
- * - command not allowed?
- *
- *
- */
