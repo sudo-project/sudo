@@ -313,6 +313,12 @@ set_fqdn()
     return;
 }
 
+void
+init_envtables()
+{
+    return;
+}
+
 int
 main(argc, argv)
     int argc;
