@@ -25,11 +25,6 @@
 
 #ifdef USE_INSULTS
 
-#if !defined(HAL_INSULTS) && !defined(GOONS_INSULTS) && !defined(CLASSIC_INSULTS)
-#  define CLASSIC_INSULTS
-#  define CSOPS_INSULTS
-#endif
-
 /*
  * Use one or more set of insults as determined by configure
  */
