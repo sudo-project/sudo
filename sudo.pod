@@ -43,6 +43,7 @@ sudo - execute a command as another user
 
 B<sudo> B<-V> | B<-h> | B<-l> | B<-L> | B<-v> | B<-k> | B<-K> | B<-s> |
 [ B<-H> ] [B<-S> ] [ B<-b> ] | [ B<-p> I<prompt> ] [ B<-c> I<class>|I<-> ]
+[ B<-a> I<auth_type> ]
 [ B<-u> I<username>|I<#uid> ] I<command>
 
 =head1 DESCRIPTION
@@ -151,6 +152,16 @@ argument specifies an existing user class, the command must be run
 as root, or the B<sudo> command must be run from a shell that is already
 root.  This option is only available on systems with BSD login classes
 where B<sudo> has been configured with the --with-logincap option.
+
+=item -a
+
+The B<-a> (I<authentication type>) option causes B<sudo> to use the
+specified authentication type when validating the user, as allowed
+by /etc/login.conf.  The system administrator may specify a list
+of sudo-specific authentication methods by adding an "auth-sudo"
+entry in /etc/login.conf.  This option is only available on systems
+that support BSD authentication where B<sudo> has been configured
+with the --with-bsdauth option.
 
 =item -u
 
