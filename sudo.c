@@ -665,16 +665,14 @@ parse_args(argc, argv)
     NewArgv = argv + 1;
     NewArgc = argc - 1;
 
-    /* Check to see if we were invoked as "sudoedit". */
+    /* FIrst, check to see if we were invoked as "sudoedit". */
     if (strcmp(getprogname(), "sudoedit") == 0) {
 	rval = MODE_EDIT;
-	if (NewArgc == 0 || NewArgv[0][0] == '-')
-	    usage(1);
-	return(rval);
-    }
+	excl = 'e';
+    } else
+	rval = MODE_RUN;
 
-    rval = MODE_RUN;
-    if (NewArgc == 0) {			/* no options and no command */
+    if (NewArgc == 0 && rval == MODE_RUN) {	/* no options and no command */
 	rval |= (MODE_IMPLIED_SHELL | MODE_SHELL);
 	return(rval);
     }
@@ -736,12 +734,20 @@ parse_args(argc, argv)
 		rval = MODE_EDIT;
 		if (excl && excl != 'e')
 		    usage_excl(1);
+		excl = 'e';
 		break;
 	    case 'v':
 		rval = MODE_VALIDATE;
 		if (excl && excl != 'v')
 		    usage_excl(1);
 		excl = 'v';
+		break;
+	    case 'i':
+		rval |= (MODE_LOGIN_SHELL | MODE_SHELL);
+		def_env_reset = TRUE;
+		if (excl && excl != 'i')
+		    usage_excl(1);
+		excl = 'i';
 		break;
 	    case 'k':
 		rval = MODE_INVALIDATE;
@@ -779,10 +785,6 @@ parse_args(argc, argv)
 		    usage_excl(1);
 		excl = 'h';
 		break;
-	    case 'i':
-		rval |= MODE_LOGIN_SHELL;
-		def_env_reset = TRUE;
-		/* FALLTHROUGH */
 	    case 's':
 		rval |= MODE_SHELL;
 		if (excl && excl != 's')
@@ -1081,22 +1083,53 @@ static void
 usage(exit_val)
     int exit_val;
 {
-    if (strcmp(getprogname(), "sudoedit") == 0) {
-	fprintf(stderr, "usage: sudoedit file [...]\n");
-	exit(exit_val);
-    }
-
-    fprintf(stderr, "usage: sudo -K | -L | -V | -h | -k | -l | -v\n");
-    fprintf(stderr, "usage: sudo [-HPSb]%s%s [-p prompt] [-u username|#uid]\n            { -e file [...] | -i | -s | <command> }\n",
+    char **p;
+    int linelen, linemax, ulen;
+    static char *uvec[] = {
+	" [-HPSb]",
 #ifdef HAVE_BSD_AUTH_H
 	" [-a auth_type]",
-#else
-	"",
 #endif
 #ifdef HAVE_LOGIN_CAP_H
-	" [-c class|-]");
-#else
-	"");
+	" [-c class|-]",
 #endif
+	" [-p prompt]",
+	" [-u username|#uid]",
+	" { -e file [...] | -i | -s | <command> }",
+	NULL
+    };
+
+    /*
+     * For sudoedit, replace the last entry in the usage vector.
+     * For sudo, print the secondary usage.
+     */
+    if (strcmp(getprogname(), "sudoedit") == 0) {
+	/* Replace the last entry in the usage vector. */
+	for (p = uvec; p[1] != NULL; p++)
+	    continue;
+	*p = " file [...]";
+    } else {
+	fprintf(stderr, "usage: %s -K | -L | -V | -h | -k | -l | -v\n",
+	    getprogname());
+    }
+
+    /*
+     * Print the main usage and wrap lines as needed.
+     * Assumes an 80-character wide terminal, which is kind of bogus...
+     */
+    ulen = (int)strlen(getprogname()) + 7;
+    linemax = 80;
+    linelen = linemax - ulen;
+    printf("usage: %s", getprogname());
+    for (p = uvec; *p != NULL; p++) {
+	if (linelen == linemax || (linelen -= strlen(*p)) >= 0) {
+	    fputs(*p, stdout);
+	} else {
+	    p--;
+	    linelen = linemax;
+	    printf("\n%*s", ulen, "");
+	}
+    }
+    putchar('\n');
     exit(exit_val);
 }
