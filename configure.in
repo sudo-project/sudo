@@ -320,6 +320,7 @@ dnl
 dnl Function checks
 dnl
 AC_CHECK_FUNCS(strchr strrchr memcpy memset sysconf sigaction tzset tcsetattr strcasecmp)
+AC_CHECK_FUNC(innetgr, AC_DEFINE(HAVE_INNETGR) AC_CHECK_FUNCS(getdomainname))
 AC_CHECK_FUNC(getwd, AC_DEFINE(HAVE_GETWD), LIBOBJS="$LIBOBJS getwd.o")
 AC_CHECK_FUNC(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
 AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), LIBOBJS="$LIBOBJS lsearch.o")
