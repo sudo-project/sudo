@@ -79,6 +79,7 @@ void log_error(code)
     time_t now;
 #else
     register int pri;		/* syslog priority */
+    char *tmp, save;
 #endif
 
     /*
@@ -87,8 +88,6 @@ void log_error(code)
 #ifndef SYSLOG
     now = time((time_t) 0);
     (void) sprintf(logline, "%19.19s : %8.8s : ", ctime(&now), user);
-#else
-    (void) sprintf(logline, "%8.8s : ", user);
 #endif
 
     /*
@@ -208,10 +207,11 @@ void log_error(code)
 	count = (int) (logline + MAXLOGLEN - p);
 
 	/*
-	 * now stuff as much of the rest of the line as will fit
+	 * Now stuff as much of the rest of the line as will fit
+	 * Do word wrap if logging to a file.
 	 */
 	while (count > 0 && argc--) {
-	    strncpy(p, *++argv, count);
+	    strncpy(p, *(++argv), count);
 	    strcat(p, " ");
 	    p += 1 + (count < strlen(*argv) ? count : strlen(*argv));
 	    count = (int) (logline + MAXLOGLEN - p);
@@ -225,7 +225,42 @@ void log_error(code)
 
 #ifdef SYSLOG
     openlog(Syslog_ident, Syslog_options, Syslog_facility);
-    syslog(pri, logline);
+    /*
+     * Log the full line, breaking into multiple syslog(3) calls if necesary
+     */
+    p = (char *)logline;
+    for (count=0; count < (strlen(logline) / MAXSYSLOGLEN) + 1; count++) {
+	if (strlen(p) > MAXSYSLOGLEN) {
+	    /*
+	     * Break up the line into what will fit on one syslog(3) line
+	     * Try to break on a word boundary if possible.
+	     */
+	    for (tmp = p + MAXSYSLOGLEN; tmp > p && *tmp != ' '; tmp--)
+		;
+	    if (tmp <= p)
+		tmp = p + MAXSYSLOGLEN;
+
+	    /* NULL terminate line, but save the char to restore later */
+	    save = *tmp;
+	    *tmp = '\0';
+
+	    if (count == 0)
+		syslog(pri, "%8.8s : %s", user, p);
+	    else
+		syslog(pri, "%8.8s : (command continued) %s", user, p);
+
+	    *tmp = save;			/* restore saved character */
+
+	    /* eliminate leading whitespace */
+	    for (p=tmp; *p != ' '; p++)
+		;
+	} else {
+	    if (count == 0)
+		syslog(pri, "%8.8s : %s", user, p);
+	    else
+		syslog(pri, "%8.8s : (command continued) %s", user, p);
+	}
+    }
     closelog();
 #else
     /* become root */
@@ -235,7 +270,57 @@ void log_error(code)
 	(void) sprintf(logline, "Can\'t open log file: %s", LOGFILE);
 	send_mail();
     } else {
-	(void) fprintf(fp, "%s\n", logline);
+	char *beg, *oldend, *end;
+	register int maxlen = MAXLOGFILELEN;
+
+	/*
+	 * Print out logline with word wrap
+	 */
+	beg = end = logline;
+	while (beg) {
+	    oldend = end;
+	    end = index(oldend, ' ');
+
+	    if (end) {
+		*end = '\0';
+		if (strlen(beg) > maxlen) {
+		    /* too far, need to back up & print the line */
+
+		    if (beg == (char *)logline)
+			maxlen -= 4;		/* don't indent first line */
+
+		    *end = ' ';
+		    if (oldend != beg) {
+			/* rewind & print */
+		    	end = oldend-1;
+			while (*end == ' ')
+			    --end;
+			*(++end) = '\0';
+			(void) fprintf(fp, "%s\n    ", beg);
+			*end = ' ';
+		    } else {
+			(void) fprintf(fp, "%s\n    ", beg);
+		    }
+
+		    /* reset beg to point to the start of the new substring */
+		    beg = end;
+		    while (*beg == ' ')
+			++beg;
+		} else {
+		    /* we still have room */
+		    *end = ' ';
+		}
+
+		/* remove leading whitespace */
+		while (*end == ' ')
+		    ++end;
+	    } else {
+		/* final line */
+		(void) fprintf(fp, "%s\n", beg);
+		beg = NULL;			/* exit condition */
+	    }
+	}
+
 	(void) fclose(fp);
     }
 
