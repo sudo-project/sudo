@@ -66,6 +66,22 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
+ * Flags used in env_reset()
+ */
+#undef DID_TERM
+#define DID_TERM	0x01
+#undef DID_PATH
+#define DID_PATH	0x02
+#undef DID_HOME
+#define DID_HOME	0x04
+#undef DID_SHELL
+#define DID_SHELL	0x08
+#undef DID_LOGNAME
+#define DID_LOGNAME	0x10
+#undef DID_USER    
+#define DID_USER    	0x12
+
+/*
  * Prototypes
  */
 char **rebuild_env		__P((int, char **));
@@ -238,7 +254,7 @@ rebuild_env(sudo_mode, envp)
     char **envp;
 {
     char **newenvp, **ep, **nep, *cp, *ps1;
-    int okvar, iswild, didterm, didpath;
+    int okvar, iswild, didvar;
     size_t env_size, len;
     struct list_member *cur;
 
@@ -250,23 +266,13 @@ rebuild_env(sudo_mode, envp)
      * Either clean out the environment or reset to a safe default.
      */
     ps1 = NULL;
-    didterm = didpath = 0;
+    didvar = 0;
     if (def_flag(I_ENV_RESET)) {
 	int keepit;
 
 	/* Alloc space for new environment. */
 	env_size = 32 + len;
 	nep = newenvp = (char **) emalloc(env_size * sizeof(char *));
-
-	*nep++ = format_env("HOME", user_dir);
-	*nep++ = format_env("SHELL", user_shell);
-	if (def_flag(I_SET_LOGNAME) && runas_pw->pw_name) {
-	    *nep++ = format_env("LOGNAME", runas_pw->pw_name);
-	    *nep++ = format_env("USER", runas_pw->pw_name);
-	} else {
-	    *nep++ = format_env("LOGNAME", user_name);
-	    *nep++ = format_env("USER", user_name);
-	}
 
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = envp; *ep; ep++) {
@@ -294,18 +300,49 @@ rebuild_env(sudo_mode, envp)
 
 	    if (keepit) {
 		/* Preserve variable. */
+		switch (**ep) {
+		    case 'H':
+			if (strncmp(*ep, "HOME=", 5) == 0)
+			    didvar |= DID_HOME;
+			    break;
+		    case 'S':
+			if (strncmp(*ep, "SHELL=", 6) == 0)
+			    didvar |= DID_SHELL;
+			    break;
+		    case 'L':
+			if (strncmp(*ep, "LOGNAME=", 8) == 0)
+			    didvar |= DID_LOGNAME;
+			    break;
+		    case 'U':
+			if (strncmp(*ep, "USER=", 5) == 0)
+			    didvar |= DID_USER;
+			    break;
+		}
 		*nep++ = *ep;
 	    } else {
-		/* Preserve PATH and TERM, ignore anything else */
-		if (!didpath && strncmp(*ep, "PATH=", 5) == 0) {
+		/* Preserve TERM and PATH, ignore anything else. */
+		if (!(didvar & DID_TERM) && !strncmp(*ep, "TERM=", 5)) {
 		    *nep++ = *ep;
-		    didpath = 1;
-		} else if (!didterm && strncmp(*ep, "TERM=", 5) == 0) {
+		    didvar |= DID_TERM;
+		} else if (!(didvar & DID_PATH) && !strncmp(*ep, "PATH=", 5)) {
 		    *nep++ = *ep;
-		    didterm = 1;
+		    didvar |= DID_PATH;
 		}
 	    }
 	}
+
+	/*
+	 * Add in defaults unless they were preserved from the
+	 * user's environment.
+	 */
+	if (!(didvar & DID_HOME))
+	    *nep++ = format_env("HOME", user_dir);
+	if (!(didvar & DID_SHELL))
+	    *nep++ = format_env("SHELL", user_shell);
+	if (!(didvar & DID_LOGNAME))
+	    *nep++ = format_env("LOGNAME", user_name);
+	if (!(didvar & DID_USER))
+	    *nep++ = format_env("USER", user_name);
     } else {
 	/* Alloc space for new environment. */
 	for (env_size = 16 + len, ep = envp; *ep; ep++, env_size++)
@@ -354,16 +391,17 @@ rebuild_env(sudo_mode, envp)
 		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
 		    ps1 = *ep + 5;
 		else if (strncmp(*ep, "PATH=", 5) == 0)
-		    didpath = 1;
+		    didvar |= DID_PATH;
 		else if (strncmp(*ep, "TERM=", 5) == 0)
-		    didterm = 1;
+		    didvar |= DID_TERM;
 		*nep++ = *ep;
 	    }
 	}
     }
-    if (!didterm)
+    /* Provide default values for $TERM and $PATH if they are not set. */
+    if (!(didvar & DID_TERM))
 	*nep++ = "TERM=unknown";
-    if (!didpath)
+    if (!(didvar & DID_PATH))
 	*nep++ = format_env("PATH", _PATH_DEFPATH);
     *nep = NULL;
 
@@ -376,6 +414,12 @@ rebuild_env(sudo_mode, envp)
     /* Replace the PATH envariable with a secure one. */
     insert_env(newenvp, format_env("PATH", SECURE_PATH));
 #endif
+
+    /* Set $USER and $LOGNAME to target if "set_logname" is true. */
+    if (def_flag(I_SET_LOGNAME) && runas_pw->pw_name) {
+	insert_env(newenvp, format_env("LOGNAME", runas_pw->pw_name));
+	insert_env(newenvp, format_env("USER", runas_pw->pw_name));
+    }
 
     /* Set $HOME for `sudo -H'.  Only valid at PERM_RUNAS. */
     if ((sudo_mode & MODE_RESET_HOME) && runas_pw->pw_dir)
