@@ -56,6 +56,7 @@ static char rcsid[] = "$Id$";
 #include <ctype.h>
 #include <sys/param.h>
 #include <sys/types.h>
+#include <netinet/in.h>
 
 #include "sudo.h"
 
@@ -74,6 +75,12 @@ int list_num, new_list[NUM_LISTS];
 int parse_error = FALSE, found_user = FALSE;
 int next_type, num_host_alias = 0, num_cmnd_alias = 0;
 LINK tmp_ptr, reset_ptr, save_ptr, list_ptr[NUM_LISTS];
+
+
+/*
+ * Prototypes
+ */
+static int hostcmp	__P((char *));
 
 
 /*
@@ -236,7 +243,7 @@ int host_type_ok()
      * this case is the normal lowercase hostname
      */
     else if (isupper(list_ptr[USER_LIST] -> data[0]) == FALSE) {
-	return (strcmp(list_ptr[USER_LIST] -> data, host) == 0);
+	return (hostcmp(list_ptr[USER_LIST] -> data) == 0);
     }
     /*
      * by now we have a Host_Alias that will have to be expanded
@@ -251,7 +258,7 @@ int host_type_ok()
 		tmp_ptr = list_ptr[HOST_LIST];
 		list_ptr[HOST_LIST] = tmp_ptr -> next;
 		while (next_type == TYPE3) {
-		    if (strcmp(list_ptr[HOST_LIST] -> data, host) == 0) {
+		    if (hostcmp(list_ptr[HOST_LIST] -> data) == 0) {
 			list_ptr[HOST_LIST] = save_ptr;
 			return (TRUE);
 		    }
@@ -495,4 +502,52 @@ int validate()
 	return (VALIDATE_ERROR);
 	break;
     }
+}
+
+
+
+/*
+ * this routine is called from host_type_ok() and tries to match a host
+ * to a host, ip address, or network based on the host and ip_addrs globals.
+ */
+
+static int hostcmp(target)
+    char *target;			/* target we are matching against */
+{
+
+    /* if target an  ip address/network or a hostname? */
+    if (isdigit(*target)) {
+	struct in_addr *addr;		/* for walking ip_addrs */
+	struct in_addr target_addr;	/* inet addr version of target */
+	struct in_addr netmask;		/* netmask */
+	int len;			/* length parameter */
+
+	/* if ip_addrs is NULL, set it */
+	if (ip_addrs == NULL)
+	    load_ip_addrs(NULL);
+	
+	/* convert target to an inet addr */
+	target_addr.s_addr = inet_addr(target);
+
+	/* XXX */
+	/* fake the netmask based on target until netmask support is in place */
+	len = strlen(target);
+	if (!strcmp(target+len-2, ".0")) {
+	    if (!strcmp(target+len-4, ".0.0"))
+		netmask.s_addr = inet_addr("255.255.0.0");
+	    else
+		netmask.s_addr = inet_addr("255.255.255.0");
+	} else {
+	    netmask.s_addr = inet_addr("255.255.255.255");
+	}
+
+	/* now match against ip_addrs array. */
+	for (addr = ip_addrs; addr->s_addr != 0; addr++)
+	    if (target_addr.s_addr == ((addr->s_addr) & (netmask.s_addr)))
+		return(0);
+    } else {
+	return(strcmp(target, host));
+    }
+
+    return(1);
 }
