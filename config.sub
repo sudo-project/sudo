@@ -310,6 +310,10 @@ case $basic_machine in
 		basic_machine=h8300-hitachi
 		os=-hms
 		;;
+	sr2201*)
+		basic_machine=harp1e-hitachi
+		os=-hiuxmpp
+		;;
 	harris)
 		basic_machine=m88k-harris
 		os=-sysv3
