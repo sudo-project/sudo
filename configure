@@ -29473,14 +29473,22 @@ echo "${ECHO_T}/var/run/sudo" >&6
 EOF
 
     timedir="/var/run/sudo"
-else
-    echo "$as_me:$LINENO: result: /tmp/.odus" >&5
-echo "${ECHO_T}/tmp/.odus" >&6
+elif test -d "/var/adm"; then
+    echo "$as_me:$LINENO: result: /var/adm/sudo" >&5
+echo "${ECHO_T}/var/adm/sudo" >&6
     cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_TIMEDIR "/tmp/.odus"
+#define _PATH_SUDO_TIMEDIR "/var/adm/sudo"
 EOF
 
-    timedir="/tmp/.odus"
+    timedir="/var/adm/sudo"
+else
+    echo "$as_me:$LINENO: result: /usr/adm/sudo" >&5
+echo "${ECHO_T}/usr/adm/sudo" >&6
+    cat >>confdefs.h <<\EOF
+#define _PATH_SUDO_TIMEDIR "/usr/adm/sudo"
+EOF
+
+    timedir="/usr/adm/sudo"
 fi
 
 
