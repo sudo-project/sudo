@@ -213,7 +213,12 @@ main(argc, argv)
 	remove_timestamp();	/* remove the timestamp ticket file */
 	exit(0);
     } else if (sudo_mode == MODE_LIST) {
+#ifdef notyet
 	(void) validate();	/* list the user's available commands */
+#else
+	(void) fprintf(stderr,
+	    "Sorry, the list command is not currently implemented.\n");
+#endif
 	exit(0);
     }
 
