@@ -526,9 +526,12 @@ static void check_passwd()
 	} else if (crypt_type == AUTH_CRYPT_CRYPT16) {
 	    if (!strcmp(user_passwd, crypt16(pass, user_passwd)))
 		return;             /* if the passwd is correct return() */
-	} else if (crypt_type == AUTH_CRYPT_OLDCRYPT) {
+#ifdef AUTH_CRYPT_OLDCRYPT
+	} else if (crypt_type == AUTH_CRYPT_OLDCRYPT ||
+		   crypt_type == AUTH_CRYPT_C1CRYPT) {
 	    if (!strcmp(user_passwd, crypt(pass, user_passwd)))
 		return;             /* if the passwd is correct return() */
+#endif
 	} else {
 	    (void) fprintf(stderr,
                     "%s: Sorry, I don't know how to deal with crypt type %d.\n",
