@@ -76,7 +76,8 @@ extern void yyerror		__P((char *));
 #endif
 %}
 
-N			[0-9][0-9]?[0-9]?
+OCTET			[0-9][0-9]?[0-9]?
+WORD			[a-zA-Z0-9_-]+
 
 %e	4000
 %p	6000
@@ -158,9 +159,16 @@ N			[0-9][0-9]?[0-9]?
 			    return(USERGROUP);
 			 }
 
-{N}\.{N}\.{N}\.{N}	{
+{OCTET}(\.{OCTET}){3}	{
 			    fill(yytext, yyleng);
+			    LEXTRACE("NTWKADDR ");
 			    return(NTWKADDR);
+			}
+
+{WORD}(\.{WORD})+	{
+			    fill(yytext, yyleng);
+			    LEXTRACE("FQHOST ");
+			    return(FQHOST);
 			}
 
 \/[^\,:=\\ \t\n#]+	{
