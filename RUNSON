@@ -35,6 +35,7 @@ IRIX	5.3	mips	gcc2.7.2.1	1.5.3	Todd Miller	 none
 IRIX	5.3	mips	gcc2.7.2.1	1.5.3	Todd Miller	 --with-kerb4
 IRIX	5.3	mips	unbundled cc	1.4	Wallace Winfrey	 --with-C2
 IRIX	6.2	mips	unbundled cc	1.5	Alek Komarnitsky --with-C2
+IRIX	6.4	mips	unbundled cc	1.5.3	Jim Volpe	 none
 NEXTSTEP 2.1	m68k	bundled cc	1.3.7	Todd Miller	 none
 NEXTSTEP 3.2	m68k	bundled cc	1.5.3	Todd Miller	 none
 NEXTSTEP 3.2	i386	bundled cc	1.3.2	Jonathan Adams	 none
