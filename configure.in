@@ -101,11 +101,11 @@ dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
 dnl
 PROGS="sudo visudo"
-test -n "$MANTYPE" || MANTYPE="man"
-test -n "$mansrcdir" || mansrcdir="."
-test -n "$SUDOERS_MODE" || SUDOERS_MODE=0440
-test -n "$SUDOERS_UID" || SUDOERS_UID=0
-test -n "$SUDOERS_GID" || SUDOERS_GID=0
+: ${MANTYPE='man'}   
+: ${mansrcdir='.'}
+: ${SUDOERS_MODE='0440'}
+: ${SUDOERS_UID='0'}
+: ${SUDOERS_GID='0'}
 DEV="#"
 
 dnl
@@ -239,8 +239,8 @@ AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
 		with_classic_insults=yes
 		with_csops_insults=yes
 		with_env_editor=yes
-		test -n "$mansectsu" || mansectsu=8
-		test -n "$mansectform" || mansectform=5
+		: ${mansectsu='8'}
+		: ${mansectform='5'}
 		;;
     no)		;;
     *)		AC_MSG_WARN([Ignoring unknown argument to --with-csops: $with_csops])
@@ -1248,9 +1248,9 @@ case "$host" in
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lucb"
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		test -n "$with_rpath" || with_rpath=yes
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
+		: ${with_rpath='yes'}
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
@@ -1279,16 +1279,16 @@ case "$host" in
 		    AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1], AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"; SECUREWARE=1]))
 		    CHECKSHADOW="false"
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
     *-*-hpux*)
 		# AFS support needs -lBSD
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 
 		case "$host" in
 			*-*-hpux[1-8].*)
@@ -1384,8 +1384,8 @@ case "$host" in
 		    with_passwd=no
 		    AUTH_OBJS="sia.o"
 		fi
-		test -n "$mansectsu" || mansectsu=8
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='8'}
+		: ${mansectform='4'}
 		;;
     *-*-irix*)
 		CPPFLAGS="${CPPFLAGS} -D_BSD_TYPES"
@@ -1411,8 +1411,8 @@ case "$host" in
 		if test "$OSREV" -le 4; then
 		    AC_CHECK_LIB(sun, getpwnam, [LIBS="${LIBS} -lsun"])
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
     *-*-linux*)
 		# Some Linux versions need to link with -lshadow
@@ -1443,8 +1443,8 @@ case "$host" in
 		LIBS="${LIBS} -lsun -lbsd"
 		CPPFLAGS="${CPPFLAGS} -I/usr/include -I/usr/include/bsd"
 		OSDEFS="${OSDEFS} -D_MIPS"
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
     *-*-isc*)
 		OSDEFS="${OSDEFS} -D_ISC"
@@ -1456,8 +1456,8 @@ case "$host" in
 		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
 		    CHECKSHADOW="false"
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
     *-*-sco*|*-sco-*)
 		if test "$CHECKSHADOW" = "true"; then
@@ -1465,36 +1465,36 @@ case "$host" in
 		    AC_CHECK_LIB(gen, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lgen"; LIBS="${LIBS} -lgen"])
 		    CHECKSHADOW="false"
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
     m88k-motorola-sysv*)
 		# motorolla's cc (a variant of gcc) does -O but not -O2
 		CFLAGS=`echo $CFLAGS | sed 's/-O2/-O/g'`
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
     *-sequent-sysv*)
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
 		    CHECKSHADOW="false"
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		test -n "$with_rpath" || with_rpath=yes
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
+		: ${with_rpath='yes'}
 		;;
     *-ncr-sysv4*|*-ncr-sysvr4*)
 		AC_CHECK_LIB(c89, strcasecmp, AC_DEFINE(HAVE_STRCASECMP) [LIBS="${LIBS} -lc89"; ac_cv_func_strcasecmp=yes])
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		test -n "$with_rpath" || with_rpath=yes
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
+		: ${with_rpath='yes'}
 		;;
     *-ccur-sysv4*|*-ccur-sysvr4*)
 		LIBS="${LIBS} -lgen"
 		SUDO_LIBS="${SUDO_LIBS} -lgen"
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		test -n "$with_rpath" || with_rpath=yes
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
+		: ${with_rpath='yes'}
 		;;
     *-*-bsdi*)
 		SKIP_SETREUID=yes
@@ -1560,21 +1560,21 @@ case "$host" in
 		ac_cv_func_flock=yes
 		;;
     *-*-*sysv4*)
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		test -n "$with_rpath" || with_rpath=yes
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
+		: ${with_rpath='yes'}
 		;;
     *-*-sysv*)
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
 esac
 
 dnl
 dnl Use BSD-style man sections by default
 dnl
-test -n "$mansectsu" || mansectsu=8
-test -n "$mansectform" || mansectform=5
+: ${mansectsu='8'}
+: ${mansectform='5'}
 
 dnl
 dnl Add in any libpaths or libraries specified via configure
