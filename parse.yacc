@@ -113,8 +113,10 @@ char *s;
 yywrap()
 {
     /* reset values so we can reparse cleanly */
-    reset_aliases();
-    top = 0;
+    if (parse_error) {
+	reset_aliases();
+	top = 0;
+    }
 
     return(1);
 }
