@@ -187,11 +187,11 @@ void load_globals()
     char *p;
 
 
-    if ((user = malloc(9)) == NULL) {
+    if ((user = (char *) malloc(9)) == NULL) {
 	perror("malloc");
 	exit(1);
     }
-    if ((host = malloc(MAXHOSTNAMELEN + 1)) == NULL) {
+    if ((host = (char *) malloc(MAXHOSTNAMELEN + 1)) == NULL) {
 	perror("malloc");
 	exit(1);
     }
