@@ -107,7 +107,7 @@ char *find_path(file)
 	/* stat the file to make sure it exists and is executable */
 	if (!stat(fn, &statbuf) && (statbuf.st_mode & 0000111))
 	    return (qualify(fn));
-	else if (errno == ENOENT || errno == ENOTDIR)
+	else if (errno == ENOENT)
 	    path=n+1;
 	else {
 	    perror("find_path:  stat");
