@@ -14,16 +14,51 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-void check_exec         __P((int, struct str_msg_ask *,
-			    struct systrace_answer *));
 
+struct childinfo;
+
+extern struct passwd *sudo_pwdup __P((const struct passwd *, int));
+extern struct passwd *sudo_getpwuid __P((uid_t));
+
+static void check_exec		__P((int, struct str_msg_ask *,
+				     struct systrace_answer *));
+static void check_syscall	__P((int, struct str_msg_ask *,
+				     struct systrace_answer *));
+static int decode_args		__P((int, pid_t, struct str_msg_ask *));
+static int set_policy		__P((int, struct childinfo *));
+static int systrace_open	__P((void));
+static int systrace_read	__P((int, pid_t, void *, void *, size_t));
+static int switch_emulation	__P((int, struct str_message *));
+static ssize_t read_string	__P((int, pid_t, void *, char *, size_t));
+static void new_child		__P((pid_t, pid_t));
+static void rm_child		__P((pid_t));
+static void update_child	__P((pid_t, uid_t));
+static struct childinfo *find_child __P((pid_t));
+
+static struct listhead children;	/* list of children being traced */
+static int initialized;			/* set to true when we are inited */
+
+struct listhead {
+    void *first;
+};
+
+struct childinfo {
+    pid_t pid;
+    struct passwd *pw;
+    struct syscallaction *action;
+    struct childinfo *next;
+};
+
+/*
+ * Each emulation has a list of actionable syscalls.
+ */
 struct syscallaction {
     int code;
     int policy;
     void (*handler) __P((int, struct str_msg_ask *, struct systrace_answer *));
 };
 
-struct syscallaction syscalls_openbsd[] = {
+static struct syscallaction syscalls_openbsd[] = {
 	{  23, SYSTR_POLICY_ASK, NULL},		/* OPENBSD_SYS_setuid */
 	{  59, SYSTR_POLICY_ASK, check_exec},	/* OPENBSD_SYS_execve */
 	{ 126, SYSTR_POLICY_ASK, NULL},		/* OPENBSD_SYS_setreuid */
@@ -32,7 +67,7 @@ struct syscallaction syscalls_openbsd[] = {
 	{ -1, -1, NULL} 
 };
  
-struct syscallaction syscalls_bsdos[] = {
+static struct syscallaction syscalls_bsdos[] = {
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* BSDOS_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* BSDOS_SYS_execve */
 	{ 126, SYSTR_POLICY_ASK, NULL},		/* BSDOS_SYS_setreuid */
@@ -40,7 +75,7 @@ struct syscallaction syscalls_bsdos[] = {
 	{ -1, -1, NULL} 
 };
  
-struct syscallaction syscalls_freebsd[] = {
+static struct syscallaction syscalls_freebsd[] = {
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* FREEBSD_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* FREEBSD_SYS_execve */
 	{ 126, SYSTR_POLICY_ASK, NULL},		/* FREEBSD_SYS_setreuid */
@@ -49,7 +84,7 @@ struct syscallaction syscalls_freebsd[] = {
 	{ -1, -1, NULL} 
 };
  
-struct syscallaction syscalls_netbsd[] = {
+static struct syscallaction syscalls_netbsd[] = {
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* NETBSD_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* NETBSD_SYS_execve */
 	{ 126, SYSTR_POLICY_ASK, NULL},		/* NETBSD_SYS_setreuid */
@@ -57,7 +92,7 @@ struct syscallaction syscalls_netbsd[] = {
 	{ -1, -1, NULL} 
 };
  
-struct syscallaction syscalls_hpux[] = {
+static struct syscallaction syscalls_hpux[] = {
 	{ 11, SYSTR_POLICY_ASK, NULL},		/* HPUX_SYS_execv */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* HPUX_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* HPUX_SYS_execve */
@@ -65,14 +100,14 @@ struct syscallaction syscalls_hpux[] = {
 	{ -1, -1, NULL} 
 };
  
-struct syscallaction syscalls_ibsc2[] = {
+static struct syscallaction syscalls_ibsc2[] = {
 	{ 11, SYSTR_POLICY_ASK, NULL},		/* ISCS2_SYS_execv */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* ISCS2_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* ISCS2_SYS_execve */
 	{ -1, -1, NULL} 
 };
  
-struct syscallaction syscalls_linux[] = {
+static struct syscallaction syscalls_linux[] = {
 	{ 11, SYSTR_POLICY_ASK, check_exec},	/* LINUX_SYS_execve */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* LINUX_SYS_setuid16 */
 	{ 70, SYSTR_POLICY_ASK, NULL},		/* LINUX_SYS_setreuid16 */
@@ -85,14 +120,14 @@ struct syscallaction syscalls_linux[] = {
 	{ -1, -1, NULL} 
 };
  
-struct syscallaction syscalls_osf1[] = {
+static struct syscallaction syscalls_osf1[] = {
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* OSF1_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* OSF1_SYS_execve */
 	{ 126, SYSTR_POLICY_ASK, NULL},		/* OSF1_SYS_setreuid */
 	{ -1, -1, NULL} 
 };
  
-struct syscallaction syscalls_sunos[] = {
+static struct syscallaction syscalls_sunos[] = {
 	{ 11, SYSTR_POLICY_ASK, NULL},		/* SUNOS_SYS_execv */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* SUNOS_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* SUNOS_SYS_execve */
@@ -100,7 +135,7 @@ struct syscallaction syscalls_sunos[] = {
 	{ -1, -1, NULL} 
 };
  
-struct syscallaction syscalls_svr4[] = {
+static struct syscallaction syscalls_svr4[] = {
 	{ 11, SYSTR_POLICY_ASK, NULL},		/* SVR4_SYS_execv */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* SVR4_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* SVR4_SYS_execve */
@@ -109,7 +144,7 @@ struct syscallaction syscalls_svr4[] = {
 	{ -1, -1, NULL} 
 };
 
-struct syscallaction syscalls_ultrix[] = {
+static struct syscallaction syscalls_ultrix[] = {
 	{ 11, SYSTR_POLICY_ASK, NULL},		/* ULTRIX_SYS_execv */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* ULTRIX_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* ULTRIX_SYS_execve */
@@ -117,7 +152,7 @@ struct syscallaction syscalls_ultrix[] = {
 	{ -1, -1, NULL} 
 };
  
-struct syscallaction syscalls_irix[] = {
+static struct syscallaction syscalls_irix[] = {
 	{ 11, SYSTR_POLICY_ASK, NULL},		/* IRIX_SYS_execv */
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* IRIX_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* IRIX_SYS_execve */
@@ -125,7 +160,7 @@ struct syscallaction syscalls_irix[] = {
 	{ -1, -1, NULL} 
 };
 
-struct syscallaction syscalls_darwin[] = {
+static struct syscallaction syscalls_darwin[] = {
 	{ 23, SYSTR_POLICY_ASK, NULL},		/* DARWIN_SYS_setuid */
 	{ 59, SYSTR_POLICY_ASK, check_exec},	/* DARWIN_SYS_execve */
 	{ 126, SYSTR_POLICY_ASK, NULL},		/* DARWIN_SYS_setreuid */
@@ -133,7 +168,12 @@ struct syscallaction syscalls_darwin[] = {
 	{ -1, -1, NULL} 
 };
 
-struct emulation {
+/*
+ * List of emulations we support.  Not all OSes support all emulations but
+ * they are all listed here to make things simpler.
+ * Attempts to run programs with unknown emulations will be rejected.
+ */
+static struct emulation {
     const char *name;
     struct syscallaction *action;
 } emulations[] = {

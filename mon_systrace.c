@@ -50,41 +50,11 @@
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-struct listhead {
-    void *first;
-};
-struct childinfo {
-    pid_t pid;
-    struct passwd *pw;
-    struct syscallaction *action;
-    struct childinfo *next;
-};
-
-void check_syscall	__P((int, struct str_msg_ask *,
-			     struct systrace_answer *));
-int decode_args		__P((int, pid_t, struct str_msg_ask *));
-int set_policy		__P((int, struct childinfo *));
-int systrace_open	__P((void));
-int systrace_read	__P((int, pid_t, void *, void *, size_t));
-int systrace_run	__P((char *, char **, int));
-int switch_emulation	__P((int, struct str_message *));
-ssize_t read_string	__P((int, pid_t, void *, char *, size_t));
-void new_child		__P((pid_t, pid_t));
-void rm_child		__P((pid_t));
-void update_child	__P((pid_t, uid_t));
-struct childinfo *find_child __P((pid_t));
-
-extern struct passwd *sudo_pwdup __P((const struct passwd *, int));
-extern struct passwd *sudo_getpwuid __P((uid_t));
-
-static struct listhead children;	/* list of children being traced */
-static int initialized;			/* set to true when we are inited */
-
 /*
  * Open the systrace device and return the fd or -1 on failure.
  * XXX - warn here on error or in caller?
  */
-int
+static int
 systrace_open()
 {
     int serrno, fd;
@@ -113,7 +83,7 @@ bad:
     return(-1);
 }
 
-void
+static void
 sigusr1(signo)
     int signo;
 {
@@ -124,7 +94,6 @@ sigusr1(signo)
  * Fork a process that traces the command to be run and its descendents.
  *
  * TODO:
- *	note euid changes and update runas info
  *	set SUDO_* env variables for sub-execs
  */
 void
@@ -296,7 +265,7 @@ fail:
  * Push a new child to the head of the list, inheriting the struct pw
  * of its parent.
  */
-void
+static void
 new_child(ppid, pid)
     pid_t ppid;
     pid_t pid;
@@ -327,7 +296,7 @@ new_child(ppid, pid)
     children.first = entry;
 }
 
-int
+static int
 switch_emulation(fd, msgp)
     int fd;
     struct str_message *msgp;
@@ -348,7 +317,7 @@ switch_emulation(fd, msgp)
 /*
  * Remove the named pid from the list.
  */
-void
+static void
 rm_child(pid)
     pid_t pid;
 {
@@ -371,7 +340,7 @@ rm_child(pid)
 /*
  * Find a child by pid.
  */
-struct childinfo *
+static struct childinfo *
 find_child(pid)
     pid_t pid;
 {
@@ -387,7 +356,7 @@ find_child(pid)
 /*
  * Update the uid associated with a pid.
  */
-void
+static void
 update_child(pid, uid)
     pid_t pid;
     uid_t uid;
@@ -414,7 +383,7 @@ update_child(pid, uid)
 /*
  * Create a policy that intercepts execve and lets all others go free.
  */
-int
+static int
 set_policy(fd, child)
     int fd;
     struct childinfo *child;
@@ -454,7 +423,7 @@ set_policy(fd, child)
  * Read from an address and store in buf.
  * XXX - should deal with EBUSY from STRIOCIO
  */
-int
+static int
 systrace_read(fd, pid, addr, buf, bufsiz)
     int fd;
     pid_t pid;
@@ -480,7 +449,7 @@ systrace_read(fd, pid, addr, buf, bufsiz)
  * XXX - could pass a hint for chunksiz
  * XXX - need to indicate oflow
  */
-ssize_t
+static ssize_t
 read_string(fd, pid, addr, buf, bufsiz)
     int fd;
     pid_t pid;
@@ -510,7 +479,7 @@ read_string(fd, pid, addr, buf, bufsiz)
     return(cp - buf);
 }
 
-void
+static void
 check_syscall(fd, askp, ansp)
     int fd;
     struct str_msg_ask *askp;
@@ -538,7 +507,7 @@ check_syscall(fd, askp, ansp)
  * Decode path and argv from systrace and fill in user_cmnd,
  * user_base and user_args.
  */
-int
+static int
 decode_args(fd, pid, askp)
     int fd;
     pid_t pid;
@@ -590,7 +559,7 @@ decode_args(fd, pid, askp)
 /*
  * Decode the args to exec and check the command in sudoers.
  */
-void
+static void
 check_exec(fd, askp, ansp)
     int fd;
     struct str_msg_ask *askp;
