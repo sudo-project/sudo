@@ -148,7 +148,7 @@ static int check_timestamp()
     timedir_is_good = 1;	/* now there's an assumption for ya... */
 
     /* become root */
-    be_root();
+    set_perms(PERM_ROOT);
 
     /*
      * walk through the path one directory at a time
@@ -192,7 +192,7 @@ static int check_timestamp()
     }
 
     /* relinquish root */
-    be_user();
+    set_perms(PERM_USER);
 
     return (timestamp_is_old);
 }
@@ -211,7 +211,7 @@ static void update_timestamp()
     register int fd;
 
     /* become root */
-    be_root();
+    set_perms(PERM_ROOT);
 
     if (timedir_is_good) {
 	(void) unlink(timestampfile_p);
@@ -221,7 +221,7 @@ static void update_timestamp()
     }
 
     /* relinquish root */
-    be_user();
+    set_perms(PERM_USER);
 }
 
 
@@ -240,13 +240,13 @@ void remove_timestamp()
     (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR, user);
 
     /* become root */
-    be_root();
+    set_perms(PERM_ROOT);
 
     /* remove the ticket file */
     (void) unlink(timestampfile);
 
     /* relinquish root */
-    be_user();
+    set_perms(PERM_USER);
 }
 
 
@@ -283,6 +283,10 @@ static void check_passwd()
     register int i;
     struct pr_passwd *spw_ent;
 #endif /* __convex__ && HAVE_C2_SECURITY */
+#ifdef HAVE_SKEY
+    int pw_ok = 1;
+    struct passwd *pw_ent = getpwuid(uid);
+#endif /* HAVE_SKEY */
     char *encrypted=epasswd;	/* this comes from /etc/passwd  */
     char *pass;			/* this is what gets entered    */
     register int counter = TRIES_FOR_PASSWORD;
@@ -292,9 +296,9 @@ static void check_passwd()
      * grab encrypted password from shadow pw file
      * or just use the regular one...
      */
-    be_root();
+    set_perms(PERM_ROOT);
     spw_ent = getspwuid(uid);
-    be_user();
+    set_perms(PERM_USER);
     if (spw_ent && spw_ent -> pw_passwd)
 	encrypted = spw_ent -> pw_passwd;
 #endif /* __hpux && HAVE_C2_SECURITY */
@@ -303,9 +307,9 @@ static void check_passwd()
      * grab encrypted password from protected passwd file
      * or just use the regular one...
      */
-    be_root();
+    set_perms(PERM_ROOT);
     spw_ent = getprpwuid(uid);
-    be_user();
+    set_perms(PERM_USER);
     if (spw_ent)
 	encrypted = spw_ent -> ufld.fd_encrypt;
 #endif /* __osf__ && HAVE_C2_SECURITY */
@@ -314,9 +318,9 @@ static void check_passwd()
      * grab encrypted password from /etc/auth
      * or just use the regular one...
      */
-    be_root();
+    set_perms(PERM_ROOT);
     spw_ent = getauthuid(uid);
-    be_user();
+    set_perms(PERM_USER);
     if (spw_ent && spw_ent -> a_password)
 	encrypted = spw_ent -> a_password;
 #endif /* ultrix && HAVE_C2_SECURITY */
@@ -325,9 +329,9 @@ static void check_passwd()
      * SVR4 should always have a shadow password file
      * so if this fails it is a fatal error.
      */
-    be_root();
+    set_perms(PERM_ROOT);
     spw_ent = getspnam(user);
-    be_user();
+    set_perms(PERM_USER);
     if (spw_ent == NULL) {
 	(void) sprintf(user, "%u", uid);
 	log_error(GLOBAL_NO_PW_ENT);
@@ -340,9 +344,9 @@ static void check_passwd()
     /*
      * Convex with C2 security
      */
-    be_root();
+    set_perms(PERM_ROOT);
     spw_ent = getprpwnam(pw_ent->pw_name);
-    be_user();
+    set_perms(PERM_USER);
     if (spw_ent == (struct pr_passwd *)NULL) {
 	(void) sprintf(user, "%u", uid);
 	log_error(GLOBAL_NO_AUTH_ENT);
@@ -356,11 +360,15 @@ static void check_passwd()
      * you get TRIES_FOR_PASSWORD times to guess your password
      */
     while (counter > 0) {
+#ifdef HAVE_SKEY
+	pass = skey_getpass("Password:", pw_ent, pw_ok);
+#else
 #ifdef USE_GETPASS
 	pass = (char *) getpass("Password:");
 #else
 	pass = tgetpass("Password:", PASSWORD_TIMEOUT);
 #endif /* USE_GETPASS */
+#endif /* HAVE_SKEY */
 	if (!pass || *pass == '\0')
 	    exit(0);
 #if defined(__convex__) && defined(HAVE_C2_SECURITY)
@@ -373,8 +381,14 @@ static void check_passwd()
 	if (spw_ent && !strcmp(encrypted, (char *) crypt16(pass, encrypted)))
 	    return;		/* if the passwd is correct return() */
 #endif /* ultrix && HAVE_C2_SECURITY */
+#ifdef HAVE_SKEY
+	if (!strcmp(pw_ent->pw_passwd, skey_crypt(pass, pw_ent->pw_passwd,
+	    pw_ent, pw_ok)))
+	    return;             /* if the passwd is correct return() */
+#else
 	if (!strcmp(encrypted, (char *) crypt(pass, encrypted)))
 	    return;		/* if the passwd is correct return() */
+#endif /* HAVE_SKEY */
 #endif /* __convex__ && HAVE_C2_SECURITY */
 #ifdef HAVE_AFS
 	code = ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION+KA_USERAUTH_DOSETPAG,
