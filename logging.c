@@ -361,6 +361,11 @@ static void send_mail()
     char *subject = MAILSUBJECT;
     int fd[2];
     char buf[MAXLOGLEN + 1024];
+#ifdef POSIX_SIGNALS
+    struct sigaction action;
+#endif /* POSIX_SIGNALS */
+
+    (void) bzero((char *)(&action), sizeof(action));
 
     /* become root for find_path() */
     be_root();
@@ -374,7 +379,12 @@ static void send_mail()
     be_user();
 
     /* catch children as they die */
+#ifdef POSIX_SIGNALS
+    action.sa_handler = reapchild;
+    (void) sigaction(SIGCHLD, &action, NULL);
+#else
     (void) signal(SIGCHLD, reapchild);
+#endif /* POSIX_SIGNALS */
 
     if (fork())
 	return;
@@ -384,9 +394,16 @@ static void send_mail()
      */
     be_full_user();
     
+#ifdef POSIX_SIGNALS
+    action.sa_handler = SIG_IGN;
+    (void) sigaction(SIGHUP, &action, NULL);
+    (void) sigaction(SIGINT, &action, NULL);
+    (void) sigaction(SIGQUIT, &action, NULL);
+#else
     (void) signal(SIGHUP, SIG_IGN);
     (void) signal(SIGINT, SIG_IGN);
     (void) signal(SIGQUIT, SIG_IGN);
+#endif /* POSIX_SIGNALS */
 
     if (pipe(fd)) {
 	perror("send_mail: pipe");
@@ -430,7 +447,9 @@ static RETSIGTYPE reapchild(sig)
     int sig;
 {
     (void) wait(NULL);
+#ifndef POSIX_SIGNALS
     (void) signal(SIGCHLD, reapchild);
+#endif /* POSIX_SIGNALS */
 }
 
 
