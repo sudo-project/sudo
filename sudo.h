@@ -195,11 +195,6 @@ typedef struct list {
     struct list *next;
 }   LIST, *LINK;
 
-#ifndef hpux
-YYSTYPE yylval, yyval;
-#else
-YYSTYPE yylval;
-#endif
 
 /*
  * Syslog(3) parameters
