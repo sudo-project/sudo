@@ -182,7 +182,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"requiretty", T_FLAG,
 	"Only allow the user to run sudo if they have a tty"
     }, {
-	"enveditor", T_FLAG,
+	"env_editor", T_FLAG,
 	"Visudo will honor the EDITOR environment variable"
     }, {
 	"loglinelen", T_INT|T_BOOL,

@@ -210,7 +210,7 @@ main(argc, argv)
 	(void) close(stmp_fd);
 	(void) touch(stmp, sudoers_sb.st_mtime);
 
-	/* Parse sudoers to pull in editor and enveditor conf values. */
+	/* Parse sudoers to pull in editor and env_editor conf values. */
 	if ((yyin = fopen(stmp, "r"))) {
 	    yyout = stdout;
 	    init_defaults();

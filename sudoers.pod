@@ -346,7 +346,7 @@ of echo when there is no tty present, some sites may with to set
 this flag to prevent a user from entering a visible password.  This
 flag is off by default.
 
-=item enveditor
+=item env_editor
 
 If set, visudo will use the value of the EDITOR or VISUAL environment
 falling back on the default editor.  Note that this may create a

@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.25  2000/02/16 00:07:28  millert
-''' crank versino to 1.6.3
+''' Revision 1.26  2000/02/18 17:11:43  millert
+''' enveditor -> env_editor
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers 5 "1.6.3" "15/Feb/2000" "FILE FORMATS"
+.TH sudoers 5 "1.6.3" "18/Feb/2000" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
@@ -464,7 +464,7 @@ tty.  This will disallow things like \f(CW"rsh somehost sudo ls"\fR since
 of echo when there is no tty present, some sites may with to set
 this flag to prevent a user from entering a visible password.  This
 flag is off by default.
-.Ip "enveditor" 12
+.Ip "env_editor" 12
 If set, visudo will use the value of the \s-1EDITOR\s0 or \s-1VISUAL\s0 environment
 falling back on the default editor.  Note that this may create a
 security hole as most editors allow a user to get a shell (which
@@ -1007,7 +1007,7 @@ as returned by the \f(CWhostname\fR command or use the \fIfqdn\fR option in
 
 .IX Item "requiretty"
 
-.IX Item "enveditor"
+.IX Item "env_editor"
 
 .IX Item "passwd_tries"
 

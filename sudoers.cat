@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-15/Feb/2000                   1.6.3                             1
+18/Feb/2000                   1.6.3                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-15/Feb/2000                   1.6.3                             2
+18/Feb/2000                   1.6.3                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-15/Feb/2000                   1.6.3                             3
+18/Feb/2000                   1.6.3                             3
 
 
 
@@ -259,7 +259,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-15/Feb/2000                   1.6.3                             4
+18/Feb/2000                   1.6.3                             4
 
 
 
@@ -325,7 +325,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-15/Feb/2000                   1.6.3                             5
+18/Feb/2000                   1.6.3                             5
 
 
 
@@ -374,7 +374,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                    flag to prevent a user from entering a visible
                    password.  This flag is off by default.
 
-       enveditor   If set, visudo will use the value of the
+       env_editor  If set, visudo will use the value of the
                    EDITOR or VISUAL environment falling back on
                    the default editor.  Note that this may create
                    a security hole as most editors allow a user
@@ -391,7 +391,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-15/Feb/2000                   1.6.3                             6
+18/Feb/2000                   1.6.3                             6
 
 
 
@@ -457,7 +457,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-15/Feb/2000                   1.6.3                             7
+18/Feb/2000                   1.6.3                             7
 
 
 
@@ -523,7 +523,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-15/Feb/2000                   1.6.3                             8
+18/Feb/2000                   1.6.3                             8
 
 
 
@@ -589,7 +589,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-15/Feb/2000                   1.6.3                             9
+18/Feb/2000                   1.6.3                             9
 
 
 
@@ -655,7 +655,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-15/Feb/2000                   1.6.3                            10
+18/Feb/2000                   1.6.3                            10
 
 
 
@@ -721,7 +721,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-15/Feb/2000                   1.6.3                            11
+18/Feb/2000                   1.6.3                            11
 
 
 
@@ -787,7 +787,7 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
 
 
-15/Feb/2000                   1.6.3                            12
+18/Feb/2000                   1.6.3                            12
 
 
 
@@ -853,7 +853,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-15/Feb/2000                   1.6.3                            13
+18/Feb/2000                   1.6.3                            13
 
 
 
@@ -919,7 +919,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-15/Feb/2000                   1.6.3                            14
+18/Feb/2000                   1.6.3                            14
 
 
 
@@ -985,7 +985,7 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 
 
 
-15/Feb/2000                   1.6.3                            15
+18/Feb/2000                   1.6.3                            15
 
 
 
@@ -1051,7 +1051,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-15/Feb/2000                   1.6.3                            16
+18/Feb/2000                   1.6.3                            16
 
 
 
@@ -1117,6 +1117,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-15/Feb/2000                   1.6.3                            17
+18/Feb/2000                   1.6.3                            17
 
 
