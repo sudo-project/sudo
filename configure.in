@@ -101,12 +101,13 @@ dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
 dnl
 PROGS="sudo visudo"
-: ${MANTYPE='man'}   
+: ${MANTYPE='man'}
 : ${mansrcdir='.'}
 : ${SUDOERS_MODE='0440'}
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
 DEV="#"
+AUTH_OBJS=passwd.o
 
 dnl
 dnl Other vaiables
@@ -128,8 +129,7 @@ dnl
 
 AC_ARG_WITH(otp-only, [  --with-otp-only         deprecated],
 [case $with_otp_only in
-    yes)	with_passwd=no
-		AC_DEFINE(WITHOUT_PASSWD)
+    yes)	AUTH_OBJS=`echo "$AUTH_OBJS"|sed -e 's/^passwd\.o *//'`
 		AC_MSG_NOTICE([--with-otp-only option deprecated, treating as --without-passwd])
 		;;
 esac])
@@ -157,16 +157,14 @@ esac])
 
 AC_ARG_WITH(rpath, [  --with-rpath            pass -R flag in addition to -L for lib paths],
 [case $with_rpath in
-    yes)	;;
-    no)		;;
+    yes|no)	;;
     *)		AC_MSG_ERROR(["--with-rpath does not take an argument."])
 		;;
 esac])
 
 AC_ARG_WITH(blibpath, [  --with-blibpath[=PATH]    pass -blibpath flag to ld for additional lib paths],
 [case $with_blibpath in
-    yes)	;;
-    no)		;;
+    yes|no)	;;
     *)		AC_MSG_NOTICE([will pass -blibpath:${with_blibpath} to the loader.])
 		;;
 esac])
@@ -250,7 +248,7 @@ esac])
 AC_ARG_WITH(passwd, [  --without-passwd        don't use passwd/shadow file for authentication],
 [case $with_passwd in
     yes)	;;
-    no)		AC_DEFINE(WITHOUT_PASSWD)
+    no)		AUTH_OBJS=`echo "$AUTH_OBJS"|sed -e 's/^passwd\.o *//'`
 		AC_MSG_CHECKING(whether to use shadow/passwd file authentication)
 		AC_MSG_RESULT(no)
 		;;
@@ -260,27 +258,37 @@ esac])
 
 AC_ARG_WITH(skey, [  --with-skey[=DIR]         enable S/Key support ],
 [case $with_skey in
-    no)		with_skey="";;
+    no)		with_skey=""
+		;;
     *)		if test -n "$with_opie"; then
 		    AC_MSG_ERROR(["cannot use both S/Key and OPIE"])
 		fi
     		AC_DEFINE(HAVE_SKEY)
 		AC_MSG_CHECKING(whether to try S/Key authentication)
 		AC_MSG_RESULT(yes)
-		AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
+		if test X"$AUTH_OBJS" = X""; then
+		    AUTH_OBJS="rfc1938.o"
+		else
+		    AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
+		fi
 		;;
 esac])
 
 AC_ARG_WITH(opie, [  --with-opie[=DIR]         enable OPIE support ],
 [case $with_opie in
-    no)		with_opie="";;
+    no)		with_opie=""
+		;;
     *)		if test -n "$with_skey"; then
 		    AC_MSG_ERROR(["cannot use both S/Key and OPIE"])
 		fi
 		AC_DEFINE(HAVE_OPIE)
 		AC_MSG_CHECKING(whether to try NRL OPIE authentication)
 		AC_MSG_RESULT(yes)
-		AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
+		if test X"$AUTH_OBJS" = X""; then
+		    AUTH_OBJS="rfc1938.o"
+		else
+		    AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
+		fi
 		;;
 esac])
 
@@ -303,7 +311,7 @@ AC_ARG_WITH(SecurID, [  --with-SecurID[[=DIR]]    enable SecurID support],
     *)		AC_DEFINE(HAVE_SECURID)
 		AC_MSG_CHECKING(whether to use SecurID for authentication)
 		AC_MSG_RESULT(yes)
-		with_passwd=no
+		# AUTH_OBJS updated later
 		;;
 esac])
 
@@ -313,7 +321,10 @@ AC_ARG_WITH(fwtk, [  --with-fwtk[[=DIR]]       enable FWTK AuthSRV support],
     *)		AC_DEFINE(HAVE_FWTK)
 		AC_MSG_CHECKING(whether to use FWTK AuthSRV for authentication)
 		AC_MSG_RESULT(yes)
-		with_passwd=no
+		if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+		    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+		    AC_MSG_ERROR(["cannot mix fwtk with other authentication methods (such as $AUTH_OBJS)"])
+		fi
 		AUTH_OBJS="fwtk.o"
 		;;
 esac])
@@ -334,28 +345,16 @@ AC_ARG_WITH(kerb5, [  --with-kerb5[[=DIR]]      enable Kerberos V support],
 		;;
 esac])
 
-AC_ARG_WITH(authenticate, [  --with-authenticate     enable AIX general authentication support],
-[case $with_authenticate in
-    yes)	AC_DEFINE(HAVE_AUTHENTICATE)
-		AC_MSG_CHECKING(whether to use AIX general authentication)
-		AC_MSG_RESULT(yes)
-		with_passwd=no
-		AUTH_OBJS="aix_auth.o"
-		;;
-    no)		;;
-    *)		AC_MSG_ERROR(["--with-authenticate does not take an argument."])
+AC_ARG_WITH(aixauth, [  --with-aixauth          enable AIX general authentication support],
+[case $with_aixauth in
+    yes|no)	;;
+    *)		AC_MSG_ERROR(["--with-aixauth does not take an argument."])
 		;;
 esac])
 
 AC_ARG_WITH(pam, [  --with-pam              enable PAM support],
 [case $with_pam in
-    yes)	AC_DEFINE(HAVE_PAM)
-		AC_MSG_CHECKING(whether to use PAM authentication)
-		AC_MSG_RESULT(yes)
-		with_passwd=no
-		AUTH_OBJS="pam.o"
-		;;
-    no)		;;
+    yes|no)	;;
     *)		AC_MSG_ERROR(["--with-pam does not take an argument."])
 		;;
 esac])
@@ -365,7 +364,11 @@ AC_ARG_WITH(AFS, [  --with-AFS              enable AFS support],
     yes)	AC_DEFINE(HAVE_AFS)
 		AC_MSG_CHECKING(whether to try AFS (kerberos) authentication)
 		AC_MSG_RESULT(yes)
-		AUTH_OBJS="${AUTH_OBJS} afs.o"
+		if test X"$AUTH_OBJS" = X""; then
+		    AUTH_OBJS="afs.o"
+		else
+		    AUTH_OBJS="${AUTH_OBJS} afs.o"
+		fi
 		;;
     no)		;;
     *)		AC_MSG_ERROR(["--with-AFS does not take an argument."])
@@ -377,7 +380,11 @@ AC_ARG_WITH(DCE, [  --with-DCE              enable DCE support],
     yes)	AC_DEFINE(HAVE_DCE)
 		AC_MSG_CHECKING(whether to try DCE (kerberos) authentication)
 		AC_MSG_RESULT(yes)
-		AUTH_OBJS="${AUTH_OBJS} dce.o"
+		if test X"$AUTH_OBJS" = X""; then
+		    AUTH_OBJS="dce.o"
+		else
+		    AUTH_OBJS="${AUTH_OBJS} dce.o"
+		fi
 		;;
     no)		;;
     *)		AC_MSG_ERROR(["--with-DCE does not take an argument."])
@@ -393,9 +400,7 @@ esac])
 
 AC_ARG_WITH(bsdauth, [  --with-bsdauth          enable BSD authentication support],
 [case $with_bsdauth in
-    yes)	with_logincap=yes
-		;;
-    no)		;;
+    yes|no)	;;
     *)		AC_MSG_ERROR(["--with-bsdauth does not take an argument."])
 		;;
 esac])
@@ -1219,10 +1224,12 @@ dnl We want to be able to differentiate between different rev's
 dnl
 if test -n "$host_os"; then
     OS=`echo $host_os | sed 's/[[0-9]].*//'`
-    OSREV=`echo $host_os | sed 's/^[[^0-9]]*\([[0-9]][[0-9]]*\).*$/\1/'`
+    OSREV=`echo $host_os | sed 's/^[[^0-9\.]]*\([[0-9\.]]*\).*$/\1/'`
+    OSMAJOR=`echo $OSREV | sed 's/\..*$//'`
 else
     OS="unknown"
     OSREV=0
+    OSMAJOR=0
 fi
 
 case "$host" in
@@ -1251,6 +1258,7 @@ case "$host" in
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		: ${with_rpath='yes'}
+		: ${with_pam='maybe'}
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
@@ -1273,6 +1281,11 @@ case "$host" in
 		    ], [AC_MSG_RESULT(no)])
 		fi
 		LDFLAGS="$O_LDFLAGS"
+
+		# check for authenticate(3)
+		if test -z "$with_aixauth"; then
+		    AC_CHECK_FUNCS(authenticate, [with_aixauth=yes])
+		fi
 		;;
     *-*-hiuxmpp*)
 		if test "$CHECKSHADOW" = "true"; then
@@ -1328,6 +1341,7 @@ case "$host" in
 			    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
 			    CHECKSHADOW="false"
 			fi
+			: ${with_pam='maybe'}
 			;;
 		esac
 		;;
@@ -1353,16 +1367,12 @@ case "$host" in
 		# use SIA by default, if we have it, else SecureWare
 		# unless overridden on the command line
 		if test "$CHECKSIA" = "true"; then
-		    AC_CHECK_FUNC(sia_ses_init, [AC_DEFINE(HAVE_SIA)] [
-		    if test -n "$with_skey" -o -n "$with_opie" -o -n "$with_otp_only" -o -n "$with_long_otp_prompt" -o -n "$with_SecurID" -o -n "$with_fwtk" -o -n "$with_kerb4" -o -n "$with_kerb5" -o -n "$with_pam" -o -n "$with_AFS" -o -n "$with_DCE"; then
-			AC_MSG_ERROR(["you cannot mix SIA and other authentication schemes.  You can turn off SIA support via the --disable-sia option"])
-		    fi]; CHECKSHADOW=false)
+		    AC_CHECK_FUNC(sia_ses_init, [AC_DEFINE(HAVE_SIA)] [CHECKSHADOW=false])
 		fi
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_LIB(security, getprpwnam, SECUREWARE=1)
 		    CHECKSHADOW="false"
 		fi
-
 		if test -n "$SECUREWARE"; then
 		    AC_DEFINE(HAVE_GETPRPWNAM)
 		    # -ldb includes bogus versions of snprintf/vsnprintf
@@ -1381,7 +1391,10 @@ case "$host" in
 		    sed 's:<acl.h>:<sys/acl.h>:g' < /usr/include/prot.h > prot.h
 		    ])
 		elif test "$CHECKSIA" = "true"; then
-		    with_passwd=no
+		    if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+			_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+			AC_MSG_ERROR(["cannot mix SIA with other authentication methods (such as $AUTH_OBJS)"])
+		    fi
 		    AUTH_OBJS="sia.o"
 		fi
 		: ${mansectsu='8'}
@@ -1408,7 +1421,7 @@ case "$host" in
 		    fi
 		fi
 		# IRIX <= 4 needs -lsun
-		if test "$OSREV" -le 4; then
+		if test "$OSMAJOR" -le 4; then
 		    AC_CHECK_LIB(sun, getpwnam, [LIBS="${LIBS} -lsun"])
 		fi
 		: ${mansectsu='1m'}
@@ -1420,6 +1433,7 @@ case "$host" in
 		    AC_CHECK_FUNCS(getspnam, , [AC_CHECK_LIB(shadow, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lshadow"; LIBS="${LIBS} -lshadow"])])
 		    CHECKSHADOW="false"
 		fi
+		: ${with_pam='maybe'}
 		;;
     *-convex-bsd*)
 		SUDO_DEFINE(_CONVEX_SOURCE)
@@ -1500,41 +1514,57 @@ case "$host" in
 		SKIP_SETREUID=yes
 		# Use shlicc for BSD/OS [23].x unless asked to do otherwise
 		if test "${with_CC+set}" != set -a "$ac_cv_prog_CC" = gcc; then
-		    case "$OSREV" in
+		    case "$OSMAJOR" in
 			2|3)	AC_MSG_NOTICE([using shlicc as CC])
 				ac_cv_prog_CC=shlicc
 				CC="$ac_cv_prog_CC"
 				;;
 		    esac
 		fi
+		# Check for newer BSD auth API (just check for >= 3.0?)
+		if test -z "$with_bsdauth"; then
+		    AC_CHECK_FUNCS(auth_challenge, [with_bsdauth=yes])
+		fi
 		;;
     *-*-freebsd*)
 		# FreeBSD has a real setreuid(2) starting with 2.1 and
 		# backported to 2.0.5.  We just take 2.1 and above...
-		case "`echo $host_os | sed 's/^freebsd\([[0-9\.]]*\).*$/\1/'`" in
+		case "$OSREV" in
 		0.*|1.*|2.0*)
 		    SKIP_SETREUID=yes
 		    ;;
 		esac
-		if test "$with_logincap" = "yes"; then
-		    SUDO_LIBS="${SUDO_LIBS} -lutil"
-		fi
 		if test "$with_skey" = "yes"; then
 		     SUDO_LIBS="${SUDO_LIBS} -lmd"
 		fi
 		if test "$CHECKSHADOW" = "true"; then
 		    CHECKSHADOW="false"
 		fi
+		: ${with_pam='maybe'}
+		: ${with_logincap='maybe'}
 		;;
     *-*-*openbsd*)
+		# OpenBSD has a real setreuid(2) starting with 3.3 but
+		# we will use setreuid(2) instead.
 		SKIP_SETREUID=yes
 		if test "$CHECKSHADOW" = "true"; then
 		    CHECKSHADOW="false"
 		fi
+		# OpenBSD >= 3.0 supports BSD auth
+		if test -z "$with_bsdauth"; then
+		    case "$OSREV" in
+		    [0-2].*)
+			;;
+		    *)
+			with_bsdauth=yes
+			;;
+		    esac
+		fi
+		: ${with_logincap='maybe'}
 		;;
     *-*-*netbsd*)
 		# NetBSD has a real setreuid(2) starting with 1.3.2
-		case "`echo $host_os | sed 's/^netbsd\([[0-9\.]]*\).*$/\1/'`" in
+		case "$OSREV" in
 		0.9*|1.[012]*|1.3|1.3.1)
 		    SKIP_SETREUID=yes
 		    ;;
@@ -1542,6 +1572,9 @@ case "$host" in
 		if test "$CHECKSHADOW" = "true"; then
 		    CHECKSHADOW="false"
 		fi
+		: ${with_logincap='maybe'}
+		dnl future versions of NetBSD (> 2.0) may include pam
+		: ${with_pam='maybe'}
 		;;
     *-*-*bsd*)
 		if test "$CHECKSHADOW" = "true"; then
@@ -1553,6 +1586,8 @@ case "$host" in
 		if test "$CHECKSHADOW" = "true"; then
 		    CHECKSHADOW="false"
 		fi
+		: ${with_pam='yes'}
+		: ${with_logincap='yes'}
 		;;
     *-*-nextstep*)
 		# lockf() on is broken on the NeXT -- use flock instead
@@ -1641,11 +1676,16 @@ if test "$OS" != "ultrix"; then
 	AC_CHECK_HEADERS(termio.h)
     fi
 fi
-if test "$with_logincap" = "yes"; then
+if test ${with_logincap-'no'} != "no"; then
     AC_CHECK_HEADERS(login_cap.h)
 fi
 if test "$with_bsdauth" = "yes"; then
-    AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H) [with_passwd=no; AUTH_OBJS=bsdauth.o], -)
+    AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H) [
+	if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+	    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+	    AC_MSG_ERROR(["cannot mix BSD authentication with other authentication methods (such as $AUTH_OBJS)"])
+	fi
+	AUTH_OBJS=bsdauth.o], -)
 fi
 dnl
 dnl typedef checks
@@ -1852,7 +1892,11 @@ if test -n "$with_kerb4"; then
     ], [$K4LIBS])
     LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} $K4LIBS"
-    AUTH_OBJS="${AUTH_OBJS} kerb4.o"
+    if test X"$AUTH_OBJS" = X""; then
+	AUTH_OBJS="kerb4.o"
+    else
+	AUTH_OBJS="${AUTH_OBJS} kerb4.o"
+    fi
 fi
 
 dnl
@@ -1863,7 +1907,11 @@ if test "$with_kerb5" = "yes"; then
     AC_CHECK_PROG(KRB5CONFIG, krb5-config, yes, "")
     if test -n "$KRB5CONFIG"; then
 	AC_DEFINE(HAVE_KERB5)
-	AUTH_OBJS="${AUTH_OBJS} kerb5.o"
+	if test X"$AUTH_OBJS" = X""; then
+	    AUTH_OBJS="kerb5.o"
+	else
+	    AUTH_OBJS="${AUTH_OBJS} kerb5.o"
+	fi
 	CPPFLAGS="$CPPFLAGS `krb5-config --cflags`"
 	SUDO_LIBS="$SUDO_LIBS `krb5-config --libs`"
 	dnl
@@ -1915,13 +1963,42 @@ if test -n "$with_kerb5" -a -z "$KRB5CONFIG"; then
 	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
 	]
     )
-    AUTH_OBJS="${AUTH_OBJS} kerb5.o"
+    if test X"$AUTH_OBJS" = X""; then
+	AUTH_OBJS="kerb5.o"
+    else
+	AUTH_OBJS="${AUTH_OBJS} kerb5.o"
+    fi
 fi
 
 dnl
-dnl Extra PAM foolishness
+dnl Some systems put login_cap(3) in libutil
 dnl
-if test "$with_pam" = "yes"; then
+if test "$with_logincap" = "yes"; then
+    case "$OS" in
+	freebsd|netbsd)	SUDO_LIBS="${SUDO_LIBS} -lutil"
+	;;
+    esac
+fi
+
+dnl
+dnl AIX general authentication
+dnl
+if test "$with_aixauth" = "yes"; then
+    AC_MSG_NOTICE([using AIX general authentication])
+    AC_DEFINE(HAVE_AIXAUTH)
+    if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+	_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+	AC_MSG_ERROR(["cannot mix AIX general authentication with other authentication methods (such as $AUTH_OBJS)"])
+    fi
+    AUTH_OBJS="aix_auth.o"
+    SUDO_LIBS="${SUDO_LIBS} -ls"
+fi
+
+dnl
+dnl PAM support.  Systems that might support PAM set with_pam=maybe
+dnl and we do that actual tests here.
+dnl
+if test ${with_pam-'no'} != "no"; then
     dnl
     dnl Linux may need this
     dnl
@@ -1930,7 +2007,15 @@ if test "$with_pam" = "yes"; then
     dnl Some PAM implementations (MacOS X for example) put the PAM headers
     dnl in /usr/include/pam instead of /usr/include/security...
     dnl
-    AC_CHECK_HEADERS([pam/pam_appl.h])
+    AC_CHECK_HEADERS([security/pam_appl.h] [pam/pam_appl.h], [with_pam=yes; break])
+    if test "$with_pam" = "yes"; then
+	AC_DEFINE(HAVE_PAM)
+	if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+	    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+	    AC_MSG_ERROR(["cannot mix PAM with other authentication methods (such as $AUTH_OBJS)"])
+	fi
+	AUTH_OBJS="pam.o"
+    fi
 fi
 
 dnl
@@ -2055,7 +2140,11 @@ fi
 dnl
 dnl extra SecurID lib + includes
 dnl
-if test -n "$with_SecurID" -a "$with_SecurID" != "no"; then
+if test ${with_SecurID-'no'} != "no"; then
+    if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+	_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+	AC_MSG_ERROR(["cannot mix SecurID with other authentication methods (such as $AUTH_OBJS)"])
+    fi
     if test "$with_SecurID" != "yes"; then
 	:
     elif test -d /usr/ace/examples; then
@@ -2097,13 +2186,6 @@ if test -n "$with_fwtk"; then
 	with_fwtk=yes
     fi
     SUDO_LIBS="${SUDO_LIBS} -lauth -lfwall"
-fi
-
-dnl
-dnl extra 'authenticate' lib (AIX only?)
-dnl
-if test "$with_authenticate" = "yes"; then
-    SUDO_LIBS="${SUDO_LIBS} -ls"
 fi
 
 dnl
@@ -2172,18 +2254,21 @@ SUDO_TIMEDIR
 dnl
 dnl Use passwd (and secureware) auth modules?
 dnl
-if test "$with_passwd" = "no"; then
+case "$AUTH_OBJS" in
+*passwd.o*)
+    if test -n "$SECUREWARE"; then
+	AUTH_OBJS="${AUTH_OBJS} secureware.o"
+    fi
+    ;;
+*)
     AC_DEFINE(WITHOUT_PASSWD)
     if test -z "$AUTH_OBJS"; then
 	AC_MSG_ERROR([no authentication methods defined.])
     fi
-else
-    if test -n "$SECUREWARE"; then
-	AUTH_OBJS="${AUTH_OBJS} passwd.o secureware.o"
-    else
-	AUTH_OBJS="${AUTH_OBJS} passwd.o"
-    fi
-fi
+    ;;
+esac
+_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+AC_MSG_NOTICE([using the following authentication methods: $_AUTH])
 
 dnl
 dnl LIBS may contain duplicates from SUDO_LIBS or NET_LIBS so prune it.
@@ -2254,7 +2339,7 @@ AH_TEMPLATE(FQDN, [Define to 1 if you want to require fully qualified hosts in s
 AH_TEMPLATE(GOONS_INSULTS, [Define to 1 if you want insults from the "Goon Show".])
 AH_TEMPLATE(HAL_INSULTS, [Define to 1 if you want 2001-like insults.])
 AH_TEMPLATE(HAVE_AFS, [Define to 1 if you use AFS.])
-AH_TEMPLATE(HAVE_AUTHENTICATE, [Define to 1 if you use AIX general authentication.])
+AH_TEMPLATE(HAVE_AIXAUTH, [Define to 1 if you use AIX general authentication.])
 AH_TEMPLATE(HAVE_BSD_AUTH_H, [Define to 1 if you use BSD authentication.])
 AH_TEMPLATE(HAVE_DCE, [Define to 1 if you use OSF DCE.])
 AH_TEMPLATE(HAVE_DD_FD, [Define to 1 if your `DIR' contains dd_fd.])
@@ -2308,7 +2393,6 @@ AH_TEMPLATE(USE_EXECV, [Define to 1 if you wish to use execv() instead of execvp
 AH_TEMPLATE(USE_INSULTS, [Define to 1 if you want to insult the user for entering an incorrect password.])
 AH_TEMPLATE(USE_STOW, [Define to 1 if you use GNU stow packaging.])
 AH_TEMPLATE(USE_TTY_TICKETS, [Define to 1 if you want a different ticket file for each tty.])
-AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])
 AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])
 AH_TEMPLATE(sig_atomic_t, [Define to `int' if <signal.h> does not define.])
 
