@@ -89,6 +89,7 @@ static char whatnow		__P((void));
 static RETSIGTYPE Exit		__P((int));
 static void setup_signals	__P((void));
 static int run_command		__P((char *, char **));
+static int check_syntax		__P((int, int));
 int command_matches		__P((char *, char *, char *, char *));
 int addr_matches		__P((char *));
 int hostname_matches		__P((char *, char *, char *));
@@ -103,6 +104,7 @@ void yyrestart			__P((FILE *));
 extern FILE *yyin, *yyout;
 extern int errorlineno;
 extern int pedantic;
+extern int quiet;
 
 /*
  * Globals
@@ -124,6 +126,7 @@ main(argc, argv)
     char *UserEditor;			/* editor user wants to use */
     char *EditorPath;			/* colon-separated list of editors */
     char *av[4];			/* argument vector for run_command */
+    int checkonly;			/* only check existing file? */
     int sudoers_fd;			/* sudoers file descriptor */
     int stmp_fd;			/* stmp file descriptor */
     int n;				/* length parameter */
@@ -141,12 +144,17 @@ main(argc, argv)
     /*
      * Arg handling.
      */
+    checkonly = 0;
     while (--argc) {
 	if (!strcmp(argv[argc], "-V")) {
 	    (void) printf("visudo version %s\n", version);
 	    exit(0);
 	} else if (!strcmp(argv[argc], "-s")) {
 	    pedantic++;			/* strict mode */
+	} else if (!strcmp(argv[argc], "-c")) {
+	    checkonly++;		/* check mode */
+	} else if (!strcmp(argv[argc], "-q")) {
+	    quiet++;			/* quiet mode */
 	} else {
 	    usage();
 	}
@@ -173,6 +181,8 @@ main(argc, argv)
 	    strerror(errno));
 	exit(1);
     }
+    if (checkonly)
+	exit(check_syntax(sudoers_fd, quiet));
     if (!lock_file(sudoers_fd, SUDO_TLOCK)) {
 	(void) fprintf(stderr, "%s: sudoers file busy, try again later.\n",
 	    Argv[0]);
@@ -530,6 +540,12 @@ user_is_exempt()
     return(TRUE);
 }
 
+void
+init_envtables()
+{
+    return;
+}
+
 /*
  * Assuming a parse error occurred, prompt the user for what they want
  * to do now.  Returns the first letter of their choice.
@@ -620,6 +636,36 @@ run_command(path, argv)
 
     /* XXX - should use WEXITSTATUS() */
     return(pid == -1 ? -1 : (status >> 8));
+}
+
+static int
+check_syntax(fd, quiet)
+    int fd;
+    int quiet;
+{
+    if ((yyin = fdopen(fd, "r")) == NULL) {
+	if (!quiet)
+	    (void) fprintf(stderr, "%s: can't fdopen sudoers fd: %s", Argv[0],
+		strerror(errno));
+	exit(1);
+    }
+    yyout = stdout;
+    init_parser();
+    if (yyparse() && parse_error != TRUE) {
+	if (!quiet)
+	    (void) printf("Failed to parse %s file, unknown error.\n",
+		sudoers);
+	parse_error = TRUE;
+    }
+    if (!quiet){
+	if (parse_error)
+	    (void) printf("parse error in %s near line %d\n", sudoers,
+		errorlineno);
+	else
+	    (void) printf("%s file parsed OK\n", sudoers);
+    }
+
+    return(parse_error == TRUE);
 }
 
 /*
