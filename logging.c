@@ -135,8 +135,7 @@ static void syslog_wrapper(pri, fmt, arg1, arg2)
 void log_error(code)
     int code;
 {
-    char *p;
-    char **a;
+    char *p, *cmnd_args = NULL;
     int count;
     time_t now;
 #if (LOGGING & SLOG_FILE)
@@ -148,14 +147,21 @@ void log_error(code)
     char *tmp, save;
 #endif /* LOGGING & SLOG_SYSLOG */
 
+    /* Get the command line args from the environment */
+    if (NewArgc > 1 && (cmnd_args = getenv("SUDO_COMMAND"))) {
+	if ((cmnd_args = strchr(cmnd_args, ' ')))
+	    cmnd_args++;
+	else
+	    cmnd_args = NULL;
+    }
+
     /*
      * Allocate enough memory for logline so we won't overflow it
      */
     count = LOG_HEADER_LEN + 136 + 2 * MAXPATHLEN + strlen(tty) + strlen(cwd) +
 	    strlen(runas_user);
-    if (NewArgc > 1)
-	for (a = &NewArgv[1]; *a; a++)
-	    count += strlen(*a) + 1;
+    if (cmnd_args)
+	count += strlen(cmnd_args);
 
     logline = (char *) malloc(count);
     if (logline == NULL) {
@@ -300,13 +306,12 @@ void log_error(code)
 	*p = '\0';
 
 	/* cat on command args if they exist */
-	if (NewArgc > 1)
-	    for (a = &NewArgv[1]; *a; a++) {
-		strcpy(p, *a);
-		p += strlen(*a);
-		*p++ = ' ';
-		*p = '\0';
-	    }
+	if (cmnd_args) {
+	    (void) strcpy(p, cmnd_args);
+	    p += strlen(cmnd_args);
+	    *p++ = ' ';
+	    *p = '\0';
+	}
     }
 
 #if (LOGGING & SLOG_SYSLOG)
@@ -547,7 +552,7 @@ static RETSIGTYPE reapchild(sig)
 void inform_user(code)
     int code;
 {
-    char **a;
+    char *cmnd_args = NULL;
 
     switch (code) {
 	case VALIDATE_NO_USER:
@@ -557,15 +562,22 @@ void inform_user(code)
 	    break;
 
 	case VALIDATE_NOT_OK:
+	    if (NewArgc > 1 && (cmnd_args = getenv("SUDO_COMMAND"))) {
+		if ((cmnd_args = strchr(cmnd_args, ' ')))
+		    cmnd_args++;
+		else
+		    cmnd_args = NULL;
+	    }
+
 	    (void) fprintf(stderr,
 		"Sorry, user %s is not allowed to execute \"%s",
 		user_name, cmnd);
 	
-	    if (NewArgc > 1)
-		for (a = &NewArgv[1]; *a; a++) {
-		    fputc(' ', stderr);
-		    fputs(*a, stderr);
-		}
+	    /* print command args if they exist */
+	    if (cmnd_args) {
+		fputc(' ', stderr);
+		fputs(cmnd_args, stderr);
+	    }
 
 	    (void) fprintf(stderr, "\" as %s on %s.\n\n", runas_user, host);
 	    break;
