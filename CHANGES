@@ -809,4 +809,6 @@ CHANGES from sudo 1.5
 
 248) Added "SUDO_PROMPT" envariable.
 
+249) Usernames may now begin with a digit.  Gross, but people do it.
+
 Sudo 1.5.1 released.
