@@ -194,11 +194,6 @@ B<sudo> is unable to update a file with its edited version, the
 user will receive a warning and the edited copy will remain in a
 temporary file.
 
-Please note that the editor used must make its changes to the
-original file (really the original inode).  If the editor makes
-changes to a temporary file and then just renames this to the
-original file name it will not work with B<sudoedit>.
-
 =item -h
 
 The B<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
