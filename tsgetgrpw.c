@@ -70,12 +70,14 @@ static char *gr_mem[GRMEM_MAX+1];
 void my_setgrfile __P((const char *));
 void my_setgrent __P((void));
 void my_endgrent __P((void));
+struct group *my_getgrent __P((void));
 struct group *my_getgrnam __P((const char *));
 struct group *my_getgruid __P((gid_t));
 
 void my_setpwfile __P((const char *));
 void my_setpwent __P((void));
 void my_endpwent __P((void));
+struct passwd *my_getpwent __P((void));
 struct passwd *my_getpwnam __P((const char *));
 struct passwd *my_getpwuid __P((uid_t));
 
@@ -109,44 +111,59 @@ my_endpwent()
 }
 
 struct passwd *
+my_getpwent()
+{
+    size_t len;
+    char buf[LINE_MAX], *cp, *colon;
+
+    if ((colon = fgets(buf, sizeof(buf), pwf)) == NULL)
+	return(NULL);
+
+    memset(&pwbuf, 0, sizeof(pwbuf));
+    if ((colon = strchr(cp = colon, ':')) == NULL)
+	return(NULL);
+    *colon++ = '\0';
+    pwbuf.pw_name = cp;
+    if ((colon = strchr(cp = colon, ':')) == NULL)
+	return(NULL);
+    *colon++ = '\0';
+    pwbuf.pw_passwd = cp;
+    if ((colon = strchr(cp = colon, ':')) == NULL)
+	return(NULL);
+    *colon++ = '\0';
+    pwbuf.pw_uid = atoi(cp);
+    if ((colon = strchr(cp = colon, ':')) == NULL)
+	return(NULL);
+    *colon++ = '\0';
+    pwbuf.pw_gid = atoi(cp);
+    if ((colon = strchr(cp = colon, ':')) == NULL)
+	return(NULL);
+    *colon++ = '\0';
+    pwbuf.pw_gecos = cp;
+    if ((colon = strchr(cp = colon, ':')) == NULL)
+	return(NULL);
+    *colon++ = '\0';
+    pwbuf.pw_dir = cp;
+    pwbuf.pw_shell = colon;
+    len = strlen(colon);
+    if (len > 0 && colon[len - 1] == '\n')
+	colon[len - 1] = '\0';
+    return(&pwbuf);
+}
+
+struct passwd *
 my_getpwnam(name)
     const char *name;
 {
-    struct passwd *pw = NULL;
-    size_t len, nlen;
-    char buf[LINE_MAX], *cp;
+    struct passwd *pw;
 
     if (pwf != NULL)
 	rewind(pwf);
     else if ((pwf = fopen(pwfile, "r")) == NULL)
 	return(NULL);
-
-    memset(&pwbuf, 0, sizeof(pwbuf));
-    nlen = strlen(name);
-    while (fgets(buf, sizeof(buf), pwf)) {
-	if (strncmp(buf, name, nlen) != 0 || buf[nlen] != ':')
-	    continue;
-	if ((pwbuf.pw_name = strtok(buf, ":")) == NULL)
-	    continue;
-	if ((pwbuf.pw_passwd = strtok(NULL, ":")) == NULL)
-	    continue;
-	if ((cp = strtok(NULL, ":")) == NULL)
-	    continue;
-	pwbuf.pw_uid = atoi(cp);
-	if ((cp = strtok(NULL, ":")) == NULL)
-	    continue;
-	pwbuf.pw_gid = atoi(cp);
-	if ((pwbuf.pw_gecos = strtok(NULL, ":")) == NULL)
-	    continue;
-	if ((pwbuf.pw_dir = strtok(NULL, ":")) == NULL)
-	    continue;
-	if ((pwbuf.pw_shell = strtok(NULL, ":")) != NULL) {
-	    len = strlen(pwbuf.pw_shell);
-	    if (pwbuf.pw_shell[len - 1] == '\n')
-		pwbuf.pw_shell[len - 1] = '\0';
-	}
-	pw = &pwbuf;
-	break;
+    while ((pw = my_getpwent()) != NULL) {
+	if (strcmp(pw->pw_name, name) == 0)
+	    break;
     }
     if (!pw_stayopen) {
 	fclose(pwf);
@@ -159,40 +176,15 @@ struct passwd *
 my_getpwuid(uid)
     uid_t uid;
 {
-    struct passwd *pw = NULL;
-    size_t len;
-    char buf[LINE_MAX], *cp;
+    struct passwd *pw;
 
     if (pwf != NULL)
 	rewind(pwf);
     else if ((pwf = fopen(pwfile, "r")) == NULL)
 	return(NULL);
-
-    memset(&pwbuf, 0, sizeof(pwbuf));
-    while (fgets(buf, sizeof(buf), pwf)) {
-	if ((pwbuf.pw_name = strtok(buf, ":")) == NULL)
-	    continue;
-	if ((pwbuf.pw_passwd = strtok(NULL, ":")) == NULL)
-	    continue;
-	if ((cp = strtok(NULL, ":")) == NULL)
-	    continue;
-	pwbuf.pw_uid = atoi(cp);
-	if (pwbuf.pw_uid != uid)
-	    continue;
-	if ((cp = strtok(NULL, ":")) == NULL)
-	    continue;
-	pwbuf.pw_gid = atoi(cp);
-	if ((pwbuf.pw_gecos = strtok(NULL, ":")) == NULL)
-	    continue;
-	if ((pwbuf.pw_dir = strtok(NULL, ":")) == NULL)
-	    continue;
-	if ((pwbuf.pw_shell = strtok(NULL, ":")) != NULL) {
-	    len = strlen(pwbuf.pw_shell);
-	    if (pwbuf.pw_shell[len - 1] == '\n')
-		pwbuf.pw_shell[len - 1] = '\0';
-	}
-	pw = &pwbuf;
-	break;
+    while ((pw = my_getpwent()) != NULL) {
+	if (pw->pw_uid == uid)
+	    break;
     }
     if (!pw_stayopen) {
 	fclose(pwf);
@@ -231,49 +223,57 @@ my_endgrent()
 }
 
 struct group *
+my_getgrent()
+{
+    size_t len;
+    char buf[LINE_MAX], *cp, *colon;
+    int n;
+
+    if ((colon = fgets(buf, sizeof(buf), grf)) == NULL)
+	return(NULL);
+
+    memset(&grbuf, 0, sizeof(grbuf));
+    if ((colon = strchr(cp = colon, ':')) == NULL)
+	return(NULL);
+    *colon++ = '\0';
+    grbuf.gr_name = cp;
+    if ((colon = strchr(cp = colon, ':')) == NULL)
+	return(NULL);
+    *colon++ = '\0';
+    grbuf.gr_passwd = cp;
+    if ((colon = strchr(cp = colon, ':')) == NULL)
+	return(NULL);
+    *colon++ = '\0';
+    grbuf.gr_gid = atoi(cp);
+    len = strlen(colon);
+    if (len > 0 && colon[len - 1] == '\n')
+	colon[len - 1] = '\0';
+    if (*colon != '\0') {
+	grbuf.gr_mem = gr_mem;
+	cp = strtok(colon, ",");
+	for (n = 0; cp != NULL && n < GRMEM_MAX; n++) {
+	    grbuf.gr_mem[n] = cp;
+	    cp = strtok(NULL, ",");
+	}
+	grbuf.gr_mem[n++] = NULL;
+    } else
+	grbuf.gr_mem = NULL;
+    return(&grbuf);
+}
+
+struct group *
 my_getgrnam(name)
     const char *name;
 {
-    struct group *gr = NULL;
-    size_t len, nlen;
-    char buf[LINE_MAX], *cp, *m;
-    int n;
+    struct group *gr;
 
     if (grf != NULL)
 	rewind(grf);
     else if ((grf = fopen(grfile, "r")) == NULL)
 	return(NULL);
-
-    nlen = strlen(name);
-    memset(&grbuf, 0, sizeof(grbuf));
-    while (fgets(buf, sizeof(buf), grf)) {
-	if (strncmp(buf, name, nlen) != 0 || buf[nlen] != ':')
-	    continue;
-	if ((grbuf.gr_name = strtok(buf, ":")) == NULL)
-	    continue;
-	if ((grbuf.gr_passwd = strtok(NULL, ":")) == NULL)
-	    continue;
-	if ((cp = strtok(NULL, ":")) == NULL)
-	    continue;
-	grbuf.gr_gid = atoi(cp);
-	if ((cp = strtok(NULL, ":")) == NULL)
-	    continue;
-	len = strlen(cp);
-	if (cp[len - 1] == '\n')
-	    cp[len - 1] = '\0';
-	/* Fill in group members */
-	if (*cp != '\0') {
-	    grbuf.gr_mem = gr_mem;
-	    m = strtok(cp, ",");
-	    for (n = 0; m != NULL && n < GRMEM_MAX; n++) {
-		grbuf.gr_mem[n++] = m;
-		m = strtok(NULL, ",");
-	    }
-	    grbuf.gr_mem[n++] = NULL;
-	} else
-	    grbuf.gr_mem = NULL;
-	gr = &grbuf;
-	break;
+    while ((gr = my_getgrent()) != NULL) {
+	if (strcmp(gr->gr_name, name) == 0)
+	    break;
     }
     if (!gr_stayopen) {
 	fclose(grf);
@@ -286,45 +286,15 @@ struct group *
 my_getgrgid(gid)
     gid_t gid;
 {
-    struct group *gr = NULL;
-    size_t len;
-    char buf[LINE_MAX], *cp, *m;
-    int n;
+    struct group *gr;
 
     if (grf != NULL)
 	rewind(grf);
     else if ((grf = fopen(grfile, "r")) == NULL)
 	return(NULL);
-
-    memset(&grbuf, 0, sizeof(grbuf));
-    while (fgets(buf, sizeof(buf), grf)) {
-	if ((grbuf.gr_name = strtok(buf, ":")) == NULL)
-	    continue;
-	if ((grbuf.gr_passwd = strtok(NULL, ":")) == NULL)
-	    continue;
-	if ((cp = strtok(NULL, ":")) == NULL)
-	    continue;
-	grbuf.gr_gid = atoi(cp);
-	if (grbuf.gr_gid != gid)
-	    continue;
-	if ((cp = strtok(NULL, ":")) == NULL)
-	    continue;
-	len = strlen(cp);
-	if (cp[len - 1] == '\n')
-	    cp[len - 1] = '\0';
-	/* Fill in group members */
-	if (*cp != '\0') {
-	    grbuf.gr_mem = gr_mem;
-	    m = strtok(cp, ",");
-	    for (n = 0; m != NULL && n < GRMEM_MAX; n++) {
-		grbuf.gr_mem[n++] = m;
-		m = strtok(NULL, ",");
-	    }
-	    grbuf.gr_mem[n++] = NULL;
-	} else
-	    grbuf.gr_mem = NULL;
-	gr = &grbuf;
-	break;
+    while ((gr = my_getgrent()) != NULL) {
+	if (gr->gr_gid == gid)
+	    break;
     }
     if (!gr_stayopen) {
 	fclose(grf);
