@@ -823,7 +823,7 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
     int *policyp;
     int *errorp;
 {
-    int validated;
+    int error, validated;
     struct childinfo *info;
 
     /* If we have a cookie we take special action. */
@@ -849,19 +849,25 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
 
     /* Fill in user_cmnd, user_base, user_args and user_stat.  */
     decode_args(fd, pid, askp);
-    if (user_cmnd[0] != '/' || !sudo_goodpath(user_cmnd, user_stat)) {
+
+    /* Get processes's cwd. */
+    error = ioctl(fd, STRIOCGETCWD, &pid);
+    if (error == -1 || !getcwd(user_cwd, sizeof(user_cwd))) {
+	warnx("cannot get working directory");
+	(void) strlcpy(user_cwd, "unknown", sizeof(user_cwd));
+    }
+
+    /*
+     * Stat user_cmnd and restore cwd
+     */
+    validated = sudo_goodpath(user_cmnd, user_stat) != NULL;
+    if (error != -1)
+	(void) ioctl(fd, STRIOCRESCWD, 0);
+    if (!validated) {
 	*policyp = SYSTR_POLICY_NEVER;
 	*errorp = EACCES;
 	return(0);
     }
-
-    /* Get processes's cwd. */
-    if (ioctl(fd, STRIOCGETCWD, &pid) == -1 ||
-	!getcwd(user_cwd, sizeof(user_cwd))) {
-	warnx("cannot get working directory");
-	(void) strlcpy(user_cwd, "unknown", sizeof(user_cwd));
-    } else
-	(void) ioctl(fd, STRIOCRESCWD, 0);
 
     /* Check sudoers and log the result. */
     init_defaults();
