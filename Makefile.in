@@ -94,7 +94,7 @@ LIBOBJS = @TGETPASS@ @LIBOBJS@
 HDRS = sudo.h version.h insults.h
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING INSTALL Makefile.in PORTING \
-            README README.v1.3.1 SUPPORTED TODO aclocal.m4 getcwd.c \
+            README README.v1.3.1 SUPPORTED TODO aclocal.m4 getcwd.c putenv.c \
             sudo_realpath.c sudo_setenv.c strdup.c tgetpass.c config.h.in \
             configure configure.in indent.pro installbsd pathnames.h.in \
             sample.sudoers sudo.man sudo.cat sudoers aixcrypt.exp \
