@@ -187,25 +187,21 @@ hostspec	:	ALL {
 			    if (addr_matches($1))
 				host_matches = TRUE;
 			    (void) free($1);
-			    $1 = NULL; /* XXX */
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, host, NULL))
 				host_matches = TRUE;
 			    (void) free($1);
-			    $1 = NULL; /* XXX */
 			}
 		|	NAME {
 			    if (strcmp(host, $1) == 0)
 				host_matches = TRUE;
 			    (void) free($1);
-			    $1 = NULL; /* XXX */
 			}
 		|	ALIAS {
 			    if (find_alias($1, HOST))
 				host_matches = TRUE;
 			    (void) free($1);
-			    $1 = NULL; /* XXX */
 			}
 		|	fqdn {
 #ifdef HAVE_STRCASECMP
@@ -216,7 +212,6 @@ hostspec	:	ALL {
 				host_matches = TRUE;
 #endif /* HAVE_STRCASECMP */
 			    (void) free($1);
-			    $1 = NULL; /* XXX */
 			}
 		;
 
@@ -224,12 +219,10 @@ fqdn		:	NAME '.' NAME {
 			    $$ = dotcat($1, $3);
 			    (void) free($1);
 			    (void) free($3);
-			    $1 = $3 = NULL; /* XXX */
 			}
 		|	fqdn '.' NAME {
 			    $$ = dotcat($1, $3);
 			    (void) free($3);
-			    $3 = NULL; /* XXX */
 			}
 		;
 
@@ -269,13 +262,11 @@ cmnd		:	ALL {
 			    if (find_alias($1, CMND))
 				cmnd_matches = TRUE;
 			    (void) free($1);
-			    $1 = NULL; /* XXX */
 			}
 		|	COMMAND {
 			    if (path_matches(cmnd, $1))
 				cmnd_matches = TRUE;
 			    (void) free($1);
-			    $1 = NULL; /* XXX */
 			}
 		;
 
@@ -303,7 +294,6 @@ cmndalias	:	ALIAS { push; }	'=' cmndlist {
 				YYERROR;
 			    pop;
 			    (void) free($1);
-			    $1 = NULL; /* XXX */
 			}
 		;
 
@@ -321,7 +311,6 @@ useralias	:	ALIAS { push; }	'=' userlist {
 				YYERROR;
 			    pop;
 			    (void) free($1);
-			    $1 = NULL; /* XXX */
 			}
 		;
 
@@ -334,25 +323,21 @@ user		:	NAME {
 			    if (strcmp($1, user_name) == 0)
 				user_matches = TRUE;
 			    (void) free($1);
-			    $1 = NULL; /* XXX */
 			}
 		|	USERGROUP {
 			    if (usergr_matches($1, user_name))
 				user_matches = TRUE;
 			    (void) free($1);
-			    $1 = NULL; /* XXX */
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, NULL, user_name))
 				user_matches = TRUE;
 			    (void) free($1);
-			    $1 = NULL; /* XXX */
 			}
 		|	ALIAS {
 			    if (find_alias($1, USER))
 				user_matches = TRUE;
 			    (void) free($1);
-			    $1 = NULL; /* XXX */
 			}
 		|	ALL {
 			    user_matches = TRUE;
