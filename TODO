@@ -13,27 +13,39 @@ TODO list
 
 06) Add a %h field to MAILSUBJECT for the hostname.
 
-07) Add a -h flag to sudo for a history mechanism.
+07) Add a -h (?) flag to sudo for a history mechanism.
 
 08) Make parse.lex in the same coding style as everything else...
 
 09) Make -l expand Command Aliases.
 
-10) Cleanup check.c and logging.c.
+10) Add an option to hard-code LD_LIBRARY_PATH?
 
-11) Add an option to hard-code LD_LIBRARY_PATH?
+11) Add Prog_Alias facility (Prog_Alias VI = /usr/secure/bin/vi +args).
 
-12) Add Prog_Alias facility (Prog_Alias VI = /usr/secure/bin/vi +args).
+12) Make '!' work in Cmnd_Alias, Host_Alias and User_Alias.
 
-13) Make '!' work in Cmnd_Alias, Host_Alias and User_Alias.
+13) check for <net/errno.h> in configure and include it in sudo.c if it exists.
 
-14) check for <net/errno.h> in configure and include it in sudo.c if it exists.
+14) Add generic STREAMS support for getting interfaces and netmasks.
 
-15) Add generic STREAMS support for getting interfaces and netmasks.
+15) Do shadow password detection at runtime like sunos' issecure(3)???
+    If so then start using GLOBAL_NO_SPW_ENT again (but rename it).
 
-16) open(2) sudo ticket file with O_EXCL flag to eliminate race condition
-    that can cause a user to be prompted when they should not be.
+16) Do all the envariable additions in one fell swoop for efficiency and speed.
 
-17) Decrease MAXLOGLEN if possible.
+17) Catch/ignore signals in sudo?
 
-18) Netgroups support.
+18) Make -p work with -v and -l in any order.
+
+19) See if having 2 versions of path_matches() (w/ and w/o args) is a win.
+
+20) Remove "register" from vars since gcc can probably do a better job at
+    optimizing than I can...
+
+21) Add support for "safe scripts" by checking for shell script
+    cookie (first two bytes are "#!") and execing the shell outselves
+    after doing the stat to guard against spoofing.  This should avoid
+    the race condition caused by going through namei() twice...
+
+22) Sudo should not allow someone with a nil password to run commands.
