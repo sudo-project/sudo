@@ -1,7 +1,6 @@
 TODO list
 
-01) Find out why bison -y warns on parse.yacc and fix the problem if it is
-	indeed a problem.
+01) FIx bison warning on parse.yacc.
 
 02) Add groups of users to the config file.
 
@@ -13,10 +12,9 @@ TODO list
 
 06) Time out the passwd: prompt
 
-07) Eliminate logline length limit in logging.c and maybe make log format
-    prettier.
+07) Add uid and gid options to sudo and sudoers file.
 
-08) Add uid and gid options to sudo and sudoers file.
-
-09) Redo parsing to be more like op(8) with true command aliases where
+08) Redo parsing to be more like op(8) with true command aliases where
     can specify uid, gid(s) and part/all of the environment.
+
+09) Add default options to sudoers file (umask, def uid, def gids, dir, PATH)
