@@ -653,6 +653,18 @@ static RETSIGTYPE
 Exit(sig)
     int sig;
 {
+#ifdef POSIX_SIGNALS
+    sigset_t mask;
+
+    sigfillset(&mask);
+    (void) sigprocmask(SIG_BLOCK, &mask, NULL);
+#else
+    unsigned int mask;
+
+    mask = 0xffffffff;
+    (void) sigblock((int) mask);
+#endif /* POSIX_SIGNALS */
+
     (void) unlink(stmp);
 
     if (sig > 0)
