@@ -305,7 +305,7 @@ subsequent commands run from that shell will I<not> be logged, nor
 will B<sudo>'s access control affect them.  The same is true for
 commands that offer shell escapes (including most editors).  Because
 of this, care must be taken when giving users access to commands
-via B<sudo> to verify that the command does not inadvertantly give
+via B<sudo> to verify that the command does not inadvertently give
 the user an effective root shell.
 
 =head1 EXAMPLES
