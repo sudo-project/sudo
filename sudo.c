@@ -138,7 +138,7 @@ uid_t timestamp_uid;
 extern int errorlineno;
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
-#endif /* RLIMIT_CORE */
+#endif /* RLIMIT_CORE && !SUDO_DEVEL */
 #ifdef HAVE_LOGIN_CAP_H
 login_cap_t *lc;
 #endif /* HAVE_LOGIN_CAP_H */
@@ -391,7 +391,7 @@ main(argc, argv, envp)
 	/* Restore coredumpsize resource limit. */
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 	(void) setrlimit(RLIMIT_CORE, &corelimit);
-#endif /* RLIMIT_CORE */
+#endif /* RLIMIT_CORE && !SUDO_DEVEL */
 
 	/* Become specified user or root. */
 	set_perms(PERM_RUNAS);
@@ -862,9 +862,10 @@ initial_setup()
      * Turn off core dumps.
      */
     (void) getrlimit(RLIMIT_CORE, &corelimit);
-    rl.rlim_cur = rl.rlim_max = 0;
+    memcpy(&rl, &corelimit, sizeof(struct rlimit));
+    rl.rlim_cur = 0;
     (void) setrlimit(RLIMIT_CORE, &rl);
-#endif /* RLIMIT_CORE */
+#endif /* RLIMIT_CORE && !SUDO_DEVEL */
 
     /*
      * Close any open fd's other than stdin, stdout and stderr.
