@@ -548,7 +548,7 @@ static void check_passwd()
     while (counter > 0) {
 #ifdef HAVE_SKEY
 	set_perms(PERM_ROOT);
-	pass = skey_getpass(prompt, pw_ent, 1);
+	pass = skey_getpass(prompt, pw_ent, TRUE);
 	set_perms(PERM_USER);
 #else
 #  ifdef USE_GETPASS
@@ -587,7 +587,7 @@ static void check_passwd()
 #ifdef HAVE_SKEY
 	set_perms(PERM_ROOT);
 	if (!strcmp(pw_ent->pw_passwd, skey_crypt(pass, pw_ent->pw_passwd,
-	    pw_ent, 0))) {
+	    pw_ent, TRUE))) {
 	    set_perms(PERM_USER);
 	    return;             /* if the passwd is correct return() */
 	}
