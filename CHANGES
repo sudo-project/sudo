@@ -1605,3 +1605,8 @@ Sudo 1.6.7 released.
 503) Fixed false positives in the overflow detection of expand_prompt().
 
 Sudo 1.6.7p1 released.
+
+504) BSD-style warn/err functions are used throughout.
+
+505) The krb5-config script is used to determine Kerberos V CPPFLAGS
+     and LDFLAGS/LIBS if it exists.
