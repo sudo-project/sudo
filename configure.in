@@ -47,16 +47,15 @@ AC_ARG_WITH(C2, [  --with-C2               enable C2 security (shadow password) 
 C2=1
 echo 'Configuring for C2 security')
 
-dnl --with-Skey
-AC_ARG_WITH(SKEY, [  --with-SKEY             enable Skey support (untested)], AC_DEFINE(HAVE_SKEY)
+dnl --with-skey
+AC_ARG_WITH(skey, [  --with-skey             enable S/Key support ], AC_DEFINE(HAVE_SKEY)
 SKEY=1
-echo 'Configuring for use with Skey')
+echo 'Configuring for use with S/Key')
 
 dnl --with-SecurID
-AC_ARG_WITH(SECURID, [  --with-SecurID        enable SecurID support], AC_DEFINE(HAVE_SECURID)
+AC_ARG_WITH(SecurID, [  --with-SecurID        enable SecurID support], AC_DEFINE(HAVE_SECURID)
 SECURID=1
 echo 'Configuring for use with SecurID')
-
 
 dnl --with-kerb4
 AC_ARG_WITH(kerb4, [  --with-kerb4            enable kerberos v4 support], AC_DEFINE(HAVE_KERB4)
@@ -407,6 +406,12 @@ dnl
 dnl extra Skey lib + includes
 if test -n "$SKEY" ; then
     LIBS="${LIBS} -lskey"
+    if test -f /usr/local/include/skey.h -a -f /usr/local/lib/libskey.a; then
+	CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
+	LDFLAGS="${LDFLAGS} -L/usr/local/lib"
+    else
+	echo 'Can't find libskey.a and skey.h, you'll have to edit the Makefile'
+    fi
 fi
 
 dnl
