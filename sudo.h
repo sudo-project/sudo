@@ -189,7 +189,6 @@ extern struct interface *interfaces;
 extern int num_interfaces;
 extern char *user;
 extern char *epasswd;
-extern char *ocmnd;
 extern char *cmnd;
 extern int Argc;
 extern char **Argv;

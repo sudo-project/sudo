@@ -136,7 +136,6 @@ static void clean_env		__P((char **));
 int Argc;
 char **Argv;
 char *cmnd = NULL;
-char *ocmnd = NULL;
 char *user = NULL;
 char *epasswd = NULL;
 char host[MAXHOSTNAMELEN + 1];
