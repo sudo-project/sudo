@@ -390,10 +390,6 @@ fi
 
 
 
-tagnames=`echo "$tagnames,CXX" | sed 's/^,//'`
-
-tagnames=`echo "$tagnames,F77" | sed 's/^,//'`
-
 # Name of the host.
 # hostname on some systems (SVR3.2, Linux) returns a bogus exit status,
 # so uname gets run too.
@@ -1032,10 +1028,10 @@ Optional Features:
   --enable-shell-sets-home
                           set $HOME to target user in shell mode
   --disable-path-info     Print 'command not allowed' not 'command not found'
-  --enable-static[=PKGS]
-                          build static libraries [default=no]
   --enable-shared[=PKGS]
                           build shared libraries [default=yes]
+  --enable-static[=PKGS]
+                          build static libraries [default=no]
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
@@ -4839,6 +4835,30 @@ test -n "$target_alias" &&
   test "$program_prefix$program_suffix$program_transform_name" = \
     NONENONEs,x,x, &&
   program_prefix=${target_alias}-
+# Check whether --enable-shared or --disable-shared was given.
+if test "${enable_shared+set}" = set; then
+  enableval="$enable_shared"
+  p=${PACKAGE-default}
+    case $enableval in
+    yes) enable_shared=yes ;;
+    no) enable_shared=no ;;
+    *)
+      enable_shared=no
+      # Look at the argument we got.  We use all the common list separators.
+      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
+      for pkg in $enableval; do
+	IFS="$lt_save_ifs"
+	if test "X$pkg" = "X$p"; then
+	  enable_shared=yes
+	fi
+      done
+      IFS="$lt_save_ifs"
+      ;;
+    esac
+else
+  enable_shared=yes
+fi;
+
 # Check whether --enable-static or --disable-static was given.
 if test "${enable_static+set}" = set; then
   enableval="$enable_static"
@@ -4863,30 +4883,6 @@ else
   enable_static=no
 fi;
 
-
-# Check whether --enable-shared or --disable-shared was given.
-if test "${enable_shared+set}" = set; then
-  enableval="$enable_shared"
-  p=${PACKAGE-default}
-    case $enableval in
-    yes) enable_shared=yes ;;
-    no) enable_shared=no ;;
-    *)
-      enable_shared=no
-      # Look at the argument we got.  We use all the common list separators.
-      lt_save_ifs="$IFS"; IFS="${IFS}$PATH_SEPARATOR,"
-      for pkg in $enableval; do
-	IFS="$lt_save_ifs"
-	if test "X$pkg" = "X$p"; then
-	  enable_shared=yes
-	fi
-      done
-      IFS="$lt_save_ifs"
-      ;;
-    esac
-else
-  enable_shared=yes
-fi;
 
 # Check whether --enable-fast-install or --disable-fast-install was given.
 if test "${enable_fast_install+set}" = set; then
@@ -5410,7 +5406,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5413 "configure"' > conftest.$ac_ext
+  echo '#line 5409 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6571,7 +6567,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:6574:" \
+echo "$as_me:6570:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -7580,11 +7576,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7583: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7579: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7587: \$? = $ac_status" >&5
+   echo "$as_me:7583: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -7812,11 +7808,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7815: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7811: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7819: \$? = $ac_status" >&5
+   echo "$as_me:7815: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -7879,11 +7875,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7882: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7878: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7886: \$? = $ac_status" >&5
+   echo "$as_me:7882: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9233,6 +9229,7 @@ openbsd*)
   #finish_cmds='PATH="\$PATH:/sbin" ldconfig -m $libdir'
   shlibpath_var=LD_LIBRARY_PATH
   if test -z "`echo __ELF__ | $CC -E - | grep __ELF__`" || test "$host_os-$host_cpu" = "openbsd2.8-powerpc"; then
+    dynamic_linker='OpenBSD (ELF) ld.so'
     case $host_os in
       openbsd2.[89] | openbsd2.[89].*)
 	shlibpath_overrides_runpath=no
@@ -9242,6 +9239,7 @@ openbsd*)
 	;;
       esac
   else
+    dynamic_linker='OpenBSD (a.out) ld.so'
     shlibpath_overrides_runpath=yes
   fi
   ;;
@@ -9850,7 +9848,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 9853 "configure"
+#line 9851 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -9948,7 +9946,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 9951 "configure"
+#line 9949 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12084,11 +12082,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12087: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12085: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12091: \$? = $ac_status" >&5
+   echo "$as_me:12089: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -12151,11 +12149,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12154: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12152: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12158: \$? = $ac_status" >&5
+   echo "$as_me:12156: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12736,6 +12734,7 @@ openbsd*)
   #finish_cmds='PATH="\$PATH:/sbin" ldconfig -m $libdir'
   shlibpath_var=LD_LIBRARY_PATH
   if test -z "`echo __ELF__ | $CC -E - | grep __ELF__`" || test "$host_os-$host_cpu" = "openbsd2.8-powerpc"; then
+    dynamic_linker='OpenBSD (ELF) ld.so'
     case $host_os in
       openbsd2.[89] | openbsd2.[89].*)
 	shlibpath_overrides_runpath=no
@@ -12745,6 +12744,7 @@ openbsd*)
 	;;
       esac
   else
+    dynamic_linker='OpenBSD (a.out) ld.so'
     shlibpath_overrides_runpath=yes
   fi
   ;;
@@ -15672,6 +15672,7 @@ openbsd*)
   #finish_cmds='PATH="\$PATH:/sbin" ldconfig -m $libdir'
   shlibpath_var=LD_LIBRARY_PATH
   if test -z "`echo __ELF__ | $CC -E - | grep __ELF__`" || test "$host_os-$host_cpu" = "openbsd2.8-powerpc"; then
+    dynamic_linker='OpenBSD (ELF) ld.so'
     case $host_os in
       openbsd2.[89] | openbsd2.[89].*)
 	shlibpath_overrides_runpath=no
@@ -15681,6 +15682,7 @@ openbsd*)
 	;;
       esac
   else
+    dynamic_linker='OpenBSD (a.out) ld.so'
     shlibpath_overrides_runpath=yes
   fi
   ;;
@@ -16243,11 +16245,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16246: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16248: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16250: \$? = $ac_status" >&5
+   echo "$as_me:16252: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -16475,11 +16477,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16478: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16480: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16482: \$? = $ac_status" >&5
+   echo "$as_me:16484: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -16542,11 +16544,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16545: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16547: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16549: \$? = $ac_status" >&5
+   echo "$as_me:16551: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17896,6 +17898,7 @@ openbsd*)
   #finish_cmds='PATH="\$PATH:/sbin" ldconfig -m $libdir'
   shlibpath_var=LD_LIBRARY_PATH
   if test -z "`echo __ELF__ | $CC -E - | grep __ELF__`" || test "$host_os-$host_cpu" = "openbsd2.8-powerpc"; then
+    dynamic_linker='OpenBSD (ELF) ld.so'
     case $host_os in
       openbsd2.[89] | openbsd2.[89].*)
 	shlibpath_overrides_runpath=no
@@ -17905,6 +17908,7 @@ openbsd*)
 	;;
       esac
   else
+    dynamic_linker='OpenBSD (a.out) ld.so'
     shlibpath_overrides_runpath=yes
   fi
   ;;
@@ -18513,7 +18517,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 18516 "configure"
+#line 18520 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18611,7 +18615,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 18614 "configure"
+#line 18618 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -19600,25 +19604,7 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-test "$can_build_shared" = "no" && with_noexec=no
+test "$enable_shared" = "no" && with_noexec=no
 echo "$as_me:$LINENO: checking path to sudo_noexec.so" >&5
 echo $ECHO_N "checking path to sudo_noexec.so... $ECHO_C" >&6
 
