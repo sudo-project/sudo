@@ -221,13 +221,6 @@ int main(argc, argv)
 	    cmnd = "kill";
 	    break;
 	case MODE_LIST:
-	    /*
-	     * XXX - want to require a password for -l
-	     * since people can be exempt we need to stuff
-	     * normal output of "sudo -l" into an array and
-	     * grow it as is required, then print out after
-	     * the user has been authenticated.
-	     */
 	    cmnd = "list";
 	    printmatches = 1;
 	    break;
@@ -300,16 +293,12 @@ int main(argc, argv)
     } else if (sudo_mode == MODE_KILL) {
 	remove_timestamp();	/* remove the timestamp ticket file */
 	exit(0);
-    } else if (sudo_mode == MODE_LIST) {
-	log_error(ALL_SYSTEMS_GO);
-	(void) validate(FALSE);
-	exit(0);
     }
 
     add_env(!(sudo_mode & MODE_SHELL));	/* add in SUDO_* envariables */
 
     /* validate the user but don't search for "validate" */
-    rtn = validate((sudo_mode != MODE_VALIDATE));
+    rtn = validate((sudo_mode != MODE_VALIDATE && sudo_mode != MODE_LIST));
 
     switch (rtn) {
 
@@ -320,6 +309,10 @@ int main(argc, argv)
 	    log_error(ALL_SYSTEMS_GO);
 	    if (sudo_mode == MODE_VALIDATE)
 		exit(0);
+	    else if (sudo_mode == MODE_LIST) {
+		list_matches();
+		exit(0);
+	    }
 
 	    /* become specified user or root */
 	    set_perms(PERM_RUNAS);
