@@ -40,7 +40,7 @@
 
 #include "config.h"
 
-#include <sys/type.h>
+#include <sys/types.h>
 #include <sys/param.h>
 
 #include <stdio.h>
