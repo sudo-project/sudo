@@ -327,7 +327,7 @@ typedef struct {
 } aliasinfo;
 
 #define MOREALIASES (32)
-aliasinfo *aliases;
+aliasinfo *aliases = NULL;
 size_t naliases = 0;
 size_t nslots = 0;
 
@@ -438,6 +438,7 @@ int dumpaliases()
 
 void reset_aliases()
 {
-    (void) free(aliases);
+    if (aliases)
+	(void) free(aliases);
     naliases = nslots = 0;
 }
