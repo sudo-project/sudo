@@ -172,3 +172,24 @@
 
 /* Define if you have the <sys/sockio.h> header file.  */
 #undef HAVE_SYS_SOCKIO_H
+
+/*
+ * Paths to commands used by sudo.  There are used by pathnames.h.
+ * If you want to override these values, do so in pathnames.h, not here!
+ */
+
+#ifndef _SUDO_PATH_SENDMAIL  
+#undef _SUDO_PATH_SENDMAIL
+#endif /* _SUDO_PATH_SENDMAIL */
+
+#ifndef _SUDO_PATH_VI
+#undef _SUDO_PATH_VI
+#endif /* _SUDO_PATH_VI */
+  
+#ifndef _SUDO_PATH_PWD
+#undef _SUDO_PATH_PWD
+#endif /* _SUDO_PATH_PWD */
+
+#ifndef _SUDO_PATH_MV
+#undef _SUDO_PATH_MV
+#endif /* _SUDO_PATH_MV */
