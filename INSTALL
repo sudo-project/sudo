@@ -217,8 +217,8 @@ Solaris 2.x:
     Since Solaris 2.x does not come with one by default this
     means that you either need to have purchased the unbundled Sun
     C compiler or have a copy of the GNU C compiler (gcc).
-    Sparc binaries for gcc may be gotten via the URL
-	ftp://prep.ai.mit.edu/pub/gnu/sparc-sun-solaris2
+    The SunSoft Catalyst CD should contain gcc binaries for
+    Solaris.
     NOTE: sudo will *not* build with the sun C compiler in BSD
           compatibility mode (/usr/ucb/cc).  Sudo is designed
           to compile with the standard C compiler (or gcc) and
