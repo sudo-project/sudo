@@ -315,7 +315,7 @@ case "$host" in
 		AC_DEFINE(_ALL_SOURCE)
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 		;;
-    *-*-hpux1[0-9]*)
+    *-*-hpux1[[0-9]]*)
 		# uncomment this for a statically linked sudo
 		# (XXX - should be an option to configure)
 		#STATIC_SUDO=true
