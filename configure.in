@@ -1684,9 +1684,9 @@ if test -n "$with_kerb4"; then
     AC_CHECK_LIB(des, des_cbc_encrypt, [K4LIBS="-ldes"], [
 	AC_CHECK_LIB(des425, des_cbc_encrypt, [K4LIBS="-ldes425"], [K4LIBS=""])
     ])
-    AC_CHECK_LIB(krb, main, [K4LIBS="$K4LIBS -lkrb"], [
-	AC_CHECK_LIB(krb4, main, [K4LIBS="$K4LIBS -lkrb4"],
-	    [K4LIBS="$K4LIBS -lkrb"]
+    AC_CHECK_LIB(krb, main, [K4LIBS="-lkrb $K4LIBS"], [
+	AC_CHECK_LIB(krb4, main, [K4LIBS="-lkrb4 $K4LIBS"],
+	    [K4LIBS="-lkrb $K4LIBS"]
 	    [AC_MSG_WARN([Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS and possibly add Kerberos libs to SUDO_LIBS])]
 	, [$K4LIBS])
     ], [$K4LIBS])
