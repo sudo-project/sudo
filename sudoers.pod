@@ -19,10 +19,14 @@ will be used.
 
   user access_group [: access_group] ...
 
-    access_group ::= host_type = [op]cmnd_type [,[op]cmnd_type] ... 
+    access_group ::= host_type = [(user_list)] [NOPASSWD:] [op]cmnd_type
+		     [,[(user_list)] [NOPASSWD:] [op]cmnd_type] ... 
        host_type ::= a lower-case hostname, netgroup, ip address,
                      network number, or host alias.
-       cmnd_type ::= an command OR a command alias.
+       user_list ::= comma-separated list of users, uids, or
+                     User_Aliases the user may run commands as
+                     (default is root).
+       cmnd_type ::= a command OR a command alias.
               op ::= the logical "!" NOT operator.
 
 =head2 host alias section format:
@@ -40,7 +44,7 @@ will be used.
 
       User_Alias ::= a keyword.
        USERALIAS ::= an upper-case alias name.
-       user-list ::= a comma separated list of users, groups and netgroups.
+       user-list ::= a comma separated list of users, groups, netgroups.
 
 =head2 command alias section format:
 
@@ -68,8 +72,8 @@ backslash (\).
 =head2 wildcards (aka meta characters):
 
 B<sudo> allows shell-style I<wildcards> along with command arguments
-in the I<sudoers> file.  Wildcard matching is done via Rich
-$alz's C<wildmat(3)> package.
+in the I<sudoers> file.  Wildcard matching is done via the B<POSIX>
+C<fnmatch(3)> routine.
 
 =over 8
 
@@ -96,28 +100,51 @@ escape special characters such as: "*", "?", "[", and "}".
 
 =back
 
+=head2 exceptions to wildcard rules:
+
+The following exceptions apply to the above rules:
+
+=over 8
+
+=item C<"">
+
+If the empty string C<""> is the only command line argument in the
+I<sudoers> entry it means that command may take B<no> arguments.
+
+=item C<*>
+
+A C<*> by itself (separated by whitespace) as the B<last> argument in
+the I<sudoers> entry will match any and all remaining arguments on
+the command line.
+
+=back
+
+=head2 other special characters and reserved words:
+
 Text after a pound sign (B<#>) is considered a comment.
 Words that begin with a percent sign (B<%>) are assumed to
 be UN*X groups (%staff refers to users in the group I<staff>).
 Words that begin with a plus sign (B<+>) are assumed to
 be netgroups (B<+cshosts> refers to the netgroup I<cshosts>).
 Long lines can be newline escaped with the backslash B<\> character.
-The reserved alias I<ALL> can be used for both {Host,User,Cmnd}_Alias.
+The reserved word B<NOPASSWD> indicates that a user need not
+enter a password for the command listed in that entry.
 
+The reserved alias I<ALL> can be used for both {Host,User,Cmnd}_Alias.
 B<DO NOT> define an alias of I<ALL>, it will B<NOT> be used.
 Note that I<ALL> implies the entire universe of hosts/users/commands.
 You can subtract elements from the universe by using the syntax:
    user  host=ALL,!ALIAS1,!/etc/halt...
 Note that the "!" notation only works in a user's command list.  You
-may not use it to subtract elements in a User_Alias, Host_Alias, or
-Cmnd_Alias.
+may not use it to subtract elements in a User_Alias, Host_Alias,
+Cmnd_Alias or user list.
 
 Commands may have optional command line arguments.  If they do,
 then the arguments in the I<sudoers> file must exactly match those
 on the command line.  It is also possible to have a command's
 arguments span multiple lines as long as the line continuance
 character "\" is used.  The following characters must be escaped
-with a "\" if used in command arguments: ",", ":", "=", "\".
+with a "\" if used in command arguments: ",", ":", "=", "\", """.
 
 =head1 EXAMPLES
 
@@ -140,7 +167,7 @@ with a "\" if used in command arguments: ",", ":", "=", "\".
                 SHUTDOWN=/etc/halt,/etc/shutdown
 
     # User specification
-    FULLTIME    ALL=ALL
+    FULLTIME    ALL=(ALL) NOPASSWD:ALL
     %wheel	ALL=ALL
     PARTTIME    ALL=ALL,!SHELLS,!SU
     +interns    +openlabs=ALL,!SHELLS,!SU
@@ -183,7 +210,7 @@ command line arguments.  The entries above should be self-explanatory.
 =item FULLTIME
 
 Full-time sysadmins in the C<FULLTIME> alias may run any
-command on any host.
+command on any host as any user without a password.
 
 =item %wheel
 
@@ -258,4 +285,4 @@ will not run with a syntactically incorrect I<sudoers> file.
 
 =head1 SEE ALSO
 
-sudo(8), visudo(8), su(1), wildmat(3).
+sudo(8), visudo(8), su(1), fnmatch(3).
