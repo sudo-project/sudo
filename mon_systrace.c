@@ -823,8 +823,11 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
     int *policyp;
     int *errorp;
 {
-    int error, validated;
+    int error, validated = VALIDATE_NOT_OK;
     struct childinfo *info;
+#ifdef HAVE_LDAP
+    void *ld;
+#endif
 
     /* If we have a cookie we take special action. */
     if (cookie != -1) {
@@ -875,11 +878,14 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
     runas_pw = info->pw;
     user_runas = &info->pw->pw_name;
 #ifdef HAVE_LDAP
-    validated = sudo_ldap_check(pwflag);
+    if ((ld = sudo_ldap_open()) != NULL) {
+	sudo_ldap_update_defaults(ld);
+	validated = sudo_ldap_check(ld, 0);
+    }
     if (!def_ignore_local_sudoers && !ISSET(validated, VALIDATE_OK))
 #endif
     {
-	rewind(sudoers_fp);
+	(void) update_defaults();
 	validated = sudoers_lookup(0);
     }
     if (ISSET(validated, VALIDATE_OK)) {
