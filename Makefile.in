@@ -185,7 +185,7 @@ TAGS: $(SRCS)
 	etags $(SRCS)
 
 clean:
-	-rm -f y.tab.[ch] *.o $(PROGS) testsudoers core
+	-rm -f y.tab.[ch] *.o $(PROGS) testsudoers core sudo.core visudo.core
 
 mostlyclean: clean
 
