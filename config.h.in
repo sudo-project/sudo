@@ -126,6 +126,9 @@
 /* Define if you have strdup(3).  */
 #undef HAVE_STRDUP
 
+/* Define if you have fnmatch(3).  */
+#undef HAVE_FNMATCH
+
 /* Define if you have lsearch(3).  */
 #undef HAVE_LSEARCH
 
