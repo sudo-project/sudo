@@ -45,7 +45,7 @@ OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
 [if test -n "$GCC"; then
 STATIC_FLAGS="-static"
 else
-STATIC_FLAGS="-bnoso -bI:/lib/syscalls.exp"
+STATIC_FLAGS="-bnso -bI:/lib/syscalls.exp -liconv -bnodelcsect"
 fi
 ])dnl
 dnl
