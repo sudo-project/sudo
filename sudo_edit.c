@@ -73,7 +73,7 @@ int sudo_edit(argc, argv)
     const char *tmpdir;
     char **nargv, **ap, *editor, *cp;
     char buf[BUFSIZ];
-    int i, ac, ofd, tfd, nargc, rval;
+    int error, i, ac, ofd, tfd, nargc, rval;
     sigaction_t sa;
     struct stat sb;
     struct timespec ts1, ts2;
@@ -105,30 +105,28 @@ int sudo_edit(argc, argv)
     tf = emalloc2(argc - 1, sizeof(*tf));
     memset(tf, 0, (argc - 1) * sizeof(*tf));
     for (i = 0, ap = argv + 1; i < argc - 1 && *ap != NULL; i++, ap++) {
+	error = -1;
 	set_perms(PERM_RUNAS);
-	ofd = open(*ap, O_RDONLY, 0644);
-	if (ofd != -1) {
+	if ((ofd = open(*ap, O_RDONLY, 0644)) != -1 || errno == ENOENT) {
+	    if (ofd == -1) {
+		memset(&sb, 0, sizeof(sb));		/* new file */
+		error = 0;
+	    } else {
 #ifdef HAVE_FSTAT
-	    if (fstat(ofd, &sb) != 0) {
+		error = fstat(ofd, &sb);
 #else
-	    if (stat(tf[i].ofile, &sb) != 0) {
+		error = stat(tf[i].ofile, &sb);
 #endif
-		close(ofd);	/* XXX - could reset errno */
-		ofd = -1;
 	    }
 	}
 	set_perms(PERM_ROOT);
-	if (ofd == -1) {
-	    if (errno != ENOENT) {
+	if (error || !S_ISREG(sb.st_mode)) {
+	    if (error)
 		warn("%s", *ap);
-		argc--;
-		i--;
-		continue;
-	    }
-	    memset(&sb, 0, sizeof(sb));
-	} else if (!S_ISREG(sb.st_mode)) {
-	    warnx("%s: not a regular file", *ap);
-	    close(ofd);
+	    else
+		warnx("%s: not a regular file", *ap);
+	    if (ofd != -1)
+		close(ofd);
 	    argc--;
 	    i--;
 	    continue;
@@ -268,38 +266,40 @@ int sudo_edit(argc, argv)
 
     /* Copy contents of temp files to real ones */
     for (i = 0; i < argc - 1; i++) {
+	error = -1;
 	set_perms(PERM_USER);
-	tfd = open(tf[i].tfile, O_RDONLY, 0644);
+	if ((tfd = open(tf[i].tfile, O_RDONLY, 0644)) != -1) {
+#ifdef HAVE_FSTAT
+	    error = fstat(tfd, &sb);
+#else
+	    error = stat(tf[i].tfile, &sb);
+#endif
+	}
 	set_perms(PERM_ROOT);
-	if (tfd < 0) {
-	    warn("unable to read %s", tf[i].tfile);
+	if (error || !S_ISREG(sb.st_mode)) {
+	    if (error)
+		warn("%s", tf[i].tfile);
+	    else
+		warnx("%s: not a regular file", tf[i].tfile);
 	    warnx("%s left unmodified", tf[i].ofile);
+	    if (tfd != -1)
+		close(tfd);
 	    continue;
 	}
-#ifdef HAVE_FSTAT
-	if (fstat(tfd, &sb) == 0) {
-	    if (!S_ISREG(sb.st_mode)) {
-		warnx("%s: not a regular file", tf[i].tfile);
-		warnx("%s left unmodified", tf[i].ofile);
+	if (tf[i].osize == sb.st_size && tf[i].omtim.tv_sec == mtim_getsec(sb)
+	    && tf[i].omtim.tv_nsec == mtim_getnsec(sb)) {
+	    /*
+	     * If mtime and size match but the user spent no measurable
+	     * time in the editor we can't tell if the file was changed.
+	     */
+	    timespecsub(&ts1, &ts2, &ts2);
+	    if (timespecisset(&ts2)) {
+		warnx("%s unchanged", tf[i].ofile);
+		unlink(tf[i].tfile);
+		close(tfd);
 		continue;
 	    }
-	    if (tf[i].osize == sb.st_size &&
-		tf[i].omtim.tv_sec == mtim_getsec(sb) &&
-		tf[i].omtim.tv_nsec == mtim_getnsec(sb)) {
-		/*
-		 * If mtime and size match but the user spent no measurable
-		 * time in the editor we can't tell if the file was changed.
-		 */
-		timespecsub(&ts1, &ts2, &ts2);
-		if (timespecisset(&ts2)) {
-		    warnx("%s unchanged", tf[i].ofile);
-		    unlink(tf[i].tfile);
-		    close(tfd);
-		    continue;
-		}
-	    }
 	}
-#endif
 	set_perms(PERM_RUNAS);
 	ofd = open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
 	set_perms(PERM_ROOT);
