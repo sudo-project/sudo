@@ -621,8 +621,14 @@ pam_attempt_auth()
             set_perms(PERM_USER, 0);
             return;
         }
-	if (null_pw)
-	    break;
+
+	/* Exit silently if they hit return at the first password prompt */
+	if (null_pw) {
+	    if (counter == TRIES_FOR_PASSWORD)
+		exit(1);
+	    else
+		break;
+	}
 
 	--counter;		/* otherwise, try again  */
         pass_warn(stderr);
