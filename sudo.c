@@ -193,6 +193,9 @@ main(argc, argv)
 # endif
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
+    /* Get rid of any nasty bits in the environment. */
+    clean_env(environ, badenv_table);
+
     Argv = argv;
     Argc = argc;
 
@@ -271,8 +274,6 @@ main(argc, argv)
     /* Must have a command to run... */
     if (user_cmnd == NULL && NewArgc == 0)
 	usage(1);
-
-    clean_env(environ, badenv_table);
 
     cmnd_status = init_vars(sudo_mode);
 
