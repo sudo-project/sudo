@@ -63,7 +63,6 @@ AC_ARG_WITH(C2, [  --with-C2               enable C2 security (shadow password) 
 [case $with_C2 in
     yes)	AC_DEFINE(HAVE_C2_SECURITY)
 		echo 'Configuring for C2 security (shadow passwords)'
-		TGETPASS=""
 		;;
     no)		;;
     *)		echo "Ignoring unknown argument to --with-C2: $with_C2"
