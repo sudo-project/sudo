@@ -95,10 +95,6 @@ DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
 HOSTNAME		[[:alnum:]_-]+
 WORD			([^@!=:,\(\) \t\n\\]|\\[^\n])+
 
-%e	4000
-%p	6000
-%k	3500
-
 %s	GOTCMND
 %s	GOTRUNAS
 %s	GOTDEFS
