@@ -284,7 +284,7 @@ AC_ARG_WITH(long-otp-prompt, [  --with-long-otp-prompt  use a two line OTP (skey
 		;;
 esac])
 
-AC_ARG_WITH(SecurID, [  --with-SecurID=DIR      enable SecurID support],
+AC_ARG_WITH(SecurID, [  --with-SecurID[[=DIR]]    enable SecurID support],
 [case $with_SecurID in
     no)		with_SecurID="";;
     *)		AC_DEFINE(HAVE_SECURID, 1, [Define if you use SecurID.])
@@ -294,7 +294,7 @@ AC_ARG_WITH(SecurID, [  --with-SecurID=DIR      enable SecurID support],
 		;;
 esac])
 
-AC_ARG_WITH(fwtk, [  --with-fwtk=DIR         enable FWTK AuthSRV support],
+AC_ARG_WITH(fwtk, [  --with-fwtk[[=DIR]]       enable FWTK AuthSRV support],
 [case $with_fwtk in
     no)		with_fwtk="";;
     *)		AC_DEFINE(HAVE_FWTK, 1, [Define if you use the FWTK authsrv daemon.])
@@ -310,7 +310,7 @@ AC_ARG_WITH(fwtk, [  --with-fwtk=DIR         enable FWTK AuthSRV support],
 		;;
 esac])
 
-AC_ARG_WITH(kerb4, [  --with-kerb4=DIR        enable Kerberos IV support],
+AC_ARG_WITH(kerb4, [  --with-kerb4[[=DIR]]      enable Kerberos IV support],
 [case $with_kerb4 in
     no)		with_kerb4="";;
     *)		AC_MSG_CHECKING(whether to try kerberos IV authentication)
@@ -318,7 +318,7 @@ AC_ARG_WITH(kerb4, [  --with-kerb4=DIR        enable Kerberos IV support],
 		;;
 esac])
 
-AC_ARG_WITH(kerb5, [  --with-kerb5=DIR        enable Kerberos V support],
+AC_ARG_WITH(kerb5, [  --with-kerb5[[=DIR]]      enable Kerberos V support],
 [case $with_kerb5 in
     no)		with_kerb5="";;
     *)		AC_MSG_CHECKING(whether to try Kerberos V authentication)
