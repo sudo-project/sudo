@@ -140,7 +140,7 @@ $0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 [#if defined(__convex__) || defined(convex)
   yes
 #endif
-], AC_DEFINE(_CONVEX_SOURCE) [$1], [$2])
+], [$1], [$2])
 ])dnl
 dnl
 dnl SUDO_MTXINU
