@@ -203,6 +203,9 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"set_logname", T_FLAG,
 	"Set the LOGNAME and USER environment variables"
     }, {
+	"stay_setuid", T_FLAG,
+	"Only set the effective uid to the target user, not the real uid"
+    }, {
 	"loglinelen", T_INT|T_BOOL,
 	"Length at which to wrap log file lines (0 for no wrap): %d"
     }, {

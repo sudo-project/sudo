@@ -96,6 +96,13 @@ extern char *getenv	__P((char *));
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
+/* XXX - for debugging, will become a runtime option */
+#ifdef STAY_SETUID
+# define SETUID(_x)	seteuid(_x)
+#else
+# define SETUID(_x)	setuid(_x)
+#endif /* XXX */
+
 /*
  * Local type declarations
  */
@@ -135,7 +142,7 @@ struct interface *interfaces;
 int num_interfaces;
 int tgetpass_flags;
 extern int errorlineno;
-static char *runas_homedir = NULL;	/* XXX */
+char *runas_homedir = NULL;	/* XXX */
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
 #endif /* RLIMIT_CORE */
@@ -928,145 +935,6 @@ clean_env(envp, badenv_table, naughtyenv_table)
 		break;
 	    }
 	}
-    }
-}
-
-/*
- * Set real and effective uids and gids based on perm.
- */
-void
-set_perms(perm, sudo_mode)
-    int perm;
-    int sudo_mode;
-{
-    struct passwd *pw;
-
-    /*
-     * First, set real & effective uids to root.
-     * If perm is PERM_ROOT then we don't need to do anything else.
-     */
-    if (setuid(0)) {
-	perror("setuid(0)");
-	exit(1);
-    }
-
-    switch (perm) {
-	case PERM_USER:
-    	    	    	        (void) setgid(user_gid);
-
-    	    	    	        if (seteuid(user_uid)) {
-    	    	    	            perror("seteuid(user_uid)");
-    	    	    	            exit(1);
-    	    	    	        }
-			      	break;
-				
-	case PERM_FULL_USER:
-    	    	    	        (void) setgid(user_gid);
-
-				if (setuid(user_uid)) {
-				    perror("setuid(user_uid)");
-				    exit(1);
-				}
-			      	break;
-
-	case PERM_RUNAS:
-				/* XXX - add group/gid support */
-				if (**user_runas == '#') {
-				    if (setuid(atoi(*user_runas + 1))) {
-					(void) fprintf(stderr,
-					    "%s: cannot set uid to %s: %s\n",
-					    Argv[0], *user_runas, strerror(errno));
-					exit(1);
-				    }
-				} else {
-				    if (!(pw = getpwnam(*user_runas))) {
-					(void) fprintf(stderr,
-					    "%s: no passwd entry for %s!\n",
-					    Argv[0], *user_runas);
-					exit(1);
-				    }
-
-				    /* Set $USER and $LOGNAME to target user */
-				    if (def_flag(I_LOGNAME)) {
-					sudo_setenv("USER", pw->pw_name);
-					sudo_setenv("LOGNAME", pw->pw_name);
-				    }
-
-#ifdef HAVE_LOGIN_CAP_H
-				    if (def_flag(I_LOGINCLASS)) {
-					/*
-					 * setusercontext() will set uid/gid/etc
-					 * for us so no need to do it below.
-					 */
-					if (setusercontext(lc, pw, pw->pw_uid,
-					    LOGIN_SETUSER|LOGIN_SETGROUP|LOGIN_SETRESOURCES|LOGIN_SETPRIORITY))
-					    log_error(
-						NO_MAIL|USE_ERRNO|MSG_ONLY,
-						"setusercontext() failed for login class %s",
-						login_class);
-					else
-					    break;
-				    }
-#endif /* HAVE_LOGIN_CAP_H */
-
-				    if (setgid(pw->pw_gid)) {
-					(void) fprintf(stderr,
-					    "%s: cannot set gid to %ld: %s\n",
-					    Argv[0], (long) pw->pw_gid,
-					    strerror(errno));
-					exit(1);
-				    }
-#ifdef HAVE_INITGROUPS
-				    /*
-				     * Initialize group vector only if are
-				     * going to run as a non-root user.
-				     */
-				    if (strcmp(*user_runas, "root") != 0 &&
-					initgroups(*user_runas, pw->pw_gid)
-					== -1) {
-					(void) fprintf(stderr,
-					    "%s: cannot set group vector: %s\n",
-					    Argv[0], strerror(errno));
-					exit(1);
-				    }
-#endif /* HAVE_INITGROUPS */
-				    if (setuid(pw->pw_uid)) {
-					(void) fprintf(stderr,
-					    "%s: cannot set uid to %ld: %s\n",
-					    Argv[0], (long) pw->pw_uid,
-					    strerror(errno));
-					exit(1);
-				    }
-				    if (sudo_mode & MODE_RESET_HOME)
-					runas_homedir = pw->pw_dir;
-				}
-				break;
-
-	case PERM_SUDOERS:
-				if (setgid(SUDOERS_GID)) {
-				    perror("setgid(SUDOERS_GID)");
-				    exit(1);
-				}
-
-				/*
-				 * If SUDOERS_UID == 0 and SUDOERS_MODE
-				 * is group readable we use a non-zero
-				 * uid in order to avoid NFS lossage.
-				 * Using uid 1 is a bit bogus but should
-				 * work on all OS's.
-				 */
-				if (SUDOERS_UID == 0) {
-				    if ((SUDOERS_MODE & 040) && seteuid(1)) {
-					perror("seteuid(1)");
-					exit(1);
-				    }
-				} else {
-				    if (seteuid(SUDOERS_UID)) {
-					perror("seteuid(SUDOERS_UID)");
-					exit(1);
-				    }
-				}
-			      	break;
     }
 }
 
