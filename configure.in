@@ -169,7 +169,7 @@ case "$OS" in
 		# but it's good enough for sudo
 		AC_DEFINE(STDC_HEADERS)
 		if test -z "$NROFFPROG" ; then
-		    MAN_POSTINSTALL='/bin/rm -f $(mandir)/sudo.$(mansect).z ; /usr/bin/pack $(mandir)/sudo.$(mansect)'
+		    MAN_POSTINSTALL='	/bin/rm -f $(mandir)/sudo.$(mansect).z ; /usr/bin/pack $(mandir)/sudo.$(mansect)'
 		    if test -d /usr/share/catman/local; then
 			MAN_PREFIX="/usr/share/catman/local"
 		    else
