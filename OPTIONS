@@ -98,6 +98,12 @@ HAL
     define USE_INSULTS as well for this to have any effect.
     This is off by default.
 
+GOONS
+    Insults the user with lines from the "Goon Show" when an incorrect
+    password is entered.  You must define USE_INSULTS as well for this
+    to have any effect.
+    This is off by default.
+
 EDITOR
     This is the default editor used by visudo (and the only editor used unless
     ENV_EDITOR is defined).

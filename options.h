@@ -48,6 +48,7 @@
 #define TRIES_FOR_PASSWORD 3	/* number of tries to enter passwd correctly */
 /*#define USE_INSULTS		/* insult the user for incorrect passwords */
 /*#define HAL			/* 2001-like insults--must define USE_INSULTS */
+/*#define GOONS			/* Goon Show insults--must define USE_INSULTS */
 #define EDITOR _PATH_VI		/* default editor to use */
 #define MAILER _PATH_SENDMAIL	/* what mailer to use */
 #define UMASK 0022		/* umask that the root-run prog should use */
