@@ -53,7 +53,6 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/file.h>
-#include <netinet/in.h>
 
 #include "sudo.h"
 #include "version.h"

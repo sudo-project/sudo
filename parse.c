@@ -77,6 +77,7 @@
 #endif
 
 #include "sudo.h"
+#include "interfaces.h"
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";

@@ -70,19 +70,11 @@
 #include <net/if.h>
 
 #include "sudo.h"
-#include "version.h"
+#include "interfaces.h"
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
-
-/*
- * Globals
- */
-struct interface *interfaces;
-int num_interfaces = 0;
-extern int Argc;
-extern char **Argv;
 
 
 #if defined(SIOCGIFCONF) && !defined(STUB_LOAD_INTERFACES)

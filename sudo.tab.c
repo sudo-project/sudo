@@ -56,7 +56,6 @@ static char yyrcsid[]
 #include <pwd.h>
 #include <sys/types.h>
 #include <sys/param.h>
-#include <netinet/in.h>
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif /* HAVE_STRING_H */

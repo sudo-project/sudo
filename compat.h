@@ -86,29 +86,24 @@
 #endif /* S_IRWXU */
 
 /*
- * Some OS's may not have this.
+ * In case this is not defined in <sys/types.h> or <sys/select.h>
  */
 #ifndef howmany
 #define howmany(x, y)	(((x) + ((y) - 1)) / (y))
 #endif
 
 /*
- * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
- * but that caused problems with various alternate authentication
- * methods.  So, we just define our own and assume that it is >= the
- * system max.
+ * These should be defined in <unistd.h> but not everyone has them.
  */
-#define SUDO_PASS_MAX	256
-
-/*
- * Some OS's lack these
- */
-#ifndef UID_NO_CHANGE
-#  define UID_NO_CHANGE		((uid_t) -1)
-#endif /* UID_NO_CHANGE */
-#ifndef GID_NO_CHANGE
-#  define GID_NO_CHANGE		((gid_t) -1)
-#endif /* GID_NO_CHANGE */
+#ifndef STDIN_FILENO
+#  define	STDIN_FILENO	0
+#endif
+#ifndef STDOUT_FILENO
+#  define	STDOUT_FILENO	1
+#endif
+#ifndef STDERR_FILENO
+#  define	STDERR_FILENO	2
+#endif
 
 /*
  * Emulate seteuid() for AIX via setuidx() -- needed for some versions of AIX
@@ -125,9 +120,9 @@
  */
 #ifndef HAVE_SETEUID
 #  ifdef __hpux
-#    define seteuid(_EUID)	(setresuid(UID_NO_CHANGE, _EUID, UID_NO_CHANGE))
+#    define seteuid(_EUID)	(setresuid((uid_t) -1, _EUID, (uid_t) -1))
 #  else
-#    define seteuid(_EUID)	(setreuid(UID_NO_CHANGE, _EUID))
+#    define seteuid(_EUID)	(setreuid((uid_t) -1, _EUID))
 #  endif /* __hpux */
 #endif /* HAVE_SETEUID */
 

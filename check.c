@@ -50,7 +50,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/file.h>
-#include <netinet/in.h>
 #include <pwd.h>
 #include <grp.h>
 #ifdef HAVE_KERB4

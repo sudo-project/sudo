@@ -29,14 +29,6 @@
 #include "compat.h"
 
 /*
- * IP address and netmask pairs for checking against local interfaces.
- */
-struct interface {
-    struct in_addr addr;
-    struct in_addr netmask;
-};
-
-/*
  * Data structure used in parsing sudoers;
  * top of stack values are the ones that
  * apply when parsing is done & can be
@@ -223,6 +215,14 @@ struct generic_alias {
 #endif
 
 /*
+ * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
+ * but that caused problems with various alternate authentication
+ * methods.  So, we just define our own and assume that it is >= the
+ * system max.
+ */
+#define SUDO_PASS_MAX	256
+
+/*
  * Function prototypes
  */
 #define YY_DECL int yylex __P((void))
@@ -235,7 +235,7 @@ int putenv		__P((const char *));
 #endif
 char *sudo_goodpath	__P((const char *));
 int sudo_setenv		__P((char *, char *));
-char *tgetpass		__P((char *, int));
+char *tgetpass		__P((const char *, int));
 int find_path		__P((char *, char **));
 void log_error		__P((int));
 void inform_user	__P((int));
@@ -243,7 +243,6 @@ void check_user		__P((void));
 int validate		__P((int));
 void set_perms		__P((int, int));
 void remove_timestamp	__P((void));
-void load_interfaces	__P((void));
 int check_secureware	__P((char *));
 void sia_attempt_auth	__P((void));
 int yyparse		__P((void));
@@ -262,8 +261,6 @@ YY_DECL;
 extern char host[];
 extern char *shost;
 extern char cwd[];
-extern struct interface *interfaces;
-extern int num_interfaces;
 extern struct passwd *user_pw_ent;
 extern char *runas_user;
 extern char *tty;

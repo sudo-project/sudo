@@ -110,8 +110,8 @@ TESTOBJS = interfaces.o testsudoers.o
 
 LIBOBJS = @LIBOBJS@ @ALLOCA@
 
-HDRS = sudo.h compat.h version.h insults.h \
-       ins_2001.h ins_classic.h ins_goons.h ins_csops.h sudo.tab.h
+HDRS = sudo.h compat.h version.h insults.h ins_2001.h ins_classic.h \
+       ins_goons.h ins_csops.h interfaces.h sudo.tab.h
 
 VERSION = 1.6
 
@@ -129,9 +129,9 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL \
 
 VERSIONFILES = emul/utime.h check.c compat.h config.h.in dce_pwent.c \
 	       find_path.c getspwuid.c getcwd.c goodpath.c ins_2001.h \
-	       ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c \
+	       ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.h \
 	       logging.c parse.c parse.lex parse.yacc pathnames.h.in \
-	       putenv.c sudo.c sudo.h sudo_setenv.c testsudoers.c \
+	       putenv.c sudo.c sudo.h sudo_setenv.c testsudoers.c interfaces.c \
 	       tgetpass.c utime.c visudo.c secureware.c check_sia.c alloc.c
 
 all: $(PROGS)

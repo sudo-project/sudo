@@ -67,8 +67,7 @@
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
-#include <pathnames.h>
-#include "compat.h"
+#include "sudo.h"
 
 #ifndef TCSASOFT
 #define TCSASOFT	0
@@ -108,8 +107,7 @@ tgetpass(prompt, timeout)
 #else
     int oldmask;
 #endif /* POSIX_SIGNALS */
-    int n, echo;
-    FILE *input, *output;
+    int n, echo, input, output;
     static char buf[SUDO_PASS_MAX + 1];
     fd_set *readfds;
     struct timeval tv;
@@ -130,45 +128,36 @@ tgetpass(prompt, timeout)
      * open /dev/tty for reading/writing if possible or use
      * stdin and stderr instead.
      */
-    if ((input = fopen(_PATH_TTY, "r+")) == NULL) {
-	input = stdin;
-	output = stderr;
-    } else {
-	output = input;
-	setbuf(output, NULL);
+    if ((input = output = open(_PATH_TTY, O_RDWR)) == NULL) {
+	input = STDIN_FILENO;
+	output = STDERR_FILENO;
     }
 
     /* print the prompt */
     if (prompt)
-	fputs(prompt, output);
-
-    /* rewind if necessary */
-    if (input == output) {
-	(void) fflush(output);
-	(void) rewind(output);
-    }
+	(void) write(output, prompt, strlen(prompt) + 1);
 
     /*
      * turn off echo
      */
 #ifdef HAVE_TERMIOS_H
-    (void) tcgetattr(fileno(input), &term);
+    (void) tcgetattr(input, &term);
     if ((echo = (term.c_lflag & ECHO))) {
 	term.c_lflag &= ~ECHO;
-	(void) tcsetattr(fileno(input), TCSAFLUSH|TCSASOFT, &term);
+	(void) tcsetattr(input, TCSAFLUSH|TCSASOFT, &term);
     }
 #else
 #ifdef HAVE_TERMIO_H
-    (void) ioctl(fileno(input), TCGETA, &term);
+    (void) ioctl(input, TCGETA, &term);
     if ((echo = (term.c_lflag & ECHO))) {
 	term.c_lflag &= ~ECHO;
-	(void) ioctl(fileno(input), TCSETA, &term);
+	(void) ioctl(input, TCSETA, &term);
     }
 #else
-    (void) ioctl(fileno(input), TIOCGETP, &ttyb);
+    (void) ioctl(input, TIOCGETP, &ttyb);
     if ((echo = (ttyb.sg_flags & ECHO))) {
 	ttyb.sg_flags &= ~ECHO;
-	(void) ioctl(fileno(input), TIOCSETP, &ttyb);
+	(void) ioctl(input, TIOCSETP, &ttyb);
     }
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
@@ -178,14 +167,10 @@ tgetpass(prompt, timeout)
      */
     if (timeout > 0) {
 	/* setup for select(2) */
-	n = howmany(fileno(input) + 1, NFDBITS) * sizeof(fd_mask);
-	if ((readfds = (fd_set *) malloc(n)) == NULL) {
-	    (void) fprintf(stderr, "Cannot allocate memory: ");
-	    perror("");
-	    return(NULL);
-	}
+	n = howmany(input + 1, NFDBITS) * sizeof(fd_mask);
+	readfds = (fd_set *) emalloc(n);
 	(void) memset((VOID *)readfds, 0, n);
-	FD_SET(fileno(input), readfds);
+	FD_SET(input, readfds);
 
 	/* set timeout for select */
 	tv.tv_sec = timeout;
@@ -195,21 +180,21 @@ tgetpass(prompt, timeout)
 	 * get password or return empty string if nothing to read by timeout
 	 */
 	buf[0] = '\0';
-	while ((n = select(fileno(input) + 1, readfds, 0, 0, &tv)) == -1 &&
+	while ((n = select(input + 1, readfds, 0, 0, &tv)) == -1 &&
 	    errno == EINTR)
 	    ;
-	if (n != 0 && fgets(buf, sizeof(buf), input)) {
-	    n = strlen(buf);
+	if (n != 0 && (n = read(input, buf, sizeof(buf) - 1)) > 0) {
 	    if (buf[n - 1] == '\n')
-		buf[n - 1] = '\0';
+		n--;
+	    buf[n] = '\0';
 	}
 	free(readfds);
     } else {
 	buf[0] = '\0';
-	if (fgets(buf, sizeof(buf), input)) {
-	    n = strlen(buf);
+	if ((n = read(input, buf, sizeof(buf) - 1)) > 0) {
 	    if (buf[n - 1] == '\n')
-		buf[n - 1] = '\0';
+		n--;
+	    buf[n] = '\0';
 	}
     }
 
@@ -217,30 +202,24 @@ tgetpass(prompt, timeout)
 #ifdef HAVE_TERMIOS_H
     if (echo) {
 	term.c_lflag |= ECHO;
-	(void) tcsetattr(fileno(input), TCSAFLUSH|TCSASOFT, &term);
+	(void) tcsetattr(input, TCSAFLUSH|TCSASOFT, &term);
     }
 #else
 #ifdef HAVE_TERMIO_H
     if (echo) {
 	term.c_lflag |= ECHO;
-	(void) ioctl(fileno(input), TCSETA, &term);
+	(void) ioctl(input, TCSETA, &term);
     }
 #else
     if (echo) {
 	ttyb.sg_flags |= ECHO;
-	(void) ioctl(fileno(input), TIOCSETP, &ttyb);
+	(void) ioctl(input, TIOCSETP, &ttyb);
     }
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
-    /* rewind if necessary */
-    if (input == output) {
-	(void) fflush(output);
-	(void) rewind(output);
-    }
-
     /* print a newline since echo is turned off */
-    (void) fputc('\n', output);
+    (void) write(output, "\n", 1);
 
     /* restore old signal mask */
 #ifdef POSIX_SIGNALS
@@ -250,8 +229,8 @@ tgetpass(prompt, timeout)
 #endif
 
     /* close /dev/tty if that's what we opened */
-    if (input != stdin)
-	(void) fclose(input);
+    if (input != STDIN_FILENO)
+	(void) close(input);
 
     return(buf);
 }

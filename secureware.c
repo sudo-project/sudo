@@ -44,7 +44,6 @@
 #endif /* HAVE_STRINGS_H */
 #include <sys/param.h>
 #include <sys/types.h>
-#include <netinet/in.h>
 #include <pwd.h>
 #ifdef __hpux
 #  include <hpsecurity.h>

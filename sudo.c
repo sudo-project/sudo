@@ -77,6 +77,7 @@
 #endif /* HAVE_KERB5 */
 
 #include "sudo.h"
+#include "interfaces.h"
 #include "version.h"
 
 #ifndef STDC_HEADERS
@@ -131,8 +132,8 @@ char *shost;
 char cwd[MAXPATHLEN];
 FILE *sudoers_fp = NULL;
 static char *runas_homedir = NULL;
-extern struct interface *interfaces;
-extern int num_interfaces;
+struct interface *interfaces;
+int num_interfaces;
 extern int printmatches;
 int arg_prompt = 0;	/* was -p used? */
 #ifdef HAVE_KERB5
@@ -869,7 +870,7 @@ check_sudoers()
 	    (void) fprintf(stderr, "%s: fixed mode on %s\n",
 		Argv[0], _PATH_SUDO_SUDOERS);
 	    if (statbuf.st_gid != SUDOERS_GID) {
-		if (!chown(_PATH_SUDO_SUDOERS,GID_NO_CHANGE,SUDOERS_GID)) {
+		if (!chown(_PATH_SUDO_SUDOERS,(uid_t) -1,SUDOERS_GID)) {
 		    (void) fprintf(stderr, "%s: set group on %s\n",
 			Argv[0], _PATH_SUDO_SUDOERS);
 		    statbuf.st_gid = SUDOERS_GID;
