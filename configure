@@ -2866,9 +2866,16 @@ fi
 		# (XXX - should be an option to configure)
 		#STATIC_SUDO=true
 
+		# If using cc, run in ANSI mode (NOTE: bundled cc will warn)
+		if test -z "$GCC"; then
+		    CPPFLAGS="${CPPFLAGS} -Aa"
+		fi
+		# Add -D_HPUX_SOURCE so we don't get strict ANSI headers
+		CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE"
+
 		if test "$CHECKSHADOW" = "true"; then
 		    echo $ac_n "checking for getprpwnam in -lsec""... $ac_c" 1>&6
-echo "configure:2872: checking for getprpwnam in -lsec" >&5
+echo "configure:2879: checking for getprpwnam in -lsec" >&5
 if test -n ""; then
   ac_lib_var=`echo sec'_'getprpwnam | sed 'y% ./+-%___p_%'`
 else
@@ -2880,7 +2887,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lsec  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 2884 "configure"
+#line 2891 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -2891,7 +2898,7 @@ int main() {
 getprpwnam()
 ; return 0; }
 EOF
-if { (eval echo configure:2895: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:2902: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2910,7 +2917,7 @@ if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
 #define HAVE_GETPRPWNAM 1
 EOF
  echo $ac_n "checking for iscomsec in -lsec""... $ac_c" 1>&6
-echo "configure:2914: checking for iscomsec in -lsec" >&5
+echo "configure:2921: checking for iscomsec in -lsec" >&5
 if test -n ""; then
   ac_lib_var=`echo sec'_'iscomsec | sed 'y% ./+-%___p_%'`
 else
@@ -2922,7 +2929,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lsec  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 2926 "configure"
+#line 2933 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -2933,7 +2940,7 @@ int main() {
 iscomsec()
 ; return 0; }
 EOF
-if { (eval echo configure:2937: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:2944: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2971,15 +2978,6 @@ fi
 		    fi
 		fi
 
-		# DCE support (requires ANSI C compiler)
-		if test "$with_DCE" = "yes"; then
-		    if test -n "$GCC"; then
-			CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE"
-		    else
-			CPPFLAGS="${CPPFLAGS} -Aa -D_HPUX_SOURCE"
-		    fi
-		fi
-
 		# AFS support needs -lBSD
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
@@ -2990,6 +2988,13 @@ fi
 		# (XXX - should be an option to configure)
 		#STATIC_SUDO=true
 
+		# If using cc, run in ANSI mode (NOTE: bundled cc will warn)
+		if test -z "$GCC"; then
+		    CPPFLAGS="${CPPFLAGS} -Aa"
+		fi
+		# Add -D_HPUX_SOURCE so we don't get strict ANSI headers
+		CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE"
+
 		cat >> confdefs.h <<\EOF
 #define BROKEN_SYSLOG 1
 EOF
@@ -2999,12 +3004,12 @@ EOF
 		    for ac_func in getspwuid
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:3003: checking for $ac_func" >&5
+echo "configure:3008: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3008 "configure"
+#line 3013 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -3027,7 +3032,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:3031: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:3036: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -3067,12 +3072,7 @@ done
 		    # order of libs in 9.X is important. -lc_r must be last
 		    SUDO_LIBS="${SUDO_LIBS} -ldce -lM -lc_r"
 		    LIBS="${LIBS} -ldce -lM -lc_r"
-
-		    if test -n "$GCC"; then
-			CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE -D_REENTRANT -I/usr/include/reentrant"
-		    else
-			CPPFLAGS="${CPPFLAGS} -Aa -D_HPUX_SOURCE -D_REENTRANT -I/usr/include/reentrant"
-		    fi
+		    CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
 		fi
 
 		# AFS support needs -lBSD
