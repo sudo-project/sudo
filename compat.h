@@ -91,6 +91,10 @@
 #  undef _PASSWD_LEN
 #  define _PASSWD_LEN	128
 #endif /* HAVE_KERB4 */
+#ifdef HAVE_DCE
+#  undef _PASSWD_LEN
+#  define _PASSWD_LEN	256
+#endif /* HAVE_DCE */
 
 /*
  * Some OS's lack these
