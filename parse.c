@@ -32,19 +32,26 @@ static char rcsid[] = "$Id$";
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
-#include <stdlib.h>
+#  include <stdlib.h>
 #endif /* STDC_HEADERS */
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#  include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #ifdef HAVE_STRING_H
-#include <string.h>
+#  include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
-#include <strings.h>
+#  include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#ifdef HAVE_FNMATCH_H
+#  include <fnmatch.h>
+#else
+#  ifndef HAVE_FNMATCH
+#    include "emul/fnmatch.h"
+#  endif /* HAVE_FNMATCH */
+#endif /* HAVE_FNMATCH_H */
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-#include <malloc.h>
+#  include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <ctype.h>
 #include <grp.h>
@@ -55,20 +62,20 @@ static char rcsid[] = "$Id$";
 #include <netdb.h>
 #include <sys/stat.h>
 #if HAVE_DIRENT_H
-# include <dirent.h>
-# define NAMLEN(dirent) strlen((dirent)->d_name)
+#  include <dirent.h>
+#  define NAMLEN(dirent) strlen((dirent)->d_name)
 #else
-# define dirent direct
-# define NAMLEN(dirent) (dirent)->d_namlen
-# if HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# if HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# if HAVE_NDIR_H
-#  include <ndir.h>
-# endif
+#  define dirent direct
+#  define NAMLEN(dirent) (dirent)->d_namlen
+#  if HAVE_SYS_NDIR_H
+#    include <sys/ndir.h>
+#  endif
+#  if HAVE_SYS_DIR_H
+#    include <sys/dir.h>
+#  endif
+#  if HAVE_NDIR_H
+#    include <ndir.h>
+#  endif
 #endif
 
 #include "sudo.h"
@@ -204,63 +211,83 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 	    c++;
     }
 
-    plen = strlen(path);
-    if (path[plen - 1] != '/') {
-#ifdef FAST_MATCH
-	char *p;
-
-	/* only proceed if the basenames of cmnd and path are the same */
-	if ((p = strrchr(path, '/')) == NULL)
-	    p = path;
-	else
-	    p++;
-	if (strcmp(c, p))
-	    return(FALSE);
-#endif /* FAST_MATCH */
-
-	if (stat(path, &pst) < 0)
-	    return(FALSE);
-
+    /*
+     * If the pathname has meta characters in it use fnmatch(3)
+     * to do the matching
+     */
+    if (has_meta(path)) {
 	/*
-	 * Return true if inode/device matches and there are no args
+	 * Return true if fnmatch(3) succeeds and there are no args
 	 * (in sudoers or command) or if the args match;
 	 * else return false.
 	 */
-	if (cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino) {
-	    if (!sudoers_args) {
-		return(TRUE);
-	    } else if (user_args && sudoers_args) {
-		return(compare_args(user_args, sudoers_args));
-	    } else {
-		return(FALSE);
-	    }
-	} else
+	if (fnmatch(path, cmnd, FNM_PATHNAME))
 	    return(FALSE);
-    }
-
-    /*
-     * Grot through path's directory entries, looking for cmnd.
-     */
-    dirp = opendir(path);
-    if (dirp == NULL)
-	return(FALSE);
-
-    while ((dent = readdir(dirp)) != NULL) {
-	strcpy(buf, path);
-	strcat(buf, dent->d_name);
+	if (!sudoers_args)
+	    return(TRUE);
+	else if (user_args && sudoers_args)
+	    return(compare_args(user_args, sudoers_args));
+	else
+	    return(FALSE);
+    } else {
+	plen = strlen(path);
+	if (path[plen - 1] != '/') {
 #ifdef FAST_MATCH
-	/* only stat if basenames are not the same */
-	if (strcmp(c, dent->d_name))
-	    continue;
-#endif /* FAST_MATCH */
-	if (stat(buf, &pst) < 0)
-	    continue;
-	if (cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino)
-	    break;
-    }
+	    char *p;
 
-    closedir(dirp);
-    return(dent != NULL);
+	    /* Only proceed if the basenames of cmnd and path are the same */
+	    if ((p = strrchr(path, '/')) == NULL)
+		p = path;
+	    else
+		p++;
+	    if (strcmp(c, p))
+		return(FALSE);
+#endif /* FAST_MATCH */
+
+	    if (stat(path, &pst) < 0)
+		return(FALSE);
+
+	    /*
+	     * Return true if inode/device matches and there are no args
+	     * (in sudoers or command) or if the args match;
+	     * else return false.
+	     */
+	    if (cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino) {
+		if (!sudoers_args) {
+		    return(TRUE);
+		} else if (user_args && sudoers_args) {
+		    return(compare_args(user_args, sudoers_args));
+		} else {
+		    return(FALSE);
+		}
+	    } else
+		return(FALSE);
+	}
+
+	/*
+	 * Grot through path's directory entries, looking for cmnd.
+	 */
+	dirp = opendir(path);
+	if (dirp == NULL)
+	    return(FALSE);
+
+	while ((dent = readdir(dirp)) != NULL) {
+	    strcpy(buf, path);
+	    strcat(buf, dent->d_name);
+#ifdef FAST_MATCH
+	    /* only stat if basenames are not the same */
+	    if (strcmp(c, dent->d_name))
+		continue;
+#endif /* FAST_MATCH */
+	    if (stat(buf, &pst) < 0)
+		continue;
+	    if (cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino)
+		break;
+	}
+
+	closedir(dirp);
+	return(dent != NULL);
+    }
 }
 
 
@@ -397,18 +424,21 @@ static int compare_args(user_args, sudoers_args)
 
     for (ua=user_args, sa=sudoers_args; *ua && *sa; ua++, sa++) {
 	/* only do wildcard match if there are meta chars */
-	/* XXX - is this really any faster than wildmat() for all? */
+	/* XXX - is this really any faster than fnmatch() for all? */
 	if (has_meta(*sa)) {
-	    if (wildmat(*ua, *sa) != 1)
+	    if (fnmatch(*sa, *ua, FNM_PATHNAME))
 		return(FALSE);
 	} else {
-	    if (strcmp(*ua, *sa))
+	    if (strcmp(*sa, *ua))
 		return(FALSE);
 	}
     }
 
-    /* return false unless we got to the end of each */
-    if (*ua || *sa)
+    /*
+     * Return false unless we got to the end of each or the
+     * last part of sudoers_args we looked at consists of '*'
+     */
+    if (*sa-- || (*ua && **sa != '*' && *(*sa + 1) != '\0'))
 	return(FALSE);
     else
 	return(TRUE);
