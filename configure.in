@@ -87,6 +87,10 @@ case "$OS" in
 		if test -z "$GCC"; then
 		    STATIC_FLAGS="-non_shared"
 		fi
+		# C2 security stuff
+		if test -n "$C2"; then
+		    LIBS="${LIBS} -lsecurity"
+		fi
 		;;
     "irix")	echo "Looks like IRIX"
 		# configure doesn't think irix has stdc headers
