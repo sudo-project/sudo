@@ -174,7 +174,8 @@ The \-V (version) option causes
 to print the version number and exit.
 .IP \-l
 The \-l (list) option will list out the allowed and forbidden commands
-for the user on the current host.
+for the user on the current host.  Note that Command Aliases are
+currently not expanded.
 .IP \-h
 The \-h (help) option causes
 .B sudo
@@ -274,6 +275,9 @@ See the HISTORY file in the sudo distribution for more details.
 .fi
 .sp
 Please send all bugs, comments, and changes to sudo\-bugs@cs.colorado.edu.
+.SH BUGS
+The \-l (list) option should expand Command Aliases.
+a password.
 .SH DISCLAIMER
 This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
