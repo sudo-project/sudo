@@ -204,6 +204,12 @@ Special features/options:
         If you don't have /usr/include/bsd_auth.h then you cannot
         use this.
 
+  --disable-root-mailer
+        By default sudo will run the mailer as root when tattling
+        on a user so as to prevent that user from killing the mailer.
+        With this option, sudo will run the mailer as the invoking
+        user which some people consider to be safer.
+
   --disable-saved-ids
 	Disable use of POSIX saved IDs.  Normally, sudo will try to
 	use POSIX saved IDs if they are supported.  However, some
