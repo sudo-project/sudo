@@ -23,13 +23,26 @@ INSTALL NOTES
 
    NOTE2: if you use AFS, you need to run configure with --with-AFS
 
-   NOTE3: if you use kerberos version 4 you need to run configure
+   NOTE3: if you use DCE integrated login services (ie, the DCE security
+   daemon), then you need to run configure with --with-DCE.  The DCE
+   configuration option is presently known to work on HP-UX 10.0 and
+   HP-UX 9.X systems, where sudo is built with either gcc 2.7.0 or HP's
+   ANSI C compiler.  To get the DCE version to compile on other platforms,
+   you will probably have to fiddle with the configure file and/or the
+   source code.
+
+   NOTE4: if you use kerberos version 4 you need to run configure
    with --with-kerb4.  This has only been tested with the Cygnus
    kerberos package (CNS) but should work for vanilla kerberos too.
    If you use kerberos version 5 you need to run configure with --with-kerb5.
    This enables the same code as --with-kerb4 but also adds in the
    kerb4 compatibility libraries.  Kerb5 support is currently untested,
    please let us know if it work for you.
+
+   NOTE5: Solaries users beware, you need to make sure that the
+   "real" (ie: non-ucb) cc is in your path (unless you use gcc).
+   Sudo is designed to compile with the standard C compiler and
+   will not build correctly with /usr/ucb/cc.
 
 1) Read the OPTIONS file and then edit options.h to enable/disable the
    options you may or may not want.  You should not have to edit
@@ -87,7 +100,10 @@ d) If you are *not* running sendmail or some other mailer, you should
 e) If you are running AIX and sudo says that it cannot find a user
    that is clearly listed in the sudoers file try compiling with
    optimization turned off.  The AIX C compiler produces incorrect
-   code with the -O flag on some versions of AIX.
+   code with the -O flag on some versions of AIX.  In fact, I've
+   run into some nasty bugs in the C compiler on an AIX 3.2.x box
+   that just produced incorrect code, even without opitmization.
+   Morale of the story, use gcc if you can...
 
 Please send changes, bugs, security holes, and gripes to:
     sudo-bugs@cs.colorado.edu
