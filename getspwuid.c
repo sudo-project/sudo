@@ -75,16 +75,11 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
- * Global variables (yuck)
+ * Exported for auth/secureware.c
  */
 #if defined(HAVE_GETPRPWNAM) && defined(__alpha)
 int crypt_type = INT_MAX;
 #endif /* HAVE_GETPRPWNAM && __alpha */
-
-extern VOID *pwcache_get		__P((enum cmptype, VOID *));
-extern int  pwcache_put			__P((enum cmptype, VOID *));
-extern struct passwd *sudo_pwdup	__P((const struct passwd *));
-extern struct group  *sudo_grdup	__P((const struct group *));
 
 /*
  * Return a copy of the encrypted password for the user described by pw.
@@ -166,83 +161,9 @@ sudo_getepw(pw)
     return(estrdup(pw->pw_passwd));
 }
 
-/*
- * Get a password entry by uid and allocate space for it.
- * Fills in pw_passwd from shadow file if necessary.
- */
-struct passwd *
-sudo_getpwuid(uid)
-    uid_t uid;
-{
-    struct passwd key, *pw;
-
-    key.pw_uid = uid;
-    if ((pw = pwcache_get(byuid, &key)) != NULL)
-	return(pw);
-    /*
-     * Cache passwd db entry if it exists or a negative response if not.
-     */
-    if ((pw = getpwuid(uid)) != NULL) {
-	pw = sudo_pwdup(pw);
-	if (!pwcache_put(bypwnam, (VOID *) pw))
-	    errorx(1, "unable to cache user name, already exists");
-	if (!pwcache_put(byuid, (VOID *) pw))
-	    errorx(1, "unable to cache uid, already exists");
-	return(pw);
-    } else {
-	pw = emalloc(sizeof(*pw));
-	memset(pw, 0, sizeof(*pw));
-	pw->pw_uid = uid;
-	if (!pwcache_put(byuid, (VOID *) pw))
-	    errorx(1, "unable to cache uid, already exists");
-	return(NULL);
-    }
-}
-
-/*
- * Get a password entry by name and allocate space for it.
- * Fills in pw_passwd from shadow file if necessary.
- */
-struct passwd *
-sudo_getpwnam(name)
-    const char *name;
-{
-    struct passwd key, *pw;
-    size_t len;
-    char *cp;
-
-    key.pw_name = (char *) name;
-    if ((pw = pwcache_get(bypwnam, &key)) != NULL)
-	return(pw);
-    /*
-     * Cache passwd db entry if it exists or a negative response if not.
-     */
-    if ((pw = getpwnam(name)) != NULL) {
-	pw = sudo_pwdup(pw);
-	if (!pwcache_put(bypwnam, (VOID *) pw))
-	    errorx(1, "unable to cache user name, already exists");
-	if (!pwcache_put(byuid, (VOID *) pw))
-	    errorx(1, "unable to cache uid, already exists");
-	return(pw);
-    } else {
-	len = strlen(name) + 1;
-	cp = emalloc(sizeof(*pw) + len);
-	memset(cp, 0, sizeof(*pw));
-	pw = (struct passwd *) cp;
-	cp += sizeof(*pw);
-	memcpy(cp, name, len);
-	pw->pw_name = cp;
-	pw->pw_uid = (uid_t) -1;
-	if (!pwcache_put(bypwnam, (VOID *) pw))
-	    errorx(1, "unable to cache user name, already exists");
-	return(NULL);
-    }
-}
-
 void
-sudo_setpwent()
+sudo_setspent()
 {
-    setpwent();
 #ifdef HAVE_GETPRPWNAM
     setprpwent();
 #endif
@@ -261,9 +182,8 @@ sudo_setpwent()
 }
 
 void
-sudo_endpwent()
+sudo_endspent()
 {
-    endpwent();
 #ifdef HAVE_GETPRPWNAM
     endprpwent();
 #endif
@@ -279,87 +199,4 @@ sudo_endpwent()
 #ifdef HAVE_GETAUTHUID
     endauthent();
 #endif
-}
-
-void
-sudo_setgrent()
-{
-    setgrent();
-}
-
-void
-sudo_endgrent()
-{
-    endgrent();
-}
-
-/*
- * Get a group entry by gid and allocate space for it.
- */
-struct group *
-sudo_getgrgid(gid)
-    gid_t gid;
-{
-    struct group key, *gr;
-
-    key.gr_gid = gid;
-    if ((gr = pwcache_get(bygid, &key)) != NULL)
-	return(gr);
-    /*
-     * Cache group db entry if it exists or a negative response if not.
-     */
-    if ((gr = getgrgid(gid)) != NULL) {
-	gr = sudo_grdup(gr);
-	if (!pwcache_put(bygrnam, (VOID *) gr))
-	    errorx(1, "unable to cache group name, already exists");
-	if (!pwcache_put(bygid, (VOID *) gr))
-	    errorx(1, "unable to cache gid, already exists");
-	return(gr);
-    } else {
-	gr = emalloc(sizeof(*gr));
-	memset(gr, 0, sizeof(*gr));
-	gr->gr_gid = gid;
-	if (!pwcache_put(bygid, (VOID *) gr))
-	    errorx(1, "unable to cache gid, already exists");
-	return(NULL);
-    }
-}
-
-/*
- * Get a group entry by name and allocate space for it.
- */
-struct group *
-sudo_getgrnam(name)
-    const char *name;
-{
-    struct group key, *gr;
-    size_t len;
-    char *cp;
-
-    key.gr_name = (char *) name;
-    if ((gr = pwcache_get(bygrnam, &key)) != NULL)
-	return(gr);
-    /*
-     * Cache group db entry if it exists or a negative response if not.
-     */
-    if ((gr = getgrnam(name)) != NULL) {
-	gr = sudo_grdup(gr);
-	if (!pwcache_put(bygrnam, (VOID *) gr))
-	    errorx(1, "unable to cache group name, already exists");
-	if (!pwcache_put(bygid, (VOID *) gr))
-	    errorx(1, "unable to cache gid, already exists");
-	return(gr);
-    } else {
-	len = strlen(name) + 1;
-	cp = emalloc(sizeof(*gr) + len);
-	memset(cp, 0, sizeof(*gr));
-	gr = (struct group *) cp;
-	cp += sizeof(*gr);
-	memcpy(cp, name, len);
-	gr->gr_name = cp;
-	gr->gr_gid = (gid_t) -1;
-	if (!pwcache_put(bygrnam, (VOID *) gr))
-	    errorx(1, "unable to cache group name, already exists");
-	return(NULL);
-    }
 }

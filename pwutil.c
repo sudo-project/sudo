@@ -55,116 +55,39 @@
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
+#ifdef MYPW
+void my_setgrfile __P((const char *));
+void my_setgrent __P((void));
+void my_endgrent __P((void));
+struct group *my_getgrnam __P((const char *));
+struct group *my_getgruid __P((gid_t));
+#define setgrent()	my_setgrent()
+#define endgrent()	my_endgrent()
+#define getgrnam(n)	my_getgrnam(n)
+#define getgruid(g)	my_getgruid(g)
+
+void my_setpwfile __P((const char *));
+void my_setpwent __P((void));
+void my_endpwent __P((void));
+struct passwd *my_getpwnam __P((const char *));
+struct passwd *my_getpwuid __P((uid_t));
+#define setpwent()	my_setpwent()
+#define endpwent()	my_endpwent()
+#define getpwnam(n)	my_getpwnam(n)
+#define getpwuid(u)	my_getpwuid(u)
+#endif
+
 /*
  * The passwd and group caches.
  */
 static struct rbtree *pwcache_byuid, *pwcache_byname;
 static struct rbtree *grcache_bygid, *grcache_byname;
 
-static int  cmp_pwuid		__P((const VOID *, const VOID *));
-static int  cmp_pwnam		__P((const VOID *, const VOID *));
-static int  cmp_grgid		__P((const VOID *, const VOID *));
-static int  cmp_grnam		__P((const VOID *, const VOID *));
-static void pw_free		__P((VOID *));
-       VOID *pwcache_get	__P((enum cmptype, VOID *));
-       int  pwcache_put		__P((enum cmptype, VOID *));
-
-void
-pwcache_init()
-{
-    pwcache_byuid = rbcreate(cmp_pwuid);
-    pwcache_byname = rbcreate(cmp_pwnam);
-    grcache_bygid = rbcreate(cmp_grgid);
-    grcache_byname = rbcreate(cmp_grnam);
-}
-
-void
-pwcache_destroy()
-{
-    if (pwcache_byuid) {
-	rbdestroy(pwcache_byuid, pw_free);
-	pwcache_byuid = NULL;
-    }
-    if (pwcache_byname) {
-	rbdestroy(pwcache_byname, NULL);
-	pwcache_byname = NULL;
-    }
-    if (grcache_bygid) {
-	rbdestroy(grcache_bygid, free);
-	grcache_bygid = NULL;
-    }
-    if (grcache_byname) {
-	rbdestroy(grcache_byname, NULL);
-	grcache_byname = NULL;
-    }
-}
-
-/*
- * Get an entry in the passwd/group cache.
- */
-VOID *
-pwcache_get(how, key)
-    enum cmptype how;
-    VOID *key;
-{
-    struct rbnode *node;
-    struct passwd *pw;
-    struct group *gr;
-
-    switch (how) {
-	case bypwnam:
-	    if ((node = rbfind(pwcache_byname, key)) != NULL) {
-		pw = (struct passwd *) node->data;
-		return(pw->pw_uid != (uid_t) -1 ? pw : NULL);
-	    }
-	    break;
-	case byuid:
-	    if ((node = rbfind(pwcache_byuid, key)) != NULL) {
-		pw = (struct passwd *) node->data;
-		return(pw->pw_name != NULL ? pw : NULL);
-	    }
-	    break;
-	case bygrnam:
-	    if ((node = rbfind(grcache_bygid, key)) != NULL) {
-		gr = (struct group *) node->data;
-		return(gr->gr_gid != (gid_t) -1 ? gr : NULL);
-	    }
-	    break;
-	case bygid:
-	    if ((node = rbfind(grcache_bygid, key)) != NULL) {
-		gr = (struct group *) node->data;
-		return(gr->gr_name != NULL ? gr : NULL);
-	    }
-	    break;
-    }
-    return(NULL);
-}
-
-/*
- * Store an entry in the passwd/group cache.
- * Returns TRUE on success and FALSE if the entry already exists.
- */
-int
-pwcache_put(how, data)
-    enum cmptype how;
-    VOID *data;
-{
-    switch (how) {
-	case bypwnam:
-	    return(rbinsert(pwcache_byname, data) == NULL);
-	    break;
-	case byuid:
-	    return(rbinsert(pwcache_byuid, data) == NULL);
-	    break;
-	case bygrnam:
-	    return(rbinsert(grcache_byname, data) == NULL);
-	    break;
-	case bygid:
-	    return(rbinsert(grcache_bygid, data) == NULL);
-	    break;
-    }
-    return(FALSE);
-}
+static int  cmp_pwuid	__P((const VOID *, const VOID *));
+static int  cmp_pwnam	__P((const VOID *, const VOID *));
+static int  cmp_grgid	__P((const VOID *, const VOID *));
+static int  cmp_grnam	__P((const VOID *, const VOID *));
+static void pw_free	__P((VOID *));
 
 /*
  * Compare by uid.
@@ -196,17 +119,14 @@ cmp_pwnam(v1, v2)
  * Dynamically allocate space for a struct password and the constituent parts
  * that we care about.  Fills in pw_passwd from shadow file.
  */
-struct passwd *
+static struct passwd *
 sudo_pwdup(pw)
     const struct passwd *pw;
 {
     char *cp;
-    const char *pw_passwd, *pw_shell;
+    const char *pw_shell;
     size_t nsize, psize, csize, gsize, dsize, ssize, total;
     struct passwd *newpw;
-
-    /* Get shadow password if available. */
-    pw_passwd = sudo_getepw(pw);
 
     /* If shell field is empty, expand to _PATH_BSHELL. */
     pw_shell = (pw->pw_shell == NULL || pw->pw_shell[0] == '\0')
@@ -219,8 +139,8 @@ sudo_pwdup(pw)
 	    nsize = strlen(pw->pw_name) + 1;
 	    total += nsize;
     }
-    if (pw_passwd) {
-	    psize = strlen(pw_passwd) + 1;
+    if (pw->pw_passwd) {
+	    psize = strlen(pw->pw_passwd) + 1;
 	    total += psize;
     }
 #ifdef HAVE_LOGIN_CAP_H
@@ -257,7 +177,7 @@ sudo_pwdup(pw)
 	    cp += nsize;
     }
     if (psize) {
-	    (void)memcpy(cp, pw_passwd, psize);
+	    (void)memcpy(cp, pw->pw_passwd, psize);
 	    newpw->pw_passwd = cp;
 	    cp += psize;
     }
@@ -285,6 +205,87 @@ sudo_pwdup(pw)
     }
 
     return(newpw);
+}
+
+/*
+ * Get a password entry by uid and allocate space for it.
+ * Fills in pw_passwd from shadow file if necessary.
+ */
+struct passwd *
+sudo_getpwuid(uid)
+    uid_t uid;
+{
+    struct passwd key, *pw;
+    struct rbnode *node;
+
+    key.pw_uid = uid;
+    if ((node = rbfind(pwcache_byuid, &key)) != NULL) {
+	pw = (struct passwd *) node->data;
+	return(pw->pw_name != NULL ? pw : NULL);
+    }
+    /*
+     * Cache passwd db entry if it exists or a negative response if not.
+     */
+    if ((pw = getpwuid(uid)) != NULL) {
+	pw->pw_passwd = sudo_getepw(pw);	/* get shadow password */
+	pw = sudo_pwdup(pw);
+	if (rbinsert(pwcache_byname, (VOID *) pw) != NULL)
+	    errorx(1, "unable to cache user name, already exists");
+	if (rbinsert(pwcache_byuid, (VOID *) pw) != NULL)
+	    errorx(1, "unable to cache uid, already exists");
+	return(pw);
+    } else {
+	pw = emalloc(sizeof(*pw));
+	memset(pw, 0, sizeof(*pw));
+	pw->pw_uid = uid;
+	if (rbinsert(pwcache_byuid, (VOID *) pw) != NULL)
+	    errorx(1, "unable to cache uid, already exists");
+	return(NULL);
+    }
+}
+
+/*
+ * Get a password entry by name and allocate space for it.
+ * Fills in pw_passwd from shadow file if necessary.
+ */
+struct passwd *
+sudo_getpwnam(name)
+    const char *name;
+{
+    struct passwd key, *pw;
+    struct rbnode *node;
+    size_t len;
+    char *cp;
+
+    key.pw_name = (char *) name;
+    if ((node = rbfind(pwcache_byname, &key)) != NULL) {
+	pw = (struct passwd *) node->data;
+	return(pw->pw_uid != (uid_t) -1 ? pw : NULL);
+    }
+    /*
+     * Cache passwd db entry if it exists or a negative response if not.
+     */
+    if ((pw = getpwnam(name)) != NULL) {
+	pw->pw_passwd = sudo_getepw(pw);	/* get shadow password */
+	pw = sudo_pwdup(pw);
+	if (rbinsert(pwcache_byname, (VOID *) pw) != NULL)
+	    errorx(1, "unable to cache user name, already exists");
+	if (rbinsert(pwcache_byuid, (VOID *) pw) != NULL)
+	    errorx(1, "unable to cache uid, already exists");
+	return(pw);
+    } else {
+	len = strlen(name) + 1;
+	cp = emalloc(sizeof(*pw) + len);
+	memset(cp, 0, sizeof(*pw));
+	pw = (struct passwd *) cp;
+	cp += sizeof(*pw);
+	memcpy(cp, name, len);
+	pw->pw_name = cp;
+	pw->pw_uid = (uid_t) -1;
+	if (rbinsert(pwcache_byname, (VOID *) pw) != NULL)
+	    errorx(1, "unable to cache user name, already exists");
+	return(NULL);
+    }
 }
 
 /*
@@ -344,6 +345,26 @@ sudo_fakepwnam(user)
 	node->data = (VOID *) pw;
     }
     return(pw);
+}
+
+void
+sudo_setpwent()
+{
+    setpwent();
+    sudo_setspent();
+    pwcache_byuid = rbcreate(cmp_pwuid);
+    pwcache_byname = rbcreate(cmp_pwnam);
+}
+
+void
+sudo_endpwent()
+{
+    endpwent();
+    sudo_endspent();
+    rbdestroy(pwcache_byuid, pw_free);
+    pwcache_byuid = NULL;
+    rbdestroy(pwcache_byname, NULL);
+    pwcache_byname = NULL;
 }
 
 static void
@@ -441,4 +462,99 @@ sudo_grdup(gr)
     }
 
     return(newgr);
+}
+
+/*
+ * Get a group entry by gid and allocate space for it.
+ */
+struct group *
+sudo_getgrgid(gid)
+    gid_t gid;
+{
+    struct group key, *gr;
+    struct rbnode *node;
+
+    key.gr_gid = gid;
+    if ((node = rbfind(grcache_bygid, &key)) != NULL) {
+	gr = (struct group *) node->data;
+	return(gr->gr_name != NULL ? gr : NULL);
+    }
+    /*
+     * Cache group db entry if it exists or a negative response if not.
+     */
+    if ((gr = getgrgid(gid)) != NULL) {
+	gr = sudo_grdup(gr);
+	if (rbinsert(grcache_byname, (VOID *) gr) != NULL)
+	    errorx(1, "unable to cache group name, already exists");
+	if (rbinsert(grcache_bygid, (VOID *) gr) != NULL)
+	    errorx(1, "unable to cache gid, already exists");
+	return(gr);
+    } else {
+	gr = emalloc(sizeof(*gr));
+	memset(gr, 0, sizeof(*gr));
+	gr->gr_gid = gid;
+	if (rbinsert(grcache_bygid, (VOID *) gr) != NULL)
+	    errorx(1, "unable to cache gid, already exists");
+	return(NULL);
+    }
+}
+
+/*
+ * Get a group entry by name and allocate space for it.
+ */
+struct group *
+sudo_getgrnam(name)
+    const char *name;
+{
+    struct group key, *gr;
+    struct rbnode *node;
+    size_t len;
+    char *cp;
+
+    key.gr_name = (char *) name;
+    if ((node = rbfind(grcache_byname, &key)) != NULL) {
+	gr = (struct group *) node->data;
+	return(gr->gr_gid != (gid_t) -1 ? gr : NULL);
+    }
+    /*
+     * Cache group db entry if it exists or a negative response if not.
+     */
+    if ((gr = getgrnam(name)) != NULL) {
+	gr = sudo_grdup(gr);
+	if (rbinsert(grcache_byname, (VOID *) gr) != NULL)
+	    errorx(1, "unable to cache group name, already exists");
+	if (rbinsert(grcache_bygid, (VOID *) gr) != NULL)
+	    errorx(1, "unable to cache gid, already exists");
+	return(gr);
+    } else {
+	len = strlen(name) + 1;
+	cp = emalloc(sizeof(*gr) + len);
+	memset(cp, 0, sizeof(*gr));
+	gr = (struct group *) cp;
+	cp += sizeof(*gr);
+	memcpy(cp, name, len);
+	gr->gr_name = cp;
+	gr->gr_gid = (gid_t) -1;
+	if (rbinsert(grcache_byname, (VOID *) gr) != NULL)
+	    errorx(1, "unable to cache group name, already exists");
+	return(NULL);
+    }
+}
+
+void
+sudo_setgrent()
+{
+    setgrent();
+    grcache_bygid = rbcreate(cmp_grgid);
+    grcache_byname = rbcreate(cmp_grnam);
+}
+
+void
+sudo_endgrent()
+{
+    endgrent();
+    rbdestroy(grcache_bygid, free);
+    grcache_bygid = NULL;
+    rbdestroy(grcache_byname, NULL);
+    grcache_byname = NULL;
 }
