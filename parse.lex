@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2001 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * This code is derived from software contributed by Chris Jepeway
@@ -59,7 +59,7 @@
 #include <sys/param.h>
 #include "sudo.h"
 #include "parse.h"
-#include "sudo.tab.h"
+#include <sudo.tab.h>
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
@@ -94,85 +94,107 @@ OCTET			(1?[0-9]{1,2})|(2[0-4][0-9])|(25[0-5])
 DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
 HOSTNAME		[[:alnum:]_-]+
 WORD			([^@!=:,\(\) \t\n\\]|\\[^\n])+
+DEFVAR			[a-z_]+
 
-%s	GOTCMND
+/* XXX - convert GOTRUNAS to exclusive state (GOTDEFS cannot be) */
 %s	GOTRUNAS
 %s	GOTDEFS
+%x	GOTCMND
+%x	STARTDEFS
+%x	INDEFS
 
 %%
-[ \t]+			{			/* throw away space/tabs */
-			    sawspace = TRUE;	/* but remember for fill_args */
+<GOTDEFS>[[:blank:]]+	BEGIN STARTDEFS;
+
+<STARTDEFS>{DEFVAR}	{
+			    BEGIN INDEFS;
+			    LEXTRACE("DEFVAR ");
+			    fill(yytext, yyleng);
+			    return(DEFVAR);
 			}
 
-\\[ \t]*\n		{
-			    sawspace = TRUE;	/* remember for fill_args */
-			    ++sudolineno;
-			    LEXTRACE("\n\t");
-			}			/* throw away EOL after \ */
+<INDEFS>{
+    ,			{
+			    BEGIN STARTDEFS;
+			    LEXTRACE(", ");
+			    return(',');
+			}			/* return ',' */
 
-<GOTCMND>\\[:\,=\\ \t#]	{
+    =			{
+			    LEXTRACE("= ");
+			    return('=');
+			}			/* return '=' */
+
+    \+=			{
+			    LEXTRACE("+= ");
+			    return('+');
+			}			/* return '+' */
+
+    -=			{
+			    LEXTRACE("-= ");
+			    return('-');
+			}			/* return '-' */
+
+    \"([^\"]|\\\")+\"	{
+			    LEXTRACE("WORD(1) ");
+			    fill(yytext + 1, yyleng - 2);
+			    return(WORD);
+			}
+}
+
+<GOTCMND>{
+    \\[:\,=\\ \t#]	{
 			    LEXTRACE("QUOTEDCHAR ");
 			    fill_args(yytext + 1, 1, sawspace);
 			    sawspace = FALSE;
 			}
 
-<GOTDEFS>\"([^\"]|\\\")+\"	{
-			    LEXTRACE("WORD(1) ");
-			    fill(yytext + 1, yyleng - 2);
-			    return(WORD);
-			}
-
-<GOTDEFS>(#.*)?\n	{
-			    BEGIN INITIAL;
-			    ++sudolineno;
-			    LEXTRACE("\n");
-			    return(COMMENT);
-			}
-
-<GOTCMND>[:\,=\n]	{
+    [#:\,=\n]		{
 			    BEGIN INITIAL;
 			    unput(*yytext);
 			    return(COMMAND);
 			}			/* end of command line args */
 
-\n			{
-			    ++sudolineno;
-			    LEXTRACE("\n");
-			    BEGIN INITIAL;
-			    return(COMMENT);
-			}			/* return newline */
-
-<INITIAL>#.*\n		{
-			    ++sudolineno;
-			    LEXTRACE("\n");
-			    return(COMMENT);
-			}			/* return comments */
-
-<GOTCMND>[^\\:, \t\n]+ {
+    [^\\:, \t\n]+ 	{
 			    LEXTRACE("ARG ");
 			    fill_args(yytext, yyleng, sawspace);
 			    sawspace = FALSE;
-			  }			/* a command line arg */
+			}			/* a command line arg */
+}
 
-,			{
-			    LEXTRACE(", ");
-			    return(',');
-			}			/* return ',' */
-
-!+			{
-			    if (yyleng % 2 == 1)
-				return('!');	/* return '!' */
+<INITIAL>^Defaults[:@]?	{
+			    BEGIN GOTDEFS;
+			    switch (yytext[8]) {
+				case ':':
+				    LEXTRACE("DEFAULTS_USER ");
+				    return(DEFAULTS_USER);
+				case '@':
+				    LEXTRACE("DEFAULTS_HOST ");
+				    return(DEFAULTS_HOST);
+				default:
+				    LEXTRACE("DEFAULTS ");
+				    return(DEFAULTS);
+			    }
 			}
 
-=			{
-			    LEXTRACE("= ");
-			    return('=');
-			}			/* return '=' */
-
-:			{
-			    LEXTRACE(": ");
-			    return(':');
-			}			/* return ':' */
+<INITIAL>^(Host|Cmnd|User|Runas)_Alias	{
+			    fill(yytext, yyleng);
+			    switch (*yytext) {
+				case 'H':
+				    LEXTRACE("HOSTALIAS ");
+				    return(HOSTALIAS);
+				case 'C':
+				    LEXTRACE("CMNDALIAS ");
+				    return(CMNDALIAS);
+				case 'U':
+				    LEXTRACE("USERALIAS ");
+				    return(USERALIAS);
+				case 'R':
+				    LEXTRACE("RUNASALIAS ");
+				    BEGIN GOTRUNAS;
+				    return(RUNASALIAS);
+			    }
+			}
 
 NOPASSWD[[:blank:]]*:	{
 				/* cmnd does not require passwd for this user */
@@ -218,8 +240,7 @@ PASSWD[[:blank:]]*:	{
 				return (RUNAS);
 			}
 
-<GOTRUNAS>[[:upper:]][[:upper:][:digit:]_]* {
-			    /* Runas_Alias user can run command as or ALL */
+[[:upper:]][[:upper:][:digit:]_]* {
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
 				return(ALL);
@@ -241,61 +262,6 @@ PASSWD[[:blank:]]*:	{
 			    BEGIN INITIAL;
 			}
 
-[[:upper:]][[:upper:][:digit:]_]*	{
-			    if (strcmp(yytext, "ALL") == 0) {
-				LEXTRACE("ALL ");
-				return(ALL);
-			    } else {
-				fill(yytext, yyleng);
-				LEXTRACE("ALIAS ");
-				return(ALIAS);
-			    }
-			}
-
-<GOTDEFS>{WORD}		{
-			    LEXTRACE("WORD(3) ");
-			    fill(yytext, yyleng);
-			    return(WORD);
-			}
-
-<INITIAL>^Defaults[:@]?	{
-			    BEGIN GOTDEFS;
-			    if (yyleng == 9) {
-				switch (yytext[8]) {
-				    case ':' :
-					LEXTRACE("DEFAULTS_USER ");
-					return(DEFAULTS_USER);
-				    case '@' :
-					LEXTRACE("DEFAULTS_HOST ");
-					return(DEFAULTS_HOST);
-				}
-			    } else {
-				LEXTRACE("DEFAULTS ");
-				return(DEFAULTS);
-			    }
-			}
-
-<INITIAL>^(Host|Cmnd|User|Runas)_Alias	{
-			    fill(yytext, yyleng);
-			    if (*yytext == 'H') {
-				LEXTRACE("HOSTALIAS ");
-				return(HOSTALIAS);
-			    }
-			    if (*yytext == 'C') {
-				LEXTRACE("CMNDALIAS ");
-				return(CMNDALIAS);
-			    }
-			    if (*yytext == 'U') {
-				LEXTRACE("USERALIAS ");
-				return(USERALIAS);
-			    }
-			    if (*yytext == 'R') {
-				LEXTRACE("RUNASALIAS ");
-				BEGIN GOTRUNAS;
-				return(RUNASALIAS);
-			    }
-			}
-
 \/(\\[\,:= \t#]|[^\,:=\\ \t\n#])+	{
 			    /* directories can't have args... */
 			    if (yytext[yyleng - 1] == '/') {
@@ -309,14 +275,58 @@ PASSWD[[:blank:]]*:	{
 			    }
 			}			/* a pathname */
 
-<INITIAL>{WORD}		{
+<INITIAL,GOTDEFS,INDEFS>{WORD} {
 			    /* a word */
 			    fill(yytext, yyleng);
-			    LEXTRACE("WORD(4) ");
+			    LEXTRACE("WORD(3) ");
 			    return(WORD);
 			}
 
-.			{
+,			{
+			    LEXTRACE(", ");
+			    return(',');
+			}			/* return ',' */
+
+=			{
+			    LEXTRACE("= ");
+			    return('=');
+			}			/* return '=' */
+
+:			{
+			    LEXTRACE(": ");
+			    return(':');
+			}			/* return ':' */
+
+<*>!+			{
+			    if (yyleng % 2 == 1)
+				return('!');	/* return '!' */
+			}
+
+<*>\n			{
+			    BEGIN INITIAL;
+			    ++sudolineno;
+			    LEXTRACE("\n");
+			    return(COMMENT);
+			}			/* return newline */
+
+<*>[[:blank:]]+		{			/* throw away space/tabs */
+			    sawspace = TRUE;	/* but remember for fill_args */
+			}
+
+<*>\\[[:blank:]]*\n	{
+			    sawspace = TRUE;	/* remember for fill_args */
+			    ++sudolineno;
+			    LEXTRACE("\n\t");
+			}			/* throw away EOL after \ */
+
+<INITIAL,STARTDEFS,INDEFS>#.*\n	{
+			    BEGIN INITIAL;
+			    ++sudolineno;
+			    LEXTRACE("\n");
+			    return(COMMENT);
+			}			/* return comments */
+
+<*>.			{
 			    LEXTRACE("ERROR ");
 			    return(ERROR);
 			}	/* parse error */
