@@ -63,6 +63,9 @@ static char rcsid[] = "$Id$";
 #ifdef __svr4__
 #include <shadow.h>
 #endif /* __svr4__ */
+#if defined(ultrix) && defined(HAVE_C2_SECURITY)
+#include <auth.h>
+#endif /* ultrix && HAVE_C2_SECURITY */
 #if defined(__convex__) && defined(HAVE_C2_SECURITY)
 #include <sys/security.h>
 #include <prot.h>
@@ -240,6 +243,9 @@ static void check_passwd()
 #if defined (__hpux) && defined(HAVE_C2_SECURITY)
     struct s_passwd *spw_ent;
 #endif /* __hpux && HAVE_C2_SECURITY */
+#if defined (ultrix) && defined(HAVE_C2_SECURITY)
+    AUTHORIZATION *spw_ent;
+#endif /* ultrix && HAVE_C2_SECURITY */
 #if defined (__convex__) && defined(HAVE_C2_SECURITY)
     char salt[2];		/* Need the salt to perform the encryption */
     register int i;
@@ -260,6 +266,17 @@ static void check_passwd()
     if (spw_ent && spw_ent -> pw_passwd)
 	encrypted = spw_ent -> pw_passwd;
 #endif /* __hpux && HAVE_C2_SECURITY */
+#if defined (ultrix) && defined(HAVE_C2_SECURITY)
+    /*
+     * grab encrypted password from /etc/auth
+     * or just use the regular one...
+     */
+    be_root();
+    spw_ent = getauthuid(uid);
+    be_user();
+    if (spw_ent && spw_ent -> a_password)
+	encrypted = spw_ent -> a_password;
+#endif /* ultrix && HAVE_C2_SECURITY */
 #ifdef __svr4__
     /*
      * SVR4 should always have a shadow password file
@@ -309,6 +326,10 @@ static void check_passwd()
 	if (strncmp(encrypted, crypt(pass, salt), i) == 0)
 	    return;           /* if the passwd is correct return() */
 #else
+#if defined (ultrix) && defined(HAVE_C2_SECURITY)
+	if (spw_ent && !strcmp(encrypted, (char *) crypt16(pass, encrypted)))
+	    return;		/* if the passwd is correct return() */
+#endif /* ultrix && HAVE_C2_SECURITY */
 	if (!strcmp(encrypted, (char *) crypt(pass, encrypted)))
 	    return;		/* if the passwd is correct return() */
 #endif /* __convex__ && HAVE_C2_SECURITY */
