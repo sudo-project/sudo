@@ -23,7 +23,7 @@ will be used.
        host_type ::= a lower-case hostname, netgroup, ip address,
                      network number, or host alias.
        cmnd_type ::= an command OR a command alias.
-              op ::= the logical '!' NOT operator.
+              op ::= the logical "!" NOT operator.
 
 =head2 host alias section format:
 
@@ -69,16 +69,16 @@ B<DO NOT> define an alias of I<ALL>, it will B<NOT> be used.
 Note that I<ALL> implies the entire universe of hosts/users/commands.
 You can subtract elements from the universe by using the syntax:
    user  host=ALL,!ALIAS1,!/etc/halt...
-Note that the '!' notation only works in a user's command list.  You
+Note that the "!" notation only works in a user's command list.  You
 may not use it to subtract elements in a User_Alias, Host_Alias, or
 Cmnd_Alias.
 
 Commands may have optional command line arguments.  If they do,
-then the arguments in the sudoers file must exactly match those
+then the arguments in the I<sudoers> file must exactly match those
 on the command line.  It is also possible to have a command's
 arguments span multiple lines as long as the line continuance
-character '\' is used.  The following characters must be escaped
-with a '\' if used in command arguments: ',', ':', '=', '\'.
+character "\" is used.  The following characters must be escaped
+with a "\" if used in command arguments: ",", ":", "=", "\".
 
 =head1 EXAMPLES
 
@@ -114,33 +114,96 @@ with a '\' if used in command arguments: ',', ':', '=', '\'.
                 kodiakthorn=ALL
     steve       CSNETS=/usr/op_commands/,/bin/su operator
 
-The above I<sudoers> file specification is composed of 4 host alias
-specifications, 2 user alias specifications, 4 command alias
-specifications and 8 user specifications.  Full time staff (those
-in the FULLTIME alias) and anyone in group I<wheel> are allowed to
-execute any command on any host.  Part time staff (those in the PARTTIME
-alias) are allowed to execute any command except for the group of SHELL
-and SU commands on any machine.  Britt is permitted to execute /etc/halt,
-/etc/shutdown, /usr/etc/lpc and /usr/ucb/lprm on the REMOTE machines (merlin,
-kodiakthorn, and spirit).  Nieusma is allowed to run /etc/halt, /etc/shutdown,
-and /etc/halt on all machines and all commands except for the group of SHELL
-commands on the HUB machines.  Jill is permitted to execute /etc/shutdown with
-the I<-r now> flags, F</bin/rm>, and F</bin/cat> on houdini.  Davehieb can
-execute any command on machines merlin and kodiakthorn and can halt the
-SERVERS.  Any user in the netgroup I<interns> may run any command on the
-machines in the netgroup I<openlabs> except for those commands in the groups
-SHELL and SU.  Steve can run any command located in the directory
-F</usr/op_commands/> on all machines on the subnets listed in B<CSNETS>
-(note that the 128.138.192 net has a netmask of 255.255.255.192 which
-is why its network number is 128.138.192.192).  He may also C<su> to
-operator but to no one else.
+=head2 Host Alias specifications:
 
-B<sudo> will do a logical and of a machine's ip address(es) with
-its netmask to decide whether that machine is on a given network).
+The are four I<host aliases>.  The first actually contains
+two I<aliases>.  It sets C<HUB> to be C<houdini> and C<REMOTE>
+to the three machines C<merlin>, C<kodiakthorn> and C<spirit>.
+Similarly, C<SERVERS> is set to the machines C<houdini>, C<merlin>,
+C<kodiakthorn> and C<spirit>.  The C<CSNETS> alias will match
+any host on the 128.138.243.0, 128.138.204.0, or 128.138.205.192
+nets.  Note that these are B<network> addresses, not ip addresses.
+The local I<netmask> is used to determine whether or not the
+current host belongs to a network.
+
+=head2 User Alias specifications:
+
+The two I<user aliases> simply groups the C<FULLTIME> and
+C<PARTTIME> folks into two separate aliases.
+
+=head2 Command alias specifications:
+
+Command aliases are lists of commands with or without associated
+command line arguments.  The entries above should be self-explanatory.
+
+=head2 User specifications:
+
+=over 16
+
+=item FULLTIME
+
+Full-time sysadmins in the C<FULLTIME> alias may run any
+command on any host.
+
+=item %wheel
+
+Any user in the UN*X group C<wheel> may run any
+command on any host.
+
+=item PARTTIME
+
+Part-time sysadmins in the C<PARTTIME> alias may run any
+command except those in the C<SHELLS> and C<SU> aliases
+on any host.
+
+=item +interns
+
+Any user in the netgroup C<interns> may run any
+command except those in the C<SHELLS> and C<SU> aliases
+on any host that is in the C<openlabs> netgroup.
+
+=item britt
+
+The user C<britt> may run commands in the C<SHUTDOWN> alias
+on the C<REMOTE> machines and commands in the C<LPCS> alias
+on any machine.
+
+=item nieusma
+
+The user C<nieusma> may run commands in the C<SHUTDOWN> alias
+as well as F</etc/reboot> on the C<SERVER> machines and
+any command except those in the C<SHELLS> alias on the C<HUB>
+machines.
+
+=item jill
+
+The user C<jill> may run C</etc/shutdown -r now> as well as
+the commands in the C<MISC> alias on houdini.
+
+=item markm
+
+The user C<markm> may run any command on the C<HUB> machines
+except F</etc/shutdown>, F</etc/halt>, and commands listed
+in the C<MISC> alias.
+
+=item davehieb
+
+The user C<davehieb> may run any command on C<merlin>,
+F</etc/halt> on the C<SERVERS> and any command on C<kodiakthorn>.
+
+=item steve
+
+The user C<steve> may run any command in the F</usr/op_commands/>
+directory and C</bin/su operator> on the machines on C<CSNETS>.
+
+=back
+
+=head1 CAVEATS
+
 The I<sudoers> file should B<always> be edited by the B<visudo>
 command which locks the file and does grammatical checking. It is
 imperative that the I<sudoers> be free of syntax errors since sudo
-will not run with a syntactically incorrect sudoers file.
+will not run with a syntactically incorrect I<sudoers> file.
 
 =head1 FILES
 
