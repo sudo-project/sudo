@@ -70,10 +70,11 @@ int printmatches = 0;
 #define USER			 3
 
 /*
- * the matching stack
+ * The matching stack, we should not have to initialize this,
+ * since it is global but some compilers are just too braindamaged...
  */
 #define MATCHSTACKSIZE (40)
-struct matchstack match[MATCHSTACKSIZE];
+struct matchstack match[MATCHSTACKSIZE] = { FALSE };
 int top = 0;
 
 #define push \
