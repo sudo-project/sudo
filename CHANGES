@@ -1232,3 +1232,7 @@ Sudo 1.6.1 released.
 
 389) The 'shell_noargs' runtime option is back based on a patch from
      bguillory@email.com.
+
+390) Systems that return RLIM_INFINITY for RLIMIT_NOFILE (like AIX)
+     would loop for a very loing time during sudo startup.  A value of
+     RLIM_INFINITY is now ignored (getdtablesize/sysconf is used instead).
