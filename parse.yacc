@@ -158,7 +158,7 @@ void yyerror(s)
 
 %type <BOOLEAN>	 cmnd
 %type <BOOLEAN>	 runasspec
-%type <BOOLEAN>	 runaslist 
+%type <BOOLEAN>	 runaslist
 %type <BOOLEAN>	 runasuser
 %type <BOOLEAN>	 nopassreq
 %type <BOOLEAN>	 chkcmnd
@@ -229,16 +229,13 @@ hostspec	:	ALL {
 			}
 		;
 
-opcmndlist	:	{ no_passwd = runas_matches = -1; } opcmnd
-		|	opcmndlist ',' {
-			    no_passwd = runas_matches = -1;
-			} opcmnd
+opcmndlist	:	{ no_passwd = -1; } opcmnd
+		|	opcmndlist ',' { no_passwd = -1; } opcmnd
 		;
 
 opcmnd		:	cmnd {
-			    if (strcmp("root", runas_user) == 0)
-				runas_matches = TRUE;
-			} 
+			    runas_matches = (strcmp("root", runas_user) == 0);
+			}
 		|	'!' {
 			    if (printmatches == TRUE && host_matches == TRUE
 				&& user_matches == TRUE) {
@@ -262,8 +259,7 @@ opcmnd		:	cmnd {
 		;
 
 runasspec	: 	RUNAS runaslist chkcmnd {
-			    if ($2 > 0 && $3 == TRUE) 
-				runas_matches = TRUE;
+			    runas_matches = ($2 > 0 && $3 == TRUE);
 			}
 
 runaslist	:	runasuser {
