@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999, 2001 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,6 @@ strerror(n)
 
     if (n > 0 && n < sys_nerr)
 	return(sys_errlist[n]);
-    else
-	return("Unknown error");
+    errno = EINVAL;
+    return("Unknown error");
 }
