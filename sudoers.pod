@@ -452,6 +452,13 @@ If set, B<sudo> will apply the defaults specified for the target user's
 login class if one exists.  Only available if B<sudo> is configured with
 the --with-logincap option.  This flag is I<off> by default.
 
+=item noexec
+
+If set, all commands run via sudo will behave as if the C<NOEXEC>
+tag has been set, unless overridden by a C<EXEC> tag.  See the
+description of I<NOEXEC and EXEC> below as well as the B<PREVENTING SHELL
+ESCAPES> section at the end of this manual.  This flag is I<off> by default.
+
 =back
 
 B<Integers>:
@@ -579,6 +586,13 @@ B<visudo>.  B<visudo> will choose the editor that matches the user's
 USER environment variable if possible, or the first editor in the
 list that exists and is executable.  The default is the path to vi
 on your system.
+
+=item noexec_file
+
+Path to a shared library containing a dummy version of the execve()
+library function that just returns an error.  This is used to
+implement the I<noexec> functionality on systems that support
+C<LD_PRELOAD> or its equivalent.  Defaults to F<@noexec_file@>.
 
 =back
 
@@ -759,9 +773,11 @@ B<err>, B<info>, B<notice>, and B<warning>.
  Cmnd_Spec_List ::= Cmnd_Spec |
 		    Cmnd_Spec ',' Cmnd_Spec_List
 
- Cmnd_Spec ::= Runas_Spec? ('NOPASSWD:' | 'PASSWD:')? Cmnd
+ Cmnd_Spec ::= Runas_Spec? Tag_Spec* Cmnd
 
  Runas_Spec ::= '(' Runas_List ')'
+
+ Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:')
 
 A B<user specification> determines which commands a user may run
 (and as what user) on specified hosts.  By default, commands are
@@ -792,7 +808,16 @@ entry.  If we modify the entry like so:
 Then user B<dgb> is now allowed to run F</bin/ls> as B<operator>,
 but  F</bin/kill> and F</usr/bin/lprm> as B<root>.
 
-=head2 NOPASSWD and PASSWD
+=head2 Tag_Spec
+
+A command may have zero or more tags associated with it.  There are
+four possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>, C<EXEC>.
+Once a tag is set on a C<Cmnd>, subsequent C<Cmnd>s in the
+C<Cmnd_Spec_List>, inherit the tag unless it is overridden by the
+opposite tag (ie: C<PASSWD> overrides C<NOPASSWD> and C<EXEC>
+overrides C<NOEXEC>).
+
+=head3 NOPASSWD and PASSWD
 
 By default, B<sudo> requires that a user authenticate him or herself
 before running a command.  This behavior can be modified via the
@@ -819,6 +844,20 @@ C<sudo -l> without a password.  Additionally, a user may only run
 C<sudo -v> without a password if the C<NOPASSWD> tag is present
 for all a user's entries that pertain to the current host.
 This behavior may be overridden via the verifypw and listpw options.
+
+=head3 NOEXEC and EXEC
+
+If sudo has been compiled with I<noexec> support and the underlying
+operating system support it, the C<NOEXEC> tag can be used to prevent
+a dynamically-linked executable from running further commands itself.
+
+In the following example, user B<aaron> may run F</usr/bin/more>
+and F</usr/bin/vi> but shell escapes will be disabled.
+
+ aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+
+See the B<PREVENTING SHELL ESCAPES> section below for more details
+on how I<noexec> works and whether or not it will work on your system.
 
 =head2 Wildcards (aka meta characters):
 
@@ -859,7 +898,7 @@ wildcards.  This is to make a path like:
 
     /usr/bin/*
 
-match C</usr/bin/who> but not C</usr/bin/X11/xterm>.
+match F</usr/bin/who> but not F</usr/bin/X11/xterm>.
 
 =head2 Exceptions to wildcard rules:
 
@@ -1089,6 +1128,49 @@ I<SU> or I<SHELLS> since he can simply copy those commands to a
 different name, or use a shell escape from an editor or other
 program.  Therefore, these kind of restrictions should be considered
 advisory at best (and reinforced by policy).
+
+=head1 PREVENTING SHELL ESCAPES
+
+Once B<sudo> executes a program, that program is free to do whatever
+it pleases, including run other programs.  This can be a security
+issue since it is not uncommon for a program to allow shell escapes,
+which lets a user bypass B<sudo>'s restrictions.  Common programs
+that permit shell escapes include shells (obviously), editors,
+paginators, mail and terminal programs.
+
+Many systems that support shared libraries have the ability to
+override default library functions by pointing an environment
+variable (usually C<LD_PRELOAD>) to an alternate shared library.
+On such systems, B<sudo>'s I<noexec> functionality can be used to
+prevent a program run by sudo from executing any other programs.
+Note, however, that this applies only to native dynamically-linked
+executables.  Statically-linked executables and foreign executables
+running under binary emulation are not affected.
+
+To tell whether or not B<sudo> supports I<noexec>, you can run
+the following as root:
+
+    # sudo -V | grep "dummy execve"
+
+If this results in output beginning with:
+
+    File containing a dummy execve() function
+
+then B<sudo> may be able to replace the standard library function
+execve() with its own that simply returns an error.  Unfortunately,
+there is no foolproof way to know whether or not I<noexec> will
+work at compile-time.  I<Noexec> should work on SunOS, Solaris,
+*BSD, Linux, IRIX, Tru64 UNIX, MacOS X, and HP-UX 11.x.  It is known
+B<not> to work on AIX and UnixWare.  I<Noexec> is expected to work
+on most operating systems that support the C<LD_PRELOAD> environment
+variable.  Check your operating system's manual pages for the dynamic
+linker (usually ld.so, dyld, dld.sl, rld, or loader) to see if
+C<LD_PRELOAD> is supported.
+
+To enable I<noexec> for a command, use the C<NOEXEC> tag as documented
+in the User Specification section above.  If you are unsure whether
+or not your system is capable of supporting I<noexec> you can always
+just try it out and see if it works.
 
 =head1 CAVEATS
 

@@ -167,7 +167,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "January  4, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "January  9, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -583,6 +583,12 @@ Other variables may be preserved with the \fIenv_keep\fR option.
 If set, \fBsudo\fR will apply the defaults specified for the target user's
 login class if one exists.  Only available if \fBsudo\fR is configured with
 the \-\-with\-logincap option.  This flag is \fIoff\fR by default.
+.IP "noexec" 12
+.IX Item "noexec"
+If set, all commands run via sudo will behave as if the \f(CW\*(C`NOEXEC\*(C'\fR
+tag has been set, unless overridden by a \f(CW\*(C`EXEC\*(C'\fR tag.  See the
+description of \fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR below as well as the \fB\s-1PREVENTING\s0 \s-1SHELL\s0
+\&\s-1ESCAPES\s0\fR section at the end of this manual.  This flag is \fIoff\fR by default.
 .PP
 \&\fBIntegers\fR:
 .IP "passwd_tries" 12
@@ -685,6 +691,12 @@ A colon (':') separated list of editors allowed to be used with
 \&\s-1USER\s0 environment variable if possible, or the first editor in the
 list that exists and is executable.  The default is the path to vi
 on your system.
+.IP "noexec_file" 12
+.IX Item "noexec_file"
+Path to a shared library containing a dummy version of the \fIexecve()\fR
+library function that just returns an error.  This is used to
+implement the \fInoexec\fR functionality on systems that support
+\&\f(CW\*(C`LD_PRELOAD\*(C'\fR or its equivalent.  Defaults to \f(CW\*(C`@noexec_file@\*(C'\fR.
 .PP
 \&\fBStrings that can be used in a boolean context\fR:
 .IP "lecture" 12
@@ -835,11 +847,15 @@ syslog priorities are supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\
 .Ve
 .PP
 .Vb 1
-\& Cmnd_Spec ::= Runas_Spec? ('NOPASSWD:' | 'PASSWD:')? Cmnd
+\& Cmnd_Spec ::= Runas_Spec? Tag_Spec* Cmnd
 .Ve
 .PP
 .Vb 1
 \& Runas_Spec ::= '(' Runas_List ')'
+.Ve
+.PP
+.Vb 1
+\& Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:')
 .Ve
 .PP
 A \fBuser specification\fR determines which commands a user may run
@@ -875,8 +891,18 @@ entry.  If we modify the entry like so:
 .PP
 Then user \fBdgb\fR is now allowed to run \fI/bin/ls\fR as \fBoperator\fR,
 but  \fI/bin/kill\fR and \fI/usr/bin/lprm\fR as \fBroot\fR.
-.Sh "\s-1NOPASSWD\s0 and \s-1PASSWD\s0"
+.Sh "Tag_Spec"
+.IX Subsection "Tag_Spec"
+A command may have zero or more tags associated with it.  There are
+four possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR, \f(CW\*(C`EXEC\*(C'\fR.
+Once a tag is set on a \f(CW\*(C`Cmnd\*(C'\fR, subsequent \f(CW\*(C`Cmnd\*(C'\fRs in the
+\&\f(CW\*(C`Cmnd_Spec_List\*(C'\fR, inherit the tag unless it is overridden by the
+opposite tag (ie: \f(CW\*(C`PASSWD\*(C'\fR overrides \f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`EXEC\*(C'\fR
+overrides \f(CW\*(C`NOEXEC\*(C'\fR).
+.PP
+\fI\s-1NOPASSWD\s0 and \s-1PASSWD\s0\fR
 .IX Subsection "NOPASSWD and PASSWD"
+.PP
 By default, \fBsudo\fR requires that a user authenticate him or herself
 before running a command.  This behavior can be modified via the
 \&\f(CW\*(C`NOPASSWD\*(C'\fR tag.  Like a \f(CW\*(C`Runas_Spec\*(C'\fR, the \f(CW\*(C`NOPASSWD\*(C'\fR tag sets
@@ -906,6 +932,14 @@ for a user on the current host, he or she will be able to run
 \&\f(CW\*(C`sudo \-v\*(C'\fR without a password if the \f(CW\*(C`NOPASSWD\*(C'\fR tag is present
 for all a user's entries that pertain to the current host.
 This behavior may be overridden via the verifypw and listpw options.
+.PP
+\fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR
+.IX Subsection "NOEXEC and EXEC"
+.PP
+If sudo has been compiled with \fInoexec\fR support and the underlying
+operating system support it, the \f(CW\*(C`NOEXEC\*(C'\fR tag can be used to prevent
+a dynamically linked executable from running further commands itself.
+See the \fB\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\fR section below for more details.
 .Sh "Wildcards (aka meta characters):"
 .IX Subsection "Wildcards (aka meta characters):"
 \&\fBsudo\fR allows shell-style \fIwildcards\fR to be used in pathnames
@@ -1215,6 +1249,52 @@ Doesn't really prevent \fBbill\fR from running the commands listed in
 different name, or use a shell escape from an editor or other
 program.  Therefore, these kind of restrictions should be considered
 advisory at best (and reinforced by policy).
+.SH "PREVENTING SHELL ESCAPES"
+.IX Header "PREVENTING SHELL ESCAPES"
+Once \fBsudo\fR executes a program, that program is free to do whatever
+it pleases, including run other programs.  This can be a security
+issue since it is not uncommon for a program to allow shell escapes,
+which lets a user bypass \fBsudo\fR's restrictions.  Common programs
+that permit shell escapes include shells (obviously), editors,
+paginators, mail programs and terminal programs.
+.PP
+Many systems that support shared libraries have the ability to
+override default library functions by pointing an environment
+variable (usually \f(CW\*(C`LD_PRELOAD\*(C'\fR) to an alternate shared library.
+On such systems, \fBsudo\fR's \fInoexec\fR functionality can be used to
+prevent a program run by sudo from executing any other programs.
+Note, however, that this applies only to native dynamically linked
+executables.  Statically linked executables and foreign executables
+running under binary emulation are not affected.
+.PP
+To tell whether or not \fBsudo\fR supports \fInoexec\fR, you can run
+the following as root:
+.PP
+.Vb 1
+\&    # sudo -V | grep "dummy execve"
+.Ve
+.PP
+If this results in output beginning with:
+.PP
+.Vb 1
+\&    File containing a dummy execve() function
+.Ve
+.PP
+then \fBsudo\fR may be able to replace the standard library function
+\&\fIexecve()\fR with its own that simply returns an error.  Unfortunately,
+there is no foolproof way to know whether or not \fInoexec\fR will
+work at compile\-time.  \fINoexec\fR should work on SunOS, Solaris,
+*BSD, Linux, \s-1IRIX\s0, Tru64 \s-1UNIX\s0, MacOS X, and HP-UX 11.x.  It is known
+\&\fBnot\fR to work on \s-1AIX\s0 and UnixWare.  \fINoexec\fR is expected to work
+on most operating systems that support the \f(CW\*(C`LD_PRELOAD\*(C'\fR environment
+variable.  Check your operating system's manual pages for the dynamic
+linker (often ld.so, dyld, dld.sl, rld, or loader) to see if
+\&\f(CW\*(C`LD_PRELOAD\*(C'\fR is supported.
+.PP
+To enable \fInoexec\fR for a command, use the \f(CW\*(C`NOEXEC\*(C'\fR tag as documented
+in the User Specification section above.  If you are unsure whether
+or not your system is capable of supporting \fInoexec\fR you can always
+just try it out and see if it works.
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 The \fIsudoers\fR file should \fBalways\fR be edited by the \fBvisudo\fR
