@@ -183,7 +183,8 @@ SHELL_IF_NO_ARGS
 SHELL_SETS_HOME
     If sudo is invoked with the "-s" flag the HOME environmental variable
     will be set to the home directory of the target user (which is root
-    unless the "-u" option is used).
+    unless the "-u" option is used).  This option effectively makes the
+    "-s" flag imply "-H".
     This is off by default.
 
 USE_TTY_TICKETS

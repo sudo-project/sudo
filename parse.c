@@ -1,5 +1,5 @@
 /*
- *  CU sudo version 1.5.1
+ *  CU sudo version 1.5.2
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_STRINGS_H
 #  include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_FNMATCH_H
+#if defined(HAVE_FNMATCH) && defined(HAVE_FNMATCH_H)
 #  include <fnmatch.h>
 #else
 #  ifndef HAVE_FNMATCH
@@ -109,7 +109,7 @@ int validate(check_cmnd)
     int return_code;
 
     /* become sudoers file owner */
-    set_perms(PERM_SUDOERS);
+    set_perms(PERM_SUDOERS, 0);
 
     if ((sudoers_fp = fopen(_PATH_SUDO_SUDOERS, "r")) == NULL) {
 	perror(_PATH_SUDO_SUDOERS);
@@ -127,7 +127,7 @@ int validate(check_cmnd)
     /*
      * Need to be root while stat'ing things in the parser.
      */
-    set_perms(PERM_ROOT);
+    set_perms(PERM_ROOT, 0);
     return_code = yyparse();
 
     /*
@@ -136,7 +136,7 @@ int validate(check_cmnd)
     (void) fclose(sudoers_fp);
 
     /* relinquish extra privs */
-    set_perms(PERM_USER);
+    set_perms(PERM_USER, 0);
 
     if (return_code || parse_error)
 	return(VALIDATE_ERROR);

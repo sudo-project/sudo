@@ -1,5 +1,5 @@
 /*
- *  CU sudo version 1.5.1
+ *  CU sudo version 1.5.2
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_STRINGS_H
 #  include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_FNMATCH_H
+#if defined(HAVE_FNMATCH) && defined(HAVE_FNMATCH_H)
 #  include <fnmatch.h>
 #else
 #  ifndef HAVE_FNMATCH
@@ -245,8 +245,8 @@ int netgr_matches(netgr, host, user)
 }
 
 
-void set_perms(i)
-    int i;
+void set_perms(i, j)
+    int i, j;
 {
     return;
 }

@@ -1,5 +1,5 @@
 /*
- * CU sudo version 1.5.1 (based on Root Group sudo version 1.1)
+ * CU sudo version 1.5.2 (based on Root Group sudo version 1.1)
  *
  * This software comes with no waranty whatsoever, use at your own risk.
  *
@@ -354,7 +354,7 @@ void log_error(code)
 #if (LOGGING & SLOG_FILE)
 
     /* become root */
-    set_perms(PERM_ROOT);
+    set_perms(PERM_ROOT, 0);
 
     oldmask = umask(077);
     fp = fopen(_PATH_SUDO_LOGFILE, "a");
@@ -418,7 +418,7 @@ void log_error(code)
     }
 
     /* relinquish root */
-    set_perms(PERM_USER);
+    set_perms(PERM_USER, 0);
 #endif /* LOGGING & SLOG_FILE */
 
     /* send mail if appropriate */
@@ -464,7 +464,7 @@ static void send_mail()
     /*
      * we don't want any security problems ...
      */
-    set_perms(PERM_FULL_USER);
+    set_perms(PERM_FULL_USER, 0);
     
 #ifdef POSIX_SIGNALS
     action.sa_handler = SIG_IGN;
