@@ -338,10 +338,14 @@ main(argc, argv)
 	av[n++] = stmp;
 	av[n++] = NULL;
 
-	/* Do the edit -- some SYSV editors exit with 1 instead of 0 */
+	/*
+	 * Do the edit:
+	 *  We cannot check the editor's exit value against 0 since
+	 *  XPG4 specifies that vi's exit value is a function of the
+	 *  number of errors during editing (?!?!).
+	 */
 	now = time(NULL);
-	n = run_command(Editor, av);
-	if (n != -1 && ((n >> 8) == 0 || (n >> 8) == 1)) {
+	if (run_command(Editor, av) != -1) {
 	    /*
 	     * Sanity checks.
 	     */
@@ -388,8 +392,8 @@ main(argc, argv)
 	    }
 	} else {
 	    (void) fprintf(stderr,
-		"%s: Editor (%s) failed with exit status %d, %s unchanged.\n",
-		Argv[0], Editor, n, sudoers);
+		"%s: Editor (%s) failed, %s unchanged.\n", Argv[0],
+		    Editor, sudoers);
 	    Exit(-1);
 	}
 
@@ -636,9 +640,8 @@ run_command(path, argv)
     (void) sigsetmask(omask);
 #endif /* POSIX_SIGNALS */
 
-    if (pid == -1)
-	status = -1;
-    return(status);
+    /* XXX - should use WEXITSTATUS() */
+    return(pid == -1 ? -1 : (status >> 8));
 }
 
 /*
