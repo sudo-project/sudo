@@ -411,22 +411,27 @@ static RETSIGTYPE Exit(sig)
 static char whatnow()
 {
     char choice;
+    int ok;
 
     do {
+	ok = FALSE;
 	printf("What now? ");
-	choice = fgetc(stdin);
-	while (fgetc(stdin) != '\n')
-	    ;
+	if ((choice = fgetc(stdin)) != '\n')
+	    while (fgetc(stdin) != '\n')
+		;
 
 	/* safely force to lower case */
 	if (isupper(choice))
 	    choice = tolower(choice);
 
-	/* help is a builtin */
-	if (choice == 'h' || choice == '?')
+	if (choice == 'e' || choice == 'x' || choice == 'q')
+	    ok = TRUE;
+
+	/* help message if they gavce us garbage */
+	if (!ok)
 	    whatnow_help();
 
-    } while (choice != 'e' && choice != 'x' && choice != 'q');
+    } while (!ok);
 
     return(choice);
 }
