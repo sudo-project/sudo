@@ -453,7 +453,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        env_reset   If set, ssssuuuuddddoooo will reset the environment to
                    only contain the following variables: `HOME',
                    `SHELL', `LOGNAME', and `USER' (in addition to
-                   the `SUDO_*' variables).  The `PATH'
+                   the `SUDO_*' variables).  The `PATH' and
 
 
 
@@ -466,9 +466,9 @@ December 29, 2000             1.6.4                             7
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
-                   environment variable is preserved unaltered.
-                   Other specific variables may be preserved with
-                   the i<env_keep> option.
+                   `TERM' environment variables are preserved
+                   unaltered.  Other specific variables may be
+                   preserved with the i<env_keep> option.
 
        use_loginclass
                    If set, ssssuuuuddddoooo will apply the defaults specified

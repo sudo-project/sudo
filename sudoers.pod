@@ -411,8 +411,8 @@ dangerous functionality when a program is run setuid.
 
 If set, B<sudo> will reset the environment to only contain the
 following variables: C<HOME>, C<SHELL>, C<LOGNAME>, and C<USER>
-(in addition to the C<SUDO_*> variables).  The C<PATH> environment
-variable is preserved unaltered.  Other specific variables
+(in addition to the C<SUDO_*> variables).  The C<PATH> and C<TERM>
+environment variables are preserved unaltered.  Other specific variables
 may be preserved with the i<env_keep> option.
 
 =item use_loginclass
