@@ -26,17 +26,17 @@
  */
 
 char *insults[] = {
-     "Wrong!  You cheating scum!\n",
-     "No soap, honkie-lips.\n",
-     "Where did you learn to type?\n",
-     "Are you on drugs?\n",
-     "My pet ferret can type better than you!\n",
-     "You type like i drive.\n",
-     "Do you think like you type?\n",
-     "Your mind just hasn't been the same since the electro-shock, has it?\n"
+     "Wrong!  You cheating scum!",
+     "No soap, honkie-lips.",
+     "Where did you learn to type?",
+     "Are you on drugs?",
+     "My pet ferret can type better than you!",
+     "You type like i drive.",
+     "Do you think like you type?",
+     "Your mind just hasn't been the same since the electro-shock, has it?"
 };
 
-#define NOFINSULTS 8 /* number of insults - 1 */
+#define NOFINSULTS 8 	/* number of insults*/
 
 /*
  *	return a random insult.
