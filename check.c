@@ -145,7 +145,8 @@ update_timestamp(timestampdir, timestampfile)
     char *timestampfile;
 {
 
-    set_perms(PERM_TIMESTAMP);
+    if (timestamp_uid != 0)
+	set_perms(PERM_TIMESTAMP);
     if (touch(timestampfile ? timestampfile : timestampdir, time(NULL)) == -1) {
 	if (timestampfile) {
 	    int fd = open(timestampfile, O_WRONLY|O_CREAT|O_TRUNC, 0600);
@@ -159,7 +160,8 @@ update_timestamp(timestampdir, timestampfile)
 		log_error(NO_EXIT|USE_ERRNO, "Can't mkdir %s", timestampdir);
 	}
     }
-    set_perms(PERM_ROOT);
+    if (timestamp_uid != 0)
+	set_perms(PERM_ROOT);
 }
 
 /*
@@ -309,7 +311,8 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
     char *dirparent = def_str(I_TIMESTAMPDIR);
     int status = TS_ERROR;		/* assume the worst */
 
-    set_perms(PERM_TIMESTAMP);
+    if (timestamp_uid != 0)
+	set_perms(PERM_TIMESTAMP);
 
     /*
      * Sanity check dirparent and make it if it doesn't already exist.
@@ -347,7 +350,8 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 	}
     }
     if (status == TS_ERROR) {
-	set_perms(PERM_ROOT);
+	if (timestamp_uid != 0)
+	    set_perms(PERM_ROOT);
 	return(status);
     }
 
@@ -462,7 +466,8 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 	}
     }
 
-    set_perms(PERM_ROOT);
+    if (timestamp_uid != 0)
+	set_perms(PERM_ROOT);
     return(status);
 }
 
