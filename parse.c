@@ -284,22 +284,16 @@ int host_type_ok()
 int cmnd_type_ok()
 {
     /*
-     * check for the reserved keyword 'ALL'.
+     * always return success if the user is running the special
+     * command "validate" or the user has the reserved keyword 'ALL'.
      */
-    if  (strcmp(list_ptr[USER_LIST] -> data, "ALL") == 0) {
-	/* if the command has an absolute path, let them do it */
-	if  (cmnd[0] == '/') {
-	        return (MATCH);
-	}
-	/* if the command does not have an absolute path, forget it */
-	else {
-	    return (NO_MATCH);
-	}
-    }
+    if (!strcmp(cmnd, "validate") || !strcmp(list_ptr[USER_LIST]->data, "ALL"))
+	return (MATCH);
+
     /*
      * if the command has an absolute path, check it out
      */
-    else if (list_ptr[USER_LIST] -> data[0] == '/') {
+    if (list_ptr[USER_LIST] -> data[0] == '/') {
 	/*
 	 * op  |   data   | return value
 	 * --------------------------------- 
@@ -488,10 +482,7 @@ int validate()
      */
     switch (return_code) {
     case FOUND_USER:
-	if (validate_only)
-	    return_code = VALIDATE_OK;
-	else
-	    return_code = cmnd_check();
+	return_code = cmnd_check();
 	delete_list(USER_LIST);
 	delete_list(HOST_LIST);
 	delete_list(CMND_LIST);
