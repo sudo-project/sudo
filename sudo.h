@@ -179,6 +179,12 @@
 
 /**********  You probably don't want to modify anything below here  ***********/
 
+#ifdef USE_EXECV
+#  define EXEC	execv
+#else
+#  define EXEC	execvp
+#endif /* USE_EXECV */
+
 /* Max length for a command */
 #define MAXCOMMANDLENGTH	MAXPATHLEN
 
