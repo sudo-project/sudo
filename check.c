@@ -480,7 +480,7 @@ static void check_passwd()
 	pass = (char *) getpass(prompt);
 #  endif /* HAVE_KERB4 */
 #else
-	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60);
+	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60, user_name, host);
 #endif /* USE_GETPASS */
 
 	/* Exit loop on nil password */
