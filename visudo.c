@@ -22,13 +22,14 @@
  *      3959 Arbol CT                      (303) 447-8093
  *      Boulder, CO 80301-1752             
  *
-********************************************************************************
-* visudo.c, sudo project
-* David R. Hieb
-* March 18, 1991
-*
-* edit, lock and parse the sudoers file in a fashion similiar to /etc/vipw.
-*******************************************************************************/
+ **************************************************************************
+ * visudo.c, sudo project
+ * David R. Hieb
+ * March 18, 1991
+ *
+ * edit, lock and parse the sudoers file in a fashion similiar to /etc/vipw.
+ */
+
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
@@ -39,140 +40,157 @@
 
 #include "sudo.h"
 
-extern	FILE *yyin, *yyout;
-extern	int errno, yylineno;
+extern FILE *yyin, *yyout;
+extern int errno, yylineno;
 
-char	buffer[BUFSIZ];
-char	*sudoers = SUDOERS;
-int	status = 0, err_line_no = 0;
-char	*sudoers_tmp_file = TMPSUDOERS;
-FILE	*sudoers_tmp_fp, *sudoers_fp;
+char buffer[BUFSIZ];
+char *sudoers = SUDOERS;
+int status = 0, err_line_no = 0;
+char *sudoers_tmp_file = TMPSUDOERS;
+FILE *sudoers_tmp_fp, *sudoers_fp;
 
 void Exit()
 {
-fclose(sudoers_tmp_fp);
-unlink(sudoers_tmp_file);
-exit(1);
+    (void) fclose(sudoers_tmp_fp);
+    (void) unlink(sudoers_tmp_file);
+    exit(1);
 }
 
+
 main(argc, argv)
-int argc;
-char **argv;
+    int argc;
+    char **argv;
 {
-int fd;
-struct stat sbuf;
+    int fd;
+    struct stat sbuf;
 
-/* handle the signals */
-signal(SIGILL, Exit);
-signal(SIGTRAP, Exit);
-signal(SIGBUS, Exit);
-signal(SIGSEGV, Exit);
-signal(SIGTERM, Exit);
+    /*
+     * handle the signals
+     */
+    (void) signal(SIGILL, Exit);
+    (void) signal(SIGTRAP, Exit);
+    (void) signal(SIGBUS, Exit);
+    (void) signal(SIGSEGV, Exit);
+    (void) signal(SIGTERM, Exit);
 
-signal(SIGHUP, SIG_IGN);
-signal(SIGINT, SIG_IGN);
-signal(SIGQUIT, SIG_IGN);
+    (void) signal(SIGHUP, SIG_IGN);
+    (void) signal(SIGINT, SIG_IGN);
+    (void) signal(SIGQUIT, SIG_IGN);
 
-setbuf(stderr, NULL);
+    setbuf(stderr, NULL);
 
-/* we only want root to be able to read/write the sudoers_tmp_file */
-umask(077);
+    /*
+     * we only want root to be able to read/write the sudoers_tmp_file
+     */
+    umask(077);
 
-/* open the sudoers file read only */
-if ((sudoers_fp = fopen(sudoers, "r")) == NULL) {
-    fprintf(stderr, "%s: ", *argv); 
-    perror(sudoers);
-    Exit();
+    /*
+     * open the sudoers file read only
+     */
+    if ((sudoers_fp = fopen(sudoers, "r")) == NULL) {
+	(void) fprintf(stderr, "%s: ", *argv);
+	perror(sudoers);
+	Exit();
     }
 
-/* open the temporary sudoers file with the correct flags */
-if ((fd = open(sudoers_tmp_file, O_WRONLY|O_CREAT|O_EXCL, 0600)) < 0) {
-    if (errno == EEXIST) {
-        fprintf(stderr, "%s: sudoers file busy\n", *argv);
-        exit(1);
-        }
-    fprintf(stderr, "%s: ", *argv); 
-    perror(sudoers_tmp_file);
-    exit(1);
+    /*
+     * open the temporary sudoers file with the correct flags
+     */
+    if ((fd = open(sudoers_tmp_file, O_WRONLY | O_CREAT | O_EXCL, 0600)) < 0) {
+	if (errno == EEXIST) {
+	    (void) fprintf(stderr, "%s: sudoers file busy\n", *argv);
+	    exit(1);
+	}
+	(void) fprintf(stderr, "%s: ", *argv);
+	perror(sudoers_tmp_file);
+	exit(1);
     }
 
-/* get a STREAM file pointer to the temporary sudoers file */
-if ((sudoers_tmp_fp = fdopen(fd, "w")) == NULL) {
-    fprintf(stderr, "%s: ", *argv); 
-    perror(sudoers_tmp_file);
-    Exit();
+    /*
+     * get a STREAM file pointer to the temporary sudoers file
+     */
+    if ((sudoers_tmp_fp = fdopen(fd, "w")) == NULL) {
+	(void) fprintf(stderr, "%s: ", *argv);
+	perror(sudoers_tmp_file);
+	Exit();
     }
 
-/* transfer the contents of the sudoers file to the temporary sudoers file */
-while (fgets(buffer, sizeof(buffer) - 1, sudoers_fp) != NULL) {
-    fputs(buffer, sudoers_tmp_fp);
+    /*
+     * transfer the contents of the sudoers file to the temporary sudoers file
+     */
+    while (fgets(buffer, sizeof(buffer) - 1, sudoers_fp) != NULL) {
+	fputs(buffer, sudoers_tmp_fp);
     }
 
-fclose(sudoers_fp);
-fclose(sudoers_tmp_fp);
+    (void) fclose(sudoers_fp);
+    (void) fclose(sudoers_tmp_fp);
 
-do {
-    /* build strings in buffer to be executed by system() */
-    sprintf(buffer, "%s +%d %s", EDITOR, err_line_no, sudoers_tmp_file);
+    do {
+	/*
+	 * build strings in buffer to be executed by system()
+	 */
+	(void) sprintf(buffer, "%s +%d %s", EDITOR, err_line_no,
+	    sudoers_tmp_file);
 
-    /* edit the file */
-    if (system(buffer) == 0) {
+	/* edit the file */
+	if (system(buffer) == 0) {
 
-        /* can't stat file */
-        if (stat(sudoers_tmp_file, &sbuf) < 0) {
-            fprintf(stderr, "%s: can't stat temporary file, %s unchanged\n", 
-                sudoers, *argv);
-            Exit();
-            }
-        /* file has size == 0 */
-        if (sbuf.st_size == 0) {
-            fprintf(stderr, "%s: bad temporary file, %s unchanged\n", 
-                sudoers, *argv);
-            Exit();
-            }
-        /* re-open the sudoers file for parsing */
-        if ((sudoers_tmp_fp = fopen(sudoers_tmp_file, "r")) == NULL) {
-            fprintf(stderr, "%s: can't re-open temporary file, %s unchanged\n", 
-                sudoers, *argv);
-            Exit();
-            }
+	    /* can't stat file */
+	    if (stat(sudoers_tmp_file, &sbuf) < 0) {
+		(void) fprintf(stderr, "%s: can't stat temporary file, %s unchanged\n",
+			sudoers, *argv);
+		Exit();
+	    }
 
-        yyin = sudoers_tmp_fp;
-        yyout = stdout;
-         
-        /* parse the file */
-        if (yyparse()) {
-            fprintf(stderr, "yyparse() failed\n");
-            Exit();
-            }
+	    /* file has size == 0 */
+	    if (sbuf.st_size == 0) {
+		(void) fprintf(stderr, "%s: bad temporary file, %s unchanged\n",
+			sudoers, *argv);
+		Exit();
+	    }
 
-        /*
-         * the first time we get an error, set status to yylineno which
-         * will be the line number after the line with the error.
-         * then, if we have gotten an error, set err_line_no to the
-         * correct line so that when we edit the file err_line_no will
-         * be correct. at this time we also reset status and yylineno
-         * to their default values so that the next time yyparse() is
-         * called, they will be initialized correctly.
-         */
-        err_line_no = (status == 0) ? 0 : status - 1;
-        status = 0;
-        yylineno = 1;
+	    /* re-open the sudoers file for parsing */
+	    if ((sudoers_tmp_fp = fopen(sudoers_tmp_file, "r")) == NULL) {
+		(void) fprintf(stderr, "%s: can't re-open temporary file, %s unchanged\n",
+			sudoers, *argv);
+		Exit();
+	    }
+	    yyin = sudoers_tmp_fp;
+	    yyout = stdout;
 
-        fclose(sudoers_tmp_fp);
-        }
+	    /* parse the file */
+	    if (yyparse()) {
+		(void) fprintf(stderr, "yyparse() failed\n");
+		Exit();
+	    }
+
+	    /*
+	     * the first time we get an error, set status to yylineno which
+	     * will be the line number after the line with the error. then,
+	     * if we have gotten an error, set err_line_no to the correct
+	     * line so that when we edit the file err_line_no will be
+	     * correct. at this time we also reset status and yylineno to
+	     * their default values so that the next time yyparse() is
+	     * called, they will be initialized correctly. 
+	     */
+	    err_line_no = (status == 0) ? 0 : status - 1;
+	    status = 0;
+	    yylineno = 1;
+
+	    (void) fclose(sudoers_tmp_fp);
+	}
     } while (err_line_no);
 
-/* once the temporary sudoers file is gramatically correct, we can 
- * rename it to the real sudoers file.
- */
-if (rename(sudoers_tmp_file, sudoers) != 0) {
-    fprintf(stderr, "%s: ", *argv), perror("rename");
-    }
-else {
-    if (chmod(sudoers, 0400) != 0) {
-        perror("chmod: failed");
-        }
-    exit(0);
+    /*
+     * once the temporary sudoers file is gramatically correct, we can 
+     * rename it to the real sudoers file.
+     */
+    if (rename(sudoers_tmp_file, sudoers) != 0) {
+	(void) fprintf(stderr, "%s: ", *argv);
+	perror("rename");
+    } else {
+	if (chmod(sudoers, 0400) != 0)
+	    perror("chmod: failed");
+	exit(0);
     }
 }
