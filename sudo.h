@@ -141,10 +141,10 @@
 #endif
 
 /*
- *  Number of seconds that can elapse before a user enters a password
+ *  Number of minutes that can elapse before a user enters a password
  */
 #ifndef PASSWORD_TIMEOUT
-#  define PASSWORD_TIMEOUT	300
+#  define PASSWORD_TIMEOUT	5
 #endif
 
 /*

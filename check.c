@@ -389,7 +389,7 @@ static void check_passwd()
 #ifdef USE_GETPASS
 	pass = (char *) getpass("Password:");
 #else
-	pass = tgetpass("Password:", PASSWORD_TIMEOUT);
+	pass = tgetpass("Password:", PASSWORD_TIMEOUT * 60);
 #endif /* USE_GETPASS */
 #endif /* HAVE_SKEY */
 	if (!pass || *pass == '\0')
