@@ -335,6 +335,7 @@ struct interface {
 #define MODE_KILL                0x02
 #define MODE_VERSION             0x03
 #define MODE_HELP                0x04
+#define MODE_LIST                0x05
 
 /*
  * Prototypes
