@@ -256,8 +256,10 @@ set_perms_suid(perm)
     switch (perm) {
 	case PERM_FULL_ROOT:
 	case PERM_ROOT:
-				if (setreuid(0, 0))
-				    fatal("setreuid(0, 0) failed, your operating system may have a broken setreuid() function\nTry running configure with --disable-setreuid", 0);
+				if (setreuid(-1, 0))
+				    fatal("setreuid(-1, 0) failed, your operating system may have a broken setreuid() function\nTry running configure with --disable-setreuid", 0);
+				if (setuid(0))
+				    fatal("setuid(0)", 1);
 			      	break;
 
 	case PERM_USER:
