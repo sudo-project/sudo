@@ -1709,6 +1709,9 @@ SUDO_FUNC_FNMATCH(AC_DEFINE(HAVE_FNMATCH, 1, [Define if you have the `fnmatch' f
 SUDO_FUNC_ISBLANK
 AC_REPLACE_FUNCS(strerror strcasecmp sigaction strlcpy strlcat closefrom)
 AC_CHECK_FUNCS(snprintf vsnprintf asprintf vasprintf, , [NEED_SNPRINTF=1])
+AH_TEMPLATE(HAVE_ST_MTIM, [Define if your struct stat has an st_mtim member])
+AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define if your struct stat has an st_mtimespec member])
+AC_CHECK_MEMBER([struct stat.st_mtim], AC_DEFINE(HAVE_ST_MTIM), [AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
 dnl
 dnl Check for the dirfd function/macro.  If not found, look for dd_fd in DIR.
 dnl
@@ -2240,6 +2243,22 @@ AH_TOP([#ifndef _SUDO_CONFIG_H
 #define _SUDO_CONFIG_H])
 
 AH_BOTTOM([/*
+ * Macros to pull sec and nsec parts of mtime from struct stat.
+ */
+#ifdef HAVE_ST_MTIM
+# define mtim_getsec(_x)	((_x).st_mtim.tv_sec)
+# define mtim_getnsec(_x)	((_x).st_mtim.tv_nsec)
+#else
+# ifdef HAVE_ST_MTIMESPEC
+#  define mtim_getsec(_x)	((_x).st_mtimespec.tv_sec)
+#  define mtim_getnsec(_x)	((_x).st_mtimespec.tv_nsec)
+# else
+#  define mtim_getsec(_x)	((_x).st_mtime)
+#  define mtim_getnsec(_x)	(0)
+# endif /* HAVE_ST_MTIMESPEC */
+#endif /* HAVE_ST_MTIM */
+
+/*
  * Emulate a subset of waitpid() if we don't have it.
  */
 #ifdef HAVE_WAITPID

@@ -17,7 +17,9 @@
 #include "config.h"
 
 #include <sys/types.h>
+#include <sys/param.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <stdio.h>
@@ -49,6 +51,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <time.h>
 
 #include "sudo.h"
 
@@ -76,9 +79,9 @@ int sudo_edit(argc, argv)
     struct tempfile {
 	char *tfile;
 	char *ofile;
-	int tfd;
-	time_t omtime;		/* XXX - use st_mtimespec / st_mtim? */
+	struct timespec ots;
 	off_t osize;
+	int tfd;
     } *tf;
 
     /*
@@ -122,11 +125,11 @@ int sudo_edit(argc, argv)
 		i--;
 		continue;
 	    }
-	    sb.st_mtime = 0;
-	    sb.st_size = 0;
+	    memset(&sb, 0, sizeof(sb));
 	}
 	tf[i].ofile = *ap;
-	tf[i].omtime = sb.st_mtime;
+	tf[i].ots.tv_sec = mtim_getsec(sb);
+	tf[i].ots.tv_nsec = mtim_getnsec(sb);
 	tf[i].osize = sb.st_size;
 	if ((cp = strrchr(tf[i].ofile, '/')) != NULL)
 	    cp++;
@@ -159,9 +162,11 @@ int sudo_edit(argc, argv)
 	 * file's mtime.  It is better than nothing and we only use the info
 	 * to determine whether or not a file has been modified.
 	 */
-	if (touch(tf[i].tfd, NULL, tf[i].omtime, 0) == -1) {
-	    if (fstat(tf[i].tfd, &sb) == 0)
-		tf[i].omtime = sb.st_mtime;
+	if (touch(tf[i].tfd, NULL, tf[i].ots.tv_sec, tf[i].ots.tv_nsec) == -1) {
+	    if (fstat(tf[i].tfd, &sb) == 0) {
+		tf[i].ots.tv_sec = mtim_getsec(sb);
+		tf[i].ots.tv_nsec = mtim_getnsec(sb);
+	    }
 	}
 #endif
     }
@@ -262,7 +267,9 @@ int sudo_edit(argc, argv)
 	}
 #ifdef HAVE_FSTAT
 	if (fstat(tf[i].tfd, &sb) == 0) {
-	    if (tf[i].osize == sb.st_size && tf[i].omtime == sb.st_mtime) {
+	    if (tf[i].osize == sb.st_size &&
+		tf[i].ots.tv_sec == mtim_getsec(sb) &&
+		tf[i].ots.tv_nsec == mtim_getnsec(sb)) {
 		warnx("%s unchanged", tf[i].ofile);
 		unlink(tf[i].tfile);
 		close(tf[i].tfd);
