@@ -74,6 +74,7 @@ static int appropriate		__P((int));
  * Globals
  */
 static char logline[MAXLOGLEN + 8];
+extern int errorlineno;
 
 
 /**********************************************************************
@@ -137,8 +138,8 @@ void log_error(code)
 	    break;
 
 	case VALIDATE_ERROR:
-	    (void) sprintf(p, "error in %s ; PWD=%s ; command: ",
-		_PATH_SUDO_SUDOERS, cwd);
+	    (void) sprintf(p, "error in %s, line %d ; PWD=%s.  ",
+		_PATH_SUDO_SUDOERS, errorlineno, cwd);
 #if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
 #endif /* LOGGING & SLOG_SYSLOG */
@@ -204,9 +205,10 @@ void log_error(code)
 
 
     /*
-     * if this error is from load_globals() don't put  argv in the message
+     * If this is a parse error or if the error is from load_globals()
+     * don't put  argv in the message.
      */
-    if (!(code & GLOBAL_PROBLEM)) {
+    if (code != VALIDATE_ERROR && !(code & GLOBAL_PROBLEM)) {
 
 	strcat(logline, cmnd);	/* stuff the command into the logline */
 	strcat(logline, " ");
@@ -377,7 +379,7 @@ static void send_mail()
 #ifdef POSIX_SIGNALS
     struct sigaction action;
 
-    (void) bzero((char *)(&action), sizeof(action));
+    (void) memset((VOID *)&action, 0, sizeof(action));
 #endif /* POSIX_SIGNALS */
 
     if ((mailer = find_path(MAILER)) == NULL) {
