@@ -2175,11 +2175,11 @@ AH_BOTTOM([/*
 # define stat_sudoers	lstat
 #endif
 
-/* Solaris doesn't use const qualifiers in PAM. */
-#ifdef sun
-# define PAM_CONST
-#else
+/* Only OpenPAM and Linux PAM use const qualifiers. */
+#if defined(_OPENPAM) || defined(__LIBPAM_VERSION)
 # define PAM_CONST	const
+#else
+# define PAM_CONST
 #endif
 
 #ifdef USE_EXECV
