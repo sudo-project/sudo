@@ -666,7 +666,7 @@ store_syslogfac(val, def, op)
 	free(def->sd_un.str);
 	closelog();
     }
-    openlog("sudo", 0, fac->num);
+    openlog(Argv[0], 0, fac->num);
     def->sd_un.str = estrdup(fac->name);
     sudo_defs_table[I_LOGFAC].sd_un.ival = fac->num;
 #else
@@ -674,7 +674,7 @@ store_syslogfac(val, def, op)
 	free(def->sd_un.str);
 	closelog();
     }
-    openlog("sudo", 0);
+    openlog(Argv[0], 0);
     def->sd_un.str = estrdup("default");
 #endif /* LOG_NFACILITIES */
     return(TRUE);
