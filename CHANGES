@@ -846,3 +846,20 @@ Sudo 1.5.2 released.
 263) %h in MAILSUBJECT expands to local hostname.
 
 Sudo 1.5.3 released.
+
+264) Don't pass getdtablesize() as first arg to select(2).  No need
+     to do this since we only select on one fd--use (fd+1) as nfds
+     and the old way caused problems on some systems (arguably
+     a bug in those OS's).  From Marc Slemko marcs@znep.com.
+
+265) Fixed coredump when passwd file is missing or unavailable.
+     Reported by Jason Downs <downsj@teeny.org> and
+     Klee Dienes <klee@mit.edu> (via a Debian Linux bug report).
+
+266) Fixed bug wrt exclusion lists and relative pathnames.
+     Reported by osiris@COURIER.CB.LUCENT.COM.
+
+267) exit(1) if user doesn't enter a passwd.
+     Noted by Alex Parchkov <alexp@ind.tansu.com.au>.
+
+Sudo 1.5.4 released.
