@@ -1009,16 +1009,17 @@ initial_setup()
     /*
      * Close any open fd's other than stdin, stdout and stderr.
      */
-#ifdef RLIMIT_NOFILE
-    if (getrlimit(RLIMIT_NOFILE, &rl) == 0)
-	maxfd = rl.rlim_max - 1;
-    else
-#endif /* RLIMIT_NOFILE */
 #ifdef HAVE_SYSCONF
-	maxfd = sysconf(_SC_OPEN_MAX) - 1;
+    maxfd = sysconf(_SC_OPEN_MAX) - 1;
 #else
-	maxfd = getdtablesize() - 1;
+    maxfd = getdtablesize() - 1;
 #endif /* HAVE_SYSCONF */
+#ifdef RLIMIT_NOFILE
+    if (getrlimit(RLIMIT_NOFILE, &rl) == 0) {
+	if (rl.rlim_max != RLIM_INFINITY && rl.rlim_max <= maxfd)
+	    maxfd = rl.rlim_max - 1;
+    }
+#endif /* RLIMIT_NOFILE */
 
     for (fd = maxfd; fd > STDERR_FILENO; fd--)
 	(void) close(fd);
