@@ -312,9 +312,12 @@ int main(argc, argv)
 
 	case VALIDATE_OK_NOPASS:
 	    /* finally tell the user if the command did not exist */
-	    if (cmnd_status != FOUND) {
+	    if (cmnd_status == NOT_FOUND_DOT) {
+		(void) fprintf(stderr, "%s: ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.\n", Argv[0], cmnd, cmnd, cmnd);
+		exit(1);
+	    } else if (cmnd_status == NOT_FOUND) {
 		(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0],
-			       cmnd);
+		    cmnd);
 		exit(1);
 	    }
 
@@ -377,7 +380,7 @@ int main(argc, argv)
 
 #ifndef DONT_LEAK_PATH_INFO
 	    if (cmnd_status == NOT_FOUND_DOT)
-		(void) fprintf(stderr, "%s: ignoring %s found in '.'\nUse `sudo ./%s' if this is the %s you wish to run.\n", Argv[0], cmnd, cmnd, cmnd);
+		(void) fprintf(stderr, "%s: ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.\n", Argv[0], cmnd, cmnd, cmnd);
 	    else if (cmnd_status == NOT_FOUND)
 		(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0],
 		    cmnd);
