@@ -179,11 +179,11 @@ DEFVAR			[a-z_]+
 			}			/* a command line arg */
 }
 
-<INITIAL>^#include[ \t]+.*\n {
+<INITIAL>^#include[[:blank:]]+\/.*\n {
 			    char *cp, *ep;
 			    ++sudolineno;
 			    /* pull out path from #include line */
-			    for (cp = yytext + 9; isspace(*cp); cp++)
+			    for (cp = yytext + 9; isblank(*cp); cp++)
 				continue;
 			    for (ep = cp; *ep != '\0' && !isspace(*ep); ep++)
 				continue;
