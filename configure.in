@@ -192,7 +192,7 @@ dnl Program checks
 dnl
 AC_PROG_YACC
 AC_PROG_LEX
-SUDO_PROG_INSTALL
+AC_PROG_INSTALL
 SUDO_PROG_SENDMAIL
 SUDO_PROG_PWD
 SUDO_PROG_MV
@@ -214,6 +214,7 @@ AC_TYPE_MODE_T
 AC_TYPE_UID_T
 AC_TYPE_SIZE_T
 SUDO_SSIZE_T
+SUDO_FULL_VOID
 dnl
 dnl only set RETSIGTYPE if it is not set already
 dnl
@@ -224,7 +225,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_CHECK_FUNCS(getwd strchr strrchr memcpy sysconf sigaction bzero tzset tcsetattr)
+AC_CHECK_FUNCS(getwd strchr strrchr memcpy sysconf sigaction bzero tzset tcsetattr strcasecmp)
 AC_CHECK_FUNC(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
 AC_CHECK_FUNC(getcwd, AC_DEFINE(HAVE_GETCWD), LIBOBJS="$LIBOBJS getcwd.o")
 AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), LIBOBJS="$LIBOBJS lsearch.o")
@@ -234,17 +235,15 @@ dnl library checks
 dnl
 dnl Irix 5.2 (at least) has bugs in -lnsl and -lsocket
 if test "$OS" != "irix" -o $OSREV -ne 5 ; then
-    AC_HAVE_LIBRARY(nsl)
-    AC_HAVE_LIBRARY(socket)
+    AC_CHECK_LIB(nsl, main)
+    AC_CHECK_LIB(socket, main)
 fi
 dnl For those w/o crypt(3)
-AC_HAVE_LIBRARY(ufc)
+AC_CHECK_LIB(ufc, main)
 dnl
 dnl OS-dependent libraries
 dnl
-if test "$OS" = "irix" -a $OSREV -le 4 ; then
-    AC_IRIX_SUN
-fi
+AC_CHECK_LIB(sun, getpwnam)
 dnl
 dnl Substitute into the Makefiles
 dnl
