@@ -129,10 +129,9 @@ char *find_path(file)
 	if (!statfailed && (statbuf.st_mode & 0000111))
 	    return (qualify(fn));
 	else if (statfailed && errno != ENOENT && errno != ENOTDIR &&
-		 errno != EINVAL) {
+		 errno != EINVAL)
 	    perror("find_path:  stat");
-	    exit(1);
-	}
+
 	path = n + 1;
 
     } while (n);
@@ -149,9 +148,10 @@ char *find_path(file)
 	statfailed = stat(fn, &statbuf);
 	if (!statfailed && (statbuf.st_mode & 0000111))
 	    return (qualify(fn));
-	else if (statfailed && errno != ENOENT && errno != ENOTDIR) {
+	else if (statfailed && errno != ENOENT && errno != ENOTDIR &&
+		 errno != EINVAL) {
 	    perror("find_path:  stat");
-	    exit(1);
+	    return (NULL);
 	}
     }
     return (NULL);
@@ -180,12 +180,9 @@ char *qualify(n)
      * is it a bogus path?
      */
     if (stat(n, &statbuf)) {
-	if (errno == ENOENT)
-	    return (NULL);
-	else {
+	if (errno != ENOENT)
 	    perror("qualify:  stat");
-	    exit(1);
-	}
+	return (NULL);
     }
 
     /*
@@ -240,7 +237,7 @@ char *qualify(n)
 	 */
 	if (lstat(full, &statbuf)) {
 	    perror("qualify:  lstat");
-	    exit(1);
+	    return (NULL);
 	}
 
 	if ((statbuf.st_mode & S_IFMT) == S_IFLNK) {
