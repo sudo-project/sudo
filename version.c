@@ -97,7 +97,7 @@ print_version()
 	(void) fputs("Logging:\n", stdout);
 #if (LOGGING & SLOG_SYSLOG)
 # ifdef HAVE_SYSLOG_NAMES
-	printf("    syslog: facility %s, failures to %s, success to %s\n",
+	printf("    syslog: facility '%s', failures to '%s', success to '%s'\n",
 	    num_to_name(LOGFAC, facilitynames),
 	    num_to_name(PRI_FAILURE, prioritynames),
 	    num_to_name(PRI_SUCCESS, prioritynames));
@@ -196,6 +196,9 @@ print_version()
 	(void) fputs("Send mail on: 'error'", stdout);
 # ifdef SEND_MAIL_WHEN_NO_USER
 	(void) fputs(" 'unlisted user'", stdout);
+# endif
+# ifdef SEND_MAIL_WHEN_NO_HOST
+	(void) fputs(" 'unlisted on host'", stdout);
 # endif
 # ifdef SEND_MAIL_WHEN_NOT_OK
 	(void) fputs(" 'authentication failure'", stdout);
