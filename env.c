@@ -444,20 +444,6 @@ rebuild_env(sudo_mode, envp)
 }
 
 void
-dump_badenv()
-{
-    struct list_member *cur;
-
-    puts("Default table of environment variables to clear");
-    for (cur = def_list(I_ENV_DELETE); cur; cur = cur->next)
-	printf("\t%s\n", cur->value);
-
-    puts("Default table of environment variables to sanity check");
-    for (cur = def_list(I_ENV_CHECK); cur; cur = cur->next)
-	printf("\t%s\n", cur->value);
-}
-
-void
 init_envtables()
 {
     struct list_member *cur;

@@ -215,7 +215,6 @@ VOID *erealloc		__P((VOID *, size_t));
 char *estrdup		__P((const char *));
 int easprintf		__P((char **, const char *, ...));
 int evasprintf		__P((char **, const char *, va_list));
-void dump_badenv	__P((void));
 void dump_defaults	__P((void));
 void dump_auth_methods	__P((void));
 void init_envtables	__P((void));
