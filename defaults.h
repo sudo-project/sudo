@@ -84,9 +84,9 @@ struct sudo_defs_types {
 #define I_LONG_OTP_PROMPT	6
 #define I_IGNORE_DOT		7
 #define I_MAIL_ALWAYS		8
-#define I_MAIL_IF_NOUSER	9
-#define I_MAIL_IF_NOHOST	10
-#define I_MAIL_IF_NOPERMS	11
+#define I_MAIL_NOUSER		9
+#define I_MAIL_NOHOST		10
+#define I_MAIL_NOPERMS		11
 #define I_TTY_TICKETS		12
 #define I_LECTURE		13
 #define I_AUTHENTICATE		14

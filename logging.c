@@ -518,11 +518,11 @@ mail_auth(status, line)
 	    VALIDATE_ERROR|VALIDATE_OK|FLAG_NO_USER|FLAG_NO_HOST|VALIDATE_NOT_OK;
     else {
 	mail_mask = VALIDATE_ERROR;
-	if (def_flag(I_MAIL_IF_NOUSER))
+	if (def_flag(I_MAIL_NOUSER))
 	    mail_mask |= FLAG_NO_USER;
-	if (def_flag(I_MAIL_IF_NOHOST))
+	if (def_flag(I_MAIL_NOHOST))
 	    mail_mask |= FLAG_NO_HOST;
-	if (def_flag(I_MAIL_IF_NOPERMS))
+	if (def_flag(I_MAIL_NOPERMS))
 	    mail_mask |= VALIDATE_NOT_OK;
     }
 

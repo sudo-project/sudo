@@ -135,13 +135,13 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"mail_always", T_FLAG, { 0 },
 	"Always send mail when sudo is run"
     }, {
-	"mail_if_no_user", T_FLAG, { 0 },
+	"mail_no_user", T_FLAG, { 0 },
 	"Send mail if the user is not in sudoers"
     }, {
-	"mail_if_no_host", T_FLAG, { 0 },
+	"mail_no_host", T_FLAG, { 0 },
 	"Send mail if the user is not in sudoers for this host"
     }, {
-	"mail_if_no_perms", T_FLAG, { 0 },
+	"mail_no_perms", T_FLAG, { 0 },
 	"Send mail if the user is not allowed to run a command"
     }, {
 	"tty_tickets", T_FLAG, { 0 },
@@ -180,7 +180,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"requiretty", T_FLAG, { 0 },
 	"Only allow the user to run sudo if they have a tty"
     }, {
-	"loglinelen", T_INT, { 0 },
+	"loglinelen", T_INT|T_BOOL, { 0 },
 	"Length at which to wrap log file lines (0 for no wrap): %d"
     }, {
 	"timestamp_timeout", T_INT|T_BOOL, { 0 },
@@ -443,13 +443,13 @@ init_defaults()
     def_flag(I_MAIL_ALWAYS) = TRUE;
 #endif
 #ifdef SEND_MAIL_WHEN_NO_USER
-    def_flag(I_MAIL_IF_NOUSER) = TRUE;
+    def_flag(I_MAIL_NOUSER) = TRUE;
 #endif
 #ifdef SEND_MAIL_WHEN_NO_HOST
-    def_flag(I_MAIL_IF_NOHOST) = TRUE;
+    def_flag(I_MAIL_NOHOST) = TRUE;
 #endif
 #ifdef SEND_MAIL_WHEN_NOT_OK
-    def_flag(I_MAIL_IF_NOPERMS) = TRUE;
+    def_flag(I_MAIL_NOPERMS) = TRUE;
 #endif
 #ifdef USE_TTY_TICKETS
     def_flag(I_TTY_TICKETS) = TRUE;
