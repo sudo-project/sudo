@@ -585,6 +585,9 @@ cleanup:
 
 
 #ifdef HAVE_PAM
+/* We'd rather use appdata_ptr but Solaris does not pass it through... */
+static int PAM_nullpw;
+
 /********************************************************************
  *  pam_attempt_auth()
  *
@@ -595,7 +598,6 @@ void
 pam_attempt_auth()
 {
     int counter = TRIES_FOR_PASSWORD;
-    int null_pw = 0;
     static struct pam_conv pam_conv;
     static pam_handle_t *pamh;
 
@@ -603,7 +605,8 @@ pam_attempt_auth()
 
     /* Initial PAM setup */
     pam_conv.conv = sudo_conv;
-    pam_conv.appdata_ptr = &null_pw;
+    pam_conv.appdata_ptr = NULL;
+    PAM_nullpw = 0;
     if (pam_start("sudo", user_name, &pam_conv, &pamh) != PAM_SUCCESS) {
 	set_perms(PERM_USER, 0);
 	log_error(BAD_AUTH_INIT);
@@ -622,7 +625,7 @@ pam_attempt_auth()
         }
 
 	/* Exit silently if they hit return at the first password prompt */
-	if (null_pw) {
+	if (PAM_nullpw) {
 	    if (counter == TRIES_FOR_PASSWORD)
 		exit(1);
 	    else
@@ -672,9 +675,8 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		    p = (char *) pm->msg;
 		pr->resp = estrdup((char *) GETPASS(p,
 		    PASSWORD_TIMEOUT * 60, !echo));
-		/* Solaris PAM does not pass through appdata_ptr! */
-		if (pr->resp[0] == '\0' && appdata_ptr != NULL)
-		    *((int *) appdata_ptr) = 1;	/* indicate an empty password */
+		if (*pr->resp == '\0')
+		    PAM_nullpw = 1;		/* empty password */
 		break;
 	    case PAM_TEXT_INFO:
 		if (pm->msg)
