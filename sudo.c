@@ -76,8 +76,13 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_MALLOC_H */ 
 #include <pwd.h>
 #include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <net/if.h>
+#include <netinet/if_ether.h>
 #include <sys/param.h>
 #ifdef _AIX
 #include <sys/id.h>
@@ -102,6 +107,7 @@ extern char *strdup	__P((const char *));
 static int  parse_args		__P((void));
 static void usage		__P((int));
 static void load_globals	__P((void));
+static void load_interfaces	__P((void));
 static void load_cmnd		__P((void));
 static void add_env		__P((void));
 static void rmenv		__P((char **, char *, int));
@@ -116,7 +122,8 @@ char *cmnd;
 char *user;
 char *epasswd;
 char host[MAXHOSTNAMELEN + 1];
-struct in_addr *ip_addrs;
+struct interface *interfaces;
+int num_interfaces;
 char cwd[MAXPATHLEN + 1];
 uid_t uid = -2;
 
@@ -286,15 +293,19 @@ static void load_globals()
 	inform_user(GLOBAL_NO_HOSTNAME);
 #ifdef FQDN
     } else {
-	if ((h_ent = gethostbyname(host)) == NULL) {
+	if ((h_ent = gethostbyname(host)) == NULL)
 	    log_error(GLOBAL_HOST_UNREGISTERED);
-	} else {
+	else
 	    strcpy(host, h_ent -> h_name);
-	    load_ip_addrs(h_ent);
-	}
     }
 #else
     }
+
+    /*
+     * load a list of ip addresses and netmasks into
+     * the interfaces array.
+     */
+    load_interfaces();
 
     /*
      * We don't want to return the fully quallified name unless FQDN is set
@@ -564,38 +575,80 @@ static void load_cmnd()
 
 /**********************************************************************
  *
- *  load_ip_addrs()
+ *  load_interfaces()
  *
- *  This function sets the ip_addrs global variable
+ *  This function sets the interfaces global variable
+ *  and sets the constituent ip addrs and netmasks.
  */
 
-void load_ip_addrs(h_ent)
-    struct hostent *h_ent;
+static void load_interfaces()
 {
-    char **addr;			/* to walk addr list in h_ent */
-    int i;				/* counter */
+    struct ifconf ifconf;
+    struct ifreq ifreq;
+    char buf[BUFSIZ];
+    int sock, len, i;
 
-    /* set h_ent if not already set */
-    if (h_ent == NULL && (h_ent = gethostbyname(host)) == NULL) {
-	log_error(GLOBAL_HOST_UNREGISTERED);
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0) {
+	perror("socket");
+	exit(1);
+    }
 
+    /*
+     * get interface configuration
+     */
+    ifconf.ifc_len = sizeof(buf);
+    ifconf.ifc_buf = buf;
+    if (ioctl(sock, SIOCGIFCONF, (char *)(&ifconf)) < 0) {
+	(void) fprintf(stderr, "%s: cannot get interface configuration: ",
+	    Argv[0]);
+	perror("");
 	return;
     }
 
-    /* malloc space for ip_addrs array */
-    for (addr = h_ent -> h_addr_list, i = 0; *addr; addr++, i++)
-	;
-    if (i) {
-	ip_addrs = malloc(sizeof(struct in_addr) * (i));
-	if (ip_addrs == NULL) {
-	    perror("malloc");
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
+    /*
+     * malloc() space for interfaces array
+     */
+    len = num_interfaces = ifconf.ifc_len / sizeof(struct ifreq);
+    interfaces = (struct interface *) malloc(sizeof(struct interface) * len);
+    if (interfaces == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
     }
 
-    /* copy ip addrs to ip_addrs array */
-    for (addr = h_ent -> h_addr_list, i = 0; *addr; addr++, i++)
-	(void) memcpy(&ip_addrs[i], *addr, h_ent -> h_length);
-    ip_addrs[i].s_addr = 0;
+    /* XXX - do two passes.  one to build up num_interfaces, one to copy */
+    /*
+     * for each interface, get the ip address and netmask
+     */
+    for (i = 0; i < len; i++) {
+
+	/* get the ip address */
+	/* XXX check for 127.0.0.1, 255.255.255.255 and 0.0.0.0 */
+	(void) memcpy(&interfaces[i].addr,
+	    &(((struct sockaddr_in *)&ifconf.ifc_req[i].ifr_addr)->sin_addr),
+	    sizeof(struct in_addr));
+
+	/* get the netmask */
+/* #ifdef SIOCGIFNETMASK */
+#if 0
+	(void) strcpy(ifreq.ifr_name, ifconf.ifc_req[i].ifr_name);
+	if (ioctl(sock, SIOCGIFNETMASK, (char *)(&ifreq)) < 0) {
+	    (void) free(interfaces);
+	    num_interfaces = 0;
+	    perror("");
+	    return;
+	}
+	(void) memcpy(&interfaces[i].netmask,
+	    &(((struct sockaddr_in *)&ifreq.ifr_addr)->sin_addr),
+	    sizeof(struct in_addr));
+#else
+	if (IN_CLASSC(interfaces[i].addr.s_addr))
+	    interfaces[i].netmask.s_addr = htonl(IN_CLASSC_NET);
+	else if (IN_CLASSB(interfaces[i].addr.s_addr))
+	    interfaces[i].netmask.s_addr = htonl(IN_CLASSB_NET);
+	else
+	    interfaces[i].netmask.s_addr = htonl(IN_CLASSA_NET);
+#endif /* SIOCGIFNETMASK */
+    }
 }
