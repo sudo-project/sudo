@@ -1,14 +1,11 @@
 .TH SUDO 8
 .SH NAME
-sudo, visudo \- execute a command as the superuser and edit the sudoers file
+sudo \- execute a command as the superuser
 
 .SH SYNOPSIS
 .B sudo
 -V | -h | -l | -v | -k |
 .I <command>
-.sp
-.B visudo
-[-V]
 
 .SH DESCRIPTION
 .I Sudo
@@ -32,7 +29,7 @@ The
 file is composed of an optional host alias section, an optional command
 alias section and the user specification section. All command or host
 aliases need to start with their respective keywords (Host_Alias/Cmnd_Alias).
-Note that only the first occurrance of a user name will be significant in
+Note that only the first occurrence of a user name will be significant in
 the user specification section.
 
 .nf
@@ -61,6 +58,7 @@ command alias section format:
 Text after a pound sign '#' is considered a comment.
 Long lines can be newline escaped with the backslash '\\' character.
 The reserved alias 'ALL' can be used for both {Host,Cmnd}_Alias'.
+
     DO NOT define an alias of 'ALL', it will NOT be used.
     Note that 'ALL' implies the entire universe of hosts/commands.
     You can subtract elements from the universe by using the syntax:
@@ -74,7 +72,7 @@ Examples
                 REMOTE=merlin,kodiakthorn,spirit
     Host_Alias  MACHINES=kalkan,alpo,milkbones,128.138.199.1
     Host_Alias  SERVERS=houdini,merlin,kodiakthorn,spirit
-    Host_Alias  CSNETS=128.138.243.0,128.138.204.0,128.138.242.0
+    Host_Alias  CSNETS=128.138.243.0,128.138.204.0
 
     # Command alias specification
     Cmnd_Alias  LPCS=/usr/etc/lpc,/usr/ucb/lprm
@@ -109,25 +107,31 @@ SERVERS.  Steve can run any command located in the directory
 
 The
 .I sudoers
-file SHOULD be edited by the 
+file should 
+.B always
+be edited by the 
 .I visudo 
-command which locks the file and does gramatical checking. This provides
-a mechanism for the prevention of stupid syntax errors.
+command which locks the file and does grammatical checking. It is
+imperative that the
+.I sudoers
+be free of syntax errors since sudo will not run with a syntactically
+incorrect sudoers file.
 
-Sudo was designed to log via the 4.3 BSD syslogging facility but
-can log to a file instead if so desired.
+Sudo was designed to log via the 4.3 BSD syslog(3) facility but
+can log to a file instead if so desired (or to both syslog and a file).
 
 If an unauthorized user executes sudo, mail will be sent from the user to 
 the local authorities (defined at installation time).
 
 All preferences are defined at installation time and are derived from
-the sudo.h include file and the Makefile.
+the options.h and pathnames.h include files as well as as well as the
+Makefile.
 
 .SH OPTIONS
 .I sudo
 accepts the following command line options:
 .IP -V
-The -V (version) option causes sudo (or visudo) to print the version number
+The -V (version) option causes sudo to print the version number
 and exit.
 .IP -l
 The -l (list) option will list out the allowed and forbidden commands
@@ -137,7 +141,7 @@ The -h (help) option causes sudo to print the version of sudo and a usage
 message before exiting.
 .IP -v
 If given the -v (validate) option, sudo will update the user's timestamp file,
-prompting for a password if necesary.  This extends the sudo timeout
+prompting for a password if necessary.  This extends the sudo timeout
 to for another N minutes (where N is defined at installation time and defaults
 to 5 minutes) but does not run a command.
 .IP -k
@@ -184,7 +188,8 @@ modified and is passed unchanged to the program that
 executes.
 .sp
 For security reasons, if your OS supports shared libraries, sudo should always
-be statically linked.
+be statically linked unless the dynamic loader disable checks user-defined
+library search paths for setuid programs.
 .SH FUTURE ENHANCEMENTS
 .nf
 Allow nesting of host and command aliases.
@@ -192,30 +197,17 @@ Allow the host specifier in the sudoers file
     to use universe notation (user ALL,!SERVERS, ... = commands).
 Allow user aliases in the sudoers file (like host/command aliases).
 Allow alias nesting.
-Have visudo do more extensive checking on the sudoers file.
 .fi
 
 .SH FILES
 .nf
 /etc/sudoers                 file of authorized users.
-/etc/stmp                    lock file for visudo.
-/usr/local/bin/sudo          the executable itself.
-/usr/local/etc/visudo        utility for modifying the sudoers file.
 .fi
 
 .SH ENVIRONMENT VARIABLES
 .nf
 SUDO_USER                    Set to the login of the user who invoked sudo
 SUDO_UID                     Set to the uid of the user who invoked sudo
-.fi
-
-The following are used only if
-.I visudo
-was compiled with the ENV_EDITOR option:
-.nf
-
-EDITOR                       Used by visudo as the editor to use.
-VISUAL                       Used by visudo if EDITOR is not set.
 .fi
 
 .SH AUTHORS
@@ -255,16 +247,5 @@ There is no easy way to prevent a user from gaining a root shell if
 that user has access to commands that are shell scripts or that 
 allow shell escapes.
 
-.SH BUGS
-The
-.I -V
-flag gives the version of the
-.I sudo
-package rather than the individual
-.I sudo
-or
-.I visudo
-program.
-
 .SH SEE ALSO
-su(1)
+.BR su (1)
