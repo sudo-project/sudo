@@ -693,3 +693,109 @@ CHANGES from sudo 1.4.2
 
 211) lsearch.c will now compile w/o compiler warnings.
      (Updated from NetBSD lsearch.c)
+
+212) Now uses POSIX fnmatch(3) (which uses ! instead of ^ in ranges)
+
+CHANGES from sudo 1.4.3
+
+213) Now allows network/netmask in sudoers to override per-interface
+     netmask.
+
+214) Fixed -u support with multiple user lists on a line.
+
+215) Fixed a core dump problem when built with -DSHELL_IF_NO_ARGS.
+
+216) Fixed 2 typos in parse.yacc and removed some unnecesary if's.
+
+217) Now always use install-sh since SunOS install can't do uid/gid's.
+     Other BSD installs are probably similarly afflicted.
+
+218) Fixed NFS-mounted sudoers file under solaris both uid *and* gid
+     were being set to -2.  Now set uid to 1 to avoid group being
+     remapped.
+
+219) Now includes alloca.c (from gcc) for those w/o it.  Linking
+     against -lPW breaks visudo on HP-UX and probably others.
+
+220) Added --with-libpath, --with-libraries, --with-incpath options
+     to configure.
+
+221) configure now uses shicc instead of gcc on BSD/OS >= 2.0 to
+     generate binaries linked with shared libs.
+
+222) The parser was setting no_passwd even if there wasn't a
+     runas match.  I reordered some things in parse.yacc
+     to fix this.
+
+223) `sudo -v' (validate) wasn't paying attention to NOPASSWD.
+     Now it does.
+
+224) testsudoers now groks "-u user".
+
+225) Updated AFS support based on what tcsh 6.06 does.
+
+226) Fixed a typo/thinko that broke BSD > 4.3reno wrt interfaces.c.
+
+227) Hpux10 shadow password stuff now uses SecureWare routines.
+
+228) SecureWare passwd checking now uses bigcrypt() if available.
+     Now uses AUTH_MAX_PASSWD_LENGTH if defined.
+
+229) configure now makes sure you don't have a config.cache file
+     from another OS.
+
+230) Added better shadow password detection.
+     BSD >= 4.3reno -> /etc/master.passwd
+     hpux9: getspwnam() -> /.secure/etc/passwd
+     hpux10: getspnam() or getprpwnam() -> /tcb/files/auth/*/* (link with -lsec)
+     SVR4: getspnam() -> /etc/shadow
+     solaris: getspnam() -> /etc/shadow
+     irix[56].x: getspnam() -> /etc/shadow
+     sunos 4.x: getpwanam() -> /etc/security/passwd.adjunct
+     DUNIX: getprpwnam() -> /tcb/files/auth/*/* (link with -lsecurity)
+     SecureWare: getprpwnam() -> /tcb/files/auth/*/*
+     ultrix 4.x: getauthuid() -> /etc/auth.{pag,dir}
+
+231) '(' in command args no longer are a syntax error.
+
+232) '!command' now works in the presence of a runas or NOPASSWD token.
+     Simplified parse rules wrt runas and NOPASSWD (more consistent).
+
+233) Command args and now compared as a flat string again.  This makes
+     wildcard matches more consistent.
+
+234) DUNIX C2 support now groks AUTH_CRYPT_OLDCRYPT and AUTH_CRYPT_C1CRYPT.
+
+235) configure now uses config.{sub,guess} to guess OS type.
+     Sudo should work out of the box on more OS's now.
+
+236) Got rid of HAVE_C2_SECURITY, now just use SHADOW_TYPE.
+
+237) Fixed race in tgetpass() where echo can be turned off and
+     left off if sudo is used in a pipeline and a password is
+     required.
+
+CHANGES from sudo 1.4.4
+
+238) `sudo -l' output now includes runas and NOPASSWD info and
+     asks for a password unless NOPASSWD for ALL is set.
+
+239) Sudo can now deal with all-caps user and host names.
+
+240) Sudo will now remove the "ENV" and "BASH_ENV" envariables.
+     From Michael Meskes <meskes@Informatik.RWTH-Aachen.DE>.
+
+241) `sudo -l' will now expand Cmnd_Alias's (could be prettier).
+
+242) `sudo -s' will now set $HOME to root's homedir (or that of
+     the user specified -u) so dot files get sourced.
+
+CHANGES from sudo 1.4.5
+
+243) $HOME was always being set, not just with `-s'.
+
+244) In visudo, the owner and group of the sudoers file were
+     being set too early; an editor could change them and change
+     the owner/group of the resulting sudoers file.
+
+Sudo 1.5 released.
