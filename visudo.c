@@ -98,9 +98,7 @@ main(argc, argv)
     int num_chars;
     struct stat sbuf;
     struct passwd *sudoers_pw;
-#ifdef ENV_EDITOR
-    char * Editor;
-#endif /* ENV_EDITOR */
+    char * Editor = EDITOR;
 #ifdef POSIX_SIGNALS
     struct sigaction action;
 #endif /* POSIX_SIGNALS */
@@ -214,13 +212,11 @@ main(argc, argv)
 	/*
 	 * build strings in buffer to be executed by system()
 	 */
-#ifdef ENV_EDITOR
-	(void) sprintf(buffer, "%s +%d %s", Editor, err_line_no,
-	    sudoers_tmp_file);
-#else
-	(void) sprintf(buffer, "%s +%d %s", EDITOR, err_line_no,
-	    sudoers_tmp_file);
-#endif /* ENV_EDITOR */
+	if (err_line_no)
+	    (void) sprintf(buffer, "%s +%d %s", Editor, err_line_no,
+		sudoers_tmp_file);
+	else
+	    (void) sprintf(buffer, "%s %s", Editor, sudoers_tmp_file);
 
 	/* edit the file */
 	if (system(buffer) == 0) {
