@@ -523,6 +523,12 @@ case "$host" in
 		    LIBS="${LIBS} -lprot -lx"
 		fi
 		;;
+    *-*-unicos*)
+		# configure thinks we have -lsocket and -linet but we don't
+		LIB_INET=1
+		LIB_SOCKET=1
+
+		# XXX - what about shadow pw?
     *-*-bsdi*)
 		# Use shlicc for BSD/OS 2.x unless asked to do otherwise
 		if test "$OSREV" -ge 2 -a "${with_CC+set}" != set -a \
@@ -701,13 +707,17 @@ if test "$OS" != "irix"; then
     if test -z "$LIB_NSL"; then
 	AC_CHECK_LIB(nsl, main, SUDO_LIBS="${SUDO_LIBS} -lnsl")
     fi
-    AC_CHECK_LIB(socket, main, SUDO_LIBS="${SUDO_LIBS} -lsocket")
+    if test -z "$LIB_SOCKET"; then
+	AC_CHECK_LIB(socket, main, SUDO_LIBS="${SUDO_LIBS} -lsocket")
+    fi
 elif test "$OSREV" -lt 5; then
     AC_CHECK_LIB(sun, getpwnam, [SUDO_LIBS="${SUDO_LIBS} -lsun"
 VISUDO_LIBS="${VISUDO_LIBS} -lsun"]
 )
 fi
-AC_CHECK_LIB(inet, main, SUDO_LIBS="${SUDO_LIBS} -linet")
+if test -z "$LIB_INET"; then
+    AC_CHECK_LIB(inet, main, SUDO_LIBS="${SUDO_LIBS} -linet")
+fi
 dnl
 dnl Find kerberos includes and libs or complain
 dnl
