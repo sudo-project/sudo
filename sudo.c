@@ -551,6 +551,10 @@ static int parse_args()
 		Argc--;
 		Argv++;
 		Argv[0] = progname;
+#ifdef SHELL_IF_NO_ARGS
+		if (ret == MODE_RUN)
+		    ret |= MODE_SHELL;
+#endif /* SHELL_IF_NO_ARGS */
 		return(ret);
 	    case '\0':
 		(void) fprintf(stderr, "%s: '-' requires an argument\n",
