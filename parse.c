@@ -81,6 +81,7 @@ LINK tmp_ptr, reset_ptr, save_ptr, list_ptr[NUM_LISTS];
  * Prototypes
  */
 static int hostcmp	__P((char *));
+static int cmndcmp	__P((char *, char *));
 
 
 /*
@@ -351,19 +352,9 @@ int cmnd_type_ok()
 		list_ptr[CMND_LIST] = tmp_ptr -> next;
 		while (next_type == TYPE3) {
 		    /*
-		     * Check to see if a directory is being permitted
+		     * Match cmnd to the data (directory or file)
 		     */
-		    if (list_ptr[CMND_LIST]->
-			data[strlen(list_ptr[CMND_LIST]->data)-1] == '/' ) {
-			    /* we have a directory spec */
-			    if (strncmp(list_ptr[CMND_LIST]->data, cmnd,
-				strlen(list_ptr[CMND_LIST]->data)) == 0)
-				return(MATCH);
-			    else
-				return(NO_MATCH);
-		    }
-
-		    if (strcmp(list_ptr[CMND_LIST] -> data, cmnd) == 0) {
+		    if (cmndcmp(cmnd, list_ptr[CMND_LIST] -> data) == 0) {
 			if (list_ptr[USER_LIST] -> op == '!') {
 			    list_ptr[CMND_LIST] = save_ptr;
 			    return (QUIT_NOW);
@@ -534,4 +525,27 @@ static int hostcmp(target)
     } else {
 	return(strcmp(target, host));
     }
+}
+
+
+
+/*
+ * this routine is called from cmnd_type_ok() and tries to match a cmnd
+ * to a data entry from the sudoers file.
+ */
+
+static int cmndcmp(cmnd, data)
+    char *cmnd;				/* command the user is attempting */
+    char *data;				/* data we are checking against */
+{
+    int len = strlen(data);
+
+    /*
+     * If the data is a directory, match based on len,
+     * otherwise do a normal strcmp(3)
+     */
+    if (*(data + len - 1) == '/')
+	return(strncmp(data, cmnd, len));
+    else
+	return(strcmp(data, cmnd));
 }
