@@ -528,30 +528,34 @@ char *yytext;
 #define INITIAL 0
 #line 2 "parse.lex"
 /*
- *  CU sudo version 1.6
- *  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
+ * This code is derived from software contributed by Chris Jepeway
+ * <jepeway@cs.utk.edu>
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * This code is derived from software contributed by Chris Jepeway
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
- *
- *******************************************************************
- *
- * parse.lex -- lexigraphical analyzer for sudo.
- *
- * Chris Jepeway <jepeway@cs.utk.edu>
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -572,6 +576,7 @@ char *yytext;
 #include <sys/types.h>
 #include <sys/param.h>
 #include "sudo.h"
+#include "parse.h"
 #include "sudo.tab.h"
 
 #ifndef lint
@@ -605,7 +610,7 @@ extern void yyerror		__P((char *));
 
 #define GOTRUNAS 2
 
-#line 610 "lex.yy.c"
+#line 614 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -756,9 +761,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 90 "parse.lex"
+#line 94 "parse.lex"
 
-#line 763 "lex.yy.c"
+#line 767 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -843,14 +848,14 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 91 "parse.lex"
+#line 95 "parse.lex"
 {			/* throw away space/tabs */
 			    sawspace = TRUE;	/* but remember for fill_args */
 			}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 95 "parse.lex"
+#line 99 "parse.lex"
 { 
 			    sawspace = TRUE;	/* remember for fill_args */
 			    ++sudolineno;
@@ -859,7 +864,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 101 "parse.lex"
+#line 105 "parse.lex"
 {
 			    LEXTRACE("QUOTEDCHAR ");
 			    fill_args(yytext + 1, 1, sawspace);
@@ -868,7 +873,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 107 "parse.lex"
+#line 111 "parse.lex"
 {
 			    BEGIN INITIAL;
 			    unput(*yytext);
@@ -877,7 +882,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 113 "parse.lex"
+#line 117 "parse.lex"
 { 
 			    ++sudolineno; 
 			    LEXTRACE("\n");
@@ -886,7 +891,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 119 "parse.lex"
+#line 123 "parse.lex"
 {
 			    ++sudolineno;
 			    LEXTRACE("\n");
@@ -895,7 +900,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 125 "parse.lex"
+#line 129 "parse.lex"
 {
 			    LEXTRACE("ARG ");
 			    fill_args(yytext, yyleng, sawspace);
@@ -904,7 +909,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 131 "parse.lex"
+#line 135 "parse.lex"
 {
 			    LEXTRACE(", ");
 			    return(',');
@@ -912,14 +917,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 136 "parse.lex"
+#line 140 "parse.lex"
 {
 			    return('!');		/* return '!' */
 			}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 140 "parse.lex"
+#line 144 "parse.lex"
 {
 			    LEXTRACE("= ");
 			    return('=');
@@ -927,7 +932,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 145 "parse.lex"
+#line 149 "parse.lex"
 {
 			    LEXTRACE(": ");
 			    return(':');
@@ -935,14 +940,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 150 "parse.lex"
+#line 154 "parse.lex"
 {
 			    return('.');
 			}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 154 "parse.lex"
+#line 158 "parse.lex"
 { 
 				/* cmnd does not require passwd for this user */
 			    	LEXTRACE("NOPASSWD ");
@@ -951,7 +956,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 160 "parse.lex"
+#line 164 "parse.lex"
 { 
 				/* cmnd requires passwd for this user */
 			    	LEXTRACE("PASSWD ");
@@ -960,7 +965,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 166 "parse.lex"
+#line 170 "parse.lex"
 {
 			    /* netgroup */
 			    fill(yytext, yyleng);
@@ -969,7 +974,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 172 "parse.lex"
+#line 176 "parse.lex"
 {
 			    /* UN*X group */
 			    fill(yytext, yyleng);
@@ -978,7 +983,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 178 "parse.lex"
+#line 182 "parse.lex"
 {
 			    fill(yytext, yyleng);
 			    LEXTRACE("NTWKADDR ");
@@ -987,7 +992,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 184 "parse.lex"
+#line 188 "parse.lex"
 {
 			    fill(yytext, yyleng);
 			    LEXTRACE("FQHOST ");
@@ -996,7 +1001,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 190 "parse.lex"
+#line 194 "parse.lex"
 {
 				BEGIN GOTRUNAS;
 				LEXTRACE("RUNAS ");
@@ -1005,7 +1010,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 196 "parse.lex"
+#line 200 "parse.lex"
 {
 			    /* Runas_Alias that user can run command as or ALL */
 			    fill(yytext, yyleng);
@@ -1020,7 +1025,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 208 "parse.lex"
+#line 212 "parse.lex"
 {
 			    /* username/uid that user can run command as */
 			    fill(yytext, yyleng);
@@ -1030,12 +1035,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 215 "parse.lex"
+#line 219 "parse.lex"
 BEGIN INITIAL;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 218 "parse.lex"
+#line 222 "parse.lex"
 {
 			    /* directories can't have args... */
 			    if (yytext[yyleng - 1] == '/') {
@@ -1051,7 +1056,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 231 "parse.lex"
+#line 235 "parse.lex"
 {
 			    fill(yytext, yyleng);
 			    if (strcmp(yytext, "ALL") == 0) {
@@ -1064,7 +1069,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 241 "parse.lex"
+#line 245 "parse.lex"
 {
 			    fill(yytext, yyleng);
 			    if (strcmp(yytext, "Host_Alias") == 0) {
@@ -1091,17 +1096,17 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 265 "parse.lex"
+#line 269 "parse.lex"
 {
 			    return(ERROR);
 			}	/* parse error */
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 269 "parse.lex"
+#line 273 "parse.lex"
 ECHO;
 	YY_BREAK
-#line 1106 "lex.yy.c"
+#line 1110 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(GOTCMND):
 case YY_STATE_EOF(GOTRUNAS):
@@ -1989,7 +1994,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 269 "parse.lex"
+#line 273 "parse.lex"
 
 static void
 fill(s, len)
@@ -2004,7 +2009,6 @@ fill(s, len)
     (void) strncpy(yylval.string, s, len);
     yylval.string[len] = '\0';
 }
-
 
 static void
 fill_cmnd(s, len)
@@ -2023,7 +2027,6 @@ fill_cmnd(s, len)
 
     yylval.command.args = NULL;
 }
-
 
 static void
 fill_args(s, len, addspace)
@@ -2072,7 +2075,6 @@ fill_args(s, len, addspace)
     arg_len = new_len;
 }
 
-
 int
 yywrap()
 {
@@ -2080,7 +2082,7 @@ yywrap()
     YY_NEW_FILE;
 #endif /* YY_NEW_FILE */
 
-    /* don't reset the aliases if called by testsudoers */
+    /* Don't reset the aliases if called by testsudoers. */
     if (clearaliases)
 	reset_aliases();
 

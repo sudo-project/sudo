@@ -17,32 +17,34 @@ static char yyrcsid[]
 #define YYRECOVERING() (yyerrflag!=0)
 #define YYPREFIX "yy"
 #line 2 "parse.yacc"
-
 /*
- *  CU sudo version 1.6
- *  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
+ * This code is derived from software contributed by Chris Jepeway
+ * <jepeway@cs.utk.edu>
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
- *
- *******************************************************************
- *
- * parse.yacc -- yacc parser and alias manipulation routines for sudo.
- *
- * Chris Jepeway <jepeway@cs.utk.edu>
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -70,6 +72,7 @@ static char yyrcsid[]
 #endif /* HAVE_LSEARCH */
 
 #include "sudo.h"
+#include "parse.h"
 
 #ifndef HAVE_LSEARCH
 #include "emul/search.h"
@@ -174,7 +177,7 @@ void
 yyerror(s)
     char *s;
 {
-    /* save the line the first error occured on */
+    /* Save the line the first error occured on. */
     if (errorlineno == -1)
 	errorlineno = sudolineno ? sudolineno - 1 : 0;
 #ifndef TRACELEXER
@@ -185,14 +188,14 @@ yyerror(s)
 #endif
     parse_error = TRUE;
 }
-#line 172 "parse.yacc"
+#line 175 "parse.yacc"
 typedef union {
     char *string;
     int BOOLEAN;
     struct sudo_command command;
     int tok;
 } YYSTYPE;
-#line 196 "sudo.tab.c"
+#line 199 "sudo.tab.c"
 #define ALIAS 257
 #define NTWKADDR 258
 #define FQHOST 259
@@ -497,8 +500,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 666 "parse.yacc"
-
+#line 668 "parse.yacc"
 
 typedef struct {
     int type;
@@ -511,13 +513,9 @@ size_t naliases = 0;
 size_t nslots = 0;
 
 
-/**********************************************************************
- *
- * aliascmp()
- *
- *  This function compares two aliasinfo structures.
+/*
+ * Compare two aliasinfo structures, strcmp() style.
  */
-
 static int
 aliascmp(a1, a2)
     const VOID *a1, *a2;
@@ -534,14 +532,9 @@ aliascmp(a1, a2)
     return(r);
 }
 
-
-/**********************************************************************
- *
- * genaliascmp()
- *
- *  This function compares two generic_alias structures.
+/*
+ * Compare two generic_alias structures, strcmp() style.
  */
-
 static int
 genaliascmp(entry, key)
     const VOID *entry, *key;
@@ -553,14 +546,9 @@ genaliascmp(entry, key)
 }
 
 
-/**********************************************************************
- *
- * add_alias()
- *
- *  This function adds the named alias of the specified type to the
- *  aliases list.
+/*
+ * Adds the named alias of the specified type to the aliases list.
  */
-
 static int
 add_alias(alias, type)
     char *alias;
@@ -600,14 +588,9 @@ add_alias(alias, type)
     return(ok);
 }
 
-
-/**********************************************************************
- *
- * find_alias()
- *
- *  This function searches for the named alias of the specified type.
+/*
+ * Searches for the named alias of the specified type.
  */
-
 static int
 find_alias(alias, type)
     char *alias;
@@ -622,17 +605,13 @@ find_alias(alias, type)
 		 sizeof(ai), aliascmp) != NULL);
 }
 
-
-/**********************************************************************
- *
- * more_aliases()
- *
- *  This function allocates more space for the aliases list.
+/*
+ * Allocates more space for the aliases list.
  */
-
 static int
 more_aliases()
 {
+
     nslots += MOREALIASES;
     if (nslots == MOREALIASES)
 	aliases = (aliasinfo *) malloc(nslots * sizeof(aliasinfo));
@@ -642,14 +621,9 @@ more_aliases()
     return(aliases != NULL);
 }
 
-
-/**********************************************************************
- *
- * dumpaliases()
- *
- *  This function lists the contents of the aliases list.
+/*
+ * Lists the contents of the aliases list.
  */
-
 void
 dumpaliases()
 {
@@ -677,15 +651,9 @@ dumpaliases()
     }
 }
 
-
-/**********************************************************************
- *
- * list_matches()
- *
- *  This function lists the contents of cm_list and ga_list for
- *  `sudo -l'.
+/*
+ * Lists the contents of cm_list and ga_list for `sudo -l'.
  */
-
 void
 list_matches()
 {
@@ -748,15 +716,9 @@ list_matches()
     cm_list_size = 0;
 }
 
-
-/**********************************************************************
- *
- * append()
- *
- *  This function appends a source string to the destination prefixing
- *  a separator if one is given.
+/*
+ * Appends a source string to the destination, optionally prefixing a separator.
  */
-
 static void
 append(src, dstp, dst_len, dst_size, separator)
     char *src, **dstp;
@@ -792,18 +754,13 @@ append(src, dstp, dst_len, dst_size, separator)
     *dst_len += src_len;
 }
 
-
-/**********************************************************************
- *
- * reset_aliases()
- *
- *  This function frees up space used by the aliases list and resets
- *  the associated counters.
+/*
+ * Frees up space used by the aliases list and resets the associated counters.
  */
-
 void
 reset_aliases()
 {
+
     if (aliases) {
 	free(aliases);
 	aliases = NULL;
@@ -811,17 +768,13 @@ reset_aliases()
     naliases = nslots = 0;
 }
 
-
-/**********************************************************************
- *
- * expand_ga_list()
- *
- *  This function increments ga_list_len, allocating more space as necessary.
+/*
+ * Increments ga_list_len, allocating more space as necessary.
  */
-
 static void
 expand_ga_list()
 {
+
     if (++ga_list_len >= ga_list_size) {
 	while ((ga_list_size += STACKINCREMENT) < ga_list_len)
 	    ;
@@ -832,17 +785,13 @@ expand_ga_list()
     ga_list[ga_list_len - 1].entries = NULL;
 }
 
-
-/**********************************************************************
- *
- * expand_match_list()
- *
- *  This function increments cm_list_len, allocating more space as necessary.
+/*
+ * Increments cm_list_len, allocating more space as necessary.
  */
-
 static void
 expand_match_list()
 {
+
     if (++cm_list_len >= cm_list_size) {
 	while ((cm_list_size += STACKINCREMENT) < cm_list_len)
 	    ;
@@ -856,18 +805,14 @@ expand_match_list()
     cm_list[cm_list_len].nopasswd = FALSE;
 }
 
-
-/**********************************************************************
- *
- * init_parser()
- *
- *  This function frees up spaced used by a previous parse and
- *  allocates new space for various data structures.
+/*
+ * Frees up spaced used by a previous parser run and allocates new space
+ * for various data structures.
  */
-
 void
 init_parser()
 {
+
     /* Free up old data structures if we run the parser more than once. */
     if (match) {
 	free(match);
@@ -886,7 +831,7 @@ init_parser()
     if (printmatches == TRUE)
 	expand_match_list();
 }
-#line 890 "sudo.tab.c"
+#line 835 "sudo.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || __STDC__
 static int yygrowstack(void)
@@ -1067,19 +1012,19 @@ yyreduce:
     switch (yyn)
     {
 case 3:
-#line 210 "parse.yacc"
+#line 212 "parse.yacc"
 { ; }
 break;
 case 4:
-#line 212 "parse.yacc"
+#line 214 "parse.yacc"
 { yyerrok; }
 break;
 case 5:
-#line 213 "parse.yacc"
+#line 215 "parse.yacc"
 { push; }
 break;
 case 6:
-#line 213 "parse.yacc"
+#line 215 "parse.yacc"
 {
 			    while (top && user_matches != TRUE) {
 				pop;
@@ -1087,23 +1032,23 @@ case 6:
 			}
 break;
 case 7:
-#line 219 "parse.yacc"
-{ ; }
-break;
-case 8:
 #line 221 "parse.yacc"
 { ; }
 break;
-case 9:
+case 8:
 #line 223 "parse.yacc"
 { ; }
 break;
-case 10:
+case 9:
 #line 225 "parse.yacc"
 { ; }
 break;
+case 10:
+#line 227 "parse.yacc"
+{ ; }
+break;
 case 13:
-#line 233 "parse.yacc"
+#line 235 "parse.yacc"
 {
 			    /*
 			     * We already did a push if necessary in
@@ -1116,13 +1061,13 @@ case 13:
 			}
 break;
 case 15:
-#line 246 "parse.yacc"
+#line 248 "parse.yacc"
 {
 			    push;
 			}
 break;
 case 16:
-#line 248 "parse.yacc"
+#line 250 "parse.yacc"
 {
 			    pop;
 			    if (host_matched == TRUE)
@@ -1132,13 +1077,13 @@ case 16:
 			}
 break;
 case 17:
-#line 256 "parse.yacc"
+#line 258 "parse.yacc"
 {
 			    host_matches = TRUE;
 			}
 break;
 case 18:
-#line 259 "parse.yacc"
+#line 261 "parse.yacc"
 {
 			    if (addr_matches(yyvsp[0].string))
 				host_matches = TRUE;
@@ -1146,41 +1091,41 @@ case 18:
 			}
 break;
 case 19:
-#line 264 "parse.yacc"
+#line 266 "parse.yacc"
 {
-			    if (netgr_matches(yyvsp[0].string, host, NULL))
+			    if (netgr_matches(yyvsp[0].string, user_host, NULL))
 				host_matches = TRUE;
 			    free(yyvsp[0].string);
 			}
 break;
 case 20:
-#line 269 "parse.yacc"
+#line 271 "parse.yacc"
 {
-			    if (strcasecmp(shost, yyvsp[0].string) == 0)
+			    if (strcasecmp(user_shost, yyvsp[0].string) == 0)
 				host_matches = TRUE;
 			    free(yyvsp[0].string);
 			}
 break;
 case 21:
-#line 274 "parse.yacc"
+#line 276 "parse.yacc"
 {
-			    if (strcasecmp(host, yyvsp[0].string) == 0)
+			    if (strcasecmp(user_host, yyvsp[0].string) == 0)
 				host_matches = TRUE;
 			    free(yyvsp[0].string);
 			}
 break;
 case 22:
-#line 279 "parse.yacc"
+#line 281 "parse.yacc"
 {
 			    /* could be an all-caps hostname */
 			    if (find_alias(yyvsp[0].string, HOST_ALIAS) == TRUE ||
-				strcasecmp(shost, yyvsp[0].string) == 0)
+				strcasecmp(user_shost, yyvsp[0].string) == 0)
 				host_matches = TRUE;
 			    free(yyvsp[0].string);
 			}
 break;
 case 25:
-#line 292 "parse.yacc"
+#line 294 "parse.yacc"
 {
 			    if (printmatches == TRUE &&
 				(runas_matches == -1 || cmnd_matches == -1)) {
@@ -1201,11 +1146,11 @@ case 25:
 			}
 break;
 case 26:
-#line 312 "parse.yacc"
+#line 314 "parse.yacc"
 { ; }
 break;
 case 27:
-#line 313 "parse.yacc"
+#line 315 "parse.yacc"
 {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
@@ -1221,7 +1166,7 @@ case 27:
 			}
 break;
 case 28:
-#line 325 "parse.yacc"
+#line 327 "parse.yacc"
 {
 			    pop;
 			    if (cmnd_matched == TRUE)
@@ -1232,7 +1177,7 @@ case 28:
 			}
 break;
 case 29:
-#line 335 "parse.yacc"
+#line 337 "parse.yacc"
 {
 			    /*
 			     * If this is the first entry in a command list
@@ -1240,15 +1185,15 @@ case 29:
 			     */
 			    if (runas_matches == -1)
 				runas_matches =
-				    (strcmp(RUNAS_DEFAULT, runas_user) == 0);
+				    (strcmp(RUNAS_DEFAULT, user_runas) == 0);
 			}
 break;
 case 30:
-#line 344 "parse.yacc"
+#line 346 "parse.yacc"
 { ; }
 break;
 case 33:
-#line 351 "parse.yacc"
+#line 353 "parse.yacc"
 {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
@@ -1258,7 +1203,7 @@ case 33:
 			}
 break;
 case 34:
-#line 358 "parse.yacc"
+#line 360 "parse.yacc"
 {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
@@ -1272,7 +1217,7 @@ case 34:
 			}
 break;
 case 35:
-#line 368 "parse.yacc"
+#line 370 "parse.yacc"
 {
 			    pop;
 			    /*
@@ -1285,9 +1230,9 @@ case 35:
 			}
 break;
 case 36:
-#line 379 "parse.yacc"
+#line 381 "parse.yacc"
 {
-			    runas_matches = (strcmp(yyvsp[0].string, runas_user) == 0);
+			    runas_matches = (strcmp(yyvsp[0].string, user_runas) == 0);
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append(yyvsp[0].string, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -1301,9 +1246,9 @@ case 36:
 			}
 break;
 case 37:
-#line 392 "parse.yacc"
+#line 394 "parse.yacc"
 {
-			    runas_matches = usergr_matches(yyvsp[0].string, runas_user);
+			    runas_matches = usergr_matches(yyvsp[0].string, user_runas);
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append(yyvsp[0].string, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -1318,9 +1263,9 @@ case 37:
 			}
 break;
 case 38:
-#line 406 "parse.yacc"
+#line 408 "parse.yacc"
 {
-			    runas_matches = netgr_matches(yyvsp[0].string, NULL, runas_user);
+			    runas_matches = netgr_matches(yyvsp[0].string, NULL, user_runas);
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append(yyvsp[0].string, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -1335,11 +1280,11 @@ case 38:
 			}
 break;
 case 39:
-#line 420 "parse.yacc"
+#line 422 "parse.yacc"
 {
 			    /* could be an all-caps username */
 			    if (find_alias(yyvsp[0].string, RUNAS_ALIAS) == TRUE ||
-				strcmp(yyvsp[0].string, runas_user) == 0)
+				strcmp(yyvsp[0].string, user_runas) == 0)
 				runas_matches = TRUE;
 			    else
 				runas_matches = FALSE;
@@ -1356,7 +1301,7 @@ case 39:
 			}
 break;
 case 40:
-#line 438 "parse.yacc"
+#line 440 "parse.yacc"
 {
 			    runas_matches = TRUE;
 			    if (printmatches == TRUE && in_alias == TRUE)
@@ -1371,13 +1316,13 @@ case 40:
 			}
 break;
 case 41:
-#line 452 "parse.yacc"
+#line 454 "parse.yacc"
 {
 			    ;
 			}
 break;
 case 42:
-#line 455 "parse.yacc"
+#line 457 "parse.yacc"
 {
 			    no_passwd = TRUE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
@@ -1386,7 +1331,7 @@ case 42:
 			}
 break;
 case 43:
-#line 461 "parse.yacc"
+#line 463 "parse.yacc"
 {
 			    no_passwd = FALSE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
@@ -1395,7 +1340,7 @@ case 43:
 			}
 break;
 case 44:
-#line 469 "parse.yacc"
+#line 471 "parse.yacc"
 {
 			    if (printmatches == TRUE && in_alias == TRUE) {
 				append("ALL", &ga_list[ga_list_len-1].entries,
@@ -1411,13 +1356,13 @@ case 44:
 			    }
 
 			    yyval.BOOLEAN = cmnd_matches = TRUE;
-			    if (cmnd_safe)
-				free(cmnd_safe);
-			    cmnd_safe = estrdup(cmnd);
+			    if (safe_cmnd)
+				free(safe_cmnd);
+			    safe_cmnd = estrdup(user_cmnd);
 			}
 break;
 case 45:
-#line 488 "parse.yacc"
+#line 490 "parse.yacc"
 {
 			    if (printmatches == TRUE && in_alias == TRUE) {
 				append(yyvsp[0].string, &ga_list[ga_list_len-1].entries,
@@ -1439,7 +1384,7 @@ case 45:
 			}
 break;
 case 46:
-#line 507 "parse.yacc"
+#line 509 "parse.yacc"
 {
 			    if (printmatches == TRUE && in_alias == TRUE) {
 				append(yyvsp[0].command.cmnd, &ga_list[ga_list_len-1].entries,
@@ -1463,8 +1408,8 @@ case 46:
 			    }
 
 			    /* if NewArgc > 1 pass ptr to 1st arg, else NULL */
-			    if (command_matches(cmnd, (NewArgc > 1) ?
-				    cmnd_args : NULL, yyvsp[0].command.cmnd, yyvsp[0].command.args)) {
+			    if (command_matches(user_cmnd, (NewArgc > 1) ?
+				    user_args : NULL, yyvsp[0].command.cmnd, yyvsp[0].command.args)) {
 				cmnd_matches = TRUE;
 				yyval.BOOLEAN = TRUE;
 			    }
@@ -1475,11 +1420,11 @@ case 46:
 			}
 break;
 case 49:
-#line 546 "parse.yacc"
+#line 548 "parse.yacc"
 { push; }
 break;
 case 50:
-#line 546 "parse.yacc"
+#line 548 "parse.yacc"
 {
 			    if (host_matches == TRUE &&
 				add_alias(yyvsp[-3].string, HOST_ALIAS) == FALSE)
@@ -1488,7 +1433,7 @@ case 50:
 			}
 break;
 case 55:
-#line 562 "parse.yacc"
+#line 564 "parse.yacc"
 {
 			    push;
 			    if (printmatches == TRUE) {
@@ -1500,7 +1445,7 @@ case 55:
 			}
 break;
 case 56:
-#line 570 "parse.yacc"
+#line 572 "parse.yacc"
 {
 			    if (cmnd_matches == TRUE &&
 				add_alias(yyvsp[-3].string, CMND_ALIAS) == FALSE)
@@ -1513,11 +1458,11 @@ case 56:
 			}
 break;
 case 57:
-#line 582 "parse.yacc"
+#line 584 "parse.yacc"
 { ; }
 break;
 case 61:
-#line 590 "parse.yacc"
+#line 592 "parse.yacc"
 {
 			    push;
 			    if (printmatches == TRUE) {
@@ -1529,7 +1474,7 @@ case 61:
 			}
 break;
 case 62:
-#line 598 "parse.yacc"
+#line 600 "parse.yacc"
 {
 			    if (runas_matches > 0 &&
 				add_alias(yyvsp[-3].string, RUNAS_ALIAS) == FALSE)
@@ -1542,11 +1487,11 @@ case 62:
 			}
 break;
 case 65:
-#line 614 "parse.yacc"
+#line 616 "parse.yacc"
 { push; }
 break;
 case 66:
-#line 614 "parse.yacc"
+#line 616 "parse.yacc"
 {
 			    if (user_matches == TRUE &&
 				add_alias(yyvsp[-3].string, USER_ALIAS) == FALSE)
@@ -1556,17 +1501,17 @@ case 66:
 			}
 break;
 case 67:
-#line 623 "parse.yacc"
+#line 625 "parse.yacc"
 { ; }
 break;
 case 70:
-#line 628 "parse.yacc"
+#line 630 "parse.yacc"
 {
 			    push;
 			}
 break;
 case 71:
-#line 630 "parse.yacc"
+#line 632 "parse.yacc"
 {
 			    pop;
 			    if (user_matched == TRUE)
@@ -1576,7 +1521,7 @@ case 71:
 			}
 break;
 case 72:
-#line 638 "parse.yacc"
+#line 640 "parse.yacc"
 {
 			    if (strcmp(yyvsp[0].string, user_name) == 0)
 				user_matches = TRUE;
@@ -1584,7 +1529,7 @@ case 72:
 			}
 break;
 case 73:
-#line 643 "parse.yacc"
+#line 645 "parse.yacc"
 {
 			    if (usergr_matches(yyvsp[0].string, user_name))
 				user_matches = TRUE;
@@ -1592,7 +1537,7 @@ case 73:
 			}
 break;
 case 74:
-#line 648 "parse.yacc"
+#line 650 "parse.yacc"
 {
 			    if (netgr_matches(yyvsp[0].string, NULL, user_name))
 				user_matches = TRUE;
@@ -1600,7 +1545,7 @@ case 74:
 			}
 break;
 case 75:
-#line 653 "parse.yacc"
+#line 655 "parse.yacc"
 {
 			    /* could be an all-caps username */
 			    if (find_alias(yyvsp[0].string, USER_ALIAS) == TRUE ||
@@ -1610,12 +1555,12 @@ case 75:
 			}
 break;
 case 76:
-#line 660 "parse.yacc"
+#line 662 "parse.yacc"
 {
 			    user_matches = TRUE;
 			}
 break;
-#line 1619 "sudo.tab.c"
+#line 1564 "sudo.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
