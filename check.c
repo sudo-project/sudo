@@ -74,7 +74,6 @@ static char rcsid[] = "$Id$";
 #  include <krb.h>
 #endif /* HAVE_KERB4 */
 #ifdef HAVE_AFS
-#  include <usersec.h>
 #  include <afs/kauth.h>
 #  include <afs/kautils.h>
 #endif /* HAVE_AFS */
