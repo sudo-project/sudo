@@ -269,8 +269,8 @@ int sudo_edit(argc, argv)
 	ofd = open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
 	set_perms(PERM_ROOT);
 	if (ofd == -1) {
-	    warn("unable to save to %s, contents of edit session saved in %s",
-		tf[i].ofile, tf[i].tfile);
+	    warn("unable to write to %s", tf[i].ofile);
+	    warnx("contents of edit session left in %s", tf[i].tfile);
 	    close(tfd);
 	    continue;
 	}
@@ -285,9 +285,10 @@ int sudo_edit(argc, argv)
 	}
 	if (nread == 0)
 	    unlink(tf[i].tfile);
-	else
-	    warn("unable to save to %s, contents of edit session saved in %s",
-		tf[i].ofile, tf[i].tfile);
+	else {
+	    warn("unable to write to %s", tf[i].ofile);
+	    warnx("contents of edit session left in %s", tf[i].tfile);
+	}
 	close(ofd);
 	close(tfd);
     }
