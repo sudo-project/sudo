@@ -107,7 +107,7 @@ char *find_path(file)
 	/* stat the file to make sure it exists and is executable */
 	if (!stat(fn, &statbuf) && (statbuf.st_mode & 0000111))
 	    return (qualify(fn));
-	else if (errno == ENOENT)
+	else if (errno == ENOENT || errno == ENOTDIR)
 	    path=n+1;
 	else {
 	    perror("find_path:  stat");
@@ -176,13 +176,16 @@ char *qualify(n)
 	else if (!strcmp(beg, "."))
 	    ;				/* ignore "." */
 	else if (!strcmp(beg, "..")) {
-	    tmp = rindex(full, '/');
-	    if (tmp && tmp != &full[0])
+	    if ((tmp = rindex(full, '/')))
 		*tmp = '\0';
 	} else {
 	    strcat(full, "/");
 	    strcat(full, beg);		/* copy in new component */
 	}
+
+	/* if we used ../.. to go past the root dir just continue */
+	if (!full[0])
+	    continue;
 
 	/* check for symbolic links */
 	if (lstat(full, &statbuf)) {
@@ -220,6 +223,10 @@ char *qualify(n)
 	    beg = NULL;			/* since we have a new name */
 	}
     } while (end);
+
+    /* if we resolved to "/" full[0] will be NULL */
+    if (!full[0])
+	strcpy(full, "/");
 
     return((char *)full);
 }
