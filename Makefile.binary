@@ -58,9 +58,9 @@ visudodir = $(sbindir)
 sudoersdir = $(sysconfdir)
 
 # Directory in which to install the man page
-mantype = @MANTYPE@
-mansectsu = @mansectsu@
-mansectform = @mansectform@
+mantype = @_MANTYPE@
+mansectsu = @_mansectsu@
+mansectform = @_mansectform@
 mandirsu = $(mandir)/$(mantype)$(mansectsu)
 mandirform = $(mandir)/$(mantype)$(mansectform)
 

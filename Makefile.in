@@ -357,8 +357,8 @@ bindist:
 	    fi ; \
 	  done ; \
 	  cp $(srcdir)/INSTALL.binary $$tdir/INSTALL ; \
-	  sed -e 's/@MANTYPE@/$(mantype)/g' -e 's/@mansectsu@/$(mansectsu)/g' \
-	      -e 's/@mansectform@/$(mansectform)/g' $(srcdir)/Makefile.binary \
+	  sed -e 's/@_MANTYPE@/$(mantype)/g' -e 's/@_mansectsu@/$(mansectsu)/g' \
+	      -e 's/@_mansectform@/$(mansectform)/g' $(srcdir)/Makefile.binary \
 	      > $$tdir/Makefile ; \
 	)  
 	strip sudo
