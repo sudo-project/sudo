@@ -15,6 +15,7 @@
  */
 
 #include <sys/types.h>
+#include <limits.h>
 #include <unistd.h>
 
 #include "config.h"
@@ -22,6 +23,10 @@
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
+
+#ifndef OPEN_MAX
+# define OPEN_MAX	256
+#endif
 
 /*
  * Close all file descriptors greater than or equal to lowfd.
@@ -33,13 +38,15 @@ void
 closefrom(lowfd)
     int lowfd;
 {
-    int fd, maxfd;
+    long fd, maxfd;
 
 #ifdef HAVE_SYSCONF
     maxfd = sysconf(_SC_OPEN_MAX);
 #else
     maxfd = getdtablesize();
 #endif /* HAVE_SYSCONF */
+    if (maxfd < 0)
+	maxfd = OPEN_MAX;
 
     for (fd = lowfd; fd < maxfd; fd++)
 	(void) close(fd);
