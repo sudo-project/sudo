@@ -428,7 +428,11 @@ UIDs are set to the target user (root by default).  This option
 changes that behavior such that the real UID is left as the invoking
 user's UID.  In other words, this makes B<sudo> act as a setuid
 wrapper.  This can be useful on systems that disable some potentially
-dangerous functionality when a program is run setuid.
+dangerous functionality when a program is run setuid.  Note, however,
+that this means that sudo will run with the real uid of the invoking
+user which may allow that user to kill B<sudo> before it can log a
+failure, depending on how your OS defines the interaction between
+signals and setuid processes.
 
 =item env_reset
 
