@@ -683,17 +683,21 @@ static char *sudo_skeyprompt(user_skey, p)
 		       Argv[0]);
 	exit(1);
 #else
+#  ifdef LONG_SKEY_PROMPT
+	return(p);
+#  else
 	if (old_prompt == NULL) {
 	    return(p);
 	} else {
 	    return(old_prompt);
 	}
+#  endif /* LONG_SKEY_PROMPT */
 #endif /* SKEY_ONLY */
     }
 
 #ifdef LONG_SKEY_PROMPT
     /* separate s/key challenge and prompt for easy snarfing */
-    (void) printf("key %d %s\n", user_skey-> - 1, user_skey->seed);
+    (void) printf("key %d %s\n", user_skey->n - 1, user_skey->seed);
 
     /* return old prompt unmolested */
     return(p);
