@@ -193,7 +193,6 @@ dnl
 dnl library checks
 dnl
 AC_HAVE_LIBRARY(nsl)
-AC_HAVE_LIBRARY(shadow)
 AC_HAVE_LIBRARY(ufc)
 dnl
 dnl OS-dependent libraries
