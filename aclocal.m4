@@ -95,7 +95,22 @@ elif test -f "/usr/sbin/pwd"; then
 fi
 ])dnl
 dnl
+dnl check for mv
+dnl
+define(SUDO_PROG_MV,
+[if test -f "/usr/bin/mv"; then
+    AC_DEFINE(_PATH_MV, "/usr/bin/mv")
+elif test -f "/bin/mv"; then
+    AC_DEFINE(_PATH_MV, "/bin/mv")
+elif test -f "/usr/ucb/mv"; then
+    AC_DEFINE(_PATH_MV, "/usr/ucb/mv")
+elif test -f "/usr/sbin/mv"; then
+    AC_DEFINE(_PATH_MV, "/usr/sbin/mv")
+fi
+])dnl
+dnl
 dnl Check for ssize_t declation
+dnl
 define(SUDO_SSIZE_T,
 [AC_CHECKING(for ssize_t in sys/types.h)
 AC_HEADER_EGREP(ssize_t, sys/types.h, , AC_DEFINE(ssize_t, int))])dnl
