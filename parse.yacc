@@ -59,6 +59,7 @@ static char rcsid[] = "$Id$";
 #include "options.h"
 
 extern int sudolineno, parse_error;
+int errorlineno = 0;
 
 /*
  * Alias types
@@ -93,17 +94,21 @@ extern int ntwk_matches		__P((char *));
 static int find_alias		__P((char *, int));
 static int add_alias		__P((char *, int));
 static int more_aliases		__P((int));
-extern int sudolineno;
+static void kill_aliases	__P((void));
 
 yyerror(s)
 char *s;
 {
+    errorlineno = sudolineno;
 #ifndef TRACELEXER
-    fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s, sudolineno);
+    fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s, errorlineno);
 #else
     fprintf(stderr, "<*> ");
 #endif
     parse_error = TRUE;
+    /* reset data structures so we can reparse cleanly */
+    kill_aliases();
+    top = 0;
 }
 
 yywrap()
@@ -351,4 +356,11 @@ dumpaliases()
 	printf("%s\t%s\n", aliases[n].type == HOST ? "HOST" : "CMND",
                            aliases[n].name);
 
+}
+
+void
+kill_aliases()
+{
+    (void) free(aliases);
+    naliases = nslots = 0;
 }
