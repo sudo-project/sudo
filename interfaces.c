@@ -74,7 +74,6 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
-#include <net/route.h>
 #include <net/if.h>
 
 #include "sudo.h"
