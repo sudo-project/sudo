@@ -117,5 +117,12 @@ A) Sun added many of the BSD library functions from -lucb into
    that will run on Solaris 2.4 just add "getwd.o" to LIBOBJS
    in the Makefile and recompile.
 
+Q) When I compile sudo on Solaris with gcc I get:
+    logging.c: In function `send_mail':
+    logging.c:448: storage size of `action' isn't known
+    *** Error code 1
+A) You probably didn't install the gcc-fixed include files.
+   Try adding -D__EXTENSIONS__ to CFLAGS in the Makefile.
+
 Q) How do you pronounce `sudo'?
 A) soo-doo (for superuser do).
