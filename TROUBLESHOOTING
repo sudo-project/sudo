@@ -11,19 +11,14 @@ A) Sudo must be setuid root to do its work.  You need to do something like
 Q) Sudo is setup to log via syslog(3) but I'm not getting any log
    messages.
 A) Make sure you have an entry in your syslog.conf file to save
-   the sudo messages.  The default log facility is local2
-   (configurable via configure) so you would want something like:
-	local2.debug				/var/adm/sudo.log
-   or
-	local2.debug				@loghost
-    depending whether you want to forward the messages to another
-    host or keep them locally.  Don't forget to send a SIGHUP to
-    your syslogd so that it re-reads its conf file.  Also, remember
-    that syslogd does *not* create log files, you need to create the
-    file before syslogd will log to it (ie: touch /var/log/sudo.log).
-    Note:  the facility ("local2.debug") must be separated from the 
-	   destination ("/var/adm/sudo.log" or "@loghost") by
-	   tabs, *not* spaces.  This is a common error.
+   the sudo messages (see the sample.syslog.conf file).  The default
+   log facility is local2 (changeable via configure).  Don't forget
+   to send a SIGHUP to your syslogd so that it re-reads its conf file.
+   Also, remember that syslogd does *not* create log files, you need to
+   create the file before syslogd will log to it (ie: touch /var/log/sudo).
+   Note:  the facility ("local2.debug") must be separated from the 
+	  destination ("/var/adm/sudo.log" or "@loghost") by
+	  tabs, *not* spaces.  This is a common error.
 
 Q) When sudo asks me for my password it never accepts what I enter even
    though I know I entered my password correctly.
@@ -45,8 +40,8 @@ Q) Can I put the sudoers file in NIS/NIS+ or do I have to have a
    copy on each machine?
 A) There is no support for making an NIS/NIS+ map/table out of
    the sudoers file at this time.  A good way to distribute the
-   sudoers file is via rdist(1).  It is also possible to
-   NFS-mount the sudoers file.
+   sudoers file is via rdist(1).  It is also possible to NFS-mount
+   the sudoers file.
 
 Q) I don't run sendmail on my machine.  Does this mean that I cannot
    use sudo?
@@ -57,7 +52,7 @@ Q) When I run visudo it uses vi as the editor and I hate vi.  How
 A) Your best bet is to run configure with the --with-env-editor switch.
    This will make visudo use the editor specified by the user's
    EDITOR environment variable.  Alternately, you can run configure
-   with the --with-editor=path_to_your_editor.
+   with the --with-editor=/path/to/another/editor.
 
 Q) Sudo appears to be removing some variables from my environment, why?
 A) Sudo removes the following "dangerous" environment variables
