@@ -107,9 +107,20 @@ Directory and file names:
 Special features/options:
   --with-CC               Specifies path to C compiler you wish to use.
 
-  --with-skey             Enable S/Key support.
+  --with-skey             Enable S/Key OTP support.
 
-  --with-opie             Enable NRL OPIE support.
+  --with-opie             Enable NRL OPIE OTP support.
+
+  --with-otp-only         When validating the user, only allow a One Time
+			  Password (OTP) passkey via S/Key or OPIE.  Do not
+                          compare against the passwd file or use any other
+                          authentication scheme.
+
+  --with-long-otp-prompt  When validating with a One Time Password scheme
+                          (S/Key or OPIE), a two-line prompt is used to make
+                          it easier to cut and paste the challenge to a local
+                          window.  It's not as pretty as the default but some
+                          people find it more convenient.
 
   --with-SecurID          Enable SecurID support.
 
@@ -123,8 +134,8 @@ Special features/options:
                           as well as the v4 compatibility libraries.
 
   --with-pam              Enable PAM support.  Tested on Redhat Linux 5.x
-			  but may work on earlier versions too.  Not tested
-			  on Solaris.
+			  but should work on earlier versions too.  Not tested
+			  on Solaris 2.X but it is expected to work.
 
   --with-AFS              Enable AFS support with kerberos authentication.
                           Should work under AFS 3.3.  If your AFS
@@ -140,11 +151,187 @@ Special features/options:
                           Other platforms may require source code
                           and/or `configure' changes.
 
+  --with-message=TYPE     Set message for first time sudo to be "short",
+			  "full", or "none".  Default is "short.
+
+  --with-logging=TYPE     How you want to do your logging.  You may choose
+			  "syslog", "file", or "both".  Setting this to
+			  "syslog" is nice because you can keep all of your
+			  sudo logs in one place.  If you don't have syslog
+			  or if your syslog is of an ancient vintage (4.2BSD,
+			  SunOS 3.x and all versions of Ultrix) you should
+			  probably use "file" logging.  The default is "syslog".
+
+  --with-logfac=FACILITY  Determines which syslog facility to log to.  This
+			  This requires a 4.3BSD or later version of syslog.
+			  You can still set this for ancient syslogs but it
+			  will have no effect.  A list of possible values may
+			  be found in /usr/include/syslog.h.  The default is to
+			  use LOG_LOCAL2 but you may want to use LOG_AUTH.
+
   --with-logpath=path	  Override the default location of the sudo
 			  log file and use "path" instead.
 
+  --with-loglen           Number of characters per line for the file log.
+			  This is only used if you are to "file" or "both".
+			  This value is used to decide when to wrap lines
+			  for nicer log files.  The default is 80.
+
+  --without-root-sudo     Don't let root run sudo.  This can be used to prevent
+			  people from "chaining" sudo commands to get a root
+			  shell by doing something like "sudo sudo /bin/sh".
+
+  --with-ignore-dot       If set, sudo will ignore '.' or '' (current dir) in
+			  $PATH.  The $PATH itself is not modified.
+
+  --with-alertmail        User that mail from sudo is sent to.  This should go
+			  to a sysadmin at your site.  The default is "root".
+
+  --with-mailsubject      Subject of the mail sent to the "alertmail" user. The
+			  token "%h" will expand to the hostname of the machine.
+			  Default is "*** SECURITY information for %h ***".
+
+  --without-mail-if-no-user Normally, sudo will mail to the "alermail" user if
+			    the user invoking sudo is not in the sudoers file.
+			    This option disables that behavior.
+
+  --with-mail-if-noperms  Send mail to the "alermail" user if the user is
+			  allowed to use sudo but the command they are trying
+			  is not listed in their sudoers file entry.
+
+  --with-passprompt       Default prompt to use when asking for a password; can
+			  be overridden via the -p option. Supports two escapes:
+			  "%u" expands to the user's login name and "%h" expands
+			  to the local hostname.  Default is "Password:".
+
+  --with-badpass-message  Message that is displayed if a user enters an
+			  incorrect password.  The default is
+			  "Sorry, try again." unless insults are turned on.
+
+  --with-fqdn             Define this if you want to put fully qualified
+			  hostnames in the sudoers file.  Ie: instead of myhost
+			  you would use myhost.mydomain.edu.  You may still use
+			  the short form if you wish (and even mix the two).
+			  Beware that turning FQDN on requires sudo to make DNS
+			  lookups which may make sudo unusable if your DNS is
+			  totally hosed.  Also note that you must use the host's
+			  official name as DNS knows it.  That is, you may not
+			  use a host alias (CNAME entry) due to performance
+			  issues and the fact that there is no way to get all
+			  aliases from DNS.
+
   --with-timedir=path	  Override the default location of the sudo
 			  timestamp directory and use "path" instead.
+
+  --with-sendmail=path    Override configure's guess as to the location
+			  of sendmail.
+
+  --without-sendmail      Do not use sendmail to mail messages to the
+			  "alertmail" user.  Use only if you have no mailers.
+
+  --with-sudoers-mode=mode File mode for the sudoers file (octal).  Note that
+			   if you wish to NFS-mount the sudoers file this must
+			   be group readable.  Also note that this is actually
+			   set in the Makefile.  The default mode is 0440.
+
+  --with-sudoers-uid      User id that "owns" the sudoers file.  Note that this
+			  is the numeric id, *not* the symbolic name.  Also
+			  note that this is actually set in the Makefile.
+			  The default is 0.
+
+  --with-sudoers-gid      Group id that "owns" the sudoers file.  Note that this
+			  is the numeric id, *not* the symbolic name.  Also
+			  note that this is actually set in the Makefile.
+			  The default is 0.
+
+  --with-sudo-umask       Umask to use when running the root command.
+			  The default is 0022.
+
+  --without-sudo-umask    Preserves the umask of the user invoking sudo.
+
+  --with-runas-default    The default user to run commands as if the -u
+			  flag is not specified on the command line.
+			  This defaults to "root".
+
+  --with-exempt=group     Users in the specified group don't need to enter a
+			  password when running sudo.  This may be useful for
+			  sites that don't want their "core" sysadmins to have
+			  to enter a password but where Jr. sysadmins need to.
+			  You should probably use NOPASSWD in sudoers instead.
+
+  --with-editor           Specify the default editor used by visudo (and the
+			  only editor used unless --with-env-editor is
+			  specified).  The default is vi.
+
+  --with-env-editor       Makes visudo consult the EDITOR and VISUAL environment
+			  variables before falling back on the default editor.
+			  Note that this may create a security hole as most
+			  editors allow a user to get a shell (which would be a
+			  root shell and hence, no logging).
+
+  --with-passwd-tries     Number of tries a user gets to enter his/her password
+			  before sudo logs the failure and exits.
+			  The default is 3.
+
+  --with-timeout          Number of minutes that can elapse before sudo will
+			  ask for a passwd again.  The default is 5, set this
+			  to 0 to always prompt for a password.
+
+  --with-password-timeout Number of minutes before the sudo password prompt
+			  times out.  The default is 5, set this to 0 for no
+			  password timeout.
+
+  --with-execv            Use execv() to exec the command instead of execvp().
+			  I can't think of a reason to actually do this since
+			  execvp() is passed a fully qualified pathname but
+			  someone might thoroughly distrust execvp().  Note that
+			  if you define this you lose the ability to exec
+			  scripts that are missing the '#!/bin/sh' cookie
+			  (like /bin/kill on SunOS and /etc/fastboot on 4.3BSD).
+			  This is off by default.
+
+  --with-tty-tickets	  This makes sudo use a different ticket file for each
+			  tty (per user).  Ie: instead of the ticket file being
+			  "username" it is "username.tty".  This offers
+			  increased security in an open lab or with "shared"
+			  accounts like "operator."  Note that this means that
+			  there will be more files in the timestamp dir.  This
+			  is not a problem if your system has a cron job to
+			  remove of files from /tmp (or wherever you specified
+			  the timestamp dir to be).
+
+  --with-insults          Define this if you want to be insulted for typing an
+			  incorrect password just like the original sudo(8).
+			  This is off by default.
+
+  --with-classic-insults  Uses insults from sudo "classic."  If you just
+			  specify --with-insults you will get the classic and
+			  CSOps insults.  This is on by default if
+			  --with-insults is given.
+
+  --with-csops-insults    Insults the user with an extra set of insults (some
+			  quotes, some original) from a sysadmin group at CU
+			  (CSOps).  You must specify --with-insults as well for
+			  this to have any effect.  This is on by default if
+			  --with-insults is given.
+
+  --with-hal-insults      Uses 2001-like insults when an incorrect password is
+			  entered.  You must specify --with-insults as well for
+			  this to have any effect.
+
+  --with-goons-insults    Insults the user with lines from the "Goon Show" when
+			  an incorrect password is entered.  You must specify
+			  --with-insults as well for this to have any effect.
+
+  --with-secure-path[=path] Path used for every command run from sudo(8).  If
+			    you don't trust the people running sudo to have a
+			    sane PATH environmental variable you may want to use
+			    this.  Another use is if you want to have the
+			    "root path" be separate from the "user path."  You
+			    will need to customize the path for your site.
+			    NOTE: this is not applied to users in the group
+			    specified by --with-exemptgroup.  If you do not
+			    specify a path,  "/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc" is used.
 
   --with-incpath          Adds the specified directories to CPPFLAGS
                           so configure and the compiler will look there
@@ -166,25 +353,34 @@ Special features/options:
 
   --with-csops            Add CSOps standard options.
 
-  --enable-shadow         Enable shadow password support if the OS supports it
-			  (default).  See the `Shadow password and C2 support'
-			  section for a list of supported platforms.
+  --without-interfaces    This option keeps sudo from trying to glean the ip
+			  address from each attached ethernet interface.  It is
+			  only useful on a machine where sudo's interface
+			  reading support does not work, which may be the case
+			  on some SysV-based OS's using STREAMS.
 
-  --disable-shadow        Disable shadow password support.
-
-  --enable-tgetpass       Use sudo's tgetpass() routine instead of the
-                          system getpass(3) (default).
+  --disable-shadow        Disable shadow password support.  Normally, sudo
+			  will compile in shadow password support and use
+			  a shadow password if it exists.
 
   --disable-tgetpass      Use system getpass(3) instead of sudo-supplied
-                          tgetpass().  For systems where tgetpass() fails.
+                          tgetpass().  For systems where tgetpass() is broken.
 
   --enable-log-host       Log the hostname in the log file.
 
-  --disable-log-host      Do not log hostname in the log file (default).
-
-  --enable-log-wrap       Wrap long lines in the log file (default).
-
   --disable-log-wrap      Do not wrap long lines in the log file.
+
+  --enable-noargs-shell   If sudo is invoked with no arguments it acts as if
+			  the "-s" flag had been given.  Namely, it runs a shell
+			  as root (the shell is determined by the SHELL
+			  envariable, falling back on the shell listed in the
+			  invoking user's /etc/passwd entry).
+
+  --enable-shell-sets-home If sudo is invoked with the "-s" flag the HOME
+			   environmental variable will be set to the home
+			   directory of the target user (which is root unless
+			   the "-u" option is used).  This option effectively
+			   makes the "-s" flag imply "-H".
 
 Shadow password and C2 support
 ==============================
