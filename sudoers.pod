@@ -62,14 +62,6 @@ will be used.
             path ::= a fully qualified pathname.
        arg[1..n] ::= optional command line arguments.
 
-Note that arguments in double quotes (") are treated as
-a single argument, whis is similar to most shells.
-Ie, given C<sh -c "cd /src; ls">, the C<"cd /src; ls">
-is treated as a single argument, just as it would be
-in a shell.  If you don't want double quotes to be
-interpreted this way, you can escape them with a
-backslash (\).
-
 =head2 wildcards (aka meta characters):
 
 B<sudo> allows shell-style I<wildcards> along with command arguments
@@ -80,7 +72,7 @@ C<fnmatch(3)> routine.
 
 =item C<*>
 
-Matches any set of one or more characters.
+Matches any set of zero or more characters.
 
 =item C<?>
 
@@ -112,12 +104,6 @@ The following exceptions apply to the above rules:
 If the empty string C<""> is the only command line argument in the
 I<sudoers> entry it means that command may take B<no> arguments.
 
-=item C<*>
-
-A C<*> by itself (separated by whitespace) as the B<last> argument in
-the I<sudoers> entry will match any and all remaining arguments on
-the command line.
-
 =back
 
 =head2 other special characters and reserved words:
@@ -145,7 +131,7 @@ then the arguments in the I<sudoers> file must exactly match those
 on the command line.  It is also possible to have a command's
 arguments span multiple lines as long as the line continuance
 character "\" is used.  The following characters must be escaped
-with a "\" if used in command arguments: ",", ":", "=", "\", """.
+with a "\" if used in command arguments: ",", ":", "=", "\".
 
 =head1 EXAMPLES
 
