@@ -218,7 +218,7 @@ int command_matches(cmnd, user_args, path, sudoers_args)
     static char *c;
 
     /* don't bother with pseudo commands like "validate" */
-    if (*cmnd != '/')
+    if (*cmnd != '/' && *cmnd != '.')
 	return(FALSE);
 
     /* only need to stat cmnd once since it never changes */
