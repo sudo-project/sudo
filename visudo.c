@@ -93,6 +93,9 @@ main(argc, argv)
 #ifdef ENV_EDITOR
     char * Editor;
 #endif /* ENV_EDITOR */
+#ifdef POSIX_SIGNALS
+    struct sigaction action;
+#endif POSIX_SIGNALS
 
     Argv = argv;
 
@@ -112,6 +115,22 @@ main(argc, argv)
     /*
      * handle the signals
      */
+#ifdef POSIX_SIGNALS
+    (void) bzero((char *)(&action), sizeof(action));
+    action.sa_handler = Exit;
+    action.sa_flags = SA_RESETHAND;
+    (void) sigaction(SIGILL, &action, NULL);
+    (void) sigaction(SIGTRAP, &action, NULL);
+    (void) sigaction(SIGBUS, &action, NULL);
+    (void) sigaction(SIGSEGV, &action, NULL);
+    (void) sigaction(SIGTERM, &action, NULL);
+
+    action.sa_handler = SIG_IGN;
+    action.sa_flags = 0;
+    (void) sigaction(SIGHUP, &action, NULL);
+    (void) sigaction(SIGINT, &action, NULL);
+    (void) sigaction(SIGQUIT, &action, NULL);
+#else
     (void) signal(SIGILL, Exit);
     (void) signal(SIGTRAP, Exit);
     (void) signal(SIGBUS, Exit);
@@ -121,6 +140,7 @@ main(argc, argv)
     (void) signal(SIGHUP, SIG_IGN);
     (void) signal(SIGINT, SIG_IGN);
     (void) signal(SIGQUIT, SIG_IGN);
+#endif POSIX_SIGNALS
 
     setbuf(stderr, NULL);
 
