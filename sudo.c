@@ -618,7 +618,7 @@ static int parse_args()
 static void usage(exit_val)
     int exit_val;
 {
-    (void) fprintf(stderr, "usage: %s -V | -h | -l | -v | -k | [-b] [-p prompt] [-u username] -s | <command>\n", Argv[0]);
+    (void) fprintf(stderr, "usage: %s -V | -h | -l | -v | -k | [-b] [-p prompt] [-u username/#uid] -s | <command>\n", Argv[0]);
     exit(exit_val);
 }
 
