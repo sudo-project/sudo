@@ -113,6 +113,7 @@ struct sudo_user {
 #define MODE_IMPLIED_SHELL       004000
 #define MODE_RESET_HOME          010000
 #define MODE_PRESERVE_GROUPS     020000
+#define MODE_EDIT                040000
 
 /*
  * Used with set_perms()
