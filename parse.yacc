@@ -48,6 +48,9 @@ static char rcsid[] = "$Id$";
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 #include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
+#if defined(YYBISON) && defined(HAVE_ALLOCA_H) && !defined(__GNUC__)
+#include <alloca.h>
+#endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
 #ifdef HAVE_LSEARCH
 #include <search.h>
 #endif /* HAVE_LSEARCH */
