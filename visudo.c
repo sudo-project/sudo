@@ -441,7 +441,7 @@ static char whatnow()
 /*
  * whatnow_help() -- print out a help message for whatnow().
  */
-void whatnow_help()
+static void whatnow_help()
 {
     printf("Options are:\n");
     printf("  (e)dit sudoers file again\n");
