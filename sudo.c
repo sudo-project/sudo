@@ -191,7 +191,8 @@ int main(argc, argv)
     int argc;
     char **argv;
 {
-    int rtn, cmnd_status = FOUND;
+    int rtn, serrno;
+    int cmnd_status = FOUND;
     int sudo_mode = MODE_RUN;
     extern char ** environ;
 
@@ -290,8 +291,10 @@ int main(argc, argv)
 
     rtn = check_sudoers();	/* check mode/owner on _PATH_SUDO_SUDOERS */
     if (rtn != ALL_SYSTEMS_GO) {
+	serrno = errno;
 	log_error(rtn);
 	set_perms(PERM_FULL_USER, sudo_mode);
+	errno = serrno;
 	inform_user(rtn);
 	exit(1);
     }
@@ -902,7 +905,7 @@ static int check_sudoers()
      */
     set_perms(PERM_SUDOERS, 0);
 
-    if (lstat(_PATH_SUDO_SUDOERS, &statbuf) != 0 && rootstat != 0)
+    if (rootstat != 0 && lstat(_PATH_SUDO_SUDOERS, &statbuf) != 0)
 	rtn = NO_SUDOERS_FILE;
     else if (!S_ISREG(statbuf.st_mode))
 	rtn = SUDOERS_NOT_FILE;
