@@ -91,19 +91,38 @@ if test -z "$NROFFPROG" ; then
 fi
 
 dnl
+dnl is our OS using shadow passwords?
+dnl XXX - need to add checks for various
+dnl shadow password schemes after OS checks...
+dnl
+if test -z "$C2"; then
+    SUDO_CHECK_SHADOW(AC_DEFINE(HAVE_C2_SECURITY)
+    C2=1)
+fi
+
+dnl
 dnl what architecture are we on?
 dnl
 SUDO_OSTYPE
 OS=`echo $OS | $TRPROG '[[A-Z]]' '[[a-z]]'`
 case "$OS" in
     "sunos")	echo "Looks like SunOS 4.x"
-		AC_DEFINE(SUNOS4)
+		if test -n "$C2"; then
+		    SHADOW_TYPE="SUNOS4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		fi
 		;;
     "solaris")	echo "Looks like Solaris"
-		AC_DEFINE(SVR4)
+		if test -n "$C2"; then
+		    SHADOW_TYPE="SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		fi
 		;;
     "aix")	echo "Looks like AIX"
 		AC_DEFINE(_ALL_SOURCE)
+		if test -n "$C2"; then
+		    SHADOW_TYPE="AIX"
+		fi
 		LDFLAGS="${LDFLAGS} -Wl,-bI:./aixcrypt.exp"
 		;;
     "hp-ux")	echo "Looks like HP-UX"
@@ -117,6 +136,11 @@ case "$OS" in
 		fi
 		if test -n "$AFS" ; then
 		    LIBS="-lBSD ${LIBS}"
+		elif test "$OSREV" -eq 9 ; then
+		    if test -n "$C2"; then
+			SHADOW_TYPE="HPUX9"
+			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		    fi
 		fi
 		;;
     "osf1")	echo "Looks like OSF/1"
@@ -124,12 +148,15 @@ case "$OS" in
 		# C2 security stuff
 		if test -n "$C2" ; then
 		    LIBS="${LIBS} -lsecurity -laud"
+		    SHADOW_TYPE="AUTH"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     "irix")	echo "Looks like IRIX"
 		# C2 security stuff
 		if test -n "$C2" ; then
-		    AC_DEFINE(SVR4)
+		    SHADOW_TYPE="SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		# configure doesn't think irix has stdc headers
 		# but it's good enough for sudo
@@ -152,7 +179,8 @@ case "$OS" in
     "linux")	echo "Looks like linux"
 		# C2 security stuff
 		if test -n "$C2" ; then
-		    AC_DEFINE(SVR4)
+		    SHADOW_TYPE="SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    OSDEFS="${OSDEFS} -DSHADOW_PWD"
 		    LIBS="${LIBS} -lshadow"
 		fi
@@ -163,12 +191,16 @@ case "$OS" in
 		if test -n "$C2" ; then
 		    OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"
 		    LIBS="${LIBS} -lprot"
+		    SHADOW_TYPE="AUTH"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     "ultrix"*)	echo "Looks like ultrix"
 		# C2 security stuff
 		if test -n "$C2" ; then
 		    LIBS="${LIBS} -lauth"
+		    SHADOW_TYPE="ULTRIX4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     "riscos")	echo "Looks like RISCos"
@@ -177,22 +209,35 @@ case "$OS" in
 		OSDEFS="${OSDEFS} -D_MIPS"
 		;;
     "isc")	echo "Looks like INTERACTIVE"
-		AC_DEFINE(SVR4)
-		LIBS="${LIBS} -lsec -linet"
+		LIBS="${LIBS} -linet"
+		if test -n "$C2" ; then
+		    LIBS="${LIBS} -lsec"
+		    SHADOW_TYPE="SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		fi
 		OSDEFS="${OSDEFS} -D_ISC"
 		;;
     "unix_sv")	echo "Looks like UnixWare"
-		AC_DEFINE(SVR4)
+		if test -n "$C2" ; then
+		    SHADOW_TYPE="SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		fi
 		;;
     "ksr"*)	echo "Looks like a KSR"
 		;;
     "next")	echo "Looks like NeXTstep"
 		;;
-    "bsd/386")	echo "Looks like bsdi BSD/386"
+    "bsd/386" | "bsd/os") echo "Looks like bsdi BSD/OS"
+		if test -n "$C2" ; then
+		    SHADOW_TYPE="BSD"
+		fi
 		;;
     "mtxinu")	echo "Looks like mt Xinu MORE/BSD"
 		;;
     "4.3bsd")	echo "Looks like HP BSD"
+		if test -n "$C2" ; then
+		    SHADOW_TYPE="BSD"
+		fi
 		;;
     *"bsd"*)	echo "Looks like some kind of BSD"
 		;;
@@ -201,6 +246,26 @@ case "$OS" in
     *)		echo "Hmmm, I don't recognize $OS offhand, but that's ok"
 		;;
 esac
+
+dnl
+dnl search for various shadow password types unless we already know
+dnl XXX - need to ACDEFINE *something* right???
+dnl
+if test -z "$AFS" -a -z "$KERB4" -a -z "$KERB5" -a -n "$C2" -a -z "$SHADOW_TYPE"
+    then
+    echo "checking for shadow password type..."
+    AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SVR4", AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="AUTH", [test -f /etc/master.passwd && SHADOW_TYPE="BSD"]))
+    case "$SHADOW_TYPE" in
+	"SVR4")	echo "shadow password type is getspnam (svr4)" ;
+		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE) ;;
+	"BSD")	echo "shadow password type is /etc/master.passwd (BSD)" ;;
+	"AUTH")	echo "shadow password type is etprpwuid (auth)" ;
+		LIBS="${LIBS} -lprot -lx" ;
+		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE) ;;
+	*)	echo "unknown" ;
+		echo "Unable to determine shadow passwd type, sudo may not be able to verify passwords" ;;
+    esac
+fi
 
 dnl
 dnl C compiler checks (to be done after os checks)
@@ -257,7 +322,7 @@ AC_FUNC_UTIME_NULL, LIBOBJS="$LIBOBJS utime.o")
 dnl
 dnl if crypt(3) not in libc, look elsewhere
 dnl
-AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, ,AC_CHECK_LIB(ufc, crypt)))
+AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, , AC_CHECK_LIB(crypt_d, crypt, , AC_CHECK_LIB(crypt, ufc))))
 dnl
 dnl library checks
 dnl
