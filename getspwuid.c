@@ -19,7 +19,7 @@
  *
  *******************************************************************
  *
- *  This module contains get_pwuid(), a function that
+ *  This module contains sudo_getpwuid(), a function that
  *  Makes a dynamic copy of the struct passwd returned by
  *  getpwuid() and substitutes the shadow password if
  *  necesary.
@@ -89,7 +89,7 @@ uchar_t crypt_type;
 
 
 /*
- * Local functions not visible outside sudo_getpwuid.c
+ * Local functions not visible outside getspwuid.c
  */
 static char *sudo_getshell	__P((struct passwd *));
 static char *sudo_getspwd	__P((struct passwd *));

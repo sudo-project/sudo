@@ -95,7 +95,7 @@ SHELL = /bin/sh
 
 PROGS = @PROGS@
 
-SRCS = check.c sudo_getpwuid.c find_path.c logging.c parse.c sudo.c \
+SRCS = check.c getspwuid.c find_path.c logging.c parse.c sudo.c \
        goodpath.c sudo_setenv.c parse.yacc parse.lex visudo.c interfaces.c
 
 PARSEOBJS = y.tab.o lex.yy.o
