@@ -59,7 +59,7 @@
 #include "pathnames.h"
 #include "compat.h"
 
-#ifdef HAVE_KERBEROS
+#ifdef HAVE_KERB4
 #undef _PASSWD_LEN
 #define _PASSWD_LEN	128
 #else
@@ -70,7 +70,7 @@
 #define	_PASSWD_LEN	8
 #endif /* HAVE_C2_SECURITY */
 #endif /* _PASSWD_LEN */
-#endif /* HAVE_KERBEROS */
+#endif /* HAVE_KERB4 */
 
 
 /******************************************************************
