@@ -258,13 +258,14 @@ int sudo_ldap_check_command(ld,entry)
   char *allowed_cmnd;
   char *allowed_args;
   int  ret=0;
+  int  foundbang;
 
   if (!entry) return ret;
 
   v=ldap_get_values(ld,entry,"sudoCommand");
 
   /* get_first_entry */
-  for (p=v; p && *p && !ret;p++){
+  for (p=v; p && *p && ret>=0;p++){
     if (ldap_conf.debug>1) printf("ldap sudoCommand '%s' ...",*p);
 
     /* Match against ALL ? */
@@ -274,24 +275,40 @@ int sudo_ldap_check_command(ld,entry)
       safe_cmnd=estrdup(user_cmnd);
     }
 
+    /* check for !command */
+    if (**p != '!'){
+      foundbang=0;
+      allowed_cmnd=estrdup(*p);  /* command */
+    } else {
+      foundbang=1;
+      allowed_cmnd=estrdup(1+*p); /* !command */
+    }
+
     /* split optional args away from command */
-    allowed_cmnd=estrdup(*p);
     allowed_args=strchr(allowed_cmnd,' ');
     if (allowed_args) *allowed_args++='\0';
 
     /* check the command like normal */
-    if (command_matches(user_cmnd, user_args,allowed_cmnd,allowed_args)) ret=1;
+    if (command_matches(user_cmnd, user_args,allowed_cmnd,allowed_args)) {
+      if (!foundbang){
+        ret=1; /* allowed, but keep checking for a deny match */
+      } else {
+        ret=-1; /* denied by match, no need to check for more */
+      }
+      if (ldap_conf.debug>1) printf(" MATCH!\n");
+    } else {
+      if (ldap_conf.debug>1) printf(" not\n");
+    }
 
     /* cleanup */
     free(allowed_cmnd);
-    if (ldap_conf.debug>1) printf(" %s\n",ret ? "MATCH!" : "not");
   }
 
   /* more cleanup */
   if (v) ldap_value_free(v);
 
   /* all done */
-  return ret;
+  return ret > 0; /* say true if we found at least one ALLOW and no DENY */
 }
 
 /*
