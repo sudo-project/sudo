@@ -634,20 +634,20 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    required when a user runs ssssuuuuddddoooo with the ----vvvv
                    flag.  It has the following possible values:
 
-                       all         All the user's I<sudoers> entries for the
-                                   current host must have the C<NOPASSWD>
-                                   flag set to avoid entering a password.
+                   all     All the user's _s_u_d_o_e_r_s entries for the
+                           current host must have the NOPASSWD
+                           flag set to avoid entering a password.
 
-                       any         At least one of the user's I<sudoers> entries
-                                   for the current host must have the
-                                   C<NOPASSWD> flag set to avoid entering a
-                                   password.
+                   any     At least one of the user's _s_u_d_o_e_r_s
+                           entries for the current host must have
+                           the NOPASSWD flag set to avoid enter­
+                           ing a password.
 
-                       never       The user need never enter a password to use
-                                   the B<-v> flag.
+                   never   The user need never enter a password
+                           to use the ----vvvv flag.
 
-                       always      The user must always enter a password to use
-                                   the B<-v> flag.
+                   always  The user must always enter a password
+                           to use the ----vvvv flag.
 
                    The default value is `all'.
 
@@ -668,20 +668,20 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    required when a user runs ssssuuuuddddoooo with the ----llll.
                    It has the following possible values:
 
-                       all         All the user's I<sudoers> entries for the
-                                   current host must have the C<NOPASSWD>
-                                   flag set to avoid entering a password.
+                   all     All the user's _s_u_d_o_e_r_s entries for the
+                           current host must have the NOPASSWD
+                           flag set to avoid entering a password.
 
-                       any         At least one of the user's I<sudoers> entries
-                                   for the current host must have the
-                                   C<NOPASSWD> flag set to avoid entering a
-                                   password.
+                   any     At least one of the user's _s_u_d_o_e_r_s
+                           entries for the current host must have
+                           the NOPASSWD flag set to avoid enter­
+                           ing a password.
 
-                       never       The user need never enter a password to use
-                                   the B<-l> flag.
+                   never   The user need never enter a password
+                           to use the ----llll flag.
 
-                       always      The user must always enter a password to use
-                                   the B<-l> flag.
+                   always  The user must always enter a password
+                           to use the ----llll flag.
 
                    The default value is `any'.
 
