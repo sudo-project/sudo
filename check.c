@@ -83,6 +83,9 @@ static char rcsid[] = "$Id$";
 #  include <sdconf.h>
 #  include <sdacmvls.h>
 #endif /* HAVE_SECURID */
+#ifdef HAVE_SKEY
+#  include <skey.h>
+#endif /* HAVE_SKEY */
 #ifdef HAVE_UTIME
 #  ifdef HAVE_UTIME_H
 #    include <utime.h>
