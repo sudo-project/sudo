@@ -60,6 +60,22 @@
 #ifndef NO_ROOT_SUDO
 #  undef NO_ROOT_SUDO
 #endif
+
+/*
+ *  Who should own the sudoers file?  This is normally root *unless*
+ *  you want to access the sudoers file over NFS.
+ */
+#ifndef SUDOERS_OWNER
+#  define SUDOERS_OWNER	"root"
+#endif
+
+/*
+ *  If you define EXEMPTGROUP, sudo will not ask for a password for
+ *  users of this group.
+ */
+#ifndef EXEMPTGROUP
+#  undef EXEMPTGROUP 100
+#endif
   
 /*
  *  Define SEND_MAIL_WHEN_NO_USER if you want a message sent to ALERTMAIL
@@ -199,12 +215,22 @@
 #  define EXEC	execvp
 #endif /* USE_EXECV */
 
-/* Max length for a command */
-#define MAXCOMMANDLENGTH	MAXPATHLEN
+/*
+ * Some systems (ie ISC V/386) do not define MAXPATHLEN even in param.h
+ */
+#ifndef MAXPATHLEN
+#  define MAXPATHLEN		1024
+#endif
 
+/*
+ * Some systems do not define MAXHOSTNAMELEN.
+ */
 #ifndef MAXHOSTNAMELEN
 #  define MAXHOSTNAMELEN	64
 #endif
+
+/* Max length for a command */
+#define MAXCOMMANDLENGTH	MAXPATHLEN
 
 typedef union {
     int int_val;
@@ -337,10 +363,11 @@ struct interface {
 #define MODE_HELP                0x04
 #define MODE_LIST                0x05
 
-#define PERM_ROOT		0x00
-#define PERM_FULL_ROOT		0x01
-#define PERM_USER		0x02
-#define PERM_FULL_USER		0x03
+#define PERM_ROOT                0x00
+#define PERM_FULL_ROOT           0x01
+#define PERM_USER                0x02
+#define PERM_FULL_USER           0x03
+#define PERM_SUDOERS             0x04
 
 /*
  * Prototypes
