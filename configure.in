@@ -246,4 +246,4 @@ fi
 dnl
 dnl Substitute into the Makefiles
 dnl
-AC_OUTPUT(Makefile visudoers/Makefile)
+AC_OUTPUT(Makefile)
