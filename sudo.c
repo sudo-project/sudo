@@ -211,8 +211,8 @@ main(argc, argv)
 	    break;
     }
 
-    /* XXX - clean up */
-    if (Argc == 1 && (sudo_mode & MODE_BACKGROUND) && !(sudo_mode & MODE_SHELL))
+    /* must have a command to run unless got -s */
+    if (Argc == 1 && !(sudo_mode & MODE_SHELL))
 	usage(1);
 
     /*
@@ -298,7 +298,7 @@ main(argc, argv)
 		    char **NewArgv;
 		    int i;
 
-		    NewArgv = (char **) malloc (sizeof(char *) * (Argc));
+		    NewArgv = (char **) malloc (sizeof(char *) * (Argc + 1));
 		    if (NewArgv == NULL) {
 			perror("malloc");
 			(void) fprintf(stderr, "%s: cannot allocate memory!\n",
@@ -310,8 +310,8 @@ main(argc, argv)
 		    if ((NewArgv[0] = strrchr(shell, '/') + 1) == (char *) 1)
 			NewArgv[0] = shell;
 
-		    for (i = 1; i < Argc - 1; i++)
-			NewArgv[i] = Argv[i + 1];
+		    for (i = 1; i < Argc; i++)
+			NewArgv[i] = Argv[i];
 
 		    NewArgv[i] = (char *) NULL;
 
@@ -518,10 +518,9 @@ static int parse_args()
 		ret = MODE_HELP;
 		excl++;
 		break;
-	    /* -s or -- means end of args.  XXX - better way? */
 	    case 's':
 		ret |= MODE_SHELL;
-		return(ret);
+		break;
 	    case '-':
 		Argc--;
 		Argv++;
@@ -619,57 +618,83 @@ static void add_env()
  *  This function sets the cmnd and cmnd_args global variables based on Argv
  */
 
+#define ARG_INC	BUFSIZ
+
 static void load_cmnd(sudo_mode)
     int sudo_mode;
 {
-    int args_len = 0;
-    char **cur_arg;
+    int arg_start = 2;			/* position where command args start */
+    char *old_cmnd;			/* command before expansion */
 
+    /* If we are running a shell command args start at position 1 */
     if ((sudo_mode & MODE_SHELL)) {
 	if (shell) {
-	    cmnd = shell;
-	    return;
+	    old_cmnd = shell;
+	    arg_start = 1;
 	} else {
 	    (void) fprintf(stderr, "%s: Unable to determine shell.", Argv[0]);
 	    exit(1);
 	}
+    } else {
+	old_cmnd = Argv[1];
     }
 
-    if (strlen(Argv[1]) > MAXPATHLEN) {
+    if (strlen(old_cmnd) > MAXPATHLEN) {
 	errno = ENAMETOOLONG;
-	(void) fprintf(stderr, "%s: %s: Pathname too long\n", Argv[0], Argv[1]);
+	(void) fprintf(stderr, "%s: %s: Pathname too long\n", Argv[0], old_cmnd);
 	exit(1);
     }
 
     /*
      * Find the length of cmnd_args and allocate space, then fill it in.
      */
-    if (Argc > 2) {
-	for (cur_arg = &Argv[2]; *cur_arg; cur_arg++)
-	    args_len += strlen(*cur_arg) + 1;
+    if (Argc > arg_start) {
+	int len;			/* length of an arg */
+	int args_size;			/* size of cmnd_args */
+	int args_remainder;		/* how much of cmnd_args is left */
+	char **cur_arg;			/* current command line arg */
+	char *pos;			/* position in the cmnd_args string */
 
-	cmnd_args = (char *)malloc(args_len);
-	if (cmnd_args == NULL) {
-	    perror("malloc");
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n",
-			   Argv[0]);
-	    exit(1);
-	}
+	pos = cmnd_args = (char *) malloc(ARG_INC);
+	*cmnd_args = '\0';
+	args_size = args_remainder = ARG_INC;
 
-	/* XXX - speed this up, slow for very long Argv's */
-	cmnd_args[0] = '\0';
-	for (cur_arg = &Argv[2]; *cur_arg; cur_arg++) {
-	    (void) strcat(cmnd_args, *cur_arg);
-	    (void) strcat(cmnd_args, " ");
+	for (cur_arg = &Argv[arg_start]; *cur_arg; cur_arg++) {
+	    /* make sure we have enough room (remeber trailing space/NULL */
+	    len = strlen(*cur_arg);
+	    if (len >= args_remainder) {
+		do {
+		    args_size += ARG_INC;
+		    args_remainder += ARG_INC;
+		} while (len >= args_remainder);
+		if (realloc(cmnd_args, args_size) == NULL) {
+		    perror("malloc");
+		    (void) fprintf(stderr, "%s: cannot allocate memory!\n",
+				   Argv[0]);
+		    exit(1);
+		}
+	    }
+
+	    /* now copy in the argument */
+	    (void) strcpy(pos, *cur_arg);
+	    pos += len;
+	    *pos++ = ' ';
+
+	    /* and update args_remainder */
+	    args_remainder -= len + 1;
 	}
-	cmnd_args[args_len - 1] = '\0';
+	*(pos - 1) = '\0';
+
+	/* XXX - is this worth the cost? */
+	/* Let's not be wasteful with our memory */
+	(void) realloc(cmnd_args, args_size - args_remainder);
     }
 
     /*
      * Resolve the path
      */
-    if ((cmnd = find_path(Argv[1])) == NULL) {
-	(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], Argv[1]);
+    if ((cmnd = find_path(old_cmnd)) == NULL) {
+	(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], old_cmnd);
 	exit(1);
     }
 }
