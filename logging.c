@@ -440,7 +440,7 @@ void log_error(code)
 
 
 
-#ifdef MAILER
+#ifdef _PATH_SENDMAIL
 /**********************************************************************
  *
  *  send_mail()
@@ -453,7 +453,7 @@ static char *mail_argv[] = { "sendmail", "-t", (char *) NULL };
 
 static void send_mail()
 {
-    char *mailer = MAILER;
+    char *mailer = _PATH_SENDMAIL;
     char *subject = MAILSUBJECT;
     int fd[2];
     char *p;
@@ -534,7 +534,7 @@ static void send_mail()
     /* no mailer defined */
     return;
 }
-#endif /* MAILER */
+#endif /* _PATH_SENDMAIL */
 
 
 
