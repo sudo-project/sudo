@@ -507,6 +507,9 @@ static int parse_args()
     int ret = MODE_RUN;			/* what mode is suod to be run in? */
     int excl = 0;			/* exclusive arg, no others allowed */
 
+    NewArgv = Argv + 1;
+    NewArgc = Argc - 1;
+
 #ifdef SHELL_IF_NO_ARGS
     if (Argc < 2) {			/* no options and no command */
 	ret |= MODE_SHELL;
@@ -517,8 +520,6 @@ static int parse_args()
 	usage(1);
 #endif /* SHELL_IF_NO_ARGS */
 
-    NewArgv = Argv + 1;
-    NewArgc = Argc - 1;
     while (NewArgc > 0 && NewArgv[0][0] == '-') {
 	if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0') {
 	    (void) fprintf(stderr, "%s: Please use single character options\n",
