@@ -157,7 +157,7 @@ main(argc, argv, envp)
     int sudo_mode;
     int pwflag;
     char **new_environ;
-    sigaction_t sa;
+    sigaction_t sa, saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
     extern int printmatches;
     extern char **environ;
 
@@ -181,18 +181,22 @@ main(argc, argv, envp)
     }
 
     /*
-     * Ignore keyboard-generated signals so the user cannot interrupt
-     * us at some point and avoid the logging.
+     * Signal setup:
+     *	Ignore keyboard-generated signals so the user cannot interrupt
+     *  us at some point and avoid the logging.
+     *  Install handler to wait for children when they exit.
      */
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_IGN;
-    (void) sigaction(SIGINT, &sa, NULL);
-    (void) sigaction(SIGQUIT, &sa, NULL);
-    (void) sigaction(SIGTSTP, &sa, NULL);
+    (void) sigaction(SIGINT, &sa, &saved_sa_int);
+    (void) sigaction(SIGQUIT, &sa, &saved_sa_quit);
+    (void) sigaction(SIGTSTP, &sa, &saved_sa_tstp);
+    sa.sa_handler = reapchild;
+    (void) sigaction(SIGCHLD, &sa, &saved_sa_chld);
 
     /*
-     * Setup signal handlers, turn off core dumps, and close open files.
+     * Turn off core dumps, close open files and setup set_perms().
      */
     initial_setup();
     setpwent();
@@ -379,14 +383,6 @@ main(argc, argv, envp)
 		"please report this error at http://courtesan.com/sudo/bugs/");
 	}
 
-	/* Reset signal handlers before we exec. */
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART;
-	sa.sa_handler = SIG_DFL;
-	(void) sigaction(SIGINT, &sa, NULL);
-	(void) sigaction(SIGQUIT, &sa, NULL);
-	(void) sigaction(SIGTSTP, &sa, NULL);
-
 	/* Override user's umask if configured to do so. */
 	if (def_ival(I_UMASK) != 0777)
 	    (void) umask(def_mode(I_UMASK));
@@ -405,6 +401,12 @@ main(argc, argv, envp)
 
 	/* Install the new environment. */
 	environ = new_environ;
+
+	/* Restore signal handlers before we exec. */
+	(void) sigaction(SIGINT, &saved_sa_int, NULL);
+	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
+	(void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
+	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
 
 #ifndef PROFILING
 	if ((sudo_mode & MODE_BACKGROUND) && fork() > 0)
@@ -871,7 +873,6 @@ initial_setup()
 #ifdef HAVE_SETRLIMIT
     struct rlimit rl;
 #endif
-    sigaction_t sa;
 
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
     /*
@@ -899,12 +900,6 @@ initial_setup()
 
     for (fd = maxfd; fd > STDERR_FILENO; fd--)
 	(void) close(fd);
-
-    /* Catch children as they die... */
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    sa.sa_handler = reapchild;
-    (void) sigaction(SIGCHLD, &sa, NULL);
 
     /* Set set_perms pointer to the correct function */
 #if !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
