@@ -85,8 +85,8 @@ LIBOBJS = @LIBOBJS@
 HDRS = sudo.h version.h insults.h
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING INSTALL Makefile.in PORTING \
-	    README README.v1.3.1 SUPPORTED TODO aclocal.m4 \
-	    config.h.in configure configure.in indent.pro installbsd \
+	    README README.v1.3.1 SUPPORTED TODO aclocal.m4 getcwd.c realpath.c \
+	    strdup.c config.h.in configure configure.in indent.pro installbsd \
 	    pathnames.h.in sample.sudoers sudo.man sudoers aixcrypt.exp \
 	    visudoers/Makefile.in  visudoers/config.h visudoers/pathnames.h \
 	    visudoers/sudo.h visudoers/version.h visudoers/visudo.c \
