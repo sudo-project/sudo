@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2000, 2001 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,15 +60,6 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
- * Local type declarations
- */
-struct env_table {
-    char *name;
-    int len;
-    int check;
-};
-
-/*
  * Prototypes
  */
 char **rebuild_env		__P((int, char **));
@@ -77,49 +68,55 @@ static void insert_env		__P((char **, char *));
 static char *format_env		__P((char *, char *));
 
 /*
- * Table of "bad" envariables to remove and len for strncmp()
+ * Default table of "bad" variables to remove from the environment.
+ * XXX - how to omit TERMCAP if it starts with '/'?
  */
-static struct env_table sudo_badenv_table[] = {
-    { "IFS=", 4, 0 },
-    { "LOCALDOMAIN=", 12, 0 },
-    { "RES_OPTIONS=", 12, 0 },
-    { "HOSTALIASES=", 12, 0 },
-    { "NLSPATH=", 8, 0 },
-    { "PATH_LOCALE=", 12, 0 },
-    { "LD_", 3, 0 },
-    { "_RLD", 4, 0 },
+char *initial_badenv_table[] = {
+    "IFS",
+    "LOCALDOMAIN",
+    "RES_OPTIONS",
+    "HOSTALIASES",
+    "NLSPATH",
+    "PATH_LOCALE",
+    "LD_*",
+    "_RLD*",
 #ifdef __hpux
-    { "SHLIB_PATH=", 11, 0 },
+    "SHLIB_PATH",
 #endif /* __hpux */
 #ifdef _AIX
-    { "LIBPATH=", 8, 0 },
+    "LIBPATH",
 #endif /* _AIX */
 #ifdef HAVE_KERB4
-    { "KRB_CONF", 8, 0 },
-    { "KRBCONFDIR=", 11, 0 },
-    { "KRBTKFILE=", 10, 0 },
+    "KRB_CONF*",
+    "KRBCONFDIR"
+    "KRBTKFILE",
 #endif /* HAVE_KERB4 */
 #ifdef HAVE_KERB5
-    { "KRB5_CONFIG", 11, 0 },
+    "KRB5_CONFIG*",
 #endif /* HAVE_KERB5 */
 #ifdef HAVE_SECURID
-    { "VAR_ACE=", 8, 0 },
-    { "USR_ACE=", 8, 0 },
-    { "DLC_ACE=", 8, 0 },
+    "VAR_ACE",
+    "USR_ACE",
+    "DLC_ACE",
 #endif /* HAVE_SECURID */
-    { "TERMINFO=", 9, 0 },
-    { "TERMINFO_DIRS=", 14, 0 },
-    { "TERMPATH=", 9, 0 },
-    { "TERMCAP=/", 9, 0 },
-    { "ENV=", 4, 0 },
-    { "BASH_ENV=", 9, 0 },
-    { "LC_", 3, 1 },
-    { "LANG=", 5, 1 },
-    { "LANGUAGE=", 5, 1 },
-    { (char *) NULL, 0, 0 }
+    "TERMINFO",
+    "TERMINFO_DIRS",
+    "TERMPATH",
+    "TERMCAP",			/* XXX - only if it starts with '/' */
+    "ENV",
+    "BASH_ENV",
+    NULL
 };
-static struct env_table *badenv_table;
 
+/*
+ * Default table of variables to check for '%' and '/' characters.
+ */
+char *initial_checkenv_table[] = {
+    "LC_*",
+    "LANG",
+    "LANGUAGE",
+    NULL
+};
 
 /*
  * Zero out environment and replace with a minimal set of
@@ -165,7 +162,7 @@ zero_env(envp)
 		continue;
 	}
 
-	/* Deal with multiply defined variables (take first instantiation) */
+	/* Deal with multiply defined variables (take first instance) */
 	for (nep = newenv; *nep; nep++) {
 	    if (**nep == **ep)
 		break;
@@ -226,7 +223,7 @@ insert_env(envp, str)
 
 /*
  * Build a new environment and ether clear potentially dangerous
- * variables from the old one or starts with a clean slate.
+ * variables from the old one or start with a clean slate.
  * Also adds sudo-specific variables (SUDO_*).
  */
 char **
@@ -234,105 +231,24 @@ rebuild_env(sudo_mode, envp)
     int sudo_mode;
     char **envp;
 {
-    char **newenvp, **ep, **nep, **ek, *cp;
-    char *ekflat, *ps1, **env_keep;
+    char **newenvp, **ep, **nep, *cp, *ps1;
     int okvar, iswild;
-    size_t env_size, eklen;
-    struct env_table *entry;
+    size_t env_size, len;
+    struct list_member *cur;
 
-    eklen = 0;
-    ekflat = ps1 = NULL;
-    env_keep = NULL;
-    if (def_str(I_ENV_KEEP)) {
-	/* XXX - start eklen at 1 instead? */
-	for (cp = def_str(I_ENV_KEEP), eklen = 2; *cp; cp++)
-	    if (*cp == ' ' || *cp == '\t')
-		eklen++;
-	env_keep = emalloc(sizeof(char *) * eklen);
-	cp = ekflat = estrdup(def_str(I_ENV_KEEP));
-	eklen = 0;
-	if ((cp = strtok(cp, " \t"))) {
-	    do {
-		/* XXX - hack due to assumption in rebuild_env */
-		if (strcmp("PATH", cp) && strcmp("TERM", cp))
-		    env_keep[eklen++] = cp;
-	    } while ((cp = strtok(NULL, " \t")));
-	}
-	env_keep[eklen] = NULL;
-    }
-
-    /*
-     * If sudoers overrides or adds to the badenv_table, rebuild it.
-     */
-    if ((cp = def_str(I_ENV_DELETE))) {
-	int i;
-	size_t len;
-	char *env_delete, *end;
-
-	env_delete = def_str(I_ENV_DELETE);
-	if (*env_delete == '+')
-	    env_delete++;
-
-	/*
-	 * Calculate number of entries in new badenv_table.
-	 * If defined we have at least two entries (including a NULL entry).
-	 */
-	for (i = 2, cp = env_delete; (cp = strpbrk(cp, " \t")); i++) {
-	    while (*cp == ' ' || *cp == '\t')
-		cp++;
-	}
-	if (*def_str(I_ENV_DELETE) == '+') {
-	    for (entry = sudo_badenv_table; entry->name; entry++, i++)
-		;
-	}
-	badenv_table = emalloc(sizeof(struct env_table) * i);
-
-	/*
-	 * Copy in user entries.
-	 */
-	for (i = 0, cp = env_delete; cp; i++) {
-	    while (*cp == ' ' || *cp == '\t')
-		cp++;
-	    end = strpbrk(cp, " \t");
-	    if (end == NULL)
-		len = strlen(cp);
-	    else
-		len = end - cp;
-	    if ((iswild = cp[len - 1] == '*'))		/* wildcard */
-		len--;
-	    entry = &badenv_table[i];
-	    entry->name = emalloc(len + 1 + !iswild);
-	    memcpy(entry->name, cp, len);
-	    if (!iswild)
-		entry->name[len++] = '=';
-	    entry->name[len] = '\0';
-	    entry->len = len;
-	    entry->check = 0;
-	    cp = end;
-	}
-
-	/*
-	 * Copy in default entries if user is appending.
-	 */
-	if (*def_str(I_ENV_DELETE) == '+') {
-	    for (entry = sudo_badenv_table; entry->name; entry++, i++) {
-		badenv_table[i].name = entry->name;
-		badenv_table[i].len = entry->len;
-		badenv_table[i].check = entry->check;
-	    }
-	}
-	memset(&badenv_table[i], 0, sizeof(badenv_table[i]));
-    } else
-	badenv_table = sudo_badenv_table;
+    /* Count number of items in "env_keep" list (if any) */
+    for (len = 0, cur = def_list(I_ENV_KEEP); cur; cur = cur->next)
+	len++;
 
     /*
      * Either clean out the environment or reset to a safe default.
      */
+    ps1 = NULL;
     if (def_flag(I_ENV_RESET)) {
 	int didterm;
 
 	/* Alloc space for new environment. */
-	env_size = 32 + eklen;
+	env_size = 32 + len;
 	nep = newenvp = (char **) emalloc(env_size * sizeof(char *));
 
 	/* XXX - set all to target user instead for -S */
@@ -346,23 +262,20 @@ rebuild_env(sudo_mode, envp)
 	    *nep++ = format_env("USER", user_name);
 	}
 
-	/* Pull in vars we want to keep from the old environment */
-	didterm = 0;
-	for (ep = envp; *ep; ep++) {
-	    if (env_keep) {
-		for (ek = env_keep; *ek; ek++) {
-		    eklen = strlen(*ek);
-		    /* Deal with '*' wildcard */
-		    if ((*ek)[eklen - 1] == '*') {
-			eklen--;
-			iswild = 1;
-		    } else
-			iswild = 0;
-		    if (strncmp(*ek, *ep, eklen) == 0 &&
-			(iswild || (*ep)[eklen] == '=')) {
-			*nep++ = *ep;
-			break;
-		    }
+	/* Pull in vars we want to keep from the old environment. */
+	for (didterm = 0, ep = envp; *ep; ep++) {
+	    for (cur = def_list(I_ENV_KEEP); cur; cur = cur->next) {
+		len = strlen(cur->value);
+		/* Deal with '*' wildcard */
+		if (cur->value[len - 1] == '*') {
+		    len--;
+		    iswild = 1;
+		} else
+		    iswild = 0;
+		if (strncmp(cur->value, *ep, len) == 0 &&
+		    (iswild || (*ep)[len] == '=')) {
+		    *nep++ = *ep;
+		    break;
 		}
 	    }
 
@@ -385,42 +298,48 @@ rebuild_env(sudo_mode, envp)
 	    *nep++ = "TERM=unknown";
     } else {
 	/* Alloc space for new environment. */
-	for (env_size = 16 + eklen, ep = envp; *ep; ep++, env_size++)
+	for (env_size = 16 + len, ep = envp; *ep; ep++, env_size++)
 	    ;
 	nep = newenvp = (char **) emalloc(env_size * sizeof(char *));
 
 	/*
-	 * Copy envp entries as long as they don't match badenv_table
-	 * (unless excepted by env_keep).
+	 * Copy envp entries as long as they don't match env_delete or
+	 * env_check.
 	 */
 	for (ep = envp; *ep; ep++) {
-	    okvar = 0;
-	    /* env_keep overrides badenv_table */
-	    if (env_keep) {
-		for (ek = env_keep; *ek; ek++) {
-		    eklen = strlen(*ek);
-		    /* Deal with '*' wildcard */
-		    if ((*ek)[eklen - 1] == '*') {
-			eklen--;
-			iswild = 1;
-		    } else
-			iswild = 0;
-		    if (strncmp(*ek, *ep, eklen) == 0 &&
-			(iswild || (*ep)[eklen] == '=')) {
-			okvar = 1;
-			break;
-		    }
+	    okvar = 1;
+
+	    /* Skip anything listed in env_delete. */
+	    for (cur = def_list(I_ENV_DELETE); cur && okvar; cur = cur->next) {
+		len = strlen(cur->value);
+		/* Deal with '*' wildcard */
+		if (cur->value[len - 1] == '*') {
+		    len--;
+		    iswild = 1;
+		} else
+		    iswild = 0;
+		if (strncmp(cur->value, *ep, len) == 0 &&
+		    (iswild || (*ep)[len] == '=')) {
+		    okvar = 0;
 		}
 	    }
-	    if (!okvar) {
-		for (okvar = 1, entry = badenv_table; entry->name; entry++) {
-		    if (strncmp(*ep, entry->name, entry->len) == 0 &&
-			(!entry->check || strpbrk(*ep, "/%"))) {
-			okvar = 0;
-			break;
-		    }
+
+	    /* Check certain variables for '%' and '/' characters. */
+	    for (cur = def_list(I_ENV_CHECK); cur && okvar; cur = cur->next) {
+		len = strlen(cur->value);
+		/* Deal with '*' wildcard */
+		if (cur->value[len - 1] == '*') {
+		    len--;
+		    iswild = 1;
+		} else
+		    iswild = 0;
+		if (strncmp(cur->value, *ep, len) == 0 &&
+		    (iswild || (*ep)[len] == '=') &&
+		    strpbrk(*ep, "/%")) {
+		    okvar = 0;
 		}
 	    }
+
 	    if (okvar) {
 		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
 		    ps1 = *ep + 5;
@@ -464,28 +383,42 @@ rebuild_env(sudo_mode, envp)
     sprintf(cp, "SUDO_GID=%ld", (long) user_gid);
     insert_env(newenvp, cp);
 
-    if (env_keep) {
-	free(env_keep);
-	free(ekflat);
-    }
     return(newenvp);
 }
 
 void
 dump_badenv()
 {
-    struct env_table *entry;
-    int len, iswild;
+    struct list_member *cur;
 
-    /* XXX - mark the ones that are just 'check' */
     puts("Default table of environment variables to clear");
-    for (entry = sudo_badenv_table; entry->name; entry++) {
-	len = strlen(entry->name);
-	if (entry->name[len - 1] == '=') {
-	    iswild = 0;
-	    len--;
-	} else
-	    iswild = 1;
-	printf("\t%.*s%s\n", len, entry->name, iswild ? "*" : "");
+    for (cur = def_list(I_ENV_DELETE); cur; cur = cur->next)
+	printf("\t%s\n", cur->value);
+
+    puts("Default table of environment variables to sanity check");
+    for (cur = def_list(I_ENV_CHECK); cur; cur = cur->next)
+	printf("\t%s\n", cur->value);
+}
+
+void
+init_envtables()
+{
+    struct list_member *cur;
+    char **p;
+
+    /* Fill in "env_delete" variable. */
+    for (p = initial_badenv_table; *p; p++) {
+	cur = emalloc(sizeof(struct list_member));
+	cur->value = estrdup(*p);
+	cur->next = def_list(I_ENV_DELETE);
+	def_list(I_ENV_DELETE) = cur;
+    }
+
+    /* Fill in "env_check" variable. */
+    for (p = initial_checkenv_table; *p; p++) {
+	cur = emalloc(sizeof(struct list_member));
+	cur->value = estrdup(*p);
+	cur->next = def_list(I_ENV_CHECK);
+	def_list(I_ENV_CHECK) = cur;
     }
 }
