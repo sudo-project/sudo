@@ -3,10 +3,12 @@
 sudo, visudo \- execute a command as the superuser and edit the sudoers file
 
 .SH SYNOPSIS
-.B sudo [-V] [-v]
-.I command
+.B sudo
+-V | -h | -v | -k |
+.I <command>
 .sp
-.B visudo [-V]
+.B visudo
+[-V]
 
 .SH DESCRIPTION
 .I Sudo
@@ -16,12 +18,7 @@ as the superuser.
 .I Sudo 
 determines who is an authorized user by consulting the file
 .I /etc/sudoers.
-The
-.I -V
-flag will print the version of sudo/visudo you are running.
-Sudo will prompt for a user's password to initiate a validation period
-of N minutes (where N is defined at installation time and defaults
-to 5 minutes).  By giving
+By giving
 .I sudo
 the
 .I -v
@@ -125,6 +122,27 @@ the local authorities (defined at installation time).
 All preferences are defined at installation time and are derived from
 the sudo.h include file and the Makefile.
 
+.SH OPTIONS
+.I sudo
+accepts the following command line options:
+.IP -V
+The -V (version) option causes sudo (or visudo) to print the version number
+and exit.
+.IP -h
+The -h (help) option causes sudo to print the version of sudo and a usage
+message before exiting.
+.IP -v
+If given the -v (validate) option, sudo will update the user's timestamp file,
+prompting for a password if necesary.  This extends the sudo timeout
+to for another N minutes (where N is defined at installation time and defaults
+to 5 minutes) but does not run a command.
+.IP -k
+The -k (kill) option to sudo removes the user's timestamp file, thus
+requiring a password the next time
+.I sudo
+is run.  This option does not require and password and was added to
+allow a user to revoke sudo permissions from a .logout file.
+
 .SH RETURN VALUES
 .I sudo
 quits with an exit value of 1 if there is a configuration/permission problem
@@ -182,6 +200,11 @@ Have visudo do more extensive checking on the sudoers file.
 .fi
 
 .SH ENVIRONMENT VARIABLES
+.nf
+SUDO_USER                    Set to the login of the user who invoked sudo
+SUDO_UID                     Set to the uid of the user who invoked sudo
+.fi
+
 The following are used only if
 .I visudo
 was compiled with the ENV_EDITOR option:
