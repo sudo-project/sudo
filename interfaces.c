@@ -133,9 +133,9 @@ void load_interfaces()
     /* networking may not be installed in kernel */
 #ifdef _ISC
     STRSET(SIOCGIFCONF, (caddr_t) ifconf, sizeof(ifconf_buf));
-    if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0)
+    if ((int) ioctl(sock, I_STR, (caddr_t) &strioctl) < 0)
 #else
-    if (ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0)
+    if ((int) ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0)
 #endif /* _ISC */
 	return;
 
@@ -181,9 +181,9 @@ void load_interfaces()
 	/* get the ip address */
 #ifdef _ISC
 	STRSET(SIOCGIFADDR, (caddr_t) &ifreq, sizeof(ifreq));
-	if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0) {
+	if ((int) ioctl(sock, I_STR, (caddr_t) &strioctl) < 0) {
 #else
-	if (ioctl(sock, SIOCGIFADDR, (caddr_t) &ifreq)) {
+	if ((int) ioctl(sock, SIOCGIFADDR, (caddr_t) &ifreq)) {
 #endif /* _ISC */
 	    /* non-fatal error if interface is down or not supported */
 	    if (errno == EADDRNOTAVAIL || errno == ENXIO || errno == EAFNOSUPPORT)
@@ -202,9 +202,9 @@ void load_interfaces()
 #ifdef SIOCGIFNETMASK
 #ifdef _ISC
 	STRSET(SIOCGIFNETMASK, (caddr_t) &ifreq, sizeof(ifreq));
-	if (ioctl(sock, I_STR, (caddr_t) &strioctl) == 0) {
+	if ((int) ioctl(sock, I_STR, (caddr_t) &strioctl) == 0) {
 #else
-	if (ioctl(sock, SIOCGIFNETMASK, (caddr_t) &ifreq) == 0) {
+	if ((int) ioctl(sock, SIOCGIFNETMASK, (caddr_t) &ifreq) == 0) {
 #endif /* _ISC */
 	    sin = (struct sockaddr_in *) &ifreq.ifr_addr;
 
