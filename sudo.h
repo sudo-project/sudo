@@ -120,6 +120,13 @@
 #endif
 
 /*
+ *  Number of seconds that can elapse before a user enters a password
+ */
+#ifndef PASSWORD_TIMEOUT
+#  define PASSWORD_TIMEOUT	300
+#endif
+
+/*
  *  Number of times sudo will let you guess are you password before screaming
  */
 #ifndef TRIES_FOR_PASSWORD
@@ -322,8 +329,15 @@ typedef struct list {
 /* These are the functions that are called in sudo(8) */
 
 #ifndef HAVE_STRDUP
-char *strdup		__P((char *));
+char *strdup		__P((const char *));
 #endif
+#ifndef HAVE_GETCWD
+char *getcwd		__P((char *, size_t));
+#endif
+#ifndef HAVE_REALPATH
+char *realpath		__P((const char *, char *));
+#endif
+char *tgetpass		__P((char *, int));
 char *find_path		__P((char *));
 void log_error		__P((int));
 void inform_user	__P((int));
