@@ -308,7 +308,7 @@ main() {
   if ((f = fopen("conftestdata", "w")) == NULL)
     exit(1);
 
-  (void) sprintf(b, "%u", u);
+  (void) sprintf(b, "%lu", (unsigned long) u);
   (void) fprintf(f, "%d\n", strlen(b));
   (void) fclose(f);
   exit(0);
