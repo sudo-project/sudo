@@ -856,14 +856,10 @@ initial_setup()
     /* Set set_perms pointer to the correct function */
 #if defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
     if (sysconf(_SC_SAVED_IDS) == 1 && sysconf(_SC_VERSION) >= 199009)
-	set_perms = set_perms_saved_uid;
+	set_perms = set_perms_posix;
     else
 #endif
-#ifdef HAVE_SETREUID
-    set_perms = set_perms_setreuid;
-#else
-    set_perms = set_perms_fallback;
-#endif
+	set_perms = set_perms_fallback;
 }
 
 #ifdef HAVE_LOGIN_CAP_H
