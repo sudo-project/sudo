@@ -43,13 +43,13 @@
 struct sudo_defs_types {
     char *name;
     int type;
+    char *desc;
     union {
 	int flag;
 	char *str;
 	unsigned int ival;
 	mode_t mode;
     } sd_un;
-    char *desc;
 };
 
 /*
