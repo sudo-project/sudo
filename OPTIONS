@@ -153,7 +153,7 @@ SECURE_PATH
     NOTE: SECURE_PATH is not applied to users in the EXEMPTGROUP.
     This is off by default.
 
-NO_DOT_PATH
+IGNORE_DOT_PATH
     If defined, sudo will ignore '.' or '' (current dir) in $PATH.
     The $PATH itself is not modified.
     This is off by default.

@@ -56,7 +56,7 @@
 #define INCORRECT_PASSWORD "Sorry, try again." /* message for bad passwd */
 #define MAILSUBJECT "*** SECURITY information ***" /* subject of mail sent */
 #define PASSPROMPT "Password:"	/* default password prompt */
-/*#define NO_DOT_PATH		/* ignore '.' if in $PATH */
+/*#define IGNORE_DOT_PATH	/* ignore '.' in $PATH if it exists */
 /*#define SECURE_PATH	"/bin:/usr/ucb:/usr/bin:/usr/etc:/etc" /* secure path */
 /*#define USE_EXECV		/* use execv() instead of execvp() */
 /*#define SHELL_IF_NO_ARGS	/* if sudo is given no arguments run a shell */
