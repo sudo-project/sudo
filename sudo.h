@@ -163,6 +163,9 @@ struct generic_alias {
 #define BAD_STAMPDIR             0x0E
 #define BAD_STAMPFILE            0x0F
 #define BAD_ALLOCATION           0x10
+#ifdef HAVE_KERB5
+#define GLOBAL_KRB5_INIT_ERR     ( 0x11 | GLOBAL_PROBLEM )
+#endif /* HAVE_KERB5 */
 
 /*
  * Boolean values

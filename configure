@@ -6815,7 +6815,7 @@ else
 fi
 
 fi
-if test "$with_kerb4" = "yes" -o "$with_kerb5" = "yes"; then
+if test "$with_kerb4" = "yes"; then
     if test -f "/usr/include/kerberosIV/krb.h"; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/include/kerberosIV"
     elif test -f "/usr/local/include/kerberosIV/krb.h"; then
@@ -6825,7 +6825,7 @@ if test "$with_kerb4" = "yes" -o "$with_kerb5" = "yes"; then
     elif test -f "/usr/local/kerberos/include/krb.h"; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/local/kerberos/include"
     else
-	echo 'Unable to locate kerberos include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS'
+	echo 'Unable to locate kerberos 4 include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS'
     fi
 
     if test -d "/usr/kerberos/lib"; then
@@ -6835,97 +6835,25 @@ if test "$with_kerb4" = "yes" -o "$with_kerb5" = "yes"; then
     elif test -f "/usr/local/lib/libkrb.a"; then
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
     elif test ! -f "/usr/lib/libkrb.a"; then
-	echo 'Unable to locate kerberos libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS'
+	echo 'Unable to locate kerberos 4 libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS'
     fi
 
-    if test "$with_kerb5" = "yes"; then
-	echo $ac_n "checking for -lkrb4""... $ac_c" 1>&6
-echo "configure:6844: checking for -lkrb4" >&5
-if eval "test \"`echo '$''{'ac_cv_lib_krb4'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  ac_save_LIBS="$LIBS"
-LIBS="-lkrb4  $LIBS"
-cat > conftest.$ac_ext <<EOF
-#line 6851 "configure"
-#include "confdefs.h"
-
-int main() {
-main()
-; return 0; }
-EOF
-if { (eval echo configure:6858: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
-  rm -rf conftest*
-  ac_cv_lib_krb4=yes
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-  ac_cv_lib_krb4=no
-fi
-rm -f conftest*
-LIBS="$ac_save_LIBS"
-
-fi
-echo "$ac_t""$ac_cv_lib_krb4" 1>&6
-if test "$ac_cv_lib_krb4" = yes; then
-  SUDO_LIBS="${SUDO_LIBS} -lkrb4"
-else
-  SUDO_LIBS="${SUDO_LIBS} -lkrb"
-fi
-
-	echo $ac_n "checking for -ldes""... $ac_c" 1>&6
-echo "configure:6879: checking for -ldes" >&5
+    echo $ac_n "checking for -ldes""... $ac_c" 1>&6
+echo "configure:6843: checking for -ldes" >&5
 if eval "test \"`echo '$''{'ac_cv_lib_des'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   ac_save_LIBS="$LIBS"
 LIBS="-ldes  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 6886 "configure"
+#line 6850 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:6893: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
-  rm -rf conftest*
-  ac_cv_lib_des=yes
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-  ac_cv_lib_des=no
-fi
-rm -f conftest*
-LIBS="$ac_save_LIBS"
-
-fi
-echo "$ac_t""$ac_cv_lib_des" 1>&6
-if test "$ac_cv_lib_des" = yes; then
-  SUDO_LIBS="${SUDO_LIBS} -ldes"
-fi
-
-	SUDO_LIBS="${SUDO_LIBS} -ldes425 -lkrb5 -lcrypto -lcom_err"
-    else
-	# kerb4
-	echo $ac_n "checking for -ldes""... $ac_c" 1>&6
-echo "configure:6915: checking for -ldes" >&5
-if eval "test \"`echo '$''{'ac_cv_lib_des'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  ac_save_LIBS="$LIBS"
-LIBS="-ldes  $LIBS"
-cat > conftest.$ac_ext <<EOF
-#line 6922 "configure"
-#include "confdefs.h"
-
-int main() {
-main()
-; return 0; }
-EOF
-if { (eval echo configure:6929: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:6857: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   ac_cv_lib_des=yes
 else
@@ -6945,7 +6873,10 @@ else
   SUDO_LIBS="${SUDO_LIBS} -lkrb"
 fi
 
-    fi
+fi
+
+if test "$with_kerb5" = "yes"; then
+    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
 fi
 
 if test "$with_pam" = "yes"; then
@@ -7036,7 +6967,7 @@ if test "$with_authenticate" = "yes"; then
 fi
 
 echo $ac_n "checking for log file location""... $ac_c" 1>&6
-echo "configure:7040: checking for log file location" >&5
+echo "configure:6971: checking for log file location" >&5
 if test -n "$with_logpath"; then
     echo "$ac_t""$with_logpath" 1>&6
     cat >> confdefs.h <<EOF
@@ -7066,7 +6997,7 @@ else
 fi
 
 echo $ac_n "checking for timestamp file location""... $ac_c" 1>&6
-echo "configure:7070: checking for timestamp file location" >&5
+echo "configure:7001: checking for timestamp file location" >&5
 if test -n "$with_timedir"; then
     echo "$ac_t""$with_timedir" 1>&6
     cat >> confdefs.h <<EOF

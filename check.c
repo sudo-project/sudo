@@ -62,6 +62,9 @@
 #ifdef HAVE_KERB4
 #  include <krb.h>
 #endif /* HAVE_KERB4 */
+#ifdef HAVE_KERB5
+#  include <krb5.h>
+#endif /* HAVE_KERB5 */
 #ifdef HAVE_PAM
 #  include <security/pam_appl.h>
 #  include <security/pam_misc.h>
@@ -109,6 +112,10 @@ static char *expand_prompt		__P((char *, char *, char *));
 #ifdef HAVE_KERB4
 static int   sudo_krb_validate_user	__P((struct passwd *, char *));
 #endif /* HAVE_KERB4 */
+#ifdef HAVE_KERB5
+static int   sudo_krb5_validate_user	__P((struct passwd *, char *));
+static int   verify_krb_v5_tgt		__P((krb5_ccache));
+#endif /* HAVE_KERB5 */
 #ifdef HAVE_PAM
 static void pam_attempt_auth            __P((void));
 #endif /* HAVE_PAM */
@@ -134,6 +141,11 @@ struct skey skey;
 #ifdef HAVE_OPIE
 struct opie opie;
 #endif
+#ifdef HAVE_KERB5
+extern krb5_context sudo_context;
+extern char *realm;
+extern int xrealm;
+#endif /* HAVE_KERB5 */
 
 
 
@@ -519,7 +531,7 @@ static void check_passwd()
 	reenter = 1;
 	if (authenticate(user_name, pass, &reenter, &message) == 0)
 	    return;		/* valid password */
-#else
+#else /* HAVE_AUTHENTICATE */
 #  ifdef HAVE_SKEY
 	/* rewrite the prompt if using s/key since the challenge can change */
 	set_perms(PERM_ROOT, 0);
@@ -598,6 +610,11 @@ static void check_passwd()
 	if (user_uid && sudo_krb_validate_user(user_pw_ent, pass) == 0)
 	    return;
 #    endif /* HAVE_KERB4 */
+
+#    ifdef HAVE_KERB5
+	if (sudo_krb5_validate_user(user_pw_ent, pass) == 0)
+	    return;
+#    endif /* HAVE_KERB5 */
 
 #    ifdef HAVE_AFS
 	if (ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION,
@@ -689,6 +706,150 @@ static int sudo_krb_validate_user(pw, pass)
     return(!(k_errno == INTK_OK));
 }
 #endif /* HAVE_KERB4 */
+
+
+#ifdef HAVE_KERB5
+/********************************************************************
+ *
+ *  sudo_krb5_validate_user()
+ *
+ *  Validate a user via Kerberos 5. We may lose a bit of memory, but it's
+ *  OK since we're a short lived program. I'd rather do that than contort
+ *  the code to handle the cleanup.
+ */
+static int sudo_krb5_validate_user(pw, pass)
+    struct passwd *pw;
+    char *pass;
+{
+    krb5_error_code	retval;
+    krb5_principal	princ;
+    krb5_creds		creds;
+    krb5_ccache		ccache;
+    char		cache_name[64];
+    char		*princ_name;
+    krb5_get_init_creds_opt opts;
+
+    /* Initialize */
+    if (!sudo_context)
+	return -1;
+    krb5_get_init_creds_opt_init(&opts);
+
+    princ_name = malloc(strlen(pw->pw_name) + strlen(realm) + 2);
+    if (!princ_name) {
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+
+    sprintf(princ_name, "%s@%s", pw->pw_name, realm);
+    if (retval = krb5_parse_name(sudo_context, princ_name, &princ))
+	return retval;
+
+    /* Set the ticket file to be in /tmp so we don't need to change perms. */
+    (void) sprintf(cache_name, "FILE:/tmp/sudocc_%ld", getpid());
+    if (retval = krb5_cc_resolve(sudo_context, cache_name, &ccache))
+	return retval;
+
+    if (retval = krb5_get_init_creds_password(sudo_context, &creds, princ,
+					      pass, krb5_prompter_posix, NULL,	
+					      0, NULL, &opts))
+	return retval;
+
+    /* Stash the TGT so we can verify it. */
+    if (retval = krb5_cc_initialize(sudo_context, ccache, princ))
+	return retval;
+    if (retval = krb5_cc_store_cred(sudo_context, ccache, &creds)) {
+	(void) krb5_cc_destroy(sudo_context, ccache);
+	return retval;
+    }
+
+    retval = verify_krb_v5_tgt(ccache);
+    (void) krb5_cc_destroy(sudo_context, ccache);
+    return (retval == -1);
+}
+
+
+/*
+ * This routine with some modification is from the MIT V5B6 appl/bsd/login.c
+ *
+ * Verify the Kerberos ticket-granting ticket just retrieved for the
+ * user.  If the Kerberos server doesn't respond, assume the user is
+ * trying to fake us out (since we DID just get a TGT from what is
+ * supposedly our KDC).  If the host/<host> service is unknown (i.e.,
+ * the local keytab doesn't have it), let her in.
+ *
+ * Returns 1 for confirmation, -1 for failure, 0 for uncertainty.
+ */
+static int verify_krb_v5_tgt(ccache)
+    krb5_ccache		ccache;
+{
+    char		phost[BUFSIZ];
+    krb5_error_code	retval;
+    krb5_principal	princ;
+    krb5_keyblock *	keyblock = 0;
+    krb5_data		packet;
+    krb5_auth_context	auth_context = NULL;
+
+    packet.data = 0;
+
+    /*
+     * Get the server principal for the local host.
+     * (Use defaults of "host" and canonicalized local name.)
+     */
+    if (krb5_sname_to_principal(sudo_context, NULL, NULL,
+				KRB5_NT_SRV_HST, &princ))
+	return -1;
+
+    /* Extract the name directly. */
+    strncpy(phost, krb5_princ_component(c, princ, 1)->data, BUFSIZ);
+    phost[BUFSIZ - 1] = '\0';
+
+    /*
+     * Do we have host/<host> keys?
+     * (use default keytab, kvno IGNORE_VNO to get the first match,
+     * and enctype is currently ignored anyhow.)
+     */
+    if (retval = krb5_kt_read_service_key(sudo_context, NULL, princ, 0,
+					  ENCTYPE_DES_CBC_MD5, &keyblock)) {
+	/* Keytab or service key does not exist */
+	if (xrealm)
+	    retval = -1;
+	else
+	    retval = 0;
+	goto cleanup;
+    }
+    if (keyblock)
+	krb5_free_keyblock(sudo_context, keyblock);
+
+    /* Talk to the kdc and construct the ticket. */
+    retval = krb5_mk_req(sudo_context, &auth_context, 0, "host", phost,
+			 NULL, ccache, &packet);
+    if (auth_context) {
+	krb5_auth_con_free(sudo_context, auth_context);
+	auth_context = NULL; /* setup for rd_req */
+    }
+    if (retval) {
+	retval = -1;
+	goto cleanup;
+    }
+
+    /* Try to use the ticket. */
+    retval = krb5_rd_req(sudo_context, &auth_context, &packet, princ,
+			 NULL, NULL, NULL);
+    if (retval) {
+	retval = -1;
+    } else {
+	retval = 1;
+    }
+
+cleanup:
+    if (packet.data)
+	krb5_free_data_contents(sudo_context, &packet);
+    krb5_free_principal(sudo_context, princ);
+    return retval;
+
+}
+#endif /* HAVE_KERB5 */
+
 
 #ifdef HAVE_PAM
 /********************************************************************

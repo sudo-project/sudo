@@ -139,11 +139,6 @@
 /* Define if you use Kerberos.  */
 #undef HAVE_KERB5
 
-/* Keberos v5 has v4 compatibility */
-#ifdef HAVE_KERB5
-#  define HAVE_KERB4
-#endif /* HAVE_KERB5 */
-
 /* Define if you use SIA.  */
 #undef HAVE_SIA
 

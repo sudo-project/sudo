@@ -1329,9 +1329,9 @@ if test "$OS" = "irix"; then
     AC_CHECK_LIB(sun, getpwnam, [SUDO_LIBS="${SUDO_LIBS} -lsun"; VISUDO_LIBS="${VISUDO_LIBS} -lsun"; LIBS="${LIBS} -lsun"])
 fi
 dnl
-dnl Find kerberos includes and libs or complain
+dnl Find kerberos 4 includes and libs or complain
 dnl
-if test "$with_kerb4" = "yes" -o "$with_kerb5" = "yes"; then
+if test "$with_kerb4" = "yes"; then
     if test -f "/usr/include/kerberosIV/krb.h"; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/include/kerberosIV"
     elif test -f "/usr/local/include/kerberosIV/krb.h"; then
@@ -1341,7 +1341,7 @@ if test "$with_kerb4" = "yes" -o "$with_kerb5" = "yes"; then
     elif test -f "/usr/local/kerberos/include/krb.h"; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/local/kerberos/include"
     else
-	echo 'Unable to locate kerberos include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS'
+	echo 'Unable to locate kerberos 4 include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS'
     fi
 
     if test -d "/usr/kerberos/lib"; then
@@ -1351,17 +1351,17 @@ if test "$with_kerb4" = "yes" -o "$with_kerb5" = "yes"; then
     elif test -f "/usr/local/lib/libkrb.a"; then
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
     elif test ! -f "/usr/lib/libkrb.a"; then
-	echo 'Unable to locate kerberos libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS'
+	echo 'Unable to locate kerberos 4 libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS'
     fi
 
-    if test "$with_kerb5" = "yes"; then
-	AC_HAVE_LIBRARY(krb4, SUDO_LIBS="${SUDO_LIBS} -lkrb4", SUDO_LIBS="${SUDO_LIBS} -lkrb")
-	AC_HAVE_LIBRARY(des, SUDO_LIBS="${SUDO_LIBS} -ldes")
-	SUDO_LIBS="${SUDO_LIBS} -ldes425 -lkrb5 -lcrypto -lcom_err"
-    else
-	# kerb4
-	AC_HAVE_LIBRARY(des, SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes", SUDO_LIBS="${SUDO_LIBS} -lkrb")
-    fi
+    AC_HAVE_LIBRARY(des, SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes", SUDO_LIBS="${SUDO_LIBS} -lkrb")
+fi
+
+dnl
+dnl Kerberos 5
+dnl
+if test "$with_kerb5" = "yes"; then
+    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
 fi
 
 dnl

@@ -169,10 +169,10 @@ Special features/options:
 	authentication but does not use the kerberos cookie scheme.
 
   --with-kerb5
-	Enable kerberos v5 support.  This enables with kerberos v4 support
-	and links with the standard kerberos v5 libraries as well as the v4
-	compatibility libraries.  This uses kerberos passphrases for
-	authentication but does not use the kerberos cookie scheme.
+	Enable kerberos v5 support.  Tested against MIT Kerberos V,
+	release 1.1, although also expected to work against CNS.  This
+	This uses kerberos passphrases for authentication but does not
+	use the kerberos cookie scheme.
 
   --with-authenticate
 	Enable support for the AIX 4.x general authentication function.

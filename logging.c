@@ -288,6 +288,12 @@ void log_error(code)
 		tty, cwd, runas_user);
 	    break;
 
+#ifdef HAVE_KERB5
+	case GLOBAL_KRB5_INIT_ERR:
+	    (void) sprintf(p, "Could not initialize Kerberos V");
+	    break;
+#endif /* HAVE_KERB5 */
+
 	default:
 	    strcat(p, "found a weird error : ");
 	    break;
