@@ -1069,13 +1069,13 @@ dnl
 dnl C compiler checks
 dnl XXX - the cross-compiler check gets false positives so we override it
 dnl
+AC_ISC_POSIX
 ac_cv_prog_cc_cross="no"
 cross_compiling="no"
-AC_PROG_CC
+AC_PROG_CC_STDC
 ac_cv_prog_cc_cross="no"
 cross_compiling="no"
 AC_PROG_CPP
-AC_ISC_POSIX
 
 dnl
 dnl It is now safe to modify CFLAGS and CPPFLAGS
@@ -1170,33 +1170,9 @@ case "$host" in
 		mansectform=4
 		;;
     *-*-hpux1[[0-9]]*)
-		# uncomment this for a statically linked sudo
-		# (XXX - should be an option to configure)
-		#STATIC_SUDO=true
-
-		# If using cc, run in ANSI mode if possible
-		if test -z "$GCC"; then
-		    $CC -Aa 2>&1 | grep 'A option is available only' >conftest.out
-		    if test ! -s conftest.out; then
-			CPPFLAGS="${CPPFLAGS} -Aa"
-		    fi
-		    rm -f conftest.out
-		fi
-
-		# Add -D_HPUX_SOURCE so we don't get strict ANSI headers
-		CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE"
-
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) AC_CHECK_LIB(sec, iscomsec, AC_DEFINE(HAVE_ISCOMSEC)) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1])
 		    CHECKSHADOW="false"
-		fi
-
-		if test -n "$STATIC_SUDO"; then
-		    if test -n "$GCC"; then
-			SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
-		    else
-			SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
-		    fi
 		fi
 
 		# AFS support needs -lBSD
@@ -1207,35 +1183,11 @@ case "$host" in
 		mansectform=4
 		;;
     *-*-hpux9*)
-		# uncomment this for a statically linked sudo
-		# (XXX - should be an option to configure)
-		#STATIC_SUDO=true
-
-		# If using cc, run in ANSI mode if possible
-		if test -z "$GCC"; then
-		    $CC -Aa 2>&1 | grep 'A option is available only' >conftest.out
-		    if test ! -s conftest.out; then
-			CPPFLAGS="${CPPFLAGS} -Aa"
-		    fi
-		    rm -f conftest.out
-		fi
-
-		# Add -D_HPUX_SOURCE so we don't get strict ANSI headers
-		CPPFLAGS="${CPPFLAGS} -D_HPUX_SOURCE"
-
 		AC_DEFINE(BROKEN_SYSLOG)
 
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_FUNCS(getspwuid)
 		    CHECKSHADOW="false"
-		fi
-
-		if test -n "$STATIC_SUDO"; then
-		    if test -n "$GCC"; then
-			SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
-		    else
-			SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
-		    fi
 		fi
 
 		# DCE support (requires ANSI C compiler)
@@ -1254,7 +1206,6 @@ case "$host" in
 		mansectform=4
 		;;
     *-*-hpux*)
-
 		AC_DEFINE(BROKEN_SYSLOG)
 
 		# Not sure if setuid binaries are safe in < 9.x
