@@ -496,7 +496,7 @@ static char *dotcat(s1, s2)
     if (s == NULL)
 	yyerror("unable to allocate memory");
 
-    /* cat s1.s2 -> s effeciently */
+    /* cat s1.s2 -> s efficient */
     (void) strcpy(s, s1);
     *(s + len1) = '.';
     (void) strcpy(s + len1 + 1, s2);

@@ -218,7 +218,7 @@ static void append() {
 	    yyerror("unable to allocate memory");
     }
 
-    /* Effeciently append the arg (with a leading space) */
+    /* Efficiently append the arg (with a leading space) */
     s = yylval.string + string_len;
     *s++ = ' ';
     (void) strcpy(s, yytext);
