@@ -141,7 +141,7 @@ AC_ARG_WITH(DCE, [  --with-DCE              enable DCE support],
 		;;
 esac])
 
-AC_ARG_WITH(incpath, [  --with-incpath          additional places to look ofr include files],
+AC_ARG_WITH(incpath, [  --with-incpath          additional places to look for include files],
 [case $with_incpath in  
     yes)	echo "Must give --with-incpath an argument."
 		exit 1
@@ -183,9 +183,15 @@ AC_ARG_WITH(libraries, [  --with-libraries        additional libraries to link w
 		;;
     *)		echo "Adding ${with_libraries} to SUDO_LIBS and VISUDO_LIBS"
 		for i in ${with_libraries}; do
-		    LIBS="${LIBS} -L${i}"
-		    SUDO_LIBS="${SUDO_LIBS} -L${i}"
-		    VISUDO_LIBS="${VISUDO_LIBS} -L${i}"
+		    case $i in
+			-l*)	;;
+			*.a)	;;
+			*.o)	;;
+			*)	i="-l${i}";;
+		    esac
+		    LIBS="${LIBS} ${i}"
+		    SUDO_LIBS="${SUDO_LIBS} ${i}"
+		    VISUDO_LIBS="${VISUDO_LIBS} ${i}"
 		done
 		;;
 esac])
