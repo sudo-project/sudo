@@ -343,10 +343,9 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 
 	while ((dent = readdir(dirp)) != NULL) {
 	    /* ignore paths > MAXPATHLEN (XXX - log) */
-	    if (plen + NAMLEN(dent) >= sizeof(buf))
+	    if (strlcpy(buf, path, sizeof(buf)) >= sizeof(buf) ||
+		strlcat(buf, dent->d_name, sizeof(buf)) >= sizeof(buf))
 		continue;
-	    strcpy(buf, path);
-	    strcat(buf, dent->d_name);
 
 	    /* only stat if basenames are the same */
 	    if (strcmp(cmnd_base, dent->d_name) != 0 || stat(buf, &pst) == -1)

@@ -213,16 +213,20 @@ format_env(var, val)
     char *var;
     char *val;
 {
-    char *estring, *p;
-    size_t varlen, vallen;
+    char *estring;
+    size_t esize;
 
-    varlen = strlen(var);
-    vallen = strlen(val);
-    p = estring = (char *) emalloc(varlen + vallen + 2);
-    strcpy(p, var);
-    p += varlen;
-    *p++ = '=';
-    strcpy(p, val);
+    esize = strlen(var) + 1 + strlen(val) + 1;
+    estring = (char *) emalloc(esize);
+
+    /* We pre-allocate enough space, so this should never overflow. */
+    if (strlcpy(estring, var, esize) >= esize ||
+	strlcat(estring, "=", esize) >= esize ||
+	strlcat(estring, val, esize) >= esize) {
+	(void) fprintf(stderr, "%s: internal error, format_env() overflow\n",
+	    Argv[0]);
+	exit(1);
+    }
 
     return(estring);
 }

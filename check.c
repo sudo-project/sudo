@@ -174,9 +174,9 @@ expand_prompt(old_prompt, user, host)
     char *user;
     char *host;
 {
-    size_t len;
+    size_t len, n;
     int subst;
-    char *p, *np, *new_prompt;
+    char *p, *np, *new_prompt, *endp;
 
     /* How much space do we need to malloc for the prompt? */
     subst = 0;
@@ -215,29 +215,35 @@ expand_prompt(old_prompt, user, host)
     }
 
     if (subst) {
-	new_prompt = (char *) emalloc(len + 1);
+	new_prompt = (char *) emalloc(++len);
+	*new_prompt = '\0';
+	endp = new_prompt + len - 1;
 	for (p = old_prompt, np = new_prompt; *p; p++) {
 	    if (p[0] =='%') {
 		switch (p[1]) {
 		    case 'h':
 			p++;
-			strcpy(np, user_shost);
-			np += strlen(user_shost);
+			if ((n = strlcat(new_prompt, user_shost, len)) >= len)
+			    goto oflow;
+			np += n;
 			continue;
 		    case 'H':
 			p++;
-			strcpy(np, user_host);
-			np += strlen(user_host);
+			if ((n = strlcat(new_prompt, user_host, len)) >= len)
+			    goto oflow;
+			np += n;
 			continue;
 		    case 'u':
 			p++;
-			strcpy(np, user_name);
-			np += strlen(user_name);
+			if ((n = strlcat(new_prompt, user_name, len)) >= len)
+			    goto oflow;
+			np += n;
 			continue;
 		    case 'U':
 			p++;
-			strcpy(np, *user_runas);
-			np += strlen(*user_runas);
+			if ((n = strlcat(new_prompt, *user_runas, len)) >= len)
+			    goto oflow;
+			np += n;
 			continue;
 		    case '%':
 			/* convert %% -> % */
@@ -248,6 +254,8 @@ expand_prompt(old_prompt, user, host)
 			break;
 		}
 	    }
+	    if (np >= endp)
+		goto oflow;
 	    *np++ = *p;
 	}
 	*np = '\0';
@@ -255,6 +263,12 @@ expand_prompt(old_prompt, user, host)
 	new_prompt = old_prompt;
 
     return(new_prompt);
+
+oflow:
+    /* We pre-allocate enough space, so this should never happen. */
+    (void) fprintf(stderr, "%s: internal error, expand_prompt() overflow\n",
+	Argv[0]);
+    exit(1);
 }
 
 /*

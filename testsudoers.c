@@ -377,17 +377,23 @@ main(argc, argv)
 
     /* Fill in cmnd_args from NewArgv. */
     if (NewArgc > 1) {
-	size_t size;
 	char *to, **from;
+	size_t size, n;
 
-	size = (size_t) NewArgv[NewArgc-1] + strlen(NewArgv[NewArgc-1]) -
-	       (size_t) NewArgv[1] + 1;
+	size = (size_t) (NewArgv[NewArgc-1] - NewArgv[1]) +
+		strlen(NewArgv[NewArgc-1]) + 1;
 	user_args = (char *) emalloc(size);
-	for (to = user_args, from = &NewArgv[1]; *from; from++) {
+	for (to = user_args, from = NewArgv + 1; *from; from++) {
+	    n = strlcpy(to, *from, size - (to - user_args));
+	    if (n >= size) {
+		(void) fprintf(stderr,
+		    "%s: internal error, init_vars() overflow\n", Argv[0]);
+		exit(1);
+	    }
+	    to += n;
 	    *to++ = ' ';
-	    (void) strcpy(to, *from);
-	    to += strlen(*from);
 	}
+	*--to = '\0';
     }
 
     /* Initialize default values. */

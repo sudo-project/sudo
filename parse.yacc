@@ -1109,6 +1109,7 @@ append(src, dstp, dst_len, dst_size, separator)
     /* Assumes dst will be NULL if not set. */
     if (dst == NULL) {
 	dst = (char *) emalloc(BUFSIZ);
+	*dst = '\0';
 	*dst_size = BUFSIZ;
 	*dst_len = 0;
 	*dstp = dst;
@@ -1124,12 +1125,10 @@ append(src, dstp, dst_len, dst_size, separator)
     }
 
     /* Copy src -> dst adding a separator if appropriate and adjust len. */
-    dst += *dst_len;
-    *dst_len += src_len;
-    *dst = '\0';
     if (separator)
-	(void) strcat(dst, separator);
-    (void) strcat(dst, src);
+	(void) strlcat(dst, separator, *dst_size);
+    (void) strlcat(dst, src, *dst_size);
+    *dst_len += src_len;
 }
 
 /*

@@ -480,7 +480,7 @@ init_vars(sudo_mode)
     /* Default value for cmnd and cwd, overridden later. */
     if (user_cmnd == NULL)
 	user_cmnd = NewArgv[0];
-    (void) strcpy(user_cwd, "unknown");
+    (void) strlcpy(user_cwd, "unknown", sizeof(user_cwd));
 
     /*
      * We avoid gethostbyname() if possible since we don't want
@@ -556,7 +556,7 @@ init_vars(sudo_mode)
 	if (!getcwd(user_cwd, sizeof(user_cwd))) {
 	    (void) fprintf(stderr, "%s: Can't get working directory!\n",
 			   Argv[0]);
-	    (void) strcpy(user_cwd, "unknown");
+	    (void) strlcpy(user_cwd, "unknown", sizeof(user_cwd));
 	}
     } else
 	set_perms(PERM_ROOT);
@@ -598,7 +598,7 @@ init_vars(sudo_mode)
 	/* set user_args */
 	if (NewArgc > 1) {
 	    char *to, **from;
-	    size_t size;
+	    size_t size, n;
 
 	    /* If MODE_SHELL not set then NewArgv is contiguous so just count */
 	    if (!(sudo_mode & MODE_SHELL)) {
@@ -610,10 +610,15 @@ init_vars(sudo_mode)
 	    }
 
 	    /* alloc and copy. */
-	    to = user_args = (char *) emalloc(size);
-	    for (from = NewArgv + 1; *from; from++) {
-		(void) strcpy(to, *from);
-		to += strlen(*from);
+	    user_args = (char *) emalloc(size);
+	    for (to = user_args, from = NewArgv + 1; *from; from++) {
+		n = strlcpy(to, *from, size - (to - user_args));
+		if (n >= size) {
+		    (void) fprintf(stderr,
+			"%s: internal error, init_vars() overflow\n", Argv[0]);
+		    exit(1);
+		}
+		to += n;
 		*to++ = ' ';
 	    }
 	    *--to = '\0';
