@@ -1,4 +1,4 @@
-FAQ and troubleshooting tips for Sudo
+Troubleshooting tips and FAQ for Sudo
 =====================================
 
 Q) When I run configure, it says "C compiler cannot create executables".
@@ -77,14 +77,28 @@ A) Sudo removes the following "dangerous" environment variables
      LOCALDOMAIN
      RES_OPTIONS
      HOSTALIASES
+     NLSPATH
+     PATH_LOCALE
+     TERMINFO
+     TERMINFO_DIRS
+     TERMPATH
+     TERMCAP (if it begins with a '/')
      ENV
      BASH_ENV
+     LC_ (if it contains a '/' or '%')
+     LANG (if it contains a '/' or '%')
+     LANGUAGE (if it contains a '/' or '%')
      LD_*
      _RLD_*
      SHLIB_PATH (HP-UX only)
-     LIB_PATH (AIX only)
+     LIBPATH (AIX only)
      KRB_CONF (kerb4 only)
+     KRBCONFDIR (kerb4 only)
+     KRBTKFILE (kerb4 only)
      KRB5_CONFIG (kerb5 only)
+     VAR_ACE (SecurID only)
+     USR_ACE (SecurID only)
+     DLC_ACE (SecurID only)
 
 Q) How can I keep sudo from asking for a password?
 A) To specify this on a per-user (and per-command) basis, use the 'NOPASSWD'
