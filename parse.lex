@@ -101,6 +101,7 @@ OCTET			(1?[0-9]{1,2})|(2[0-4][0-9])|(25[0-5])
 DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
 HOSTNAME		[[:alnum:]_-]+
 WORD			([^#@!=:,\(\) \t\n\\]|\\[^\n])+
+ENVAR			([^#!=, \t\n\\]|\\[^\n])([^#=, \t\n\\]|\\[^\n])*
 DEFVAR			[a-z_]+
 
 /* XXX - convert GOTRUNAS to exclusive state (GOTDEFS cannot be) */
@@ -145,6 +146,12 @@ DEFVAR			[a-z_]+
     \"([^\"]|\\\")+\"	{
 			    LEXTRACE("WORD(1) ");
 			    fill(yytext + 1, yyleng - 2);
+			    return(WORD);
+			}
+
+    {ENVAR}		{
+			    LEXTRACE("WORD(2) ");
+			    fill(yytext, yyleng);
 			    return(WORD);
 			}
 }
@@ -261,7 +268,7 @@ PASSWD[[:blank:]]*:	{
 <GOTRUNAS>(#[0-9-]+|{WORD}) {
 			    /* username/uid that user can run command as */
 			    fill(yytext, yyleng);
-			    LEXTRACE("WORD(2) ");
+			    LEXTRACE("WORD(3) ");
 			    return(WORD);
 			}
 
@@ -282,10 +289,10 @@ PASSWD[[:blank:]]*:	{
 			    }
 			}			/* a pathname */
 
-<INITIAL,GOTDEFS,INDEFS>{WORD} {
+<INITIAL,GOTDEFS>{WORD} {
 			    /* a word */
 			    fill(yytext, yyleng);
-			    LEXTRACE("WORD(3) ");
+			    LEXTRACE("WORD(4) ");
 			    return(WORD);
 			}
 
