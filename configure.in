@@ -512,12 +512,14 @@ case "$host" in
 		test -z "$with_C2" && SUDO_CHECK_SHADOW_BSD(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_BSD"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     *-*-*bsd*)
 		test -z "$with_C2" && SUDO_CHECK_SHADOW_BSD(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_BSD"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     *-*-sysv*)
@@ -554,6 +556,7 @@ case "$host" in
 			"SPW_NONE")
 			    echo "none"
 		    esac
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
 esac
