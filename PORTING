@@ -1,22 +1,14 @@
 sudo porting hints:
 
 Sudo should be fairly easy to port.  The most problematic part is how
-set*uid() functions.  For systems that support saved uids you should
-define HAS_SAVED_UID if an only if you can do a setuid(0) when only your
-saved uid is 0.  This way most of sudo is running with the effective
-and real uids set to the uid of the caller.  The saved uid of 0 is used
-to do a setuid(0) before exec'ing the command.
-
-If saved uids are not supported, only the effective uid is set the the uid
-of the caller.  If you have saved uids, sudo needs a setreuid() function,
-otherwise it uses seteuid().  If you have no setreuid() or seteuid() but do have
-setresuid() you can emulate setreuid() with a macro like the one in
-sudo.h used for HP-UX.
+set*uid() functions.  If you have no seteuid() but do have setreuid()
+you can emulate seteuid() with a macro like the following:
+    #define seteuid(__EUID)	(setreuid((uid_t)-1, __EUID))
 
 Another possible pitfall is getdtablesize() which is used to get the maximum
 number of open files the process can have.  For systems that have the
 Posix(?) sysconf() but no getdtablesize(), use the following macro:
-    :#define getdtablesize()	(sysconf(_SC_OPEN_MAX))
+    #define getdtablesize()	(sysconf(_SC_OPEN_MAX))
 If all else fails you can use the value of NOFILE in <sys/param.h>.
 
 If you port sudo to a new architecture, please send your changes to
