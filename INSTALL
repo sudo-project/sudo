@@ -149,6 +149,12 @@ Special features/options:
                           Other platforms may require source code
                           and/or `configure' changes.
 
+  --with-logfile=path	  Override the default location of the sudo
+			  log file and use "path" instead.
+
+  --with-timedir=path	  Override the default location of the sudo
+			  timestamp directory and use "path" instead.
+
   --with-incpath          Adds the specified directories to CPPFLAGS
                           so configure and the compiler will look there
 			  for include files.  Multiple directories may
