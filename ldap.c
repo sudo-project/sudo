@@ -979,3 +979,14 @@ int pwflag;
 
   return ret ;
 }
+
+/*
+ * shut down LDAP connection
+ */
+void
+sudo_ldap_close(v)
+VOID *v;
+{
+  if (v)
+    ldap_unbind_s((LDAP *)v);
+}

@@ -215,6 +215,7 @@ int sudo_ldap_check	__P((VOID *, int));
 void sudo_ldap_display_privs __P((void));
 void sudo_ldap_update_defaults __P((VOID *));
 VOID *sudo_ldap_open	__P((void));
+void sudo_ldap_close	__P((VOID *));
 #endif
 void set_perms		__P((int));
 void remove_timestamp	__P((int));

@@ -283,8 +283,10 @@ main(argc, argv, envp)
     cmnd_status = set_cmnd(sudo_mode);
 
 #ifdef HAVE_LDAP
-    if (ld != NULL)
+    if (ld != NULL) {
 	validated = sudo_ldap_check(ld, pwflag);
+	sudo_ldap_close(ld);
+    }
     /* Fallback to sudoers if we are allowed to and we aren't validated. */
     if (!def_ignore_local_sudoers && !ISSET(validated, VALIDATE_OK))
 #endif

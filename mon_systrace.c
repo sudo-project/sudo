@@ -879,6 +879,7 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
     if ((ld = sudo_ldap_open()) != NULL) {
 	sudo_ldap_update_defaults(ld);
 	validated = sudo_ldap_check(ld, 0);
+	sudo_ldap_close(ld);
     }
     if (!def_ignore_local_sudoers && !ISSET(validated, VALIDATE_OK))
 #endif
