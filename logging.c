@@ -345,7 +345,7 @@ void log_error(code)
  *
  */
 
-char *mail_argv[] = {"sendmail",
+const char *mail_argv[] = {"sendmail",
 		     "-t",
 		     ALERTMAIL,
 		     (char *) NULL};
