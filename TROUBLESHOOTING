@@ -79,13 +79,6 @@ A) Yes, the s/key support requires that you use tgetpass() since
    to get tgetpass() to work, send mail to sudo-bugs@cs.colorado.edu
    if you need help.
 
-Q) I overwrote the distributed lex.yy.c with a lex-generated one and
-   now sudo does not work.
-A) The simplest thing to do is "rm -f lex.yy.c ; ln sudo-lex.yy.c lex.yy.c"
-   which will set you back up with a pre-flexed lex.yy.c.
-   If you want to hack on the lexer you should get a copy of flex
-   from ftp.ee.lbl.gov
-
 Q) My C compiler complains about:
 	"./options.h", line xx "/*" detected in comment
    Should I be worried?
@@ -93,3 +86,11 @@ A) No, this is due to the way options are commented out in options.h.
    Some ANSI compilers are just a bit too protective.
    If anyone have a better way to that is just as easy to uncomment
    and that doesn't produce a similar warning, please let me know.
+
+Q) I modified parse.lex but the Makefile is not generating a new
+   lex.yy.c.
+A) You need to uncomment the rule in Makefile (or Makefile.in)
+   that generates lex.yy.c from parse.lex.  This is not enable
+   by default since sudo comes with a pre-flex'd parse.lex.
+   May sure you are using flex version 2.5.2 or higher--the
+   lex that came with your OS may not like parse.lex.

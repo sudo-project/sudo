@@ -37,10 +37,10 @@ System requirements
 
 Sudo requires a machine running UN*X (most flavors of BSD, SYSV, or
 POSIX will do), a C compiler, and a yacc-compatible parser generator
-(yacc, byacc, bison).  If you wish to modify the tokenizer then a
-version of lex or flex is required (sudo comes with a pre-flex'd
-tokenizer).  Note that there are a lot of broken lex's out there
-so I really recommend using flex (ftp://ftp.ee.lbl.gov/pub/flex*).
+(yacc, byacc, bison).  If you wish to modify the tokenizer then you
+will need flex version 2.5.2 or later.  (sudo comes with a pre-flex'd
+tokenizer).  You can get flex via anonymous ftp from
+ftp://ftp.ee.lbl.gov/pub/flex* as well as any GNU mirror.
 
 Building the release
 ===================
