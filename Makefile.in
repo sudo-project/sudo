@@ -81,7 +81,7 @@ mandir5 = $(man_prefix)/$(mantype)$(mansect5)
 owner = root
 group = staff
 
-# See sudo.h for a list of options
+# See options.h and OPTINOS for a list of options
 OPTIONS = @OPTIONS@
 
 #### End of system configuration section. ####
