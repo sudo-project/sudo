@@ -458,6 +458,16 @@ tag has been set, unless overridden by a C<EXEC> tag.  See the
 description of I<NOEXEC and EXEC> below as well as the L<PREVENTING SHELL
 ESCAPES> section at the end of this manual.  This flag is I<off> by default.
 
+=item trace
+
+If set, all commands run via sudo will behave as if the C<TRACE>
+tag has been set, unless overridden by a C<NOTRACE> tag.  See the
+description of I<TRACE and NOTRACE> below as well as the L<PREVENTING
+SHELL ESCAPES> section at the end of this manual.  Be aware that
+tracing is only supported on certain operating systems.  On systems
+where it is not supported this flag will have no effect.
+This flag is I<off> by default.
+
 =item ignore_local_sudoers
 
 If set via LDAP, parsing of @sysconfdir@/sudoers will be skipped.
@@ -790,7 +800,8 @@ B<notice>, and B<warning>.
 
  Runas_Spec ::= '(' Runas_List ')'
 
- Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:')
+ Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
+	       'TRACE' | 'NOTRACE')
 
 A B<user specification> determines which commands a user may run
 (and as what user) on specified hosts.  By default, commands are
@@ -824,11 +835,12 @@ but  F</bin/kill> and F</usr/bin/lprm> as B<root>.
 =head2 Tag_Spec
 
 A command may have zero or more tags associated with it.  There are
-four possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>, C<EXEC>.
+four possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>, C<EXEC>,
+C<TRACE> and C<NOTRACE>.
 Once a tag is set on a C<Cmnd>, subsequent C<Cmnd>s in the
 C<Cmnd_Spec_List>, inherit the tag unless it is overridden by the
-opposite tag (ie: C<PASSWD> overrides C<NOPASSWD> and C<EXEC>
-overrides C<NOEXEC>).
+opposite tag (ie: C<PASSWD> overrides C<NOPASSWD> and C<NOTRACE>
+overrides C<TRACE>).
 
 =head3 NOPASSWD and PASSWD
 
@@ -860,8 +872,8 @@ This behavior may be overridden via the verifypw and listpw options.
 
 =head3 NOEXEC and EXEC
 
-If sudo has been compiled with I<noexec> support and the underlying
-operating system support it, the C<NOEXEC> tag can be used to prevent
+If B<sudo> has been compiled with I<noexec> support and the underlying
+operating system supports it, the C<NOEXEC> tag can be used to prevent
 a dynamically-linked executable from running further commands itself.
 
 In the following example, user B<aaron> may run F</usr/bin/more>
@@ -870,7 +882,24 @@ and F</usr/bin/vi> but shell escapes will be disabled.
  aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 
 See the L<PREVENTING SHELL ESCAPES> section below for more details
-on how I<noexec> works and whether or not it will work on your system.
+on how C<NOEXEC> works and whether or not it will work on your system.
+
+=head3 TRACE and NOTRACE
+
+If B<sudo> has been configured with the C<--with-systrace> option,
+the C<TRACE> tag can be used to cause programs spawned by a command
+to be checked against I<sudoers> and logged just like they would
+be if run through B<sudo> directly.  This is useful in conjunction
+with commands that allow shell escapes such as editors, shells and
+paginators.
+
+In the following example, user B<chuck> may run any command on the
+machine research with tracing enabled.
+
+ chuck	research = TRACE: ALL
+
+See the L<PREVENTING SHELL ESCAPES> section below for more details
+on how C<TRACE> works and whether or not it will work on your system.
 
 =head2 Wildcards
 
@@ -1182,9 +1211,24 @@ advisory at best (and reinforced by policy).
 Once B<sudo> executes a program, that program is free to do whatever
 it pleases, including run other programs.  This can be a security
 issue since it is not uncommon for a program to allow shell escapes,
-which lets a user bypass B<sudo>'s restrictions.  Common programs
-that permit shell escapes include shells (obviously), editors,
-paginators, mail and terminal programs.
+which lets a user bypass B<sudo>'s access control and logging.
+Common programs that permit shell escapes include shells (obviously),
+editors, paginators, mail and terminal programs.
+
+There are three basic approaches to this problem:
+
+=over 10
+
+=item restrict
+
+Avoid giving users access to commands that allow the user to run
+arbitrary commands.  Many editors have a restricted mode where shell
+escapes are disabled, though B<sudoedit> is a better solution to
+running editors via sudo.  Due to the large number of programs that
+offer shell escapes, restricting users to the set of programs that
+do not if often unworkable.
+
+=item noexec
 
 Many systems that support shared libraries have the ability to
 override default library functions by pointing an environment
@@ -1226,11 +1270,39 @@ executing other commands (such as a shell).  If you are unsure
 whether or not your system is capable of supporting I<noexec> you
 can always just try it out and see if it works.
 
-Note that disabling shell escapes is not a panacea.  Programs running
-as root are still capable of many potentially hazardous operations
-(such as changing or overwriting files) that could lead to unintended
-privilege escalation.  In the specific case of an editor, a safer
-approach is to give the user permission to run B<sudoedit>.
+=item tracing
+
+On operating systems that support the B<systrace> pseudo-device,
+the C<--with-systrace> configure option can be used to compile
+support for command tracing in B<sudo>.  With B<systrace> support
+B<sudo> can transparently intercept a new command, allow or deny
+it based on I<sudoers>, and log the result.  This does require that
+B<sudo> become a daemon that persists until the command and all its
+descendents have finished.
+
+To enable tracing on a per-command basis, use the C<TRACE> tag as
+documented in the User Specification section above.  Here is that
+example again:
+
+ chuck	research = TRACE: ALL
+
+This allows user B<chuck> to run any command on the machine research
+with tracing enabled.  Any commands run via shell escapes will be
+logged by sudo.
+
+At the time of this writing the B<systrace> pseudo-device comes
+standard with OpenBSD and NetBSD and is available as patches to
+FreeBSD, MacOS X and Linux.  See L<http://www.systrace.org/> for
+more information.
+
+=back
+
+Note that restricting shell escapes is not a panacea.  Programs
+running as root are still capable of many potentially hazardous
+operations (such as changing or overwriting files) that could lead
+to unintended privilege escalation.  In the specific case of an
+editor, a safer approach is to give the user permission to run
+B<sudoedit>.
 
 =head1 SEE ALSO
 
