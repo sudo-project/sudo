@@ -165,3 +165,6 @@ CHANGES from sudo 1.3
 57) Added -k and -h options and rearranged some of the code to be
     more modular and less braindamaged.  This introduces the concept
     of "run modes" to sudo.
+
+58) Fixed visudo and flex.  visudo now calls yyrestart() if you are using
+    flex instead of lex.  From bostley@cs.colorado.edu.
