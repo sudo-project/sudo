@@ -80,7 +80,8 @@ int parse_error = FALSE;
  * this routine is called from the sudo.c module and tries to validate
  * the user, host and command triplet.
  */
-int validate()
+int validate(check_cmnd)
+    int check_cmnd;
 {
     FILE *sudoers_fp;
     int i, return_code;
@@ -118,14 +119,15 @@ int validate()
 	return(VALIDATE_NO_USER);
 
     /*
-     * if the cmnd is the pseudo-command "validate"
-     * return VALIDATE_OK if the host matches, else
-     * check host and command.
+     * Only check the actual command if the check_cmnd
+     * flag is set.  It is not set for the "validate"
+     * and "list" pseudo-commands.  Always check the
+     * host and user.
      */
-    if (!strcmp(cmnd, "validate"))
+    if (check_cmnd == FALSE)
 	while (top) {
 	    if (host_matches == TRUE)
-		/* user may always do validate on allowed hosts */
+		/* user may always do validate or list on allowed hosts */
 		return(VALIDATE_OK);
 	    top--;
 	}
