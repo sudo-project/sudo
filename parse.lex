@@ -77,6 +77,7 @@ extern void yyerror		__P((char *));
 %}
 
 OCTET			[[:digit:]]{1,3}
+DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
 WORD			[[:alnum:]_-]+
 
 %e	4000
@@ -176,7 +177,7 @@ NOPASSWD:		{
 			    return(USERGROUP);
 			}
 
-{OCTET}(\.{OCTET}){3}	{
+{DOTTEDQUAD}(\/{DOTTEDQUAD})? {
 			    fill(yytext, yyleng);
 			    LEXTRACE("NTWKADDR ");
 			    return(NTWKADDR);

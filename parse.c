@@ -305,15 +305,28 @@ int addr_matches(n)
     char *n;
 {
     int i;
-    struct in_addr addr;
+    char *m;
+    struct in_addr addr, mask;
 
-    addr.s_addr = inet_addr(n);
+    /* If there's an explicate netmask, use it. */
+    if ((m = strchr(n, '/'))) {
+	*m++ = '\0';
+	mask.s_addr = inet_addr(m);
+	addr.s_addr = inet_addr(n);
+	*(m - 1) = '/';
 
-    for (i = 0; i < num_interfaces; i++)
-	if (interfaces[i].addr.s_addr == addr.s_addr ||
-	    (interfaces[i].addr.s_addr & interfaces[i].netmask.s_addr)
-	    == addr.s_addr)
-	    return(TRUE);
+	for (i = 0; i < num_interfaces; i++)
+	    if ((interfaces[i].addr.s_addr & mask.s_addr) == addr.s_addr)
+		return(TRUE);
+    } else {
+	addr.s_addr = inet_addr(n);
+
+	for (i = 0; i < num_interfaces; i++)
+	    if (interfaces[i].addr.s_addr == addr.s_addr ||
+		(interfaces[i].addr.s_addr & interfaces[i].netmask.s_addr)
+		== addr.s_addr)
+		return(TRUE);
+    }
 
     return(FALSE);
 }
