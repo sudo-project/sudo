@@ -372,8 +372,8 @@ static void load_globals(sudo_mode)
      * Need to get tty early since it's used for logging
      */
     if ((tty = (char *) ttyname(0)) || (tty = (char *) ttyname(0))) {
-	if ((p = strrchr(tty, '/')))
-	    tty = p + 1;
+	if (strncmp(tty, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
+	    tty += sizeof(_PATH_DEV) - 1;
 	if ((tty = strdup(tty)) == NULL) {
 	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
