@@ -116,16 +116,17 @@ struct env_table {
 
 
 /*
- * local functions not visible outside sudo.c
+ * Prototypes
  */
-static int  parse_args		__P((void));
-static void usage		__P((int));
-static void load_globals	__P((int));
-static int check_sudoers	__P((void));
-static void load_cmnd		__P((int));
-static void add_env		__P((void));
-static void clean_env		__P((char **, struct env_table *));
-extern int user_is_exempt	__P((void));
+static int  parse_args			__P((void));
+static void usage			__P((int));
+static void load_globals		__P((int));
+static int check_sudoers		__P((void));
+static void load_cmnd			__P((int));
+static void add_env			__P((void));
+static void clean_env			__P((char **, struct env_table *));
+extern int user_is_exempt		__P((void));
+extern struct passwd *sudo_getpwuid	__P((uid_t));
 
 /*
  * Globals
