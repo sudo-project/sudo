@@ -258,8 +258,8 @@ static void check_passwd()
      * you get TRIES_FOR_PASSWORD times to guess your password
      */
     while (counter > 0) {
-	pass = (char *) getpass("Password:");
-	if (*pass == '\0')
+	pass = tgetpass("Password:", PASSWORD_TIMEOUT);
+	if (!pass || *pass == '\0')
 	    exit(0);
 	if (!strcmp(encrypted, (char *) crypt(pass, encrypted)))
 	    return;		/* if the passwd is correct return() */
