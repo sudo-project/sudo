@@ -19,9 +19,10 @@ allow one to change the shared library path.  See clean_env() for examples
 for this for various OS's.
 
 It is possible that on a really weird system, tgetpass() may not compile.
-If this is the case you can define USE_GETPASS in config.h.  You'll lose
-the timeout feature but gain a working sudo.  Actually, in beta8 the
-system getpass() is used by default.  This will change in the beta9.
+If this is the case you can run configure with the --with-getpass flag
+to use the system getpass().  You'll lose the timeout feature but gain a
+working sudo.  Alternately, you can define USE_GETPASS in config.h and
+remove tgetpass.o from LIBS in the Makefile.
 
 If you port sudo to a new architecture, please send your changes to
     sudo-bugs@cs.colorado.edu
