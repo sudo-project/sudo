@@ -194,7 +194,7 @@ sudo_noexec.la: sudo_noexec.lo
 @DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h
 
 # Uncomment the $(YACC) and mv lines if you intend to modify gram.y
-$(devdir)/gram.c gram.h: $(srcdir)/gram.y
+$(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
 @DEV@	$(YACC) -d $(srcdir)/gram.y
 @DEV@	mv -f y.tab.c gram.c
 @DEV@	mv -f y.tab.h gram.h
@@ -207,11 +207,11 @@ $(devdir)/toke.c: $(srcdir)/toke.l
 	-@true
 
 # Uncomment the following if you intend to modify def_data.in
-@DEV@def_data.h def_data.c: def_data.in
+@DEV@$(devdir)/def_data.h $(devdir)/def_data.c: $(srcdir)/def_data.in
 @DEV@	perl $(srcdir)/mkdefaults -o def_data $(srcdir)/def_data.in
 
 # Dependencies (not counting auth functions)
-alias.o: $(devdir)/alias.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/redblack.h
+alias.o: $(srcdir)/alias.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/redblack.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alias.c
 alloc.o: $(srcdir)/alloc.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alloc.c
