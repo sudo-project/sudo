@@ -458,6 +458,17 @@ tag has been set, unless overridden by a C<EXEC> tag.  See the
 description of I<NOEXEC and EXEC> below as well as the L<PREVENTING SHELL
 ESCAPES> section at the end of this manual.  This flag is I<off> by default.
 
+=item ignore_local_sudoers
+
+If set via LDAP, parsing of @sysconfdir@/sudoers will be skipped.
+This is intended for an Enterprises that wish to prevent the usage of local
+sudoers files so that only LDAP is used.  This thwarts the efforts of
+rogue operators who would attempt to add roles to @sysconfdir@/sudoers.
+When this option is present, @sysconfdir@/sudoers does not even need to exist. 
+Since this options tells sudo how to behave when no specific LDAP entries
+have been matched, this sudoOption is only meaningful for the cn=defaults
+section.  This flag is I<off> by default.
+
 =back
 
 B<Integers>:

@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "June  8, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "July 30, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -589,6 +589,16 @@ the \-\-with\-logincap option.  This flag is \fIoff\fR by default.
 If set, all commands run via sudo will behave as if the \f(CW\*(C`NOEXEC\*(C'\fR
 tag has been set, unless overridden by a \f(CW\*(C`EXEC\*(C'\fR tag.  See the
 description of \fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR below as well as the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section at the end of this manual.  This flag is \fIoff\fR by default.
+.IP "ignore_local_sudoers" 12
+.IX Item "ignore_local_sudoers"
+If set via \s-1LDAP\s0, parsing of \f(CW@sysconfdir\fR@/sudoers will be skipped.
+This is intended for an Enterprises that wish to prevent the usage of local
+sudoers files so that only \s-1LDAP\s0 is used.  This thwarts the efforts of
+rogue operators who would attempt to add roles to \f(CW@sysconfdir\fR@/sudoers.
+When this option is present, \f(CW@sysconfdir\fR@/sudoers does not even need to exist. 
+Since this options tells sudo how to behave when no specific \s-1LDAP\s0 entries
+have been matched, this sudoOption is only meaningful for the cn=defaults
+section.  This flag is \fIoff\fR by default.
 .PP
 \&\fBIntegers\fR:
 .IP "passwd_tries" 12
