@@ -90,6 +90,7 @@ static const char rcsid[] = "$Sudo$";
 struct ldap_config {
   char *host;
   int  port;
+  int  version;
   char *uri;
   char *binddn;
   char *bindpw;
@@ -480,6 +481,7 @@ sudo_ldap_read_config()
      * if else if else if else if else ... */
          MATCH_S("host",    ldap_conf.host)
     else MATCH_I("port",    ldap_conf.port)
+    else MATCH_I("ldap_version", ldap_conf.version)
     else MATCH_S("uri",     ldap_conf.uri)
     else MATCH_S("binddn",  ldap_conf.binddn)
     else MATCH_S("bindpw",  ldap_conf.bindpw)
@@ -498,6 +500,7 @@ sudo_ldap_read_config()
   if (f) fclose(f);
 
   /* defaults */
+  if (!ldap_conf.version) ldap_conf.version=3;
   if (!ldap_conf.port) ldap_conf.port=389;
   if (!ldap_conf.host) ldap_conf.host=estrdup("localhost");
 
@@ -508,6 +511,7 @@ sudo_ldap_read_config()
     printf("host         %s\n", ldap_conf.host ?
                  ldap_conf.host   : "(NONE)");
     printf("port         %d\n", ldap_conf.port);
+    printf("ldap_version %d\n", ldap_conf.version);
 
     printf("uri          %s\n", ldap_conf.uri ?
                  ldap_conf.uri    : "(NONE)");
@@ -581,6 +585,19 @@ int pwflag;
       return VALIDATE_ERROR;
     }
   }
+
+#ifdef LDAP_OPT_PROTOCOL_VERSION
+
+  /* Set the LDAP Protocol version */
+
+  rc=ldap_set_option(ld,LDAP_OPT_PROTOCOL_VERSION,&ldap_conf.version);
+  if(rc){
+    fprintf(stderr,"ldap_set_option(protocol=%d)=%d : %s\n",
+           ldap_conf.version, rc, ldap_err2string(rc));
+    return VALIDATE_ERROR ;
+  }
+
+#endif /* LDAP_OPT_PROTOCOL_VERSION */
 
   /* Actually connect */
 
