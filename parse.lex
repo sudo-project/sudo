@@ -53,6 +53,7 @@ static char rcsid[] = "$Id$";
 #include <sys/param.h>
 #include <netinet/in.h>
 #include "sudo.h"
+#include "options.h"
 #include "y.tab.h"
 
 extern YYSTYPE yylval;

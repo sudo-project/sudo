@@ -48,6 +48,7 @@ static char rcsid[] = "$Id$";
 #include <sys/param.h>
 #include <netinet/in.h>
 #include "sudo.h"
+#include "options.h"
 
 extern int sudolineno;
 extern int parse_error, found_user;
