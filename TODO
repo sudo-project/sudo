@@ -1,65 +1,51 @@
-TODO list
+TODO list (most will be addressed in the next rewrite)
 
-01) Add uid and gid options to sudo and sudoers file.
-
-02) Redo parsing to be more like op(8) with true command aliases where
+01) Redo parsing to be more like op(8) with true command aliases where
     can specify uid, gid(s) and part/all of the environment.
 
-03) Add default options to sudoers file (umask, def uid, def gids, dir, PATH).
+02) Add default options to sudoers file (umask, def uid, def gids, dir, PATH).
 
-04) Add a SHELLS reserved word that checks against /etc/shells.
+03) Add a SHELLS reserved word that checks against /etc/shells.
 
-05) Make the sudoers file accessible via NIS, Hesiod, and maybe NetInfo.
+04) Make the sudoers file accessible via NIS, Hesiod, and maybe NetInfo.
 
-06) Add a %h field to MAILSUBJECT for the hostname.
+05) Add a %h field to MAILSUBJECT for the hostname.
 
-07) Add a -h (?) flag to sudo for a history mechanism.
+06) Add a -h (?) flag to sudo for a history mechanism.
 
-08) Make parse.lex in the same coding style as everything else...
+07) Make parse.lex in the same coding style as everything else...
 
-09) Make -l expand Command Aliases.
+08) Add an option to hard-code LD_LIBRARY_PATH?
 
-10) Add an option to hard-code LD_LIBRARY_PATH?
+09) Add Prog_Alias facility (Prog_Alias VI = /usr/secure/bin/vi +args).
 
-11) Add Prog_Alias facility (Prog_Alias VI = /usr/secure/bin/vi +args).
+10) Make '!' work in Cmnd_Alias, Host_Alias, User_Alias and runas list.
 
-12) Make '!' work in Cmnd_Alias, Host_Alias and User_Alias.
+11) check for <net/errno.h> in configure and include it in sudo.c if it exists.
 
-13) check for <net/errno.h> in configure and include it in sudo.c if it exists.
+12) Add generic STREAMS support for getting interfaces and netmasks.
 
-14) Add generic STREAMS support for getting interfaces and netmasks.
-
-15) Do shadow password detection at runtime like sunos' issecure(3)???
+13) Do shadow password detection at runtime like sunos' issecure(3)???
     If so then start using GLOBAL_NO_SPW_ENT again (but rename it).
 
-16) Do all the envariable additions in one fell swoop for efficiency and speed.
+14) Do all the envariable additions in one fell swoop for efficiency and speed.
 
-17) Catch/ignore signals in sudo?
+15) Catch/ignore signals in sudo?
 
-18) Make -p work with -v and -l in any order.
+16) Make -p work with -v and -l in any order.
 
-19) See if having 2 versions of path_matches() (w/ and w/o args) is a win.
-
-20) Remove "register" from vars since gcc can probably do a better job at
-    optimizing than I can...
-
-21) Add support for "safe scripts" by checking for shell script
+17) Add support for "safe scripts" by checking for shell script
     cookie (first two bytes are "#!") and execing the shell outselves
     after doing the stat to guard against spoofing.  This should avoid
     the race condition caused by going through namei() twice...
 
-22) Sudo should not allow someone with a nil password to run commands.
+18) Sudo should not allow someone with a nil password to run commands.
 
-23) Overhaul testsudoers to use parse.o so we don't reimplement things.
+19) Overhaul testsudoers to use parse.o so we don't reimplement things.
 
-24) Make runas_user a struct "runas" with user and group components.
+20) Make runas_user a struct "runas" with user and group components.
     (make uid and gid too???)
 
-25) Make "sudo -l" output go into a dynamically-sized array that gets
-    printed if passwd is ok or none is required.
+21) Add -g group/gid option.
 
-26) Update docs wrt NOPASSWD, "runas" and wildcards in pathnames.
-
-27) Would be nice to use '!' in the runas list.
-
-28) Add -g group/gid option.
+22) Make `sudo -l' output prettier.
