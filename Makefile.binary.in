@@ -19,11 +19,11 @@
 
 srcdir = .
 
-# For installing the shared lib
-LIBTOOL = @LIBTOOL@
-
 # Which install program?
 INSTALL = $(srcdir)/install-sh -c
+
+# For installing the shared lib
+LIBTOOL = $(srcdir)/libtool
 
 # Where to install things...
 prefix = @prefix@
@@ -76,7 +76,8 @@ install-dirs:
 
 install-binaries: $(PROGS)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 sudo $(DESTDIR)$(sudodir)/sudo
-	ln -f $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
+	rm -f $(DESTDIR)$(sudodir)/sudoedit
+	ln $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 visudo $(DESTDIR)$(visudodir)/visudo
 
 install-noexec: sudo_noexec.la
