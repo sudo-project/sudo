@@ -46,7 +46,7 @@ NET_LIBS = @NET_LIBS@
 SUDO_LIBS = @SUDO_LIBS@ @AFS_LIBS@ $(LIBS) $(NET_LIBS)
 
 # C preprocessor flags
-CPPFLAGS = -I$(srcdir) -I. @CPPFLAGS@
+CPPFLAGS = -I. -I$(srcdir) @CPPFLAGS@
 
 # Usually -O and/or -g
 CFLAGS = @CFLAGS@
