@@ -103,17 +103,12 @@ to specify them at configure time.
 
   $ ./configure --with-ldap=/usr/local/ldapsdk --with-pam
 
-Sudo by default builds against OpenLDAP's libraries.  For others LDAP libraries
-such as Netscape, iPlanet, Mozilla, SecureWay, add these lines to config.h
-before running make:
+Sudo is tested against OpenLDAP's implementation.  Other LDAP implementations
+may require adding '-lldif' to SUDO_LIBS in the Makefile.
 
-  #define HAVE_LBER_H
-
-You might have to also include '-llber' or '-lldif' in your LIBS.
-
-Your Mileage may vary.  Please let Aaron Spangler <aaron@spangler.ods.org> know
-what combinations worked best for your OS & LDAP Combinations so we can improve
-sudo.
+Your Mileage may vary.  Please let Aaron Spangler <aaron@spangler.ods.org>
+know what combinations worked best for your OS & LDAP Combinations so we can
+improve sudo.
 
 More Build Notes:
 HP-UX 11.23 (gcc3) Galen Johnson <Galen.Johnson@sas.com>
