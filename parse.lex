@@ -415,11 +415,14 @@ fill_args(s, len, addspace)
 int
 yywrap()
 {
-#ifdef YY_NEW_FILE
-    YY_NEW_FILE;
-#endif /* YY_NEW_FILE */
 
-    /* Don't reset the aliases if called by testsudoers. */
+    /* Flush any buffers that might still exist. */
+    YY_FLUSH_BUFFER;
+
+    /* Set file pointer to the beginning so we can re-run the parser. */
+    yyrestart(yyin);
+
+    /* Free space used by the aliases unless called by testsudoers. */
     if (clearaliases)
 	reset_aliases();
 
