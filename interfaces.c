@@ -1,5 +1,5 @@
 /*
- *  CU sudo version 1.5.5b2
+ *  CU sudo version 1.5.5b3
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -82,6 +82,7 @@ static char rcsid[] = "$Id$";
 
 #if !defined(STDC_HEADERS) && !defined(__GNUC__)
 extern char *malloc	__P((size_t));
+extern char *realloc	__P((VOID *, size_t));
 #endif /* !STDC_HEADERS && !__GNUC__ */
 
 /*
@@ -105,11 +106,12 @@ extern char **Argv;
 void load_interfaces()
 {
     struct ifconf *ifconf;
-    char ifconf_buf[sizeof(struct ifconf) + BUFSIZ];
     struct ifreq ifreq, *ifr;
     struct sockaddr_in *sin;
-    unsigned long localhost_mask;
+    unsigned int localhost_mask;
     int sock, n, i;
+    size_t len = sizeof(struct ifconf) + BUFSIZ;
+    char *ifconf_buf = NULL;
 #ifdef _ISC
     struct strioctl strioctl;
 #endif /* _ISC */
@@ -126,18 +128,35 @@ void load_interfaces()
     /*
      * get interface configuration or return (leaving interfaces NULL)
      */
-    ifconf = (struct ifconf *) ifconf_buf;
-    ifconf->ifc_buf = (caddr_t) (ifconf_buf + sizeof(struct ifconf));
-    ifconf->ifc_len = sizeof(ifconf_buf) - sizeof(struct ifconf);
+    for (;;) {
+	if (ifconf_buf == NULL)
+	    ifconf_buf = (char *) malloc(len);
+	else
+	    ifconf_buf = (char *) realloc(ifconf_buf, len);
+	if (ifconf_buf == NULL) {
+	    perror("malloc");
+	    exit(1);
+	}
+	ifconf = (struct ifconf *) ifconf_buf;
+	ifconf->ifc_len = len - sizeof(struct ifconf);
+	ifconf->ifc_buf = (caddr_t) (ifconf_buf + sizeof(struct ifconf));
 
-    /* networking may not be installed in kernel */
+	/* networking may not be installed in kernel */
 #ifdef _ISC
-    STRSET(SIOCGIFCONF, (caddr_t) ifconf, sizeof(ifconf_buf));
-    if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0)
+	STRSET(SIOCGIFCONF, (caddr_t) ifconf, len);
+	if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0) {
 #else
-    if (ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0)
+	if (ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0) {
 #endif /* _ISC */
-	return;
+	    (void) free(ifconf_buf);
+	    return;
+	}
+
+	/* break out of loop if we have a big enough buffer */
+	if (ifconf->ifc_len + sizeof(struct ifreq) < len)
+	    break;
+	len += BUFSIZ;
+    }
 
     /*
      * get the maximum number of interfaces that *could* exist.
@@ -245,6 +264,7 @@ void load_interfaces()
 	    (void) free(interfaces);
 	}
     }
+    (void) free(ifconf_buf);
 }
 
 #else /* !SIOCGIFCONF || STUB_LOAD_INTERFACES */
