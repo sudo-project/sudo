@@ -218,6 +218,11 @@ typedef struct list {
     struct list *next;
 }   LIST, *LINK;
 
+struct interface {
+    struct in_addr addr;
+    struct in_addr netmask;
+};
+
 
 /*
  * Syslog(3) parameters
@@ -335,7 +340,6 @@ typedef struct list {
  * Prototypes
  */
 
-struct hostent;				/* so gcc won't complain */
 
 /* These are the functions that are called in sudo(8) */
 
@@ -360,7 +364,6 @@ void be_root		__P((void));
 void be_user		__P((void));
 void be_full_user	__P((void));
 void remove_timestamp	__P((void));
-void load_ip_addrs	__P((struct hostent *));
 
 
 /*
@@ -371,7 +374,8 @@ void load_ip_addrs	__P((struct hostent *));
 extern uid_t uid;
 extern char host[];
 extern char cwd[];
-extern struct in_addr *ip_addrs;
+extern struct interface *interfaces;
+extern int num_interfaces;
 extern char *user;
 extern char *epasswd;
 extern char *cmnd;
