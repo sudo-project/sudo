@@ -154,16 +154,16 @@ current_time + 2 * C<TIMEOUT>.
 
 =head1 FILES
 
-F</etc/sudoers>S<			file of authorized users.>
+ /etc/sudoers		file of authorized users.
 
 =head1 ENVIRONMENT VARIABLES
 
-C<PATH>S<					Set to a sane value if SECURE_PATH is set>
-C<SHELL>S<				Used to determine shell to run with -s option>
-C<SUDO_COMMAND>S<			Set to the command run by B<sudo>>
-C<SUDO_USER>S<				Set to the login of the user who invoked B<sudo>>
-C<SUDO_UID>S<				Set to the uid of the user who invoked B<sudo>>
-C<SUDO_GID>S<				Set to the gid of the user who invoked B<sudo>>
+ PATH			Set to a sane value if SECURE_PATH is set
+ SHELL			Used to determine shell to run with -s option
+ SUDO_COMMAND		Set to the command run by sudo
+ SUDO_USER		Set to the login of the user who invoked sudo
+ SUDO_UID		Set to the uid of the user who invoked sudo
+ SUDO_GID		Set to the gid of the user who invoked sudo
 
 =head1 AUTHORS
 
