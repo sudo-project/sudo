@@ -37,8 +37,16 @@
 #endif /* __P */
 
 /*
- * Some systems do not define PATH_MAX.
+ * Some systems lack full limit definitions.
  */
+#ifndef OPEN_MAX
+# define OPEN_MAX	256
+#endif
+
+#ifndef INT_MAX 
+# define INT_MAX	0x7fffffff
+#endif
+
 #ifndef PATH_MAX
 # ifdef MAXPATHLEN
 #  define PATH_MAX		MAXPATHLEN
@@ -51,9 +59,6 @@
 # endif
 #endif
 
-/*
- * Some systems do not define MAXHOSTNAMELEN.
- */
 #ifndef MAXHOSTNAMELEN
 # define MAXHOSTNAMELEN		64
 #endif
@@ -196,14 +201,6 @@ typedef struct sigaction sigaction_t;
 # ifndef SA_RESTART
 #  define SA_RESTART	0
 # endif
-#endif
-
-/*
- * HP-UX 9.x has RLIMIT_* but no RLIM_INFINITY.
- * Using -1 works because we only check for RLIM_INFINITY and do not set it.
- */
-#ifndef RLIM_INFINITY
-# define RLIM_INFINITY	(-1)
 #endif
 
 /*
