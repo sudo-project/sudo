@@ -423,7 +423,7 @@ AC_ARG_WITH(logging, [  --with-logging          log via syslog, file, or both],
 esac], [AC_DEFINE(LOGGING, SLOG_SYSLOG) AC_MSG_RESULT(syslog)])
 
 AC_MSG_CHECKING(which syslog facility sudo should log with)
-AC_ARG_WITH(logfac, [  --with-logfac           syslog facility to log with (default is $logfac)],
+AC_ARG_WITH(logfac, [  --with-logfac           syslog facility to log with (default is \"local2\")],
 [case $with_logfac in  
     yes)	AC_MSG_ERROR(["must give --with-logfac an argument."])
 		;;
@@ -438,7 +438,7 @@ AC_DEFINE_UNQUOTED(LOGFAC, "$logfac")
 AC_MSG_RESULT($logfac)
 
 AC_MSG_CHECKING(at which syslog priority to log commands)
-AC_ARG_WITH(goodpri, [  --with-goodpri          syslog priority for commands (def is $goodpri)],
+AC_ARG_WITH(goodpri, [  --with-goodpri          syslog priority for commands (def is \"notice\")],
 [case $with_goodpri in  
     yes)	AC_MSG_ERROR(["must give --with-goodpri an argument."])
 		;;
@@ -454,7 +454,7 @@ AC_DEFINE_UNQUOTED(PRI_SUCCESS, "$goodpri")
 AC_MSG_RESULT($goodpri)
 
 AC_MSG_CHECKING(at which syslog priority to log failures)
-AC_ARG_WITH(badpri, [  --with-badpri           syslog priority for failures (def is $badpri)],
+AC_ARG_WITH(badpri, [  --with-badpri           syslog priority for failures (def is cw\"alert\"badpri)],
 [case $with_badpri in  
     yes)	AC_MSG_ERROR(["must give --with-badpri an argument."])
 		;;
@@ -478,7 +478,7 @@ AC_ARG_WITH(logpath, [  --with-logpath          path to the sudo log file],
 esac])
 
 AC_MSG_CHECKING(how long a line in the log file should be)
-AC_ARG_WITH(loglen, [  --with-loglen           maximum length of a log file line (default is $loglen)],
+AC_ARG_WITH(loglen, [  --with-loglen           maximum length of a log file line (default is 80)],
 [case $with_loglen in  
     yes)	AC_MSG_ERROR(["must give --with-loglen an argument."])
 		;;
@@ -561,7 +561,7 @@ else
 fi
 
 AC_MSG_CHECKING(who should get the mail that sudo sends)
-AC_ARG_WITH(mailto, [  --with-mailto           who should get sudo mail (default is "$mailto")],
+AC_ARG_WITH(mailto, [  --with-mailto           who should get sudo mail (default is \"root\")],
 [case $with_mailto in  
     yes)	AC_MSG_ERROR(["must give --with-mailto an argument."])
 		;;
@@ -685,7 +685,7 @@ AC_ARG_WITH(sudoers-gid, [  --with-sudoers-gid      gid that owns sudoers file (
 esac])
 
 AC_MSG_CHECKING(for umask programs should be run with)
-AC_ARG_WITH(umask, [  --with-umask            umask with which the prog should run (default is $sudo_umask)
+AC_ARG_WITH(umask, [  --with-umask            umask with which the prog should run (default is 022)
   --without-umask         Preserves the umask of the user invoking sudo.],
 [case $with_umask in  
     yes)	AC_MSG_ERROR(["must give --with-umask an argument."])
@@ -708,7 +708,7 @@ else
 fi
 
 AC_MSG_CHECKING(for default user to run commands as)
-AC_ARG_WITH(runas-default, [  --with-runas-default    User to run commands as (default is "root"],
+AC_ARG_WITH(runas-default, [  --with-runas-default    User to run commands as (default is \"root\")],
 [case $with_runas_default in  
     yes)	AC_MSG_ERROR(["must give --with-runas-default an argument."])
 		;;
@@ -762,7 +762,7 @@ else
 fi
 
 AC_MSG_CHECKING(number of tries a user gets to enter their password)
-AC_ARG_WITH(passwd-tries, [  --with-passwd-tries     number of tries to enter password (default is $passwd_tries)],
+AC_ARG_WITH(passwd-tries, [  --with-passwd-tries     number of tries to enter password (default is 3)],
 [case $with_passwd_tries in  
     yes)	;;
     no)		AC_MSG_ERROR(["--without-editor not supported."])
@@ -776,7 +776,7 @@ AC_DEFINE_UNQUOTED(TRIES_FOR_PASSWORD, $passwd_tries)
 AC_MSG_RESULT($passwd_tries)
 
 AC_MSG_CHECKING(time in minutes after which sudo will ask for a password again)
-AC_ARG_WITH(timeout, [  --with-timeout          minutes before sudo asks for passwd again (def is $timeout)],
+AC_ARG_WITH(timeout, [  --with-timeout          minutes before sudo asks for passwd again (def is 5 minutes)],
 [echo $with_timeout; case $with_timeout in  
     yes)	;;
     no)		timeout=0
@@ -790,7 +790,7 @@ AC_DEFINE_UNQUOTED(TIMEOUT, $timeout)
 AC_MSG_RESULT($timeout)
 
 AC_MSG_CHECKING(time in minutes after the password prompt will time out)
-AC_ARG_WITH(password-timeout, [  --with-password-timeout passwd prompt timeout in minutes (default is $password_timeout)],
+AC_ARG_WITH(password-timeout, [  --with-password-timeout passwd prompt timeout in minutes (default is 5 minutes)],
 [case $with_password_timeout in  
     yes)	;;
     no)		password_timeout=0
@@ -862,7 +862,7 @@ AC_ARG_WITH(all-insults, [  --with-all-insults      include all the sudo insult 
 		;;
 esac])
 
-AC_ARG_WITH(classic-insults, [  --with-classic-insults  include the insults from the "classic" sudo],
+AC_ARG_WITH(classic-insults, [  --with-classic-insults  include the insults from the \"classic\" sudo],
 [case $with_classic_insults in  
     yes)	AC_DEFINE(CLASSIC_INSULTS)
 		;;

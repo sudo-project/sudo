@@ -58,15 +58,15 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-logging          log via syslog, file, or both"
 ac_help="$ac_help
-  --with-logfac           syslog facility to log with (default is $logfac)"
+  --with-logfac           syslog facility to log with (default is \"local2\")"
 ac_help="$ac_help
-  --with-goodpri          syslog priority for commands (def is $goodpri)"
+  --with-goodpri          syslog priority for commands (def is \"notice\")"
 ac_help="$ac_help
-  --with-badpri           syslog priority for failures (def is $badpri)"
+  --with-badpri           syslog priority for failures (def is cw\"alert\"badpri)"
 ac_help="$ac_help
   --with-logpath          path to the sudo log file"
 ac_help="$ac_help
-  --with-loglen           maximum length of a log file line (default is $loglen)"
+  --with-loglen           maximum length of a log file line (default is 80)"
 ac_help="$ac_help
   --with-ignore-dot       ignore '.' in the PATH"
 ac_help="$ac_help
@@ -76,7 +76,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-mail-if-noperms  send mail if user not allowed to run command"
 ac_help="$ac_help
-  --with-mailto           who should get sudo mail (default is "$mailto")"
+  --with-mailto           who should get sudo mail (default is \"root\")"
 ac_help="$ac_help
   --with-mailsubject      subject of sudo mail"
 ac_help="$ac_help
@@ -97,10 +97,10 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-sudoers-gid      gid that owns sudoers file (defaults to 0)"
 ac_help="$ac_help
-  --with-umask            umask with which the prog should run (default is $sudo_umask)
+  --with-umask            umask with which the prog should run (default is 022)
   --without-umask         Preserves the umask of the user invoking sudo."
 ac_help="$ac_help
-  --with-runas-default    User to run commands as (default is "root""
+  --with-runas-default    User to run commands as (default is \"root\")"
 ac_help="$ac_help
   --with-exempt=group     no passwd needed for users in this group"
 ac_help="$ac_help
@@ -108,11 +108,11 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-env-editor       Use the environment variable EDITOR for visudo"
 ac_help="$ac_help
-  --with-passwd-tries     number of tries to enter password (default is $passwd_tries)"
+  --with-passwd-tries     number of tries to enter password (default is 3)"
 ac_help="$ac_help
-  --with-timeout          minutes before sudo asks for passwd again (def is $timeout)"
+  --with-timeout          minutes before sudo asks for passwd again (def is 5 minutes)"
 ac_help="$ac_help
-  --with-password-timeout passwd prompt timeout in minutes (default is $password_timeout)"
+  --with-password-timeout passwd prompt timeout in minutes (default is 5 minutes)"
 ac_help="$ac_help
   --with-execv            use execv() instead of execvp()"
 ac_help="$ac_help
@@ -122,7 +122,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-all-insults      include all the sudo insult sets"
 ac_help="$ac_help
-  --with-classic-insults  include the insults from the "classic" sudo"
+  --with-classic-insults  include the insults from the \"classic\" sudo"
 ac_help="$ac_help
   --with-csops-insults    include CSOps insults"
 ac_help="$ac_help
