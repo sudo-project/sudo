@@ -94,7 +94,7 @@ emalloc(size)
     VOID *ptr;
 
     if (size == 0) {
-	(void) fprintf(stderr, "%s: internal error, tried to malloc(0)\n",
+	(void) fprintf(stderr, "%s: internal error, tried to emalloc(0)\n",
 	    Argv[0]);
 	exit(1);
     }
@@ -117,7 +117,7 @@ emalloc2(nmemb, size)
     VOID *ptr;
 
     if (nmemb == 0 || size == 0) {
-	(void) fprintf(stderr, "%s: internal error, tried to malloc(0)\n",
+	(void) fprintf(stderr, "%s: internal error, tried to emalloc2(0)\n",
 	    Argv[0]);
 	exit(1);
     }
@@ -146,7 +146,7 @@ erealloc(ptr, size)
 {
 
     if (size == 0) {
-	(void) fprintf(stderr, "%s: internal error, tried to realloc(0)\n",
+	(void) fprintf(stderr, "%s: internal error, tried to erealloc(0)\n",
 	    Argv[0]);
 	exit(1);
     }
@@ -172,7 +172,7 @@ erealloc3(ptr, nmemb, size)
 {
 
     if (nmemb == 0 || size == 0) {
-	(void) fprintf(stderr, "%s: internal error, tried to realloc(0)\n",
+	(void) fprintf(stderr, "%s: internal error, tried to erealloc3(0)\n",
 	    Argv[0]);
 	exit(1);
     }
