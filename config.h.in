@@ -240,6 +240,9 @@
 /* Define if you have initprivs(3).  */
 #undef HAVE_INITPRIVS
 
+/* Define if you have dispcrypt(3).  */
+#undef HAVE_DISPCRYPT
+
 /* Define if you have getspnam(3).  [SVR4-style shadow passwords] */
 #undef HAVE_GETSPNAM
 
