@@ -106,6 +106,7 @@ static void  check_passwd		__P((void));
 static int   touch			__P((char *));
 static void  update_timestamp		__P((void));
 static void  reminder			__P((void));
+static char *expand_prompt		__P((char *, char *, char *));
 #ifdef HAVE_KERB4
 static int   sudo_krb_validate_user	__P((struct passwd *, char *));
 #endif /* HAVE_KERB4 */
@@ -161,6 +162,10 @@ void check_user()
 	if (rtn == 2)
 	    reminder();		/* do the reminder if ticket file is new */
 #endif /* NO_MESSAGE */
+
+	/* expand any escapes in the prompt */
+	prompt = expand_prompt(prompt, user_name, shost);
+
 #ifdef HAVE_SIA
 	sia_attempt_auth();
 #elif HAVE_PAM
@@ -482,8 +487,8 @@ static void check_passwd()
 #else /* !HAVE_SECURID */
 static void check_passwd()
 {
-    char *pass;			/* this is what gets entered    */
-    register int counter = TRIES_FOR_PASSWORD;
+    char *pass;			/* this is what gets entered */
+    int counter = TRIES_FOR_PASSWORD;
 #if defined(HAVE_KERB4) && defined(USE_GETPASS)
     char kpass[_PASSWD_LEN + 1];
 #endif /* HAVE_KERB4 && USE_GETPASS */
@@ -509,7 +514,7 @@ static void check_passwd()
 #  ifdef USE_GETPASS
 	pass = (char *) getpass(prompt);
 #  else
-	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60, user_name, shost);
+	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60);
 #  endif /* USE_GETPASS */
 	reenter = 1;
 	if (authenticate(user_name, pass, &reenter, &message) == 0)
@@ -537,7 +542,7 @@ static void check_passwd()
 	pass = (char *) getpass(prompt);
 #    endif /* HAVE_KERB4 */
 #  else
-	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60, user_name, shost);
+	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60);
 #  endif /* USE_GETPASS */
 
 	/* Exit loop on nil password */
@@ -932,4 +937,70 @@ void pass_warn(fp)
 #else
     (void) fprintf(fp, "%s\n", INCORRECT_PASSWORD);
 #endif /* USE_INSULTS */
+}
+
+/********************************************************************
+ *
+ *  expand_prompt()
+ *
+ *  expand %h and %u in the prompt and pass back the dynamically
+ *  allocated result.  Returns the same string if no escapes.
+ */
+
+static char *expand_prompt(old_prompt, user, host)
+    char *old_prompt;
+    char *user;
+    char *host;
+{
+    size_t len;
+    int subst;
+    char *p, *np, *new_prompt, lastchar;
+
+    /* How much space do we need to malloc for the prompt? */
+    subst = 0;
+    for (p = old_prompt, len = strlen(old_prompt), lastchar = '\0'; *p; p++) {
+	if (lastchar == '%') {
+	    if (*p == 'h') {
+		len += strlen(shost) - 2;
+		subst = 1;
+	    } else if (*p == 'u') {
+		len += strlen(user_name) - 2;
+		subst = 1;
+	    }
+	}
+
+	if (lastchar == '%' && *p == '%')
+	    lastchar = '\0';
+	else
+	    lastchar = *p;
+    }
+
+    if (subst) {
+	if ((new_prompt = (char *) malloc(len + 1)) == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+	for (p = prompt, np = new_prompt; *p; p++) {
+	    if (lastchar == '%' && (*p == 'h' || *p == 'u')) {
+		/* substiture user/host name */
+		if (*p == 'h') {
+		    strcpy(np, shost);
+		    np += strlen(shost);
+		} else if (*p == 'u') {
+		    strcpy(np, user_name);
+		    np += strlen(user_name);
+		}
+	    } else
+		*np++ = *p;
+
+	    if (lastchar == '%' && *p == '%')
+		lastchar = '\0';
+	    else
+		lastchar = *p;
+	}
+    } else
+	new_prompt = prompt;
+
+    return(new_prompt);
 }
