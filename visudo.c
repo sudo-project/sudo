@@ -96,6 +96,7 @@ int addr_matches		__P((char *));
 int netgr_matches		__P((char *, char *, char *));
 int usergr_matches		__P((char *, char *));
 void init_parser		__P((void));
+void yyrestart			__P((FILE *));
 
 /*
  * External globals exported by the parser
@@ -299,6 +300,7 @@ main(argc, argv)
 		case 'x' :	Exit(0);
 				break;
 	    }
+	    yyrestart(yyin);	/* reset lexer */
 	}
     } while (parse_error == TRUE);
 
