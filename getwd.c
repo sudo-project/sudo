@@ -31,6 +31,7 @@ static char rcsid[] = "$Id$";
 #endif /* lint */
 
 #include "config.h"
+#include "compat.h"
 #include "pathnames.h"
 
 #include <stdio.h>

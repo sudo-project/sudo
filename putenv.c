@@ -29,6 +29,7 @@ static char rcsid[] = "$Id$";
 #endif /* lint */
 
 #include "config.h"
+#include "compat.h"
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
