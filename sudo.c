@@ -193,6 +193,10 @@ static void load_globals()
     }
     uid = getuid();		/* we need to tuck this away for safe keeping */
 
+#ifdef UMASK
+    (void) umask((mode_t)UMASK);
+#endif /* UMASK */
+
 
     /*
      * loading the cmnd global variable from argv[1]
