@@ -1023,3 +1023,10 @@ Sudo 1.5.8 released.
 Sudo 1.5.8p1 released.
 
 321) Fixed a bug wrt quoting characters in command args.
+
+322) Make --without-sendmail work.
+
+Sudo 1.5.8p2 released.
+
+323) Fixed a segv if HOST_IN_LOG defined and gethostbyname() fails.
+     Reported by Gero Treuner <gero@faveve.uni-stuttgart.de>.
