@@ -141,6 +141,55 @@ AC_ARG_WITH(DCE, [  --with-DCE              enable DCE support],
 		;;
 esac])
 
+AC_ARG_WITH(incpath, [  --with-incpath          additional places to look ofr include files],
+[case $with_incpath in  
+    yes)	echo "Must give --with-incpath an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-incpath not supported."
+		exit 1
+		;;
+    *)		echo "Adding ${with_incpath} to CPPFLAGS"
+		for i in ${with_incpath}; do
+		    CPPFLAGS="${CPPFLAGS} -I${i}"
+		done
+		;;
+esac])
+
+AC_ARG_WITH(libpath, [  --with-libpath          additional places to look for libraries],
+[case $with_libpath in  
+    yes)	echo "Must give --with-libpath an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-libpath not supported."
+		exit 1
+		;;
+    *)		echo "Adding ${with_libpath} to SUDO_LDFLAGS and VISUDO_LDFLAGS"
+		for i in ${with_libpath}; do
+		    LDFLAGS="${LDFLAGS} -L${i}"
+		    SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${i}"
+		    VISUDO_LDFLAGS="${VISUDO_LDFLAGS} -L${i}"
+		done
+		;;
+esac])
+
+AC_ARG_WITH(libraries, [  --with-libraries        additional libraries to link with],
+[case $with_libraries in  
+    yes)	echo "Must give --with-libraries an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-libraries not supported."
+		exit 1
+		;;
+    *)		echo "Adding ${with_libraries} to SUDO_LIBS and VISUDO_LIBS"
+		for i in ${with_libraries}; do
+		    LIBS="${LIBS} -L${i}"
+		    SUDO_LIBS="${SUDO_LIBS} -L${i}"
+		    VISUDO_LIBS="${VISUDO_LIBS} -L${i}"
+		done
+		;;
+esac])
+
 AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
 [case $with_csops in  
     yes)	OPTIONS="${OPTIONS} -DIGNORE_DOT_PATH -DUSE_INSULTS -DCLASSIC_INSULTS -DCSOPS_INSULTS -DENV_EDITOR"
@@ -307,7 +356,7 @@ case "$OS" in
 		# but it's good enough for sudo
 		AC_DEFINE(STDC_HEADERS)
 		if test -z "$NROFFPROG"; then
-		    MAN_POSTINSTALL='	/bin/rm -f $(mandir)/sudo.$(mansect).z; /usr/bin/pack $(mandir)/sudo.$(mansect)'
+		    MAN_POSTINSTALL='	/bin/rm -f $(mandir8)/sudo.$(mansect8).z $(mandir8)/visudo.$(mansect8).z $(mandir5)/sudoers.$(mansect5).z ; /usr/bin/pack $(mandir8)/sudo.$(mansect8) $(mandir8)/visudo.$(mansect8) $(mandir5)/sudoers.$(mansect5)'
 		    if test -d /usr/share/catman/local; then
 			mandir="/usr/share/catman/local"
 		    else
