@@ -267,8 +267,15 @@ cmnd		:	ALL {
 		|	COMMAND {
 			    char **t;
 
-			    if (path_matches(cmnd, &NewArgv[1], $1.cmnd, $1.args))
-				cmnd_matches = TRUE;
+			    /* XXX - use '?' operator */
+			    if (NewArgc > 1) {
+				if (path_matches(cmnd, &NewArgv[1], $1.cmnd,
+						 $1.args))
+				    cmnd_matches = TRUE;
+				else if (path_matches(cmnd, NULL, $1.cmnd,
+						      $1.args))
+				    cmnd_matches = TRUE;
+			    }
 
 			    (void) free($1.cmnd);
 			    for (t = $1.args; t && *t; t++)
