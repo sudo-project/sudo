@@ -317,6 +317,15 @@
 /* Define to 1 if your struct stat has an st_mtimespec member */
 #undef HAVE_ST_MTIMESPEC
 
+/* Define to 1 to build support for tracing subprocesses using systrace(4) */
+#undef HAVE_SYSTRACE
+
+/* Define to 1 if you have the <dev/systrace.h> header file. */
+#undef HAVE_DEV_SYSTRACE_H
+
+/* Define to 1 if you have the <sys/systrace.h> header file. */
+#undef HAVE_SYS_SYSTRACE_H
+
 /* Define to 1 if you have the `sysconf' function. */
 #undef HAVE_SYSCONF
 
