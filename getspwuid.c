@@ -1,0 +1,231 @@
+/*
+ *  CU sudo version 1.3.6
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 1, or (at your option)
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ *  Please send bugs, changes, problems to sudo-bugs@cs.colorado.edu
+ *
+ *******************************************************************
+ *
+ *  This module contains get_pwuid(), a function that
+ *  Makes a dyname copy of the struct passwd returned by
+ *  getpwuid() and substitutes the shadow password if
+ *  necesary.
+ *
+ *  Todd C. Miller  Mon Nov 20 13:53:06 MST 1995
+ */
+
+#ifndef lint
+static char rcsid[] = "$Id$";
+#endif /* lint */
+
+#include "config.h"
+
+#include <stdio.h>
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif /* STDC_HEADERS */
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <pwd.h>
+#include "sudo.h"
+#include <options.h>
+#ifdef SHADOW_TYPE
+#  if (SHADOW_TYPE == SPW_SVR4)
+#    include <shadow.h>
+#  endif /* SVR4 */
+#  if (SHADOW_TYPE == SPW_SECUREWARE)
+#    include <sys/security.h>
+#    include <prot.h>
+#  endif /* SECUREWARE */
+#  if (SHADOW_TYPE == SPW_ULTRIX4)
+#    include <auth.h>
+#  endif /* ULTRIX4 */
+#  if (SHADOW_TYPE == SPW_SUNOS4)
+#    include <sys/label.h>
+#    include <sys/audit.h>
+#    include <pwdadj.h>
+#  endif /* SUNOS4 */
+#endif /* SHADOW_TYPE */
+
+#ifndef STDC_HEADERS
+#ifndef __GNUC__                /* gcc has its own malloc */
+extern char *malloc     __P((size_t));
+#endif /* __GNUC__ */
+extern char *getenv     __P((const char *));
+#ifdef HAVE_STRDUP
+extern char *strdup     __P((const char *));
+#endif /* HAVE_STRDUP */
+#endif /* !STDC_HEADERS */
+
+
+/*
+ * local functions not visible outside sudo_getpwuid.c
+ */
+static char *sudo_getshell	__P((struct passwd *));
+static char *sudo_getspwd	__P((struct passwd *));
+
+
+
+/**********************************************************************
+ *
+ * sudo_getshell()
+ *
+ *  This function returns the user's shell based on either the
+ *  SHELL evariable or the passwd(5) entry (in that order).
+ */
+
+static char *sudo_getshell(pw_ent)
+    struct passwd *pw_ent;
+{
+    char *pw_shell;
+
+    if ((pw_shell = getenv("SHELL")) == NULL)
+	pw_shell = pw_ent -> pw_shell;
+
+    return(pw_shell);
+}
+
+
+/**********************************************************************
+ *
+ *  sudo_getpwuid()
+ *
+ *  This function ...
+ */
+
+static char *sudo_getspwd(pw_ent)
+    struct passwd *pw_ent;
+#ifdef SHADOW_TYPE
+#  if (SHADOW_TYPE == SPW_SVR4)
+{
+    struct spwd *spw_ent;
+
+    if ((spw_ent = getspnam(pw_ent -> pw_name)) && spw_ent -> sp_pwdp)
+	return(spw_ent -> sp_pwdp);
+    else
+	return(pw_ent -> pw_passwd);
+}
+#  endif /* SVR4 */
+#  if (SHADOW_TYPE == SPW_HPUX9)
+{
+    struct s_passwd *spw_ent;
+
+    if ((spw_ent = getspwuid(pw_ent -> pw_uid)) && spw_ent -> pw_passwd)
+	return(spw_ent -> pw_passwd);
+    else
+	return(pw_ent -> pw_passwd);
+}
+#  endif /* HPUX9 */
+#  if (SHADOW_TYPE == SPW_SUNOS4)
+{
+    struct passwd_adjunct *spw_ent;
+
+    if ((spw_ent = getpwanam(pw_name)) && spw_ent -> pwa_passwd)
+	return(spw_ent -> pwa_passwd);
+    else
+	return(pw_ent -> pw_passwd);
+}
+#  endif /* SUNOS4 */
+#  if (SHADOW_TYPE == SPW_ULTRIX4)
+{
+    AUTHORIZATION *spw_ent;
+
+    if ((spw_ent = getauthuid(pw_uid)) && spw_ent -> a_password)
+	return(spw_ent -> a_password);
+    else
+	return(pw_ent -> pw_passwd);
+}
+#  endif /* ULTRIX4 */
+#  if (SHADOW_TYPE == SPW_SECUREWARE)
+{
+    struct pr_passwd *spw_ent;
+
+    if ((spw_ent = getprpwuid(pw_uid)) && spw_ent -> ufld.fd_encrypt)
+	return(spw_ent -> ufld.fd_encrypt);
+    else
+	return(pw_ent -> pw_passwd);
+}
+#  endif /* SECUREWARE */
+#else
+{
+    return(pw_ent->pw_passwd);
+}
+#endif /* SHADOW_TYPE */
+
+
+/**********************************************************************
+ *
+ *  sudo_getpwuid()
+ *
+ *  This function ...
+ */
+
+struct passwd *sudo_getpwuid(uid)
+    uid_t uid;
+{
+    struct passwd *pw_ent, *local_pw_ent;
+
+    if ((pw_ent = getpwuid(uid)) == NULL)
+	return(NULL);
+
+    /* allocate space for a local copy of pw_ent */
+    local_pw_ent = (struct passwd *) malloc(sizeof(struct passwd));
+    if (local_pw_ent == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+
+    /*
+     * Copy the struct passwd and the interesting strings...
+     */
+    (void) memcpy(local_pw_ent, pw_ent, sizeof(struct passwd));
+
+    local_pw_ent->pw_name = strdup(pw_ent->pw_name);
+    if (local_pw_ent->pw_name == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+
+    local_pw_ent->pw_dir = strdup(pw_ent->pw_dir);
+    if (local_pw_ent->pw_dir == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+
+    /* pw_shell is a special case since we overide with $SHELL */
+    local_pw_ent->pw_shell = strdup(sudo_getshell(pw_ent));
+    if (local_pw_ent->pw_shell == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+
+    /* pw_passwd gets a shadow password if applicable */
+    local_pw_ent->pw_passwd = strdup(sudo_getspwd(pw_ent));
+    if (local_pw_ent->pw_passwd == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+
+    return(local_pw_ent);
+}
