@@ -1,29 +1,41 @@
+.\" $Id$
 .TH SUDO 8
 .SH NAME
 sudo \- execute a command as the superuser
-
 .SH SYNOPSIS
 .B sudo
--V | -h | -l | -v | -k |
-.I <command>
-
+.B \-V
+|
+.B
+\-h
+|
+.B \-l
+|
+.B \-v
+|
+.B \-k
+|
+.I command
 .SH DESCRIPTION
-.I Sudo
+.B sudo
 allows a permitted user to execute a 
 .I command 
-as the superuser.
-.I Sudo 
+as the superuser (real and effective uid and gid are set to 0 and root's
+group as set in the passwd file respectively).
+.sp
+.B sudo 
 determines who is an authorized user by consulting the file
 .I /etc/sudoers.
 By giving
-.I sudo
+.B sudo
 the
 .I -v
-flag a user can update the time stamp without running a command.
+flag a user can update the time stamp without running a
+.I command.
 The password prompt itself will also time out if the password is
 not entered with N minutes (again, this is defined at installation
 time and defaults to 5 minutes).
-
+.sp
 The
 .I sudoers
 file is composed of an optional host alias section, an optional command
@@ -32,8 +44,8 @@ aliases need to start with their respective keywords
 (Host_Alias/User_Alias/Cmnd_Alias).
 If there are multiple occurrences of a user, the union of the entries
 will be used.
-
 .nf
+
 user specification format: 
   user access_group [: access_group] ...
 
@@ -75,9 +87,8 @@ The reserved alias 'ALL' can be used for both {Host,User,Cmnd}_Alias'.
     may not use it to subtract elements in a User_Alias, Host_Alias, or
     Cmnd_Alias.
 .fi
-
-Examples
-
+.SH EXAMPLES
+.nf
     # Host alias specification
     Host_Alias  HUB=houdini:\\
                 REMOTE=merlin,kodiakthorn,spirit
@@ -107,7 +118,8 @@ Examples
     davehieb    merlin=ALL:SERVERS=/etc/halt:\\
                 kodiakthorn=ALL
     steve       CSNETS=/usr/su_commands/
-
+.fi
+.sp
 The above
 .I sudoers
 file specification is composed of 4 host alias specifications, 2 user alias
@@ -125,7 +137,7 @@ and can halt the SERVERS.  Steve can run any command located in the directory
 /usr/su_commands on all machines on the subnets listed in CSNETS (note that
 the 128.138.192 net has a netmask of 255.255.255.192 which is why its
 network number is 128.138.192.192.
-.I sudo
+.B sudo
 will do a logical and of a machine's ip address(es) with its netmask to decide
 whether that machine is on a given network).
 
@@ -134,56 +146,64 @@ The
 file should 
 .B always
 be edited by the 
-.I visudo 
+.B visudo 
 command which locks the file and does grammatical checking. It is
 imperative that the
 .I sudoers
 be free of syntax errors since sudo will not run with a syntactically
 incorrect sudoers file.
-
-Sudo was designed to log via the 4.3 BSD syslog(3) facility but
+.B sudo
+was designed to log via the 4.3 BSD syslog(3) facility but
 can log to a file instead if so desired (or to both syslog and a file).
-
+.sp
 If an unauthorized user executes sudo, mail will be sent from the user to 
 the local authorities (defined at installation time).
-
+.sp
 All preferences are defined at installation time and are derived from
 the options.h and pathnames.h include files as well as as well as the
 Makefile.
-
 .SH OPTIONS
-.I sudo
+.B sudo
 accepts the following command line options:
 .IP -V
-The -V (version) option causes sudo to print the version number
-and exit.
+The -V (version) option causes
+.B sudo
+to print the version number and exit.
 .IP -l
 The -l (list) option will list out the allowed and forbidden commands
 for the user on the current host.
 .IP -h
-The -h (help) option causes sudo to print the version of sudo and a usage
-message before exiting.
+The -h (help) option causes
+.B sudo
+to print the version of sudo and a usage message before exiting.
 .IP -v
-If given the -v (validate) option, sudo will update the user's timestamp file,
-prompting for a password if necessary.  This extends the sudo timeout
-to for another N minutes (where N is defined at installation time and defaults
-to 5 minutes) but does not run a command.
+If given the -v (validate) option,
+.B sudo
+will update the user's timestamp file, prompting for a password if necessary.
+This extends the
+.B sudo
+timeout to for another N minutes (where N is defined at installation time and
+defaults to 5 minutes) but does not run a command.
 .IP -k
-The -k (kill) option to sudo removes the user's timestamp file, thus
-requiring a password the next time
-.I sudo
+The -k (kill) option to
+.B sudo
+removes the user's timestamp file, thus requiring a password the next time
+.B sudo
 is run.  This option does not require and password and was added to
-allow a user to revoke sudo permissions from a .logout file.
-
+allow a user to revoke
+.B sudo
+permissions from a .logout file.
 .SH RETURN VALUES
-.I sudo
+.B sudo
 quits with an exit value of 1 if there is a configuration/permission problem
 or if
-.I sudo
+.B sudo
 cannot execute the given command.  In the latter case the error string is
 printed to stdout via
 .BR perror (3).
-If sudo cannot
+If
+.B sudo
+cannot
 .BR stat (3)
 one or more entries in the user's PATH the error is printed on stdout via
 .BR perror (3).
@@ -194,35 +214,33 @@ normal circumstances.  The most common reason for
 to return "permission denied" is if you are running an automounter and
 one of the directories in your PATH is on a machine that is currently
 unreachable.
-
 .SH SECURITY NOTES
-.I sudo
+.B sudo
 tries to be safe when executing external commands.  To this end
-LD_*, SHLIB_PATH (hpux only), LIBPATH (AIX only), and _RLD_* (Digital UNIX only)
-environmental variables are removed from the environment passed on to all
-commands executed.
-.I sudo
+LD_*, SHLIB_PATH (HP-UX only), LIBPATH (AIX only), and _RLD_* (Digital UNIX
+only) environmental variables are removed from the environment passed on to
+all commands executed.
+.B sudo
 also sets the IFS environmental variable to its default value (" \\t\\n").
 .sp
 To prevent command spoofing,
-.I sudo
+.B sudo
 checks '.' and '' (both denoting current directory) last when searching for
 a command in the user's PATH (if one or both are in the PATH).
 Note, however, that the actual PATH environmental variable is
 .I not
 modified and is passed unchanged to the program that
-.I sudo
+.B sudo
 executes.
 .sp
-For security reasons, if your OS supports shared libraries, sudo should always
-be statically linked unless the dynamic loader disables user-defined library
-search paths for setuid programs.
-
+For security reasons, if your OS supports shared libraries,
+.B sudo
+should always be statically linked unless the dynamic loader disables
+user-defined library search paths for setuid programs.
 .SH FILES
 .nf
 /etc/sudoers                 file of authorized users.
 .fi
-
 .SH ENVIRONMENT VARIABLES
 .nf
 SUDO_COMMAND                 Set to the command run by sudo
@@ -230,10 +248,9 @@ SUDO_USER                    Set to the login of the user who invoked sudo
 SUDO_UID                     Set to the uid of the user who invoked sudo
 SUDO_GID                     Set to the gid of the user who invoked sudo
 .fi
-
 .SH AUTHORS
 Many people have worked on
-.I sudo
+.B sudo
 over the years, this version consists of code written primarily by:
 .nf
 
@@ -244,23 +261,20 @@ Chris Jepeway                <jepeway@cs.utk.edu>
 
 See the HISTORY file in the sudo distribution for more details.
 .fi
-
+.sp
 Please send all bugs, comments, and changes to sudo-bugs@cs.colorado.edu.
-
 .SH DISCLAIMER
 This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 General Public License for more details.
-
+.sp
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 675 Mass Ave, Cambridge, MA 02139, USA.
-
 .SH CAVEATS
 There is no easy way to prevent a user from gaining a root shell if 
 that user has access to commands that are shell scripts or that 
 allow shell escapes.
-
 .SH SEE ALSO
 .BR su (1)
