@@ -93,7 +93,7 @@ extern void yyerror		__P((char *));
 OCTET			(1?[0-9]{1,2})|(2[0-4][0-9])|(25[0-5])
 DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
 HOSTNAME		[[:alnum:]_-]+
-WORD			([^@!=:,\(\) \t\n\\]|\\[^\n])+
+WORD			([^#@!=:,\(\) \t\n\\]|\\[^\n])+
 DEFVAR			[a-z_]+
 
 /* XXX - convert GOTRUNAS to exclusive state (GOTDEFS cannot be) */
@@ -251,7 +251,7 @@ PASSWD[[:blank:]]*:	{
 			    }
 			}
 
-<GOTRUNAS>#?{WORD}	{
+<GOTRUNAS>(#[0-9-]+|{WORD}) {
 			    /* username/uid that user can run command as */
 			    fill(yytext, yyleng);
 			    LEXTRACE("WORD(2) ");
