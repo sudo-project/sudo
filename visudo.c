@@ -74,10 +74,12 @@ extern int stat		__P((const char *, struct stat *));
 /*
  * Function prototypes
  */
-static void usage	__P((void));
-static RETSIGTYPE Exit	__P((int));
-int path_matches	__P((char *, char *));
-int ntwk_matches	__P((char *));
+static void usage		__P((void));
+static char whatnow		__P((void));
+static void whatnow_help	__P((void));
+static RETSIGTYPE Exit		__P((int));
+int path_matches		__P((char *, char *));
+int ntwk_matches		__P((char *));
 
 
 /*
@@ -295,7 +297,17 @@ int main(argc, argv)
 	    Exit(1);
 	}
 
-	/* XXX - do whatnow() here */
+	/*
+	 * Prompt the user for what to do now
+	 */
+	if (parse_error == TRUE) {
+	    switch (whatnow()) {
+		case 'q' :	parse_error = FALSE;	/* ignore parse error */
+				break;
+		case 'x' :	Exit(0);
+				break;
+	    }
+	}
     } while (parse_error == TRUE);
 
     /*
@@ -388,4 +400,45 @@ static RETSIGTYPE Exit(sig)
 {
     (void) unlink(stmp);
     exit(sig);
+}
+
+
+/*
+ * whatnow() -- assuming a parse error occurred, prompt the user for
+ *              what they want to do now.  Returns first letter
+ *              of their choice (always lowercase).
+ */
+static char whatnow()
+{
+    char choice;
+
+    do {
+	printf("What now? ");
+	choice = fgetc(stdin);
+	while (fgetc(stdin) != '\n')
+	    ;
+
+	/* safely force to lower case */
+	if (isupper(choice))
+	    choice = tolower(choice);
+
+	/* help is a builtin */
+	if (choice == 'h' || choice == '?')
+	    whatnow_help();
+
+    } while (choice != 'e' && choice != 'x' && choice != 'q');
+
+    return(choice);
+}
+
+
+/*
+ * whatnow_help() -- print out a help message for whatnow().
+ */
+void whatnow_help()
+{
+    printf("Options are:\n");
+    printf("  (e)dit sudoers file again\n");
+    printf("  e(x)it without saving changes to sudoers file\n");
+    printf("  (q)uit and save changes to sudoers file (DANGER!)\n\n");
 }
