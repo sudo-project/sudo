@@ -85,7 +85,7 @@ letters, digits, and the underscore ('_') character.
 
 =item -V
 
-The C<-V> (version) option causes B<visudo> to print the version number
+The B<-V> (version) option causes B<visudo> to print the version number
 and exit.
 
 =back

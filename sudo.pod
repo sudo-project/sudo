@@ -59,7 +59,7 @@ user may then use sudo without a password for a short period of time
 (five minutes by default).
 
 B<sudo> determines who is an authorized user by consulting the
-file F<@sysconfdir@/sudoers>.  By giving B<sudo> the C<-v> flag a user
+file F<@sysconfdir@/sudoers>.  By giving B<sudo> the B<-v> flag a user
 can update the time stamp without running a I<command.>
 The password prompt itself will also time out if the user's password is
 not entered with N minutes (again, this is defined at configure
@@ -69,7 +69,7 @@ If a user that is not listed in the I<sudoers> file tries to run
 a command via B<sudo>, mail is sent to the proper authorities,
 as defined at configure time (defaults to root).  Note that the
 mail will not be sent if an unauthorized user tries to run sudo
-with the C<-l> or C<-v> flags.  This allows users to determine
+with the B<-l> or B<-v> flags.  This allows users to determine
 for themselves whether or not they are allowed to use B<sudo>.
 
 B<sudo> can log both successful an unsuccessful attempts (as well
@@ -84,27 +84,27 @@ B<sudo> accepts the following command line options:
 
 =item -V
 
-The C<-V> (I<version>) option causes B<sudo> to print the
+The B<-V> (I<version>) option causes B<sudo> to print the
 version number and exit.
 
 =item -l
 
-The C<-l> (I<list>) option will list out the allowed (and
+The B<-l> (I<list>) option will list out the allowed (and
 forbidden) commands for the user on the current host.
 
 =item -L
 
-The C<-L> (I<list> defaults) option will list out the parameters
+The B<-L> (I<list> defaults) option will list out the parameters
 that may be set in a I<Defaults> line along with a short description
 for each.  This option is useful in conjunction with grep(1).
 
 =item -h
 
-The C<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
+The B<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
 
 =item -v
 
-If given the C<-v> (I<validate>) option, B<sudo> will update the
+If given the B<-v> (I<validate>) option, B<sudo> will update the
 user's timestamp, prompting for the user's password if necessary.
 This extends the B<sudo> timeout to for another N minutes
 (where N is defined at installation time and defaults to 5
@@ -112,7 +112,7 @@ minutes) but does not run a command.
 
 =item -k
 
-The C<-k> (I<kill>) option to B<sudo> invalidates the user's timestamp
+The B<-k> (I<kill>) option to B<sudo> invalidates the user's timestamp
 by setting the time on it to the epoch.  The next time B<sudo> is
 run a password will be required.  This option does not require a password
 and was added to allow a user to revoke B<sudo> permissions from a .logout
@@ -120,18 +120,18 @@ file.
 
 =item -K
 
-The C<-K> (sure I<kill>) option to B<sudo> removes the user's timestamp
+The B<-K> (sure I<kill>) option to B<sudo> removes the user's timestamp
 entirely.  This option does not require a password.
 
 =item -b
 
-The C<-b> (I<background>) option tells B<sudo> to run the given
-command in the background.  Note that if you use the C<-b>
+The B<-b> (I<background>) option tells B<sudo> to run the given
+command in the background.  Note that if you use the B<-b>
 option you cannot use shell job control to manipulate the command.
 
 =item -p
 
-The C<-p> (I<prompt>) option allows you to override the default
+The B<-p> (I<prompt>) option allows you to override the default
 password prompt and use a custom one.  If the password prompt
 contains the C<%u> escape, C<%u> will be replaced with the user's
 login name.  Similarly, C<%h> will be replaced with the local
@@ -139,7 +139,7 @@ hostname.
 
 =item -c
 
-The C<-c> (I<class>) option causes B<sudo> to run the specified command
+The B<-c> (I<class>) option causes B<sudo> to run the specified command
 with resources limited by the specified login class.  The I<class>
 argument can be either a class name as defined in /etc/login.conf,
 or a single '-' character.  Specifying the I<class> as '-' means
@@ -152,31 +152,31 @@ where B<sudo> has been configured with the --with-logincap option.
 
 =item -u
 
-The C<-u> (I<user>) option causes B<sudo> to run the specified command
+The B<-u> (I<user>) option causes B<sudo> to run the specified command
 as a user other than I<root>.  To specify a I<uid> instead of a
 I<username>, use "#uid".
 
 =item -s
 
-The C<-s> (I<shell>) option runs the shell specified by the I<SHELL>
+The B<-s> (I<shell>) option runs the shell specified by the I<SHELL>
 environment variable if it is set or the shell as specified
 in passwd(5).
 
 =item -H
 
-The C<-H> (I<HOME>) option sets the I<HOME> environment variable
+The B<-H> (I<HOME>) option sets the I<HOME> environment variable
 to the homedir of the target user (root by default) as specified
 in passwd(5).  By default, B<sudo> does not modify I<HOME>.
 
 =item -S
 
-The C<-S> (I<stdin>) option causes B<sudo> to read the password from
+The B<-S> (I<stdin>) option causes B<sudo> to read the password from
 standard input instead of the terminal device.
 
 =item --
 
-The C<--> flag indicates that B<sudo> should stop processing command
-line arguments.  It is most useful in conjunction with the C<-s> flag.
+The B<--> flag indicates that B<sudo> should stop processing command
+line arguments.  It is most useful in conjunction with the B<-s> flag.
 
 =back
 

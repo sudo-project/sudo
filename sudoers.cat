@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-April  7, 2000                1.6.3                             1
+April 22, 2000                1.6.3                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April  7, 2000                1.6.3                             2
+April 22, 2000                1.6.3                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April  7, 2000                1.6.3                             3
+April 22, 2000                1.6.3                             3
 
 
 
@@ -259,7 +259,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April  7, 2000                1.6.3                             4
+April 22, 2000                1.6.3                             4
 
 
 
@@ -312,20 +312,20 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
        shell_noargs
                    If set and ssssuuuuddddoooo is invoked with no arguments
-                   it acts as if the `-s' flag had been given.
+                   it acts as if the ----ssss flag had been given.
                    That is, it runs a shell as root (the shell is
                    determined by the `SHELL' environment variable
                    if it is set, falling back on the shell listed
                    in the invoking user's /etc/passwd entry if
                    not).  This flag is off by default.
 
-       set_home    If set and ssssuuuuddddoooo is invoked with the `-s' flag
+       set_home    If set and ssssuuuuddddoooo is invoked with the ----ssss flag
                    the `HOME' environment variable will be set to
                    the home directory of the target user (which
 
 
 
-April  7, 2000                1.6.3                             5
+April 22, 2000                1.6.3                             5
 
 
 
@@ -334,9 +334,9 @@ April  7, 2000                1.6.3                             5
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
-                   is root unless the `-u' option is used).  This
-                   effectively makes the `-s' flag imply `-H'.
-                   This flag is off by default.
+                   is root unless the ----uuuu option is used).  This
+                   effectively makes the ----ssss flag imply ----HHHH.  This
+                   flag is off by default.
 
        path_info   Normally, ssssuuuuddddoooo will tell the user when a com­
                    mand could not be found in their `$PATH'.
@@ -391,7 +391,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April  7, 2000                1.6.3                             6
+April 22, 2000                1.6.3                             6
 
 
 
@@ -416,13 +416,13 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    default.
 
        targetpw    If set, ssssuuuuddddoooo will prompt for the password of
-                   the user specified by the `-u' flag (defaults
-                   to root) instead of the password of the invok­
-                   ing user.  This flag is off by default.
+                   the user specified by the ----uuuu flag (defaults to
+                   root) instead of the password of the invoking
+                   user.  This flag is off by default.
 
        set_logname Normally, ssssuuuuddddoooo will set the `LOGNAME' and
                    `USER' environment variables to the name of
-                   the target user (usually root unless the `-u'
+                   the target user (usually root unless the ----uuuu
                    flag is given).  However, since some programs
                    (including the RCS revision control system)
                    use `LOGNAME' to determine the real identity
@@ -457,7 +457,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April  7, 2000                1.6.3                             7
+April 22, 2000                1.6.3                             7
 
 
 
@@ -498,17 +498,17 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    tamp files.  The default is _/_v_a_r_/_r_u_n_/_s_u_d_o.
 
        passprompt  The default prompt to use when asking for a
-                   password; can be overridden via the `-p'
-                   option or the `SUDO_PROMPT' environment vari­
-                   able. Supports two escapes: "%u" expands to
-                   the user's login name and "%h" expands to the
+                   password; can be overridden via the ----pppp option
+                   or the `SUDO_PROMPT' environment variable.
+                   Supports two escapes: "%u" expands to the
+                   user's login name and "%h" expands to the
                    local hostname.  The default value is "Pass­
                    word:".
 
        runas_default
-                   The default user to run commands as if the
-                   `-u' flag is not specified on the command
-                   line.  This defaults to "root".
+                   The default user to run commands as if the ----uuuu
+                   flag is not specified on the command line.
+                   This defaults to "root".
 
        syslog_goodpri
                    Syslog priority to use when user authenticates
@@ -523,7 +523,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April  7, 2000                1.6.3                             8
+April 22, 2000                1.6.3                             8
 
 
 
@@ -553,7 +553,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    at configure time.
 
        mailerflags Flags to use when invoking mailer. Defaults to
-                   `-t'.
+                   ----tttt.
 
        mailto      Address to send warning and erorr mail to.
                    Defaults to "root".
@@ -571,8 +571,8 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    the "user path."  This is not set by default.
 
        verifypw    This option controls when a password will be
-                   required when a user runs ssssuuuuddddoooo with the ----vvvv.
-                   It has the following possible values:
+                   required when a user runs ssssuuuuddddoooo with the ----vvvv
+                   flag.  It has the following possible values:
 
                        all         All the user's I<sudoers> entries for the
                                    current host must have the C<NOPASSWD>
@@ -589,7 +589,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April  7, 2000                1.6.3                             9
+April 22, 2000                1.6.3                             9
 
 
 
@@ -655,7 +655,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April  7, 2000                1.6.3                            10
+April 22, 2000                1.6.3                            10
 
 
 
@@ -712,8 +712,8 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
        By default, if the `NOPASSWD' tag is applied to any of the
        entries for a user on the current host, he or she will be
-       able to run `sudo -l' without a password.  Additionally, a
-       user may only run `sudo -v' without a password if the
+       able to run `sudo \-l' without a password.  Additionally,
+       a user may only run `sudo \-v' without a password if the
        `NOPASSWD' tag is present for all a user's entries that
        pertain to the current host.  This behavior may be over­
        ridden via the verifypw and listpw options.
@@ -721,7 +721,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April  7, 2000                1.6.3                            11
+April 22, 2000                1.6.3                            11
 
 
 
@@ -787,7 +787,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April  7, 2000                1.6.3                            12
+April 22, 2000                1.6.3                            12
 
 
 
@@ -853,7 +853,7 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
 
 
-April  7, 2000                1.6.3                            13
+April 22, 2000                1.6.3                            13
 
 
 
@@ -919,7 +919,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April  7, 2000                1.6.3                            14
+April 22, 2000                1.6.3                            14
 
 
 
@@ -985,7 +985,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April  7, 2000                1.6.3                            15
+April 22, 2000                1.6.3                            15
 
 
 
@@ -1051,7 +1051,7 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 
 
 
-April  7, 2000                1.6.3                            16
+April 22, 2000                1.6.3                            16
 
 
 
@@ -1117,6 +1117,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-April  7, 2000                1.6.3                            17
+April 22, 2000                1.6.3                            17
 
 

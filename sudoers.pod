@@ -299,17 +299,17 @@ This flag is off by default.
 =item shell_noargs
 
 If set and B<sudo> is invoked with no arguments it acts as if the
-C<-s> flag had been given.  That is, it runs a shell as root (the
+B<-s> flag had been given.  That is, it runs a shell as root (the
 shell is determined by the C<SHELL> environment variable if it is
 set, falling back on the shell listed in the invoking user's
 /etc/passwd entry if not).  This flag is off by default.
 
 =item set_home
 
-If set and B<sudo> is invoked with the C<-s> flag the C<HOME>
+If set and B<sudo> is invoked with the B<-s> flag the C<HOME>
 environment variable will be set to the home directory of the target
-user (which is root unless the C<-u> option is used).  This effectively
-makes the C<-s> flag imply C<-H>.  This flag is off by default.
+user (which is root unless the B<-u> option is used).  This effectively
+makes the B<-s> flag imply B<-H>.  This flag is off by default.
 
 =item path_info
 
@@ -375,13 +375,13 @@ of the invoking user.  This flag is off by default.
 =item targetpw
 
 If set, B<sudo> will prompt for the password of the user specified by
-the C<-u> flag (defaults to root) instead of the password of the
+the B<-u> flag (defaults to root) instead of the password of the
 invoking user.  This flag is off by default.
 
 =item set_logname
 
 Normally, B<sudo> will set the C<LOGNAME> and C<USER> environment variables
-to the name of the target user (usually root unless the C<-u> flag is given).
+to the name of the target user (usually root unless the B<-u> flag is given).
 However, since some programs (including the RCS revision control system)
 use C<LOGNAME> to determine the real identity of the user, it may be desirable
 to change this behavior.  This can be done by negating the set_logname option.
@@ -456,13 +456,13 @@ The default is F<@TIMEDIR@>.
 =item passprompt
 
 The default prompt to use when asking for a password; can be overridden
-via the C<-p> option or the C<SUDO_PROMPT> environment variable. Supports
+via the B<-p> option or the C<SUDO_PROMPT> environment variable. Supports
 two escapes: "%u" expands to the user's login name and "%h" expands
 to the local hostname.  The default value is "Password:".
 
 =item runas_default
 
-The default user to run commands as if the C<-u> flag is not specified
+The default user to run commands as if the B<-u> flag is not specified
 on the command line.  This defaults to "root".
 
 =item syslog_goodpri
@@ -506,7 +506,7 @@ Defaults to the path to sendmail found at configure time.
 
 =item mailerflags
 
-Flags to use when invoking mailer. Defaults to C<-t>.
+Flags to use when invoking mailer. Defaults to B<-t>.
 
 =item mailto
 
@@ -526,8 +526,8 @@ be separate from the "user path."  This is not set by default.
 
 =item verifypw
 
-This option controls when a password will be required when a
-user runs B<sudo> with the B<-v>.  It has the following possible values:
+This option controls when a password will be required when a user runs
+B<sudo> with the B<-v> flag.  It has the following possible values:
 
     all		All the user's I<sudoers> entries for the
 		current host must have the C<NOPASSWD>

@@ -26,17 +26,17 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        time (five minutes by default).
 
        ssssuuuuddddoooo determines who is an authorized user by consulting
-       the file _/_e_t_c_/_s_u_d_o_e_r_s.  By giving ssssuuuuddddoooo the `-v' flag a
-       user can update the time stamp without running a _c_o_m_m_a_n_d_.
-       The password prompt itself will also time out if the
-       user's password is not entered with N minutes (again, this
-       is defined at configure time and defaults to 5 minutes).
+       the file _/_e_t_c_/_s_u_d_o_e_r_s.  By giving ssssuuuuddddoooo the ----vvvv flag a user
+       can update the time stamp without running a _c_o_m_m_a_n_d_.  The
+       password prompt itself will also time out if the user's
+       password is not entered with N minutes (again, this is
+       defined at configure time and defaults to 5 minutes).
 
        If a user that is not listed in the _s_u_d_o_e_r_s file tries to
        run a command via ssssuuuuddddoooo, mail is sent to the proper author­
        ities, as defined at configure time (defaults to root).
        Note that the mail will not be sent if an unauthorized
-       user tries to run sudo with the `-l' or `-v' flags.  This
+       user tries to run sudo with the ----llll or ----vvvv flags.  This
        allows users to determine for themselves whether or not
        they are allowed to use ssssuuuuddddoooo.
 
@@ -48,20 +48,20 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 OOOOPPPPTTTTIIIIOOOONNNNSSSS
        ssssuuuuddddoooo accepts the following command line options:
 
-       -V  The `-V' (_v_e_r_s_i_o_n) option causes ssssuuuuddddoooo to print the
-           version number and exit.
+       -V  The ----VVVV (_v_e_r_s_i_o_n) option causes ssssuuuuddddoooo to print the ver­
+           sion number and exit.
 
-       -l  The `-l' (_l_i_s_t) option will list out the allowed (and
+       -l  The ----llll (_l_i_s_t) option will list out the allowed (and
            forbidden) commands for the user on the current host.
 
-       -L  The `-L' (_l_i_s_t defaults) option will list out the
-           parameters that may be set in a _D_e_f_a_u_l_t_s line along
-           with a short description for each.  This option is
-           useful in conjunction with _g_r_e_p(1).
+       -L  The ----LLLL (_l_i_s_t defaults) option will list out the param­
+           eters that may be set in a _D_e_f_a_u_l_t_s line along with a
+           short description for each.  This option is useful in
+           conjunction with _g_r_e_p(1).
 
 
 
-April  7, 2000                1.6.3                             1
+April 22, 2000                1.6.3                             1
 
 
 
@@ -70,44 +70,44 @@ April  7, 2000                1.6.3                             1
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
-       -h  The `-h' (_h_e_l_p) option causes ssssuuuuddddoooo to print a usage
-           message and exit.
+       -h  The ----hhhh (_h_e_l_p) option causes ssssuuuuddddoooo to print a usage mes­
+           sage and exit.
 
-       -v  If given the `-v' (_v_a_l_i_d_a_t_e) option, ssssuuuuddddoooo will update
+       -v  If given the ----vvvv (_v_a_l_i_d_a_t_e) option, ssssuuuuddddoooo will update
            the user's timestamp, prompting for the user's pass­
            word if necessary.  This extends the ssssuuuuddddoooo timeout to
            for another N minutes (where N is defined at installa­
            tion time and defaults to 5 minutes) but does not run
            a command.
 
-       -k  The `-k' (_k_i_l_l) option to ssssuuuuddddoooo invalidates the user's
+       -k  The ----kkkk (_k_i_l_l) option to ssssuuuuddddoooo invalidates the user's
            timestamp by setting the time on it to the epoch.  The
            next time ssssuuuuddddoooo is run a password will be required.
            This option does not require a password and was added
            to allow a user to revoke ssssuuuuddddoooo permissions from a
            .logout file.
 
-       -K  The `-K' (sure _k_i_l_l) option to ssssuuuuddddoooo removes the user's
+       -K  The ----KKKK (sure _k_i_l_l) option to ssssuuuuddddoooo removes the user's
            timestamp entirely.  This option does not require a
            password.
 
-       -b  The `-b' (_b_a_c_k_g_r_o_u_n_d) option tells ssssuuuuddddoooo to run the
-           given command in the background.  Note that if you use
-           the `-b' option you cannot use shell job control to
-           manipulate the command.
+       -b  The ----bbbb (_b_a_c_k_g_r_o_u_n_d) option tells ssssuuuuddddoooo to run the given
+           command in the background.  Note that if you use the
+           ----bbbb option you cannot use shell job control to manipu­
+           late the command.
 
-       -p  The `-p' (_p_r_o_m_p_t) option allows you to override the
+       -p  The ----pppp (_p_r_o_m_p_t) option allows you to override the
            default password prompt and use a custom one.  If the
            password prompt contains the `%u' escape, `%u' will be
            replaced with the user's login name.  Similarly, `%h'
            will be replaced with the local hostname.
 
-       -c  The `-c' (_c_l_a_s_s) option causes ssssuuuuddddoooo to run the speci­
-           fied command with resources limited by the specified
-           login class.  The _c_l_a_s_s argument can be either a class
-           name as defined in /etc/login.conf, or a single '-'
-           character.  Specifying the _c_l_a_s_s as '-' means that the
-           command should be run restricted by the default login
+       -c  The ----cccc (_c_l_a_s_s) option causes ssssuuuuddddoooo to run the specified
+           command with resources limited by the specified login
+           class.  The _c_l_a_s_s argument can be either a class name
+           as defined in /etc/login.conf, or a single '-' charac­
+           ter.  Specifying the _c_l_a_s_s as '-' means that the com­
+           mand should be run restricted by the default login
            capibilities of the user the command is run as.  If
            the _c_l_a_s_s argument specifies an existing user class,
            the command must be run as root, or the ssssuuuuddddoooo command
@@ -116,18 +116,18 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
            classes where ssssuuuuddddoooo has been configured with the
            --with-logincap option.
 
-       -u  The `-u' (_u_s_e_r) option causes ssssuuuuddddoooo to run the speci­
-           fied command as a user other than _r_o_o_t.  To specify a
-           _u_i_d instead of a _u_s_e_r_n_a_m_e, use "#uid".
+       -u  The ----uuuu (_u_s_e_r) option causes ssssuuuuddddoooo to run the specified
+           command as a user other than _r_o_o_t.  To specify a _u_i_d
+           instead of a _u_s_e_r_n_a_m_e, use "#uid".
 
-       -s  The `-s' (_s_h_e_l_l) option runs the shell specified by
-           the _S_H_E_L_L environment variable if it is set or the
-           shell as specified in _p_a_s_s_w_d(4).
-
-
+       -s  The ----ssss (_s_h_e_l_l) option runs the shell specified by the
+           _S_H_E_L_L environment variable if it is set or the shell
+           as specified in _p_a_s_s_w_d(4).
 
 
-April  7, 2000                1.6.3                             2
+
+
+April 22, 2000                1.6.3                             2
 
 
 
@@ -136,18 +136,17 @@ April  7, 2000                1.6.3                             2
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
-       -H  The `-H' (_H_O_M_E) option sets the _H_O_M_E environment vari­
+       -H  The ----HHHH (_H_O_M_E) option sets the _H_O_M_E environment vari­
            able to the homedir of the target user (root by
            default) as specified in _p_a_s_s_w_d(4).  By default, ssssuuuuddddoooo
            does not modify _H_O_M_E.
 
-       -S  The `-S' (_s_t_d_i_n) option causes ssssuuuuddddoooo to read the pass­
-           word from standard input instead of the terminal
-           device.
+       -S  The ----SSSS (_s_t_d_i_n) option causes ssssuuuuddddoooo to read the password
+           from standard input instead of the terminal device.
 
-       --  The `--' flag indicates that ssssuuuuddddoooo should stop process­
-           ing command line arguments.  It is most useful in con­
-           junction with the `-s' flag.
+       --  The -------- flag indicates that ssssuuuuddddoooo should stop processing
+           command line arguments.  It is most useful in conjunc­
+           tion with the ----ssss flag.
 
 RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEESSSS
        Upon successful execution of a program, the return value
@@ -189,11 +188,12 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
        For security reasons, if your OS supports shared libraries
        and does not disable user-defined library search paths for
        setuid programs (most do), you should either use a linker
-       option that disables this behavior or link ssssuuuuddddoooo
+       option that disables this behavior or link ssssuuuuddddoooo stati­
+       cally.
 
 
 
-April  7, 2000                1.6.3                             3
+April 22, 2000                1.6.3                             3
 
 
 
@@ -201,8 +201,6 @@ April  7, 2000                1.6.3                             3
 
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
-
-       statically.
 
        ssssuuuuddddoooo will check the ownership of its timestamp directory
        (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's con­
@@ -256,19 +254,18 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
        partition.  Note that this runs the commands in a sub-
        shell to make the `cd' and file redirection work.
 
+        % sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 
 
 
-April  7, 2000                1.6.3                             4
+
+April 22, 2000                1.6.3                             4
 
 
 
 
 
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
-
-
-        % sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 
 
 EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
@@ -322,10 +319,13 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 
        If users have sudo `ALL' there is nothing to prevent them
        from creating their own program that gives them a root
+       shell regardless of any '!'  elements in the user specifi­
+       cation.
 
 
 
-April  7, 2000                1.6.3                             5
+
+April 22, 2000                1.6.3                             5
 
 
 
@@ -333,9 +333,6 @@ April  7, 2000                1.6.3                             5
 
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
-
-       shell regardless of any '!'  elements in the user specifi­
-       cation.
 
        Running shell scripts via ssssuuuuddddoooo can expose the same kernel
        bugs that make setuid shell scripts unsafe on some operat­
@@ -391,6 +388,9 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-April  7, 2000                1.6.3                             6
+
+
+
+April 22, 2000                1.6.3                             6
 
 
