@@ -19,7 +19,7 @@ for parse errors.  If the I<sudoers> file is currently being
 edited you will receive a message to try again later.  In the
 default configuration, the vi(1) editor is used, but there is
 a compile time option to allow use of whatever editor the
-environmental variables EDITOR or VISUAL are set to.
+environmental variables C<EDITOR> or C<VISUAL> are set to.
 
 B<visudo> parses the I<sudoers> file after the edit and will
 not save the changes if there is a syntax error.  Upon finding
@@ -44,30 +44,30 @@ B<visudo> accepts the following command line option:
 
 =item -V
 
-The B<-V> (version) option causes visudo to print the version number
+The C<-V> (version) option causes B<visudo> to print the version number
 and exit.
 
 =back
 
 =head1 FILES
 
- /etc/sudoers			file of authorized users.
- /etc/stmp			lock file for visudo.
+F</etc/sudoers>S<			file of authorized users.>
+F</etc/stmp>S<				lock file for B<visudo>.>
 
 =head1 ENVIRONMENT VARIABLES
 
 The following are used only if B<visudo> was compiled with the
-ENV_EDITOR option:
+I<ENV_EDITOR> option:
 
- EDITOR				Used by visudo as the editor to use.
- VISUAL				Used by visudo if EDITOR is not set.
+C<EDITOR>S<				Used by B<visudo> as the editor to use.>
+C<VISUAL>S<				Used by B<visudo> if C<EDITOR> is not set.>
 
 =head1 AUTHOR
 
 Many people have worked on I<sudo> over the years, this version of
-I<visudo> was written by:
+B<visudo> was written by:
 
- Todd Miller                   <Todd.Miller@cs.colorado.edu>
+ Todd Miller		<Todd.Miller@cs.colorado.edu>
 
 See the HISTORY file in the sudo distribution for more details.
 
@@ -86,13 +86,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 =head1 CAVEATS
 
+Due to the syntax of the I<sudoers> file, there is no way
+for B<visudo> to tell the difference between a mistyped
+{Host,User,Cmnd}_Alias and a username.
+
 There is no easy way to prevent a user from gaining a root shell if 
-the editor used by visudo allows shell escapes.
+the editor used by B<visudo> allows shell escapes.
 
 =head1 BUGS
 
 The I<-V> flag gives the version of the I<sudo> package rather than
-the individual I<visudo> program.
+the individual B<visudo> program.
 
 =head1 SEE ALSO
 
