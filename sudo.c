@@ -848,8 +848,8 @@ parse_args(argc, argv)
 }
 
 /*
- * Sanity check sudoers mode/owner/type.
- * Leaves a file pointer to the sudoers file open in ``fp''.
+ * Open sudoers and sanity check mode/owner/type.
+ * Returns a handle to the sudoers file.
  */
 FILE *
 open_sudoers(sudoers)
@@ -919,6 +919,7 @@ open_sudoers(sudoers)
 	}
 	if (fp == NULL)
 	    log_error(USE_ERRNO, "can't open %s", sudoers);
+	rewind(fp);
 	(void) fcntl(fileno(fp), F_SETFD, 1);
     }
 

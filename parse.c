@@ -109,8 +109,6 @@ sudoers_lookup(pwflag)
     int error, nopass;
     enum def_tupple pwcheck;
 
-    /* We opened _PATH_SUDOERS in check_sudoers() so just rewind it. */
-    rewind(sudoers_fp);
     yyin = sudoers_fp;
     yyout = stdout;
 
