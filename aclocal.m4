@@ -293,6 +293,18 @@ AC_DEFUN(SUDO_TYPE_SSIZE_T,
 [SUDO_CHECK_TYPE(ssize_t, int)])
 
 dnl
+dnl Check for dev_t declation
+dnl
+AC_DEFUN(SUDO_TYPE_DEV_T,
+[SUDO_CHECK_TYPE(dev_t, int)])
+
+dnl
+dnl Check for ino_t declation
+dnl
+AC_DEFUN(SUDO_TYPE_INO_T,
+[SUDO_CHECK_TYPE(ino_t, unsigned int)])
+
+dnl
 dnl check for POSIX utime() using struct utimbuf
 dnl
 AC_DEFUN(SUDO_FUNC_UTIME_POSIX,
