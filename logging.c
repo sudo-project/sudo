@@ -75,6 +75,8 @@ static void mysyslog		__P((int, const char *, ...));
  * We do an openlog(3)/closelog(3) for each message because some
  * authentication methods (notably PAM) use syslog(3) for their
  * own nefarious purposes and may call openlog(3) and closelog(3).
+ * Note that because we don't want to assume that all systems have
+ * vsyslog(3) (HP-UX doesn't) "%m" will not be expanded.
  * Sadly this is a maze of #ifdefs.
  */
 static void
@@ -90,6 +92,7 @@ mysyslog(pri, fmt, ap)
 #ifdef BROKEN_SYSLOG
     int i;
 #endif
+    char buf[MAXSYSLOGLEN+1];
     va_list ap;
 
 #ifdef __STDC__
@@ -102,6 +105,7 @@ mysyslog(pri, fmt, ap)
 #else
     openlog(Argv[0], 0);
 #endif
+    vsnprintf(buf, sizeof(buf), fmt, ap);
 #ifdef BROKEN_SYSLOG
     /*
      * Some versions of syslog(3) don't guarantee success and return
@@ -109,10 +113,10 @@ mysyslog(pri, fmt, ap)
      * try, try again...
      */
     for (i = 0; i < MAXSYSLOGTRIES; i++)
-	if (vsyslog(pri, fmt, ap) == 0)
+	if (syslog(pri, "%s", buf) == 0)
 	    break;
 #else
-    vsyslog(pri, fmt, ap);
+    syslog(pri, "%s", buf);
 #endif /* BROKEN_SYSLOG */
     va_end(ap);
     closelog();
