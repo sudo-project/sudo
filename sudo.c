@@ -85,7 +85,9 @@ static char rcsid[] = "$Id$";
 #include "version.h"
 
 #ifndef STDC_HEADERS
+#ifndef __GNUC__		/* gcc has its own malloc */
 extern char *malloc	__P((size_t));
+#endif /* __GNUC__ */
 #ifdef HAVE_STRDUP
 extern char *strdup	__P((const char *));
 #endif /* HAVE_STRDUP */
@@ -308,39 +310,38 @@ static void load_globals()
 
 static int parse_args()
 {
-    int opt_ch;
-    int V_flag=0, h_flag=0, v_flag=0, k_flag=0, error=0;
-    int ret=MODE_RUN;
+    int ret=MODE_RUN;			/* what mode is suod to be run in? */
 
-    /* no options and no command */
-    if (Argc < 2)
+    if (Argc < 2)			/* no options and no command */
 	usage(1);
 
-    while ((opt_ch = getopt(Argc, Argv, "vkVh")) != -1)
-	switch (opt_ch) {
+    if (Argv[1][0] == '-') {
+	if (Argc > 2)			/* only one -? option allowed */
+	    usage(1);
+
+	if (Argv[1][2] != '\0') {
+	    fprintf(stderr, "%s: Please use single character options\n", Argv[0]);
+	    usage(1);
+	}
+
+	switch (Argv[1][1]) {
 	    case 'v':
-		++v_flag;
 		ret = MODE_VALIDATE;
 		break;
 	    case 'k':
-		++k_flag;
 		ret = MODE_KILL;
 		break;
 	    case 'V':
-		++V_flag;
 		ret = MODE_VERSION;
 		break;
 	    case 'h':
-		++h_flag;
 		ret = MODE_HELP;
 		break;
-	    case '?':
-		++error;
+	    default:
+		fprintf(stderr, "%s: Illegal option %s\n", Argv[0], Argv[1]);
+		usage(1);
 	}
-
-    error += (V_flag + v_flag + k_flag > 1);
-    if (error)
-	usage(1);
+    }
 
     return(ret);
 }
