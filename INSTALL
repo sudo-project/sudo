@@ -125,6 +125,24 @@ Special features/options:
                           Other platforms may require source code
                           and/or `configure' changes.
 
+  --with-incpath          Adds the specified directories to CPPFLAGS
+                          so configure and the compiler will look there
+			  for include files.  Multiple directories may
+			  be specified as long as they are space separated.
+			  Eg: --with-incpath="/usr/local/include /opt/include"
+
+  --with-libpath          Adds the specified directories to SUDO_LDFLAGS
+			  and VISUDO_LDFLAGS so configure and the compiler
+			  will look there for libraries.  Multiple directories
+			  may be specified as with --with-incpath.
+
+  --with-libraries        Adds the specified libaries to SUDO_LIBS and
+			  and VISUDO_LIBS so sudo will link against them.
+			  If the library doesn't start with `-l' or end
+			  in `.a' or `.o' a `-l' will be prepended to it.
+			  Multiple libraries may be specified as long
+			  as they are space separated.
+
   --with-csops            Add CSOps standard options.
 
 Shadow password and C2 support
