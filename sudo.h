@@ -325,6 +325,12 @@ typedef struct list {
 #define CMND_LIST                0x02
 #define EXTRA_LIST               0x03
 
+#define MODE_RUN                 0x00
+#define MODE_VALIDATE            0x01
+#define MODE_KILL                0x02
+#define MODE_VERSION             0x03
+#define MODE_HELP                0x04
+
 /*
  * Prototypes
  */
@@ -349,6 +355,8 @@ int validate		__P((void));
 void be_root		__P((void));
 void be_user		__P((void));
 void be_full_user	__P((void));
+void remove_timestamp	__P((void));
+
 
 /*
  * Most of these variables are declared in main() so they don't need
@@ -363,7 +371,6 @@ extern char *epasswd;
 extern char *cmnd;
 extern int Argc;
 extern char **Argv;
-extern int validate_only;
 #endif
 extern int errno;
 extern char ** environ;
