@@ -262,6 +262,11 @@ AIX 3.2.x:
     flex from ftp.ee.lbl.gov (also available on most GNU mirrors)
     and sudo will use that instead.
 
+HP-UX:
+    HP-UX doesn't have yacc unless you buy the developement option.
+    If you don't have yacc, you will need GNU bison which is available
+    from ftp://prep.ai.mit.edu/pub/gnu/ or any GNU mirror.
+
 Ultrix 4.x:
     Ultrix still ships with the 4.2BSD syslog(3) which does not
     allow things like logging different faclities to different
