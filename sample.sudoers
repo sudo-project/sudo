@@ -88,4 +88,4 @@ jim		+biglab=ALL
 fred		ALL=(oracle) /bin/ls,(#-2) NOPASSWD:/bin/date
 
 # somedude may su to anyone but root and flags are not allowed
-somedude	ALL=/usr/bin/su [^-]*, !/usr/bin/su *root*
+somedude	ALL=/usr/bin/su [!-]*, !/usr/bin/su *root*
