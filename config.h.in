@@ -137,6 +137,9 @@
 #  define isblank(_x)	((_x) == ' ' || (_x) == '\t')
 #endif
 
+/* Define if you have the sigaction_t type.  */
+#undef HAVE_SIGACTION_T
+
 /* Define if you have tzset(3).  */
 #undef HAVE_TZSET
 

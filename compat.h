@@ -210,7 +210,9 @@ int sigprocmask __P((int, const sigset_t *, sigset_t *));
  * as well as the fact that SunOS has a SA_INTERRUPT flag.
  */
 #ifdef HAVE_SIGACTION
+# ifndef HAVE_SIGACTION_T
 typedef struct sigaction sigaction_t;
+# endif
 # ifndef SA_INTERRUPT 
 #  define SA_INTERRUPT	0
 # endif
