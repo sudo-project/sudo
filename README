@@ -65,17 +65,21 @@ Mailing lists
 =============
 sudo-announce	This list receives announcements whenever a new version
 		of sudo is released.
+		http://www.courtesan.com/mailman/listinfo/sudo-announce
 
 sudo-users	This list is for questions and general discussion about sudo.
+		http://www.courtesan.com/mailman/listinfo/sudo-users
 
 sudo-workers	This list is for people working on and porting sudo.
+		http://www.courtesan.com/mailman/listinfo/sudo-workers
 
-To subscribe to a list, send a mail message to "majordomo@courtesan.com"
-with a line in the message body (_not_ the subject) of "subscribe listname"
-where "listname" is one of sudo-announce, sudo-users, or sudo-workers.
+To subscribe to a list, visit its url (as listed above) and enter
+your email address to subscribe.  Digest versions are available but
+these are fairly low traffic lists so the digest versions are not
+a significant win.
 
-Currently all the lists are fairly low-volume so there hasn't been a
-need for digest versions.
+Mailing list archives are also available.  See the mailing list web sites
+for the appropriate links.
 
 Web page
 ========
