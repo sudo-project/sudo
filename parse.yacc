@@ -174,8 +174,8 @@ extern int  command_matches	__P((char *, char *, char *, char *));
 extern int  addr_matches	__P((char *));
 extern int  netgr_matches	__P((char *, char *, char *));
 extern int  usergr_matches	__P((char *, char *));
-static int  find_alias		__P((char *, int));
-static int  add_alias		__P((char *, int));
+static aliasinfo *find_alias	__P((char *, int));
+static int  add_alias		__P((char *, int, int));
 static int  more_aliases	__P((void));
 static void append		__P((char *, char **, size_t *, size_t *, char *));
 static void expand_ga_list	__P((void));
@@ -229,6 +229,12 @@ yyerror(s)
 %token <tok>	 ':' '=' ',' '!' '.'	/* union member tokens */
 %token <tok>	 ERROR
 
+/*
+ * NOTE: these are not true booleans as there are actually 3 possible values: 
+ *        1) TRUE (item matched and user is allowed)
+ *        0) FALSE (item matched and user is *not* allowed because of '!')
+ *       -1) No change (don't change the value of *_matches)
+ */
 %type <BOOLEAN>	 cmnd
 %type <BOOLEAN>	 hostspec
 %type <BOOLEAN>	 runasuser
@@ -245,9 +251,8 @@ entry		:	COMMENT
                 |       error COMMENT
 			    { yyerrok; }
 		|	{ push; } userlist privileges {
-			    while (top && user_matches != TRUE) {
+			    while (top && user_matches != TRUE)
 				pop;
-			    }
 			}
 		|	USERALIAS useraliases
 			    { ; }
@@ -277,12 +282,12 @@ privilege	:	hostlist '=' cmndspeclist {
 		;
 
 ophostspec	:	hostspec {
-			    if ($1 == TRUE)
-				host_matches = TRUE;
+			    if ($1 != -1)
+				host_matches = $1;
 			}
 		|	'!' hostspec {
-			    if ($2 == TRUE)
-				host_matches = FALSE;
+			    if ($2 != -1)
+				host_matches = !$2;
 			}
 
 hostspec	:	ALL {
@@ -292,28 +297,41 @@ hostspec	:	ALL {
 		|	NTWKADDR {
 			    if (addr_matches($1))
 				$$ = TRUE;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, user_host, NULL))
 				$$ = TRUE;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		|	NAME {
 			    if (strcasecmp(user_shost, $1) == 0)
 				$$ = TRUE;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		|	FQHOST {
 			    if (strcasecmp(user_host, $1) == 0)
 				$$ = TRUE;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		|	ALIAS {
+			    aliasinfo *aip = find_alias($1, HOST_ALIAS);
+
 			    /* could be an all-caps hostname */
-			    if (find_alias($1, HOST_ALIAS) == TRUE ||
-				strcasecmp(user_shost, $1) == 0)
+			    if (aip)
+				$$ = aip->val;
+			    else if (strcasecmp(user_shost, $1) == 0)
 				$$ = TRUE;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		;
@@ -337,8 +355,8 @@ cmndspec	:	runasspec nopasswd opcmnd {
 		;
 
 opcmnd		:	cmnd {
-			    if ($1 == TRUE)
-				cmnd_matches = TRUE;
+			    if ($1 != -1)
+				cmnd_matches = $1;
 			}
 		|	'!' {
 			    if (printmatches == TRUE) {
@@ -349,8 +367,8 @@ opcmnd		:	cmnd {
 				    append_cmnd("!", NULL);
 			    }
 			} cmnd {
-			    if ($3 == TRUE)
-				cmnd_matches = FALSE;
+			    if ($3 != -1)
+				cmnd_matches = !$3;
 			}
 		;
 
@@ -385,8 +403,8 @@ runaslist	:	oprunasuser
 		;
 
 oprunasuser	:	runasuser {
-			    if ($1 == TRUE)
-				runas_matches = TRUE;
+			    if ($1 != -1)
+				runas_matches = $1;
 			}
 		|	'!' {
 			    if (printmatches == TRUE) {
@@ -397,8 +415,8 @@ oprunasuser	:	runasuser {
 				    append_runas("!", ", ");
 			    }
 			} runasuser {
-			    if ($3 == TRUE)
-				runas_matches = FALSE;
+			    if ($3 != -1)
+				runas_matches = !$3;
 			}
 
 runasuser	:	NAME {
@@ -411,6 +429,8 @@ runasuser	:	NAME {
 			    }
 			    if (strcmp($1, user_runas) == 0)
 				$$ = TRUE;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		|	USERGROUP {
@@ -423,6 +443,8 @@ runasuser	:	NAME {
 			    }
 			    if (usergr_matches($1, user_runas))
 				$$ = TRUE;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		|	NETGROUP {
@@ -435,9 +457,13 @@ runasuser	:	NAME {
 			    }
 			    if (netgr_matches($1, NULL, user_runas))
 				$$ = TRUE;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		|	ALIAS {
+			    aliasinfo *aip = find_alias($1, RUNAS_ALIAS);
+
 			    if (printmatches == TRUE) {
 				if (in_alias == TRUE)
 				    append_entries($1, ", ");
@@ -446,9 +472,12 @@ runasuser	:	NAME {
 				    append_runas($1, ", ");
 			    }
 			    /* could be an all-caps username */
-			    if (find_alias($1, RUNAS_ALIAS) == TRUE ||
-				strcmp($1, user_runas) == 0)
+			    if (aip)
+				$$ = aip->val;
+			    else if (strcmp($1, user_runas) == 0)
 				$$ = TRUE;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		|	ALL {
@@ -507,6 +536,8 @@ cmnd		:	ALL {
 			    safe_cmnd = estrdup(user_cmnd);
 			}
 		|	ALIAS {
+			    aliasinfo *aip;
+
 			    if (printmatches == TRUE) {
 				if (in_alias == TRUE)
 				    append_entries($1, ", ");
@@ -517,8 +548,10 @@ cmnd		:	ALL {
 				}
 			    }
 
-			    if (find_alias($1, CMND_ALIAS) == TRUE)
-				$$ = TRUE;
+			    if ((aip = find_alias($1, CMND_ALIAS)))
+				$$ = aip->val;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		|	 COMMAND {
@@ -540,6 +573,8 @@ cmnd		:	ALL {
 			    if (command_matches(user_cmnd, user_args,
 				$1.cmnd, $1.args))
 				$$ = TRUE;
+			    else
+				$$ = -1;
 
 			    free($1.cmnd);
 			    if ($1.args)
@@ -552,8 +587,8 @@ hostaliases	:	hostalias
 		;
 
 hostalias	:	ALIAS { push; } '=' hostlist {
-			    if (host_matches == TRUE &&
-				add_alias($1, HOST_ALIAS) == FALSE)
+			    if (host_matches != -1 &&
+				!add_alias($1, HOST_ALIAS, host_matches))
 				YYERROR;
 			    pop;
 			}
@@ -576,8 +611,8 @@ cmndalias	:	ALIAS {
 				ga_list[ga_list_len-1].alias = estrdup($1);
 			     }
 			} '=' cmndlist {
-			    if (cmnd_matches == TRUE &&
-				add_alias($1, CMND_ALIAS) == FALSE)
+			    if (cmnd_matches != -1 &&
+				!add_alias($1, CMND_ALIAS, cmnd_matches))
 				YYERROR;
 			    pop;
 			    free($1);
@@ -604,8 +639,8 @@ runasalias	:	ALIAS {
 				ga_list[ga_list_len-1].alias = estrdup($1);
 			    }
 			} '=' runaslist {
-			    if (runas_matches > 0 &&
-				add_alias($1, RUNAS_ALIAS) == FALSE)
+			    if (runas_matches != -1 &&
+				!add_alias($1, RUNAS_ALIAS, runas_matches))
 				YYERROR;
 			    pop;
 			    free($1);
@@ -620,8 +655,8 @@ useraliases	:	useralias
 		;
 
 useralias	:	ALIAS { push; }	'=' userlist {
-			    if (user_matches == TRUE &&
-				add_alias($1, USER_ALIAS) == FALSE)
+			    if (user_matches != -1 &&
+				!add_alias($1, USER_ALIAS, user_matches))
 				YYERROR;
 			    pop;
 			    free($1);
@@ -633,34 +668,45 @@ userlist	:	opuser { ; }
 		;
 
 opuser		:	user {
-			    if ($1 == TRUE)
-				user_matches = TRUE;
+			    if ($1 != -1)
+				user_matches = $1;
 			}
 		|	'!' user {
-			    if ($2 == TRUE)
-				user_matches = FALSE;
+			    if ($2 != -1)
+				user_matches = !$2;
 			}
 
 user		:	NAME {
 			    if (strcmp($1, user_name) == 0)
 				$$ = TRUE;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		|	USERGROUP {
 			    if (usergr_matches($1, user_name))
 				$$ = TRUE;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, NULL, user_name))
 				$$ = TRUE;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		|	ALIAS {
+			    aliasinfo *aip = find_alias($1, USER_ALIAS);
+
 			    /* could be an all-caps username */
-			    if (find_alias($1, USER_ALIAS) == TRUE ||
-				strcmp($1, user_name) == 0)
+			    if (aip)
+				$$ = aip->val;
+			    else if (strcmp($1, user_name) == 0)
 				$$ = TRUE;
+			    else
+				$$ = -1;
 			    free($1);
 			}
 		|	ALL {
@@ -671,11 +717,6 @@ user		:	NAME {
 
 %%
 
-typedef struct {
-    int type;
-    char *name;
-} aliasinfo;
-
 #define MOREALIASES (32)
 aliasinfo *aliases = NULL;
 size_t naliases = 0;
@@ -684,6 +725,7 @@ size_t nslots = 0;
 
 /*
  * Compare two aliasinfo structures, strcmp() style.
+ * Note that we do *not* compare their values.
  */
 static int
 aliascmp(a1, a2)
@@ -719,9 +761,10 @@ genaliascmp(entry, key)
  * Adds the named alias of the specified type to the aliases list.
  */
 static int
-add_alias(alias, type)
+add_alias(alias, type, val)
     char *alias;
     int type;
+    int val;
 {
     aliasinfo ai, *aip;
     size_t onaliases;
@@ -735,6 +778,7 @@ add_alias(alias, type)
     }
 
     ai.type = type;
+    ai.val = val;
     ai.name = estrdup(alias);
     onaliases = naliases;
 
@@ -758,7 +802,7 @@ add_alias(alias, type)
 /*
  * Searches for the named alias of the specified type.
  */
-static int
+static aliasinfo *
 find_alias(alias, type)
     char *alias;
     int type;
@@ -768,8 +812,8 @@ find_alias(alias, type)
     ai.name = alias;
     ai.type = type;
 
-    return(lfind((VOID *)&ai, (VOID *)aliases, &naliases,
-		 sizeof(ai), aliascmp) != NULL);
+    return((aliasinfo *) lfind((VOID *)&ai, (VOID *)aliases, &naliases,
+		 sizeof(ai), aliascmp));
 }
 
 /*
@@ -814,7 +858,7 @@ dumpaliases()
 	    (void) puts("RUNAS_ALIAS");
 	    break;
 	}
-	(void) printf("\t%s\n", aliases[n].name);
+	(void) printf("\t%s: %d\n", aliases[n].name, aliases[n].val);
     }
 }
 
