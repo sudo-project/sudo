@@ -1,25 +1,30 @@
 /*
- *  CU sudo version 1.6 -- allows users to execute commands as root and others
- *  Copyright (c) 1991  The Root Group, Inc.
- *  Copyright (c) 1994,1996,1998,1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994,1996,1998,1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  $Sudo$
+ * $Sudo$
  */
 
 #ifndef _SUDO_SUDO_H
@@ -27,136 +32,34 @@
 
 #include <pathnames.h>
 #include "compat.h"
+#include "logging.h"
 
 /*
- * Data structure used in parsing sudoers;
- * top of stack values are the ones that
- * apply when parsing is done & can be
- * accessed by *_matches macros
+ * Info pertaining to the invoking user.
  */
-#define STACKINCREMENT (32)
-struct matchstack {
-	int user;
-	int cmnd;
-	int host;
-	int runas;
-	int nopass;
-};
-
-/*
- * Data structure describing a command in the
- * sudoers file.
- */
-struct sudo_command {
-    char *cmnd;
-    char *args;
-};
-
-
-extern struct matchstack *match;
-extern int top;
-
-#define user_matches	(match[top-1].user)
-#define user_matched	(match[top].user)
-#define cmnd_matches	(match[top-1].cmnd)
-#define cmnd_matched	(match[top].cmnd)
-#define host_matches	(match[top-1].host)
-#define host_matched	(match[top].host)
-#define runas_matches	(match[top-1].runas)
-#define runas_matched	(match[top].runas)
-#define no_passwd	(match[top-1].nopass)
-
-/*
- * Structure containing command matches if "sudo -l" is used.
- */
-struct command_match {
+struct sudo_user {
+    struct passwd *pw;
+    char *tty;
+    char  cwd[MAXPATHLEN];
+    char *host;
+    char *shost;
     char *runas;
-    size_t runas_len;
-    size_t runas_size;
+    char *prompt;
+    char *cmnd_safe;
     char *cmnd;
-    size_t cmnd_len;
-    size_t cmnd_size;
-    int nopasswd;
+    char *cmnd_args;
 };
 
 /*
- * Structure containing Cmnd_Alias's if "sudo -l" is used.
+ * Return values for validate()
+ * Also arguments for log_auth()
  */
-struct generic_alias {
-    char *alias;
-    char *entries;
-    size_t entries_size;
-    size_t entries_len;
-};
-
-/*
- * Maximum number of characters to log per entry.  The syslogger
- * will log this much, after that, it truncates the log line.
- * We need this here to make sure that we continue with another
- * syslog(3) call if the internal buffer is moe than 1023 characters.
- */
-#ifndef MAXSYSLOGLEN
-#  define MAXSYSLOGLEN		960
-#endif
-
-/*
- * syslog(3) parameters
- */
-
-#define SLOG_SYSLOG              0x01
-#define SLOG_FILE                0x02
-#define SLOG_BOTH                0x03
-
-#if (LOGGING & SLOG_SYSLOG)
-#  include <syslog.h>
-#  ifndef Syslog_ident
-#    define Syslog_ident	"sudo"
-#  endif
-#  ifndef Syslog_options
-#    define Syslog_options	0
-#  endif
-#  if !defined(Syslog_facility) && defined(LOG_NFACILITIES)
-#    define Syslog_facility	LOGFAC
-#  endif
-#  ifndef Syslog_priority_OK
-#    define Syslog_priority_OK	LOG_NOTICE
-#  endif
-#  ifndef Syslog_priority_NO
-#    define Syslog_priority_NO	LOG_ALERT
-#  endif
-#endif	/* LOGGING & SLOG_SYSLOG */
-
 #define VALIDATE_OK              0x00
 #define VALIDATE_OK_NOPASS       0x01
 #define VALIDATE_NO_USER         0x02
 #define VALIDATE_NOT_OK          0x03
 #define VALIDATE_NOT_OK_NOPASS   0x04
 #define VALIDATE_ERROR          -1
-
-/*
- *  The arguments passed to log_error() are ANDed with GLOBAL_PROBLEM
- *  If the result is TRUE, the argv is NOT logged with the error message
- *  NOTE: 0x00 - 0x04 below must correspond to 0x00 - 0x04 above.
- */
-#define GLOBAL_PROBLEM           0x100
-#define ALL_SYSTEMS_GO           0x00
-#define GLOBAL_NO_PW_ENT         ( 0x01 | GLOBAL_PROBLEM )
-#define GLOBAL_NO_HOSTNAME       ( 0x02 | GLOBAL_PROBLEM )
-#define GLOBAL_HOST_UNREGISTERED ( 0x03 | GLOBAL_PROBLEM )
-#define PASSWORD_NOT_CORRECT     0x05
-#define PASSWORDS_NOT_CORRECT    0x06
-#define NO_SUDOERS_FILE          ( 0x07 | GLOBAL_PROBLEM )
-#define BAD_SUDOERS_FILE         ( 0x08 | GLOBAL_PROBLEM )
-#define SUDOERS_WRONG_OWNER      ( 0x09 | GLOBAL_PROBLEM )
-#define SUDOERS_WRONG_MODE       ( 0x0A | GLOBAL_PROBLEM )
-#define SUDOERS_NOT_FILE         ( 0x0B | GLOBAL_PROBLEM )
-#define BAD_STAMPDIR             0x0C
-#define BAD_STAMPFILE            0x0D
-#define BAD_AUTH_INIT            0x0E
-#define NO_CMND_SAFE             0x0F
-#ifdef HAVE_KERB5
-#define GLOBAL_KRB5_INIT_ERR     ( 0x10 | GLOBAL_PROBLEM )
-#endif /* HAVE_KERB5 */
 
 /*
  * Boolean values
@@ -178,13 +81,14 @@ struct generic_alias {
  */
 #define MODE_RUN                 00001
 #define MODE_VALIDATE            00002
-#define MODE_KILL                00004
-#define MODE_VERSION             00010
-#define MODE_HELP                00020
-#define MODE_LIST                00040
-#define MODE_BACKGROUND          00100
-#define MODE_SHELL               00200
-#define MODE_RESET_HOME          00400
+#define MODE_INVALIDATE          00004
+#define MODE_KILL                00010
+#define MODE_VERSION             00020
+#define MODE_HELP                00040
+#define MODE_LIST                00100
+#define MODE_BACKGROUND          00200
+#define MODE_SHELL               00400
+#define MODE_RESET_HOME          01000
 
 /*
  * Used with set_perms()
@@ -196,23 +100,23 @@ struct generic_alias {
 #define PERM_RUNAS	         0x04
 
 /*
- * Shortcuts for user_pw_ent
+ * Shortcuts for sudo_user contents.
  */
-#define user_name		(user_pw_ent -> pw_name)
-#define user_passwd		(user_pw_ent -> pw_passwd)
-#define user_uid		(user_pw_ent -> pw_uid)
-#define user_gid		(user_pw_ent -> pw_gid)
-#define user_shell		(user_pw_ent -> pw_shell)
-#define user_dir		(user_pw_ent -> pw_dir)
-
-/*
- * Use either tgetpass() or system getpass()
- */
-#ifdef USE_GETPASS
-#define GETPASS(p, t, e)	getpass(p)
-#else
-#define GETPASS(p, t, e)	tgetpass(p, t, e)
-#endif
+#define user_name		(sudo_user.pw->pw_name)
+#define user_passwd		(sudo_user.pw->pw_passwd)
+#define user_uid		(sudo_user.pw->pw_uid)
+#define user_gid		(sudo_user.pw->pw_gid)
+#define user_shell		(sudo_user.pw->pw_shell)
+#define user_dir		(sudo_user.pw->pw_dir)
+#define user_tty		(sudo_user.tty)
+#define user_cwd		(sudo_user.cwd)
+#define user_runas		(sudo_user.runas)
+#define user_cmnd		(sudo_user.cmnd)
+#define user_args		(sudo_user.cmnd_args)
+#define user_prompt		(sudo_user.prompt)
+#define user_host		(sudo_user.host)
+#define user_shost		(sudo_user.shost)
+#define safe_cmnd		(sudo_user.cmnd_safe)
 
 /*
  * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
@@ -237,13 +141,11 @@ char *sudo_goodpath	__P((const char *));
 int sudo_setenv		__P((char *, char *));
 char *tgetpass		__P((const char *, int, int));
 int find_path		__P((char *, char **));
-void log_error		__P((int));
-void inform_user	__P((int));
 void check_user		__P((void));
-void check_passwd	__P((void));
+void verify_user	__P((void));
 int validate		__P((int));
 void set_perms		__P((int, int));
-void remove_timestamp	__P((void));
+void remove_timestamp	__P((int));
 int check_secureware	__P((char *));
 void sia_attempt_auth	__P((void));
 void pam_attempt_auth	__P((void));
@@ -254,22 +156,10 @@ VOID *erealloc		__P((VOID *, size_t));
 char *estrdup		__P((const char *));
 YY_DECL;
 
+/* Only provide extern declarations outside of sudo.c. */
+#ifndef _SUDO_SUDO_C
+extern struct sudo_user sudo_user;
 
-/*
- * Most of these variables are declared in main() so they don't need
- * to be extern'ed here if this is main...
- */
-#ifndef MAIN
-extern char host[];
-extern char *shost;
-extern char cwd[];
-extern struct passwd *user_pw_ent;
-extern char *runas_user;
-extern char *tty;
-extern char *cmnd;
-extern char *cmnd_safe;
-extern char *cmnd_args;
-extern char *prompt;
 extern int Argc;
 extern char **Argv;
 extern int NewArgc;
