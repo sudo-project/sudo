@@ -82,7 +82,7 @@ LINK tmp_ptr, reset_ptr, save_ptr, list_ptr[NUM_LISTS];
  * Prototypes
  */
 static int hostcmp	__P((char *));
-static int cmndcmp	__P((char *, char *));
+static int cmndcmp	__P((char *, char *, char *));
 static void print_cmnds	__P((void));
 
 
@@ -317,25 +317,11 @@ int cmnd_type_ok()
 	 *    user machine=ALL,!/bin/rm,!/etc/named ... 
 	 */
 
-	/*
-	 * Check to see if a directory is being permitted
-	 */
-	if (list_ptr[USER_LIST]->data[strlen(list_ptr[USER_LIST]->data)-1]
-	    == '/') {
-	    /* we have a directory spec */
-	    if (strncmp(list_ptr[USER_LIST]->data, cmnd,
-		        strlen(list_ptr[USER_LIST]->data)) == 0)
-		return(MATCH);
-	    else
-		return(NO_MATCH);
-	}
-
-	if (strcmp(list_ptr[USER_LIST] -> data, cmnd) == 0) {
-	    if (list_ptr[USER_LIST] -> op == '!') {
+	if (cmndcmp(list_ptr[USER_LIST] -> data, cmnd, ocmnd) == 0) {
+	    if (list_ptr[USER_LIST] -> op == '!')
 		return (QUIT_NOW);
-	    } else {
+	    else
 		return (MATCH);
-	    }
 	} else {
 	    return (NO_MATCH);
 	}
@@ -356,7 +342,7 @@ int cmnd_type_ok()
 		    /*
 		     * Match cmnd to the data (directory or file)
 		     */
-		    if (cmndcmp(cmnd, list_ptr[CMND_LIST] -> data) == 0) {
+		    if (cmndcmp(list_ptr[CMND_LIST] -> data, cmnd, ocmnd) == 0) {
 			if (list_ptr[USER_LIST] -> op == '!') {
 			    list_ptr[CMND_LIST] = save_ptr;
 			    return (QUIT_NOW);
@@ -634,21 +620,30 @@ static int hostcmp(target)
 
 /*
  * this routine is called from cmnd_type_ok() and tries to match a cmnd
- * to a data entry from the sudoers file.
+ * or ocmnd to a data entry from the sudoers file.
  */
 
-static int cmndcmp(cmnd, data)
-    char *cmnd;				/* command the user is attempting */
+static int cmndcmp(data, cmnd, ocmnd)
     char *data;				/* data we are checking against */
+    char *cmnd;				/* command the user is attempting */
+    char *ocmnd;			/* unresolved version of cmnd */
 {
     int len = strlen(data);
+    int result;
 
     /*
-     * If the data is a directory, match based on len,
-     * otherwise do a normal strcmp(3)
+     * If the data is a directory, match based on len, otherwise
+     * do a normal strcmp(3) (must check both cmnd and ocmnd).
      */
-    if (*(data + len - 1) == '/')
-	return(strncmp(data, cmnd, len));
-    else
-	return(strcmp(data, cmnd));
+    if (*(data + len - 1) == '/') {
+	result = strncmp(data, cmnd, len);
+	if (result && ocmnd)
+	    result = strncmp(data, ocmnd, len);
+    } else {
+	result = strcmp(data, cmnd);
+	if (result && ocmnd)
+	    result = strcmp(data, ocmnd);
+    }
+
+    return(result);
 }
