@@ -63,6 +63,7 @@ static int sawspace = 0;
 static void fill		__P((char *, int));
 static void append		__P((char *, int, int));
 extern void reset_aliases	__P((void));
+extern void yyerror		__P((char *));
 
 /* realloc() to size + COMMANDARGINC to make room for command args */
 #define COMMANDARGINC	256
