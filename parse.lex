@@ -317,7 +317,7 @@ PASSWD[[:blank:]]*:	{
 			    }
 			}			/* a pathname */
 
-{WORD}			{
+<INITIAL>{WORD}		{
 			    /* a word */
 			    fill(yytext, yyleng);
 			    LEXTRACE("WORD(4) ");
