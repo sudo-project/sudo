@@ -1,4 +1,5 @@
 dnl Local m4 macors for autoconf (used by sudo)
+snl XXX - should cache values in all cases!!!
 dnl
 dnl checks for programs
 
@@ -111,6 +112,20 @@ fi
 ])dnl
 
 dnl
+dnl check for shadow passwords
+dnl
+AC_DEFUN(SUDO_CHECK_SHADOW, [AC_MSG_CHECKING(for shadow passwords)
+AC_TRY_RUN([#include <pwd.h>
+int main() {
+struct passwd *pwd;
+pwd = getpwuid(getuid());
+return(!(pwd->pw_passwd == (char *) 0 || (pwd->pw_passwd[0] && pwd->pw_passwd [1] == '\0'))); }
+], AC_MSG_RESULT(yes)
+[$1], AC_MSG_RESULT(no)
+[$2])])
+
+dnl
+dnl
 dnl check for fullly working void
 dnl
 AC_DEFUN(SUDO_FULL_VOID, [AC_MSG_CHECKING(for full void implementation)
@@ -118,6 +133,7 @@ AC_TRY_COMPILE(, [void *foo;
 foo = (void *)0; foo += 0;], AC_DEFINE(VOID, void)
 AC_MSG_RESULT(yes), AC_DEFINE(VOID, char)
 AC_MSG_RESULT(no))])
+
 dnl
 dnl SUDO_CHECK_TYPE(TYPE, DEFAULT)
 dnl XXX - should require the check for unistd.h...
