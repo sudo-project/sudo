@@ -108,6 +108,7 @@ NetBSD	1.3.2	alpha	gcc-2.7.2.2	1.5.4p1	Ted Spradley	 none
 Dynix/ptx 4.1.5	i386	gcc2.7.2	1.5.4	Leon von Stauber none
 Dynix/ptx 4.4.2	Sequent	bundled cc	1.5.4p1	Larry Mascarenhas none
 Dynix/ptx 4.4.3	Sequent	bundled cc	1.5.6p2	Sandra Birgerson none
+Dynix/ptx 4.4.4	Sequent	bundled cc	1.5.9p2	Jason Merritt	 none
 DC-OSx	1.1-9x	mips	PyrC 4.0A20	1.5.6p2	Brian Jackson	 none
 HI-UX/MPP 02-03	sr2201	bundled cc	1.5.4	Ben Edgington	 none
 SVR4	4.4	m88k	bundled gcc	1.5.7p4	Gerry Belanger	 CFLAGS=
