@@ -72,6 +72,7 @@ void log_error(code)
     char cwd[MAXPATHLEN + 1];
     int argc;
     char **argv;
+    mode_t oldmask;
     register char *p;
     register int count;
 #ifndef SYSLOG
@@ -266,7 +267,10 @@ void log_error(code)
     /* become root */
     be_root();
 
-    if ((fp = fopen(LOGFILE, "a")) == NULL) {
+    oldmask = umask(077);
+    fp = fopen(LOGFILE, "a");
+    (void) umask(oldmask);
+    if (fp == NULL) {
 	(void) sprintf(logline, "Can\'t open log file: %s", LOGFILE);
 	send_mail();
     } else {
