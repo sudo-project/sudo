@@ -134,9 +134,10 @@ static void clean_env		__P((char **));
  */
 int Argc;
 char **Argv;
-char *cmnd;
-char *user;
-char *epasswd;
+char *cmnd = NULL;
+char *ocmnd = NULL;
+char *user = NULL;
+char *epasswd = NULL;
 char host[MAXHOSTNAMELEN + 1];
 struct interface *interfaces;
 int num_interfaces;
@@ -539,8 +540,10 @@ static void load_cmnd()
 
     (void) strcpy(path, Argv[1]);
 
-    cmnd = find_path(path);	/* get the absolute path */
-    if (cmnd == NULL) {
+    /*
+     * Resolved the path (cmnd == resolved, ocmnd == unresolved).
+     */
+    if (find_path(path, &cmnd, &ocmnd) == FALSE) {
 	(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], Argv[1]);
 	exit(1);
     }
