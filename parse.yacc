@@ -295,13 +295,13 @@ runasuser	:	NAME {
 			}
 		|	ALIAS {
 			    if (find_alias($1, USER))
-				$$ == TRUE;
+				$$ = TRUE;
 			    else
 				$$ = FALSE;
 			    (void) free($1);
 			}
 		|	ALL {
-			    $$ == TRUE;
+			    $$ = TRUE;
 			}
 		;
 
