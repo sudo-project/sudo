@@ -65,6 +65,7 @@ extern int num_interfaces;
 
 char *cmnd = NULL;
 char host[MAXHOSTNAMELEN+1];
+char *shost;
 char cwd[MAXPATHLEN+1];
 struct passwd *user_pw_ent;
 char **Argv;
@@ -220,6 +221,7 @@ main(argc, argv)
     char **argv;
 {
     struct passwd pw_ent;
+    char *p;
 #ifdef	YYDEBUG
     extern int yydebug;
     yydebug = 1;
@@ -239,6 +241,17 @@ main(argc, argv)
     cmnd = argv[1];
     pw_ent.pw_name = argv[2];
     strcpy(host, argv[3]);
+    if ((p = strchr(host, '.'))) {
+	*p = '\0';
+	if ((shost = strdup(host)) == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+	*p = '.';
+    } else {
+	shost = &host[0];
+    }
 
     clearaliases = 0;
 
