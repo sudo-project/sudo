@@ -82,7 +82,7 @@ A) Sudo removes the following "dangerous" environment variables
      TERMINFO
      TERMINFO_DIRS
      TERMPATH
-     TERMCAP (if it begins with a '/')
+     TERMCAP
      ENV
      BASH_ENV
      LC_ (if it contains a '/' or '%')
@@ -151,6 +151,18 @@ Q) When I try to use "cd" with sudo the command completes without
 A) Some SVR4-derived OS's include a /usr/bin/cd command for reasons
    unfathomable.  A "cd" command is totally useless since a child process
    cannot affect the current working directory of the parent (your shell).
+
+Q) When I run sudo it says I am not alllowed to run the command as root
+   but I don't want to run it as root, I want to run it as another user.
+   My sudoers file entry looks like:
+    bob	ALL=(oracle) ALL
+A) The default user sudo tries to run things as is always root, even if
+   the invoking user can only run commands as a single, specific user.
+   This may change in the future but at the present time you have to
+   work around this using the 'runas_default' option in sudoers.
+   For example:
+    Defaults:bob	runas_default=oracle
+   would achieve the desired result ofr the preceding sudoers fragment.
 
 Q) How do you pronounce `sudo'?
 A) soo-doo (for superuser do).
