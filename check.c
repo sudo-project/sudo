@@ -77,33 +77,11 @@ void check_user()
 
     umask(077);			/* make sure the timestamp files are private */
 
-    if (setuid(0)) {		/* have to be root to see timestamps */
-	perror("setuid(0)");
-	exit(1);
-    }
     rtn = check_timestamp();
-    /* don't want to be root longer than necessary */
-    if (setreuid(uid, (uid_t)-1)) {
-#ifndef _AIX
-	perror("setreuid()");
-	exit(1);
-#endif
-    }
     if (rtn && uid)		/* if timestamp is not current... */
 	check_passwd();
 
-    if (setuid(0)) {		/* have to be root to play with timestamps */
-	perror("setuid(0)");
-	exit(1);
-    }
     update_timestamp();
-    /* don't want to be root longer than necessary */
-    if (setreuid(uid, (uid_t)-1)) {
-#ifndef _AIX
-	perror("setreuid()");
-	exit(1);
-#endif
-    }
     umask(022);			/* want a real umask to exec() the command */
 
 }

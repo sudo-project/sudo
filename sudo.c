@@ -126,17 +126,7 @@ main(argc, argv, envp)
 
     clean_envp(envp);		/* build Envp based on envp (w/o LD_*) */
 
-    if (setuid(0)) {
-	perror("setuid(0)");
-	exit(1);
-    }
     rtn = validate();
-    if (setreuid(uid, (uid_t)-1)) {
-#ifndef _AIX
-	perror("setreuid()");
-	exit(1);
-#endif
-    }
     switch (rtn) {
 
     case VALIDATE_OK:
