@@ -1,5 +1,5 @@
 #
-# Sample /etc/sudoers file.  (Assumes SunOS 4.x paths)
+# Sample /etc/sudoers file.
 #
 # This file MUST be edited with the 'visudo' command as root.
 #
@@ -20,18 +20,18 @@ Runas_Alias	OP=root,operator
 ##
 # Cmnd alias specification
 ##
-Cmnd_Alias      DUMPS=/usr/etc/dump,/usr/etc/rdump,/usr/etc/restore,\
-		      /usr/etc/rrestore,/usr/bin/mt
+Cmnd_Alias      DUMPS=/usr.sbin/dump,/usr.sbin/rdump,/usr.sbin/restore,\
+		      /usr.sbin/rrestore,/usr/bin/mt
 Cmnd_Alias	KILL=/usr/bin/kill
-Cmnd_Alias	PRINTING=/usr/etc/lpc,/usr/ucb/lprm
-Cmnd_Alias	SHUTDOWN=/usr/etc/shutdown
-Cmnd_Alias	HALT=/usr/etc/halt,/usr/etc/fasthalt
-Cmnd_Alias	REBOOT=/usr/etc/reboot,/usr/etc/fastboot
+Cmnd_Alias	PRINTING=/usr.sbin/lpc,/usr.bin/lprm
+Cmnd_Alias	SHUTDOWN=/usr.sbin/shutdown
+Cmnd_Alias	HALT=/usr.sbin/halt,/usr.sbin/fasthalt
+Cmnd_Alias	REBOOT=/usr.sbin/reboot,/usr.sbin/fastboot
 Cmnd_Alias	SHELLS=/usr/bin/sh,/usr/bin/csh,/usr/bin/ksh,\
-                       /usr/local/bin/tcsh,/usr/ucb/rsh,\
+                       /usr/local/bin/tcsh,/usr.bin/rsh,\
                        /usr/local/bin/zsh
 Cmnd_Alias	SU=/usr/bin/su
-Cmnd_Alias	VIPW=/usr/etc/vipw,/etc/vipw,/bin/passwd
+Cmnd_Alias	VIPW=/usr.sbin/vipw,/usr/sbin/vipw,/usr/bin/passwd
 
 ##
 # Host alias specification
@@ -41,8 +41,9 @@ Host_Alias	SUN3=brazil,columbine
 Host_Alias	DECSTATION=wilkinson,soma,dendrite,thang
 Host_Alias 	DECALPHA=widget,thalamus,foobar
 Host_Alias	HPSNAKE=boa,nag,python
-Host_Alias	CSNETS=128.138.243.0,128.138.204.0,128.138.242.0
 Host_Alias	CUNETS=128.138.0.0/255.255.0.0
+Host_Alias	CSNETS=128.138.243.0,128.138.204.0,128.138.242.0
+Host_Alias	SEVERS=master,mail,www,ns
 
 ##
 # User specification
@@ -67,10 +68,10 @@ smartguy	CUNETS=ALL
 operator	ALL=DUMPS,KILL,PRINTING,SHUTDOWN,HALT,REBOOT,/usr/oper/bin/
 
 # joe may su only to operator
-joe		ALL=/usr/bin/su operator
+joe		ALL=SU operator
 
 # pete may change passwords for anyone but root
-pete		ALL=/bin/passwd [A-z]*,!/bin/passwd root
+pete		ALL=/usr/bin/passwd [A-z]*,!/usr/bin/passwd root
 
 # bob may run anything except root shells or su on the sun3 and sun4 machines
 # as any user in the Runas_Alias "OP" (contains root and operator)
@@ -83,9 +84,13 @@ jim		+biglab=ALL
 # users in the secretaries netgroup need to help manage the printers
 +secretaries	ALL=PRINTING
 
-# fred can run /bin/ls as oracle by specifying -u oracle on command line;
-# he can also run /bin/date as uid -2 without entering a password
-fred		ALL=(oracle) /bin/ls,(#-2) NOPASSWD:/bin/date
+# fred can run commands as oracle by specifying -u oracle on command line
+# without a password but cannot run su or any shells
+fred		ALL=(oracle) NOPASSWD:ALL, !SU, !SHELLS
 
-# somedude may su to anyone but root and flags are not allowed
-somedude	ALL=/usr/bin/su [!-]*, !/usr/bin/su *root*
+# john may su to anyone but root and flags are not allowed
+john		ALL=SU [!-]*, !SU *root*
+
+# killroy can run all but shells and su on all machines but those
+# in the "SERVERS" Host_Alias
+killroy		ALL,!SERVERS=ALL, !SU, !SHELLS
