@@ -68,6 +68,7 @@ struct sudo_user {
 #define FLAG_NOPASS		0x10
 #define FLAG_NO_USER		0x20
 #define FLAG_NO_HOST		0x40
+#define FLAG_NO_CHECK		0x80
 
 /*
  * Boolean values

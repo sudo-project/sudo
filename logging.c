@@ -298,6 +298,9 @@ log_auth(status, inform_user)
 	else if (status & FLAG_NO_HOST)
 	    (void) fprintf(stderr, "%s is not allowed to run sudo on %s.  %s",
 		user_name, user_shost, "This incident will be reported.\n");
+	else if (status & FLAG_NO_CHECK)
+	    (void) fprintf(stderr, "Sorry, user %s may not run sudo on %s.\n",
+		user_name, user_shost);
 	else
 	    (void) fprintf(stderr,
 		"Sorry, user %s is not allowed to execute '%s%s%s' as %s on %s.\n",

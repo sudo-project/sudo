@@ -147,7 +147,8 @@ sudoers_lookup(check_cmnd)
 	error |= FLAG_NO_HOST;
 	if (!top)
 	    error |= FLAG_NO_USER;
-    }
+    } else
+	error |= FLAG_NO_CHECK;
 
     /*
      * Only check the actual command if the check_cmnd flag is set.
