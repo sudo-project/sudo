@@ -130,7 +130,7 @@ main(argc, argv)
     if ((sudoers_fp = fopen(sudoers, "r")) == NULL) {
 	(void) fprintf(stderr, "%s: ", *argv);
 	perror(sudoers);
-	Exit();
+	Exit(0);
     }
 
     /*
@@ -152,7 +152,7 @@ main(argc, argv)
     if ((sudoers_tmp_fp = fdopen(fd, "w")) == NULL) {
 	(void) fprintf(stderr, "%s: ", *argv);
 	perror(sudoers_tmp_file);
-	Exit();
+	Exit(0);
     }
 
     /*
@@ -184,21 +184,21 @@ main(argc, argv)
 	    if (stat(sudoers_tmp_file, &sbuf) < 0) {
 		(void) fprintf(stderr, "%s: can't stat temporary file, %s unchanged\n",
 			sudoers, *argv);
-		Exit();
+		Exit(0);
 	    }
 
 	    /* file has size == 0 */
 	    if (sbuf.st_size == 0) {
 		(void) fprintf(stderr, "%s: bad temporary file, %s unchanged\n",
 			sudoers, *argv);
-		Exit();
+		Exit(0);
 	    }
 
 	    /* re-open the sudoers file for parsing */
 	    if ((sudoers_tmp_fp = fopen(sudoers_tmp_file, "r")) == NULL) {
 		(void) fprintf(stderr, "%s: can't re-open temporary file, %s unchanged\n",
 			sudoers, *argv);
-		Exit();
+		Exit(0);
 	    }
 	    yyin = sudoers_tmp_fp;
 	    yyout = stdout;
@@ -206,7 +206,7 @@ main(argc, argv)
 	    /* parse the file */
 	    if (yyparse()) {
 		(void) fprintf(stderr, "yyparse() failed\n");
-		Exit();
+		Exit(0);
 	    }
 
 	    /*
