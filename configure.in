@@ -1035,21 +1035,6 @@ AC_ARG_ENABLE(setresuid,
   esac
 ])
 
-AC_MSG_CHECKING(whether to disable use of POSIX saved ids)
-AC_ARG_ENABLE(saved-ids,
-[  --disable-saved-ids     Don't try to use POSIX saved ids],
-[ case "$enableval" in
-    yes)	AC_MSG_RESULT(no)
-		;;
-    no)		AC_MSG_RESULT(yes)
-		AC_DEFINE(NO_SAVED_IDS)
-		;;
-    *)		AC_MSG_RESULT(no)
-    		AC_MSG_WARN([Ignoring unknown argument to --enable-saved-ids: $enableval])
-		;;
-  esac
-], AC_MSG_RESULT(no))
-
 AC_MSG_CHECKING(whether to disable shadow password support)
 AC_ARG_ENABLE(shadow,
 [  --disable-shadow        Never use shadow passwords],
@@ -1691,7 +1676,6 @@ dnl Function checks
 dnl
 AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups fstat)
-AC_CHECK_FUNCS(seteuid, , [AC_DEFINE(NO_SAVED_IDS)])
 if test -z "$SKIP_SETRESUID"; then
     AC_CHECK_FUNCS(setresuid, [SKIP_SETREUID=yes])
 fi
@@ -2294,7 +2278,6 @@ AH_TEMPLATE(NO_AUTHENTICATION, [Define to 1 if you don't want sudo to prompt for
 AH_TEMPLATE(NO_LECTURE, [Define to 1 if you don't want users to get the lecture the first they user sudo.])
 AH_TEMPLATE(NO_ROOT_MAILER, [Define to avoid runing the mailer as root.])
 AH_TEMPLATE(NO_ROOT_SUDO, [Define to 1 if root should not be allowed to use sudo.])
-AH_TEMPLATE(NO_SAVED_IDS, [Define to avoid using POSIX saved ids.])
 AH_TEMPLATE(PC_INSULTS, [Define to 1 to replace politically incorrect insults with less offensive ones.])
 AH_TEMPLATE(SECURE_PATH, [Define to 1 to override the user's path with a built-in one.])
 AH_TEMPLATE(SEND_MAIL_WHEN_NOT_OK, [Define to 1 to send mail when the user is not allowed to run a command.])

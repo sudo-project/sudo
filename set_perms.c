@@ -67,90 +67,6 @@ static const char rcsid[] = "$Sudo$";
 static void runas_setup		__P((void));
 static void fatal		__P((char *, int));
 
-#if !defined(HAVE_SETRESUID) && !defined(HAVE_SETREUID) && \
-    !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
-/*
- * Set real and effective uids and gids based on perm.
- * Since we have POSIX saved IDs we can get away with just
- * toggling the effective uid/gid unless we are headed for an exec().
- */
-void
-set_perms_posix(perm)
-    int perm;
-{
-    int error;
-
-    switch (perm) {
-	case PERM_ROOT:
-				if (seteuid(ROOT_UID))
-				    fatal("seteuid(ROOT_UID) failed, your operating system may have broken POSIX saved ID support\nTry running configure with --disable-saved-ids", 0);
-			      	break;
-
-	case PERM_FULL_ROOT:
-				/* headed for exec() */
-				(void) seteuid(ROOT_UID);
-				if (setuid(ROOT_UID))
-				    fatal("setuid(ROOT_UID)", 1);
-			      	break;
-
-	case PERM_USER:
-    	    	    	        (void) setegid(user_gid);
-				if (seteuid(user_uid))
-				    fatal("seteuid(user_uid)", 1);
-			      	break;
-
-	case PERM_FULL_USER:
-				/* headed for exec() */
-				(void) setgid(user_gid);
-				if (setuid(user_uid))
-				    fatal("setuid(user_uid)", 1);
-				break;
-				
-	case PERM_RUNAS:
-				if (seteuid(runas_pw->pw_uid))
-				    fatal("unable to change to runas uid", 1);
-			      	break;
-
-	case PERM_FULL_RUNAS:
-				/* headed for exec(), assume euid == ROOT_UID */
-				runas_setup();
-				if (def_stay_setuid)
-				    error = seteuid(runas_pw->pw_uid);
-				else
-				    error = setuid(runas_pw->pw_uid);
-				if (error)
-				    fatal("unable to change to runas uid", 1);
-				break;
-
-	case PERM_SUDOERS:
-				/* assume euid == ROOT_UID, ruid == user */
-				if (setegid(SUDOERS_GID))
-				    fatal("unable to change to sudoers gid", 1);
-
-				/*
-				 * If SUDOERS_UID == ROOT_UID and SUDOERS_MODE
-				 * is group readable we use a non-zero
-				 * uid in order to avoid NFS lossage.
-				 * Using uid 1 is a bit bogus but should
-				 * work on all OS's.
-				 */
-				if (SUDOERS_UID == ROOT_UID) {
-				    if ((SUDOERS_MODE & 040) && seteuid(1))
-					fatal("seteuid(1)", 1);
-				} else {
-				    if (seteuid(SUDOERS_UID))
-					fatal("seteuid(SUDOERS_UID)", 1);
-				}
-			      	break;
-	case PERM_TIMESTAMP:
-				if (seteuid(timestamp_uid))
-				    fatal("seteuid(timestamp_uid)", 1);
-			      	break;
-
-    }
-}
-#endif /* !NO_SAVED_IDS && _SC_SAVED_IDS && _SC_VERSION */
-
 #ifdef HAVE_SETRESUID
 /*
  * Set real and effective and saved uids and gids based on perm.
@@ -159,7 +75,7 @@ set_perms_posix(perm)
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
 void
-set_perms_suid(perm)
+set_perms(perm)
     int perm;
 {
     int error;
@@ -236,7 +152,7 @@ set_perms_suid(perm)
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
 void
-set_perms_suid(perm)
+set_perms(perm)
     int perm;
 {
     int error;
@@ -305,79 +221,7 @@ set_perms_suid(perm)
     }
 }
 
-# else
-#  ifdef HAVE_SETREUID
-
-/*
- * Set real and effective uids and gids based on perm.
- * NOTE: does not support the "stay_setuid" option.
- */
-void
-set_perms_nosuid(perm)
-    int perm;
-{
-
-    /*
-     * Since we only have setuid() and seteuid() we have to set
-     * real and effective uids to ROOT_UID initially.
-     */
-    if (setuid(ROOT_UID))
-	fatal("setuid(ROOT_UID)", 1);
-
-    switch (perm) {
-	case PERM_USER:
-    	    	    	        (void) setegid(user_gid);
-				if (seteuid(user_uid))
-				    fatal("seteuid(user_uid)", 1);
-			      	break;
-				
-	case PERM_FULL_USER:
-				/* headed for exec() */
-    	    	    	        (void) setgid(user_gid);
-				if (setuid(user_uid))
-				    fatal("setuid(user_uid)", 1);
-			      	break;
-				
-	case PERM_RUNAS:
-				if (seteuid(runas_pw->pw_uid))
-				    fatal("unable to change to runas uid", 1);
-			      	break;
-
-	case PERM_FULL_RUNAS:
-				/* headed for exec(), assume euid == ROOT_UID */
-				runas_setup();
-				if (setuid(runas_pw->pw_uid))
-				    fatal("unable to change to runas uid", 1);
-				break;
-
-	case PERM_SUDOERS:
-				/* assume euid == ROOT_UID, ruid == user */
-				if (setegid(SUDOERS_GID))
-				    fatal("unable to change to sudoers gid", 1);
-
-				/*
-				 * If SUDOERS_UID == ROOT_UID and SUDOERS_MODE
-				 * is group readable we use a non-zero
-				 * uid in order to avoid NFS lossage.
-				 * Using uid 1 is a bit bogus but should
-				 * work on all OS's.
-				 */
-				if (SUDOERS_UID == ROOT_UID) {
-				    if ((SUDOERS_MODE & 040) && seteuid(1))
-					fatal("seteuid(1)", 1);
-				} else {
-				    if (seteuid(SUDOERS_UID))
-					fatal("seteuid(SUDOERS_UID)", 1);
-				}
-			      	break;
-	case PERM_TIMESTAMP:
-				if (seteuid(timestamp_uid))
-				    fatal("seteuid(timestamp_uid)", 1);
-			      	break;
-    }
-}
-
-#  else
+# else /* !HAVE_SETRESUID && !HAVE_SETREUID */
 
 /*
  * Set uids and gids based on perm via setuid() and setgid().
@@ -385,7 +229,7 @@ set_perms_nosuid(perm)
  *       Also, SUDOERS_UID and SUDOERS_GID are not used.
  */
 void
-set_perms_nosuid(perm)
+set_perms(perm)
     int perm;
 {
 
@@ -416,7 +260,6 @@ set_perms_nosuid(perm)
 				break;
     }
 }
-#  endif /* HAVE_SETEUID */
 # endif /* HAVE_SETREUID */
 #endif /* HAVE_SETRESUID */
 
