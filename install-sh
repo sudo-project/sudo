@@ -6,7 +6,7 @@
 
 PROGNAME=`basename $0`
 
-##  Paths to programs.  CHOWN and WHOAMI are checked below.
+##  Paths to programs.  CHOWN, STRIP and WHOAMI are checked below.
 CHOWN=chown
 CHGRP=chgrp
 CHMOD=chmod
@@ -34,6 +34,14 @@ if [ ${WHOAMI} = whoami ] ; then
 	WHOAMI=/usr/ucb/whoami
     elif [ -f /usr/bin/whoami ] ; then
 	WHOAMI=/usr/bin/whoami
+    fi
+fi
+
+if [ ${STRIP} = strip ] ; then
+    if [ -f /usr/ccs/bin/strip ] ; then
+	STRIP=/usr/ccs/bin/strip
+    elif [ -f /usr/bin/strip ] ; then
+	STRIP=/usr/bin/strip
     fi
 fi
 
