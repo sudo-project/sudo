@@ -101,10 +101,10 @@ PROGS = @PROGS@
 SRCS = alloc.c alloca.c check.c closefrom.c def_data.c defaults.c env.c \
        error.c fileops.c find_path.c fnmatch.c getcwd.c getprogname.c \
        getspwuid.c gettime.c goodpath.c gram.c gram.y interfaces.c ldap.c \
-       logging.c match.c mon_systrace.c parse.c set_perms.c sigaction.c \
-       snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c sudo.c \
-       sudo_noexec.c sudo_edit.c testsudoers.c tgetpass.c toke.c toke.l \
-       utimes.c visudo.c zero_bytes.c redblack.c $(AUTH_SRCS)
+       logging.c match.c mon_systrace.c parse.c pwutil.c set_perms.c \
+       sigaction.c snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c \
+       sudo.c sudo_noexec.c sudo_edit.c testsudoers.c tgetpass.c toke.c toke.l \
+       tsgetgrpw.c utimes.c visudo.c zero_bytes.c redblack.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -118,18 +118,18 @@ HDRS = compat.h def_data.h defaults.h error.h ins_2001.h ins_classic.h \
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
-PARSEOBJS = alias.o alloc.o defaults.o error.o gram.o match.o toke.o redblack.o
+COMMON_OBJS = alias.o alloc.o defaults.o error.o gram.o match.o pwutil.o \
+	    toke.o redblack.o zero_bytes.o
 
-SUDOBJS = check.o env.o getspwuid.o gettime.o goodpath.o fileops.o \
-	  find_path.o interfaces.o logging.o parse.o set_perms.o sudo.o \
-	  sudo_edit.o tgetpass.o zero_bytes.o @SUDO_OBJS@ $(AUTH_OBJS) \
-	  $(PARSEOBJS)
+SUDO_OBJS = check.o env.o getspwuid.o gettime.o goodpath.o fileops.o \
+	    find_path.o interfaces.o logging.o parse.o set_perms.o sudo.o \
+	    sudo_edit.o tgetpass.o @SUDO_OBJS@ $(AUTH_OBJS) $(COMMON_OBJS)
 
-VISUDOBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o $(PARSEOBJS)
+VISUDO_OBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o $(COMMON_OBJS)
 
-TESTOBJS = interfaces.o testsudoers.o $(PARSEOBJS)
+TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o $(COMMON_OBJS)
 
-LIBOBJS = @LIBOBJS@ @ALLOCA@
+LIB_OBJS = @LIBOBJS@ @ALLOCA@
 
 VERSION = 1.6.9
 
@@ -172,14 +172,14 @@ all: $(PROGS)
 	@rm -f $(srcdir)/$@
 	$(NROFF) -man $< > $(srcdir)/$@
 
-sudo: $(SUDOBJS) $(LIBOBJS)
-	$(CC) -o $@ $(SUDOBJS) $(LIBOBJS) $(SUDO_LDFLAGS) $(SUDO_LIBS)
+sudo: $(SUDO_OBJS) $(LIB_OBJS)
+	$(CC) -o $@ $(SUDO_OBJS) $(LIB_OBJS) $(SUDO_LDFLAGS) $(SUDO_LIBS)
 
-visudo: $(VISUDOBJS) $(LIBOBJS)
-	$(CC) -o $@ $(VISUDOBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS) $(NET_LIBS)
+visudo: $(VISUDO_OBJS) $(LIB_OBJS)
+	$(CC) -o $@ $(VISUDO_OBJS) $(LIB_OBJS) $(LDFLAGS) $(LIBS) $(NET_LIBS)
 
-testsudoers: $(TESTOBJS) $(LIBOBJS)
-	$(CC) -o $@ $(TESTOBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS) $(NET_LIBS)
+testsudoers: $(TEST_OBJS) $(LIB_OBJS)
+	$(CC) -o $@ $(TEST_OBJS) $(LIB_OBJS) $(LDFLAGS) $(LIBS) $(NET_LIBS)
 
 sudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
@@ -224,6 +224,7 @@ interfaces.o: interfaces.c $(SUDODEP) interfaces.h
 testsudoers.o: testsudoers.c $(SUDODEP) parse.h interfaces.h gram.h
 match.o: match.c $(SUDODEP) parse.h interfaces.h gram.h
 parse.o: parse.c $(SUDODEP) parse.h gram.h
+pwutil.o: pwutil.c $(SUDODEP)
 toke.o: toke.c $(SUDODEP) parse.h gram.h
 gram.o: gram.c $(SUDODEP) parse.h gram.c gram.h redblack.h
 defaults.o: defaults.c $(SUDODEP) def_data.c auth/sudo_auth.h gram.h
@@ -237,6 +238,7 @@ strerror.o: strerror.c config.h
 utime.o: utime.c config.h pathnames.h compat.h emul/utime.h
 ldap.o: ldap.c $(SUDODEP) parse.h
 mon_systrace.o: mon_systrace.c $(SUDODEP) mon_systrace.h
+tsgetgrpw.o: tsgetgrpw.c $(SUDODEP)
 
 # Authentication functions live in "auth" dir and so need extra care
 sudo_auth.o: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
