@@ -83,23 +83,23 @@ all: $(PROGS)
 install: install-dirs install-binaries install-sudoers install-man
 
 install-dirs:
-	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)/$(sudodir) \
-	    $(DESTDIR)/$(visudodir) $(DESTDIR)/$(sudoersdir) \
-	    $(DESTDIR)/$(mandirsu) $(DESTDIR)/$(mandirform)
+	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)$(sudodir) \
+	    $(DESTDIR)$(visudodir) $(DESTDIR)$(sudoersdir) \
+	    $(DESTDIR)$(mandirsu) $(DESTDIR)$(mandirform)
 
 install-binaries: $(PROGS)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 sudo $(DESTDIR)/$(sudodir)/sudo
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 visudo $(DESTDIR)/$(visudodir)/visudo
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 sudo $(DESTDIR)$(sudodir)/sudo
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 visudo $(DESTDIR)$(visudodir)/visudo
 
 install-sudoers:
-	test -f $(DESTDIR)/$(sudoersdir)/sudoers || \
+	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
 	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
-		$(srcdir)/sudoers $(DESTDIR)/$(sudoersdir)/sudoers
+		$(srcdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
 install-man:
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/sudo.$(mantype) $(DESTDIR)/$(mandirsu)/sudo.$(mansectsu)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/visudo.$(mantype) $(DESTDIR)/$(mandirsu)/visudo.$(mansectsu)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/sudoers.$(mantype) $(DESTDIR)/$(mandirform)/sudoers.$(mansectform)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/visudo.$(mantype) $(DESTDIR)$(mandirsu)/visudo.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/sudoers.$(mantype) $(DESTDIR)$(mandirform)/sudoers.$(mansectform)
 
 check:
 	@echo nothing to check
