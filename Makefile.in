@@ -197,7 +197,7 @@ testsudoers: $(TESTOBJS) $(LIBOBJS)
 	$(CC) -o $@ $(TESTOBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS) $(NET_LIBS)
 
 sudo_noexec.la: sudo_noexec.lo
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -module -rpath $(noexecdir)
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
 # Uncomment the following if you want "make clean" to clean the parser
 @DEV@PARSESRCS = sudo.tab.h sudo.tab.c lex.yy.c
