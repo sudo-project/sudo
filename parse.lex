@@ -83,7 +83,6 @@ N			[0-9][0-9]?[0-9]?
 %k	3500
 
 %s	GOTCMND
-%s	QUOTEDCMND
 
 %%
 [ \t]+			{			/* throw away space/tabs */
@@ -96,18 +95,7 @@ N			[0-9][0-9]?[0-9]?
 			    LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
 
-<QUOTEDCMND>\\\"	{
-			    LEXTRACE("QUOTEDCHAR ");
-			    fill_args("\"", 1, sawspace);      
-			    sawspace = FALSE;
-			}
-
-<QUOTEDCMND>\"		{
-			    BEGIN 0;
-			    return(COMMAND);
-			}			/* end of command line args */
-
-<GOTCMND>\\[:\,=\\]	{
+<GOTCMND>\\[:\,=\\ \t]	{
 			    LEXTRACE("QUOTEDCHAR ");
 			    fill_args(yytext + 1, 1, sawspace);
 			    sawspace = FALSE;
@@ -131,13 +119,7 @@ N			[0-9][0-9]?[0-9]?
 			    return(COMMENT);
 			}			/* return comments */
 
-<QUOTEDCMND>[^\" \t\n#]+ {
-			    LEXTRACE("ARG ");
-			    fill_args(yytext, yyleng, sawspace);
-			    sawspace = FALSE;
-			  }			/* a command line arg */
-
-<GOTCMND>[^\,:=\\ \t\n#]+ {
+<GOTCMND>[^:\,= \t\n#]+ {
 			    LEXTRACE("ARG ");
 			    fill_args(yytext, yyleng, sawspace);
 			    sawspace = FALSE;
@@ -181,31 +163,16 @@ N			[0-9][0-9]?[0-9]?
 			    return(NTWKADDR);
 			}
 
-\"?\/[^\,:=\\ \t\n#]+	{
-			    /* command may be quoted */
-			    if (yytext[0] == '"') {
-				/* may not have args so has endquote */
-				if (yytext[yyleng - 1] == '"' &&
-				    yytext[yyleng - 2] != '\\') {
-				    LEXTRACE("COMMAND ");
-				    fill_cmnd(yytext + 1, yyleng - 2);
-				    return(COMMAND);
-				} else {
-				    BEGIN QUOTEDCMND;
-				    LEXTRACE("COMMAND ");
-				    fill_cmnd(yytext + 1, yyleng - 1);
-				}
+\/[^\,:=\\ \t\n#]+	{
+			    /* directories can't have args... */
+			    if (yytext[yyleng - 1] == '/') {
+				LEXTRACE("COMMAND ");
+				fill_cmnd(yytext, yyleng);
+				return(COMMAND);
 			    } else {
-				/* directories can't have args... */
-				if (yytext[yyleng - 1] == '/') {
-				    LEXTRACE("COMMAND ");
-				    fill_cmnd(yytext, yyleng);
-				    return(COMMAND);
-				} else {
-				    BEGIN GOTCMND;
-				    LEXTRACE("COMMAND ");
-				    fill_cmnd(yytext, yyleng);
-				}
+				BEGIN GOTCMND;
+				LEXTRACE("COMMAND ");
+				fill_cmnd(yytext, yyleng);
 			    }
 			}			/* a pathname */
 
