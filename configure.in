@@ -808,17 +808,6 @@ esac])
 AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $password_timeout, [The passwd prompt timeout (in minutes).])
 AC_MSG_RESULT($password_timeout)
 
-AC_MSG_CHECKING(path to sudo_noexec.so)
-AC_ARG_WITH(noexec, [  --with-noexec           fully qualified pathname of sudo_noexec.so],
-[case $with_noexec in  
-    yes)	with_noexec="$libexecdir/sudo_noexec.so"
-		;;
-    no)		;;
-    *)		;;
-esac], [with_noexec="$libexecdir/sudo_noexec.so"])
-AC_MSG_RESULT($with_noexec)
-NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[[^/]]*:\1:'`"
-
 AC_ARG_WITH(execv, [  --with-execv            use execv() instead of execvp()],
 [case $with_execv in  
     yes)	AC_MSG_CHECKING(whether to use execvp or execv)
@@ -1156,6 +1145,21 @@ AC_DISABLE_STATIC
 AM_PROG_LIBTOOL
 
 dnl
+dnl Defer with_noexec until after libtool magic runs
+dnl
+test "$can_build_shared" = "no" && with_noexec=no
+AC_MSG_CHECKING(path to sudo_noexec.so)
+AC_ARG_WITH(noexec, [  --with-noexec           fully qualified pathname of sudo_noexec.so],
+[case $with_noexec in  
+    yes)	with_noexec="$libexecdir/sudo_noexec$shrext"
+		;;
+    no)		;;
+    *)		;;
+esac], [with_noexec="$libexecdir/sudo_noexec$shrext"])
+AC_MSG_RESULT($with_noexec)
+NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[[^/]]*:\1:'`"
+
+dnl
 dnl It is now safe to modify CFLAGS and CPPFLAGS
 dnl
 if test "$with_devel" = "yes" -a -n "$GCC"; then
@@ -1167,7 +1171,6 @@ dnl Find programs we use
 dnl
 AC_CHECK_PROG(UNAMEPROG, uname, uname, )
 AC_CHECK_PROG(TRPROG, tr, tr, )
-AC_CHECK_PROG(SEDPROG, sed, sed, )
 AC_CHECK_PROG(NROFFPROG, nroff, nroff, )
 if test -z "$NROFFPROG"; then
     MANTYPE="cat"
@@ -1415,7 +1418,6 @@ case "$host" in
 		    AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lprot"; LIBS="${LIBS} -lprot"; OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"; SECUREWARE=1])
 		    CHECKSHADOW="false"
 		fi
-		with_noexec=no
 		;;
     *-*-ultrix*)
 		OS="ultrix"
@@ -1423,7 +1425,6 @@ case "$host" in
 		    AC_CHECK_LIB(auth, getauthuid, AC_DEFINE(HAVE_GETAUTHUID, 1, [Define if you have the `getauthuid' function.  (ULTRIX 4.x shadow passwords)]) [SUDO_LIBS="${SUDO_LIBS} -lauth"; LIBS="${LIBS} -lauth"])
 		    CHECKSHADOW="false"
 		fi
-		with_noexec=no
 		;;
     *-*-riscos*)
 		LIBS="${LIBS} -lsun -lbsd"
