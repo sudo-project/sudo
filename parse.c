@@ -443,25 +443,27 @@ usergr_matches(group, user)
 {
     struct group *grp;
     struct passwd *pw;
+    gid_t pw_gid;
     char **cur;
 
     /* make sure we have a valid usergroup, sudo style */
     if (*group++ != '%')
 	return(FALSE);
 
+    /* look up user's primary gid in the passwd file (XXX - reduce lookups) */
+    if ((pw = getpwnam(user)) == NULL)
+	return(FALSE);
+    pw_gid = pw->pw_gid;
+
     if ((grp = getgrnam(group)) == NULL) 
 	return(FALSE);
 
-    /*
-     * Check against user's real gid as well as group's user list
-     */
-    if ((pw = getpwnam(user)) == NULL)
-	return(FALSE);
-
-    if (grp->gr_gid == pw->pw_gid)
+    /* check against user's primary (passwd file) gid */
+    if (grp->gr_gid == pw_gid)
 	return(TRUE);
 
-    for (cur=grp->gr_mem; *cur; cur++) {
+    /* check to see if user is explicitly listed in the group */
+    for (cur = grp->gr_mem; *cur; cur++) {
 	if (strcmp(*cur, user) == 0)
 	    return(TRUE);
     }
