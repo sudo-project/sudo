@@ -53,10 +53,16 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
+#ifdef HAVE_LSEARCH
 #include <search.h>
+#endif /* HAVE_LSEARCH */
 
 #include "sudo.h"
 #include "options.h"
+
+#ifndef HAVE_LSEARCH
+#include "search.h"
+#endif /* HAVE_LSEARCH */
 
 extern int sudolineno, parse_error;
 int errorlineno = -1;
@@ -187,8 +193,13 @@ hostspec	:	ALL {
 				host_matches = TRUE;
 			}
 		|	fqdn {
+#ifdef HAVE_STRCASECMP
 			    if (strcasecmp($1, host) == 0)
 				host_matches = TRUE;
+#else
+			    if (strcmp($1, host) == 0)
+				host_matches = TRUE;
+#endif /* HAVE_STRCASECMP */
 		}
 		;
 
@@ -303,7 +314,7 @@ int type;
     ok = FALSE;			/* assume failure */
     ai.type = type;
     strcpy(ai.name, alias);
-    if (lfind(&ai, aliases, &naliases, sizeof ai, aliascmp) != NULL) {
+    if (lfind(&ai, aliases, &naliases, sizeof(ai), aliascmp) != NULL) {
 	sprintf(s, "Alias `%s' already defined", alias);
 	yyerror(s);
     } else {
@@ -312,7 +323,7 @@ int type;
 	    yyerror(s);
 	}
 
-	aip = (aliasinfo *) lsearch(&ai, aliases, &naliases, sizeof ai,
+	aip = (aliasinfo *) lsearch(&ai, aliases, &naliases, sizeof(ai),
 	    aliascmp);
 
 	if (aip != NULL) {
@@ -336,7 +347,7 @@ int type;
     strcpy(ai.name, alias);
     ai.type = type;
 
-    return(lfind(&ai, aliases, &naliases, sizeof ai, aliascmp) != NULL);
+    return(lfind(&ai, aliases, &naliases, sizeof(ai), aliascmp) != NULL);
 }
 
 static int
@@ -345,9 +356,10 @@ int nslots;
 {
     aliasinfo *aip;
     if (nslots == 0)
-	aip = malloc(MOREALIASES * sizeof *aip);
+	aip = (aliasinfo *) malloc(MOREALIASES * sizeof(*aip));
     else
-	aip = realloc(aliases, (nslots + MOREALIASES) * sizeof *aip);
+	aip = (aliasinfo *) realloc(aliases,
+				    (nslots + MOREALIASES) * sizeof(*aip));
 
     if (aip != NULL) {
 	aliases = aip;
