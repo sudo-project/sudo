@@ -52,3 +52,8 @@ TODO list (most will be addressed in the next rewrite)
 	pete   ALL=PASSWD [A-z]*,!PASSWD root
     where PASSWD was defined to be /usr/bin/passwd.
     This requires the arg parsing to happen in the yacc grammer.
+
+23) Should be able to set _CONFIG_PATH_TIMEDIR via configure or the Makefile
+    so folks with sysV chown can set to a secure location.
+
+24) Add a per-tty restriction?  Ie: only can run foo from /dev/console.
