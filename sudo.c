@@ -633,6 +633,9 @@ parse_args()
 		break;
 	    case 's':
 		rval |= MODE_SHELL;
+		if (excl && excl != 's')
+		    usage_excl(1);
+		excl = 's';
 		if (def_flag(I_SET_HOME))
 		    rval |= MODE_RESET_HOME;
 		break;
@@ -1043,7 +1046,7 @@ usage_excl(exit_val)
     int exit_val;
 {
     (void) fprintf(stderr,
-	"Only one of the -v, -k, -K, -l, -V and -h options may be used\n");
+	"Only one of the -h, -k, -K, -l, -s, -v or -V options may be used\n");
     usage(exit_val);
 }
 
