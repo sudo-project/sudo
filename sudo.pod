@@ -193,10 +193,10 @@ date.
 Many people have worked on B<sudo> over the years, this
 version consists of code written primarily by:
 
- Jeff Nieusma		<nieusma@FirstLink.com>
- David Hieb		<davehieb@internetone.com>
- Todd Miller		<Todd.Miller@courtesan.com>
- Chris Jepeway		<jepeway@cs.utk.edu>
+	Jeff Nieusma
+	David Hieb
+	Todd Miller
+	Chris Jepeway
 
 See the HISTORY file in the B<sudo> distribution for more details.
 
