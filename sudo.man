@@ -113,6 +113,24 @@ the local authorities (defined at installation time).
 All preferences are defined at installation time and are derived from
 the sudo.h include file and the Makefile.
 
+.SH SECURITY NOTES
+.I sudo
+tries to be safe when executing external commands.  To this end
+LD_* and SHLIB_PATH (on hpux only) environmental variables are removed
+from the environment passed on to all commands executed.
+.sp
+Also,
+.I sudo
+checks '.' and '' (both denoting current directory) last when searching for
+a command in the user's PATH (if one or both are in the PATH).
+Note, however, that the actual PATH environmental variable is
+.I not
+modified and is passed unchanged to the program that
+.I sudo
+executes.
+.sp
+For security reasons, if your OS supports shared libraries, sudo should always
+be statically linked.
 .SH FUTURE ENHANCEMENTS
 .nf
 Allow nesting of host and command aliases.
