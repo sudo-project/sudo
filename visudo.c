@@ -638,8 +638,9 @@ run_command(path, argv)
 
     (void) sigprocmask(SIG_SETMASK, &oset, NULL);
 
-    /* XXX - should use WEXITSTATUS() */
-    return(pid == -1 ? -1 : (status >> 8));
+    if (pid == -1 || !WIFEXITED(status))
+	return(-1);
+    return(WEXITSTATUS(status));
 }
 
 static int
