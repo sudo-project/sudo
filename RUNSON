@@ -17,6 +17,7 @@ IRIX	5.1.1.2	mips	unbundled cc	5b2	todd miller	none
 IRIX	5.1.1.2	mips	gcc2.6.3	5b2	todd miller	none
 NEXTSTEP 3.2	m68k	cc		5b2	todd miller	none
 DEC UNIX 3.0	alpha	cc		5b2	todd miller	none
+DEC UNIX 3.0	alpha	gcc2.6.3	5b2	todd miller	none
 AIX	3.2.X	rs6000	cc		5b2	todd miller	none
 BSD	4.3	mips	cc		5b2	todd miller	none
 BSD	4.3	hp300	gcc2.5.6	5b2	todd miller	none
