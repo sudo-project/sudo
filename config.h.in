@@ -144,6 +144,9 @@
 #  define HAVE_KERB4
 #endif /* HAVE_KERB5 */
 
+/* Define if you use SIA.  */
+#undef HAVE_SIA
+
 /* Define if you use PAM.  */
 #undef HAVE_PAM
 

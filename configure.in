@@ -233,10 +233,22 @@ AC_ARG_WITH(authenticate, [  --with-authenticate     enable AIX general authenti
 		;;
 esac])
 
+AC_ARG_WITH(sia, [  --with-sia              enable SIA support],
+[case $with_sia in
+    yes)	AC_DEFINE(HAVE_SIA)
+		AC_MSG_CHECKING(whether to use SIA authentication)
+		AC_MSG_RESULT(yes)
+		;;
+    no)		;;
+    *)		echo "Sorry, --with-sia does not take an argument."
+		exit 1
+		;;
+esac])
+
 AC_ARG_WITH(pam, [  --with-pam              enable PAM support],
 [case $with_pam in
     yes)	AC_DEFINE(HAVE_PAM)
-		AC_MSG_CHECKING(whether to try PAM authentication)
+		AC_MSG_CHECKING(whether to use PAM authentication)
 		AC_MSG_RESULT(yes)
 		;;
     no)		;;
@@ -1437,5 +1449,6 @@ dnl
 if test "$with_pam" = "yes"; then
     echo ""
     echo "You will need to customize sample.pam and install it as /etc/pam.d/sudo"
+    echo "for RedHat Linux 5.x or modify /etc/pam.conf for Solaris."
     echo ""
 fi

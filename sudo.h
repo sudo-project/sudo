@@ -162,6 +162,7 @@ struct generic_alias {
 #define SPOOF_ATTEMPT            0x0D
 #define BAD_STAMPDIR             0x0E
 #define BAD_STAMPFILE            0x0F
+#define BAD_ALLOCATION           0x10
 
 /*
  * Boolean values
@@ -229,6 +230,7 @@ void set_perms		__P((int, int));
 void remove_timestamp	__P((void));
 void load_interfaces	__P((void));
 int check_secureware	__P((char *));
+void sia_attempt_auth	__P((void));
 int yyparse		__P((void));
 YY_DECL;
 

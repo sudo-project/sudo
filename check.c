@@ -159,11 +159,13 @@ void check_user()
 	if (rtn == 2)
 	    reminder();		/* do the reminder if ticket file is new */
 #endif /* NO_MESSAGE */
-#ifdef HAVE_PAM
+#ifdef HAVE_SIA
+	sia_attempt_auth();
+#elif HAVE_PAM
 	pam_attempt_auth();
-#else  /* !HAVE_PAM */
+#else  /* !HAVE_SIA && !HAVE_PAM */
 	check_passwd();
-#endif /* HAVE_PAM */
+#endif /* HAVE_SIA */
     }
 
     update_timestamp();

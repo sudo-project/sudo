@@ -283,8 +283,14 @@ void log_error(code)
 		tty, cwd, runas_user);
 	    break;
 
+	case BAD_ALLOCATION:
+	    (void) sprintf(p,
+		"allocation failure; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
+		tty, cwd, runas_user);
+	    break;
+
 	default:
-	    strcat(p, "found a wierd error : ");
+	    strcat(p, "found a weird error : ");
 	    break;
     }
 
@@ -675,9 +681,14 @@ void inform_user(code)
 		"Your timestamp file has a preposterous date, ignoring.\n");
 	    break;
 
+	case BAD_ALLOCATION:
+	    (void) fprintf(stderr,
+		"Resource allocation failure.\n");
+	    break;
+
 	default:
 	    (void) fprintf(stderr,
-		"Something wierd happened.\n\n");
+		"Something weird happened.\n\n");
 	    break;
     }
 }
@@ -732,6 +743,7 @@ static int appropriate(code)
     case SPOOF_ATTEMPT:
     case BAD_STAMPDIR:
     case BAD_STAMPFILE:
+    case BAD_ALLOCATION:
     default:
 	return (1);
 	break;
