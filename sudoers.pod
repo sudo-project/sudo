@@ -942,28 +942,6 @@ wildcards.  This is to make a path like:
 
 match F</usr/bin/who> but not F</usr/bin/X11/xterm>.
 
-WARNING: a pathname with wildcards will B<not> match a user command
-that consists of a relative path.  In other words, given the
-following I<sudoers> entry:
-
-    billy  workstation = /usr/bin/*
-
-user billy will be able to run any command in /usr/bin as root, such
-as F</usr/bin/w>.  The following two command will be allowed (the first
-assumes that F</usr/bin> is in the user's path):
-
-    $ sudo w
-    $ sudo /usr/bin/w
-
-However, this will not:
-
-    $ cd /usr/bin
-    $ sudo ./w
-
-For this reason you should only B<grant> access to commands using
-wildcards and never B<restrict> access using them.  This limitation
-will be removed in a future version of B<sudo>.
-
 =head2 Exceptions to wildcard rules
 
 The following exceptions apply to the above rules:

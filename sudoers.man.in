@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "October  4, 2004" "1.6.9" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "October  7, 2004" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -1030,34 +1030,6 @@ wildcards.  This is to make a path like:
 .Ve
 .PP
 match \fI/usr/bin/who\fR but not \fI/usr/bin/X11/xterm\fR.
-.PP
-\&\s-1WARNING:\s0 a pathname with wildcards will \fBnot\fR match a user command
-that consists of a relative path.  In other words, given the
-following \fIsudoers\fR entry:
-.PP
-.Vb 1
-\&    billy  workstation = /usr/bin/*
-.Ve
-.PP
-user billy will be able to run any command in /usr/bin as root, such
-as \fI/usr/bin/w\fR.  The following two command will be allowed (the first
-assumes that \fI/usr/bin\fR is in the user's path):
-.PP
-.Vb 2
-\&    $ sudo w
-\&    $ sudo /usr/bin/w
-.Ve
-.PP
-However, this will not:
-.PP
-.Vb 2
-\&    $ cd /usr/bin
-\&    $ sudo ./w
-.Ve
-.PP
-For this reason you should only \fBgrant\fR access to commands using
-wildcards and never \fBrestrict\fR access using them.  This limitation
-will be removed in a future version of \fBsudo\fR.
 .Sh "Exceptions to wildcard rules"
 .IX Subsection "Exceptions to wildcard rules"
 The following exceptions apply to the above rules:
