@@ -348,6 +348,11 @@ case "$host" in
 		AC_DEFINE(_ALL_SOURCE)
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 		;;
+    *-*-hiuxmpp*)
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
+		fi
+		;;
     *-*-hpux1[[0-9]]*)
 		# uncomment this for a statically linked sudo
 		# (XXX - should be an option to configure)
@@ -765,6 +770,7 @@ dnl
 AC_CHECK_FUNCS(strchr strrchr memcpy memset sysconf sigaction tzset strcasecmp seteuid)
 if test "$SHADOW_TYPE" = "SPW_SECUREWARE"; then
     AC_CHECK_FUNCS(bigcrypt)
+    AC_CHECK_FUNCS(set_auth_parameters)
 fi
 if test -z "$BROKEN_GETCWD"; then
     AC_CHECK_FUNC(getcwd, AC_DEFINE(HAVE_GETCWD), LIBOBJS="$LIBOBJS getcwd.o")
