@@ -47,6 +47,7 @@ static char rcsid[] = "$Id$";
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <sys/types.h>
+#include <sys/param.h>
 #include <netinet/in.h>
 #include <pwd.h>
 #include "sudo.h"
@@ -79,9 +80,16 @@ extern char *strdup     __P((const char *));
 #endif /* HAVE_STRDUP */
 #endif /* !STDC_HEADERS */
 
+/*
+ * Global variables (yuck)
+ */
+#if (SHADOW_TYPE == SPW_SECUREWARE) && defined(__alpha)
+uchar_t crypt_type;
+#endif /* SPW_SECUREWARE && __alpha */
+
 
 /*
- * local functions not visible outside sudo_getpwuid.c
+ * Local functions not visible outside sudo_getpwuid.c
  */
 static char *sudo_getshell	__P((struct passwd *));
 static char *sudo_getspwd	__P((struct passwd *));
@@ -164,9 +172,12 @@ static char *sudo_getspwd(pw_ent)
 {
     struct pr_passwd *spw_ent;
 
-    if ((spw_ent = getprpwuid(pw_ent -> pw_uid)) && spw_ent -> ufld.fd_encrypt)
+    if ((spw_ent = getprpwuid(pw_ent->pw_uid)) && spw_ent->ufld.fd_encrypt) {
+#ifdef __alpha
+	crypt_type = spw_ent -> ufld.fd_oldcrypt;
+#endif /* __alpha */
 	return(spw_ent -> ufld.fd_encrypt);
-    else
+    } else
 	return(pw_ent -> pw_passwd);
 }
 #  endif /* SECUREWARE */
