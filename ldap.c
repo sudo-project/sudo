@@ -105,7 +105,7 @@ sudo_ldap_check_user_netgroup(ld, entry)
     int ret = FALSE;
 
     if (!entry)
-	return ret;
+	return(ret);
 
     /* get the values from the entry */
     v = ldap_get_values(ld, entry, "sudoUser");
@@ -126,7 +126,7 @@ sudo_ldap_check_user_netgroup(ld, entry)
     if (v)
 	ldap_value_free(v);	/* cleanup */
 
-    return ret;
+    return(ret);
 }
 
 /*
@@ -142,7 +142,7 @@ sudo_ldap_check_host(ld, entry)
     int ret = FALSE;
 
     if (!entry)
-	return ret;
+	return(ret);
 
     /* get the values from the entry */
     v = ldap_get_values(ld, entry, "sudoHost");
@@ -165,7 +165,7 @@ sudo_ldap_check_host(ld, entry)
     if (v)
 	ldap_value_free(v);	/* cleanup */
 
-    return ret;
+    return(ret);
 }
 
 /*
@@ -182,7 +182,7 @@ sudo_ldap_check_runas(ld, entry)
     int ret = FALSE;
 
     if (!entry)
-	return ret;
+	return(ret);
 
     /* get the values from the entry */
     v = ldap_get_values(ld, entry, "sudoRunAs");
@@ -209,9 +209,9 @@ sudo_ldap_check_runas(ld, entry)
      * If there are no runas entries, then match the runas_default with whats
      * on the command line
      */
-    if (!v) {
+    if (!v)
 	ret = !strcasecmp(*user_runas, def_runas_default);
-    }
+
     /*
      * What about the case where exactly one runas is specified in the config
      * and the user forgets the -u option, should we switch it?
@@ -233,7 +233,7 @@ sudo_ldap_check_runas(ld, entry)
     if (v)
 	ldap_value_free(v);	/* cleanup */
 
-    return ret;
+    return(ret);
 }
 
 /*
@@ -248,7 +248,7 @@ sudo_ldap_check_command(ld, entry)
     int foundbang, ret = FALSE;
 
     if (!entry)
-	return ret;
+	return(ret);
 
     v = ldap_get_values(ld, entry, "sudoCommand");
 
@@ -302,7 +302,7 @@ sudo_ldap_check_command(ld, entry)
 	ldap_value_free(v);	/* more cleanup */
 
     /* return TRUE if we found at least one ALLOW and no DENY */
-    return ret > 0;
+    return(ret > 0);
 }
 
 /*
@@ -438,7 +438,7 @@ sudo_ldap_build_pass1()
     /* End of OR List */
     ncat(&b, &sz, ")");
 
-    return b;
+    return(b);
 }
 
 /*
@@ -448,11 +448,36 @@ int
 _atobool(s)
     const char *s;
 {
-    if (!strcasecmp(s, "yes") || !strcasecmp(s, "true") || !strcasecmp(s, "on"))
-	return TRUE;
-    if (!strcasecmp(s, "no") || !strcasecmp(s, "false") || !strcasecmp(s, "off"))
-	return FALSE;
-    return -1;
+    switch (*s) {
+	case 'y':
+	case 'Y':
+	    if (strcasecmp(s, "yes") == 0)
+		return(TRUE);
+	    break;
+	case 't':
+	case 'T':
+	    if (strcasecmp(s, "true") == 0)
+		return(TRUE);
+	    break;
+	case 'o':
+	case 'O':
+	    if (strcasecmp(s, "on") == 0)
+		return(TRUE);
+	    if (strcasecmp(s, "off") == 0)
+		return(FALSE);
+	    break;
+	case 'n':
+	case 'N':
+	    if (strcasecmp(s, "no") == 0)
+		return(FALSE);
+	    break;
+	case 'f':
+	case 'F':
+	    if (strcasecmp(s, "false") == 0)
+		return(FALSE);
+	    break;
+    }
+    return(-1);
 }
 
 int
@@ -464,7 +489,7 @@ sudo_ldap_read_config()
     ldap_conf.tls_checkpeer = -1;	/* default */
 
     if ((f = fopen(_PATH_LDAP_CONF, "r")) == NULL)
-	return FALSE;
+	return(FALSE);
     while (fgets(buf, sizeof(buf), f)) {
 	c = buf;
 	if (*c == '#')
@@ -586,8 +611,8 @@ sudo_ldap_read_config()
 	printf("===================\n");
     }
     if (!ldap_conf.base)
-	return FALSE;		/* if no base is defined, ignore LDAP */
-    return TRUE;
+	return(FALSE);		/* if no base is defined, ignore LDAP */
+    return(TRUE);
 }
 
 /*
@@ -614,7 +639,7 @@ char *
 	ncat(&b, &sz, "(empty list)");	/* append value */
     }
 
-    return b;
+    return(b);
 }
 
 char *sudo_ldap_cm_list = NULL;
@@ -635,7 +660,7 @@ sudo_ldap_add_match(ld, entry, pwflag)
 
     /* if we are not collecting matches, then don't save them */
     if (pwflag != I_LISTPW)
-	return TRUE;
+	return(TRUE);
 
     /* collect the dn, only show the rdn */
     dn = ldap_get_dn(ld, entry);
@@ -670,7 +695,7 @@ sudo_ldap_add_match(ld, entry, pwflag)
     if (v)
 	ldap_value_free(v);
 
-    return FALSE;		/* Don't stop at the first match */
+    return(FALSE);		/* Don't stop at the first match */
 }
 #undef SAVE_LIST
 
@@ -691,7 +716,7 @@ sudo_ldap_open()
     int rc;					/* temp return value */
 
     if (!sudo_ldap_read_config())
-	return NULL;
+	return(NULL);
 
     /* macro to set option, error on failure plus consistent debugging */
 #define SET_OPT(opt,optname,val) \
@@ -702,7 +727,7 @@ sudo_ldap_open()
     if(rc != LDAP_OPT_SUCCESS){ \
       fprintf(stderr,"ldap_set_option(LDAP_OPT_%s,\"%s\")=%d: %s\n", \
            optname, ldap_conf.val, rc, ldap_err2string(rc)); \
-      return NULL ; \
+      return(NULL) ; \
     } \
   } \
 
@@ -714,7 +739,7 @@ sudo_ldap_open()
     if(rc != LDAP_OPT_SUCCESS){ \
       fprintf(stderr,"ldap_set_option(LDAP_OPT_%s,0x%02x)=%d: %s\n", \
            optname, ldap_conf.val, rc, ldap_err2string(rc)); \
-      return NULL ; \
+      return(NULL) ; \
     } \
 
     /* attempt to setup ssl options */
@@ -762,7 +787,7 @@ sudo_ldap_open()
 	if (rc) {
 	    fprintf(stderr, "ldap_initialize()=%d : %s\n",
 		rc, ldap_err2string(rc));
-	    return NULL;
+	    return(NULL);
 	}
     } else
 #endif /* HAVE_LDAP_INITIALIZE */
@@ -775,7 +800,7 @@ sudo_ldap_open()
 	if ((ld = ldap_init(ldap_conf.host, ldap_conf.port)) == NULL) {
 	    fprintf(stderr, "ldap_init(): errno=%d : %s\n",
 		errno, strerror(errno));
-	    return NULL;
+	    return(NULL);
 	}
     }
 #ifdef LDAP_OPT_PROTOCOL_VERSION
@@ -793,7 +818,7 @@ sudo_ldap_open()
 	    fprintf(stderr, "ldap_start_tls_s(): %d: %s\n", rc,
 		ldap_err2string(rc));
 	    ldap_unbind(ld);
-	    return NULL;
+	    return(NULL);
 	}
 	if (ldap_conf.debug)
 	    printf("ldap_start_tls_s() ok\n");
@@ -804,12 +829,12 @@ sudo_ldap_open()
     if ((rc = ldap_simple_bind_s(ld, ldap_conf.binddn, ldap_conf.bindpw))) {
 	fprintf(stderr, "ldap_simple_bind_s()=%d : %s\n",
 	    rc, ldap_err2string(rc));
-	return NULL;
+	return(NULL);
     }
     if (ldap_conf.debug)
 	printf("ldap_bind() ok\n");
 
-    return (VOID *) ld;
+    return((VOID *) ld);
 }
 
 void
@@ -969,7 +994,7 @@ sudo_ldap_check(v, pwflag)
     if (ldap_conf.debug)
 	printf("sudo_ldap_check(%d)=0x%02x\n", pwflag, ret);
 
-    return ret;
+    return(ret);
 }
 
 /*
