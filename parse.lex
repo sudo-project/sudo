@@ -203,12 +203,12 @@ PASSWD[[:blank:]]*:	{
 			}
 
 <GOTRUNAS>[[:upper:]][[:upper:][:digit:]_]* {
-			    /* Runas_Alias that user can run command as or ALL */
-			    fill(yytext, yyleng);
+			    /* Runas_Alias user can run command as or ALL */
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
 				return(ALL);
 			    } else {
+				fill(yytext, yyleng);
 				LEXTRACE("ALIAS ");
 				return(ALIAS);
 			    }
@@ -238,11 +238,11 @@ PASSWD[[:blank:]]*:	{
 			}			/* a pathname */
 
 [[:upper:]][[:upper:][:digit:]_]*	{
-			    fill(yytext, yyleng);
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
 				return(ALL);
 			    } else {
+				fill(yytext, yyleng);
 				LEXTRACE("ALIAS ");
 				return(ALIAS);
 			    }

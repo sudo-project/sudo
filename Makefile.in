@@ -40,6 +40,7 @@
 #### Start of system configuration section. ####
 
 srcdir = @srcdir@
+authdir = $(srcdir)/auth
 VPATH = @srcdir@
 
 # Compiler & tools to use
@@ -58,7 +59,7 @@ VISUDO_LIBS = @VISUDO_LIBS@
 # C preprocessor flags
 CPPFLAGS = -I. -I$(srcdir) @CPPFLAGS@
 
-# Usually -g or -O
+# Usually -O and/or -g
 CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
@@ -108,13 +109,19 @@ SHELL = /bin/sh
 
 PROGS = @PROGS@
 
-SRCS = alloc.c check.c fileops.c find_path.c getspwuid.c goodpath.c \
-       interfaces.c logging.c parse.c parse.lex parse.yacc sudo.c \
-       sudo_setenv.c tgetpass.c version.c visudo.c $(AUTH_SRCS)
+SRCS = alloc.c alloca.c check.c fileops.c find_path.c fnmatch.c getcwd.c \
+       getspwuid.c goodpath.c interfaces.c lex.yy.c lsearch.c logging.c \
+       parse.c parse.lex parse.yacc putenv.c snprintf.c strerror.c sudo.c \
+       sudo.tab.c sudo_setenv.c testsudoers.c tgetpass.c utime.c version.c \
+       visudo.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/dce.c auth/fwtk.c auth/kerb4.c \
 	    auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
 	    auth/secureware.c auth/securid.c auth/sia.c auth/sudo_auth.c
+
+HDRS = compat.h ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h \
+       interfaces.h logging.h sudo.h sudo.tab.h version.h auth/sudo_auth.h \
+       emul/fnmatch.h emul/search.h emul/utime.h
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
@@ -130,21 +137,23 @@ TESTOBJS = interfaces.o testsudoers.o $(PARSEOBJS)
 
 LIBOBJS = @LIBOBJS@ @ALLOCA@
 
-HDRS = compat.h ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h \
-       interfaces.h logging.h sudo.h version.h
-
 VERSION = 1.6
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES FAQ HISTORY INSTALL INSTALL.configure \
 	    LICENSE Makefile.in PORTING README RUNSON TODO TROUBLESHOOTING \
-	    UPGRADE acsite.m4 aixcrypt.exp alloca.c config.guess config.h.in \
-	    config.sub configure configure.in fnmatch.3 fnmatch.c getcwd.c \
-	    indent.pro install-sh lex.yy.c lsearch.c mkinstalldirs \
-	    pathnames.h.in putenv.c sample.pam sample.sudoers snprintf.c \
-	    strerror.c sudo.cat sudo.man sudo.pod sudo.tab.c sudo.tab.c \
-	    sudoers sudoers.cat sudoers.man sudoers.pod testsudoers.c utime.c \
-	    visudo.cat visudo.man visudo.pod auth/sudo_auth.h emul/fnmatch.h \
-	    emul/search.h emul/utime.h
+	    UPGRADE acsite.m4 aixcrypt.exp config.guess config.h.in config.sub \
+	    configure configure.in fnmatch.3 indent.pro install-sh \
+	    mkinstalldirs pathnames.h.in sample.pam sample.sudoers sudo.cat \
+	    sudo.man sudo.pod sudoers sudoers.cat sudoers.man sudoers.pod \
+	    visudo.cat visudo.man visudo.pod
+
+SUDODEP = $(srcdir)/sudo.h $(srcdir)/compat.h $(srcdir)/logging.h \
+	  config.h pathnames.h
+
+AUTHDEP = $(SUDODEP) $(authdir)/sudo_auth.h
+
+INSDEP = $(srcdir)/ins_2001.h $(srcdir)/ins_classic.h $(srcdir)/ins_csops.h \
+	 $(srcdir)/ins_goons.h $(srcdir)/insults.h
 
 all: $(PROGS)
 
@@ -166,52 +175,72 @@ visudo: $(VISUDOBJS) $(LIBOBJS)
 testsudoers: $(TESTOBJS) $(LIBOBJS)
 	$(CC) -o $@ $(TESTOBJS) $(LIBOBJS) $(VISUDO_LDFLAGS) $(VISUDO_LIBS)
 
-# Uncomment the following if you intend to modify parse.yacc
-#sudo.tab.c sudo.tab.h: parse.yacc
-#	rm -f sudo.tab.h sudo.tab.c
-#	$(YACC) -d -b sudo $(srcdir)/parse.yacc
+# Uncomment the following if you want "make clean" to clean the parser
+@DEV@PARSESRCS = sudo.tab.h sudo.tab.c lex.yy.c
 
-sudo.tab.o: $(HDRS) config.h pathnames.h sudo.tab.h sudo.tab.c
+# Uncomment the following if you intend to modify parse.yacc
+@DEV@sudo.tab.c sudo.tab.h: parse.yacc
+@DEV@	rm -f sudo.tab.h sudo.tab.c
+@DEV@	$(YACC) -d -b sudo $(srcdir)/parse.yacc
 
 # Uncomment the following if you intend to modify parse.lex
-#lex.yy.c: parse.lex
-#	rm -f lex.yy.c
-#	$(LEX) $(srcdir)/parse.lex
+@DEV@lex.yy.c: parse.lex
+@DEV@	rm -f lex.yy.c
+@DEV@	$(LEX) $(srcdir)/parse.lex
 
-lex.yy.o: $(HDRS) config.h pathnames.h sudo.tab.h lex.yy.c
-
-$(PARSEOBJS): parse.h
-
-$(SUDOBJS) $(LIBOBJS): $(HDRS) config.h pathnames.h
+# Dependencies (not counting auth functions)
+alloc.o: alloc.c $(SUDODEP)
+check.o: check.c $(SUDODEP)
+fileops.o: fileops.c $(SUDODEP)
+find_path.o: find_path.c $(SUDODEP)
+getspwuid.o: getspwuid.c $(SUDODEP)
+goodpath.o: goodpath.c $(SUDODEP)
+logging.o: logging.c $(SUDODEP)
+sudo_setenv.o: sudo_setenv.c $(SUDODEP)
+tgetpass.o: tgetpass.c $(SUDODEP)
+visudo.o: visudo.c $(SUDODEP) version.h
+sudo.o: sudo.c $(SUDODEP) interfaces.h
+interfaces.o: interfaces.c $(SUDODEP) interfaces.h
+testsudoers.o: testsudoers.c $(SUDODEP) parse.h interfaces.h
+parse.o: parse.c $(SUDODEP) parse.h interfaces.h
+lex.yy.o: lex.yy.c $(SUDODEP) parse.h sudo.tab.h
+sudo.tab.o: sudo.tab.c $(SUDODEP) parse.h
+version.o: version.c $(SUDODEP) version.h auth/sudo_auth.h
+fnmatch.o: fnmatch.c config.h compat.h emul/fnmatch.h
+getcwd.o: getcwd.c config.h compat.h
+lsearch.o: lsearch.c config.h compat.h emul/search.h
+putenv.o: putenv.c config.h compat.h
+snprintf.o: snprintf.c config.h compat.h
+strerror.o: strerror.c config.h
+utime.o: utime.c config.h pathnames.h compat.h emul/utime.h
 
 # Authentication functions live in "auth" dir and so need extra care
-$(AUTH_OBJS): logging.h sudo.h auth/sudo_auth.h
-sudo_auth.o: $(srcdir)/auth/sudo_auth.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/sudo_auth.c
-afs.o: $(srcdir)/auth/afs.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/afs.c
-aix_auth.o: $(srcdir)/auth/aix_auth.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/aix_auth.c
-dce.o: $(srcdir)/auth/dce.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/dce.c
-fwtk.o: $(srcdir)/auth/fwtk.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/fwtk.c
-kerb4.o: $(srcdir)/auth/kerb4.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/kerb4.c
-kerb5.o: $(srcdir)/auth/kerb5.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/kerb5.c
-pam.o: $(srcdir)/auth/pam.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/pam.c
-passwd.o: $(srcdir)/auth/passwd.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/passwd.c
-rfc1938.o: $(srcdir)/auth/rfc1938.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/rfc1938.c
-secureware.o: $(srcdir)/auth/secureware.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/secureware.c
-securid.o: $(srcdir)/auth/securid.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/securid.c
-sia.o: $(srcdir)/auth/sia.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/sia.c
+sudo_auth.o: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/sudo_auth.c
+afs.o: $(authdir)/afs.c $(AUTHDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/afs.c
+aix_auth.o: $(authdir)/aix_auth.c $(AUTHDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/aix_auth.c
+dce.o: $(authdir)/dce.c $(AUTHDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/dce.c
+fwtk.o: $(authdir)/fwtk.c $(AUTHDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/fwtk.c
+kerb4.o: $(authdir)/kerb4.c $(AUTHDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/kerb4.c
+kerb5.o: $(authdir)/kerb5.c $(AUTHDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/kerb5.c
+pam.o: $(authdir)/pam.c $(AUTHDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/pam.c
+passwd.o: $(authdir)/passwd.c $(AUTHDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/passwd.c
+rfc1938.o: $(authdir)/rfc1938.c $(AUTHDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/rfc1938.c
+secureware.o: $(authdir)/secureware.c $(AUTHDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/secureware.c
+securid.o: $(authdir)/securid.c $(AUTHDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/securid.c
+sia.o: $(authdir)/sia.c $(AUTHDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/sia.c
 
 sudo.html: $(srcdir)/sudo.pod
 	@rm -f $(srcdir)/$@
@@ -276,12 +305,14 @@ TAGS: $(SRCS)
 	etags $(SRCS)
 
 clean:
-	-rm -f *.o $(PROGS) testsudoers core sudo.core visudo.core testsudoers.core
+	-rm -f *.o $(PROGS) testsudoers core sudo.core visudo.core \
+	       testsudoers.core $(PARSESRCS)
 
 mostlyclean: clean
 
 distclean: clean
-	rm -f Makefile pathnames.h config.h config.status config.cache config.log pod2html-dircache pod2html-itemcache
+	-rm -f Makefile pathnames.h config.h config.status config.cache \
+	       config.log pod2html-dircache pod2html-itemcache $(PARSESRCS)
 
 clobber: distclean
 

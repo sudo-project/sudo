@@ -1054,12 +1054,12 @@ case 19:
 YY_RULE_SETUP
 #line 205 "parse.lex"
 {
-			    /* Runas_Alias that user can run command as or ALL */
-			    fill(yytext, yyleng);
+			    /* Runas_Alias user can run command as or ALL */
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
 				return(ALL);
 			    } else {
+				fill(yytext, yyleng);
 				LEXTRACE("ALIAS ");
 				return(ALIAS);
 			    }
@@ -1100,11 +1100,11 @@ case 23:
 YY_RULE_SETUP
 #line 240 "parse.lex"
 {
-			    fill(yytext, yyleng);
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
 				return(ALL);
 			    } else {
+				fill(yytext, yyleng);
 				LEXTRACE("ALIAS ");
 				return(ALIAS);
 			    }

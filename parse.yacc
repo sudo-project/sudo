@@ -176,16 +176,16 @@ static struct generic_alias *ga_list = NULL;
 /*
  * Protoypes
  */
-extern int  command_matches	__P((char *, char *, char *, char *));
 extern int  addr_matches	__P((char *));
+extern int  command_matches	__P((char *, char *, char *, char *));
 extern int  netgr_matches	__P((char *, char *, char *));
 extern int  usergr_matches	__P((char *, char *));
-static aliasinfo *find_alias	__P((char *, int));
 static int  add_alias		__P((char *, int, int));
-static int  more_aliases	__P((void));
 static void append		__P((char *, char **, size_t *, size_t *, char *));
 static void expand_ga_list	__P((void));
 static void expand_match_list	__P((void));
+static aliasinfo *find_alias	__P((char *, int));
+static int  more_aliases	__P((void));
        void init_parser		__P((void));
        void yyerror		__P((char *));
 
@@ -214,19 +214,17 @@ yyerror(s)
 }
 
 %start file				/* special start symbol */
+%token <command> COMMAND		/* absolute pathname w/ optional args */
 %token <string>  ALIAS			/* an UPPERCASE alias name */
 %token <string>  NTWKADDR		/* w.x.y.z */
 %token <string>  FQHOST			/* foo.bar.com */
 %token <string>  NETGROUP		/* a netgroup (+NAME) */
 %token <string>  USERGROUP		/* a usergroup (%NAME) */
 %token <string>  NAME			/* a mixed-case name */
-/* XXX - may want to make this back into a tok but if so, don't allocate
-         space in parse.lex via fill() */
-%token <string>	 ALL			/* ALL keyword */
-%token <tok> 	 RUNAS			/* a mixed-case runas name */
+%token <tok> 	 RUNAS			/* ( runas_list ) */
 %token <tok> 	 NOPASSWD		/* no passwd req for command */
 %token <tok> 	 PASSWD			/* passwd req for command (default) */
-%token <command> COMMAND		/* an absolute pathname */
+%token <tok>	 ALL			/* ALL keyword */
 %token <tok>	 COMMENT		/* comment and/or carriage return */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
 %token <tok>	 CMNDALIAS		/* Cmnd_Alias keyword */
@@ -242,7 +240,7 @@ yyerror(s)
  *       -1) No match (don't change the value of *_matches)
  */
 %type <BOOLEAN>	 cmnd
-%type <BOOLEAN>	 hostspec
+%type <BOOLEAN>	 host
 %type <BOOLEAN>	 runasuser
 %type <BOOLEAN>	 user
 
@@ -287,18 +285,17 @@ privilege	:	hostlist '=' cmndspeclist {
 			}
 		;
 
-ophostspec	:	hostspec {
+ophost		:	host {
 			    if ($1 != -1)
 				host_matches = $1;
 			}
-		|	'!' hostspec {
+		|	'!' host {
 			    if ($2 != -1)
-				host_matches = !$2;
+				host_matches = ! $2;
 			}
 
-hostspec	:	ALL {
+host		:	ALL {
 			    $$ = TRUE;
-			    free($1);
 			}
 		|	NTWKADDR {
 			    if (addr_matches($1))
@@ -378,7 +375,7 @@ opcmnd		:	cmnd {
 			    }
 			} cmnd {
 			    if ($3 != -1)
-				cmnd_matches = !$3;
+				cmnd_matches = ! $3;
 			}
 		;
 
@@ -426,7 +423,7 @@ oprunasuser	:	runasuser {
 			    }
 			} runasuser {
 			    if ($3 != -1)
-				runas_matches = !$3;
+				runas_matches = ! $3;
 			}
 
 runasuser	:	NAME {
@@ -497,13 +494,12 @@ runasuser	:	NAME {
 		|	ALL {
 			    if (printmatches == TRUE) {
 				if (in_alias == TRUE)
-				    append_entries($1, ", ");
+				    append_entries("ALL", ", ");
 				else if (host_matches == TRUE &&
 				    user_matches == TRUE)
-				    append_runas($1, ", ");
+				    append_runas("ALL", ", ");
 			    }
 			    $$ = TRUE;
-			    free($1);
 			}
 		;
 
@@ -534,16 +530,15 @@ nopasswd	:	/* empty */ {
 cmnd		:	ALL {
 			    if (printmatches == TRUE) {
 				if (in_alias == TRUE)
-				    append_entries($1, ", ");
+				    append_entries("ALL", ", ");
 				else if (host_matches == TRUE &&
 				    user_matches == TRUE) {
-				    append_cmnd($1, NULL);
+				    append_cmnd("ALL", NULL);
 				    expand_match_list();
 				}
 			    }
 
 			    $$ = TRUE;
-			    free($1);
 
 			    if (safe_cmnd)
 				free(safe_cmnd);
@@ -612,8 +607,8 @@ hostalias	:	ALIAS { push; } '=' hostlist {
 			}
 		;
 
-hostlist	:	ophostspec
-		|	hostlist ',' ophostspec
+hostlist	:	ophost
+		|	hostlist ',' ophost
 		;
 
 cmndaliases	:	cmndalias
@@ -691,7 +686,7 @@ opuser		:	user {
 			}
 		|	'!' user {
 			    if ($2 != -1)
-				user_matches = !$2;
+				user_matches = ! $2;
 			}
 
 user		:	NAME {
@@ -733,7 +728,6 @@ user		:	NAME {
 			}
 		|	ALL {
 			    $$ = TRUE;
-			    free($1);
 			}
 		;
 

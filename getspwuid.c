@@ -104,7 +104,7 @@ sudo_getshell(pw)
     char *pw_shell;
 
     if ((pw_shell = getenv("SHELL")) == NULL)
-	pw_shell = pw -> pw_shell;
+	pw_shell = pw->pw_shell;
 
 #ifdef _PATH_BSHELL
     /* empty string "" means bourne shell */
@@ -141,9 +141,9 @@ sudo_getepw(pw)
 	spw = getprpwnam(pw->pw_name);
 	if (spw != NULL && spw->ufld.fd_encrypt != NULL) {
 #  ifdef __alpha
-	    crypt_type = spw -> ufld.fd_oldcrypt;
+	    crypt_type = spw->ufld.fd_oldcrypt;
 #  endif /* __alpha */
-	    return(spw -> ufld.fd_encrypt);
+	    return(spw->ufld.fd_encrypt);
 	}
     }
 #endif /* HAVE_GETPRPWNAM */
@@ -151,32 +151,32 @@ sudo_getepw(pw)
     {
 	struct spwd *spw;
 
-	if ((spw = getspnam(pw -> pw_name)) && spw -> sp_pwdp)
-	    return(spw -> sp_pwdp);
+	if ((spw = getspnam(pw->pw_name)) && spw->sp_pwdp)
+	    return(spw->sp_pwdp);
     }
 #endif /* HAVE_GETSPNAM */
 #ifdef HAVE_GETSPWUID
     {
 	struct s_passwd *spw;
 
-	if ((spw = getspwuid(pw -> pw_uid)) && spw -> pw_passwd)
-	    return(spw -> pw_passwd);
+	if ((spw = getspwuid(pw->pw_uid)) && spw->pw_passwd)
+	    return(spw->pw_passwd);
     }
 #endif /* HAVE_GETSPWUID */
 #ifdef HAVE_GETPWANAM
     {
 	struct passwd_adjunct *spw;
 
-	if ((spw = getpwanam(pw -> pw_name)) && spw -> pwa_passwd)
-	    return(spw -> pwa_passwd);
+	if ((spw = getpwanam(pw->pw_name)) && spw->pwa_passwd)
+	    return(spw->pwa_passwd);
     }
 #endif /* HAVE_GETPWANAM */
 #ifdef HAVE_GETAUTHUID
     {
 	AUTHORIZATION *spw;
 
-	if ((spw = getauthuid(pw -> pw_uid)) && spw -> a_password)
-	    return(spw -> a_password);
+	if ((spw = getauthuid(pw->pw_uid)) && spw->a_password)
+	    return(spw->a_password);
     }
 #endif /* HAVE_GETAUTHUID */
 

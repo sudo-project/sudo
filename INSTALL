@@ -129,9 +129,7 @@ Special features/options:
 	Enable NRL OPIE OTP (One Time Password) support.
 
   --with-otp-only
-	When validating the user, only allow a One Time Password (OTP)
-	passkey via S/Key or OPIE.  Do not compare against the passwd
-	file or use any other authentication scheme.
+	This option is now just an alias for --without-passwd.
 
   --with-long-otp-prompt
 	When validating with a One Time Password scheme (S/Key or OPIE), a

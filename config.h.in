@@ -142,9 +142,6 @@
 /* Define if you want a two line OTP (skey/opie) prompt.  */
 #undef LONG_OTP_PROMPT
 
-/* Define if you want to validate users via OTP (skey/opie) only.  */
-#undef OTP_ONLY
-
 /* Define if you use SecurID.  */
 #undef HAVE_SECURID
 

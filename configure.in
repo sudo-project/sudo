@@ -13,9 +13,11 @@ echo "Configuring Sudo version 1.6"
 dnl
 dnl Variables that get substituted in the Makefile
 dnl
+AC_SUBST(CFLAGS)dnl must not initialize CFLAGS, it is magic
 PROGS="sudo visudo"
-AC_SUBST(CFLAGS)dnl
 AC_SUBST(PROGS)dnl
+CPPFLAGS=""
+AC_SUBST(CPPFLAGS)dnl
 SUDO_LDFLAGS=""
 AC_SUBST(SUDO_LDFLAGS)dnl
 VISUDO_LDFLAGS=""
@@ -26,8 +28,6 @@ VISUDO_LIBS=""
 AC_SUBST(VISUDO_LIBS)dnl
 AFS_LIBS=""
 AC_SUBST(AFS_LIBS)dnl
-CPPFLAGS=""
-AC_SUBST(CPPFLAGS)dnl
 OSDEFS=""
 AC_SUBST(OSDEFS)dnl
 AUTH_OBJS=""
@@ -44,6 +44,8 @@ SUDOERS_UID=0
 AC_SUBST(SUDOERS_UID)dnl
 SUDOERS_GID=0
 AC_SUBST(SUDOERS_GID)dnl
+DEV="#"
+AC_SUBST(DEV)
 CHECKSHADOW=true
 CHECKSIA=true
 
@@ -54,6 +56,18 @@ test "$mandir" = '${prefix}/man' && mandir='$(prefix)/man'
 test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
 test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
 test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
+
+dnl
+dnl Deprecated --with options (these all warn or generate an error)
+dnl
+
+AC_ARG_WITH(otp-only, [  --with-otp-only         deprecated],
+[case $with_otp_only in
+    yes)	with_passwd=no
+		AC_DEFINE(WITHOUT_PASSWD)
+		AC_MSG_WARN([--with-otp-only option deprecated, treating as --without-passwd])
+		;;
+esac])
 
 dnl
 dnl Options for --with
@@ -126,6 +140,16 @@ AC_ARG_WITH(libraries, [  --with-libraries        additional libraries to link w
 		;;
 esac])
 
+AC_ARG_WITH(devel, [  --with-devel            add developement options],
+[case $with_devel in  
+    yes)	echo 'Setting up for developement: -Wall, flex, yacc'
+		DEV=""
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-devel: $with_csops"
+		;;
+esac])
+
 AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
 [case $with_csops in  
     yes)	echo 'Adding CSOps standard options'
@@ -182,18 +206,6 @@ AC_ARG_WITH(opie, [  --with-opie             enable OPIE support ],
 		;;
     no)		;;
     *)		echo "Ignoring unknown argument to --with-opie: $with_opie"
-		;;
-esac])
-
-AC_ARG_WITH(otp-only, [  --with-otp-only         validate user via OTP (skey/opie) only],
-[case $with_otp_only in
-    yes)	AC_DEFINE(OTP_ONLY)
-		AC_MSG_CHECKING(whether to use OTP as the sole authentication method)
-		AC_MSG_RESULT(yes)
-		;;
-    no)		;;
-    *)		echo "Sorry, --with-otp-only does not take an argument."
-		exit 1
 		;;
 esac])
 
@@ -994,7 +1006,14 @@ AC_PROG_CPP
 AC_ISC_POSIX
 
 dnl
-dnl find programs we use
+dnl It is now safe to modify CFLAGS
+dnl
+if test "$with_devel" = "yes" -a -n "$GCC"; then
+    CFLAGS="${CFLAGS} -Wall"
+fi
+
+dnl
+dnl Find programs we use
 dnl
 AC_CHECK_PROG(UNAMEPROG, uname, uname, )
 AC_CHECK_PROG(TRPROG, tr, tr, )
