@@ -185,6 +185,10 @@ static char *sudo_getspwd(pw_ent)
     if ((spw_ent = getprpwuid(pw_ent->pw_uid)) && spw_ent->ufld.fd_encrypt) {
 #    ifdef __alpha
 	crypt_type = spw_ent -> ufld.fd_oldcrypt;
+#      ifdef AUTH_CRYPT_C1CRYPT
+        if (crypt_type == AUTH_CRYPT_C1CRYPT)
+	    return(pw_ent -> pw_passwd);
+#      endif /* AUTH_CRYPT_C1CRYPT */
 #    endif /* __alpha */
 	return(spw_ent -> ufld.fd_encrypt);
     } else
