@@ -1699,8 +1699,6 @@ AC_TRY_COMPILE([#include <glob.h>], [int i = GLOB_BRACE | GLOB_TILDE; (void)i;],
 AC_CHECK_FUNCS(lockf flock, [break])
 AC_CHECK_FUNCS(waitpid wait3, [break])
 AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])
-AC_CHECK_FUNCS(lsearch, , [AC_CHECK_LIB([compat], [lsearch], [AC_CHECK_HEADER([search.h], [AC_DEFINE(HAVE_LSEARCH)]
-[LIBS="${LIBS} -lcompat"], [AC_LIBOBJ(lsearch)], [-])], [AC_LIBOBJ(lsearch)])])
 AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_FUNCS(futime) AC_LIBOBJ(utimes)])
 SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)])
 SUDO_FUNC_ISBLANK
