@@ -142,7 +142,15 @@ DEFVAR			[a-z_]+
 }
 
 <GOTCMND>{
+    \\[\*\?\[\]\!]	{
+			    /* quoted fnmatch glob char, pass verbatim */
+			    LEXTRACE("QUOTEDCHAR ");
+			    fill_args(yytext, 2, sawspace);
+			    sawspace = FALSE;
+			}
+
     \\[:\\,= \t#]	{
+			    /* quoted sudoers special char, strip backslash */
 			    LEXTRACE("QUOTEDCHAR ");
 			    fill_args(yytext + 1, 1, sawspace);
 			    sawspace = FALSE;
