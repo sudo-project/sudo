@@ -429,6 +429,9 @@ static void clean_env(envp)
     rmenv(envp, "_RLD_", 5);
 #endif /* __alpha */
 
+    /* set IFS to a sane default (same as sh(1) */
+    sudo_setenv("IFS", " \t\n");
+
 #ifdef SECURE_PATH
     sudo_setenv("PATH", SECURE_PATH);
 #endif /* SECURE_PATH */
