@@ -239,3 +239,38 @@ addr_matches(n)
 
     return(FALSE);
 }
+
+
+
+int
+netgr_matches(netgr, host, user)
+    char *netgr;
+    char *host;
+    char *user;
+{
+    /* XXX - all these statics make me want to puke! */
+    static char *domain = NULL;
+#ifdef HAVE_GETDOMAINNAME
+    static int firsttime = 1;
+    static char d[MAXHOSTNAMELEN];
+#endif /* HAVE_GETDOMAINNAME */
+
+    /* make sure we have a valid netgroup, sudo style */
+    if (*netgr != '+')
+	return(FALSE);
+
+#ifdef HAVE_GETDOMAINNAME
+    /* get the domain name (if any) */
+    if (firsttime) {
+	firsttime = 0;
+	if (getdomainname(d, sizeof(d)) == 0 && d[0])
+	    domain = d;
+    }
+#endif /* HAVE_GETDOMAINNAME */
+
+#ifdef HAVE_INNETGR
+    return(innetgr(netgr+1, host, user, domain));
+#else
+    return(FALSE);
+#endif /* HAVE_INNETGR */
+}
