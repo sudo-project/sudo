@@ -7,12 +7,10 @@ sudo was fed and watered by a handful of folks
 at CU-Boulder, including Bob Coggeshall, Bob Manchek, and 
 Trent Hein.
 
-In 1991, the University of Colorado and a consulting firm
-named "The Root Group" both paid (unbeknownst to each
-other) a group of programmers to add enhancements to sudo.
-Instead of using existing code, they started from scratch.
-These programmers (Dave Hieb and Jeff Nieusma) eventually
-released the new code under the GNU general license.
+In 1991, Dave Hieb and Jeff Nieusma wrote a new version
+of sudo with an enhanced sudoers format.  This version
+was bought by a consulting firm called "The Root Group"
+and released under the GNU general license.
 
 In 1996, Todd Miller, who had been maintaining sudo
 for several years in his spare time, brought sudo
