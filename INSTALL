@@ -116,9 +116,10 @@ Special features/options:
                           links with the standard kerberos v5 libraries
                           as well as the v4 compatibility libraries.
 
-  --with-AFS              Enable AFS support.
-                          Written for AFS under AIX 3.2.x but should
-                          work for AFS on most platforms.
+  --with-AFS              Enable AFS support with kerberos authentication.
+                          Should work under AFS 3.3.  If your AFS
+                          doesn't have -laudit you should be able to
+                          link without it.
 
   --with-DCE              Enable DCE support.
                           Known to work on HP-UX 9.X and 10.0.
