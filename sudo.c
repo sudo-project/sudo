@@ -195,7 +195,6 @@ main(argc, argv, envp)
     initial_setup();
     sudo_setpwent();
     sudo_setgrent();
-    pwcache_init();
 
     /* Parse our arguments. */
     sudo_mode = parse_args(Argc, Argv);
@@ -409,7 +408,6 @@ main(argc, argv, envp)
 	/* Close the password and group files */
 	sudo_endpwent();
 	sudo_endgrent();
-	pwcache_destroy();
 
 	/* Install the real environment. */
 	environ = new_environ;
@@ -1147,7 +1145,8 @@ get_authpw()
 void
 cleanup()
 {
-    pwcache_destroy();
+    sudo_endpwent();
+    sudo_endgrent();
 }
 
 /*
