@@ -34,217 +34,198 @@
  *  Jeff Nieusma  Thu Mar 21 23:11:23 MST 1991
  */
 
+/*
+ *  Most of this code has been rewritten to fix bugs and bears little
+ *  resemblence to the original.  As such, this file conforms to my
+ *  personal coding style.
+ *
+ *  Todd C. Miller (millert@colorado.edu) Sat Sep  4 12:22:04 MDT 1993
+ */
+
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/param.h>
-#include <string.h>
 #include <strings.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/param.h>
+#include <sys/stat.h>
+#include "sudo.h"
+
 extern char *malloc();
 extern char *getenv();
-
-extern char **Argv;
-char *find_path();
-static char *do_stat();
-static char *check_link();
-char *strdup();
-
+extern char *strcpy();
+extern int fprintf();
+extern int readlink();
+extern int stat();
+extern int lstat();
+#ifdef USE_CWD
+extern char *getcwd();
+#else
+extern char *getwd();
+#endif
 
 
 /*******************************************************************
  *
- * find_path()
+ *  find_path()
  *
- * this function finds the full pathname for a command
+ *  this function finds the full pathname for a command
  */
 
 char *find_path(file)
-char *file;
+    char *file;
 {
-register char *n;
-char *path=NULL;
-char *cmd;
+    register char *n;			/* for traversing path */
+    char *path = NULL;			/* contents of PATH env var */
+    char fn[MAXPATHLEN+1];		/* filename (path + file) */
+    struct stat statbuf;		/* for stat() */
+    char *qualify();
 
-if ( strlen ( file ) > MAXPATHLEN ) {
-    fprintf ( stderr, "%s:  path too long:  %s\n", Argv[0], file );
-    exit (1);
+    if (strlen(file) > MAXPATHLEN) {
+	fprintf(stderr, "%s:  path too long:  %s\n", Argv[0], file);
+	exit(1);
     }
-    
-if ( *file == '.' && *(file+1) == '/' || *file == '/' ) 
-    return ( do_stat ( NULL, file ) );
-
-if ( ( path=getenv("PATH") ) == NULL ) return ( NULL ) ;
-if ( ( path=strdup(path) ) == NULL ) {
-    perror ( "find_path:  malloc" );
-    exit (1);
-    }
-
-while ( n = index ( path, ':' ) ) {
-    *n='\0';
-    if ( cmd = do_stat ( path, file ) ) return ( cmd );
-    path=n+1;
-    }
-
-if ( cmd = do_stat ( path, file ) ) 
-    return ( cmd );
-else
-    return ( NULL );
 	
-}
+    /* do we need to search the path? */
+    if (index(file, '/'))
+	return (qualify(file));
 
+    /* grab PATH out of environment and make a local copy */
+    if ((path = getenv("PATH") ) == NULL)
+	return (NULL);
 
-
-
-/**********************************************************************
- * 
- * check_link()
- * 
- * this function makes sure the argument is not a symbolic link.
- * it returns the pathname of the binary or NULL
- */
-
-static char *check_link(path)
-char *path;
-{
-char buf1[MAXPATHLEN+1];    /* is the link */
-char *s, *buf;
-register int rtn;
-
-/* the recursive buck stops here */
-if ( path == NULL ) return NULL ;
-
-/* I'd rather play with pointers than arrays... */
-buf = buf1;
-
-/* If this is NOT a sym link, return */
-if ( ( rtn=readlink(path, buf, MAXPATHLEN)) < 0 )
-    return (path);
-
-/* if it is a sym link, NULL terminate the string */
-buf[rtn]='\0';
-
-/* if the link points to an absolute path, start again... */
-if ( *buf == '/' ) return ( do_stat( NULL, buf ) );
-
-/* if the link points to ./something or something/ we need to 
- * strip off the filename portion of the current path */
-if ( ( s=rindex(path,'/') ) == NULL ) {
-    fprintf( stderr, "check_link:  This path is very wierd: %s \n", path );
-    exit (1);
+    if ((path = strdup(path)) == NULL) {
+	perror("find_path:  malloc");
+	exit(1);
     }
-else
-    *s='\0';
 
-/* as long as the link has ./ or ../ in it, get rid of it... */
-while ( *buf == '.' ) {
+    while ((n = index(path, ':'))) {
+	*n='\0';
+	strcpy(fn, path);
+	strcat(fn, "/");
+	strcat(fn, file);
 
-    if ( strncmp(buf, "../", 3) == 0 ) {
-	if ( ( s=rindex(path, '/')) ) {
-            *s='\0';
-	    if ( *path == '\0' ) strcpy ( path, "/" );
-	    }
-	buf += 3; 
-	continue;
+	/* stat the file to make sure it exists and is executable */
+	if (!stat(fn, &statbuf) && (statbuf.st_mode & 0000111))
+	    return (qualify(fn));
+	else if (errno == ENOENT || errno == ENOTDIR)
+	    path=n+1;
+	else {
+	    perror("find_path:  stat");
+	    exit(1);
 	}
-    else if ( strncmp(buf, "./", 2) == 0 ) {
-	buf += 2;
-	continue;
-	}
-    else 
-	break;
-
     }
-
-/* we have to copy the path buffer since do_stat() will bzero() it */
-if ( ( s = strdup ( path ) ) == NULL ) {
-    perror ( "check_link:  malloc" );
-    exit (1);
-    }
-
-return ( do_stat ( s, buf ) );
+    return(NULL);
 }
-
 
 
 /******************************************************************
  *
- *   do_stat()
+ *  qualify()
  *
- *    This function takes a path and a file and stat()s the file
- *    If the file exists and is executable, the full path to that
- *    file is returned otherwise NULL is returned.
+ *  this function takes a path and makes it fully qualified and resolves
+ *  all symbolic links, returning the fully qualfied path.
  */
 
-static char *do_stat( path, file )
-char *path, *file;
+char *qualify(n)
+    char *n;				/* name to make fully qualified */
 {
-static char buf[MAXPATHLEN+1];
-struct stat s;
-register char type;
+    char *beg = NULL;			/* begining of a path component */
+    char *end;				/* end of a path component */
+    static char full[MAXPATHLEN+1];	/* the fully qualified name */
+    char name[MAXPATHLEN+1];		/* local copy of n */
+    struct stat statbuf;		/* for lstat() */
+    char *tmp;				/* temporary pointer */
 
+    /* is it a bogus path? */
+    if (stat(n, &statbuf)) {
+    	if (errno == ENOENT)
+	    return(NULL);
+	else {
+	    perror("qualify:  stat");
+	    exit(1);
+	}
+    }
 
-if (index(file, '/') && *file != '/' && strncmp(file, "./", 2)
-    && strncmp(file, "../", 3))
-    type=3;
-else if ( *file == '.' && *(file+1) == '/' ) 
-    type=1;
-else  if ( *file == '/' )
-    type=2;
-else  if ( path == NULL )
-    type=2;
-else  if ( *path == '.' && *(path+1) == (char)NULL )
-    type=3;
-else
-    type=0;
-
-
-switch ( type ) {
-    case 1:
-        file += 2;
-    case 3:
-	if ( (path=(char *)malloc(MAXPATHLEN+1)) == NULL ) {
-	    perror ("do_stat:  malloc");
-	    exit (1);
-	    }
-#ifdef hpux
-	if ( ! getcwd ( path, (size_t)(MAXPATHLEN+1) ) ) {
-	    perror ("do_stat:  getcwd");
-	    exit (1);
-	    }
+    /* if n is relative, fill full with working dir */
+    if (*n != '/') {
+#ifdef USE_CWD
+	if (!getcwd(full, (size_t)(MAXPATHLEN+1))) {
 #else
-	if ( ! getwd ( path ) ) {
-	    perror ("do_stat:  getwd");
-	    exit (1);
-	    }
+	if (!getwd(full)) {
 #endif
-        break;
-    case 2:
-    default:
-        break;
-    }
-    
-    
-if ( ( ( path? strlen(path) : 0 ) + strlen (file) ) > MAXPATHLEN - 1 ) {
-    fprintf ( stderr, "%s:  path too long:  %s/%s\n", Argv[0], path, file );
-    exit (1);
-    }
+	    fprintf(stderr, "%s:  Can't get working directory!\n", Argv[0]);
+	    exit(1);
+	}
+    } else
+	full[0] = '\0';
 
-bzero ( buf, MAXPATHLEN+1 );
-if ( path ) strcat ( buf, path );
-if ( *file != '/' && path [strlen(path)-1] != '/' ) strcat ( buf, "/" );
-strcat ( buf, file );
+    (void)strcpy(name, n);		/* working copy... */
 
-/* make sure file exists and is executable */
-if ( ! stat ( buf, &s ) && (s.st_mode & 0000111) )
-    return ( check_link ( buf ) );
-else
-    return ( NULL );
+    do {				/* while (end) */
+	if (beg)
+	    beg = end + 1;		/* skip past the NULL */
+	else
+	    beg = name;			/* just starting out... */
 
+	/* find and terminate end of path component */
+	if ((end = index(beg, '/')))
+	    *end = '\0';
+
+	if (beg == end)
+	    continue;
+	else if (!strcmp(beg, "."))
+	    ;				/* ignore "." */
+	else if (!strcmp(beg, "..")) {
+	    tmp = rindex(full, '/');
+	    if (tmp && tmp != &full[0])
+		*tmp = '\0';
+	} else {
+	    strcat(full, "/");
+	    strcat(full, beg);		/* copy in new component */
+	}
+
+	/* check for symbolic links */
+	if (lstat(full, &statbuf)) {
+	    perror("qualify:  lstat");
+	    exit(1);
+	}
+
+	if ((statbuf.st_mode & S_IFMT) == S_IFLNK) {
+	    int linklen;		/* length of link contents */
+	    char newname[MAXPATHLEN+1];	/* temp storage to build new name */
+
+	    linklen = readlink(full, newname, sizeof(newname));
+	    newname[linklen] = '\0';
+	    
+	    /* check to make sure we don't go past MAXPATHLEN */
+	    ++end;
+	    if (end != (char *)1) {
+		if (linklen + strlen(end) >= MAXPATHLEN) {
+		    fprintf(stderr, "%s:  path too long:  %s/%s\n", Argv[0],
+								newname, end);
+		    exit(1);
+		}
+
+		strcat(newname, "/");
+		strcat(newname, end);	/* copy what's left of end */
+	    }
+
+	    if (newname[0] == '/')	/* reset full if necesary */
+		full[0] = '\0';
+	    else
+		if ((tmp = rindex(full, '/')))	/* remove component from full */
+		    *tmp = '\0';
+
+	    strcpy(name, newname);	/* reset name with new path */
+	    beg = NULL;			/* since we have a new name */
+	}
+    } while (end);
+
+    return((char *)full);
 }
 
 
-
-
+#ifdef NEED_STRDUP
 /******************************************************************
  *
  *  strdup()
@@ -254,11 +235,14 @@ else
  */
 
 char *strdup(s1)
-char *s1;
+    char *s1;
 {
-char *s;
-if ( ( s=(char *)malloc(strlen(s1)+1)) == NULL )
-    return (NULL);
-strcpy(s,s1);
-return (s);
+    char *s;
+
+    if ((s = (char *) malloc(strlen(s1) + 1)) == NULL)
+	return (NULL);
+
+    (void)strcpy(s, s1);
+    return(s);
 }
+#endif
