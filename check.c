@@ -95,6 +95,7 @@ static int   check_timestamp	__P((void));
 static void  check_passwd	__P((void));
 static void  update_timestamp	__P((void));
 static void  reminder		__P((void));
+static char *osf_C2_crypt	__P((char *, char *));
 int   user_is_exempt		__P((void));
 
 /*
@@ -102,6 +103,13 @@ int   user_is_exempt		__P((void));
  */
 static int   timedir_is_good;
 static char *timestampfile_p;
+
+/*
+ * Defines for Digital Un*x 3.x enhanced security
+ */
+#define C2_MAXPASS	100
+#define C2_MAXENPASS	200
+#define C2_SEGSIZE	8
 
 
 /********************************************************************
@@ -430,6 +438,10 @@ static void check_passwd()
 	if (spw_ent && !strcmp(encrypted, (char *) crypt16(pass, encrypted)))
 	    return;		/* if the passwd is correct return() */
 #endif /* ultrix && HAVE_C2_SECURITY */
+#if defined(__osf__) && defined(HAVE_C2_SECURITY)
+	if (spw_ent && !strcmp(encrypted, osf_C2_crypt(pass,encrypted)))
+	    return;             /* if the passwd is correct return() */
+#endif /* __osf__ && HAVE_C2_SECURITY */
 #ifdef HAVE_SKEY
 	if (!strcmp(pw_ent->pw_passwd, skey_crypt(pass, pw_ent->pw_passwd,
 	    pw_ent, pw_ok)))
@@ -471,6 +483,56 @@ static void check_passwd()
     exit(1);
 }
 
+
+/********************************************************************
+ * osf_C2_crypt()  - returns OSF/1 3.0 enhanced security encrypted
+ *               password.  crypt() produces, given an eight
+ *               character segment, an encrypted 13 character
+ *               with the first two the salt and the remaining
+ *               11 characters the encrypted password.  OSF/1 uses
+ *               crypt() on each 8 character segment appending each
+ *               resulting encrypted segment except the first two
+ *               character (salt) after the first segement.  See
+ *               OSF/1 Security documentation section 16.4.
+ * Programmer: Richard Jackson, George Mason University
+ */
+static char *osf_C2_crypt(pass, encrypt_salt)
+    char *pass;
+    char *encrypt_salt;
+{
+    static char     enpass[C2_MAXENPASS];
+    char   segpass[C2_MAXPASS];	    /* segment of original password */
+    char   segenpass[C2_MAXENPASS]; /* segment of encrypted password */
+    char   salt[3];		    /* salt for crypt() */
+    int    segnum;		    /* num of 8 char pw segments to process */
+    int    len;			    /* length of passwd */
+    int    i;
+
+    /*
+     * calculate the num of pw segs to process
+     */
+    len = strlen(pass);
+    if ((len % C2_SEGSIZE) > 0)
+	segnum = (len / C2_SEGSIZE) + 1;	/* ie, 9 chars is 2 segments */
+    else
+	segnum = (len / C2_SEGSIZE);		/* ie, 8 chars is 1 segment */
+
+    strncpy(salt, encrypt_salt, 2);		/* starting salt */
+    for (i = 0; i < segnum; i++) {
+	strncpy(segpass, (pass + (i * C2_SEGSIZE)), C2_SEGSIZE);
+
+	strncpy(segenpass, (char *) crypt(segpass, salt), C2_MAXENPASS);
+
+	strncpy(salt, (segenpass + 2), 2);  /* next salt is from previous seg */
+
+	if (i == 0)
+	    strncpy(enpass, segenpass, C2_MAXENPASS);
+	else
+	    strncat(enpass, (segenpass + 2), C2_MAXENPASS);
+    }
+
+    return(enpass);
+}
 
 
 /********************************************************************
