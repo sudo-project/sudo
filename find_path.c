@@ -172,10 +172,8 @@ char * find_path(file)
     /*
      * check current dir if dot was in the PATH
      */
-    if (!result && checkdot) {
-	path = ".";
-	result = sudo_goodpath(command);
-    }
+    if (!result && checkdot)
+	result = sudo_goodpath(file);
 
     (void) free(origpath);
 
