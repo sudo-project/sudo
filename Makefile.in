@@ -29,7 +29,6 @@ srcdir = @srcdir@
 devdir = @devdir@
 authdir = $(srcdir)/auth
 top_builddir = .
-VPATH = @srcdir@
 
 # Compiler & tools to use
 CC = @CC@
@@ -154,7 +153,8 @@ BINFILES= BUGS CHANGES HISTORY LICENSE README TODO TROUBLESHOOTING \
 BINSPECIAL= INSTALL.binary Makefile.binary.in libtool
 
 SUDODEP = $(srcdir)/sudo.h $(srcdir)/compat.h $(srcdir)/defaults.h \
-	  $(srcdir)/error.h $(srcdir)/logging.h config.h def_data.h pathnames.h
+	  $(srcdir)/error.h $(srcdir)/logging.h $(devdir)/def_data.h \
+	  pathnames.h config.h
 
 AUTHDEP = $(SUDODEP) $(authdir)/sudo_auth.h
 
@@ -191,14 +191,14 @@ sudo_noexec.la: sudo_noexec.lo
 @DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h
 
 # Uncomment the $(YACC) and mv lines if you intend to modify gram.y
-$(devdir)/gram.c gram.h: gram.y
+$(devdir)/gram.c gram.h: $(srcdir)/gram.y
 @DEV@	$(YACC) -d $(srcdir)/gram.y
 @DEV@	mv -f y.tab.c gram.c
 @DEV@	mv -f y.tab.h gram.h
 	-@true
 
 # Uncomment the $(LEX) and mv lines if you intend to modify toke.l
-$(devdir)/toke.c: toke.l
+$(devdir)/toke.c: $(srcdir)/toke.l
 @DEV@	$(LEX) $(srcdir)/toke.l
 @DEV@	mv -f lex.yy.c toke.c
 	-@true
@@ -208,44 +208,99 @@ $(devdir)/toke.c: toke.l
 @DEV@	perl $(srcdir)/mkdefaults -o def_data $(srcdir)/def_data.in
 
 # Dependencies (not counting auth functions)
-alloc.o: alloc.c $(SUDODEP)
-check.o: check.c $(SUDODEP)
-closefrom.o: closefrom.c config.h
-env.o: env.c $(SUDODEP)
-error.o: error.c config.h compat.h error.h
-fileops.o: fileops.c $(SUDODEP)
-find_path.o: find_path.c $(SUDODEP)
-getprogname.o: getprogname.c config.h
-getspwuid.o: getspwuid.c $(SUDODEP)
-goodpath.o: goodpath.c $(SUDODEP)
-logging.o: logging.c $(SUDODEP)
-set_perms.o: set_perms.c $(SUDODEP)
-tgetpass.o: tgetpass.c $(SUDODEP)
-visudo.o: visudo.c $(SUDODEP) version.h $(devdir)/gram.h
-sudo.o: sudo.c $(SUDODEP) interfaces.h version.h
-interfaces.o: interfaces.c $(SUDODEP) interfaces.h
-testsudoers.o: testsudoers.c $(SUDODEP) parse.h interfaces.h $(devdir)/gram.h
-match.o: match.c $(SUDODEP) parse.h interfaces.h $(devdir)/gram.h
-parse.o: parse.c $(SUDODEP) parse.h $(devdir)/gram.h
-pwutil.o: pwutil.c $(SUDODEP)
-toke.o: $(devdir)/toke.c $(SUDODEP) parse.h $(devdir)/gram.h
-gram.o: $(devdir)/gram.c $(SUDODEP) parse.h $(devdir)/gram.h redblack.h
-defaults.o: defaults.c $(SUDODEP) def_data.c auth/sudo_auth.h $(devdir)/gram.h
-fnmatch.o: fnmatch.c config.h compat.h emul/fnmatch.h
-getcwd.o: getcwd.c config.h compat.h
-snprintf.o: snprintf.c config.h compat.h
-strcasecmp.o: strcasecmp.c config.h
-strlcat.o: strlcat.c config.h
-strlcpy.o: strlcpy.c config.h
-strerror.o: strerror.c config.h
-utime.o: utime.c config.h pathnames.h compat.h emul/utime.h
-ldap.o: ldap.c $(SUDODEP) parse.h
-mon_systrace.o: mon_systrace.c $(SUDODEP) mon_systrace.h
-tsgetgrpw.o: tsgetgrpw.c $(SUDODEP)
-tspwutil.o: pwutil.c $(SUDODEP)
+alias.o: $(devdir)/alias.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/redblack.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alias.c
+alloc.o: $(srcdir)/alloc.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alloc.c
+alloca.o: $(srcdir)/alloca.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alloca.c
+check.o: $(srcdir)/check.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/check.c
+closefrom.o: $(srcdir)/closefrom.c config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/closefrom.c
+defaults.o: $(srcdir)/defaults.c $(SUDODEP) $(srcdir)/def_data.c $(authdir)/sudo_auth.h $(devdir)/gram.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/defaults.c
+env.o: $(srcdir)/env.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/env.c
+error.o: $(srcdir)/error.c $(srcdir)/compat.h $(srcdir)/error.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/error.c
+fileops.o: $(srcdir)/fileops.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fileops.c
+find_path.o: $(srcdir)/find_path.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/find_path.c
+fnmatch.o: $(srcdir)/fnmatch.c $(srcdir)/emul/fnmatch.h $(srcdir)/compat.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fnmatch.c
+getcwd.o: $(srcdir)/getcwd.c $(srcdir)/compat.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getcwd.c
+getprogname.o: $(srcdir)/getprogname.c config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getprogname.c
+getspwuid.o: $(srcdir)/getspwuid.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getspwuid.c
+gettime.o: $(srcdir)/gettime.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/gettime.c
+glob.o: $(srcdir)/glob.c $(srcdir)/emul/glob.h $(srcdir)/compat.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/glob.c
+goodpath.o: $(srcdir)/goodpath.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/goodpath.c
+gram.o: $(devdir)/gram.c $(SUDODEP) $(srcdir)/parse.h $(devdir)/gram.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/gram.c
+interfaces.o: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/interfaces.c
+ldap.o: $(srcdir)/ldap.c $(SUDODEP) $(srcdir)/parse.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ldap.c
+logging.o: $(srcdir)/logging.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/logging.c
+match.o: $(srcdir)/match.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/interfaces.h $(devdir)/gram.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/match.c
+mon_solaris.o: $(srcdir)/mon_solaris.c $(SUDODEP) $(srcdir)/mon_solaris.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mon_solaris.c
+mon_systrace.o: $(srcdir)/mon_systrace.c $(SUDODEP) $(srcdir)/mon_systrace.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mon_systrace.c
+parse.o: $(srcdir)/parse.c $(SUDODEP) $(srcdir)/parse.h $(devdir)/gram.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/parse.c
+pwutil.o: $(srcdir)/pwutil.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/pwutil.c
+redblack.o: $(srcdir)/redblack.c $(SUDODEP) $(srcdir)/redblack.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/redblack.c
+set_perms.o: $(srcdir)/set_perms.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/set_perms.c
+sigaction.o: $(srcdir)/sigaction.c $(srcdir)/compat.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sigaction.c
+snprintf.o: $(srcdir)/snprintf.c $(srcdir)/compat.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/snprintf.c
+strcasecmp.o: $(srcdir)/strcasecmp.c $(srcdir)/compat.h  config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strcasecmp.c
+strerror.o: $(srcdir)/strerror.c $(srcdir)/compat.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strerror.c
+strlcat.o: $(srcdir)/strlcat.c $(srcdir)/compat.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strlcat.c
+strlcpy.o: $(srcdir)/strlcpy.c $(srcdir)/compat.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strlcpy.c
+sudo.o: $(srcdir)/sudo.c $(SUDODEP) $(srcdir)/interfaces.h $(srcdir)/version.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
+sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_edit.c
+sudo_noexec.o: $(srcdir)/sudo_noexec.c $(srcdir)/compat.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_noexec.c
+testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/interfaces.h $(devdir)/gram.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/testsudoers.c
+tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tgetpass.c
+toke.o: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(devdir)/gram.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/toke.c
+tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tsgetgrpw.c
+utimes.o: $(srcdir)/utimes.c $(srcdir)/compat.h $(srcdir)/emul/utime.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/utimes.c
+visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(srcdir)/version.h $(devdir)/gram.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/visudo.c
+zero_bytes.o: $(srcdir)/zero_bytes.c $(srcdir)/compat.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/zero_bytes.c
+
+# Private copy of pwutil.o with MYPW defined for testsudoers
+tspwutil.o: $(srcdir)/pwutil.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) -DMYPW -o tspwutil.o $(srcdir)/pwutil.c
 
-# Authentication functions live in "auth" dir and so need extra care
 sudo_auth.o: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/sudo_auth.c
 afs.o: $(authdir)/afs.c $(AUTHDEP)
@@ -340,12 +395,6 @@ install-man:
 
 check:
 	@echo nothing to check
-
-tags: $(SRCS)
-	ctags $(SRCS)
-
-TAGS: $(SRCS)
-	etags $(SRCS)
 
 clean:
 	-rm -f *.o $(PROGS) testsudoers core sudo.core visudo.core \
