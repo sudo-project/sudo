@@ -66,6 +66,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <errno.h>
+#include <ldap.h>
 
 #include "sudo.h"
 #include "parse.h"
@@ -75,10 +76,6 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /* LDAP code below */
-
-
-#ifdef HAVE_LDAP
-#include <ldap.h>
 
 #ifndef LDAP_CONFIG
 #define LDAP_CONFIG "/etc/ldap.conf"
@@ -727,6 +724,3 @@ int pwflag;
  *
  *
  */
-
-#endif /* HAVE_LDAP */
-

@@ -18,6 +18,7 @@ AC_SUBST(PROGS)dnl
 AC_SUBST(CPPFLAGS)dnl
 AC_SUBST(LDFLAGS)dnl
 AC_SUBST(SUDO_LDFLAGS)dnl
+AC_SUBST(SUDO_OBJS)dnl
 AC_SUBST(LIBS)dnl
 AC_SUBST(SUDO_LIBS)dnl
 AC_SUBST(NET_LIBS)dnl
@@ -2029,6 +2030,14 @@ if test "$with_authenticate" = "yes"; then
 fi
 
 dnl
+dnl extra lib and .o file for LDAP support
+dnl
+if test "$with_ldap" = "yes"; then
+    SUDO_LIBS="${SUDO_LIBS} -lldap"
+    SUDO_OBJS="${SUDO_OBJS} ldap.o"
+fi
+
+dnl
 dnl Add $blibpath to SUDO_LDFLAGS if specified by the user or if we
 dnl added -L dirpaths to SUDO_LDFLAGS.
 dnl
@@ -2168,12 +2177,3 @@ AH_BOTTOM([/*
 #endif /* __svr4__ */
 
 #endif /* _SUDO_CONFIG_H */])
-
-/* LDAP support */
-dnl
-dnl LDAP libs
-dnl
-if test "$with_ldap" = "yes"; then
-    SUDO_LIBS="${SUDO_LIBS} -lldap"
-fi
-

@@ -307,7 +307,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CFLAGS PROGS CPPFLAGS LDFLAGS SUDO_LDFLAGS SUDO_LIBS NET_LIBS AFS_LIBS OSDEFS AUTH_OBJS MANTYPE MAN_POSTINSTALL SUDOERS_MODE SUDOERS_UID SUDOERS_GID DEV mansectsu mansectform mansrcdir timedir timeout password_timeout sudo_umask passprompt long_otp_prompt lecture logfac goodpri badpri loglen ignore_dot mail_no_user mail_no_host mail_no_perms mailto mailsub badpass_message fqdn runas_default env_editor passwd_tries tty_tickets insults EGREPPROG CC ac_ct_CC EXEEXT OBJEXT CPP UNAMEPROG TRPROG SEDPROG NROFFPROG build build_cpu build_vendor build_os host host_cpu host_vendor host_os EGREP YACC LIBOBJS ALLOCA KRB5CONFIG LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CFLAGS PROGS CPPFLAGS LDFLAGS SUDO_LDFLAGS SUDO_OBJS SUDO_LIBS NET_LIBS AFS_LIBS OSDEFS AUTH_OBJS MANTYPE MAN_POSTINSTALL SUDOERS_MODE SUDOERS_UID SUDOERS_GID DEV mansectsu mansectform mansrcdir timedir timeout password_timeout sudo_umask passprompt long_otp_prompt lecture logfac goodpri badpri loglen ignore_dot mail_no_user mail_no_host mail_no_perms mailto mailsub badpass_message fqdn runas_default env_editor passwd_tries tty_tickets insults EGREPPROG CC ac_ct_CC EXEEXT OBJEXT CPP UNAMEPROG TRPROG SEDPROG NROFFPROG build build_cpu build_vendor build_os host host_cpu host_vendor host_os EGREP YACC LIBOBJS ALLOCA KRB5CONFIG LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -14262,6 +14262,11 @@ if test "$with_authenticate" = "yes"; then
     SUDO_LIBS="${SUDO_LIBS} -ls"
 fi
 
+if test "$with_ldap" = "yes"; then
+    SUDO_LIBS="${SUDO_LIBS} -lldap"
+    SUDO_OBJS="${SUDO_OBJS} ldap.o"
+fi
+
 if test -n "$blibpath"; then
     if test -n "$blibpath_add"; then
     	SUDO_LDFLAGS="$SUDO_LDFLAGS -Wl,-blibpath:${blibpath}${blibpath_add}"
@@ -14985,6 +14990,7 @@ s,@PROGS@,$PROGS,;t t
 s,@CPPFLAGS@,$CPPFLAGS,;t t
 s,@LDFLAGS@,$LDFLAGS,;t t
 s,@SUDO_LDFLAGS@,$SUDO_LDFLAGS,;t t
+s,@SUDO_OBJS@,$SUDO_OBJS,;t t
 s,@SUDO_LIBS@,$SUDO_LIBS,;t t
 s,@NET_LIBS@,$NET_LIBS,;t t
 s,@AFS_LIBS@,$AFS_LIBS,;t t
@@ -15522,10 +15528,4 @@ fi
 
 
 
-
-
-/* LDAP support */
-if test "$with_ldap" = "yes"; then
-    SUDO_LIBS="${SUDO_LIBS} -lldap"
-fi
 
