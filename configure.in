@@ -32,6 +32,7 @@ AC_SUBST(SUDOERS_MODE)dnl
 AC_SUBST(SUDOERS_UID)dnl
 AC_SUBST(SUDOERS_GID)dnl
 AC_SUBST(DEV)
+AC_SUBST(devdir)
 AC_SUBST(mansectsu)
 AC_SUBST(mansectform)
 AC_SUBST(mansrcdir)
@@ -94,6 +95,7 @@ tty_tickets=off
 insults=off
 root_sudo=on
 INSTALL_NOEXEC=
+devdir='$(srcdir)'
 dnl
 dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
@@ -208,6 +210,7 @@ AC_ARG_WITH(devel, [  --with-devel            add development options],
 		PROGS="${PROGS} testsudoers"
 		OSDEFS="${OSDEFS} -DSUDO_DEVEL"
 		DEV=""
+		devdir=.
 		;;
     no)		;;
     *)		AC_MSG_WARN([Ignoring unknown argument to --with-devel: $with_devel])
