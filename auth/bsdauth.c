@@ -47,6 +47,7 @@
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <ctype.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <pwd.h>
@@ -105,7 +106,8 @@ bsdauth_verify(pw, prompt, auth)
     sudo_auth *auth;
 {
     char *s, *pass;
-    int authok, echo;
+    size_t len;
+    int authok;
     sig_t childkiller;
     auth_session_t *as = (auth_session_t *) auth->data;
     extern int nil_pw;
@@ -114,18 +116,35 @@ bsdauth_verify(pw, prompt, auth)
     childkiller = signal(SIGCHLD, SIG_DFL);
 
     /*
-     * If there is a challenge we use that as the prompt and the response
-     * will be echoed.  Since this should be a single use password that is ok.
-     * Otherwise we use the (possibly custom) prompt provided to us.
+     * If there is a challenge then print that instead of the normal
+     * prompt.  If the user just hits return we prompt again with echo
+     * turned on, which is useful for challenge/response things like
+     * S/Key.
      */
-    if ((s = auth_challenge(as)) != NULL) {
-	echo = TGP_ECHO;
+    if ((s = auth_challenge(as)) == NULL) {
+	pass = tgetpass(prompt, def_ival(I_PW_TIMEOUT) * 60, tgetpass_flags);
     } else {
-	echo = 0;
-	s = prompt;
+	pass = tgetpass(s, def_ival(I_PW_TIMEOUT) * 60, tgetpass_flags);
+	if (!pass || *pass == '\0') {
+	    if ((prompt = strrchr(s, '\n')))
+		prompt++;
+	    else
+		prompt = s;
+
+	    /*
+	     * Append '[echo on]' to the last line of the challenge and
+	     * reprompt with echo turned on.
+	     */
+	    len = strlen(prompt) - 1;
+	    while (isspace(prompt[len]) || prompt[len] == ':')
+		prompt[len--] = '\0';
+	    easprintf(&s, "%s [echo on]: ", prompt);
+	    pass = tgetpass(s, def_ival(I_PW_TIMEOUT) * 60,
+		tgetpass_flags | TGP_ECHO);
+	    free(s);
+	}
     }
 
-    pass = tgetpass(s, def_ival(I_PW_TIMEOUT) * 60, tgetpass_flags | echo);
     if (!pass || *pass == '\0')
 	nil_pw = 1;			/* empty password */
 
