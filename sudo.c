@@ -132,7 +132,6 @@ extern struct passwd *sudo_pwdup	__P((const struct passwd *));
  * Globals
  */
 int Argc, NewArgc;
-static int sudo_mode;
 char **Argv, **NewArgv;
 struct sudo_user sudo_user;
 struct passwd *auth_pw;
@@ -163,6 +162,7 @@ main(argc, argv, envp)
     int validated;
     int fd;
     int cmnd_status;
+    int sudo_mode;
     int pwflag;
     char **new_environ;
     sigaction_t sa, saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
@@ -547,6 +547,8 @@ init_vars(sudo_mode)
     if (nohostname)
 	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
 
+    set_runaspw(*user_runas);		/* may call log_error() */
+
     /*
      * Get current working directory.  Try as user, fall back to root.
      */
@@ -568,30 +570,24 @@ init_vars(sudo_mode)
 	char **dst, **src = NewArgv;
 
 	NewArgv = (char **) emalloc2((++NewArgc + 1), sizeof(char *));
-	/* For MODE_LOGIN_SHELL, NewArgv[0] is set by set_runaspw() */
-	if (!(sudo_mode & MODE_LOGIN_SHELL)) {
-	    if (user_shell && *user_shell)
-		NewArgv[0] = user_shell;
-	    else
-		errx(1, "unable to determine shell");
-	}
+	if (sudo_mode & MODE_LOGIN_SHELL) 
+	    NewArgv[0] = runas_pw->pw_shell;
+	else if (user_shell && *user_shell)
+	    NewArgv[0] = user_shell;
+	else
+	    errx(1, "unable to determine shell");
 
 	/* copy the args from NewArgv */
 	for (dst = NewArgv + 1; (*dst = *src) != NULL; ++src, ++dst)
 	    ;
     }
 
-    set_runaspw(*user_runas);		/* may set NewArgv[0] as side effect */
-
     /* Set login class if applicable. */
     set_loginclass(sudo_user.pw);
 
     /* Resolve the path and return. */
     if ((sudo_mode & MODE_RUN)) {
-	/*
-	 * XXX - default_runas may be modified during parsing of sudoers
-	 *       which will also change NewArgv[0] in -i mode.
-	 */
+	/* XXX - default_runas may be modified during parsing of sudoers */
 	set_perms(PERM_RUNAS);
 	rval = find_path(NewArgv[0], &user_cmnd, user_path);
 	set_perms(PERM_ROOT);
@@ -998,8 +994,6 @@ set_runaspw(user)
 	if (runas_pw == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, "no passwd entry for %s!", user);
     }
-    if (sudo_mode & MODE_LOGIN_SHELL)
-	NewArgv[0] = runas_pw->pw_shell;
     return(TRUE);
 }
 
