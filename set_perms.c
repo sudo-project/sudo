@@ -75,7 +75,8 @@ static const char rcsid[] = "$Sudo$";
 static void runas_setup		__P((void));
 static void fatal		__P((char *, int));
 
-#if !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
+#if !defined(HAVE_SETRESUID) && !defined(HAVE_SETREUID) && \
+    !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
 /*
  * Set real and effective uids and gids based on perm.
  * Since we have POSIX saved IDs we can get away with just
