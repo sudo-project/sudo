@@ -314,6 +314,14 @@ case "$OS" in
 		fi
 		OSDEFS="${OSDEFS} -D_ISC"
 		;;
+    "smp_dc.osx") echo "Looks like Pyramid DC/OSx"
+		LIB_SOCKET=1
+		SUDO_LIBS="${SUDO_LIBS} -lsocket"
+		if test -n "$C2"; then
+		    SHADOW_TYPE="SPW_SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		fi
+		;;
     "unix_sv")	echo "Looks like UnixWare"
 		LIB_SOCKET=1
 		SUDO_LIBS="${SUDO_LIBS} -lsocket"
