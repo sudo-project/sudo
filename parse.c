@@ -249,7 +249,7 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 	 *  b) there are no args on command line and none req by sudoers OR
 	 *  c) there are args in sudoers and on command line and they match
 	 */
-	if (strcmp(cmnd, "sudoedit") != 0)
+	if (strcmp(cmnd, "sudoedit") != 0 || strcmp(path, "sudoedit") != 0)
 	    return(FALSE);
 	if (!sudoers_args ||
 	    (!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
