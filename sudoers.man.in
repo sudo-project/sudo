@@ -167,7 +167,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "January 21, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "January 22, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -702,10 +702,10 @@ list that exists and is executable.  The default is the path to vi
 on your system.
 .IP "noexec_file" 12
 .IX Item "noexec_file"
-Path to a shared library containing a dummy version of the \fIexecve()\fR
-library function that just returns an error.  This is used to
-implement the \fInoexec\fR functionality on systems that support
-\&\f(CW\*(C`LD_PRELOAD\*(C'\fR or its equivalent.  Defaults to \fI@noexec_file@\fR.
+Path to a shared library containing dummy versions of the \fIexecv()\fR,
+\&\fIexecve()\fR and \fIfexecve()\fR library functions that just return an error.
+This is used to implement the \fInoexec\fR functionality on systems that
+support \f(CW\*(C`LD_PRELOAD\*(C'\fR or its equivalent.  Defaults to \fI@noexec_file@\fR.
 .PP
 \&\fBStrings that can be used in a boolean context\fR:
 .IP "lecture" 12
@@ -1289,25 +1289,25 @@ To tell whether or not \fBsudo\fR supports \fInoexec\fR, you can run
 the following as root:
 .PP
 .Vb 1
-\&    # sudo -V | grep "dummy execve"
+\&    # sudo -V | grep "dummy exec"
 .Ve
 .PP
-If this results in output beginning with:
+If the resulting output contains a line that begins with:
 .PP
 .Vb 1
-\&    File containing a dummy execve() function
+\&    File containing dummy exec functions
 .Ve
 .PP
-then \fBsudo\fR may be able to replace the standard library function
-\&\fIexecve()\fR with its own that simply returns an error.  Unfortunately,
-there is no foolproof way to know whether or not \fInoexec\fR will
-work at compile\-time.  \fINoexec\fR should work on SunOS, Solaris,
-*BSD, Linux, \s-1IRIX\s0, Tru64 \s-1UNIX\s0, MacOS X, and HP-UX 11.x.  It is known
-\&\fBnot\fR to work on \s-1AIX\s0 and UnixWare.  \fINoexec\fR is expected to work
-on most operating systems that support the \f(CW\*(C`LD_PRELOAD\*(C'\fR environment
-variable.  Check your operating system's manual pages for the dynamic
-linker (usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader) to see if
-\&\f(CW\*(C`LD_PRELOAD\*(C'\fR is supported.
+then \fBsudo\fR may be able to replace the exec family of functions
+in the standard library with its own that simply return an error.
+Unfortunately, there is no foolproof way to know whether or not
+\&\fInoexec\fR will work at compile\-time.  \fINoexec\fR should work on
+SunOS, Solaris, *BSD, Linux, \s-1IRIX\s0, Tru64 \s-1UNIX\s0, MacOS X, and HP-UX
+11.x.  It is known \fBnot\fR to work on \s-1AIX\s0 and UnixWare.  \fINoexec\fR
+is expected to work on most operating systems that support the
+\&\f(CW\*(C`LD_PRELOAD\*(C'\fR environment variable.  Check your operating system's
+manual pages for the dynamic linker (usually ld.so, ld.so.1, dyld,
+dld.sl, rld, or loader) to see if \f(CW\*(C`LD_PRELOAD\*(C'\fR is supported.
 .PP
 To enable \fInoexec\fR for a command, use the \f(CW\*(C`NOEXEC\*(C'\fR tag as documented
 in the User Specification section above.  If you are unsure whether

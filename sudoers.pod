@@ -596,10 +596,10 @@ on your system.
 
 =item noexec_file
 
-Path to a shared library containing a dummy version of the execve()
-library function that just returns an error.  This is used to
-implement the I<noexec> functionality on systems that support
-C<LD_PRELOAD> or its equivalent.  Defaults to F<@noexec_file@>.
+Path to a shared library containing dummy versions of the execv(),
+execve() and fexecve() library functions that just return an error.
+This is used to implement the I<noexec> functionality on systems that
+support C<LD_PRELOAD> or its equivalent.  Defaults to F<@noexec_file@>.
 
 =back
 
@@ -1157,22 +1157,22 @@ running under binary emulation are not affected.
 To tell whether or not B<sudo> supports I<noexec>, you can run
 the following as root:
 
-    # sudo -V | grep "dummy execve"
+    # sudo -V | grep "dummy exec"
 
-If this results in output beginning with:
+If the resulting output contains a line that begins with:
 
-    File containing a dummy execve() function
+    File containing dummy exec functions
 
-then B<sudo> may be able to replace the standard library function
-execve() with its own that simply returns an error.  Unfortunately,
-there is no foolproof way to know whether or not I<noexec> will
-work at compile-time.  I<Noexec> should work on SunOS, Solaris,
-*BSD, Linux, IRIX, Tru64 UNIX, MacOS X, and HP-UX 11.x.  It is known
-B<not> to work on AIX and UnixWare.  I<Noexec> is expected to work
-on most operating systems that support the C<LD_PRELOAD> environment
-variable.  Check your operating system's manual pages for the dynamic
-linker (usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader) to see if
-C<LD_PRELOAD> is supported.
+then B<sudo> may be able to replace the exec family of functions
+in the standard library with its own that simply return an error.
+Unfortunately, there is no foolproof way to know whether or not
+I<noexec> will work at compile-time.  I<Noexec> should work on
+SunOS, Solaris, *BSD, Linux, IRIX, Tru64 UNIX, MacOS X, and HP-UX
+11.x.  It is known B<not> to work on AIX and UnixWare.  I<Noexec>
+is expected to work on most operating systems that support the
+C<LD_PRELOAD> environment variable.  Check your operating system's
+manual pages for the dynamic linker (usually ld.so, ld.so.1, dyld,
+dld.sl, rld, or loader) to see if C<LD_PRELOAD> is supported.
 
 To enable I<noexec> for a command, use the C<NOEXEC> tag as documented
 in the User Specification section above.  If you are unsure whether
