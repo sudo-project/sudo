@@ -92,7 +92,7 @@ WORD			[[:alnum:]_-]+
 			    sawspace = TRUE;	/* but remember for fill_args */
 			}
 
-\\\n			{ 
+\\[ \t]*\n		{ 
 			    sawspace = TRUE;	/* remember for fill_args */
 			    ++sudolineno;
 			    LEXTRACE("\n\t");
