@@ -30,7 +30,10 @@ AC_SUBST(MAN_POSTINSTALL)dnl
 AC_SUBST(SUDOERS_MODE)dnl
 AC_SUBST(SUDOERS_UID)dnl
 AC_SUBST(SUDOERS_GID)dnl
+AC_SUBST(TIMEDIR)
 AC_SUBST(DEV)
+AC_SUBST(mansectsu)
+AC_SUBST(mansectform)
 dnl
 dnl Initial values for Makefile variables listed above
 dnl Some may be overridden by environment variables..
@@ -1023,6 +1026,8 @@ case "$host" in
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lucb"
 		fi
+		mansectsu=1m
+		mansectform=4
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
@@ -1035,6 +1040,8 @@ case "$host" in
 		    AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1], AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"; SECUREWARE=1]))
 		    CHECKSHADOW="false"
 		fi
+		mansectsu=1m
+		mansectform=4
 		;;
     *-*-hpux1[[0-9]]*)
 		# uncomment this for a statically linked sudo
@@ -1070,6 +1077,8 @@ case "$host" in
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
 		fi
+		mansectsu=1m
+		mansectform=4
 		;;
     *-*-hpux9*)
 		# uncomment this for a statically linked sudo
@@ -1115,6 +1124,8 @@ case "$host" in
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
 		fi
+		mansectsu=1m
+		mansectform=4
 		;;
     *-*-hpux*)
 
@@ -1131,6 +1142,8 @@ case "$host" in
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
 		fi
+		mansectsu=1m
+		mansectform=4
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
@@ -1213,6 +1226,8 @@ case "$host" in
 		if test "$OSREV" -le 4; then
 		    AC_CHECK_LIB(sun, getpwnam, [LIBS="${LIBS} -lsun"])
 		fi
+		mansectsu=1m
+		mansectform=4
 		;;
     *-*-linux*)
 		# To get crypt(3) and vasprintf() prototypes (so we pass -Wall)
@@ -1246,6 +1261,8 @@ case "$host" in
 		LIBS="${LIBS} -lsun -lbsd"
 		CPPFLAGS="${CPPFLAGS} -I/usr/include -I/usr/include/bsd"
 		OSDEFS="${OSDEFS} -D_MIPS"
+		mansectsu=1m
+		mansectform=4
 		;;
     *-*-isc*)
 		OSDEFS="${OSDEFS} -D_ISC"
@@ -1257,6 +1274,8 @@ case "$host" in
 		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
 		    CHECKSHADOW="false"
 		fi
+		mansectsu=1m
+		mansectform=4
 		;;
     *-*-sco*)
 		if test "$CHECKSHADOW" = "true"; then
@@ -1264,16 +1283,22 @@ case "$host" in
 		    AC_CHECK_LIB(gen, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lgen"; LIBS="${LIBS} -lgen"])
 		    CHECKSHADOW="false"
 		fi
+		mansectsu=1m
+		mansectform=4
 		;;
     *-sequent-sysv*)
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
 		    CHECKSHADOW="false"
 		fi
+		mansectsu=1m
+		mansectform=4
 		;;
     *-ccur-sysv4|*-ccur-sysvr4)
 		LIBS="${LIBS} -lgen"
 		SUDO_LIBS="${SUDO_LIBS} -lgen"
+		mansectsu=1m
+		mansectform=4
 		;;
     *-*-bsdi*)
 		# Use shlicc for BSD/OS 2.x unless asked to do otherwise
@@ -1283,10 +1308,16 @@ case "$host" in
 		    ac_cv_prog_CC=shlicc
 		    CC="$ac_cv_prog_CC"
 		fi
+		if test "$CHECKSHADOW" = "true"; then
+		    CHECKSHADOW="false"
+		fi
 		;;
     *-*-freebsd*)
 		if test "$with_skey" = "yes"; then
 		     SUDO_LIBS="${SUDO_LIBS} -lmd"
+		fi
+		if test "$CHECKSHADOW" = "true"; then
+		    CHECKSHADOW="false"
 		fi
 		;;
     *-*-*bsd*)
@@ -1294,7 +1325,17 @@ case "$host" in
 		    CHECKSHADOW="false"
 		fi
 		;;
+    *-*-sysv*)
+		mansectsu=1m
+		mansectform=4
+		;;
 esac
+
+dnl
+dnl Use BSD-style man sections by default
+dnl
+test -n "$mansectsu" || mansectsu=8
+test -n "$mansectform" || mansectform=5
 
 dnl
 dnl Check for shadow password routines if we have not already done so.
@@ -1655,9 +1696,9 @@ dnl
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
 
 dnl
-dnl Substitute into the Makefiles
+dnl Substitute into the Makefile and man pages
 dnl
-AC_OUTPUT(Makefile)
+AC_OUTPUT([Makefile sudo.man visudo.man sudoers.man])
 
 dnl
 dnl Spew any text the user needs to know about

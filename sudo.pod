@@ -42,7 +42,7 @@ sudo - execute a command as another user
 =head1 SYNOPSIS
 
 B<sudo> B<-V> | B<-h> | B<-l> | B<-L> | B<-v> | B<-k> | B<-K> | B<-s> |
-[ B<-H> ] [B<-S> ] [ B<-b> ] | [ B<-p> prompt ]
+[ B<-H> ] [B<-S> ] [ B<-b> ] | [ B<-p> prompt ] [ B<-c> class|- ]
 [ B<-u> username/#uid ] I<command>
 
 =head1 DESCRIPTION
@@ -59,7 +59,7 @@ user may then use sudo without a password for a short period of time
 (five minutes by default).
 
 B<sudo> determines who is an authorized user by consulting the
-file F</etc/sudoers>.  By giving B<sudo> the C<-v> flag a user
+file F<@sysconfdir@/sudoers>.  By giving B<sudo> the C<-v> flag a user
 can update the time stamp without running a I<command.>
 The password prompt itself will also time out if the user's password is
 not entered with N minutes (again, this is defined at configure
@@ -137,9 +137,22 @@ contains the C<%u> escape, C<%u> will be replaced with the user's
 login name.  Similarly, C<%h> will be replaced with the local
 hostname.
 
+=item -c
+
+The C<-c> (I<class>) option causes B<sudo> to run the specified command
+with resources limited by the specified login class.  The I<class>
+argument can be either a class name as defined in /etc/login.conf,
+or a single '-' character.  Specifying the I<class> as '-' means
+that the command should be run restricted by the default login
+capibilities of the user the command is run as.  If the I<class>
+argument specifies an existing user class, the command must be run
+as root, or the B<sudo> command must be run from a shell that is already
+root.  This option is only available on systems with BSD login classes
+where B<sudo> has been configured with the --with-logincap option.
+
 =item -u
 
-The C<-u> (I<user>) option causes sudo to run the specified command
+The C<-u> (I<user>) option causes B<sudo> to run the specified command
 as a user other than I<root>.  To specify a I<uid> instead of a
 I<username>, use "#uid".
 
@@ -205,21 +218,21 @@ not disable user-defined library search paths for setuid programs
 behavior or link B<sudo> statically.
 
 B<sudo> will check the ownership of its timestamp directory
-(F</var/run/sudo> or F</tmp/.odus> by default) and ignore the
-directory's contents if it is not owned by root and only writable
-by root.  On systems that allow non-root users to give away files
-via chown(2), if the timestamp directory is located in a directory
-writable by anyone (ie: F</tmp>), it is possible for a user to
-create the timestamp directory before B<sudo> is run.  However,
-because B<sudo> checks the ownership and mode of the directory and
-its contents, the only damage that can be done is to "hide" files
-by putting them in the timestamp dir.  This is unlikely to happen
-since once the timestamp dir is owned by root and inaccessible by
-any other user the user placing files there would be unable to get
-them back out.  To get around this issue you can use a directory
-that is not world-writable for the timestamps (F</var/adm/sudo> for
-instance) or create /tmp/.odus with the appropriate owner (root)
-and permissions (0700) in the system startup files.
+(F<@TIMEDIR@> by default) and ignore the directory's contents if
+it is not owned by root and only writable by root.  On systems that
+allow non-root users to give away files via chown(2), if the timestamp
+directory is located in a directory writable by anyone (eg: F</tmp>),
+it is possible for a user to create the timestamp directory before
+B<sudo> is run.  However, because B<sudo> checks the ownership and
+mode of the directory and its contents, the only damage that can
+be done is to "hide" files by putting them in the timestamp dir.
+This is unlikely to happen since once the timestamp dir is owned
+by root and inaccessible by any other user the user placing files
+there would be unable to get them back out.  To get around this
+issue you can use a directory that is not world-writable for the
+timestamps (F</var/adm/sudo> for instance) or create F<@TIMEDIR@>
+with the appropriate owner (root) and permissions (0700) in the
+system startup files.
 
 B<sudo> will not honor timestamps set far in the future.
 Timestamps with a date greater than current_time + 2 * C<TIMEOUT>
@@ -274,30 +287,8 @@ B<sudo> utilizes the following environment variables:
 
 =head1 FILES
 
- /etc/sudoers		List of who can run what
- /var/run/sudo		Directory containing timestamps
-
-B<sudo> utilizes the following environment variables:
-
- PATH			Set to a sane value if SECURE_PATH is set
- SHELL			Used to determine shell to run with -s option
- USER			Set to the target user (root unless the -u option
-			is specified)
- HOME			In -s or -H mode (or if sudo was configured with
-			the --enable-shell-sets-home option), set to
-			homedir of the target user.
- SUDO_PROMPT		Used as the default password prompt
- SUDO_COMMAND		Set to the command run by sudo
- SUDO_USER		Set to the login of the user who invoked sudo
- SUDO_UID		Set to the uid of the user who invoked sudo
- SUDO_GID		Set to the gid of the user who invoked sudo
- SUDO_PS1		If set, PS1 will be set to its value
-
-=head1 FILES
-
- /etc/sudoers		List of who can run what
- /var/run/sudo		Directory containing timestamps
- /tmp/.odus		Same as above if no /var/run exists
+ @sysconfdir@/sudoers		List of who can run what
+ @TIMEDIR@		Directory containing timestamps
 
 =head1 AUTHORS
 
@@ -338,4 +329,4 @@ are generally safe).
 
 =head1 SEE ALSO
 
-sudoers(5), visudo(8), su(1).
+login_cap(3), sudoers(5), visudo(8), su(1).

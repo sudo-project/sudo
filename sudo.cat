@@ -9,7 +9,8 @@ NNNNAAAAMMMMEEEE
 
 SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
        ssssuuuuddddoooo ----VVVV | ----hhhh | ----llll | ----LLLL | ----vvvv | ----kkkk | ----KKKK | ----ssss | [ ----HHHH ] [----SSSS ]
-       [ ----bbbb ] | [ ----pppp prompt ] [ ----uuuu username/#uid ] _c_o_m_m_a_n_d
+       [ ----bbbb ] | [ ----pppp prompt ] [ ----cccc class|- ] [ ----uuuu username/#uid ]
+       _c_o_m_m_a_n_d
 
 DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        ssssuuuuddddoooo allows a permitted user to execute a _c_o_m_m_a_n_d as the
@@ -60,8 +61,7 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-
-26/Feb/2000                   1.6.3                             1
+22/Mar/2000                   1.6.3                             1
 
 
 
@@ -102,13 +102,39 @@ sudo(8)                MAINTENANCE COMMANDS               sudo(8)
            replaced with the user's login name.  Similarly, %h
            will be replaced with the local hostname.
 
-       -u  The -u (_u_s_e_r) option causes sudo to run the specified
+       -c  The -c (_c_l_a_s_s) option causes ssssuuuuddddoooo to run the specified
+           command with resources limited by the specified login
+           class.  The _c_l_a_s_s argument can be either a class name
+           as defined in /etc/login.conf, or a single '-'
+           character.  Specifying the _c_l_a_s_s as '-' means that the
+           command should be run restricted by the default login
+           capibilities of the user the command is run as.  If
+           the _c_l_a_s_s argument specifies an existing user class,
+           the command must be run as root, or the ssssuuuuddddoooo command
+           must be run from a shell that is already root.  This
+           option is only available on systems with BSD login
+           classes where ssssuuuuddddoooo has been configured with the
+           --with-logincap option.
+
+       -u  The -u (_u_s_e_r) option causes ssssuuuuddddoooo to run the specified
            command as a user other than _r_o_o_t.  To specify a _u_i_d
            instead of a _u_s_e_r_n_a_m_e, use "#uid".
 
        -s  The -s (_s_h_e_l_l) option runs the shell specified by the
            _S_H_E_L_L environment variable if it is set or the shell
            as specified in _p_a_s_s_w_d(5).
+
+
+
+
+22/Mar/2000                   1.6.3                             2
+
+
+
+
+
+sudo(8)                MAINTENANCE COMMANDS               sudo(8)
+
 
        -H  The -H (_H_O_M_E) option sets the _H_O_M_E environment
            variable to the homedir of the target user (root by
@@ -124,18 +150,6 @@ sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEESSSS
        ssssuuuuddddoooo quits with an exit value of 1 if there is a
-
-
-
-26/Feb/2000                   1.6.3                             2
-
-
-
-
-
-sudo(8)                MAINTENANCE COMMANDS               sudo(8)
-
-
        configuration/permission problem or if ssssuuuuddddoooo cannot execute
        the given command.  In the latter case the error string is
        printed to stderr.  If ssssuuuuddddoooo cannot _s_t_a_t(2) one or more
@@ -173,27 +187,13 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
        statically.
 
        ssssuuuuddddoooo will check the ownership of its timestamp directory
-       (_/_v_a_r_/_r_u_n_/_s_u_d_o or _/_t_m_p_/_._o_d_u_s by default) and ignore the
-       directory's contents if it is not owned by root and only
-       writable by root.  On systems that allow non-root users to
-       give away files via _c_h_o_w_n(2), if the timestamp directory
-       is located in a directory writable by anyone (ie: _/_t_m_p),
-       it is possible for a user to create the timestamp
-       directory before ssssuuuuddddoooo is run.  However, because ssssuuuuddddoooo
-       checks the ownership and mode of the directory and its
-       contents, the only damage that can be done is to "hide"
-       files by putting them in the timestamp dir.  This is
-       unlikely to happen since once the timestamp dir is owned
-       by root and inaccessible by any other user the user
-       placing files there would be unable to get them back out.
-       To get around this issue you can use a directory that is
-       not world-writable for the timestamps (_/_v_a_r_/_a_d_m_/_s_u_d_o for
-       instance) or create /tmp/.odus with the appropriate owner
-       (root) and permissions (0700) in the system startup files.
+       (_/_v_a_r_/_r_u_n_/_s_u_d_o by default) and ignore the directory's
+       contents if it is not owned by root and only writable by
+       root.  On systems that allow non-root users to give away
 
 
 
-26/Feb/2000                   1.6.3                             3
+22/Mar/2000                   1.6.3                             3
 
 
 
@@ -201,6 +201,21 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
+
+       files via _c_h_o_w_n(2), if the timestamp directory is located
+       in a directory writable by anyone (eg: _/_t_m_p), it is
+       possible for a user to create the timestamp directory
+       before ssssuuuuddddoooo is run.  However, because ssssuuuuddddoooo checks the
+       ownership and mode of the directory and its contents, the
+       only damage that can be done is to "hide" files by putting
+       them in the timestamp dir.  This is unlikely to happen
+       since once the timestamp dir is owned by root and
+       inaccessible by any other user the user placing files
+       there would be unable to get them back out.  To get around
+       this issue you can use a directory that is not world-
+       writable for the timestamps (_/_v_a_r_/_a_d_m_/_s_u_d_o for instance)
+       or create _/_v_a_r_/_r_u_n_/_s_u_d_o with the appropriate owner (root)
+       and permissions (0700) in the system startup files.
 
        ssssuuuuddddoooo will not honor timestamps set far in the future.
        Timestamps with a date greater than current_time + 2 *
@@ -241,25 +256,10 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
        ssssuuuuddddoooo utilizes the following environment variables:
 
-        PATH                   Set to a sane value if SECURE_PATH is set
-        SHELL                  Used to determine shell to run with -s option
-        USER                   Set to the target user (root unless the -u option
-                               is specified)
-        HOME                   In -s or -H mode (or if sudo was configured with
-                               the --enable-shell-sets-home option), set to
-                               homedir of the target user.
-        SUDO_PROMPT            Used as the default password prompt
-        SUDO_COMMAND           Set to the command run by sudo
-        SUDO_USER              Set to the login of the user who invoked sudo
-        SUDO_UID               Set to the uid of the user who invoked sudo
-        SUDO_GID               Set to the gid of the user who invoked sudo
-        SUDO_PS1               If set, PS1 will be set to its value
 
 
 
-
-
-26/Feb/2000                   1.6.3                             4
+22/Mar/2000                   1.6.3                             4
 
 
 
@@ -268,12 +268,6 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
-FFFFIIIILLLLEEEESSSS
-        /etc/sudoers           List of who can run what
-        /var/run/sudo          Directory containing timestamps
-
-       ssssuuuuddddoooo utilizes the following environment variables:
-
         PATH                   Set to a sane value if SECURE_PATH is set
         SHELL                  Used to determine shell to run with -s option
         USER                   Set to the target user (root unless the -u option
@@ -291,8 +285,7 @@ FFFFIIIILLLLEEEESSSS
 
 FFFFIIIILLLLEEEESSSS
         /etc/sudoers           List of who can run what
-        /var/run/sudo          Directory containing timestamps
-        /tmp/.odus             Same as above if no /var/run exists
+        /var/run/sudo              Directory containing timestamps
 
 
 AAAAUUUUTTTTHHHHOOOORRRRSSSS
@@ -322,10 +315,17 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        escapes.
 
        If users have sudo ALL there is nothing to prevent them
+       from creating their own program that gives them a root
+       shell regardless of any '!'  elements in the user
+       specification.
+
+       Running shell scripts via ssssuuuuddddoooo can expose the same kernel
+       bugs that make setuid shell scripts unsafe on some
+       operating systems (if your OS supports the /dev/fd/
 
 
 
-26/Feb/2000                   1.6.3                             5
+22/Mar/2000                   1.6.3                             5
 
 
 
@@ -334,17 +334,10 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
-       from creating their own program that gives them a root
-       shell regardless of any '!'  elements in the user
-       specification.
-
-       Running shell scripts via ssssuuuuddddoooo can expose the same kernel
-       bugs that make setuid shell scripts unsafe on some
-       operating systems (if your OS supports the /dev/fd/
        directory, setuid shell scripts are generally safe).
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
-       _s_u_d_o_e_r_s(5), _v_i_s_u_d_o(8), _s_u(1).
+       _l_o_g_i_n___c_a_p(3), _s_u_d_o_e_r_s(5), _v_i_s_u_d_o(8), _s_u(1).
 
 
 
@@ -391,6 +384,13 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-26/Feb/2000                   1.6.3                             6
+
+
+
+
+
+
+
+22/Mar/2000                   1.6.3                             6
 
 

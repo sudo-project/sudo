@@ -370,6 +370,12 @@ If set, sudo will prompt for the password of the user specified by
 the C<-u> flag (defaults to root) instead of the password of the
 invoking user.
 
+=item use_loginclass
+
+If set, sudo will apply the defaults specified for the target user's
+login class if one exists.  Only available if sudo is configured with
+the --with-logincap option.
+
 =back
 
 B<Integers>:
@@ -429,7 +435,7 @@ The default is "Sorry, try again." unless insults are enabled.
 =item timestampdir
 
 The directory in which B<sudo> stores its timestamp files.
-The default is either C</var/run/sudo> or C</tmp/sudo>.
+The default is F<@TIMEDIR@>.
 
 =item passprompt
 
@@ -463,6 +469,11 @@ to vi on your system.
 B<Strings that can be used in a boolean context>:
 
 =over 12
+
+=item logfile
+
+Path to the sudo log file (not the syslog log file).  Setting a path
+turns on logging to a file, negating this option turns it off.
 
 =item syslog
 
@@ -898,7 +909,7 @@ I<sudoers>.
 
 =head1 FILES
 
- /etc/sudoers		List of who can run what
+ @sysconfdir@/sudoers		List of who can run what
  /etc/group		Local groups file
  /etc/netgroup		List of network groups
 

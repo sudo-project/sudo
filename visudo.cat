@@ -55,13 +55,13 @@ EEEERRRRRRRROOOORRRRSSSS
        sudoers file busy, try again later.
            Someone else is currently editing the _s_u_d_o_e_r_s file.
 
-       /etc/sudoers.tmp: Permission denied
+       @sysconf@/sudoers.tmp: Permission denied
            You didn't run vvvviiiissssuuuuddddoooo as root.
 
 
 
 
-15/Feb/2000                   1.6.3                             1
+22/Mar/2000                   1.6.3                             1
 
 
 
@@ -91,8 +91,8 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
 
 
 FFFFIIIILLLLEEEESSSS
-        /etc/sudoers           List of who can run what
-        /etc/sudoers.tmp       Lock file for visudo
+        @sysconf@/sudoers              List of who can run what
+        @sysconf@/sudoers.tmp  Lock file for visudo
 
 
 AAAAUUUUTTTTHHHHOOOORRRR
@@ -127,7 +127,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-15/Feb/2000                   1.6.3                             2
+22/Mar/2000                   1.6.3                             2
 
 
 
@@ -193,6 +193,6 @@ visudo(8)              MAINTENANCE COMMANDS             visudo(8)
 
 
 
-15/Feb/2000                   1.6.3                             3
+22/Mar/2000                   1.6.3                             3
 
 

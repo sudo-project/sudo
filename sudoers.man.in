@@ -2,8 +2,12 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.1  2000/03/23 00:17:29  millert
-''' configure does substitution on these to produce *.man
+''' Revision 1.2  2000/03/23 00:35:59  millert
+''' Add FreeBSD login.conf support (untested on BSD/OS) based on a patch from
+''' Michael D. Marchionna.
+''' configure now does substitution on the man pages, allowing us to
+''' fix up the paths and set the section correctly.  Based on an idea
+''' from Michael D. Marchionna.
 '''
 '''
 .de Sh
@@ -96,7 +100,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers.pod.in @mansectform@ "1.6.3" "22/Mar/2000" "FILE FORMATS"
+.TH sudoers @mansectform@ "1.6.3" "22/Mar/2000" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
@@ -970,7 +974,7 @@ as returned by the \f(CWhostname\fR command or use the \fIfqdn\fR option in
 \fIsudo\fR\|(8), \fIvisudo\fR\|(8), \fIsu\fR\|(1), \fIfnmatch\fR\|(3).
 
 .rn }` ''
-.IX Title "sudoers.pod.in @mansectform@"
+.IX Title "sudoers @mansectform@"
 .IX Name "sudoers - list of which users may execute what"
 
 .IX Header "NAME"

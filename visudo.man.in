@@ -2,8 +2,12 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.1  2000/03/23 00:17:30  millert
-''' configure does substitution on these to produce *.man
+''' Revision 1.2  2000/03/23 00:35:59  millert
+''' Add FreeBSD login.conf support (untested on BSD/OS) based on a patch from
+''' Michael D. Marchionna.
+''' configure now does substitution on the man pages, allowing us to
+''' fix up the paths and set the section correctly.  Based on an idea
+''' from Michael D. Marchionna.
 '''
 '''
 .de Sh
@@ -96,7 +100,7 @@
 .nr % 0
 .rr F
 .\}
-.TH visudo.pod.in @mansectsu@ "1.6.3" "18/Mar/2000" "MAINTENANCE COMMANDS"
+.TH visudo @mansectsu@ "1.6.3" "22/Mar/2000" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -280,7 +284,7 @@ the editor used by \fBvisudo\fR allows shell escapes.
 \fIsudo\fR\|(8), \fIvipw\fR\|(8).
 
 .rn }` ''
-.IX Title "visudo.pod.in @mansectsu@"
+.IX Title "visudo @mansectsu@"
 .IX Name "visudo - edit the sudoers file"
 
 .IX Header "NAME"

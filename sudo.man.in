@@ -2,8 +2,12 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.1  2000/03/23 00:17:29  millert
-''' configure does substitution on these to produce *.man
+''' Revision 1.2  2000/03/23 00:35:58  millert
+''' Add FreeBSD login.conf support (untested on BSD/OS) based on a patch from
+''' Michael D. Marchionna.
+''' configure now does substitution on the man pages, allowing us to
+''' fix up the paths and set the section correctly.  Based on an idea
+''' from Michael D. Marchionna.
 '''
 '''
 .de Sh
@@ -96,7 +100,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudo.pod.in @mansectsu@ "1.6.3" "22/Mar/2000" "MAINTENANCE COMMANDS"
+.TH sudo @mansectsu@ "1.6.3" "22/Mar/2000" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -327,22 +331,22 @@ not disable user-defined library search paths for setuid programs
 (most do), you should either use a linker option that disables this
 behavior or link \fBsudo\fR statically.
 .PP
-\fBsudo\fR will check the ownership of its timestamp directory (\fI@TIMEDIR@\fR)
-and ignore the directory's contents if it is not owned by root and
-only writable by root.  On systems that allow non-root users to
-give away files via \fIchown\fR\|(2), if the timestamp directory is located
-in a directory writable by anyone (eg: \fI/tmp\fR), it is possible for
-a user to create the timestamp directory before \fBsudo\fR is run.
-However, because \fBsudo\fR checks the ownership and mode of the
-directory and its contents, the only damage that can be done is to
-\*(L"hide\*(R" files by putting them in the timestamp dir.  This is unlikely
-to happen since once the timestamp dir is owned by root and
-inaccessible by any other user the user placing files there would
-be unable to get them back out.  To get around this issue you can
-use a directory that is not world-writable for the timestamps
-(\fI/var/adm/sudo\fR for instance) or create \fI@TIMEDIR@\fR with the
-appropriate owner (root) and permissions (0700) in the system startup
-files.
+\fBsudo\fR will check the ownership of its timestamp directory
+(\fI@TIMEDIR@\fR by default) and ignore the directory's contents if
+it is not owned by root and only writable by root.  On systems that
+allow non-root users to give away files via \fIchown\fR\|(2), if the timestamp
+directory is located in a directory writable by anyone (eg: \fI/tmp\fR),
+it is possible for a user to create the timestamp directory before
+\fBsudo\fR is run.  However, because \fBsudo\fR checks the ownership and
+mode of the directory and its contents, the only damage that can
+be done is to \*(L"hide\*(R" files by putting them in the timestamp dir.
+This is unlikely to happen since once the timestamp dir is owned
+by root and inaccessible by any other user the user placing files
+there would be unable to get them back out.  To get around this
+issue you can use a directory that is not world-writable for the
+timestamps (\fI/var/adm/sudo\fR for instance) or create \fI@TIMEDIR@\fR
+with the appropriate owner (root) and permissions (0700) in the
+system startup files.
 .PP
 \fBsudo\fR will not honor timestamps set far in the future.
 Timestamps with a date greater than current_time + 2 * \f(CWTIMEOUT\fR
@@ -438,7 +442,7 @@ are generally safe).
 \fIlogin_cap\fR\|(3), \fIsudoers\fR\|(5), \fIvisudo\fR\|(8), \fIsu\fR\|(1).
 
 .rn }` ''
-.IX Title "sudo.pod.in @mansectsu@"
+.IX Title "sudo @mansectsu@"
 .IX Name "sudo - execute a command as another user"
 
 .IX Header "NAME"

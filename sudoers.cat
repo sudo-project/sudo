@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-18/Feb/2000                   1.6.3                             1
+22/Mar/2000                   1.6.3                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-18/Feb/2000                   1.6.3                             2
+22/Mar/2000                   1.6.3                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-18/Feb/2000                   1.6.3                             3
+22/Mar/2000                   1.6.3                             3
 
 
 
@@ -259,7 +259,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-18/Feb/2000                   1.6.3                             4
+22/Mar/2000                   1.6.3                             4
 
 
 
@@ -325,7 +325,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-18/Feb/2000                   1.6.3                             5
+22/Mar/2000                   1.6.3                             5
 
 
 
@@ -391,7 +391,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-18/Feb/2000                   1.6.3                             6
+22/Mar/2000                   1.6.3                             6
 
 
 
@@ -404,6 +404,12 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                    the user specified by the -u flag (defaults to
                    root) instead of the password of the invoking
                    user.
+
+       use_loginclass
+                   If set, sudo will apply the defaults specified
+                   for the target user's login class if one
+                   exists.  Only available if sudo is configured
+                   with the --with-logincap option.
 
        IIIInnnntttteeeeggggeeeerrrrssss:
 
@@ -448,16 +454,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                    incorrect password.  The default is "Sorry,
                    try again." unless insults are enabled.
 
-       timestampdir
-                   The directory in which ssssuuuuddddoooo stores its
-                   timestamp files.  The default is either
-                   /var/run/sudo or /tmp/sudo.
 
 
 
-
-
-18/Feb/2000                   1.6.3                             7
+22/Mar/2000                   1.6.3                             7
 
 
 
@@ -465,6 +465,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+       timestampdir
+                   The directory in which ssssuuuuddddoooo stores its
+                   timestamp files.  The default is _@_T_I_M_E_D_I_R_@.
 
        passprompt  The default prompt to use when asking for a
                    password; can be overridden via the -p option
@@ -492,6 +496,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        SSSSttttrrrriiiinnnnggggssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
 
+       logfile     Path to the sudo log file (not the syslog log
+                   file).  Setting a path turns on logging to a
+                   file, negating this option turns it off.
+
        syslog      Syslog facility if syslog is being used for
                    logging (negate to disable syslog logging).
                    Defaults to "local2".
@@ -511,6 +519,19 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                    and PATH requirements.  This is not set by
                    default.
 
+
+
+
+
+22/Mar/2000                   1.6.3                             8
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        secure_path Path used for every command run from ssssuuuuddddoooo.  If
                    you don't trust the people running sudo to
                    have a sane PATH environment variable you may
@@ -520,18 +541,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        verifypw    This option controls when a password will be
                    required when a user runs sudo with the ----vvvv.
-
-
-
-18/Feb/2000                   1.6.3                             8
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
-
                    It has the following possible values:
 
                        all         All the user's I<sudoers> entries for the
@@ -577,6 +586,18 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        Parameter): aaaauuuutttthhhhpppprrrriiiivvvv (if your OS supports it), aaaauuuutttthhhh,
        ddddaaaaeeeemmmmoooonnnn, uuuusssseeeerrrr, llllooooccccaaaallll0000, llllooooccccaaaallll1111, llllooooccccaaaallll2222, llllooooccccaaaallll3333, llllooooccccaaaallll4444,
        llllooooccccaaaallll5555, llllooooccccaaaallll6666, and llllooooccccaaaallll7777.  The following syslog
+
+
+
+22/Mar/2000                   1.6.3                             9
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        priorities are supported: aaaalllleeeerrrrtttt, ccccrrrriiiitttt, ddddeeeebbbbuuuugggg, eeeemmmmeeeerrrrgggg, eeeerrrrrrrr,
        iiiinnnnffffoooo, nnnnoooottttiiiicccceeee, and wwwwaaaarrrrnnnniiiinnnngggg.
 
@@ -585,18 +606,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
         User_Spec ::= User_list Host_List '=' User_List Cmnd_Spec_List \
                       (':' User_Spec)*
-
-
-
-
-18/Feb/2000                   1.6.3                             9
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
 
         Cmnd_Spec_List ::= Cmnd_Spec |
                            Cmnd_Spec ',' Cmnd_Spec_List
@@ -643,6 +652,18 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        modified via the NOPASSWD tag.  Like a Runas_Spec, the
        NOPASSWD tag sets a default for the commands that follow
        it in the Cmnd_Spec_List.  Conversely, the PASSWD tag can
+
+
+
+22/Mar/2000                   1.6.3                            10
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        be used to reverse things.  For example:
 
         ray    rushmore = NOPASSWD: /bin/kill, /bin/ls, /usr/bin/lprm
@@ -652,17 +673,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        without authenticating himself.  If we only want rrrraaaayyyy to be
        able to run _/_b_i_n_/_k_i_l_l without a password the entry would
        be:
-
-
-
-18/Feb/2000                   1.6.3                            10
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
 
         ray    rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
 
@@ -705,6 +715,21 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        match /usr/bin/who but not /usr/bin/X11/xterm.
 
+
+
+
+
+
+
+22/Mar/2000                   1.6.3                            11
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        EEEExxxxcccceeeeppppttttiiiioooonnnnssss ttttoooo wwwwiiiillllddddccccaaaarrrrdddd rrrruuuulllleeeessss::::
 
        The following exceptions apply to the above rules:
@@ -718,18 +743,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        The pound sign ('#') is used to indicate a comment (unless
        it occurs in the context of a user name and is followed by
-
-
-
-18/Feb/2000                   1.6.3                            11
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
-
        one or more digits, in which case it is treated as a uid).
        Both the comment character and any text after it, up to
        the end of the line, are ignored.
@@ -770,6 +783,19 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
         User_Alias     PARTTIMERS = bostley, jwfox, crawl
         User_Alias     WEBMASTERS = will, wendy, wim
 
+
+
+
+
+22/Mar/2000                   1.6.3                            12
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
         # Runas alias specification
         Runas_Alias    OP = root, operator
         Runas_Alias    DB = oracle, sybase
@@ -783,18 +809,6 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
         Host_Alias     CSNETS = 128.138.243.0, 128.138.204.0/24, 128.138.242.0
         Host_Alias     SERVERS = master, mail, www, ns
         Host_Alias     CDROM = orion, perseus, hercules
-
-
-
-
-18/Feb/2000                   1.6.3                            12
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
 
         # Cmnd alias specification
         Cmnd_Alias     DUMPS = /usr/bin/mt, /usr/sbin/dump, /usr/sbin/rdump,\
@@ -836,6 +850,18 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
         FULLTIMERS     ALL = NOPASSWD: ALL
 
        Full time sysadmins (mmmmiiiilllllllleeeerrrrtttt, mmmmiiiikkkkeeeeffff, and ddddoooowwwwddddyyyy) may run
+
+
+
+22/Mar/2000                   1.6.3                            13
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        any command on any host without authenticating themselves.
 
         PARTTIMERS     ALL = ALL
@@ -850,18 +876,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        _C_S_N_E_T_S alias (the networks 128.138.243.0, 128.138.204.0,
        and 128.138.242.0).  Of those networks, only
        <128.138.204.0> has an explicit netmask (in CIDR notation)
-
-
-
-18/Feb/2000                   1.6.3                            13
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
-
        indicating it is a class C network.  For the other
        networks in _C_S_N_E_T_S, the local machine's netmask will be
        used during matching.
@@ -902,6 +916,18 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        netgroup.  SSSSuuuuddddoooo knows that "biglab" is a netgroup due to
        the '+' prefix.
 
+
+
+
+22/Mar/2000                   1.6.3                            14
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
         +secretaries   ALL = PRINTING, /usr/bin/adduser, /usr/bin/rmuser
 
        Users in the sssseeeeccccrrrreeeettttaaaarrrriiiieeeessss netgroup need to help manage the
@@ -916,18 +942,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
         john           ALPHA = /usr/bin/su [!-]*, !/usr/bin/su *root*
 
        On the _A_L_P_H_A machines, user jjjjoooohhhhnnnn may su to anyone except
-
-
-
-18/Feb/2000                   1.6.3                            14
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
-
        root but he is not allowed to give _s_u(1) any flags.
 
         jen            ALL, !SERVERS = ALL
@@ -967,6 +981,19 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        type, so it is a prime candiate for encapsulating in a
        shell script.
 
+
+
+
+
+22/Mar/2000                   1.6.3                            15
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
 SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTEEEESSSS
        It is generally not effective to "subtract" commands from
        ALL using the '!' operator.  A user can trivially
@@ -981,18 +1008,6 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
        an editor or other program.  Therefore, these kind of
        restrictions should be considered advisory at best (and
        reinforced by policy).
-
-
-
-
-18/Feb/2000                   1.6.3                            15
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
 
 CCCCAAAAVVVVEEEEAAAATTTTSSSS
        The _s_u_d_o_e_r_s file should aaaallllwwwwaaaayyyyssss be edited by the vvvviiiissssuuuuddddoooo
@@ -1036,22 +1051,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-18/Feb/2000                   1.6.3                            16
+22/Mar/2000                   1.6.3                            16
 
 
 
@@ -1117,6 +1117,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-18/Feb/2000                   1.6.3                            17
+22/Mar/2000                   1.6.3                            17
 
 
