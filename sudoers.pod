@@ -352,27 +352,31 @@ flag is off by default.
 
 =item env_editor
 
-If set, B<visudo> will use the value of the EDITOR or VISUAL environment
-falling back on the default editor.  Note that this may create a
-security hole as most editors allow a user to get a shell (which
-would be a root shell and not be logged).
+If set, B<visudo> will use the value of the EDITOR or VISUAL
+environment variables before falling back on the default editor list.
+Note that this may create a security hole as it allows the user to
+run any arbitrary command as root without logging.  A safer alternative
+is to place a colon-separated list of editors in the C<editor>
+variable.  B<visudo> will then only use the EDITOR or VISUAL if
+they match a value specified in C<editor>.  This flag is off by
+default.
 
 =item rootpw
 
 If set, B<sudo> will prompt for the root password instead of the password
-of the invoking user.
+of the invoking user.  This flag is off by default.
 
 =item runaspw
 
 If set, B<sudo> will prompt for the password of the user defined by the
 I<runas_default> option (defaults to root) instead of the password
-of the invoking user.
+of the invoking user.  This flag is off by default.
 
 =item targetpw
 
 If set, B<sudo> will prompt for the password of the user specified by
 the C<-u> flag (defaults to root) instead of the password of the
-invoking user.
+invoking user.  This flag is off by default.
 
 =item set_logname
 
@@ -386,7 +390,7 @@ to change this behavior.  This can be done by negating the set_logname option.
 
 If set, B<sudo> will apply the defaults specified for the target user's
 login class if one exists.  Only available if B<sudo> is configured with
-the --with-logincap option.
+the --with-logincap option.  This flag is off by default.
 
 =back
 
@@ -473,8 +477,11 @@ Defaults to "alert".
 
 =item editor
 
-Path to the editor to be used by B<visudo>.  The default is the path
-to vi on your system.
+A colon (':') separated list of editors allowed to be used with
+B<visudo>.  B<visudo> will choose the editor that matches the user's
+USER environment variable if possible, or the first editor in the
+list that exists and is executable.  The default is the path to vi
+on your system.
 
 =back 12
 

@@ -2,8 +2,14 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.5  2000/03/27 03:26:23  millert
-''' Use @mansectsu@ and @mansectform@ in the man page bodies as well.
+''' Revision 1.6  2000/04/01 21:23:28  millert
+''' Visudo now checks for the existence of an editor and gives a sensible
+''' error if it does not exist.
+'''
+''' The path to the editor for visudo is now a colon-separated list of
+''' allowable editors.  If the user has $EDITOR set and it matches
+''' one of the allowed editors that editor will be used.  If not,
+''' the first editor in the list that actually exists is used.
 '''
 '''
 .de Sh
@@ -96,7 +102,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers @mansectform@ "1.6.3" "26/Mar/2000" "FILE FORMATS"
+.TH sudoers @mansectform@ "1.6.3" "1/Apr/2000" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
@@ -469,21 +475,25 @@ of echo when there is no tty present, some sites may with to set
 this flag to prevent a user from entering a visible password.  This
 flag is off by default.
 .Ip "env_editor" 12
-If set, \fBvisudo\fR will use the value of the \s-1EDITOR\s0 or \s-1VISUAL\s0 environment
-falling back on the default editor.  Note that this may create a
-security hole as most editors allow a user to get a shell (which
-would be a root shell and not be logged).
+If set, \fBvisudo\fR will use the value of the \s-1EDITOR\s0 or \s-1VISUAL\s0
+environment variables before falling back on the default editor list.
+Note that this may create a security hole as it allows the user to
+run any arbitrary command as root without logging.  A safer alternative
+is to place a colon-separated list of editors in the \f(CWeditor\fR
+variable.  \fBvisudo\fR will then only use the \s-1EDITOR\s0 or \s-1VISUAL\s0 if
+they match a value specified in \f(CWeditor\fR.  This flag is off by
+default.
 .Ip "rootpw" 12
 If set, \fBsudo\fR will prompt for the root password instead of the password
-of the invoking user.
+of the invoking user.  This flag is off by default.
 .Ip "runaspw" 12
 If set, \fBsudo\fR will prompt for the password of the user defined by the
 \fIrunas_default\fR option (defaults to root) instead of the password
-of the invoking user.
+of the invoking user.  This flag is off by default.
 .Ip "targetpw" 12
 If set, \fBsudo\fR will prompt for the password of the user specified by
 the \f(CW-u\fR flag (defaults to root) instead of the password of the
-invoking user.
+invoking user.  This flag is off by default.
 .Ip "set_logname" 12
 Normally, \fBsudo\fR will set the \f(CWLOGNAME\fR and \f(CWUSER\fR environment variables
 to the name of the target user (usually root unless the \f(CW-u\fR flag is given).
@@ -493,7 +503,7 @@ to change this behavior.  This can be done by negating the set_logname option.
 .Ip "use_loginclass" 12
 If set, \fBsudo\fR will apply the defaults specified for the target user's
 login class if one exists.  Only available if \fBsudo\fR is configured with
-the --with-logincap option.
+the --with-logincap option.  This flag is off by default.
 .PP
 \fBIntegers\fR:
 .Ip "passwd_tries" 12
@@ -542,8 +552,11 @@ Defaults to \*(L"notice\*(R".
 Syslog priority to use when user authenticates unsuccessfully.
 Defaults to \*(L"alert\*(R".
 .Ip "editor" 12
-Path to the editor to be used by \fBvisudo\fR.  The default is the path
-to vi on your system.
+A colon (':') separated list of editors allowed to be used with
+\fBvisudo\fR.  \fBvisudo\fR will choose the editor that matches the user's
+\s-1USER\s0 environment variable if possible, or the first editor in the
+list that exists and is executable.  The default is the path to vi
+on your system.
 .PP
 \fBStrings that can be used in a boolean context\fR:
 .Ip "logfile" 12

@@ -413,15 +413,20 @@ The following options are also configurable at runtime:
 	Don't print the lecture the first time a user runs sudo.
 
   --with-editor=path
-	Specify the default editor used by visudo (and the only editor used
-	unless --with-env-editor is specified).  The default is the path
-	to vi on your system.
+	Specify the default editor path for use by visudo.  This may be
+	a single pathname or a colon-separated list of editors.  In
+	the latter case, visudo will choose the editor that matches
+	the user's USER environment variable or the first editor in
+	the list that exists.  The default is the path to vi on your system.
 
   --with-env-editor
 	Makes visudo consult the EDITOR and VISUAL environment variables before
-	falling back on the default editor.  Note that this may create a
-	security hole as most editors allow a user to get a shell (which would
-	be a root shell and hence, no logging).
+	falling back on the default editor list (as specified by --with-editor).
+	Note that this may create a security hole as it allows the user to
+	run any arbitrary command as root without logging.  A safer alternative
+	is to use a colon-separated list of editors with the --with-env-editor
+	option.  visudo will then only use the EDITOR or VISUAL if they match
+	a value specified via --with-editor.
 
   --disable-authentication
         By default, sudo requires the user to authenticate via a

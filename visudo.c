@@ -123,6 +123,8 @@ main(argc, argv)
 {
     char buf[MAXPATHLEN*2];		/* buffer used for copying files */
     char *Editor;			/* editor to use */
+    char *UserEditor;			/* editor user wants to use */
+    char *EditorPath;			/* colon-separated list of editors */
     int sudoers_fd;			/* sudoers file descriptor */
     int stmp_fd;			/* stmp file descriptor */
     int n;				/* length parameter */
@@ -225,12 +227,99 @@ main(argc, argv)
 	(void) close(stmp_fd);
 
     /*
-     * If we are allowing EDITOR and VISUAL envariables set Editor
-     * base on whichever exists...
+     * Check EDITOR and VISUAL environment variables to see which editor
+     * the user wants to use (we may not end up using it though).
+     * If the path is not fully-qualified, make it so and check that
+     * the specified executable actually exists.
      */
-    if (!def_flag(I_ENV_EDITOR) ||
-	(!(Editor = getenv("EDITOR")) && !(Editor = getenv("VISUAL"))))
-	Editor = def_str(I_EDITOR);
+    if ((UserEditor = getenv("EDITOR")) == NULL || *UserEditor == '\0')
+	UserEditor = getenv("VISUAL");
+    if (*UserEditor == '\0')
+	UserEditor = NULL;
+    else if (UserEditor) {
+	if (find_path(UserEditor, &Editor) == FOUND) {
+	    UserEditor = Editor;
+	} else {
+	    if (def_flag(I_ENV_EDITOR)) {
+		/* If we are honoring $EDITOR this is a fatal error. */
+		(void) fprintf(stderr,
+		    "%s: specified editor (%s) doesn't exist!\n",
+		    Argv[0], UserEditor);
+		Exit(-1);
+	    } else {
+		/* Otherwise, just ignore $EDITOR. */
+		UserEditor = NULL;
+	    }
+	}
+    }
+
+    /*
+     * See if we can use the user's choice of editors either because
+     * we allow any $EDITOR or because $EDITOR is in the allowable list.
+     */
+    Editor = NULL;
+    if (def_flag(I_ENV_EDITOR) && UserEditor)
+	Editor = UserEditor;
+    else if (UserEditor) {
+	struct stat editor_sb;
+	struct stat user_editor_sb;
+	char *base, *userbase;
+
+	if (stat(UserEditor, &user_editor_sb) != 0) {
+	    /* Should never happen since we already checked above. */
+	    (void) fprintf(stderr, "%s: unable to stat editor (%s): %s\n",
+		Argv[0], UserEditor, strerror(errno));
+	    Exit(-1);
+	}
+	EditorPath = estrdup(def_str(I_EDITOR));
+	Editor = strtok(EditorPath, ":");
+	do {
+	    /*
+	     * Both Editor and UserEditor should be fully qualified but
+	     * check anyway...
+	     */
+	    if ((base = strrchr(Editor, '/')) == NULL)
+		continue;
+	    if ((userbase = strrchr(UserEditor, '/')) == NULL) {
+		Editor = NULL;
+		break;
+	    }
+	    base++, userbase++;
+
+	    /*
+	     * We compare the basenames first and then use stat to match
+	     * for sure.
+	     */
+	    if (strcmp(base, userbase) == 0) {
+		if (stat(Editor, &editor_sb) == 0 && S_ISREG(editor_sb.st_mode)
+		    && (editor_sb.st_mode & 0000111) &&
+		    editor_sb.st_dev == user_editor_sb.st_dev &&
+		    editor_sb.st_ino == user_editor_sb.st_ino)
+		    break;
+	    }
+	} while ((Editor = strtok(NULL, ":")));
+	free(EditorPath);
+    }
+
+    /*
+     * Can't use $EDITOR, try each element of I_EDITOR until we
+     * find one that exists, is regular, and is executable.
+     */
+    if (Editor == NULL || *Editor == '\0') {
+	EditorPath = estrdup(def_str(I_EDITOR));
+	Editor = strtok(EditorPath, ":");
+	do {
+	    if (sudo_goodpath(Editor))
+		break;
+	} while ((Editor = strtok(NULL, ":")));
+
+	/* Bleah, none of the editors existed! */
+	if (Editor == NULL || *Editor == '\0') {
+	    (void) fprintf(stderr, "%s: no editor found (editor path = %s)\n",
+		Argv[0], def_str(I_EDITOR));
+	    Exit(-1);
+	}
+    }
 
     /*
      * Edit the temp file and parse it (for sanity checking)
@@ -431,6 +520,12 @@ void
 set_fqdn()
 {
     return;
+}
+
+int
+user_is_exempt()
+{
+    return(TRUE);
 }
 
 /*

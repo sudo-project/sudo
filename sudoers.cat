@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-26/Mar/2000                   1.6.3                             1
+1/Apr/2000                    1.6.3                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-26/Mar/2000                   1.6.3                             2
+1/Apr/2000                    1.6.3                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-26/Mar/2000                   1.6.3                             3
+1/Apr/2000                    1.6.3                             3
 
 
 
@@ -259,7 +259,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-26/Mar/2000                   1.6.3                             4
+1/Apr/2000                    1.6.3                             4
 
 
 
@@ -325,7 +325,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-26/Mar/2000                   1.6.3                             5
+1/Apr/2000                    1.6.3                             5
 
 
 
@@ -382,16 +382,16 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
                    password.  This flag is off by default.
 
        env_editor  If set, vvvviiiissssuuuuddddoooo will use the value of the
-                   EDITOR or VISUAL environment falling back on
-                   the default editor.  Note that this may create
-                   a security hole as most editors allow a user
-                   to get a shell (which would be a root shell
-                   and not be logged).
+                   EDITOR or VISUAL environment variables before
+                   falling back on the default editor list.  Note
+                   that this may create a security hole as it
+                   allows the user to run any arbitrary command
+                   as root without logging.  A safer alternative
+                   is to place a colon-separated list of editors
 
 
 
-
-26/Mar/2000                   1.6.3                             6
+1/Apr/2000                    1.6.3                             6
 
 
 
@@ -400,18 +400,25 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
+                   in the editor variable.  vvvviiiissssuuuuddddoooo will then only
+                   use the EDITOR or VISUAL if they match a value
+                   specified in editor.  This flag is off by
+                   default.
+
        rootpw      If set, ssssuuuuddddoooo will prompt for the root password
                    instead of the password of the invoking user.
+                   This flag is off by default.
 
        runaspw     If set, ssssuuuuddddoooo will prompt for the password of
                    the user defined by the _r_u_n_a_s___d_e_f_a_u_l_t option
                    (defaults to root) instead of the password of
-                   the invoking user.
+                   the invoking user.  This flag is off by
+                   default.
 
        targetpw    If set, ssssuuuuddddoooo will prompt for the password of
                    the user specified by the -u flag (defaults to
                    root) instead of the password of the invoking
-                   user.
+                   user.  This flag is off by default.
 
        set_logname Normally, ssssuuuuddddoooo will set the LOGNAME and USER
                    environment variables to the name of the
@@ -427,7 +434,8 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
                    If set, ssssuuuuddddoooo will apply the defaults specified
                    for the target user's login class if one
                    exists.  Only available if ssssuuuuddddoooo is configured
-                   with the --with-logincap option.
+                   with the --with-logincap option.  This flag is
+                   off by default.
 
        IIIInnnntttteeeeggggeeeerrrrssss:
 
@@ -445,6 +453,19 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
                    log.  The default is 80 (use 0 or negate to
                    disable word wrap).
 
+
+
+
+
+1/Apr/2000                    1.6.3                             7
+
+
+
+
+
+sudoers(4)                 FILE FORMATS                sudoers(4)
+
+
        timestamp_timeout
                    Number of minutes that can elapse before ssssuuuuddddoooo
                    will ask for a passwd again.  The default is
@@ -454,18 +475,6 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
        passwd_timeout
                    Number of minutes before the ssssuuuuddddoooo password
                    prompt times out.  The default is 5, set this
-
-
-
-26/Mar/2000                   1.6.3                             7
-
-
-
-
-
-sudoers(4)                 FILE FORMATS                sudoers(4)
-
-
                    to 0 for no password timeout.
 
        umask       Umask to use when running the root command.
@@ -509,8 +518,25 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
                    Syslog priority to use when user authenticates
                    unsuccessfully.  Defaults to "alert".
 
-       editor      Path to the editor to be used by vvvviiiissssuuuuddddoooo.  The
-                   default is the path to vi on your system.
+       editor      A colon (':') separated list of editors
+                   allowed to be used with vvvviiiissssuuuuddddoooo.  vvvviiiissssuuuuddddoooo will
+
+
+
+1/Apr/2000                    1.6.3                             8
+
+
+
+
+
+sudoers(4)                 FILE FORMATS                sudoers(4)
+
+
+                   choose the editor that matches the user's USER
+                   environment variable if possible, or the first
+                   editor in the list that exists and is
+                   executable.  The default is the path to vi on
+                   your system.
 
        SSSSttttrrrriiiinnnnggggssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
 
@@ -520,18 +546,6 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
        syslog      Syslog facility if syslog is being used for
                    logging (negate to disable syslog logging).
-
-
-
-26/Mar/2000                   1.6.3                             8
-
-
-
-
-
-sudoers(4)                 FILE FORMATS                sudoers(4)
-
-
                    Defaults to "local2".
 
        mailerpath  Path to mail program used to send warning
@@ -572,6 +586,18 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
                        never       The user need never enter a password to use
                                    the B<-v> flag.
 
+
+
+
+1/Apr/2000                    1.6.3                             9
+
+
+
+
+
+sudoers(4)                 FILE FORMATS                sudoers(4)
+
+
                        always      The user must always enter a password to use
                                    the B<-v> flag.
 
@@ -584,19 +610,6 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
                        all         All the user's I<sudoers> entries for the
                                    current host must have the C<NOPASSWD>
                                    flag set to avoid entering a password.
-
-
-
-
-
-26/Mar/2000                   1.6.3                             9
-
-
-
-
-
-sudoers(4)                 FILE FORMATS                sudoers(4)
-
 
                        any         At least one of the user's I<sudoers> entries
                                    for the current host must have the
@@ -639,6 +652,18 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
        Let's break that down into its constituent parts:
 
+
+
+
+1/Apr/2000                    1.6.3                            10
+
+
+
+
+
+sudoers(4)                 FILE FORMATS                sudoers(4)
+
+
        RRRRuuuunnnnaaaassss____SSSSppppeeeecccc
 
        A Runas_Spec is simply a Runas_List (as defined above)
@@ -652,17 +677,6 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
        The user ddddggggbbbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m
        -- but only as ooooppppeeeerrrraaaattttoooorrrr.  Eg.
-
-
-
-26/Mar/2000                   1.6.3                            10
-
-
-
-
-
-sudoers(4)                 FILE FORMATS                sudoers(4)
-
 
            sudo -u operator /bin/ls.
 
@@ -704,6 +718,18 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
        pertain to the current host.  This behavior may be
        overridden via the verifypw and listpw options.
 
+
+
+
+1/Apr/2000                    1.6.3                            11
+
+
+
+
+
+sudoers(4)                 FILE FORMATS                sudoers(4)
+
+
        WWWWiiiillllddddccccaaaarrrrddddssss ((((aaaakkkkaaaa mmmmeeeettttaaaa cccchhhhaaaarrrraaaacccctttteeeerrrrssss))))::::
 
        ssssuuuuddddoooo allows shell-style _w_i_l_d_c_a_r_d_s to be used in pathnames
@@ -716,19 +742,6 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
        ?       Matches any single character.
 
        [...]   Matches any character in the specified range.
-
-
-
-
-
-26/Mar/2000                   1.6.3                            11
-
-
-
-
-
-sudoers(4)                 FILE FORMATS                sudoers(4)
-
 
        [!...]  Matches any character nnnnooootttt in the specified range.
 
@@ -771,6 +784,18 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
        dangerous since in a command context, it allows the user
        to run aaaannnnyyyy command on the system.
 
+
+
+
+1/Apr/2000                    1.6.3                            12
+
+
+
+
+
+sudoers(4)                 FILE FORMATS                sudoers(4)
+
+
        An exclamation point ('!') can be used as a logical _n_o_t
        operator both in an _a_l_i_a_s and in front of a Cmnd.  This
        allows one to exclude certain values.  Note, however, that
@@ -784,17 +809,6 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
        Whitespace between elements in a list as well as specicial
        syntactic characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n ('=', ':',
        '(', ')') is optional.
-
-
-
-26/Mar/2000                   1.6.3                            12
-
-
-
-
-
-sudoers(4)                 FILE FORMATS                sudoers(4)
-
 
        The following characters must be escaped with a backslash
        ('\') when used as part of a word (eg. a username or
@@ -836,6 +850,18 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
                                 /usr/local/bin/zsh
         Cmnd_Alias     SU = /usr/bin/su
 
+
+
+
+1/Apr/2000                    1.6.3                            13
+
+
+
+
+
+sudoers(4)                 FILE FORMATS                sudoers(4)
+
+
        Here we override some of the compiled in default values.
        We want ssssuuuuddddoooo to log via _s_y_s_l_o_g(3) using the _a_u_t_h facility
        in all cases.  We don't want to subject the full time
@@ -850,17 +876,6 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
         Defaults:FULLTIMERS    !lecture
         Defaults:millert       !authenticate
         Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
-
-
-
-26/Mar/2000                   1.6.3                            13
-
-
-
-
-
-sudoers(4)                 FILE FORMATS                sudoers(4)
-
 
        The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually
        determines who may run what.
@@ -901,6 +916,18 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
                        /usr/oper/bin/
 
        The ooooppppeeeerrrraaaattttoooorrrr user may run commands limited to simple
+
+
+
+1/Apr/2000                    1.6.3                            14
+
+
+
+
+
+sudoers(4)                 FILE FORMATS                sudoers(4)
+
+
        maintenance.  Here, those are commands related to backups,
        killing processes, the printing system, shutting down the
        system, and any commands in the directory _/_u_s_r_/_o_p_e_r_/_b_i_n_/.
@@ -915,18 +942,6 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
        except for root on the _H_P_P_A machines.  Note that this
        assumes _p_a_s_s_w_d(1) does not take multiple usernames on the
        command line.
-
-
-
-
-26/Mar/2000                   1.6.3                            14
-
-
-
-
-
-sudoers(4)                 FILE FORMATS                sudoers(4)
-
 
         bob            SPARC = (OP) ALL : SGI = (OP) ALL
 
@@ -968,6 +983,17 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
        any commands in the directory /usr/bin/ except for those
        commands belonging to the _S_U and _S_H_E_L_L_S Cmnd_Aliases.
 
+
+
+1/Apr/2000                    1.6.3                            15
+
+
+
+
+
+sudoers(4)                 FILE FORMATS                sudoers(4)
+
+
         steve          CSNETS = (operator) /usr/local/op_commands/
 
        The user sssstttteeeevvvveeee may run any command in the directory
@@ -982,18 +1008,6 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
        On the host www, any user in the _W_E_B_M_A_S_T_E_R_S User_Alias
        (will, wendy, and wim), may run any command as user www
-
-
-
-26/Mar/2000                   1.6.3                            15
-
-
-
-
-
-sudoers(4)                 FILE FORMATS                sudoers(4)
-
-
        (which owns the web pages) or simply _s_u(1) to www.
 
         ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
@@ -1033,6 +1047,19 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        hostname be fully qualified as returned by the hostname
        command or use the _f_q_d_n option in _s_u_d_o_e_r_s.
 
+
+
+
+
+1/Apr/2000                    1.6.3                            16
+
+
+
+
+
+sudoers(4)                 FILE FORMATS                sudoers(4)
+
+
 FFFFIIIILLLLEEEESSSS
         /etc/sudoers           List of who can run what
         /etc/group             Local groups file
@@ -1051,7 +1078,46 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-26/Mar/2000                   1.6.3                            16
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1/Apr/2000                    1.6.3                            17
 
 
 
@@ -1117,6 +1183,6 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-26/Mar/2000                   1.6.3                            17
+1/Apr/2000                    1.6.3                            18
 
 

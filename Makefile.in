@@ -131,7 +131,7 @@ SUDOBJS = check.o getspwuid.o goodpath.o fileops.o find_path.o interfaces.o \
 	  logging.o parse.o sudo.o sudo_setenv.o tgetpass.o \
 	  $(AUTH_OBJS) $(PARSEOBJS)
 
-VISUDOBJS = visudo.o fileops.o $(PARSEOBJS)
+VISUDOBJS = visudo.o fileops.o goodpath.o find_path.o $(PARSEOBJS)
 
 TESTOBJS = interfaces.o testsudoers.o $(PARSEOBJS)
 
@@ -253,7 +253,7 @@ sia.o: $(authdir)/sia.c $(AUTHDEP)
 
 sudo.man.in: $(srcdir)/sudo.pod
 	@rm -f $(srcdir)/$@
-	(cd $(srcdir); pod2man --section=`echo @MANSECTSU@|tr A-Z a-z` --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudo.pod > $(srcdir)/$@)
+	( cd $(srcdir); pod2man --section=`echo @MANSECTSU@|tr A-Z a-z` --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudo.pod > $@ )
 
 sudo.man: sudo.man.in
 	CONFIG_FILES=$@ CONFIG_HEADERS= sh ./config.status
@@ -262,7 +262,7 @@ sudo.cat: sudo.man
 
 visudo.man.in: $(srcdir)/visudo.pod
 	@rm -f $(srcdir)/$@
-	(cd $(srcdir); pod2man --section=`echo @MANSECTSU@|tr A-Z a-z` --release=$(VERSION) --center="MAINTENANCE COMMANDS" visudo.pod > $(srcdir)/$@)
+	( cd $(srcdir); pod2man --section=`echo @MANSECTSU@|tr A-Z a-z` --release=$(VERSION) --center="MAINTENANCE COMMANDS" visudo.pod > $@ )
 
 visudo.man: visudo.man.in
 	CONFIG_FILES=$@ CONFIG_HEADERS= sh ./config.status
@@ -271,7 +271,7 @@ visudo.cat: visudo.man
 
 sudoers.man.in: $(srcdir)/sudoers.pod
 	@rm -f $(srcdir)/$@
-	(cd $(srcdir); pod2man --section=`echo @MANSECTFORM@|tr A-Z a-z` --release=$(VERSION) --center="FILE FORMATS" sudoers.pod | sed 's/"\\f(CW""\\fR"/\\f(CW""\\fR/' > $(srcdir)/$@)
+	( cd $(srcdir); pod2man --section=`echo @MANSECTFORM@|tr A-Z a-z` --release=$(VERSION) --center="FILE FORMATS" sudoers.pod | sed 's/"\\f(CW""\\fR"/\\f(CW""\\fR/' > $@ )
 
 sudoers.man:: sudoers.man.in
 	CONFIG_FILES=$@ CONFIG_HEADERS= sh ./config.status
