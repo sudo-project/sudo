@@ -196,6 +196,16 @@ Special features/options:
 	found in /usr/include/syslog.h.  The default is to use LOG_LOCAL2 but
 	some sites may wish to use LOG_AUTH instead.
 
+  --with-goodpri=PRIORITY
+	Determines which syslog priority to log successfully authenticated
+	commands.  A list of possible values may be found in
+	/usr/include/syslog.h.  The default is LOG_NOTICE.
+
+  --with-badpri=PRIORITY
+	Determines which syslog priority to log unauthenticated commands
+	and errors.  A list of possible values may be found in
+	/usr/include/syslog.h.  The default is LOG_ALERT.
+
   --with-logpath=path
 	Override the default location of the sudo log file and use "path"
 	instead.  By default will use /var/log/sudo.log if there is a /var/log

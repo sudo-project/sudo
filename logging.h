@@ -36,9 +36,18 @@
 #define _LOGGING_H
 
 #ifdef __STDC__
-#include <stdarg.h>
+# include <stdarg.h>
 #else
-#include <varargs.h>
+# include <varargs.h>
+#endif
+
+/* Logging types */
+#define SLOG_SYSLOG		0x01
+#define SLOG_FILE		0x02
+#define SLOG_BOTH		0x03
+
+#if (LOGGING & SLOG_SYSLOG)
+# include <syslog.h>
 #endif
 
 /* Flags for log_error() */
@@ -57,21 +66,6 @@
 # define MAXSYSLOGLEN		960
 #endif
       
-/*
- * syslog(3) parameters
- */
-
-#define SLOG_SYSLOG		0x01
-#define SLOG_FILE		0x02
-#define SLOG_BOTH		0x03
-
-/* XXX - PRI_SUCCESS and PRI_FAILURE should be configure options */
-#if (LOGGING & SLOG_SYSLOG)
-# include <syslog.h>
-# define PRI_SUCCESS		LOG_NOTICE
-# define PRI_FAILURE		LOG_ALERT
-#endif /* LOGGING & SLOG_SYSLOG */
-
 void log_auth			__P((int, int));
 void log_error			__P((int flags, const char *fmt, ...));
 RETSIGTYPE reapchild		__P((int));

@@ -369,6 +369,34 @@ AC_ARG_WITH(logfac, [  --with-logfac           syslog facility to log with (defa
 		;;
 esac], [AC_DEFINE(LOGFAC, LOG_LOCAL2) AC_MSG_RESULT(LOG_LOCAL2)])
 
+AC_MSG_CHECKING(at which syslog priority to log commands)
+AC_ARG_WITH(goodpri, [  --with-goodpri          syslog priority for commands (def is LOG_NOTICE)],
+[case $with_goodpri in  
+    yes)	echo "Must give --with-goodpri an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-goodpri not supported."
+		exit 1
+		;;
+    *)		AC_DEFINE_UNQUOTED(LOGFAC, $with_goodpri)
+		AC_MSG_RESULT([$with_goodpri])
+		;;
+esac], [AC_DEFINE(PRI_SUCCESS, LOG_NOTICE) AC_MSG_RESULT(LOG_NOTICE)])
+
+AC_MSG_CHECKING(at which syslog priority to log failures)
+AC_ARG_WITH(badpri, [  --with-badpri           syslog priority for failures (def is LOG_ALERT)],
+[case $with_badpri in  
+    yes)	echo "Must give --with-badpri an argument."
+		exit 1
+		;;
+    no)		echo "Sorry, --without-badpri not supported."
+		exit 1
+		;;
+    *)		AC_DEFINE_UNQUOTED(LOGFAC, $with_badpri)
+		AC_MSG_RESULT([$with_badpri])
+		;;
+esac], [AC_DEFINE(PRI_FAILURE, LOG_ALERT) AC_MSG_RESULT(LOG_ALERT)])
+
 AC_ARG_WITH(logpath, [  --with-logpath          path to the sudo log file],
 [case $with_logpath in  
     yes)	echo "Must give --with-logpath an argument."
