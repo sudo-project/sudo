@@ -90,7 +90,8 @@ extern int errorlineno;
  *  guarantee that the syslog() operation will succeed!
  */
 
-static void syslog_wrapper(pri, fmt, arg1, arg2)
+static void
+syslog_wrapper(pri, fmt, arg1, arg2)
     int pri;
     char *fmt;
     char *arg1;
@@ -116,7 +117,8 @@ static void syslog_wrapper(pri, fmt, arg1, arg2)
  *  syslogs the error or writes it to the log file
  */
 
-void log_error(code)
+void
+log_error(code)
     int code;
 {
     char *p;
@@ -448,7 +450,8 @@ void log_error(code)
 
 static char *mail_argv[] = { "sendmail", "-t", (char *) NULL };
 
-static void send_mail()
+static void
+send_mail()
 {
     char *mailer = _PATH_SENDMAIL;
     char *subject = MAILSUBJECT;
@@ -526,7 +529,8 @@ static void send_mail()
     }
 }
 #else
-static void send_mail()
+static void
+send_mail()
 {
     /* no mailer defined */
     return;
@@ -542,7 +546,8 @@ static void send_mail()
  *  This function gets rid of all the ugly zombies
  */
 
-static RETSIGTYPE reapchild(sig)
+static RETSIGTYPE
+reapchild(sig)
     int sig;
 {
     int pid, status, save_errno = errno;
@@ -570,7 +575,8 @@ static RETSIGTYPE reapchild(sig)
  *  when an error occurs
  */
 
-void inform_user(code)
+void
+inform_user(code)
     int code;
 {
     switch (code) {
@@ -689,7 +695,8 @@ void inform_user(code)
  *  This function determines whether to send mail or not...
  */
 
-static int appropriate(code)
+static int
+appropriate(code)
     int code;
 {
 

@@ -64,7 +64,8 @@ static unsigned char    error_string[dce_c_error_string_len];
 
 
 /* returns 1 ("true") if user is a valid DCE principal, 0 otherwise */
-int dce_pwent(username, plain_pw)
+int
+dce_pwent(username, plain_pw)
 char *username;
 char *plain_pw;
 {
@@ -183,7 +184,8 @@ char *plain_pw;
 }
 
 /* returns 0 for DCE "ok" status, 1 otherwise */
-static int check_dce_status(input_status, comment)
+static int
+check_dce_status(input_status, comment)
 error_status_t input_status;
 char *comment;
 {

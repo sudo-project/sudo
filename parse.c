@@ -99,7 +99,8 @@ static int has_meta	__P((char *));
  * This routine is called from the sudo.c module and tries to validate
  * the user, host and command triplet.
  */
-int validate(check_cmnd)
+int
+validate(check_cmnd)
     int check_cmnd;
 {
     int return_code;
@@ -202,7 +203,8 @@ int validate(check_cmnd)
  * If path doesn't end in /, return TRUE iff cmnd & path name the same inode;
  * otherwise, return TRUE if cmnd names one of the inodes in path.
  */
-int command_matches(cmnd, user_args, path, sudoers_args)
+int
+command_matches(cmnd, user_args, path, sudoers_args)
     char *cmnd;
     char *user_args;
     char *path;
@@ -330,7 +332,8 @@ int command_matches(cmnd, user_args, path, sudoers_args)
  * Returns TRUE if "n" is one of our ip addresses or if
  * "n" is a network that we are on, else returns FALSE.
  */
-int addr_matches(n)
+int
+addr_matches(n)
     char *n;
 {
     int i;
@@ -366,7 +369,8 @@ int addr_matches(n)
  *  Returns TRUE if the given user belongs to the named group,
  *  else returns FALSE.
  */
-int usergr_matches(group, user)
+int
+usergr_matches(group, user)
     char *group;
     char *user;
 {
@@ -405,7 +409,8 @@ int usergr_matches(group, user)
  * else return FALSE.  Either of "host" or "user" may be NULL
  * in which case that argument is not checked...
  */
-int netgr_matches(netgr, host, user)
+int
+netgr_matches(netgr, host, user)
     char *netgr;
     char *host;
     char *user;
@@ -444,7 +449,8 @@ int netgr_matches(netgr, host, user)
  * Returns TRUE if "s" has shell meta characters in it,
  * else returns FALSE.
  */
-static int has_meta(s)
+static int
+has_meta(s)
     char *s;
 {
     register char *t;

@@ -65,7 +65,8 @@ static const char rcsid[] = "$Sudo$";
  *  that is a normal file and executable by root.
  */
 
-char * sudo_goodpath(path)
+char *
+sudo_goodpath(path)
     const char * path;
 {
     struct stat statbuf;		/* for stat(2) */

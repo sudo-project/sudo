@@ -173,7 +173,8 @@ struct env_table badenv_table[] = {
  *  the driving force behind sudo...
  */
 
-int main(argc, argv)
+int
+main(argc, argv)
     int argc;
     char **argv;
 {
@@ -389,7 +390,8 @@ int main(argc, argv)
  *  user_pw_ent, host, cwd, interfaces.
  */
 
-static void load_globals(sudo_mode)
+static void
+load_globals(sudo_mode)
     int sudo_mode;
 {
     char *p;
@@ -546,7 +548,8 @@ static void load_globals(sudo_mode)
  *  this function parses the arguments to sudo
  */
 
-static int parse_args()
+static int
+parse_args()
 {
     int ret = MODE_RUN;			/* what mode is suod to be run in? */
     int excl = 0;			/* exclusive arg, no others allowed */
@@ -687,7 +690,8 @@ static int parse_args()
  *  Tell which options are mutually exclusive and exit
  */
 
-static void usage_excl(exit_val)
+static void
+usage_excl(exit_val)
     int exit_val;
 {
     (void) fprintf(stderr, "Only one of the -v, -k, -l, -V and -h options may be used\n");
@@ -701,7 +705,8 @@ static void usage_excl(exit_val)
  *  this function just gives you instructions and exits
  */
 
-static void usage(exit_val)
+static void
+usage(exit_val)
     int exit_val;
 {
     (void) fprintf(stderr,
@@ -723,7 +728,8 @@ static void usage(exit_val)
  *  this function adds sudo-specific variables into the environment
  */
 
-static void add_env(contiguous)
+static void
+add_env(contiguous)
     int contiguous;
 {
     char idstr[MAX_UID_T_LEN + 1];
@@ -811,7 +817,8 @@ static void add_env(contiguous)
  *  Returns 1 on success, 0 on failure.
  */
 
-static int load_cmnd(sudo_mode)
+static int
+load_cmnd(sudo_mode)
     int sudo_mode;
 {
     int retval;
@@ -841,7 +848,8 @@ static int load_cmnd(sudo_mode)
  *  uid SUDOERS_UID, gid SUDOERS_GID and is mode SUDOERS_MODE.
  */
 
-static int check_sudoers()
+static int
+check_sudoers()
 {
     struct stat statbuf;
     int rootstat, i;
@@ -928,7 +936,8 @@ static int check_sudoers()
  *  this function sets real and effective uids and gids based on perm.
  */
 
-void set_perms(perm, sudo_mode)
+void
+set_perms(perm, sudo_mode)
     int perm;
     int sudo_mode;
 {
@@ -1075,7 +1084,8 @@ void set_perms(perm, sudo_mode)
  *  variables here as well but cmnd has not been defined at this point.
  */
 
-static void clean_env(envp, badenv_table)
+static void
+clean_env(envp, badenv_table)
     char **envp;
     struct env_table *badenv_table;
 {

@@ -60,7 +60,8 @@ static const char rcsid[] = "$Sudo$";
  *  Note that this string becomes a part of the environment.
  */
 
-int putenv(str)
+int
+putenv(str)
     const char *str;
 {
     char **current;

@@ -99,7 +99,8 @@ static char *sudo_getepw	__P((struct passwd *));
  *  SHELL evariable or the passwd(5) entry (in that order).
  */
 
-static char *sudo_getshell(pw)
+static char *
+sudo_getshell(pw)
     struct passwd *pw;
 {
     char *pw_shell;
@@ -126,7 +127,8 @@ static char *sudo_getshell(pw)
  *  normal UN*X password is returned instead.
  */
 
-static char *sudo_getepw(pw)
+static char *
+sudo_getepw(pw)
     struct passwd *pw;
 {
 
@@ -200,7 +202,8 @@ static char *sudo_getepw(pw)
  *  are in use, it substitutes the shadow password for pw_passwd.
  */
 
-struct passwd *sudo_getpwuid(uid)
+struct passwd *
+sudo_getpwuid(uid)
     uid_t uid;
 {
     struct passwd *pw, *local_pw;

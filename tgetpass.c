@@ -96,7 +96,8 @@ static const char rcsid[] = "$Sudo$";
  *  and input will time out based on the value of timeout.
  */
 
-char * tgetpass(prompt, timeout)
+char *
+tgetpass(prompt, timeout)
     const char *prompt;
     int timeout;
 {

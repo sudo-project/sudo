@@ -94,7 +94,8 @@ extern char **Argv;
  *  and sets the constituent ip addrs and netmasks.
  */
 
-void load_interfaces()
+void
+load_interfaces()
 {
     struct ifconf *ifconf;
     struct ifreq *ifr, ifr_tmp;
@@ -246,7 +247,8 @@ void load_interfaces()
  *  Stub function for those without SIOCGIFCONF
  */
 
-void load_interfaces()
+void
+load_interfaces()
 {
     return;
 }

@@ -67,7 +67,8 @@ static const char rcsid[] = "$Sudo$";
  *  else it returns 0.
  */
 
-int sudo_setenv(var, val)
+int
+sudo_setenv(var, val)
     char *var;
     char *val;
 {

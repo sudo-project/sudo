@@ -66,7 +66,8 @@ static int tcollect	__P((int, int, uchar_t *, int, prompt_t *));
  *  Collection routine (callback) for limiting the timeouts in SIA
  *  prompts.
  */
-static int tcollect(timeout, rendition, title, nprompts, prompts)
+static int
+tcollect(timeout, rendition, title, nprompts, prompts)
     int timeout;
     int rendition;
     uchar_t *title;
@@ -100,7 +101,8 @@ static int tcollect(timeout, rendition, title, nprompts, prompts)
  *  Try to authenticate the user using Security Integration Architecture
  *  (SIA). Added 9/26/98 by Spider Boardman
  */
-void sia_attempt_auth()
+void
+sia_attempt_auth()
 {
     SIAENTITY *siah = NULL;
     int retval;

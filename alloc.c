@@ -64,7 +64,8 @@ static const char rcsid[] = "$Sudo$";
  *  malloc(3) fails.
  */
 
-VOID *emalloc(size)
+VOID *
+emalloc(size)
     size_t size;
 {
     VOID *ptr;
@@ -85,7 +86,8 @@ VOID *emalloc(size)
  *  if the system realloc(3) does not support this.
  */
 
-VOID *erealloc(ptr, size)
+VOID *
+erealloc(ptr, size)
     VOID *ptr;
     size_t size;
 {
@@ -105,7 +107,8 @@ VOID *erealloc(ptr, size)
  *  malloc(3) fails.  NOTE: unlike strdup(3), estrdup(NULL) is legal.
  */
 
-char *estrdup(src)
+char *
+estrdup(src)
     const char *src;
 {
     char *dst = NULL;

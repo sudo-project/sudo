@@ -82,7 +82,8 @@ static const char rcsid[] = "$Sudo$";
  *  but it is in '.' and IGNORE_DOT_PATH is in effect.
  */
 
-int find_path(infile, outfile)
+int
+find_path(infile, outfile)
     char *infile;		/* file to find */
     char **outfile;		/* result parameter */
 {

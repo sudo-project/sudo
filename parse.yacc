@@ -153,7 +153,8 @@ static void expand_match_list	__P((void));
        void init_parser		__P((void));
        void yyerror		__P((char *));
 
-void yyerror(s)
+void
+yyerror(s)
     char *s;
 {
     /* save the line the first error occured on */
@@ -678,7 +679,8 @@ size_t nslots = 0;
  *  This function compares two aliasinfo structures.
  */
 
-static int aliascmp(a1, a2)
+static int
+aliascmp(a1, a2)
     const VOID *a1, *a2;
 {
     int r;
@@ -701,7 +703,8 @@ static int aliascmp(a1, a2)
  *  This function compares two generic_alias structures.
  */
 
-static int genaliascmp(entry, key)
+static int
+genaliascmp(entry, key)
     const VOID *entry, *key;
 {
     struct generic_alias *ga1 = (struct generic_alias *) key;
@@ -719,7 +722,8 @@ static int genaliascmp(entry, key)
  *  aliases list.
  */
 
-static int add_alias(alias, type)
+static int
+add_alias(alias, type)
     char *alias;
     int type;
 {
@@ -765,7 +769,8 @@ static int add_alias(alias, type)
  *  This function searches for the named alias of the specified type.
  */
 
-static int find_alias(alias, type)
+static int
+find_alias(alias, type)
     char *alias;
     int type;
 {
@@ -786,7 +791,8 @@ static int find_alias(alias, type)
  *  This function allocates more space for the aliases list.
  */
 
-static int more_aliases()
+static int
+more_aliases()
 {
     nslots += MOREALIASES;
     if (nslots == MOREALIASES)
@@ -805,7 +811,8 @@ static int more_aliases()
  *  This function lists the contents of the aliases list.
  */
 
-void dumpaliases()
+void
+dumpaliases()
 {
     size_t n;
 
@@ -840,7 +847,8 @@ void dumpaliases()
  *  `sudo -l'.
  */
 
-void list_matches()
+void
+list_matches()
 {
     int i; 
     char *p;
@@ -910,7 +918,8 @@ void list_matches()
  *  a separator if one is given.
  */
 
-static void append(src, dstp, dst_len, dst_size, separator)
+static void
+append(src, dstp, dst_len, dst_size, separator)
     char *src, **dstp;
     size_t *dst_len, *dst_size;
     int separator;
@@ -953,7 +962,8 @@ static void append(src, dstp, dst_len, dst_size, separator)
  *  the associated counters.
  */
 
-void reset_aliases()
+void
+reset_aliases()
 {
     if (aliases) {
 	free(aliases);
@@ -970,7 +980,8 @@ void reset_aliases()
  *  This function increments ga_list_len, allocating more space as necesary.
  */
 
-static void expand_ga_list()
+static void
+expand_ga_list()
 {
     if (++ga_list_len >= ga_list_size) {
 	while ((ga_list_size += STACKINCREMENT) < ga_list_len)
@@ -990,7 +1001,8 @@ static void expand_ga_list()
  *  This function increments cm_list_len, allocating more space as necesary.
  */
 
-static void expand_match_list()
+static void
+expand_match_list()
 {
     if (++cm_list_len >= cm_list_size) {
 	while ((cm_list_size += STACKINCREMENT) < cm_list_len)
@@ -1014,7 +1026,8 @@ static void expand_match_list()
  *  allocates new space for various data structures.
  */
 
-void init_parser()
+void
+init_parser()
 {
     /* Free up old data structures if we run the parser more than once. */
     if (match) {

@@ -53,7 +53,8 @@ static const char rcsid[] = "$Sudo$";
  *  utime(3) sets the access and mod times of the named file.
  */
 
-int utime(file, tvp)
+int
+utime(file, tvp)
     const char *file;					/* file to udpate */
     const struct utimbuf *utp;				/* what to update to */
 {

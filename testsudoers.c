@@ -98,7 +98,8 @@ void dumpaliases	__P((void));
  * Returns TRUE if "s" has shell meta characters in it,
  * else returns FALSE.
  */
-int has_meta(s)
+int
+has_meta(s)
     char *s;
 {
     register char *t;
@@ -115,7 +116,8 @@ int has_meta(s)
  * return TRUE if cmnd matches, in the sudo sense,
  * the pathname in path; otherwise, return FALSE
  */
-int command_matches(cmnd, user_args, path, sudoers_args)
+int
+command_matches(cmnd, user_args, path, sudoers_args)
     char *cmnd;
     char *user_args;
     char *path;
@@ -172,7 +174,8 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 }
 
 
-int addr_matches(n)
+int
+addr_matches(n)
     char *n;
 {
     int i;
@@ -203,7 +206,8 @@ int addr_matches(n)
 }
 
 
-int usergr_matches(group, user)
+int
+usergr_matches(group, user)
     char *group;
     char *user;
 {
@@ -232,7 +236,8 @@ int usergr_matches(group, user)
 }
 
 
-int netgr_matches(netgr, host, user)
+int
+netgr_matches(netgr, host, user)
     char *netgr;
     char *host;
     char *user;
@@ -267,14 +272,16 @@ int netgr_matches(netgr, host, user)
 }
 
 
-void set_perms(i, j)
+void
+set_perms(i, j)
     int i, j;
 {
     return;
 }
 
 
-int main(argc, argv)
+int
+main(argc, argv)
     int argc;
     char **argv;
 {

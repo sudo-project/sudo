@@ -1992,7 +1992,8 @@ int main()
 #endif
 #line 269 "parse.lex"
 
-static void fill(s, len)
+static void
+fill(s, len)
     char *s;
     int len;
 {
@@ -2006,7 +2007,8 @@ static void fill(s, len)
 }
 
 
-static void fill_cmnd(s, len)
+static void
+fill_cmnd(s, len)
     char *s;
     int len;
 {
@@ -2024,7 +2026,8 @@ static void fill_cmnd(s, len)
 }
 
 
-static void fill_args(s, len, addspace)
+static void
+fill_args(s, len, addspace)
     char *s;
     int len;
     int addspace;
@@ -2071,7 +2074,8 @@ static void fill_args(s, len, addspace)
 }
 
 
-int yywrap()
+int
+yywrap()
 {
 #ifdef YY_NEW_FILE
     YY_NEW_FILE;

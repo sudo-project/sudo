@@ -157,7 +157,8 @@ extern int xrealm;
  *  verify who s/he is.  
  */
 
-void check_user()
+void
+check_user()
 {
     register int rtn;
     mode_t oldmask;
@@ -200,7 +201,8 @@ void check_user()
  *  this function checks the user is exempt from supplying a password.
  */
 
-int user_is_exempt()
+int
+user_is_exempt()
 {
 #ifdef EXEMPTGROUP
     struct group *grp;
@@ -233,7 +235,8 @@ int user_is_exempt()
  *  TIMEOUT minutes, no password will be required
  */
 
-static int check_timestamp()
+static int
+check_timestamp()
 {
     register char *p;
     struct stat statbuf;
@@ -346,7 +349,8 @@ static int check_timestamp()
  *  via utime(2).
  */
 
-static int touch(file)
+static int
+touch(file)
     char *file;
 {
 #if defined(HAVE_UTIME) && !defined(HAVE_UTIME_NULL)
@@ -379,7 +383,8 @@ static int touch(file)
  *  This function changes the timestamp to "now"
  */
 
-static void update_timestamp()
+static void
+update_timestamp()
 {
     if (timedir_is_good) {
 	/* become root */
@@ -408,7 +413,8 @@ static void update_timestamp()
  *  This function removes the timestamp ticket file
  */
 
-void remove_timestamp()
+void
+remove_timestamp()
 {
 #ifdef USE_TTY_TICKETS
     char *p;
@@ -456,7 +462,8 @@ void remove_timestamp()
  */
 
 #ifdef HAVE_SECURID
-static void check_passwd()
+static void
+check_passwd()
 {
     struct SD_CLIENT sd_dat, *sd;		/* SecurID data block */
     register int counter = TRIES_FOR_PASSWORD;
@@ -498,7 +505,8 @@ static void check_passwd()
 }
 #else /* !HAVE_SECURID */
 #ifdef HAVE_AUTHSRV
-static void check_passwd()
+static void
+check_passwd()
 {
     char *pass;			/* this is what gets entered */
     Cfg *confp;
@@ -581,7 +589,8 @@ static void check_passwd()
 }
 #else /* !HAVE_AUTHSRV */
 
-static void check_passwd()
+static void
+check_passwd()
 {
     char *pass;			/* this is what gets entered */
     int counter = TRIES_FOR_PASSWORD;
@@ -739,7 +748,8 @@ static void check_passwd()
  *
  *  Validate a user via kerberos.
  */
-static int sudo_krb_validate_user(pw, pass)
+static int
+sudo_krb_validate_user(pw, pass)
     struct passwd *pw;
     char *pass;
 {
@@ -794,7 +804,8 @@ static int sudo_krb_validate_user(pw, pass)
  *  OK since we're a short lived program. I'd rather do that than contort
  *  the code to handle the cleanup.
  */
-static int sudo_krb5_validate_user(pw, pass)
+static int
+sudo_krb5_validate_user(pw, pass)
     struct passwd *pw;
     char *pass;
 {
@@ -852,7 +863,8 @@ static int sudo_krb5_validate_user(pw, pass)
  *
  * Returns 1 for confirmation, -1 for failure, 0 for uncertainty.
  */
-static int verify_krb_v5_tgt(ccache)
+static int
+verify_krb_v5_tgt(ccache)
     krb5_ccache		ccache;
 {
     char		phost[BUFSIZ];
@@ -935,7 +947,8 @@ cleanup:
 static char *PAM_username;
 static char *PAM_password;
 
-static int PAM_conv(num_msg, msg, resp, appdata_ptr)
+static int
+PAM_conv(num_msg, msg, resp, appdata_ptr)
     int num_msg;
     PAM_CONST struct pam_message **msg;
     struct pam_response **resp;
@@ -978,7 +991,8 @@ static int PAM_conv(num_msg, msg, resp, appdata_ptr)
     return(PAM_SUCCESS);
 }
 
-static int pam_auth(user, password)
+static int
+pam_auth(user, password)
     char *user;
     char *password;
 {
@@ -1010,7 +1024,8 @@ static int pam_auth(user, password)
     return(1);
 }
 
-static void pam_attempt_auth()
+static void
+pam_attempt_auth()
 {
     int i = TRIES_FOR_PASSWORD;
 
@@ -1047,7 +1062,8 @@ static void pam_attempt_auth()
  *  s/key challenge *  and fills in the user's skey structure.
  */
 
-static char *sudo_skeyprompt(user_skey, p)
+static char *
+sudo_skeyprompt(user_skey, p)
     struct skey *user_skey;
     char *p;
 {
@@ -1117,7 +1133,8 @@ static char *sudo_skeyprompt(user_skey, p)
  *  OPIE challenge *  and fills in the user's opie structure.
  */
 
-static char *sudo_opieprompt(user_opie, p)
+static char *
+sudo_opieprompt(user_opie, p)
     struct opie *user_opie;
     char *p;
 {
@@ -1182,7 +1199,8 @@ static char *sudo_opieprompt(user_opie, p)
  *  this function just prints the the reminder message
  */
 
-static void reminder()
+static void
+reminder()
 {
 #ifdef SHORT_MESSAGE
     (void) fprintf(stderr, "\n%s\n%s\n\n%s\n%s\n\n",
@@ -1211,7 +1229,8 @@ static void reminder()
  *  (and insult them if insults are configured).
  */
 
-void pass_warn(fp)
+void
+pass_warn(fp)
     FILE *fp;
 {
 
@@ -1230,7 +1249,8 @@ void pass_warn(fp)
  *  allocated result.  Returns the same string if no escapes.
  */
 
-static char *expand_prompt(old_prompt, user, host)
+static char *
+expand_prompt(old_prompt, user, host)
     char *old_prompt;
     char *user;
     char *host;

@@ -68,7 +68,8 @@ static const char rcsid[] = "$Sudo$";
  *  using the SecureWare crypt functions. Returns 1 on a match, else 0.
  */
 
-int check_secureware(pass)
+int
+check_secureware(pass)
     char *pass;
 {
 #ifdef __alpha

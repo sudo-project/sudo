@@ -125,7 +125,8 @@ struct passwd *user_pw_ent;
  *  where it all begins...
  */
 
-int main(argc, argv)
+int
+main(argc, argv)
     int argc;
     char **argv;
 {
@@ -370,7 +371,8 @@ int main(argc, argv)
  *  These exist to allow us to use the same parser as sudo(8).
  */
 
-int command_matches(cmnd, user_args, path, sudoers_args)
+int
+command_matches(cmnd, user_args, path, sudoers_args)
     char *cmnd;
     char *user_args;
     char *path;
@@ -380,20 +382,23 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 }
 
 
-int addr_matches(n)
+int
+addr_matches(n)
     char *n;
 {
     return(TRUE);
 }
 
-int usergr_matches(g, u)
+int
+usergr_matches(g, u)
     char *g, *u;
 {
     return(TRUE);
 }
 
 
-int netgr_matches(n, h, u)
+int
+netgr_matches(n, h, u)
     char *n, *h, *u;
 {
     return(TRUE);
@@ -407,7 +412,8 @@ int netgr_matches(n, h, u)
  *  Prints a help message and exits w/ exit value of 1.
  */
 
-static void usage()
+static void
+usage()
 {
     (void) fprintf(stderr, "usage: %s [-V]\n", Argv[0]);
     Exit(-1);
@@ -423,7 +429,8 @@ static void usage()
  *  A positive parameter is considered to be a signal and is reported.
  */
 
-static RETSIGTYPE Exit(sig)
+static RETSIGTYPE
+Exit(sig)
     int sig;
 {
     (void) unlink(stmp);
@@ -443,7 +450,8 @@ static RETSIGTYPE Exit(sig)
  *  to do now.  Returns first letter of their choice (always lowercase).
  */
 
-static char whatnow()
+static char
+whatnow()
 {
     char choice;
     int ok;
@@ -475,7 +483,8 @@ static char whatnow()
  *  Print out a help message for whatnow().
  */
 
-static void whatnow_help()
+static void
+whatnow_help()
 {
     (void) printf("Options are:\n");
     (void) printf("  (e)dit sudoers file again\n");
@@ -491,7 +500,8 @@ static void whatnow_help()
  *  Install signal handlers for visudo.
  */
 
-static void setup_signals()
+static void
+setup_signals()
 {
 #ifdef POSIX_SIGNALS
 	struct sigaction action;		/* posix signal structure */
