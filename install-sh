@@ -16,7 +16,7 @@ MKDIR=mkdir
 MV=mv
 RM=rm
 STRIP=strip
-WHOAMI=whoami
+WHOAMI="echo root"
 
 ##  Some systems don't support -x, so we have to use -f.
 for d in /sbin /etc /usr/sbin /usr/etc; do
@@ -34,10 +34,6 @@ for d in /usr/bin /bin /usr/ucb /usr/bsd; do
 	WHOAMI=${d}/id | sed -n 's/^[^(]*(\([^)]*\)).*/\1/p'
     fi
 done
-if [ X"$WHOAMI" = X"" ]; then
-    # neither whoami nor id, assume root
-    WHOAMI=echo root
-fi
 
 for d in /usr/ccs/bin /usr/bin /bin; do
     if [ -f $d/strip ]; then
