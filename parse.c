@@ -90,6 +90,8 @@ static char rcsid[] = "$Id$";
  */
 int parse_error = FALSE;
 extern FILE *yyin, *yyout;
+extern struct sudo_match *matches;
+extern int printmatches;
 
 /*
  * Prototypes for static (local) functions
@@ -97,7 +99,7 @@ extern FILE *yyin, *yyout;
 static int has_meta	__P((char *));
 
 /*
- * this routine is called from the sudo.c module and tries to validate
+ * This routine is called from the sudo.c module and tries to validate
  * the user, host and command triplet.
  */
 int validate(check_cmnd)
@@ -118,13 +120,28 @@ int validate(check_cmnd)
     yyout = stdout;
 
     /*
-     * need to be root while stat'ing things in the parser.
+     * Allocate space for matches if printmatches is set.
+     */
+    if (printmatches) {
+	if ((matches = (struct sudo_match *)
+		  malloc(sizeof(struct sudo_match) * MATCHSTACKSIZE)) == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+	/* XXX - maybe just set sizes to 0??? */
+	matches[0].runas = matches[0].cmnd = NULL;
+	matches[0].nopasswd = FALSE;
+    }
+
+    /*
+     * Need to be root while stat'ing things in the parser.
      */
     set_perms(PERM_ROOT);
     return_code = yyparse();
 
     /*
-     * don't need to keep this open...
+     * Don't need to keep this open...
      */
     (void) fclose(sudoers_fp);
 
