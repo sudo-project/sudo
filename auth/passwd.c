@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999, 2001 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,6 +60,19 @@ static const char rcsid[] = "$Sudo$";
 
 #define DESLEN			13
 #define HAS_AGEINFO(p, l)	(l == 18 && p[DESLEN] == ',')
+
+int
+passwd_init(pw, promptp, auth)
+    struct passwd *pw;
+    char **promptp;
+    sudo_auth *auth;
+{
+#ifdef HAVE_SKEYACCESS
+    if (skeyaccess(pw->pw_name, user_tty, NULL, NULL) == 0)
+	return(AUTH_FATAL);
+#endif
+    return(AUTH_SUCCESS);
+}
 
 int
 passwd_verify(pw, pass, auth)

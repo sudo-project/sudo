@@ -80,6 +80,7 @@ int bsdauth_verify __P((struct passwd *pw, char *prompt, sudo_auth *auth));
 int bsdauth_cleanup __P((struct passwd *pw, sudo_auth *auth));
 
 /* Prototypes for normal methods */
+int passwd_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
 int passwd_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
 int secureware_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
 int secureware_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
