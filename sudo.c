@@ -77,7 +77,7 @@
 # endif /* __hpux */
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
-#ifdef HAVE_LOGINCAP
+#ifdef HAVE_LOGIN_CAP_H
 # include <login_cap.h>
 # ifndef LOGIN_DEFROOTCLASS
 #  define LOGIN_DEFROOTCLASS	"daemon"
@@ -112,7 +112,7 @@ static void usage			__P((int));
 static void usage_excl			__P((int));
 static void check_sudoers		__P((void));
 static int init_vars			__P((int));
-static int set_loginclass		__P((struct passwd *));
+static void set_loginclass		__P((struct passwd *));
 static void add_env			__P((int));
 static void clean_env			__P((char **, struct env_table *));
 static void initial_setup		__P((void));
@@ -139,6 +139,12 @@ static char *runas_homedir = NULL;	/* XXX */
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
 #endif /* RLIMIT_CORE */
+#ifdef HAVE_LOGIN_CAP_H
+login_cap_t *lc;
+#endif /* HAVE_LOGIN_CAP_H */
+#ifdef HAVE_BSD_AUTH_H
+char *login_style;
+#endif /* HAVE_BSD_AUTH_H */
 
 /*
  * Table of "bad" envariables to remove and len for strncmp()
@@ -545,6 +551,9 @@ init_vars(sudo_mode)
 	    ;
     }
 
+    /* Set login class if applicable. */
+    set_loginclass(sudo_user.pw);
+
     /* Resolve the path and return. */
     if ((sudo_mode & MODE_RUN))
 	return(find_path(NewArgv[0], &user_cmnd));
@@ -599,7 +608,20 @@ parse_args()
 		NewArgc--;
 		NewArgv++;
 		break;
-#ifdef HAVE_LOGINCAP
+#ifdef HAVE_BSD_AUTH_H
+	    case 'a':
+		/* Must have an associated authentication style. */
+		if (NewArgv[1] == NULL)
+		    usage(1);
+
+		login_style = NewArgv[1];
+
+		/* Shift Argv over and adjust Argc. */
+		NewArgc--;
+		NewArgv++;
+		break;
+#endif
+#ifdef HAVE_LOGIN_CAP_H
 	    case 'c':
 		/* Must have an associated login class. */
 		if (NewArgv[1] == NULL)
@@ -930,14 +952,22 @@ set_perms(perm, sudo_mode)
 					sudo_setenv("LOGNAME", pw->pw_name);
 				    }
 
+#ifdef HAVE_LOGIN_CAP_H
 				    if (def_flag(I_LOGINCLASS)) {
 					/*
 					 * setusercontext() will set uid/gid/etc
 					 * for us so no need to do it below.
 					 */
-					if (set_loginclass(pw) > 0)
+					if (setusercontext(lc, pw, pw->pw_uid,
+					    LOGIN_SETUSER|LOGIN_SETGROUP|LOGIN_SETRESOURCES|LOGIN_SETPRIORITY))
+					    log_error(
+						NO_MAIL|USE_ERRNO|MSG_ONLY,
+						"setusercontext() failed for login class %s",
+						login_class);
+					else
 					    break;
 				    }
+#endif /* HAVE_LOGIN_CAP_H */
 
 				    if (setgid(pw->pw_gid)) {
 					(void) fprintf(stderr,
@@ -1051,12 +1081,11 @@ initial_setup()
 #endif /* POSIX_SIGNALS */
 }
 
-#ifdef HAVE_LOGINCAP
-static int
+#ifdef HAVE_LOGIN_CAP_H
+static void
 set_loginclass(pw)
     struct passwd *pw;
 {
-    login_cap_t *lc;
     int errflags;
 
     /*
@@ -1083,28 +1112,16 @@ set_loginclass(pw)
     }
 
     lc = login_getclass(login_class);
-    if (!lc || !lc->lc_class || strcmp(lc->lc_class, login_class) != 0) {
+    if (!lc || !lc->lc_class || strcmp(lc->lc_class, login_class) != 0)
 	log_error(errflags, "unknown login class: %s", login_class);
-	return(0);
-    }
-    
-    /* Set everything except the environment and umask.  */
-    if (setusercontext(lc, pw, pw->pw_uid,
-	LOGIN_SETUSER|LOGIN_SETGROUP|LOGIN_SETRESOURCES|LOGIN_SETPRIORITY) < 0)
-	log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,
-	    "setusercontext() failed for login class %s", login_class);
-
-    login_close(lc);
-    return(1);
 }
 #else
 static int
 set_loginclass(pw)
     struct passwd *pw;
 {
-    return(0);
 }
-#endif /* HAVE_LOGINCAP */
+#endif /* HAVE_LOGIN_CAP_H */
 
 /*
  * Look up the fully qualified domain name and set user_host and user_shost.
@@ -1189,10 +1206,13 @@ usage(exit_val)
     (void) fprintf(stderr,
 	"usage: %s -V | -h | -L | -l | -v | -k | -K | [-H] [-S] [-b]\n%*s",
 	Argv[0], (int) strlen(Argv[0]) + 8, " ");
-#ifdef HAVE_LOGINCAP
-    (void) fprintf(stderr, "[-p prompt] [-u username/#uid] [-c class] -s | <command>\n");
-#else
-    (void) fprintf(stderr, "[-p prompt] [-u username/#uid] -s | <command>\n");
+    (void) fprintf(stderr, "[-p prompt] [-u username/#uid] ");
+#ifdef HAVE_LOGIN_CAP_H
+    (void) fprintf(stderr, "[-c class] ");
 #endif
+#ifdef HAVE_BSD_AUTH_H
+    (void) fprintf(stderr, "[-a auth_type] ");
+#endif
+    (void) fprintf(stderr, "-s | <command>\n");
     exit(exit_val);
 }
