@@ -3,8 +3,7 @@
  * Copyright (c) 1996, 1998-2001 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
- * This code is derived from software contributed by Chris Jepeway
- * <jepeway@cs.utk.edu>
+ * This code is derived from software contributed by Chris Jepeway.
  *
  * This code is derived from software contributed by Chris Jepeway
  * Redistribution and use in source and binary forms, with or without
