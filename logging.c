@@ -53,6 +53,7 @@
 # include "emul/err.h"
 #endif /* HAVE_ERR_H */
 #include <pwd.h>
+#include <grp.h>
 #include <signal.h>
 #include <time.h>
 #include <errno.h>
@@ -494,8 +495,9 @@ send_mail(line)
 		}
 		argv[i] = NULL;
 
-		/* Close password file so we don't leak the fd. */
-		endpwent();
+		/* Close password and group files so we don't leak fds. */
+		sudo_endpwent();
+		endgrent();
 
 		/*
 		 * Depending on the config, either run the mailer as root

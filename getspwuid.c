@@ -80,7 +80,6 @@ static const char rcsid[] = "$Sudo$";
 int crypt_type = INT_MAX;
 #endif /* HAVE_GETPRPWNAM && __alpha */
 
-
 /*
  * Return a copy of the encrypted password for the user described by pw.
  * If shadow passwords are in use, look in the shadow file.
@@ -106,14 +105,12 @@ sudo_getepw(pw)
     {
 	struct pr_passwd *spw;
 
-	setprpwent();
 	if ((spw = getprpwnam(pw->pw_name)) && spw->ufld.fd_encrypt) {
 # ifdef __alpha
 	    crypt_type = spw->ufld.fd_oldcrypt;
 # endif /* __alpha */
 	    epw = estrdup(spw->ufld.fd_encrypt);
 	}
-	endprpwent();
 	if (epw)
 	    return(epw);
     }
@@ -122,10 +119,8 @@ sudo_getepw(pw)
     {
 	struct spwd *spw;
 
-	setspent();
 	if ((spw = getspnam(pw->pw_name)) && spw->sp_pwdp)
 	    epw = estrdup(spw->sp_pwdp);
-	endspent();
 	if (epw)
 	    return(epw);
     }
@@ -134,10 +129,8 @@ sudo_getepw(pw)
     {
 	struct s_passwd *spw;
 
-	setspwent();
 	if ((spw = getspwuid(pw->pw_uid)) && spw->pw_passwd)
 	    epw = estrdup(spw->pw_passwd);
-	endspwent();
 	if (epw)
 	    return(epw);
     }
@@ -146,10 +139,8 @@ sudo_getepw(pw)
     {
 	struct passwd_adjunct *spw;
 
-	setpwaent();
 	if ((spw = getpwanam(pw->pw_name)) && spw->pwa_passwd)
 	    epw = estrdup(spw->pwa_passwd);
-	endpwaent();
 	if (epw)
 	    return(epw);
     }
@@ -158,10 +149,8 @@ sudo_getepw(pw)
     {
 	AUTHORIZATION *spw;
 
-	setauthent();
 	if ((spw = getauthuid(pw->pw_uid)) && spw->a_password)
 	    epw = estrdup(spw->a_password);
-	endauthent();
 	if (epw)
 	    return(epw);
     }
@@ -297,4 +286,46 @@ sudo_getpwnam(name)
 	return(NULL);
     else
 	return(sudo_pwdup(pw, 1));
+}
+
+void
+sudo_setpwent()
+{
+    setpwent();
+#ifdef HAVE_GETPRPWNAM
+    setprpwent();
+#endif
+#ifdef HAVE_GETSPNAM
+    setspent();
+#endif
+#ifdef HAVE_GETSPWUID
+    setspwent();
+#endif
+#ifdef HAVE_GETPWANAM
+    setpwaent();
+#endif
+#ifdef HAVE_GETAUTHUID
+    setauthent();
+#endif
+}
+
+void
+sudo_endpwent()
+{
+    endpwent();
+#ifdef HAVE_GETPRPWNAM
+    endprpwent();
+#endif
+#ifdef HAVE_GETSPNAM
+    endspent();
+#endif
+#ifdef HAVE_GETSPWUID
+    endspwent();
+#endif
+#ifdef HAVE_GETPWANAM
+    endpwaent();
+#endif
+#ifdef HAVE_GETAUTHUID
+    endauthent();
+#endif
 }

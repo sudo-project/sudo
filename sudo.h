@@ -237,6 +237,8 @@ void zero_bytes		__P((volatile VOID *, size_t));
 int gettime		__P((struct timespec *));
 FILE *open_sudoers	__P((const char *, int *));
 void display_privs      __P((struct passwd *));
+void sudo_setpwent	__P((void));
+void sudo_endpwent	__P((void));
 #ifdef HAVE_SYSTRACE
 void systrace_attach	__P((pid_t));
 #endif

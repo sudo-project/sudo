@@ -197,7 +197,7 @@ main(argc, argv, envp)
      * Turn off core dumps and close open files.
      */
     initial_setup();
-    setpwent();
+    sudo_setpwent();
 
     /* Parse our arguments. */
     sudo_mode = parse_args(Argc, Argv);
@@ -402,7 +402,7 @@ main(argc, argv, envp)
 	    set_perms(PERM_FULL_RUNAS);
 
 	/* Close the password and group files */
-	endpwent();
+	sudo_endpwent();
 	endgrent();
 
 	/* Install the real environment. */
