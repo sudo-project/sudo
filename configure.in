@@ -40,6 +40,7 @@ case `echo $OS | $TRPROG '[A-Z]' '[a-z]'` in
 		fi
 		;;
     "solaris")	echo "Looks like Solaris"
+		AC_DEFINE(SVR4)
 		;;
     "aix")	echo "Looks like AIX"
 		AC_DEFINE(_ALL_SOURCE)
