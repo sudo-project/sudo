@@ -152,7 +152,10 @@ int validate(check_cmnd)
 	while (top) {
 	    if (host_matches == TRUE)
 		/* user may always do validate or list on allowed hosts */
-		return(VALIDATE_OK);
+		if (no_passwd == TRUE)
+		    return(VALIDATE_OK_NOPASS);
+		else
+		    return(VALIDATE_OK);
 	    top--;
 	}
     else
@@ -165,9 +168,9 @@ int validate(check_cmnd)
 		    	 * If no passwd required return as such.
 			 */
 		    	if (no_passwd == TRUE)
-		    		return(VALIDATE_OK_NOPASS);
+			    return(VALIDATE_OK_NOPASS);
 		    	else
-		    		return(VALIDATE_OK);
+			    return(VALIDATE_OK);
 		   else
 		        return(VALIDATE_NOT_OK);
 		else if (cmnd_matches == FALSE)
