@@ -93,6 +93,14 @@
 /* Define if you use Kerberos.  */
 #undef HAVE_KERB4
 
+/* Define if you use Kerberos.  */
+#undef HAVE_KERB5
+
+/* Keberos v5 has v4 compatibility */
+#ifdef HAVE_KERB5
+#  define HAVE_KERB4
+#endif /* HAVE_KERB5 */
+
 /* Define if you use AFS.  */
 #undef HAVE_AFS
 
@@ -161,12 +169,6 @@
 
 /* Define if you have tcgetattr(3). */
 #undef HAVE_TCGETATTR
-
-/* Define if you have setreuid(2). */
-#undef HAVE_SETREUID
-
-/* Define if you have setresuid(2). */ 
-#undef HAVE_SETRESUID
 
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
