@@ -100,21 +100,20 @@ char *find_path(file)
     }
 
     while ((n = index(path, ':'))) {
-	*n='\0';
-	strcpy(fn, path);
-	strcat(fn, "/");
-	strcat(fn, file);
+	*n = '\0';
+	(void)strcpy(fn, path);
+	(void)strcat(fn, "/");
+	(void)strcat(fn, file);
 
 	/* stat the file to make sure it exists and is executable */
 	statfailed = stat(fn, &statbuf);
 	if (!statfailed && (statbuf.st_mode & 0000111))
-	    return (qualify(fn));
-	else if (!statfailed || errno == ENOENT || errno == ENOTDIR)
-	    path=n+1;
-	else {
+	    return(qualify(fn));
+	else if (statfailed && errno != ENOENT && errno != ENOTDIR) {
 	    perror("find_path:  stat");
 	    exit(1);
 	}
+	path = n + 1;
     }
     return(NULL);
 }
