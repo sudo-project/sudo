@@ -196,6 +196,9 @@
 #undef HAVE_SYS_DIR_H
 #undef HAVE_NDIR_H
 
+/* Define if you have the <utime.h> header file.  */
+#undef HAVE_UTIME_H
+
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
