@@ -257,7 +257,8 @@ The following options are also configurable at runtime:
   --with-logging=TYPE
 	How you want to do your logging.  You may choose "syslog", "file",
 	or "both".  Setting this to "syslog" is nice because you can keep all
-	of your sudo logs in one place (see the FAQ).  The default is "syslog".
+	of your sudo logs in one place (see the sample.syslog.conf file).
+	The default is "syslog".
 
   --with-logfac=FACILITY
 	Determines which syslog facility to log to.  This requires a 4.3BSD
