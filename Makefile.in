@@ -191,7 +191,7 @@ sudo_noexec.la: sudo_noexec.lo
 gram.c gram.h: gram.y
 @DEV@	$(YACC) -d $(srcdir)/gram.y
 @DEV@	mv -f y.tab.c gram.c
-@DEV@	mv -f y.tab.h gram.h
+@DEV@	if cmp -s y.tab.h gram.h; then rm -f y.tab.h; else mv -f y.tab.h gram.h; fi
 	-@true
 
 # Uncomment the $(LEX) and mv lines if you intend to modify toke.l
