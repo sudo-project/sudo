@@ -62,7 +62,7 @@ struct matchstack {
  */
 struct sudo_command {
     char *cmnd;
-    char **args;
+    char *args;
 };
 
 
@@ -198,6 +198,7 @@ extern struct passwd *user_pw_ent;
 extern char *runas_user;
 extern char *tty;
 extern char *cmnd;
+extern char *cmnd_args;
 extern char *prompt;
 extern struct stat cmnd_st;
 extern int Argc;
