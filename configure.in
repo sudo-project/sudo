@@ -165,8 +165,9 @@ case "$OS" in
 			CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
 		    # shadow pw support
 		    elif test -n "$C2"; then
-			SHADOW_TYPE="SPW_SVR4"
+			SHADOW_TYPE="SPW_HPUX9"
 			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+			LIBS="${LIBS} /usr/lib/libsec.1"
 		    fi
 		fi
 
@@ -378,6 +379,7 @@ if test "$OS" != "irix" ; then
 elif test "$OSREV" -lt 5 ; then
     AC_CHECK_LIB(sun, getpwnam)
 fi
+AC_CHECK_LIB(inet, main)
 dnl
 dnl Find kerberos includes and libs or complain
 dnl
