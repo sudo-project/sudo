@@ -123,7 +123,7 @@ extern char *strdup	__P((const char *));
 static int  parse_args		__P((void));
 static void usage		__P((int));
 static void load_globals	__P((void));
-static void check_sudoers	__P((void));
+static int check_sudoers	__P((void));
 static void load_interfaces	__P((void));
 static void load_cmnd		__P((void));
 static void add_env		__P((void));
@@ -207,11 +207,17 @@ main(argc, argv)
 	(void) close(rtn);
 #endif /* HAVE_SYSCONF */
 
-    check_sudoers();		/* check mode/owner on _PATH_SUDO_SUDOERS */
-
     clean_env(environ);		/* clean up the environment (no LD_*) */
 
     load_globals();		/* load the user host cmnd and uid variables */
+
+    rtn = check_sudoers();	/* check mode/owner on _PATH_SUDO_SUDOERS */
+    if (rtn != ALL_SYSTEMS_GO) {
+	log_error(rtn);
+	set_perms(PERM_FULL_USER);
+	inform_user(rtn);
+	exit(1);
+    }
 
     if (sudo_mode == MODE_RUN) {
 	load_cmnd();		/* load the cmnd global variable */
@@ -670,30 +676,24 @@ static void load_interfaces()
  *  SUDOERS_OWNER and not writable by anyone else.
  */
 
-static void check_sudoers()
+static int check_sudoers()
 {
     struct stat statbuf;
     struct passwd *pw_ent;
 
-    if (!(pw_ent = getpwnam(SUDOERS_OWNER))) {
-	(void) fprintf(stderr, "%s: no passwd entry for sudoers file owner (%s)\n", Argv[0], SUDOERS_OWNER);
-	exit(1);
-    }
+    if (!(pw_ent = getpwnam(SUDOERS_OWNER)))
+	return(SUDOERS_NO_OWNER);
 
-    if (lstat(_PATH_SUDO_SUDOERS, &statbuf)) {
-	(void) fprintf(stderr, "%s: Can't stat %s: ", Argv[0], _PATH_SUDO_SUDOERS);
-	perror("");
-	exit(1);
-    } else if (!S_ISREG(statbuf.st_mode)) {
-	(void) fprintf(stderr, "%s: %s is not a regular file!\n", Argv[0], _PATH_SUDO_SUDOERS);
-	exit(1);
-    } else if (statbuf.st_uid != pw_ent -> pw_uid) {
-	(void) fprintf(stderr, "%s: %s is not owned by %s!\n", Argv[0], _PATH_SUDO_SUDOERS, SUDOERS_OWNER);
-	exit(1);
-    } else if ((statbuf.st_mode & 0000066)) {
-	(void) fprintf(stderr, "%s: %s is readable or writeable by other than %s!\n", Argv[0], _PATH_SUDO_SUDOERS, SUDOERS_OWNER);
-	exit(1);
-    }
+    if (lstat(_PATH_SUDO_SUDOERS, &statbuf))
+	return(NO_SUDOERS_FILE);
+    else if (!S_ISREG(statbuf.st_mode))
+	return(SUDOERS_NOT_FILE);
+    else if (statbuf.st_uid != pw_ent -> pw_uid)
+        return(SUDOERS_WRONG_OWNER);
+    else if ((statbuf.st_mode & 0000066))
+        return(SUDOERS_RW_OTHER); 
+
+    return(ALL_SYSTEMS_GO);
 }
 
 
@@ -761,7 +761,10 @@ void set_perms(perm)
 				    (void) fprintf(stderr, "%s: no passwd entry for sudoers file owner (%s)\n", Argv[0], SUDOERS_OWNER);
 				    exit(1);
 				} else if (seteuid(pw_ent->pw_uid)) {
-				    perror("seteuid");
+				    (void) fprintf(stderr, "%s: ",
+							   SUDOERS_OWNER);
+				    perror("");
+				    exit(1);
     	    	    	    	}
 
 			      	break;
@@ -795,4 +798,6 @@ char *uid2str(uid)
     }
 
     (void) sprintf(uidstr, "%u", (unsigned)uid);
+
+    return(uidstr);
 }
