@@ -576,7 +576,9 @@ AC_ARG_WITH(sudoers-mode, [  --with-sudoers-mode     mode of sudoers file (defau
     no)		echo "Sorry, --without-sudoers-mode not supported."
 		exit 1
 		;;
-    [[0-9]]*)	SUDOERS_MODE=$with_sudoers_mode
+    [[1-9]]*)	SUDOERS_MODE=0${with_sudoers_mode}
+		;;
+    0*)		SUDOERS_MODE=$with_sudoers_mode
 		;;
     *)		echo "You must use a numeric uid, not a name."
 		exit 1
