@@ -90,6 +90,9 @@
 /* Define if you use AFS.  */
 #undef HAVE_AFS
 
+/* Define if you use flex instead of lex.  */
+#undef HAVE_FLEX
+
 /* Define if you have POSIX signals.  */
 #undef HAVE_SIGACTION
 #ifdef HAVE_SIGACTION
