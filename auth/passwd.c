@@ -74,7 +74,7 @@ passwd_init(pw, promptp, auth)
     sudo_auth *auth;
 {
 #ifdef HAVE_SKEYACCESS
-    if (skeyaccess(pw->pw_name, user_tty, NULL, NULL) == 0)
+    if (skeyaccess(pw, user_tty, NULL, NULL) == 0)
 	return(AUTH_FATAL);
 #endif
     return(AUTH_SUCCESS);
