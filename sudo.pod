@@ -266,6 +266,15 @@ will be ignored and sudo will log and complain.  This is done to
 keep a user from creating his/her own timestamp with a bogus
 date on systems that allow users to give away files.
 
+Please note that B<sudo> will only log the command it explicitly
+runs.  If a user runs a command such as C<sudo su> or C<sudo sh>,
+subsequent commands run from that shell will I<not> be logged, nor
+will B<sudo>'s access control affect them.  The same is true for
+commands that offer shell escapes (including most editors).  Because
+of this, care must be taken when giving users access to commands
+via B<sudo> to verify that the command does not inadvertantly give
+the user an effective root shell.
+
 =head1 EXAMPLES
 
 Note: the following examples assume suitable sudoers(5) entries.
