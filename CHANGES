@@ -1265,3 +1265,30 @@ Sudo 1.6.2 released.
      password).
 
 399) Added -S flag to force password read from stdin.
+
+400) Restore coredumpsize resource limit before exec'ing the child
+     process (sudo sets it to 0 internally).
+
+401) Truncate unencrypted password to 8 chars if encrypted password is exactly
+     13 characters (indicateing standard a DES password).  Many versions
+     of crypt() do this for you, but not all (like HP-UX's).
+
+402) Fixed a typo/thinko that broke secureware support for long passwords.
+
+403) Added a new command line switch '-c' to support FreeBSD style login
+     classes.  The '-c' option can be used to sudo a command with specific
+     resource limits in the login.conf database.  This feature is optionally
+     enabled via the --with-logincap configure switch.  Based on a patch
+     from Michael D. Marchionna.
+
+404) Fixed a bug where sudo would hang around and consume CPU if we spawn
+     a long-running process.
+
+405) Deal with HP-UX password aging info tacked on to the end of the
+     encrypted password.
+
+406) Added set_logname run-time option.  When unset, sudo will not set
+     the USER and LOGNAME environment variables.
+
+407) Wildcards are now allowed in the hostnames specified in sudoers.
+     The 'fqdn' option is often required for this to be useful.
