@@ -104,7 +104,7 @@ WORD			[a-zA-Z0-9_-]+
 			}
 
 <GOTCMND>[:\,=\n]	{
-			    BEGIN 0;
+			    BEGIN INITIAL;
 			    unput(*yytext);
 			    return(COMMAND);
 			}			/* end of command line args */
@@ -115,7 +115,7 @@ WORD			[a-zA-Z0-9_-]+
 			    return(COMMENT);
 			}			/* return newline */
 
-#.*\n			{
+<INITIAL>#.*\n		{
 			    ++sudolineno;
 			    LEXTRACE("\n");
 			    return(COMMENT);
@@ -128,7 +128,7 @@ WORD			[a-zA-Z0-9_-]+
 			    sawspace = FALSE;
 			}			/* quoted command line arg */
 
-<GOTCMND>[^:\,= \t\n#]+ {
+<GOTCMND>[^:\,= \t\n]+ {
 			    LEXTRACE("ARG ");
 			    fill_args(yytext, yyleng, sawspace);
 			    sawspace = FALSE;
@@ -164,15 +164,17 @@ NOPASSWD:		{
 			    	return(NOPASSWD);
 			}
 
-\+[a-zA-Z][a-zA-Z0-9_-]* {
+\+{WORD}		{
+			    /* netgroup */
 			    fill(yytext, yyleng);
 			    return(NETGROUP);
-			 }
+			}
 
-\%[a-zA-Z][a-zA-Z0-9_-]* {
+\%{WORD}		{
+			    /* UN*X group */
 			    fill(yytext, yyleng);
 			    return(USERGROUP);
-			 }
+			}
 
 {OCTET}(\.{OCTET}){3}	{
 			    fill(yytext, yyleng);
@@ -205,15 +207,14 @@ NOPASSWD:		{
 			    }
 			}
 
-<GOTRUNAS>#?[a-zA-Z0-9_-]+	{
+<GOTRUNAS>#?{WORD}	{
 			    /* username/uid that user can run command as */
-			    /* XXX - should we allow more than thse chars? */
 			    fill(yytext, yyleng);
 			    LEXTRACE("NAME ");
 			    return(NAME);
 			}
 
-<GOTRUNAS>\)		BEGIN 0; /* XXX - will newlines be treated correctly? */
+<GOTRUNAS>\)		BEGIN INITIAL; /* XXX - will newlines be treated correctly? */
 
 
 \/[^\,:=\\ \t\n#]+	{
