@@ -156,7 +156,7 @@ void yyerror(s)
 %token <tok>	 ':' '=' ',' '!' '.'	/* union member tokens */
 %token <tok>	 ERROR
 
-%type <BOOLEAN>	  cmnd
+%type <BOOLEAN>	 cmnd
 %type <BOOLEAN>	 runasspec
 %type <BOOLEAN>	 runaslist 
 %type <BOOLEAN>	 runasuser
@@ -252,13 +252,15 @@ opcmnd		:  cmnd { ; }
 			    else if (cmnd_matched == FALSE)
 				cmnd_matches = TRUE;
 			}
-		|	runasspec {;}
-		|	nopassreq {;}
+		|	runasspec { ; }
+		|	nopassreq { ; }
 		;
 
 runasspec	: 	RUNAS runaslist chkcmnd {
 			    if ($2 > 0 && $3 == TRUE) 
 				runas_matches = TRUE;
+			    else
+				runas_matches = FALSE;
 			}
 
 runaslist	:	runasuser {
