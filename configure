@@ -20087,9 +20087,136 @@ fi
 		test -n "$mansectsu" || mansectsu=1m
 		test -n "$mansectform" || mansectform=4
 		;;
-    *-*-hpux1[0-9]*)
-		if test "$CHECKSHADOW" = "true"; then
-		    echo "$as_me:$LINENO: checking for getprpwnam in -lsec" >&5
+    *-*-hpux*)
+		# AFS support needs -lBSD
+		if test "$with_AFS" = "yes"; then
+		    AFS_LIBS="-lc -lBSD"
+		fi
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
+
+		case "$host" in
+			*-*-hpux1-8.*)
+			    cat >>confdefs.h <<\_ACEOF
+#define BROKEN_SYSLOG 1
+_ACEOF
+
+
+			    # Not sure if setuid binaries are safe in < 9.x
+			    if test -n "$GCC"; then
+				SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
+			    else
+				SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
+			    fi
+			;;
+			*-*-hpux9.*)
+
+cat >>confdefs.h <<\_ACEOF
+#define BROKEN_SYSLOG 1
+_ACEOF
+
+
+			    if test "$CHECKSHADOW" = "true"; then
+
+for ac_func in getspwuid
+do
+as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
+echo "$as_me:$LINENO: checking for $ac_func" >&5
+echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
+if eval "test \"\${$as_ac_var+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $ac_func (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char $ac_func ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
+choke me
+#else
+char (*f) () = $ac_func;
+#endif
+#ifdef __cplusplus
+}
+#endif
+
+int
+main ()
+{
+return f != $ac_func;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  eval "$as_ac_var=yes"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+eval "$as_ac_var=no"
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_var'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_var'}'`" >&6
+if test `eval echo '${'$as_ac_var'}'` = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
+
+
+				CHECKSHADOW="false"
+			    fi
+
+			    # DCE support (requires ANSI C compiler)
+			    if test "$with_DCE" = "yes"; then
+				# order of libs in 9.X is important. -lc_r must be last
+				SUDO_LIBS="${SUDO_LIBS} -ldce -lM -lc_r"
+				LIBS="${LIBS} -ldce -lM -lc_r"
+				CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
+			    fi
+			;;
+			*-*-hpux10.*)
+			    if test "$CHECKSHADOW" = "true"; then
+				echo "$as_me:$LINENO: checking for getprpwnam in -lsec" >&5
 echo $ECHO_N "checking for getprpwnam in -lsec... $ECHO_C" >&6
 if test "${ac_cv_lib_sec_getprpwnam+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -20211,73 +20338,37 @@ fi
  SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1
 fi
 
-		    CHECKSHADOW="false"
-		fi
-
-		# AFS support needs -lBSD
-		if test "$with_AFS" = "yes"; then
-		    AFS_LIBS="-lc -lBSD"
-		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		;;
-    *-*-hpux9*)
-
-cat >>confdefs.h <<\_ACEOF
-#define BROKEN_SYSLOG 1
-_ACEOF
-
-
-		if test "$CHECKSHADOW" = "true"; then
-
-for ac_func in getspwuid
-do
-as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
-echo "$as_me:$LINENO: checking for $ac_func" >&5
-echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
-if eval "test \"\${$as_ac_var+set}\" = set"; then
+				CHECKSHADOW="false"
+			    fi
+			;;
+			*)
+			if test "$CHECKSHADOW" = "true"; then
+			    echo "$as_me:$LINENO: checking for getspnam in -lsec" >&5
+echo $ECHO_N "checking for getspnam in -lsec... $ECHO_C" >&6
+if test "${ac_cv_lib_sec_getspnam+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  cat >conftest.$ac_ext <<_ACEOF
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lsec  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-/* System header to define __stub macros and hopefully few prototypes,
-    which can conflict with char $ac_func (); below.
-    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
-    <limits.h> exists even on freestanding compilers.  */
-#ifdef __STDC__
-# include <limits.h>
-#else
-# include <assert.h>
-#endif
+
 /* Override any gcc2 internal prototype to avoid an error.  */
 #ifdef __cplusplus
 extern "C"
-{
 #endif
 /* We use char because int might match the return type of a gcc2
    builtin and then its argument prototype would still apply.  */
-char $ac_func ();
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
-choke me
-#else
-char (*f) () = $ac_func;
-#endif
-#ifdef __cplusplus
-}
-#endif
-
+char getspnam ();
 int
 main ()
 {
-return f != $ac_func;
+getspnam ();
   ;
   return 0;
 }
@@ -20294,64 +20385,29 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  eval "$as_ac_var=yes"
+  ac_cv_lib_sec_getspnam=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-eval "$as_ac_var=no"
+ac_cv_lib_sec_getspnam=no
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
 fi
-echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_var'}'`" >&5
-echo "${ECHO_T}`eval echo '${'$as_ac_var'}'`" >&6
-if test `eval echo '${'$as_ac_var'}'` = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
+echo "$as_me:$LINENO: result: $ac_cv_lib_sec_getspnam" >&5
+echo "${ECHO_T}$ac_cv_lib_sec_getspnam" >&6
+if test $ac_cv_lib_sec_getspnam = yes; then
+  cat >>confdefs.h <<\_ACEOF
+#define HAVE_GETSPNAM 1
 _ACEOF
-
+ SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"
 fi
-done
 
-
-
-		    CHECKSHADOW="false"
-		fi
-
-		# DCE support (requires ANSI C compiler)
-		if test "$with_DCE" = "yes"; then
-		    # order of libs in 9.X is important. -lc_r must be last
-		    SUDO_LIBS="${SUDO_LIBS} -ldce -lM -lc_r"
-		    LIBS="${LIBS} -ldce -lM -lc_r"
-		    CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
-		fi
-
-		# AFS support needs -lBSD
-		if test "$with_AFS" = "yes"; then
-		    AFS_LIBS="-lc -lBSD"
-		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		;;
-    *-*-hpux*)
-		cat >>confdefs.h <<\_ACEOF
-#define BROKEN_SYSLOG 1
-_ACEOF
-
-
-		# Not sure if setuid binaries are safe in < 9.x
-		if test -n "$GCC"; then
-		    SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
-		else
-		    SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
-		fi
-
-		# AFS support needs -lBSD
-		if test "$with_AFS" = "yes"; then
-		    AFS_LIBS="-lc -lBSD"
-		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+			    CHECKSHADOW="false"
+			fi
+			;;
+		esac
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path

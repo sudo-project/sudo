@@ -1269,59 +1269,55 @@ case "$host" in
 		test -n "$mansectsu" || mansectsu=1m
 		test -n "$mansectform" || mansectform=4
 		;;
-    *-*-hpux1[[0-9]]*)
-		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) AC_CHECK_LIB(sec, iscomsec, AC_DEFINE(HAVE_ISCOMSEC, 1, [Define if you have the `iscomsec' function. (HP-UX >= 10.x check for shadow enabled)])) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1])
-		    CHECKSHADOW="false"
-		fi
-
-		# AFS support needs -lBSD
-		if test "$with_AFS" = "yes"; then
-		    AFS_LIBS="-lc -lBSD"
-		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		;;
-    *-*-hpux9*)
-		AC_DEFINE(BROKEN_SYSLOG, 1, [Define if the `syslog' function returns a non-zero int to denote failure.])
-
-		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_FUNCS(getspwuid)
-		    AH_TEMPLATE([HAVE_GETSPWUID], [Define if you have the `getspwuid' function. (HP-UX <= 9.X shadow passwords)])
-		    CHECKSHADOW="false"
-		fi
-
-		# DCE support (requires ANSI C compiler)
-		if test "$with_DCE" = "yes"; then
-		    # order of libs in 9.X is important. -lc_r must be last
-		    SUDO_LIBS="${SUDO_LIBS} -ldce -lM -lc_r"
-		    LIBS="${LIBS} -ldce -lM -lc_r"
-		    CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
-		fi
-
-		# AFS support needs -lBSD
-		if test "$with_AFS" = "yes"; then
-		    AFS_LIBS="-lc -lBSD"
-		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		;;
     *-*-hpux*)
-		AC_DEFINE(BROKEN_SYSLOG)
-
-		# Not sure if setuid binaries are safe in < 9.x
-		if test -n "$GCC"; then
-		    SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
-		else
-		    SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
-		fi
-
 		# AFS support needs -lBSD
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
 		fi
 		test -n "$mansectsu" || mansectsu=1m
 		test -n "$mansectform" || mansectform=4
+
+		case "$host" in
+			*-*-hpux[1-8].*)
+			    AC_DEFINE(BROKEN_SYSLOG)
+
+			    # Not sure if setuid binaries are safe in < 9.x
+			    if test -n "$GCC"; then
+				SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
+			    else
+				SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
+			    fi
+			;;
+			*-*-hpux9.*)
+			    AC_DEFINE(BROKEN_SYSLOG, 1, [Define if the `syslog' function returns a non-zero int to denote failure.])
+
+			    if test "$CHECKSHADOW" = "true"; then
+				AC_CHECK_FUNCS(getspwuid)
+				AH_TEMPLATE([HAVE_GETSPWUID], [Define if you have the `getspwuid' function. (HP-UX <= 9.X shadow passwords)])
+				CHECKSHADOW="false"
+			    fi
+
+			    # DCE support (requires ANSI C compiler)
+			    if test "$with_DCE" = "yes"; then
+				# order of libs in 9.X is important. -lc_r must be last
+				SUDO_LIBS="${SUDO_LIBS} -ldce -lM -lc_r"
+				LIBS="${LIBS} -ldce -lM -lc_r"
+				CPPFLAGS="${CPPFLAGS} -D_REENTRANT -I/usr/include/reentrant"
+			    fi
+			;;
+			*-*-hpux10.*)
+			    if test "$CHECKSHADOW" = "true"; then
+				AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) AC_CHECK_LIB(sec, iscomsec, AC_DEFINE(HAVE_ISCOMSEC, 1, [Define if you have the `iscomsec' function. (HP-UX >= 10.x check for shadow enabled)])) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1])
+				CHECKSHADOW="false"
+			    fi
+			;;
+			*)
+			if test "$CHECKSHADOW" = "true"; then
+			    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
+			    CHECKSHADOW="false"
+			fi
+			;;
+		esac
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
