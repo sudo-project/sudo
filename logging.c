@@ -380,7 +380,7 @@ static void send_mail()
     (void) bzero((char *)(&action), sizeof(action));
 #endif /* POSIX_SIGNALS */
 
-    if (find_path(MAILER, &mailer, NULL) == FALSE) {
+    if ((mailer = find_path(MAILER)) == NULL) {
 	(void) fprintf(stderr, "%s: mailer (%s) not found\n", Argv[0], MAILER);
 	exit(1);
     }
