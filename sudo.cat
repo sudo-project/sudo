@@ -9,41 +9,41 @@ NNNNAAAAMMMMEEEE
 
 SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
        ssssuuuuddddoooo ----VVVV | ----hhhh | ----llll | ----LLLL | ----vvvv | ----kkkk | ----KKKK | ----ssss | [ ----HHHH ] [----SSSS ]
-       [ ----bbbb ] | [ ----pppp prompt ] [ ----cccc class|- ] [ ----uuuu username/#uid ]
+       [ ----bbbb ] | [ ----pppp _p_r_o_m_p_t ] [ ----cccc _c_l_a_s_s|_- ] [ ----uuuu _u_s_e_r_n_a_m_e|_#_u_i_d ]
        _c_o_m_m_a_n_d
 
 DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        ssssuuuuddddoooo allows a permitted user to execute a _c_o_m_m_a_n_d as the
-       superuser or another user, as specified in the sudoers
+       superuser or another user, as specified in the _s_u_d_o_e_r_s
        file.  The real and effective uid and gid are set to match
        those of the target user as specified in the passwd file
        (the group vector is also initialized when the target user
        is not root).  By default, ssssuuuuddddoooo requires that users
-       authenticate themselves with a password (NOTE: this is the
-       user's password, not the root password).  Once a user has
-       been authenticated, a timestamp is updated and the user
-       may then use sudo without a password for a short period of
-       time (five minutes by default).
+       authenticate themselves with a password (NOTE: by default
+       this is the user's password, not the root password).  Once
+       a user has been authenticated, a timestamp is updated and
+       the user may then use sudo without a password for a short
+       period of time (`5' minutes unless overridden in _s_u_d_o_e_r_s).
 
        ssssuuuuddddoooo determines who is an authorized user by consulting
        the file _/_e_t_c_/_s_u_d_o_e_r_s.  By giving ssssuuuuddddoooo the ----vvvv flag a user
-       can update the time stamp without running a _c_o_m_m_a_n_d_.  The
+       can update the time stamp without running a _c_o_m_m_a_n_d_. The
        password prompt itself will also time out if the user's
-       password is not entered with N minutes (again, this is
-       defined at configure time and defaults to 5 minutes).
+       password is not entered within `5' minutes (unless over­
+       ridden via _s_u_d_o_e_r_s).
 
-       If a user that is not listed in the _s_u_d_o_e_r_s file tries to
+       If a user who is not listed in the _s_u_d_o_e_r_s file tries to
        run a command via ssssuuuuddddoooo, mail is sent to the proper author­
-       ities, as defined at configure time (defaults to root).
-       Note that the mail will not be sent if an unauthorized
-       user tries to run sudo with the ----llll or ----vvvv flags.  This
-       allows users to determine for themselves whether or not
-       they are allowed to use ssssuuuuddddoooo.
+       ities, as defined at configure time or the _s_u_d_o_e_r_s file
+       (defaults to root).  Note that the mail will not be sent
+       if an unauthorized user tries to run sudo with the ----llll or
+       ----vvvv flags.  This allows users to determine for themselves
+       whether or not they are allowed to use ssssuuuuddddoooo.
 
        ssssuuuuddddoooo can log both successful an unsuccessful attempts (as
        well as errors) to _s_y_s_l_o_g(3), a log file, or both.  By
        default ssssuuuuddddoooo will log via _s_y_s_l_o_g(3) but this is changeable
-       at configure time.
+       at configure time or via the _s_u_d_o_e_r_s file.
 
 OOOOPPPPTTTTIIIIOOOONNNNSSSS
        ssssuuuuddddoooo accepts the following command line options:
@@ -61,7 +61,7 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-April 22, 2000                1.6.3                             1
+August 13, 2000               1.6.4                             1
 
 
 
@@ -76,9 +76,8 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
        -v  If given the ----vvvv (_v_a_l_i_d_a_t_e) option, ssssuuuuddddoooo will update
            the user's timestamp, prompting for the user's pass­
            word if necessary.  This extends the ssssuuuuddddoooo timeout to
-           for another N minutes (where N is defined at installa­
-           tion time and defaults to 5 minutes) but does not run
-           a command.
+           for another `5' minutes (or whatever the timeout is
+           set to in _s_u_d_o_e_r_s) but does not run a command.
 
        -k  The ----kkkk (_k_i_l_l) option to ssssuuuuddddoooo invalidates the user's
            timestamp by setting the time on it to the epoch.  The
@@ -88,13 +87,13 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
            .logout file.
 
        -K  The ----KKKK (sure _k_i_l_l) option to ssssuuuuddddoooo removes the user's
-           timestamp entirely.  This option does not require a
-           password.
+           timestamp entirely.  Likewise, this option does not
+           require a password.
 
        -b  The ----bbbb (_b_a_c_k_g_r_o_u_n_d) option tells ssssuuuuddddoooo to run the given
            command in the background.  Note that if you use the
            ----bbbb option you cannot use shell job control to manipu­
-           late the command.
+           late the process.
 
        -p  The ----pppp (_p_r_o_m_p_t) option allows you to override the
            default password prompt and use a custom one.  If the
@@ -106,9 +105,9 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
            command with resources limited by the specified login
            class.  The _c_l_a_s_s argument can be either a class name
            as defined in /etc/login.conf, or a single '-' charac­
-           ter.  Specifying the _c_l_a_s_s as '-' means that the com­
-           mand should be run restricted by the default login
-           capibilities of the user the command is run as.  If
+           ter.  Specifying a _c_l_a_s_s of `-' indicates that the
+           command should be run restricted by the default login
+           capibilities for the user the command is run as.  If
            the _c_l_a_s_s argument specifies an existing user class,
            the command must be run as root, or the ssssuuuuddddoooo command
            must be run from a shell that is already root.  This
@@ -118,7 +117,7 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
        -u  The ----uuuu (_u_s_e_r) option causes ssssuuuuddddoooo to run the specified
            command as a user other than _r_o_o_t.  To specify a _u_i_d
-           instead of a _u_s_e_r_n_a_m_e, use "#uid".
+           instead of a _u_s_e_r_n_a_m_e, use _#_u_i_d.
 
        -s  The ----ssss (_s_h_e_l_l) option runs the shell specified by the
            _S_H_E_L_L environment variable if it is set or the shell
@@ -127,7 +126,8 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
 
-April 22, 2000                1.6.3                             2
+
+August 13, 2000               1.6.4                             2
 
 
 
@@ -136,10 +136,10 @@ April 22, 2000                1.6.3                             2
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
-       -H  The ----HHHH (_H_O_M_E) option sets the _H_O_M_E environment vari­
+       -H  The ----HHHH (_H_O_M_E) option sets the `HOME' environment vari­
            able to the homedir of the target user (root by
            default) as specified in _p_a_s_s_w_d(4).  By default, ssssuuuuddddoooo
-           does not modify _H_O_M_E.
+           does not modify `HOME'.
 
        -S  The ----SSSS (_s_t_d_i_n) option causes ssssuuuuddddoooo to read the password
            from standard input instead of the terminal device.
@@ -193,7 +193,7 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 
 
 
-April 22, 2000                1.6.3                             3
+August 13, 2000               1.6.4                             3
 
 
 
@@ -259,7 +259,7 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
 
 
-April 22, 2000                1.6.3                             4
+August 13, 2000               1.6.4                             4
 
 
 
@@ -325,7 +325,7 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 
 
 
-April 22, 2000                1.6.3                             5
+August 13, 2000               1.6.4                             5
 
 
 
@@ -340,7 +340,8 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
        setuid shell scripts are generally safe).
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
-       _l_o_g_i_n___c_a_p(3), _s_u_d_o_e_r_s(4), _v_i_s_u_d_o(1m), _s_u(1).
+       _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), _s_u_d_o_e_r_s(4), _p_a_s_s_w_d(5), _v_i_s_u_d_o(1m),
+       _g_r_e_p(1), _s_u(1).
 
 
 
@@ -390,7 +391,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-April 22, 2000                1.6.3                             6
+August 13, 2000               1.6.4                             6
 
 

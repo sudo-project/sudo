@@ -49,15 +49,24 @@ B<visudo> edits the I<sudoers> file in a safe fashion, analogous to
 vipw(8).  B<visudo> locks the I<sudoers> file against multiple
 simultaneous edits, provides basic sanity checks, and checks
 for parse errors.  If the I<sudoers> file is currently being
-edited you will receive a message to try again later.  In the
-default configuration, the vi(1) editor is used, but there is
-a compile time option to allow use of whatever editor the
-environment variables C<EDITOR> or C<VISUAL> are set to.
+edited you will receive a message to try again later.
+
+There is a hard-coded list of editors that B<visudo> will use set
+at compile time that may be overridden via the I<editor> I<sudoers>
+C<Default> variable.  This list defaults to the path to vi(1) on
+your system, as determined by the I<configure> script.  Normally,
+B<visudo> does not honor the C<EDITOR> or C<VISUAL> environment
+variables unless they contain an editor in the aforementioned editors
+list.  However, if B<visudo> is configured with the I<--with-enveditor>
+flag or the I<enveditor> C<Default> variable is set in I<sudoers>,
+B<visudo> will use any the editor defines by C<EDITOR> or C<VISUAL>.
+Note that this can be a security hole since it allows the user to
+execute any program they wish simply by setting C<EDITOR> or C<VISUAL>.
 
 B<visudo> parses the I<sudoers> file after the edit and will
 not save the changes if there is a syntax error.  Upon finding
 an error, a message will be printed stating the line number(s)
-that the error occurred on and the user will receive the
+where the error occurred and the user will receive the
 "What now?" prompt.  At this point the user may enter "e"
 to re-edit the I<sudoers> file, enter "x" to exit without
 saving the changes, or "Q" to quit and save changes.  The
@@ -158,4 +167,4 @@ the editor used by B<visudo> allows shell escapes.
 
 =head1 SEE ALSO
 
-sudo(8), vipw(8).
+vi(1), sudo(8), vipw(8).

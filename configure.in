@@ -11,7 +11,7 @@ dnl This won't work before AC_INIT()
 dnl
 echo "Configuring Sudo version 1.6.3"
 dnl
-dnl Variables that get substituted in the Makefile
+dnl Variables that get substituted in the Makefile and man pages
 dnl
 AC_SUBST(CFLAGS)dnl
 AC_SUBST(PROGS)dnl
@@ -30,14 +30,66 @@ AC_SUBST(MAN_POSTINSTALL)dnl
 AC_SUBST(SUDOERS_MODE)dnl
 AC_SUBST(SUDOERS_UID)dnl
 AC_SUBST(SUDOERS_GID)dnl
-AC_SUBST(TIMEDIR)
 AC_SUBST(DEV)
 AC_SUBST(mansectsu)
 AC_SUBST(mansectform)
 AC_SUBST(mansrcdir)
 dnl
+dnl Variables that get substituted in docs (not overridden by environment)
+dnl
+AC_SUBST(timedir)dnl initial value from SUDO_TIMEDIR
+AC_SUBST(timeout)
+AC_SUBST(password_timeout)
+AC_SUBST(sudo_umask)
+AC_SUBST(passprompt)
+AC_SUBST(long_otp_prompt)
+AC_SUBST(lecture)
+AC_SUBST(logfac)
+AC_SUBST(goodpri)
+AC_SUBST(badpri)
+AC_SUBST(loglen)
+AC_SUBST(ignore_dot)
+AC_SUBST(mail_no_user)
+AC_SUBST(mail_no_host)
+AC_SUBST(mail_no_perms)
+AC_SUBST(mailto)
+AC_SUBST(mailsub)
+AC_SUBST(badpass_message)
+AC_SUBST(fqdn)
+AC_SUBST(runas_default)
+AC_SUBST(env_editor)
+AC_SUBST(passwd_tries)
+AC_SUBST(tty_tickets)
+AC_SUBST(insults)
+dnl
+dnl Initial values for above
+dnl
+timeout=5
+password_timeout=5
+sudo_umask=0022
+passprompt="Password:"
+long_otp_prompt=off
+lecture=on
+logfac=local2
+goodpri=notice
+badpri=alert
+loglen=80
+ignore_dot=off
+mail_no_user=on
+mail_no_host=off
+mail_no_perms=off
+mailto=root
+mailsub='*** SECURITY information for %h ***'
+badpass_message='Sorry, try again.'
+fqdn=off
+runas_default=root
+env_editor=off
+passwd_tries=3
+tty_tickets=off
+insults=off
+dnl
 dnl Initial values for Makefile variables listed above
-dnl Some may be overridden by environment variables..
+dnl May be overridden by environment variables..
 dnl
 PROGS="sudo visudo"
 test -n "$MANTYPE" || MANTYPE="man"
@@ -157,7 +209,7 @@ AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
     yes)	echo 'Adding CSOps standard options'
 		CHECKSIA=false
 		with_ignore_dot=yes
-		with_insults=yes
+		insults=on
 		with_classic_insults=yes
 		with_csops_insults=yes
 		with_env_editor=yes
@@ -213,8 +265,10 @@ AC_ARG_WITH(long-otp-prompt, [  --with-long-otp-prompt  use a two line OTP (skey
     yes)	AC_DEFINE(LONG_OTP_PROMPT)
 		AC_MSG_CHECKING(whether to use a two line prompt for OTP authentication)
 		AC_MSG_RESULT(yes)
+		long_otp_prompt=on
 		;;
-    no)		;;
+    no)		long_otp_prompt=off
+		;;
     *)		AC_MSG_ERROR(["--with-long-otp-prompt does not take an argument."])
 		;;
 esac])
@@ -334,14 +388,19 @@ esac])
 AC_MSG_CHECKING(whether to lecture users the first time they run sudo)
 AC_ARG_WITH(lecture, [  --without-lecture       don't print lecture for first-time sudoer],
 [case $with_lecture in  
-    yes|short)	AC_MSG_RESULT(yes)
+    yes|short)	lecture=on
 		;;
-    no|none)	AC_DEFINE(NO_LECTURE)
-		AC_MSG_RESULT(no)
+    no|none)	lecture=off
 		;;
     *)		AC_MSG_ERROR(["unknown argument to --with-lecture: $with_lecture"])
 		;;
-esac], [AC_MSG_RESULT(yes)])
+esac])
+if test "$lecture" = "on"; then
+    AC_MSG_RESULT(yes)
+else
+    AC_DEFINE(NO_LECTURE)
+    AC_MSG_RESULT(no)
+fi
 
 AC_MSG_CHECKING(whether sudo should log via syslog or to a file by default)
 AC_ARG_WITH(logging, [  --with-logging          log via syslog, file, or both],
@@ -364,46 +423,51 @@ AC_ARG_WITH(logging, [  --with-logging          log via syslog, file, or both],
 esac], [AC_DEFINE(LOGGING, SLOG_SYSLOG) AC_MSG_RESULT(syslog)])
 
 AC_MSG_CHECKING(which syslog facility sudo should log with)
-AC_ARG_WITH(logfac, [  --with-logfac           syslog facility to log with (default is local2)],
+AC_ARG_WITH(logfac, [  --with-logfac           syslog facility to log with (default is $logfac)],
 [case $with_logfac in  
     yes)	AC_MSG_ERROR(["must give --with-logfac an argument."])
 		;;
     no)		AC_MSG_ERROR(["--without-logfac not supported."])
 		;;
-    authpriv|auth|daemon|user|local0|local1|local2|local3|local4|local5|local6|local7)		AC_DEFINE_UNQUOTED(LOGFAC, "$with_logfac")
-		AC_MSG_RESULT([$with_logfac])
+    authpriv|auth|daemon|user|local0|local1|local2|local3|local4|local5|local6|local7)		logfac=$with_logfac
 		;;
     *)		AC_MSG_ERROR(["$with_logfac is not a supported syslog facility."])
 		;;
-esac], [AC_DEFINE_UNQUOTED(LOGFAC, "local2") AC_MSG_RESULT("local2")])
+esac])
+AC_DEFINE_UNQUOTED(LOGFAC, "$logfac")
+AC_MSG_RESULT($logfac)
 
 AC_MSG_CHECKING(at which syslog priority to log commands)
-AC_ARG_WITH(goodpri, [  --with-goodpri          syslog priority for commands (def is notice)],
+AC_ARG_WITH(goodpri, [  --with-goodpri          syslog priority for commands (def is $goodpri)],
 [case $with_goodpri in  
     yes)	AC_MSG_ERROR(["must give --with-goodpri an argument."])
 		;;
     no)		AC_MSG_ERROR(["--without-goodpri not supported."])
 		;;
-    alert|crit|debug|emerg|err|info|notice|warning)		AC_DEFINE_UNQUOTED(PRI_SUCCESS, "$with_goodpri")
-		AC_MSG_RESULT([$with_goodpri])
+    alert|crit|debug|emerg|err|info|notice|warning)
+		goodpri=$with_goodpri
 		;;
     *)		AC_MSG_ERROR(["$with_goodpri is not a supported syslog priority."])
 		;;
-esac], [AC_DEFINE_UNQUOTED(PRI_SUCCESS, "notice") AC_MSG_RESULT("notice")])
+esac])
+AC_DEFINE_UNQUOTED(PRI_SUCCESS, "$goodpri")
+AC_MSG_RESULT($goodpri)
 
 AC_MSG_CHECKING(at which syslog priority to log failures)
-AC_ARG_WITH(badpri, [  --with-badpri           syslog priority for failures (def is alert)],
+AC_ARG_WITH(badpri, [  --with-badpri           syslog priority for failures (def is $badpri)],
 [case $with_badpri in  
     yes)	AC_MSG_ERROR(["must give --with-badpri an argument."])
 		;;
     no)		AC_MSG_ERROR(["--without-badpri not supported."])
 		;;
-    alert|crit|debug|emerg|err|info|notice|warning)		AC_DEFINE_UNQUOTED(PRI_FAILURE, "$with_badpri")
-		AC_MSG_RESULT([$with_badpri])
+    alert|crit|debug|emerg|err|info|notice|warning)
+		badpri=$with_badpri
 		;;
     *)		AC_MSG_ERROR([$with_badpri is not a supported syslog priority.])
 		;;
-esac], [AC_DEFINE_UNQUOTED(PRI_FAILURE, "alert") AC_MSG_RESULT("alert")])
+esac])
+AC_DEFINE_UNQUOTED(PRI_FAILURE, "$badpri")
+AC_MSG_RESULT(badpri)
 
 AC_ARG_WITH(logpath, [  --with-logpath          path to the sudo log file],
 [case $with_logpath in  
@@ -414,42 +478,100 @@ AC_ARG_WITH(logpath, [  --with-logpath          path to the sudo log file],
 esac])
 
 AC_MSG_CHECKING(how long a line in the log file should be)
-AC_ARG_WITH(loglen, [  --with-loglen           maximum length of a log file line (default is 80)],
+AC_ARG_WITH(loglen, [  --with-loglen           maximum length of a log file line (default is $loglen)],
 [case $with_loglen in  
     yes)	AC_MSG_ERROR(["must give --with-loglen an argument."])
 		;;
     no)		AC_MSG_ERROR(["--without-loglen not supported."])
 		;;
-    [[0-9]]*)	AC_DEFINE_UNQUOTED(MAXLOGFILELEN, $with_loglen)
-		AC_MSG_RESULT([$with_loglen])
+    [[0-9]]*)	loglen=$with_loglen
 		;;
     *)		AC_MSG_ERROR(["you must enter a number, not $with_loglen"])
 		;;
-esac], [AC_DEFINE(MAXLOGFILELEN, 80) AC_MSG_RESULT(80)])
+esac])
+AC_DEFINE_UNQUOTED(MAXLOGFILELEN, $loglen)
+AC_MSG_RESULT($loglen)
 
 AC_MSG_CHECKING(whether sudo should ignore '.' or '' in \$PATH)
 AC_ARG_WITH(ignore-dot, [  --with-ignore-dot       ignore '.' in the PATH],
 [case $with_ignore_dot in  
-    yes)	AC_DEFINE(IGNORE_DOT_PATH)
-		AC_MSG_RESULT(yes)
+    yes)	ignore_dot=on
 		;;
-    no)		AC_MSG_RESULT(no)
+    no)		ignore_dot=off
 		;;
     *)		AC_MSG_ERROR(["--with-ignore-dot does not take an argument."])
 		;;
-esac], AC_MSG_RESULT(no))
+esac])
+if test "$ignore_dot" = "on"; then
+    AC_DEFINE(IGNORE_DOT_PATH)
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
+fi
+
+AC_MSG_CHECKING(whether to send mail when a user is not in sudoers)
+AC_ARG_WITH(mail-if-no-user, [  --without-mail-if-no-user do not send mail if user not in sudoers],
+[case $with_mail_if_no_user in  
+    yes)	mail_no_user=on
+		;;
+    no)		mail_no_user=off
+		;;
+    *)		AC_MSG_ERROR(["--with-mail-if-no-user does not take an argument."])
+		;;
+esac])
+if test "$mail_no_user" = "on"; then
+    AC_DEFINE(SEND_MAIL_WHEN_NO_USER)
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
+fi
+
+AC_MSG_CHECKING(whether to send mail when user listed but not for this host)
+AC_ARG_WITH(mail-if-no-host, [  --with-mail-if-no-host  send mail if user in sudoers but not for this host],
+[case $with_mail_if_no_host in  
+    yes)	mail_no_host=on
+		;;
+    no)		mail_no_host=off
+		;;
+    *)		AC_MSG_ERROR(["--with-mail-if-no-host does not take an argument."])
+		;;
+esac])
+if test "$mail_no_host" = "on"; then
+    AC_DEFINE(SEND_MAIL_WHEN_NO_HOST)
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
+fi
+
+AC_MSG_CHECKING(whether to send mail when a user tries a disallowed command)
+AC_ARG_WITH(mail-if-noperms, [  --with-mail-if-noperms  send mail if user not allowed to run command],
+[case $with_mail_if_noperms in  
+    yes)	mail_noperms=on
+		;;
+    no)		mail_noperms=off
+		;;
+    *)		AC_MSG_ERROR(["--with-mail-if-noperms does not take an argument."])
+		;;
+esac])
+if test "$mail_noperms" = "on"; then
+    AC_DEFINE(SEND_MAIL_WHEN_NOT_OK)
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
+fi
 
 AC_MSG_CHECKING(who should get the mail that sudo sends)
-AC_ARG_WITH(mailto, [  --with-mailto           who should get sudo mail (default is "root")],
+AC_ARG_WITH(mailto, [  --with-mailto           who should get sudo mail (default is "$mailto")],
 [case $with_mailto in  
     yes)	AC_MSG_ERROR(["must give --with-mailto an argument."])
 		;;
     no)		AC_MSG_ERROR(["--without-mailto not supported."])
 		;;
-    *)		AC_DEFINE_UNQUOTED(MAILTO, "$with_mailto")
-		AC_MSG_RESULT([$with_mailto])
+    *)		mailto=$with_mailto
 		;;
-esac], [AC_DEFINE(MAILTO, "root") AC_MSG_RESULT(root)])
+esac])
+AC_DEFINE_UNQUOTED(MAILTO, "$mailto")
+AC_MSG_RESULT([$mailto])
 
 AC_ARG_WITH(mailsubject, [  --with-mailsubject      subject of sudo mail],
 [case $with_mailsubject in  
@@ -457,47 +579,12 @@ AC_ARG_WITH(mailsubject, [  --with-mailsubject      subject of sudo mail],
 		;;
     no)		echo "Sorry, --without-mailsubject not supported."
 		;;
-    *)		AC_DEFINE_UNQUOTED(MAILSUBJECT, "$with_mailsubject")
+    *)		mailsub="$with_mailsubject"
 		AC_MSG_CHECKING(sudo mail subject)
-		AC_MSG_RESULT([Using alert mail subject: $with_mailsubject])
+		AC_MSG_RESULT([Using alert mail subject: $mailsub])
 		;;
-esac], AC_DEFINE(MAILSUBJECT, "*** SECURITY information for %h ***"))
-
-AC_MSG_CHECKING(whether to send mail when a user is not in sudoers)
-AC_ARG_WITH(mail-if-no-user, [  --without-mail-if-no-user do not send mail if user not in sudoers],
-[case $with_mail_if_no_user in  
-    yes)	AC_DEFINE(SEND_MAIL_WHEN_NO_USER)
-		AC_MSG_RESULT(yes)
-		;;
-    no)		AC_MSG_RESULT(no)
-		;;
-    *)		AC_MSG_ERROR(["unknown argument to --with-mail-if-no-user: $with_mail_if_no_user"])
-		;;
-esac], [AC_DEFINE(SEND_MAIL_WHEN_NO_USER) AC_MSG_RESULT(yes)])
-
-AC_MSG_CHECKING(whether to send mail when user listed but not for this host)
-AC_ARG_WITH(mail-if-no-host, [  --with-mail-if-no-host  send mail if user in sudoers but not for this host],
-[case $with_mail_if_no_host in  
-    yes)	AC_DEFINE(SEND_MAIL_WHEN_NO_HOST)
-		AC_MSG_RESULT(yes)
-		;;
-    no)		AC_MSG_RESULT(no)
-		;;
-    *)		AC_MSG_ERROR(["unknown argument to --with-mail-if-no-host: $with_mail_if_no_host"])
-		;;
-esac], AC_MSG_RESULT(no))
-
-AC_MSG_CHECKING(whether to send mail when a user tries a disallowed command)
-AC_ARG_WITH(mail-if-noperms, [  --with-mail-if-noperms  send mail if user not allowed to run command],
-[case $with_mail_if_noperms in  
-    yes)	AC_DEFINE(SEND_MAIL_WHEN_NOT_OK)
-		AC_MSG_RESULT(yes)
-		;;
-    no)		AC_MSG_RESULT(no)
-		;;
-    *)		AC_MSG_ERROR(["unknown argument to --with-mail-if-noperms: $with_mail_if_noperms"])
-		;;
-esac], AC_MSG_RESULT(no))
+esac])
+AC_DEFINE_UNQUOTED(MAILSUBJECT, "$mailsub")
 
 AC_MSG_CHECKING(for bad password prompt)
 AC_ARG_WITH(passprompt, [  --with-passprompt       default password prompt],
@@ -506,10 +593,10 @@ AC_ARG_WITH(passprompt, [  --with-passprompt       default password prompt],
 		;;
     no)		echo "Sorry, --without-passprompt not supported."
 		;;
-    *)		AC_DEFINE_UNQUOTED(PASSPROMPT, "$with_passprompt")
-		AC_MSG_RESULT([$with_passprompt])
-		;;
-esac], [AC_DEFINE(PASSPROMPT, "Password:") AC_MSG_RESULT(Password:)])
+    *)		passprompt="$with_passprompt"
+esac])
+AC_MSG_RESULT($passprompt)
+AC_DEFINE_UNQUOTED(PASSPROMPT, "$passprompt")
 
 AC_MSG_CHECKING(for bad password message)
 AC_ARG_WITH(badpass-message, [  --with-badpass-message  message the user sees when the password is wrong],
@@ -518,22 +605,28 @@ AC_ARG_WITH(badpass-message, [  --with-badpass-message  message the user sees wh
 		;;
     no)		echo "Sorry, --without-badpass-message not supported."
 		;;
-    *)		AC_DEFINE_UNQUOTED(INCORRECT_PASSWORD, "$with_badpass_message")
-		AC_MSG_RESULT([$with_badpass_message])
+    *)		badpass_message="$with_badpass_message"
 		;;
-esac], [AC_DEFINE(INCORRECT_PASSWORD, ["Sorry, try again."]) AC_MSG_RESULT([Sorry, try again.])])
+esac])
+AC_DEFINE_UNQUOTED(INCORRECT_PASSWORD, "$badpass_message")
+AC_MSG_RESULT([$badpass_message])
 
 AC_MSG_CHECKING(whether to expect fully qualified hosts in sudoers)
 AC_ARG_WITH(fqdn, [  --with-fqdn             expect fully qualified hosts in sudoers],
 [case $with_fqdn in  
-    yes)	AC_DEFINE(FQDN)
-		AC_MSG_RESULT(yes)
+    yes)	fqdn=on
 		;;
-    no)		AC_MSG_RESULT(no)
+    no)		fqdn=off
 		;;
     *)		AC_MSG_ERROR(["--with-fqdn does not take an argument."])
 		;;
-esac], AC_MSG_RESULT(no))
+esac])
+if test "$fqdn" = "on"; then
+    AC_DEFINE(FQDN)
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
+fi
 
 AC_ARG_WITH(timedir, [  --with-timedir          path to the sudo timestamp dir],
 [case $with_timedir in  
@@ -592,19 +685,27 @@ AC_ARG_WITH(sudoers-gid, [  --with-sudoers-gid      gid that owns sudoers file (
 esac])
 
 AC_MSG_CHECKING(for umask programs should be run with)
-AC_ARG_WITH(umask, [  --with-umask            umask with which the prog should run (default is 0022)
+AC_ARG_WITH(umask, [  --with-umask            umask with which the prog should run (default is $sudo_umask)
   --without-umask         Preserves the umask of the user invoking sudo.],
 [case $with_umask in  
     yes)	AC_MSG_ERROR(["must give --with-umask an argument."])
 		;;
     no)		AC_MSG_RESULT(user)
+		sudo_umask=0777
 		;;
     [[0-9]]*)	AC_DEFINE_UNQUOTED(SUDO_UMASK, $with_umask)
 		AC_MSG_RESULT([$with_umask])
+		sudo_umask=$with_umask
 		;;
     *)		AC_MSG_ERROR(["you must enter a numeric mask."])
 		;;
-esac], [AC_DEFINE(SUDO_UMASK, 0022) AC_MSG_RESULT(0022)])
+esac])
+AC_DEFINE_UNQUOTED(SUDO_UMASK, $sudo_umask)
+if test "$sudo_umask" = "0777"; then
+    AC_MSG_RESULT(user)
+else
+    AC_MSG_RESULT($sudo_umask)
+fi
 
 AC_MSG_CHECKING(for default user to run commands as)
 AC_ARG_WITH(runas-default, [  --with-runas-default    User to run commands as (default is "root"],
@@ -613,10 +714,11 @@ AC_ARG_WITH(runas-default, [  --with-runas-default    User to run commands as (d
 		;;
     no)		AC_MSG_ERROR(["--without-runas-default not supported."])
 		;;
-    *)		AC_DEFINE_UNQUOTED(RUNAS_DEFAULT, "$with_runas_default")
-		AC_MSG_RESULT([$with_runas_default])
+    *)		runas_default="$with_runas_default"
 		;;
-esac], [AC_DEFINE(RUNAS_DEFAULT, "root") AC_MSG_RESULT(root)])
+esac])
+AC_DEFINE_UNQUOTED(RUNAS_DEFAULT, "$runas_default")
+AC_MSG_RESULT([$runas_default])
 
 AC_ARG_WITH(exempt, [  --with-exempt=group     no passwd needed for users in this group],
 [case $with_exempt in  
@@ -645,99 +747,108 @@ esac], [AC_DEFINE(EDITOR, _PATH_VI) AC_MSG_RESULT(vi)])
 AC_MSG_CHECKING(whether to obey EDITOR and VISUAL environment variables)
 AC_ARG_WITH(env-editor, [  --with-env-editor       Use the environment variable EDITOR for visudo],
 [case $with_env_editor in  
-    yes)	AC_DEFINE(ENV_EDITOR)
-		AC_MSG_RESULT(yes)
+    yes)	env_editor=on
 		;;
-    no)		AC_MSG_RESULT(no)
+    no)		env_editor=off
 		;;
     *)		AC_MSG_ERROR(["--with-env-editor does not take an argument."])
 		;;
-esac], AC_MSG_RESULT(no))
+esac])
+if test "$env_editor" = "on"; then
+    AC_DEFINE(ENV_EDITOR)
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
+fi
 
 AC_MSG_CHECKING(number of tries a user gets to enter their password)
-AC_ARG_WITH(passwd-tries, [  --with-passwd-tries     number of tries to enter password (default is 3)],
+AC_ARG_WITH(passwd-tries, [  --with-passwd-tries     number of tries to enter password (default is $passwd_tries)],
 [case $with_passwd_tries in  
-    yes)	AC_DEFINE(TRIES_FOR_PASSWORD, 3)
-		AC_MSG_RESULT(3)
-		;;
+    yes)	;;
     no)		AC_MSG_ERROR(["--without-editor not supported."])
 		;;
-    [[1-9]]*)	AC_DEFINE_UNQUOTED(TRIES_FOR_PASSWORD, $with_passwd_tries)
-		AC_MSG_RESULT([$with_passwd_tries])
+    [[1-9]]*)	passwd_tries=$with_passwd_tries
 		;;
     *)		AC_MSG_ERROR(["you must enter the numer of tries, > 0"])
 		;;
-esac], [AC_DEFINE(TRIES_FOR_PASSWORD, 3) AC_MSG_RESULT(3)])
+esac])
+AC_DEFINE_UNQUOTED(TRIES_FOR_PASSWORD, $passwd_tries)
+AC_MSG_RESULT($passwd_tries)
 
 AC_MSG_CHECKING(time in minutes after which sudo will ask for a password again)
-AC_ARG_WITH(timeout, [  --with-timeout          minutes before sudo asks for passwd again (def is 5)],
+AC_ARG_WITH(timeout, [  --with-timeout          minutes before sudo asks for passwd again (def is $timeout)],
 [echo $with_timeout; case $with_timeout in  
-    yes)	AC_DEFINE(TIMEOUT, 5)
-		AC_MSG_RESULT(5)
+    yes)	;;
+    no)		timeout=0
 		;;
-    no)		AC_DEFINE(TIMEOUT, 0)
-		AC_MSG_RESULT([no timeout])
-		;;
-    [[0-9]]*)	AC_DEFINE_UNQUOTED(TIMEOUT, $with_timeout)
-		AC_MSG_RESULT([$with_timeout])
+    [[0-9]]*)	timeout=$with_timeout
 		;;
     *)		AC_MSG_ERROR(["you must enter the numer of minutes."])
 		;;
-esac], [AC_DEFINE(TIMEOUT, 5) AC_MSG_RESULT(5)])
+esac])
+AC_DEFINE_UNQUOTED(TIMEOUT, $timeout)
+AC_MSG_RESULT($timeout)
 
 AC_MSG_CHECKING(time in minutes after the password prompt will time out)
-AC_ARG_WITH(password-timeout, [  --with-password-timeout passwd prompt timeout in minutes (default is 5)],
+AC_ARG_WITH(password-timeout, [  --with-password-timeout passwd prompt timeout in minutes (default is $password_timeout)],
 [case $with_password_timeout in  
-    yes)	AC_DEFINE(PASSWORD_TIMEOUT, 5)
-		AC_MSG_RESULT(5)
+    yes)	;;
+    no)		password_timeout=0
 		;;
-    no)		AC_DEFINE(PASSWORD_TIMEOUT, 0)
-		AC_MSG_RESULT([no timeout])
-		;;
-    [[0-9]]*)	AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $with_password_timeout)
-		AC_MSG_RESULT([$with_password_timeout])
+    [[0-9]]*)	password_timeout=$with_password_timeout
 		;;
     *)		AC_MSG_ERROR(["you must enter the numer of minutes."])
 		;;
-esac], [AC_DEFINE(PASSWORD_TIMEOUT, 5) AC_MSG_RESULT(5)])
+esac])
+AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $password_timeout)
+AC_MSG_RESULT($password_timeout)
 
-AC_MSG_CHECKING(whether to use execvp or execv)
 AC_ARG_WITH(execv, [  --with-execv            use execv() instead of execvp()],
 [case $with_execv in  
-    yes)	AC_DEFINE(USE_EXECV)
+    yes)	AC_MSG_CHECKING(whether to use execvp or execv)
 		AC_MSG_RESULT(execv)
+		AC_DEFINE(USE_EXECV)
 		;;
-    no)		AC_MSG_RESULT(execvp)
-		;;
+    no)		;;
     *)		AC_MSG_ERROR(["--with-execv does not take an argument."])
 		;;
-esac], AC_MSG_RESULT(execvp))
+esac])
 
 AC_MSG_CHECKING(whether to use per-tty ticket files)
 AC_ARG_WITH(tty-tickets, [  --with-tty-tickets      use a different ticket file for each tty],
 [case $with_tty_tickets in  
-    yes)	AC_DEFINE(USE_TTY_TICKETS)
-		AC_MSG_RESULT(yes)
+    yes)	tty_tickets=on
 		;;
-    no)		AC_MSG_RESULT(no)
+    no)		tty_tickets=off
 		;;
     *)		AC_MSG_ERROR(["--with-tty-tickets does not take an argument."])
 		;;
-esac], AC_MSG_RESULT(no))
+esac])
+if test "$tty_tickets" = "on"; then
+    AC_DEFINE(USE_TTY_TICKETS)
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
+fi
 
 AC_MSG_CHECKING(whether to include insults)
 AC_ARG_WITH(insults, [  --with-insults          insult the user for entering an incorrect password],
 [case $with_insults in  
-    yes)	AC_DEFINE(USE_INSULTS)
-		AC_MSG_RESULT(yes)
+    yes)	insults=on
 		with_classic_insults=yes
 		with_csops_insults=yes
 		;;
-    no)		AC_MSG_RESULT(no)
+    no)		insults=off
 		;;
     *)		AC_MSG_ERROR(["--with-insults does not take an argument."])
 		;;
-esac], AC_MSG_RESULT(no))
+esac])
+if test "$insults" = "on"; then
+    AC_DEFINE(USE_INSULTS)
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
+fi
 
 AC_ARG_WITH(all-insults, [  --with-all-insults      include all the sudo insult sets],
 [case $with_all_insults in  
@@ -788,7 +899,7 @@ AC_ARG_WITH(goons-insults, [  --with-goons-insults    include the insults from t
 esac])
 
 dnl include all insult sets on one line
-if test "$with_insults" = "yes"; then
+if test "$insults" = "on"; then
     AC_MSG_CHECKING(which insult sets to include)
     i=""
     test "$with_goons_insults" = "yes" && i="goons ${i}"
@@ -1197,7 +1308,7 @@ case "$host" in
 		    [AC_MSG_RESULT([yes, fixing locally])
 		    sed 's:<acl.h>:<sys/acl.h>:g' < /usr/include/prot.h > prot.h
 		    ])
-		else
+		elif test "$CHECKSIA" = "true"; then
 		    with_passwd=no
 		    AUTH_OBJS="sia.o"
 		fi
@@ -1404,6 +1515,9 @@ dnl
 dnl Function checks
 dnl
 AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset seteuid strftime setrlimit initgroups fstat)
+if test X"$with_interfaces" != X"no"; then
+    AC_CHECK_FUNCS(getifaddrs)
+fi
 if test -n "$SECUREWARE"; then
     AC_CHECK_FUNCS(bigcrypt)
     AC_CHECK_FUNCS(set_auth_parameters)
@@ -1472,6 +1586,8 @@ if test "$with_kerb5" = "yes"; then
 	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
     elif test -f "/usr/local/kerberos/include/krb5.h"; then
 	CPPFLAGS="$CPPFLAGS -I/usr/local/kerberos/include"
+    elif test -f "/usr/krb5/include/krb5.h"; then
+	CPPFLAGS="$CPPFLAGS -I/usr/krb5/include"
     elif test -f "/usr/local/krb5/include/krb5.h"; then
 	CPPFLAGS="$CPPFLAGS -I/usr/local/krb5/include"
     else
@@ -1482,6 +1598,8 @@ if test "$with_kerb5" = "yes"; then
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
     elif test -f "/usr/local/kerberos/lib/libkrb5.a"; then
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/kerberos/lib"
+    elif test -f "/usr/krb5/lib/libkrb5.a"; then
+	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/krb5/lib"
     elif test -f "/usr/local/krb5/lib/libkrb5.a"; then
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/krb5/lib"
     else

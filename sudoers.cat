@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-April 22, 2000                1.6.3                             1
+August 13, 2000               1.6.4                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April 22, 2000                1.6.3                             2
+August 13, 2000               1.6.4                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April 22, 2000                1.6.3                             3
+August 13, 2000               1.6.4                             3
 
 
 
@@ -237,29 +237,29 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    used to make it easier to cut and paste the
                    challenge to a local window.  It's not as
                    pretty as the default but some people find it
-                   more convenient.  This flag is off by default.
+                   more convenient.  This flag is _o_f_f by default.
 
        ignore_dot  If set, ssssuuuuddddoooo will ignore '.' or '' (current
-                   dir) in `$PATH'; the `$PATH' itself is not
-                   modified.  This flag is off by default.
+                   dir) in the `PATH' environment variable; the
+                   `PATH' itself is not modified.  This flag is
+                   _o_f_f by default.
 
        mail_always Send mail to the _m_a_i_l_t_o user every time a
-                   users runs ssssuuuuddddoooo.  This flag is off by default.
+                   users runs ssssuuuuddddoooo.  This flag is _o_f_f by default.
 
        mail_no_user
                    If set, mail will be sent to the _m_a_i_l_t_o user
                    if the invoking user is not in the _s_u_d_o_e_r_s
-                   file.  This flag is on by default.
+                   file.  This flag is _o_n by default.
 
        mail_no_host
                    If set, mail will be sent to the _m_a_i_l_t_o user
                    if the invoking user exists in the _s_u_d_o_e_r_s
                    file, but is not allowed to run commands on
-                   the current host.  This flag is off by
 
 
 
-April 22, 2000                1.6.3                             4
+August 13, 2000               1.6.4                             4
 
 
 
@@ -268,13 +268,14 @@ April 22, 2000                1.6.3                             4
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
+                   the current host.  This flag is _o_f_f by
                    default.
 
        mail_no_perms
                    If set, mail will be sent to the _m_a_i_l_t_o user
                    if the invoking user allowed to use ssssuuuuddddoooo but
                    the command they are trying is not listed in
-                   their _s_u_d_o_e_r_s file entry.  This flag is off by
+                   their _s_u_d_o_e_r_s file entry.  This flag is _o_f_f by
                    default.
 
        tty_tickets If set, users must authenticate on a per-tty
@@ -283,32 +284,32 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    ning it.  With this flag enabled, ssssuuuuddddoooo will
                    use a file named for the tty the user is
                    logged in on in that directory.  This flag is
-                   off by default.
+                   _o_f_f by default.
 
        lecture     If set, a user will receive a short lecture
                    the first time he/she runs ssssuuuuddddoooo.  This flag is
-                   on by default.
+                   _o_n by default.
 
        authenticate
                    If set, users must authenticate themselves via
                    a password (or other means of authentication)
                    before they may run commands.  This default
                    may be overridden via the `PASSWD' and
-                   `NOPASSWD' tags.  This flag is on by default.
+                   `NOPASSWD' tags.  This flag is _o_n by default.
 
        root_sudo   If set, root is allowed to run ssssuuuuddddoooo too.  Dis­
                    abling this prevents users from "chaining"
                    ssssuuuuddddoooo commands to get a root shell by doing
                    something like `"sudo sudo /bin/sh"'.  This
-                   flag is on by default.
+                   flag is _o_n by default.
 
        log_host    If set, the hostname will be logged in the
-                   (non-syslog) ssssuuuuddddoooo log file.  This flag is off
+                   (non-syslog) ssssuuuuddddoooo log file.  This flag is _o_f_f
                    by default.
 
        log_year    If set, the four-digit year will be logged in
                    the (non-syslog) ssssuuuuddddoooo log file.  This flag is
-                   off by default.
+                   _o_f_f by default.
 
        shell_noargs
                    If set and ssssuuuuddddoooo is invoked with no arguments
@@ -317,15 +318,14 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    determined by the `SHELL' environment variable
                    if it is set, falling back on the shell listed
                    in the invoking user's /etc/passwd entry if
-                   not).  This flag is off by default.
+                   not).  This flag is _o_f_f by default.
 
        set_home    If set and ssssuuuuddddoooo is invoked with the ----ssss flag
                    the `HOME' environment variable will be set to
-                   the home directory of the target user (which
 
 
 
-April 22, 2000                1.6.3                             5
+August 13, 2000               1.6.4                             5
 
 
 
@@ -334,20 +334,22 @@ April 22, 2000                1.6.3                             5
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
+                   the home directory of the target user (which
                    is root unless the ----uuuu option is used).  This
                    effectively makes the ----ssss flag imply ----HHHH.  This
-                   flag is off by default.
+                   flag is _o_f_f by default.
 
        path_info   Normally, ssssuuuuddddoooo will tell the user when a com­
-                   mand could not be found in their `$PATH'.
-                   Some sites may wish to disable this as it
-                   could be used to gather information on the
-                   location of executables that the normal user
-                   does not have access to.  The disadvantage is
-                   that if the executable is simply not in the
-                   user's `$PATH', ssssuuuuddddoooo will tell the user that
-                   they are not allowed to run it, which can be
-                   confusing.  This flag is off by default.
+                   mand could not be found in their `PATH' envi­
+                   ronment variable.  Some sites may wish to dis­
+                   able this as it could be used to gather infor­
+                   mation on the location of executables that the
+                   normal user does not have access to.  The dis­
+                   advantage is that if the executable is simply
+                   not in the user's `PATH', ssssuuuuddddoooo will tell the
+                   user that they are not allowed to run it,
+                   which can be confusing.  This flag is off by
+                   default.
 
        fqdn        Set this flag if you want to put fully quali­
                    fied hostnames in the _s_u_d_o_e_r_s file.  Ie:
@@ -365,11 +367,11 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    get all aliases from DNS.  If your machine's
                    hostname (as returned by the `hostname' com­
                    mand) is already fully qualified you shouldn't
-                   need to set _f_q_f_n.  This flag is off by
+                   need to set _f_q_f_n.  This flag is _o_f_f by
                    default.
 
        insults     If set, ssssuuuuddddoooo will insult users when they enter
-                   an incorrect password.  This flag is off by
+                   an incorrect password.  This flag is _o_f_f by
                    default.
 
        requiretty  If set, ssssuuuuddddoooo will only run when the user is
@@ -379,19 +381,17 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    not possible to turn of echo when there is no
                    tty present, some sites may with to set this
                    flag to prevent a user from entering a visible
-                   password.  This flag is off by default.
+                   password.  This flag is _o_f_f by default.
 
        env_editor  If set, vvvviiiissssuuuuddddoooo will use the value of the EDI­
                    TOR or VISUAL environment variables before
                    falling back on the default editor list.  Note
                    that this may create a security hole as it
                    allows the user to run any arbitrary command
-                   as root without logging.  A safer alternative
-                   is to place a colon-separated list of editors
 
 
 
-April 22, 2000                1.6.3                             6
+August 13, 2000               1.6.4                             6
 
 
 
@@ -400,25 +400,27 @@ April 22, 2000                1.6.3                             6
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
+                   as root without logging.  A safer alternative
+                   is to place a colon-separated list of editors
                    in the `editor' variable.  vvvviiiissssuuuuddddoooo will then
                    only use the EDITOR or VISUAL if they match a
-                   value specified in `editor'.  This flag is off
-                   by default.
+                   value specified in `editor'.  This flag is
+                   `off' by default.
 
        rootpw      If set, ssssuuuuddddoooo will prompt for the root password
                    instead of the password of the invoking user.
-                   This flag is off by default.
+                   This flag is _o_f_f by default.
 
        runaspw     If set, ssssuuuuddddoooo will prompt for the password of
                    the user defined by the _r_u_n_a_s___d_e_f_a_u_l_t option
-                   (defaults to root) instead of the password of
-                   the invoking user.  This flag is off by
+                   (defaults to `root') instead of the password
+                   of the invoking user.  This flag is _o_f_f by
                    default.
 
        targetpw    If set, ssssuuuuddddoooo will prompt for the password of
                    the user specified by the ----uuuu flag (defaults to
-                   root) instead of the password of the invoking
-                   user.  This flag is off by default.
+                   `root') instead of the password of the invok­
+                   ing user.  This flag is _o_f_f by default.
 
        set_logname Normally, ssssuuuuddddoooo will set the `LOGNAME' and
                    `USER' environment variables to the name of
@@ -435,14 +437,14 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    for the target user's login class if one
                    exists.  Only available if ssssuuuuddddoooo is configured
                    with the --with-logincap option.  This flag is
-                   off by default.
+                   _o_f_f by default.
 
        IIIInnnntttteeeeggggeeeerrrrssss:
 
        passwd_tries
                    The number of tries a user gets to enter
                    his/her password before ssssuuuuddddoooo logs the failure
-                   and exits.  The default is 3.
+                   and exits.  The default is `3'.
 
        IIIInnnntttteeeeggggeeeerrrrssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
 
@@ -450,14 +452,12 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    log.  This value is used to decide when to
                    wrap lines for nicer log files.  This has no
                    effect on the syslog log file, only the file
-                   log.  The default is 80 (use 0 or negate to
-                   disable word wrap).
+                   log.  The default is `80' (use 0 or negate the
+                   option to disable word wrap).
 
 
 
-
-
-April 22, 2000                1.6.3                             7
+August 13, 2000               1.6.4                             7
 
 
 
@@ -469,29 +469,29 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        timestamp_timeout
                    Number of minutes that can elapse before ssssuuuuddddoooo
                    will ask for a passwd again.  The default is
-                   5, set this to 0 to always prompt for a pass­
-                   word.
+                   `5', set this to `0' to always prompt for a
+                   password.
 
        passwd_timeout
                    Number of minutes before the ssssuuuuddddoooo password
-                   prompt times out.  The default is 5, set this
-                   to 0 for no password timeout.
+                   prompt times out.  The default is `5', set
+                   this to `0' for no password timeout.
 
        umask       Umask to use when running the root command.
                    Set this to 0777 to not override the user's
-                   umask.  The default is 0022.
+                   umask.  The default is `0022'.
 
        SSSSttttrrrriiiinnnnggggssss:
 
        mailsub     Subject of the mail sent to the _m_a_i_l_t_o user.
                    The escape `%h' will expand to the hostname of
-                   the machine.  Default is "*** SECURITY infor­
-                   mation for %h ***".
+                   the machine.  Default is `*** SECURITY infor­
+                   mation for %h ***'.
 
        badpass_message
                    Message that is displayed if a user enters an
-                   incorrect password.  The default is "Sorry,
-                   try again." unless insults are enabled.
+                   incorrect password.  The default is `Sorry,
+                   try again.' unless insults are enabled.
 
        timestampdir
                    The directory in which ssssuuuuddddoooo stores its times­
@@ -502,28 +502,28 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    or the `SUDO_PROMPT' environment variable.
                    Supports two escapes: "%u" expands to the
                    user's login name and "%h" expands to the
-                   local hostname.  The default value is "Pass­
-                   word:".
+                   local hostname.  The default value is `Pass­
+                   word:'.
 
        runas_default
                    The default user to run commands as if the ----uuuu
                    flag is not specified on the command line.
-                   This defaults to "root".
+                   This defaults to `root'.
 
        syslog_goodpri
                    Syslog priority to use when user authenticates
-                   successfully.  Defaults to "notice".
+                   successfully.  Defaults to `notice'.
 
        syslog_badpri
                    Syslog priority to use when user authenticates
-                   unsuccessfully.  Defaults to "alert".
+                   unsuccessfully.  Defaults to `alert'.
 
        editor      A colon (':') separated list of editors
                    allowed to be used with vvvviiiissssuuuuddddoooo.  vvvviiiissssuuuuddddoooo will
 
 
 
-April 22, 2000                1.6.3                             8
+August 13, 2000               1.6.4                             8
 
 
 
@@ -546,7 +546,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
        syslog      Syslog facility if syslog is being used for
                    logging (negate to disable syslog logging).
-                   Defaults to "local2".
+                   Defaults to `local2'.
 
        mailerpath  Path to mail program used to send warning
                    mail.  Defaults to the path to sendmail found
@@ -556,7 +556,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    ----tttt.
 
        mailto      Address to send warning and erorr mail to.
-                   Defaults to "root".
+                   Defaults to `root'.
 
        exempt_group
                    Users in this group are exempt from password
@@ -589,7 +589,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April 22, 2000                1.6.3                             9
+August 13, 2000               1.6.4                             9
 
 
 
@@ -655,7 +655,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April 22, 2000                1.6.3                            10
+August 13, 2000               1.6.4                            10
 
 
 
@@ -712,8 +712,8 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
        By default, if the `NOPASSWD' tag is applied to any of the
        entries for a user on the current host, he or she will be
-       able to run `sudo \-l' without a password.  Additionally,
-       a user may only run `sudo \-v' without a password if the
+       able to run `sudo -l' without a password.  Additionally, a
+       user may only run `sudo -v' without a password if the
        `NOPASSWD' tag is present for all a user's entries that
        pertain to the current host.  This behavior may be over­
        ridden via the verifypw and listpw options.
@@ -721,7 +721,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April 22, 2000                1.6.3                            11
+August 13, 2000               1.6.4                            11
 
 
 
@@ -787,7 +787,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April 22, 2000                1.6.3                            12
+August 13, 2000               1.6.4                            12
 
 
 
@@ -853,7 +853,7 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
 
 
-April 22, 2000                1.6.3                            13
+August 13, 2000               1.6.4                            13
 
 
 
@@ -919,7 +919,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April 22, 2000                1.6.3                            14
+August 13, 2000               1.6.4                            14
 
 
 
@@ -985,7 +985,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-April 22, 2000                1.6.3                            15
+August 13, 2000               1.6.4                            15
 
 
 
@@ -1051,7 +1051,7 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 
 
 
-April 22, 2000                1.6.3                            16
+August 13, 2000               1.6.4                            16
 
 
 
@@ -1067,7 +1067,7 @@ FFFFIIIILLLLEEEESSSS
 
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
-       _s_u_d_o(1m), _v_i_s_u_d_o(8), _s_u(1), _f_n_m_a_t_c_h(3).
+       _r_s_h(1), _s_u_d_o(1m), _v_i_s_u_d_o(8), _s_u(1), _f_n_m_a_t_c_h(3).
 
 
 
@@ -1117,6 +1117,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-April 22, 2000                1.6.3                            17
+August 13, 2000               1.6.4                            17
 
 

@@ -139,15 +139,15 @@ AC_DEFUN(SUDO_TIMEDIR, [AC_MSG_CHECKING(for timestamp file location)
 if test -n "$with_timedir"; then
     AC_MSG_RESULT($with_timedir)
     AC_DEFINE_UNQUOTED(_PATH_SUDO_TIMEDIR, "$with_timedir")
-    TIMEDIR="$with_timedir"
+    timedir="$with_timedir"
 elif test -d "/var/run"; then
     AC_MSG_RESULT(/var/run/sudo)
     AC_DEFINE(_PATH_SUDO_TIMEDIR, "/var/run/sudo")
-    TIMEDIR="/var/run/sudo"
+    timedir="/var/run/sudo"
 else
     AC_MSG_RESULT(/tmp/.odus)
     AC_DEFINE(_PATH_SUDO_TIMEDIR, "/tmp/.odus")
-    TIMEDIR="/tmp/.odus"
+    timedir="/tmp/.odus"
 fi
 ])dnl
 

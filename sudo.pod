@@ -42,39 +42,41 @@ sudo - execute a command as another user
 =head1 SYNOPSIS
 
 B<sudo> B<-V> | B<-h> | B<-l> | B<-L> | B<-v> | B<-k> | B<-K> | B<-s> |
-[ B<-H> ] [B<-S> ] [ B<-b> ] | [ B<-p> prompt ] [ B<-c> class|- ]
-[ B<-u> username/#uid ] I<command>
+[ B<-H> ] [B<-S> ] [ B<-b> ] | [ B<-p> I<prompt> ] [ B<-c> I<class>|I<-> ]
+[ B<-u> I<username>|I<#uid> ] I<command>
 
 =head1 DESCRIPTION
 
 B<sudo> allows a permitted user to execute a I<command> as the
-superuser or another user, as specified in the sudoers file.  The
-real and effective uid and gid are set to match those of the target
-user as specified in the passwd file (the group vector is also
-initialized when the target user is not root).  By default, B<sudo>
-requires that users authenticate themselves with a password
-(NOTE: this is the user's password, not the root password).  Once
-a user has been authenticated, a timestamp is updated and the
-user may then use sudo without a password for a short period of time
-(five minutes by default).
+superuser or another user, as specified in the I<sudoers> file.
+The real and effective uid and gid are set to match those of the
+target user as specified in the passwd file (the group vector is
+also initialized when the target user is not root).  By default,
+B<sudo> requires that users authenticate themselves with a password
+(NOTE: by default this is the user's password, not the root password).
+Once a user has been authenticated, a timestamp is updated and the
+user may then use sudo without a password for a short period of
+time (C<@timeout@> minutes unless overridden in I<sudoers>).
 
-B<sudo> determines who is an authorized user by consulting the
-file F<@sysconfdir@/sudoers>.  By giving B<sudo> the B<-v> flag a user
-can update the time stamp without running a I<command.>
-The password prompt itself will also time out if the user's password is
-not entered with N minutes (again, this is defined at configure
-time and defaults to 5 minutes).
+B<sudo> determines who is an authorized user by consulting the file
+F<@sysconfdir@/sudoers>.  By giving B<sudo> the B<-v> flag a user
+can update the time stamp without running a I<command.> The password
+prompt itself will also time out if the user's password is not
+entered within C<@password_timeout@> minutes (unless overridden via
+I<sudoers>).
 
-If a user that is not listed in the I<sudoers> file tries to run
-a command via B<sudo>, mail is sent to the proper authorities,
-as defined at configure time (defaults to root).  Note that the
-mail will not be sent if an unauthorized user tries to run sudo
-with the B<-l> or B<-v> flags.  This allows users to determine
-for themselves whether or not they are allowed to use B<sudo>.
+If a user who is not listed in the I<sudoers> file tries to run a
+command via B<sudo>, mail is sent to the proper authorities, as
+defined at configure time or the I<sudoers> file (defaults to root).
+Note that the mail will not be sent if an unauthorized user tries
+to run sudo with the B<-l> or B<-v> flags.  This allows users to
+determine for themselves whether or not they are allowed to use
+B<sudo>.
 
 B<sudo> can log both successful an unsuccessful attempts (as well
 as errors) to syslog(3), a log file, or both.  By default B<sudo>
-will log via syslog(3) but this is changeable at configure time.
+will log via syslog(3) but this is changeable at configure time
+or via the I<sudoers> file.
 
 =head1 OPTIONS
 
@@ -106,9 +108,9 @@ The B<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
 
 If given the B<-v> (I<validate>) option, B<sudo> will update the
 user's timestamp, prompting for the user's password if necessary.
-This extends the B<sudo> timeout to for another N minutes
-(where N is defined at installation time and defaults to 5
-minutes) but does not run a command.
+This extends the B<sudo> timeout to for another C<@timeout@> minutes
+(or whatever the timeout is set to in I<sudoers>) but does not run
+a command.
 
 =item -k
 
@@ -121,13 +123,13 @@ file.
 =item -K
 
 The B<-K> (sure I<kill>) option to B<sudo> removes the user's timestamp
-entirely.  This option does not require a password.
+entirely.  Likewise, this option does not require a password.
 
 =item -b
 
 The B<-b> (I<background>) option tells B<sudo> to run the given
 command in the background.  Note that if you use the B<-b>
-option you cannot use shell job control to manipulate the command.
+option you cannot use shell job control to manipulate the process.
 
 =item -p
 
@@ -142,9 +144,9 @@ hostname.
 The B<-c> (I<class>) option causes B<sudo> to run the specified command
 with resources limited by the specified login class.  The I<class>
 argument can be either a class name as defined in /etc/login.conf,
-or a single '-' character.  Specifying the I<class> as '-' means
+or a single '-' character.  Specifying a I<class> of C<-> indicates
 that the command should be run restricted by the default login
-capibilities of the user the command is run as.  If the I<class>
+capibilities for the user the command is run as.  If the I<class>
 argument specifies an existing user class, the command must be run
 as root, or the B<sudo> command must be run from a shell that is already
 root.  This option is only available on systems with BSD login classes
@@ -154,7 +156,7 @@ where B<sudo> has been configured with the --with-logincap option.
 
 The B<-u> (I<user>) option causes B<sudo> to run the specified command
 as a user other than I<root>.  To specify a I<uid> instead of a
-I<username>, use "#uid".
+I<username>, use I<#uid>.
 
 =item -s
 
@@ -164,9 +166,9 @@ in passwd(5).
 
 =item -H
 
-The B<-H> (I<HOME>) option sets the I<HOME> environment variable
+The B<-H> (I<HOME>) option sets the C<HOME> environment variable
 to the homedir of the target user (root by default) as specified
-in passwd(5).  By default, B<sudo> does not modify I<HOME>.
+in passwd(5).  By default, B<sudo> does not modify C<HOME>.
 
 =item -S
 
@@ -221,7 +223,7 @@ not disable user-defined library search paths for setuid programs
 behavior or link B<sudo> statically.
 
 B<sudo> will check the ownership of its timestamp directory
-(F<@TIMEDIR@> by default) and ignore the directory's contents if
+(F<@timedir@> by default) and ignore the directory's contents if
 it is not owned by root and only writable by root.  On systems that
 allow non-root users to give away files via chown(2), if the timestamp
 directory is located in a directory writable by anyone (eg: F</tmp>),
@@ -233,7 +235,7 @@ This is unlikely to happen since once the timestamp dir is owned
 by root and inaccessible by any other user the user placing files
 there would be unable to get them back out.  To get around this
 issue you can use a directory that is not world-writable for the
-timestamps (F</var/adm/sudo> for instance) or create F<@TIMEDIR@>
+timestamps (F</var/adm/sudo> for instance) or create F<@timedir@>
 with the appropriate owner (root) and permissions (0700) in the
 system startup files.
 
@@ -291,7 +293,7 @@ B<sudo> utilizes the following environment variables:
 =head1 FILES
 
  @sysconfdir@/sudoers		List of who can run what
- @TIMEDIR@		Directory containing timestamps
+ @timedir@		Directory containing timestamps
 
 =head1 AUTHORS
 
@@ -332,4 +334,4 @@ are generally safe).
 
 =head1 SEE ALSO
 
-login_cap(3), sudoers(5), visudo(8), su(1).
+stat(2), login_cap(3), sudoers(5), passwd(5), visudo(8), grep(1), su(1).
