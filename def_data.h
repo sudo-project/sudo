@@ -49,9 +49,10 @@
 #define I_RUNAS_DEFAULT         48
 #define I_SECURE_PATH           49
 #define I_EDITOR                50
-#define I_ENV_DELETE            51
-#define I_ENV_KEEP              52
-#define I_LISTPW_I              53
-#define I_VERIFYPW_I            54
-#define I_LISTPW                55
-#define I_VERIFYPW              56
+#define I_ENV_CHECK             51
+#define I_ENV_DELETE            52
+#define I_ENV_KEEP              53
+#define I_LISTPW_I              54
+#define I_VERIFYPW_I            55
+#define I_LISTPW                56
+#define I_VERIFYPW              57

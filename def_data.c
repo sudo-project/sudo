@@ -1,13 +1,13 @@
 struct sudo_defs_types sudo_defs_table[] = {
     {
-	"syslog_ifac", NULL,
-	"NULL"
+	"syslog_ifac", T_UINT,
+	NULL
     }, {
-	"syslog_igoodpri", NULL,
-	"NULL"
+	"syslog_igoodpri", T_UINT,
+	NULL
     }, {
-	"syslog_ibadpri", NULL,
-	"NULL"
+	"syslog_ibadpri", T_UINT,
+	NULL
     }, {
 	"syslog", T_LOGFAC|T_BOOL,
 	"Syslog facility if syslog is being used for logging: %s"
@@ -153,17 +153,20 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"editor", T_STR|T_PATH,
 	"Path to the editor for use by visudo: %s"
     }, {
-	"env_delete", T_STR|T_BOOL,
-	"Environment variables to remove: %s"
+	"env_check", T_LIST|T_BOOL,
+	"Environment variables to check for sanity:"
     }, {
-	"env_keep", T_STR|T_BOOL,
-	"Environment variables to preserve: %s"
+	"env_delete", T_LIST|T_BOOL,
+	"Environment variables to remove:"
     }, {
-	"listpw_i", NULL,
-	"NULL"
+	"env_keep", T_LIST|T_BOOL,
+	"Environment variables to preserve:"
     }, {
-	"verifypw_i", NULL,
-	"NULL"
+	"listpw_i", T_UINT,
+	NULL
+    }, {
+	"verifypw_i", T_UINT,
+	NULL
     }, {
 	"listpw", T_PWFLAG,
 	"When to require a password for 'list' pseudocommand: %s"

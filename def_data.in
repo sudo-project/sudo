@@ -159,12 +159,15 @@ secure_path
 editor
 	T_STR|T_PATH
 	"Path to the editor for use by visudo: %s"
+env_check
+	T_LIST|T_BOOL
+	"Environment variables to check for sanity:"
 env_delete
-	T_STR|T_BOOL
-	"Environment variables to remove: %s"
+	T_LIST|T_BOOL
+	"Environment variables to remove:"
 env_keep
-	T_STR|T_BOOL
-	"Environment variables to preserve: %s"
+	T_LIST|T_BOOL
+	"Environment variables to preserve:"
 listpw_i
 	T_UINT
 	NULL
