@@ -170,6 +170,7 @@ date.
 
  PATH			Set to a sane value if SECURE_PATH is set
  SHELL			Used to determine shell to run with -s option
+ HOME			In -s mode, set to homedir of root (or runas user)
  SUDO_COMMAND		Set to the command run by sudo
  SUDO_USER		Set to the login of the user who invoked sudo
  SUDO_UID		Set to the uid of the user who invoked sudo
