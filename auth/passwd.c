@@ -75,7 +75,7 @@ passwd_init(pw, promptp, auth)
 {
 #ifdef HAVE_SKEYACCESS
     if (skeyaccess(pw, user_tty, NULL, NULL) == 0)
-	return(AUTH_FATAL);
+	return(AUTH_FAILURE);
 #endif
     return(AUTH_SUCCESS);
 }
