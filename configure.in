@@ -708,7 +708,6 @@ VISUDO_LIBS="${VISUDO_LIBS} -lsun"]
 )
 fi
 AC_CHECK_LIB(inet, main, SUDO_LIBS="${SUDO_LIBS} -linet")
-AC_CHECK_LIB(gnumalloc, main, SUDO_LIBS="${SUDO_LIBS} -lgnumalloc"; VISUDO_LIBS="${VISUDO_LIBS} -lgnumalloc")
 dnl
 dnl Find kerberos includes and libs or complain
 dnl
