@@ -81,15 +81,14 @@ linear_base(key, base, nelp, width, compar, add_flag)
 	int (*compar) __P((const VOID *, const VOID *));
 	int add_flag;
 {
-	VOID *element, *end;
+	/* strict ANSI does not allow pointer arithmetic on void *'s */
+	char *element, *end;
 
-	end = base + *nelp * width;
-	for (element = base; element < end; element += width)
-		if (!compar(element, key))		/* key found */
-			return(element);
-
-	if (!add_flag)					/* key not found */
-		return(NULL);
+	end = (char *) base + *nelp * width;
+	for (element = (char *) base; element < end; element += width)
+		if (!compar((VOID *) element, key))	/* key found */
+			return((VOID *) element);
+	if (!add_flag)					/* key not found */ return(NULL);
 
 	/*
 	 * The UNIX System User's Manual, 1986 edition claims that
@@ -102,5 +101,5 @@ linear_base(key, base, nelp, width, compar, add_flag)
 	 */
 	++*nelp;
 	(void) memcpy(end, key, width);
-	return(end);
+	return((VOID *) end);
 }
