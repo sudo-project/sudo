@@ -51,16 +51,16 @@ and exit.
 
 =head1 FILES
 
-F</etc/sudoers>S<			file of authorized users.>
-F</etc/stmp>S<				lock file for B<visudo>.>
+ /etc/sudoers		file of authorized users.
+ /etc/stmp		lock file for visudo.
 
 =head1 ENVIRONMENT VARIABLES
 
 The following are used only if B<visudo> was compiled with the
 I<ENV_EDITOR> option:
 
-C<EDITOR>S<				Used by B<visudo> as the editor to use.>
-C<VISUAL>S<				Used by B<visudo> if C<EDITOR> is not set.>
+ EDITOR			Used by visudo as the editor to use.
+ VISUAL			Used by visudo if EDITOR is not set.
 
 =head1 AUTHOR
 
