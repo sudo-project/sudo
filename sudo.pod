@@ -45,10 +45,11 @@ sudo - execute a command as another user
 
 =head1 SYNOPSIS
 
-B<sudo> B<-V> | B<-h> | B<-l> | B<-L> | B<-v> | B<-k> | B<-K> | B<-s> |
-[ B<-H> ] [B<-P> ] [B<-S> ] [ B<-b> ] | [ B<-p> I<prompt> ]
-[ B<-c> I<class>|I<-> ] [ B<-a> I<auth_type> ]
-[ B<-u> I<username>|I<#uid> ] I<command>
+B<sudo> B<-K> | B<-L> | B<-V> | B<-h> | B<-k> | B<-l> | B<-v>
+
+B<sudo> [B<-HPSb>] S<[B<-a> I<auth_type>]> S<[B<-c> I<class>|I<->]>
+s<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
+S<{B<-i> | B<-s> | I<command>}>
 
 =head1 DESCRIPTION
 
@@ -89,17 +90,16 @@ B<sudo> accepts the following command line options:
 
 =over 4
 
-=item -V
+=item -H
 
-The B<-V> (I<version>) option causes B<sudo> to print the
-version number and exit.  If the invoking user is already root
-the B<-V> option will print out a list of the defaults B<sudo>
-was compiled with as well as the machine's local network addresses.
+The B<-H> (I<HOME>) option sets the C<HOME> environment variable
+to the homedir of the target user (root by default) as specified
+in passwd(5).  By default, B<sudo> does not modify C<HOME>.
 
-=item -l
+=item -K
 
-The B<-l> (I<list>) option will list out the allowed (and
-forbidden) commands for the user on the current host.
+The B<-K> (sure I<kill>) option to B<sudo> removes the user's timestamp
+entirely.  Likewise, this option does not require a password.
 
 =item -L
 
@@ -107,17 +107,73 @@ The B<-L> (I<list> defaults) option will list out the parameters
 that may be set in a I<Defaults> line along with a short description
 for each.  This option is useful in conjunction with grep(1).
 
+=item -P
+
+The B<-P> (I<preserve group vector>) option causes B<sudo> to preserve
+the user's group vector unaltered.  By default, B<sudo> will initialize
+the group vector to the list of groups the target user is in.
+The real and effective group IDs, however, are still set to match
+the target user.
+
+=item -S
+
+The B<-S> (I<stdin>) option causes B<sudo> to read the password from
+standard input instead of the terminal device.
+
+=item -V
+
+The B<-V> (I<version>) option causes B<sudo> to print the
+version number and exit.  If the invoking user is already root
+the B<-V> option will print out a list of the defaults B<sudo>
+was compiled with as well as the machine's local network addresses.
+
+=item -a
+
+The B<-a> (I<authentication type>) option causes B<sudo> to use the
+specified authentication type when validating the user, as allowed
+by /etc/login.conf.  The system administrator may specify a list
+of sudo-specific authentication methods by adding an "auth-sudo"
+entry in /etc/login.conf.  This option is only available on systems
+that support BSD authentication where B<sudo> has been configured
+with the --with-bsdauth option.
+
+=item -b
+
+The B<-b> (I<background>) option tells B<sudo> to run the given
+command in the background.  Note that if you use the B<-b>
+option you cannot use shell job control to manipulate the process.
+
+=item -c
+
+The B<-c> (I<class>) option causes B<sudo> to run the specified command
+with resources limited by the specified login class.  The I<class>
+argument can be either a class name as defined in /etc/login.conf,
+or a single '-' character.  Specifying a I<class> of C<-> indicates
+that the command should be run restricted by the default login
+capabilities for the user the command is run as.  If the I<class>
+argument specifies an existing user class, the command must be run
+as root, or the B<sudo> command must be run from a shell that is already
+root.  This option is only available on systems with BSD login classes
+where B<sudo> has been configured with the --with-logincap option.
+
 =item -h
 
 The B<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
 
-=item -v
+=item -i
 
-If given the B<-v> (I<validate>) option, B<sudo> will update the
-user's timestamp, prompting for the user's password if necessary.
-This extends the B<sudo> timeout for another C<@timeout@> minutes
-(or whatever the timeout is set to in I<sudoers>) but does not run
-a command.
+The C<-i> (I<simulate initial login>) option runs the shell specified
+in the passwd(@mansectform@) entry of the user that the command is
+being run as.  The command name argument given to the shell begins
+with a C<-> to tell the shell to run as a login shell.  B<sudo>
+attempts to change to that user's home directory before running the
+shell.  It also initializes the environment, leaving I<TERM>
+unchanged, setting I<HOME>, I<SHELL>, I<USER>, I<LOGNAME>, and
+I<PATH>, and unsetting all other environment variables.  Note that
+because the shell to use is determined before the I<sudoers> file
+is parsed, a I<runas_default> setting in I<sudoers> will specify
+the user to run the shell as but will not affect which shell is
+actually run.
 
 =item -k
 
@@ -127,16 +183,10 @@ run a password will be required.  This option does not require a password
 and was added to allow a user to revoke B<sudo> permissions from a .logout
 file.
 
-=item -K
+=item -l
 
-The B<-K> (sure I<kill>) option to B<sudo> removes the user's timestamp
-entirely.  Likewise, this option does not require a password.
-
-=item -b
-
-The B<-b> (I<background>) option tells B<sudo> to run the given
-command in the background.  Note that if you use the B<-b>
-option you cannot use shell job control to manipulate the process.
+The B<-l> (I<list>) option will list out the allowed (and
+forbidden) commands for the user on the current host.
 
 =item -p
 
@@ -171,28 +221,11 @@ two consecutive C<%> characters are collaped into a single C<%> character
 
 =back 8
 
-=item -c
+=item -s
 
-The B<-c> (I<class>) option causes B<sudo> to run the specified command
-with resources limited by the specified login class.  The I<class>
-argument can be either a class name as defined in /etc/login.conf,
-or a single '-' character.  Specifying a I<class> of C<-> indicates
-that the command should be run restricted by the default login
-capabilities for the user the command is run as.  If the I<class>
-argument specifies an existing user class, the command must be run
-as root, or the B<sudo> command must be run from a shell that is already
-root.  This option is only available on systems with BSD login classes
-where B<sudo> has been configured with the --with-logincap option.
-
-=item -a
-
-The B<-a> (I<authentication type>) option causes B<sudo> to use the
-specified authentication type when validating the user, as allowed
-by /etc/login.conf.  The system administrator may specify a list
-of sudo-specific authentication methods by adding an "auth-sudo"
-entry in /etc/login.conf.  This option is only available on systems
-that support BSD authentication where B<sudo> has been configured
-with the --with-bsdauth option.
+The B<-s> (I<shell>) option runs the shell specified by the I<SHELL>
+environment variable if it is set or the shell as specified
+in passwd(5).
 
 =item -u
 
@@ -200,30 +233,13 @@ The B<-u> (I<user>) option causes B<sudo> to run the specified command
 as a user other than I<root>.  To specify a I<uid> instead of a
 I<username>, use I<#uid>.
 
-=item -s
+=item -v
 
-The B<-s> (I<shell>) option runs the shell specified by the I<SHELL>
-environment variable if it is set or the shell as specified
-in passwd(5).
-
-=item -H
-
-The B<-H> (I<HOME>) option sets the C<HOME> environment variable
-to the homedir of the target user (root by default) as specified
-in passwd(5).  By default, B<sudo> does not modify C<HOME>.
-
-=item -P
-
-The B<-P> (I<preserve group vector>) option causes B<sudo> to preserve
-the user's group vector unaltered.  By default, B<sudo> will initialize
-the group vector to the list of groups the target user is in.
-The real and effective group IDs, however, are still set to match
-the target user.
-
-=item -S
-
-The B<-S> (I<stdin>) option causes B<sudo> to read the password from
-standard input instead of the terminal device.
+If given the B<-v> (I<validate>) option, B<sudo> will update the
+user's timestamp, prompting for the user's password if necessary.
+This extends the B<sudo> timeout for another C<@timeout@> minutes
+(or whatever the timeout is set to in I<sudoers>) but does not run
+a command.
 
 =item --
 

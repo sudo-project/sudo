@@ -167,15 +167,16 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "January  9, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "January 18, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo \- execute a command as another user
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBsudo\fR \fB\-V\fR | \fB\-h\fR | \fB\-l\fR | \fB\-L\fR | \fB\-v\fR | \fB\-k\fR | \fB\-K\fR | \fB\-s\fR |
-[ \fB\-H\fR ] [\fB\-P\fR ] [\fB\-S\fR ] [ \fB\-b\fR ] | [ \fB\-p\fR \fIprompt\fR ]
-[ \fB\-c\fR \fIclass\fR|\fI\-\fR ] [ \fB\-a\fR \fIauth_type\fR ]
-[ \fB\-u\fR \fIusername\fR|\fI#uid\fR ] \fIcommand\fR
+\&\fBsudo\fR \fB\-K\fR | \fB\-L\fR | \fB\-V\fR | \fB\-h\fR | \fB\-k\fR | \fB\-l\fR | \fB\-v\fR
+.PP
+\&\fBsudo\fR [\fB\-HPSb\fR] [\fB\-a\fR\ \fIauth_type\fR] [\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
+s<[\fB\-p\fR \fIprompt\fR]> [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
+{\fB\-i\fR\ |\ \fB\-s\fR\ |\ \fIcommand\fR}
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 \&\fBsudo\fR allows a permitted user to execute a \fIcommand\fR as the
@@ -211,31 +212,80 @@ or via the \fIsudoers\fR file.
 .SH "OPTIONS"
 .IX Header "OPTIONS"
 \&\fBsudo\fR accepts the following command line options:
+.IP "\-H" 4
+.IX Item "-H"
+The \fB\-H\fR (\fI\s-1HOME\s0\fR) option sets the \f(CW\*(C`HOME\*(C'\fR environment variable
+to the homedir of the target user (root by default) as specified
+in \fIpasswd\fR\|(@mansectform@).  By default, \fBsudo\fR does not modify \f(CW\*(C`HOME\*(C'\fR.
+.IP "\-K" 4
+.IX Item "-K"
+The \fB\-K\fR (sure \fIkill\fR) option to \fBsudo\fR removes the user's timestamp
+entirely.  Likewise, this option does not require a password.
+.IP "\-L" 4
+.IX Item "-L"
+The \fB\-L\fR (\fIlist\fR defaults) option will list out the parameters
+that may be set in a \fIDefaults\fR line along with a short description
+for each.  This option is useful in conjunction with \fIgrep\fR\|(1).
+.IP "\-P" 4
+.IX Item "-P"
+The \fB\-P\fR (\fIpreserve group vector\fR) option causes \fBsudo\fR to preserve
+the user's group vector unaltered.  By default, \fBsudo\fR will initialize
+the group vector to the list of groups the target user is in.
+The real and effective group IDs, however, are still set to match
+the target user.
+.IP "\-S" 4
+.IX Item "-S"
+The \fB\-S\fR (\fIstdin\fR) option causes \fBsudo\fR to read the password from
+standard input instead of the terminal device.
 .IP "\-V" 4
 .IX Item "-V"
 The \fB\-V\fR (\fIversion\fR) option causes \fBsudo\fR to print the
 version number and exit.  If the invoking user is already root
 the \fB\-V\fR option will print out a list of the defaults \fBsudo\fR
 was compiled with as well as the machine's local network addresses.
-.IP "\-l" 4
-.IX Item "-l"
-The \fB\-l\fR (\fIlist\fR) option will list out the allowed (and
-forbidden) commands for the user on the current host.
-.IP "\-L" 4
-.IX Item "-L"
-The \fB\-L\fR (\fIlist\fR defaults) option will list out the parameters
-that may be set in a \fIDefaults\fR line along with a short description
-for each.  This option is useful in conjunction with \fIgrep\fR\|(1).
+.IP "\-a" 4
+.IX Item "-a"
+The \fB\-a\fR (\fIauthentication type\fR) option causes \fBsudo\fR to use the
+specified authentication type when validating the user, as allowed
+by /etc/login.conf.  The system administrator may specify a list
+of sudo-specific authentication methods by adding an \*(L"auth\-sudo\*(R"
+entry in /etc/login.conf.  This option is only available on systems
+that support \s-1BSD\s0 authentication where \fBsudo\fR has been configured
+with the \-\-with\-bsdauth option.
+.IP "\-b" 4
+.IX Item "-b"
+The \fB\-b\fR (\fIbackground\fR) option tells \fBsudo\fR to run the given
+command in the background.  Note that if you use the \fB\-b\fR
+option you cannot use shell job control to manipulate the process.
+.IP "\-c" 4
+.IX Item "-c"
+The \fB\-c\fR (\fIclass\fR) option causes \fBsudo\fR to run the specified command
+with resources limited by the specified login class.  The \fIclass\fR
+argument can be either a class name as defined in /etc/login.conf,
+or a single '\-' character.  Specifying a \fIclass\fR of \f(CW\*(C`\-\*(C'\fR indicates
+that the command should be run restricted by the default login
+capabilities for the user the command is run as.  If the \fIclass\fR
+argument specifies an existing user class, the command must be run
+as root, or the \fBsudo\fR command must be run from a shell that is already
+root.  This option is only available on systems with \s-1BSD\s0 login classes
+where \fBsudo\fR has been configured with the \-\-with\-logincap option.
 .IP "\-h" 4
 .IX Item "-h"
 The \fB\-h\fR (\fIhelp\fR) option causes \fBsudo\fR to print a usage message and exit.
-.IP "\-v" 4
-.IX Item "-v"
-If given the \fB\-v\fR (\fIvalidate\fR) option, \fBsudo\fR will update the
-user's timestamp, prompting for the user's password if necessary.
-This extends the \fBsudo\fR timeout for another \f(CW\*(C`@timeout@\*(C'\fR minutes
-(or whatever the timeout is set to in \fIsudoers\fR) but does not run
-a command.
+.IP "\-i" 4
+.IX Item "-i"
+The \f(CW\*(C`\-i\*(C'\fR (\fIsimulate initial login\fR) option runs the shell specified
+in the passwd(@mansectform@) entry of the user that the command is
+being run as.  The command name argument given to the shell begins
+with a \f(CW\*(C`\-\*(C'\fR to tell the shell to run as a login shell.  \fBsudo\fR
+attempts to change to that user's home directory before running the
+shell.  It also initializes the environment, leaving \fI\s-1TERM\s0\fR
+unchanged, setting \fI\s-1HOME\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR, \fI\s-1LOGNAME\s0\fR, and
+\&\fI\s-1PATH\s0\fR, and unsetting all other environment variables.  Note that
+because the shell to use is determined before the \fIsudoers\fR file
+is parsed, a \fIrunas_default\fR setting in \fIsudoers\fR will specify
+the user to run the shell as but will not affect which shell is
+actually run.
 .IP "\-k" 4
 .IX Item "-k"
 The \fB\-k\fR (\fIkill\fR) option to \fBsudo\fR invalidates the user's timestamp
@@ -243,15 +293,10 @@ by setting the time on it to the epoch.  The next time \fBsudo\fR is
 run a password will be required.  This option does not require a password
 and was added to allow a user to revoke \fBsudo\fR permissions from a .logout
 file.
-.IP "\-K" 4
-.IX Item "-K"
-The \fB\-K\fR (sure \fIkill\fR) option to \fBsudo\fR removes the user's timestamp
-entirely.  Likewise, this option does not require a password.
-.IP "\-b" 4
-.IX Item "-b"
-The \fB\-b\fR (\fIbackground\fR) option tells \fBsudo\fR to run the given
-command in the background.  Note that if you use the \fB\-b\fR
-option you cannot use shell job control to manipulate the process.
+.IP "\-l" 4
+.IX Item "-l"
+The \fB\-l\fR (\fIlist\fR) option will list out the allowed (and
+forbidden) commands for the user on the current host.
 .IP "\-p" 4
 .IX Item "-p"
 The \fB\-p\fR (\fIprompt\fR) option allows you to override the default
@@ -284,53 +329,23 @@ two consecutive \f(CW\*(C`%\*(C'\fR characters are collaped into a single \f(CW\
 .RE
 .RS 4
 .RE
-.IP "\-c" 4
-.IX Item "-c"
-The \fB\-c\fR (\fIclass\fR) option causes \fBsudo\fR to run the specified command
-with resources limited by the specified login class.  The \fIclass\fR
-argument can be either a class name as defined in /etc/login.conf,
-or a single '\-' character.  Specifying a \fIclass\fR of \f(CW\*(C`\-\*(C'\fR indicates
-that the command should be run restricted by the default login
-capabilities for the user the command is run as.  If the \fIclass\fR
-argument specifies an existing user class, the command must be run
-as root, or the \fBsudo\fR command must be run from a shell that is already
-root.  This option is only available on systems with \s-1BSD\s0 login classes
-where \fBsudo\fR has been configured with the \-\-with\-logincap option.
-.IP "\-a" 4
-.IX Item "-a"
-The \fB\-a\fR (\fIauthentication type\fR) option causes \fBsudo\fR to use the
-specified authentication type when validating the user, as allowed
-by /etc/login.conf.  The system administrator may specify a list
-of sudo-specific authentication methods by adding an \*(L"auth\-sudo\*(R"
-entry in /etc/login.conf.  This option is only available on systems
-that support \s-1BSD\s0 authentication where \fBsudo\fR has been configured
-with the \-\-with\-bsdauth option.
-.IP "\-u" 4
-.IX Item "-u"
-The \fB\-u\fR (\fIuser\fR) option causes \fBsudo\fR to run the specified command
-as a user other than \fIroot\fR.  To specify a \fIuid\fR instead of a
-\&\fIusername\fR, use \fI#uid\fR.
 .IP "\-s" 4
 .IX Item "-s"
 The \fB\-s\fR (\fIshell\fR) option runs the shell specified by the \fI\s-1SHELL\s0\fR
 environment variable if it is set or the shell as specified
 in \fIpasswd\fR\|(@mansectform@).
-.IP "\-H" 4
-.IX Item "-H"
-The \fB\-H\fR (\fI\s-1HOME\s0\fR) option sets the \f(CW\*(C`HOME\*(C'\fR environment variable
-to the homedir of the target user (root by default) as specified
-in \fIpasswd\fR\|(@mansectform@).  By default, \fBsudo\fR does not modify \f(CW\*(C`HOME\*(C'\fR.
-.IP "\-P" 4
-.IX Item "-P"
-The \fB\-P\fR (\fIpreserve group vector\fR) option causes \fBsudo\fR to preserve
-the user's group vector unaltered.  By default, \fBsudo\fR will initialize
-the group vector to the list of groups the target user is in.
-The real and effective group IDs, however, are still set to match
-the target user.
-.IP "\-S" 4
-.IX Item "-S"
-The \fB\-S\fR (\fIstdin\fR) option causes \fBsudo\fR to read the password from
-standard input instead of the terminal device.
+.IP "\-u" 4
+.IX Item "-u"
+The \fB\-u\fR (\fIuser\fR) option causes \fBsudo\fR to run the specified command
+as a user other than \fIroot\fR.  To specify a \fIuid\fR instead of a
+\&\fIusername\fR, use \fI#uid\fR.
+.IP "\-v" 4
+.IX Item "-v"
+If given the \fB\-v\fR (\fIvalidate\fR) option, \fBsudo\fR will update the
+user's timestamp, prompting for the user's password if necessary.
+This extends the \fBsudo\fR timeout for another \f(CW\*(C`@timeout@\*(C'\fR minutes
+(or whatever the timeout is set to in \fIsudoers\fR) but does not run
+a command.
 .IP "\-\-" 4
 The \fB\-\-\fR flag indicates that \fBsudo\fR should stop processing command
 line arguments.  It is most useful in conjunction with the \fB\-s\fR flag.
