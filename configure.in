@@ -2123,7 +2123,7 @@ AH_BOTTOM([/*
 #endif
 
 /* GNU stow needs /etc/sudoers to be a symlink. */
-#ifdef HAVE_STOW
+#ifdef USE_STOW
 # define stat_sudoers	stat
 #else
 # define stat_sudoers	lstat
