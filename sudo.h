@@ -142,15 +142,15 @@ struct generic_alias {
 #define VALIDATE_ERROR          -1
 
 /*
- *  the arguments passed to log_error() are ANDed with GLOBAL_PROBLEM
+ *  The arguments passed to log_error() are ANDed with GLOBAL_PROBLEM
  *  If the result is TRUE, the argv is NOT logged with the error message
+ *  NOTE: 0x00 - 0x04 below must correspond to 0x00 - 0x04 above.
  */
-#define GLOBAL_PROBLEM           0x20
+#define GLOBAL_PROBLEM           0x100
 #define ALL_SYSTEMS_GO           0x00
 #define GLOBAL_NO_PW_ENT         ( 0x01 | GLOBAL_PROBLEM )
-#define GLOBAL_NO_SPW_ENT        ( 0x02 | GLOBAL_PROBLEM )
-#define GLOBAL_NO_HOSTNAME       ( 0x03 | GLOBAL_PROBLEM )
-#define GLOBAL_HOST_UNREGISTERED ( 0x04 | GLOBAL_PROBLEM )
+#define GLOBAL_NO_HOSTNAME       ( 0x02 | GLOBAL_PROBLEM )
+#define GLOBAL_HOST_UNREGISTERED ( 0x03 | GLOBAL_PROBLEM )
 #define PASSWORD_NOT_CORRECT     0x05
 #define PASSWORDS_NOT_CORRECT    0x06
 #define NO_SUDOERS_FILE          ( 0x07 | GLOBAL_PROBLEM )
@@ -158,12 +158,12 @@ struct generic_alias {
 #define SUDOERS_WRONG_OWNER      ( 0x09 | GLOBAL_PROBLEM )
 #define SUDOERS_WRONG_MODE       ( 0x0A | GLOBAL_PROBLEM )
 #define SUDOERS_NOT_FILE         ( 0x0B | GLOBAL_PROBLEM )
-#define SPOOF_ATTEMPT            0x0D
-#define BAD_STAMPDIR             0x0E
-#define BAD_STAMPFILE            0x0F
-#define BAD_ALLOCATION           0x10
+#define SPOOF_ATTEMPT            0x0C
+#define BAD_STAMPDIR             0x0D
+#define BAD_STAMPFILE            0x0E
+#define BAD_ALLOCATION           0x0F
 #ifdef HAVE_KERB5
-#define GLOBAL_KRB5_INIT_ERR     ( 0x11 | GLOBAL_PROBLEM )
+#define GLOBAL_KRB5_INIT_ERR     ( 0x10 | GLOBAL_PROBLEM )
 #endif /* HAVE_KERB5 */
 
 /*
