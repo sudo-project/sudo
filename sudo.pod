@@ -41,7 +41,7 @@ sudo - execute a command as another user
 
 =head1 SYNOPSIS
 
-B<sudo> B<-V> | B<-h> | B<-l> | B<-v> | B<-k> | B<-K> | B<-s> | B<-H> |
+B<sudo> B<-V> | B<-h> | B<-l> | B<-L> | B<-v> | B<-k> | B<-K> | B<-s> | B<-H> |
 [ B<-b> ] | [ B<-r> realm ] | [ B<-p> prompt ] [ B<-u> username/#uid] I<command>
 
 =head1 DESCRIPTION
@@ -85,6 +85,12 @@ version number and exit.
 
 The C<-l> (I<list>) option will list out the allowed (and
 forbidden) commands for the user on the current host.
+
+=item -L
+
+The C<-L> (I<list> defaults) option will list out the parameters
+that may be set in a I<Defaults> line along with a short description
+for each.  This option is useful in conjunction with grep(1).
 
 =item -h
 

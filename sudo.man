@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.36  1999/08/26 09:10:11  millert
-''' rename "ENVIRONMENT VARIABLES" section to "ENVIRONMENT" to be more standard and add "EXAMPLES" section
+''' Revision 1.37  1999/10/12 00:05:39  millert
+''' document -L flag
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH SUDO 8 "1.6" "25/Aug/1999" "MAINTENANCE COMMANDS"
+.TH SUDO 8 "1.6" "11/Oct/1999" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -193,7 +193,7 @@
 .SH "NAME"
 sudo \- execute a command as another user
 .SH "SYNOPSIS"
-\fBsudo\fR \fB\-V\fR | \fB\-h\fR | \fB\-l\fR | \fB\-v\fR | \fB\-k\fR | \fB\-K\fR | \fB\-s\fR | \fB\-H\fR |
+\fBsudo\fR \fB\-V\fR | \fB\-h\fR | \fB\-l\fR | \fB\-L\fR | \fB\-v\fR | \fB\-k\fR | \fB\-K\fR | \fB\-s\fR | \fB\-H\fR |
 [ \fB\-b\fR ] | [ \fB\-r\fR realm ] | [ \fB\-p\fR prompt ] [ \fB\-u\fR username/#uid] \fIcommand\fR
 .SH "DESCRIPTION"
 \fBsudo\fR allows a permitted user to execute a \fIcommand\fR as the
@@ -227,6 +227,10 @@ version number and exit.
 .Ip "-l" 4
 The \f(CW-l\fR (\fIlist\fR) option will list out the allowed (and
 forbidden) commands for the user on the current host.
+.Ip "-L" 4
+The \f(CW-L\fR (\fIlist\fR defaults) option will list out the parameters
+that may be set in a \fIDefaults\fR line along with a short description
+for each.  This option is useful in conjunction with \fIgrep\fR\|(1).
 .Ip "-h" 4
 The \f(CW-h\fR (\fIhelp\fR) option causes \fBsudo\fR to print a usage message and exit.
 .Ip "-v" 4
@@ -458,6 +462,8 @@ are generally safe).
 .IX Item "-V"
 
 .IX Item "-l"
+
+.IX Item "-L"
 
 .IX Item "-h"
 

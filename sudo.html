@@ -39,7 +39,7 @@ sudo - execute a command as another user
 <HR>
 <H1><A NAME="SYNOPSIS">SYNOPSIS</A></H1>
 <P>
-<STRONG>sudo</STRONG>  <STRONG>-V</STRONG> | <STRONG>-h</STRONG> | <STRONG>-l</STRONG> | <STRONG>-v</STRONG> | <STRONG>-k</STRONG> | <STRONG>-K</STRONG> | <STRONG>-s</STRONG> | <STRONG>-H</STRONG> | [ <STRONG>-b</STRONG> ] | [ <STRONG>-r</STRONG> realm ] | [ <STRONG>-p</STRONG> prompt ] [ <STRONG>-u</STRONG> username/#uid] <EM>command</EM>
+<STRONG>sudo</STRONG>  <STRONG>-V</STRONG> | <STRONG>-h</STRONG> | <STRONG>-l</STRONG> | <STRONG>-L</STRONG> | <STRONG>-v</STRONG> | <STRONG>-k</STRONG> | <STRONG>-K</STRONG> | <STRONG>-s</STRONG> | <STRONG>-H</STRONG> | [ <STRONG>-b</STRONG> ] | [ <STRONG>-r</STRONG> realm ] | [ <STRONG>-p</STRONG> prompt ] [ <STRONG>-u</STRONG> username/#uid] <EM>command</EM>
 
 
 
@@ -85,6 +85,11 @@ The <CODE>-V</CODE> (<EM>version</EM>) option causes <STRONG>sudo</STRONG> to pr
 <P>
 The <CODE>-l</CODE> (<EM>list</EM>) option will list out the allowed (and forbidden) commands for the user on
 the current host.
+
+<DT><STRONG><A NAME="item__L">-L</A></STRONG><DD>
+<P>
+The <CODE>-L</CODE> (<EM>list</EM> defaults) option will list out the parameters that may be set in a <EM>Defaults</EM> line along with a short description for each. This option is useful in
+conjunction with <CODE>grep(1).</CODE>
 
 <DT><STRONG><A NAME="item__h">-h</A></STRONG><DD>
 <P>
