@@ -219,7 +219,6 @@ main(argc, argv)
 	/* Parse sudoers to pull in editor and env_editor conf values. */
 	if ((yyin = fopen(stmp, "r"))) {
 	    yyout = stdout;
-	    init_defaults();
 	    init_parser();
 	    yyparse();
 	    parse_error = FALSE;
@@ -380,6 +379,7 @@ main(argc, argv)
 	    }
 
 	    /* Clean slate for each parse */
+	    user_runas = NULL;
 	    init_defaults();
 	    init_parser();
 
