@@ -172,7 +172,7 @@ static char * realpath_exec(path, file, command)
     char * file;
     char * command;
 {
-    char fn[MAXPATHLEN];		/* filename (path + file) */
+    char fn[MAXPATHLEN+1];		/* filename (path + file) */
     struct stat statbuf;		/* for stat(2) */
 
     (void) sprintf(fn, "%s/%s", path, file);
@@ -185,7 +185,7 @@ static char * realpath_exec(path, file, command)
 	    return(command);
     } else if (errno && errno != ENOENT && errno != ENOTDIR && errno != EINVAL
 	&& errno != EPERM && errno != EACCES) {
-	/* realpath() got an error */
+	/* sudo_realpath() got an error */
 	fprintf(stderr, "sudo: Error resolving %s: ", fn);
 	perror("");
     }
