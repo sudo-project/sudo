@@ -42,8 +42,6 @@
  * XXX - the way things are stored for printmatches is stupid,
  *       they should be stored as elements in an array and then
  *       list_matches() can format things the way it wants.
- *
- * XXX - '!' chars are not preserved when expanding Aliases
  */
 
 #include "config.h"
@@ -144,6 +142,19 @@ int top = 0, stacksize = 0;
     }
 
 /*
+ * Shortcuts for append()
+ */
+#define append_cmnd(s, p) append(s, &cm_list[cm_list_len].cmnd, \
+	&cm_list[cm_list_len].cmnd_len, &cm_list[cm_list_len].cmnd_size, p)
+
+#define append_runas(s, p) append(s, &cm_list[cm_list_len].runas, \
+	&cm_list[cm_list_len].runas_len, &cm_list[cm_list_len].runas_size, p)
+
+#define append_entries(s, p) append(s, &ga_list[ga_list_len-1].entries, \
+	&ga_list[ga_list_len-1].entries_len, \
+	&ga_list[ga_list_len-1].entries_size, p)
+
+/*
  * The stack for printmatches.  A list of allowed commands for the user.
  */
 static struct command_match *cm_list = NULL;
@@ -166,7 +177,7 @@ extern int  usergr_matches	__P((char *, char *));
 static int  find_alias		__P((char *, int));
 static int  add_alias		__P((char *, int));
 static int  more_aliases	__P((void));
-static void append		__P((char *, char **, size_t *, size_t *, int));
+static void append		__P((char *, char **, size_t *, size_t *, char *));
 static void expand_ga_list	__P((void));
 static void expand_match_list	__P((void));
        void init_parser		__P((void));
@@ -312,12 +323,6 @@ cmndspeclist	:	cmndspec
 		;
 
 cmndspec	:	runasspec nopasswd opcmnd {
-			    if (printmatches == TRUE &&
-				(runas_matches == -1 || cmnd_matches == -1)) {
-				cm_list[cm_list_len].runas_len = 0;
-				cm_list[cm_list_len].cmnd_len = 0;
-				cm_list[cm_list_len].nopasswd = FALSE;
-			    }
 			    /*
 			     * Push the entry onto the stack if it is worth
 			     * saving (or if nothing else is on the stack)
@@ -336,11 +341,12 @@ opcmnd		:	cmnd {
 				cmnd_matches = TRUE;
 			}
 		|	'!' {
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE) {
-				append("!", &cm_list[cm_list_len].cmnd,
-				       &cm_list[cm_list_len].cmnd_len,
-				       &cm_list[cm_list_len].cmnd_size, 0);
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries("!", ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_cmnd("!", NULL);
 			    }
 			} cmnd {
 			    if ($3 == TRUE)
@@ -349,6 +355,20 @@ opcmnd		:	cmnd {
 		;
 
 runasspec	:	/* empty */ {
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE) {
+				if (runas_matches == -1) {
+				    cm_list[cm_list_len].runas_len = 0;
+				} else {
+				    /* Inherit runas data. */
+				    cm_list[cm_list_len].runas =
+					estrdup(cm_list[cm_list_len-1].runas);
+				    cm_list[cm_list_len].runas_len =
+					cm_list[cm_list_len-1].runas_len;
+				    cm_list[cm_list_len].runas_size =
+					cm_list[cm_list_len-1].runas_size;
+				}
+			    }
 			    /*
 			     * If this is the first entry in a command list
 			     * then check against RUNAS_DEFAULT.
@@ -365,79 +385,66 @@ runaslist	:	oprunasuser
 		;
 
 oprunasuser	:	runasuser {
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE)
-				append("", &cm_list[cm_list_len].runas,
-				       &cm_list[cm_list_len].runas_len,
-				       &cm_list[cm_list_len].runas_size, ':');
 			    if ($1 == TRUE)
 				runas_matches = TRUE;
 			}
 		|	'!' {
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE)
-				append("!", &cm_list[cm_list_len].runas,
-				       &cm_list[cm_list_len].runas_len,
-				       &cm_list[cm_list_len].runas_size, ':');
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries("!", ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_runas("!", ", ");
+			    }
 			} runasuser {
 			    if ($3 == TRUE)
 				runas_matches = FALSE;
 			}
 
 runasuser	:	NAME {
-			    if (printmatches == TRUE && in_alias == TRUE)
-				append($1, &ga_list[ga_list_len-1].entries,
-				       &ga_list[ga_list_len-1].entries_len,
-				       &ga_list[ga_list_len-1].entries_size, ',');
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE)
-				append($1, &cm_list[cm_list_len].runas,
-				       &cm_list[cm_list_len].runas_len,
-				       &cm_list[cm_list_len].runas_size, 0);
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries($1, ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_runas($1, ", ");
+			    }
 			    if (strcmp($1, user_runas) == 0)
 				$$ = TRUE;
 			    free($1);
 			}
 		|	USERGROUP {
-			    if (printmatches == TRUE && in_alias == TRUE)
-				append($1, &ga_list[ga_list_len-1].entries,
-				       &ga_list[ga_list_len-1].entries_len,
-				       &ga_list[ga_list_len-1].entries_size, ',');
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE) {
-				append($1, &cm_list[cm_list_len].runas,
-				       &cm_list[cm_list_len].runas_len,
-				       &cm_list[cm_list_len].runas_size, 0);
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries($1, ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_runas($1, ", ");
 			    }
 			    if (usergr_matches($1, user_runas))
 				$$ = TRUE;
 			    free($1);
 			}
 		|	NETGROUP {
-			    if (printmatches == TRUE && in_alias == TRUE)
-				append($1, &ga_list[ga_list_len-1].entries,
-				       &ga_list[ga_list_len-1].entries_len,
-				       &ga_list[ga_list_len-1].entries_size, ',');
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE) {
-				append($1, &cm_list[cm_list_len].runas,
-				       &cm_list[cm_list_len].runas_len,
-				       &cm_list[cm_list_len].runas_size, 0);
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries($1, ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_runas($1, ", ");
 			    }
 			    if (netgr_matches($1, NULL, user_runas))
 				$$ = TRUE;
 			    free($1);
 			}
 		|	ALIAS {
-			    if (printmatches == TRUE && in_alias == TRUE)
-				append($1, &ga_list[ga_list_len-1].entries,
-				       &ga_list[ga_list_len-1].entries_len,
-				       &ga_list[ga_list_len-1].entries_size, ',');
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE)
-				append($1, &cm_list[cm_list_len].runas,
-				       &cm_list[cm_list_len].runas_len,
-				       &cm_list[cm_list_len].runas_size, 0);
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries($1, ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_runas($1, ", ");
+			    }
 			    /* could be an all-caps username */
 			    if (find_alias($1, RUNAS_ALIAS) == TRUE ||
 				strcmp($1, user_runas) == 0)
@@ -445,22 +452,27 @@ runasuser	:	NAME {
 			    free($1);
 			}
 		|	ALL {
-			    if (printmatches == TRUE && in_alias == TRUE)
-				append("ALL", &ga_list[ga_list_len-1].entries,
-				       &ga_list[ga_list_len-1].entries_len,
-				       &ga_list[ga_list_len-1].entries_size, ',');
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE)
-				append("ALL", &cm_list[cm_list_len].runas,
-				       &cm_list[cm_list_len].runas_len,
-				       &cm_list[cm_list_len].runas_size, 0);
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries($1, ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_runas($1, ", ");
+			    }
 			    $$ = TRUE;
 			    free($1);
 			}
 		;
 
 nopasswd	:	/* empty */ {
-			    ;
+			    /* Inherit NOPASSWD/PASSWD status. */
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE) {
+				if (no_passwd == TRUE)
+				    cm_list[cm_list_len].nopasswd = TRUE;
+				else
+				    cm_list[cm_list_len].nopasswd = FALSE;
+			    }
 			}
 		|	NOPASSWD {
 			    no_passwd = TRUE;
@@ -477,17 +489,14 @@ nopasswd	:	/* empty */ {
 		;
 
 cmnd		:	ALL {
-			    if (printmatches == TRUE && in_alias == TRUE) {
-				append("ALL", &ga_list[ga_list_len-1].entries,
-				       &ga_list[ga_list_len-1].entries_len,
-				       &ga_list[ga_list_len-1].entries_size, ',');
-			    }
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE) {
-				append("ALL", &cm_list[cm_list_len].cmnd,
-				       &cm_list[cm_list_len].cmnd_len,
-				       &cm_list[cm_list_len].cmnd_size, 0);
-				expand_match_list();
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries($1, ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE) {
+				    append_cmnd($1, NULL);
+				    expand_match_list();
+				}
 			    }
 
 			    $$ = TRUE;
@@ -498,42 +507,34 @@ cmnd		:	ALL {
 			    safe_cmnd = estrdup(user_cmnd);
 			}
 		|	ALIAS {
-			    if (printmatches == TRUE && in_alias == TRUE) {
-				append($1, &ga_list[ga_list_len-1].entries,
-				       &ga_list[ga_list_len-1].entries_len,
-				       &ga_list[ga_list_len-1].entries_size, ',');
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries($1, ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE) {
+				    append_cmnd($1, NULL);
+				    expand_match_list();
+				}
 			    }
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE) {
-				append($1, &cm_list[cm_list_len].cmnd,
-				       &cm_list[cm_list_len].cmnd_len,
-				       &cm_list[cm_list_len].cmnd_size, 0);
-				expand_match_list();
-			    }
+
 			    if (find_alias($1, CMND_ALIAS) == TRUE)
 				$$ = TRUE;
 			    free($1);
 			}
 		|	 COMMAND {
-			    if (printmatches == TRUE && in_alias == TRUE) {
-				append($1.cmnd, &ga_list[ga_list_len-1].entries,
-				       &ga_list[ga_list_len-1].entries_len,
-				       &ga_list[ga_list_len-1].entries_size, ',');
-				if ($1.args)
-				    append($1.args, &ga_list[ga_list_len-1].entries,
-					&ga_list[ga_list_len-1].entries_len,
-					&ga_list[ga_list_len-1].entries_size, ' ');
-			    }
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE)  {
-				append($1.cmnd, &cm_list[cm_list_len].cmnd,
-				       &cm_list[cm_list_len].cmnd_len,
-				       &cm_list[cm_list_len].cmnd_size, 0);
-				if ($1.args)
-				    append($1.args, &cm_list[cm_list_len].cmnd,
-					   &cm_list[cm_list_len].cmnd_len,
-					   &cm_list[cm_list_len].cmnd_size, ' ');
-				expand_match_list();
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE) {
+				    append_entries($1.cmnd, ", ");
+				    if ($1.args)
+					append_entries($1.args, " ");
+				}
+				if (host_matches == TRUE &&
+				    user_matches == TRUE)  {
+				    append_cmnd($1.cmnd, NULL);
+				    if ($1.args)
+					append_cmnd($1.args, " ");
+				    expand_match_list();
+				}
 			    }
 
 			    if (command_matches(user_cmnd, user_args,
@@ -672,7 +673,7 @@ user		:	NAME {
 
 typedef struct {
     int type;
-    char name[BUFSIZ];
+    char *name;
 } aliasinfo;
 
 #define MOREALIASES (32)
@@ -723,37 +724,35 @@ add_alias(alias, type)
     int type;
 {
     aliasinfo ai, *aip;
+    size_t onaliases;
     char s[512];
-    int ok;
 
-    ok = FALSE;			/* assume failure */
-    ai.type = type;
-    (void) strcpy(ai.name, alias);
-    if (lfind((VOID *)&ai, (VOID *)aliases, &naliases, sizeof(ai),
-	aliascmp) != NULL) {
-	(void) sprintf(s, "Alias `%.*s' already defined", (int) sizeof(s) - 25,
-		       alias);
+    if (naliases >= nslots && !more_aliases()) {
+	(void) snprintf(s, sizeof(s), "Out of memory defining alias `%s'",
+			alias);
 	yyerror(s);
-    } else {
-	if (naliases >= nslots && !more_aliases()) {
-	    (void) sprintf(s, "Out of memory defining alias `%.*s'",
-			   (int) sizeof(s) - 32, alias);
-	    yyerror(s);
-	}
-
-	aip = (aliasinfo *) lsearch((VOID *)&ai, (VOID *)aliases,
-				    &naliases, sizeof(ai), aliascmp);
-
-	if (aip != NULL) {
-	    ok = TRUE;
-	} else {
-	    (void) sprintf(s, "Aliases corrupted defining alias `%.*s'",
-			   (int) sizeof(s) - 36, alias);
-	    yyerror(s);
-	}
+	return(FALSE);
     }
 
-    return(ok);
+    ai.type = type;
+    ai.name = estrdup(alias);
+    onaliases = naliases;
+
+    aip = (aliasinfo *) lsearch((VOID *)&ai, (VOID *)aliases, &naliases,
+				sizeof(ai), aliascmp);
+    if (aip == NULL) {
+	(void) snprintf(s, sizeof(s), "Aliases corrupted defining alias `%s'",
+			alias);
+	yyerror(s);
+	return(FALSE);
+    }
+    if (onaliases == naliases) {
+	(void) snprintf(s, sizeof(s), "Alias `%s' already defined", alias);
+	yyerror(s);
+	return(FALSE);
+    }
+
+    return(TRUE);
 }
 
 /*
@@ -766,7 +765,7 @@ find_alias(alias, type)
 {
     aliasinfo ai;
 
-    (void) strcpy(ai.name, alias);
+    ai.name = alias;
     ai.type = type;
 
     return(lfind((VOID *)&ai, (VOID *)aliases, &naliases,
@@ -836,7 +835,7 @@ list_matches()
 	(void) fputs("    ", stdout);
 	if (cm_list[i].runas) {
 	    (void) putchar('(');
-	    p = strtok(cm_list[i].runas, ":");
+	    p = strtok(cm_list[i].runas, ", ");
 	    do {
 		if (p != cm_list[i].runas)
 		    (void) fputs(", ", stdout);
@@ -847,10 +846,10 @@ list_matches()
 		    (void) fputs(ga->entries, stdout);
 		else
 		    (void) fputs(p, stdout);
-	    } while ((p = strtok(NULL, ":")));
+	    } while ((p = strtok(NULL, ", ")));
 	    (void) fputs(") ", stdout);
 	} else {
-	    (void) fputs("(root) ", stdout);
+	    (void) printf("(%s) ", RUNAS_DEFAULT);
 	}
 
 	/* Is a password required? */
@@ -891,11 +890,19 @@ static void
 append(src, dstp, dst_len, dst_size, separator)
     char *src, **dstp;
     size_t *dst_len, *dst_size;
-    int separator;
+    char *separator;
 {
-    /* Only add the separator if *dstp is non-NULL. */
-    size_t src_len = strlen(src) + ((separator && *dstp) ? 1 : 0);
+    size_t src_len = strlen(src);
     char *dst = *dstp;
+
+    /*
+     * Only add the separator if there is something to separate from.
+     * If the last char is a '!', don't apply the separator (XXX).
+     */
+    if (separator && dst && dst[*dst_len - 1] != '!')
+	src_len += strlen(separator);
+    else
+	separator = NULL;
 
     /* Assumes dst will be NULL if not set. */
     if (dst == NULL) {
@@ -914,12 +921,13 @@ append(src, dstp, dst_len, dst_size, separator)
 	*dstp = dst;
     }
 
-    /* Copy src -> dst adding a separator char if appropriate and adjust len. */
+    /* Copy src -> dst adding a separator if appropriate and adjust len. */
     dst += *dst_len;
-    if (separator && *dst_len)
-	*dst++ = (char) separator;
-    (void) strcpy(dst, src);
     *dst_len += src_len;
+    *dst = '\0';
+    if (separator)
+	(void) strcat(dst, separator);
+    (void) strcat(dst, src);
 }
 
 /*
@@ -928,8 +936,11 @@ append(src, dstp, dst_len, dst_size, separator)
 void
 reset_aliases()
 {
+    size_t n;
 
     if (aliases) {
+	for (n = 0; n < naliases; n++)
+	    free(aliases[n].name);
 	free(aliases);
 	aliases = NULL;
     }
