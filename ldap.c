@@ -66,6 +66,10 @@ static const char rcsid[] = "$Sudo$";
 #define BUF_SIZ 1024
 #endif
 
+#ifndef LDAP_OPT_SUCCESS
+#define LDAP_OPT_SUCCESS LDAP_SUCCESS
+#endif
+
 extern int printmatches;
 
 /* ldap configuration structure */
@@ -946,8 +950,9 @@ int pwflag;
     /* We have a match.  Should we check the password? */
     /* Note: This could be the global or a rule specific option */
     if (!def_authenticate) SET(ret,FLAG_NOPASS);
-    /* Same logic with noexec */
+    /* Same logic with noexec and monitor */
     if (def_noexec)        SET(ret,FLAG_NOEXEC);
+    if (def_monitor)       SET(ret,FLAG_MONITOR);
   } else {
     /* we do not have a match */
     ret=VALIDATE_NOT_OK;
