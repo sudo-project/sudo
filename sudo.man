@@ -6,14 +6,15 @@ sudo \- execute a command as the superuser
 .B sudo
 .B \-V
 |
-.B
-\-h
+.B \-h
 |
 .B \-l
 |
 .B \-v
 |
 .B \-k
+|
+.B \-b
 |
 .I command
 .SH DESCRIPTION
@@ -29,7 +30,7 @@ determines who is an authorized user by consulting the file
 By giving
 .B sudo
 the
-.I -v
+.I \-v
 flag a user can update the time stamp without running a
 .I command.
 The password prompt itself will also time out if the password is
@@ -50,30 +51,30 @@ user specification format:
   user access_group [: access_group] ...
 
     access_group ::= host_type = [op]cmnd_type [,[op]cmnd_type] ... 
-       host_type ::= a lower-case host name OR a host alias.
+       host_type ::= a lower\-case host name OR a host alias.
        cmnd_type ::= an command OR a command alias.
               op ::= the logical '!' NOT operator.
 
 host alias section format:
-  Host_Alias HOSTALIAS = host-list
+  Host_Alias HOSTALIAS = host\-list
 
       Host_Alias ::= a keyword.
-       HOSTALIAS ::= an upper-case alias name.
-       host-list ::= a comma separated list of hosts/addresses/networks.
+       HOSTALIAS ::= an upper\-case alias name.
+       host\-list ::= a comma separated list of hosts/addresses/networks.
 
 user alias section format:
-  User_Alias USERALIAS = user-list
+  User_Alias USERALIAS = user\-list
 
       User_Alias ::= a keyword.
-       USERALIAS ::= an upper-case alias name.
-       user-list ::= a comma separated list of users.
+       USERALIAS ::= an upper\-case alias name.
+       user\-list ::= a comma separated list of users.
 
 command alias section format:
-  Cmnd_Alias CMNDALIAS = cmnd-list
+  Cmnd_Alias CMNDALIAS = cmnd\-list
 
       Cmnd_Alias ::= a keyword.
-       CMNDALIAS ::= an upper-case alias name.
-       cmnd-list ::= a comma separated list commands.
+       CMNDALIAS ::= an upper\-case alias name.
+       cmnd\-list ::= a comma separated list commands.
 
 Text after a pound sign '#' is considered a comment.
 Long lines can be newline escaped with the backslash '\\' character.
@@ -165,27 +166,27 @@ Makefile.
 .SH OPTIONS
 .B sudo
 accepts the following command line options:
-.IP -V
-The -V (version) option causes
+.IP \-V
+The \-V (version) option causes
 .B sudo
 to print the version number and exit.
-.IP -l
-The -l (list) option will list out the allowed and forbidden commands
+.IP \-l
+The \-l (list) option will list out the allowed and forbidden commands
 for the user on the current host.
-.IP -h
-The -h (help) option causes
+.IP \-h
+The \-h (help) option causes
 .B sudo
 to print the version of sudo and a usage message before exiting.
-.IP -v
-If given the -v (validate) option,
+.IP \-v
+If given the \-v (validate) option,
 .B sudo
 will update the user's timestamp file, prompting for a password if necessary.
 This extends the
 .B sudo
 timeout to for another N minutes (where N is defined at installation time and
 defaults to 5 minutes) but does not run a command.
-.IP -k
-The -k (kill) option to
+.IP \-k
+The \-k (kill) option to
 .B sudo
 removes the user's timestamp file, thus requiring a password the next time
 .B sudo
@@ -193,6 +194,11 @@ is run.  This option does not require and password and was added to
 allow a user to revoke
 .B sudo
 permissions from a .logout file.
+.IP \-b
+The \-b (background) option tells
+.B sudo
+to run the given command in the background.  Note that if you use the
+\-b option you cannot use shell job control to manipulate the command.
 .SH RETURN VALUES
 .B sudo
 quits with an exit value of 1 if there is a configuration/permission problem
@@ -217,7 +223,7 @@ unreachable.
 .SH SECURITY NOTES
 .B sudo
 tries to be safe when executing external commands.  To this end
-LD_*, SHLIB_PATH (HP-UX only), LIBPATH (AIX only), and _RLD_* (Digital UNIX
+LD_*, SHLIB_PATH (HP\-UX only), LIBPATH (AIX only), and _RLD_* (Digital UNIX
 only) environmental variables are removed from the environment passed on to
 all commands executed.
 .B sudo
@@ -236,7 +242,7 @@ executes.
 For security reasons, if your OS supports shared libraries,
 .B sudo
 should always be statically linked unless the dynamic loader disables
-user-defined library search paths for setuid programs.
+user\-defined library search paths for setuid programs.
 .SH FILES
 .nf
 /etc/sudoers                 file of authorized users.
@@ -262,7 +268,7 @@ Chris Jepeway                <jepeway@cs.utk.edu>
 See the HISTORY file in the sudo distribution for more details.
 .fi
 .sp
-Please send all bugs, comments, and changes to sudo-bugs@cs.colorado.edu.
+Please send all bugs, comments, and changes to sudo\-bugs@cs.colorado.edu.
 .SH DISCLAIMER
 This program is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
