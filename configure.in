@@ -20,8 +20,10 @@ LIBOBJS=""
 AC_SUBST(LIBOBJS)dnl
 TGETPASS="tgetpass.o"
 AC_SUBST(TGETPASS)dnl
-MAN_PREFIX='$(prefix)/man'
-AC_SUBST(MAN_PREFIX)dnl
+prefix='/usr/local'
+exec_prefix='$(prefix)'
+man_prefix='$(prefix)/man'
+AC_SUBST(man_prefix)dnl
 MANTYPE="man"
 MAN_POSTINSTALL=""
 AC_SUBST(MAN_POSTINSTALL)dnl
@@ -171,15 +173,15 @@ case "$OS" in
 		if test -z "$NROFFPROG" ; then
 		    MAN_POSTINSTALL='	/bin/rm -f $(mandir)/sudo.$(mansect).z ; /usr/bin/pack $(mandir)/sudo.$(mansect)'
 		    if test -d /usr/share/catman/local; then
-			MAN_PREFIX="/usr/share/catman/local"
+			man_prefix="/usr/share/catman/local"
 		    else
-			MAN_PREFIX="/usr/catman/local"
+			man_prefix="/usr/catman/local"
 		    fi
 		else
 		    if test -d "/usr/share/man/local" ; then
-			MAN_PREFIX="/usr/share/man/local"
+			man_prefix="/usr/share/man/local"
 		    else
-			MAN_PREFIX="/usr/man/local"
+			man_prefix="/usr/man/local"
 		    fi
 		fi
 		;;
