@@ -338,7 +338,7 @@ AC_ARG_WITH(logging, [  --with-logging          log via syslog, file, or both],
     yes)	echo "Must give --with-logging an argument."
 		exit 1
 		;;
-    no)		echo "Sorry, --without-logfile not supported."
+    no)		echo "Sorry, --without-logging not supported."
 		exit 1
 		;;
     syslog)	AC_DEFINE(LOGGING, SLOG_SYSLOG)
@@ -1383,6 +1383,11 @@ dnl
 if test "$with_DCE" = "yes" -o "$ac_cv_prog_YACC" = "bison -y"; then
     AC_FUNC_ALLOCA
 fi
+
+dnl
+dnl Check to see if the facility and priority names live in syslog.h
+dnl
+SUDO_SYSLOG_NAMES
 
 dnl
 dnl Kerberos 5

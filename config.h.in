@@ -426,6 +426,9 @@
 /* Define to be the max chars per log line (for line wrapping).  */
 #undef MAXLOGFILELEN
 
+/* Define if your syslog.h has the prioritynames and facilitynames tables.  */
+#undef HAVE_SYSLOG_NAMES
+
 /* Define if you want to ignore '.' and '' in $PATH */
 #undef IGNORE_DOT_PATH
 

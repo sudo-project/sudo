@@ -304,3 +304,23 @@ rm -f conftestdata
 AC_MSG_RESULT($sudo_cv_uid_t_len)
 AC_DEFINE_UNQUOTED(MAX_UID_T_LEN, $sudo_cv_uid_t_len)
 ])
+
+dnl
+dnl check for facilitynames and prioritynames in syslog.h
+dnl 4.4BSD has these but most others do not.
+dnl
+AC_DEFUN(SUDO_SYSLOG_NAMES,
+[AC_MSG_CHECKING(for facilitynames and prioritynames in syslog.h)
+AC_CACHE_VAL(sudo_cv_syslog_names,
+[
+AC_TRY_COMPILE([
+#define SYSLOG_NAMES
+#include <stdio.h>
+#include <syslog.h>
+], [ CODE *p=&prioritynames[0]; CODE *f=&facilitynames[0]; ],
+sudo_cv_syslog_names=yes, sudo_cv_syslog_names=no)])dnl
+AC_MSG_RESULT($sudo_cv_syslog_names)
+if test $sudo_cv_syslog_names = yes; then
+    AC_DEFINE(HAVE_SYSLOG_NAMES)
+fi
+])

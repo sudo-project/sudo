@@ -1087,7 +1087,7 @@ if test "${with_logging+set}" = set; then
     yes)	echo "Must give --with-logging an argument."
 		exit 1
 		;;
-    no)		echo "Sorry, --without-logfile not supported."
+    no)		echo "Sorry, --without-logging not supported."
 		exit 1
 		;;
     syslog)	cat >> confdefs.h <<\EOF
@@ -7288,9 +7288,47 @@ fi
 
 fi
 
+echo $ac_n "checking for facilitynames and prioritynames in syslog.h""... $ac_c" 1>&6
+echo "configure:7293: checking for facilitynames and prioritynames in syslog.h" >&5
+if eval "test \"`echo '$''{'sudo_cv_syslog_names'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+cat > conftest.$ac_ext <<EOF
+#line 7299 "configure"
+#include "confdefs.h"
+
+#define SYSLOG_NAMES
+#include <stdio.h>
+#include <syslog.h>
+
+int main() {
+ CODE *p=&prioritynames[0]; CODE *f=&facilitynames[0]; 
+; return 0; }
+EOF
+if { (eval echo configure:7310: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  sudo_cv_syslog_names=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  sudo_cv_syslog_names=no
+fi
+rm -f conftest*
+fi
+echo "$ac_t""$sudo_cv_syslog_names" 1>&6
+if test $sudo_cv_syslog_names = yes; then
+    cat >> confdefs.h <<\EOF
+#define HAVE_SYSLOG_NAMES 1
+EOF
+
+fi
+
+
 if test "$with_kerb5" = "yes"; then
                     echo $ac_n "checking for krb5_get_init_creds_opt in -lkrb5""... $ac_c" 1>&6
-echo "configure:7294: checking for krb5_get_init_creds_opt in -lkrb5" >&5
+echo "configure:7332: checking for krb5_get_init_creds_opt in -lkrb5" >&5
 if test -n ""; then
   ac_lib_var=`echo krb5'_'krb5_get_init_creds_opt | sed 'y% ./+-%___p_%'`
 else
@@ -7302,7 +7340,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lkrb5  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 7306 "configure"
+#line 7344 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -7313,7 +7351,7 @@ int main() {
 krb5_get_init_creds_opt()
 ; return 0; }
 EOF
-if { (eval echo configure:7317: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:7355: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -7372,21 +7410,21 @@ EOF
 
     if test "$with_kerb5" = "yes"; then
 	echo $ac_n "checking for -lkrb4""... $ac_c" 1>&6
-echo "configure:7376: checking for -lkrb4" >&5
+echo "configure:7414: checking for -lkrb4" >&5
 if eval "test \"`echo '$''{'ac_cv_lib_krb4'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   ac_save_LIBS="$LIBS"
 LIBS="-lkrb4  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 7383 "configure"
+#line 7421 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:7390: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:7428: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   ac_cv_lib_krb4=yes
 else
@@ -7407,21 +7445,21 @@ else
 fi
 
 	echo $ac_n "checking for -ldes""... $ac_c" 1>&6
-echo "configure:7411: checking for -ldes" >&5
+echo "configure:7449: checking for -ldes" >&5
 if eval "test \"`echo '$''{'ac_cv_lib_des'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   ac_save_LIBS="$LIBS"
 LIBS="-ldes  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 7418 "configure"
+#line 7456 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:7425: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:7463: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   ac_cv_lib_des=yes
 else
@@ -7442,21 +7480,21 @@ fi
 	SUDO_LIBS="${SUDO_LIBS} -ldes425 -lkrb5 -lcrypto -lcom_err"
     else
 	echo $ac_n "checking for -ldes""... $ac_c" 1>&6
-echo "configure:7446: checking for -ldes" >&5
+echo "configure:7484: checking for -ldes" >&5
 if eval "test \"`echo '$''{'ac_cv_lib_des'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   ac_save_LIBS="$LIBS"
 LIBS="-ldes  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 7453 "configure"
+#line 7491 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:7460: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:7498: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   ac_cv_lib_des=yes
 else
@@ -7580,7 +7618,7 @@ if test "$with_authenticate" = "yes"; then
 fi
 
 echo $ac_n "checking for log file location""... $ac_c" 1>&6
-echo "configure:7584: checking for log file location" >&5
+echo "configure:7622: checking for log file location" >&5
 if test -n "$with_logpath"; then
     echo "$ac_t""$with_logpath" 1>&6
     cat >> confdefs.h <<EOF
@@ -7610,7 +7648,7 @@ else
 fi
 
 echo $ac_n "checking for timestamp file location""... $ac_c" 1>&6
-echo "configure:7614: checking for timestamp file location" >&5
+echo "configure:7652: checking for timestamp file location" >&5
 if test -n "$with_timedir"; then
     echo "$ac_t""$with_timedir" 1>&6
     cat >> confdefs.h <<EOF
