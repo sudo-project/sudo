@@ -114,7 +114,7 @@ dce_verify(pw, plain_pw, auth)
 	    &reset_passwd, &auth_src, &status)) {
 
 	    if (check_dce_status(status, "sec_login_validate_identity(1):"))
-		return(0);
+		return(AUTH_FAILURE);
 
 	    /*
 	     * Certify that the DCE Security Server used to set
@@ -122,12 +122,12 @@ dce_verify(pw, plain_pw, auth)
 	     * sure that we didn't get spoofed by another DCE server.
 	     */
 	    if (!sec_login_certify_identity(login_context, &status)) {
-		fprintf(stderr,"Whoa! Bogus authentication server!\n");
+		(void) fprintf(stderr, "Whoa! Bogus authentication server!\n");
 		(void) check_dce_status(status,"sec_login_certify_identity(1):");
 		return(AUTH_FAILURE);
 	    }
 	    if (check_dce_status(status, "sec_login_certify_identity(2):"))
-		return(0);
+		return(AUTH_FAILURE);
 
 	    /*
 	     * Sets the network credentials to those specified
@@ -135,7 +135,7 @@ dce_verify(pw, plain_pw, auth)
 	     */
 	    sec_login_set_context(login_context, &status);
 	    if (check_dce_status(status, "sec_login_set_context:"))
-		return(0);
+		return(AUTH_FAILURE);
 
 	    /*
 	     * Oops, your credentials were no good. Possibly
@@ -143,12 +143,14 @@ dce_verify(pw, plain_pw, auth)
 	     * DCE client and DCE security server...
 	     */
 	    if (auth_src != sec_login_auth_src_network) {
-		    fprintf(stderr,"You have no network credentials.\n");
+		    (void) fprintf(stderr,
+			"You have no network credentials.\n");
 		    return(AUTH_FAILURE);
 	    }
 	    /* Check if the password has aged and is thus no good */
 	    if (reset_passwd) {
-		    fprintf(stderr,"Your DCE password needs resetting.\n");
+		    (void) fprintf(stderr,
+			"Your DCE password needs resetting.\n");
 		    return(AUTH_FAILURE);
 	    }
 
@@ -208,6 +210,6 @@ check_dce_status(input_status, comment)
     if (input_status == rpc_s_ok)
 	return(0);
     dce_error_inq_text(input_status, error_string, &error_stat);
-    fprintf(stderr, "%s %s\n", comment, error_string);
+    (void) fprintf(stderr, "%s %s\n", comment, error_string);
     return(1);
 }
