@@ -541,6 +541,23 @@ case "$host" in
 		LIB_INET=1
 		LIB_SOCKET=1
 		;;
+    *-sequent-sysv*)
+		# XXX - this needs to be tested.
+		LIBS="${LIBS} -lsocket -lnsl"
+		SUDO_LIBS="${LIBS} -lsocket -lnsl"
+		LIB_SOCKET=1
+		LIB_NSL=1                                    
+
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		fi
+		if test "$with_C2" = "yes"; then
+		    SHADOW_TYPE="SPW_SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		    SUDO_LIBS="${SUDO_LIBS} -lsec"
+		    LIBS="${LIBS} -lsec"
+		fi
+		;;
     *-*-bsdi*)
 		# Use shlicc for BSD/OS 2.x unless asked to do otherwise
 		if test "$OSREV" -ge 2 -a "${with_CC+set}" != set -a \
@@ -659,7 +676,7 @@ dnl Header file checks
 dnl
 AC_HEADER_STDC
 AC_HEADER_DIRENT
-AC_CHECK_HEADERS(string.h strings.h unistd.h malloc.h paths.h utime.h fnmatch.h netgroup.h sys/sockio.h sys/bsdtypes.h)
+AC_CHECK_HEADERS(string.h strings.h unistd.h malloc.h paths.h utime.h fnmatch.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h)
 dnl ultrix termio/termios are broken
 if test "$OS" != "ultrix"; then
     AC_CHECK_HEADERS(termio.h)
