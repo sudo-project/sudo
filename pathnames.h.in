@@ -49,15 +49,6 @@
 #endif /* _PATH_SUDOERS */
 
 /*
- * NOTE:  _PATH_SUDOERS_TMP is usually overriden by the Makefile.
- *        _PATH_SUDOERS_TMP *MUST* be on the same partition
- *        as _PATH_SUDOERS!
- */
-#ifndef _PATH_SUDOERS_TMP
-#define _PATH_SUDOERS_TMP	"/etc/sudoers.tmp"
-#endif /* _PATH_SUDOERS_TMP */
-
-/*
  * The following paths are controlled via the configure script.
  */
 
