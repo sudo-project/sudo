@@ -143,9 +143,10 @@ Special features/options:
 	Enable SecurID support.  If specified, DIR is directory containing
 	sdiclient.a, sdi_athd.h, sdconf.h, and sdacmvls.h.
 
-  --with-AuthSRV=DIR
+  --with-fwtk=DIR
 	Enable TIS Firewall Toolkit (FWTK) 'authsrv' support. If specified,
-	DIR is the base directory containing the compiled FWTK package.
+	DIR is the base directory containing the compiled FWTK package
+	(or at least the library and header files).
 
   --with-kerb4
 	Enable kerberos v4 support.  Tested only with the Cygnus Network
@@ -369,6 +370,11 @@ Special features/options:
 	sudo's interface reading support does not work, which may be the case
 	on some SysV-based OS's using STREAMS.
 
+  --without-passwd
+	This option disables passwd/shadow file authentication.  If
+	no other authentication function is defined, sudo will not
+	prompt for a password at all.
+
   --disable-shadow
 	Disable shadow password support.  Normally, sudo will compile in shadow
 	password support and use a shadow password if it exists.
@@ -377,10 +383,6 @@ Special features/options:
 	Don't let root run sudo.  This can be used to prevent people from
 	"chaining" sudo commands to get a root shell by doing something
 	like "sudo sudo /bin/sh".
-
-  --disable-tgetpass
-	Use system getpass(3) instead of sudo-supplied tgetpass().  For systems
-	where tgetpass() is broken.
 
   --enable-log-host
 	Log the hostname in the log file.
@@ -525,10 +527,6 @@ Digital UNIX:
     edit that.
 
 Linux:
-    One person reported that he needed to run configure with
-    the --with-getpass flag to get a working sudo.  Other people
-    haven't had that problem so it may only affect certain
-    distributions.
     NOTE: Reportedly, Linux's execvp(3) doesn't always execute
 	  scripts that lack the "#!/some/shell" header correctly.
 	  The workaround is to give all your scripts a proper
