@@ -79,5 +79,10 @@ c) If you have a sense of humor you may want to define USE_INSULTS to
 d) If you are *not* running sendmail or some other mailer, you should
    comment out the MAILER #define in sudo.h.
 
+e) If you are running AIX and sudo says that it cannot find a user
+   that is clearly listed in the sudoers file try compiling with
+   optimization turned off.  The AIX C compiler produces incorrect
+   code with the -O flag on some versions of AIX.
+
 Please send changes, bugs, security holes, and gripes to:
     sudo-bugs@cs.colorado.edu
