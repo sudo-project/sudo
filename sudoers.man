@@ -2,12 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.24  2000/02/16 00:03:44  millert
-''' Add 'editor' and 'enveditor' sudoers defaults and make visudo honor them.
-''' This means that visudo will now parse the sudoers file *before* it is
-''' edited so a bogus sudoers file will cause a warning to go to stderr.
-''' Also, visudo checks the variables once--it does not check them after
-''' each editor run since that could be confusing.
+''' Revision 1.25  2000/02/16 00:07:28  millert
+''' crank versino to 1.6.3
 '''
 '''
 .de Sh
@@ -100,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers 5 "1.6.2" "15/Feb/2000" "FILE FORMATS"
+.TH sudoers 5 "1.6.3" "15/Feb/2000" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
