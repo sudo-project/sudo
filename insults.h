@@ -20,53 +20,28 @@
  *  $Id$
  */
 
-#ifdef USE_INSULTS
-
 #ifndef _SUDO_INSULTS_H
 #define _SUDO_INSULTS_H
 
-/*
- * To add insult to injury, just add to the following strings and
- * adjust NOFINSULTS accordingly.  This code taken from the original
- * sudo(8).  HAL insults from 2001.
- */
-
-#ifdef HAL
-char *insults[] = {
-    "Just what do you think you're doing Dave?",
-    "It can only be attributed to human error.",
-    "That's something I cannot allow to happen.",
-    "My mind is going. I can feel it.",
-    "Sorry about this, I know it's a bit silly.",
-    "Take a stress pill and think things over.",
-    "This mission is too important for me to allow you to jeopardize it.",
-    "I feel much better now."
-};
-
-#define NOFINSULTS 8 	/* number of insults */
-
-#else /* HAL */
-char *insults[] = {
-    "Wrong!  You cheating scum!",
-    "No soap, honkie-lips.",
-    "Where did you learn to type?",
-    "Are you on drugs?",
-    "My pet ferret can type better than you!",
-    "You type like i drive.",
-    "Do you think like you type?",
-    "Your mind just hasn't been the same since the electro-shock, has it?"
-};
-
-#define NOFINSULTS 8 	/* number of insults */
-
-#endif /* HAL */
+#ifdef USE_INSULTS
 
 /*
- *	return a random insult.
+ * Choose a set of insults, the default is to use the insults from
+ * "sudo classic" (in the original edition of the Sys Admin book).
  */
+#if defined(HAL)
+#include "ins_2001.h"
+#elif defined(GOONS)
+#include "ins_goons.h"
+#else
+#include "ins_classic.h"
+#endif
 
+/*
+ * return a pseudo-random insult.
+ */
 #define INSULT		(insults[time(NULL) % NOFINSULTS])
 
-#endif /* _SUDO_INSULTS_H */
-
 #endif /* USE_INSULTS */
+
+#endif /* _SUDO_INSULTS_H */
