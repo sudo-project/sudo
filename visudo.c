@@ -81,6 +81,7 @@ static void usage		__P((void));
 static char whatnow		__P((void));
 static void whatnow_help	__P((void));
 static RETSIGTYPE Exit		__P((int));
+static void setup_signals	__P((void));
 int path_matches		__P((char *, char *));
 int addr_matches		__P((char *));
 
@@ -119,40 +120,6 @@ int main(argc, argv)
     int stmp_fd;			/* stmp file descriptor */
     int n;				/* length parameter */
     struct passwd *pwd;			/* to look up info for SUDOERS_OWNER */
-#ifdef POSIX_SIGNALS
-    struct sigaction action;		/* posix signal structure */
-#endif /* POSIX_SIGNALS */
-
-
-    /*
-     * Setup signal handlers
-     */
-#ifdef POSIX_SIGNALS
-    (void) memset((VOID *)&action, 0, sizeof(action));
-    action.sa_handler = Exit;
-    action.sa_flags = SA_RESETHAND;
-    (void) sigaction(SIGILL, &action, NULL);
-    (void) sigaction(SIGTRAP, &action, NULL);
-    (void) sigaction(SIGBUS, &action, NULL);
-    (void) sigaction(SIGSEGV, &action, NULL);
-    (void) sigaction(SIGTERM, &action, NULL);
-
-    action.sa_handler = SIG_IGN;
-    action.sa_flags = 0;
-    (void) sigaction(SIGHUP, &action, NULL);
-    (void) sigaction(SIGINT, &action, NULL);
-    (void) sigaction(SIGQUIT, &action, NULL);
-#else
-    (void) signal(SIGILL, Exit);
-    (void) signal(SIGTRAP, Exit);
-    (void) signal(SIGBUS, Exit);
-    (void) signal(SIGSEGV, Exit);
-    (void) signal(SIGTERM, Exit);
-
-    (void) signal(SIGHUP, SIG_IGN);
-    (void) signal(SIGINT, SIG_IGN);
-    (void) signal(SIGQUIT, SIG_IGN);
-#endif /* POSIX_SIGNALS */
 
     (void) setbuf(stderr, (char *)NULL);	/* unbuffered stderr */
 
@@ -209,6 +176,9 @@ int main(argc, argv)
 	perror(stmp);
 	Exit(1);
     }
+
+    /* install signal handler to clean up stmp */
+    setup_signals();
 
     sudoers_fd = open(sudoers, O_RDONLY);
     if (sudoers_fd < 0) {
@@ -452,4 +422,45 @@ static void whatnow_help()
     printf("  (e)dit sudoers file again\n");
     printf("  e(x)it without saving changes to sudoers file\n");
     printf("  (q)uit and save changes to sudoers file (DANGER!)\n\n");
+}
+
+
+/*
+ * setup_signals() -- install signal handlers for visudo.
+ */
+static void setup_signals()
+{
+#ifdef POSIX_SIGNALS
+	struct sigaction action;		/* posix signal structure */
+#endif /* POSIX_SIGNALS */
+
+	/*
+	 * Setup signal handlers
+	 */
+#ifdef POSIX_SIGNALS
+	(void) memset((VOID *)&action, 0, sizeof(action));
+	action.sa_handler = Exit;
+	action.sa_flags = SA_RESETHAND;
+	(void) sigaction(SIGILL, &action, NULL);
+	(void) sigaction(SIGTRAP, &action, NULL);
+	(void) sigaction(SIGBUS, &action, NULL);
+	(void) sigaction(SIGSEGV, &action, NULL);
+	(void) sigaction(SIGTERM, &action, NULL);
+
+	action.sa_handler = SIG_IGN;
+	action.sa_flags = 0;
+	(void) sigaction(SIGHUP, &action, NULL);
+	(void) sigaction(SIGINT, &action, NULL);
+	(void) sigaction(SIGQUIT, &action, NULL);
+#else
+	(void) signal(SIGILL, Exit);
+	(void) signal(SIGTRAP, Exit);
+	(void) signal(SIGBUS, Exit);
+	(void) signal(SIGSEGV, Exit);
+	(void) signal(SIGTERM, Exit);
+
+	(void) signal(SIGHUP, SIG_IGN);
+	(void) signal(SIGINT, SIG_IGN);
+	(void) signal(SIGQUIT, SIG_IGN);
+#endif /* POSIX_SIGNALS */
 }
