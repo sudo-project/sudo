@@ -85,6 +85,14 @@ static char rcsid[] = "$Id$";
 #else
 #include <sys/ioctl.h>
 #endif /* HAVE_SYS_SOCKIO_H */
+#ifdef _ISC
+#include <sys/stream.h>
+#include <sys/sioctl.h>
+#include <sys/stropts.h>
+#endif /* _ISC */
+#ifdef _MIPS
+#include <net/soioctl.h>
+#endif /* _MIPS */
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/if.h>
@@ -558,6 +566,10 @@ static void load_interfaces()
     char buf[BUFSIZ];
     int sock, len;
     int i, j;
+#ifdef _ISC
+    struct ifreq *ifrp;
+    struct strioctl strioctl;
+#endif /* _ISC */
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
@@ -570,10 +582,20 @@ static void load_interfaces()
      */
     ifconf.ifc_len = sizeof(buf);
     ifconf.ifc_buf = buf;
+#ifdef _ISC
+    strioctl.ic_cmd = SIOCGIFCONF;
+    strioctl.ic_dp = (char *)&ifconf;
+    strioctl.ic_len = sizeof(ifconf);
+    if (ioctl(sock, I_STR, &strioctl) < 0) {
+	/* networking probably not installed in kernel */
+	return;
+    }
+#else
     if (ioctl(sock, SIOCGIFCONF, (char *)(&ifconf)) < 0) {
 	/* networking probably not installed in kernel */
 	return;
     }
+#endif /* _ISC */
 
     /*
      * find out how many interfaces exist, skipping bogus ones.
@@ -642,25 +664,31 @@ static void load_interfaces()
  *  check_sudoers()
  *
  *  This function check to see that the sudoers file is owned by
- *  root and not writable by anyone else.
+ *  SUDOERS_OWNER and not writable by anyone else.
  */
 
 static void check_sudoers()
 {
     struct stat statbuf;
+    struct passwd *pw_ent;
+
+    if (!(pw_ent = getpwnam(SUDOERS_OWNER))) {
+	(void) fprintf(stderr, "%s: no passwd entry for sudoers file owner (%s)\n", Argv[0], SUDOERS_OWNER);
+	exit(1);
+    }
 
     if (lstat(_PATH_SUDO_SUDOERS, &statbuf)) {
-	(void) fprintf(stderr, "Can't stat %s: ", _PATH_SUDO_SUDOERS);
+	(void) fprintf(stderr, "%s: Can't stat %s: ", Argv[0], _PATH_SUDO_SUDOERS);
 	perror("");
 	exit(1);
     } else if (!S_ISREG(statbuf.st_mode)) {
-	(void) fprintf(stderr, "%s is not a regular file!\n", _PATH_SUDO_SUDOERS);
+	(void) fprintf(stderr, "%s: %s is not a regular file!\n", Argv[0], _PATH_SUDO_SUDOERS);
 	exit(1);
-    } else if (statbuf.st_uid != 0) {
-	(void) fprintf(stderr, "%s is not owned by root!\n", _PATH_SUDO_SUDOERS);
+    } else if (statbuf.st_uid != pw_ent -> pw_uid) {
+	(void) fprintf(stderr, "%s: %s is not owned by %s!\n", Argv[0], _PATH_SUDO_SUDOERS, SUDOERS_OWNER);
 	exit(1);
     } else if (statbuf.st_mode & (0000066)) {
-	(void) fprintf(stderr, "%s is readable or writeable by other than root!\n", _PATH_SUDO_SUDOERS);
+	(void) fprintf(stderr, "%s: %s is readable or writeable by other than %s!\n", Argv[0], _PATH_SUDO_SUDOERS, SUDOERS_OWNER);
 	exit(1);
     }
 }
@@ -717,6 +745,21 @@ void set_perms(perm)
 				    perror("setuid(uid)");
 				    exit(1);
 				}
+
+			      	break;
+
+	case   PERM_SUDOERS : 
+				if (setuid(0)) {
+				    perror("setuid(0)");
+				    exit(1);
+				}
+
+				if (!(pw_ent = getpwnam(SUDOERS_OWNER))) {
+				    (void) fprintf(stderr, "%s: no passwd entry for sudoers file owner (%s)\n", Argv[0], SUDOERS_OWNER);
+				    exit(1);
+				} else if (seteuid(pw_ent->pw_uid)) {
+				    perror("seteuid");
+    	    	    	    	}
 
 			      	break;
     }
