@@ -84,6 +84,7 @@ WORD			[a-zA-Z0-9_-]+
 %k	3500
 
 %s	GOTCMND
+%s	GOTRUNAS
 
 %%
 [ \t]+			{			/* throw away space/tabs */
@@ -156,6 +157,13 @@ WORD			[a-zA-Z0-9_-]+
 			    return('.');
 			}
 
+NOPASSWD:		{ 
+				/* XXX - is this the best way? */
+				/* cmnd does not require passwd for this user */
+			    	LEXTRACE("NOPASSWD ");
+			    	return(NOPASSWD);
+			}
+
 \+[a-zA-Z][a-zA-Z0-9_-]* {
 			    fill(yytext, yyleng);
 			    return(NETGROUP);
@@ -177,6 +185,36 @@ WORD			[a-zA-Z0-9_-]+
 			    LEXTRACE("FQHOST ");
 			    return(FQHOST);
 			}
+
+\(			{
+				/* XXX - what about '(' in command args? */
+				BEGIN GOTRUNAS;
+				LEXTRACE("RUNAS ");
+				return (RUNAS);
+			}
+
+<GOTRUNAS>[A-Z][A-Z0-9_]* {
+			    /* User_Alias that user can run command as or ALL */
+			    fill(yytext, yyleng);
+			    if (strcmp(yytext, "ALL") == 0) {
+				LEXTRACE("ALL ");
+				return(ALL);
+			    } else {
+				LEXTRACE("ALIAS ");
+				return(ALIAS);
+			    }
+			}
+
+<GOTRUNAS>#?[a-zA-Z0-9_-]+	{
+			    /* username/uid that user can run command as */
+			    /* XXX - should we allow more than thse chars? */
+			    fill(yytext, yyleng);
+			    LEXTRACE("NAME ");
+			    return(NAME);
+			}
+
+<GOTRUNAS>\)		BEGIN 0; /* XXX - will newlines be treated correctly? */
+
 
 \/[^\,:=\\ \t\n#]+	{
 			    /* directories can't have args... */
@@ -217,7 +255,6 @@ WORD			[a-zA-Z0-9_-]+
 				LEXTRACE("USERALIAS ");
 				return(USERALIAS);
 			    }
-
 			    l = yyleng - 1;
 			    if (isalpha(yytext[l]) || isdigit(yytext[l])) {
 				/* NAME is what RFC1034 calls a label */

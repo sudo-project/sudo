@@ -74,12 +74,11 @@ static char rcsid[] = "$Id$";
 #include "sudo.h"
 #include <options.h>
 
-extern FILE *yyin, *yyout;
-
 /*
  * Globals
  */
 int parse_error = FALSE;
+extern FILE *yyin, *yyout;
 
 /*
  * Prototypes for static (local) functions
@@ -146,10 +145,20 @@ int validate(check_cmnd)
 	while (top) {
 	    if (host_matches == TRUE)
 		if (cmnd_matches == TRUE)
-		    /* user was granted access to cmnd on host */
-		    return(VALIDATE_OK);
+		   if (runas_user == NULL || 
+			(runas_user != NULL && runas_matches == TRUE))
+		    	/*
+			 * User was granted access to cmnd on host.
+		    	 * If no passwd required return as such.
+			 */
+		    	if (no_passwd == TRUE)
+		    		return(VALIDATE_OK_NOPASS);
+		    	else
+		    		return(VALIDATE_OK);
+		   else
+		        return(VALIDATE_NOT_OK);
 		else if (cmnd_matches == FALSE)
-		    /* user was explicitly denied acces to cmnd on host */
+		    /* User was explicitly denied acces to cmnd on host. */
 		    return(VALIDATE_NOT_OK);
 	    top--;
 	}
