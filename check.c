@@ -63,9 +63,6 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 #include <pwd.h>
 #include <grp.h>
-#include "sudo.h"
-#include "insults.h"
-#include "version.h"
 #ifdef HAVE_KERB4
 #  include <krb.h>
 #endif /* HAVE_KERB4 */
@@ -95,6 +92,10 @@ static char rcsid[] = "$Id$";
 #else
 #  include "emul/utime.h"
 #endif /* HAVE_UTIME */
+
+#include "sudo.h"
+#include "insults.h"
+#include "version.h"
 
 
 /*
