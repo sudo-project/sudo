@@ -103,8 +103,10 @@ static int init_vars			__P((int));
 static int parse_args			__P((int, char **));
 static void initial_setup		__P((void));
 static void set_loginclass		__P((struct passwd *));
-static void usage			__P((int));
-static void usage_excl			__P((int));
+static void usage			__P((int))
+					    __attribute__((__noreturn__));
+static void usage_excl			__P((int))
+					    __attribute__((__noreturn__));
 static struct passwd *get_authpw	__P((void));
 extern int sudo_edit			__P((int, char **));
 extern void list_matches		__P((void));

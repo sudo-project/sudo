@@ -94,9 +94,11 @@ struct sudoersfile {
 /*
  * Function prototypes
  */
-static void usage		__P((void));
+static void usage		__P((void))
+				    __attribute__((__noreturn__));
 static char whatnow		__P((void));
-static RETSIGTYPE Exit		__P((int));
+static RETSIGTYPE Exit		__P((int))
+				    __attribute__((__noreturn__));
 static void setup_signals	__P((void));
 static int run_command		__P((char *, char **));
 static int check_syntax		__P((char *));
@@ -112,8 +114,10 @@ int usergr_matches		__P((char *, char *, struct passwd *));
 int userpw_matches		__P((char *, char *, struct passwd *));
 void yyerror			__P((const char *));
 void yyrestart			__P((FILE *));
-void Err			__P((int, const char *, ...));
-void Errx			__P((int, const char *, ...));
+void Err			__P((int, const char *, ...))
+				    __attribute__((__noreturn__));
+void Errx			__P((int, const char *, ...))
+				    __attribute__((__noreturn__));
 
 /*
  * External globals exported by the parser

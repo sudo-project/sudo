@@ -36,6 +36,11 @@
 # endif
 #endif /* __P */
 
+/* Define away __attribute__ for non-gcc or old gcc */
+#if !defined(__GNUC__) || __GNUC__ < 2 || __GNUC__ == 2 && __GNUC_MINOR__ < 5
+#define __attribute__(x)
+#endif
+
 /*
  * Some systems lack full limit definitions.
  */
