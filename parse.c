@@ -98,6 +98,7 @@ static const char rcsid[] = "$Sudo$";
  * Globals
  */
 int parse_error = FALSE;
+extern int keepall;
 extern FILE *yyin, *yyout;
 
 /*
@@ -111,8 +112,8 @@ static int has_meta	__P((char *));
  * allowed to run the specified command on this host as the target user.
  */
 int
-sudoers_lookup(check_cmnd)
-    int check_cmnd;
+sudoers_lookup(pwflags)
+    int pwflags;
 {
     int error;
 
@@ -126,6 +127,10 @@ sudoers_lookup(check_cmnd)
 
     /* Allocate space for data structures in the parser. */
     init_parser();
+
+    /* For most pwflags to be useful we need to keep more state around. */
+    if (pwflags && !(pwflags & PWCHECK_NEVER))
+	keepall = TRUE;
 
     /* Need to be root while stat'ing things in the parser. */
     set_perms(PERM_ROOT, 0);
@@ -146,30 +151,45 @@ sudoers_lookup(check_cmnd)
 	error = VALIDATE_NOT_OK;
     else
 	error = VALIDATE_NOT_OK | FLAG_NOPASS;
-    if (check_cmnd == TRUE) {
+    if (pwflags) {
+	error |= FLAG_NO_CHECK;
+    } else {
 	error |= FLAG_NO_HOST;
 	if (!top)
 	    error |= FLAG_NO_USER;
-    } else
-	error |= FLAG_NO_CHECK;
+    }
 
     /*
-     * Only check the actual command if the check_cmnd flag is set.
-     * It is not set for the "validate" and "list" pseudo-commands.
+     * Only check the actual command if pwflags flag is not set.
+     * It is set for the "validate", "list" and "kill" pseudo-commands.
      * Always check the host and user.
      */
-    if (check_cmnd == FALSE)
+    if (pwflags) {
+	int nopass, found;
+
+	if ((pwflags & PWCHECK_NEVER) || !def_flag(I_AUTHENTICATE))
+	    nopass = FLAG_NOPASS;
+	else
+	    nopass = -1;
+	found = 0;
 	while (top) {
 	    if (host_matches == TRUE) {
-		/* User may always validate or list on allowed hosts */
-		if (no_passwd == TRUE)
-		    return(VALIDATE_OK | FLAG_NOPASS);
-		else
-		    return(VALIDATE_OK);
+		found = 1;
+		if (!(pwflags & PWCHECK_RUNAS) || runas_matches == TRUE) {
+		    if ((pwflags & PWCHECK_ANY) && no_passwd == TRUE)
+			nopass = FLAG_NOPASS;
+		    else if ((pwflags & PWCHECK_ALL) && nopass != 0)
+			nopass = (no_passwd == TRUE) ? FLAG_NOPASS : 0;
+		}
 	    }
 	    top--;
 	}
-    else
+	if (found) {
+	    if (nopass == -1)
+		nopass = 0;
+	    return(VALIDATE_OK | nopass);
+	}
+    } else {
 	while (top) {
 	    if (host_matches == TRUE) {
 		error &= ~FLAG_NO_HOST;
@@ -196,6 +216,7 @@ sudoers_lookup(check_cmnd)
 	    }
 	    top--;
 	}
+    }
 
     /*
      * The user was not explicitly granted nor denied access.

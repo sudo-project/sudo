@@ -145,6 +145,18 @@ struct sudo_user {
 #define SUDO_UNLOCK	4		/* unlock a file */
 
 /*
+ * Flags for sudoers_lookup:
+ *  PASSWD_NEVER:  user never has to give a passwd
+ *  PASSWD_ALL:    no passwd needed if all entries for host have NOPASSWD flag
+ *  PASSWD_ANY:    no passwd needed if any entry for host has a NOPASSWD flag
+ *  PWCHECK_RUNAS: require that runas_matches be TRUE
+ */
+#define PWCHECK_NEVER	001
+#define PWCHECK_ALL	002
+#define PWCHECK_ANY	004
+#define PWCHECK_RUNAS	010
+
+/*
  * Function prototypes
  */
 #define YY_DECL int yylex __P((void))

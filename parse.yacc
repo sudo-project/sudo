@@ -90,6 +90,7 @@ int errorlineno = -1;
 int clearaliases = TRUE;
 int printmatches = FALSE;
 int pedantic = FALSE;
+int keepall = FALSE;
 
 /*
  * Alias types
@@ -411,6 +412,9 @@ cmndspec	:	runasspec nopasswd opcmnd {
 			     * the user was listed in sudoers.  Also, we
 			     * need to be able to tell whether or not a
 			     * user was listed for this specific host.
+			     *
+			     * If keepall is set and the user matches then
+			     * we need to keep entries around too...
 			     */
 			    if (user_matches != -1 && host_matches != -1 &&
 				cmnd_matches != -1 && runas_matches != -1)
@@ -418,6 +422,8 @@ cmndspec	:	runasspec nopasswd opcmnd {
 			    else if (user_matches != -1 && (top == 1 ||
 				(top == 2 && host_matches != -1 &&
 				match[0].host == -1)))
+				pushcp;
+			    else if (user_matches == TRUE && keepall)
 				pushcp;
 			    cmnd_matches = -1;
 			}
