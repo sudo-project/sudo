@@ -80,6 +80,41 @@ static void realpath_restore	__P((char *));
 
 /******************************************************************
  *
+ *  sudo_goodpath()
+ *
+ *  this function takes a path and makes sure it describes a a file
+ *  that is a normal file and executable by root.
+ */
+
+char * sudo_goodpath(path)
+    const char * path;
+{
+    struct stat statbuf;		/* for stat(2) */
+    int err;				/* if stat(2) got an error */
+
+    /* check for brain damage */
+    if (path == NULL || path[0] == '\0')
+	return(NULL);
+
+    /* we need to be root for the stat */
+    set_perms(PERM_ROOT);
+
+    err = stat(path, &statbuf);
+
+    /* discard root perms */
+    set_perms(PERM_USER);
+
+    /* make sure path describes an executable regular file */
+    if (!err && S_ISREG(statbuf.st_mode) &&(statbuf.st_mode & 0000111))
+	return(path);
+    else
+	return(NULL);
+}
+
+
+#ifdef USE_REALPATH
+/******************************************************************
+ *
  *  sudo_realpath()
  *
  *  this function takes a path and makes it fully qualified and resolves
@@ -105,12 +140,6 @@ char * sudo_realpath(old, new)
 
     /* we need to be root for this section */
     set_perms(PERM_ROOT);
-
-#ifndef USE_REALPATH
-    err = stat(new, &statbuf);
-    set_perms(PERM_USER);
-    return((err == 0) ? new : NULL);
-#endif /* USE_REALPATH */
 
     /*
      * Resolve the last component of the path if it is a link
@@ -216,3 +245,4 @@ static void realpath_restore(cwd)
 	exit(1);
     }
 }
+#endif /* USE_REALPATH */
