@@ -323,11 +323,6 @@
 /* and syslog(3) returns non-zero to denote failure */
 #undef BROKEN_SYSLOG
 
-/* The file mode, user id, and group id of the sudoers file */
-#undef SUDOERS_MODE
-#undef SUDOERS_UID
-#undef SUDOERS_GID
-
 /* The umask that the root-run prog should use */
 #undef SUDO_UMASK
 
