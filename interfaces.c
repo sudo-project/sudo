@@ -111,7 +111,7 @@ void load_interfaces()
     unsigned int localhost_mask;
     int sock, n, i;
     size_t len = sizeof(struct ifconf) + BUFSIZ;
-    char *previfname, *ifconf_buf = NULL;
+    char *previfname = "", *ifconf_buf = NULL;
 #ifdef _ISC
     struct strioctl strioctl;
 #endif /* _ISC */
