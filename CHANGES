@@ -305,3 +305,73 @@ CHANGES from sudo 1.3.1pl4
 
 103) Added fix for parse.yacc to avoid the kludge I was doing.
      (from Chris Jepeway <jepeway@cs.utk.edu>)
+
+104) Now remove the IFS envar if set instead of setting it to a "safe"
+     value to avoid problems with make and others.
+
+105) Added FAST_MATCH option to check basenames of sudo command and
+     paths listed in sudoers file.  If the basename doesn't match
+     then it is not a match.  If the basename matches, then do
+     a stat to make sure it is a valid match.
+
+106) Now only stat(2) cmnd once in path_matches() (in parse.c).  Sudo
+     was stating cmnd for *every* attempted match.  Now the stat struct
+     is cached (ie: the var is a static).
+
+107) Signal handlers in visudo are now only installed after the stmp
+     file is opened.  Previously, it was possible to erase an open
+     stmp file by sending visudo a signal within a small window.
+
+108) Added Goon Show insults from  Russell Street <r.street@auckland.ac.nz>.
+
+109) Broke out the insults into separate include files (insults.h
+     is the master and includes the appropriate one).
+
+110) Now use getwd() instead of getcwd() and provide emulation for
+     OS's w/o it.  This was done since some OS's with getwd()
+     implement getcwd() via a pipe to pwd(1).  By emulating getwd()
+     by calling getcwd() on OS's w/o getwd() we lose nothing since
+     the compiler should optimize away the extra function call.
+
+111) Added crypt() for DEC OSF/1 3.x enhanced security.
+     From "Richard L Jackson Jr" <rjackson@osf1.gmu.edu>.
+
+112) Added an option to run the command in the background (-b) as
+     suggested by Jonathan Adams <jonathan@smada.com>
+
+113) First stab at kerberos support.  I'm not really sure it is
+     possible to do this in a sane manor.  Sigh.
+
+114) Better kerberos support.  Had to use setreuid(2) but falls
+     back on a kludge if that does not exist or is broken.
+
+115) Added -p (password prompt) support.
+     Suggested by "David W. Cooley" <dwcooley@COLBY.EDU>
+
+116) Added partial implementation of -l (list) flag.
+     This is probably as good as it will get until sudo:tng.
+
+117) Added anti-spoofing code to tighten up a race condition
+     where a user could run sudo some_link and then change
+     where the link pointed after the old link had been
+     validated but before the exec().
+
+118) Now update timestamp file via utime() (and emulate via utimes()
+     if necesary) to eliminate a small race.  Works with
+     both POSIX utime() as well as old utime() in BSD <= 4.3.
+
+119) Kerberos ticket file now lives in same dirs as sudo timestamp
+     files (to avoid trouncing on normal ticket file) and is removed
+     after validation.
+
+120) Now log tty user is on as well as pwd in sudo logs.
+
+CHANGES from sudo 1.3.2
+
+121) Fixed a bug in the anti-spoofing check.
+
+122) Fixed up ISC support so that it works and looks like non-streams
+     stuff in interfaces.c.
+
+123) Now deal correctly with ip implementations that has an sa_len
+     field in struct sockaddr.
