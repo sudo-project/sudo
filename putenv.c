@@ -47,7 +47,7 @@ extern char *malloc	__P((size_t));
 #endif /* !STDC_HEADERS && !gcc */
 
 #ifndef lint
-static const char rcsid[] = "$Id$";
+static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 

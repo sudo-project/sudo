@@ -17,7 +17,7 @@
  *
  *  Please send bugs, changes, problems to sudo-bugs@cs.colorado.edu
  *
- *  $Id$
+ *  $Sudo$
  */
 
 #ifndef	_UTIME_H

@@ -34,7 +34,7 @@
  *
  *  Use at your own risk!!!  (But I would like to hear about bugs.)
  *
- *  $Id$
+ *  $Sudo$
  */
 
 #include "config.h"

@@ -561,7 +561,7 @@ char *yytext;
 #include "sudo.tab.h"
 
 #ifndef lint
-static const char rcsid[] = "$Id$";
+static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 #undef yywrap		/* guard against a yywrap macro */

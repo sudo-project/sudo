@@ -76,7 +76,7 @@ extern char *strdup	__P((const char *));
 #endif /* _S_IFLNK */
 
 #ifndef lint
-static const char rcsid[] = "$Id$";
+static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*******************************************************************

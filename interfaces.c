@@ -79,7 +79,7 @@ extern char *realloc	__P((VOID *, size_t));
 #endif /* !STDC_HEADERS && !__GNUC__ */
 
 #ifndef lint
-static const char rcsid[] = "$Id$";
+static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*

@@ -58,7 +58,7 @@ extern char *strcpy	__P((char *, const char *));
 #endif /* !STDC_HEADERS */
 
 #ifndef lint
-static const char rcsid[] = "$Id$";
+static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 

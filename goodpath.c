@@ -53,7 +53,7 @@ extern int stat		__P((const char *, struct stat *));
 #endif /* !STDC_HEADERS */
 
 #ifndef lint
-static const char rcsid[] = "$Id$";
+static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /******************************************************************

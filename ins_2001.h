@@ -17,7 +17,7 @@
  *
  *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
  *
- *  $Id$
+ *  $Sudo$
  */
 
 #ifndef _SUDO_INS_2001_H
