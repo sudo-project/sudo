@@ -153,6 +153,7 @@ main(argc, argv)
     int sudo_mode;
 #ifdef POSIX_SIGNALS
     sigset_t set, oset;
+    struct sigaction sa;
 #else
     int omask;
 #endif /* POSIX_SIGNALS */
@@ -184,18 +185,22 @@ main(argc, argv)
 # endif /* LOG_NFACILITIES */
 #endif /* LOGGING & SLOG_SYSLOG */
 
+    /* Catch children as they die... */
+#ifdef POSIX_SIGNALS
+    (void) memset((VOID *)&sa, 0, sizeof(sa));
+    sa.sa_handler = reapchild;
+    (void) sigaction(SIGCHLD, &sa, NULL);
+#else
+    (void) signal(SIGCHLD, reapchild);
+#endif /* POSIX_SIGNALS */
+
     /*
      * Block signals so the user cannot kill us at some point and
      * avoid the logging.
-     * XXX - this list is not complete!
      */
 #ifdef POSIX_SIGNALS
-    (void) sigemptyset(&set);
-    (void) sigaddset(&set, SIGHUP);
-    (void) sigaddset(&set, SIGINT);
-    (void) sigaddset(&set, SIGQUIT);
-    (void) sigaddset(&set, SIGILL);
-    (void) sigaddset(&set, SIGTSTP);
+    (void) sigfillset(&set);
+    (void) sigdelset(&set, SIGCHLD);
     (void) sigprocmask(SIG_BLOCK, &set, &oset);
 #else
     omask = sigblock(sigmask(SIGHUP)|sigmask(SIGINT)|sigmask(SIGQUIT)|sigmask(SIGILL)|sigmask(SIGTSTP));
@@ -313,7 +318,7 @@ main(argc, argv)
 	closelog();
 #endif
 
-	/* Reset signal mask. */
+	/* Reset signal mask before we exec. */
 #ifdef POSIX_SIGNALS
 	(void) sigprocmask(SIG_SETMASK, &oset, NULL);
 #else

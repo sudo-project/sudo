@@ -407,12 +407,6 @@ log_error(va_alist)
     free(logline);
     if (message != logline);
 	free(message);
-
-    /* Wait for mail to finish sending and exit. */
-    if (!(flags & NO_EXIT)) {
-	reapchild(0);
-	exit(1);
-    }
 }
 
 #ifdef _PATH_SENDMAIL
@@ -424,32 +418,14 @@ send_mail(line)
     char *p;
     int pfd[2], pid;
     time_t now;
-#ifdef POSIX_SIGNALS
-    struct sigaction sa;
-
-    (void) memset((VOID *)&sa, 0, sizeof(sa));
-#endif /* POSIX_SIGNALS */
-
-    /* Catch children as they die... */
-#ifdef POSIX_SIGNALS
-    sa.sa_handler = reapchild;
-    (void) sigaction(SIGCHLD, &sa, NULL);
-#else
-    (void) signal(SIGCHLD, reapchild);
-#endif /* POSIX_SIGNALS */
 
     if ((pid = fork()) > 0) {	/* Child. */
 
 	/* We do an explicit wait() later on... */
-#ifdef POSIX_SIGNALS
-	sa.sa_handler = SIG_DFL;
-	(void) sigaction(SIGCHLD, &sa, NULL);
-#else
-	(void) signal(SIGCHLD, SIG_DFL);
-#endif /* POSIX_SIGNALS */
+	(void) signal(SIGCHLD, SIG_IGN);
 
 	if (pipe(pfd) == -1) {
-	    (void) fprintf(stderr, "%s: cannot open pipe failed: %s\n",
+	    (void) fprintf(stderr, "%s: cannot open pipe: %s\n",
 		Argv[0], strerror(errno));
 	    exit(1);
 	}
@@ -468,8 +444,9 @@ send_mail(line)
 		(void) close(pfd[1]);
 		(void) dup2(pfd[0], STDIN_FILENO);
 		(void) close(pfd[0]);
-		/* Run sendmail as invoking user, not root. */
-		set_perms(PERM_FULL_USER, 0);
+
+		/* Run sendmail as root so user cannot kill it. */
+		set_perms(PERM_ROOT, 0);
 		execl(_PATH_SENDMAIL, "sendmail", "-t", NULL);
 		_exit(127);
 		break;
@@ -479,7 +456,8 @@ send_mail(line)
 	(void) close(pfd[0]);
 
 	/* Pipes are all setup, send message via sendmail. */
-	(void) fprintf(mail, "To: %s\nSubject: ", ALERTMAIL);
+	(void) fprintf(mail, "To: %s\nFrom: %s\nSubject: ", ALERTMAIL,
+	    user_name);
 	for (p = MAILSUBJECT; *p; p++) {
 	    /* Expand escapes in the subject */
 	    if (*p == '%' && *(p+1) != '%') {
