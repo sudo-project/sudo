@@ -525,7 +525,8 @@ init_vars(sudo_mode)
 	char pw_name[MAX_UID_T_LEN + 1];
 
 	pw.pw_uid = getuid();
-	(void) snprintf(pw_name, sizeof(pw_name), "%ld", (long) pw.pw_uid);
+	(void) snprintf(pw_name, sizeof(pw_name), "%lu",
+	    (unsigned long) pw.pw_uid);
 	pw.pw_name = pw_name;
 	sudo_user.pw = &pw;
 
