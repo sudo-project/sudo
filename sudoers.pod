@@ -540,7 +540,7 @@ USER environment variable if possible, or the first editor in the
 list that exists and is executable.  The default is the path to vi
 on your system.
 
-=back 12
+=back
 
 B<Strings that can be used in a boolean context>:
 
@@ -581,20 +581,27 @@ This is not set by default.
 This option controls when a password will be required when a user runs
 B<sudo> with the B<-v> flag.  It has the following possible values:
 
-    all		All the user's I<sudoers> entries for the
-		current host must have the C<NOPASSWD>
-		flag set to avoid entering a password.
+=over 8
 
-    any		At least one of the user's I<sudoers> entries
-		for the current host must have the
-		C<NOPASSWD> flag set to avoid entering a
-		password.
+=item all
 
-    never	The user need never enter a password to use
-		the B<-v> flag.
+All the user's I<sudoers> entries for the current host must have
+the C<NOPASSWD> flag set to avoid entering a password.
 
-    always	The user must always enter a password to use
-		the B<-v> flag.
+=item any
+
+At least one of the user's I<sudoers> entries for the current host
+must have the C<NOPASSWD> flag set to avoid entering a password.
+
+=item never
+
+The user need never enter a password to use the B<-v> flag.
+
+=item always
+
+The user must always enter a password to use the B<-v> flag.
+
+=back
 
 The default value is `all'.
 
@@ -603,24 +610,31 @@ The default value is `all'.
 This option controls when a password will be required when a
 user runs B<sudo> with the B<-l>.  It has the following possible values:
 
-    all		All the user's I<sudoers> entries for the
-		current host must have the C<NOPASSWD>
-		flag set to avoid entering a password.
+=over 8
 
-    any		At least one of the user's I<sudoers> entries
-		for the current host must have the
-		C<NOPASSWD> flag set to avoid entering a
-		password.
+=item all
 
-    never	The user need never enter a password to use
-		the B<-l> flag.
+All the user's I<sudoers> entries for the current host must have
+the C<NOPASSWD> flag set to avoid entering a password.
 
-    always	The user must always enter a password to use
-		the B<-l> flag.
+=item any
+
+At least one of the user's I<sudoers> entries for the current host
+must have the C<NOPASSWD> flag set to avoid entering a password.
+
+=item never
+
+The user need never enter a password to use the B<-l> flag.
+
+=item always
+
+The user must always enter a password to use the B<-l> flag.
+
+=back
 
 The default value is `any'.
 
-=back 12
+=back
 
 B<Lists that can be used in a boolean context>:
 
@@ -655,7 +669,7 @@ B<sudo>-spawned processes will get.  The list can be replaced, added
 to, deleted from, or disabled by using the C<=>, C<+=>, C<-=>, and
 C<!> operators respectively.  This list has no default members.
 
-=back 12
+=back
 
 When logging via syslog(3), B<sudo> accepts the following values for the syslog
 facility (the value of the B<syslog> Parameter): B<authpriv> (if your OS
