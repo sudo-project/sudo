@@ -150,7 +150,7 @@ zero_env(envp)
     char **envp;
 {
     char **ep, **nep;
-    static char *newenv[7];
+    static char *newenv[8];
     extern char *prev_user;
 
     for (ep = envp; *ep; ep++) {
@@ -198,6 +198,16 @@ zero_env(envp)
 	if (*nep == NULL)
 	    *nep++ = *ep;
     }
+
+#ifdef HAVE_LDAP
+    /*
+     * Prevent OpenLDAP from reading any user dotfiles
+     * or files in the current directory.
+     *
+     */	     
+    *nep++ = "LDAPNOINIT=1";
+#endif
+
     return(&newenv[0]);
 }
 
