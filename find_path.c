@@ -142,7 +142,7 @@ char *find_path(file)
 	if (!statfailed && (statbuf.st_mode & 0000111))
 	    return (qualify(fn));
 	else if (statfailed && errno != ENOENT && errno != ENOTDIR &&
-		 errno != EINVAL) {
+		 errno != EINVAL && errno != EPERM) {
 	    fprintf(stderr, "sudo: Can't stat %s: ", fn);
 	    perror("");
 	}
@@ -164,7 +164,7 @@ char *find_path(file)
 	if (!statfailed && (statbuf.st_mode & 0000111))
 	    return (qualify(fn));
 	else if (statfailed && errno != ENOENT && errno != ENOTDIR &&
-		 errno != EINVAL) {
+		 errno != EINVAL && errno != EPERM) {
 	    fprintf(stderr, "sudo: Can't stat %s: ", fn);
 	    perror("");
 	    return (NULL);
