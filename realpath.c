@@ -163,12 +163,19 @@ char * realpath(old, new)
 	errno = ENOTDIR;
 	return(realpath_ret(NULL, cwd));
     }
+
     *(temp++) = '\0';
     (void) strcpy(buf, temp);
 
+    /* if the last '/' is the first char in new we need to preserve it */
+    if (new[0] == '\0') {
+	new[0] = '/';
+	new[1] = '\0';
+    }
+
     /*
-     * chdir() to new and go a getcwd() to find real path
-     * then append buf (last component of the path) and return.
+     * chdir() to new and go a getcwd() to find real path then
+     * append buf * (last component of the path) and return.
      */
     if (chdir(new))
 	return(realpath_ret(NULL, cwd));
