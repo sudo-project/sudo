@@ -59,18 +59,13 @@
 #include "pathnames.h"
 #include "compat.h"
 
-#ifdef HAVE_KERB4
-#undef _PASSWD_LEN
-#define _PASSWD_LEN	BUFSIZ
-#else
 #ifndef _PASSWD_LEN
-#ifdef HAVE_C2_SECURITY
-#define	_PASSWD_LEN	24
-#else
-#define	_PASSWD_LEN	8
-#endif /* HAVE_C2_SECURITY */
+#  ifdef HAVE_C2_SECURITY
+#    define	_PASSWD_LEN	24
+#  else
+#    define	_PASSWD_LEN	8
+#  endif /* HAVE_C2_SECURITY */
 #endif /* _PASSWD_LEN */
-#endif /* HAVE_KERB4 */
 
 
 /******************************************************************
