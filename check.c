@@ -225,12 +225,18 @@ static void check_passwd()
 #ifdef __svr4__
     struct spwd *spw_ent;
 #endif /* __svr4__ */
+#if defined (hpux) && defined(HAVE_C2_SECURITY)
+    struct s_passwd *spw_ent;
+#endif /* hpux && HAVE_C2_SECURITY */
     char *encrypted;		/* this comes from /etc/passwd  */
     char *pass;			/* this is what gets entered    */
     register int counter = TRIES_FOR_PASSWORD;
 
     /* some os's need to be root to get at shadow password */
     be_root();
+#if defined (hpux) && defined(HAVE_C2_SECURITY)
+    spw_ent = getspwuid(uid);
+#endif /* hpux && HAVE_C2_SECURITY */
     pw_ent = getpwuid(uid);
     be_user();
     if (pw_ent == NULL) {
@@ -251,14 +257,23 @@ static void check_passwd()
     }
     encrypted = spw_ent -> sp_pwdp;
 #else
-    encrypted = pw_ent -> pw_passwd;
+#if defined (hpux) && defined(HAVE_C2_SECURITY)
+    if (spw_ent && spw_ent -> pw_passwd)
+	encrypted = spw_ent -> pw_passwd;
+    else
+#endif /* hpux && HAVE_C2_SECURITY */
+	encrypted = pw_ent -> pw_passwd;
 #endif /* __svr4__ */
 
     /*
      * you get TRIES_FOR_PASSWORD times to guess your password
      */
     while (counter > 0) {
+#ifdef USE_GETPASS
+	pass = (char *) getpass("Password:");
+#else
 	pass = tgetpass("Password:", PASSWORD_TIMEOUT);
+#endif /* USE_GETPASS */
 	if (!pass || *pass == '\0')
 	    exit(0);
 	if (!strcmp(encrypted, (char *) crypt(pass, encrypted)))
