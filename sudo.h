@@ -98,6 +98,9 @@
            USE_INSULTS              if you want to be insulted for typing an
                                     incorrect password like the original sudo(8)
  
+           HAL                      if you want lines from 2001 instead of
+                                    insults (must define USE_INSULTS too)
+ 
            STD_HEADERS              if you have ansi-compliant header files
 */
 
