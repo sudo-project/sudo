@@ -111,6 +111,9 @@
 #  define HAVE_KERB4
 #endif /* HAVE_KERB5 */
 
+/* Define if you use PAM.  */
+#define HAVE_PAM
+
 /* Define if you use AFS.  */
 #undef HAVE_AFS
 

@@ -77,6 +77,10 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_KERB4
 #  include <krb.h>
 #endif /* HAVE_KERB4 */
+#ifdef HAVE_PAM
+#  include <security/pam_appl.h>
+#  include <security/pam_misc.h>
+#endif /* HAVE_PAM */
 #ifdef HAVE_AFS
 #  include <afs/stds.h>
 #  include <afs/kautils.h>
@@ -112,6 +116,9 @@ static void  reminder			__P((void));
 #ifdef HAVE_KERB4
 static int   sudo_krb_validate_user	__P((struct passwd *, char *));
 #endif /* HAVE_KERB4 */
+#ifdef HAVE_PAM
+static void pam_attempt_auth            __P((void));
+#endif /* HAVE_PAM */
 #ifdef HAVE_SKEY
 static char *sudo_skeyprompt		__P((struct skey *, char *));
 #endif /* HAVE_SKEY */
@@ -130,6 +137,12 @@ union config_record configure;
 #endif /* HAVE_SECURID */
 #ifdef HAVE_SKEY
 struct skey skey;
+#endif
+#ifdef HAVE_PAM
+static struct pam_conv conv = {
+	misc_conv,
+	NULL
+};
 #endif
 #ifdef HAVE_OPIE
 struct opie opie;
@@ -164,7 +177,11 @@ void check_user()
 	if (rtn == 2)
 	    reminder();		/* do the reminder if ticket file is new */
 #endif /* NO_MESSAGE */
+#ifdef HAVE_PAM
+	pam_attempt_auth();
+#else  /* !HAVE_PAM */
 	check_passwd();
+#endif /* HAVE_PAM */
     }
 
     update_timestamp();
@@ -715,6 +732,53 @@ static int sudo_krb_validate_user(pw_ent, pass)
 }
 #endif /* HAVE_KERB4 */
 
+#ifdef HAVE_PAM
+/********************************************************************
+ *  pam_attempt_auth()
+ *
+ *  Try to authenticate the user using Pluggable Authentication
+ *  Modules (PAM). Added 9/11/98 by Gary J. Calvin
+ */
+static void pam_attempt_auth()
+{
+    pam_handle_t *pamh=NULL;
+    int retval;
+    register int counter = TRIES_FOR_PASSWORD;
+
+    /* printf("PAM Authentication\n"); */
+    retval = pam_start("sudo", user_name, &conv, &pamh);
+    if (retval != PAM_SUCCESS) {
+        pam_end(pamh, retval);
+        exit(1);
+    }
+    while (counter > 0) {
+        retval = pam_authenticate(pamh, 0);
+        if (retval == PAM_SUCCESS) {
+            set_perms(PERM_USER, 0);
+            pam_end(pamh, retval);
+            return;
+        }
+
+        --counter;
+#ifdef USE_INSULTS
+        (void) fprintf(stderr, "%s\n", INSULT);
+#else
+        (void) fprintf(stderr, "%s\n", INCORRECT_PASSWORD);
+#endif /* USE_INSULTS */
+    }
+    set_perms(PERM_USER, 0);
+
+    if (counter > 0) {
+        log_error(PASSWORD_NOT_CORRECT);
+        inform_user(PASSWORD_NOT_CORRECT);
+    } else {
+        log_error(PASSWORDS_NOT_CORRECT);
+        inform_user(PASSWORDS_NOT_CORRECT);
+    }
+    pam_end(pamh, retval);
+    exit(1);
+}
+#endif /* HAVE_PAM */
 
 #ifdef HAVE_SKEY
 /********************************************************************

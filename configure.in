@@ -135,6 +135,16 @@ AC_ARG_WITH(kerb5, [  --with-kerb5            enable kerberos v5 support],
 		;;
 esac])
 
+AC_ARG_WITH(pam, [  --with-pam              enable PAM support],
+[case $with_pam in
+    yes)       AC_DEFINE(HAVE_PAM)
+		echo 'Configuring for use with PAM'
+		;;
+    no)		;;
+    *)		echo "Ignoring unknown argument to --with-pam: $with_pam"
+		;;
+esac])
+
 AC_ARG_WITH(AFS, [  --with-AFS              enable AFS support],
 [case $with_AFS in
     yes)	AC_DEFINE(HAVE_AFS)
@@ -878,6 +888,13 @@ if test "$with_kerb4" = "yes" -o "$with_kerb5" = "yes"; then
     if test "$with_kerb5" = "yes"; then
 	SUDO_LIBS="${SUDO_LIBS} -ldes425 -lkrb5 -lcrypto -lcom_err"
     fi
+fi
+
+dnl
+dnl PAM libs and includes
+dnl
+if test "$with_pam" = "yes"; then
+    SUDO_LIBS="${SUDO_LIBS} -ldl -lpam -lpam_misc"
 fi
 
 dnl
