@@ -216,14 +216,14 @@ tgetline(fd, buf, bufsiz, timeout)
 
 	    /* Read a character, exit loop on error, EOF or EOL */
 	    n = read(fd, &c, 1);
-	    if (n != 1 || c == '\n')
+	    if (n != 1 || c == '\n' || c == '\r')
 		break;
 	    *cp++ = c;
 	}
 	free(readfds);
     } else {
 	/* Keep reading until out of space, EOF, error, or newline */
-	while (--left && (n = read(fd, &c, 1)) == 1 && c != '\n')
+	while (--left && (n = read(fd, &c, 1)) == 1 && (c != '\n' || c != '\r'))
 	    *cp++ = c;
     }
     *cp = '\0';
