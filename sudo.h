@@ -120,6 +120,7 @@ extern int top;
 #define SUDOERS_WRONG_OWNER      ( 0x0A | GLOBAL_PROBLEM )
 #define SUDOERS_NOT_FILE         ( 0x0B | GLOBAL_PROBLEM )
 #define SUDOERS_RW_OTHER         ( 0x0C | GLOBAL_PROBLEM )
+#define SPOOF_ATTEMPT            0x0D
 
 /*
  * Boolean values
@@ -196,6 +197,7 @@ extern char *user;
 extern char *epasswd;
 extern char *cmnd;
 extern char *prompt;
+extern struct stat cmnd_st;
 extern int Argc;
 extern char **Argv;
 #endif
