@@ -135,14 +135,14 @@ Special features/options:
                           links with the standard kerberos v5 libraries
                           as well as the v4 compatibility libraries.
 
+  --with-pam              Enable PAM support.  Tested on Readhat Linux 5.x
+			  but may work on earlier versions too.  Not tested
+			  on Solaris.
+
   --with-AFS              Enable AFS support with kerberos authentication.
                           Should work under AFS 3.3.  If your AFS
                           doesn't have -laudit you should be able to
                           link without it.
-
-  --with-pam              Enable PAM support.  Tested on Readhat Linux 5.x
-			  but may work on earlier versions too.  Not tested
-			  on Solaris.
 
   --with-authenticate     Enable support for the AIX 4.x general authentication
 			  function.  This will use the authentication
@@ -178,6 +178,14 @@ Special features/options:
 			  as they are space separated.
 
   --with-csops            Add CSOps standard options.
+
+  --enable-log-host       Log the hostname in the log file.
+
+  --disable-log-host      Do not log hostname in the log file (default).
+
+  --enable-log-wrap       Wrap long lines in the log file (default).
+
+  --disable-log-wrap      Do not wrap long lines in the log file.
 
 Shadow password and C2 support
 ==============================
