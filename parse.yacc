@@ -92,7 +92,7 @@ static int add_alias		__P((char *, int));
 static int more_aliases		__P((int));
 static void reset_aliases	__P((void));
 
-yyerror(s)
+int yyerror(s)
 char *s;
 {
     /* save the line the first error occured on */
@@ -104,17 +104,6 @@ char *s;
     fprintf(stderr, "<*> ");
 #endif
     parse_error = TRUE;
-}
-
-yywrap()
-{
-    /* reset values so we can reparse cleanly */
-    if (parse_error) {
-	reset_aliases();
-	top = 0;
-    }
-
-    return(1);
 }
 %}
 
@@ -375,4 +364,14 @@ reset_aliases()
 {
     (void) free(aliases);
     naliases = nslots = 0;
+}
+
+
+void parser_cleanup()
+{
+    /* reset values so we can reparse cleanly */
+    if (parse_error) {
+	reset_aliases();
+	top = 0;
+    }
 }
