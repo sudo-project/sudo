@@ -39,7 +39,7 @@ sudo - execute a command as another user
 <HR>
 <H1><A NAME="SYNOPSIS">SYNOPSIS</A></H1>
 <P>
-<STRONG>sudo</STRONG>  <STRONG>-V</STRONG> | <STRONG>-h</STRONG> | <STRONG>-l</STRONG> | <STRONG>-L</STRONG> | <STRONG>-v</STRONG> | <STRONG>-k</STRONG> | <STRONG>-K</STRONG> | <STRONG>-s</STRONG> | <STRONG>-H</STRONG> | [ <STRONG>-b</STRONG> ] | [ <STRONG>-r</STRONG> realm ] | [ <STRONG>-p</STRONG> prompt ] [ <STRONG>-u</STRONG> username/#uid] <EM>command</EM>
+<STRONG>sudo</STRONG>  <STRONG>-V</STRONG> | <STRONG>-h</STRONG> | <STRONG>-l</STRONG> | <STRONG>-L</STRONG> | <STRONG>-v</STRONG> | <STRONG>-k</STRONG> | <STRONG>-K</STRONG> | <STRONG>-s</STRONG> | <STRONG>-H</STRONG> | [ <STRONG>-b</STRONG> ] | [ <STRONG>-p</STRONG> prompt ] [ <STRONG>-u</STRONG> username/#uid] <EM>command</EM>
 
 
 
@@ -116,11 +116,6 @@ password.
 <P>
 The <CODE>-b</CODE> (<EM>background</EM>) option tells <STRONG>sudo</STRONG> to run the given command in the background. Note that if you use the <CODE>-b</CODE>
 option you cannot use shell job control to manipulate the command.
-
-<DT><STRONG><A NAME="item__r">-r</A></STRONG><DD>
-<P>
-The <CODE>-r</CODE> (<EM>realm</EM>) option is only available if <STRONG>sudo</STRONG> was configured with <STRONG>Kerberos</STRONG> version 5 support. It allows the user to specify a
-<STRONG>Kerberos</STRONG> realm other than the system default to use when authenticating the user via <STRONG>Kerberos</STRONG>.
 
 <DT><STRONG><A NAME="item__p">-p</A></STRONG><DD>
 <P>

@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.37  1999/10/12 00:05:39  millert
-''' document -L flag
+''' Revision 1.38  1999/10/13 04:18:40  millert
+''' Remove -r realm option
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH SUDO 8 "1.6" "11/Oct/1999" "MAINTENANCE COMMANDS"
+.TH SUDO 8 "1.6" "12/Oct/1999" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -194,7 +194,7 @@
 sudo \- execute a command as another user
 .SH "SYNOPSIS"
 \fBsudo\fR \fB\-V\fR | \fB\-h\fR | \fB\-l\fR | \fB\-L\fR | \fB\-v\fR | \fB\-k\fR | \fB\-K\fR | \fB\-s\fR | \fB\-H\fR |
-[ \fB\-b\fR ] | [ \fB\-r\fR realm ] | [ \fB\-p\fR prompt ] [ \fB\-u\fR username/#uid] \fIcommand\fR
+[ \fB\-b\fR ] | [ \fB\-p\fR prompt ] [ \fB\-u\fR username/#uid] \fIcommand\fR
 .SH "DESCRIPTION"
 \fBsudo\fR allows a permitted user to execute a \fIcommand\fR as the
 superuser or another user, as specified in the sudoers file.  The
@@ -252,11 +252,6 @@ entirely.  This option does not require a password.
 The \f(CW-b\fR (\fIbackground\fR) option tells \fBsudo\fR to run the given
 command in the background.  Note that if you use the \f(CW-b\fR
 option you cannot use shell job control to manipulate the command.
-.Ip "-r" 4
-The \f(CW-r\fR (\fIrealm\fR) option is only available if \fBsudo\fR was configured
-with \fBKerberos\fR version 5 support.  It allows the user to specify a
-\fBKerberos\fR realm other than the system default to use when authenticating
-the user via \fBKerberos\fR.
 .Ip "-p" 4
 The \f(CW-p\fR (\fIprompt\fR) option allows you to override the default
 password prompt and use a custom one.  If the password prompt
@@ -474,8 +469,6 @@ are generally safe).
 .IX Item "-K"
 
 .IX Item "-b"
-
-.IX Item "-r"
 
 .IX Item "-p"
 

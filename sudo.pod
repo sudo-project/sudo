@@ -42,7 +42,7 @@ sudo - execute a command as another user
 =head1 SYNOPSIS
 
 B<sudo> B<-V> | B<-h> | B<-l> | B<-L> | B<-v> | B<-k> | B<-K> | B<-s> | B<-H> |
-[ B<-b> ] | [ B<-r> realm ] | [ B<-p> prompt ] [ B<-u> username/#uid] I<command>
+[ B<-b> ] | [ B<-p> prompt ] [ B<-u> username/#uid] I<command>
 
 =head1 DESCRIPTION
 
@@ -122,13 +122,6 @@ entirely.  This option does not require a password.
 The C<-b> (I<background>) option tells B<sudo> to run the given
 command in the background.  Note that if you use the C<-b>
 option you cannot use shell job control to manipulate the command.
-
-=item -r
-
-The C<-r> (I<realm>) option is only available if B<sudo> was configured
-with B<Kerberos> version 5 support.  It allows the user to specify a
-B<Kerberos> realm other than the system default to use when authenticating
-the user via B<Kerberos>.
 
 =item -p
 
