@@ -225,8 +225,9 @@ It is not an error to use the C<-=> operator to remove an element
 that does not exist in a list.
 
 Note that since the I<sudoers> file is parsed in order the best place
-to put the Defaults section is after the Host, User, and Cmnd aliases
-but before the user specifications.
+to put the Defaults section is after the C<Host_Alias>, C<User_Alias>,
+and C<Cmnd_Alias> specifications but before any C<Runas_Alias> or user
+specifications.
 
 B<Flags>:
 
@@ -566,6 +567,8 @@ The default value is C<@passprompt@>.
 
 The default user to run commands as if the B<-u> flag is not specified
 on the command line.  This defaults to C<@runas_default@>.
+Note that if I<runas_default> is set it B<must> occur before
+any C<Runas_Alias> specifications.
 
 =item syslog_goodpri
 
