@@ -67,9 +67,6 @@ case "$OS" in
 		;;
     "aix")	echo "Looks like AIX"
 		AC_DEFINE(_ALL_SOURCE)
-		if test -z "$GCC"; then
-		    STATIC_FLAGS="-bnso -bI:/lib/syscalls.exp -bI:./aixcrypt.exp -liconv -bnodelcsect"
-		fi
 		;;
     "hp-ux")	echo "Looks like HP-UX"
 		if test -z "$GCC"; then
@@ -120,9 +117,9 @@ case "$OS" in
 		;;
 esac
 dnl
-dnl We can't make a static binary on solaris...
+dnl We can't make a static binary on solaris and it causes probs on AIX
 dnl
-if test -n "$GCC" -a -n "$OS" -a "$OS" != "solaris" ; then
+if test -n "$GCC" -a -n "$OS" -a "$OS" != "solaris" -a "$OS" != "aix" ; then
     STATIC_FLAGS="-static"
 fi
 dnl
