@@ -34,6 +34,7 @@ echo 'Configuring for C2 security')
 dnl
 dnl --with-AFS
 AC_WITH(AFS, AC_DEFINE(HAVE_AFS)
+AFS=1
 echo 'Configuring for use with AFS')
 dnl
 dnl --with-csops
@@ -68,6 +69,9 @@ case "$OS" in
 		AC_DEFINE(_ALL_SOURCE)
 		if test -z "$GCC"; then
 		    STATIC_FLAGS="-bnso -bI:/lib/syscalls.exp -bI:./aixcrypt.exp -liconv -bnodelcsect"
+		fi
+		if test -n "$AFS" ; then
+		    LIBS="${LIBS} -ls"
 		fi
 		;;
     "hp-ux")	echo "Looks like HP-UX"
@@ -119,6 +123,12 @@ dnl We can't make a static binary on solaris...
 dnl
 if test -n "$GCC" -a -n "$OS" -a "$OS" != "solaris" ; then
     STATIC_FLAGS="-static"
+fi
+dnl
+dnl extra AFS libs
+dnl
+if test -n "$AFS" ; then
+    LIBS="${LIBS} -L/usr/lib/afs -lkauth -lprot -lauth -lubik -lrxkad -lsys -ldes -lrx -llwp -lcom_err -laudit -lutil"
 fi
 dnl
 dnl C compiler checks (to be done after os checks)
