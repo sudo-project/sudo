@@ -152,30 +152,6 @@ AC_DEFUN(SUDO_TYPE_SSIZE_T,
 [SUDO_CHECK_TYPE(ssize_t, int)])
 
 dnl
-dnl Check to see if POSIX utime() takes a null arg
-dnl (only change from AC_FUNC_UTIME_NULL is an added sleep(1)
-dnl
-AC_DEFUN(SUDO_FUNC_UTIME_NULL,
-[AC_MSG_CHECKING(whether utime accepts a null argument)
-AC_CACHE_VAL(ac_cv_func_utime_null,
-[rm -f conftestdata; > conftestdata
-# Sequent interprets utime(file, 0) to mean use start of epoch.  Wrong.
-AC_TRY_RUN([#include <sys/types.h>
-#include <sys/stat.h>
-main() {
-struct stat s, t;
-exit(!(stat ("conftestdata", &s) == 0 && !sleep(1) && utime("conftestdata", (long *)0) == 0
-&& stat("conftestdata", &t) == 0 && t.st_mtime >= s.st_mtime
-&& t.st_mtime - s.st_mtime < 120));
-}], ac_cv_func_utime_null=yes, ac_cv_func_utime_null=no,
-  ac_cv_func_utime_null=no)
-rm -f core core.* *.core])dnl
-AC_MSG_RESULT($ac_cv_func_utime_null)
-if test $ac_cv_func_utime_null = yes; then
-  AC_DEFINE(HAVE_UTIME_NULL)
-fi
-])
-
 dnl check for POSIX utime() using struct utimbuf
 dnl
 AC_DEFUN(SUDO_FUNC_UTIME_POSIX,
