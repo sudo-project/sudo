@@ -59,8 +59,7 @@ struct childinfo {
 };
 struct syscallhandler {
     int num;
-    void (*handler)
-	__P((int, struct str_msg_ask *, struct systrace_answer *));
+    void (*handler) __P((int, struct str_msg_ask *, struct systrace_answer *));
     struct syscallhandler *next;
 };
 
@@ -253,8 +252,7 @@ systrace_attach(pid)
 		memset(&ans, 0, sizeof(ans));
 		ans.stra_pid = msg.msg_pid;
 		ans.stra_seqnr = msg.msg_seqnr;
-		check_syscall(fd, &msg.msg_data.msg_ask,
-		    &ans, &handlers);
+		check_syscall(fd, &msg.msg_data.msg_ask, &ans, &handlers);
 		if ((ioctl(fd, STRIOCANSWER, &ans)) == -1)
 		    goto fail;
 		break;
@@ -266,7 +264,6 @@ systrace_attach(pid)
 		 *       the various emulations are.
 		 */
 		warnx("change in emul");
-		update_child(&children, msg.msg_pid, msg.msg_data.msg_ugid.uid);
 		memset(&ans, 0, sizeof(ans));
 		ans.stra_pid = msg.msg_pid;
 		ans.stra_seqnr = msg.msg_seqnr;
