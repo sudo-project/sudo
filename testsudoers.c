@@ -64,12 +64,13 @@ extern struct interface *interfaces;
 extern int num_interfaces;
 
 char *cmnd = NULL;
-char *cmnd_args = NULL;
 char host[MAXHOSTNAMELEN+1];
 char cwd[MAXPATHLEN+1];
 struct passwd *user_pw_ent;
 char **Argv;
 int  Argc;
+char **NewArgv;
+int  NewArgc;
 uid_t uid;
 
 
@@ -77,8 +78,11 @@ uid_t uid;
  * return TRUE if cmnd matches, in the sudo sense,
  * the pathname in path; otherwise, return FALSE
  */
-int path_matches(cmnd, path)
-    char *cmnd, *path;
+int command_matches(cmnd, user_args, path, sudoers_args)
+    char *cmnd;
+    char **user_args;
+    char *path;
+    char **sudoers_args;
 {
     int clen, plen;
     char *args;
@@ -92,12 +96,13 @@ int path_matches(cmnd, path)
     plen = strlen(path);
     if (path[plen - 1] != '/') {
 	if (strcmp(cmnd, path) == 0) {
-	    if (!cmnd_args && !args)
+	    if (!sudoers_args) {
 		return(TRUE);
-	    else if (cmnd_args && args)
-		return((strcmp(cmnd_args, args) == 0));
-	    else
+	    } else if (user_args && sudoers_args) {
+		return(compare_args(user_args, sudoers_args));
+	    } else {
 		return(FALSE);
+	    }
 	} else
 	    return(FALSE);
     }
@@ -225,6 +230,7 @@ main(argc, argv)
 	exit(1);
     }
 
+    /* XXX - need to set NewArgv and NewArgc */
     Argv = argv;
     Argc = argc;
 
@@ -256,4 +262,51 @@ main(argc, argv)
     /* dump aliases */
     (void) printf("Matching Aliases --\n");
     dumpaliases();
+}
+
+
+/*
+ * Returns TRUE if "s" has shell meta characters in it,
+ * else returns FALSE.
+ */
+int has_meta(s)
+    char *s;
+{
+    register char *t;
+    
+    for (t = s; *t; t++) {
+	if (*t == '\\' || *t == '?' || *t == '*' || *t == '[' || *t == ']')
+	    return(TRUE);
+    }
+    return(FALSE);
+}
+
+
+/*
+ * Compare two arguments lists and return TRUE if they are
+ * the same (inc. wildcard matches) or FALSE if they differ.
+ */
+int compare_args(user_args, sudoers_args)
+    char **user_args;
+    char **sudoers_args;
+{
+    char **ua, **sa;
+
+    for (ua=user_args, sa=sudoers_args; *ua && *sa; ua++, sa++) {
+	/* only do wildcard match if there are meta chars */
+	/* XXX - is this really any faster than wildmat() for all? */
+	if (has_meta(*sa)) {
+	    if (wildmat(*ua, *sa) != 1)
+		return(FALSE);
+	} else {
+	    if (strcmp(*ua, *sa))
+		return(FALSE);
+	}
+    }
+
+    /* return false unless we got to the end of each */
+    if (*ua || *sa)
+	return(FALSE);
+    else
+	return(TRUE);
 }
