@@ -78,6 +78,9 @@
 /* Define to 1 if you have the `dirfd' function (not macro). */
 #undef HAVE_DIRFD
 
+/* Define to 1 if your `DIR' contains dd_fd. */
+#undef HAVE_DD_FD
+
 /* Define to 1 if you have the `dispcrypt' function. */
 #undef HAVE_DISPCRYPT
 
