@@ -558,7 +558,8 @@ init_vars(sudo_mode)
 	user_groups = emalloc2(user_ngroups, sizeof(gid_t));
 	if (getgroups(user_ngroups, user_groups) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
-    }
+    } else
+	user_ngroups = 0;
 #endif
 
     if (def_fqdn)
