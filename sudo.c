@@ -97,15 +97,13 @@ static char rcsid[] = "$Id$";
 #include <arpa/inet.h>
 #include <net/if.h>
 #include <sys/param.h>
-#ifdef _AIX
-#include <sys/id.h>
-#endif /* _AIX */
 #if defined(__osf__) && defined(HAVE_C2_SECURITY)
 #include <sys/security.h>
 #include <prot.h>
 #endif /* __osf__ && HAVE_C2_SECURITY */
 
 #include "sudo.h"
+#include "options.h"
 #include "version.h"
 
 #ifndef STDC_HEADERS
