@@ -74,7 +74,7 @@ to run sudo with the B<-l> or B<-v> flags.  This allows users to
 determine for themselves whether or not they are allowed to use
 B<sudo>.
 
-B<sudo> can log both successful an unsuccessful attempts (as well
+B<sudo> can log both successful and unsuccessful attempts (as well
 as errors) to syslog(3), a log file, or both.  By default B<sudo>
 will log via syslog(3) but this is changeable at configure time
 or via the I<sudoers> file.
@@ -147,7 +147,7 @@ with resources limited by the specified login class.  The I<class>
 argument can be either a class name as defined in /etc/login.conf,
 or a single '-' character.  Specifying a I<class> of C<-> indicates
 that the command should be run restricted by the default login
-capibilities for the user the command is run as.  If the I<class>
+capabilities for the user the command is run as.  If the I<class>
 argument specifies an existing user class, the command must be run
 as root, or the B<sudo> command must be run from a shell that is already
 root.  This option is only available on systems with BSD login classes
@@ -237,7 +237,7 @@ B<sudo> will check the ownership of its timestamp directory
 (F<@timedir@> by default) and ignore the directory's contents if
 it is not owned by root and only writable by root.  On systems that
 allow non-root users to give away files via chown(2), if the timestamp
-directory is located in a directory writable by anyone (eg: F</tmp>),
+directory is located in a directory writable by anyone (e.g.: F</tmp>),
 it is possible for a user to create the timestamp directory before
 B<sudo> is run.  However, because B<sudo> checks the ownership and
 mode of the directory and its contents, the only damage that can
