@@ -533,9 +533,14 @@ void inform_user(code)
 	    break;
 
 	case VALIDATE_NOT_OK:
-	    (void) fprintf(stderr,
-		"Sorry, user %s is not allowed to execute \"%s %s\" on %s.\n\n",
-		user, cmnd, cmnd_args, host);
+	    if (cmnd_args)
+		(void) fprintf(stderr,
+		    "Sorry, user %s is not allowed to execute \"%s %s\" on %s.\n\n",
+		    user, cmnd, cmnd_args, host);
+	    else
+		(void) fprintf(stderr,
+		    "Sorry, user %s is not allowed to execute \"%s\" on %s.\n\n",
+		    user, cmnd, host);
 	    break;
 
 	case VALIDATE_ERROR:
