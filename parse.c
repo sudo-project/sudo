@@ -31,6 +31,9 @@ static char rcsid[] = "$Id$";
 #include "config.h"
 
 #include <stdio.h>
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif /* STDC_HEADERS */
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
@@ -47,6 +50,7 @@ static char rcsid[] = "$Id$";
 #include <sys/param.h>
 #include <sys/types.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/stat.h>
 #if HAVE_DIRENT_H
@@ -84,7 +88,7 @@ int validate(check_cmnd)
     int check_cmnd;
 {
     FILE *sudoers_fp;
-    int i, return_code;
+    int return_code;
 
     /* become sudoers file owner */
     set_perms(PERM_SUDOERS);

@@ -43,6 +43,9 @@ static char rcsid[] = "$Id$";
 #include "config.h"
 
 #include <stdio.h>
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#endif /* STDC_HEADERS */
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
@@ -52,11 +55,15 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
+#include <malloc.h>   
+#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <sys/errno.h>
 #include <netinet/in.h>
 
@@ -119,11 +126,11 @@ static void syslog_wrapper(pri, fmt, arg1, arg2)
 void log_error(code)
     int code;
 {
-    mode_t oldmask;
     char *p;
     int count;
     time_t now;
 #if (LOGGING & SLOG_FILE)
+    mode_t oldmask;
     FILE *fp;
 #endif /* LOGGING & SLOG_FILE */
 #if (LOGGING & SLOG_SYSLOG)
@@ -184,7 +191,8 @@ void log_error(code)
 
 	case GLOBAL_NO_PW_ENT:
 	    (void) sprintf(p,
-		"There is no passwd entry for uid %d (TTY=%s).  ", uid, tty);
+		"There is no passwd entry for uid %ld (TTY=%s).  ",
+		(long) uid, tty);
 	    break;
 
 	case PASSWORD_NOT_CORRECT:
@@ -569,8 +577,7 @@ void inform_user(code)
 	    break;
 
 	case PASSWORD_NOT_CORRECT:
-	    (void) fprintf(stderr, "Password not entered correctly\n\n",
-		TRIES_FOR_PASSWORD);
+	    (void) fprintf(stderr, "Password not entered correctly\n\n");
 	    break;
 
 	case PASSWORDS_NOT_CORRECT:

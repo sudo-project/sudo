@@ -112,8 +112,10 @@ static void  check_passwd		__P((void));
 static int   touch			__P((char *));
 static void  update_timestamp		__P((void));
 static void  reminder			__P((void));
-static char *osf_C2_crypt		__P((char *, char *));
 static int   sudo_krb_validate_user	__P((char *, char *));
+#if defined(__alpha) && defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
+static char *osf_C2_crypt		__P((char *, char *));
+#endif /* __alpha && (SHADOW_TYPE == SPW_SECUREWARE) */
 int   user_is_exempt			__P((void));
 
 /*
@@ -218,7 +220,7 @@ static int check_timestamp()
     /*
      * walk through the path one directory at a time
      */
-    for (p = timestampfile + 1; p = strchr(p, '/'); *p++ = '/') {
+    for (p = timestampfile + 1; (p = strchr(p, '/')); *p++ = '/') {
 	*p = '\0';
 	if (stat(timestampfile, &statbuf) < 0) {
 	    if (strcmp(timestampfile, _PATH_SUDO_TIMEDIR))
@@ -354,9 +356,9 @@ static void update_timestamp()
 
 void remove_timestamp()
 {
+#ifdef USE_TTY_TICKETS
     char *p;
 
-#ifdef USE_TTY_TICKETS
     if (p = strrchr(tty, '/'))
 	p++;
     else
