@@ -105,6 +105,9 @@
                                     insults (must define USE_INSULTS too)
  
            STD_HEADERS              if you have ansi-compliant header files
+ 
+           USE_EXECVE               if you want to use execve() instead of
+                                    execvp()
 */
 
 
