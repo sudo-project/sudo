@@ -1658,7 +1658,7 @@ YY_RULE_SETUP
 #line 171 "parse.lex"
 {
 			    BEGIN INITIAL;
-			    yyless(1);
+			    yyless(0);
 			    return(COMMAND);
 			}			/* end of command line args */
 	YY_BREAK
