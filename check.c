@@ -650,9 +650,11 @@ static char *sudo_skeyprompt(user_skey, p)
     char *p;
 {
     char skeyprompt[80];
+#ifndef LONG_SKEY_PROMPT
     static char *old_prompt = NULL;
     static int plen;
     char *new_prompt;
+#endif /* LONG_SKEY_PROMPT */
 
     /* return the old prompt if we cannot get s/key info */
     if (skeychallenge(user_skey, user_name, skeyprompt)) {
@@ -665,6 +667,18 @@ static char *sudo_skeyprompt(user_skey, p)
 	return(p);
 #  endif /* SKEY_ONLY */
     }
+
+#ifdef LONG_SKEY_PROMPT
+    /* separate s/key challenge and prompt for easy snarfing */
+    if (skeyprompt[0] == 's' && skeyprompt[1] == '/')
+	(void) puts(&skeyprompt[2]);
+    else
+	(void) puts(skeyprompt);
+
+    /* return old prompt unmodified */
+    return(p);
+
+#else
 
     /* keep a pointer to the original prompt around for future reference */
     if (old_prompt == NULL) {
@@ -684,19 +698,12 @@ static char *sudo_skeyprompt(user_skey, p)
 	exit(1);
     }
 
-#ifdef LONG_SKEY_PROMPT
-    /* separate s/key challenge and prompt for easy snarfing */
-    if (skeyprompt[0] == 's' && skeyprompt[1] == '/')
-	(void) sprintf(new_prompt, "%s\n%s", &skeyprompt[2], old_prompt);
-    else
-	(void) sprintf(new_prompt, "%s\n%s", skeyprompt, old_prompt);
-#else
     /* embed the s/key challenge into the new password prompt */
     (void) strncpy(new_prompt, old_prompt, plen);
     (void) sprintf(new_prompt + plen, " [%s]:", skeyprompt);
-#endif /* LONG_SKEY_PROMPT */
 
     return(new_prompt);
+#endif /* LONG_SKEY_PROMPT */
 }
 #endif /* HAVE_SKEY */
 
