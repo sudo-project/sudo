@@ -65,7 +65,7 @@ NCR	3.00	5100	bundled cc	1.4	Mark Rauschkolb	 --with-getpass
 Unicos	9.0.1ai	C90	bundled cc	1.5	Sunit Nangia	none
 
 Systems on which CU sudo is expected to run on but hasn't been tested.
-If you can verify any of these, please send mail to sudo-bugs@cs.colorado.edu
+If you can verify any of these, please send mail to sudo-bugs@courtesan.com
 
  Op. System	CPU	Compilers	Sudo	Reported	 Special
 Name	Rev	Arch	Used		Version	By		 Options

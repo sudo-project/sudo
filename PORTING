@@ -50,5 +50,6 @@ possible to make it work by modifying the ISC streams support
 and network address support, you can just define STUB_LOAD_INTERFACES
 to get a do-nothing load_interfaces() stub function.
 
-If you port sudo to a new architecture, please send your changes to
-    sudo-bugs@cs.colorado.edu
+If you port sudo to a new architecture, please send the output of
+"configure" and your changes to:
+    sudo-bugs@courtesan.com
