@@ -167,6 +167,7 @@ path_matches(cmnd, path)
     struct dirent *dent;
     char buf[MAXCOMMANDLENGTH+1];
     static char *c;
+    char *args;
 
     /* only need to stat cmnd once since it never changes */
     if (cmnd_st.st_dev == 0) {
@@ -176,6 +177,11 @@ path_matches(cmnd, path)
 	    c = cmnd;
 	else
 	    c++;
+    }
+
+    /* if the given path has command line args, split them out */
+    if ((args = strchr(path, ' '))) {
+	*args++ = '\0';
     }
 
     plen = strlen(path);
@@ -193,6 +199,20 @@ path_matches(cmnd, path)
 #endif /* FAST_MATCH */
 
 	if (stat(path, &pst) < 0)
+	    return(FALSE);
+
+	/* XXX - clean up this monstrosity! */
+	if (args)
+	    *(args - 1) = ' ';
+
+	if (cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino) {
+	    if (!cmnd_args && !args)
+		return(TRUE);
+	    else if (cmnd_args && args)
+		return((strcmp(cmnd_args, args) == 0));
+	    else
+		return(FALSE);
+	} else
 	    return(FALSE);
 	return(cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino);
     }
