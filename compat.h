@@ -89,7 +89,7 @@
  * For alternate password schemes we need longer passwords.
  * This is a bit, ummm, gross but necesary.
  */
-#if defined(HAVE_KERB4) || defined(HAVE_DCE) || defined(HAVE_SKEY)
+#if defined(HAVE_KERB4) || defined(HAVE_AFS) || defined(HAVE_DCE) || defined(HAVE_SKEY)
 #  undef _PASSWD_LEN
 #  define _PASSWD_LEN		256
 #else
