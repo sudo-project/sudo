@@ -343,7 +343,8 @@ static void update_timestamp()
 
 	    if (fd < 0)
 		perror("update_timestamp: open");
-	    close(fd);
+	    else
+		close(fd);
 	}
 
 	/* relinquish root */
