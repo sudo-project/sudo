@@ -702,7 +702,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_CHECK_FUNCS(strchr strrchr memcpy memset sysconf sigaction tzset strcasecmp)
+AC_CHECK_FUNCS(strchr strrchr memcpy memset sysconf sigaction tzset strcasecmp seteuid)
 if test "$SHADOW_TYPE" = "SPW_SECUREWARE"; then
     AC_CHECK_FUNCS(bigcrypt)
 fi
