@@ -7,13 +7,13 @@
 #
 
 syslog_ifac
-	T_INT
+	T_UINT
 	NULL
 syslog_igoodpri
-	T_INT
+	T_UINT
 	NULL
 syslog_ibadpri
-	T_INT
+	T_UINT
 	NULL
 syslog
 	T_LOGFAC|T_BOOL
@@ -106,16 +106,16 @@ env_reset
 	T_FLAG
 	"Reset the environment to a default set of variables"
 loglinelen
-	T_INT|T_BOOL
+	T_UINT|T_BOOL
 	"Length at which to wrap log file lines (0 for no wrap): %d"
 timestamp_timeout
 	T_INT|T_BOOL
 	"Authentication timestamp timeout: %d minutes"
 passwd_timeout
-	T_INT|T_BOOL
+	T_UINT|T_BOOL
 	"Password prompt timeout: %d minutes"
 passwd_tries
-	T_INT
+	T_UINT
 	"Number of tries to enter a password: %d"
 umask
 	T_MODE|T_BOOL
@@ -160,10 +160,10 @@ env_keep
 	T_STR|T_BOOL
 	"Environment variables to preserve: %s"
 listpw_i
-	T_INT
+	T_UINT
 	NULL
 verifypw_i
-	T_INT
+	T_UINT
 	NULL
 listpw
 	T_PWFLAG
