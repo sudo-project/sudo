@@ -6391,8 +6391,8 @@ else
 LIBOBJS="$LIBOBJS utime.o"
 fi
 
-echo $ac_n "checking for working fnmatch""... $ac_c" 1>&6
-echo "configure:6396: checking for working fnmatch" >&5
+echo $ac_n "checking for working fnmatch with FNM_CASEFOLD""... $ac_c" 1>&6
+echo "configure:6396: checking for working fnmatch with FNM_CASEFOLD" >&5
 if eval "test \"`echo '$''{'sudo_cv_func_fnmatch'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -6404,7 +6404,7 @@ else
 #line 6405 "configure"
 #include "confdefs.h"
 #include <fnmatch.h>
-main() { exit(fnmatch("/*/bin/echo *", "/usr/bin/echo just a test", 0)); }
+main() { exit(fnmatch("/*/bin/echo *", "/usr/bin/echo just a test", FNM_CASEFOLD)); }
 
 EOF
 if { (eval echo configure:6411: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
