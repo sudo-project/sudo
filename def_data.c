@@ -253,7 +253,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	NULL,
     }, {
 	"ignore_local_sudoers", T_FLAG,
-	"If LDAP directory is up, do we ignore local sudoers file: %s",
+	"If LDAP directory is up, do we ignore local sudoers file",
 	NULL,
     }, {
 	NULL, 0, NULL

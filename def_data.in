@@ -184,4 +184,4 @@ env_keep
 	"Environment variables to preserve:"
 ignore_local_sudoers
 	T_FLAG
-	"If LDAP directory is up, do we ignore local sudoers file: %s"
+	"If LDAP directory is up, do we ignore local sudoers file"
