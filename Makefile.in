@@ -330,7 +330,7 @@ realclean: distclean
 
 cleandir: realclean
 
-dist: $(DISTFILES)
+dist:
 	rm -f ../sudo-$(VERSION).tar.gz
 	( cd .. ; TF="/tmp/sudo.dist$$$$" ; rm -f $$TF ; for i in $(DISTFILES) ; \
 	  do echo sudo-$(VERSION)/$$i >> $$TF ; done ; \
