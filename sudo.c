@@ -259,6 +259,7 @@ char ** tenvp;
 
 for ( envlen=0; envp[envlen]; envlen++ )
     ; /* noop */
+++envlen;
 
 Envp = (char **) malloc ( sizeof (char **) * envlen );
 
