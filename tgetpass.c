@@ -139,7 +139,8 @@ tgetpass(prompt, timeout, flags)
     int timeout;
     int flags;
 {
-    sigaction_t sa, saveint, savehup, savequit, saveterm, savetstp;
+    sigaction_t sa, saveint, savehup, savequit, saveterm;
+    sigaction_t savetstp, savettin, savettou;
     static char buf[SUDO_PASS_MAX + 1];
     int input, output, save_errno;
     struct TERM term, oterm;
@@ -164,11 +165,13 @@ restart:
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;		/* don't restart system calls */
     sa.sa_handler = handler;
-    (void)sigaction(SIGINT, &sa, &saveint);
-    (void)sigaction(SIGHUP, &sa, &savehup);
-    (void)sigaction(SIGQUIT, &sa, &savequit);
-    (void)sigaction(SIGTERM, &sa, &saveterm);
-    (void)sigaction(SIGTSTP, &sa, &savetstp);
+    (void) sigaction(SIGINT, &sa, &saveint);
+    (void) sigaction(SIGHUP, &sa, &savehup);
+    (void) sigaction(SIGQUIT, &sa, &savequit);
+    (void) sigaction(SIGTERM, &sa, &saveterm);
+    (void) sigaction(SIGTSTP, &sa, &savetstp);
+    (void) sigaction(SIGTTIN, &sa, &savettin);
+    (void) sigaction(SIGTTOU, &sa, &savettou);
 
     /* Turn echo off/on as specified by flags.  */
     if (term_getattr(input, &oterm) == 0) {
@@ -198,6 +201,8 @@ restart:
     (void) sigaction(SIGQUIT, &savequit, NULL);
     (void) sigaction(SIGTERM, &saveterm, NULL);
     (void) sigaction(SIGTSTP, &savetstp, NULL);
+    (void) sigaction(SIGTTIN, &savettin, NULL);
+    (void) sigaction(SIGTTOU, &savettou, NULL);
     if (input != STDIN_FILENO)
 	(void) close(input);
 
@@ -207,9 +212,12 @@ restart:
      */
     if (signo) {
 	kill(getpid(), signo); 
-	if (signo == SIGTSTP) {
-	    signo = 0;
-	    goto restart;
+	switch (signo) {
+	    case SIGTSTP:
+	    case SIGTTIN:
+	    case SIGTTOU:
+		signo = 0;
+		goto restart;
 	}
     }
 
