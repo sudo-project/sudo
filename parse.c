@@ -428,15 +428,9 @@ static int compare_args(user_args, sudoers_args)
     char **ua, **sa;
 
     for (ua=user_args, sa=sudoers_args; *ua && *sa; ua++, sa++) {
-	/* only do wildcard match if there are meta chars */
-	/* XXX - is this really any faster than fnmatch() for all? */
-	if (has_meta(*sa)) {
-	    if (fnmatch(*sa, *ua, FNM_PATHNAME))
-		return(FALSE);
-	} else {
-	    if (strcmp(*sa, *ua))
-		return(FALSE);
-	}
+	/* Match and honor wildcards */
+	if (fnmatch(*sa, *ua, FNM_PATHNAME) != 0)
+	    return(FALSE);
     }
 
     /*
