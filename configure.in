@@ -140,7 +140,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_HAVE_FUNCS(getwd strchr strrchr sysconf sigaction)
+AC_HAVE_FUNCS(getwd strchr strrchr sysconf sigaction strdup realpath getcwd bzero)
 dnl
 dnl Function checks w/ replacements
 dnl
