@@ -164,7 +164,10 @@
 #  define memset(S, X, N)	(bzero(S, N))
 #endif
 
-/* Define if you have sysconf(3c).  */
+/* Define if you have sigaction(2).  */
+#undef HAVE_SIGACTION
+
+/* Define if you have sysconf(3).  */
 #undef HAVE_SYSCONF
 
 /* Define if you have strcasecmp(3).  */
