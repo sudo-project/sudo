@@ -144,7 +144,7 @@ int find_path(file, command, ocommand)
 	return (FALSE);
 
     if ((path = strdup(path)) == NULL) {
-	fprintf(stderr, "sudo: out of memory!\n");
+	(void) fprintf(stderr, "sudo: out of memory!\n");
 	exit(1);
     }
     origpath=path;
@@ -229,7 +229,7 @@ static char * realpath_exec(path, file, command)
     } else if (errno && errno != ENOENT && errno != ENOTDIR && errno != EINVAL
 	&& errno != EPERM && errno != EACCES) {
 	/* sudo_realpath() got an error */
-	fprintf(stderr, "sudo: Error resolving %s: ", fn);
+	(void) fprintf(stderr, "sudo: Error resolving %s: ", fn);
 	perror("");
     }
 
