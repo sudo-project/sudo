@@ -259,7 +259,10 @@ by default.
 
 If set, B<sudo> will ignore '.' or '' (current dir) in the C<PATH>
 environment variable; the C<PATH> itself is not modified.  This
-flag is I<@ignore_dot@> by default.
+flag is I<@ignore_dot@> by default.  Currently, while it is possible
+to set I<ignore_dot> in I<sudoers>, its value is not used.  This option
+should be considered read-only (it will be fixed in a future version
+of B<sudo>).
 
 =item mail_always
 
