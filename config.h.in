@@ -96,6 +96,9 @@
 #  define POSIX_SIGNALS
 #endif /* HAVE_SIGACTION */
 
+/* Define if you have tzset(3).  */
+#undef HAVE_TZSET
+
 /* Define if you have fchdir(3).  */
 #undef HAVE_FCHDIR
 
