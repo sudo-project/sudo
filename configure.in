@@ -1077,7 +1077,13 @@ case "$host" in
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
 
 		if test "$CHECKSHADOW" = "true"; then
+		    AC_CHECK_LIB(security, getprpwnam, SECUREWARE=1)
 		    AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"; SECUREWARE=1])
+		    CHECKSHADOW="false"
+		fi
+		if test -n "$SECUREWARE"; then
+		    # 4.x and higher need -ldb too...
+		    AC_CHECK_LIB(db, dbopen, [SUDO_LIBS="${SUDO_LIBS} -lsecurity -ldb -laud -lm"; LIBS="${LIBS} -lsecurity -ldb -laud -lm"], [SUDO_LIBS="${SUDO_LIBS} -lsecurity -ldb -laud -lm"; LIBS="${LIBS} -lsecurity -ldb -laud -lm"]);
 		    AC_MSG_CHECKING([for broken /usr/include/prot.h])
 		    AC_TRY_COMPILE([
 #include <sys/types.h>
@@ -1087,7 +1093,6 @@ case "$host" in
 		    [AC_MSG_RESULT([yes, fixing locally])
 		    sed 's:<acl.h>:<sys/acl.h>:g' < /usr/include/prot.h > prot.h
 		    ])
-		    CHECKSHADOW="false"
 		fi
 		;;
     *-*-irix*)
