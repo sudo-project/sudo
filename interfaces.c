@@ -291,8 +291,8 @@ load_interfaces()
     /* If the expected size < real size, realloc the array. */
     if (n != num_interfaces) {
 	if (num_interfaces != 0)
-	    interfaces = (struct interface *) erealloc(interfaces,
-		sizeof(struct interface) * num_interfaces);
+	    interfaces = (struct interface *) erealloc3(interfaces,
+		num_interfaces, sizeof(struct interface));
 	else
 	    free(interfaces);
     }
