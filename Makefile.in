@@ -68,7 +68,6 @@ sudoersdir = /etc
 
 # Directory in which to install the man page
 mantype = @MANTYPE@
-manpage = sudo.$(mantype)
 mansect = 8
 mandir = $(man_prefix)/$(mantype)$(mansect)
 
@@ -107,7 +106,7 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING INSTALL Makefile.in PORTING \
             README SUPPORTED TODO OPTIONS HISTORY acsite.m4 getcwd.c putenv.c \
             strdup.c lsearch.c search.h tgetpass.c config.h.in configure.in \
 	    configure indent.pro installbsd sample.sudoers sudo.man sudo.cat \
-	    sudoers aixcrypt.exp testsudoers.c visudo.c
+	    visudo.man visudo.cat sudoers aixcrypt.exp testsudoers.c visudo.c
 
 all: $(PROGS)
 
@@ -156,11 +155,8 @@ install-sudoers:
 	fi
 
 install-man:
-	$(INSTALL) -o $(owner) -g $(group) -m 0644 $(manpage) $(mandir)/sudo.$(mansect)
-	echo '.so man$(mansect)/sudo.$(mansect)' > $(mandir)/visudo.$(mansect)
-	chown $(owner) $(mandir)/visudo.$(mansect)
-	chgrp $(group) $(mandir)/visudo.$(mansect)
-	chmod 0644 $(mandir)/visudo.$(mansect)
+	$(INSTALL) -o $(owner) -g $(group) -m 0644 sudo.$(mantype) $(mandir)/sudo.$(mansect)
+	$(INSTALL) -o $(owner) -g $(group) -m 0644 visudo.$(mantype) $(mandir)/visudo.$(mansect)
 	@MAN_POSTINSTALL@
 
 tags: $(SRCS)
