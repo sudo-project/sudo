@@ -128,6 +128,10 @@ MAILSUBJECT
     Subject of the mail sent to the ALERTMAIL user.
     Default is "*** SECURITY information ***".
 
+PASSPROMPT
+    Default prompt to use when asking for a password.  Can be overridden
+    via the -p option.  Default is "Password:".
+
 SECURE_PATH
     Path used for every command run from sudo(8).  If you don't trust
     the people running sudo to have a sane PATH environmental variable
