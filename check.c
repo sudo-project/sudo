@@ -84,9 +84,9 @@ static char rcsid[] = "$Id$";
 #include <sys/audit.h>
 #include <pwdadj.h>
 #endif /* SUNOS4 && HAVE_C2_SECURITY */
-#ifdef HAVE_KERBEROS
+#ifdef HAVE_KERB4
 #include <krb.h>
-#endif /* HAVE_KERBEROS */
+#endif /* HAVE_KERB4 */
 #ifdef HAVE_AFS
 #include <usersec.h>
 #include <afs/kauth.h>
@@ -335,11 +335,11 @@ static void check_passwd()
     struct passwd *pw_ent = getpwuid(uid);
 #endif /* HAVE_SKEY */
     char *encrypted=epasswd;	/* this comes from /etc/passwd  */
-#if defined(HAVE_KERBEROS) && defined(USE_GETPASS)
+#if defined(HAVE_KERB4) && defined(USE_GETPASS)
     char pass[128];
 #else
     char *pass;			/* this is what gets entered    */
-#endif /* HAVE_KERBEROS && USE_GETPASS */
+#endif /* HAVE_KERB4 && USE_GETPASS */
     register int counter = TRIES_FOR_PASSWORD;
 
 #if defined(__hpux) && defined(HAVE_C2_SECURITY)
@@ -429,11 +429,11 @@ static void check_passwd()
 	pass = skey_getpass("Password:", pw_ent, pw_ok);
 #else
 #ifdef USE_GETPASS
-#ifdef HAVE_KERBEROS
+#ifdef HAVE_KERB4
 	(void) des_read_pw_string(pass, sizeof(pass) - 1, "Password: ", 0);
 #else
 	pass = (char *) getpass("Password:");
-#endif /* HAVE_KERBEROS */
+#endif /* HAVE_KERB4 */
 #else
 	pass = tgetpass("Password:", PASSWORD_TIMEOUT * 60);
 #endif /* USE_GETPASS */
@@ -466,10 +466,10 @@ static void check_passwd()
 	    return;		/* if the passwd is correct return() */
 #endif /* HAVE_SKEY */
 #endif /* __convex__ && HAVE_C2_SECURITY */
-#ifdef HAVE_KERBEROS
+#ifdef HAVE_KERB4
 	if (sudo_krb_validate_user(user, pass) == 0)
 	    return;
-#endif /* HAVE_KERBEROS */
+#endif /* HAVE_KERB4 */
 #ifdef HAVE_AFS
 	code = ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION+KA_USERAUTH_DOSETPAG,
                                           user,
@@ -556,7 +556,7 @@ static char *osf_C2_crypt(pass, encrypt_salt)
 #endif /* __osf__ && HAVE_C2_SECURITY */
 
 
-#ifdef HAVE_KERBEROS
+#ifdef HAVE_KERB4
 /********************************************************************
  *
  *  sudo_krb_validate_user()
@@ -570,6 +570,8 @@ int sudo_krb_validate_user(user, pass)
     char *env;
     int k_errno;
 
+    fprintf(stderr, "validating via kerb4\n");
+
     /* Get the local realm */
     if (krb_get_lrealm(realm, 1) != KSUCCESS) {
 	/* XXX - use logging functions */
@@ -578,29 +580,47 @@ int sudo_krb_validate_user(user, pass)
     }
 
     /* Need to set the ticket file based on the effective uid */
-    if (env = getenv("KRBTKFILE")) {
+    if (env = (char *) getenv("KRBTKFILE")) {
 	krb_set_tkt_string(env);
     } else {
 	char tkfile[MAXPATHLEN];
 
-	(void) sprintf(tkfile, "%s%d", TKT_ROOT, geteuid());
+	(void) sprintf(tkfile, "%s%d", TKT_ROOT, uid);
 	krb_set_tkt_string(tkfile);
     }
 
+#ifdef HAVE_SETREUID
     /*
-     * Need to chown the ticket file to root for stupid in_tkt()
-     * which makes some nasty assumptions.  How broken.
+     * need to have real uid be the uid of the invoking user
+     * for krb_get_pw_in_tkt() (actually in_tkt()).
      */
-    set_perms(PERM_ROOT);
-    (void) chown(tkt_string(), 0, GID_NO_CHANGE);
+    if (setreuid(uid, (uid_t) 0)) {
 
-    /* Update the ticket if password is ok */
-    k_errno = krb_get_pw_in_tkt(user, "", realm, "krbtgt", realm,
-	DEFAULT_TKT_LIFE, pass);
+	/* Update the ticket if password is ok */
+	k_errno = krb_get_pw_in_tkt(user, "", realm, "krbtgt", realm,
+	    DEFAULT_TKT_LIFE, pass);
 
-    /* Set the owner back on the ticket file and relinquish root perms */
-    (void) chown(tkt_string(), uid, GID_NO_CHANGE);
-    set_perms(PERM_USER);
+	/* now swap 'em back */
+	(void) setreuid((uid_t) 0, uid);
+    } else {
+#else
+    {
+#endif /* HAVE_SETREUID */
+	/*
+	 * Need to chown the ticket file to root for stupid in_tkt()
+	 * which makes some nasty assumptions.  How broken.
+	 */
+	set_perms(PERM_ROOT);
+	(void) chown(tkt_string(), 0, GID_NO_CHANGE);
+
+	/* Update the ticket if password is ok */
+	k_errno = krb_get_pw_in_tkt(user, "", realm, "krbtgt", realm,
+	    DEFAULT_TKT_LIFE, pass);
+
+	/* Set the owner back on the ticket file and relinquish root perms */
+	(void) chown(tkt_string(), uid, GID_NO_CHANGE);
+	set_perms(PERM_USER);
+    }
 
     /* Exit if we got a kerberos error */
     if (k_errno != INTK_OK && k_errno != INTK_BADPW) {
@@ -612,7 +632,7 @@ int sudo_krb_validate_user(user, pass)
 
     return(!(k_errno == INTK_OK));
 }
-#endif /* HAVE_KERBEROS */
+#endif /* HAVE_KERB4 */
 
 
 /********************************************************************
