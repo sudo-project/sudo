@@ -218,14 +218,14 @@ struct passwd *sudo_getpwuid(uid)
      */
     (void) memcpy(local_pw_ent, pw_ent, sizeof(struct passwd));
 
-    local_pw_ent->pw_name = strdup(pw_ent->pw_name);
+    local_pw_ent->pw_name = (char *) strdup(pw_ent->pw_name);
     if (local_pw_ent->pw_name == NULL) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
 
-    local_pw_ent->pw_dir = strdup(pw_ent->pw_dir);
+    local_pw_ent->pw_dir = (char *) strdup(pw_ent->pw_dir);
     if (local_pw_ent->pw_dir == NULL) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
@@ -233,7 +233,7 @@ struct passwd *sudo_getpwuid(uid)
     }
 
     /* pw_shell is a special case since we overide with $SHELL */
-    local_pw_ent->pw_shell = strdup(sudo_getshell(pw_ent));
+    local_pw_ent->pw_shell = (char *) strdup(sudo_getshell(pw_ent));
     if (local_pw_ent->pw_shell == NULL) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
@@ -241,7 +241,7 @@ struct passwd *sudo_getpwuid(uid)
     }
 
     /* pw_passwd gets a shadow password if applicable */
-    local_pw_ent->pw_passwd = strdup(sudo_getspwd(pw_ent));
+    local_pw_ent->pw_passwd = (char *) strdup(sudo_getspwd(pw_ent));
     if (local_pw_ent->pw_passwd == NULL) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);

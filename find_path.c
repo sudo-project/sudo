@@ -132,7 +132,7 @@ char * find_path(file)
     if ((path = getenv("PATH")) == NULL)
 	return(NULL);
 
-    if ((path = strdup(path)) == NULL) {
+    if ((path = (char *) strdup(path)) == NULL) {
 	(void) fprintf(stderr, "%s: out of memory!\n", Argv[0]);
 	exit(1);
     }
