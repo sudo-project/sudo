@@ -138,6 +138,7 @@ WORD			([^@!=:,\(\) \t\n\\]|\\[^\n])+
 \n			{
 			    ++sudolineno;
 			    LEXTRACE("\n");
+			    BEGIN INITIAL;
 			    return(COMMENT);
 			}			/* return newline */
 
@@ -257,7 +258,7 @@ PASSWD[[:blank:]]*:	{
 			    }
 			}
 
-<GOTDEFS>{WORD}	{
+<GOTDEFS>{WORD}		{
 			    LEXTRACE("WORD(3) ");
 			    fill(yytext, yyleng);
 			    return(WORD);
@@ -296,6 +297,7 @@ PASSWD[[:blank:]]*:	{
 			    }
 			    if (*yytext == 'R') {
 				LEXTRACE("RUNASALIAS ");
+				BEGIN GOTRUNAS;
 				return(RUNASALIAS);
 			    }
 			}

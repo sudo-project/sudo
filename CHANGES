@@ -1202,3 +1202,5 @@ Sudo 1.6 released.
 
 378) Fixed a bug parsing runas modifiers.  If a user spec contained multiple
      runas specs, the latter ones may not be applied.
+
+379) #uid now works in a RunasAlias
