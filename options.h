@@ -61,6 +61,7 @@
 /*#define SHELL_IF_NO_ARGS	/* if sudo is given no arguments run a shell */
 /*#define USE_TTY_TICKETS	/* have a different ticket file for each tty */
 /*#define SKEY_ONLY		/* validate user via s/key only */
+/*#define LONG_SKEY_PROMPT	/* use a two line s/key prompt */
 #define FAST_MATCH		/* command check fails if basenames not same */
 #ifndef SUDOERS_OWNER
 #define SUDOERS_OWNER "root"	/* sudoers file owner (usually root) */

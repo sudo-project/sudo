@@ -190,6 +190,13 @@ SKEY_ONLY
     use s/key.
     This feature is off by default.
 
+LONG_SKEY_PROMPT
+    When validating with s/key a two-line prompt is used to make
+    it easier to cut and paste the s/key challenge to a local
+    window.  It's not as pretty as the default but some people
+    find it more convenient.
+    This feature is off by default.
+
 SUDOERS_OWNER
     Who should own the sudoers file.  This must be a username, *not* a uid.
     This is useful if you want to make the sudoers file NFS-mounted
