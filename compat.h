@@ -37,10 +37,18 @@
 #endif /* __P */
 
 /*
- * Some systems (ie ISC V/386) do not define MAXPATHLEN even in param.h
+ * Some systems do not define PATH_MAX.
  */
-#ifndef MAXPATHLEN
-# define MAXPATHLEN		1024
+#ifndef PATH_MAX
+# ifdef MAXPATHLEN
+#  define PATH_MAX		MAXPATHLEN
+# else
+#  ifdef _POSIX_PATH_MAX
+#   define PATH_MAX		_POSIX_PATH_MAX
+#  else
+#   define PATH_MAX		1024
+#  endif
+# endif
 #endif
 
 /*

@@ -131,7 +131,7 @@ getcwd(pt, size)
 	 */
 	if ((up = malloc(upsize = 1024 - 4)) == NULL)
 		goto err;
-	eup = up + MAXPATHLEN;
+	eup = up + PATH_MAX;
 	bup = up;
 	up[0] = '.';
 	up[1] = '\0';

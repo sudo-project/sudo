@@ -497,7 +497,7 @@ init_vars(sudo_mode)
     int nohostname, rval;
 
     /* Sanity check command from user. */
-    if (user_cmnd == NULL && strlen(NewArgv[0]) >= MAXPATHLEN)
+    if (user_cmnd == NULL && strlen(NewArgv[0]) >= PATH_MAX)
 	errx(1, "%s: File name too long", NewArgv[0]);
 
 #ifdef HAVE_TZSET

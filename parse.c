@@ -238,7 +238,7 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
     struct stat pst;
     DIR *dirp;
     struct dirent *dent;
-    char buf[MAXPATHLEN];
+    char buf[PATH_MAX];
     static char *cmnd_base;
 
     /* Check for pseudo-commands */
@@ -350,7 +350,7 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 	    return(FALSE);
 
 	while ((dent = readdir(dirp)) != NULL) {
-	    /* ignore paths > MAXPATHLEN (XXX - log) */
+	    /* ignore paths > PATH_MAX (XXX - log) */
 	    if (strlcpy(buf, path, sizeof(buf)) >= sizeof(buf) ||
 		strlcat(buf, dent->d_name, sizeof(buf)) >= sizeof(buf))
 		continue;

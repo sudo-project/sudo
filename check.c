@@ -316,7 +316,7 @@ build_timestamp(timestampdir, timestampfile)
 
     dirparent = def_timestampdir;
     len = easprintf(timestampdir, "%s/%s", dirparent, user_name);
-    if (len >= MAXPATHLEN)
+    if (len >= PATH_MAX)
 	log_error(0, "timestamp path too long: %s", timestampdir);
 
     /*
@@ -335,12 +335,12 @@ build_timestamp(timestampdir, timestampfile)
 		p, *user_runas);
 	else
 	    len = easprintf(timestampfile, "%s/%s/%s", dirparent, user_name, p);
-	if (len >= MAXPATHLEN)
+	if (len >= PATH_MAX)
 	    log_error(0, "timestamp path too long: %s", timestampfile);
     } else if (def_targetpw) {
 	len = easprintf(timestampfile, "%s/%s/%s", dirparent, user_name,
 	    *user_runas);
-	if (len >= MAXPATHLEN)
+	if (len >= PATH_MAX)
 	    log_error(0, "timestamp path too long: %s", timestampfile);
     } else
 	*timestampfile = NULL;

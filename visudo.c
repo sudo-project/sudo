@@ -119,7 +119,7 @@ main(argc, argv)
     int argc;
     char **argv;
 {
-    char buf[MAXPATHLEN*2];		/* buffer used for copying files */
+    char buf[PATH_MAX*2];		/* buffer used for copying files */
     char *Editor;			/* editor to use */
     char *UserEditor;			/* editor user wants to use */
     char *EditorPath;			/* colon-separated list of editors */

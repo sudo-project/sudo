@@ -46,7 +46,6 @@
 #else
 # include "emul/err.h"
 #endif /* HAVE_ERR_H */
-#include <limits.h>
 
 #include "sudo.h"
 

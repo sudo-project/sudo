@@ -24,6 +24,7 @@
 #define _SUDO_SUDO_H
 
 #include <pathnames.h>
+#include <limits.h>
 #include "compat.h"
 #include "defaults.h"
 #include "logging.h"
@@ -37,7 +38,7 @@ struct sudo_user {
     char *path;
     char *shell;
     char *tty;
-    char  cwd[MAXPATHLEN];
+    char  cwd[PATH_MAX];
     char *host;
     char *shost;
     char **runas;

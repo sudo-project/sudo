@@ -1695,3 +1695,5 @@ Sudo 1.6.7p5 released.
 
 533) Fixed several issues when closing all open descriptors.  Sudo now uses
      closefrom() if it exists.
+
+534) Use PATH_MAX, not MAXPATHLEN since the former is standardized.

@@ -67,14 +67,14 @@ find_path(infile, outfile, path)
     char **outfile;		/* result parameter */
     char *path;			/* path to search */
 {
-    static char command[MAXPATHLEN]; /* qualified filename */
+    static char command[PATH_MAX]; /* qualified filename */
     char *n;			/* for traversing path */
     char *origpath;		/* so we can free path later */
     char *result = NULL;	/* result of path/file lookup */
     int checkdot = 0;		/* check current dir? */
     int len;			/* length parameter */
 
-    if (strlen(infile) >= MAXPATHLEN)
+    if (strlen(infile) >= PATH_MAX)
 	errx(1, "%s: File name too long", infile);
 
     /*
