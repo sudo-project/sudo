@@ -27,7 +27,8 @@ dnl
 dnl what architecture are we on?
 dnl
 AC_HEADER_CHECK(elf.h, AC_DEFINE(SVR4) [SVR4="1"])
-SUDO_AIX(OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
+SUDO_AIX(echo "Looks like AIX"
+OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
 [if test -n "$GCC"; then
 STATIC_FLAGS="-static"
 else
@@ -46,7 +47,8 @@ if test -n "$SVR4"; then
 fi
 dnl
 if test -z "$SVR4"; then
-SUDO_SUNOS([if test -n "$GCC"; then
+SUDO_SUNOS(echo "Looks like SunOS"
+[if test -n "$GCC"; then
 STATIC_FLAGS="-static"
 else
 STATIC_FLAGS="-Bstatic"
@@ -54,7 +56,8 @@ fi
 ])dnl
 fi
 dnl
-SUDO_HPUX(OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
+SUDO_HPUX(echo "Looks like HP-UX"
+OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
 [if test -n "$GCC"; then
 STATIC_FLAGS="-static"
 else
@@ -62,20 +65,23 @@ STATIC_FLAGS="-Wl,-a,archive"
 fi
 ])dnl
 dnl
-SUDO_DEC_OSF1([if test -n "$GCC"; then
+SUDO_DEC_OSF1(echo "Looks like OSF/1"
+[if test -n "$GCC"; then
 STATIC_FLAGS="-static"
 else
 STATIC_FLAGS="-non_shared"
 fi
 ])dnl
 dnl
-SUDO_IRIX(OPTIONS="${OPTIONS} -DBROKEN_GETPASS")
+SUDO_IRIX(echo "Looks like IRIX"
+OPTIONS="${OPTIONS} -DBROKEN_GETPASS")
 dnl
-SUDO_LINUX([STATIC_FLAGS="-static"])
+SUDO_LINUX(echo "Looks like linux"
+[STATIC_FLAGS="-static"])
 dnl
-SUDO_CONVEX()
+SUDO_CONVEX(echo "Looks like ConvexOS")
 dnl
-SUDO_KSR()
+SUDO_KSR(echo "Looks a KSR")
 dnl
 dnl program checks
 dnl
