@@ -223,7 +223,14 @@ case "$OS" in
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
-    "ksr"*)	echo "Looks like a KSR"
+    "sco")	echo "Looks like SCO"
+		if test -n "$C2" ; then
+		    SHADOW_TYPE="SPW_SECUREWARE"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		    LIBS="${LIBS} -lprot -lx"
+		fi
+		;;
+    "ksr"*)	echo "Looks like a KSR (wow, yours is still running?!?)"
 		;;
     "next")	echo "Looks like NeXTstep"
 		;;
