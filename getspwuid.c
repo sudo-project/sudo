@@ -112,6 +112,12 @@ static char *sudo_getshell(pw_ent)
     if ((pw_shell = getenv("SHELL")) == NULL)
 	pw_shell = pw_ent -> pw_shell;
 
+#ifdef _PATH_BSHELL
+    /* empty string "" means bourne shell */
+    if (*pw_shell == '\0')
+	pw_shell = _PATH_BSHELL;
+#endif /* _PATH_BSHELL */
+
     return(pw_shell);
 }
 
