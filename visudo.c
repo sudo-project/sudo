@@ -105,7 +105,7 @@ int NewArgc = 0;
 char *sudoers = _PATH_SUDO_SUDOERS;
 char *stmp = _PATH_SUDO_STMP;
 int parse_error = FALSE;
-char *runas_user = "root";
+char *runas_user = RUNAS_DEFAULT;
 
 /*
  * For the parsing routines

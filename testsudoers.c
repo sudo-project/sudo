@@ -78,7 +78,7 @@ extern int num_interfaces;
 
 char *cmnd = NULL;
 char *cmnd_args = NULL;
-char *runas_user = "root";
+char *runas_user = RUNAS_DEFAULT;
 char host[MAXHOSTNAMELEN];
 char *shost;
 char cwd[MAXPATHLEN];

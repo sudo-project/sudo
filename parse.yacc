@@ -308,7 +308,7 @@ opcmnd		:	cmnd { ; }
 		;
 
 runasspec	:	/* empty */ {
-			    $$ = (strcmp("root", runas_user) == 0);
+			    $$ = (strcmp(RUNAS_DEFAULT, runas_user) == 0);
 			}
 		|	RUNAS runaslist {
 			    $$ = $2;

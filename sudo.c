@@ -141,7 +141,7 @@ char **Argv;
 int NewArgc = 0;
 char **NewArgv = NULL;
 struct passwd *user_pw_ent;
-char *runas_user = "root";
+char *runas_user = RUNAS_DEFAULT;
 char *cmnd = NULL;
 char *cmnd_args = NULL;
 char *tty = "unknown";

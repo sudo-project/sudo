@@ -1,5 +1,9 @@
 The following options may be used to configure sudo 1.4
 
+RUNAS_DEFAULT
+    The default user to run commands as if the -u flag is not specified
+    on the command line.  This defaults to "root".
+
 FQDN
     Define this if you want to put fully qualified hostnames in the sudoers
     file.  Ie: instead of myhost you would use myhost.mydomain.edu.
