@@ -181,6 +181,7 @@ pam_prep_user(pw)
      * it returns the last saved return code, not the return code
      * for the setcred module.  Because we haven't called pam_authenticate(),
      * this is not set and so pam_setcred() returns PAM_PERM_DENIED.
+     * We can't call pam_acct_mgmt() with Linux-PAM for a similar reason.
      */
     (void) pam_setcred(pamh, PAM_ESTABLISH_CRED);
 
