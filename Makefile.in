@@ -124,7 +124,7 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL \
             testsudoers.c sample.pam sample.sudoers sudo.pod sudo.man \
             sudo.cat visudo.pod visudo.man visudo.cat sudoers.pod \
             sudoers.man sudoers.cat lex.yy.c sudo-lex.yy.c sudoers \
-            dce_pwent.c alloca.c \
+            dce_pwent.c alloca.c
 
 VERSIONFILES = emul/utime.h check.c compat.h config.h.in dce_pwent.c \
 	       find_path.c getspwuid.c getcwd.c goodpath.c ins_2001.h \
