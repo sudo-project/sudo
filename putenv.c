@@ -29,7 +29,6 @@ static char rcsid[] = "$Id$";
 #endif /* lint */
 
 #include "config.h"
-#include "compat.h"
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -46,6 +45,8 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_MALLOC_H */
 #include <errno.h>
 #include <sys/param.h>
+
+#include "compat.h"
 
 #if !defined(STDC_HEADERS) && !defined(__GNUC__)
 extern char *malloc	__P((size_t));
