@@ -169,44 +169,44 @@ main(argc, argv)
 #endif /* ENV_EDITOR */
 
     /*
-     * Open sudoers temp file and grab a lock.
+     * Open sudoers, lock it and stat it.  
+     * sudoers_fd must remain open throughout in order to hold the lock.
      */
-    stmp_fd = open(stmp, O_WRONLY | O_CREAT, 0600);
-    if (stmp_fd < 0) {
-	(void) fprintf(stderr, "%s: %s\n", Argv[0], strerror(errno));
-	exit(1);
+    sudoers_fd = open(sudoers, O_RDWR | O_CREAT);
+    if (sudoers_fd == -1) {
+	(void) fprintf(stderr, "%s: %s: %s\n", Argv[0], sudoers,
+	    strerror(errno));
+	Exit(-1);
     }
-    if (!lock_file(stmp_fd, SUDO_TLOCK)) {
+    if (!lock_file(sudoers_fd, SUDO_TLOCK)) {
 	(void) fprintf(stderr, "%s: sudoers file busy, try again later.\n",
 	    Argv[0]);
 	exit(1);
     }
-#ifdef HAVE_FTRUNCATE
-    if (ftruncate(stmp_fd, 0) == -1) {
+#ifdef HAVE_FSTAT
+    if (fstat(sudoers_fd, &sudoers_sb) == -1) {
 #else
-    if (truncate(stmp, 0) == -1) {
+    if (stat(sudoers, &sudoers_sb) == -1) {
 #endif
-	(void) fprintf(stderr, "%s: can't truncate %s: %s\n", Argv[0],
-	    stmp, strerror(errno));
+	(void) fprintf(stderr, "%s: can't stat %s: %s\n",
+	    Argv[0], sudoers, strerror(errno));
 	Exit(-1);
+    }
+
+    /*
+     * Open sudoers temp file.
+     */
+    stmp_fd = open(stmp, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    if (stmp_fd < 0) {
+	(void) fprintf(stderr, "%s: %s: %s\n", Argv[0], stmp, strerror(errno));
+	exit(1);
     }
 
     /* Install signal handlers to clean up stmp if we are killed. */
     setup_signals();
 
-    (void) memset(&sudoers_sb, 0, sizeof(sudoers_sb));
-    if (stat(sudoers, &sudoers_sb) == -1 && errno != ENOENT) {
-	(void) fprintf(stderr, "%s: %s\n", Argv[0], strerror(errno));
-	Exit(-1);
-    }
-    sudoers_fd = open(sudoers, O_RDONLY);
-    if (sudoers_fd == -1 && errno != ENOENT) {
-	(void) fprintf(stderr, "%s: %s\n", Argv[0], strerror(errno));
-	Exit(-1);
-    }
-
     /* Copy sudoers -> stmp and reset the mtime */
-    if (sudoers_fd != -1) {
+    if (sudoers_sb.st_size) {
 	while ((n = read(sudoers_fd, buf, sizeof(buf))) > 0)
 	    if (write(stmp_fd, buf, n) != n) {
 		(void) fprintf(stderr, "%s: Write failed: %s\n", Argv[0],
@@ -214,10 +214,10 @@ main(argc, argv)
 		Exit(-1);
 	    }
 
-	(void) close(sudoers_fd);
-    }
-    (void) close(stmp_fd);
-    (void) touch(stmp, sudoers_sb.st_mtime);
+	(void) close(stmp_fd);
+	(void) touch(stmp, sudoers_sb.st_mtime);
+    } else
+	(void) close(stmp_fd);
 
     /*
      * Edit the temp file and parse it (for sanity checking)
@@ -369,7 +369,7 @@ main(argc, argv)
 	}
     }
 
-    return(0);
+    exit(0);
 }
 
 /*

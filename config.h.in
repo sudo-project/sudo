@@ -251,6 +251,9 @@
 /* Define if you have flock(2).  */
 #undef HAVE_FLOCK
 
+/* Define if you have fstat(2).  */
+#undef HAVE_FSTAT
+
 /* Define if you have setrlimit(2).  */
 #undef HAVE_SETRLIMIT
 
