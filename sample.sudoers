@@ -22,10 +22,10 @@ Runas_Alias	DB = oracle, sybase
 ##
 # Host alias specification
 ##
-Host_Alias	SPARC = bigtime, eclipse, moet, anchor
-Host_Alias	SGI = grolsch, dandelion, black
-Host_Alias 	ALPHA = widget, thalamus, foobar
-Host_Alias	HPPA = boa, nag, python
+Host_Alias	SPARC = bigtime, eclipse, moet, anchor:\
+		SGI = grolsch, dandelion, black:\
+		ALPHA = widget, thalamus, foobar:\
+		HPPA = boa, nag, python
 Host_Alias	CUNETS = 128.138.0.0/255.255.0.0
 Host_Alias	CSNETS = 128.138.243.0, 128.138.204.0, 128.138.242.0
 Host_Alias	SERVERS = master, mail, www, ns
@@ -112,7 +112,7 @@ steve		CSNETS = (operator) /usr/local/op_commands/
 matt		valkyrie = KILL
 
 # users in the WEBMASTERS User_Alias (will, wendy, and wim)
-# may run any command as use www (which owns the web pages)
+# may run any command as user www (which owns the web pages)
 # or simply su to www.
 WEBMASTERS	www = (www) ALL, (root) /usr/bin/su www
 
