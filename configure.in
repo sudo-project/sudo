@@ -126,6 +126,10 @@ case "$OS" in
 		fi
 		;;
     "irix")	echo "Looks like IRIX"
+		# C2 security stuff
+		if test -n "$C2" ; then
+		    AC_DEFINE(SVR4)
+		fi
 		# configure doesn't think irix has stdc headers
 		# but it's good enough for sudo
 		AC_DEFINE(STDC_HEADERS)
