@@ -128,5 +128,10 @@ Q) When I compile sudo on Solaris with gcc I get:
 A) You probably didn't install the gcc-fixed include files.
    Try adding -D__EXTENSIONS__ to CFLAGS in the Makefile.
 
+Q) When I run "visudo" it says "sudoers file busy, try again later."
+   and doesn't do anything.
+A) You have a stale sudoers temporary file.  The default location is
+   /etc/stmp.  If you delete this file visudo will be happy again.
+
 Q) How do you pronounce `sudo'?
 A) soo-doo (for superuser do).
