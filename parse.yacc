@@ -1,6 +1,6 @@
 %{
 /*
- * Copyright (c) 1996, 1998-2000 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2001 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * This code is derived from software contributed by Chris Jepeway
@@ -91,6 +91,7 @@ int clearaliases = TRUE;
 int printmatches = FALSE;
 int pedantic = FALSE;
 int keepall = FALSE;
+int quiet = FALSE;
 
 /*
  * Alias types
@@ -192,7 +193,7 @@ yyerror(s)
     /* Save the line the first error occured on. */
     if (errorlineno == -1)
 	errorlineno = sudolineno ? sudolineno - 1 : 0;
-    if (s) {
+    if (s && !quiet) {
 #ifndef TRACELEXER
 	(void) fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s,
 	    sudolineno ? sudolineno - 1 : 0);
