@@ -65,38 +65,40 @@
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-       int   user_is_exempt		__P((void));
-static char *build_timestampfile	__P((void));
-static int   timestamp_status		__P((char *, char *, int));
-static int   touch			__P((char *, time_t));
-#ifndef NO_PASSWD
-static char *expand_prompt		__P((char *, char *, char *));
-static void  lecture			__P((void));
-static void  update_timestamp		__P((char *));
-
 /* Status codes for timestamp_status() */
-#define TS_CURRENT	0
-#define TS_OLD		1
-#define TS_MISSING	2
-#define TS_ERROR	3
+#define TS_CURRENT		0
+#define TS_OLD			1
+#define TS_MISSING		2
+#define TS_NOFILE		3
+#define TS_ERROR		4
+
+       int   user_is_exempt	__P((void));
+static void  build_timestamp	__P((char **, char **));
+static int   timestamp_status	__P((char *, char *, char *, int));
+static int   touch		__P((char *, time_t));
+#ifndef NO_PASSWD
+static char *expand_prompt	__P((char *, char *, char *));
+static void  lecture		__P((void));
+static void  update_timestamp	__P((char *, char *));
 
 /*
  * This function only returns if the user can successfully
- * verify who s/he is.  
+ * verify who he/she is.  
  */
 void
 check_user()
 {
-    char *timestampfile;
+    char *timestampdir = NULL;
+    char *timestampfile = NULL;
     int status;
 
     if (user_uid == 0 || user_is_exempt())
 	return;
 
-    timestampfile = build_timestampfile();
-    status = timestamp_status(timestampfile, user_name, TRUE);
+    build_timestamp(&timestampdir, &timestampfile);
+    status = timestamp_status(timestampdir, timestampfile, user_name, TRUE);
     if (status != TS_CURRENT) {
-	if (status == TS_MISSING)
+	if (status == TS_MISSING || status == TS_ERROR)
 	    lecture();		/* first time through they get a lecture */
 
 	/* Expand any escapes in the prompt. */
@@ -105,7 +107,10 @@ check_user()
 	verify_user();
     }
     if (status != TS_ERROR)
-	update_timestamp(timestampfile);
+	update_timestamp(timestampdir, timestampfile);
+    (void) free(timestampdir);
+    if (timestampfile)
+	(void) free(timestampfile);
 }
 
 /*
@@ -127,22 +132,28 @@ Administrator. It usually boils down to these two things:\n\
 }
 
 /*
- * Update the time on the timestamp file or create it if neccesary.
+ * Update the time on the timestamp file/dir or create it if necessary.
  */
 static void
-update_timestamp(timestampfile)
+update_timestamp(timestampdir, timestampfile)
+    char *timestampdir;
     char *timestampfile;
 {
 
     set_perms(PERM_ROOT, 0);		/* become root */
 
-    if (touch(timestampfile, time(NULL)) < 0) {
-	int fd = open(timestampfile, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    if (touch(timestampfile ? timestampfile : timestampdir, time(NULL)) == -1) {
+	if (timestampfile) {
+	    int fd = open(timestampfile, O_WRONLY|O_CREAT|O_TRUNC, 0600);
 
-	if (fd < 0)
-	    log_error(NO_EXIT|USE_ERRNO, "Can't open %s", timestampfile);
-	else
-	    close(fd);
+	    if (fd == -1)
+		log_error(NO_EXIT|USE_ERRNO, "Can't open %s", timestampfile);
+	    else
+		close(fd);
+	} else {
+	    if (mkdir(timestampdir, 0700) == -1)
+		log_error(NO_EXIT|USE_ERRNO, "Can't mkdir %s", timestampdir);
+	}
     }
 
     set_perms(PERM_USER, 0);		/* relinquish root */
@@ -233,7 +244,7 @@ user_is_exempt()
     struct group *grp;
     char **gr_mem;
 
-    if ((grp = getgrnam(EXEMPTGROUP)) == NULL)
+    if (!(grp = getgrnam(EXEMPTGROUP)))
 	return(FALSE);
 
     if (getgid() == grp->gr_gid)
@@ -243,19 +254,17 @@ user_is_exempt()
 	if (strcmp(user_name, *gr_mem) == 0)
 	    return(TRUE);
     }
+#endif
 
     return(FALSE);
-#else
-    return(FALSE);
-#endif
 }
 
 /*
  * Update the access and modify times on a file.
  */
 static int
-touch(file, when)
-    char *file;
+touch(path, when)
+    char *path;
     time_t when;
 {
 #ifdef HAVE_UTIME_POSIX
@@ -264,64 +273,58 @@ touch(file, when)
     ut.actime = ut.modtime = when;
     utp = &ut;
 #else
-    /* old BSD <= 4.3 has no struct utimbuf */
+    /* BSD <= 4.3 has no struct utimbuf */
     time_t utp[2];
 
     utp[0] = utp[1] = when;
 #endif /* HAVE_UTIME_POSIX */
 
-    return(utime(file, utp));
+    return(utime(path, utp));
 }
 
 /*
- * Returns a pointer to static storage containing the timestamp path.
+ * Fills in timestampdir as well as timestampfile if using tty tickets.
  */
-static char *
-build_timestampfile()
+static void
+build_timestamp(timestampdir, timestampfile)
+    char **timestampdir;
+    char **timestampfile;
 {
 #ifdef USE_TTY_TICKETS
     char *p;
-#endif
-    static char timestampfile[MAXPATHLEN];
 
-    if (timestampfile[0] != '\0')
-	return(timestampfile);
-
-#ifdef USE_TTY_TICKETS
-    if (p = strrchr(tty, '/'))
+    if ((p = strrchr(user_tty, '/')))
 	p++;
     else
-	p = tty;
+	p = user_tty;
     if (sizeof(_PATH_SUDO_TIMEDIR) + strlen(user_name) + strlen(p) + 2 >
 	MAXPATHLEN)
 	log_error(0, "timestamp path too long: %s/%s/%s", _PATH_SUDO_TIMEDIR,
 	    user_name, p);
-    (void) sprintf(timestampfile, "%s/%s/%s", _PATH_SUDO_TIMEDIR, user_name, p);
+    easprintf(timestampdir, "%s/%s", _PATH_SUDO_TIMEDIR, user_name);
+    easprintf(timestampfile, "%s/%s/%s", _PATH_SUDO_TIMEDIR, user_name, p);
 #else
     if (sizeof(_PATH_SUDO_TIMEDIR) + strlen(user_name) + 1 > MAXPATHLEN)
 	log_error(0, "timestamp path too long: %s/%s", _PATH_SUDO_TIMEDIR,
 	    user_name);
-    (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR, user_name);
+    easprintf(timestampdir, "%s/%s", _PATH_SUDO_TIMEDIR, user_name);
+    *timestampfile = NULL;
 #endif /* USE_TTY_TICKETS */
-
-    return(timestampfile);
 }
 
 /*
  * Check the timestamp file and directory and return their status.
  */
 static int
-timestamp_status(timestampfile, user, make_dirs)
+timestamp_status(timestampdir, timestampfile, user, make_dirs)
+    char *timestampdir;
     char *timestampfile;
     char *user;
     int make_dirs;
 {
-#ifdef USE_TTY_TICKETS
-    char *p;
-#endif
     struct stat sb;
     time_t now;
-    int status = TS_ERROR;
+    int status = TS_ERROR;		/* assume the worst */
 
     set_perms(PERM_ROOT, 0);		/* become root */
 
@@ -360,100 +363,114 @@ timestamp_status(timestampfile, user, make_dirs)
 		status = TS_MISSING;
 	}
     }
-    if (status == TS_ERROR)
-	return(TS_ERROR);
+    if (status == TS_ERROR) {
+	set_perms(PERM_USER, 0);		/* relinquish root */
+	return(status);
+    }
 
-#ifdef USE_TTY_TICKETS
     /*
      * Sanity check the user's ticket dir.  We start by downgrading
      * the status to TS_ERROR.  If the ticket dir exists and is sane
-     * this will be upgraded to TS_OLD.  If the dir does not exist and
-     * we can make it successfully, it will be upgraded to TS_MISSING.
+     * this will be upgraded to TS_OLD.  If the dir does not exist,
+     * it will be upgraded to TS_MISSING.
      */
     status = TS_ERROR;			/* downgrade status again */
-    p = strrchr(timestampfile, '/');
-    *p = '\0';
-    if (lstat(timestampfile, &sb) == 0) {
+    if (lstat(timestampdir, &sb) == 0) {
 	if (!S_ISDIR(sb.st_mode)) {
-	    if (S_ISREG(sb.st_mode))
-		(void) unlink(timestampfile);	/* convert from old style */
-	    else
+	    if (S_ISREG(sb.st_mode)) {
+		/* convert from old style */
+		if (unlink(timestampdir) == 0)
+		    status = TS_MISSING;
+	    } else
 		log_error(NO_EXIT, "%s exists but is not a directory (0%o)",
-		    timestampfile, sb.st_mode);
+		    timestampdir, sb.st_mode);
 	} else if (sb.st_uid != 0)
 	    log_error(NO_EXIT, "%s owned by uid %ld, should be owned by root",
-		timestampfile, (long) sb.st_uid);
+		timestampdir, (long) sb.st_uid);
 	else if ((sb.st_mode & 0000022))
 	    log_error(NO_EXIT,
 		"%s writable by non-owner (0%o), should be mode 0700",
-		timestampfile, sb.st_mode);
+		timestampdir, sb.st_mode);
 	else {
 	    if ((sb.st_mode & 0000777) != 0700)
-		(void) chmod(timestampfile, 0700);
-	    status = TS_OLD;
+		(void) chmod(timestampdir, 0700);
+	    status = TS_OLD;		/* do date check later */
 	}
     } else if (errno != ENOENT) {
-	log_error(NO_EXIT|USE_ERRNO, "can't stat %s", timestampfile);
-    } else {
-	/* No user ticket dir, try to make one. */
-	if (make_dirs) {
-	    if (mkdir(timestampfile, S_IRWXU))
-		log_error(NO_EXIT|USE_ERRNO, "can't mkdir %s", timestampfile);
-	    else
-		status = TS_MISSING;
-	}
-    }
-    *p = '/';
-#endif /* USE_TTY_TICKETS */
+	log_error(NO_EXIT|USE_ERRNO, "can't stat %s", timestampdir);
+    } else
+	status = TS_MISSING;
 
     /*
-     * Sanity check the timestamp file, if it exists.
-     * Status has been upgraded to TS_MISSING.
-     * XXX - should deal with case where TTY tickets were in use but no longer are
-     *       that means that %s/user being as dir is ok.
+     * If there is no user ticket dir, AND we are in tty ticket mode,
+     * AND the make_dirs flag is set, create the user ticket dir.
      */
-    if (lstat(timestampfile, &sb) == 0) {
-	if (!S_ISREG(sb.st_mode))
-	    log_error(NO_EXIT, "%s exists but is not a regular file (0%o)",
-		timestampfile, sb.st_mode);
-	else {
-	    /* If bad uid or file mode, complain and kill the bogus file. */
-	    if (sb.st_uid != 0) {
-		log_error(NO_EXIT,
-		    "%s owned by uid %ld, should be owned by root",
-		    timestampfile, (long) sb.st_uid);
-		(void) unlink(timestampfile);
-	    } else if ((sb.st_mode & 0000022)) {
-		log_error(NO_EXIT,
-		    "%s writable by non-owner (0%o), should be mode 0600",
-		    timestampfile, sb.st_mode);
-		(void) unlink(timestampfile);
-	    } else {
-		/* If not mode 0600, fix it. */
-		if ((sb.st_mode & 0000777) != 0600)
-		    (void) chmod(timestampfile, 0600);
-
-		/* Check the time against the timestamp file */
-		now = time((time_t *) NULL);
-		if (TIMEOUT && now - sb.st_mtime < 60 * TIMEOUT) {
-		    /*
-		     * Check for bogus time on the stampfile.  The clock may
-		     * have been reset or someone could be trying to fake us.
-		     */
-		    if (sb.st_mtime > now + 60 * TIMEOUT * 2) {
-			log_error(NO_EXIT,
-			    "timestamp too far in the future: %20.20s",
-			    4 + ctime(&sb.st_mtime));
-			(void) unlink(timestampfile);
-		    } else
-			status = TS_CURRENT;
-		} else
-		    status = TS_OLD;
-	    }
+    if (status == TS_MISSING && timestampfile && make_dirs) {
+	if (mkdir(timestampdir, S_IRWXU) == -1) {
+	    status = TS_ERROR;
+	    log_error(NO_EXIT|USE_ERRNO, "can't mkdir %s", timestampdir);
 	}
-    } else if (errno != ENOENT) {
-	log_error(NO_EXIT|USE_ERRNO, "can't stat %s", timestampfile);
-	status = TS_ERROR;
+    }
+
+    /*
+     * Sanity check the tty ticket file if it exists.
+     */
+    if (timestampfile && status != TS_ERROR) {
+	if (status != TS_MISSING)
+	    status = TS_NOFILE;			/* dir there, file missing */
+	if (lstat(timestampfile, &sb) == 0) {
+	    if (!S_ISREG(sb.st_mode)) {
+		status = TS_ERROR;
+		log_error(NO_EXIT, "%s exists but is not a regular file (0%o)",
+		    timestampfile, sb.st_mode);
+	    } else {
+		/* If bad uid or file mode, complain and kill the bogus file. */
+		if (sb.st_uid != 0) {
+		    log_error(NO_EXIT,
+			"%s owned by uid %ld, should be owned by root",
+			timestampfile, (long) sb.st_uid);
+		    (void) unlink(timestampfile);
+		} else if ((sb.st_mode & 0000022)) {
+		    log_error(NO_EXIT,
+			"%s writable by non-owner (0%o), should be mode 0600",
+			timestampfile, sb.st_mode);
+		    (void) unlink(timestampfile);
+		} else {
+		    /* If not mode 0600, fix it. */
+		    if ((sb.st_mode & 0000777) != 0600)
+			(void) chmod(timestampfile, 0600);
+
+		    status = TS_OLD;	/* actually check mtime below */
+		}
+	    }
+	} else if (errno != ENOENT) {
+	    log_error(NO_EXIT|USE_ERRNO, "can't stat %s", timestampfile);
+	    status = TS_ERROR;
+	}
+    }
+
+    /*
+     * If the file/dir exists, check its mtime.
+     */
+    if (status == TS_OLD) {
+	now = time(NULL);
+	if (TIMEOUT && now - sb.st_mtime < 60 * TIMEOUT) {
+	    /*
+	     * Check for bogus time on the stampfile.  The clock may
+	     * have been set back or someone could be trying to spoof us.
+	     */
+	    if (sb.st_mtime > now + 60 * TIMEOUT * 2) {
+		log_error(NO_EXIT,
+		    "timestamp too far in the future: %20.20s",
+		    4 + ctime(&sb.st_mtime));
+		if (timestampfile)
+		    (void) unlink(timestampfile);
+		else
+		    (void) rmdir(timestampdir);
+		status = TS_MISSING;
+	    } else
+		status = TS_CURRENT;
+	}
     }
 
     set_perms(PERM_USER, 0);		/* relinquish root */
@@ -461,25 +478,41 @@ timestamp_status(timestampfile, user, make_dirs)
 }
 
 /*
- * Removes the timestamp ticket file.
+ * Remove the timestamp ticket file/dir.
  */
 void
 remove_timestamp(remove)
     int remove;
 {
+    char *timestampdir;
     char *timestampfile;
+    char *ts;
     int status;
 
-    timestampfile = build_timestampfile();
-    status = timestamp_status(timestampfile, user_name, FALSE);
-    if (status != TS_ERROR && status != TS_MISSING) {
+    build_timestamp(&timestampdir, &timestampfile);
+    status = timestamp_status(timestampdir, timestampfile, user_name, FALSE);
+    if (status == TS_OLD || status == TS_CURRENT) {
+	ts = timestampfile ? timestampfile : timestampdir;
 	set_perms(PERM_ROOT, 0);		/* become root */
-	if (remove)
-	    (void) unlink(timestampfile);
-	else
-	    if (touch(timestampfile, 0))
-		(void) fprintf(stderr, "%s: can't reset %s to epoch\n",
-		    Argv[0], timestampfile);
+	if (remove) {
+	    if (timestampfile)
+		status = unlink(timestampfile);
+	    else
+		status = rmdir(timestampdir);
+	    if (status == -1) {
+		log_error(NO_EXIT, "can't remove %s (%s), will reset to epoch",
+		    strerror(errno), ts);
+		remove = FALSE;
+	    }
+	}
+	if (!remove && touch(ts, 0) == -1) {
+	    (void) fprintf(stderr, "%s: can't reset %s to epoch: %s\n",
+		Argv[0], ts, strerror(errno));
+	}
 	set_perms(PERM_USER, 0);		/* relinquish root */
     }
+
+    (void) free(timestampdir);
+    if (timestampfile)
+	(void) free(timestampfile);
 }
