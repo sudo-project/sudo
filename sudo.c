@@ -919,6 +919,14 @@ void set_perms(perm, sudo_mode)
 					exit(1);
 				    }
 
+				    /* Set $USER to match target user */
+				    if (sudo_setenv("USER", pw->pw_name)) {
+					(void) fprintf(stderr,
+					    "%s: cannot allocate memory!\n",
+					    Argv[0]);
+					exit(1);
+				    }
+
 				    if (setgid(pw->pw_gid)) {
 					(void) fprintf(stderr,
 					    "%s: cannot set gid to %d: ",  
@@ -928,24 +936,17 @@ void set_perms(perm, sudo_mode)
 				    }
 
 				    /*
-				     * Initialize group vector and set
-				     * $USER only if we are going to be
-				     * a non-root user.
+				     * Initialize group vector only if are
+				     * going to run as a non-root user.
 				     */
-				    if (strcmp(runas_user, "root") != 0) {
-					if (initgroups(runas_user, pw->pw_gid) == -1) {
-					    (void) fprintf(stderr,
-						"%s: cannot set group vector ",
-						Argv[0]);
-					    perror("");
-					    exit(1);
-					}
-					if (sudo_setenv("USER", runas_user)) {
-					    (void) fprintf(stderr,
-						"%s: cannot allocate memory!\n",
-						Argv[0]);
-					    exit(1);
-					}
+				    if (strcmp(runas_user, "root") != 0 &&
+					initgroups(runas_user, pw->pw_gid)
+					== -1) {
+					(void) fprintf(stderr,
+					    "%s: cannot set group vector ",
+					    Argv[0]);
+					perror("");
+					exit(1);
 				    }
 
 				    if (setuid(pw->pw_uid)) {
