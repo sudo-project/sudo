@@ -44,11 +44,17 @@ command alias section format:
        CMNDALIAS ::= an upper\-case alias name.
        cmnd\-list ::= a comma separated list commands.
 
-Text after a pound sign '#' is considered a comment.
-Words that begin with a plus sign '+' are assumed to
-be netgroups
-Long lines can be newline escaped with the backslash '\\' character.
-The reserved alias 'ALL' can be used for both {Host,User,Cmnd}_Alias'.
+command specification:
+  path arg1 arg2 .. argn = command
+
+            path ::= a fully qualified pathname.
+       arg[1..n] ::= optional command line arguments.
+
+    Text after a pound sign ('#') is considered a comment.
+    Words that begin with a plus sign ('+') are assumed to
+    be netgroups (+cshosts refers to the netgroup "cshosts").
+    Long lines can be newline escaped with the backslash '\\' character.
+    The reserved alias 'ALL' can be used for both {Host,User,Cmnd}_Alias.
 
     DO NOT define an alias of 'ALL', it will NOT be used.
     Note that 'ALL' implies the entire universe of hosts/users/commands.
@@ -57,6 +63,13 @@ The reserved alias 'ALL' can be used for both {Host,User,Cmnd}_Alias'.
     Note that the '!' notation only works in a user's command list.  You
     may not use it to subtract elements in a User_Alias, Host_Alias, or
     Cmnd_Alias.
+
+    Commands may have optional command line arguments.  If they do,
+    then the arguments in the sudoers file must exactly match those
+    on the command line.  It is also possible to have a command's
+    arguments span multiple lines as long as the line continuance
+    character '\\' is used.  The following characters must be escaped
+    with a '\\' if used in command arguments: ',', ':', '=', '\\'.
 .fi
 .SH EXAMPLES
 .nf
@@ -85,11 +98,11 @@ The reserved alias 'ALL' can be used for both {Host,User,Cmnd}_Alias'.
     britt       REMOTE=SHUTDOWN:ALL=LPCS
     nieusma     SERVERS=SHUTDOWN,/etc/reboot:\\
                 HUB=ALL,!SHELLS
-    jill        houdini=/etc/shutdown,MISC
+    jill        houdini=/etc/shutdown -r now,MISC
     markm       HUB=ALL,!MISC,!/etc/shutdown,!/etc/halt
     davehieb    merlin=ALL:SERVERS=/etc/halt:\\
                 kodiakthorn=ALL
-    steve       CSNETS=/usr/su_commands/
+    steve       CSNETS=/usr/op_commands/,/bin/su operator
 .fi
 .sp
 The above
@@ -103,14 +116,17 @@ Britt is permitted to execute /etc/halt, /etc/shutdown, /usr/etc/lpc and
 /usr/ucb/lprm on the REMOTE machines (merlin, kodiakthorn, and spirit).
 Nieusma is allowed to run /etc/halt, /etc/shutdown, and /etc/halt on all
 machines and all commands except for the group of SHELL commands on the HUB
-machines.  Jill is permitted to execute /etc/shutdown, /bin/rm, and /bin/cat
+machines.  Jill is permitted to execute /etc/shutdown with the "\-r now"
+flags, /bin/rm, and /bin/cat
 on houdini.  Davehieb can execute any command on machines merlin and kodiakthorn
 and can halt the SERVERS.  Any user in the netgroup "interns" may run any
 command on the machines in the netgroup "openlabs" except for those commands
 in the groups SHELL and SU.  Steve can run any command located in the
-directory /usr/su_commands on all machines on the subnets listed in CSNETS
+directory /usr/op_commands on all machines on the subnets listed in CSNETS
 (note that the 128.138.192 net has a netmask of 255.255.255.192 which is
-why its network number is 128.138.192.192.
+why its network number is 128.138.192.192).  He may also su to operator
+but to no one else.
+
 .sp
 .B sudo
 will do a logical and of a machine's ip address(es) with its netmask to decide
