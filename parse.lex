@@ -87,7 +87,7 @@ extern void yyerror		__P((char *));
 #endif
 %}
 
-OCTET			[[:digit:]]{1,3}
+OCTET			[1]?[0-9]{1,2}|2[0-5]{1,2}
 DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
 HOSTNAME		[[:alnum:]_-]+
 USERNAME		[^:,\) \t\n]+
