@@ -604,7 +604,18 @@ lock_file(fp, lockit)
     FILE *fp;
     int lockit;
 {
-    /* XXX - implement fcntl-style locking */
+#ifdef F_SETLK
+    struct flock lock;
+
+    lock.l_start = 0;
+    lock.l_len = 0;
+    lock.l_pid = getpid();
+    lock.l_type = lockit ? F_WRLCK : F_UNLCK;
+    lock.l_whence = SEEK_SET;
+
+    return(fcntl(fileno(fp), F_SETLKW, &lock) == 0);
+#else
     return(TRUE);
+#endif
 }
 #endif
