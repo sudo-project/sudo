@@ -54,11 +54,13 @@ char buffer[BUFSIZ];
 char *sudoers = SUDOERS;
 int status = 0, err_line_no = 0;
 char *sudoers_tmp_file = TMPSUDOERS;
-FILE *sudoers_tmp_fp, *sudoers_fp;
+FILE *sudoers_tmp_fp=NULL, *sudoers_fp=NULL;
 
 void Exit()
 {
-    (void) fclose(sudoers_tmp_fp);
+    if (sudoers_tmp_fp)
+	(void) fclose(sudoers_tmp_fp);
+
     (void) unlink(sudoers_tmp_file);
     exit(1);
 }
