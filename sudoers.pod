@@ -96,7 +96,7 @@ C<Host_Alias> and C<Cmnd_Alias>.
 
  User_Alias ::= NAME '=' User_List
 
- Runas_Alias ::= NAME '=' Runas_User_List
+ Runas_Alias ::= NAME '=' Runas_List
 
  Host_Alias ::= NAME '=' Host_List
 
@@ -122,7 +122,6 @@ The definitions of what constitutes a valid I<alias> member follow.
 	       User ',' User_List
 
  User ::= '!'* username |
-	  '!'* '#'uid |
 	  '!'* '%'group |
 	  '!'* '+'netgroup |
 	  '!'* User_Alias
@@ -143,9 +142,9 @@ just cancel each other out.
 	        '!'* +netgroup |
 	        '!'* Runas_Alias
 
-Likewise, a C<Runas_List> has the same possible elements
-as a C<User_List>, except that it can include a C<Runas_Alias>,
-instead of a C<User_Alias>.
+A C<Runas_List> is similar to a C<User_List> except that it can
+also contain uids (prefixed with '#') and instead of C<User_Alias>es
+it can contain C<Runas_Alias>es.
 
  Host_List ::= Host |
 	       Host ',' Host_List
@@ -227,6 +226,10 @@ Lists have two additional assignment operators, C<+=> and C<-=>.
 These operators are used to add to and delete from a list respectively.
 It is not an error to use the C<-=> operator to remove an element
 that does not exist in a list.
+
+Note that since the I<sudoers> file is parsed in order the best place
+to put the Defaults section is after the Host, User, and Cmnd aliases
+but before the user specifications.
 
 B<Flags>:
 
