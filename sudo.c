@@ -512,7 +512,14 @@ static void rmenv(envp, s, len)
 
 static void add_env()
 {
-    char *uidstr;
+    char *idstr;
+
+    /* add the SUDO_COMMAND envariable */
+    if (sudo_setenv("SUDO_COMMAND", cmnd)) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
 
     /* add the SUDO_USER envariable */
     if (sudo_setenv("SUDO_USER", user)) {
@@ -522,13 +529,22 @@ static void add_env()
     }
 
     /* add the SUDO_UID envariable */
-    uidstr = uid2str(uid);
-    if (sudo_setenv("SUDO_UID", uidstr)) {
+    idstr = uid2str(uid);
+    if (sudo_setenv("SUDO_UID", idstr)) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
-    (void) free(uidstr);
+    (void) free(idstr);
+
+    /* add the SUDO_GID envariable */
+    idstr = uid2str((uid_t)getegid());
+    if (sudo_setenv("SUDO_GID", idstr)) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+    (void) free(idstr);
 }
 
 
