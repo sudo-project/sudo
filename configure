@@ -6719,6 +6719,12 @@ echo "$as_me: using shlicc as CC" >&6;}
 		    CHECKSHADOW="false"
 		fi
 		;;
+    *-*-darwin*)
+		SKIP_SETREUID=yes
+		if test "$CHECKSHADOW" = "true"; then
+		    CHECKSHADOW="false"
+		fi
+		;;
     *-*-nextstep*)
 		# lockf() on is broken on the NeXT -- use flock instead
 		ac_cv_func_lockf=no
