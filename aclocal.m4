@@ -3,22 +3,22 @@ dnl
 dnl checks for programs
 dnl
 define(SUDO_PROG_INSTALL,
-[# Make sure to not get the incompatible SysV /etc/install and
-# /usr/sbin/install, which might be in PATH before a BSD-like install,
+[# Make sure to not get the incompatible SysV /etc/install, /sbin/install
+# and /usr/sbin/install, which might be in PATH before a BSD-like install,
 # or the SunOS /usr/etc/install directory, or the AIX /bin/install,
 # or the AFS install, which mishandles nonexistent args, or
 # /usr/ucb/install on SVR4, which tries to use the nonexistent group
 # `staff'.  On most BSDish systems install is in /usr/bin, not /usr/ucb
 # anyway.  Sigh.  We can always use the installbsd in $srcdir.
 if test "z${INSTALL}" = "z" ; then
-  echo checking for install
+  echo checking for BSD compatible install
   savepath="$PATH"
   PATH="${PATH}:${srcdir}"
   IFS="${IFS= 	}"; saveifs="$IFS"; IFS="${IFS}:"
   for dir in $PATH; do
     test -z "$dir" && dir=.
     case $dir in
-    /etc|/usr/sbin|/usr/etc|/usr/afsws/bin|/usr/ucb) ;;
+    /sbin|/etc|/usr/sbin|/usr/etc|/usr/afsws/bin|/usr/ucb) ;;
     *)
       if test -f $dir/installbsd; then
 	INSTALL="$dir/installbsd -c" # OSF1
@@ -163,6 +163,6 @@ $0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 #ifdef sgi
   yes
 #endif
-], [$1], [$2])
+], AC_DEFINE(_BSD_COMPAT), [$1], [$2])
 ])dnl
 dnl
