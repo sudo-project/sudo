@@ -135,7 +135,9 @@ void log_error(code)
     /*
      * Get our ttyname or set to "none"
      */
-    tty = (char *) ttyname(0);
+    if ((tty = (char *) ttyname(0)) == NULL)
+	tty = (char *) ttyname(1);
+
     if (tty && (p = strrchr(tty, '/')))
 	tty = p + 1;
     else
