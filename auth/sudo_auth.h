@@ -40,16 +40,17 @@ typedef struct sudo_auth {
     int status;			/* status from verify routine */
     char *name;
     void *data;			/* method-specific data pointer */
+    int (*init) __P((struct passwd *pw, char **prompt, void **data));
     int (*setup) __P((struct passwd *pw, char **prompt, void **data));
     int (*verify) __P((struct passwd *pw, char *p, void **data));
     int (*cleanup) __P((struct passwd *pw, int status, void **data));
 } sudo_auth;
 
 /* Prototypes for standalone methods */
-int fwtk_setup __P((struct passwd *pw, char **prompt, void **data));
+int fwtk_init __P((struct passwd *pw, char **prompt, void **data));
 int fwtk_verify __P((struct passwd *pw, char *prompt, void **data));
 int fwtk_cleanup __P((struct passwd *pw, int status, void **data));
-int pam_setup __P((struct passwd *pw, char **prompt, void **data));
+int pam_init __P((struct passwd *pw, char **prompt, void **data));
 int pam_verify __P((struct passwd *pw, char *prompt, void **data));
 int pam_cleanup __P((struct passwd *pw, int status, void **data));
 int sia_setup __P((struct passwd *pw, char **prompt, void **data));
@@ -60,41 +61,44 @@ int dce_verify __P((struct passwd *pw, char *pass, void **data));
 
 /* Prototypes for normal methods */
 int passwd_verify __P((struct passwd *pw, char *pass, void **data));
-int secureware_setup __P((struct passwd *pw, char **prompt, void **data));
+int secureware_init __P((struct passwd *pw, char **prompt, void **data));
 int secureware_verify __P((struct passwd *pw, char *pass, void **data));
 int rfc1938_setup __P((struct passwd *pw, char **prompt, void **data));
 int rfc1938_verify __P((struct passwd *pw, char *pass, void **data));
 int afs_verify __P((struct passwd *pw, char *pass, void **data));
-int kerb4_setup __P((struct passwd *pw, char **prompt, void **data));
+int kerb4_init __P((struct passwd *pw, char **prompt, void **data));
 int kerb4_verify __P((struct passwd *pw, char *pass, void **data));
-int kerb5_setup __P((struct passwd *pw, char **prompt, void **data));
+int kerb5_init __P((struct passwd *pw, char **prompt, void **data));
 int kerb5_verify __P((struct passwd *pw, char *pass, void **data));
+int securid_init __P((struct passwd *pw, char **prompt, void **data));
+int securid_setup __P((struct passwd *pw, char **prompt, void **data));
+int securid_verify __P((struct passwd *pw, char *pass, void **data));
 
-/* Fields: need_root, name, setup, verify, cleanup */
-#define AUTH_ENTRY(r, n, s, v, c) { r, 1, AUTH_FAILURE, n, NULL, s, v, c },
+/* Fields: need_root, name, init, setup, verify, cleanup */
+#define AUTH_ENTRY(r, n, i, s, v, c) { r, 1, AUTH_FAILURE, n, NULL, i, s, v, c },
 
 /* Some methods cannots (or should not) interoperate with any others */
 #if defined(HAVE_PAM)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(1, "pam", pam_setup, pam_verify, pam_cleanup)
+	AUTH_ENTRY(1, "pam", pam_init, NULL, pam_verify, pam_cleanup)
 #elif defined(HAVE_SECURID)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(1, "SecurId", securid_setup, securid_verify, NULL)
+	AUTH_ENTRY(1, "SecurId", securid_init, securid_setup, securid_verify, NULL)
 #elif defined(HAVE_SIA)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(1, "sia", sia_setup, sia_verify, sia_cleanup)
+	AUTH_ENTRY(1, "sia", NULL, sia_setup, sia_verify, sia_cleanup)
 #elif defined(HAVE_DCE)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(1, "dce", NULL, dce_verify, NULL)
+	AUTH_ENTRY(1, "dce", NULL, NULL, dce_verify, NULL)
 #elif defined(HAVE_AUTHENTICATE)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(1, "aixauth", NULL, aixauth_verify, NULL)
+	AUTH_ENTRY(1, "aixauth", NULL, NULL, aixauth_verify, NULL)
 #elif defined(HAVE_FWTK)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(1, "fwtk", fwtk_setup, fwtk_verify, fwtk_cleanup)
+	AUTH_ENTRY(1, "fwtk", fwtk_init, NULL, fwtk_verify, fwtk_cleanup)
 #elif defined(OTP_ONLY) && (defined(HAVE_SKEY) || defined(HAVE_OPIE))
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(1, "rfc1938", rfc1938_setup, rfc1938_verify, NULL)
+	AUTH_ENTRY(1, "rfc1938", NULL, rfc1938_setup, rfc1938_verify, NULL)
 #  define AUTH_STANDALONE_GETPASS
 #endif
 

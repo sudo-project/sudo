@@ -106,7 +106,7 @@ rfc1938_setup(pw, promptp, data)
 #endif /* OTP_ONLY */
     }
 
-    /* Get space for new prompt with embedded S/Key challenge */
+    /* Get space for new prompt with embedded challenge */
     if (np_size < op_len + strlen(challenge) + 7) {
 	np_size = op_len + strlen(challenge) + 7;
 	new_prompt = (char *) erealloc(new_prompt, np_size);

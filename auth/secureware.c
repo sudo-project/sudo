@@ -58,7 +58,7 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 int
-secureware_setup(pw, promptp, data)
+secureware_init(pw, promptp, data)
     struct passwd *pw;
     char **promptp;
     void **data;

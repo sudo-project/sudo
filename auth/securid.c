@@ -61,6 +61,17 @@ static const char rcsid[] = "$Sudo$";
 union config_record configure;
 
 int
+securid_init(pw, promptp, data)
+    struct passwd *pw;
+    char **promptp;
+    void **data;
+{
+
+    creadcfg();					/* Only read config file once */
+    return(AUTH_SUCCESS);
+}
+
+int
 securid_setup(pw, promptp, data)
     struct passwd *pw;
     char **promptp;
@@ -68,10 +79,7 @@ securid_setup(pw, promptp, data)
 {
     static SD_CLIENT sd_dat;			/* SecurID data block */
 
-    if (!*data)
-	creadcfg();				/* Only read config file once */
-
-    /* Initialize SecurID every time. */
+    /* Re-initialize SecurID every time. */
     *data = &sd_dat;
     if (sd_init(sd) == 0)
 	return(AUTH_SUCCESS);

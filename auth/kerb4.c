@@ -53,15 +53,12 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 int
-kerb4_setup(pw, promptp, data)
+kerb4_init(pw, promptp, data)
     struct passwd *pw;
     char **promptp;
     void **data;
 {
     static char realm[REALM_SZ];
-
-    if (*data)
-	return(AUTH_SUCCESS);		/* Already initialized */
 
     /* Don't try to verify root */
     if (pw->pw_uid == 0)

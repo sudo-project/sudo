@@ -54,16 +54,13 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 int
-fwtk_setup(pw, promptp, data)
+fwtk_init(pw, promptp, data)
     struct passwd *pw;
     char **promptp;
     void **data;
 {
     static Cfg *confp;			/* Configuration entry struct */
     char resp[128];			/* Response from the server */
-
-    if (confp)
-	return(AUTH_SUCCESS);		/* Already initialized */
 
     if ((confp = cfg_read("sudo")) == (Cfg *)-1) {
 	(void) fprintf(stderr, "%s: cannot read fwtk config.\n", Argv[0]);

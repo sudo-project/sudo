@@ -58,16 +58,13 @@ static int sudo_conv __P((int, PAM_CONST struct pam_message **,
 static char *def_prompt;
 
 int
-pam_setup(pw, promptp, data)
+pam_init(pw, promptp, data)
     struct passwd *pw;
     char **promptp;
     void **data;
 {
     static struct pam_conv pam_conv;
     pam_handle_t *pamh;
-
-    if (*data)
-	return(AUTH_SUCCESS);		/* Already initialized */
 
     /* Initial PAM setup */
     pam_conv.conv = sudo_conv;

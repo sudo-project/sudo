@@ -59,25 +59,25 @@ sudo_auth auth_switch[] = {
     AUTH_STANDALONE
 #else
 #  ifndef WITHOUT_PASSWD
-    AUTH_ENTRY(0, "passwd", NULL, passwd_verify, NULL)
+    AUTH_ENTRY(0, "passwd", NULL, NULL, passwd_verify, NULL)
 #  endif
 #  if defined(HAVE_SECUREWARE) && !defined(WITHOUT_PASSWD)
-    AUTH_ENTRY(0, "secureware", secureware_setup, secureware_verify, NULL)
+    AUTH_ENTRY(0, "secureware", secureware_init, NULL, secureware_verify, NULL)
 #  endif
 #  ifdef HAVE_AFS
-    AUTH_ENTRY(1, "afs", NULL, afs_verify, NULL)
+    AUTH_ENTRY(1, "afs", NULL, NULL, afs_verify, NULL)
 #  endif
 #  ifdef HAVE_KERB4
-    AUTH_ENTRY(1, "kerb4", kerb4_setup, kerb4_verify, NULL)
+    AUTH_ENTRY(1, "kerb4", kerb4_init, NULL, kerb4_verify, NULL)
 #  endif
 #  ifdef HAVE_KERB5
-    AUTH_ENTRY(1, "kerb5", kerb5_setup, kerb5_verify, NULL)
+    AUTH_ENTRY(1, "kerb5", kerb5_init, NULL, kerb5_verify, NULL)
 #  endif
 #  if defined(HAVE_SKEY)  || defined(HAVE_OPIE)
-    AUTH_ENTRY(1, "skey", rfc1938_setup, rfc1938_verify, NULL)
+    AUTH_ENTRY(1, "rfc1938", NULL, rfc1938_setup, rfc1938_verify, NULL)
 #  endif
 #endif /* AUTH_STANDALONE */
-    AUTH_ENTRY(0, NULL, NULL, NULL, NULL)
+    AUTH_ENTRY(0, NULL, NULL, NULL, NULL, NULL)
 };
 
 int nil_pw;		/* I hate resorting to globals like this... */
@@ -89,6 +89,23 @@ verify_user()
     int status, success = AUTH_FAILURE;
     char *p;
     sudo_auth *auth;
+
+    /* Initialize auth methods and unconfigure the method if necessary. */
+    for (auth = auth_switch; auth->name; auth++) {
+	if (auth->init && auth->configured) {
+	    if (auth->need_root)
+		set_perms(PERM_ROOT, 0);
+
+	    status = (auth->init)(sudo_user.pw, &user_prompt, &auth->data);
+	    if (status == AUTH_FAILURE)
+		auth->configured = 0;
+	    else if (status == AUTH_FATAL)	/* XXX log */
+		exit(1);		/* assume error msg already printed */
+
+	    if (auth->need_root)
+		set_perms(PERM_USER, 0);
+	}
+    }
 
     while (--counter) {
 	/* Do any per-method setup and unconfigure the method if needed */

@@ -62,7 +62,7 @@ static krb5_context sudo_context = NULL;
 static int verify_krb_v5_tgt __P((krb5_ccache));
 
 int
-kerb5_setup(pw, promptp, data)
+kerb5_init(pw, promptp, data)
     struct passwd *pw;
     char **promptp;
     void **data;
@@ -70,9 +70,6 @@ kerb5_setup(pw, promptp, data)
     char *lrealm;
     krb5_error_code retval;
     extern int arg_prompt;
-
-    if (*data)
-	return(AUTH_SUCCESS);		/* Already initialized */
 
     /* XXX - make these errors non-fatal for better fallback? */
     if (retval = krb5_init_context(&sudo_context)) {
