@@ -73,6 +73,10 @@ static int sudo_conv __P((int, PAM_CONST struct pam_message **,
 			  struct pam_response **, VOID *));
 static char *def_prompt;
 
+#ifndef PAM_DATA_SILENT
+#define PAM_DATA_SILENT	0
+#endif
+
 int
 pam_init(pw, promptp, auth)
     struct passwd *pw;
@@ -108,17 +112,19 @@ pam_verify(pw, prompt, auth)
 
     def_prompt = prompt;	/* for sudo_conv */
 
-    /* PAM_SILENT prevents error messages from going to syslog(3) */
-    if ((error = pam_authenticate(pamh, PAM_SILENT)) == PAM_SUCCESS)
-	return(AUTH_SUCCESS);
-
-    /* Any error other than PAM_AUTH_ERR or PAM_MAXTRIES is probably fatal.  */
-    if (error != PAM_AUTH_ERR && error != PAM_MAXTRIES) {
-	if ((s = pam_strerror(pamh, error)))
-	    log_error(NO_EXIT|NO_MAIL, "pam_authenticate: %s", s);
-	return(AUTH_FATAL);
+    /* PAM_SILENT prevents the authentication service from generating output. */
+    error = pam_authenticate(pamh, PAM_SILENT);
+    switch (error) {
+	case PAM_SUCCESS:
+	    return(AUTH_SUCCESS);
+	case PAM_AUTH_ERR:
+	case PAM_MAXTRIES:
+	    return(AUTH_FAILURE);
+	default:
+	    if ((s = pam_strerror(pamh, error)))
+		log_error(NO_EXIT|NO_MAIL, "pam_authenticate: %s", s);
+	    return(AUTH_FATAL);
     }
-    return(AUTH_FAILURE);
 }
 
 int
@@ -127,11 +133,59 @@ pam_cleanup(pw, auth)
     sudo_auth *auth;
 {
     pam_handle_t *pamh = (pam_handle_t *) auth->data;
+    int status = PAM_DATA_SILENT;
 
-    if (pam_end(pamh, (auth->status == AUTH_SUCCESS)) == PAM_SUCCESS)
+    /* Convert AUTH_FOO -> PAM_FOO as best we can. */
+    /* XXX - store real value somewhere in auth->data and use it */
+    switch (auth->status) {
+	case AUTH_SUCCESS:
+	    status |= PAM_SUCCESS;
+	    break;
+	case AUTH_FAILURE:
+	    status |= PAM_AUTH_ERR;
+	    break;
+	case AUTH_FATAL:
+	default:
+	    status |= PAM_ABORT;
+	    break;
+    }
+
+    if (pam_end(pamh, status) == PAM_SUCCESS)
 	return(AUTH_SUCCESS);
     else
 	return(AUTH_FAILURE);
+}
+
+int
+pam_prep_user(pw)
+    struct passwd *pw;
+{
+    struct pam_conv pam_conv;
+    pam_handle_t *pamh;
+    const char *s;
+    int error;
+
+    /* We need to setup a new PAM session for the user we are changing *to*. */
+    pam_conv.conv = sudo_conv;
+    if (pam_start("sudo", pw->pw_name, &pam_conv, &pamh) != PAM_SUCCESS) {
+	log_error(USE_ERRNO|NO_EXIT|NO_MAIL, 
+	    "unable to initialize PAM");
+	return(AUTH_FATAL);
+    }
+    (void) pam_set_item(pamh, PAM_RUSER, user_name);
+    if (strcmp(user_tty, "unknown"))
+	(void) pam_set_item(pamh, PAM_TTY, user_tty);
+
+    /* Set credentials (may include resource limits, device ownership, etc). */
+    if ((error = pam_setcred(pamh, PAM_ESTABLISH_CRED)) != PAM_SUCCESS) {
+	if ((s = pam_strerror(pamh, error)))
+	    log_error(NO_EXIT|NO_MAIL, "pam_setcred: %s", s);
+    }
+
+    if (pam_end(pamh, error) != PAM_SUCCESS)
+	return(AUTH_FAILURE);
+
+    return(error == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
 }
 
 /*
