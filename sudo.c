@@ -193,7 +193,7 @@ int main(argc, argv)
     int sudo_mode = MODE_RUN;
     extern char ** environ;
 
-#if (SHADOW_TYPE == SPW_SECUREWARE)
+#if (SHADOW_TYPE == SPW_SECUREWARE) && defined(HAVE_SET_AUTH_PARAMETERS)
     (void) set_auth_parameters(argc, argv);
 #endif /* SPW_SECUREWARE */
 
