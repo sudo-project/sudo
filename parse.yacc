@@ -706,8 +706,10 @@ hostaliases	:	hostalias
 
 hostalias	:	ALIAS { push; } '=' hostlist {
 			    if ((host_matches != -1 || pedantic) &&
-				!add_alias($1, HOST_ALIAS, host_matches))
+				!add_alias($1, HOST_ALIAS, host_matches)) {
+				yyerror(NULL);
 				YYERROR;
+			    }
 			    pop;
 			}
 		;
@@ -731,8 +733,10 @@ cmndalias	:	ALIAS {
 			     }
 			} '=' cmndlist {
 			    if ((cmnd_matches != -1 || pedantic) &&
-				!add_alias($1, CMND_ALIAS, cmnd_matches))
+				!add_alias($1, CMND_ALIAS, cmnd_matches)) {
+				yyerror(NULL);
 				YYERROR;
+			    }
 			    pop;
 			    free($1);
 
@@ -759,8 +763,10 @@ runasalias	:	ALIAS {
 			    }
 			} '=' runaslist {
 			    if (($4 != -1 || pedantic) &&
-				!add_alias($1, RUNAS_ALIAS, $4))
+				!add_alias($1, RUNAS_ALIAS, $4)) {
+				yyerror(NULL);
 				YYERROR;
+			    }
 			    free($1);
 
 			    if (printmatches == TRUE)
@@ -774,8 +780,10 @@ useraliases	:	useralias
 
 useralias	:	ALIAS { push; }	'=' userlist {
 			    if ((user_matches != -1 || pedantic) &&
-				!add_alias($1, USER_ALIAS, user_matches))
+				!add_alias($1, USER_ALIAS, user_matches)) {
+				yyerror(NULL);
 				YYERROR;
+			    }
 			    pop;
 			    free($1);
 			}
@@ -828,8 +836,10 @@ user		:	WORD {
 				    (void) fprintf(stderr,
 					"%s: undeclared User_Alias `%s' referenced near line %d\n",
 					(pedantic == 1) ? "Warning" : "Error", $1, sudolineno);
-				    if (pedantic > 1)
+				    if (pedantic > 1) {
+					yyerror(NULL);
 					YYERROR;
+				    }
 				}
 				$$ = -1;
 			    }
