@@ -156,11 +156,9 @@ void yyerror(s)
 %token <tok>	 ':' '=' ',' '!' '.'	/* union member tokens */
 %token <tok>	 ERROR
 
-%type <BOOLEAN>	 cmnd
 %type <BOOLEAN>	 runasspec
 %type <BOOLEAN>	 runaslist
 %type <BOOLEAN>	 runasuser
-%type <BOOLEAN>	 nopassreq
 %type <BOOLEAN>	 nopasswd
 
 %%
@@ -191,7 +189,7 @@ privileges	:	privilege
 		|	privileges ':' privilege
 		;
 
-privilege	:	hostspec '=' opcmndlist {
+privilege	:	hostspec '=' cmndspeclist {
 			    if (user_matches == TRUE) {
 				push;
 				user_matches = TRUE;
@@ -232,15 +230,20 @@ hostspec	:	ALL {
 			}
 		;
 
-opcmndlist	:	opcmnd
-		|	opcmndlist ',' opcmnd
+cmndspeclist	:	cmndspec
+		|	cmndspeclist ',' cmndspec
 		;
 
-opcmnd		:	cmnd {
-			    if ($1 == TRUE && runas_matches != TRUE &&
-				strcmp("root", runas_user) == 0)
+cmndspec	:	runasspec nopasswd opcmnd {
+			    if ($1 > 0 && cmnd_matches == TRUE) {
 				runas_matches = TRUE;
+				if ($2 == TRUE)
+				    no_passwd = TRUE;
+			    }
 			}
+		;
+
+opcmnd		:	cmnd { ; }
 		|	'!' {
 			    if (printmatches == TRUE && host_matches == TRUE
 				&& user_matches == TRUE) {
@@ -259,17 +262,15 @@ opcmnd		:	cmnd {
 			    else if (cmnd_matched == FALSE)
 				cmnd_matches = TRUE;
 			}
-		|	runasspec { ; }
-		|	nopassreq { ; }
 		;
 
-runasspec	: 	RUNAS runaslist nopasswd cmnd {
-			    if ($2 > 0 && $4 == TRUE) {
-				runas_matches = TRUE;
-				if ($3 == TRUE)
-				    no_passwd = TRUE;
-			    }
+runasspec	:	/* empty */ {
+			    $$ = (strcmp("root", runas_user) == 0);
 			}
+		|	RUNAS runaslist {
+			    $$ = $2;
+			}
+		;
 
 runaslist	:	runasuser {
 			    $$ = $1;
@@ -308,27 +309,12 @@ nopasswd	:	/* empty */
 			}
 		;
 
-nopassreq	:	NOPASSWD cmnd {
-			    if ($2 == TRUE) {
-				if (runas_matches == TRUE) {
-				    no_passwd = TRUE;
-				    $$ = TRUE;
-				} else if (strcmp("root", runas_user) == 0) {
-				    runas_matches = TRUE;
-				    no_passwd = TRUE;
-				    $$ = TRUE;
-				}
-			    }
-			}
-		;
-
 cmnd		:	ALL {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				(void) puts("ALL");
 
 			    cmnd_matches = TRUE;
-			    $$ = TRUE;
 			}
 		|	ALIAS {
 			    if (printmatches == TRUE && host_matches == TRUE &&
@@ -336,7 +322,6 @@ cmnd		:	ALL {
 				(void) puts($1);
 			    if (find_alias($1, CMND)) {
 				cmnd_matches = TRUE;
-				$$ = TRUE;
 			    }
 			    (void) free($1);
 			}
@@ -355,7 +340,6 @@ cmnd		:	ALL {
 			    if (command_matches(cmnd, (NewArgc > 1) ?
 				    &NewArgv[1] : NULL, $1.cmnd, $1.args)) {
 				cmnd_matches = TRUE;
-				$$ = TRUE;
 			    }
 
 			    (void) free($1.cmnd);
