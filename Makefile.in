@@ -234,6 +234,7 @@ strlcpy.o: strlcpy.c config.h
 strerror.o: strerror.c config.h
 utime.o: utime.c config.h pathnames.h compat.h emul/utime.h
 ldap.o: ldap.c $(SUDODEP) parse.h
+trace_systrace.o: trace_systrace.c $(SUDODEP) trace_systrace.h
 
 # Build special copy of alloc.c for visudo that calls Exit()
 vsalloc.o: alloc.c $(SUDODEP)
