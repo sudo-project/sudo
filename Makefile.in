@@ -100,7 +100,7 @@ LIBOBJS = @TGETPASS@ @LIBOBJS@
 
 HDRS = sudo.h pathnames.h options.h compat.h version.h insults.h
 
-VERSION = 1.3.1pl5b2
+VERSION = 1.3.1pl5b3
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
             PORTING README RUNSON TROUBLESHOOTING Makefile.in acsite.m4 \
