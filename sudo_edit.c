@@ -80,7 +80,7 @@ int sudo_edit(argc, argv)
     struct tempfile {
 	char *tfile;
 	char *ofile;
-	struct timespec ots;
+	struct timespec omtim;
 	off_t osize;
     } *tf;
 
@@ -128,8 +128,8 @@ int sudo_edit(argc, argv)
 	    memset(&sb, 0, sizeof(sb));
 	}
 	tf[i].ofile = *ap;
-	tf[i].ots.tv_sec = mtim_getsec(sb);
-	tf[i].ots.tv_nsec = mtim_getnsec(sb);
+	tf[i].omtim.tv_sec = mtim_getsec(sb);
+	tf[i].omtim.tv_nsec = mtim_getnsec(sb);
 	tf[i].osize = sb.st_size;
 	if ((cp = strrchr(tf[i].ofile, '/')) != NULL)
 	    cp++;
@@ -162,10 +162,10 @@ int sudo_edit(argc, argv)
 	 * file's mtime.  It is better than nothing and we only use the info
 	 * to determine whether or not a file has been modified.
 	 */
-	if (touch(tfd, NULL, &tf[i].ots) == -1) {
+	if (touch(tfd, NULL, &tf[i].omtim) == -1) {
 	    if (fstat(tfd, &sb) == 0) {
-		tf[i].ots.tv_sec = mtim_getsec(sb);
-		tf[i].ots.tv_nsec = mtim_getnsec(sb);
+		tf[i].omtim.tv_sec = mtim_getsec(sb);
+		tf[i].omtim.tv_nsec = mtim_getnsec(sb);
 	    }
 	    /* XXX - else error? */
 	}
@@ -273,8 +273,8 @@ int sudo_edit(argc, argv)
 #ifdef HAVE_FSTAT
 	if (fstat(tfd, &sb) == 0) {
 	    if (tf[i].osize == sb.st_size &&
-		tf[i].ots.tv_sec == mtim_getsec(sb) &&
-		tf[i].ots.tv_nsec == mtim_getnsec(sb)) {
+		tf[i].omtim.tv_sec == mtim_getsec(sb) &&
+		tf[i].omtim.tv_nsec == mtim_getnsec(sb)) {
 		/*
 		 * If mtime and size match but the user spent no measurable
 		 * time in the editor we can't tell if the file was changed.
