@@ -1787,6 +1787,7 @@ if test -n "$with_systrace"; then
 	CPPFLAGS="$CPPFLAGS -I${with_systrace}"
     fi
     SUDO_OBJS="${SUDO_OBJS} systrace.o"
+    AC_CHECK_FUNCS(setproctitle)
 fi
 dnl
 dnl Kerberos IV
