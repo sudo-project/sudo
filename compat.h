@@ -156,6 +156,13 @@
 #endif /* HAVE_SETEUID */
 
 /*
+ * NCR's SVr4 has _innetgr(3) instead of innetgr(3) for some reason.
+ */
+#ifdef HAVE__INNETGR
+# define innetgr(n, h, u, d)	(_innetgr(n, h, u, d))
+#endif /* HAVE__INNETGR */
+
+/*
  * On POSIX systems, O_NOCTTY is the default so some OS's may lack this define.
  */
 #ifndef O_NOCTTY
