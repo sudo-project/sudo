@@ -145,7 +145,7 @@ char *runas_user = "root";
 char *cmnd = NULL;
 char *cmnd_args = NULL;
 char *tty = NULL;
-char *prompt = PASSPROMPT;
+char *prompt;
 char host[MAXHOSTNAMELEN + 1];
 char *shost;
 char cwd[MAXPATHLEN + 1];
@@ -205,6 +205,12 @@ int main(argc, argv)
 	(void) fprintf(stderr, "Sorry, %s must be setuid root.\n", Argv[0]);
 	exit(1);
     }
+
+    /*
+     * set the prompt based on $SUDO_PROMPT (can be overridden by `-p')
+     */
+    if ((prompt = getenv("SUDO_PROMPT")) == NULL)
+	prompt = PASSPROMPT;
 
     /*
      * parse our arguments
