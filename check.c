@@ -41,7 +41,9 @@ static char rcsid[] = "$Id$";
 
 #include <stdio.h>
 #include <string.h>
+#ifndef STD_HEADERS
 #include <strings.h>
+#endif /* !STD_HEADERS */
 #include <fcntl.h>
 #include <sys/param.h>
 #include <sys/types.h>

@@ -39,7 +39,7 @@ static char rcsid[] = "$Id$";
 #endif /* lint */
 
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 #include <ctype.h>
 #include <sys/param.h>
 #include <sys/types.h>
@@ -297,6 +297,20 @@ int cmnd_type_ok()
 	 * of commands in something like:
 	 *    user machine=ALL,!/bin/rm,!/etc/named ... 
 	 */
+
+	/*
+	 * Check to see if a directory is being permitted
+	 */
+	if (list_ptr[USER_LIST]->data[strlen(list_ptr[USER_LIST]->data)-1]
+	    == '/') {
+	    /* we have a directory spec */
+	    if (strncmp(list_ptr[USER_LIST]->data, cmnd,
+		        strlen(list_ptr[USER_LIST]->data)) == 0)
+		return(MATCH);
+	    else
+		return(NO_MATCH);
+	}
+
 	if (strcmp(list_ptr[USER_LIST] -> data, cmnd) == 0) {
 	    if (list_ptr[USER_LIST] -> op == '!') {
 		return (QUIT_NOW);
@@ -320,6 +334,19 @@ int cmnd_type_ok()
 		tmp_ptr = list_ptr[CMND_LIST];
 		list_ptr[CMND_LIST] = tmp_ptr -> next;
 		while (next_type == TYPE3) {
+		    /*
+		     * Check to see if a directory is being permitted
+		     */
+		    if (list_ptr[CMND_LIST]->
+			data[strlen(list_ptr[CMND_LIST]->data)-1] == '/' ) {
+			    /* we have a directory spec */
+			    if (strncmp(list_ptr[CMND_LIST]->data, cmnd,
+				strlen(list_ptr[CMND_LIST]->data)) == 0)
+				return(MATCH);
+			    else
+				return(NO_MATCH);
+		    }
+
 		    if (strcmp(list_ptr[CMND_LIST] -> data, cmnd) == 0) {
 			if (list_ptr[USER_LIST] -> op == '!') {
 			    list_ptr[CMND_LIST] = save_ptr;
