@@ -109,7 +109,7 @@ TESTOBJS = interfaces.o testsudoers.o
 
 LIBOBJS = @LIBOBJS@ @ALLOCA@
 
-HDRS = sudo.h pathnames.h options.h compat.h version.h insults.h \
+HDRS = sudo.h options.h compat.h version.h insults.h \
        ins_2001.h ins_classic.h ins_goons.h ins_csops.h sudo.tab.h
 
 VERSION = 1.5.7
@@ -118,18 +118,18 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL \
             INSTALL.configure OPTIONS TODO PORTING README RUNSON \
             FAQ TROUBLESHOOTING Makefile.in acsite.m4 aixcrypt.exp \
             config.h.in configure configure.in config.guess config.sub \
-            getcwd.c strdup.c indent.pro install-sh mkinstalldirs \
-            lsearch.c putenv.c sudo.tab.c tgetpass.c emul/search.h \
-            emul/utime.h utime.c fnmatch.c emul/fnmatch.h fnmatch.3 \
-            testsudoers.c sample.pam sample.sudoers sudo.pod sudo.man \
-            sudo.cat visudo.pod visudo.man visudo.cat sudoers.pod \
-            sudoers.man sudoers.cat lex.yy.c sudo-lex.yy.c sudoers \
-            dce_pwent.c alloca.c
+            pathnames.h.in getcwd.c strdup.c indent.pro install-sh \
+            mkinstalldirs lsearch.c putenv.c sudo.tab.c tgetpass.c \
+            emul/search.h emul/utime.h utime.c fnmatch.c emul/fnmatch.h \
+            fnmatch.3 testsudoers.c sample.pam sample.sudoers \
+            sudo.pod sudo.man sudo.cat visudo.pod visudo.man \
+            visudo.cat sudoers.pod sudoers.man sudoers.cat lex.yy.c \
+            sudo-lex.yy.c sudoers dce_pwent.c alloca.c
 
 VERSIONFILES = emul/utime.h check.c compat.h config.h.in dce_pwent.c \
 	       find_path.c getspwuid.c getcwd.c goodpath.c ins_2001.h \
 	       ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c \
-	       logging.c options.h parse.c parse.lex parse.yacc pathnames.h \
+	       logging.c options.h parse.c parse.lex parse.yacc pathnames.h.in \
 	       putenv.c strdup.c sudo.c sudo.h sudo_setenv.c testsudoers.c \
 	       tgetpass.c utime.c visudo.c
 
@@ -159,7 +159,7 @@ testsudoers: $(PARSEOBJS) $(TESTOBJS)
 #	rm -f sudo.tab.h sudo.tab.c
 #	$(YACC) -d -b sudo $(srcdir)/parse.yacc
 
-sudo.tab.o: $(HDRS) sudo.tab.c
+sudo.tab.o: $(HDRS) config.h pathnames.h sudo.tab.c
 
 # Uncomment the following if you intend to modify parse.lex
 #lex.yy.c: parse.lex
