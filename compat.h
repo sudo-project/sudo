@@ -168,32 +168,6 @@
 #endif
 
 /*
- * Emulate sete[ug]id() via setres[ug]id(2) or setre[ug]id(2)
- */
-#ifndef HAVE_SETEUID
-# ifdef __hpux
-#  define seteuid(_EUID)	(setresuid((uid_t) -1, _EUID, (uid_t) -1))
-# else
-#  define seteuid(_EUID)	(setreuid((uid_t) -1, _EUID))
-# endif /* __hpux */
-#endif /* HAVE_SETEUID */
-#ifndef HAVE_SETEGID
-# ifdef __hpux
-#  define setegid(_EGID)	(setresgid((gid_t) -1, _EGID, (gid_t) -1))
-# else
-#  define setegid(_EGID)	(setregid((gid_t) -1, _EGID))
-# endif /* __hpux */
-#endif /* HAVE_SETEGID */
-
-/*
- * Emulate setreuid() for HP-UX via setresuid(2)
- */
-#if !defined(HAVE_SETREUID) && defined(__hpux)
-# define setreuid(_RUID, _EUID)	(setresuid(_RUID, _EUID, (uid_t) -1))
-# define HAVE_SETREUID
-#endif /* !HAVE_SETEUID && __hpux */
-
-/*
  * NCR's SVr4 has _innetgr(3) instead of innetgr(3) for some reason.
  */
 #ifdef HAVE__INNETGR
