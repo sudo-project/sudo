@@ -3,6 +3,7 @@ The following options may be used to configure sudo 1.4
 FQDN
     Define this if you want to put fully qualified hostnames in the sudoers
     file.  Ie: instead of myhost you would use myhost.mydomain.edu.
+    You may still use the short form if you wish (and even mix the two).
     Beware that turning FQDN on requires sudo to make DNS lookups which
     may make sudo unusable if your DNS is totally hosed.
     Also note that you must use the host's official name as DNS knows it.
