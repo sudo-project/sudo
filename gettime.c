@@ -16,8 +16,10 @@
 
 #include <sys/types.h>
 #include <sys/time.h>
-#include <time.h>
 #include <stdio.h>
+#if TIME_WITH_SYS_TIME
+# include <time.h>
+#endif
 
 #include <config.h>
 #include <compat.h>

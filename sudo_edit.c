@@ -46,7 +46,9 @@
 #include <signal.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <time.h>
+#if TIME_WITH_SYS_TIME
+# include <time.h>
+#endif
 
 #include "sudo.h"
 

@@ -61,13 +61,15 @@
 #include <ctype.h>
 #include <pwd.h>
 #include <grp.h>
-#include <time.h>
 #include <signal.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#if TIME_WITH_SYS_TIME
+# include <time.h>
+#endif
 #ifdef __STDC__
 # include <stdarg.h>
 #else
