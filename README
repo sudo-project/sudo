@@ -58,9 +58,8 @@ file.
 
 Copyright
 =========
-Sudo is distributed under the `GNU general public license.'
-Please refer to the `COPYING' file included with the release
-for a copy of the license proper.
+Sudo is distributed under a BSD-style license.
+Please refer to the `LICENSE' file included with the release for details.
 
 Mailing lists
 =============
