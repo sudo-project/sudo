@@ -128,7 +128,7 @@ alias_add(name, type, members)
  */
 void
 alias_apply(func, cookie)
-    int (*func)(VOID *, VOID *);
+    int (*func) __P((VOID *, VOID *));
     VOID *cookie;
 {
     rbapply(aliases, func, cookie, inorder);

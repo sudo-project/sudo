@@ -56,7 +56,7 @@ void
 #ifdef __STDC__
 errorx(int eval, const char *fmt, ...)
 #else
-error(eval, fmt, va_alist)
+errorx(eval, fmt, va_alist)
 	int eval;
 	const char *fmt;
 	va_dcl
@@ -97,7 +97,7 @@ void
 #ifdef __STDC__
 warningx(const char *fmt, ...)
 #else
-warning(fmt, va_alist)
+warningx(fmt, va_alist)
 	const char *fmt;
 	va_dcl
 #endif
