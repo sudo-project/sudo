@@ -133,6 +133,7 @@ extern struct passwd *sudo_pwdup	__P((const struct passwd *));
  */
 int Argc, NewArgc;
 char **Argv, **NewArgv;
+char *prev_user;
 struct sudo_user sudo_user;
 struct passwd *auth_pw;
 FILE *sudoers_fp;
@@ -514,9 +515,16 @@ init_vars(sudo_mode)
     /*
      * Get a local copy of the user's struct passwd with the shadow password
      * if necessary.  It is assumed that euid is 0 at this point so we
-     * can read the shadow passwd file if necessary.
+     * can read the shadow passwd file if necessary.  If we are being run
+     * as root and the user is chaining sudo commands, use the SUDO_USER
+     * environment variable to determine the user's real identity.
+     * It is not safe to trust SUDO_USER if the real uid != 0.
      */
-    if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL) {
+    if (getuid() == 0 && prev_user != NULL)
+	sudo_user.pw = sudo_getpwnam(prev_user);
+    else
+	sudo_user.pw = sudo_getpwuid(getuid());
+    if (sudo_user.pw == NULL) {
 	/* Need to make a fake struct passwd for logging to work. */
 	struct passwd pw;
 	char pw_name[MAX_UID_T_LEN + 1];
@@ -570,7 +578,7 @@ init_vars(sudo_mode)
 	char **dst, **src = NewArgv;
 
 	NewArgv = (char **) emalloc2((++NewArgc + 1), sizeof(char *));
-	if (sudo_mode & MODE_LOGIN_SHELL) 
+	if (sudo_mode & MODE_LOGIN_SHELL)
 	    NewArgv[0] = runas_pw->pw_shell;
 	else if (user_shell && *user_shell)
 	    NewArgv[0] = user_shell;

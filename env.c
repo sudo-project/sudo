@@ -169,6 +169,7 @@ zero_env(envp)
 {
     char **ep, **nep;
     static char *newenv[7];
+    extern char *prev_user;
 
     for (ep = envp; *ep; ep++) {
 	switch (**ep) {
@@ -190,8 +191,10 @@ zero_env(envp)
 	    case 'S':
 		if (strncmp("SHELL=", *ep, 6) == 0)
 		    user_shell = *ep + 6;
-		else if (!user_prompt && !strncmp("SUDO_PROMPT=", *ep, 12))
+		else if (!user_prompt && strncmp("SUDO_PROMPT=", *ep, 12) == 0)
 		    user_prompt = *ep + 12;
+		else if (strncmp("SUDO_USER=", *ep, 10) == 0)
+		    prev_user = *ep + 10;
 		continue;
 	    case 'T':
 		if (strncmp("TZ=", *ep, 3) == 0)
