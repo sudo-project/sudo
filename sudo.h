@@ -226,7 +226,18 @@ YYSTYPE yylval;
  * syslog(3) call if the internal buffer is moe than 1023 characters.
  */
 #ifndef MAXSYSLOGLEN
-#  define MAXSYSLOGLEN 960
+#  define MAXSYSLOGLEN		960
+#endif
+
+/*
+ * Maximum number of characters per physical log file line.
+ * This is only used if you are logging to a file.  It basically
+ * just means "wrap lines after MAXLOGFILELEN characters."
+ * Word wrapping is done where possible.  If you don't want word
+ * wrap, set this to be MAXLOGLEN.
+ */
+#ifndef MAXLOGFILELEN
+#  define MAXLOGFILELEN		80
 #endif
 
 /*
