@@ -1318,15 +1318,15 @@ if test -z "$LIB_CRYPT"; then
     AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, [SUDO_LIBS="${SUDO_LIBS} -lcrypt"; LIBS="${LIBS} -lcrypt"], AC_CHECK_LIB(crypt_d, crypt, [SUDO_LIBS="${SUDO_LIBS} -lcrypt_d"; LIBS="${LIBS} -lcrypt_d"], AC_CHECK_LIB(crypt, ufc, [SUDO_LIBS="${SUDO_LIBS} -lufc"; LIBS="${LIBS} -lufc"]))))
 fi
 dnl
-dnl If inet_addr(3) not in libc, check -lnsl and -linet
-dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
-dnl
-AC_CHECK_FUNC(inet_addr, ,AC_CHECK_LIB(nsl, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_CHECK_LIB(nsl, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , socket))))
-dnl
 dnl If socket(2) not in libc, check -lsocket and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl
-AC_CHECK_FUNC(socket, ,AC_CHECK_LIB(socket, socket, [SUDO_LIBS="${SUDO_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(inet, socket, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_CHECK_LIB(socket, socket, [SUDO_LIBS="${SUDO_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , nsl))))
+AC_CHECK_FUNC(socket, ,AC_CHECK_LIB(socket, socket, [SUDO_LIBS="${SUDO_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(inet, socket, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find socket() trying -lsocket -lnsl) AC_CHECK_LIB(socket, socket, [SUDO_LIBS="${SUDO_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl))))
+dnl
+dnl If inet_addr(3) not in libc, check -lnsl and -linet
+dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
+dnl
+AC_CHECK_FUNC(inet_addr, ,AC_CHECK_LIB(nsl, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find socket() trying -lsocket -lnsl) AC_CHECK_LIB(socket, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl))))
 dnl
 dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
 dnl
