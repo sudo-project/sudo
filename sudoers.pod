@@ -275,8 +275,8 @@ commands on the current host.  This flag is I<@mail_no_host@> by default.
 
 If set, mail will be sent to the I<mailto> user if the invoking
 user is allowed to use B<sudo> but the command they are trying is not
-listed in their I<sudoers> file entry.  This flag is I<@mail_no_perms@>
-by default.
+listed in their I<sudoers> file entry or is explicitly denied.
+This flag is I<@mail_no_perms@> by default.
 
 =item tty_tickets
 
