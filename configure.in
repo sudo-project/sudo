@@ -1465,6 +1465,11 @@ case "$host" in
 		    CHECKSHADOW="false"
 		fi
 		;;
+    *-*-nextstep*)
+		# lockf() on is broken on the NeXT -- use flock instead
+		ac_cv_func_lockf=no
+		ac_cv_func_flock=yes
+		;;
     *-*-sysv*)
 		mansectsu=1m
 		mansectform=4
