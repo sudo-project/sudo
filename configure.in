@@ -482,6 +482,7 @@ AC_ARG_WITH(sendmail, [  --with-sendmail=path    set path to sendmail],
 [case $with_sendmail in  
     yes)	with_sendmail=""
 		;;
+    no)		;;
     *)		AC_DEFINE_UNQUOTED(_PATH_SENDMAIL, "$with_sendmail")
 		;;
 esac])
