@@ -64,6 +64,7 @@ struct strmap {
     int num;
 };
 
+#ifdef LOG_NFACILITIES
 static struct strmap facilities[] = {
 #ifdef LOG_AUTHPRIV
 	{ "authpriv",	LOG_AUTHPRIV },
@@ -81,6 +82,7 @@ static struct strmap facilities[] = {
 	{ "local7",	LOG_LOCAL7 },
 	{ NULL,		-1 }
 };
+#endif /* LOG_NFACILITIES */
 
 static struct strmap priorities[] = {
 	{ "alert",	LOG_ALERT },
@@ -591,6 +593,7 @@ store_syslogfac(val, def, op)
 	return(TRUE);
     }
 
+#ifdef LOG_NFACILITIES
     for (fac = facilities; fac->name && strcmp(val, fac->name); fac++)
 	;
     if (fac->name == NULL)
@@ -601,6 +604,7 @@ store_syslogfac(val, def, op)
 	free(def->sd_un.str);
     def->sd_un.str = estrdup(fac->name);
     sudo_defs_table[I_LOGFAC].sd_un.ival = fac->num;
+#endif /* LOG_NFACILITIES */
     return(TRUE);
 }
 
