@@ -360,6 +360,13 @@ main(argc, argv)
 	    check_user();
 
 	case VALIDATE_NOT_OK_NOPASS:
+	    /*
+	     * We'd like to not leak path info at all here, but that can
+	     * *really* confuse the users.  To really close the leak we'd
+	     * have to say "not allowed to run foo" even when the problem
+	     * is just "no foo in path" since the user can trivially set
+	     * their path to just contain a single dir.
+	     */
 #ifndef DONT_LEAK_PATH_INFO
 	    log_error(rtn);
 	    if (cmnd_status == NOT_FOUND_DOT)
