@@ -117,7 +117,7 @@ VERSION = 1.5.5
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
             PORTING README RUNSON FAQ TROUBLESHOOTING Makefile.in acsite.m4 \
             aixcrypt.exp config.h.in configure configure.in config.guess \
-	    config.sub getwd.c strdup.c indent.pro install-sh mkinstalldirs \
+	    config.sub getcwd.c strdup.c indent.pro install-sh mkinstalldirs \
 	    lsearch.c putenv.c tgetpass.c emul/search.h emul/utime.h utime.c \
 	    fnmatch.c emul/fnmatch.h fnmatch.3 testsudoers.c sample.sudoers \
 	    sudo.pod sudo.man sudo.cat visudo.pod visudo.man visudo.cat \
@@ -252,10 +252,10 @@ dist: $(DISTFILES)
 
 # Update version strings based on version specified in version.h
 # This is ugly but it works...
-update_version: Makefile.in emul/utime.h check.c compat.h config.h.in dce_pwent.c find_path.c getspwuid.c getwd.c goodpath.c ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c logging.c options.h parse.c parse.lex parse.yacc pathnames.h putenv.c strdup.c sudo.c sudo.h sudo_setenv.c testsudoers.c tgetpass.c utime.c visudo.c
+update_version: Makefile.in emul/utime.h check.c compat.h config.h.in dce_pwent.c find_path.c getspwuid.c getcwd.c goodpath.c ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c logging.c options.h parse.c parse.lex parse.yacc pathnames.h putenv.c strdup.c sudo.c sudo.h sudo_setenv.c testsudoers.c tgetpass.c utime.c visudo.c
 
 Makefile.in : version.h
 	( if `co -l -q $@` ; then CHECKIN=1; else CHECKIN=0 ; fi ;  VERSION=`sed -n 's/static char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h` ; sed -e 's/\(VERSION =\) [^ ,:][^ ,:]*/\1 '$$VERSION'/' -e 's/\(CU sudo version\) [^ ,:][^ ,:]*/\1 '$$VERSION'/' < $@ > $@.$$$$ ; mv -f $@.$$$$ $@ ; chmod 644 $@ ; if test $$CHECKIN -eq 1 ; then ci -u -m"updated version" $@ ; fi )
 
-emul/utime.h check.c compat.h config.h.in dce_pwent.c find_path.c getspwuid.c getwd.c goodpath.c ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c logging.c options.h parse.c parse.lex parse.yacc pathnames.h putenv.c strdup.c sudo.c sudo.h sudo_setenv.c testsudoers.c tgetpass.c utime.c visudo.c: version.h
+emul/utime.h check.c compat.h config.h.in dce_pwent.c find_path.c getspwuid.c getcwd.c goodpath.c ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c logging.c options.h parse.c parse.lex parse.yacc pathnames.h putenv.c strdup.c sudo.c sudo.h sudo_setenv.c testsudoers.c tgetpass.c utime.c visudo.c: version.h
 	( if `co -l -q $@` ; then CHECKIN=1; else CHECKIN=0 ; fi ; VERSION=`sed -n 's/static char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h` ; sed 's/\(CU sudo version\) [^ ,:][^ ,:]*/\1 '$$VERSION'/' < $@ > $@.$$$$ ; mv -f $@.$$$$ $@ ; chmod 644 $@ ; if test $$CHECKIN -eq 1 ; then ci -u -m"updated version" $@ ; fi )
