@@ -365,7 +365,7 @@ static int parse_args()
 	    usage(1);
 
 	if (Argv[1][1] != '\0' && Argv[1][2] != '\0') {
-	    fprintf(stderr, "%s: Please use single character options\n", Argv[0]);
+	    (void) fprintf(stderr, "%s: Please use single character options\n", Argv[0]);
 	    usage(1);
 	}
 
@@ -386,10 +386,12 @@ static int parse_args()
 		ret = MODE_HELP;
 		break;
 	    case '\0':
-		fprintf(stderr, "%s: '-' requires an argument\n", Argv[0]);
+		(void) fprintf(stderr, "%s: '-' requires an argument\n",
+		    Argv[0]);
 		usage(1);
 	    default:
-		fprintf(stderr, "%s: Illegal option %s\n", Argv[0], Argv[1]);
+		(void) fprintf(stderr, "%s: Illegal option %s\n", Argv[0],
+		    Argv[1]);
 		usage(1);
 	}
     }

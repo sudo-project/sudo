@@ -210,8 +210,9 @@ static void realpath_restore(cwd)
     /* relinquish root privs and chdir to where we started... */
     set_perms(PERM_USER);
     if (chdir(cwd)) {
-	fprintf(stderr, "Error: cannot change dir back to %s, sudo aborting!\n",
-			cwd);
+	(void) fprintf(stderr,
+		       "Error: cannot change dir back to %s, sudo aborting!\n",
+		       cwd);
 	exit(1);
     }
 }
