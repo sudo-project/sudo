@@ -35,6 +35,9 @@
 /* Max length for a command */
 #define MAXCOMMANDLENGTH	MAXPATHLEN
 
+/*
+ * IP address and netmask pairs for checking against local interfaces.
+ */
 struct interface {
     struct in_addr addr;
     struct in_addr netmask;
@@ -101,7 +104,6 @@ extern int top;
  *  the arguments passed to log_error() are ANDed with GLOBAL_PROBLEM
  *  If the result is TRUE, the argv is NOT logged with the error message
  */
-
 #define GLOBAL_PROBLEM           0x20
 #define GLOBAL_NO_PW_ENT         ( 0x01 | GLOBAL_PROBLEM )
 #define GLOBAL_NO_HOSTNAME       ( 0x02 | GLOBAL_PROBLEM )
@@ -117,27 +119,17 @@ extern int top;
 #define SUDOERS_NOT_FILE         ( 0x0B | GLOBAL_PROBLEM )
 #define SUDOERS_RW_OTHER         ( 0x0C | GLOBAL_PROBLEM )
 
+/*
+ * Boolean values
+ */
 #undef TRUE
 #define TRUE                     0x01
 #undef FALSE
 #define FALSE                    0x00
 
-#define TYPE1                    0x11
-#define TYPE2                    0x12
-#define TYPE3                    0x13
-
-#define FOUND_USER               0x14
-#define NOT_FOUND_USER           0x15
-#define MATCH                    0x16
-#define NO_MATCH                 0x17
-#define QUIT_NOW                 0x18
-#define PARSE_ERROR              0x19
-
-#define USER_LIST                0x00
-#define HOST_LIST                0x01
-#define CMND_LIST                0x02
-#define EXTRA_LIST               0x03
-
+/*
+ * Various modes sudo can be in (based on arguments)
+ */
 #define MODE_RUN                 0x00
 #define MODE_VALIDATE            0x01
 #define MODE_KILL                0x02
@@ -145,6 +137,9 @@ extern int top;
 #define MODE_HELP                0x04
 #define MODE_LIST                0x05
 
+/*
+ * Used with set_perms()
+ */
 #define PERM_ROOT                0x00
 #define PERM_FULL_ROOT           0x01
 #define PERM_USER                0x02
