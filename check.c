@@ -586,8 +586,7 @@ static void check_passwd()
 
 #ifdef HAVE_SKEY
 	set_perms(PERM_ROOT);
-	if (!strcmp(pw_ent->pw_passwd, skey_crypt(pass, pw_ent->pw_passwd,
-	    pw_ent, TRUE))) {
+	if (!strcmp(encrypted, skey_crypt(pass, encrypted, pw_ent, TRUE))) {
 	    set_perms(PERM_USER);
 	    return;             /* if the passwd is correct return() */
 	}
