@@ -79,16 +79,22 @@ extern char *strdup();
 #endif
 #endif
 
+
 int Argc;
 char **Argv;
-char **Envp;
 char *host;
 char *user;
 char *cmnd;
 uid_t uid;
 
 
+/*
+ * local functions not visible outside sudo.c
+ */
 static void usage();
+static void load_globals();
+static void rmenv();
+static void clean_env();
 
 
 /********************************************************************
@@ -98,10 +104,9 @@ static void usage();
  *  the driving force behind sudo...
  */
 
-main(argc, argv, envp)
+main(argc, argv)
     int argc;
     char **argv;
-    char **envp;
 {
     int rtn;
 
@@ -130,7 +135,7 @@ main(argc, argv, envp)
     be_root();
     be_user();
 
-    clean_envp(envp);		/* build Envp based on envp (w/o LD_*) */
+    clean_env(environ);		/* clean up the environment (no LD_*) */
 
     rtn = validate();
     switch (rtn) {
@@ -139,8 +144,12 @@ main(argc, argv, envp)
 	check_user();
 	log_error(ALL_SYSTEMS_GO);
 	be_root();
-	execve(cmnd, &Argv[1], Envp);
-	perror(cmnd);		/* execve() failed! */
+#ifdef USE_EXECVE
+	execve(cmnd, &Argv[1]);
+#else /* USE_EXECVE */
+	execvp(cmnd, &Argv[1]);
+#endif /* USE_EXECVE */
+	perror(cmnd);		/* exec failed! */
 	exit(-1);
 	break;
 
@@ -166,7 +175,7 @@ main(argc, argv, envp)
  *  user, host, cmnd, uid
  */
 
-void load_globals()
+static void load_globals()
 {
     struct passwd *pw_ent;
     struct hostent *h_ent;
@@ -261,49 +270,30 @@ static void usage()
 
 /**********************************************************************
  *
- *  clean_envp()
+ *  clean_env()
  *
- *  This function builds Envp, the environment pointer to be
- *  used for all execve()'s and omits LD_* variables
+ *  This function builds cleans up the environ pointer so that all execvp()'s
+ *  omit LD_* variables and hard-code PATH if SECURE_PATH is defined.
  */
 
-void clean_envp(envp)
+static void clean_env(envp)
     char **envp;
 {
-    int envlen;
-    char **tenvp;
-
-    for (envlen = 0; envp[envlen]; envlen++);	/* noop */
-    ++envlen;
-
-    Envp = (char **) malloc(sizeof(char **) * envlen);
-
-    if (Envp == NULL) {
-	perror("clean_envp:  malloc");
-	exit(1);
-    }
 
     /*
      * omit all LD_* environmental vars
      */
-    for (tenvp = Envp; *envp; envp++)
+    rmenv(envp, "LD_", 3);
 #ifdef hpux
-	if (strncmp("LD_", *envp, 3) && strncmp("SHLIB_PATH", *envp, 10)) {
-#else
-#ifdef __alpha
-	if (strncmp("LD_", *envp, 3) && strncmp("_RLD_", *envp, 5)) {
-#else
-	if (strncmp("LD_", *envp, 3)) {
-#endif /* __alpha */
+    rmenv(envp, "SHLIB_PATH", 10);
 #endif /* hpux */
+#ifdef __alpha
+    rmenv(envp, "_RLD_", 5);
+#endif /* __alpha */
+
 #ifdef SECURE_PATH
-	    if (!strncmp("PATH=", *envp, 5))
-		*tenvp++ = "PATH=" SECURE_PATH;
-	    else
+    putenv("PATH=" SECURE_PATH);
 #endif /* SECURE_PATH */
-		*tenvp++ = *envp;
-	}
-    *tenvp = NULL;
 }
 
 
@@ -329,7 +319,8 @@ void be_root()
  *
  * be_user()
  *
- *  this function sets the effective uid to the value of uid
+ *  this function sets the effective uid to the value of uid.
+ *  Naturally, we need to do something completely different for AIX.
  */
 
 #ifdef _AIX
@@ -369,5 +360,34 @@ void be_full_user()
     if (setuid(uid)) {
         perror("setuid(uid)");
         exit(1); 
+    }
+}
+
+/**********************************************************************
+ *
+ * rmenv()
+ *
+ *  this function removes things from the environment that match the
+ *  string "s" up to length len [ie: with strncmp()].
+ */
+
+static void rmenv(envp, s, len)
+    char ** envp;				/* pointer to environment */
+    char * s;					/* string to search for */
+    int len;					/* how much of it to check */
+{
+    char ** tenvp;				/* temp env pointer */
+    char ** move;				/* used to move around */
+
+    /*
+     * cycle through the environment and purge strings that match s
+     */
+    for (tenvp=envp; *tenvp; tenvp++) {
+	if (!strncmp(*tenvp, s, len)) {
+	    /* matched: remove by shifting everything below one up */
+	    for (move=tenvp; *move; move++)
+		*move = *(move+1);
+	    tenvp--;
+	}
     }
 }
