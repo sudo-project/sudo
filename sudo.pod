@@ -13,7 +13,7 @@ B<sudo> B<-V> | B<-h> | B<-l> | B<-v> | B<-k> | B<-s> | B<-H> |
 
 =head1 DESCRIPTION
 
-B<sudo> allows a permitted user to execute a I<command> 
+B<sudo> allows a permitted user to execute a I<command>
 as the superuser (real and effective uid and gid are set
 to C<0> and root's group as set in the passwd file respectively).
 
@@ -99,7 +99,7 @@ in passwd(5).
 =item -H
 
 The C<-H> (I<HOME>) option sets the I<HOME> environmental variable
-to the homedir of the target user (root by default) as specified 
+to the homedir of the target user (root by default) as specified
 in passwd(5).
 
 =item --
@@ -215,8 +215,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 =head1 CAVEATS
 
-There is no easy way to prevent a user from gaining a root shell if 
+There is no easy way to prevent a user from gaining a root shell if
 that user has access to commands allow shell escapes.
+
+If users have sudo ALL there is nothing to prevent them from creating
+their own program that gives them a root shell regardless of any '!'
+elements in the user specification.
+
 Running shell scripts via B<sudo> can expose the same kernel bugs
 that make setuid shell scripts unsafe on some operating systems.
 
