@@ -1,0 +1,8 @@
+#%PAM-1.0
+# Sample /etc/pam.d/sudo file for RedHat Linux 5.0 and above.
+# This is where you configure your authorization method. The uncommented
+# line below does 'normal' (/etc/passwd) authentication. The commented line
+# just above is what I use on my system, which allows my users to validate
+# against our Windows NT domain. - GJC
+#auth      required	/lib/security/pam_smb_auth.so
+auth       required	/lib/security/pam_pwdb.so shadow nullok
