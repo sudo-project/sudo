@@ -152,7 +152,7 @@ static char *sudo_getepw(pw)
     {
 	struct pr_passwd *spw;
 
-	spw = getprpwnam(spw->pw_name);
+	spw = getprpwnam(pw->pw_name);
 	if (spw != NULL && spw->ufld.fd_encrypt != NULL) {
 #  ifdef __alpha
 	    crypt_type = spw -> ufld.fd_oldcrypt;
