@@ -252,7 +252,6 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 	    return(FALSE);
     } else {
 	if (path[plen - 1] != '/') {
-#ifdef FAST_MATCH
 	    char *p;
 
 	    /* Only proceed if the basenames of cmnd and path are the same */
@@ -262,7 +261,6 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 		p++;
 	    if (strcmp(c, p))
 		return(FALSE);
-#endif /* FAST_MATCH */
 
 	    if (stat(path, &pst) < 0)
 		return(FALSE);
@@ -297,11 +295,10 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 		continue;
 	    strcpy(buf, path);
 	    strcat(buf, dent->d_name);
-#ifdef FAST_MATCH
+
 	    /* only stat if basenames are not the same */
 	    if (strcmp(c, dent->d_name))
 		continue;
-#endif /* FAST_MATCH */
 	    if (stat(buf, &pst) < 0)
 		continue;
 	    if (cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino)
