@@ -7,7 +7,7 @@ AC_CONFIG_HEADER(config.h)
 dnl
 dnl This won't work before AC_INIT()
 dnl
-echo "Configuring CU Sudo version 1.5"
+echo "Configuring CU Sudo version 1.5.1"
 dnl
 dnl Variables that get substituted in the Makefile
 dnl
@@ -527,8 +527,6 @@ case "$host" in
 		# configure thinks we have -lsocket and -linet but we don't
 		LIB_INET=1
 		LIB_SOCKET=1
-
-		# XXX - what about shadow pw?
     *-*-bsdi*)
 		# Use shlicc for BSD/OS 2.x unless asked to do otherwise
 		if test "$OSREV" -ge 2 -a "${with_CC+set}" != set -a \
