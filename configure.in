@@ -1301,6 +1301,10 @@ dnl If inet_addr(3) not in libc, check -lnsl and -linet
 dnl
 AC_CHECK_FUNC(inet_addr, ,AC_CHECK_LIB(nsl, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"])))
 dnl
+dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
+dnl
+AC_CHECK_FUNC(syslog, ,AC_CHECK_LIB(socket, syslog, [SUDO_LIBS="${SUDO_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(nsl, syslog, [SUDO_LIBS="${SUDO_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, syslog, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"]))))
+dnl
 dnl Bison and DCE use alloca(3), if not in libc, use the sudo one (from gcc)
 dnl (gcc includes its own alloca(3) but other compilers may not)
 dnl
