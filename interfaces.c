@@ -53,6 +53,7 @@ static char rcsid[] = "$Id$";
 #include <netdb.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <sys/socket.h>
 #ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
