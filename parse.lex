@@ -44,6 +44,7 @@ static char rcsid[] = "$Id$";
 #undef yywrap		/* guard against a yywrap macro */
 
 extern YYSTYPE yylval;
+extern int clearaliases;
 int sudolineno = 1;
 
 static int fill	__P((void));
@@ -150,6 +151,9 @@ int yywrap()
     YY_NEW_FILE;
 #endif /* YY_NEW_FILE */
 
-    reset_aliases();
+    /* don't reset the aliases if called by testsudoers */
+    if (clearaliases)
+	reset_aliases();
+
     return(1);
 }
