@@ -49,7 +49,6 @@ int sudolineno = 1;
 
 static void fill		__P((void));
 static void append		__P((void));
-static char chop		__P((void));
 extern void reset_aliases	__P((void));
 
 #ifdef TRACELEXER
@@ -75,6 +74,12 @@ N			[0-9][0-9]?[0-9]?
 			  LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
 
+<GOTCMND>[:,=\n]	{
+			  BEGIN 0;
+			  unput(yytext[0]);
+			  return(PATH);
+			}			/* end of command line args */
+
 \n			{ 
 			  ++sudolineno; 
 			  LEXTRACE("\n");
@@ -87,18 +92,10 @@ N			[0-9][0-9]?[0-9]?
 			  return COMMENT;
 			}			/* return comments */
 
-<GOTCMND>[^\,:=\\ \t\n#]+[:,=\n]	{
-				  BEGIN 0;
-				  LEXTRACE("ARG");
-				  append();
-				  unput(chop());
-				  return(PATH);
-				} /* the last command line arg */
-
-<GOTCMND>[^\,:=\\ \t\n#]+	{
-			  LEXTRACE("ARG ");
-			  append();
-			} /* a command line arg */
+<GOTCMND>[^\,:=\\ \t\n#]+ {
+			    LEXTRACE("ARG ");
+			    append();
+			  }			/* a command line arg */
 
 \,			{
 			  LEXTRACE(", ");
@@ -128,13 +125,6 @@ N			[0-9][0-9]?[0-9]?
 			  fill();
 			  return NTWKADDR;
 			}
-
-\/[^\,:=\\ \t\n#]+[:,=\n]	{
-			  LEXTRACE("PATH ");
-			  fill();
-			  unput(chop());
-			  return(PATH);
-			}			/* a pathname with no args */
 
 \/[^\,:=\\ \t\n#]+	{
 			  BEGIN GOTCMND;
@@ -189,17 +179,6 @@ static void fill() {
 static void append() {
     (void) strcat(yylval.string, " ");
     (void) strcat(yylval.string, yytext);
-}
-
-static char chop() {
-    int len;
-    char c;
-
-    len = strlen(yylval.string);
-    c = yylval.string[--len];
-    yylval.string[len] = '\0';
-    
-    return(c);
 }
 
 int yywrap()
