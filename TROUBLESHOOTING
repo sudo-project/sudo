@@ -3,13 +3,17 @@ Troubleshooting tips for CU sudo.
 Q) Sudo compiles but when I run it I get "Sorry, sudo must be setuid root."
    and sudo quits.
 A) Sudo must be setuid root to do its work.  You need to do something like
-   "chmod 4111 /usr/local/bin/sudo".
+   "chmod 4111 /usr/local/bin/sudo".  Also, the filesystem sudo resides
+   on must *not* be mounted with the nosuid mount option or sudo will
+   not be able to work.
 
 Q) When sudo asks me for my password it never accepts what I enter even
    though I know I entered my password correctly.
 A) Try running configure with the --with-getpass option.  After this
    when you build sudo it will use the system's getpass() routine instead
-   of sudo's own version.  If that doesn't work, make sure that you
-   gave configure the --with-C2 option if your OS uses shadow passwords
+   of sudo's own version.  If that doesn't work, and your OS uses shadow
+   passwords, re-run configure and add the --with-C2 option.  Configure
+   tries to guess whether or not you are using shadow passwords but
+   it is not bulletproof.
    (see the INSTALL doc for a list of OS's that sudo knows how to get
    shadow password info for).
