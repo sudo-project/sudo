@@ -87,6 +87,9 @@ static char rcsid[] = "$Id$";
 #include <sys/security.h>
 #include <prot.h>
 #endif /* __osf__ && HAVE_C2_SECURITY */
+#ifdef HAVE_DCE
+#include <pthread.h>
+#endif /* HAVE_DCE */
 
 #include "sudo.h"
 #include <options.h>
