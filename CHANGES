@@ -871,3 +871,66 @@ Sudo 1.5.4 released.
      once for the parser.  Also try to open ten times if we get EAGAIN.
 
 Sudo 1.5.5 released.
+
+270) Initialize group vector if we are becoming a user other than root.
+     For root, it is often more useful to hang on to our existing group
+     vector.
+
+271) Fix usage of select(2) to deal correctly with a high-numbered fd.
+
+272) Fixed a bug where sudo sometime didn't give the user a chance to
+     enter a password at the prompt.
+
+273) Use a dynamically sized buffer when reading ether interfaces.
+
+274) Fixed configure problems with identification of HP-UX > 10.x and
+     with cc being identified as a cross compiler on some platforms.
+
+275) Fixed a problem with HP-UX 10.x and alloca.  Bison does not
+     include alloca.h on HP-UX 10.x even though it uses alloca()
+     (and thus needs the #define of alloca(x) to __builtin_alloca(x)).
+     To fix this we include alloca.h ourselves if using bison and not gcc.
+
+276) Included support for the AIX 4.x authenticate() function from
+     Matt Richards <v2matt@btv.ibm.com>.
+
+277) Fixed an off by one error in the parser.  Found by
+     Piete Brooks <Piete.Brooks@cl.cam.ac.uk>
+
+278) Change NewArgv size computation to work on UNICOS.
+     From Mike Kienenberger <mkienenb@arsc.edu>
+
+279) Added --with-logfile and --with-timedir configure options.
+
+280) Use getcwd(3), not getwd(3) to avoid possible buffer overflow.
+     Use BSD getcwd(3) if system lacks one or is SunOS 4.x.
+
+281) Fix 'fprintf' argument mismatches in 'visudo.c'.
+     From ariel@oz.engr.sgi.com (Ariel Faigon)
+
+282) Use waitpid or wait3 to reap children in logging.c.
+     Pointed out by Theo de Raadt <deraadt@theos.com>
+
+283) Sudo should prompt for a password before telling the user that
+     a command could not be found.  Noted by rhodie@NAC.NET.
+
+284) Fix OTP_ONLY for opie; "Deven T. Corzine" <deven@fuse.net>.
+
+285) Include pre-yacc'd parse.yacc as sudo.tab.[ch] since more and
+     more vendors are charging for yacc (bad vendor, no cookie).
+
+286) Use MAX*, not MAX*+1
+
+287) Add support for Hitachi SR2201, from b-edgington@hpcc.hitachi-eu.co.uk
+
+288) Added RUNAS_DEFAULT option to allow one to compile sudo with a
+     default runas user other than root.
+
+289) Add options to log the hostname in the file-based log and to not
+     do word wrap in file-based log.  From Theo Van Dinter <tvd@chrysalis.com>
+
+290) RedHat Linux pam support, from Gary Calvin <GCalvin@kenwoodusa.com>.
+     pam.sudo goes in /etc/pam.d/sudo on RedHat 5.0 and above.
+
+291) With sudo -s, set command the full path of the shell, not the basename.
+     Noted by Peter W. Osel <pwo@guug.de>

@@ -57,3 +57,18 @@ TODO list (most will be addressed in the next rewrite)
     so folks with sysV chown can set to a secure location.
 
 24) Add a per-tty restriction?  Ie: only can run foo from /dev/console.
+
+25) Use popen.c instead of rolling own in logging.c
+    Need to make popen.c portable first...
+
+26) Add test for how to read ether interfaces in configure script
+
+27) If an OS is capable of using shadow password, try the shadow
+    functions first and fallback on getpw*().
+
+28) Add configure check for $(CC) -R and use it in addition to -L
+
+29) Change things in options.h -> --with-FOO options to configure.
+
+30) An option to make "sudo -s" use the target user's shell might be nice
+    (and more like su).

@@ -18,3 +18,7 @@ Known bugs in sudo version 1.5.6
 
 6) There is still a bug in the ``sudo -l'' processing code that can
    cause sudo to get a SEGV.  I've not been able to track it down yet.
+
+7) HOST_IN_LOG and WRAP_LOG are changeable via configure but not options.h.
+   All the options should really become arguments to configure and
+   options.h should just go away (its functionality subsumed by config.h).
