@@ -446,11 +446,10 @@ main(argc, argv, envp)
 	 * If we got here then execve() failed...
 	 */
 	if (errno == ENOEXEC) {
-	    char **av = emalloc2(NewArgc + 2, sizeof(char *));
-	    av[0] = "sh";
-	    av[1] = safe_cmnd;
-	    memcpy(av + 2, NewArgv + 1, NewArgc * sizeof(char *));
-	    execve(_PATH_BSHELL, av, new_environ);
+	    NewArgv--;			/* at least one extra slot... */
+	    NewArgv[0] = "sh";
+	    NewArgv[1] = safe_cmnd;
+	    execve(_PATH_BSHELL, NewArgv, new_environ);
 	}
 	warning("unable to execute %s", safe_cmnd);
 	exit(127);
@@ -610,7 +609,9 @@ init_vars(sudo_mode)
     if ((sudo_mode & (MODE_SHELL | MODE_EDIT))) {
 	char **dst, **src = NewArgv;
 
-	NewArgv = (char **) emalloc2((++NewArgc + 1), sizeof(char *));
+	/* Allocate an extra slot for execve() failure (ENOEXEC). */
+	NewArgv = (char **) emalloc2((++NewArgc + 2), sizeof(char *));
+	NewArgv++;
 	if (ISSET(sudo_mode, MODE_EDIT))
 	    NewArgv[0] = "sudoedit";
 	else if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
