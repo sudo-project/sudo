@@ -1700,11 +1700,27 @@ if test -n "$with_kerb4"; then
     fi
 
     dnl
-    dnl Check for -ldes vs. -ldes425 and -lkrb vs. -lkrb4
+    dnl Check for -ldes vs. -ldes425
     dnl
     AC_CHECK_LIB(des, des_cbc_encrypt, [K4LIBS="-ldes"], [
 	AC_CHECK_LIB(des425, des_cbc_encrypt, [K4LIBS="-ldes425"], [K4LIBS=""])
     ])
+    dnl
+    dnl Try to determine whether we have KTH or MIT/CNS Kerberos IV
+    dnl
+    AC_MSG_CHECKING(whether we are using KTH Kerberos IV)
+    AC_TRY_COMPILE([#include <krb.h>], [const char *tmp = krb4_version;],
+	[
+	    AC_MSG_RESULT(yes)
+	    K4LIBS="${K4LIBS} -lcom_err"
+	    AC_CHECK_LIB(roken, main, [K4LIBS="${K4LIBS} -lroken"])
+	], [
+	    AC_MSG_RESULT(no)
+	]
+    )
+    dnl
+    dnl The actual Kerberos IV lib might be -lkrb or -lkrb4
+    dnl
     AC_CHECK_LIB(krb, main, [K4LIBS="-lkrb $K4LIBS"], [
 	AC_CHECK_LIB(krb4, main, [K4LIBS="-lkrb4 $K4LIBS"],
 	    [K4LIBS="-lkrb $K4LIBS"]
@@ -1748,7 +1764,8 @@ if test -n "$with_kerb5"; then
     AC_TRY_COMPILE([#include <krb5.h>], [const char *tmp = heimdal_version;],
 	[
 	    AC_MSG_RESULT(yes)
-	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -ldes -lcom_err -lasn1 -lroken"
+	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -ldes -lcom_err -lasn1"
+	    AC_CHECK_LIB(roken, main, [SUDO_LIBS="${SUDO_LIBS} -lroken"])
 	], [
 	    AC_MSG_RESULT(no)
 	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
