@@ -132,6 +132,9 @@ Shadow passwords (also included with most C2 security packages)
 are supported on most major platforms for which they exist.
 The `configure' script will attempt to determine if your
 system uses shadow passwords, but this is really just a guess.
+Also, if you are using an alternate authentication scheme
+(s/key. kerberos, AFS, DCE, etc...) configure will *not* try
+to check for a shadowed passwd file.
 Therefore, it is suggested that you use the `--with-C2' option
 to `configure' if you need shadow password support.
 
@@ -144,7 +147,7 @@ Shadow passwords are supported on the following platforms:
     Digital UNIX 3.x
     Irix 5.x
     AIX 3.2.x
-    ConvexOS with C2 security
+    ConvexOS with C2 security (not tested recently)
     Linux
     SCO 3.2.2
     SVR4 (and variants using standard SVR4 shadow passwords)
@@ -175,7 +178,7 @@ Solaris 2.x:
     C compiler or have a copy of the GNU C compiler (gcc).
     Sparc binaries for gcc may be gotten via the URL
 	ftp://prep.ai.mit.edu/pub/gnu/sparc-sun-solaris2
-    NOTE: sudo will not build with the sun C compiler in BSD
+    NOTE: sudo will *not* build with the sun C compiler in BSD
           compatibility mode (/usr/ucb/cc).  Sudo is designed
           to compile with the standard C compiler (or gcc) and
           will not build correctly with /usr/ucb/cc.
