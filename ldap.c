@@ -291,7 +291,7 @@ int sudo_ldap_check_command(ld,entry)
     if (allowed_args) *allowed_args++='\0';
 
     /* check the command like normal */
-    if (command_matches(user_cmnd, user_args,allowed_cmnd,allowed_args)) {
+    if (command_matches(allowed_cmnd,allowed_args)) {
       if (!foundbang){
         ret=1; /* allowed, but keep checking for a deny match */
       } else {
