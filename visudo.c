@@ -444,33 +444,21 @@ setup_signals()
 #endif /* POSIX_SIGNALS */
 
 	/*
-	 * Setup signal handlers
+	 * Setup signal handlers to cleanup nicely.
 	 */
 #ifdef POSIX_SIGNALS
 	(void) memset((VOID *)&action, 0, sizeof(action));
 	action.sa_handler = Exit;
 	action.sa_flags = SA_RESETHAND;
-	(void) sigaction(SIGILL, &action, NULL);
-	(void) sigaction(SIGTRAP, &action, NULL);
-	(void) sigaction(SIGBUS, &action, NULL);
-	(void) sigaction(SIGSEGV, &action, NULL);
 	(void) sigaction(SIGTERM, &action, NULL);
-
-	action.sa_handler = SIG_IGN;
-	action.sa_flags = 0;
 	(void) sigaction(SIGHUP, &action, NULL);
 	(void) sigaction(SIGINT, &action, NULL);
 	(void) sigaction(SIGQUIT, &action, NULL);
 #else
-	(void) signal(SIGILL, Exit);
-	(void) signal(SIGTRAP, Exit);
-	(void) signal(SIGBUS, Exit);
-	(void) signal(SIGSEGV, Exit);
 	(void) signal(SIGTERM, Exit);
-
-	(void) signal(SIGHUP, SIG_IGN);
-	(void) signal(SIGINT, SIG_IGN);
-	(void) signal(SIGQUIT, SIG_IGN);
+	(void) signal(SIGHUP, Exit);
+	(void) signal(SIGINT, Exit);
+	(void) signal(SIGQUIT, Exit);
 #endif /* POSIX_SIGNALS */
 }
 
