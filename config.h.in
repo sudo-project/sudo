@@ -189,6 +189,9 @@
 /* Define if you have bigcrypt(3). */
 #undef HAVE_BIGCRYPT
 
+/* Define if you have seteuid(3). */
+#undef HAVE_SETEUID
+
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
 
