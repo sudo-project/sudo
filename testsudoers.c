@@ -22,7 +22,7 @@
 
 #define _SUDO_MAIN
 
-#include "config.h"
+#include <config.h>
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -63,7 +63,7 @@
 #include "sudo.h"
 #include "interfaces.h"
 #include "parse.h"
-#include "gram.h"
+#include <gram.h>
 
 #ifndef HAVE_FNMATCH
 # include "emul/fnmatch.h"

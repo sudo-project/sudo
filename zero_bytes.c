@@ -16,7 +16,7 @@
 
 #include <sys/types.h>
 
-#include "config.h"
+#include <config.h>
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";

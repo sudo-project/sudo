@@ -27,7 +27,7 @@
  * SUCH DAMAGE.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <sys/param.h>
 #include <sys/stat.h>

@@ -27,7 +27,7 @@ struct mbuf;
 struct rtentry;
 #endif
 
-#include "config.h"
+#include <config.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>

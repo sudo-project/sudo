@@ -19,7 +19,7 @@
 #include <time.h>
 #include <stdio.h>
 
-#include "config.h"
+#include <config.h>
 
 #ifdef HAVE_UTIME_H
 # include <utime.h>

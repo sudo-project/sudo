@@ -28,7 +28,7 @@
 # include <floss.h>
 #endif
 
-#include "config.h"
+#include <config.h>
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -77,7 +77,7 @@
 #include "sudo.h"
 #include "interfaces.h"
 #include "parse.h"
-#include "gram.h"
+#include <gram.h>
 #include "version.h"
 
 #ifndef lint

@@ -19,7 +19,7 @@
 #include <time.h>
 #include <stdio.h>
 
-#include "config.h"
+#include <config.h>
 #include <compat.h>
 
 #ifndef lint

@@ -39,7 +39,7 @@ static char rcsid[] = "$OpenBSD: fnmatch.c,v 1.6 1998/03/19 00:29:59 millert Exp
  * Compares a filename or pathname to a pattern.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include <ctype.h>

@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
+#include <config.h>
 #include "compat.h"
 #include "error.h"
 

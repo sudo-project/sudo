@@ -51,7 +51,7 @@
  *	Number of matches in the current invocation of glob.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <sys/param.h>
 #include <sys/stat.h>

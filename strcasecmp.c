@@ -29,7 +29,7 @@
  * @(#)strcasecmp.c	8.1 (Berkeley) 6/4/93
  */
 
-#include "config.h"
+#include <config.h>
 #include <sys/types.h>
 
 #ifndef lint

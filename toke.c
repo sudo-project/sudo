@@ -984,7 +984,7 @@ char *yytext;
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -1013,7 +1013,7 @@ char *yytext;
 #include <ctype.h>
 #include "sudo.h"
 #include "parse.h"
-#include "gram.h"
+#include <gram.h>
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
