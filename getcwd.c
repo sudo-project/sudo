@@ -80,9 +80,9 @@
 	(dp->d_name[0] == '.' && (dp->d_name[1] == '\0' || \
 	    (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static const char rcsid[] = "$OpenBSD: getcwd.c,v 1.5 1998/08/14 21:39:26 deraadt Exp $";
-#endif /* LIBC_SCCS and not lint */
+#ifndef lint
+static const char rcsid[] = "$Sudo$";
+#endif /* lint */
 
 char *
 getcwd(pt, size)
