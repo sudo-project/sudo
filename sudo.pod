@@ -467,8 +467,7 @@ L<passwd(@mansectform@)>, L<visudo(@mansectsu@)>
 Many people have worked on B<sudo> over the years; this
 version consists of code written primarily by:
 
-	Todd Miller
-	Chris Jepeway
+	Todd C. Miller
 
 See the HISTORY file in the B<sudo> distribution or visit
 http://www.sudo.ws/sudo/history.html for a short history
