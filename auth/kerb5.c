@@ -266,8 +266,8 @@ verify_krb_v5_tgt(sudo_context, ccache, auth_name)
 	return(-1);
     }
 
-    /* Extract the name directly. 
-    strlcpy(phost, krb5_principal_get_realm(sudo_context, princ, 1),
+    /* Extract the name directly. */
+    strlcpy(phost, krb5_principal_get_realm(sudo_context, princ),
 	    sizeof(phost));
 
     /*
