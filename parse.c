@@ -473,7 +473,15 @@ get_ttycols()
  *       at the end of an arg.
  */
 static void
+#ifdef __STDC__
 print_wrap(int indent, int lc, int nargs, ...)
+#else
+print_wrap(indent, lc, nargs, va_alist)
+	int indent;
+	int lc;
+	int nargs;
+	va_dcl
+#endif
 {
     static int left, cols = -1;
     int i, n, len;
@@ -483,7 +491,11 @@ print_wrap(int indent, int lc, int nargs, ...)
     if (cols == -1)
 	left = cols = get_ttycols();
 
+#ifdef __STDC__
     va_start(ap, nargs);
+#else
+    va_start(ap);
+#endif
     for (len = 0, i = 1; i <= nargs; i++) {
 	s = va_arg(ap, char *);
 	if ((n = strlen(s)) > 0)
@@ -499,7 +511,11 @@ print_wrap(int indent, int lc, int nargs, ...)
 	    putchar(' ');
 	left = cols - indent;
     }
+#ifdef __STDC__
     va_start(ap, nargs);
+#else
+    va_start(ap);
+#endif
     for (i = 1; i <= nargs; i++) {
 	s = va_arg(ap, char *);
 	if ((len = strlen(s)) > 0) {
