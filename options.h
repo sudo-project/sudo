@@ -18,8 +18,6 @@
  *  Please send bugs, changes, problems to sudo-bugs@cs.colorado.edu
  */
 
-/* XXX - this should be include *AFTER* sudo.h */
-
 #ifndef _SUDO_OPTIONS_H
 #define _SUDO_OPTINOS_H
 
@@ -29,7 +27,7 @@
  * for a description of what this stuff does.
  */
 
-/* Configurable Sudo options */
+/* User-configurable Sudo runtime options */
 
 /*#define FQDN			/* expect fully qualified hosts in sudoers */
 #define LOGGING SLOG_SYSLOG	/* log via SLOG_SYSLOG, SLOG_FILE, SLOG_BOTH */
