@@ -97,6 +97,7 @@ extern char *strdup();
  */
 static void usage		__P((void));
 static void load_globals	__P((void));
+static void add_env		__P((void));
 static void rmenv		__P((char **, char *, int));
 static void clean_env		__P((char **));
 
@@ -166,6 +167,8 @@ main(argc, argv)
     clean_env(environ);		/* clean up the environment (no LD_*) */
 
     load_globals();		/* load the user host cmnd and uid variables */
+
+    add_env();			/* add in SUDO_* envariables */
 
     rtn = validate();
     switch (rtn) {
@@ -451,4 +454,43 @@ static void rmenv(envp, s, len)
 	    tenvp--;
 	}
     }
+}
+
+
+
+/**********************************************************************
+ *
+ * add_env()
+ *
+ *  this function adds sudo-specific variables into the environment
+ */
+
+static void add_env()
+{
+    char *envar;
+    int len, n;
+
+    /* add the SUDO_USER envariable */
+    envar = (char *) malloc(strlen(user) + 10);
+    if (envar == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+    (void) strcpy(envar, "SUDO_USER=");
+    (void) strcpy(envar+10, user);
+    (void) putenv(envar);
+
+    /* add the SUDO_UID envariable */
+    for (len = 1 + (uid < 0), n = (int)uid; (n = n / 10) != 0; )
+	++len;
+    
+    envar = (char *) malloc(len+9);
+    if (envar == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+    (void) sprintf(envar, "SUDO_UID=%d", (int)uid);
+    (void) putenv(envar);
 }
