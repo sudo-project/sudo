@@ -1172,7 +1172,7 @@ else
     eval _shrext="$shrext"
 fi
 AC_MSG_CHECKING(path to sudo_noexec.so)
-AC_ARG_WITH(noexec, [  --with-noexec           fully qualified pathname of sudo_noexec.so],
+AC_ARG_WITH(noexec, [  --with-noexec[=PATH]    fully qualified pathname of sudo_noexec.so],
 [case $with_noexec in  
     yes)	with_noexec="$libexecdir/sudo_noexec$_shrext"
 		;;

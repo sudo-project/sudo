@@ -1114,7 +1114,7 @@ Optional Packages:
                           both]
   --with-tags[=TAGS]
                           include additional configurations [automatic]
-  --with-noexec           fully qualified pathname of sudo_noexec.so
+  --with-noexec=PATH    fully qualified pathname of sudo_noexec.so
 
 Some influential environment variables:
   CC          C compiler command
