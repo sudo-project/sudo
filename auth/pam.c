@@ -100,9 +100,13 @@ pam_verify(pw, prompt, auth)
     if ((error = pam_authenticate(pamh, PAM_SILENT)) == PAM_SUCCESS)
 	return(AUTH_SUCCESS);
 
-    /* Any error other than PAM_PERM_DENIED may indicate a config problem. */
-    if (error != PAM_PERM_DENIED && (s = pam_strerror(pamh, error))) {
-	log_error(NO_EXIT|NO_MAIL, "pam_authenticate: %s\n", s);
+    /*
+     * Any error other than PAM_AUTH_ERR or PAM_MAXTRIES may indicate
+     * a config problem.
+     */
+    if (error != PAM_AUTH_ERR && error != PAM_MAXTRIES) {
+	if ((s = pam_strerror(pamh, error)))
+	    log_error(NO_EXIT|NO_MAIL, "pam_authenticate: %s\n", s);
 	return(AUTH_FATAL);
     }
     return(AUTH_FAILURE);
@@ -133,7 +137,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 {
     struct pam_response *pr;
     PAM_CONST struct pam_message *pm;
-    char *p = def_prompt;
+    const char *p = def_prompt;
     int echo = 0;
     extern int nil_pw;
 
@@ -146,9 +150,11 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 	    case PAM_PROMPT_ECHO_ON:
 		echo = 1;
 	    case PAM_PROMPT_ECHO_OFF:
-		/* Override default prompt for unix auth */
-		if (strcmp(p, "Password: ") && strcmp(p, "Password:"))
-		    p = (char *) pm->msg;
+		/* Only override PAM prompt if it matches /^Password: ?/ */
+		if (strncmp(pm->msg, "Password:", 9) || (pm->msg[9] != '\0'
+		    && (pm->msg[9] != ' ' || pm->msg[10] != '\0')))
+		    p = pm->msg;
+		/* Read the password. */
 		pr->resp = estrdup((char *) tgetpass(p,
 		    def_ival(I_PW_TIMEOUT) * 60, !echo));
 		if (*pr->resp == '\0')
