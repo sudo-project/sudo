@@ -97,7 +97,7 @@ N			[0-9][0-9]?[0-9]?
 			  return COMMENT;
 			}			/* return comments */
 
-<GOTCMND>[^\,:=\\ \t\n#]+ {
+<GOTCMND>((\\[\,:=\\])|([^\,:=\\ \t\n#]))+ {
 			    LEXTRACE("ARG ");
 			    append();
 			  }			/* a command line arg */
