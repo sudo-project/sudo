@@ -94,6 +94,7 @@ char * sudo_realpath(old, new)
     struct stat statbuf;			/* for lstat() */
     char * temp;				/* temporary ptr */
     int len;					/* length parameter */
+    int err;					/* did we get an error? */
 
     /* check for brain damage */
     if (old == NULL || old[0] == '\0')
@@ -104,6 +105,12 @@ char * sudo_realpath(old, new)
 
     /* we need to be root for this section */
     set_perms(PERM_ROOT);
+
+#ifndef USE_REALPATH
+    err = stat(new, &statbuf);
+    set_perms(PERM_USER);
+    return((err == 0) ? new : NULL);
+#endif /* USE_REALPATH */
 
     /*
      * Resolve the last component of the path if it is a link

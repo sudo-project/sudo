@@ -4,7 +4,7 @@
  *
  * This software comes with no waranty whatsoever, use at your own risk.
  *
- * Please send bugs, changes, problems to sudo-bugs@cs.colorado.edu
+ * Please send bugs, changes, problems to sudo-bugs.cs.colorado.edu
  *
  */
 
@@ -47,70 +47,308 @@ static char rcsid[] = "$Id$";
 #include <sys/types.h>
 #include <sys/param.h>
 #include <netinet/in.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+#include <search.h>
+
 #include "sudo.h"
 #include "options.h"
 
+extern int sudolineno, parse_error;
+
+/*
+ * Alias types
+ */
+#define HOST			 1
+#define CMND			 2
+
+/*
+ * the matching stack
+ */
+#define MATCHSTACKSIZE (20)
+struct matchstack match[MATCHSTACKSIZE];
+int top = 0;
+
+#define push \
+    if (top > MATCHSTACKSIZE) \
+	yyerror("matching stack overflow\n"); \
+    else {\
+	match[top].user = -1; \
+	match[top].cmnd = -1; \
+	match[top].host = -1; \
+	top++; \
+    }
+#define pop \
+    if (top == 0) \
+	yyerror("matching stack underflow\n"); \
+    else \
+	top--;
+
+extern int path_matches		__P((char *, char *));
+extern int ntwk_matches		__P((char *));
+static int find_alias		__P((char *, int));
+static int add_alias		__P((char *, int));
+static int more_aliases		__P((int));
 extern int sudolineno;
-extern int parse_error, found_user;
 
 yyerror(s)
 char *s;
 {
-fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s, sudolineno);
-parse_error = TRUE;
+#ifndef TRACELEXER
+    fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s, sudolineno);
+#else
+    fprintf(stderr, "<*> ");
+#endif
+    parse_error = TRUE;
 }
 
 yywrap()
 {
-return(1);
+    return(1);
 }
 %}
 
+%union {
+    char string[MAXCOMMANDLENGTH+1];
+    int tok;
+}
+
+
 %start file				/* special start symbol */
-%token <char_val> IDENT1		/* identifier type 1*/
-%token <char_val> IDENT2		/* identifier type 2*/
-%token <char_val> IDENT3		/* identifier type 3*/
-%token <int_val>  COMMENT		/* comment and/or carriage return */
-%token <int_val>  ERROR			/* error character(s) */
-%token <int_val> ':' '=' ',' '!'	/* union member tokens */
+%token <string>	ALIAS			/* an UPPERCASE alias name */
+%token <string> NTWKADDR		/* w.x.y.z */
+%token <string> PATH			/* an absolute pathname */
+%token <string> NAME			/* a mixed-case name */
+%token <tok>	COMMENT			/* comment and/or carriage return */
+%token <tok>	ALL			/* ALL keyword */
+%token <tok>	HOSTALIAS		/* Host_Alias keyword */
+%token <tok>	CMNDALIAS		/* Cmnd_Alias keyword */
+%token <tok>	':' '=' ',' '!' '.'	/* union member tokens */
+%token <tok>	ERROR
+
+%type <string>	fqdn cmnd
+
 %%
+
 file		:	entry
 		|	file entry
 		;
 
 entry		:	COMMENT
-			{ ; }
                 |       error COMMENT
 			{ yyerrok; }
-		|	IDENT1 access_series COMMENT
-			{ if (call_back(TYPE1, ' ', $1) == FOUND_USER) {
-				found_user = TRUE;
-				return(FOUND_USER);
-				}
-			  else {
-				found_user = FALSE;
-				} }
+		|	NAME { push; } privileges {
+			    user_matches = strcmp(user, $1) == 0;
+			    if (!user_matches)
+				pop;
+			}
+		|	HOSTALIAS hostaliases
+		|	CMNDALIAS cmndaliases
+		;
+		
+
+privileges	:	privilege
+		|	privileges ':' privilege
 		;
 
-access_series	:	access_group
-		|	access_series ':' access_group
+privilege	:	hostspec '=' opcmndlist
 		;
 
-access_group	:	IDENT2 '=' cmnd_list
-			{ call_back(TYPE2, ' ', $1); }
+hostspec	:	ALL {
+			    host_matches = TRUE;
+			}
+		|	NTWKADDR {
+			    if (ntwk_matches($1))
+				host_matches = TRUE;
+			}
+		|	NAME {
+			    if (strcmp(host, $1) == 0)
+				host_matches = TRUE;
+			}
+		|	ALIAS {
+			    if (find_alias($1, HOST))
+				host_matches = TRUE;
+			}
+		|	fqdn {
+			    if (strcasecmp($1, host) == 0)
+				host_matches = TRUE;
+		}
 		;
 
-cmnd_list	:	cmnd_type
-		|	cmnd_list ',' cmnd_type
+fqdn		:	NAME '.' NAME {
+			    strcpy($$, $1);
+			    strcat($$, ".");
+			    strcat($$, $3);
+			}
+		|	fqdn '.' NAME {
+			    strcpy($$, $1);
+			    strcat($$, ".");
+			    strcat($$, $3);
+			}
 		;
 
-cmnd_type	:	IDENT3
-			{ call_back(TYPE3, ' ', $1); }
-		|	'!' IDENT3
-			{ call_back(TYPE3, '!', $2); }
-		|	IDENT2
-			{ call_back(TYPE3, ' ', $1); }
-		|	'!' IDENT2
-			{ call_back(TYPE3, '!', $2); }
+opcmndlist	:	opcmnd
+		|	opcmndlist ',' opcmnd
 		;
+
+opcmnd		:	cmnd
+		|	'!' { push; } opcmnd {
+			    int cmnd_matched = cmnd_matches;
+			    pop;
+			    if (cmnd_matched == TRUE)
+				cmnd_matches = FALSE;
+			    else if (cmnd_matched == FALSE)
+				cmnd_matches = TRUE;
+			}
+		;
+
+cmnd		:	ALL { cmnd_matches = TRUE; }
+		|	ALIAS {
+			    if (find_alias($1, CMND))
+				cmnd_matches = TRUE;
+			}
+		|	PATH {
+			    if (path_matches(cmnd, $1))
+				cmnd_matches = TRUE;
+			}
+		;
+
+hostaliases	:	hostalias
+		|	hostaliases ':' hostalias
+		;
+
+hostalias	:	ALIAS { push; } '=' hostlist {
+			    if (host_matches == TRUE && !add_alias($1, HOST))
+				YYERROR;
+			    pop;
+			}
+		;
+
+hostlist	:	hostspec
+		|	hostlist ',' hostspec
+		;
+
+cmndaliases	:	cmndalias
+		|	cmndaliases ':' cmndalias
+		;
+
+cmndalias	:	ALIAS { push; }	'=' cmndlist {
+			    if (cmnd_matches == TRUE && !add_alias($1, CMND))
+				YYERROR;
+			    pop;
+			}
+		;
+
+cmndlist	:	cmnd
+		|	cmndlist ',' cmnd
+		;
+
 %%
+
+
+typedef struct {
+    int type;
+    char name[1024];
+} aliasinfo;
+
+#define MOREALIASES (32)
+aliasinfo *aliases;
+int naliases = 0;
+int nslots = 0;
+
+static int
+aliascmp(a1, a2)
+char *a1, *a2;
+{
+    int r;
+    aliasinfo *ai1, *ai2;
+
+    ai1 = (aliasinfo *) a1;
+    ai2 = (aliasinfo *) a2;
+    r = strcmp(ai1->name, ai2->name);
+    if (r == 0)
+	r = ai1->type - ai2->type;
+
+    return(r);
+}
+
+static int
+add_alias(alias, type)
+char *alias;
+int type;
+{
+    aliasinfo ai, *aip;
+    char s[512];
+    int ok;
+
+    ok = FALSE;			/* assume failure */
+    ai.type = type;
+    strcpy(ai.name, alias);
+    if (lfind(&ai, aliases, &naliases, sizeof ai, aliascmp) != NULL) {
+	sprintf(s, "Alias `%s' already defined", alias);
+	yyerror(s);
+    } else {
+	if (naliases == nslots && !more_aliases(nslots)) {
+	    (void) sprintf(s, "Out of memory defining alias `%s'", alias);
+	    yyerror(s);
+	}
+
+	aip = (aliasinfo *) lsearch(&ai, aliases, &naliases, sizeof ai,
+	    aliascmp);
+
+	if (aip != NULL) {
+	    ok = TRUE;
+	} else {
+	    (void) sprintf(s, "Aliases corrupted defining alias `%s'", alias);
+	    yyerror(s);
+	}
+    }
+
+    return(ok);
+}
+
+static int
+find_alias(alias, type)
+char *alias;
+int type;
+{
+    aliasinfo ai;
+
+    strcpy(ai.name, alias);
+    ai.type = type;
+
+    return(lfind(&ai, aliases, &naliases, sizeof ai, aliascmp) != NULL);
+}
+
+static int
+more_aliases(nslots)
+int nslots;
+{
+    aliasinfo *aip;
+    if (nslots == 0)
+	aip = malloc(MOREALIASES * sizeof *aip);
+    else
+	aip = realloc(aliases, (nslots + MOREALIASES) * sizeof *aip);
+
+    if (aip != NULL) {
+	aliases = aip;
+	nslots += MOREALIASES;
+    }
+
+    return(aip != NULL);
+}
+
+int
+dumpaliases()
+{
+    int n = naliases;
+
+    while (n--)
+	printf("%s\t%s\n", aliases[n].type == HOST ? "HOST" : "CMND",
+                           aliases[n].name);
+
+}

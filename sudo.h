@@ -35,23 +35,29 @@
 /* Max length for a command */
 #define MAXCOMMANDLENGTH	MAXPATHLEN
 
-typedef union {
-    int int_val;
-    char char_val[MAXCOMMANDLENGTH];
-}   YYSTYPE;
-
-typedef struct list {
-    int type;
-    char op;
-    char *data;
-    struct list *next;
-}   LIST, *LINK;
-
 struct interface {
     struct in_addr addr;
     struct in_addr netmask;
 };
 
+/*
+ * Data structure used in parsing sudoers;
+ * top of stack values are the ones that
+ * apply when parsing is done & can be
+ * accessed by *_matches macros
+ */
+struct matchstack {
+	int user;
+	int cmnd;
+	int host;
+};
+
+extern struct matchstack match[];
+extern int top;
+
+#define user_matches	(match[top-1].user)
+#define cmnd_matches	(match[top-1].cmnd)
+#define host_matches	(match[top-1].host)
 
 /*
  * Maximum number of characters to log per entry.  The syslogger
