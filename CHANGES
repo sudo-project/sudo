@@ -49,3 +49,5 @@ CHANGES between sudo 1.2 (unofficial version)
 
 17) The bulk of sudo now runs with the caller's real uid.  Grep for
     be_root() to find the exceptions.
+
+18) Added SECURE_PATH as suggested by russells@ccu1.auckland.ac.nz.
