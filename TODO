@@ -12,3 +12,11 @@ TODO list
 05) POSIX signals (plus emulation where they are lacking)
 
 06) Time out the passwd: prompt
+
+07) Eliminate logline length limit in logging.c and maybe make log format
+    prettier.
+
+08) Add uid and gid options to sudo and sudoers file.
+
+09) Redo parsing to be more like op(8) with true command aliases where
+    can specify uid, gid(s) and part/all of the environment.
