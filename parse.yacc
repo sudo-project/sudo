@@ -449,7 +449,7 @@ cmndspec	:	runasspec cmndtag opcmnd {
 				pushcp;
 			    else if (user_matches >= 0 && (top == 1 ||
 				(top == 2 && host_matches >= 0 &&
-				match[0].host >= 0)))
+				match[0].host < 0)))
 				pushcp;
 			    else if (user_matches == TRUE && keepall)
 				pushcp;
