@@ -383,7 +383,9 @@ esac])
 
 AC_ARG_WITH(bsdauth, [  --with-bsdauth          enable BSD authentication support],
 [case $with_bsdauth in
-    yes|no)	;;
+    yes)	with_logincap=yes
+		;;
+    no)		;;
     *)		AC_MSG_ERROR(["--with-bsdauth does not take an argument."])
 		;;
 esac])
