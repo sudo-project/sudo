@@ -388,8 +388,12 @@ See the LICENSE file distributed with B<sudo> for complete details.
 
 =head1 CAVEATS
 
-There is no easy way to prevent a user from gaining a root shell if
-that user has access to commands allowing shell escapes.
+There is no easy way to prevent a user from gaining a root shell
+if that user is allowed to run arbitrary commands via B<sudo>.
+Also, many programs (such as editors) allow the user to run commands
+via shell escapes, thus avoiding B<sudo>'s checks.  However, on
+most systems it is possible to prevent shell escapes with B<sudo>'s
+I<noexec> functionality.  See the sudoers(5) manual for details.
 
 If users have sudo C<ALL> there is nothing to prevent them from creating
 their own program that gives them a root shell regardless of any '!'
