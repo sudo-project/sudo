@@ -90,6 +90,12 @@ N			[0-9][0-9]?[0-9]?
 			  LEXTRACE("\n");
 			  return COMMENT;
 			}			/* return comments */
+
+\+[a-zA-Z][a-zA-Z0-9_-]* {
+			  fill();
+			  return NETGROUP;
+			 }
+
 {N}\.{N}\.{N}\.{N}	{
 			  fill();
 			  return NTWKADDR;

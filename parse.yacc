@@ -121,6 +121,7 @@ char *s;
 %start file				/* special start symbol */
 %token <string>	ALIAS			/* an UPPERCASE alias name */
 %token <string> NTWKADDR		/* w.x.y.z */
+%token <string> NETGROUP		/* +NAME */
 %token <string> PATH			/* an absolute pathname */
 %token <string> NAME			/* a mixed-case name */
 %token <tok>	COMMENT			/* comment and/or carriage return */
@@ -174,6 +175,10 @@ hostspec	:	ALL {
 			}
 		|	NTWKADDR {
 			    if (addr_matches($1))
+				host_matches = TRUE;
+			}
+		|	NETGROUP {
+			    if (netgr_matches($1, host, NULL))
 				host_matches = TRUE;
 			}
 		|	NAME {
@@ -298,6 +303,10 @@ userlist	:	user
 
 user		:	NAME {
 			    if (strcmp($1, user) == 0)
+				user_matches = TRUE;
+			}
+		|	NETGROUP {
+			    if (netgr_matches($1, NULL, user))
 				user_matches = TRUE;
 			}
 		|	ALIAS {
