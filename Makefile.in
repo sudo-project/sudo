@@ -109,11 +109,12 @@ SHELL = /bin/sh
 
 PROGS = @PROGS@
 
-SRCS = alloc.c alloca.c check.c defaults.c env.c fileops.c find_path.c \
-       fnmatch.c getcwd.c getspwuid.c goodpath.c interfaces.c lex.yy.c \
-       lsearch.c logging.c parse.c parse.lex parse.yacc set_perms.c \
-       snprintf.c strcasecmp.c strerror.c sudo.c sudo.tab.c testsudoers.c \
-       tgetpass.c utime.c visudo.c $(AUTH_SRCS)
+SRCS = alloc.c alloca.c check.c def_data.c defaults.c env.c fileops.c \
+       find_path.c fnmatch.c getcwd.c getspwuid.c goodpath.c \
+       interfaces.c lex.yy.c lsearch.c logging.c parse.c parse.lex \
+       parse.yacc set_perms.c snprintf.c strcasecmp.c strerror.c \
+       sudo.c sudo.tab.c testsudoers.c tgetpass.c utime.c visudo.c \
+       $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
