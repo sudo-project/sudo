@@ -85,6 +85,16 @@ struct sudo_user sudo_user;
 struct passwd *list_pw;
 extern int parse_error;
 
+/* passwd/group redirection for pwutil.c */
+void (*my_setgrent) __P((void)) = setgrent;
+void (*my_endgrent) __P((void)) = endgrent;
+struct group *(*my_getgrnam) __P((const char *)) = getgrnam;
+struct group *(*my_getgrgid) __P((gid_t)) = getgrgid;
+void (*my_setpwent) __P((void)) = setpwent;
+void (*my_endpwent) __P((void)) = endpwent;
+struct passwd *(*my_getpwnam) __P((const char *)) = getpwnam;
+struct passwd *(*my_getpwuid) __P((uid_t)) = getpwuid;
+
 /* For getopt(3) */
 extern char *optarg;
 extern int optind;
@@ -99,8 +109,18 @@ void print_privilege __P((struct privilege *));
 void print_userspecs __P((void));
 void usage __P((void)) __attribute__((__noreturn__));
 
-extern void my_setpwfile __P((const char *));
-extern void my_setgrfile __P((const char *));
+extern void ts_setgrfile __P((const char *));
+extern void ts_setgrent __P((void));
+extern void ts_endgrent __P((void));
+extern struct group *ts_getgrent __P((void));
+extern struct group *ts_getgrnam __P((const char *));
+extern struct group *ts_getgrgid __P((gid_t));
+extern void ts_setpwfile __P((const char *));
+extern void ts_setpwent __P((void));
+extern void ts_endpwent __P((void));
+extern struct passwd *ts_getpwent __P((void));
+extern struct passwd *ts_getpwnam __P((const char *));
+extern struct passwd *ts_getpwuid __P((uid_t));
 
 int
 main(argc, argv)
@@ -152,10 +172,20 @@ main(argc, argv)
     NewArgv = argv;
 
     /* Set group/passwd file and init the cache. */
-    if (grfile)
-	my_setgrfile(grfile);
-    if (pwfile)
-	my_setpwfile(pwfile);
+    if (grfile) {
+	my_setgrent = ts_setgrent;
+	my_endgrent = ts_endgrent;
+	my_getgrnam = ts_getgrnam;
+	my_getgrgid = ts_getgrgid;
+	ts_setgrfile(grfile);
+    }
+    if (pwfile) {
+	my_setpwent = ts_setpwent;
+	my_endpwent = ts_endpwent;
+	my_getpwnam = ts_getpwnam;
+	my_getpwuid = ts_getpwuid;
+	ts_setpwfile(pwfile);
+    }
     sudo_setpwent();
     sudo_setgrent();
 

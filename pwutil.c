@@ -56,21 +56,19 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 #ifdef MYPW
-void my_setgrfile __P((const char *));
-void my_setgrent __P((void));
-void my_endgrent __P((void));
-struct group *my_getgrnam __P((const char *));
-struct group *my_getgruid __P((gid_t));
+extern void (*my_setgrent) __P((void));
+extern void (*my_endgrent) __P((void));
+extern struct group *(*my_getgrnam) __P((const char *));
+extern struct group *(*my_getgrgid) __P((gid_t));
 #define setgrent()	my_setgrent()
 #define endgrent()	my_endgrent()
 #define getgrnam(n)	my_getgrnam(n)
-#define getgruid(g)	my_getgruid(g)
+#define getgrgid(g)	my_getgrgid(g)
 
-void my_setpwfile __P((const char *));
-void my_setpwent __P((void));
-void my_endpwent __P((void));
-struct passwd *my_getpwnam __P((const char *));
-struct passwd *my_getpwuid __P((uid_t));
+extern void (*my_setpwent) __P((void));
+extern void (*my_endpwent) __P((void));
+extern struct passwd *(*my_getpwnam) __P((const char *));
+extern struct passwd *(*my_getpwuid) __P((uid_t));
 #define setpwent()	my_setpwent()
 #define endpwent()	my_endpwent()
 #define getpwnam(n)	my_getpwnam(n)
