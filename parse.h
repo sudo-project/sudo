@@ -154,7 +154,6 @@ struct defaults {
  * Prototypes
  */
 int addr_matches	__P((char *));
-int alias_matches	__P((char *, int, VOID *, VOID *));
 int alias_remove	__P((char *, int));
 int cmnd_matches	__P((char *, char *, struct member *));
 int command_matches	__P((char *, char *));
