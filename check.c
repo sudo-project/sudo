@@ -57,6 +57,7 @@ static char rcsid[] = "$Id$";
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/file.h>
+#include <netinet/in.h>
 #include <pwd.h>
 #include "sudo.h"
 #include "insults.h"
