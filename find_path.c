@@ -51,10 +51,9 @@ static char rcsid[] = "$Id$";
 #include <stdio.h>
 #ifdef STD_HEADERS
 #include <stdlib.h>
-#else
-#include <strings.h>
 #endif /* STD_HEADERS */
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/param.h>
