@@ -342,6 +342,7 @@ void log_error(code)
 
 
 
+#ifdef MAILER
 /**********************************************************************
  *
  *  send_mail()
@@ -433,6 +434,13 @@ static void send_mail()
 	exit(0);
     }
 }
+#else
+static void send_mail()
+{
+    /* no mailer defined */
+    return;
+}
+#endif /* MAILER */
 
 
 
