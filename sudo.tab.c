@@ -234,13 +234,16 @@ yyerror(s)
     parse_error = TRUE;
 }
 #line 220 "parse.yacc"
+#ifndef YYSTYPE_DEFINED
+#define YYSTYPE_DEFINED
 typedef union {
     char *string;
     int BOOLEAN;
     struct sudo_command command;
     int tok;
 } YYSTYPE;
-#line 244 "sudo.tab.c"
+#endif /* YYSTYPE_DEFINED */
+#line 247 "sudo.tab.c"
 #define COMMAND 257
 #define ALIAS 258
 #define DEFVAR 259
@@ -1027,7 +1030,7 @@ init_parser()
     if (printmatches == TRUE)
 	expand_match_list();
 }
-#line 979 "sudo.tab.c"
+#line 982 "sudo.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1962,7 +1965,7 @@ case 91:
 			    yyval.BOOLEAN = TRUE;
 			}
 break;
-#line 1914 "sudo.tab.c"
+#line 1917 "sudo.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
