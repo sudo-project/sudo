@@ -97,7 +97,7 @@ __unused static const char rcsid[] = "$Sudo$";
 # define TERM			termios
 # define tflags			c_lflag
 # define term_getattr(f, t)	tcgetattr(f, t)
-# define term_setattr(f, t)	tcsetattr(f, TCSAFLUSH|TCSASOFT, t)
+# define term_setattr(f, t)	tcsetattr(f, TCSADRAIN|TCSASOFT, t)
 #else
 # ifdef HAVE_TERMIO_H
 # define TERM			termio
