@@ -24,27 +24,27 @@
  */
 
 /*        The following macros can be defined when compiling
-
+  
           FQDN                   - if you have fully qualified hostnames
                                    in your SUDOERS files
-
+  
           SYSLOG                 - if you want to use syslog instead
                                    of a log file
 				   ( This is a nice feature.  You can 
 				     collect all you sudo logs at a
 				     central host.  The default is for
 				     sudo to log at the local2 facility. )
-
+  
           SEND_MAIL_WHEN_NOT_OK  - if you want a message sent to ALERTMAIL
                                    when the user is in the SUDOERS but
                                    does not have permission to execute
                                    the command entered
 				   ( This can be used at paranoid sites )
-
+  
           SEND_MAIL_WHEN_NO_USER - if you want a message sent to ALERTMAIL
 				   when the user is not in the SUDOERS file
 				   ( This is generally the case )
-
+  
           BROKEN_GETPASS         - if your os has a broken version of getpass()
 				   sysV and variants are suspect.  Test by
 				   doing an rsh host "sudo echo hi" when
@@ -56,33 +56,33 @@
 				   rsh hostname "sudo whoami" and see if getpass
 				   will read from stdin as well as /dev/tty.
 				   If not, define BROKEN_GETPASS.
-
+  
           USE_CWD                - if your os has getcwd() and not getwd()
 				   you should define this (done automatically
 				   for hpux)
-
+  
           NEED_STRDUP            - if your os lacks strdup(3) you need to
 				   define this
-
+  
           SHORT_MESSAGE          - if you don't want a copyright notice when
 				   someone runs sudo for the first time
 */
 
 
 #ifndef TIMEDIR
-#define TIMEDIR "/tmp/.odus"
+#define TIMEDIR			"/tmp/.odus"
 #endif
 
 #ifndef TIMEOUT
-#define TIMEOUT 5
+#define TIMEOUT			5
 #endif
 
 #ifndef TRIES_FOR_PASSWORD
-#define TRIES_FOR_PASSWORD 3
+#define TRIES_FOR_PASSWORD	3
 #endif
 
 #ifndef INCORRECT_PASSWORD
-#define INCORRECT_PASSWORD "Sorry, try again."
+#define INCORRECT_PASSWORD	"Sorry, try again."
 #endif
 
 /*
@@ -93,47 +93,46 @@
  */
 
 #ifndef MAILER
-#define MAILER "/usr/lib/sendmail"
+#define MAILER			"/usr/lib/sendmail"
 #endif
 
 #ifndef MAILSUBJECT
-#define MAILSUBJECT "*** SECURITY information ***"
+#define MAILSUBJECT		"*** SECURITY information ***"
 #endif
 
 #ifndef ALERTMAIL
-#define ALERTMAIL "root"
+#define ALERTMAIL		"root"
 #endif
 
 #ifndef SUDOERS
-#define SUDOERS "/etc/sudoers"
+#define SUDOERS			"/etc/sudoers"
 #endif
 
 #ifndef TMPSUDOERS
-#define TMPSUDOERS "/etc/stmp"
+#define TMPSUDOERS		"/etc/stmp"
 #endif
 
 #ifndef EDITOR
-#define EDITOR "/usr/ucb/vi"
+#define EDITOR			"/usr/ucb/vi"
 #endif
 
 #ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN 64
+#define MAXHOSTNAMELEN		64
 #endif
 
-/* 48 chars is not enough */
 #define MAXCOMMANDLENGTH         MAXPATHLEN
 
 typedef union {
     int int_val;
     char char_val[MAXCOMMANDLENGTH];
-    } YYSTYPE;
+}   YYSTYPE;
 
 typedef struct list {
     int type;
     char op;
     char *data;
     struct list *next;
-    } LIST, *LINK;
+}   LIST, *LINK;
 
 #ifndef hpux
 YYSTYPE yylval, yyval;
@@ -141,10 +140,10 @@ YYSTYPE yylval, yyval;
 YYSTYPE yylval;
 #endif
 
-
-
- 
-#ifdef SYSLOG   /* SYSLOG should be defined in the makefile */
+/*
+ * SYSLOG should be defined in the makefile
+ */
+#ifdef SYSLOG
 #include <syslog.h>
 #ifndef Syslog_ident
 #define Syslog_ident        "sudo"
@@ -158,7 +157,7 @@ YYSTYPE yylval;
 #ifndef Syslog_priority_OK
 #define Syslog_priority_OK  LOG_NOTICE
 #endif
-#ifndef Syslog_priority_NO  
+#ifndef Syslog_priority_NO
 #define Syslog_priority_NO  LOG_ALERT
 #endif
 #else
@@ -167,16 +166,20 @@ YYSTYPE yylval;
 #define LOGFILE "/var/adm/sudo.log"
 #else
 #define LOGFILE "/usr/adm/sudo.log"
-#endif  /* /var vs. /usr */
-#endif  /* LOGFILE */
-#endif  /* SYSLOG  */
+#endif	/* /var vs. /usr */
+#endif	/* LOGFILE */
+#endif	/* SYSLOG  */
 
-                       /* Maximum number of characters to log per entry. */
-#ifndef MAXLOGLEN      /* The syslogger will log this much, after that,  */
-#define MAXLOGLEN 990  /* it truncates the log line. We need this here   */
-#endif                 /* to make sure that we get ellipses when the log */
-		       /* line is longer than 990 characters.            */
-
+/*
+ * Maximum number of characters to log per entry.
+ * The syslogger will log this much, after that,
+ * it truncates the log line. We need this here
+ * to make sure that we get ellipses when the log
+ * line is longer than 990 characters.
+ */
+#ifndef MAXLOGLEN
+#define MAXLOGLEN 990
+#endif
 
 #define VALIDATE_OK              0x00
 #define VALIDATE_NO_USER         0x01
@@ -226,6 +229,7 @@ void load_globals();
 void log_error();
 void inform_user();
 void check_user();
+void clean_envp();
 int validate();
 
 /* Most of these variables are declared in main() so they don't need
@@ -240,16 +244,19 @@ extern uid_t uid;
 extern char *host;
 extern char *user;
 extern char *cmnd;
+extern int Argc;
 extern char **Argv;
-extern int  Argc;
+extern char **Envp;
 #endif
 extern int errno;
 
-/* This is to placate hpux */
+/*
+ * This is to placate hpux
+ */
 #ifdef hpux
 #define setruid(__RUID)  (setresuid((uid_t)(__RUID), (uid_t) -1, (uid_t) -1))
 #define getdtablesize()  (sysconf(_SC_OPEN_MAX))
 #ifndef USE_CWD
 #define USE_CWD
-#endif
-#endif
+#endif	/* USE_CWD */
+#endif	/* hpux */

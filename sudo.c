@@ -20,7 +20,7 @@
  *  them to include in future releases.  Feel free to send them to:
  *      Jeff Nieusma                       nieusma@rootgroup.com
  *      3959 Arbol CT                      (303) 447-8093
- *      Boulder, CO 80301-1752             
+ *      Boulder, CO 80301-1752
  *
  **************************************************************************
  *
@@ -56,7 +56,7 @@
 #include "sudo.h"
 extern char *malloc();
 
-int  Argc;
+int Argc;
 char **Argv;
 char **Envp;
 char *host;
@@ -78,71 +78,76 @@ uid_t uid;
  */
 
 main(argc, argv, envp)
-int argc; char **argv; char **envp;
+    int argc;
+    char **argv;
+    char **envp;
 {
-static void usage();
-int rtn;
+    static void usage();
+    int rtn;
 
-Argv=argv;
-Argc=argc;
+    Argv = argv;
+    Argc = argc;
 
-/* if nothing is passed, we don't need to do anything... */
-if ( argc < 2 ) usage();
+    /*
+     * if nothing is passed, we don't need to do anything...
+     */
+    if (argc < 2)
+	usage();
 
-/* close all file descriptors to make sure we have a nice
- * clean slate from which to work.  
- */
-for ( rtn = getdtablesize() - 1 ; rtn > 3; rtn -- )
-    (void)close(rtn);
+    /*
+     * close all file descriptors to make sure we have a nice
+     * clean slate from which to work.  
+     */
+    for (rtn = getdtablesize() - 1; rtn > 3; rtn--)
+	(void) close(rtn);
 
-load_globals();    /* load the user host cmnd and uid variables */
+    load_globals();		/* load the user host cmnd and uid variables */
 
-clean_envp(envp);  /* build Envp based on envp (w/o LD_*) */
+    clean_envp(envp);		/* build Envp based on envp (w/o LD_*) */
 
-if ( setuid(0) ) {
-    perror("setuid(0)");
-    exit(1);
+    if (setuid(0)) {
+	perror("setuid(0)");
+	exit(1);
     }
-rtn=validate();
-if ( setruid(uid) ) {
+    rtn = validate();
+    if (setruid(uid)) {
 #ifndef _AIX
-    perror("setruid(uid)");
-    exit(1);
+	perror("setruid(uid)");
+	exit(1);
 #endif
     }
-
-switch ( rtn ) {
+    switch (rtn) {
 
     case VALIDATE_OK:
-	    check_user();
-            log_error( ALL_SYSTEMS_GO );
-            if ( setuid(0) ) {
-		perror("setuid(0)");
-		exit(1);
-		}
-            execve(cmnd, &Argv[1], Envp);
-	    perror(cmnd);
-	    break;
-	    
+	check_user();
+	log_error(ALL_SYSTEMS_GO);
+	if (setuid(0)) {
+	    perror("setuid(0)");
+	    exit(1);
+	}
+	execve(cmnd, &Argv[1], Envp);
+	perror(cmnd);
+	break;
+
     case VALIDATE_NO_USER:
-    case VALIDATE_NOT_OK: 
+    case VALIDATE_NOT_OK:
     case VALIDATE_ERROR:
     default:
-	    log_error ( rtn );
-	    if ( setuid ( uid ) ) {
-		perror("setuid(uid)");
-		exit(1);
-		}
-	    inform_user ( rtn );
-	    exit (1);
-	    break;
-
+	log_error(rtn);
+	if (setuid(uid)) {
+	    perror("setuid(uid)");
+	    exit(1);
+	}
+	inform_user(rtn);
+	exit(1);
+	break;
     }
 
-    return(-1);		/* If we get here it's an error (execve failed) */
+    /*
+     * If we get here it's an error (execve failed)
+     */
+    return (-1);
 }
-
-
 
 
 
@@ -156,74 +161,76 @@ switch ( rtn ) {
 
 void load_globals()
 {
-struct passwd *pw_ent;
-struct hostent *h_ent;
-char path[MAXPATHLEN+1];
-char *p;
+    struct passwd *pw_ent;
+    struct hostent *h_ent;
+    char path[MAXPATHLEN + 1];
+    char *p;
 
 
-if ( (user=malloc(9)) == NULL ) {
-    perror ("malloc");
-    exit (1);
+    if ((user = malloc(9)) == NULL) {
+	perror("malloc");
+	exit(1);
     }
-if ( (host=malloc(MAXHOSTNAMELEN+1)) == NULL ) {
-    perror ("malloc");
-    exit (1);
+    if ((host = malloc(MAXHOSTNAMELEN + 1)) == NULL) {
+	perror("malloc");
+	exit(1);
     }
+    uid = getuid();		/* we need to tuck this away for safe keeping */
 
-uid = getuid();            /* we need to tuck this away for safe keeping */
 
-
-/* loading the cmnd global variable from argv[1] */
-
-strncpy(path, Argv[1], MAXPATHLEN)[MAXPATHLEN] = 0;  
-cmnd = find_path ( path );  /* get the absolute path */
-if ( cmnd == NULL ) {
-    fprintf ( stderr, "%s: %s: command not found\n", Argv[0], Argv[1] );
-    exit (1);
+    /*
+     * loading the cmnd global variable from argv[1]
+     */
+    strncpy(path, Argv[1], MAXPATHLEN)[MAXPATHLEN] = 0;
+    cmnd = find_path(path);	/* get the absolute path */
+    if (cmnd == NULL) {
+	(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], Argv[1]);
+	exit(1);
     }
-cmnd = strdup ( cmnd );
+    cmnd = strdup(cmnd);
 
 #ifdef NO_ROOT_SUDO
-if ( uid == 0 ) {
-    fprintf(stderr, "You are already root, you don\'t need to use sudo.\n");
-    exit (1);
+    if (uid == 0) {
+	(void) fprintf(stderr, "You are already root, you don\'t need to use sudo.\n");
+	exit(1);
     }
 #endif
 
-/* loading the user global variable from the passwd file */
-
-if ( (pw_ent = getpwuid( uid )) == NULL ) {
-    sprintf ( user, "%u", uid );
-    log_error( GLOBAL_NO_PW_ENT );
-    inform_user ( GLOBAL_NO_PW_ENT );
-    exit (1);
+    /*
+     * loading the user global variable from the passwd file
+     */
+    if ((pw_ent = getpwuid(uid)) == NULL) {
+	(void) sprintf(user, "%u", uid);
+	log_error(GLOBAL_NO_PW_ENT);
+	inform_user(GLOBAL_NO_PW_ENT);
+	exit(1);
     }
-strncpy ( user, pw_ent -> pw_name, 8 ) [8] = '\0';
+    strncpy(user, pw_ent -> pw_name, 8)[8] = '\0';
 
 
-/* loading the host global variable from gethostname() & gethostbyname() */
+    /*
+     * loading the host global variable from gethostname() & gethostbyname()
+     */
+    if ((gethostname(host, MAXHOSTNAMELEN))) {
+	strcpy(host, "amnesiac");
+	log_error(GLOBAL_NO_HOSTNAME);
+	inform_user(GLOBAL_NO_HOSTNAME);
+    } else {
+	if ((h_ent = gethostbyname(host)) == NULL)
+	    log_error(GLOBAL_HOST_UNREGISTERED);
+	else
+	    strcpy(host, h_ent -> h_name);
 
-if (( gethostname ( host, MAXHOSTNAMELEN ))) {
-    strcpy ( host, "amnesiac" );
-    log_error ( GLOBAL_NO_HOSTNAME );
-    inform_user ( GLOBAL_NO_HOSTNAME );
-    }
-else {
-    if ( ( h_ent = gethostbyname ( host) ) == NULL ) 
-	log_error ( GLOBAL_HOST_UNREGISTERED );
-    else 
-	strcpy ( host, h_ent -> h_name );
-
-/* We don't want to return the fully quallified name all the time...  */
-
+    /*
+     * We don't want to return the fully quallified name all the time...
+     */
 #ifndef FQDN
-    if ( (p = index ( host, '.' )) ) *p='\0';
+	if ((p = index(host, '.')))
+	    *p = '\0';
 #endif
     }
 
 }
-
 
 
 
@@ -236,10 +243,9 @@ else {
 
 static void usage()
 {
-fprintf( stderr, "usage: %s command\n", *Argv);
-exit (1);
+    (void) fprintf(stderr, "usage: %s command\n", *Argv);
+    exit(1);
 }
-
 
 
 
@@ -252,26 +258,27 @@ exit (1);
  */
 
 void clean_envp(envp)
-char **envp;
+    char **envp;
 {
-int envlen;
-char ** tenvp;
+    int envlen;
+    char **tenvp;
 
-for ( envlen=0; envp[envlen]; envlen++ )
-    ; /* noop */
-++envlen;
+    for (envlen = 0; envp[envlen]; envlen++);	/* noop */
+    ++envlen;
 
-Envp = (char **) malloc ( sizeof (char **) * envlen );
+    Envp = (char **) malloc(sizeof(char **) * envlen);
 
-if ( Envp == NULL ) {
-    perror ("clean_envp:  malloc");
-    exit (1);
-}
+    if (Envp == NULL) {
+	perror("clean_envp:  malloc");
+	exit(1);
+    }
 
-/* omit all LD_* environmental vars */
-for ( tenvp=Envp; *envp; envp++ )
-    if ( strncmp ("LD_", *envp, 3) )
-	*tenvp++ = *envp;
+    /*
+     * omit all LD_* environmental vars
+     */
+    for (tenvp = Envp; *envp; envp++)
+	if (strncmp("LD_", *envp, 3))
+	    *tenvp++ = *envp;
 
-*tenvp = NULL;
+    *tenvp = NULL;
 }

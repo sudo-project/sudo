@@ -24,7 +24,7 @@
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)getpass.c	based on 5.3 (Berkeley) 9/22/88";
-#endif /* LIBC_SCCS and not lint */
+#endif				/* LIBC_SCCS and not lint */
 
 #include <fcntl.h>
 #include <sgtty.h>
@@ -33,69 +33,68 @@ static char sccsid[] = "@(#)getpass.c	based on 5.3 (Berkeley) 9/22/88";
 #include <stdio.h>
 
 char *
-getpass(prompt)
-	char *prompt;
+    getpass(prompt)
+    char *prompt;
 {
 #if defined(sgi)
-	struct termio ttyb;
+    struct termio ttyb;
 #else
-	struct sgttyb ttyb;
+    struct sgttyb ttyb;
 #endif
-	register int ch;
-	register char *p;
-	FILE *fp, *outfp;
-	long omask;
-	int fd_tmp;
+    register int ch;
+    register char *p;
+    FILE *fp, *outfp;
+    long omask;
+    int fd_tmp;
 #if defined(sgi)
-	tcflag_t svflagval;
+    tcflag_t svflagval;
 #else
-	int svflagval;
+    int svflagval;
 #endif
 #define	PASSWD_LEN	8
-	static char buf[PASSWD_LEN + 1];
+    static char buf[PASSWD_LEN + 1];
 
-	/*
-	 * read and write to /dev/tty if possible; else read from
-	 * stdin and write to stderr.
-	 */
-	fd_tmp = open("/dev/tty", O_RDWR);
-	if (fd_tmp < 0 || (outfp = fp = fdopen(fd_tmp, "r+")) == NULL) {
-		outfp = stderr;
-		fp = stdin;
-	}
-
+    /*
+     * read and write to /dev/tty if possible; else read from stdin and write
+     * to stderr. 
+     */
+    fd_tmp = open("/dev/tty", O_RDWR);
+    if (fd_tmp < 0 || (outfp = fp = fdopen(fd_tmp, "r+")) == NULL) {
+	outfp = stderr;
+	fp = stdin;
+    }
 #if defined(sgi)
-	(void)ioctl(fileno(fp), TCGETA, &ttyb);
-	svflagval = ttyb.c_lflag;
-	ttyb.c_lflag &= ~ECHO;
-	omask = sigblock(sigmask(SIGINT));
-	(void)ioctl(fileno(fp), TCSETA, &ttyb);
+    (void) ioctl(fileno(fp), TCGETA, &ttyb);
+    svflagval = ttyb.c_lflag;
+    ttyb.c_lflag &= ~ECHO;
+    omask = sigblock(sigmask(SIGINT));
+    (void) ioctl(fileno(fp), TCSETA, &ttyb);
 #else
-	(void)ioctl(fileno(fp), TIOCGETP, &ttyb);
-	svflagval = ttyb.sg_flags;
-	ttyb.sg_flags &= ~ECHO;
-	omask = sigblock(sigmask(SIGINT));
-	(void)ioctl(fileno(fp), TIOCSETP, &ttyb);
+    (void) ioctl(fileno(fp), TIOCGETP, &ttyb);
+    svflagval = ttyb.sg_flags;
+    ttyb.sg_flags &= ~ECHO;
+    omask = sigblock(sigmask(SIGINT));
+    (void) ioctl(fileno(fp), TIOCSETP, &ttyb);
 #endif
 
-	fprintf(outfp, "%s", prompt);
-	rewind(outfp);			/* implied flush */
-	for (p = buf; (ch = getc(fp)) != EOF && ch != '\n';)
-		if (p < buf + PASSWD_LEN)
-			*p++ = ch;
-	*p = '\0';
-	(void)write(fileno(outfp), "\n", 1);
+    (void) fprintf(outfp, "%s", prompt);
+    rewind(outfp);		/* implied flush */
+    for (p = buf; (ch = getc(fp)) != EOF && ch != '\n';)
+	if (p < buf + PASSWD_LEN)
+	    *p++ = ch;
+    *p = '\0';
+    (void) write(fileno(outfp), "\n", 1);
 
 #if defined(sgi)
-	ttyb.c_lflag = svflagval;
-	(void)ioctl(fileno(fp), TCSETA, &ttyb);
+    ttyb.c_lflag = svflagval;
+    (void) ioctl(fileno(fp), TCSETA, &ttyb);
 #else
-	ttyb.sg_flags = svflagval;
-	(void)ioctl(fileno(fp), TIOCSETP, &ttyb);
+    ttyb.sg_flags = svflagval;
+    (void) ioctl(fileno(fp), TIOCSETP, &ttyb);
 #endif
-	(void)sigsetmask(omask);
-	if (fp != stdin)
-		(void)fclose(fp);
-	return(buf);
+    (void) sigsetmask(omask);
+    if (fp != stdin)
+	(void) fclose(fp);
+    return (buf);
 }
 #endif

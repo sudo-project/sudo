@@ -20,7 +20,7 @@
  *  them to include in future releases.  Feel free to send them to:
  *      Jeff Nieusma                       nieusma@rootgroup.com
  *      3959 Arbol CT                      (303) 447-8093
- *      Boulder, CO 80301-1752             
+ *      Boulder, CO 80301-1752
  *
  *******************************************************************
  *
@@ -36,8 +36,7 @@
 
 /*
  *  Most of this code has been rewritten to fix bugs and bears little
- *  resemblence to the original.  As such, this file conforms to my
- *  personal coding style.
+ *  resemblence to the original.
  *
  *  Todd C. Miller (millert@colorado.edu) Sat Sep  4 12:22:04 MDT 1993
  */
@@ -74,25 +73,29 @@ extern char *getwd();
 char *find_path(file)
     char *file;
 {
-    register char *n;			/* for traversing path */
-    char *path = NULL;			/* contents of PATH env var */
-    char fn[MAXPATHLEN+1];		/* filename (path + file) */
-    struct stat statbuf;		/* for stat(2) */
-    int statfailed;			/* stat(2) return value */
-    int checkdot = 0;			/* check current dir? */
+    register char *n;		/* for traversing path */
+    char *path = NULL;		/* contents of PATH env var */
+    char fn[MAXPATHLEN + 1];	/* filename (path + file) */
+    struct stat statbuf;	/* for stat(2) */
+    int statfailed;		/* stat(2) return value */
+    int checkdot = 0;		/* check current dir? */
     char *qualify();
 
     if (strlen(file) > MAXPATHLEN) {
-	fprintf(stderr, "%s:  path too long:  %s\n", Argv[0], file);
+	(void) fprintf(stderr, "%s:  path too long:  %s\n", Argv[0], file);
 	exit(1);
     }
-	
-    /* do we need to search the path? */
+
+    /*
+     * do we need to search the path?
+     */
     if (index(file, '/'))
 	return (qualify(file));
 
-    /* grab PATH out of environment and make a local copy */
-    if ((path = getenv("PATH") ) == NULL)
+    /*
+     * grab PATH out of environment and make a local copy
+     */
+    if ((path = getenv("PATH")) == NULL)
 	return (NULL);
 
     if ((path = strdup(path)) == NULL) {
@@ -101,27 +104,27 @@ char *find_path(file)
     }
 
     do {
-	/* cheap strtok() */
 	if ((n = index(path, ':')))
 	    *n = '\0';
 
 	/*
-	 * search current dir last if it is in PATH
-	 * This will miss sneaky things like using './' or './/'
+	 * search current dir last if it is in PATH This will miss sneaky
+	 * things like using './' or './/' 
 	 */
-	if (*path == NULL || (*path == '.' && *(path+1) == NULL)) {
+	if (*path == NULL || (*path == '.' && *(path + 1) == NULL)) {
 	    checkdot = 1;
 	    path = n + 1;
 	    continue;
 	}
 
-	/* filename to try */
-	(void)sprintf(fn, "%s/%s", path, file);
+	(void) sprintf(fn, "%s/%s", path, file);
 
-	/* stat the file to make sure it exists and is executable */
+	/*
+	 * stat the file to make sure it exists and is executable
+	 */
 	statfailed = stat(fn, &statbuf);
 	if (!statfailed && (statbuf.st_mode & 0000111))
-	    return(qualify(fn));
+	    return (qualify(fn));
 	else if (statfailed && errno != ENOENT && errno != ENOTDIR) {
 	    perror("find_path:  stat");
 	    exit(1);
@@ -130,20 +133,24 @@ char *find_path(file)
 
     } while (n);
 
-    /* check current dir if dot was in the PATH */
+    /*
+     * check current dir if dot was in the PATH
+     */
     if (checkdot) {
-	(void)sprintf(fn, "./%s", file);
+	(void) sprintf(fn, "./%s", file);
 
-	/* stat the file to make sure it exists and is executable */
+	/*
+	 * stat the file to make sure it exists and is executable
+	 */
 	statfailed = stat(fn, &statbuf);
 	if (!statfailed && (statbuf.st_mode & 0000111))
-	    return(qualify(fn));
+	    return (qualify(fn));
 	else if (statfailed && errno != ENOENT && errno != ENOTDIR) {
 	    perror("find_path:  stat");
 	    exit(1);
 	}
     }
-    return(NULL);
+    return (NULL);
 }
 
 
@@ -156,108 +163,118 @@ char *find_path(file)
  */
 
 char *qualify(n)
-    char *n;				/* name to make fully qualified */
+    char *n;			/* name to make fully qualified */
 {
-    char *beg = NULL;			/* begining of a path component */
-    char *end;				/* end of a path component */
-    static char full[MAXPATHLEN+1];	/* the fully qualified name */
-    char name[MAXPATHLEN+1];		/* local copy of n */
-    struct stat statbuf;		/* for lstat() */
-    char *tmp;				/* temporary pointer */
+    char *beg = NULL;		/* begining of a path component */
+    char *end;			/* end of a path component */
+    static char full[MAXPATHLEN + 1];	/* the fully qualified name */
+    char name[MAXPATHLEN + 1];	/* local copy of n */
+    struct stat statbuf;	/* for lstat() */
+    char *tmp;			/* temporary pointer */
 
-    /* is it a bogus path? */
+    /*
+     * is it a bogus path?
+     */
     if (stat(n, &statbuf)) {
-    	if (errno == ENOENT)
-	    return(NULL);
+	if (errno == ENOENT)
+	    return (NULL);
 	else {
 	    perror("qualify:  stat");
 	    exit(1);
 	}
     }
 
-    /* if n is relative, fill full with working dir */
+    /*
+     * if n is relative, fill full with working dir
+     */
     if (*n != '/') {
 #ifdef USE_CWD
-	if (!getcwd(full, (size_t)(MAXPATHLEN+1))) {
+	if (!getcwd(full, (size_t) (MAXPATHLEN + 1))) {
 #else
 	if (!getwd(full)) {
 #endif
-	    fprintf(stderr, "%s:  Can't get working directory!\n", Argv[0]);
+	    (void) fprintf(stderr, "%s:  Can't get working directory!\n",
+	        Argv[0]);
 	    exit(1);
 	}
     } else
 	full[0] = '\0';
 
-    (void)strcpy(name, n);		/* working copy... */
+    (void) strcpy(name, n);	/* working copy... */
 
-    do {				/* while (end) */
+    do {			/* while (end) */
 	if (beg)
-	    beg = end + 1;		/* skip past the NULL */
+	    beg = end + 1;	/* skip past the NULL */
 	else
-	    beg = name;			/* just starting out... */
+	    beg = name;		/* just starting out... */
 
-	/* find and terminate end of path component */
+	/*
+	 * find and terminate end of path component
+	 */
 	if ((end = index(beg, '/')))
 	    *end = '\0';
 
 	if (beg == end)
 	    continue;
-	else if (!strcmp(beg, "."))
-	    ;				/* ignore "." */
+	else if (!strcmp(beg, "."));	/* ignore "." */
 	else if (!strcmp(beg, "..")) {
 	    if ((tmp = rindex(full, '/')))
 		*tmp = '\0';
 	} else {
 	    strcat(full, "/");
-	    strcat(full, beg);		/* copy in new component */
+	    strcat(full, beg);	/* copy in new component */
 	}
 
-	/* if we used ../.. to go past the root dir just continue */
+	/*
+	 * if we used ../.. to go past the root dir just continue
+	 */
 	if (!full[0])
 	    continue;
 
-	/* check for symbolic links */
+	/*
+	 * check for symbolic links
+	 */
 	if (lstat(full, &statbuf)) {
 	    perror("qualify:  lstat");
 	    exit(1);
 	}
 
 	if ((statbuf.st_mode & S_IFMT) == S_IFLNK) {
-	    int linklen;		/* length of link contents */
-	    char newname[MAXPATHLEN+1];	/* temp storage to build new name */
+	    int linklen;	/* length of link contents */
+	    char newname[MAXPATHLEN + 1];	/* temp storage to build new
+						 * name */
 
 	    linklen = readlink(full, newname, sizeof(newname));
 	    newname[linklen] = '\0';
-	    
+
 	    /* check to make sure we don't go past MAXPATHLEN */
 	    ++end;
-	    if (end != (char *)1) {
+	    if (end != (char *) 1) {
 		if (linklen + strlen(end) >= MAXPATHLEN) {
-		    fprintf(stderr, "%s:  path too long:  %s/%s\n", Argv[0],
-								newname, end);
+		    (void )fprintf(stderr, "%s:  path too long:  %s/%s\n",
+			Argv[0], newname, end);
 		    exit(1);
 		}
-
 		strcat(newname, "/");
 		strcat(newname, end);	/* copy what's left of end */
 	    }
-
 	    if (newname[0] == '/')	/* reset full if necesary */
 		full[0] = '\0';
-	    else
-		if ((tmp = rindex(full, '/')))	/* remove component from full */
-		    *tmp = '\0';
+	    else if ((tmp = rindex(full, '/')))	/* remove component from full */
+		*tmp = '\0';
 
 	    strcpy(name, newname);	/* reset name with new path */
-	    beg = NULL;			/* since we have a new name */
+	    beg = NULL;		/* since we have a new name */
 	}
     } while (end);
 
-    /* if we resolved to "/" full[0] will be NULL */
+    /*
+     * if we resolved to "/" full[0] will be NULL
+     */
     if (!full[0])
 	strcpy(full, "/");
 
-    return((char *)full);
+    return ((char *) full);
 }
 
 
@@ -278,7 +295,7 @@ char *strdup(s1)
     if ((s = (char *) malloc(strlen(s1) + 1)) == NULL)
 	return (NULL);
 
-    (void)strcpy(s, s1);
-    return(s);
+    (void) strcpy(s, s1);
+    return (s);
 }
 #endif

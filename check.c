@@ -20,7 +20,7 @@
  *  them to include in future releases.  Feel free to send them to:
  *      Jeff Nieusma                       nieusma@rootgroup.com
  *      3959 Arbol CT                      (303) 447-8093
- *      Boulder, CO 80301-1752             
+ *      Boulder, CO 80301-1752
  *
  *******************************************************************
  *
@@ -46,13 +46,13 @@
 
 char *getpass();
 
-static int  check_timestamp();
+static int check_timestamp();
 static void check_passwd();
 static void update_timestamp();
 static void reminder();
 static char *timestampfile_p;
 
-static int  timedir_is_good;
+static int timedir_is_good;
 
 
 /********************************************************************
@@ -65,38 +65,38 @@ static int  timedir_is_good;
 
 void check_user()
 {
-register int rtn;
+    register int rtn;
 
-umask ( 077 );              /* make sure the timestamp files are private */
+    umask(077);			/* make sure the timestamp files are private */
 
-if ( setuid (0) ) {         /* have to be root to see timestamps */
-    perror("setuid(0)");
-    exit(1);
+    if (setuid(0)) {		/* have to be root to see timestamps */
+	perror("setuid(0)");
+	exit(1);
     }
-rtn = check_timestamp();    
-if ( setruid (uid) ) {      /* don't want to be root longer than necessary */
+    rtn = check_timestamp();
+    if (setruid(uid)) {		/* don't want to be root longer than
+				 * necessary */
 #ifndef _AIX
-    perror("setruid(uid)");
-    exit(1);
+	perror("setruid(uid)");
+	exit(1);
 #endif
     }
+    if (rtn && uid)		/* if timestamp is not current... */
+	check_passwd();
 
-if ( rtn && uid )           /* if timestamp is not current... */
-    check_passwd(); 
-
-if ( setuid (0) ) {         /* have to be root to play with timestamps */
-    perror("setuid(0)");
-    exit(1);
+    if (setuid(0)) {		/* have to be root to play with timestamps */
+	perror("setuid(0)");
+	exit(1);
     }
-update_timestamp();
-if ( setruid (uid) ) {      /* don't want to be root longer than necessary */
+    update_timestamp();
+    if (setruid(uid)) {		/* don't want to be root longer than
+				 * necessary */
 #ifndef _AIX
-    perror("setruid(uid)");
-    exit(1);
+	perror("setruid(uid)");
+	exit(1);
 #endif
     }
-
-umask ( 022 );              /* want a real umask to exec() the command */
+    umask(022);			/* want a real umask to exec() the command */
 
 }
 
@@ -113,66 +113,64 @@ umask ( 022 );              /* want a real umask to exec() the command */
 
 static int check_timestamp()
 {
-static char timestampfile[MAXPATHLEN+1];
-register char *p;
-struct stat statbuf;
-register int timestamp_is_old = -1;
-time_t now;
+    static char timestampfile[MAXPATHLEN + 1];
+    register char *p;
+    struct stat statbuf;
+    register int timestamp_is_old = -1;
+    time_t now;
+
+    (void) sprintf(timestampfile, "%s/%s", TIMEDIR, user);
+    timestampfile_p = timestampfile;
+
+    timedir_is_good = 1;	/* now there's an assumption for ya... */
 
 
-sprintf ( timestampfile, "%s/%s", TIMEDIR, user );
-timestampfile_p = timestampfile;
-
-timedir_is_good = 1;  /* now there's an assumption for ya... */
-
-
-/* walk through the path one directory at a time */
-
-for ( p=timestampfile+1; p=index(p,'/'); *p++='/' ) {
-    *p='\0';
-    if ( stat(timestampfile,&statbuf) < 0) {
-        if ( strcmp ( timestampfile, TIMEDIR ))
-	    fprintf ( stderr, "Cannot stat() %s\n", timestampfile );
-	timedir_is_good = 0;
-        *p='/';
-	break;
+    /*
+     * walk through the path one directory at a time
+     */
+    for (p = timestampfile + 1; p = index(p, '/'); *p++ = '/') {
+	*p = '\0';
+	if (stat(timestampfile, &statbuf) < 0) {
+	    if (strcmp(timestampfile, TIMEDIR))
+		(void) fprintf(stderr, "Cannot stat() %s\n", timestampfile);
+	    timedir_is_good = 0;
+	    *p = '/';
+	    break;
 	}
     }
 
-
-if ( timedir_is_good ) {            /* if all the directories are stat()able */ 
-    if ( stat(timestampfile, &statbuf) ) { /* does the file exist?    */
-        if ( uid ) reminder();             /* if not, do the reminder */
-	timestamp_is_old=1;                /* and return (1)          */
-        }
-    else {                                 /* otherwise, check the time */
-	now = time ( (time_t *) NULL );
-	if ( now - statbuf.st_mtime < 60 * TIMEOUT )
-	    timestamp_is_old = 0;          /* if file is recent, return(0) */
-	else
-	    timestamp_is_old = 1;          /* else make 'em enter password */
+    /*
+     * if all the directories are stat()able
+     */
+    if (timedir_is_good) {
+	if (stat(timestampfile, &statbuf)) {	/* does the file exist?    */
+	    if (uid)
+		reminder();	/* if not, do the reminder */
+	    timestamp_is_old = 1;	/* and return (1)          */
+	} else {		/* otherwise, check the time */
+	    now = time((time_t *) NULL);
+	    if (now - statbuf.st_mtime < 60 * TIMEOUT)
+		timestamp_is_old = 0;	/* if file is recent, return(0) */
+	    else
+		timestamp_is_old = 1;	/* else make 'em enter password */
 	}
     }
-
-/* there was a problem stat()ing a directory */
-
-else {
-    timestamp_is_old = 1;                   /* user has to enter password */
-    if ( mkdir (TIMEDIR, 0700 ) ) {         /* make the TIMEDIR directory */
-	perror("check_timestamp: mkdir");
-	timedir_is_good = 0;
-	}
+    /*
+     * there was a problem stat()ing a directory
+     */
     else {
-	timedir_is_good = 1;                /* TIMEDIR now exists         */
-	reminder();
+	timestamp_is_old = 1;	/* user has to enter password */
+	if (mkdir(TIMEDIR, 0700)) {	/* make the TIMEDIR directory */
+	    perror("check_timestamp: mkdir");
+	    timedir_is_good = 0;
+	} else {
+	    timedir_is_good = 1;/* TIMEDIR now exists         */
+	    reminder();
 	}
     }
 
-return (timestamp_is_old);
-
+    return (timestamp_is_old);
 }
-
-
 
 
 
@@ -185,17 +183,15 @@ return (timestamp_is_old);
 
 static void update_timestamp()
 {
-register int fd;
+    register int fd;
 
-if ( timedir_is_good ) {
-    unlink ( timestampfile_p );
-    if (( fd = open (timestampfile_p, O_WRONLY|O_CREAT|O_TRUNC, 0600 )) < 0 )
-	perror( "update_timestamp: open" );
-    close (fd);
+    if (timedir_is_good) {
+	unlink(timestampfile_p);
+	if ((fd = open(timestampfile_p, O_WRONLY | O_CREAT | O_TRUNC, 0600)) < 0)
+	    perror("update_timestamp: open");
+	close(fd);
     }
 }
-
-
 
 
 
@@ -209,41 +205,38 @@ if ( timedir_is_good ) {
 
 static void check_passwd()
 {
-char *crypt();
-struct passwd *pw_ent;
-char *encrypted;                          /*  this comes from /etc/passwd  */
-char *pass;                               /*  this is what gets entered    */
-register int counter=TRIES_FOR_PASSWORD;
+    char *crypt();
+    struct passwd *pw_ent;
+    char *encrypted;		/* this comes from /etc/passwd  */
+    char *pass;			/* this is what gets entered    */
+    register int counter = TRIES_FOR_PASSWORD;
 
+    if ((pw_ent = getpwuid(uid)) == NULL) {
+	(void) sprintf(user, "%u", uid);
+	log_error(GLOBAL_NO_PW_ENT);
+	inform_user(GLOBAL_NO_PW_ENT);
+	exit(1);
+    }
+    encrypted = pw_ent -> pw_passwd;
 
-if ( (pw_ent = getpwuid( uid )) == NULL ) {
-    sprintf ( user, "%u", uid );
-    log_error( GLOBAL_NO_PW_ENT );
-    inform_user ( GLOBAL_NO_PW_ENT );
-    exit (1);
+    /*
+     * you get TRIES_FOR_PASSWORD times to guess your password
+     */
+    while (counter > 0) {
+	pass = getpass("Password:");
+	if (*pass == (char) NULL)
+	    exit(0);
+	if (!strcmp(encrypted, crypt(pass, encrypted)))
+	    return;		/* if the passwd is correct return() */
+	--counter;		/* otherwise, try again  */
+	(void) fprintf(stderr, "%s\n", INCORRECT_PASSWORD);
     }
 
-encrypted = pw_ent -> pw_passwd;
+    log_error(PASSWORD_NOT_CORRECT);
+    inform_user(PASSWORD_NOT_CORRECT);
 
-/* you get TRIES_FOR_PASSWORD times to guess your password */
-
-while ( counter > 0 ) {
-    pass = getpass ( "Password:" );
-    if ( *pass == (char)NULL ) exit(0);
-    if ( !strcmp(encrypted, crypt(pass,encrypted)))
-
-        return;                      /*  if the passwd is correct return() */
-    -- counter;                                  /*  otherwise, try again  */
-    fprintf ( stderr, "%s\n", INCORRECT_PASSWORD );
-    }
-
-log_error( PASSWORD_NOT_CORRECT );
-inform_user ( PASSWORD_NOT_CORRECT );
-
-exit (1);
-
+    exit(1);
 }
-
 
 
 
@@ -256,21 +249,17 @@ exit (1);
 
 static void reminder()
 {
-
 #ifdef SHORT_MESSAGE
-fprintf(stderr,"\n%s\n%s\n\n%s\n%s\n\n", 
+    (void) fprintf(stderr, "\n%s\n%s\n\n%s\n%s\n\n",
 #else
-fprintf(stderr,"\n%s\n%s\n%s\n\n%s\n%s\n\n%s\n%s\n\n", 
-
-"    sudo version 1.1, Copyright (C) 1991 The Root Group, Inc.",
-"    sudo comes with ABSOLUTELY NO WARRANTY.  This is free software,",
-"    and you are welcome to redistribute it under certain conditions.",
+    (void) fprintf(stderr, "\n%s\n%s\n%s\n\n%s\n%s\n\n%s\n%s\n\n",
+	"    sudo version 1.1, Copyright (C) 1991 The Root Group, Inc.",
+	"    sudo comes with ABSOLUTELY NO WARRANTY.  This is free software,",
+	"    and you are welcome to redistribute it under certain conditions.",
 #endif
-
-"We trust you have received the usual lecture from the local Systems",
-"Administrator. It usually boils down to these two things:",
-
-"        #1) Respect the privacy of others.",
-"        #2) Think before you type."
-);
+	"We trust you have received the usual lecture from the local Systems",
+	"Administrator. It usually boils down to these two things:",
+	"        #1) Respect the privacy of others.",
+	"        #2) Think before you type."
+    );
 }
