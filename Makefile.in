@@ -295,7 +295,8 @@ install: install-dirs install-binaries @INSTALL_NOEXEC@ install-sudoers install-
 install-dirs:
 	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)$(sudodir) \
 	    $(DESTDIR)$(visudodir) $(DESTDIR)$(sudoersdir) \
-	    $(DESTDIR)$(mandirsu) $(DESTDIR)$(mandirform)
+	    $(DESTDIR)$(mandirsu) $(DESTDIR)$(mandirform) \
+	    $(DESTDIR)$(noexecdir)
 
 install-binaries: $(PROGS)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 -s sudo $(DESTDIR)$(sudodir)/sudo
