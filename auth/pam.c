@@ -162,7 +162,6 @@ pam_prep_user(pw)
 {
     struct pam_conv pam_conv;
     pam_handle_t *pamh;
-    const char *s;
 
     /* We need to setup a new PAM session for the user we are changing *to*. */
     pam_conv.conv = sudo_conv;
@@ -222,7 +221,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		    p = pm->msg;
 		/* Read the password. */
 		pass = tgetpass(p, def_ival(I_PASSWD_TIMEOUT) * 60,
-		    tgetpass_flags));
+		    tgetpass_flags);
 		pr->resp = pass ? estrdup(pass) : "";
 		if (*pr->resp == '\0')
 		    nil_pw = 1;		/* empty password */
