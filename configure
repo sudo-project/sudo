@@ -6789,6 +6789,7 @@ fi
 
 		    CHECKSHADOW="false"
 		fi
+		with_noexec=no
 		;;
     *-*-ultrix*)
 		OS="ultrix"
@@ -6857,6 +6858,7 @@ fi
 
 		    CHECKSHADOW="false"
 		fi
+		with_noexec=no
 		;;
     *-*-riscos*)
 		LIBS="${LIBS} -lsun -lbsd"
