@@ -93,10 +93,12 @@ static char rcsid[] = "$Id$";
 #include <afs/kautils.h>
 #endif /* HAVE_AFS */
 #ifdef HAVE_UTIME
+#ifdef HAVE_UTIME_H
 #include <utime.h>
+#endif /* HAVE_UTIME_H */
 #else
 #include "utime.h"
-#endif
+#endif /* HAVE_UTIME */
 
 
 /*
@@ -257,12 +259,12 @@ static int check_timestamp()
 
 static void update_timestamp()
 {
-    struct utimbuf *utp = NULL;
 #if defined(HAVE_UTIME) && !defined(HAVE_UTIME_NULL)
-    struct utimbuf ut;
+    time_t utp[2];
 
-    ut.actime = ut.modtime = time(NULL);
-    utp = &ut;
+    utp[0] = utp[1] = time(NULL);
+#else
+    struct utimbuf *utp = NULL;
 #endif /* HAVE_UTIME && !HAVE_UTIME_NULL */
 
     /* become root */
