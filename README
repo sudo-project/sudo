@@ -1,4 +1,4 @@
-This is a copletely *unofficial* release of sudo.  As such, please don't
+This is a completely *unofficial* release of sudo.  As such, please don't
 bother rootgroup about bugs in it as their source tree doesn't even include
 this version of sudo.  In fact, since I've used indent(1) to make the
 code actually readable by my standards, it won't even diff usefully against
@@ -7,6 +7,7 @@ The indent.pro in this directory is what was used to format the source.
 
 Note that the Makefile has changed significantly.  Type make and choose
 whichever OS type is appropriate.  If there is nothing close, try generic.
-If you need to make changes, please send them to sudo-bugs@cs.colorado.edu
+For more info see the INSTALL file.  If you need to make changes, please
+send them to sudo-bugs@cs.colorado.edu
 
 Please send bugs to sudo-bugs@cs.colorado.edu
