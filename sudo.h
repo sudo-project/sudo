@@ -50,6 +50,11 @@
 #endif
 
 /*
+ *  Uncomment this if you want to log to a file *and* via syslog(3)
+ */
+/* #define BOTH_LOGS */
+
+/*
  *  If you define NO_ROOT_SUDO, sudo will exit if called by root.
  */
 #ifndef NO_ROOT_SUDO
@@ -234,7 +239,9 @@ typedef struct list {
 #  ifndef Syslog_priority_NO
 #    define Syslog_priority_NO	LOG_ALERT
 #  endif
-#  undef _PATH_SUDO_LOGFILE
+#  ifndef BOTH_LOGS
+#    undef			_PATH_SUDO_LOGFILE
+#  endif
 #endif	/* SYSLOG  */
 
 /*
