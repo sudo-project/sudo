@@ -131,6 +131,7 @@ void log_error(code)
     int code;
 {
     char *p;
+    char **a;
     int count;
     time_t now;
 #if (LOGGING & SLOG_FILE)
@@ -147,8 +148,8 @@ void log_error(code)
      * XXX - don't use 33, use a macro!
      */
     count = 33 + 128 + 2 * MAXPATHLEN + strlen(tty) + strlen(cwd);
-    if (cmnd_args)
-	count += strlen(cmnd_args);
+    for (a = &NewArgv[1]; *a; a++)
+	count += strlen(*a) + 1;
 
     logline = (char *) malloc(count);
     if (logline == NULL) {
@@ -287,8 +288,8 @@ void log_error(code)
 	/* XXX - this could be sped up */
 	strcat(logline, cmnd);
 	strcat(logline, " ");
-	if (cmnd_args) {
-	    strcat(logline, cmnd_args);
+	for (a = &NewArgv[1]; *a; a++) {
+	    strcat(logline, *a);
 	    strcat(logline, " ");
 	}
     }
@@ -535,6 +536,7 @@ static RETSIGTYPE reapchild(sig)
 void inform_user(code)
     int code;
 {
+    char **a;
 
     switch (code) {
 	case VALIDATE_NO_USER:
@@ -544,14 +546,16 @@ void inform_user(code)
 	    break;
 
 	case VALIDATE_NOT_OK:
-	    if (cmnd_args)
-		(void) fprintf(stderr,
-		    "Sorry, user %s is not allowed to execute \"%s %s\" on %s.\n\n",
-		    user_name, cmnd, cmnd_args, host);
-	    else
-		(void) fprintf(stderr,
-		    "Sorry, user %s is not allowed to execute \"%s\" on %s.\n\n",
-		    user_name, cmnd, host);
+	    (void) fprintf(stderr,
+		"Sorry, user %s is not allowed to execute \"%s",
+		user_name, cmnd);
+
+	    for (a = &NewArgv[1]; *a; a++) {
+		fputc(' ', stderr);
+		fputs(*a, stderr);
+	    }
+
+	    (void) fprintf(stderr, "\" on %s.\n\n", host);
 	    break;
 
 	case VALIDATE_ERROR:
