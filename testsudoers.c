@@ -199,8 +199,13 @@ addr_matches(n)
 	addr.s_addr = inet_addr(n);
 	if (strchr(m, '.'))
 	    mask.s_addr = inet_addr(m);
-	else
-	    mask.s_addr = (1 << atoi(m)) - 1;	/* XXX - better way? */
+	else {
+	    i = 32 - atoi(m);
+	    mask.s_addr = 0xffffffff;
+	    mask.s_addr >>= i;
+	    mask.s_addr <<= i;
+	    mask.s_addr = htonl(mask.s_addr);
+	}
 	*(m - 1) = '/';               
 
 	for (i = 0; i < num_interfaces; i++)
