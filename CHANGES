@@ -1,4 +1,4 @@
-CHANGES from sudo 1.2 (unofficial version)
+CHANGES since sudo 1.2
 
 01) sudo now works under hpux, aix, sunos, bsd43, ultrix, linux, osf and irix.
 
@@ -1101,3 +1101,8 @@ Sudo 1.5.9 released.
 344) tgetpass() now has a flag to specify whether or not to turn
      off echo while reading the password.  Used by the new PAM and
      fwtk code.
+
+345) Fixed shadow password dectection on SCO.
+
+346) Sudo is now available under a BSD/Apache style license.  This is
+     possible because it no longer contains any of the original 1.1 code.
