@@ -294,12 +294,12 @@ static void load_globals()
 	    (void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], Argv[1]);
 	    exit(1);
 	}
-    }
 
-    if ((cmnd = strdup(cmnd)) == NULL)  {
-	perror("malloc");
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
+	if ((cmnd = strdup(cmnd)) == NULL)  {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
     }
 }
 
