@@ -1304,11 +1304,11 @@ fi
 dnl
 dnl If inet_addr(3) not in libc, check -lnsl and -linet
 dnl
-AC_CHECK_FUNC(inet_addr, ,AC_CHECK_LIB(nsl, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"])))
+AC_CHECK_FUNC(inet_addr, ,AC_CHECK_LIB(nsl, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"]), -lsocket))
 dnl
 dnl If socket(2) not in libc, check -lsocket and -linet
 dnl
-AC_CHECK_FUNC(socket, ,AC_CHECK_LIB(socket, socket, [SUDO_LIBS="${SUDO_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(inet, socket, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"])))
+AC_CHECK_FUNC(socket, ,AC_CHECK_LIB(socket, socket, [SUDO_LIBS="${SUDO_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(inet, socket, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"]), -lnsl))
 dnl
 dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
 dnl
