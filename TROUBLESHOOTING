@@ -1,4 +1,5 @@
-Troubleshooting tips for CU sudo.
+Troubleshooting tips for CU sudo
+================================
 
 Q) Sudo compiles but when I run it I get "Sorry, sudo must be setuid root."
    and sudo quits.
@@ -17,3 +18,24 @@ A) Try running configure with the --with-getpass option.  After this
    it is not bulletproof.
    (see the INSTALL doc for a list of OS's that sudo knows how to get
    shadow password info for).
+
+Q) Sudo says that it cannot read the sudoers file even though the
+   path it says is correct.
+A) If the sudoers file lives on an NFS-mounted partition that partition
+   needs to be exported as root to the host in question unless you
+   have set SUDOERS_OWNER to something other than root.  An easy test
+   is to see if "cat /path/to/sudoers" works as root.  If not, then
+   you have the aforementioned problem.  See the entry for SUDOERS_OWNER
+   in the OPTIONS file.
+
+Q) I don't run sendmail on my machine.  Does this mean that I cannot
+   use sudo?
+A) No, you just need to comment out the MAILER #define in options.h.
+
+Q) When I run visudo it uses vi as the editor and I hate vi.  How
+   can I make it use another editor?
+A) Your best bet is to enable the ENV_EDITOR option in options.h.
+   This will make visudo use the editor specified by the user's
+   EDITOR environmental variable.  Alternately, you can change the
+   default editor by setting the EDITOR macro in options.h to
+   the editor of your choice.
