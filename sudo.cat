@@ -8,9 +8,9 @@ NNNNAAAAMMMMEEEE
        sudo - execute a command as another user
 
 SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
-       ssssuuuuddddoooo ----VVVV | ----hhhh | ----llll | ----LLLL | ----vvvv | ----kkkk | ----KKKK | ----ssss | [ ----HHHH ] [----SSSS ]
-       [ ----bbbb ] | [ ----pppp _p_r_o_m_p_t ] [ ----cccc _c_l_a_s_s|_- ] [ ----aaaa _a_u_t_h___t_y_p_e ] [
-       ----uuuu _u_s_e_r_n_a_m_e|_#_u_i_d ] _c_o_m_m_a_n_d
+       ssssuuuuddddoooo ----VVVV | ----hhhh | ----llll | ----LLLL | ----vvvv | ----kkkk | ----KKKK | ----ssss | [ ----HHHH ] [----PPPP ]
+       [----SSSS ] [ ----bbbb ] | [ ----pppp _p_r_o_m_p_t ] [ ----cccc _c_l_a_s_s|_- ] [ ----aaaa _a_u_t_h___t_y_p_e
+       ] [ ----uuuu _u_s_e_r_n_a_m_e|_#_u_i_d ] _c_o_m_m_a_n_d
 
 DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        ssssuuuuddddoooo allows a permitted user to execute a _c_o_m_m_a_n_d as the
@@ -154,6 +154,13 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
            default) as specified in _p_a_s_s_w_d(4).  By default, ssssuuuuddddoooo
            does not modify HOME.
 
+       -P  The ----PPPP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssssuuuuddddoooo to
+           preserve the user's group vector unaltered.  By
+           default, ssssuuuuddddoooo will initialize the group vector to the
+           list of groups the target user is in.  The real and
+           effective group IDs, however, are still set to match
+           the target user.
+
        -S  The ----SSSS (_s_t_d_i_n) option causes ssssuuuuddddoooo to read the password
            from standard input instead of the terminal device.
 
@@ -183,13 +190,6 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
        ssssuuuuddddoooo tries to be safe when executing external commands.
        Variables that control how dynamic loading and binding is
        done can be used to subvert the program that ssssuuuuddddoooo runs.
-       To combat this the LD_*, _RLD_*, SHLIB_PATH (HP-UX only),
-       and LIBPATH (AIX only) environment variables are removed
-       from the environment passed on to all commands executed.
-       ssssuuuuddddoooo will also remove the IFS, ENV, BASH_ENV, KRB_CONF,
-       KRBCONFDIR, KRBTKFILE, KRB5_CONFIG, LOCALDOMAIN,
-       RES_OPTIONS, HOSTALIASES, NLSPATH, PATH_LOCALE, TERMINFO,
-       TERMINFO_DIRS and TERMPATH variables as they too can pose
 
 
 
@@ -202,6 +202,13 @@ December 14, 2001             1.6.4                             3
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
+       To combat this the LD_*, _RLD_*, SHLIB_PATH (HP-UX only),
+       and LIBPATH (AIX only) environment variables are removed
+       from the environment passed on to all commands executed.
+       ssssuuuuddddoooo will also remove the IFS, ENV, BASH_ENV, KRB_CONF,
+       KRBCONFDIR, KRBTKFILE, KRB5_CONFIG, LOCALDOMAIN,
+       RES_OPTIONS, HOSTALIASES, NLSPATH, PATH_LOCALE, TERMINFO,
+       TERMINFO_DIRS and TERMPATH variables as they too can pose
        a threat.  If the TERMCAP variable is set and is a path­
        name, it too is ignored.  Additionally, if the LC_* or
        LANGUAGE variables contain the / or % characters, they are
@@ -249,13 +256,6 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
        timestamp with a bogus date on systems that allow users to
        give away files.
 
-       Please note that ssssuuuuddddoooo will only log the command it explic­
-       itly runs.  If a user runs a command such as sudo su or
-       sudo sh, subsequent commands run from that shell will _n_o_t
-       be logged, nor will ssssuuuuddddoooo's access control affect them.
-       The same is true for commands that offer shell escapes
-       (including most editors).  Because of this, care must be
-       taken when giving users access to commands via ssssuuuuddddoooo to
 
 
 
@@ -268,6 +268,13 @@ December 14, 2001             1.6.4                             4
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
+       Please note that ssssuuuuddddoooo will only log the command it explic­
+       itly runs.  If a user runs a command such as sudo su or
+       sudo sh, subsequent commands run from that shell will _n_o_t
+       be logged, nor will ssssuuuuddddoooo's access control affect them.
+       The same is true for commands that offer shell escapes
+       (including most editors).  Because of this, care must be
+       taken when giving users access to commands via ssssuuuuddddoooo to
        verify that the command does not inadvertantly give the
        user an effective root shell.
 
@@ -303,6 +310,30 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
        ssssuuuuddddoooo utilizes the following environment variables:
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+December 14, 2001             1.6.4                             5
+
+
+
+
+
+sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
+
+
         PATH                   Set to a sane value if SECURE_PATH is set
         SHELL                  Used to determine shell to run with -s option
         USER                   Set to the target user (root unless the -u option
@@ -321,17 +352,6 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
 FFFFIIIILLLLEEEESSSS
         /etc/sudoers           List of who can run what
         /var/run/sudo              Directory containing timestamps
-
-
-
-
-December 14, 2001             1.6.4                             5
-
-
-
-
-
-sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
 AAAAUUUUTTTTHHHHOOOORRRRSSSS
@@ -367,9 +387,21 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        cation.
 
        Running shell scripts via ssssuuuuddddoooo can expose the same kernel
-       bugs that make setuid shell scripts unsafe on some operat­
-       ing systems (if your OS supports the /dev/fd/ directory,
-       setuid shell scripts are generally safe).
+       bugs that make setuid shell scripts unsafe on some
+
+
+
+December 14, 2001             1.6.4                             6
+
+
+
+
+
+sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
+
+
+       operating systems (if your OS supports the /dev/fd/ direc­
+       tory, setuid shell scripts are generally safe).
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
        _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), _s_u_d_o_e_r_s(4), _p_a_s_s_w_d(5), _v_i_s_u_d_o(1m),
@@ -391,6 +423,40 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-December 14, 2001             1.6.4                             6
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+December 14, 2001             1.6.4                             7
 
 
