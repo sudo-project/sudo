@@ -118,6 +118,10 @@ int validate(check_cmnd)
     yyin = sudoers_fp;
     yyout = stdout;
 
+    /*
+     * need to be root while stat'ing things in the parser.
+     */
+    set_perms(PERM_ROOT);
     return_code = yyparse();
 
     /*
@@ -126,7 +130,6 @@ int validate(check_cmnd)
     (void) fclose(sudoers_fp);
 
     /* relinquish extra privs */
-    set_perms(PERM_ROOT);
     set_perms(PERM_USER);
 
     if (return_code || parse_error)
