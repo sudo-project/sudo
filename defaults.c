@@ -177,6 +177,9 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"insults", T_FLAG, { 0 },
 	"Insult the user when they enter an incorrect password"
     }, {
+	"requiretty", T_FLAG, { 0 },
+	"Only allow the user to run sudo if they have a tty"
+    }, {
 	"loglinelen", T_INT, { 0 },
 	"Length at which to wrap log file lines (0 for no wrap): %d"
     }, {

@@ -77,10 +77,6 @@
 #define TCSASOFT	0
 #endif /* TCSASOFT */
 
-#ifndef O_NOCTTY
-#define O_NOCTTY	0
-#endif /* O_NOCTTY */
-
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */

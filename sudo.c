@@ -304,6 +304,14 @@ main(argc, argv)
 	exit(1);
     }
 
+    /* Bail if a tty is required and we don't have one.  */
+    if (def_flag(I_REQUIRETTY)) {
+	if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1)
+	    log_error(NO_MAIL, "sorry, you must have a tty to run sudo");
+	else
+	    (void) close(fd);
+    }
+
     /* Require a password unless the NOPASS tag was set.  */
     if (!(validated & FLAG_NOPASS))
 	check_user();

@@ -155,4 +155,11 @@
 # endif /* __hpux */
 #endif /* HAVE_SETEUID */
 
+/*
+ * On POSIX systems, O_NOCTTY is the default so some OS's may lack this define.
+ */
+#ifndef O_NOCTTY
+# define O_NOCTTY	0
+#endif /* O_NOCTTY */
+
 #endif /* _SUDO_COMPAT_H */
