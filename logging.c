@@ -79,7 +79,6 @@ static char logline[MAXLOGLEN + 8];
 void log_error(code)
     int code;
 {
-    char cwd[MAXPATHLEN + 1];
     int argc;
     char **argv;
     mode_t oldmask;
@@ -105,15 +104,6 @@ void log_error(code)
      * we need a pointer to the end of logline
      */
     p = logline + strlen(logline);
-
-    /*
-     * so we know where we are...
-     */
-#ifdef HAVE_GETCWD
-    getcwd(cwd, (size_t) (MAXPATHLEN + 1));
-#else
-    getwd(cwd);
-#endif /* HAVE_GETCWD */
 
     switch (code) {
 
@@ -439,7 +429,8 @@ static void send_mail()
  *  This function gets rid of all the ugly zombies
  */
 
-static RETSIGTYPE reapchild()
+static RETSIGTYPE reapchild(sig)
+    int sig;
 {
     (void) wait(NULL);
     (void) signal(SIGCHLD, reapchild);
