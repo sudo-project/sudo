@@ -431,20 +431,27 @@ static void load_globals(sudo_mode)
     (void) umask((mode_t)UMASK);
 #endif /* UMASK */
 
+#ifdef NO_ROOT_SUDO
+    if (uid == 0) {
+	(void) fprintf(stderr,
+		       "You are already root, you don't need to use sudo.\n");
+	exit(1);
+    }
+#endif
+
     /*
      * so we know where we are... (do as user)
      */
     if (!getwd(cwd)) {
-    	(void) fprintf(stderr, "%s:  Can't get working directory!\n", Argv[0]);
-	exit(1);
+	/* try as root... */
+	set_perms(PERM_ROOT);
+	if (!getwd(cwd)) {
+	    (void) fprintf(stderr, "%s:  Can't get working directory!\n",
+			   Argv[0]);
+	    (void) strcpy(cwd, "unknown");
+	}
+	set_perms(PERM_USER);
     }
-
-#ifdef NO_ROOT_SUDO
-    if (uid == 0) {
-	(void) fprintf(stderr, "You are already root, you don't need to use sudo.\n");
-	exit(1);
-    }
-#endif
 
     /*
      * load the host global variable from gethostname()
