@@ -362,7 +362,11 @@ edit_sudoers(sp, editor, args, lineno)
 	 * If mtime and size match but the user spent no measurable
 	 * time in the editor we can't tell if the file was changed.
 	 */
+#ifdef HAVE_TIMESPECSUB2
+	timespecsub(&ts1, &ts2);
+#else
 	timespecsub(&ts1, &ts2, &ts2);
+#endif
 	if (timespecisset(&ts2))
 	    modified = FALSE;
     }
