@@ -31,10 +31,13 @@ const char *
 getprogname()
 {
     static const char *progname;
+    extern int Argc;
     extern char **Argv;
 
     if (progname == NULL) {
-	if ((progname = strrchr(Argv[0], '/')) != NULL)
+	if (Argc < 0)
+	    progname = "sudo";
+	else if ((progname = strrchr(Argv[0], '/')) != NULL)
 	    progname++;
 	else
 	    progname = Argv[0];
