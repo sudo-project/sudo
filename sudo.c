@@ -462,7 +462,7 @@ static void load_globals(sudo_mode)
     if (!getcwd(cwd, sizeof(cwd))) {
 	/* try as root... */
 	set_perms(PERM_ROOT, sudo_mode);
-	if (!getcwd(cwd), sizeof(cwd)) {
+	if (!getcwd(cwd, sizeof(cwd))) {
 	    (void) fprintf(stderr, "%s:  Can't get working directory!\n",
 			   Argv[0]);
 	    (void) strcpy(cwd, "unknown");
