@@ -216,7 +216,11 @@ static void check_passwd()
     char *pass;			/* this is what gets entered    */
     register int counter = TRIES_FOR_PASSWORD;
 
-    if ((pw_ent = getpwuid(uid)) == NULL) {
+    /* some os's need to be root to get at shadow password */
+    be_root();
+    pw_ent = getpwuid(uid);
+    be_user();
+    if (pw_ent == NULL) {
 	(void) sprintf(user, "%u", uid);
 	log_error(GLOBAL_NO_PW_ENT);
 	inform_user(GLOBAL_NO_PW_ENT);
@@ -224,13 +228,14 @@ static void check_passwd()
     }
 #ifdef __svr4__
     be_root();
-    if ((spw_ent = getspnam(pw_ent->pw_name)) == NULL) {
+    spw_ent = getspnam(pw_ent->pw_name);
+    be_user();
+    if (spw_ent == NULL) {
 	(void) sprintf(user, "%u", uid);
 	log_error(GLOBAL_NO_PW_ENT);
 	inform_user(GLOBAL_NO_PW_ENT);
 	exit(1);
     }
-    be_user();
     encrypted = spw_ent -> sp_pwdp;
 #else
     encrypted = pw_ent -> pw_passwd;
