@@ -946,10 +946,6 @@ sudo_ldap_check(v, pwflag)
 	result = NULL;
     }
 
-    /* shut down connection */
-    if (ld)
-	ldap_unbind_s(ld);
-
     if (ldap_conf.debug)
 	printf("user_matches=%d\n", ldap_user_matches);
     if (ldap_conf.debug)
