@@ -155,7 +155,7 @@ testsudoers: $(PARSEOBJS) $(TESTOBJS)
 # Uncomment the following if you intend to modify parse.yacc
 #sudo.tab.c sudo.tab.h: parse.yacc
 #	rm -f sudo.tab.h sudo.tab.c
-#	$(YACC) -d sudo $(srcdir)/parse.yacc
+#	$(YACC) -d -b sudo $(srcdir)/parse.yacc
 
 sudo.tab.o: $(HDRS) sudo.tab.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) sudo.tab.c
