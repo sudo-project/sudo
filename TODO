@@ -28,3 +28,5 @@ TODO list
 13) Cleanup check.c and logging.c.
 
 14) Fixed network address support.
+
+15) Add an option to hard-code LD_LIBRARY_PATH?
