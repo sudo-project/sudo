@@ -100,7 +100,7 @@ LIBOBJS = @TGETPASS@ @LIBOBJS@
 
 HDRS = sudo.h pathnames.h options.h compat.h version.h insults.h
 
-VERSION = 1.3.1pl5
+VERSION = 1.3.1pl5b1
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING INSTALL Makefile.in PORTING \
             README SUPPORTED TODO OPTIONS HISTORY acsite.m4 getcwd.c putenv.c \
@@ -140,6 +140,8 @@ testsudoers: $(PARSEOBJS) $(TESTOBJS)
 $(OBJS) $(LIBOBJS) : $(HDRS) config.h
 
 sudo.cat: sudo.man
+
+visudo.cat: visudo.man
 
 install: install-binaries install-sudoers install-man
 
