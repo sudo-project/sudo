@@ -135,3 +135,6 @@ TODO list (most will be addressed in sudo 2.0)
 
 48) Some way of using a new pty for the program run via sudo would prevent
     access to the caller's /dev/tty (but probably makes job control tricky).
+
+49) Maybe have a database of checksums that commands are verified against.
+    Basically replace the st_ino/st_dev check with a checksum lookup.
