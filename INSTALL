@@ -303,9 +303,10 @@ Special features/options:
 	"core" sysadmins to have to enter a password but where Jr. sysadmins
 	need to.  You should probably use NOPASSWD in sudoers instead.
 
-  --with-editor
+  --with-editor=path
 	Specify the default editor used by visudo (and the only editor used
-	unless --with-env-editor is specified).  The default is vi.
+	unless --with-env-editor is specified).  The default is the path
+	to vi on your system.
 
   --with-env-editor
 	Makes visudo consult the EDITOR and VISUAL environment variables before
