@@ -10,5 +10,3 @@ TODO list
 04) Nestable command aliases
 
 05) POSIX signals (plus emulation where they are lacking)
-
-06) Maybe have most of code run with euid of caller (ruid of 0)
