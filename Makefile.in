@@ -198,7 +198,7 @@ sudoers.cat: $(srcdir)/sudoers.man
 install: install-dirs install-binaries install-sudoers install-man
 
 install-dirs:
-	$(srcdir)/../mkinstalldirs $(sudodir) $(visudodir) $(sudoersdir) $(mandir8) $(mandir5)
+	$(srcdir)/mkinstalldirs $(sudodir) $(visudodir) $(sudoersdir) $(mandir8) $(mandir5)
 
 install-binaries: $(PROGS)
 	$(INSTALL) -o $(owner) -g $(group) -m 4111 -s sudo $(sudodir)/sudo
