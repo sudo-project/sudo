@@ -47,7 +47,7 @@
  *   However, due to the fact that both of the above are no longer
  *   working at Root Group, I am maintaining the "CU version" of
  *   sudo.
- *		Todd Miller  <millert@cs.colorado.edu>
+ *		Todd Miller  <Todd.Miller@cs.colorado.edu>
  */
 
 #ifndef lint
@@ -81,6 +81,7 @@ static char rcsid[] = "$Id$";
 #include <sys/time.h>
 #include <sys/param.h>
 #include <netinet/in.h>
+#include <netdb.h>
 #if defined(__osf__) && defined(HAVE_C2_SECURITY)
 #include <sys/security.h>
 #include <prot.h>
@@ -163,12 +164,12 @@ struct env_table badenv_table[] = {
 
 /********************************************************************
  *
- *  main ()
+ *  main()
  *
  *  the driving force behind sudo...
  */
 
-main(argc, argv)
+int main(argc, argv)
     int argc;
     char **argv;
 {
@@ -278,8 +279,8 @@ main(argc, argv)
 		    struct stat st;
 
 		    if (stat(cmnd, &st) < 0) {
-			fprintf(stderr, "%s: unable to stat %s:", Argv[0],
-					cmnd);
+			(void) fprintf(stderr, "%s: unable to stat %s:",
+					Argv[0], cmnd);
 			perror("");
 			exit(1);
 		    }
@@ -474,8 +475,15 @@ static int parse_args()
     char *progname = Argv[0];		/* so we can save Argv[0] */
     int i;
 
+#ifdef SHELL_IF_NO_ARGS
+    if (Argc < 2) {			/* no options and no command */
+	ret |= MODE_SHELL;
+	return(ret);
+    }
+#else
     if (Argc < 2)			/* no options and no command */
 	usage(1);
+#endif
 
     while (Argc > 1 && Argv[1][0] == '-') {
 	if (Argv[1][1] != '\0' && Argv[1][2] != '\0') {
@@ -670,7 +678,7 @@ static void load_cmnd(sudo_mode)
 		    args_size += ARG_INC;
 		    args_remainder += ARG_INC;
 		} while (len >= args_remainder);
-		if (realloc(cmnd_args, args_size) == NULL) {
+		if ((cmnd_args = realloc(cmnd_args, args_size)) == NULL) {
 		    perror("malloc");
 		    (void) fprintf(stderr, "%s: cannot allocate memory!\n",
 				   Argv[0]);
@@ -688,9 +696,9 @@ static void load_cmnd(sudo_mode)
 	}
 	*(pos - 1) = '\0';
 
-	/* XXX - is this worth the cost? */
 	/* Let's not be wasteful with our memory */
-	(void) realloc(cmnd_args, args_size - args_remainder);
+	if ((pos = realloc(cmnd_args, args_size - args_remainder)))
+	    cmnd_args = pos;
     }
 
     /*
