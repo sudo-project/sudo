@@ -35,8 +35,9 @@ MAXLOGFILELEN
     The default is 80.
 
 NO_ROOT_SUDO
-    Don't let root run sudo.  This is historical from when doing "sudo sudo"
-    would give you a root shell.  You probably don't want to define this.
+    Don't let root run sudo.  This can be used to prevent people from
+    "chaining" sudo commands to get a root shell by doing something
+    like "sudo sudo /bin/sh".
     This is off by default.
 
 ALERTMAIL
