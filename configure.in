@@ -335,15 +335,13 @@ AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, , AC_CHECK_LIB(crypt_d, crypt, 
 dnl
 dnl library checks
 dnl
-dnl Irix 5.2 (at least) has bugs in -lnsl and -lsocket
-if test "$OS" != "irix" -o $OSREV -ne 5 ; then
+dnl Irix doesn't want -lnsl or -lsocket (and Irix 4 needs -lsun)
+if test "$OS" != "irix" ; then
     AC_CHECK_LIB(nsl, main)
     AC_CHECK_LIB(socket, main)
+elif test "$OSREV" -lt 5 ; then
+    AC_CHECK_LIB(sun, getpwnam)
 fi
-dnl
-dnl OS-dependent libraries
-dnl
-AC_CHECK_LIB(sun, getpwnam)
 dnl
 dnl Find kerberos includes and libs or complain
 dnl
