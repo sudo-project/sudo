@@ -68,6 +68,10 @@ static char rcsid[] = "$Id$";
 #include <pathnames.h>
 #include "compat.h"
 
+#ifndef TCSASOFT
+#define TCSASOFT	0
+#endif /* TCSASOFT */
+
 
 /******************************************************************
  *
