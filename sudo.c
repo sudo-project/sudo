@@ -158,8 +158,9 @@ main(argc, argv, envp)
     extern int printmatches;
     extern char **environ;
 
-    Argc = argc;
     Argv = argv;
+    if ((Argc = argc) < 1)
+	usage(1);
 
     /* Must be done as the first thing... */
 #if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)

@@ -112,7 +112,7 @@ char **Argv;
 char *sudoers = _PATH_SUDOERS;
 char *stmp = _PATH_SUDOERS_TMP;
 struct sudo_user sudo_user;
-int parse_error = FALSE;
+int Argc, parse_error = FALSE;
 
 int
 main(argc, argv)
@@ -135,7 +135,9 @@ main(argc, argv)
     /* Warn about aliases that are used before being defined. */
     pedantic = 1;
 
-    Argv = argv;			/* for warn/err */
+    Argv = argv;
+    if ((Argc = argc) < 1)
+	usage();
 
     /*
      * Arg handling.
