@@ -13,41 +13,38 @@ echo "Configuring Sudo version 1.6.2"
 dnl
 dnl Variables that get substituted in the Makefile
 dnl
-AC_SUBST(CFLAGS)dnl must not initialize CFLAGS, it is magic
-PROGS="sudo visudo"
+AC_SUBST(CFLAGS)dnl
 AC_SUBST(PROGS)dnl
-CPPFLAGS=""
 AC_SUBST(CPPFLAGS)dnl
-LDFLAGS=""
 AC_SUBST(LDFLAGS)dnl
-SUDO_LDFLAGS=""
 AC_SUBST(SUDO_LDFLAGS)dnl
-LIBS=""
 AC_SUBST(LIBS)dnl
-SUDO_LIBS=""
 AC_SUBST(SUDO_LIBS)dnl
-NET_LIBS=""
 AC_SUBST(NET_LIBS)dnl
-AFS_LIBS=""
 AC_SUBST(AFS_LIBS)dnl
-OSDEFS=""
 AC_SUBST(OSDEFS)dnl
-AUTH_OBJS=""
 AC_SUBST(AUTH_OBJS)dnl
-LIBOBJS=""
 AC_SUBST(LIBOBJS)dnl
-MANTYPE="man"
 AC_SUBST(MANTYPE)dnl
-MAN_POSTINSTALL=""
 AC_SUBST(MAN_POSTINSTALL)dnl
-SUDOERS_MODE=0440
 AC_SUBST(SUDOERS_MODE)dnl
-SUDOERS_UID=0
 AC_SUBST(SUDOERS_UID)dnl
-SUDOERS_GID=0
 AC_SUBST(SUDOERS_GID)dnl
-DEV="#"
 AC_SUBST(DEV)
+dnl
+dnl Initial values for Makefile variables listed above
+dnl Some may be overridden by environment variables..
+dnl
+PROGS="sudo visudo"
+test -n "$MANTYPE" && MANTYPE="man"
+test -n "$SUDOERS_MODE" && SUDOERS_MODE=0440
+test -n "$SUDOERS_UID" && SUDOERS_UID=0
+test -n "$SUDOERS_GID" && SUDOERS_GID=0
+DEV="#"
+
+dnl
+dnl Other vaiables
+dnl
 CHECKSHADOW=true
 CHECKSIA=true
 
