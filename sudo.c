@@ -78,7 +78,11 @@ static char rcsid[] = "$Id$";
 #include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#ifdef HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
+#else
 #include <sys/ioctl.h>
+#endif /* HAVE_SYS_SOCKIO_H */
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/if.h>
@@ -334,7 +338,7 @@ static int parse_args()
 	if (Argc > 2)			/* only one -? option allowed */
 	    usage(1);
 
-	if (Argv[1][2] != '\0') {
+	if (Argv[1][1] != '\0' && Argv[1][2] != '\0') {
 	    fprintf(stderr, "%s: Please use single character options\n", Argv[0]);
 	    usage(1);
 	}
@@ -352,6 +356,9 @@ static int parse_args()
 	    case 'h':
 		ret = MODE_HELP;
 		break;
+	    case '\0':
+		fprintf(stderr, "%s: '-' requires an argument\n", Argv[0]);
+		usage(1);
 	    default:
 		fprintf(stderr, "%s: Illegal option %s\n", Argv[0], Argv[1]);
 		usage(1);
