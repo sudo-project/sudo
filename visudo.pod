@@ -49,6 +49,24 @@ and exit.
 
 =back
 
+=head1 ERRORS
+
+=over 4
+
+=item sudoers file busy, try again later.
+
+Either someone is currently editing the I<sudoers> file
+or there is a stale sudoers lock file (/etc/stmp by default)
+that you need to delete.
+
+= item /etc/stmp: Permission denied
+
+You didn't run B<visudo> as root.
+
+= item Can't find you in the passwd database
+
+Your userid does not appear in the passwd file.
+
 =head1 FILES
 
  /etc/sudoers		file of authorized users.
