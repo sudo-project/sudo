@@ -145,16 +145,9 @@ main(argc, argv)
 	(void) close(rtn);
 #endif /* HAVE_SYSCONF */
 
-    load_globals();		/* load the user host cmnd and uid variables */
-
-    /*
-     * We only want to be root when we absolutely need it.
-     * This will effectively do setreuid(0, uid) but for portability...
-     */
-    be_root();
-    be_user();
-
     clean_env(environ);		/* clean up the environment (no LD_*) */
+
+    load_globals();		/* load the user host cmnd and uid variables */
 
     rtn = validate();
     switch (rtn) {
@@ -202,6 +195,13 @@ static void load_globals()
     char *p;
 
     uid = getuid();		/* we need to tuck this away for safe keeping */
+
+    /*
+     * We only want to be root when we absolutely need it.
+     * This will effectively do setreuid(0, uid) but for portability...
+     */
+    be_root();
+    be_user();
 
 #ifdef UMASK
     (void) umask((mode_t)UMASK);
