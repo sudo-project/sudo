@@ -91,7 +91,7 @@ int sudo_edit(argc, argv)
     else
 	tmpdir = _PATH_TMP;
     tmplen = strlen(tmpdir);
-    while (tmpdir[tmplen - 1] == '/')
+    while (tmplen > 0 && tmpdir[tmplen - 1] == '/')
 	tmplen--;
 
     /*
