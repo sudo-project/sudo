@@ -544,7 +544,7 @@ static void check_passwd()
 	    return;
 #endif /* HAVE_AFS */
 #ifdef HAVE_DCE
-	/* XXX - this seems wrong... */
+	/* dce_pwent() validates the user's pw as well */
 	if (dce_pwent(user_name, pass))
 	    return;
 #endif /* HAVE_DCE */
