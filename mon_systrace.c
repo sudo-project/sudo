@@ -16,11 +16,7 @@
 
 #include "config.h"
 
-#include <sys/types.h>
 #include <sys/param.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/wait.h>
 #include <sys/syscall.h>
 #include <sys/ioctl.h>
 #ifdef HAVE_DEV_SYSTRACE_H
@@ -33,34 +29,19 @@
 # endif
 #endif
 #include <stdio.h>
-#ifdef STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif /* STDC_HEADERS */
-#ifdef HAVE_STRING_H
-# include <string.h>
-#else
-# ifdef HAVE_STRINGS_H
-#  include <strings.h>
-# endif
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#include <stdlib.h>
+#include <stddef.h>
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
+#include <pwd.h>
+#include <signal.h>
+#include <fcntl.h>
 #ifdef HAVE_ERR_H
 # include <err.h>
 #else
 # include "emul/err.h"
 #endif /* HAVE_ERR_H */
-#include <pwd.h>
-#include <signal.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <time.h>
 
 #include "sudo.h"
 
