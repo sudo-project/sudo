@@ -440,9 +440,10 @@ init_vars(sudo_mode)
 	user_host = user_shost = "localhost";
     else {
 	user_host = estrdup(thost);
-	if (def_flag(I_FQDN))
-	    set_fqdn();
-	else {
+	if (def_flag(I_FQDN)) {
+	    /* Defer call to set_fqdn() until log_error() is safe. */
+	    user_shost = user_host;
+	} else {
 	    if ((p = strchr(user_host, '.'))) {
 		*p = '\0';
 		user_shost = estrdup(user_host);
@@ -481,6 +482,12 @@ init_vars(sudo_mode)
     user_shell = sudo_user.pw->pw_shell;
 
     /* It is now safe to use log_error() and set_perms() */
+
+    /*
+     * Must defer set_fqdn() until it is safe to call log_error()
+     */
+    if (def_flag(I_FQDN))
+	set_fqdn();
 
     if (nohostname)
 	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
@@ -902,7 +909,7 @@ set_fqdn()
 
     if (def_flag(I_FQDN)) {
 	if (!(hp = gethostbyname(user_host))) {
-	    log_error(USE_ERRNO|MSG_ONLY|NO_EXIT,
+	    log_error(MSG_ONLY|NO_EXIT,
 		"unable to lookup %s via gethostbyname()", user_host);
 	} else {
 	    free(user_host);
