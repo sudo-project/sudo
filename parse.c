@@ -1,15 +1,5 @@
 /*
- * CU sudo version 1.3.1 (based on Root Group sudo version 1.1)
- *
- * This software comes with no waranty whatsoever, use at your own risk.
- *
- * Please send bugs, changes, problems to sudo-bugs.cs.colorado.edu
- *
- */
-
-/*
- *  sudo version 1.1 allows users to execute commands as root
- *  Copyright (C) 1991  The Root Group, Inc.
+ *  CU sudo version 1.3.1
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,13 +15,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- **************************************************************************
+ *  Please send bugs, changes, problems to sudo-bugs@cs.colorado.edu
  *
- * parse.c, sudo project
- * David R. Hieb
- * March 18, 1991
+ *******************************************************************
  *
- * routines to implement and maintain the parsing and list management.
+ * parse.c -- sudo parser frontend and comparison routines.
+ *
+ * Chris Jepeway <jepeway@cs.utk.edu>
  */
 
 #ifndef lint
