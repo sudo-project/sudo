@@ -276,7 +276,7 @@ verify_krb_v5_tgt(sudo_context, ccache, auth_name)
      * and enctype is currently ignored anyhow.)
      */
     if ((error = krb5_kt_read_service_key(sudo_context, NULL, princ, 0,
-					 ETYPE_DES_CBC_MD5, &keyblock))) {
+					 ENCTYPE_DES_CBC_MD5, &keyblock))) {
 	/* Keytab or service key does not exist. */
 	log_error(NO_EXIT,
 		  "%s: host service key not found: %s", auth_name,
