@@ -303,15 +303,25 @@ sudo_getpwuid(uid)
     struct rbnode *node;
 
     key.pw_uid = uid;
-    if ((node = rbfind(pwcache_byuid, &key)) != NULL)
-	return((struct passwd *) node->data);
-    if ((pw = getpwuid(uid)) == NULL)
-	return(NULL);
-    else
+    if ((node = rbfind(pwcache_byuid, &key)) != NULL) {
+	pw = (struct passwd *) node->data;
+	return(pw->pw_name != NULL ? pw : NULL);
+    }
+    /*
+     * Cache passwd db entry if it exists or a negative response if not.
+     */
+    if ((pw = getpwuid(uid)) != NULL) {
 	pw = sudo_pwdup(pw);
-    rbinsert(pwcache_byname, (VOID *) pw);
-    rbinsert(pwcache_byuid, (VOID *) pw);
-    return(pw);
+	rbinsert(pwcache_byname, (VOID *) pw);
+	rbinsert(pwcache_byuid, (VOID *) pw);
+	return(pw);
+    } else {
+	pw = emalloc(sizeof(*pw));
+	memset(pw, 0, sizeof(*pw));
+	pw->pw_uid = uid;
+	rbinsert(pwcache_byuid, (VOID *) pw);
+	return(NULL);
+    }
 }
 
 /*
@@ -324,17 +334,34 @@ sudo_getpwnam(name)
 {
     struct passwd key, *pw;
     struct rbnode *node;
+    size_t len;
+    char *cp;
 
     key.pw_name = (char *) name;
-    if ((node = rbfind(pwcache_byname, &key)) != NULL)
-	return((struct passwd *) node->data);
-    if ((pw = getpwnam(name)) == NULL)
-	return(NULL);
-    else
+    if ((node = rbfind(pwcache_byname, &key)) != NULL) {
+	pw = (struct passwd *) node->data;
+	return(pw->pw_uid != (uid_t) -1 ? pw : NULL);
+    }
+    /*
+     * Cache passwd db entry if it exists or a negative response if not.
+     */
+    if ((pw = getpwnam(name)) != NULL) {
 	pw = sudo_pwdup(pw);
-    rbinsert(pwcache_byname, (VOID *) pw);
-    rbinsert(pwcache_byuid, (VOID *) pw);
-    return(pw);
+	rbinsert(pwcache_byname, (VOID *) pw);
+	rbinsert(pwcache_byuid, (VOID *) pw);
+	return(pw);
+    } else {
+	len = strlen(name) + 1;
+	cp = emalloc(sizeof(*pw) + len);
+	memset(cp, 0, sizeof(*pw));
+	pw = (struct passwd *) cp;
+	cp += sizeof(*pw);
+	memcpy(cp, name, len);
+	pw->pw_name = cp;
+	pw->pw_uid = (uid_t) -1;
+	rbinsert(pwcache_byname, (VOID *) pw);
+	return(NULL);
+    }
 }
 
 /*
@@ -551,15 +578,25 @@ sudo_getgrgid(gid)
     struct rbnode *node;
 
     key.gr_gid = gid;
-    if ((node = rbfind(grcache_bygid, &key)) != NULL)
-	return((struct group *) node->data);
-    if ((gr = getgrgid(gid)) == NULL)
-	return(NULL);
-    else
+    if ((node = rbfind(grcache_bygid, &key)) != NULL) {
+	gr = (struct group *) node->data;
+	return(gr->gr_name != NULL ? gr : NULL);
+    }
+    /*
+     * Cache group db entry if it exists or a negative response if not.
+     */
+    if ((gr = getgrgid(gid)) != NULL) {
 	gr = sudo_grdup(gr);
-    rbinsert(grcache_byname, (VOID *) gr);
-    rbinsert(grcache_bygid, (VOID *) gr);
-    return(gr);
+	rbinsert(grcache_byname, (VOID *) gr);
+	rbinsert(grcache_bygid, (VOID *) gr);
+	return(gr);
+    } else {
+	gr = emalloc(sizeof(*gr));
+	memset(gr, 0, sizeof(*gr));
+	gr->gr_gid = gid;
+	rbinsert(grcache_bygid, (VOID *) gr);
+	return(NULL);
+    }
 }
 
 /*
@@ -571,15 +608,32 @@ sudo_getgrnam(name)
 {
     struct group key, *gr;
     struct rbnode *node;
+    size_t len;
+    char *cp;
 
     key.gr_name = (char *) name;
-    if ((node = rbfind(grcache_byname, &key)) != NULL)
-	return((struct group *) node->data);
-    if ((gr = getgrnam(name)) == NULL)
-	return(NULL);
-    else
+    if ((node = rbfind(grcache_byname, &key)) != NULL) {
+	gr = (struct group *) node->data;
+	return(gr->gr_gid != (gid_t) -1 ? gr : NULL);
+    }
+    /*
+     * Cache group db entry if it exists or a negative response if not.
+     */
+    if ((gr = getgrnam(name)) != NULL) {
 	gr = sudo_grdup(gr);
-    rbinsert(grcache_byname, (VOID *) gr);
-    rbinsert(grcache_bygid, (VOID *) gr);
-    return(gr);
+	rbinsert(grcache_byname, (VOID *) gr);
+	rbinsert(grcache_bygid, (VOID *) gr);
+	return(gr);
+    } else {
+	len = strlen(name) + 1;
+	cp = emalloc(sizeof(*gr) + len);
+	memset(cp, 0, sizeof(*gr));
+	gr = (struct group *) cp;
+	cp += sizeof(*gr);
+	memcpy(cp, name, len);
+	gr->gr_name = cp;
+	gr->gr_gid = (gid_t) -1;
+	rbinsert(grcache_byname, (VOID *) gr);
+	return(NULL);
+    }
 }
