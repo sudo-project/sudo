@@ -149,6 +149,7 @@ char *prompt;
 char host[MAXHOSTNAMELEN + 1];
 char *shost;
 char cwd[MAXPATHLEN + 1];
+FILE *sudoers_fp = NULL;
 struct stat cmnd_st;
 static char *runas_homedir = NULL;
 extern struct interface *interfaces;
@@ -783,7 +784,7 @@ static void load_cmnd(sudo_mode)
 static int check_sudoers()
 {
     struct stat statbuf;
-    int fd = -1, rootstat;
+    int rootstat, i;
     char c;
     int rtn = ALL_SYSTEMS_GO;
 
@@ -832,12 +833,25 @@ static int check_sudoers()
 	rtn = SUDOERS_WRONG_MODE;
     else if (statbuf.st_uid != SUDOERS_UID || statbuf.st_gid != SUDOERS_GID)
 	rtn = SUDOERS_WRONG_OWNER;
-    else if ((fd = open(_PATH_SUDO_SUDOERS, O_RDONLY)) == -1 ||
-	     read(fd, &c, 1) == -1)
-	rtn = NO_SUDOERS_FILE;
-
-    if (fd != -1)
-	(void) close(fd);
+    else {
+	/* Solaris sometimes returns EAGAIN so try 10 times */
+	for (i = 0; i < 10 ; i++) {
+	    errno = 0;
+	    if ((sudoers_fp = fopen(_PATH_SUDO_SUDOERS, "r")) == NULL ||
+		fread(&c, sizeof(c), 1, sudoers_fp) != 1) {
+		sudoers_fp = NULL;
+		if (errno != EAGAIN && errno != EWOULDBLOCK)
+		    break;
+	    } else
+		break;
+	    sleep(1);
+	}
+	if (sudoers_fp == NULL) {
+	    fprintf(stderr, "%s: cannot open %s: ", Argv[0], _PATH_SUDO_SUDOERS);
+	    perror("");
+	    rtn = NO_SUDOERS_FILE;
+	}
+    }
 
     set_perms(PERM_ROOT, 0);
     set_perms(PERM_USER, 0);
