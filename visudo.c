@@ -37,6 +37,8 @@
 static char rcsid[] = "$Id$";
 #endif /* lint */
 
+#include "config.h"
+
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
@@ -61,9 +63,9 @@ extern FILE *yyin, *yyout;
 extern int errno, yylineno;
 
 char buffer[BUFSIZ];
-char *sudoers = SUDOERS;
+char *sudoers = _PATH_SUDO_SUDOERS;
 int status = 0, err_line_no = 0;
-char *sudoers_tmp_file = TMPSUDOERS;
+char *sudoers_tmp_file = _PATH_SUDO_STMP;
 FILE *sudoers_tmp_fp=NULL, *sudoers_fp=NULL;
 
 RETSIGTYPE Exit()
