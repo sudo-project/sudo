@@ -78,6 +78,9 @@ char *
 #endif
 
     (void) fprintf(outfp, "%s", prompt);
+#ifdef hpux
+    (void) fflush(outfp);
+#endif
     rewind(outfp);		/* implied flush */
     for (p = buf; (ch = getc(fp)) != EOF && ch != '\n';)
 	if (p < buf + PASSWD_LEN)
