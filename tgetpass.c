@@ -48,9 +48,9 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_SYS_BSDTYPES_H
 #include <sys/bsdtypes.h>
 #endif /* HAVE_SYS_BSDTYPES_H */
-#ifdef _AIX
+#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
-#endif /* _AIX */
+#endif /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #include <signal.h>
 #include <fcntl.h>
