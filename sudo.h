@@ -161,11 +161,10 @@ char *getcwd		__P((char *, size_t));
 #if !defined(HAVE_PUTENV) && !defined(HAVE_SETENV)
 int putenv		__P((const char *));
 #endif
-char *sudo_realpath	__P((const char *, char *));
 char *sudo_goodpath	__P((const char *));
 int sudo_setenv		__P((char *, char *));
 char *tgetpass		__P((char *, int));
-int find_path		__P((char *, char **, char **));
+char * find_path	__P((char *));
 void log_error		__P((int));
 void inform_user	__P((int));
 void check_user		__P((void));
