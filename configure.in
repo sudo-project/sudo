@@ -527,6 +527,7 @@ case "$host" in
 		# configure thinks we have -lsocket and -linet but we don't
 		LIB_INET=1
 		LIB_SOCKET=1
+		;;
     *-*-bsdi*)
 		# Use shlicc for BSD/OS 2.x unless asked to do otherwise
 		if test "$OSREV" -ge 2 -a "${with_CC+set}" != set -a \
