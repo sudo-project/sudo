@@ -307,9 +307,9 @@ insert_env(str, dupcheck)
  * Also adds sudo-specific variables (SUDO_*).
  */
 char **
-rebuild_env(envp, reset_home, noexec)
+rebuild_env(envp, sudo_mode, noexec)
     char **envp;
-    int reset_home;
+    int sudo_mode;
     int noexec;
 {
     char **ep, *cp, *ps1;
@@ -383,17 +383,25 @@ rebuild_env(envp, reset_home, noexec)
 	}
 
 	/*
-	 * Add in defaults unless they were preserved from the
-	 * user's environment.
+	 * Add in defaults.  In -i mode these come from the runas user,
+	 * otherwise they may be from the user's environment (depends
+	 * on sudoers options).
 	 */
-	if (!(didvar & DID_HOME))
-	    insert_env(format_env("HOME", user_dir, VNULL), 0);
-	if (!(didvar & DID_SHELL))
-	    insert_env(format_env("SHELL", sudo_user.pw->pw_shell, VNULL), 0);
-	if (!(didvar & DID_LOGNAME))
-	    insert_env(format_env("LOGNAME", user_name, VNULL), 0);
-	if (!(didvar & DID_USER))
-	    insert_env(format_env("USER", user_name, VNULL), 0);
+	if (sudo_mode & MODE_LOGIN_SHELL) {
+	    insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), 0);
+	    insert_env(format_env("SHELL", runas_pw->pw_shell, VNULL), 0);
+	    insert_env(format_env("LOGNAME", runas_pw->pw_name, VNULL), 0);
+	    insert_env(format_env("USER", runas_pw->pw_name, VNULL), 0);
+	} else {
+	    if (!(didvar & DID_HOME))
+		insert_env(format_env("HOME", user_dir, VNULL), 0);
+	    if (!(didvar & DID_SHELL))
+		insert_env(format_env("SHELL", sudo_user.pw->pw_shell, VNULL), 0);
+	    if (!(didvar & DID_LOGNAME))
+		insert_env(format_env("LOGNAME", user_name, VNULL), 0);
+	    if (!(didvar & DID_USER))
+		insert_env(format_env("USER", user_name, VNULL), 0);
+	}
     } else {
 	/*
 	 * Copy envp entries as long as they don't match env_delete or
@@ -462,7 +470,7 @@ rebuild_env(envp, reset_home, noexec)
     }
 
     /* Set $HOME for `sudo -H'.  Only valid at PERM_FULL_RUNAS. */
-    if (reset_home && runas_pw->pw_dir)
+    if ((sudo_mode & MODE_RESET_HOME) && runas_pw->pw_dir)
 	insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), 1);
 
     /*

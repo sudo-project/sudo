@@ -132,7 +132,7 @@ extern struct passwd *sudo_pwdup	__P((const struct passwd *));
  * Globals
  */
 int Argc, NewArgc;
-int sudo_mode;
+static int sudo_mode;
 char **Argv, **NewArgv;
 struct sudo_user sudo_user;
 struct passwd *auth_pw;
@@ -344,8 +344,7 @@ main(argc, argv, envp)
 	check_user(validated & FLAG_CHECK_USER);
 
     /* Build up custom environment that avoids any nasty bits. */
-    new_environ = rebuild_env(envp, (sudo_mode & MODE_RESET_HOME),
-	(validated & FLAG_NOEXEC));
+    new_environ = rebuild_env(envp, sudo_mode, (validated & FLAG_NOEXEC));
 
     if (validated & VALIDATE_OK) {
 	/* Finally tell the user if the command did not exist. */
