@@ -1,5 +1,5 @@
-Troubleshooting tips for CU sudo
-================================
+FAQ and troubleshooting tips for CU sudo
+========================================
 
 Q) Sudo compiles but when I run it I get "Sorry, sudo must be setuid root."
    and sudo quits.
@@ -39,6 +39,14 @@ A) If the sudoers file lives on an NFS-mounted partition that partition
    you have the aforementioned problem.  See the entry for SUDOERS_OWNER
    in the OPTIONS file.
 
+Q) Can I put the sudoers file in NIS/NIS+ or do I have to have a
+   copy on each machine?
+A) There is no support for making an NIS/NIS+ map/table out of
+   the sudoers file at this time.  A good way to distribute the
+   sudoers file is via rdist(1).  It is also possible to
+   NFS-mount the sudoers file.  However, please read the previous
+   TROUBLESHOOTING entry for info on this.
+
 Q) I don't run sendmail on my machine.  Does this mean that I cannot
    use sudo?
 A) No, you just need to comment out the MAILER #define in options.h.
@@ -70,3 +78,10 @@ A) Yes, the s/key support requires that you use tgetpass() since
    and s/key needs much mroe than that.  It should be possible
    to get tgetpass() to work, send mail to sudo-bugs@cs.colorado.edu
    if you need help.
+
+Q) I overwrote the distributed lex.yy.c with a lex-generated one and
+   now sudo does not work.
+A) The simplest thing to do is "rm -f lex.yy.c ; ln sudo-lex.yy.c lex.yy.c"
+   which will set you back up with a pre-flexed lex.yy.c.
+   If you want to hack on the lexer you should get a copy of flex
+   from ftp.ee.lbl.gov
