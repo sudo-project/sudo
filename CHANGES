@@ -61,3 +61,11 @@ CHANGES between sudo 1.2 (unofficial version)
     lacks a '#!/bin/sh' magic number will now work with sudo.  Personally
     I think that the broken scripts should be fixed rather than changing
     sudo, but vendors will be broken.  Sigh.
+
+21) Added USE_EXECVE define so you can make sudo use execve() if you
+    want.  Using execvp() shouldn't be a problem since it is always
+    handed a non-relative path that begins with '/' but some people
+    may not trust execvp().
+
+22) Log file lines will no longer get truncated.  Syslog entries that
+    would overrun the syslog(3) line limit are continued on another entry.
