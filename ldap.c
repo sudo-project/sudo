@@ -956,7 +956,8 @@ int pwflag;
   } else {
     /* we do not have a match */
     ret=VALIDATE_NOT_OK;
-    if (!ldap_user_matches) SET(ret,FLAG_NO_USER);
+    if (pwflag) SET(ret,FLAG_NO_CHECK);
+    else if (!ldap_user_matches) SET(ret,FLAG_NO_USER);
     else if (!ldap_host_matches) SET(ret,FLAG_NO_HOST);
   }
 
