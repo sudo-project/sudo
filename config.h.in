@@ -170,8 +170,10 @@
 /* Define if you have the <termio.h> header file.  */
 #undef HAVE_TERMIO_H
 
-/* Define if you have the <termios.h> header file.  */
+/* Define if you have the <termios.h> header file and tcgetattr(3).  */
+#ifdef HAVE_TCGETATTR
 #undef HAVE_TERMIOS_H
+#endif /* HAVE_TCGETATTR */
 
 /* Define if you have the <sys/sockio.h> header file.  */
 #undef HAVE_SYS_SOCKIO_H
