@@ -218,7 +218,7 @@ YYSTYPE yylval;
 #define EXTRA_LIST               0x03
 
 /* These are the functions that are called in sudo */
-#ifndef NEED_STRDUP
+#ifdef NEED_STRDUP
 char *strdup();
 #endif
 char *find_path();
