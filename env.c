@@ -153,6 +153,8 @@ zero_env(envp)
     static char *newenv[8];
     extern char *prev_user;
 
+    nep = newenv;
+
     for (ep = envp; *ep; ep++) {
 	switch (**ep) {
 	    case 'H':
