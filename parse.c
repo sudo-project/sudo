@@ -235,8 +235,8 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 	    return(TRUE);
 	else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
 	    return(TRUE);
-	else if (user_args && sudoers_args)
-	    return((fnmatch(sudoers_args, user_args, FNM_PATHNAME) == 0));
+	else if (sudoers_args)
+	    return((fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0));
 	else
 	    return(FALSE);
     } else {
@@ -268,8 +268,8 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 		return(TRUE);
 	    else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
 		return(TRUE);
-	    else if (user_args && sudoers_args)
-		return((fnmatch(sudoers_args, user_args, FNM_PATHNAME) == 0));
+	    else if (sudoers_args)
+		return((fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0));
 	    else
 		return(FALSE);
 	}
