@@ -283,11 +283,11 @@ Linux:
 	  scripts that lack the "#!/some/shell" header correctly.
 	  The workaround is to give all your scripts a proper
 	  header.
-    Linux libc6 (aka glibc2) has a broken lsearch().  You will need
-    to either upgrade to glibc-2.0.6 or use sudo's version of
-    lsearch().  To use sudo's lsearch(), comment out the "#define
-    HAVE_LSEARCH 1" line in config.h and add lsearch.o to the
-    LIBOBJS line in the Makefile.
+    Versions of glibc previous to 2.0.7 have a broken lsearch().
+    You will need to either upgrade to glibc-2.0.7 or use sudo's
+    version of lsearch().  To use sudo's lsearch(), comment out
+    the "#define HAVE_LSEARCH 1" line in config.h and add lsearch.o
+    to the LIBOBJS line in the Makefile.
 
 SCO ODT:
     You'll probably need libcrypt_i.a available via anonymous ftp
