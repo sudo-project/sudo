@@ -96,7 +96,7 @@ int top = 0;
 /*
  * Protoypes
  */
-extern int path_matches		__P((char *, char *));
+extern int path_matches		__P((char *, char **, char *, char **));
 extern int addr_matches		__P((char *));
 extern int netgr_matches	__P((char *, char *, char *));
 extern int usergr_matches	__P((char *, char *));
@@ -123,6 +123,7 @@ void yyerror(s)
 
 %union {
     char *string;
+    struct sudo_command command;
     int tok;
 }
 
@@ -132,8 +133,8 @@ void yyerror(s)
 %token <string> NTWKADDR		/* w.x.y.z */
 %token <string> NETGROUP		/* a netgroup (+NAME) */
 %token <string> USERGROUP		/* a usergroup (*NAME) */
-%token <string> COMMAND			/* an absolute pathname + args */
 %token <string> NAME			/* a mixed-case name */
+%token <command> COMMAND		/* an absolute pathname */
 %token <tok>	COMMENT			/* comment and/or carriage return */
 %token <tok>	ALL			/* ALL keyword */
 %token <tok>	HOSTALIAS		/* Host_Alias keyword */
@@ -264,9 +265,14 @@ cmnd		:	ALL {
 			    (void) free($1);
 			}
 		|	COMMAND {
-			    if (path_matches(cmnd, $1))
+			    char **t;
+
+			    if (path_matches(cmnd, &NewArgv[1], $1.cmnd, $1.args))
 				cmnd_matches = TRUE;
-			    (void) free($1);
+
+			    (void) free($1.cmnd);
+			    for (t = $1.args; t && *t; t++)
+				(void) free(*t);
 			}
 		;
 
