@@ -68,6 +68,9 @@ static char rcsid[] = "$Id$";
 #include <pwd.h>
 #include <netdb.h>
 #include <sys/param.h>
+#ifdef _AIX
+#include <sys/id.h>
+#endif /* _AIX */
 #include "sudo.h"
 #ifndef STD_HEADERS
 extern char *malloc();
@@ -328,6 +331,15 @@ void be_root()
  *  this function sets the effective uid to the value of uid
  */
 
+#ifdef _AIX
+void be_user()
+{
+    if (setuidx(ID_EFFECTIVE|ID_REAL, uid)) {
+        perror("setuidx(ID_EFFECTIVE|ID_REAL, uid)");
+        exit(1); 
+    }
+}
+#else /* _AIX */
 void be_user()
 {
     if (seteuid(uid)) {
@@ -335,6 +347,7 @@ void be_user()
         exit(1); 
     }
 }
+#endif /* _AIX */
 
 
 
