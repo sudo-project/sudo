@@ -18,3 +18,7 @@ TODO list
 08) Add a whatnow-style prompt to visudo.
 
 09) Add a SHELLS reserved word that checks against /etc/shells.
+
+10) Make the sudoers file accessible via NIS, Hesiod, and maybe NetInfo.
+
+11) Flag to sudo to show what a user is allowed to run.
