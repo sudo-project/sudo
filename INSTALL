@@ -225,6 +225,17 @@ Special features/options:
         only the newer BSD authentication API is supported.  If you
         don't have /usr/include/bsd_auth.h then you cannot use this.
 
+  --with-noexec[=PATH]
+        Enable support for the "noexec" functionality which prevents
+        a dynamically-linked program being run by sudo from executing
+        another program (think shell escapes).  Please see the
+        "PREVENTING SHELL ESCAPES" section in the sudoers man page
+        for details.  If specified, PATH should be a fully qualified
+        pathname, e.g. /usr/local/libexec/sudo_noexec.so.  If PATH
+        is "no", noexec support will not be compiled in.  The default
+        is to compile noexec support if libtool supports building
+        shared objects on your OS.
+
   --disable-root-mailer
         By default sudo will run the mailer as root when tattling
         on a user so as to prevent that user from killing the mailer.
