@@ -943,17 +943,19 @@ set_perms(perm, sudo_mode)
 				    }
 
 				    /* Set $USER and $LOGNAME to target user */
-				    if (sudo_setenv("USER", pw->pw_name)) {
-					(void) fprintf(stderr,
-					    "%s: cannot allocate memory!\n",
-					    Argv[0]);
-					exit(1);
-				    }
-				    if (sudo_setenv("LOGNAME", pw->pw_name)) {
-					(void) fprintf(stderr,
-					    "%s: cannot allocate memory!\n",
-					    Argv[0]);
-					exit(1);
+				    if (def_flag(I_LOGNAME)) {
+					if (sudo_setenv("USER", pw->pw_name)) {
+					    (void) fprintf(stderr,
+						"%s: cannot allocate memory!\n",
+						Argv[0]);
+					    exit(1);
+					}
+					if (sudo_setenv("LOGNAME", pw->pw_name)) {
+					    (void) fprintf(stderr,
+						"%s: cannot allocate memory!\n",
+						Argv[0]);
+					    exit(1);
+					}
 				    }
 
 				    if (def_flag(I_LOGINCLASS)) {
