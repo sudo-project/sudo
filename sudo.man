@@ -84,18 +84,20 @@ Examples
     billp       ALL=/usr/local/bin/top:MACHINES=SHELLS
     davehieb    merlin=ALL:SERVERS=/etc/halt:\\
                 kodiakthorn=ALL
+    steve       ALL=/usr/su_commands/
 
 The above
 .I sudoers
 file specification is composed of 4 host alias specifications, 4
-command alias specifications and 7 user specifications.  Britt is
+command alias specifications and 8 user specifications.  Britt is
 permitted to execute /etc/halt, /etc/shutdown, /usr/etc/lpc and
 /usr/ucb/lprm on the REMOTE machines (merlin, kodiakthorn, and
 spirit).  Robh is permitted to execute any command except for the group
 of SHELL commands on any machine.  Jill is permitted to execute
 /etc/shutdown, /bin/rm, and /bin/cat on houdini.  Davehieb can execute
 any command on machines merlin and kodiakthorn and can halt the
-SERVERS.
+SERVERS.  Steve can run any command located in the directory
+/usr/su_commands on all machines.
 
 The
 .I sudoers
@@ -167,6 +169,11 @@ Have visudo do more extensive checking on the sudoers file.
 /etc/stmp                    lock file for visudo.
 /usr/local/bin/sudo          the executable itself.
 /usr/local/etc/visudo        utility for modifying the sudoers file.
+.fi
+
+.SH ENVIRONMENT VARIABLES
+.nf
+EDITOR                       Used by visudo to determine the editor to use.
 .fi
 
 .SH AUTHORS
