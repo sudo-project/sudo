@@ -1,5 +1,5 @@
-Installation instructions for CU sudo 1.3.8
-===========================================
+Installation instructions for CU sudo 1.4
+=========================================
 
 Sudo uses a `configure' script to probe the capabilities and type
 of the system in question.  Please read this document fully before

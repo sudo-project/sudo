@@ -1,4 +1,4 @@
-This is the CU version of sudo, release 1.3.8 (GAMMA)
+This is the CU version of sudo, release 1.4
 
 The sudo philosophy
 ===================
@@ -26,7 +26,7 @@ Group's sudo 1.1, the code has been changed significantly, so please
 do not bother them with bugs in CU sudo.  Bug reports for this sudo
 should be sent to sudo-bugs@cs.colorado.edu.
 
-CU sudo 1.3.8 represents a huge change from the 1.3.1 code base.
+CU sudo 1.4 represents a huge change from the 1.3.1 code base.
 It includes a completely rewritten parser contributed by Chris Jepeway,
 a smarter and easier to use visudo, an updated configure script along
 with the usual bug fixes and portability changes.  See the CHANGES file
