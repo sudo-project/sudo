@@ -93,12 +93,12 @@ USE_INSULTS
     just like the original sudo(8).
     This is off by default.
 
-HAL
+HAL_INSULTS
     Uses 2001-like insults when an incorrect password is entered.  You must
     define USE_INSULTS as well for this to have any effect.
     This is off by default.
 
-GOONS
+GOONS_INSULTS
     Insults the user with lines from the "Goon Show" when an incorrect
     password is entered.  You must define USE_INSULTS as well for this
     to have any effect.
