@@ -333,20 +333,20 @@ MONITOR[[:blank:]]*:	{
 			    BEGIN INITIAL;
 			}
 
-sudoedit		{
-			    BEGIN GOTCMND;
-			    LEXTRACE("COMMAND ");
-			    if (!fill_cmnd(yytext, yyleng))
-				yyterminate();
-			}			/* sudo -e */
-
-<GOTDEFS>{PATH}		{
+<GOTDEFS>({PATH}|sudoedit) {
 			    /* no command args allowed for Defaults!/path */
 			    if (!fill_cmnd(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("COMMAND ");
 			    return(COMMAND);
 			}
+
+sudoedit		{
+			    BEGIN GOTCMND;
+			    LEXTRACE("COMMAND ");
+			    if (!fill_cmnd(yytext, yyleng))
+				yyterminate();
+			}			/* sudo -e */
 
 {PATH}			{
 			    /* directories can't have args... */
