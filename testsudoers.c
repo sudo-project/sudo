@@ -55,7 +55,9 @@
 #include <grp.h>
 #include <sys/param.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -84,6 +86,28 @@ struct passwd *user_pw_ent;
 char **Argv, **NewArgv;
 int  Argc, NewArgc;
 uid_t uid;
+
+/*
+ * Prototypes for external functions
+ */
+void init_parser	__P((void));
+void dumpaliases	__P((void));
+
+/*
+ * Returns TRUE if "s" has shell meta characters in it,
+ * else returns FALSE.
+ */
+int has_meta(s)
+    char *s;
+{
+    register char *t;
+    
+    for (t = s; *t; t++) {
+	if (*t == '\\' || *t == '?' || *t == '*' || *t == '[' || *t == ']')
+	    return(TRUE);
+    }
+    return(FALSE);
+}
 
 
 /*
@@ -340,21 +364,4 @@ int main(argc, argv)
     dumpaliases();
 
     exit(0);
-}
-
-
-/*
- * Returns TRUE if "s" has shell meta characters in it,
- * else returns FALSE.
- */
-int has_meta(s)
-    char *s;
-{
-    register char *t;
-    
-    for (t = s; *t; t++) {
-	if (*t == '\\' || *t == '?' || *t == '*' || *t == '[' || *t == ']')
-	    return(TRUE);
-    }
-    return(FALSE);
 }
