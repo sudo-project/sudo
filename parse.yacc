@@ -1,4 +1,5 @@
 %{
+
 /*
  *  CU sudo version 1.4
  *
@@ -62,6 +63,9 @@ static char rcsid[] = "$Id$";
 #define strcasecmp(a,b)		strcmp(a,b)
 #endif /* !HAVE_STRCASECMP */
 
+/*
+ * Globals
+ */
 extern int sudolineno, parse_error;
 int errorlineno = -1;
 int clearaliases = 1;
@@ -85,10 +89,12 @@ int top = 0;
 #define push \
     if (top > MATCHSTACKSIZE) \
 	yyerror("matching stack overflow"); \
-    else {\
-	match[top].user = -1; \
-	match[top].cmnd = -1; \
-	match[top].host = -1; \
+    else { \
+	match[top].user   = -1; \
+	match[top].cmnd   = -1; \
+	match[top].host   = -1; \
+	match[top].runas  = -1; \
+	match[top].nopass = -1; \
 	top++; \
     }
 #define pop \
@@ -100,13 +106,13 @@ int top = 0;
 /*
  * Protoypes
  */
-extern int command_matches		__P((char *, char **, char *, char **));
-extern int addr_matches		__P((char *));
-extern int netgr_matches	__P((char *, char *, char *));
-extern int usergr_matches	__P((char *, char *));
-static int find_alias		__P((char *, int));
-static int add_alias		__P((char *, int));
-static int more_aliases		__P((size_t));
+extern int  command_matches	__P((char *, char **, char *, char **));
+extern int  addr_matches	__P((char *));
+extern int  netgr_matches	__P((char *, char *, char *));
+extern int  usergr_matches	__P((char *, char *));
+static int  find_alias		__P((char *, int));
+static int  add_alias		__P((char *, int));
+static int  more_aliases	__P((size_t));
        void yyerror		__P((char *));
 
 void yyerror(s)
@@ -126,28 +132,36 @@ void yyerror(s)
 
 %union {
     char *string;
+    int BOOLEAN;
     struct sudo_command command;
     int tok;
 }
 
 
 %start file				/* special start symbol */
-%token <string>	ALIAS			/* an UPPERCASE alias name */
-%token <string> NTWKADDR		/* w.x.y.z */
-%token <string> FQHOST			/* foo.bar.com */
-%token <string> NETGROUP		/* a netgroup (+NAME) */
-%token <string> USERGROUP		/* a usergroup (%NAME) */
-%token <string> NAME			/* a mixed-case name */
+%token <string>  ALIAS			/* an UPPERCASE alias name */
+%token <string>  NTWKADDR		/* w.x.y.z */
+%token <string>  FQHOST			/* foo.bar.com */
+%token <string>  NETGROUP		/* a netgroup (+NAME) */
+%token <string>  USERGROUP		/* a usergroup (%NAME) */
+%token <string>  NAME			/* a mixed-case name */
+%token <tok> 	 RUNAS			/* a mixed-case runas name */
+%token <tok> 	 NOPASSWD		/* no passwd req for command*/
 %token <command> COMMAND		/* an absolute pathname */
-%token <tok>	COMMENT			/* comment and/or carriage return */
-%token <tok>	ALL			/* ALL keyword */
-%token <tok>	HOSTALIAS		/* Host_Alias keyword */
-%token <tok>	CMNDALIAS		/* Cmnd_Alias keyword */
-%token <tok>	USERALIAS		/* User_Alias keyword */
-%token <tok>	':' '=' ',' '!' '.'	/* union member tokens */
-%token <tok>	ERROR
+%token <tok>	 COMMENT		/* comment and/or carriage return */
+%token <tok>	 ALL			/* ALL keyword */
+%token <tok>	 HOSTALIAS		/* Host_Alias keyword */
+%token <tok>	 CMNDALIAS		/* Cmnd_Alias keyword */
+%token <tok>	 USERALIAS		/* User_Alias keyword */
+%token <tok>	 ':' '=' ',' '!' '.'	/* union member tokens */
+%token <tok>	 ERROR
 
-%type <string>	cmnd
+%type <BOOLEAN>	  cmnd
+%type <BOOLEAN>	 runasspec
+%type <BOOLEAN>	 runaslist 
+%type <BOOLEAN>	 runasuser
+%type <BOOLEAN>	 nopassreq
+%type <BOOLEAN>	 chkcmnd
 
 %%
 
@@ -219,11 +233,7 @@ opcmndlist	:	opcmnd
 		|	opcmndlist ',' opcmnd
 		;
 
-opcmnd		:	cmnd {
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE)
-				(void) puts($1);
-			}
+opcmnd		:  cmnd { ; } 
 		|	'!' {
 			    if (printmatches == TRUE && host_matches == TRUE
 				&& user_matches == TRUE) {
@@ -242,23 +252,110 @@ opcmnd		:	cmnd {
 			    else if (cmnd_matched == FALSE)
 				cmnd_matches = TRUE;
 			}
+		|	runasspec {;}
+		|	nopassreq {;}
+		;
+
+runasspec	: 	RUNAS runaslist chkcmnd {
+			    if ($2 > 0 && $3 == TRUE) 
+				runas_matches = TRUE;
+			}
+
+runaslist	:	runasuser {
+			    $$ = $1;
+			}
+		|	runaslist ',' runasuser	{
+			    $$ = $1 + $3;
+			}
+		;
+
+
+runasuser	:	NAME {
+			    if (strcmp($1, runas_user) == 0) 
+				$$ = TRUE;
+			    else 
+				$$ = FALSE;
+			    (void) free($1);
+			}
+		|	USERGROUP {
+			    if (usergr_matches($1, runas_user))
+				$$ = TRUE;
+			    else
+				$$ = FALSE;
+			    (void) free($1);
+			}
+		|	NETGROUP {
+			    if (netgr_matches($1, NULL, runas_user))
+				$$ = TRUE;
+			    else
+				$$ = FALSE;
+			    (void) free($1);
+			}
+		|	ALIAS {
+			    if (find_alias($1, USER))
+				$$ == TRUE;
+			    else
+				$$ = FALSE;
+			    (void) free($1);
+			}
+		|	ALL {
+			    $$ == TRUE;
+			}
+		;
+
+
+chkcmnd		:	cmnd {
+			    $$=$1;
+			}
+		|	nopassreq {
+			    $$=$1;
+			}
+		;
+
+nopassreq	:	NOPASSWD cmnd {
+			    if (host_matches == TRUE && user_matches == TRUE && 
+				$2 == TRUE)  {
+				no_passwd=TRUE;
+				$$ = TRUE;
+			    }
+			}
 		;
 
 cmnd		:	ALL {
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				(void) puts("ALL");
+
 			    cmnd_matches = TRUE;
+			    $$=TRUE;
 			}
 		|	ALIAS {
-			    if (find_alias($1, CMND))
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				(void) puts($1);
+			    if (find_alias($1, CMND)) {
 				cmnd_matches = TRUE;
+				$$=TRUE;
+			    }
 			    (void) free($1);
 			}
-		|	COMMAND {
+		|	 COMMAND {
 			    char **t;
+
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)  {
+				(void) printf("%s ", $1.cmnd);
+			    	for (t = $1.args; t && *t; t++)
+					(void) printf("%s ",*t);
+				(void) putchar('\n');
+			    }
 
 			    /* if NewArgc > 1 pass ptr to 1st arg, else NULL */
 			    if (command_matches(cmnd, (NewArgc > 1) ?
-				    &NewArgv[1] : NULL, $1.cmnd, $1.args))
+				    &NewArgv[1] : NULL, $1.cmnd, $1.args)) {
 				cmnd_matches = TRUE;
+				$$=TRUE;
+			    }
 
 			    (void) free($1.cmnd);
 			    for (t = $1.args; t && *t; t++)
