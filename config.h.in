@@ -189,6 +189,9 @@
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
 
+/* Define if you have the <alloca.h> header file.  */
+#undef HAVE_ALLOCA_H
+
 /* Define if you have the <paths.h> header file.  */
 #undef HAVE_PATHS_H
 
