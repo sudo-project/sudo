@@ -59,6 +59,7 @@ static char rcsid[] = "$Id$";
 
 extern int sudolineno, parse_error;
 int errorlineno = -1;
+int clearaliases = 1;
 
 /*
  * Alias types
