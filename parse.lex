@@ -51,10 +51,14 @@ extern YYSTYPE yylval;
 extern int clearaliases;
 int sudolineno = 1;
 static int string_len = 0;
+static int string_size = 0;
 
 static void fill		__P((void));
 static void append		__P((void));
 extern void reset_aliases	__P((void));
+
+/* realloc() to size + COMMANDARGINC to make room for command args */
+#define COMMANDARGINC	256
 
 #ifdef TRACELEXER
 #define LEXTRACE(msg)	fputs(msg, stderr)
@@ -185,29 +189,42 @@ N			[0-9][0-9]?[0-9]?
 %%
 static void fill() {
 
-    if (yyleng > MAXCOMMANDLENGTH) {
-	yyerror("command too long, recompile with a larger MAXCOMMANDLENGTH");
-    } else {
-	(void) strcpy(yylval.string, yytext);
-	string_len = yyleng;
-    }
+    string_len = yyleng;	/* length of copied string */
+    string_size = yyleng + 1;	/* leave room for the NULL */
+
+    yylval.string = (char *) malloc(string_size);
+    if (yylval.string == NULL)
+	yyerror("unable to allocate memory");
+    (void) strcpy(yylval.string, yytext);
 }
+
 
 static void append() {
     char *s;
+    int new_len;
+
+    new_len = string_len + yyleng + 1;
 
     /*
-     * Make sure we have enough space...
+     * If we don't have enough space realloc() some more
      */
-    s = yylval.string + string_len;
-    string_len += yyleng + 1;
-    if (string_len > MAXCOMMANDLENGTH) {
-	yyerror("command too long, recompile with a larger MAXCOMMANDLENGTH");
-    } else {
-	*s++ = ' ';
-	(void) strcpy(s, yytext);
+    if (new_len >= string_size) {
+	/* Allocate more space than we need for subsequent args */
+	while (new_len >= (string_size += COMMANDARGINC))
+	    ;
+
+	yylval.string = (char *) realloc(yylval.string, string_size);
+	if (yylval.string == NULL )
+	    yyerror("unable to allocate memory");
     }
+
+    /* Effeciently append the arg (with a leading space) */
+    s = yylval.string + string_len;
+    *s++ = ' ';
+    (void) strcpy(s, yytext);
+    string_len = new_len;
 }
+
 
 int yywrap()
 {
