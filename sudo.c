@@ -781,7 +781,7 @@ void set_perms(perm)
  *  then converts uid to a string and returns it.
  */
 
-char *uid2str(uid)
+static char *uid2str(uid)
     uid_t uid;
 {
     int len, n;
