@@ -84,3 +84,7 @@
 #ifndef _PATH_MV
 #define _PATH_MV		_SUDO_PATH_MV
 #endif /* _PATH_MV */
+
+#ifndef _PATH_BSHELL
+#define _PATH_BSHELL		_SUDO_PATH_BSHELL
+#endif /* _PATH_BSHELL */
