@@ -50,26 +50,17 @@ static char rcsid[] = "$Id$";
 #include "y.tab.h"
 
 extern YYSTYPE yylval;
-#ifdef FLEX_SCANNER
-int yylineno = 0;
-#endif /* flex */
+int sudolineno = 0;
 %}
 
 %%
 [ \t]+			{ ; }                     /* throw away space/tabs */
-\\\n			{ 
-#ifdef FLEX_SCANNER
-			++yylineno
-#endif /* flex */
-			  ; }                     /* throw away EOL after \ */
+\\\n			{ ++sudolineno ; }        /* throw away EOL after \ */
 \,			{ return ','; }           /* return ',' */
 \!			{ return '!'; }           /* return '!' */
 =			{ return '='; }           /* return '=' */
 :			{ return ':'; }           /* return ':' */
-\n			{ 
-#ifdef FLEX_SCANNER
-			++yylineno; 
-#endif /* flex */
+\n			{ ++sudolineno; 
 			  return COMMENT; }       /* return newline */
 #.*\n			{ return COMMENT; }       /* return comments */
 [@$%^&*()"'`/_+]*	{ return ERROR; }         /* return error */
