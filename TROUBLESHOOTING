@@ -68,7 +68,7 @@ Q) I can't get the s/key support to work, whatever I do sudo won't
 A) Yes, the s/key support requires that you use tgetpass() since
    most system getpass()'s only grab eight characters or so
    and s/key needs much mroe than that.  It should be possible
-   to get tgetpass() to work, send mail to sudo-bugs@cs.colorado.edu
+   to get tgetpass() to work, send mail to sudo-bugs@courtesan.com
    if you need help.
 
 Q) My C compiler complains about:
