@@ -517,37 +517,21 @@ static int hostcmp(target)
 
     /* if target an  ip address/network or a hostname? */
     if (isdigit(*target)) {
-	struct in_addr *addr;		/* for walking ip_addrs */
 	struct in_addr target_addr;	/* inet addr version of target */
-	struct in_addr netmask;		/* netmask */
-	int len;			/* length parameter */
+	int i;				/* loop counter */
 
-	/* if ip_addrs is NULL, set it */
-	if (ip_addrs == NULL)
-	    load_ip_addrs(NULL);
-	
 	/* convert target to an inet addr */
 	target_addr.s_addr = inet_addr(target);
 
-	/* XXX */
-	/* fake the netmask based on target until netmask support is in place */
-	len = strlen(target);
-	if (!strcmp(target+len-2, ".0")) {
-	    if (!strcmp(target+len-4, ".0.0"))
-		netmask.s_addr = inet_addr("255.255.0.0");
-	    else
-		netmask.s_addr = inet_addr("255.255.255.0");
-	} else {
-	    netmask.s_addr = inet_addr("255.255.255.255");
-	}
-
-	/* now match against ip_addrs array. */
-	for (addr = ip_addrs; addr->s_addr != 0; addr++)
-	    if (target_addr.s_addr == ((addr->s_addr) & (netmask.s_addr)))
+	/* now match against interfaces array. */
+	for (i = 0; i < num_interfaces; i++)
+	    if (target_addr.s_addr == interfaces[i].addr.s_addr ||
+		target_addr.s_addr == ((interfaces[i].addr.s_addr) &
+		(interfaces[i].netmask.s_addr)))
 		return(0);
+
+	return(1);
     } else {
 	return(strcmp(target, host));
     }
-
-    return(1);
 }
