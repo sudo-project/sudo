@@ -194,6 +194,11 @@ B<sudo> is unable to update a file with its edited version, the
 user will receive a warning and the edited copy will remain in a
 temporary file.
 
+Please note that the editor used must make its changes to the
+original file (really the original inode).  If the editor makes
+changes to a temporary file and then just renames this to the
+original file name it will not work with B<sudoedit>.
+
 =item -h
 
 The B<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
@@ -478,10 +483,9 @@ If users have sudo C<ALL> there is nothing to prevent them from
 creating their own program that gives them a root shell regardless
 of any '!' elements in the user specification.
 
-Running shell scripts via B<sudo> can expose the same kernel bugs
-that make setuid shell scripts unsafe on some operating systems
-(if your OS supports the /dev/fd/ directory, setuid shell scripts
-are generally safe).
+Running shell scripts via B<sudo> can expose the same kernel bugs that
+make setuid shell scripts unsafe on some operating systems (if your OS
+has a /dev/fd/ directory, setuid shell scripts are generally safe).
 
 =head1 SEE ALSO
 
