@@ -51,6 +51,9 @@ static char rcsid[] = "$Id$";
 #include <pwd.h>
 #include "sudo.h"
 #include "insults.h"
+#ifdef __svr4__
+#include <shadow.h>
+#endif /* __svr4__ */
 
 extern char *getpass();
 
@@ -195,6 +198,9 @@ static void check_passwd()
     char *crypt();
 #endif /* linux */
     struct passwd *pw_ent;
+#ifdef __svr4__
+    struct spwd *spw_ent;
+#endif /* __svr4__ */
     char *encrypted;		/* this comes from /etc/passwd  */
     char *pass;			/* this is what gets entered    */
     register int counter = TRIES_FOR_PASSWORD;
@@ -205,7 +211,17 @@ static void check_passwd()
 	inform_user(GLOBAL_NO_PW_ENT);
 	exit(1);
     }
+#ifdef __svr4__
+    if ((spw_ent = getspnam(pw_ent->pw_name)) == NULL) {
+	(void) sprintf(user, "%u", uid);
+	log_error(GLOBAL_NO_PW_ENT);
+	inform_user(GLOBAL_NO_PW_ENT);
+	exit(1);
+    }
+    encrypted = spw_ent -> sp_pwdp;
+#else
     encrypted = pw_ent -> pw_passwd;
+#endif /* __svr4__ */
 
     /*
      * you get TRIES_FOR_PASSWORD times to guess your password
