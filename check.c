@@ -86,6 +86,7 @@ static char rcsid[] = "$Id$";
  * Prototypes for local functions
  */
 static int   check_timestamp	__P((void));
+static int   user_is_exempt	__P((void));
 static void  check_passwd	__P((void));
 static void  update_timestamp	__P((void));
 static void  reminder		__P((void));
@@ -110,6 +111,9 @@ void check_user()
     register int rtn;
     mode_t oldmask;
 
+    if (user_is_exempt())	/* some users don't need to enter a passwd */
+	return;
+
     oldmask = umask(077);	/* make sure the timestamp files are private */
 
     rtn = check_timestamp();
@@ -122,6 +126,25 @@ void check_user()
     update_timestamp();
     (void) umask(oldmask);	/* want a real umask to exec() the command */
 
+}
+
+
+
+/********************************************************************
+ *
+ *  user_is_exempt()
+ *
+ *  this function checks the user is exempt from supplying a password
+ *  XXX - should check more that just real gid.
+ */
+
+static int user_is_exempt()
+{
+#ifdef EXEMPTGROUP
+    return ((getgid() == EXEMPTGROUP));
+#else
+    return (1);
+#endif
 }
 
 
