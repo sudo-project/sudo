@@ -89,9 +89,6 @@
            USE_CWD                  if you have getcwd() and not getwd()
                                     (defined by default for hpux)
 
-           HAS_SAVED_UID            if you have saved uid
-                                    (defined by default for hpux)
- 
            USE_TERMIO               if you have sysV terminal control
                                     (defined by default for hpux and irix)
  
@@ -295,7 +292,7 @@ extern int errno;
  */
 #ifdef hpux
 # define getdtablesize()	(sysconf(_SC_OPEN_MAX))
-# define setreuid(__RUID, __EUID)	(setresuid(__RUID, __EUID, (uid_t)-1))
+# define seteuid(__EUID)	(setresuid((uid_t)-1, __EUID, (uid_t)-1))
 #endif	/* hpux */
 
 /*
