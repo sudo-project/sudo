@@ -64,7 +64,7 @@ passwd_verify(pw, pass, auth)
     char *pass;
     sudo_auth *auth;
 {
-    char sav;
+    char sav, *epass;
     int error;
 
 #ifdef HAVE_GETAUTHUID
@@ -82,8 +82,16 @@ passwd_verify(pw, pass, auth)
     if (strlen(pw->pw_passwd) == 13)
 	pass[8] = '\0';
 
-    /* Normal UN*X password check.  */
-    error = strcmp(pw->pw_passwd, (char *) crypt(pass, pw->pw_passwd));
+    /*
+     * Normal UN*X password check.
+     * HP-UX adds extra info at the end for password aging so we only
+     * compare the first len(epass) bytes *unless* pass is the empty string.
+     */
+    epass = (char *) crypt(pass, pw->pw_passwd);
+    if (*pass)
+	error = strncmp(pw->pw_passwd, epass, strlen(epass));
+    else
+	error = strcmp(pw->pw_passwd, epass);
     pass[8] = sav;
 
     return(error ? AUTH_FAILURE : AUTH_SUCCESS);
