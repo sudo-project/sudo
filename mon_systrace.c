@@ -60,13 +60,13 @@ struct childinfo {
 struct syscallhandler {
     int num;
     void (*handler)
-	__P((int, int *, struct str_msg_ask *, struct systrace_answer *));
+	__P((int, struct str_msg_ask *, struct systrace_answer *));
     struct syscallhandler *next;
 };
 
-void check_exec		__P((int, int *, struct str_msg_ask *,
+void check_exec		__P((int, struct str_msg_ask *,
 			     struct systrace_answer *));
-void check_syscall	__P((int, int *, struct str_msg_ask *,
+void check_syscall	__P((int, struct str_msg_ask *,
 			     struct systrace_answer *, struct listhead *));
 int decode_args		__P((int, pid_t, struct str_msg_ask *));
 int set_policy		__P((int, pid_t, struct listhead *));
@@ -76,10 +76,12 @@ int systrace_run	__P((char *, char **, int));
 ssize_t read_string	__P((int, pid_t, void *, char *, size_t));
 void new_child		__P((struct listhead *, pid_t, uid_t));
 void new_handler	__P((struct listhead *, int,
-			     void (*)(int, int *, struct str_msg_ask *,
+			     void (*)(int, struct str_msg_ask *,
 				     struct systrace_answer *)));
 void rm_child		__P((struct listhead *, pid_t));
 void update_child	__P((struct listhead *, pid_t, uid_t));
+
+static int initialized;
 
 /*
  * Open the systrace device and return the fd or -1 on failure.
@@ -138,11 +140,11 @@ systrace_attach(pid)
     sigaction_t sa, osa;
     sigset_t set, oset;
     ssize_t nread;
-    int fd, initialized = 0;
+    int fd;
 
-    fflush(stdout);
     if ((fd = systrace_open()) == -1)
 	err(1, "unable to open systrace");
+    fflush(stdout);
 
     /*
      * Do signal setup early so there is no race between when the tracer
@@ -165,6 +167,7 @@ systrace_attach(pid)
 	break;
     default:
 	/* tracee, sleep until the tracer process wakes us up. */
+	close(fd);
 	sigdelset(&set, SIGUSR1);
 	(void) sigsuspend(&set);
 	if (sigprocmask(SIG_SETMASK, &oset, NULL) != 0) {
@@ -187,19 +190,24 @@ systrace_attach(pid)
     }
     (void) chdir("/");
 #ifdef HAVE_SETPROCTITLE
-    setproctitle("systrace %s %s", user_base, user_args);
+    setproctitle("systrace %s%s%s", user_base, user_args ? " " : "",
+	user_args ? user_args : "");
 #endif
+
+    if (ioctl(fd, STRIOCATTACH, &pid) == -1) {
+	if (errno == EBUSY) {
+	    /* already being traced, nothing to do */
+	    (void) kill(pid, SIGUSR1);
+	    _exit(0);
+	}
+	goto fail;
+    }
+
+    if (set_policy(fd, pid, &handlers) != 0)
+	goto fail;
 
     children.first = NULL;
     new_child(&children, pid, runas_pw->pw_uid);
-
-    /*
-     * Open systrace device and set a policy to generate
-     * ask events when the traced process does an exec.
-     */
-    if (ioctl(fd, STRIOCATTACH, &pid) == -1 || set_policy(fd, pid, &handlers) != 0)
-	goto fail;
-
     if (kill(pid, SIGUSR1) != 0) {
 	warn("unable to wake up sleeping child");
 	_exit(1);
@@ -231,21 +239,22 @@ systrace_attach(pid)
 
 	    case SYSTR_MSG_UGID:
 		/* uid/gid change */
-		/* XXX - how is this triggered? */
 		warn("new uid %d", msg.msg_data.msg_ugid.uid);
 		update_child(&children, msg.msg_pid, msg.msg_data.msg_ugid.uid);
+		memset(&ans, 0, sizeof(ans));
+		ans.stra_pid = msg.msg_pid;
+		ans.stra_seqnr = msg.msg_seqnr;
+		ans.stra_policy = SYSTR_POLICY_PERMIT;
+		if ((ioctl(fd, STRIOCANSWER, &ans)) == -1)
+		    goto fail;
 		break;
 
 	    case SYSTR_MSG_ASK:
 		memset(&ans, 0, sizeof(ans));
 		ans.stra_pid = msg.msg_pid;
 		ans.stra_seqnr = msg.msg_seqnr;
-		check_syscall(fd, &initialized, &msg.msg_data.msg_ask,
+		check_syscall(fd, &msg.msg_data.msg_ask,
 		    &ans, &handlers);
-#if 0
-		ans.stra_policy = check_syscall(fd, &initialized,
-		    msg.msg_data.msg_ask.code, &msg, &handlers);
-#endif
 		if ((ioctl(fd, STRIOCANSWER, &ans)) == -1)
 		    goto fail;
 		break;
@@ -257,12 +266,29 @@ systrace_attach(pid)
 		 *       the various emulations are.
 		 */
 		warnx("change in emul");
+		update_child(&children, msg.msg_pid, msg.msg_data.msg_ugid.uid);
+		memset(&ans, 0, sizeof(ans));
+		ans.stra_pid = msg.msg_pid;
+		ans.stra_seqnr = msg.msg_seqnr;
+		ans.stra_policy = SYSTR_POLICY_PERMIT;
+		if ((ioctl(fd, STRIOCANSWER, &ans)) == -1)
+		    goto fail;
 		break;
-#ifdef SUDO_DEVEL
+
+	    case SYSTR_MSG_POLICYFREE:
+		break;
+
 	    default:
+#ifdef SUDO_DEVEL
 		warnx("unexpected message type %d", msg.msg_type);
-		break;
 #endif
+		memset(&ans, 0, sizeof(ans));
+		ans.stra_pid = msg.msg_pid;
+		ans.stra_seqnr = msg.msg_seqnr;
+		ans.stra_policy = SYSTR_POLICY_PERMIT;
+		if ((ioctl(fd, STRIOCANSWER, &ans)) == -1)
+		    goto fail;
+		break;
 	}
     }
 
@@ -279,7 +305,7 @@ void
 new_handler(head, num, handler)
     struct listhead *head;
     int num;
-    void (*handler) __P((int, int *, struct str_msg_ask *, struct systrace_answer *));
+    void (*handler) __P((int, struct str_msg_ask *, struct systrace_answer *));
 {
     struct syscallhandler *entry;
 
@@ -466,9 +492,8 @@ read_string(fd, pid, addr, buf, bufsiz)
 }
 
 void
-check_syscall(fd, initialized, askp, ansp, handlers)
+check_syscall(fd, askp, ansp, handlers)
     int fd;
-    int *initialized;
     struct str_msg_ask *askp;
     struct systrace_answer *ansp;
     struct listhead *handlers;
@@ -477,7 +502,7 @@ check_syscall(fd, initialized, askp, ansp, handlers)
 
     for (h = handlers->first; h != NULL; h = h->next) {
 	if (h->num == askp->code) {
-	    h->handler(fd, initialized, askp, ansp);
+	    h->handler(fd, askp, ansp);
 	    return;
 	}
     }
@@ -541,17 +566,16 @@ decode_args(fd, pid, askp)
  * Decode the args to exec and check the command in sudoers.
  */
 void
-check_exec(fd, initialized, askp, ansp)
+check_exec(fd, askp, ansp)
     int fd;
-    int *initialized;
     struct str_msg_ask *askp;
     struct systrace_answer *ansp;
 {
     int validated;
 
     /* We're not really initialized until the first exec finishes. */
-    if (*initialized == 0) {
-	*initialized = 1;
+    if (initialized == 0) {
+	initialized = 1;
 	ansp->stra_policy = SYSTR_POLICY_PERMIT;
 	return;
     }
