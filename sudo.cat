@@ -61,7 +61,7 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-17/Jan/99                     1.5.8                             1
+26/Jan/99                     1.5.8                             1
 
 
 
@@ -119,15 +119,15 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
        ssssuuuuddddoooo tries to be safe when executing external commands.
        Variables that control how dynamic loading and binding is
        done can be used to subvert the program that ssssuuuuddddoooo runs.
-       To combat this the LD_*, SHLIB_PATH (HP-UX only), LIBPATH
-       (AIX only), and _RLD_* environment variables are removed
+       To combat this the LD_*, _RLD_*, SHLIB_PATH (HP-UX only),
+       and LIBPATH (AIX only) environment variables are removed
        from the environment passed on to all commands executed.
-       ssssuuuuddddoooo will also remove the IFS, ENV, BASH_ENV and KRB_CONF
-       variables as they too can pose a threat.
+       ssssuuuuddddoooo will also remove the IFS, ENV, BASH_ENV, KRB_CONF and
+       KRB5_CONFIG variables as they too can pose a threat.
 
 
 
-17/Jan/99                     1.5.8                             2
+26/Jan/99                     1.5.8                             2
 
 
 
@@ -168,9 +168,10 @@ sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
        sudo will not honor timestamp files set far in the future.
        Timestamp files with a date greater than current_time + 2
-       * TIMEOUT will be ignored and sudo will log the anomaly.
-       This is done to keep a user from creating his/her own
-       timestamp file with a bogus date.
+       * TIMEOUT will be ignored and sudo complain about a
+       "preposterous stampfile date".  This is done to keep a
+       user from creating his/her own timestamp file with a bogus
+       date.
 
 FFFFIIIILLLLEEEESSSS
         /etc/sudoers           file of authorized users.
@@ -192,8 +193,7 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT V
 
 
 
-
-17/Jan/99                     1.5.8                             3
+26/Jan/99                     1.5.8                             3
 
 
 
@@ -259,7 +259,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-17/Jan/99                     1.5.8                             4
+26/Jan/99                     1.5.8                             4
 
 
 
@@ -325,6 +325,6 @@ sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
 
-17/Jan/99                     1.5.8                             5
+26/Jan/99                     1.5.8                             5
 
 

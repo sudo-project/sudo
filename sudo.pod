@@ -115,64 +115,60 @@ line arguments.  It is most useful in conjunction with the C<-s> flag.
 =head1 RETURN VALUES
 
 B<sudo> quits with an exit value of 1 if there is a
-configuration/permission problem or if B<sudo> cannot execute
-the given command.  In the latter case the error string is
-printed to stderr via perror(3).  If B<sudo> cannot stat(2)
-one or more entries in the user's PATH the error is printed
-on stderr via perror(3).  (If the directory does not exist
-or if it is not really a directory, the entry is ignored and
-no error is printed.)  This should not happen under normal
-circumstances.  The most common reason for stat(3) to return
-"permission denied" is if you are running an automounter and
-one of the directories in your PATH is on a machine that is
-currently unreachable.
+configuration/permission problem or if B<sudo> cannot execute the
+given command.  In the latter case the error string is printed to
+stderr via perror(3).  If B<sudo> cannot stat(2) one or more entries
+in the user's PATH the error is printed on stderr via perror(3).
+(If the directory does not exist or if it is not really a directory,
+the entry is ignored and no error is printed.)  This should not
+happen under normal circumstances.  The most common reason for
+stat(3) to return "permission denied" is if you are running an
+automounter and one of the directories in your PATH is on a machine
+that is currently unreachable.
 
 =head1 SECURITY NOTES
 
-B<sudo> tries to be safe when executing external commands.
-Variables that control how dynamic loading and binding is
-done can be used to subvert the program that B<sudo> runs.
-To combat this the C<LD_*>, C<SHLIB_PATH> (HP-UX only),
-C<LIBPATH> (AIX only), and C<_RLD_*> environment variables are
-removed from the environment passed on to all commands executed.
-B<sudo> will also remove the C<IFS>, C<ENV>, C<BASH_ENV>
-and C<KRB_CONF> variables as they too can pose a threat.
+B<sudo> tries to be safe when executing external commands.  Variables
+that control how dynamic loading and binding is done can be used
+to subvert the program that B<sudo> runs.  To combat this the
+C<LD_*>, C<_RLD_*>, C<SHLIB_PATH> (HP-UX only), and C<LIBPATH> (AIX
+only) environment variables are removed from the environment passed
+on to all commands executed.  B<sudo> will also remove the C<IFS>,
+C<ENV>, C<BASH_ENV>, C<KRB_CONF> and C<KRB5_CONFIG> variables as
+they too can pose a threat.
 
-To prevent command spoofing, B<sudo> checks "." and "" (both
-denoting current directory) last when searching for a command
-in the user's PATH (if one or both are in the PATH).
-Note, however, that the actual PATH environment variable
-is I<not> modified and is passed unchanged to the program that
-B<sudo> executes.
+To prevent command spoofing, B<sudo> checks "." and "" (both denoting
+current directory) last when searching for a command in the user's
+PATH (if one or both are in the PATH).  Note, however, that the
+actual PATH environment variable is I<not> modified and is passed
+unchanged to the program that B<sudo> executes.
 
-For security reasons, if your OS supports shared libraries,
-B<sudo> should always be statically linked unless the
-dynamic loader disables user-defined library search paths
-for setuid programs.  (Most modern dynamic loaders do this.)
+For security reasons, if your OS supports shared libraries, B<sudo>
+should always be statically linked unless the dynamic loader disables
+user-defined library search paths for setuid programs.  (Most modern
+dynamic loaders do this.)
 
 B<sudo> will check the ownership of its timestamp directory
-(F</var/run/sudo> or F</tmp/.odus> by default) and ignore
-the directory's contents if it is not owned by root and
-only read, writable, and executable by root.  On systems
-that allow users to give files away to root (via chown),
-if the timestamp directory is located in a directory writable
-by anyone (ie: F</tmp>), it is possible for a user to create
-the timestamp directory before B<sudo> is run.
-However, because B<sudo> checks the ownership and mode of
-the directory, the only damage that can be done is to "hide"
-files by putting them in the timestamp dir.  This is unlikely
-to happen since once the timestamp dir is owned by root and
-inaccessible by any other user the user placing files there
-would be unable to get them back out.  To get around this
-issue you can use a directory that is not world-writable
-for the timestamps (F</var/adm/sudo> for instance).
+(F</var/run/sudo> or F</tmp/.odus> by default) and ignore the
+directory's contents if it is not owned by root and only read,
+writable, and executable by root.  On systems that allow users to
+give files away to root (via chown), if the timestamp directory is
+located in a directory writable by anyone (ie: F</tmp>), it is
+possible for a user to create the timestamp directory before B<sudo>
+is run.  However, because B<sudo> checks the ownership and mode of
+the directory, the only damage that can be done is to "hide" files
+by putting them in the timestamp dir.  This is unlikely to happen
+since once the timestamp dir is owned by root and inaccessible by
+any other user the user placing files there would be unable to get
+them back out.  To get around this issue you can use a directory
+that is not world-writable for the timestamps (F</var/adm/sudo> for
+instance).
 
-C<sudo> will not honor timestamp files set far in the
-future.  Timestamp files with a date greater than
-current_time + 2 * C<TIMEOUT> will be ignored and
-sudo will log the anomaly.  This is done to keep a user
-from creating his/her own timestamp file with a bogus
-date.
+C<sudo> will not honor timestamp files set far in the future.
+Timestamp files with a date greater than current_time + 2 * C<TIMEOUT>
+will be ignored and sudo complain about a "preposterous stampfile
+date".  This is done to keep a user from creating his/her own
+timestamp file with a bogus date.
 
 =head1 FILES
 
