@@ -148,6 +148,9 @@ entry		:	COMMENT
 		|	ALIAS {
 			    user_matched = find_alias($1, USER) != 0;
 			} privileges
+		|	ALL {
+			    user_matched = TRUE;
+			} privileges
 		|	USERALIAS useraliases
 			{ ; }
 		|	HOSTALIAS hostaliases
@@ -286,6 +289,9 @@ userlist	:	user
 user		:	NAME {
 			    if (strcmp($1, user) == 0)
 				user_matches = TRUE;
+			}
+		|	ALL {
+			    user_matches = TRUE;
 			}
 		;
 
