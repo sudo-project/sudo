@@ -72,3 +72,9 @@ jim		+biglab=ALL
 
 # users in the secretaries netgroup need to help manage the printers
 +secretaries	ALL=PRINTING
+
+#  Additional options
+# fred can run /bin/ls as oracle by specifying -u oracle on command line
+# he can also run command /bin/date as uid -2 without entering passwd
+
+fred		ALL=(oracle) /bin/ls,(#-2) NOPASSWD:/bin/date
