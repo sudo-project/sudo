@@ -27,58 +27,88 @@ dnl
 dnl find "uname"
 dnl
 AC_PROGRAM_CHECK(UNAMEPROG, uname, uname ,)
+AC_PROGRAM_CHECK(TRPROG, tr, tr ,)
 dnl
 dnl what architecture are we on?
 dnl
-SUDO_SUNOS(echo "Looks like SunOS"
-[if test -n "$GCC"; then
-STATIC_FLAGS="-static"
-else
-STATIC_FLAGS="-Bstatic"
+SUDO_OSTYPE()
+case `echo $OS | $TRPROG '[A-Z]' '[a-z]'` in
+    "sunos")	echo "Looks like SunOS 4.x"
+		if test -n "$GCC"; then
+		    STATIC_FLAGS="-static"
+		fi
+		;;
+    "solaris")	echo "Looks like Solaris"
+		;;
+    "aix")	echo "Looks like AIX"
+		AC_DEFINE(_ALL_SOURCE)
+		OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
+		if test -n "$GCC"; then
+		    STATIC_FLAGS="-bnso -bI:/lib/syscalls.exp -bI:./aixcrypt.exp -liconv -bnodelcsect"
+		fi
+		;;
+    "hp-ux")	echo "Looks like HP-UX"
+		OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
+		if test -n "$GCC"; then
+		    STATIC_FLAGS="-Wl,-a,archive"
+		fi
+		;;
+    "osf1")	echo "Looks like OSF/1"
+		if test -n "$GCC"; then
+		    STATIC_FLAGS="-non_shared"
+		fi
+		;;
+    "irix")	echo "Looks like IRIX"
+		OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
+		# need bsd signals to get sigmask()
+		AC_DEFINE(_BSD_SIGNALS)
+		AC_DEFINE(RETSIGTYPE, int)
+		# configure doesn't think irix has stdc headers
+		# but it's good enough for sudo
+		AC_DEFINE(STDC_HEADERS)
+		;;
+    "linux")	echo "Looks like linux"
+		if test -n "$GCC"; then
+		    STATIC_FLAGS="-static"
+		fi
+		;;
+    "convex")	echo "Looks like ConvexOs"
+		AC_DEFINE(_CONVEX_SOURCE)
+		;;
+    "ultrix"*)	echo "Looks like ultrix"
+		;;
+    "ksr"*)	echo "Looks like a KSR"
+		;;
+    "next")	echo "Looks like NeXTstep"
+		if test -n "$GCC"; then
+		    STATIC_FLAGS="-static"
+		fi
+		;;
+    "bsd/386")	echo "Looks like bsdi BSD/386"
+		;;
+    "4.3bsd")	echo "Looks like HP BSD"
+		;;
+    *"bsd"*)	echo "Looks like some kind of BSD"
+		;;
+    "unknown")	echo "I don't recognize your OS, but that's ok"
+		;;
+    *)		echo "Hmmm, I don't recognize $OS offhand, but that's ok"
+		;;
+esac
+dnl
+dnl We can't make a static binary on solaris...
+dnl
+if test -n "$GCC" -a -n "$OS" -a "$OS" != "solaris" ; then
+    STATIC_FLAGS="-static"
 fi
-])dnl
 dnl
-SUDO_SOLARIS(echo "Looks like Solaris")
+dnl C compiler checks (to be done after os checks)
 dnl
-SUDO_AIX(echo "Looks like AIX"
-OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
-[if test -n "$GCC"; then
-STATIC_FLAGS="-static"
-else
-STATIC_FLAGS="-bnso -bI:/lib/syscalls.exp -liconv -bnodelcsect"
-fi
-])dnl
-dnl
-SUDO_HPUX(echo "Looks like HP-UX"
-OPTIONS="${OPTIONS} -DBROKEN_GETPASS"
-[if test -n "$GCC"; then
-STATIC_FLAGS="-static"
-else
-STATIC_FLAGS="-Wl,-a,archive"
-fi
-])dnl
-dnl
-SUDO_DEC_OSF1(echo "Looks like OSF/1"
-[if test -n "$GCC"; then
-STATIC_FLAGS="-static"
-else
-STATIC_FLAGS="-non_shared"
-fi
-])dnl
-dnl
-SUDO_IRIX(echo "Looks like IRIX"
-OPTIONS="${OPTIONS} -DBROKEN_GETPASS")
-dnl
-SUDO_LINUX(echo "Looks like linux"
-[STATIC_FLAGS="-static"])
-dnl
-SUDO_CONVEX(echo "Looks like ConvexOS")
-dnl
-SUDO_KSR(echo "Looks like a KSR")
+AC_GCC_TRADITIONAL
+AC_CONST
 dnl
 dnl Program checks
 dnl
-AC_GCC_TRADITIONAL
 AC_PROG_YACC
 AC_PROG_LEX
 SUDO_PROG_INSTALL
@@ -113,11 +143,11 @@ AC_HAVE_LIBRARY(nsl)
 AC_HAVE_LIBRARY(shadow)
 AC_HAVE_LIBRARY(ufc)
 dnl
-dnl These are os-dependent, they should probably go with the os checks
+dnl OS-dependent libraries
 dnl
-AC_IRIX_SUN
-AC_HAVE_LIBRARY(bsd)
-AC_HAVE_LIBRARY(BSD)
+if test -n "$OS" -a "$OS" = "irix" ; then
+    AC_IRIX_SUN
+fi
 dnl
 dnl Substitute into the Makefiles
 dnl
