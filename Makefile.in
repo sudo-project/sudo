@@ -124,6 +124,13 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
 	    sudoers.pod sudoers.man sudoers.cat lex.yy.c sudo-lex.yy.c sudoers \
 	    dce_pwent.c alloca.c INSTALL.configure
 
+VERSIONFILES = emul/utime.h check.c compat.h config.h.in dce_pwent.c \
+	       find_path.c getspwuid.c getcwd.c goodpath.c ins_2001.h \
+	       ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c \
+	       logging.c options.h parse.c parse.lex parse.yacc pathnames.h \
+	       putenv.c strdup.c sudo.c sudo.h sudo_setenv.c testsudoers.c \
+	       tgetpass.c utime.c visudo.c
+
 all: $(PROGS)
 
 .SUFFIXES: .o .c .h .lex .yacc .man .cat
@@ -252,10 +259,18 @@ dist: $(DISTFILES)
 
 # Update version strings based on version specified in version.h
 # This is ugly but it works...
-update_version: Makefile.in emul/utime.h check.c compat.h config.h.in dce_pwent.c find_path.c getspwuid.c getcwd.c goodpath.c ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c logging.c options.h parse.c parse.lex parse.yacc pathnames.h putenv.c strdup.c sudo.c sudo.h sudo_setenv.c testsudoers.c tgetpass.c utime.c visudo.c
-
-Makefile.in : version.h
-	( if `co -l -q $@` ; then CHECKIN=1; else CHECKIN=0 ; fi ;  VERSION=`sed -n 's/static char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h` ; sed -e 's/\(VERSION =\) [^ ,:][^ ,:]*/\1 '$$VERSION'/' -e 's/\(CU sudo version\) [^ ,:][^ ,:]*/\1 '$$VERSION'/' < $@ > $@.$$$$ ; mv -f $@.$$$$ $@ ; chmod 644 $@ ; if test $$CHECKIN -eq 1 ; then ci -u -m"updated version" $@ ; fi )
-
-emul/utime.h check.c compat.h config.h.in dce_pwent.c find_path.c getspwuid.c getcwd.c goodpath.c ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c logging.c options.h parse.c parse.lex parse.yacc pathnames.h putenv.c strdup.c sudo.c sudo.h sudo_setenv.c testsudoers.c tgetpass.c utime.c visudo.c: version.h
-	( if `co -l -q $@` ; then CHECKIN=1; else CHECKIN=0 ; fi ; VERSION=`sed -n 's/static char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h` ; sed 's/\(CU sudo version\) [^ ,:][^ ,:]*/\1 '$$VERSION'/' < $@ > $@.$$$$ ; mv -f $@.$$$$ $@ ; chmod 644 $@ ; if test $$CHECKIN -eq 1 ; then ci -u -m"updated version" $@ ; fi )
+update_version:
+	for f in Makefile.in $(VERSIONFILES); do \
+	    if co -l -q $$f; then \
+		CHECKIN=1; \
+	    else \
+		CHECKIN=0; \
+	    fi; \
+	    VERSION=`sed -n 's/static char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h`; \
+	    sed -e 's/\(VERSION =\) [^ ,:][^ ,:]*/\1 '$$VERSION'/' -e 's/\(CU sudo version\) [^ ,:][^ ,:]*/\1 '$$VERSION'/' < $$f > $$f.$$$$; \
+	    mv -f $$f.$$$$ $$f; \
+	    chmod 644 $$f; \
+	    if [ $$CHECKIN -eq 1 ]; then \
+		ci -u -m"updated version" $$f; \
+	    fi; \
+	done
