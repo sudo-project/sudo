@@ -581,7 +581,11 @@ int sudo_krb_validate_user(user, pass)
     (void) sprintf(tkfile, "%s/tkt%d", _PATH_SUDO_TIMEDIR, uid);
     (void) krb_set_tkt_string(tkfile);
 
-    /* Update the ticket if password is ok */
+    /*
+     * Update the ticket if password is ok.  Kerb4 expects
+     * the ruid and euid to be the same here so we setuid to root.
+     */
+    set_perms(PERM_ROOT);
     k_errno = krb_get_pw_in_tkt(user, "", realm, "krbtgt", realm,
 	DEFAULT_TKT_LIFE, pass);
 
@@ -594,6 +598,9 @@ int sudo_krb_validate_user(user, pass)
     else if (k_errno != INTK_BADPW && k_errno != KDC_PR_UNKNOWN)
 	(void) fprintf(stderr, "Warning: Kerberos error: %s\n",
 		       krb_err_txt[k_errno]);
+
+    /* done with rootly stuff */
+    set_perms(PERM_USER);
 
     return(!(k_errno == INTK_OK));
 }
