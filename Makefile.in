@@ -295,6 +295,9 @@ install-man:
 	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 $(srcdir)/sudoers.$(mantype) $(mandir5)/sudoers.$(mansect5)
 @MAN_POSTINSTALL@
 
+check:
+	@echo nothing to check
+
 tags: $(SRCS)
 	ctags $(SRCS)
 
