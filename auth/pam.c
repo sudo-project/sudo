@@ -163,7 +163,6 @@ pam_prep_user(pw)
     struct pam_conv pam_conv;
     pam_handle_t *pamh;
     const char *s;
-    int error;
 
     /* We need to setup a new PAM session for the user we are changing *to*. */
     pam_conv.conv = sudo_conv;
@@ -176,16 +175,19 @@ pam_prep_user(pw)
     if (strcmp(user_tty, "unknown"))
 	(void) pam_set_item(pamh, PAM_TTY, user_tty);
 
-    /* Set credentials (may include resource limits, device ownership, etc). */
-    if ((error = pam_setcred(pamh, PAM_ESTABLISH_CRED)) != PAM_SUCCESS) {
-	if ((s = pam_strerror(pamh, error)))
-	    log_error(NO_EXIT|NO_MAIL, "pam_setcred: %s", s);
-    }
+    /*
+     * Set credentials (may include resource limits, device ownership, etc).
+     * We don't check the return value here because in Linux-PAM 0.75
+     * it returns the last saved return code, not the return code
+     * for the setcred module.  Because we haven't called pam_authenticate(),
+     * this is not set and so pam_setcred() returns PAM_PERM_DENIED.
+     */
+    (void) pam_setcred(pamh, PAM_ESTABLISH_CRED);
 
-    if (pam_end(pamh, error) != PAM_SUCCESS)
+    if (pam_end(pamh, PAM_SUCCESS) == PAM_SUCCESS)
+	return(PAM_SUCCESS);
+    else
 	return(AUTH_FAILURE);
-
-    return(error == PAM_SUCCESS ? AUTH_SUCCESS : AUTH_FAILURE);
 }
 
 /*
