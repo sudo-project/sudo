@@ -172,7 +172,7 @@ char * find_path	__P((char *));
 void log_error		__P((int));
 void inform_user	__P((int));
 void check_user		__P((void));
-int validate		__P((void));
+int validate		__P((int));
 void set_perms		__P((int));
 void remove_timestamp	__P((void));
 void load_interfaces	__P((void));
