@@ -95,3 +95,6 @@ TODO list (most will be addressed in sudo 2.0)
     syntax and sets the Defaults options and sets up the
     data structures to check a user.  The second stage does
     the actual user check.
+
+36) Add a flag similar to '-l' but that spits out sudo commands in
+    a format suitable for cut & paste (requires parser overhaul first).
