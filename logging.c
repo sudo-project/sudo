@@ -489,8 +489,8 @@ void inform_user(code)
 
 	case VALIDATE_NOT_OK:
 	    (void) fprintf(stderr,
-		    "Sorry, user %s is not allowed to execute %s\n\n",
-		    user, cmnd);
+		    "Sorry, user %s is not allowed to execute %s on %s.\n\n",
+		    user, cmnd, host);
 	    break;
 
 	case VALIDATE_ERROR:
