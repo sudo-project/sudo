@@ -410,7 +410,7 @@ static char *mail_argv[] = { "sendmail",
 
 static void send_mail()
 {
-    char *mailer;
+    char *mailer = MAILER;
     char *subject = MAILSUBJECT;
     int fd[2];
     char buf[MAXLOGLEN + BUFSIZ];
@@ -419,11 +419,6 @@ static void send_mail()
 
     (void) memset((VOID *)&action, 0, sizeof(action));
 #endif /* POSIX_SIGNALS */
-
-    if ((mailer = find_path(MAILER)) == NULL) {
-	(void) fprintf(stderr, "%s: mailer (%s) not found\n", Argv[0], MAILER);
-	exit(1);
-    }
 
     /* catch children as they die */
 #ifdef POSIX_SIGNALS
