@@ -73,6 +73,13 @@
 #include "sudo.h"
 #include "sudo_auth.h"
 
+/* Only OpenPAM and Linux PAM use const qualifiers. */
+#if defined(_OPENPAM) || defined(__LIBPAM_VERSION)
+# define PAM_CONST	const
+#else
+# define PAM_CONST
+#endif
+
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
