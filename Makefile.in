@@ -191,14 +191,14 @@ sudo_noexec.la: sudo_noexec.lo
 @DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h
 
 # Uncomment the $(YACC) and mv lines if you intend to modify gram.y
-gram.c gram.h: gram.y
+$(devdir)/gram.c gram.h: gram.y
 @DEV@	$(YACC) -d $(srcdir)/gram.y
 @DEV@	mv -f y.tab.c gram.c
 @DEV@	mv -f y.tab.h gram.h
 	-@true
 
 # Uncomment the $(LEX) and mv lines if you intend to modify toke.l
-toke.c: toke.l
+$(devdir)/toke.c: toke.l
 @DEV@	$(LEX) $(srcdir)/toke.l
 @DEV@	mv -f lex.yy.c toke.c
 	-@true
