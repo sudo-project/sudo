@@ -218,7 +218,6 @@ static int check_timestamp()
     /*
      * if all the directories are stat()able
      */
-    /* XXX - make this readable!!! */
     if (timedir_is_good) {
 	/*
 	 * last component in _PATH_SUDO_TIMEDIR must be owned by root
@@ -232,7 +231,8 @@ static int check_timestamp()
 	} else if (stat(timestampfile, &statbuf)) {
 	    /* timestamp file does not exist? */
 	    timestamp_is_old = 2;	/* return (2)          */
-	} else {		/* otherwise, check the time */
+	} else {
+	    /* check the time against the timestamp file */
 	    now = time((time_t *) NULL);
 	    if (TIMEOUT && now - statbuf.st_mtime < 60 * TIMEOUT)
 		/* check for bogus time on the stampfile */
@@ -257,7 +257,7 @@ static int check_timestamp()
 	    perror("check_timestamp: mkdir");
 	    timedir_is_good = 0;
 	} else {
-	    timedir_is_good = 1;/* _PATH_SUDO_TIMEDIR now exists         */
+	    timedir_is_good = 1;	/* _PATH_SUDO_TIMEDIR now exists */
 	}
     }
 
