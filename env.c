@@ -399,7 +399,14 @@ rebuild_env(sudo_mode, envp)
 	    if (env_keep) {
 		for (ek = env_keep; *ek; ek++) {
 		    eklen = strlen(*ek);
-		    if (strncmp(*ek, *ep, eklen) == 0 && (*ep)[eklen] == '=') {
+		    /* Deal with '*' wildcard */
+		    if ((*ek)[eklen - 1] == '*') {
+			eklen--;
+			iswild = 1;
+		    } else
+			iswild = 0;
+		    if (strncmp(*ek, *ep, eklen) == 0 &&
+			(iswild || (*ep)[eklen] == '=')) {
 			okvar = 1;
 			break;
 		    }
