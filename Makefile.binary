@@ -78,8 +78,6 @@ SHELL = /bin/sh
 
 PROGS = sudo visudo
 
-VERSION = 1.6.1
-
 all: $(PROGS)
 	@echo run 'make install' to install sudo
 
