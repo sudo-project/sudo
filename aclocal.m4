@@ -5,7 +5,7 @@ dnl
 dnl
 dnl check for sendmail
 dnl
-AC_DEFUN(SUDO_PROG_SENDMAIL, [AC_MSG_CHECKING(checking for sendmail)
+AC_DEFUN(SUDO_PROG_SENDMAIL, [AC_MSG_CHECKING(for sendmail)
 if test -f "/usr/sbin/sendmail"; then
     AC_MSG_RESULT(/usr/sbin/sendmail)
     AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/sbin/sendmail")
@@ -28,7 +28,7 @@ fi
 dnl
 dnl check for vi
 dnl
-AC_DEFUN(SUDO_PROG_VI, [AC_MSG_CHECKING(checking for vi)
+AC_DEFUN(SUDO_PROG_VI, [AC_MSG_CHECKING(for vi)
 if test -f "/usr/bin/vi"; then
     AC_MSG_RESULT(/usr/bin/vi)
     AC_DEFINE(_SUDO_PATH_VI, "/usr/bin/vi")
@@ -48,7 +48,7 @@ fi
 dnl
 dnl check for pwd
 dnl
-AC_DEFUN(SUDO_PROG_PWD, [AC_MSG_CHECKING(checking for pwd)
+AC_DEFUN(SUDO_PROG_PWD, [AC_MSG_CHECKING(for pwd)
 if test -f "/usr/bin/pwd"; then
     AC_MSG_RESULT(/usr/bin/pwd)
     AC_DEFINE(_SUDO_PATH_PWD, "/usr/bin/pwd")
@@ -68,7 +68,7 @@ fi
 dnl
 dnl check for mv
 dnl
-AC_DEFUN(SUDO_PROG_MV, [AC_MSG_CHECKING(checking for mv)
+AC_DEFUN(SUDO_PROG_MV, [AC_MSG_CHECKING(for mv)
 if test -f "/usr/bin/mv"; then
     AC_MSG_RESULT(/usr/bin/mv)
     AC_DEFINE(_SUDO_PATH_MV, "/usr/bin/mv")
@@ -86,19 +86,60 @@ else
 fi
 ])dnl
 dnl
+dnl Where the log file goes, use /var/log if it exists, else /{var,usr}/adm
+dnl
+AC_DEFUN(SUDO_LOGFILE, [AC_MSG_CHECKING(for log file location)
+if test -d "/var/log"; then
+    AC_MSG_RESULT(/var/log/sudo.log)
+    AC_DEFINE(_SUDO_PATH_LOGFILE, "/var/log/sudo.log")
+elif test -d "/var/adm"; then
+    AC_MSG_RESULT(/var/adm/sudo.log)
+    AC_DEFINE(_SUDO_PATH_LOGFILE, "/var/adm/sudo.log")
+elif test -d "/usr/adm"; then
+    AC_MSG_RESULT(/usr/adm/sudo.log)
+    AC_DEFINE(_SUDO_PATH_LOGFILE, "/usr/adm/sudo.log")
+else
+    AC_MSG_RESULT(unknown, you will have to set _PATH_SUDO_LOGFILE by hand)
+fi
+])dnl
+dnl
 dnl check for fullly working void
 dnl
-AC_DEFUN(SUDO_FULL_VOID, [AC_MSG_CHECKING(checking for full void implementation)
+AC_DEFUN(SUDO_FULL_VOID, [AC_MSG_CHECKING(for full void implementation)
 AC_TRY_COMPILE(, [void *foo;
 foo = 0;], AC_DEFINE(VOID, void)
 AC_MSG_RESULT(yes), AC_DEFINE(VOID, char)
 AC_MSG_RESULT(no))])
 dnl
-dnl Check for ssize_t declation
-dnl XXX - check unistd.h too
+dnl SUDO_CHECK_TYPE(TYPE, DEFAULT)
+dnl XXX - should require the check for unistd.h...
 dnl
-AC_DEFUN(SUDO_SSIZE_T,
-[AC_CHECK_TYPE(ssize_t, int)])
+AC_DEFUN(SUDO_CHECK_TYPE,
+[AC_REQUIRE([AC_HEADER_STDC])dnl
+AC_MSG_CHECKING(for $1)
+AC_CACHE_VAL(ac_cv_type_$1,
+[AC_EGREP_CPP($1, [#include <sys/types.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif], ac_cv_type_$1=yes, ac_cv_type_$1=no)])dnl
+AC_MSG_RESULT($ac_cv_type_$1)
+if test $ac_cv_type_$1 = no; then
+  AC_DEFINE($1, $2)
+fi
+])
+dnl
+dnl Check for size_t declation
+dnl
+AC_DEFUN(SUDO_TYPE_SIZE_T,
+[SUDO_CHECK_TYPE(size_t, int)])
+dnl
+dnl Check for ssize_t declation
+dnl
+AC_DEFUN(SUDO_TYPE_SSIZE_T,
+[SUDO_CHECK_TYPE(ssize_t, int)])
 dnl
 dnl check for known UNIX variants
 dnl XXX - check to see that uname was checked first
