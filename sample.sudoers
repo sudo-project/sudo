@@ -5,6 +5,7 @@
 #
 # See the sudoers man page for the details on how to write a sudoers file.
 #
+# $Sudo$
 
 ##
 # User alias specification
