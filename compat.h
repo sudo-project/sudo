@@ -139,8 +139,8 @@
 /*
  * Emulate seteuid() for DYNIX
  */
-#ifdef sequent
+#ifdef _SEQUENT_
 #  define seteuid(_EUID)	(setresuid(UID_NO_CHANGE, _EUID))
-#endif /* sequent */
+#endif /* _SEQUENT_ */
 
 #endif /* _SUDO_COMPAT_H */
