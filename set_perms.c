@@ -65,7 +65,6 @@ __unused static const char rcsid[] = "$Sudo$";
  * Prototypes
  */
 static void runas_setup		__P((void));
-static void fatal		__P((char *, int));
 
 #ifdef HAVE_SETRESUID
 /*
@@ -78,47 +77,44 @@ void
 set_perms(perm)
     int perm;
 {
-    int error;
-
     switch (perm) {
 	case PERM_FULL_ROOT:
 	case PERM_ROOT:
 				if (setresuid(ROOT_UID, ROOT_UID, ROOT_UID))
-				    fatal("setresuid(ROOT_UID, ROOT_UID, ROOT_UID) failed, your operating system may have a broken setresuid() function\nTry running configure with --disable-setresuid", 0);
+				    errorx(1, "setresuid(ROOT_UID, ROOT_UID, ROOT_UID) failed, your operating system may have a broken setresuid() function\nTry running configure with --disable-setresuid");
 			      	break;
 
 	case PERM_USER:
     	    	    	        (void) setresgid(-1, user_gid, -1);
 				if (setresuid(user_uid, user_uid, ROOT_UID))
-				    fatal("setresuid(user_uid, user_uid, ROOT_UID)", 1);
+				    error(1, "setresuid(user_uid, user_uid, ROOT_UID)");
 			      	break;
 				
 	case PERM_FULL_USER:
 				/* headed for exec() */
     	    	    	        (void) setgid(user_gid);
 				if (setresuid(user_uid, user_uid, user_uid))
-				    fatal("setresuid(user_uid, user_uid, user_uid)", 1);
+				    error(1, "setresuid(user_uid, user_uid, user_uid)");
 			      	break;
 				
 	case PERM_RUNAS:
 				if (setresuid(-1, runas_pw->pw_uid, -1))
-				    fatal("unable to change to runas uid", 1);
+				    error(1, "unable to change to runas uid");
 			      	break;
 
 	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == ROOT_UID */
 				runas_setup();
-				error = setresuid(def_stay_setuid ?
+				if (setresuid(def_stay_setuid ?
 				    user_uid : runas_pw->pw_uid,
-				    runas_pw->pw_uid, runas_pw->pw_uid);
-				if (error)
-				    fatal("unable to change to runas uid", 1);
+				    runas_pw->pw_uid, runas_pw->pw_uid))
+				    error(1, "unable to change to runas uid");
 				break;
 
 	case PERM_SUDOERS:
 				/* assume euid == ROOT_UID, ruid == user */
 				if (setresgid(-1, SUDOERS_GID, -1))
-				    fatal("unable to change to sudoers gid", 1);
+				    error(1, "unable to change to sudoers gid");
 
 				/*
 				 * If SUDOERS_UID == ROOT_UID and SUDOERS_MODE
@@ -129,15 +125,15 @@ set_perms(perm)
 				 */
 				if (SUDOERS_UID == ROOT_UID) {
 				    if ((SUDOERS_MODE & 040) && setresuid(ROOT_UID, 1, ROOT_UID))
-					fatal("setresuid(ROOT_UID, 1, ROOT_UID)", 1);
+					error(1, "setresuid(ROOT_UID, 1, ROOT_UID)");
 				} else {
 				    if (setresuid(ROOT_UID, SUDOERS_UID, ROOT_UID))
-					fatal("setresuid(ROOT_UID, SUDOERS_UID, ROOT_UID)", 1);
+					error(1, "setresuid(ROOT_UID, SUDOERS_UID, ROOT_UID)");
 				}
 			      	break;
 	case PERM_TIMESTAMP:
 				if (setresuid(ROOT_UID, timestamp_uid, ROOT_UID))
-				    fatal("setresuid(ROOT_UID, timestamp_uid, ROOT_UID)", 1);
+				    error(1, "setresuid(ROOT_UID, timestamp_uid, ROOT_UID)");
 			      	break;
     }
 }
@@ -155,49 +151,45 @@ void
 set_perms(perm)
     int perm;
 {
-    int error;
-
     switch (perm) {
 	case PERM_FULL_ROOT:
 	case PERM_ROOT:
 				if (setreuid(-1, ROOT_UID))
-				    fatal("setreuid(-1, ROOT_UID) failed, your operating system may have a broken setreuid() function\nTry running configure with --disable-setreuid", 0);
+				    errorx(1, "setreuid(-1, ROOT_UID) failed, your operating system may have a broken setreuid() function\nTry running configure with --disable-setreuid");
 				if (setuid(ROOT_UID))
-				    fatal("setuid(ROOT_UID)", 1);
+				    error(1, "setuid(ROOT_UID)");
 			      	break;
 
 	case PERM_USER:
     	    	    	        (void) setregid(-1, user_gid);
 				if (setreuid(ROOT_UID, user_uid))
-				    fatal("setreuid(ROOT_UID, user_uid)", 1);
+				    error(1, "setreuid(ROOT_UID, user_uid)");
 			      	break;
 				
 	case PERM_FULL_USER:
 				/* headed for exec() */
     	    	    	        (void) setgid(user_gid);
 				if (setreuid(user_uid, user_uid))
-				    fatal("setreuid(user_uid, user_uid)", 1);
+				    error(1, "setreuid(user_uid, user_uid)");
 			      	break;
 				
 	case PERM_RUNAS:
 				if (setreuid(-1, runas_pw->pw_uid))
-				    fatal("unable to change to runas uid", 1);
+				    error(1, "unable to change to runas uid");
 			      	break;
 
 	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == ROOT_UID */
 				runas_setup();
-				error = setreuid(def_stay_setuid ?
-				    user_uid : runas_pw->pw_uid,
-				    runas_pw->pw_uid);
-				if (error)
-				    fatal("unable to change to runas uid", 1);
+				if (setreuid(def_stay_setuid ? user_uid :
+				    runas_pw->pw_uid, runas_pw->pw_uid))
+				    error(1, "unable to change to runas uid");
 				break;
 
 	case PERM_SUDOERS:
 				/* assume euid == ROOT_UID, ruid == user */
 				if (setregid(-1, SUDOERS_GID))
-				    fatal("unable to change to sudoers gid", 1);
+				    error(1, "unable to change to sudoers gid");
 
 				/*
 				 * If SUDOERS_UID == ROOT_UID and SUDOERS_MODE
@@ -208,15 +200,15 @@ set_perms(perm)
 				 */
 				if (SUDOERS_UID == ROOT_UID) {
 				    if ((SUDOERS_MODE & 040) && setreuid(ROOT_UID, 1))
-					fatal("setreuid(ROOT_UID, 1)", 1);
+					error(1, "setreuid(ROOT_UID, 1)");
 				} else {
 				    if (setreuid(ROOT_UID, SUDOERS_UID))
-					fatal("setreuid(ROOT_UID, SUDOERS_UID)", 1);
+					error(1, "setreuid(ROOT_UID, SUDOERS_UID)");
 				}
 			      	break;
 	case PERM_TIMESTAMP:
 				if (setreuid(ROOT_UID, timestamp_uid))
-				    fatal("setreuid(ROOT_UID, timestamp_uid)", 1);
+				    error(1, "setreuid(ROOT_UID, timestamp_uid)");
 			      	break;
     }
 }
@@ -237,19 +229,19 @@ set_perms(perm)
 	case PERM_FULL_ROOT:
 	case PERM_ROOT:
 				if (setuid(ROOT_UID))
-					fatal("setuid(ROOT_UID)", 1);
+					error(1, "setuid(ROOT_UID)");
 				break;
 
 	case PERM_FULL_USER:
     	    	    	        (void) setgid(user_gid);
 				if (setuid(user_uid))
-				    fatal("setuid(user_uid)", 1);
+				    error(1, "setuid(user_uid)");
 			      	break;
 				
 	case PERM_FULL_RUNAS:
 				runas_setup();
 				if (setuid(runas_pw->pw_uid))
-				    fatal("unable to change to runas uid", 1);
+				    error(1, "unable to change to runas uid");
 				break;
 
 	case PERM_USER:
@@ -267,7 +259,7 @@ static void
 runas_setup()
 {
 #ifdef HAVE_LOGIN_CAP_H
-    int error, flags;
+    int flags;
     extern login_cap_t *lc;
 #endif
 
@@ -288,45 +280,26 @@ runas_setup()
 	    if (!def_preserve_groups)
 		SET(flags, LOGIN_SETGROUP);
 	    else if (setgid(runas_pw->pw_gid))
-		perror("cannot set gid to runas gid");
-	    error = setusercontext(lc, runas_pw,
-		runas_pw->pw_uid, flags);
-	    if (error) {
+		warning("cannot set gid to runas gid");
+	    if (setusercontext(lc, runas_pw, runas_pw->pw_uid, flags)) {
 		if (runas_pw->pw_uid != ROOT_UID)
-		    fatal("unable to set user context", 1);
+		    error(1, "unable to set user context");
 		else
-		    perror("unable to set user context");
+		    warning("unable to set user context");
 	    }
 	} else
 #endif /* HAVE_LOGIN_CAP_H */
 	{
 	    if (setgid(runas_pw->pw_gid))
-		perror("cannot set gid to runas gid");
+		warning("cannot set gid to runas gid");
 #ifdef HAVE_INITGROUPS
 	    /*
 	     * Initialize group vector unless asked not to.
 	     */
 	    if (!def_preserve_groups &&
 		initgroups(*user_runas, runas_pw->pw_gid) < 0)
-		perror("cannot set group vector");
+		warning("cannot set group vector");
 #endif /* HAVE_INITGROUPS */
 	}
     }
-}
-
-static void
-fatal(str, printerr)
-    char *str;
-    int printerr;
-{
-
-    if (str) {
-	if (printerr)
-	    perror(str);
-	else {
-	    fputs(str, stderr);
-	    fputc('\n', stderr);
-	}
-    }
-    exit(1);
 }
