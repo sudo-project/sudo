@@ -1,5 +1,5 @@
 /*
- * CU sudo version 1.5.1 (based on Root Group sudo version 1.1)
+ * CU sudo version 1.5.2 (based on Root Group sudo version 1.1)
  *
  * This software comes with no waranty whatsoever, use at your own risk.
  *
@@ -159,6 +159,7 @@ struct command_alias {
 #define MODE_LIST                00040
 #define MODE_BACKGROUND          00100
 #define MODE_SHELL               00200
+#define MODE_RESET_HOME          00400
 
 /*
  * Used with set_perms()
@@ -201,7 +202,7 @@ void log_error		__P((int));
 void inform_user	__P((int));
 void check_user		__P((void));
 int validate		__P((int));
-void set_perms		__P((int));
+void set_perms		__P((int, int));
 void remove_timestamp	__P((void));
 void load_interfaces	__P((void));
 int yyparse		__P((void));
