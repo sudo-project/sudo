@@ -1072,9 +1072,12 @@ get_authpw()
 	else if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
 	    log_error(0, "user %s does not exist in the passwd file!",
 		def_runas_default);
-    } else if (def_targetpw)
+    } else if (def_targetpw) {
+	if (runas_pw->pw_name == NULL)
+	    log_error(0, "user %lu does not exist in the passwd file!",
+		runas_pw->pw_uid);
 	pw = runas_pw;
-    else
+    } else
 	pw = sudo_user.pw;
 
     return(pw);
