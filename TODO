@@ -6,3 +6,5 @@ TODO list
 02) Add groups of users to the config file.
 
 03) Solaris 2.x support.
+
+04) Deal with host aliases rationally.
