@@ -34,6 +34,9 @@
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <sys/types.h>
+#ifdef _AIX
+#include <sys/select.h>
+#endif /* _AIX */
 #include <sys/time.h>
 #include <signal.h>
 #include <fcntl.h>
