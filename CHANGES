@@ -96,3 +96,13 @@ CHANGES from sudo 1.3
 32) Now use sysconf(2) instead of getdtablesize(2) if it is available
     (see change #31).  Because of the the getdtablesize() emulation for
     hpux is no longer necesary.
+
+33) Now only do a getcwd(3) or getwd(3) once and do it as the real user.
+    Sudo should no longer complain that it can't get the cwd unless
+    there is a real problem.
+
+34) Changed some malloc'd globals of fixed length to be allocated from
+    the stack instead as there was no win in allocating them from the
+    heap.
+
+35) Fixed AIX STATIC_FLAGS as per the AIX faq.
