@@ -231,9 +231,9 @@ int main(argc, argv)
 	else
 	    (void) sprintf(buf, "%s %s", Editor, stmp);
 
-	/* do the edit -- some SYSV editors return 256 instead of 0 */
+	/* do the edit -- some SYSV editors exit with 1 instead of 0 */
 	n = system(buf);
-	if (n == 0 || n == 256) {
+	if (n != -1 && ((n >> 8) == 0 || (n >> 8) == 1)) {
 	    struct stat statbuf;	/* for sanity checking */
 
 	    /* make sure stmp exists */
@@ -279,8 +279,9 @@ int main(argc, argv)
 		parse_error = TRUE;
 	    }
 	} else {
-	    (void) fprintf(stderr, "%s: Editor (%s) failed, %s unchanged.\n",
-		Argv[0], Editor, sudoers);
+	    (void) fprintf(stderr,
+		"%s: Editor (%s) failed with exit status %d, %s unchanged.\n",
+		Argv[0], Editor, n, sudoers);
 	    Exit(-1);
 	}
 
