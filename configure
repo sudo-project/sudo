@@ -926,7 +926,7 @@ Optional Packages:
   --with-csops-insults    include CSOps insults
   --with-hal-insults      include 2001-like insults
   --with-goons-insults    include the insults from the "Goon Show"
-  --with-secure-path      override the user's path with a builtin one
+  --with-secure-path      override the user's path with a built-in one
   --without-interfaces    don't try to read the ip addr of ether interfaces
   --with-stow             properly handle GNU stow packaging
 

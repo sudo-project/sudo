@@ -911,9 +911,9 @@ if test "$insults" = "on"; then
 fi
 
 AC_MSG_CHECKING(whether to override the user's path)
-AC_ARG_WITH(secure-path, [  --with-secure-path      override the user's path with a builtin one],
+AC_ARG_WITH(secure-path, [  --with-secure-path      override the user's path with a built-in one],
 [case $with_secure_path in  
-    yes)	AC_DEFINE_UNQUOTED(SECURE_PATH, "/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc", [Define to override the user's path with a builtin one.])
+    yes)	AC_DEFINE_UNQUOTED(SECURE_PATH, "/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc", [Define to override the user's path with a built-in one.])
 		AC_MSG_RESULT([:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc])
 		;;
     no)		AC_MSG_RESULT(no)
