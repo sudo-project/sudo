@@ -318,8 +318,9 @@ void be_full_user();
  */
 #ifndef MAIN
 extern uid_t uid;
-extern char *host;
-extern char *user;
+extern char host[];
+extern char user[];
+extern char cwd[];
 extern char *cmnd;
 extern int Argc;
 extern char **Argv;
