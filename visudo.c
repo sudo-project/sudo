@@ -63,7 +63,7 @@ extern char *getenv	__P((const char *));
 #endif /* !STDC_HEADERS */
 
 extern FILE *yyin, *yyout;
-extern int errno, yylineno;
+extern int errno, sudolineno;
 
 #ifndef SA_RESETHAND
 #define SA_RESETHAND	0
@@ -253,17 +253,17 @@ main(argc, argv)
 	    }
 
 	    /*
-	     * the first time we get an error, set status to yylineno which
+	     * the first time we get an error, set status to sudolineno which
 	     * will be the line number after the line with the error. then,
 	     * if we have gotten an error, set err_line_no to the correct
 	     * line so that when we edit the file err_line_no will be
-	     * correct. at this time we also reset status and yylineno to
+	     * correct. at this time we also reset status and sudolineno to
 	     * their default values so that the next time yyparse() is
 	     * called, they will be initialized correctly. 
 	     */
 	    err_line_no = (status == 0) ? 0 : status - 1;
 	    status = 0;
-	    yylineno = 0;
+	    sudolineno = 0;
 
 	    (void) fclose(sudoers_tmp_fp);
 	}
