@@ -976,8 +976,8 @@ these are a bit contrived.  First, we define our I<aliases>:
  Cmnd_Alias	KILL = /usr/bin/kill
  Cmnd_Alias	PRINTING = /usr/sbin/lpc, /usr/bin/lprm
  Cmnd_Alias	SHUTDOWN = /usr/sbin/shutdown
- Cmnd_Alias	HALT = /usr/sbin/halt, /usr/sbin/fasthalt
- Cmnd_Alias	REBOOT = /usr/sbin/reboot, /usr/sbin/fastboot
+ Cmnd_Alias	HALT = /usr/sbin/halt
+ Cmnd_Alias	REBOOT = /usr/sbin/reboot
  Cmnd_Alias	SHELLS = /usr/bin/sh, /usr/bin/csh, /usr/bin/ksh, \
 			 /usr/local/bin/tcsh, /usr/bin/rsh, \
 			 /usr/local/bin/zsh
@@ -1034,8 +1034,8 @@ during matching.
 The user B<lisa> may run any command on any host in the I<CUNETS> alias
 (the class B network C<128.138.0.0>).
 
- operator	ALL = DUMPS, KILL, PRINTING, SHUTDOWN, HALT, REBOOT,\
-		/usr/oper/bin/
+ operator	ALL = DUMPS, KILL, SHUTDOWN, HALT, REBOOT, PRINTING,\
+		sudoedit /etc/printcap, /usr/oper/bin/
 
 The B<operator> user may run commands limited to simple maintenance.
 Here, those are commands related to backups, killing processes, the
@@ -1175,8 +1175,7 @@ Note that disabling shell escapes is not a panacea.  Programs running
 as root are still capable of many potentially hazardous operations
 (such as changing or overwriting files) that could lead to unintended
 privilege escalation.  In the specific case of an editor, a safer
-approach is to give the user permission to run the B<sudoedit>
-program.
+approach is to give the user permission to run B<sudoedit>.
 
 =head1 CAVEATS
 
