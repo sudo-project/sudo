@@ -15,7 +15,9 @@ sudo \- execute a command as the superuser
 .B \-k
 |
 .B \-b
-|
+| [
+.B \-p
+prompt ]
 .I command
 .SH DESCRIPTION
 .B sudo
@@ -199,6 +201,9 @@ The \-b (background) option tells
 .B sudo
 to run the given command in the background.  Note that if you use the
 \-b option you cannot use shell job control to manipulate the command.
+.IP \-p
+The \-p (prompt) option allows you to override the default password
+prompt and use a custom one.
 .SH RETURN VALUES
 .B sudo
 quits with an exit value of 1 if there is a configuration/permission problem
