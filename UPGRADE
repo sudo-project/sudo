@@ -1,6 +1,14 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.6.8:
+
+    Prior to sudo 1.6.8, if /var/run did not exist, sudo would put
+    the timestamp files in /tmp/.odus.  As of sudo 1.6.8, the
+    timestamp files will be placed in /var/adm/sudo or /usr/adm/sudo
+    if there is no /var/run directory.  This directory will be
+    created if it does not already exist.
+
 o Upgrading from a version prior to 1.6:
 
     As of sudo 1.6, parsing of runas entries and the NOPASSWD tag
