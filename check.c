@@ -77,15 +77,16 @@ static int timedir_is_good;
 void check_user()
 {
     register int rtn;
+    mode_t oldmask;
 
-    umask(077);			/* make sure the timestamp files are private */
+    oldmask = umask(077);	/* make sure the timestamp files are private */
 
     rtn = check_timestamp();
     if (rtn && uid)		/* if timestamp is not current... */
 	check_passwd();
 
     update_timestamp();
-    umask(022);			/* want a real umask to exec() the command */
+    (void) umask(oldmask);	/* want a real umask to exec() the command */
 
 }
 
