@@ -195,6 +195,37 @@ void log_error(code)
 #endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
+	case SUDOERS_NO_OWNER:
+	    (void) sprintf(p, "no passwd entry for sudoers file owner (%s) ",
+		SUDOERS_OWNER);
+#if (LOGGING & SLOG_SYSLOG)
+	    pri = Syslog_priority_NO;
+#endif /* LOGGING & SLOG_SYSLOG */
+	    break;
+
+	case SUDOERS_NOT_FILE:
+	    (void) sprintf(p, "%s is not a regular file ", _PATH_SUDO_SUDOERS);
+#if (LOGGING & SLOG_SYSLOG)
+	    pri = Syslog_priority_NO;
+#endif /* LOGGING & SLOG_SYSLOG */
+	    break;
+
+	case SUDOERS_WRONG_OWNER:
+	    (void) sprintf(p, "%s is not owned by %s ", _PATH_SUDO_SUDOERS,
+		SUDOERS_OWNER);
+#if (LOGGING & SLOG_SYSLOG)
+	    pri = Syslog_priority_NO;
+#endif /* LOGGING & SLOG_SYSLOG */
+	    break;
+
+	case SUDOERS_RW_OTHER:
+	    (void) sprintf(p, "%s is readable or writeable by other than %s ",
+		_PATH_SUDO_SUDOERS, SUDOERS_OWNER);
+#if (LOGGING & SLOG_SYSLOG)
+	    pri = Syslog_priority_NO;
+#endif /* LOGGING & SLOG_SYSLOG */
+	    break;
+
 	default:
 	    strcat(p, "found a wierd error : ");
 #if (LOGGING & SLOG_SYSLOG)
@@ -485,49 +516,75 @@ void inform_user(code)
     switch (code) {
 	case VALIDATE_NO_USER:
 	    (void) fprintf(stderr,
-		    "%s is not in the sudoers file.  This incident will be reported.\n\n",
-		    user);
+		"%s is not in the sudoers file.  This incident will be reported.\n\n",
+		user);
 	    break;
 
 	case VALIDATE_NOT_OK:
 	    (void) fprintf(stderr,
-		    "Sorry, user %s is not allowed to execute %s on %s.\n\n",
-		    user, cmnd, host);
+		"Sorry, user %s is not allowed to execute %s on %s.\n\n",
+		user, cmnd, host);
 	    break;
 
 	case VALIDATE_ERROR:
 	    (void) fprintf(stderr,
-		    "Sorry, there is a fatal error in the sudoers file.\n\n");
+		"Sorry, there is a fatal error in the sudoers file.\n\n");
 	    break;
 
 	case GLOBAL_NO_PW_ENT:
 	    (void) fprintf(stderr,
-		    "Intruder Alert!  You don\'t exist in the passwd file\n\n");
+		"Intruder Alert!  You don\'t exist in the passwd file\n\n");
 	    break;
 
 	case GLOBAL_NO_AUTH_ENT:
 	    (void) fprintf(stderr,
-		    "Intruder Alert!  You don\'t exist in the auth database\n\n");
+		"Intruder Alert!  You don\'t exist in the auth database\n\n");
 	    break;
 
 	case GLOBAL_NO_HOSTNAME:
 	    (void) fprintf(stderr,
-		    "This machine does not have a hostname\n\n");
+		"This machine does not have a hostname\n\n");
 	    break;
 
 	case GLOBAL_HOST_UNREGISTERED:
 	    (void) fprintf(stderr,
-		    "This machine is not available via gethostbyname()\n\n");
+		"This machine is not available via gethostbyname()\n\n");
 	    break;
 
 	case PASSWORD_NOT_CORRECT:
 	    (void) fprintf(stderr, "Password not entered correctly after %d tries\n\n",
-		    TRIES_FOR_PASSWORD);
+		TRIES_FOR_PASSWORD);
+	    break;
+
+	case SUDOERS_NO_OWNER:
+	    (void) fprintf(stderr,
+		"No passwd entry for sudoers file owner (%s)\n", SUDOERS_OWNER);
+	    break;
+
+	case NO_SUDOERS_FILE:
+	    (void) fprintf(stderr, "Can't stat %s: ", _PATH_SUDO_SUDOERS);
+	    perror("");
+	    break;
+
+	case SUDOERS_NOT_FILE:
+	    (void) fprintf(stderr,
+		"%s is not a regular file!\n", _PATH_SUDO_SUDOERS);
+	    break;
+
+	case SUDOERS_WRONG_OWNER:
+	    (void) fprintf(stderr, "%s is not owned by %s!\n",
+		_PATH_SUDO_SUDOERS, SUDOERS_OWNER);
+	    break;
+
+	case SUDOERS_RW_OTHER:
+	    (void) fprintf(stderr,
+		"%s is readable or writeable by other than %s!\n",
+		_PATH_SUDO_SUDOERS, SUDOERS_OWNER);
 	    break;
 
 	default:
 	    (void) fprintf(stderr,
-		    "Something wierd happened.\n\n");
+		"Something wierd happened.\n\n");
 	    break;
     }
 }
