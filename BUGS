@@ -3,3 +3,6 @@
 
 2) A syntax error on the first line of the sudoers file may not be caught
    by visudo.
+
+3) Common syntax errors cause visudo to catch the error on the wrong
+   line.
