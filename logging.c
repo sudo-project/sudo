@@ -255,6 +255,24 @@ void log_error(code)
 #endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
+	case BAD_STAMPDIR:
+	    (void) sprintf(p,
+	    "%s owned by non-root or not mode 0700; TTY=%s ; PWD=%s ; COMMAND=",
+	    _PATH_SUDO_TIMEDIR, tty, cwd);
+#if (LOGGING & SLOG_SYSLOG)
+	    pri = Syslog_priority_NO;
+#endif /* LOGGING & SLOG_SYSLOG */
+	    break;
+
+	case BAD_STAMPFILE:
+	    (void) sprintf(p,
+		"preposterous stampfile date; TTY=%s ; PWD=%s ; COMMAND=",
+		tty, cwd);
+#if (LOGGING & SLOG_SYSLOG)
+	    pri = Syslog_priority_NO;
+#endif /* LOGGING & SLOG_SYSLOG */
+	    break;
+
 	default:
 	    strcat(p, "found a wierd error : ");
 #if (LOGGING & SLOG_SYSLOG)
@@ -562,7 +580,7 @@ void inform_user(code)
 
 	case GLOBAL_NO_PW_ENT:
 	    (void) fprintf(stderr,
-		"Intruder Alert!  You don\'t exist in the passwd file\n\n");
+		"Intruder Alert!  You don't exist in the passwd file\n\n");
 	    break;
 
 	case GLOBAL_NO_AUTH_ENT:
@@ -622,6 +640,16 @@ void inform_user(code)
 		cmnd);
 	    break;
 
+	case BAD_STAMPDIR:
+	    (void) fprintf(stderr,
+		"Timestamp directory has wrong permissions, ignoring.\n");
+	    break;
+
+	case BAD_STAMPFILE:
+	    (void) fprintf(stderr,
+		"Your timestamp file has a preposterous date, ignoring.\n");
+	    break;
+
 	default:
 	    (void) fprintf(stderr,
 		"Something wierd happened.\n\n");
@@ -676,6 +704,8 @@ static int appropriate(code)
     case VALIDATE_ERROR:
     case NO_SUDOERS_FILE:
     case SPOOF_ATTEMPT:
+    case BAD_STAMPDIR:
+    case BAD_STAMPFILE:
     default:
 	return (1);
 	break;

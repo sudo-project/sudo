@@ -121,6 +121,8 @@ extern int top;
 #define SUDOERS_NOT_FILE         ( 0x0B | GLOBAL_PROBLEM )
 #define SUDOERS_RW_OTHER         ( 0x0C | GLOBAL_PROBLEM )
 #define SPOOF_ATTEMPT            0x0D
+#define BAD_STAMPDIR             0x0E
+#define BAD_STAMPFILE            0x0F
 
 /*
  * Boolean values
