@@ -88,8 +88,14 @@ PROGS = @PROGS@
 SRCS = check.c find_path.c logging.c parse.c sudo.c sudo_realpath.c \
        sudo_setenv.c parse.yacc parse.lex
 
-OBJS = check.o find_path.o logging.o parse.o sudo.o sudo_realpath.o \
-       sudo_setenv.o y.tab.o lex.yy.o
+PARSEOBJS = y.tab.o lex.yy.o
+
+TESTOBJS = testsudoers.o
+
+SUDOBJS = check.o find_path.o logging.o parse.o sudo.o sudo_realpath.o \
+          sudo_setenv.o
+
+VISUDOBJS = visudo.o
 
 LIBOBJS = @TGETPASS@ @LIBOBJS@
 
@@ -101,10 +107,7 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING INSTALL Makefile.in PORTING \
             README SUPPORTED TODO OPTIONS HISTORY acsite.m4 getcwd.c putenv.c \
             strdup.c tgetpass.c config.h.in configure.in configure indent.pro \
 	    installbsd sample.sudoers sudo.man sudo.cat sudoers aixcrypt.exp \
-	    visudoers/Makefile.in visudoers/compat.h visudoers/config.h \
-	    visudoers/pathnames.h visudoers/sudo.h visudoers/version.h \
-	    visudoers/visudo.c visudoers/visudo.lex visudoers/visudo.yacc \
-	    visudoers/aixcrypt.exp visudoers/options.h
+	    testsudoers.c visudo.c
 
 all: $(PROGS)
 
@@ -116,29 +119,34 @@ all: $(PROGS)
 .man.cat:
 	$(NROFF) -man $< > $@
 
-sudo : $(OBJS) $(LIBOBJS)
-	$(CC) -o $@ $(OBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS)
+sudo: $(PARSEOBJS) $(SUDOBJS) $(LIBOBJS)
+	$(CC) -o $@ $(PARSEOBJS) $(SUDOBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS)
 
-y.tab.o y.tab.h: parse.yacc $(HDRS) config.h
+visudo: $(PARSEOBJS) $(VISUDOBJS)
+	$(CC) -o $@ $(PARSEOBJS) $(VISUDOBJS) $(LDFLAGS) $(LIBS)
+
+y.tab.o: $(HDRS) y.tab.c
+
+y.tab.c y.tab.h: parse.yacc
 	$(YACC) -d parse.yacc
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) -I$(srcdir) y.tab.c
 
-lex.yy.o: parse.lex y.tab.h $(HDRS) config.h
+lex.yy.o: lex.yy.c y.tab.h $(HDRS)
+
+lex.yy.c: parse.lex
 	$(LEX) parse.lex
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) -I$(srcdir) lex.yy.c
+
+testsudoers: $(PARSEOBJS) $(TESTOBJS)
+	$(CC) -o $@ $(PARSEOBJS) $(TESTOBJS) $(LDFLAGS) $(LIBS)
 
 $(OBJS) $(LIBOBJS) : $(HDRS) config.h
 
 sudo.cat: sudo.man
 
-visudo :
-	( cd visudoers && make "OPTIONS=$(OPTIONS)" $@ )
-
 install: install-binaries install-sudoers install-man
 
 install-binaries: $(PROGS)
 	$(INSTALL) -o $(owner) -g $(group) -m 4111 -s sudo $(sudodir)/sudo
-	$(INSTALL) -o $(owner) -g $(group) -m 0111 -s visudoers/visudo $(visudodir)/visudo
+	$(INSTALL) -o $(owner) -g $(group) -m 0111 -s visudo $(visudodir)/visudo
 
 install-sudoers:
 	@ if [ -f $(sudoersdir)/sudoers ]; then  \
@@ -163,17 +171,14 @@ TAGS: $(SRCS)
 
 clean:
 	-rm -f lex.yy.* y.tab.* *.o $(PROGS) core
-	( cd visudoers && make $@ )
 
 mostlyclean: clean
 
 distclean: clean
 	rm -f Makefile config.h config.status config.cache config.log
-	( cd visudoers && rm -f Makefile )
 
 realclean: distclean
 	rm -f TAGS tags
-	( cd visudoers && rm -f TAGS tags )
 
 dist: $(DISTFILES)
 	rm -f ../cu-sudo.v$(VERSION).tar.Z
