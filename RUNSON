@@ -9,10 +9,10 @@ does as well.
 Name	Rev	Arch	Used		Version	By		 Options
 =======	=======	=======	===============	======= ===============  ===============
 Auspex	1.6.1	sun4	bundled cc	1.3.4	Alek Komarnitsky none
-SunOS	4.1.3	sun4	bundled cc	1.6.7	Todd Miller	 none
-SunOS	4.1.3	sun4	gcc2.9.5.2	1.6.7	Todd Miller	 none
+SunOS	4.1.3	sun4	bundled cc	1.6.8	Todd Miller	 none
+SunOS	4.1.3	sun4	gcc2.9.5.2	1.6.8	Todd Miller	 none
 SunOS	4.1.3	sun4	gcc2.7.2.1	1.5.3	Todd Miller	 --with-kerb4
-SunOS	4.1.3	sun4	gcc2.9.5.2	1.6.7	Todd Miller	 --with-skey
+SunOS	4.1.3	sun4	gcc2.9.5.2	1.6.8	Todd Miller	 --with-skey
 Solaris	2.5.1	sparc	SC4.0		1.5.6p1	Brian Jackson	 none 
 Solaris	2.5.1	sun4u	gcc2.7.2.3	1.5.4	Leon von Stauber none
 Solaris	2.5.1	i386	gcc2.7.2	1.5.4	Leon von Stauber none
@@ -53,6 +53,8 @@ HP-UX	11.00	hp700	bundled cc	1.6.7	Todd Miller 	 none
 HP-UX	11.00	hp700	bundled cc	1.6.7	Todd Miller 	 --with-pam
 HP-UX	11.00	hp700	gcc 3.2		1.6.7	Todd Miller 	 none
 HP-UX	11.00	hp700	gcc 3.2		1.6.7	Todd Miller 	 --with-pam
+HP-UX	11.11	hp700	gcc 3.3.2	1.6.8	Todd Miller 	 --with-pam
+HP-UX	11.11	hp700	unbundled cc	1.6.8	Todd Miller 	 --with-pam
 HP-UX	11.11	hp800	HP C compiler	1.6.5p2	Bill Marmagas 	 --with-pam
 Ultrix	4.3	mips	bundled cc	1.6.3b2	Todd Miller	 none
 Ultrix	4.3	mips	gcc2.7.2.1	1.5.9	Todd Miller	 --with-skey
@@ -104,8 +106,8 @@ AIX	5.1	PowerPC	gcc-3.2.1	1.6.6	Neil MacGregor	 none
 ConvexOS 9.1	convex	bundled cc	1.3.6	Todd Miller	 none
 ConvexOS 9.1	convex	gcc2.4.5	1.3.6	Todd Miller	 none
 BSD/OS	4.1	i386	cc		1.6.3	Todd Miller	 --with-skey
-OpenBSD	3.X	all	gcc-2.95.3	1.6.7	Todd Miller	 none
-OpenBSD	3.X	all	gcc-2.95.3	1.6.7	Todd Miller	 --with-bsdauth
+OpenBSD	3.X	all	gcc-2.95.3	1.6.8	Todd Miller	 none
+OpenBSD	3.X	all	gcc-3.3.2	1.6.8	Todd Miller	 --with-bsdauth
 FreeBSD	1.1	i386	gcc		1.3.2	Dworkin Muller	 none
 FreeBSD	2.0.5	i386	gcc		1.3.4	Dworkin Muller	 none
 FreeBSD	3.2	i386	gcc 2.7.2.1	1.6	Brian Jackson	 none
