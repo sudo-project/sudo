@@ -103,8 +103,15 @@ verify_user()
     char *p;
     sudo_auth *auth;
 
-    /* Set FLAG_ONEANDONLY if there is only one auth method.  */
-    if (auth_switch[0].name && !auth_switch[1].name)
+    /* Make sure we have at least one auth method. */
+    if (auth_switch[0].name == NULL)
+    	log_error(0, "%s  %s %s",
+	    "There are no authentication methods compiled into sudo!",
+	    "If you want to turn off authentication, use the",
+	    "--disable-authentication configure option.");
+
+    /* Set FLAG_ONEANDONLY if there is only one auth method. */
+    if (auth_switch[1].name == NULL)
 	auth_switch[0].flags |= FLAG_ONEANDONLY;
 
     /* Initialize auth methods and unconfigure the method if necessary. */
