@@ -469,10 +469,12 @@ send_mail(line)
 		char *mpath, *mflags;
 		int i;
 
-		/* Child. */
+		/* Child, set stdin to output side of the pipe */
+		if (pfd[0] != STDIN_FILENO) {
+		    (void) dup2(pfd[0], STDIN_FILENO);
+		    (void) close(pfd[0]);
+		}
 		(void) close(pfd[1]);
-		(void) dup2(pfd[0], STDIN_FILENO);
-		(void) close(pfd[0]);
 
 		/* Build up an argv based the mailer path and flags */
 		mflags = estrdup(def_str(I_MAILERFLAGS));
@@ -501,8 +503,8 @@ send_mail(line)
 	    break;
     }
 
-    mail = fdopen(pfd[1], "w");
     (void) close(pfd[0]);
+    mail = fdopen(pfd[1], "w");
 
     /* Pipes are all setup, send message via sendmail. */
     (void) fprintf(mail, "To: %s\nFrom: %s\nSubject: ",
