@@ -155,7 +155,8 @@ verify_user(prompt)
 #ifdef AUTH_STANDALONE
 	p = prompt;
 #else
-	p = (char *) tgetpass(prompt, def_ival(I_PW_TIMEOUT) * 60, 1);
+	p = (char *) tgetpass(prompt, def_ival(I_PW_TIMEOUT) * 60,
+	    tgetpass_flags);
 	if (!p || *p == '\0')
 	    nil_pw = 1;
 #endif /* AUTH_STANDALONE */

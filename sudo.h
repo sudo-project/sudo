@@ -158,6 +158,12 @@ struct sudo_user {
 #define PWCHECK_ALWAYS	0x08
 
 /*
+ * Flags for tgetpass()
+ */
+#define TGP_ECHO	0x01		/* leave echo on when reading passwd */
+#define TGP_STDIN	0x02		/* read from stdin, not /dev/tty */
+
+/*
  * Function prototypes
  */
 #define YY_DECL int yylex __P((void))
@@ -218,6 +224,7 @@ extern struct sudo_user sudo_user;
 extern int Argc;
 extern char **Argv;
 extern FILE *sudoers_fp;
+extern int tgetpass_flags;
 #endif
 extern int errno;
 

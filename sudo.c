@@ -124,6 +124,7 @@ FILE *sudoers_fp = NULL;
 static char *runas_homedir = NULL;	/* XXX */
 struct interface *interfaces;
 int num_interfaces;
+int tgetpass_flags;
 extern int errorlineno;
 
 /*
@@ -639,6 +640,9 @@ parse_args()
 	    case 'H':
 		rval |= MODE_RESET_HOME;
 		break;
+	    case 'S':
+		tgetpass_flags |= TGP_STDIN;
+		break;
 	    case '-':
 		NewArgc--;
 		NewArgv++;
@@ -1122,7 +1126,7 @@ usage(exit_val)
     int exit_val;
 {
     (void) fprintf(stderr,
-	"usage: %s -V | -h | -L | -l | -v | -k | -K | -H | [-b] [-p prompt]\n%*s",
+	"usage: %s -V | -h | -L | -l | -v | -k | -K | -H | [-S] [-b] [-p prompt]\n%*s",
 	Argv[0], (int) strlen(Argv[0]) + 8, " ");
     (void) fprintf(stderr, "[-u username/#uid] -s | <command>\n");
     exit(exit_val);

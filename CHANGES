@@ -1250,13 +1250,18 @@ Sudo 1.6.2 released.
 
 394) Pam now works on HP-UX 11.0, thanks to Jeff A. Earickson.
 
-395) It is now possible to set the path to the editor for visudo as well
+395) Fixed a bug that caused an infinite loop when the password
+     timeout was disabled.
+
+396) It is now possible to set the path to the editor for visudo as well
      as the flag that determines whether or not visudo will look at
      $EDITOR in the sudoers file.
 
-396) configure now pulls in the values of LIBS, LDFLAGS, CPPFLAGS, etc
+397) configure now pulls in the values of LIBS, LDFLAGS, CPPFLAGS, etc
      as the documentation says it ought to.
 
-397) Added rootpw, runaspw, and targetpw to prompt for the root, runas_default
+398) Added rootpw, runaspw, and targetpw to prompt for the root, runas_default
      and target user's passwords respectively (instead of the invoking user's
      password).
+
+399) Added -S flag to force password read from stdin.
