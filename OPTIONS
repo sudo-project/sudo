@@ -56,11 +56,11 @@ SEND_MAIL_WHEN_NOT_OK
     This is off by default.
 
 EXEMPTGROUP
-    If this is defined then the gid EXEMPTGROUP is set to doesn't need
-    to enter a password when running sudo.  This may be useful for sites
-    that don't want their "core" sysadmins to have to enter a password
-    but where Jr. sysadmins need to.
-    This is of by default.
+    If this is defined then users in the group defined by EXEMPTGROUP
+    don't need to enter a password when running sudo.  This may be useful
+    for sites that don't want their "core" sysadmins to have to enter
+    a password but where Jr. sysadmins need to.
+    This is off by default.
 
 ENV_EDITOR
     Makes visudo consult the EDITOR and VISUAL environmental variables
