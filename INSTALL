@@ -176,7 +176,7 @@ Special features/options:
 
   --with-sia
 	Enable SIA support.  This is the "Security Integration Architecture"
-	on Digital UN*X.
+	on Digital UNIX.
 
   --with-pam
 	Enable PAM support.  Tested on Redhat Linux 5.x but should work on
@@ -512,14 +512,11 @@ Ultrix 4.x:
 
 Digital UNIX:
     Digital UNIX 4.0 shipped with /usr/include/prot.h including acl.h,
-    but there is no /usr/include/acl.h.  Digital says this will be
-    fixed in the next release of Digital UNIX.  In the meantime
-    you can use the acl.h from /usr/sys/include/sys.  Digital
-    recommends that you just:
+    but there is no /usr/include/acl.h.  This was fixed in version 4.0D.
+    If you are running a version of 4.0 before 4.0D, Digital recommends
+    that you just:
 	cd /usr/include
 	ln -s sys/acl.h acl.h
-    This will only be an issue if you are using C2 (enhanced)
-    security.
 
 Linux:
     One person reported that he needed to run configure with
