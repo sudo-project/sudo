@@ -956,7 +956,7 @@ case "$host" in
 
 		# check for password adjunct functions (shadow passwords)
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_FUNCS(getpwanam)
+		    AC_CHECK_FUNC(getpwanam, AC_DEFINE(HAVE_GETPWANAM) AC_CHECK_FUNCS(issecure))
 		    CHECKSHADOW="false"
 		fi
 		;;
@@ -1084,8 +1084,11 @@ case "$host" in
 		# use SIA by default, if we have it, else SecureWare
 		# unless overridden on the command line
 		if test "$CHECKSIA" = "true"; then
-		    AC_CHECK_FUNC(sia_ses_init, AC_DEFINE(HAVE_SIA))
-		    CHECKSHADOW="false"
+		    AC_CHECK_FUNC(sia_ses_init, AC_DEFINE(HAVE_SIA) [
+		    if test -n "$with_skey" -o -n "$with_opie" -o -n "$with_otp_only" -o -n "$with_long_otp_prompt" -o -n "$with_SecurID" -o -n "$with_kerb4" -o -n "$with_kerb5" -o -n "$with_pam" -o -n "$with_AFS" -o -n "$with_DCE"; then
+			echo "Sorry, you cannot mix SIA and other authentication schemes.  You can turn off SIA support via the --disable-sia option"
+			exit 1
+		    fi]; CHECKSHADOW=false)
 		fi
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_LIB(security, getprpwnam, SECUREWARE=1)
@@ -1095,6 +1098,7 @@ case "$host" in
 		if test -n "$SECUREWARE"; then
 		    # 4.x and higher need -ldb too...
 		    AC_CHECK_LIB(db, dbopen, [SUDO_LIBS="${SUDO_LIBS} -lsecurity -ldb -laud -lm"; LIBS="${LIBS} -lsecurity -ldb -laud -lm"], [SUDO_LIBS="${SUDO_LIBS} -lsecurity -ldb -laud -lm"; LIBS="${LIBS} -lsecurity -ldb -laud -lm"])
+		    AC_CHECK_FUNCS(dispcrypt)
 		    AC_MSG_CHECKING([for broken /usr/include/prot.h])
 		    AC_TRY_COMPILE([
 #include <sys/types.h>
