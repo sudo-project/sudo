@@ -224,9 +224,11 @@ pass_warn(fp)
     FILE *fp;
 {
 
+#ifdef INSULT
     if (def_flag(I_INSULTS))
 	(void) fprintf(fp, "%s\n", INSULT);
     else
+#endif
 	(void) fprintf(fp, "%s\n", def_str(I_BADPASS_MSG));
 }
 
