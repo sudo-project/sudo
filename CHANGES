@@ -388,3 +388,16 @@ CHANGES from sudo 1.3.2
 126) A timeout of 0 will now cause a password to be entered every
      time.  Based on a suggestion by Larry Auton <lda@research.AT&T.com>
      and Navjot Singh <singh@research.AT&T.com>.
+
+CHANGES from sudo 1.3.3
+
+127) Cleaned up interfaces.c so that it is more readable.
+
+128) Added support for syslog()'s that don't guarantee delivery
+     of a message.  HP-UX is the only known offender.
+
+129) No longer use memmove() since memcpy() does what we need and
+     configure doesn't always catch memmove() even when it is
+     there (may be a library problem).
+
+130) Updated man page to reflect two more security issues.
