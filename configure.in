@@ -515,9 +515,10 @@ if test -n "$SECURID" ; then
 fi
 
 dnl
-dnl Check for log file location
+dnl Check for log file and timestamp locations
 dnl
 SUDO_LOGFILE
+SUDO_TIMEDIR
 
 dnl
 dnl Set exec_prefix

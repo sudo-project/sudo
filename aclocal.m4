@@ -136,6 +136,21 @@ fi
 ])dnl
 
 dnl
+dnl Where the log file goes, use /var/log if it exists, else /{var,usr}/adm
+dnl
+AC_DEFUN(SUDO_TIMEDIR, [AC_MSG_CHECKING(for timestamp file location)
+if test -d "/var/run"; then
+    AC_MSG_RESULT(/var/run/.odus)
+    AC_DEFINE(_SUDO_PATH_TIMEDIR, "/var/run/.odus")
+elif test -d "/tmp"; then
+    AC_MSG_RESULT(/tmp/.odus)
+    AC_DEFINE(_SUDO_PATH_TIMEDIR, "/tmp/.odus")
+else
+    AC_MSG_RESULT(unknown, you will have to set _PATH_SUDO_TIMEDIR by hand)
+fi
+])dnl
+
+dnl
 dnl check for shadow passwords
 dnl
 AC_DEFUN(SUDO_CHECK_SHADOW, [AC_MSG_CHECKING(for shadow passwords)
