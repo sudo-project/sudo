@@ -585,16 +585,19 @@ store_list(str, def, op)
 
     /* Split str into multiple space-separated words and act on each one. */
     if (op != FALSE) {
-	for (start = str; isblank(*start); start++)
-	    ;
-	while ((end = strpbrk(start, " \t"))) {
-	    list_op(start, end - start, def, op == '-' ? delete : add);
-	    start = end;
-	    for (; isblank(*start); start++)
+	end = str;
+	do {
+	    /* Remove leading blanks, if nothing but blanks we are done. */
+	    for (start = end; isblank(*start); start++)
 		;
-	}
-	if (*start)
-	    list_op(start, strlen(start), def, op == '-' ? delete : add);
+	    if (*start == '\0')
+		break;
+
+	    /* Find end position and perform operation. */
+	    for (end = start; *end && !isblank(*end); end++) 
+		;
+	    list_op(start, end - start, def, op == '-' ? delete : add);
+	} while (*end++ != '\0');
     }
     return(TRUE);
 }
@@ -773,7 +776,9 @@ list_op(val, len, def, op)
     /* Add new node to the head of the list. */
     if (op == add) {
 	cur = emalloc(sizeof(struct list_member));
-	cur->value = estrdup(val);
+	cur->value = emalloc(len + 1);
+	(void) memcpy(cur->value, val, len);
+	cur->value[len] = '\0';
 	cur->next = def->sd_un.list;
 	def->sd_un.list = cur;
     }
