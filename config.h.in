@@ -91,6 +91,9 @@
 /* Define if you use SecurID.  */
 #undef HAVE_SECURID
 
+/* Define if you use AIX general authentication.  */
+#undef HAVE_AUTHENTICATE
+
 /* Define if you use Kerberos.  */
 #undef HAVE_KERB4
 
