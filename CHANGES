@@ -161,3 +161,7 @@ CHANGES from sudo 1.3
 
 56) Moved code to send error mail to be after the log message.
     From rouilj@cs.umb.edu.
+
+57) Added -k and -h options and rearranged some of the code to be
+    more modular and less braindamaged.  This introduces the concept
+    of "run modes" to sudo.
