@@ -1,5 +1,5 @@
 /*
- * CU sudo version 1.5.1 (based on Root Group sudo version 1.1)
+ * CU sudo version 1.5.2 (based on Root Group sudo version 1.1)
  *
  * This software comes with no waranty whatsoever, use at your own risk.
  *
@@ -150,9 +150,7 @@ char host[MAXHOSTNAMELEN + 1];
 char *shost;
 char cwd[MAXPATHLEN + 1];
 struct stat cmnd_st;
-#ifdef SHELL_SETS_HOME
 static char *runas_homedir = NULL;
-#endif /* SHELL_SETS_HOME */
 extern struct interface *interfaces;
 extern int num_interfaces;
 extern int printmatches;
@@ -289,7 +287,7 @@ int main(argc, argv)
     rtn = check_sudoers();	/* check mode/owner on _PATH_SUDO_SUDOERS */
     if (rtn != ALL_SYSTEMS_GO) {
 	log_error(rtn);
-	set_perms(PERM_FULL_USER);
+	set_perms(PERM_FULL_USER, sudo_mode);
 	inform_user(rtn);
 	exit(1);
     }
@@ -330,13 +328,11 @@ int main(argc, argv)
 	    }
 
 	    /* become specified user or root */
-	    set_perms(PERM_RUNAS);
+	    set_perms(PERM_RUNAS, sudo_mode);
 
-#ifdef SHELL_SETS_HOME
-	    /* set $HOME for `sudo -s' */
-	    if ((sudo_mode & MODE_SHELL) && runas_homedir)
+	    /* set $HOME for `sudo -H' */
+	    if ((sudo_mode & MODE_RESET_HOME) && runas_homedir)
 		(void) sudo_setenv("HOME", runas_homedir);
-#endif /* SHELL_SETS_HOME */
 
 #ifndef PROFILING
 	    if ((sudo_mode & MODE_BACKGROUND) && fork() > 0) {
@@ -379,7 +375,7 @@ int main(argc, argv)
 
 	default:
 	    log_error(rtn);
-	    set_perms(PERM_FULL_USER);
+	    set_perms(PERM_FULL_USER, sudo_mode);
 	    inform_user(rtn);
 	    exit(1);
 	    break;
@@ -410,8 +406,8 @@ static void load_globals(sudo_mode)
      * can read the shadow passwd file if necesary.
      */
     user_pw_ent = sudo_getpwuid(getuid());
-    set_perms(PERM_ROOT);
-    set_perms(PERM_USER);
+    set_perms(PERM_ROOT, sudo_mode);
+    set_perms(PERM_USER, sudo_mode);
     if (user_pw_ent == NULL) {
 	/* need to make a fake user_pw_ent */
 	struct passwd pw_ent;
@@ -464,13 +460,13 @@ static void load_globals(sudo_mode)
      */
     if (!getwd(cwd)) {
 	/* try as root... */
-	set_perms(PERM_ROOT);
+	set_perms(PERM_ROOT, sudo_mode);
 	if (!getwd(cwd)) {
 	    (void) fprintf(stderr, "%s:  Can't get working directory!\n",
 			   Argv[0]);
 	    (void) strcpy(cwd, "unknown");
 	}
-	set_perms(PERM_USER);
+	set_perms(PERM_USER, sudo_mode);
     }
 
     /*
@@ -598,6 +594,12 @@ static int parse_args()
 		break;
 	    case 's':
 		ret |= MODE_SHELL;
+#ifdef SHELL_SETS_HOME
+		ret |= MODE_RESET_HOME;
+#endif /* SHELL_SETS_HOME */
+		break;
+	    case 'H':
+		ret |= MODE_RESET_HOME;
 		break;
 	    case '-':
 		NewArgc--;
@@ -639,7 +641,7 @@ static int parse_args()
 static void usage(exit_val)
     int exit_val;
 {
-    (void) fprintf(stderr, "usage: %s -V | -h | -l | -v | -k | [-b] [-p prompt] [-u username/#uid] -s | <command>\n", Argv[0]);
+    (void) fprintf(stderr, "usage: %s -V | -h | -l | -v | -k | -H | [-b] [-p prompt] [-u username/#uid] -s | <command>\n", Argv[0]);
     exit(exit_val);
 }
 
@@ -729,6 +731,14 @@ static void add_env(contiguous)
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
+
+    /* set PS1 if SUDO_PS1 is set */
+    if ((buf = getenv("SUDO_PS1")))
+	if (sudo_setenv("PS1", buf)) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
 }
 
 
@@ -781,7 +791,7 @@ static int check_sudoers()
      * Fix the mode and group on sudoers file from old default.
      * Only works if filesystem is readable/writable by root.
      */
-    set_perms(PERM_ROOT);
+    set_perms(PERM_ROOT, 0);
     if (!lstat(_PATH_SUDO_SUDOERS, &statbuf) && SUDOERS_UID == statbuf.st_uid) {
 	if (SUDOERS_MODE != 0400 && (statbuf.st_mode & 0007777) == 0400) {
 	    if (chmod(_PATH_SUDO_SUDOERS, SUDOERS_MODE) == 0) {
@@ -806,7 +816,7 @@ static int check_sudoers()
 	}
     }
 
-    set_perms(PERM_SUDOERS);
+    set_perms(PERM_SUDOERS, 0);
 
     if ((fd = open(_PATH_SUDO_SUDOERS, O_RDONLY)) < 0 || read(fd, &c, 1) == -1)
 	rtn = NO_SUDOERS_FILE;
@@ -822,8 +832,8 @@ static int check_sudoers()
     if (fd != -1)
 	(void) close(fd);
 
-    set_perms(PERM_ROOT);
-    set_perms(PERM_USER);
+    set_perms(PERM_ROOT, 0);
+    set_perms(PERM_USER, 0);
 
     return(rtn);
 }
@@ -837,8 +847,9 @@ static int check_sudoers()
  *  this function sets real and effective uids and gids based on perm.
  */
 
-void set_perms(perm)
+void set_perms(perm, sudo_mode)
     int perm;
+    int sudo_mode;
 {
     struct passwd *pw_ent;
 
@@ -911,9 +922,8 @@ void set_perms(perm)
 					perror("");
 					exit(1);
 				    }
-#ifdef SHELL_SETS_HOME
-				    runas_homedir = pw_ent->pw_dir;
-#endif /* SHELL_SETS_HOME */
+				    if (sudo_mode & MODE_RESET_HOME)
+					runas_homedir = pw_ent->pw_dir;
 				}
 
 				break;
