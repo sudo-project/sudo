@@ -163,10 +163,11 @@ void load_interfaces()
 
 	/* set i to the subscript of the next interface */
 #ifdef HAVE_SA_LEN
-	i += sizeof(ifreq.ifr_name) + ifreq.ifr_addr.sa_len;
-#else
-	i += sizeof(struct ifreq);
+	if (ifreq.ifr_addr.sa_len > sizeof(ifreq.ifr_addr))
+	    i += sizeof(ifreq.ifr_name) + ifreq.ifr_addr.sa_len;
+	else
 #endif /* HAVE_SA_LEN */
+	    i += sizeof(struct ifreq);
 
 	/* skip duplicates and interfaces with NULL addresses */
 	sin = (struct sockaddr_in *) &ifr->ifr_addr;
@@ -231,12 +232,17 @@ void load_interfaces()
 
     /* if there were bogus entries, realloc the array */
     if (n != num_interfaces) {
-	interfaces = (struct interface *) realloc(interfaces,
-	    sizeof(struct interface) * num_interfaces);
-	if (interfaces == NULL) {
-	    perror("realloc");
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
+	/* it is unlikely that num_interfaces will be 0 but who knows... */
+	if (num_interfaces != 0) {
+	    interfaces = (struct interface *) realloc(interfaces,
+		sizeof(struct interface) * num_interfaces);
+	    if (interfaces == NULL) {
+		perror("realloc");
+		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+		exit(1);
+	    }
+	} else {
+	    (void) free(interfaces);
 	}
     }
 }
