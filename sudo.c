@@ -133,9 +133,10 @@ extern struct passwd *sudo_getpwuid	__P((uid_t));
  */
 int Argc;
 char **Argv;
+int NewArgc = 0;
+char **NewArgv = NULL;
 struct passwd *user_pw_ent;
 char *cmnd = NULL;
-char *cmnd_args = NULL;
 char *tty = NULL;
 char *prompt = PASSPROMPT;
 char host[MAXHOSTNAMELEN + 1];
@@ -238,6 +239,38 @@ int main(argc, argv)
 
     load_globals(sudo_mode);	/* load global variables used throughout sudo */
 
+    /*
+     * If we got the '-s' option (run shell) we need to redo NewArgv
+     * and NewArgc.  This can only be done after load_globals().
+     */
+    if ((sudo_mode & MODE_SHELL)) {
+	char **dst, **src = NewArgv;
+
+	NewArgv = (char **) malloc (sizeof(char *) * (++NewArgc));
+	if (NewArgv == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+
+	/* add the shell as argv[0] */
+	/* XXX - doesn't deal with "" meaning bourne shell */
+	if (user_shell && *user_shell) {
+	    if ((NewArgv[0] = strrchr(user_shell, '/') + 1) == (char *) 1)
+		NewArgv[0] = user_shell;
+	} else {
+	    (void) fprintf(stderr, "%s: Unable to determine shell.", Argv[0]);
+	    exit(1);
+	}
+
+	/* copy the args from Argv */
+	dst = NewArgv + 1;
+	*dst = (char *) NULL;
+	while (*src) {
+	    *dst++ = *src++;
+	}
+    }
+
     rtn = check_sudoers();	/* check mode/owner on _PATH_SUDO_SUDOERS */
     if (rtn != ALL_SYSTEMS_GO) {
 	log_error(rtn);
@@ -303,35 +336,7 @@ int main(argc, argv)
 		    }
 		}
 
-		/*
-		 * If invoking a shell, replace "-s" with shell to exec.
-		 * For this to work we need to malloc() a new argv...
-		 */
-		if ((sudo_mode & MODE_SHELL)) {
-		    char **NewArgv;
-		    int i;
-
-		    NewArgv = (char **) malloc (sizeof(char *) * (Argc + 1));
-		    if (NewArgv == NULL) {
-			perror("malloc");
-			(void) fprintf(stderr, "%s: cannot allocate memory!\n",
-				       Argv[0]);
-			exit(1);
-		    }
-
-		    /* replace "-s" with the shell's name */
-		    if ((NewArgv[0] = strrchr(user_shell, '/') + 1)
-			== (char *) 1)
-			NewArgv[0] = user_shell;
-
-		    for (i = 1; i < Argc; i++)
-			NewArgv[i] = Argv[i];
-
-		    NewArgv[i] = (char *) NULL;
-
-		    EXEC(cmnd, NewArgv);
-		} else 
-		    EXEC(cmnd, &Argv[1]);
+		EXEC(cmnd, NewArgv);	/* run the command */
 	    }
 #else
 	    exit(0);
@@ -485,7 +490,6 @@ static int parse_args()
 {
     int ret = MODE_RUN;			/* what mode is suod to be run in? */
     int excl = 0;			/* exclusive arg, no others allowed */
-    char *progname = Argv[0];		/* so we can save Argv[0] */
 
 #ifdef SHELL_IF_NO_ARGS
     if (Argc < 2) {			/* no options and no command */
@@ -497,26 +501,29 @@ static int parse_args()
 	usage(1);
 #endif /* SHELL_IF_NO_ARGS */
 
-    while (Argc > 1 && Argv[1][0] == '-') {
-	if (Argv[1][1] != '\0' && Argv[1][2] != '\0') {
+    NewArgv = Argv + 1;
+    NewArgc = Argc - 1;
+    while (NewArgc > 0 && NewArgv[0][0] == '-') {
+	if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0') {
 	    (void) fprintf(stderr, "%s: Please use single character options\n",
-		progname);
+		Argv[0]);
 	    usage(1);
 	}
 
 	if (excl)
 	    usage(1);			/* only one -? option allowed */
 
-	switch (Argv[1][1]) {
+	switch (NewArgv[0][1]) {
 	    case 'p':
-		if (Argc + (ret & MODE_SHELL) < 4)
+		/* must have an associated prompt */
+		if (NewArgv[1] == NULL)
 		    usage(1);
 
-		prompt = Argv[2];
+		prompt = NewArgv[1];
 
 		/* shift Argv over and adjust Argc */
-		Argc--;
-		Argv++;
+		NewArgc--;
+		NewArgv++;
 		break;
 	    case 'b':
 		ret |= MODE_BACKGROUND;
@@ -545,9 +552,8 @@ static int parse_args()
 		ret |= MODE_SHELL;
 		break;
 	    case '-':
-		Argc--;
-		Argv++;
-		Argv[0] = progname;
+		NewArgc--;
+		NewArgv++;
 #ifdef SHELL_IF_NO_ARGS
 		if (ret == MODE_RUN)
 		    ret |= MODE_SHELL;
@@ -555,16 +561,15 @@ static int parse_args()
 		return(ret);
 	    case '\0':
 		(void) fprintf(stderr, "%s: '-' requires an argument\n",
-		    progname);
+		    Argv[0]);
 		usage(1);
 	    default:
-		(void) fprintf(stderr, "%s: Illegal option %s\n", progname,
-		    Argv[1]);
+		(void) fprintf(stderr, "%s: Illegal option %s\n", Argv[0],
+		    NewArgv[0]);
 		usage(1);
 	}
-	Argc--;
-	Argv++;
-	Argv[0] = progname;
+	NewArgc--;
+	NewArgv++;
     }
 
     return(ret);
@@ -636,71 +641,25 @@ static void add_env()
  *
  *  load_cmnd()
  *
- *  This function sets the cmnd and cmnd_args global variables based on Argv
+ *  This function sets the cmnd global variable based on Argv
  */
 
 static void load_cmnd(sudo_mode)
     int sudo_mode;
 {
-    int arg_start = 2;			/* position where command args start */
-    char *old_cmnd;			/* command before expansion */
-
-    /* If we are running a shell command args start at position 1 */
-    if ((sudo_mode & MODE_SHELL)) {
-	if (user_shell && *user_shell) {
-	    old_cmnd = user_shell;
-	    arg_start = 1;
-	} else {
-	    (void) fprintf(stderr, "%s: Unable to determine shell.", Argv[0]);
-	    exit(1);
-	}
-    } else {
-	old_cmnd = Argv[1];
-    }
-
-    if (strlen(old_cmnd) > MAXPATHLEN) {
+    if (strlen(NewArgv[0]) > MAXPATHLEN) {
 	errno = ENAMETOOLONG;
-	(void) fprintf(stderr, "%s: %s: Pathname too long\n", Argv[0], old_cmnd);
+	(void) fprintf(stderr, "%s: %s: Pathname too long\n", Argv[0],
+		       NewArgv[0]);
 	exit(1);
-    }
-
-    /*
-     * Find the length of cmnd_args and allocate space, then fill it in.
-     */
-    if (Argc > arg_start) {
-	size_t arg_len;			/* sum length of all args */
-	char *from, *to;		/* loop variables for string copy */
-	int i;				/* venerable loop variable */
-
-	/*
-	 * How much space do we need?
-	 * This assumes that Argv (aka argv) is contiguous.
-	 */
-	arg_len = (size_t) Argv[Argc-1] + strlen(Argv[Argc-1]) + 1 -
-		  (size_t) Argv[arg_start];
-
-	if ((cmnd_args = (char *) malloc(arg_len)) == NULL) {
-	    perror("malloc");
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
-
-	/*
-	 * Copy from Argv to cmnd_args, replacing NULL's with spaces.
-	 * This assumes that Argv (aka argv) is contiguous.
-	 */
-	for (i=0, to=cmnd_args, from=Argv[arg_start]; i < arg_len; i++) {
-	    if ((*to++ = *from++) == NULL)
-		*(to-1) = ' ';
-	}
-	cmnd_args[arg_len-1] = '\0';		/* need a NULL at the end */
     }
 
     /*
      * Resolve the path
      */
-    if ((cmnd = find_path(old_cmnd)) == NULL) {
-	(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], old_cmnd);
+    if ((cmnd = find_path(NewArgv[0])) == NULL) {
+	(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0],
+		       NewArgv[0]);
 	exit(1);
     }
 }
