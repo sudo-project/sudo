@@ -318,14 +318,6 @@ typedef struct list {
  * Prototypes
  */
 
-/* Deal with ansi stuff reasonably */
-#undef  __P
-#if defined (__cplusplus) || defined (__STDC__)
-#  define __P(args)	args
-#else
-#  define __P(args)	()
-#endif
-
 /* These are the functions that are called in sudo(8) */
 
 #ifndef HAVE_STRDUP
