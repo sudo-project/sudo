@@ -39,14 +39,6 @@
 static char rcsid[] = "$Id$";
 #endif /* lint */
 
-/* Shadow password types */
-#define SPW_NONE	0
-#define SPW_SECUREWARE	1
-#define SPW_HPUX9	2
-#define SPW_SUNOS4	3
-#define SPW_SVR4	4
-#define SPW_ULTRIX4	5
-
 #include "config.h"
 
 #include <stdio.h>
