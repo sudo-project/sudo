@@ -9,6 +9,12 @@ o Upgrading from a version prior to 1.6.8:
     if there is no /var/run directory.  This directory will be
     created if it does not already exist.
 
+    Previously, a sudoers entry that explicitly prohibited running
+    a command as a certain user did not override a previous entry
+    allowing the same command.  This has been fixed in sudo 1.6.8
+    such that the last match is now used (as it is documented).
+    Hopefully no one was depending on the previous (buggy) beghavior.
+
 o Upgrading from a version prior to 1.6:
 
     As of sudo 1.6, parsing of runas entries and the NOPASSWD tag
