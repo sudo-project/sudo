@@ -228,6 +228,8 @@ AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
 		with_classic_insults=yes
 		with_csops_insults=yes
 		with_env_editor=yes
+		test -n "$mansectsu" || mansectsu=8
+		test -n "$mansectform" || mansectform=5
 		;;
     no)		;;
     *)		AC_MSG_WARN([Ignoring unknown argument to --with-csops: $with_csops])
