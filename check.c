@@ -336,10 +336,9 @@ static void check_passwd()
 #endif /* HAVE_SKEY */
     char *encrypted=epasswd;	/* this comes from /etc/passwd  */
 #if defined(HAVE_KERB4) && defined(USE_GETPASS)
-    char pass[128];
-#else
-    char *pass;			/* this is what gets entered    */
+    char kpass[BUFSIZ];
 #endif /* HAVE_KERB4 && USE_GETPASS */
+    char *pass;			/* this is what gets entered    */
     register int counter = TRIES_FOR_PASSWORD;
 
 #if defined(__hpux) && defined(HAVE_C2_SECURITY)
@@ -426,16 +425,17 @@ static void check_passwd()
      */
     while (counter > 0) {
 #ifdef HAVE_SKEY
-	pass = skey_getpass("Password:", pw_ent, pw_ok);
+	pass = skey_getpass(prompt, pw_ent, pw_ok);
 #else
 #ifdef USE_GETPASS
 #ifdef HAVE_KERB4
-	(void) des_read_pw_string(pass, sizeof(pass) - 1, "Password: ", 0);
+	(void) des_read_pw_string(kpass, sizeof(kpass) - 1, prompt, 0);
+	pass = kpass;
 #else
-	pass = (char *) getpass("Password:");
+	pass = (char *) getpass(prompt);
 #endif /* HAVE_KERB4 */
 #else
-	pass = tgetpass("Password:", PASSWORD_TIMEOUT * 60);
+	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60);
 #endif /* USE_GETPASS */
 #endif /* HAVE_SKEY */
 	if (!pass || *pass == '\0')
