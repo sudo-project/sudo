@@ -42,10 +42,17 @@ static char rcsid[] = "$Id$";
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <stdio.h>
+#ifdef STD_HEADERS
+#include <stdlib.h>
+#endif /* STD_HEADERS */
 #include <errno.h>
 #include <signal.h>
 
 #include "sudo.h"
+
+#ifndef STD_HEADERS
+extern char *getenv();
+#endif /* !STD_HEADERS */
 
 extern FILE *yyin, *yyout;
 extern int errno, yylineno;
@@ -72,6 +79,7 @@ main(argc, argv)
 {
     int fd;
     struct stat sbuf;
+    char * Editor;
 
     /*
      * handle the signals
@@ -92,6 +100,13 @@ main(argc, argv)
      * we only want root to be able to read/write the sudoers_tmp_file
      */
     umask(077);
+
+    /*
+     * set up the Editor variable correctly
+     */
+    if ( (Editor = getenv("EDITOR")) == NULL)
+	if ( (Editor = getenv("VISUAL")) == NULL )
+	    Editor = EDITOR;
 
     /*
      * open the sudoers file read only
@@ -138,7 +153,7 @@ main(argc, argv)
 	/*
 	 * build strings in buffer to be executed by system()
 	 */
-	(void) sprintf(buffer, "%s +%d %s", EDITOR, err_line_no,
+	(void) sprintf(buffer, "%s +%d %s", Editor, err_line_no,
 	    sudoers_tmp_file);
 
 	/* edit the file */
