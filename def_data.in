@@ -44,6 +44,9 @@ lecture
 	T_TUPLE|T_BOOL
 	"Lecture user the first time they run sudo"
 	never once always
+lecture_file
+	T_STR|T_PATH|T_BOOL
+	"Path to a file containing the sudo lecture: %s"
 authenticate
 	T_FLAG
 	"Require users to authenticate by default"

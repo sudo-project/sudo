@@ -134,18 +134,26 @@ static void
 lecture(status)
     int status;
 {
+    FILE *fp;
+    char buf[BUFSIZ];
+    ssize_t nread;
 
     if (def_lecture == never ||
 	(def_lecture == once && status != TS_MISSING && status != TS_ERROR))
 	return;
 
-    (void) fputs("\n\
+    if (def_lecture_file && (fp = fopen(def_lecture_file, "r")) != NULL) {
+	while ((nread = fread(buf, sizeof(char), sizeof(buf), fp)) != 0)
+	    fwrite(buf, nread, 1, stderr);
+    } else {
+	(void) fputs("\n\
 We trust you have received the usual lecture from the local System\n\
 Administrator. It usually boils down to these two things:\n\
 \n\
     #1) Respect the privacy of others.\n\
     #2) Think before you type.\n\n",
     stderr);
+    }
 }
 
 /*

@@ -167,7 +167,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "December 30, 2003" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "January  4, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -706,6 +706,10 @@ Always lecture the user.
 .Sp
 The default value is \fI@lecture@\fR.
 .RE
+.IP "lecture_file" 12
+.IX Item "lecture_file"
+Path to a file containing an alternate sudo lecture that will
+be used in place of the standard lecture if the named file exists.
 .IP "logfile" 12
 .IX Item "logfile"
 Path to the \fBsudo\fR log file (not the syslog log file).  Setting a path

@@ -60,6 +60,9 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Lecture user the first time they run sudo",
 	def_data_lecture,
     }, {
+	"lecture_file", T_STR|T_PATH|T_BOOL,
+	"Path to a file containing the sudo lecture: %s",
+    }, {
 	"authenticate", T_FLAG,
 	"Require users to authenticate by default",
     }, {
