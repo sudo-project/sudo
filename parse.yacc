@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *  Please send bugs, changes, problems to sudo-bugs@cs.colorado.edu
+ *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
  *
  *******************************************************************
  *

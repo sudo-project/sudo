@@ -3,7 +3,7 @@
  *
  * This software comes with no waranty whatsoever, use at your own risk.
  *
- * Please send bugs, changes, problems to sudo-bugs@cs.colorado.edu
+ * Please send bugs, changes, problems to sudo-bugs@courtesan.com
  *
  */
 
@@ -47,7 +47,7 @@
  *   However, due to the fact that both of the above are no longer
  *   working at Root Group, I am maintaining the "CU version" of
  *   sudo.
- *		Todd Miller  <Todd.Miller@cs.colorado.edu>
+ *		Todd Miller  <Todd.Miller@courtesan.com>
  */
 
 #ifndef lint
