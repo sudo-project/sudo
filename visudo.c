@@ -271,7 +271,10 @@ int main(argc, argv)
 	     * for parse errors.
 	     */
 	    yyout = stdout;
-	    yyin = fopen(stmp, "r");
+	    if (parse_error)
+		yyin = freopen(stmp, "r", yyin);
+	    else
+		yyin = fopen(stmp, "r");
 	    if (yyin == NULL) {
 		(void) fprintf(stderr,
 		    "%s: Can't re-open temporary file (%s), %s unchanged.\n",
@@ -291,8 +294,6 @@ int main(argc, argv)
 		    Argv[0], stmp, sudoers);
 		Exit(1);
 	    }
-
-	    (void) fclose(yyin);
 	} else {
 	    (void) fprintf(stderr, "%s: Editor (%s) failed, %s unchanged.\n",
 		Argv[0], Editor, sudoers);
