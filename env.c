@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000-2003 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2000-2004 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
