@@ -256,6 +256,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"If LDAP directory is up, do we ignore local sudoers file",
 	NULL,
     }, {
+	"trace", T_FLAG,
+	"Trace children of cmnd and apply sudoers restrictions to them",
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };
