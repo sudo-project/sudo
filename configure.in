@@ -572,11 +572,11 @@ case "$host" in
 		LIB_SOCKET=1
 		;;
     *-sequent-sysv*)
-		# XXX - this needs to be tested.
 		LIBS="${LIBS} -lsocket -lnsl"
 		SUDO_LIBS="${SUDO_LIBS} -lsocket -lnsl"
 		LIB_SOCKET=1
 		LIB_NSL=1                                    
+		LIB_INET=0
 
 		if test -z "$with_C2"; then
 		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
