@@ -253,8 +253,10 @@ main(argc, argv)
     yydebug = 1;
 #endif
 
-    if (argc != 4) {
-	(void) fprintf(stderr, "usage: %s <command> <user> <host>\n", argv[0]);
+    if (argc == 6 && strcmp(argv[1], "-u") == 0) {
+	runas_user = argv[2];
+    } else if (argc != 4) {
+	(void) fprintf(stderr, "usage: %s [-u user] <command> <user> <host>\n", argv[0]);
 	exit(1);
     }
 
