@@ -61,7 +61,7 @@
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <limits.h>
 
-#if __STDC__
+#ifdef __STDC__
 # include <stdarg.h>
 #else
 # include <varargs.h>
