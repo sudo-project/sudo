@@ -378,7 +378,7 @@ case "$OS" in
 		;;
     "unix_sv")	echo "Looks like UnixWare"
 		LIB_SOCKET=1
-		SUDO_LIBS="${SUDO_LIBS} -lsocket"
+		SUDO_LIBS="${SUDO_LIBS} -lsocket -lgen"
 
 		if test "$with_C2" != "no"; then
 		    with_C2="yes"
@@ -397,7 +397,7 @@ case "$OS" in
 		;;
     "next")	echo "Looks like NeXTstep"
 		;;
-    "bsd/386" | "bsd/os") echo "Looks like bsdi BSD/OS"
+    "bsd/386" | "bsd/os") echo "Looks like BSDi BSD/OS"
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_BSD"
 		fi
@@ -409,7 +409,7 @@ case "$OS" in
 		    SHADOW_TYPE="SPW_BSD"
 		fi
 		;;
-    *"bsd"*)	echo "Looks like some kind of BSD"
+    *"bsd"*)	echo "Looks like some kind of BSD, that's just fine"
 		;;
     "unknown")	echo "I don't recognize your OS, but that's ok"
 		;;
