@@ -528,7 +528,7 @@ static void check_passwd()
 	/* Exit loop on nil password */
 	if (!pass || *pass == '\0') {
 	    if (counter == TRIES_FOR_PASSWORD)
-		exit(0);
+		exit(1);
 	    else
 		break;
 	}
