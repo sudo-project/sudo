@@ -34,3 +34,8 @@ CHANGES between sudo 1.2 (unofficial version)
 11) Added in linux patches from drew + flex support.
 
 12) Added insults back in from original sudo(8) (define USE_INSULTS).
+
+13) visudo now uses EDITOR envar (from John_Rouillard@dl5000.bc.edu)
+
+14) you can now specify a dir containing commands that a sudoer can do.
+    (from John_Rouillard@dl5000.bc.edu)
