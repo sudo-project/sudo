@@ -427,6 +427,7 @@ init_defaults()
 #ifdef ENV_EDITOR
     def_env_editor = TRUE;
 #endif
+    def_env_reset = TRUE;
     def_set_logname = TRUE;
     def_closefrom = STDERR_FILENO + 1;
 
