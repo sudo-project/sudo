@@ -1175,3 +1175,10 @@ Sudo 1.5.9 released.
 369) Sudo will now accept a hostname/username/netgroupname that contains
      almost any character in it.  It seems many people want to use '.'
      and other non-alphanumberics in usernames.
+
+370) Fixed the root_sudo option.  Sudo was always complaining that root
+     was not allowed to run sudo if the root_sudo flag was turned off.
+
+371) tgetpass() now uses a function to read up until the end of line.
+     Fixes problems in a pipeline when a program sets the tty mode
+     to be character at a time.
