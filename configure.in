@@ -1148,15 +1148,19 @@ AC_PROG_LIBTOOL
 dnl
 dnl Defer with_noexec until after libtool magic runs
 dnl
-test "$enable_shared" = "no" && with_noexec=no
+if test "$enable_shared" = "no"; then
+    with_noexec=no
+else
+    eval _shrext="$shrext"
+fi
 AC_MSG_CHECKING(path to sudo_noexec.so)
 AC_ARG_WITH(noexec, [  --with-noexec           fully qualified pathname of sudo_noexec.so],
 [case $with_noexec in  
-    yes)	with_noexec="$libexecdir/sudo_noexec$shrext"
+    yes)	with_noexec="$libexecdir/sudo_noexec$_shrext"
 		;;
     no)		;;
     *)		;;
-esac], [with_noexec="$libexecdir/sudo_noexec$shrext"])
+esac], [with_noexec="$libexecdir/sudo_noexec$_shrext"])
 AC_MSG_RESULT($with_noexec)
 NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[[^/]]*:\1:'`"
 

@@ -19604,7 +19604,11 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 
 
 
-test "$enable_shared" = "no" && with_noexec=no
+if test "$enable_shared" = "no"; then
+    with_noexec=no
+else
+    eval _shrext="$shrext"
+fi
 echo "$as_me:$LINENO: checking path to sudo_noexec.so" >&5
 echo $ECHO_N "checking path to sudo_noexec.so... $ECHO_C" >&6
 
@@ -19612,13 +19616,13 @@ echo $ECHO_N "checking path to sudo_noexec.so... $ECHO_C" >&6
 if test "${with_noexec+set}" = set; then
   withval="$with_noexec"
   case $with_noexec in
-    yes)	with_noexec="$libexecdir/sudo_noexec$shrext"
+    yes)	with_noexec="$libexecdir/sudo_noexec$_shrext"
 		;;
     no)		;;
     *)		;;
 esac
 else
-  with_noexec="$libexecdir/sudo_noexec$shrext"
+  with_noexec="$libexecdir/sudo_noexec$_shrext"
 fi;
 echo "$as_me:$LINENO: result: $with_noexec" >&5
 echo "${ECHO_T}$with_noexec" >&6
