@@ -58,13 +58,13 @@ static char rcsid[] = "$Id$";
 /*
  * Globals
  */
-char *runas_user = "oracle";
 int parse_error = FALSE;
 extern int clearaliases;
 extern struct interface *interfaces;
 extern int num_interfaces;
 
 char *cmnd = NULL;
+char *runas_user = "root";
 char host[MAXHOSTNAMELEN+1];
 char *shost;
 char cwd[MAXPATHLEN+1];
