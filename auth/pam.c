@@ -221,7 +221,9 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		/* Read the password. */
 		pr->resp = estrdup((char *) tgetpass(p,
 		    def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags));
-		if (pr->resp == NULL || *pr->resp == '\0')
+		if (pr->resp == NULL)
+		    pr->resp = "";
+		if (*pr->resp == '\0')
 		    nil_pw = 1;		/* empty password */
 		break;
 	    case PAM_TEXT_INFO:
