@@ -32,12 +32,16 @@
 #define _PATH_DEV		"/dev/"
 #endif /* _PATH_DEV */
 
+/*
+ * NOTE: _PATH_SUDO_SUDOERS is usually overriden by the Makefile
+ */
 #ifndef _PATH_SUDO_SUDOERS
 #define _PATH_SUDO_SUDOERS	"/etc/sudoers"
 #endif /* _PATH_SUDO_SUDOERS */
 
 /*
- * NOTE:  _PATH_SUDO_STMP *MUST* be on the same partition
+ * NOTE:  _PATH_SUDO_STMP is usually overriden by the Makefile.
+ *        _PATH_SUDO_STMP *MUST* be on the same partition
  *        as _PATH_SUDO_SUDOERS!
  */
 #ifndef _PATH_SUDO_STMP
