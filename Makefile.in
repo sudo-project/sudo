@@ -145,6 +145,7 @@ install-sudoers:
 
 install-man:
 	$(INSTALL) -o $(owner) -g $(group) -m 0644 $(manpage) $(mandir)/sudo.$(mansect)
+	@MAN_POSTINSTALL@
 
 tags: $(SRCS)
 	ctags $(SRCS)
