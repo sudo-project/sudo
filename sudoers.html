@@ -14,27 +14,18 @@
 	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
 	<UL>
 
-		<LI><A HREF="#user_specification_format_">user specification format:</A>
-		<LI><A HREF="#host_alias_section_format_">host alias section format:</A>
-		<LI><A HREF="#user_alias_section_format_">user alias section format:</A>
-		<LI><A HREF="#runas_alias_section_format_">runas alias section format:</A>
-		<LI><A HREF="#command_alias_section_format_">command alias section format:</A>
-		<LI><A HREF="#command_specification_">command specification:</A>
-		<LI><A HREF="#persistence_of_modifiers">persistence of modifiers</A>
-		<LI><A HREF="#wildcards_aka_meta_characters_">wildcards (aka meta characters):</A>
-		<LI><A HREF="#exceptions_to_wildcard_rules_">exceptions to wildcard rules:</A>
-		<LI><A HREF="#other_special_characters_and_res">other special characters and reserved words:</A>
+		<LI><A HREF="#Quick_guide_to_EBNF">Quick guide to EBNF</A>
+		<LI><A HREF="#Aliases">Aliases</A>
+		<LI><A HREF="#User_Specification">User Specification</A>
+		<LI><A HREF="#Runas_Spec">Runas_Spec</A>
+		<LI><A HREF="#NOPASSWD_and_PASSWD">NOPASSWD and PASSWD</A>
+		<LI><A HREF="#Wildcards_aka_meta_characters_">Wildcards (aka meta characters):</A>
+		<LI><A HREF="#Exceptions_to_wildcard_rules_">Exceptions to wildcard rules:</A>
+		<LI><A HREF="#Other_special_characters_and_res">Other special characters and reserved words:</A>
 	</UL>
 
 	<LI><A HREF="#EXAMPLES">EXAMPLES</A>
-	<UL>
-
-		<LI><A HREF="#Host_Alias_specifications_">Host Alias specifications:</A>
-		<LI><A HREF="#User_Alias_specifications_">User Alias specifications:</A>
-		<LI><A HREF="#Command_alias_specifications_">Command alias specifications:</A>
-		<LI><A HREF="#User_specifications_">User specifications:</A>
-	</UL>
-
+	<LI><A HREF="#SECURITY_NOTES">SECURITY NOTES</A>
 	<LI><A HREF="#CAVEATS">CAVEATS</A>
 	<LI><A HREF="#FILES">FILES</A>
 	<LI><A HREF="#SEE_ALSO">SEE ALSO</A>
@@ -46,147 +37,266 @@
 <HR>
 <H1><A NAME="NAME">NAME</A></H1>
 <P>
-sudoers - list of which users may execute what as root
+sudoers - list of which users may execute what
 
 <P>
 <HR>
 <H1><A NAME="DESCRIPTION">DESCRIPTION</A></H1>
 <P>
-The <EM>sudoers</EM> file is composed of an optional host alias section, an optional command
-alias section and the user specification section. All command or host
-aliases need to start with their respective keywords (ie: Host_Alias,
-User_Alias, Runas_Alias or Cmnd_Alias). If there are multiple occurrences
-of a user, the logical union of the entries will be used. Note that if
-there is an entry that denies access to a command that is followed by an
-entry that grants access the user will be allowed to run the command.
+The <EM>sudoers</EM> file is composed two types of entries: aliases (basically variables) and
+user specifications (which specify who may run what). The grammar of <EM>sudoers</EM>
+will be described below in Extended Backus-Naur Form (EBNF). Don't despair
+if you don't know what EBNF is, it is fairly simple and the definitions
+below are annotated.
 
 <P>
 <HR>
-<H2><A NAME="user_specification_format_">user specification format:</A></H2>
+<H2><A NAME="Quick_guide_to_EBNF">Quick guide to EBNF</A></H2>
 <P>
-<PRE>  user access_group [: access_group] ...
-</PRE>
-<P>
-<PRE>    access_group ::= host-list = [(runas-list)] [NOPASSWD:] [op]cmnd_type
-                     [,[(user-list)] [NOPASSWD|PASSWD:] [op]cmnd_type] ... 
-       cmnd_type ::= a command OR a command alias.
-              op ::= the logical &quot;!&quot; NOT operator.
-</PRE>
-<P>
-<HR>
-<H2><A NAME="host_alias_section_format_">host alias section format:</A></H2>
-<P>
-<PRE>  Host_Alias HOSTALIAS = host-list
-</PRE>
-<P>
-<PRE>      Host_Alias ::= a keyword.
-       HOSTALIAS ::= an upper-case alias name.
-       host-list ::= a comma separated list of hosts, netgroups,
-                     ip addresses, networks.  A logical &quot;!&quot;
-                     NOT operator may be prefixed to any of these.
-</PRE>
-<P>
-<HR>
-<H2><A NAME="user_alias_section_format_">user alias section format:</A></H2>
-<P>
-<PRE>  User_Alias USERALIAS = user-list
-</PRE>
-<P>
-<PRE>      User_Alias ::= a keyword.
-       USERALIAS ::= an upper-case alias name.
-       user-list ::= a comma separated list of users, groups, netgroups.
-                     A logical &quot;!&quot; NOT operator may be prefixed to any
-                     of these.
-</PRE>
-<P>
-<HR>
-<H2><A NAME="runas_alias_section_format_">runas alias section format:</A></H2>
-<P>
-<PRE>  Runas_Alias RUNASALIAS = runas-list
-</PRE>
-<P>
-<PRE>      Runas_Alias ::= a keyword.
-       RUNASALIAS ::= an upper-case alias name.
-       runas-list ::= a comma separated list of users, groups, netgroups.
-                      A logical &quot;!&quot; NOT operator may be prefixed to any
-                      of these.
-</PRE>
-<P>
-<HR>
-<H2><A NAME="command_alias_section_format_">command alias section format:</A></H2>
-<P>
-<PRE>  Cmnd_Alias CMNDALIAS = cmnd-list
-</PRE>
-<P>
-<PRE>      Cmnd_Alias ::= a keyword.
-       CMNDALIAS ::= an upper-case alias name.
-       cmnd-list ::= a comma separated list commands.
-                     A logical &quot;!&quot; NOT operator may be prefixed to any
-                     of these.
-</PRE>
-<P>
-<HR>
-<H2><A NAME="command_specification_">command specification:</A></H2>
-<P>
-<PRE>  path arg1 arg2 .. argn = command
-</PRE>
-<P>
-<PRE>            path ::= a fully qualified pathname.
-       arg[1..n] ::= optional command line arguments.
-</PRE>
-<P>
-<HR>
-<H2><A NAME="persistence_of_modifiers">persistence of modifiers</A></H2>
-<P>
-When a <EM>runas-list</EM> is specified for an <EM>access_group</EM>, it affects all commands in the <EM>access_group</EM>. For example, given:
+EBNF is a concise and exact way of describing the grammar of a language.
+Each EBNF definition is made up of <EM>production rules</EM>. Eg.
 
 <P>
-<PRE>    oper bigserver = (root, sysadm) /usr/bin/kill, /bin/rm
+<PRE> symbol ::= definition | alternate1 | alternate2 ...
 </PRE>
 <P>
-User <CODE>oper</CODE> will be able to run <CODE>/usr/bin/kill</CODE> and <CODE>/bin/rm</CODE>
-as <STRONG>root</STRONG> or <STRONG>sysadm</STRONG> on the machine, <CODE>bigserver</CODE>. The
-<EM>runas-list</EM> is ``sticky'' across entries in the comma-separated
-<EM>access_group</EM>. You can override the <EM>runas-list</EM> with another one, at which point the new <EM>runas-list</EM> becomes the default for that <EM>access_group</EM>. For example, given:
+Each <EM>production rule</EM> references others and thus makes up a grammar for the language. EBNF also
+contains the following operators, which many readers will recognize from
+regular expressions. Do not, however, confuse them with ``wildcard''
+characters, which have different meanings.
 
+<DL>
+<DT><STRONG><A NAME="item__">?</A></STRONG><DD>
 <P>
-<PRE>    oper bigserver = (root, sysadm) /usr/bin/kill, (root) /bin/rm, \
-        /bin/rmdir
-</PRE>
-<P>
-User <CODE>oper</CODE> can still run <CODE>/usr/bin/kill</CODE> as <STRONG>root</STRONG> or <STRONG>sysadm</STRONG> but can only run <CODE>/bin/rm</CODE> and <CODE>/bin/rmdir</CODE> as <STRONG>root</STRONG>.
+Means that the preceding symbol (or group of symbols) is optional. That is,
+it may appear once or not at all.
 
+<LI>
 <P>
-Similarly, the <STRONG>NOPASSWD</STRONG> modifier is also persistent across an
-<EM>access_group</EM>. For example given:
+Means that the preceding symbol (or group of symbols) may appear zero or
+more times.
 
+<DT><STRONG><A NAME="item__">+</A></STRONG><DD>
 <P>
-<PRE>    oper bigserver = NOPASSWD: /usr/bin/kill, /bin/rm, /bin/rmdir
-</PRE>
-<P>
-User <CODE>oper</CODE> will be able to run <CODE>/usr/bin/kill</CODE>, <CODE>/bin/rm</CODE>, and
-<CODE>/bin/rmdir</CODE> as <STRONG>root</STRONG> without a password. If we change that to:
+Means that the preceding symbol (or group of symbols) may appear one or
+more times.
 
+</DL>
 <P>
-<PRE>    oper bigserver = NOPASSWD: /usr/bin/kill, PASSWD: /bin/rm, /bin/rmdir
-</PRE>
-<P>
-User <CODE>oper</CODE> can still run <CODE>/usr/bin/kill</CODE> without a password but must give a password to run <CODE>/bin/rm</CODE> and <CODE>/bin/rmdir</CODE>.
+Parentheses may be used to group symbols together. For clarity, we will use
+single quotes ('') to designate what is a verbatim character string (as
+opposed to a symbol name).
 
 <P>
 <HR>
-<H2><A NAME="wildcards_aka_meta_characters_">wildcards (aka meta characters):</A></H2>
+<H2><A NAME="Aliases">Aliases</A></H2>
 <P>
-<STRONG>sudo</STRONG> allows shell-style <EM>wildcards</EM> along with command arguments in the <EM>sudoers</EM> file. Wildcard matching is done via the <STRONG>POSIX</STRONG>
+There are four kinds of aliases: the <CODE>User_Alias</CODE>, <CODE>Runas_Alias</CODE>,
+<CODE>Host_Alias</CODE> and <CODE>Cmnd_Alias</CODE>.
 
-<CODE>fnmatch(3)</CODE> routine.
+<P>
+<PRE> Alias ::= User_Alias = User_Alias (':' User_Alias)* |
+           Runas_Alias (':' Runas_Alias)* |
+           Host_Alias (':' Host_Alias)* |
+           Cmnd_Alias (':' Cmnd_Alias)*
+</PRE>
+<P>
+<PRE> User_Alias ::= NAME '=' User_List
+</PRE>
+<P>
+<PRE> Runas_Alias ::= NAME '=' Runas_User_List
+</PRE>
+<P>
+<PRE> Host_Alias ::= NAME '=' Host_List
+</PRE>
+<P>
+<PRE> Cmnd_Alias ::= NAME '=' Cmnd_List
+</PRE>
+<P>
+<PRE> NAME ::= [A-Z]([A-Z][0-9]_)*
+</PRE>
+<P>
+Each <EM>alias</EM> definition is of the form
+
+<P>
+<PRE> Alias_Type NAME = item1, item2, ...
+</PRE>
+<P>
+where <EM>Alias_Type</EM> is one of <CODE>User_Alias</CODE>, <CODE>Runas_Alias</CODE>, <CODE>Host_Alias</CODE>, or <CODE>Cmnd_Alias</CODE>. A <CODE>NAME</CODE> is a string of upper case letters, numbers, and the underscore characters
+('_'). A <CODE>NAME</CODE>  <STRONG>must</STRONG> start with an upper case letter. It is possible to put several alias
+definitions of the same type on a single line, joined by a semicolon (':').
+Eg.
+
+<P>
+<PRE> Alias_Type NAME = item1, item2, item3 : NAME = item4, item5
+</PRE>
+<P>
+The definitions of what constitutes a valid <EM>alias</EM> member follow.
+
+<P>
+<PRE> User_List ::= User |
+               User ',' User_List
+</PRE>
+<P>
+<PRE> User ::= '!'* username |
+          '!'* '#'uid |
+          '!'* '%'group |
+          '!'* '+'netgroup |
+          '!'* User_Alias
+</PRE>
+<P>
+A <CODE>User_List</CODE> is made up of one or more usernames, uids (prefixed with '#'), System
+groups (prefixed with '%'), netgroups (prefixed with '+') and other
+aliases. Each list item may be prefixed with one or more '!' operators. An
+odd number of '!' operators negates the value of the item; an even number
+just cancel each other out.
+
+<P>
+<PRE> Runas_List ::= Runas_User |
+                Runas_User ',' Runas_List
+</PRE>
+<P>
+<PRE> Runas_User ::= '!'* username |
+                '!'* '#'uid |
+                '!'* '%'group |
+                '!'* +netgroup |
+                '!'* Runas_Alias
+</PRE>
+<P>
+Likewise, a <CODE>Runas_List</CODE> has the same possible elements as a <CODE>User_List</CODE>, except that it can include a <CODE>Runas_Alias</CODE>, instead of a <CODE>User_Alias</CODE>.
+
+<P>
+<PRE> Host_List ::= Host |
+               Host ',' Host_List
+</PRE>
+<P>
+<PRE> Host ::= '!'* hostname |
+          '!'* ip_addr |
+          '!'* network(/netmask)? |
+          '!'* '+'netgroup |
+          '!'* Host_Alias
+</PRE>
+<P>
+A <CODE>Host_List</CODE> is made up of one or more hostnames, IP addresses, network numbers,
+netgroups (prefixed with '+') and other aliases. Again, the value of an
+item may be negated with the '!' operator. If you do not specify a netmask
+with a network number, the netmask of the host's ethernet
+<CODE>interface(s)</CODE> will be used when matching. The netmask may be
+specified either in dotted quad notation (eg. 255.255.255.0) or CIDR
+notation (number of bits, eg. 24).
+
+<P>
+<PRE> Cmnd_List ::= Cmnd |
+               Cmnd ',' Cmnd_List
+</PRE>
+<P>
+<PRE> commandname ::= filename |
+                 filename args |
+                 filename '&quot;&quot;'
+</PRE>
+<P>
+<PRE> Cmnd ::= '!'* commandname |
+          '!'* directory |
+          '!'* Cmnd_Alias
+</PRE>
+<P>
+A <CODE>Cmnd_List</CODE> is a list of one or more commandnames, directories, and other aliases. A
+commandname is a fully-qualified filename which may include shell-style
+wildcards (see `Wildcards' section below). A simple filename allows the
+user to run the command with any arguments he/she wishes. However, you may
+also command line arguments (including wildcards). Alternately, you can
+specify <CODE>&quot;&quot;</CODE> to indicate that the command may only be run <STRONG>without</STRONG> command line arguments. A directory is a fully qualified pathname ending in
+a '/'. When you specify a directory in a <CODE>Cmnd_List</CODE>, the user will be able to run any file within that directory (but not in
+any subdirectories therein).
+
+<P>
+If a <CODE>Cmnd</CODE> has associated command line arguments, then the arguments in the <CODE>Cmnd</CODE> must match exactly those given by the user on the command line (or match
+the wildcards if there are any). Note that the following characters must be
+escaped with a '\' if they are used in command arguments: ',', ':', '=',
+'\\'.
+
+<P>
+<HR>
+<H2><A NAME="User_Specification">User Specification</A></H2>
+<P>
+<PRE> Runas_Spec ::= '(' Runas_List ')'
+</PRE>
+<P>
+<PRE> Cmnd_Spec ::= Runas_Spec? ('NOPASSWD:' | 'PASSWD:')? Cmnd
+</PRE>
+<P>
+<PRE> Cmnd_Spec_List ::= Cmnd_Spec |
+                    Cmnd_Spec ',' Cmnd_Spec_List
+</PRE>
+<P>
+<PRE> User_Spec ::= User_list Cmnd_Spec_List (':' User_Spec)*
+</PRE>
+<P>
+A <STRONG>user specification</STRONG> determines which commands a user may run (and as what user) on specified
+hosts. By default, commands are run as <STRONG>root</STRONG> but this can be changed on a per-command basis.
+
+<P>
+Let's break that down into its constituent parts:
+
+<P>
+<HR>
+<H2><A NAME="Runas_Spec">Runas_Spec</A></H2>
+<P>
+A <CODE>Runas_Spec</CODE> is simply a <CODE>Runas_List</CODE> (as defined above) enclosed in a set of parentheses. If you do not specify
+a
+<CODE>Runas_Spec</CODE> in the user specification, a default <CODE>Runas_Spec</CODE>
+of <STRONG>root</STRONG> will be used. A <CODE>Runas_Spec</CODE> sets the default for commands that follow it. What this means is that for
+the entry:
+
+<P>
+<PRE> dgb    boulder = (operator) /bin/ls, /bin/kill, /usr/bin/who
+</PRE>
+<P>
+The user <STRONG>dgb</STRONG> may run <EM>/bin/ls</EM>, <EM>/bin/kill</EM>, and
+<EM>/usr/bin/lprm</EM> -- but only as <STRONG>operator</STRONG>. Eg.
+
+<P>
+<PRE>    sudo -u operator /bin/ls.
+</PRE>
+<P>
+It is also possible to override a <CODE>Runas_Spec</CODE> later on in an entry. If we modify the entry like so:
+
+<P>
+<PRE> dgb    boulder = (operator) /bin/ls, (root) /bin/kill, /usr/bin/lprm
+</PRE>
+<P>
+Then user <STRONG>dgb</STRONG> is now allowed to run <EM>/bin/ls</EM> as <STRONG>operator</STRONG>, but  <EM>/bin/kill</EM> and <EM>/usr/bin/lprm</EM> as <STRONG>root</STRONG>.
+
+<P>
+<HR>
+<H2><A NAME="NOPASSWD_and_PASSWD">NOPASSWD and PASSWD</A></H2>
+<P>
+By default, <STRONG>sudo</STRONG> requires that a user authenticate him or herself before running a command.
+This behavior can be modified via the
+<CODE>NOPASSWD</CODE> tag. Like a <CODE>Runas_Spec</CODE>, the <CODE>NOPASSWD</CODE> tag sets a default for the commands that follow it in the <CODE>Cmnd_Spec_List</CODE>. Conversely, the <CODE>PASSWD</CODE> tag can be used to reverse things. For example:
+
+<P>
+<PRE> ray    rushmore = NOPASSWD: /bin/kill, /bin/ls, /usr/bin/lprm
+</PRE>
+<P>
+would allow the user <STRONG>ray</STRONG> to run <EM>/bin/kill</EM>, <EM>/bin/ls</EM>, and
+<EM>/usr/bin/lprm</EM> as root on the machine rushmore as <STRONG>root</STRONG> without authenticating himself. If we only want <STRONG>ray</STRONG> to be able to run <EM>/bin/kill</EM> without a password the entry would be:
+
+<P>
+<PRE> ray    rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
+</PRE>
+<P>
+<HR>
+<H2><A NAME="Wildcards_aka_meta_characters_">Wildcards (aka meta characters):</A></H2>
+<P>
+<STRONG>sudo</STRONG> allows shell-style <EM>wildcards</EM> to be used in pathnames as well as command line arguments in the <EM>sudoers</EM> file. Wildcard matching is done via the <STRONG>POSIX</STRONG>  <CODE>fnmatch(3)</CODE> routine. Note that these are <EM>not</EM> regular expressions.
 
 <UL>
 <LI>
 <P>
 Matches any set of zero or more characters.
 
-<DT><STRONG><A NAME="item__">?</A></STRONG><DD>
+<DT><STRONG>?</STRONG><DD>
 <P>
 Matches any single character.
 
@@ -205,8 +315,18 @@ characters such as: ``*'', ``?'', ``['', and ``}''.
 
 </UL>
 <P>
+Note that a forward slash ('/') will <STRONG>not</STRONG> be matched by wildcards used in the pathname. When matching the command
+line arguments, however, as slash <STRONG>does</STRONG> get matched by wildcards. This is to make a path like:
+
+<P>
+<PRE>    /usr/bin/*
+</PRE>
+<P>
+match <CODE>/usr/bin/who</CODE> but not <CODE>/usr/bin/X11/xterm</CODE>.
+
+<P>
 <HR>
-<H2><A NAME="exceptions_to_wildcard_rules_">exceptions to wildcard rules:</A></H2>
+<H2><A NAME="Exceptions_to_wildcard_rules_">Exceptions to wildcard rules:</A></H2>
 <P>
 The following exceptions apply to the above rules:
 
@@ -214,175 +334,246 @@ The following exceptions apply to the above rules:
 <DT><STRONG><A NAME="item__">&quot;&quot;</A></STRONG><DD>
 <P>
 If the empty string <CODE>&quot;&quot;</CODE> is the only command line argument in the
-<EM>sudoers</EM> entry it means that command may take <STRONG>no</STRONG> arguments.
+<EM>sudoers</EM> entry it means that command is not allowed to be run with <STRONG>any</STRONG> arguments.
 
 </DL>
 <P>
 <HR>
-<H2><A NAME="other_special_characters_and_res">other special characters and reserved words:</A></H2>
+<H2><A NAME="Other_special_characters_and_res">Other special characters and reserved words:</A></H2>
 <P>
-Text after a pound sign (<STRONG>#</STRONG>) is considered a comment. Words that begin with a percent sign (<STRONG>%</STRONG>) are assumed to be UN*X groups (%staff refers to users in the group <EM>staff</EM>). Words that begin with a plus sign (<STRONG>+</STRONG>) are assumed to be netgroups (<STRONG>+cshosts</STRONG> refers to the netgroup <EM>cshosts</EM>). Long lines can be newline escaped with the backslash <STRONG>\</STRONG> character.
+The pound sign ('#') is used to indicate a comment (unless it occurs in the
+context of a user name and is followed by one or more digits, in which case
+it is treated as a uid). Both the comment character and any text after it,
+up to the end of the line, are ignored.
 
 <P>
-The reserved word <STRONG>NOPASSWD</STRONG> indicates that a user need not enter a password for the command listed in
-that entry. The
-<STRONG>NOPASSWD</STRONG> modifier is persistent across entries in a <EM>user-list</EM>
-and can be reversed with the <STRONG>PASSWD</STRONG> modifier.
+The reserved word <STRONG>ALL</STRONG> is a a built in <EM>alias</EM> that always causes a match to succeed. It can be used wherever one might
+otherwise use a <CODE>Cmnd_Alias</CODE>, <CODE>User_Alias</CODE>, <CODE>Runas_Alias</CODE>, or <CODE>Host_Alias</CODE>. You should not try to define your own <EM>alias</EM> called <STRONG>ALL</STRONG> as the built in alias will be used in preference to your own.
 
 <P>
-The reserved alias <EM>ALL</EM> can be used for both {Host,User,Cmnd}_Alias.
-<STRONG>DO NOT</STRONG> define an alias of <EM>ALL</EM>, it will <STRONG>NOT</STRONG> be used. Note that <EM>ALL</EM> implies the entire universe of hosts/users/commands. You can subtract
-elements from the universe by using the syntax:
+An exclamation point ('!') can be used as a logical <EM>not</EM> operator both in an <EM>alias</EM> and in front of a <CODE>Cmnd</CODE>. This allows one to exclude certain values. Note, however, that using a <CODE>!</CODE> in conjunction with the built in <CODE>ALL</CODE> alias to allow a user to run ``all but a few'' commands rarely works as
+intended (see SECURITY NOTES below).
 
 <P>
-<PRE>   user  host=ALL,!ALIAS1,!/sbin/halt...
-</PRE>
+Long lines can be continued with a backslash ('\\') as the last character
+on the line.
+
 <P>
-Commands may have optional command line arguments. If they do, then the
-arguments in the <EM>sudoers</EM> file must exactly match those on the command line. It is also possible to
-have a command's arguments span multiple lines as long as the line
-continuance character ``\'' is used. The following characters must be
-escaped with a ``\'' if used in command arguments: ``,'', ``:'', ``='',
-``\''.
+Whitespace between elements in a list as well as specicial syntactic
+characters in a <EM>User Specification</EM> ('=', ':', '(', ')') is optional.
 
 <P>
 <HR>
 <H1><A NAME="EXAMPLES">EXAMPLES</A></H1>
 <P>
-<PRE>    # Host alias specification
-    Host_Alias  HUB=houdini:\
-                REMOTE=merlin,kodiakthorn,spirit
-    Host_Alias  SERVERS=houdini,merlin,kodiakthorn,spirit
-    Host_Alias  CUNETS=128.138.0.0/255.255.0.0
-    Host_Alias  CSNETS=128.138.243.0,128.138.204.0,\
-                       128.138.205.192
+Below are example <EM>sudoers</EM> entries. Admittedly, some of these are a bit contrived. First, we define
+our <EM>aliases</EM>:
+
+<P>
+<PRE> # User alias specification
+ User_Alias     FULLTIMERS = millert, mikef, dowdy
+ User_Alias     PARTTIMERS = bostley, jwfox, crawl
+ User_Alias     WEBMASTERS = will, wendy, wim
 </PRE>
 <P>
-<PRE>    # User alias specification
-    User_Alias  FULLTIME=millert,dowdy,mikef
-    User_Alias  PARTTIME=juola,mccreary,tor
+<PRE> # Runas alias specification
+ Runas_Alias    OP = root, operator
+ Runas_Alias    DB = oracle, sybase
 </PRE>
 <P>
-<PRE>    # Runas alias specification
-    Runas_Alias OP=root,operator
+<PRE> # Host alias specification
+ Host_Alias     SPARC = bigtime, eclipse, moet, anchor :\
+                SGI = grolsch, dandelion, black :\
+                ALPHA = widget, thalamus, foobar :\
+                HPPA = boa, nag, python
+ Host_Alias     CUNETS = 128.138.0.0/255.255.0.0
+ Host_Alias     CSNETS = 128.138.243.0, 128.138.204.0/24, 128.138.242.0
+ Host_Alias     SERVERS = master, mail, www, ns
+ Host_Alias     CDROM = orion, perseus, hercules
 </PRE>
 <P>
-<PRE>    # Command alias specification
-    Cmnd_Alias  LPCS=/usr/sbin/lpc,/usr/bin/lprm
-    Cmnd_Alias  SHELLS=/bin/sh,/bin/csh,/bin/tcsh,/bin/ksh
-    Cmnd_Alias  SU=/usr/bin/su
-    Cmnd_Alias  MISC=/bin/rm,/bin/cat:\
-                SHUTDOWN=/sbin/halt,/sbin/shutdown
+<PRE> # Cmnd alias specification
+ Cmnd_Alias     DUMPS = /usr/bin/mt, /usr/sbin/dump, /usr/sbin/rdump,\
+                        /usr/sbin/restore, /usr/sbin/rrestore
+ Cmnd_Alias     KILL = /usr/bin/kill
+ Cmnd_Alias     PRINTING = /usr/sbin/lpc, /usr/bin/lprm
+ Cmnd_Alias     SHUTDOWN = /usr/sbin/shutdown
+ Cmnd_Alias     HALT = /usr/sbin/halt, /usr/sbin/fasthalt
+ Cmnd_Alias     REBOOT = /usr/sbin/reboot, /usr/sbin/fastboot
+ Cmnd_Alias     SHELLS = /usr/bin/sh, /usr/bin/csh, /usr/bin/ksh, \
+                         /usr/local/bin/tcsh, /usr/bin/rsh, \
+                         /usr/local/bin/zsh
+ Cmnd_Alias     SU = /usr/bin/su
 </PRE>
 <P>
-<PRE>    # User specification
-    FULLTIME    ALL=(ALL) NOPASSWD: ALL
-    %wheel      ALL=ALL
-    PARTTIME    ALL=ALL,!SHELLS,!SU
-    +interns    +openlabs=ALL,!SHELLS,!SU
-    britt       REMOTE=SHUTDOWN:ALL=LPCS
-    jimbo       CUNETS=/usr/bin/su [!-]*,!/usr/bin/su *root*
-    nieusma     SERVERS=SHUTDOWN,/sbin/reboot:\
-                HUB=ALL,!SHELLS
-    jill        houdini=/sbin/shutdown -[hr] now,MISC
-    markm       HUB=ALL,!MISC,!/sbin/shutdown,!/sbin/halt
-    davehieb    merlin=(OP) ALL:SERVERS=/sbin/halt:\
-                kodiakthorn=NOPASSWD: ALL
-    steve       CSNETS=(operator) /usr/op_commands/
+The <EM>User specification</EM> is the part that actually determines who may run what.
+
+<P>
+<PRE> root           ALL = (ALL) ALL
+ %wheel         ALL = (ALL) ALL
 </PRE>
+<P>
+We let <STRONG>root</STRONG> and any user in group <STRONG>wheel</STRONG> run any command on any host as any user.
+
+<P>
+<PRE> FULLTIMERS     ALL = NOPASSWD: ALL
+</PRE>
+<P>
+Full time sysadmins (<STRONG>millert</STRONG>, <STRONG>mikef</STRONG>, and <STRONG>dowdy</STRONG>) may run any command on any host without authenticating themselves.
+
+<P>
+<PRE> PARTTIMERS     ALL = ALL
+</PRE>
+<P>
+Part time sysadmins (<STRONG>bostley</STRONG>, <STRONG>jwfox</STRONG>, and <STRONG>crawl</STRONG>) may run any command on any host but they must authenticate themselves
+first (since the entry lacks the <CODE>NOPASSWD</CODE> tag).
+
+<P>
+<PRE> jack           CSNETS = ALL
+</PRE>
+<P>
+The user <STRONG>jack</STRONG> may run any command on the machines in the <EM>CSNETS</EM> alias (the networks <CODE>128.138.243.0</CODE>, <CODE>128.138.204.0</CODE>, and <CODE>128.138.242.0</CODE>). Of those networks, only &lt;128.138.204.0&gt; has an explicit netmask (in CIDR notation) indicating it
+is a class C network. For the other networks in <EM>CSNETS</EM>, the local machine's netmask will be used during matching.
+
+<P>
+<PRE> lisa           CUNETS = ALL
+</PRE>
+<P>
+The user <STRONG>lisa</STRONG> may run any command on any host in the <EM>CUNETS</EM> alias (the class B network <CODE>128.138.0.0</CODE>).
+
+<P>
+<PRE> operator       ALL = DUMPS, KILL, PRINTING, SHUTDOWN, HALT, REBOOT,\
+                /usr/oper/bin/
+</PRE>
+<P>
+The <STRONG>operator</STRONG> user may run commands limited to simple maintenance. Here, those are
+commands related to backups, killing processes, the printing system,
+shutting down the system, and any commands in the directory <EM>/usr/oper/bin/</EM>.
+
+<P>
+<PRE> joe            ALL = /usr/bin/su operator
+</PRE>
+<P>
+The user <STRONG>joe</STRONG> may only <CODE>su(1)</CODE> to operator.
+
+<P>
+<PRE> pete           HPPA = /usr/bin/passwd [A-z]*, !/usr/bin/passwd root
+</PRE>
+<P>
+The user <STRONG>pete</STRONG> is allowed to change anyone's password except for root on the <EM>HPPA</EM> machines. Note that this assumes <CODE>passwd(1)</CODE> does not take
+multiple usernames on the command line.
+
+<P>
+<PRE> bob            SPARC = (OP) ALL : SGI = (OP) ALL
+</PRE>
+<P>
+The user <STRONG>bob</STRONG> may run anything on the <EM>SPARC</EM> and <EM>SGI</EM> machines as any user listed in the <EM>OP</EM>  <CODE>Runas_Alias</CODE> (<STRONG>root</STRONG> and <STRONG>operator</STRONG>).
+
+<P>
+<PRE> jim            +biglab = ALL
+</PRE>
+<P>
+The user <STRONG>jim</STRONG> may run any command on machines in the <EM>biglab</EM> netgroup.
+<STRONG>Sudo</STRONG> knows that ``biglab'' is a netgroup due to the '+' prefix.
+
+<P>
+<PRE> +secretaries   ALL = PRINTING, /usr/bin/adduser, /usr/bin/rmuser
+</PRE>
+<P>
+Users in the <STRONG>secretaries</STRONG> netgroup need to help manage the printers as well as add and remove users,
+so they are allowed to run those commands on all machines.
+
+<P>
+<PRE> fred           ALL = (DB) NOPASSWD: ALL
+</PRE>
+<P>
+The user <STRONG>fred</STRONG> can run commands as any user in the <EM>DB</EM>  <CODE>Runas_Alias</CODE>
+(<STRONG>oracle</STRONG> or <STRONG>sybase</STRONG>) without giving a password.
+
+<P>
+<PRE> john           ALPHA = /usr/bin/su [!-]*, !/usr/bin/su *root*
+</PRE>
+<P>
+On the <EM>ALPHA</EM> machines, user <STRONG>john</STRONG> may su to anyone except root but he is not allowed to give
+<CODE>su(1)</CODE> any flags.
+
+<P>
+<PRE> jen            ALL, !SERVERS = ALL
+</PRE>
+<P>
+The user <STRONG>jen</STRONG> may run any command on any machine except for those in the <EM>SERVERS</EM>  <CODE>Host_Alias</CODE> (master, mail, www and ns).
+
+<P>
+<PRE> jill           SERVERS = /usr/bin/, !SU, !SHELLS
+</PRE>
+<P>
+For any machine in the <EM>SERVERS</EM>  <CODE>Host_Alias</CODE>, <STRONG>jill</STRONG> may run any commands in the directory /usr/bin/ except for those commands
+belonging to the <EM>SU</EM> and <EM>SHELLS</EM>  <CODE>Cmnd_Aliases</CODE>.
+
+<P>
+<PRE> steve          CSNETS = (operator) /usr/local/op_commands/
+</PRE>
+<P>
+The user <STRONG>steve</STRONG> may run any command in the directory /usr/local/op_commands/ but only as
+user operator.
+
+<P>
+<PRE> matt           valkyrie = KILL
+</PRE>
+<P>
+On his personal workstation, valkyrie, <STRONG>matt</STRONG> needs to be able to kill hung processes.
+
+<P>
+<PRE> WEBMASTERS     www = (www) ALL, (root) /usr/bin/su www
+</PRE>
+<P>
+On the host www, any user in the <EM>WEBMASTERS</EM>  <CODE>User_Alias</CODE> (will, wendy, and wim), may run any command as user www (which owns the web
+pages) or simply <CODE>su(1)</CODE> to www.
+
+<P>
+<PRE> ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
+                /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
+</PRE>
+<P>
+Any user may mount or unmount a CD-ROM on the machines in the CDROM
+<CODE>Host_Alias</CODE> (orion, perseus, hercules) without entering a password. This is a bit
+tedious for users to type, so it is a prime candiate for encapsulating in a
+shell script.
+
 <P>
 <HR>
-<H2><A NAME="Host_Alias_specifications_">Host Alias specifications:</A></H2>
+<H1><A NAME="SECURITY_NOTES">SECURITY NOTES</A></H1>
 <P>
-The are four <EM>host aliases</EM>. The first actually contains two <EM>aliases</EM>. It sets <CODE>HUB</CODE> to be <CODE>houdini</CODE> and <CODE>REMOTE</CODE>
-to the three machines <CODE>merlin</CODE>, <CODE>kodiakthorn</CODE> and <CODE>spirit</CODE>. Similarly, <CODE>SERVERS</CODE> is set to the machines <CODE>houdini</CODE>, <CODE>merlin</CODE>,
-<CODE>kodiakthorn</CODE> and <CODE>spirit</CODE>. The <CODE>CSNETS</CODE> alias will match any host on the 128.138.243.0, 128.138.204.0, or
-128.138.205.192 nets. The <CODE>CUNETS</CODE> alias will match any host on the 128.138.0.0 (class B) network. Note that
-these are <STRONG>network</STRONG> addresses, not ip addresses. Unless an explicit netmask is given, the local <EM>netmask</EM>
-is used to determine whether or not the current host belongs to a network.
+It is generally not effective to ``subtract'' commands from <CODE>ALL</CODE>
+using the '!' operator. A user can trivially circumvent this by copying the
+desired command to a different name and then executing that. For example:
 
 <P>
-<HR>
-<H2><A NAME="User_Alias_specifications_">User Alias specifications:</A></H2>
+<PRE>    bill        ALL = ALL, !SU, !SHELLS
+</PRE>
 <P>
-The two <EM>user aliases</EM> simply groups the <A HREF="#item_FULLTIME">FULLTIME</A> and
-<A HREF="#item_PARTTIME">PARTTIME</A> folks into two separate aliases.
+Doesn't really prevent <STRONG>bill</STRONG> from running the commands listed in
+<EM>SU</EM> or <EM>SHELLS</EM> since he can simply copy those commands to a different name, or use a shell
+escape from an editor or other program. Therefore, these kind of
+restrictions should be considered advisory at best (and reinforced by
+policy).
 
-<P>
-<HR>
-<H2><A NAME="Command_alias_specifications_">Command alias specifications:</A></H2>
-<P>
-Command aliases are lists of commands with or without associated command
-line arguments. The entries above should be self-explanatory.
-
-<P>
-<HR>
-<H2><A NAME="User_specifications_">User specifications:</A></H2>
-<DL>
-<DT><STRONG><A NAME="item_FULLTIME">FULLTIME</A></STRONG><DD>
-<P>
-Full-time sysadmins in the <A HREF="#item_FULLTIME">FULLTIME</A> alias may run any command on any host as any user without a password.
-
-<DT><STRONG><A NAME="item__wheel">%wheel</A></STRONG><DD>
-<P>
-Any user in the UN*X group <CODE>wheel</CODE> may run any command on any host.
-
-<DT><STRONG><A NAME="item_PARTTIME">PARTTIME</A></STRONG><DD>
-<P>
-Part-time sysadmins in the <A HREF="#item_PARTTIME">PARTTIME</A> alias may run any command except those in the <CODE>SHELLS</CODE> and <CODE>SU</CODE> aliases on any host.
-
-<DT><STRONG><A NAME="item__interns">+interns</A></STRONG><DD>
-<P>
-Any user in the netgroup <CODE>interns</CODE> may run any command except those in the <CODE>SHELLS</CODE> and <CODE>SU</CODE> aliases on any host that is in the <CODE>openlabs</CODE> netgroup.
-
-<DT><STRONG><A NAME="item_britt">britt</A></STRONG><DD>
-<P>
-The user <A HREF="#item_britt">britt</A> may run commands in the <CODE>SHUTDOWN</CODE> alias on the <CODE>REMOTE</CODE> machines and commands in the <CODE>LPCS</CODE> alias on any machine.
-
-<DT><STRONG><A NAME="item_jimbo">jimbo</A></STRONG><DD>
-<P>
-The user <A HREF="#item_jimbo">jimbo</A> may <CODE>su</CODE> to any user save root on the machines on <CODE>CUNETS</CODE> (which is explicitly listed as a class B network).
-
-<DT><STRONG><A NAME="item_nieusma">nieusma</A></STRONG><DD>
-<P>
-The user <A HREF="#item_nieusma">nieusma</A> may run commands in the <CODE>SHUTDOWN</CODE> alias as well as <EM>/sbin/reboot</EM> on the <CODE>SERVER</CODE> machines and any command except those in the <CODE>SHELLS</CODE> alias on the <CODE>HUB</CODE>
-machines.
-
-<DT><STRONG><A NAME="item_jill">jill</A></STRONG><DD>
-<P>
-The user <A HREF="#item_jill">jill</A> may run <CODE>/sbin/shutdown -h now</CODE> or
-<CODE>/sbin/shutdown -r now</CODE> as well as the commands in the
-<CODE>MISC</CODE> alias on houdini.
-
-<DT><STRONG><A NAME="item_markm">markm</A></STRONG><DD>
-<P>
-The user <A HREF="#item_markm">markm</A> may run any command on the <CODE>HUB</CODE> machines except <EM>/sbin/shutdown</EM>, <EM>/sbin/halt</EM>, and commands listed in the <CODE>MISC</CODE> alias.
-
-<DT><STRONG><A NAME="item_davehieb">davehieb</A></STRONG><DD>
-<P>
-The user <A HREF="#item_davehieb">davehieb</A> may run any command on <CODE>merlin</CODE> as any user in the Runas_Alias OP (ie: root or operator). He may also run <EM>/sbin/halt</EM> on the <CODE>SERVERS</CODE> and any command on <CODE>kodiakthorn</CODE> (no password required on <CODE>kodiakthorn</CODE>).
-
-<DT><STRONG><A NAME="item_steve">steve</A></STRONG><DD>
-<P>
-The user <A HREF="#item_steve">steve</A> may run any command in the <EM>/usr/op_commands/</EM>
-directory as user <CODE>operator</CODE> on the machines on <CODE>CSNETS</CODE>.
-
-</DL>
 <P>
 <HR>
 <H1><A NAME="CAVEATS">CAVEATS</A></H1>
 <P>
 The <EM>sudoers</EM> file should <STRONG>always</STRONG> be edited by the <STRONG>visudo</STRONG>
 command which locks the file and does grammatical checking. It is
-imperative that the <EM>sudoers</EM> be free of syntax errors since sudo will not run with a syntactically
-incorrect <EM>sudoers</EM> file.
+imperative that <EM>sudoers</EM> be free of syntax errors since <STRONG>sudo</STRONG>
+will not run with a syntactically incorrect <EM>sudoers</EM> file.
 
 <P>
 <HR>
 <H1><A NAME="FILES">FILES</A></H1>
 <P>
-<PRE> /etc/sudoers           file of authorized users.
- /etc/netgroup          list of network groups.
+<PRE> /etc/sudoers           List of who can run what
+ /etc/group             Local groups file
+ /etc/netgroup          List of network groups
 </PRE>
 <P>
 <HR>
