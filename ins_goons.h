@@ -23,13 +23,10 @@
 #ifndef _SUDO_INS_GOONS_H
 #define _SUDO_INS_GOONS_H
 
-/*
- * Insults from the "Goon Show."
- * To add insult to injury, just add to the following strings and
- * adjust NOFINSULTS accordingly.
- */
+    /*
+     * Insults from the "Goon Show."
+     */
 
-char *insults[] = {
     "You silly, twisted boy you.",
     "He has fallen in the water!",
     "We'll all be murdered in our beds!",
@@ -52,9 +49,6 @@ char *insults[] = {
     "You gotta go owwwww!",
     "I have been called worse.",
     "It's only your word against mine.",
-    "I think ... err ... I think ... I think I'll go home"
-};
-
-#define NOFINSULTS 23 	/* number of insults */
+    "I think ... err ... I think ... I think I'll go home",
 
 #endif /* _SUDO_INS_GOONS_H */

@@ -23,13 +23,10 @@
 #ifndef _SUDO_INS_2001_H
 #define _SUDO_INS_2001_H
 
-/*
- * HAL insults (paraphrased) from 2001.
- * To add insult to injury, just add to the following strings and
- * adjust NOFINSULTS accordingly.
- */
+    /*
+     * HAL insults (paraphrased) from 2001.
+     */
 
-char *insults[] = {
     "Just what do you think you're doing Dave?",
     "It can only be attributed to human error.",
     "That's something I cannot allow to happen.",
@@ -37,9 +34,6 @@ char *insults[] = {
     "Sorry about this, I know it's a bit silly.",
     "Take a stress pill and think things over.",
     "This mission is too important for me to allow you to jeopardize it.",
-    "I feel much better now."
-};
-
-#define NOFINSULTS 8 	/* number of insults */
+    "I feel much better now.",
 
 #endif /* _SUDO_INS_2001_H */

@@ -23,13 +23,10 @@
 #ifndef _SUDO_INS_CLASSIC_H
 #define _SUDO_INS_CLASSIC_H
 
-/*
- * Insults from the original sudo(8).
- * To add insult to injury, just add to the following strings and
- * adjust NOFINSULTS accordingly.
- */
+    /*
+     * Insults from the original sudo(8).
+     */
 
-char *insults[] = {
     "Wrong!  You cheating scum!",
     "No soap, honkie-lips.",
     "Where did you learn to type?",
@@ -37,9 +34,6 @@ char *insults[] = {
     "My pet ferret can type better than you!",
     "You type like i drive.",
     "Do you think like you type?",
-    "Your mind just hasn't been the same since the electro-shock, has it?"
-};
-
-#define NOFINSULTS 8 	/* number of insults */
+    "Your mind just hasn't been the same since the electro-shock, has it?",
 
 #endif /* _SUDO_INS_CLASSIC_H */

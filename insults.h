@@ -25,19 +25,36 @@
 
 #ifdef USE_INSULTS
 
+#if !defined(HAL_INSULTS) && !defined(GOONS_INSULTS) && !defined(CLASSIC_INSULTS)
+#  define CLASSIC_INSULTS
+#endif
+
 /*
- * Choose a set of insults, the default is to use the insults from
- * "sudo classic" (in the original edition of the Sys Admin book).
+ * Use one or more set of insults as defined in options.h.
  */
-#ifdef HAL
+
+char *insults[] = {
+
+# ifdef HAL_INSULTS
 #  include "ins_2001.h"
-#else
-#  ifdef GOONS
-#    include "ins_goons.h"
-#  else
-#    include "ins_classic.h"
-#  endif /* GOONS */
-#endif /* HAL */
+# endif
+
+# ifdef GOONS_INSULTS
+#  include "ins_goons.h"
+# endif
+
+# ifdef CLASSIC_INSULTS
+#  include "ins_classic.h"
+# endif
+
+    (char *) 0
+
+};
+
+/*
+ * How may I insult you?  Let me count the ways...
+ */
+#define NOFINSULTS (sizeof(insults) / sizeof(insults[0]) - 1)
 
 /*
  * return a pseudo-random insult.
