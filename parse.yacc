@@ -304,7 +304,7 @@ int type;
     ok = FALSE;			/* assume failure */
     ai.type = type;
     strcpy(ai.name, alias);
-    if (lfind(&ai, aliases, &naliases, sizeof(ai), aliascmp) != NULL) {
+    if (lfind((const void *)&ai, (void *)aliases, (size_t *)&naliases, sizeof(ai), aliascmp) != NULL) {
 	sprintf(s, "Alias `%s' already defined", alias);
 	yyerror(s);
     } else {
@@ -313,7 +313,7 @@ int type;
 	    yyerror(s);
 	}
 
-	aip = (aliasinfo *) lsearch(&ai, aliases, &naliases, sizeof(ai),
+	aip = (aliasinfo *) lsearch((const void *)&ai, (void *)aliases, (size_t *)&naliases, sizeof(ai),
 	    aliascmp);
 
 	if (aip != NULL) {
@@ -337,7 +337,7 @@ int type;
     strcpy(ai.name, alias);
     ai.type = type;
 
-    return(lfind(&ai, aliases, &naliases, sizeof(ai), aliascmp) != NULL);
+    return(lfind((const void *)&ai, (void *)aliases, (size_t *)&naliases, sizeof(ai), aliascmp) != NULL);
 }
 
 static int
