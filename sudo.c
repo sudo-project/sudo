@@ -99,7 +99,8 @@ static const char rcsid[] = "$Sudo$";
 /*
  * Prototypes
  */
-static int init_vars			__P((int));
+static void init_vars			__P((int));
+static int set_cmnd			__P((int));
 static int parse_args			__P((int, char **));
 static void initial_setup		__P((void));
 static void set_loginclass		__P((struct passwd *));
@@ -109,7 +110,6 @@ static void usage_excl			__P((int))
 					    __attribute__((__noreturn__));
 static struct passwd *get_authpw	__P((void));
 extern int sudo_edit			__P((int, char **));
-extern void list_matches		__P((void));
 extern char **rebuild_env		__P((char **, int, int));
 extern char **zero_env			__P((char **));
 extern struct passwd *sudo_getpwnam	__P((const char *));
@@ -123,12 +123,13 @@ char **Argv, **NewArgv;
 char *prev_user;
 struct sudo_user sudo_user;
 struct passwd *auth_pw;
-FILE *sudoers_fp;
+static struct passwd *list_pw;
 struct interface *interfaces;
 int num_interfaces;
 int tgetpass_flags;
 uid_t timestamp_uid;
 extern int errorlineno;
+extern int parse_error;
 extern char *errorfile;
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
@@ -148,14 +149,16 @@ main(argc, argv, envp)
     char **argv;
     char **envp;
 {
-    int validated;
+    int validated = 0;
     int fd;
     int cmnd_status;
     int sudo_mode;
     int pwflag;
     char **new_environ;
     sigaction_t sa;
-    extern int printmatches;
+#ifdef HAVE_LDAP
+    VOID *ld;
+#endif
     extern char **environ;
 
     Argv = argv;
@@ -242,7 +245,6 @@ main(argc, argv, envp)
 	    case MODE_LIST:
 		user_cmnd = "list";
 		pwflag = I_LISTPW;
-		printmatches = 1;
 		break;
 	}
 
@@ -250,31 +252,45 @@ main(argc, argv, envp)
     if (user_cmnd == NULL && NewArgc == 0)
 	usage(1);
 
-    cmnd_status = init_vars(sudo_mode);
+    init_vars(sudo_mode);	/* XXX - move this? */
 
 #ifdef HAVE_LDAP
-    validated = sudo_ldap_check(pwflag);
+    if ((ld = sudo_ldap_open()) != NULL)
+	sudo_ldap_update_defaults(ld);
 
-    /* Skip reading /etc/sudoers if LDAP told us to */
-    if (def_ignore_local_sudoers); /* skips */
-    else if (ISSET(validated, VALIDATE_OK) && !printmatches); /* skips */
-    else if (ISSET(validated, VALIDATE_OK) && printmatches)
-    {
-	sudoers_fp = open_sudoers(_PATH_SUDOERS, NULL);
-
-	/* User is found in LDAP and we want a list of all sudo commands the
-	 * user can do, so consult sudoers but throw away result.
-	 */
-	sudoers_lookup(pwflag);
-    }
-    else
+    if (!def_ignore_local_sudoers)
 #endif
     {
-	sudoers_fp = open_sudoers(_PATH_SUDOERS, NULL);
-
-	/* Validate the user but don't search for pseudo-commands. */
-	validated = sudoers_lookup(pwflag);
+	/* Parse sudoers and set any defaults listed in it. */
+	if (parse_sudoers(_PATH_SUDOERS) || parse_error)
+	    log_error(0, "parse error in %s near line %d", errorfile, errorlineno);
+	if (!update_defaults())
+	    log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
     }
+
+    /* This goes after sudoers is parsed since it may have timestamp options. */
+    if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
+	remove_timestamp((sudo_mode == MODE_KILL));
+	exit(0);
+    }
+
+    /* Is root even allowed to run sudo? */
+    if (user_uid == 0 && !def_root_sudo) {
+	(void) fprintf(stderr,
+	    "Sorry, %s has been configured to not allow root to run it.\n",
+	    getprogname());
+	exit(1);
+    }
+
+    cmnd_status = set_cmnd(sudo_mode);
+
+#ifdef HAVE_LDAP
+    if (ld != NULL)
+	validated = sudo_ldap_check(ld, pwflag);
+    /* Fallback to sudoers if we are allowed to and we aren't validated. */
+    if (!def_ignore_local_sudoers && !ISSET(validated, VALIDATE_OK))
+#endif
+	validated = sudoers_lookup(pwflag);
 
     /*
      * Look up the timestamp dir owner if one is specified.
@@ -290,23 +306,6 @@ main(argc, argv, envp)
 	    log_error(0, "timestamp owner (%s): No such user",
 		def_timestampowner);
 	timestamp_uid = pw->pw_uid;
-    }
-
-    /* This goes after the sudoers parse since we honor sudoers options. */
-    if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
-	remove_timestamp((sudo_mode == MODE_KILL));
-	exit(0);
-    }
-
-    if (ISSET(validated, VALIDATE_ERROR))
-	log_error(0, "parse error in %s near line %d", errorfile, errorlineno);
-
-    /* Is root even allowed to run sudo? */
-    if (user_uid == 0 && !def_root_sudo) {
-	(void) fprintf(stderr,
-	    "Sorry, %s has been configured to not allow root to run it.\n",
-	    getprogname());
-	exit(1);
     }
 
     /* If given the -P option, set the "preserve_groups" flag. */
@@ -338,6 +337,7 @@ main(argc, argv, envp)
 	check_user(ISSET(validated, FLAG_CHECK_USER));
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
+    /* XXX - causes confusion when root is not listed in sudoers */
     if (user_uid == 0 && prev_user != NULL && strcmp(prev_user, "root") != 0) {
 	    struct passwd *pw;
 
@@ -367,9 +367,9 @@ main(argc, argv, envp)
 	if (sudo_mode == MODE_VALIDATE)
 	    exit(0);
 	else if (sudo_mode == MODE_LIST) {
-	    list_matches();
+	    display_privs(list_pw ? list_pw : sudo_user.pw);
 #ifdef HAVE_LDAP
-	    sudo_ldap_list_matches();
+	    sudo_ldap_display_privs();	/* XXX - use list_pw */
 #endif
 	    exit(0);
 	}
@@ -478,12 +478,12 @@ main(argc, argv, envp)
  * Initialize timezone, set umask, fill in ``sudo_user'' struct and
  * load the ``interfaces'' array.
  */
-static int
+static void
 init_vars(sudo_mode)
     int sudo_mode;
 {
     char *p, thost[MAXHOSTNAMELEN];
-    int nohostname, rval;
+    int nohostname;
 
     /* Sanity check command from user. */
     if (user_cmnd == NULL && strlen(NewArgv[0]) >= PATH_MAX)
@@ -607,13 +607,22 @@ init_vars(sudo_mode)
 
     /* Set login class if applicable. */
     set_loginclass(sudo_user.pw);
+}
+
+/*
+ * Fill in user_cmnd, user_args, user_base and user_stat variables.
+ */
+static int
+set_cmnd(sudo_mode)
+    int sudo_mode;
+{
+    int rval;
 
     /* Resolve the path and return. */
     rval = FOUND;
     user_stat = emalloc(sizeof(struct stat));
     if (sudo_mode & (MODE_RUN | MODE_EDIT)) {
 	if (ISSET(sudo_mode, MODE_RUN)) {
-	    /* XXX - default_runas may be modified during parsing of sudoers */
 	    set_perms(PERM_RUNAS);
 	    rval = find_path(NewArgv[0], &user_cmnd, user_stat, user_path);
 	    set_perms(PERM_ROOT);
@@ -780,6 +789,15 @@ parse_args(argc, argv)
 		if (excl && excl != 'l')
 		    usage_excl(1);
 		excl = 'l';
+		if (NewArgv[1] != NULL && *NewArgv[1] != '-') {
+		    if ((list_pw = sudo_getpwnam(NewArgv[1])) != NULL) {
+			if (getuid() != 0 && list_pw->pw_uid != getuid())
+			    errx(1, "only root may list other user's entries");
+		    } else
+			errx(1, "unknown user %s", NewArgv[1]);
+		    NewArgc--;
+		    NewArgv++;
+		}
 		break;
 	    case 'V':
 		rval = MODE_VERSION;
@@ -1108,7 +1126,7 @@ usage(exit_val)
 	    continue;
 	*p = " file [...]";
     } else {
-	fprintf(stderr, "usage: %s -K | -L | -V | -h | -k | -l | -v\n",
+	fprintf(stderr, "usage: %s -K | -L | -V | -h | -k | -l [user] | -v\n",
 	    getprogname());
     }
 
