@@ -377,10 +377,14 @@ CHANGES from sudo 1.3.2
      field in struct sockaddr.
 
 124) Check ownership and permissions on timestamp dir and ignore if
-     not owned by root and mode 0700.
+     not owned by root and mode 0700.  Problem pointed out by Larry Auton
+     <lda@research.AT&T.com> and Navjot Singh <singh@research.AT&T.com>.
 
 125) Ignore timestamp files with preposterous dates to keep people from
      faking out sudo on OS's that allow you to give away files to root.
+     Problem pointed out by Larry Auton <lda@research.AT&T.com> and
+     Navjot Singh <singh@research.AT&T.com>.
 
 126) A timeout of 0 will now cause a password to be entered every
-     time.
+     time.  Based on a suggestion by Larry Auton <lda@research.AT&T.com>
+     and Navjot Singh <singh@research.AT&T.com>.
