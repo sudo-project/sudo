@@ -58,7 +58,10 @@ touch(fd, path, when)
 	return(futimes(fd, times));
     else
 #endif
+    if (path != NULL)
 	return(utimes(path, times));
+    else
+	return(-1);
 }
 
 /*
