@@ -94,7 +94,7 @@ extern int path_matches		__P((char *, char *));
 extern int addr_matches		__P((char *));
 static int find_alias		__P((char *, int));
 static int add_alias		__P((char *, int));
-static int more_aliases		__P((int));
+static int more_aliases		__P((size_t));
 
 int yyerror(s)
 char *s;
@@ -394,9 +394,9 @@ size_t nslots;
 int
 dumpaliases()
 {
-    size_t n = naliases;
+    size_t n;
 
-    while (n--)
+    for (n = 0; n < naliases; n++)
 	printf("%s\t%s\n", aliases[n].type == HOST ? "HOST" : "CMND",
                            aliases[n].name);
 
