@@ -14,8 +14,11 @@ sudo \- execute a command as the superuser
 |
 .B \-k
 |
-.B \-b
+.B \-s
 | [
+.B \-b
+]
+[
 .B \-p
 prompt ]
 .I command
@@ -89,6 +92,16 @@ to run the given command in the background.  Note that if you use the
 .IP \-p
 The \-p (prompt) option allows you to override the default password
 prompt and use a custom one.
+.IP \-s
+The \-s (shell) option runs the shell specified by the
+.I SHELL
+environmental variable if it is set or the shell as specified in
+.BR passwd (5).
+.IP \-\-
+The \-\- flag indicates that
+.B sudo
+should stop processing command line arguments.  It is most useful
+in conjunction with the -s flag.
 .SH RETURN VALUES
 .B sudo
 quits with an exit value of 1 if there is a configuration/permission problem
@@ -166,6 +179,7 @@ current_time + 2 * TIMEOUT.
 .SH ENVIRONMENT VARIABLES
 .nf
 PATH                         Set to a sane value if SECURE_PATH is set
+SHELL                        Used to determine shell to run with \-s option
 SUDO_COMMAND                 Set to the command run by sudo
 SUDO_USER                    Set to the login of the user who invoked sudo
 SUDO_UID                     Set to the uid of the user who invoked sudo
