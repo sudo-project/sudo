@@ -302,7 +302,8 @@ install-dirs:
 
 install-binaries: $(PROGS)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 -s sudo $(DESTDIR)$(sudodir)/sudo
-	ln -f $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
+	rm -f $(DESTDIR)$(sudodir)/sudoedit
+	ln $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
 
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s visudo $(DESTDIR)$(visudodir)/visudo
 
@@ -360,7 +361,7 @@ dist:
 
 bindist:
 	( \
-	  ARCH=`uname -m`+`uname -sr|sed 's/ /_/g'` ; \
+	  ARCH=`uname -m|sed 's:/:_:g'`+`uname -sr|sed 's/ /_/g'` ; \
 	  mkdir tmp.$$ARCH ; \
 	  tdir=tmp.$$ARCH/sudo-$(VERSION) ; \
 	  mkdir $$tdir ; \
