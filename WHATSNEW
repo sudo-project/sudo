@@ -1,0 +1,45 @@
+What's new in Sudo 1.7?
+
+ * Rewritten parser that converts sudoers into a set of data structures.
+   This eliminates a number of ordering issues and makes it possible to
+   apply sudoers Defaults entries before searching for the command.
+   It also adds support for per-command Defaults specifications.
+
+ * New monitor functionality for systems with the systrace kernel facility
+   (OpenBSD and NetBSD in the default system, FreeBSD and Linux with kernel
+   patched).  When monitoring is enabled, sudo will fork a daemon that
+   monitors the command being run and intercepts the execve() system call,
+   allowing or denying execution of the new command based on a sudoers lookup.
+   The SUDO_* environment variables are also updated if this is supported by
+   the version of systrace(4) on the system.
+
+ * Sudoers now supports a #include facility to allow the inclusion of other
+   sudoers-format files.
+
+ * Wildcard matches on commands now use glob() and stat() so that relative
+   paths now work correctly in conjunction with wildcards.
+
+ * Sudo's -l (list) flag has been enhanced:
+    o applicable Defaults options are now listed
+    o a command argument can be specified for testing whether a user
+      may run a specific command.
+    o a new -U flag can be used in conjunction with "sudo -l" to allow
+      root (or a user with "sudo ALL") list another user's privileges.
+
+ * The "secure_path" run-time Defaults option has been restored.
+
+ * Password and group data is now cached for fast lookup.
+
+ * Sudo will use the supplemental group vector if it is present in addition
+   to doing string comparisons of the group members.  This is useful for
+   systems with nsswitch.conf where group entries can be in either /etc/group
+   or some other database (NIS, NIS+, LDAP, etc) and getgrnam() only returns
+   data from one source.
+
+ * The file descriptor at which sudo starts closing all open files is now
+   configurable via sudoers and, optionally, the command line.
+
+ * Visudo can now handle VISUAL and EDITOR environment variables that contain
+   command line arguments.
+
+ * Visudo will now warn about aliases that are defined but not used.
