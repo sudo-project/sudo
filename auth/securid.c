@@ -99,7 +99,8 @@ securid_setup(pw, promptp, auth)
 
     /* Re-initialize SecurID every time. */
     if (sd_init(sd) == 0) {
-	strcpy(sd->username, pw->pw_name);
+	/* The programmer's guide says username is 32 bytes */
+	strlcpy(sd->username, pw->pw_name, 32);
 	return(AUTH_SUCCESS);
     } else {
 	(void) fprintf(stderr, "%s: Cannot contact SecurID server\n", Argv[0]);
