@@ -155,19 +155,19 @@ with a "\" if used in command arguments: ",", ":", "=", "\".
                 SHUTDOWN=/etc/halt,/etc/shutdown
 
     # User specification
-    FULLTIME    ALL=(ALL) NOPASSWD:ALL
+    FULLTIME    ALL=(ALL) NOPASSWD: ALL
     %wheel	ALL=ALL
     PARTTIME    ALL=ALL,!SHELLS,!SU
     +interns    +openlabs=ALL,!SHELLS,!SU
     britt       REMOTE=SHUTDOWN:ALL=LPCS
-    jimbo	CUNETS=/bin/su *,!/bin/su root
+    jimbo	CUNETS=/bin/su ?*,!/bin/su root
     nieusma     SERVERS=SHUTDOWN,/etc/reboot:\
                 HUB=ALL,!SHELLS
     jill        houdini=/etc/shutdown -[hr] now,MISC
     markm       HUB=ALL,!MISC,!/etc/shutdown,!/etc/halt
     davehieb    merlin=ALL:SERVERS=/etc/halt:\
-                kodiakthorn=ALL
-    steve       CSNETS=/usr/op_commands/,/bin/su operator
+                kodiakthorn=NOPASSWD: ALL
+    steve       CSNETS= (operator) /usr/op_commands/
 
 =head2 Host Alias specifications:
 
@@ -252,12 +252,13 @@ in the C<MISC> alias.
 =item davehieb
 
 The user C<davehieb> may run any command on C<merlin>,
-F</etc/halt> on the C<SERVERS> and any command on C<kodiakthorn>.
+F</etc/halt> on the C<SERVERS>.  He may also run any command
+on C<kodiakthorn> without giving a password.
 
 =item steve
 
 The user C<steve> may run any command in the F</usr/op_commands/>
-directory and C</bin/su operator> on the machines on C<CSNETS>.
+directory as user C<operator> on the machines on C<CSNETS>.
 
 =back
 
