@@ -1969,7 +1969,7 @@ if test "${with_sendmail+set}" = set; then
 		;;
     no)		;;
     *)		cat >>confdefs.h <<EOF
-#define _PATH_SENDMAIL "$with_sendmail"
+#define _PATH_SUDO_SENDMAIL "$with_sendmail"
 EOF
 
 		;;
@@ -6330,42 +6330,42 @@ if test -f "/usr/sbin/sendmail"; then
     echo "$as_me:6330: result: /usr/sbin/sendmail" >&5
 echo "${ECHO_T}/usr/sbin/sendmail" >&6
     cat >>confdefs.h <<\EOF
-#define _PATH_SENDMAIL "/usr/sbin/sendmail"
+#define _PATH_SUDO_SENDMAIL "/usr/sbin/sendmail"
 EOF
 
 elif test -f "/usr/lib/sendmail"; then
     echo "$as_me:6337: result: /usr/lib/sendmail" >&5
 echo "${ECHO_T}/usr/lib/sendmail" >&6
     cat >>confdefs.h <<\EOF
-#define _PATH_SENDMAIL "/usr/lib/sendmail"
+#define _PATH_SUDO_SENDMAIL "/usr/lib/sendmail"
 EOF
 
 elif test -f "/usr/etc/sendmail"; then
     echo "$as_me:6344: result: /usr/etc/sendmail" >&5
 echo "${ECHO_T}/usr/etc/sendmail" >&6
     cat >>confdefs.h <<\EOF
-#define _PATH_SENDMAIL "/usr/etc/sendmail"
+#define _PATH_SUDO_SENDMAIL "/usr/etc/sendmail"
 EOF
 
 elif test -f "/usr/ucblib/sendmail"; then
     echo "$as_me:6351: result: /usr/ucblib/sendmail" >&5
 echo "${ECHO_T}/usr/ucblib/sendmail" >&6
     cat >>confdefs.h <<\EOF
-#define _PATH_SENDMAIL "/usr/ucblib/sendmail"
+#define _PATH_SUDO_SENDMAIL "/usr/ucblib/sendmail"
 EOF
 
 elif test -f "/usr/local/lib/sendmail"; then
     echo "$as_me:6358: result: /usr/local/lib/sendmail" >&5
 echo "${ECHO_T}/usr/local/lib/sendmail" >&6
     cat >>confdefs.h <<\EOF
-#define _PATH_SENDMAIL "/usr/local/lib/sendmail"
+#define _PATH_SUDO_SENDMAIL "/usr/local/lib/sendmail"
 EOF
 
 elif test -f "/usr/local/bin/sendmail"; then
     echo "$as_me:6365: result: /usr/local/bin/sendmail" >&5
 echo "${ECHO_T}/usr/local/bin/sendmail" >&6
     cat >>confdefs.h <<\EOF
-#define _PATH_SENDMAIL "/usr/local/bin/sendmail"
+#define _PATH_SUDO_SENDMAIL "/usr/local/bin/sendmail"
 EOF
 
 else
