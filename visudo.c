@@ -237,7 +237,7 @@ main(argc, argv)
      */
     if ((UserEditor = getenv("EDITOR")) == NULL || *UserEditor == '\0')
 	UserEditor = getenv("VISUAL");
-    if (*UserEditor == '\0')
+    if (UserEditor && *UserEditor == '\0')
 	UserEditor = NULL;
     else if (UserEditor) {
 	if (find_path(UserEditor, &Editor) == FOUND) {
@@ -337,7 +337,7 @@ main(argc, argv)
 	    av[0] = Editor;
 	n = 1;
 	if (parse_error == TRUE) {
-	    (void) snprintf(linestr, sizeof(linestr), "%d", errorlineno);
+	    (void) snprintf(linestr, sizeof(linestr), "+%d", errorlineno);
 	    av[n++] = linestr;
 	}
 	av[n++] = stmp;
