@@ -7,7 +7,9 @@
 
 # Host alias specification
 
+# User alias specification
+
 # Cmnd alias specification
 
-# User specification
+# User privilege specification
 root	ALL=ALL
