@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.29  1999/02/07 00:47:32  millert
-''' Make it clear that it is the user's password, not root's, that we want.
+''' Revision 1.30  1999/02/17 16:40:55  millert
+''' fix grammar; espie@openbsd.org
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudo 8 "1.5.8" "6/Feb/99" "MAINTENANCE COMMANDS"
+.TH sudo 8 "1.5.8" "17/Feb/99" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -363,7 +363,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 675 Mass Ave, Cambridge, MA 02139, USA.
 .SH "CAVEATS"
 There is no easy way to prevent a user from gaining a root shell if
-that user has access to commands allow shell escapes.
+that user has access to commands allowing shell escapes.
 .PP
 If users have sudo ALL there is nothing to prevent them from creating
 their own program that gives them a root shell regardless of any \*(L'!\*(R'

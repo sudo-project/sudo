@@ -61,7 +61,7 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-6/Feb/99                      1.5.8                             1
+17/Feb/99                     1.5.8                             1
 
 
 
@@ -127,7 +127,7 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 
 
 
-6/Feb/99                      1.5.8                             2
+17/Feb/99                     1.5.8                             2
 
 
 
@@ -193,7 +193,7 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT V
 
 
 
-6/Feb/99                      1.5.8                             3
+17/Feb/99                     1.5.8                             3
 
 
 
@@ -231,7 +231,7 @@ DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
 
 CCCCAAAAVVVVEEEEAAAATTTTSSSS
        There is no easy way to prevent a user from gaining a root
-       shell if that user has access to commands allow shell
+       shell if that user has access to commands allowing shell
        escapes.
 
        If users have sudo ALL there is nothing to prevent them
@@ -259,7 +259,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-6/Feb/99                      1.5.8                             4
+17/Feb/99                     1.5.8                             4
 
 
 
@@ -325,6 +325,6 @@ sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
 
-6/Feb/99                      1.5.8                             5
+17/Feb/99                     1.5.8                             5
 
 
