@@ -170,6 +170,12 @@
 /* Define if you have tcgetattr(3). */
 #undef HAVE_TCGETATTR
 
+/* Define if you have utime(2). */
+#undef HAVE_UTIME
+
+/* Define if utime(file, NULL) sets timestamp to current */
+#undef HAVE_UTIME_NULL
+
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
 
