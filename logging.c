@@ -74,7 +74,7 @@ static void syslog_wrapper	__P((int, char *, char *, char *));
 /*
  * Globals
  */
-static char logline[MAXLOGLEN + 8];
+static char *logline;
 extern int errorlineno;
 
 
@@ -119,8 +119,6 @@ static void syslog_wrapper(pri, fmt, arg1, arg2)
 void log_error(code)
     int code;
 {
-    int argc;
-    char **argv;
     mode_t oldmask;
     char *p;
     int count;
@@ -143,6 +141,21 @@ void log_error(code)
 	    tty = p + 1;
     else
 	tty = "none";
+
+    /*
+     * Allocate enough memory for logline so we won't overflow it
+     * XXX - don't use 33, use a macro!
+     */
+    count = 33 + 128 + 2 * MAXPATHLEN + strlen(tty) + strlen(cwd);
+    if (cmnd_args)
+	count += strlen(cmnd_args);
+
+    logline = (char *) malloc(count);
+    if (logline == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
 
     /*
      * we will skip this stuff when using syslog(3) but it is
@@ -270,24 +283,11 @@ void log_error(code)
      */
     if (code != VALIDATE_ERROR && !(code & GLOBAL_PROBLEM)) {
 
-	strcat(logline, cmnd);	/* stuff the command into the logline */
+	/* stuff the command into the logline */
+	strcat(logline, cmnd);
 	strcat(logline, " ");
-
-	/* XXX - clean up this abonimation and just set count sanely */
-	if (Argc > 1) {
-	    argc = Argc - 2;
-	    argv = Argv + 1;
-	} else {
-	    argc = Argc - 1;
-	    argv = Argv;
-	}
-
-	/*
-	 * We have defined MAXLOGLEN to be bigger than argv[] can be
-	 * so do not need to do bounds checking.
-	 */
-	for (count = 0; count < argc; count++) {
-	    strcat(logline, argv[count]);
+	if (cmnd_args) {
+	    strcat(logline, cmnd_args);
 	    strcat(logline, " ");
 	}
     }
