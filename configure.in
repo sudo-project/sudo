@@ -443,12 +443,14 @@ dnl
 dnl Find kerberos includes and libs or complain
 dnl
 if test -n "$KERB4" -o -n "$KERB5" ; then
-    if test -d "/usr/include/kerberosIV" ; then
+    if test -f "/usr/include/kerberosIV/krb.h" ; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/include/kerberosIV"
-    elif test -d "/usr/local/include/kerberosIV" ; then
+    elif test -f "/usr/local/include/kerberosIV/krb.h" ; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/local/include/kerberosIV"
-    elif test -d "/usr/kerberos/include" ; then
+    elif test -f "/usr/kerberos/include/krb.h" ; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/kerberos/include"
+    elif test -f "/usr/local/kerberos/include/krb.h" ; then
+	CPPFLAGS="${CPPFLAGS} -I/usr/local/kerberos/include"
     else
 	echo 'Unable to locate kerberos include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS'
     fi
