@@ -547,16 +547,16 @@ store_int(val, def, op)
     int op;
 {
     char *endp;
-    unsigned long ul;
+    long l;
 
     if (op == FALSE) {
 	def->sd_un.ival = 0;
     } else {
-	ul = strtoul(val, &endp, 10);
-	if (*endp != '\0')
+	l = strtol(val, &endp, 10);
+	if (*endp != '\0' || l < 0)
 	    return(FALSE);
-	/* XXX - should check against UINT_MAX */
-	def->sd_un.ival = (unsigned int)ul;
+	/* XXX - should check against INT_MAX */
+	def->sd_un.ival = (unsigned int)l;
     }
     return(TRUE);
 }
@@ -642,15 +642,15 @@ store_mode(val, def, op)
     int op;
 {
     char *endp;
-    unsigned long ul;
+    long l;
 
     if (op == FALSE) {
 	def->sd_un.mode = 0777;
     } else {
-	ul = strtoul(val, &endp, 8);
-	if (*endp != '\0' || ul >= 0777)
+	l = strtol(val, &endp, 8);
+	if (*endp != '\0' || l < 0 || l >= 0777)
 	    return(FALSE);
-	def->sd_un.mode = (mode_t)ul;
+	def->sd_un.mode = (mode_t)l;
     }
     return(TRUE);
 }
