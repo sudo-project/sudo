@@ -91,9 +91,12 @@ int top = 0;
     else \
 	top--;
 
+/*
+ * Protoypes
+ */
 extern int path_matches		__P((char *, char *));
 extern int addr_matches		__P((char *));
-extern int netgr_matches	__P((char *));
+extern int netgr_matches	__P((char *, char *, char *));
 static int find_alias		__P((char *, int));
 static int add_alias		__P((char *, int));
 static int more_aliases		__P((size_t));
