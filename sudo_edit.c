@@ -64,6 +64,7 @@
 #endif /* HAVE_ERR_H */
 #include <ctype.h>
 #include <pwd.h>
+#include <signal.h>
 #include <errno.h>
 #include <fcntl.h>
 
@@ -73,6 +74,8 @@
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
+extern sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
+
 /*
  * Wrapper to allow users to edit privileged files with their own uid.
  */
@@ -81,11 +84,12 @@ int sudo_edit(argc, argv)
     char **argv;
 {
     ssize_t nread, nwritten;
-    pid_t pid;
+    pid_t kidpid, pid;
     const char *tmpdir;
     char **nargv, **ap, *editor, *cp;
     char buf[BUFSIZ];
     int i, ac, ofd, tfd, nargc, rval;
+    sigaction_t sa;
     struct stat sb;
     struct tempfile {
 	char *tfile;
@@ -207,28 +211,49 @@ int sudo_edit(argc, argv)
 	nargv[ac++] = tf[i++].tfile;
     nargv[ac] = NULL;
 
+    /* We wait for our own children and can be suspended. */
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = SIG_DFL;
+    (void) sigaction(SIGCHLD, &sa, NULL);
+    (void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
+
     /*
      * Fork and exec the editor as with the invoking user's creds.
      */
-    pid = fork();
-    if (pid == -1) {
+    kidpid = fork();
+    if (kidpid == -1) {
 	warn("fork");
 	goto cleanup;
-    } else if (pid == 0) {
+    } else if (kidpid == 0) {
 	/* child */
+	(void) sigaction(SIGINT, &saved_sa_int, NULL);
+	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
+	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
 	set_perms(PERM_FULL_USER);
 	execvp(nargv[0], nargv);
 	warn("unable to execute %s", nargv[0]);
 	_exit(127);
     }
 
-    /* In parent, wait for child to finish. */
+    /* Anxious parent, waiting for letters home from camp... */
+    do {
 #ifdef sudo_waitpid
-    pid = sudo_waitpid(pid, &i, 0);
+        pid = sudo_waitpid(kidpid, &i, WUNTRACED);
 #else
-    pid = wait(&i);
+	pid = wait(&i);
 #endif
-    rval = pid == -1 ? -1 : (i >> 8);
+	if (pid == kidpid) {
+	    if (WIFSTOPPED(i))
+		kill(getpid(), WSTOPSIG(i));
+	    else
+		break;
+	}
+    } while (pid != -1 || errno == EINTR);
+    if (pid == -1 || !WIFEXITED(i))
+	rval = 1;
+    else
+	rval = WEXITSTATUS(i);
 
     /* Copy contents of temp files to real ones */
     for (i = 0; i < argc - 1; i++) {

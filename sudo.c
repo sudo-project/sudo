@@ -152,6 +152,7 @@ login_cap_t *lc;
 #ifdef HAVE_BSD_AUTH_H
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
+sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
 void (*set_perms) __P((int));
 
 
@@ -167,7 +168,7 @@ main(argc, argv, envp)
     int sudo_mode;
     int pwflag;
     char **new_environ;
-    sigaction_t sa, saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
+    sigaction_t sa;
     extern int printmatches;
     extern char **environ;
 
@@ -413,14 +414,14 @@ main(argc, argv, envp)
 		warn("unable to change directory to %s", runas_pw->pw_dir);
 	}
 
+	if (sudo_mode & MODE_EDIT)
+	    exit(sudo_edit(NewArgc, NewArgv));
+
 	/* Restore signal handlers before we exec. */
 	(void) sigaction(SIGINT, &saved_sa_int, NULL);
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	(void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
 	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
-
-	if (sudo_mode & MODE_EDIT)
-	    exit(sudo_edit(NewArgc, NewArgv));
 
 #ifndef PROFILING
 	if ((sudo_mode & MODE_BACKGROUND) && fork() > 0)
