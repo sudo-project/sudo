@@ -162,7 +162,6 @@ path_matches(cmnd, path)
     char *cmnd, *path;
 {
     int plen;
-    static struct stat cst;
     struct stat pst;
     DIR *dirp;
     struct dirent *dent;
@@ -170,8 +169,8 @@ path_matches(cmnd, path)
     static char *c;
 
     /* only need to stat cmnd once since it never changes */
-    if (cst.st_dev == 0) {
-	if (stat(cmnd, &cst) < 0)
+    if (cmnd_st.st_dev == 0) {
+	if (stat(cmnd, &cmnd_st) < 0)
 	    return(FALSE);
 	if ((c = strrchr(cmnd, '/')) == NULL)
 	    c = cmnd;
@@ -195,7 +194,7 @@ path_matches(cmnd, path)
 
 	if (stat(path, &pst) < 0)
 	    return(FALSE);
-	return(cst.st_dev == pst.st_dev && cst.st_ino == pst.st_ino);
+	return(cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino);
     }
 
     /* grot through path's directory entries, looking for cmnd */
@@ -213,7 +212,7 @@ path_matches(cmnd, path)
 #endif /* FAST_MATCH */
 	if (stat(buf, &pst) < 0)
 	    continue;
-	if (cst.st_dev == pst.st_dev && cst.st_ino == pst.st_ino)
+	if (cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino)
 	    break;
     }
 
