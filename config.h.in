@@ -143,12 +143,6 @@
 #  define memcpy(D, S, L)	(bcopy(S, D, L))
 #endif
 
-/* Define if you have memmove(3).  */
-#undef HAVE_MEMMOVE
-#if !defined(HAVE_MEMMOVE) && !defined(memmove)
-#  define memmove(D, S, L)	(bcopy(S, D, L))
-#endif
-
 /* Define if you have memset(3).  */
 #undef HAVE_MEMSET
 #if !defined(HAVE_MEMSET) && !defined(memset)
@@ -221,6 +215,10 @@
 
 /* Define to void if your C compiler fully groks void, else char */
 #undef VOID
+
+/* Define if your syslog(3) does not guarantee the message will be logged */
+/* and syslog(3) returns non-zero to denote failure */
+#undef BROKEN_SYSLOG
 
 /*
  * Paths to commands used by sudo.  There are used by pathnames.h.
