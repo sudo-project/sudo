@@ -694,10 +694,8 @@ update_env(fd, pid, seqnr, askp)
 	inject.stri_pid = pid;
 	inject.stri_addr = buf;
 	inject.stri_len = cp - buf;
-	if (ioctl(fd, STRIOCINJECT, &inject) != 0) {
-	    warnx("STRIOCINJECT");
+	if (ioctl(fd, STRIOCINJECT, &inject) != 0)
 	    return(-1);
-	}
 	n = (offsets[SUDO_USER] == NULL) + (offsets[SUDO_COMMAND] == NULL) +
 	    (offsets[SUDO_UID] == NULL) + (offsets[SUDO_GID] == NULL);
 	/*
@@ -754,10 +752,8 @@ update_env(fd, pid, seqnr, askp)
 	    repl.strr_argind[0] = 2;
 	    repl.strr_off[0] = 0;
 	    repl.strr_offlen[0] = (char *)envp - (char *)envbuf;
-	    if (ioctl(fd, STRIOCREPLACE, &repl) != 0) {
-		warnx("STRIOCREPLACE");
+	    if (ioctl(fd, STRIOCREPLACE, &repl) != 0)
 		return(-1);
-	    }
 	}
     }
     return(0);
