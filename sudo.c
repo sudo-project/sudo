@@ -113,7 +113,6 @@ extern char **rebuild_env		__P((char **, int, int));
 extern char **zero_env			__P((char **));
 extern struct passwd *sudo_getpwnam	__P((const char *));
 extern struct passwd *sudo_getpwuid	__P((uid_t));
-extern struct passwd *sudo_pwdup	__P((const struct passwd *));
 
 /*
  * Globals
