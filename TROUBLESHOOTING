@@ -17,7 +17,8 @@ A) Make sure you have an entry in your syslog.conf file to save
    or
 	local2.debug				@loghost
     depending whether you want to forward the messages to another
-    host or keep them locally.
+    host or keep them locally.  Don't forget to send a SIGHUP to
+    your syslogd so that it re-reads its conf file.
 
 Q) When sudo asks me for my password it never accepts what I enter even
    though I know I entered my password correctly.
