@@ -281,10 +281,10 @@
 /* Define if you have the <string.h> header file.  */
 #undef HAVE_STRING_H
 
-/* Define if you have the <strings.h> header file.  */
-#if !defined(__convex__) && !defined(convex)
+/* Define if you have the <strings.h> header file but no <string.h>.  */
+#ifndef HAVE_STRING_H
 #undef HAVE_STRINGS_H
-#endif /* convex */
+#endif /* !HAVE_STRING_H */
 
 /* Define your flavor of dir entry header file.  */
 #undef HAVE_DIRENT_H
