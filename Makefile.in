@@ -98,7 +98,8 @@ TESTOBJS = interfaces.o testsudoers.o
 
 LIBOBJS = @TGETPASS@ @LIBOBJS@
 
-HDRS = sudo.h pathnames.h options.h compat.h version.h insults.h
+HDRS = sudo.h pathnames.h options.h compat.h version.h insults.h \
+       ins_2001.h ins_classic.h ins_goons.h
 
 VERSION = 1.3.1pl5b4
 
