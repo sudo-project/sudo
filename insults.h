@@ -22,21 +22,38 @@
 /*
  * To add insult to injury, just add to the following strings and
  * adjust NOFINSULTS accordingly.  This code taken from the original
- * sudo(8).
+ * sudo(8).  HAL insults from 2001.
  */
 
+#ifdef HAL
 char *insults[] = {
-     "Wrong!  You cheating scum!",
-     "No soap, honkie-lips.",
-     "Where did you learn to type?",
-     "Are you on drugs?",
-     "My pet ferret can type better than you!",
-     "You type like i drive.",
-     "Do you think like you type?",
-     "Your mind just hasn't been the same since the electro-shock, has it?"
+    "Just what do you think you're doing Dave?",
+    "It can only be attribuited to human error.",
+    "That's something I cannot allow to happen.",
+    "My mind is going. I can feel it.",
+    "Sorry about this, I know it's a bit silly.",
+    "Take a stress pill and think things over.",
+    "This mission is too important for me to allow you to jeopardize it.",
+    "I feel much better now."
 };
 
 #define NOFINSULTS 8 	/* number of insults */
+
+#else /* HAL */
+char *insults[] = {
+    "Wrong!  You cheating scum!",
+    "No soap, honkie-lips.",
+    "Where did you learn to type?",
+    "Are you on drugs?",
+    "My pet ferret can type better than you!",
+    "You type like i drive.",
+    "Do you think like you type?",
+    "Your mind just hasn't been the same since the electro-shock, has it?"
+};
+
+#define NOFINSULTS 8 	/* number of insults */
+
+#endif /* HAL */
 
 /*
  *	return a random insult.
