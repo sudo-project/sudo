@@ -148,7 +148,7 @@ case "$OS" in
 		# C2 security stuff
 		if test -n "$C2" ; then
 		    LIBS="${LIBS} -lsecurity -laud"
-		    SHADOW_TYPE="AUTH"
+		    SHADOW_TYPE="SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
@@ -191,7 +191,7 @@ case "$OS" in
 		if test -n "$C2" ; then
 		    OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"
 		    LIBS="${LIBS} -lprot"
-		    SHADOW_TYPE="AUTH"
+		    SHADOW_TYPE="SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
@@ -254,12 +254,12 @@ dnl
 if test -z "$AFS" -a -z "$KERB4" -a -z "$KERB5" -a -n "$C2" -a -z "$SHADOW_TYPE"
     then
     echo "checking for shadow password type..."
-    AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SVR4", AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="AUTH", [test -f /etc/master.passwd && SHADOW_TYPE="BSD"]))
+    AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SVR4", AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SECUREWARE", [test -f /etc/master.passwd && SHADOW_TYPE="BSD"]))
     case "$SHADOW_TYPE" in
 	"SVR4")	echo "shadow password type is getspnam (svr4)" ;
 		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE) ;;
 	"BSD")	echo "shadow password type is /etc/master.passwd (BSD)" ;;
-	"AUTH")	echo "shadow password type is etprpwuid (auth)" ;
+	"SECUREWARE")	echo "shadow password type is etprpwuid (SecureWare)" ;
 		LIBS="${LIBS} -lprot -lx" ;
 		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE) ;;
 	*)	echo "unknown" ;
