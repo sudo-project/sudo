@@ -122,8 +122,7 @@ int Argc, NewArgc;
 char **Argv, **NewArgv;
 char *prev_user;
 struct sudo_user sudo_user;
-struct passwd *auth_pw;
-static struct passwd *list_pw;
+struct passwd *auth_pw, *list_pw;
 struct interface *interfaces;
 int num_interfaces;
 int tgetpass_flags;
@@ -791,15 +790,6 @@ parse_args(argc, argv)
 		if (excl && excl != 'l')
 		    usage_excl(1);
 		excl = 'l';
-		if (NewArgv[1] != NULL && *NewArgv[1] != '-') {
-		    if ((list_pw = sudo_getpwnam(NewArgv[1])) != NULL) {
-			if (getuid() != 0 && list_pw->pw_uid != getuid())
-			    errx(1, "only root may list other user's entries");
-		    } else
-			errx(1, "unknown user %s", NewArgv[1]);
-		    NewArgc--;
-		    NewArgv++;
-		}
 		break;
 	    case 'V':
 		rval = MODE_VERSION;
@@ -845,6 +835,16 @@ parse_args(argc, argv)
 	NewArgv++;
     }
 
+    if (user_runas != NULL) {
+	if (rval == MODE_LIST) {
+	    if ((list_pw = sudo_getpwnam(*user_runas)) == NULL)
+		errx(1, "unknown user %s", *user_runas);
+	    user_runas = NULL;
+	} else if (!ISSET(rval, (MODE_EDIT|MODE_RUN))) {
+	    warnx("the `-u' and '-%c' options may not be used together", excl);
+	    usage(1);
+	}
+    }
     if ((NewArgc == 0 && (rval & MODE_EDIT)) ||
 	(NewArgc > 0 && !(rval & (MODE_RUN | MODE_EDIT))))
 	usage(1);
@@ -1128,7 +1128,7 @@ usage(exit_val)
 	    continue;
 	*p = " file [...]";
     } else {
-	fprintf(stderr, "usage: %s -K | -L | -V | -h | -k | -l [user] | -v\n",
+	fprintf(stderr, "usage: %s -K | -L | -V | -h | -k | -l | -v\n",
 	    getprogname());
     }
 

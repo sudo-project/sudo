@@ -245,7 +245,7 @@ YY_DECL;
 /* Only provide extern declarations outside of sudo.c. */
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
-extern struct passwd *auth_pw;
+extern struct passwd *auth_pw, *list_pw;
 
 extern int tgetpass_flags;
 extern uid_t timestamp_uid;

@@ -97,7 +97,7 @@ sudoers_lookup(pwflag)
 
     /* Assume the worst.  */
     validated = VALIDATE_NOT_OK | FLAG_NO_HOST | FLAG_NO_USER;
-    if (pwflag)
+    if (pwflag && list_pw == NULL)
 	SET(validated, FLAG_NO_CHECK);
     else if (!def_authenticate)
 	validated |= FLAG_NOPASS;
@@ -117,8 +117,11 @@ sudoers_lookup(pwflag)
 	    if (user_matches(sudo_user.pw, us->user) == TRUE) {
 		priv = us->privileges;
 		if (host_matches(user_shost, user_host, priv->hostlist) == TRUE) {
-		    matched = TRUE;
 		    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
+			/* Only check the command when listing another user. */
+			if (user_uid == 0 || list_pw == NULL ||
+			    cmnd_matches(user_cmnd, user_args, cs->cmnd) == TRUE)
+				matched = TRUE;
 			if ((pwcheck == any && nopass != TRUE) ||
 			    (pwcheck == all && nopass == TRUE))
 			    nopass = cs->tags.nopasswd;
