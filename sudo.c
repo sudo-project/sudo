@@ -433,7 +433,7 @@ main(argc, argv)
 	 */
 	(void) fprintf(stderr, "%s: unable to exec %s: %s\n",
 	    Argv[0], safe_cmnd, strerror(errno));
-	exit(-1);
+	exit(127);
     } else if ((validated & FLAG_NO_USER) || (validated & FLAG_NO_HOST)) {
 	log_auth(validated, 1);
 	exit(1);

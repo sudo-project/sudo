@@ -621,7 +621,7 @@ run_command(path, argv)
 	    execv(path, argv);
 	    (void) fprintf(stderr,
 		"%s: unable to run %s: %s\n", Argv[0], path, strerror(errno));
-	    _exit(-1);
+	    _exit(127);
 	    break;	/* NOTREACHED */
     }
 
