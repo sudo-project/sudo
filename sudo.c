@@ -298,9 +298,13 @@ void clean_envp(envp)
      */
     for (tenvp = Envp; *envp; envp++)
 #ifdef hpux
-	if (strncmp("LD_", *envp, 3) && strcmp("SHLIB_PATH", *envp))
+	if (strncmp("LD_", *envp, 3) && strncmp("SHLIB_PATH", *envp, 10))
+#else
+#ifdef __alpha
+	if (strncmp("LD_", *envp, 3) && strncmp("_RLD_ROOT", *envp, 9))
 #else
 	if (strncmp("LD_", *envp, 3))
+#endif /* __alpha */
 #endif /* hpux */
 	    *tenvp++ = *envp;
 
