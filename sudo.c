@@ -1080,7 +1080,7 @@ initial_setup()
 }
 
 #ifdef HAVE_LOGINCAP
-int
+static int
 set_loginclass(pw)
     struct passwd *pw;
 {
@@ -1117,12 +1117,13 @@ set_loginclass(pw)
     return(1);
 }
 #else
-int set_loginclass(pw)
+static int
+set_loginclass(pw)
     struct passwd *pw;
 {
     return(0);
 }
-#endif
+#endif /* HAVE_LOGINCAP */
 
 /*
  * Look up the fully qualified domain name and set user_host and user_shost.
