@@ -85,7 +85,7 @@ SHELL = /bin/sh
 PROGS = @PROGS@
 
 SRCS = check.c find_path.c logging.c parse.c sudo.c sudo_goodpath.c \
-       sudo_setenv.c parse.yacc parse.lex
+       sudo_setenv.c parse.yacc parse.lex visudo.c
 
 PARSEOBJS = y.tab.o lex.yy.o
 
@@ -100,11 +100,11 @@ HDRS = sudo.h pathnames.h options.h compat.h version.h insults.h
 
 VERSION = 1.3.1pl5b1
 
-DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS PORTING
-            README RUNSON TODO TROUBLESHOOTING Makefile.in acsite.m4 getcwd.c
-            putenv.c strdup.c lsearch.c search.h tgetpass.c config.h.in
-            configure.in configure indent.pro install-sh sample.sudoers sudo.man
-            sudo.cat visudo.man visudo.cat sudoers aixcrypt.exp visudo.c
+DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
+            PORTING README RUNSON TODO TROUBLESHOOTING Makefile.in acsite.m4 \
+            aixcrypt.exp config.h.in configure configure.in getcwd.c strdup.c \
+            indent.pro install-sh lsearch.c putenv.c tgetpass.c search.h \
+            sudoers sample.sudoers sudo.cat sudo.man visudo.cat visudo.man
 
 all: $(PROGS)
 
