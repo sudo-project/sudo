@@ -236,8 +236,9 @@ int main(argc, argv)
 	else
 	    (void) sprintf(buf, "%s %s", Editor, stmp);
 
-	/* do the edit */
-	if (system(buf) == 0) {
+	/* do the edit -- some SYSV editors return 256 instead of 0 */
+	n = system(buf);
+	if (n == 0 || n == 256) {
 	    struct stat statbuf;	/* for sanity checking */
 
 	    /* make sure stmp exists */
