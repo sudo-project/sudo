@@ -241,7 +241,7 @@ static int check_timestamp()
 		       _PATH_SUDO_TIMEDIR, user_name, p);
 	exit(1);                                              
     }
-    (void) sprintf(timestampfile, "%s/%s.%s", _PATH_SUDO_TIMEDIR, user_name, p);
+    (void) sprintf(timestampfile, "%s/%s:%s", _PATH_SUDO_TIMEDIR, user_name, p);
 #else
     if (sizeof(_PATH_SUDO_TIMEDIR) + strlen(user_name) + 1 >
 	sizeof(timestampfile)) {
