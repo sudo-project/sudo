@@ -18,14 +18,16 @@ PROGS="sudo visudo"
 AC_SUBST(PROGS)dnl
 CPPFLAGS=""
 AC_SUBST(CPPFLAGS)dnl
+LDFLAGS=""
+AC_SUBST(LDFLAGS)dnl
 SUDO_LDFLAGS=""
 AC_SUBST(SUDO_LDFLAGS)dnl
-VISUDO_LDFLAGS=""
-AC_SUBST(VISUDO_LDFLAGS)dnl
+LIBS=""
+AC_SUBST(LIBS)dnl
 SUDO_LIBS=""
 AC_SUBST(SUDO_LIBS)dnl
-VISUDO_LIBS=""
-AC_SUBST(VISUDO_LIBS)dnl
+NET_LIBS=""
+AC_SUBST(NET_LIBS)dnl
 AFS_LIBS=""
 AC_SUBST(AFS_LIBS)dnl
 OSDEFS=""
@@ -108,11 +110,9 @@ AC_ARG_WITH(libpath, [  --with-libpath          additional places to look for li
     no)		echo "Sorry, --without-libpath not supported."
 		exit 1
 		;;
-    *)		echo "Adding ${with_libpath} to SUDO_LDFLAGS and VISUDO_LDFLAGS"
+    *)		echo "Adding ${with_libpath} to LDFLAGS"
 		for i in ${with_libpath}; do
 		    LDFLAGS="${LDFLAGS} -L${i}"
-		    SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${i}"
-		    VISUDO_LDFLAGS="${VISUDO_LDFLAGS} -L${i}"
 		done
 		;;
 esac])
@@ -125,7 +125,7 @@ AC_ARG_WITH(libraries, [  --with-libraries        additional libraries to link w
     no)		echo "Sorry, --without-libraries not supported."
 		exit 1
 		;;
-    *)		echo "Adding ${with_libraries} to SUDO_LIBS and VISUDO_LIBS"
+    *)		echo "Adding ${with_libraries} to LIBS"
 		for i in ${with_libraries}; do
 		    case $i in
 			-l*)	;;
@@ -134,8 +134,6 @@ AC_ARG_WITH(libraries, [  --with-libraries        additional libraries to link w
 			*)	i="-l${i}";;
 		    esac
 		    LIBS="${LIBS} ${i}"
-		    SUDO_LIBS="${SUDO_LIBS} ${i}"
-		    VISUDO_LIBS="${VISUDO_LIBS} ${i}"
 		done
 		;;
 esac])
@@ -1265,7 +1263,7 @@ case "$host" in
 		fi
 		# IRIX <= 4 needs -lsun
 		if test "$OSREV" -le 4; then
-		    AC_CHECK_LIB(sun, getpwnam, [SUDO_LIBS="${SUDO_LIBS} -lsun"; VISUDO_LIBS="${VISUDO_LIBS} -lsun"; LIBS="${LIBS} -lsun"])
+		    AC_CHECK_LIB(sun, getpwnam, [LIBS="${LIBS} -lsun"])
 		fi
 		;;
     *-*-linux*)
@@ -1294,7 +1292,6 @@ case "$host" in
 		fi
 		;;
     *-*-riscos*)
-		SUDO_LIBS="${SUDO_LIBS} -lsun -lbsd"
 		LIBS="${LIBS} -lsun -lbsd"
 		CPPFLAGS="${CPPFLAGS} -I/usr/include -I/usr/include/bsd"
 		OSDEFS="${OSDEFS} -D_MIPS"
@@ -1420,7 +1417,7 @@ fi
 AC_CHECK_FUNC(lockf, AC_DEFINE(HAVE_LOCKF), AC_CHECK_FUNCS(flock))
 AC_CHECK_FUNC(waitpid, AC_DEFINE(HAVE_WAITPID), AC_CHECK_FUNCS(wait3))
 AC_CHECK_FUNC(innetgr, AC_DEFINE(HAVE_INNETGR) AC_CHECK_FUNCS(getdomainname))
-AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) [SUDO_LIBS="${SUDO_LIBS} -lcompat"; VISUDO_LIBS="${VISUDO_LIBS} -lcompat"; LIBS="${LIBS} -lcompat"], LIBOBJS="$LIBOBJS lsearch.o"), LIBOBJS="$LIBOBJS lsearch.o"))
+AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) [LIBS="${LIBS} -lcompat"], LIBOBJS="$LIBOBJS lsearch.o"), LIBOBJS="$LIBOBJS lsearch.o"))
 AC_CHECK_FUNC(setenv, AC_DEFINE(HAVE_SETENV), AC_FUNC_CHECK(putenv, AC_DEFINE(HAVE_PUTENV), LIBOBJS="$LIBOBJS putenv.o"))
 AC_CHECK_FUNC(utime, AC_DEFINE(HAVE_UTIME)
 SUDO_FUNC_UTIME_POSIX, LIBOBJS="$LIBOBJS utime.o")
@@ -1448,18 +1445,18 @@ dnl If socket(2) not in libc, check -lsocket and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl In this case we look for main(), not socket() to avoid using a cached value
 dnl
-AC_CHECK_FUNC(socket, ,AC_CHECK_LIB(socket, socket, [SUDO_LIBS="${SUDO_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(inet, socket, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find socket() trying -lsocket -lnsl)
-AC_CHECK_LIB(socket, socket, [SUDO_LIBS="${SUDO_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl))))
+AC_CHECK_FUNC(socket, ,AC_CHECK_LIB(socket, socket, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(inet, socket, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find socket() trying -lsocket -lnsl)
+AC_CHECK_LIB(socket, socket, [NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl))))
 dnl
 dnl If inet_addr(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl
-AC_CHECK_FUNC(inet_addr, ,AC_CHECK_LIB(nsl, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find socket() trying -lsocket -lnsl)
-AC_CHECK_LIB(socket, inet_addr, [SUDO_LIBS="${SUDO_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl))))
+AC_CHECK_FUNC(inet_addr, ,AC_CHECK_LIB(nsl, inet_addr, [NET_LIBS="${NET_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, inet_addr, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find socket() trying -lsocket -lnsl)
+AC_CHECK_LIB(socket, inet_addr, [NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl))))
 dnl
 dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
 dnl
-AC_CHECK_FUNC(syslog, ,AC_CHECK_LIB(socket, syslog, [SUDO_LIBS="${SUDO_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(nsl, syslog, [SUDO_LIBS="${SUDO_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, syslog, [SUDO_LIBS="${SUDO_LIBS} -linet"; LIBS="${LIBS} -linet"]))))
+AC_CHECK_FUNC(syslog, ,AC_CHECK_LIB(socket, syslog, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(nsl, syslog, [NET_LIBS="${NET_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, syslog, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"]))))
 dnl
 dnl Bison and DCE use alloca(3), if not in libc, use the sudo one (from gcc)
 dnl (gcc includes its own alloca(3) but other compilers may not)
@@ -1669,6 +1666,21 @@ else
     else
 	AUTH_OBJS="${AUTH_OBJS} passwd.o"
     fi
+fi
+
+dnl
+dnl LIBS may contain duplicates from SUDO_LIBS or NET_LIBS so prune it.
+dnl
+if test -n "$LIBS"; then
+    L="$LIBS"
+    LIBS=
+    for l in ${L}; do
+	dupe=0
+	for sl in ${SUDO_LIBS} ${NET_LIBS}; do
+	    test $l = $sl && dupe=1
+	done
+	test $dupe = 0 && LIBS="${LIBS} $l"
+    done
 fi
 
 dnl

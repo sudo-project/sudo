@@ -53,8 +53,9 @@ NROFF = nroff
 INSTALL = $(srcdir)/install-sh -c
 
 # Libraries
-SUDO_LIBS = @SUDO_LIBS@ @AFS_LIBS@
-VISUDO_LIBS = @VISUDO_LIBS@
+LIBS = @LIBS@
+NET_LIBS = @NET_LIBS@
+SUDO_LIBS = @SUDO_LIBS@ @AFS_LIBS@ $(LIBS) $(NET_LIBS)
 
 # C preprocessor flags
 CPPFLAGS = -I. -I$(srcdir) @CPPFLAGS@
@@ -63,8 +64,8 @@ CPPFLAGS = -I. -I$(srcdir) @CPPFLAGS@
 CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
-SUDO_LDFLAGS = @SUDO_LDFLAGS@
-VISUDO_LDFLAGS = @VISUDO_LDFLAGS@
+LDFLAGS = @LDFLAGS@
+SUDO_LDFLAGS = @SUDO_LDFLAGS@ $(LDFLAGS)
 
 # Where to install things...
 prefix = @prefix@
@@ -170,10 +171,10 @@ sudo: $(SUDOBJS) $(LIBOBJS)
 	$(CC) -o $@ $(SUDOBJS) $(LIBOBJS) $(SUDO_LDFLAGS) $(SUDO_LIBS)
 
 visudo: $(VISUDOBJS) $(LIBOBJS)
-	$(CC) -o $@ $(VISUDOBJS) $(LIBOBJS) $(VISUDO_LDFLAGS) $(VISUDO_LIBS)
+	$(CC) -o $@ $(VISUDOBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS)
 
 testsudoers: $(TESTOBJS) $(LIBOBJS)
-	$(CC) -o $@ $(TESTOBJS) $(LIBOBJS) $(VISUDO_LDFLAGS) $(VISUDO_LIBS)
+	$(CC) -o $@ $(TESTOBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS) $(NET_LIBS)
 
 # Uncomment the following if you want "make clean" to clean the parser
 @DEV@PARSESRCS = sudo.tab.h sudo.tab.c lex.yy.c
