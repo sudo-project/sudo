@@ -37,6 +37,7 @@ Host_Alias	DECSTATION=wilkinson,soma,dendrite,thang
 Host_Alias 	DECALPHA=widget,thalamus,foobar
 Host_Alias	HPSNAKE=boa,nag,python
 Host_Alias	CSNETS=128.138.243.0,128.138.204.0,128.138.242.0
+Host_Alias	CUNETS=128.138.0.0/255.255.0.0
 
 ##
 # User specification
@@ -53,6 +54,9 @@ PARTTIMERS	ALL=ALL,!SU,!SHELLS
 
 # rodney may run anything except root shells or su on machines in CSNETS
 rodney		CSNETS=ALL,!SU,!SHELLS
+
+# smartguy may run any command on any host in CUNETS (call B address)
+smartguy	CUNETS=ALL
 
 # operator may run maintenance commands and anything in /usr/oper/bin/
 operator	ALL=DUMPS,KILL,PRINTING,SHUTDOWN,HALT,REBOOT,/usr/oper/bin/
