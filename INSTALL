@@ -562,7 +562,7 @@ OS dependent notes
 ==================
 
 OpenBSD < 2.2 and NetBSD < 1.2.1:
-    The fdesc filesystem has a bug wrt /dev/tty handling that
+    The fdesc file system has a bug wrt /dev/tty handling that
     causes sudo to hang at the password prompt.  The workaround
     is to run configure with --with-password-timeout=0
 

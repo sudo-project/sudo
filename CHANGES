@@ -552,7 +552,7 @@ CHANGES from sudo 1.3.6 BETA
 
 172) interfaces.c should work on ISC UN*X again.
 
-173) All source files are <= 14 characters for old SYSV filesystems.
+173) All source files are <= 14 characters for old SYSV file systems.
 
 CHANGES from sudo 1.3.7 GAMMA
 
@@ -1682,3 +1682,5 @@ Sudo 1.6.7p5 released.
 528) /tmp/.odus is no longer used for timestamps by default.  One of
      /var/run/sudo, /var/adm/sudo or /usr/adm/sudo is used depending
      on what directories exist.
+
+529) Quoting globbing characters with a backslash now works as documented.
