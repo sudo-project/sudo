@@ -47,8 +47,6 @@
 #include <sys/types.h>
 #include <sys/param.h>
 
-/* XXX - configure needs to check for the tables */
-/* XXX   most OS's don't have the tables! */
 #define SYSLOG_NAMES
 
 #include "sudo.h"
@@ -225,6 +223,11 @@ print_version()
 }
 
 #if (LOGGING & SLOG_SYSLOG) && defined(HAVE_SYSLOG_NAMES)
+/*
+ * Convert a syslog number to a name.  At some point in the
+ * future, sudo will have its own tables internally so syslog
+ * can be configured at run time.
+ */
 static char *
 num_to_name(num, table)
     int num;
