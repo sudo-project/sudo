@@ -1,13 +1,39 @@
-# sudoers file.
+#
+# Sample /etc/sudoers file.  (Assumes SunOS paths)
 #
 # This file MUST be edited with the 'visudo' command as root.
 #
 # See the man page for the details on how to write a sudoers file.
 #
 
-# Host alias specification
-
 # Cmnd alias specification
+Cmnd_Alias      DUMPS=/usr/etc/dump,/usr/etc/rdump,/usr/etc/restore,\
+		      /usr/etc/rrestore,/usr/bin/mt
+Cmnd_Alias	KILL=/usr/bin/kill
+Cmnd_Alias	LPC=/usr/etc/lpc,/usr/ucb/lprm
+Cmnd_Alias	SHUTDOWN=/usr/etc/shutdown
+Cmnd_Alias	HALT=/usr/etc/halt,/usr/etc/fasthalt
+Cmnd_Alias	REBOOT=/usr/etc/reboot,/usr/etc/fastboot
+Cmnd_Alias	SHELLS=/usr/bin/sh,/usr/bin/csh,/usr/bin/ksh,\
+                       /usr/local/bin/tcsh,/usr/ucb/rsh,\
+                       /usr/local/bin/zsh
+Cmnd_Alias	SU=/usr/bin/su
+Cmnd_Alias	VIPW=/usr/etc/vipw,/etc/vipw,/bin/passwd
+
+# Host alias specification
+Host_Alias	SUN4=bruno,eclipse,moet,anchor
+Host_Alias	SUN3=brazil,columbine
+Host_Alias	DECSTATION=wilkinson,soma,dendrite,nordsieck
+Host_Alias 	DECALPHA=widget,thalamus
+Host_Alias	HPSNAKE=boa,nag,python
 
 # User specification
-root	ALL=ALL
+root		ALL=ALL
+
+millert		ALL=ALL
+barb		ALL=ALL
+bostley		ALL=ALL,!SU,!SHELLS
+lp		All=LPC
+operator	ALL=DUMPS,KILL,LPC,SHUTDOWN,HALT,REBOOT
+bob		SUN4=ALL,!SU,!SHELLS:\
+		SUN3=ALL,!SU,!SHELLS
