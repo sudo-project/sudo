@@ -1184,3 +1184,17 @@ Sudo 1.5.9 released.
      to be character at a time.
 
 372) sudo now turns off core dumps via setrlimit (probably paranoia).
+
+Sudo 1.6 released.
+
+373) Better diagnostics on PAM failure.
+
+374) Killed shell_noargs option, it cannot work since the command needs to
+     be set before sudoers is parsed.
+
+375) Fixed the following Defaults options: set_home, fqdn, syslog
+
+376) When using select() in tgetpass(), do a separate select before
+     each read to be sure we can timeout correctly.
+
+377) Hopefully fix SecurID support.

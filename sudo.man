@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.41  1999/11/29 01:57:04  millert
-''' fix some syntactic goofs
+''' Revision 1.42  1999/12/05 02:18:47  millert
+''' crank version to 1.6
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudo 8 "1.6" "28/Nov/1999" "MAINTENANCE COMMANDS"
+.TH sudo 8 "1.6.1" "4/Dec/1999" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na

@@ -2,14 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.17  1999/12/02 20:31:24  millert
-''' o Kill shell_noargs option, it cannot work since the command needs to
-'''   be set before sudoers is parsed.
-''' o Fix the "set_home" sudoers option (only worked at compile time).
-''' o Fix "fqdn" sudoers option.  We now set host/shost via set_fqdn which
-'''   gets called when the "fqdn" option is set in sudoers.
-''' o Move the openlog() to store_syslogfac() so this gets overridden
-'''   correctly from the sudoers file.
+''' Revision 1.18  1999/12/05 02:18:47  millert
+''' crank version to 1.6
 '''
 '''
 .de Sh
@@ -102,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers 5 "1.6" "2/Dec/1999" "FILE FORMATS"
+.TH sudoers 5 "1.6.1" "4/Dec/1999" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
