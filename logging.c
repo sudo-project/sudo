@@ -536,9 +536,15 @@ static void send_mail()
 static RETSIGTYPE reapchild(sig)
     int sig;
 {
-    int save_errno = errno;
+    int pid, status, save_errno = errno;
 
+#ifdef sudo_waitpid
+    do {
+	pid = sudo_waitpid(-1, &status, WNOHANG);
+    } while (pid == -1);
+#else
     (void) wait(NULL);
+#endif
 #ifndef POSIX_SIGNALS
     (void) signal(SIGCHLD, reapchild);
 #endif /* POSIX_SIGNALS */
