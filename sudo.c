@@ -567,7 +567,7 @@ init_vars(sudo_mode)
     if ((sudo_mode & MODE_SHELL)) {
 	char **dst, **src = NewArgv;
 
-	NewArgv = (char **) emalloc (sizeof(char *) * (++NewArgc + 1));
+	NewArgv = (char **) emalloc2((++NewArgc + 1), sizeof(char *));
 	if (user_shell && *user_shell) {
 	    NewArgv[0] = user_shell;
 	} else {

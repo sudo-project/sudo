@@ -135,7 +135,7 @@ load_interfaces()
 	}
     }
     interfaces =
-	(struct interface *) emalloc(sizeof(struct interface) * num_interfaces);
+	(struct interface *) emalloc2(num_interfaces, sizeof(struct interface));
 
     /* Store the ip addr / netmask pairs. */
     for (ifa = ifaddrs, i = 0; ifa -> ifa_next; ifa = ifa -> ifa_next) {
@@ -219,7 +219,7 @@ load_interfaces()
 
     /* Allocate space for the maximum number of interfaces that could exist. */
     n = ifconf->ifc_len / sizeof(struct ifreq);
-    interfaces = (struct interface *) emalloc(sizeof(struct interface) * n);
+    interfaces = (struct interface *) emalloc2(n, sizeof(struct interface));
 
     /* For each interface, store the ip address and netmask. */
     for (i = 0; i < ifconf->ifc_len; ) {
