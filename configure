@@ -1059,7 +1059,7 @@ Optional Packages:
   --with-fwtk[=DIR]       enable FWTK AuthSRV support
   --with-kerb4[=DIR]      enable Kerberos IV support
   --with-kerb5[=DIR]      enable Kerberos V support
-  --with-authenticate     enable AIX general authentication support
+  --with-aixauth          enable AIX general authentication support
   --with-pam              enable PAM support
   --with-AFS              enable AFS support
   --with-DCE              enable DCE support
@@ -1644,12 +1644,13 @@ root_sudo=on
 INSTALL_NOEXEC=
 devdir='$(srcdir)'
 PROGS="sudo visudo"
-test -n "$MANTYPE" || MANTYPE="man"
-test -n "$mansrcdir" || mansrcdir="."
-test -n "$SUDOERS_MODE" || SUDOERS_MODE=0440
-test -n "$SUDOERS_UID" || SUDOERS_UID=0
-test -n "$SUDOERS_GID" || SUDOERS_GID=0
+: ${MANTYPE='man'}
+: ${mansrcdir='.'}
+: ${SUDOERS_MODE='0440'}
+: ${SUDOERS_UID='0'}
+: ${SUDOERS_GID='0'}
 DEV="#"
+AUTH_OBJS=passwd.o
 
 CHECKSHADOW=true
 CHECKSIA=true
@@ -1665,11 +1666,7 @@ test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/
 if test "${with_otp_only+set}" = set; then
   withval="$with_otp_only"
   case $with_otp_only in
-    yes)	with_passwd=no
-		cat >>confdefs.h <<\_ACEOF
-#define WITHOUT_PASSWD 1
-_ACEOF
-
+    yes)	AUTH_OBJS=`echo "$AUTH_OBJS"|sed -e 's/^passwd\.o *//'`
 		{ echo "$as_me:$LINENO: --with-otp-only option deprecated, treating as --without-passwd" >&5
 echo "$as_me: --with-otp-only option deprecated, treating as --without-passwd" >&6;}
 		;;
@@ -1712,8 +1709,7 @@ fi;
 if test "${with_rpath+set}" = set; then
   withval="$with_rpath"
   case $with_rpath in
-    yes)	;;
-    no)		;;
+    yes|no)	;;
     *)		{ { echo "$as_me:$LINENO: error: \"--with-rpath does not take an argument.\"" >&5
 echo "$as_me: error: \"--with-rpath does not take an argument.\"" >&2;}
    { (exit 1); exit 1; }; }
@@ -1726,8 +1722,7 @@ fi;
 if test "${with_blibpath+set}" = set; then
   withval="$with_blibpath"
   case $with_blibpath in
-    yes)	;;
-    no)		;;
+    yes|no)	;;
     *)		{ echo "$as_me:$LINENO: will pass -blibpath:${with_blibpath} to the loader." >&5
 echo "$as_me: will pass -blibpath:${with_blibpath} to the loader." >&6;}
 		;;
@@ -1845,8 +1840,8 @@ echo "$as_me: Adding CSOps standard options" >&6;}
 		with_classic_insults=yes
 		with_csops_insults=yes
 		with_env_editor=yes
-		test -n "$mansectsu" || mansectsu=8
-		test -n "$mansectform" || mansectform=5
+		: ${mansectsu='8'}
+		: ${mansectform='5'}
 		;;
     no)		;;
     *)		{ echo "$as_me:$LINENO: WARNING: Ignoring unknown argument to --with-csops: $with_csops" >&5
@@ -1861,10 +1856,7 @@ if test "${with_passwd+set}" = set; then
   withval="$with_passwd"
   case $with_passwd in
     yes)	;;
-    no)		cat >>confdefs.h <<\_ACEOF
-#define WITHOUT_PASSWD 1
-_ACEOF
-
+    no)		AUTH_OBJS=`echo "$AUTH_OBJS"|sed -e 's/^passwd\.o *//'`
 		echo "$as_me:$LINENO: checking whether to use shadow/passwd file authentication" >&5
 echo $ECHO_N "checking whether to use shadow/passwd file authentication... $ECHO_C" >&6
 		echo "$as_me:$LINENO: result: no" >&5
@@ -1882,7 +1874,8 @@ fi;
 if test "${with_skey+set}" = set; then
   withval="$with_skey"
   case $with_skey in
-    no)		with_skey="";;
+    no)		with_skey=""
+		;;
     *)		if test -n "$with_opie"; then
 		    { { echo "$as_me:$LINENO: error: \"cannot use both S/Key and OPIE\"" >&5
 echo "$as_me: error: \"cannot use both S/Key and OPIE\"" >&2;}
@@ -1896,7 +1889,11 @@ _ACEOF
 echo $ECHO_N "checking whether to try S/Key authentication... $ECHO_C" >&6
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
+		if test X"$AUTH_OBJS" = X""; then
+		    AUTH_OBJS="rfc1938.o"
+		else
+		    AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
+		fi
 		;;
 esac
 fi;
@@ -1906,7 +1903,8 @@ fi;
 if test "${with_opie+set}" = set; then
   withval="$with_opie"
   case $with_opie in
-    no)		with_opie="";;
+    no)		with_opie=""
+		;;
     *)		if test -n "$with_skey"; then
 		    { { echo "$as_me:$LINENO: error: \"cannot use both S/Key and OPIE\"" >&5
 echo "$as_me: error: \"cannot use both S/Key and OPIE\"" >&2;}
@@ -1920,7 +1918,11 @@ _ACEOF
 echo $ECHO_N "checking whether to try NRL OPIE authentication... $ECHO_C" >&6
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
+		if test X"$AUTH_OBJS" = X""; then
+		    AUTH_OBJS="rfc1938.o"
+		else
+		    AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
+		fi
 		;;
 esac
 fi;
@@ -1963,7 +1965,7 @@ _ACEOF
 echo $ECHO_N "checking whether to use SecurID for authentication... $ECHO_C" >&6
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		with_passwd=no
+		# AUTH_OBJS updated later
 		;;
 esac
 fi;
@@ -1982,7 +1984,12 @@ _ACEOF
 echo $ECHO_N "checking whether to use FWTK AuthSRV for authentication... $ECHO_C" >&6
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		with_passwd=no
+		if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+		    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+		    { { echo "$as_me:$LINENO: error: \"cannot mix fwtk with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix fwtk with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+		fi
 		AUTH_OBJS="fwtk.o"
 		;;
 esac
@@ -2017,24 +2024,13 @@ esac
 fi;
 
 
-# Check whether --with-authenticate or --without-authenticate was given.
-if test "${with_authenticate+set}" = set; then
-  withval="$with_authenticate"
-  case $with_authenticate in
-    yes)	cat >>confdefs.h <<\_ACEOF
-#define HAVE_AUTHENTICATE 1
-_ACEOF
-
-		echo "$as_me:$LINENO: checking whether to use AIX general authentication" >&5
-echo $ECHO_N "checking whether to use AIX general authentication... $ECHO_C" >&6
-		echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-		with_passwd=no
-		AUTH_OBJS="aix_auth.o"
-		;;
-    no)		;;
-    *)		{ { echo "$as_me:$LINENO: error: \"--with-authenticate does not take an argument.\"" >&5
-echo "$as_me: error: \"--with-authenticate does not take an argument.\"" >&2;}
+# Check whether --with-aixauth or --without-aixauth was given.
+if test "${with_aixauth+set}" = set; then
+  withval="$with_aixauth"
+  case $with_aixauth in
+    yes|no)	;;
+    *)		{ { echo "$as_me:$LINENO: error: \"--with-aixauth does not take an argument.\"" >&5
+echo "$as_me: error: \"--with-aixauth does not take an argument.\"" >&2;}
    { (exit 1); exit 1; }; }
 		;;
 esac
@@ -2045,18 +2041,7 @@ fi;
 if test "${with_pam+set}" = set; then
   withval="$with_pam"
   case $with_pam in
-    yes)	cat >>confdefs.h <<\_ACEOF
-#define HAVE_PAM 1
-_ACEOF
-
-		echo "$as_me:$LINENO: checking whether to use PAM authentication" >&5
-echo $ECHO_N "checking whether to use PAM authentication... $ECHO_C" >&6
-		echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-		with_passwd=no
-		AUTH_OBJS="pam.o"
-		;;
-    no)		;;
+    yes|no)	;;
     *)		{ { echo "$as_me:$LINENO: error: \"--with-pam does not take an argument.\"" >&5
 echo "$as_me: error: \"--with-pam does not take an argument.\"" >&2;}
    { (exit 1); exit 1; }; }
@@ -2077,7 +2062,11 @@ _ACEOF
 echo $ECHO_N "checking whether to try AFS (kerberos) authentication... $ECHO_C" >&6
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		AUTH_OBJS="${AUTH_OBJS} afs.o"
+		if test X"$AUTH_OBJS" = X""; then
+		    AUTH_OBJS="afs.o"
+		else
+		    AUTH_OBJS="${AUTH_OBJS} afs.o"
+		fi
 		;;
     no)		;;
     *)		{ { echo "$as_me:$LINENO: error: \"--with-AFS does not take an argument.\"" >&5
@@ -2100,7 +2089,11 @@ _ACEOF
 echo $ECHO_N "checking whether to try DCE (kerberos) authentication... $ECHO_C" >&6
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		AUTH_OBJS="${AUTH_OBJS} dce.o"
+		if test X"$AUTH_OBJS" = X""; then
+		    AUTH_OBJS="dce.o"
+		else
+		    AUTH_OBJS="${AUTH_OBJS} dce.o"
+		fi
 		;;
     no)		;;
     *)		{ { echo "$as_me:$LINENO: error: \"--with-DCE does not take an argument.\"" >&5
@@ -2128,9 +2121,7 @@ fi;
 if test "${with_bsdauth+set}" = set; then
   withval="$with_bsdauth"
   case $with_bsdauth in
-    yes)	with_logincap=yes
-		;;
-    no)		;;
+    yes|no)	;;
     *)		{ { echo "$as_me:$LINENO: error: \"--with-bsdauth does not take an argument.\"" >&5
 echo "$as_me: error: \"--with-bsdauth does not take an argument.\"" >&2;}
    { (exit 1); exit 1; }; }
@@ -5520,7 +5511,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5523 "configure"' > conftest.$ac_ext
+  echo '#line 5514 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6749,7 +6740,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:6752:" \
+echo "$as_me:6743:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -7780,11 +7771,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7783: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7774: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7787: \$? = $ac_status" >&5
+   echo "$as_me:7778: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -8012,11 +8003,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8015: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8006: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8019: \$? = $ac_status" >&5
+   echo "$as_me:8010: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -8079,11 +8070,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8082: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8073: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8086: \$? = $ac_status" >&5
+   echo "$as_me:8077: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10165,7 +10156,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10168 "configure"
+#line 10159 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10263,7 +10254,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10266 "configure"
+#line 10257 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12419,11 +12410,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12422: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12413: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12426: \$? = $ac_status" >&5
+   echo "$as_me:12417: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -12486,11 +12477,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12489: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12480: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12493: \$? = $ac_status" >&5
+   echo "$as_me:12484: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13776,7 +13767,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 13779 "configure"
+#line 13770 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13874,7 +13865,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 13877 "configure"
+#line 13868 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14696,11 +14687,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14699: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14690: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14703: \$? = $ac_status" >&5
+   echo "$as_me:14694: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -14763,11 +14754,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14766: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14757: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14770: \$? = $ac_status" >&5
+   echo "$as_me:14761: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16697,11 +16688,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16700: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16691: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16704: \$? = $ac_status" >&5
+   echo "$as_me:16695: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -16929,11 +16920,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16932: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16923: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16936: \$? = $ac_status" >&5
+   echo "$as_me:16927: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -16996,11 +16987,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16999: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16990: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17003: \$? = $ac_status" >&5
+   echo "$as_me:16994: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -19082,7 +19073,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 19085 "configure"
+#line 19076 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -19180,7 +19171,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 19183 "configure"
+#line 19174 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20336,10 +20327,12 @@ fi
 
 if test -n "$host_os"; then
     OS=`echo $host_os | sed 's/[0-9].*//'`
-    OSREV=`echo $host_os | sed 's/^[^0-9]*\([0-9][0-9]*\).*$/\1/'`
+    OSREV=`echo $host_os | sed 's/^[^0-9\.]*\([0-9\.]*\).*$/\1/'`
+    OSMAJOR=`echo $OSREV | sed 's/\..*$//'`
 else
     OS="unknown"
     OSREV=0
+    OSMAJOR=0
 fi
 
 case "$host" in
@@ -20469,9 +20462,10 @@ done
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lucb"
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		test -n "$with_rpath" || with_rpath=yes
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
+		: ${with_rpath='yes'}
+		: ${with_pam='maybe'}
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
@@ -20545,6 +20539,112 @@ rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
 		fi
 		LDFLAGS="$O_LDFLAGS"
+
+		# check for authenticate(3)
+		if test -z "$with_aixauth"; then
+
+for ac_func in authenticate
+do
+as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
+echo "$as_me:$LINENO: checking for $ac_func" >&5
+echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
+if eval "test \"\${$as_ac_var+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+/* Define $ac_func to an innocuous variant, in case <limits.h> declares $ac_func.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define $ac_func innocuous_$ac_func
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $ac_func (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef $ac_func
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char $ac_func ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
+choke me
+#else
+char (*f) () = $ac_func;
+#endif
+#ifdef __cplusplus
+}
+#endif
+
+int
+main ()
+{
+return f != $ac_func;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  eval "$as_ac_var=yes"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+eval "$as_ac_var=no"
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_var'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_var'}'`" >&6
+if test `eval echo '${'$as_ac_var'}'` = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+ with_aixauth=yes
+fi
+done
+
+		fi
 		;;
     *-*-hiuxmpp*)
 		if test "$CHECKSHADOW" = "true"; then
@@ -20693,16 +20793,16 @@ fi
 
 		    CHECKSHADOW="false"
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
     *-*-hpux*)
 		# AFS support needs -lBSD
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 
 		case "$host" in
 			*-*-hpux1-8.*)
@@ -21059,6 +21159,7 @@ fi
 
 			    CHECKSHADOW="false"
 			fi
+			: ${with_pam='maybe'}
 			;;
 		esac
 		;;
@@ -21188,12 +21289,7 @@ if test $ac_cv_func_sia_ses_init = yes; then
   cat >>confdefs.h <<\_ACEOF
 #define HAVE_SIA 1
 _ACEOF
-
-		    if test -n "$with_skey" -o -n "$with_opie" -o -n "$with_otp_only" -o -n "$with_long_otp_prompt" -o -n "$with_SecurID" -o -n "$with_fwtk" -o -n "$with_kerb4" -o -n "$with_kerb5" -o -n "$with_pam" -o -n "$with_AFS" -o -n "$with_DCE"; then
-			{ { echo "$as_me:$LINENO: error: \"you cannot mix SIA and other authentication schemes.  You can turn off SIA support via the --disable-sia option\"" >&5
-echo "$as_me: error: \"you cannot mix SIA and other authentication schemes.  You can turn off SIA support via the --disable-sia option\"" >&2;}
-   { (exit 1); exit 1; }; }
-		    fi; CHECKSHADOW=false
+ CHECKSHADOW=false
 fi
 
 		fi
@@ -21268,7 +21364,6 @@ fi
 
 		    CHECKSHADOW="false"
 		fi
-
 		if test -n "$SECUREWARE"; then
 		    cat >>confdefs.h <<\_ACEOF
 #define HAVE_GETPRPWNAM 1
@@ -21712,11 +21807,16 @@ echo "${ECHO_T}yes, fixing locally" >&6
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 		elif test "$CHECKSIA" = "true"; then
-		    with_passwd=no
+		    if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+			_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+			{ { echo "$as_me:$LINENO: error: \"cannot mix SIA with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix SIA with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+		    fi
 		    AUTH_OBJS="sia.o"
 		fi
-		test -n "$mansectsu" || mansectsu=8
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='8'}
+		: ${mansectform='4'}
 		;;
     *-*-irix*)
 		CPPFLAGS="${CPPFLAGS} -D_BSD_TYPES"
@@ -21739,7 +21839,7 @@ rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 		    fi
 		fi
 		# IRIX <= 4 needs -lsun
-		if test "$OSREV" -le 4; then
+		if test "$OSMAJOR" -le 4; then
 		    echo "$as_me:$LINENO: checking for getpwnam in -lsun" >&5
 echo $ECHO_N "checking for getpwnam in -lsun... $ECHO_C" >&6
 if test "${ac_cv_lib_sun_getpwnam+set}" = set; then
@@ -21809,8 +21909,8 @@ if test $ac_cv_lib_sun_getpwnam = yes; then
 fi
 
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
     *-*-linux*)
 		# Some Linux versions need to link with -lshadow
@@ -21991,6 +22091,7 @@ done
 
 		    CHECKSHADOW="false"
 		fi
+		: ${with_pam='maybe'}
 		;;
     *-convex-bsd*)
 		cat >>confdefs.h <<\EOF
@@ -22157,8 +22258,8 @@ fi
 		LIBS="${LIBS} -lsun -lbsd"
 		CPPFLAGS="${CPPFLAGS} -I/usr/include -I/usr/include/bsd"
 		OSDEFS="${OSDEFS} -D_MIPS"
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
     *-*-isc*)
 		OSDEFS="${OSDEFS} -D_ISC"
@@ -22240,8 +22341,8 @@ fi
 
 		    CHECKSHADOW="false"
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
     *-*-sco*|*-sco-*)
 		if test "$CHECKSHADOW" = "true"; then
@@ -22389,14 +22490,14 @@ fi
 
 		    CHECKSHADOW="false"
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
     m88k-motorola-sysv*)
 		# motorolla's cc (a variant of gcc) does -O but not -O2
 		CFLAGS=`echo $CFLAGS | sed 's/-O2/-O/g'`
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
     *-sequent-sysv*)
 		if test "$CHECKSHADOW" = "true"; then
@@ -22473,9 +22574,9 @@ fi
 
 		    CHECKSHADOW="false"
 		fi
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		test -n "$with_rpath" || with_rpath=yes
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
+		: ${with_rpath='yes'}
 		;;
     *-ncr-sysv4*|*-ncr-sysvr4*)
 		echo "$as_me:$LINENO: checking for strcasecmp in -lc89" >&5
@@ -22549,22 +22650,22 @@ _ACEOF
  LIBS="${LIBS} -lc89"; ac_cv_func_strcasecmp=yes
 fi
 
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		test -n "$with_rpath" || with_rpath=yes
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
+		: ${with_rpath='yes'}
 		;;
     *-ccur-sysv4*|*-ccur-sysvr4*)
 		LIBS="${LIBS} -lgen"
 		SUDO_LIBS="${SUDO_LIBS} -lgen"
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		test -n "$with_rpath" || with_rpath=yes
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
+		: ${with_rpath='yes'}
 		;;
     *-*-bsdi*)
 		SKIP_SETREUID=yes
 		# Use shlicc for BSD/OS [23].x unless asked to do otherwise
 		if test "${with_CC+set}" != set -a "$ac_cv_prog_CC" = gcc; then
-		    case "$OSREV" in
+		    case "$OSMAJOR" in
 			2|3)	{ echo "$as_me:$LINENO: using shlicc as CC" >&5
 echo "$as_me: using shlicc as CC" >&6;}
 				ac_cv_prog_CC=shlicc
@@ -22572,34 +22673,151 @@ echo "$as_me: using shlicc as CC" >&6;}
 				;;
 		    esac
 		fi
+		# Check for newer BSD auth API (just check for >= 3.0?)
+		if test -z "$with_bsdauth"; then
+
+for ac_func in auth_challenge
+do
+as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
+echo "$as_me:$LINENO: checking for $ac_func" >&5
+echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
+if eval "test \"\${$as_ac_var+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+/* Define $ac_func to an innocuous variant, in case <limits.h> declares $ac_func.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define $ac_func innocuous_$ac_func
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $ac_func (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef $ac_func
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char $ac_func ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
+choke me
+#else
+char (*f) () = $ac_func;
+#endif
+#ifdef __cplusplus
+}
+#endif
+
+int
+main ()
+{
+return f != $ac_func;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  eval "$as_ac_var=yes"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+eval "$as_ac_var=no"
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_var'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_var'}'`" >&6
+if test `eval echo '${'$as_ac_var'}'` = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+ with_bsdauth=yes
+fi
+done
+
+		fi
 		;;
     *-*-freebsd*)
 		# FreeBSD has a real setreuid(2) starting with 2.1 and
 		# backported to 2.0.5.  We just take 2.1 and above...
-		case "`echo $host_os | sed 's/^freebsd\([0-9\.]*\).*$/\1/'`" in
+		case "$OSREV" in
 		0.*|1.*|2.0*)
 		    SKIP_SETREUID=yes
 		    ;;
 		esac
-		if test "$with_logincap" = "yes"; then
-		    SUDO_LIBS="${SUDO_LIBS} -lutil"
-		fi
 		if test "$with_skey" = "yes"; then
 		     SUDO_LIBS="${SUDO_LIBS} -lmd"
 		fi
 		if test "$CHECKSHADOW" = "true"; then
 		    CHECKSHADOW="false"
 		fi
+		: ${with_pam='maybe'}
+		: ${with_logincap='maybe'}
 		;;
     *-*-*openbsd*)
+		# OpenBSD has a real setreuid(2) starting with 3.3 but
+		# we will use setreuid(2) instead.
 		SKIP_SETREUID=yes
 		if test "$CHECKSHADOW" = "true"; then
 		    CHECKSHADOW="false"
 		fi
+		# OpenBSD >= 3.0 supports BSD auth
+		if test -z "$with_bsdauth"; then
+		    case "$OSREV" in
+		    0-2.*)
+			;;
+		    *)
+			with_bsdauth=yes
+			;;
+		    esac
+		fi
+		: ${with_logincap='maybe'}
 		;;
     *-*-*netbsd*)
 		# NetBSD has a real setreuid(2) starting with 1.3.2
-		case "`echo $host_os | sed 's/^netbsd\([0-9\.]*\).*$/\1/'`" in
+		case "$OSREV" in
 		0.9*|1.012*|1.3|1.3.1)
 		    SKIP_SETREUID=yes
 		    ;;
@@ -22607,6 +22825,8 @@ echo "$as_me: using shlicc as CC" >&6;}
 		if test "$CHECKSHADOW" = "true"; then
 		    CHECKSHADOW="false"
 		fi
+		: ${with_logincap='maybe'}
+				: ${with_pam='maybe'}
 		;;
     *-*-*bsd*)
 		if test "$CHECKSHADOW" = "true"; then
@@ -22618,6 +22838,8 @@ echo "$as_me: using shlicc as CC" >&6;}
 		if test "$CHECKSHADOW" = "true"; then
 		    CHECKSHADOW="false"
 		fi
+		: ${with_pam='yes'}
+		: ${with_logincap='yes'}
 		;;
     *-*-nextstep*)
 		# lockf() on is broken on the NeXT -- use flock instead
@@ -22625,18 +22847,18 @@ echo "$as_me: using shlicc as CC" >&6;}
 		ac_cv_func_flock=yes
 		;;
     *-*-*sysv4*)
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
-		test -n "$with_rpath" || with_rpath=yes
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
+		: ${with_rpath='yes'}
 		;;
     *-*-sysv*)
-		test -n "$mansectsu" || mansectsu=1m
-		test -n "$mansectform" || mansectform=4
+		: ${mansectsu='1m'}
+		: ${mansectform='4'}
 		;;
 esac
 
-test -n "$mansectsu" || mansectsu=8
-test -n "$mansectform" || mansectform=5
+: ${mansectsu='8'}
+: ${mansectform='5'}
 
 if test -n "$with_libpath"; then
     for i in ${with_libpath}; do
@@ -24543,7 +24765,7 @@ done
 
     fi
 fi
-if test "$with_logincap" = "yes"; then
+if test ${with_logincap-'no'} != "no"; then
 
 for ac_header in login_cap.h
 do
@@ -24837,7 +25059,14 @@ if test $ac_cv_header_bsd_auth_h = yes; then
   cat >>confdefs.h <<\_ACEOF
 #define HAVE_BSD_AUTH_H 1
 _ACEOF
- with_passwd=no; AUTH_OBJS=bsdauth.o
+
+	if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+	    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+	    { { echo "$as_me:$LINENO: error: \"cannot mix BSD authentication with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix BSD authentication with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+	fi
+	AUTH_OBJS=bsdauth.o
 else
   -
 fi
@@ -30673,7 +30902,11 @@ fi
 
     LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} $K4LIBS"
-    AUTH_OBJS="${AUTH_OBJS} kerb4.o"
+    if test X"$AUTH_OBJS" = X""; then
+	AUTH_OBJS="kerb4.o"
+    else
+	AUTH_OBJS="${AUTH_OBJS} kerb4.o"
+    fi
 fi
 
 if test "$with_kerb5" = "yes"; then
@@ -30718,7 +30951,11 @@ fi
 #define HAVE_KERB5 1
 _ACEOF
 
-	AUTH_OBJS="${AUTH_OBJS} kerb5.o"
+	if test X"$AUTH_OBJS" = X""; then
+	    AUTH_OBJS="kerb5.o"
+	else
+	    AUTH_OBJS="${AUTH_OBJS} kerb5.o"
+	fi
 	CPPFLAGS="$CPPFLAGS `krb5-config --cflags`"
 	SUDO_LIBS="$SUDO_LIBS `krb5-config --libs`"
 				echo "$as_me:$LINENO: checking whether we are using Heimdal" >&5
@@ -30958,10 +31195,38 @@ echo "${ECHO_T}no" >&6
 
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-    AUTH_OBJS="${AUTH_OBJS} kerb5.o"
+    if test X"$AUTH_OBJS" = X""; then
+	AUTH_OBJS="kerb5.o"
+    else
+	AUTH_OBJS="${AUTH_OBJS} kerb5.o"
+    fi
 fi
 
-if test "$with_pam" = "yes"; then
+if test "$with_logincap" = "yes"; then
+    case "$OS" in
+	freebsd|netbsd)	SUDO_LIBS="${SUDO_LIBS} -lutil"
+	;;
+    esac
+fi
+
+if test "$with_aixauth" = "yes"; then
+    { echo "$as_me:$LINENO: using AIX general authentication" >&5
+echo "$as_me: using AIX general authentication" >&6;}
+    cat >>confdefs.h <<\_ACEOF
+#define HAVE_AIXAUTH 1
+_ACEOF
+
+    if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+	_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+	{ { echo "$as_me:$LINENO: error: \"cannot mix AIX general authentication with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix AIX general authentication with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+    AUTH_OBJS="aix_auth.o"
+    SUDO_LIBS="${SUDO_LIBS} -ls"
+fi
+
+if test ${with_pam-'no'} != "no"; then
                 echo "$as_me:$LINENO: checking for main in -ldl" >&5
 echo $ECHO_N "checking for main in -ldl... $ECHO_C" >&6
 if test "${ac_cv_lib_dl_main+set}" = set; then
@@ -31028,7 +31293,8 @@ fi
 ac_cv_lib_dl=ac_cv_lib_dl_main
 
 
-for ac_header in pam/pam_appl.h
+
+for ac_header in security/pam_appl.h pam/pam_appl.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
@@ -31172,11 +31438,24 @@ if test `eval echo '${'$as_ac_Header'}'` = yes; then
   cat >>confdefs.h <<_ACEOF
 #define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
-
+ with_pam=yes; break
 fi
 
 done
 
+    if test "$with_pam" = "yes"; then
+	cat >>confdefs.h <<\_ACEOF
+#define HAVE_PAM 1
+_ACEOF
+
+	if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+	    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+	    { { echo "$as_me:$LINENO: error: \"cannot mix PAM with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix PAM with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+	fi
+	AUTH_OBJS="pam.o"
+    fi
 fi
 
 if test "$with_AFS" = "yes"; then
@@ -31680,7 +31959,13 @@ fi
     SUDO_LIBS="${SUDO_LIBS} -lopie"
 fi
 
-if test -n "$with_SecurID" -a "$with_SecurID" != "no"; then
+if test ${with_SecurID-'no'} != "no"; then
+    if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+	_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+	{ { echo "$as_me:$LINENO: error: \"cannot mix SecurID with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix SecurID with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
     if test "$with_SecurID" != "yes"; then
 	:
     elif test -d /usr/ace/examples; then
@@ -31813,10 +32098,6 @@ if test -n "$with_fwtk"; then
 	with_fwtk=yes
     fi
     SUDO_LIBS="${SUDO_LIBS} -lauth -lfwall"
-fi
-
-if test "$with_authenticate" = "yes"; then
-    SUDO_LIBS="${SUDO_LIBS} -ls"
 fi
 
 if test -n "$with_ldap"; then
@@ -32157,7 +32438,13 @@ EOF
 fi
 
 
-if test "$with_passwd" = "no"; then
+case "$AUTH_OBJS" in
+*passwd.o*)
+    if test -n "$SECUREWARE"; then
+	AUTH_OBJS="${AUTH_OBJS} secureware.o"
+    fi
+    ;;
+*)
     cat >>confdefs.h <<\_ACEOF
 #define WITHOUT_PASSWD 1
 _ACEOF
@@ -32167,13 +32454,11 @@ _ACEOF
 echo "$as_me: error: no authentication methods defined." >&2;}
    { (exit 1); exit 1; }; }
     fi
-else
-    if test -n "$SECUREWARE"; then
-	AUTH_OBJS="${AUTH_OBJS} passwd.o secureware.o"
-    else
-	AUTH_OBJS="${AUTH_OBJS} passwd.o"
-    fi
-fi
+    ;;
+esac
+_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+{ echo "$as_me:$LINENO: using the following authentication methods: $_AUTH" >&5
+echo "$as_me: using the following authentication methods: $_AUTH" >&6;}
 
 if test -n "$LIBS"; then
     L="$LIBS"
@@ -33412,8 +33697,6 @@ echo "$as_me: You will need to customize sample.pam and install it as /etc/pam.d
 	    ;;
     esac
 fi
-
-
 
 
 

@@ -323,7 +323,7 @@ AC_ARG_WITH(fwtk, [  --with-fwtk[[=DIR]]       enable FWTK AuthSRV support],
 		AC_MSG_RESULT(yes)
 		if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
 		    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-		    AC_MSG_ERROR(["cannot mix fwtk with other authentication methods (such as $AUTH_OBJS)"])
+		    AC_MSG_ERROR(["cannot mix fwtk with other authentication methods (such as $_AUTH)"])
 		fi
 		AUTH_OBJS="fwtk.o"
 		;;
@@ -1393,7 +1393,7 @@ case "$host" in
 		elif test "$CHECKSIA" = "true"; then
 		    if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
 			_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-			AC_MSG_ERROR(["cannot mix SIA with other authentication methods (such as $AUTH_OBJS)"])
+			AC_MSG_ERROR(["cannot mix SIA with other authentication methods (such as $_AUTH)"])
 		    fi
 		    AUTH_OBJS="sia.o"
 		fi
@@ -1683,7 +1683,7 @@ if test "$with_bsdauth" = "yes"; then
     AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H) [
 	if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
 	    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-	    AC_MSG_ERROR(["cannot mix BSD authentication with other authentication methods (such as $AUTH_OBJS)"])
+	    AC_MSG_ERROR(["cannot mix BSD authentication with other authentication methods (such as $_AUTH)"])
 	fi
 	AUTH_OBJS=bsdauth.o], -)
 fi
@@ -1988,7 +1988,7 @@ if test "$with_aixauth" = "yes"; then
     AC_DEFINE(HAVE_AIXAUTH)
     if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
 	_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-	AC_MSG_ERROR(["cannot mix AIX general authentication with other authentication methods (such as $AUTH_OBJS)"])
+	AC_MSG_ERROR(["cannot mix AIX general authentication with other authentication methods (such as $_AUTH)"])
     fi
     AUTH_OBJS="aix_auth.o"
     SUDO_LIBS="${SUDO_LIBS} -ls"
@@ -2012,7 +2012,7 @@ if test ${with_pam-'no'} != "no"; then
 	AC_DEFINE(HAVE_PAM)
 	if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
 	    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-	    AC_MSG_ERROR(["cannot mix PAM with other authentication methods (such as $AUTH_OBJS)"])
+	    AC_MSG_ERROR(["cannot mix PAM with other authentication methods (such as $_AUTH)"])
 	fi
 	AUTH_OBJS="pam.o"
     fi
@@ -2143,7 +2143,7 @@ dnl
 if test ${with_SecurID-'no'} != "no"; then
     if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
 	_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-	AC_MSG_ERROR(["cannot mix SecurID with other authentication methods (such as $AUTH_OBJS)"])
+	AC_MSG_ERROR(["cannot mix SecurID with other authentication methods (such as $_AUTH)"])
     fi
     if test "$with_SecurID" != "yes"; then
 	:
