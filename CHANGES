@@ -807,4 +807,6 @@ CHANGES from sudo 1.5
 247) Added %u and %h escapes in PASSPROMPT to expand to user's name
      and host.
 
+248) Added "SUDO_PROMPT" envariable.
+
 Sudo 1.5.1 released.
