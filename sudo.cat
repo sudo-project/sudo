@@ -23,14 +23,14 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        this is the user's password, not the root password).  Once
        a user has been authenticated, a timestamp is updated and
        the user may then use sudo without a password for a short
-       period of time (`5' minutes unless overridden in _s_u_d_o_e_r_s).
+       period of time (5 minutes unless overridden in _s_u_d_o_e_r_s).
 
        ssssuuuuddddoooo determines who is an authorized user by consulting
        the file _/_e_t_c_/_s_u_d_o_e_r_s.  By giving ssssuuuuddddoooo the ----vvvv flag a user
        can update the time stamp without running a _c_o_m_m_a_n_d_. The
        password prompt itself will also time out if the user's
-       password is not entered within `5' minutes (unless over­
-       ridden via _s_u_d_o_e_r_s).
+       password is not entered within 5 minutes (unless overrid­
+       den via _s_u_d_o_e_r_s).
 
        If a user who is not listed in the _s_u_d_o_e_r_s file tries to
        run a command via ssssuuuuddddoooo, mail is sent to the proper author­
@@ -49,19 +49,19 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
        ssssuuuuddddoooo accepts the following command line options:
 
        -V  The ----VVVV (_v_e_r_s_i_o_n) option causes ssssuuuuddddoooo to print the ver­
-           sion number and exit.
+           sion number and exit.  If the invoking user is already
+           root the ----VVVV option will print out a list of the
+           defaults ssssuuuuddddoooo was compiled with as well as the
+           machine's local network addresses.
 
        -l  The ----llll (_l_i_s_t) option will list out the allowed (and
            forbidden) commands for the user on the current host.
 
-       -L  The ----LLLL (_l_i_s_t defaults) option will list out the param­
-           eters that may be set in a _D_e_f_a_u_l_t_s line along with a
-           short description for each.  This option is useful in
-           conjunction with _g_r_e_p(1).
 
 
 
-December 29, 2000             1.6.4                             1
+
+December 14, 2001             1.6.4                             1
 
 
 
@@ -70,13 +70,18 @@ December 29, 2000             1.6.4                             1
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
+       -L  The ----LLLL (_l_i_s_t defaults) option will list out the param­
+           eters that may be set in a _D_e_f_a_u_l_t_s line along with a
+           short description for each.  This option is useful in
+           conjunction with _g_r_e_p(1).
+
        -h  The ----hhhh (_h_e_l_p) option causes ssssuuuuddddoooo to print a usage mes­
            sage and exit.
 
        -v  If given the ----vvvv (_v_a_l_i_d_a_t_e) option, ssssuuuuddddoooo will update
            the user's timestamp, prompting for the user's pass­
            word if necessary.  This extends the ssssuuuuddddoooo timeout for
-           another `5' minutes (or whatever the timeout is set to
+           another 5 minutes (or whatever the timeout is set to
            in _s_u_d_o_e_r_s) but does not run a command.
 
        -k  The ----kkkk (_k_i_l_l) option to ssssuuuuddddoooo invalidates the user's
@@ -97,16 +102,16 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
        -p  The ----pppp (_p_r_o_m_p_t) option allows you to override the
            default password prompt and use a custom one.  If the
-           password prompt contains the `%u' escape, `%u' will be
-           replaced with the user's login name.  Similarly, `%h'
+           password prompt contains the %u escape, %u will be
+           replaced with the user's login name.  Similarly, %h
            will be replaced with the local hostname.
 
        -c  The ----cccc (_c_l_a_s_s) option causes ssssuuuuddddoooo to run the specified
            command with resources limited by the specified login
            class.  The _c_l_a_s_s argument can be either a class name
            as defined in /etc/login.conf, or a single '-' charac­
-           ter.  Specifying a _c_l_a_s_s of `-' indicates that the
-           command should be run restricted by the default login
+           ter.  Specifying a _c_l_a_s_s of - indicates that the com­
+           mand should be run restricted by the default login
            capabilities for the user the command is run as.  If
            the _c_l_a_s_s argument specifies an existing user class,
            the command must be run as root, or the ssssuuuuddddoooo command
@@ -119,15 +124,10 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
            the specified authentication type when validating the
            user, as allowed by /etc/login.conf.  The system
            administrator may specify a list of sudo-specific
-           authentication methods by adding an "auth-sudo" entry
-           in /etc/login.conf.  This option is only available on
-           systems that support BSD authentication where ssssuuuuddddoooo has
-           been configured with the --with-bsdauth option.
 
 
 
-
-December 29, 2000             1.6.4                             2
+December 14, 2001             1.6.4                             2
 
 
 
@@ -135,6 +135,11 @@ December 29, 2000             1.6.4                             2
 
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
+
+           authentication methods by adding an "auth-sudo" entry
+           in /etc/login.conf.  This option is only available on
+           systems that support BSD authentication where ssssuuuuddddoooo has
+           been configured with the --with-bsdauth option.
 
        -u  The ----uuuu (_u_s_e_r) option causes ssssuuuuddddoooo to run the specified
            command as a user other than _r_o_o_t.  To specify a _u_i_d
@@ -144,10 +149,10 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
            _S_H_E_L_L environment variable if it is set or the shell
            as specified in _p_a_s_s_w_d(4).
 
-       -H  The ----HHHH (_H_O_M_E) option sets the `HOME' environment vari­
+       -H  The ----HHHH (_H_O_M_E) option sets the HOME environment vari­
            able to the homedir of the target user (root by
            default) as specified in _p_a_s_s_w_d(4).  By default, ssssuuuuddddoooo
-           does not modify `HOME'.
+           does not modify HOME.
 
        -S  The ----SSSS (_s_t_d_i_n) option causes ssssuuuuddddoooo to read the password
            from standard input instead of the terminal device.
@@ -165,35 +170,30 @@ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEES
        a configuration/permission problem or if ssssuuuuddddoooo cannot exe­
        cute the given command.  In the latter case the error
        string is printed to stderr.  If ssssuuuuddddoooo cannot _s_t_a_t(2) one
-       or more entries in the user's `PATH' an error is printed
-       on stderr.  (If the directory does not exist or if it is
-       not really a directory, the entry is ignored and no error
-       is printed.)  This should not happen under normal circum­
+       or more entries in the user's PATH an error is printed on
+       stderr.  (If the directory does not exist or if it is not
+       really a directory, the entry is ignored and no error is
+       printed.)  This should not happen under normal circum­
        stances.  The most common reason for _s_t_a_t(2) to return
        "permission denied" is if you are running an automounter
-       and one of the directories in your `PATH' is on a machine
+       and one of the directories in your PATH is on a machine
        that is currently unreachable.
 
 SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTEEEESSSS
        ssssuuuuddddoooo tries to be safe when executing external commands.
        Variables that control how dynamic loading and binding is
        done can be used to subvert the program that ssssuuuuddddoooo runs.
-       To combat this the `LD_*', `_RLD_*', `SHLIB_PATH' (HP-UX
-       only), and `LIBPATH' (AIX only) environment variables are
-       removed from the environment passed on to all commands
-       executed.  ssssuuuuddddoooo will also remove the `IFS', `ENV',
-       `BASH_ENV', `KRB_CONF', `KRBCONFDIR', `KRBTKFILE',
-       `KRB5_CONFIG', `LOCALDOMAIN', `RES_OPTIONS', `HOSTAL­
-       IASES', `NLSPATH', `PATH_LOCALE', `TERMINFO', `TER­
-       MINFO_DIRS' and `TERMPATH' variables as they too can pose
-       a threat.  If the `TERMCAP' variable is set and is a path­
-       name, it too is ignored.  Additionally, if the `LC_*' or
-       `LANGUAGE' variables contain the `/' or `%' characters,
-       they are ignored.  If ssssuuuuddddoooo has been compiled with SecurID
+       To combat this the LD_*, _RLD_*, SHLIB_PATH (HP-UX only),
+       and LIBPATH (AIX only) environment variables are removed
+       from the environment passed on to all commands executed.
+       ssssuuuuddddoooo will also remove the IFS, ENV, BASH_ENV, KRB_CONF,
+       KRBCONFDIR, KRBTKFILE, KRB5_CONFIG, LOCALDOMAIN,
+       RES_OPTIONS, HOSTALIASES, NLSPATH, PATH_LOCALE, TERMINFO,
+       TERMINFO_DIRS and TERMPATH variables as they too can pose
 
 
 
-December 29, 2000             1.6.4                             3
+December 14, 2001             1.6.4                             3
 
 
 
@@ -202,13 +202,18 @@ December 29, 2000             1.6.4                             3
 sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
-       support, the `VAR_ACE', `USR_ACE' and `DLC_ACE' variables
-       are cleared as well.
+       a threat.  If the TERMCAP variable is set and is a path­
+       name, it too is ignored.  Additionally, if the LC_* or
+       LANGUAGE variables contain the / or % characters, they are
+       ignored.  If ssssuuuuddddoooo has been compiled with SecurID support,
+       the VAR_ACE, USR_ACE and DLC_ACE variables are cleared as
+       well.  The list of environment variables that ssssuuuuddddoooo clears
+       is contained in the output of sudo -V when run as root.
 
        To prevent command spoofing, ssssuuuuddddoooo checks "." and "" (both
        denoting current directory) last when searching for a com­
        mand in the user's PATH (if one or both are in the PATH).
-       Note, however, that the actual `PATH' environment variable
+       Note, however, that the actual PATH environment variable
        is _n_o_t modified and is passed unchanged to the program
        that ssssuuuuddddoooo executes.
 
@@ -239,10 +244,32 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
        ssssuuuuddddoooo will not honor timestamps set far in the future.
        Timestamps with a date greater than current_time + 2 *
-       `TIMEOUT' will be ignored and sudo will log and complain.
+       TIMEOUT will be ignored and sudo will log and complain.
        This is done to keep a user from creating his/her own
        timestamp with a bogus date on systems that allow users to
        give away files.
+
+       Please note that ssssuuuuddddoooo will only log the command it explic­
+       itly runs.  If a user runs a command such as sudo su or
+       sudo sh, subsequent commands run from that shell will _n_o_t
+       be logged, nor will ssssuuuuddddoooo's access control affect them.
+       The same is true for commands that offer shell escapes
+       (including most editors).  Because of this, care must be
+       taken when giving users access to commands via ssssuuuuddddoooo to
+
+
+
+December 14, 2001             1.6.4                             4
+
+
+
+
+
+sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
+
+
+       verify that the command does not inadvertantly give the
+       user an effective root shell.
 
 EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
        Note: the following examples assume suitable _s_u_d_o_e_r_s(4)
@@ -256,18 +283,6 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
        where the filesystem holding ~yazza is not exported as
        root:
 
-
-
-
-December 29, 2000             1.6.4                             4
-
-
-
-
-
-sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
-
-
         % sudo -u yazza ls ~yazza
 
        To edit the _i_n_d_e_x_._h_t_m_l file as user www:
@@ -280,7 +295,7 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
        To make a usage listing of the directories in the /home
        partition.  Note that this runs the commands in a sub-
-       shell to make the `cd' and file redirection work.
+       shell to make the cd and file redirection work.
 
         % sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 
@@ -308,6 +323,17 @@ FFFFIIIILLLLEEEESSSS
         /var/run/sudo              Directory containing timestamps
 
 
+
+
+December 14, 2001             1.6.4                             5
+
+
+
+
+
+sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
+
+
 AAAAUUUUTTTTHHHHOOOORRRRSSSS
        Many people have worked on ssssuuuuddddoooo over the years; this ver­
        sion consists of code written primarily by:
@@ -323,17 +349,6 @@ BBBBUUUUGGGGSSSS
        If you feel you have found a bug in sudo, please submit a
        bug report at http://www.courtesan.com/sudo/bugs/
 
-
-
-December 29, 2000             1.6.4                             5
-
-
-
-
-
-sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
-
-
 DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
        SSSSuuuuddddoooo is provided ``AS IS'' and any express or implied war­
        ranties, including, but not limited to, the implied war­
@@ -346,7 +361,7 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        shell if that user has access to commands allowing shell
        escapes.
 
-       If users have sudo `ALL' there is nothing to prevent them
+       If users have sudo ALL there is nothing to prevent them
        from creating their own program that gives them a root
        shell regardless of any '!'  elements in the user specifi­
        cation.
@@ -376,21 +391,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-December 29, 2000             1.6.4                             6
+December 14, 2001             1.6.4                             6
 
 

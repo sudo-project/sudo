@@ -8,18 +8,18 @@ NNNNAAAAMMMMEEEE
        sudoers - list of which users may execute what
 
 DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
-       The _s_u_d_o_e_r_s file is composed two types of entries: aliases
-       (basically variables) and user specifications (which spec­
-       ify who may run what).  The grammar of _s_u_d_o_e_r_s will be
-       described below in Extended Backus-Naur Form (EBNF).
-       Don't despair if you don't know what EBNF is, it is fairly
-       simple and the definitions below are annotated.
+       The _s_u_d_o_e_r_s file is composed of two types of entries:
+       aliases (basically variables) and user specifications
+       (which specify who may run what).  The grammar of _s_u_d_o_e_r_s
+       will be described below in Extended Backus-Naur Form
+       (EBNF).  Don't despair if you don't know what EBNF is; it
+       is fairly simple, and the definitions below are annotated.
 
        QQQQuuuuiiiicccckkkk gggguuuuiiiiddddeeee ttttoooo EEEEBBBBNNNNFFFF
 
        EBNF is a concise and exact way of describing the grammar
        of a language.  Each EBNF definition is made up of _p_r_o_d_u_c_­
-       _t_i_o_n _r_u_l_e_s.  Eg.
+       _t_i_o_n _r_u_l_e_s.  E.g.,
 
         symbol ::= definition | alternate1 | alternate2 ...
 
@@ -29,14 +29,14 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        ular expressions.  Do not, however, confuse them with
        "wildcard" characters, which have different meanings.
 
-       `?'     Means that the preceding symbol (or group of sym­
+       ?       Means that the preceding symbol (or group of sym­
                bols) is optional.  That is, it may appear once or
                not at all.
 
-       `*'     Means that the preceding symbol (or group of sym­
+       *       Means that the preceding symbol (or group of sym­
                bols) may appear zero or more times.
 
-       `+'     Means that the preceding symbol (or group of sym­
+       +       Means that the preceding symbol (or group of sym­
                bols) may appear one or more times.
 
        Parentheses may be used to group symbols together.  For
@@ -46,13 +46,13 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
        AAAAlllliiiiaaaasssseeeessss
 
-       There are four kinds of aliases: the `User_Alias',
-       `Runas_Alias', `Host_Alias' and `Cmnd_Alias'.
+       There are four kinds of aliases: User_Alias, Runas_Alias,
+       Host_Alias and Cmnd_Alias.
 
-        Alias ::= 'User_Alias' = User_Alias (':' User_Alias)* |
-                  'Runas_Alias' = Runas_Alias (':' Runas_Alias)* |
-                  'Host_Alias' = Host_Alias (':' Host_Alias)* |
-                  'Cmnd_Alias' = Cmnd_Alias (':' Cmnd_Alias)*
+        Alias ::= 'User_Alias'  User_Alias (':' User_Alias)* |
+                  'Runas_Alias' Runas_Alias (':' Runas_Alias)* |
+                  'Host_Alias'  Host_Alias (':' Host_Alias)* |
+                  'Cmnd_Alias'  Cmnd_Alias (':' Cmnd_Alias)*
 
         User_Alias ::= NAME '=' User_List
 
@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-December 29, 2000             1.6.4                             1
+December 13, 2001             1.6.4                             1
 
 
 
@@ -80,12 +80,12 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
         Alias_Type NAME = item1, item2, ...
 
-       where _A_l_i_a_s___T_y_p_e is one of `User_Alias', `Runas_Alias',
-       `Host_Alias', or `Cmnd_Alias'.  A `NAME' is a string of
-       upper case letters, numbers, and the underscore characters
-       ('_').  A `NAME' mmmmuuuusssstttt start with an upper case letter.  It
-       is possible to put several alias definitions of the same
-       type on a single line, joined by a colon (':').  Eg.
+       where _A_l_i_a_s___T_y_p_e is one of User_Alias, Runas_Alias,
+       Host_Alias, or Cmnd_Alias.  A NAME is a string of upper­
+       case letters, numbers, and the underscore characters
+       ('_').  A NAME mmmmuuuusssstttt start with an uppercase letter.  It is
+       possible to put several alias definitions of the same type
+       on a single line, joined by a colon (':').  E.g.,
 
         Alias_Type NAME = item1, item2, item3 : NAME = item4, item5
 
@@ -101,11 +101,11 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                  '!'* '+'netgroup |
                  '!'* User_Alias
 
-       A `User_List' is made up of one or more usernames, uids
+       A User_List is made up of one or more usernames, uids
        (prefixed with '#'), System groups (prefixed with '%'),
        netgroups (prefixed with '+') and other aliases.  Each
        list item may be prefixed with one or more '!' operators.
-       An odd number of '!' operators negates the value of the
+       An odd number of '!' operators negate the value of the
        item; an even number just cancel each other out.
 
         Runas_List ::= Runas_User |
@@ -117,9 +117,9 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                        '!'* +netgroup |
                        '!'* Runas_Alias
 
-       Likewise, a `Runas_List' has the same possible elements as
-       a `User_List', except that it can include a `Runas_Alias',
-       instead of a `User_Alias'.
+       Likewise, a Runas_List has the same possible elements as a
+       User_List, except that it can include a Runas_Alias,
+       instead of a User_Alias.
 
         Host_List ::= Host |
                       Host ',' Host_List
@@ -127,7 +127,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 29, 2000             1.6.4                             2
+December 13, 2001             1.6.4                             2
 
 
 
@@ -142,19 +142,19 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                  '!'* '+'netgroup |
                  '!'* Host_Alias
 
-       A `Host_List' is made up of one or more hostnames, IP
+       A Host_List is made up of one or more hostnames, IP
        addresses, network numbers, netgroups (prefixed with '+')
        and other aliases.  Again, the value of an item may be
        negated with the '!' operator.  If you do not specify a
        netmask with a network number, the netmask of the host's
        ethernet _i_n_t_e_r_f_a_c_e(s) will be used when matching.  The
        netmask may be specified either in dotted quad notation
-       (eg.  255.255.255.0) or CIDR notation (number of bits, eg.
-       24).  A hostname may include shell-style wildcards (see
-       `Wildcards' section below), but unless the `hostname' com­
-       mand on your machine returns the fully qualified hostname,
-       you'll need to use the _f_q_d_n option for wildcards to be
-       useful.
+       (e.g.  255.255.255.0) or CIDR notation (number of bits,
+       e.g. 24).  A hostname may include shell-style wildcards
+       (see `Wildcards' section below), but unless the hostname
+       command on your machine returns the fully qualified host­
+       name, you'll need to use the _f_q_d_n option for wildcards to
+       be useful.
 
         Cmnd_List ::= Cmnd |
                       Cmnd ',' Cmnd_List
@@ -167,23 +167,22 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                  '!'* directory |
                  '!'* Cmnd_Alias
 
-       A `Cmnd_List' is a list of one or more commandnames,
-       directories, and other aliases.  A commandname is a fully
-       qualified filename which may include shell-style wildcards
+       A Cmnd_List is a list of one or more commandnames, direc­
+       tories, and other aliases.  A commandname is a fully qual­
+       ified filename which may include shell-style wildcards
        (see `Wildcards' section below).  A simple filename allows
        the user to run the command with any arguments he/she
-       wishes.  However, you may also command line arguments
-       (including wildcards).  Alternately, you can specify `""'
-       to indicate that the command may only be run wwwwiiiitttthhhhoooouuuutttt com­
-       mand line arguments.  A directory is a fully qualified
+       wishes.  However, you may also specify command line argu­
+       ments (including wildcards).  Alternately, you can specify
+       "" to indicate that the command may only be run wwwwiiiitttthhhhoooouuuutttt
+       command line arguments.  A directory is a fully qualified
        pathname ending in a '/'.  When you specify a directory in
-       a `Cmnd_List', the user will be able to run any file
-       within that directory (but not in any subdirectories
-       therein).
+       a Cmnd_List, the user will be able to run any file within
+       that directory (but not in any subdirectories therein).
 
-       If a `Cmnd' has associated command line arguments, then
-       the arguments in the `Cmnd' must match exactly those given
-       by the user on the command line (or match the wildcards if
+       If a Cmnd has associated command line arguments, then the
+       arguments in the Cmnd must match exactly those given by
+       the user on the command line (or match the wildcards if
        there are any).  Note that the following characters must
        be escaped with a '\' if they are used in command argu­
        ments: ',', ':', '=', '\'.
@@ -193,7 +192,8 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 29, 2000             1.6.4                             3
+
+December 13, 2001             1.6.4                             3
 
 
 
@@ -205,7 +205,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        DDDDeeeeffffaaaauuuullllttttssss
 
        Certain configuration options may be changed from their
-       default values at runtime via one or more `Default_Entry'
+       default values at runtime via one or more Default_Entry
        lines.  These may affect all users on any host, all users
        on a specific host, or just a specific user.  When multi­
        ple entries match, they are applied in order.  Where there
@@ -219,15 +219,22 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
         Default_Entry ::= Default_Type Parameter_List
 
         Parameter ::= Parameter '=' Value ||
+                      Parameter '+=' Value ||
+                      Parameter '-=' Value ||
                       '!'* Parameter ||
 
-       Parameters may be ffffllllaaaaggggssss, iiiinnnntttteeeeggggeeeerrrr values, or ssssttttrrrriiiinnnnggggssss.
-       Flags are implicitly boolean and can be turned off via the
-       '!' operator.  Some integer and string parameters may also
-       be used in a boolean context to disable them.  Values may
-       be enclosed in double quotes (`"') when they contain mul­
-       tiple words.  Special characters may be escaped with a
-       backslash (`\').
+       Parameters may be ffffllllaaaaggggssss, iiiinnnntttteeeeggggeeeerrrr values, ssssttttrrrriiiinnnnggggssss, or
+       lllliiiissssttttssss.  Flags are implicitly boolean and can be turned off
+       via the '!'  operator.  Some integer, string and list
+       parameters may also be used in a boolean context to dis­
+       able them.  Values may be enclosed in double quotes (")
+       when they contain multiple words.  Special characters may
+       be escaped with a backslash (\).
+
+       Lists have two additional assignment operators, += and -=.
+       These operators are used to add to and delete from a list
+       respectively.  It is not an error to use the -= operator
+       to remove an element that does not exist in a list.
 
        FFFFllllaaaaggggssss:
 
@@ -240,12 +247,29 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    more convenient.  This flag is _o_f_f by default.
 
        ignore_dot  If set, ssssuuuuddddoooo will ignore '.' or '' (current
-                   dir) in the `PATH' environment variable; the
-                   `PATH' itself is not modified.  This flag is
-                   _o_f_f by default.
+                   dir) in the PATH environment variable; the
+                   PATH itself is not modified.  This flag is _o_f_f
+                   by default.
 
        mail_always Send mail to the _m_a_i_l_t_o user every time a
                    users runs ssssuuuuddddoooo.  This flag is _o_f_f by default.
+
+       mail_badpass
+                   Send mail to the _m_a_i_l_t_o user if the user
+
+
+
+December 13, 2001             1.6.4                             4
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
+
+                   running sudo does not enter the correct pass­
+                   word.  This flag is _o_f_f by default.
 
        mail_no_user
                    If set, mail will be sent to the _m_a_i_l_t_o user
@@ -256,18 +280,6 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    If set, mail will be sent to the _m_a_i_l_t_o user
                    if the invoking user exists in the _s_u_d_o_e_r_s
                    file, but is not allowed to run commands on
-
-
-
-December 29, 2000             1.6.4                             4
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
-
                    the current host.  This flag is _o_f_f by
                    default.
 
@@ -294,14 +306,14 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    If set, users must authenticate themselves via
                    a password (or other means of authentication)
                    before they may run commands.  This default
-                   may be overridden via the `PASSWD' and
-                   `NOPASSWD' tags.  This flag is _o_n by default.
+                   may be overridden via the PASSWD and NOPASSWD
+                   tags.  This flag is _o_n by default.
 
        root_sudo   If set, root is allowed to run ssssuuuuddddoooo too.  Dis­
                    abling this prevents users from "chaining"
                    ssssuuuuddddoooo commands to get a root shell by doing
-                   something like `"sudo sudo /bin/sh"'.  This
-                   flag is _o_n by default.
+                   something like "sudo sudo /bin/sh".  This flag
+                   is _o_n by default.
 
        log_host    If set, the hostname will be logged in the
                    (non-syslog) ssssuuuuddddoooo log file.  This flag is _o_f_f
@@ -311,21 +323,9 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    the (non-syslog) ssssuuuuddddoooo log file.  This flag is
                    _o_f_f by default.
 
-       shell_noargs
-                   If set and ssssuuuuddddoooo is invoked with no arguments
-                   it acts as if the ----ssss flag had been given.
-                   That is, it runs a shell as root (the shell is
-                   determined by the `SHELL' environment variable
-                   if it is set, falling back on the shell listed
-                   in the invoking user's /etc/passwd entry if
-                   not).  This flag is _o_f_f by default.
-
-       set_home    If set and ssssuuuuddddoooo is invoked with the ----ssss flag
-                   the `HOME' environment variable will be set to
 
 
-
-December 29, 2000             1.6.4                             5
+December 13, 2001             1.6.4                             5
 
 
 
@@ -334,13 +334,24 @@ December 29, 2000             1.6.4                             5
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
+       shell_noargs
+                   If set and ssssuuuuddddoooo is invoked with no arguments
+                   it acts as if the ----ssss flag had been given.
+                   That is, it runs a shell as root (the shell is
+                   determined by the SHELL environment variable
+                   if it is set, falling back on the shell listed
+                   in the invoking user's /etc/passwd entry if
+                   not).  This flag is _o_f_f by default.
+
+       set_home    If set and ssssuuuuddddoooo is invoked with the ----ssss flag
+                   the HOME environment variable will be set to
                    the home directory of the target user (which
                    is root unless the ----uuuu option is used).  This
                    effectively makes the ----ssss flag imply ----HHHH.  This
                    flag is _o_f_f by default.
 
        always_set_home
-                   If set, ssssuuuuddddoooo will set the `HOME' environment
+                   If set, ssssuuuuddddoooo will set the HOME environment
                    variable to the home directory of the target
                    user (which is root unless the ----uuuu option is
                    used).  This effectively means that the ----HHHH
@@ -348,19 +359,18 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    default.
 
        path_info   Normally, ssssuuuuddddoooo will tell the user when a com­
-                   mand could not be found in their `PATH' envi­
-                   ronment variable.  Some sites may wish to dis­
-                   able this as it could be used to gather infor­
-                   mation on the location of executables that the
-                   normal user does not have access to.  The dis­
-                   advantage is that if the executable is simply
-                   not in the user's `PATH', ssssuuuuddddoooo will tell the
-                   user that they are not allowed to run it,
-                   which can be confusing.  This flag is off by
-                   default.
+                   mand could not be found in their PATH environ­
+                   ment variable.  Some sites may wish to disable
+                   this as it could be used to gather information
+                   on the location of executables that the normal
+                   user does not have access to.  The disadvan­
+                   tage is that if the executable is simply not
+                   in the user's PATH, ssssuuuuddddoooo will tell the user
+                   that they are not allowed to run it, which can
+                   be confusing.  This flag is off by default.
 
        fqdn        Set this flag if you want to put fully quali­
-                   fied hostnames in the _s_u_d_o_e_r_s file.  Ie:
+                   fied hostnames in the _s_u_d_o_e_r_s file.  I.e.:
                    instead of myhost you would use myhost.mydo­
                    main.edu.  You may still use the short form if
                    you wish (and even mix the two).  Beware that
@@ -370,28 +380,18 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    not plugged into the network).  Also note that
                    you must use the host's official name as DNS
                    knows it.  That is, you may not use a host
-                   alias (`CNAME' entry) due to performance
-                   issues and the fact that there is no way to
-                   get all aliases from DNS.  If your machine's
-                   hostname (as returned by the `hostname' com­
-                   mand) is already fully qualified you shouldn't
-                   need to set _f_q_d_n.  This flag is _o_f_f by
-                   default.
-
-       insults     If set, ssssuuuuddddoooo will insult users when they enter
-                   an incorrect password.  This flag is _o_f_f by
-                   default.
-
-       requiretty  If set, ssssuuuuddddoooo will only run when the user is
-                   logged in to a real tty.  This will disallow
-                   things like `"rsh somehost sudo ls"' since
-                   _r_s_h(1) does not allocate a tty.  Because it is
-                   not possible to turn of echo when there is no
-                   tty present, some sites may with to set this
+                   alias (CNAME entry) due to performance issues
+                   and the fact that there is no way to get all
+                   aliases from DNS.  If your machine's hostname
+                   (as returned by the hostname command) is
+                   already fully qualified you shouldn't need to
+                   set _f_q_d_n.  This flag is _o_f_f by default.
 
 
 
-December 29, 2000             1.6.4                             6
+
+
+December 13, 2001             1.6.4                             6
 
 
 
@@ -400,6 +400,16 @@ December 29, 2000             1.6.4                             6
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
+       insults     If set, ssssuuuuddddoooo will insult users when they enter
+                   an incorrect password.  This flag is _o_f_f by
+                   default.
+
+       requiretty  If set, ssssuuuuddddoooo will only run when the user is
+                   logged in to a real tty.  This will disallow
+                   things like "rsh somehost sudo ls" since
+                   _r_s_h(1) does not allocate a tty.  Because it is
+                   not possible to turn of echo when there is no
+                   tty present, some sites may with to set this
                    flag to prevent a user from entering a visible
                    password.  This flag is _o_f_f by default.
 
@@ -410,10 +420,10 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    allows the user to run any arbitrary command
                    as root without logging.  A safer alternative
                    is to place a colon-separated list of editors
-                   in the `editor' variable.  vvvviiiissssuuuuddddoooo will then
-                   only use the EDITOR or VISUAL if they match a
-                   value specified in `editor'.  This flag is
-                   `off' by default.
+                   in the editor variable.  vvvviiiissssuuuuddddoooo will then only
+                   use the EDITOR or VISUAL if they match a value
+                   specified in editor.  This flag is off by
+                   default.
 
        rootpw      If set, ssssuuuuddddoooo will prompt for the root password
                    instead of the password of the invoking user.
@@ -421,43 +431,33 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
        runaspw     If set, ssssuuuuddddoooo will prompt for the password of
                    the user defined by the _r_u_n_a_s___d_e_f_a_u_l_t option
-                   (defaults to `root') instead of the password
-                   of the invoking user.  This flag is _o_f_f by
+                   (defaults to root) instead of the password of
+                   the invoking user.  This flag is _o_f_f by
                    default.
 
        targetpw    If set, ssssuuuuddddoooo will prompt for the password of
                    the user specified by the ----uuuu flag (defaults to
-                   `root') instead of the password of the invok­
-                   ing user.  This flag is _o_f_f by default.
+                   root) instead of the password of the invoking
+                   user.  This flag is _o_f_f by default.
 
-       set_logname Normally, ssssuuuuddddoooo will set the `LOGNAME' and
-                   `USER' environment variables to the name of
-                   the target user (usually root unless the ----uuuu
-                   flag is given).  However, since some programs
-                   (including the RCS revision control system)
-                   use `LOGNAME' to determine the real identity
-                   of the user, it may be desirable to change
-                   this behavior.  This can be done by negating
-                   the set_logname option.
+       set_logname Normally, ssssuuuuddddoooo will set the LOGNAME and USER
+                   environment variables to the name of the tar­
+                   get user (usually root unless the ----uuuu flag is
+                   given).  However, since some programs (includ­
+                   ing the RCS revision control system) use LOG­
+                   NAME to determine the real identity of the
+                   user, it may be desirable to change this
+                   behavior.  This can be done by negating the
+                   set_logname option.
 
        stay_setuid Normally, when ssssuuuuddddoooo executes a command the
                    real and effective UIDs are set to the target
                    user (root by default).  This option changes
                    that behavior such that the real UID is left
-                   as the invoking user's UID.  In other words,
-                   this makes ssssuuuuddddoooo act as a setuid wrapper.  This
-                   can be useful on systems that disable some
-                   potentially dangerous functionality when a
-                   program is run setuid.
-
-       env_reset   If set, ssssuuuuddddoooo will reset the environment to
-                   only contain the following variables: `HOME',
-                   `SHELL', `LOGNAME', and `USER' (in addition to
-                   the `SUDO_*' variables).  The `PATH' and
 
 
 
-December 29, 2000             1.6.4                             7
+December 13, 2001             1.6.4                             7
 
 
 
@@ -466,9 +466,24 @@ December 29, 2000             1.6.4                             7
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
-                   `TERM' environment variables are preserved
-                   unaltered.  Other specific variables may be
-                   preserved with the i<env_keep> option.
+                   as the invoking user's UID.  In other words,
+                   this makes ssssuuuuddddoooo act as a setuid wrapper.  This
+                   can be useful on systems that disable some
+                   potentially dangerous functionality when a
+                   program is run setuid.
+
+       env_reset   If set, ssssuuuuddddoooo will reset the environment to
+                   only contain the following variables: HOME,
+                   LOGNAME, PATH, SHELL, TERM, and USER (in addi­
+                   tion to the SUDO_* variables).  Of these, only
+                   TERM is copied unaltered from the old environ­
+                   ment.  The other variables are set to default
+                   values (possibly modified by the value of the
+                   _s_e_t___l_o_g_n_a_m_e option).  If ssssuuuuddddoooo was compiled
+                   with the SECURE_PATH option, its value will be
+                   used for the PATH environment variable.  Other
+                   variables may be preserved with the
+                   i<env_keep> option.
 
        use_loginclass
                    If set, ssssuuuuddddoooo will apply the defaults specified
@@ -482,7 +497,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        passwd_tries
                    The number of tries a user gets to enter
                    his/her password before ssssuuuuddddoooo logs the failure
-                   and exits.  The default is `3'.
+                   and exits.  The default is 3.
 
        IIIInnnntttteeeeggggeeeerrrrssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
 
@@ -490,40 +505,25 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    log.  This value is used to decide when to
                    wrap lines for nicer log files.  This has no
                    effect on the syslog log file, only the file
-                   log.  The default is `80' (use 0 or negate the
+                   log.  The default is 80 (use 0 or negate the
                    option to disable word wrap).
 
        timestamp_timeout
                    Number of minutes that can elapse before ssssuuuuddddoooo
                    will ask for a passwd again.  The default is
-                   `5', set this to `0' to always prompt for a
-                   password.
+                   5.  Set this to 0 to always prompt for a pass­
+                   word.  If set to a value less than 0 the
+                   user's timestamp will never expire.  This can
+                   be used to allow users to create or delete
+                   their own timestamps via sudo -v and sudo -k
+                   respectively.
 
        passwd_timeout
                    Number of minutes before the ssssuuuuddddoooo password
-                   prompt times out.  The default is `5', set
-                   this to `0' for no password timeout.
-
-       umask       Umask to use when running the command.  Negate
-                   this option or set it to 0777 to preserve the
-                   user's umask.  The default is `0022'.
-
-       SSSSttttrrrriiiinnnnggggssss:
-
-       mailsub     Subject of the mail sent to the _m_a_i_l_t_o user.
-                   The escape `%h' will expand to the hostname of
-                   the machine.  Default is `*** SECURITY infor­
-                   mation for %h ***'.
-
-       badpass_message
-                   Message that is displayed if a user enters an
-                   incorrect password.  The default is `Sorry,
-                   try again.' unless insults are enabled.
 
 
 
-
-December 29, 2000             1.6.4                             8
+December 13, 2001             1.6.4                             8
 
 
 
@@ -532,40 +532,48 @@ December 29, 2000             1.6.4                             8
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
+                   prompt times out.  The default is 5, set this
+                   to 0 for no password timeout.
+
+       umask       Umask to use when running the command.  Negate
+                   this option or set it to 0777 to preserve the
+                   user's umask.  The default is 0022.
+
+       SSSSttttrrrriiiinnnnggggssss:
+
+       mailsub     Subject of the mail sent to the _m_a_i_l_t_o user.
+                   The escape %h will expand to the hostname of
+                   the machine.  Default is *** SECURITY informa­
+                   tion for %h ***.
+
+       badpass_message
+                   Message that is displayed if a user enters an
+                   incorrect password.  The default is Sorry, try
+                   again. unless insults are enabled.
+
        timestampdir
                    The directory in which ssssuuuuddddoooo stores its times­
                    tamp files.  The default is _/_v_a_r_/_r_u_n_/_s_u_d_o.
 
        passprompt  The default prompt to use when asking for a
                    password; can be overridden via the ----pppp option
-                   or the `SUDO_PROMPT' environment variable.
-                   Supports two escapes: "%u" expands to the
-                   user's login name and "%h" expands to the
-                   local hostname.  The default value is `Pass­
-                   word:'.
+                   or the SUDO_PROMPT environment variable. Sup­
+                   ports two escapes: "%u" expands to the user's
+                   login name and "%h" expands to the local host­
+                   name.  The default value is Password:.
 
        runas_default
                    The default user to run commands as if the ----uuuu
                    flag is not specified on the command line.
-                   This defaults to `root'.
+                   This defaults to root.
 
        syslog_goodpri
                    Syslog priority to use when user authenticates
-                   successfully.  Defaults to `notice'.
+                   successfully.  Defaults to notice.
 
        syslog_badpri
                    Syslog priority to use when user authenticates
-                   unsuccessfully.  Defaults to `alert'.
-
-       env_keep    A double-quoted, space-separated list of envi­
-                   ronment variables to be preserved in the
-                   user's environment.  When used in conjuction
-                   with the _e_n_v___r_e_s_e_t option, this allows fine
-                   control over the environment ssssuuuuddddoooo-spawned pro­
-                   cesses will get.  If the _e_n_v___r_e_s_e_t option is
-                   not used, _e_n_v___k_e_e_p can be used to make excep­
-                   tions to the built in list of "dangerous"
-                   environment variables.
+                   unsuccessfully.  Defaults to alert.
 
        editor      A colon (':') separated list of editors
                    allowed to be used with vvvviiiissssuuuuddddoooo.  vvvviiiissssuuuuddddoooo will
@@ -577,19 +585,11 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
        SSSSttttrrrriiiinnnnggggssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
 
-       logfile     Path to the ssssuuuuddddoooo log file (not the syslog log
-                   file).  Setting a path turns on logging to a
-                   file, negating this option turns it off.
-
-       syslog      Syslog facility if syslog is being used for
-                   logging (negate to disable syslog logging).
-                   Defaults to `local2'.
 
 
 
 
-
-December 29, 2000             1.6.4                             9
+December 13, 2001             1.6.4                             9
 
 
 
@@ -598,6 +598,14 @@ December 29, 2000             1.6.4                             9
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
+       logfile     Path to the ssssuuuuddddoooo log file (not the syslog log
+                   file).  Setting a path turns on logging to a
+                   file; negating this option turns it off.
+
+       syslog      Syslog facility if syslog is being used for
+                   logging (negate to disable syslog logging).
+                   Defaults to local2.
+
        mailerpath  Path to mail program used to send warning
                    mail.  Defaults to the path to sendmail found
                    at configure time.
@@ -605,22 +613,15 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        mailerflags Flags to use when invoking mailer. Defaults to
                    ----tttt.
 
-       mailto      Address to send warning and erorr mail to.
+       mailto      Address to send warning and error mail to.
                    The address should be enclosed in double
-                   quotes (`"') to protect against sudo inter­
-                   preting the `@' sign.  Defaults to `root'.
+                   quotes (") to protect against sudo interpret­
+                   ing the @ sign.  Defaults to root.
 
        exempt_group
                    Users in this group are exempt from password
                    and PATH requirements.  This is not set by
                    default.
-
-       secure_path Path used for every command run from ssssuuuuddddoooo.  If
-                   you don't trust the people running ssssuuuuddddoooo to
-                   have a sane `PATH' environment variable you
-                   may want to use this.  Another use is if you
-                   want to have the "root path" be separate from
-                   the "user path."  This is not set by default.
 
        verifypw    This option controls when a password will be
                    required when a user runs ssssuuuuddddoooo with the ----vvvv
@@ -654,8 +655,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-
-December 29, 2000             1.6.4                            10
+December 13, 2001             1.6.4                            10
 
 
 
@@ -677,6 +677,39 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
                    The default value is `any'.
 
+       LLLLiiiissssttttssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
+
+       env_check   A double-quoted, space-separated list of envi­
+                   ronment variables to be removed from the
+                   user's environment if the variable's value
+                   contains % or / characters.  This can be used
+                   to guard against printf-style format vulnera­
+                   bilties in poorly-written programs.  The list
+                   can be replaced, added to, deleted from, or
+                   disabled by using the =, +=, -=, and <!> oper­
+                   ators respectively.  The default list of envi­
+                   ronment variable to check is printed when ssssuuuuddddoooo
+                   is run by root with the _-_V option.
+
+       env_delete  A double-quoted, space-separated list of envi­
+                   ronment variables to be removed from the
+                   user's environment.  The list can be replaced,
+                   added to, deleted from, or disabled by using
+                   the =, +=, -=, and <!> operators respectively.
+                   The default list of environment variable to
+                   remove is printed when ssssuuuuddddoooo is run by root
+                   with the _-_V option.
+
+       env_keep    A double-quoted, space-separated list of envi­
+                   ronment variables to be preserved in the
+                   user's environment when the _e_n_v___r_e_s_e_t option
+                   is in effect.  This allows fine-grained con­
+                   trol over the environment ssssuuuuddddoooo-spawned pro­
+                   cesses will get.  The list can be replaced,
+                   added to, deleted from, or disabled by using
+                   the =, +=, -=, and <!> operators respectively.
+                   This list has no default members.
+
        When logging via _s_y_s_l_o_g(3), ssssuuuuddddoooo accepts the following
        values for the syslog facility (the value of the ssssyyyysssslllloooogggg
        Parameter): aaaauuuutttthhhhpppprrrriiiivvvv (if your OS supports it), aaaauuuutttthhhh, ddddaaaaeeee­­­­
@@ -685,9 +718,21 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        supported: aaaalllleeeerrrrtttt, ccccrrrriiiitttt, ddddeeeebbbbuuuugggg, eeeemmmmeeeerrrrgggg, eeeerrrrrrrr, iiiinnnnffffoooo, nnnnoooottttiiiicccceeee,
        and wwwwaaaarrrrnnnniiiinnnngggg.
 
+
+
+
+December 13, 2001             1.6.4                            11
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
+
        UUUUsssseeeerrrr SSSSppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnn
 
-        User_Spec ::= User_list Host_List '=' User_List Cmnd_Spec_List \
+        User_Spec ::= User_list Host_List '=' Cmnd_Spec_List \
                       (':' User_Spec)*
 
         Cmnd_Spec_List ::= Cmnd_Spec |
@@ -699,40 +744,28 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
        A uuuusssseeeerrrr ssssppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnn determines which commands a user may
        run (and as what user) on specified hosts.  By default,
-       commands are run as rrrrooooooootttt but this can be changed on a per-
-       command basis.
+       commands are run as rrrrooooooootttt, but this can be changed on a
+       per-command basis.
 
        Let's break that down into its constituent parts:
 
        RRRRuuuunnnnaaaassss____SSSSppppeeeecccc
 
-       A `Runas_Spec' is simply a `Runas_List' (as defined above)
+       A Runas_Spec is simply a Runas_List (as defined above)
        enclosed in a set of parentheses.  If you do not specify a
-       `Runas_Spec' in the user specification, a default
-       `Runas_Spec' of rrrrooooooootttt will be used.  A `Runas_Spec' sets
-       the default for commands that follow it.  What this means
-       is that for the entry:
+       Runas_Spec in the user specification, a default Runas_Spec
+       of rrrrooooooootttt will be used.  A Runas_Spec sets the default for
+       commands that follow it.  What this means is that for the
+       entry:
 
         dgb    boulder = (operator) /bin/ls, /bin/kill, /usr/bin/who
 
        The user ddddggggbbbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m
-       -- but only as ooooppppeeeerrrraaaattttoooorrrr.  Eg.
-
-
-
-
-December 29, 2000             1.6.4                            11
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
+       -- but only as ooooppppeeeerrrraaaattttoooorrrr.  E.g.,
 
            sudo -u operator /bin/ls.
 
-       It is also possible to override a `Runas_Spec' later on in
+       It is also possible to override a Runas_Spec later on in
        an entry.  If we modify the entry like so:
 
         dgb    boulder = (operator) /bin/ls, (root) /bin/kill, /usr/bin/lprm
@@ -744,12 +777,24 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
        By default, ssssuuuuddddoooo requires that a user authenticate him or
        herself before running a command.  This behavior can be
-       modified via the `NOPASSWD' tag.  Like a `Runas_Spec', the
-       `NOPASSWD' tag sets a default for the commands that follow
-       it in the `Cmnd_Spec_List'.  Conversely, the `PASSWD' tag
-       can be used to reverse things.  For example:
+       modified via the NOPASSWD tag.  Like a Runas_Spec, the
+       NOPASSWD tag sets a default for the commands that follow
+       it in the Cmnd_Spec_List.  Conversely, the PASSWD tag can
+       be used to reverse things.  For example:
 
         ray    rushmore = NOPASSWD: /bin/kill, /bin/ls, /usr/bin/lprm
+
+
+
+
+December 13, 2001             1.6.4                            12
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
 
        would allow the user rrrraaaayyyy to run _/_b_i_n_/_k_i_l_l, _/_b_i_n_/_l_s, and
        _/_u_s_r_/_b_i_n_/_l_p_r_m as root on the machine rushmore as rrrrooooooootttt
@@ -759,47 +804,33 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
         ray    rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
 
-       Note however, that the `PASSWD' tag has no effect on users
+       Note, however, that the PASSWD tag has no effect on users
        who are in the group specified by the exempt_group option.
 
-       By default, if the `NOPASSWD' tag is applied to any of the
+       By default, if the NOPASSWD tag is applied to any of the
        entries for a user on the current host, he or she will be
-       able to run `sudo -l' without a password.  Additionally, a
-       user may only run `sudo -v' without a password if the
-       `NOPASSWD' tag is present for all a user's entries that
-       pertain to the current host.  This behavior may be over­
-       ridden via the verifypw and listpw options.
+       able to run sudo -l without a password.  Additionally, a
+       user may only run sudo -v without a password if the
+       NOPASSWD tag is present for all a user's entries that per­
+       tain to the current host.  This behavior may be overridden
+       via the verifypw and listpw options.
 
        WWWWiiiillllddddccccaaaarrrrddddssss ((((aaaakkkkaaaa mmmmeeeettttaaaa cccchhhhaaaarrrraaaacccctttteeeerrrrssss))))::::
 
        ssssuuuuddddoooo allows shell-style _w_i_l_d_c_a_r_d_s to be used in pathnames
        as well as command line arguments in the _s_u_d_o_e_r_s file.
-       Wildcard matching is done via the PPPPOOOOSSSSIIIIXXXX `fnmatch(3)' rou­
+       Wildcard matching is done via the PPPPOOOOSSSSIIIIXXXX fnmatch(3) rou­
        tine.  Note that these are _n_o_t regular expressions.
 
-       `*'     Matches any set of zero or more characters.
+       *       Matches any set of zero or more characters.
 
-       `?'     Matches any single character.
+       ?       Matches any single character.
 
-       `[...]' Matches any character in the specified range.
+       [...]   Matches any character in the specified range.
 
+       [!...]  Matches any character nnnnooootttt in the specified range.
 
-
-
-
-December 29, 2000             1.6.4                            12
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
-
-       `[!...]'
-               Matches any character nnnnooootttt in the specified range.
-
-       `\x'    For any character "x", evaluates to "x".  This is
+       \x      For any character "x", evaluates to "x".  This is
                used to escape special characters such as: "*",
                "?", "[", and "}".
 
@@ -810,15 +841,26 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
            /usr/bin/*
 
-       match `/usr/bin/who' but not `/usr/bin/X11/xterm'.
+       match /usr/bin/who but not /usr/bin/X11/xterm.
 
        EEEExxxxcccceeeeppppttttiiiioooonnnnssss ttttoooo wwwwiiiillllddddccccaaaarrrrdddd rrrruuuulllleeeessss::::
 
        The following exceptions apply to the above rules:
 
-       `""""'  If the empty string `""' is the only command line
+       """"    If the empty string "" is the only command line
                argument in the _s_u_d_o_e_r_s entry it means that com­
                mand is not allowed to be run with aaaannnnyyyy arguments.
+
+
+
+December 13, 2001             1.6.4                            13
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
 
        OOOOtttthhhheeeerrrr ssssppppeeeecccciiiiaaaallll cccchhhhaaaarrrraaaacccctttteeeerrrrssss aaaannnndddd rrrreeeesssseeeerrrrvvvveeeedddd wwwwoooorrrrddddssss::::
 
@@ -830,41 +872,30 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
        The reserved word AAAALLLLLLLL is a built in _a_l_i_a_s that always
        causes a match to succeed.  It can be used wherever one
-       might otherwise use a `Cmnd_Alias', `User_Alias',
-       `Runas_Alias', or `Host_Alias'.  You should not try to
-       define your own _a_l_i_a_s called AAAALLLLLLLL as the built in alias
-       will be used in preference to your own.  Please note that
-       using AAAALLLLLLLL can be dangerous since in a command context, it
-       allows the user to run aaaannnnyyyy command on the system.
+       might otherwise use a Cmnd_Alias, User_Alias, Runas_Alias,
+       or Host_Alias.  You should not try to define your own
+       _a_l_i_a_s called AAAALLLLLLLL as the built in alias will be used in
+       preference to your own.  Please note that using AAAALLLLLLLL can be
+       dangerous since in a command context, it allows the user
+       to run aaaannnnyyyy command on the system.
 
        An exclamation point ('!') can be used as a logical _n_o_t
-       operator both in an _a_l_i_a_s and in front of a `Cmnd'.  This
+       operator both in an _a_l_i_a_s and in front of a Cmnd.  This
        allows one to exclude certain values.  Note, however, that
-       using a `!' in conjunction with the built in `ALL' alias
-       to allow a user to run "all but a few" commands rarely
-       works as intended (see SECURITY NOTES below).
+       using a ! in conjunction with the built in ALL alias to
+       allow a user to run "all but a few" commands rarely works
+       as intended (see SECURITY NOTES below).
 
        Long lines can be continued with a backslash ('\') as the
        last character on the line.
 
-       Whitespace between elements in a list as well as specicial
+       Whitespace between elements in a list as well as special
        syntactic characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n ('=', ':',
        '(', ')') is optional.
 
-
-
-December 29, 2000             1.6.4                            13
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
-
        The following characters must be escaped with a backslash
-       ('\') when used as part of a word (eg. a username or host­
-       name): '@', '!', '=', ':', ',', '(', ')', '\'.
+       ('\') when used as part of a word (e.g. a username or
+       hostname): '@', '!', '=', ':', ',', '(', ')', '\'.
 
 EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
        Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of
@@ -878,6 +909,24 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
         # Runas alias specification
         Runas_Alias    OP = root, operator
         Runas_Alias    DB = oracle, sybase
+
+
+
+
+
+
+
+
+
+
+December 13, 2001             1.6.4                            14
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
 
         # Host alias specification
         Host_Alias     SPARC = bigtime, eclipse, moet, anchor :\
@@ -907,8 +956,8 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
        in all cases.  We don't want to subject the full time
        staff to the ssssuuuuddddoooo lecture, and user mmmmiiiilllllllleeeerrrrtttt need not give
        a password.  In addition, on the machines in the _S_E_R_V_E_R_S
-       `Host_Alias', we keep an additional local log file and
-       make sure we log the year in each log line since the log
+       Host_Alias, we keep an additional local log file and make
+       sure we log the year in each log line since the log
        entries will be kept around for several years.
 
         # Override built in defaults
@@ -916,17 +965,6 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
         Defaults:FULLTIMERS    !lecture
         Defaults:millert       !authenticate
         Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
-
-
-
-December 29, 2000             1.6.4                            14
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
 
        The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually deter­
        mines who may run what.
@@ -944,24 +982,35 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
         PARTTIMERS     ALL = ALL
 
+
+
+
+December 13, 2001             1.6.4                            15
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
+
        Part time sysadmins (bbbboooossssttttlllleeeeyyyy, jjjjwwwwffffooooxxxx, and ccccrrrraaaawwwwllll) may run
        any command on any host but they must authenticate them­
-       selves first (since the entry lacks the `NOPASSWD' tag).
+       selves first (since the entry lacks the NOPASSWD tag).
 
         jack           CSNETS = ALL
 
        The user jjjjaaaacccckkkk may run any command on the machines in the
-       _C_S_N_E_T_S alias (the networks `128.138.243.0',
-       `128.138.204.0', and `128.138.242.0').  Of those networks,
-       only <128.138.204.0> has an explicit netmask (in CIDR
-       notation) indicating it is a class C network.  For the
-       other networks in _C_S_N_E_T_S, the local machine's netmask will
-       be used during matching.
+       _C_S_N_E_T_S alias (the networks 128.138.243.0, 128.138.204.0,
+       and 128.138.242.0).  Of those networks, only 128.138.204.0
+       has an explicit netmask (in CIDR notation) indicating it
+       is a class C network.  For the other networks in _C_S_N_E_T_S,
+       the local machine's netmask will be used during matching.
 
         lisa           CUNETS = ALL
 
        The user lllliiiissssaaaa may run any command on any host in the
-       _C_U_N_E_T_S alias (the class B network `128.138.0.0').
+       _C_U_N_E_T_S alias (the class B network 128.138.0.0).
 
         operator       ALL = DUMPS, KILL, PRINTING, SHUTDOWN, HALT, REBOOT,\
                        /usr/oper/bin/
@@ -982,22 +1031,10 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        assumes _p_a_s_s_w_d(1) does not take multiple usernames on the
        command line.
 
-
-
-
-December 29, 2000             1.6.4                            15
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
-
         bob            SPARC = (OP) ALL : SGI = (OP) ALL
 
        The user bbbboooobbbb may run anything on the _S_P_A_R_C and _S_G_I
-       machines as any user listed in the _O_P `Runas_Alias' (rrrrooooooootttt
+       machines as any user listed in the _O_P Runas_Alias (rrrrooooooootttt
        and ooooppppeeeerrrraaaattttoooorrrr).
 
         jim            +biglab = ALL
@@ -1012,11 +1049,21 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        printers as well as add and remove users, so they are
        allowed to run those commands on all machines.
 
+
+
+December 13, 2001             1.6.4                            16
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
+
         fred           ALL = (DB) NOPASSWD: ALL
 
        The user ffffrrrreeeedddd can run commands as any user in the _D_B
-       `Runas_Alias' (oooorrrraaaacccclllleeee or ssssyyyybbbbaaaasssseeee) without giving a pass­
-       word.
+       Runas_Alias (oooorrrraaaacccclllleeee or ssssyyyybbbbaaaasssseeee) without giving a password.
 
         john           ALPHA = /usr/bin/su [!-]*, !/usr/bin/su *root*
 
@@ -1026,14 +1073,14 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
         jen            ALL, !SERVERS = ALL
 
        The user jjjjeeeennnn may run any command on any machine except for
-       those in the _S_E_R_V_E_R_S `Host_Alias' (master, mail, www and
+       those in the _S_E_R_V_E_R_S Host_Alias (master, mail, www and
        ns).
 
         jill           SERVERS = /usr/bin/, !SU, !SHELLS
 
-       For any machine in the _S_E_R_V_E_R_S `Host_Alias', jjjjiiiillllllll may run
+       For any machine in the _S_E_R_V_E_R_S Host_Alias, jjjjiiiillllllll may run
        any commands in the directory /usr/bin/ except for those
-       commands belonging to the _S_U and _S_H_E_L_L_S `Cmnd_Aliases'.
+       commands belonging to the _S_U and _S_H_E_L_L_S Cmnd_Aliases.
 
         steve          CSNETS = (operator) /usr/local/op_commands/
 
@@ -1047,19 +1094,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
         WEBMASTERS     www = (www) ALL, (root) /usr/bin/su www
 
-       On the host www, any user in the _W_E_B_M_A_S_T_E_R_S `User_Alias'
-
-
-
-December 29, 2000             1.6.4                            16
-
-
-
-
-
-sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
-
-
+       On the host www, any user in the _W_E_B_M_A_S_T_E_R_S User_Alias
        (will, wendy, and wim), may run any command as user www
        (which owns the web pages) or simply _s_u(1) to www.
 
@@ -1067,18 +1102,29 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                        /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
 
        Any user may mount or unmount a CD-ROM on the machines in
-       the CDROM `Host_Alias' (orion, perseus, hercules) without
+       the CDROM Host_Alias (orion, perseus, hercules) without
        entering a password.  This is a bit tedious for users to
-       type, so it is a prime candiate for encapsulating in a
+       type, so it is a prime candidate for encapsulating in a
        shell script.
 
 SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTEEEESSSS
        It is generally not effective to "subtract" commands from
-       `ALL' using the '!' operator.  A user can trivially cir­
-       cumvent this by copying the desired command to a different
+       ALL using the '!' operator.  A user can trivially circum­
+       vent this by copying the desired command to a different
        name and then executing that.  For example:
 
            bill        ALL = ALL, !SU, !SHELLS
+
+
+
+December 13, 2001             1.6.4                            17
+
+
+
+
+
+sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
+
 
        Doesn't really prevent bbbbiiiillllllll from running the commands
        listed in _S_U or _S_H_E_L_L_S since he can simply copy those com­
@@ -1097,7 +1143,7 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        When using netgroups of machines (as opposed to users), if
        you store fully qualified hostnames in the netgroup (as is
        usually the case), you either need to have the machine's
-       hostname be fully qualified as returned by the `hostname'
+       hostname be fully qualified as returned by the hostname
        command or use the _f_q_d_n option in _s_u_d_o_e_r_s.
 
 FFFFIIIILLLLEEEESSSS
@@ -1117,6 +1163,26 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-December 29, 2000             1.6.4                            17
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+December 13, 2001             1.6.4                            18
 
 
