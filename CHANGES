@@ -232,5 +232,22 @@ CHANGES from sudo 1.3.1pl4
 
 79) Moved all compatibility #defines to compat.h
 
-80) Sudo now checks both the fully qualified/resolved and unresolved command
-    paths against entries in the sudoers file.
+80) Incorporated new parsing code from Chris Jepeway <jepeway@cs.utk.edu>.
+    This is much better than the previous parser.
+
+81) Rewrote visudo.c and tickled parse.yacc to work with it.  Visudo
+    now gives you options if a parse error occurs rather than blindly
+    dumping you back in the editor.
+
+82) Took out all references to realpath since we are now checking based
+    in inode and device (with Chris' new parser).  The upshot of this
+    is that path matches are done safely and the symlink problem has
+    gone away.
+
+83) Fixed bison warnings from new parse.yacc.
+
+84) Added a case to parse.lex to error on tokens beginning with [0-9_].
+
+85) Converted configure.in and acsite.m4 to autoconf 2.1.
+
+86) Added lsearch.c and search.h for os's w/o lsearch()/lfind().
