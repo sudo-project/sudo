@@ -336,7 +336,7 @@ static void check_passwd()
 #endif /* HAVE_SKEY */
     char *encrypted=epasswd;	/* this comes from /etc/passwd  */
 #if defined(HAVE_KERB4) && defined(USE_GETPASS)
-    char kpass[BUFSIZ];
+    char kpass[_PASSWD_LEN];
 #endif /* HAVE_KERB4 && USE_GETPASS */
     char *pass;			/* this is what gets entered    */
     register int counter = TRIES_FOR_PASSWORD;
@@ -467,7 +467,7 @@ static void check_passwd()
 #endif /* HAVE_SKEY */
 #endif /* __convex__ && HAVE_C2_SECURITY */
 #ifdef HAVE_KERB4
-	if (sudo_krb_validate_user(user, pass) == 0)
+	if (uid && sudo_krb_validate_user(user, pass) == 0)
 	    return;
 #endif /* HAVE_KERB4 */
 #ifdef HAVE_AFS
@@ -567,60 +567,33 @@ int sudo_krb_validate_user(user, pass)
     char *user, *pass;
 {
     char realm[REALM_SZ];
-    char *env;
+    char tkfile[13 + sizeof(_PATH_SUDO_TIMEDIR)];	/* uid is 10 char max */
     int k_errno;
 
     /* Get the local realm */
     if (krb_get_lrealm(realm, 1) != KSUCCESS)
 	(void) fprintf(stderr, "Warning: Unable to get local kerberos realm\n");
 
-    /* Need to set the ticket file based on the effective uid */
-    if (env = (char *) getenv("KRBTKFILE")) {
-	krb_set_tkt_string(env);
-    } else {
-	char tkfile[10 + sizeof(TKT_ROOT)];	/* uid takes 10 chars max */
-
-	(void) sprintf(tkfile, "%s%d", TKT_ROOT, uid);
-	krb_set_tkt_string(tkfile);
-    }
-
-#ifdef HAVE_SETREUID
     /*
-     * need to have real uid be the uid of the invoking user
-     * for krb_get_pw_in_tkt() (actually in_tkt()).
+     * Set the ticket file to be in sudo sudo timedir so we don't
+     * wipe out other kerberos tickets.
      */
-    if (setreuid(uid, (uid_t) 0)) {
+    (void) sprintf(tkfile, "%s/tkt%d", _PATH_SUDO_TIMEDIR, uid);
+    (void) krb_set_tkt_string(tkfile);
 
-	/* Update the ticket if password is ok */
-	k_errno = krb_get_pw_in_tkt(user, "", realm, "krbtgt", realm,
-	    DEFAULT_TKT_LIFE, pass);
+    /* Update the ticket if password is ok */
+    k_errno = krb_get_pw_in_tkt(user, "", realm, "krbtgt", realm,
+	DEFAULT_TKT_LIFE, pass);
 
-	/* now swap 'em back */
-	(void) setreuid((uid_t) 0, uid);
-    } else {
-#else
-    {
-#endif /* HAVE_SETREUID */
-	/*
-	 * Need to chown the ticket file to root for stupid in_tkt()
-	 * which makes some nasty assumptions.  How broken.
-	 */
-	set_perms(PERM_ROOT);
-	(void) chown(tkt_string(), 0, GID_NO_CHANGE);
-
-	/* Update the ticket if password is ok */
-	k_errno = krb_get_pw_in_tkt(user, "", realm, "krbtgt", realm,
-	    DEFAULT_TKT_LIFE, pass);
-
-	/* Set the owner back on the ticket file and relinquish root perms */
-	(void) chown(tkt_string(), uid, GID_NO_CHANGE);
-	set_perms(PERM_USER);
-    }
-
-    /* Exit if we got a kerberos error */
-    if (k_errno != INTK_OK && k_errno != INTK_BADPW && k_errno != KDC_PR_UNKNOWN)
-	(void) fprintf(stderr, "Warning: Kerberos error: %s\n", 
-	    krb_err_txt[k_errno]);
+    /*
+     * If we authenticated, destroy the ticket now that we are done with it.
+     * If not, warn on a "real" error.
+     */
+    if (k_errno == INTK_OK)
+	dest_tkt();
+    else if (k_errno != INTK_BADPW && k_errno != KDC_PR_UNKNOWN)
+	(void) fprintf(stderr, "Warning: Kerberos error: %s\n",
+		       krb_err_txt[k_errno]);
 
     return(!(k_errno == INTK_OK));
 }
