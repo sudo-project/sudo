@@ -196,6 +196,9 @@ case "$OS" in
 		;;
     "convex")	echo "Looks like ConvexOs"
 		AC_DEFINE(_CONVEX_SOURCE)
+		if test -z "$GCC" ; then
+		    CFLAGS="${CFLAGS} -D__STDC__"
+		fi
 		# C2 security stuff
 		if test -n "$C2" ; then
 		    OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"
