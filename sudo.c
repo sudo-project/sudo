@@ -356,6 +356,9 @@ int main(argc, argv)
 	    break;
 
 	default:
+	    /* Anyone can try to list... */
+	    if (sudo_mode == MODE_LIST)
+		rtn = VALIDATE_NOT_OK;
 	    log_error(rtn);
 	    set_perms(PERM_FULL_USER);
 	    inform_user(rtn);
