@@ -84,9 +84,16 @@ char * sudo_goodpath(path)
     /* discard root perms */
     set_perms(PERM_USER);
 
-    /* make sure path describes an executable regular file */
-    if (!err && S_ISREG(statbuf.st_mode) &&(statbuf.st_mode & 0000111))
-	return((char *)path);
-    else
+    /* stat(3) failed */
+    if (!err)
 	return(NULL);
+
+    /* make sure path describes an executable regular file */
+    if (S_ISREG(statbuf.st_mode) && (statbuf.st_mode & 0000111)) {
+	return((char *)path);
+    } else {
+	/* file is not executable/regular */
+	errno = EACCES;
+	return(NULL);
+    }
 }
