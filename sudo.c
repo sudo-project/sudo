@@ -473,8 +473,7 @@ init_vars(sudo_mode)
      * "host" is the (possibly fully-qualified) hostname and
      * "shost" is the unqualified form of the hostname.
      */
-    /* nohostname = gethostname(thost, sizeof(thost)); */
-    nohostname = -1;
+    nohostname = gethostname(thost, sizeof(thost));
     if (nohostname)
 	user_host = user_shost = "localhost";
     else {
