@@ -831,6 +831,7 @@ Optional Features:
                           Do not require authentication by default
   --disable-root-mailer   Don't run the mailer as root, run as the user
   --disable-setreuid      Don't try to use the setreuid() function
+  --disable-setresuid      Don't try to use the setresuid() function
   --disable-saved-ids     Don't try to use POSIX saved ids
   --disable-shadow        Never use shadow passwords
   --disable-root-sudo     Don't allow root to run sudo
@@ -1639,7 +1640,6 @@ echo $ECHO_N "checking whether to use SecurID for authentication... $ECHO_C" >&6
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 		with_passwd=no
-		AUTH_OBJS="securid.o"
 		;;
 esac
 fi;
@@ -2945,7 +2945,18 @@ fi;
 if test "${enable_setreuid+set}" = set; then
   enableval="$enable_setreuid"
    case "$enableval" in
-    no)		BROKEN_SETREUID=1
+    no)		SKIP_SETREUID=yes
+		;;
+    *)		;;
+  esac
+
+fi;
+
+# Check whether --enable-setresuid or --disable-setresuid was given.
+if test "${enable_setresuid+set}" = set; then
+  enableval="$enable_setresuid"
+   case "$enableval" in
+    no)		SKIP_SETRESUID=yes
 		;;
     *)		;;
   esac
@@ -6391,7 +6402,7 @@ fi
 		test -n "$mansectform" || mansectform=4
 		;;
     *-*-bsdi*)
-		BROKEN_SETREUID=yes
+		SKIP_SETREUID=yes
 		# Use shlicc for BSD/OS [23].x unless asked to do otherwise
 		if test "${with_CC+set}" != set -a "$ac_cv_prog_CC" = gcc; then
 		    case "$OSREV" in
@@ -6407,7 +6418,7 @@ fi
 		# backported to 2.0.5.  We just take 2.1 and above...
 		case "`echo $host_os | sed 's/^freebsd\([0-9\.]*\).*$/\1/'`" in
 		0.*|1.*|2.0*)
-		    BROKEN_SETREUID=yes
+		    SKIP_SETREUID=yes
 		    ;;
 		esac
 		if test "$with_logincap" = "yes"; then
@@ -6421,7 +6432,7 @@ fi
 		fi
 		;;
     *-*-*openbsd*)
-		BROKEN_SETREUID=yes
+		SKIP_SETREUID=yes
 		if test "$CHECKSHADOW" = "true"; then
 		    CHECKSHADOW="false"
 		fi
@@ -6430,7 +6441,7 @@ fi
 		# NetBSD has a real setreuid(2) starting with 1.3.2
 		case "`echo $host_os | sed 's/^netbsd\([0-9\.]*\).*$/\1/'`" in
 		0.9*|1.012*|1.3|1.3.1)
-		    BROKEN_SETREUID=yes
+		    SKIP_SETREUID=yes
 		    ;;
 		esac
 		if test "$CHECKSHADOW" = "true"; then
@@ -8987,10 +8998,8 @@ esac
 
 
 
-
-
 for ac_func in strchr strrchr memchr memcpy memset sysconf tzset \
-	       seteuid setegid strftime setrlimit initgroups fstat
+	       strftime setrlimit initgroups fstat
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -9065,7 +9074,85 @@ _ACEOF
 fi
 done
 
-if test -z "$BROKEN_SETREUID"; then
+if test -z "$SKIP_SETRESUID"; then
+
+for ac_func in setresuid
+do
+as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
+echo "$as_me:$LINENO: checking for $ac_func" >&5
+echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6
+if eval "test \"\${$as_ac_var+set}\" = set"; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $ac_func (); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char $ac_func ();
+char (*f) ();
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
+choke me
+#else
+f = $ac_func;
+#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  eval "$as_ac_var=yes"
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+eval "$as_ac_var=no"
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_var'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_var'}'`" >&6
+if test `eval echo '${'$as_ac_var'}'` = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+ SKIP_SETREUID=yes
+fi
+done
+
+fi
+if test -z "$SKIP_SETREUID"; then
 
 for ac_func in setreuid
 do
@@ -12048,15 +12135,80 @@ fi
 
 if test -n "$with_SecurID" -a "$with_SecurID" != "no"; then
     if test "$with_SecurID" != "yes"; then
-	SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"
-	CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
-    elif test -f /usr/ace/examples/sdiclient.a; then
-	SUDO_LIBS="${SUDO_LIBS} /usr/ace/examples/sdiclient.a"
-	CPPFLAGS="${CPPFLAGS} -I/usr/ace/examples"
+	:
+    elif test -d /usr/ace/examples; then
+	with_SecurID=/usr/ace/examples
     else
-	SUDO_LIBS="${SUDO_LIBS} /usr/ace/sdiclient.a"
-	CPPFLAGS="${CPPFLAGS} -I/usr/ace"
+	with_SecurID=/usr/ace
     fi
+    CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
+    _LDFLAGS="${LDFLAGS}"
+    LDFLAGS="${LDFLAGS} -L${with_SecurID}"
+    #
+    # Determine whether to use the new or old SecurID API
+    #
+    echo "$as_me:$LINENO: checking for SD_Init in -laceclnt" >&5
+echo $ECHO_N "checking for SD_Init in -laceclnt... $ECHO_C" >&6
+if test "${ac_cv_lib_aceclnt_SD_Init_lpthread+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-laceclnt -lpthread $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char SD_Init ();
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+SD_Init ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_aceclnt_SD_Init_lpthread=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ac_cv_lib_aceclnt_SD_Init_lpthread=no
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_aceclnt_SD_Init_lpthread" >&5
+echo "${ECHO_T}$ac_cv_lib_aceclnt_SD_Init_lpthread" >&6
+if test $ac_cv_lib_aceclnt_SD_Init_lpthread = yes; then
+  AUTH_OBJS="securid5.o"; SUDO_LIBS="${SUDO_LIBS} -laceclnt -lpthread"; SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_SecurID}"
+else
+  AUTH_OBJS="securid.o"; SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"
+fi
+
+    LDFLAGS="${_LDFLAGS}"
 fi
 
 if test "$with_fwtk" = "yes"; then
