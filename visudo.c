@@ -65,7 +65,7 @@ extern char *getenv	__P((const char *));
 #endif /* !STDC_HEADERS */
 
 extern FILE *yyin, *yyout;
-extern int errno, sudolineno;
+extern int errorlineno;
 
 #ifndef SA_RESETHAND
 #define SA_RESETHAND	0
@@ -78,9 +78,7 @@ char **Argv;
 char buffer[BUFSIZ];
 char *sudoers = _PATH_SUDO_SUDOERS;
 char *sudoers_tmp_file = _PATH_SUDO_STMP;
-int  status = 0,
-     err_line_no = 0,
-     parse_error = 0;
+int parse_error = FALSE;
 
 char host[] = "";
 char *user = "";
@@ -202,7 +200,7 @@ main(argc, argv)
     if ((sudoers_fd = open(sudoers, O_RDONLY)) < 0) {
 	(void) fprintf(stderr, "%s: ", Argv[0]);
 	perror(sudoers);
-	Exit(0);
+	Exit(1);
     }
 
     /*
@@ -237,8 +235,8 @@ main(argc, argv)
 	/*
 	 * build strings in buffer to be executed by system()
 	 */
-	if (err_line_no)
-	    (void) sprintf(buffer, "%s +%d %s", Editor, err_line_no,
+	if (parse_error)
+	    (void) sprintf(buffer, "%s +%d %s", Editor, errorlineno,
 		sudoers_tmp_file);
 	else
 	    (void) sprintf(buffer, "%s %s", Editor, sudoers_tmp_file);
@@ -251,14 +249,14 @@ main(argc, argv)
 		(void) fprintf(stderr,
 		    "%s: can't stat temporary file, %s unchanged\n", sudoers,
 		    Argv[0]);
-		Exit(0);
+		Exit(1);
 	    }
 
 	    /* file has size == 0 */
 	    if (sbuf.st_size == 0) {
 		(void) fprintf(stderr, "%s: bad temporary file, %s unchanged\n",
                                sudoers, Argv[0]);
-		Exit(0);
+		Exit(1);
 	    }
 
 	    /* re-open the sudoers file for parsing */
@@ -266,38 +264,24 @@ main(argc, argv)
 		(void) fprintf(stderr,
 		    "%s: can't re-open temporary file, %s unchanged\n",
 		    sudoers, Argv[0]);
-		Exit(0);
+		Exit(1);
 	    }
 
-#ifdef YY_NEW_FILE
-	    /* XXX - this should not be necesary */
-	    YY_NEW_FILE
-#endif /* YY_NEW_FILE */
 	    yyin = sudoers_tmp_fp;
 	    yyout = stdout;
+
+	    /* clean slate for each parse */
+	    parse_error = FALSE;
 
 	    /* parse the file */
 	    if (yyparse()) {
 		(void) fprintf(stderr, "yyparse() failed\n");
-		Exit(0);
+		Exit(1);
 	    }
-
-	    /*
-	     * the first time we get an error, set status to sudolineno which
-	     * will be the line number after the line with the error. then,
-	     * if we have gotten an error, set err_line_no to the correct
-	     * line so that when we edit the file err_line_no will be
-	     * correct. at this time we also reset status and sudolineno to
-	     * their default values so that the next time yyparse() is
-	     * called, they will be initialized correctly. 
-	     */
-	    err_line_no = (status == 0) ? 0 : status - 1;
-	    status = 0;
-	    sudolineno = 0;
 
 	    (void) fclose(sudoers_tmp_fp);
 	}
-    } while (err_line_no);
+    } while (parse_error);
 
     /*
      * Once the temporary sudoers file is gramatically correct, we can 
@@ -319,7 +303,7 @@ main(argc, argv)
 	if ((tmpbuf = (char *) malloc(len)) == NULL) {
 	    (void) fprintf(stderr, "%s: cannot allocate memory: ", Argv[0]);
 	    perror("");
-	    Exit(0);
+	    Exit(1);
 	}
 
 	(void) sprintf(tmpbuf, "%s %s %s", _PATH_MV, sudoers_tmp_file, sudoers);
@@ -328,7 +312,7 @@ main(argc, argv)
 	if (status) {
 	    (void) fprintf(stderr, "Command failed: '%s', %s unchanged.\n",
 		tmpbuf, sudoers);
-	    Exit(0);
+	    Exit(1);
 	} else {
 	    (void) fprintf(stderr, "Used '%s' instead.\n", tmpbuf);
 	}
@@ -373,5 +357,5 @@ static RETSIGTYPE Exit(sig)
     int sig;
 {
     (void) unlink(sudoers_tmp_file);
-    exit(1);
+    exit(sig);
 }
