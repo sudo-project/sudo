@@ -23,6 +23,14 @@
  *             NOT using configure.
  */
 
+/* Deal with ansi stuff reasonably.  */
+#undef  __P
+#if defined (__cplusplus) || defined (__STDC__)
+#  define __P(args)	args
+#else
+#  define __P(args)	()
+#endif
+
 /* Define if on AIX 3.
    System headers sometimes define this.
    We just want to avoid a redefinition error message.  */
