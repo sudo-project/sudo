@@ -113,8 +113,8 @@ sia_attempt_auth()
 			      1, NULL);
 	if (retval != SIASUCCESS) {
 	    set_perms(PERM_USER, 0);
-	    log_error(BAD_ALLOCATION);
-	    inform_user(BAD_ALLOCATION);
+	    log_error(BAD_AUTH_INIT);
+	    inform_user(BAD_AUTH_INIT);
 	    exit(1);
 	}
 	/* XXX - need a way to detect user hitting return or EOF at prompt */

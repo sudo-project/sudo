@@ -92,8 +92,7 @@ static int   sudo_krb5_validate_user	__P((struct passwd *, char *));
 static int   verify_krb_v5_tgt		__P((krb5_ccache));
 #endif /* HAVE_KERB5 */
 #ifdef HAVE_PAM
-static int pam_auth            		__P((char *, char *));
-static int PAM_conv			__P((int,
+static int sudo_conv			__P((int,
 					     PAM_CONST struct pam_message **,
 					     struct pam_response **, void *));
 #endif /* HAVE_PAM */
@@ -150,9 +149,7 @@ check_passwd()
 	exit(1);
     }
 
-    /*
-     * you get TRIES_FOR_PASSWORD times to guess your password
-     */
+    /* You get TRIES_FOR_PASSWORD times to guess your password */
     while (counter > 0) {
 	if (sd_auth(sd) == ACM_OK) {
 	    set_perms(PERM_USER, 0);
@@ -164,14 +161,8 @@ check_passwd()
     }
     set_perms(PERM_USER, 0);
 
-    if (counter > 0) {
-	log_error(PASSWORD_NOT_CORRECT);
-	inform_user(PASSWORD_NOT_CORRECT);
-    } else {
-	log_error(PASSWORDS_NOT_CORRECT);
-	inform_user(PASSWORDS_NOT_CORRECT);
-    }
-
+    log_error(counter ? PASSWORD_NOT_CORRECT : PASSWORDS_NOT_CORRECT);
+    inform_user(counter ? PASSWORD_NOT_CORRECT : PASSWORDS_NOT_CORRECT);
     exit(1);
 }
 #else /* !HAVE_SECURID */
@@ -207,9 +198,7 @@ check_passwd()
 	exit(1);
     }
 
-    /*
-     * you get TRIES_FOR_PASSWORD times to guess your password
-     */
+    /* You get TRIES_FOR_PASSWORD times to guess your password */
     while (counter > 0) {
 
 	sprintf(cbuf,"authorize	%s	sudo",user_name);
@@ -219,9 +208,9 @@ check_passwd()
 
 	if (!strncmp(cbuf, "challenge ", 10)) {
 	    sprintf(buf, "Challenge \"%s\": ", &cbuf[10]);
-	    pass = GETPASS(buf, PASSWORD_TIMEOUT * 60);
+	    pass = GETPASS(buf, PASSWORD_TIMEOUT * 60, 1);
 	} else if (!strncmp(cbuf, "password", 8)) {
-	    pass = GETPASS(buf, PASSWORD_TIMEOUT * 60);
+	    pass = GETPASS(buf, PASSWORD_TIMEOUT * 60, 1);
 	} else {
 	    fprintf(stderr, "Server sent %s\n", cbuf);
 	    auth_close();
@@ -249,13 +238,8 @@ check_passwd()
 
     auth_close();
 
-    if (counter > 0) {
-	log_error(PASSWORD_NOT_CORRECT);
-	inform_user(PASSWORD_NOT_CORRECT);
-    } else {
-	log_error(PASSWORDS_NOT_CORRECT);
-	inform_user(PASSWORDS_NOT_CORRECT);
-    }
+    log_error(counter ? PASSWORD_NOT_CORRECT : PASSWORDS_NOT_CORRECT);
+    inform_user(counter ? PASSWORD_NOT_CORRECT : PASSWORDS_NOT_CORRECT);
     exit(1);
 }
 
@@ -281,14 +265,12 @@ check_passwd()
     (void) memset((VOID *)&opie, 0, sizeof(opie));
 #endif /* HAVE_OPIE */
 
-    /*
-     * you get TRIES_FOR_PASSWORD times to guess your password
-     */
+    /* You get TRIES_FOR_PASSWORD times to guess your password */
     while (counter > 0) {
 
 #ifdef HAVE_AUTHENTICATE
 	/* use AIX authenticate() function */
-	pass = GETPASS(prompt, PASSWORD_TIMEOUT * 60);
+	pass = GETPASS(prompt, PASSWORD_TIMEOUT * 60, 1);
 	reenter = 1;
 	if (authenticate(user_name, pass, &reenter, &message) == 0)
 	    return;		/* valid password */
@@ -311,7 +293,7 @@ check_passwd()
 	(void) des_read_pw_string(kpass, sizeof(kpass) - 1, prompt, 0);
 	pass = kpass;
 #  else
-	pass = (char *) GETPASS(prompt, PASSWORD_TIMEOUT * 60);
+	pass = (char *) GETPASS(prompt, PASSWORD_TIMEOUT * 60, 1);
 #  endif /* HAVE_KERB4 */
 
 #  ifdef HAVE_SKEY
@@ -399,14 +381,8 @@ check_passwd()
 	pass_warn(stderr);
     }
 
-    if (counter > 0) {
-	log_error(PASSWORD_NOT_CORRECT);
-	inform_user(PASSWORD_NOT_CORRECT);
-    } else {
-	log_error(PASSWORDS_NOT_CORRECT);
-	inform_user(PASSWORDS_NOT_CORRECT);
-    }
-
+    log_error(counter ? PASSWORD_NOT_CORRECT : PASSWORDS_NOT_CORRECT);
+    inform_user(counter ? PASSWORD_NOT_CORRECT : PASSWORDS_NOT_CORRECT);
     exit(1);
 }
 #endif /* HAVE_AUTHSRV */
@@ -496,7 +472,7 @@ sudo_krb5_validate_user(pw, pass)
 
     princ_name = emalloc(strlen(pw->pw_name) + strlen(realm) + 2);
 
-    sprintf(princ_name, "%s@%s", pw->pw_name, realm);
+    (void) sprintf(princ_name, "%s@%s", pw->pw_name, realm);
     if (retval = krb5_parse_name(sudo_context, princ_name, &princ))
 	return retval;
 
@@ -613,117 +589,108 @@ cleanup:
  *  pam_attempt_auth()
  *
  *  Try to authenticate the user using Pluggable Authentication
- *  Modules (PAM). Added 9/11/98 by Gary J. Calvin
- *  Reworked for stock PAM by Amos Elberg and Todd Miller
+ *  Modules (PAM).
  */
-static char *PAM_username;
-static char *PAM_password;
-
-static int
-PAM_conv(num_msg, msg, resp, appdata_ptr)
-    int num_msg;
-    PAM_CONST struct pam_message **msg;
-    struct pam_response **resp;
-    void *appdata_ptr;
-{
-    int replies = 0;
-    struct pam_response *reply = NULL;
-
-    if ((reply = malloc(sizeof(struct pam_response) * num_msg)) == NULL)
-	return(PAM_CONV_ERR);
-
-    for (replies = 0; replies < num_msg; replies++) {
-	switch (msg[replies]->msg_style) {
-	case PAM_PROMPT_ECHO_ON:
-	    reply[replies].resp_retcode = PAM_SUCCESS;
-	    reply[replies].resp = estrdup(PAM_username);
-	    /* PAM frees resp */
-	    break;
-	case PAM_PROMPT_ECHO_OFF:
-	    reply[replies].resp_retcode = PAM_SUCCESS;
-	    reply[replies].resp = estrdup(PAM_password);
-	    /* PAM frees resp */
-	    break;
-	case PAM_TEXT_INFO:
-	    /* fall through */
-	case PAM_ERROR_MSG:
-	    /* ignore it... */
-	    reply[replies].resp_retcode = PAM_SUCCESS;
-	    reply[replies].resp = NULL;
-	    break;
-	default:
-	    /* Must be an error of some sort... */
-	    free(reply);
-	    return(PAM_CONV_ERR);
-	}
-    }
-    if (reply)
-	*resp = reply;
-
-    return(PAM_SUCCESS);
-}
-
-static int
-pam_auth(user, password)
-    char *user;
-    char *password;
-{
-    struct pam_conv PAM_conversation;
-    pam_handle_t *pamh;
-
-    /* Initialize our variables for PAM */
-    PAM_conversation.conv = PAM_conv;
-    PAM_conversation.appdata_ptr = NULL;
-    PAM_password = password;
-    PAM_username = user;
-
-    /*
-     * Setting PAM_SILENT stops generation of error messages to syslog
-     * to enable debugging on Red Hat Linux set:
-     * /etc/pam.d/sudo:
-     *      auth required /lib/security/pam_pwdb.so shadow nullok audit
-     * _OR_ change PAM_SILENT to 0 to force detailed reporting (logging)
-     */
-    if (pam_start("sudo", user, &PAM_conversation, &pamh) != PAM_SUCCESS ||
-	pam_authenticate(pamh, PAM_SILENT) != PAM_SUCCESS) {
-	pam_end(pamh, 0);
-	return(0);
-    }
-
-    /* User authenticated successfully */
-    pam_end(pamh, PAM_SUCCESS);
-
-    return(1);
-}
-
 void
 pam_attempt_auth()
 {
-    int i = TRIES_FOR_PASSWORD;
+    int counter = TRIES_FOR_PASSWORD;
+    int null_pw = 0;
+    static struct pam_conv pam_conv;
+    static pam_handle_t *pamh;
 
     set_perms(PERM_ROOT, 0);
-    while (i > 0) {
-        char *pamPass = (char *) GETPASS(prompt, PASSWORD_TIMEOUT * 60);
 
-        if (pam_auth(user_name, pamPass)) {
+    /* Initial PAM setup + use our default prompt */
+    pam_conv.conv = sudo_conv;
+    pam_conv.appdata_ptr = &null_pw;
+    if (pam_start("sudo", user_name, &pam_conv, &pamh) != PAM_SUCCESS ||
+	pam_set_item(pamh, PAM_USER_PROMPT, (void *) prompt) != PAM_SUCCESS) {
+	set_perms(PERM_USER, 0);
+	log_error(BAD_AUTH_INIT);
+	inform_user(BAD_AUTH_INIT);
+	exit(1);
+    }
+
+    /* You get TRIES_FOR_PASSWORD times to guess your password */
+    while (counter > 0) {
+
+	/* PAM_SILENT prevents error messages from going to syslog(3) */
+	if (pam_authenticate(pamh, PAM_SILENT) == PAM_SUCCESS) {
+	    pam_end(pamh, PAM_SUCCESS);
             set_perms(PERM_USER, 0);
             return;
         }
-	--i;
+	if (null_pw)
+	    break;
+
+	--counter;		/* otherwise, try again  */
         pass_warn(stderr);
     }
+    pam_end(pamh, 0);
     set_perms(PERM_USER, 0);
 
-    if (i == 0) {
-        log_error(PASSWORD_NOT_CORRECT);
-        inform_user(PASSWORD_NOT_CORRECT);
-    } else {
-        log_error(PASSWORDS_NOT_CORRECT);
-        inform_user(PASSWORDS_NOT_CORRECT);
-    }
+    log_error(counter ? PASSWORD_NOT_CORRECT : PASSWORDS_NOT_CORRECT);
+    inform_user(counter ? PASSWORD_NOT_CORRECT : PASSWORDS_NOT_CORRECT);
     exit(1);
 }
+
+
+/********************************************************************
+ *  sudo_conv()
+ *
+ *  ``Conversation function'' for PAM.
+ */
+static int
+sudo_conv(num_msg, msg, response, appdata_ptr)
+    int num_msg;
+    PAM_CONST struct pam_message **msg;
+    struct pam_response **response;
+    void *appdata_ptr;
+{
+    struct pam_response *pr;
+    struct pam_message *pm;
+    int echo = 0;
+
+    if ((*response = malloc(num_msg * sizeof(struct pam_response))) == NULL)
+	return(PAM_CONV_ERR);
+    (void) memset((VOID *)*response, 0, num_msg * sizeof(struct pam_response));
+
+    for (pr = *response, pm = *msg; num_msg--; pr++, pm++) {
+	switch (pm->msg_style) {
+	    case PAM_PROMPT_ECHO_ON:
+		echo = 1;
+	    case PAM_PROMPT_ECHO_OFF:
+		pr->resp = estrdup((char *) GETPASS(pm->msg,
+		    PASSWORD_TIMEOUT * 60, !echo));
+		/* Solaris PAM does not pass through appdata_ptr! */
+		if (pr->resp[0] == '\0' && appdata_ptr != NULL)
+		    *((int *) appdata_ptr) = 1;	/* indicate an empty password */
+		break;
+	    case PAM_TEXT_INFO:
+		if (pm->msg)
+		    (void) puts(pm->msg);
+		break;
+	    case PAM_ERROR_MSG:
+		if (pm->msg) {
+		    (void) fputs(pm->msg, stderr);
+		    (void) fputc('\n', stderr);
+		}
+		break;
+	    default:
+		/* Something odd happened */
+		/* XXX - should free non-NULL response members */
+		free(*response);
+		*response = NULL;
+		return(PAM_CONV_ERR);
+		break;
+	}
+    }
+
+    return(PAM_SUCCESS);
+}
 #endif /* HAVE_PAM */
+
 
 #ifdef HAVE_SKEY
 /********************************************************************

@@ -152,7 +152,7 @@ struct generic_alias {
 #define SUDOERS_NOT_FILE         ( 0x0B | GLOBAL_PROBLEM )
 #define BAD_STAMPDIR             0x0C
 #define BAD_STAMPFILE            0x0D
-#define BAD_ALLOCATION           0x0E
+#define BAD_AUTH_INIT            0x0E
 #define NO_CMND_SAFE             0x0F
 #ifdef HAVE_KERB5
 #define GLOBAL_KRB5_INIT_ERR     ( 0x10 | GLOBAL_PROBLEM )
@@ -209,9 +209,9 @@ struct generic_alias {
  * Use either tgetpass() or system getpass()
  */
 #ifdef USE_GETPASS
-#define GETPASS(p, t)		getpass(p)
+#define GETPASS(p, t, e)	getpass(p)
 #else
-#define GETPASS(p, t)		tgetpass(p, t)
+#define GETPASS(p, t, e)	tgetpass(p, t, e)
 #endif
 
 /*
@@ -235,7 +235,7 @@ int putenv		__P((const char *));
 #endif
 char *sudo_goodpath	__P((const char *));
 int sudo_setenv		__P((char *, char *));
-char *tgetpass		__P((const char *, int));
+char *tgetpass		__P((const char *, int, int));
 int find_path		__P((char *, char **));
 void log_error		__P((int));
 void inform_user	__P((int));

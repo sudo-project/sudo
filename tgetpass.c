@@ -88,9 +88,10 @@ static const char rcsid[] = "$Sudo$";
  */
 
 char *
-tgetpass(prompt, timeout)
+tgetpass(prompt, timeout, echo_off)
     const char *prompt;
     int timeout;
+    int echo_off;
 {
 #ifdef HAVE_TERMIOS_H
     struct termios term;
@@ -102,12 +103,11 @@ tgetpass(prompt, timeout)
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 #ifdef POSIX_SIGNALS
-    sigset_t oldmask;
-    sigset_t mask;
+    sigset_t set, oset;
 #else
-    int oldmask;
+    int omask;
 #endif /* POSIX_SIGNALS */
-    int n, echo, input, output;
+    int n, input, output;
     static char buf[SUDO_PASS_MAX + 1];
     fd_set *readfds;
     struct timeval tv;
@@ -116,13 +116,13 @@ tgetpass(prompt, timeout)
      * mask out SIGINT and SIGTSTP, should probably just catch and deal.
      */
 #ifdef POSIX_SIGNALS
-    (void) sigemptyset(&mask);
-    (void) sigaddset(&mask, SIGINT);
-    (void) sigaddset(&mask, SIGTSTP);
-    (void) sigprocmask(SIG_BLOCK, &mask, &oldmask);
+    (void) sigemptyset(&set);
+    (void) sigaddset(&set, SIGINT);
+    (void) sigaddset(&set, SIGTSTP);
+    (void) sigprocmask(SIG_BLOCK, &set, &oset);
 #else
-    oldmask = sigblock(sigmask(SIGINT)|sigmask(SIGTSTP));
-#endif
+    omask = sigblock(sigmask(SIGINT)|sigmask(SIGTSTP));
+#endif /* POSIX_SIGNALS */
 
     /*
      * open /dev/tty for reading/writing if possible or use
@@ -138,29 +138,31 @@ tgetpass(prompt, timeout)
 	(void) write(output, prompt, strlen(prompt) + 1);
 
     /*
-     * turn off echo
+     * turn off echo unless asked to keep it on
      */
+    if (echo_off) {
 #ifdef HAVE_TERMIOS_H
-    (void) tcgetattr(input, &term);
-    if ((echo = (term.c_lflag & ECHO))) {
-	term.c_lflag &= ~ECHO;
-	(void) tcsetattr(input, TCSAFLUSH|TCSASOFT, &term);
-    }
+	(void) tcgetattr(input, &term);
+	if ((echo_off = (term.c_lflag & ECHO))) {
+	    term.c_lflag &= ~ECHO;
+	    (void) tcsetattr(input, TCSAFLUSH|TCSASOFT, &term);
+	}
 #else
 #ifdef HAVE_TERMIO_H
-    (void) ioctl(input, TCGETA, &term);
-    if ((echo = (term.c_lflag & ECHO))) {
-	term.c_lflag &= ~ECHO;
-	(void) ioctl(input, TCSETA, &term);
-    }
+	(void) ioctl(input, TCGETA, &term);
+	if ((echo_off = (term.c_lflag & ECHO))) {
+	    term.c_lflag &= ~ECHO;
+	    (void) ioctl(input, TCSETA, &term);
+	}
 #else
-    (void) ioctl(input, TIOCGETP, &ttyb);
-    if ((echo = (ttyb.sg_flags & ECHO))) {
-	ttyb.sg_flags &= ~ECHO;
-	(void) ioctl(input, TIOCSETP, &ttyb);
-    }
+	(void) ioctl(input, TIOCGETP, &ttyb);
+	if ((echo_off = (ttyb.sg_flags & ECHO))) {
+	    ttyb.sg_flags &= ~ECHO;
+	    (void) ioctl(input, TIOCSETP, &ttyb);
+	}
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
+    }
 
     /*
      * Timeout of <= 0 means no timeout
@@ -198,20 +200,20 @@ tgetpass(prompt, timeout)
 	}
     }
 
-     /* turn on echo */
+     /* turn on echo if we turned it off above */
 #ifdef HAVE_TERMIOS_H
-    if (echo) {
+    if (echo_off) {
 	term.c_lflag |= ECHO;
 	(void) tcsetattr(input, TCSAFLUSH|TCSASOFT, &term);
     }
 #else
 #ifdef HAVE_TERMIO_H
-    if (echo) {
+    if (echo_off) {
 	term.c_lflag |= ECHO;
 	(void) ioctl(input, TCSETA, &term);
     }
 #else
-    if (echo) {
+    if (echo_off) {
 	ttyb.sg_flags |= ECHO;
 	(void) ioctl(input, TIOCSETP, &ttyb);
     }
@@ -219,14 +221,15 @@ tgetpass(prompt, timeout)
 #endif /* HAVE_TERMIOS_H */
 
     /* print a newline since echo is turned off */
-    (void) write(output, "\n", 1);
+    if (echo_off)
+	(void) write(output, "\n", 1);
 
     /* restore old signal mask */
 #ifdef POSIX_SIGNALS
-    (void) sigprocmask(SIG_SETMASK, &oldmask, NULL);
+    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
 #else
-    (void) sigsetmask(oldmask);
-#endif
+    (void) sigsetmask(omask);
+#endif /* POSIX_SIGNALS */
 
     /* close /dev/tty if that's what we opened */
     if (input != STDIN_FILENO)

@@ -45,6 +45,7 @@
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #include <fcntl.h>
+#include <signal.h>
 #include <time.h>
 #include <sys/param.h>
 #include <sys/types.h>
@@ -96,13 +97,28 @@ static char  timestampfile[MAXPATHLEN];
 void
 check_user()
 {
-    register int rtn;
-    mode_t oldmask;
+    int rtn;
+#ifdef POSIX_SIGNALS
+    sigset_t set, oset;
+#else
+    int omask;
+#endif /* POSIX_SIGNALS */
 
     if (user_is_exempt())	/* some users don't need to enter a passwd */
 	return;
 
-    oldmask = umask(077);	/* make sure the timestamp files are private */
+    /*
+     * Block SIGINT and SIGTSTP during authentication so the user
+     * can't abort the logging.
+     */
+#ifdef POSIX_SIGNALS
+    (void) sigemptyset(&set);
+    (void) sigaddset(&set, SIGINT);
+    (void) sigaddset(&set, SIGTSTP);
+    (void) sigprocmask(SIG_BLOCK, &set, &oset);
+#else
+    omask = sigblock(sigmask(SIGINT)|sigmask(SIGTSTP));
+#endif /* POSIX_SIGNALS */
 
     rtn = check_timestamp();
     if (rtn && user_uid) {	/* if timestamp is not current... */
@@ -123,9 +139,14 @@ check_user()
 #endif /* HAVE_SIA */
     }
 
-    update_timestamp();
-    (void) umask(oldmask);	/* want a real umask to exec() the command */
+    /* Unblock signals */
+#ifdef POSIX_SIGNALS
+    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
+#else
+    (void) sigsetmask(omask);       
+#endif /* POSIX_SIGNALS */
 
+    update_timestamp();
 }
 
 

@@ -264,9 +264,9 @@ log_error(code)
 		tty, cwd, runas_user);
 	    break;
 
-	case BAD_ALLOCATION:
+	case BAD_AUTH_INIT:
 	    (void) sprintf(p,
-		"allocation failure; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
+		"unable to initialize authentication scheme; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
 		tty, cwd, runas_user);
 	    break;
 
@@ -668,9 +668,9 @@ inform_user(code)
 		"Your timestamp file has a preposterous date, ignoring.\n");
 	    break;
 
-	case BAD_ALLOCATION:
+	case BAD_AUTH_INIT:
 	    (void) fprintf(stderr,
-		"Resource allocation failure.\n");
+		"Unable to initialize authentication scheme.\n");
 	    break;
 
 	case NO_CMND_SAFE:
@@ -736,7 +736,7 @@ appropriate(code)
     case NO_SUDOERS_FILE:
     case BAD_STAMPDIR:
     case BAD_STAMPFILE:
-    case BAD_ALLOCATION:
+    case BAD_AUTH_INIT:
     case NO_CMND_SAFE:
     default:
 	return (1);
