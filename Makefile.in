@@ -356,10 +356,10 @@ bindist:
 	      exit 1 ; \
 	    fi ; \
 	  done ; \
-	  for i in $(BINSPECIAL) ; do \
-	    cp $(srcdir)/$$i $$tdir/`echo $$i | sed 's/\.binary$$//'` || \
-	      exit 1 ; \
-	  done \
+	  cp $(srcdir)/INSTALL.binary $$tdir/INSTALL ; \
+	  sed -e 's/@MANTYPE@/$(mantype)/g' -e 's/@mansectsu@/$(mansectsu)/g' \
+	      -e 's/@mansectform@/$(mansectform)/g' $(srcdir)/Makefile.binary \
+	      > $$tdir/Makefile ; \
 	)  
 	strip sudo
 	strip visudo
