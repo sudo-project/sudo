@@ -4,8 +4,8 @@ Systems that sudo 1.3.1 is known to run on.
 Name	Rev	Arch	Used		Level	By		Options
 =======	=======	=======	===============	======= =============== ===============
 SunOS	3.5	sun3	cc		5b2	todd miller	none
-SunOS	4.1	sun3	cc		5b2	todd miller	none
-SunOS	4.1.3	sun4	gcc2.6.3	5b2	todd miller	none
+SunOS	4.1	sun3	cc		5b3	todd miller	none
+SunOS	4.1.3	sun4	gcc2.6.3	5b3	todd miller	none
 SunOS	4.1.3U1	sun4	gcc2.5.8	5b2	kendall libby	--with-C2
 Solaris	2.3	sun4	gcc2.6.2	5b2	todd miller	none
 Solaris	2.3	sun4	acc 2.0.1	5b2	todd miller	none
@@ -13,26 +13,28 @@ Solaris	2.4	sun4	gcc2.3.3	5b2	andy smith	none
 Solaris	2.4	x86	gcc2.3.3	5b2	andy smith	none
 ISC	4.1	i386	cc		5b2	andy smith	--with-getpass
 RISCos	4_52	mips	cc		5b2	andy smith	--with-getpass
-HP-UX	9.05	hp700	gcc2.6.3	5b2	todd miller	none
-HP-UX	9.05	hp700	unbundled cc	5b2	todd miller	none
-Ultrix	4.2	mips	cc		5b2	todd miller	none
-Ultrix	4.2	mips	gcc2.5.8	5b2	todd miller	none
-IRIX	4.05H	mips	unbundled cc	5b2	todd miller	none
-IRIX	5.1.1.2	mips	unbundled cc	5b2	todd miller	none
-IRIX	5.1.1.2	mips	gcc2.6.3	5b2	todd miller	none
-NEXTSTEP 3.2	m68k	cc		5b2	todd miller	none
+HP-UX	9.05	hp700	gcc2.6.3	5b3	todd miller	none
+HP-UX	9.05	hp700	unbundled cc	5b3	todd miller	none
+Ultrix	4.2	mips	cc		5b3	todd miller	none
+Ultrix	4.2	mips	gcc2.5.8	5b3	todd miller	none
+IRIX	4.05H	mips	unbundled cc	5b3	todd miller	none
+IRIX	5.1.1.2	mips	unbundled cc	5b3	todd miller	none
+IRIX	5.1.1.2	mips	gcc2.6.3	5b3	todd miller	none
+NEXTSTEP 3.2	m68k	cc		5b3	todd miller	none
 NEXTSTEP 3.2	i386	cc		5b2	jonathan adams	none
 NEXTSTEP 3.3	i386	cc		5b2	jonathan adams	none
-DEC UNIX 3.0	alpha	cc		5b2	todd miller	none
-DEC UNIX 3.0	alpha	gcc2.6.3	5b2	todd miller	none
+DEC UNIX 3.0	alpha	cc		5b3	todd miller	none
+DEC UNIX 3.0	alpha	gcc2.6.3	5b3	todd miller	none
 AIX	3.2.X	rs6000	cc		5b2	todd miller	none
-BSD	4.3	mips	cc		5b2	todd miller	none
+BSD	4.3	mips	cc		5b3	todd miller	none
 BSD	4.3	hp300	gcc2.5.6	5b2	todd miller	none
-ConvexOS 9.1	convex	gcc2.4.5	5b2	todd miller	none
-ConvexOS 9.1	convex	cc		5b2	todd miller	none
-KSR OS	1.2.2	ksr	cc		5b2	todd miller	none
+ConvexOS 9.1	convex	gcc2.4.5	5b3	todd miller	none
+ConvexOS 9.1	convex	cc		5b3	todd miller	none
+KSR OS	1.2.2	ksr	cc		5b3	todd miller	none
 
 Systems on which sudo 1.3.1 is expected to run on but hasn't been tested.
+If you can verify any of these, please send mail to sudo-bugs@cs.colorado.edu
+
  Op. System	CPU	Compilers	Patch	Reported	Special
 Name	Rev	Arch	Used		Level	By		Options
 =======	=======	=======	===============	======= =============== ===============
