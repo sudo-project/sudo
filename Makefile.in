@@ -107,7 +107,7 @@ VISUDOBJS = visudo.o
 
 TESTOBJS = interfaces.o testsudoers.o
 
-LIBOBJS = @LIBOBJS@
+LIBOBJS = @LIBOBJS@ @ALLOCA@
 
 HDRS = sudo.h pathnames.h options.h compat.h version.h insults.h \
        ins_2001.h ins_classic.h ins_goons.h ins_csops.h
@@ -121,7 +121,7 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
 	    emul/search.h emul/utime.h utime.c emul/fnmatch.h fnmatch.c \
 	    fnmatch.3 testsudoers.c sudoers sample.sudoers sudo.pod sudo.man \
 	    sudo.cat visudo.pod visudo.man visudo.cat sudoers.pod sudoers.man \
-	    sudoers.cat lex.yy.c sudo-lex.yy.c dce_pwent.c
+	    sudoers.cat lex.yy.c sudo-lex.yy.c dce_pwent.c alloca.c
 
 all: $(PROGS)
 
