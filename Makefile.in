@@ -132,7 +132,7 @@ lex.yy.o: lex.yy.c y.tab.h $(HDRS)
 lex.yy.c: parse.lex
 	$(LEX) parse.lex
 
-$(OBJS) $(LIBOBJS) : $(HDRS) config.h
+$(SUDOOBJS) $(LIBOBJS) : $(HDRS) config.h
 
 sudo.cat: sudo.man
 
