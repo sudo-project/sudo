@@ -1,5 +1,5 @@
 /*
- * CU sudo version 1.5.1 (based on Root Group sudo version 1.1)
+ * CU sudo version 1.5.2 (based on Root Group sudo version 1.1)
  *
  * This software comes with no waranty whatsoever, use at your own risk.
  *
@@ -235,7 +235,7 @@ static int check_timestamp()
     timedir_is_good = 1;	/* now there's an assumption for ya... */
 
     /* become root */
-    set_perms(PERM_ROOT);
+    set_perms(PERM_ROOT, 0);
 
     /*
      * walk through the path one directory at a time
@@ -298,7 +298,7 @@ static int check_timestamp()
     }
 
     /* relinquish root */
-    set_perms(PERM_USER);
+    set_perms(PERM_USER, 0);
 
     return (timestamp_is_old);
 }
@@ -350,7 +350,7 @@ static void update_timestamp()
 {
     if (timedir_is_good) {
 	/* become root */
-	set_perms(PERM_ROOT);
+	set_perms(PERM_ROOT, 0);
 
 	if (touch(timestampfile) < 0) {
 	    int fd = open(timestampfile, O_WRONLY | O_CREAT | O_TRUNC, 0600);
@@ -362,7 +362,7 @@ static void update_timestamp()
 	}
 
 	/* relinquish root */
-	set_perms(PERM_USER);
+	set_perms(PERM_USER, 0);
     }
 }
 
@@ -391,13 +391,13 @@ void remove_timestamp()
 #endif /* USE_TTY_TICKETS */
 
     /* become root */
-    set_perms(PERM_ROOT);
+    set_perms(PERM_ROOT, 0);
 
     /* remove the ticket file */
     (void) unlink(timestampfile);
 
     /* relinquish root */
-    set_perms(PERM_USER);
+    set_perms(PERM_USER, 0);
 }
 
 
@@ -420,7 +420,7 @@ static void check_passwd()
     sd = &sd_dat;
 
     /* Initialize SecurID. */
-    set_perms(PERM_ROOT);
+    set_perms(PERM_ROOT, 0);
     creadcfg();
     if (sd_init(sd) != 0) {
 	(void) fprintf(stderr, "%s: Cannot contact SecurID server\n", Argv[0]);
@@ -432,7 +432,7 @@ static void check_passwd()
      */
     while (counter > 0) {
 	if (sd_auth(sd) == ACM_OK) {
-	    set_perms(PERM_USER);
+	    set_perms(PERM_USER, 0);
 	    return;
 	}
 
@@ -443,7 +443,7 @@ static void check_passwd()
 	(void) fprintf(stderr, "%s\n", INCORRECT_PASSWORD);
 #endif /* USE_INSULTS */
     }
-    set_perms(PERM_USER);
+    set_perms(PERM_USER, 0);
 
     if (counter > 0) {
 	log_error(PASSWORD_NOT_CORRECT);
@@ -478,15 +478,15 @@ static void check_passwd()
 
 #ifdef HAVE_SKEY
 	/* rewrite the prompt if using s/key since the challenge can change */
-	set_perms(PERM_ROOT);
+	set_perms(PERM_ROOT, 0);
 	prompt = sudo_skeyprompt(&skey, prompt);
-	set_perms(PERM_USER);
+	set_perms(PERM_USER, 0);
 #endif /* HAVE_SKEY */
 #ifdef HAVE_OPIE
 	/* rewrite the prompt if using OPIE since the challenge can change */
-	set_perms(PERM_ROOT);
+	set_perms(PERM_ROOT, 0);
 	prompt = sudo_opieprompt(&opie, prompt);
-	set_perms(PERM_USER);
+	set_perms(PERM_USER, 0);
 #endif /* HAVE_OPIE */
 
 	/* get a password from the user */
@@ -512,23 +512,23 @@ static void check_passwd()
 #ifdef HAVE_SKEY
 	/* Only check s/key db if the user exists there */
 	if (skey.keyfile) {
-	    set_perms(PERM_ROOT);
+	    set_perms(PERM_ROOT, 0);
 	    if (skeyverify(&skey, pass) == 0) {
-		set_perms(PERM_USER);
+		set_perms(PERM_USER, 0);
 		return;             /* if the key is correct return() */
 	    }
-	    set_perms(PERM_USER);
+	    set_perms(PERM_USER, 0);
 	}
 #endif /* HAVE_SKEY */
 #ifdef HAVE_OPIE
 	/* Only check OPIE db if the user exists there */
 	if (opie.opie_flags) {
-	    set_perms(PERM_ROOT);
+	    set_perms(PERM_ROOT, 0);
 	    if (opieverify(&opie, pass) == 0) {
-		set_perms(PERM_USER);
+		set_perms(PERM_USER, 0);
 		return;             /* if the key is correct return() */
 	    }
-	    set_perms(PERM_USER);
+	    set_perms(PERM_USER, 0);
 	}
 #endif /* HAVE_OPIE */
 #if !defined(HAVE_SKEY) || !defined(SKEY_ONLY)
@@ -654,7 +654,7 @@ static int sudo_krb_validate_user(pw_ent, pass)
      * Update the ticket if password is ok.  Kerb4 expects
      * the ruid and euid to be the same here so we setuid to root.
      */
-    set_perms(PERM_ROOT);
+    set_perms(PERM_ROOT, 0);
     k_errno = krb_get_pw_in_tkt(pw_ent->pw_name, "", realm, "krbtgt", realm,
 	DEFAULT_TKT_LIFE, pass);
 
@@ -669,7 +669,7 @@ static int sudo_krb_validate_user(pw_ent, pass)
 		       krb_err_txt[k_errno]);
 
     /* done with rootly stuff */
-    set_perms(PERM_USER);
+    set_perms(PERM_USER, 0);
 
     return(!(k_errno == INTK_OK));
 }
@@ -844,7 +844,7 @@ static void reminder()
     (void) fprintf(stderr, "\n%s\n%s\n\n%s\n%s\n\n",
 #else
     (void) fprintf(stderr, "\n%s\n%s\n%s\n%s\n\n%s\n%s\n\n%s\n%s\n\n",
-	"    CU sudo version 1.5.1, based on Root Group sudo version 1.1",
+	"    CU sudo version 1.5.2, based on Root Group sudo version 1.1",
 	"    sudo version 1.1, Copyright (C) 1991 The Root Group, Inc.",
 	"    sudo comes with ABSOLUTELY NO WARRANTY.  This is free software,",
 	"    and you are welcome to redistribute it under certain conditions.",

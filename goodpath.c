@@ -1,5 +1,5 @@
 /*
- *  CU sudo version 1.5.1
+ *  CU sudo version 1.5.2
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -77,12 +77,12 @@ char * sudo_goodpath(path)
 	return(NULL);
 
     /* we need to be root for the stat */
-    set_perms(PERM_ROOT);
+    set_perms(PERM_ROOT, 0);
 
     err = stat(path, &statbuf);
 
     /* discard root perms */
-    set_perms(PERM_USER);
+    set_perms(PERM_USER, 0);
 
     /* stat(3) failed */
     if (err)
