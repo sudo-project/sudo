@@ -20,8 +20,9 @@
  *******************************************************************
  *
  *  This module contains the find_path() function that returns
- *  a pointer to a static area with the absolute path of the 
- *  command or NULL if the command is not found in the path.
+ *  TRUE if the command was found and FALSE if not.
+ *  If find_path() returns TRUE, the copyin paramters command and
+ *  ocommand contain the resolved and unresolved pathnames respectively.
  *  NOTE: if "." or "" exists in PATH it will be searched last.
  *
  *  Todd C. Miller (millert@colorado.edu) Sat Sep  4 12:22:04 MDT 1993
@@ -94,14 +95,15 @@ static char * realpath_exec	__P((char *, char *, char *));
  *  this function finds the full pathname for a command
  */
 
-char *find_path(file)
-    char *file;
+int find_path(file, command, ocommand)
+    char *file;			/* file to find */
+    char **command;		/* copyout parameter */
+    char **ocommand;		/* copyout parameter */
 {
     register char *n;		/* for traversing path */
     char *path = NULL;		/* contents of PATH env var */
-    char *oldpath;		/* so we can free path later */
+    char *origpath;		/* so we can free path later */
     char *result = NULL;	/* result of path/file lookup */
-    char *command;		/* resolved pathname */
     int checkdot = 0;		/* check current dir? */
 
     if (strlen(file) > MAXPATHLEN) {
@@ -112,8 +114,8 @@ char *find_path(file)
     /*
      * allocate memory for command
      */
-    command = (char *) malloc(MAXPATHLEN + 1);
-    if (command == NULL) {
+    *command = (char *) malloc(MAXPATHLEN + 1);
+    if (*command == NULL) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
@@ -122,20 +124,30 @@ char *find_path(file)
     /*
      * do we need to search the path?
      */
-    if (strchr(file, '/'))
-	return((char *) sudo_realpath(file, command));
+    if (strchr(file, '/')) {
+	/* store the unresolved command in ocommand */
+	if (ocommand) {
+	    *ocommand = strdup(file);
+	    if (*ocommand == NULL) {
+		perror("malloc");
+		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+		exit(1);
+	    }
+	}
+	return((sudo_realpath(file, *command)) ? TRUE : FALSE);
+    }
 
     /*
      * grab PATH out of environment and make a local copy
      */
     if ((path = getenv("PATH")) == NULL)
-	return (NULL);
+	return (FALSE);
 
     if ((path = strdup(path)) == NULL) {
 	fprintf(stderr, "sudo: out of memory!\n");
 	exit(1);
     }
-    oldpath=path;
+    origpath=path;
 
     do {
 	if ((n = strchr(path, ':')))
@@ -154,7 +166,7 @@ char *find_path(file)
 	/*
 	 * resolve the path and exit the loop if found
 	 */
-	if ((result = realpath_exec(path, file, command)))
+	if ((result = realpath_exec(path, file, *command)))
 	    break;
 
 	path = n + 1;
@@ -165,10 +177,24 @@ char *find_path(file)
      * check current dir if dot was in the PATH
      */
     if (!result && checkdot)
-	result = realpath_exec(".", file, command);
+	result = realpath_exec(".", file, *command);
 
-    (void) free(oldpath);
-    return (result);
+    /*
+     * save old (unresolved) command
+     */
+    if (result && ocommand) {
+	*ocommand = (char *) malloc(strlen(path) + strlen(file) + 2);
+	if (*ocommand == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+	(void) sprintf(*ocommand, "%s/%s", path, file);
+    }
+
+    (void) free(origpath);
+
+    return(result ? TRUE : FALSE);
 }
 
 
