@@ -127,17 +127,15 @@ TODO list (most will be addressed in sudo 2.0)
     line and that have a constant record length (sparse files) for
     easy seeking.
 
-46) Move cmnd_base setting and stashing of stat info from parse.c to sudo.c
-
-47) Investigate using glob(3) instead of fnmatch(3) for path matching.  That
+46) Investigate using glob(3) instead of fnmatch(3) for path matching.  That
     way we can stat each potential match like we normally would.  Patterns
     ending in '/*' can be replaced with '/basename' as an optimization.
 
-48) Some way of using a new pty for the program run via sudo would prevent
+47) Some way of using a new pty for the program run via sudo would prevent
     access to the caller's /dev/tty (but probably makes job control tricky).
 
-49) Maybe have a database of checksums that commands are verified against.
+48) Maybe have a database of checksums that commands are verified against.
     Basically replace the st_ino/st_dev check with a checksum lookup.
 
-50) Look into testing writability of a file via sudoedit *before* doing
+49) Look into testing writability of a file via sudoedit *before* doing
     the edit; e.g., try opening with O_APPEND.

@@ -35,6 +35,7 @@
 struct sudo_user {
     struct passwd *pw;
     struct passwd *_runas_pw;
+    struct stat *cmnd_stat;
     char *path;
     char *shell;
     char *tty;
@@ -43,9 +44,10 @@ struct sudo_user {
     char *shost;
     char **runas;
     char *prompt;
-    char *cmnd_safe;
     char *cmnd;
     char *cmnd_args;
+    char *cmnd_base;
+    char *cmnd_safe;
     char *class_name;
 };
 
@@ -128,6 +130,8 @@ struct sudo_user {
 #define user_runas		(sudo_user.runas)
 #define user_cmnd		(sudo_user.cmnd)
 #define user_args		(sudo_user.cmnd_args)
+#define user_base		(sudo_user.cmnd_base)
+#define user_stat		(sudo_user.cmnd_stat)
 #define user_path		(sudo_user.path)
 #define user_prompt		(sudo_user.prompt)
 #define user_host		(sudo_user.host)
@@ -189,9 +193,9 @@ size_t strlcat		__P((char *, const char *, size_t));
 #ifndef HAVE_STRLCPY
 size_t strlcpy		__P((char *, const char *, size_t));
 #endif
-char *sudo_goodpath	__P((const char *));
+char *sudo_goodpath	__P((const char *, struct stat *));
 char *tgetpass		__P((const char *, int, int));
-int find_path		__P((char *, char **, char *));
+int find_path		__P((char *, char **, struct stat *, char *));
 void check_user		__P((int));
 void verify_user	__P((struct passwd *, char *));
 int sudoers_lookup	__P((int));

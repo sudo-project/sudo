@@ -248,7 +248,7 @@ main(argc, argv)
     if (UserEditor && *UserEditor == '\0')
 	UserEditor = NULL;
     else if (UserEditor) {
-	if (find_path(UserEditor, &Editor, getenv("PATH")) == FOUND) {
+	if (find_path(UserEditor, &Editor, NULL, getenv("PATH")) == FOUND) {
 	    UserEditor = Editor;
 	} else {
 	    if (def_env_editor) {
@@ -318,7 +318,7 @@ main(argc, argv)
 	EditorPath = estrdup(def_editor);
 	Editor = strtok(EditorPath, ":");
 	do {
-	    if (sudo_goodpath(Editor))
+	    if (sudo_goodpath(Editor, NULL))
 		break;
 	} while ((Editor = strtok(NULL, ":")));
 

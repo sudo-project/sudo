@@ -62,9 +62,10 @@ static const char rcsid[] = "$Sudo$";
  * but it is in '.' and IGNORE_DOT is set.
  */
 int
-find_path(infile, outfile, path)
+find_path(infile, outfile, sbp, path)
     char *infile;		/* file to find */
     char **outfile;		/* result parameter */
+    struct stat *sbp;		/* stat result parameter */
     char *path;			/* path to search */
 {
     static char command[PATH_MAX]; /* qualified filename */
@@ -83,7 +84,7 @@ find_path(infile, outfile, path)
      */
     if (strchr(infile, '/')) {
 	strlcpy(command, infile, sizeof(command));	/* paranoia */
-	if (sudo_goodpath(command)) {
+	if (sudo_goodpath(command, sbp)) {
 	    *outfile = command;
 	    return(FOUND);
 	} else
@@ -120,7 +121,7 @@ find_path(infile, outfile, path)
 	len = snprintf(command, sizeof(command), "%s/%s", path, infile);
 	if (len <= 0 || len >= sizeof(command))
 	    errx(1, "%s: File name too long", infile);
-	if ((result = sudo_goodpath(command)))
+	if ((result = sudo_goodpath(command, sbp)))
 	    break;
 
 	path = n + 1;
@@ -132,7 +133,7 @@ find_path(infile, outfile, path)
      * Check current dir if dot was in the PATH
      */
     if (!result && checkdot) {
-	result = sudo_goodpath(infile);
+	result = sudo_goodpath(infile, sbp);
 	if (result && def_ignore_dot)
 	    return(NOT_FOUND_DOT);
     }

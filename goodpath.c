@@ -47,8 +47,9 @@ static const char rcsid[] = "$Sudo$";
  * Verify that path is a normal file and executable by root.
  */
 char *
-sudo_goodpath(path)
+sudo_goodpath(path, sbp)
     const char *path;
+    struct stat *sbp;
 {
     struct stat sb;
 
@@ -65,5 +66,7 @@ sudo_goodpath(path)
 	return(NULL);
     }
 
+    if (sbp != NULL)
+	(void) memcpy(sbp, &sb, sizeof(struct stat));
     return((char *)path);
 }

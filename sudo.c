@@ -622,16 +622,17 @@ init_vars(sudo_mode)
 
     /* Resolve the path and return. */
     rval = FOUND;
+    user_stat = emalloc(sizeof(struct stat));
     if (sudo_mode & (MODE_RUN | MODE_EDIT)) {
 	if (ISSET(sudo_mode, MODE_RUN)) {
 	    /* XXX - default_runas may be modified during parsing of sudoers */
 	    set_perms(PERM_RUNAS);
-	    rval = find_path(NewArgv[0], &user_cmnd, user_path);
+	    rval = find_path(NewArgv[0], &user_cmnd, user_stat, user_path);
 	    set_perms(PERM_ROOT);
 	    if (rval != FOUND) {
 		/* Failed as root, try as invoking user. */
 		set_perms(PERM_USER);
-		rval = find_path(NewArgv[0], &user_cmnd, user_path);
+		rval = find_path(NewArgv[0], &user_cmnd, user_stat, user_path);
 		set_perms(PERM_ROOT);
 	    }
 	}
@@ -662,6 +663,10 @@ init_vars(sudo_mode)
 	    *--to = '\0';
 	}
     }
+    if ((user_base = strrchr(user_cmnd, '/')) != NULL)
+	user_base++;
+    else
+	user_base = user_cmnd;
 
     return(rval);
 }
