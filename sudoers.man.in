@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "May 27, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "June  6, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -389,8 +389,9 @@ It is not an error to use the \f(CW\*(C`\-=\*(C'\fR operator to remove an elemen
 that does not exist in a list.
 .PP
 Note that since the \fIsudoers\fR file is parsed in order the best place
-to put the Defaults section is after the Host, User, and Cmnd aliases
-but before the user specifications.
+to put the Defaults section is after the \f(CW\*(C`Host_Alias\*(C'\fR, \f(CW\*(C`User_Alias\*(C'\fR,
+and \f(CW\*(C`Cmnd_Alias\*(C'\fR specifications but before any \f(CW\*(C`Runas_Alias\*(C'\fR or user
+specifications.
 .PP
 \&\fBFlags\fR:
 .IP "long_otp_prompt" 12
@@ -675,6 +676,8 @@ The default value is \f(CW\*(C`@passprompt@\*(C'\fR.
 .IX Item "runas_default"
 The default user to run commands as if the \fB\-u\fR flag is not specified
 on the command line.  This defaults to \f(CW\*(C`@runas_default@\*(C'\fR.
+Note that if \fIrunas_default\fR is set it \fBmust\fR occur before
+any \f(CW\*(C`Runas_Alias\*(C'\fR specifications.
 .IP "syslog_goodpri" 12
 .IX Item "syslog_goodpri"
 Syslog priority to use when user authenticates successfully.
