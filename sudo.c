@@ -91,6 +91,10 @@ static char rcsid[] = "$Id$";
 #ifdef _AIX
 #include <sys/id.h>
 #endif /* _AIX */
+#if defined(__osf__) && defined(HAVE_C2_SECURITY)
+#include <sys/security.h>
+#include <prot.h>
+#endif /* __osf__ && HAVE_C2_SECURITY */
 
 #include "sudo.h"
 #include "version.h"
@@ -146,6 +150,10 @@ main(argc, argv)
     int rtn;
     int sudo_mode = MODE_RUN;
     extern char ** environ;
+
+#if defined(__osf__) && defined(HAVE_C2_SECURITY)
+    (void) set_auth_parameters();
+#endif /* __osf__ && HAVE_C2_SECURITY */
 
     Argv = argv;
     Argc = argc;
