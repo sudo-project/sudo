@@ -441,8 +441,8 @@ The default is C<@password_timeout@>, set this to C<0> for no password timeout.
 
 =item umask
 
-Umask to use when running the root command.  Set this to 0777 to
-not override the user's umask.  The default is C<@sudo_umask@>.
+Umask to use when running the command.  Negate this option or set
+it to 0777 to preserve the user's umask.  The default is C<@sudo_umask@>.
 
 =back
 
