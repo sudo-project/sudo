@@ -66,6 +66,7 @@ static void do_syslog		__P((int, char *));
 static void do_logfile		__P((char *));
 static void send_mail		__P((char *));
 static void mail_auth		__P((int, char *));
+static char *get_timestr	__P((void));
 
 #ifdef BROKEN_SYSLOG
 # define MAXSYSLOGTRIES	16	/* num of retries for broken syslogs */
@@ -149,14 +150,11 @@ static void
 do_logfile(msg)
     char *msg;
 {
-    char *full_line, *timestr;
+    char *full_line;
     char *beg, *oldend, *end;
     FILE *fp;
     mode_t oldmask;
-    time_t now;
     int maxlen = sudo_inttable[I_LOGLEN];
-
-    now = time((time_t) 0);
 
     oldmask = umask(077);
     fp = fopen(sudo_strtable[I_LOGFILE], "a");
@@ -172,25 +170,21 @@ do_logfile(msg)
 	send_mail(full_line);
 	free(full_line);
     } else {
-	timestr = ctime(&now) + 4;		/* skip day of the week */
-	if (sudo_flag_set(FL_LOG_YEAR))
-	    timestr[20] = '\0';			/* avoid the newline */
-	else
-	    timestr[15] = '\0';			/* don't care about year */
-
 	if (sudo_inttable[I_LOGLEN] == 0) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
 	    if (sudo_flag_set(FL_LOG_HOST))
-		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n", timestr,
+		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n", get_timestr(),
 		    user_name, user_shost, msg);
 	    else
-		(void) fprintf(fp, "%s : %s : %s\n", timestr, user_name, msg);
+		(void) fprintf(fp, "%s : %s : %s\n", get_timestr(),
+		    user_name, msg);
 	} else {
 	    if (sudo_flag_set(FL_LOG_HOST))
-		easprintf(&full_line, "%s : %s : HOST=%s : %s", timestr,
+		easprintf(&full_line, "%s : %s : HOST=%s : %s", get_timestr(),
 		    user_name, user_shost, msg);
 	    else
-		easprintf(&full_line, "%s : %s : %s", timestr, user_name, msg);
+		easprintf(&full_line, "%s : %s : %s", get_timestr(),
+		    user_name, msg);
 
 	    /*
 	     * Print out full_line with word wrap
@@ -405,7 +399,6 @@ send_mail(line)
     FILE *mail;
     char *p;
     int pfd[2], pid;
-    time_t now;
 
     /* Just return if mailer is disabled. */
     if (!sudo_strtable[I_MAILERPATH])
@@ -467,14 +460,8 @@ send_mail(line)
 	    } else
 		(void) fputc(*p, mail);
 	}
-	now = time((time_t) 0);
-	p = ctime(&now) + 4;
-	if (sudo_flag_set(FL_LOG_YEAR))
-	    p[20] = '\0';			/* avoid the newline */
-	else
-	    p[15] = '\0';			/* don't care about year */
-	(void) fprintf(mail, "\n\n%s : %s : %s : %s\n\n", user_host, p,
-	    user_name, line);
+	(void) fprintf(mail, "\n\n%s : %s : %s : %s\n\n", user_host,
+	    get_timestr(), user_name, line);
 	fclose(mail);
 	reapchild(0);
 	_exit(0);
@@ -535,4 +522,40 @@ reapchild(sig)
     (void) signal(SIGCHLD, reapchild);
 #endif /* POSIX_SIGNALS */
     errno = serrno;
+}
+
+/*
+ * Return an ascii string with the current date + time
+ * Uses strftime() if available, else falls back to ctime().
+ */
+static char *
+get_timestr()
+{
+    char *s;
+    time_t now = time((time_t) 0);
+#ifdef HAVE_STRFTIME
+    static char buf[128];
+    struct tm *timeptr;
+
+    timeptr = localtime(&now);
+    if (sudo_flag_set(FL_LOG_YEAR))
+	s = "%h %e %T %Y";
+    else
+	s = "%h %e %T";
+
+    /* strftime() does not guarantee to NUL-terminate so we must check. */
+    buf[sizeof(buf) - 1] = '\0';
+    if (strftime(buf, sizeof(buf), s, timeptr) && !buf[sizeof(buf) - 1])
+	return(buf);
+
+#else
+
+    s = ctime(&now) + 4;		/* skip day of the week */
+    if (sudo_flag_set(FL_LOG_YEAR))
+	s[20] = '\0';			/* avoid the newline */
+    else
+	s[15] = '\0';			/* don't care about year */
+
+    return(s);
+#endif /* HAVE_STRFTIME */
 }

@@ -67,8 +67,10 @@ TODO list (most will be addressed in sudo 2.0)
 23) Make 'sudo -l user' if run as root do a "sudo -l" output for the specified
     user.
 
-24) Use strtol() and strtoul(), not atoi()?
+24) Use strtol() and strtoul(), not atoi()
 
 25) In parse.yacc get rid on unneeded '{ ; }'
 
 26) Look into %e, %p, %k in parse.lex
+
+27) Document Defaults stuff in sudoers.pod
