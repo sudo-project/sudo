@@ -570,13 +570,8 @@ add_alias(a)
 {
     if (aliases == NULL)
 	aliases = a;
-    else {
-	if (aliases->last != NULL)
-	    aliases->last->next = a;
-	else /* if (aliases->next == NULL) */
-	    aliases->next = a;
-	aliases->last = a->last ? a->last : a;
-    }
+    else
+	LIST_APPEND(aliases, a);
 }
 
 /*
@@ -601,13 +596,8 @@ add_defaults(type, binding, defs)
     }
     if (defaults == NULL)
 	defaults = defs;
-    else {
-	if (defaults->last != NULL)
-	    defaults->last->next = defs;
-	else /* if (defaults->next == NULL) */
-	    defaults->next = defs;
-	defaults->last = defs->last ? defs->last : defs;
-    }
+    else
+	LIST_APPEND(defaults, defs);
 }
 
 /*
@@ -628,13 +618,8 @@ add_userspec(members, privs)
     u->next = NULL;
     if (userspecs == NULL)
 	userspecs = u;
-    else {
-	if (userspecs->last != NULL)
-	    userspecs->last->next = u;
-	else /* if (userspecs->next == NULL) */
-	    userspecs->next = u;
-	userspecs->last = u;
-    }
+    else
+	LIST_APPEND(userspecs, u);
 }
 
 /*
@@ -727,7 +712,7 @@ init_parser(path, quiet)
     sudolineno = 1;
     verbose = !quiet;
 }
-#line 679 "gram.c"
+#line 664 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1381,7 +1366,7 @@ case 83:
 			    NEW_MEMBER(yyval.member, yyvsp[0].string, WORD);
 			}
 break;
-#line 1333 "gram.c"
+#line 1318 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

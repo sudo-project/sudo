@@ -152,7 +152,7 @@ struct defaults {
 } while (0)
 
 /*
- * Append an entry to the tail of a list.
+ * Append a list (or single entry) to the tail of a list.
  */
 #define LIST_APPEND(h, e) do {				\
     if ((h)->last != NULL)				\
@@ -160,6 +160,7 @@ struct defaults {
     else /* if ((h)->next == NULL) */			\
 	(h)->next = (e);				\
     (h)->last = (e);					\
+    (h)->last = (e)->last ? (e)->last : (e);		\
 } while (0)
 
 /*
