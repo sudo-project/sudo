@@ -136,3 +136,5 @@ CHANGES from sudo 1.3
     "Peter A. Nikitser, Systems Software Support, QUT" <P.NIKITSER@qut.edu.au>
 
 48) You can now #undef MAILER if you don't run sendmail or the equivalent.
+
+49) AFS support from adamh@austin.ibm.com
