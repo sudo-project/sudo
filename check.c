@@ -205,7 +205,9 @@ static void update_timestamp()
 
 static void check_passwd()
 {
+#if !(defined (linux) && defined (SHADOW_PWD))
     char *crypt();
+#endif /* linux */
     struct passwd *pw_ent;
     char *encrypted;		/* this comes from /etc/passwd  */
     char *pass;			/* this is what gets entered    */
