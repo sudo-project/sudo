@@ -249,11 +249,17 @@
 /* Define if you have getprpwnam(3).  [SecureWare-style shadow passwords] */
 #undef HAVE_GETPRPWNAM
 
+/* Define if you have iscomsec(3).  [HP-UX >= 10.x check for shadow enabled] */
+#undef HAVE_ISCOMSEC
+
 /* Define if you have getspwuid(3).  [HP-UX <= 9.X shadow passwords] */
 #undef HAVE_GETSPWUID
 
 /* Define if you have getpwanam(3).  [SunOS 4.x shadow passwords] */
 #undef HAVE_GETPWANAM
+
+/* Define if you have issecure(3).  [SunOS 4.x check for shadow enabled] */
+#undef HAVE_ISSECURE
 
 /* Define if you have getauthuid(3).  [ULTRIX 4.x shadow passwords] */
 #undef HAVE_GETAUTHUID
