@@ -98,6 +98,7 @@ extern int Argc;
 extern char **Argv;
 
 
+#ifdef SIOCGIFCONF
 /**********************************************************************
  *
  *  load_interfaces()
@@ -265,3 +266,19 @@ static struct ifreq *next_if(cur)
 
     return(next);
 }
+
+#else /* SIOCGIFCONF */
+
+/**********************************************************************
+ *
+ *  load_interfaces()
+ *
+ *  Stub function for those without SIOCGIFCONF
+ */
+
+void load_interfaces()
+{
+    return;
+}
+
+#endif /* SIOCGIFCONF */
