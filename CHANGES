@@ -1399,13 +1399,13 @@ Sudo 1.6.3p7 released.
 437) Added a check-only mode to visudo to check an existing sudoers
      file for sanity.
 
-438) visudo can now edit an alternate sudoers file
+438) Visudo can now edit an alternate sudoers file.
 
 439) If sudo is configured with S/Key support and the system has
      skeyaccess(3) use that to determine whether or not to allow
      a normal Unix password or just S/Key.
 
-440) Fixed CIDR handling in sudoers
+440) Fixed CIDR handling in sudoers.
 
 441) Fixed a segv if the local hostname is not resolvable and
      the 'fqdn' option is set.
@@ -1437,7 +1437,7 @@ Sudo 1.6.3p7 released.
 449) Dump list of local IP addresses and environment variables to clear
      when 'sudo -V' is run as root.
 
-450) Reorganize the lexer a bit and add more states.  Sudo now does a
+450) Reorganized the lexer a bit and added more states.  Sudo now does a
      better job of parsing command arguments in the sudoers file.
 
 451) Wrap each call to syslog() with openlog()/closelog() since some
