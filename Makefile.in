@@ -117,10 +117,10 @@ VERSION = 1.4.2
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
             PORTING README RUNSON FAQ TROUBLESHOOTING Makefile.in acsite.m4 \
             aixcrypt.exp config.h.in configure configure.in getwd.c strdup.c \
-            indent.pro install-sh lsearch.c putenv.c tgetpass.c emul/search.h \
-	    emul/utime.h utime.c testsudoers.c sudoers sample.sudoers \
-	    sudo.pod sudo.man sudo.cat visudo.pod visudo.man visudo.cat \
-	    sudoers.pod sudoers.man sudoers.cat \
+            indent.pro install-sh mkinstalldirs lsearch.c putenv.c tgetpass.c \
+	    emul/search.h emul/utime.h utime.c testsudoers.c sudoers \
+	    sample.sudoers sudo.pod sudo.man sudo.cat visudo.pod visudo.man \
+	    visudo.cat sudoers.pod sudoers.man sudoers.cat \
 	    lex.yy.c sudo-lex.yy.c dce_pwent.c wildmat.3
 
 all: $(PROGS)
@@ -195,7 +195,10 @@ sudoers.man: $(srcdir)/sudoers.pod
 
 sudoers.cat: $(srcdir)/sudoers.man
 
-install: install-binaries install-sudoers install-man
+install: install-dirs install-binaries install-sudoers install-man
+
+install-dirs:
+	$(srcdir)/../mkinstalldirs $(sudodir) $(visudodir) $(sudoersdir) $(mandir8) $(mandir5)
 
 install-binaries: $(PROGS)
 	$(INSTALL) -o $(owner) -g $(group) -m 4111 -s sudo $(sudodir)/sudo
