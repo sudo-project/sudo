@@ -64,11 +64,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <dirent.h>
 
 #include "sudo.h"
-#include "parse.h"
 #include "interfaces.h"
+#include "parse.h"
+#include "gram.h"
 
 #ifndef HAVE_FNMATCH
 # include "emul/fnmatch.h"
@@ -80,237 +80,171 @@ static const char rcsid[] = "$Sudo$";
 
 
 /*
- * Prototypes
- */
-void dumpaliases	__P((void));
-
-/*
  * Globals
  */
 int  Argc, NewArgc;
 char **Argv, **NewArgv;
-int parse_error = FALSE;
 int num_interfaces;
 struct interface *interfaces;
 struct sudo_user sudo_user;
-extern int clearaliases;
-extern int pedantic;
+extern int parse_error;
 
-/*
- * Returns TRUE if "s" has shell meta characters in it,
- * else returns FALSE.
- */
-int
-has_meta(s)
-    char *s;
-{
-    char *t;
+/* For getopt(3) */
+extern char *optarg;
+extern int optind;
 
-    for (t = s; *t; t++) {
-	if (*t == '\\' || *t == '?' || *t == '*' || *t == '[' || *t == ']')
-	    return(TRUE);
-    }
-    return(FALSE);
-}
+extern struct alias *aliases;
+extern struct defaults *defaults;
+extern struct userspec *userspecs;
 
-/*
- * Returns TRUE if user_cmnd matches, in the sudo sense,
- * the pathname in path; otherwise, return FALSE
- */
-int
-command_matches(path, sudoers_args)
-    char *path;
-    char *sudoers_args;
-{
-    int clen, plen;
-    char *args;
-
-    if (user_cmnd == NULL)
-	return(FALSE);
-
-    if ((args = strchr(path, ' ')))
-	*args++ = '\0';
-
-    if (has_meta(path)) {
-	if (fnmatch(path, user_cmnd, FNM_PATHNAME))
-	    return(FALSE);
-	if (!sudoers_args)
-	    return(TRUE);
-	else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
-	    return(TRUE);
-	else if (sudoers_args)
-	    return((fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0));
-	else
-	    return(FALSE);
-    } else {
-	plen = strlen(path);
-	if (path[plen - 1] != '/') {
-	    if (strcmp(user_cmnd, path))
-		return(FALSE);
-	    if (!sudoers_args)
-		return(TRUE);
-	    else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
-		return(TRUE);
-	    else if (sudoers_args)
-		return((fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0));
-	    else
-		return(FALSE);
-	}
-
-	clen = strlen(user_cmnd);
-	if (clen < plen + 1)
-	    /* path cannot be the parent dir of user_cmnd */
-	    return(FALSE);
-
-	if (strchr(user_cmnd + plen + 1, '/') != NULL)
-	    /* path could only be an anscestor of user_cmnd -- */
-	    /* ignoring, of course, things like // & /./  */
-	    return(FALSE);
-
-	/* see whether path is the prefix of user_cmnd */
-	return((strncmp(user_cmnd, path, plen) == 0));
-    }
-}
+void dump_sudoers __P((void));
+void print_aliases __P((void));
+void print_defaults __P((void));
+void print_privilege __P((struct privilege *));
+void print_userspecs __P((void));
+void usage __P((void)) __attribute__((__noreturn__));
 
 int
-addr_matches(n)
-    char *n;
+main(argc, argv)
+    int argc;
+    char **argv;
 {
-    int i;
-    char *m;
-    struct in_addr addr, mask;
+    struct cmndspec *cs;
+    struct passwd pw, rpw;
+    struct privilege *priv;
+    struct userspec *us;
+    char *p, hbuf[MAXHOSTNAMELEN];
+    int ch, dflag, rval, matched;
+#ifdef	YYDEBUG
+    extern int yydebug;
+    yydebug = 1;
+#endif
 
-    /* If there's an explicit netmask, use it. */
-    if ((m = strchr(n, '/'))) {
-	*m++ = '\0';
-	addr.s_addr = inet_addr(n);
-	if (strchr(m, '.'))
-	    mask.s_addr = inet_addr(m);
-	else {
-	    i = 32 - atoi(m);
-	    mask.s_addr = 0xffffffff;
-	    mask.s_addr >>= i;
-	    mask.s_addr <<= i;
-	    mask.s_addr = htonl(mask.s_addr);
-	}
-	*(m - 1) = '/';
+    Argv = argv;
+    Argc = argc;
 
-	for (i = 0; i < num_interfaces; i++)
-	    if ((interfaces[i].addr.s_addr & mask.s_addr) == addr.s_addr)
-		return(TRUE);
-    } else {
-	addr.s_addr = inet_addr(n);
+    memset(&pw, 0, sizeof(pw));
+    sudo_user.pw = &pw;
+    memset(&rpw, 0, sizeof(rpw));
+    runas_pw = &rpw;
 
-	for (i = 0; i < num_interfaces; i++)
-	    if (interfaces[i].addr.s_addr == addr.s_addr ||
-		(interfaces[i].addr.s_addr & interfaces[i].netmask.s_addr)
-		== addr.s_addr)
-		return(TRUE);
-    }
-
-    return(FALSE);
-}
-
-int
-hostname_matches(shost, lhost, pattern)
-    char *shost;
-    char *lhost;
-    char *pattern;
-{
-    if (has_meta(pattern)) {
-        if (strchr(pattern, '.'))
-            return(fnmatch(pattern, lhost, FNM_CASEFOLD));
-        else
-            return(fnmatch(pattern, shost, FNM_CASEFOLD));
-    } else {
-        if (strchr(pattern, '.'))
-            return(strcasecmp(lhost, pattern));
-        else
-            return(strcasecmp(shost, pattern));
-    }
-}
-
-int
-userpw_matches(sudoers_user, user, pw)
-    char *sudoers_user;
-    char *user;
-    struct passwd *pw;
-{
-    if (pw != NULL && *sudoers_user == '#') {
-	uid_t uid = atoi(sudoers_user + 1);
-	if (uid == pw->pw_uid)
-	    return(1);
-    }
-    return(strcmp(sudoers_user, user) == 0);
-}
-
-int
-usergr_matches(group, user, pw)
-    char *group;
-    char *user;
-    struct passwd *pw;
-{
-    struct group *grp;
-    char **cur;
-
-    /* Make sure we have a valid usergroup, sudo style. */
-    if (*group++ != '%')
-	return(FALSE);
-
-    if ((grp = getgrnam(group)) == NULL)
-	return(FALSE);
-
-    /*
-     * Check against user's real gid as well as group's user list
-     */
-    if (getgid() == grp->gr_gid)
-	return(TRUE);
-
-    for (cur=grp->gr_mem; *cur; cur++) {
-	if (strcmp(*cur, user) == 0)
-	    return(TRUE);
-    }
-
-    return(FALSE);
-}
-
-int
-netgr_matches(netgr, host, shost, user)
-    char *netgr;
-    char *host;
-    char *shost;
-    char *user;
-{
-#ifdef HAVE_GETDOMAINNAME
-    static char *domain = (char *) -1;
-#else
-    static char *domain = NULL;
-#endif /* HAVE_GETDOMAINNAME */
-
-    /* Make sure we have a valid netgroup, sudo style. */
-    if (*netgr++ != '+')
-	return(FALSE);
-
-#ifdef HAVE_GETDOMAINNAME
-    /* Get the domain name (if any). */
-    if (domain == (char *) -1) {
-	domain = (char *) emalloc(MAXHOSTNAMELEN);
-
-	if (getdomainname(domain, MAXHOSTNAMELEN) != 0 || *domain == '\0') {
-	    free(domain);
-	    domain = NULL;
+    dflag = 0;
+    while ((ch = getopt(argc, argv, "dh:u:")) != -1) {
+	switch (ch) {
+	    case 'd':
+		dflag = 1;
+		break;
+	    case 'h':
+		user_host = optarg;
+		break;
+	    case 'u':
+		user_runas = &optarg;
+		break;
+	    default:
+		usage();
+		break;
 	}
     }
-#endif /* HAVE_GETDOMAINNAME */
+    argc -= optind;
+    argv += optind;
+    NewArgc = argc;
+    NewArgv = argv;
+    if (argc < 2) {
+	if (!dflag)
+	    usage();
+	user_name = "nobody";
+	user_cmnd = "true";
+    } else {
+	user_name = *argv++;
+	user_cmnd = *argv;
+	NewArgc -= 2;
+    }
 
-#ifdef HAVE_INNETGR
-    if (innetgr(netgr, host, user, domain))
-	return(TRUE);
-    else if (host != shost && innetgr(netgr, shost, user, domain))
-	return(TRUE);
-#endif /* HAVE_INNETGR */
+    if (user_host == NULL) {
+	if (gethostname(hbuf, sizeof(hbuf)) != 0)
+	    err(1, "gethostname");
+	user_host = hbuf;
+    }
+    if ((p = strchr(user_host, '.'))) {
+	*p = '\0';
+	user_shost = estrdup(user_host);
+	*p = '.';
+    } else {
+	user_shost = user_host;
+    }
 
-    return(FALSE);
+    /* Fill in user_args from NewArgv. */
+    if (NewArgc > 1) {
+	char *to, **from;
+	size_t size, n;
+
+	size = (size_t) (NewArgv[NewArgc-1] - NewArgv[1]) +
+		strlen(NewArgv[NewArgc-1]) + 1;
+	user_args = (char *) emalloc(size);
+	for (to = user_args, from = NewArgv + 1; *from; from++) {
+	    n = strlcpy(to, *from, size - (to - user_args));
+	    if (n >= size - (to - user_args))
+		    errx(1, "internal error, init_vars() overflow");
+	    to += n;
+	    *to++ = ' ';
+	}
+	*--to = '\0';
+    }
+
+    /* Initialize default values. */
+    init_defaults();
+    runas_pw->pw_name = *user_runas;
+
+    /* Load ip addr/mask for each interface. */
+    load_interfaces();
+
+    /* Allocate space for data structures in the parser. */
+    init_parser("sudoers", 0);
+
+    if (yyparse() != 0 || parse_error)
+	(void) fputs("Does not parse", stdout);
+    else
+	(void) fputs("Parses OK", stdout);
+
+    if (!update_defaults())
+	(void) fputs(" (problem with defaults entries)", stdout);
+    puts(".");
+
+    if (dflag) {
+	(void) putchar('\n');
+	dump_sudoers();
+	if (argc < 2)
+	    exit(0);
+    }
+
+    /* This loop must match the one in sudoers_lookup() */
+    printf("\nEntries for user %s:\n", user_name);
+    matched = UNSPEC;
+    for (us = userspecs; us != NULL; us = us->next) {
+	if (user_matches(sudo_user.pw, us->user) == TRUE) {
+	    priv = us->privileges;
+	    putchar('\n');
+	    print_privilege(priv);
+	    putchar('\n');
+	    if (host_matches(user_shost, user_host, priv->hostlist) == TRUE) {
+		puts("\thost  matched");
+		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
+		    if (runas_matches(runas_pw, cs->runaslist) == TRUE) {
+			puts("\trunas matched");
+			rval = cmnd_matches(user_cmnd, user_args, cs->cmnd);
+			if (rval != UNSPEC)
+			    matched = rval;
+			printf("\tcommand %s\n", rval == ALLOW ? "allowed" :
+			    rval == DENY ? "denied" : "unmatched");
+		    }
+		}
+	    }
+	}
+    }
+    printf("\nCommand %s\n", matched == TRUE ? "allowed" :
+	matched == FALSE ? "denied" : "unmatched");
+
+    exit(0);
 }
 
 void
@@ -340,106 +274,181 @@ init_envtables()
     return;
 }
 
-int
-main(argc, argv)
-    int argc;
-    char **argv;
+void
+set_perms(perm)
+    int perm;
 {
-    struct passwd pw;
-    char *p;
-#ifdef	YYDEBUG
-    extern int yydebug;
-    yydebug = 1;
-#endif
+    return;
+}
 
-    Argv = argv;
-    Argc = argc;
+void
+print_member(m)    
+    struct member *m;
+{
+    struct sudo_command *c;
 
-    if (Argc >= 6 && strcmp(Argv[1], "-u") == 0) {
-	user_runas = &Argv[2];
-	pw.pw_name = Argv[3];
-	user_host = Argv[4];
-	user_cmnd = Argv[5];
-
-	NewArgv = &Argv[5];
-	NewArgc = Argc - 5;
-    } else if (Argc >= 4) {
-	pw.pw_name = Argv[1];
-	user_host = Argv[2];
-	user_cmnd = Argv[3];
-
-	NewArgv = &Argv[3];
-	NewArgc = Argc - 3;
-    } else {
-	(void) fprintf(stderr,
-	    "usage: sudo [-u user] <user> <host> <command> [args]\n");
-	exit(1);
+    if (m->negated)
+	putchar('!');
+    if (m->name == NULL)
+	fputs("ALL", stdout);
+    else if (m->type != COMMAND)
+	fputs(m->name, stdout);
+    else {
+	c = (struct sudo_command *) m->name;
+	printf("%s%s%s", c->cmnd, c->args ? " " : "",
+	    c->args ? c->args : "");
     }
+}
 
-    sudo_user.pw = &pw;		/* user_name needs to be defined */
+void
+print_defaults()
+{
+    struct defaults *d;
+    struct member *m;
 
-    if ((p = strchr(user_host, '.'))) {
-	*p = '\0';
-	user_shost = estrdup(user_host);
-	*p = '.';
-    } else {
-	user_shost = user_host;
-    }
-
-    /* Fill in user_args from NewArgv. */
-    if (NewArgc > 1) {
-	char *to, **from;
-	size_t size, n;
-
-	size = (size_t) (NewArgv[NewArgc-1] - NewArgv[1]) +
-		strlen(NewArgv[NewArgc-1]) + 1;
-	user_args = (char *) emalloc(size);
-	for (to = user_args, from = NewArgv + 1; *from; from++) {
-	    n = strlcpy(to, *from, size - (to - user_args));
-	    if (n >= size - (to - user_args))
-		    errx(1, "internal error, init_vars() overflow");
-	    to += n;
-	    *to++ = ' ';
+    for (d = defaults; d != NULL; d = d->next) {
+	(void) fputs("Defaults", stdout);
+	switch (d->type) {
+	    case DEFAULTS_HOST:
+		putchar('@');
+		break;
+	    case DEFAULTS_USER:
+		putchar(':');
+		break;
+	    case DEFAULTS_RUNAS:
+		putchar('>');
+		break;
 	}
-	*--to = '\0';
+	for (m = d->binding; m != NULL; m = m->next) {
+	    if (m->type == COMMAND)
+		printf("%s\"%s %s\"", m != d->binding ? "," : "",
+		    ((struct sudo_command *)m->name)->cmnd,
+		    ((struct sudo_command *)m->name)->args);
+	    else
+		printf("%s%s", m != d->binding ? "," : "", m->name);
+	}
+	printf("\t%s%s", d->op == FALSE ? "!" : "", d->var);
+	if (d->val != NULL) {
+	    printf("%c%s", d->op == TRUE ? '=' : d->op, d->val);
+	}
+	putchar('\n');
     }
+}
 
-    /* Initialize default values. */
-    init_defaults();
+void
+print_aliases()
+{
+    struct alias *a;
+    struct member *m;
+    struct sudo_command *c;
 
-    /* Warn about aliases that are used before being defined. */
-    pedantic = TRUE;
+    for (a = aliases; a != NULL; a = a->next) {
+	switch (a->type) {
+	    case HOSTALIAS:
+		(void) printf("Host_Alias\t%s = ", a->name);
+		break;
+	    case CMNDALIAS:
+		(void) printf("Cmnd_Alias\t%s = ", a->name);
+		break;
+	    case USERALIAS:
+		(void) printf("User_Alias\t%s = ", a->name);
+		break;
+	    case RUNASALIAS:
+		(void) printf("Runas_Alias\t%s = ", a->name);
+		break;
+	}
+	for (m = a->first_member; m != NULL; m = m->next) {
+	    if (m != a->first_member)
+		fputs(", ", stdout);
+	    if (m->type == COMMAND) {
+		c = (struct sudo_command *) m->name;
+		printf("%s%s%s", c->cmnd, c->args ? " " : "",
+		    c->args ? c->args : "");
+	    } else
+		fputs(m->name, stdout);
+	}
+	putchar('\n');
+    }
+}
 
-    /* Need to keep aliases around for dumpaliases(). */
-    clearaliases = FALSE;
+void
+print_privilege(priv)
+    struct privilege *priv;
+{
+    struct cmndspec *cs;
+    struct member *m;
+    struct privilege *p;
+    struct cmndtag tags;
 
-    /* Load ip addr/mask for each interface. */
-    load_interfaces();
-
-    /* Allocate space for data structures in the parser. */
-    init_parser("sudoers");
-
-    if (yyparse() || parse_error) {
-	(void) printf("doesn't parse.\n");
-    } else {
-	(void) printf("parses OK.\n\n");
-	if (top == 0)
-	    (void) printf("User %s not found\n", pw.pw_name);
-	else while (top) {
-	    (void) printf("[%d]\n", top-1);
-	    (void) printf("user_match : %d\n", user_matches);
-	    (void) printf("host_match : %d\n", host_matches);
-	    (void) printf("cmnd_match : %d\n", cmnd_matches);
-	    (void) printf("no_passwd  : %d\n", no_passwd);
-	    (void) printf("runas_match: %d\n", runas_matches);
-	    (void) printf("runas      : %s\n", *user_runas);
-	    top--;
+    for (p = priv; p != NULL; p = p->next) {
+	if (p != priv)
+	    fputs(" : ", stdout);
+	for (m = p->hostlist; m != NULL; m = m->next) {
+	    if (m != p->hostlist)
+		fputs(", ", stdout);
+	    print_member(m);
+	}
+	fputs(" = ", stdout);
+	tags.nopasswd = tags.noexec = tags.monitor = UNSPEC;
+	for (cs = p->cmndlist; cs != NULL; cs = cs->next) {
+	    if (cs != p->cmndlist)
+		fputs(", ", stdout);
+	    if (cs->runaslist) {
+		fputs("(", stdout);
+		for (m = cs->runaslist; m != NULL; m = m->next) {
+		    if (m != cs->runaslist)
+			fputs(", ", stdout);
+		    print_member(m);
+		}
+		fputs(") ", stdout);
+	    }
+	    if (cs->tags.nopasswd != UNSPEC && cs->tags.nopasswd != tags.nopasswd)
+		printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
+	    if (cs->tags.noexec != UNSPEC && cs->tags.noexec != tags.noexec)
+		printf("%sEXEC: ", cs->tags.noexec ? "NO" : "");
+	    if (cs->tags.monitor != UNSPEC && cs->tags.monitor != tags.monitor)
+		printf("%sMONITOR: ", cs->tags.monitor ? "" : "NO");
+	    print_member(cs->cmnd);
+	    memcpy(&tags, &cs->tags, sizeof(tags));
 	}
     }
+}
 
-    /* Dump aliases. */
-    (void) printf("Matching Aliases --\n");
-    dumpaliases();
+void
+print_userspecs()
+{
+    struct member *m;
+    struct userspec *us;
 
-    exit(0);
+    for (us = userspecs; us != NULL; us = us->next) {
+	for (m = us->user; m != NULL; m = m->next) {
+	    if (m != us->user)
+		fputs(", ", stdout);
+	    print_member(m);
+	}
+	putchar('\t');
+	print_privilege(us->privileges);
+	putchar('\n');
+    }
+}
+
+void
+dump_sudoers()
+{
+    print_defaults();
+
+    putchar('\n');
+    print_aliases();
+
+    putchar('\n');
+    print_userspecs();
+}
+
+void
+usage()
+{
+    (void) fprintf(stderr,
+	"usage: %s [-h host] [-u user] <user> <command> [args]\n",
+	    getprogname());
+    exit(1);
 }
