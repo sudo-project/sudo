@@ -188,8 +188,8 @@ struct generic_alias {
 #ifndef HAVE_STRDUP
 char *strdup		__P((const char *));
 #endif
-#ifndef HAVE_GETWD
-char *getwd		__P((char *));
+#ifndef HAVE_GETCWD
+char *getcwd		__P((char *, size_t size));
 #endif
 #if !defined(HAVE_PUTENV) && !defined(HAVE_SETENV)
 int putenv		__P((const char *));
