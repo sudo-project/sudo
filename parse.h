@@ -50,10 +50,11 @@ struct cmndtag {
  * The parses sudoers file is stored as a collection of linked lists,
  * modelled after the yacc grammar.
  *
- * There is no separate head struct, the first entry acts as the list head.
- * Because of this, the "last" field is only valid in the first entry.
- * The lack of a separate list head structure allows us to avoid keeping
- * static state in the parser and makes it easy to append sublists.
+ * Other than the alias struct, which is stored in a red-black tree,
+ * the data structure used is basically a tail queue without a separate
+ * head struct--the first entry acts as the head.  This makes it possible
+ * to trivally append sub-lists.  Note, however, that the "last" field is
+ * only valid in the first entry (the list head).
  */
 
 /*
@@ -96,6 +97,7 @@ struct member {
 
 /*
  * Generic structure to hold {User,Host,Runas,Cmnd}_Alias
+ * Aliases are stored in a red-black tree, sorted by name and type.
  */
 struct alias {
     char *name;				/* alias name */
@@ -139,7 +141,7 @@ struct defaults {
 } while (0)
 
 /*
- * Append a list (or single entry) to the tail of a list.
+ * Append a list (or single entry) to a tail queue.
  */
 #define LIST_APPEND(h, e) do {				\
     if ((h)->last != NULL)				\
