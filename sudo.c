@@ -379,12 +379,14 @@ int main(argc, argv)
 	    check_user();
 
 #ifndef DONT_LEAK_PATH_INFO
+	    log_error(rtn);
 	    if (cmnd_status == NOT_FOUND_DOT)
 		(void) fprintf(stderr, "%s: ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.\n", Argv[0], cmnd, cmnd, cmnd);
 	    else if (cmnd_status == NOT_FOUND)
 		(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0],
 		    cmnd);
-	    log_error(rtn);
+	    else
+		inform_user(rtn);
 	    exit(1);
 	    break;
 #endif /* DONT_LEAK_PATH_INFO */
