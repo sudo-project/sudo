@@ -112,7 +112,7 @@
 #endif /* HAVE_KERB5 */
 
 /* Define if you use PAM.  */
-#define HAVE_PAM
+#undef HAVE_PAM
 
 /* Define if you use AFS.  */
 #undef HAVE_AFS
