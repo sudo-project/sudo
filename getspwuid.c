@@ -100,18 +100,12 @@ int crypt_type = INT_MAX;
 
 
 /*
- * Local functions not visible outside getspwuid.c
- */
-static struct passwd *sudo_pwdup	__P((struct passwd *));
-
-
-/*
  * Return a copy of the encrypted password for the user described by pw.
  * If shadow passwords are in use, look in the shadow file.
  */
 char *
 sudo_getepw(pw)
-    struct passwd *pw;
+    const struct passwd *pw;
 {
     char *epw;
 
@@ -199,36 +193,95 @@ sudo_getepw(pw)
  * Dynamically allocate space for a struct password and the constituent parts
  * that we care about.  Fills in pw_passwd from shadow file if necessary.
  */
-static struct passwd *
+struct passwd *
 sudo_pwdup(pw)
-    struct passwd *pw;
+    const struct passwd *pw;
 {
-    struct passwd *local_pw;
+    char *cp;
+    const char *pw_passwd, *pw_shell;
+    size_t nsize, psize, csize, gsize, dsize, ssize, total;
+    struct passwd *newpw;
 
-    /* Allocate space for a local copy of pw. */
-    local_pw = (struct passwd *) emalloc(sizeof(struct passwd));
-
-    /*
-     * Copy the struct passwd and the interesting strings...
-     */
-    (void) memcpy(local_pw, pw, sizeof(struct passwd));
-    local_pw->pw_name = estrdup(pw->pw_name);
-    local_pw->pw_dir = estrdup(pw->pw_dir);
-    local_pw->pw_gecos = estrdup(pw->pw_gecos);
-#ifdef HAVE_LOGIN_CAP_H
-    local_pw->pw_class = estrdup(pw->pw_class);
-#endif
+    /* Get shadow password if available. */
+    pw_passwd = sudo_getepw(pw);
 
     /* If shell field is empty, expand to _PATH_BSHELL. */
-    if (local_pw->pw_shell[0] == '\0')
-	local_pw->pw_shell = _PATH_BSHELL;
-    else
-	local_pw->pw_shell = estrdup(pw->pw_shell);
+    pw_shell = (pw->pw_shell == NULL || pw->pw_shell[0] == '\0')
+	? _PATH_BSHELL : pw->pw_shell;
 
-    /* pw_passwd gets a shadow password if applicable */
-    local_pw->pw_passwd = sudo_getepw(pw);
+    /* Allocate in one big chunk for easy freeing. */
+    nsize = psize = csize = gsize = dsize = ssize = 0;
+    total = sizeof(struct passwd);
+    if (pw->pw_name) {
+	    nsize = strlen(pw->pw_name) + 1;
+	    total += nsize;
+    }
+    if (pw_passwd) {
+	    psize = strlen(pw_passwd) + 1;
+	    total += psize;
+    }
+#ifdef HAVE_LOGIN_CAP_H
+    if (pw->pw_class) {
+	    csize = strlen(pw->pw_class) + 1;
+	    total += csize;
+    }
+#endif
+    if (pw->pw_gecos) {
+	    gsize = strlen(pw->pw_gecos) + 1;
+	    total += gsize;
+    }
+    if (pw->pw_dir) {
+	    dsize = strlen(pw->pw_dir) + 1;
+	    total += dsize;
+    }
+    if (pw_shell) {
+	    ssize = strlen(pw_shell) + 1;
+	    total += ssize;
+    }
+    if ((cp = malloc(total)) == NULL)
+	    return (NULL);
+    newpw = (struct passwd *)cp;
 
-    return(local_pw);
+    /*
+     * Copy in passwd contents and make strings relative to space
+     * at the end of the buffer.
+     */
+    (void)memcpy(newpw, pw, sizeof(struct passwd));
+    cp += sizeof(struct passwd);
+    if (nsize) {
+	    (void)memcpy(cp, pw->pw_name, nsize);
+	    newpw->pw_name = cp;
+	    cp += nsize;
+    }
+    if (psize) {
+	    (void)memcpy(cp, pw_passwd, psize);
+	    newpw->pw_passwd = cp;
+	    cp += psize;
+    }
+#ifdef HAVE_LOGIN_CAP_H
+    if (csize) {
+	    (void)memcpy(cp, pw->pw_class, csize);
+	    newpw->pw_class = cp;
+	    cp += csize;
+    }
+#endif
+    if (gsize) {
+	    (void)memcpy(cp, pw->pw_gecos, gsize);
+	    newpw->pw_gecos = cp;
+	    cp += gsize;
+    }
+    if (dsize) {
+	    (void)memcpy(cp, pw->pw_dir, dsize);
+	    newpw->pw_dir = cp;
+	    cp += dsize;
+    }
+    if (ssize) {
+	    (void)memcpy(cp, pw_shell, ssize);
+	    newpw->pw_shell = cp;
+	    cp += ssize;
+    }
+
+    return (newpw);
 }
 
 /*
