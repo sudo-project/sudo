@@ -335,6 +335,8 @@ typedef struct list {
  * Prototypes
  */
 
+struct hostent;				/* so gcc won't complain */
+
 /* These are the functions that are called in sudo(8) */
 
 #ifndef HAVE_STRDUP
@@ -358,6 +360,7 @@ void be_root		__P((void));
 void be_user		__P((void));
 void be_full_user	__P((void));
 void remove_timestamp	__P((void));
+void load_ip_addrs	__P((struct hostent *));
 
 
 /*
@@ -368,6 +371,7 @@ void remove_timestamp	__P((void));
 extern uid_t uid;
 extern char host[];
 extern char cwd[];
+extern struct in_addr *ip_addrs;
 extern char *user;
 extern char *epasswd;
 extern char *cmnd;
