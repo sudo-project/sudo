@@ -82,7 +82,6 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/if.h>
-#include <netinet/if_ether.h>
 #include <sys/param.h>
 #ifdef _AIX
 #include <sys/id.h>
