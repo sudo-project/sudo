@@ -90,6 +90,9 @@
 /* Define if you have C2 security.  */
 #undef HAVE_C2_SECURITY
 
+/* Define if you use Skey.  */
+#undef HAVE_SKEY
+
 /* Define if you use AFS.  */
 #undef HAVE_AFS
 
