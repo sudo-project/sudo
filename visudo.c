@@ -555,43 +555,25 @@ user_is_exempt()
     return(FALSE);
 }
 
+/* STUB */
+void
+sudo_setspent()
+{
+    return;
+}
+
+/* STUB */
+void
+sudo_endspent()
+{
+    return;
+}
+
 char *
 sudo_getepw(pw)
     const struct passwd *pw;
 {
     return (pw->pw_passwd);
-}
-
-/* STUB */
-struct passwd *
-sudo_getpwuid(uid)
-    uid_t uid;
-{
-    return(getpwuid(uid));
-}
-
-/* STUB */
-struct passwd *
-sudo_getpwnam(name)
-    const char *name;
-{
-    return(getpwnam(name));
-}
-
-/* STUB */
-struct group *
-sudo_getgrgid(gid)
-    gid_t gid;
-{
-    return(getgrgid(gid));
-}
-
-/* STUB */
-struct group *
-sudo_getgrnam(name)
-    const char *name;
-{
-    return(getgrnam(name));
 }
 
 /*
@@ -999,6 +981,12 @@ cleanup()
 	if (sp->tpath != NULL)
 	    (void) unlink(sp->tpath);
     }
+    /*
+     * XXX - would like to call sudo_endpwent/sudo_endgrent but they
+     *       are not signal-safe.
+    sudo_endpwent();
+    sudo_endgrent();
+     */
 }
 
 /*
