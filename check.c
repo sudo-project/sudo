@@ -536,6 +536,10 @@ static void check_passwd()
 	    exit(1);
 	}
 #    endif /* SECUREWARE && __alpha */
+#    if (SHADOW_TYPE == SPW_HPUX10)
+	if (strcmp(user_passwd, (char *) bigcrypt(pass, user_passwd)) == 0)
+	    return;           /* if the passwd is correct return() */
+#    endif /* HPUX10 */
 #  endif /* SHADOW_TYPE */
 
 	/* Normal UN*X password check */
