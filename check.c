@@ -303,5 +303,5 @@ static void reminder()
 	"        #2) Think before you type."
     );
     
-    (void)fflush(stderr);
+    (void) fflush(stderr);
 }
