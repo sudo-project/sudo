@@ -102,6 +102,20 @@ int top = 0, stacksize = 0;
 	top++; \
     }
 
+#define pushcp \
+    { \
+	if (top >= stacksize) { \
+	    while ((stacksize += STACKINCREMENT) < top); \
+	    match = (struct matchstack *) erealloc(match, sizeof(struct matchstack) * stacksize); \
+	} \
+	match[top].user   = match[top-1].user; \
+	match[top].cmnd   = match[top-1].cmnd; \
+	match[top].host   = match[top-1].host; \
+	match[top].runas  = match[top-1].runas; \
+	match[top].nopass = match[top-1].nopass; \
+	top++; \
+    }
+
 #define pop \
     { \
 	if (top == 0) \
@@ -171,7 +185,8 @@ void yyerror(s)
 %token <string>  USERGROUP		/* a usergroup (%NAME) */
 %token <string>  NAME			/* a mixed-case name */
 %token <tok> 	 RUNAS			/* a mixed-case runas name */
-%token <tok> 	 NOPASSWD		/* no passwd req for command*/
+%token <tok> 	 NOPASSWD		/* no passwd req for command */
+%token <tok> 	 PASSWD			/* passwd req for command (default) */
 %token <command> COMMAND		/* an absolute pathname */
 %token <tok>	 COMMENT		/* comment and/or carriage return */
 %token <tok>	 ALL			/* ALL keyword */
@@ -268,20 +283,11 @@ cmndspeclist	:	cmndspec
 
 cmndspec	:	{   /* Push a new entry onto the stack if needed */
 			    if (user_matches == TRUE && host_matches == TRUE &&
-				cmnd_matches != -1 && runas_matches == TRUE) {
-				push;
-				user_matches = TRUE;
-				host_matches = TRUE;
-			    } else {
-				cmnd_matches = -1;
-				runas_matches = -1;
-				no_passwd = -1;
-			    }
+				cmnd_matches != -1 && runas_matches == TRUE)
+				pushcp;
+			    cmnd_matches = -1;
 			} runasspec nopasswd opcmnd {
-			    if ($2 > 0)
-				runas_matches = TRUE;
-			    if ($3 == TRUE)
-				no_passwd = TRUE;
+			    /* XXX - test runas_matches and cmnd_matches instead? */
 			    if (($2 == -1 || $4 == -1) && printmatches == TRUE) {
 				cm_list[cm_list_len].runas_len = 0;
 				cm_list[cm_list_len].cmnd_len = 0;
@@ -315,10 +321,18 @@ opcmnd		:	cmnd { ; }
 		;
 
 runasspec	:	/* empty */ {
-			    $$ = (strcmp(RUNAS_DEFAULT, runas_user) == 0);
+			    /*
+			     * If this is the first entry in a command list
+			     * then check against RUNAS_DEFAULT.
+			     */
+			    if (runas_matches == -1)
+				runas_matches =
+				    (strcmp(RUNAS_DEFAULT, runas_user) == 0);
+			    $$ = runas_matches;
 			}
 		|	RUNAS runaslist {
-			    $$ = $2;
+			    runas_matches = ($2 > 0);
+			    $$ = runas_matches;
 			}
 		;
 
@@ -411,13 +425,19 @@ runasuser	:	NAME {
 		;
 
 nopasswd	:	/* empty */ {
-			    $$ = FALSE;
+			    ;
 			}
 		|	NOPASSWD {
-			    $$ = TRUE;
+			    no_passwd = $$ = TRUE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				cm_list[cm_list_len].nopasswd = TRUE;
+			}
+		|	PASSWD {
+			    no_passwd = $$ = FALSE;
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				cm_list[cm_list_len].nopasswd = FALSE;
 			}
 		;
 

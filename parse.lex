@@ -157,6 +157,12 @@ NOPASSWD[[:blank:]]*:	{
 			    	return(NOPASSWD);
 			}
 
+PASSWD[[:blank:]]*:	{ 
+				/* cmnd requires passwd for this user */
+			    	LEXTRACE("PASSWD ");
+			    	return(PASSWD);
+			}
+
 \+{WORD}		{
 			    /* netgroup */
 			    fill(yytext, yyleng);
