@@ -90,12 +90,15 @@ extern char *strdup();
 #endif /* STDC_HEADERS */
 
 
+/*
+ * Globals
+ */
 int Argc;
 char **Argv;
 char *host;
 char *user;
 char *cmnd;
-uid_t uid;
+uid_t uid = -2;
 
 
 /*
