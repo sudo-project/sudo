@@ -1198,7 +1198,7 @@ Sudo 1.6 released.
 376) When using select() in tgetpass(), do a separate select before
      each read to be sure we can timeout correctly.
 
-377) Hopefully fix SecurID support.
+377) SecurID support compiles and works again.
 
 378) Fixed a bug parsing runas modifiers.  If a user spec contained multiple
      runas specs, the latter ones may not be applied.

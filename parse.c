@@ -50,7 +50,7 @@
 #ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#if defined(HAVE_FNMATCH) && defined(HAVE_FNMATCH_H)
+#ifdef HAVE_FNMATCH
 # include <fnmatch.h>
 #endif /* HAVE_FNMATCH_H */
 #ifdef HAVE_NETGROUP_H
