@@ -409,7 +409,7 @@ case "$OS" in
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
-    "ultrix"*)	echo "Looks like ultrix"
+    "ultrix"*)	echo "Looks like Ultrix"
 		# C2 security stuff
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lauth"
@@ -435,6 +435,12 @@ case "$OS" in
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		OSDEFS="${OSDEFS} -D_ISC"
+		;;
+    "sinix"*)	echo "Looks like SINIX"
+		if test "$with_C2" = "yes"; then
+		    SHADOW_TYPE="SPW_SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		fi
 		;;
     "smp_dc.osx") echo "Looks like Pyramid DC/OSx"
 		LIB_SOCKET=1
