@@ -1,29 +1,27 @@
 /*
- *  CU sudo version 1.6
- *  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * CU sudo version 1.6
+ * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 1, or (at your option)
+ * any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
+ * Please send bugs, changes, problems to sudo-bugs@courtesan.com
  *
  *******************************************************************
  *
- *  visudo.c -- locks the sudoers file for safe editing and check
- *  for parse errors.
- *
- *  Todd C. Miller <Todd.Miller@courtesan.com> Sat Mar 25 21:50:36 MST 1995
+ * visudo.c -- locks the sudoers file for safe editing (ala vipw)
+ * and checks for parse errors.
  */
 
 #include "config.h"
@@ -78,7 +76,6 @@ static const char rcsid[] = "$Sudo$";
  */
 static void usage		__P((void));
 static char whatnow		__P((void));
-static void whatnow_help	__P((void));
 static RETSIGTYPE Exit		__P((int));
 static void setup_signals	__P((void));
 int command_matches		__P((char *, char *, char *, char *));
@@ -87,13 +84,11 @@ int netgr_matches		__P((char *, char *, char *));
 int usergr_matches		__P((char *, char *));
 void init_parser		__P((void));
 
-
 /*
- * External globals
+ * External globals exported by the parser
  */
 extern FILE *yyin, *yyout;
 extern int errorlineno, sudolineno;
-
 
 /*
  * Globals
@@ -103,11 +98,9 @@ char **NewArgv = NULL;
 int NewArgc = 0;
 char *sudoers = _PATH_SUDO_SUDOERS;
 char *stmp = _PATH_SUDO_STMP;
-int parse_error = FALSE;
-char *runas_user = RUNAS_DEFAULT;
 
 /*
- * For the parsing routines
+ * Globals required by the parsing routines
  */
 char host[] = "";
 char *shost = "";
@@ -115,14 +108,9 @@ char *cmnd = "";
 char *cmnd_safe = NULL;
 char *cmnd_args = NULL;
 struct passwd *user_pw_ent;
+char *runas_user = RUNAS_DEFAULT;
+int parse_error = FALSE;
 
-
-/********************************************************************
- *
- *  main()
- *
- *  where it all begins...
- */
 
 int
 main(argc, argv)
@@ -130,7 +118,7 @@ main(argc, argv)
     char **argv;
 {
     char buf[MAXPATHLEN*2];		/* buffer used for copying files */
-    char * Editor = EDITOR;		/* editor to use (default is EDITOR */
+    char *Editor = EDITOR;		/* editor to use (default is EDITOR */
     int sudoers_fd;			/* sudoers file descriptor */
     int stmp_fd;			/* stmp file descriptor */
     int n;				/* length parameter */
@@ -143,8 +131,7 @@ main(argc, argv)
     Argv = argv;
 
     /*
-     * If passesd -V then print version, else print usage
-     * if any other option...
+     * Arg handling.  For -V print version, else usage...
      */
     if (argc == 2) {
 	if (!strcmp(Argv[1], "-V")) {
@@ -157,7 +144,7 @@ main(argc, argv)
 	usage();
     }
 
-    /* user_pw_ent needs to point to something... */
+    /* user_pw_ent needs to point to something real */
     if ((user_pw_ent = getpwuid(getuid())) == NULL) {
 	(void) fprintf(stderr, "%s: Can't find you in the passwd database: ",
 	    Argv[0]);
@@ -190,7 +177,7 @@ main(argc, argv)
 	Exit(-1);
     }
 
-    /* install signal handler to clean up stmp */
+    /* Install signal handlers to clean up stmp if we are killed. */
     setup_signals();
 
     sudoers_fd = open(sudoers, O_RDONLY);
@@ -200,9 +187,7 @@ main(argc, argv)
 	Exit(-1);
     }
 
-    /*
-     * Copy the data
-     */
+    /* Copy sudoers -> stmp */
     if (sudoers_fd >= 0) {
 	while ((n = read(sudoers_fd, buf, sizeof(buf))) > 0)
 	    if (write(stmp_fd, buf, n) != n) {
@@ -232,20 +217,20 @@ main(argc, argv)
 	else
 	    (void) sprintf(buf, "%s %s", Editor, stmp);
 
-	/* do the edit -- some SYSV editors exit with 1 instead of 0 */
+	/* Do the edit -- some SYSV editors exit with 1 instead of 0 */
 	n = system(buf);
 	if (n != -1 && ((n >> 8) == 0 || (n >> 8) == 1)) {
 	    struct stat statbuf;	/* for sanity checking */
 
-	    /* make sure stmp exists */
+	    /*
+	     * Sanity checks.
+	     */
 	    if (stat(stmp, &statbuf) < 0) {
 		(void) fprintf(stderr,
 		    "%s: Can't stat temporary file (%s), %s unchanged.\n",
 		    Argv[0], stmp, sudoers);
 		Exit(-1);
 	    }
-
-	    /* check for zero length file */
 	    if (statbuf.st_size == 0) {
 		(void) fprintf(stderr,
 		    "%s: Zero length temporary file (%s), %s unchanged.\n",
@@ -254,7 +239,7 @@ main(argc, argv)
 	    }
 
 	    /*
-	     * passed sanity checks so reopen stmp file and check
+	     * Passed sanity checks so reopen stmp file and check
 	     * for parse errors.
 	     */
 	    yyout = stdout;
@@ -269,10 +254,10 @@ main(argc, argv)
 		Exit(-1);
 	    }
 
-	    /* clean slate for each parse */
+	    /* Clean slate for each parse */
 	    init_parser();
 
-	    /* parse the sudoers file */
+	    /* Parse the sudoers file */
 	    if (yyparse() && parse_error != TRUE) {
 		(void) fprintf(stderr,
 		    "%s: Failed to parse temporary file (%s), unknown error.\n",
@@ -287,7 +272,7 @@ main(argc, argv)
 	}
 
 	/*
-	 * Prompt the user for what to do now
+	 * Got an error, prompt the user for what to do now
 	 */
 	if (parse_error == TRUE) {
 	    switch (whatnow()) {
@@ -319,7 +304,7 @@ main(argc, argv)
     }
 
     /*
-     * Now that we have a sane stmp file (parse ok) it needs to be
+     * Now that we have a sane stmp file (parses ok) it needs to be
      * rename(2)'d to sudoers.  If the rename(2) fails we try using
      * mv(1) in case stmp and sudoers are on different filesystems.
      */
@@ -362,14 +347,10 @@ main(argc, argv)
     return(0);
 }
 
-
-/********************************************************************
- *
- *  dummy *_matches routines
- *
- *  These exist to allow us to use the same parser as sudo(8).
+/*
+ * Dummy *_matches routines.
+ * These exist to allow us to use the same parser as sudo(8).
  */
-
 int
 command_matches(cmnd, user_args, path, sudoers_args)
     char *cmnd;
@@ -379,7 +360,6 @@ command_matches(cmnd, user_args, path, sudoers_args)
 {
     return(TRUE);
 }
-
 
 int
 addr_matches(n)
@@ -395,7 +375,6 @@ usergr_matches(g, u)
     return(TRUE);
 }
 
-
 int
 netgr_matches(n, h, u)
     char *n, *h, *u;
@@ -403,107 +382,42 @@ netgr_matches(n, h, u)
     return(TRUE);
 }
 
-
-/********************************************************************
- *
- *  usage()
- *
- *  Prints a help message and exits w/ exit value of 1.
+/*
+ * Assuming a parse error occurred, prompt the user for what they want
+ * to do now.  Returns the first letter of their choice.
  */
-
-static void
-usage()
-{
-    (void) fprintf(stderr, "usage: %s [-V]\n", Argv[0]);
-    Exit(-1);
-}
-
-
-/********************************************************************
- *
- *  Exit()
- *
- *  Unlinks the sudoers temp file (if it exists) and exits.
- *  Used in place of a normal exit() and as a signal handler.
- *  A positive parameter is considered to be a signal and is reported.
- */
-
-static RETSIGTYPE
-Exit(sig)
-    int sig;
-{
-    (void) unlink(stmp);
-
-    if (sig > 0)
-	(void) fprintf(stderr, "%s exiting, caught signal %d.\n", Argv[0], sig);
-
-    exit(-sig);
-}
-
-
-/********************************************************************
- *
- *  whatnow()
- *
- *  Assuming a parse error occurred, prompt the user for what they want
- *  to do now.  Returns first letter of their choice (always lowercase).
- */
-
 static char
 whatnow()
 {
-    char choice;
-    int ok;
+    int choice, c;
 
-    do {
-	ok = FALSE;
+    for (;;) {
 	(void) fputs("What now? ", stdout);
-	if ((choice = getchar()) != '\n')
-	    while (getchar() != '\n')
-		;
+	choice = getchar();
+	for (c = choice; c != '\n' && c != EOF;)
+	    c = getchar();
 
 	if (choice == 'e' || choice == 'x' || choice == 'Q')
-	    ok = TRUE;
-
-	/* help message if they gavce us garbage */
-	if (!ok)
-	    whatnow_help();
-
-    } while (!ok);
+	    break;
+	else {
+	    (void) puts("Options are:");
+	    (void) puts("  (e)dit sudoers file again");
+	    (void) puts("  e(x)it without saving changes to sudoers file");
+	    (void) puts("  (Q)uit and save changes to sudoers file (DANGER!)\n");
+	}
+    }
 
     return(choice);
 }
 
-
-/********************************************************************
- *
- *  whatnow_help()
- *
- *  Print out a help message for whatnow().
+/*
+ * Install signal handlers for visudo.
  */
-
-static void
-whatnow_help()
-{
-    (void) printf("Options are:\n");
-    (void) printf("  (e)dit sudoers file again\n");
-    (void) printf("  e(x)it without saving changes to sudoers file\n");
-    (void) printf("  (Q)uit and save changes to sudoers file (DANGER!)\n\n");
-}
-
-
-/********************************************************************
- *
- *  setup_signals()
- *
- *  Install signal handlers for visudo.
- */
-
 static void
 setup_signals()
 {
 #ifdef POSIX_SIGNALS
-	struct sigaction action;		/* posix signal structure */
+	struct sigaction action;		/* POSIX signal structure */
 #endif /* POSIX_SIGNALS */
 
 	/*
@@ -535,4 +449,28 @@ setup_signals()
 	(void) signal(SIGINT, SIG_IGN);
 	(void) signal(SIGQUIT, SIG_IGN);
 #endif /* POSIX_SIGNALS */
+}
+
+/*
+ * Unlink the sudoers temp file (if it exists) and exit.
+ * Used in place of a normal exit() and as a signal handler.
+ * A positive parameter is considered to be a signal and is reported.
+ */
+static RETSIGTYPE
+Exit(sig)
+    int sig;
+{
+    (void) unlink(stmp);
+
+    if (sig > 0)
+	(void) fprintf(stderr, "%s exiting, caught signal %d.\n", Argv[0], sig);
+
+    exit(-sig);
+}
+
+static void
+usage()
+{
+    (void) fprintf(stderr, "usage: %s [-V]\n", Argv[0]);
+    Exit(-1);
 }
