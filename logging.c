@@ -61,11 +61,11 @@ static char rcsid[] = "$Id$";
 #include <pwd.h>
 #include <signal.h>
 #include <time.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <sys/errno.h>
 #include <netinet/in.h>
 
 #include "sudo.h"
