@@ -220,6 +220,9 @@
 /* Define if you have the <sys/sockio.h> header file.  */
 #undef HAVE_SYS_SOCKIO_H
 
+/* Define if you have the <sys/bsdtypes.h> header file.  */
+#undef HAVE_SYS_BSDTYPES_H
+
 /* Define if your struct sockadr has an sa_len field. */
 #undef HAVE_SA_LEN
 
