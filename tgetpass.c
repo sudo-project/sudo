@@ -20,6 +20,8 @@
  *******************************************************************
  *
  *  This module contains tgetpass(), getpass(3) with a timeout.
+ *  It should work on any OS that supports sgtty (4BSD), termio (SYSV),
+ *  or termios (POSIX) line disciplines.
  *
  *  Todd C. Miller  Sun Jun  5 17:22:31 MDT 1994
  */
@@ -73,7 +75,7 @@ char * tgetpass(prompt, timeout)
     struct sgttyb ttyb;
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
-    int input, output;
+    FILE * input, * output;
     static char buf[_PASSWD_LEN + 1];
 #ifdef POSIX_SIGNALS
     sigset_t oldmask;
@@ -105,11 +107,11 @@ char * tgetpass(prompt, timeout)
      * open /dev/tty for reading/writing if possible or use
      * stdin and stderr instead.
      */
-    input = open(_PATH_TTY, O_RDWR);
+    input = fopen(_PATH_TTY, "r+");
     if (!input) {
-	(void) fflush(stderr);
-	input = fileno(stdin);
-	output = fileno(stderr);
+	input = stdin;
+	output = stderr;
+	(void) fflush(output);
     } else {
 	output = input;
     }
@@ -118,26 +120,26 @@ char * tgetpass(prompt, timeout)
      * turn off echo
      */
 #ifdef HAVE_TERMIOS_H
-    (void) tcgetattr(input, &term);
+    (void) tcgetattr(fileno(input), &term);
     svflagval = term.c_lflag;
     term.c_lflag &= ~ECHO;
-    (void) tcsetattr(input, TCSAFLUSH, &term);
+    (void) tcsetattr(fileno(input), TCSAFLUSH, &term);
 #else
 #ifdef HAVE_TERMIO_H
-    (void) ioctl(input, TCGETA, &term);
+    (void) ioctl(fileno(input), TCGETA, &term);
     svflagval = term.c_lflag;
     term.c_lflag &= ~ECHO;
-    (void) ioctl(input, TCSETA, &term);
+    (void) ioctl(fileno(input), TCSETA, &term);
 #else
-    (void) ioctl(input, TIOCGETP, &ttyb);
+    (void) ioctl(fileno(input), TIOCGETP, &ttyb);
     svflagval = ttyb.sg_flags;
     ttyb.sg_flags &= ~ECHO;
-    (void) ioctl(input, TIOCSETP, &ttyb);
+    (void) ioctl(fileno(input), TIOCSETP, &ttyb);
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
     /* print the prompt & rewind */
-    (void) write(output, prompt, strlen(prompt));
+    (void) write(fileno(output), prompt, strlen(prompt));
 
     /* setup for select(2) */
     FD_ZERO(&readfds);
@@ -145,7 +147,7 @@ char * tgetpass(prompt, timeout)
     /* get the password */
     for (i=0; i < _PASSWD_LEN; i++) {
 	/* do select */
-	FD_SET(input, &readfds);
+	FD_SET(fileno(input), &readfds);
 	tv.tv_sec = timeout;
 	tv.tv_usec = 0;
 #ifdef HAVE_SYSCONF
@@ -153,27 +155,30 @@ char * tgetpass(prompt, timeout)
 #else
 	if (select(getdtablesize(), &readfds, NULL, NULL, &tv) <= 0) {
 #endif /* HAVE_SYSCONF */
-	    i = 0;
+	    buf[0] = '\0';
 	    break;
 	}
-	(void) read(input, &buf[i], 1);
-	if (buf[i] == EOF || buf[i] == '\n')
+
+	buf[i] = fgetc(input);
+	if (buf[i] == EOF || buf[i] == '\n') {
+	    buf[i] = '\0';
 	    break;
+	}
     }
-    buf[i] = '\0';
-    (void) write(output, "\n", 1);
+    buf[_PASSWD_LEN - 1] = '\0';
+    (void) fputc('\n', output);
 
      /* turn on echo */
 #ifdef HAVE_TERMIOS_H
     term.c_lflag = svflagval;
-    tcsetattr(input, TCSAFLUSH, &term);
+    (void) tcsetattr(fileno(input), TCSAFLUSH, &term);
 #else
 #ifdef HAVE_TERMIO_H
     term.c_lflag = svflagval;
-    (void) ioctl(input, TCSETA, &term);
+    (void) ioctl(fileno(input), TCSETA, &term);
 #else
     ttyb.sg_flags = svflagval;
-    (void) ioctl(input, TIOCSETP, &ttyb);
+    (void) ioctl(fileno(input), TIOCSETP, &ttyb);
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
@@ -185,8 +190,8 @@ char * tgetpass(prompt, timeout)
 #endif
 
     /* close /dev/tty if that's what we opened */
-    if (input != fileno(stdin))
-	(void) close(input);
+    if (input != stdin)
+	(void) fclose(input);
 
     if (buf[0])
 	return(buf);
