@@ -386,9 +386,9 @@ static int compare_args(user_args, sudoers_args)
 {
     char **ua, **sa;
 
-    for (ua=user_args, sudoers_args=sa; *ua && *sa; ua++, sa++) {
+    for (ua=user_args, sa=sudoers_args; *ua && *sa; ua++, sa++) {
 	/* only do wildcard match if there are meta chars */
-	/* XXX - is this really any faster? */
+	/* XXX - is this really any faster than wildmat() for all? */
 	if (has_meta(*sa)) {
 	    if (wildmat(*ua, *sa) != 1)
 		return(FALSE);
