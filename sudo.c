@@ -80,7 +80,9 @@ static char rcsid[] = "$Id$";
 #ifdef _AIX
 #include <sys/id.h>
 #endif /* _AIX */
+
 #include "sudo.h"
+#include "version.h"
 
 #ifndef STDC_HEADERS
 extern char *malloc();
@@ -134,6 +136,18 @@ main(argc, argv)
 	usage();
 
     /*
+     * print version string and exit if we got -v
+     * when we add other options getopt(3) will be used
+     */
+    if (*argv[1] == '-')
+	if (!strcmp(argv[1], "-v")) {
+	    (void) printf("CU Sudo version %s\n", version);
+	    exit(0);
+	} else {
+	    usage();
+	}
+
+    /*
      * close all file descriptors to make sure we have a nice
      * clean slate from which to work.  
      */
@@ -157,9 +171,9 @@ main(argc, argv)
 	log_error(ALL_SYSTEMS_GO);
 	be_root();
 #ifdef USE_EXECV
-	execv(cmnd, &Argv[1]);
+	execv(cmnd, (const char **) &Argv[1]);
 #else /* USE_EXECV */
-	execvp(cmnd, &Argv[1]);
+	execvp(cmnd, (const char **) &Argv[1]);
 #endif /* USE_EXECV */
 	perror(cmnd);		/* exec failed! */
 	exit(-1);
@@ -292,7 +306,7 @@ static void load_globals()
 
 static void usage()
 {
-    (void) fprintf(stderr, "usage: %s command\n", *Argv);
+    (void) fprintf(stderr, "usage: %s [-v] [command]\n", *Argv);
     exit(1);
 }
 
