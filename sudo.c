@@ -205,6 +205,9 @@ main(argc, argv)
 	case MODE_VALIDATE :
 	    cmnd = "validate";
 	    break;
+    	case MODE_KILL :
+	    cmnd = "kill";
+	    break;
 	case MODE_LIST :
 	    cmnd = "list";
 	    printmatches = 1;
@@ -212,7 +215,7 @@ main(argc, argv)
     }
 
     /* must have a command to run unless got -s */
-    if (Argc == 1 && !(sudo_mode & MODE_SHELL))
+    if (cmnd == NULL && Argc == 1 && !(sudo_mode & MODE_SHELL))
 	usage(1);
 
     /*
@@ -442,17 +445,17 @@ static void load_globals(sudo_mode)
     }
 
     /*
-     * load a list of ip addresses and netmasks into
-     * the interfaces array.
-     */
-    load_interfaces();
-
-    /*
      * We don't want to return the fully quallified name unless FQDN is set
      */
     if ((p = strchr(host, '.')))
 	*p = '\0';
 #endif /* FQDN */
+
+    /*
+     * load a list of ip addresses and netmasks into
+     * the interfaces array.
+     */
+    load_interfaces();
 }
 
 
@@ -486,7 +489,7 @@ static int parse_args()
 
 	switch (Argv[1][1]) {
 	    case 'p':
-		if (Argc < 4)
+		if (Argc + (ret & MODE_SHELL) < 4)
 		    usage(1);
 
 		prompt = Argv[2];
