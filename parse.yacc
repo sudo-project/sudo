@@ -244,7 +244,7 @@ entry		:	COMMENT
 			    { ; }
                 |       error COMMENT
 			    { yyerrok; }
-		|	{ push; } opuser privileges {
+		|	{ push; } userlist privileges {
 			    while (top && user_matches != TRUE) {
 				pop;
 			    }
