@@ -295,6 +295,12 @@
 #endif
 #endif
 
+/* Define if you want the hostname to be entered into the log file */
+#undef HOST_IN_LOG
+
+/* Define if you want the log file line to be wrapped */
+#undef WRAP_LOG
+
 /*
  * Paths to commands used by sudo.  There are used by pathnames.h.
  * If you want to override these values, do so in pathnames.h, not here!
