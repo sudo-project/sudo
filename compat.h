@@ -72,6 +72,14 @@
 #endif /* S_ISREG */
 
 /*
+ * For kerberos, max password len is 128
+ */
+#ifdef HAVE_KERB4
+#  undef _PASSWD_LEN
+#  define _PASSWD_LEN	128
+#endif /* HAVE_KERB4 */
+
+/*
  * Some OS's lack these
  */
 #ifndef UID_NO_CHANGE
@@ -80,15 +88,6 @@
 #ifndef GID_NO_CHANGE
 #  define GID_NO_CHANGE	((gid_t) -1)
 #endif /* GID_NO_CHANGE */
-
-/*
- * Emulate setreuid(2) with setresuid(2)
- */
-#if defined(HAVE_SETRESUID) && !defined(HAVE_SETREUID)
-#  undef setreuid
-#  define setreuid(__R, __E)	(setresuid(__R, __E, UID_NO_CHANGE))
-#  define HAVE_SETREUID
-#endif /* HAVE_SETRESUID && !HAVE_SETREUID */
 
 /*
  * Emulate seteuid() and setegid() for HP-UX
