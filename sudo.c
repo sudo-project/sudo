@@ -683,8 +683,9 @@ static void load_interfaces()
 
     /* if there were bogus entries, realloc the array */
     if (i != j) {
+	num_interfaces = j;
 	interfaces = (struct interface *) realloc(interfaces,
-	    sizeof(struct interface) * j);
+	    sizeof(struct interface) * num_interfaces);
 	if (interfaces == NULL) {
 	    perror("realloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
