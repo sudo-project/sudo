@@ -140,6 +140,10 @@ Special features/options:
                           doesn't have -laudit you should be able to
                           link without it.
 
+  --with-authenticate     Enable support for the AIX 4.x general authentication
+			  function.  This will use the authentication
+			  scheme specified for the user on the machine.
+
   --with-DCE              Enable DCE support.
                           Known to work on HP-UX 9.X and 10.0.
                           Other platforms may require source code
