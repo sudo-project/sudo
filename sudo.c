@@ -101,6 +101,15 @@ extern char *strdup	__P((const char *));
 
 
 /*
+ * Local type declarations
+ */
+struct env_table {
+    char *name;
+    int len;
+};
+
+
+/*
  * local functions not visible outside sudo.c
  */
 static int  parse_args		__P((void));
@@ -109,9 +118,7 @@ static void load_globals	__P((void));
 static int check_sudoers	__P((void));
 static void load_cmnd		__P((void));
 static void add_env		__P((void));
-static void rmenv		__P((char **, char *, int));
-static void clean_env		__P((char **));
-static char *uid2str		__P((uid_t));
+static void clean_env		__P((char **, struct env_table *));
 extern int user_is_exempt	__P((void));
 
 /*
@@ -130,6 +137,24 @@ struct stat cmnd_st;
 extern struct interface *interfaces;
 extern int num_interfaces;
 extern int printmatches;
+
+/*
+ * Table of "bad" envariables to remove and len for strncmp()
+ */
+struct env_table badenv_table[] = {
+    { "LD_", 3 },
+#ifdef __hpux
+    { "SHLIB_PATH=", 11 },
+#endif /* __hpux */
+#ifdef _AIX
+    { "LIBPATH=", 8 },
+#endif /* _AIX */
+#if defined (__osf__) && defined(__alpha)
+    { "_RLD_", 5 },
+#endif /* __alpha && __alpha */
+    { "IFS=", 4 },
+    { (char *) NULL, 0 }
+};
 
 
 /********************************************************************
@@ -198,7 +223,7 @@ main(argc, argv)
 	(void) close(rtn);
 #endif /* HAVE_SYSCONF */
 
-    clean_env(environ);		/* clean up the environment (no LD_*) */
+    clean_env(environ, badenv_table);
 
     load_globals();		/* load the user host cmnd and uid variables */
 
@@ -312,7 +337,13 @@ static void load_globals()
      */
     set_perms(PERM_ROOT);
     if ((pw_ent = getpwuid(uid)) == NULL) {
-	user = uid2str(uid);
+	set_perms(PERM_USER);
+	if ((user = (char *)malloc(MAX_UID_T_LEN + 1)) == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+	(void) sprintf(user, "%ld", uid);
 	log_error(GLOBAL_NO_PW_ENT);
 	inform_user(GLOBAL_NO_PW_ENT);
 	exit(1);
@@ -484,73 +515,6 @@ static void usage(exit_val)
 
 /**********************************************************************
  *
- *  clean_env()
- *
- *  This function builds cleans up the environ pointer so that all execv*()'s
- *  omit LD_* variables and hard-code PATH if SECURE_PATH is defined.
- */
-
-static void clean_env(envp)
-    char **envp;
-{
-    /*
-     * omit all LD_* environmental vars
-     */
-    rmenv(envp, "LD_", 3);
-#ifdef __hpux
-    rmenv(envp, "SHLIB_PATH", 10);
-#endif /* __hpux */
-#ifdef _AIX
-    rmenv(envp, "LIBPATH", 7);
-#endif /* _AIX */
-#ifdef __alpha
-    rmenv(envp, "_RLD_", 5);
-#endif /* __alpha */
-
-    /* remove IFS variable to prevent /bin/sh spoofing */
-    rmenv(envp, "IFS", 3);
-
-#ifdef SECURE_PATH
-    if (!user_is_exempt())
-    sudo_setenv("PATH", SECURE_PATH);
-#endif /* SECURE_PATH */
-}
-
-
-
-/**********************************************************************
- *
- * rmenv()
- *
- *  this function removes things from the environment that match the
- *  string "s" up to length len [ie: with strncmp()].
- */
-
-static void rmenv(envp, s, len)
-    char ** envp;				/* pointer to environment */
-    char * s;					/* string to search for */
-    int len;					/* how much of it to check */
-{
-    char ** tenvp;				/* temp env pointer */
-    char ** move;				/* used to move around */
-
-    /*
-     * cycle through the environment and purge strings that match s
-     */
-    for (tenvp=envp; *tenvp; tenvp++) {
-	if (!strncmp(*tenvp, s, len)) {
-	    /* matched: remove by shifting everything below one up */
-	    for (move=tenvp; *move; move++)
-		*move = *(move+1);
-	    tenvp--;
-	}
-    }
-}
-
-
-
-/**********************************************************************
- *
  * add_env()
  *
  *  this function adds sudo-specific variables into the environment
@@ -558,7 +522,13 @@ static void rmenv(envp, s, len)
 
 static void add_env()
 {
-    char *idstr;
+    char idstr[MAX_UID_T_LEN + 1];
+
+#ifdef SECURE_PATH
+    /* replace the PATH envariable with a secure one */
+    if (!user_is_exempt())
+	sudo_setenv("PATH", SECURE_PATH);
+#endif /* SECURE_PATH */
 
     /* add the SUDO_COMMAND envariable */
     if (sudo_setenv("SUDO_COMMAND", cmnd)) {
@@ -575,22 +545,20 @@ static void add_env()
     }
 
     /* add the SUDO_UID envariable */
-    idstr = uid2str(uid);
+    (void) sprintf(idstr, "%ld", (long) uid);
     if (sudo_setenv("SUDO_UID", idstr)) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
-    (void) free(idstr);
 
     /* add the SUDO_GID envariable */
-    idstr = uid2str((uid_t)getegid());
+    (void) sprintf(idstr, "%ld", (long) getegid());
     if (sudo_setenv("SUDO_GID", idstr)) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
-    (void) free(idstr);
 }
 
 
@@ -728,25 +696,36 @@ void set_perms(perm)
 
 /**********************************************************************
  *
- * uid2str()
+ * clean_env()
  *
- *  this function allocates memory for a strings version of uid,
- *  then converts uid to a string and returns it.
+ *  This function removes things from the environment that match the
+ *  entries in badenv_table.  It would be nice to add in the SUDO_*
+ *  variables here as well but cmnd has not been defined at this point.
  */
 
-static char *uid2str(uid)
-    uid_t uid;
+static void clean_env(envp, badenv_table)
+    char **envp;
+    struct env_table *badenv_table;
 {
-    char *uidstr;
+    struct env_table *bad;
+    char **cur;
 
-    uidstr = (char *) malloc(MAX_UID_T_LEN + 1);
-    if (uidstr == NULL) {
-	perror("malloc");
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
+    /*
+     * Remove any envars that match entries in badenv_table
+     */
+    for (cur = envp; *cur; cur++) {
+	for (bad = badenv_table; bad -> name; bad++) {
+	    if (strncmp(*cur, bad -> name, bad -> len) == 0) {
+		/* got a match so remove it */
+		char **move;
+
+		for (move = cur; *move; move++)
+		    *move = *(move + 1);
+
+		cur--;
+
+		break;
+	    }
+	}
     }
-
-    (void) sprintf(uidstr, "%ld", uid);
-
-    return(uidstr);
 }
