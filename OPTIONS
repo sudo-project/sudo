@@ -142,8 +142,9 @@ INCORRECT_PASSWORD
     The default is "Sorry, try again."
 
 MAILSUBJECT
-    Subject of the mail sent to the ALERTMAIL user.
-    Default is "*** SECURITY information ***".
+    Subject of the mail sent to the ALERTMAIL user.  The token "%h"
+    will expand to the hostname of the machine.
+    Default is "*** SECURITY information for %h ***".
 
 PASSPROMPT
     Default prompt to use when asking for a password.  Can be overridden
@@ -220,9 +221,8 @@ LONG_OTP_PROMPT
 
 SUDOERS_MODE
     File mode for the sudoers file (octal).  Note that if you
-    set this to be more restictive than 0440 you *MUST* set
-    SUDOERS_UID to be something other than 0.  Also Note that
-    this is usually set in the Makefile.
+    wish to NFS-mount the sudoers file this must be group
+    readable.  Also Note that this is usually set in the Makefile.
     The default mode is 0440.
 
 SUDOERS_UID
