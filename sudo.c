@@ -133,7 +133,7 @@ char host[MAXHOSTNAMELEN + 1];
 struct interface *interfaces;
 int num_interfaces;
 char cwd[MAXPATHLEN + 1];
-uid_t uid = -2;
+uid_t uid = (uid_t)-2;
 
 
 /********************************************************************
@@ -175,6 +175,9 @@ main(argc, argv)
 	case MODE_VALIDATE :
 	    cmnd = "validate";
 	    break;
+	case MODE_LIST :
+	    cmnd = "list";
+	    break;
     }
 
     /*
@@ -197,6 +200,9 @@ main(argc, argv)
 	load_cmnd();		/* load the cmnd global variable */
     } else if (sudo_mode == MODE_KILL) {
 	remove_timestamp();	/* remove the timestamp ticket file */
+	exit(0);
+    } else if (sudo_mode == MODE_LIST) {
+	(void) validate();	/* list the user's available commands */
 	exit(0);
     }
 
@@ -359,6 +365,9 @@ static int parse_args()
 	    case 'k':
 		ret = MODE_KILL;
 		break;
+	    case 'l':
+		ret = MODE_LIST;
+		break;
 	    case 'V':
 		ret = MODE_VERSION;
 		break;
@@ -389,7 +398,7 @@ static int parse_args()
 static void usage(exit_val)
     int exit_val;
 {
-    (void) fprintf(stderr, "usage: %s -V | -h | -v | -k | <command>\n", Argv[0]);
+    (void) fprintf(stderr, "usage: %s -V | -h | -l | -v | -k | <command>\n", Argv[0]);
     exit(exit_val);
 }
 
@@ -545,7 +554,7 @@ static void add_env()
     }
 
     /* add the SUDO_UID envariable */
-    for (len = 1 + (uid < 0), n = (int)uid; (n = n / 10) != 0; )
+    for (len = 1 + ((int)uid < 0), n = (int)uid; (n = n / 10) != 0; )
 	++len;
     
     uidstr = (char *) malloc(len+1);
