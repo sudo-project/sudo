@@ -645,8 +645,8 @@ static void check_passwd()
  *
  *  Validate a user via kerberos.
  */
-static int sudo_krb_validate_user(pw_ent, pass)
-    struct passwd *pw_ent;
+static int sudo_krb_validate_user(pw, pass)
+    struct passwd *pw;
     char *pass;
 {
     char realm[REALM_SZ];
@@ -662,7 +662,7 @@ static int sudo_krb_validate_user(pw_ent, pass)
      * wipe out other kerberos tickets.
      */
     (void) sprintf(tkfile, "%s/tkt%ld", _PATH_SUDO_TIMEDIR,
-		   (long) pw_ent->pw_uid);
+		   (long) pw->pw_uid);
     (void) krb_set_tkt_string(tkfile);
 
     /*
@@ -670,7 +670,7 @@ static int sudo_krb_validate_user(pw_ent, pass)
      * the ruid and euid to be the same here so we setuid to root.
      */
     set_perms(PERM_ROOT, 0);
-    k_errno = krb_get_pw_in_tkt(pw_ent->pw_name, "", realm, "krbtgt", realm,
+    k_errno = krb_get_pw_in_tkt(pw->pw_name, "", realm, "krbtgt", realm,
 	DEFAULT_TKT_LIFE, pass);
 
     /*
@@ -788,7 +788,6 @@ static char *sudo_skeyprompt(user_skey, p)
 	/* allocate space for new prompt */
 	np_size = op_len + strlen(challenge) + 7;
 	if (!(new_prompt = (char *) malloc(np_size))) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
@@ -797,7 +796,6 @@ static char *sudo_skeyprompt(user_skey, p)
 	if (np_size < op_len + strlen(challenge) + 7) {
 	    np_size = op_len + strlen(challenge) + 7;
 	    if (!(new_prompt = (char *) realloc(new_prompt, np_size))) {
-		perror("malloc");
 		(void) fprintf(stderr, "%s: cannot allocate memory!\n",
 			       Argv[0]);
 		exit(1);
@@ -863,7 +861,6 @@ static char *sudo_opieprompt(user_opie, p)
 	/* allocate space for new prompt */
 	np_size = op_len + strlen(challenge) + 7;
 	if (!(new_prompt = (char *) malloc(np_size))) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
@@ -872,7 +869,6 @@ static char *sudo_opieprompt(user_opie, p)
 	if (np_size < op_len + strlen(challenge) + 7) {
 	    np_size = op_len + strlen(challenge) + 7;
 	    if (!(new_prompt = (char *) realloc(new_prompt, np_size))) {
-		perror("malloc");
 		(void) fprintf(stderr, "%s: cannot allocate memory!\n",
 			       Argv[0]);
 		exit(1);
@@ -977,7 +973,6 @@ static char *expand_prompt(old_prompt, user, host)
 
     if (subst) {
 	if ((new_prompt = (char *) malloc(len + 1)) == NULL) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}

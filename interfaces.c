@@ -125,7 +125,7 @@ void load_interfaces()
     for (;;) {
 	ifconf_buf = ifconf_buf ? realloc(ifconf_buf, len) : malloc(len);
 	if (ifconf_buf == NULL) {
-	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
 	ifconf = (struct ifconf *) ifconf_buf;
@@ -159,7 +159,6 @@ void load_interfaces()
      */
     interfaces = (struct interface *) malloc(sizeof(struct interface) * n);
     if (interfaces == NULL) {
-	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
