@@ -341,7 +341,7 @@ rebuild_env(sudo_mode, envp)
 	if (!(didvar & DID_HOME))
 	    *nep++ = format_env("HOME", user_dir);
 	if (!(didvar & DID_SHELL))
-	    *nep++ = format_env("SHELL", user_shell);
+	    *nep++ = format_env("SHELL", sudo_user.pw->pw_shell);
 	if (!(didvar & DID_LOGNAME))
 	    *nep++ = format_env("LOGNAME", user_name);
 	if (!(didvar & DID_USER))

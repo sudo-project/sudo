@@ -511,7 +511,8 @@ init_vars(sudo_mode)
 	log_error(0, "uid %ld does not exist in the passwd file!",
 	    (long) pw.pw_uid);
     }
-    user_shell = sudo_user.pw->pw_shell;
+    if (user_shell == NULL || *user_shell == '\0')
+	user_shell = sudo_user.pw->pw_shell;
 
     /* It is now safe to use log_error() and set_perms() */
 
