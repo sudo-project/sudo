@@ -1346,7 +1346,7 @@ case "$host" in
     *-*-irix*)
 		CPPFLAGS="${CPPFLAGS} -D_BSD_TYPES"
 		if test -z "$NROFFPROG"; then
-		    MAN_POSTINSTALL='	/bin/rm -f $(mandir8)/sudo.$(mansect8).z $(mandir8)/visudo.$(mansect8).z $(mandir5)/sudoers.$(mansect5).z ; /usr/bin/pack $(mandir8)/sudo.$(mansect8) $(mandir8)/visudo.$(mansect8) $(mandir5)/sudoers.$(mansect5)'
+		    MAN_POSTINSTALL='	/bin/rm -f $(mandirsu)/sudo.$(mansectsu).z $(mandirsu)/visudo.$(mansectsu).z $(mandirform)/sudoers.$(mansectform).z ; /usr/bin/pack $(mandirsu)/sudo.$(mansectsu) $(mandirsu)/visudo.$(mansectsu) $(mandirform)/sudoers.$(mansectform)'
 		    if test "$prefix" = "/usr/local" -a "$mandir" = '$(prefix)/man'; then
 			if test -d /usr/share/catman/local; then
 			    mandir="/usr/share/catman/local"
