@@ -140,8 +140,8 @@ dnl Where the log file goes, use /var/log if it exists, else /{var,usr}/adm
 dnl
 AC_DEFUN(SUDO_TIMEDIR, [AC_MSG_CHECKING(for timestamp file location)
 if test -d "/var/run"; then
-    AC_MSG_RESULT(/var/run/.odus)
-    AC_DEFINE(_SUDO_PATH_TIMEDIR, "/var/run/.odus")
+    AC_MSG_RESULT(/var/run/sudo)
+    AC_DEFINE(_SUDO_PATH_TIMEDIR, "/var/run/sudo")
 elif test -d "/tmp"; then
     AC_MSG_RESULT(/tmp/.odus)
     AC_DEFINE(_SUDO_PATH_TIMEDIR, "/tmp/.odus")

@@ -130,7 +130,7 @@ dynamic loader disables user-defined library search paths
 for setuid programs.  (Most modern dynamic loaders do this.)
 
 B<sudo> will check the ownership of its timestamp directory
-(F</var/run/.odus> or F</tmp/.odus> by default) and ignore
+(F</var/run/sudo> or F</tmp/.odus> by default) and ignore
 the directory's contents if it is not owned by root and
 only read, writable, and executable by root.  On systems
 that allow users to give files away to root (via chown),
