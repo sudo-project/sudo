@@ -113,7 +113,9 @@ set_perms(perm, sudo_mode)
 {
     struct passwd *pw;
     int error;
+#ifdef HAVE_LOGIN_CAP_H
     extern login_cap_t *lc;
+#endif
     extern char *runas_homedir;
 
     /*
