@@ -570,8 +570,6 @@ int sudo_krb_validate_user(user, pass)
     char *env;
     int k_errno;
 
-    fprintf(stderr, "validating via kerb4\n");
-
     /* Get the local realm */
     if (krb_get_lrealm(realm, 1) != KSUCCESS) {
 	/* XXX - use logging functions */
