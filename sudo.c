@@ -78,6 +78,9 @@
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 #ifdef HAVE_LOGINCAP
 # include <login_cap.h>
+# ifndef LOGIN_DEFROOTCLASS
+#  define LOGIN_DEFROOTCLASS	"daemon"
+# endif
 #endif
 
 #include "sudo.h"
@@ -1085,6 +1088,17 @@ set_loginclass(pw)
     struct passwd *pw;
 {
     login_cap_t *lc;
+    int errflags;
+
+    /*
+     * Don't make it a fatal error if the user didn't specify the login
+     * class themselves.  We do this because if login.conf gets
+     * corrupted we want the admin to be able to use sudo to fix it.
+     */
+    if (login_class)
+	errflags = NO_MAIL|MSG_ONLY;
+    else
+	errflags = NO_MAIL|MSG_ONLY|NO_EXIT;
 
     if (login_class && strcmp(login_class, "-") != 0) {
 	if (strcmp(*user_runas, "root") != 0 && user_uid != 0) {
@@ -1092,18 +1106,16 @@ set_loginclass(pw)
 		Argv[0], login_class);
 	    exit(1);
 	}
+    } else {
+	login_class = pw->pw_class;
+	if (!login_class || !*login_class)
+	    login_class =
+		(pw->pw_uid == 0) ? LOGIN_DEFROOTCLASS : LOGIN_DEFCLASS;
+    }
 
-	lc = login_getclass(login_class);
-	if (!lc || !lc->lc_class || strcmp(lc->lc_class, login_class) != 0)
-	    log_error(NO_MAIL|MSG_ONLY, "unknown login class: %s", login_class);
-    } else if (!(lc = login_getpwclass(pw))) {
-	/*
-	 * This is not a fatal error if the user didn't specify the login
-	 * class themselves.  We do this because if login.conf gets
-	 * corrupted we want the admin to be able to use sudo to fix it.
-	 */
-	log_error(login_class ? NO_MAIL|MSG_ONLY : NO_MAIL|NO_EXIT|MSG_ONLY,
-	    "can't get class for user: %s", user_runas);
+    lc = login_getclass(login_class);
+    if (!lc || !lc->lc_class || strcmp(lc->lc_class, login_class) != 0) {
+	log_error(errflags, "unknown login class: %s", login_class);
 	return(0);
     }
     
@@ -1111,7 +1123,7 @@ set_loginclass(pw)
     if (setusercontext(lc, pw, pw->pw_uid,
 	LOGIN_SETUSER|LOGIN_SETGROUP|LOGIN_SETRESOURCES|LOGIN_SETPRIORITY) < 0)
 	log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,
-	    "setusercontext() failed for login class %s", lc);
+	    "setusercontext() failed for login class %s", login_class);
 
     login_close(lc);
     return(1);

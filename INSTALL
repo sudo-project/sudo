@@ -187,11 +187,12 @@ Special features/options:
 	access DCE via PAM before using this option.
 
   --with-logincap
-	Enable support for BSD login classes on FreeBSD.  This adds support
-	for the login classes specified in /etc/login.conf.  By default,
-	a login class is not applied unless the 'use_loginclass' option
-	is defined in sudoers or the user specifies a class on the command
-	line.
+	Enable support for BSD login classes on FreeBSD and BSD/OS.  This
+	adds support for the login classes specified in /etc/login.conf.
+	By default, a login class is not applied unless the 'use_loginclass'
+	option is defined in sudoers or the user specifies a class on the
+	command line.  It does *not*, however cause sudo to use BSD
+	authentication.
 
   --disable-sia
 	Disable SIA support.  This is the "Security Integration Architecture"

@@ -1275,11 +1275,11 @@ Sudo 1.6.2 released.
 
 402) Fixed a typo/thinko that broke secureware support for long passwords.
 
-403) Added a new command line switch '-c' to support FreeBSD style login
-     classes.  The '-c' option can be used to sudo a command with specific
-     resource limits in the login.conf database.  This feature is optionally
-     enabled via the --with-logincap configure switch.  Based on a patch
-     from Michael D. Marchionna.
+403) Added a new command line switch '-c' to support BSD login classes.
+     The '-c' option can be used to sudo a command with specific resource
+     limits in the login.conf database.  This feature is optionally enabled
+     via the --with-logincap configure switch.  Based on a patch from
+     Michael D. Marchionna.
 
 404) Fixed a bug where sudo would hang around and consume CPU if we spawn
      a long-running process.
