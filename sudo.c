@@ -336,15 +336,6 @@ void be_user()
     }
 }
 #else /* _AIX */
-# ifdef HAS_SAVED_UID
-void be_user()
-{
-    if (setreuid(uid, uid)) {
-        perror("setreuid(uid)");
-        exit(1); 
-    }
-}
-# else /* HAS_SAVED_UID */
 void be_user()
 {
     if (seteuid(uid)) {
@@ -352,7 +343,6 @@ void be_user()
         exit(1); 
     }
 }
-# endif /* HAS_SAVED_UID */
 #endif /* _AIX */
 
 
