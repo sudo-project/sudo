@@ -29580,12 +29580,122 @@ if test -n "$with_ldap"; then
 	blibpath_add="${blibpath_add}:${with_ldap}/lib"
     fi
 
+	_LDFLAGS="$LDFLAGS"
+
+    if test X"$with_rpath" = X"yes"; then
+	LDFLAGS="${LDFLAGS} -L${with_ldap}/lib -R${with_ldap}/lib"
+    else
+	LDFLAGS="${LDFLAGS} -L${with_ldap}/lib"
+    fi
+    if test X"$blibpath" != X"" -a "LDFLAGS" = "SUDO_LDFLAGS"; then
+	blibpath_add="${blibpath_add}:${with_ldap}/lib"
+    fi
+
 	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
 	with_ldap=yes
     fi
-    LIBS="${LIBS} -lldap"
-    SUDO_LIBS="${SUDO_LIBS} -lldap"
     SUDO_OBJS="${SUDO_OBJS} ldap.o"
+
+    echo "$as_me:$LINENO: checking for LDAP libraries" >&5
+echo $ECHO_N "checking for LDAP libraries... $ECHO_C" >&6
+    LDAP_LIBS=""
+    _LIBS="$LIBS"
+    found=no
+    for l in -lldap -llber '-lssl -lcrypto'; do
+	LIBS="${LIBS} $l"
+	LDAP_LIBS="${LDAP_LIBS} $l"
+	cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <sys/types.h>
+	#include <lber.h>
+	#include <ldap.h>
+int
+main ()
+{
+(void)ldap_init(0, 0)
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  found=yes; break
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+    done
+        if test "$found" = "no"; then
+	LDAP_LIBS=" -ldap"
+	echo "$as_me:$LINENO: result: not found, using -ldap" >&5
+echo "${ECHO_T}not found, using -ldap" >&6
+    else
+	echo "$as_me:$LINENO: result: $LDAP_LIBS" >&5
+echo "${ECHO_T}$LDAP_LIBS" >&6
+    fi
+        echo "$as_me:$LINENO: checking whether lber.h is needed" >&5
+echo $ECHO_N "checking whether lber.h is needed... $ECHO_C" >&6
+    cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <sys/types.h>
+    #include <ldap.h>
+int
+main ()
+{
+(void)ldap_init(0, 0)
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+    echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+    cat >>confdefs.h <<\_ACEOF
+#define HAVE_LBER_H 1
+_ACEOF
+
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 
 
 
@@ -29672,6 +29782,10 @@ _ACEOF
 fi
 done
 
+
+    SUDO_LIBS="${SUDO_LIBS}${LDAP_LIBS}"
+    LIBS="$_LIBS"
+    LDFLAGS="$_LDFLAGS"
 fi
 
 if test -n "$blibpath"; then

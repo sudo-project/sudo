@@ -2083,15 +2083,43 @@ dnl
 if test -n "$with_ldap"; then
     if test "$with_ldap" != "yes"; then
 	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_ldap}/lib])
+	_LDFLAGS="$LDFLAGS"
+	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_ldap}/lib])
 	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
 	with_ldap=yes
     fi
-    LIBS="${LIBS} -lldap"
-    SUDO_LIBS="${SUDO_LIBS} -lldap"
     SUDO_OBJS="${SUDO_OBJS} ldap.o"
 
-    dnl XXX - check for -llber and -lldif as well as if lber.h is needed XXX
+    AC_MSG_CHECKING([for LDAP libraries])
+    LDAP_LIBS=""
+    _LIBS="$LIBS"
+    found=no
+    for l in -lldap -llber '-lssl -lcrypto'; do
+	LIBS="${LIBS} $l"
+	LDAP_LIBS="${LDAP_LIBS} $l"
+	AC_TRY_LINK([#include <sys/types.h>
+	#include <lber.h>
+	#include <ldap.h>], [(void)ldap_init(0, 0)], [found=yes; break], [])
+    done
+    dnl if nothing linked just try with -ldap
+    if test "$found" = "no"; then
+	LDAP_LIBS=" -ldap"
+	AC_MSG_RESULT([not found, using -ldap])
+    else
+	AC_MSG_RESULT([$LDAP_LIBS])
+    fi
+    dnl try again w/o explicitly including lber.h
+    AC_MSG_CHECKING([whether lber.h is needed])
+    AC_TRY_LINK([#include <sys/types.h>
+    #include <ldap.h>], [(void)ldap_init(0, 0)], [AC_MSG_RESULT([no])], [
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_LBER_H)])
+
     AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s)
+
+    SUDO_LIBS="${SUDO_LIBS}${LDAP_LIBS}"
+    LIBS="$_LIBS"
+    LDFLAGS="$_LDFLAGS"
 fi
 
 dnl
