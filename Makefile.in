@@ -269,16 +269,8 @@ dist: $(DISTFILES)
 # This is ugly but it works...
 update_version:
 	for f in Makefile.in $(VERSIONFILES); do \
-	    if co -l -q $$f; then \
-		CHECKIN=1; \
-	    else \
-		CHECKIN=0; \
-	    fi; \
-	    VERSION=`sed -n 's/static char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h`; \
+	    VERSION=`sed -n 's/static const char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h`; \
 	    sed -e 's/\(VERSION =\) [^ ,:][^ ,:]*/\1 '$$VERSION'/' -e 's/\(CU sudo version\) [^ ,:][^ ,:]*/\1 '$$VERSION'/' < $$f > $$f.$$$$; \
 	    mv -f $$f.$$$$ $$f; \
 	    chmod 644 $$f; \
-	    if [ $$CHECKIN -eq 1 ]; then \
-		ci -u -m"updated version" $$f; \
-	    fi; \
 	done
