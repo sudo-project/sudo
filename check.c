@@ -223,7 +223,7 @@ static int check_timestamp()
 	 * last component in _PATH_SUDO_TIMEDIR must be owned by root
 	 * and mode 0700 or we ignore the timestamps in it.
 	 */
-	if (statbuf.st_uid != 0 || !(statbuf.st_mode & S_IRWXU)) {
+	if (statbuf.st_uid != 0 || (statbuf.st_mode & 0000077)) {
 	    timedir_is_good = 0;
 	    timestamp_is_old = 2;
 	    log_error(BAD_STAMPDIR);
