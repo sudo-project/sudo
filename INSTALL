@@ -332,12 +332,11 @@ Special features/options:
 
   --with-tty-tickets
 	This makes sudo use a different ticket file for each tty (per user).
-	Ie: instead of the ticket file being "username" it is "username.tty".
-	This offers increased security in an open lab or with "shared" accounts
-	like "operator."  Note that this means that there will be more files in
-	the timestamp dir.  This is not a problem if your system has a cron job
-	to remove of files from /tmp (or wherever you specified the timestamp
-	dir to be).
+	Ie: instead of the ticket file being "username" it is "username:tty".
+	This is useful for "shared" accounts like "operator".  Note that this
+	means that there will be more files in the timestamp dir.  This is not
+	a problem if your system has a cron job to remove of files from /tmp
+	(or wherever you specified the timestamp dir to be).
 
   --with-insults
 	Define this if you want to be insulted for typing an incorrect password
