@@ -118,7 +118,8 @@ SRCS = alloc.c alloca.c check.c def_data.c defaults.c env.c fileops.c \
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
-	    auth/secureware.c auth/securid.c auth/sia.c auth/sudo_auth.c
+	    auth/secureware.c auth/securid.c auth/securid5.c auth/sia.c \
+	    auth/sudo_auth.c
 
 HDRS = compat.h def_data.h defaults.h ins_2001.h ins_classic.h ins_csops.h \
        ins_goons.h insults.h interfaces.h logging.h parse.h sudo.h sudo.tab.h \
@@ -255,6 +256,8 @@ secureware.o: $(authdir)/secureware.c $(AUTHDEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/secureware.c
 securid.o: $(authdir)/securid.c $(AUTHDEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/securid.c
+securid5.o: $(authdir)/securid5.c $(AUTHDEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/securid5.c
 sia.o: $(authdir)/sia.c $(AUTHDEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/sia.c
 
