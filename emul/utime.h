@@ -1,5 +1,5 @@
 /*
- *  CU sudo version 1.3.8
+ *  CU sudo version 1.4
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
