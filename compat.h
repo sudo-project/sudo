@@ -206,8 +206,9 @@ typedef struct sigaction sigaction_t;
 /*
  * If dirfd() does not exists, hopefully dd_fd does.
  */
-#if !defined(HAVE_DIRFD) && !defined(dirfd)
+#if !defined(HAVE_DIRFD) && defined(HAVE_DD_FD)
 # define dirfd(_d)	((_d)->dd_fd)
+# define HAVE_DIRFD
 #endif
 
 /*
