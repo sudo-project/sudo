@@ -571,17 +571,14 @@ int sudo_krb_validate_user(user, pass)
     int k_errno;
 
     /* Get the local realm */
-    if (krb_get_lrealm(realm, 1) != KSUCCESS) {
-	/* XXX - use logging functions */
-	(void) fprintf(stderr, "%s: Unable to get local realm\n", Argv[0]);
-	exit(1);
-    }
+    if (krb_get_lrealm(realm, 1) != KSUCCESS)
+	(void) fprintf(stderr, "Warning: Unable to get local kerberos realm\n");
 
     /* Need to set the ticket file based on the effective uid */
     if (env = (char *) getenv("KRBTKFILE")) {
 	krb_set_tkt_string(env);
     } else {
-	char tkfile[MAXPATHLEN];
+	char tkfile[10 + sizeof(TKT_ROOT)];	/* uid takes 10 chars max */
 
 	(void) sprintf(tkfile, "%s%d", TKT_ROOT, uid);
 	krb_set_tkt_string(tkfile);
@@ -621,12 +618,9 @@ int sudo_krb_validate_user(user, pass)
     }
 
     /* Exit if we got a kerberos error */
-    if (k_errno != INTK_OK && k_errno != INTK_BADPW) {
-	/* XXX - use logging functions */
-	(void) fprintf(stderr, "%s: Kerberos error: %s\n", Argv[0],
+    if (k_errno != INTK_OK && k_errno != INTK_BADPW && k_errno != KDC_PR_UNKNOWN)
+	(void) fprintf(stderr, "Warning: Kerberos error: %s\n", 
 	    krb_err_txt[k_errno]);
-	exit(1);
-    }
 
     return(!(k_errno == INTK_OK));
 }
