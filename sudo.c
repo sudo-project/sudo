@@ -169,6 +169,8 @@ struct env_table badenv_table[] = {
 #ifdef HAVE_KERB4
     { "KRB_CONF", 8 },
 #endif
+    { "ENV=", 4 },
+    { "BASH_ENV=", 9 },
     { (char *) NULL, 0 }
 };
 
