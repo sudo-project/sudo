@@ -97,21 +97,21 @@ struct sudoersfile {
  * Function prototypes
  */
 static RETSIGTYPE quit		__P((int)) __attribute__((__noreturn__));
-static char *get_editor		__P((void));
+static char *get_args		__P((char *));
+static char *get_editor		__P((char **));
 static char whatnow		__P((void));
 static int check_aliases	__P((int));
 static int check_syntax		__P((char *, int));
-static int edit_sudoers		__P((struct sudoersfile *, char *, int));
+static int edit_sudoers		__P((struct sudoersfile *, char *, char *, int));
 static int install_sudoers	__P((struct sudoersfile *));
 static int print_unused		__P((VOID *, VOID *));
-static int reparse_sudoers	__P((char *, int, int));
+static int reparse_sudoers	__P((char *, char *, int, int));
 static int run_command		__P((char *, char **));
 static void setup_signals	__P((void));
 static void usage		__P((void)) __attribute__((__noreturn__));
-    VOID *v2;
 
-void yyerror			__P((const char *));
-void yyrestart			__P((FILE *));
+extern void yyerror		__P((const char *));
+extern void yyrestart		__P((FILE *));
 
 /*
  * External globals exported by the parser
@@ -144,7 +144,7 @@ main(argc, argv)
     char **argv;
 {
     struct sudoersfile *sp;
-    char *editor, *sudoers_path;
+    char *args, *editor, *sudoers_path;
     int ch, checkonly, quiet, strict;
 
     Argv = argv;
@@ -205,7 +205,7 @@ main(argc, argv)
     yyparse();
     (void) update_defaults();
 
-    editor = get_editor();
+    editor = get_editor(&args);
 
     /* Install signal handlers to clean up temp files if we are killed. */
     setup_signals();
@@ -217,11 +217,11 @@ main(argc, argv)
 	    while ((ch = getchar()) != EOF && ch != '\n')
 		    continue;
 	}
-	edit_sudoers(sp, editor, -1);
+	edit_sudoers(sp, editor, args, -1);
     }
 
     /* Check edited files for a parse error and re-edit any that fail. */
-    reparse_sudoers(editor, strict, quiet);
+    reparse_sudoers(editor, args, strict, quiet);
 
     /* Install the sudoers temp files. */
     for (sp = sudoerslist.first; sp != NULL; sp = sp->next) {
@@ -239,20 +239,22 @@ main(argc, argv)
  * Returns TRUE on success, else FALSE.
  */
 static int
-edit_sudoers(sp, editor, lineno)
+edit_sudoers(sp, editor, args, lineno)
     struct sudoersfile *sp;
-    char *editor;
+    char *editor, *args;
     int lineno;
 {
     int tfd;				/* sudoers temp file descriptor */
-    int n;				/* length parameter */
     int modified;			/* was the file modified? */
+    int ac;				/* argument count */
+    char **av;				/* argument vector for run_command */
+    char *cp;				/* scratch char pointer */
     char buf[PATH_MAX*2];		/* buffer used for copying files */
     char linestr[64];			/* string version of lineno */
-    char *av[4];			/* argument vector for run_command */
     struct timespec ts1, ts2;		/* time before and after edit */
     struct timespec orig_mtim;		/* starting mtime of sudoers file */
     off_t orig_size;			/* starting size of sudoers file */
+    ssize_t nread;			/* number of bytes read */
     struct stat sb;			/* stat buffer */
 
 #ifdef HAVE_FSTAT
@@ -275,12 +277,12 @@ edit_sudoers(sp, editor, lineno)
 	/* Copy sp->path -> sp->tpath and reset the mtime. */
 	if (orig_size != 0) {
 	    (void) lseek(sp->fd, (off_t)0, SEEK_SET);
-	    while ((n = read(sp->fd, buf, sizeof(buf))) > 0)
-		if (write(tfd, buf, n) != n)
+	    while ((nread = read(sp->fd, buf, sizeof(buf))) > 0)
+		if (write(tfd, buf, nread) != nread)
 		    error(1, "write error");
 
 	    /* Add missing newline at EOF if needed. */
-	    if (n > 0 && buf[n - 1] != '\n') {
+	    if (nread > 0 && buf[nread - 1] != '\n') {
 		buf[0] = '\n';
 		write(tfd, buf, 1);
 	    }
@@ -289,18 +291,39 @@ edit_sudoers(sp, editor, lineno)
     }
     (void) touch(-1, sp->tpath, &orig_mtim);
 
+    /* Find the length of the argument vector */
+    ac = 3 + (lineno > 0);
+    if (args) {
+        int wasspace;
+
+        ac++;
+        for (wasspace = FALSE, cp = args; *cp; cp++) {
+            if (isspace((unsigned char) *cp))
+                wasspace = TRUE;
+            else if (wasspace) {
+                wasspace = FALSE;
+                ac++;
+            }
+        }
+    }
+
     /* Build up argument vector for the command */
+    av = emalloc2(ac, sizeof(char *));
     if ((av[0] = strrchr(editor, '/')) != NULL)
 	av[0]++;
     else
 	av[0] = editor;
-    n = 1;
+    ac = 1;
     if (lineno > 0) {
 	(void) snprintf(linestr, sizeof(linestr), "+%d", lineno);
-	av[n++] = linestr;
+	av[ac++] = linestr;
     }
-    av[n++] = sp->tpath;
-    av[n++] = NULL;
+    if (args) {
+	for ((cp = strtok(args, " \t")); cp; (cp = strtok(NULL, " \t")))
+	    av[ac++] = cp;
+    }
+    av[ac++] = sp->tpath;
+    av[ac++] = NULL;
 
     /*
      * Do the edit:
@@ -360,8 +383,8 @@ edit_sudoers(sp, editor, lineno)
  * Returns TRUE on success, else FALSE.
  */
 static int
-reparse_sudoers(editor, strict, quiet)
-    char *editor;
+reparse_sudoers(editor, args, strict, quiet)
+    char *editor, *args;
     int strict, quiet;
 {
     struct sudoersfile *sp, *last;
@@ -411,7 +434,7 @@ reparse_sudoers(editor, strict, quiet)
 	    /* Edit file with the parse error */
 	    for (sp = sudoerslist.first; sp != NULL; sp = sp->next) {
 		if (errorfile == NULL || strcmp(sp->path, errorfile) == 0) {
-		    edit_sudoers(sp, editor, errorlineno);
+		    edit_sudoers(sp, editor, args, errorlineno);
 		    break;
 		}
 	    }
@@ -424,7 +447,7 @@ reparse_sudoers(editor, strict, quiet)
 	    printf("press return to edit %s: ", sp->path);
 	    while ((ch = getchar()) != EOF && ch != '\n')
 		    continue;
-	    edit_sudoers(sp, editor, errorlineno);
+	    edit_sudoers(sp, editor, args, errorlineno);
 	}
     } while (parse_error);
 
@@ -726,9 +749,10 @@ open_sudoers(path, keepopen)
 }
 
 static char *
-get_editor()
+get_editor(args)
+    char **args;
 {
-    char *Editor, *UserEditor, *EditorPath;
+    char *Editor, *EditorArgs, *EditorPath, *UserEditor, *UserEditorArgs;
 
     /*
      * Check VISUAL and EDITOR environment variables to see which editor
@@ -736,11 +760,13 @@ get_editor()
      * If the path is not fully-qualified, make it so and check that
      * the specified executable actually exists.
      */
+    UserEditorArgs = NULL;
     if ((UserEditor = getenv("VISUAL")) == NULL || *UserEditor == '\0')
 	UserEditor = getenv("EDITOR");
     if (UserEditor && *UserEditor == '\0')
 	UserEditor = NULL;
     else if (UserEditor) {
+	UserEditorArgs = get_args(UserEditor);
 	if (find_path(UserEditor, &Editor, NULL, getenv("PATH")) == FOUND) {
 	    UserEditor = Editor;
 	} else {
@@ -758,10 +784,11 @@ get_editor()
      * See if we can use the user's choice of editors either because
      * we allow any $EDITOR or because $EDITOR is in the allowable list.
      */
-    Editor = EditorPath = NULL;
-    if (def_env_editor && UserEditor)
+    Editor = EditorArgs = EditorPath = NULL;
+    if (def_env_editor && UserEditor) {
 	Editor = UserEditor;
-    else if (UserEditor) {
+	EditorArgs = UserEditorArgs;
+    } else if (UserEditor) {
 	struct stat editor_sb;
 	struct stat user_editor_sb;
 	char *base, *userbase;
@@ -773,6 +800,7 @@ get_editor()
 	EditorPath = estrdup(def_editor);
 	Editor = strtok(EditorPath, ":");
 	do {
+	    EditorArgs = get_args(Editor);
 	    /*
 	     * Both Editor and UserEditor should be fully qualified but
 	     * check anyway...
@@ -809,6 +837,7 @@ get_editor()
 	EditorPath = estrdup(def_editor);
 	Editor = strtok(EditorPath, ":");
 	do {
+	    EditorArgs = get_args(Editor);
 	    if (sudo_goodpath(Editor, NULL))
 		break;
 	} while ((Editor = strtok(NULL, ":")));
@@ -817,7 +846,28 @@ get_editor()
 	if (Editor == NULL || *Editor == '\0')
 	    errorx(1, "no editor found (editor path = %s)", def_editor);
     }
+    *args = EditorArgs;
     return(Editor);
+}
+
+/*
+ * Split out any command line arguments and return them.
+ */
+static char *
+get_args(cmnd)
+    char *cmnd;
+{
+    char *args;
+
+    args = cmnd;
+    while (*args && !isspace((unsigned char) *args))
+	args++;
+    if (*args) {
+	*args++ = '\0';
+	while (*args && isspace((unsigned char) *args))
+	    args++;
+    }
+    return(*args ? args : NULL);
 }
 
 /*
