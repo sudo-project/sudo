@@ -31,7 +31,6 @@ static char rcsid[] = "$Id$";
 #endif /* lint */
 
 #include "config.h"
-#include "pathnames.h"
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -55,6 +54,7 @@ static char rcsid[] = "$Id$";
 #include <sys/param.h>
 #include <netinet/in.h>
 
+#include "pathnames.h"
 #include "compat.h"
 
 #ifndef STDC_HEADERS
