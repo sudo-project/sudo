@@ -13,22 +13,22 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        specification section.  All command or host aliases need
        to start with their respective keywords (ie: Host_Alias,
        User_Alias, Runas_Alias or Cmnd_Alias).  If there are
-       multiple occurrences of a user, the union of the entries
-       will be used.
+       multiple occurrences of a user, the logical union of the
+       entries will be used.  Note that if there is an entry that
+       denies access to a command that is followed by an entry
+       that grants access the user will be allowed to run the
+       command.
 
        uuuusssseeeerrrr ssssppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnn ffffoooorrrrmmmmaaaatttt::::
 
 
          user access_group [: access_group] ...
 
-           access_group ::= host_type = [(runas_list)] [NOPASSWD:] [op]cmnd_type
-                            [,[(user_list)] [NOPASSWD:] [op]cmnd_type] ...
+           access_group ::= host_type = [(runas-list)] [NOPASSWD:] [op]cmnd_type
+                            [,[(user-list)] [NOPASSWD|PASSWD:] [op]cmnd_type] ...
               host_type ::= a lower-case hostname, netgroup, ip address,
                             network number, network number/netmask,
                             or host alias.
-              runas_list ::= comma-separated list of users, groups,
-                             netgroups or Runas_Aliases the user may run
-                             commands as (default is root).
               cmnd_type ::= a command OR a command alias.
                      op ::= the logical "!" NOT operator.
 
@@ -41,7 +41,8 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
              Host_Alias ::= a keyword.
               HOSTALIAS ::= an upper-case alias name.
               host-list ::= a comma separated list of hosts, netgroups,
-                            ip addresses, networks.
+                            ip addresses, networks.  A logical "!"
+                            NOT operator may be prefixed to any of these.
 
 
        uuuusssseeeerrrr aaaalllliiiiaaaassss sssseeeeccccttttiiiioooonnnn ffffoooorrrrmmmmaaaatttt::::
@@ -52,16 +53,15 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
              User_Alias ::= a keyword.
               USERALIAS ::= an upper-case alias name.
               user-list ::= a comma separated list of users, groups, netgroups.
-
-
-       rrrruuuunnnnaaaassss aaaalllliiiiaaaassss sssseeeeccccttttiiiioooonnnn ffffoooorrrrmmmmaaaatttt::::
-
-
-         Runas_Alias RUNASALIAS = runas-list
+                            A logical "!" NOT operator may be prefixed to any
+                            of these.
 
 
 
-17/Jan/99                      1.6                              1
+
+
+
+6/Apr/99                       1.6                              1
 
 
 
@@ -70,9 +70,16 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
+       rrrruuuunnnnaaaassss aaaalllliiiiaaaassss sssseeeeccccttttiiiioooonnnn ffffoooorrrrmmmmaaaatttt::::
+
+
+         Runas_Alias RUNASALIAS = runas-list
+
              Runas_Alias ::= a keyword.
               RUNASALIAS ::= an upper-case alias name.
               runas-list ::= a comma separated list of users, groups, netgroups.
+                             A logical "!" NOT operator may be prefixed to any
+                             of these.
 
 
        ccccoooommmmmmmmaaaannnndddd aaaalllliiiiaaaassss sssseeeeccccttttiiiioooonnnn ffffoooorrrrmmmmaaaatttt::::
@@ -83,6 +90,8 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
              Cmnd_Alias ::= a keyword.
               CMNDALIAS ::= an upper-case alias name.
               cmnd-list ::= a comma separated list commands.
+                            A logical "!" NOT operator may be prefixed to any
+                            of these.
 
 
        ccccoooommmmmmmmaaaannnndddd ssssppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnn::::
@@ -93,6 +102,46 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                    path ::= a fully qualified pathname.
               arg[1..n] ::= optional command line arguments.
 
+
+       ppppeeeerrrrssssiiiisssstttteeeennnncccceeee ooooffff mmmmooooddddiiiiffffiiiieeeerrrrssss
+
+       When a _r_u_n_a_s_-_l_i_s_t is specified for an _a_c_c_e_s_s___g_r_o_u_p, it
+       affects all commands in the _a_c_c_e_s_s___g_r_o_u_p.  For example,
+       given:
+           oper bigserver = (root, sysadm) /usr/bin/kill, /bin/rm
+       User oper will be able to run /usr/bin/kill and /bin/rm as
+       rrrrooooooootttt or ssssyyyyssssaaaaddddmmmm on the machine, bigserver.  The _r_u_n_a_s_-_l_i_s_t
+       is "sticky" across entries in the comma-separated
+       _a_c_c_e_s_s___g_r_o_u_p.  You can override the _r_u_n_a_s_-_l_i_s_t with
+       another one, at which point the new _r_u_n_a_s_-_l_i_s_t becomes the
+       default for that _a_c_c_e_s_s___g_r_o_u_p.  For example, given:
+           oper bigserver = (root, sysadm) /usr/bin/kill, (root)
+       /bin/rm, \      /bin/rmdir User oper can still run
+       /usr/bin/kill as rrrrooooooootttt or ssssyyyyssssaaaaddddmmmm but can only run /bin/rm
+       and /bin/rmdir as rrrrooooooootttt.
+
+       Similarly, the NNNNOOOOPPPPAAAASSSSSSSSWWWWDDDD modifier is also persistent across
+       an _a_c_c_e_s_s___g_r_o_u_p. For example given:
+           oper bigserver = NOPASSWD: /usr/bin/kill, /bin/rm,
+       /bin/rmdir User oper will be able to run /usr/bin/kill,
+
+
+
+6/Apr/99                       1.6                              2
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
+       /bin/rm, and /bin/rmdir as rrrrooooooootttt without a password.  If we
+       change that to:
+           oper bigserver = NOPASSWD: /usr/bin/kill, PASSWD:
+       /bin/rm, /bin/rmdir User oper can still run /usr/bin/kill
+       without a password but must give a password to run /bin/rm
+       and /bin/rmdir.
 
        wwwwiiiillllddddccccaaaarrrrddddssss ((((aaaakkkkaaaa mmmmeeeettttaaaa cccchhhhaaaarrrraaaacccctttteeeerrrrssss))))::::
 
@@ -124,10 +173,27 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        Text after a pound sign (####) is considered a comment.
        Words that begin with a percent sign (%%%%) are assumed to be
+       UN*X groups (%staff refers to users in the group _s_t_a_f_f).
+       Words that begin with a plus sign (++++) are assumed to be
+       netgroups (++++ccccsssshhhhoooossssttttssss refers to the netgroup _c_s_h_o_s_t_s).  Long
+       lines can be newline escaped with the backslash \\\\
+       character.
+
+       The reserved word NNNNOOOOPPPPAAAASSSSSSSSWWWWDDDD indicates that a user need not
+       enter a password for the command listed in that entry.
+       The NNNNOOOOPPPPAAAASSSSSSSSWWWWDDDD modifier is persistent across entries in a
+       _u_s_e_r_-_l_i_s_t and can be reversed with the PPPPAAAASSSSSSSSWWWWDDDD modifier.
+
+       The reserved alias _A_L_L can be used for both
+       {Host,User,Cmnd}_Alias.  DDDDOOOO NNNNOOOOTTTT define an alias of _A_L_L, it
+       will NNNNOOOOTTTT be used.  Note that _A_L_L implies the entire
+       universe of hosts/users/commands.  You can subtract
+       elements from the universe by using the syntax:
+          user  host=ALL,!ALIAS1,!/sbin/halt...
 
 
 
-17/Jan/99                      1.6                              2
+6/Apr/99                       1.6                              3
 
 
 
@@ -135,24 +201,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
-
-       UN*X groups (%staff refers to users in the group _s_t_a_f_f).
-       Words that begin with a plus sign (++++) are assumed to be
-       netgroups (++++ccccsssshhhhoooossssttttssss refers to the netgroup _c_s_h_o_s_t_s).  Long
-       lines can be newline escaped with the backslash \\\\
-       character.  The reserved word NNNNOOOOPPPPAAAASSSSSSSSWWWWDDDD indicates that a
-       user need not enter a password for the command listed in
-       that entry.
-
-       The reserved alias _A_L_L can be used for both
-       {Host,User,Cmnd}_Alias.  DDDDOOOO NNNNOOOOTTTT define an alias of _A_L_L, it
-       will NNNNOOOOTTTT be used.  Note that _A_L_L implies the entire
-       universe of hosts/users/commands.  You can subtract
-       elements from the universe by using the syntax:
-          user  host=ALL,!ALIAS1,!/etc/halt...  Note that the "!"
-       notation only works in a user's command list.  You may not
-       use it to subtract elements in a User_Alias, Host_Alias,
-       Cmnd_Alias or user list.
 
        Commands may have optional command line arguments.  If
        they do, then the arguments in the _s_u_d_o_e_r_s file must
@@ -179,28 +227,11 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
            Runas_Alias OP=root,operator
 
            # Command alias specification
-           Cmnd_Alias  LPCS=/usr/etc/lpc,/usr/ucb/lprm
+           Cmnd_Alias  LPCS=/usr/sbin/lpc,/usr/bin/lprm
            Cmnd_Alias  SHELLS=/bin/sh,/bin/csh,/bin/tcsh,/bin/ksh
-           Cmnd_Alias  SU=/bin/su
+           Cmnd_Alias  SU=/usr/bin/su
            Cmnd_Alias  MISC=/bin/rm,/bin/cat:\
-                       SHUTDOWN=/etc/halt,/etc/shutdown
-
-
-
-
-
-
-
-
-
-17/Jan/99                      1.6                              3
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
+                       SHUTDOWN=/sbin/halt,/sbin/shutdown
 
            # User specification
            FULLTIME    ALL=(ALL) NOPASSWD: ALL
@@ -208,12 +239,12 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
            PARTTIME    ALL=ALL,!SHELLS,!SU
            +interns    +openlabs=ALL,!SHELLS,!SU
            britt       REMOTE=SHUTDOWN:ALL=LPCS
-           jimbo       CUNETS=/bin/su ?*,!/bin/su *root*
-           nieusma     SERVERS=SHUTDOWN,/etc/reboot:\
+           jimbo       CUNETS=/usr/bin/su [!-]*,!/usr/bin/su *root*
+           nieusma     SERVERS=SHUTDOWN,/sbin/reboot:\
                        HUB=ALL,!SHELLS
-           jill        houdini=/etc/shutdown -[hr] now,MISC
-           markm       HUB=ALL,!MISC,!/etc/shutdown,!/etc/halt
-           davehieb    merlin=(OP) ALL:SERVERS=/etc/halt:\
+           jill        houdini=/sbin/shutdown -[hr] now,MISC
+           markm       HUB=ALL,!MISC,!/sbin/shutdown,!/sbin/halt
+           davehieb    merlin=(OP) ALL:SERVERS=/sbin/halt:\
                        kodiakthorn=NOPASSWD: ALL
            steve       CSNETS=(operator) /usr/op_commands/
 
@@ -225,11 +256,23 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        three machines merlin, kodiakthorn and spirit.  Similarly,
        SERVERS is set to the machines houdini, merlin,
        kodiakthorn and spirit.  The CSNETS alias will match any
+
+
+
+6/Apr/99                       1.6                              4
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        host on the 128.138.243.0, 128.138.204.0, or
        128.138.205.192 nets.  The CUNETS alias will match any
        host on the 128.138.0.0 (class B) network.  Note that
        these are nnnneeeettttwwwwoooorrrrkkkk addresses, not ip addresses.  Unless an
-       explicate netmask is given, the local _n_e_t_m_a_s_k is used to
+       explicit netmask is given, the local _n_e_t_m_a_s_k is used to
        determine whether or not the current host belongs to a
        network.
 
@@ -256,18 +299,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        PARTTIME        Part-time sysadmins in the PARTTIME alias
                        may run any command except those in the
-
-
-
-17/Jan/99                      1.6                              4
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
-
                        SHELLS and SU aliases on any host.
 
        +interns        Any user in the netgroup interns may run
@@ -281,27 +312,39 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        jimbo           The user jimbo may su to any user save
                        root on the machines on CUNETS (which is
-                       explicately listed as a class B network).
+                       explicitly listed as a class B network).
 
        nieusma         The user nieusma may run commands in the
-                       SHUTDOWN alias as well as _/_e_t_c_/_r_e_b_o_o_t on
+                       SHUTDOWN alias as well as _/_s_b_i_n_/_r_e_b_o_o_t on
                        the SERVER machines and any command except
                        those in the SHELLS alias on the HUB
                        machines.
 
-       jill            The user jill may run /etc/shutdown -h now
-                       or /etc/shutdown -r now as well as the
-                       commands in the MISC alias on houdini.
+       jill            The user jill may run /sbin/shutdown -h
+                       now or /sbin/shutdown -r now as well as
+
+
+
+6/Apr/99                       1.6                              5
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
+                       the commands in the MISC alias on houdini.
 
        markm           The user markm may run any command on the
-                       HUB machines except _/_e_t_c_/_s_h_u_t_d_o_w_n,
-                       _/_e_t_c_/_h_a_l_t, and commands listed in the MISC
-                       alias.
+                       HUB machines except _/_s_b_i_n_/_s_h_u_t_d_o_w_n,
+                       _/_s_b_i_n_/_h_a_l_t, and commands listed in the
+                       MISC alias.
 
        davehieb        The user davehieb may run any command on
                        merlin as any user in the Runas_Alias OP
                        (ie: root or operator).  He may also run
-                       _/_e_t_c_/_h_a_l_t on the SERVERS and any command
+                       _/_s_b_i_n_/_h_a_l_t on the SERVERS and any command
                        on kodiakthorn (no password required on
                        kodiakthorn).
 
@@ -319,19 +362,6 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 FFFFIIIILLLLEEEESSSS
         /etc/sudoers           file of authorized users.
         /etc/netgroup          list of network groups.
-
-
-
-
-
-
-17/Jan/99                      1.6                              5
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
@@ -361,6 +391,13 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
+6/Apr/99                       1.6                              6
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
@@ -391,6 +428,35 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-17/Jan/99                      1.6                              6
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+6/Apr/99                       1.6                              7
 
 

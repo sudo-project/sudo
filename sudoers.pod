@@ -12,21 +12,20 @@ The I<sudoers> file is composed of an optional host alias section,
 an optional command alias section and the user specification section.
 All command or host aliases need to start with their respective keywords
 (ie: Host_Alias, User_Alias, Runas_Alias or Cmnd_Alias).
-If there are multiple occurrences of a user, the union of the entries
-will be used.
+If there are multiple occurrences of a user, the logical union of the
+entries will be used.  Note that if there is an entry that denies access
+to a command that is followed by an entry that grants access the user
+will be allowed to run the command.
 
 =head2 user specification format:
 
   user access_group [: access_group] ...
 
-    access_group ::= host_type = [(runas_list)] [NOPASSWD:] [op]cmnd_type
-		     [,[(user_list)] [NOPASSWD:] [op]cmnd_type] ... 
+    access_group ::= host_type = [(runas-list)] [NOPASSWD:] [op]cmnd_type
+		     [,[(user-list)] [NOPASSWD|PASSWD:] [op]cmnd_type] ... 
        host_type ::= a lower-case hostname, netgroup, ip address,
                      network number, network number/netmask,
 		     or host alias.
-       runas_list ::= comma-separated list of users, groups,
-		      netgroups or Runas_Aliases the user may run
-		      commands as (default is root).
        cmnd_type ::= a command OR a command alias.
               op ::= the logical "!" NOT operator.
 
@@ -37,7 +36,8 @@ will be used.
       Host_Alias ::= a keyword.
        HOSTALIAS ::= an upper-case alias name.
        host-list ::= a comma separated list of hosts, netgroups,
-                     ip addresses, networks.
+                     ip addresses, networks.  A logical "!"
+		     NOT operator may be prefixed to any of these.
 
 =head2 user alias section format:
 
@@ -46,6 +46,8 @@ will be used.
       User_Alias ::= a keyword.
        USERALIAS ::= an upper-case alias name.
        user-list ::= a comma separated list of users, groups, netgroups.
+                     A logical "!" NOT operator may be prefixed to any
+		     of these.
 
 =head2 runas alias section format:
 
@@ -54,6 +56,8 @@ will be used.
       Runas_Alias ::= a keyword.
        RUNASALIAS ::= an upper-case alias name.
        runas-list ::= a comma separated list of users, groups, netgroups.
+                      A logical "!" NOT operator may be prefixed to any
+		      of these.
 
 =head2 command alias section format:
 
@@ -62,6 +66,8 @@ will be used.
       Cmnd_Alias ::= a keyword.
        CMNDALIAS ::= an upper-case alias name.
        cmnd-list ::= a comma separated list commands.
+                     A logical "!" NOT operator may be prefixed to any
+		     of these.
 
 =head2 command specification:
 
@@ -69,6 +75,31 @@ will be used.
 
             path ::= a fully qualified pathname.
        arg[1..n] ::= optional command line arguments.
+
+=head2 persistence of modifiers
+
+When a I<runas-list> is specified for an I<access_group>, it
+affects all commands in the I<access_group>.  For example, given:
+    oper bigserver = (root, sysadm) /usr/bin/kill, /bin/rm
+User C<oper> will be able to run C</usr/bin/kill> and C</bin/rm>
+as B<root> or B<sysadm> on the machine, C<bigserver>.  The
+I<runas-list> is "sticky" across entries in the comma-separated
+I<access_group>.  You can override the I<runas-list> with another
+one, at which point the new I<runas-list> becomes the default for
+that I<access_group>.  For example, given:
+    oper bigserver = (root, sysadm) /usr/bin/kill, (root) /bin/rm, \
+	/bin/rmdir
+User C<oper> can still run C</usr/bin/kill> as B<root> or B<sysadm> but
+can only run C</bin/rm> and C</bin/rmdir> as B<root>.
+
+Similarly, the B<NOPASSWD> modifier is also persistent across an
+I<access_group>. For example given:
+    oper bigserver = NOPASSWD: /usr/bin/kill, /bin/rm, /bin/rmdir
+User C<oper> will be able to run C</usr/bin/kill>, C</bin/rm>, and
+C</bin/rmdir> as B<root> without a password.  If we change that to:
+    oper bigserver = NOPASSWD: /usr/bin/kill, PASSWD: /bin/rm, /bin/rmdir
+User C<oper> can still run C</usr/bin/kill> without a password but
+must give a password to run C</bin/rm> and C</bin/rmdir>.
 
 =head2 wildcards (aka meta characters):
 
@@ -122,17 +153,17 @@ be UN*X groups (%staff refers to users in the group I<staff>).
 Words that begin with a plus sign (B<+>) are assumed to
 be netgroups (B<+cshosts> refers to the netgroup I<cshosts>).
 Long lines can be newline escaped with the backslash B<\> character.
+
 The reserved word B<NOPASSWD> indicates that a user need not
-enter a password for the command listed in that entry.
+enter a password for the command listed in that entry.  The
+B<NOPASSWD> modifier is persistent across entries in a I<user-list>
+and can be reversed with the B<PASSWD> modifier.
 
 The reserved alias I<ALL> can be used for both {Host,User,Cmnd}_Alias.
 B<DO NOT> define an alias of I<ALL>, it will B<NOT> be used.
 Note that I<ALL> implies the entire universe of hosts/users/commands.
 You can subtract elements from the universe by using the syntax:
    user  host=ALL,!ALIAS1,!/sbin/halt...
-Note that the "!" notation only works in a user's command list.  You
-may not use it to subtract elements in a User_Alias, Host_Alias,
-Cmnd_Alias or user list.
 
 Commands may have optional command line arguments.  If they do,
 then the arguments in the I<sudoers> file must exactly match those
@@ -190,7 +221,7 @@ C<kodiakthorn> and C<spirit>.  The C<CSNETS> alias will match
 any host on the 128.138.243.0, 128.138.204.0, or 128.138.205.192
 nets.  The C<CUNETS> alias will match any host on the 128.138.0.0
 (class B) network.  Note that these are B<network> addresses, not ip
-addresses.  Unless an explicate netmask is given, the local I<netmask>
+addresses.  Unless an explicit netmask is given, the local I<netmask>
 is used to determine whether or not the current host belongs to a network.
 
 =head2 User Alias specifications:
@@ -238,7 +269,7 @@ on any machine.
 =item jimbo
 
 The user C<jimbo> may C<su> to any user save root on the
-machines on C<CUNETS> (which is explicately listed as a class
+machines on C<CUNETS> (which is explicitly listed as a class
 B network).
 
 =item nieusma
