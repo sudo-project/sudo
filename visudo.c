@@ -79,7 +79,12 @@ char buffer[BUFSIZ];
 char *sudoers = _PATH_SUDO_SUDOERS;
 char *sudoers_tmp_file = _PATH_SUDO_STMP;
 int  status = 0,
-     err_line_no = 0;
+     err_line_no = 0,
+     parse_error = 0;
+
+char host[] = "";
+char *user = "";
+char *cmnd = "";
 
 
 /*
