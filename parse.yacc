@@ -99,6 +99,7 @@ int top = 0;
 extern int path_matches		__P((char *, char *));
 extern int addr_matches		__P((char *));
 extern int netgr_matches	__P((char *, char *, char *));
+extern int usergr_matches	__P((char *, char *));
 static int find_alias		__P((char *, int));
 static int add_alias		__P((char *, int));
 static int more_aliases		__P((size_t));
@@ -130,6 +131,7 @@ void yyerror(s)
 %token <string>	ALIAS			/* an UPPERCASE alias name */
 %token <string> NTWKADDR		/* w.x.y.z */
 %token <string> NETGROUP		/* a netgroup (+NAME) */
+%token <string> USERGROUP		/* a usergroup (*NAME) */
 %token <string> COMMAND			/* an absolute pathname + args */
 %token <string> NAME			/* a mixed-case name */
 %token <tok>	COMMENT			/* comment and/or carriage return */
@@ -330,6 +332,12 @@ userlist	:	user
 
 user		:	NAME {
 			    if (strcmp($1, user_name) == 0)
+				user_matches = TRUE;
+			    (void) free($1);
+			    $1 = NULL; /* XXX */
+			}
+		|	USERGROUP {
+			    if (usergr_matches($1, user_name))
 				user_matches = TRUE;
 			    (void) free($1);
 			    $1 = NULL; /* XXX */

@@ -47,6 +47,7 @@ static char rcsid[] = "$Id$";
 #include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <ctype.h>
+#include <grp.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -273,6 +274,36 @@ int addr_matches(n)
 
 
 
+int usergr_matches(group, user)
+    char *group;
+    char *user;
+{
+    struct group *grpent;
+    char **cur;
+
+    /* make sure we have a valid usergroup, sudo style */
+    if (*group++ != '%')
+	return(FALSE);
+
+    if ((grpent = getgrnam(group)) == NULL) 
+	return(FALSE);
+
+    /*
+     * Check against user's real gid as well as group's user list
+     */
+    if (getgid() == grpent->gr_gid)
+	return(TRUE);
+
+    for (cur=grpent->gr_mem; *cur; cur++) {
+	if (strcmp(*cur, user) == 0)
+	    return(TRUE);
+    }
+
+    return(FALSE);
+}
+
+
+
 int netgr_matches(netgr, host, user)
     char *netgr;
     char *host;
@@ -285,7 +316,7 @@ int netgr_matches(netgr, host, user)
 #endif /* HAVE_GETDOMAINNAME */
 
     /* make sure we have a valid netgroup, sudo style */
-    if (*netgr != '+')
+    if (*netgr++ != '+')
 	return(FALSE);
 
 #ifdef HAVE_GETDOMAINNAME
@@ -305,7 +336,7 @@ int netgr_matches(netgr, host, user)
 #endif /* HAVE_GETDOMAINNAME */
 
 #ifdef HAVE_INNETGR
-    return(innetgr(netgr+1, host, user, domain));
+    return(innetgr(netgr, host, user, domain));
 #else
     return(FALSE);
 #endif /* HAVE_INNETGR */

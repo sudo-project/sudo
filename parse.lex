@@ -152,6 +152,11 @@ N			[0-9][0-9]?[0-9]?
 			    return(NETGROUP);
 			 }
 
+\%[a-zA-Z][a-zA-Z0-9_-]* {
+			    fill(yytext, yyleng);
+			    return(USERGROUP);
+			 }
+
 {N}\.{N}\.{N}\.{N}	{
 			    fill(yytext, yyleng);
 			    return(NTWKADDR);
