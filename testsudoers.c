@@ -184,23 +184,23 @@ int usergr_matches(group, user)
     char *group;
     char *user;
 {
-    struct group *grpent;
+    struct group *grp;
     char **cur;
 
     /* make sure we have a valid usergroup, sudo style */
     if (*group++ != '%')
 	return(FALSE);
 
-    if ((grpent = getgrnam(group)) == NULL) 
+    if ((grp = getgrnam(group)) == NULL) 
 	return(FALSE);
 
     /*
      * Check against user's real gid as well as group's user list
      */
-    if (getgid() == grpent->gr_gid)
+    if (getgid() == grp->gr_gid)
 	return(TRUE);
 
-    for (cur=grpent->gr_mem; *cur; cur++) {
+    for (cur=grp->gr_mem; *cur; cur++) {
 	if (strcmp(*cur, user) == 0)
 	    return(TRUE);
     }
@@ -228,7 +228,6 @@ int netgr_matches(netgr, host, user)
     /* get the domain name (if any) */
     if (domain == (char *) -1) {
 	if ((domain = (char *) malloc(MAXHOSTNAMELEN)) == NULL) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
@@ -259,7 +258,7 @@ int main(argc, argv)
     int argc;
     char **argv;
 {
-    struct passwd pw_ent;
+    struct passwd pw;
     char *p;
 #ifdef	YYDEBUG
     extern int yydebug;
@@ -271,14 +270,14 @@ int main(argc, argv)
 
     if (Argc >= 6 && strcmp(Argv[1], "-u") == 0) {
 	runas_user = Argv[2];
-	pw_ent.pw_name = Argv[3];
+	pw.pw_name = Argv[3];
 	strcpy(host, Argv[4]);
 	cmnd = Argv[5];
 
 	NewArgv = &Argv[5];
 	NewArgc = Argc - 5;
     } else if (Argc >= 4) {
-	pw_ent.pw_name = Argv[1];
+	pw.pw_name = Argv[1];
 	strcpy(host, Argv[2]);
 	cmnd = Argv[3];
 
@@ -289,12 +288,11 @@ int main(argc, argv)
 	exit(1);
     }
 
-    user_pw_ent = &pw_ent;		/* need user_pw_ent->pw_name defined */
+    user_pw_ent = &pw;		/* need user_pw_ent->pw_name defined */
 
     if ((p = strchr(host, '.'))) {
 	*p = '\0';
 	if ((shost = strdup(host)) == NULL) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
@@ -311,7 +309,6 @@ int main(argc, argv)
 	size = (size_t) NewArgv[NewArgc-1] + strlen(NewArgv[NewArgc-1]) -
 	       (size_t) NewArgv[1] + 1;
 	if ((cmnd_args = (char *) malloc(size)) == NULL) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);  
 	    exit(1);
 	}
@@ -336,7 +333,7 @@ int main(argc, argv)
     } else {
 	(void) printf("parses OK.\n\n");
 	if (top == 0)
-	    (void) printf("User %s not found\n", pw_ent.pw_name);
+	    (void) printf("User %s not found\n", pw.pw_name);
 	else while (top) {
 	    (void) printf("[%d]\n", top-1);
 	    (void) printf("user_match : %d\n", user_matches);
