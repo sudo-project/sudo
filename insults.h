@@ -36,7 +36,7 @@ char *insults[] = {
      "Your mind just hasn't been the same since the electro-shock, has it?"
 };
 
-#define NOFINSULTS 8 	/* number of insults*/
+#define NOFINSULTS 8 	/* number of insults */
 
 /*
  *	return a random insult.
