@@ -696,7 +696,7 @@ on your system.
 Path to a shared library containing a dummy version of the \fIexecve()\fR
 library function that just returns an error.  This is used to
 implement the \fInoexec\fR functionality on systems that support
-\&\f(CW\*(C`LD_PRELOAD\*(C'\fR or its equivalent.  Defaults to \f(CW\*(C`@noexec_file@\*(C'\fR.
+\&\f(CW\*(C`LD_PRELOAD\*(C'\fR or its equivalent.  Defaults to \fI@noexec_file@\fR.
 .PP
 \&\fBStrings that can be used in a boolean context\fR:
 .IP "lecture" 12
@@ -938,8 +938,17 @@ This behavior may be overridden via the verifypw and listpw options.
 .PP
 If sudo has been compiled with \fInoexec\fR support and the underlying
 operating system support it, the \f(CW\*(C`NOEXEC\*(C'\fR tag can be used to prevent
-a dynamically linked executable from running further commands itself.
-See the \fB\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\fR section below for more details.
+a dynamically-linked executable from running further commands itself.
+.PP
+In the following example, user \fBaaron\fR may run \fI/usr/bin/more\fR
+and \fI/usr/bin/vi\fR but shell escapes will be disabled.
+.PP
+.Vb 1
+\& aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+.Ve
+.PP
+See the \fB\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\fR section below for more details
+on how \fInoexec\fR works and whether or not it will work on your system.
 .Sh "Wildcards (aka meta characters):"
 .IX Subsection "Wildcards (aka meta characters):"
 \&\fBsudo\fR allows shell-style \fIwildcards\fR to be used in pathnames
@@ -977,7 +986,7 @@ wildcards.  This is to make a path like:
 \&    /usr/bin/*
 .Ve
 .PP
-match \f(CW\*(C`/usr/bin/who\*(C'\fR but not \f(CW\*(C`/usr/bin/X11/xterm\*(C'\fR.
+match \fI/usr/bin/who\fR but not \fI/usr/bin/X11/xterm\fR.
 .Sh "Exceptions to wildcard rules:"
 .IX Subsection "Exceptions to wildcard rules:"
 The following exceptions apply to the above rules:
@@ -1256,15 +1265,15 @@ it pleases, including run other programs.  This can be a security
 issue since it is not uncommon for a program to allow shell escapes,
 which lets a user bypass \fBsudo\fR's restrictions.  Common programs
 that permit shell escapes include shells (obviously), editors,
-paginators, mail programs and terminal programs.
+paginators, mail and terminal programs.
 .PP
 Many systems that support shared libraries have the ability to
 override default library functions by pointing an environment
 variable (usually \f(CW\*(C`LD_PRELOAD\*(C'\fR) to an alternate shared library.
 On such systems, \fBsudo\fR's \fInoexec\fR functionality can be used to
 prevent a program run by sudo from executing any other programs.
-Note, however, that this applies only to native dynamically linked
-executables.  Statically linked executables and foreign executables
+Note, however, that this applies only to native dynamically-linked
+executables.  Statically-linked executables and foreign executables
 running under binary emulation are not affected.
 .PP
 To tell whether or not \fBsudo\fR supports \fInoexec\fR, you can run
@@ -1288,7 +1297,7 @@ work at compile\-time.  \fINoexec\fR should work on SunOS, Solaris,
 \&\fBnot\fR to work on \s-1AIX\s0 and UnixWare.  \fINoexec\fR is expected to work
 on most operating systems that support the \f(CW\*(C`LD_PRELOAD\*(C'\fR environment
 variable.  Check your operating system's manual pages for the dynamic
-linker (often ld.so, dyld, dld.sl, rld, or loader) to see if
+linker (usually ld.so, dyld, dld.sl, rld, or loader) to see if
 \&\f(CW\*(C`LD_PRELOAD\*(C'\fR is supported.
 .PP
 To enable \fInoexec\fR for a command, use the \f(CW\*(C`NOEXEC\*(C'\fR tag as documented
