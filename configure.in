@@ -95,11 +95,7 @@ case "$OS" in
 		fi
 		# C2 security stuff
 		if test -n "$C2"; then
-		    if test -n "$GCC"; then
-			LIBS="${LIBS} -lsecurity -laud"
-		    else
-			LIBS="${LIBS} -lsecurity"
-		    fi
+		    LIBS="${LIBS} -lsecurity -laud"
 		fi
 		;;
     "irix")	echo "Looks like IRIX"
