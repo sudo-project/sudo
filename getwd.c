@@ -66,6 +66,12 @@ extern int lstat();
 #endif /* _PATH_PWD */
 
 
+/*
+ * Since we can't count on this being defined...
+ */
+extern int errno;
+
+
 /******************************************************************
  *
  *  getcwd()

@@ -69,10 +69,16 @@ extern int lstat();
  * Prototypes
  */
 #ifdef HAVE_FCHDIR
-static char * realpath_ret(char *, FILE *);
+static char * realpath_ret	__P((char *, FILE *));
 #else
-static char * realpath_ret(char *, char *);
+static char * realpath_ret	__P((char *, char *));
 #endif /* HAVE_FCHDIR */
+
+
+/*
+ * Since we can't count on this being defined...
+ */
+extern int errno;
 
 
 /******************************************************************
