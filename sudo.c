@@ -122,6 +122,7 @@ char **Argv;
 char *cmnd = NULL;
 char *user = NULL;
 char *epasswd = NULL;
+char *prompt = PASSPROMPT;
 char host[MAXHOSTNAMELEN + 1];
 char cwd[MAXPATHLEN + 1];
 uid_t uid = (uid_t)-2;
@@ -179,6 +180,7 @@ main(argc, argv)
 	case MODE_BACKGROUND :
 	    if (Argc == 1)
 		usage(1);
+	    break;
     }
 
     /*
@@ -368,54 +370,70 @@ static void load_globals()
 
 static int parse_args()
 {
-    int ret=MODE_RUN;			/* what mode is suod to be run in? */
+    int ret = MODE_RUN;			/* what mode is suod to be run in? */
+    int excl = 0;			/* exclusive arg, no others allowed */
+    char *progname = Argv[0];		/* so we can save Argv[0] */
     int i;
 
     if (Argc < 2)			/* no options and no command */
 	usage(1);
 
-    if (Argv[1][0] == '-') {
-	if (Argc > 2 && Argv[2][0] == '-')
-	    usage(1);			/* only one -? option allowed */
-
+    while (Argc > 1 && Argv[1][0] == '-') {
 	if (Argv[1][1] != '\0' && Argv[1][2] != '\0') {
-	    (void) fprintf(stderr, "%s: Please use single character options\n", Argv[0]);
+	    (void) fprintf(stderr, "%s: Please use single character options\n",
+		progname);
 	    usage(1);
 	}
 
+	if (excl)
+	    usage(1);			/* only one -? option allowed */
+
 	switch (Argv[1][1]) {
+	    case 'p':
+		if (Argc < 3)
+		    usage(1);
+
+		prompt = Argv[2];
+
+		/* shift Argv over and adjust Argc */
+		Argc--;
+		Argv++;
+		break;
 	    case 'b':
 		ret = MODE_BACKGROUND;
-		/* shift Argv over and adjust Argc */
-		for (i=1; i < Argc; i++) {
-		    Argv[i] = Argv[i+1];
-		}
-		Argc--;
 		break;
 	    case 'v':
 		ret = MODE_VALIDATE;
+		excl++;
 		break;
 	    case 'k':
 		ret = MODE_KILL;
+		excl++;
 		break;
 	    case 'l':
 		ret = MODE_LIST;
+		excl++;
 		break;
 	    case 'V':
 		ret = MODE_VERSION;
+		excl++;
 		break;
 	    case 'h':
 		ret = MODE_HELP;
+		excl++;
 		break;
 	    case '\0':
 		(void) fprintf(stderr, "%s: '-' requires an argument\n",
-		    Argv[0]);
+		    progname);
 		usage(1);
 	    default:
-		(void) fprintf(stderr, "%s: Illegal option %s\n", Argv[0],
+		(void) fprintf(stderr, "%s: Illegal option %s\n", progname,
 		    Argv[1]);
 		usage(1);
 	}
+	Argc--;
+	Argv++;
+	Argv[0] = progname;
     }
 
     return(ret);
@@ -433,7 +451,7 @@ static int parse_args()
 static void usage(exit_val)
     int exit_val;
 {
-    (void) fprintf(stderr, "usage: %s -V | -h | -l | -b | -v | -k | <command>\n", Argv[0]);
+    (void) fprintf(stderr, "usage: %s -V | -h | -l | -b | -v | -k | [-p prompt] <command>\n", Argv[0]);
     exit(exit_val);
 }
 
