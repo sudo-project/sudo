@@ -82,7 +82,7 @@ static char whatnow		__P((void));
 static void whatnow_help	__P((void));
 static RETSIGTYPE Exit		__P((int));
 int path_matches		__P((char *, char *));
-int ntwk_matches		__P((char *));
+int addr_matches		__P((char *));
 
 
 /*
@@ -379,7 +379,7 @@ int path_matches(cmnd, path)
 }
 
 
-int ntwk_matches(n)
+int addr_matches(n)
     char *n;
 {
     return(TRUE);
