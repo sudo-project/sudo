@@ -2184,9 +2184,9 @@ AH_BOTTOM([/*
 #endif
 
 #ifdef USE_EXECV
-# define EXEC	execv
+# define EXECV	execv
 #else
-# define EXEC	execvp
+# define EXECV	execvp
 #endif /* USE_EXECV */
 
 /* New ANSI-style OS defs for HP-UX and ConvexOS. */
