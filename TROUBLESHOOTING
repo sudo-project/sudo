@@ -1,6 +1,13 @@
 FAQ and troubleshooting tips for Sudo
 =====================================
 
+Q) When I run configure, it says "C compiler cannot create executables".
+A) This usually means you either don't have a working compiler.  This
+   could be due to the lack of a license or that some component of the
+   compiler suite could not be found.  Check config.log for clues as
+   to why this is happening.  On many systems, compiler components live
+   in /usr/ccs/bin which may not be in your PATH environment variable.
+
 Q) Sudo compiles but when I run it I get "Sorry, sudo must be setuid root."
    and sudo quits.
 A) Sudo must be setuid root to do its work.  You need to do something like
