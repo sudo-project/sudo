@@ -39,7 +39,7 @@
  
            NO_ROOT_SUDO           - sudo will exit if called by root
   
-           SOLARIS                - define if using Solaris 2.x
+           SVR4                   - define if using Solaris 2.x or SVR4
 
            SEND_MAIL_WHEN_NOT_OK  - if you want a message sent to ALERTMAIL
                                     when the user is in the SUDOERS but
@@ -91,10 +91,9 @@
            BROKEN_GETPASS           if using a os with a broken getpass()
                                     hpux,aix,irix need this, sudo.h has details
  
-           NEED_STRDUP              if your os lacks strdup(3)
+           HAVE_STRDUP              if your os has strdup(3)
  
-           USE_CWD                  if you have getcwd() and not getwd()
-                                    (defined by default for hpux)
+           HAVE_CWD                 if you have getcwd(3)
 
            USE_TERMIO               if you have sysV terminal control
                                     (defined by default for hpux and irix)
@@ -108,7 +107,7 @@
            HAL                      if you want lines from 2001 instead of
                                     insults (must define USE_INSULTS too)
  
-           STD_HEADERS              if you have ansi-compliant header files
+           STDC_HEADERS             if you have ansi-compliant header files
  
            USE_EXECV                if you want to use execv() instead of
                                     execvp()
@@ -307,7 +306,7 @@ YYSTYPE yylval;
 #define EXTRA_LIST               0x03
 
 /* These are the functions that are called in sudo */
-#ifdef NEED_STRDUP
+#ifndef HAVE_STRDUP
 char *strdup();
 #endif
 char *find_path();
@@ -333,12 +332,6 @@ extern char **Argv;
 extern int errno;
 extern char ** environ;
 
-/*
- * For OS's w/o mode_t
- */
-#ifdef NO_MODE_T
-typedef int mode_t;
-#endif
 
 /*
  * This is to placate hpux
@@ -351,6 +344,6 @@ typedef int mode_t;
 /*
  * Sun's cpp doesn't define this but it should
  */
-#if defined(SOLARIS) && !defined(__svr4__)
+#if defined(SVR4) && !defined(__svr4__)
 #  define __svr4__
-#endif /* SOLARIS */
+#endif /* SVR4 */
