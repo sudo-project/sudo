@@ -89,7 +89,7 @@ static char whatnow		__P((void));
 static RETSIGTYPE Exit		__P((int));
 static void setup_signals	__P((void));
 static int run_command		__P((char *, char **));
-static int check_syntax		__P((int, int));
+static int check_syntax		__P((int));
 int command_matches		__P((char *, char *, char *, char *));
 int addr_matches		__P((char *));
 int hostname_matches		__P((char *, char *, char *));
@@ -171,6 +171,9 @@ main(argc, argv)
     /* Setup defaults data structures. */
     init_defaults();
 
+    if (checkonly)
+	exit(check_syntax(quiet));
+
     /*
      * Open sudoers, lock it and stat it.  
      * sudoers_fd must remain open throughout in order to hold the lock.
@@ -181,8 +184,6 @@ main(argc, argv)
 	    strerror(errno));
 	exit(1);
     }
-    if (checkonly)
-	exit(check_syntax(sudoers_fd, quiet));
     if (!lock_file(sudoers_fd, SUDO_TLOCK)) {
 	(void) fprintf(stderr, "%s: sudoers file busy, try again later.\n",
 	    Argv[0]);
@@ -639,22 +640,23 @@ run_command(path, argv)
 }
 
 static int
-check_syntax(fd, quiet)
-    int fd;
+check_syntax(quiet)
     int quiet;
 {
-    if ((yyin = fdopen(fd, "r")) == NULL) {
+
+    if ((yyin = fopen(sudoers, "r")) == NULL) {
 	if (!quiet)
-	    (void) fprintf(stderr, "%s: can't fdopen sudoers fd: %s", Argv[0],
-		strerror(errno));
+	    (void) fprintf(stderr, "%s: unable to open %s: %s\n", Argv[0],
+		sudoers, strerror(errno));
 	exit(1);
     }
     yyout = stdout;
     init_parser();
     if (yyparse() && parse_error != TRUE) {
 	if (!quiet)
-	    (void) printf("Failed to parse %s file, unknown error.\n",
-		sudoers);
+	    (void) fprintf(stderr,
+		"%s: failed to parse %s file, unknown error.\n",
+		Argv[0], sudoers);
 	parse_error = TRUE;
     }
     if (!quiet){
