@@ -1141,6 +1141,7 @@ case "$host" in
 		# configure may not think irix has stdc headers
 		# but it's good enough for sudo
 		AC_DEFINE(STDC_HEADERS)
+		CPPFLAGS="${CPPFLAGS} -D_BSD_TYPES"
 		if test -z "$NROFFPROG"; then
 		    MAN_POSTINSTALL='	/bin/rm -f $(mandir8)/sudo.$(mansect8).z $(mandir8)/visudo.$(mansect8).z $(mandir5)/sudoers.$(mansect5).z ; /usr/bin/pack $(mandir8)/sudo.$(mansect8) $(mandir8)/visudo.$(mansect8) $(mandir5)/sudoers.$(mansect5)'
 		    if test "$prefix" = "/usr/local" -a "$mandir" = '$(prefix)/man'; then
