@@ -1714,7 +1714,8 @@ Sudo 1.6.7p5 released.
 
 Sudo 1.6.8 released.
 
-540) Find the command base and fill in struct stat earlier.
+540) Now find the command base and fill in struct stat earlier.
 
-541) sudoedit now keeps the temp file open instead of re-opening after
-     the editor has exited.
+541) sudoedit now re-opens the temp file as the invoking user.
+
+542) struct timespec is used throughout the code base.
