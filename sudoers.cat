@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-December 30, 2001             1.6.4                             1
+January 13, 2002              1.6.4                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 30, 2001             1.6.4                             2
+January 13, 2002              1.6.4                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 30, 2001             1.6.4                             3
+January 13, 2002              1.6.4                             3
 
 
 
@@ -259,7 +259,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 30, 2001             1.6.4                             4
+January 13, 2002              1.6.4                             4
 
 
 
@@ -325,7 +325,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 30, 2001             1.6.4                             5
+January 13, 2002              1.6.4                             5
 
 
 
@@ -391,7 +391,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 30, 2001             1.6.4                             6
+January 13, 2002              1.6.4                             6
 
 
 
@@ -457,7 +457,7 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
 
-December 30, 2001             1.6.4                             7
+January 13, 2002              1.6.4                             7
 
 
 
@@ -484,7 +484,12 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    this makes ssssuuuuddddoooo act as a setuid wrapper.  This
                    can be useful on systems that disable some
                    potentially dangerous functionality when a
-                   program is run setuid.
+                   program is run setuid.  Note, however, that
+                   this means that sudo will run with the real
+                   uid of the invoking user which may allow that
+                   user to kill ssssuuuuddddoooo before it can log a failure,
+                   depending on how your OS defines the interac­
+                   tion between signals and setuid processes.
 
        env_reset   If set, ssssuuuuddddoooo will reset the environment to
                    only contain the following variables: HOME,
@@ -515,15 +520,10 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
        IIIInnnntttteeeeggggeeeerrrrssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
 
-       loglinelen  Number of characters per line for the file
-                   log.  This value is used to decide when to
-                   wrap lines for nicer log files.  This has no
-                   effect on the syslog log file, only the file
-                   log.  The default is 80 (use 0 or negate the
 
 
 
-December 30, 2001             1.6.4                             8
+January 13, 2002              1.6.4                             8
 
 
 
@@ -532,6 +532,11 @@ December 30, 2001             1.6.4                             8
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
+       loglinelen  Number of characters per line for the file
+                   log.  This value is used to decide when to
+                   wrap lines for nicer log files.  This has no
+                   effect on the syslog log file, only the file
+                   log.  The default is 80 (use 0 or negate the
                    option to disable word wrap).
 
        timestamp_timeout
@@ -581,15 +586,10 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    flag is not specified on the command line.
                    This defaults to root.
 
-       syslog_goodpri
-                   Syslog priority to use when user authenticates
-                   successfully.  Defaults to notice.
 
 
 
-
-
-December 30, 2001             1.6.4                             9
+January 13, 2002              1.6.4                             9
 
 
 
@@ -597,6 +597,10 @@ December 30, 2001             1.6.4                             9
 
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
+
+       syslog_goodpri
+                   Syslog priority to use when user authenticates
+                   successfully.  Defaults to notice.
 
        syslog_badpri
                    Syslog priority to use when user authenticates
@@ -647,15 +651,11 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
                    any     At least one of the user's _s_u_d_o_e_r_s
                            entries for the current host must have
-                           the NOPASSWD flag set to avoid enter­
-                           ing a password.
-
-                   never   The user need never enter a password
-                           to use the ----vvvv flag.
+                           the NOPASSWD flag set to avoid
 
 
 
-December 30, 2001             1.6.4                            10
+January 13, 2002              1.6.4                            10
 
 
 
@@ -663,6 +663,11 @@ December 30, 2001             1.6.4                            10
 
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
+
+                           entering a password.
+
+                   never   The user need never enter a password
+                           to use the ----vvvv flag.
 
                    always  The user must always enter a password
                            to use the ----vvvv flag.
@@ -713,15 +718,10 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
                    abled by using the =, +=, -=, and ! operators
                    respectively.  The default list of environment
                    variable to remove is printed when ssssuuuuddddoooo is run
-                   by root with the _-_V option.
-
-       env_keep    Environment variables to be preserved in the
-                   user's environment when the _e_n_v___r_e_s_e_t option
-                   is in effect.  This allows fine-grained
 
 
 
-December 30, 2001             1.6.4                            11
+January 13, 2002              1.6.4                            11
 
 
 
@@ -730,7 +730,12 @@ December 30, 2001             1.6.4                            11
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
-                   control over the environment ssssuuuuddddoooo-spawned pro­
+                   by root with the _-_V option.
+
+       env_keep    Environment variables to be preserved in the
+                   user's environment when the _e_n_v___r_e_s_e_t option
+                   is in effect.  This allows fine-grained con­
+                   trol over the environment ssssuuuuddddoooo-spawned pro­
                    cesses will receive.  The argument may be a
                    double-quoted, space-separated list or a sin­
                    gle value without double-quotes.  The list can
@@ -780,14 +785,9 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        The user ddddggggbbbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m
        -- but only as ooooppppeeeerrrraaaattttoooorrrr.  E.g.,
 
-           sudo -u operator /bin/ls.
-
-       It is also possible to override a Runas_Spec later on in
-       an entry.  If we modify the entry like so:
 
 
-
-December 30, 2001             1.6.4                            12
+January 13, 2002              1.6.4                            12
 
 
 
@@ -795,6 +795,11 @@ December 30, 2001             1.6.4                            12
 
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
+
+           sudo -u operator /bin/ls.
+
+       It is also possible to override a Runas_Spec later on in
+       an entry.  If we modify the entry like so:
 
         dgb    boulder = (operator) /bin/ls, (root) /bin/kill, /usr/bin/lprm
 
@@ -844,16 +849,11 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
        [...]   Matches any character in the specified range.
 
-       [!...]  Matches any character nnnnooootttt in the specified range.
-
-       \x      For any character "x", evaluates to "x".  This is
-               used to escape special characters such as: "*",
-               "?", "[", and "}".
 
 
 
 
-December 30, 2001             1.6.4                            13
+January 13, 2002              1.6.4                            13
 
 
 
@@ -861,6 +861,12 @@ December 30, 2001             1.6.4                            13
 
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
+
+       [!...]  Matches any character nnnnooootttt in the specified range.
+
+       \x      For any character "x", evaluates to "x".  This is
+               used to escape special characters such as: "*",
+               "?", "[", and "}".
 
        Note that a forward slash ('/') will nnnnooootttt be matched by
        wildcards used in the pathname.  When matching the command
@@ -910,16 +916,10 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        syntactic characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n ('=', ':',
        '(', ')') is optional.
 
-       The following characters must be escaped with a backslash
-       ('\') when used as part of a word (e.g. a username or
-       hostname): '@', '!', '=', ':', ',', '(', ')', '\'.
-
-EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
-       Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of
 
 
 
-December 30, 2001             1.6.4                            14
+January 13, 2002              1.6.4                            14
 
 
 
@@ -928,6 +928,12 @@ December 30, 2001             1.6.4                            14
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
+       The following characters must be escaped with a backslash
+       ('\') when used as part of a word (e.g. a username or
+       hostname): '@', '!', '=', ':', ',', '(', ')', '\'.
+
+EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
+       Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of
        these are a bit contrived.  First, we define our _a_l_i_a_s_e_s:
 
         # User alias specification
@@ -977,15 +983,9 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
         Defaults:millert       !authenticate
         Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
 
-       The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually deter­
-       mines who may run what.
-
-        root           ALL = (ALL) ALL
-        %wheel         ALL = (ALL) ALL
 
 
-
-December 30, 2001             1.6.4                            15
+January 13, 2002              1.6.4                            15
 
 
 
@@ -993,6 +993,12 @@ December 30, 2001             1.6.4                            15
 
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
+
+       The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually deter­
+       mines who may run what.
+
+        root           ALL = (ALL) ALL
+        %wheel         ALL = (ALL) ALL
 
        We let rrrrooooooootttt and any user in group wwwwhhhheeeeeeeellll run any command on
        any host as any user.
@@ -1043,15 +1049,9 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
         bob            SPARC = (OP) ALL : SGI = (OP) ALL
 
-       The user bbbboooobbbb may run anything on the _S_P_A_R_C and _S_G_I
-       machines as any user listed in the _O_P Runas_Alias (rrrrooooooootttt
-       and ooooppppeeeerrrraaaattttoooorrrr).
-
-        jim            +biglab = ALL
 
 
-
-December 30, 2001             1.6.4                            16
+January 13, 2002              1.6.4                            16
 
 
 
@@ -1059,6 +1059,12 @@ December 30, 2001             1.6.4                            16
 
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
+
+       The user bbbboooobbbb may run anything on the _S_P_A_R_C and _S_G_I
+       machines as any user listed in the _O_P Runas_Alias (rrrrooooooootttt
+       and ooooppppeeeerrrraaaattttoooorrrr).
+
+        jim            +biglab = ALL
 
        The user jjjjiiiimmmm may run any command on machines in the _b_i_g_l_a_b
        netgroup.  SSSSuuuuddddoooo knows that "biglab" is a netgroup due to
@@ -1108,16 +1114,10 @@ sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
        (will, wendy, and wim), may run any command as user www
        (which owns the web pages) or simply _s_u(1) to www.
 
-        ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
-                       /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
-
-       Any user may mount or unmount a CD-ROM on the machines in
-       the CDROM Host_Alias (orion, perseus, hercules) without
-       entering a password.  This is a bit tedious for users to
 
 
 
-December 30, 2001             1.6.4                            17
+January 13, 2002              1.6.4                            17
 
 
 
@@ -1126,6 +1126,12 @@ December 30, 2001             1.6.4                            17
 sudoers(4)             MAINTENANCE COMMANDS            sudoers(4)
 
 
+        ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
+                       /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
+
+       Any user may mount or unmount a CD-ROM on the machines in
+       the CDROM Host_Alias (orion, perseus, hercules) without
+       entering a password.  This is a bit tedious for users to
        type, so it is a prime candidate for encapsulating in a
        shell script.
 
@@ -1177,12 +1183,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-
-
-
-
-
-December 30, 2001             1.6.4                            18
+January 13, 2002              1.6.4                            18
 
 
