@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996,1998-1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996,1998-2000 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,33 +67,56 @@ static void do_logfile		__P((char *));
 static void send_mail		__P((char *));
 static void mail_auth		__P((int, char *));
 static char *get_timestr	__P((void));
+static void mysyslog		__P((int, const char *, ...));
 
-#ifdef BROKEN_SYSLOG
-# define MAXSYSLOGTRIES	16	/* num of retries for broken syslogs */
-# define SYSLOG		syslog_wrapper
-
-static void syslog_wrapper	__P((int, char *, char *, char *));
+#define MAXSYSLOGTRIES	16	/* num of retries for broken syslogs */
 
 /*
- * Some versions of syslog(3) don't guarantee success and return
- * an int (notably HP-UX < 10.0).  So, if at first we don't succeed,
- * try, try again...
+ * We do an openlog(3)/closelog(3) for each message because some
+ * authentication methods (notably PAM) use syslog(3) for their
+ * own nefarious purposes and may call openlog(3) and closelog(3).
+ * Sadly this is a maze of #ifdefs.
  */
 static void
-syslog_wrapper(pri, fmt, ap)
+#ifdef __STDC__
+mysyslog(int pri, const char *fmt, ...)
+#else
+mysyslog(pri, fmt, ap)
     int pri;
     const char *fmt;
-    va_list ap;
+    va_dcl
+#endif
 {
+#ifdef BROKEN_SYSLOG
     int i;
+#endif
+    va_list ap;
 
+#ifdef __STDC__
+    va_start(ap, fmt);
+#else
+    va_start(ap);
+#endif
+#ifdef LOG_NFACILITIES
+    openlog(Argv[0], 0, def_ival(I_LOGFAC));
+#else
+    openlog(Argv[0], 0);
+#endif
+#ifdef BROKEN_SYSLOG
+    /*
+     * Some versions of syslog(3) don't guarantee success and return
+     * an int (notably HP-UX < 10.0).  So, if at first we don't succeed,
+     * try, try again...
+     */
     for (i = 0; i < MAXSYSLOGTRIES; i++)
 	if (vsyslog(pri, fmt, ap) == 0)
 	    break;
-}
 #else
-# define SYSLOG		syslog
+    vsyslog(pri, fmt, ap);
 #endif /* BROKEN_SYSLOG */
+    va_end(ap);
+    closelog();
+}
 
 /*
  * Log a message to syslog, pre-pending the username and splitting the
@@ -128,9 +151,9 @@ do_syslog(pri, msg)
 	    *tmp = '\0';
 
 	    if (count == 0)
-		SYSLOG(pri, "%8.8s : %s", user_name, p);
+		mysyslog(pri, "%8.8s : %s", user_name, p);
 	    else
-		SYSLOG(pri, "%8.8s : (command continued) %s", user_name, p);
+		mysyslog(pri, "%8.8s : (command continued) %s", user_name, p);
 
 	    *tmp = save;			/* restore saved character */
 
@@ -139,9 +162,9 @@ do_syslog(pri, msg)
 		;
 	} else {
 	    if (count == 0)
-		SYSLOG(pri, "%8.8s : %s", user_name, p);
+		mysyslog(pri, "%8.8s : %s", user_name, p);
 	    else
-		SYSLOG(pri, "%8.8s : (command continued) %s", user_name, p);
+		mysyslog(pri, "%8.8s : (command continued) %s", user_name, p);
 	}
     }
 }

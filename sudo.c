@@ -345,13 +345,10 @@ main(argc, argv)
 	/* This *must* have been set if we got a match but... */
 	if (safe_cmnd == NULL) {
 	    log_error(MSG_ONLY,
-		"internal error, cmnd_safe never got set for %s; %s",
+		"internal error, safe_cmnd never got set for %s; %s",
 		user_cmnd,
 		"please report this error at http://courtesan.com/sudo/bugs/");
 	}
-
-	if (def_ival(I_LOGFACSTR))
-	    closelog();
 
 	/* Reset signal mask before we exec. */
 #ifdef POSIX_SIGNALS

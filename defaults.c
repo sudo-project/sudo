@@ -669,19 +669,13 @@ store_syslogfac(val, def, op)
 	return(FALSE);				/* not found */
 
     /* Store both name and number. */
-    if (def->sd_un.str) {
+    if (def->sd_un.str)
 	free(def->sd_un.str);
-	closelog();
-    }
-    openlog(Argv[0], 0, fac->num);
     def->sd_un.str = estrdup(fac->name);
     sudo_defs_table[I_LOGFAC].sd_un.ival = fac->num;
 #else
-    if (def->sd_un.str) {
+    if (def->sd_un.str)
 	free(def->sd_un.str);
-	closelog();
-    }
-    openlog(Argv[0], 0);
     def->sd_un.str = estrdup("default");
 #endif /* LOG_NFACILITIES */
     return(TRUE);
