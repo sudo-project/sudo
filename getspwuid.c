@@ -138,7 +138,7 @@ static char *sudo_getspwd(pw_ent)
 {
     struct passwd_adjunct *spw_ent;
 
-    if ((spw_ent = getpwanam(pw_name)) && spw_ent -> pwa_passwd)
+    if ((spw_ent = getpwanam(pw_ent -> pw_name)) && spw_ent -> pwa_passwd)
 	return(spw_ent -> pwa_passwd);
     else
 	return(pw_ent -> pw_passwd);
@@ -148,7 +148,7 @@ static char *sudo_getspwd(pw_ent)
 {
     AUTHORIZATION *spw_ent;
 
-    if ((spw_ent = getauthuid(pw_uid)) && spw_ent -> a_password)
+    if ((spw_ent = getauthuid(pw_ent -> pw_uid)) && spw_ent -> a_password)
 	return(spw_ent -> a_password);
     else
 	return(pw_ent -> pw_passwd);
@@ -158,7 +158,7 @@ static char *sudo_getspwd(pw_ent)
 {
     struct pr_passwd *spw_ent;
 
-    if ((spw_ent = getprpwuid(pw_uid)) && spw_ent -> ufld.fd_encrypt)
+    if ((spw_ent = getprpwuid(pw_ent -> pw_uid)) && spw_ent -> ufld.fd_encrypt)
 	return(spw_ent -> ufld.fd_encrypt);
     else
 	return(pw_ent -> pw_passwd);
