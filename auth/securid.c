@@ -73,7 +73,9 @@ securid_init(pw, promptp, auth)
     char **promptp;
     sudo_auth *auth;
 {
+    static struct SD_CLIENT sd_dat;		/* SecurID data block */
 
+    auth->data = (VOID *) &sd_dat;		/* For method-specific data */
     creadcfg();					/* Only read config file once */
     return(AUTH_SUCCESS);
 }
@@ -84,10 +86,9 @@ securid_setup(pw, promptp, auth)
     char **promptp;
     sudo_auth *auth;
 {
-    static SD_CLIENT sd_dat;			/* SecurID data block */
+    struct SD_CLIENT *sd = (struct SD_CLIENT *) auth->data;
 
     /* Re-initialize SecurID every time. */
-    auth->data = (VOID *) &sd_dat;
     if (sd_init(sd) == 0)
 	return(AUTH_SUCCESS);
     else {
