@@ -47,8 +47,3 @@ TODO list (most will be addressed in the next rewrite)
 
 19) Sudo should have a separate error message for when the user is in sudoers
     but not allowed to run stuff on that host, and send mail.
-
-20) Use asctime(), not ctime(), if available.
-
-21) Make -k just touch the time back to the epoch.  New -K flag to really
-    kill things.  Make timestamp a dir unless tty tickets in use.
