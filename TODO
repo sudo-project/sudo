@@ -127,6 +127,4 @@ TODO list (most will be addressed in sudo 2.0)
     line and that have a constant record length (sparse files) for
     easy seeking.
 
-46) Investigate POSIX setreuid() semantics and how sudo violates them.
-
-47) In a runas list, what should (!user) as opposed to (ALL, !user) do?
+46) In a runas list, what should (!user) as opposed to (ALL, !user) do?
