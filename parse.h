@@ -62,13 +62,9 @@ struct sudo_command {
 };
 
 #define user_matches	(match[top-1].user)
-#define user_matched	(match[top].user)
 #define cmnd_matches	(match[top-1].cmnd)
-#define cmnd_matched	(match[top].cmnd)
 #define host_matches	(match[top-1].host)
-#define host_matched	(match[top].host)
 #define runas_matches	(match[top-1].runas)
-#define runas_matched	(match[top].runas)
 #define no_passwd	(match[top-1].nopass)
 
 /*
@@ -83,6 +79,15 @@ struct command_match {
     size_t cmnd_size;
     int nopasswd;
 };
+
+/*
+ * Structure describing an alias match in parser.
+ */
+typedef struct {
+    int type;
+    char *name;
+    int val;
+} aliasinfo;
 
 /*
  * Structure containing Cmnd_Alias's if "sudo -l" is used.
