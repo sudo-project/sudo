@@ -323,6 +323,10 @@ runaslist	:	runasuser {
 
 runasuser	:	NAME {
 			    $$ = (strcmp($1, runas_user) == 0);
+			    if (printmatches == TRUE && in_alias == TRUE)
+				append($1, &ca_list[ca_list_len-1].entries,
+				       &ca_list[ca_list_len-1].entries_len,
+				       &ca_list[ca_list_len-1].entries_size, ',');
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				append($1, &cm_list[cm_list_len].runas,
@@ -332,6 +336,10 @@ runasuser	:	NAME {
 			}
 		|	USERGROUP {
 			    $$ = usergr_matches($1, runas_user);
+			    if (printmatches == TRUE && in_alias == TRUE)
+				append($1, &ca_list[ca_list_len-1].entries,
+				       &ca_list[ca_list_len-1].entries_len,
+				       &ca_list[ca_list_len-1].entries_size, ',');
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
 				append("%", &cm_list[cm_list_len].runas,
@@ -345,6 +353,10 @@ runasuser	:	NAME {
 			}
 		|	NETGROUP {
 			    $$ = netgr_matches($1, NULL, runas_user);
+			    if (printmatches == TRUE && in_alias == TRUE)
+				append($1, &ca_list[ca_list_len-1].entries,
+				       &ca_list[ca_list_len-1].entries_len,
+				       &ca_list[ca_list_len-1].entries_size, ',');
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
 				append("+", &cm_list[cm_list_len].runas,
@@ -363,6 +375,10 @@ runasuser	:	NAME {
 				$$ = TRUE;
 			    else
 				$$ = FALSE;
+			    if (printmatches == TRUE && in_alias == TRUE)
+				append($1, &ca_list[ca_list_len-1].entries,
+				       &ca_list[ca_list_len-1].entries_len,
+				       &ca_list[ca_list_len-1].entries_size, ',');
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				append($1, &cm_list[cm_list_len].runas,
@@ -372,6 +388,10 @@ runasuser	:	NAME {
 			}
 		|	ALL {
 			    $$ = TRUE;
+			    if (printmatches == TRUE && in_alias == TRUE)
+				append("ALL", &ca_list[ca_list_len-1].entries,
+				       &ca_list[ca_list_len-1].entries_len,
+				       &ca_list[ca_list_len-1].entries_size, ',');
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				append("ALL", &cm_list[cm_list_len].runas,
@@ -516,11 +536,27 @@ runasaliases	:	runasalias
 		|	runasaliases ':' runasalias
 		;
 
-runasalias	:	ALIAS { push; }	'=' runaslist {
-			    if (add_alias($1, RUNAS_ALIAS) == FALSE)
+runasalias	:	ALIAS {
+			    push;
+			    if (printmatches == TRUE) {
+				in_alias = TRUE;
+				/* Allocate space for ca_list if necesary. */
+				expand_ca_list();
+				if (!(ca_list[ca_list_len-1].alias = strdup($1))){
+				    perror("malloc");
+				    (void) fprintf(stderr,
+				      "%s: cannot allocate memory!\n", Argv[0]);
+				    exit(1);
+				}
+			    }
+			} '=' runaslist {
+			    if ($4 > 0 && add_alias($1, RUNAS_ALIAS) == FALSE)
 				YYERROR;
 			    pop;
 			    (void) free($1);
+
+			    if (printmatches == TRUE)
+				in_alias = FALSE;
 			}
 		;
 
@@ -770,12 +806,19 @@ void list_matches()
 	(void) fputs("    ", stdout);
 	if (cm_list[i].runas) {
 	    (void) putchar('(');
-	    if ((p = strtok(cm_list[i].runas, ":")))
-		(void) fputs(p, stdout);
-	    while ((p = strtok(NULL, ":"))) {
-		(void) fputs(", ", stdout);
-		(void) fputs(p, stdout);
-	    }
+	    p = strtok(cm_list[i].runas, ":");
+	    do {
+		if (p != cm_list[i].runas)
+		    (void) fputs(", ", stdout);
+
+		/* XXX - this is disgusting! Make ca_list generic? */
+		key.alias = p;
+		if ((ca = (struct command_alias *) lfind((VOID *) &key,
+		    (VOID *) &ca_list[0], &ca_list_len, sizeof(key), cmndaliascmp)))
+		    (void) fputs(ca->entries, stdout);
+		else
+		    (void) fputs(p, stdout);
+	    } while ((p = strtok(NULL, ":")));
 	    (void) fputs(") ", stdout);
 	} else {
 	    (void) fputs("(root) ", stdout);
