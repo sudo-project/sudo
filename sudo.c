@@ -122,7 +122,6 @@ static int check_sudoers	__P((void));
 static void load_cmnd		__P((int));
 static void add_env		__P((void));
 static void clean_env		__P((char **, struct env_table *));
-static char *getshell		__P((struct passwd *));
 extern int user_is_exempt	__P((void));
 
 /*
@@ -130,16 +129,13 @@ extern int user_is_exempt	__P((void));
  */
 int Argc;
 char **Argv;
+struct passwd *sudo_pw_ent;
 char *cmnd = NULL;
 char *cmnd_args = NULL;
-char *user = NULL;
 char *tty = NULL;
-char *epasswd = NULL;
 char *prompt = PASSPROMPT;
-char *shell = NULL;
 char host[MAXHOSTNAMELEN + 1];
 char cwd[MAXPATHLEN + 1];
-uid_t uid = (uid_t)-2;
 struct stat cmnd_st;
 extern struct interface *interfaces;
 extern int num_interfaces;
@@ -236,7 +232,7 @@ int main(argc, argv)
 
     clean_env(environ, badenv_table);
 
-    load_globals(sudo_mode);	/* load the user host cmnd and uid variables */
+    load_globals(sudo_mode);	/* load global variables used throughout sudo */
 
     rtn = check_sudoers();	/* check mode/owner on _PATH_SUDO_SUDOERS */
     if (rtn != ALL_SYSTEMS_GO) {
@@ -301,7 +297,7 @@ int main(argc, argv)
 		 * If invoking a shell, replace "-s" with shell to exec.
 		 * For this to work we need to malloc() a new argv...
 		 */
-		if (shell) {
+		if ((sudo_mode & MODE_SHELL)) {
 		    char **NewArgv;
 		    int i;
 
@@ -314,8 +310,9 @@ int main(argc, argv)
 		    }
 
 		    /* replace "-s" with the shell's name */
-		    if ((NewArgv[0] = strrchr(shell, '/') + 1) == (char *) 1)
-			NewArgv[0] = shell;
+		    if ((NewArgv[0] = strrchr(sudo_pw_ent->pw_shell, '/') + 1)
+			== (char *) 1)
+			NewArgv[0] = sudo_pw_ent->pw_shell;
 
 		    for (i = 1; i < Argc; i++)
 			NewArgv[i] = Argv[i];
@@ -352,19 +349,42 @@ int main(argc, argv)
  *  load_globals()
  *
  *  This function primes these important global variables:
- *  user, host, cwd, uid
+ *  sudo_pw_ent, host, cwd, interfaces.
  */
 
 static void load_globals(sudo_mode)
     int sudo_mode;
 {
+    char *p;
     struct passwd *pw_ent;
 #ifdef FQDN
     struct hostent *h_ent;
 #endif /* FQDN */
-    char *p;
 
-    uid = getuid();		/* we need to tuck this away for safe keeping */
+    /*
+     * Get a local copy of the user's struct passwd with the shadow password
+     * if necesary.  It is assumed that euid is 0 at this point so we
+     * can read the shadow passwd file if necesary.
+     */
+    sudo_pw_ent = sudo_getpwuid(getuid());
+    set_perms(PERM_ROOT);
+    set_perms(PERM_USER);
+    if (sudo_pw_ent == NULL) {
+	/* need to make a fake sudo_pw_ent */
+	struct passwd pw_ent;
+	char pw_name[MAX_UID_T_LEN+1];
+
+	/* fill in uid and name fields with the uid */
+	pw_ent.pw_uid = getuid();
+	(void) sprintf(pw_name, "%ld", pw_ent.pw_uid);
+	pw_ent.pw_name = pw_name;
+	sudo_pw_ent = &pw_ent;
+
+	/* complain, log, and die */
+	log_error(GLOBAL_NO_PW_ENT);
+	inform_user(GLOBAL_NO_PW_ENT);
+	exit(1);
+    }
 
 #ifdef HAVE_TZSET
     (void) tzset();		/* set the timezone if applicable */
@@ -384,53 +404,12 @@ static void load_globals(sudo_mode)
     } else
 	tty = "none";
 
-    /*
-     * loading the user & epasswd global variable from the passwd file
-     * (must be done as root to get real passwd on some systems)
-     */
-    set_perms(PERM_ROOT);
-    if ((pw_ent = getpwuid(uid)) == NULL) {
-	set_perms(PERM_USER);
-	if ((user = (char *)malloc(MAX_UID_T_LEN + 1)) == NULL) {
-	    perror("malloc");
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
-	(void) sprintf(user, "%ld", uid);
-	log_error(GLOBAL_NO_PW_ENT);
-	inform_user(GLOBAL_NO_PW_ENT);
-	exit(1);
-    }
-
-    user = strdup(pw_ent -> pw_name);
-    epasswd = strdup(pw_ent -> pw_passwd);
-    if (user == NULL || epasswd == NULL) {
-	perror("malloc");
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
-
-    /* get shell if we need it */
-    if ((sudo_mode & MODE_SHELL) && (shell = getshell(pw_ent)))
-	if ((shell = strdup(shell)) == NULL) {
-	    perror("malloc");
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
-
-    /*
-     * We only want to be root when we absolutely need it.
-     * Since we set euid and ruid to 0 above, this will set the euid
-     * to the * uid of the caller so (ruid, euid) == (0, user's uid).
-     */
-    set_perms(PERM_USER);
-
 #ifdef UMASK
     (void) umask((mode_t)UMASK);
 #endif /* UMASK */
 
 #ifdef NO_ROOT_SUDO
-    if (uid == 0) {
+    if (sudo_pw_ent -> pw_uid == 0) {
 	(void) fprintf(stderr,
 		       "You are already root, you don't need to use sudo.\n");
 	exit(1);
@@ -624,14 +603,14 @@ static void add_env()
     }
 
     /* add the SUDO_USER envariable */
-    if (sudo_setenv("SUDO_USER", user)) {
+    if (sudo_setenv("SUDO_USER", sudo_pw_ent -> pw_name)) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
 
     /* add the SUDO_UID envariable */
-    (void) sprintf(idstr, "%ld", (long) uid);
+    (void) sprintf(idstr, "%ld", (long) sudo_pw_ent -> pw_uid);
     if (sudo_setenv("SUDO_UID", idstr)) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
@@ -666,8 +645,8 @@ static void load_cmnd(sudo_mode)
 
     /* If we are running a shell command args start at position 1 */
     if ((sudo_mode & MODE_SHELL)) {
-	if (shell) {
-	    old_cmnd = shell;
+	if (sudo_pw_ent->pw_shell && *sudo_pw_ent->pw_shell) {
+	    old_cmnd = sudo_pw_ent->pw_shell;
 	    arg_start = 1;
 	} else {
 	    (void) fprintf(stderr, "%s: Unable to determine shell.", Argv[0]);
@@ -815,8 +794,8 @@ void set_perms(perm)
 			      	break;
 
 	case        PERM_USER : 
-    	    	    	        if (seteuid(uid)) {
-    	    	    	            perror("seteuid(uid)");
+    	    	    	        if (seteuid(sudo_pw_ent -> pw_uid)) {
+    	    	    	            perror("seteuid(sudo_pw_ent -> pw_uid)");
     	    	    	            exit(1); 
     	    	    	        }
 			      	break;
@@ -827,7 +806,7 @@ void set_perms(perm)
 				    exit(1);
 				}
 
-				if (setuid(uid)) {
+				if (setuid(sudo_pw_ent -> pw_uid)) {
 				    perror("setuid(uid)");
 				    exit(1);
 				}
@@ -890,25 +869,4 @@ static void clean_env(envp, badenv_table)
 	    }
 	}
     }
-}
-
-
-
-/**********************************************************************
- *
- * getshell()
- *
- *  This function returns the user's shell based on either the
- *  SHELL evariable or the passwd(5) entry (in that order).
- */
-
-static char *getshell(pw_ent)
-    struct passwd *pw_ent;
-{
-    char *s;
-
-    if ((s = getenv("SHELL")) == NULL)
-	s = pw_ent -> pw_shell;
-
-    return(s);
 }
