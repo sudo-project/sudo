@@ -95,7 +95,7 @@ SINIX	5.42	R4000	bundled cc	1.4	Paul Tuininga	 none
 SINIX	5.43	mips	PyrC 5.0A00	1.5.6p2	Brian Jackson	 none
 SINIX	5.43	mips	CDS++ V1	1.58p2	Brian Jackson	 none
 SINIX	5.44	mips	PyrC 5.0A00	1.5.6p2	Brian Jackson	 none
-ReliantUNIX 5.44 mips	CDS++ V1	1.58p2	Brian Jackson	 none
+ReliantUNIX 5.45 mips	CDS++ V1	1.59p4	Brian Jackson	 none
 NCR	2.03	3400	bundled cc	1.4	Mark Rauschkolb	 --with-getpass
 NCR	3.00	5100	bundled cc	1.4	Mark Rauschkolb	 --with-getpass
 Unicos/mk 2.0.2.19 T3E  bundled cc      1.5.3   Mike Kienenberger none
