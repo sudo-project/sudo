@@ -160,12 +160,12 @@ int top = 0, stacksize = 0;
     } while (0)
 
 #define pop \
-    { \
+    do { \
 	if (top == 0) \
 	    yyerror("matching stack underflow"); \
 	else \
 	    top--; \
-    }
+    } while (0)
 
 /*
  * Shortcuts for append()
@@ -1376,7 +1376,7 @@ break;
 case 31:
 #line 376 "parse.yacc"
 {
-			    SETNMATCH(host_matches, yyvsp[-1].tok);
+			    SETNMATCH(host_matches, yyvsp[0].BOOLEAN);
 			}
 break;
 case 32:
@@ -1445,7 +1445,7 @@ case 39:
 {
 			    /*
 			     * Push the entry onto the stack if it is worth
-			     * saving and clear cmnd_matches for next cmnd.
+			     * saving and reset cmnd_matches for next cmnd.
 			     *
 			     * We need to save at least one entry on
 			     * the stack so sudoers_lookup() can tell that
@@ -1461,11 +1461,11 @@ case 39:
 				pushcp;
 			    else if (user_matches >= 0 && (top == 1 ||
 				(top == 2 && host_matches >= 0 &&
-				match[0].host >= 0)))
+				match[0].host < 0)))
 				pushcp;
 			    else if (user_matches == TRUE && keepall)
 				pushcp;
-			    cmnd_matches = NOMATCH;
+			    cmnd_matches = UNSPEC;
 			}
 break;
 case 40:
@@ -1489,7 +1489,7 @@ break;
 case 42:
 #line 471 "parse.yacc"
 {
-			    SETNMATCH(cmnd_matches, yyvsp[-2].tok);
+			    SETNMATCH(cmnd_matches, yyvsp[0].BOOLEAN);
 			}
 break;
 case 43:
@@ -1891,7 +1891,7 @@ break;
 case 86:
 #line 824 "parse.yacc"
 {
-			    SETNMATCH(user_matches, yyvsp[-1].tok);
+			    SETNMATCH(user_matches, yyvsp[0].BOOLEAN);
 			}
 break;
 case 87:
