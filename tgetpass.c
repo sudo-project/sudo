@@ -52,7 +52,11 @@
 #endif /* HAVE_TERMIOS_H */
 
 #ifndef _PASSWD_LEN
+#ifdef HAVE_C2_SECURITY
+#define	_PASSWD_LEN	24
+#else
 #define	_PASSWD_LEN	8
+#endif /* HAVE_C2_SECURITY */
 #endif /* _PASSWD_LEN */
 
 
