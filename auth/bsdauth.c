@@ -86,36 +86,59 @@ bsdauth_init(pw, promptp, auth)
 	return(AUTH_FATAL);
     }
 
+     if (auth_setitem(as, AUTHV_STYLE, login_style) < 0 ||
+	auth_setitem(as, AUTHV_NAME, pw->pw_name) < 0 ||
+	auth_setitem(as, AUTHV_CLASS, login_class) < 0) {
+	log_error(NO_EXIT|NO_MAIL, "unable to setup authentication");
+	auth_close(as);
+	return(AUTH_FATAL);
+    }
+
     auth->data = (VOID *) as;
     return(AUTH_SUCCESS);
 }
 
-/* XXX - doesn't deal with custom prompts yet (have to use lower-level funcs) */
 int
 bsdauth_verify(pw, prompt, auth)
     struct passwd *pw;
     char *prompt;
     sudo_auth *auth;
 {
-    char *s;
-    int authok;
+    char *s, *pass;
+    int authok, echo;
     sig_t childkiller;
     auth_session_t *as = (auth_session_t *) auth->data;
+    extern int nil_pw;
 
     /* save old signal handler */
     childkiller = signal(SIGCHLD, SIG_DFL);
 
-    auth_verify(as, login_style, pw->pw_name, login_class, NULL);
+    /*
+     * If there is a challenge we use that as the prompt and the response
+     * will be echoed.  Since this should be a single use password that is ok.
+     * Otherwise we use the (possibly custom) prompt provided to us.
+     */
+    if ((s = auth_challenge(as)) != NULL) {
+	echo = TGP_ECHO;
+    } else {
+	echo = 0;
+	s = prompt;
+    }
+
+    pass = tgetpass(s, def_ival(I_PW_TIMEOUT) * 60, tgetpass_flags | echo);
+    if (!pass || *pass == '\0')
+	nil_pw = 1;			/* empty password */
+
+    authok = auth_userresponse(as, pass, 1);
 
     /* restore old signal handler */
     (void)signal(SIGCHLD, childkiller);
 
-    authok = auth_getstate(as);
-    if ((authok & AUTH_ALLOW))
+    if (authok)
 	return(AUTH_SUCCESS);
 
     if ((s = auth_getvalue(as, "errormsg")) != NULL)
-	log_error(NO_EXIT|NO_MAIL, "%s\n", s);
+	log_error(NO_EXIT|NO_MAIL, "%s", s);
     return(AUTH_FAILURE);
 }
 
