@@ -87,10 +87,14 @@
 #endif /* S_IRWXU */
 
 /*
- * In case this is not defined in <sys/types.h> or <sys/select.h>
+ * In case these are not defined in <sys/types.h> or <sys/select.h>
  */
 #ifndef howmany
 # define howmany(x, y)	(((x) + ((y) - 1)) / (y))
+#endif
+#ifndef NFDBITS
+# define NFDBITS	32
+# define fd_mask	int
 #endif
 
 /*

@@ -23,7 +23,9 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
-#include <sys/file.h>
+#ifndef __TANDEM
+# include <sys/file.h>
+#endif
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
