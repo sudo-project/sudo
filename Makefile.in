@@ -116,7 +116,7 @@ HDRS = sudo.h compat.h version.h insults.h \
 VERSION = 1.6
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL \
-            INSTALL.configure TODO PORTING README RUNSON \
+            INSTALL.configure UPGRADE TODO PORTING README RUNSON \
             FAQ TROUBLESHOOTING Makefile.in acsite.m4 aixcrypt.exp \
             config.h.in configure configure.in config.guess config.sub \
             pathnames.h.in getcwd.c indent.pro install-sh \

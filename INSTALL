@@ -13,7 +13,7 @@ Simple sudo installation
 For most systems and configurations it is possible simply to:
 
     0) If you are upgrading from a previous version of sudo
-       please read the section "Notes on upgrading from an older release".
+       please read the info in the UPGRADE file before proceeding.
 
     1) If you previously ran `configure' on a different host
        you will probably want to do a `make distclean' to remove
@@ -54,30 +54,6 @@ For most systems and configurations it is possible simply to:
     7) Edit the sudoers file with `visudo' as necessary for your
        site.  You will probably want to refer the sample.sudoers
        file and sudoers man page included with the sudo package.
-
-Notes on upgrading from an older release
-========================================
-
-Starting with sudo 1.5.7 the configuration method has changed
-significantly as compared to previous versions.  All options are
-now set via the configure script.  See below for a list of all the
-configure options and their meanings.
-
-As of sudo 1.6, parsing of runas entries and the NOPASSWD tag has
-changed.  Please read the UPGRADE file.
-
-By default, sudo expects the sudoers file to be mode 0440 and
-to be owned by user and group 0.  This differs from version 1.4 and
-below which expected the sudoers file to be mode 0400 and to be
-owned by root.  Doing a `make install' will set the sudoers file
-to the new mode and group.  If sudo encounters a sudoers file
-with the old permissions it will attempt to update it to the new
-scheme.  You cannot, however, use a sudoers file with the new
-permissions with an old sudo binary.  It is suggested that if have
-a means of distributing sudo you distribute the new binaries first,
-then the new sudoers file (or you can leave sudoers as is and sudo
-will fix the permissions itself as long as sudoers is on a local
-filesystem).
 
 Available configure options
 ===========================
