@@ -122,20 +122,25 @@
 #endif /* GID_NO_CHANGE */
 
 /*
- * Emulate seteuid() and setegid() for HP-UX
+ * Emulate seteuid() for HP-UX
  */
 #ifdef __hpux
 #  define seteuid(_EUID)	(setresuid(UID_NO_CHANGE, _EUID, UID_NO_CHANGE))
-#  define setegid(_EGID)	(setresgid(GID_NO_CHANGE, _EGID, GID_NO_CHANGE))
-#endif	/* __hpux */
+#endif /* __hpux */
 
 /*
- * Emulate seteuid() and setegid() for AIX
+ * Emulate seteuid() for AIX
  */
 #ifdef _AIX
 #  include <sys/id.h>
 #  define seteuid(_EUID)	(setuidx(ID_EFFECTIVE|ID_REAL, _EUID))
-#  define setegid(_EGID)	(setgidx(ID_EFFECTIVE|ID_REAL, _EGID))
-#endif	/* _AIX */
+#endif /* _AIX */
+
+/*
+ * Emulate seteuid() for DYNIX
+ */
+#ifdef sequent
+#  define seteuid(_EUID)	(setresuid(UID_NO_CHANGE, _EUID))
+#endif /* sequent */
 
 #endif /* _SUDO_COMPAT_H */
