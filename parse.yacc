@@ -142,7 +142,7 @@ entry		:	COMMENT
                 |       error COMMENT
 			{ yyerrok; }
 		|	NAME {
-			    user_matched = ($1, user) == 0;
+			    user_matched = strcmp($1, user) == 0;
 			} privileges
 		|	HOSTALIAS hostaliases
 			{ ; }
