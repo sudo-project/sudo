@@ -255,17 +255,26 @@ sudo.man.in: $(srcdir)/sudo.pod
 	@rm -f $(srcdir)/$@
 	(cd $(srcdir); pod2man --section=`echo @MANSECTSU@|tr A-Z a-z` --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudo.pod > $(srcdir)/$@)
 
+sudo.man: sudo.man.in
+	CONFIG_FILES=$@ CONFIG_HEADERS= sh ./config.status
+
 sudo.cat: sudo.man
 
 visudo.man.in: $(srcdir)/visudo.pod
 	@rm -f $(srcdir)/$@
 	(cd $(srcdir); pod2man --section=`echo @MANSECTSU@|tr A-Z a-z` --release=$(VERSION) --center="MAINTENANCE COMMANDS" visudo.pod > $(srcdir)/$@)
 
+visudo.man: visudo.man.in
+	CONFIG_FILES=$@ CONFIG_HEADERS= sh ./config.status
+
 visudo.cat: visudo.man
 
 sudoers.man.in: $(srcdir)/sudoers.pod
 	@rm -f $(srcdir)/$@
 	(cd $(srcdir); pod2man --section=`echo @MANSECTFORM@|tr A-Z a-z` --release=$(VERSION) --center="FILE FORMATS" sudoers.pod | sed 's/"\\f(CW""\\fR"/\\f(CW""\\fR/' > $(srcdir)/$@)
+
+sudoers.man:: sudoers.man.in
+	CONFIG_FILES=$@ CONFIG_HEADERS= sh ./config.status
 
 sudoers.cat: sudoers.man
 
