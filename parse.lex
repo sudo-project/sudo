@@ -49,7 +49,7 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 #include "sudo.h"
 #include <options.h>
-#include "y.tab.h"
+#include "sudo.tab.h"
 
 #undef yywrap		/* guard against a yywrap macro */
 
@@ -122,7 +122,7 @@ WORD			[[:alnum:]_-]+
 			    return(COMMENT);
 			}			/* return comments */
 
-<GOTCMND>[^:\,= \t\n]+ {
+<GOTCMND>[^:\, \t\n]+ {
 			    LEXTRACE("ARG ");
 			    fill_args(yytext, yyleng, sawspace);
 			    sawspace = FALSE;
