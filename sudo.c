@@ -574,6 +574,8 @@ init_vars(sudo_mode)
 	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
 
     set_runaspw(*user_runas);		/* may call log_error() */
+    if (*user_runas[0] == '#' && runas_pw->pw_name  && runas_pw->pw_name[0])
+	*user_runas = estrdup(runas_pw->pw_name);
 
     /*
      * Get current working directory.  Try as user, fall back to root.

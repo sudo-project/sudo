@@ -483,9 +483,11 @@ runasspec	:	/* empty */ {
 			     * If this is the first entry in a command list
 			     * then check against default runas user.
 			     */
-			    if (runas_matches == -1)
-				runas_matches = (strcmp(*user_runas,
-				    def_runas_default) == 0);
+			    if (runas_matches == -1) {
+				runas_matches =
+				    userpw_matches(def_runas_default,
+					*user_runas, runas_pw);
+			    }
 			}
 		|	RUNAS runaslist {
 			    runas_matches = ($2 == TRUE ? TRUE : FALSE);
@@ -525,7 +527,7 @@ runasuser	:	WORD {
 				    user_matches == TRUE)
 				    append_runas($1, ", ");
 			    }
-			    if (strcmp($1, *user_runas) == 0)
+			    if (userpw_matches($1, *user_runas, runas_pw))
 				$$ = TRUE;
 			    else
 				$$ = -1;
@@ -539,7 +541,7 @@ runasuser	:	WORD {
 				    user_matches == TRUE)
 				    append_runas($1, ", ");
 			    }
-			    if (usergr_matches($1, *user_runas))
+			    if (usergr_matches($1, *user_runas, runas_pw))
 				$$ = TRUE;
 			    else
 				$$ = -1;
@@ -818,14 +820,14 @@ opuser		:	user {
 		;
 
 user		:	WORD {
-			    if (strcmp($1, user_name) == 0)
+			    if (userpw_matches($1, user_name, sudo_user.pw))
 				$$ = TRUE;
 			    else
 				$$ = -1;
 			    free($1);
 			}
 		|	USERGROUP {
-			    if (usergr_matches($1, user_name))
+			    if (usergr_matches($1, user_name, sudo_user.pw))
 				$$ = TRUE;
 			    else
 				$$ = -1;

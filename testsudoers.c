@@ -236,9 +236,24 @@ hostname_matches(shost, lhost, pattern)
 }
 
 int
-usergr_matches(group, user)
+userpw_matches(sudoers_user, user, pw)
+    char *sudoers_user;
+    char *user;
+    struct passwd *pw;
+{
+    if (pw != NULL && *sudoers_user == '#') {
+	uid_t uid = atoi(sudoers_user + 1);
+	if (uid == pw->pw_uid)
+	    return(1);
+    }
+    return(strcmp(sudoers_user, user) == 0);
+}
+
+int
+usergr_matches(group, user, pw)
     char *group;
     char *user;
+    struct passwd *pw;
 {
     struct group *grp;
     char **cur;

@@ -438,16 +438,35 @@ hostname_matches(shost, lhost, pattern)
 }
 
 /*
- *  Returns TRUE if the given user belongs to the named group,
+ *  Returns TRUE if the user/uid from sudoers matches the specified user/uid,
  *  else returns FALSE.
  */
 int
-usergr_matches(group, user)
+userpw_matches(sudoers_user, user, pw)
+    char *sudoers_user;
+    char *user;
+    struct passwd *pw;
+{
+    if (pw != NULL && *sudoers_user == '#') {
+	uid_t uid = atoi(sudoers_user + 1);
+	if (uid == pw->pw_uid)
+	    return(1);
+    }
+    return(strcmp(sudoers_user, user) == 0);
+}
+
+/*
+ *  Returns TRUE if the given user belongs to the named group,
+ *  else returns FALSE.
+ *  XXX - reduce the number of passwd/group lookups
+ */
+int
+usergr_matches(group, user, pw)
     char *group;
     char *user;
+    struct passwd *pw;
 {
     struct group *grp;
-    struct passwd *pw;
     gid_t pw_gid;
     char **cur;
 
@@ -455,8 +474,8 @@ usergr_matches(group, user)
     if (*group++ != '%')
 	return(FALSE);
 
-    /* look up user's primary gid in the passwd file (XXX - reduce lookups) */
-    if ((pw = getpwnam(user)) == NULL)
+    /* look up user's primary gid in the passwd file */
+    if (pw == NULL && (pw = getpwnam(user)) == NULL)
 	return(FALSE);
     pw_gid = pw->pw_gid;
 

@@ -82,7 +82,8 @@ int command_matches		__P((char *, char *, char *, char *));
 int addr_matches		__P((char *));
 int hostname_matches		__P((char *, char *, char *));
 int netgr_matches		__P((char *, char *, char *, char *));
-int usergr_matches		__P((char *, char *));
+int usergr_matches		__P((char *, char *, struct passwd *));
+int userpw_matches		__P((char *, char *, struct passwd *));
 void init_parser		__P((void));
 void yyrestart			__P((FILE *));
 
@@ -496,8 +497,17 @@ hostname_matches(s, l, p)
 }
 
 int
-usergr_matches(g, u)
+usergr_matches(g, u, pw)
     char *g, *u;
+    struct passwd *pw;
+{
+    return(TRUE);
+}
+
+int
+userpw_matches(s, u, pw)
+    char *s, *u;
+    struct passwd *pw;
 {
     return(TRUE);
 }
