@@ -43,7 +43,11 @@
 
 /* For silencing gcc warnings about rcsids */
 #ifndef __unused
-# define __unused	__attribute__((__unused__))
+# if defined(__GNUC__) && (__GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ > 7)
+#  define __unused	__attribute__((__unused__))
+# else
+#  define __unused
+# endif
 #endif
 
 /*
