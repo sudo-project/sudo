@@ -1085,7 +1085,7 @@ set_loginclass(pw)
     login_cap_t *lc;
 
     if (login_class && strcmp(login_class, "-") != 0) {
-	if (strcmp(*user_runas, "root") != 0) {
+	if (strcmp(*user_runas, "root") != 0 && user_uid != 0) {
 	    (void) fprintf(stderr, "%s: only root can use -c %s\n",
 		Argv[0], login_class);
 	    exit(1);
