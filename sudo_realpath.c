@@ -102,7 +102,7 @@ char * sudo_realpath(old, new)
     (void) strncpy(new, old, MAXPATHLEN);
 
     /* we need to be root for this section */
-    be_root();
+    set_perms(PERM_ROOT);
 
     /*
      * Resolve the last component of the path if it is a link
@@ -200,7 +200,7 @@ static void realpath_restore(cwd)
     char * cwd;
 {
     /* relinquish root privs and chdir to where we started... */
-    be_user();
+    set_perms(PERM_USER);
     if (chdir(cwd)) {
 	fprintf(stderr, "Error: cannot change dir back to %s, sudo aborting!\n",
 			cwd);
