@@ -78,8 +78,7 @@ esac])
 
 AC_ARG_WITH(C2, [  --with-C2               enable C2 security (shadow password) support],
 [case $with_C2 in
-    yes)	AC_DEFINE(HAVE_C2_SECURITY)
-		echo 'Configuring for C2 security (shadow passwords)'
+    yes)	echo 'Configuring for C2 security (shadow passwords)'
 		;;
     no)		;;
     *)		echo "Ignoring unknown argument to --with-C2: $with_C2"
@@ -246,15 +245,22 @@ dnl What kind of beastie are we being run on?
 dnl Barf if config.cache was generated on another host.
 dnl
 AC_CANONICAL_HOST
-if test -n "$sudo_cv_oldhost" -a "$sudo_cv_oldhost" != "$host"; then
-    echo ""
-    echo "Fatal Error: config.cache exists from another platform!"
-    echo "Please remove it and re-run configure."
-    echo ""
-    exit 1
+if test -n "$sudo_cv_prev_host"; then
+    if test "$sudo_cv_prev_host" != "$host"; then
+	echo ""
+	echo "Fatal Error: config.cache exists from another platform!"
+	echo "Please remove it and re-run configure."
+	echo ""
+	exit 1
+    else
+	AC_MSG_CHECKING(previous host type)
+	AC_CACHE_VAL(sudo_cv_prev_host, sudo_cv_prev_host="$host")
+	echo $sudo_cv_prev_host
+    fi
+else
+    # this will produce no output since there is no cached value
+    AC_CACHE_VAL(sudo_cv_prev_host, sudo_cv_prev_host="$host")
 fi
-AC_MSG_CHECKING(host type against cached value (if any))
-AC_CACHE_VAL(sudo_cv_oldhost, sudo_cv_oldhost="$host")
 
 dnl
 dnl We want to be able to differentiate between different rev's
@@ -272,20 +278,14 @@ case "$host" in
 		dnl Don't really need -lnsl
 		LIB_NSL=1
 
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SUNOS4(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SUNOS4(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SUNOS4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     *-*-solaris2*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
 		if test "$with_C2" != "no"; then
 		    with_C2="yes"
 		    SHADOW_TYPE="SPW_SVR4"
@@ -306,10 +306,7 @@ case "$host" in
 		# (XXX - should be an option to configure)
 		#STATIC_SUDO=true
 
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -346,10 +343,7 @@ case "$host" in
 
 		AC_DEFINE(BROKEN_SYSLOG)
 
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_HPUX9(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_HPUX9(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_HPUX9"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -400,10 +394,7 @@ case "$host" in
 		# ignore envariables wrt dynamic lib path
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
 
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_DUNIX(with_C2="yes")
 		# C2 security stuff
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lsecurity -laud"
@@ -413,10 +404,7 @@ case "$host" in
 		fi
 		;;
     *-*-irix*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -441,10 +429,7 @@ case "$host" in
 		fi
 		;;
     *-*-linux*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -460,10 +445,7 @@ case "$host" in
 		    CFLAGS="${CFLAGS} -D__STDC__"
 		fi
 
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"
 		    SUDO_LIBS="${SUDO_LIBS} -lprot"
@@ -474,10 +456,7 @@ case "$host" in
 		;;
     *-*-ultrix*)
 		OS="ultrix"
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_ULTRIX4(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_ULTRIX4(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lauth"
 		    LIBS="${LIBS} -lauth"
@@ -486,10 +465,7 @@ case "$host" in
 		fi
 		;;
     *-*-riscos*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -506,10 +482,7 @@ case "$host" in
 		SUDO_LIBS="${SUDO_LIBS} -lcrypt"
 		LIBS="${LIBS} -lcrypt"
 
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lsec"
 		    LIBS="${LIBS} -lsec"
@@ -518,10 +491,7 @@ case "$host" in
 		fi
 		;;
     *-*-sco*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -539,28 +509,19 @@ case "$host" in
 		fi
 
 		# This should always be true but why not be careful...
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_BSD(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_BSD(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_BSD"
 		fi
 		;;
     *-*-*bsd*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_BSD(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_BSD(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_BSD"
 		fi
 		;;
     *-*-sysv*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(
-		    AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes"
-		)
+		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -576,10 +537,7 @@ case "$host" in
 		dnl Just check the most common schemes.
 		dnl
 		if test -z "$with_C2"; then
-		    SUDO_CHECK_SHADOW_GENERIC([
-			AC_DEFINE(HAVE_C2_SECURITY)
-			with_C2="yes"
-		    ])
+		    SUDO_CHECK_SHADOW_GENERIC(with_C2="yes")
 		    AC_MSG_CHECKING(for shadow passwords and type)
 		    case "$SHADOW_TYPE" in
 			"SPW_SVR4")
@@ -625,6 +583,9 @@ if test "$with_C2" = "yes" -a -z "$SHADOW_TYPE"; then
 		echo "Unable to determine shadow passwd type, sudo may not be able to verify passwords"
 		;;
     esac
+    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+elif test -z "$SHADOW_TYPE"; then
+    SHADOW_TYPE="SPW_NONE"
     AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 fi
 
