@@ -41,7 +41,7 @@ $Sudo$
 
 =head1 NAME
 
-sudo - execute a command as another user
+sudo, sudoedit - execute a command as another user
 
 =head1 SYNOPSIS
 
