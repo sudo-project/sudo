@@ -1640,3 +1640,13 @@ Sudo 1.6.7p6 released.
 513) BSD-style warn/err functions are now used throughout.
 
 514) Fixed the --with-stow configure option
+
+515) Added a "sudo_lecture" option that points to a file containing a custom
+     lecture.
+
+516) The username in a log entry is no longer truncated at 8 characters.
+
+517) A new tag, NOEXEC, will prevent a dynamically-linked program being run
+     by sudo from executing another program (think shell escapes).
+     Because this uses LD_PRELOAD it has no effect on static binaries.
+     Idea from Reznic Valery.
