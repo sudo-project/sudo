@@ -112,7 +112,6 @@ find_path(infile, outfile)
     path = estrdup(path);
     origpath = path;
 
-    /* XXX use strtok() */
     do {
 	if ((n = strchr(path, ':')))
 	    *n = '\0';

@@ -67,19 +67,12 @@ sudo_goodpath(path)
     const char *path;
 {
     struct stat sb;
-    int err;
 
     /* Check for brain damage */
     if (path == NULL || path[0] == '\0')
 	return(NULL);
 
-    /* Do the stat() as root. */
-    set_perms(PERM_ROOT, 0);
-    err = stat(path, &sb);
-    set_perms(PERM_USER, 0);
-
-    /* stat() failed */
-    if (err)
+    if (stat(path, &sb))
 	return(NULL);
 
     /* Make sure path describes an executable regular file. */

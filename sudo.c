@@ -258,7 +258,7 @@ main(argc, argv)
 
     cmnd_status = init_vars(sudo_mode);
 
-    set_perms(PERM_USER, sudo_mode);
+    /* At this point, ruid == euid == 0 */
 
     check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
 
@@ -763,7 +763,6 @@ check_sudoers()
      * Fix the mode and group on sudoers file from old default.
      * Only works if filesystem is readable/writable by root.
      */
-    set_perms(PERM_ROOT, 0);
     if ((rootstat = lstat(_PATH_SUDOERS, &statbuf)) == 0 &&
 	SUDOERS_UID == statbuf.st_uid && SUDOERS_MODE != 0400 &&
 	(statbuf.st_mode & 0007777) == 0400) {
@@ -824,8 +823,7 @@ check_sudoers()
 	    log_error(USE_ERRNO, "can't open %s", _PATH_SUDOERS);
     }
 
-    set_perms(PERM_ROOT, 0);
-    set_perms(PERM_USER, 0);
+    set_perms(PERM_ROOT, 0);		/* change back to root */
 }
 
 /*

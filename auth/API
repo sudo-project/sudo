@@ -31,8 +31,8 @@ The variables in the struct are as follows:
 		initialized in the "init" or "setup" routines.
 
 Possible values of sudo_auth.flags:
-    FLAG_ROOT		Whether or not the auth functions should run with
-			an euid of 0 or the uid of the invoking user.
+    FLAG_USER		Whether or not the auth functions should run with
+			the euid of the invoking user instead of 0.
 
     FLAG_CONFIGURED	If set then the auth method is assumed to have been
 			configured successfully.  All auth methods start out
@@ -102,23 +102,23 @@ in sudo_auth.h.  For instance, for a method, ``fooauth'', add:
 
 #elif defined(HAVE_FOOAUTH)
 #  define AUTH_STANDALONE \
-        AUTH_ENTRY(FLAG_ROOT, "foo", \
+        AUTH_ENTRY(0, "foo", \
 	    foo_init, foo_setup, foo_verify, foo_cleanup)
 
-If the method doesn't need to run as root, replace FLAG_ROOT with 0.
-If you don't have a init/setup/cleanup routine, just use a NULL for that
-field.
+If the method needs to run as the user, not root, replace the first
+parameter to AUTH_ENTRY (0) with FLAG_USER.  If you don't have a
+init/setup/cleanup routine, just use a NULL for that field.
 
 For a normal authentication method, add it to the ``auth_switch'' in
 sudo_auth.c.  If ``fooauth'' is a normal auth method, its entry
 would look like:
 
 #  ifdef HAVE_FOOAUTH
-    AUTH_ENTRY(FLAG_ROOT, "foo", foo_init, foo_setup, foo_verify, foo_cleanup)
+    AUTH_ENTRY(0, "foo", foo_init, foo_setup, foo_verify, foo_cleanup)
 #  endif
 
-Again, if the method doesn't need to run as root, replace FLAG_ROOT
-with 0.  Likewise, if you don't have a init/setup/cleanup routine,
+Again, if the method doesn't need to run as root, replace the 0 with
+FLAG_USER.  Likewise, if you don't have a init/setup/cleanup routine,
 just use a NULL for that field.
 
 NOTE:  You should not make a method both ``standalone'' and

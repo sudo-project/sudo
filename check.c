@@ -137,8 +137,6 @@ update_timestamp(timestampdir, timestampfile)
     char *timestampfile;
 {
 
-    set_perms(PERM_ROOT, 0);		/* become root */
-
     if (touch(timestampfile ? timestampfile : timestampdir, time(NULL)) == -1) {
 	if (timestampfile) {
 	    int fd = open(timestampfile, O_WRONLY|O_CREAT|O_TRUNC, 0600);
@@ -152,8 +150,6 @@ update_timestamp(timestampdir, timestampfile)
 		log_error(NO_EXIT|USE_ERRNO, "Can't mkdir %s", timestampdir);
 	}
     }
-
-    set_perms(PERM_USER, 0);		/* relinquish root */
 }
 
 /*
@@ -288,8 +284,6 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
     time_t now;
     int status = TS_ERROR;		/* assume the worst */
 
-    set_perms(PERM_ROOT, 0);		/* become root */
-
     /*
      * Sanity check _PATH_SUDO_TIMEDIR and make it if it doesn't already exist.
      * We start out assuming the worst (that the dir is not sane) and
@@ -325,10 +319,8 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 		status = TS_MISSING;
 	}
     }
-    if (status == TS_ERROR) {
-	set_perms(PERM_USER, 0);		/* relinquish root */
+    if (status == TS_ERROR)
 	return(status);
-    }
 
     /*
      * Sanity check the user's ticket dir.  We start by downgrading
@@ -435,7 +427,6 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 	}
     }
 
-    set_perms(PERM_USER, 0);		/* relinquish root */
     return(status);
 }
 
@@ -455,7 +446,6 @@ remove_timestamp(remove)
     status = timestamp_status(timestampdir, timestampfile, user_name, FALSE);
     if (status == TS_OLD || status == TS_CURRENT) {
 	ts = timestampfile ? timestampfile : timestampdir;
-	set_perms(PERM_ROOT, 0);		/* become root */
 	if (remove) {
 	    if (timestampfile)
 		status = unlink(timestampfile);
@@ -471,7 +461,6 @@ remove_timestamp(remove)
 	    (void) fprintf(stderr, "%s: can't reset %s to epoch: %s\n",
 		Argv[0], ts, strerror(errno));
 	}
-	set_perms(PERM_USER, 0);		/* relinquish root */
     }
 
     (void) free(timestampdir);

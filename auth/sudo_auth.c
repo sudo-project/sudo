@@ -65,25 +65,25 @@ sudo_auth auth_switch[] = {
     AUTH_STANDALONE
 #else
 #  ifndef WITHOUT_PASSWD
-    AUTH_ENTRY(FLAG_ROOT, "passwd", NULL, NULL, passwd_verify, NULL)
+    AUTH_ENTRY(0, "passwd", NULL, NULL, passwd_verify, NULL)
 #  endif
 #  if defined(HAVE_SECUREWARE) && !defined(WITHOUT_PASSWD)
-    AUTH_ENTRY(FLAG_ROOT, "secureware", secureware_init, NULL, secureware_verify, NULL)
+    AUTH_ENTRY(0, "secureware", secureware_init, NULL, secureware_verify, NULL)
 #  endif
 #  ifdef HAVE_AFS
-    AUTH_ENTRY(FLAG_ROOT, "afs", NULL, NULL, afs_verify, NULL)
+    AUTH_ENTRY(0, "afs", NULL, NULL, afs_verify, NULL)
 #  endif
 #  ifdef HAVE_KERB4
-    AUTH_ENTRY(FLAG_ROOT, "kerb4", kerb4_init, NULL, kerb4_verify, NULL)
+    AUTH_ENTRY(0, "kerb4", kerb4_init, NULL, kerb4_verify, NULL)
 #  endif
 #  ifdef HAVE_KERB5
-    AUTH_ENTRY(FLAG_ROOT, "kerb5", kerb5_init, NULL, kerb5_verify, NULL)
+    AUTH_ENTRY(0, "kerb5", kerb5_init, NULL, kerb5_verify, NULL)
 #  endif
 #  ifdef HAVE_SKEY
-    AUTH_ENTRY(FLAG_ROOT, "S/Key", NULL, rfc1938_setup, rfc1938_verify, NULL)
+    AUTH_ENTRY(0, "S/Key", NULL, rfc1938_setup, rfc1938_verify, NULL)
 #  endif
 #  ifdef HAVE_OPIE
-    AUTH_ENTRY(FLAG_ROOT, "OPIE", NULL, rfc1938_setup, rfc1938_verify, NULL)
+    AUTH_ENTRY(0, "OPIE", NULL, rfc1938_setup, rfc1938_verify, NULL)
 #  endif
 #endif /* AUTH_STANDALONE */
     AUTH_ENTRY(0, NULL, NULL, NULL, NULL, NULL)
@@ -107,8 +107,8 @@ verify_user()
     /* Initialize auth methods and unconfigure the method if necessary. */
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->init && IS_CONFIGURED(auth)) {
-	    if (NEEDS_ROOT(auth))
-		set_perms(PERM_ROOT, 0);
+	    if (NEEDS_USER(auth))
+		set_perms(PERM_USER, 0);
 
 	    status = (auth->init)(sudo_user.pw, &user_prompt, auth);
 	    if (status == AUTH_FAILURE)
@@ -116,8 +116,8 @@ verify_user()
 	    else if (status == AUTH_FATAL)	/* XXX log */
 		exit(1);		/* assume error msg already printed */
 
-	    if (NEEDS_ROOT(auth))
-		set_perms(PERM_USER, 0);
+	    if (NEEDS_USER(auth))
+		set_perms(PERM_ROOT, 0);
 	}
     }
 
@@ -125,8 +125,8 @@ verify_user()
 	/* Do any per-method setup and unconfigure the method if needed */
 	for (auth = auth_switch; auth->name; auth++) {
 	    if (auth->setup && IS_CONFIGURED(auth)) {
-		if (NEEDS_ROOT(auth))
-		    set_perms(PERM_ROOT, 0);
+		if (NEEDS_USER(auth))
+		    set_perms(PERM_USER, 0);
 
 		status = (auth->setup)(sudo_user.pw, &user_prompt, auth);
 		if (status == AUTH_FAILURE)
@@ -134,8 +134,8 @@ verify_user()
 		else if (status == AUTH_FATAL)	/* XXX log */
 		    exit(1);		/* assume error msg already printed */
 
-		if (NEEDS_ROOT(auth))
-		    set_perms(PERM_USER, 0);
+		if (NEEDS_USER(auth))
+		    set_perms(PERM_ROOT, 0);
 	    }
 	}
 
@@ -154,14 +154,14 @@ verify_user()
 	    if (!IS_CONFIGURED(auth))
 		continue;
 
-	    if (NEEDS_ROOT(auth))
-		set_perms(PERM_ROOT, 0);
+	    if (NEEDS_USER(auth))
+		set_perms(PERM_USER, 0);
 
 	    success = auth->status = (auth->verify)(sudo_user.pw, p, auth);
 	    (void) memset(p, 0, strlen(p));
 
-	    if (NEEDS_ROOT(auth))
-		set_perms(PERM_USER, 0);
+	    if (NEEDS_USER(auth))
+		set_perms(PERM_ROOT, 0);
 
 	    if (auth->status != AUTH_FAILURE)
 		goto cleanup;
@@ -182,15 +182,15 @@ cleanup:
     /* Call cleanup routines. */
     for (auth = auth_switch; auth->name; auth++) {
 	if (auth->cleanup && IS_CONFIGURED(auth)) {
-	    if (NEEDS_ROOT(auth))
-		set_perms(PERM_ROOT, 0);
+	    if (NEEDS_USER(auth))
+		set_perms(PERM_USER, 0);
 
 	    status = (auth->cleanup)(sudo_user.pw, auth);
 	    if (status == AUTH_FATAL)	/* XXX log */
 		exit(1);		/* assume error msg already printed */
 
-	    if (NEEDS_ROOT(auth))
-		set_perms(PERM_USER, 0);
+	    if (NEEDS_USER(auth))
+		set_perms(PERM_ROOT, 0);
 	}
     }
 

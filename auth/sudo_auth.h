@@ -55,12 +55,12 @@ typedef struct sudo_auth {
 
 /* Values for sudo_auth.flags.  */
 /* XXX - these names are too long for my liking */
-#define FLAG_ROOT	0x01	/* functions must run as root */
+#define FLAG_USER	0x01	/* functions must run as root */
 #define FLAG_CONFIGURED	0x02	/* method configured ok */
 #define FLAG_ONEANDONLY	0x04	/* one and only auth method */
 
 /* Shortcuts for using the flags above. */
-#define NEEDS_ROOT(x)		((x)->flags & FLAG_ROOT)
+#define NEEDS_USER(x)		((x)->flags & FLAG_USER)
 #define IS_CONFIGURED(x)	((x)->flags & FLAG_CONFIGURED)
 #define IS_ONEANDONLY(x)	((x)->flags & FLAG_ONEANDONLY)
 
@@ -99,27 +99,27 @@ int securid_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
 /* Some methods cannots (or should not) interoperate with any others */
 #if defined(HAVE_PAM)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(FLAG_ROOT, "pam", \
+	AUTH_ENTRY(0, "pam", \
 	    pam_init, NULL, pam_verify, pam_cleanup)
 #elif defined(HAVE_SECURID)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(FLAG_ROOT, "SecurId", \
+	AUTH_ENTRY(0, "SecurId", 
 	    securid_init, securid_setup, securid_verify, NULL)
 #elif defined(HAVE_SIA)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(FLAG_ROOT, "sia", \
+	AUTH_ENTRY(0, "sia", \
 	    NULL, sia_setup, sia_verify, sia_cleanup)
 #elif defined(HAVE_DCE)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(FLAG_ROOT, "dce", \
+	AUTH_ENTRY(0, "dce", \
 	    NULL, NULL, dce_verify, NULL)
 #elif defined(HAVE_AUTHENTICATE)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(FLAG_ROOT, "aixauth", \
+	AUTH_ENTRY(0, "aixauth", \
 	    NULL, NULL, aixauth_verify, NULL)
 #elif defined(HAVE_FWTK)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(FLAG_ROOT, "fwtk", fwtk_init, \
+	AUTH_ENTRY(0, "fwtk", fwtk_init, \
 	    NULL, fwtk_verify, fwtk_cleanup)
 #endif
 

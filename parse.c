@@ -124,25 +124,16 @@ sudoers_lookup(check_cmnd)
     yyin = sudoers_fp;
     yyout = stdout;
 
-    /*
-     * Allocate space for data structures in the parser.
-     */
+    /* Allocate space for data structures in the parser. */
     init_parser();
 
-    /*
-     * Need to be root while stat'ing things in the parser.
-     */
+    /* Need to be root while stat'ing things in the parser. */
     set_perms(PERM_ROOT, 0);
     error = yyparse();
 
-    /*
-     * Don't need to keep this open...
-     */
+    /* Close the sudoers file now that we are done with it. */
     (void) fclose(sudoers_fp);
     sudoers_fp = NULL;
-
-    /* relinquish extra privs */
-    set_perms(PERM_USER, 0);
 
     if (error || parse_error)
 	return(VALIDATE_ERROR);
@@ -159,10 +150,9 @@ sudoers_lookup(check_cmnd)
     }
 
     /*
-     * Only check the actual command if the check_cmnd
-     * flag is set.  It is not set for the "validate"
-     * and "list" pseudo-commands.  Always check the
-     * host and user.
+     * Only check the actual command if the check_cmnd flag is set.
+     * It is not set for the "validate" and "list" pseudo-commands.
+     * Always check the host and user.
      */
     if (check_cmnd == FALSE)
 	while (top) {

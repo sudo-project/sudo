@@ -161,14 +161,9 @@ do_logfile(msg)
     FILE *fp;
     mode_t oldmask;
     time_t now;
-    int oldeuid = geteuid();
     int maxlen = MAXLOGFILELEN;
 
     now = time((time_t) 0);
-
-    /* Become root if we are not already. */
-    if (oldeuid)
-	set_perms(PERM_ROOT, 0);
 
     oldmask = umask(077);
     fp = fopen(_PATH_SUDO_LOGFILE, "a");
@@ -254,9 +249,6 @@ do_logfile(msg)
 	(void) lock_file(fileno(fp), SUDO_UNLOCK);
 	(void) fclose(fp);
     }
-
-    if (oldeuid)
-	set_perms(PERM_USER, 0);	/* relinquish root */
 }
 #endif /* LOGGING & SLOG_FILE */
 
@@ -299,20 +291,18 @@ log_auth(status, inform_user)
     mail_auth(status, logline);		/* send mail based on status */
 
     /* Inform the user if they failed to authenticate.  */
-    if (inform_user) {
+    if (inform_user && (status & VALIDATE_NOT_OK)) {
 	if (status & FLAG_NO_USER)
 	    (void) fprintf(stderr, "%s is not in the sudoers file.  %s",
 		user_name, "This incident will be reported.\n");
 	else if (status & FLAG_NO_HOST)
 	    (void) fprintf(stderr, "%s is not allowed to run sudo on %s.  %s",
 		user_name, user_shost, "This incident will be reported.\n");
-	else if (status & VALIDATE_NOT_OK)
+	else
 	    (void) fprintf(stderr,
 		"Sorry, user %s is not allowed to execute '%s%s%s' as %s on %s.\n",
 		user_name, user_cmnd, user_args ? " " : "",
 		user_args ? user_args : "", user_runas, user_host);
-	else
-	    (void) fprintf(stderr, "An unknown error has occurred.\n");
     }
 
     /*
@@ -350,6 +340,10 @@ log_error(va_alist)
     flags = va_arg(ap, int);
     fmt = va_arg(ap, const char *);
 #endif
+
+    /* Become root if we are not already to avoid user control */
+    if (geteuid() != 0)
+	set_perms(PERM_ROOT, 0);
 
     /* Expand printf-style format + args. */
     evasprintf(&message, fmt, ap);
@@ -409,6 +403,9 @@ log_error(va_alist)
 	free(message);
 }
 
+/*
+ * Send a message to ALERTMAIL
+ */
 #ifdef _PATH_SENDMAIL
 static void
 send_mail(line)
@@ -481,7 +478,7 @@ send_mail(line)
 	    user_name, line);
 	fclose(mail);
 	reapchild(0);
-	exit(0);
+	_exit(0);
     } else {
 	/* Parent, just return unless there is an error. */
 	if (pid == -1) {
@@ -510,6 +507,7 @@ mail_auth(status, line)
 {
     int mail_mask;
 
+    /* If any of these bits are set in status, we send mail. */
     mail_mask = VALIDATE_ERROR;
 #ifdef SEND_MAIL_WHEN_OK
     mail_mask |= VALIDATE_OK;
