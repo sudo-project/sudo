@@ -298,7 +298,7 @@ main(argc, argv)
 	    errorlineno);
 
     /* Is root even allowed to run sudo? */
-    if (getuid() == 0 && !def_flag(I_ROOT_SUDO)) {
+    if (user_uid == 0 && !def_flag(I_ROOT_SUDO)) {
 	(void) fputs("You are already root, you don't need to use sudo.\n",
 	    stderr);
 	exit(1);
