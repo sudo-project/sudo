@@ -154,7 +154,7 @@ case "$OS" in
 		if test -n "$C2"; then
 		    SHADOW_TYPE="SPW_AIX"
 		fi
-		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:./aixcrypt.exp"
+		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 		;;
     "hp-ux")	echo "Looks like HP-UX $OSREV"
 		
