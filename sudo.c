@@ -390,7 +390,7 @@ static int parse_args()
 
 	switch (Argv[1][1]) {
 	    case 'p':
-		if (Argc < 3)
+		if (Argc < 4)
 		    usage(1);
 
 		prompt = Argv[2];
