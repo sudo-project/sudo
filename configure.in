@@ -585,6 +585,20 @@ case "$host" in
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
+    *-*-svr4)
+		LIBS="${LIBS} -lsocket -lnsl"
+		SUDO_LIBS="${LIBS} -lsocket -lnsl"
+		LIB_SOCKET=1
+		LIB_NSL=1                                    
+
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		fi
+		if test "$with_C2" = "yes"; then
+		    SHADOW_TYPE="SPW_SVR4"
+		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+		fi
+		;;
     *-*-sysv*)
 		if test -z "$with_C2"; then
 		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
