@@ -158,6 +158,7 @@ int validate		__P((int));
 void set_perms		__P((int));
 void remove_timestamp	__P((void));
 void load_interfaces	__P((void));
+struct passwd *sudo_getpwuid	__P((uid_t));
 
 
 /*
@@ -165,18 +166,15 @@ void load_interfaces	__P((void));
  * to be extern'ed here if this is main...
  */
 #ifndef MAIN
-extern uid_t uid;
 extern char host[];
 extern char cwd[];
 extern struct interface *interfaces;
 extern int num_interfaces;
-extern char *user;
+extern struct passwd *sudo_pw_ent;
 extern char *tty;
-extern char *epasswd;
 extern char *cmnd;
 extern char *cmnd_args;
 extern char *prompt;
-extern char *shell;
 extern struct stat cmnd_st;
 extern int Argc;
 extern char **Argv;

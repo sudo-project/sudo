@@ -58,6 +58,7 @@ static char rcsid[] = "$Id$";
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 #include <malloc.h>   
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
+#include <pwd.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/time.h>
@@ -158,7 +159,8 @@ void log_error(code)
      * necesary for mail and file logs.
      */
     now = time((time_t) 0);
-    (void) sprintf(logline, "%19.19s : %8.8s : ", ctime(&now), user);
+    (void) sprintf(logline, "%19.19s : %8.8s : ", ctime(&now),
+		   sudo_pw_ent->pw_name);
 
     /*
      * we need a pointer to the end of logline (XXX - use a #define not 33)
@@ -192,7 +194,7 @@ void log_error(code)
 	case GLOBAL_NO_PW_ENT:
 	    (void) sprintf(p,
 		"There is no passwd entry for uid %ld (TTY=%s).  ",
-		(long) uid, tty);
+		(long) sudo_pw_ent->pw_uid, tty);
 	    break;
 
 	case PASSWORD_NOT_CORRECT:
@@ -317,9 +319,10 @@ void log_error(code)
 	    *tmp = '\0';
 
 	    if (count == 0)
-		syslog(pri, "%8.8s : %s", user, p);
+		syslog(pri, "%8.8s : %s", sudo_pw_ent->pw_name, p);
 	    else
-		syslog(pri, "%8.8s : (command continued) %s", user, p);
+		syslog(pri, "%8.8s : (command continued) %s",
+		       sudo_pw_ent->pw_name, p);
 
 	    *tmp = save;			/* restore saved character */
 
@@ -328,9 +331,10 @@ void log_error(code)
 		;
 	} else {
 	    if (count == 0)
-		syslog(pri, "%8.8s : %s", user, p);
+		syslog(pri, "%8.8s : %s", sudo_pw_ent->pw_name, p);
 	    else
-		syslog(pri, "%8.8s : (command continued) %s", user, p);
+		syslog(pri, "%8.8s : (command continued) %s",
+		       sudo_pw_ent->pw_name, p);
 	}
     }
     closelog();
@@ -536,18 +540,18 @@ void inform_user(code)
 	case VALIDATE_NO_USER:
 	    (void) fprintf(stderr,
 		"%s is not in the sudoers file.  This incident will be reported.\n\n",
-		user);
+		sudo_pw_ent->pw_name);
 	    break;
 
 	case VALIDATE_NOT_OK:
 	    if (cmnd_args)
 		(void) fprintf(stderr,
 		    "Sorry, user %s is not allowed to execute \"%s %s\" on %s.\n\n",
-		    user, cmnd, cmnd_args, host);
+		    sudo_pw_ent->pw_name, cmnd, cmnd_args, host);
 	    else
 		(void) fprintf(stderr,
 		    "Sorry, user %s is not allowed to execute \"%s\" on %s.\n\n",
-		    user, cmnd, host);
+		    sudo_pw_ent->pw_name, cmnd, host);
 	    break;
 
 	case VALIDATE_ERROR:
