@@ -84,6 +84,9 @@
 #ifdef HAVE_OPIE
 #  include <opie.h>
 #endif /* HAVE_OPIE */
+#ifdef HAVE_AUTHSRV
+#  include <firewall.h>
+#endif
 #ifdef HAVE_UTIME
 #  ifdef HAVE_UTIME_H
 #    include <utime.h>
@@ -497,6 +500,104 @@ static void check_passwd()
     exit(1);
 }
 #else /* !HAVE_SECURID */
+#ifdef HAVE_AUTHSRV
+static void check_passwd()
+{
+    	char *pass;			/* this is what gets entered */
+	Cfg *confp;
+
+	char        cbuf[128];
+	char        ubuf[128], buf[128];
+	register int counter = TRIES_FOR_PASSWORD;
+
+	if((confp = cfg_read("sudo")) == (Cfg *)-1) {
+                fprintf(stderr,"Cannot read config.\n");
+                exit(1);
+        }
+ 
+
+    /* Initialize Auth Client */
+    auth_open(confp);
+
+	/* get welcome message from auth server */
+	if(auth_recv(buf,sizeof(buf))) {
+		sprintf(buf,"Lost connection to server");
+		fprintf(stderr,"%s\n",buf);
+		exit(1);
+		}
+
+	if(strncmp(buf,"Authsrv ready",13)) {
+		fprintf(stderr,"Auth server error %s\n",buf);
+		auth_close();
+		exit(1);
+		}
+    /*
+     * you get TRIES_FOR_PASSWORD times to guess your password
+     */
+    while (counter > 0) {
+
+	sprintf(cbuf,"authorize	%s	sudo",user_name);
+
+	auth_send(cbuf);
+	auth_recv(cbuf,sizeof(cbuf));
+
+	if(!strncmp(cbuf,"challenge ",10)) {
+		sprintf(buf,"Challenge \"%s\": ",&cbuf[10]);
+
+#  ifdef USE_GETPASS
+		pass = (char *) getpass(buf);
+#  else
+		pass = tgetpass(buf, PASSWORD_TIMEOUT * 60);
+#  endif /* USE_GETPASS */
+
+		}
+
+	else if(!strncmp(cbuf,"password",8)) {
+#  ifdef USE_GETPASS
+		pass = (char *) getpass(cbuf);
+#  else
+		pass = tgetpass(cbuf, PASSWORD_TIMEOUT * 60);
+#  endif /* USE_GETPASS */
+		}
+	else {
+		fprintf(stderr,"Server sent %s\n",cbuf);
+		auth_close();
+		exit(1);
+		}
+
+	sprintf(cbuf,"response '%s'",pass);
+	auth_send(cbuf);
+	auth_recv(cbuf,sizeof(cbuf));
+
+	if(!strncmp(cbuf,"ok",2)) {
+		/* Success */
+		/*inform_user(cbuf);*/
+	    	set_perms(PERM_USER, 0);
+		auth_close();
+		return;
+		}
+	else {
+		fprintf(stderr,"Server returned %s\n",cbuf);
+		}
+	pass_warn(stderr);
+	--counter;		/* otherwise, try again  */
+    }
+
+    set_perms(PERM_USER, 0);
+
+    auth_close();
+
+    if (counter > 0) {
+	log_error(PASSWORD_NOT_CORRECT);
+	inform_user(PASSWORD_NOT_CORRECT);
+    } else {
+	log_error(PASSWORDS_NOT_CORRECT);
+	inform_user(PASSWORDS_NOT_CORRECT);
+    }
+    exit(1);
+}
+#else /* !HAVE_AUTHSRV */
+
 static void check_passwd()
 {
     char *pass;			/* this is what gets entered */
@@ -652,6 +753,7 @@ static void check_passwd()
 
     exit(1);
 }
+#endif /* HAVE_AUTHSRV */
 #endif /* HAVE_SECURID */
 
 

@@ -163,6 +163,10 @@ Special features/options:
   --with-SecurID
 	Enable SecurID support.
 
+  --with-AuthSRV=DIR
+	Enable TIS Firewall Toolkit (FWTK) 'authsrv' support. If specified,
+	DIR is the base directory containing the compiled FWTK package.
+
   --with-kerb4
 	Enable kerberos v4 support Tested only with the Cygnus Network
 	Security package (CNS).  This uses kerberos passphrases for
