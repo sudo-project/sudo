@@ -254,7 +254,6 @@ int main(argc, argv)
 	}
 
 	/* add the shell as argv[0] */
-	/* XXX - doesn't deal with "" meaning bourne shell */
 	if (user_shell && *user_shell) {
 	    if ((NewArgv[0] = strrchr(user_shell, '/') + 1) == (char *) 1)
 		NewArgv[0] = user_shell;
