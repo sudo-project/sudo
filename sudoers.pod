@@ -11,7 +11,7 @@ sudoers - list of which users may execute what as root
 The I<sudoers> file is composed of an optional host alias section,
 an optional command alias section and the user specification section.
 All command or host aliases need to start with their respective keywords
-(ie: Host_Alias, User_Alias, or Cmnd_Alias).
+(ie: Host_Alias, User_Alias, Runas_Alias or Cmnd_Alias).
 If there are multiple occurrences of a user, the union of the entries
 will be used.
 
@@ -19,14 +19,14 @@ will be used.
 
   user access_group [: access_group] ...
 
-    access_group ::= host_type = [(user_list)] [NOPASSWD:] [op]cmnd_type
+    access_group ::= host_type = [(runas_list)] [NOPASSWD:] [op]cmnd_type
 		     [,[(user_list)] [NOPASSWD:] [op]cmnd_type] ... 
        host_type ::= a lower-case hostname, netgroup, ip address,
                      network number, network number/netmask,
 		     or host alias.
-       user_list ::= comma-separated list of users, uids, or
-                     User_Aliases the user may run commands as
-                     (default is root).
+       runas_list ::= comma-separated list of users, groups,
+		      netgroups or Runas_Aliases the user may run
+		      commands as (default is root).
        cmnd_type ::= a command OR a command alias.
               op ::= the logical "!" NOT operator.
 
@@ -46,6 +46,14 @@ will be used.
       User_Alias ::= a keyword.
        USERALIAS ::= an upper-case alias name.
        user-list ::= a comma separated list of users, groups, netgroups.
+
+=head2 runas alias section format:
+
+  Runas_Alias RUNASALIAS = runas-list
+
+      Runas_Alias ::= a keyword.
+       RUNASALIAS ::= an upper-case alias name.
+       runas-list ::= a comma separated list of users, groups, netgroups.
 
 =head2 command alias section format:
 
@@ -147,6 +155,9 @@ with a "\" if used in command arguments: ",", ":", "=", "\".
     User_Alias  FULLTIME=millert,dowdy,mikef
     User_Alias  PARTTIME=juola,mccreary,tor
 
+    # Runas alias specification
+    Runas_Alias	OP=root,operator
+
     # Command alias specification
     Cmnd_Alias  LPCS=/usr/etc/lpc,/usr/ucb/lprm
     Cmnd_Alias  SHELLS=/bin/sh,/bin/csh,/bin/tcsh,/bin/ksh
@@ -165,9 +176,9 @@ with a "\" if used in command arguments: ",", ":", "=", "\".
                 HUB=ALL,!SHELLS
     jill        houdini=/etc/shutdown -[hr] now,MISC
     markm       HUB=ALL,!MISC,!/etc/shutdown,!/etc/halt
-    davehieb    merlin=ALL:SERVERS=/etc/halt:\
+    davehieb    merlin=(OP) ALL:SERVERS=/etc/halt:\
                 kodiakthorn=NOPASSWD: ALL
-    steve       CSNETS= (operator) /usr/op_commands/
+    steve       CSNETS=(operator) /usr/op_commands/
 
 =head2 Host Alias specifications:
 
@@ -251,9 +262,10 @@ in the C<MISC> alias.
 
 =item davehieb
 
-The user C<davehieb> may run any command on C<merlin>,
-F</etc/halt> on the C<SERVERS>.  He may also run any command
-on C<kodiakthorn> without giving a password.
+The user C<davehieb> may run any command on C<merlin> as any
+user in the Runas_Alias OP (ie: root or operator).  He may
+also run F</etc/halt> on the C<SERVERS> and any command
+on C<kodiakthorn> (no password required on C<kodiakthorn>).
 
 =item steve
 
