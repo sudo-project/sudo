@@ -72,6 +72,13 @@
 #undef _POSIX_SOURCE
 #endif
 
+/* Define if needed to get X/Open extended functionality.
+   System headers sometimes define this.
+   We just want to avoid a redefinition error message.  */
+#ifndef _XOPEN_SOURCE_EXTENDED
+#undef _XOPEN_SOURCE_EXTENDED
+#endif
+
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef uid_t
 

@@ -1025,8 +1025,6 @@ dnl
 if test "$with_devel" = "yes" -a -n "$GCC"; then
     CFLAGS="${CFLAGS} -Wall"
 fi
-dnl for crypt() macro in unistd.h
-CFLAGS="${CFLAGS} -D_XOPEN_SOURCE"
 
 dnl
 dnl Find programs we use
@@ -1344,6 +1342,11 @@ case "$host" in
 		fi
 		;;
 esac
+
+dnl
+dnl We define this to get a crypt() prototype on some systems
+dnl
+AC_DEFINE(_XOPEN_SOURCE_EXTENDED)
 
 dnl
 dnl Check for shadow password routines if we have not already done so.
