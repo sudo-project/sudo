@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-22/Mar/2000                   1.6.3                             1
+26/Mar/2000                   1.6.3                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                             2
+26/Mar/2000                   1.6.3                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                             3
+26/Mar/2000                   1.6.3                             3
 
 
 
@@ -259,7 +259,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                             4
+26/Mar/2000                   1.6.3                             4
 
 
 
@@ -325,7 +325,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                             5
+26/Mar/2000                   1.6.3                             5
 
 
 
@@ -391,7 +391,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                             6
+26/Mar/2000                   1.6.3                             6
 
 
 
@@ -457,7 +457,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                             7
+26/Mar/2000                   1.6.3                             7
 
 
 
@@ -523,7 +523,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                             8
+26/Mar/2000                   1.6.3                             8
 
 
 
@@ -589,7 +589,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                             9
+26/Mar/2000                   1.6.3                             9
 
 
 
@@ -655,7 +655,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                            10
+26/Mar/2000                   1.6.3                            10
 
 
 
@@ -721,7 +721,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                            11
+26/Mar/2000                   1.6.3                            11
 
 
 
@@ -787,7 +787,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                            12
+26/Mar/2000                   1.6.3                            12
 
 
 
@@ -853,7 +853,7 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
 
 
-22/Mar/2000                   1.6.3                            13
+26/Mar/2000                   1.6.3                            13
 
 
 
@@ -919,7 +919,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                            14
+26/Mar/2000                   1.6.3                            14
 
 
 
@@ -985,7 +985,7 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                            15
+26/Mar/2000                   1.6.3                            15
 
 
 
@@ -1040,7 +1040,7 @@ FFFFIIIILLLLEEEESSSS
 
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
-       _s_u_d_o(8), _v_i_s_u_d_o(8), _s_u(1), _f_n_m_a_t_c_h(3).
+       _s_u_d_o(1m), _v_i_s_u_d_o(1m), _s_u(1), _f_n_m_a_t_c_h(3).
 
 
 
@@ -1051,7 +1051,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-22/Mar/2000                   1.6.3                            16
+26/Mar/2000                   1.6.3                            16
 
 
 
@@ -1117,6 +1117,6 @@ sudoers(4)                 FILE FORMATS                sudoers(4)
 
 
 
-22/Mar/2000                   1.6.3                            17
+26/Mar/2000                   1.6.3                            17
 
 

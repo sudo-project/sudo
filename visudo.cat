@@ -12,7 +12,7 @@ SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
 
 DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        vvvviiiissssuuuuddddoooo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous
-       to _v_i_p_w(8).  vvvviiiissssuuuuddddoooo locks the _s_u_d_o_e_r_s file against
+       to _v_i_p_w(1m).  vvvviiiissssuuuuddddoooo locks the _s_u_d_o_e_r_s file against
        multiple simultaneous edits, provides basic sanity checks,
        and checks for parse errors.  If the _s_u_d_o_e_r_s file is
        currently being edited you will receive a message to try
@@ -120,7 +120,7 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        shell if the editor used by vvvviiiissssuuuuddddoooo allows shell escapes.
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
-       _s_u_d_o(8), _v_i_p_w(8).
+       _s_u_d_o(1m), _v_i_p_w(1m).
 
 
 

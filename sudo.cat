@@ -61,7 +61,7 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-22/Mar/2000                   1.6.3                             1
+26/Mar/2000                   1.6.3                             1
 
 
 
@@ -122,12 +122,12 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
        -s  The -s (_s_h_e_l_l) option runs the shell specified by the
            _S_H_E_L_L environment variable if it is set or the shell
-           as specified in _p_a_s_s_w_d(5).
+           as specified in _p_a_s_s_w_d(4).
 
 
 
 
-22/Mar/2000                   1.6.3                             2
+26/Mar/2000                   1.6.3                             2
 
 
 
@@ -138,7 +138,7 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
        -H  The -H (_H_O_M_E) option sets the _H_O_M_E environment
            variable to the homedir of the target user (root by
-           default) as specified in _p_a_s_s_w_d(5).  By default, ssssuuuuddddoooo
+           default) as specified in _p_a_s_s_w_d(4).  By default, ssssuuuuddddoooo
            does not modify _H_O_M_E.
 
        -S  The -S (_s_t_d_i_n) option causes ssssuuuuddddoooo to read the password
@@ -193,7 +193,7 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 
 
 
-22/Mar/2000                   1.6.3                             3
+26/Mar/2000                   1.6.3                             3
 
 
 
@@ -225,7 +225,7 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
        give away files.
 
 EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
-       Note: the following examples assume suitable _s_u_d_o_e_r_s(5)
+       Note: the following examples assume suitable _s_u_d_o_e_r_s(4)
        entries.
 
        To get a file listing of an unreadable directory:
@@ -259,7 +259,7 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
 
 
 
-22/Mar/2000                   1.6.3                             4
+26/Mar/2000                   1.6.3                             4
 
 
 
@@ -325,7 +325,7 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 
 
 
-22/Mar/2000                   1.6.3                             5
+26/Mar/2000                   1.6.3                             5
 
 
 
@@ -337,7 +337,7 @@ sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
        directory, setuid shell scripts are generally safe).
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
-       _l_o_g_i_n___c_a_p(3), _s_u_d_o_e_r_s(5), _v_i_s_u_d_o(8), _s_u(1).
+       _l_o_g_i_n___c_a_p(3), _s_u_d_o_e_r_s(4), _v_i_s_u_d_o(1m), _s_u(1).
 
 
 
@@ -391,6 +391,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-22/Mar/2000                   1.6.3                             6
+26/Mar/2000                   1.6.3                             6
 
 

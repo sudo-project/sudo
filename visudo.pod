@@ -46,7 +46,7 @@ B<visudo> [ B<-s> ] [ B<-V> ]
 =head1 DESCRIPTION
 
 B<visudo> edits the I<sudoers> file in a safe fashion, analogous to
-vipw(8).  B<visudo> locks the I<sudoers> file against multiple
+vipw(@mansectsu@).  B<visudo> locks the I<sudoers> file against multiple
 simultaneous edits, provides basic sanity checks, and checks
 for parse errors.  If the I<sudoers> file is currently being
 edited you will receive a message to try again later.  In the
@@ -158,4 +158,4 @@ the editor used by B<visudo> allows shell escapes.
 
 =head1 SEE ALSO
 
-sudo(8), vipw(8).
+sudo(@mansectsu@), vipw(@mansectsu@).

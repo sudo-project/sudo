@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.3  2000/03/27 03:07:35  millert
-''' Typo: @sysconf@ -> @sysconfdir@
+''' Revision 1.4  2000/03/27 03:26:24  millert
+''' Use @mansectsu@ and @mansectform@ in the man page bodies as well.
 '''
 '''
 .de Sh
@@ -196,7 +196,7 @@ visudo \- edit the sudoers file
 \fBvisudo\fR [ \fB\-s\fR ] [ \fB\-V\fR ]
 .SH "DESCRIPTION"
 \fBvisudo\fR edits the \fIsudoers\fR file in a safe fashion, analogous to
-\fIvipw\fR\|(8).  \fBvisudo\fR locks the \fIsudoers\fR file against multiple
+\fIvipw\fR\|(@mansectsu@).  \fBvisudo\fR locks the \fIsudoers\fR file against multiple
 simultaneous edits, provides basic sanity checks, and checks
 for parse errors.  If the \fIsudoers\fR file is currently being
 edited you will receive a message to try again later.  In the
@@ -277,7 +277,7 @@ See the LICENSE file distributed with \fBsudo\fR for complete details.
 There is no easy way to prevent a user from gaining a root shell if 
 the editor used by \fBvisudo\fR allows shell escapes.
 .SH "SEE ALSO"
-\fIsudo\fR\|(8), \fIvipw\fR\|(8).
+\fIsudo\fR\|(@mansectsu@), \fIvipw\fR\|(@mansectsu@).
 
 .rn }` ''
 .IX Title "visudo @mansectsu@"

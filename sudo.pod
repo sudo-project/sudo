@@ -160,13 +160,13 @@ I<username>, use "#uid".
 
 The C<-s> (I<shell>) option runs the shell specified by the I<SHELL>
 environment variable if it is set or the shell as specified
-in passwd(5).
+in passwd(@mansectform@).
 
 =item -H
 
 The C<-H> (I<HOME>) option sets the I<HOME> environment variable
 to the homedir of the target user (root by default) as specified
-in passwd(5).  By default, B<sudo> does not modify I<HOME>.
+in passwd(@mansectform@).  By default, B<sudo> does not modify I<HOME>.
 
 =item -S
 
@@ -242,7 +242,7 @@ date on system that allow users to give away files.
 
 =head1 EXAMPLES
 
-Note: the following examples assume suitable sudoers(5) entries.
+Note: the following examples assume suitable sudoers(@mansectform@) entries.
 
 To get a file listing of an unreadable directory:
 
@@ -329,4 +329,4 @@ are generally safe).
 
 =head1 SEE ALSO
 
-login_cap(3), sudoers(5), visudo(8), su(1).
+login_cap(3), sudoers(@mansectform@), visudo(@mansectsu@), su(1).
