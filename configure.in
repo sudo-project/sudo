@@ -11,6 +11,8 @@ STATIC_FLAGS=""
 AC_SUBST(STATIC_FLAGS)dnl
 INC_FLAGS=""
 AC_SUBST(INC_FLAGS)dnl
+OSDEFS=""
+AC_SUBST(OSDEFS)dnl
 OPTIONS=""
 AC_SUBST(OPTIONS)dnl
 LIBOBJS=""
@@ -27,6 +29,7 @@ TGETPASS="")
 dnl
 dnl --with-C2
 AC_WITH(C2, AC_DEFINE(HAVE_C2_SECURITY)
+C2=1
 echo 'Configuring for C2 security')
 dnl
 dnl --with-csops
@@ -82,6 +85,11 @@ case "$OS" in
 		;;
     "convex")	echo "Looks like ConvexOs"
 		AC_DEFINE(_CONVEX_SOURCE)
+		# C2 security stuff
+		if test -n "$C2"; then
+		    OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"
+		    LIBS="${LIBS} -lprot"
+		fi
 		;;
     "ultrix"*)	echo "Looks like ultrix"
 		;;
