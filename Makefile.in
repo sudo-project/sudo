@@ -158,7 +158,6 @@ testsudoers: $(PARSEOBJS) $(TESTOBJS)
 #	$(YACC) -d -b sudo $(srcdir)/parse.yacc
 
 sudo.tab.o: $(HDRS) sudo.tab.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) sudo.tab.c
 
 # Uncomment the following if you intend to modify parse.lex
 #lex.yy.c: parse.lex
