@@ -94,7 +94,7 @@ char * sudo_realpath(old, new)
     const char * old;
           char * new;
 {
-    char buf[MAXPATHLEN];			/* generic path buffer */
+    char buf[MAXPATHLEN+1];			/* generic path buffer */
     struct stat statbuf;			/* for lstat() */
     char * temp;				/* temporary ptr */
     int len;					/* length parameter */
@@ -103,8 +103,8 @@ char * sudo_realpath(old, new)
     if (old == NULL || old[0] == NULL)
 	return(NULL);
 
-    new[MAXPATHLEN - 1] = '\0';
-    (void) strncpy(new, old, MAXPATHLEN - 1);
+    new[MAXPATHLEN] = '\0';
+    (void) strncpy(new, old, MAXPATHLEN);
 
     /* we need to be root for this section */
     be_root();
