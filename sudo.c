@@ -82,9 +82,6 @@ static char rcsid[] = "$Id$";
 #include <sys/param.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#ifdef HAVE_GETPRPWUID
-#include <prot.h>
-#endif /* HAVE_GETPRPWUID */
 #ifdef HAVE_DCE
 #include <pthread.h>
 #endif /* HAVE_DCE */
@@ -188,6 +185,9 @@ int main(argc, argv)
 
 #if defined(HAVE_GETPRPWUID) && defined(HAVE_SET_AUTH_PARAMETERS)
     (void) set_auth_parameters(argc, argv);
+#  ifdef HAVE_INITPRIVS
+    initprivs();
+#  endif
 #endif /* HAVE_GETPRPWUID && HAVE_SET_AUTH_PARAMETERS */
 
     Argv = argv;
