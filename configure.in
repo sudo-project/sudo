@@ -906,6 +906,15 @@ AC_ARG_WITH(goons-insults, [  --with-goons-insults    include the insults from t
 		;;
 esac])
 
+AC_ARG_WITH(pc-insults, [  --with-pc-insults       replace politically incorrect insults with less offensive ones],
+[case $with_pc_insults in  
+    yes)	AC_DEFINE(PC_INSULTS, 1, [Define to replace politically incorrect insults with less offensive ones.])
+		;;
+    no)		;;
+    *)		AC_MSG_ERROR(["--with-pc-insults does not take an argument."])
+		;;
+esac])
+
 dnl include all insult sets on one line
 if test "$insults" = "on"; then
     AC_MSG_CHECKING(which insult sets to include)

@@ -401,6 +401,9 @@
 /* The passwd prompt timeout (in minutes). */
 #undef PASSWORD_TIMEOUT
 
+/* Define to replace politically incorrect insults with less offensive ones. */
+#undef PC_INSULTS
+
 /* The syslog priority sudo will use for unsuccessful attempts/errors. */
 #undef PRI_FAILURE
 

@@ -42,7 +42,11 @@
      */
 
     "Wrong!  You cheating scum!",
+#ifdef PC_INSULTS
+    "And you call yourself a Rocket Scientist!",
+#else
     "No soap, honkie-lips.",
+#endif
     "Where did you learn to type?",
     "Are you on drugs?",
     "My pet ferret can type better than you!",

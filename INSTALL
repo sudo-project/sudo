@@ -464,6 +464,9 @@ The following options are also configurable at runtime:
 	password is entered.  You must either specify --with-insults or
 	enable insults in the sudoers file for this to have any effect.
 
+  --with-pc-insults
+	Replace politically incorrect insults with less objectionable ones.
+
   --with-secure-path[=PATH]
 	Path used for every command run from sudo(8).  If you don't trust the
 	people running sudo to have a sane PATH environment variable you may
