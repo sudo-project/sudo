@@ -49,3 +49,6 @@ TODO list
     the race condition caused by going through namei() twice...
 
 22) Sudo should not allow someone with a nil password to run commands.
+
+23) configure should not check for -lcrypt if it has already been
+    added to SUDO_LIBS.
