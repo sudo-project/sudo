@@ -29,13 +29,15 @@
  * Choose a set of insults, the default is to use the insults from
  * "sudo classic" (in the original edition of the Sys Admin book).
  */
-#if defined(HAL)
-#include "ins_2001.h"
-#elif defined(GOONS)
-#include "ins_goons.h"
+#ifdef HAL
+#  include "ins_2001.h"
 #else
-#include "ins_classic.h"
-#endif
+#  ifdef GOONS
+#    include "ins_goons.h"
+#  else
+#    include "ins_classic.h"
+#  endif /* GOONS */
+#endif /* HAL */
 
 /*
  * return a pseudo-random insult.
