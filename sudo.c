@@ -95,8 +95,10 @@ extern char *strdup();
 /*
  * local functions not visible outside sudo.c
  */
-static void usage		__P((void));
+static int  parse_args		__P((void));
+static void usage		__P((int));
 static void load_globals	__P((void));
+static void load_cmnd		__P((void));
 static void add_env		__P((void));
 static void rmenv		__P((char **, char *, int));
 static void clean_env		__P((char **));
@@ -112,7 +114,6 @@ char *epasswd;
 char host[MAXHOSTNAMELEN + 1];
 char cwd[MAXPATHLEN + 1];
 uid_t uid = -2;
-int validate_only = 0;
 
 
 /********************************************************************
@@ -127,33 +128,32 @@ main(argc, argv)
     char **argv;
 {
     int rtn;
+    int sudo_mode = MODE_RUN;
 
     Argv = argv;
     Argc = argc;
 
     /*
-     * if nothing is passed, we don't need to do anything...
+     * parse our arguments
      */
-    if (argc < 2)
-	usage();
+    sudo_mode = parse_args();
 
-    /*
-     * print version string and exit if we got -V
-     * or set validate flag if we got -v.
-     * when we add other options getopt(3) will be used
-     */
-    if (*argv[1] == '-')
-	if (!strcmp(argv[1], "-V")) {
+    switch(sudo_mode) {
+	case MODE_VERSION :
+	case MODE_HELP :
 	    (void) printf("CU Sudo version %s\n", version);
-	    exit(0);
-	} else if (!strcmp(argv[1], "-v")) {
-	    validate_only = 1;
-	} else {
-	    usage();
-	}
+	    if (sudo_mode == MODE_VERSION)
+		exit(0);
+	    else
+		usage(0);
+	    break;
+	case MODE_VALIDATE :
+	    cmnd = "validate";
+	    break;
+    }
 
     /*
-     * close all file descriptors to make sure we have a nice
+     * Close all file descriptors to make sure we have a nice
      * clean slate from which to work.  
      */
 #ifdef HAVE_SYSCONF
@@ -168,31 +168,38 @@ main(argc, argv)
 
     load_globals();		/* load the user host cmnd and uid variables */
 
+    if (sudo_mode == MODE_RUN) {
+	load_cmnd();		/* load the cmnd global variable */
+    } else if (sudo_mode == MODE_KILL) {
+	remove_timestamp();	/* remove the timestamp ticket file */
+	exit(0);
+    }
+
     add_env();			/* add in SUDO_* envariables */
 
-    rtn = validate();
+    rtn = validate();		/* validate the user */
     switch (rtn) {
 
-    case VALIDATE_OK:
-	check_user();
-	log_error(ALL_SYSTEMS_GO);
-	if (validate_only)
-	    exit(0);
-	be_root();
-	EXEC(cmnd, &Argv[1]);
-	perror(cmnd);		/* exec failed! */
-	exit(-1);
-	break;
+	case VALIDATE_OK:
+	    check_user();
+	    log_error(ALL_SYSTEMS_GO);
+	    if (sudo_mode == MODE_VALIDATE)
+		exit(0);
+	    be_root();
+	    EXEC(cmnd, &Argv[1]);
+	    perror(cmnd);		/* exec failed! */
+	    exit(-1);
+	    break;
 
-    case VALIDATE_NO_USER:
-    case VALIDATE_NOT_OK:
-    case VALIDATE_ERROR:
-    default:
-	log_error(rtn);
-	be_full_user();
-	inform_user(rtn);
-	exit(1);
-	break;
+	case VALIDATE_NO_USER:
+	case VALIDATE_NOT_OK:
+	case VALIDATE_ERROR:
+	default:
+	    log_error(rtn);
+	    be_full_user();
+	    inform_user(rtn);
+	    exit(1);
+	    break;
     }
 }
 
@@ -202,15 +209,14 @@ main(argc, argv)
  *
  *  load_globals()
  *
- *  This function primes the important global variables:
- *  user, host, cwd, cmnd, uid
+ *  This function primes these important global variables:
+ *  user, host, cwd, uid
  */
 
 static void load_globals()
 {
     struct passwd *pw_ent;
     struct hostent *h_ent;
-    char path[MAXPATHLEN + 1];
     char *p;
 
     uid = getuid();		/* we need to tuck this away for safe keeping */
@@ -288,27 +294,54 @@ static void load_globals()
     if ((p = strchr(host, '.')))
 	*p = '\0';
 #endif /* FQDN */
+}
 
-    /*
-     * loading the cmnd global variable from argv[1]
-     * unless they are just validating the time stamp
-     */
-    if (validate_only) {
-	cmnd = "validate";
-    } else {
-	strncpy(path, Argv[1], MAXPATHLEN)[MAXPATHLEN] = 0;
-	cmnd = find_path(path);	/* get the absolute path */
-	if (cmnd == NULL) {
-	    (void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], Argv[1]);
-	    exit(1);
+
+
+/**********************************************************************
+ *
+ * parse_args()
+ *
+ *  this function parses the arguments to sudo
+ */
+
+static int parse_args()
+{
+    int opt_ch;
+    int V_flag=0, h_flag=0, v_flag=0, k_flag=0, error=0;
+    int ret;
+
+    /* no options and no command */
+    if (Argc < 2)
+	usage(1);
+
+    while ((opt_ch = getopt(Argc, Argv, "vkVh")) != -1)
+	switch (opt_ch) {
+	    case 'v':
+		++v_flag;
+		ret = MODE_VALIDATE;
+		break;
+	    case 'k':
+		++k_flag;
+		ret = MODE_KILL;
+		break;
+	    case 'V':
+		++V_flag;
+		ret = MODE_VERSION;
+		break;
+	    case 'h':
+		++h_flag;
+		ret = MODE_HELP;
+		break;
+	    case '?':
+		++error;
 	}
 
-	if ((cmnd = strdup(cmnd)) == NULL)  {
-	    perror("malloc");
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
-    }
+    error += (V_flag + v_flag + k_flag > 1);
+    if (error)
+	usage(1);
+
+    return(ret);
 }
 
 
@@ -320,10 +353,11 @@ static void load_globals()
  *  this function just gives you instructions and exits
  */
 
-static void usage()
+static void usage(exit_val)
+    int exit_val;
 {
-    (void) fprintf(stderr, "usage: %s [-v] [-V] [command]\n", *Argv);
-    exit(1);
+    (void) fprintf(stderr, "usage: %s -V | -h | -v | -k | <command>\n", Argv[0]);
+    exit(exit_val);
 }
 
 
@@ -493,4 +527,26 @@ static void add_env()
     }
     (void) sprintf(envar, "SUDO_UID=%d", (int)uid);
     (void) putenv(envar);
+}
+
+
+
+/**********************************************************************
+ *
+ *  load_cmnd()
+ *
+ *  This function sets the cmnd global variable based on Argv[1]
+ */
+
+static void load_cmnd()
+{
+    char path[MAXPATHLEN + 1];
+
+    strncpy(path, Argv[1], MAXPATHLEN)[MAXPATHLEN] = 0;
+
+    cmnd = find_path(path);	/* get the absolute path */
+    if (cmnd == NULL) {
+	(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], Argv[1]);
+	exit(1);
+    }
 }
