@@ -1696,7 +1696,7 @@ dnl
 dnl PAM libs
 dnl
 if test "$with_pam" = "yes"; then
-    AC_HAVE_LIBRARY(dl, SUDO_LIBS="${SUDO_LIBS} -ldl -lpam", SUDO_LIBS="${SUDO_LIBS} -lpam")
+    AC_HAVE_LIBRARY(dl, SUDO_LIBS="${SUDO_LIBS} -lpam -ldl", SUDO_LIBS="${SUDO_LIBS} -lpam")
 fi
 
 dnl
