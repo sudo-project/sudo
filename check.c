@@ -218,13 +218,31 @@ static int check_timestamp()
     /*
      * if all the directories are stat()able
      */
+    /* XXX - make this readable!!! */
     if (timedir_is_good) {
-	if (stat(timestampfile, &statbuf)) {	/* does the file exist?    */
+	/*
+	 * last component in _PATH_SUDO_TIMEDIR must be owned by root
+	 * and mode 0700 or we ignore the timestamps in it.
+	 */
+	if (statbuf.st_uid != 0 || !(statbuf.st_mode & S_IRWXU)) {
+	    timedir_is_good = 0;
+	    timestamp_is_old = 2;
+	    log_error(BAD_STAMPDIR);
+	    inform_user(BAD_STAMPDIR);
+	} else if (stat(timestampfile, &statbuf)) {
+	    /* timestamp file does not exist? */
 	    timestamp_is_old = 2;	/* return (2)          */
 	} else {		/* otherwise, check the time */
 	    now = time((time_t *) NULL);
-	    if (now - statbuf.st_mtime < 60 * TIMEOUT)
-		timestamp_is_old = 0;	/* if file is recent, return(0) */
+	    if (TIMEOUT && now - statbuf.st_mtime < 60 * TIMEOUT)
+		/* check for bogus time on the stampfile */
+		if (statbuf.st_mtime > now + 60 * TIMEOUT) {
+		    timestamp_is_old = 2;	/* bogus time value */
+		    log_error(BAD_STAMPFILE);
+		    inform_user(BAD_STAMPFILE);
+		} else {
+		    timestamp_is_old = 0;	/* time value is reasonable */
+		}
 	    else
 		timestamp_is_old = 1;	/* else make 'em enter password */
 	}
@@ -234,7 +252,8 @@ static int check_timestamp()
      */
     else {
 	timestamp_is_old = 2;	/* user has to enter password + reminder */
-	if (mkdir(_PATH_SUDO_TIMEDIR, 0700)) {	/* make the TIMEDIR directory */
+	/* make the TIMEDIR directory */
+	if (mkdir(_PATH_SUDO_TIMEDIR, S_IRWXU)) {
 	    perror("check_timestamp: mkdir");
 	    timedir_is_good = 0;
 	} else {
@@ -276,10 +295,10 @@ static void update_timestamp()
 #define UTP		NULL
 #endif /* HAVE_UTIME && !HAVE_UTIME_NULL */
 
-    /* become root */
-    set_perms(PERM_ROOT);
-
     if (timedir_is_good) {
+	/* become root */
+	set_perms(PERM_ROOT);
+
 	if (utime(timestampfile_p, UTP) < 0) {
 	    int fd = open(timestampfile_p, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 
@@ -287,10 +306,10 @@ static void update_timestamp()
 		perror("update_timestamp: open");
 	    close(fd);
 	}
-    }
 
-    /* relinquish root */
-    set_perms(PERM_USER);
+	/* relinquish root */
+	set_perms(PERM_USER);
+    }
 }
 #undef UTP
 
