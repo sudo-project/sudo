@@ -199,11 +199,11 @@ static void expand_match_list	__P((void));
 static aliasinfo *find_alias	__P((char *, int));
 static int  more_aliases	__P((void));
        void init_parser		__P((void));
-       void yyerror		__P((char *));
+       void yyerror		__P((const char *));
 
 void
 yyerror(s)
-    char *s;
+    const char *s;
 {
     /* Save the line the first error occurred on. */
     if (errorlineno == -1)
