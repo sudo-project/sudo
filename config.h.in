@@ -139,7 +139,7 @@
 /* Define if you have memset(3).  */
 #undef HAVE_MEMSET
 #if !defined(HAVE_MEMSET) && !defined(memset)
-#  define memset(S, 0, N)	(bzero(S, N))
+#  define memset(S, X, N)	(bzero(S, N))
 #endif
 
 /* Define if you have sysconf(3c). */
