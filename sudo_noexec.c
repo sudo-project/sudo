@@ -15,6 +15,7 @@
  */
 
 #include <errno.h>
+#include <time.h>
 
 #include <config.h>
 #include <compat.h>
