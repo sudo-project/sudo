@@ -75,7 +75,7 @@ static const char rcsid[] = "$Sudo$";
 static void runas_setup		__P((void));
 static void fatal		__P((char *));
 
-#if defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
+#if !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
 /*
  * Set real and effective uids and gids based on perm.
  * Since we have POSIX saved IDs we can get away with just
@@ -140,7 +140,7 @@ set_perms_posix(perm, sudo_mode)
 			      	break;
     }
 }
-#endif /* _SC_SAVED_IDS && _SC_VERSION */
+#endif /* !NO_SAVED_IDS && _SC_SAVED_IDS && _SC_VERSION */
 
 #ifdef HAVE_SETREUID
 /*

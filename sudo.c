@@ -260,7 +260,7 @@ main(argc, argv, envp)
      * set the real, effective and saved uids to 0 and use set_perms_fallback()
      * instead of set_perms_posix().
      */
-#if defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
+#if !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
     if (!def_flag(I_STAY_SETUID) && set_perms == set_perms_posix) {
 	if (setuid(0)) {
 	    perror("setuid(0)");
@@ -888,7 +888,7 @@ initial_setup()
     (void) sigaction(SIGCHLD, &sa, NULL);
 
     /* Set set_perms pointer to the correct function */
-#if defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
+#if !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
     if (sysconf(_SC_SAVED_IDS) == 1 && sysconf(_SC_VERSION) >= 199009)
 	set_perms = set_perms_posix;
     else
