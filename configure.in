@@ -2191,6 +2191,14 @@ AH_BOTTOM([/*
 # define EXECV	execvp
 #endif /* USE_EXECV */
 
+/* Macros to set/clear/test flags. */
+#undef SET
+#define SET(t, f)	((t) |= (f))
+#undef CLR
+#define CLR(t, f)	((t) &= ~(f))
+#undef ISSET
+#define ISSET(t, f)     ((t) & (f))
+
 /* New ANSI-style OS defs for HP-UX and ConvexOS. */
 #if defined(hpux) && !defined(__hpux)
 # define __hpux		1
