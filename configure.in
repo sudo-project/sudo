@@ -1416,7 +1416,7 @@ case "$host" in
 		mansectform=4
 		;;
     *-ncr-sysv4*|*-ncr-sysvr4*)
-		AC_CHECK_LIB(c89, strcasecmp, [SUDO_LIBS="${SUDO_LIBS} -lc89"; LIBS="${LIBS} -lc89"])
+		AC_CHECK_LIB(c89, strcasecmp, AC_DEFINE(HAVE_STRCASECMP) [LIBS="${LIBS} -lc89"; ac_cv_func_strcasecmp=yes])
 		mansectsu=1m
 		mansectform=4
 		;;
