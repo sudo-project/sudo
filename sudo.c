@@ -640,7 +640,6 @@ static void add_env(contiguous)
 	char *to, **from;
 
 	if (contiguous) {
-	    fprintf(stderr, "NewArgv is contiguous.\n"); /* XXX */
 	    size += (size_t) NewArgv[NewArgc-1] + strlen(NewArgv[NewArgc-1]) -
 		    (size_t) NewArgv[1] + 1;
 	} else {
@@ -648,7 +647,6 @@ static void add_env(contiguous)
 		size += strlen(*from) + 1;
 	}
 
-	fprintf(stderr, "malloc'ing %u bytes.\n", size); /* XXX */
 	if ((buf = (char *) malloc(size)) == NULL) {
 	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
@@ -668,7 +666,6 @@ static void add_env(contiguous)
     } else {
 	buf = cmnd;
     }
-    (void) fprintf(stderr, "cmnd + args = '%s'\n", buf);
     if (sudo_setenv("SUDO_COMMAND", buf)) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
