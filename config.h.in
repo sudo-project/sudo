@@ -76,6 +76,9 @@
 #  define POSIX_SIGNALS
 #endif /* HAVE_SIGACTION */
 
+/* Define if you have fchdir(3).  */
+#undef HAVE_FCHDIR
+
 /* Define if you have realpath(3).  */
 #undef HAVE_REALPATH
 
