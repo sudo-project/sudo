@@ -164,6 +164,9 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"log_year", T_FLAG,
 	"Log the year in the (non-syslog) log file"
     }, {
+	"shell_noargs", T_FLAG,
+	"If sudo is invoked with no arguments, start a shell"
+    }, {
 	"set_home", T_FLAG,
 	"Set $HOME to the target user when starting a shell with -s"
     }, {
@@ -514,6 +517,9 @@ init_defaults()
 #endif
 #ifdef HOST_IN_LOG
     def_flag(I_LOG_HOST) = TRUE;
+#endif
+#ifdef SHELL_IF_NO_ARGS
+    def_flag(I_SHELL_NOARGS) = TRUE;
 #endif
 #ifdef SHELL_SETS_HOME
     def_flag(I_SET_HOME) = TRUE;

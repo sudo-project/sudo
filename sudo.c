@@ -289,6 +289,10 @@ main(argc, argv)
 	exit(1);
     }
 
+    /* If no command line args and "set_home" is not set, error out. */
+    if ((sudo_mode & MODE_IMPLIED_SHELL) && !def_flag(I_SHELL_NOARGS))
+	usage(1);
+
     /* May need to set $HOME to target user. */
     if ((sudo_mode & MODE_SHELL) && def_flag(I_SET_HOME))
 	sudo_mode |= MODE_RESET_HOME;
@@ -543,12 +547,10 @@ parse_args()
     NewArgv = Argv + 1;
     NewArgc = Argc - 1;
 
-#ifdef SHELL_IF_NO_ARGS
     if (NewArgc == 0) {			/* no options and no command */
-	rval |= MODE_SHELL;
+	rval |= (MODE_IMPLIED_SHELL | MODE_SHELL);
 	return(rval);
     }
-#endif
 
     while (NewArgc > 0 && NewArgv[0][0] == '-') {
 	if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0') {
@@ -637,10 +639,8 @@ parse_args()
 	    case '-':
 		NewArgc--;
 		NewArgv++;
-#ifdef SHELL_IF_NO_ARGS
 		if (rval == MODE_RUN)
-		    rval |= MODE_SHELL;
-#endif
+		    rval |= (MODE_IMPLIED_SHELL | MODE_SHELL);
 		return(rval);
 	    case '\0':
 		(void) fprintf(stderr, "%s: '-' requires an argument\n",

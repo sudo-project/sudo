@@ -269,6 +269,10 @@ Log the hostname in the (non-syslog) log file
 
 Log the year in the (non-syslog) log file
 
+=item shell_noargs
+
+If sudo is invoked with no arguments, start a shell
+
 =item set_home
 
 Set $HOME to the target user when starting a shell with C<-s>
