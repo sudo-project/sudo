@@ -230,7 +230,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_CHECK_FUNCS(getwd strchr strrchr memcpy memmove sysconf sigaction memset tzset tcsetattr strcasecmp)
+AC_CHECK_FUNCS(getwd strchr strrchr memcpy memmove memset sysconf sigaction tzset tcsetattr strcasecmp)
 AC_CHECK_FUNC(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
 AC_CHECK_FUNC(getcwd, AC_DEFINE(HAVE_GETCWD), LIBOBJS="$LIBOBJS getcwd.o")
 AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), LIBOBJS="$LIBOBJS lsearch.o")
