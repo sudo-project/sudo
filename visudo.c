@@ -277,7 +277,7 @@ main(argc, argv)
      * See if we can use the user's choice of editors either because
      * we allow any $EDITOR or because $EDITOR is in the allowable list.
      */
-    Editor = NULL;
+    Editor = EditorPath = NULL;
     if (def_flag(I_ENV_EDITOR) && UserEditor)
 	Editor = UserEditor;
     else if (UserEditor) {
@@ -318,7 +318,6 @@ main(argc, argv)
 		    break;
 	    }
 	} while ((Editor = strtok(NULL, ":")));
-	free(EditorPath);
     }
 
     /*
@@ -326,6 +325,8 @@ main(argc, argv)
      * find one that exists, is regular, and is executable.
      */
     if (Editor == NULL || *Editor == '\0') {
+	if (EditorPath != NULL)
+	    free(EditorPath);
 	EditorPath = estrdup(def_str(I_EDITOR));
 	Editor = strtok(EditorPath, ":");
 	do {
