@@ -1193,9 +1193,9 @@ case 25:
 			     * saving (or if nothing else is on the stack)
 			     * and clear match status.
 			     */
-			    if ((user_matches == TRUE && host_matches == TRUE &&
-				cmnd_matches != -1 && runas_matches != -1) ||
-				top == 1)
+			    if (user_matches == TRUE && host_matches == TRUE &&
+				((cmnd_matches != -1 && runas_matches != -1) ||
+				top == 1))
 				pushcp;
 			    cmnd_matches = -1;
 			}
