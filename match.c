@@ -486,7 +486,7 @@ userpw_matches(sudoers_user, user, pw)
     struct passwd *pw;
 {
     if (pw != NULL && *sudoers_user == '#') {
-	uid_t uid = atoi(sudoers_user + 1);
+	uid_t uid = (uid_t) atoi(sudoers_user + 1);
 	if (uid == pw->pw_uid)
 	    return(1);
     }
