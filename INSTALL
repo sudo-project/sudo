@@ -58,6 +58,11 @@ For most systems and configurations it is possible simply to:
 Notes on upgrading from an older release
 ========================================
 
+Starting with sudo 1.5.7 the configuration method has changed
+significantly as compared to previous versions.  All options are
+now set via the configure script.  See below for a list of all the
+configure options and their meanings.
+
 By default, sudo 1.5.7 expects the sudoers file to be mode 0440 and
 to be owned by user and group 0.  This differs from version 1.4 and
 below which expected the sudoers file to be mode 0400 and to be
