@@ -25,7 +25,7 @@
  *  ocommand contain the resolved and unresolved pathnames respectively.
  *  NOTE: if "." or "" exists in PATH it will be searched last.
  *
- *  Todd C. Miller (millert@colorado.edu) Sat Sep  4 12:22:04 MDT 1993
+ *  Todd C. Miller (millert@colorado.edu) Sat Mar 25 21:50:36 MST 1995
  */
 
 #ifndef lint
@@ -82,71 +82,46 @@ extern char *strdup	__P((const char *));
 #endif /* _S_IFLNK */
 
 
-/*
- * Globals
- */
-static char * realpath_exec	__P((char *, char *, char *));
-
-
 /*******************************************************************
  *
  *  find_path()
  *
- *  this function finds the full pathname for a command
+ *  this function finds the full pathname for a command and
+ *  stores it in a statically allocated array, returning a pointer
+ *  to the array.
  */
 
-int find_path(file, command, ocommand)
+char * find_path(file)
     char *file;			/* file to find */
-    char **command;		/* copyout parameter */
-    char **ocommand;		/* copyout parameter */
 {
+    static char command[MAXPATHLEN + 1];	/* qualified filename */
     register char *n;		/* for traversing path */
     char *path = NULL;		/* contents of PATH env var */
     char *origpath;		/* so we can free path later */
     char *result = NULL;	/* result of path/file lookup */
     int checkdot = 0;		/* check current dir? */
 
+    command[0] = NULL;
+
     if (strlen(file) > MAXPATHLEN) {
+	errno = ENAMETOOLONG;
 	(void) fprintf(stderr, "%s:  path too long:  %s\n", Argv[0], file);
 	exit(1);
     }
 
     /*
-     * allocate memory for command
-     */
-    *command = (char *) malloc(MAXPATHLEN + 1);
-    if (*command == NULL) {
-	perror("malloc");
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
-
-    /*
-     * do we need to search the path?
+     * Don't search PATH if we don't need to...
      */
     if (strchr(file, '/')) {
-	/* store the unresolved command in ocommand */
-	if (ocommand) {
-	    *ocommand = strdup(file);
-	    if (*ocommand == NULL) {
-		perror("malloc");
-		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-		exit(1);
-	    }
-	}
-#ifdef USE_REALPATH
-	return((sudo_realpath(file, *command)) ? TRUE : FALSE);
-#else
-	*command = *ocommand;
-	return((sudo_goodpath(file)) ? TRUE : FALSE);
-#endif /* USE_REALPATH */
+	(void) strcpy(command, file);
+	return(sudo_goodpath(command));
     }
 
     /*
      * grab PATH out of environment and make a local copy
      */
     if ((path = getenv("PATH")) == NULL)
-	return (FALSE);
+	return(NULL);
 
     if ((path = strdup(path)) == NULL) {
 	(void) fprintf(stderr, "sudo: out of memory!\n");
@@ -154,6 +129,7 @@ int find_path(file, command, ocommand)
     }
     origpath=path;
 
+    /* XXX use strtok() */
     do {
 	if ((n = strchr(path, ':')))
 	    *n = '\0';
@@ -171,7 +147,13 @@ int find_path(file, command, ocommand)
 	/*
 	 * resolve the path and exit the loop if found
 	 */
-	if ((result = realpath_exec(path, file, *command)))
+	if (strlen(path) + strlen(file) >= MAXPATHLEN) {
+	    errno = ENAMETOOLONG;
+	    (void) fprintf(stderr, "%s:  path too long:  %s\n", Argv[0], file);
+	    exit(1);
+	}
+	(void) sprintf(command, "%s/%s", path, file);
+	if ((result = sudo_goodpath(command)))
 	    break;
 
 	path = n + 1;
@@ -183,70 +165,10 @@ int find_path(file, command, ocommand)
      */
     if (!result && checkdot) {
 	path = ".";
-	result = realpath_exec(path, file, *command);
-    }
-
-    /*
-     * save old (unresolved) command
-     */
-    if (result && ocommand) {
-	*ocommand = (char *) malloc(strlen(path) + strlen(file) + 2);
-	if (*ocommand == NULL) {
-	    perror("malloc");
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
-	(void) sprintf(*ocommand, "%s/%s", path, file);
+	result = sudo_goodpath(command);
     }
 
     (void) free(origpath);
 
-    return(result ? TRUE : FALSE);
+    return(result);
 }
-
-
-/*******************************************************************
- *
- *  realpath_exec()
- *
- *  This function calls realpath() to resolve the path and checks
- *  so see that file is executable.  Returns the resolved path on
- *  success and NULL on failure (or if file is not executable).
- */
-
-#ifdef USE_REALPATH
-static char * realpath_exec(path, file, command)
-    char * path;
-    char * file;
-    char * command;
-{
-    char fn[MAXPATHLEN+1];		/* filename (path + file) */
-
-    (void) sprintf(fn, "%s/%s", path, file);
-
-    /* resolve the path */
-    errno = 0;
-    if (sudo_realpath(fn, command)) {
-	/* stat the file to make sure it is executable and a file */
-	if (sudo_goodpath(command))
-	    return(command);
-    } else if (errno && errno != ENOENT && errno != ENOTDIR && errno != EINVAL
-	&& errno != EPERM && errno != EACCES) {
-	/* sudo_realpath() got an abnormal error */
-	(void) fprintf(stderr, "sudo: Error resolving %s: ", fn);
-	perror("");
-    }
-
-    return(NULL);
-}
-#else
-static char * realpath_exec(path, file, command)
-    char * path;
-    char * file;
-    char * command;
-{
-    (void) sprintf(command, "%s/%s", path, file);
-
-    return(sudo_goodpath(command));
-}
-#endif /* USE_REALPATH */
