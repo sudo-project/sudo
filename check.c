@@ -148,10 +148,11 @@ lecture(status)
     } else {
 	(void) fputs("\n\
 We trust you have received the usual lecture from the local System\n\
-Administrator. It usually boils down to these two things:\n\
+Administrator. It usually boils down to these three things:\n\
 \n\
     #1) Respect the privacy of others.\n\
-    #2) Think before you type.\n\n",
+    #2) Think before you type.\n\
+    #3) With great power comes great responsibility.\n\n",
     stderr);
     }
 }
