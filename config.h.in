@@ -85,6 +85,9 @@
 #  define strrchr	rindex
 #endif
 
+/* Define if you have sysconf(3c). */
+#undef HAVE_SYSCONF
+
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
 
