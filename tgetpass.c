@@ -42,6 +42,7 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
+#include <limits.h>
 #include <pwd.h>
 #include <sys/types.h>
 #ifdef HAVE_SYS_BSDTYPES_H
@@ -66,14 +67,6 @@ static char rcsid[] = "$Id$";
 
 #include <pathnames.h>
 #include "compat.h"
-
-#ifndef _PASSWD_LEN
-#  ifdef HAVE_C2_SECURITY
-#    define	_PASSWD_LEN	24
-#  else
-#    define	_PASSWD_LEN	8
-#  endif /* HAVE_C2_SECURITY */
-#endif /* _PASSWD_LEN */
 
 
 /******************************************************************
