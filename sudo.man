@@ -1,8 +1,6 @@
 .TH SUDO 8
 .SH NAME
-sudo \- execute a command as the superuser
-
-visudo \- edit the sudoers file
+sudo, visudo \- execute a command as the superuser and edit the suoders file
 
 .SH SYNOPSIS
 .B sudo 
@@ -113,6 +111,26 @@ the local authorities (defined at installation time).
 All preferences are defined at installation time and are derived from
 the sudo.h include file and the Makefile.
 
+.SH RETURN VALUES
+.I sudo
+quits with an exit value of 1 if there is a configuration/permission problem
+or if
+.I sudo
+cannot execute the given command.  In the latter case the error string is
+printed to stdout via
+.I perror(3).
+If sudo cannot
+.I stat(3)
+one or more entries in the user's PATH the error is printed on stdout via
+.I perror(3).
+(If the directory does not exist or if it is not really a directory, the
+entry is ignored and no error is printed.)  This should not happen under
+normal circumstances.  The most common reason for
+.I stat(3)
+to return "permission denied" is if you are running an automounter and
+one of the directories in your PATH is on a machine that is currently
+unreachable.
+
 .SH SECURITY NOTES
 .I sudo
 tries to be safe when executing external commands.  To this end
@@ -137,6 +155,7 @@ Allow nesting of host and command aliases.
 Allow the host specifier in the sudoers file
     to use universe notation (user ALL,!SERVERS, ... = commands).
 Allow user aliases in the sudoers file (like host/command aliases).
+Allow alias nesting.
 Have visudo do more extensive checking on the sudoers file.
 .fi
 
@@ -153,6 +172,17 @@ Have visudo do more extensive checking on the sudoers file.
 Jeff Nieusma                 <nieusma@rootgroup.com>
 David Hieb                   <davehieb@rootgroup.com>
 .fi
+
+.SH MAINTAINER
+The CU version of
+.I sudo
+is being maintained internally by
+.nf
+
+Todd Miller                  <millert@cs.colorado.edu>
+
+.fi
+Please send all bugs, comments, and changes to sudo-bugs@cs.colorado.edu.
 
 .SH DISCLAIMER
 This program is distributed in the hope that it will be useful, but
