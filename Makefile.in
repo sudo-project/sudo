@@ -47,12 +47,12 @@ LIBS = @LIBS@ @LEXLIB@
 OSDEFS = @OSDEFS@
 
 # C preprocessor flags
-CPPFLAGS = @CPPFLAGS@
+CPPFLAGS = -I. -I$(srcdir) @CPPFLAGS@
 
 # Usually -g or -O
-CFLAGS = -I. -I$(srcdir) @CFLAGS@
+CFLAGS = @CFLAGS@
 
-# How to make a static binary
+# Flags to pass to the link stage
 LDFLAGS = @LDFLAGS@
 
 # Where to install things...
