@@ -79,6 +79,7 @@ char *find_path(file)
     char fn[MAXPATHLEN+1];		/* filename (path + file) */
     struct stat statbuf;		/* for stat(2) */
     int statfailed;			/* stat(2) return value */
+    int checkdot = 0;			/* check current dir? */
     char *qualify();
 
     if (strlen(file) > MAXPATHLEN) {
@@ -99,11 +100,23 @@ char *find_path(file)
 	exit(1);
     }
 
-    while ((n = index(path, ':'))) {
-	*n = '\0';
-	(void)strcpy(fn, path);
-	(void)strcat(fn, "/");
-	(void)strcat(fn, file);
+    do {
+	/* cheap strtok() */
+	if ((n = index(path, ':')))
+	    *n = '\0';
+
+	/*
+	 * search current dir last if it is in PATH
+	 * This will miss sneaky things like using './' or './/'
+	 */
+	if (*path == NULL || (*path == '.' && *(path+1) == NULL)) {
+	    checkdot = 1;
+	    path = n + 1;
+	    continue;
+	}
+
+	/* filename to try */
+	(void)sprintf(fn, "%s/%s", path, file);
 
 	/* stat the file to make sure it exists and is executable */
 	statfailed = stat(fn, &statbuf);
@@ -114,6 +127,21 @@ char *find_path(file)
 	    exit(1);
 	}
 	path = n + 1;
+
+    } while (n);
+
+    /* check current dir if dot was in the PATH */
+    if (checkdot) {
+	(void)sprintf(fn, "./%s", file);
+
+	/* stat the file to make sure it exists and is executable */
+	statfailed = stat(fn, &statbuf);
+	if (!statfailed && (statbuf.st_mode & 0000111))
+	    return(qualify(fn));
+	else if (statfailed && errno != ENOENT && errno != ENOTDIR) {
+	    perror("find_path:  stat");
+	    exit(1);
+	}
     }
     return(NULL);
 }
