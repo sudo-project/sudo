@@ -22,16 +22,18 @@ WHOAMI=whoami
 if [ ${CHOWN} = chown ] ; then
     if [ -f /etc/chown ] ; then
 	CHOWN=/etc/chown
-    else
-	if [ -f /usr/etc/chown ] ; then
-	    CHOWN=/usr/etc/chown
-	fi
+    elif [ -f /usr/etc/chown ] ; then
+	CHOWN=/usr/etc/chown
+    elif [ -f /usr/sbin/chown ] ; then
+	CHOWN=/usr/sbin/chown
     fi
 fi
 
 if [ ${WHOAMI} = whoami ] ; then
     if [ -f /usr/ucb/whoami ] ; then
 	WHOAMI=/usr/ucb/whoami
+    elif [ -f /usr/bin/whoami ] ; then
+	WHOAMI=/usr/bin/whoami
     fi
 fi
 
