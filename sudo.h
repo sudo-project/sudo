@@ -90,6 +90,16 @@ struct sudo_match {
 };
 
 /*
+ * Structure containing Cmnd_Alias's if "sudo -l" is used.
+ */
+struct command_alias {
+    char *alias;
+    char *entries;
+    size_t entries_size;
+    size_t entries_len;
+};
+
+/*
  * Maximum number of characters to log per entry.  The syslogger
  * will log this much, after that, it truncates the log line.
  * We need this here to make sure that we continue with another
