@@ -125,6 +125,11 @@ Your Mileage may vary.  Please let Aaron Spangler <aaron@spangler.ods.org>
 know what combinations worked best for your OS & LDAP Combinations so
 we can improve sudo.
 
+More Build Notes:
+HP-UX 11.23 (gcc3) Galen Johnson <Galen.Johnson@sas.com>
+  CFLAGS="-D__10_10_compat_code" LDFLAGS="-L/opt/ldapux/lib"
+  Also had to comment out '#define HAVE_LDAP_START_TLS_S' in config.h
+
 Schema Changes
 ==============
 Add the following schema to your LDAP server so that it may contain sudoer
