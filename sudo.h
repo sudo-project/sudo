@@ -36,9 +36,9 @@
 
 /*
  * Max length for a command + args in the sudoers file.
- * This is fairly arbitrary but 8K should be enough.
+ * This is fairly arbitrary but 1K should be enough.
  */
-#define MAXCOMMANDLENGTH	8192
+#define MAXCOMMANDLENGTH	1024
 
 /*
  * IP address and netmask pairs for checking against local interfaces.
