@@ -2074,7 +2074,7 @@ dnl
 dnl Use passwd (and secureware) auth modules?
 dnl
 if test "$with_passwd" = "no"; then
-    AC_DEFINE(WITHOUT_PASSWD, 1. [Define to avoid using the passwd/shadow file for authentication.])
+    AC_DEFINE(WITHOUT_PASSWD, 1, [Define to avoid using the passwd/shadow file for authentication.])
     if test -z "$AUTH_OBJS"; then
 	AC_MSG_ERROR([no authentication methods defined.])
     fi

@@ -29433,8 +29433,9 @@ fi
 
 
 if test "$with_passwd" = "no"; then
-    cat >>confdefs.h <<\_ACEOF
-#define WITHOUT_PASSWD 1. Define to avoid using the passwd/shadow file for authentication.
+
+cat >>confdefs.h <<\_ACEOF
+#define WITHOUT_PASSWD 1
 _ACEOF
 
     if test -z "$AUTH_OBJS"; then
