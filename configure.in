@@ -338,9 +338,10 @@ case "$OS" in
 
 		    # shadow pw support
 		    if test "$with_C2" = "yes"; then
-			SHADOW_TYPE="SPW_HPUX10"
+			SHADOW_TYPE="SPW_SECUREWARE"
 			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-			SUDO_LIBS="${SUDO_LIBS} /usr/lib/libsec.1"
+			SUDO_LIBS="${SUDO_LIBS} -lsec"
+			LIBS="${LIBS} -lsec"
 		    fi
 		fi
 
@@ -354,6 +355,7 @@ case "$OS" in
 		# C2 security stuff
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lsecurity -laud"
+		    LIBS="${LIBS} -lsecurity -laud"
 		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
@@ -388,7 +390,9 @@ case "$OS" in
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    OSDEFS="${OSDEFS} -DSHADOW_PWD"
-		    AC_CHECK_FUNC(getspnam, , SUDO_LIBS="${SUDO_LIBS} -lshadow")
+		    AC_CHECK_FUNC(getspnam, ,
+			SUDO_LIBS="${SUDO_LIBS} -lshadow"
+			LIBS="${LIBS} -lshadow")
 		fi
 		;;
     "convex")	echo "Looks like ConvexOs"
@@ -400,6 +404,7 @@ case "$OS" in
 		if test "$with_C2" = "yes"; then
 		    OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"
 		    SUDO_LIBS="${SUDO_LIBS} -lprot"
+		    LIBS="${LIBS} -lprot"
 		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
@@ -408,20 +413,24 @@ case "$OS" in
 		# C2 security stuff
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lauth"
+		    LIBS="${LIBS} -lauth"
 		    SHADOW_TYPE="SPW_ULTRIX4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     "riscos")	echo "Looks like RISCos"
 		SUDO_LIBS="${SUDO_LIBS} -lsun -lbsd"
+		LIBS="${LIBS} -lsun -lbsd"
 		CPPFLAGS="${CPPFLAGS} -I/usr/include -I/usr/include/bsd"
 		OSDEFS="${OSDEFS} -D_MIPS"
 		;;
     "isc")	echo "Looks like INTERACTIVE"
 		LIB_CRYPT=1
 		SUDO_LIBS="${SUDO_LIBS} -lcrypt"
+		LIBS="${LIBS} -lcrypt"
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lsec"
+		    LIBS="${LIBS} -lsec"
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
@@ -452,6 +461,7 @@ case "$OS" in
 		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    SUDO_LIBS="${SUDO_LIBS} -lprot -lx"
+		    LIBS="${LIBS} -lprot -lx"
 		fi
 		;;
     "ksr"*)	echo "Looks like a KSR (wow, yours is still running?!?)"
@@ -499,6 +509,7 @@ if test "$with_C2" = "yes" -a -z "$SHADOW_TYPE"; then
 	"SPW_BSD")		echo "shadow password type is /etc/master.passwd (BSD)";;
 	"SPW_SECUREWARE")	echo "shadow password type is etprpwuid (SecureWare)";
 		SUDO_LIBS="${SUDO_LIBS} -lprot -lx";
+		LIBS="${LIBS} -lprot -lx";
 		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE);;
 	*)	echo "unknown";
 		echo "Unable to determine shadow passwd type, sudo may not be able to verify passwords";;
@@ -551,6 +562,9 @@ dnl
 dnl Function checks
 dnl
 AC_CHECK_FUNCS(strchr strrchr memcpy memset sysconf sigaction tzset strcasecmp)
+if test "$SHADOW_TYPE" = "SPW_SECUREWARE"; then
+    AC_CHECK_FUNCS(bigcrypt)
+fi
 AC_CHECK_FUNC(innetgr, AC_DEFINE(HAVE_INNETGR) AC_CHECK_FUNCS(getdomainname))
 AC_CHECK_FUNC(getwd, AC_DEFINE(HAVE_GETWD), LIBOBJS="$LIBOBJS getwd.o")
 AC_CHECK_FUNC(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
