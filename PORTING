@@ -24,12 +24,24 @@ allow one to change the shared library path.  See badenv_table() in
 sudo.c to see how this is done for various OS's.
 
 It is possible that on a really weird system, tgetpass() may not compile.
+(The most common cause for this is that the "fd_set" type is not
+defined in a place that sudo expects it to be.  If you can fine the
+header file where "fd_set" is typedef'd, have tgetpass.c include
+it and send in a bug report.)
 Alternately, it may compile but not work (nothing happens at Password: prompt).
-If this is the case you can run configure with the --with-getpass flag
-to use the system getpass().  You'll lose the timeout feature but gain a
-working sudo.  Alternately, you can define USE_GETPASS in config.h and
-remove tgetpass.o from LIBS in the Makefile.  NOTE: s/key support will
-not work with most OS's getpass(3) routine.
+It is possible that your C library contains a broken or unusable crypt()
+function--try linking with -lcrypt if that exists.  If all else fails
+you can run configure with the --with-getpass flag to use the system getpass().
+You'll lose the timeout feature but gain a working sudo.
+NOTE: s/key support will not work with most OS's getpass(3) routine.
+
+If you are trying to port to a system without standard Berkeley
+networking you may find that interfaces.c will not compile.  This
+is most likely on OS's with STREAMS-based networking.  It should be
+possible to make it work by modifying the ISC streams support
+(see the _ISC #ifdef's).  However, if you don't care about ip address
+and network address support, you can just define STUB_LOAD_INTERFACES
+to get a do-nothing load_interfaces() stub function.
 
 If you port sudo to a new architecture, please send your changes to
     sudo-bugs@cs.colorado.edu
