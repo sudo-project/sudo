@@ -1235,7 +1235,8 @@ case "$host" in
 		;;
     *-*-sco*)
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(prot, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lprot -lx"; LIBS="${LIBS} -lprot -lx"; SECUREWARE=1])
+		    AC_CHECK_LIB(prot, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lprot -lx"; LIBS="${LIBS} -lprot -lx"; SECUREWARE=1], , -lx)
+		    AC_CHECK_LIB(gen, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lgen"; LIBS="${LIBS} -lgen"])
 		    CHECKSHADOW="false"
 		fi
 		;;
