@@ -187,16 +187,18 @@ Special features/options:
 
   --with-pam
 	Enable PAM support.  Tested on:
-	    Redhat Linux 5.x, 6.0, and 6.1
-	    Solaris 2.6 and 7
-	    HP-UX 11.0
-        NOTE: on RedHat Linux you *must* install an /etc/pam.d/sudo file.
-	You may either use the sample.pam file included with sudo or use
-	/etc/pam.d/su as a reference.  On Solaris and HP-UX 11 systems
-	you should check (and understand) the contents of /etc/pam.conf.
-	Do a "man pam.conf" for more information and consider using the
-	"debug" option, if available, with your PAM libraries in
-	/etc/pam.conf to obtain syslog output for debugging purposes.
+	    Redhat Linux >= 5.x
+	    Solaris >= 2.6
+	    HP-UX >= 11.0
+        NOTE: on RedHat Linux and Fedora you *must* have an /etc/pam.d/sudo
+	file install.  You may either use the sample.pam file included with
+	sudo or use /etc/pam.d/su as a reference.  The sample.pam file
+	included with sudo may or may not work with other Linux distributions.
+	On Solaris and HP-UX 11 systems you should check (and understand)
+	the contents of /etc/pam.conf.  Do a "man pam.conf" for more
+	information and consider using the "debug" option, if available,
+	with your PAM libraries in /etc/pam.conf to obtain syslog output
+	for debugging purposes.
 
   --with-AFS
 	Enable AFS support with Kerberos authentication.  Should work under
@@ -686,5 +688,6 @@ Dynix:
 HP-UX:
     The default C compiler shipped with HP-UX does not support creating
     position independent code and so is unable to support sudo's "noexec"
-    functionality.  You must use either HP ANSI C compiler or gcc for
-    noexec to work.
+    functionality.  You must use either the HP ANSI C compiler or gcc for
+    noexec to work.  Binary packages of gcc are available from
+    http://hpux.connect.org.uk/ and http://hpux.cs.utah.edu/.
