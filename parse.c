@@ -124,9 +124,8 @@ int
 sudoers_lookup(pwflag)
     int pwflag;
 {
-    int error;
-    int pwcheck;
-    int nopass;
+    int error, nopass;
+    enum def_tupple pwcheck;
 
     /* Become sudoers file owner */
     set_perms(PERM_SUDOERS);
@@ -139,7 +138,7 @@ sudoers_lookup(pwflag)
     /* Allocate space for data structures in the parser. */
     init_parser();
 
-    /* If pwcheck *could* be PWCHECK_ALL or PWCHECK_ANY, keep more state. */
+    /* If pwcheck *could* be "all" or "any", keep more state. */
     if (pwflag > 0)
 	keepall = TRUE;
 
@@ -159,7 +158,7 @@ sudoers_lookup(pwflag)
      * wait until now to set this.
      */
     if (pwflag)
-	pwcheck = (pwflag == -1) ? PWCHECK_NEVER : sudo_defs_table[pwflag].sd_un.ival;
+	pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
     else
 	pwcheck = 0;
 
@@ -180,23 +179,25 @@ sudoers_lookup(pwflag)
     }
 
     /*
-     * Only check the actual command if pwcheck flag is not set.
+     * Only check the actual command if pwflag is not set.
      * It is set for the "validate", "list" and "kill" pseudo-commands.
      * Always check the host and user.
      */
     nopass = -1;
-    if (pwcheck) {
+    if (pwflag) {
 	int found;
 
-	if (pwcheck == PWCHECK_NEVER || !def_authenticate)
+	if (pwcheck == always && def_authenticate)
+	    nopass = FLAG_CHECK_USER;
+	else if (pwcheck == never || !def_authenticate)
 	    nopass = FLAG_NOPASS;
 	found = 0;
 	while (top) {
 	    if (host_matches == TRUE) {
 		found = 1;
-		if (pwcheck == PWCHECK_ANY && no_passwd == TRUE)
+		if (pwcheck == any && no_passwd == TRUE)
 		    nopass = FLAG_NOPASS;
-		else if (pwcheck == PWCHECK_ALL && nopass != 0)
+		else if (pwcheck == all && nopass != 0)
 		    nopass = (no_passwd == TRUE) ? FLAG_NOPASS : 0;
 	    }
 	    top--;

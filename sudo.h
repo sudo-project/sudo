@@ -71,13 +71,14 @@ struct sudo_user {
  * Note: cannot use '0' as a value here.
  */
 /* XXX - VALIDATE_SUCCESS and VALIDATE_FAILURE instead? */
-#define VALIDATE_ERROR          0x01
-#define VALIDATE_OK		0x02
-#define VALIDATE_NOT_OK		0x04
-#define FLAG_NOPASS		0x10
-#define FLAG_NO_USER		0x20
-#define FLAG_NO_HOST		0x40
-#define FLAG_NO_CHECK		0x80
+#define VALIDATE_ERROR          0x001
+#define VALIDATE_OK		0x002
+#define VALIDATE_NOT_OK		0x004
+#define FLAG_CHECK_USER		0x010
+#define FLAG_NOPASS		0x020
+#define FLAG_NO_USER		0x040
+#define FLAG_NO_HOST		0x080
+#define FLAG_NO_CHECK		0x100
 
 /*
  * Boolean values
@@ -160,18 +161,6 @@ struct sudo_user {
 #define SUDO_UNLOCK	4		/* unlock a file */
 
 /*
- * Flags for sudoers_lookup:
- *  PASSWD_NEVER:  user never has to give a passwd
- *  PASSWD_ALL:    no passwd needed if all entries for host have NOPASSWD flag
- *  PASSWD_ANY:    no passwd needed if any entry for host has a NOPASSWD flag
- *  PASSWD_ALWAYS: passwd always needed
- */
-#define PWCHECK_NEVER	0x01
-#define PWCHECK_ALL	0x02
-#define PWCHECK_ANY	0x04
-#define PWCHECK_ALWAYS	0x08
-
-/*
  * Flags for tgetpass()
  */
 #define TGP_ECHO	0x01		/* leave echo on when reading passwd */
@@ -209,7 +198,7 @@ size_t strlcpy		__P((char *, const char *, size_t));
 char *sudo_goodpath	__P((const char *));
 char *tgetpass		__P((const char *, int, int));
 int find_path		__P((char *, char **, char *));
-void check_user		__P((void));
+void check_user		__P((int));
 void verify_user	__P((struct passwd *, char *));
 int sudoers_lookup	__P((int));
 void set_perms_nosuid	__P((int));

@@ -116,7 +116,7 @@ mysyslog(pri, fmt, va_alist)
     va_start(ap);
 #endif
 #ifdef LOG_NFACILITIES
-    openlog("sudo", 0, def_syslog_ifac);
+    openlog("sudo", 0, def_syslog);
 #else
     openlog("sudo", 0);
 #endif
@@ -299,9 +299,9 @@ log_auth(status, inform_user)
     int pri;
 
     if (status & VALIDATE_OK)
-	pri = def_syslog_igoodpri;
+	pri = def_syslog_goodpri;
     else
-	pri = def_syslog_ibadpri;
+	pri = def_syslog_badpri;
 
     /* Set error message, if any. */
     if (status & VALIDATE_OK)
@@ -424,7 +424,7 @@ log_error(va_alist)
      * Log to syslog and/or a file.
      */
     if (def_syslog)
-	do_syslog(def_syslog_ibadpri, logline);
+	do_syslog(def_syslog_badpri, logline);
     if (def_logfile)
 	do_logfile(logline);
 

@@ -89,7 +89,7 @@ static const char rcsid[] = "$Sudo$";
 static void  build_timestamp	__P((char **, char **));
 static int   timestamp_status	__P((char *, char *, char *, int));
 static char *expand_prompt	__P((char *, char *, char *));
-static void  lecture		__P((void));
+static void  lecture		__P((int));
 static void  update_timestamp	__P((char *, char *));
 
 /*
@@ -97,7 +97,8 @@ static void  update_timestamp	__P((char *, char *));
  * verify who he/she is.  
  */
 void
-check_user()
+check_user(override)
+    int override;
 {
     char *timestampdir = NULL;
     char *timestampfile = NULL;
@@ -109,9 +110,8 @@ check_user()
 
     build_timestamp(&timestampdir, &timestampfile);
     status = timestamp_status(timestampdir, timestampfile, user_name, TRUE);
-    if (status != TS_CURRENT) {
-	if (status == TS_MISSING || status == TS_ERROR)
-	    lecture();		/* first time through they get a lecture */
+    if (override || status != TS_CURRENT) {
+	lecture(status);
 
 	/* Expand any escapes in the prompt. */
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
@@ -131,18 +131,21 @@ check_user()
  * TODO: allow the user to specify a file name instead.
  */
 static void
-lecture()
+lecture(status)
+    int status;
 {
 
-    if (def_lecture) {
-	(void) fputs("\n\
+    if (def_lecture == never ||
+	(def_lecture == once && status != TS_MISSING && status != TS_ERROR))
+	return;
+
+    (void) fputs("\n\
 We trust you have received the usual lecture from the local System\n\
 Administrator. It usually boils down to these two things:\n\
 \n\
-	#1) Respect the privacy of others.\n\
-	#2) Think before you type.\n\n",
-	stderr);
-    }
+    #1) Respect the privacy of others.\n\
+    #2) Think before you type.\n\n",
+    stderr);
 }
 
 /*

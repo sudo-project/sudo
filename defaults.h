@@ -41,9 +41,16 @@
 #ifndef _SUDO_DEFAULTS_H
 #define _SUDO_DEFAULTS_H
 
+#include <def_data.h>
+
 struct list_member {
     char *value;
     struct list_member *next;
+};
+
+struct def_values {
+    char *sval;		/* string value */
+    int ival;		/* actually an enum */
 };
 
 enum list_ops {
@@ -59,9 +66,11 @@ struct sudo_defs_types {
     char *name;
     int type;
     char *desc;
+    struct def_values *values;
     union {
 	int flag;
 	int ival;
+	enum def_tupple tuple;
 	char *str;
 	mode_t mode;
 	struct list_member *list;
@@ -89,22 +98,14 @@ struct sudo_defs_types {
 #define T_LOGFAC	0x007
 #undef T_LOGPRI
 #define T_LOGPRI	0x008
-#undef T_PWFLAG
-#define T_PWFLAG	0x009
+#undef T_TUPLE
+#define T_TUPLE		0x009
 #undef T_MASK
 #define T_MASK		0x0FF
 #undef T_BOOL
 #define T_BOOL		0x100
 #undef T_PATH
 #define T_PATH		0x200
-
-/*
- * Indexes into sudo_defs_table
- */
-#include <def_data.h>
-#define I_LOGFAC	I_SYSLOG_IFAC
-#define I_GOODPRI	I_SYSLOG_IGOODPRI
-#define I_BADPRI	I_SYSLOG_IBADPRI 
 
 /*
  * Prototypes

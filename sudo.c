@@ -235,7 +235,7 @@ main(argc, argv, envp)
 		break;
 	    case MODE_VALIDATE:
 		user_cmnd = "validate";
-		pwflag = I_VERIFYPW_I;
+		pwflag = I_VERIFYPW;
 		break;
 	    case MODE_KILL:
 	    case MODE_INVALIDATE:
@@ -248,7 +248,7 @@ main(argc, argv, envp)
 		break;
 	    case MODE_LIST:
 		user_cmnd = "list";
-		pwflag = I_LISTPW_I;
+		pwflag = I_LISTPW;
 		printmatches = 1;
 		break;
 	}
@@ -355,9 +355,9 @@ main(argc, argv, envp)
     /* Fill in passwd struct based on user we are authenticating as.  */
     auth_pw = get_authpw();
 
-    /* Require a password unless the NOPASS tag was set.  */
+    /* Require a password if sudoers says so.  */
     if (!(validated & FLAG_NOPASS))
-	check_user();
+	check_user(validated & FLAG_CHECK_USER);
 
     /* Build up custom environment that avoids any nasty bits. */
     new_environ = rebuild_env(sudo_mode, envp);
