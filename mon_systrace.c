@@ -657,6 +657,7 @@ check_exec(fd, askp, ansp)
     def_authenticate = FALSE;
     runas_pw = info->pw;
     user_runas = &info->pw->pw_name;
+    rewind(sudoers_fp);
     validated = sudoers_lookup(0);
 #ifdef DEBUG
     warnx("intercepted: %s %s in %s -> 0x%x", user_cmnd, user_args, user_cwd, validated);
