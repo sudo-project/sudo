@@ -89,6 +89,22 @@ static void usage	__P((void));
 static RETSIGTYPE Exit	__P((int));
 
 
+/* dummy *_matches routines */
+int
+path_matches(cmnd, path)
+char *cmnd, *path;
+{
+    return(TRUE);
+}
+
+int
+ntwk_matches(n)
+char *n;
+{
+    return(TRUE);
+}
+
+
 main(argc, argv)
     int argc;
     char **argv;
@@ -153,7 +169,9 @@ main(argc, argv)
      * need to lookup passwd entry for sudoers file owner
      */
     if (!(sudoers_pw = getpwnam(SUDOERS_OWNER))) {
-	(void) fprintf(stderr, "%s:  no passwd entry for sudoers file owner (%s)\n", Argv[0], SUDOERS_OWNER);
+	(void) fprintf(stderr,
+                       "%s:  no passwd entry for sudoers file owner (%s)\n",
+		       Argv[0], SUDOERS_OWNER);
 	exit(1);
     }
 
@@ -185,7 +203,8 @@ main(argc, argv)
     /*
      * open the temporary sudoers file with the correct flags
      */
-    if ((sudoers_tmp_fd = open(sudoers_tmp_file, O_WRONLY | O_CREAT | O_EXCL, 0600)) < 0) {
+    if ((sudoers_tmp_fd = open(sudoers_tmp_file, O_WRONLY | O_CREAT | O_EXCL,
+        0600)) < 0) {
 	if (errno == EEXIST) {
 	    (void) fprintf(stderr, "%s: sudoers file busy\n", Argv[0]);
 	    exit(1);
@@ -224,25 +243,29 @@ main(argc, argv)
 
 	    /* can't stat file */
 	    if (stat(sudoers_tmp_file, &sbuf) < 0) {
-		(void) fprintf(stderr, "%s: can't stat temporary file, %s unchanged\n",
-			sudoers, Argv[0]);
+		(void) fprintf(stderr,
+		    "%s: can't stat temporary file, %s unchanged\n", sudoers,
+		    Argv[0]);
 		Exit(0);
 	    }
 
 	    /* file has size == 0 */
 	    if (sbuf.st_size == 0) {
 		(void) fprintf(stderr, "%s: bad temporary file, %s unchanged\n",
-			sudoers, Argv[0]);
+                               sudoers, Argv[0]);
 		Exit(0);
 	    }
 
 	    /* re-open the sudoers file for parsing */
 	    if ((sudoers_tmp_fp = fopen(sudoers_tmp_file, "r")) == NULL) {
-		(void) fprintf(stderr, "%s: can't re-open temporary file, %s unchanged\n",
-			sudoers, Argv[0]);
+		(void) fprintf(stderr,
+		    "%s: can't re-open temporary file, %s unchanged\n",
+		    sudoers, Argv[0]);
 		Exit(0);
 	    }
+
 #ifdef YY_NEW_FILE
+	    /* XXX - this should not be necesary */
 	    YY_NEW_FILE
 #endif /* YY_NEW_FILE */
 	    yyin = sudoers_tmp_fp;
@@ -329,7 +352,7 @@ main(argc, argv)
 
 static void usage()
 {
-    (void) fprintf(stderr, "usage: %s [-V]\n", *Argv);
+    (void) fprintf(stderr, "usage: %s [-V]\n", Argv[0]);
     exit(1);
 }
 
