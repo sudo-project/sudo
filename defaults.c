@@ -481,8 +481,8 @@ init_defaults()
     def_str(I_TIMESTAMPDIR) = estrdup(_PATH_SUDO_TIMEDIR);
     def_str(I_PASSPROMPT) = estrdup(PASSPROMPT);
     def_str(I_RUNAS_DEFAULT) = estrdup(RUNAS_DEFAULT);
-#ifdef _PATH_SENDMAIL
-    def_str(I_MAILERPATH) = estrdup(_PATH_SENDMAIL);
+#ifdef _PATH_SUDO_SENDMAIL
+    def_str(I_MAILERPATH) = estrdup(_PATH_SUDO_SENDMAIL);
     def_str(I_MAILERFLAGS) = estrdup("-t");
 #endif
 #if (LOGGING & SLOG_FILE)

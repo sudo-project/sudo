@@ -86,9 +86,9 @@
 #undef _PATH_SUDO_LOGFILE
 #endif /* _PATH_SUDO_LOGFILE */
 
-#ifndef _PATH_SENDMAIL
-#undef _PATH_SENDMAIL
-#endif /* _PATH_SENDMAIL */
+#ifndef _PATH_SUDO_SENDMAIL
+#undef _PATH_SUDO_SENDMAIL
+#endif /* _PATH_SUDO_SENDMAIL */
 
 #ifndef _PATH_VI
 #undef _PATH_VI

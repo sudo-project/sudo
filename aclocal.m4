@@ -12,22 +12,22 @@ dnl
 AC_DEFUN(SUDO_PROG_SENDMAIL, [AC_MSG_CHECKING(for sendmail)
 if test -f "/usr/sbin/sendmail"; then
     AC_MSG_RESULT(/usr/sbin/sendmail)
-    AC_DEFINE(_PATH_SENDMAIL, "/usr/sbin/sendmail")
+    AC_DEFINE(_PATH_SUDO_SENDMAIL, "/usr/sbin/sendmail")
 elif test -f "/usr/lib/sendmail"; then
     AC_MSG_RESULT(/usr/lib/sendmail)
-    AC_DEFINE(_PATH_SENDMAIL, "/usr/lib/sendmail")
+    AC_DEFINE(_PATH_SUDO_SENDMAIL, "/usr/lib/sendmail")
 elif test -f "/usr/etc/sendmail"; then
     AC_MSG_RESULT(/usr/etc/sendmail)
-    AC_DEFINE(_PATH_SENDMAIL, "/usr/etc/sendmail")
+    AC_DEFINE(_PATH_SUDO_SENDMAIL, "/usr/etc/sendmail")
 elif test -f "/usr/ucblib/sendmail"; then
     AC_MSG_RESULT(/usr/ucblib/sendmail)
-    AC_DEFINE(_PATH_SENDMAIL, "/usr/ucblib/sendmail")
+    AC_DEFINE(_PATH_SUDO_SENDMAIL, "/usr/ucblib/sendmail")
 elif test -f "/usr/local/lib/sendmail"; then
     AC_MSG_RESULT(/usr/local/lib/sendmail)
-    AC_DEFINE(_PATH_SENDMAIL, "/usr/local/lib/sendmail")
+    AC_DEFINE(_PATH_SUDO_SENDMAIL, "/usr/local/lib/sendmail")
 elif test -f "/usr/local/bin/sendmail"; then
     AC_MSG_RESULT(/usr/local/bin/sendmail)
-    AC_DEFINE(_PATH_SENDMAIL, "/usr/local/bin/sendmail")
+    AC_DEFINE(_PATH_SUDO_SENDMAIL, "/usr/local/bin/sendmail")
 else
     AC_MSG_RESULT(not found)
 fi
