@@ -1881,9 +1881,10 @@ if test -n "$with_skey"; then
     if test "$found" = "no"; then
 	AC_MSG_WARN([Unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS])
     fi
-    AC_CHECK_LIB(skey, main, , [AC_MSG_WARN([Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS])])
+    AC_CHECK_LIB(skey, main, [found=yes], [AC_MSG_WARN([Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS])])
     AC_CHECK_LIB(skey, skeyaccess, AC_DEFINE(HAVE_SKEYACCESS, 1, [Define if your S/Key library has skeyaccess().]))
     LDFLAGS="$O_LDFLAGS"
+    SUDO_LIBS="${SUDO_LIBS} -lskey"
 fi
 
 dnl
@@ -1913,8 +1914,9 @@ if test -n "$with_opie"; then
     if test "$found" = "no"; then
 	AC_MSG_WARN([Unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS])
     fi
-    AC_CHECK_LIB(opie, main, , [AC_MSG_WARN([Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDO_LDFLAGS])])
+    AC_CHECK_LIB(opie, main, [found=yes], [AC_MSG_WARN([Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDO_LDFLAGS])])
     LDFLAGS="$O_LDFLAGS"
+    SUDO_LIBS="${SUDO_LIBS} -lopie"
 fi
 
 dnl
