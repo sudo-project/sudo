@@ -197,6 +197,9 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"use_loginclass", T_FLAG,
 	"Apply defaults in the target user's login class if there is one"
     }, {
+	"set_logname", T_FLAG,
+	"Set the LOGNAME and USER environment variables"
+    }, {
 	"loglinelen", T_INT|T_BOOL,
 	"Length at which to wrap log file lines (0 for no wrap): %d"
     }, {
@@ -548,6 +551,7 @@ init_defaults()
 #ifdef ENV_EDITOR
     def_flag(I_ENV_EDITOR) = TRUE;
 #endif
+    def_flag(I_LOGNAME) = TRUE;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)

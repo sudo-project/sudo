@@ -116,35 +116,36 @@ struct sudo_defs_types {
 #define I_RUNASPW		26
 #define I_TARGETPW		27
 #define I_LOGINCLASS		28
+#define I_LOGNAME		29
 
 /* Integer values */
-#define	I_LOGLEN	29	/* wrap log file line after N chars */
-#define	I_TS_TIMEOUT	30	/* timestamp stale after N minutes */
-#define	I_PW_TIMEOUT	31	/* exit if pass not entered in N minutes */
-#define	I_PW_TRIES	32	/* exit after N bad password tries */
-#define	I_UMASK		33	/* umask to use or 0777 to use user's */
+#define	I_LOGLEN	30	/* wrap log file line after N chars */
+#define	I_TS_TIMEOUT	31	/* timestamp stale after N minutes */
+#define	I_PW_TIMEOUT	32	/* exit if pass not entered in N minutes */
+#define	I_PW_TRIES	33	/* exit after N bad password tries */
+#define	I_UMASK		34	/* umask to use or 0777 to use user's */
 
 /* Strings */
-#define	I_LOGFILE	34	/* path to logfile (or NULL for none) */
-#define	I_MAILERPATH	35	/* path to sendmail or other mailer */
-#define	I_MAILERFLAGS	36	/* flags to pass to the mailer */
-#define	I_MAILTO	37	/* who to send bitch mail to */
-#define	I_MAILSUB	38	/* subject line of mail msg */
-#define	I_BADPASS_MSG	39	/* what to say when passwd is wrong */
-#define	I_TIMESTAMPDIR	40	/* path to timestamp dir */
-#define	I_EXEMPT_GRP	41	/* no password or PATH override for these */
-#define	I_PASSPROMPT	42	/* password prompt */
-#define	I_RUNAS_DEF	43	/* default user to run commands as */
-#define	I_SECURE_PATH	44	/* set $PATH to this if not NULL */
-#define	I_EDITOR	45	/* path to editor used by visudo */
+#define	I_LOGFILE	35	/* path to logfile (or NULL for none) */
+#define	I_MAILERPATH	36	/* path to sendmail or other mailer */
+#define	I_MAILERFLAGS	37	/* flags to pass to the mailer */
+#define	I_MAILTO	38	/* who to send bitch mail to */
+#define	I_MAILSUB	39	/* subject line of mail msg */
+#define	I_BADPASS_MSG	40	/* what to say when passwd is wrong */
+#define	I_TIMESTAMPDIR	41	/* path to timestamp dir */
+#define	I_EXEMPT_GRP	42	/* no password or PATH override for these */
+#define	I_PASSPROMPT	43	/* password prompt */
+#define	I_RUNAS_DEF	44	/* default user to run commands as */
+#define	I_SECURE_PATH	45	/* set $PATH to this if not NULL */
+#define	I_EDITOR	46	/* path to editor used by visudo */
 
 /* Integer versions of list/verify options */
-#define I_LISTPW	46
-#define I_VERIFYPW	47
+#define I_LISTPW	47
+#define I_VERIFYPW	48
 
 /* String versions of list/verify options */
-#define I_LISTPWSTR	48
-#define I_VERIFYPWSTR	49
+#define I_LISTPWSTR	49
+#define I_VERIFYPWSTR	50
 
 /*
  * Macros for accessing sudo_defs_table.
