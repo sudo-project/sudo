@@ -246,8 +246,8 @@ if test "$OS" != "irix" -o $OSREV -ne 5 ; then
     AC_CHECK_LIB(nsl, main)
     AC_CHECK_LIB(socket, main)
 fi
-dnl For those w/o crypt(3)
-AC_CHECK_LIB(ufc, main)
+dnl For those w/o crypt(3) in libc.a
+AC_CHECK_LIB(crypt, crypt, ,AC_CHECK_LIB(ufc, crypt))
 dnl
 dnl OS-dependent libraries
 dnl
