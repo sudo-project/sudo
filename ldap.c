@@ -833,23 +833,23 @@ int pwflag;
      *
      */
     if (pwflag<0) { /* -k */
-      ret=VALIDATE_OK | FLAG_NOPASS;
+      ret=VALIDATE_OK; SET(ret,FLAG_NOPASS);
     } else if (sudo_defs_table[pwflag].sd_un.tuple == never){ /* see note above */
-      ret=VALIDATE_OK | FLAG_NOPASS;
+      ret=VALIDATE_OK; SET(ret,FLAG_NOPASS);
     } else {
       ret=VALIDATE_OK; /* extra paranoid */
     }
   }
 
-  if (ret & VALIDATE_OK) {
+  if (ISSET(ret,VALIDATE_OK)) {
     /* We have a match.  Should we check the password? */
     /* Note: This could be the global or a rule specific option */
-    if (!def_authenticate) ret|=FLAG_NOPASS;
+    if (!def_authenticate) SET(ret,FLAG_NOPASS);
   } else {
     /* we do not have a match */   
     ret=VALIDATE_NOT_OK;
-    if (!ldap_user_matches) ret|=FLAG_NO_USER;
-    else if (!ldap_host_matches) ret|=FLAG_NO_HOST;
+    if (!ldap_user_matches) SET(ret,FLAG_NO_USER);
+    else if (!ldap_host_matches) SET(ret,FLAG_NO_HOST);
   }
 
   if (ldap_conf.debug) printf("sudo_ldap_check(%d)=0x%02x\n",pwflag,ret);
