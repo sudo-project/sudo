@@ -1,109 +1,207 @@
-INSTALL NOTES
+Installation instructions for CU sudo 1.3.6
+===========================================
 
-0) Run the configure script, ie: "./configure".  See the SUPPORTED file
-   for a list of OS's sudo is known to work on.  Configure will generate
-   config.h, pathnames.h, Makefile and visudoers/Makefile.  You shouldn't
-   need to hand-edit the Makefiles but if you don't like configure's choice
-   of C compiler, yacc or lex programs you may want to.  You can also
-   use the --prefix flag to configure to install sudo/visudo in a place
-   other than /usr/local (ie: --prefix=/opt).
+Sudo uses a `configure' script to probe the capabilities and type
+of the system in question.  Please read this document fully before
+configuring and building sudo.
 
-   BEWARE: configure caches values in config.cache.  This will cause
-   problems if you are building for different architectures.  You
-   *must* do a "make realclean" to remove the configure-generated
-   files betweem builds in this case.  Basically, you should do a
-   "make realclean" before you run configure each time.
+Simple sudo installation
+========================
 
-   NOTE: if you use shadow passwords or C2 security you need to use the
-   --with-C2 flag to configure.  Currently this only works for SunOS 4.x,
-   hpux 9.x, ultrix 4.x, Digital UNIX (aka DEC OSF1), Irix 5.x and
-   ConvexOS with C2 security.  For hpux only, you can use
-   --with-C2 if you are expecting to migrate to C2 security later but it
-   makes password lookups about twice as slow.
+For most systems and configurations it is possible simply to:
 
-   NOTE2: if you use AFS, you need to run configure with --with-AFS
+    0) If you previously ran `configure' on a different host
+       you will probably want to do a `make clean' to remove
+       the old `config.cache' file.  Otherwise, `configure'
+       will use the cached values which is probably not
+       what you want unless the two hosts are running the
+       same OS and are virtually identical.  Alternately,
+       one can simply `rm config.cache'.
 
-   NOTE3: if you use DCE integrated login services (ie, the DCE security
-   daemon), then you need to run configure with --with-DCE.  The DCE
-   configuration option is presently known to work on HP-UX 10.0 and
-   HP-UX 9.X systems, where sudo is built with either gcc 2.7.0 or HP's
-   ANSI C compiler.  To get the DCE version to compile on other platforms,
-   you will probably have to fiddle with the configure file and/or the
-   source code.
+    1) Read the `OS dependent notes' section for any particular
+       "gotchas" relating to your operating system.
 
-   NOTE4: if you use kerberos version 4 you need to run configure
-   with --with-kerb4.  This has only been tested with the Cygnus
-   kerberos package (CNS) but should work for vanilla kerberos too.
-   If you use kerberos version 5 you need to run configure with --with-kerb5.
-   This enables the same code as --with-kerb4 but also adds in the
-   kerb4 compatibility libraries.  Kerb5 support is currently untested,
-   please let us know if it work for you.
+    2) `cd' to the source or build directory and type `./configure'
+       to generate a Makefile and config.h file suitable for
+       building sudo.  Before you actually run configure you
+       should read the `Available configure options' section
+       to see if there are any special options you may want
+       or need.  Also of interest may be the section on
+       `Mixing password authentication schemes'.
 
-   NOTE5: Solaries users beware, you need to make sure that the
-   "real" (ie: non-ucb) cc is in your path (unless you use gcc).
-   Sudo is designed to compile with the standard C compiler and
-   will not build correctly with /usr/ucb/cc.
+    3) Edit the configure-generated Makefile if you wish to
+       change any of the default paths (alternately you could
+       have changed the paths via options to `configure'.
 
-1) Read the OPTIONS file and then edit options.h to enable/disable the
-   options you may or may not want.  You should not have to edit
-   sudo.h or config.h.
+    4) Edit `options.h' to enable any particular non-default
+       options you wish to use.  Refer to the OPTIONS file for
+       an explanation of each one.  If you are building in
+       a separate build directory you may make a local copy
+       of options.h in that directory and edit it instead.
 
-2) Type make.  If configure did its job correctly there won't be any
-   problems.  If this doesn't work, take a look at the file PORTING for
-   tips on what might have gone wrong.  Please mail us if you have a
-   fix or if you are unable to come up with a fix (address at EOF).
+    5) Type `make' to compile sudo.  If you are building sudo
+       in a separate build tree (apart from the sudo source)
+       GNU make will probably be required.  If `configure' did
+       its job properly (and you have a supported configuration)
+       there won't be any problems.  If this doesn't work, take
+       a look at the files TROUBLESHOOTING and PORTING for tips
+       on what might have gone wrong.  Please mail us if you have a
+       fix or if you are unable to come up with a fix (address at EOF).
 
-3) Do a make install (as root) to install sudo.  If you get an error
-   about setuid(0) failing, something went wrong with the install and
-   the permissions on sudo are wrong.  Sudo needs to run setuid root.
-   If you get this message, chances are it's not running setuid root.
+    6) Type `make install' (as root) to install sudo, visudo, the
+       man pages, and a skeleton sudoers file.  Note that the install
+       will not overwrite an existing sudoers file.  You can also
+       install various pieces the package via the install-binaries,
+       install-man, and install-sudoers make targets.
 
-   You can also install various pieces the package via install-binaries,
-   install-man, install-sudoers.
+    7) Edit the sudoers file with `visudo' as necessary for your
+       site.  You will probably want to refer the sample.sudoers
+       file and sudoers man page included with the sudo package.
 
-4) Customize /etc/sudoers for your site.  Read the man page and take a
-   look at sample.sudoers to see how to do this.
+Available configure options
+===========================
 
-5) You're done.
+This section describes flags accepted by the sudo's `configure' script.
+Defaults are listed in brackets after the description.
 
-A few notes:
+Configuration:
+  --cache-file=FILE       Cache test results in FILE
 
-a) To use syslog with the ultrix version you may want to grab
-   and install pub/DEC/jtkohl-syslog-complete.tar.Z available from
-   gatekeeper.dec.com via anonymous ftp.  If you don't I'd suggest
-   logging to a separate file rather than using the 4.2BSD syslog()
-   that comes with ultrix.  The jtkohl syslog is a nice port of the
-   4.3 syslogd that is backwards compatible with the ultrix version.
-   I recommend it highly.
+  --help                  Print the usage/help info
 
-b) visudo will *NOT* use the editor referred to by the EDITOR or
-   VISUAL environmental variables unless you define ENV_EDITOR in
-   sudo.h.  I like the feature, but it can be a security hole
-   if you don't know about it.  If you have EDITOR set to something
-   secure (ie: no shells or external commands) in the Makefile or
-   sudo.h you don't want to define ENV_EDITOR.  Note that vi (the default
-   editor) is anything *but* secure in this respect (and no, setting the
-   editor to a wrapper that sets the SHELL envar to /bin/true does *not*
-   make vi secure--you can change your shell from within vi).  If you
-   leave the default of vi, you really don't stand to lose anything by
-   defining ENV_EDITOR.
+  --no-create             Do not create output files
 
-c) If you have a sense of humor you may want to define USE_INSULTS to
-   get the insults from the "old" sudo when you enter an incorrect
-   password.  Beware, this feature causes some people to want to throw
-   their machine across the room and dash it to tiny pieces.
-   Sci fi fans may want to define HAL as well (see insults.h).
+  --quiet, --silent       Do not print `checking...' messages
 
-d) If you are *not* running sendmail or some other mailer, you should
-   comment out the MAILER #define in sudo.h.
+Directory and file names:
+  --prefix=PREFIX         Install architecture-independent files in PREFIX
+                          This really only applies to man pages.
+                          [/usr/local]
 
-e) If you are running AIX and sudo says that it cannot find a user
-   that is clearly listed in the sudoers file try compiling with
-   optimization turned off.  The AIX C compiler produces incorrect
-   code with the -O flag on some versions of AIX.  In fact, I've
-   run into some nasty bugs in the C compiler on an AIX 3.2.x box
-   that just produced incorrect code, even without opitmization.
-   Morale of the story, use gcc if you can...
+  --exec-prefix=EPREFIX   Install architecture-dependent files in EPREFIX
+                          This includes the sudo and visudo executables.
+                          [same as prefix]
+
+  --bindir=DIR            Install `sudo' in DIR [EPREFIX/bin]
+
+  --sbindir=DIR           Install `visudo' in DIR
+                          [EPREFIX/etc for historical reasons]
+
+  --sysconfdir=DIR        Install `sudoers' file in DIR [/etc]
+
+  --mandir=DIR            Install man pages in DIR [PREFIX/man]
+
+  --srcdir=DIR            Find the sources in DIR [configure dir or ..]
+
+Special features/options:
+  --with-getpass          Use system getpass(3) instead of sudo-supplied
+                          tgetpass() for systems where tgetpass() fails.
+
+  --with-C2               Enable C2 security (shadow password) support
+                          See `Shadow password and C2 support' section
+                          for a list of supported platforms.
+
+  --with-skey             Enable S/Key support.
+
+  --with-SecurID          Enable SecurID support.
+
+  --with-kerb4            Enable kerberos v4 support
+                          Tested only with the Cygnus Network Security
+                          package (CNS).
+
+  --with-kerb5            Enable kerberos v5 support.
+                          This enables with kerberos v4 support and
+                          links with the standard kerberos v5 libraries
+                          as well as the v4 compatibility libraries.
+
+  --with-AFS              Enable AFS support.
+                          Written for AFS under AIX 3.2.x but should
+                          work for AFS on most platforms.
+
+  --with-DCE              Enable DCE support.
+                          Known to work on HP-UX 9.X and 10.0.
+                          Other platforms may require source code
+                          and/or `configure' changes.
+
+  --with-csops            Add CSOps standard options.
+
+Shadow password and C2 support
+==============================
+
+Shadow passwords (also included with most C2 security packages)
+are supported on most major platforms for which they exist.
+The `configure' script will attempt to determine if your
+system uses shadow passwords, but this is really just a guess.
+Therefore, it is suggested that you use the `--with-C2' option
+to `configure' if you need shadow password support.
+
+Shadow passwords are supported on the following platforms:
+
+    SunOS 4.x
+    Solaris 2.x
+    HP-UX 9.x
+    Ultrix 4.x
+    Digital UNIX 3.x
+    Irix 5.x
+    AIX 3.2.x
+    ConvexOS with C2 security
+    Linux
+    SCO 3.2.2
+    SVR4 (and variants using standard SVR4 shadow passwords)
+
+It is possible to configure in shadow password support even
+if your system does not currently use shadow passwords.
+That way, if you put shadow passwords in place, your installed
+sudo will already support them.
+
+Mixing password authentication schemes
+======================================
+
+It is possible to build sudo with support for several authentication
+schemes, including shadow passwords, kerberos, s/key, AFS, DCE,
+and normal UN*X passwords into a single binary.  User validation
+will take slightly longer, of course, but it may be valuable
+to have a single sudo binary that is distributed among systems
+with varying authentication mechanisms.
+
+OS dependent notes
+==================
+
+Solaris 2.x:
+    You need to have a C compiler in order to build sudo.
+    Since Solaris 2.x does not come with one by default this
+    means that you either need to have purchased the unbundled Sun
+    C compiler or have a copy of the GNU C compiler (gcc).
+    Sparc binaries for gcc may be gotten via the URL
+	ftp://prep.ai.mit.edu/pub/gnu/sparc-sun-solaris2
+    NOTE: sudo will not build with the sun C compiler in BSD
+          compatibility mode (/usr/ucb/cc).  Sudo is designed
+          to compile with the standard C compiler (or gcc) and
+          will not build correctly with /usr/ucb/cc.
+
+AIX 3.2.x:
+    I've had various problems with the AIX C compiler producing
+    incorrect code when the -O flag was used.  When optimization
+    is not used, the problems go away.  Gcc does not appear
+    to have this problem.
+
+    Also, the AIX 3.2.x lex will not work with sudo's parse.lex.
+    This should not be a problem as sudo comes shipped with
+    a pre-generated lex.yy.c (created by flex).  If you want
+    to modify the lex tokenizer, make sure you grab a copy of
+    flex from ftp.ee.lbl.gov (also available on most GNU mirrors)
+    and sudo will use that instead.
+
+Ultrix 4.x:
+    Ultrix still ships with the 4.2BSD syslog(3) which does not
+    allow things like logging different faclities to different
+    files, redirecting logs to a single loghost and other niceties.
+    You may want to just grab and install:
+	ftp://gatekeeper.dec.com/pub/DEC/jtkohl-syslog-complete.tar.Z
+    (available via anonymous ftp) which is a port if the 4.3BSD
+    syslog/syslogd that is backwards compatible with the Ultrix version.
+    I recommend it highly.  If you do not do this you probably want
+    to set `LOGGING' to SLOG_FILE in options.h.
 
 Please send changes, bugs, security holes, and gripes to:
     sudo-bugs@cs.colorado.edu
