@@ -193,22 +193,21 @@ sudoers_lookup(pwflag)
 	while (top) {
 	    if (host_matches == TRUE) {
 		CLR(error, FLAG_NO_HOST);
-		if (runas_matches == TRUE) {
-		    if (cmnd_matches == TRUE) {
-		    	/*
-			 * User was granted access to cmnd on host.
-			 */
-			return(VALIDATE_OK |
-			    (no_passwd == TRUE ? FLAG_NOPASS : 0) |
-			    (no_execve == TRUE ? FLAG_NOEXEC : 0));
-		    } else if (cmnd_matches == FALSE) {
-			/*
-			 * User was explicitly denied access to cmnd on host.
-			 */
-			return(VALIDATE_NOT_OK |
-			    (no_passwd == TRUE ? FLAG_NOPASS : 0) |
-			    (no_execve == TRUE ? FLAG_NOEXEC : 0));
-		    }
+		if (runas_matches == TRUE && cmnd_matches == TRUE) {
+		    /*
+		     * User was granted access to cmnd on host as user.
+		     */
+		    return(VALIDATE_OK |
+			(no_passwd == TRUE ? FLAG_NOPASS : 0) |
+			(no_execve == TRUE ? FLAG_NOEXEC : 0));
+		} else if ((runas_matches == TRUE && cmnd_matches == FALSE) ||
+		    (runas_matches == FALSE && cmnd_matches == TRUE)) {
+		    /*
+		     * User was explicitly denied access to cmnd on host.
+		     */
+		    return(VALIDATE_NOT_OK |
+			(no_passwd == TRUE ? FLAG_NOPASS : 0) |
+			(no_execve == TRUE ? FLAG_NOEXEC : 0));
 		}
 	    }
 	    top--;
