@@ -80,11 +80,6 @@ extern int fprintf();
 extern int readlink();
 extern int stat();
 extern int lstat();
-#ifdef HAVE_GETCWD
-extern char *getcwd();
-#else
-extern char *getwd();
-#endif /* HAVE_GETCWD */
 #ifdef HAVE_STRDUP
 extern char *strdup();
 #endif /* HAVE_STRDUP */
@@ -226,17 +221,9 @@ char *qualify(n)
     /*
      * if n is relative, fill full with working dir
      */
-    if (*n != '/') {
-#ifdef HAVE_GETCWD
-	if (!getcwd(full, (size_t) (MAXPATHLEN + 1))) {
-#else
-	if (!getwd(full)) {
-#endif /* HAVE_GETCWD */
-	    (void) fprintf(stderr, "%s:  Can't get working directory!\n",
-	        Argv[0]);
-	    exit(1);
-	}
-    } else
+    if (*n != '/')
+	(void) strcpy(full, cwd);
+    else
 	full[0] = '\0';
 
     (void) strcpy(name, n);	/* working copy... */
