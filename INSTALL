@@ -94,6 +94,8 @@ Directory and file names:
   --srcdir=DIR            Find the sources in DIR [configure dir or ..]
 
 Special features/options:
+  --with-CC               Specifies path to C compiler you wish to use.
+
   --with-getpass          Use system getpass(3) instead of sudo-supplied
                           tgetpass() for systems where tgetpass() fails.
 
