@@ -541,13 +541,18 @@ sudo_ldap_read_config()
   if (ldap_conf.debug>1) {
     printf("LDAP Config Summary\n");
     printf("===================\n");
+#ifdef HAVE_LDAP_INITIALIZE
+    if (ldap_conf.uri){
+      printf("uri          %s\n", ldap_conf.uri);
+    } else
+#endif
+    {
     printf("host         %s\n", ldap_conf.host ?
                  ldap_conf.host   : "(NONE)");
     printf("port         %d\n", ldap_conf.port);
+    }
     printf("ldap_version %d\n", ldap_conf.version);
 
-    printf("uri          %s\n", ldap_conf.uri ?
-                 ldap_conf.uri    : "(NONE)");
     printf("sudoers_base %s\n", ldap_conf.base ?
                  ldap_conf.base : "(NONE) <---Sudo will ignore ldap)");
     printf("binddn       %s\n", ldap_conf.binddn ?
@@ -555,7 +560,7 @@ sudo_ldap_read_config()
     printf("bindpw       %s\n", ldap_conf.bindpw ?
                  ldap_conf.bindpw : "(anonymous)");
 #ifdef HAVE_LDAP_START_TLS_S
-    printf("ssl			%s\n", ldap_conf.ssl ?
+    printf("ssl          %s\n", ldap_conf.ssl ?
                  ldap_conf.ssl    : "(no)");
 #endif
     printf("===================\n");
