@@ -78,6 +78,7 @@ static const char rcsid[] = "$Sudo$";
 
 static int check_dce_status __P((error_status_t, char *));
 
+/* XXX - some of this should move into the init and/or setup routines. */
 int
 dce_verify(pw, plain_pw, auth)
     struct passwd *pw;
