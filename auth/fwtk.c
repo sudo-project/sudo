@@ -61,10 +61,10 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 int
-fwtk_init(pw, promptp, data)
+fwtk_init(pw, promptp, auth)
     struct passwd *pw;
     char **promptp;
-    void **data;
+    sudo_auth *auth;
 {
     static Cfg *confp;			/* Configuration entry struct */
     char resp[128];			/* Response from the server */
@@ -96,10 +96,10 @@ fwtk_init(pw, promptp, data)
 }
 
 int
-fwtk_verify(pw, prompt, data)
+fwtk_verify(pw, prompt, auth)
     struct passwd *pw;
     char *prompt;
-    void **data;
+    sudo_auth *auth;
 {
     char *pass;				/* Password from the user */
     char buf[SUDO_PASS_MAX + 12];	/* General prupose buffer */
@@ -145,10 +145,9 @@ fwtk_verify(pw, prompt, data)
 }
 
 int
-fwtk_cleanup(pw, status, data)
+fwtk_cleanup(pw, auth)
     struct passwd *pw;
-    int status;
-    void **data;
+    sudo_auth *auth;
 {
 
     auth_close();

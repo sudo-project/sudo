@@ -59,10 +59,10 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 int
-passwd_verify(pw, pass, data)
+passwd_verify(pw, pass, auth)
     struct passwd *pw;
     char *pass;
-    void **data;
+    sudo_auth *auth;
 {
 
 #ifdef HAVE_GETAUTHUID

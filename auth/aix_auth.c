@@ -59,10 +59,10 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 int
-aixauth_verify(pw, prompt, data)
+aixauth_verify(pw, prompt, auth)
     struct passwd *pw;
     char *prompt;
-    void **data;
+    sudo_auth *auth;
 {
     char *message, *pass;
     int reenter = 1;

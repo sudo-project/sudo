@@ -1,4 +1,4 @@
-NOTE: the sudo auth API is subject to change
+NOTE: the Sudo auth API is subject to change
 
 Purpose: to provide a simple API for authentication methods that
          encapsulates things nicely without turning into a maze
@@ -7,26 +7,19 @@ Purpose: to provide a simple API for authentication methods that
 The sudo_auth struct looks like this:
 
 typedef struct sudo_auth {
-    int need_root;              /* must run as root? */
-    int configured;             /* auth type configured on this host? */
-    int status;                 /* status from verify routine */
+    short flags;                /* /* various flags, see below */
+    short status;               /* status from verify routine */
     char *name;			/* name of the method in string form */
-    void *data;                 /* method-specific data pointer */
+    VOID *data;                 /* method-specific data pointer */
 
-    int (*init) __P((struct passwd *pw, char **prompt, void **data));
-    int (*setup) __P((struct passwd *pw, char **prompt, void **data));
-    int (*verify) __P((struct passwd *pw, char *p, void **data));
-    int (*cleanup) __P((struct passwd *pw, int status, void **data));
+    int (*init) __P((struct passwd *pw, char **prompt, sudo_auth *auth));
+    int (*setup) __P((struct passwd *pw, char **prompt, sudo_auth *auth));
+    int (*verify) __P((struct passwd *pw, char *p, sudo_auth *auth));
+    int (*cleanup) __P((struct passwd *pw, int status, sudo_auth *auth));
 } sudo_auth;
 
 The variables in the struct are as follows:
-    need_root	Boolean flag that determines whether or not the auth functions
-		run with an euid of 0 or the uid of the invoking user.
-
-    configured	Boolean flag that is true if the auth method has
-		been configured and false if not.  All auth methods
-		start out with this set to true.  If an "init" or "setup"
-		functions fails, "configured" is set to false.
+    flags	Bitwise binary flags, see below.
 
     status	Contains the return value from the last run of
 		the "verify" function.  Starts out as AUTH_FAILURE.
@@ -36,6 +29,20 @@ The variables in the struct are as follows:
     data	A pointer to method-specific data.  This is passed to
 		all the functions of an auth method and is usually
 		initialized in the "init" or "setup" routines.
+
+Possible values of sudo_auth.flags:
+    FLAG_ROOT		Whether or not the auth functions should run with
+			an euid of 0 or the uid of the invoking user.
+
+    FLAG_CONFIGURED	If set then the auth method is assumed to have been
+			configured successfully.  All auth methods start out
+			with this set.  If an "init" or "setup" function
+			fails, this bit is cleared.
+
+    FLAG_ONEANDONLY	If set, this indicates that the method is the
+			only one in use.  Can be used by auth functions
+			to determine whether to return a fatal or nonfatal
+			error.
 
 The member functions can return the following values:
     AUTH_SUCCESS	Function succeeded.  For a ``verify'' function
@@ -54,34 +61,34 @@ The member functions can return the following values:
 
 The functions in the struct are as follows:
 
-    int init(struct passwd *pw, char **prompt, void **data)
+    int init(struct passwd *pw, char **prompt, sudo_auth *auth)
         Function to do any one-time initialization for the auth
         method.  All of the "init" functions are run before anything
         else.  A pointer to the prompt string may be used to add
         method-specific info to the prompt.
 
-    int setup(struct passwd *pw, char **prompt, void **data)
+    int setup(struct passwd *pw, char **prompt, sudo_auth *auth)
         Function to do method-specific setup.  All the "setup"
         routines are run before any of the "verify" routines.  A
         pointer to the prompt string may be used to add method-specific
         info to the prompt.
 
-    int verify(struct passwd *pw, char *p, void **data)
+    int verify(struct passwd *pw, char *p, sudo_auth *auth)
         Function to do user verification for this auth method.  For
         standalone auth methods ``p'' is the prompt string.  For
         normal auth methods, ``p'' is the password the user entered.
         Note that standalone auth methods are responsible for
         rerading the password themselves.
 
-    int cleanup(struct passwd *pw, int status, void **data)
+    int cleanup(struct passwd *pw, sudo_auth *auth)
         Function to do per-auth method cleanup.  This is only run
         at the end of the authentication process, after the user
         has completely failed or succeeded to authenticate.
-	The ``status'' variable contains the result of the last
-	authentication attempt.
+	The ``auth->status'' variable contains the result of the
+	last authentication attempt which may be interesting.
 
 A note about standalone methods.  Some authentication methods can't
-coexist with anyh others.  This may be because they encapsulate other
+coexist with any others.  This may be because they encapsulate other
 methods (pam, sia) or because they have a special way of interacting
 with the user (securid).
 
@@ -95,8 +102,10 @@ in sudo_auth.h.  For instance, for a method, ``fooauth'', add:
 
 #elif defined(HAVE_FOOAUTH)
 #  define AUTH_STANDALONE \
-        AUTH_ENTRY(1, "foo", foo_init, foo_setup, foo_verify, foo_cleanup)
+        AUTH_ENTRY(FLAG_ROOT, "foo", \
+	    foo_init, foo_setup, foo_verify, foo_cleanup)
 
+If the method doesn't need to run as root, replace FLAG_ROOT with 0.
 If you don't have a init/setup/cleanup routine, just use a NULL for that
 field.
 
@@ -105,14 +114,15 @@ sudo_auth.c.  If ``fooauth'' is a normal auth method, its entry
 would look like:
 
 #  ifdef HAVE_FOOAUTH
-    AUTH_ENTRY(1, "foo", foo_init, foo_setup, foo_verify, foo_cleanup)
+    AUTH_ENTRY(FLAG_ROOT, "foo", foo_init, foo_setup, foo_verify, foo_cleanup)
 #  endif
 
-Again, if you don't have a init/setup/cleanup routine, just use a NULL
-for that field.
+Again, if the method doesn't need to run as root, replace FLAG_ROOT
+with 0.  Likewise, if you don't have a init/setup/cleanup routine,
+just use a NULL for that field.
 
-NOTE:  in general, you should not make a method both ``standalone'' and
-       ``normal'' unless you *really* know what you are doing.  See
-       the ``rfc1938'' method for an example of how to do this.
-       In most cases, you are better off using the --without-passwd
-       configure argument.
+NOTE:  You should not make a method both ``standalone'' and
+       ``normal''.  Just use the --without-passwd configure argument
+       to disable passwd/shadow file checking and then have your
+       auth routines check the FLAG_ONEANDONLY flag to see if
+       they are running standalone and act accordingly.

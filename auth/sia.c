@@ -99,10 +99,10 @@ sudo_collect(timeout, rendition, title, nprompts, prompts)
 }
 
 int
-sia_setup(pw, promptp, data)
+sia_setup(pw, promptp, auth)
     struct passwd *pw;
     char **promptp;
-    void **data;
+    sudo_auth *auth;
 {
     SIAENTITY *siah = NULL;
 
@@ -114,17 +114,17 @@ sia_setup(pw, promptp, data)
 	return(AUTH_FATAL);
     }
 
-    *data = siah;
+    auth->data = (VOID *) siah;
     return(AUTH_SUCCESS);
 }
 
 int
-sia_verify(pw, prompt, data)
+sia_verify(pw, prompt, auth)
     struct passwd *pw;
     char *prompt;
-    void **data;
+    sudo_auth *auth;
 {
-    SIAENTITY *siah = (SIAENTITY *)(*data);
+    SIAENTITY *siah = (SIAENTITY *) auth->data;
 
     def_prompt = prompt;		/* for sudo_collect */
 
@@ -136,12 +136,11 @@ sia_verify(pw, prompt, data)
 }
 
 int
-sia_cleanup(pw, status, data)
+sia_cleanup(pw, auth)
     struct passwd *pw;
-    int status;
-    void **data;
+    sudo_auth *auth;
 {
-    SIAENTITY *siah = (SIAENTITY *)(*data);
+    SIAENTITY *siah = (SIAENTITY *) auth->data;
 
     (void) sia_ses_release(&siah);
 }

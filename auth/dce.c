@@ -79,10 +79,10 @@ static const char rcsid[] = "$Sudo$";
 static int check_dce_status __P((error_status_t, char *));
 
 int
-dce_verify(pw, plain_pw, data)
+dce_verify(pw, plain_pw, auth)
     struct passwd *pw;
     char *plain_pw;
-    void **data;
+    sudo_auth *auth;
 {
     struct passwd		temp_pw;
     sec_passwd_rec_t		password_rec;

@@ -62,10 +62,10 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 int
-afs_verify(pw, pass, data)
+afs_verify(pw, pass, auth)
     struct passwd *pw;
     char *pass;
-    void **data;
+    sudo_auth *auth;
 {
     struct ktc_encryptionKey afs_key;
     struct ktc_token afs_token;

@@ -65,10 +65,10 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 int
-secureware_init(pw, promptp, data)
+secureware_init(pw, promptp, auth)
     struct passwd *pw;
     char **promptp;
-    void **data;
+    sudo_auth *auth;
 {
 #ifdef __alpha
     extern int crypt_type;
@@ -80,10 +80,10 @@ secureware_init(pw, promptp, data)
 }
 
 int
-secureware_verify(pw, pass, data)
+secureware_verify(pw, pass, auth)
     struct passwd *pw;
     char *pass;
-    void **data;
+    sudo_auth *auth;
 {
 #ifdef __alpha
     extern int crypt_type;

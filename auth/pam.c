@@ -61,14 +61,14 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 static int sudo_conv __P((int, PAM_CONST struct pam_message **,
-			  struct pam_response **, void *));
+			  struct pam_response **, VOID *));
 static char *def_prompt;
 
 int
-pam_init(pw, promptp, data)
+pam_init(pw, promptp, auth)
     struct passwd *pw;
     char **promptp;
-    void **data;
+    sudo_auth *auth;
 {
     static struct pam_conv pam_conv;
     pam_handle_t *pamh;
@@ -80,17 +80,17 @@ pam_init(pw, promptp, data)
 	    "unable to initialize PAM");
 	return(AUTH_FATAL);
     }
-    *data = pamh;
+    auth->data = (VOID *) pamh;
     return(AUTH_SUCCESS);
 }
 
 int
-pam_verify(pw, prompt, data)
+pam_verify(pw, prompt, auth)
     struct passwd *pw;
     char *prompt;
-    void **data;
+    sudo_auth *auth;
 {
-    pam_handle_t *pamh = (pam_handle_t *)(*data);
+    pam_handle_t *pamh = (pam_handle_t *) auth->data;
 
     def_prompt = prompt;	/* for sudo_conv */
 
@@ -102,22 +102,19 @@ pam_verify(pw, prompt, data)
 }
 
 int
-pam_cleanup(pw, status, data)
+pam_cleanup(pw, auth)
     struct passwd *pw;
-    int status;
-    void **data;
+    sudo_auth *auth;
 {
-    pam_handle_t *pamh = (pam_handle_t *)(*data);
+    pam_handle_t *pamh = (pam_handle_t *) auth->data;
 
-    if (pam_end(pamh, (status == AUTH_SUCCESS)) == PAM_SUCCESS)
+    if (pam_end(pamh, (auth->status == AUTH_SUCCESS)) == PAM_SUCCESS)
 	return(AUTH_SUCCESS);
     else
 	return(AUTH_FAILURE);
 }
 
 /*
- * sudo_conv()
- *
  * ``Conversation function'' for PAM.
  */
 static int
@@ -125,7 +122,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
     int num_msg;
     PAM_CONST struct pam_message **msg;
     struct pam_response **response;
-    void *appdata_ptr;
+    VOID *appdata_ptr;
 {
     struct pam_response *pr;
     struct pam_message *pm;

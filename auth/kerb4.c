@@ -60,10 +60,10 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 int
-kerb4_init(pw, promptp, data)
+kerb4_init(pw, promptp, auth)
     struct passwd *pw;
     char **promptp;
-    void **data;
+    sudo_auth *auth;
 {
     static char realm[REALM_SZ];
 
@@ -76,19 +76,19 @@ kerb4_init(pw, promptp, data)
 	return(AUTH_FAILURE);
 
     /* Stash a pointer to the realm (used in kerb4_verify) */
-    *data = realm;
+    auth->data = (VOID *) realm;
 
     return(AUTH_SUCCESS);
 }
 
 int
-kerb4_verify(pw, pass, data)
+kerb4_verify(pw, pass, auth)
     struct passwd *pw;
     char *pass;
-    void **data;
+    sudo_auth *auth;
 {
     char tkfile[sizeof(_PATH_SUDO_TIMEDIR) + 4 + MAX_UID_T_LEN];
-    char *realm = *data;
+    char *realm = (char *) auth->data;
     int error;
 
     /*

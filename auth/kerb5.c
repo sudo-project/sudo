@@ -69,10 +69,10 @@ static krb5_context sudo_context = NULL;
 static int verify_krb_v5_tgt __P((krb5_ccache));
 
 int
-kerb5_init(pw, promptp, data)
+kerb5_init(pw, promptp, auth)
     struct passwd *pw;
     char **promptp;
-    void **data;
+    sudo_auth *auth;
 {
     char *lrealm;
     krb5_error_code retval;
@@ -85,12 +85,11 @@ kerb5_init(pw, promptp, data)
 	    "unable to initialize Kerberos V context");
 	return(AUTH_FATAL);
     }
-    *data = (void *) &sudo_context;	/* save a pointer to the context */
+    auth->data = (VOID *) &sudo_context; /* save a pointer to the context */
 
     krb5_init_ets(sudo_context);
 
     if (retval = krb5_get_default_realm(sudo_context, &lrealm)) {
-	set_perms(PERM_USER, 0);
 	log_error(NO_EXIT|NO_MAIL, 
 	    "unable to get default Kerberos V realm");
 	return(AUTH_FATAL);
@@ -110,10 +109,10 @@ kerb5_init(pw, promptp, data)
 }
 
 int
-kerb5_verify(pw, pass, data)
+kerb5_verify(pw, pass, auth)
     struct passwd *pw;
     char *pass;
-    void **data;
+    sudo_auth *auth;
 {
     krb5_error_code	retval;
     krb5_principal	princ;

@@ -71,10 +71,10 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 int
-rfc1938_setup(pw, promptp, data)
+rfc1938_setup(pw, promptp, auth)
     struct passwd *pw;
     char **promptp;
-    void **data;
+    sudo_auth *auth;
 {
     char challenge[256];
     static char *orig_prompt = NULL, *new_prompt = NULL;
@@ -82,8 +82,8 @@ rfc1938_setup(pw, promptp, data)
     static struct RFC1938 rfc1938;
 
     /* Stash a pointer to the rfc1938 struct if we have not initialized */
-    if (!*data)
-	*data = &rfc1938;
+    if (!auth->data)
+	auth->data = &rfc1938;
 
     /* Save the original prompt */
     if (orig_prompt == NULL) {
@@ -101,16 +101,20 @@ rfc1938_setup(pw, promptp, data)
 	(void) fclose(rfc1938.keyfile);
 #endif
 
-    /* Get the rfc1938 part of the prompt */
+    /*
+     * Look up the user and get the rfc1938 challenge.
+     * If the user is not in the OTP db, only post a fatal error if
+     * we are running alone (since they may just use a normal passwd).
+     */
     if (rfc1938challenge(&rfc1938, pw->pw_name, challenge) != 0) {
-#ifdef OTP_ONLY
-	(void) fprintf(stderr,
-		       "%s: You do not exist in the OTP database.\n",
-		       Argv[0]);
-	return(AUTH_FATAL);
-#else
-	return(AUTH_FAILURE);
-#endif /* OTP_ONLY */
+	if (IS_ONEANDONLY(auth)) {
+	    (void) fprintf(stderr,
+			   "%s: You do not exist in the %s database.\n",
+			   Argv[0], auth->name);
+	    return(AUTH_FATAL);
+	} else {
+	    return(AUTH_FAILURE);
+	}
     }
 
     /* Get space for new prompt with embedded challenge */
@@ -130,13 +134,13 @@ rfc1938_setup(pw, promptp, data)
 }
 
 int
-rfc1938_verify(pw, pass, data)
+rfc1938_verify(pw, pass, auth)
     struct passwd *pw;
     char *pass;
-    void **data;
+    sudo_auth *auth;
 {
 
-    if (rfc1938verify((struct RFC1938 *) (*data), pass) == 0)
+    if (rfc1938verify((struct RFC1938 *) auth->data, pass) == 0)
 	return(AUTH_SUCCESS);
     else
 	return(AUTH_FAILURE);
