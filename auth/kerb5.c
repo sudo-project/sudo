@@ -70,7 +70,7 @@ static struct _sudo_krb5_data {
 } sudo_krb5_data = { NULL, NULL, NULL };
 typedef struct _sudo_krb5_data *sudo_krb5_datap;
 
-extern krb5_cc_ops krb5_mcc_ops;
+extern const krb5_cc_ops krb5_mcc_ops;
 
 int
 kerb5_init(pw, promptp, auth)
