@@ -65,12 +65,16 @@ struct sudo_user {
 #define FLAG_NOEXEC		0x200
 
 /*
- * Boolean values
+ * Pseudo-boolean values
  */
 #undef TRUE
 #define TRUE                     1
 #undef FALSE
 #define FALSE                    0
+#undef NOMATCH
+#define NOMATCH                 -1
+#undef UNSPEC
+#define UNSPEC                  -2
 
 /*
  * find_path()/load_cmnd() return values
