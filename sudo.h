@@ -121,7 +121,11 @@
 #endif
 
 #ifndef EDITOR
+#if defined(hpux) || defined(__alpha) || defined(_AIX) || defined(__ksr__)
+#define EDITOR			"/usr/bin/vi"
+#else
 #define EDITOR			"/usr/ucb/vi"
+#endif
 #endif
 
 #ifndef MAXHOSTNAMELEN
