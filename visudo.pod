@@ -146,7 +146,8 @@ B<visudo> was written by:
 
  Todd Miller		<Todd.Miller@courtesan.com>
 
-See the HISTORY file in the sudo distribution for more details.
+See the HISTORY file in the sudo distribution or visit
+http://www.courtesan.com/sudo/history.html for more details.
 
 =head1 BUGS
 
