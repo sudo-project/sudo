@@ -14,41 +14,85 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <sys/types.h>
-#include <limits.h>
-#include <unistd.h>
-
 #include "config.h"
+
+#include <sys/types.h>
+#include <sys/param.h>
+#include <unistd.h>
+#include <stdio.h>
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif /* STDC_HEADERS */
+#ifdef HAVE_DIRENT_H
+# include <dirent.h>
+# define NAMLEN(dirent) strlen((dirent)->d_name)
+#else
+# define dirent direct
+# define NAMLEN(dirent) (dirent)->d_namlen
+# ifdef HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# ifdef HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# ifdef HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
+
+#include "sudo.h"
+
+#ifndef dirfd
+# define dirfd(dirp)	((dirp)->dd_fd)
+#endif
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-#ifndef OPEN_MAX
-# define OPEN_MAX	256
-#endif
-
 /*
  * Close all file descriptors greater than or equal to lowfd.
- * We cannot rely on resource limits since it is possible to
- * open a file descriptor and then drop the rlimit such that
- * it is below the open fd.
  */
 void
 closefrom(lowfd)
     int lowfd;
 {
     long fd, maxfd;
+    char fdpath[PATH_MAX], *endp;
+    struct dirent *dent;
+    DIR *dirp;
+    int len;
 
+    /* Check for a /proc/$$/fd directory. */
+    len = snprintf(fdpath, sizeof(fdpath), "/proc/%ld/fd", (long)getpid());
+    if (len != -1 && len <= sizeof(fdpath) && (dirp = opendir(fdpath))) {
+	while ((dent = readdir(dirp)) != NULL) {
+	    fd = strtol(dent->d_name, &endp, 10);
+	    if (dent->d_name != endp && *endp == '\0' &&
+		fd >= 0 && fd < INT_MAX && fd >= lowfd && fd != dirfd(dirp))
+		(void) close((int) fd);
+	}
+	closedir(dirp);
+    } else {
+	/*
+	 * Fall back on sysconf() or getdtablesize().  We avoid checking
+	 * resource limits since it is possible to open a file descriptor
+	 * and then drop the rlimit such that it is below the open fd.
+	 */
 #ifdef HAVE_SYSCONF
-    maxfd = sysconf(_SC_OPEN_MAX);
+	maxfd = sysconf(_SC_OPEN_MAX);
 #else
-    maxfd = getdtablesize();
+	maxfd = getdtablesize();
 #endif /* HAVE_SYSCONF */
-    if (maxfd < 0)
-	maxfd = OPEN_MAX;
+	if (maxfd < 0)
+	    maxfd = OPEN_MAX;
 
-    for (fd = lowfd; fd < maxfd; fd++)
-	(void) close(fd);
-    return;
+	for (fd = lowfd; fd < maxfd; fd++)
+	    (void) close((int) fd);
+    }
 }
