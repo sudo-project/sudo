@@ -52,7 +52,7 @@ static char rcsid[] = "$Id$";
 #include "sudo.h"
 #include "insults.h"
 
-char *getpass();
+extern char *getpass();
 
 static int check_timestamp();
 static void check_passwd();
@@ -234,7 +234,7 @@ static void check_passwd()
      */
     while (counter > 0) {
 	pass = getpass("Password:");
-	if (*pass == (char) NULL)
+	if (*pass == '\0')
 	    exit(0);
 	if (!strcmp(encrypted, crypt(pass, encrypted)))
 	    return;		/* if the passwd is correct return() */
