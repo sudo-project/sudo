@@ -229,8 +229,6 @@ void log_error(code)
 	    strcat(p, " ... ");	/* add an elipsis to the end */
 
     }
-    if (appropriate(code))
-	send_mail();
 
 #ifdef SYSLOG
 #ifdef Syslog_facility
@@ -278,6 +276,7 @@ void log_error(code)
     closelog();
 #endif /* SYSLOG */
 #ifdef _PATH_SUDO_LOGFILE
+
     /* become root */
     be_root();
 
@@ -345,6 +344,10 @@ void log_error(code)
     /* relinquish root */
     be_user();
 #endif /* _PATH_SUDO_LOGFILE */
+
+    /* send mail if appropriate */
+    if (appropriate(code))
+	send_mail();
 }
 
 
