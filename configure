@@ -13422,8 +13422,7 @@ rm -f conftest.err conftest.$ac_ext
 	{ echo "$as_me:$LINENO: WARNING: Unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS" >&5
 echo "$as_me: WARNING: Unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS" >&2;}
     fi
-
-echo "$as_me:$LINENO: checking for main in -lskey" >&5
+    echo "$as_me:$LINENO: checking for main in -lskey" >&5
 echo $ECHO_N "checking for main in -lskey... $ECHO_C" >&6
 if test "${ac_cv_lib_skey_main+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -13472,12 +13471,7 @@ fi
 echo "$as_me:$LINENO: result: $ac_cv_lib_skey_main" >&5
 echo "${ECHO_T}$ac_cv_lib_skey_main" >&6
 if test $ac_cv_lib_skey_main = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBSKEY 1
-_ACEOF
-
-  LIBS="-lskey $LIBS"
-
+  found=yes
 else
   { echo "$as_me:$LINENO: WARNING: Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS" >&5
 echo "$as_me: WARNING: Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS" >&2;}
@@ -13546,6 +13540,7 @@ _ACEOF
 fi
 
     LDFLAGS="$O_LDFLAGS"
+    SUDO_LIBS="${SUDO_LIBS} -lskey"
 fi
 
 if test -n "$with_opie"; then
@@ -13663,8 +13658,7 @@ rm -f conftest.err conftest.$ac_ext
 	{ echo "$as_me:$LINENO: WARNING: Unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS" >&5
 echo "$as_me: WARNING: Unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS" >&2;}
     fi
-
-echo "$as_me:$LINENO: checking for main in -lopie" >&5
+    echo "$as_me:$LINENO: checking for main in -lopie" >&5
 echo $ECHO_N "checking for main in -lopie... $ECHO_C" >&6
 if test "${ac_cv_lib_opie_main+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -13713,18 +13707,14 @@ fi
 echo "$as_me:$LINENO: result: $ac_cv_lib_opie_main" >&5
 echo "${ECHO_T}$ac_cv_lib_opie_main" >&6
 if test $ac_cv_lib_opie_main = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBOPIE 1
-_ACEOF
-
-  LIBS="-lopie $LIBS"
-
+  found=yes
 else
   { echo "$as_me:$LINENO: WARNING: Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDO_LDFLAGS" >&5
 echo "$as_me: WARNING: Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDO_LDFLAGS" >&2;}
 fi
 
     LDFLAGS="$O_LDFLAGS"
+    SUDO_LIBS="${SUDO_LIBS} -lopie"
 fi
 
 if test -n "$with_SecurID" -a "$with_SecurID" != "no"; then
