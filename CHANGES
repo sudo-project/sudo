@@ -1601,3 +1601,7 @@ Sudo 1.6.6 released.
      lib dir for the skey/opie include file and library respectively.
 
 Sudo 1.6.7 released.
+
+503) Fixed false positives in the overflow detection of expand_prompt().
+
+Sudo 1.6.7p1 released.
