@@ -206,6 +206,18 @@ int main(argc, argv)
     }
 
     /*
+     * Close all file descriptors to make sure we have a nice
+     * clean slate from which to work.  
+     */
+#ifdef HAVE_SYSCONF
+    for (rtn = sysconf(_SC_OPEN_MAX) - 1; rtn > 2; rtn--)
+	(void) close(rtn);
+#else
+    for (rtn = getdtablesize() - 1; rtn > 2; rtn--)
+	(void) close(rtn);
+#endif /* HAVE_SYSCONF */
+
+    /*
      * set the prompt based on $SUDO_PROMPT (can be overridden by `-p')
      */
     if ((prompt = getenv("SUDO_PROMPT")) == NULL)
@@ -240,18 +252,6 @@ int main(argc, argv)
     /* must have a command to run unless got -s */
     if (cmnd == NULL && NewArgc == 0 && !(sudo_mode & MODE_SHELL))
 	usage(1);
-
-    /*
-     * Close all file descriptors to make sure we have a nice
-     * clean slate from which to work.  
-     */
-#ifdef HAVE_SYSCONF
-    for (rtn = sysconf(_SC_OPEN_MAX) - 1; rtn > 3; rtn--)
-	(void) close(rtn);
-#else
-    for (rtn = getdtablesize() - 1; rtn > 3; rtn--)
-	(void) close(rtn);
-#endif /* HAVE_SYSCONF */
 
     clean_env(environ, badenv_table);
 
