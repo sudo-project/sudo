@@ -56,8 +56,11 @@ extern void parser_cleanup __P((void));
 #endif
 %}
 
-D			[0-9]
-N			{D}{1,3}
+#ifdef _AIX
+N			[0-9][0-9]?[0-9]?
+#else
+N			[0-9]{1,3}
+#endif /* broken AIX lex */
 
 %e	4000
 %p	6000
