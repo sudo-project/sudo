@@ -55,6 +55,9 @@
 #include <sys/param.h>
 #include "sudo.h"
 extern char *malloc();
+#ifndef NEED_STRDUP
+extern char *strdup();
+#endif
 
 int Argc;
 char **Argv;

@@ -61,6 +61,9 @@ extern char *getcwd();
 #else
 extern char *getwd();
 #endif
+#ifndef NEED_STRDUP
+extern char *strdup();
+#endif
 
 
 /*******************************************************************
