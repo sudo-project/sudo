@@ -114,7 +114,7 @@ all: $(PROGS)
 .SUFFIXES: .o .c .h .lex .yacc .man .cat
 
 .c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) -I$(srcdir) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) $<
 
 .man.cat:
 	$(NROFF) -man $< > $@
