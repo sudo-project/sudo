@@ -33,7 +33,7 @@ VPATH = @srcdir@
 
 # Compiler & tools to use
 CC = @CC@
-LEX = @LEX@
+LEX = flex
 YACC = @YACC@
 NROFF = nroff
 
@@ -41,8 +41,8 @@ NROFF = nroff
 INSTALL = @INSTALL@
 
 # Libraries
-SUDO_LIBS = @LEXLIB@ @SUDO_LIBS@
-VISUDO_LIBS = @LEXLIB@ @VISUDO_LIBS@
+SUDO_LIBS = @SUDO_LIBS@
+VISUDO_LIBS = @VISUDO_LIBS@
 
 # OS defines
 OSDEFS = @OSDEFS@
@@ -147,9 +147,10 @@ y.tab.c y.tab.h: parse.yacc
 y.tab.o: $(HDRS) y.tab.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) y.tab.c
 
-lex.yy.c: parse.lex
-	rm -f lex.yy.c
-	$(LEX) $(srcdir)/parse.lex
+# Uncomment the following if you intend to modify parse.lex
+#lex.yy.c: parse.lex
+#	rm -f lex.yy.c
+#	$(LEX) $(srcdir)/parse.lex
 
 lex.yy.o: lex.yy.c y.tab.h $(HDRS)
 
