@@ -146,7 +146,7 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES FAQ HISTORY INSTALL INSTALL.configure \
 	    configure configure.in fnmatch.3 indent.pro install-sh \
 	    mkinstalldirs pathnames.h.in sample.pam sample.sudoers sudo.cat \
 	    sudo.man sudo.pod sudoers sudoers.cat sudoers.man sudoers.pod \
-	    visudo.cat visudo.man visudo.pod
+	    visudo.cat visudo.man visudo.pod auth/API
 
 SUDODEP = $(srcdir)/sudo.h $(srcdir)/compat.h $(srcdir)/logging.h \
 	  config.h pathnames.h

@@ -543,6 +543,11 @@ Linux:
     the "#define HAVE_LSEARCH 1" line in config.h and add lsearch.o
     to the LIBOBJS line in the Makefile.
 
+    It is not possible to access the sudoers file via NFS on Linux.
+    This is due to a bug in the Linux client-side NFS implementation.
+    It has been fixed in the developement kernel but, as of Aug 27, 1999,
+    the fixes have not made it into the mainstream kernel.
+
 SCO ODT:
     You'll probably need libcrypt_i.a available via anonymous ftp
     from sosco.sco.com.  The necessary files are /SLS/lng225b.Z
