@@ -42,7 +42,7 @@ sudo - execute a command as the superuser
 <H1><A NAME="SYNOPSIS">SYNOPSIS
 
 </A></H1>
-<STRONG>sudo</STRONG>  <STRONG>-V</STRONG> | <STRONG>-h</STRONG> | <STRONG>-l</STRONG> | <STRONG>-v</STRONG> | <STRONG>-k</STRONG> | <STRONG>-s</STRONG> | <STRONG>-H</STRONG> | [ <STRONG>-b</STRONG> ] | [ <STRONG>-p</STRONG> prompt ] [ <STRONG>-u</STRONG> username/#uid] <EM>command</EM>
+<STRONG>sudo</STRONG>  <STRONG>-V</STRONG> | <STRONG>-h</STRONG> | <STRONG>-l</STRONG> | <STRONG>-v</STRONG> | <STRONG>-k</STRONG> | <STRONG>-s</STRONG> | <STRONG>-H</STRONG> | [ <STRONG>-b</STRONG> ] | [ <STRONG>-r</STRONG> realm ] | [ <STRONG>-p</STRONG> prompt ] [ <STRONG>-u</STRONG> username/#uid] <EM>command</EM>
 
 
 
@@ -61,7 +61,7 @@ as the superuser (real and effective uid and gid are set to <CODE></CODE> and ro
 <P>
 
 <STRONG>sudo</STRONG> determines who is an authorized user by consulting the file <EM>/etc/sudoers</EM>. By giving <STRONG>sudo</STRONG> the <CODE>-v</CODE> flag a user can update the time stamp without running a <EM>command.</EM>
-The password prompt itself will also time out if the password is not
+The password prompt itself will also time out if the user's password is not
 entered with N minutes (again, this is defined at installation time and
 defaults to 5 minutes).
 
@@ -119,7 +119,7 @@ The <CODE>-h</CODE> (<EM>help</EM>) option causes <STRONG>sudo</STRONG> to print
 <DT><STRONG><A NAME="item__v">-v
 
 </A></STRONG><DD>
-If given the <CODE>-v</CODE> (<EM>validate</EM>) option, <STRONG>sudo</STRONG> will update the user's timestamp file, prompting for a password if
+If given the <CODE>-v</CODE> (<EM>validate</EM>) option, <STRONG>sudo</STRONG> will update the user's timestamp file, prompting for the user's password if
 necessary. This extends the <STRONG>sudo</STRONG> timeout to for another N minutes (where N is defined at installation time
 and defaults to 5 minutes) but does not run a command.
 
@@ -129,7 +129,8 @@ and defaults to 5 minutes) but does not run a command.
 <DT><STRONG><A NAME="item__k">-k
 
 </A></STRONG><DD>
-The <CODE>-k</CODE> (<EM>kill</EM>) option to <STRONG>sudo</STRONG> removes the user's timestamp file, thus requiring a password the next time <STRONG>sudo</STRONG> is run. This option does not require a password and was added to allow a
+The <CODE>-k</CODE> (<EM>kill</EM>) option to <STRONG>sudo</STRONG> removes the user's timestamp file, thus requiring the user's password the
+next time <STRONG>sudo</STRONG> is run. This option does not require a password and was added to allow a
 user to revoke <STRONG>sudo</STRONG> permissions from a .logout file.
 
 
@@ -140,6 +141,15 @@ user to revoke <STRONG>sudo</STRONG> permissions from a .logout file.
 </A></STRONG><DD>
 The <CODE>-b</CODE> (<EM>background</EM>) option tells <STRONG>sudo</STRONG> to run the given command in the background. Note that if you use the <CODE>-b</CODE>
 option you cannot use shell job control to manipulate the command.
+
+
+<P>
+
+<DT><STRONG><A NAME="item__r">-r
+
+</A></STRONG><DD>
+The <CODE>-r</CODE> (<EM>realm</EM>) option is only available if <STRONG>sudo</STRONG> was configured with <STRONG>Kerberos</STRONG> version 5 support. It allows the user to specify a
+<STRONG>Kerberos</STRONG> realm other than the system default to use when authenticating the user via <STRONG>Kerberos</STRONG>.
 
 
 <P>
@@ -216,25 +226,23 @@ your PATH is on a machine that is currently unreachable.
 </A></H1>
 <STRONG>sudo</STRONG> tries to be safe when executing external commands. Variables that control
 how dynamic loading and binding is done can be used to subvert the program
-that <STRONG>sudo</STRONG> runs. To combat this the <CODE>LD_*</CODE>, <CODE>SHLIB_PATH</CODE> (HP-UX only),
-<CODE>LIBPATH</CODE> (AIX only), and <CODE>_RLD_*</CODE> environment variables are removed from the environment passed on to all
-commands executed.
-<STRONG>sudo</STRONG> will also remove the <CODE>IFS</CODE>, <CODE>ENV</CODE>, <CODE>BASH_ENV</CODE>
-and <CODE>KRB_CONF</CODE> variables as they too can pose a threat.
+that <STRONG>sudo</STRONG> runs. To combat this the
+<CODE>LD_*</CODE>, <CODE>_RLD_*</CODE>, <CODE>SHLIB_PATH</CODE> (HP-UX only), and <CODE>LIBPATH</CODE> (AIX only) environment variables are removed from the environment passed on
+to all commands executed.  <STRONG>sudo</STRONG> will also remove the <CODE>IFS</CODE>,
+<CODE>ENV</CODE>, <CODE>BASH_ENV</CODE>, <CODE>KRB_CONF</CODE> and <CODE>KRB5_CONFIG</CODE> variables as they too can pose a threat.
 
 
 <P>
 
 To prevent command spoofing, <STRONG>sudo</STRONG> checks ``.'' and ``'' (both denoting current directory) last when searching
 for a command in the user's PATH (if one or both are in the PATH). Note,
-however, that the actual PATH environment variable is <EM>not</EM> modified and is passed unchanged to the program that
-<STRONG>sudo</STRONG> executes.
+however, that the actual PATH environment variable is <EM>not</EM> modified and is passed unchanged to the program that <STRONG>sudo</STRONG> executes.
 
 
 <P>
 
-For security reasons, if your OS supports shared libraries,
-<STRONG>sudo</STRONG> should always be statically linked unless the dynamic loader disables
+For security reasons, if your OS supports shared libraries, <STRONG>sudo</STRONG>
+should always be statically linked unless the dynamic loader disables
 user-defined library search paths for setuid programs. (Most modern dynamic
 loaders do this.)
 
@@ -244,7 +252,8 @@ loaders do this.)
 <STRONG>sudo</STRONG> will check the ownership of its timestamp directory (<EM>/var/run/sudo</EM> or <EM>/tmp/.odus</EM> by default) and ignore the directory's contents if it is not owned by root
 and only read, writable, and executable by root. On systems that allow
 users to give files away to root (via chown), if the timestamp directory is
-located in a directory writable by anyone (ie: <EM>/tmp</EM>), it is possible for a user to create the timestamp directory before <STRONG>sudo</STRONG> is run. However, because <STRONG>sudo</STRONG> checks the ownership and mode of the directory, the only damage that can be
+located in a directory writable by anyone (ie: <EM>/tmp</EM>), it is possible for a user to create the timestamp directory before <STRONG>sudo</STRONG>
+is run. However, because <STRONG>sudo</STRONG> checks the ownership and mode of the directory, the only damage that can be
 done is to ``hide'' files by putting them in the timestamp dir. This is
 unlikely to happen since once the timestamp dir is owned by root and
 inaccessible by any other user the user placing files there would be unable
@@ -255,8 +264,10 @@ is not world-writable for the timestamps (<EM>/var/adm/sudo</EM> for instance).
 <P>
 
 <CODE>sudo</CODE> will not honor timestamp files set far in the future. Timestamp files with
-a date greater than current_time + 2 * <CODE>TIMEOUT</CODE> will be ignored and sudo will log the anomaly. This is done to keep a user
-from creating his/her own timestamp file with a bogus date.
+a date greater than current_time + 2 * <CODE>TIMEOUT</CODE>
+will be ignored and sudo complain about a ``preposterous stampfile date''.
+This is done to keep a user from creating his/her own timestamp file with a
+bogus date.
 
 
 <P>

@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.28  1999/02/01 00:45:02  millert
-''' clarify bad timestamp and fmt
+''' Revision 1.29  1999/02/07 00:47:32  millert
+''' Make it clear that it is the user's password, not root's, that we want.
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudo 8 "1.5.8" "26/Jan/99" "MAINTENANCE COMMANDS"
+.TH sudo 8 "1.5.8" "6/Feb/99" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -203,7 +203,7 @@ to \f(CW0\fR and root's group as set in the passwd file respectively).
 \fBsudo\fR determines who is an authorized user by consulting the
 file \fI/etc/sudoers\fR.  By giving \fBsudo\fR the \f(CW-v\fR flag a user
 can update the time stamp without running a \fIcommand.\fR
-The password prompt itself will also time out if the password is
+The password prompt itself will also time out if the user's password is
 not entered with N minutes (again, this is defined at installation
 time and defaults to 5 minutes).
 .PP
@@ -225,13 +225,13 @@ The \f(CW-h\fR (\fIhelp\fR) option causes \fBsudo\fR to print the version
 of \fBsudo\fR and a usage message before exiting.
 .Ip "-v" 4
 If given the \f(CW-v\fR (\fIvalidate\fR) option, \fBsudo\fR will update the
-user's timestamp file, prompting for a password if necessary.
+user's timestamp file, prompting for the user's password if necessary.
 This extends the \fBsudo\fR timeout to for another N minutes
 (where N is defined at installation time and defaults to 5
 minutes) but does not run a command.
 .Ip "-k" 4
 The \f(CW-k\fR (\fIkill\fR) option to \fBsudo\fR removes the user's timestamp
-file, thus requiring a password the next time \fBsudo\fR is run.
+file, thus requiring the user's password the next time \fBsudo\fR is run.
 This option does not require a password and was added to
 allow a user to revoke \fBsudo\fR permissions from a .logout file.
 .Ip "-b" 4

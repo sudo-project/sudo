@@ -19,9 +19,9 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        ssssuuuuddddoooo determines who is an authorized user by consulting
        the file _/_e_t_c_/_s_u_d_o_e_r_s.  By giving ssssuuuuddddoooo the -v flag a user
        can update the time stamp without running a _c_o_m_m_a_n_d_.  The
-       password prompt itself will also time out if the password
-       is not entered with N minutes (again, this is defined at
-       installation time and defaults to 5 minutes).
+       password prompt itself will also time out if the user's
+       password is not entered with N minutes (again, this is
+       defined at installation time and defaults to 5 minutes).
 
        If an unauthorized user executes ssssuuuuddddoooo, mail will be sent
        from the user to the local authorities (defined at
@@ -44,15 +44,15 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
            of ssssuuuuddddoooo and a usage message before exiting.
 
        -v  If given the -v (_v_a_l_i_d_a_t_e) option, ssssuuuuddddoooo will update
-           the user's timestamp file, prompting for a password if
-           necessary.  This extends the ssssuuuuddddoooo timeout to for
-           another N minutes (where N is defined at installation
-           time and defaults to 5 minutes) but does not run a
-           command.
+           the user's timestamp file, prompting for the user's
+           password if necessary.  This extends the ssssuuuuddddoooo timeout
+           to for another N minutes (where N is defined at
+           installation time and defaults to 5 minutes) but does
+           not run a command.
 
        -k  The -k (_k_i_l_l) option to ssssuuuuddddoooo removes the user's
-           timestamp file, thus requiring a password the next
-           time ssssuuuuddddoooo is run.  This option does not require a
+           timestamp file, thus requiring the user's password the
+           next time ssssuuuuddddoooo is run.  This option does not require a
            password and was added to allow a user to revoke ssssuuuuddddoooo
            permissions from a .logout file.
 
@@ -61,7 +61,7 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-26/Jan/99                     1.5.8                             1
+6/Feb/99                      1.5.8                             1
 
 
 
@@ -127,7 +127,7 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 
 
 
-26/Jan/99                     1.5.8                             2
+6/Feb/99                      1.5.8                             2
 
 
 
@@ -193,7 +193,7 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT V
 
 
 
-26/Jan/99                     1.5.8                             3
+6/Feb/99                      1.5.8                             3
 
 
 
@@ -259,7 +259,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-26/Jan/99                     1.5.8                             4
+6/Feb/99                      1.5.8                             4
 
 
 
@@ -325,6 +325,6 @@ sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
 
-26/Jan/99                     1.5.8                             5
+6/Feb/99                      1.5.8                             5
 
 

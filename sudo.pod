@@ -20,7 +20,7 @@ to C<0> and root's group as set in the passwd file respectively).
 B<sudo> determines who is an authorized user by consulting the
 file I</etc/sudoers>.  By giving B<sudo> the C<-v> flag a user
 can update the time stamp without running a I<command.>
-The password prompt itself will also time out if the password is
+The password prompt itself will also time out if the user's password is
 not entered with N minutes (again, this is defined at installation
 time and defaults to 5 minutes).
 
@@ -54,7 +54,7 @@ of B<sudo> and a usage message before exiting.
 =item -v
 
 If given the C<-v> (I<validate>) option, B<sudo> will update the
-user's timestamp file, prompting for a password if necessary.
+user's timestamp file, prompting for the user's password if necessary.
 This extends the B<sudo> timeout to for another N minutes
 (where N is defined at installation time and defaults to 5
 minutes) but does not run a command.
@@ -62,7 +62,7 @@ minutes) but does not run a command.
 =item -k
 
 The C<-k> (I<kill>) option to B<sudo> removes the user's timestamp
-file, thus requiring a password the next time B<sudo> is run.
+file, thus requiring the user's password the next time B<sudo> is run.
 This option does not require a password and was added to
 allow a user to revoke B<sudo> permissions from a .logout file.
 
