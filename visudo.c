@@ -99,7 +99,7 @@ main(argc, argv)
 #endif /* ENV_EDITOR */
 #ifdef POSIX_SIGNALS
     struct sigaction action;
-#endif POSIX_SIGNALS
+#endif /* POSIX_SIGNALS */
 
     Argv = argv;
 
@@ -144,7 +144,7 @@ main(argc, argv)
     (void) signal(SIGHUP, SIG_IGN);
     (void) signal(SIGINT, SIG_IGN);
     (void) signal(SIGQUIT, SIG_IGN);
-#endif POSIX_SIGNALS
+#endif /* POSIX_SIGNALS */
 
     setbuf(stderr, NULL);
 
