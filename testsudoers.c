@@ -106,7 +106,7 @@ int
 has_meta(s)
     char *s;
 {
-    register char *t;
+    char *t;
     
     for (t = s; *t; t++) {
 	if (*t == '\\' || *t == '?' || *t == '*' || *t == '[' || *t == ']')

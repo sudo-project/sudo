@@ -77,8 +77,8 @@ linear_base(key, base, nelp, width, compar, add_flag)
 	cmp_fn_t compar;
 	int add_flag;
 {
-	/* strict ANSI does not allow pointer arithmetic on void *'s */
-	register const char *element, *end;
+	/* Strict ANSI does not allow pointer arithmetic on void *'s */
+	const char *element, *end;
 
 	end = (const char *) base + *nelp * width;
 	for (element = (const char *) base; element < end; element += width)
