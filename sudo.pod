@@ -68,7 +68,7 @@ minutes) but does not run a command.
 
 The C<-k> (I<kill>) option to B<sudo> removes the user's timestamp
 file, thus requiring a password the next time B<sudo> is run.
-This option does not require and password and was added to
+This option does not require a password and was added to
 allow a user to revoke B<sudo> permissions from a .logout file.
 
 =item -b
