@@ -58,6 +58,7 @@ static char rcsid[] = "$Id$";
 /*
  * Globals
  */
+char *runas_user = "oracle";
 int parse_error = FALSE;
 extern int clearaliases;
 extern struct interface *interfaces;
@@ -265,9 +266,12 @@ main(argc, argv)
 	    (void) printf("User %s not found\n", pw_ent.pw_name);
 	else while (top) {
 	    (void) printf("[%d]\n", top-1);
-	    (void) printf("user_match: %d\n", user_matches);
-	    (void) printf("host_match: %d\n", host_matches);
-	    (void) printf("cmnd_match: %d\n", cmnd_matches);
+	    (void) printf("user_match : %d\n", user_matches);
+	    (void) printf("host_match : %d\n", host_matches);
+	    (void) printf("cmnd_match : %d\n", cmnd_matches);
+	    (void) printf("no_passwd  : %d\n", no_passwd);
+	    (void) printf("runas_match: %d\n", runas_matches);
+	    (void) printf("runas      : %s\n", runas_user);
 	    top--;
 	}
     }
