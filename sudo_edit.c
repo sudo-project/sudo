@@ -113,7 +113,7 @@ int sudo_edit(argc, argv)
 #else
 	    if (stat(tf[i].ofile, &sb) != 0) {
 #endif
-		close(ofd);
+		close(ofd);	/* XXX - could reset errno */
 		ofd = -1;
 	    }
 	}
@@ -126,6 +126,12 @@ int sudo_edit(argc, argv)
 		continue;
 	    }
 	    memset(&sb, 0, sizeof(sb));
+	} else if (!S_ISREG(sb.st_mode)) {
+	    warnx("%s: not a regular file", *ap);
+	    close(ofd);
+	    argc--;
+	    i--;
+	    continue;
 	}
 	tf[i].ofile = *ap;
 	tf[i].omtim.tv_sec = mtim_getsec(sb);
@@ -272,6 +278,11 @@ int sudo_edit(argc, argv)
 	}
 #ifdef HAVE_FSTAT
 	if (fstat(tfd, &sb) == 0) {
+	    if (!S_ISREG(sb.st_mode)) {
+		warnx("%s: not a regular file", tf[i].tfile);
+		warnx("%s left unmodified", tf[i].ofile);
+		continue;
+	    }
 	    if (tf[i].osize == sb.st_size &&
 		tf[i].omtim.tv_sec == mtim_getsec(sb) &&
 		tf[i].omtim.tv_nsec == mtim_getnsec(sb)) {

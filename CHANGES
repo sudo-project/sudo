@@ -1723,3 +1723,5 @@ Sudo 1.6.8 released.
 543) Added --with-ldap-conf-file option to override /etc/ldap.conf
 
 544) Added SSL tls_* certificate checking options when using LDAP.
+
+545) Sudoedit will now only attempt to edit regular files or links.
