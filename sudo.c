@@ -388,7 +388,7 @@ static void clean_env(envp)
 #endif /* __alpha */
 
 #ifdef SECURE_PATH
-    putenv("PATH=" SECURE_PATH);
+    setenv("PATH", SECURE_PATH);
 #endif /* SECURE_PATH */
 }
 
@@ -501,32 +501,34 @@ static void rmenv(envp, s, len)
 
 static void add_env()
 {
-    char *envar;
+    char *uidstr;
     int len, n;
 
     /* add the SUDO_USER envariable */
-    envar = (char *) malloc(strlen(user) + 10);
-    if (envar == NULL) {
+    if (sudo_setenv("SUDO_USER", user)) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
-    (void) strcpy(envar, "SUDO_USER=");
-    (void) strcpy(envar+10, user);
-    (void) putenv(envar);
 
     /* add the SUDO_UID envariable */
     for (len = 1 + (uid < 0), n = (int)uid; (n = n / 10) != 0; )
 	++len;
     
-    envar = (char *) malloc(len+9);
-    if (envar == NULL) {
+    uidstr = (char *) malloc(len+1);
+    if (uidstr == NULL) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
-    (void) sprintf(envar, "SUDO_UID=%d", (int)uid);
-    (void) putenv(envar);
+
+    (void) sprintf(uidstr, "%d", (int)uid);
+    if (sudo_setenv("SUDO_UID", uidstr)) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+    (void) free(uidstr);
 }
 
 
