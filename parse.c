@@ -59,7 +59,11 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/stat.h>
+#ifdef HAVE_DIRENT_H
 #include <dirent.h>
+#else
+#include <sys/dir.h>
+#endif /* HAVE_DIRENT_H */
 
 #include "sudo.h"
 #include "options.h"
@@ -176,7 +180,11 @@ char *cmnd, *path;
     int plen;
     struct stat cst, pst;
     DIR *dirp;
+#ifdef HAVE_DIRENT_H
     struct dirent *dent;
+#else
+    struct direct *dent;
+#endif /* HAVE_DIRENT_H */
     char buf[MAXCOMMANDLENGTH+1];
 
     if (stat(cmnd, &cst) < 0)
@@ -207,7 +215,7 @@ char *cmnd, *path;
     return(dent != NULL);
 }
 
-#endif
+#endif /* USE_REALPATH */
 
 int
 ntwk_matches(n)
