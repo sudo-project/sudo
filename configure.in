@@ -26,30 +26,30 @@ MAN_POSTINSTALL=""
 AC_SUBST(MAN_POSTINSTALL)dnl
 AC_SUBST(MANTYPE)dnl
 dnl
-dnl Options for --with(out)
+dnl Options for --with
 dnl
 dnl --with-getpass
-AC_WITH(getpass, AC_DEFINE(USE_GETPASS)
+AC_ARG_WITH(getpass, [  --with-getpass          use system getpass(3)], AC_DEFINE(USE_GETPASS)
 echo 'Using system getpass'
 TGETPASS="")
 dnl
 dnl --with-C2
-AC_WITH(C2, AC_DEFINE(HAVE_C2_SECURITY)
+AC_ARG_WITH(C2, [  --with-C2               enable C2 security (shadow password) support], AC_DEFINE(HAVE_C2_SECURITY)
 C2=1
 echo 'Configuring for C2 security')
 dnl
 dnl --with-Skey
-AC_WITH(SKEY, AC_DEFINE(HAVE_SKEY)
+AC_ARG_WITH(SKEY, [  --with-SKEY             enable Skey support (untested)], AC_DEFINE(HAVE_SKEY)
 SKEY=1
 echo 'Configuring for use with Skey')
 dnl
 dnl --with-AFS
-AC_WITH(AFS, AC_DEFINE(HAVE_AFS)
+AC_ARG_WITH(AFS, [  --with-AFS              enable AFS support], AC_DEFINE(HAVE_AFS)
 AFS=1
 echo 'Configuring for use with AFS')
 dnl
 dnl --with-csops
-AC_WITH(csops, OPTIONS="${OPTIONS} -DUSE_INSULTS -DENV_EDITOR"
+AC_ARG_WITH(csops, [  --with-csops            add CSops standard options], OPTIONS="${OPTIONS} -DUSE_INSULTS -DENV_EDITOR"
 echo 'CSOps--adding options: USE_INSULTS ENV_EDITOR')
 dnl
 dnl C compiler checks
@@ -230,9 +230,9 @@ AC_FUNC_CHECK(setenv, AC_DEFINE(HAVE_SETENV), AC_FUNC_CHECK(putenv, AC_DEFINE(HA
 dnl
 dnl library checks
 dnl
-AC_HAVE_LIBRARY(nsl)
-AC_HAVE_LIBRARY(socket)
-AC_HAVE_LIBRARY(ufc)
+AC_CHECK_LIB(nsl)
+AC_CHECK_LIB(socket)
+AC_CHECK_LIB(ufc)
 dnl
 dnl OS-dependent libraries
 dnl
