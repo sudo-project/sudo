@@ -6,7 +6,15 @@
 # See the man page for the details on how to write a sudoers file.
 #
 
+##
+# User alias specification
+##
+User_Alias	FULLTIMERS=millert,mikef,dowdy
+User_Alias	PARTTIMERS=bostley,jwfox,mccreary
+
+##
 # Cmnd alias specification
+##
 Cmnd_Alias      DUMPS=/usr/etc/dump,/usr/etc/rdump,/usr/etc/restore,\
 		      /usr/etc/rrestore,/usr/bin/mt
 Cmnd_Alias	KILL=/usr/bin/kill
@@ -20,7 +28,9 @@ Cmnd_Alias	SHELLS=/usr/bin/sh,/usr/bin/csh,/usr/bin/ksh,\
 Cmnd_Alias	SU=/usr/bin/su
 Cmnd_Alias	VIPW=/usr/etc/vipw,/etc/vipw,/bin/passwd
 
+##
 # Host alias specification
+##
 Host_Alias	SUN4=bruno,eclipse,moet,anchor
 Host_Alias	SUN3=brazil,columbine
 Host_Alias	DECSTATION=wilkinson,soma,dendrite,thang
@@ -28,13 +38,14 @@ Host_Alias 	DECALPHA=widget,thalamus,foobar
 Host_Alias	HPSNAKE=boa,nag,python
 Host_Alias	CSNETS=128.138.243.0,128.138.204.0,128.138.242.0
 
+##
 # User specification
+##
 root		ALL=ALL
 
-millert		ALL=ALL
-barb		ALL=ALL
-bostley		ALL=ALL,!SU,!SHELLS
+FULLTIMERS	ALL=ALL
+PARTTIMERS	ALL=ALL,!SU,!SHELLS
 rodney		CSNETS=ALL,!SU,!SHELLS
-operator	ALL=DUMPS,KILL,LPC,SHUTDOWN,HALT,REBOOT,/usr/oper/
+operator	ALL=DUMPS,KILL,LPC,SHUTDOWN,HALT,REBOOT,/usr/oper/bin/
 bob		SUN4=ALL,!SU,!SHELLS:\
 		SUN3=ALL,!SU,!SHELLS
