@@ -1,5 +1,5 @@
 /*
- * CU sudo version 1.5.5 (based on Root Group sudo version 1.1)
+ * CU sudo version 1.5.5b1.5.5 (based on Root Group sudo version 1.1)
  *
  * This software comes with no waranty whatsoever, use at your own risk.
  *
@@ -868,7 +868,7 @@ static void reminder()
     (void) fprintf(stderr, "\n%s\n%s\n\n%s\n%s\n\n",
 #else
     (void) fprintf(stderr, "\n%s\n%s\n%s\n%s\n\n%s\n%s\n\n%s\n%s\n\n",
-	"    CU sudo version 1.5.5, based on Root Group sudo version 1.1",
+	"    CU sudo version 1.5.5b1.5.5, based on Root Group sudo version 1.1",
 	"    sudo version 1.1, Copyright (C) 1991 The Root Group, Inc.",
 	"    sudo comes with ABSOLUTELY NO WARRANTY.  This is free software,",
 	"    and you are welcome to redistribute it under certain conditions.",
