@@ -54,6 +54,16 @@ struct matchstack {
 	int host;
 };
 
+/*
+ * Data structure describing a command in the
+ * sudoers file.
+ */
+struct sudo_command {
+    char *cmnd;
+    char **args;
+};
+
+
 extern struct matchstack match[];
 extern int top;
 
@@ -182,11 +192,12 @@ extern int num_interfaces;
 extern struct passwd *user_pw_ent;
 extern char *tty;
 extern char *cmnd;
-extern char *cmnd_args;
 extern char *prompt;
 extern struct stat cmnd_st;
 extern int Argc;
 extern char **Argv;
+extern int NewArgc;
+extern char **NewArgv;
 #endif
 extern int errno;
 
