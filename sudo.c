@@ -893,43 +893,35 @@ set_perms(perm, sudo_mode)
 {
     struct passwd *pw;
 
-    switch (perm) {
-	case PERM_ROOT:
-				if (setuid(0)) {
-				    perror("setuid(0)");
-				    exit(1);
-				}
-			      	break;
+    /*
+     * First, set real & effective uids to root.
+     * If perm is PERM_ROOT then we don't need to do anything else.
+     */
+    if (setuid(0)) {
+	perror("setuid(0)");
+	exit(1);
+    }
 
+    switch (perm) {
 	case PERM_USER:
     	    	    	        (void) setgid(user_gid);
 
-    	    	    	        if (geteuid() != user_uid && seteuid(user_uid)) {
+    	    	    	        if (seteuid(user_uid)) {
     	    	    	            perror("seteuid(user_uid)");
     	    	    	            exit(1);
     	    	    	        }
 			      	break;
 				
 	case PERM_FULL_USER:
-				if (setuid(0)) {
-				    perror("setuid(0)");
-				    exit(1);
-				}
-
     	    	    	        (void) setgid(user_gid);
 
 				if (setuid(user_uid)) {
 				    perror("setuid(user_uid)");
 				    exit(1);
 				}
-
 			      	break;
+
 	case PERM_RUNAS:
-				if (setuid(0)) {
-				    perror("setuid(0)");
-				    exit(1);
-				}
-				
 				/* XXX - add group/gid support */
 				if (**user_runas == '#') {
 				    if (setuid(atoi(*user_runas + 1))) {
@@ -991,14 +983,9 @@ set_perms(perm, sudo_mode)
 				    if (sudo_mode & MODE_RESET_HOME)
 					runas_homedir = pw->pw_dir;
 				}
-
 				break;
-	case PERM_SUDOERS:
-				if (setuid(0)) {
-				    perror("setuid(0)");
-				    exit(1);
-				}
 
+	case PERM_SUDOERS:
 				if (setgid(SUDOERS_GID)) {
 				    perror("setgid(SUDOERS_GID)");
 				    exit(1);
@@ -1022,7 +1009,6 @@ set_perms(perm, sudo_mode)
 					exit(1);
 				    }
 				}
-
 			      	break;
     }
 }
