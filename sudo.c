@@ -126,6 +126,7 @@ extern char **rebuild_env		__P((char **, int, int));
 extern char **zero_env			__P((char **));
 extern struct passwd *sudo_getpwnam	__P((const char *));
 extern struct passwd *sudo_getpwuid	__P((uid_t));
+extern struct passwd *sudo_pwdup	__P((const struct passwd *));
 
 /*
  * Globals
@@ -279,23 +280,6 @@ main(argc, argv, envp)
 	set_perms = set_perms_nosuid;
     }
 #endif
-
-    /*
-     * Look up runas user passwd struct.  If we are given a uid then
-     * there may be no corresponding passwd(5) entry (which is OK).
-     */
-    if (**user_runas == '#') {
-	runas_pw = sudo_getpwuid(atoi(*user_runas + 1));
-	if (runas_pw == NULL) {
-	    runas_pw = emalloc(sizeof(struct passwd));
-	    (void) memset((VOID *)runas_pw, 0, sizeof(struct passwd));
-	    runas_pw->pw_uid = atoi(*user_runas + 1);
-	}
-    } else {
-	runas_pw = sudo_getpwnam(*user_runas);
-	if (runas_pw == NULL)
-	    log_error(NO_MAIL|MSG_ONLY, "no passwd entry for %s!", *user_runas);
-    }
 
     /*
      * Look up the timestamp dir owner if one is specified.
@@ -544,14 +528,13 @@ init_vars(sudo_mode)
 
     /* It is now safe to use log_error() and set_perms() */
 
-    /*
-     * Must defer set_fqdn() until it is safe to call log_error()
-     */
     if (def_fqdn)
-	set_fqdn();
+	set_fqdn();			/* may call log_error() */
 
     if (nohostname)
 	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
+
+    set_runaspw(*user_runas);		/* may call log_error() */
 
     /*
      * Get current working directory.  Try as user, fall back to root.
@@ -963,6 +946,31 @@ set_fqdn()
     } else {
 	user_shost = user_host;
     }
+}
+
+/*
+ * Get passwd entry for the user we are going to run commands as.
+ * By default, this is "root".  Updates runas_pw as a side effect.
+ */
+int
+set_runaspw(user)
+    char *user;
+{
+    if (runas_pw != NULL)
+	free(runas_pw);
+    if (*user == '#') {
+	runas_pw = sudo_getpwuid(atoi(user + 1));
+	if (runas_pw == NULL) {
+	    runas_pw = emalloc(sizeof(struct passwd));
+	    (void) memset((VOID *)runas_pw, 0, sizeof(struct passwd));
+	    runas_pw->pw_uid = atoi(user + 1);
+	}
+    } else {
+	runas_pw = sudo_getpwnam(user);
+	if (runas_pw == NULL)
+	    log_error(NO_MAIL|MSG_ONLY, "no passwd entry for %s!", user);
+    }
+    return(TRUE);
 }
 
 /*
