@@ -93,7 +93,7 @@
 #  undef _PASSWD_LEN
 #  define _PASSWD_LEN		256
 #else
-#  if defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
+#  if (SHADOW_TYPE == SPW_SECUREWARE)
 #    undef _PASSWD_LEN
 #    define _PASSWD_LEN		AUTH_MAX_PASSWD_LENGTH
 #  else
@@ -101,11 +101,11 @@
 #      ifdef PASS_MAX
 #        define _PASSWD_LEN	PASS_MAX
 #      else
-#        ifdef HAVE_C2_SECURITY
+#        if (SHADOW_TYPE != SPW_NONE)
 #          define _PASSWD_LEN	24
 #        else
 #          define _PASSWD_LEN	8
-#        endif /* HAVE_C2_SECURITY */
+#        endif /* SHADOW_TYPE != SPW_NONE */
 #      endif /* PASS_MAX */
 #    endif /* !_PASSWD_LEN */
 #  endif /* HAVE_KERB4 || HAVE_DCE || HAVE_SKEY */
