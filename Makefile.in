@@ -1,0 +1,227 @@
+#*
+#* CU sudo version 1.3 (based on Root Group sudo version 1.1)
+#*
+#* This software comes with no waranty whatsoever, use at your own risk.
+#*
+#* Please send bugs, changes, problems to sudo-bugs.cs.colorado.edu
+#*
+
+#*  sudo version 1.1 allows users to execute commands as root
+#*  Copyright (C) 1991  The Root Group, Inc.
+#*
+#*  This program is free software; you can redistribute it and/or modify
+#*  it under the terms of the GNU General Public License as published by
+#*  the Free Software Foundation; either version 1, or (at your option)
+#*  any later version.
+#*
+#*  This program is distributed in the hope that it will be useful,
+#*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#*  GNU General Public License for more details.
+#*
+#*  You should have received a copy of the GNU General Public License
+#*  along with this program; if not, write to the Free Software
+#*  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#*
+
+#### Start of system configuration section. ####
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+# Compiler & tools to use
+CC = @CC@
+LEX = @LEX@
+YACC = @YACC@
+SENDMAIL = @SENDMAIL@
+
+# Which install program?
+INSTALL = @INSTALL@
+
+DEFS = -DMAILER=\"$(SENDMAIL)\" @DEFS@
+LIBS = @LIBS@
+
+# Usually -g or -O
+CFLAGS = -O
+LDFLAGS = @STATIC_FLAGS@
+
+prefix = /usr/local
+exec_prefix = $(prefix)
+man_prefix = $(prefix)
+
+# Directory in which to install sudo.
+sudodir = $(exec_prefix)/bin
+
+# Directory in which to install visudo
+visudodir = $(exec_prefix)/etc
+
+# Directory in which to install the man page
+mandir = $(man_prefix)/man/man1
+manext = 1
+
+# User and Group the installed file should be owned by
+owner = root
+group = staff
+
+################################################################################
+#          The following macros can be defined when compiling.
+#
+#          FQDN                   - if you have fully qualified hostnames
+#                                   in your SUDOERS files
+#
+#          SYSLOG                 - if you want to use syslog instead
+#                                   of a log file
+#                                   ( This is a nice feature.  You can
+#                                     collect all your sudo logs at a
+#                                     single host)
+#
+#          NO_ROOT_SUDO           - sudo will exit if called by root
+# 
+#          SOLARIS                - define if using Solaris 2.x
+#
+#          SEND_MAIL_WHEN_NOT_OK  - if you want a message sent to ALERTMAIL
+#                                   when the user is in the SUDOERS but
+#                                   does not have permission to execute
+#                                   the command entered
+#                                   ( This can be used at paranoid sites )
+#
+#          SEND_MAIL_WHEN_NO_USER - if you want a message sent to ALERTMAIL
+#                                   when the user is not in the SUDOERS file
+#                                   ( This is generally the case )
+#
+#          TIMEDIR                  the directory where the timestamp 
+#                                   files are kept.
+#
+#          TIMEOUT                  the number of minutes that can elapse
+#                                   before sudo will ask for a passwd again
+#
+#          TRIES_FOR_PASSWORD       the number of times sudo will let you
+#                                   guess are you password before screaming
+#
+#          INCORRECT_PASSWORD       the message that is displayed if you 
+#                                   incorrectly enter your password
+#
+#          MAILSUBJECT              the subject of the mail sent to ALERTMAIL
+#
+#          ALERTMAIL                the recipient of mail from sudo
+#
+#          SUDOERS                  the location of the sudoers file
+#
+#          TMPSUDOERS               the location of the lock file for visudo
+#
+#          EDITOR                   the location of the editor
+#
+#          ENV_EDITOR               if this variable is defined then the
+#                                   EDITOR and VISUAL envariables are consulted
+#
+#          LOGFILE                  log file location IF NOT USING SYSLOG
+#
+#          SECURE_PATH              if this variable is set, its value is
+#                                   used as the PATH variable
+#
+#          UMASK                    umask that sudo should use, comment out
+#                                   of sudo.h to preserve umask of the caller,
+#                                   default is 022
+#
+#          BROKEN_GETPASS           if using a os with a broken getpass()
+#                                   hpux,aix,irix need this, sudo.h has details
+#
+#          HAVE_STRDUP              if your os has strdup(3)
+#
+#          HAVE_CWD                 if you have getcwd(3)
+#
+#          USE_TERMIO               if you have sysV terminal control
+#                                   (defined by default for hpux and irix)
+#
+#          SHORT_MESSAGE            if you don't want the full copyright message
+#                                   with the "we expect you have..." banner
+#
+#          USE_INSULTS              if you want to be insulted for typing an
+#                                   incorrect password like the original sudo(8)
+#
+#          HAL                      if you want lines from 2001 instead of
+#                                   insults (must define USE_INSULTS too)
+#
+#          STDC_HEADERS             if you have ansi-compliant header files
+#
+#          USE_EXECV                if you want to use execv() instead of 
+#                                   execvp()
+#
+#       Macro:                   Default:
+#          Syslog_ident             "sudo"
+#          Syslog_options           LOG_PID
+#          Syslog_facility          LOG_LOCAL2
+#          Syslog_priority_OK       LOG_NOTICE
+#          Syslog_priority_NO       LOG_ALERT
+################################################################################
+
+OPTIONS = -DSYSLOG -DSEND_MAIL_WHEN_NO_USER -DSyslog_options=0 @OPTIONS@
+
+#### End of system configuration section. ####
+
+SHELL = /bin/sh
+
+SRCS = check.c find_path.c getpass.c logging.c parse.c sudo.c parse.yacc \
+       parse.lex
+
+OBJS = check.o find_path.o getpass.o logging.o parse.o sudo.o y.tab.o \
+       lex.yy.o
+
+HDRS = sudo.h insults.h
+
+all: @PROGS@
+
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) -I$(srcdir) $<
+
+sudo : $(OBJS)
+	$(CC) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
+
+y.tab.o y.tab.h: parse.yacc $(HDRS)
+	$(YACC) -d parse.yacc
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) -I$(srcdir) y.tab.c
+
+lex.yy.o: parse.lex y.tab.h $(HDRS)
+	$(LEX) parse.lex
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) -I$(srcdir) lex.yy.c
+
+$(OBJS) : $(HDRS)
+
+visudo :
+	( cd visudoers && make "OPTIONS=$(OPTIONS)" $@ )
+
+install: install-binaries install-sudoers install-man
+
+install-binaries: $(PROGS)
+	$(INSTALL) -o $(owner) -g $(group) -m 4111 -s sudo $(sudodir)/sudo
+	$(INSTALL) -o $(owner) -g $(group) -m 0111 -s visudoers/visudo $(visudodir)/visudo
+
+install-sudoers:
+	@ if [ -f $(SUDOERSDIR)/sudoers ]; then  \
+	    echo "Will not overwrite existing $(SUDOERSDIR)/sudoers file."; \
+	else \
+	    $(INSTALL) -o $(owner) -g $(group) -m 0400 sudoers $(SUDOERSDIR)/sudoers; \
+	fi
+
+install-man:
+	$(INSTALL) -o $(owner) -g $(group) -m 0644 sudo.man $(mandir)/sudo.$(manext)
+
+clean:
+	-rm -f lex.yy.* y.tab.* *.o $(PROGS) core
+	( cd visudoers && make $@ )
+
+mostlyclean: clean
+
+distclean: clean
+	rm -f Makefile config.status
+	( cd visudoers && make $@ )
+
+realclean: distclean
+	rm -f TAGS
+	( cd visudoers && make $@ )
+
+TAGS:
+	etags ${srcdir}/*.m4 ${srcdir}/*.sh ${srcdir}/[a-z]*.in ${srcdir}/*.texi
+
+# Prevent GNU make v3 from overflowing arg limit on SysV.
+.NOEXPORT:
