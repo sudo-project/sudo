@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "August  5, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "August  6, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -546,7 +546,9 @@ password of the invoking user.  This flag is \fIoff\fR by default.
 .IX Item "targetpw"
 If set, \fBsudo\fR will prompt for the password of the user specified by
 the \fB\-u\fR flag (defaults to \f(CW\*(C`root\*(C'\fR) instead of the password of the
-invoking user.  This flag is \fIoff\fR by default.
+invoking user.  Note that this precludes the use of a uid not listed
+in the passwd database as an argument to the \fB\-u\fR flag.
+This flag is \fIoff\fR by default.
 .IP "set_logname" 12
 .IX Item "set_logname"
 Normally, \fBsudo\fR will set the \f(CW\*(C`LOGNAME\*(C'\fR and \f(CW\*(C`USER\*(C'\fR environment variables
