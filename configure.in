@@ -81,18 +81,19 @@ case "$OS" in
 		AC_DEFINE(_ALL_SOURCE)
 		;;
     "hp-ux")	echo "Looks like HP-UX"
-		if test -n "$GCC"; then
-		    STATIC_FLAGS="-static"
-		else
-		    STATIC_FLAGS="-Wl,-a,archive"
+		if test "$OSREV" -lt 9 ; then
+		    if test -n "$GCC"; then
+			STATIC_FLAGS="-static"
+		    else
+			STATIC_FLAGS="-Wl,-a,archive"
+		    fi
+		fi
+		if test -n "$AFS" ; then
+		    LIBS="-lBSD ${LIBS}"
 		fi
 		;;
     "osf1")	echo "Looks like OSF/1"
-		if test -n "$GCC"; then
-		    STATIC_FLAGS="-static"
-		else
-		    STATIC_FLAGS="-non_shared"
-		fi
+		STATIC_FLAGS="-Wl,-no_library_replacement"
 		# C2 security stuff
 		if test -n "$C2"; then
 		    LIBS="${LIBS} -lsecurity -laud"
