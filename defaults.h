@@ -111,36 +111,39 @@ struct sudo_defs_types {
 #define I_FQDN			21
 #define I_INSULTS		22
 #define I_REQUIRETTY		23
-#define I_ENVEDITOR		24
+#define I_ENV_EDITOR		24
+#define I_ROOTPW		25
+#define I_RUNASPW		26
+#define I_TARGETPW		27
 
 /* Integer values */
-#define	I_LOGLEN	25	/* wrap log file line after N chars */
-#define	I_TS_TIMEOUT	26	/* timestamp stale after N minutes */
-#define	I_PW_TIMEOUT	27	/* exit if pass not entered in N minutes */
-#define	I_PW_TRIES	28	/* exit after N bad password tries */
-#define	I_UMASK		29	/* umask to use or 0777 to use user's */
+#define	I_LOGLEN	28	/* wrap log file line after N chars */
+#define	I_TS_TIMEOUT	29	/* timestamp stale after N minutes */
+#define	I_PW_TIMEOUT	30	/* exit if pass not entered in N minutes */
+#define	I_PW_TRIES	31	/* exit after N bad password tries */
+#define	I_UMASK		32	/* umask to use or 0777 to use user's */
 
 /* Strings */
-#define	I_LOGFILE	30	/* path to logfile (or NULL for none) */
-#define	I_MAILERPATH	31	/* path to sendmail or other mailer */
-#define	I_MAILERFLAGS	32	/* flags to pass to the mailer */
-#define	I_MAILTO	33	/* who to send bitch mail to */
-#define	I_MAILSUB	34	/* subject line of mail msg */
-#define	I_BADPASS_MSG	35	/* what to say when passwd is wrong */
-#define	I_TIMESTAMPDIR	36	/* path to timestamp dir */
-#define	I_EXEMPT_GRP	37	/* no password or PATH override for these */
-#define	I_PASSPROMPT	38	/* password prompt */
-#define	I_RUNAS_DEF	39	/* default user to run commands as */
-#define	I_SECURE_PATH	40	/* set $PATH to this if not NULL */
-#define	I_EDITOR	41	/* path to editor used by visudo */
+#define	I_LOGFILE	33	/* path to logfile (or NULL for none) */
+#define	I_MAILERPATH	34	/* path to sendmail or other mailer */
+#define	I_MAILERFLAGS	35	/* flags to pass to the mailer */
+#define	I_MAILTO	36	/* who to send bitch mail to */
+#define	I_MAILSUB	37	/* subject line of mail msg */
+#define	I_BADPASS_MSG	38	/* what to say when passwd is wrong */
+#define	I_TIMESTAMPDIR	39	/* path to timestamp dir */
+#define	I_EXEMPT_GRP	40	/* no password or PATH override for these */
+#define	I_PASSPROMPT	41	/* password prompt */
+#define	I_RUNAS_DEF	42	/* default user to run commands as */
+#define	I_SECURE_PATH	43	/* set $PATH to this if not NULL */
+#define	I_EDITOR	44	/* path to editor used by visudo */
 
 /* Integer versions of list/verify options */
-#define I_LISTPW	42
-#define I_VERIFYPW	43
+#define I_LISTPW	45
+#define I_VERIFYPW	46
 
 /* String versions of list/verify options */
-#define I_LISTPWSTR	44
-#define I_VERIFYPWSTR	45
+#define I_LISTPWSTR	47
+#define I_VERIFYPWSTR	48
 
 /*
  * Macros for accessing sudo_defs_table.

@@ -208,6 +208,7 @@ int lock_file		__P((int, int));
 int touch		__P((char *, time_t));
 int user_is_exempt	__P((void));
 void set_fqdn		__P((void));
+char *sudo_getepw	__P((struct passwd *));
 YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */

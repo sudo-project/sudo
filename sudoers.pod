@@ -353,6 +353,23 @@ falling back on the default editor.  Note that this may create a
 security hole as most editors allow a user to get a shell (which
 would be a root shell and not be logged).
 
+=item rootpw
+
+If set, sudo will prompt for the root password instead of the password
+of the invoking user.
+
+=item runaspw
+
+If set, sudo will prompt for the password of the user defined by the
+I<runas_default> option (defaults to root) instead of the password
+of the invoking user.
+
+=item targetpw
+
+If set, sudo will prompt for the password of the user specified by
+the C<-u> flag (defaults to root) instead of the password of the
+invoking user.
+
 =back
 
 B<Integers>:

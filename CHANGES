@@ -1253,3 +1253,10 @@ Sudo 1.6.2 released.
 395) It is now possible to set the path to the editor for visudo as well
      as the flag that determines whether or not visudo will look at
      $EDITOR in the sudoers file.
+
+396) configure now pulls in the values of LIBS, LDFLAGS, CPPFLAGS, etc
+     as the documentation says it ought to.
+
+397) Added rootpw, runaspw, and targetpw to prompt for the root, runas_default
+     and target user's passwords respectively (instead of the invoking user's
+     password).

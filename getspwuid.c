@@ -94,7 +94,6 @@ int crypt_type = INT_MAX;
  * Local functions not visible outside getspwuid.c
  */
 static char *sudo_getshell	__P((struct passwd *));
-static char *sudo_getepw	__P((struct passwd *));
 
 
 /*
@@ -123,7 +122,7 @@ sudo_getshell(pw)
  * Return the encrypted password for the user described by pw.  If shadow
  * passwords are in use, look in the shadow file.
  */
-static char *
+char *
 sudo_getepw(pw)
     struct passwd *pw;
 {

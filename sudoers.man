@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.26  2000/02/18 17:11:43  millert
-''' enveditor -> env_editor
+''' Revision 1.27  2000/02/18 17:56:27  millert
+''' Add rootpw, runaspw, and targetpw options.
 '''
 '''
 .de Sh
@@ -469,6 +469,17 @@ If set, visudo will use the value of the \s-1EDITOR\s0 or \s-1VISUAL\s0 environm
 falling back on the default editor.  Note that this may create a
 security hole as most editors allow a user to get a shell (which
 would be a root shell and not be logged).
+.Ip "rootpw" 12
+If set, sudo will prompt for the root password instead of the password
+of the invoking user.
+.Ip "runaspw" 12
+If set, sudo will prompt for the password of the user defined by the
+\fIrunas_default\fR option (defaults to root) instead of the password
+of the invoking user.
+.Ip "targetpw" 12
+If set, sudo will prompt for the password of the user specified by
+the \f(CW-u\fR flag (defaults to root) instead of the password of the
+invoking user.
 .PP
 \fBIntegers\fR:
 .Ip "passwd_tries" 12
@@ -1008,6 +1019,12 @@ as returned by the \f(CWhostname\fR command or use the \fIfqdn\fR option in
 .IX Item "requiretty"
 
 .IX Item "env_editor"
+
+.IX Item "rootpw"
+
+.IX Item "runaspw"
+
+.IX Item "targetpw"
 
 .IX Item "passwd_tries"
 

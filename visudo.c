@@ -227,7 +227,7 @@ main(argc, argv)
      * If we are allowing EDITOR and VISUAL envariables set Editor
      * base on whichever exists...
      */
-    if (!def_flag(I_ENVEDITOR) ||
+    if (!def_flag(I_ENV_EDITOR) ||
 	(!(Editor = getenv("EDITOR")) && !(Editor = getenv("VISUAL"))))
 	Editor = def_str(I_EDITOR);
 

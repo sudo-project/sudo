@@ -108,6 +108,7 @@ static int init_vars			__P((int));
 static void add_env			__P((int));
 static void clean_env			__P((char **, struct env_table *));
 static void initial_setup		__P((void));
+static void update_epasswd		__P((void));
 extern struct passwd *sudo_getpwuid	__P((uid_t));
 extern void list_matches		__P((void));
 
@@ -303,6 +304,9 @@ main(argc, argv)
 	else
 	    (void) close(fd);
     }
+
+    /* Update encrypted password in user_password if sudoers said to.  */
+    update_epasswd();
 
     /* Require a password unless the NOPASS tag was set.  */
     if (!(validated & FLAG_NOPASS))
@@ -1059,6 +1063,42 @@ set_fqdn()
 	*p = '.';
     } else {
 	user_shost = user_host;
+    }
+}
+
+/*
+ * If the sudoers file says to prompt for a different user's password,
+ * update the encrypted password in user_passwd accordingly.
+ */
+static void
+update_epasswd()
+{
+    struct passwd *pw;
+
+    /* We may be configured to prompt for a password other than the user's */
+    if (def_ival(I_ROOTPW)) {
+	if ((pw = getpwuid(0)) == NULL)
+	    log_error(0, "uid 0 does not exist in the passwd file!");
+	free(user_passwd);
+	user_passwd = estrdup(sudo_getepw(pw));
+    } else if (def_ival(I_RUNASPW)) {
+	if ((pw = getpwnam(def_str(I_RUNAS_DEF))) == NULL)
+	    log_error(0, "user %s does not exist in the passwd file!",
+		def_str(I_RUNAS_DEF));
+	free(user_passwd);
+	user_passwd = estrdup(sudo_getepw(pw));
+    } else if (def_ival(I_TARGETPW)) {
+	if (**user_runas == '#') {
+	    if ((pw = getpwuid(atoi(*user_runas + 1))) == NULL)
+		log_error(0, "uid %s does not exist in the passwd file!",
+		    user_runas);
+	} else {
+	    if ((pw = getpwnam(*user_runas)) == NULL)
+		log_error(0, "user %s does not exist in the passwd file!",
+		    user_runas);
+	}
+	free(user_passwd);
+	user_passwd = estrdup(sudo_getepw(pw));
     }
 }
 

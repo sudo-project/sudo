@@ -185,6 +185,15 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"env_editor", T_FLAG,
 	"Visudo will honor the EDITOR environment variable"
     }, {
+	"rootpw", T_FLAG,
+	"Prompt for root's password, not the users's"
+    }, {
+	"runaspw", T_FLAG,
+	"Prompt for the runas_default user's password, not the users's"
+    }, {
+	"targetpw", T_FLAG,
+	"Prompt for the target user's password, not the users's"
+    }, {
 	"loglinelen", T_INT|T_BOOL,
 	"Length at which to wrap log file lines (0 for no wrap): %d"
     }, {
@@ -534,7 +543,7 @@ init_defaults()
     def_flag(I_INSULTS) = TRUE;
 #endif
 #ifdef ENV_EDITOR
-    def_flag(I_ENVEDITOR) = TRUE;
+    def_flag(I_ENV_EDITOR) = TRUE;
 #endif
 
     /* Syslog options need special care since they both strings and ints */
