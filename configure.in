@@ -1152,8 +1152,8 @@ case "$host" in
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lucb"
 		fi
-		mansectsu=1m
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
@@ -1166,8 +1166,8 @@ case "$host" in
 		    AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1], AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"; SECUREWARE=1]))
 		    CHECKSHADOW="false"
 		fi
-		mansectsu=1m
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
 		;;
     *-*-hpux1[[0-9]]*)
 		if test "$CHECKSHADOW" = "true"; then
@@ -1179,8 +1179,8 @@ case "$host" in
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
 		fi
-		mansectsu=1m
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
 		;;
     *-*-hpux9*)
 		AC_DEFINE(BROKEN_SYSLOG)
@@ -1202,8 +1202,8 @@ case "$host" in
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
 		fi
-		mansectsu=1m
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
 		;;
     *-*-hpux*)
 		AC_DEFINE(BROKEN_SYSLOG)
@@ -1219,8 +1219,8 @@ case "$host" in
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lBSD"
 		fi
-		mansectsu=1m
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
@@ -1275,8 +1275,8 @@ case "$host" in
 		    with_passwd=no
 		    AUTH_OBJS="sia.o"
 		fi
-		mansectsu=8
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=8
+		test -n "$mansectform" || mansectform=4
 		;;
     *-*-irix*)
 		CPPFLAGS="${CPPFLAGS} -D_BSD_TYPES"
@@ -1302,8 +1302,8 @@ case "$host" in
 		if test "$OSREV" -le 4; then
 		    AC_CHECK_LIB(sun, getpwnam, [LIBS="${LIBS} -lsun"])
 		fi
-		mansectsu=1m
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
 		;;
     *-*-linux*)
 		# To get crypt(3) and vasprintf() prototypes (so we pass -Wall)
@@ -1337,8 +1337,8 @@ case "$host" in
 		LIBS="${LIBS} -lsun -lbsd"
 		CPPFLAGS="${CPPFLAGS} -I/usr/include -I/usr/include/bsd"
 		OSDEFS="${OSDEFS} -D_MIPS"
-		mansectsu=1m
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
 		;;
     *-*-isc*)
 		OSDEFS="${OSDEFS} -D_ISC"
@@ -1350,8 +1350,8 @@ case "$host" in
 		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
 		    CHECKSHADOW="false"
 		fi
-		mansectsu=1m
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
 		;;
     *-*-sco*|*-sco-*)
 		if test "$CHECKSHADOW" = "true"; then
@@ -1359,27 +1359,27 @@ case "$host" in
 		    AC_CHECK_LIB(gen, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lgen"; LIBS="${LIBS} -lgen"])
 		    CHECKSHADOW="false"
 		fi
-		mansectsu=1m
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
 		;;
     *-sequent-sysv*)
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_LIB(sec, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"])
 		    CHECKSHADOW="false"
 		fi
-		mansectsu=1m
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
 		;;
     *-ncr-sysv4*|*-ncr-sysvr4*)
 		AC_CHECK_LIB(c89, strcasecmp, AC_DEFINE(HAVE_STRCASECMP) [LIBS="${LIBS} -lc89"; ac_cv_func_strcasecmp=yes])
-		mansectsu=1m
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
 		;;
     *-ccur-sysv4*|*-ccur-sysvr4*)
 		LIBS="${LIBS} -lgen"
 		SUDO_LIBS="${SUDO_LIBS} -lgen"
-		mansectsu=1m
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
 		;;
     *-*-bsdi*)
 		# Use shlicc for BSD/OS [23].x unless asked to do otherwise
@@ -1426,8 +1426,8 @@ case "$host" in
 		ac_cv_func_flock=yes
 		;;
     *-*-sysv*)
-		mansectsu=1m
-		mansectform=4
+		test -n "$mansectsu" || mansectsu=1m
+		test -n "$mansectform" || mansectform=4
 		;;
 esac
 
