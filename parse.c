@@ -308,10 +308,8 @@ command_matches(cmnd, user_args, path, sudoers_args)
 	    strcpy(buf, path);
 	    strcat(buf, dent->d_name);
 
-	    /* only stat if basenames are not the same */
-	    if (strcmp(cmnd_base, dent->d_name))
-		continue;
-	    if (stat(buf, &pst) == -1)
+	    /* only stat if basenames are the same */
+	    if (strcmp(cmnd_base, dent->d_name) != 0 || stat(buf, &pst) == -1)
 		continue;
 	    if (cst.st_dev == pst.st_dev && cst.st_ino == pst.st_ino) {
 		if (cmnd_safe)
