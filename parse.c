@@ -90,13 +90,13 @@ static char rcsid[] = "$Id$";
  */
 int parse_error = FALSE;
 extern FILE *yyin, *yyout;
-extern struct sudo_match *matches;
 extern int printmatches;
 
 /*
- * Prototypes for static (local) functions
+ * Prototypes
  */
 static int has_meta	__P((char *));
+       void init_parser	__P((void));
 
 /*
  * This routine is called from the sudo.c module and tries to validate
@@ -120,19 +120,9 @@ int validate(check_cmnd)
     yyout = stdout;
 
     /*
-     * Allocate space for matches if printmatches is set.
+     * Allocate space for data structures in the parser.
      */
-    if (printmatches) {
-	if ((matches = (struct sudo_match *)
-		  malloc(sizeof(struct sudo_match) * MATCHSTACKSIZE)) == NULL) {
-	    perror("malloc");
-	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	    exit(1);
-	}
-	/* XXX - maybe just set sizes to 0??? */
-	matches[0].runas = matches[0].cmnd = NULL;
-	matches[0].nopasswd = FALSE;
-    }
+    init_parser();
 
     /*
      * Need to be root while stat'ing things in the parser.
@@ -153,9 +143,14 @@ int validate(check_cmnd)
 
     /*
      * Nothing on the top of the stack => user doesn't appear in sudoers.
+     * Allow anyone to try the psuedo commands "list" and "validate".
      */
-    if (top == 0)
-	return(VALIDATE_NO_USER);
+    if (top == 0) {
+	if (check_cmnd == TRUE)
+	    return(VALIDATE_NO_USER);
+	else
+	    return(VALIDATE_NOT_OK);
+    }
 
     /*
      * Only check the actual command if the check_cmnd
