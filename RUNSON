@@ -19,6 +19,8 @@ Solaris	2.6	sparc	unbundled cc	1.5.7	Giff Hammar	 none
 Solaris	2.6	i386	unbundled cc	1.5.8p2	Udo Keller	 none
 Solaris	7	i386	gcc 2.8.1	1.58p2	Brian Jackson	 none
 Solaris	7	i386	Workshop 5.0	1.58p2	Brian Jackson	 none
+Solaris	7	sun4u	egcs 1.1.2	1.5.9p4	Scott Kinnane	 none
+Solaris	5.6	sun4u	egcs 1.1.2	1.5.9p4	Scott Kinnane	 none
 ISC	4.0	i386	bundled cc	1.4	Andy Smith	 none
 ISC	4.0	i386	gcc2.7.0	1.4	Andy Smith	 none
 ISC	4.1	i386	bundled cc	1.4	Andy Smith	 none
@@ -51,8 +53,10 @@ IRIX	5.3	mips	unbundled cc	1.4	Wallace Winfrey	 --with-C2
 IRIX	6.2	mips	unbundled cc	1.5	Alek Komarnitsky --with-C2
 IRIX	6.2	mips	MipsPro C	1.58p2	Brian Jackson	 none
 IRIX	6.4	mips	MipsPro C	1.58p2	Brian Jackson	 none
+IRIX	6.4	mips	egcs 1.1.2	1.5.9p4	Scott Kinnane	 none
 IRIX	6.5	mips	unbundled cc	1.5.4	Brian Jackson	 --with-C2
 IRIX	6.5	mips	gcc 2.8.1	1.58p2	Brian Jackson	 none
+IRIX	6.5	mips	egcs 1.1.2	1.5.9p4	Scott Kinnane	 none
 NEXTSTEP 2.1	m68k	bundled cc	1.3.7	Todd Miller	 none
 NEXTSTEP 3.2	m68k	bundled cc	1.5.5b4	Todd Miller	 --with-skey
 NEXTSTEP 3.2	i386	bundled cc	1.3.2	Jonathan Adams	 none
@@ -64,12 +68,14 @@ DEC UNIX 4.0	alpha	gcc-2.7.2.1	1.5.3	Todd Miller	 --with-kerb4
 DEC UNIX 4.0D	alpha	bundled cc	1.5.3	Randall R. Cable --with-C2
 DEC UNIX 4.0E	alpha	bundled cc	1.5.9p2	Vangelis Haniotakis none
 AIX	3.2.X	rs6000	bundled cc	1.4	Todd Miller	 none
-AIX	4.1.5	rs6000	gcc-2.7.2.3	1.4.4	Daniel Robitaille none
 AIX	4.1.3	PowerPC	gcc-2.7.0	1.4	Bob Shair	 none
+AIX	4.1.5	rs6000	gcc-2.7.2.3	1.4.4	Daniel Robitaille none
 AIX	4.1.X	rs6000	bundled cc	1.5.3	Robin Jackson	 --with-AFS
 AIX	4.1.X	PowerPC	bundled cc	1.5.3	Robin Jackson	 --with-AFS
 AIX	4.2.1	rs6000	bundled cc	1.5.7p4	Sam Mabjish	 none
+AIX	4.2.1	rs6000	egcs 1.1.2	1.5.9p4	Scott Kinnane	 none
 AIX	4.3	rs6000	bundled cc	1.5.4	Leon von Stauber none
+AIX	4.3.2	rs6000	egcs 1.1.2	1.5.9p4	Scott Kinnane	 none
 ConvexOS 9.1	convex	bundled cc	1.3.6	Todd Miller	 none
 ConvexOS 9.1	convex	gcc2.4.5	1.3.6	Todd Miller	 none
 BSD/OS	2.1	i386	shlicc		1.5.3	Todd Miller	 none
