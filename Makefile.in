@@ -77,8 +77,8 @@ sudoersdir = $(sysconfdir)
 mantype = @MANTYPE@
 mansect8 = 8
 mansect5 = 5
-mandir8 = $(man_prefix)/$(mantype)$(mansect8)
-mandir5 = $(man_prefix)/$(mantype)$(mansect5)
+mandir8 = $(mandir)/$(mantype)$(mansect8)
+mandir5 = $(mandir)/$(mantype)$(mansect5)
 
 # User and Group the installed file should be owned by
 owner = root
