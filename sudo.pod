@@ -49,7 +49,6 @@ version number and exit.
 
 The C<-l> (I<list>) option will list out the allowed and
 forbidden commands for the user on the current host.
-Note that Command Aliases are currently not expanded.
 
 =item -h
 
