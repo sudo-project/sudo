@@ -47,6 +47,7 @@ static char rcsid[] = "$Id$";
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/param.h>
 #include <netinet/in.h>
 #include <pwd.h>
@@ -136,6 +137,17 @@ static char *sudo_getshell(pw_ent)
 static char *sudo_getepw(pw_ent)
     struct passwd *pw_ent;
 {
+
+    /* if there is a function to check for shadow enabled, use it... */
+#ifdef HAVE_ISCOMSEC
+    if (!iscomsec())
+	return(pw_ent->pw_passwd);
+#endif /* HAVE_ISCOMSEC */
+#ifdef HAVE_ISSECURE
+    if (!issecure())
+	return(pw_ent->pw_passwd);
+#endif /* HAVE_ISSECURE */
+
 #ifdef HAVE_GETPRPWNAM
     {
 	struct pr_passwd *spw_ent;
