@@ -167,7 +167,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "January  9, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "January 12, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -1297,7 +1297,7 @@ work at compile\-time.  \fINoexec\fR should work on SunOS, Solaris,
 \&\fBnot\fR to work on \s-1AIX\s0 and UnixWare.  \fINoexec\fR is expected to work
 on most operating systems that support the \f(CW\*(C`LD_PRELOAD\*(C'\fR environment
 variable.  Check your operating system's manual pages for the dynamic
-linker (usually ld.so, dyld, dld.sl, rld, or loader) to see if
+linker (usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader) to see if
 \&\f(CW\*(C`LD_PRELOAD\*(C'\fR is supported.
 .PP
 To enable \fInoexec\fR for a command, use the \f(CW\*(C`NOEXEC\*(C'\fR tag as documented
