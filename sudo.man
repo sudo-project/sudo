@@ -4,7 +4,7 @@ sudo, visudo \- execute a command as the superuser and edit the sudoers file
 
 .SH SYNOPSIS
 .B sudo
--V | -h | -v | -k |
+-V | -h | -l | -v | -k |
 .I <command>
 .sp
 .B visudo
@@ -105,7 +105,7 @@ of SHELL commands on any machine.  Jill is permitted to execute
 /etc/shutdown, /bin/rm, and /bin/cat on houdini.  Davehieb can execute
 any command on machines merlin and kodiakthorn and can halt the
 SERVERS.  Steve can run any command located in the directory
-/usr/su_commands on all machines on the subnets listed in OURNETS.
+/usr/su_commands on all machines on the subnets listed in CSNETS.
 
 The
 .I sudoers
@@ -129,6 +129,9 @@ accepts the following command line options:
 .IP -V
 The -V (version) option causes sudo (or visudo) to print the version number
 and exit.
+.IP -l
+The -l (list) option will list out the allowed and forbidden commands
+for the user on the current host.
 .IP -h
 The -h (help) option causes sudo to print the version of sudo and a usage
 message before exiting.
