@@ -143,4 +143,5 @@ sia_cleanup(pw, auth)
     SIAENTITY *siah = (SIAENTITY *) auth->data;
 
     (void) sia_ses_release(&siah);
+    return(AUTH_SUCCESS);
 }

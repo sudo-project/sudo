@@ -151,4 +151,5 @@ fwtk_cleanup(pw, auth)
 {
 
     auth_close();
+    return(AUTH_SUCCESS);
 }
