@@ -25,7 +25,7 @@
  *
  *   This is the main() routine for sudo
  *
- *   sudo is a program to allow users to execute commands 
+ *   sudo is a program to allow users to execute commands
  *   as root.  The commands are defined in a global network-
  *   wide file and can be distributed.
  *
@@ -64,6 +64,7 @@
 #include <pwd.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <grp.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/param.h>
@@ -201,7 +202,7 @@ main(argc, argv)
 
     /*
      * Close all file descriptors to make sure we have a nice
-     * clean slate from which to work.  
+     * clean slate from which to work.
      */
 #ifdef HAVE_SYSCONF
     for (rtn = sysconf(_SC_OPEN_MAX) - 1; rtn > 2; rtn--)
@@ -221,7 +222,7 @@ main(argc, argv)
      * parse our arguments
      */
     sudo_mode = parse_args();
- 
+
     switch (sudo_mode) {
 	case MODE_VERSION:
 	case MODE_HELP:
@@ -406,7 +407,7 @@ load_globals(sudo_mode)
 #ifdef FQDN
     struct hostent *h_ent;
 #endif /* FQDN */
-#ifdef HAVE_KERB5 
+#ifdef HAVE_KERB5
     krb5_error_code retval;
     char *lrealm;
 #endif /* HAVE_KERB5 */
@@ -959,16 +960,16 @@ set_perms(perm, sudo_mode)
 				}
 			      	break;
 
-	case PERM_USER: 
+	case PERM_USER:
     	    	    	        (void) setgid(user_gid);
 
     	    	    	        if (seteuid(user_uid)) {
     	    	    	            perror("seteuid(user_uid)");
-    	    	    	            exit(1); 
+    	    	    	            exit(1);
     	    	    	        }
 			      	break;
 				
-	case PERM_FULL_USER: 
+	case PERM_FULL_USER:
 				if (setuid(0)) {
 				    perror("setuid(0)");
 				    exit(1);
@@ -1021,8 +1022,8 @@ set_perms(perm, sudo_mode)
 
 				    if (setgid(pw->pw_gid)) {
 					(void) fprintf(stderr,
-					    "%s: cannot set gid to %d: ",  
-					    Argv[0], pw->pw_gid);
+					    "%s: cannot set gid to %ld: ",
+					    Argv[0], (long) pw->pw_gid);
 					perror("");
 					exit(1);
 				    }
@@ -1043,8 +1044,8 @@ set_perms(perm, sudo_mode)
 
 				    if (setuid(pw->pw_uid)) {
 					(void) fprintf(stderr,
-					    "%s: cannot set uid to %d: ",  
-					    Argv[0], pw->pw_uid);
+					    "%s: cannot set uid to %ld: ",
+					    Argv[0], (long) pw->pw_uid);
 					perror("");
 					exit(1);
 				    }
@@ -1053,7 +1054,7 @@ set_perms(perm, sudo_mode)
 				}
 
 				break;
-	case PERM_SUDOERS: 
+	case PERM_SUDOERS:
 				if (setuid(0)) {
 				    perror("setuid(0)");
 				    exit(1);
