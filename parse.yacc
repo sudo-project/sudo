@@ -94,7 +94,6 @@ extern int ntwk_matches		__P((char *));
 static int find_alias		__P((char *, int));
 static int add_alias		__P((char *, int));
 static int more_aliases		__P((int));
-static void reset_aliases	__P((void));
 
 int yyerror(s)
 char *s;
@@ -366,19 +365,9 @@ dumpaliases()
 
 }
 
-static void
+void
 reset_aliases()
 {
     (void) free(aliases);
     naliases = nslots = 0;
-}
-
-
-void parser_cleanup()
-{
-    /* reset values so we can reparse cleanly */
-    if (parse_error) {
-	reset_aliases();
-	top = 0;
-    }
 }
