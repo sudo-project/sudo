@@ -39,26 +39,22 @@
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
-#  include <stdlib.h>
+# include <stdlib.h>
 #endif /* STDC_HEADERS */
 #ifdef HAVE_UNISTD_H
-#  include <unistd.h>
+# include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #ifdef HAVE_STRING_H
-#  include <string.h>
+# include <string.h>
 #endif /* HAVE_STRING_H */
 #ifdef HAVE_STRINGS_H
-#  include <strings.h>
+# include <strings.h>
 #endif /* HAVE_STRINGS_H */
 #if defined(HAVE_FNMATCH) && defined(HAVE_FNMATCH_H)
-#  include <fnmatch.h>
-#else
-#  ifndef HAVE_FNMATCH
-#    include "emul/fnmatch.h"
-#  endif /* HAVE_FNMATCH */
+# include <fnmatch.h>
 #endif /* HAVE_FNMATCH_H */
 #ifdef HAVE_NETGROUP_H
-#  include <netgroup.h>
+# include <netgroup.h>
 #endif /* HAVE_NETGROUP_H */
 #include <ctype.h>
 #include <pwd.h>
@@ -75,6 +71,10 @@
 #include "sudo.h"
 #include "parse.h"
 #include "interfaces.h"
+
+#ifndef HAVE_FNMATCH
+# include "emul/fnmatch.h"
+#endif /* HAVE_FNMATCH */
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
