@@ -48,10 +48,10 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <errno.h>
-#include <ldap.h>
 #ifdef HAVE_LBER_H
 #include <lber.h>
 #endif
+#include <ldap.h>
 
 #include "sudo.h"
 #include "parse.h"
