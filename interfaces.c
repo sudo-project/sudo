@@ -146,7 +146,7 @@ load_interfaces()
 #ifdef HAVE_FREEIFADDRS
     freeifaddrs(ifaddrs);
 #else
-    free(ifaddrs);
+    efree(ifaddrs);
 #endif
 }
 
@@ -189,7 +189,7 @@ load_interfaces()
 #else
 	if (ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0) {
 #endif /* _ISC */
-	    free(ifconf_buf);
+	    efree(ifconf_buf);
 	    (void) close(sock);
 	    return;
 	}
@@ -279,9 +279,9 @@ load_interfaces()
 	    interfaces = (struct interface *) erealloc3(interfaces,
 		num_interfaces, sizeof(struct interface));
 	else
-	    free(interfaces);
+	    efree(interfaces);
     }
-    free(ifconf_buf);
+    efree(ifconf_buf);
     (void) close(sock);
 }
 

@@ -1091,8 +1091,8 @@ set_fqdn()
 	    "unable to lookup %s via gethostbyname()", user_host);
     } else {
 	if (user_shost != user_host)
-	    free(user_shost);
-	free(user_host);
+	    efree(user_shost);
+	efree(user_host);
 	user_host = estrdup(hp->h_name);
     }
     if ((p = strchr(user_host, '.'))) {

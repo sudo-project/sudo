@@ -489,7 +489,7 @@ install_sudoers(sp)
      * mv(1) in case sp->tpath and sp->path are on different file systems.
      */
     if (rename(sp->tpath, sp->path) == 0) {
-	free(sp->tpath);
+	efree(sp->tpath);
 	sp->tpath = NULL;
     } else {
 	if (errno == EXDEV) {
@@ -511,11 +511,11 @@ install_sudoers(sp)
 		warningx("command failed: '%s %s %s', %s unchanged",
 		    _PATH_MV, sp->tpath, sp->path, sp->path);
 		(void) unlink(sp->tpath);
-		free(sp->tpath);
+		efree(sp->tpath);
 		sp->tpath = NULL;
 		return(FALSE);
 	    }
-	    free(sp->tpath);
+	    efree(sp->tpath);
 	    sp->tpath = NULL;
 	} else {
 	    warning("error renaming %s, %s unchanged", sp->tpath, sp->path);
@@ -716,7 +716,7 @@ open_sudoers(path, keepopen)
 	entry->tpath = NULL;
 	if (entry->fd == -1) {
 	    warning("%s", entry->path);
-	    free(entry);
+	    efree(entry);
 	    return(NULL);
 	}
 	if (!lock_file(entry->fd, SUDO_TLOCK))
@@ -828,8 +828,7 @@ get_editor(args)
      * find one that exists, is regular, and is executable.
      */
     if (Editor == NULL || *Editor == '\0') {
-	if (EditorPath != NULL)
-	    free(EditorPath);
+	efree(EditorPath);
 	EditorPath = estrdup(def_editor);
 	Editor = strtok(EditorPath, ":");
 	do {

@@ -363,7 +363,7 @@ rm_child(pid)
 		prev->next = cur->next;
 	    else
 		children.first = cur->next;
-	    free(cur);
+	    efree(cur);
 	    break;
 	}
 	prev = cur;

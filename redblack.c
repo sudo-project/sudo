@@ -326,7 +326,7 @@ _rbdestroy(tree, node, destroy)
 	_rbdestroy(tree, node->right, destroy);
 	if (destroy != NULL)
 	    destroy(node->data);
-	free(node);
+	efree(node);
     }
 }
 
@@ -340,7 +340,7 @@ rbdestroy(tree, destroy)
     void (*destroy)__P((VOID *));
 {
     _rbdestroy(tree, rbfirst(tree), destroy);
-    free(tree);
+    efree(tree);
 }
 
 /*
@@ -379,7 +379,7 @@ rbdelete(tree, victim)
 	else
 	    victim->parent->right = succ;
 	data = victim->data;
-	free(victim);
+	efree(victim);
     } else {
 	pred = victim->left == rbnil(tree) ? victim->right : victim->left;
 	if (victim->parent == rbroot(tree)) {
@@ -394,7 +394,7 @@ rbdelete(tree, victim)
 	if (victim->color == black)
 	    rbrepair(tree, pred);
 	data = victim->data;
-	free(victim);
+	efree(victim);
     }
     return(data);
 }

@@ -508,8 +508,7 @@ fill_args(s, len, addspace)
 	    (char *) realloc(yylval.command.args, arg_size) :
 	    (char *) malloc(arg_size);
 	if (p == NULL) {
-	    if (yylval.command.args != NULL)
-		free(yylval.command.args);
+	    efree(yylval.command.args);
 	    yyerror("unable to allocate memory");
 	    return(FALSE);
 	} else
@@ -585,7 +584,7 @@ switch_buffer(path)
 	    fclose(YY_CURRENT_BUFFER->yy_input_file);
 	yy_delete_buffer(YY_CURRENT_BUFFER);
 	yy_switch_to_buffer(state[depth].bs);
-	free(sudoers);
+	efree(sudoers);
 	sudoers = state[depth].path;
 	sudolineno = state[depth].lineno;
 	keepopen = FALSE;

@@ -664,35 +664,31 @@ init_parser(path, quiet)
     for (us = userspecs; us != NULL; us = next) {
 	for (m = us->user; m != NULL; m = next) {
 	    next = m->next;
-	    if (m->name != NULL)
-		free(m->name);
-	    free(m);
+	    efree(m->name);
+	    efree(m);
 	}
 	for (priv = us->privileges; priv != NULL; priv = next) {
 	    for (m = priv->hostlist; m != NULL; m = next) {
 		next = m->next;
-		if (m->name != NULL)
-		    free(m->name);
-		free(m);
+		efree(m->name);
+		efree(m);
 	    }
 	    for (cs = priv->cmndlist; cs != NULL; cs = next) {
 		for (m = cs->runaslist; m != NULL; m = next) {
 		    next = m->next;
-		    if (m->name != NULL)
-			free(m->name);
-		    free(m);
+		    efree(m->name);
+		    efree(m);
 		}
-		if (cs->cmnd->name != NULL)
-		    free(cs->cmnd->name);
-		free(cs->cmnd);
+		efree(cs->cmnd->name);
+		efree(cs->cmnd);
 		next = cs->next;
-		free(cs);
+		efree(cs);
 	    }
 	    next = priv->next;
-	    free(priv);
+	    efree(priv);
 	}
 	next = us->next;
-	free(us);
+	efree(us);
     }
     userspecs = NULL;
 
@@ -701,24 +697,21 @@ init_parser(path, quiet)
 	if (d->binding != lastbinding) {
 	    for (m = d->binding; m != NULL; m = next) {
 		next = m->next;
-		if (m->name != NULL)
-		    free(m->name);
-		free(m);
+		efree(m->name);
+		efree(m);
 	    }
 	    lastbinding = d->binding;
 	}
 	next = d->next;
-	free(d->var);
-	if (d->val != NULL)
-	    free(d->val);
-	free(d);
+	efree(d->var);
+	efree(d->val);
+	efree(d);
     }
     defaults = NULL;
 
     init_aliases();
 
-    if (sudoers != NULL)
-	free(sudoers);
+    efree(sudoers);
     sudoers = estrdup(path);
 
     parse_error = FALSE;
@@ -726,7 +719,7 @@ init_parser(path, quiet)
     sudolineno = 1;
     verbose = !quiet;
 }
-#line 678 "gram.c"
+#line 671 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1371,7 +1364,7 @@ case 84:
 			    NEW_MEMBER(yyval.member, yyvsp[0].string, WORD);
 			}
 break;
-#line 1323 "gram.c"
+#line 1316 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

@@ -290,11 +290,11 @@ sudo_fakepwuid(uid)
 
     /* Store by uid and by name, overwriting cached version. */
     if ((node = rbinsert(pwcache_byuid, pw)) != NULL) {
-	free(node->data);
+	efree(node->data);
 	node->data = (VOID *) pw;
     }
     if ((node = rbinsert(pwcache_byname, pw)) != NULL) {
-	free(node->data);
+	efree(node->data);
 	node->data = (VOID *) pw;
     }
     return(pw);
@@ -320,11 +320,11 @@ sudo_fakepwnam(user)
 
     /* Store by uid and by name, overwriting cached version. */
     if ((node = rbinsert(pwcache_byuid, pw)) != NULL) {
-	free(node->data);
+	efree(node->data);
 	node->data = (VOID *) pw;
     }
     if ((node = rbinsert(pwcache_byname, pw)) != NULL) {
-	free(node->data);
+	efree(node->data);
 	node->data = (VOID *) pw;
     }
     return(pw);
@@ -362,9 +362,9 @@ pw_free(v)
 
     if (pw->pw_passwd != NULL) {
 	zero_bytes(pw->pw_passwd, strlen(pw->pw_passwd));
-	free(pw->pw_passwd);
+	efree(pw->pw_passwd);
     }
-    free(pw);
+    efree(pw);
 }
 
 /*

@@ -116,7 +116,7 @@ alias_add(name, type, members)
     a->type = type;
     a->first_member = members;
     if (rbinsert(aliases, a)) {
-	free(a);
+	efree(a);
 	snprintf(errbuf, sizeof(errbuf), "Alias `%s' already defined", name);
 	return(errbuf);
     }
@@ -156,11 +156,10 @@ alias_free(v)
 
     for (m = a->first_member; m != NULL; m = next) {
 	next = m->next;
-	if (m->name != NULL)
-	    free(m->name);
-	free(m);
+	efree(m->name);
+	efree(m);
     }
-    free(a);
+    efree(a);
 }
 
 /*

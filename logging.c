@@ -189,12 +189,12 @@ do_logfile(msg)
 	easprintf(&full_line, "Can't open log file: %s: %s",
 	    def_logfile, strerror(errno));
 	send_mail(full_line);
-	free(full_line);
+	efree(full_line);
     } else if (!lock_file(fileno(fp), SUDO_LOCK)) {
 	easprintf(&full_line, "Can't lock log file: %s: %s",
 	    def_logfile, strerror(errno));
 	send_mail(full_line);
-	free(full_line);
+	efree(full_line);
     } else {
 	if (def_loglinelen == 0) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
@@ -259,7 +259,7 @@ do_logfile(msg)
 		    beg = NULL;			/* exit condition */
 		}
 	    }
-	    free(full_line);
+	    efree(full_line);
 	}
 	(void) fflush(fp);
 	(void) lock_file(fileno(fp), SUDO_UNLOCK);
@@ -330,7 +330,7 @@ log_auth(status, inform_user)
     if (def_logfile)
 	do_logfile(logline);
 
-    free(logline);
+    efree(logline);
 }
 
 void
@@ -410,9 +410,9 @@ log_error(flags, fmt, va_alist)
     if (def_logfile)
 	do_logfile(logline);
 
-    free(message);
+    efree(message);
     if (logline != message)
-	free(logline);
+	efree(logline);
 
     if (!ISSET(flags, NO_EXIT))
 	exit(1);

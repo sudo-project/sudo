@@ -260,8 +260,7 @@ sudo_ldap_check_command(ld, entry)
 	/* Match against ALL ? */
 	if (!strcasecmp(*p, "ALL")) {
 	    ret = TRUE;
-	    if (safe_cmnd)
-		free(safe_cmnd);
+	    efree(safe_cmnd);
 	    safe_cmnd = estrdup(user_cmnd);
 	    if (ldap_conf.debug > 1)
 		printf(" MATCH!\n");
@@ -295,7 +294,7 @@ sudo_ldap_check_command(ld, entry)
 	    printf(" not\n");
 	}
 
-	free(allowed_cmnd);	/* cleanup */
+	efree(allowed_cmnd);	/* cleanup */
     }
 
     if (v)
@@ -348,7 +347,7 @@ sudo_ldap_parse_options(ld, entry)
 	    /* case var Boolean True */
 	    set_default(var, NULL, TRUE);
 	}
-	free(var);
+	efree(var);
     }
 
     if (v)
@@ -524,7 +523,7 @@ sudo_ldap_read_config()
 	/* The following macros make the code much more readable */
 
 #define MATCH_S(x,y) if (!strcasecmp(keyword,x)) \
-    { if (y) free(y); y=estrdup(value); }
+    { efree(y); y=estrdup(value); }
 #define MATCH_I(x,y) if (!strcasecmp(keyword,x)) { y=atoi(value); }
 #define MATCH_B(x,y) if (!strcasecmp(keyword,x)) { y=_atobool(value); }
 
@@ -905,8 +904,7 @@ sudo_ldap_check(v, pwflag)
 	    if (ldap_conf.debug)
 		printf("nothing found for '%s'\n", filt);
 	}
-	if (filt)
-	    free(filt);
+	efree(filt);
 
 	/* parse each entry returned from this most recent search */
 	entry = rc ? NULL : ldap_first_entry(ld, result);

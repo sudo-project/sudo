@@ -293,8 +293,7 @@ command_matches(sudoers_cmnd, sudoers_args)
 	    (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
 	    (sudoers_args &&
 	     fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
-	    if (safe_cmnd)
-		free(safe_cmnd);
+	    efree(safe_cmnd);
 	    safe_cmnd = estrdup(sudoers_cmnd);
 	    return(TRUE);
 	} else
@@ -331,8 +330,7 @@ command_matches(sudoers_cmnd, sudoers_args)
 	    if (user_stat == NULL ||
 		(user_stat->st_dev == sudoers_stat.st_dev &&
 		user_stat->st_ino == sudoers_stat.st_ino)) {
-		if (safe_cmnd)
-		    free(safe_cmnd);
+		efree(safe_cmnd);
 		safe_cmnd = estrdup(*ap);
 		break;
 	    }
@@ -345,8 +343,7 @@ command_matches(sudoers_cmnd, sudoers_args)
 	    (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
 	    (sudoers_args &&
 	     fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
-	    if (safe_cmnd)
-		free(safe_cmnd);
+	    efree(safe_cmnd);
 	    safe_cmnd = estrdup(user_cmnd);
 	    return(TRUE);
 	} else
@@ -382,8 +379,7 @@ command_matches(sudoers_cmnd, sudoers_args)
 		(!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
 		(sudoers_args &&
 		 fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
-		if (safe_cmnd)
-		    free(safe_cmnd);
+		efree(safe_cmnd);
 		safe_cmnd = estrdup(sudoers_cmnd);
 		return(TRUE);
 	    } else
@@ -411,8 +407,7 @@ command_matches(sudoers_cmnd, sudoers_args)
 		continue;
 	    if (user_stat->st_dev == sudoers_stat.st_dev &&
 		user_stat->st_ino == sudoers_stat.st_ino) {
-		if (safe_cmnd)
-		    free(safe_cmnd);
+		efree(safe_cmnd);
 		safe_cmnd = estrdup(buf);
 		break;
 	    }
@@ -581,7 +576,7 @@ netgr_matches(netgr, lhost, shost, user)
     if (domain == (char *) -1) {
 	domain = (char *) emalloc(MAXHOSTNAMELEN);
 	if (getdomainname(domain, MAXHOSTNAMELEN) == -1 || *domain == '\0') {
-	    free(domain);
+	    efree(domain);
 	    domain = NULL;
 	}
     }
