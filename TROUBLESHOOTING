@@ -47,7 +47,8 @@ A) There is no support for making an NIS/NIS+ map/table out of
 
 Q) I don't run sendmail on my machine.  Does this mean that I cannot
    use sudo?
-A) No, you just need to run use the --without-sendmail argument to configure.
+A) No, you just need to run use the --without-sendmail argument to configure
+   or add "!mailerpath" to the Defaults line in /etc/sudoers.
 
 Q) When I run visudo it uses vi as the editor and I hate vi.  How
    can I make it use another editor?
@@ -77,7 +78,10 @@ Q) How can I keep sudo from asking for a password?
 A) To specify this on a per-user (and per-command) basis, use the 'NOPASSWD'
    tag right before the command list in sudoers.  See the sudoers man page
    and sample.sudoers for details.  To disable passwords completely,
-   run configure with the --without-passwd option.
+   run configure with the --without-passwd option or add "!authenticate"
+   to the Defaults line in /etc/sudoers.  You can also turn off authentication
+   on a per-user or per-host basis using a user or host-specific Defaults
+   entry in sudoers.
 
 Q) When I run configure, it dies with the following error:
    "no acceptable cc found in $PATH".
