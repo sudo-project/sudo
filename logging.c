@@ -494,7 +494,7 @@ send_mail(line)
 		endpwent();
 
 		/* Run mailer as root so user cannot kill it. */
-		set_perms(PERM_ROOT, 0);
+		set_perms(PERM_FULL_ROOT, 0);
 		execv(mpath, argv);
 		_exit(127);
 	    }
