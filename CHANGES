@@ -182,14 +182,23 @@ CHANGES from sudo 1.3
 
 CHANGES from sudo 1.3.1
 
-63) Added support for DEC OSF/1 protected passwords (shadow passwords).
+63) Added preliminary support for DEC OSF/1 protected passwords
+    (shadow passwords).
 
-64) Fixed mail logging to include the username as it should have.
+CHANGES from sudo 1.3.1pl1
 
-65) Added hostname to log message in error mail.
+64) More support for DEC OSF/1 protected passwords (shadow passwords).
 
-66) Added -l flag to sudo to list the allowed/forbidden commands.
+CHANGES from sudo 1.3.1pl2
+
+65) Fixed mail logging to include the username as it should have.
+
+66) Added hostname to log message in error mail.
+
+67) Added -l flag to sudo to list the allowed/forbidden commands.
     Suggested by matthew@gateway.bsis.com (Matthew Stier)
 
-67) Fixed bison warnings for parse.yacc and visudo.yacc.
+68) Fixed bison warnings for parse.yacc and visudo.yacc.
     Pointed out by alfie@dcs.warwick.ac.uk (Nick Holloway).
+
+CHANGES from sudo 1.3.1pl3
