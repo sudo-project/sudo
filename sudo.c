@@ -85,11 +85,7 @@ char **Envp;
 char *host;
 char *user;
 char *cmnd;
-#ifdef MULTIMAX
-unsigned short uid;
-#else
 uid_t uid;
-#endif
 
 
 static void usage();

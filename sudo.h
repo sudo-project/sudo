@@ -41,9 +41,6 @@
   
            SOLARIS                - define if using Solaris 2.x
 
-           MULTIMAX               - define if installing on Encore Multimax
-                                    Also change the LIBS macro to "LIBS=-ll"
- 
            SEND_MAIL_WHEN_NOT_OK  - if you want a message sent to ALERTMAIL
                                     when the user is in the SUDOERS but
                                     does not have permission to execute
@@ -283,11 +280,7 @@ void be_full_user();
  * to be extern'ed here if this is main...
  */
 #ifndef MAIN
-#ifdef MULTIMAX
-extern unsigned short uid;
-#else
 extern uid_t uid;
-#endif
 extern char *host;
 extern char *user;
 extern char *cmnd;
