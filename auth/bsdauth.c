@@ -57,6 +57,7 @@
 #endif /* HAVE_UNISTD_H */
 #include <ctype.h>
 #include <pwd.h>
+#include <signal.h>
 
 #include <login_cap.h>
 #include <bsd_auth.h>
@@ -114,12 +115,15 @@ bsdauth_verify(pw, prompt, auth)
     char *s, *pass;
     size_t len;
     int authok = 0;
-    sig_t childkiller;
+    sigaction_t sa, osa;
     auth_session_t *as = (auth_session_t *) auth->data;
     extern int nil_pw;
 
     /* save old signal handler */
-    childkiller = signal(SIGCHLD, SIG_DFL);
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = SIG_DFL;
+    (void) sigaction(SIGCHLD, &sa, &osa);
 
     /*
      * If there is a challenge then print that instead of the normal
@@ -160,7 +164,7 @@ bsdauth_verify(pw, prompt, auth)
     }
 
     /* restore old signal handler */
-    (void)signal(SIGCHLD, childkiller);
+    (void) sigaction(SIGCHLD, &osa, NULL);
 
     if (authok)
 	return(AUTH_SUCCESS);
