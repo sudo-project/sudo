@@ -47,7 +47,6 @@
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#include <limits.h>
 #include <pwd.h>
 #include <sys/param.h>
 #include <sys/types.h>
