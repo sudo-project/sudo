@@ -294,14 +294,14 @@ edit_sudoers(sp, editor, args, lineno)
     /* Find the length of the argument vector */
     ac = 3 + (lineno > 0);
     if (args) {
-        int wasspace;
+        int wasblank;
 
         ac++;
-        for (wasspace = FALSE, cp = args; *cp; cp++) {
-            if (isspace((unsigned char) *cp))
-                wasspace = TRUE;
-            else if (wasspace) {
-                wasspace = FALSE;
+        for (wasblank = FALSE, cp = args; *cp; cp++) {
+            if (isblank((unsigned char) *cp))
+                wasblank = TRUE;
+            else if (wasblank) {
+                wasblank = FALSE;
                 ac++;
             }
         }
@@ -860,11 +860,11 @@ get_args(cmnd)
     char *args;
 
     args = cmnd;
-    while (*args && !isspace((unsigned char) *args))
+    while (*args && !isblank((unsigned char) *args))
 	args++;
     if (*args) {
 	*args++ = '\0';
-	while (*args && isspace((unsigned char) *args))
+	while (*args && isblank((unsigned char) *args))
 	    args++;
     }
     return(*args ? args : NULL);

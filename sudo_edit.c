@@ -68,7 +68,7 @@ int sudo_edit(argc, argv)
     const char *tmpdir;
     char **nargv, **ap, *editor, *cp;
     char buf[BUFSIZ];
-    int error, i, ac, ofd, tfd, nargc, rval, tmplen;
+    int error, i, ac, ofd, tfd, nargc, rval, tmplen, wasblank;
     sigaction_t sa;
     struct stat sb;
     struct timespec ts1, ts2;
@@ -197,9 +197,13 @@ int sudo_edit(argc, argv)
      * line args so look for those and alloc space for them too.
      */
     nargc = argc;
-    for (cp = editor + 1; *cp != '\0'; cp++) {
-	if (isblank((unsigned char)cp[0]) && !isblank((unsigned char)cp[-1]))
+    for (wasblank = FALSE, cp = editor; *cp != '\0'; cp++) {
+	if (isblank((unsigned char) *cp))
+	    wasblank = TRUE;
+	else if (wasblank) {
+	    wasblank = FALSE;
 	    nargc++;
+	}
     }
     nargv = (char **) emalloc2(nargc + 1, sizeof(char *));
     ac = 0;
