@@ -103,8 +103,10 @@ int sudo_edit(argc, argv)
      */
     if (stat(_PATH_VARTMP, &sb) == 0 && S_ISDIR(sb.st_mode))
 	tmpdir = _PATH_VARTMP;
+#ifdef _PATH_USRTMP
     else if (stat(_PATH_USRTMP, &sb) == 0 && S_ISDIR(sb.st_mode))
 	tmpdir = _PATH_USRTMP;
+#endif
     else
 	tmpdir = _PATH_TMP;
 
