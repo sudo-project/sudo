@@ -84,7 +84,7 @@ static RETSIGTYPE Exit		__P((int));
 static void setup_signals	__P((void));
 static int run_command		__P((char *, char **));
 static int check_syntax		__P((int));
-int command_matches		__P((char *, char *, char *, char *));
+int command_matches		__P((char *, char *));
 int addr_matches		__P((char *));
 int hostname_matches		__P((char *, char *, char *));
 int netgr_matches		__P((char *, char *, char *, char *));
@@ -482,9 +482,7 @@ main(argc, argv)
  * These exist to allow us to use the same parser as sudo(8).
  */
 int
-command_matches(cmnd, cmnd_args, path, sudoers_args)
-    char *cmnd;
-    char *cmnd_args;
+command_matches(path, sudoers_args)
     char *path;
     char *sudoers_args;
 {

@@ -227,12 +227,10 @@ sudoers_lookup(pwflag)
 
 /*
  * If path doesn't end in /, return TRUE iff cmnd & path name the same inode;
- * otherwise, return TRUE if cmnd names one of the inodes in path.
+ * otherwise, return TRUE if user_cmnd names one of the inodes in path.
  */
 int
-command_matches(cmnd, cmnd_args, path, sudoers_args)
-    char *cmnd;
-    char *cmnd_args;
+command_matches(path, sudoers_args)
     char *path;
     char *sudoers_args;
 {
@@ -245,19 +243,19 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
     static char *cmnd_base;
 
     /* Check for pseudo-commands */
-    if (strchr(cmnd, '/') == NULL) {
+    if (strchr(user_cmnd, '/') == NULL) {
 	/*
-	 * Return true if cmnd is "sudoedit" AND
+	 * Return true if both path and user_cmnd are "sudoedit" AND
 	 *  a) there are no args in sudoers OR
 	 *  b) there are no args on command line and none req by sudoers OR
 	 *  c) there are args in sudoers and on command line and they match
 	 */
-	if (strcmp(cmnd, "sudoedit") != 0 || strcmp(path, "sudoedit") != 0)
+	if (strcmp(path, "sudoedit") != 0 || strcmp(user_cmnd, "sudoedit") != 0)
 	    return(FALSE);
 	if (!sudoers_args ||
-	    (!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
+	    (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
 	    (sudoers_args &&
-	     fnmatch(sudoers_args, cmnd_args ? cmnd_args : "", 0) == 0)) {
+	     fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
 	    if (safe_cmnd)
 		free(safe_cmnd);
 	    safe_cmnd = estrdup(path);
@@ -268,12 +266,12 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 
     plen = strlen(path);
 
-    /* Only need to stat cmnd once since it never changes */
-    if (cst.st_dev == 0) {
-	if (stat(cmnd, &cst) == -1)
+    /* Only need to stat user_cmnd and set base once since it never changes */
+    if (cmnd_base == NULL) {
+	if (stat(user_cmnd, &cst) == -1)
 	    return(FALSE);
-	if ((cmnd_base = strrchr(cmnd, '/')) == NULL)
-	    cmnd_base = cmnd;
+	if ((cmnd_base = strrchr(user_cmnd, '/')) == NULL)
+	    cmnd_base = user_cmnd;
 	else
 	    cmnd_base++;
     }
@@ -290,12 +288,12 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 	 *  c) there are args in sudoers and on command line and they match
 	 * else return false.
 	 */
-	if (fnmatch(path, cmnd, FNM_PATHNAME) != 0)
+	if (fnmatch(path, user_cmnd, FNM_PATHNAME) != 0)
 	    return(FALSE);
 	if (!sudoers_args ||
-	    (!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
+	    (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
 	    (sudoers_args &&
-	     fnmatch(sudoers_args, cmnd_args ? cmnd_args : "", 0) == 0)) {
+	     fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
 	    if (safe_cmnd)
 		free(safe_cmnd);
 	    safe_cmnd = estrdup(user_cmnd);
@@ -310,7 +308,7 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 	if (path[plen - 1] != '/') {
 	    char *p;
 
-	    /* Only proceed if the basenames of cmnd and path are the same */
+	    /* Only proceed if cmnd_base and basename(path) are the same */
 	    if ((p = strrchr(path, '/')) == NULL)
 		p = path;
 	    else
@@ -327,9 +325,9 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 	    if (cst.st_dev != pst.st_dev || cst.st_ino != pst.st_ino)
 		return(FALSE);
 	    if (!sudoers_args ||
-		(!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
+		(!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
 		(sudoers_args &&
-		 fnmatch(sudoers_args, cmnd_args ? cmnd_args : "", 0) == 0)) {
+		 fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
 		if (safe_cmnd)
 		    free(safe_cmnd);
 		safe_cmnd = estrdup(path);
@@ -339,7 +337,7 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 	}
 
 	/*
-	 * Grot through path's directory entries, looking for cmnd.
+	 * Grot through path's directory entries, looking for cmnd_base.
 	 */
 	dirp = opendir(path);
 	if (dirp == NULL)

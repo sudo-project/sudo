@@ -117,63 +117,61 @@ has_meta(s)
 }
 
 /*
- * Returns TRUE if cmnd matches, in the sudo sense,
+ * Returns TRUE if user_cmnd matches, in the sudo sense,
  * the pathname in path; otherwise, return FALSE
  */
 int
-command_matches(cmnd, cmnd_args, path, sudoers_args)
-    char *cmnd;
-    char *cmnd_args;
+command_matches(path, sudoers_args)
     char *path;
     char *sudoers_args;
 {
     int clen, plen;
     char *args;
 
-    if (cmnd == NULL)
+    if (user_cmnd == NULL)
 	return(FALSE);
 
     if ((args = strchr(path, ' ')))
 	*args++ = '\0';
 
     if (has_meta(path)) {
-	if (fnmatch(path, cmnd, FNM_PATHNAME))
+	if (fnmatch(path, user_cmnd, FNM_PATHNAME))
 	    return(FALSE);
 	if (!sudoers_args)
 	    return(TRUE);
-	else if (!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args))
+	else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
 	    return(TRUE);
 	else if (sudoers_args)
-	    return((fnmatch(sudoers_args, cmnd_args ? cmnd_args : "", 0) == 0));
+	    return((fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0));
 	else
 	    return(FALSE);
     } else {
 	plen = strlen(path);
 	if (path[plen - 1] != '/') {
-	    if (strcmp(cmnd, path))
+	    if (strcmp(user_cmnd, path))
 		return(FALSE);
 	    if (!sudoers_args)
 		return(TRUE);
-	    else if (!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args))
+	    else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
 		return(TRUE);
 	    else if (sudoers_args)
-		return((fnmatch(sudoers_args, cmnd_args ? cmnd_args : "", 0) == 0));
+		return((fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0));
 	    else
 		return(FALSE);
 	}
 
-	clen = strlen(cmnd);
+	clen = strlen(user_cmnd);
 	if (clen < plen + 1)
-	    /* path cannot be the parent dir of cmnd */
+	    /* path cannot be the parent dir of user_cmnd */
 	    return(FALSE);
 
-	if (strchr(cmnd + plen + 1, '/') != NULL)
-	    /* path could only be an anscestor of cmnd -- */
+	if (strchr(user_cmnd + plen + 1, '/') != NULL)
+	    /* path could only be an anscestor of user_cmnd -- */
 	    /* ignoring, of course, things like // & /./  */
 	    return(FALSE);
 
-	/* see whether path is the prefix of cmnd */
-	return((strncmp(cmnd, path, plen) == 0));
+	/* see whether path is the prefix of user_cmnd */
+	return((strncmp(user_cmnd, path, plen) == 0));
     }
 }
 
@@ -390,7 +388,7 @@ main(argc, argv)
 	user_shost = user_host;
     }
 
-    /* Fill in cmnd_args from NewArgv. */
+    /* Fill in user_args from NewArgv. */
     if (NewArgc > 1) {
 	char *to, **from;
 	size_t size, n;
