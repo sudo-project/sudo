@@ -99,9 +99,10 @@ verify_user(pw, prompt)
     struct passwd *pw;
     char *prompt;
 {
-    short counter = def_ival(I_PASSWD_TRIES) + 1;
-    short success = AUTH_FAILURE;
-    short status;
+    int counter = def_ival(I_PASSWD_TRIES) + 1;
+    int success = AUTH_FAILURE;
+    int status;
+    int flags;
     char *p;
     sudo_auth *auth;
 
@@ -213,7 +214,11 @@ cleanup:
 	case AUTH_SUCCESS:
 	    return;
 	case AUTH_FAILURE:
-	    log_error(NO_MAIL, "%d incorrect password attempt%s",
+	    if (def_flag(I_MAIL_BADPASS) || def_flag(I_MAIL_ALWAYS))
+		flags = 0;
+	    else
+		flags = NO_MAIL;
+	    log_error(flags, "%d incorrect password attempt%s",
 		def_ival(I_PASSWD_TRIES) - counter,
 		(def_ival(I_PASSWD_TRIES) - counter == 1) ? "" : "s");
 	case AUTH_FATAL:

@@ -27,6 +27,9 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"mail_always", T_FLAG,
 	"Always send mail when sudo is run"
     }, {
+	"mail_badpass", T_FLAG,
+	"Send mail if user authentication fails"
+    }, {
 	"mail_no_user", T_FLAG,
 	"Send mail if the user is not in sudoers"
     }, {
@@ -149,6 +152,9 @@ struct sudo_defs_types sudo_defs_table[] = {
     }, {
 	"editor", T_STR|T_PATH,
 	"Path to the editor for use by visudo: %s"
+    }, {
+	"env_delete", T_STR|T_BOOL,
+	"Environment variables to remove: %s"
     }, {
 	"env_keep", T_STR|T_BOOL,
 	"Environment variables to preserve: %s"

@@ -244,6 +244,11 @@ flag is I<@ignore_dot@> by default.
 Send mail to the I<mailto> user every time a users runs B<sudo>.
 This flag is I<off> by default.
 
+=item mail_badpass
+
+Send mail to the I<mailto> user if the user running sudo does not
+enter the correct password.  This flag is I<off> by default.
+
 =item mail_no_user
 
 If set, mail will be sent to the I<mailto> user if the invoking
