@@ -36,6 +36,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * XXX - the whole opFOO naming thing is somewhat bogus.
+ *
+ * XXX - the way things are stored for printmatches is stupid,
+ *       they should be stored as elements in an array and then
+ *       list_matches() can format things the way it wants.
+ *
+ * XXX - '!' chars are not preserved when expanding Aliases
+ */
+
 #include "config.h"
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -193,12 +203,14 @@ yyerror(s)
 %token <string>  NETGROUP		/* a netgroup (+NAME) */
 %token <string>  USERGROUP		/* a usergroup (%NAME) */
 %token <string>  NAME			/* a mixed-case name */
+/* XXX - may want to make this back into a tok but if so, don't allocate
+         space in parse.lex via fill() */
+%token <string>	 ALL			/* ALL keyword */
 %token <tok> 	 RUNAS			/* a mixed-case runas name */
 %token <tok> 	 NOPASSWD		/* no passwd req for command */
 %token <tok> 	 PASSWD			/* passwd req for command (default) */
 %token <command> COMMAND		/* an absolute pathname */
 %token <tok>	 COMMENT		/* comment and/or carriage return */
-%token <tok>	 ALL			/* ALL keyword */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
 %token <tok>	 CMNDALIAS		/* Cmnd_Alias keyword */
 %token <tok>	 USERALIAS		/* User_Alias keyword */
@@ -207,7 +219,9 @@ yyerror(s)
 %token <tok>	 ERROR
 
 %type <BOOLEAN>	 cmnd
-%type <BOOLEAN>	 opcmnd
+%type <BOOLEAN>	 hostspec
+%type <BOOLEAN>	 runasuser
+%type <BOOLEAN>	 user
 
 %%
 
@@ -219,7 +233,7 @@ entry		:	COMMENT
 			    { ; }
                 |       error COMMENT
 			    { yyerrok; }
-		|	{ push; } user privileges {
+		|	{ push; } opuser privileges {
 			    while (top && user_matches != TRUE) {
 				pop;
 			    }
@@ -251,45 +265,44 @@ privilege	:	hostlist '=' cmndspeclist {
 			}
 		;
 
-ophostspec	:	hostspec
-		|	'!' {
-			    push;
-			} ophostspec {
-			    pop;
-			    if (host_matched == TRUE)
-				host_matches = FALSE;
-			    else if (host_matched == FALSE)
+ophostspec	:	hostspec {
+			    if ($1 == TRUE)
 				host_matches = TRUE;
+			}
+		|	'!' hostspec {
+			    if ($2 == TRUE)
+				host_matches = FALSE;
 			}
 
 hostspec	:	ALL {
-			    host_matches = TRUE;
+			    $$ = TRUE;
+			    free($1);
 			}
 		|	NTWKADDR {
 			    if (addr_matches($1))
-				host_matches = TRUE;
+				$$ = TRUE;
 			    free($1);
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, user_host, NULL))
-				host_matches = TRUE;
+				$$ = TRUE;
 			    free($1);
 			}
 		|	NAME {
 			    if (strcasecmp(user_shost, $1) == 0)
-				host_matches = TRUE;
+				$$ = TRUE;
 			    free($1);
 			}
 		|	FQHOST {
 			    if (strcasecmp(user_host, $1) == 0)
-				host_matches = TRUE;
+				$$ = TRUE;
 			    free($1);
 			}
 		|	ALIAS {
 			    /* could be an all-caps hostname */
 			    if (find_alias($1, HOST_ALIAS) == TRUE ||
 				strcasecmp(user_shost, $1) == 0)
-				host_matches = TRUE;
+				$$ = TRUE;
 			    free($1);
 			}
 		;
@@ -318,26 +331,20 @@ cmndspec	:	runasspec nopasswd opcmnd {
 			}
 		;
 
-opcmnd		:	cmnd { ; }
+opcmnd		:	cmnd {
+			    if ($1 == TRUE)
+				cmnd_matches = TRUE;
+			}
 		|	'!' {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
 				append("!", &cm_list[cm_list_len].cmnd,
 				       &cm_list[cm_list_len].cmnd_len,
 				       &cm_list[cm_list_len].cmnd_size, 0);
-				push;
-				user_matches = TRUE;
-				host_matches = TRUE;
-			    } else {
-				push;
 			    }
-			} opcmnd {
-			    pop;
-			    if (cmnd_matched == TRUE)
+			} cmnd {
+			    if ($3 == TRUE)
 				cmnd_matches = FALSE;
-			    else if (cmnd_matched == FALSE)
-				cmnd_matches = TRUE;
-			    $$ = cmnd_matches;
 			}
 		;
 
@@ -363,30 +370,21 @@ oprunasuser	:	runasuser {
 				append("", &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, ':');
+			    if ($1 == TRUE)
+				runas_matches = TRUE;
 			}
 		|	'!' {
 			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE) {
+				user_matches == TRUE)
 				append("!", &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, ':');
-				pushcp;
-			    } else {
-				push;
-			    }
-			} oprunasuser {
-			    pop;
-			    /*
-			     * Don't negate FALSE -> TRUE since that would
-			     * make !foo match any time the user specified
-			     * a runas user (via -u) other than foo.
-			     */
-			    if (runas_matched == TRUE)
+			} runasuser {
+			    if ($3 == TRUE)
 				runas_matches = FALSE;
 			}
 
 runasuser	:	NAME {
-			    runas_matches = (strcmp($1, user_runas) == 0);
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append($1, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -396,10 +394,11 @@ runasuser	:	NAME {
 				append($1, &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
+			    if (strcmp($1, user_runas) == 0)
+				$$ = TRUE;
 			    free($1);
 			}
 		|	USERGROUP {
-			    runas_matches = usergr_matches($1, user_runas);
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append($1, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -410,10 +409,11 @@ runasuser	:	NAME {
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
 			    }
+			    if (usergr_matches($1, user_runas))
+				$$ = TRUE;
 			    free($1);
 			}
 		|	NETGROUP {
-			    runas_matches = netgr_matches($1, NULL, user_runas);
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append($1, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -424,15 +424,11 @@ runasuser	:	NAME {
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
 			    }
+			    if (netgr_matches($1, NULL, user_runas))
+				$$ = TRUE;
 			    free($1);
 			}
 		|	ALIAS {
-			    /* could be an all-caps username */
-			    if (find_alias($1, RUNAS_ALIAS) == TRUE ||
-				strcmp($1, user_runas) == 0)
-				runas_matches = TRUE;
-			    else
-				runas_matches = FALSE;
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append($1, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -442,10 +438,13 @@ runasuser	:	NAME {
 				append($1, &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
+			    /* could be an all-caps username */
+			    if (find_alias($1, RUNAS_ALIAS) == TRUE ||
+				strcmp($1, user_runas) == 0)
+				$$ = TRUE;
 			    free($1);
 			}
 		|	ALL {
-			    runas_matches = TRUE;
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append("ALL", &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -455,6 +454,8 @@ runasuser	:	NAME {
 				append("ALL", &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
+			    $$ = TRUE;
+			    free($1);
 			}
 		;
 
@@ -489,7 +490,9 @@ cmnd		:	ALL {
 				expand_match_list();
 			    }
 
-			    $$ = cmnd_matches = TRUE;
+			    $$ = TRUE;
+			    free($1);
+
 			    if (safe_cmnd)
 				free(safe_cmnd);
 			    safe_cmnd = estrdup(user_cmnd);
@@ -507,10 +510,8 @@ cmnd		:	ALL {
 				       &cm_list[cm_list_len].cmnd_size, 0);
 				expand_match_list();
 			    }
-			    if (find_alias($1, CMND_ALIAS) == TRUE) {
-				cmnd_matches = TRUE;
+			    if (find_alias($1, CMND_ALIAS) == TRUE)
 				$$ = TRUE;
-			    }
 			    free($1);
 			}
 		|	 COMMAND {
@@ -535,12 +536,9 @@ cmnd		:	ALL {
 				expand_match_list();
 			    }
 
-			    /* if NewArgc > 1 pass ptr to 1st arg, else NULL */
-			    if (command_matches(user_cmnd, (NewArgc > 1) ?
-				    user_args : NULL, $1.cmnd, $1.args)) {
-				cmnd_matches = TRUE;
+			    if (command_matches(user_cmnd, user_args,
+				$1.cmnd, $1.args))
 				$$ = TRUE;
-			    }
 
 			    free($1.cmnd);
 			    if ($1.args)
@@ -633,41 +631,40 @@ userlist	:	opuser { ; }
 		|	userlist ',' opuser
 		;
 
-opuser		:	user
-		|	'!' {
-			    push;
-			} opuser {
-			    pop;
-			    if (user_matched == TRUE)
-				user_matches = FALSE;
-			    else if (user_matched == FALSE)
+opuser		:	user {
+			    if ($1 == TRUE)
 				user_matches = TRUE;
+			}
+		|	'!' user {
+			    if ($2 == TRUE)
+				user_matches = FALSE;
 			}
 
 user		:	NAME {
 			    if (strcmp($1, user_name) == 0)
-				user_matches = TRUE;
+				$$ = TRUE;
 			    free($1);
 			}
 		|	USERGROUP {
 			    if (usergr_matches($1, user_name))
-				user_matches = TRUE;
+				$$ = TRUE;
 			    free($1);
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, NULL, user_name))
-				user_matches = TRUE;
+				$$ = TRUE;
 			    free($1);
 			}
 		|	ALIAS {
 			    /* could be an all-caps username */
 			    if (find_alias($1, USER_ALIAS) == TRUE ||
 				strcmp($1, user_name) == 0)
-				user_matches = TRUE;
+				$$ = TRUE;
 			    free($1);
 			}
 		|	ALL {
-			    user_matches = TRUE;
+			    $$ = TRUE;
+			    free($1);
 			}
 		;
 
