@@ -45,11 +45,11 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
        -V  The -V (_v_e_r_s_i_o_n) option causes ssssuuuuddddoooo to print the
            version number and exit.
 
-       -l  The -l (_l_i_s_t) option will list out the allowed and
-           forbidden commands for the user on the current host.
+       -l  The -l (_l_i_s_t) option will list out the allowed (and
+           forbidden) commands for the user on the current host.
 
-       -h  The -h (_h_e_l_p) option causes ssssuuuuddddoooo to print the version
-           of ssssuuuuddddoooo and a usage message before exiting.
+       -h  The -h (_h_e_l_p) option causes ssssuuuuddddoooo to print a usage
+           message and exit.
 
        -v  If given the -v (_v_a_l_i_d_a_t_e) option, ssssuuuuddddoooo will update
            the user's timestamp, prompting for the user's
@@ -61,7 +61,7 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-17/Aug/1999                    1.6                              1
+25/Aug/1999                    1.6                              1
 
 
 
@@ -71,15 +71,15 @@ SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
 
 
        -k  The -k (_k_i_l_l) option to ssssuuuuddddoooo invalidates the user's
-           timestamp file by setting the time on it to the epoch.
-           The next time ssssuuuuddddoooo is run a password will be required.
+           timestamp by setting the time on it to the epoch.  The
+           next time ssssuuuuddddoooo is run a password will be required.
            This option does not require a password and was added
            to allow a user to revoke ssssuuuuddddoooo permissions from a
            .logout file.
 
        -K  The -K (sure _k_i_l_l) option to ssssuuuuddddoooo removes the user's
-           timestamp file entirely.  This option does not require
-           a password.
+           timestamp entirely.  This option does not require a
+           password.
 
        -b  The -b (_b_a_c_k_g_r_o_u_n_d) option tells ssssuuuuddddoooo to run the given
            command in the background.  Note that if you use the
@@ -127,7 +127,7 @@ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEES
 
 
 
-17/Aug/1999                    1.6                              2
+25/Aug/1999                    1.6                              2
 
 
 
@@ -184,7 +184,7 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
        instance) or create /tmp/.odus with the appropriate owner
        (root) and permissions (0700) in the system startup files.
 
-       sudo will not honor timestamps set far in the future.
+       ssssuuuuddddoooo will not honor timestamps set far in the future.
        Timestamps with a date greater than current_time + 2 *
        TIMEOUT will be ignored and sudo will log and complain.
        This is done to keep a user from creating his/her own
@@ -193,7 +193,7 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 
 
 
-17/Aug/1999                    1.6                              3
+25/Aug/1999                    1.6                              3
 
 
 
@@ -202,13 +202,38 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
 
 
-FFFFIIIILLLLEEEESSSS
-        /etc/sudoers           List of who can run what
-        /var/run/sudo          Directory containing timestamps
-        /tmp/.odus             Same as above if no /var/run exists
+EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
+       Note: the following examples assume suitable _s_u_d_o_e_r_s(5)
+       entries.
+
+       To get a file listing of an unreadable directory:
+
+        % sudo ls /usr/local/protected
+
+       To list the home directory of user yazza on a machine
+       where the filesystem holding ~yazza is not exported as
+       root:
+
+        % sudo -u yazza ls ~yazza
+
+       To edit the _i_n_d_e_x_._h_t_m_l file as user www:
+
+        % sudo -u www vi ~www/htdocs/index.html
+
+       To shutdown a machine:
+
+        % sudo shutdown -r +15 "quick reboot"
+
+       To make a usage listing of the directories in the /home
+       partition.  Note that this runs the commands in a sub-
+       shell to make the cd and file redirection work.
+
+        % sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 
 
-EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT VVVVAAAARRRRIIIIAAAABBBBLLLLEEEESSSS
+EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
+       ssssuuuuddddoooo utilizes the following environment variables:
+
         PATH                   Set to a sane value if SECURE_PATH is set
         SHELL                  Used to determine shell to run with -s option
         USER                   Set to the target user (root unless the -u option
@@ -222,6 +247,46 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT V
         SUDO_UID               Set to the uid of the user who invoked sudo
         SUDO_GID               Set to the gid of the user who invoked sudo
         SUDO_PS1               If set, PS1 will be set to its value
+
+
+FFFFIIIILLLLEEEESSSS
+        /etc/sudoers           List of who can run what
+        /var/run/sudo          Directory containing timestamps
+
+       ssssuuuuddddoooo utilizes the following environment variables:
+
+
+
+
+
+25/Aug/1999                    1.6                              4
+
+
+
+
+
+SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
+
+
+        PATH                   Set to a sane value if SECURE_PATH is set
+        SHELL                  Used to determine shell to run with -s option
+        USER                   Set to the target user (root unless the -u option
+                               is specified)
+        HOME                   In -s or -H mode (or if sudo was configured with
+                               the --enable-shell-sets-home option), set to
+                               homedir of the target user.
+        SUDO_PROMPT            Used as the default password prompt
+        SUDO_COMMAND           Set to the command run by sudo
+        SUDO_USER              Set to the login of the user who invoked sudo
+        SUDO_UID               Set to the uid of the user who invoked sudo
+        SUDO_GID               Set to the gid of the user who invoked sudo
+        SUDO_PS1               If set, PS1 will be set to its value
+
+
+FFFFIIIILLLLEEEESSSS
+        /etc/sudoers           List of who can run what
+        /var/run/sudo          Directory containing timestamps
+        /tmp/.odus             Same as above if no /var/run exists
 
 
 AAAAUUUUTTTTHHHHOOOORRRRSSSS
@@ -256,10 +321,11 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        shell regardless of any '!'  elements in the user
        specification.
 
+       Running shell scripts via ssssuuuuddddoooo can expose the same kernel
 
 
 
-17/Aug/1999                    1.6                              4
+25/Aug/1999                    1.6                              5
 
 
 
@@ -268,9 +334,9 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
 
 
-       Running shell scripts via ssssuuuuddddoooo can expose the same kernel
        bugs that make setuid shell scripts unsafe on some
-       operating systems.
+       operating systems (if your OS supports the /dev/fd/
+       directory, setuid shell scripts are generally safe).
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
        _s_u_d_o_e_r_s(5), _v_i_s_u_d_o(8), _s_u(1).
@@ -325,6 +391,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-17/Aug/1999                    1.6                              5
+25/Aug/1999                    1.6                              6
 
 
