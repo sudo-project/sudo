@@ -517,6 +517,11 @@ The default is C<@badpass_message@> unless insults are enabled.
 The directory in which B<sudo> stores its timestamp files.
 The default is F<@timedir@>.
 
+=item timestampowner
+
+The owner of the timestamp directory and the timestamps stored therein.
+The default is C<root>.
+
 =item passprompt
 
 The default prompt to use when asking for a password; can be overridden
