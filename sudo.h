@@ -107,14 +107,15 @@ extern int top;
 #define GLOBAL_NO_HOSTNAME       ( 0x02 | GLOBAL_PROBLEM )
 #define GLOBAL_HOST_UNREGISTERED ( 0x03 | GLOBAL_PROBLEM )
 #define PASSWORD_NOT_CORRECT     0x04
+#define PASSWORDS_NOT_CORRECT    0x05
 #define ALL_SYSTEMS_GO           0x00
-#define NO_SUDOERS_FILE          ( 0x05 | GLOBAL_PROBLEM )
-#define GLOBAL_NO_AUTH_ENT       ( 0x06 | GLOBAL_PROBLEM )
-#define BAD_SUDOERS_FILE         ( 0x07 | GLOBAL_PROBLEM )
-#define SUDOERS_NO_OWNER         ( 0x08 | GLOBAL_PROBLEM )
-#define SUDOERS_WRONG_OWNER      ( 0x09 | GLOBAL_PROBLEM )
-#define SUDOERS_NOT_FILE         ( 0x0A | GLOBAL_PROBLEM )
-#define SUDOERS_RW_OTHER         ( 0x0B | GLOBAL_PROBLEM )
+#define NO_SUDOERS_FILE          ( 0x06 | GLOBAL_PROBLEM )
+#define GLOBAL_NO_AUTH_ENT       ( 0x07 | GLOBAL_PROBLEM )
+#define BAD_SUDOERS_FILE         ( 0x08 | GLOBAL_PROBLEM )
+#define SUDOERS_NO_OWNER         ( 0x09 | GLOBAL_PROBLEM )
+#define SUDOERS_WRONG_OWNER      ( 0x0A | GLOBAL_PROBLEM )
+#define SUDOERS_NOT_FILE         ( 0x0B | GLOBAL_PROBLEM )
+#define SUDOERS_RW_OTHER         ( 0x0C | GLOBAL_PROBLEM )
 
 #undef TRUE
 #define TRUE                     0x01
