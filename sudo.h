@@ -111,8 +111,8 @@ struct sudo_user {
  * Used with set_perms()
  */
 #define PERM_ROOT                0x00
-#define PERM_USER                0x01
-#define PERM_FULL_USER           0x02
+#define PERM_FULL_ROOT           0x01
+#define PERM_USER                0x02
 #define PERM_SUDOERS             0x03
 #define PERM_RUNAS	         0x04
 
