@@ -109,9 +109,21 @@ elif test -f "/usr/bin/sh"; then
 elif test -f "/sbin/sh"; then
     AC_MSG_RESULT(/sbin/sh)
     AC_DEFINE(_CONFIG_PATH_BSHELL, "/sbin/sh")
-elif test -f "/sbin/sh"; then
+elif test -f "/usr/sbin/sh"; then
     AC_MSG_RESULT(/usr/sbin/sh)
     AC_DEFINE(_CONFIG_PATH_BSHELL, "/usr/sbin/sh")
+elif test -f "/bin/ksh"; then
+    AC_MSG_RESULT(/bin/ksh)
+    AC_DEFINE(_CONFIG_PATH_BSHELL, "/bin/ksh")
+elif test -f "/usr/bin/ksh"; then
+    AC_MSG_RESULT(/usr/bin/ksh)
+    AC_DEFINE(_CONFIG_PATH_BSHELL, "/usr/bin/ksh")
+elif test -f "/bin/bash"; then
+    AC_MSG_RESULT(/bin/bash)
+    AC_DEFINE(_CONFIG_PATH_BSHELL, "/bin/bash")
+elif test -f "/usr/bin/bash"; then
+    AC_MSG_RESULT(/usr/bin/bash)
+    AC_DEFINE(_CONFIG_PATH_BSHELL, "/usr/bin/bash")
 else
     AC_MSG_RESULT(not found)
 fi
