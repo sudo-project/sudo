@@ -57,11 +57,12 @@
 #endif /* HAVE_UNISTD_H */
 #include <pwd.h>
 
-#include <afs/stds.h>
-#include <afs/kautils.h>
-
 #include "sudo.h"
 #include "sudo_auth.h"
+
+#undef VOID
+#include <afs/stds.h>
+#include <afs/kautils.h>
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
