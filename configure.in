@@ -583,7 +583,7 @@ AC_ARG_WITH(editor, [  --with-editor=path      Default editor for visudo (defaul
     no)		echo "Sorry, --without-editor not supported."
 		exit 1
 		;;
-    *)		AC_DEFINE_UNQUOTED(EDITOR, $with_editor)
+    *)		AC_DEFINE_UNQUOTED(EDITOR, "$with_editor")
 		AC_MSG_RESULT([$with_editor])
 		;;
 esac], [AC_DEFINE(EDITOR, _PATH_VI) AC_MSG_RESULT(vi)])
