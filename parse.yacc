@@ -298,10 +298,12 @@ cmndspec	:	runasspec nopasswd opcmnd {
 			    }
 			    /*
 			     * Push the entry onto the stack if it is worth
-			     * saving and clear match status.
+			     * saving (or if nothing else is on the stack)
+			     * and clear match status.
 			     */
-			    if (user_matches == TRUE && host_matches == TRUE &&
-				cmnd_matches != -1 && runas_matches == TRUE)
+			    if ((user_matches == TRUE && host_matches == TRUE &&
+				cmnd_matches != -1 && runas_matches != -1) ||
+				top == 1)
 				pushcp;
 			    cmnd_matches = -1;
 			}
@@ -365,10 +367,13 @@ oprunasuser	:	runasuser {
 			    }
 			} oprunasuser {
 			    pop;
+			    /*
+			     * Don't negate FALSE -> TRUE since that would
+			     * make !foo match any time the user specified
+			     * a runas user (via -u) other than foo.
+			     */
 			    if (runas_matched == TRUE)
 				runas_matches = FALSE;
-			    else if (runas_matched == FALSE)
-				runas_matches = TRUE;
 			}
 
 runasuser	:	NAME {
