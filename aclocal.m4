@@ -57,17 +57,27 @@ dnl check for sendmail
 dnl
 define(SUDO_PROG_SENDMAIL,
 [if test -f "/usr/sbin/sendmail"; then
-    SENDMAIL="/usr/sbin/sendmail"
+    AC_DEFINE(_PATH_SENDMAIL, "/usr/sbin/sendmail")
 elif test -f "/usr/lib/sendmail"; then
-    SENDMAIL="/usr/lib/sendmail"
+    AC_DEFINE(_PATH_SENDMAIL, "/usr/lib/sendmail")
 elif test -f "/usr/etc/sendmail"; then
-    SENDMAIL="/usr/etc/sendmail"
+    AC_DEFINE(_PATH_SENDMAIL, "/usr/etc/sendmail")
 elif test -f "/usr/local/lib/sendmail"; then
-    SENDMAIL="/usr/local/lib/sendmail"
+    AC_DEFINE(_PATH_SENDMAIL, "/usr/local/lib/sendmail")
 elif test -f "/usr/local/bin/sendmail"; then
-    SENDMAIL="/usr/local/bin/sendmail"
-else
-    SENDMAIL=""
+    AC_DEFINE(_PATH_SENDMAIL, "/usr/local/bin/sendmail")
+fi
+])dnl
+dnl
+dnl check for vi
+dnl
+define(SUDO_PROG_VI,
+[if test -f "/usr/bin/vi"; then
+    AC_DEFINE(_PATH_VI, "/usr/bin/vi")
+elif test -f "/usr/ucb/vi"; then
+    AC_DEFINE(_PATH_VI, "/usr/ucb/vi")
+elif test -f "/usr/local/bin/vi"; then
+    AC_DEFINE(_PATH_VI, "/usr/local/bin/vi")
 fi
 ])dnl
 dnl
@@ -140,6 +150,17 @@ $0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 [
 #include <sys/param.h>
 #if defined(sun) && !defined(BSD)
+  yes
+#endif
+], [$1], [$2])
+])dnl
+dnl
+define(SUDO_IRIX,
+[echo checking for Irix
+AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
+$0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
+[
+#ifdef sgi
   yes
 #endif
 ], [$1], [$2])
