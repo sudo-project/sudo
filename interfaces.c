@@ -64,9 +64,10 @@ static char rcsid[] = "$Id$";
 #include <sys/sioctl.h>
 #include <sys/stropts.h>
 #include <net/errno.h>
-#define STRSET(cmd, param, len) {strioctl.ic_cmd=(cmd);\
-                  strioctl.ic_dp=(param);\
-                    strioctl.ic_len=(len);}
+#define STRSET(cmd, param, len)	{strioctl.ic_cmd=(cmd);\
+				 strioctl.ic_dp=(param);\
+				 strioctl.ic_timout=0;\
+				 strioctl.ic_len=(len);}
 #endif /* _ISC */
 #ifdef _MIPS
 #include <net/soioctl.h>
@@ -88,7 +89,7 @@ extern char *malloc	__P((size_t));
  * Globals
  */
 struct interface *interfaces;
-int num_interfaces;
+int num_interfaces = 0;
 extern int Argc;
 extern char **Argv;
 
