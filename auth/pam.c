@@ -192,6 +192,7 @@ pam_prep_user(pw)
 
 /*
  * ``Conversation function'' for PAM.
+ * XXX - does not handle PAM_BINARY_PROMPT
  */
 static int
 sudo_conv(num_msg, msg, response, appdata_ptr)
@@ -204,13 +205,14 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
     PAM_CONST struct pam_message *pm;
     const char *p = def_prompt;
     char *pass;
+    int n;
     extern int nil_pw;
 
     if ((*response = malloc(num_msg * sizeof(struct pam_response))) == NULL)
 	return(PAM_CONV_ERR);
-    (void) memset((VOID *)*response, 0, num_msg * sizeof(struct pam_response));
+    (void) memset(*response, 0, num_msg * sizeof(struct pam_response));
 
-    for (pr = *response, pm = *msg; num_msg--; pr++, pm++) {
+    for (pr = *response, pm = *msg, n = num_msg; n--; pr++, pm++) {
 	switch (pm->msg_style) {
 	    case PAM_PROMPT_ECHO_ON:
 		tgetpass_flags |= TGP_ECHO;
@@ -222,7 +224,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		/* Read the password. */
 		pass = tgetpass(p, def_ival(I_PASSWD_TIMEOUT) * 60,
 		    tgetpass_flags);
-		pr->resp = pass ? estrdup(pass) : "";
+		pr->resp = estrdup(pass ? pass : "");
 		if (*pr->resp == '\0')
 		    nil_pw = 1;		/* empty password */
 		else
@@ -239,12 +241,19 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		}
 		break;
 	    default:
-		/* Something odd happened */
-		/* XXX - should free non-NULL response members */
+		/* Zero and free allocated memory and return an error. */
+		for (pr = *response, n = num_msg; n--; pr++) {
+		    if (pr->resp != NULL) {
+			(void) memset(pr->resp, 0, strlen(pr->resp));
+			free(pr->resp);
+			pr->resp = NULL;
+		    }
+		}
+		(void) memset(*response, 0,
+		    num_msg * sizeof(struct pam_response));
 		free(*response);
 		*response = NULL;
 		return(PAM_CONV_ERR);
-		break;
 	}
     }
 
