@@ -64,6 +64,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #ifdef HAVE_SETRLIMIT
+#include <sys/time.h>
 #include <sys/resource.h>
 #endif
 #if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
