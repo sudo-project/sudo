@@ -96,6 +96,7 @@ struct sudo_defs_types {
 void dump_default	__P((void));
 int set_default		__P((char *, char *, int));
 void init_defaults	__P((void));
+int update_defaults	__P((void));
 void list_options	__P((void));
 
 extern struct sudo_defs_types sudo_defs_table[];
