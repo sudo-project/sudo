@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.6.8                     June  6, 2004                         1
+1.6.8                     June  8, 2004                         1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                         2
+1.6.8                     June  8, 2004                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                         3
+1.6.8                     June  8, 2004                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                         4
+1.6.8                     June  8, 2004                         4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                         5
+1.6.8                     June  8, 2004                         5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                         6
+1.6.8                     June  8, 2004                         6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                         7
+1.6.8                     June  8, 2004                         7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                         8
+1.6.8                     June  8, 2004                         8
 
 
 
@@ -589,7 +589,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                         9
+1.6.8                     June  8, 2004                         9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                        10
+1.6.8                     June  8, 2004                        10
 
 
 
@@ -721,7 +721,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                        11
+1.6.8                     June  8, 2004                        11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                        12
+1.6.8                     June  8, 2004                        12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                        13
+1.6.8                     June  8, 2004                        13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                        14
+1.6.8                     June  8, 2004                        14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                        15
+1.6.8                     June  8, 2004                        15
 
 
 
@@ -1051,7 +1051,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.6.8                     June  6, 2004                        16
+1.6.8                     June  8, 2004                        16
 
 
 
@@ -1117,7 +1117,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                        17
+1.6.8                     June  8, 2004                        17
 
 
 
@@ -1183,7 +1183,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                        18
+1.6.8                     June  8, 2004                        18
 
 
 
@@ -1249,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.8                     June  6, 2004                        19
+1.6.8                     June  8, 2004                        19
 
 
 
@@ -1301,7 +1301,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
        To tell whether or not ssuuddoo supports _n_o_e_x_e_c, you can run
        the following as root:
 
-           \# sudo -V | grep "dummy exec"
+           sudo -V | grep "dummy exec"
 
        If the resulting output contains a line that begins with:
 
@@ -1315,7 +1315,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.6.8                     June  6, 2004                        20
+1.6.8                     June  8, 2004                        20
 
 
 
@@ -1333,10 +1333,17 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        ported.
 
        To enable _n_o_e_x_e_c for a command, use the NOEXEC tag as doc­
-       umented in the User Specification section above.  If you
-       are unsure whether or not your system is capable of sup­
-       porting _n_o_e_x_e_c you can always just try it out and see if
-       it works.
+       umented in the User Specification section above.  Here is
+       that example again:
+
+        aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+
+       This allows user aaaarroonn to run _/_u_s_r_/_b_i_n_/_m_o_r_e and
+       _/_u_s_r_/_b_i_n_/_v_i with _n_o_e_x_e_c enabled.  This will prevent those
+       two commands from executing other commands (such as a
+       shell).  If you are unsure whether or not your system is
+       capable of supporting _n_o_e_x_e_c you can always just try it
+       out and see if it works.
 
        Note that disabling shell escapes is not a panacea.  Pro­
        grams running as root are still capable of many poten­
@@ -1374,13 +1381,6 @@ SSEEEE AALLSSOO
 
 
 
-
-
-
-
-
-
-
-1.6.8                     June  6, 2004                        21
+1.6.8                     June  8, 2004                        21
 
 

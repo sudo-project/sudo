@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "June  6, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "June  8, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -1283,7 +1283,7 @@ To tell whether or not \fBsudo\fR supports \fInoexec\fR, you can run
 the following as root:
 .PP
 .Vb 1
-\&    \e# sudo -V | grep "dummy exec"
+\&    sudo -V | grep "dummy exec"
 .Ve
 .PP
 If the resulting output contains a line that begins with:
@@ -1304,9 +1304,17 @@ manual pages for the dynamic linker (usually ld.so, ld.so.1, dyld,
 dld.sl, rld, or loader) to see if \f(CW\*(C`LD_PRELOAD\*(C'\fR is supported.
 .PP
 To enable \fInoexec\fR for a command, use the \f(CW\*(C`NOEXEC\*(C'\fR tag as documented
-in the User Specification section above.  If you are unsure whether
-or not your system is capable of supporting \fInoexec\fR you can always
-just try it out and see if it works.
+in the User Specification section above.  Here is that example again:
+.PP
+.Vb 1
+\& aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+.Ve
+.PP
+This allows user \fBaaron\fR to run \fI/usr/bin/more\fR and \fI/usr/bin/vi\fR
+with \fInoexec\fR enabled.  This will prevent those two commands from
+executing other commands (such as a shell).  If you are unsure
+whether or not your system is capable of supporting \fInoexec\fR you
+can always just try it out and see if it works.
 .PP
 Note that disabling shell escapes is not a panacea.  Programs running
 as root are still capable of many potentially hazardous operations
