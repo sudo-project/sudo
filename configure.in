@@ -20,16 +20,18 @@ LIBOBJS=""
 AC_SUBST(LIBOBJS)dnl
 TGETPASS="tgetpass.o"
 AC_SUBST(TGETPASS)dnl
-prefix='/usr/local'
-exec_prefix='$(prefix)'
-man_prefix='$(prefix)/man'
-AC_SUBST(man_prefix)dnl
-sbin_dir='$(exec_prefix)/etc'
-AC_SUBST(sbin_dir)dnl
 MANTYPE="man"
+AC_SUBST(MANTYPE)dnl
 MAN_POSTINSTALL=""
 AC_SUBST(MAN_POSTINSTALL)dnl
-AC_SUBST(MANTYPE)dnl
+
+dnl
+dnl Override default configure dirs...
+dnl
+test "$mandir" = '${prefix}/man' && mandir='$(prefix)/man'
+test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
+test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/etc'
+test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 
 dnl
 dnl Options for --with
@@ -176,15 +178,15 @@ case "$OS" in
 		if test -z "$NROFFPROG" ; then
 		    MAN_POSTINSTALL='	/bin/rm -f $(mandir)/sudo.$(mansect).z ; /usr/bin/pack $(mandir)/sudo.$(mansect)'
 		    if test -d /usr/share/catman/local; then
-			man_prefix="/usr/share/catman/local"
+			mandir="/usr/share/catman/local"
 		    else
-			man_prefix="/usr/catman/local"
+			mandir="/usr/catman/local"
 		    fi
 		else
 		    if test -d "/usr/share/man/local" ; then
-			man_prefix="/usr/share/man/local"
+			mandir="/usr/share/man/local"
 		    else
-			man_prefix="/usr/man/local"
+			mandir="/usr/man/local"
 		    fi
 		fi
 		;;
@@ -418,6 +420,11 @@ dnl
 dnl Check for log file location
 dnl
 SUDO_LOGFILE
+
+dnl
+dnl Set exec_prefix
+dnl
+test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
 
 dnl
 dnl Substitute into the Makefiles
