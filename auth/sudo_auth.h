@@ -103,7 +103,7 @@ int securid_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
 	    pam_init, NULL, pam_verify, pam_cleanup)
 #elif defined(HAVE_SECURID)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(0, "SecurId", 
+	AUTH_ENTRY(0, "SecurId", \
 	    securid_init, securid_setup, securid_verify, NULL)
 #elif defined(HAVE_SIA)
 #  define AUTH_STANDALONE \
