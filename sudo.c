@@ -638,8 +638,8 @@ static void load_interfaces()
 	    if (errno == EADDRNOTAVAIL || errno == EAFNOSUPPORT)
 		continue;
 
-	    /* XXX - do better */
-	    perror("ioctl: SIOCGIFADDR");
+	    (void) fprintf(stderr, "%s: Error, ioctl: SIOCGIFADDR", Argv[0]);
+	    perror("");
 	    exit(1);
 	}
 	sin = (struct sockaddr_in *)&ifreq.ifr_addr;
@@ -681,8 +681,6 @@ static void load_interfaces()
 	++j;
     }
 
-    /* XXX - debugging */
-    fprintf(stderr, "there was/were %d bogus interface(s)\n", i-j);
     /* if there were bogus entries, realloc the array */
     if (i != j) {
 	interfaces = (struct interface *) realloc(interfaces,
@@ -692,17 +690,6 @@ static void load_interfaces()
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
-    }
-
-    /* XXX - debugging */
-    for (i = 0; i < j; i++) {
-	(void) memcpy(&(sin->sin_addr), &interfaces[i].addr,
-	    sizeof(struct in_addr));
-	(void) fprintf(stderr, "%s ", inet_ntoa(sin->sin_addr));
-
-	(void) memcpy(&(sin->sin_addr), &interfaces[i].netmask,
-	    sizeof(struct in_addr));
-	(void) fprintf(stderr, "%s\n", inet_ntoa(sin->sin_addr));
     }
 }
 
