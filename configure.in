@@ -79,6 +79,7 @@ case "$OS" in
 		;;
     "aix")	echo "Looks like AIX"
 		AC_DEFINE(_ALL_SOURCE)
+		STATIC_FLAGS="-Wl,-bI:./aixcrypt.exp"
 		;;
     "hp-ux")	echo "Looks like HP-UX"
 		if test "$OSREV" -lt 9 ; then
