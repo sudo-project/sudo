@@ -2,55 +2,88 @@ dnl Local m4 macors for autoconf (used by sudo)
 dnl
 dnl checks for programs
 dnl
-define(SUDO_PROG_INSTALL,
-[# Make sure to not get the incompatible SysV /etc/install, /sbin/install
-# and /usr/sbin/install, which might be in PATH before a BSD-like install,
-# or the SunOS /usr/etc/install directory, or the AIX /bin/install,
-# or the AFS install, which mishandles nonexistent args, or
-# /usr/ucb/install on SVR4, which tries to use the nonexistent group
-# `staff'.  On most BSDish systems install is in /usr/bin, not /usr/ucb
-# anyway.  Sigh.  We can always use the installbsd in $srcdir.
-if test "z${INSTALL}" = "z" ; then
-  echo checking for BSD compatible install...
-  savepath="$PATH"
-  PATH="${PATH}:${srcdir}"
-  IFS="${IFS= 	}"; saveifs="$IFS"; IFS="${IFS}:"
-  for dir in $PATH; do
-    test -z "$dir" && dir=.
-    case $dir in
-    /sbin|/etc|/usr/sbin|/usr/etc|/usr/afsws/bin|/usr/ucb) ;;
-    *)
-      if test -f $dir/installbsd; then
-	INSTALL="$dir/installbsd -c" # OSF1
-	INSTALL_PROGRAM='$(INSTALL)'
-	INSTALL_DATA='$(INSTALL) -m 644'
-	break
-      fi
-      if test -f $dir/install; then
-	if grep dspmsg $dir/install >/dev/null 2>&1; then
-	  : # AIX
-	else
-	  INSTALL="$dir/install -c"
-	  INSTALL_PROGRAM='$(INSTALL)'
-	  INSTALL_DATA='$(INSTALL) -m 644'
-	  break
-	fi
-      fi
-      ;;
-    esac
-  done
-  IFS="$saveifs"
-  PATH="$savepath"
+dnl
+dnl check for sendmail
+dnl
+AC_DEFUN(SUDO_PROG_SENDMAIL, [AC_MSG_CHECKING(checking for sendmail)
+if test -f "/usr/sbin/sendmail"; then
+    AC_MSG_RESULT(/usr/sbin/sendmail)
+    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/sbin/sendmail")
+elif test -f "/usr/lib/sendmail"; then
+    AC_MSG_RESULT(/usr/lib/sendmail)
+    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/lib/sendmail")
+elif test -f "/usr/etc/sendmail"; then
+    AC_MSG_RESULT(/usr/etc/sendmail)
+    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/etc/sendmail")
+elif test -f "/usr/local/lib/sendmail"; then
+    AC_MSG_RESULT(/usr/local/lib/sendmail)
+    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/local/lib/sendmail")
+elif test -f "/usr/local/bin/sendmail"; then
+    AC_MSG_RESULT(/usr/local/bin/sendmail)
+    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/local/bin/sendmail")
+else
+    AC_MSG_RESULT(not found)
 fi
-INSTALL=${INSTALL-cp}
-AC_SUBST(INSTALL)dnl
-test -n "$verbose" && echo "	setting INSTALL to $INSTALL"
-INSTALL_PROGRAM=${INSTALL_PROGRAM-'$(INSTALL)'}
-AC_SUBST(INSTALL_PROGRAM)dnl
-test -n "$verbose" && echo "	setting INSTALL_PROGRAM to $INSTALL_PROGRAM"
-INSTALL_DATA=${INSTALL_DATA-'$(INSTALL)'}
-AC_SUBST(INSTALL_DATA)dnl
-test -n "$verbose" && echo "	setting INSTALL_DATA to $INSTALL_DATA"
+])dnl
+dnl
+dnl check for vi
+dnl
+AC_DEFUN(SUDO_PROG_VI, [AC_MSG_CHECKING(checking for vi)
+if test -f "/usr/bin/vi"; then
+    AC_MSG_RESULT(/usr/bin/vi)
+    AC_DEFINE(_SUDO_PATH_VI, "/usr/bin/vi")
+elif test -f "/usr/ucb/vi"; then
+    AC_MSG_RESULT(/usr/ucb/vi)
+    AC_DEFINE(_SUDO_PATH_VI, "/usr/ucb/vi")
+elif test -f "/usr/bsd/vi"; then
+    AC_MSG_RESULT(/usr/bsd/vi)
+    AC_DEFINE(_SUDO_PATH_VI, "/usr/bsd/vi")
+elif test -f "/usr/local/bin/vi"; then
+    AC_MSG_RESULT(/usr/local/bin/vi)
+    AC_DEFINE(_SUDO_PATH_VI, "/usr/local/bin/vi")
+else
+    AC_MSG_RESULT(not found)
+fi
+])dnl
+dnl
+dnl check for pwd
+dnl
+AC_DEFUN(SUDO_PROG_PWD, [AC_MSG_CHECKING(checking for pwd)
+if test -f "/usr/bin/pwd"; then
+    AC_MSG_RESULT(/usr/bin/pwd)
+    AC_DEFINE(_SUDO_PATH_PWD, "/usr/bin/pwd")
+elif test -f "/bin/pwd"; then
+    AC_MSG_RESULT(/bin/pwd)
+    AC_DEFINE(_SUDO_PATH_PWD, "/bin/pwd")
+elif test -f "/usr/ucb/pwd"; then
+    AC_MSG_RESULT(/usr/ucb/pwd)
+    AC_DEFINE(_SUDO_PATH_PWD, "/usr/ucb/pwd")
+elif test -f "/usr/sbin/pwd"; then
+    AC_MSG_RESULT(/usr/sbin/pwd)
+    AC_DEFINE(_SUDO_PATH_PWD, "/usr/sbin/pwd")
+else
+    AC_MSG_RESULT(not found)
+fi
+])dnl
+dnl
+dnl check for mv
+dnl
+AC_DEFUN(SUDO_PROG_MV, [AC_MSG_CHECKING(checking for mv)
+if test -f "/usr/bin/mv"; then
+    AC_MSG_RESULT(/usr/bin/mv)
+    AC_DEFINE(_SUDO_PATH_MV, "/usr/bin/mv")
+elif test -f "/bin/mv"; then
+    AC_MSG_RESULT(/bin/mv)
+    AC_DEFINE(_SUDO_PATH_MV, "/bin/mv")
+elif test -f "/usr/ucb/mv"; then
+    AC_MSG_RESULT(/usr/ucb/mv)
+    AC_DEFINE(_SUDO_PATH_MV, "/usr/ucb/mv")
+elif test -f "/usr/sbin/mv"; then
+    AC_MSG_RESULT(/usr/sbin/mv)
+    AC_DEFINE(_SUDO_PATH_MV, "/usr/sbin/mv")
+else
+    AC_MSG_RESULT(not found)
+fi
 ])dnl
 dnl
 dnl check for fullly working void
@@ -61,63 +94,8 @@ foo = 0;], AC_DEFINE(VOID, void)
 AC_MSG_RESULT(yes), AC_DEFINE(VOID, char)
 AC_MSG_RESULT(no))])
 dnl
-dnl check for sendmail
-dnl
-define(SUDO_PROG_SENDMAIL,
-[if test -f "/usr/sbin/sendmail"; then
-    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/sbin/sendmail")
-elif test -f "/usr/lib/sendmail"; then
-    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/lib/sendmail")
-elif test -f "/usr/etc/sendmail"; then
-    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/etc/sendmail")
-elif test -f "/usr/local/lib/sendmail"; then
-    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/local/lib/sendmail")
-elif test -f "/usr/local/bin/sendmail"; then
-    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/local/bin/sendmail")
-fi
-])dnl
-dnl
-dnl check for vi
-dnl
-define(SUDO_PROG_VI,
-[if test -f "/usr/bin/vi"; then
-    AC_DEFINE(_SUDO_PATH_VI, "/usr/bin/vi")
-elif test -f "/usr/ucb/vi"; then
-    AC_DEFINE(_SUDO_PATH_VI, "/usr/ucb/vi")
-elif test -f "/usr/local/bin/vi"; then
-    AC_DEFINE(_SUDO_PATH_VI, "/usr/local/bin/vi")
-fi
-])dnl
-dnl
-dnl check for pwd
-dnl
-define(SUDO_PROG_PWD,
-[if test -f "/usr/bin/pwd"; then
-    AC_DEFINE(_SUDO_PATH_PWD, "/usr/bin/pwd")
-elif test -f "/bin/pwd"; then
-    AC_DEFINE(_SUDO_PATH_PWD, "/bin/pwd")
-elif test -f "/usr/ucb/pwd"; then
-    AC_DEFINE(_SUDO_PATH_PWD, "/usr/ucb/pwd")
-elif test -f "/usr/sbin/pwd"; then
-    AC_DEFINE(_SUDO_PATH_PWD, "/usr/sbin/pwd")
-fi
-])dnl
-dnl
-dnl check for mv
-dnl
-define(SUDO_PROG_MV,
-[if test -f "/usr/bin/mv"; then
-    AC_DEFINE(_SUDO_PATH_MV, "/usr/bin/mv")
-elif test -f "/bin/mv"; then
-    AC_DEFINE(_SUDO_PATH_MV, "/bin/mv")
-elif test -f "/usr/ucb/mv"; then
-    AC_DEFINE(_SUDO_PATH_MV, "/usr/ucb/mv")
-elif test -f "/usr/sbin/mv"; then
-    AC_DEFINE(_SUDO_PATH_MV, "/usr/sbin/mv")
-fi
-])dnl
-dnl
 dnl Check for ssize_t declation
+dnl XXX - check unistd.h too
 dnl
 AC_DEFUN(SUDO_SSIZE_T,
 [AC_CHECK_TYPE(ssize_t, int)])
@@ -125,7 +103,7 @@ dnl
 dnl check for known UNIX variants
 dnl XXX - check to see that uname was checked first
 dnl
-define(SUDO_OSTYPE,
+AC_DEFUN(SUDO_OSTYPE,
 AC_BEFORE([$0], [AC_PROGRAM_CHECK])
 [echo trying to figure out what OS you are running...
 OS="unknown"
@@ -162,7 +140,7 @@ dnl checks for UNIX variants that lack uname
 dnl
 dnl SUDO_CONVEX
 dnl
-define(SUDO_CONVEX,
+AC_DEFUN(SUDO_CONVEX,
 [echo checking for ConvexOS 
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
 $0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
@@ -174,7 +152,7 @@ $0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 dnl
 dnl SUDO_MTXINU
 dnl
-define(SUDO_MTXINU,
+AC_DEFUN(SUDO_MTXINU,
 [echo checking for MORE/BSD
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
 $0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
@@ -187,7 +165,7 @@ $0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 dnl
 dnl SUDO_NEXT
 dnl
-define(SUDO_NEXT,
+AC_DEFUN(SUDO_NEXT,
 [echo checking for NeXTstep 
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
 $0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
@@ -199,7 +177,7 @@ $0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 dnl
 dnl SUDO_BSD
 dnl
-define(SUDO_BSD,
+AC_DEFUN(SUDO_BSD,
 [echo checking for BSD 
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
 $0], [AC_EGREP_HEADER])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
