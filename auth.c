@@ -601,11 +601,10 @@ pam_attempt_auth()
 
     set_perms(PERM_ROOT, 0);
 
-    /* Initial PAM setup + use our default prompt */
+    /* Initial PAM setup */
     pam_conv.conv = sudo_conv;
     pam_conv.appdata_ptr = &null_pw;
-    if (pam_start("sudo", user_name, &pam_conv, &pamh) != PAM_SUCCESS ||
-	pam_set_item(pamh, PAM_USER_PROMPT, (void *) prompt) != PAM_SUCCESS) {
+    if (pam_start("sudo", user_name, &pam_conv, &pamh) != PAM_SUCCESS) {
 	set_perms(PERM_USER, 0);
 	log_error(BAD_AUTH_INIT);
 	inform_user(BAD_AUTH_INIT);
@@ -656,6 +655,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 {
     struct pam_response *pr;
     struct pam_message *pm;
+    char *p = prompt;
     int echo = 0;
 
     if ((*response = malloc(num_msg * sizeof(struct pam_response))) == NULL)
@@ -667,7 +667,10 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 	    case PAM_PROMPT_ECHO_ON:
 		echo = 1;
 	    case PAM_PROMPT_ECHO_OFF:
-		pr->resp = estrdup((char *) GETPASS(pm->msg,
+		/* Override default prompt for unix auth */
+		if (strcmp(p, "Password: ") && strcmp(p, "Password:"))
+		    p = (char *) pm->msg;
+		pr->resp = estrdup((char *) GETPASS(p,
 		    PASSWORD_TIMEOUT * 60, !echo));
 		/* Solaris PAM does not pass through appdata_ptr! */
 		if (pr->resp[0] == '\0' && appdata_ptr != NULL)
