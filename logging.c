@@ -444,6 +444,7 @@ static void send_mail()
     char *mailer = MAILER;
     char *subject = MAILSUBJECT;
     int fd[2];
+    char *p;
 #ifdef POSIX_SIGNALS
     struct sigaction action;
 
@@ -498,8 +499,18 @@ static void send_mail()
 
 	/* feed the data to sendmail */
 	/* XXX - do we need to fdopen this fd #1 to a new stream??? */
-	(void) fprintf(stdout, "To: %s\nSubject: %s\n\n%s : %s\n\n",
-		ALERTMAIL, subject, host, logline);
+	(void) fprintf(stdout, "To: %s\nSubject: ", ALERTMAIL);
+	p = subject;
+	while (*p) {
+	    /* expand %h -> hostname in subject */
+	    if (*p == '%' && *(p+1) == 'h') {
+		(void) fputs(host, stdout);
+		p++;
+	    } else
+		(void) fputc(*p, stdout);
+	    p++;
+	}
+	(void) fprintf(stdout, "\n\n%s : %s\n\n", host, logline);
 	fclose(stdout);
 
 	exit(0);
