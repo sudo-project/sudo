@@ -23,7 +23,7 @@
  *  This module contains sudo_getpwuid(), a function that
  *  Makes a dynamic copy of the struct passwd returned by
  *  getpwuid() and substitutes the shadow password if
- *  necesary.
+ *  necessary.
  *
  *  Todd C. Miller  Mon Nov 20 13:53:06 MST 1995
  */

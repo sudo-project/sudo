@@ -66,14 +66,6 @@
 #include <sys/ioctl.h>
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
-#ifdef HAVE_GETPRPWNAM
-#  ifdef __hpux
-#    include <hpsecurity.h>
-#  else
-#    include <sys/security.h>
-#  endif /* __hpux */
-#  include <prot.h>			/* for AUTH_MAX_PASSWD_LENGTH */
-#endif /* HAVE_GETPRPWNAM */
 
 #include <pathnames.h>
 #include "compat.h"
@@ -118,7 +110,7 @@ tgetpass(prompt, timeout)
 #endif /* POSIX_SIGNALS */
     int n, echo;
     FILE *input, *output;
-    static char buf[_PASSWD_LEN + 1];
+    static char buf[SUDO_PASS_MAX + 1];
     fd_set *readfds;
     struct timeval tv;
 
@@ -150,7 +142,7 @@ tgetpass(prompt, timeout)
     if (prompt)
 	fputs(prompt, output);
 
-    /* rewind if necesary */
+    /* rewind if necessary */
     if (input == output) {
 	(void) fflush(output);
 	(void) rewind(output);
@@ -241,7 +233,7 @@ tgetpass(prompt, timeout)
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
-    /* rewind if necesary */
+    /* rewind if necessary */
     if (input == output) {
 	(void) fflush(output);
 	(void) rewind(output);

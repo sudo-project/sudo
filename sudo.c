@@ -412,8 +412,8 @@ load_globals(sudo_mode)
 
     /*
      * Get a local copy of the user's struct passwd with the shadow password
-     * if necesary.  It is assumed that euid is 0 at this point so we
-     * can read the shadow passwd file if necesary.
+     * if necessary.  It is assumed that euid is 0 at this point so we
+     * can read the shadow passwd file if necessary.
      */
     if ((user_pw_ent = sudo_getpwuid(getuid())) == NULL) {
 	/* need to make a fake user_pw_ent */

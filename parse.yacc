@@ -559,7 +559,7 @@ cmndalias	:	ALIAS {
 			    push;
 			    if (printmatches == TRUE) {
 				in_alias = TRUE;
-				/* Allocate space for ga_list if necesary. */
+				/* Allocate space for ga_list if necessary. */
 				expand_ga_list();
 				ga_list[ga_list_len-1].alias = estrdup($1);
 			     }
@@ -587,7 +587,7 @@ runasalias	:	ALIAS {
 			    push;
 			    if (printmatches == TRUE) {
 				in_alias = TRUE;
-				/* Allocate space for ga_list if necesary. */
+				/* Allocate space for ga_list if necessary. */
 				expand_ga_list();
 				ga_list[ga_list_len-1].alias = estrdup($1);
 			    }
@@ -936,7 +936,7 @@ append(src, dstp, dst_len, dst_size, separator)
 	*dstp = dst;
     }
 
-    /* Allocate more space if necesary. */
+    /* Allocate more space if necessary. */
     if (*dst_size <= *dst_len + src_len) {
 	while (*dst_size <= *dst_len + src_len)
 	    *dst_size += BUFSIZ;
@@ -977,7 +977,7 @@ reset_aliases()
  *
  * expand_ga_list()
  *
- *  This function increments ga_list_len, allocating more space as necesary.
+ *  This function increments ga_list_len, allocating more space as necessary.
  */
 
 static void
@@ -998,7 +998,7 @@ expand_ga_list()
  *
  * expand_match_list()
  *
- *  This function increments cm_list_len, allocating more space as necesary.
+ *  This function increments cm_list_len, allocating more space as necessary.
  */
 
 static void

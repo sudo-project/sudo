@@ -93,31 +93,12 @@
 #endif
 
 /*
- * We need to know how long the longest password may be.
- * For alternate password schemes we need longer passwords.
- * This is a bit, ummm, gross but necesary.
+ * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
+ * but that caused problems with various alternate authentication
+ * methods.  So, we just define our own and assume that it is >= the
+ * system max.
  */
-#if defined(HAVE_KERB4) || defined(HAVE_AFS) || defined(HAVE_DCE) || defined(HAVE_SKEY) || defined(HAVE_OPIE)
-#  undef _PASSWD_LEN
-#  define _PASSWD_LEN		256
-#else
-#  ifdef  HAVE_GETPRPWNAM
-#    undef _PASSWD_LEN
-#    define _PASSWD_LEN		AUTH_MAX_PASSWD_LENGTH
-#  else
-#    ifndef _PASSWD_LEN
-#      ifdef PASS_MAX
-#        define _PASSWD_LEN	PASS_MAX
-#      else
-#        if (SHADOW_TYPE != SPW_NONE)
-#          define _PASSWD_LEN	24
-#        else
-#          define _PASSWD_LEN	8
-#        endif /* SHADOW_TYPE != SPW_NONE */
-#      endif /* PASS_MAX */
-#    endif /* !_PASSWD_LEN */
-#  endif /* HAVE_GETPRPWNAM */
-#endif /* HAVE_KERB4 || HAVE_AFS || HAVE_DCE || HAVE_SKEY || HAVE_OPIE */
+#define SUDO_PASS_MAX	256
 
 /*
  * Some OS's lack these

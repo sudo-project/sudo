@@ -86,7 +86,7 @@ extern int errorlineno;
  *  syslog_wrapper()
  *
  *  This function logs via syslog w/ a priority and 3 strings args.
- *  It really shouldn't be necesary but some syslog()'s don't
+ *  It really shouldn't be necessary but some syslog()'s don't
  *  guarantee that the syslog() operation will succeed!
  */
 
@@ -154,7 +154,7 @@ log_error(code)
 
     /*
      * we will skip this stuff when using syslog(3) but it is
-     * necesary for mail and file logs.
+     * necessary for mail and file logs.
      */
     now = time((time_t) 0);
     p = ctime(&now) + 4;
@@ -321,7 +321,7 @@ log_error(code)
 #endif /* Syslog_facility */
 
     /*
-     * Log the full line, breaking into multiple syslog(3) calls if necesary
+     * Log the full line, breaking into multiple syslog(3) calls if necessary
      */
     p = &logline[header_length];	/* skip past the date, host, and user */
     for (count = 0; count < strlen(logline) / MAXSYSLOGLEN + 1; count++) {

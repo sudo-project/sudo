@@ -11,53 +11,51 @@ TODO list (most will be addressed in the next rewrite)
 
 05) Add a -h (?) flag to sudo for a history mechanism.
 
-06) Make parse.lex in the same coding style as everything else...
+06) Add an option to hard-code LD_LIBRARY_PATH?
 
-07) Add an option to hard-code LD_LIBRARY_PATH?
+07) Add Prog_Alias facility (Prog_Alias VI = /usr/secure/bin/vi +args).
 
-08) Add Prog_Alias facility (Prog_Alias VI = /usr/secure/bin/vi +args).
+08) check for <net/errno.h> in configure and include it in sudo.c if it exists.
 
-09) check for <net/errno.h> in configure and include it in sudo.c if it exists.
+09) Add generic STREAMS support for getting interfaces and netmasks.
 
-10) Add generic STREAMS support for getting interfaces and netmasks.
-
-11) Do all the environment variable additions in one fell swoop for
+10) Do all the environment variable additions in one fell swoop for
     efficiency and speed.
 
-12) Catch/ignore signals in sudo?
+11) Catch/ignore signals in sudo?
 
-13) Make -p work with -v and -l in any order.
-
-14) Add support for "safe scripts" by checking for shell script
+12) Add support for "safe scripts" by checking for shell script
     cookie (first two bytes are "#!") and execing the shell outselves
     after doing the stat to guard against spoofing.  This should avoid
     the race condition caused by going through namei() twice...
 
-15) Sudo should not allow someone with a nil password to run commands.
+13) Sudo should not allow someone with a nil password to run commands.
 
-16) Overhaul testsudoers to use parse.o so we don't reimplement things.
+14) Overhaul testsudoers to use parse.o so we don't reimplement things.
 
-17) Make runas_user a struct "runas" with user and group components.
+15) Make runas_user a struct "runas" with user and group components.
     (make uid and gid too???)
 
-18) Add -g group/gid option.
+16) Add -g group/gid option.
 
-19) Should be able to mix Cmnd_Alias's and command args.  Ie:
+17) Should be able to mix Cmnd_Alias's and command args.  Ie:
 	pete   ALL=PASSWD [A-z]*,!PASSWD root
     where PASSWD was defined to be /usr/bin/passwd.
     This requires the arg parsing to happen in the yacc grammer.
 
-20) Add a per-tty restriction?  Ie: only can run foo from /dev/console.
+18) Add a per-tty restriction?  Ie: only can run foo from /dev/console.
 
-21) Use popen.c instead of rolling own in logging.c
+19) Use popen.c instead of rolling own in logging.c
     Need to make popen.c portable first...
 
-22) Add test for how to read ether interfaces in configure script
+20) Add test for how to read ether interfaces in configure script
 
-23) Add configure check for $(CC) -R and use it in addition to -L
+21) Add configure check for $(CC) -R and use it in addition to -L
 
-24) An option to make "sudo -s" use the target user's shell might be nice
+22) An option to make "sudo -s" use the target user's shell might be nice
     (and more like su).
 
-25) Sudo should have a separate error message for when the user is in sudoers
+23) Sudo should have a separate error message for when the user is in sudoers
     but not allowed to run stuff on that host, and send mail.
+
+24) Break authentication stuff out of check.c into auth.c

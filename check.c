@@ -595,7 +595,7 @@ check_passwd()
     char *pass;			/* this is what gets entered */
     int counter = TRIES_FOR_PASSWORD;
 #if defined(HAVE_KERB4) && defined(USE_GETPASS)
-    char kpass[_PASSWD_LEN + 1];
+    char kpass[SUDO_PASS_MAX + 1];
 #endif /* HAVE_KERB4 && USE_GETPASS */
 #ifdef HAVE_AUTHENTICATE
     char *message;

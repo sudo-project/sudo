@@ -516,6 +516,9 @@ Digital UNIX:
 	#ifdef __cplusplus
     to:
 	#if defined(__cplusplus) || defined(__GNUC__)
+    If you don't like the idea of editing the system header file
+    you can just make a copy in gcc's private include tree and
+    edit that.
 
 Linux:
     One person reported that he needed to run configure with
