@@ -1134,7 +1134,7 @@ case "$host" in
 
 		# check for password adjunct functions (shadow passwords)
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_FUNC(getpwanam, AC_DEFINE(HAVE_GETPWANAM) AC_CHECK_FUNCS(issecure))
+		    AC_CHECK_FUNCS(getpwanam issecure, , [break])
 		    CHECKSHADOW="false"
 		fi
 		;;
@@ -1299,8 +1299,8 @@ case "$host" in
 		if test -n "$SECUREWARE"; then
 		    AC_DEFINE(HAVE_GETPRPWNAM)
 		    # -ldb includes bogus versions of snprintf/vsnprintf
-		    AC_CHECK_FUNC(snprintf, AC_DEFINE(HAVE_SNPRINTF), NEED_SNPRINTF=1)
-		    AC_CHECK_FUNC(vsnprintf, AC_DEFINE(HAVE_VSNPRINTF), NEED_SNPRINTF=1)
+		    AC_CHECK_FUNCS(snprintf, , [NEED_SNPRINTF=1])
+		    AC_CHECK_FUNCS(vsnprintf, , [NEED_SNPRINTF=1])
 		    # 4.x and higher need -ldb too...
 		    AC_CHECK_LIB(db, dbopen, [SUDO_LIBS="${SUDO_LIBS} -lsecurity -ldb -laud -lm"; LIBS="${LIBS} -lsecurity -ldb -laud -lm"], [SUDO_LIBS="${SUDO_LIBS} -lsecurity -ldb -laud -lm"; LIBS="${LIBS} -lsecurity -ldb -laud -lm"])
 		    AC_CHECK_FUNCS(dispcrypt)
@@ -1356,7 +1356,7 @@ case "$host" in
 
 		# Some Linux versions need to link with -lshadow
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_FUNC(getspnam, AC_DEFINE(HAVE_GETSPNAM), AC_CHECK_LIB(shadow, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lshadow"; LIBS="${LIBS} -lshadow"]))
+		    AC_CHECK_FUNCS(getspnam, , [AC_CHECK_LIB(shadow, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lshadow"; LIBS="${LIBS} -lshadow"])])
 		    CHECKSHADOW="false"
 		fi
 		;;
@@ -1487,10 +1487,10 @@ dnl Check for shadow password routines if we have not already done so.
 dnl We check for SVR4-style first and then SecureWare-style.
 dnl
 if test "$CHECKSHADOW" = "true"; then
-    AC_CHECK_FUNC(getspnam, AC_DEFINE(HAVE_GETSPNAM) [CHECKSHADOW="false"])
+    AC_CHECK_FUNCS(getspnam, [CHECKSHADOW="false"])
 fi
 if test "$CHECKSHADOW" = "true"; then
-    AC_CHECK_FUNC(getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1], AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"], AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"], AC_CHECK_LIB(prot, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lprot"; LIBS="${LIBS} -lprot"]))))
+    AC_CHECK_FUNC(getprpwnam, [AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1], AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"], AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"], AC_CHECK_LIB(prot, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lprot"; LIBS="${LIBS} -lprot"])))])
 fi
 
 dnl
@@ -1550,7 +1550,8 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset seteuid setegid strftime setrlimit initgroups fstat)
+AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset \
+	       seteuid setegid strftime setrlimit initgroups fstat)
 if test -z "$BROKEN_SETREUID"; then
     AC_CHECK_FUNCS(setreuid)
 fi
@@ -1558,55 +1559,49 @@ if test X"$with_interfaces" != X"no"; then
     AC_CHECK_FUNCS(getifaddrs)
 fi
 if test -n "$SECUREWARE"; then
-    AC_CHECK_FUNCS(bigcrypt)
-    AC_CHECK_FUNCS(set_auth_parameters)
-    AC_CHECK_FUNCS(initprivs)
+    AC_CHECK_FUNCS(bigcrypt set_auth_parameters initprivs)
 fi
 if test -z "$BROKEN_GETCWD"; then
-    AC_CHECK_FUNC(getcwd, AC_DEFINE(HAVE_GETCWD), LIBOBJS="$LIBOBJS getcwd.o")
+    AC_REPLACE_FUNCS(getcwd)
 fi
-AC_CHECK_FUNC(lockf, AC_DEFINE(HAVE_LOCKF), AC_CHECK_FUNCS(flock))
-AC_CHECK_FUNC(waitpid, AC_DEFINE(HAVE_WAITPID), AC_CHECK_FUNCS(wait3))
-AC_CHECK_FUNC(innetgr, AC_DEFINE(HAVE_INNETGR) AC_CHECK_FUNCS(getdomainname), [AC_CHECK_FUNC(_innetgr, AC_DEFINE(HAVE__INNETGR) AC_CHECK_FUNCS(getdomainname))])
-AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) [LIBS="${LIBS} -lcompat"], LIBOBJS="$LIBOBJS lsearch.o"), LIBOBJS="$LIBOBJS lsearch.o"))
-AC_CHECK_FUNC(utime, AC_DEFINE(HAVE_UTIME)
-SUDO_FUNC_UTIME_POSIX, LIBOBJS="$LIBOBJS utime.o")
-SUDO_FUNC_FNMATCH(AC_DEFINE(HAVE_FNMATCH), LIBOBJS="$LIBOBJS fnmatch.o")
+AC_CHECK_FUNCS(lockf flock, [break])
+AC_CHECK_FUNCS(waitpid wait3, [break])
+AC_CHECK_FUNCS(innetgr _innetgr, AC_CHECK_FUNCS(getdomainname) [break])
+AC_CHECK_FUNCS(lsearch, , [AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) [LIBS="${LIBS} -lcompat"], AC_LIBOBJ(lsearch)), AC_LIBOBJ(lsearch))])
+AC_CHECK_FUNCS(utime, SUDO_FUNC_UTIME_POSIX, AC_LIBOBJ(utime))
+SUDO_FUNC_FNMATCH(AC_DEFINE(HAVE_FNMATCH), AC_LIBOBJ(fnmatch))
 AC_REPLACE_FUNCS(strerror strcasecmp)
-AC_CHECK_FUNC(snprintf, AC_DEFINE(HAVE_SNPRINTF), NEED_SNPRINTF=1)
-AC_CHECK_FUNC(vsnprintf, AC_DEFINE(HAVE_VSNPRINTF), NEED_SNPRINTF=1)
-AC_CHECK_FUNC(asprintf, AC_DEFINE(HAVE_ASPRINTF), NEED_SNPRINTF=1)
-AC_CHECK_FUNC(vasprintf, AC_DEFINE(HAVE_VASPRINTF), NEED_SNPRINTF=1)
+AC_CHECK_FUNCS(snprintf vsnprintf asprintf vasprintf, , [NEED_SNPRINTF=1])
 dnl
 dnl If NEED_SNPRINTF is set, add snprintf.c to LIBOBJS
 dnl (it contains snprintf, vsnprintf, asprintf, and vasprintf)
 dnl
 if test -n "$NEED_SNPRINTF"; then
-    LIBOBJS="$LIBOBJS snprintf.o"
+    AC_LIBOBJ(snprintf)
 fi
 dnl
 dnl if crypt(3) not in libc, look elsewhere
 dnl
 if test -z "$LIB_CRYPT"; then
-    AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, [SUDO_LIBS="${SUDO_LIBS} -lcrypt"; LIBS="${LIBS} -lcrypt"], AC_CHECK_LIB(crypt_d, crypt, [SUDO_LIBS="${SUDO_LIBS} -lcrypt_d"; LIBS="${LIBS} -lcrypt_d"], AC_CHECK_LIB(ufc, crypt, [SUDO_LIBS="${SUDO_LIBS} -lufc"; LIBS="${LIBS} -lufc"]))))
+    AC_CHECK_FUNC(crypt, , [AC_CHECK_LIB(crypt, crypt, [SUDO_LIBS="${SUDO_LIBS} -lcrypt"; LIBS="${LIBS} -lcrypt"], AC_CHECK_LIB(crypt_d, crypt, [SUDO_LIBS="${SUDO_LIBS} -lcrypt_d"; LIBS="${LIBS} -lcrypt_d"], AC_CHECK_LIB(ufc, crypt, [SUDO_LIBS="${SUDO_LIBS} -lufc"; LIBS="${LIBS} -lufc"])))])
 fi
 dnl
 dnl If socket(2) not in libc, check -lsocket and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl In this case we look for main(), not socket() to avoid using a cached value
 dnl
-AC_CHECK_FUNC(socket, ,AC_CHECK_LIB(socket, socket, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(inet, socket, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find socket() trying -lsocket -lnsl)
-AC_CHECK_LIB(socket, socket, [NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl))))
+AC_CHECK_FUNC(socket, , [AC_CHECK_LIB(socket, socket, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(inet, socket, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find socket() trying -lsocket -lnsl)
+AC_CHECK_LIB(socket, socket, [NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl)))])
 dnl
 dnl If inet_addr(3) not in libc, check -lnsl and -linet
 dnl May need to link with *both* -lnsl and -lsocket due to unresolved symbols
 dnl
-AC_CHECK_FUNC(inet_addr, , AC_CHECK_FUNC(__inet_addr, , AC_CHECK_LIB(nsl, inet_addr, [NET_LIBS="${NET_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, inet_addr, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find inet_addr() trying -lsocket -lnsl)
-AC_CHECK_LIB(socket, inet_addr, [NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl)))))
+AC_CHECK_FUNC(inet_addr, , [AC_CHECK_FUNC(__inet_addr, , AC_CHECK_LIB(nsl, inet_addr, [NET_LIBS="${NET_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, inet_addr, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"], AC_MSG_WARN(unable to find inet_addr() trying -lsocket -lnsl)
+AC_CHECK_LIB(socket, inet_addr, [NET_LIBS="${NET_LIBS} -lsocket -lnsl"; LIBS="${LIBS} -lsocket -lnsl"], , -lnsl))))])
 dnl
 dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
 dnl
-AC_CHECK_FUNC(syslog, ,AC_CHECK_LIB(socket, syslog, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(nsl, syslog, [NET_LIBS="${NET_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, syslog, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"]))))
+AC_CHECK_FUNC(syslog, , [AC_CHECK_LIB(socket, syslog, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(nsl, syslog, [NET_LIBS="${NET_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, syslog, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"])))])
 dnl
 dnl Bison and DCE use alloca(3), if not in libc, use the sudo one (from gcc)
 dnl (gcc includes its own alloca(3) but other compilers may not)
