@@ -29,8 +29,8 @@
 #ifndef _SUDO_SUDO_H
 #define _SUDO_SUDO_H
 
-#include "compat.h"		/* XXX - should this be here? */
-#include "pathnames.h"		/* XXX - should this be here? */
+#include "compat.h"
+#include "pathnames.h"
 
 /* Max length for a command */
 #define MAXCOMMANDLENGTH	MAXPATHLEN
@@ -158,7 +158,7 @@ int putenv		__P((const char *));
 char *sudo_realpath	__P((const char *, char *));
 int sudo_setenv		__P((char *, char *));
 char *tgetpass		__P((char *, int));
-char *find_path		__P((char *));
+int find_path		__P((char *, char **, char **));
 void log_error		__P((int));
 void inform_user	__P((int));
 void check_user		__P((void));
@@ -183,6 +183,7 @@ extern struct interface *interfaces;
 extern int num_interfaces;
 extern char *user;
 extern char *epasswd;
+extern char *ocmnd;
 extern char *cmnd;
 extern int Argc;
 extern char **Argv;
