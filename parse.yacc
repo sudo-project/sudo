@@ -42,6 +42,7 @@ static char rcsid[] = "$Id$";
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/param.h>
+#include "config.h"
 #include "sudo.h"
 
 extern int yylineno;
