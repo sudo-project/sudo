@@ -218,15 +218,15 @@ goodpath.o: goodpath.c $(SUDODEP)
 logging.o: logging.c $(SUDODEP)
 set_perms.o: set_perms.c $(SUDODEP)
 tgetpass.o: tgetpass.c $(SUDODEP)
-visudo.o: visudo.c $(SUDODEP) version.h
+visudo.o: visudo.c $(SUDODEP) version.h gram.h
 sudo.o: sudo.c $(SUDODEP) interfaces.h version.h
 interfaces.o: interfaces.c $(SUDODEP) interfaces.h
-testsudoers.o: testsudoers.c $(SUDODEP) parse.h interfaces.h
-match.o: match.c $(SUDODEP) parse.h interfaces.h
-parse.o: parse.c $(SUDODEP) parse.h
+testsudoers.o: testsudoers.c $(SUDODEP) parse.h interfaces.h gram.h
+match.o: match.c $(SUDODEP) parse.h interfaces.h gram.h
+parse.o: parse.c $(SUDODEP) parse.h gram.h
 toke.o: toke.c $(SUDODEP) parse.h gram.h
 gram.o: gram.c $(SUDODEP) parse.h gram.c gram.h redblack.h
-defaults.o: defaults.c $(SUDODEP) def_data.c auth/sudo_auth.h
+defaults.o: defaults.c $(SUDODEP) def_data.c auth/sudo_auth.h gram.h
 fnmatch.o: fnmatch.c config.h compat.h emul/fnmatch.h
 getcwd.o: getcwd.c config.h compat.h
 snprintf.o: snprintf.c config.h compat.h
