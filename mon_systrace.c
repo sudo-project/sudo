@@ -477,6 +477,7 @@ read_string(fd, pid, addr, buf, bufsiz)
 		break;
 	    }
 	    cp += chunksiz;
+	    addr += chunksiz;
 	    bufsiz -= chunksiz;
 	} else {
 	    if (errno != EINVAL || chunksiz == 4)
