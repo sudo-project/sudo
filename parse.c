@@ -213,6 +213,19 @@ display_privs(pw)
     struct userspec *us;
     struct cmndtag tags;
 
+#if defined(HAVE_INITGROUPS) && defined(HAVE_GETGROUPS)
+    /* Set group vector so group matching works correctly. */
+    if (pw != sudo_user.pw) {
+       (void) initgroups(pw->pw_name, pw->pw_gid);
+       if ((user_ngroups = getgroups(0, NULL)) > 0) {
+	   user_groups = erealloc3(user_groups, user_ngroups, sizeof(gid_t));
+	   if (getgroups(user_ngroups, user_groups) < 0)
+	       log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
+       } else
+	   user_ngroups = 0;
+    }
+#endif
+
     display_defaults(pw);
 
     print_priv4("\n", "User ", pw->pw_name,

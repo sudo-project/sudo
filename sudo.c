@@ -872,10 +872,6 @@ parse_args(argc, argv)
 		    usage(1);
 		if ((list_pw = sudo_getpwnam(NewArgv[1])) == NULL)
 		    errorx(1, "unknown user %s", NewArgv[1]);
-#ifdef HAVE_INITGROUPS
-		/* Set group vector so group matching works correctly. */
-		(void) initgroups(list_pw->pw_name, list_pw->pw_gid);
-#endif
 		NewArgc--;
 		NewArgv++;
 		break;
