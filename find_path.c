@@ -99,7 +99,9 @@ char * find_path(file)
     char *path = NULL;		/* contents of PATH env var */
     char *origpath;		/* so we can free path later */
     char *result = NULL;	/* result of path/file lookup */
+#ifndef NO_DOT_PATH
     int checkdot = 0;		/* check current dir? */
+#endif /* NO_DOT_PATH */
 
     command[0] = '\0';
 
@@ -148,7 +150,9 @@ char * find_path(file)
 	 * things like using './' or './/' 
 	 */
 	if (*path == '\0' || (*path == '.' && *(path + 1) == '\0')) {
+#ifndef NO_DOT_PATH
 	    checkdot = 1;
+#endif /* NO_DOT_PATH */
 	    path = n + 1;
 	    continue;
 	}
@@ -169,11 +173,13 @@ char * find_path(file)
 
     } while (n);
 
+#ifndef NO_DOT_PATH
     /*
      * check current dir if dot was in the PATH
      */
     if (!result && checkdot)
 	result = sudo_goodpath(file);
+#endif /* NO_DOT_PATH */
 
     (void) free(origpath);
 

@@ -153,6 +153,11 @@ SECURE_PATH
     NOTE: SECURE_PATH is not applied to users in the EXEMPTGROUP.
     This is off by default.
 
+NO_DOT_PATH
+    If defined, sudo will ignore '.' or '' (current dir) in $PATH.
+    The $PATH itself is not modified.
+    This is off by default.
+
 USE_EXECV
     Use execv() to exec the command instead of execvp().  I can't think of
     a reason to actually do this since execvp() is passed a fully qualified
