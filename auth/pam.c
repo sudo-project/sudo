@@ -116,7 +116,32 @@ pam_verify(pw, prompt, auth)
     *pam_status = pam_authenticate(pamh, PAM_SILENT);
     switch (*pam_status) {
 	case PAM_SUCCESS:
-	    return(AUTH_SUCCESS);
+	    *pam_status = pam_acct_mgmt(pamh, PAM_SILENT);
+	    switch (*pam_status) {
+		case PAM_SUCCESS:
+		    return(AUTH_SUCCESS);
+		case PAM_AUTH_ERR:
+		    log_error(NO_EXIT|NO_MAIL, "pam_acct_mgmt: %d",
+			*pam_status);
+		    return(AUTH_FAILURE);
+		case PAM_NEW_AUTHTOK_REQD:
+		    log_error(NO_EXIT|NO_MAIL, "%s, %s"
+			"Account or password is expired",
+			"reset your password and try again");
+		    *pam_status = pam_chauthtok(pamh, PAM_CHANGE_EXPIRED_AUTHTOK);
+		    if (*pam_status == PAM_SUCCESS)
+			return(AUTH_SUCCESS);
+		    if ((s = pam_strerror(pamh, *pam_status)))
+			log_error(NO_EXIT|NO_MAIL, "pam_chauthtok: %s",s);
+		    return(AUTH_FAILURE);
+		case PAM_ACCT_EXPIRED:
+		    log_error(NO_EXIT|NO_MAIL, "%s, %s"
+			"Account or password is expired",
+			"contact your system administrator");
+		    /* FALLTHROUGH */
+		default:
+		    return(AUTH_FAILURE);
+	    }
 	case PAM_AUTH_ERR:
 	case PAM_MAXTRIES:
 	    return(AUTH_FAILURE);
