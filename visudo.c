@@ -104,7 +104,7 @@ int NewArgc = 0;
 char *sudoers = _PATH_SUDO_SUDOERS;
 char *stmp = _PATH_SUDO_STMP;
 int parse_error = FALSE;
-
+char *runas_user = NULL;
 
 /*
  * For the parsing routines
@@ -131,7 +131,6 @@ int main(argc, argv)
     int sudoers_fd;			/* sudoers file descriptor */
     int stmp_fd;			/* stmp file descriptor */
     int n;				/* length parameter */
-    struct passwd *pwd;			/* to look up info for SUDOERS_OWNER */
 
     (void) setbuf(stderr, (char *)NULL);	/* unbuffered stderr */
 
@@ -154,6 +153,9 @@ int main(argc, argv)
     else if (argc != 1)
 	usage();
 
+    /* user_pw_ent needs to point to something... */
+    user_pw_ent = getpwuid(getuid());
+
 #ifdef ENV_EDITOR
     /*
      * If we are allowing EDITOR and VISUAL envariables set Editor
@@ -163,19 +165,6 @@ int main(argc, argv)
 	if (!(Editor = getenv("VISUAL")))
 	    Editor = EDITOR;
 #endif /* ENV_EDITOR */
-
-    /*
-     * Need to find who should own the sudoers file
-     */
-    if (!(pwd = getpwnam(SUDOERS_OWNER))) {
-	(void) fprintf(stderr,
-		       "%s:  no passwd entry for sudoers file owner (%s)\n",
-		       Argv[0], SUDOERS_OWNER);
-	exit(1);
-    }
-
-    /* user_pw_ent needs to be defined to _something_, this will do */
-    user_pw_ent = pwd;
 
     /*
      * Copy sudoers file to stmp
@@ -216,12 +205,13 @@ int main(argc, argv)
     (void) close(stmp_fd);
 
     /*
-     * Change ownership of temp file to SUDOERS_OWNER
+     * Change ownership of temp file to SUDOERS_UID, SUDOERS_GID
      * so when we move it to sudoers things are kosher.
      */
-    if (chown(stmp, pwd -> pw_uid, -1)) {
-	(void) fprintf(stderr, "%s: Warning, unable to set owner to %s: ",
-	    Argv[0], SUDOERS_OWNER);
+    if (chown(stmp, SUDOERS_UID, SUDOERS_GID)) {
+	(void) fprintf(stderr,
+	    "%s: Warning, unable to set (uid, gid) to (%d, %d): ",
+	    Argv[0], SUDOERS_UID, SUDOERS_GID);
 	perror("");
     }
 
@@ -350,9 +340,10 @@ int main(argc, argv)
      * Make the new sudoers file readable only by owner.
      * If this fail it is ok since the file is only least rw owner.
      */
-    if (chmod(sudoers, 0400)) {
-	(void) fprintf(stderr, "%s: Warning, unable to chmod 0400 %s: ",
-	    Argv[0], sudoers);
+    if (chmod(sudoers, SUDOERS_MODE)) {
+	(void) fprintf(stderr,
+	    "%s: Warning, unable to change mode of %s to %o: ",
+	    Argv[0], sudoers, SUDOERS_MODE);
 	perror("");
     }
 
