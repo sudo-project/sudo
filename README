@@ -35,8 +35,9 @@ NOTE: Starting with sudo 1.5.7 the configuration method has changed
 
 System requirements
 ===================
-Sudo requires a machine running UN*X (most flavors of BSD, SYSV,
-or POSIX will do), a working C compiler, and the make utility.
+To build sudo from the source distribution you need a machine running
+UN*X (most flavors of BSD, SYSV, or POSIX will do), a working C
+compiler, and the make utility.
 
 If you wish to modify the parser then you will need flex version
 2.5.2 or later and either bison or byacc (sudo comes with a
