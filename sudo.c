@@ -639,8 +639,6 @@ static void add_env()
  *  This function sets the cmnd and cmnd_args global variables based on Argv
  */
 
-#define ARG_INC	BUFSIZ
-
 static void load_cmnd(sudo_mode)
     int sudo_mode;
 {
@@ -670,30 +668,32 @@ static void load_cmnd(sudo_mode)
      * Find the length of cmnd_args and allocate space, then fill it in.
      */
     if (Argc > arg_start) {
-	int len=0;			/* sum length of all args */
-	char **cur_arg;			/* current command line arg */
-	char *pos;			/* position in the cmnd_args string */
+	size_t arg_len;			/* sum length of all args */
+	char *from, *to;		/* loop variables for string copy */
+	int i;				/* venerable loop variable */
 
-	/* how much space do we need? */
-	for (cur_arg = &Argv[arg_start]; *cur_arg; cur_arg++) {
-	    len += strlen(*cur_arg) + 1;
-	}
+	/*
+	 * How much space do we need?
+	 * This assumes that Argv (aka argv) is contiguous.
+	 */
+	arg_len = (size_t) Argv[Argc-1] + strlen(Argv[Argc-1]) + 1 -
+		  (size_t) Argv[arg_start];
 
-	if ((pos = cmnd_args = (char *) malloc(len)) == NULL) {
+	if ((cmnd_args = (char *) malloc(arg_len)) == NULL) {
 	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
 
 	/*
-	 * It would be quicker to store the result of strlen() in
-	 * an array when it is computed the first time (above).
-	 * Then we wouldn't need to duplicate the effort... XXX
+	 * Copy from Argv to cmnd_args, replacing NULL's with spaces.
+	 * This assumes that Argv (aka argv) is contiguous.
 	 */
-	for (cur_arg = &Argv[arg_start]; *cur_arg; cur_arg++) {
-	    (void) strcpy(pos, *cur_arg);
-	    pos += strlen(*cur_arg);
+	for (i=0, to=cmnd_args, from=Argv[arg_start]; i < arg_len; i++) {
+	    if ((*to++ = *from++) == NULL)
+		*(to-1) = ' ';
 	}
+	cmnd_args[arg_len-1] = '\0';		/* need a NULL at the end */
     }
 
     /*
