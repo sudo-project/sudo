@@ -1309,7 +1309,7 @@ case "$host" in
 		# use SIA by default, if we have it, else SecureWare
 		# unless overridden on the command line
 		if test "$CHECKSIA" = "true"; then
-		    AC_CHECK_FUNC(sia_ses_init, AC_DEFINE(HAVE_SIA, 1, [Define if you use SIA.]) [
+		    AC_CHECK_FUNC(sia_ses_init, [AC_DEFINE(HAVE_SIA, 1, [Define if you use SIA.])] [
 		    if test -n "$with_skey" -o -n "$with_opie" -o -n "$with_otp_only" -o -n "$with_long_otp_prompt" -o -n "$with_SecurID" -o -n "$with_fwtk" -o -n "$with_kerb4" -o -n "$with_kerb5" -o -n "$with_pam" -o -n "$with_AFS" -o -n "$with_DCE"; then
 			AC_MSG_ERROR(["you cannot mix SIA and other authentication schemes.  You can turn off SIA support via the --disable-sia option"])
 		    fi]; CHECKSHADOW=false)
@@ -1604,7 +1604,7 @@ if test -z "$SKIP_SETREUID"; then
     AC_CHECK_FUNCS(setreuid)
 fi
 if test X"$with_interfaces" != X"no"; then
-    AC_CHECK_FUNCS(getifaddrs, AC_CHECK_FUNCS(freeifaddrs))
+    AC_CHECK_FUNCS(getifaddrs, [AC_CHECK_FUNCS(freeifaddrs)])
 fi
 if test -n "$SECUREWARE"; then
     AC_CHECK_FUNCS(bigcrypt set_auth_parameters initprivs)
@@ -1614,9 +1614,9 @@ if test -z "$BROKEN_GETCWD"; then
 fi
 AC_CHECK_FUNCS(lockf flock, [break])
 AC_CHECK_FUNCS(waitpid wait3, [break])
-AC_CHECK_FUNCS(innetgr _innetgr, AC_CHECK_FUNCS(getdomainname) [break])
+AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])
 AC_CHECK_FUNCS(lsearch, , [AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) [LIBS="${LIBS} -lcompat"], AC_LIBOBJ(lsearch), -), AC_LIBOBJ(lsearch))])
-AC_CHECK_FUNCS(utime, SUDO_FUNC_UTIME_POSIX, AC_LIBOBJ(utime))
+AC_CHECK_FUNCS(utime, [SUDO_FUNC_UTIME_POSIX], [AC_LIBOBJ(utime)])
 SUDO_FUNC_FNMATCH(AC_DEFINE(HAVE_FNMATCH, 1, [Define if you have the `fnmatch' function.]), AC_LIBOBJ(fnmatch))
 SUDO_FUNC_ISBLANK
 AC_REPLACE_FUNCS(strerror strcasecmp sigaction)
