@@ -223,75 +223,128 @@ B<Flags>:
 
 =item long_otp_prompt
 
-Put OTP prompt on its own line
+When validating with a One Time Password scheme (B<S/Key> or B<OPIE>),
+a two-line prompt is used to make it easier to cut and paste the
+challenge to a local window.  It's not as pretty as the default but
+some people find it more convenient.  This flag is off by default.
 
 =item ignore_dot
 
-Ignore '.' in $PATH
+If set, B<sudo> will ignore '.' or '' (current dir) in C<$PATH>;
+the C<$PATH> itself is not modified.  This flag is off by default.
 
 =item mail_always
 
-Always send mail when sudo is run
+Send mail to the I<mailto> user every time a users runs sudo.
+This flag is off by default.
 
 =item mail_no_user
 
-Send mail if the user is not in sudoers
+If set, mail will be sent to the I<mailto> user if the invoking
+user is not in the I<sudoers> file.  This flag is on by default.
 
 =item mail_no_host
 
-Send mail if the user is not in sudoers for this host
+If set, mail will be sent to the I<mailto> user if the invoking
+user exists in the I<sudoers> file, but is not allowed to run
+commands on the current host.  This flag is off by default.
 
 =item mail_no_perms
 
-Send mail if the user is not allowed to run a command
+If set, mail will be sent to the I<mailto> user if the invoking
+user allowed to use sudo but the command they are trying is not
+listed in their I<sudoers> file entry.  This flag is off by default.
 
 =item tty_tickets
 
-Use a separate timestamp for each user/tty combo
+If set, users must authenticate on a per-tty basis.  Normally,
+B<sudo> uses a directory in the ticket dir with the same name as
+the user running it.  With this flag enabled, B<sudo> will use a
+file named for the tty the user is logged in on in that directory.
+This flag is off by default.
 
 =item lecture
 
-Lecture user the first time they run sudo
+If set, a user will receive a short lecture the first time he/she
+runs B<sudo>.  This flag is on by default.
 
 =item authenticate
 
-Require users to authenticate by default
+If set, users must authenticate themselves via a password (or other
+means of authentication) before they may run commands.  This default
+may be overridden via the C<PASSWD> and C<NOPASSWD> tags.
+This flag is on by default.
 
 =item root_sudo
 
-Root may run sudo
+If set, root is allowed to run sudo too.  Disabling this prevents users
+from "chaining" sudo commands to get a root shell by doing something
+like C<"sudo sudo /bin/sh">.
+This flag is on by default.
 
 =item log_host
 
-Log the hostname in the (non-syslog) log file
+If set, the hostname will be logged in the (non-syslog) B<sudo> log file.
+This flag is off by default.
 
 =item log_year
 
-Log the year in the (non-syslog) log file
+If set, the four-digit year will be logged in the (non-syslog) B<sudo> log file.
+This flag is off by default.
 
 =item shell_noargs
 
-If sudo is invoked with no arguments, start a shell
+If set and B<sudo> is invoked with no arguments it acts as if the
+C<-s> flag had been given.  That is, it runs a shell as root (the
+shell is determined by the C<SHELL> environment variable if it is
+set, falling back on the shell listed in the invoking user's
+/etc/passwd entry if not).  This flag is off by default.
 
 =item set_home
 
-Set $HOME to the target user when starting a shell with C<-s>
+If set and B<sudo> is invoked with the C<-s> flag the C<HOME>
+environment variable will be set to the home directory of the target
+user (which is root unless the C<-u> option is used).  This effectively
+makes the C<-s> flag imply C<-H>.  This flag is off by default.
 
 =item path_info
 
-Allow some information gathering to give useful error messages
+Normally, B<sudo> will tell the user when a command could not be
+found in their C<$PATH>.  Some sites may wish to disable this as
+it could be used to gather information on the location of executables
+that the normal user does not have access to.  The disadvantage is
+that if the executable is simply not in the user's C<$PATH>, B<sudo>
+will tell the user that they are not allowed to run it, which can
+be confusing.  This flag is off by default.
 
 =item fqdn
 
-Require fully-qualified hostnames in the sudoers file
+Set this flag if you want to put fully qualified hostnames in the
+I<sudoers> file.  Ie: instead of myhost you would use myhost.mydomain.edu.
+You may still use the short form if you wish (and even mix the two).
+Beware that turning on I<fqdn> requires sudo to make DNS lookups
+which may make B<sudo> unusable if DNS stops working (for example
+if the machine is not plugged into the network).  Also note that
+you must use the host's official name as DNS knows it.  That is,
+you may not use a host alias (C<CNAME> entry) due to performance
+issues and the fact that there is no way to get all aliases from
+DNS.  If your machine's hostname (as returned by the C<hostname>
+command) is already fully qualified you shouldn't need to set
+I<fqfn>.  This flag is off by default.
 
 =item insults
 
-Insult the user when they enter an incorrect password
+If set, sudo will insult users when they enter an incorrect
+password.  This flag is off by default.
 
 =item requiretty
 
-Only allow the user to run sudo if they have a tty
+If set, sudo will only run when the user is logged in to a real
+tty.  This will disallow things like C<"rsh somehost sudo ls"> since
+rsh(1) does not allocate a tty.  Because it is not possible to turn
+of echo when there is no tty present, some sites may with to set
+this flag to prevent a user from entering a visible password.  This
+flag is off by default.
 
 =back
 
@@ -301,7 +354,8 @@ B<Integers>:
 
 =item passwd_tries
 
-Number of tries to enter a password
+The number of tries a user gets to enter his/her password before
+sudo logs the failure and exits.  The default is 3.
 
 =back
 
@@ -311,19 +365,25 @@ B<Integers that can be used in a boolean context>:
 
 =item loglinelen
 
-Length at which to wrap log file lines (use 0 or negate for no wrap)
+Number of characters per line for the file log.  This value is used
+to decide when to wrap lines for nicer log files.  This has no
+effect on the syslog log file, only the file log.  The default is
+80 (use 0 or negate to disable word wrap).
 
 =item timestamp_timeout
 
-Authentication timestamp timeout
+Number of minutes that can elapse before B<sudo> will ask for a passwd
+again.  The default is 5, set this to 0 to always prompt for a password.
 
 =item passwd_timeout
 
-Password prompt timeout
+Number of minutes before the sudo password prompt times out.
+The default is 5, set this to 0 for no password timeout.
 
 =item umask
 
-Umask to use or 0777 to use user's
+Umask to use when running the root command.  Set this to 0777 to
+not override the user's umask.  The default is 0022.
 
 =back
 
@@ -333,31 +393,41 @@ B<Strings>:
 
 =item mailsub
 
-Subject line for mail messages
+Subject of the mail sent to the I<mailto> user. The escape C<%h>
+will expand to the hostname of the machine.
+Default is "*** SECURITY information for %h ***".
 
 =item badpass_message
 
-Incorrect password message
+Message that is displayed if a user enters an incorrect password.
+The default is "Sorry, try again." unless insults are enabled.
 
 =item timestampdir
 
-Path to authentication timestamp dir
+The directory in which B<sudo> stores its timestamp files.
+The default is either C</var/run/sudo> or C</tmp/sudo>.
 
 =item passprompt
 
-Default password prompt
+The default prompt to use when asking for a password; can be overridden
+via the C<-p> option or the C<SUDO_PROMPT> environment variable. Supports
+two escapes: "%u" expands to the user's login name and "%h" expands
+to the local hostname.  The default value is "Password:".
 
 =item runas_default
 
-Default user to run commands as
+The default user to run commands as if the C<-u> flag is not specified
+on the command line.  This defaults to "root".
 
 =item syslog_goodpri
 
-Syslog priority to use when user authenticates successfully
+Syslog priority to use when user authenticates successfully.
+Defaults to "notice".
 
 =item syslog_badpri
 
-Syslog priority to use when user authenticates unsuccessfully
+Syslog priority to use when user authenticates unsuccessfully.
+Defaults to "alert".
 
 =back 12
 
@@ -367,38 +437,44 @@ B<Strings that can be used in a boolean context>:
 
 =item syslog
 
-Syslog facility if syslog is being used for logging (negate to disable syslog)
+Syslog facility if syslog is being used for logging (negate to
+disable syslog logging).  Defaults to "local2".
 
 =item mailerpath
 
-Path to mail program
+Path to mail program used to send warning mail.
+Defaults to the path to sendmail found at configure time.
 
 =item mailerflags
 
-Flags for mail program
+Flags to use when invoking mailer. Defaults to C<-t>.
 
 =item mailto
 
-Address to send mail to
+Address to send warning and erorr mail to.  Defaults to "root".
 
 =item exempt_group
 
-Users in this group are exempt from password and PATH requirements
+Users in this group are exempt from password and PATH requirements.
+This is not set by default.
 
 =item secure_path
 
-Value to override user's $PATH with
+Path used for every command run from B<sudo>.  If you don't trust the
+people running sudo to have a sane C<PATH> environment variable you may
+want to use this.  Another use is if you want to have the "root path"
+be separate from the "user path."  This is not set by default.
 
 =item verifypw
 
 This option controls when a password will be required when a
 user runs sudo with the B<-v>.  It has the following possible values:
 
-    all		All the user's sudoers entries for the
+    all		All the user's I<sudoers> entries for the
 		current host must have the C<NOPASSWD>
 		flag set to avoid entering a password.
 
-    any		At least one of the user's sudoers entries
+    any		At least one of the user's I<sudoers> entries
 		for the current host must have the
 		C<NOPASSWD> flag set to avoid entering a
 		password.
@@ -416,11 +492,11 @@ The default value is `all'.
 This option controls when a password will be required when a
 user runs sudo with the B<-l>.  It has the following possible values:
 
-    all		All the user's sudoers entries for the
+    all		All the user's I<sudoers> entries for the
 		current host must have the C<NOPASSWD>
 		flag set to avoid entering a password.
 
-    any		At least one of the user's sudoers entries
+    any		At least one of the user's I<sudoers> entries
 		for the current host must have the
 		C<NOPASSWD> flag set to avoid entering a
 		password.

@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-23/Jan/2000                   1.6.2                             1
+26/Jan/2000                   1.6.2                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-23/Jan/2000                   1.6.2                             2
+26/Jan/2000                   1.6.2                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-23/Jan/2000                   1.6.2                             3
+26/Jan/2000                   1.6.2                             3
 
 
 
@@ -225,41 +225,41 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        FFFFllllaaaaggggssss:
 
        long_otp_prompt
-                   Put OTP prompt on its own line
+                   When validating with a One Time Password
+                   scheme (SSSS////KKKKeeeeyyyy or OOOOPPPPIIIIEEEE), a two-line prompt is
+                   used to make it easier to cut and paste the
+                   challenge to a local window.  It's not as
+                   pretty as the default but some people find it
+                   more convenient.  This flag is off by default.
 
-       ignore_dot  Ignore '.' in $PATH
+       ignore_dot  If set, ssssuuuuddddoooo will ignore '.' or '' (current
+                   dir) in $PATH; the $PATH itself is not
+                   modified.  This flag is off by default.
 
-       mail_always Always send mail when sudo is run
+       mail_always Send mail to the _m_a_i_l_t_o user every time a
+                   users runs sudo.  This flag is off by default.
 
        mail_no_user
-                   Send mail if the user is not in sudoers
+                   If set, mail will be sent to the _m_a_i_l_t_o user
+                   if the invoking user is not in the _s_u_d_o_e_r_s
+                   file.  This flag is on by default.
 
        mail_no_host
-                   Send mail if the user is not in sudoers for
-                   this host
+                   If set, mail will be sent to the _m_a_i_l_t_o user
+                   if the invoking user exists in the _s_u_d_o_e_r_s
+                   file, but is not allowed to run commands on
+                   the current host.  This flag is off by
+                   default.
 
        mail_no_perms
-                   Send mail if the user is not allowed to run a
-                   command
-
-       tty_tickets Use a separate timestamp for each user/tty
-                   combo
-
-       lecture     Lecture user the first time they run sudo
-
-       authenticate
-                   Require users to authenticate by default
-
-       root_sudo   Root may run sudo
-
-       log_host    Log the hostname in the (non-syslog) log file
-
-       log_year    Log the year in the (non-syslog) log file
+                   If set, mail will be sent to the _m_a_i_l_t_o user
+                   if the invoking user allowed to use sudo but
+                   the command they are trying is not listed in
+                   their _s_u_d_o_e_r_s file entry.  This flag is off by
 
 
 
-
-23/Jan/2000                   1.6.2                             4
+26/Jan/2000                   1.6.2                             4
 
 
 
@@ -268,64 +268,130 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
+                   default.
+
+       tty_tickets If set, users must authenticate on a per-tty
+                   basis.  Normally, ssssuuuuddddoooo uses a directory in the
+                   ticket dir with the same name as the user
+                   running it.  With this flag enabled, ssssuuuuddddoooo will
+                   use a file named for the tty the user is
+                   logged in on in that directory.  This flag is
+                   off by default.
+
+       lecture     If set, a user will receive a short lecture
+                   the first time he/she runs ssssuuuuddddoooo.  This flag is
+                   on by default.
+
+       authenticate
+                   If set, users must authenticate themselves via
+                   a password (or other means of authentication)
+                   before they may run commands.  This default
+                   may be overridden via the PASSWD and NOPASSWD
+                   tags.  This flag is on by default.
+
+       root_sudo   If set, root is allowed to run sudo too.
+                   Disabling this prevents users from "chaining"
+                   sudo commands to get a root shell by doing
+                   something like "sudo sudo /bin/sh".  This flag
+                   is on by default.
+
+       log_host    If set, the hostname will be logged in the
+                   (non-syslog) ssssuuuuddddoooo log file.  This flag is off
+                   by default.
+
+       log_year    If set, the four-digit year will be logged in
+                   the (non-syslog) ssssuuuuddddoooo log file.  This flag is
+                   off by default.
+
        shell_noargs
-                   If sudo is invoked with no arguments, start a
-                   shell
+                   If set and ssssuuuuddddoooo is invoked with no arguments
+                   it acts as if the -s flag had been given.
+                   That is, it runs a shell as root (the shell is
+                   determined by the SHELL environment variable
+                   if it is set, falling back on the shell listed
+                   in the invoking user's /etc/passwd entry if
+                   not).  This flag is off by default.
 
-       set_home    Set $HOME to the target user when starting a
-                   shell with -s
+       set_home    If set and ssssuuuuddddoooo is invoked with the -s flag
+                   the HOME environment variable will be set to
+                   the home directory of the target user (which
+                   is root unless the -u option is used).  This
+                   effectively makes the -s flag imply -H.  This
+                   flag is off by default.
 
-       path_info   Allow some information gathering to give
-                   useful error messages
+       path_info   Normally, ssssuuuuddddoooo will tell the user when a
+                   command could not be found in their $PATH.
+                   Some sites may wish to disable this as it
 
-       fqdn        Require fully-qualified hostnames in the
-                   sudoers file
 
-       insults     Insult the user when they enter an incorrect
-                   password
 
-       requiretty  Only allow the user to run sudo if they have a
-                   tty
+26/Jan/2000                   1.6.2                             5
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
+                   could be used to gather information on the
+                   location of executables that the normal user
+                   does not have access to.  The disadvantage is
+                   that if the executable is simply not in the
+                   user's $PATH, ssssuuuuddddoooo will tell the user that
+                   they are not allowed to run it, which can be
+                   confusing.  This flag is off by default.
+
+       fqdn        Set this flag if you want to put fully
+                   qualified hostnames in the _s_u_d_o_e_r_s file.  Ie:
+                   instead of myhost you would use
+                   myhost.mydomain.edu.  You may still use the
+                   short form if you wish (and even mix the two).
+                   Beware that turning on _f_q_d_n requires sudo to
+                   make DNS lookups which may make ssssuuuuddddoooo unusable
+                   if DNS stops working (for example if the
+                   machine is not plugged into the network).
+                   Also note that you must use the host's
+                   official name as DNS knows it.  That is, you
+                   may not use a host alias (CNAME entry) due to
+                   performance issues and the fact that there is
+                   no way to get all aliases from DNS.  If your
+                   machine's hostname (as returned by the
+                   hostname command) is already fully qualified
+                   you shouldn't need to set _f_q_f_n.  This flag is
+                   off by default.
+
+       insults     If set, sudo will insult users when they enter
+                   an incorrect password.  This flag is off by
+                   default.
+
+       requiretty  If set, sudo will only run when the user is
+                   logged in to a real tty.  This will disallow
+                   things like "rsh somehost sudo ls" since
+                   _r_s_h(1) does not allocate a tty.  Because it is
+                   not possible to turn of echo when there is no
+                   tty present, some sites may with to set this
+                   flag to prevent a user from entering a visible
+                   password.  This flag is off by default.
 
        IIIInnnntttteeeeggggeeeerrrrssss:
 
        passwd_tries
-                   Number of tries to enter a password
+                   The number of tries a user gets to enter
+                   his/her password before sudo logs the failure
+                   and exits.  The default is 3.
 
        IIIInnnntttteeeeggggeeeerrrrssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
 
-       loglinelen  Length at which to wrap log file lines (use 0
-                   or negate for no wrap)
-
-       timestamp_timeout
-                   Authentication timestamp timeout
-
-       passwd_timeout
-                   Password prompt timeout
-
-       umask       Umask to use or 0777 to use user's
-
-       SSSSttttrrrriiiinnnnggggssss:
-
-       mailsub     Subject line for mail messages
-
-       badpass_message
-                   Incorrect password message
-
-       timestampdir
-                   Path to authentication timestamp dir
-
-       passprompt  Default password prompt
-
-       runas_default
-                   Default user to run commands as
-
-       syslog_goodpri
-                   Syslog priority to use when user authenticates
+       loglinelen  Number of characters per line for the file
+                   log.  This value is used to decide when to
+                   wrap lines for nicer log files.  This has no
+                   effect on the syslog log file, only the file
+                   log.  The default is 80 (use 0 or negate to
 
 
 
-23/Jan/2000                   1.6.2                             5
+26/Jan/2000                   1.6.2                             6
 
 
 
@@ -334,38 +400,109 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
-                   successfully
+                   disable word wrap).
+
+       timestamp_timeout
+                   Number of minutes that can elapse before ssssuuuuddddoooo
+                   will ask for a passwd again.  The default is
+                   5, set this to 0 to always prompt for a
+                   password.
+
+       passwd_timeout
+                   Number of minutes before the sudo password
+                   prompt times out.  The default is 5, set this
+                   to 0 for no password timeout.
+
+       umask       Umask to use when running the root command.
+                   Set this to 0777 to not override the user's
+                   umask.  The default is 0022.
+
+       SSSSttttrrrriiiinnnnggggssss:
+
+       mailsub     Subject of the mail sent to the _m_a_i_l_t_o user.
+                   The escape %h will expand to the hostname of
+                   the machine.  Default is "*** SECURITY
+                   information for %h ***".
+
+       badpass_message
+                   Message that is displayed if a user enters an
+                   incorrect password.  The default is "Sorry,
+                   try again." unless insults are enabled.
+
+       timestampdir
+                   The directory in which ssssuuuuddddoooo stores its
+                   timestamp files.  The default is either
+                   /var/run/sudo or /tmp/sudo.
+
+       passprompt  The default prompt to use when asking for a
+                   password; can be overridden via the -p option
+                   or the SUDO_PROMPT environment variable.
+                   Supports two escapes: "%u" expands to the
+                   user's login name and "%h" expands to the
+                   local hostname.  The default value is
+                   "Password:".
+
+       runas_default
+                   The default user to run commands as if the -u
+                   flag is not specified on the command line.
+                   This defaults to "root".
+
+       syslog_goodpri
+                   Syslog priority to use when user authenticates
+                   successfully.  Defaults to "notice".
 
        syslog_badpri
                    Syslog priority to use when user authenticates
-                   unsuccessfully
+                   unsuccessfully.  Defaults to "alert".
+
+
+
+26/Jan/2000                   1.6.2                             7
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
 
        SSSSttttrrrriiiinnnnggggssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
 
        syslog      Syslog facility if syslog is being used for
-                   logging (negate to disable syslog)
+                   logging (negate to disable syslog logging).
+                   Defaults to "local2".
 
-       mailerpath  Path to mail program
+       mailerpath  Path to mail program used to send warning
+                   mail.  Defaults to the path to sendmail found
+                   at configure time.
 
-       mailerflags Flags for mail program
+       mailerflags Flags to use when invoking mailer. Defaults to
+                   -t.
 
-       mailto      Address to send mail to
+       mailto      Address to send warning and erorr mail to.
+                   Defaults to "root".
 
        exempt_group
                    Users in this group are exempt from password
-                   and PATH requirements
+                   and PATH requirements.  This is not set by
+                   default.
 
-       secure_path Value to override user's $PATH with
+       secure_path Path used for every command run from ssssuuuuddddoooo.  If
+                   you don't trust the people running sudo to
+                   have a sane PATH environment variable you may
+                   want to use this.  Another use is if you want
+                   to have the "root path" be separate from the
+                   "user path."  This is not set by default.
 
        verifypw    This option controls when a password will be
                    required when a user runs sudo with the ----vvvv.
                    It has the following possible values:
 
-                       all         All the user's sudoers entries for the
+                       all         All the user's I<sudoers> entries for the
                                    current host must have the C<NOPASSWD>
                                    flag set to avoid entering a password.
 
-                       any         At least one of the user's sudoers entries
+                       any         At least one of the user's I<sudoers> entries
                                    for the current host must have the
                                    C<NOPASSWD> flag set to avoid entering a
                                    password.
@@ -382,16 +519,11 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                    required when a user runs sudo with the ----llll.
                    It has the following possible values:
 
-                       all         All the user's sudoers entries for the
-                                   current host must have the C<NOPASSWD>
-                                   flag set to avoid entering a password.
 
 
 
 
-
-
-23/Jan/2000                   1.6.2                             6
+26/Jan/2000                   1.6.2                             8
 
 
 
@@ -400,7 +532,11 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
-                       any         At least one of the user's sudoers entries
+                       all         All the user's I<sudoers> entries for the
+                                   current host must have the C<NOPASSWD>
+                                   flag set to avoid entering a password.
+
+                       any         At least one of the user's I<sudoers> entries
                                    for the current host must have the
                                    C<NOPASSWD> flag set to avoid entering a
                                    password.
@@ -450,14 +586,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        commands that follow it.  What this means is that for the
        entry:
 
-        dgb    boulder = (operator) /bin/ls, /bin/kill, /usr/bin/who
-
-       The user ddddggggbbbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m
-       -- but only as ooooppppeeeerrrraaaattttoooorrrr.  Eg.
 
 
 
-23/Jan/2000                   1.6.2                             7
+26/Jan/2000                   1.6.2                             9
 
 
 
@@ -465,6 +597,11 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+        dgb    boulder = (operator) /bin/ls, /bin/kill, /usr/bin/who
+
+       The user ddddggggbbbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m
+       -- but only as ooooppppeeeerrrraaaattttoooorrrr.  Eg.
 
            sudo -u operator /bin/ls.
 
@@ -515,15 +652,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        *       Matches any set of zero or more characters.
 
-       ?       Matches any single character.
-
-       [...]   Matches any character in the specified range.
 
 
 
-
-
-23/Jan/2000                   1.6.2                             8
+26/Jan/2000                   1.6.2                            10
 
 
 
@@ -531,6 +663,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+       ?       Matches any single character.
+
+       [...]   Matches any character in the specified range.
 
        [!...]  Matches any character nnnnooootttt in the specified range.
 
@@ -583,13 +719,9 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        Long lines can be continued with a backslash ('\') as the
        last character on the line.
 
-       Whitespace between elements in a list as well as specicial
-       syntactic characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n ('=', ':',
-       '(', ')') is optional.
 
 
-
-23/Jan/2000                   1.6.2                             9
+26/Jan/2000                   1.6.2                            11
 
 
 
@@ -597,6 +729,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+       Whitespace between elements in a list as well as specicial
+       syntactic characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n ('=', ':',
+       '(', ')') is optional.
 
        The following characters must be escaped with a backslash
        ('\') when used as part of a word (eg. a username or
@@ -647,15 +783,11 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
        sure we log the year in each log line since the log
        entries will be kept around for several years.
 
-        # Override builtin defaults
-        Defaults               syslog=auth
-        Defaults:FULLTIMERS    !lecture
-        Defaults:millert       !authenticate
-        Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
 
 
 
-23/Jan/2000                   1.6.2                            10
+
+26/Jan/2000                   1.6.2                            12
 
 
 
@@ -663,6 +795,12 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+        # Override builtin defaults
+        Defaults               syslog=auth
+        Defaults:FULLTIMERS    !lecture
+        Defaults:millert       !authenticate
+        Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
 
        The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually
        determines who may run what.
@@ -713,15 +851,9 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
         pete           HPPA = /usr/bin/passwd [A-z]*, !/usr/bin/passwd root
 
-       The user ppppeeeetttteeee is allowed to change anyone's password
-       except for root on the _H_P_P_A machines.  Note that this
-       assumes _p_a_s_s_w_d(1) does not take multiple usernames on the
-       command line.
 
 
-
-
-23/Jan/2000                   1.6.2                            11
+26/Jan/2000                   1.6.2                            13
 
 
 
@@ -729,6 +861,11 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+       The user ppppeeeetttteeee is allowed to change anyone's password
+       except for root on the _H_P_P_A machines.  Note that this
+       assumes _p_a_s_s_w_d(1) does not take multiple usernames on the
+       command line.
 
         bob            SPARC = (OP) ALL : SGI = (OP) ALL
 
@@ -780,14 +917,9 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        On his personal workstation, valkyrie, mmmmaaaatttttttt needs to be
        able to kill hung processes.
 
-        WEBMASTERS     www = (www) ALL, (root) /usr/bin/su www
-
-       On the host www, any user in the _W_E_B_M_A_S_T_E_R_S User_Alias
-       (will, wendy, and wim), may run any command as user www
 
 
-
-23/Jan/2000                   1.6.2                            12
+26/Jan/2000                   1.6.2                            14
 
 
 
@@ -796,6 +928,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
+        WEBMASTERS     www = (www) ALL, (root) /usr/bin/su www
+
+       On the host www, any user in the _W_E_B_M_A_S_T_E_R_S User_Alias
+       (will, wendy, and wim), may run any command as user www
        (which owns the web pages) or simply _s_u(1) to www.
 
         ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
@@ -849,11 +985,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-
-
-
-23/Jan/2000                   1.6.2                            13
+26/Jan/2000                   1.6.2                            15
 
 
 
@@ -919,6 +1051,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-23/Jan/2000                   1.6.2                            14
+26/Jan/2000                   1.6.2                            16
 
 
