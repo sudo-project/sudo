@@ -151,7 +151,6 @@ fi
 ])dnl
 
 dnl
-dnl
 dnl check for fullly working void
 dnl
 AC_DEFUN(SUDO_FULL_VOID, [AC_MSG_CHECKING(for full void implementation)
@@ -324,3 +323,10 @@ if test $sudo_cv_syslog_names = yes; then
     AC_DEFINE(HAVE_SYSLOG_NAMES)
 fi
 ])
+
+dnl
+dnl check for "long long"
+dnl
+AC_DEFUN(SUDO_LONG_LONG, [AC_MSG_CHECKING(for long long support)
+AC_TRY_COMPILE(, [long long foo; foo = 1;], AC_DEFINE(HAVE_LONG_LONG)
+AC_MSG_RESULT(yes), AC_MSG_RESULT(no))])

@@ -1391,6 +1391,7 @@ SUDO_TYPE_DEV_T
 SUDO_TYPE_INO_T
 SUDO_FULL_VOID
 SUDO_UID_T_LEN
+SUDO_LONG_LONG
 SUDO_SOCK_SA_LEN
 dnl
 dnl only set RETSIGTYPE if it is not set already
@@ -1402,7 +1403,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_CHECK_FUNCS(strchr strrchr memcpy memset sysconf sigaction tzset strcasecmp seteuid ftruncate)
+AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset strcasecmp seteuid ftruncate)
 if test -n "$SECUREWARE"; then
     AC_CHECK_FUNCS(bigcrypt)
     AC_CHECK_FUNCS(set_auth_parameters)

@@ -96,6 +96,9 @@
 /* Define to be nil if C compiler doesn't support "const."  */
 #undef const
 
+/* Define if your compiler supports the "long long" type.  */
+#undef HAVE_LONG_LONG
+
 /* Solaris doesn't use const qualifiers in PAM. */
 #ifdef sun
 #define PAM_CONST
@@ -198,6 +201,9 @@
 #if !defined(HAVE_STRRCHR) && !defined(strrchr)
 #  define strrchr	rindex
 #endif
+
+/* Define if you have memchr(3).  */
+#undef HAVE_MEMCHR
 
 /* Define if you have memcpy(3).  */
 #undef HAVE_MEMCPY

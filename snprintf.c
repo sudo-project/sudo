@@ -1,32 +1,31 @@
 /*
- * Copyright (c) 1995-1997, 1999 Kungliga Tekniska Högskolan
- * (Royal Institute of Technology, Stockholm, Sweden).
- * All rights reserved.
- * 
+ * Copyright (c) 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1990, 1993
+ *	The Regents of the University of California.  All rights reserved.
+ *
+ * This code is derived from software contributed to Berkeley by
+ * Chris Torek.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *      This product includes software developed by the Kungliga Tekniska
- *      Högskolan and its contributors.
- * 
- * 4. Neither the name of the Institute nor the names of its contributors
+ *	This product includes software developed by the University of
+ *	California, Berkeley and its contributors.
+ * 4. Neither the name of the University nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
  * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
@@ -35,11 +34,17 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $KTH: snprintf.c,v 1.19 1999/03/27 16:32:57 joda Exp $
- *
+ * From: @(#)vfprintf.c	8.1 (Berkeley) 6/4/93
+ */
+
+/*
+ * v?snprintf/v?asprintf based on 4.4BSD stdio.
+ * NOTE: does not support floating point.
  */
 
 #include "config.h"
+
+#include <sys/param.h>
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -54,673 +59,703 @@
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 # include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
-#include <ctype.h>
-#ifdef __STDC__
+#include <limits.h>
+
+#if __STDC__
 # include <stdarg.h>
 #else
 # include <varargs.h>
 #endif
-#include <sys/param.h>
 
 #include "compat.h"
 
-enum format_flags {
-    minus_flag     =  1,
-    plus_flag      =  2,
-    space_flag     =  4,
-    alternate_flag =  8,
-    zero_flag      = 16
-};
+#ifndef lint
+static const char rcsid[] = "$Sudo$";
+#endif /* lint */
+
+static int xxxprintf	 __P((char **, size_t, int, const char *, va_list));
 
 /*
- * Common state
+ * Some systems may not have these defined in <limits.h>
  */
-struct state {
-  unsigned char *str;
-  unsigned char *s;
-  unsigned char *theend;
-  size_t sz;
-  size_t max_sz;
-  int (*append_char) __P((struct state *, unsigned char));
-  int (*reserve) __P((struct state *, size_t));
-  /* XXX - methods */
-};
-
-#ifndef HAVE_VSNPRINTF
-static int
-sn_reserve (state, n)
-  struct state *state;
-  size_t n;
-{
-  return state->s + n > state->theend;
-}
-
-static int
-#ifdef __STDC__
-sn_append_char (struct state *state, unsigned char c)
-#else
-sn_append_char (state, c)
-  struct state *state;
-  unsigned char c;
+#ifndef ULONG_MAX
+# define ULONG_MAX	((unsigned long)-1)
 #endif
-{
-  if (sn_reserve (state, 1)) {
-    return 1;
-  } else {
-    *state->s++ = c;
-    return 0;
-  }
-}
+#ifndef LONG_MAX
+# define LONG_MAX	(ULONG_MAX / 2)
 #endif
-
-static int
-as_reserve (state, n)
-  struct state *state;
-  size_t n;
-{
-  if (state->s + n > state->theend) {
-    int off = state->s - state->str;
-    unsigned char *tmp;
-
-    if (state->max_sz && state->sz >= state->max_sz)
-      return 1;
-
-    state->sz = MAX(state->sz * 2, state->sz + n);
-    if (state->max_sz)
-      state->sz = MIN(state->sz, state->max_sz);
-    tmp = (unsigned char *) realloc (state->str, state->sz);
-    if (tmp == NULL)
-      return 1;
-    state->str = tmp;
-    state->s = state->str + off;
-    state->theend = state->str + state->sz - 1;
-  }
-  return 0;
-}
-
-static int
-#ifdef __STDC__
-as_append_char (struct state *state, unsigned char c)
-#else
-as_append_char (state, c)
-  struct state *state;
-  unsigned char c;
-#endif
-{
-  if(as_reserve (state, 1))
-    return 1;
-  else {
-    *state->s++ = c;
-    return 0;
-  }
-}
-
-static int
-append_number(state, num, base, rep, width, prec, flags, minusp)
-  struct state *state;
-  unsigned long num;
-  unsigned base;
-  unsigned char *rep;
-  int width;
-  int prec;
-  int flags;
-  int minusp;
-{
-  int len = 0;
-  int i;
-
-  /* given precision, ignore zero flag */
-  if(prec != -1)
-    flags &= ~zero_flag;
-  else
-    prec = 1;
-  /* zero value with zero precision -> "" */
-  if(prec == 0 && num == 0)
-    return 0;
-  do{
-    if((*state->append_char)(state, rep[num % base]))
-      return 1;
-    len++;
-    num /= base;
-  }while(num);
-  prec -= len;
-  /* pad with prec zeros */
-  while(prec-- > 0){
-    if((*state->append_char)(state, '0'))
-      return 1;
-    len++;
-  }
-  /* add length of alternate prefix (added later) to len */
-  if(flags & alternate_flag && (base == 16 || base == 8))
-    len += base / 8;
-  /* pad with zeros */
-  if(flags & zero_flag){
-    width -= len;
-    if(minusp || (flags & space_flag) || (flags & plus_flag))
-      width--;
-    while(width-- > 0){
-      if((*state->append_char)(state, '0'))
-	return 1;
-      len++;
-    }
-  }
-  /* add alternate prefix */
-  if(flags & alternate_flag && (base == 16 || base == 8)){
-    if(base == 16)
-      if((*state->append_char)(state, rep[10] + 23)) /* XXX */
-	return 1;
-    if((*state->append_char)(state, '0'))
-      return 1;
-  }
-  /* add sign */
-  if(minusp){
-    if((*state->append_char)(state, '-'))
-      return 1;
-    len++;
-  } else if(flags & plus_flag) {
-    if((*state->append_char)(state, '+'))
-      return 1;
-    len++;
-  } else if(flags & space_flag) {
-    if((*state->append_char)(state, ' '))
-      return 1;
-    len++;
-  }
-  if(flags & minus_flag)
-    /* swap before padding with spaces */
-    for(i = 0; i < len / 2; i++){
-      char c = state->s[-i-1];
-      state->s[-i-1] = state->s[-len+i];
-      state->s[-len+i] = c;
-    }
-  width -= len;
-  while(width-- > 0){
-    if((*state->append_char)(state,  ' '))
-      return 1;
-    len++;
-  }
-  if(!(flags & minus_flag))
-    /* swap after padding with spaces */
-    for(i = 0; i < len / 2; i++){
-      char c = state->s[-i-1];
-      state->s[-i-1] = state->s[-len+i];
-      state->s[-len+i] = c;
-    }
-    
-  return 0;
-}
-
-static int
-append_string (state, arg, width, prec, flags)
-  struct state *state;
-  unsigned char *arg;
-  int width;
-  int prec;
-  int flags;
-{
-  if(prec != -1)
-    width -= prec;
-  else
-    width -= strlen(arg);
-  if(!(flags & minus_flag))
-    while(width-- > 0)
-      if((*state->append_char) (state, ' '))
-	return 1;
-  if (prec != -1) {
-    while (*arg && prec--)
-      if ((*state->append_char) (state, *arg++))
-	return 1;
-  } else {
-    while (*arg)
-      if ((*state->append_char) (state, *arg++))
-	return 1;
-  }
-  if(flags & minus_flag)
-    while(width-- > 0)
-      if((*state->append_char) (state, ' '))
-	return 1;
-  return 0;
-}
-
-static int
-append_char(state, arg, width, flags)
-  struct state *state;
-  unsigned char arg;
-  int width;
-  int flags;
-{
-  while(!(flags & minus_flag) && --width > 0)
-    if((*state->append_char) (state, ' '))
-      return 1;
-    
-  if((*state->append_char) (state, arg))
-    return 1;
-  while((flags & minus_flag) && --width > 0)
-    if((*state->append_char) (state, ' '))
-      return 1;
-    
-  return 0;
-}
+#ifdef HAVE_LONG_LONG
+# ifndef UQUAD_MAX
+#  define UQUAD_MAX	((unsigned long long)-1)
+# endif
+# ifndef QUAD_MAX
+#  define QUAD_MAX	(UQUAD_MAX / 2)
+# endif
+#endif /* HAVE_LONG_LONG */
 
 /*
- * This can't be made into a function...
+ * Macros for converting digits to letters and vice versa
  */
-
-#define PARSE_INT_FORMAT(res, arg) \
-if (long_flag) \
-     res = va_arg(arg, long); \
-else if (short_flag) \
-     res = va_arg(arg, short); \
-else \
-     res = va_arg(arg, int)
-
-#define PARSE_UINT_FORMAT(res, arg) \
-if (long_flag) \
-     res = va_arg(arg, unsigned long); \
-else if (short_flag) \
-     res = va_arg(arg, unsigned short); \
-else \
-     res = va_arg(arg, unsigned int)
+#define	to_digit(c)	((c) - '0')
+#define is_digit(c)	((unsigned int)to_digit(c) <= 9)
+#define	to_char(n)	((n) + '0')
 
 /*
- * zyxprintf - return 0 or -1
+ * Flags used during conversion.
  */
+#define	ALT		0x001		/* alternate form */
+#define	HEXPREFIX	0x002		/* add 0x or 0X prefix */
+#define	LADJUST		0x004		/* left adjustment */
+#define	LONGDBL		0x008		/* long double; unimplemented */
+#define	LONGINT		0x010		/* long integer */
+#define	QUADINT		0x020		/* quad integer */
+#define	SHORTINT	0x040		/* short integer */
+#define	ZEROPAD		0x080		/* zero (as opposed to blank) pad */
 
-static int
-xyzprintf (state, char_format, ap)
-  struct state *state;
-  const char *char_format;
-  va_list ap;
+#define BUF		68
+
+#ifndef HAVE_MEMCHR
+VOID *
+memchr(s, c, n)
+	const VOID *s;
+	unsigned char c;
+	size_t n;
 {
-  const unsigned char *format = (const unsigned char *)char_format;
-  unsigned char c;
+	if (n != 0) {
+		const unsigned char *p = s;
 
-  while((c = *format++)) {
-    if (c == '%') {
-      int flags      = 0;
-      int width      = 0;
-      int prec       = -1;
-      int long_flag  = 0;
-      int short_flag = 0;
-
-      /* flags */
-      while((c = *format++)){
-	if(c == '-')
-	  flags |= minus_flag;
-	else if(c == '+')
-	  flags |= plus_flag;
-	else if(c == ' ')
-	  flags |= space_flag;
-	else if(c == '#')
-	  flags |= alternate_flag;
-	else if(c == '0')
-	  flags |= zero_flag;
-	else
-	  break;
-      }
-      
-      if((flags & space_flag) && (flags & plus_flag))
-	flags ^= space_flag;
-
-      if((flags & minus_flag) && (flags & zero_flag))
-	flags ^= zero_flag;
-
-      /* width */
-      if (isdigit(c))
-	do {
-	  width = width * 10 + c - '0';
-	  c = *format++;
-	} while(isdigit(c));
-      else if(c == '*') {
-	width = va_arg(ap, int);
-	c = *format++;
-      }
-
-      /* precision */
-      if (c == '.') {
-	prec = 0;
-	c = *format++;
-	if (isdigit(c))
-	  do {
-	    prec = prec * 10 + c - '0';
-	    c = *format++;
-	  } while(isdigit(c));
-	else if (c == '*') {
-	  prec = va_arg(ap, int);
-	  c = *format++;
+		do {
+			if (*p++ == c)
+				return ((VOID *)(p - 1));
+		} while (--n != 0);
 	}
-      }
+	return (NULL);
+}
+#endif /* !HAVE_MEMCHR */
 
-      /* size */
+/*
+ * Convert an unsigned long to ASCII for printf purposes, returning
+ * a pointer to the first character of the string representation.
+ * Octal numbers can be forced to have a leading zero; hex numbers
+ * use the given digits.
+ */
+static char *
+__ultoa(val, endp, base, octzero, xdigs)
+	unsigned long val;
+	char *endp;
+	int base, octzero;
+	char *xdigs;
+{
+	char *cp = endp;
+	long sval;
 
-      if (c == 'h') {
-	short_flag = 1;
-	c = *format++;
-      } else if (c == 'l') {
-	long_flag = 1;
-	c = *format++;
-      }
+	/*
+	 * Handle the three cases separately, in the hope of getting
+	 * better/faster code.
+	 */
+	switch (base) {
+	case 10:
+		if (val < 10) {	/* many numbers are 1 digit */
+			*--cp = to_char(val);
+			return (cp);
+		}
+		/*
+		 * On many machines, unsigned arithmetic is harder than
+		 * signed arithmetic, so we do at most one unsigned mod and
+		 * divide; this is sufficient to reduce the range of
+		 * the incoming value to where signed arithmetic works.
+		 */
+		if (val > LONG_MAX) {
+			*--cp = to_char(val % 10);
+			sval = val / 10;
+		} else
+			sval = val;
+		do {
+			*--cp = to_char(sval % 10);
+			sval /= 10;
+		} while (sval != 0);
+		break;
 
-      switch (c) {
-      case 'c' :
-	if(append_char(state, va_arg(ap, int), width, flags))
-	  return -1;
-	break;
-      case 's' :
-	if (append_string(state,
-			  va_arg(ap, unsigned char*),
-			  width,
-			  prec, 
-			  flags))
-	  return -1;
-	break;
-      case 'd' :
-      case 'i' : {
-	long arg;
-	unsigned long num;
-	int minusp = 0;
+	case 8:
+		do {
+			*--cp = to_char(val & 7);
+			val >>= 3;
+		} while (val);
+		if (octzero && *cp != '0')
+			*--cp = '0';
+		break;
 
-	PARSE_INT_FORMAT(arg, ap);
+	case 16:
+		do {
+			*--cp = xdigs[val & 15];
+			val >>= 4;
+		} while (val);
+		break;
 
-	if (arg < 0) {
-	  minusp = 1;
-	  num = -arg;
-	} else
-	  num = arg;
+	default:			/* oops */
+		abort();
+	}
+	return (cp);
+}
 
-	if (append_number (state, num, 10, "0123456789",
-			   width, prec, flags, minusp))
-	  return -1;
-	break;
-      }
-      case 'u' : {
-	unsigned long arg;
+/* Identical to __ultoa, but for quads. */
+#ifdef HAVE_LONG_LONG
+# if UQUAD_MAX == ULONG_MAX
+#  define __uqtoa(v, e, b, o, x) __ultoa((unsigned long)(v), (e), (b), (o), (x))
+# else
+static char *
+__uqtoa(val, endp, base, octzero, xdigs)
+	unsigned long long val;
+	char *endp;
+	int base, octzero;
+	char *xdigs;
+{
+	char *cp = endp;
+	long long sval;
 
-	PARSE_UINT_FORMAT(arg, ap);
+	/* quick test for small values; __ultoa is typically much faster */
+	/* (perhaps instead we should run until small, then call __ultoa?) */
+	if (val <= ULONG_MAX)
+		return (__ultoa((unsigned long)val, endp, base, octzero, xdigs));
+	switch (base) {
+	case 10:
+		if (val < 10) {
+			*--cp = to_char(val % 10);
+			return (cp);
+		}
+		if (val > QUAD_MAX) {
+			*--cp = to_char(val % 10);
+			sval = val / 10;
+		} else
+			sval = val;
+		do {
+			*--cp = to_char(sval % 10);
+			sval /= 10;
+		} while (sval != 0);
+		break;
 
-	if (append_number (state, arg, 10, "0123456789",
-			   width, prec, flags, 0))
-	  return -1;
-	break;
-      }
-      case 'o' : {
-	unsigned long arg;
+	case 8:
+		do {
+			*--cp = to_char(val & 7);
+			val >>= 3;
+		} while (val);
+		if (octzero && *cp != '0')
+			*--cp = '0';
+		break;
 
-	PARSE_UINT_FORMAT(arg, ap);
+	case 16:
+		do {
+			*--cp = xdigs[val & 15];
+			val >>= 4;
+		} while (val);
+		break;
 
-	if (append_number (state, arg, 010, "01234567",
-			   width, prec, flags, 0))
-	  return -1;
-	break;
-      }
-      case 'x' : {
-	unsigned long arg;
+	default:			/* oops */
+		abort();
+	}
+	return (cp);
+}
+#endif /* !(UQUAD_MAX == ULONG_MAX) */
+#endif /* HAVE_LONG_LONG */
 
-	PARSE_UINT_FORMAT(arg, ap);
+/*
+ * Actual printf innards.
+ */
+static int
+xxxprintf(strp, strsize, alloc, fmt0, ap)
+	char **strp;
+	size_t strsize;
+	int alloc;
+	const char *fmt0;
+	va_list ap;
+{
+	char *fmt;		/* format string */
+	int ch;			/* character from fmt */
+	int n;			/* handy integer (short term usage) */
+	char *cp;		/* handy char pointer (short term usage) */
+	int flags;		/* flags as above */
+	int ret;		/* return value accumulator */
+	int width;		/* width from format (%8d), or 0 */
+	int prec;		/* precision from format (%.3d), or -1 */
+	char sign;		/* sign prefix (' ', '+', '-', or \0) */
+	unsigned long ulval;	/* integer arguments %[diouxX] */
+#ifdef HAVE_LONG_LONG
+	unsigned long long uqval; /* %q (quad) integers */
+#endif
+	int base;		/* base for [diouxX] conversion */
+	int dprec;		/* a copy of prec if [diouxX], 0 otherwise */
+	int fieldsz;		/* field size expanded by sign, etc */
+	int realsz;		/* field size expanded by dprec */
+	int size;		/* size of converted field or string */
+	char *xdigs;		/* digits for [xX] conversion */
+	char buf[BUF];		/* space for %c, %[diouxX], %[eEfgG] */
+	char ox[2];		/* space for 0x hex-prefix */
+	char *str;		/* pointer to string to fill */
+	char *estr;		/* pointer to last char in str */
 
-	if (append_number (state, arg, 0x10, "0123456789abcdef",
-			   width, prec, flags, 0))
-	  return -1;
-	break;
-      }
-      case 'X' :{
-	unsigned long arg;
+	/*
+	 * Choose PADSIZE to trade efficiency vs. size.  If larger printf
+	 * fields occur frequently, increase PADSIZE and make the initialisers
+	 * below longer.
+	 */
+#define	PADSIZE	16		/* pad chunk size */
+	static char blanks[PADSIZE] =
+	 {' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
+	static char zeroes[PADSIZE] =
+	 {'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'};
 
-	PARSE_UINT_FORMAT(arg, ap);
+	/* Print chars to "str", (allocate as needed if alloc is set). */
+#define	PRINT(ptr, len) do { \
+	const char *p = ptr; \
+	const char *endp = ptr + len; \
+	while (p < endp && (str < estr || alloc)) { \
+		if (alloc && str >= estr) { \
+			char *t; \
+			strsize = (strsize << 1) + 1; \
+			if (!(t = (char *)realloc(*strp, strsize))) { \
+				free(str); \
+				*strp = NULL; \
+				ret = -1; \
+				goto done; \
+			} \
+			str = t + (str - *strp); \
+			estr = t + strsize - 1; \
+			*strp = t; \
+		} \
+		*str++ = *p++; \
+	} \
+} while (0)
 
-	if (append_number (state, arg, 0x10, "0123456789ABCDEF",
-			   width, prec, flags, 0))
-	  return -1;
-	break;
-      }
-      case 'p' : {
-	unsigned long arg = (unsigned long)va_arg(ap, void*);
+	/* BEWARE, PAD uses `n'. */
+#define	PAD(howmany, with) do { \
+	if ((n = (howmany)) > 0) { \
+		while (n > PADSIZE) { \
+			PRINT(with, PADSIZE); \
+			n -= PADSIZE; \
+		} \
+		PRINT(with, n); \
+	} \
+} while (0)
 
-	if (append_number (state, arg, 0x10, "0123456789ABCDEF",
-			   width, prec, flags, 0))
-	  return -1;
-	break;
-      }
-      case 'n' : {
-	int *arg = va_arg(ap, int*);
-	*arg = state->s - state->str;
-	break;
-      }
-      case '%' :
-	if ((*state->append_char)(state, c))
-	  return -1;
-	break;
-      default :
-	if (   (*state->append_char)(state, '%')
-	    || (*state->append_char)(state, c))
-	  return -1;
-	break;
-      }
-    } else
-      if ((*state->append_char) (state, c))
-	return -1;
-  }
-  return 0;
+	/*
+	 * To extend shorts properly, we need both signed and unsigned
+	 * argument extraction methods.
+	 */
+#define	SARG() \
+	(flags&LONGINT ? va_arg(ap, long) : \
+	    flags&SHORTINT ? (long)(short)va_arg(ap, int) : \
+	    (long)va_arg(ap, int))
+#define	UARG() \
+	(flags&LONGINT ? va_arg(ap, unsigned long) : \
+	    flags&SHORTINT ? (unsigned long)(unsigned short)va_arg(ap, int) : \
+	    (unsigned long)va_arg(ap, unsigned int))
+
+	fmt = (char *)fmt0;
+	ret = 0;
+
+	if (alloc) {
+		strsize = 128;
+		*strp = str = (char *)malloc(strsize);
+		if (str == NULL) {
+			ret = -1;
+			goto done;
+		}
+		estr = str + 127;
+	} else {
+		str = *strp;
+		if (strsize)
+			estr = str + strsize - 1;
+		else
+			estr = NULL;
+	}
+
+	/*
+	 * Scan the format for conversions (`%' character).
+	 */
+	for (;;) {
+		for (cp = fmt; (ch = *fmt) != '\0' && ch != '%'; fmt++)
+			/* void */;
+		if ((n = fmt - cp) != 0) {
+			PRINT(cp, n);
+			ret += n;
+		}
+		if (ch == '\0')
+			goto done;
+		fmt++;		/* skip over '%' */
+
+		flags = 0;
+		dprec = 0;
+		width = 0;
+		prec = -1;
+		sign = '\0';
+
+rflag:		ch = *fmt++;
+reswitch:	switch (ch) {
+		case ' ':
+			/*
+			 * ``If the space and + flags both appear, the space
+			 * flag will be ignored.''
+			 *	-- ANSI X3J11
+			 */
+			if (!sign)
+				sign = ' ';
+			goto rflag;
+		case '#':
+			flags |= ALT;
+			goto rflag;
+		case '*':
+			/*
+			 * ``A negative field width argument is taken as a
+			 * - flag followed by a positive field width.''
+			 *	-- ANSI X3J11
+			 * They don't exclude field widths read from args.
+			 */
+			if ((width = va_arg(ap, int)) >= 0)
+				goto rflag;
+			width = -width;
+			/* FALLTHROUGH */
+		case '-':
+			flags |= LADJUST;
+			goto rflag;
+		case '+':
+			sign = '+';
+			goto rflag;
+		case '.':
+			if ((ch = *fmt++) == '*') {
+				n = va_arg(ap, int);
+				prec = n < 0 ? -1 : n;
+				goto rflag;
+			}
+			n = 0;
+			while (is_digit(ch)) {
+				n = 10 * n + to_digit(ch);
+				ch = *fmt++;
+			}
+			prec = n < 0 ? -1 : n;
+			goto reswitch;
+		case '0':
+			/*
+			 * ``Note that 0 is taken as a flag, not as the
+			 * beginning of a field width.''
+			 *	-- ANSI X3J11
+			 */
+			flags |= ZEROPAD;
+			goto rflag;
+		case '1': case '2': case '3': case '4':
+		case '5': case '6': case '7': case '8': case '9':
+			n = 0;
+			do {
+				n = 10 * n + to_digit(ch);
+				ch = *fmt++;
+			} while (is_digit(ch));
+			width = n;
+			goto reswitch;
+		case 'h':
+			flags |= SHORTINT;
+			goto rflag;
+		case 'l':
+			flags |= LONGINT;
+			goto rflag;
+#ifdef HAVE_LONG_LONG
+		case 'q':
+			flags |= QUADINT;
+			goto rflag;
+#endif /* HAVE_LONG_LONG */
+		case 'c':
+			*(cp = buf) = va_arg(ap, int);
+			size = 1;
+			sign = '\0';
+			break;
+		case 'D':
+			flags |= LONGINT;
+			/*FALLTHROUGH*/
+		case 'd':
+		case 'i':
+#ifdef HAVE_LONG_LONG
+			if (flags & QUADINT) {
+				uqval = va_arg(ap, long long);
+				if ((long long)uqval < 0) {
+					uqval = -uqval;
+					sign = '-';
+				}
+			}
+			else
+#endif /* HAVE_LONG_LONG */
+			{
+				ulval = SARG();
+				if ((long)ulval < 0) {
+					ulval = -ulval;
+					sign = '-';
+				}
+			}
+			base = 10;
+			goto number;
+		case 'n':
+#ifdef HAVE_LONG_LONG
+			if (flags & QUADINT)
+				*va_arg(ap, long long *) = ret;
+			else
+#endif /* HAVE_LONG_LONG */
+			if (flags & LONGINT)
+				*va_arg(ap, long *) = ret;
+			else if (flags & SHORTINT)
+				*va_arg(ap, short *) = ret;
+			else
+				*va_arg(ap, int *) = ret;
+			continue;	/* no output */
+		case 'O':
+			flags |= LONGINT;
+			/*FALLTHROUGH*/
+		case 'o':
+#ifdef HAVE_LONG_LONG
+			if (flags & QUADINT)
+				uqval = va_arg(ap, unsigned long long);
+			else
+#endif /* HAVE_LONG_LONG */
+				ulval = UARG();
+			base = 8;
+			goto nosign;
+		case 'p':
+			/*
+			 * ``The argument shall be a pointer to void.  The
+			 * value of the pointer is converted to a sequence
+			 * of printable characters, in an implementation-
+			 * defined manner.''
+			 *	-- ANSI X3J11
+			 */
+			ulval = (unsigned long)va_arg(ap, VOID *);
+			base = 16;
+			xdigs = "0123456789abcdef";
+			flags = (flags & ~QUADINT) | HEXPREFIX;
+			ch = 'x';
+			goto nosign;
+		case 's':
+			if ((cp = va_arg(ap, char *)) == NULL)
+				cp = "(null)";
+			if (prec >= 0) {
+				/*
+				 * can't use strlen; can only look for the
+				 * NUL in the first `prec' characters, and
+				 * strlen() will go further.
+				 */
+				char *p = memchr(cp, 0, prec);
+
+				if (p != NULL) {
+					size = p - cp;
+					if (size > prec)
+						size = prec;
+				} else
+					size = prec;
+			} else
+				size = strlen(cp);
+			sign = '\0';
+			break;
+		case 'U':
+			flags |= LONGINT;
+			/*FALLTHROUGH*/
+		case 'u':
+#ifdef HAVE_LONG_LONG
+			if (flags & QUADINT)
+				uqval = va_arg(ap, unsigned long long);
+			else
+#endif /* HAVE_LONG_LONG */
+				ulval = UARG();
+			base = 10;
+			goto nosign;
+		case 'X':
+			xdigs = "0123456789ABCDEF";
+			goto hex;
+		case 'x':
+			xdigs = "0123456789abcdef";
+hex:
+#ifdef HAVE_LONG_LONG
+			if (flags & QUADINT)
+				uqval = va_arg(ap, unsigned long long);
+			else
+#endif /* HAVE_LONG_LONG */
+				ulval = UARG();
+			base = 16;
+			/* leading 0x/X only if non-zero */
+			if (flags & ALT &&
+#ifdef HAVE_LONG_LONG
+			    (flags & QUADINT ? uqval != 0 : ulval != 0))
+#else
+			    ulval != 0)
+#endif /* HAVE_LONG_LONG */
+				flags |= HEXPREFIX;
+
+			/* unsigned conversions */
+nosign:			sign = '\0';
+			/*
+			 * ``... diouXx conversions ... if a precision is
+			 * specified, the 0 flag will be ignored.''
+			 *	-- ANSI X3J11
+			 */
+number:			if ((dprec = prec) >= 0)
+				flags &= ~ZEROPAD;
+
+			/*
+			 * ``The result of converting a zero value with an
+			 * explicit precision of zero is no characters.''
+			 *	-- ANSI X3J11
+			 */
+			cp = buf + BUF;
+#ifdef HAVE_LONG_LONG
+			if (flags & QUADINT) {
+				if (uqval != 0 || prec != 0)
+					cp = __uqtoa(uqval, cp, base,
+					    flags & ALT, xdigs);
+			}
+			else
+#endif /* HAVE_LONG_LONG */
+			{
+				if (ulval != 0 || prec != 0)
+					cp = __ultoa(ulval, cp, base,
+					    flags & ALT, xdigs);
+			}
+			size = buf + BUF - cp;
+			break;
+		default:	/* "%?" prints ?, unless ? is NUL */
+			if (ch == '\0')
+				goto done;
+			/* pretend it was %c with argument ch */
+			cp = buf;
+			*cp = ch;
+			size = 1;
+			sign = '\0';
+			break;
+		}
+
+		/*
+		 * All reasonable formats wind up here.  At this point, `cp'
+		 * points to a string which (if not flags&LADJUST) should be
+		 * padded out to `width' places.  If flags&ZEROPAD, it should
+		 * first be prefixed by any sign or other prefix; otherwise,
+		 * it should be blank padded before the prefix is emitted.
+		 * After any left-hand padding and prefixing, emit zeroes
+		 * required by a decimal [diouxX] precision, then print the
+		 * string proper, then emit zeroes required by any leftover
+		 * floating precision; finally, if LADJUST, pad with blanks.
+		 *
+		 * Compute actual size, so we know how much to pad.
+		 * fieldsz excludes decimal prec; realsz includes it.
+		 */
+		fieldsz = size;
+		if (sign)
+			fieldsz++;
+		else if (flags & HEXPREFIX)
+			fieldsz += 2;
+		realsz = dprec > fieldsz ? dprec : fieldsz;
+
+		/* right-adjusting blank padding */
+		if ((flags & (LADJUST|ZEROPAD)) == 0)
+			PAD(width - realsz, blanks);
+
+		/* prefix */
+		if (sign) {
+			PRINT(&sign, 1);
+		} else if (flags & HEXPREFIX) {
+			ox[0] = '0';
+			ox[1] = ch;
+			PRINT(ox, 2);
+		}
+
+		/* right-adjusting zero padding */
+		if ((flags & (LADJUST|ZEROPAD)) == ZEROPAD)
+			PAD(width - realsz, zeroes);
+
+		/* leading zeroes from decimal precision */
+		PAD(dprec - fieldsz, zeroes);
+
+		/* the string or number proper */
+		PRINT(cp, size);
+
+		/* left-adjusting padding (always blank) */
+		if (flags & LADJUST)
+			PAD(width - realsz, blanks);
+
+		/* finally, adjust ret */
+		ret += width > realsz ? width : realsz;
+	}
+done:
+	if (strsize)
+		*str = '\0';
+	return (ret);
+	/* NOTREACHED */
 }
 
 #ifndef HAVE_VSNPRINTF
 int
-vsnprintf (str, sz, format, args)
-  char *str;
-  size_t sz;
-  const char *format;
-  va_list args;
+vsnprintf(str, n, fmt, ap)
+	char *str;
+	size_t n;
+	const char *fmt;
+	va_list ap;
 {
-  struct state state;
-  int ret;
 
-  state.max_sz = 0;
-  state.sz     = sz;
-  state.str    = (unsigned char *) str;
-  state.s      = (unsigned char *) str;
-  state.theend = (unsigned char *) str + sz - 1;
-  state.append_char = sn_append_char;
-  state.reserve     = sn_reserve;
-
-  ret = xyzprintf (&state, format, args);
-  *state.s = '\0';
-  if (ret)
-    return sz;
-  else
-    return state.s - state.str;
+	return (xxxprintf(&str, n, 0, fmt, ap));
 }
-#endif
+#endif /* HAVE_VSNPRINTF */
 
 #ifndef HAVE_SNPRINTF
 int
 #ifdef __STDC__
-snprintf (char *str, size_t sz, const char *format, ...)
+snprintf(char *str, size_t n, char const *fmt, ...)
 #else
-snprintf (va_alist)
-  va_dcl
+snprintf(str, n, fmt, va_alist)
+	char *str;
+	size_t n;
+	char *fmt;
+	va_dcl
 #endif
 {
-  va_list args;
-  int ret;
+	int ret;
+	va_list ap;
 
 #ifdef __STDC__
-  va_start(args, format);
+	va_start(ap, fmt);
 #else
-  char *str;
-  size_t sz;
-  const char *format;
-
-  va_start(args);
-  str = va_arg(args, char *);
-  sz = va_arg(args, size_t);
-  format = va_arg(args, const char *);
+	va_start(ap);
 #endif
-  ret = vsnprintf (str, sz, format, args);
-
-#ifdef PARANOIA
-  {
-    int ret2;
-    char *tmp;
-
-    tmp = malloc (sz);
-    if (tmp == NULL)
-      abort ();
-
-    ret2 = vsprintf (tmp, format, args);
-    if (ret != ret2 || strcmp(str, tmp))
-      abort ();
-    free (tmp);
-  }
-#endif
-
-  va_end(args);
-  return ret;
+	ret = xxxprintf(&str, n, 0, fmt, ap);
+	va_end(ap);
+	return (ret);
 }
-#endif
+#endif /* HAVE_SNPRINTF */
 
-#ifndef HAVE_VASNPRINTF
+#ifdef HAVE_VASPRINTF
 int
-vasnprintf (ret, max_sz, format, args)
-  char **ret;
-  size_t max_sz;
-  const char *format;
-  va_list args;
+vasprintf(str, fmt, ap)
+	char **str;
+	const char *fmt;
+	va_list ap;
 {
-  int st;
-  size_t len;
-  struct state state;
 
-  state.max_sz = max_sz;
-  state.sz     = 1;
-  state.str    = (unsigned char *) malloc(state.sz);
-  if (state.str == NULL) {
-    *ret = NULL;
-    return -1;
-  }
-  state.s = state.str;
-  state.theend = state.s + state.sz - 1;
-  state.append_char = as_append_char;
-  state.reserve     = as_reserve;
-
-  st = xyzprintf (&state, format, args);
-  if (st) {
-    free (state.str);
-    *ret = NULL;
-    return -1;
-  } else {
-    char *tmp;
-
-    *state.s = '\0';
-    len = state.s - state.str;
-    tmp = realloc (state.str, len+1);
-    if (tmp == NULL) {
-      free (state.str);
-      *ret = NULL;
-      return -1;
-    }
-    *ret = tmp;
-    return len;
-  }
+	return (vfprintf(str, 0, 1, fmt, ap));
 }
-#endif
-
-#ifndef HAVE_VASPRINTF
-int
-vasprintf (ret, format, args)
-  char **ret;
-  const char *format;
-  va_list args;
-{
-  return vasnprintf (ret, 0, format, args);
-}
-#endif
+#endif /* HAVE_VASPRINTF */
 
 #ifndef HAVE_ASPRINTF
 int
 #ifdef __STDC__
-asprintf (char **ret, const char *format, ...)
+asprintf(char **str, char const *fmt, ...)
 #else
-asprintf (va_alist)
-  va_dcl
+asprintf(str, fmt, va_alist)
+	char **str;
+	char *fmt;
+	va_dcl
 #endif
 {
-  va_list args;
-  int val;
+	int ret;
+	va_list ap;
 
 #ifdef __STDC__
-  va_start(args, format);
+	va_start(ap, fmt);
 #else
-  char **ret;
-  const char *format;
-
-  va_start(args);
-  ret = va_arg(args, char **);
-  format = va_arg(args, const char *);
+	va_start(ap);
 #endif
-  val = vasprintf (ret, format, args);
-
-#ifdef PARANOIA
-  {
-    int ret2;
-    char *tmp;
-    tmp = malloc (val + 1);
-    if (tmp == NULL)
-      abort ();
-
-    ret2 = vsprintf (tmp, format, args);
-    if (val != ret2 || strcmp(*ret, tmp))
-      abort ();
-    free (tmp);
-  }
-#endif
-
-  va_end(args);
-  return val;
+	ret = xxxprintf(str, 0, 1, fmt, ap);
+	va_end(ap);
+	return (ret);
 }
-#endif
-
-#ifndef HAVE_ASNPRINTF
-int
-#ifdef __STDC__
-asnprintf (char **ret, size_t max_sz, const char *format, ...)
-#else
-asnprintf (va_alist)
-  va_dcl
-#endif
-{
-  va_list args;
-  int val;
-
-#ifdef __STDC__
-  va_start(args, format);
-#else
-  char **ret;
-  size_t max_sz;
-  const char *format;
-
-  va_start(args);
-  ret = va_arg(args, char **);
-  max_sz = va_arg(args, size_t);
-  format = va_arg(args, const char *);
-#endif
-  val = vasnprintf (ret, max_sz, format, args);
-
-#ifdef PARANOIA
-  {
-    int ret2;
-    char *tmp;
-    tmp = malloc (val + 1);
-    if (tmp == NULL)
-      abort ();
-
-    ret2 = vsprintf (tmp, format, args);
-    if (val != ret2 || strcmp(*ret, tmp))
-      abort ();
-    free (tmp);
-  }
-#endif
-
-  va_end(args);
-  return val;
-}
-#endif
+#endif /* HAVE_ASPRINTF */
