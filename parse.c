@@ -59,6 +59,7 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 
 #include "sudo.h"
+#include "options.h"
 
 /*
  * there are 3 main lists (User, Host_Alias, Cmnd_Alias) and 1 extra list

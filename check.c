@@ -60,6 +60,7 @@ static char rcsid[] = "$Id$";
 #include <netinet/in.h>
 #include <pwd.h>
 #include "sudo.h"
+#include "options.h"
 #include "insults.h"
 #ifdef __svr4__
 #include <shadow.h>

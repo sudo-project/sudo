@@ -55,6 +55,7 @@ static char rcsid[] = "$Id$";
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include "sudo.h"
+#include "options.h"
 
 #ifndef STDC_HEADERS
 #ifndef __GNUC__		/* gcc has its own malloc */
