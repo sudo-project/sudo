@@ -68,11 +68,7 @@ static char rcsid[] = "$Id$";
 #  ifdef HAVE_C2_SECURITY
 #    define	_PASSWD_LEN	24
 #  else
-#    if defined(HAVE_DCE) || defined(HAVE_KERB4) || defined(HAVE_KERB5)
-#      define	_PASSWD_LEN	256
-#    else
-#      define	_PASSWD_LEN	8
-#    endif /* HAVE_DCE || HAVE_KERB[45] */
+#    define	_PASSWD_LEN	8
 #  endif /* HAVE_C2_SECURITY */
 #endif /* _PASSWD_LEN */
 
