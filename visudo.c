@@ -106,6 +106,10 @@ extern int errorlineno;
 extern int pedantic;
 extern int quiet;
 
+/* For getopt(3) */
+extern char *optarg;
+extern int optind;
+
 /*
  * Globals
  */
@@ -114,7 +118,6 @@ char *sudoers = _PATH_SUDOERS;
 char *stmp = _PATH_SUDOERS_TMP;
 struct sudo_user sudo_user;
 int parse_error = FALSE;
-
 
 int
 main(argc, argv)
@@ -130,6 +133,7 @@ main(argc, argv)
     int sudoers_fd;			/* sudoers file descriptor */
     int stmp_fd;			/* stmp file descriptor */
     int n;				/* length parameter */
+    int ch;				/* getopt char */
     time_t now;				/* time now */
     struct stat stmp_sb, sudoers_sb;	/* to check for changes */
 
@@ -145,20 +149,32 @@ main(argc, argv)
      * Arg handling.
      */
     checkonly = 0;
-    while (--argc) {
-	if (!strcmp(argv[argc], "-V")) {
-	    (void) printf("visudo version %s\n", version);
-	    exit(0);
-	} else if (!strcmp(argv[argc], "-s")) {
-	    pedantic++;			/* strict mode */
-	} else if (!strcmp(argv[argc], "-c")) {
-	    checkonly++;		/* check mode */
-	} else if (!strcmp(argv[argc], "-q")) {
-	    quiet++;			/* quiet mode */
-	} else {
-	    usage();
+    while ((ch = getopt(argc, argv, "Vcf:sq")) != -1) {
+	switch (ch) {
+	    case 'V':
+		(void) printf("visudo version %s\n", version);
+		exit(0);
+	    case 'c':
+		checkonly++;		/* check mode */
+		break;
+	    case 'f':
+		sudoers = optarg;	/* sudoers file path */
+		easprintf(&stmp, "%s.tmp", optarg);
+		break;
+	    case 's':
+		pedantic++;		/* strict mode */
+		break;
+	    case 'q':
+		quiet++;		/* quiet mode */
+		break;
+	    default:
+		usage();
 	}
     }
+    argc -= optind;
+    argv += optind;
+    if (argc)
+	usage();
 
     /* Mock up a fake sudo_user struct. */
     user_host = user_shost = user_cmnd = "";
@@ -694,6 +710,7 @@ Exit(sig)
 static void
 usage()
 {
-    (void) fprintf(stderr, "usage: %s [-s] [-V]\n", Argv[0]);
+    (void) fprintf(stderr, "usage: %s [-c] [-f sudoers] [-q] [-s] [-V]\n",
+	Argv[0]);
     exit(1);
 }
