@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998, 1999, 2001
+ * Copyright (c) 1996, 1998, 1999, 2001, 2002
  *	Todd C. Miller <Todd.Miller@courtesan.com>.  All rights reserved.
  *
  * This code is derived from software contributed by Jeff Earickson
