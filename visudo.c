@@ -84,6 +84,7 @@ static RETSIGTYPE Exit		__P((int));
 static void setup_signals	__P((void));
 int path_matches		__P((char *, char *));
 int addr_matches		__P((char *));
+int netgr_matches		__P((char *, char *, char *));
 
 
 /*
@@ -352,6 +353,13 @@ int path_matches(cmnd, path)
 
 int addr_matches(n)
     char *n;
+{
+    return(TRUE);
+}
+
+
+int netgr_matches(n, h, u)
+    char *n, *h, *u;
 {
     return(TRUE);
 }
