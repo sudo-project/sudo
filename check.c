@@ -370,8 +370,9 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 	    log_error(NO_EXIT, "%s exists but is not a directory (0%o)",
 		dirparent, sb.st_mode);
 	else if (sb.st_uid != timestamp_uid)
-	    log_error(NO_EXIT, "%s owned by uid %ld, should be uid %ld",
-		dirparent, (long) sb.st_uid, (long) timestamp_uid);
+	    log_error(NO_EXIT, "%s owned by uid %lu, should be uid %lu",
+		dirparent, (unsigned long) sb.st_uid,
+		(unsigned long) timestamp_uid);
 	else if ((sb.st_mode & 0000022))
 	    log_error(NO_EXIT,
 		"%s writable by non-owner (0%o), should be mode 0700",
@@ -416,8 +417,9 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 		log_error(NO_EXIT, "%s exists but is not a directory (0%o)",
 		    timestampdir, sb.st_mode);
 	} else if (sb.st_uid != timestamp_uid)
-	    log_error(NO_EXIT, "%s owned by uid %ld, should be uid %ld",
-		timestampdir, (long) sb.st_uid, (long) timestamp_uid);
+	    log_error(NO_EXIT, "%s owned by uid %lu, should be uid %lu",
+		timestampdir, (unsigned long) sb.st_uid,
+		(unsigned long) timestamp_uid);
 	else if ((sb.st_mode & 0000022))
 	    log_error(NO_EXIT,
 		"%s writable by non-owner (0%o), should be mode 0700",
@@ -458,8 +460,9 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 		/* If bad uid or file mode, complain and kill the bogus file. */
 		if (sb.st_uid != timestamp_uid) {
 		    log_error(NO_EXIT,
-			"%s owned by uid %ld, should be uid %ld",
-			timestampfile, (long) sb.st_uid, (long) timestamp_uid);
+			"%s owned by uid %ud, should be uid %lu",
+			timestampfile, (unsigned long) sb.st_uid,
+			(unsigned long) timestamp_uid);
 		    (void) unlink(timestampfile);
 		} else if ((sb.st_mode & 0000022)) {
 		    log_error(NO_EXIT,

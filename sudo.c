@@ -530,8 +530,8 @@ init_vars(sudo_mode)
 	pw.pw_name = pw_name;
 	sudo_user.pw = &pw;
 
-	log_error(0, "uid %ld does not exist in the passwd file!",
-	    (long) pw.pw_uid);
+	log_error(0, "uid %lu does not exist in the passwd file!",
+	    (unsigned long) pw.pw_uid);
     }
     if (user_shell == NULL || *user_shell == '\0')
 	user_shell = sudo_user.pw->pw_shell;
@@ -844,11 +844,11 @@ check_sudoers()
 	log_error(0, "%s is mode 0%o, should be 0%o", _PATH_SUDOERS,
 	    (statbuf.st_mode & 07777), SUDOERS_MODE);
     else if (statbuf.st_uid != SUDOERS_UID)
-	log_error(0, "%s is owned by uid %ld, should be %d", _PATH_SUDOERS,
-	    (long) statbuf.st_uid, SUDOERS_UID);
+	log_error(0, "%s is owned by uid %lu, should be %lu", _PATH_SUDOERS,
+	    (unsigned long) statbuf.st_uid, SUDOERS_UID);
     else if (statbuf.st_gid != SUDOERS_GID)
-	log_error(0, "%s is owned by gid %ld, should be %d", _PATH_SUDOERS,
-	    (long) statbuf.st_gid, SUDOERS_GID);
+	log_error(0, "%s is owned by gid %lu, should be %lu", _PATH_SUDOERS,
+	    (unsigned long) statbuf.st_gid, SUDOERS_GID);
     else {
 	/* Solaris sometimes returns EAGAIN so try 10 times */
 	for (i = 0; i < 10 ; i++) {

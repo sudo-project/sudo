@@ -442,9 +442,9 @@ rebuild_env(sudo_mode, envp)
 
     /* Add the SUDO_USER, SUDO_UID, SUDO_GID environment variables. */
     insert_env(format_env("SUDO_USER", user_name), 1);
-    easprintf(&cp, "SUDO_UID=%ld", (long) user_uid);
+    easprintf(&cp, "SUDO_UID=%lu", (unsigned long) user_uid);
     insert_env(cp, 1);
-    easprintf(&cp, "SUDO_GID=%ld", (long) user_gid);
+    easprintf(&cp, "SUDO_GID=%lu", (unsigned long) user_gid);
     insert_env(cp, 1);
 
     return(new_environ);
