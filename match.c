@@ -107,16 +107,11 @@ user_matches(pw, list)
     struct member *list;
 {
     struct member *m;
+    struct alias *a;
     int rval, matched = UNSPEC;
 
     for (m = list; m != NULL; m = m->next) {
 	switch (m->type) {
-	    case ALIAS:
-		rval = alias_matches(m->name, USERALIAS, pw, NULL);
-		if (rval == UNSPEC)
-		    rval = !strcmp(m->name, pw->pw_name);
-		matched = m->negated ? !rval : rval;
-		break;
 	    case ALL:
 		matched = !m->negated;
 		break;
@@ -128,6 +123,14 @@ user_matches(pw, list)
 		if (usergr_matches(m->name, pw->pw_name, pw))
 		    matched = !m->negated;
 		break;
+	    case ALIAS:
+		if ((a = find_alias(m->name, USERALIAS)) != NULL) {
+		    rval = user_matches(pw, a->first_member);
+		    if (rval != UNSPEC)
+			matched = m->negated ? !rval : rval;
+		    break;
+		}
+		/* FALLTHROUGH */
 	    case WORD:
 		if (userpw_matches(m->name, pw->pw_name, pw))
 		    matched = !m->negated;
@@ -148,6 +151,7 @@ runas_matches(pw, list)
     struct member *list;
 {
     struct member *m;
+    struct alias *a;
     int rval, matched = UNSPEC;
 
     if (list == NULL)
@@ -155,12 +159,6 @@ runas_matches(pw, list)
 
     for (m = list; m != NULL; m = m->next) {
 	switch (m->type) {
-	    case ALIAS:
-		rval = alias_matches(m->name, RUNASALIAS, pw, NULL);
-		if (rval == UNSPEC)
-		    rval = !strcmp(m->name, pw->pw_name);
-		matched = m->negated ? !rval : rval;
-		break;
 	    case ALL:
 		matched = !m->negated;
 		break;
@@ -172,6 +170,14 @@ runas_matches(pw, list)
 		if (usergr_matches(m->name, pw->pw_name, pw))
 		    matched = !m->negated;
 		break;
+	    case ALIAS:
+		if ((a = find_alias(m->name, RUNASALIAS)) != NULL) {
+		    rval = runas_matches(pw, a->first_member);
+		    if (rval != UNSPEC)
+			matched = m->negated ? !rval : rval;
+		    break;
+		}
+		/* FALLTHROUGH */
 	    case WORD:
 		if (userpw_matches(m->name, pw->pw_name, pw))
 		    matched = !m->negated;
@@ -191,16 +197,11 @@ host_matches(shost, lhost, list)
     struct member *list;
 {
     struct member *m;
+    struct alias *a;
     int rval, matched = UNSPEC;
 
     for (m = list; m != NULL; m = m->next) {
 	switch (m->type) {
-	    case ALIAS:
-		rval = alias_matches(m->name, HOSTALIAS, shost, lhost);
-		if (rval == UNSPEC)
-		    rval = hostname_matches(shost, lhost, m->name);
-		matched = m->negated ? !rval : rval;
-		break;
 	    case ALL:
 		matched = !m->negated;
 		break;
@@ -212,6 +213,14 @@ host_matches(shost, lhost, list)
 		if (addr_matches(m->name))
 		    matched = !m->negated;
 		break;
+	    case ALIAS:
+		if ((a = find_alias(m->name, HOSTALIAS)) != NULL) {
+		    rval = host_matches(shost, lhost, a->first_member);
+		    if (rval != UNSPEC)
+			matched = m->negated ? !rval : rval;
+		    break;
+		}
+		/* FALLTHROUGH */
 	    case WORD:
 		if (hostname_matches(shost, lhost, m->name))
 		    matched = !m->negated;
@@ -231,19 +240,22 @@ cmnd_matches(cmnd, args, list)
     char *cmnd, *args;
     struct member *list;
 {
-    struct member *m;
     struct sudo_command *c;
+    struct member *m;
+    struct alias *a;
     int rval, matched = UNSPEC;
 
     for (m = list; m != NULL; m = m->next) {
 	switch (m->type) {
-	    case ALIAS:
-		rval = alias_matches(m->name, CMNDALIAS, cmnd, args);
-		if (rval != UNSPEC)
-		    matched = m->negated ? !rval : rval;
-		break;
 	    case ALL:
 		matched = !m->negated;
+		break;
+	    case ALIAS:
+		if ((a = find_alias(m->name, CMNDALIAS)) != NULL) {
+		    rval = cmnd_matches(cmnd, args, a->first_member);
+		    if (rval != UNSPEC)
+			matched = m->negated ? !rval : rval;
+		}
 		break;
 	    case COMMAND:
 		c = (struct sudo_command *)m->name;
@@ -253,35 +265,6 @@ cmnd_matches(cmnd, args, list)
 	}
     }
     return(matched);
-}
-
-/*
- * Looks through the alias list for one with a matching name and type
- * and calls {host,cmnd,user}_matches() with the aliases.
- * Returns ALLOW, DENY or UNSPEC.
- */
-int
-alias_matches(name, type, v1, v2)
-    char *name;
-    int type;
-    VOID *v1;
-    VOID *v2;
-{
-    struct alias *a;
-
-    if ((a = find_alias(name, type)) != NULL) {
-	switch (type) {
-	    case HOSTALIAS:
-		return(host_matches(v1, v2, a->first_member));
-	    case CMNDALIAS:
-		return(cmnd_matches(v1, v2, a->first_member));
-	    case USERALIAS:
-		return(user_matches(v1, a->first_member));
-	    case RUNASALIAS:
-		return(runas_matches(v1, a->first_member));
-	}
-    }
-    return(UNSPEC);
 }
 
 /*
