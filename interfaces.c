@@ -163,8 +163,8 @@ void load_interfaces()
 
 	/* set i to the subscript of the next interface */
 #ifdef HAVE_SA_LEN
-	if (ifreq.ifr_addr.sa_len > sizeof(ifreq.ifr_addr))
-	    i += sizeof(ifreq.ifr_name) + ifreq.ifr_addr.sa_len;
+	if (ifr->ifr_addr.sa_len > sizeof(ifr->ifr_addr))
+	    i += sizeof(ifr->ifr_name) + ifr->ifr_addr.sa_len;
 	else
 #endif /* HAVE_SA_LEN */
 	    i += sizeof(struct ifreq);
