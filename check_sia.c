@@ -125,18 +125,13 @@ sia_attempt_auth()
 	    return;
 	}
 
-	--counter;
+	--counter;		/* otherwise, try again  */
 	pass_warn(stderr);
     }
     set_perms(PERM_USER, 0);
 
-    if (counter > 0) {
-	log_error(PASSWORD_NOT_CORRECT);
-	inform_user(PASSWORD_NOT_CORRECT);
-    } else {
-	log_error(PASSWORDS_NOT_CORRECT);
-	inform_user(PASSWORDS_NOT_CORRECT);
-    }
+    log_error(counter ? PASSWORD_NOT_CORRECT : PASSWORDS_NOT_CORRECT);
+    inform_user(counter ? PASSWORD_NOT_CORRECT : PASSWORDS_NOT_CORRECT);
     exit(1);
 }
 
