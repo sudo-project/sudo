@@ -269,7 +269,9 @@ in L<passwd(@mansectform@)>.
 
 The B<-u> (I<user>) option causes B<sudo> to run the specified command
 as a user other than I<root>.  To specify a I<uid> instead of a
-I<username>, use I<#uid>.
+I<username>, use I<#uid>.  Note that if the I<targetpw> Defaults
+option is set (see L<sudoers(@mansectform@)>) it is not possible
+to run commands with a uid not listed in the password database.
 
 =item -v
 

@@ -408,7 +408,9 @@ password of the invoking user.  This flag is I<off> by default.
 
 If set, B<sudo> will prompt for the password of the user specified by
 the B<-u> flag (defaults to C<root>) instead of the password of the
-invoking user.  This flag is I<off> by default.
+invoking user.  Note that this precludes the use of a uid not listed
+in the passwd database as an argument to the B<-u> flag.
+This flag is I<off> by default.
 
 =item set_logname
 
