@@ -1160,6 +1160,10 @@ case "$host" in
 			fi
 		    fi
 		fi
+		# IRIX <= 4 needs -lsun
+		if test "$OSREV" -le 4; then
+		    AC_CHECK_LIB(sun, getpwnam, [SUDO_LIBS="${SUDO_LIBS} -lsun"; VISUDO_LIBS="${VISUDO_LIBS} -lsun"; LIBS="${LIBS} -lsun"])
+		fi
 		;;
     *-*-linux*)
 		# Some Linux versions need to link with -lshadow
@@ -1343,13 +1347,6 @@ if test "$with_DCE" = "yes" -o "$ac_cv_prog_YACC" = "bison -y"; then
     AC_FUNC_ALLOCA
 fi
 
-dnl
-dnl library checks
-dnl
-dnl IRIX 4 needs -lsun)
-if test "$OS" = "irix"; then
-    AC_CHECK_LIB(sun, getpwnam, [SUDO_LIBS="${SUDO_LIBS} -lsun"; VISUDO_LIBS="${VISUDO_LIBS} -lsun"; LIBS="${LIBS} -lsun"])
-fi
 dnl
 dnl Find kerberos 4 includes and libs or complain
 dnl
