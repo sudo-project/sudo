@@ -24,5 +24,8 @@ Known bugs in sudo version 1.6.8
 6) For the same reason as #5, changing the value of "ignore_dot" has
    no effect (find_path() is called before sudoers is parsed).
 
+7) A negated user/uid in a runas list is not treated the same as a
+   negated command.  E.g. it does not override a previously allowed spec.
+
 For a list of things that are not bugs but that I would like to
 add / fix, please see the TODO file.

@@ -1678,3 +1678,5 @@ Sudo 1.6.7p6 released.
 
 526) Added start_tls support from Gudleik Rasch <gudleik@rastamatra.org>.
 
+527) A uid specified in sudoers now matches the user specified by the
+     -u flag even if the -u flag specified a name, not a uid.
