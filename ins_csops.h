@@ -28,7 +28,11 @@
     "stty: unknown mode: doofus",
     "I can't hear you -- I'm using the scrambler.",
     "The more you drive -- the dumber you get.",
+#ifdef PC_INSULTS
+    "Listen, broccoli brains, I don't have time to listen to this trash.",
+#else
     "Listen, burrito brains, I don't have time to listen to this trash.",
+#endif
     "I've seen penguins that can type better than that.",
     "Have you considered trying to match wits with a rutabaga?",
     "You speak an infinite deal of nothing",

@@ -1672,7 +1672,7 @@ Sudo 1.6.7p5 released.
 524) Merged in LDAP support from Aaron Spangler.
 
 525) Added the --with-pc-insults configure to replace politically
-     incorrect insults with other ones.
+     incorrect insults with ones from Alek O. Komarnitsky.
 
 526) Added start_tls support from Gudleik Rasch <gudleik@rastamatra.org>.
 
