@@ -125,7 +125,7 @@ sudoers_lookup(pwflag)
     int nopass;
 
     /* Become sudoers file owner */
-    set_perms(PERM_SUDOERS, 0);
+    set_perms(PERM_SUDOERS);
 
     /* We opened _PATH_SUDOERS in check_sudoers() so just rewind it. */
     rewind(sudoers_fp);
@@ -140,7 +140,7 @@ sudoers_lookup(pwflag)
 	keepall = TRUE;
 
     /* Need to be root while stat'ing things in the parser. */
-    set_perms(PERM_ROOT, 0);
+    set_perms(PERM_ROOT);
     error = yyparse();
 
     /* Close the sudoers file now that we are done with it. */

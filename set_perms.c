@@ -82,9 +82,8 @@ static void fatal		__P((char *, int));
  * toggling the effective uid/gid unless we are headed for an exec().
  */
 void
-set_perms_posix(perm, sudo_mode)
+set_perms_posix(perm)
     int perm;
-    int sudo_mode;
 {
     int error;
 
@@ -161,9 +160,8 @@ set_perms_posix(perm, sudo_mode)
  * we are headed for an exec().
  */
 void
-set_perms_fallback(perm, sudo_mode)
+set_perms_fallback(perm)
     int perm;
-    int sudo_mode;
 {
     int error;
 
@@ -232,9 +230,8 @@ set_perms_fallback(perm, sudo_mode)
  * NOTE: does not support the "stay_setuid" option.
  */
 void
-set_perms_fallback(perm, sudo_mode)
+set_perms_fallback(perm)
     int perm;
-    int sudo_mode;
 {
 
     /*

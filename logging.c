@@ -365,7 +365,7 @@ log_error(va_alist)
 
     /* Become root if we are not already to avoid user control */
     if (geteuid() != 0)
-	set_perms(PERM_ROOT, 0);
+	set_perms(PERM_ROOT);
 
     /* Expand printf-style format + args. */
     evasprintf(&message, fmt, ap);
@@ -507,10 +507,10 @@ send_mail(line)
 		 * (so user cannot kill it) or as the user (for the paranoid).
 		 */
 #ifndef NO_ROOT_MAILER
-		set_perms(PERM_FULL_ROOT, 0);
+		set_perms(PERM_FULL_ROOT);
 		execve(mpath, argv, root_envp);
 #else
-		set_perms(PERM_FULL_USER, 0);
+		set_perms(PERM_FULL_USER);
 		execv(mpath, argv);
 #endif /* NO_ROOT_MAILER */
 		_exit(127);

@@ -142,7 +142,7 @@ login_cap_t *lc;
 #ifdef HAVE_BSD_AUTH_H
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
-void (*set_perms) __P((int, int));
+void (*set_perms) __P((int));
 
 
 int
@@ -397,7 +397,7 @@ main(argc, argv, envp)
 #endif /* RLIMIT_CORE */
 
 	/* Become specified user or root. */
-	set_perms(PERM_RUNAS, sudo_mode);
+	set_perms(PERM_RUNAS);
 
 	/* Close the password and group files */
 	endpwent();
@@ -546,16 +546,16 @@ init_vars(sudo_mode)
     /*
      * Get current working directory.  Try as user, fall back to root.
      */
-    set_perms(PERM_USER, sudo_mode);
+    set_perms(PERM_USER);
     if (!getcwd(user_cwd, sizeof(user_cwd))) {
-	set_perms(PERM_ROOT, sudo_mode);
+	set_perms(PERM_ROOT);
 	if (!getcwd(user_cwd, sizeof(user_cwd))) {
 	    (void) fprintf(stderr, "%s: Can't get working directory!\n",
 			   Argv[0]);
 	    (void) strcpy(user_cwd, "unknown");
 	}
     } else
-	set_perms(PERM_ROOT, sudo_mode);
+	set_perms(PERM_ROOT);
 
     /*
      * If we were given the '-s' option (run shell) we need to redo
@@ -586,9 +586,9 @@ init_vars(sudo_mode)
 	rval = find_path(NewArgv[0], &user_cmnd, user_path);
 	if (rval != FOUND) {
 	    /* Failed as root, try as invoking user. */
-	    set_perms(PERM_USER, sudo_mode);
+	    set_perms(PERM_USER);
 	    rval = find_path(NewArgv[0], &user_cmnd, user_path);
-	    set_perms(PERM_ROOT, sudo_mode);
+	    set_perms(PERM_ROOT);
 	}
 
 	/* set user_args */
@@ -823,7 +823,7 @@ check_sudoers()
      * file owner.  We already did a stat as root, so use that
      * data if we can't stat as sudoers file owner.
      */
-    set_perms(PERM_SUDOERS, 0);
+    set_perms(PERM_SUDOERS);
 
     if (rootstat != 0 && lstat(_PATH_SUDOERS, &statbuf) != 0)
 	log_error(USE_ERRNO, "can't stat %s", _PATH_SUDOERS);
@@ -857,7 +857,7 @@ check_sudoers()
 	    log_error(USE_ERRNO, "can't open %s", _PATH_SUDOERS);
     }
 
-    set_perms(PERM_ROOT, 0);		/* change back to root */
+    set_perms(PERM_ROOT);		/* change back to root */
 }
 
 /*

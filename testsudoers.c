@@ -91,7 +91,7 @@ static const char rcsid[] = "$Sudo$";
  */
 void init_parser	__P((void));
 void dumpaliases	__P((void));
-void set_perms_dummy	__P((int, int));
+void set_perms_dummy	__P((int));
 
 /*
  * Globals
@@ -102,7 +102,7 @@ int parse_error = FALSE;
 int num_interfaces;
 struct interface *interfaces;
 struct sudo_user sudo_user;
-void (*set_perms) __P((int, int)) = set_perms_dummy;
+void (*set_perms) __P((int)) = set_perms_dummy;
 extern int clearaliases;
 extern int pedantic;
 
@@ -311,8 +311,8 @@ netgr_matches(netgr, host, shost, user)
 }
 
 void
-set_perms_dummy(i, j)
-    int i, j;
+set_perms_dummy(i)
+    int i;
 {
     return;
 }
