@@ -87,6 +87,7 @@ Linux	2.0.34	i586	egcs-2.91.57	1.5.6p2	Darrin Chandler	 none
 Linux	2.0.36	i586	gcc-2.7.2.3	1.5.7p4	Nathan Haney	 none
 Linux	2.0.34	alpha	egcs-2.90.27	1.5.3	Karl Schlitt	 none
 Linux	2.0.33pl1 m68k	gcc 2.7.2.3	1.5.6	James Troup	 none
+Linux	2.2.6-15 ppc	egcs-1.1.2	1.5.9p4	Barbara Schelkle none
 UnixWare 1.1.4	i386	gcc-2.7.2	1.4	Michael Hancock	 none
 Pyramid DC/OSx 1.1	bundled cc	1.4	Les Schuettpelz	 none
 ATT	SVR4.x	i486	Metaware CC	1.4	Chris Ellington	 none
@@ -113,6 +114,7 @@ Dynix/ptx 4.4.4	Sequent	bundled cc	1.5.9p2	Jason Merritt	 none
 DC-OSx	1.1-9x	mips	PyrC 4.0A20	1.5.6p2	Brian Jackson	 none
 HI-UX/MPP 02-03	sr2201	bundled cc	1.5.4	Ben Edgington	 none
 SVR4	4.4	m88k	bundled gcc	1.5.7p4	Gerry Belanger	 CFLAGS=
+NonStop-UX B32	CO-1475	cc		1.5.9p3	Andrei Panfilenko none
 
 Systems on which Sudo is expected to run on but hasn't been tested.
 If you can verify any of these, please send mail to sudo-bugs@courtesan.com
