@@ -116,7 +116,7 @@ static const char rcsid[] = "$Sudo$";
 # endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
-static int signo;		/* XXX - should be volatile sig_atomic_t */
+static volatile sig_atomic_t signo;
 
 static char *tgetline __P((int, char *, size_t, int));
 static void handler __P((int));
