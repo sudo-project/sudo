@@ -196,6 +196,12 @@ int vasprintf		__P((char **, const char *, va_list));
 #ifndef HAVE_STRCASECMP
 int strcasecmp		__P((const char *, const char *));
 #endif
+#ifndef HAVE_STRLCAT
+size_t strlcat		__P((char *, const char *, size_t));
+#endif
+#ifndef HAVE_STRLCPY
+size_t strlcpy		__P((char *, const char *, size_t));
+#endif
 char *sudo_goodpath	__P((const char *));
 char *tgetpass		__P((const char *, int, int));
 int find_path		__P((char *, char **, char *));
