@@ -68,7 +68,6 @@
 #endif /* HAVE_KERB5 */
 #ifdef HAVE_PAM
 #  include <security/pam_appl.h>
-#  include <security/pam_misc.h>
 #endif /* HAVE_PAM */
 #ifdef HAVE_AFS
 #  include <afs/stds.h>
@@ -122,6 +121,9 @@ static int   verify_krb_v5_tgt		__P((krb5_ccache));
 #endif /* HAVE_KERB5 */
 #ifdef HAVE_PAM
 static void pam_attempt_auth            __P((void));
+static int pam_auth            		__P((char *, char *));
+static int PAM_conv			__P((int, struct pam_message **,
+					     struct pam_response **, void *));
 #endif /* HAVE_PAM */
 #ifdef HAVE_SKEY
 static char *sudo_skeyprompt		__P((struct skey *, char *));
@@ -938,44 +940,128 @@ cleanup:
  *
  *  Try to authenticate the user using Pluggable Authentication
  *  Modules (PAM). Added 9/11/98 by Gary J. Calvin
+ *  Reworked for stock PAM by Amos Elberg based on samba code.
  */
-static void pam_attempt_auth()
+static char *PAM_username;
+static char *PAM_password;
+
+static int PAM_conv(num_msg, msg, resp, appdata_ptr)
+    int num_msg;
+    struct pam_message **msg;
+    struct pam_response **resp;
+    void *appdata_ptr;
 {
-    pam_handle_t *pamh=NULL;
-    int retval;
-    register int counter = TRIES_FOR_PASSWORD;
-    struct pam_conv conv = {
-	    misc_conv,
-	    NULL
+    int replies = 0;
+    struct pam_response *reply = NULL;
+
+/* XXX - replace with estrdup() */
+#define COPY_STRING(s) (s) ? strdup(s) : NULL
+
+    reply = malloc(sizeof(struct pam_response) * num_msg);
+    if (reply == NULL)
+	return(PAM_CONV_ERR);
+
+    for (replies = 0; replies < num_msg; replies++) {
+	switch (msg[replies]->msg_style) {
+	case PAM_PROMPT_ECHO_ON:
+	    reply[replies].resp_retcode = PAM_SUCCESS;
+	    reply[replies].resp = COPY_STRING(PAM_username);
+	    /* PAM frees resp */
+	    break;
+	case PAM_PROMPT_ECHO_OFF:
+	    reply[replies].resp_retcode = PAM_SUCCESS;
+	    reply[replies].resp = COPY_STRING(PAM_password);
+	    /* PAM frees resp */
+	    break;
+	case PAM_TEXT_INFO:
+	    /* fall through */
+	case PAM_ERROR_MSG:
+	    /* ignore it... */
+	    reply[replies].resp_retcode = PAM_SUCCESS;
+	    reply[replies].resp = NULL;
+	    break;
+	default:
+	    /* Must be an error of some sort... */
+	    free (reply);
+	    return(PAM_CONV_ERR);
+	}
+    }
+    if (reply)
+	*resp = reply;
+
+    return(PAM_SUCCESS);
+}
+
+static int pam_auth(user, password)
+    char *user;
+    char *password;
+{
+    pam_handle_t *pamh;
+    int pam_error;
+    static struct pam_conv PAM_conversation = {
+	&PAM_conv,
+	NULL
     };
 
+    /*
+     * Now use PAM to do authentication.  For now, we won't worry about
+     * session logging, only authentication.  Bail out if there are any
+     * errors.
+     */
+#define PAM_BAIL if (pam_error != PAM_SUCCESS) { pam_end(pamh, 0); return(0); }
+
+    PAM_password = password;
+    PAM_username = user;
+    pam_error = pam_start("sudo", user, &PAM_conversation, &pamh);
+    PAM_BAIL;
+    /*
+     * Setting PAM_SILENT stops generation of error messages to syslog
+     * to enable debugging on Red Hat Linux set:
+     * /etc/pam.d/sudo:
+     *      auth required /lib/security/pam_pwdb.so shadow nullok audit
+     * _OR_ change PAM_SILENT to 0 to force detailed reporting (logging)
+     */
+    pam_error = pam_authenticate(pamh, PAM_SILENT);
+    PAM_BAIL;
+#if 0
+    /*
+     * It is not clear to me that account management is the right thing
+     * to do, but it is not clear that it isn't, either.  This can be
+     * removed if no account management should be done.  Alternately,
+     * put a pam_allow.so entry in /etc/pam.conf for account handling.
+     */
+    pam_error = pam_acct_mgmt(pamh, PAM_SILENT);
+    PAM_BAIL;
+#endif
+    pam_end(pamh, PAM_SUCCESS);
+    /* If this point is reached, the user has been authenticated. */
+    return(1);
+}
+
+static void pam_attempt_auth()
+{
+    int i = TRIES_FOR_PASSWORD;
+
     set_perms(PERM_ROOT, 0);
-    retval = pam_start("sudo", user_name, &conv, &pamh);
-    if (retval != PAM_SUCCESS) {
-        pam_end(pamh, retval);
-        exit(1);
-    }
-    while (counter > 0) {
-        retval = pam_authenticate(pamh, 0);
-        if (retval == PAM_SUCCESS) {
+    while (i > 0) {
+        char *pamPass = (char *) GETPASS(prompt, PASSWORD_TIMEOUT * 60);
+
+        if (pam_auth(user_name, pamPass)) {
             set_perms(PERM_USER, 0);
-            pam_end(pamh, retval);
             return;
         }
-
-        --counter;
+	--i;
         pass_warn(stderr);
     }
     set_perms(PERM_USER, 0);
 
-    if (counter > 0) {
+    if (i == 0) {
         log_error(PASSWORD_NOT_CORRECT);
         inform_user(PASSWORD_NOT_CORRECT);
     } else {
         log_error(PASSWORDS_NOT_CORRECT);
         inform_user(PASSWORDS_NOT_CORRECT);
     }
-    pam_end(pamh, retval);
     exit(1);
 }
 #endif /* HAVE_PAM */

@@ -1388,7 +1388,7 @@ dnl
 dnl PAM libs
 dnl
 if test "$with_pam" = "yes"; then
-    SUDO_LIBS="${SUDO_LIBS} -ldl -lpam -lpam_misc"
+    SUDO_LIBS="${SUDO_LIBS} -ldl -lpam"
 fi
 
 dnl
@@ -1529,6 +1529,14 @@ dnl Spew any text the user needs to know about
 dnl
 if test "$with_pam" = "yes"; then
     echo ""
-    echo "You will need to customize sample.pam and install it as /etc/pam.d/sudo"
+    case $host in
+	*-*-solaris2*)
+	    echo "You will need to add the following line to /etc/pam.conf"
+	    echo "sudo	auth required	/usr/lib/security/pam_unix.so.1"
+	    ;;
+	*-*-linux*)
+	    echo "You will need to customize sample.pam and install it as /etc/pam.d/sudo"
+	    ;;
+    esac
     echo ""
 fi
