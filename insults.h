@@ -31,7 +31,7 @@
 #endif
 
 /*
- * Use one or more set of insults as defined in options.h.
+ * Use one or more set of insults as determined by configure
  */
 
 char *insults[] = {
