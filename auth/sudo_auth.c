@@ -144,7 +144,7 @@ verify_user()
 
 	/* Get the password unless the auth function will do it for us */
 	nil_pw = 0;
-#if defined(AUTH_STANDALONE)
+#ifdef AUTH_STANDALONE
 	p = user_prompt;
 #else
 	p = (char *) tgetpass(user_prompt, PASSWORD_TIMEOUT * 60, 1);
@@ -161,7 +161,6 @@ verify_user()
 		set_perms(PERM_USER, 0);
 
 	    success = auth->status = (auth->verify)(sudo_user.pw, p, auth);
-	    (void) memset(p, 0, strlen(p));
 
 	    if (NEEDS_USER(auth))
 		set_perms(PERM_ROOT, 0);
@@ -169,6 +168,9 @@ verify_user()
 	    if (auth->status != AUTH_FAILURE)
 		goto cleanup;
 	}
+#ifndef AUTH_STANDALONE
+	(void) memset(p, 0, strlen(p));
+#endif
 
 	/* Exit loop on nil password, but give it a chance to match first. */
 	if (nil_pw) {
