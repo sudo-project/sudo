@@ -44,6 +44,9 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_STRINGS_H */
 #include <pwd.h>
 #include <sys/types.h>
+#ifdef HAVE_SYS_BSDTYPES
+#include <sys/bsdtypes.h>
+#endif /* HAVE_SYS_BSDTYPES */
 #ifdef _AIX
 #include <sys/select.h>
 #endif /* _AIX */
@@ -88,26 +91,24 @@ char * tgetpass(prompt, timeout)
 {
 #ifdef HAVE_TERMIOS_H
     struct termios term;
+    tcflag_t svflagval;
 #else
 #ifdef HAVE_TERMIO_H
     struct termio term;
+    unsigned short svflagval;
 #else
     struct sgttyb ttyb;
+    int svflagval;
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
-    FILE * input, * output;
-    static char buf[_PASSWD_LEN + 1];
 #ifdef POSIX_SIGNALS
     sigset_t oldmask;
     sigset_t mask;
 #else
     int oldmask;
-#endif
-#ifdef HAVE_TERMIOS_H
-    tcflag_t svflagval;
-#else
-    unsigned short svflagval;
-#endif
+#endif /* POSIX_SIGNALS */
+    FILE * input, * output;
+    static char buf[_PASSWD_LEN + 1];
     fd_set readfds;
     struct timeval tv;
     char *tmp;
@@ -182,13 +183,13 @@ char * tgetpass(prompt, timeout)
     if (select(getdtablesize(), &readfds, NULL, NULL, &tv) <= 0) {
 #endif /* HAVE_SYSCONF */
 	buf[0] = '\0';
-	goto cleanup;
+	goto cleanup;			/* XXX - goto considered harmful */
     }
 
     /* get the password */
     if (!fgets(buf, sizeof(buf), input)) {
 	buf[0] = '\0';
-	goto cleanup;
+	goto cleanup;			/* XXX - goto considered harmful */
     }
 
     if (*(tmp = &buf[strlen(buf)-1]) == '\n')
