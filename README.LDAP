@@ -101,15 +101,12 @@ need to recompile sudo.
 If your ldap libraries and headers are in a non standard place, you will need
 to specify them at configure time.
 
-  $ CPPFLAGS="-I/usr/local/ldapsdk/include" \
-  > LDFLAGS="-L/usr/local/ldapsdk/lib" \
-  > ./configure --with-ldap --with-pam
+  $ ./configure --with-ldap=/usr/local/ldapsdk --with-pam
 
 Sudo by default builds against OpenLDAP's libraries.  For others LDAP libraries
 such as Netscape, iPlanet, Mozilla, SecureWay, add these lines to config.h
 before running make:
 
-  #undef HAVE_LDAP_INITIALIZE
   #define HAVE_LBER_H
 
 You might have to also include '-llber' or '-lldif' in your LIBS.
@@ -121,7 +118,6 @@ sudo.
 More Build Notes:
 HP-UX 11.23 (gcc3) Galen Johnson <Galen.Johnson@sas.com>
   CFLAGS="-D__10_10_compat_code" LDFLAGS="-L/opt/ldapux/lib"
-  Also had to comment out '#define HAVE_LDAP_START_TLS_S' in config.h
 
 Schema Changes
 ==============

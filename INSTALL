@@ -175,6 +175,11 @@ Special features/options:
         does not use the Kerberos cookie scheme.  Will not work for
         Kerberos V older than version 1.1.
 
+  --with-ldap[=DIR]
+	Enable LDAP support.  If specified, DIR is the base directory
+	containing the LDAP include and lib directories.  Please see
+	README.LDAP for more information.
+
   --with-authenticate
 	Enable support for the AIX 4.x general authentication function.
 	This will use the authentication scheme specified for the user
