@@ -1697,3 +1697,6 @@ Sudo 1.6.7p5 released.
      closefrom() if it exists, using /proc/$$/fd if possible.
 
 534) Use PATH_MAX, not MAXPATHLEN since the former is standardized.
+
+535) Added a check in visudo for runas_default being used before it
+     was set.

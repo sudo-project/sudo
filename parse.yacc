@@ -84,6 +84,7 @@ int printmatches = FALSE;
 int pedantic = FALSE;
 int keepall = FALSE;
 int quiet = FALSE;
+int used_runas = FALSE;
 
 /*
  * Alias types
@@ -549,6 +550,7 @@ runasuser	:	WORD {
 			    else
 				$$ = NOMATCH;
 			    free($1);
+			    used_runas = TRUE;
 			}
 		|	USERGROUP {
 			    if (printmatches == TRUE) {
@@ -563,6 +565,7 @@ runasuser	:	WORD {
 			    else
 				$$ = NOMATCH;
 			    free($1);
+			    used_runas = TRUE;
 			}
 		|	NETGROUP {
 			    if (printmatches == TRUE) {
@@ -577,6 +580,7 @@ runasuser	:	WORD {
 			    else
 				$$ = NOMATCH;
 			    free($1);
+			    used_runas = TRUE;
 			}
 		|	ALIAS {
 			    aliasinfo *aip = find_alias($1, RUNAS_ALIAS);
@@ -606,6 +610,7 @@ runasuser	:	WORD {
 				$$ = NOMATCH;
 			    }
 			    free($1);
+			    used_runas = TRUE;
 			}
 		|	ALL {
 			    if (printmatches == TRUE) {

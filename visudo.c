@@ -91,6 +91,7 @@ int netgr_matches		__P((char *, char *, char *, char *));
 int usergr_matches		__P((char *, char *, struct passwd *));
 int userpw_matches		__P((char *, char *, struct passwd *));
 void init_parser		__P((void));
+void yyerror			__P((char *));
 void yyrestart			__P((FILE *));
 
 /*
@@ -537,6 +538,15 @@ int
 set_runaspw(user)
     char *user;
 {
+    extern int sudolineno, used_runas;
+
+    if (used_runas) {
+	(void) fprintf(stderr,
+	    "%s: runas_default set after old value is in use near line %d\n",
+	    pedantic > 1 ? "Error" : "Warning", sudolineno);
+	if (pedantic > 1)
+	    yyerror(NULL);
+    }
     return(TRUE);
 }
 
