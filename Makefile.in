@@ -213,31 +213,31 @@ sia.o: $(srcdir)/auth/sia.c
 
 sudo.html: $(srcdir)/sudo.pod
 	@rm -f $(srcdir)/$@
-	pod2html --title="Sudo Manual" --infile=$> --outfile=$(srcdir)/$@
+	(cd $(srcdir); pod2html --title="Sudo Manual" --infile=sudo.pod --outfile=$(srcdir)/$@)
 
 sudo.man: $(srcdir)/sudo.pod
 	@rm -f $(srcdir)/$@
-	(cd $(srcdir); pod2man --section=$(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" $> > $@)
+	(cd $(srcdir); pod2man --section=$(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudo.pod > $(srcdir)/$@)
 
 sudo.cat: sudo.man
 
 visudo.html: $(srcdir)/visudo.pod
 	@rm -f $(srcdir)/$@
-	pod2html --title="Visudo Manual" --infile=$> --outfile=$(srcdir)/$@
+	(cd $(srcdir); pod2html --title="Visudo Manual" --infile=visudo.pod --outfile=$(srcdir)/$@)
 
 visudo.man: $(srcdir)/visudo.pod
 	@rm -f $(srcdir)/$@
-	(cd $(srcdir); pod2man --section=$(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" $> > $@)
+	(cd $(srcdir); pod2man --section=$(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" visudo.pod > $(srcdir)/$@)
 
 visudo.cat: visudo.man
 
 sudoers.html: $(srcdir)/sudoers.pod
 	@rm -f $(srcdir)/$@
-	pod2html --title="Sudoers Manual" --infile=$> --outfile=$(srcdir)/$@
+	(cd $(srcdir); pod2html --title="Sudoers Manual" --infile=sudoers.pod --outfile=$(srcdir)/$@)
 
 sudoers.man: $(srcdir)/sudoers.pod
 	@rm -f $(srcdir)/$@
-	(cd $(srcdir); pod2man --section=$(mansect5) --release=$(VERSION) --center="FILE FORMATS" $> > $@)
+	(cd $(srcdir); pod2man --section=$(mansect5) --release=$(VERSION) --center="FILE FORMATS" sudoers.pod > $(srcdir)/$@)
 
 sudoers.cat: sudoers.man
 
