@@ -437,6 +437,13 @@ static void load_globals(sudo_mode)
     char *lrealm;
 #endif /* HAVE_KERB5 */
 
+#ifdef HOST_IN_LOG
+    /*
+     * Logging routines may use shost so set to a dummy value for now.
+     */
+    shost = strcpy(host, "localhost");
+#endif
+
     /*
      * Get a local copy of the user's struct passwd with the shadow password
      * if necesary.  It is assumed that euid is 0 at this point so we
