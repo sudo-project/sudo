@@ -375,16 +375,10 @@ static void send_mail()
     (void) bzero((char *)(&action), sizeof(action));
 #endif /* POSIX_SIGNALS */
 
-    /* become root for find_path() */
-    be_root();
-
     if ((mailer = find_path(mailer)) == NULL) {
 	(void) fprintf(stderr, "%s: mailer (%s) not found\n", Argv[0], mailer);
 	exit(1);
     }
-
-    /* relinquish root */
-    be_user();
 
     /* catch children as they die */
 #ifdef POSIX_SIGNALS

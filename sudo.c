@@ -294,10 +294,7 @@ static void load_globals()
 	cmnd = "validate";
     } else {
 	strncpy(path, Argv[1], MAXPATHLEN)[MAXPATHLEN] = 0;
-	/* become root for find_path() only */
-	be_root();
 	cmnd = find_path(path);	/* get the absolute path */
-	be_user();
 	if (cmnd == NULL) {
 	    (void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], Argv[1]);
 	    exit(1);
