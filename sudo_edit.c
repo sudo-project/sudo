@@ -213,7 +213,8 @@ int sudo_edit(argc, argv)
 	(void) sigaction(SIGINT, &saved_sa_int, NULL);
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
-	closefrom(STDERR_FILENO + 1);
+	for (i = 0; i < argc - 1; i++)
+	    close(tf[i].tfd);
 	set_perms(PERM_FULL_USER);
 	execvp(nargv[0], nargv);
 	warn("unable to execute %s", nargv[0]);
