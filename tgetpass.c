@@ -220,7 +220,7 @@ char * tgetpass(prompt, timeout, user, host)
 	while ((n = select(fileno(input) + 1, readfds, 0, 0, &tv)) == -1 &&
 	    errno == EINTR)
 	    ;
-	if (n > 0 && fgets(buf, sizeof(buf), input)) {
+	if (n != 0 && fgets(buf, sizeof(buf), input)) {
 	    n = strlen(buf);
 	    if (buf[n - 1] == '\n')
 		buf[n - 1] = '\0';
