@@ -5480,7 +5480,7 @@ EOF
 
 ;;
 esac
-for ac_func in strchr strrchr memchr memcpy memset sysconf sigaction tzset strcasecmp seteuid ftruncate
+for ac_func in strchr strrchr memchr memcpy memset sysconf sigaction tzset seteuid ftruncate
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:5487: checking for $ac_func" >&5
@@ -6444,7 +6444,7 @@ else
   LIBOBJS="$LIBOBJS fnmatch.o"
 fi
 
-for ac_func in strerror
+for ac_func in strerror strcasecmp
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:6451: checking for $ac_func" >&5

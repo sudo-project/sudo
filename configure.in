@@ -1405,7 +1405,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset strcasecmp seteuid ftruncate)
+AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset seteuid ftruncate)
 if test -n "$SECUREWARE"; then
     AC_CHECK_FUNCS(bigcrypt)
     AC_CHECK_FUNCS(set_auth_parameters)
@@ -1422,7 +1422,7 @@ AC_CHECK_FUNC(setenv, AC_DEFINE(HAVE_SETENV), AC_FUNC_CHECK(putenv, AC_DEFINE(HA
 AC_CHECK_FUNC(utime, AC_DEFINE(HAVE_UTIME)
 SUDO_FUNC_UTIME_POSIX, LIBOBJS="$LIBOBJS utime.o")
 SUDO_FUNC_FNMATCH(AC_DEFINE(HAVE_FNMATCH), LIBOBJS="$LIBOBJS fnmatch.o")
-AC_REPLACE_FUNCS(strerror)
+AC_REPLACE_FUNCS(strerror strcasecmp)
 AC_CHECK_FUNC(snprintf, AC_DEFINE(HAVE_SNPRINTF), NEED_SNPRINTF=1)
 AC_CHECK_FUNC(vsnprintf, AC_DEFINE(HAVE_VSNPRINTF), NEED_SNPRINTF=1)
 AC_CHECK_FUNC(asprintf, AC_DEFINE(HAVE_ASPRINTF), NEED_SNPRINTF=1)

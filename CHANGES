@@ -1161,3 +1161,5 @@ Sudo 1.5.9 released.
      stored with the contents.  This could lead to incorrect output
      if the sudoers file had different alias types with the same name.
      Normal parsing (ie: not in '-l' mode) is unaffected.
+
+365) Now include strcasecmp() for those without it.

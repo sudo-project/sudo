@@ -75,10 +75,6 @@
 #include "emul/search.h"
 #endif /* HAVE_LSEARCH */
 
-#ifndef HAVE_STRCASECMP
-#define strcasecmp(a,b)		strcmp(a,b)
-#endif /* !HAVE_STRCASECMP */
-
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
