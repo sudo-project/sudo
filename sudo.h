@@ -84,6 +84,10 @@
            SECURE_PATH              if this variable is set, its value is
 				    used as the PATH variable
  
+           UMASK                    umask that sudo should use, comment out
+				    to preserve umask of the caller, default
+                                    is 022
+ 
            BROKEN_GETPASS           if using a os with a broken getpass()
                                     hpux,aix,irix need this, sudo.h has details
  
@@ -170,6 +174,10 @@
 #define MAXCOMMANDLENGTH	MAXPATHLEN
 
 /*#define SECURE_PATH		"/bin:/usr/ucb/:/usr/bin:/usr/etc:/etc" /**/
+
+#ifndef UMASK
+#  define UMASK			022
+#endif /* UMASK */
 
 typedef union {
     int int_val;
@@ -324,6 +332,13 @@ extern char **Argv;
 #endif
 extern int errno;
 extern char ** environ;
+
+/*
+ * For OS's w/o mode_t
+ */
+#ifdef NO_MODE_T
+typedef int mode_t
+#endif
 
 /*
  * This is to placate hpux
