@@ -175,7 +175,7 @@ set_perms_suid(perm)
 			      	break;
 
 	case PERM_USER:
-    	    	    	        (void) setresgid(user_gid, -1, -1);
+    	    	    	        (void) setresgid(-1, user_gid, -1);
 				if (setresuid(user_uid, user_uid, 0))
 				    fatal("setresuid(user_uid, user_uid, 0)", 1);
 			      	break;
@@ -199,7 +199,7 @@ set_perms_suid(perm)
 
 	case PERM_SUDOERS:
 				/* assume euid == 0, ruid == user */
-				if (setresgid(SUDOERS_GID, -1, -1))
+				if (setresgid(-1, SUDOERS_GID, -1))
 				    fatal("unable to change to sudoers gid", 1);
 
 				/*
@@ -247,7 +247,7 @@ set_perms_suid(perm)
 			      	break;
 
 	case PERM_USER:
-    	    	    	        (void) setregid(user_gid, -1);
+    	    	    	        (void) setregid(-1, user_gid);
 				if (setreuid(0, user_uid))
 				    fatal("setreuid(0, user_uid)", 1);
 			      	break;
@@ -271,7 +271,7 @@ set_perms_suid(perm)
 
 	case PERM_SUDOERS:
 				/* assume euid == 0, ruid == user */
-				if (setregid(SUDOERS_GID, -1))
+				if (setregid(-1, SUDOERS_GID))
 				    fatal("unable to change to sudoers gid", 1);
 
 				/*
