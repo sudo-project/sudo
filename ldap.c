@@ -598,7 +598,7 @@ sudo_ldap_add_match(ld,entry)
  
   /* collect the dn, only show the rdn */
   dn=ldap_get_dn(ld,entry);
-  if (dn) edn=ldap_explode_dn(dn,1);
+  edn=dn ? ldap_explode_dn(dn,1) : NULL;
   SAVE_LIST("\nLDAP Role: ");
   SAVE_LIST((edn && *edn) ? *edn : "UNKNOWN");
   SAVE_LIST("\n");
