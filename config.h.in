@@ -82,8 +82,11 @@
 /* Define if you want to use the system getpass().  */
 #undef USE_GETPASS
 
-/* Define if you use Skey.  */
+/* Define if you use S/Key.  */
 #undef HAVE_SKEY
+
+/* Define if you use NRL OPIE.  */
+#undef HAVE_OPIE
 
 /* Define if you use SecurID.  */
 #undef HAVE_SECURID

@@ -89,7 +89,7 @@
  * For alternate password schemes we need longer passwords.
  * This is a bit, ummm, gross but necesary.
  */
-#if defined(HAVE_KERB4) || defined(HAVE_AFS) || defined(HAVE_DCE) || defined(HAVE_SKEY)
+#if defined(HAVE_KERB4) || defined(HAVE_AFS) || defined(HAVE_DCE) || defined(HAVE_SKEY) || defined(HAVE_OPIE)
 #  undef _PASSWD_LEN
 #  define _PASSWD_LEN		256
 #else
@@ -108,7 +108,7 @@
 #        endif /* SHADOW_TYPE != SPW_NONE */
 #      endif /* PASS_MAX */
 #    endif /* !_PASSWD_LEN */
-#  endif /* HAVE_KERB4 || HAVE_DCE || HAVE_SKEY */
+#  endif /* HAVE_KERB4 || HAVE_AFS || HAVE_DCE || HAVE_SKEY || HAVE_OPIE */
 #endif /* SPW_SECUREWARE */
 
 /*
