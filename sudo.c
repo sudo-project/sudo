@@ -268,7 +268,7 @@ if ( Envp == NULL ) {
 }
 
 /* omit all LD_* environmental vars */
-for ( Envp=tenvp=envp; *envp; envp++ )
+for ( tenvp=Envp; *envp; envp++ )
     if ( strncmp ("LD_", *envp, 3) )
 	*tenvp++ = *envp;
 
