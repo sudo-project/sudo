@@ -401,7 +401,7 @@ static void check_passwd()
     struct SD_CLIENT sd_dat, *sd;		/* SecurID data block */
     register int counter = TRIES_FOR_PASSWORD;
 
-    (void) memset (&sd_dat, 0, sizeof(sd_dat));
+    (void) memset ((VOID *)&sd_dat, 0, sizeof(sd_dat));
     sd = &sd_dat;
 
     /* Initialize SecurID. */
@@ -458,6 +458,10 @@ static void check_passwd()
     char kpass[_PASSWD_LEN];
 #endif /* HAVE_KERB4 && USE_GETPASS */
 
+#ifdef HAVE_SKEY
+    (void) memset((VOID *)&skey, 0, sizeof(skey));
+#endif /* HAVE_SKEY */
+
     /*
      * you get TRIES_FOR_PASSWORD times to guess your password
      */
@@ -492,7 +496,7 @@ static void check_passwd()
 
 #ifdef HAVE_SKEY
 	/* Only check s/key db if the user exists there */
-	if (skey.logname) {
+	if (skey.keyfile) {
 	    set_perms(PERM_ROOT);
 	    if (skeyverify(&skey, pass) == 0) {
 		set_perms(PERM_USER);
@@ -652,33 +656,41 @@ static char *sudo_skeyprompt(user_skey, p)
     struct skey *user_skey;
     char *p;
 {
-    char skeyprompt[80];
 #ifndef LONG_SKEY_PROMPT
+    char buf[32];
+    char *new_prompt;
     static char *old_prompt = NULL;
     static int plen;
-    char *new_prompt;
 #endif /* LONG_SKEY_PROMPT */
 
+    /* close the key file if necesary */
+    if (user_skey->keyfile != NULL)
+	(void) fclose(user_skey->keyfile);
+
     /* return the old prompt if we cannot get s/key info */
-    if (skeychallenge(user_skey, user_name, skeyprompt)) {
-#  ifdef SKEY_ONLY
+    if (skeylookup(user_skey, user_name)) {
+	if (user_skey->keyfile != NULL) {
+	    (void) fclose(user_skey->keyfile);
+	    user_skey->keyfile = NULL;
+	}
+#ifdef SKEY_ONLY
 	(void) fprintf(stderr, "%s: You do not exist in the s/key database.\n",
 		       Argv[0]);
 	exit(1);
-#  else
-	user_skey->logname = NULL;
-	return(p);
-#  endif /* SKEY_ONLY */
+#else
+	if (old_prompt == NULL) {
+	    return(p);
+	} else {
+	    return(old_prompt);
+	}
+#endif /* SKEY_ONLY */
     }
 
 #ifdef LONG_SKEY_PROMPT
     /* separate s/key challenge and prompt for easy snarfing */
-    if (skeyprompt[0] == 's' && skeyprompt[1] == '/')
-	(void) puts(&skeyprompt[2]);
-    else
-	(void) puts(skeyprompt);
+    (void) printf("key %d %s\n", user_skey-> - 1, user_skey->seed);
 
-    /* return old prompt unmodified */
+    /* return old prompt unmolested */
     return(p);
 
 #else
@@ -695,15 +707,17 @@ static char *sudo_skeyprompt(user_skey, p)
 	(void) free(p);
     }
 
-    if ((new_prompt = (char *) malloc(plen + strlen(skeyprompt) + 5)) == NULL) {
+    (void) sprintf(buf, "%d", user_skey->n - 1);
+    if ((new_prompt = (char *)
+	malloc(plen + strlen(buf) + strlen(user_skey->seed) + 12)) == NULL) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
 
     /* embed the s/key challenge into the new password prompt */
-    (void) strncpy(new_prompt, old_prompt, plen);
-    (void) sprintf(new_prompt + plen, " [%s]:", skeyprompt);
+    (void) sprintf(new_prompt, "%.*s [s/key %d %s]:", plen, old_prompt,
+	user_skey->n - 1, user_skey->seed);
 
     return(new_prompt);
 #endif /* LONG_SKEY_PROMPT */
