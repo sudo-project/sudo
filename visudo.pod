@@ -88,7 +88,7 @@ B<visudo> accepts the following command line options:
 Enable B<strict> checking of the I<sudoers> file.  If an alias is
 used before it is defined, B<visudo> will consider this a parse
 error.  Note that it is not possible to differentiate between an
-alias and a hostname or username that consists solely of upper case
+alias and a hostname or username that consists solely of uppercase
 letters, digits, and the underscore ('_') character.
 
 =item -V
@@ -118,7 +118,7 @@ Your userid does not appear in the system passwd file.
 
 Either you are using a {User,Runas,Host,Cmnd}_Alias before
 defining it or you have a user or hostname listed that
-consists solely of upper case letters, digits, and the
+consists solely of uppercase letters, digits, and the
 underscore ('_') character.  If the latter, you can ignore
 the warnings (B<sudo> will not complain).  In B<-s> (strict)
 mode these are errors, not warnings.

@@ -109,9 +109,9 @@ Each I<alias> definition is of the form
  Alias_Type NAME = item1, item2, ...
 
 where I<Alias_Type> is one of C<User_Alias>, C<Runas_Alias>, C<Host_Alias>,
-or C<Cmnd_Alias>.  A C<NAME> is a string of upper case letters, numbers,
+or C<Cmnd_Alias>.  A C<NAME> is a string of uppercase letters, numbers,
 and the underscore characters ('_').  A C<NAME> B<must> start with an
-upper case letter.  It is possible to put several alias definitions
+uppercase letter.  It is possible to put several alias definitions
 of the same type on a single line, joined by a colon (':').  E.g.,
 
  Alias_Type NAME = item1, item2, item3 : NAME = item4, item5
