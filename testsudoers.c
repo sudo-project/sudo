@@ -1,28 +1,31 @@
 /*
- *  CU sudo version 1.6
- *  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
+ * This code is derived from software contributed by Chris Jepeway
+ * <jepeway@cs.utk.edu>.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
- *
- *******************************************************************
- *
- *  testsudoers.c -- frontend for parser testing and development.
- *
- *  Chris Jepeway <jepeway@cs.utk.edu>
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -63,6 +66,7 @@
 #include <dirent.h>
 
 #include "sudo.h"
+#include "parse.h"
 #include "interfaces.h"
 
 #ifndef lint
@@ -72,22 +76,13 @@ static const char rcsid[] = "$Sudo$";
 /*
  * Globals
  */
-int parse_error = FALSE;
-struct interface *interfaces;
-int num_interfaces;
-extern int clearaliases;
-
-char *cmnd = NULL;
-char *cmnd_args = NULL;
-char *cmnd_safe = NULL;
-char *runas_user = RUNAS_DEFAULT;
-char host[MAXHOSTNAMELEN];
-char *shost;
-char cwd[MAXPATHLEN];
-struct passwd *user_pw_ent;
 char **Argv, **NewArgv;
 int  Argc, NewArgc;
-uid_t uid;
+int parse_error = FALSE;
+int num_interfaces;
+struct interface *interfaces;
+struct sudo_user sudo_user;
+extern int clearaliases;
 
 /*
  * Prototypes for external functions
@@ -112,15 +107,14 @@ has_meta(s)
     return(FALSE);
 }
 
-
 /*
- * return TRUE if cmnd matches, in the sudo sense,
+ * Returns TRUE if cmnd matches, in the sudo sense,
  * the pathname in path; otherwise, return FALSE
  */
 int
-command_matches(cmnd, user_args, path, sudoers_args)
+command_matches(cmnd, cmnd_args, path, sudoers_args)
     char *cmnd;
-    char *user_args;
+    char *cmnd_args;
     char *path;
     char *sudoers_args;
 {
@@ -138,10 +132,10 @@ command_matches(cmnd, user_args, path, sudoers_args)
 	    return(FALSE);
 	if (!sudoers_args)
 	    return(TRUE);
-	else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
+	else if (!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args))
 	    return(TRUE);
 	else if (sudoers_args)
-	    return((fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0));
+	    return((fnmatch(sudoers_args, cmnd_args ? cmnd_args : "", 0) == 0));
 	else
 	    return(FALSE);
     } else {
@@ -151,10 +145,10 @@ command_matches(cmnd, user_args, path, sudoers_args)
 		return(FALSE);
 	    if (!sudoers_args)
 		return(TRUE);
-	    else if (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args))
+	    else if (!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args))
 		return(TRUE);
 	    else if (sudoers_args)
-		return((fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0));
+		return((fnmatch(sudoers_args, cmnd_args ? cmnd_args : "", 0) == 0));
 	    else
 		return(FALSE);
 	}
@@ -173,7 +167,6 @@ command_matches(cmnd, user_args, path, sudoers_args)
 	return((strncmp(cmnd, path, plen) == 0));
     }
 }
-
 
 int
 addr_matches(n)
@@ -206,7 +199,6 @@ addr_matches(n)
     return(FALSE);
 }
 
-
 int
 usergr_matches(group, user)
     char *group;
@@ -215,7 +207,7 @@ usergr_matches(group, user)
     struct group *grp;
     char **cur;
 
-    /* make sure we have a valid usergroup, sudo style */
+    /* Make sure we have a valid usergroup, sudo style. */
     if (*group++ != '%')
 	return(FALSE);
 
@@ -236,7 +228,6 @@ usergr_matches(group, user)
     return(FALSE);
 }
 
-
 int
 netgr_matches(netgr, host, user)
     char *netgr;
@@ -249,12 +240,12 @@ netgr_matches(netgr, host, user)
     static char *domain = NULL;
 #endif /* HAVE_GETDOMAINNAME */
 
-    /* make sure we have a valid netgroup, sudo style */
+    /* Make sure we have a valid netgroup, sudo style. */
     if (*netgr++ != '+')
 	return(FALSE);
 
 #ifdef HAVE_GETDOMAINNAME
-    /* get the domain name (if any) */
+    /* Get the domain name (if any). */
     if (domain == (char *) -1) {
 	domain = (char *) emalloc(MAXHOSTNAMELEN);
 
@@ -272,14 +263,12 @@ netgr_matches(netgr, host, user)
 #endif /* HAVE_INNETGR */
 }
 
-
 void
 set_perms(i, j)
     int i, j;
 {
     return;
 }
-
 
 int
 main(argc, argv)
@@ -296,58 +285,60 @@ main(argc, argv)
     Argv = argv;
     Argc = argc;
 
+    user_runas = RUNAS_DEFAULT;
     if (Argc >= 6 && strcmp(Argv[1], "-u") == 0) {
-	runas_user = Argv[2];
+	user_runas = Argv[2];
 	pw.pw_name = Argv[3];
-	strcpy(host, Argv[4]);
-	cmnd = Argv[5];
+	user_host = Argv[4];
+	user_cmnd = Argv[5];
 
 	NewArgv = &Argv[5];
 	NewArgc = Argc - 5;
     } else if (Argc >= 4) {
 	pw.pw_name = Argv[1];
-	strcpy(host, Argv[2]);
-	cmnd = Argv[3];
+	user_host = Argv[2];
+	user_cmnd = Argv[3];
 
 	NewArgv = &Argv[3];
 	NewArgc = Argc - 3;
     } else {
-	(void) fprintf(stderr, "usage: %s [-u user] <user> <host> <command> [args]\n", Argv[0]);
+	(void) fprintf(stderr,
+	    "usage: %s [-u user] <user> <host> <command> [args]\n", Argv[0]);
 	exit(1);
     }
 
-    user_pw_ent = &pw;		/* need user_pw_ent->pw_name defined */
+    sudo_user.pw = &pw;		/* user_name needs to be defined */
 
-    if ((p = strchr(host, '.'))) {
+    if ((p = strchr(user_host, '.'))) {
 	*p = '\0';
-	shost = estrdup(host);
+	user_shost = estrdup(user_host);
 	*p = '.';
     } else {
-	shost = &host[0];
+	user_shost = user_host;
     }
 
-    /* fill in cmnd_args from NewArgv */
+    /* Fill in cmnd_args from NewArgv. */
     if (NewArgc > 1) {
 	size_t size;
 	char *to, **from;
 
 	size = (size_t) NewArgv[NewArgc-1] + strlen(NewArgv[NewArgc-1]) -
 	       (size_t) NewArgv[1] + 1;
-	cmnd_args = (char *) emalloc(size);
-	for (to = cmnd_args, from = &NewArgv[1]; *from; from++) {
+	user_args = (char *) emalloc(size);
+	for (to = user_args, from = &NewArgv[1]; *from; from++) {
 	    *to++ = ' ';
 	    (void) strcpy(to, *from);
 	    to += strlen(*from);
 	}
     }
 
-    /* need to keep aliases around for dumpaliases() */
+    /* Need to keep aliases around for dumpaliases(). */
     clearaliases = 0;
 
-    /* load ip addr/mask for each interface */
+    /* Load ip addr/mask for each interface. */
     load_interfaces();
 
-    /* allocate space for data structures in the parser */
+    /* Allocate space for data structures in the parser. */
     init_parser();
 
     if (yyparse() || parse_error) {
@@ -363,12 +354,12 @@ main(argc, argv)
 	    (void) printf("cmnd_match : %d\n", cmnd_matches);
 	    (void) printf("no_passwd  : %d\n", no_passwd);
 	    (void) printf("runas_match: %d\n", runas_matches);
-	    (void) printf("runas      : %s\n", runas_user);
+	    (void) printf("runas      : %s\n", user_runas);
 	    top--;
 	}
     }
 
-    /* dump aliases */
+    /* Dump aliases. */
     (void) printf("Matching Aliases --\n");
     dumpaliases();
 

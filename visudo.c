@@ -1,27 +1,32 @@
 /*
- * CU sudo version 1.6
  * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 1, or (at your option)
- * any later version.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * Please send bugs, changes, problems to sudo-bugs@courtesan.com
- *
- *******************************************************************
- *
- * visudo.c -- locks the sudoers file for safe editing (ala vipw)
- * and checks for parse errors.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/*
+ * Lock the sudoers file for safe editing (ala vipw) and check for parse errors.
  */
 
 #include "config.h"
@@ -88,7 +93,7 @@ void init_parser		__P((void));
  * External globals exported by the parser
  */
 extern FILE *yyin, *yyout;
-extern int errorlineno, sudolineno;
+extern int errorlineno;
 
 /*
  * Globals
@@ -98,17 +103,7 @@ char **NewArgv = NULL;
 int NewArgc = 0;
 char *sudoers = _PATH_SUDO_SUDOERS;
 char *stmp = _PATH_SUDO_STMP;
-
-/*
- * Globals required by the parsing routines
- */
-char host[] = "";
-char *shost = "";
-char *cmnd = "";
-char *cmnd_safe = NULL;
-char *cmnd_args = NULL;
-struct passwd *user_pw_ent;
-char *runas_user = RUNAS_DEFAULT;
+struct sudo_user sudo_user;
 int parse_error = FALSE;
 
 
@@ -144,11 +139,12 @@ main(argc, argv)
 	usage();
     }
 
-    /* user_pw_ent needs to point to something real */
-    if ((user_pw_ent = getpwuid(getuid())) == NULL) {
-	(void) fprintf(stderr, "%s: Can't find you in the passwd database: ",
+    /* Mock up a fake sudo_user struct. */
+    user_runas = RUNAS_DEFAULT;
+    user_host = user_shost = user_cmnd = "";
+    if ((sudo_user.pw = getpwuid(getuid())) == NULL) {
+	(void) fprintf(stderr, "%s: Can't find you in the passwd database.\n",
 	    Argv[0]);
-	perror(stmp);
 	exit(1);
     }
 
@@ -172,8 +168,7 @@ main(argc, argv)
 		Argv[0]);
 	    exit(1);
 	}
-	(void) fprintf(stderr, "%s: ", Argv[0]);
-	perror(stmp);
+	(void) fprintf(stderr, "%s: %s\n", Argv[0], strerror(errno));
 	Exit(-1);
     }
 
@@ -182,8 +177,7 @@ main(argc, argv)
 
     sudoers_fd = open(sudoers, O_RDONLY);
     if (sudoers_fd < 0 && errno != ENOENT) {
-	(void) fprintf(stderr, "%s: ", Argv[0]);
-	perror(sudoers);
+	(void) fprintf(stderr, "%s: %s\n", Argv[0], strerror(errno));
 	Exit(-1);
     }
 
@@ -191,8 +185,8 @@ main(argc, argv)
     if (sudoers_fd >= 0) {
 	while ((n = read(sudoers_fd, buf, sizeof(buf))) > 0)
 	    if (write(stmp_fd, buf, n) != n) {
-		(void) fprintf(stderr, "%s: Write failed: ", Argv[0]);
-		perror("");
+		(void) fprintf(stderr, "%s: Write failed: %s\n", Argv[0],
+		strerror(errno));
 		Exit(-1);
 	    }
 
@@ -290,16 +284,14 @@ main(argc, argv)
      */
     if (chown(stmp, SUDOERS_UID, SUDOERS_GID)) {
 	(void) fprintf(stderr,
-	    "%s: Unable to set (uid, gid) of %s to (%d, %d): ",
-	    Argv[0], stmp, SUDOERS_UID, SUDOERS_GID);
-	perror("");
+	    "%s: Unable to set (uid, gid) of %s to (%d, %d): %s\n",
+	    Argv[0], stmp, SUDOERS_UID, SUDOERS_GID, strerror(errno));
 	Exit(-1);
     }
     if (chmod(stmp, SUDOERS_MODE)) {
 	(void) fprintf(stderr,
-	    "%s: Unable to change mode of %s to %o: ",
-	    Argv[0], stmp, SUDOERS_MODE);
-	perror("");
+	    "%s: Unable to change mode of %s to %o: %s\n",
+	    Argv[0], stmp, SUDOERS_MODE, strerror(errno));
 	Exit(-1);
     }
 
@@ -321,9 +313,8 @@ main(argc, argv)
 		  strlen(sudoers) + 4);
 	    if ((tmpbuf = (char *) malloc(n)) == NULL) {
 		(void) fprintf(stderr,
-			      "%s: Cannot alocate memory, %s unchanged: ",
-			      Argv[0], sudoers);
-		perror("");
+			      "%s: Cannot alocate memory, %s unchanged: %s\n",
+			      Argv[0], sudoers, strerror(errno));
 		Exit(-1);
 	    }
 
@@ -337,9 +328,8 @@ main(argc, argv)
 	    }
 	    free(tmpbuf);
 	} else {
-	    (void) fprintf(stderr, "%s: Error renaming %s, %s unchanged: ",
-				   Argv[0], stmp, sudoers);
-	    perror("");
+	    (void) fprintf(stderr, "%s: Error renaming %s, %s unchanged: %s\n",
+				   Argv[0], stmp, sudoers, strerror(errno));
 	    Exit(-1);
 	}
     }
@@ -352,9 +342,9 @@ main(argc, argv)
  * These exist to allow us to use the same parser as sudo(8).
  */
 int
-command_matches(cmnd, user_args, path, sudoers_args)
+command_matches(cmnd, cmnd_args, path, sudoers_args)
     char *cmnd;
-    char *user_args;
+    char *cmnd_args;
     char *path;
     char *sudoers_args;
 {
