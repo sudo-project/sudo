@@ -92,6 +92,11 @@ static char rcsid[] = "$Id$";
 #include <afs/kauth.h>
 #include <afs/kautils.h>
 #endif /* HAVE_AFS */
+#ifdef HAVE_UTIME
+#include <utime.h>
+#else
+#include "utime.h"
+#endif
 
 
 /*
@@ -252,16 +257,17 @@ static int check_timestamp()
 
 static void update_timestamp()
 {
-    register int fd;
-
     /* become root */
     set_perms(PERM_ROOT);
 
     if (timedir_is_good) {
-	(void) unlink(timestampfile_p);
-	if ((fd = open(timestampfile_p, O_WRONLY | O_CREAT | O_TRUNC, 0600)) < 0)
-	    perror("update_timestamp: open");
-	close(fd);
+	if (utime(timestampfile_p, NULL) < 0) {
+	    int fd = open(timestampfile_p, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+
+	    if (fd < 0)
+		perror("update_timestamp: open");
+	    close(fd);
+	}
     }
 
     /* relinquish root */
