@@ -92,10 +92,10 @@ static char rcsid[] = "$Id$";
  * Prototypes for local functions
  */
 static int   check_timestamp	__P((void));
-static int   user_is_exempt	__P((void));
 static void  check_passwd	__P((void));
 static void  update_timestamp	__P((void));
 static void  reminder		__P((void));
+int   user_is_exempt		__P((void));
 
 /*
  * Globals
@@ -144,7 +144,7 @@ void check_user()
  *  XXX - should check more that just real gid via getgrnam.
  */
 
-static int user_is_exempt()
+int user_is_exempt()
 {
 #ifdef EXEMPTGROUP
     return((getgid() == EXEMPTGROUP));
