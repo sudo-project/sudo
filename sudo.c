@@ -93,15 +93,6 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
- * Local type declarations
- */
-struct env_table {
-    char *name;
-    int len;
-    int check;
-};
-
-/*
  * Prototypes
  */
 static int init_vars			__P((int));
