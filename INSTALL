@@ -682,3 +682,9 @@ Dynix:
     on Dynix, try using the native compiler (cc).  You can do so
     by removing the config.cache file and then re-running configure
     with the --with-CC=cc option.
+
+HP-UX:
+    The default C compiler shipped with HP-UX does not support creating
+    position independent code and so is unable to support sudo's "noexec"
+    functionality.  You must use either HP ANSI C compiler or gcc for
+    noexec to work.
