@@ -105,17 +105,13 @@ static int has_meta	__P((char *));
 int validate(check_cmnd)
     int check_cmnd;
 {
-    FILE *sudoers_fp;
     int return_code;
 
     /* become sudoers file owner */
     set_perms(PERM_SUDOERS, 0);
 
-    if ((sudoers_fp = fopen(_PATH_SUDO_SUDOERS, "r")) == NULL) {
-	perror(_PATH_SUDO_SUDOERS);
-	log_error(NO_SUDOERS_FILE);
-	exit(1);
-    }
+    /* we opened _PATH_SUDO_SUDOERS in check_sudoers() so just rewind it */
+    rewind(sudoers_fp);
     yyin = sudoers_fp;
     yyout = stdout;
 
