@@ -752,22 +752,32 @@ static int check_sudoers()
 	rtn = NO_SUDOERS_FILE;
     else if (!S_ISREG(statbuf.st_mode))
 	rtn = SUDOERS_NOT_FILE;
-    else if (statbuf.st_uid != SUDOERS_UID || statbuf.st_gid != SUDOERS_GID)
-	rtn = SUDOERS_WRONG_OWNER;
     else if ((statbuf.st_mode & 0007777) != SUDOERS_MODE) {
 	if ((statbuf.st_mode & 0007777) == 0400) {
 	    if (chmod(_PATH_SUDO_SUDOERS, SUDOERS_MODE) == 0) {
-		fprintf(stderr, "%s: fixed mode on %s\n", Argv[0],
-		    _PATH_SUDO_SUDOERS);
+		(void) fprintf(stderr, "%s: fixed mode on %s\n",
+		    Argv[0], _PATH_SUDO_SUDOERS);
+		if (statbuf.st_gid != SUDOERS_GID) {
+		    if (!chown(_PATH_SUDO_SUDOERS,GID_NO_CHANGE,SUDOERS_GID)) {
+			(void) fprintf(stderr, "%s: set group on %s\n",
+			    Argv[0], _PATH_SUDO_SUDOERS);
+			statbuf.st_gid = SUDOERS_GID;
+		    } else {
+			(void) fprintf(stderr,"%s: Unable to set group on %s: ",
+			    Argv[0], _PATH_SUDO_SUDOERS);
+			perror("");
+		    }
+		}
 	    } else {
-		fprintf(stderr, "%s: Unable to fix mode on %s: ", Argv[0],
-		    _PATH_SUDO_SUDOERS);
+		(void) fprintf(stderr, "%s: Unable to fix mode on %s: ",
+		    Argv[0], _PATH_SUDO_SUDOERS);
 		perror("");
 	    }
 	} else {
 	    rtn = SUDOERS_WRONG_MODE;
 	}
-    }
+    } else if (statbuf.st_uid != SUDOERS_UID || statbuf.st_gid != SUDOERS_GID)
+	rtn = SUDOERS_WRONG_OWNER;
 
     if (fd != -1)
 	(void) close(fd);
