@@ -19,6 +19,8 @@ SUDO_LIBS=""
 AC_SUBST(SUDO_LIBS)dnl
 VISUDO_LIBS=""
 AC_SUBST(VISUDO_LIBS)dnl
+AFS_LIBS=""
+AC_SUBST(AFS_LIBS)dnl
 CPPFLAGS=""
 AC_SUBST(CPPFLAGS)dnl
 OSDEFS=""
@@ -265,6 +267,10 @@ case "$OS" in
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
+		# AFS support needs -lucb
+		if test "$with_AFS" = "yes"; then
+		    AFS_LIBS="-lc -lucb"
+		fi
 		;;
     "aix")	echo "Looks like AIX"
 		AC_DEFINE(_ALL_SOURCE)
@@ -338,9 +344,9 @@ case "$OS" in
 		    fi
 		fi
 
-		# AFS support
+		# AFS support needs -lBSD
 		if test "$with_AFS" = "yes"; then
-		    SUDO_LIBS="-lBSD ${SUDO_LIBS}"
+		    AFS_LIBS="-lc -lBSD"
 		fi
 		;;
     "osf1")	echo "Looks like OSF/1"
@@ -618,16 +624,48 @@ if test "$with_kerb4" = "yes" -o "$with_kerb5" = "yes"; then
 fi
 
 dnl
-dnl extra AFS libs
+dnl extra AFS libs and includes
 dnl
 if test "$with_AFS" = "yes"; then
-    if test -d "/usr/lib/afs"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/lib/afs"
-    else
-	echo 'Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDO_LDFLAGS'
+
+    # looks like the "standard" place for AFS libs is /usr/afsws/lib
+    AFSLIBDIRS="/usr/lib/afs /usr/afsws/lib /usr/afsws/lib/afs"
+    for i in $AFSLIBDIRS; do
+	if test -d ${i}; then
+	    SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${i}"
+	    FOUND_AFSLIBDIR=true
+	fi
+    done
+    if test -z "$FOUND_AFSLIBDIR"; then
+	echo 'Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDO_LDFLAGS or rerun configure with the --with-libpath options.'
     fi
 
-    SUDO_LIBS="${SUDO_LIBS} -lkauth -lprot -lauth -lubik -lrxkad -lsys -ldes -lrx -llwp -lcom_err -laudit -lutil"
+    # Order is important here.  Note that we build AFS_LIBS from right to left
+    # since AFS_LIBS may be initialized with BSD compat libs that must go last
+    AFS_LIBS="-laudit ${AFS_LIBS}"
+    for i in $AFSLIBDIRS; do
+	if test -f ${i}/util.a; then
+	    AFS_LIBS="${i}/util.a ${AFS_LIBS}"
+	    FOUND_UTIL_A=true
+	    break;
+	fi
+    done
+    if test -z "$FOUND_UTIL_A"; then
+	AFS_LIBS="-lutil ${AFS_LIBS}"
+    fi
+    AFS_LIBS="-lkauth -lprot -lubik -lauth -lrxkad -lsys -ldes -lrx -llwp -lcom_err ${AFS_LIBS}"
+
+    # AFS includes may live in /usr/include on some machines...
+    for i in /usr/afsws/include; do
+	if test -d ${i}; then
+	    CPPFLAGS="${CPPFLAGS} -I${i}"
+	    FOUND_AFSINCDIR=true
+	fi
+    done
+
+    if test -z "$FOUND_AFSLIBDIR"; then
+	echo 'Unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options.'
+    fi
 fi
 
 dnl

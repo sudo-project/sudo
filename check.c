@@ -74,7 +74,7 @@ static char rcsid[] = "$Id$";
 #  include <krb.h>
 #endif /* HAVE_KERB4 */
 #ifdef HAVE_AFS
-#  include <afs/kauth.h>
+#  include <afs/stds.h>
 #  include <afs/kautils.h>
 #endif /* HAVE_AFS */
 #ifdef HAVE_SECURID
@@ -445,11 +445,6 @@ static void check_passwd()
 {
     char *pass;			/* this is what gets entered    */
     register int counter = TRIES_FOR_PASSWORD;
-#ifdef HAVE_AFS
-    int code;
-    long password_expires = -1;
-    char *reason;
-#endif /* HAVE_AFS */
 #if defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
     char salt[2];		/* Need the salt to perform the encryption */
     register int i;
@@ -551,16 +546,14 @@ static void check_passwd()
 #  endif /* HAVE_KERB4 */
 
 #  ifdef HAVE_AFS
-	code = ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION+KA_USERAUTH_DOSETPAG,
-                                          user_name,
-                                          (char *) 0, 
-                                          (char *) 0,
-                                          pass,
-                                          0,
-                                          &password_expires,
-                                          0,
-                                          &reason);
-	if (code == 0)
+	if (ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION,
+                                       user_name,	/* name */
+                                       NULL,		/* instance */
+                                       NULL		/* realm */
+                                       pass		/* password */
+                                       0,		/* lifetime */
+                                       0, 0,		/* spare */
+                                       NULL) == 0)	/* reason */
 	    return;
 #  endif /* HAVE_AFS */
 #  ifdef HAVE_DCE
