@@ -86,18 +86,16 @@ bad:
 }
 
 static void
-sigusr1(signo)
+catchsig(signo)
     int signo;
 {
+    dodetach = signo;
     return;
 }
 
 /*
- * Fork a process that traces the command to be run and its descendents.
- *
- * TODO:
- *	should the tracing process catch signals and detach?
- *	(right now "sudo reboot" fails due to tracing)
+ * Fork a process that monitors the command to be run and its descendents.
+ * The monitoring process will detach upon receipt of SIGHUP, SIGINT or SIGTERM.
  */
 void
 systrace_attach(pid)
@@ -124,7 +122,7 @@ systrace_attach(pid)
 	err(1, "sigprocmask");
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
-    sa.sa_handler = sigusr1;
+    sa.sa_handler = catchsig;
     if (sigaction(SIGUSR1, &sa, &osa) != 0)
 	err(1, "sigaction");
 
@@ -146,14 +144,22 @@ systrace_attach(pid)
 	return;
     }
 
-    /* reset signal state for tracer */
+    /* set signal state for tracer */
+    dodetach = 0;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = catchsig;
     if (sigaction(SIGUSR1, &osa, NULL) != 0 ||
+	sigaction(SIGHUP, &sa, NULL) != 0 ||
+	sigaction(SIGINT, &sa, NULL) != 0 ||
+	sigaction(SIGTERM, &sa, NULL) != 0 ||
 	sigprocmask(SIG_SETMASK, &oset, NULL) != 0) {
 	warn("unable to setup signals for %s", user_cmnd);
 	goto fail;
     }
 
     /* become a daemon */
+    set_perms(PERM_FULL_ROOT);
     if (setsid() == -1) {
 	warn("setsid");
 	kill(pid, SIGKILL);
@@ -190,9 +196,13 @@ systrace_attach(pid)
     for (;;) {
 	nread = read(fd, &msg, sizeof(msg));
 	if (nread != sizeof(msg)) {
+	    if (dodetach) {
+		detachall(fd);
+		_exit(0);
+	    }
 	    if (nread == -1 && (errno == EINTR || errno == EAGAIN))
 		continue;
-	    killall(&children, SIGKILL);
+	    killall(SIGKILL);
 	    _exit(nread != 0);	/* shouldn't happen */
 	}
 
@@ -275,7 +285,7 @@ systrace_attach(pid)
     }
 
 fail:
-    killall(&children, SIGKILL);
+    killall(SIGKILL);
     _exit(1);
 }
 
@@ -903,12 +913,24 @@ check_execve(fd, pid, seqnr, askp, cookie, policyp, errorp)
  * Kill all pids in the list
  */
 static void
-killall(head, sig)
-    struct listhead *head;
+killall(sig)
     int sig;
 {
     struct childinfo *child;
 
-    for (child = head->first; child != NULL; child = child->next)
+    for (child = children.first; child != NULL; child = child->next)
 	(void) kill(child->pid, sig);
+}
+
+/*
+ * Detach all traced processes.
+ */
+static void
+detachall(fd)
+    int fd;
+{
+    struct childinfo *child;
+
+    for (child = children.first; child != NULL; child = child->next)
+	(void) ioctl(fd, STRIOCDETACH, &child->pid);
 }

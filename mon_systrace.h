@@ -41,7 +41,9 @@ static int update_env		__P((int, pid_t, u_int16_t, struct str_msg_ask *));
 static schandler_t find_handler	__P((pid_t, int));
 static ssize_t read_string	__P((int, pid_t, void *, char *, size_t));
 static struct childinfo *find_child __P((pid_t));
-static void killall		__P((struct listhead *, int));
+static void catchsig		__P((int));
+static void detachall		__P((int));
+static void killall		__P((int));
 static void new_child		__P((pid_t, pid_t));
 static void rm_child		__P((pid_t));
 static void update_child	__P((pid_t, uid_t));
@@ -49,6 +51,7 @@ static void update_child	__P((pid_t, uid_t));
 
 static struct listhead children;	/* list of children being traced */
 static int initialized;			/* set to true when we are inited */
+static volatile sig_atomic_t dodetach;	/* caught signal */
 
 struct listhead {
     void *first;
