@@ -1341,11 +1341,6 @@ case "$host" in
 esac
 
 dnl
-dnl We define this to get a crypt() prototype on some systems
-dnl
-AC_DEFINE(_XOPEN_SOURCE_EXTENDED)
-
-dnl
 dnl Check for shadow password routines if we have not already done so.
 dnl We check for SVR4-style first and then SecureWare-style.
 dnl

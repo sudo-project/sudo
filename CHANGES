@@ -1072,9 +1072,9 @@ Sudo 1.5.9 released.
      to anything real.  Instead, we just use a max password size of 256
      everywhere.
 
-337) Block many signals during startup and restore signal mask before exec'ing
-     the program.  We don't want the user to be able to simply kill us and
-     avoid logging.
+337) Block all signals during startup (for non-POSIX signals we only block
+     some of them) and restore signal mask before exec'ing the program.
+     We don't want the user to be able to simply kill us and avoid logging.
 
 338) Rewrote timestamp handling.  For the default case, a directory is used
      instead of a file.  For the tty-based case, the timestamp is just a
@@ -1086,8 +1086,8 @@ Sudo 1.5.9 released.
 339) The meaning of -k has changed to mean "invalidate the timestamp".
      There is a new -K option to really remove the timestamp file/dir.
 
-340) New modular authentication API.  This fixes the nest of #ifdefs that
-     was the old auth code.
+340) New modular authentication API.  This fixes the rat's nest of
+     #ifdefs that was the old auth code.
 
 341) New logging functions.  log_error() now takes a variable number of
      args ala printf() and log_auth() reacts to the return value of validate().
