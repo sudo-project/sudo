@@ -198,23 +198,27 @@ DEFVAR			[a-z_]+
 			    return(COMMENT);
 			}
 
-<INITIAL>^Defaults([:@>\!]{WORD})? {
+<INITIAL>^[[:blank:]]*Defaults([:@>\!]{WORD})? {
+			    int n;
+			    for (n = 0; isblank((unsigned char)yytext[n]); n++)
+				continue;
+			    n += 8;
 			    BEGIN GOTDEFS;
-			    switch (yytext[8]) {
+			    switch (yytext[n++]) {
 				case ':':
-				    yyless(9);
+				    yyless(n);
 				    LEXTRACE("DEFAULTS_USER ");
 				    return(DEFAULTS_USER);
 				case '>':
-				    yyless(9);
+				    yyless(n);
 				    LEXTRACE("DEFAULTS_RUNAS ");
 				    return(DEFAULTS_RUNAS);
 				case '@':
-				    yyless(9);
+				    yyless(n);
 				    LEXTRACE("DEFAULTS_HOST ");
 				    return(DEFAULTS_HOST);
 				case '!':
-				    yyless(9);
+				    yyless(n);
 				    LEXTRACE("DEFAULTS_CMND ");
 				    return(DEFAULTS_CMND);
 				default:
@@ -223,10 +227,13 @@ DEFVAR			[a-z_]+
 			    }
 			}
 
-<INITIAL>^(Host|Cmnd|User|Runas)_Alias	{
-			    if (!fill(yytext, yyleng))
+<INITIAL>^[[:blank:]]*(Host|Cmnd|User|Runas)_Alias	{
+			    int n;
+			    for (n = 0; isblank((unsigned char)yytext[n]); n++)
+				continue;
+			    if (!fill(yytext + n, yyleng - n))
 				yyterminate();
-			    switch (*yytext) {
+			    switch (yytext[n]) {
 				case 'H':
 				    LEXTRACE("HOSTALIAS ");
 				    return(HOSTALIAS);
