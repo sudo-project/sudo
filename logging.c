@@ -89,7 +89,7 @@ static void
 #ifdef __STDC__
 mysyslog(int pri, const char *fmt, ...)
 #else
-mysyslog(pri, fmt, ap)
+mysyslog(pri, fmt, va_alist)
     int pri;
     const char *fmt;
     va_dcl
