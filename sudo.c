@@ -312,9 +312,9 @@ main(argc, argv, envp)
     if ((sudo_mode & MODE_IMPLIED_SHELL) && !def_flag(I_SHELL_NOARGS))
 	usage(1);
 
-    /* May need to set $HOME to target user. */
-    if (def_flag(I_ALWAYS_SET_HOME) ||
-	((sudo_mode & MODE_SHELL) && def_flag(I_SET_HOME)))
+    /* May need to set $HOME to target user if we are running a command. */
+    if ((sudo_mode & MODE_RUN) && (def_flag(I_ALWAYS_SET_HOME) ||
+	((sudo_mode & MODE_SHELL) && def_flag(I_SET_HOME))))
 	sudo_mode |= MODE_RESET_HOME;
 
     /* Bail if a tty is required and we don't have one.  */
