@@ -68,7 +68,11 @@ extern int lstat();
 /*
  * Prototypes
  */
+#ifdef HAVE_FCHDIR
 static char * realpath_ret(char *, FILE *);
+#else
+static char * realpath_ret(char *, char *);
+#endif /* HAVE_FCHDIR */
 
 
 /******************************************************************
@@ -84,7 +88,11 @@ char * realpath(old, new)
           char * new;
 {
     char buf[MAXPATHLEN];			/* generic path buffer */
+#ifdef HAVE_FCHDIR
     FILE * cwd;					/* current working dir */
+#else
+    static char cwd[MAXPATHLEN];		/* old working dir */
+#endif /* HAVE_FCHDIR */
     struct stat statbuf;			/* for lstat() */
     char * temp;				/* temporary ptr */
     int len;					/* length parameter */
@@ -94,8 +102,13 @@ char * realpath(old, new)
 	return(NULL);
 
     /* save old cwd so we can get back */
+#ifdef HAVE_FCHDIR
     if (!(cwd = fopen(".", "r")))
 	return(NULL);
+#else
+    if (!getcwd(cwd, sizeof(cwd)))
+	return(NULL);
+#endif /* HAVE_FCHDIR */
 
     new[MAXPATHLEN - 1] = '\0';
     (void) strncpy(new, old, MAXPATHLEN - 1);
@@ -180,6 +193,7 @@ char * realpath(old, new)
  *  this function cd's to cwd, closes it, and returns path.
  */
 
+#ifdef HAVE_FCHDIR
 static char * realpath_ret(path, cwd)
     char * path;
     FILE * cwd;
@@ -192,3 +206,16 @@ static char * realpath_ret(path, cwd)
     errno = old_errno;
     return(path);
 }
+#else
+static char * realpath_ret(path, cwd)
+    char * path;
+    char * cwd;
+{
+    int old_errno = errno;			/* so we can restore errno... */
+
+    (void) chdir(cwd);
+
+    errno = old_errno;
+    return(path);
+}
+#endif /* HAVE_FCHDIR */
