@@ -293,10 +293,10 @@ Special features/options:
 	id, *not* the symbolic name.  Also note that this is actually set in
 	the Makefile.  The default is 0.
 
-  --with-sudo-umask
+  --with-umask
 	Umask to use when running the root command.  The default is 0022.
 
-  --without-sudo-umask
+  --without-umask
 	Preserves the umask of the user invoking sudo.
 
   --with-runas-default=user

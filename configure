@@ -83,7 +83,7 @@ ac_help="$ac_help
   --with-sudoers-gid      gid that owns sudoers file (defaults to 0)"
 ac_help="$ac_help
   --with-umask            umask with which the prog should run (default is 0022)
-  --without-sudo-umask    Preserves the umask of the user invoking sudo."
+  --without-umask         Preserves the umask of the user invoking sudo."
 ac_help="$ac_help
   --with-runas-default    User to run commands as (default is "root""
 ac_help="$ac_help
@@ -1458,7 +1458,7 @@ if test "${with_umask+set}" = set; then
     no)		echo "$ac_t""user" 1>&6
 		;;
     [0-9]*)	cat >> confdefs.h <<EOF
-#define SUDO_UMASK "$with_umask"
+#define SUDO_UMASK $with_umask
 EOF
 
 		echo "$ac_t""$with_umask" 1>&6
@@ -7522,6 +7522,5 @@ test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 if test "$with_pam" = "yes"; then
     echo ""
     echo "You will need to customize sample.pam and install it as /etc/pam.d/sudo"
-    echo "for RedHat Linux 5.x or modify /etc/pam.conf for Solaris."
     echo ""
 fi

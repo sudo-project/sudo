@@ -1005,3 +1005,5 @@ Sudo 1.5.7 released.
 314) Real Kerberos 5 support from Frank Cusack <fcusack@iconnet.net>.
 
 315) FWTK 'authsrv' support from Kevin Kadow <kadow@MSG.NET>.
+
+316) Fixed handling and documentation of -with-umask.

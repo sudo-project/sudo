@@ -533,14 +533,14 @@ esac])
 
 AC_MSG_CHECKING(for umask programs should be run with)
 AC_ARG_WITH(umask, [  --with-umask            umask with which the prog should run (default is 0022)
-  --without-sudo-umask    Preserves the umask of the user invoking sudo.],
+  --without-umask         Preserves the umask of the user invoking sudo.],
 [case $with_umask in  
     yes)	echo "Must give --with-umask an argument."
 		exit 1
 		;;
     no)		AC_MSG_RESULT(user)
 		;;
-    [[0-9]]*)	AC_DEFINE_UNQUOTED(SUDO_UMASK, "$with_umask")
+    [[0-9]]*)	AC_DEFINE_UNQUOTED(SUDO_UMASK, $with_umask)
 		AC_MSG_RESULT([$with_umask])
 		;;
     *)		echo "You must enter a numeric mask."
@@ -1528,6 +1528,5 @@ dnl
 if test "$with_pam" = "yes"; then
     echo ""
     echo "You will need to customize sample.pam and install it as /etc/pam.d/sudo"
-    echo "for RedHat Linux 5.x or modify /etc/pam.conf for Solaris."
     echo ""
 fi
