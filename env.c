@@ -115,6 +115,7 @@ static struct env_table badenv_table[] = {
     { "BASH_ENV=", 9, 0 },
     { "LC_", 3, 1 },
     { "LANG=", 5, 1 },
+    { "LANGUAGE=", 5, 1 },
     { (char *) NULL, 0, 0 }
 };
 
