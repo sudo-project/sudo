@@ -1692,3 +1692,6 @@ Sudo 1.6.7p5 released.
 531) Added support for Tandem NSK and other systems w/o seteuid().
 
 532) The timeout on password reading is now done via alarm(), not select().
+
+533) Fixed several issues when closing all open descriptors.  Sudo now uses
+     closefrom() if it exists.
