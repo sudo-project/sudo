@@ -232,7 +232,7 @@ rebuild_env(sudo_mode, envp)
     char **envp;
 {
     char **newenvp, **ep, **nep, *cp, *ps1;
-    int okvar, iswild;
+    int okvar, iswild, didterm, didpath;
     size_t env_size, len;
     struct list_member *cur;
 
@@ -244,14 +244,14 @@ rebuild_env(sudo_mode, envp)
      * Either clean out the environment or reset to a safe default.
      */
     ps1 = NULL;
+    didterm = didpath = 0;
     if (def_flag(I_ENV_RESET)) {
-	int didterm;
+	int keepit;
 
 	/* Alloc space for new environment. */
 	env_size = 32 + len;
 	nep = newenvp = (char **) emalloc(env_size * sizeof(char *));
 
-	/* XXX - set all to target user instead for -S */
 	*nep++ = format_env("HOME", user_dir);
 	*nep++ = format_env("SHELL", user_shell);
 	if (def_flag(I_SET_LOGNAME) && runas_pw->pw_name) {
@@ -263,7 +263,8 @@ rebuild_env(sudo_mode, envp)
 	}
 
 	/* Pull in vars we want to keep from the old environment. */
-	for (didterm = 0, ep = envp; *ep; ep++) {
+	for (ep = envp; *ep; ep++) {
+	    keepit = 0;
 	    for (cur = def_list(I_ENV_KEEP); cur; cur = cur->next) {
 		len = strlen(cur->value);
 		/* Deal with '*' wildcard */
@@ -274,28 +275,31 @@ rebuild_env(sudo_mode, envp)
 		    iswild = 0;
 		if (strncmp(cur->value, *ep, len) == 0 &&
 		    (iswild || (*ep)[len] == '=')) {
-		    *nep++ = *ep;
+		    /* We always preserve TERM, no special treatment needed. */
+		    if (strncmp(*ep, "TERM=", 5) != 0)
+			keepit = 1;
 		    break;
 		}
 	    }
 
-	    /* We assume PATH and TERM are not listed in env_keep. */
-	    if (!def_str(I_SECURE_PATH) && strncmp(*ep, "PATH=", 5) == 0) {
-		*nep++ = *ep;
-	    } else if (!didterm && strncmp(*ep, "TERM=", 5) == 0) {
-		*nep++ = *ep;
-		didterm = 1;
-	    } else if (strncmp(*ep, "SUDO_PS1=", 8) == 0)
+	    /* For SUDO_PS1 -> PS1 conversion. */
+	    if (strncmp(*ep, "SUDO_PS1=", 8) == 0)
 		ps1 = *ep + 5;
-	}
 
-#if 0
-	/* XXX - set to _PATH_DEFPATH if no secure path? */
-	if (!def_str(I_SECURE_PATH))
-	    *nep++ = "PATH" _PATH_DEFPATH); /* XXX - concat macro? */
-#endif
-	if (!didterm)
-	    *nep++ = "TERM=unknown";
+	    if (keepit) {
+		/* Preserve variable. */
+		*nep++ = *ep;
+	    } else {
+		/* Preserve PATH and TERM, ignore anything else */
+		if (!didpath && strncmp(*ep, "PATH=", 5) == 0) {
+		    *nep++ = *ep;
+		    didpath = 1;
+		} else if (!didterm && strncmp(*ep, "TERM=", 5) == 0) {
+		    *nep++ = *ep;
+		    didterm = 1;
+		}
+	    }
+	}
     } else {
 	/* Alloc space for new environment. */
 	for (env_size = 16 + len, ep = envp; *ep; ep++, env_size++)
@@ -343,10 +347,18 @@ rebuild_env(sudo_mode, envp)
 	    if (okvar) {
 		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
 		    ps1 = *ep + 5;
+		else if (strncmp(*ep, "PATH=", 5) == 0)
+		    didpath = 1;
+		else if (strncmp(*ep, "TERM=", 5) == 0)
+		    didterm = 1;
 		*nep++ = *ep;
 	    }
 	}
     }
+    if (!didterm)
+	*nep++ = "TERM=unknown";
+    if (!didpath)
+	*nep++ = format_env("PATH", _PATH_DEFPATH);
     *nep = NULL;
 
     /*
@@ -355,7 +367,7 @@ rebuild_env(sudo_mode, envp)
      */
 
     /* Replace the PATH envariable with a secure one. */
-    if (def_str(I_SECURE_PATH) && !user_is_exempt())
+    if (def_str(I_SECURE_PATH))
 	insert_env(newenvp, format_env("PATH", def_str(I_SECURE_PATH)));
 
     /* Set $HOME for `sudo -H'.  Only valid at PERM_RUNAS. */

@@ -50,6 +50,10 @@
 #define _PATH_TTY		"/dev/tty"
 #endif /* _PATH_TTY */
 
+#ifndef _PATH_DEFPATH
+#define _PATH_DEFPATH		"/usr/bin:/bin"
+#endif /* _PATH_DEFPATH */
+
 /*
  * NOTE: _PATH_SUDOERS is usually overriden by the Makefile.
  */
