@@ -204,7 +204,7 @@ main(argc, argv)
     else
 	(void) fputs("Parses OK", stdout);
 
-    if (!update_defaults())
+    if (!update_defaults(SET_ALL))
 	(void) fputs(" (problem with defaults entries)", stdout);
     puts(".");
 
@@ -350,14 +350,14 @@ print_defaults()
 	    case DEFAULTS_RUNAS:
 		putchar('>');
 		break;
+	    case DEFAULTS_CMND:
+		putchar('!');
+		break;
 	}
 	for (m = d->binding; m != NULL; m = m->next) {
-	    if (m->type == COMMAND)
-		printf("%s\"%s %s\"", m != d->binding ? "," : "",
-		    ((struct sudo_command *)m->name)->cmnd,
-		    ((struct sudo_command *)m->name)->args);
-	    else
-		printf("%s%s", m != d->binding ? "," : "", m->name);
+	    if (m != d->binding)
+		putchar(',');
+	    print_member(m);
 	}
 	printf("\t%s%s", d->op == FALSE ? "!" : "", d->var);
 	if (d->val != NULL) {

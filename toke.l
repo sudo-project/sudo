@@ -87,6 +87,7 @@ OCTET			(1?[0-9]{1,2})|(2[0-4][0-9])|(25[0-5])
 DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
 HOSTNAME		[[:alnum:]_-]+
 WORD			([^#>!=:,\(\) \t\n\\]|\\[^\n])+
+PATH			\/(\\[\,:= \t#]|[^\,:=\\ \t\n#])+
 ENVAR			([^#!=, \t\n\\]|\\[^\n])([^#=, \t\n\\]|\\[^\n])*
 DEFVAR			[a-z_]+
 
@@ -195,7 +196,7 @@ DEFVAR			[a-z_]+
 			    return(COMMENT);
 			}
 
-<INITIAL>^Defaults([:@>]{WORD})? {
+<INITIAL>^Defaults([:@>\!]{WORD})? {
 			    BEGIN GOTDEFS;
 			    switch (yytext[8]) {
 				case ':':
@@ -210,6 +211,10 @@ DEFVAR			[a-z_]+
 				    yyless(9);
 				    LEXTRACE("DEFAULTS_HOST ");
 				    return(DEFAULTS_HOST);
+				case '!':
+				    yyless(9);
+				    LEXTRACE("DEFAULTS_CMND ");
+				    return(DEFAULTS_CMND);
 				default:
 				    LEXTRACE("DEFAULTS ");
 				    return(DEFAULTS);
@@ -335,7 +340,15 @@ sudoedit		{
 				yyterminate();
 			}			/* sudo -e */
 
-\/(\\[\,:= \t#]|[^\,:=\\ \t\n#])+	{
+<GOTDEFS>{PATH}		{
+			    /* no command args allowed for Defaults!/path */
+			    if (!fill_cmnd(yytext, yyleng))
+				yyterminate();
+			    LEXTRACE("COMMAND ");
+			    return(COMMAND);
+			}
+
+{PATH}			{
 			    /* directories can't have args... */
 			    if (yytext[yyleng - 1] == '/') {
 				LEXTRACE("COMMAND ");

@@ -257,7 +257,7 @@ main(argc, argv, envp)
 	/* Parse sudoers and set any defaults listed in it. */
 	if (parse_sudoers(_PATH_SUDOERS) || parse_error)
 	    log_error(0, "parse error in %s near line %d", errorfile, errorlineno);
-	if (!update_defaults())
+	if (!update_defaults(SKIP_CMND))
 	    log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
     }
 
@@ -612,7 +612,8 @@ init_vars(sudo_mode)
 }
 
 /*
- * Fill in user_cmnd, user_args, user_base and user_stat variables.
+ * Fill in user_cmnd, user_args, user_base and user_stat variables
+ * and apply any command-specific defaults entries.
  */
 static int
 set_cmnd(sudo_mode)
@@ -666,6 +667,9 @@ set_cmnd(sudo_mode)
 	user_base++;
     else
 	user_base = user_cmnd;
+
+    if (!update_defaults(ONLY_CMND))
+	log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
 
     return(rval);
 }

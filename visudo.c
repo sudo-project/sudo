@@ -203,7 +203,7 @@ main(argc, argv)
 	errorx(1, "%s busy, try again later", sudoers_path);
     init_parser(sudoers_path, 0);
     yyparse();
-    (void) update_defaults();
+    (void) update_defaults(SKIP_CMND);
 
     editor = get_editor(&args);
 

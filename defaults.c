@@ -495,14 +495,18 @@ init_defaults()
 
 /*
  * Update the defaults based on what was set by sudoers.
+ * If skip_cmnd is 1, skip DEFAULTS_CMND, if it is 0, skip all others.
  * Returns TRUE on success and FALSE on failure.
  */
 int
-update_defaults()
+update_defaults(skip_cmnd)
+    int skip_cmnd;
 {
     struct defaults *def;
 
     for (def = defaults; def != NULL; def = def->next) {
+	if (skip_cmnd == (def->type == DEFAULTS_CMND))
+	    continue;
 	switch (def->type) {
 	    case DEFAULTS:
 		if (!set_default(def->var, def->val, def->op))
@@ -522,6 +526,10 @@ update_defaults()
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 		break;
+	    case DEFAULTS_CMND:
+		if (cmnd_matches(def->binding) &&
+		    !set_default(def->var, def->val, def->op))
+		    return(FALSE);
 	}
     }
     return(TRUE);

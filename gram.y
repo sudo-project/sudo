@@ -120,6 +120,7 @@ yyerror(s)
 %token <tok>	 DEFAULTS_HOST		/* Host-specific defaults entry */
 %token <tok>	 DEFAULTS_USER		/* User-specific defaults entry */
 %token <tok>	 DEFAULTS_RUNAS		/* Runas-specific defaults entry */
+%token <tok>	 DEFAULTS_CMND		/* Command-specific defaults entry */
 %token <tok> 	 RUNAS			/* ( runas_list ) */
 %token <tok> 	 NOPASSWD		/* no passwd req for command */
 %token <tok> 	 PASSWD			/* passwd req for command (default) */
@@ -199,6 +200,9 @@ entry		:	COMMENT {
 			}
 		|	DEFAULTS_HOST hostlist defaults_list {
 			    add_defaults(DEFAULTS_HOST, $2, $3);
+			}
+		|	DEFAULTS_CMND cmndlist defaults_list {
+			    add_defaults(DEFAULTS_CMND, $2, $3);
 			}
 		;
 

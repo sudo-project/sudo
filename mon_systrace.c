@@ -872,7 +872,7 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
     if (!def_ignore_local_sudoers && !ISSET(validated, VALIDATE_OK))
 #endif
     {
-	(void) update_defaults();
+	(void) update_defaults(SET_ALL);
 	validated = sudoers_lookup(0);
     }
     if (ISSET(validated, VALIDATE_OK)) {

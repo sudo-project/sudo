@@ -91,12 +91,19 @@ struct sudo_defs_types {
 #define T_PATH		0x200
 
 /*
+ * Argument to update_defaults()
+ */
+#define	SKIP_CMND	1
+#define	ONLY_CMND	0
+#define	SET_ALL		-1
+
+/*
  * Prototypes
  */
 void dump_default	__P((void));
 int set_default		__P((char *, char *, int));
 void init_defaults	__P((void));
-int update_defaults	__P((void));
+int update_defaults	__P((int));
 void list_options	__P((void));
 
 extern struct sudo_defs_types sudo_defs_table[];
