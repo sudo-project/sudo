@@ -103,7 +103,12 @@ static void  check_passwd		__P((void));
 static int   touch			__P((char *));
 static void  update_timestamp		__P((void));
 static void  reminder			__P((void));
+#ifdef HAVE_KERB4
 static int   sudo_krb_validate_user	__P((struct passwd *, char *));
+#endif /* HAVE_KERB4 */
+#ifdef HAVE_SKEY
+static char *sudo_skeyprompt		__P((struct skey *, char *));
+#endif /* HAVE_SKEY */
 int   user_is_exempt			__P((void));
 
 /*
@@ -114,6 +119,9 @@ static char  timestampfile[MAXPATHLEN + 1];
 #ifdef HAVE_SECURID
 union config_record configure;
 #endif /* HAVE_SECURID */
+#ifdef HAVE_SKEY
+struct skey skey;
+#endif
 #if (SHADOW_TYPE == SPW_SECUREWARE) && defined(__alpha)
 extern uchar_t crypt_type;
 #endif /* SPW_SECUREWARE && __alpha */
@@ -455,23 +463,24 @@ static void check_passwd()
      */
     while (counter > 0) {
 
-    /* get a password from the user */
 #ifdef HAVE_SKEY
-	set_perms(PERM_ROOT);
-	pass = skey_getpass(prompt, user_pw_ent, TRUE);
-	set_perms(PERM_USER);
-#else
-#  ifdef USE_GETPASS
-#    ifdef HAVE_KERB4
+    /* rewrite the prompt if using s/key since the challenge can change */
+    set_perms(PERM_ROOT);
+    prompt = sudo_skeyprompt(&skey, prompt);
+    set_perms(PERM_USER);
+#endif /* HAVE_SKEY */
+
+    /* get a password from the user */
+#ifdef USE_GETPASS
+#  ifdef HAVE_KERB4
 	(void) des_read_pw_string(kpass, sizeof(kpass) - 1, prompt, 0);
 	pass = kpass;
-#    else
-	pass = (char *) getpass(prompt);
-#    endif /* HAVE_KERB4 */
 #  else
+	pass = (char *) getpass(prompt);
+#  endif /* HAVE_KERB4 */
+#else
 	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60);
-#  endif /* USE_GETPASS */
-#endif /* HAVE_SKEY */
+#endif /* USE_GETPASS */
 
 	/* Exit loop on nil password */
 	if (!pass || *pass == '\0') {
@@ -481,22 +490,34 @@ static void check_passwd()
 		break;
 	}
 
+#ifdef HAVE_SKEY
+	/* Only check s/key db if the user exists there */
+	if (skey.logname) {
+	    set_perms(PERM_ROOT);
+	    if (skeyverify(&skey, pass) == 0) {
+		set_perms(PERM_USER);
+		return;             /* if the key is correct return() */
+	    }
+	    set_perms(PERM_USER);
+	}
+#endif /* HAVE_SKEY */
+#if !defined(HAVE_SKEY) || !defined(SKEY_ONLY)
 	/*
 	 * If we use shadow passwords with a different crypt(3)
 	 * check that here, else use standard crypt(3).
 	 */
-#ifdef SHADOW_TYPE
-#  if (SHADOW_TYPE == SPW_ULTRIX4)
+#  ifdef SHADOW_TYPE
+#    if (SHADOW_TYPE == SPW_ULTRIX4)
 	if (!strcmp(user_passwd, (char *)crypt16(pass, user_passwd)))
 	    return;		/* if the passwd is correct return() */
-#  endif /* ULTRIX4 */
-#  if (SHADOW_TYPE == SPW_SECUREWARE) && !defined(__alpha)
+#    endif /* ULTRIX4 */
+#    if (SHADOW_TYPE == SPW_SECUREWARE) && !defined(__alpha)
 	strncpy(salt, user_passwd, 2);
 	i = AUTH_SALT_SIZE + AUTH_CIPHERTEXT_SEG_CHARS;
 	if (strncmp(user_passwd, crypt(pass, salt), i) == 0)
 	    return;           /* if the passwd is correct return() */
-#  endif /* SECUREWARE && !__alpha */
-#  if (SHADOW_TYPE == SPW_SECUREWARE) && defined(__alpha)
+#    endif /* SECUREWARE && !__alpha */
+#    if (SHADOW_TYPE == SPW_SECUREWARE) && defined(__alpha)
 	if (crypt_type == AUTH_CRYPT_BIGCRYPT) {
 	    if (!strcmp(user_passwd, bigcrypt(pass, user_passwd)))
 		return;             /* if the passwd is correct return() */
@@ -509,28 +530,19 @@ static void check_passwd()
                     Argv[0]);
 	    exit(1);
 	}
-#  endif /* SECUREWARE && __alpha */
-#endif /* SHADOW_TYPE */
+#    endif /* SECUREWARE && __alpha */
+#  endif /* SHADOW_TYPE */
 
-#ifdef HAVE_SKEY
-	set_perms(PERM_ROOT);
-	if (!strcmp(user_passwd,
-	    skey_crypt(pass, user_passwd, user_pw_ent, TRUE))) {
-	    set_perms(PERM_USER);
-	    return;             /* if the passwd is correct return() */
-	}
-	set_perms(PERM_USER);
-#else
+	/* Normal UN*X password check */
 	if (!strcmp(user_passwd, (char *) crypt(pass, user_passwd)))
 	    return;		/* if the passwd is correct return() */
-#endif /* HAVE_SKEY */
 
-#ifdef HAVE_KERB4
+#  ifdef HAVE_KERB4
 	if (user_uid && sudo_krb_validate_user(user_pw_ent, pass) == 0)
 	    return;
-#endif /* HAVE_KERB4 */
+#  endif /* HAVE_KERB4 */
 
-#ifdef HAVE_AFS
+#  ifdef HAVE_AFS
 	code = ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION+KA_USERAUTH_DOSETPAG,
                                           user_name,
                                           (char *) 0, 
@@ -542,12 +554,13 @@ static void check_passwd()
                                           &reason);
 	if (code == 0)
 	    return;
-#endif /* HAVE_AFS */
-#ifdef HAVE_DCE
+#  endif /* HAVE_AFS */
+#  ifdef HAVE_DCE
 	/* dce_pwent() validates the user's pw as well */
 	if (dce_pwent(user_name, pass))
 	    return;
-#endif /* HAVE_DCE */
+#  endif /* HAVE_DCE */
+#endif /* !HAVE_SKEY || !SKEY_ONLY */
 
 	--counter;		/* otherwise, try again  */
 #ifdef USE_INSULTS
@@ -621,6 +634,63 @@ static int sudo_krb_validate_user(pw_ent, pass)
     return(!(k_errno == INTK_OK));
 }
 #endif /* HAVE_KERB4 */
+
+
+#ifdef HAVE_SKEY
+/********************************************************************
+ *
+ *  sudo_skeyprompt()
+ *
+ *  This function rewrites and return the prompt based the
+ *  s/key challenge *  and fills in the user's skey structure.
+ */
+
+static char *sudo_skeyprompt(user_skey, p)
+    struct skey *user_skey;
+    char *p;
+{
+    char skeyprompt[80];
+    static char *old_prompt = NULL;
+    static int plen;
+    char *new_prompt;
+
+    /* return the old prompt if we cannot get s/key info */
+    if (skeychallenge(user_skey, user_name, skeyprompt)) {
+#  ifdef SKEY_ONLY
+	(void) fprintf(stderr, "%s: You do not exist in the s/key database.\n",
+		       Argv[0]);
+	exit(1);
+#  else
+	user_skey->logname = NULL;
+	return(p);
+#  endif /* SKEY_ONLY */
+    }
+
+    /* keep a pointer to the original prompt around for future reference */
+    if (old_prompt == NULL) {
+	old_prompt = p;
+	plen = strlen(p);
+
+	/* ignore trailing colon's */
+	if (p[plen - 1] == ':')
+	    plen--;
+    } else {
+	(void) free(p);
+    }
+
+    if ((new_prompt = (char *) malloc(plen + strlen(skeyprompt) + 5)) == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+
+    /* embed the s/key challenge into the new password prompt */
+    (void) strncpy(new_prompt, old_prompt, plen);
+    (void) sprintf(new_prompt + plen, " [%s]:", skeyprompt);
+
+    return(new_prompt);
+}
+#endif /* HAVE_SKEY */
 
 
 /********************************************************************
