@@ -27,13 +27,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef lint
-static char *rcsid = "$Sudo$";
-#endif /* lint */
-
 #include <sys/types.h>
 
 #include "config.h"
+
+#ifndef lint
+static const char rcsid[] = "$Sudo$";
+#endif /* lint */
 
 /*
  * Copy src to string dst of size siz.  At most siz-1 characters

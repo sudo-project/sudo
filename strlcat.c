@@ -27,14 +27,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef lint
-static char *rcsid = "$Sudo$";
-#endif /* lint */
-
 #include <sys/types.h>
 #include <string.h>
 
 #include "config.h"
+
+#ifndef lint
+static const char rcsid[] = "$Sudo$";
+#endif /* lint */
+
 
 /*
  * Appends src to string dst of size siz (unlike strncat, siz is the
