@@ -19,8 +19,8 @@
  *
  *******************************************************************
  *
- *  check_sia.c -- check a user's password using Digital UN*X's
- *                 Security Integration Architecture
+ *  check_sia.c -- check a user's password using Digital UNIX's
+ *		   Security Integration Architecture
  *
  *  Spider Boardman Sep 26, 1998
  */
@@ -92,42 +92,42 @@ static int tcollect(timeout, rendition, title, nprompts, prompts)
  */
 void sia_attempt_auth()
 {
-    SIAENTITY *siah=NULL;
+    SIAENTITY *siah = NULL;
     int retval;
-    register int counter = TRIES_FOR_PASSWORD;
+    int counter = TRIES_FOR_PASSWORD;
 
     set_perms(PERM_ROOT, 0);
-    retval = sia_ses_init(&siah, Argc, Argv, NULL, user_name, ttyname(0),
-			  1, NULL);
-    if (retval != SIASUCCESS) {
-	log_error(BAD_ALLOCATION);
-	inform_user(BAD_ALLOCATION);
-        exit(1);
-    }
     while (counter > 0) {
+	retval = sia_ses_init(&siah, Argc, Argv, NULL, user_name, ttyname(0),
+			      1, NULL);
+	if (retval != SIASUCCESS) {
+	    set_perms(PERM_USER, 0);
+	    log_error(BAD_ALLOCATION);
+	    inform_user(BAD_ALLOCATION);
+	    exit(1);
+	}
 	retval = sia_ses_reauthent(tcollect, siah);
-        if (retval == SIASUCCESS) {
-	    (void) sia_ses_release(&siah);
-            set_perms(PERM_USER, 0);
-            return;
-        }
+	(void) sia_ses_release(&siah);
+	if (retval == SIASUCCESS) {
+	    set_perms(PERM_USER, 0);
+	    return;
+	}
 
-        --counter;
+	--counter;
 #ifdef USE_INSULTS
-        (void) fprintf(stderr, "%s\n", INSULT);
+	(void) fprintf(stderr, "%s\n", INSULT);
 #else
-        (void) fprintf(stderr, "%s\n", INCORRECT_PASSWORD);
+	(void) fprintf(stderr, "%s\n", INCORRECT_PASSWORD);
 #endif /* USE_INSULTS */
     }
-    (void) sia_ses_release(&siah);
     set_perms(PERM_USER, 0);
 
     if (counter > 0) {
-        log_error(PASSWORD_NOT_CORRECT);
-        inform_user(PASSWORD_NOT_CORRECT);
+	log_error(PASSWORD_NOT_CORRECT);
+	inform_user(PASSWORD_NOT_CORRECT);
     } else {
-        log_error(PASSWORDS_NOT_CORRECT);
-        inform_user(PASSWORDS_NOT_CORRECT);
+	log_error(PASSWORDS_NOT_CORRECT);
+	inform_user(PASSWORDS_NOT_CORRECT);
     }
     exit(1);
 }
