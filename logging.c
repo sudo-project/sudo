@@ -1,33 +1,28 @@
 /*
- *  CU sudo version 1.6 -- allows users to execute commands as root and others
- *  Copyright (c) 1991  The Root Group, Inc.
- *  Copyright (c) 1994,1996,1998,1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994,1996,1998,1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- ****************************************************************
- *
- *  logging.c
- *
- *  this file supports the general logging facilities
- *  if you want to change any error messages, this is probably
- *  the place to be...
- *
- *  Jeff Nieusma   Thu Mar 21 23:39:04 MST 1991
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -60,270 +55,60 @@
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-/*
- * Prototypes for local functions
- */
-static void send_mail		__P((void));
-static RETSIGTYPE reapchild	__P((int));
-static int appropriate		__P((int));
-#ifdef BROKEN_SYSLOG
+#if (LOGGING & SLOG_SYSLOG)
+static void do_syslog		__P((int, char *));
+#endif
+#if (LOGGING & SLOG_FILE)
+static void do_logfile		__P((char *));
+#endif
+static void send_mail		__P((char *));
+
+#if (LOGGING & SLOG_SYSLOG)
+# ifdef BROKEN_SYSLOG
+#  define MAXSYSLOGTRIES	16	/* num of retries for broken syslogs */
+#  define SYSLOG		syslog_wrapper
+
 static void syslog_wrapper	__P((int, char *, char *, char *));
-#endif /* BROKEN_SYSLOG */
 
 /*
- * Globals
+ * Some versions of syslog(3) don't guarantee success and return
+ * an int (notably HP-UX < 10.0).  So, if at first we don't succeed,
+ * try, try again...
  */
-static char *logline;
-extern int errorlineno;
-
-#ifdef BROKEN_SYSLOG
-#define MAXSYSLOGTRIES		16	/* num of retries for broken syslogs */
-#define SYSLOG(a,b,c,d)		syslog_wrapper(a,b,c,d)
-
-/****************************************************************
- *
- *  syslog_wrapper()
- *
- *  This function logs via syslog w/ a priority and 3 strings args.
- *  It really shouldn't be necessary but some syslog()'s don't
- *  guarantee that the syslog() operation will succeed!
- */
-
 static void
-syslog_wrapper(pri, fmt, arg1, arg2)
+syslog_wrapper(pri, fmt, ap)
     int pri;
-    char *fmt;
-    char *arg1;
-    char *arg2;
+    const char *fmt;
+    va_list ap;
 {
     int i;
 
     for (i = 0; i < MAXSYSLOGTRIES; i++)
-	if (syslog(pri, fmt, arg1, arg2) == 0)
+	if (vsyslog(pri, fmt, ap) == 0)
 	    break;
 }
-#else
-#define SYSLOG(a,b,c,d)		syslog(a,b,c,d)
-#endif /* BROKEN_SYSLOG */
+# else
+#  define SYSLOG		syslog
+# endif /* BROKEN_SYSLOG */
 
-
-
-/**********************************************************************
- *
- *  log_error()
- *
- *  This function attempts to deliver mail to ALERTMAIL and either
- *  syslogs the error or writes it to the log file
+/*
+ * Log a message to syslog, pre-pending the username and splitting the
+ * message into parts if it is longer than MAXSYSLOGLEN.
  */
-
-void
-log_error(code)
-    int code;
+static void
+do_syslog(pri, msg)
+    int pri;
+    char *msg;
 {
+    int count;
     char *p;
-    int count, header_length;
-    time_t now;
-#if (LOGGING & SLOG_FILE)
-    mode_t oldmask;
-    FILE *fp;
-#endif /* LOGGING & SLOG_FILE */
-#if (LOGGING & SLOG_SYSLOG)
-    int pri = Syslog_priority_NO;	/* syslog priority, assume the worst */
-    char *tmp, save;
-#endif /* LOGGING & SLOG_SYSLOG */
-
-    /*
-     * length of syslog-like header info used for mail and file logs
-     * is len("DDD MM HH:MM:SS : username : ") with an additional
-     * len("HOST=hostname : ") if HOST_IN_LOG is defined.
-     */
-    header_length = 21 + strlen(user_name);
-#ifdef HOST_IN_LOG
-    header_length += 8 + strlen(shost);
-#endif
-
-    /*
-     * Allocate enough memory for logline so we won't overflow it
-     */
-    count = header_length + 136 + 2 * MAXPATHLEN + strlen(tty) + strlen(cwd) +
-	    strlen(runas_user);
-    if (cmnd_args)
-	count += strlen(cmnd_args);
-    logline = (char *) emalloc(count);
-
-    /*
-     * we will skip this stuff when using syslog(3) but it is
-     * necessary for mail and file logs.
-     */
-    now = time((time_t) 0);
-    p = ctime(&now) + 4;
-#ifdef HOST_IN_LOG
-    (void) sprintf(logline, "%15.15s : %s : HOST=%s : ", p, user_name, shost);
-#else
-    (void) sprintf(logline, "%15.15s : %s : ", p, user_name);
-#endif
-
-    /*
-     * we need a pointer to the end of logline for cheap appends.
-     */
-    p = logline + header_length;
-
-    switch (code) {
-
-	case ALL_SYSTEMS_GO:
-	    (void) sprintf(p, "TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
-	    tty, cwd, runas_user);
-#if (LOGGING & SLOG_SYSLOG)
-	    pri = Syslog_priority_OK;
-#endif /* LOGGING & SLOG_SYSLOG */
-	    break;
-
-	case VALIDATE_NO_USER:
-	    (void) sprintf(p,
-		"user NOT in sudoers ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
-		tty, cwd, runas_user);
-	    break;
-
-	case VALIDATE_NOT_OK:
-	case VALIDATE_NOT_OK_NOPASS:
-	    (void) sprintf(p,
-		"command not allowed ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
-		tty, cwd, runas_user);
-	    break;
-
-	case VALIDATE_ERROR:
-	    (void) sprintf(p, "error in %s, line %d ; TTY=%s ; PWD=%s ; USER=%s.  ",
-		_PATH_SUDO_SUDOERS, errorlineno, tty, cwd, runas_user);
-	    break;
-
-	case GLOBAL_NO_PW_ENT:
-	    (void) sprintf(p,
-		"There is no passwd entry for uid %ld (TTY=%s).  ",
-		(long) user_uid, tty);
-	    break;
-
-	case PASSWORD_NOT_CORRECT:
-	    (void) sprintf(p,
-		"password incorrect ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
-		tty, cwd, runas_user);
-	    break;
-
-	case PASSWORDS_NOT_CORRECT:
-	    (void) sprintf(p,
-		"%d incorrect passwords ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
-		TRIES_FOR_PASSWORD, tty, cwd, runas_user);
-	    break;
-
-	case GLOBAL_NO_HOSTNAME:
-	    strcat(p, "This machine does not have a hostname ");
-	    break;
-
-	case NO_SUDOERS_FILE:
-	    switch (errno) {
-		case ENOENT:
-		    (void) sprintf(p, "There is no %s file.  ",
-			_PATH_SUDO_SUDOERS);
-		    break;
-		case EACCES:
-		    (void) sprintf(p, "Can't read %s.  ", _PATH_SUDO_SUDOERS);
-		    break;
-		default:
-		    (void) sprintf(p, "There is a problem opening %s ",
-			_PATH_SUDO_SUDOERS);
-		    break;
-	    }
-	    break;
-
-	case GLOBAL_HOST_UNREGISTERED:
-	    (void) sprintf(p, "gethostbyname() cannot find host %s ", host);
-	    break;
-
-	case SUDOERS_NOT_FILE:
-	    (void) sprintf(p, "%s is not a regular file ", _PATH_SUDO_SUDOERS);
-	    break;
-
-	case SUDOERS_WRONG_OWNER:
-	    (void) sprintf(p, "%s is not owned by uid %d and gid %d ",
-		_PATH_SUDO_SUDOERS, SUDOERS_UID, SUDOERS_GID);
-	    break;
-
-	case SUDOERS_WRONG_MODE:
-	    (void) sprintf(p, "%s is not mode %o ", _PATH_SUDO_SUDOERS,
-		SUDOERS_MODE);
-	    break;
-
-	case BAD_STAMPDIR:
-	    (void) sprintf(p,
-	    "%s owned by non-root or not mode 0700; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
-	    _PATH_SUDO_TIMEDIR, tty, cwd, runas_user);
-	    break;
-
-	case BAD_STAMPFILE:
-	    (void) sprintf(p,
-		"preposterous stampfile date; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
-		tty, cwd, runas_user);
-	    break;
-
-	case BAD_AUTH_INIT:
-	    (void) sprintf(p,
-		"unable to initialize authentication scheme; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
-		tty, cwd, runas_user);
-	    break;
-
-	case NO_CMND_SAFE:
-	    (void) sprintf(p,
-		"internal error, cmnd_safe never got set for %s; %s", cmnd,
-		"please report this error to sudo-bugs@courtesan.com");
-	    break;
-
-#ifdef HAVE_KERB5
-	case GLOBAL_KRB5_INIT_ERR:
-	    (void) sprintf(p, "Could not initialize Kerberos V");
-	    break;
-#endif /* HAVE_KERB5 */
-
-	default:
-	    strcat(p, "found a weird error : ");
-	    break;
-    }
-
-
-    /*
-     * If this is a parse error or if the error is from load_globals()
-     * don't put  argv in the message.
-     */
-    if (code != VALIDATE_ERROR && !(code & GLOBAL_PROBLEM)) {
-
-	/* stuff the command into the logline */
-	p = logline + strlen(logline);
-	strcpy(p, cmnd);
-
-	/* add a trailing space */
-	p += strlen(cmnd);
-	*p++ = ' ';
-	*p = '\0';
-
-	/* cat on command args if they exist */
-	if (cmnd_args) {
-	    (void) strcpy(p, cmnd_args);
-	    p += strlen(cmnd_args);
-	    *p++ = ' ';
-	    *p = '\0';
-	}
-    }
-
-#if (LOGGING & SLOG_SYSLOG)
-#ifdef Syslog_facility
-    openlog(Syslog_ident, Syslog_options, Syslog_facility);
-#else
-    openlog(Syslog_ident, Syslog_options);
-#endif /* Syslog_facility */
+    char *tmp;
+    char save;
 
     /*
      * Log the full line, breaking into multiple syslog(3) calls if necessary
      */
-    p = &logline[header_length];	/* skip past the date, host, and user */
-    for (count = 0; count < strlen(logline) / MAXSYSLOGLEN + 1; count++) {
+    for (p = msg, count = 0; count < strlen(msg) / MAXSYSLOGLEN + 1; count++) {
 	if (strlen(p) > MAXSYSLOGLEN) {
 	    /*
 	     * Break up the line into what will fit on one syslog(3) line
@@ -345,8 +130,8 @@ log_error(code)
 
 	    *tmp = save;			/* restore saved character */
 
-	    /* eliminate leading whitespace */
-	    for (p=tmp; *p != ' '; p++)
+	    /* Eliminate leading whitespace */
+	    for (p = tmp; *p != ' '; p++)
 		;
 	} else {
 	    if (count == 0)
@@ -355,30 +140,59 @@ log_error(code)
 		SYSLOG(pri, "%8.8s : (command continued) %s", user_name, p);
 	}
     }
-    closelog();
+}
 #endif /* LOGGING & SLOG_SYSLOG */
-#if (LOGGING & SLOG_FILE)
 
-    /* become root */
-    set_perms(PERM_ROOT, 0);
+#if (LOGGING & SLOG_FILE)
+static void
+do_logfile(msg)
+    char *msg;
+{
+    char *full_line;
+    char *beg, *oldend, *end;
+    FILE *fp;
+    mode_t oldmask;
+    time_t now;
+    int oldeuid = geteuid();
+    int maxlen = MAXLOGFILELEN;
+
+    now = time((time_t) 0);
+
+    /* Become root if we are not already. */
+    if (oldeuid)
+	set_perms(PERM_ROOT, 0);
 
     oldmask = umask(077);
+    /* XXX - lock log file */
     fp = fopen(_PATH_SUDO_LOGFILE, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
-	(void) sprintf(logline, "Can\'t open log file: %s", _PATH_SUDO_LOGFILE);
-	send_mail();
+	(void) asprintf(&full_line, "Can't open log file: %s: %s",
+	    _PATH_SUDO_LOGFILE, strerror(errno));
+	send_mail(full_line);
+	free(full_line);
     } else {
-	char *beg, *oldend, *end;
-	int maxlen = MAXLOGFILELEN;
+# ifndef WRAP_LOG
+#  ifdef HOST_IN_LOG
+	(void) fprintf(fp, "%15.15s : %s : HOST=%s : %s\n", ctime(&now) + 4,
+	    user_name, user_shost, msg);
+#  else
+	(void) fprintf(fp, "%15.15s : %s : %s\n", ctime(&now) + 4, user_name,
+	    msg);
+#  endif
+# else
+#  ifdef HOST_IN_LOG
+	(void) asprintf(&full_line, "%15.15s : %s : HOST=%s : %s",
+	    ctime(&now) + 4, user_name, user_shost, msg);
+#  else
+	(void) asprintf(&full_line, "%15.15s : %s : %s", ctime(&now) + 4,
+	    user_name, msg);
+#  endif
 
-#ifndef WRAP_LOG
-       (void) fprintf(fp, "%s\n", logline);
-#else
 	/*
-	 * Print out logline with word wrap
+	 * Print out full_line with word wrap
 	 */
-	beg = end = logline;
+	beg = end = full_line;
 	while (beg) {
 	    oldend = end;
 	    end = strchr(oldend, ' ');
@@ -388,7 +202,7 @@ log_error(code)
 		if (strlen(beg) > maxlen) {
 		    /* too far, need to back up & print the line */
 
-		    if (beg == (char *)logline)
+		    if (beg == (char *)full_line)
 			maxlen -= 4;		/* don't indent first line */
 
 		    *end = ' ';
@@ -422,325 +236,324 @@ log_error(code)
 		beg = NULL;			/* exit condition */
 	    }
 	}
-#endif
-
+	free(full_line);
+# endif
 	(void) fclose(fp);
     }
 
-    /* relinquish root */
-    set_perms(PERM_USER, 0);
+    if (oldeuid)
+	set_perms(PERM_USER, 0);	/* relinquish root */
+}
 #endif /* LOGGING & SLOG_FILE */
 
-    /* send mail if appropriate */
-    if (appropriate(code))
-	send_mail();
+/*
+ * Two main functions, log_error() to log errors and log_auth() to
+ * log allow/deny messages.
+ */
+void
+log_auth(status, inform_user)
+    int status;
+    int inform_user;
+{
+    char *message;
+    char *logline;
+#if (LOGGING & SLOG_SYSLOG)
+    int pri = Syslog_priority_NO;
+#endif /* LOGGING & SLOG_SYSLOG */
+
+    /* Set error message, if any. */
+    switch (status) {
+	case VALIDATE_OK:
+	case VALIDATE_OK_NOPASS:
+	    message = "";
+	    break;
+	case VALIDATE_NO_USER:
+	    message = "user NOT in sudoers ; ";
+	    break;
+	case VALIDATE_NOT_OK:
+	case VALIDATE_NOT_OK_NOPASS:
+	    message = "command not allowed ; ";
+	    break;
+	default:
+	    message = "unknown error ; ";
+    }
+
+    if (user_args)
+	(void) asprintf(&logline, "%sTTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s %s",
+	    message, user_tty, user_cwd, user_runas, user_cmnd, user_args);
+    else
+	(void) asprintf(&logline, "%sTTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s",
+	    message, user_tty, user_cwd, user_runas, user_cmnd);
+
+    /*
+     * Inform the user if they failed to authenticate and send a
+     * copy of the error via mail if compiled with the appropriate option.
+     */
+    switch (status) {
+	case VALIDATE_OK:
+	case VALIDATE_OK_NOPASS:
+#if (LOGGING & SLOG_SYSLOG)
+	    pri = Syslog_priority_OK;
+#endif /* LOGGING & SLOG_SYSLOG */
+#ifdef SEND_MAIL_WHEN_OK
+	    send_mail(logline);
+#endif
+	    break;
+	case VALIDATE_NO_USER:
+#ifdef SEND_MAIL_WHEN_NO_USER
+	    send_mail(logline);
+#endif
+	    if (inform_user)
+		(void) fprintf(stderr, "%s is not in the sudoers file.  %s",
+		    user_name, "This incident will be reported.\n");
+	    break;
+	case VALIDATE_NOT_OK:
+	case VALIDATE_NOT_OK_NOPASS:
+#ifdef SEND_MAIL_WHEN_NOT_OK
+	    send_mail(logline);
+#endif
+	    if (inform_user) {
+		(void) fprintf(stderr,
+		    "Sorry, user %s is not allowed to execute '%s",
+		    user_name, user_cmnd);
+		if (user_args) {
+		    fputc(' ', stderr);
+		    fputs(user_args, stderr);
+		}
+		(void) fprintf(stderr, "' as %s on %s.\n", user_runas, user_host);
+	    }
+	    break;
+	default:
+	    send_mail(logline);
+	    if (inform_user)
+		(void) fprintf(stderr, "An unknown error has occurred.\n");
+	    break;
+    }
+
+    /*
+     * Log to syslog and/or a file.
+     */
+#if (LOGGING & SLOG_SYSLOG)
+    do_syslog(pri, logline);
+#endif
+#if (LOGGING & SLOG_FILE)
+    do_logfile(logline);
+#endif
+
+    free(logline);
 }
 
+void
+#ifdef __STDC__
+log_error(int flags, const char *fmt, ...)
+#else
+log_error(va_alist)
+    va_dcl
+#endif
+{
+    int serrno = errno;
+    char *message;
+    char *logline;
+    va_list ap;
+#ifdef __STDC__
+    va_start(ap, fmt);
+#else
+    int flags;
+    const char *fmt;
 
+    va_start(ap);
+    flags = va_arg(ap, int);
+    fmt = va_arg(ap, const char *);
+#endif
+
+    /* Expand printf-style format + args. */
+    (void) vasprintf(&message, fmt, ap);
+    va_end(ap);
+
+    if (flags & MSG_ONLY)
+	logline = message;
+    else if (flags & USE_ERRNO) {
+	if (user_args) {
+	    (void) asprintf(&logline,
+		"%s: %s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s %s",
+		message, strerror(serrno), user_tty, user_cwd, user_runas,
+		user_cmnd, user_args);
+	} else {
+	    (void) asprintf(&logline,
+		"%s: %s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s", message,
+		strerror(serrno), user_tty, user_cwd, user_runas, user_cmnd);
+	}
+    } else {
+	if (user_args) {
+	    (void) asprintf(&logline,
+		"%s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s %s", message,
+		user_tty, user_cwd, user_runas, user_cmnd, user_args);
+	} else {
+	    (void) asprintf(&logline,
+		"%s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s", message,
+		user_tty, user_cwd, user_runas, user_cmnd);
+	}
+    }
+
+    /*
+     * Tell the user.
+     */
+    (void) fprintf(stderr, "%s: %s", Argv[0], message);
+    if (flags & USE_ERRNO)
+	fprintf(stderr, ": %s", strerror(serrno));
+    fputc('\n', stderr);
+
+    /*
+     * Send a copy of the error via mail.
+     */
+    if (!(flags & NO_MAIL))
+	send_mail(logline);
+
+    /*
+     * Log to syslog and/or a file.
+     */
+#if (LOGGING & SLOG_SYSLOG)
+    do_syslog(Syslog_priority_NO, logline);
+#endif
+#if (LOGGING & SLOG_FILE)
+    do_logfile(logline);
+#endif
+
+    free(logline);
+    if (message != logline);
+	free(message);
+
+    /* Wait for mail to finish sending and exit. */
+    if (!(flags & NO_EXIT)) {
+	reapchild(0);
+	exit(1);
+    }
+}
 
 #ifdef _PATH_SENDMAIL
-/**********************************************************************
- *
- *  send_mail()
- *
- *  This function attempts to mail to ALERTMAIL about the sudo error
- *
- */
-
-static char *mail_argv[] = { "sendmail", "-t", (char *) NULL };
-
 static void
-send_mail()
+send_mail(line)
+    char *line;
 {
-    char *mailer = _PATH_SENDMAIL;
-    char *subject = MAILSUBJECT;
-    int fd[2];
+    FILE *mail;
     char *p;
+    int pfd[2], pid;
+    time_t now;
 #ifdef POSIX_SIGNALS
-    struct sigaction action;
+    struct sigaction sa;
 
-    (void) memset((VOID *)&action, 0, sizeof(action));
+    (void) memset((VOID *)&sa, 0, sizeof(sa));
 #endif /* POSIX_SIGNALS */
 
-    /* catch children as they die */
+    /* Catch children as they die... */
 #ifdef POSIX_SIGNALS
-    action.sa_handler = reapchild;
-    (void) sigaction(SIGCHLD, &action, NULL);
+    sa.sa_handler = reapchild;
+    (void) sigaction(SIGCHLD, &sa, NULL);
 #else
     (void) signal(SIGCHLD, reapchild);
 #endif /* POSIX_SIGNALS */
 
-    if (fork())
-	return;
+    if ((pid = fork()) > 0) {	/* Child. */
 
-    /*
-     * we don't want any security problems ...
-     */
-    set_perms(PERM_FULL_USER, 0);
-    
+	/* We do an explicit wait() later on... */
 #ifdef POSIX_SIGNALS
-    action.sa_handler = SIG_IGN;
-    (void) sigaction(SIGHUP, &action, NULL);
-    (void) sigaction(SIGINT, &action, NULL);
-    (void) sigaction(SIGQUIT, &action, NULL);
+	sa.sa_handler = SIG_DFL;
+	(void) sigaction(SIGCHLD, &sa, NULL);
 #else
-    (void) signal(SIGHUP, SIG_IGN);
-    (void) signal(SIGINT, SIG_IGN);
-    (void) signal(SIGQUIT, SIG_IGN);
+	(void) signal(SIGCHLD, SIG_DFL);
 #endif /* POSIX_SIGNALS */
 
-    if (pipe(fd)) {
-	perror("send_mail: pipe");
-	exit(1);
-    }
-    (void) dup2(fd[0], 0);
-    (void) dup2(fd[1], 1);
-    (void) close(fd[0]);
-    (void) close(fd[1]);
-
-    if (!fork()) {		/* child */
-	(void) close(1);
-	EXEC(mailer, mail_argv);
-
-	/* this should not happen */
-	perror(mailer);
-	exit(1);
-    } else {			/* parent */
-	(void) close(0);
-
-	/* feed the data to sendmail */
-	/* XXX - do we need to fdopen this fd #1 to a new stream??? */
-	(void) fprintf(stdout, "To: %s\nSubject: ", ALERTMAIL);
-	p = subject;
-	while (*p) {
-	    /* expand %h -> hostname in subject */
-	    if (*p == '%' && *(p+1) == 'h') {
-		(void) fputs(host, stdout);
-		p++;
-	    } else
-		(void) fputc(*p, stdout);
-	    p++;
+	if (pipe(pfd) == -1) {
+	    (void) fprintf(stderr, "%s: cannot open pipe failed: %s\n",
+		Argv[0], strerror(errno));
+	    exit(1);
 	}
-	(void) fprintf(stdout, "\n\n%s : %s\n\n", host, logline);
-	fclose(stdout);
 
+	switch (pid = fork()) {
+	    case -1:
+		/* Error. */
+		/* XXX - parent will continue, return an exit val to
+		   let parent know and abort? */
+		(void) fprintf(stderr, "%s: cannot fork: %s\n",
+		    Argv[0], strerror(errno));
+		exit(1);
+		break;
+	    case 0:
+		/* Grandchild. */
+		(void) close(pfd[1]);
+		(void) dup2(pfd[0], STDIN_FILENO);
+		(void) close(pfd[0]);
+		/* Run sendmail as invoking user, not root. */
+		set_perms(PERM_FULL_USER, 0);
+		execl(_PATH_SENDMAIL, "sendmail", "-t", NULL);
+		_exit(127);
+		break;
+	}
+
+	mail = fdopen(pfd[1], "w");
+	(void) close(pfd[0]);
+
+	/* Pipes are all setup, send message via sendmail. */
+	(void) fprintf(mail, "To: %s\nSubject: ", ALERTMAIL);
+	for (p = MAILSUBJECT; *p; p++) {
+	    /* Expand escapes in the subject */
+	    if (*p == '%' && *(p+1) != '%') {
+		switch (*(++p)) {
+		    case 'h':
+			(void) fputs(user_host, mail);
+			break;
+		    case 'u':
+			(void) fputs(user_name, mail);
+			break;
+		    default:
+			p--;
+			break;
+		}
+	    } else
+		(void) fputc(*p, mail);
+	}
+	now = time((time_t) 0);
+	p = ctime(&now) + 4;
+	(void) fprintf(mail, "\n\n%s : %15.15s : %s : %s\n\n", user_host, p,
+	    user_name, line);
+	fclose(mail);
+	reapchild(0);
 	exit(0);
+    } else {
+	/* Parent, just return unless there is an error. */
+	if (pid == -1) {
+	    (void) fprintf(stderr, "%s: cannot fork: %s\n",
+		Argv[0], strerror(errno));
+	    exit(1);
+	}
     }
 }
 #else
 static void
-send_mail()
+send_mail(line)
+    char *line;
 {
-    /* no mailer defined */
     return;
 }
-#endif /* _PATH_SENDMAIL */
+#endif
 
-
-
-/****************************************************************
- *
- *  reapchild()
- *
- *  This function gets rid of all the ugly zombies
+/*
+ * SIGCHLD sig handler--wait for children as they die.
  */
-
-static RETSIGTYPE
+RETSIGTYPE
 reapchild(sig)
     int sig;
 {
-    int pid, status, save_errno = errno;
+    int status, serrno = errno;
 
 #ifdef sudo_waitpid
-    do {
-	pid = sudo_waitpid(-1, &status, WNOHANG);
-    } while (pid == -1);
+    while (sudo_waitpid(-1, &status, WNOHANG) != -1)
+	;
 #else
-    (void) wait(NULL);
+    (void) wait(&status);
 #endif
 #ifndef POSIX_SIGNALS
     (void) signal(SIGCHLD, reapchild);
 #endif /* POSIX_SIGNALS */
-    errno = save_errno;
-}
-
-
-
-/**********************************************************************
- *
- *  inform_user ()
- *
- *  This function lets the user know what is happening 
- *  when an error occurs
- */
-
-void
-inform_user(code)
-    int code;
-{
-    switch (code) {
-	case VALIDATE_NO_USER:
-	    (void) fprintf(stderr,
-		"%s is not in the sudoers file.  This incident will be reported.\n\n",
-		user_name);
-	    break;
-
-	case VALIDATE_NOT_OK:
-	case VALIDATE_NOT_OK_NOPASS:
-	    (void) fprintf(stderr,
-		"Sorry, user %s is not allowed to execute \"%s",
-		user_name, cmnd);
-	
-	    /* print command args if they exist */
-	    if (cmnd_args) {
-		fputc(' ', stderr);
-		fputs(cmnd_args, stderr);
-	    }
-
-	    (void) fprintf(stderr, "\" as %s on %s.\n\n", runas_user, host);
-	    break;
-
-	case VALIDATE_ERROR:
-	    (void) fprintf(stderr,
-		"Sorry, there is a fatal error in the sudoers file.\n\n");
-	    break;
-
-	case GLOBAL_NO_PW_ENT:
-	    (void) fprintf(stderr,
-		"Intruder Alert!  You don't exist in the passwd file\n\n");
-	    break;
-
-	case GLOBAL_NO_HOSTNAME:
-	    (void) fprintf(stderr,
-		"This machine does not have a hostname\n\n");
-	    break;
-
-	case GLOBAL_HOST_UNREGISTERED:
-	    (void) fprintf(stderr,
-		"This machine is not available via gethostbyname()\n\n");
-	    break;
-
-	case PASSWORD_NOT_CORRECT:
-	    (void) fprintf(stderr, "Password not entered correctly\n\n");
-	    break;
-
-	case PASSWORDS_NOT_CORRECT:
-	    (void) fprintf(stderr, "Password not entered correctly after %d tries\n\n",
-		TRIES_FOR_PASSWORD);
-	    break;
-
-	case NO_SUDOERS_FILE:
-	    switch (errno) {
-		case ENOENT:
-		    (void) fprintf(stderr, "There is no %s file.\n",
-			_PATH_SUDO_SUDOERS);
-		    break;
-		default:
-		    (void) fprintf(stderr, "Can't read %s: ",
-			_PATH_SUDO_SUDOERS);
-		    perror("");
-		    break;
-	    }
-	    break;
-
-	case SUDOERS_NOT_FILE:
-	    (void) fprintf(stderr,
-		"%s is not a regular file!\n", _PATH_SUDO_SUDOERS);
-	    break;
-
-	case SUDOERS_WRONG_OWNER:
-	    (void) fprintf(stderr, "%s is not owned by uid %d and gid %d!\n",
-		_PATH_SUDO_SUDOERS, SUDOERS_UID, SUDOERS_GID);
-	    break;
-
-	case SUDOERS_WRONG_MODE:
-	    (void) fprintf(stderr, "%s must be mode %o!\n", _PATH_SUDO_SUDOERS,
-		SUDOERS_MODE);
-	    break;
-
-	case BAD_STAMPDIR:
-	    (void) fprintf(stderr,
-		"Timestamp directory has wrong permissions, ignoring.\n");
-	    break;
-
-	case BAD_STAMPFILE:
-	    (void) fprintf(stderr,
-		"Your timestamp file has a preposterous date, ignoring.\n");
-	    break;
-
-	case BAD_AUTH_INIT:
-	    (void) fprintf(stderr,
-		"Unable to initialize authentication scheme.\n");
-	    break;
-
-	case NO_CMND_SAFE:
-	    (void) fprintf(stderr,
-		"Internal error, cmnd_safe never got set for %s\n", cmnd);
-	    break;
-
-	default:
-	    (void) fprintf(stderr,
-		"Something weird happened.\n\n");
-	    break;
-    }
-}
-
-
-
-/****************************************************************
- *
- *  appropriate()
- *
- *  This function determines whether to send mail or not...
- */
-
-static int
-appropriate(code)
-    int code;
-{
-
-    switch (code) {
-
-    /* 
-     * these will NOT send mail
-     */
-    case VALIDATE_OK:
-    case VALIDATE_OK_NOPASS:
-    case PASSWORD_NOT_CORRECT:
-    case PASSWORDS_NOT_CORRECT:
-/*  case ALL_SYSTEMS_GO:               this is the same as OK */
-	return (0);
-	break;
-
-    case VALIDATE_NO_USER:
-#ifdef SEND_MAIL_WHEN_NO_USER
-	return (1);
-#else
-	return (0);
-#endif
-	break;
-
-    case VALIDATE_NOT_OK:
-    case VALIDATE_NOT_OK_NOPASS:
-#ifdef SEND_MAIL_WHEN_NOT_OK
-	return (1);
-#else
-	return (0);
-#endif
-	break;
-
-    /*
-     * these WILL send mail
-     */
-    case VALIDATE_ERROR:
-    case NO_SUDOERS_FILE:
-    case BAD_STAMPDIR:
-    case BAD_STAMPFILE:
-    case BAD_AUTH_INIT:
-    case NO_CMND_SAFE:
-    default:
-	return (1);
-	break;
-
-    }
+    errno = serrno;
 }
