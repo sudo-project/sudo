@@ -1,6 +1,18 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.7
+
+    Starting with sudo 1.7, if an OS supports a modular authentication
+    method such as PAM, it will be used by default.
+
+    Prior to version 1.7, sudo would preserve the user's environment,
+    pruning out potentially dangerous variables.  Starting with sudo
+    1.7 the envionment is reset to a default set of values.  To
+    preserve specific environment variables, add them to the "env_keep"
+    list in sudoers.  The old behavior can be restored by negating the
+    "env_reset" option in sudoers.
+
 o Upgrading from a version prior to 1.6.8:
 
     Prior to sudo 1.6.8, if /var/run did not exist, sudo would put
