@@ -1,0 +1,155 @@
+.TH SUDO 8
+.SH NAME
+sudo \- execute a command as the superuser
+
+visudo \- edit the sudoers file
+
+.SH SYNOPSIS
+.B sudo 
+.I command
+
+.SH DESCRIPTION
+.I Sudo
+allows a permitted user to execute a 
+.I command 
+as the superuser.
+.I Sudo 
+determines who is an authorized user by consulting the file
+.I /etc/sudoers.
+Sudo will prompt for a user's password to initiate a validation period
+of N minutes (where N is defined at installation time and defaults 
+to 5 minutes).
+
+The
+.I sudoers
+file is composed of an optional host alias section, an optional command
+alias section and the user specification section. All command or host
+aliases need to start with their respective keywords (Host_Alias/Cmnd_Alias).
+Note that only the first occurrance of a user name will be significant in
+the user specification section.
+
+.nf
+user specification format: 
+  user access_group [: access_group] ...
+
+    access_group ::= host_type = [op]cmnd_type [,[op]cmnd_type] ... 
+       host_type ::= a lower-case host name OR a host alias.
+       cmnd_type ::= an command OR a command alias.
+              op ::= the logical '!' NOT operator.
+
+host alias section format:
+  Host_Alias HOSTALIAS = host-list
+
+      Host_Alias ::= a keyword.
+       HOSTALIAS ::= an upper-case alias name.
+       host-list ::= a comma separated list of hosts.
+
+command alias section format:
+  Cmnd_Alias CMNDALIAS = cmnd-list
+
+      Cmnd_Alias ::= a keyword.
+       CMNDALIAS ::= an upper-case alias name.
+       cmnd-list ::= a comma separated list commands.
+
+Text after a pound sign '#' is considered a comment.
+Long lines can be newline escaped with the backslash '\\' character.
+The reserved alias 'ALL' can be used for both {Host,Cmnd}_Alias'.
+    DO NOT define an alias of 'ALL', it will NOT be used.
+    Note that 'ALL' implies the entire universe of hosts/commands.
+    You can subtract elements from the universe by using the syntax:
+       user  host=ALL,!ALIAS1,!/etc/halt...
+.fi
+
+Examples
+
+    # Host alias specification
+    Host_Alias  HUB=houdini.rootgroup.com:\\
+                REMOTE=merlin,kodiakthorn,spirit
+    Host_Alias  MACHINES=kalkan,alpo,milkbones
+    Host_Alias  SERVERS=houdini,merlin,kodiakthorn,spirit
+
+    # Command alias specification
+    Cmnd_Alias  LPCS=/usr/etc/lpc,/usr/ucb/lprm
+    Cmnd_Alias  SHELLS=/bin/sh,/bin/csh,/bin/tcsh
+    Cmnd_Alias  MISC=/bin/rm,/bin/cat:\\
+                SHUTDOWN=/etc/halt,/etc/shutdown
+
+    # User specification
+    britt       REMOTE=SHUTDOWN:ALL=LPCS
+    robh        ALL=ALL,!SHELLS
+    nieusma     SERVERS=SHUTDOWN,/etc/reboot:\\
+                HUB=ALL,!SHELLS
+    jill        houdini.rootgroup.com=/etc/shutdown,MISC
+    markm       HUB=ALL,!MISC,!/etc/shutdown,!/etc/halt
+    billp       ALL=/usr/local/bin/top:MACHINES=SHELLS
+    davehieb    merlin=ALL:SERVERS=/etc/halt:\\
+                kodiakthorn=ALL
+
+The above
+.I sudoers
+file specification is composed of 4 host alias specifications, 4
+command alias specifications and 7 user specifications.  Britt is
+permitted to execute /etc/halt, /etc/shutdown, /usr/etc/lpc and
+/usr/ucb/lprm on the REMOTE machines (merlin, kodiakthorn, and
+spirit).  Robh is permitted to execute any command except for the group
+of SHELL commands on any machine.  Jill is permitted to execute
+/etc/shutdown, /bin/rm, and /bin/cat on houdini.  Davehieb can execute
+any command on machines merlin and kodiakthorn and can halt the
+SERVERS.
+
+The
+.I sudoers
+file SHOULD be edited by the 
+.I visudo 
+command which locks the file and does gramatical checking. This provides
+a mechanism for the prevention of stupid syntax errors.
+
+Sudo was designed to log via the 4.3 BSD syslogging facility but
+can log to a file instead if so desired.
+
+If an unauthorized user executes sudo, mail will be sent from the user to 
+the local authorities (defined at installation time).
+
+All preferences are defined at installation time and are derived from
+the sudo.h include file and the Makefile.
+
+.SH FUTURE ENHANCEMENTS
+.nf
+Allow nesting of host and command aliases.
+Allow the host specifier in the sudoers file
+    to use universe notation (user ALL,!SERVERS, ... = commands).
+Allow user aliases in the sudoers file (like host/command aliases).
+Have visudo do more extensive checking on the sudoers file.
+.fi
+
+.SH FILES
+.nf
+/etc/sudoers                 file of authorized users.
+/etc/stmp                    lock file for visudo.
+/usr/local/bin/sudo          the executable itself.
+/usr/local/etc/visudo        utility for modifying the sudoers file.
+.fi
+
+.SH AUTHORS
+.nf
+Jeff Nieusma                 <nieusma@rootgroup.com>
+David Hieb                   <davehieb@rootgroup.com>
+.fi
+
+.SH DISCLAIMER
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+675 Mass Ave, Cambridge, MA 02139, USA.
+
+.SH CAVEATS
+There is no easy way to prevent a user from gaining a root shell if 
+that user has access to commands that are shell scripts or that 
+allow shell escapes.
+
+.SH SEE ALSO
+su(1)
