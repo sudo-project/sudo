@@ -76,8 +76,11 @@ securid_init(pw, promptp, auth)
     static struct SD_CLIENT sd_dat;		/* SecurID data block */
 
     auth->data = (VOID *) &sd_dat;		/* For method-specific data */
-    creadcfg();					/* Only read config file once */
-    return(AUTH_SUCCESS);
+
+    if (creadcfg() == 0)
+	return(AUTH_SUCCESS);
+    else
+	return(AUTH_FATAL);
 }
 
 int
@@ -89,9 +92,10 @@ securid_setup(pw, promptp, auth)
     struct SD_CLIENT *sd = (struct SD_CLIENT *) auth->data;
 
     /* Re-initialize SecurID every time. */
-    if (sd_init(sd) == 0)
+    if (sd_init(sd) == 0) {
+	strcpy(sd->username, pw->pw_name);
 	return(AUTH_SUCCESS);
-    else {
+    } else {
 	(void) fprintf(stderr, "%s: Cannot contact SecurID server\n", Argv[0]);
 	return(AUTH_FATAL);
     }
@@ -104,8 +108,11 @@ securid_verify(pw, pass, auth)
     sudo_auth *auth;
 {
     struct SD_CLIENT *sd = (struct SD_CLIENT *) auth->data;
+    int rval;
 
-    if (sd_auth(sd) == ACM_OK)
+    rval = sd_auth(sd);
+    sd_close();
+    if (rval == ACM_OK)
 	return(AUTH_SUCCESS);
     else
 	return(AUTH_FAILURE);
