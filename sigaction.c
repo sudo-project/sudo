@@ -97,7 +97,7 @@ sigaddset(set, signo)
 	return(-1);
     }
 
-    *set |= sigmask(signo);
+    SET(*set, sigmask(signo));
     return(0);
 }
 
@@ -112,7 +112,7 @@ sigdelset(set, signo)
 	return(-1);
     }
 
-    *set &= ~(sigmask(signo));
+    CLR(*set, sigmask(signo));
     return(0);
 }
 
@@ -122,7 +122,7 @@ sigismember(set, signo)
     int signo;
 {
 
-    return(*set & sigmask(signo));
+    return(ISSET(*set, sigmask(signo)));
 }
 
 int

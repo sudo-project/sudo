@@ -152,7 +152,7 @@ tgetpass(prompt, timeout, flags)
 
 restart:
     /* Open /dev/tty for reading/writing if possible else use stdin/stderr. */
-    if ((flags & TGP_STDIN) ||
+    if (ISSET(flags, TGP_STDIN) ||
 	(input = output = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1) {
 	input = STDIN_FILENO;
 	output = STDERR_FILENO;
@@ -177,8 +177,8 @@ restart:
     /* Turn echo off/on as specified by flags.  */
     if (term_getattr(input, &oterm) == 0) {
 	(void) memcpy(&term, &oterm, sizeof(term));
-	if (!(flags & TGP_ECHO))
-	    term.tflags &= ~(ECHO | ECHONL);
+	if (!ISSET(flags, TGP_ECHO))
+	    CLR(term.tflags, (ECHO | ECHONL));
 #ifdef VSTATUS
 	term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
@@ -194,7 +194,7 @@ restart:
     pass = tgetline(input, buf, sizeof(buf), timeout);
     save_errno = errno;
 
-    if (!(term.tflags & ECHO))
+    if (!ISSET(term.tflags, ECHO))
 	(void) write(output, "\n", 1);
 
     /* Restore old tty settings and signals. */

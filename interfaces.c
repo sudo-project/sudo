@@ -130,8 +130,8 @@ load_interfaces()
     /* Allocate space for the interfaces list. */
     for (ifa = ifaddrs; ifa != NULL; ifa = ifa -> ifa_next) {
 	/* Skip interfaces marked "down" and "loopback". */
-	if (ifa->ifa_addr == NULL || !(ifa->ifa_flags & IFF_UP) ||
-	    (ifa->ifa_flags & IFF_LOOPBACK))
+	if (ifa->ifa_addr == NULL || !ISSET(ifa->ifa_flags, IFF_UP) ||
+	    ISSET(ifa->ifa_flags, IFF_LOOPBACK))
 	    continue;
 
 	switch(ifa->ifa_addr->sa_family) {
@@ -149,8 +149,8 @@ load_interfaces()
     /* Store the ip addr / netmask pairs. */
     for (ifa = ifaddrs, i = 0; ifa != NULL; ifa = ifa -> ifa_next) {
 	/* Skip interfaces marked "down" and "loopback". */
-	if (ifa->ifa_addr == NULL || !(ifa->ifa_flags & IFF_UP) ||
-	    (ifa->ifa_flags & IFF_LOOPBACK))
+	if (ifa->ifa_addr == NULL || !ISSET(ifa->ifa_flags, IFF_UP) ||
+	    ISSET(ifa->ifa_flags, IFF_LOOPBACK))
 		continue;
 
 	switch(ifa->ifa_addr->sa_family) {
@@ -257,7 +257,8 @@ load_interfaces()
 	    ifr_tmp = *ifr;
 	
 	/* Skip interfaces marked "down" and "loopback". */
-	if (!(ifr_tmp.ifr_flags & IFF_UP) || (ifr_tmp.ifr_flags & IFF_LOOPBACK))
+	if (!ISSET(ifr_tmp.ifr_flags, IFF_UP) ||
+	    ISSET(ifr_tmp.ifr_flags, IFF_LOOPBACK))
 		continue;
 
 	sin = (struct sockaddr_in *) &ifr->ifr_addr;

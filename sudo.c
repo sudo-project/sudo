@@ -220,9 +220,9 @@ main(argc, argv, envp)
     load_interfaces();
 
     pwflag = 0;
-    if (sudo_mode & MODE_SHELL)
+    if (ISSET(sudo_mode, MODE_SHELL))
 	user_cmnd = "shell";
-    else if (sudo_mode & MODE_EDIT)
+    else if (ISSET(sudo_mode, MODE_EDIT))
 	user_cmnd = "sudoedit";
     else
 	switch (sudo_mode) {
@@ -308,7 +308,7 @@ main(argc, argv, envp)
 	exit(0);
     }
 
-    if (validated & VALIDATE_ERROR)
+    if (ISSET(validated, VALIDATE_ERROR))
 	log_error(0, "parse error in %s near line %d", _PATH_SUDOERS,
 	    errorlineno);
 
@@ -321,17 +321,17 @@ main(argc, argv, envp)
     }
 
     /* If given the -P option, set the "preserve_groups" flag. */
-    if (sudo_mode & MODE_PRESERVE_GROUPS)
+    if (ISSET(sudo_mode, MODE_PRESERVE_GROUPS))
 	def_preserve_groups = TRUE;
 
     /* If no command line args and "set_home" is not set, error out. */
-    if ((sudo_mode & MODE_IMPLIED_SHELL) && !def_shell_noargs)
+    if (ISSET(sudo_mode, MODE_IMPLIED_SHELL) && !def_shell_noargs)
 	usage(1);
 
     /* May need to set $HOME to target user if we are running a command. */
-    if ((sudo_mode & MODE_RUN) && (def_always_set_home ||
-	((sudo_mode & MODE_SHELL) && def_set_home)))
-	sudo_mode |= MODE_RESET_HOME;
+    if (ISSET(sudo_mode, MODE_RUN) && (def_always_set_home ||
+	(ISSET(sudo_mode, MODE_SHELL) && def_set_home)))
+	SET(sudo_mode, MODE_RESET_HOME);
 
     /* Bail if a tty is required and we don't have one.  */
     if (def_requiretty) {
@@ -345,8 +345,8 @@ main(argc, argv, envp)
     auth_pw = get_authpw();
 
     /* Require a password if sudoers says so.  */
-    if (!(validated & FLAG_NOPASS))
-	check_user(validated & FLAG_CHECK_USER);
+    if (!ISSET(validated, FLAG_NOPASS))
+	check_user(ISSET(validated, FLAG_CHECK_USER));
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
     if (user_uid == 0 && prev_user != NULL && strcmp(prev_user, "root") != 0) {
@@ -359,12 +359,12 @@ main(argc, argv, envp)
     }
 
     /* Build a new environment that avoids any nasty bits if we have a cmnd. */
-    if (sudo_mode & MODE_RUN)
-	new_environ = rebuild_env(envp, sudo_mode, (validated & FLAG_NOEXEC));
+    if (ISSET(sudo_mode, MODE_RUN))
+	new_environ = rebuild_env(envp, sudo_mode, ISSET(validated, FLAG_NOEXEC));
     else
 	new_environ = envp;
 
-    if (validated & VALIDATE_OK) {
+    if (ISSET(validated, VALIDATE_OK)) {
 	/* Finally tell the user if the command did not exist. */
 	if (cmnd_status == NOT_FOUND_DOT) {
 	    warnx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
@@ -400,7 +400,7 @@ main(argc, argv, envp)
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
 
 	/* Become specified user or root if executing a command. */
-	if (sudo_mode & MODE_RUN)
+	if (ISSET(sudo_mode, MODE_RUN))
 	    set_perms(PERM_FULL_RUNAS);
 
 	/* Close the password and group files */
@@ -410,7 +410,7 @@ main(argc, argv, envp)
 	/* Install the real environment. */
 	environ = new_environ;
 
-	if (sudo_mode & MODE_LOGIN_SHELL) {
+	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	    char *p;
 
 	    /* Convert /bin/sh -> -sh so shell knows it is a login shell */
@@ -424,7 +424,7 @@ main(argc, argv, envp)
 		warn("unable to change directory to %s", runas_pw->pw_dir);
 	}
 
-	if (sudo_mode & MODE_EDIT)
+	if (ISSET(sudo_mode, MODE_EDIT))
 	    exit(sudo_edit(NewArgc, NewArgv));
 
 	/* Restore signal handlers before we exec. */
@@ -434,7 +434,7 @@ main(argc, argv, envp)
 	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
 
 #ifndef PROFILING
-	if ((sudo_mode & MODE_BACKGROUND) && fork() > 0)
+	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0)
 	    exit(0);
 	else
 	    EXECV(safe_cmnd, NewArgv);	/* run the command */
@@ -446,10 +446,10 @@ main(argc, argv, envp)
 	 */
 	warn("unable to execute %s", safe_cmnd);
 	exit(127);
-    } else if ((validated & FLAG_NO_USER) || (validated & FLAG_NO_HOST)) {
+    } else if (ISSET(validated, FLAG_NO_USER) || (validated & FLAG_NO_HOST)) {
 	log_auth(validated, 1);
 	exit(1);
-    } else if (validated & VALIDATE_NOT_OK) {
+    } else if (ISSET(validated, VALIDATE_NOT_OK)) {
 	if (def_path_info) {
 	    /*
 	     * We'd like to not leak path info at all here, but that can
@@ -592,9 +592,9 @@ init_vars(sudo_mode)
 	char **dst, **src = NewArgv;
 
 	NewArgv = (char **) emalloc2((++NewArgc + 1), sizeof(char *));
-	if (sudo_mode & MODE_EDIT)
+	if (ISSET(sudo_mode, MODE_EDIT))
 	    NewArgv[0] = "sudoedit";
-	else if (sudo_mode & MODE_LOGIN_SHELL)
+	else if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
 	    NewArgv[0] = runas_pw->pw_shell;
 	else if (user_shell && *user_shell)
 	    NewArgv[0] = user_shell;
@@ -612,7 +612,7 @@ init_vars(sudo_mode)
     /* Resolve the path and return. */
     rval = FOUND;
     if (sudo_mode & (MODE_RUN | MODE_EDIT)) {
-	if (sudo_mode & MODE_RUN) {
+	if (ISSET(sudo_mode, MODE_RUN)) {
 	    /* XXX - default_runas may be modified during parsing of sudoers */
 	    set_perms(PERM_RUNAS);
 	    rval = find_path(NewArgv[0], &user_cmnd, user_path);
@@ -677,7 +677,7 @@ parse_args(argc, argv)
 	rval = MODE_RUN;
 
     if (NewArgc == 0 && rval == MODE_RUN) {	/* no options and no command */
-	rval |= (MODE_IMPLIED_SHELL | MODE_SHELL);
+	SET(rval, (MODE_IMPLIED_SHELL | MODE_SHELL));
 	return(rval);
     }
 
@@ -732,7 +732,7 @@ parse_args(argc, argv)
 		break;
 #endif
 	    case 'b':
-		rval |= MODE_BACKGROUND;
+		SET(rval, MODE_BACKGROUND);
 		break;
 	    case 'e':
 		rval = MODE_EDIT;
@@ -747,7 +747,7 @@ parse_args(argc, argv)
 		excl = 'v';
 		break;
 	    case 'i':
-		rval |= (MODE_LOGIN_SHELL | MODE_SHELL);
+		SET(rval, (MODE_LOGIN_SHELL | MODE_SHELL));
 		def_env_reset = TRUE;
 		if (excl && excl != 'i')
 		    usage_excl(1);
@@ -790,25 +790,25 @@ parse_args(argc, argv)
 		excl = 'h';
 		break;
 	    case 's':
-		rval |= MODE_SHELL;
+		SET(rval, MODE_SHELL);
 		if (excl && excl != 's')
 		    usage_excl(1);
 		excl = 's';
 		break;
 	    case 'H':
-		rval |= MODE_RESET_HOME;
+		SET(rval, MODE_RESET_HOME);
 		break;
 	    case 'P':
-		rval |= MODE_PRESERVE_GROUPS;
+		SET(rval, MODE_PRESERVE_GROUPS);
 		break;
 	    case 'S':
-		tgetpass_flags |= TGP_STDIN;
+		SET(tgetpass_flags, TGP_STDIN);
 		break;
 	    case '-':
 		NewArgc--;
 		NewArgv++;
 		if (rval == MODE_RUN)
-		    rval |= (MODE_IMPLIED_SHELL | MODE_SHELL);
+		    SET(rval, (MODE_IMPLIED_SHELL | MODE_SHELL));
 		return(rval);
 	    case '\0':
 		warnx("'-' requires an argument");
@@ -849,7 +849,7 @@ check_sudoers()
 
 	if (chmod(_PATH_SUDOERS, SUDOERS_MODE) == 0) {
 	    warnx("fixed mode on %s", _PATH_SUDOERS);
-	    statbuf.st_mode |= SUDOERS_MODE;
+	    SET(statbuf.st_mode, SUDOERS_MODE);
 	    if (statbuf.st_gid != SUDOERS_GID) {
 		if (!chown(_PATH_SUDOERS,(uid_t) -1,SUDOERS_GID)) {
 		    warnx("set group on %s", _PATH_SUDOERS);

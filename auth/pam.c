@@ -216,7 +216,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 	flags = tgetpass_flags;
 	switch (pm->msg_style) {
 	    case PAM_PROMPT_ECHO_ON:
-		flags |= TGP_ECHO;
+		SET(flags, TGP_ECHO);
 	    case PAM_PROMPT_ECHO_OFF:
 		/* Only override PAM prompt if it matches /^Password: ?/ */
 		if (strncmp(pm->msg, "Password:", 9) || (pm->msg[9] != '\0'

@@ -171,11 +171,11 @@ sudoers_lookup(pwflag)
     else
 	error = VALIDATE_NOT_OK | FLAG_NOPASS;
     if (pwcheck) {
-	error |= FLAG_NO_CHECK;
+	SET(error, FLAG_NO_CHECK);
     } else {
-	error |= FLAG_NO_HOST;
+	SET(error, FLAG_NO_HOST);
 	if (!top)
-	    error |= FLAG_NO_USER;
+	    SET(error, FLAG_NO_USER);
     }
 
     /*
@@ -210,7 +210,7 @@ sudoers_lookup(pwflag)
     } else {
 	while (top) {
 	    if (host_matches == TRUE) {
-		error &= ~FLAG_NO_HOST;
+		CLR(error, FLAG_NO_HOST);
 		if (runas_matches == TRUE) {
 		    if (cmnd_matches == TRUE) {
 		    	/*

@@ -411,7 +411,7 @@ runas_setup()
 	     */
 	    flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
 	    if (!def_preserve_groups)
-		flags |= LOGIN_SETGROUP;
+		SET(flags, LOGIN_SETGROUP);
 	    else if (setgid(runas_pw->pw_gid))
 		perror("cannot set gid to runas gid");
 	    error = setusercontext(lc, runas_pw,

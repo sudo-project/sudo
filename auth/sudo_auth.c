@@ -136,7 +136,7 @@ verify_user(pw, prompt)
 
     /* Set FLAG_ONEANDONLY if there is only one auth method. */
     if (auth_switch[1].name == NULL)
-	auth_switch[0].flags |= FLAG_ONEANDONLY;
+	SET(auth_switch[0].flags, FLAG_ONEANDONLY);
 
     /* Initialize auth methods and unconfigure the method if necessary. */
     for (auth = auth_switch; auth->name; auth++) {
@@ -146,7 +146,7 @@ verify_user(pw, prompt)
 
 	    status = (auth->init)(pw, &prompt, auth);
 	    if (status == AUTH_FAILURE)
-		auth->flags &= ~FLAG_CONFIGURED;
+		CLR(auth->flags, FLAG_CONFIGURED);
 	    else if (status == AUTH_FATAL)	/* XXX log */
 		exit(1);		/* assume error msg already printed */
 
@@ -164,7 +164,7 @@ verify_user(pw, prompt)
 
 		status = (auth->setup)(pw, &prompt, auth);
 		if (status == AUTH_FAILURE)
-		    auth->flags &= ~FLAG_CONFIGURED;
+		    CLR(auth->flags, FLAG_CONFIGURED);
 		else if (status == AUTH_FATAL)	/* XXX log */
 		    exit(1);		/* assume error msg already printed */
 
