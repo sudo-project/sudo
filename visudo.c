@@ -187,7 +187,7 @@ int main(argc, argv)
     setup_signals();
 
     sudoers_fd = open(sudoers, O_RDONLY);
-    if (sudoers_fd < 0) {
+    if (sudoers_fd < 0 && errno != ENOENT) {
 	(void) fprintf(stderr, "%s: ", Argv[0]);
 	perror(sudoers);
 	Exit(1);
@@ -196,14 +196,16 @@ int main(argc, argv)
     /*
      * Copy the data
      */
-    while ((n = read(sudoers_fd, buf, sizeof(buf))) > 0)
-	if (write(stmp_fd, buf, n) != n) {
-	    (void) fprintf(stderr, "%s: Write failed: ", Argv[0]);
-	    perror("");
-	    Exit(1);
-	}
+    if (sudoers_fd >= 0) {
+	while ((n = read(sudoers_fd, buf, sizeof(buf))) > 0)
+	    if (write(stmp_fd, buf, n) != n) {
+		(void) fprintf(stderr, "%s: Write failed: ", Argv[0]);
+		perror("");
+		Exit(1);
+	    }
 
-    (void) close(sudoers_fd);
+	(void) close(sudoers_fd);
+    }
     (void) close(stmp_fd);
 
     /*
