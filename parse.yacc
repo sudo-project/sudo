@@ -680,11 +680,13 @@ static int add_alias(alias, type)
     (void) strcpy(ai.name, alias);
     if (lfind((VOID *)&ai, (VOID *)aliases, &naliases, sizeof(ai),
 	aliascmp) != NULL) {
-	(void) sprintf(s, "Alias `%s' already defined", alias);
+	(void) sprintf(s, "Alias `%.*s' already defined", sizeof(s) - 25,
+		       alias);
 	yyerror(s);
     } else {
 	if (naliases >= nslots && !more_aliases()) {
-	    (void) sprintf(s, "Out of memory defining alias `%s'", alias);
+	    (void) sprintf(s, "Out of memory defining alias `%.*s'",
+			   sizeof(s) - 32, alias);
 	    yyerror(s);
 	}
 
@@ -694,7 +696,8 @@ static int add_alias(alias, type)
 	if (aip != NULL) {
 	    ok = TRUE;
 	} else {
-	    (void) sprintf(s, "Aliases corrupted defining alias `%s'", alias);
+	    (void) sprintf(s, "Aliases corrupted defining alias `%.*s'",
+			   sizeof(s) - 36, alias);
 	    yyerror(s);
 	}
     }
