@@ -232,29 +232,29 @@ main(argc, argv)
     /* Parse our arguments. */
     sudo_mode = parse_args();
 
-    switch (sudo_mode) {
-	case MODE_VERSION:
-	    print_version();
-	    exit(0);
-	    break;
-	case MODE_HELP:
-	    usage(0);
-	    break;
-	case MODE_VALIDATE:
-	    user_cmnd = "validate";
-	    break;
-    	case MODE_KILL:
-    	case MODE_INVALIDATE:
-	    user_cmnd = "kill";
-	    break;
-    	case MODE_SHELL:
-	    user_cmnd = "shell";
-	    break;
-	case MODE_LIST:
-	    user_cmnd = "list";
-	    printmatches = 1;
-	    break;
-    }
+    if (sudo_mode & MODE_SHELL)
+	user_cmnd = "shell";
+    else
+	switch (sudo_mode) {
+	    case MODE_VERSION:
+		print_version();
+		exit(0);
+		break;
+	    case MODE_HELP:
+		usage(0);
+		break;
+	    case MODE_VALIDATE:
+		user_cmnd = "validate";
+		break;
+	    case MODE_KILL:
+	    case MODE_INVALIDATE:
+		user_cmnd = "kill";
+		break;
+	    case MODE_LIST:
+		user_cmnd = "list";
+		printmatches = 1;
+		break;
+	}
 
     /* Must have a command to run... */
     if (user_cmnd == NULL && NewArgc == 0)
