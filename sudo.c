@@ -132,6 +132,7 @@ extern struct passwd *sudo_pwdup	__P((const struct passwd *));
  * Globals
  */
 int Argc, NewArgc;
+int sudo_mode;
 char **Argv, **NewArgv;
 struct sudo_user sudo_user;
 struct passwd *auth_pw;
@@ -162,7 +163,6 @@ main(argc, argv, envp)
     int validated;
     int fd;
     int cmnd_status;
-    int sudo_mode;
     int pwflag;
     char **new_environ;
     sigaction_t sa, saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
@@ -392,6 +392,20 @@ main(argc, argv, envp)
 	/* Install the new environment. */
 	environ = new_environ;
 
+	if ((sudo_mode & MODE_LOGIN_SHELL)) {
+	    char *p;
+
+	    /* Convert /bin/sh -> -sh so shell knows it is a login shell */
+	    if ((p = strrchr(NewArgv[0], '/')) == NULL)
+		p = NewArgv[0];
+	    *p = '-';
+	    NewArgv[0] = p;
+
+	    /* Change to target user's homedir. */
+	    if (chdir(runas_pw->pw_dir) == -1)
+		warn("unable to change directory to %s", runas_pw->pw_dir);
+	}
+
 	/* Restore signal handlers before we exec. */
 	(void) sigaction(SIGINT, &saved_sa_int, NULL);
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
@@ -534,8 +548,6 @@ init_vars(sudo_mode)
     if (nohostname)
 	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
 
-    set_runaspw(*user_runas);		/* may call log_error() */
-
     /*
      * Get current working directory.  Try as user, fall back to root.
      */
@@ -550,29 +562,37 @@ init_vars(sudo_mode)
 	set_perms(PERM_ROOT);
 
     /*
-     * If we were given the '-s' option (run shell) we need to redo
+     * If we were given the '-i' or '-s' options (run shell) we need to redo
      * NewArgv and NewArgc.
      */
     if ((sudo_mode & MODE_SHELL)) {
 	char **dst, **src = NewArgv;
 
 	NewArgv = (char **) emalloc2((++NewArgc + 1), sizeof(char *));
-	if (user_shell && *user_shell) {
-	    NewArgv[0] = user_shell;
-	} else
-	    errx(1, "unable to determine shell");
+	/* For MODE_LOGIN_SHELL, NewArgv[0] is set by set_runaspw() */
+	if (!(sudo_mode & MODE_LOGIN_SHELL)) {
+	    if (user_shell && *user_shell)
+		NewArgv[0] = user_shell;
+	    else
+		errx(1, "unable to determine shell");
+	}
 
 	/* copy the args from NewArgv */
 	for (dst = NewArgv + 1; (*dst = *src) != NULL; ++src, ++dst)
 	    ;
     }
 
+    set_runaspw(*user_runas);		/* may set NewArgv[0] as side effect */
+
     /* Set login class if applicable. */
     set_loginclass(sudo_user.pw);
 
     /* Resolve the path and return. */
     if ((sudo_mode & MODE_RUN)) {
-	/* XXX - default_runas may be modified during parsing of sudoers */
+	/*
+	 * XXX - default_runas may be modified during parsing of sudoers
+	 *       which will also change NewArgv[0] in -i mode.
+	 */
 	set_perms(PERM_RUNAS);
 	rval = find_path(NewArgv[0], &user_cmnd, user_path);
 	set_perms(PERM_ROOT);
@@ -728,6 +748,10 @@ parse_args(argc, argv)
 		    usage_excl(1);
 		excl = 'h';
 		break;
+	    case 'i':
+		rval |= MODE_LOGIN_SHELL;
+		def_env_reset = TRUE;
+		/* FALLTHROUGH */
 	    case 's':
 		rval |= MODE_SHELL;
 		if (excl && excl != 's')
@@ -975,6 +999,8 @@ set_runaspw(user)
 	if (runas_pw == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, "no passwd entry for %s!", user);
     }
+    if (sudo_mode & MODE_LOGIN_SHELL)
+	NewArgv[0] = runas_pw->pw_shell;
     return(TRUE);
 }
 
@@ -1027,14 +1053,17 @@ usage(exit_val)
     int exit_val;
 {
 
-    (void) fprintf(stderr, "usage: sudo -V | -h | -L | -l | -v | -k | -K | %s",
-	"[-H] [-P] [-S] [-b] [-p prompt]\n            [-u username/#uid] ");
-#ifdef HAVE_LOGIN_CAP_H
-    (void) fprintf(stderr, "[-c class] ");
-#endif
+    (void) fprintf(stderr, "usage: sudo -K | -L | -V | -h | -k | -l | -v\n");
+    (void) fprintf(stderr, "usage: sudo [-HPSb]%s%s [-p prompt] [-u username|#uid]\n            { -i | -s | <command> }\n",
 #ifdef HAVE_BSD_AUTH_H
-    (void) fprintf(stderr, "[-a auth_type] ");
+    " [-a auth_type]",
+#else
+    "",
 #endif
-    (void) fprintf(stderr, "-s | <command>\n");
+#ifdef HAVE_LOGIN_CAP_H
+    " [-c class|-]");
+#else
+    "");
+#endif
     exit(exit_val);
 }

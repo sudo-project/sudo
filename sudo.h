@@ -109,9 +109,10 @@ struct sudo_user {
 #define MODE_LISTDEFS            000200
 #define MODE_BACKGROUND          000400
 #define MODE_SHELL               001000
-#define MODE_IMPLIED_SHELL       002000
-#define MODE_RESET_HOME          004000
-#define MODE_PRESERVE_GROUPS     010000
+#define MODE_LOGIN_SHELL         002000
+#define MODE_IMPLIED_SHELL       004000
+#define MODE_RESET_HOME          010000
+#define MODE_PRESERVE_GROUPS     020000
 
 /*
  * Used with set_perms()
