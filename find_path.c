@@ -114,19 +114,14 @@ int find_path(infile, outfile)
     /*
      * If we were given a fully qualified or relative path
      * there is no need to look at PATH.
-     * We really want to fall back if !sudo_goodpath() but then
-     * the error is "not found" -- this way we get the correct error.
      */
     if (strchr(infile, '/')) {
 	(void) strcpy(command, infile);
 	if (sudo_goodpath(command)) {
 	    *outfile = command;
 	    return(FOUND);
-	} else {
-	    (void) fprintf(stderr, "%s: %s: ", Argv[0], command);
-	    perror("");
-	    exit(1);
-	}
+	} else
+	    return(NOT_FOUND);
     }
 
     /*
