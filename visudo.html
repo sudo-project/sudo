@@ -15,8 +15,8 @@
 	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
 	<LI><A HREF="#OPTIONS">OPTIONS</A>
 	<LI><A HREF="#ERRORS">ERRORS</A>
+	<LI><A HREF="#ENVIRONMENT">ENVIRONMENT</A>
 	<LI><A HREF="#FILES">FILES</A>
-	<LI><A HREF="#ENVIRONMENT_VARIABLES">ENVIRONMENT VARIABLES</A>
 	<LI><A HREF="#AUTHOR">AUTHOR</A>
 	<LI><A HREF="#BUGS">BUGS</A>
 	<LI><A HREF="#DISCLAIMER">DISCLAIMER</A>
@@ -100,19 +100,19 @@ you have a user or hostname listed that consists solely of upper case
 letters, digits, and the underscore ('_') character. If the latter, you can
 ignore the warnings (<STRONG>sudo</STRONG> will not complain). In <STRONG>-s</STRONG> (strict) mode these are errors not warnings.
 
-<H1><A NAME="FILES">FILES</A></H1>
+<H1><A NAME="ENVIRONMENT">ENVIRONMENT</A></H1>
 <P>
-<PRE> /etc/sudoers           List of who can run what
- /etc/sudoers.tmp       Lock file for visudo
-</PRE>
-<H1><A NAME="ENVIRONMENT_VARIABLES">ENVIRONMENT VARIABLES</A></H1>
-<P>
-The following are used only if <STRONG>visudo</STRONG> was configured with the
-<EM>--with-env-editor</EM> option:
+The following environment variables are used only if <STRONG>visudo</STRONG>
+was configured with the <EM>--with-env-editor</EM> option:
 
 <P>
 <PRE> EDITOR                 Used by visudo as the editor to use
  VISUAL                 Used by visudo if EDITOR is not set
+</PRE>
+<H1><A NAME="FILES">FILES</A></H1>
+<P>
+<PRE> /etc/sudoers           List of who can run what
+ /etc/sudoers.tmp       Lock file for visudo
 </PRE>
 <H1><A NAME="AUTHOR">AUTHOR</A></H1>
 <P>

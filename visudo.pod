@@ -115,18 +115,18 @@ underscore ('_') character.  If the latter, you can ignore
 the warnings (B<sudo> will not complain).  In B<-s> (strict)
 mode these are errors not warnings.
 
+=head1 ENVIRONMENT
+
+The following environment variables are used only if B<visudo>
+was configured with the I<--with-env-editor> option:
+
+ EDITOR			Used by visudo as the editor to use
+ VISUAL			Used by visudo if EDITOR is not set
+
 =head1 FILES
 
  /etc/sudoers		List of who can run what
  /etc/sudoers.tmp	Lock file for visudo
-
-=head1 ENVIRONMENT VARIABLES
-
-The following are used only if B<visudo> was configured with the
-I<--with-env-editor> option:
-
- EDITOR			Used by visudo as the editor to use
- VISUAL			Used by visudo if EDITOR is not set
 
 =head1 AUTHOR
 

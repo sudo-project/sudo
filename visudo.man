@@ -2,10 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.10  1999/08/17 15:29:47  millert
-''' o NewArgv and NewArgc don't need to be externally visible.
-''' o If pedantic > 1, it is a parse error.
-''' o Add -s (strict) option to visudo which sets pedantic to 2.
+''' Revision 1.11  1999/08/26 09:08:31  millert
+''' rename "ENVIRONMENT VARIABLES" section to "ENVIRONMENT" to be more standard
 '''
 '''
 .de Sh
@@ -98,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH VISUDO 8 "1.6" "17/Aug/1999" "MAINTENANCE COMMANDS"
+.TH VISUDO 8 "1.6" "25/Aug/1999" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -245,19 +243,19 @@ consists solely of upper case letters, digits, and the
 underscore ('_') character.  If the latter, you can ignore
 the warnings (\fBsudo\fR will not complain).  In \fB\-s\fR (strict)
 mode these are errors not warnings.
+.SH "ENVIRONMENT"
+The following environment variables are used only if \fBvisudo\fR
+was configured with the \fI--with-env-editor\fR option:
+.Sp
+.Vb 2
+\& EDITOR                 Used by visudo as the editor to use
+\& VISUAL                 Used by visudo if EDITOR is not set
+.Ve
 .SH "FILES"
 .Sp
 .Vb 2
 \& /etc/sudoers           List of who can run what
 \& /etc/sudoers.tmp       Lock file for visudo
-.Ve
-.SH "ENVIRONMENT VARIABLES"
-The following are used only if \fBvisudo\fR was configured with the
-\fI--with-env-editor\fR option:
-.Sp
-.Vb 2
-\& EDITOR                 Used by visudo as the editor to use
-\& VISUAL                 Used by visudo if EDITOR is not set
 .Ve
 .SH "AUTHOR"
 Many people have worked on \fIsudo\fR over the years, this version of
@@ -308,9 +306,9 @@ the editor used by \fBvisudo\fR allows shell escapes.
 
 .IX Item "Warning: undeclared Alias referenced near ..."
 
-.IX Header "FILES"
+.IX Header "ENVIRONMENT"
 
-.IX Header "ENVIRONMENT VARIABLES"
+.IX Header "FILES"
 
 .IX Header "AUTHOR"
 

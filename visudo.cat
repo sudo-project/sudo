@@ -61,7 +61,7 @@ EEEERRRRRRRROOOORRRRSSSS
 
 
 
-17/Aug/1999                    1.6                              1
+25/Aug/1999                    1.6                              1
 
 
 
@@ -82,17 +82,17 @@ VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
            complain).  In ----ssss (strict) mode these are errors not
            warnings.
 
-FFFFIIIILLLLEEEESSSS
-        /etc/sudoers           List of who can run what
-        /etc/sudoers.tmp       Lock file for visudo
-
-
-EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT VVVVAAAARRRRIIIIAAAABBBBLLLLEEEESSSS
-       The following are used only if vvvviiiissssuuuuddddoooo was configured with
-       the _-_-_w_i_t_h_-_e_n_v_-_e_d_i_t_o_r option:
+EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
+       The following environment variables are used only if
+       vvvviiiissssuuuuddddoooo was configured with the _-_-_w_i_t_h_-_e_n_v_-_e_d_i_t_o_r option:
 
         EDITOR                 Used by visudo as the editor to use
         VISUAL                 Used by visudo if EDITOR is not set
+
+
+FFFFIIIILLLLEEEESSSS
+        /etc/sudoers           List of who can run what
+        /etc/sudoers.tmp       Lock file for visudo
 
 
 AAAAUUUUTTTTHHHHOOOORRRR
@@ -127,7 +127,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-17/Aug/1999                    1.6                              2
+25/Aug/1999                    1.6                              2
 
 
 
@@ -193,6 +193,6 @@ VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
 
 
 
-17/Aug/1999                    1.6                              3
+25/Aug/1999                    1.6                              3
 
 
