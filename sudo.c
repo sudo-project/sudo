@@ -129,8 +129,9 @@ static int check_sudoers		__P((void));
 static void load_cmnd			__P((int));
 static void add_env			__P((int));
 static void clean_env			__P((char **, struct env_table *));
-extern int user_is_exempt		__P((void));
+extern int  user_is_exempt		__P((void));
 extern struct passwd *sudo_getpwuid	__P((uid_t));
+extern void list_matches		__P((void));
 
 /*
  * Globals
@@ -358,9 +359,6 @@ int main(argc, argv)
 	    break;
 
 	default:
-	    /* Anyone can try to list... */
-	    if (sudo_mode == MODE_LIST)
-		rtn = VALIDATE_NOT_OK;
 	    log_error(rtn);
 	    set_perms(PERM_FULL_USER);
 	    inform_user(rtn);
