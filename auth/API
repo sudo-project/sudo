@@ -15,7 +15,7 @@ typedef struct sudo_auth {
     int (*init) __P((struct passwd *pw, char **prompt, sudo_auth *auth));
     int (*setup) __P((struct passwd *pw, char **prompt, sudo_auth *auth));
     int (*verify) __P((struct passwd *pw, char *p, sudo_auth *auth));
-    int (*cleanup) __P((struct passwd *pw, int status, sudo_auth *auth));
+    int (*cleanup) __P((struct passwd *pw, sudo_auth *auth));
 } sudo_auth;
 
 The variables in the struct are as follows:
