@@ -164,7 +164,7 @@ int path_matches(cmnd, path)
     struct stat pst;
     DIR *dirp;
     struct dirent *dent;
-    char buf[MAXCOMMANDLENGTH+1];
+    char buf[MAXPATHLEN+1];
     static char *c;
     char *args;
 
