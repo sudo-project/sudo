@@ -139,6 +139,7 @@ void load_interfaces()
 	if (ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0) {
 #endif /* _ISC */
 	    (void) free(ifconf_buf);
+	    (void) close(sock);
 	    return;
 	}
 
@@ -253,6 +254,7 @@ void load_interfaces()
 	}
     }
     (void) free(ifconf_buf);
+    (void) close(sock);
 }
 
 #else /* !SIOCGIFCONF || STUB_LOAD_INTERFACES */
