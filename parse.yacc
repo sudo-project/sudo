@@ -316,7 +316,6 @@ defaults_entry	:	DEFVAR {
 			    free($2);
 			}
 		|	DEFVAR '=' WORD {
-			    /* XXX - need to support quoted values */
 			    if (defaults_matches == TRUE &&
 				!set_default($1, $3, TRUE)) {
 				yyerror(NULL);
@@ -326,7 +325,6 @@ defaults_entry	:	DEFVAR {
 			    free($3);
 			}
 		|	DEFVAR '+' WORD {
-			    /* XXX - need to support quoted values */
 			    if (defaults_matches == TRUE &&
 				!set_default($1, $3, '+')) {
 				yyerror(NULL);
@@ -336,7 +334,6 @@ defaults_entry	:	DEFVAR {
 			    free($3);
 			}
 		|	DEFVAR '-' WORD {
-			    /* XXX - need to support quoted values */
 			    if (defaults_matches == TRUE &&
 				!set_default($1, $3, '-')) {
 				yyerror(NULL);
