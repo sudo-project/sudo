@@ -229,6 +229,7 @@ AC_TYPE_UID_T
 SUDO_TYPE_SIZE_T
 SUDO_TYPE_SSIZE_T
 SUDO_FULL_VOID
+SUDO_SOCK_SA_LEN
 dnl
 dnl only set RETSIGTYPE if it is not set already
 dnl
