@@ -85,16 +85,12 @@
 #endif /* S_IRWXU */
 
 /*
- * For kerberos, max password len is 128
+ * For alternate password schemes we need longer passwords
  */
-#ifdef HAVE_KERB4
-#  undef _PASSWD_LEN
-#  define _PASSWD_LEN	128
-#endif /* HAVE_KERB4 */
-#ifdef HAVE_DCE
+#if defined(HAVE_KERB4) || defined(HAVE_DCE) || defined(HAVE_SKEY)
 #  undef _PASSWD_LEN
 #  define _PASSWD_LEN	256
-#endif /* HAVE_DCE */
+#endif /* HAVE_KERB4 || HAVE_DCE || HAVE_SKEY */
 
 /*
  * Some OS's lack these
