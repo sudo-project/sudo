@@ -438,7 +438,7 @@ send_mail(line)
 {
     FILE *mail;
     char *p;
-    int pfd[2], status;
+    int pfd[2];
     pid_t pid;
     sigset_t set, oset;
 #ifndef NO_ROOT_MAILER
