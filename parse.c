@@ -260,9 +260,27 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
     char buf[MAXPATHLEN];
     static char *cmnd_base;
 
-    /* Don't bother with pseudo commands like "validate" */
-    if (strchr(cmnd, '/') == NULL)
-	return(FALSE);
+    /* Check for pseudo-commands */
+    if (*cmnd != '/') {
+	/*
+	 * Return true if cmnd is "sudoedit" AND
+	 *  a) there are no args in sudoers OR
+	 *  b) there are no args on command line and none req by sudoers OR
+	 *  c) there are args in sudoers and on command line and they match
+	 */
+	if (strcmp(cmnd, "sudoedit") != 0)
+	    return(FALSE);
+	if (!sudoers_args ||
+	    (!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
+	    (sudoers_args &&
+	     fnmatch(sudoers_args, cmnd_args ? cmnd_args : "", 0) == 0)) {
+	    if (safe_cmnd)
+		free(safe_cmnd);
+	    safe_cmnd = estrdup(path);
+	    return(TRUE);
+	} else
+	    return(FALSE);
+    }
 
     plen = strlen(path);
 
@@ -299,8 +317,8 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 	    return(FALSE);
 	if (!sudoers_args ||
 	    (!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
-	    (sudoers_args && fnmatch(sudoers_args, cmnd_args ? cmnd_args : "",
-	    0) == 0)) {
+	    (sudoers_args &&
+	     fnmatch(sudoers_args, cmnd_args ? cmnd_args : "", 0) == 0)) {
 	    if (safe_cmnd)
 		free(safe_cmnd);
 	    safe_cmnd = estrdup(user_cmnd);

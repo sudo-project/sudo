@@ -292,6 +292,12 @@ EXEC[[:blank:]]*:	{
 			    BEGIN INITIAL;
 			}
 
+sudoedit		{
+			    BEGIN GOTCMND;
+			    LEXTRACE("COMMAND ");
+			    fill_cmnd(yytext, yyleng);
+			}			/* sudo -e */
+
 \/(\\[\,:= \t#]|[^\,:=\\ \t\n#])+	{
 			    /* directories can't have args... */
 			    if (yytext[yyleng - 1] == '/') {

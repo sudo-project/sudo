@@ -121,6 +121,7 @@ static void set_loginclass		__P((struct passwd *));
 static void usage			__P((int));
 static void usage_excl			__P((int));
 static struct passwd *get_authpw	__P((void));
+extern int sudo_edit			__P((int, char **));
 extern void list_matches		__P((void));
 extern char **rebuild_env		__P((char **, int, int));
 extern char **zero_env			__P((char **));
@@ -220,6 +221,8 @@ main(argc, argv, envp)
     pwflag = 0;
     if (sudo_mode & MODE_SHELL)
 	user_cmnd = "shell";
+    else if (sudo_mode & MODE_EDIT)
+	user_cmnd = "sudoedit";
     else
 	switch (sudo_mode) {
 	    case MODE_VERSION:
@@ -344,8 +347,11 @@ main(argc, argv, envp)
     if (!(validated & FLAG_NOPASS))
 	check_user(validated & FLAG_CHECK_USER);
 
-    /* Build up custom environment that avoids any nasty bits. */
-    new_environ = rebuild_env(envp, sudo_mode, (validated & FLAG_NOEXEC));
+    /* Build a new environment that avoids any nasty bits if we have a cmnd. */
+    if (sudo_mode & MODE_RUN)
+	new_environ = rebuild_env(envp, sudo_mode, (validated & FLAG_NOEXEC));
+    else
+	new_environ = envp;
 
     if (validated & VALIDATE_OK) {
 	/* Finally tell the user if the command did not exist. */
@@ -382,17 +388,18 @@ main(argc, argv, envp)
 	(void) setrlimit(RLIMIT_CORE, &corelimit);
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
 
-	/* Become specified user or root. */
-	set_perms(PERM_FULL_RUNAS);
+	/* Become specified user or root if executing a command. */
+	if (sudo_mode & MODE_RUN)
+	    set_perms(PERM_FULL_RUNAS);
 
 	/* Close the password and group files */
 	endpwent();
 	endgrent();
 
-	/* Install the new environment. */
+	/* Install the real environment. */
 	environ = new_environ;
 
-	if ((sudo_mode & MODE_LOGIN_SHELL)) {
+	if (sudo_mode & MODE_LOGIN_SHELL) {
 	    char *p;
 
 	    /* Convert /bin/sh -> -sh so shell knows it is a login shell */
@@ -411,6 +418,9 @@ main(argc, argv, envp)
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	(void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
 	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
+
+	if (sudo_mode & MODE_EDIT)
+	    exit(sudo_edit(NewArgc, NewArgv));
 
 #ifndef PROFILING
 	if ((sudo_mode & MODE_BACKGROUND) && fork() > 0)
@@ -571,14 +581,16 @@ init_vars(sudo_mode)
 	set_perms(PERM_ROOT);
 
     /*
-     * If we were given the '-i' or '-s' options (run shell) we need to redo
+     * If we were given the '-e', '-i' or '-s' options we need to redo
      * NewArgv and NewArgc.
      */
-    if ((sudo_mode & MODE_SHELL)) {
+    if ((sudo_mode & (MODE_SHELL | MODE_EDIT))) {
 	char **dst, **src = NewArgv;
 
 	NewArgv = (char **) emalloc2((++NewArgc + 1), sizeof(char *));
-	if (sudo_mode & MODE_LOGIN_SHELL)
+	if (sudo_mode & MODE_EDIT)
+	    NewArgv[0] = "sudoedit";
+	else if (sudo_mode & MODE_LOGIN_SHELL)
 	    NewArgv[0] = runas_pw->pw_shell;
 	else if (user_shell && *user_shell)
 	    NewArgv[0] = user_shell;
@@ -594,16 +606,19 @@ init_vars(sudo_mode)
     set_loginclass(sudo_user.pw);
 
     /* Resolve the path and return. */
-    if ((sudo_mode & MODE_RUN)) {
-	/* XXX - default_runas may be modified during parsing of sudoers */
-	set_perms(PERM_RUNAS);
-	rval = find_path(NewArgv[0], &user_cmnd, user_path);
-	set_perms(PERM_ROOT);
-	if (rval != FOUND) {
-	    /* Failed as root, try as invoking user. */
-	    set_perms(PERM_USER);
+    rval = FOUND;
+    if (sudo_mode & (MODE_RUN | MODE_EDIT)) {
+	if (sudo_mode & MODE_RUN) {
+	    /* XXX - default_runas may be modified during parsing of sudoers */
+	    set_perms(PERM_RUNAS);
 	    rval = find_path(NewArgv[0], &user_cmnd, user_path);
 	    set_perms(PERM_ROOT);
+	    if (rval != FOUND) {
+		/* Failed as root, try as invoking user. */
+		set_perms(PERM_USER);
+		rval = find_path(NewArgv[0], &user_cmnd, user_path);
+		set_perms(PERM_ROOT);
+	    }
 	}
 
 	/* set user_args */
@@ -611,8 +626,8 @@ init_vars(sudo_mode)
 	    char *to, **from;
 	    size_t size, n;
 
-	    /* If MODE_SHELL not set then NewArgv is contiguous so just count */
-	    if (!(sudo_mode & MODE_SHELL)) {
+	    /* If we didn't realloc NewArgv it is contiguous so just count. */
+	    if (!(sudo_mode & (MODE_SHELL | MODE_EDIT))) {
 		size = (size_t) (NewArgv[NewArgc-1] - NewArgv[1]) +
 			strlen(NewArgv[NewArgc-1]) + 1;
 	    } else {
@@ -620,7 +635,7 @@ init_vars(sudo_mode)
 		    size += strlen(*from) + 1;
 	    }
 
-	    /* alloc and copy. */
+	    /* Alloc and build up user_args. */
 	    user_args = (char *) emalloc(size);
 	    for (to = user_args, from = NewArgv + 1; *from; from++) {
 		n = strlcpy(to, *from, size - (to - user_args));
@@ -631,8 +646,7 @@ init_vars(sudo_mode)
 	    }
 	    *--to = '\0';
 	}
-    } else
-	rval = FOUND;
+    }
 
     return(rval);
 }
@@ -708,6 +722,11 @@ parse_args(argc, argv)
 #endif
 	    case 'b':
 		rval |= MODE_BACKGROUND;
+		break;
+	    case 'e':
+		rval = MODE_EDIT;
+		if (excl && excl != 'e')
+		    usage_excl(1);
 		break;
 	    case 'v':
 		rval = MODE_VALIDATE;
@@ -787,7 +806,8 @@ parse_args(argc, argv)
 	NewArgv++;
     }
 
-    if (NewArgc > 0 && !(rval & MODE_RUN))
+    if ((NewArgc == 0 && (rval & MODE_EDIT)) ||
+	(NewArgc > 0 && !(rval & (MODE_RUN | MODE_EDIT))))
 	usage(1);
 
     return(rval);
@@ -1041,8 +1061,7 @@ static void
 usage_excl(exit_val)
     int exit_val;
 {
-    (void) fprintf(stderr,
-	"Only one of the -h, -k, -K, -l, -s, -v or -V options may be used\n");
+    warnx("Only one of the -e, -h, -k, -K, -l, -s, -v or -V options may be used");
     usage(exit_val);
 }
 
@@ -1055,7 +1074,7 @@ usage(exit_val)
 {
 
     (void) fprintf(stderr, "usage: sudo -K | -L | -V | -h | -k | -l | -v\n");
-    (void) fprintf(stderr, "usage: sudo [-HPSb]%s%s [-p prompt] [-u username|#uid]\n            { -i | -s | <command> }\n",
+    (void) fprintf(stderr, "usage: sudo [-HPSb]%s%s [-p prompt] [-u username|#uid]\n            { -e file [...] | -i | -s | <command> }\n",
 #ifdef HAVE_BSD_AUTH_H
     " [-a auth_type]",
 #else
