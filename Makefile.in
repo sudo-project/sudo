@@ -121,8 +121,8 @@ AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/dce.c auth/fwtk.c auth/kerb4.c \
 	    auth/secureware.c auth/securid.c auth/sia.c auth/sudo_auth.c
 
 HDRS = compat.h ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h \
-       interfaces.h logging.h sudo.h sudo.tab.h version.h auth/sudo_auth.h \
-       emul/fnmatch.h emul/search.h emul/utime.h
+       interfaces.h logging.h parse.h sudo.h sudo.tab.h version.h \
+       auth/sudo_auth.h emul/fnmatch.h emul/search.h emul/utime.h
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
