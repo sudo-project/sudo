@@ -291,14 +291,16 @@ defaults_list	:	defaults_entry
 		|	defaults_entry ',' defaults_list
 
 defaults_entry	:	WORD {
-			    if (defaults_matches && !set_default($1, NULL, 1)) {
+			    if (defaults_matches == TRUE &&
+				!set_default($1, NULL, 1)) {
 				yyerror(NULL);
 				YYERROR;
 			    }
 			    free($1);
 			}
 		|	'!' WORD {
-			    if (defaults_matches && !set_default($2, NULL, 0)) {
+			    if (defaults_matches == TRUE &&
+				!set_default($2, NULL, 0)) {
 				yyerror(NULL);
 				YYERROR;
 			    }
@@ -306,7 +308,8 @@ defaults_entry	:	WORD {
 			}
 		|	WORD '=' WORD {
 			    /* XXX - need to support quoted values */
-			    if (defaults_matches && !set_default($1, $3, 1)) {
+			    if (defaults_matches == TRUE &&
+				!set_default($1, $3, 1)) {
 				yyerror(NULL);
 				YYERROR;
 			    }
