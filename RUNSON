@@ -29,8 +29,8 @@ Solaris	7	sparc	SC4.2		1.6.6	Todd Miller	 none
 Solaris	7	sun4u	Workshop 6.2	1.6.3p7	Donna Dickerson	 none
 Solaris	7	sparc	gcc2.95.2	1.6.6	Todd Miller	 --with-skey
 Solaris	2.6	sun4u	egcs 1.1.2	1.5.9p4	Scott Kinnane	 none
-Solaris	8	sparc	gcc2.95.2	1.6.7	Todd Miller	 --with-skey
-Solaris	8	sparc	SC4.2		1.6.7	Todd Miller	 none
+Solaris	8	sun4u	gcc2.95.2	1.6.8	Todd Miller	 --with-skey
+Solaris	8	sun4u	SC4.2		1.6.8	Todd Miller	 none
 Solaris	8	sun4u	Workshop 6.2	1.6.3p7	Donna Dickerson	 none
 Solaris	8	sun4u	gcc2.95.3	1.6.6	Banu Yobas	 none
 ISC	4.0	i386	bundled cc	1.4	Andy Smith	 none
@@ -49,10 +49,10 @@ HP-UX	10.20	hp700	gcc2.9.5.2	1.6.7	Todd Miller	 --with-skey
 HP-UX	10.20	hp700	bundled cc	1.6.7	Todd Miller	 none
 HP-UX	10.20	hp700	gcc 2.95.2	1.6.2	Jeff Earickson 	 --with-DCE
 HP-UX	11.00	hp700	ansi-c		1.5.5b1	Alek Komarnitsky --with-C2
-HP-UX	11.00	hp700	bundled cc	1.6.7	Todd Miller 	 none
-HP-UX	11.00	hp700	bundled cc	1.6.7	Todd Miller 	 --with-pam
-HP-UX	11.00	hp700	gcc 3.2		1.6.7	Todd Miller 	 none
-HP-UX	11.00	hp700	gcc 3.2		1.6.7	Todd Miller 	 --with-pam
+HP-UX	11.00	hp700	bundled cc	1.6.8	Todd Miller 	 none
+HP-UX	11.00	hp700	bundled cc	1.6.8	Todd Miller 	 --with-pam
+HP-UX	11.00	hp700	gcc 3.2		1.6.8	Todd Miller 	 none
+HP-UX	11.00	hp700	gcc 3.2		1.6.8	Todd Miller 	 --with-pam
 HP-UX	11.11	hp700	gcc 3.3.2	1.6.8	Todd Miller 	 --with-pam
 HP-UX	11.11	hp700	unbundled cc	1.6.8	Todd Miller 	 --with-pam
 HP-UX	11.11	hp800	HP C compiler	1.6.5p2	Bill Marmagas 	 --with-pam
@@ -85,7 +85,8 @@ NEXTSTEP 3.2	i386	bundled cc	1.3.2	Jonathan Adams	 none
 NEXTSTEP 3.3	i386	bundled cc	1.4	Jonathan Adams	 none
 NEXTSTEP 3.3	sparc	bundled cc	1.5.3	Mike Kienenberger none
 DEC UNIX 3.2c	alpha	bundled cc	1.5.3	Todd Miller	 none
-DEC UNIX 4.0D	alpha	bundled cc	1.6.7	Todd Miller	 --with-skey
+DEC UNIX 4.0D	alpha	bundled cc	1.6.8	Todd Miller	 none
+DEC UNIX 4.0D	alpha	gcc-2.95.2	1.6.8	Todd Miller	 none
 DEC UNIX 4.0	alpha	gcc-2.7.2.1	1.5.3	Todd Miller	 --with-kerb4
 DEC UNIX 4.0D	alpha	bundled cc	1.5.3	Randall R. Cable --with-C2
 DEC UNIX 4.0E	alpha	bundled cc	1.5.9p2	Vangelis Haniotakis none
@@ -124,6 +125,7 @@ Linux	2.2.13	alpha	egcs-2.91.66	1.6.3	Todd Miller	 --with-pam
 Linux	2.2.6-15 ppc	egcs-1.1.2	1.5.9p4	Barbara Schelkle none
 Linux	2.4.18	i686	gcc-3.2		1.6.7	Todd Miller	 --with-pam
 Linux	2.4.20	i686	gcc-3.2.1	1.6.6	Vasily Korytov	 none
+Linux	2.4.20	i686	gcc-3.2.2	1.6.8	Todd Miller	 --with-pam
 Linux	2.4.20	ppc	gcc-3.2.3	1.6.7p5	Nicolas Kaiser	 --with-pam
 UnixWare 1.1.4	i386	gcc-2.7.2	1.4	Michael Hancock	 none
 UnixWare 7.1.1	i686	cc		1.6.5p1	Mike Petkau	 none
