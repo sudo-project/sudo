@@ -225,8 +225,8 @@ sudo_getpwuid(uid)
      * Cache passwd db entry if it exists or a negative response if not.
      */
     if ((pw = getpwuid(uid)) != NULL) {
-	pw->pw_passwd = sudo_getepw(pw);	/* get shadow password */
 	pw = sudo_pwdup(pw);
+	pw->pw_passwd = sudo_getepw(pw);	/* get shadow password */
 	if (rbinsert(pwcache_byname, (VOID *) pw) != NULL)
 	    errorx(1, "unable to cache user name, already exists");
 	if (rbinsert(pwcache_byuid, (VOID *) pw) != NULL)
@@ -375,8 +375,10 @@ pw_free(v)
 {
     struct passwd *pw = (struct passwd *) v;
 
-    if (pw->pw_passwd != NULL)
+    if (pw->pw_passwd != NULL) {
 	zero_bytes(pw->pw_passwd, strlen(pw->pw_passwd));
+	free(pw->pw_passwd);
+    }
     free(pw);
 }
 
