@@ -64,16 +64,27 @@ passwd_verify(pw, pass, auth)
     char *pass;
     sudo_auth *auth;
 {
+    char sav;
+    int error;
 
 #ifdef HAVE_GETAUTHUID
     /* Ultrix shadow passwords may use crypt16() */
-    if (!strcmp(pw->pw_passwd, (char *) crypt16(pass, pw->pw_passwd)))
+    error = strcmp(pw->pw_passwd, (char *) crypt16(pass, pw->pw_passwd));
+    if (!error)
 	return(AUTH_SUCCESS);
 #endif /* HAVE_GETAUTHUID */
 
-    /* Normal UN*X password check */
-    if (!strcmp(pw->pw_passwd, (char *) crypt(pass, pw->pw_passwd)))
-	return(AUTH_SUCCESS);
+    /*
+     * Truncate to 8 chars if standard DES since not all crypt()'s do this.
+     * If this turns out not to be safe we will have to use OS #ifdef's (sigh).
+     */
+    sav = pass[8];
+    if (strlen(pw->pw_passwd) == 13)
+	pass[8] = '\0';
 
-    return(AUTH_FAILURE);
+    /* Normal UN*X password check.  */
+    error = strcmp(pw->pw_passwd, (char *) crypt(pass, pw->pw_passwd));
+    pass[8] = sav;
+
+    return(error ? AUTH_FAILURE : AUTH_SUCCESS);
 }
