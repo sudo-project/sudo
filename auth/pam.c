@@ -80,6 +80,10 @@ pam_init(pw, promptp, auth)
 	    "unable to initialize PAM");
 	return(AUTH_FATAL);
     }
+    if (strcmp(user_tty, "unknown"))
+	(void) pam_set_item(pamh, PAM_TTY, user_tty);
+    (void) pam_set_item(pamh, PAM_USER, user_name);
+
     auth->data = (VOID *) pamh;
     return(AUTH_SUCCESS);
 }
