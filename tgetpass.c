@@ -47,6 +47,7 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_STRINGS_H */
 #include <limits.h>
 #include <pwd.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #ifdef HAVE_SYS_BSDTYPES_H
 #include <sys/bsdtypes.h>
