@@ -555,6 +555,13 @@ user_is_exempt()
     return(FALSE);
 }
 
+char *
+sudo_getepw(pw)
+    const struct passwd *pw;
+{
+    return (pw->pw_passwd);
+}
+
 /* STUB */
 struct passwd *
 sudo_getpwuid(uid)

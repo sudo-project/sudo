@@ -161,6 +161,16 @@ struct sudo_user {
 #define TGP_ECHO	0x01		/* leave echo on when reading passwd */
 #define TGP_STDIN	0x02		/* read from stdin, not /dev/tty */
 
+/*
+ * Second param of pwcache_{get,put}
+ */
+enum cmptype {
+    bypwnam,
+    byuid,
+    bygrnam,
+    bygid
+};
+
 struct passwd;
 struct timespec;
 struct timeval;
@@ -257,6 +267,8 @@ struct passwd *sudo_getpwuid __P((uid_t));
 struct passwd *sudo_fakepwuid __P((uid_t));
 struct group *sudo_getgrnam __P((const char *));
 struct group *sudo_getgrgid __P((gid_t));
+void pwcache_init __P((void));
+void pwcache_destroy __P((void));
 #ifdef HAVE_SYSTRACE
 void systrace_attach	__P((pid_t));
 #endif

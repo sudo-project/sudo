@@ -493,6 +493,7 @@ send_mail(line)
 		/* Close password, group and other fds so we don't leak. */
 		sudo_endpwent();
 		sudo_endgrent();
+		pwcache_destroy();
 		closefrom(STDERR_FILENO + 1);
 
 		/*

@@ -119,6 +119,10 @@ main(argc, argv)
     Argv = argv;
     Argc = argc;
 
+    setpwent();
+    setgrent();
+    pwcache_init();
+
     memset(&pw, 0, sizeof(pw));
     sudo_user.pw = &pw;
     memset(&rpw, 0, sizeof(rpw));
@@ -134,7 +138,8 @@ main(argc, argv)
 		user_host = optarg;
 		break;
 	    case 'u':
-		user_runas = &optarg;
+		/* XXX - call getpwnam() */
+		runas_pw->pw_name = optarg;
 		break;
 	    default:
 		usage();
@@ -193,7 +198,10 @@ main(argc, argv)
 
     /* Initialize default values. */
     init_defaults();
-    runas_pw->pw_name = *user_runas;
+    if (runas_pw->pw_name)
+	user_runas = &runas_pw->pw_name;
+    else
+	runas_pw->pw_name = *user_runas;
 
     /* Load ip addr/mask for each interface. */
     load_interfaces();
@@ -286,38 +294,10 @@ set_perms(perm)
     return;
 }
 
-struct passwd *
-sudo_getpwuid(uid)
-    uid_t uid;
-{
-    return(getpwuid(uid));
-}
-
-struct passwd *
-sudo_getpwnam(name)
-    const char *name;
-{ 
-    return(getpwnam(name));
-}
-
-struct group *
-sudo_getgrgid(gid)
-    gid_t gid;
-{
-    return(getgrgid(gid));
-}
-
-struct group *
-sudo_getgrnam(name)
-    const char *name;
-{
-    return(getgrnam(name));
-}
-
 void
 cleanup()
 {
-    return;
+    pwcache_destroy();
 }
 
 void
