@@ -40,42 +40,45 @@ static char sccsid[] = "@(#)lsearch.c	8.1 (Berkeley) 6/4/93";
 
 #include "config.h"
 
+#include <stdio.h>
 #include <sys/types.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+
+#include "compat.h"
 #include "search.h"
 
 
-static void *linear_base __P((const void *, const void *, size_t *, size_t,
-                              int (*)(const void *, const void *), int));
+static VOID *linear_base __P((const VOID *, VOID *, size_t *, size_t,
+                              int (*)(const VOID *, const VOID *), int));
 
-void *
+VOID *
 lsearch(key, base, nelp, width, compar)
-	const void *key;
-	void *base;
+	const VOID *key;
+	VOID *base;
 	size_t *nelp, width;
-	int (*compar) __P((const void *, const void *));
+	int (*compar) __P((const VOID *, const VOID *));
 {
 	return(linear_base(key, base, nelp, width, compar, 1));
 }
 
-void *
+VOID *
 lfind(key, base, nelp, width, compar)
-	const void *key;
-	void *base;
+	const VOID *key;
+	VOID *base;
 	size_t *nelp, width;
-	int (*compar) __P((const void *, const void *));
+	int (*compar) __P((const VOID *, const VOID *));
 {
 	return(linear_base(key, base, nelp, width, compar, 0));
 }
 
-static void *
+static VOID *
 linear_base(key, base, nelp, width, compar, add_flag)
-	const void *key;
-	void *base;
+	const VOID *key;
+	VOID *base;
 	size_t *nelp, width;
-	int (*compar) __P((const void *, const void *));
+	int (*compar) __P((const VOID *, const VOID *));
 	int add_flag;
 {
 	char *element, *end;
