@@ -44,6 +44,7 @@ static char rcsid[] = "$Id$";
 #include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <ctype.h>
+#include <pwd.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -63,10 +64,9 @@ extern int num_interfaces;
 
 char *cmnd = NULL;
 char *cmnd_args = NULL;
-char *user = NULL;
 char host[MAXHOSTNAMELEN+1];
 char cwd[MAXPATHLEN+1];
-char *epasswd = NULL;
+struct passwd *sudo_pw_ent;
 char **Argv;
 int  Argc;
 uid_t uid;
@@ -184,6 +184,7 @@ main(argc, argv)
     int argc;
     char **argv;
 {
+    struct passwd pw_ent;
 #ifdef	YYDEBUG
     extern int yydebug;
     yydebug = 1;
@@ -197,8 +198,10 @@ main(argc, argv)
     Argv = argv;
     Argc = argc;
 
+    sudo_pw_ent = &pw_ent;		/* need sudo_pw_ent->pw_name defined */
+
     cmnd = argv[1];
-    user = argv[2];
+    pw_ent.pw_name = argv[2];
     strcpy(host, argv[3]);
 
     clearaliases = 0;
@@ -210,7 +213,7 @@ main(argc, argv)
     } else {
 	(void) printf("parses OK.\n\n");
 	if (top == 0)
-	    (void) printf("User %s not found\n", user);
+	    (void) printf("User %s not found\n", pw_ent.pw_name);
 	else while (top) {
 	    (void) printf("[%d]\n", top-1);
 	    (void) printf("user_match: %d\n", user_matches);
