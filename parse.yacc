@@ -305,8 +305,8 @@ typedef struct {
 
 #define MOREALIASES (32)
 aliasinfo *aliases;
-int naliases = 0;
-int nslots = 0;
+size_t naliases = 0;
+size_t nslots = 0;
 
 static int
 aliascmp(a1, a2)
@@ -336,7 +336,7 @@ int type;
     ok = FALSE;			/* assume failure */
     ai.type = type;
     strcpy(ai.name, alias);
-    if (lfind((const void *)&ai, (void *)aliases, (size_t *)&naliases, sizeof(ai), aliascmp) != NULL) {
+    if (lfind((const VOID *)&ai, (VOID *)aliases, &naliases, sizeof(ai), aliascmp) != NULL) {
 	sprintf(s, "Alias `%s' already defined", alias);
 	yyerror(s);
     } else {
@@ -345,7 +345,7 @@ int type;
 	    yyerror(s);
 	}
 
-	aip = (aliasinfo *) lsearch((const void *)&ai, (void *)aliases, (size_t *)&naliases, sizeof(ai),
+	aip = (aliasinfo *) lsearch((const VOID *)&ai, (VOID *)aliases, &naliases, sizeof(ai),
 	    aliascmp);
 
 	if (aip != NULL) {
@@ -369,12 +369,12 @@ int type;
     strcpy(ai.name, alias);
     ai.type = type;
 
-    return(lfind((const void *)&ai, (void *)aliases, (size_t *)&naliases, sizeof(ai), aliascmp) != NULL);
+    return(lfind((const VOID *)&ai, (VOID *)aliases, &naliases, sizeof(ai), aliascmp) != NULL);
 }
 
 static int
 more_aliases(nslots)
-int nslots;
+size_t nslots;
 {
     aliasinfo *aip;
     if (nslots == 0)
@@ -394,7 +394,7 @@ int nslots;
 int
 dumpaliases()
 {
-    int n = naliases;
+    size_t n = naliases;
 
     while (n--)
 	printf("%s\t%s\n", aliases[n].type == HOST ? "HOST" : "CMND",
