@@ -2423,8 +2423,8 @@ echo "$as_me: error: \"--without-sudoers-mode not supported.\"" >&2;}
 		;;
     0*)		SUDOERS_MODE=$with_sudoers_mode
 		;;
-    *)		{ { echo "$as_me:$LINENO: error: \"you must use a numeric uid, not a name.\"" >&5
-echo "$as_me: error: \"you must use a numeric uid, not a name.\"" >&2;}
+    *)		{ { echo "$as_me:$LINENO: error: \"you must use an octal mode, not a name.\"" >&5
+echo "$as_me: error: \"you must use an octal mode, not a name.\"" >&2;}
    { (exit 1); exit 1; }; }
 		;;
 esac
@@ -2445,8 +2445,8 @@ echo "$as_me: error: \"--without-sudoers-uid not supported.\"" >&2;}
 		;;
     [0-9]*)	SUDOERS_UID=$with_sudoers_uid
 		;;
-    *)		{ { echo "$as_me:$LINENO: error: \"you must use a numeric uid, not a name.\"" >&5
-echo "$as_me: error: \"you must use a numeric uid, not a name.\"" >&2;}
+    *)		{ { echo "$as_me:$LINENO: error: \"you must use an unsigned numeric uid, not a name.\"" >&5
+echo "$as_me: error: \"you must use an unsigned numeric uid, not a name.\"" >&2;}
    { (exit 1); exit 1; }; }
 		;;
 esac
@@ -2467,8 +2467,8 @@ echo "$as_me: error: \"--without-sudoers-gid not supported.\"" >&2;}
 		;;
     [0-9]*)	SUDOERS_GID=$with_sudoers_gid
 		;;
-    *)		{ { echo "$as_me:$LINENO: error: \"you must use a numeric gid, not a name.\"" >&5
-echo "$as_me: error: \"you must use a numeric gid, not a name.\"" >&2;}
+    *)		{ { echo "$as_me:$LINENO: error: \"you must use an unsigned numeric gid, not a name.\"" >&5
+echo "$as_me: error: \"you must use an unsigned numeric gid, not a name.\"" >&2;}
    { (exit 1); exit 1; }; }
 		;;
 esac
