@@ -1719,3 +1719,7 @@ Sudo 1.6.8 released.
 541) sudoedit now re-opens the temp file as the invoking user.
 
 542) struct timespec is used throughout the code base.
+
+543) Added --with-ldap-conf-file option to override /etc/ldap.conf
+
+544) Added SSL tls_* certificate checking options when using LDAP.
