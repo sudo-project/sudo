@@ -8,3 +8,5 @@ TODO list
 03) Solaris 2.x support.
 
 04) Deal with host aliases rationally.
+
+05) Nestable command aliases
