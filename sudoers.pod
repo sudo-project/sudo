@@ -32,8 +32,8 @@ The I<sudoers> file is composed of two types of entries: aliases
 may run what).
 
 When multiple entries match for a user, they are applied in order.
-Where there are conflicting values, the last match is used (which
-is not necessarily the most specific match).
+Where there are multiple matches, the last match is used (which is
+not necessarily the most specific match).
 
 The I<sudoers> grammar will be described below in Extended Backus-Naur
 Form (EBNF).  Don't despair if you don't know what EBNF is; it is
@@ -243,10 +243,7 @@ by default.
 
 If set, B<sudo> will ignore '.' or '' (current dir) in the C<PATH>
 environment variable; the C<PATH> itself is not modified.  This
-flag is I<@ignore_dot@> by default.  Currently, while it is possible
-to set I<ignore_dot> in I<sudoers>, its value is not used.  This option
-should be considered read-only (it will be fixed in a future version
-of B<sudo>).
+flag is I<@ignore_dot@> by default.
 
 =item mail_always
 
@@ -1014,13 +1011,6 @@ used as part of a word (e.g. a username or hostname):
  /etc/netgroup		List of network groups
 
 =head1 EXAMPLES
-
-Since the I<sudoers> file is parsed in a single pass, order is
-important.  In general, you should structure I<sudoers> such that
-the C<Host_Alias>, C<User_Alias>, and C<Cmnd_Alias> specifications
-come first, followed by any C<Default_Entry> lines, and finally the
-C<Runas_Alias> and user specifications.  The basic rule of thumb
-is you cannot reference an Alias that has not already been defined.
 
 Below are example I<sudoers> entries.  Admittedly, some of
 these are a bit contrived.  First, we define our I<aliases>:
