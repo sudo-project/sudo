@@ -176,8 +176,9 @@ sudo_getepw(pw)
  * that we care about.  Fills in pw_passwd from shadow file if necessary.
  */
 struct passwd *
-sudo_pwdup(pw)
+sudo_pwdup(pw, checkshadow)
     const struct passwd *pw;
+    int checkshadow;
 {
     char *cp;
     const char *pw_passwd, *pw_shell;
@@ -185,7 +186,7 @@ sudo_pwdup(pw)
     struct passwd *newpw;
 
     /* Get shadow password if available. */
-    pw_passwd = sudo_getepw(pw);
+    pw_passwd = checkshadow ? sudo_getepw(pw) : pw->pw_passwd;
 
     /* If shell field is empty, expand to _PATH_BSHELL. */
     pw_shell = (pw->pw_shell == NULL || pw->pw_shell[0] == '\0')
@@ -279,7 +280,7 @@ sudo_getpwuid(uid)
     if ((pw = getpwuid(uid)) == NULL)
 	return(NULL);
     else
-	return(sudo_pwdup(pw));
+	return(sudo_pwdup(pw, 1));
 }
 
 /*
@@ -295,5 +296,5 @@ sudo_getpwnam(name)
     if ((pw = getpwnam(name)) == NULL)
 	return(NULL);
     else
-	return(sudo_pwdup(pw));
+	return(sudo_pwdup(pw, 1));
 }
