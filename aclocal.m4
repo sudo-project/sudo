@@ -317,7 +317,11 @@ if test -n "$UNAMEPROG"; then
 		OS="sco"
 	    fi
 	else
-	    OS=`$UNAMEPROG -v`
+	    if test -f /etc/.relid -a "`$UNAMEPROG -p`" = "386/486/MC"; then
+		OS="ncr"
+	    else
+		OS=`$UNAMEPROG -v`
+	    fi
 	fi
     fi
 
