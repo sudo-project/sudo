@@ -152,16 +152,26 @@ fi
 
 dnl
 dnl check for shadow passwords
+dnl NOTE: not verbose
 dnl
-AC_DEFUN(SUDO_CHECK_SHADOW_GENERIC, [AC_MSG_CHECKING(for shadow passwords)
-AC_TRY_RUN([#include <pwd.h>
-int main() {
-struct passwd *pwd;
-pwd = getpwuid(getuid());
-return(!(pwd->pw_passwd == (char *) 0 || (pwd->pw_passwd[0] && pwd->pw_passwd [1] == '\0'))); }
-], AC_MSG_RESULT(yes)
-[$1], AC_MSG_RESULT(no)
-[$2])])
+AC_DEFUN(SUDO_CHECK_SHADOW_GENERIC, [
+if test -z "$SHADOW_TYPE" -a -d /tcb/files/auth; then
+    AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SPW_SECUREWARE")
+fi
+if test -z "$SHADOW_TYPE" -a -s /etc/shadow; then
+    AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SPW_SVR4")
+fi
+if test -z "$SHADOW_TYPE" -a -s /etc/master.passwd; then
+    SHADOW_TYPE="SPW_BSD"
+fi
+if test -z "$SHADOW_TYPE"; then
+    SHADOW_TYPE="SPW_NONE"
+    $2
+else
+    $1
+fi
+AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
+])
 
 AC_DEFUN(SUDO_CHECK_SHADOW_SUNOS4, [AC_MSG_CHECKING(for shadow passwords)
 if test -s /etc/security/passwd.adjunct; then
@@ -204,7 +214,7 @@ fi
 ])
 
 AC_DEFUN(SUDO_CHECK_SHADOW_SVR4, [AC_MSG_CHECKING(for shadow passwords)
-if test -s /etc/master; then
+if test -s /etc/shadow; then
     AC_MSG_RESULT(yes)
     [$1]
 else
