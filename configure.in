@@ -193,7 +193,7 @@ case "$OS" in
 		    fi
 
 		    # shadow pw support
-		    if test -n "$C2"; then
+		    if test -z "$DCE" -a -n "$C2"; then
 			SHADOW_TYPE="SPW_HPUX9"
 			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    fi
@@ -351,7 +351,7 @@ dnl
 dnl search for various shadow password types unless we already know
 dnl XXX - need to ACDEFINE *something* right???
 dnl
-if test -z "$SKEY" -a -z "$SECURID" -a -z "$AFS" -a -z "$KERB4" -a -z "$KERB5" -a -n "$DCE" -a -n "$C2" -a -z "$SHADOW_TYPE"
+if test -z "$SKEY" -a -z "$SECURID" -a -z "$AFS" -a -z "$KERB4" -a -z "$KERB5" -a -z "$DCE" -a -n "$C2" -a -z "$SHADOW_TYPE"
     then
     echo "checking for shadow password type..."
     AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SPW_SVR4", AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SPW_SECUREWARE", [test -f /etc/master.passwd && SHADOW_TYPE="SPW_BSD"]))
