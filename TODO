@@ -50,5 +50,16 @@ TODO list
 
 22) Sudo should not allow someone with a nil password to run commands.
 
-23) configure should not check for -lcrypt if it has already been
-    added to SUDO_LIBS.
+23) Overhaul testsudoers to use parse.o so we don't reimplement things.
+
+24) Make runas_user a struct "runas" with user and group components.
+    (make uid and gid too???)
+
+25) Make "sudo -l" output go into a dynamically-sized array that gets
+    printed if passwd is ok or none is required.
+
+26) Update docs wrt NOPASSWD, "runas" and wildcards in pathnames.
+
+27) Would be nice to use '!' in the runas list.
+
+28) Add -g group/gid option.
