@@ -150,7 +150,9 @@ char host[MAXHOSTNAMELEN + 1];
 char *shost;
 char cwd[MAXPATHLEN + 1];
 struct stat cmnd_st;
+#ifdef SHELL_SETS_HOME
 static char *runas_homedir = NULL;
+#endif /* SHELL_SETS_HOME */
 extern struct interface *interfaces;
 extern int num_interfaces;
 extern int printmatches;
@@ -324,9 +326,11 @@ int main(argc, argv)
 	    /* become specified user or root */
 	    set_perms(PERM_RUNAS);
 
+#ifdef SHELL_SETS_HOME
 	    /* set $HOME for `sudo -s' */
 	    if ((sudo_mode & MODE_SHELL) && runas_homedir)
 		(void) sudo_setenv("HOME", runas_homedir);
+#endif /* SHELL_SETS_HOME */
 
 #ifndef PROFILING
 	    if ((sudo_mode & MODE_BACKGROUND) && fork() > 0) {
@@ -901,8 +905,9 @@ void set_perms(perm)
 					perror("");
 					exit(1);
 				    }
-
+#ifdef SHELL_SETS_HOME
 				    runas_homedir = pw_ent->pw_dir;
+#endif /* SHELL_SETS_HOME */
 				}
 
 				break;

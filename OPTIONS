@@ -173,6 +173,12 @@ SHELL_IF_NO_ARGS
     in the invoking user's /etc/passwd entry).
     This is off by default.
 
+SHELL_SETS_HOME
+    If sudo is invoked with the "-s" flag the HOME environmental variable
+    will be set to the home directory of the target user (which is root
+    unless the "-u" option is used).
+    This is off by default.
+
 USE_TTY_TICKETS
     This makes sudo use a different ticket file for each tty (per user).
     Ie: instead of the ticket file being "username" it is "username.tty".

@@ -60,6 +60,7 @@
 /*#define SECURE_PATH	"/bin:/usr/ucb:/usr/bin:/usr/etc:/etc" /* secure path */
 /*#define USE_EXECV		/* use execv() instead of execvp() */
 /*#define SHELL_IF_NO_ARGS	/* if sudo is given no arguments run a shell */
+/*#define SHELL_SETS_HOME	/* -s sets $HOME to runas user's homedir */
 /*#define USE_TTY_TICKETS	/* have a different ticket file for each tty */
 /*#define SKEY_ONLY		/* validate user via s/key only */
 /*#define LONG_SKEY_PROMPT	/* use a two line s/key prompt */
