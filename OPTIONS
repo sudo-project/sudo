@@ -205,9 +205,11 @@ LONG_SKEY_PROMPT
     This feature is off by default.
 
 SUDOERS_MODE
-    File mode for the sudoers file (octal).  This should be 0440 if
-    you want to be able to share the sudoers file via NFS or 0400
-    if you do not.  The default mode is 0440.
+    File mode for the sudoers file (octal).  Note that if you
+    set this to be more restictive than 0440 you *MUST* set
+    SUDOERS_UID to be something other than 0.  Also Note that
+    this is usually set in the Makefile.
+    The default mode is 0440.
 
 SUDOERS_UID
     User id that "owns" the sudoers file.  Note that this is the
