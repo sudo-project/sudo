@@ -89,6 +89,9 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_SKEY
 #  include <skey.h>
 #endif /* HAVE_SKEY */
+#ifdef HAVE_OPIE
+#  include <opie.h>
+#endif /* HAVE_OPIE */
 #ifdef HAVE_UTIME
 #  ifdef HAVE_UTIME_H
 #    include <utime.h>
@@ -112,6 +115,9 @@ static int   sudo_krb_validate_user	__P((struct passwd *, char *));
 #ifdef HAVE_SKEY
 static char *sudo_skeyprompt		__P((struct skey *, char *));
 #endif /* HAVE_SKEY */
+#ifdef HAVE_OPIE
+static char *sudo_opieprompt		__P((struct opie *, char *));
+#endif /* HAVE_OPIE */
 int   user_is_exempt			__P((void));
 
 /*
@@ -124,6 +130,9 @@ union config_record configure;
 #endif /* HAVE_SECURID */
 #ifdef HAVE_SKEY
 struct skey skey;
+#endif
+#ifdef HAVE_OPIE
+struct opie opie;
 #endif
 #if (SHADOW_TYPE == SPW_SECUREWARE) && defined(__alpha)
 extern uchar_t crypt_type;
@@ -458,6 +467,9 @@ static void check_passwd()
 #ifdef HAVE_SKEY
     (void) memset((VOID *)&skey, 0, sizeof(skey));
 #endif /* HAVE_SKEY */
+#ifdef HAVE_OPIE
+    (void) memset((VOID *)&opie, 0, sizeof(opie));
+#endif /* HAVE_OPIE */
 
     /*
      * you get TRIES_FOR_PASSWORD times to guess your password
@@ -470,6 +482,12 @@ static void check_passwd()
 	prompt = sudo_skeyprompt(&skey, prompt);
 	set_perms(PERM_USER);
 #endif /* HAVE_SKEY */
+#ifdef HAVE_OPIE
+	/* rewrite the prompt if using OPIE since the challenge can change */
+	set_perms(PERM_ROOT);
+	prompt = sudo_opieprompt(&opie, prompt);
+	set_perms(PERM_USER);
+#endif /* HAVE_OPIE */
 
 	/* get a password from the user */
 #ifdef USE_GETPASS
@@ -502,6 +520,17 @@ static void check_passwd()
 	    set_perms(PERM_USER);
 	}
 #endif /* HAVE_SKEY */
+#ifdef HAVE_OPIE
+	/* Only check OPIE db if the user exists there */
+	if (opie.opie_flags) {
+	    set_perms(PERM_ROOT);
+	    if (opieverify(&opie, pass) == 0) {
+		set_perms(PERM_USER);
+		return;             /* if the key is correct return() */
+	    }
+	    set_perms(PERM_USER);
+	}
+#endif /* HAVE_OPIE */
 #if !defined(HAVE_SKEY) || !defined(SKEY_ONLY)
 	/*
 	 * If we use shadow passwords with a different crypt(3)
@@ -662,8 +691,18 @@ static char *sudo_skeyprompt(user_skey, p)
 {
     char challenge[256];
     int rval;
-    static char *orig_prompt, *new_prompt = NULL;
+    static char *orig_prompt = NULL, *new_prompt = NULL;
     static int op_len, np_size;
+
+    /* save the original prompt */
+    if (orig_prompt == NULL) {
+	orig_prompt = p;
+	op_len = strlen(p);
+
+	/* ignore trailing colon */
+	if (p[op_len - 1] == ':')
+	    op_len--;
+    }
 
     /* close old stream */
     if (user_skey->keyfile)
@@ -671,7 +710,7 @@ static char *sudo_skeyprompt(user_skey, p)
 
     /* get the skey part of the prompt */
     if ((rval = skeychallenge(user_skey, user_name, challenge)) != 0) {
-#ifdef SKEY_ONLY
+#ifdef OTP_ONLY
 	(void) fprintf(stderr,
 		       "%s: You do not exist in the s/key database.\n",
 		       Argv[0]);
@@ -679,18 +718,11 @@ static char *sudo_skeyprompt(user_skey, p)
 #else
 	/* return the original prompt if we cannot get s/key info */
 	return(orig_prompt);
-#endif /* SKEY_ONLY */
+#endif /* OTP_ONLY */
     }
 
     /* get space for new prompt with embedded s/key challenge */
     if (new_prompt == NULL) {
-	orig_prompt = p;
-	op_len = strlen(p);
-
-	/* ignore trailing colon */
-	if (p[op_len - 1] == ':')
-	    op_len--;
-
 	/* allocate space for new prompt */
 	np_size = op_len + strlen(challenge) + 7;
 	if (!(new_prompt = (char *) malloc(np_size))) {
@@ -712,15 +744,90 @@ static char *sudo_skeyprompt(user_skey, p)
     }
 
     /* embed the s/key challenge into the new password prompt */
-#ifdef LONG_SKEY_PROMPT
+#ifdef LONG_OTP_PROMPT
     (void) sprintf(new_prompt, "%s\n%s", challenge, orig_prompt);
 #else
     (void) sprintf(new_prompt, "%.*s [ %s ]:", op_len, orig_prompt, challenge);
-#endif /* LONG_SKEY_PROMPT */
+#endif /* LONG_OTP_PROMPT */
 
     return(new_prompt);
 }
 #endif /* HAVE_SKEY */
+
+
+#ifdef HAVE_OPIE
+/********************************************************************
+ *
+ *  sudo_opieprompt()
+ *
+ *  This function rewrites and return the prompt based the
+ *  OPIE challenge *  and fills in the user's opie structure.
+ */
+
+static char *sudo_opieprompt(user_opie, p)
+    struct opie *user_opie;
+    char *p;
+{
+    char challenge[OPIE_CHALLENGE_MAX];
+    int rval;
+    static char *orig_prompt = NULL, *new_prompt = NULL;
+    static int op_len, np_size;
+
+    /* save the original prompt */
+    if (orig_prompt == NULL) {
+	orig_prompt = p;
+	op_len = strlen(p);
+
+	/* ignore trailing colon */
+	if (p[op_len - 1] == ':')
+	    op_len--;
+    }
+
+    /* get the opie part of the prompt */
+    if ((rval = opiechallenge(user_opie, user_name, challenge)) != 0) {
+#ifdef OTP_ONLY
+	(void) fprintf(stderr,
+		       "%s: You do not exist in the s/key database.\n",
+		       Argv[0]);
+	exit(1);
+#else
+	/* return the original prompt if we cannot get s/key info */
+	return(orig_prompt);
+#endif /* OTP_ONLY */
+    }
+
+    /* get space for new prompt with embedded s/key challenge */
+    if (new_prompt == NULL) {
+	/* allocate space for new prompt */
+	np_size = op_len + strlen(challenge) + 7;
+	if (!(new_prompt = (char *) malloc(np_size))) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+    } else {
+	/* already have space allocated, is it enough? */
+	if (np_size < op_len + strlen(challenge) + 7) {
+	    np_size = op_len + strlen(challenge) + 7;
+	    if (!(new_prompt = (char *) realloc(new_prompt, np_size))) {
+		perror("malloc");
+		(void) fprintf(stderr, "%s: cannot allocate memory!\n",
+			       Argv[0]);
+		exit(1);
+	    }
+	}
+    }
+
+    /* embed the s/key challenge into the new password prompt */
+#ifdef LONG_OTP_PROMPT
+    (void) sprintf(new_prompt, "%s\n%s", challenge, orig_prompt);
+#else
+    (void) sprintf(new_prompt, "%.*s [ %s ]:", op_len, orig_prompt, challenge);
+#endif /* LONG_OTP_PROMPT */
+
+    return(new_prompt);
+}
+#endif /* HAVE_OPIE */
 
 
 #ifndef NO_MESSAGE
