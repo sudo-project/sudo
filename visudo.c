@@ -82,7 +82,7 @@ static char whatnow		__P((void));
 static void whatnow_help	__P((void));
 static RETSIGTYPE Exit		__P((int));
 static void setup_signals	__P((void));
-int command_matches		__P((char *, char **, char *, char **));
+int command_matches		__P((char *, char *, char *, char *));
 int addr_matches		__P((char *));
 int netgr_matches		__P((char *, char *, char *));
 int usergr_matches		__P((char *, char *));
@@ -361,9 +361,9 @@ int main(argc, argv)
 
 int command_matches(cmnd, user_args, path, sudoers_args)
     char *cmnd;
-    char **user_args;
+    char *user_args;
     char *path;
-    char **sudoers_args;
+    char *sudoers_args;
 {
     return(TRUE);
 }
