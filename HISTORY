@@ -25,6 +25,4 @@ sudo, in its current form, is maintained by:
 
 	Todd Miller <Todd.Miller@courtesan.com>
 
-Todd continues to enhance sudo and fix bugs.  Bug reports and fixes
-should be mailed to sudo-bugs@courtesan.com.  Please include the version
-of sudo you are using and the platform you are running it on.
+Todd continues to enhance sudo and fix bugs.
