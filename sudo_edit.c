@@ -68,7 +68,7 @@ int sudo_edit(argc, argv)
     const char *tmpdir;
     char **nargv, **ap, *editor, *cp;
     char buf[BUFSIZ];
-    int error, i, ac, ofd, tfd, nargc, rval;
+    int error, i, ac, ofd, tfd, nargc, rval, tmplen;
     sigaction_t sa;
     struct stat sb;
     struct timespec ts1, ts2;
@@ -90,6 +90,9 @@ int sudo_edit(argc, argv)
 #endif
     else
 	tmpdir = _PATH_TMP;
+    tmplen = strlen(tmpdir);
+    while (tmpdir[tmplen - 1] == '/')
+	tmplen--;
 
     /*
      * For each file specified by the user, make a temporary version
@@ -134,7 +137,7 @@ int sudo_edit(argc, argv)
 	    cp++;
 	else
 	    cp = tf[i].ofile;
-	easprintf(&tf[i].tfile, "%s%s.XXXXXXXX", tmpdir, cp);
+	easprintf(&tf[i].tfile, "%.*s/%s.XXXXXXXX", tmplen, tmpdir, cp);
 	set_perms(PERM_USER);
 	tfd = mkstemp(tf[i].tfile);
 	set_perms(PERM_ROOT);
