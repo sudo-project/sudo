@@ -1,31 +1,32 @@
 %{
-
 /*
- *  CU sudo version 1.6
- *  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
- *
- *******************************************************************
- *
- * parse.yacc -- yacc parser and alias manipulation routines for sudo.
+ * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
  * This code is derived from software contributed by Chris Jepeway
  * <jepeway@cs.utk.edu>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -53,6 +54,7 @@
 #endif /* HAVE_LSEARCH */
 
 #include "sudo.h"
+#include "parse.h"
 
 #ifndef HAVE_LSEARCH
 #include "emul/search.h"
@@ -157,7 +159,7 @@ void
 yyerror(s)
     char *s;
 {
-    /* save the line the first error occured on */
+    /* Save the line the first error occured on. */
     if (errorlineno == -1)
 	errorlineno = sudolineno ? sudolineno - 1 : 0;
 #ifndef TRACELEXER
@@ -176,7 +178,6 @@ yyerror(s)
     struct sudo_command command;
     int tok;
 }
-
 
 %start file				/* special start symbol */
 %token <string>  ALIAS			/* an UPPERCASE alias name */
@@ -263,24 +264,24 @@ hostspec	:	ALL {
 			    free($1);
 			}
 		|	NETGROUP {
-			    if (netgr_matches($1, host, NULL))
+			    if (netgr_matches($1, user_host, NULL))
 				host_matches = TRUE;
 			    free($1);
 			}
 		|	NAME {
-			    if (strcasecmp(shost, $1) == 0)
+			    if (strcasecmp(user_shost, $1) == 0)
 				host_matches = TRUE;
 			    free($1);
 			}
 		|	FQHOST {
-			    if (strcasecmp(host, $1) == 0)
+			    if (strcasecmp(user_host, $1) == 0)
 				host_matches = TRUE;
 			    free($1);
 			}
 		|	ALIAS {
 			    /* could be an all-caps hostname */
 			    if (find_alias($1, HOST_ALIAS) == TRUE ||
-				strcasecmp(shost, $1) == 0)
+				strcasecmp(user_shost, $1) == 0)
 				host_matches = TRUE;
 			    free($1);
 			}
@@ -340,7 +341,7 @@ runasspec	:	/* empty */ {
 			     */
 			    if (runas_matches == -1)
 				runas_matches =
-				    (strcmp(RUNAS_DEFAULT, runas_user) == 0);
+				    (strcmp(RUNAS_DEFAULT, user_runas) == 0);
 			}
 		|	RUNAS runaslist { ; }
 		;
@@ -378,7 +379,7 @@ oprunasuser	:	runasuser {
 			}
 
 runasuser	:	NAME {
-			    runas_matches = (strcmp($1, runas_user) == 0);
+			    runas_matches = (strcmp($1, user_runas) == 0);
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append($1, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -391,7 +392,7 @@ runasuser	:	NAME {
 			    free($1);
 			}
 		|	USERGROUP {
-			    runas_matches = usergr_matches($1, runas_user);
+			    runas_matches = usergr_matches($1, user_runas);
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append($1, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -405,7 +406,7 @@ runasuser	:	NAME {
 			    free($1);
 			}
 		|	NETGROUP {
-			    runas_matches = netgr_matches($1, NULL, runas_user);
+			    runas_matches = netgr_matches($1, NULL, user_runas);
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append($1, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -421,7 +422,7 @@ runasuser	:	NAME {
 		|	ALIAS {
 			    /* could be an all-caps username */
 			    if (find_alias($1, RUNAS_ALIAS) == TRUE ||
-				strcmp($1, runas_user) == 0)
+				strcmp($1, user_runas) == 0)
 				runas_matches = TRUE;
 			    else
 				runas_matches = FALSE;
@@ -482,9 +483,9 @@ cmnd		:	ALL {
 			    }
 
 			    $$ = cmnd_matches = TRUE;
-			    if (cmnd_safe)
-				free(cmnd_safe);
-			    cmnd_safe = estrdup(cmnd);
+			    if (safe_cmnd)
+				free(safe_cmnd);
+			    safe_cmnd = estrdup(user_cmnd);
 			}
 		|	ALIAS {
 			    if (printmatches == TRUE && in_alias == TRUE) {
@@ -528,8 +529,8 @@ cmnd		:	ALL {
 			    }
 
 			    /* if NewArgc > 1 pass ptr to 1st arg, else NULL */
-			    if (command_matches(cmnd, (NewArgc > 1) ?
-				    cmnd_args : NULL, $1.cmnd, $1.args)) {
+			    if (command_matches(user_cmnd, (NewArgc > 1) ?
+				    user_args : NULL, $1.cmnd, $1.args)) {
 				cmnd_matches = TRUE;
 				$$ = TRUE;
 			    }
@@ -665,7 +666,6 @@ user		:	NAME {
 
 %%
 
-
 typedef struct {
     int type;
     char name[BUFSIZ];
@@ -677,13 +677,9 @@ size_t naliases = 0;
 size_t nslots = 0;
 
 
-/**********************************************************************
- *
- * aliascmp()
- *
- *  This function compares two aliasinfo structures.
+/*
+ * Compare two aliasinfo structures, strcmp() style.
  */
-
 static int
 aliascmp(a1, a2)
     const VOID *a1, *a2;
@@ -700,14 +696,9 @@ aliascmp(a1, a2)
     return(r);
 }
 
-
-/**********************************************************************
- *
- * genaliascmp()
- *
- *  This function compares two generic_alias structures.
+/*
+ * Compare two generic_alias structures, strcmp() style.
  */
-
 static int
 genaliascmp(entry, key)
     const VOID *entry, *key;
@@ -719,14 +710,9 @@ genaliascmp(entry, key)
 }
 
 
-/**********************************************************************
- *
- * add_alias()
- *
- *  This function adds the named alias of the specified type to the
- *  aliases list.
+/*
+ * Adds the named alias of the specified type to the aliases list.
  */
-
 static int
 add_alias(alias, type)
     char *alias;
@@ -766,14 +752,9 @@ add_alias(alias, type)
     return(ok);
 }
 
-
-/**********************************************************************
- *
- * find_alias()
- *
- *  This function searches for the named alias of the specified type.
+/*
+ * Searches for the named alias of the specified type.
  */
-
 static int
 find_alias(alias, type)
     char *alias;
@@ -788,17 +769,13 @@ find_alias(alias, type)
 		 sizeof(ai), aliascmp) != NULL);
 }
 
-
-/**********************************************************************
- *
- * more_aliases()
- *
- *  This function allocates more space for the aliases list.
+/*
+ * Allocates more space for the aliases list.
  */
-
 static int
 more_aliases()
 {
+
     nslots += MOREALIASES;
     if (nslots == MOREALIASES)
 	aliases = (aliasinfo *) malloc(nslots * sizeof(aliasinfo));
@@ -808,14 +785,9 @@ more_aliases()
     return(aliases != NULL);
 }
 
-
-/**********************************************************************
- *
- * dumpaliases()
- *
- *  This function lists the contents of the aliases list.
+/*
+ * Lists the contents of the aliases list.
  */
-
 void
 dumpaliases()
 {
@@ -843,15 +815,9 @@ dumpaliases()
     }
 }
 
-
-/**********************************************************************
- *
- * list_matches()
- *
- *  This function lists the contents of cm_list and ga_list for
- *  `sudo -l'.
+/*
+ * Lists the contents of cm_list and ga_list for `sudo -l'.
  */
-
 void
 list_matches()
 {
@@ -914,15 +880,9 @@ list_matches()
     cm_list_size = 0;
 }
 
-
-/**********************************************************************
- *
- * append()
- *
- *  This function appends a source string to the destination prefixing
- *  a separator if one is given.
+/*
+ * Appends a source string to the destination, optionally prefixing a separator.
  */
-
 static void
 append(src, dstp, dst_len, dst_size, separator)
     char *src, **dstp;
@@ -958,18 +918,13 @@ append(src, dstp, dst_len, dst_size, separator)
     *dst_len += src_len;
 }
 
-
-/**********************************************************************
- *
- * reset_aliases()
- *
- *  This function frees up space used by the aliases list and resets
- *  the associated counters.
+/*
+ * Frees up space used by the aliases list and resets the associated counters.
  */
-
 void
 reset_aliases()
 {
+
     if (aliases) {
 	free(aliases);
 	aliases = NULL;
@@ -977,17 +932,13 @@ reset_aliases()
     naliases = nslots = 0;
 }
 
-
-/**********************************************************************
- *
- * expand_ga_list()
- *
- *  This function increments ga_list_len, allocating more space as necessary.
+/*
+ * Increments ga_list_len, allocating more space as necessary.
  */
-
 static void
 expand_ga_list()
 {
+
     if (++ga_list_len >= ga_list_size) {
 	while ((ga_list_size += STACKINCREMENT) < ga_list_len)
 	    ;
@@ -998,17 +949,13 @@ expand_ga_list()
     ga_list[ga_list_len - 1].entries = NULL;
 }
 
-
-/**********************************************************************
- *
- * expand_match_list()
- *
- *  This function increments cm_list_len, allocating more space as necessary.
+/*
+ * Increments cm_list_len, allocating more space as necessary.
  */
-
 static void
 expand_match_list()
 {
+
     if (++cm_list_len >= cm_list_size) {
 	while ((cm_list_size += STACKINCREMENT) < cm_list_len)
 	    ;
@@ -1022,18 +969,14 @@ expand_match_list()
     cm_list[cm_list_len].nopasswd = FALSE;
 }
 
-
-/**********************************************************************
- *
- * init_parser()
- *
- *  This function frees up spaced used by a previous parse and
- *  allocates new space for various data structures.
+/*
+ * Frees up spaced used by a previous parser run and allocates new space
+ * for various data structures.
  */
-
 void
 init_parser()
 {
+
     /* Free up old data structures if we run the parser more than once. */
     if (match) {
 	free(match);

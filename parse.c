@@ -1,29 +1,31 @@
 /*
- *  CU sudo version 1.6
- *  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
- *
- *******************************************************************
- *
- * parse.c -- sudo parser frontend and comparison routines.
+ * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
  * This code is derived from software contributed by Chris Jepeway
- * <jepeway@cs.utk.edu>
+ * <jepeway@cs.utk.edu>.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -78,6 +80,7 @@
 #endif
 
 #include "sudo.h"
+#include "parse.h"
 #include "interfaces.h"
 
 #ifndef lint
@@ -89,7 +92,6 @@ static const char rcsid[] = "$Sudo$";
  */
 int parse_error = FALSE;
 extern FILE *yyin, *yyout;
-extern int printmatches;
 
 /*
  * Prototypes
@@ -107,10 +109,10 @@ validate(check_cmnd)
 {
     int return_code;
 
-    /* become sudoers file owner */
+    /* Become sudoers file owner */
     set_perms(PERM_SUDOERS, 0);
 
-    /* we opened _PATH_SUDO_SUDOERS in check_sudoers() so just rewind it */
+    /* We opened _PATH_SUDO_SUDOERS in check_sudoers() so just rewind it. */
     rewind(sudoers_fp);
     yyin = sudoers_fp;
     yyout = stdout;
@@ -192,23 +194,20 @@ validate(check_cmnd)
 	}
 
     /*
-     * we popped everything off the stack =>
-     * user was mentioned, but not explicitly
-     * granted nor denied access => say no
+     * We popped everything off the stack and the user was mentioned, but
+     * not explicitly granted nor denied access.
      */
     return(VALIDATE_NOT_OK);
 }
-
-
 
 /*
  * If path doesn't end in /, return TRUE iff cmnd & path name the same inode;
  * otherwise, return TRUE if cmnd names one of the inodes in path.
  */
 int
-command_matches(cmnd, user_args, path, sudoers_args)
+command_matches(cmnd, cmnd_args, path, sudoers_args)
     char *cmnd;
-    char *user_args;
+    char *cmnd_args;
     char *path;
     char *sudoers_args;
 {
@@ -251,12 +250,12 @@ command_matches(cmnd, user_args, path, sudoers_args)
 	if (fnmatch(path, cmnd, FNM_PATHNAME) != 0)
 	    return(FALSE);
 	if (!sudoers_args ||
-	    (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
-	    (sudoers_args && fnmatch(sudoers_args, user_args ? user_args : "",
+	    (!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
+	    (sudoers_args && fnmatch(sudoers_args, cmnd_args ? cmnd_args : "",
 	    0) == 0)) {
-	    if (cmnd_safe)
-		free(cmnd_safe);
-	    cmnd_safe = estrdup(cmnd);
+	    if (safe_cmnd)
+		free(safe_cmnd);
+	    safe_cmnd = estrdup(user_cmnd);
 	    return(TRUE);
 	} else
 	    return(FALSE);
@@ -285,12 +284,12 @@ command_matches(cmnd, user_args, path, sudoers_args)
 	    if (cst.st_dev != pst.st_dev || cst.st_ino != pst.st_ino)
 		return(FALSE);
 	    if (!sudoers_args ||
-		(!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
+		(!cmnd_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
 		(sudoers_args &&
-		 fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
-		if (cmnd_safe)
-		    free(cmnd_safe);
-		cmnd_safe = estrdup(path);
+		 fnmatch(sudoers_args, cmnd_args ? cmnd_args : "", 0) == 0)) {
+		if (safe_cmnd)
+		    free(safe_cmnd);
+		safe_cmnd = estrdup(path);
 		return(TRUE);
 	    } else
 		return(FALSE);
@@ -314,9 +313,9 @@ command_matches(cmnd, user_args, path, sudoers_args)
 	    if (strcmp(cmnd_base, dent->d_name) != 0 || stat(buf, &pst) == -1)
 		continue;
 	    if (cst.st_dev == pst.st_dev && cst.st_ino == pst.st_ino) {
-		if (cmnd_safe)
-		    free(cmnd_safe);
-		cmnd_safe = estrdup(buf);
+		if (safe_cmnd)
+		    free(safe_cmnd);
+		safe_cmnd = estrdup(buf);
 		break;
 	    }
 	}
@@ -325,8 +324,6 @@ command_matches(cmnd, user_args, path, sudoers_args)
 	return(dent != NULL);
     }
 }
-
-
 
 /*
  * Returns TRUE if "n" is one of our ip addresses or if
@@ -362,8 +359,6 @@ addr_matches(n)
 
     return(FALSE);
 }
-
-
 
 /*
  *  Returns TRUE if the given user belongs to the named group,
@@ -401,8 +396,6 @@ usergr_matches(group, user)
 
     return(FALSE);
 }
-
-
 
 /*
  * Returns TRUE if "host" and "user" belong to the netgroup "netgr",
@@ -442,8 +435,6 @@ netgr_matches(netgr, host, user)
     return(FALSE);
 #endif /* HAVE_INNETGR */
 }
-
-
 
 /*
  * Returns TRUE if "s" has shell meta characters in it,
