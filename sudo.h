@@ -165,6 +165,9 @@ int asprintf		__P((char **, const char *, ...));
 #ifndef HAVE_VASPRINTF
 int vasprintf		__P((char **, const char *, va_list));
 #endif
+#ifndef HAVE_STRCASECMP
+int strcasecmp		__P((const char *, const char *));
+#endif
 char *sudo_goodpath	__P((const char *));
 int sudo_setenv		__P((char *, char *));
 char *tgetpass		__P((const char *, int, int));
