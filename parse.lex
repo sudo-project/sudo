@@ -165,7 +165,7 @@ WORD			[a-zA-Z0-9_-]+
 			    return(NTWKADDR);
 			}
 
-{WORD}(\.{WORD})+	{
+[a-zA-Z][a-zA-Z0-9_-]*(\.{WORD})+ {
 			    fill(yytext, yyleng);
 			    LEXTRACE("FQHOST ");
 			    return(FQHOST);
