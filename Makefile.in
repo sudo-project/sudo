@@ -101,10 +101,10 @@ PROGS = @PROGS@
 SRCS = alloc.c alloca.c check.c closefrom.c def_data.c defaults.c env.c err.c \
        fileops.c find_path.c fnmatch.c getcwd.c getprogname.c getspwuid.c \
        gettime.c goodpath.c interfaces.c ldap.c lex.yy.c lsearch.c logging.c \
-       parse.c parse.lex parse.yacc set_perms.c sigaction.c snprintf.c \
-       strcasecmp.c strerror.c strlcat.c strlcpy.c sudo.c sudo_noexec.c \
-       sudo.tab.c sudo_edit.c testsudoers.c tgetpass.c utimes.c \
-       trace_systrace.c visudo.c zero_bytes.c $(AUTH_SRCS)
+       mon_systrace.c parse.c parse.lex parse.yacc set_perms.c sigaction.c \
+       snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c sudo.c \
+       sudo_noexec.c sudo.tab.c sudo_edit.c testsudoers.c tgetpass.c utimes.c \
+       visudo.c zero_bytes.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -234,7 +234,7 @@ strlcpy.o: strlcpy.c config.h
 strerror.o: strerror.c config.h
 utime.o: utime.c config.h pathnames.h compat.h emul/utime.h
 ldap.o: ldap.c $(SUDODEP) parse.h
-trace_systrace.o: trace_systrace.c $(SUDODEP) trace_systrace.h
+mon_systrace.o: mon_systrace.c $(SUDODEP) mon_systrace.h
 
 # Build special copy of alloc.c for visudo that calls Exit()
 vsalloc.o: alloc.c $(SUDODEP)

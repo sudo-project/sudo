@@ -400,7 +400,7 @@ main(argc, argv, envp)
 	}
 
 #ifdef HAVE_SYSTRACE 
-	if (ISSET(validated, FLAG_TRACE))
+	if (ISSET(validated, FLAG_MONITOR))
 	    systrace_attach(getpid());
 #endif
 

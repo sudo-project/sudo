@@ -255,7 +255,7 @@ This flag is I<off> by default.
 
 =item mail_badpass
 
-Send mail to the I<mailto> user if the user running sudo does not
+Send mail to the I<mailto> user if the user running B<sudo> does not
 enter the correct password.  This flag is I<off> by default.
 
 =item mail_no_user
@@ -428,7 +428,7 @@ changes that behavior such that the real UID is left as the invoking
 user's UID.  In other words, this makes B<sudo> act as a setuid
 wrapper.  This can be useful on systems that disable some potentially
 dangerous functionality when a program is run setuid.  Note, however,
-that this means that sudo will run with the real uid of the invoking
+that this means that B<sudo> will run with the real uid of the invoking
 user which may allow that user to kill B<sudo> before it can log a
 failure, depending on how your OS defines the interaction between
 signals and setuid processes.
@@ -453,16 +453,16 @@ the --with-logincap option.  This flag is I<off> by default.
 
 =item noexec
 
-If set, all commands run via sudo will behave as if the C<NOEXEC>
+If set, all commands run via B<sudo> will behave as if the C<NOEXEC>
 tag has been set, unless overridden by a C<EXEC> tag.  See the
 description of I<NOEXEC and EXEC> below as well as the L<PREVENTING SHELL
 ESCAPES> section at the end of this manual.  This flag is I<off> by default.
 
-=item trace
+=item monitor
 
-If set, all commands run via sudo will behave as if the C<TRACE>
-tag has been set, unless overridden by a C<NOTRACE> tag.  See the
-description of I<TRACE and NOTRACE> below as well as the L<PREVENTING
+If set, all commands run via B<sudo> will behave as if the C<MONITOR>
+tag has been set, unless overridden by a C<NOMONITOR> tag.  See the
+description of I<MONITOR and NOMONITOR> below as well as the L<PREVENTING
 SHELL ESCAPES> section at the end of this manual.  Be aware that
 tracing is only supported on certain operating systems.  On systems
 where it is not supported this flag will have no effect.
@@ -475,7 +475,7 @@ This is intended for an Enterprises that wish to prevent the usage of local
 sudoers files so that only LDAP is used.  This thwarts the efforts of
 rogue operators who would attempt to add roles to @sysconfdir@/sudoers.
 When this option is present, @sysconfdir@/sudoers does not even need to exist. 
-Since this options tells sudo how to behave when no specific LDAP entries
+Since this options tells B<sudo> how to behave when no specific LDAP entries
 have been matched, this sudoOption is only meaningful for the cn=defaults
 section.  This flag is I<off> by default.
 
@@ -647,7 +647,7 @@ The default value is I<@lecture@>.
 
 =item lecture_file
 
-Path to a file containing an alternate sudo lecture that will
+Path to a file containing an alternate B<sudo> lecture that will
 be used in place of the standard lecture if the named file exists.
 
 =item logfile
@@ -672,7 +672,7 @@ Flags to use when invoking mailer. Defaults to B<-t>.
 =item mailto
 
 Address to send warning and error mail to.  The address should
-be enclosed in double quotes (C<">) to protect against sudo
+be enclosed in double quotes (C<">) to protect against B<sudo>
 interpreting the C<@> sign.  Defaults to C<@mailto@>.
 
 =item exempt_group
@@ -801,7 +801,7 @@ B<notice>, and B<warning>.
  Runas_Spec ::= '(' Runas_List ')'
 
  Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-	       'TRACE' | 'NOTRACE')
+	       'MONITOR' | 'NOMONITOR')
 
 A B<user specification> determines which commands a user may run
 (and as what user) on specified hosts.  By default, commands are
@@ -836,11 +836,11 @@ but  F</bin/kill> and F</usr/bin/lprm> as B<root>.
 
 A command may have zero or more tags associated with it.  There are
 four possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>, C<EXEC>,
-C<TRACE> and C<NOTRACE>.
+C<MONITOR> and C<NOMONITOR>.
 Once a tag is set on a C<Cmnd>, subsequent C<Cmnd>s in the
 C<Cmnd_Spec_List>, inherit the tag unless it is overridden by the
-opposite tag (ie: C<PASSWD> overrides C<NOPASSWD> and C<NOTRACE>
-overrides C<TRACE>).
+opposite tag (ie: C<PASSWD> overrides C<NOPASSWD> and C<NOMONITOR>
+overrides C<MONITOR>).
 
 =head3 NOPASSWD and PASSWD
 
@@ -884,22 +884,22 @@ and F</usr/bin/vi> but shell escapes will be disabled.
 See the L<PREVENTING SHELL ESCAPES> section below for more details
 on how C<NOEXEC> works and whether or not it will work on your system.
 
-=head3 TRACE and NOTRACE
+=head3 MONITOR and NOMONITOR
 
 If B<sudo> has been configured with the C<--with-systrace> option,
-the C<TRACE> tag can be used to cause programs spawned by a command
+the C<MONITOR> tag can be used to cause programs spawned by a command
 to be checked against I<sudoers> and logged just like they would
 be if run through B<sudo> directly.  This is useful in conjunction
 with commands that allow shell escapes such as editors, shells and
 paginators.
 
 In the following example, user B<chuck> may run any command on the
-machine research with tracing enabled.
+machine research in monitor mode.
 
- chuck	research = TRACE: ALL
+ chuck	research = MONITOR: ALL
 
 See the L<PREVENTING SHELL ESCAPES> section below for more details
-on how C<TRACE> works and whether or not it will work on your system.
+on how C<MONITOR> works and whether or not it will work on your system.
 
 =head2 Wildcards
 
@@ -1244,7 +1244,7 @@ There are three basic approaches to this problem:
 Avoid giving users access to commands that allow the user to run
 arbitrary commands.  Many editors have a restricted mode where shell
 escapes are disabled, though B<sudoedit> is a better solution to
-running editors via sudo.  Due to the large number of programs that
+running editors via B<sudo>.  Due to the large number of programs that
 offer shell escapes, restricting users to the set of programs that
 do not if often unworkable.
 
@@ -1254,7 +1254,7 @@ Many systems that support shared libraries have the ability to
 override default library functions by pointing an environment
 variable (usually C<LD_PRELOAD>) to an alternate shared library.
 On such systems, B<sudo>'s I<noexec> functionality can be used to
-prevent a program run by sudo from executing any other programs.
+prevent a program run by B<sudo> from executing any other programs.
 Note, however, that this applies only to native dynamically-linked
 executables.  Statically-linked executables and foreign executables
 running under binary emulation are not affected.
@@ -1290,25 +1290,25 @@ executing other commands (such as a shell).  If you are unsure
 whether or not your system is capable of supporting I<noexec> you
 can always just try it out and see if it works.
 
-=item tracing
+=item monitor
 
 On operating systems that support the B<systrace> pseudo-device,
 the C<--with-systrace> configure option can be used to compile
-support for command tracing in B<sudo>.  With B<systrace> support
+support for proccess monitoring in B<sudo>.  In monitor mode
 B<sudo> can transparently intercept a new command, allow or deny
 it based on I<sudoers>, and log the result.  This does require that
 B<sudo> become a daemon that persists until the command and all its
-descendents have finished.
+descendents have exited.
 
-To enable tracing on a per-command basis, use the C<TRACE> tag as
-documented in the User Specification section above.  Here is that
-example again:
+To enable monitor mode on a per-command basis, use the C<MONITOR>
+tag as documented in the User Specification section above.  Here
+is that example again:
 
- chuck	research = TRACE: ALL
+ chuck	research = MONITOR: ALL
 
 This allows user B<chuck> to run any command on the machine research
-with tracing enabled.  Any commands run via shell escapes will be
-logged by sudo.
+in monitor mode.  Any commands run via shell escapes will be logged
+by B<sudo>.
 
 At the time of this writing the B<systrace> pseudo-device comes
 standard with OpenBSD and NetBSD and is available as patches to

@@ -144,7 +144,7 @@ int top = 0, stacksize = 0;
 	match[top].runas  = UNSPEC; \
 	match[top].nopass = def_authenticate ? UNSPEC : TRUE; \
 	match[top].noexec = def_noexec ? TRUE : UNSPEC; \
-	match[top].trace  = def_trace ? TRUE : UNSPEC; \
+	match[top].monitor  = def_monitor ? TRUE : UNSPEC; \
 	top++; \
     } while (0)
 
@@ -154,13 +154,13 @@ int top = 0, stacksize = 0;
 	    while ((stacksize += STACKINCREMENT) < top); \
 	    match = (struct matchstack *) erealloc3(match, stacksize, sizeof(struct matchstack)); \
 	} \
-	match[top].user   = match[top-1].user; \
-	match[top].cmnd   = match[top-1].cmnd; \
-	match[top].host   = match[top-1].host; \
-	match[top].runas  = match[top-1].runas; \
-	match[top].nopass = match[top-1].nopass; \
-	match[top].noexec = match[top-1].noexec; \
-	match[top].trace  = match[top-1].trace; \
+	match[top].user     = match[top-1].user; \
+	match[top].cmnd     = match[top-1].cmnd; \
+	match[top].host     = match[top-1].host; \
+	match[top].runas    = match[top-1].runas; \
+	match[top].nopass   = match[top-1].nopass; \
+	match[top].noexec   = match[top-1].noexec; \
+	match[top].monitor  = match[top-1].monitor; \
 	top++; \
     } while (0)
 
@@ -266,8 +266,8 @@ typedef union {
 #define PASSWD 270
 #define NOEXEC 271
 #define EXEC 272
-#define TRACE 273
-#define NOTRACE 274
+#define MONITOR 273
+#define NOMONITOR 274
 #define ALL 275
 #define COMMENT 276
 #define HOSTALIAS 277
@@ -547,7 +547,7 @@ char *yyname[] =
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 "COMMAND","ALIAS","DEFVAR","NTWKADDR","NETGROUP","USERGROUP","WORD","DEFAULTS",
 "DEFAULTS_HOST","DEFAULTS_USER","DEFAULTS_RUNAS","RUNAS","NOPASSWD","PASSWD",
-"NOEXEC","EXEC","TRACE","NOTRACE","ALL","COMMENT","HOSTALIAS","CMNDALIAS",
+"NOEXEC","EXEC","MONITOR","NOMONITOR","ALL","COMMENT","HOSTALIAS","CMNDALIAS",
 "USERALIAS","RUNASALIAS","ERROR",
 };
 #if defined(__cplusplus) || defined(__STDC__)
@@ -617,8 +617,8 @@ char *yyrule[] =
 "cmndtag : cmndtag PASSWD",
 "cmndtag : cmndtag NOEXEC",
 "cmndtag : cmndtag EXEC",
-"cmndtag : cmndtag TRACE",
-"cmndtag : cmndtag NOTRACE",
+"cmndtag : cmndtag MONITOR",
+"cmndtag : cmndtag NOMONITOR",
 "cmnd : ALL",
 "cmnd : ALIAS",
 "cmnd : COMMAND",
@@ -873,11 +873,11 @@ list_matches()
 	else if (cm_list[count].noexecve == FALSE && def_noexec)
 	    (void) fputs("EXEC: ", stdout);
 
-	/* Is tracing enabled? */
-	if (cm_list[count].trace == TRUE && !def_trace)
-	    (void) fputs("TRACE: ", stdout);
-	else if (cm_list[count].trace == FALSE && def_trace)
-	    (void) fputs("NOTRACE: ", stdout);
+	/* Is monitoring enabled? */
+	if (cm_list[count].monitor == TRUE && !def_monitor)
+	    (void) fputs("MONITOR: ", stdout);
+	else if (cm_list[count].monitor == FALSE && def_monitor)
+	    (void) fputs("NOMONITOR: ", stdout);
 
 	/* Is a password required? */
 	if (cm_list[count].nopasswd == TRUE && def_authenticate)
@@ -1012,7 +1012,7 @@ expand_match_list()
     cm_list[cm_list_len].runas = cm_list[cm_list_len].cmnd = NULL;
     cm_list[cm_list_len].nopasswd = FALSE;
     cm_list[cm_list_len].noexecve = FALSE;
-    cm_list[cm_list_len].trace    = FALSE;
+    cm_list[cm_list_len].monitor  = FALSE;
 }
 
 /*
@@ -1391,7 +1391,7 @@ case 31:
 			    runas_matches = UNSPEC;
 			    no_passwd = def_authenticate ? UNSPEC : TRUE;
 			    no_execve = def_noexec ? TRUE : UNSPEC;
-			    trace_cmnd = def_trace ? TRUE : UNSPEC;
+			    monitor_cmnd = def_monitor ? TRUE : UNSPEC;
 			}
 break;
 case 32:
@@ -1706,10 +1706,10 @@ case 57:
 				    cm_list[cm_list_len].noexecve = TRUE;
 				else
 				    cm_list[cm_list_len].noexecve = FALSE;
-				if (trace_cmnd == TRUE)
-				    cm_list[cm_list_len].trace = TRUE;
+				if (monitor_cmnd == TRUE)
+				    cm_list[cm_list_len].monitor = TRUE;
 				else
-				    cm_list[cm_list_len].trace = FALSE;
+				    cm_list[cm_list_len].monitor = FALSE;
 			    }
 			}
 break;
@@ -1752,19 +1752,19 @@ break;
 case 62:
 #line 681 "parse.yacc"
 {
-			    trace_cmnd = TRUE;
+			    monitor_cmnd = TRUE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
-				cm_list[cm_list_len].trace = TRUE;
+				cm_list[cm_list_len].monitor = TRUE;
 			}
 break;
 case 63:
 #line 687 "parse.yacc"
 {
-			    trace_cmnd = FALSE;
+			    monitor_cmnd = FALSE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
-				cm_list[cm_list_len].trace = FALSE;
+				cm_list[cm_list_len].monitor = FALSE;
 			}
 break;
 case 64:

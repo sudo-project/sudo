@@ -261,14 +261,14 @@ EXEC[[:blank:]]*:	{
 			    	return(EXEC);
 			}
 
-NOTRACE[[:blank:]]*:	{
-			    	LEXTRACE("NOTRACE ");
-			    	return(NOTRACE);
+NOMONITOR[[:blank:]]*:	{
+			    	LEXTRACE("NOMONITOR ");
+			    	return(NOMONITOR);
 			}
 
-TRACE[[:blank:]]*:	{
-			    	LEXTRACE("TRACE ");
-			    	return(TRACE);
+MONITOR[[:blank:]]*:	{
+			    	LEXTRACE("MONITOR ");
+			    	return(MONITOR);
 			}
 
 \+{WORD}		{

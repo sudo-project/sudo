@@ -14,8 +14,8 @@
 #define PASSWD 270
 #define NOEXEC 271
 #define EXEC 272
-#define TRACE 273
-#define NOTRACE 274
+#define MONITOR 273
+#define NOMONITOR 274
 #define ALL 275
 #define COMMENT 276
 #define HOSTALIAS 277

@@ -65,7 +65,7 @@ struct sudo_user {
 #define FLAG_NO_HOST		0x080
 #define FLAG_NO_CHECK		0x100
 #define FLAG_NOEXEC		0x200
-#define FLAG_TRACE		0x400
+#define FLAG_MONITOR		0x400
 
 /*
  * Pseudo-boolean values

@@ -185,6 +185,6 @@ env_keep
 ignore_local_sudoers
 	T_FLAG
 	"If LDAP directory is up, do we ignore local sudoers file"
-trace
+monitor
 	T_FLAG
-	"Trace children of cmnd and apply sudoers restrictions to them"
+	"Monitor children of cmnd and apply sudoers restrictions to them"

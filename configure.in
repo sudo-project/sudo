@@ -1786,7 +1786,7 @@ if test -n "$with_systrace"; then
     else
 	CPPFLAGS="$CPPFLAGS -I${with_systrace}"
     fi
-    SUDO_OBJS="${SUDO_OBJS} trace_systrace.o"
+    SUDO_OBJS="${SUDO_OBJS} mon_systrace.o"
     AC_CHECK_FUNCS(setproctitle)
 fi
 dnl

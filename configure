@@ -30290,7 +30290,7 @@ done
     else
 	CPPFLAGS="$CPPFLAGS -I${with_systrace}"
     fi
-    SUDO_OBJS="${SUDO_OBJS} trace_systrace.o"
+    SUDO_OBJS="${SUDO_OBJS} mon_systrace.o"
 
 for ac_func in setproctitle
 do
