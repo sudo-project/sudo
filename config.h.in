@@ -205,3 +205,7 @@
 #ifndef _SUDO_PATH_MV
 #undef _SUDO_PATH_MV
 #endif /* _SUDO_PATH_MV */
+
+#ifndef _SUDO_PATH_LOGFILE
+#undef _SUDO_PATH_LOGFILE
+#endif /* _SUDO_PATH_LOGFILE */
