@@ -120,6 +120,45 @@ int addr_matches(n)
 }
 
 
+int netgr_matches(netgr, host, user)
+    char *netgr;
+    char *host;
+    char *user;
+{
+#ifdef HAVE_GETDOMAINNAME
+    static char *domain = (char *) -1;
+#else
+    static char *domain = NULL;
+#endif /* HAVE_GETDOMAINNAME */
+
+    /* make sure we have a valid netgroup, sudo style */
+    if (*netgr != '+')
+	return(FALSE);
+
+#ifdef HAVE_GETDOMAINNAME
+    /* get the domain name (if any) */
+    if (domain == (char *) -1) {
+	if ((domain = (char *) malloc(MAXHOSTNAMELEN + 1)) == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+
+	if (getdomainname(domain, MAXHOSTNAMELEN + 1) != 0 || *domain == '\0') {
+	    (void) free(domain);
+	    domain = NULL;
+	}
+    }
+#endif /* HAVE_GETDOMAINNAME */
+
+#ifdef HAVE_INNETGR
+    return(innetgr(netgr+1, host, user, domain));
+#else
+    return(FALSE);
+#endif /* HAVE_INNETGR */
+}
+
+
 void set_perms(i)
     int i;
 {
