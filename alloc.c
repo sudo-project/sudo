@@ -120,7 +120,8 @@ emalloc2(nmemb, size)
 	    Argv[0]);
 	exit(1);
     }
-    if ((ptr = (VOID *) malloc(nmemb * size)) == NULL) {
+    size *= nmemb;
+    if ((ptr = (VOID *) malloc(size)) == NULL) {
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
@@ -143,6 +144,38 @@ erealloc(ptr, size)
 	    Argv[0]);
 	exit(1);
     }
+    ptr = ptr ? (VOID *) realloc(ptr, size) : (VOID *) malloc(size);
+    if (ptr == NULL) {
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+    return(ptr);
+}
+
+/*
+ * erealloc3() realloc(3)s nmemb * size bytes and exits with an error
+ * if overflow would occur or if the system malloc(3)/realloc(3) fails.
+ * You can call erealloc() with a NULL pointer even if the system realloc(3)
+ * does not support this.
+ */
+VOID *
+erealloc3(ptr, nmemb, size)
+    VOID *ptr;
+    size_t nmemb;
+    size_t size;
+{
+
+    if (nmemb == 0 || size == 0) {
+	(void) fprintf(stderr, "%s: internal error, tried to realloc(0)\n",
+	    Argv[0]);
+	exit(1);
+    }
+    if (nmemb >= SIZE_MAX / size) {
+	(void) fprintf(stderr, "%s: internal error, erealloc3() overflow\n",
+	    Argv[0]);
+	exit(1);
+    }
+    size *= nmemb;
     ptr = ptr ? (VOID *) realloc(ptr, size) : (VOID *) malloc(size);
     if (ptr == NULL) {
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
