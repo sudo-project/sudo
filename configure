@@ -7119,7 +7119,7 @@ if test "$with_kerb5" = "yes"; then
 fi
 
 if test "$with_pam" = "yes"; then
-    SUDO_LIBS="${SUDO_LIBS} -ldl -lpam -lpam_misc"
+    SUDO_LIBS="${SUDO_LIBS} -ldl -lpam"
 fi
 
 if test "$with_AFS" = "yes"; then
@@ -7650,6 +7650,14 @@ test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
 if test "$with_pam" = "yes"; then
     echo ""
-    echo "You will need to customize sample.pam and install it as /etc/pam.d/sudo"
+    case $host in
+	*-*-solaris2*)
+	    echo "You will need to add the following line to /etc/pam.conf"
+	    echo "sudo	auth required	/usr/lib/security/pam_unix.so.1"
+	    ;;
+	*-*-linux*)
+	    echo "You will need to customize sample.pam and install it as /etc/pam.d/sudo"
+	    ;;
+    esac
     echo ""
 fi
