@@ -230,13 +230,17 @@ AC_FUNC_CHECK(setenv, AC_DEFINE(HAVE_SETENV), AC_FUNC_CHECK(putenv, AC_DEFINE(HA
 dnl
 dnl library checks
 dnl
-AC_CHECK_LIB(nsl)
-AC_CHECK_LIB(socket)
+dnl Irix 5.2 (at least) has bugs in -lnsl and -lsocket
+if test -n "$OS" -a "$OS" = "irix" -a $OSREV -ne 5 ; then
+    AC_CHECK_LIB(nsl)
+    AC_CHECK_LIB(socket)
+fi
+dnl For those w/o crypt(3)
 AC_CHECK_LIB(ufc)
 dnl
 dnl OS-dependent libraries
 dnl
-if test -n "$OS" -a "$OS" = "irix" ; then
+if test -n "$OS" -a "$OS" = "irix" -a $OSREV -le 4 ; then
     AC_IRIX_SUN
 fi
 dnl
