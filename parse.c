@@ -349,10 +349,12 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 	if (dirp == NULL)
 	    return(FALSE);
 
+	if (strlcpy(buf, path, sizeof(buf)) >= sizeof(buf))
+	    return(FALSE);
 	while ((dent = readdir(dirp)) != NULL) {
 	    /* ignore paths > PATH_MAX (XXX - log) */
-	    if (strlcpy(buf, path, sizeof(buf)) >= sizeof(buf) ||
-		strlcat(buf, dent->d_name, sizeof(buf)) >= sizeof(buf))
+	    buf[plen] = '\0';
+	    if (strlcat(buf, dent->d_name, sizeof(buf)) >= sizeof(buf))
 		continue;
 
 	    /* only stat if basenames are the same */
