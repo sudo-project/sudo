@@ -50,8 +50,8 @@ SUDO_OSTYPE()
 OS=`echo $OS | $TRPROG '[[A-Z]]' '[[a-z]]'`
 case "$OS" in
     "sunos")	echo "Looks like SunOS 4.x"
-		if test -n "$GCC"; then
-		    STATIC_FLAGS="-static"
+		if test -z "$GCC"; then
+		    STATIC_FLAGS="-Bstatic"
 		fi
 		;;
     "solaris")	echo "Looks like Solaris"
@@ -59,17 +59,17 @@ case "$OS" in
 		;;
     "aix")	echo "Looks like AIX"
 		AC_DEFINE(_ALL_SOURCE)
-		if test -n "$GCC"; then
+		if test -z "$GCC"; then
 		    STATIC_FLAGS="-bnso -bI:/lib/syscalls.exp -bI:./aixcrypt.exp -liconv -bnodelcsect"
 		fi
 		;;
     "hp-ux")	echo "Looks like HP-UX"
-		if test -n "$GCC"; then
+		if test -z "$GCC"; then
 		    STATIC_FLAGS="-Wl,-a,archive"
 		fi
 		;;
     "osf1")	echo "Looks like OSF/1"
-		if test -n "$GCC"; then
+		if test -z "$GCC"; then
 		    STATIC_FLAGS="-non_shared"
 		fi
 		;;
@@ -79,9 +79,6 @@ case "$OS" in
 		AC_DEFINE(STDC_HEADERS)
 		;;
     "linux")	echo "Looks like linux"
-		if test -n "$GCC"; then
-		    STATIC_FLAGS="-static"
-		fi
 		;;
     "convex")	echo "Looks like ConvexOs"
 		AC_DEFINE(_CONVEX_SOURCE)
