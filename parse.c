@@ -66,6 +66,9 @@ static char rcsid[] = "$Id$";
 
 extern FILE *yyin, *yyout;
 
+/*
+ * Globals
+ */
 int user_list_found = FALSE;
 int list_num, new_list[NUM_LISTS];
 int parse_error = FALSE, found_user = FALSE;
