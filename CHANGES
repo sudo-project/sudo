@@ -1139,3 +1139,12 @@ Sudo 1.5.9 released.
 356) Add a --disable-authentication option to configure that causes sudo
      to not require authentication by default.  The PASSWD tag can be
      used to require authentication for an entry.
+
+357) Add a --with-devel option to add -Wall and uncomment yacc/lex
+     generation in Makefile.
+
+358) Zero out plaintext password after use (should do encrypted as well).
+
+359) Added real dependencies in Makefile.
+
+360) Deprecated --with-otp-only in favor of --without-passwd.
