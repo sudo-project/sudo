@@ -238,7 +238,7 @@ main(argc, argv)
 	if (!sp->modified)
 	    (void) unlink(sp->tpath);
 	else
-	    install_sudoers(sp);	/* XXX rval */
+	    (void) install_sudoers(sp);
     }
 
     exit(0);
@@ -902,7 +902,7 @@ Err(eval, fmt, va_alist)
 #endif
 	vwarn(fmt, ap);
 	va_end(ap);
-	Exit(eval);
+	Exit(-eval);
 }
 
 /*
@@ -926,7 +926,7 @@ Errx(eval, fmt, va_alist)
 #endif
 	vwarnx(fmt, ap);
 	va_end(ap);
-	Exit(eval);
+	Exit(-eval);
 }
 
 static void
