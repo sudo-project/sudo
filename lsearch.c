@@ -81,7 +81,7 @@ linear_base(key, base, nelp, width, compar, add_flag)
 	int (*compar) __P((const VOID *, const VOID *));
 	int add_flag;
 {
-	char *element, *end;
+	VOID *element, *end;
 
 	end = base + *nelp * width;
 	for (element = base; element < end; element += width)
@@ -101,6 +101,6 @@ linear_base(key, base, nelp, width, compar, add_flag)
 	 * manual.
 	 */
 	++*nelp;
-	bcopy(key, end, (int)width);
+	(void) memmove(key, end, (size_t)width);
 	return(end);
 }
