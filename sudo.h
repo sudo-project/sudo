@@ -90,7 +90,7 @@ extern int top;
 #      endif
 #    endif
 #  endif
-#  define MAXLOGLEN		(49 + MAXPATHLEN + MAXPATHLEN + ARG_MAX)
+#  define MAXLOGLEN		(49 + 3 * MAXPATHLEN + ARG_MAX)
 #endif
 
 #define SLOG_SYSLOG              0x01
