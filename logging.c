@@ -233,6 +233,14 @@ void log_error(code)
 #endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
+	case SPOOF_ATTEMPT:
+	    (void) sprintf(p, "probable spoofing attempt; PWD=%s ; COMMAND=",
+		cwd);
+#if (LOGGING & SLOG_SYSLOG)
+	    pri = Syslog_priority_NO;
+#endif /* LOGGING & SLOG_SYSLOG */
+	    break;
+
 	default:
 	    strcat(p, "found a wierd error : ");
 #if (LOGGING & SLOG_SYSLOG)
@@ -594,6 +602,12 @@ void inform_user(code)
 		_PATH_SUDO_SUDOERS, SUDOERS_OWNER);
 	    break;
 
+	case SPOOF_ATTEMPT:
+	    (void) fprintf(stderr,
+		"%s is not the same command that was validated, disallowing.\n",
+		cmnd);
+	    break;
+
 	default:
 	    (void) fprintf(stderr,
 		"Something wierd happened.\n\n");
@@ -647,6 +661,7 @@ static int appropriate(code)
      */
     case VALIDATE_ERROR:
     case NO_SUDOERS_FILE:
+    case SPOOF_ATTEMPT:
     default:
 	return (1);
 	break;
