@@ -228,7 +228,11 @@ main(argc, argv)
 	    if (sudo_mode == MODE_VALIDATE)
 		exit(0);
 	    set_perms(PERM_FULL_ROOT);
+#ifndef GPROF
 	    EXEC(cmnd, &Argv[1]);
+#else
+	    exit(0);
+#endif /* GPROF */
 	    perror(cmnd);		/* exec failed! */
 	    exit(-1);
 	    break;
@@ -303,7 +307,7 @@ static void load_globals()
     /*
      * so we know where we are... (do as user)
      */
-    if (!getcwd(cwd, (size_t) sizeof(cwd))) {
+    if (!getwd(cwd)) {
     	(void) fprintf(stderr, "%s:  Can't get working directory!\n", Argv[0]);
 	exit(1);
     }
