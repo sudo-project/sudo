@@ -129,6 +129,7 @@ extern int user_is_exempt	__P((void));
 int Argc;
 char **Argv;
 char *cmnd = NULL;
+char *cmnd_args = NULL;
 char *user = NULL;
 char *epasswd = NULL;
 char *prompt = PASSPROMPT;
@@ -615,12 +616,15 @@ static void add_env()
  *
  *  load_cmnd()
  *
- *  This function sets the cmnd global variable based on Argv[1]
+ *  This function sets the cmnd and cmnd_args global variables based on Argv
  */
 
 static void load_cmnd(sudo_mode)
     int sudo_mode;
 {
+    int args_len = 0;
+    char **cur_arg;
+
     if ((sudo_mode & MODE_SHELL)) {
 	if (shell) {
 	    cmnd = shell;
@@ -635,6 +639,30 @@ static void load_cmnd(sudo_mode)
 	errno = ENAMETOOLONG;
 	(void) fprintf(stderr, "%s: %s: Pathname too long\n", Argv[0], Argv[1]);
 	exit(1);
+    }
+
+    /*
+     * Find the length of cmnd_args and allocate space, then fill it in.
+     */
+    if (Argc > 1) {
+	for (cur_arg = &Argv[1]; *cur_arg; cur_arg++)
+	    args_len += strlen(*cur_arg) + 1;
+
+	cmnd_args = (char *)malloc(args_len);
+	if (cmnd_args == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n",
+			   Argv[0]);
+	    exit(1);
+	}
+
+	/* XXX - speed this up, slow for very long Argv's */
+	cmnd_args[0] = '\0';
+	for (cur_arg = &Argv[1]; *cur_arg; cur_arg++) {
+	    (void) strcat(cmnd_args, *cur_arg);
+	    (void) strcat(cmnd_args, " ");
+	}
+	cmnd_args[args_len - 1] = '\0';		/* XXX - is this correct? */
     }
 
     /*
