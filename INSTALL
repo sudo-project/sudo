@@ -152,6 +152,26 @@ Shadow passwords are supported on the following platforms:
     SCO 3.2.2
     SVR4 (and variants using standard SVR4 shadow passwords)
 
+The following operating systems have shadow passwords turned
+on by *default* (use --without-C2 to turn them off):
+
+    Solaris 2.x
+    Pyramid DC/OSx
+    UnixWare
+
+The following operating systems have transparent shadow password
+support so --with-C2 and --without-C2 will have no effect
+(and neither is necesary).
+
+    AIX 3.x
+    AIX 4.x
+    BSD/386 1.x
+    BSD/OS 2.x
+    NetBSD
+    FreeBSD
+    OpenBSD
+    HPBSD 2.x
+
 It is possible to configure in shadow password support even
 if your system does not currently use shadow passwords.
 That way, if you put shadow passwords in place, your installed
