@@ -166,6 +166,16 @@ SHELL_IF_NO_ARGS
     in the invoking user's /etc/passwd entry).
     This is off by default.
 
+USE_TTY_TICKETS
+    This makes sudo use a different ticket file for each tty (per user).
+    Ie: instead of the ticket file being "username" it is "username.tty".
+    This offers increased security in an open lab or with "shared"
+    accounts like "operator."  Note that this means that there will
+    be more files in the timestamp dir.  This is not a problem is your
+    system has a cron job to remove of files from /tmp (or wherever
+    you specified the timestamp dir to be).
+    This feature is off by default.
+
 FAST_MATCH
     When matching a given command to a path listed in the sudoers file,
     only check the inodes for a match if the basenames match.
