@@ -259,7 +259,6 @@ int main(argc, argv)
 
 	NewArgv = (char **) malloc (sizeof(char *) * (++NewArgc + 1));
 	if (NewArgv == NULL) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
@@ -288,7 +287,6 @@ int main(argc, argv)
 #ifdef SECURE_PATH
     /* replace the PATH envariable with a secure one */
     if (!user_is_exempt() && sudo_setenv("PATH", SECURE_PATH)) {
-	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
@@ -408,14 +406,14 @@ static void load_globals(sudo_mode)
      */
     if ((user_pw_ent = sudo_getpwuid(getuid())) == NULL) {
 	/* need to make a fake user_pw_ent */
-	struct passwd pw_ent;
+	struct passwd pw;
 	char pw_name[MAX_UID_T_LEN + 1];
 
 	/* fill in uid and name fields with the uid */
-	pw_ent.pw_uid = getuid();
-	(void) sprintf(pw_name, "%ld", (long) pw_ent.pw_uid);
-	pw_ent.pw_name = pw_name;
-	user_pw_ent = &pw_ent;
+	pw.pw_uid = getuid();
+	(void) sprintf(pw_name, "%ld", (long) pw.pw_uid);
+	pw.pw_name = pw_name;
+	user_pw_ent = &pw;
 
 	/* complain, log, and die */
 	log_error(GLOBAL_NO_PW_ENT);
@@ -438,7 +436,6 @@ static void load_globals(sudo_mode)
 	if (strncmp(p, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
 	    p += sizeof(_PATH_DEV) - 1;
 	if ((tty = (char *) strdup(p)) == NULL) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
@@ -494,7 +491,6 @@ static void load_globals(sudo_mode)
     if ((p = strchr(host, '.'))) {
 	*p = '\0';
 	if ((shost = strdup(host)) == NULL) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
@@ -676,7 +672,6 @@ static void add_env(contiguous)
 	}
 
 	if ((buf = (char *) malloc(size)) == NULL) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
@@ -695,7 +690,6 @@ static void add_env(contiguous)
 	buf = cmnd;
     }
     if (sudo_setenv("SUDO_COMMAND", buf)) {
-	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
@@ -712,7 +706,6 @@ static void add_env(contiguous)
 
     /* add the SUDO_USER envariable */
     if (sudo_setenv("SUDO_USER", user_name)) {
-	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
@@ -720,7 +713,6 @@ static void add_env(contiguous)
     /* add the SUDO_UID envariable */
     (void) sprintf(idstr, "%ld", (long) user_uid);
     if (sudo_setenv("SUDO_UID", idstr)) {
-	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
@@ -728,7 +720,6 @@ static void add_env(contiguous)
     /* add the SUDO_GID envariable */
     (void) sprintf(idstr, "%ld", (long) user_gid);
     if (sudo_setenv("SUDO_GID", idstr)) {
-	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
@@ -736,7 +727,6 @@ static void add_env(contiguous)
     /* set PS1 if SUDO_PS1 is set */
     if ((buf = getenv("SUDO_PS1")))
 	if (sudo_setenv("PS1", buf)) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
@@ -873,7 +863,7 @@ void set_perms(perm, sudo_mode)
     int perm;
     int sudo_mode;
 {
-    struct passwd *pw_ent;
+    struct passwd *pw;
 
     switch (perm) {
 	case PERM_ROOT:
@@ -922,44 +912,51 @@ void set_perms(perm, sudo_mode)
 					exit(1);
 				    }
 				} else {
-				    if (!(pw_ent = getpwnam(runas_user))) {
+				    if (!(pw = getpwnam(runas_user))) {
 					(void) fprintf(stderr,
 					    "%s: no passwd entry for %s!\n",
 					    Argv[0], runas_user);
 					exit(1);
 				    }
 
-				    if (setgid(pw_ent->pw_gid)) {
+				    if (setgid(pw->pw_gid)) {
 					(void) fprintf(stderr,
 					    "%s: cannot set gid to %d: ",  
-					    Argv[0], pw_ent->pw_gid);
+					    Argv[0], pw->pw_gid);
 					perror("");
 					exit(1);
 				    }
 
 				    /*
-				     * Initialize group vector only if
-				     * we are going to be a non-root user.
+				     * Initialize group vector and set
+				     * $USER only if we are going to be
+				     * a non-root user.
 				     */
-				    if (strcmp(runas_user, "root") != 0 &&
-					initgroups(runas_user, pw_ent->pw_gid)
-					== -1) {
-					(void) fprintf(stderr,
-					    "%s: cannot set group vector ",
-					    Argv[0]);
-					perror("");
-					exit(1);
+				    if (strcmp(runas_user, "root") != 0) {
+					if (initgroups(runas_user, pw->pw_gid) == -1) {
+					    (void) fprintf(stderr,
+						"%s: cannot set group vector ",
+						Argv[0]);
+					    perror("");
+					    exit(1);
+					}
+					if (sudo_setenv("USER", runas_user)) {
+					    (void) fprintf(stderr,
+						"%s: cannot allocate memory!\n",
+						Argv[0]);
+					    exit(1);
+					}
 				    }
 
-				    if (setuid(pw_ent->pw_uid)) {
+				    if (setuid(pw->pw_uid)) {
 					(void) fprintf(stderr,
 					    "%s: cannot set uid to %d: ",  
-					    Argv[0], pw_ent->pw_uid);
+					    Argv[0], pw->pw_uid);
 					perror("");
 					exit(1);
 				    }
 				    if (sudo_mode & MODE_RESET_HOME)
-					runas_homedir = pw_ent->pw_dir;
+					runas_homedir = pw->pw_dir;
 				}
 
 				break;
