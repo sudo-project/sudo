@@ -6,6 +6,9 @@
 #	description (or NULL)
 #	array of struct def_values if TYPE == T_TUPLE
 #
+# NOTE: for tuples that can be used in a boolean context the first
+#	value corresponds to boolean FALSE and the second to TRUE.
+#
 
 syslog
 	T_LOGFAC|T_BOOL
