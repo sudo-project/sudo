@@ -1,5 +1,5 @@
 /*
- *  CU sudo version 1.3.1
+ *  CU sudo version 1.5.5
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *  Please send bugs, changes, problems to sudo-bugs@cs.colorado.edu
+ *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
  *
  *******************************************************************
  *
@@ -45,16 +45,16 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif /* HAVE_MALLOC_H */
+#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
+#  include <malloc.h>
+#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/param.h>
 #include <netinet/in.h>
 
-#include "pathnames.h"
+#include <pathnames.h>
 #include "compat.h"
 
 #ifndef STDC_HEADERS
@@ -94,7 +94,8 @@ char * getcwd(path, len)
     char * path;				/* path to copy into */
     size_t len;					/* length of path */
 {
-    char buf[MAXPATHLEN+1];			/* temp buffer */
+    char buf[MAXPATHLEN+1];			/* +1 for the newline */
+    size_t blen;				/* length of buf */
 #ifndef HAVE_GETWD
     FILE * pwd;					/* for popen */
 #endif /* HAVE_GETWD */
@@ -104,10 +105,6 @@ char * getcwd(path, len)
 	return(NULL);
     }
 
-#ifdef HAVE_GETWD
-    if (!getwd(buf))
-	return(NULL);
-#else
     /*
      * open a pipe to pwd and read a line
      */
@@ -121,16 +118,21 @@ char * getcwd(path, len)
     }
     pclose(pwd); 
 
-    buf[strlen(buf)-1] = '\0';			/* remove newline */
-#endif /* HAVE_GETWD */
+    blen = strlen(buf);
+    if (buf[blen - 1] == '\n')
+	buf[--blen] = '\0';			/* remove newline */
+    else if (blen >= MAXPATHLEN) {
+	errno = ENAMETOOLONG;			/* only possible w/o newline */
+	return(NULL);
+    }
 
-    if (len < strlen(buf) + 1) {
+    if (len < blen + 1) {
 	errno = ERANGE;
 	return(NULL);
     }
 
     if (path == NULL) {
-	if (!(path = (char *) malloc(MAXPATHLEN+1))) {
+	if (!(path = (char *) malloc(MAXPATHLEN))) {
 	    errno = ENOMEM;
 	    return(NULL);
 	}
