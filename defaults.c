@@ -622,7 +622,7 @@ store_list(str, def, op)
 		break;
 
 	    /* Find end position and perform operation. */
-	    for (end = start; *end && !isblank(*end); end++) 
+	    for (end = start; *end && !isblank(*end); end++)
 		;
 	    list_op(start, end - start, def, op == '-' ? delete : add);
 	} while (*end++ != '\0');

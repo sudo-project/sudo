@@ -43,7 +43,7 @@
 # define OPEN_MAX	256
 #endif
 
-#ifndef INT_MAX 
+#ifndef INT_MAX
 # define INT_MAX	0x7fffffff
 #endif
 

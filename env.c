@@ -68,7 +68,7 @@ static const char rcsid[] = "$Sudo$";
 #define DID_SHELL	0x08
 #undef DID_LOGNAME
 #define DID_LOGNAME	0x10
-#undef DID_USER    
+#undef DID_USER
 #define DID_USER    	0x12
 
 #undef VNULL
