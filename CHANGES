@@ -138,3 +138,6 @@ CHANGES from sudo 1.3
 48) You can now #undef MAILER if you don't run sendmail or the equivalent.
 
 49) AFS support from adamh@austin.ibm.com
+
+50) If you define BOTH_LOGS in sudo.h you can log both via syslog(3) *ans*
+    to a log file.
