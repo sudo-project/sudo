@@ -149,17 +149,22 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "July 30, 2004" "1.6.8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "August  5, 2004" "1.6.8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
-The \fIsudoers\fR file is composed of two types of entries:
-aliases (basically variables) and user specifications
-(which specify who may run what).  The grammar of \fIsudoers\fR
-will be described below in Extended Backus-Naur Form (\s-1EBNF\s0).
-Don't despair if you don't know what \s-1EBNF\s0 is; it is fairly
-simple, and the definitions below are annotated.
+The \fIsudoers\fR file is composed of two types of entries: aliases
+(basically variables) and user specifications (which specify who
+may run what).
+.PP
+When multiple entries match for a user, they are applied in order.
+Where there are conflicting values, the last match is used (which
+is not necessarily the most specific match).
+.PP
+The \fIsudoers\fR grammar will be described below in Extended Backus-Naur
+Form (\s-1EBNF\s0).  Don't despair if you don't know what \s-1EBNF\s0 is; it is
+fairly simple, and the definitions below are annotated.
 .Sh "Quick guide to \s-1EBNF\s0"
 .IX Subsection "Quick guide to EBNF"
 \&\s-1EBNF\s0 is a concise and exact way of describing the grammar of a language.
@@ -349,9 +354,7 @@ a normal command does.
 Certain configuration options may be changed from their default
 values at runtime via one or more \f(CW\*(C`Default_Entry\*(C'\fR lines.  These
 may affect all users on any host, all users on a specific host, a
-specific user, or commands being run as a specific user.  When
-multiple entries match, they are applied in order.  Where there are
-conflicting values, the last value on a matching line takes effect.
+specific user, or commands being run as a specific user.
 .PP
 .Vb 4
 \& Default_Type ::= 'Defaults' |
@@ -387,11 +390,6 @@ Lists have two additional assignment operators, \f(CW\*(C`+=\*(C'\fR and \f(CW\*
 These operators are used to add to and delete from a list respectively.
 It is not an error to use the \f(CW\*(C`\-=\*(C'\fR operator to remove an element
 that does not exist in a list.
-.PP
-Note that since the \fIsudoers\fR file is parsed in order the best place
-to put the Defaults section is after the \f(CW\*(C`Host_Alias\*(C'\fR, \f(CW\*(C`User_Alias\*(C'\fR,
-and \f(CW\*(C`Cmnd_Alias\*(C'\fR specifications but before any \f(CW\*(C`Runas_Alias\*(C'\fR or user
-specifications.
 .PP
 \&\fBFlags\fR:
 .IP "long_otp_prompt" 12
@@ -1000,6 +998,34 @@ wildcards.  This is to make a path like:
 .Ve
 .PP
 match \fI/usr/bin/who\fR but not \fI/usr/bin/X11/xterm\fR.
+.PP
+\&\s-1WARNING:\s0 a pathname with wildcards will \fBnot\fR match a user command
+that consists of a relative path.  In other words, given the
+following \fIsudoers\fR entry:
+.PP
+.Vb 1
+\&    billy  workstation = /usr/bin/*
+.Ve
+.PP
+user billy will be able to run any command in /usr/bin as root, such
+as \fI/usr/bin/w\fR.  The following two command will be allowed (the first
+assumes that \fI/usr/bin\fR is in the user's path):
+.PP
+.Vb 2
+\&    $ sudo w
+\&    $ sudo /usr/bin/w
+.Ve
+.PP
+However, this will not:
+.PP
+.Vb 2
+\&    $ cd /usr/bin
+\&    $ sudo ./w
+.Ve
+.PP
+For this reason you should only \fBgrant\fR access to commands using
+wildcards and never \fBrestrict\fR access using them.  This limitation
+will be removed in a future version of \fBsudo\fR.
 .Sh "Exceptions to wildcard rules"
 .IX Subsection "Exceptions to wildcard rules"
 The following exceptions apply to the above rules:
@@ -1043,6 +1069,13 @@ used as part of a word (e.g. a username or hostname):
 \&'@', '!', '=', ':', ',', '(', ')', '\e'.
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
+Since the \fIsudoers\fR file is parsed in a single pass, order is
+important.  In general, you should structure \fIsudoers\fR such that
+the \f(CW\*(C`Host_Alias\*(C'\fR, \f(CW\*(C`User_Alias\*(C'\fR, and \f(CW\*(C`Cmnd_Alias\*(C'\fR specifications
+come first, followed by any \f(CW\*(C`Default_Entry\*(C'\fR lines, and finally the
+\&\f(CW\*(C`Runas_Alias\*(C'\fR and user specifications.  The basic rule of thumb
+is you cannot reference an Alias that has not already been defined.
+.PP
 Below are example \fIsudoers\fR entries.  Admittedly, some of
 these are a bit contrived.  First, we define our \fIaliases\fR:
 .PP
@@ -1090,7 +1123,7 @@ Here we override some of the compiled in default values.  We want
 \&\fBsudo\fR to log via \fIsyslog\fR\|(3) using the \fIauth\fR facility in all
 cases.  We don't want to subject the full time staff to the \fBsudo\fR
 lecture, user \fBmillert\fR need not give a password, and we don't
-want to set the \f(CW\*(C`LOGNAME\*(C'\fR or \f(CW\*(C`USER\*(C'\fR environment variables when
+want to reset the \f(CW\*(C`LOGNAME\*(C'\fR or \f(CW\*(C`USER\*(C'\fR environment variables when
 running commands as root.  Additionally, on the machines in the
 \&\fI\s-1SERVERS\s0\fR \f(CW\*(C`Host_Alias\*(C'\fR, we keep an additional local log file and
 make sure we log the year in each log line since the log entries
