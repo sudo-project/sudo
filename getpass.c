@@ -16,6 +16,12 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+/*
+ * This version of getpass() is known to work under Ultrix 4.2/4.3, 4.3 BSD,
+ * HP-UX 8.07, AIX 3.1/3.2, and Iirix 4.05F.  It should be easy to change it
+ * to suit your tty interface.
+ */
+
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)getpass.c	based on 5.3 (Berkeley) 9/22/88";
 #endif /* LIBC_SCCS and not lint */
