@@ -18,3 +18,7 @@ TODO list
     can specify uid, gid(s) and part/all of the environment.
 
 09) Add default options to sudoers file (umask, def uid, def gids, dir, PATH)
+
+10) put BROKEN_GETPASS in sudo.h?  Need it somewhere...
+
+11) clean up aclocal.m4 & configure.in (use uname...)
