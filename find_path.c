@@ -134,7 +134,12 @@ int find_path(file, command, ocommand)
 		exit(1);
 	    }
 	}
+#ifdef USE_REALPATH
 	return((sudo_realpath(file, *command)) ? TRUE : FALSE);
+#else
+	*command = *ocommand;
+	return((sudo_goodpath(file)) ? TRUE : FALSE);
+#endif /* USE_REALPATH */
     }
 
     /*
@@ -209,13 +214,13 @@ int find_path(file, command, ocommand)
  *  success and NULL on failure (or if file is not executable).
  */
 
+#ifdef USE_REALPATH
 static char * realpath_exec(path, file, command)
     char * path;
     char * file;
     char * command;
 {
     char fn[MAXPATHLEN+1];		/* filename (path + file) */
-    struct stat statbuf;		/* for stat(2) */
 
     (void) sprintf(fn, "%s/%s", path, file);
 
@@ -223,15 +228,25 @@ static char * realpath_exec(path, file, command)
     errno = 0;
     if (sudo_realpath(fn, command)) {
 	/* stat the file to make sure it is executable and a file */
-	if (stat(command, &statbuf) == 0 && S_ISREG(statbuf.st_mode) &&
-	    (statbuf.st_mode & 0000111))
+	if (sudo_goodpath(command))
 	    return(command);
     } else if (errno && errno != ENOENT && errno != ENOTDIR && errno != EINVAL
 	&& errno != EPERM && errno != EACCES) {
-	/* sudo_realpath() got an error */
+	/* sudo_realpath() got an abnormal error */
 	(void) fprintf(stderr, "sudo: Error resolving %s: ", fn);
 	perror("");
     }
 
     return(NULL);
 }
+#else
+static char * realpath_exec(path, file, command)
+    char * path;
+    char * file;
+    char * command;
+{
+    (void) sprintf(command, "%s/%s", path, file);
+
+    return(sudo_goodpath(command));
+}
+#endif /* USE_REALPATH */
