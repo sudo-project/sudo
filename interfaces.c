@@ -108,16 +108,12 @@ void load_interfaces()
     struct ifconf *ifconf;
     struct ifreq *ifr, ifr_tmp;
     struct sockaddr_in *sin;
-    unsigned int localhost_mask;
     int sock, n, i;
     size_t len = sizeof(struct ifconf) + BUFSIZ;
     char *previfname = "", *ifconf_buf = NULL;
 #ifdef _ISC
     struct strioctl strioctl;
 #endif /* _ISC */
-
-    /* so we can skip localhost and its ilk */
-    localhost_mask = inet_addr("127.0.0.0");
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
@@ -217,6 +213,7 @@ void load_interfaces()
 
 	/* get the netmask */
 	(void) memset(&ifr_tmp, 0, sizeof(ifr_tmp));
+	strncpy(ifr_tmp.ifr_name, ifr->ifr_name, sizeof(ifr_tmp.ifr_name) - 1);
 #ifdef SIOCGIFNETMASK
 #ifdef _ISC
 	STRSET(SIOCGIFNETMASK, (caddr_t) &ifr_tmp, sizeof(ifr_tmp));
