@@ -236,7 +236,7 @@ static int check_timestamp()
 	    now = time((time_t *) NULL);
 	    if (TIMEOUT && now - statbuf.st_mtime < 60 * TIMEOUT)
 		/* check for bogus time on the stampfile */
-		if (statbuf.st_mtime > now + 60 * TIMEOUT) {
+		if (statbuf.st_mtime > now + 60 * TIMEOUT * 2) {
 		    timestamp_is_old = 2;	/* bogus time value */
 		    log_error(BAD_STAMPFILE);
 		    inform_user(BAD_STAMPFILE);
