@@ -766,6 +766,7 @@ check_sudoers()
 	if (chmod(_PATH_SUDOERS, SUDOERS_MODE) == 0) {
 	    (void) fprintf(stderr, "%s: fixed mode on %s\n",
 		Argv[0], _PATH_SUDOERS);
+	    statbuf.st_mode |= SUDOERS_MODE;
 	    if (statbuf.st_gid != SUDOERS_GID) {
 		if (!chown(_PATH_SUDOERS,(uid_t) -1,SUDOERS_GID)) {
 		    (void) fprintf(stderr, "%s: set group on %s\n",
