@@ -788,7 +788,7 @@ dnl Options for --enable
 dnl
 
 AC_MSG_CHECKING(whether to disable shadow password support)
-AC_ARG_ENABLE(tgetpass,
+AC_ARG_ENABLE(shadow,
 [  --disable-shadow        Never use shadow passwords],
 [ case "$enableval" in
     yes)	AC_MSG_RESULT(no)
@@ -1078,7 +1078,6 @@ case "$host" in
 
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_LIB(security, getprpwnam, SECUREWARE=1)
-		    AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"; SECUREWARE=1])
 		    CHECKSHADOW="false"
 		fi
 		if test -n "$SECUREWARE"; then
