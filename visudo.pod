@@ -189,4 +189,4 @@ the editor used by B<visudo> allows shell escapes.
 
 =head1 SEE ALSO
 
-vi(1), sudo(8), vipw(8)
+vi(1), sudoers(5), sudo(8), vipw(8)
