@@ -135,7 +135,7 @@ static void syslog_wrapper(pri, fmt, arg1, arg2)
 void log_error(code)
     int code;
 {
-    char *p, *cmnd_args = NULL;
+    char *p;
     int count;
     time_t now;
 #if (LOGGING & SLOG_FILE)
@@ -146,14 +146,6 @@ void log_error(code)
     int pri = Syslog_priority_NO;	/* syslog priority, assume the worst */
     char *tmp, save;
 #endif /* LOGGING & SLOG_SYSLOG */
-
-    /* Get the command line args from the environment */
-    if (NewArgc > 1 && (cmnd_args = getenv("SUDO_COMMAND"))) {
-	if ((cmnd_args = strchr(cmnd_args, ' ')))
-	    cmnd_args++;
-	else
-	    cmnd_args = NULL;
-    }
 
     /*
      * Allocate enough memory for logline so we won't overflow it
@@ -552,8 +544,6 @@ static RETSIGTYPE reapchild(sig)
 void inform_user(code)
     int code;
 {
-    char *cmnd_args = NULL;
-
     switch (code) {
 	case VALIDATE_NO_USER:
 	    (void) fprintf(stderr,
@@ -562,13 +552,6 @@ void inform_user(code)
 	    break;
 
 	case VALIDATE_NOT_OK:
-	    if (NewArgc > 1 && (cmnd_args = getenv("SUDO_COMMAND"))) {
-		if ((cmnd_args = strchr(cmnd_args, ' ')))
-		    cmnd_args++;
-		else
-		    cmnd_args = NULL;
-	    }
-
 	    (void) fprintf(stderr,
 		"Sorry, user %s is not allowed to execute \"%s",
 		user_name, cmnd);
