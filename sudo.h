@@ -168,7 +168,6 @@ int validate		__P((int));
 void set_perms		__P((int));
 void remove_timestamp	__P((void));
 void load_interfaces	__P((void));
-struct passwd *sudo_getpwuid	__P((uid_t));
 
 
 /*
