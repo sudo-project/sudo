@@ -483,7 +483,7 @@ static int parse_args()
 #else
     if (Argc < 2)			/* no options and no command */
 	usage(1);
-#endif
+#endif /* SHELL_IF_NO_ARGS */
 
     while (Argc > 1 && Argv[1][0] == '-') {
 	if (Argv[1][1] != '\0' && Argv[1][2] != '\0') {
@@ -696,7 +696,7 @@ static void load_cmnd(sudo_mode)
 	}
 	*(pos - 1) = '\0';
 
-	/* Let's not be wasteful with our memory */
+	/* Let's not be wasteful with our memory... */
 	if ((pos = realloc(cmnd_args, args_size - args_remainder)))
 	    cmnd_args = pos;
     }
