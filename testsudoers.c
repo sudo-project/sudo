@@ -82,7 +82,6 @@ static const char rcsid[] = "$Sudo$";
 /*
  * Prototypes
  */
-void init_parser	__P((void));
 void dumpaliases	__P((void));
 void set_perms_dummy	__P((int));
 
@@ -426,7 +425,7 @@ main(argc, argv)
     load_interfaces();
 
     /* Allocate space for data structures in the parser. */
-    init_parser();
+    init_parser("sudoers");
 
     if (yyparse() || parse_error) {
 	(void) printf("doesn't parse.\n");
