@@ -35,10 +35,6 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "config.h"
-
-#ifndef HAVE_STRERROR
-
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
@@ -58,5 +54,3 @@ strerror(n)
     else
 	return("Unknown error");
 }
-
-#endif /* HAVE_STRERROR */
