@@ -730,8 +730,8 @@ B<err>, B<info>, B<notice>, and B<warning>.
 
 =head2 User Specification
 
- User_Spec ::= User_list Host_List '=' Cmnd_Spec_List \
-	       (':' User_Spec)*
+ User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \
+	       (':' Host_List '=' Cmnd_Spec_List)*
 
  Cmnd_Spec_List ::= Cmnd_Spec |
 		    Cmnd_Spec ',' Cmnd_Spec_List
