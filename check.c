@@ -273,7 +273,7 @@ static void update_timestamp()
     utp[0] = utp[1] = time(NULL);
 #endif /* HAVE_UTIME_H */
 #else
-    struct utimbuf *utp = (utimbuf *) NULL;
+    struct utimbuf *utp = (struct utimbuf *) NULL;
 #endif /* HAVE_UTIME && !HAVE_UTIME_NULL */
 
     /* become root */
