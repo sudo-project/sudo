@@ -1167,7 +1167,7 @@ the following as root:
 
 If the resulting output contains a line that begins with:
 
-    File containing dummy exec functions
+    File containing dummy exec functions:
 
 then B<sudo> may be able to replace the exec family of functions
 in the standard library with its own that simply return an error.
@@ -1184,6 +1184,13 @@ To enable I<noexec> for a command, use the C<NOEXEC> tag as documented
 in the User Specification section above.  If you are unsure whether
 or not your system is capable of supporting I<noexec> you can always
 just try it out and see if it works.
+
+Note that disabling shell escapes is not a panacea.  Programs running
+as root are still capable of many potentially hazardous operations
+(such as chaning or overwriting files) that could lead to unintended
+privilege escalation.  In the specific case of an editor, a safer
+approach is to give the user permission to run the B<sudoedit>
+program.
 
 =head1 CAVEATS
 
