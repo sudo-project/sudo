@@ -1036,4 +1036,6 @@ Sudo 1.5.8p2 released.
 
 325) Use new emalloc/erealloc/estrdup functions (catch errors and exit).
 
+326) New PAM code that should work on both Solaris and Linux.
+
 Sudo 1.5.9 released.
