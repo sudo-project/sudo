@@ -412,6 +412,12 @@ Special features/options:
 	unless the "-u" option is used).  This option effectively makes the
 	"-s" flag imply "-H".
 
+  --disable-path-info
+	Normally, sudo will tell the user when a command could not be found
+	in their $PATH.  Some sites may wish to disable this as it could
+	be used to gather information on the location of executables that
+	the normal user does not have access to.
+
   --disable-sia
 	Disable SIA support.  This is the "Security Integration Architecture"
 	on Digital UNIX.

@@ -168,9 +168,16 @@ struct generic_alias {
  * Boolean values
  */
 #undef TRUE
-#define TRUE                     0x01
+#define TRUE                     1
 #undef FALSE
-#define FALSE                    0x00
+#define FALSE                    0
+
+/*
+ * find_path()/load_cmnd() return values
+ */
+#define FOUND                    1
+#define NOT_FOUND                0
+#define NOT_FOUND_DOT		-1
 
 /*
  * Various modes sudo can be in (based on arguments) in octal
@@ -221,7 +228,7 @@ int putenv		__P((const char *));
 char *sudo_goodpath	__P((const char *));
 int sudo_setenv		__P((char *, char *));
 char *tgetpass		__P((char *, int));
-char * find_path	__P((char *));
+int find_path		__P((char *, char **));
 void log_error		__P((int));
 void inform_user	__P((int));
 void check_user		__P((void));

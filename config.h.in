@@ -395,6 +395,9 @@
 /* Define if you want to ignore '.' and '' in $PATH */
 #undef IGNORE_DOT_PATH
 
+/* Define if you want "command not allowed" instead of "command not found" */
+#undef DONT_LEAK_PATH_INFO
+
 /* Define SHORT_MESSAGE for a short lecture or NO_MESSAGE for none.  */
 #undef SHORT_MESSAGE
 #undef NO_MESSAGE

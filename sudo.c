@@ -179,7 +179,7 @@ int main(argc, argv)
     int argc;
     char **argv;
 {
-    int rtn, found_cmnd;
+    int rtn, cmnd_status = FOUND;
     int sudo_mode = MODE_RUN;
     extern char ** environ;
 
@@ -293,7 +293,7 @@ int main(argc, argv)
 #endif /* SECURE_PATH */
 
     if ((sudo_mode & MODE_RUN)) {
-	found_cmnd = load_cmnd(sudo_mode); /* load the cmnd global variable */
+	cmnd_status = load_cmnd(sudo_mode); /* load the cmnd global variable */
     } else if (sudo_mode == MODE_KILL) {
 	remove_timestamp();	/* remove the timestamp ticket file */
 	exit(0);
@@ -301,18 +301,18 @@ int main(argc, argv)
 
     add_env(!(sudo_mode & MODE_SHELL));	/* add in SUDO_* envariables */
 
-    /* validate the user but don't search for "validate" */
+    /* validate the user but don't search for pseudo-commands */
     rtn = validate((sudo_mode != MODE_VALIDATE && sudo_mode != MODE_LIST));
 
     switch (rtn) {
 
 	case VALIDATE_OK:
-	case VALIDATE_OK_NOPASS:
-	    if (rtn != VALIDATE_OK_NOPASS) 
-		check_user();
+	    check_user();
+	    /* fallthrough */
 
+	case VALIDATE_OK_NOPASS:
 	    /* finally tell the user if the command did not exist */
-	    if ((sudo_mode & MODE_RUN) && !found_cmnd) {
+	    if (cmnd_status != FOUND) {
 		(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0],
 			       cmnd);
 		exit(1);
@@ -372,9 +372,22 @@ int main(argc, argv)
 	    exit(-1);
 	    break;
 
+	case VALIDATE_NOT_OK:
+	    check_user();
+
+#ifndef DONT_LEAK_PATH_INFO
+	    if (cmnd_status == NOT_FOUND_DOT)
+		(void) fprintf(stderr, "%s: ignoring %s found in '.'\nUse `sudo ./%s' if this is the %s you wish to run.\n", Argv[0], cmnd, cmnd);
+	    else if (cmnd_status == NOT_FOUND)
+		(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0],
+		    cmnd);
+	    log_error(rtn);
+	    exit(1);
+	    break;
+#endif /* DONT_LEAK_PATH_INFO */
+
 	default:
 	    log_error(rtn);
-	    set_perms(PERM_FULL_USER, sudo_mode);
 	    inform_user(rtn);
 	    exit(1);
 	    break;
@@ -745,6 +758,8 @@ static void add_env(contiguous)
 static int load_cmnd(sudo_mode)
     int sudo_mode;
 {
+    int retval;
+
     if (strlen(NewArgv[0]) >= MAXPATHLEN) {
 	errno = ENAMETOOLONG;
 	(void) fprintf(stderr, "%s: %s: Pathname too long\n", Argv[0],
@@ -755,11 +770,9 @@ static int load_cmnd(sudo_mode)
     /*
      * Resolve the path
      */
-    if ((cmnd = find_path(NewArgv[0])) == NULL) {
+    if ((retval = find_path(NewArgv[0], &cmnd)) != FOUND)
 	cmnd = NewArgv[0];
-	return(0);
-    } else
-	return(1);
+    return(retval);
 }
 
 

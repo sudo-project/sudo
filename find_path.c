@@ -86,27 +86,28 @@ extern char *strdup	__P((const char *));
  *  find_path()
  *
  *  this function finds the full pathname for a command and
- *  stores it in a statically allocated array, returning a pointer
- *  to the array.
+ *  stores it in a statically allocated array, filling in a pointer
+ *  to the array.  Returns FOUND if the command was found, NOT_FOUND
+ *  if it was not found, or NOT_FOUND_DOT if it would have been found
+ *  but it is in '.' and IGNORE_DOT_PATH is in effect.
  */
 
-char * find_path(file)
-    char *file;			/* file to find */
+int find_path(infile, outfile)
+    char *infile;		/* file to find */
+    char **outfile;		/* result parameter */
 {
     static char command[MAXPATHLEN]; /* qualified filename */
     register char *n;		/* for traversing path */
     char *path = NULL;		/* contents of PATH env var */
     char *origpath;		/* so we can free path later */
     char *result = NULL;	/* result of path/file lookup */
-#ifndef IGNORE_DOT_PATH
     int checkdot = 0;		/* check current dir? */
-#endif /* IGNORE_DOT_PATH */
 
     command[0] = '\0';
 
-    if (strlen(file) >= MAXPATHLEN) {
+    if (strlen(infile) >= MAXPATHLEN) {
 	errno = ENAMETOOLONG;
-	(void) fprintf(stderr, "%s:  path too long:  %s\n", Argv[0], file);
+	(void) fprintf(stderr, "%s: path too long: %s\n", Argv[0], infile);
 	exit(1);
     }
 
@@ -116,10 +117,11 @@ char * find_path(file)
      * We really want to fall back if !sudo_goodpath() but then
      * the error is "not found" -- this way we get the correct error.
      */
-    if (strchr(file, '/')) {
-	(void) strcpy(command, file);
+    if (strchr(infile, '/')) {
+	(void) strcpy(command, infile);
 	if (sudo_goodpath(command)) {
-	    return(command);
+	    *outfile = command;
+	    return(FOUND);
 	} else {
 	    (void) fprintf(stderr, "%s: %s: ", Argv[0], command);
 	    perror("");
@@ -131,13 +133,13 @@ char * find_path(file)
      * grab PATH out of environment and make a local copy
      */
     if ((path = getenv("PATH")) == NULL)
-	return(NULL);
+	return(NOT_FOUND);
 
     if ((path = (char *) strdup(path)) == NULL) {
 	(void) fprintf(stderr, "%s: out of memory!\n", Argv[0]);
 	exit(1);
     }
-    origpath=path;
+    origpath = path;
 
     /* XXX use strtok() */
     do {
@@ -149,9 +151,7 @@ char * find_path(file)
 	 * things like using './' or './/' 
 	 */
 	if (*path == '\0' || (*path == '.' && *(path + 1) == '\0')) {
-#ifndef IGNORE_DOT_PATH
 	    checkdot = 1;
-#endif /* IGNORE_DOT_PATH */
 	    path = n + 1;
 	    continue;
 	}
@@ -159,27 +159,33 @@ char * find_path(file)
 	/*
 	 * resolve the path and exit the loop if found
 	 */
-	if (strlen(path) + strlen(file) + 1 >= MAXPATHLEN) {
-	    (void) fprintf(stderr, "%s:  path too long:  %s\n", Argv[0], file);
+	if (strlen(path) + strlen(infile) + 1 >= MAXPATHLEN) {
+	    (void) fprintf(stderr, "%s: path too long: %s\n", Argv[0], infile);
 	    exit(1);
 	}
-	(void) sprintf(command, "%s/%s", path, file);
+	(void) sprintf(command, "%s/%s", path, infile);
 	if ((result = sudo_goodpath(command)))
 	    break;
 
 	path = n + 1;
 
     } while (n);
-
-#ifndef IGNORE_DOT_PATH
-    /*
-     * check current dir if dot was in the PATH
-     */
-    if (!result && checkdot)
-	result = sudo_goodpath(file);
-#endif /* IGNORE_DOT_PATH */
-
     (void) free(origpath);
 
-    return(result);
+    /*
+     * Check current dir if dot was in the PATH
+     */
+    if (!result && checkdot) {
+	result = sudo_goodpath(infile);
+#ifdef IGNORE_DOT_PATH
+	if (result)
+	    return(NOT_FOUND_DOT);
+#endif /* IGNORE_DOT_PATH */
+    }
+
+    if (result) {
+	*outfile = result;
+	return(FOUND);
+    } else
+	return(NOT_FOUND);
 }
