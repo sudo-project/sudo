@@ -73,9 +73,21 @@ int check_secureware(pass)
 #ifdef __alpha
     extern int crypt_type;
 
-    if (crypt_type != INT_MAX &&
-	strcmp(user_passwd, dispcrypt(pass, user_passwd, crypt_type)) == 0)
+    if (crypt_type == INT_MAX)
+	return(0);			/* no shadow */
+
+#  ifdef HAVE_DISPCRYPT
+    if (strcmp(user_passwd, dispcrypt(pass, user_passwd, crypt_type)) == 0)
 	return(1);
+#  else
+    if (crypt_type == AUTH_CRYPT_BIGCRYPT) {
+	if (strcmp(user_passwd, bigcrypt(pass, user_passwd)) == 0)
+	    return(1);
+    } else if (crypt_type == AUTH_CRYPT_CRYPT16) {
+	if (strcmp(user_passwd, crypt(pass, user_passwd)) == 0)
+	    return(1);
+    }
+#  endif /* HAVE_DISPCRYPT */
 #elif defined(HAVE_BIGCRYPT)
     if (strcmp(user_passwd, bigcrypt(pass, user_passwd)) == 0)
 	return(1);
