@@ -1627,6 +1627,7 @@ dnl Header file checks
 dnl
 AC_HEADER_STDC
 AC_HEADER_DIRENT
+AC_HEADER_TIME
 AC_CHECK_HEADERS(malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h)
 dnl ultrix termio/termios are broken
 if test "$OS" != "ultrix"; then
@@ -1653,8 +1654,12 @@ AC_CHECK_TYPES([sig_atomic_t], , [AC_DEFINE(sig_atomic_t, int)], [#include <sys/
 AC_CHECK_TYPES([sigaction_t], [AC_DEFINE(HAVE_SIGACTION_T)], ,[#include <sys/types.h>
 #include <signal.h>])
 AC_CHECK_TYPE([struct timespec], [AC_DEFINE(HAVE_TIMESPEC)], , [#include <sys/types.h>
-#include <sys/time.h>
-#include <time.h>])
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# include <sys/time.h>
+#endif])
 SUDO_TYPE_SIZE_T
 SUDO_TYPE_SSIZE_T
 SUDO_TYPE_DEV_T

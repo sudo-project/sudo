@@ -88,7 +88,7 @@
 /* Define to 1 if you have the `dispcrypt' function. */
 #undef HAVE_DISPCRYPT
 
-/* [Define to 1 if your glob.h defines the GLOB_BRACE and GLOB_TILDE flags. */
+/* Define to 1 if your glob.h defines the GLOB_BRACE and GLOB_TILDE flags. */
 #undef HAVE_EXTENDED_GLOB
 
 /* Define to 1 if you have the `flock' function. */
@@ -251,9 +251,6 @@
 /* Define to 1 if you use SecurID for authentication. */
 #undef HAVE_SECURID
 
-/* Define to 1 if you have the `seteuid' function. */
-#undef HAVE_SETEUID
-
 /* Define to 1 if you have the `setproctitle' function. */
 #undef HAVE_SETPROCTITLE
 
@@ -371,8 +368,8 @@
 /* Define to 1 if you have struct timespec in sys/time.h */
 #undef HAVE_TIMESPEC
 
-/* Define to 1 if you have a timespecsub macro or function that takes
-   two arguments (not three) */
+/* Define to 1 if you have a timespecsub macro or function that takes two
+   arguments (not three) */
 #undef HAVE_TIMESPECSUB2
 
 /* Define to 1 if you have the `tzset' function. */
@@ -512,6 +509,9 @@
 
 /* The number of minutes before sudo asks for a password again. */
 #undef TIMEOUT
+
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
+#undef TIME_WITH_SYS_TIME
 
 /* The number of tries a user gets to enter their password. */
 #undef TRIES_FOR_PASSWORD
