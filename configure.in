@@ -1709,7 +1709,8 @@ if test -z "$BROKEN_GETCWD"; then
 fi
 AC_CHECK_FUNCS(glob, [AC_MSG_CHECKING(for GLOB_BRACE and GLOB_TILDE in glob.h)
 AC_TRY_COMPILE([#include <glob.h>], [int i = GLOB_BRACE | GLOB_TILDE; (void)i;],
-    [AC_MSG_RESULT(yes)], [AC_LIBOBJ(glob)]
+    [AC_DEFINE(HAVE_EXTENDED_GLOB)
+    AC_MSG_RESULT(yes)], [AC_LIBOBJ(glob)]
     [AC_MSG_RESULT(no)])], [AC_LIBOBJ(glob)])
 AC_CHECK_FUNCS(lockf flock, [break])
 AC_CHECK_FUNCS(waitpid wait3, [break])
@@ -2257,6 +2258,7 @@ AH_TEMPLATE(HAVE_BSD_AUTH_H, [Define to 1 if you use BSD authentication.])
 AH_TEMPLATE(HAVE_DCE, [Define to 1 if you use OSF DCE.])
 AH_TEMPLATE(HAVE_DD_FD, [Define to 1 if your `DIR' contains dd_fd.])
 AH_TEMPLATE(HAVE_DIRFD, [Define to 1 if you have the `dirfd' function or macro.])
+AH_TEMPLATE(HAVE_EXTENDED_GLOB, [Define to 1 if your glob.h defines the GLOB_BRACE and GLOB_TILDE flags.])
 AH_TEMPLATE(HAVE_FNMATCH, [Define to 1 if you have the `fnmatch' function.])
 AH_TEMPLATE(HAVE_FWTK, [Define to 1 if you use the FWTK authsrv daemon.])
 AH_TEMPLATE(HAVE_GETAUTHUID, [Define to 1 if you have the `getauthuid' function. (ULTRIX 4.x  shadow passwords)])

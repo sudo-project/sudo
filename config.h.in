@@ -91,6 +91,9 @@
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
 
+/* [Define to 1 if your glob.h defines the GLOB_BRACE and GLOB_TILDE flags. */
+#undef HAVE_EXTENDED_GLOB
+
 /* Define to 1 if you have the `flock' function. */
 #undef HAVE_FLOCK
 
