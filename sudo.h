@@ -107,14 +107,14 @@ extern int top;
  *  If the result is TRUE, the argv is NOT logged with the error message
  */
 #define GLOBAL_PROBLEM           0x20
-#define GLOBAL_NO_PW_ENT         ( 0x01 | GLOBAL_PROBLEM )
-#define GLOBAL_NO_HOSTNAME       ( 0x02 | GLOBAL_PROBLEM )
-#define GLOBAL_HOST_UNREGISTERED ( 0x03 | GLOBAL_PROBLEM )
-#define PASSWORD_NOT_CORRECT     0x04
-#define PASSWORDS_NOT_CORRECT    0x05
 #define ALL_SYSTEMS_GO           0x00
-#define NO_SUDOERS_FILE          ( 0x06 | GLOBAL_PROBLEM )
-#define GLOBAL_NO_AUTH_ENT       ( 0x07 | GLOBAL_PROBLEM )
+#define GLOBAL_NO_PW_ENT         ( 0x01 | GLOBAL_PROBLEM )
+#define GLOBAL_NO_SPW_ENT        ( 0x02 | GLOBAL_PROBLEM )
+#define GLOBAL_NO_HOSTNAME       ( 0x03 | GLOBAL_PROBLEM )
+#define GLOBAL_HOST_UNREGISTERED ( 0x04 | GLOBAL_PROBLEM )
+#define PASSWORD_NOT_CORRECT     0x05
+#define PASSWORDS_NOT_CORRECT    0x06
+#define NO_SUDOERS_FILE          ( 0x07 | GLOBAL_PROBLEM )
 #define BAD_SUDOERS_FILE         ( 0x08 | GLOBAL_PROBLEM )
 #define SUDOERS_NO_OWNER         ( 0x09 | GLOBAL_PROBLEM )
 #define SUDOERS_WRONG_OWNER      ( 0x0A | GLOBAL_PROBLEM )
@@ -151,6 +151,16 @@ extern int top;
 #define PERM_USER                0x02
 #define PERM_FULL_USER           0x03
 #define PERM_SUDOERS             0x04
+
+/*
+ * Shadow password types
+ */
+#define SPW_NONE		0x00
+#define SPW_SECUREWARE		0x01
+#define SPW_HPUX9		0x02
+#define SPW_SUNOS4		0x03
+#define SPW_SVR4		0x04
+#define SPW_ULTRIX4		0x05
 
 /*
  * Prototypes
