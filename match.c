@@ -273,8 +273,9 @@ alias_matches(name, type, v1, v2)
 	    case CMNDALIAS:
 		return(cmnd_matches(v1, v2, a->first_member));
 	    case USERALIAS:
-	    case RUNASALIAS:
 		return(user_matches(v1, a->first_member));
+	    case RUNASALIAS:
+		return(runas_matches(v1, a->first_member));
 	}
     }
     return(UNSPEC);
