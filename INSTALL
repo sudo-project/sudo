@@ -16,7 +16,9 @@ INSTALL NOTES
 
    NOTE2: if you use AFS, you need to run configure with --with-AFS
 
-1) Read sudo.h to enable/disable the options you may or may not want.
+1) Read the OPTIONS file and then edit options.h to enable/disable the
+   options you may or may not want.  You should not have to edit
+   sudo.h or config.h.
 
 2) Type make.  If configure did its job correctly there won't be any
    problems.  If this doesn't work, take a look at the file PORTING for
