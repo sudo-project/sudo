@@ -51,6 +51,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 
+#include <auth.h>
 #include <firewall.h>
 
 #include "sudo.h"
