@@ -2753,11 +2753,6 @@ EOF
 	eval libname=\"$libname_spec\"
 	;;
       *)
-	if test "$module" = no; then
-	  $echo "$modename: libtool library \`$output' must begin with \`lib'" 1>&2
-	  $echo "$help" 1>&2
-	  exit 1
-	fi
 	if test "$need_lib_prefix" != no; then
 	  # Add the "lib" prefix for modules if required
 	  name=`$echo "X$outputname" | $Xsed -e 's/\.la$//'`
