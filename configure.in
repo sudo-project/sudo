@@ -1201,6 +1201,8 @@ case "$host" in
 		    with_passwd=no
 		    AUTH_OBJS="sia.o"
 		fi
+		mansectsu=8
+		mansectform=4
 		;;
     *-*-irix*)
 		# configure may not think irix has stdc headers
