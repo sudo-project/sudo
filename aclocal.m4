@@ -269,8 +269,8 @@ fi
 
 dnl
 dnl check for max length of uid_t in string representation.
-dnl if MAXUID exists there is no real way to see if uid_t is
-dnl signed or not so we add one on the off chance that it is.
+dnl we can't really trust UID_MAX or MAXUID since they may exist
+dnl only for backwards compatibility.
 dnl
 AC_DEFUN(SUDO_UID_T_LEN,
 [AC_REQUIRE([AC_TYPE_UID_T])
@@ -285,16 +285,8 @@ AC_TRY_RUN(
 #include <sys/param.h>
 main() {
   FILE *f;
-  char b[BUFSIZ];
-#ifdef UID_MAX
-  uid_t u = UID_MAX;
-#else
-# ifdef MAXUID
-  uid_t u = MAXUID;
-# else
+  char b[1024];
   uid_t u = (uid_t) -1;
-# endif
-#endif
 
   if ((f = fopen("conftestdata", "w")) == NULL)
     exit(1);
