@@ -268,7 +268,7 @@ AC_ARG_WITH(authenticate, [  --with-authenticate     enable AIX general authenti
     yes)	AC_DEFINE(HAVE_AUTHENTICATE)
 		AC_MSG_CHECKING(whether to use AIX general authentication)
 		AC_MSG_RESULT(yes)
-		AUTH_OBJS="authenticate.o"
+		AUTH_OBJS="aix_auth.o"
 		;;
     no)		;;
     *)		echo "Sorry, --with-authenticate does not take an argument."

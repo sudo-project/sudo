@@ -976,7 +976,7 @@ EOF
 		echo $ac_n "checking whether to use AIX general authentication""... $ac_c" 1>&6
 echo "configure:978: checking whether to use AIX general authentication" >&5
 		echo "$ac_t""yes" 1>&6
-		AUTH_OBJS="authenticate.o"
+		AUTH_OBJS="aix_auth.o"
 		;;
     no)		;;
     *)		echo "Sorry, --with-authenticate does not take an argument."
