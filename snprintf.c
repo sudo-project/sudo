@@ -87,13 +87,6 @@ struct state {
   /* XXX - methods */
 };
 
-#ifndef MIN
-#define MIN(a,b) (((a)<(b))?(a):(b))
-#endif
-#ifndef MAX
-#define MAX(a,b) (((a)>(b))?(a):(b))
-#endif
-
 #ifndef HAVE_VSNPRINTF
 static int
 sn_reserve (state, n)
@@ -136,7 +129,7 @@ as_reserve (state, n)
     state->sz = MAX(state->sz * 2, state->sz + n);
     if (state->max_sz)
       state->sz = MIN(state->sz, state->max_sz);
-    tmp = realloc (state->str, state->sz);
+    tmp = (unsigned char *) realloc (state->str, state->sz);
     if (tmp == NULL)
       return 1;
     state->str = tmp;
@@ -314,13 +307,21 @@ append_char(state, arg, width, flags)
  * This can't be made into a function...
  */
 
-#define PARSE_INT_FORMAT(res, arg, unsig) \
+#define PARSE_INT_FORMAT(res, arg) \
 if (long_flag) \
-     res = va_arg(arg, unsig long); \
+     res = va_arg(arg, long); \
 else if (short_flag) \
-     res = va_arg(arg, unsig short); \
+     res = va_arg(arg, short); \
 else \
-     res = va_arg(arg, unsig int)
+     res = va_arg(arg, int)
+
+#define PARSE_UINT_FORMAT(res, arg) \
+if (long_flag) \
+     res = va_arg(arg, unsigned long); \
+else if (short_flag) \
+     res = va_arg(arg, unsigned short); \
+else \
+     res = va_arg(arg, unsigned int)
 
 /*
  * zyxprintf - return 0 or -1
@@ -420,7 +421,7 @@ xyzprintf (state, char_format, ap)
 	unsigned long num;
 	int minusp = 0;
 
-	PARSE_INT_FORMAT(arg, ap, signed);
+	PARSE_INT_FORMAT(arg, ap);
 
 	if (arg < 0) {
 	  minusp = 1;
@@ -436,7 +437,7 @@ xyzprintf (state, char_format, ap)
       case 'u' : {
 	unsigned long arg;
 
-	PARSE_INT_FORMAT(arg, ap, unsigned);
+	PARSE_UINT_FORMAT(arg, ap);
 
 	if (append_number (state, arg, 10, "0123456789",
 			   width, prec, flags, 0))
@@ -446,7 +447,7 @@ xyzprintf (state, char_format, ap)
       case 'o' : {
 	unsigned long arg;
 
-	PARSE_INT_FORMAT(arg, ap, unsigned);
+	PARSE_UINT_FORMAT(arg, ap);
 
 	if (append_number (state, arg, 010, "01234567",
 			   width, prec, flags, 0))
@@ -456,7 +457,7 @@ xyzprintf (state, char_format, ap)
       case 'x' : {
 	unsigned long arg;
 
-	PARSE_INT_FORMAT(arg, ap, unsigned);
+	PARSE_UINT_FORMAT(arg, ap);
 
 	if (append_number (state, arg, 0x10, "0123456789abcdef",
 			   width, prec, flags, 0))
@@ -466,7 +467,7 @@ xyzprintf (state, char_format, ap)
       case 'X' :{
 	unsigned long arg;
 
-	PARSE_INT_FORMAT(arg, ap, unsigned);
+	PARSE_UINT_FORMAT(arg, ap);
 
 	if (append_number (state, arg, 0x10, "0123456789ABCDEF",
 			   width, prec, flags, 0))
@@ -564,7 +565,7 @@ vasnprintf (ret, max_sz, format, args)
 
   state.max_sz = max_sz;
   state.sz     = 1;
-  state.str    = malloc(state.sz);
+  state.str    = (unsigned char *) malloc(state.sz);
   if (state.str == NULL) {
     *ret = NULL;
     return -1;
@@ -711,9 +712,9 @@ vsnprintf (str, sz, format, args)
 
   state.max_sz = 0;
   state.sz     = sz;
-  state.str    = str;
-  state.s      = str;
-  state.theend = str + sz - 1;
+  state.str    = (unsigned char *) str;
+  state.s      = (unsigned char *) str;
+  state.theend = (unsigned char *) str + sz - 1;
   state.append_char = sn_append_char;
   state.reserve     = sn_reserve;
 
