@@ -86,10 +86,15 @@ static char rcsid[] = "$Id$";
 #  include <krb.h>
 #endif /* HAVE_KERB4 */
 #ifdef HAVE_AFS
-  #include <usersec.h>
-  #include <afs/kauth.h>
-  #include <afs/kautils.h>
+#  include <usersec.h>
+#  include <afs/kauth.h>
+#  include <afs/kautils.h>
 #endif /* HAVE_AFS */
+#ifdef HAVE_SECURID
+#  include <sdi_athd.h>
+#  include <sdconf.h>
+#  include <sdacmvls.h>
+#endif /* HAVE_SECURID */
 #ifdef HAVE_UTIME
 #  ifdef HAVE_UTIME_H
 #    include <utime.h>
@@ -115,6 +120,9 @@ int   user_is_exempt			__P((void));
  */
 static int   timedir_is_good;
 static char *timestampfile_p;
+#ifdef HAVE_SECURID
+union config_record configure;
+#endif /* HAVE_SECURID */
 
 /*
  * Defines for Digital Un*x 3.x enhanced security
@@ -342,10 +350,56 @@ void remove_timestamp()
  *
  *  check_passwd()
  *
- *  This function grabs the user's password and checks with 
- *  the password in /etc/passwd
+ *  This function grabs the user's password and checks with the password
+ *  in /etc/passwd (or uses other specified authentication method).
  */
 
+#ifdef HAVE_SECURID
+static void check_passwd()
+{
+    struct SD_CLIENT sd_dat, *sd;		/* SecurID data block */
+    register int counter = TRIES_FOR_PASSWORD;
+
+    (void) memset (&sd_dat, 0, sizeof(sd_dat));
+    sd = &sd_dat;
+
+    /* Initialize SecurID. */
+    set_perms(PERM_ROOT);
+    creadcfg();
+    if (sd_init(sd) != 0) {
+	(void) fprintf(stderr, "%s: Cannot contact SecurID server\n", Argv[0]);
+	exit(1);
+    }
+
+    /*
+     * you get TRIES_FOR_PASSWORD times to guess your password
+     */
+    while (counter > 0) {
+	if (sd_auth(sd) == ACM_OK) {
+	    set_perms(PERM_USER);
+	    return;
+	}
+
+	--counter;		/* otherwise, try again  */
+#ifdef USE_INSULTS
+	(void) fprintf(stderr, "%s\n", INSULT);
+#else
+	(void) fprintf(stderr, "%s\n", INCORRECT_PASSWORD);
+#endif /* USE_INSULTS */
+    }
+    set_perms(PERM_USER);
+
+    if (counter > 0) {
+	log_error(PASSWORD_NOT_CORRECT);
+	inform_user(PASSWORD_NOT_CORRECT);
+    } else {
+	log_error(PASSWORDS_NOT_CORRECT);
+	inform_user(PASSWORDS_NOT_CORRECT);
+    }
+
+    exit(1);
+}
+#else /* !HAVE_SECURID */
 static void check_passwd()
 {
 #ifdef HAVE_AFS
@@ -526,6 +580,7 @@ static void check_passwd()
 
     exit(1);
 }
+#endif /* HAVE_SECURID */
 
 
 #if defined(__alpha) && defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
@@ -650,7 +705,7 @@ static void reminder()
 	"    sudo comes with ABSOLUTELY NO WARRANTY.  This is free software,",
 	"    and you are welcome to redistribute it under certain conditions.",
 #endif
-	"We trust you have received the usual lecture from the local Systems",
+	"We trust you have received the usual lecture from the local System",
 	"Administrator. It usually boils down to these two things:",
 	"        #1) Respect the privacy of others.",
 	"        #2) Think before you type."
