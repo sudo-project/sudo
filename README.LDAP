@@ -253,7 +253,7 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
   #bindpw        <password>
   #
   # LDAP Protocol Version defaults to 3
-  # ldap_version 3
+  #ldap_version 3
   #
 
 Debugging your LDAP configuration
