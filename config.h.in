@@ -31,6 +31,15 @@
 #  define __P(args)	()
 #endif
 
+/* New ANSI-style OS defs.  */
+#if defined(hpux) && !defined(__hpux)
+#define __hpux		1
+#endif /* hpux */
+
+#if defined(convex) && !defined(__convex__)
+#define __convex__	1
+#endif /* convex */
+
 /* Define if on AIX 3.
    System headers sometimes define this.
    We just want to avoid a redefinition error message.  */
