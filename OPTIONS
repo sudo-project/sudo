@@ -82,7 +82,7 @@ TIMEOUT
 
 PASSWORD_TIMEOUT
     Number of minutes before the sudo password prompt times out.
-    The default is 5.
+    The default is 5, set this to 0 for no password timeout.
 
 TRIES_FOR_PASSWORD
     Number of tries a user gets to enter his/her password before sudo
