@@ -75,17 +75,17 @@ fnmatch(pattern, string, flags)
 	for (stringstart = string;;)
 		switch (c = *pattern++) {
 		case EOS:
-			if ((flags & FNM_LEADING_DIR) && *string == '/')
+			if (ISSET(flags, FNM_LEADING_DIR) && *string == '/')
 				return (0);
 			return (*string == EOS ? 0 : FNM_NOMATCH);
 		case '?':
 			if (*string == EOS)
 				return (FNM_NOMATCH);
-			if (*string == '/' && (flags & FNM_PATHNAME))
+			if (*string == '/' && ISSET(flags, FNM_PATHNAME))
 				return (FNM_NOMATCH);
-			if (*string == '.' && (flags & FNM_PERIOD) &&
+			if (*string == '.' && ISSET(flags, FNM_PERIOD) &&
 			    (string == stringstart ||
-			    ((flags & FNM_PATHNAME) && *(string - 1) == '/')))
+			    (ISSET(flags, FNM_PATHNAME) && *(string - 1) == '/')))
 				return (FNM_NOMATCH);
 			++string;
 			break;
@@ -95,20 +95,20 @@ fnmatch(pattern, string, flags)
 			while (c == '*')
 				c = *++pattern;
 
-			if (*string == '.' && (flags & FNM_PERIOD) &&
+			if (*string == '.' && ISSET(flags, FNM_PERIOD) &&
 			    (string == stringstart ||
-			    ((flags & FNM_PATHNAME) && *(string - 1) == '/')))
+			    (ISSET(flags, FNM_PATHNAME) && *(string - 1) == '/')))
 				return (FNM_NOMATCH);
 
 			/* Optimize for pattern with * at end or before /. */
 			if (c == EOS) {
-				if (flags & FNM_PATHNAME)
-					return ((flags & FNM_LEADING_DIR) ||
+				if (ISSET(flags, FNM_PATHNAME))
+					return (ISSET(flags, FNM_LEADING_DIR) ||
 					    strchr(string, '/') == NULL ?
 					    0 : FNM_NOMATCH);
 				else
 					return (0);
-			} else if (c == '/' && (flags & FNM_PATHNAME)) {
+			} else if (c == '/' && ISSET(flags, FNM_PATHNAME)) {
 				if ((string = strchr(string, '/')) == NULL)
 					return (FNM_NOMATCH);
 				break;
@@ -118,7 +118,7 @@ fnmatch(pattern, string, flags)
 			while ((test = *string) != EOS) {
 				if (!fnmatch(pattern, string, flags & ~FNM_PERIOD))
 					return (0);
-				if (test == '/' && (flags & FNM_PATHNAME))
+				if (test == '/' && ISSET(flags, FNM_PATHNAME))
 					break;
 				++string;
 			}
@@ -126,11 +126,11 @@ fnmatch(pattern, string, flags)
 		case '[':
 			if (*string == EOS)
 				return (FNM_NOMATCH);
-			if (*string == '/' && (flags & FNM_PATHNAME))
+			if (*string == '/' && ISSET(flags, FNM_PATHNAME))
 				return (FNM_NOMATCH);
-			if (*string == '.' && (flags & FNM_PERIOD) &&
+			if (*string == '.' && ISSET(flags, FNM_PERIOD) &&
 			    (string == stringstart ||
-			    ((flags & FNM_PATHNAME) && *(string - 1) == '/')))
+			    (ISSET(flags, FNM_PATHNAME) && *(string - 1) == '/')))
 				return (FNM_NOMATCH);
 
 			switch (rangematch(pattern, *string, flags, &newp)) {
@@ -146,7 +146,7 @@ fnmatch(pattern, string, flags)
 			++string;
 			break;
 		case '\\':
-			if (!(flags & FNM_NOESCAPE)) {
+			if (!ISSET(flags, FNM_NOESCAPE)) {
 				if ((c = *pattern++) == EOS) {
 					c = '\\';
 					--pattern;
@@ -155,7 +155,7 @@ fnmatch(pattern, string, flags)
 			/* FALLTHROUGH */
 		default:
 		normal:
-			if (c != *string && !((flags & FNM_CASEFOLD) &&
+			if (c != *string && !(ISSET(flags, FNM_CASEFOLD) &&
 				 (tolower((unsigned char)c) ==
 				 tolower((unsigned char)*string))))
 				return (FNM_NOMATCH);
@@ -189,7 +189,7 @@ rangematch(pattern, test, flags, newp)
 	if ((negate = (*pattern == '!' || *pattern == '^')))
 		++pattern;
 
-	if (flags & FNM_CASEFOLD)
+	if (ISSET(flags, FNM_CASEFOLD))
 		test = tolower((unsigned char)test);
 
 	/*
@@ -200,22 +200,22 @@ rangematch(pattern, test, flags, newp)
 	ok = 0;
 	c = *pattern++;
 	do {
-		if (c == '\\' && !(flags & FNM_NOESCAPE))
+		if (c == '\\' && !ISSET(flags, FNM_NOESCAPE))
 			c = *pattern++;
 		if (c == EOS)
 			return (RANGE_ERROR);
-		if (c == '/' && (flags & FNM_PATHNAME))
+		if (c == '/' && ISSET(flags, FNM_PATHNAME))
 			return (RANGE_NOMATCH);
-		if ((flags & FNM_CASEFOLD))
+		if (ISSET(flags, FNM_CASEFOLD))
 			c = tolower((unsigned char)c);
 		if (*pattern == '-'
 		    && (c2 = *(pattern+1)) != EOS && c2 != ']') {
 			pattern += 2;
-			if (c2 == '\\' && !(flags & FNM_NOESCAPE))
+			if (c2 == '\\' && !ISSET(flags, FNM_NOESCAPE))
 				c2 = *pattern++;
 			if (c2 == EOS)
 				return (RANGE_ERROR);
-			if (flags & FNM_CASEFOLD)
+			if (ISSET(flags, FNM_CASEFOLD))
 				c2 = tolower((unsigned char)c2);
 			if (c <= test && test <= c2)
 				ok = 1;
