@@ -1694,6 +1694,6 @@ Sudo 1.6.7p5 released.
 532) The timeout on password reading is now done via alarm(), not select().
 
 533) Fixed several issues when closing all open descriptors.  Sudo now uses
-     closefrom() if it exists.
+     closefrom() if it exists, using /proc/$$/fd if possible.
 
 534) Use PATH_MAX, not MAXPATHLEN since the former is standardized.
