@@ -285,9 +285,9 @@ if ( ! fork () ) {
     /*      child                                parent     */
 
     (void) close(1);
-    execve ( mailer, exec_argv, Envp );
+    execv ( mailer, exec_argv );
     /* this should not happen */
-    perror ("execve");
+    perror( "execv");
     exit (1);
 
     }
