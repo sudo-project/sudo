@@ -18,16 +18,30 @@
 
 /*
  * This version of getpass() is known to work under Ultrix 4.2/4.3, 4.3 BSD,
- * HP-UX 8.07, AIX 3.1/3.2, and Iirix 4.05F.  It should be easy to change it
- * to suit your tty interface.
+ * HP-UX 8.07, AIX 3.1/3.2, and Irix 4.05F.  It should be easy to change it
+ * to suit your tty interface.  There's no support for POSIX termios here
+ * but it should be trivial to add.
  */
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)getpass.c	based on 5.3 (Berkeley) 9/22/88";
 #endif				/* LIBC_SCCS and not lint */
 
+/*
+ * HP-UX and Irix defines
+*/
+#if defined(sgi) || defined(hpux)
+#ifndef USE_TERMIO
+#define USE_TERMIO
+#endif /* USE_TERMIO */
+#endif /* sgi || hpux */
+
 #include <fcntl.h>
+#ifdef USE_TERMIO
+#include <termio.h>
+#else
 #include <sgtty.h>
+#endif
 #include <sys/ioctl.h>
 #include <sys/signal.h>
 #include <stdio.h>
@@ -36,7 +50,7 @@ char *
     getpass(prompt)
     char *prompt;
 {
-#if defined(sgi)
+#ifdef USE_TERMIO
     struct termio ttyb;
 #else
     struct sgttyb ttyb;
@@ -46,7 +60,7 @@ char *
     FILE *fp, *outfp;
     long omask;
     int fd_tmp;
-#if defined(sgi)
+#ifdef USE_TERMIO
     tcflag_t svflagval;
 #else
     int svflagval;
@@ -63,7 +77,7 @@ char *
 	outfp = stderr;
 	fp = stdin;
     }
-#if defined(sgi)
+#ifdef USE_TERMIO
     (void) ioctl(fileno(fp), TCGETA, &ttyb);
     svflagval = ttyb.c_lflag;
     ttyb.c_lflag &= ~ECHO;
@@ -78,9 +92,6 @@ char *
 #endif
 
     (void) fprintf(outfp, "%s", prompt);
-#ifdef hpux
-    (void) fflush(outfp);
-#endif
     rewind(outfp);		/* implied flush */
     for (p = buf; (ch = getc(fp)) != EOF && ch != '\n';)
 	if (p < buf + PASSWD_LEN)
@@ -88,7 +99,7 @@ char *
     *p = '\0';
     (void) write(fileno(outfp), "\n", 1);
 
-#if defined(sgi)
+#ifdef USE_TERMIO
     ttyb.c_lflag = svflagval;
     (void) ioctl(fileno(fp), TCSETA, &ttyb);
 #else
