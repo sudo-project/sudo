@@ -147,6 +147,10 @@ install-sudoers:
 
 install-man:
 	$(INSTALL) -o $(owner) -g $(group) -m 0644 $(manpage) $(mandir)/sudo.$(mansect)
+	echo '.so man$(mansect)/sudo.$(mansect)' > $(mandir)/visudo.$(mansect)
+	chown $(owner) $(mandir)/visudo.$(mansect)
+	chgrp $(group) $(mandir)/visudo.$(mansect)
+	chmod 0644 $(mandir)/visudo.$(mansect)
 	@MAN_POSTINSTALL@
 
 tags: $(SRCS)
