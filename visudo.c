@@ -46,6 +46,7 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <pwd.h>
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
@@ -78,8 +79,6 @@ char *sudoers = _PATH_SUDO_SUDOERS;
 char *sudoers_tmp_file = _PATH_SUDO_STMP;
 int  status = 0,
      err_line_no = 0;
-FILE *sudoers_tmp_fp=NULL,
-     *sudoers_fp=NULL;
 
 
 /*
@@ -93,8 +92,12 @@ main(argc, argv)
     int argc;
     char **argv;
 {
-    int fd;
+    int sudoers_fd;
+    int sudoers_tmp_fd;
+    FILE *sudoers_tmp_fp;
+    int num_chars;
     struct stat sbuf;
+    struct passwd *sudoers_pw;
 #ifdef ENV_EDITOR
     char * Editor;
 #endif /* ENV_EDITOR */
@@ -108,7 +111,7 @@ main(argc, argv)
 	/*
 	 * print version string and exit if we got -V
 	 */
-	if (!strcmp(argv[1], "-V")) {
+	if (!strcmp(Argv[1], "-V")) {
 	    (void) printf("visudo version %s\n", version);
 	    exit(0);
 	} else {
@@ -147,10 +150,18 @@ main(argc, argv)
     (void) signal(SIGQUIT, SIG_IGN);
 #endif /* POSIX_SIGNALS */
 
+    /*
+     * need to lookup passwd entry for sudoers file owner
+     */
+    if (!(sudoers_pw = getpwnam(SUDOERS_OWNER))) {
+	(void) fprintf(stderr, "%s:  no passwd entry for sudoers file owner (%s)\n", Argv[0], SUDOERS_OWNER);
+	exit(1);
+    }
+
     setbuf(stderr, NULL);
 
     /*
-     * we only want root to be able to read/write the sudoers_tmp_file
+     * we only want SUDOERS_OWNER to be able to read/write the sudoers_tmp_file
      */
     umask(077);
 
@@ -166,8 +177,8 @@ main(argc, argv)
     /*
      * open the sudoers file read only
      */
-    if ((sudoers_fp = fopen(sudoers, "r")) == NULL) {
-	(void) fprintf(stderr, "%s: ", *argv);
+    if ((sudoers_fd = open(sudoers, O_RDONLY)) < 0) {
+	(void) fprintf(stderr, "%s: ", Argv[0]);
 	perror(sudoers);
 	Exit(0);
     }
@@ -175,34 +186,29 @@ main(argc, argv)
     /*
      * open the temporary sudoers file with the correct flags
      */
-    if ((fd = open(sudoers_tmp_file, O_WRONLY | O_CREAT | O_EXCL, 0600)) < 0) {
+    if ((sudoers_tmp_fd = open(sudoers_tmp_file, O_WRONLY | O_CREAT | O_EXCL, 0600)) < 0) {
 	if (errno == EEXIST) {
-	    (void) fprintf(stderr, "%s: sudoers file busy\n", *argv);
+	    (void) fprintf(stderr, "%s: sudoers file busy\n", Argv[0]);
 	    exit(1);
 	}
-	(void) fprintf(stderr, "%s: ", *argv);
+	(void) fprintf(stderr, "%s: ", Argv[0]);
 	perror(sudoers_tmp_file);
 	exit(1);
     }
 
     /*
-     * get a STREAM file pointer to the temporary sudoers file
-     */
-    if ((sudoers_tmp_fp = fdopen(fd, "w")) == NULL) {
-	(void) fprintf(stderr, "%s: ", *argv);
-	perror(sudoers_tmp_file);
-	Exit(0);
-    }
-
-    /*
      * transfer the contents of the sudoers file to the temporary sudoers file
      */
-    while (fgets(buffer, sizeof(buffer) - 1, sudoers_fp) != NULL) {
-	fputs(buffer, sudoers_tmp_fp);
-    }
+    while ((num_chars = read(sudoers_fd, buffer, sizeof(buffer))) > 0)
+	(void) write(sudoers_tmp_fd, buffer, num_chars);
 
-    (void) fclose(sudoers_fp);
-    (void) fclose(sudoers_tmp_fp);
+    (void) close(sudoers_fd);
+    (void) close(sudoers_tmp_fd);
+
+    /*
+     * make sudoers_tmp_file owned by SUDOERS_OWNER so sudo(8) can read it.
+     */
+    (void) chown(sudoers_tmp_file, sudoers_pw -> pw_uid, -1);
 
     do {
 	/*
@@ -222,21 +228,21 @@ main(argc, argv)
 	    /* can't stat file */
 	    if (stat(sudoers_tmp_file, &sbuf) < 0) {
 		(void) fprintf(stderr, "%s: can't stat temporary file, %s unchanged\n",
-			sudoers, *argv);
+			sudoers, Argv[0]);
 		Exit(0);
 	    }
 
 	    /* file has size == 0 */
 	    if (sbuf.st_size == 0) {
 		(void) fprintf(stderr, "%s: bad temporary file, %s unchanged\n",
-			sudoers, *argv);
+			sudoers, Argv[0]);
 		Exit(0);
 	    }
 
 	    /* re-open the sudoers file for parsing */
 	    if ((sudoers_tmp_fp = fopen(sudoers_tmp_file, "r")) == NULL) {
 		(void) fprintf(stderr, "%s: can't re-open temporary file, %s unchanged\n",
-			sudoers, *argv);
+			sudoers, Argv[0]);
 		Exit(0);
 	    }
 #ifdef HAVE_FLEX
@@ -274,7 +280,7 @@ main(argc, argv)
      * rename it to the real sudoers file.
      */
     if (rename(sudoers_tmp_file, sudoers) != 0) {
-	(void) fprintf(stderr, "%s: ", *argv);
+	(void) fprintf(stderr, "%s: ", Argv[0]);
 	perror("rename");
     } else {
 	if (chmod(sudoers, 0400) != 0)
@@ -308,9 +314,6 @@ static void usage()
 static RETSIGTYPE Exit(sig)
     int sig;
 {
-    if (sudoers_tmp_fp)
-	(void) fclose(sudoers_tmp_fp);
-
     (void) unlink(sudoers_tmp_file);
     exit(1);
 }
