@@ -362,6 +362,7 @@ cmnd		:	ALL {
 			    (void) free($1.cmnd);
 			    for (t = $1.args; t && *t; t++)
 				(void) free(*t);
+			    (void) free($1.args);
 			}
 		;
 
