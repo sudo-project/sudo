@@ -504,34 +504,34 @@ static void check_passwd()
 #ifdef HAVE_AUTHSRV
 static void check_passwd()
 {
-    	char *pass;			/* this is what gets entered */
-	Cfg *confp;
+    char *pass;			/* this is what gets entered */
+    Cfg *confp;
 
-	char        cbuf[128];
-	char        ubuf[128], buf[128];
-	register int counter = TRIES_FOR_PASSWORD;
+    char        cbuf[128];
+    char        ubuf[128], buf[128];
+    register int counter = TRIES_FOR_PASSWORD;
 
-	if((confp = cfg_read("sudo")) == (Cfg *)-1) {
-                fprintf(stderr,"Cannot read config.\n");
-                exit(1);
-        }
- 
+    if ((confp = cfg_read("sudo")) == (Cfg *)-1) {
+	fprintf(stderr, "Cannot read config.\n");
+	exit(1);
+    }
 
     /* Initialize Auth Client */
     auth_open(confp);
 
-	/* get welcome message from auth server */
-	if(auth_recv(buf,sizeof(buf))) {
-		sprintf(buf,"Lost connection to server");
-		fprintf(stderr,"%s\n",buf);
-		exit(1);
-		}
+    /* get welcome message from auth server */
+    if (auth_recv(buf, sizeof(buf))) {
+	sprintf(buf, "Lost connection to server");
+	fprintf(stderr, "%s\n", buf);
+	exit(1);
+    }
 
-	if(strncmp(buf,"Authsrv ready",13)) {
-		fprintf(stderr,"Auth server error %s\n",buf);
-		auth_close();
-		exit(1);
-		}
+    if (strncmp(buf, "Authsrv ready", 13)) {
+	fprintf(stderr, "Auth server error %s\n", buf);
+	auth_close();
+	exit(1);
+    }
+
     /*
      * you get TRIES_FOR_PASSWORD times to guess your password
      */
@@ -542,44 +542,30 @@ static void check_passwd()
 	auth_send(cbuf);
 	auth_recv(cbuf,sizeof(cbuf));
 
-	if(!strncmp(cbuf,"challenge ",10)) {
-		sprintf(buf,"Challenge \"%s\": ",&cbuf[10]);
+	if (!strncmp(cbuf, "challenge ", 10)) {
+	    sprintf(buf, "Challenge \"%s\": ", &cbuf[10]);
+	    pass = GETPASS(buf, PASSWORD_TIMEOUT * 60);
+	} else if (!strncmp(cbuf, "password", 8)) {
+	    pass = GETPASS(buf, PASSWORD_TIMEOUT * 60);
+	} else {
+	    fprintf(stderr, "Server sent %s\n", cbuf);
+	    auth_close();
+	    exit(1);
+	}
 
-#  ifdef USE_GETPASS
-		pass = (char *) getpass(buf);
-#  else
-		pass = tgetpass(buf, PASSWORD_TIMEOUT * 60);
-#  endif /* USE_GETPASS */
-
-		}
-
-	else if(!strncmp(cbuf,"password",8)) {
-#  ifdef USE_GETPASS
-		pass = (char *) getpass(cbuf);
-#  else
-		pass = tgetpass(cbuf, PASSWORD_TIMEOUT * 60);
-#  endif /* USE_GETPASS */
-		}
-	else {
-		fprintf(stderr,"Server sent %s\n",cbuf);
-		auth_close();
-		exit(1);
-		}
-
-	sprintf(cbuf,"response '%s'",pass);
+	sprintf(cbuf, "response '%s'", pass);
 	auth_send(cbuf);
-	auth_recv(cbuf,sizeof(cbuf));
+	auth_recv(cbuf, sizeof(cbuf));
 
-	if(!strncmp(cbuf,"ok",2)) {
-		/* Success */
-		/*inform_user(cbuf);*/
-	    	set_perms(PERM_USER, 0);
-		auth_close();
-		return;
-		}
-	else {
-		fprintf(stderr,"Server returned %s\n",cbuf);
-		}
+	if (!strncmp(cbuf, "ok", 2)) {
+	    /* Success */
+	    /*inform_user(cbuf);*/
+	    set_perms(PERM_USER, 0);
+	    auth_close();
+	    return;
+	} else {
+	    fprintf(stderr, "Server returned %s\n", cbuf);
+	}
 	pass_warn(stderr);
 	--counter;		/* otherwise, try again  */
     }
@@ -625,11 +611,7 @@ static void check_passwd()
 
 #ifdef HAVE_AUTHENTICATE
 	/* use AIX authenticate() function */
-#  ifdef USE_GETPASS
-	pass = (char *) getpass(prompt);
-#  else
-	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60);
-#  endif /* USE_GETPASS */
+	pass = GETPASS(buf, PASSWORD_TIMEOUT * 60);
 	reenter = 1;
 	if (authenticate(user_name, pass, &reenter, &message) == 0)
 	    return;		/* valid password */
@@ -648,24 +630,12 @@ static void check_passwd()
 #  endif /* HAVE_OPIE */
 
 	/* get a password from the user */
-#  ifdef USE_GETPASS
-#    ifdef HAVE_KERB4
+#  if defined(HAVE_KERB4) && defined(USE_GETPASS)
 	(void) des_read_pw_string(kpass, sizeof(kpass) - 1, prompt, 0);
 	pass = kpass;
-#    else
-	pass = (char *) getpass(prompt);
-#    endif /* HAVE_KERB4 */
 #  else
-	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60);
-#  endif /* USE_GETPASS */
-
-	/* Exit loop on nil password */
-	if (!pass || *pass == '\0') {
-	    if (counter == TRIES_FOR_PASSWORD)
-		exit(1);
-	    else
-		break;
-	}
+	pass = (char *) GETPASS(prompt, PASSWORD_TIMEOUT * 60);
+#  endif /* HAVE_KERB4 */
 
 #  ifdef HAVE_SKEY
 	/* Only check s/key db if the user exists there */
@@ -739,6 +709,14 @@ static void check_passwd()
 #    endif /* HAVE_DCE */
 #  endif /* !OTP_ONLY || (!HAVE_SKEY && !HAVE_OPIE) */
 #endif /* HAVE_AUTHENTICATE */
+
+	/* Exit loop on nil password, but give it a chance to match first. */
+	if (!pass || *pass == '\0') {
+	    if (counter == TRIES_FOR_PASSWORD)
+		exit(1);
+	    else
+		break;
+	}
 
 	--counter;		/* otherwise, try again  */
 	pass_warn(stderr);

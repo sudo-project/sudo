@@ -216,6 +216,15 @@ struct generic_alias {
 #define user_dir		(user_pw_ent -> pw_dir)
 
 /*
+ * Use either tgetpass() or system getpass()
+ */
+#ifdef USE_GETPASS
+#define GETPASS(p, t)		getpass(p)
+#else
+#define GETPASS(p, t)		tgetpass(p, t)
+#endif
+
+/*
  * Function prototypes
  */
 #define YY_DECL int yylex __P((void))
