@@ -146,9 +146,37 @@ runas_matches(pw, list)
     struct passwd *pw;
     struct member *list;
 {
+    struct member *m;
+    int rval, matched = UNSPEC;
+
     if (list == NULL)
 	return(userpw_matches(def_runas_default, pw->pw_name, pw));
-    return(user_matches(pw, list));
+
+    for (m = list; m != NULL; m = m->next) {
+	switch (m->type) {
+	    case ALIAS:
+		rval = alias_matches(m->name, RUNASALIAS, pw, NULL);
+		if (rval != UNSPEC || (rval = !strcmp(m->name, pw->pw_name)))
+		    matched = rval;
+		break;
+	    case ALL:
+		matched = !m->negated;
+		break;
+	    case NETGROUP:
+		if (netgr_matches(m->name, NULL, NULL, pw->pw_name))
+		    matched = !m->negated;
+		break;
+	    case USERGROUP:
+		if (usergr_matches(m->name, pw->pw_name, pw))
+		    matched = !m->negated;
+		break;
+	    case WORD:
+		if (userpw_matches(m->name, pw->pw_name, pw))
+		    matched = !m->negated;
+		break;
+	}
+    }
+    return(matched);
 }
 
 /*

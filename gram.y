@@ -276,7 +276,7 @@ ophost		:	host {
 		;
 
 host		:	ALIAS {
-			    NEW_MEMBER($$, $1, HOSTALIAS);
+			    NEW_MEMBER($$, $1, ALIAS);
 			}
 		|	ALL {
 			    NEW_MEMBER($$, NULL, ALL);
@@ -346,7 +346,7 @@ oprunasuser	:	runasuser {
 		;
 
 runasuser	:	ALIAS {
-			    NEW_MEMBER($$, $1, RUNASALIAS);
+			    NEW_MEMBER($$, $1, ALIAS);
 			}
 		|	ALL {
 			    NEW_MEMBER($$, NULL, ALL);
@@ -392,7 +392,7 @@ cmnd		:	ALL {
 			    safe_cmnd = estrdup(user_cmnd);
 			}
 		|	ALIAS {
-			    NEW_MEMBER($$, $1, CMNDALIAS);
+			    NEW_MEMBER($$, $1, ALIAS);
 			}
 		|	COMMAND {
 			    struct sudo_command *c = emalloc(sizeof(*c));
@@ -486,7 +486,7 @@ opuser		:	user {
 		;
 
 user		:	ALIAS {
-			    NEW_MEMBER($$, $1, USERALIAS);
+			    NEW_MEMBER($$, $1, ALIAS);
 			}
 		|	ALL {
 			    NEW_MEMBER($$, NULL, ALL);
