@@ -65,6 +65,7 @@
 /*#define USE_TTY_TICKETS	/* have a different ticket file for each tty */
 /*#define OTP_ONLY		/* validate user via OTP (skey/opie) only */
 /*#define LONG_OTP_PROMPT	/* use a two line OTP (skey/opie) prompt */
+/*#define STUB_LOAD_INTERFACES	/* don't try to read ether interfaces */
 #define FAST_MATCH		/* command check fails if basenames not same */
 #ifndef SUDOERS_MODE
 #define SUDOERS_MODE 0440	/* file mode for sudoers (octal) */

@@ -198,6 +198,12 @@ USE_TTY_TICKETS
     you specified the timestamp dir to be).
     This feature is off by default.
 
+STUB_LOAD_INTERFACES
+    This option keeps sudo from trying to glean the ip address from
+    each attached ethernet interface.  It is only useful on a machine
+    where sudo's interface reading support does not work, which may
+    be the case on some SysV-based OS's.
+
 FAST_MATCH
     When matching a given command to a path listed in the sudoers file,
     only check the inodes for a match if the basenames match.
