@@ -29,29 +29,8 @@
 #ifndef _SUDO_SUDO_H
 #define _SUDO_SUDO_H
 
+#include "compat.h"		/* XXX - should this be here? */
 #include "pathnames.h"		/* XXX - should this be here? */
-
-/* Deal with ansi stuff reasonably.  */
-#undef  __P
-#if defined (__cplusplus) || defined (__STDC__)
-#  define __P(args)     args
-#else
-#  define __P(args)     ()
-#endif
-
-/*
- * Some systems (ie ISC V/386) do not define MAXPATHLEN even in param.h
- */
-#ifndef MAXPATHLEN
-#  define MAXPATHLEN		1024
-#endif
-
-/*
- * Some systems do not define MAXHOSTNAMELEN.
- */
-#ifndef MAXHOSTNAMELEN
-#  define MAXHOSTNAMELEN	64
-#endif
 
 /* Max length for a command */
 #define MAXCOMMANDLENGTH	MAXPATHLEN
@@ -209,23 +188,5 @@ extern int Argc;
 extern char **Argv;
 #endif
 extern int errno;
-
-
-/*
- * Emulate seteuid() and setegid() for HP-UX
- */
-#ifdef __hpux
-#  define seteuid(__EUID)	(setresuid((uid_t)-1, __EUID, (uid_t)-1))
-#  define setegid(__EGID)	(setresgid((gid_t)-1, __EGID, (gid_t)-1))
-#endif	/* __hpux */
-
-/*
- * Emulate seteuid() and setegid() for AIX
- */
-#ifdef _AIX
-#  include <sys/id.h>
-#  define seteuid(__EUID)	(setuidx(ID_EFFECTIVE|ID_REAL, __EUID))
-#  define setegid(__EGID)	(setgidx(ID_EFFECTIVE|ID_REAL, __EGID))
-#endif	/* _AIX */
 
 #endif /* _SUDO_SUDO_H */
