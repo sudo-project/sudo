@@ -1700,3 +1700,5 @@ Sudo 1.6.7p5 released.
 
 535) Added a check in visudo for runas_default being used before it
      was set.
+
+536) If the target user == invoking user a password is no longer required.
