@@ -6617,28 +6617,28 @@ if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   SUDO_LIBS="${SUDO_LIBS} -lcrypt_d"; LIBS="${LIBS} -lcrypt_d"
 else
   echo "$ac_t""no" 1>&6
-echo $ac_n "checking for ufc in -lcrypt""... $ac_c" 1>&6
-echo "configure:6622: checking for ufc in -lcrypt" >&5
+echo $ac_n "checking for crypt in -lufc""... $ac_c" 1>&6
+echo "configure:6622: checking for crypt in -lufc" >&5
 if test -n ""; then
-  ac_lib_var=`echo crypt'_'ufc | sed 'y% ./+-%___p_%'`
+  ac_lib_var=`echo ufc'_'crypt | sed 'y% ./+-%___p_%'`
 else
-  ac_lib_var=`echo crypt'_'ufc | sed 'y%./+-%__p_%'`
+  ac_lib_var=`echo ufc'_'crypt | sed 'y%./+-%__p_%'`
 fi
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   ac_save_LIBS="$LIBS"
-LIBS="-lcrypt  $LIBS"
+LIBS="-lufc  $LIBS"
 cat > conftest.$ac_ext <<EOF
 #line 6634 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
     builtin and then its argument prototype would still apply.  */
-char ufc();
+char crypt();
 
 int main() {
-ufc()
+crypt()
 ; return 0; }
 EOF
 if { (eval echo configure:6645: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
