@@ -182,7 +182,7 @@ main(argc, argv)
 	exit(check_syntax(quiet));
 
     /*
-     * Open sudoers, lock it and stat it.  
+     * Open sudoers, lock it and stat it.
      * sudoers_fd must remain open throughout in order to hold the lock.
      */
     sudoers_fd = open(sudoers, O_RDWR | O_CREAT, SUDOERS_MODE);

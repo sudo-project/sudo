@@ -67,7 +67,7 @@ bsdauth_init(pw, promptp, auth)
     extern login_cap_t *lc;			/* from sudo.c */
 
     if ((as = auth_open()) == NULL) {
-	log_error(USE_ERRNO|NO_EXIT|NO_MAIL, 
+	log_error(USE_ERRNO|NO_EXIT|NO_MAIL,
 	    "unable to begin bsd authentication");
 	return(AUTH_FATAL);
     }

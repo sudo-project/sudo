@@ -91,7 +91,7 @@ pam_init(pw, promptp, auth)
     pam_conv.conv = sudo_conv;
     pam_status = pam_start("sudo", pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
-	log_error(USE_ERRNO|NO_EXIT|NO_MAIL, 
+	log_error(USE_ERRNO|NO_EXIT|NO_MAIL,
 	    "unable to initialize PAM");
 	return(AUTH_FATAL);
     }
