@@ -21,20 +21,12 @@
 
 #ifdef __STDC__
 # include <stdarg.h>
-#else
-# include <varargs.h>
-#endif
-
-#if !defined(__GNUC__) || __GNUC__ < 2 || __GNUC__ == 2 && __GNUC_MINOR__ < 5
-#define __attribute__(x)
-#endif
-
-#ifdef __STDC__
 void	error(int, const char *, ...) __attribute__((__noreturn__));
 void	errorx(int, const char *, ...) __attribute__((__noreturn__));
 void	warning(const char *, ...);
 void	warningx(const char *, ...);
 #else
+# include <varargs.h>
 void	error() __attribute__((__noreturn__));
 void	errorx() __attribute__((__noreturn__));
 void	warning();
