@@ -680,7 +680,7 @@ parse_args(argc, argv)
     NewArgv = argv + 1;
     NewArgc = argc - 1;
 
-    /* FIrst, check to see if we were invoked as "sudoedit". */
+    /* First, check to see if we were invoked as "sudoedit". */
     if (strcmp(getprogname(), "sudoedit") == 0) {
 	rval = MODE_EDIT;
 	excl = 'e';
