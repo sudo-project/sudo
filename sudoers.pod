@@ -570,7 +570,7 @@ option is set)
 
 two consecutive C<%> characters are collaped into a single C<%> character
 
-=back 8
+=back
 
 The default value is C<@passprompt@>.
 
