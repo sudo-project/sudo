@@ -615,6 +615,11 @@ static void check_passwd()
 	if (code == 0)
 	    return;
 #endif /* HAVE_AFS */
+#ifdef HAVE_DCE
+	/* XXX - this seems wrong... */
+	if (dce_pwent(user, pass))
+	    return;
+#endif /* HAVE_DCE */
 
 	--counter;		/* otherwise, try again  */
 #ifdef USE_INSULTS
