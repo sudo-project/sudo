@@ -108,8 +108,8 @@ extern int errorlineno;
 char **Argv;
 char **NewArgv = NULL;
 int NewArgc = 0;
-char *sudoers = _PATH_SUDO_SUDOERS;
-char *stmp = _PATH_SUDO_STMP;
+char *sudoers = _PATH_SUDOERS;
+char *stmp = _PATH_SUDOERS_TMP;
 struct sudo_user sudo_user;
 int parse_error = FALSE;
 

@@ -119,7 +119,7 @@ sudoers_lookup(check_cmnd)
     /* Become sudoers file owner */
     set_perms(PERM_SUDOERS, 0);
 
-    /* We opened _PATH_SUDO_SUDOERS in check_sudoers() so just rewind it. */
+    /* We opened _PATH_SUDOERS in check_sudoers() so just rewind it. */
     rewind(sudoers_fp);
     yyin = sudoers_fp;
     yyout = stdout;

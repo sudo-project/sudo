@@ -100,7 +100,7 @@ sudoers_gid = @SUDOERS_GID@
 sudoers_mode = @SUDOERS_MODE@
 
 # Pass in paths and uid/gid + OS dependent defined
-DEFS = @OSDEFS@ -D_PATH_SUDO_SUDOERS=\"$(sudoersdir)/sudoers\" -D_PATH_SUDO_STMP=\"$(sudoersdir)/stmp\" -DSUDOERS_UID=$(sudoers_uid) -DSUDOERS_GID=$(sudoers_gid) -DSUDOERS_MODE=$(sudoers_mode)
+DEFS = @OSDEFS@ -D_PATH_SUDOERS=\"$(sudoersdir)/sudoers\" -D_PATH_SUDOERS_TMP=\"$(sudoersdir)/sudoers.tmp\" -DSUDOERS_UID=$(sudoers_uid) -DSUDOERS_GID=$(sudoers_gid) -DSUDOERS_MODE=$(sudoers_mode)
 
 #### End of system configuration section. ####
 

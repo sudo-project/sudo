@@ -89,10 +89,10 @@ and exit.
 =item sudoers file busy, try again later.
 
 Either someone is currently editing the I<sudoers> file
-or there is a stale sudoers lock file (/etc/stmp by default)
+or there is a stale sudoers lock file (/etc/sudoers.tmp by default)
 that you need to delete.
 
-=item /etc/stmp: Permission denied
+=item /etc/sudoers.tmp: Permission denied
 
 You didn't run B<visudo> as root.
 
@@ -103,7 +103,7 @@ Your userid does not appear in the passwd file.
 =head1 FILES
 
  /etc/sudoers		List of who can run what
- /etc/stmp		Lock file for visudo
+ /etc/sudoers.tmp	Lock file for visudo
 
 =head1 ENVIRONMENT VARIABLES
 

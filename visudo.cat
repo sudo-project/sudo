@@ -46,10 +46,10 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 EEEERRRRRRRROOOORRRRSSSS
        sudoers file busy, try again later.
            Either someone is currently editing the _s_u_d_o_e_r_s file
-           or there is a stale sudoers lock file (/etc/stmp by
-           default) that you need to delete.
+           or there is a stale sudoers lock file
+           (/etc/sudoers.tmp by default) that you need to delete.
 
-       /etc/stmp: Permission denied
+       /etc/sudoers.tmp: Permission denied
            You didn't run vvvviiiissssuuuuddddoooo as root.
 
        Can't find you in the passwd database
@@ -57,11 +57,11 @@ EEEERRRRRRRROOOORRRRSSSS
 
 FFFFIIIILLLLEEEESSSS
         /etc/sudoers           List of who can run what
-        /etc/stmp              Lock file for visudo
+        /etc/sudoers.tmp       Lock file for visudo
 
 
 
-1/Aug/1999                     1.6                              1
+6/Aug/1999                     1.6                              1
 
 
 
@@ -127,7 +127,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-1/Aug/1999                     1.6                              2
+6/Aug/1999                     1.6                              2
 
 
 
@@ -193,6 +193,6 @@ VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
 
 
 
-1/Aug/1999                     1.6                              3
+6/Aug/1999                     1.6                              3
 
 

@@ -251,7 +251,7 @@ main(argc, argv)
 
     set_perms(PERM_USER, sudo_mode);
 
-    check_sudoers();	/* check mode/owner on _PATH_SUDO_SUDOERS */
+    check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
 
     if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
 	remove_timestamp((sudo_mode == MODE_KILL));
@@ -359,7 +359,7 @@ main(argc, argv)
 #endif /* DONT_LEAK_PATH_INFO */
 
 	case VALIDATE_ERROR:
-	    log_error(0, "parse error in %s around line %d", _PATH_SUDO_SUDOERS,
+	    log_error(0, "parse error in %s around line %d", _PATH_SUDOERS,
 		errorlineno);
 	    break;
 
@@ -765,26 +765,26 @@ check_sudoers()
      * Only works if filesystem is readable/writable by root.
      */
     set_perms(PERM_ROOT, 0);
-    if ((rootstat = lstat(_PATH_SUDO_SUDOERS, &statbuf)) == 0 &&
+    if ((rootstat = lstat(_PATH_SUDOERS, &statbuf)) == 0 &&
 	SUDOERS_UID == statbuf.st_uid && SUDOERS_MODE != 0400 &&
 	(statbuf.st_mode & 0007777) == 0400) {
 
-	if (chmod(_PATH_SUDO_SUDOERS, SUDOERS_MODE) == 0) {
+	if (chmod(_PATH_SUDOERS, SUDOERS_MODE) == 0) {
 	    (void) fprintf(stderr, "%s: fixed mode on %s\n",
-		Argv[0], _PATH_SUDO_SUDOERS);
+		Argv[0], _PATH_SUDOERS);
 	    if (statbuf.st_gid != SUDOERS_GID) {
-		if (!chown(_PATH_SUDO_SUDOERS,(uid_t) -1,SUDOERS_GID)) {
+		if (!chown(_PATH_SUDOERS,(uid_t) -1,SUDOERS_GID)) {
 		    (void) fprintf(stderr, "%s: set group on %s\n",
-			Argv[0], _PATH_SUDO_SUDOERS);
+			Argv[0], _PATH_SUDOERS);
 		    statbuf.st_gid = SUDOERS_GID;
 		} else {
 		    (void) fprintf(stderr,"%s: Unable to set group on %s: %s\n",
-			Argv[0], _PATH_SUDO_SUDOERS, strerror(errno));
+			Argv[0], _PATH_SUDOERS, strerror(errno));
 		}
 	    }
 	} else {
 	    (void) fprintf(stderr, "%s: Unable to fix mode on %s: %s\n",
-		Argv[0], _PATH_SUDO_SUDOERS, strerror(errno));
+		Argv[0], _PATH_SUDOERS, strerror(errno));
 	}
     }
 
@@ -795,24 +795,24 @@ check_sudoers()
      */
     set_perms(PERM_SUDOERS, 0);
 
-    if (rootstat != 0 && lstat(_PATH_SUDO_SUDOERS, &statbuf) != 0)
-	log_error(USE_ERRNO, "can't stat %s", _PATH_SUDO_SUDOERS);
+    if (rootstat != 0 && lstat(_PATH_SUDOERS, &statbuf) != 0)
+	log_error(USE_ERRNO, "can't stat %s", _PATH_SUDOERS);
     else if (!S_ISREG(statbuf.st_mode))
-	log_error(0, "%s is not a regular file", _PATH_SUDO_SUDOERS);
+	log_error(0, "%s is not a regular file", _PATH_SUDOERS);
     else if ((statbuf.st_mode & 07777) != SUDOERS_MODE)
-	log_error(0, "%s is mode 0%o, should be 0%o", _PATH_SUDO_SUDOERS,
+	log_error(0, "%s is mode 0%o, should be 0%o", _PATH_SUDOERS,
 	    (statbuf.st_mode & 07777), SUDOERS_MODE);
     else if (statbuf.st_uid != SUDOERS_UID)
-	log_error(0, "%s is owned by uid %ld, should be %d", _PATH_SUDO_SUDOERS,
+	log_error(0, "%s is owned by uid %ld, should be %d", _PATH_SUDOERS,
 	    (long) statbuf.st_uid, SUDOERS_UID);
     else if (statbuf.st_gid != SUDOERS_GID)
-	log_error(0, "%s is owned by gid %ld, should be %d", _PATH_SUDO_SUDOERS,
+	log_error(0, "%s is owned by gid %ld, should be %d", _PATH_SUDOERS,
 	    (long) statbuf.st_gid, SUDOERS_GID);
     else {
 	/* Solaris sometimes returns EAGAIN so try 10 times */
 	for (i = 0; i < 10 ; i++) {
 	    errno = 0;
-	    if ((sudoers_fp = fopen(_PATH_SUDO_SUDOERS, "r")) == NULL ||
+	    if ((sudoers_fp = fopen(_PATH_SUDOERS, "r")) == NULL ||
 		fread(&c, sizeof(c), 1, sudoers_fp) != 1) {
 		sudoers_fp = NULL;
 		if (errno != EAGAIN && errno != EWOULDBLOCK)
@@ -822,7 +822,7 @@ check_sudoers()
 	    sleep(1);
 	}
 	if (sudoers_fp == NULL)
-	    log_error(USE_ERRNO, "can't open %s", _PATH_SUDO_SUDOERS);
+	    log_error(USE_ERRNO, "can't open %s", _PATH_SUDOERS);
     }
 
     set_perms(PERM_ROOT, 0);

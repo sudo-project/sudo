@@ -77,10 +77,10 @@ The <CODE>-V</CODE> (version) option causes <STRONG>visudo</STRONG> to print the
 <DL>
 <DT><STRONG><A NAME="item_sudoers">sudoers file busy, try again later.</A></STRONG><DD>
 <P>
-Either someone is currently editing the <EM>sudoers</EM> file or there is a stale sudoers lock file (/etc/stmp by default) that you
-need to delete.
+Either someone is currently editing the <EM>sudoers</EM> file or there is a stale sudoers lock file (/etc/sudoers.tmp by default)
+that you need to delete.
 
-<DT><STRONG><A NAME="item__etc_stmp_">/etc/stmp: Permission denied</A></STRONG><DD>
+<DT><STRONG><A NAME="item__etc_sudoers_tmp_">/etc/sudoers.tmp: Permission denied</A></STRONG><DD>
 <P>
 You didn't run <STRONG>visudo</STRONG> as root.
 
@@ -90,17 +90,17 @@ Your userid does not appear in the passwd file.
 
 <H1><A NAME="FILES">FILES</A></H1>
 <P>
-<PRE> /etc/sudoers           file of authorized users.
- /etc/stmp              lock file for visudo.
+<PRE> /etc/sudoers           List of who can run what
+ /etc/sudoers.tmp       Lock file for visudo
 </PRE>
 <H1><A NAME="ENVIRONMENT_VARIABLES">ENVIRONMENT VARIABLES</A></H1>
 <P>
-The following are used only if <STRONG>visudo</STRONG> was compiled with the
-<EM>ENV_EDITOR</EM> option:
+The following are used only if <STRONG>visudo</STRONG> was configured with the
+<EM>--with-env-editor</EM> option:
 
 <P>
-<PRE> EDITOR                 Used by visudo as the editor to use.
- VISUAL                 Used by visudo if EDITOR is not set.
+<PRE> EDITOR                 Used by visudo as the editor to use
+ VISUAL                 Used by visudo if EDITOR is not set
 </PRE>
 <H1><A NAME="AUTHOR">AUTHOR</A></H1>
 <P>
@@ -115,18 +115,19 @@ See the HISTORY file in the sudo distribution for more details.
 
 <P>
 Please send all bugs, comments, and changes to <A
-HREF="mailto:sudo-bugs@courtesan.com.">sudo-bugs@courtesan.com.</A>
+HREF="mailto:sudo-bugs@courtesan.com.">sudo-bugs@courtesan.com.</A> Be sure
+to include the version of <STRONG>sudo</STRONG> you are using and the platform you are running it on.
 
 <H1><A NAME="DISCLAIMER">DISCLAIMER</A></H1>
 <P>
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE. See the LICENSE file distributed with
-sudo for more details.
+<STRONG>Visudo</STRONG> is provided ``AS IS'' and any express or implied warranties, including, but
+not limited to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed. See the LICENSE file distributed with <STRONG>sudo</STRONG> for complete details.
 
 <H1><A NAME="CAVEATS">CAVEATS</A></H1>
 <P>
-Due to the syntax of the <EM>sudoers</EM> file, there is no way for <STRONG>visudo</STRONG> to tell the difference between a mistyped {Host,User,Cmnd}_Alias and a user
+Due to the syntax of the <EM>sudoers</EM> file, there is no way for
+<STRONG>visudo</STRONG> to tell the difference between a mistyped {Host,User,Cmnd}_Alias and a user
 or host name.
 
 <P>
