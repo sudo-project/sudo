@@ -420,8 +420,8 @@ to the name of the target user (usually root unless the B<-u> flag is given).
 However, since some programs (including the RCS revision control system)
 use C<LOGNAME> to determine the real identity of the user, it may be desirable
 to change this behavior.  This can be done by negating the set_logname option.
-However, unless the I<env_reset> option has been disabled it is generally
-better to add C<LOGNAME> and C<USER> to the I<env_keep> list instead.
+Note that if the I<env_reset> option has not been disabled, entries in
+the I<env_keep> list will override the value of I<set_logname>.
 
 =item stay_setuid
 
