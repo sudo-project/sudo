@@ -83,7 +83,6 @@ static const char rcsid[] = "$Sudo$";
  * Prototypes
  */
 void dumpaliases	__P((void));
-void set_perms_dummy	__P((int));
 
 /*
  * Globals
@@ -96,7 +95,6 @@ struct interface *interfaces;
 struct sudo_user sudo_user;
 extern int clearaliases;
 extern int pedantic;
-void (*set_perms) __P((int)) = set_perms_dummy;
 
 /*
  * Returns TRUE if "s" has shell meta characters in it,
@@ -313,13 +311,6 @@ netgr_matches(netgr, host, shost, user)
 #endif /* HAVE_INNETGR */
 
     return(FALSE);
-}
-
-void
-set_perms_dummy(i)
-    int i;
-{
-    return;
 }
 
 void
