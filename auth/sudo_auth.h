@@ -47,7 +47,7 @@ int kerb5_verify __P((struct passwd *pw, char *pass, void **data));
 /* Some methods cannots (or should not) interoperate with any others */
 #if defined(HAVE_PAM)
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(1, "pam", pam_setup, passwd_verify, pam_cleanup)
+	AUTH_ENTRY(1, "pam", pam_setup, pam_verify, pam_cleanup)
 #elif defined(HAVE_SECURID)
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(1, "SecurId", securid_setup, securid_verify, NULL)
