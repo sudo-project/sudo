@@ -185,7 +185,7 @@ variable is used.
 If they have been modified, the temporary files are copied back to
 their original location and the temporary versions are removed.
 
-=back 8
+=back
 
 If the specified file does not exist, it will be created.  Note
 that unlike most commands run by B<sudo>, the editor is run with
@@ -257,7 +257,7 @@ sudoers option is set)
 
 two consecutive C<%> characters are collapsed into a single C<%> character
 
-=back 8
+=back
 
 =item -s
 
