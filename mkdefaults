@@ -51,12 +51,13 @@ while(<IN>) {
 	s/\s+$//;
 	die "$0: syntax error near line $.\n" if
 	    defined($type) && defined($desc);
-	if (defined($type) && !/^NULL$/) {
+	next if /^NULL$/;
+	if (defined($type)) {
 	    # Strip leading and trailing double quote and escape the rest
 	    s/^"//;
 	    s/"$//;
 	    s/"/\\"/g;
-	    $desc = $_;
+	    $desc = "\"$_\"";
 	} else {
 	    $type = $_;
 	}
@@ -76,5 +77,5 @@ sub print_record {
     print HEADER "\n";
 
     $desc = "NULL" unless defined($desc);
-    print CFILE "\t\"$var\", $type,\n\t\"$desc\"\n    }, {\n";
+    print CFILE "\t\"$var\", $type,\n\t$desc\n    }, {\n";
 }
