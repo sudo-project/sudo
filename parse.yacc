@@ -270,22 +270,26 @@ cmndspeclist	:	cmndspec
 		|	cmndspeclist ',' cmndspec
 		;
 
-cmndspec	:	runasspec nopasswd opcmnd {
-			    if ($1 > 0 && $3 == TRUE) {
-				runas_matches = TRUE;
-				if ($2 == TRUE)
-				    no_passwd = TRUE;
+cmndspec	:	{   /* Push a new entry onto the stack if needed */
+			    if (user_matches == TRUE && host_matches == TRUE &&
+				cmnd_matches == TRUE && runas_matches == TRUE) {
 				push;
 				user_matches = TRUE;
 				host_matches = TRUE;
-			    } else if (printmatches == TRUE) {
-				cm_list[cm_list_len].runas_len = 0;
-				cm_list[cm_list_len].cmnd_len = 0;
-				cm_list[cm_list_len].nopasswd = FALSE;
 			    } else {
 				cmnd_matches = -1;
 				runas_matches = -1;
 				no_passwd = -1;
+			    }
+			} runasspec nopasswd opcmnd {
+			    if ($2 > 0 && $4 == TRUE) {
+				runas_matches = TRUE;
+				if ($3 == TRUE)
+				    no_passwd = TRUE;
+			    } else if (printmatches == TRUE) {
+				cm_list[cm_list_len].runas_len = 0;
+				cm_list[cm_list_len].cmnd_len = 0;
+				cm_list[cm_list_len].nopasswd = FALSE;
 			    }
 			}
 		;
