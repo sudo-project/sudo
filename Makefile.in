@@ -186,31 +186,31 @@ $(SUDOBJS) $(LIBOBJS): $(HDRS) config.h pathnames.h
 # Authentication functions live in "auth" dir and so need extra care
 $(AUTH_OBJS): logging.h sudo.h auth/sudo_auth.h
 sudo_auth.o: $(srcdir)/auth/sudo_auth.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/sudo_auth.c
 afs.o: $(srcdir)/auth/afs.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/afs.c
 aix_auth.o: $(srcdir)/auth/aix_auth.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/aix_auth.c
 dce.o: $(srcdir)/auth/dce.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/dce.c
 fwtk.o: $(srcdir)/auth/fwtk.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/fwtk.c
 kerb4.o: $(srcdir)/auth/kerb4.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/kerb4.c
 kerb5.o: $(srcdir)/auth/kerb5.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/kerb5.c
 pam.o: $(srcdir)/auth/pam.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/pam.c
 passwd.o: $(srcdir)/auth/passwd.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/passwd.c
 rfc1938.o: $(srcdir)/auth/rfc1938.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/rfc1938.c
 secureware.o: $(srcdir)/auth/secureware.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/secureware.c
 securid.o: $(srcdir)/auth/securid.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/securid.c
 sia.o: $(srcdir)/auth/sia.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/auth/sia.c
 
 sudo.html: $(srcdir)/sudo.pod
 	@rm -f $(srcdir)/$@
