@@ -219,7 +219,7 @@ __uqtoa(val, endp, base, octzero, xdigs)
 
 	/* quick test for small values; __ultoa is typically much faster */
 	/* (perhaps instead we should run until small, then call __ultoa?) */
-	if (val <= ULONG_MAX)
+	if (val <= (unsigned long long)ULONG_MAX)
 		return (__ultoa((unsigned long)val, endp, base, octzero, xdigs));
 	switch (base) {
 	case 10:
