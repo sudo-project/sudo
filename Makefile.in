@@ -248,7 +248,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	rm -f Makefile config.h config.status config.cache config.log
+	rm -f Makefile pathnames.h config.h config.status config.cache config.log
 
 clobber: distclean
 
