@@ -5,18 +5,14 @@ sudo-workers mailing list (see the README) and ask if anyone has
 a port working or in-progress.
 
 Sudo should be fairly easy to port.  In fact, now that it uses a configure
-script, most of the work should be done for you. The most problematic part
-is how set*uid() functions.  If you have no seteuid() but do have setreuid()
-you can emulate seteuid() with a macro like the following:
-    #define seteuid(__EUID)	(setreuid((uid_t)-1, __EUID))
-This only affects the set_perms() function.
+script, most of the work should be done for you.
 
 If your OS is an SVR4 derivative (or some approximation thereof), it may
 be sufficient to tell configure you are runnng SVR4, something like:
     configure foo-bar-sysv4
 where foo is the hardware architecture and bar is the vendor.
 
-Another possible pitfall is getdtablesize(2) which is used to get the maximum
+A possible pitfall is getdtablesize(2) which is used to get the maximum
 number of open files the process can have.  If an OS has the POSIX sysconf(2)
 it will be used instead of getdtablesize(2).  ulimit(2) or getrlimit(2) can
 also be used on some OS's.  If all else fails you can use the value of
@@ -40,7 +36,7 @@ is that select() is not fully functional; setting PASSWORD_TIMEOUT to
 0 in options.h will disable the use of select().  If all else fails
 you can run configure with the --with-getpass flag to use the system getpass().
 You'll lose the timeout feature but gain a working sudo.
-NOTE: s/key support will not work with most OS's getpass(3) routine.
+NOTE: S/Key and OPIE support will not work with most OS's getpass(3) routine.
 
 If you are trying to port to a system without standard Berkeley
 networking you may find that interfaces.c will not compile.  This
