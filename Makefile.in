@@ -148,7 +148,7 @@ BINFILES= BUGS CHANGES HISTORY LICENSE README TODO TROUBLESHOOTING \
 	  sudo sudo.cat sudo.man sudo.pod sudoers sudoers.cat sudoers.man \
 	  sudoers.pod visudo visudo.cat visudo.man visudo.pod
 
-BINSPECIAL= INSTALL.binary Makefile.binary libtool
+BINSPECIAL= INSTALL.binary Makefile.binary.in libtool
 
 SUDODEP = $(srcdir)/sudo.h $(srcdir)/compat.h $(srcdir)/defaults.h \
 	  $(srcdir)/logging.h config.h def_data.h pathnames.h
@@ -349,7 +349,7 @@ mostlyclean: clean
 distclean: clean
 	-rm -rf Makefile pathnames.h config.h config.status config.cache \
 		config.log libtool sudo_noexec.lo .libs $(PARSESRCS) \
-		sudo.man sudoers.man visudo.man
+		sudo.man sudoers.man visudo.man Makefile.binary
 
 clobber: distclean
 
