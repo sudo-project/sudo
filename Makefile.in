@@ -388,7 +388,7 @@ bindist:
 	  strip $$tdir/sudo ; \
 	  strip $$tdir/visudo ; \
 	  cd tmp.$$ARCH && tar Ocf ../sudo-$(VERSION)-$$ARCH.tar sudo-$(VERSION) && cd .. ; \
-	  gzip --best sudo-$(VERSION)-$$ARCH.tar ; \
+	  gzip -f --best sudo-$(VERSION)-$$ARCH.tar ; \
 	  rm -rf tmp.$$ARCH ; \
 	)
 
@@ -396,7 +396,7 @@ depot:
 	( \
 	  tdir=tmp.depot ; \
 	  mkdir $$tdir ; \
-	  for i in sudo visudo sudo.man visudo.man sudoers.man sudoers; do \
+	  for i in sudo visudo sudo.man visudo.man sudoers.man sudoers BUGS CHANGES HISTORY LICENSE README TODO TROUBLESHOOTING UPGRADE sample.syslog.conf sample.sudoers; do \
 	    if [ -f $$i ]; then \
 	      cp $$i $$tdir ; \
 	    elif [ -f $(srcdir)/$$i ]; then \
@@ -412,15 +412,14 @@ depot:
 	  fi ; \
 	  sed 's/@VERSION@/$(VERSION)/g' <$(srcdir)/sudo.psf >$$tdir/sudo.psf ; \
 	  printf '#!/sbin/sh\nrm -f /usr/local/bin/sudoedit\nln /usr/local/bin/sudo /usr/local/bin/sudoedit\n' > $$tdir/sudo-exec.postinstall ; \
-	  chmod 755 $$tdir/sudo-exec.postinstall ; \
-	  printf '#!/sbin/sh\nrm -f /usr/local/man/man1m/sudoedit.1m\nln /usr/local/man/man1m/sudo /usr/local/man/man1m/sudoedit.1m\n' > $$tdir/sudo-man.postinstall ; \
-	  chmod 755 $$tdir/sudo-man.postinstall ; \
-EOS ; \
+	  printf '#!/sbin/sh\nrm -f /usr/local/man/man1m/sudoedit.1m\nln /usr/local/man/man1m/sudo.1m /usr/local/man/man1m/sudoedit.1m\n' > $$tdir/sudo-man.postinstall ; \
+	  printf '#!/sbin/sh\nif [ ! -s /etc/sudoers ]; then\n\techo installing /usr/local/doc/sudo/sudoers as /etc/sudoers\n\techo use /usr/local/sbin/visudo to configure sudo\n\tcp /usr/local/doc/sudo/sudoers /etc/sudoers\n\tchmod 440 /etc/sudoers\n\tchown root:root /etc/sudoers\nfi\n' > $$tdir/sudo-config.postinstall ; \
+	  chmod 755 $$tdir/sudo-exec.postinstall $$tdir/sudo-man.postinstall $$tdir/sudo-config.postinstall ; \
 	  strip $$tdir/sudo ; \
 	  strip $$tdir/visudo ; \
 	  cd $$tdir ; \
 	  swpackage -x target_type=tape -d ../sudo-$(VERSION).depot -s sudo.psf ; \
 	  cd .. ; \
-	  gzip --best sudo-$(VERSION).depot; \
+	  gzip -f --best sudo-$(VERSION).depot; \
 	  rm -rf tmp.depot ; \
 	)
