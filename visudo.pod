@@ -157,7 +157,7 @@ The following environment variables are used only if B<visudo>
 was configured with the I<--with-env-editor> option:
 
  EDITOR			Invoked by visudo as the editor to use
- VISUAL			Used Invoked visudo if EDITOR is not set
+ VISUAL			Used by visudo if EDITOR is not set
 
 =head1 FILES
 
