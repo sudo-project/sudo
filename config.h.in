@@ -64,7 +64,7 @@
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
-/* Define on System V Release 4 or Soloris 2.x.  */
+/* Define on System V Release 4 or Solaris 2.x.  */
 #undef SVR4
 #if defined(SVR4) && !defined(__svr4__)
 #  define __svr4__
