@@ -29,191 +29,15 @@
 #ifndef _SUDO_SUDO_H
 #define _SUDO_SUDO_H
 
-#include "pathnames.h"
+#include "pathnames.h"		/* XXX - should this be here? */
 
-/* Configurable OPTIONS--these can be overridden from the Makefile */
-  
-/*
- *  Define FQDN if you have fully qualified hostnames in your SUDOERS file
- */
-#ifndef FQDN
-#  undef FQDN
-#endif
-
-/*
- *  Define SYSLOG if you want to use syslog(3) instead of a log file.
- *  (This is a nice feature.  You can collect all your sudo logs at
- *   a single host.)
- */
-#ifndef SYSLOG
-#  define SYSLOG
-#endif
-
-/*
- *  Uncomment this if you want to log to a file *and* via syslog(3)
- */
-/* #define BOTH_LOGS */
-
-/*
- *  If you define NO_ROOT_SUDO, sudo will exit if called by root.
- */
-#ifndef NO_ROOT_SUDO
-#  undef NO_ROOT_SUDO
-#endif
-
-/*
- *  Who should own the sudoers file?  This is normally root *unless*
- *  you want to access the sudoers file over NFS.
- */
-#ifndef SUDOERS_OWNER
-#  define SUDOERS_OWNER	"root"
-#endif
-
-/*
- *  If you define EXEMPTGROUP, sudo will not ask for a password for
- *  users of this group.
- */
-#ifndef EXEMPTGROUP
-#  undef EXEMPTGROUP 100
-#endif
-  
-/*
- *  Define SEND_MAIL_WHEN_NO_USER if you want a message sent to ALERTMAIL
- *  when the user is not in the SUDOERS file.  (This is generally the case.)
- */
-#ifndef SEND_MAIL_WHEN_NO_USER
-#  define SEND_MAIL_WHEN_NO_USER
-#endif
-  
-/*
- *  Define SEND_MAIL_WHEN_NOT_OK if you want a message sent to ALERTMAIL
- *  when the user is in the SUDOERS but does not have permission to execute
- *  the command entered.  (This can be used at paranoid sites.)
- */
-#ifndef SEND_MAIL_WHEN_NOT_OK
-#  undef SEND_MAIL_WHEN_NOT_OK
-#endif
- 
-/*
- *  Define ENV_EDITOR if you want the EDITOR and VISUAL envariables to
- *  be consulted by visudo(8).
- */
-#ifndef ENV_EDITOR
-#  undef ENV_EDITOR
-#endif
- 
-/*
- *  Change the "define" to "undef" if you want the full copyright message
- *  along with the "we expect you have..." banner.
- */
-#ifndef SHORT_MESSAGE
-#  define SHORT_MESSAGE
-#endif
- 
-/*
- *  Define USE_INSULTS if you want to be insulted for typing an
- *  incorrect password just like the original sudo(8).
- */
-#ifndef USE_INSULTS
-#  undef USE_INSULTS
-#endif
- 
-/*
- *  Define HAL if you want lines from 2001 instead of insults.
- *  (Note: you must define USE_INSULTS too.)
- */
-#ifndef HAL
-#  undef HAL
-#endif
- 
-/*
- *  Define USE_EXECV if you want to use execv() instead of execvp().
- */
-#ifndef USE_EXECV
-#  undef USE_EXECV
-#endif
-
-/*
- *  Number of minutes that can elapse before sudo will ask for a passwd again
- */
-#ifndef TIMEOUT
-#  define TIMEOUT		5
-#endif
-
-/*
- *  Number of minutes that can elapse before a user enters a password
- */
-#ifndef PASSWORD_TIMEOUT
-#  define PASSWORD_TIMEOUT	5
-#endif
-
-/*
- *  Number of times sudo will let you guess are you password before screaming
- */
-#ifndef TRIES_FOR_PASSWORD
-#  define TRIES_FOR_PASSWORD	3
-#endif
-
-/*
- *  Message that is displayed if you incorrectly enter your password
- */
-#ifndef INCORRECT_PASSWORD
-#  define INCORRECT_PASSWORD	"Sorry, try again."
-#endif
-
-/*
- *  If the MAILER macro is changed make sure it will work in logging.c,
- *  there is some sendmail mail specific stuff in the send_mail() routine
- *  ( e.g.  the argv for the execvp() ).  MAILER should ALWAYS be fully
- *  quallified.  (_PATH_SENDMAIL defined in pathanmes.h)
- *  If you do *not* run sendmail or another mailer, comment out the
- *  #define MAILER below.
- */
-#ifndef MAILER
-#  define MAILER		_PATH_SENDMAIL
-#endif
-
-/*
- *  Subject of the mail sent to ALERTMAIL
- */
-#ifndef MAILSUBJECT
-#  define MAILSUBJECT		"*** SECURITY information ***"
-#endif
-
-/*
- *  Recipient of mail from sudo
- */
-#ifndef ALERTMAIL
-#  define ALERTMAIL		"root"
-#endif
-
-/*
- *  Location of the editor
- */
-#ifndef EDITOR
-#  define EDITOR		_PATH_VI
-#endif
-
-/*
- *  Uncomment to hardcode the PATH envariable in sudo
- */
-/*#define SECURE_PATH		"/bin:/usr/ucb:/usr/bin:/usr/etc:/etc" /**/
-
-/*
- *  Umask that sudo should use, change the "#define" to an "#undef"
- *  to preserve the umask of the caller.
- */
-#ifndef UMASK
-#  define UMASK			022
-#endif /* UMASK */
-
-/**********  You probably don't want to modify anything below here  ***********/
-
-#ifdef USE_EXECV
-#  define EXEC	execv
+/* Deal with ansi stuff reasonably.  */
+#undef  __P
+#if defined (__cplusplus) || defined (__STDC__)
+#  define __P(args)     args
 #else
-#  define EXEC	execvp
-#endif /* USE_EXECV */
+#  define __P(args)     ()
+#endif
 
 /*
  * Some systems (ie ISC V/386) do not define MAXPATHLEN even in param.h
@@ -251,32 +75,6 @@ struct interface {
 
 
 /*
- * Syslog(3) parameters
- */
-
-#ifdef SYSLOG
-#  include <syslog.h>
-#  ifndef Syslog_ident
-#    define Syslog_ident	"sudo"
-#  endif
-#  ifndef Syslog_options
-#    define Syslog_options	0
-#  endif
-#  if !defined(Syslog_facility) && defined(LOG_LOCAL2)
-#    define Syslog_facility	LOG_LOCAL2
-#  endif
-#  ifndef Syslog_priority_OK
-#    define Syslog_priority_OK	LOG_NOTICE
-#  endif
-#  ifndef Syslog_priority_NO
-#    define Syslog_priority_NO	LOG_ALERT
-#  endif
-#  ifndef BOTH_LOGS
-#    undef			_PATH_SUDO_LOGFILE
-#  endif
-#endif	/* SYSLOG  */
-
-/*
  * Maximum number of characters to log per entry.  The syslogger
  * will log this much, after that, it truncates the log line.
  * We need this here to make sure that we continue with another
@@ -305,16 +103,9 @@ struct interface {
 #  define MAXLOGLEN		(49 + MAXPATHLEN + MAXPATHLEN + ARG_MAX)
 #endif
 
-/*
- * Maximum number of characters per physical log file line.
- * This is only used if you are logging to a file.  It basically
- * just means "wrap lines after MAXLOGFILELEN characters."
- * Word wrapping is done where possible.  If you don't want word
- * wrap, set this to be MAXLOGLEN.
- */
-#ifndef MAXLOGFILELEN
-#  define MAXLOGFILELEN		80
-#endif
+#define SLOG_SYSLOG              0x01
+#define SLOG_FILE                0x02
+#define SLOG_BOTH                0x03
 
 #define VALIDATE_OK              0x00
 #define VALIDATE_NO_USER         0x01
@@ -432,6 +223,7 @@ extern int errno;
  * Emulate seteuid() and setegid() for AIX
  */
 #ifdef _AIX
+#  include <sys/id.h>
 #  define seteuid(__EUID)	(setuidx(ID_EFFECTIVE|ID_REAL, __EUID))
 #  define setegid(__EGID)	(setgidx(ID_EFFECTIVE|ID_REAL, __EGID))
 #endif	/* _AIX */
