@@ -138,15 +138,6 @@ AC_ARG_WITH(CC, [  --with-CC               C compiler to use],
 		;;
 esac])
 
-AC_ARG_WITH(C2, [  --with-C2               enable C2 security (shadow password) support],
-[case $with_C2 in
-    yes)	echo 'Configuring for C2 security (shadow passwords)'
-		;;
-    no)		;;
-    *)		echo "Ignoring unknown argument to --with-C2: $with_C2"
-		;;
-esac])
-
 AC_ARG_WITH(skey, [  --with-skey             enable S/Key support ],
 [case $with_skey in
     yes)	AC_DEFINE(HAVE_SKEY)

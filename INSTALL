@@ -113,13 +113,6 @@ Directory and file names:
 Special features/options:
   --with-CC               Specifies path to C compiler you wish to use.
 
-  --with-getpass          Use system getpass(3) instead of sudo-supplied
-                          tgetpass() for systems where tgetpass() fails.
-
-  --with-C2               Enable C2 security (shadow password) support
-                          See `Shadow password and C2 support' section
-                          for a list of supported platforms.
-
   --with-skey             Enable S/Key support.
 
   --with-opie             Enable NRL OPIE support.
@@ -179,6 +172,18 @@ Special features/options:
 
   --with-csops            Add CSOps standard options.
 
+  --enable-shadow         Enable shadow password support if the OS supports it
+			  (default).  See the `Shadow password and C2 support'
+			  section for a list of supported platforms.
+
+  --disable-shadow        Disable shadow password support.
+
+  --enable-tgetpass       Use sudo's tgetpass() routine instead of the
+                          system getpass(3) (default).
+
+  --disable-tgetpass      Use system getpass(3) instead of sudo-supplied
+                          tgetpass().  For systems where tgetpass() fails.
+
   --enable-log-host       Log the hostname in the log file.
 
   --disable-log-host      Do not log hostname in the log file (default).
@@ -190,21 +195,19 @@ Special features/options:
 Shadow password and C2 support
 ==============================
 
-Shadow passwords (also included with most C2 security packages)
-are supported on most major platforms for which they exist.
-The `configure' script will attempt to determine if your
-system uses shadow passwords, but this is really just a guess.
-If configure guesses incorrectly you can use the `--with-C2' option
-to cause sudo to use shadow passwords (assuming sudo can figure
-out what type of shadow password scheme is available).  If configure
-thinks you can shadow passwords but you really do not you can
-use the `--without-C2' option to override configure's guess.
+Shadow passwords (also included with most C2 security packages) are
+supported on most major platforms for which they exist.  The
+`configure' script will attempt to determine if your system can use
+shadow passwords and include support for them if so.  Shadow password
+support is now compiled in by default (it doesn't hurt anything if you
+don't have them configured).  To disable the shadow password support,
+use the --disable-shadow option to configure.
 
 Shadow passwords are supported on the following platforms:
 
     SunOS 4.x
     Solaris 2.x
-    HP-UX 9.x and 10.x
+    HP-UX >= 9.x
     Ultrix 4.x
     Digital UNIX 3.x and 4.x
     Irix 5.x and 6.x
@@ -217,11 +220,6 @@ Shadow passwords are supported on the following platforms:
     SVR4 (and variants using standard SVR4 shadow passwords)
     4.4BSD based systems (including OpenBSD, NetBSD, FreeBSD, and BSD/OS)
     OS's using SecureWare's C2 security.
-
-It is possible to configure in shadow password support even
-if your system does not currently use shadow passwords.
-That way, if you put shadow passwords in place, your installed
-sudo will already support them.
 
 Mixing password authentication schemes
 ======================================
