@@ -939,13 +939,14 @@ void set_perms(perm, sudo_mode)
 				}
 
 				/*
-				 * If SUDOERS_UID == 0 we need to use
-				 * a different uid in order to avoid
-				 * NFS lossage.  Using uid 1 is a bit
-				 * bogus but should be safe.
+				 * If SUDOERS_UID == 0 and SUDOERS_MODE
+				 * is group readable we use a non-zero
+				 * uid in order to avoid NFS lossage.
+				 * Using uid 1 is a bit bogus but should
+				 * work on all OS's.
 				 */
 				if (SUDOERS_UID == 0) {
-				    if (seteuid(1)) {
+				    if ((SUDOERS_MODE & 040) && seteuid(1)) {
 					perror("seteuid(1)");
 					exit(1);
 				    }
