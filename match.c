@@ -528,7 +528,7 @@ userpw_matches(sudoers_user, user, pw)
 /*
  *  Returns TRUE if the given user belongs to the named group,
  *  else returns FALSE.
- *  XXX - reduce the number of passwd/group lookups
+ *  XXX - reduce the number of group lookups
  */
 int
 usergr_matches(group, user, pw)
@@ -539,24 +539,32 @@ usergr_matches(group, user, pw)
     struct group *grp;
     gid_t pw_gid;
     char **cur;
+    int n;
 
     /* make sure we have a valid usergroup, sudo style */
     if (*group++ != '%')
 	return(FALSE);
 
     /* look up user's primary gid in the passwd file */
-    if (pw == NULL && (pw = getpwnam(user)) == NULL)
+    if (pw == NULL && (pw = sudo_getpwnam(user)) == NULL)
 	return(FALSE);
     pw_gid = pw->pw_gid;
 
-    if ((grp = getgrnam(group)) == NULL)
+    if ((grp = sudo_getgrnam(group)) == NULL)
 	return(FALSE);
 
     /* check against user's primary (passwd file) gid */
     if (grp->gr_gid == pw_gid)
 	return(TRUE);
 
+    /* check the user's group vector */
+    n = user_ngroups;
+    while (n--)
+	if (grp->gr_gid == user_groups[n])
+	    return(TRUE);
+
     /* check to see if user is explicitly listed in the group */
+    /* XXX - skip if group vector is set? */
     for (cur = grp->gr_mem; *cur; cur++) {
 	if (strcmp(*cur, user) == 0)
 	    return(TRUE);

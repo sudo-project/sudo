@@ -60,6 +60,7 @@
 #endif /* HAVE_UNISTD_H */
 #include <ctype.h>
 #include <pwd.h>
+#include <grp.h>
 #include <time.h>
 #include <signal.h>
 #include <errno.h>
@@ -522,6 +523,38 @@ int
 user_is_exempt()
 {
     return(FALSE);
+}
+
+/* STUB */
+struct passwd *
+sudo_getpwuid(uid)
+    uid_t uid;
+{
+    return(getpwuid(uid));
+}
+
+/* STUB */
+struct passwd *
+sudo_getpwnam(name)
+    const char *name;
+{
+    return(getpwnam(name));
+}
+
+/* STUB */
+struct group *
+sudo_getgrgid(gid)
+    gid_t gid;
+{
+    return(getgrgid(gid));
+}
+
+/* STUB */
+struct group *
+sudo_getgrnam(name)
+    const char *name;
+{
+    return(getgrnam(name));
 }
 
 /*

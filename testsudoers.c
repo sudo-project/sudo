@@ -147,10 +147,14 @@ main(argc, argv)
 	if (!dflag)
 	    usage();
 	user_name = "nobody";
-	user_cmnd = "true";
+	user_cmnd = user_base = "true";
     } else {
 	user_name = *argv++;
 	user_cmnd = *argv;
+	if ((p = strrchr(user_cmnd, '/')) != NULL)
+	    user_base = p + 1;
+	else
+	    user_base = user_cmnd;
 	NewArgc -= 2;
     }
 
@@ -273,6 +277,34 @@ set_perms(perm)
     int perm;
 {
     return;
+}
+
+struct passwd *
+sudo_getpwuid(uid)
+    uid_t uid;
+{
+    return(getpwuid(uid));
+}
+
+struct passwd *
+sudo_getpwnam(name)
+    const char *name;
+{ 
+    return(getpwnam(name));
+}
+
+struct group *
+sudo_getgrgid(gid)
+    gid_t gid;
+{
+    return(getgrgid(gid));
+}
+
+struct group *
+sudo_getgrnam(name)
+    const char *name;
+{
+    return(getgrnam(name));
 }
 
 void

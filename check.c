@@ -283,7 +283,7 @@ user_is_exempt()
     if (!def_exempt_group)
 	return(FALSE);
 
-    if (!(grp = getgrnam(def_exempt_group)))
+    if (!(grp = sudo_getgrnam(def_exempt_group)))
 	return(FALSE);
 
     if (user_gid == grp->gr_gid)

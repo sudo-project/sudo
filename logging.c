@@ -492,7 +492,7 @@ send_mail(line)
 
 		/* Close password and group files so we don't leak fds. */
 		sudo_endpwent();
-		endgrent();
+		sudo_endgrent();
 
 		/*
 		 * Depending on the config, either run the mailer as root

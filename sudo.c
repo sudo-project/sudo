@@ -107,9 +107,6 @@ static struct passwd *get_authpw	__P((void));
 extern int sudo_edit			__P((int, char **));
 extern char **rebuild_env		__P((char **, int, int));
 extern char **zero_env			__P((char **));
-extern struct passwd *sudo_fakepwnam	__P((const char *));
-extern struct passwd *sudo_getpwnam	__P((const char *));
-extern struct passwd *sudo_getpwuid	__P((uid_t));
 
 /*
  * Globals
@@ -194,6 +191,7 @@ main(argc, argv, envp)
      */
     initial_setup();
     sudo_setpwent();
+    sudo_setgrent();
 
     /* Parse our arguments. */
     sudo_mode = parse_args(Argc, Argv);
@@ -294,9 +292,9 @@ main(argc, argv, envp)
 	struct passwd *pw;
 
 	if (*def_timestampowner == '#')
-	    pw = getpwuid(atoi(def_timestampowner + 1));
+	    pw = sudo_getpwuid(atoi(def_timestampowner + 1));
 	else
-	    pw = getpwnam(def_timestampowner);
+	    pw = sudo_getpwnam(def_timestampowner);
 	if (!pw)
 	    log_error(0, "timestamp owner (%s): No such user",
 		def_timestampowner);
@@ -397,7 +395,7 @@ main(argc, argv, envp)
 
 	/* Close the password and group files */
 	sudo_endpwent();
-	endgrent();
+	sudo_endgrent();
 
 	/* Install the real environment. */
 	environ = new_environ;
@@ -554,6 +552,12 @@ init_vars(sudo_mode)
 	user_shell = sudo_user.pw->pw_shell;
 
     /* It is now safe to use log_error() and set_perms() */
+
+    if ((user_ngroups = getgroups(0, NULL)) > 0) {
+	user_groups = emalloc2(user_ngroups, sizeof(gid_t));
+	if (getgroups(user_ngroups, user_groups) < 0)
+	    log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
+    }
 
     if (def_fqdn)
 	set_fqdn();			/* may call log_error() */

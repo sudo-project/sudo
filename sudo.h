@@ -40,7 +40,6 @@ struct sudo_user {
     char *path;
     char *shell;
     char *tty;
-    char  cwd[PATH_MAX];
     char *host;
     char *shost;
     char **runas;
@@ -50,6 +49,9 @@ struct sudo_user {
     char *cmnd_base;
     char *cmnd_safe;
     char *class_name;
+    int   ngroups;
+    gid_t *groups;
+    char  cwd[PATH_MAX];
 };
 
 /*
@@ -123,6 +125,8 @@ struct sudo_user {
 #define user_gid		(sudo_user.pw->pw_gid)
 #define user_dir		(sudo_user.pw->pw_dir)
 #define user_shell		(sudo_user.shell)
+#define user_ngroups		(sudo_user.ngroups)
+#define user_groups		(sudo_user.groups)
 #define user_tty		(sudo_user.tty)
 #define user_cwd		(sudo_user.cwd)
 #define user_runas		(sudo_user.runas)
@@ -240,7 +244,15 @@ FILE *open_sudoers	__P((const char *, int *));
 void display_privs      __P((struct passwd *));
 void sudo_setpwent	__P((void));
 void sudo_endpwent	__P((void));
+void sudo_setgrent	__P((void));
+void sudo_endgrent	__P((void));
 void cleanup		__P((void));
+struct passwd *sudo_getpwnam __P((const char *));
+struct passwd *sudo_fakepwnam __P((const char *));
+struct passwd *sudo_getpwuid __P((uid_t));
+struct passwd *sudo_fakepwuid __P((uid_t));
+struct group *sudo_getgrnam __P((const char *));
+struct group *sudo_getgrgid __P((gid_t));
 #ifdef HAVE_SYSTRACE
 void systrace_attach	__P((pid_t));
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2002 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -46,6 +46,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <pwd.h>
+#include <grp.h>
 #ifdef HAVE_GETSPNAM
 # include <shadow.h>
 #endif /* HAVE_GETSPNAM */
@@ -80,18 +81,20 @@ static const char rcsid[] = "$Sudo$";
 #if defined(HAVE_GETPRPWNAM) && defined(__alpha)
 int crypt_type = INT_MAX;
 #endif /* HAVE_GETPRPWNAM && __alpha */
-static struct rbtree *cache_byuid;
-static struct rbtree *cache_byname;
+static struct rbtree *pwcache_byuid, *pwcache_byname;
+static struct rbtree *grcache_bygid, *grcache_byname;
 
-static int  cmp_byuid	__P((const VOID *, const VOID *));
-static int  cmp_byname	__P((const VOID *, const VOID *));
+static int  cmp_pwuid	__P((const VOID *, const VOID *));
+static int  cmp_pwnam	__P((const VOID *, const VOID *));
 static void pw_free	__P((VOID *));
+static int  cmp_grgid	__P((const VOID *, const VOID *));
+static int  cmp_grnam	__P((const VOID *, const VOID *));
 
 /*
  * Compare by uid.
  */
 static int
-cmp_byuid(v1, v2)
+cmp_pwuid(v1, v2)
     const VOID *v1;
     const VOID *v2;
 {
@@ -104,7 +107,7 @@ cmp_byuid(v1, v2)
  * Compare by user name.
  */
 static int
-cmp_byname(v1, v2)
+cmp_pwnam(v1, v2)
     const VOID *v1;
     const VOID *v2;
 {
@@ -197,7 +200,7 @@ sudo_getepw(pw)
  * Dynamically allocate space for a struct password and the constituent parts
  * that we care about.  Fills in pw_passwd from shadow file.
  */
-struct passwd *
+static struct passwd *
 sudo_pwdup(pw)
     const struct passwd *pw;
 {
@@ -300,14 +303,14 @@ sudo_getpwuid(uid)
     struct rbnode *node;
 
     key.pw_uid = uid;
-    if ((node = rbfind(cache_byuid, &key)) != NULL)
+    if ((node = rbfind(pwcache_byuid, &key)) != NULL)
 	return((struct passwd *) node->data);
     if ((pw = getpwuid(uid)) == NULL)
 	return(NULL);
     else
 	pw = sudo_pwdup(pw);
-    rbinsert(cache_byname, (VOID *) pw);
-    rbinsert(cache_byuid, (VOID *) pw);
+    rbinsert(pwcache_byname, (VOID *) pw);
+    rbinsert(pwcache_byuid, (VOID *) pw);
     return(pw);
 }
 
@@ -323,14 +326,14 @@ sudo_getpwnam(name)
     struct rbnode *node;
 
     key.pw_name = (char *) name;
-    if ((node = rbfind(cache_byname, &key)) != NULL)
+    if ((node = rbfind(pwcache_byname, &key)) != NULL)
 	return((struct passwd *) node->data);
     if ((pw = getpwnam(name)) == NULL)
 	return(NULL);
     else
 	pw = sudo_pwdup(pw);
-    rbinsert(cache_byname, (VOID *) pw);
-    rbinsert(cache_byuid, (VOID *) pw);
+    rbinsert(pwcache_byname, (VOID *) pw);
+    rbinsert(pwcache_byuid, (VOID *) pw);
     return(pw);
 }
 
@@ -349,8 +352,8 @@ sudo_fakepwuid(uid)
     pw->pw_name = (char *)pw + sizeof(struct passwd);
     (void) snprintf(pw->pw_name, MAX_UID_T_LEN + 1, "#%lu",
 	(unsigned long) uid);
-    rbinsert(cache_byname, (VOID *) pw);
-    rbinsert(cache_byuid, (VOID *) pw);
+    rbinsert(pwcache_byname, (VOID *) pw);
+    rbinsert(pwcache_byuid, (VOID *) pw);
     return(pw);
 }
 
@@ -359,7 +362,7 @@ sudo_fakepwuid(uid)
  */
 struct passwd *
 sudo_fakepwnam(user)
-    char *user;
+    const char *user;
 {
     struct passwd *pw;
     size_t len;
@@ -370,8 +373,8 @@ sudo_fakepwnam(user)
     pw->pw_uid = (uid_t) atoi(user + 1);
     pw->pw_name = (char *)pw + sizeof(struct passwd);
     strlcpy(pw->pw_name, user, len + 1);
-    rbinsert(cache_byname, (VOID *) pw);
-    rbinsert(cache_byuid, (VOID *) pw);
+    rbinsert(pwcache_byname, (VOID *) pw);
+    rbinsert(pwcache_byuid, (VOID *) pw);
     return(pw);
 }
 
@@ -394,8 +397,8 @@ sudo_setpwent()
 #ifdef HAVE_GETAUTHUID
     setauthent();
 #endif
-    cache_byuid = rbcreate(cmp_byuid);
-    cache_byname = rbcreate(cmp_byname);
+    pwcache_byuid = rbcreate(cmp_pwuid);
+    pwcache_byname = rbcreate(cmp_pwnam);
 }
 
 void
@@ -417,10 +420,10 @@ sudo_endpwent()
 #ifdef HAVE_GETAUTHUID
     endauthent();
 #endif
-    rbdestroy(cache_byuid, pw_free);
-    cache_byuid = NULL;
-    rbdestroy(cache_byname, NULL);
-    cache_byname = NULL;
+    rbdestroy(pwcache_byuid, pw_free);
+    pwcache_byuid = NULL;
+    rbdestroy(pwcache_byname, NULL);
+    pwcache_byname = NULL;
 }
 
 static void
@@ -432,3 +435,152 @@ pw_free(v)
     zero_bytes(pw->pw_passwd, strlen(pw->pw_passwd));
     free(pw);
 }
+
+/*
+ * Compare by gid.
+ */
+static int
+cmp_grgid(v1, v2)
+    const VOID *v1;
+    const VOID *v2;
+{
+    const struct group *grp1 = (const struct group *) v1;
+    const struct group *grp2 = (const struct group *) v2;
+    return(grp1->gr_gid - grp2->gr_gid);
+}
+
+/*
+ * Compare by group name.
+ */
+static int
+cmp_grnam(v1, v2)
+    const VOID *v1;
+    const VOID *v2;
+{
+    const struct group *grp1 = (const struct group *) v1;
+    const struct group *grp2 = (const struct group *) v2;
+    return(strcmp(grp1->gr_name, grp2->gr_name));
+}
+
+void
+sudo_setgrent()
+{
+    setgrent();
+    grcache_bygid = rbcreate(cmp_grgid);
+    grcache_byname = rbcreate(cmp_grnam);
+}
+
+void
+sudo_endgrent()
+{
+    endgrent();
+    rbdestroy(grcache_bygid, free);
+    grcache_bygid = NULL;
+    rbdestroy(grcache_byname, NULL);
+    grcache_byname = NULL;
+}
+
+static struct group *
+sudo_grdup(gr)
+    const struct group *gr;
+{
+    char *cp;
+    size_t nsize, psize, csize, num, total, len;
+    struct group *newgr;
+
+    /* Allocate in one big chunk for easy freeing. */
+    nsize = psize = csize = num = 0;
+    total = sizeof(struct group);
+    if (gr->gr_name) {
+	    nsize = strlen(gr->gr_name) + 1;
+	    total += nsize;
+    }
+    if (gr->gr_passwd) {
+	    psize = strlen(gr->gr_passwd) + 1;
+	    total += psize;
+    }
+    if (gr->gr_mem) {
+	for (num = 0; gr->gr_mem[num] != NULL; num++)
+	    total += strlen(gr->gr_mem[num]) + 1;
+	num++;
+	total += sizeof(char *) * num;
+    }
+    if ((cp = malloc(total)) == NULL)
+	    return (NULL);
+    newgr = (struct group *)cp;
+
+    /*
+     * Copy in group contents and make strings relative to space
+     * at the end of the buffer.
+     */
+    (void)memcpy(newgr, gr, sizeof(struct group));
+    cp += sizeof(struct group);
+    if (nsize) {
+	(void)memcpy(cp, gr->gr_name, nsize);
+	newgr->gr_name = cp;
+	cp += nsize;
+    }
+    if (psize) {
+	(void)memcpy(cp, gr->gr_passwd, psize);
+	newgr->gr_passwd = cp;
+	cp += psize;
+    }
+    if (gr->gr_mem) {
+	newgr->gr_mem = (char **)cp;
+	cp += sizeof(char *) * num;
+	for (num = 0; gr->gr_mem[num] != NULL; num++) {
+	    len = strlen(gr->gr_mem[num]) + 1;
+	    memcpy(cp, gr->gr_mem[num], len);
+	    newgr->gr_mem[num] = cp;
+	    cp += len;
+	}
+	newgr->gr_mem[num] = NULL;
+    }
+
+    return (newgr);
+}
+
+/*
+ * Get a group entry by gid and allocate space for it.
+ */
+struct group *
+sudo_getgruid(gid)
+    gid_t gid;
+{
+    struct group key, *gr;
+    struct rbnode *node;
+
+    key.gr_gid = gid;
+    if ((node = rbfind(grcache_bygid, &key)) != NULL)
+	return((struct group *) node->data);
+    if ((gr = getgrgid(gid)) == NULL)
+	return(NULL);
+    else
+	gr = sudo_grdup(gr);
+    rbinsert(grcache_byname, (VOID *) gr);
+    rbinsert(grcache_bygid, (VOID *) gr);
+    return(gr);
+}
+
+/*
+ * Get a group entry by name and allocate space for it.
+ */
+struct group *
+sudo_getgrnam(name)
+    const char *name;
+{
+    struct group key, *gr;
+    struct rbnode *node;
+
+    key.gr_name = (char *) name;
+    if ((node = rbfind(grcache_byname, &key)) != NULL)
+	return((struct group *) node->data);
+    if ((gr = getgrnam(name)) == NULL)
+	return(NULL);
+    else
+	gr = sudo_grdup(gr);
+    rbinsert(grcache_byname, (VOID *) gr);
+    rbinsert(grcache_bygid, (VOID *) gr);
+    return(gr);
+}
+
