@@ -826,3 +826,23 @@ Sudo 1.5.1 released.
 255) Attempt at sequent support.
 
 Sudo 1.5.2 released.
+
+256) visudo acts sanely when there is no sudoers file.
+
+257) Added Runas_Alias support.
+
+258) Sudo will now work with SUDOERS_MODE == 400 and SUDO_UID = 0.
+
+259) Alias's in a runas list are now expanded.
+
+260) Fixed bug with > 32 saved aliases.  Reported by BHH@capgroup.com.
+
+261) Code that uses sprintf() is now more paraniod about buffer
+     overflows.
+
+262) Whitespace is now allowed after a line continuation character before
+     a newline in sudoers.
+
+263) %h in MAILSUBJECT expands to local hostname.
+
+Sudo 1.5.3 released.
