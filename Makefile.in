@@ -112,7 +112,7 @@ LIBOBJS = @LIBOBJS@ @ALLOCA@
 HDRS = sudo.h pathnames.h options.h compat.h version.h insults.h \
        ins_2001.h ins_classic.h ins_goons.h ins_csops.h
 
-VERSION = 1.4.4
+VERSION = 1.4.5
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
             PORTING README RUNSON FAQ TROUBLESHOOTING Makefile.in acsite.m4 \
@@ -122,7 +122,7 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
 	    fnmatch.c emul/fnmatch.h fnmatch.3 testsudoers.c sample.sudoers \
 	    sudo.pod sudo.man sudo.cat visudo.pod visudo.man visudo.cat \
 	    sudoers.pod sudoers.man sudoers.cat lex.yy.c sudo-lex.yy.c sudoers \
-	    dce_pwent.c alloca.c
+	    dce_pwent.c alloca.c INSTALL.configure
 
 all: $(PROGS)
 
