@@ -569,16 +569,19 @@ static void load_cmnd()
 
 static void load_interfaces()
 {
+    unsigned long localhost_mask;
     struct ifconf ifconf;
     struct ifreq ifreq;
-    struct in_addr *inptr;
+    struct sockaddr_in *sin;
     char buf[BUFSIZ];
-    int sock, len;
-    int i, j;
+    int sock, i, j;
 #ifdef _ISC
     struct ifreq *ifrp;
     struct strioctl strioctl;
 #endif /* _ISC */
+
+    /* so we can skip localhost and its ilk */
+    localhost_mask = inet_addr("127.0.0.0");
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
@@ -607,16 +610,9 @@ static void load_interfaces()
 #endif /* _ISC */
 
     /*
-     * find out how many interfaces exist, skipping bogus ones.
+     * find out how many interfaces exist
      */
-    len = num_interfaces = ifconf.ifc_len / sizeof(struct ifreq);
-    for (i = 0; i < len; i++) {
-	inptr = &(((struct sockaddr_in *)&ifconf.ifc_req[i].ifr_addr)->sin_addr);
-	if (inptr->s_addr == inet_addr("127.0.0.1") ||
-	    inptr->s_addr == inet_addr("255.255.255.255") ||
-	    inptr->s_addr == inet_addr("0.0.0.0"))
-	    --num_interfaces;
-    }
+    num_interfaces = ifconf.ifc_len / sizeof(struct ifreq);
 
     /*
      * malloc() space for interfaces array
@@ -632,25 +628,39 @@ static void load_interfaces()
     /*
      * for each interface, get the ip address and netmask
      */
-    for (i = 0, j = 0; i < len; i++) {
-
-	inptr = &(((struct sockaddr_in *)&ifconf.ifc_req[i].ifr_addr)->sin_addr);
+    for (i = 0, j = 0; i < num_interfaces; i++) {
+	(void) strncpy(ifreq.ifr_name, ifconf.ifc_req[i].ifr_name,
+	    sizeof(ifreq.ifr_name));
 
 	/* get the ip address */
-	if (inptr->s_addr == inet_addr("127.0.0.1") ||
-	    inptr->s_addr == inet_addr("255.255.255.255") ||
-	    inptr->s_addr == inet_addr("0.0.0.0"))
+	if (ioctl(sock, SIOCGIFADDR, (caddr_t)(&ifreq))) {
+	    /* non-fatal error if interface is down or not supported */
+	    if (errno == EADDRNOTAVAIL || errno == EAFNOSUPPORT)
+		continue;
+
+	    /* XXX - do better */
+	    perror("ioctl: SIOCGIFADDR");
+	    exit(1);
+	}
+	sin = (struct sockaddr_in *)&ifreq.ifr_addr;
+
+	/* make sure we don't have a dupe (usually consecutive) */
+	if (j > 0 && memcmp(&interfaces[j-1].addr, &(sin->sin_addr),
+	    sizeof(sin->sin_addr)) == 0)
 	    continue;
 
-	(void) memcpy(&interfaces[j].addr, inptr, sizeof(struct in_addr));
+	/* store the ip address */
+	(void) memcpy(&interfaces[j].addr, &(sin->sin_addr),
+	    sizeof(struct in_addr));
 
 	/* get the netmask */
 #ifdef SIOCGIFNETMASK
-	(void) strcpy(ifreq.ifr_name, ifconf.ifc_req[i].ifr_name);
-	if (ioctl(sock, SIOCGIFNETMASK, (char *)(&ifreq)) >= 0) {
-	    (void) memcpy(&interfaces[j].netmask,
-			  &(((struct sockaddr_in *)&ifreq.ifr_addr)->sin_addr),
-			  sizeof(struct in_addr));
+	(void) strncpy(ifreq.ifr_name, ifconf.ifc_req[i].ifr_name,
+	    sizeof(ifreq.ifr_name));
+	if (ioctl(sock, SIOCGIFNETMASK, (char *)(&ifreq)) == 0) {
+	    /* store the netmask */
+	    (void) memcpy(&interfaces[j].netmask, &(sin->sin_addr),
+		sizeof(struct in_addr));
 	} else {
 #else
 	{
@@ -662,7 +672,37 @@ static void load_interfaces()
 	    else
 		interfaces[j].netmask.s_addr = htonl(IN_CLASSA_NET);
 	}
+
+	/* avoid localhost and friends */
+	if ((interfaces[j].addr.s_addr & interfaces[j].netmask.s_addr) ==
+	    localhost_mask)
+	    continue;
+
 	++j;
+    }
+
+    /* XXX - debugging */
+    fprintf(stderr, "there was/were %d bogus interface(s)\n", i-j);
+    /* if there were bogus entries, realloc the array */
+    if (i != j) {
+	interfaces = (struct interface *) realloc(interfaces,
+	    sizeof(struct interface) * j);
+	if (interfaces == NULL) {
+	    perror("realloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+    }
+
+    /* XXX - debugging */
+    for (i = 0; i < j; i++) {
+	(void) memcpy(&(sin->sin_addr), &interfaces[i].addr,
+	    sizeof(struct in_addr));
+	(void) fprintf(stderr, "%s ", inet_ntoa(sin->sin_addr));
+
+	(void) memcpy(&(sin->sin_addr), &interfaces[i].netmask,
+	    sizeof(struct in_addr));
+	(void) fprintf(stderr, "%s\n", inet_ntoa(sin->sin_addr));
     }
 }
 
