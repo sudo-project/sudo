@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.21  2000/01/18 22:00:40  millert
-''' "a a" -> "a"; Aaron Campbell <aaron@cs.dal.ca>
+''' Revision 1.22  2000/01/24 03:57:49  millert
+''' Add netgroup caveat
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers 5 "1.6.2" "18/Jan/2000" "FILE FORMATS"
+.TH sudoers 5 "1.6.2" "23/Jan/2000" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
@@ -851,6 +851,12 @@ The \fIsudoers\fR file should \fBalways\fR be edited by the \fBvisudo\fR
 command which locks the file and does grammatical checking. It is
 imperative that \fIsudoers\fR be free of syntax errors since \fBsudo\fR
 will not run with a syntactically incorrect \fIsudoers\fR file.
+.PP
+When using netgroups of machines (as opposed to users), if you
+store fully-qualified hostnames in the netgroup (as is usually the
+case), you either need to have the machine's hostname be fully-qualified
+as returned by the \f(CWhostname\fR command or use the \fIfqdn\fR option in
+\fIsudoers\fR.
 .SH "FILES"
 .PP
 .Vb 3
@@ -977,7 +983,7 @@ will not run with a syntactically incorrect \fIsudoers\fR file.
 
 .IX Subsection "Exceptions to wildcard rules:"
 
-.IX Item "\f(CW""\fR"
+.IX Item \f(CW""\fR
 
 .IX Subsection "Other special characters and reserved words:"
 

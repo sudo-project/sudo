@@ -785,6 +785,12 @@ command which locks the file and does grammatical checking. It is
 imperative that I<sudoers> be free of syntax errors since B<sudo>
 will not run with a syntactically incorrect I<sudoers> file.
 
+When using netgroups of machines (as opposed to users), if you
+store fully-qualified hostnames in the netgroup (as is usually the
+case), you either need to have the machine's hostname be fully-qualified
+as returned by the C<hostname> command or use the I<fqdn> option in
+I<sudoers>.
+
 =head1 FILES
 
  /etc/sudoers		List of who can run what
