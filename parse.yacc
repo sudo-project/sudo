@@ -233,7 +233,7 @@ opcmndlist	:	opcmnd
 		|	opcmndlist ',' opcmnd
 		;
 
-opcmnd		:  cmnd { ; } 
+opcmnd		:  cmnd { runas_matches = TRUE; } 
 		|	'!' {
 			    if (printmatches == TRUE && host_matches == TRUE
 				&& user_matches == TRUE) {
@@ -259,8 +259,6 @@ opcmnd		:  cmnd { ; }
 runasspec	: 	RUNAS runaslist chkcmnd {
 			    if ($2 > 0 && $3 == TRUE) 
 				runas_matches = TRUE;
-			    else
-				runas_matches = FALSE;
 			}
 
 runaslist	:	runasuser {

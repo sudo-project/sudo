@@ -153,8 +153,7 @@ int validate(check_cmnd)
 	while (top) {
 	    if (host_matches == TRUE)
 		if (cmnd_matches == TRUE)
-		   if ((runas_matches == TRUE) ||
-		       (runas_matches != FALSE && !strcmp(runas_user, "root")))
+		   if (runas_matches == TRUE)
 		    	/*
 			 * User was granted access to cmnd on host.
 		    	 * If no passwd required return as such.
