@@ -110,11 +110,20 @@ char * find_path(file)
     }
 
     /*
-     * If we were given a fully qualified or relative path just accept for now
+     * If we were given a fully qualified or relative path
+     * there is no need to look at PATH.
+     * We really want to fall back if !sudo_goodpath() but then
+     * the error is "not found" -- this way we get the correct error.
      */
     if (strchr(file, '/')) {
 	(void) strcpy(command, file);
-	return(command);
+	if (sudo_goodpath(command)) {
+	    return(command);
+	} else {
+	    (void) fprintf(stderr, "%s: %s: ", Argv[0], command);
+	    perror("");
+	    exit(1);
+	}
     }
 
     /*
@@ -124,7 +133,7 @@ char * find_path(file)
 	return(NULL);
 
     if ((path = strdup(path)) == NULL) {
-	(void) fprintf(stderr, "sudo: out of memory!\n");
+	(void) fprintf(stderr, "%s: out of memory!\n", Argv[0]);
 	exit(1);
     }
     origpath=path;
