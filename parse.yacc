@@ -161,7 +161,7 @@ void yyerror(s)
 %type <BOOLEAN>	 runaslist
 %type <BOOLEAN>	 runasuser
 %type <BOOLEAN>	 nopassreq
-%type <BOOLEAN>	 chkcmnd
+%type <BOOLEAN>	 nopasswd
 
 %%
 
@@ -195,6 +195,9 @@ privilege	:	hostspec '=' opcmndlist {
 			    if (user_matches == TRUE) {
 				push;
 				user_matches = TRUE;
+			    } else {
+				no_passwd = -1;
+				runas_matches = -1;
 			    }
 			}
 		;
@@ -229,12 +232,14 @@ hostspec	:	ALL {
 			}
 		;
 
-opcmndlist	:	{ no_passwd = -1; } opcmnd
-		|	opcmndlist ',' { no_passwd = -1; } opcmnd
+opcmndlist	:	opcmnd
+		|	opcmndlist ',' opcmnd
 		;
 
 opcmnd		:	cmnd {
-			    runas_matches = (strcmp("root", runas_user) == 0);
+			    if ($1 == TRUE && runas_matches != TRUE &&
+				strcmp("root", runas_user) == 0)
+				runas_matches = TRUE;
 			}
 		|	'!' {
 			    if (printmatches == TRUE && host_matches == TRUE
@@ -258,8 +263,12 @@ opcmnd		:	cmnd {
 		|	nopassreq { ; }
 		;
 
-runasspec	: 	RUNAS runaslist chkcmnd {
-			    runas_matches = ($2 > 0 && $3 == TRUE);
+runasspec	: 	RUNAS runaslist nopasswd cmnd {
+			    if ($2 > 0 && $4 == TRUE) {
+				runas_matches = TRUE;
+				if ($3 == TRUE)
+				    no_passwd = TRUE;
+			    }
 			}
 
 runaslist	:	runasuser {
@@ -292,21 +301,24 @@ runasuser	:	NAME {
 			}
 		;
 
-
-chkcmnd		:	cmnd {
-			    $$ = $1;
-			}
-		|	nopassreq {
-			    $$ = $1;
+nopasswd	:	/* empty */
+			{ $$ = FALSE; }
+		|	NOPASSWD {
+			    $$ = TRUE;
 			}
 		;
 
 nopassreq	:	NOPASSWD cmnd {
-			    if (host_matches == TRUE && user_matches == TRUE &&
-				$2 == TRUE) {
+			    if ($2 == TRUE) {
+				if (runas_matches == TRUE) {
+				    no_passwd = TRUE;
+				    $$ = TRUE;
+				} else if (strcmp("root", runas_user) == 0) {
+				    runas_matches = TRUE;
 				    no_passwd = TRUE;
 				    $$ = TRUE;
 				}
+			    }
 			}
 		;
 
