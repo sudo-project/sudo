@@ -92,7 +92,7 @@ struct command_match {
 /*
  * Structure containing Cmnd_Alias's if "sudo -l" is used.
  */
-struct command_alias {
+struct generic_alias {
     char *alias;
     char *entries;
     size_t entries_size;

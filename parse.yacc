@@ -122,8 +122,8 @@ static size_t cm_list_len = 0, cm_list_size = 0;
  * List of Cmnd_Aliases and expansions for `sudo -l'
  */
 static int in_alias = FALSE;
-static size_t ca_list_len = 0, ca_list_size = 0;
-static struct command_alias *ca_list = NULL;
+static size_t ga_list_len = 0, ga_list_size = 0;
+static struct generic_alias *ga_list = NULL;
 
 /*
  * Protoypes
@@ -136,7 +136,7 @@ static int  find_alias		__P((char *, int));
 static int  add_alias		__P((char *, int));
 static int  more_aliases	__P((void));
 static void append		__P((char *, char **, size_t *, size_t *, int));
-static void expand_ca_list	__P((void));
+static void expand_ga_list	__P((void));
 static void expand_match_list	__P((void));
        void init_parser		__P((void));
        void yyerror		__P((char *));
@@ -324,9 +324,9 @@ runaslist	:	runasuser {
 runasuser	:	NAME {
 			    $$ = (strcmp($1, runas_user) == 0);
 			    if (printmatches == TRUE && in_alias == TRUE)
-				append($1, &ca_list[ca_list_len-1].entries,
-				       &ca_list[ca_list_len-1].entries_len,
-				       &ca_list[ca_list_len-1].entries_size, ',');
+				append($1, &ga_list[ga_list_len-1].entries,
+				       &ga_list[ga_list_len-1].entries_len,
+				       &ga_list[ga_list_len-1].entries_size, ',');
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				append($1, &cm_list[cm_list_len].runas,
@@ -337,9 +337,9 @@ runasuser	:	NAME {
 		|	USERGROUP {
 			    $$ = usergr_matches($1, runas_user);
 			    if (printmatches == TRUE && in_alias == TRUE)
-				append($1, &ca_list[ca_list_len-1].entries,
-				       &ca_list[ca_list_len-1].entries_len,
-				       &ca_list[ca_list_len-1].entries_size, ',');
+				append($1, &ga_list[ga_list_len-1].entries,
+				       &ga_list[ga_list_len-1].entries_len,
+				       &ga_list[ga_list_len-1].entries_size, ',');
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
 				append("%", &cm_list[cm_list_len].runas,
@@ -354,9 +354,9 @@ runasuser	:	NAME {
 		|	NETGROUP {
 			    $$ = netgr_matches($1, NULL, runas_user);
 			    if (printmatches == TRUE && in_alias == TRUE)
-				append($1, &ca_list[ca_list_len-1].entries,
-				       &ca_list[ca_list_len-1].entries_len,
-				       &ca_list[ca_list_len-1].entries_size, ',');
+				append($1, &ga_list[ga_list_len-1].entries,
+				       &ga_list[ga_list_len-1].entries_len,
+				       &ga_list[ga_list_len-1].entries_size, ',');
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
 				append("+", &cm_list[cm_list_len].runas,
@@ -376,9 +376,9 @@ runasuser	:	NAME {
 			    else
 				$$ = FALSE;
 			    if (printmatches == TRUE && in_alias == TRUE)
-				append($1, &ca_list[ca_list_len-1].entries,
-				       &ca_list[ca_list_len-1].entries_len,
-				       &ca_list[ca_list_len-1].entries_size, ',');
+				append($1, &ga_list[ga_list_len-1].entries,
+				       &ga_list[ga_list_len-1].entries_len,
+				       &ga_list[ga_list_len-1].entries_size, ',');
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				append($1, &cm_list[cm_list_len].runas,
@@ -389,9 +389,9 @@ runasuser	:	NAME {
 		|	ALL {
 			    $$ = TRUE;
 			    if (printmatches == TRUE && in_alias == TRUE)
-				append("ALL", &ca_list[ca_list_len-1].entries,
-				       &ca_list[ca_list_len-1].entries_len,
-				       &ca_list[ca_list_len-1].entries_size, ',');
+				append("ALL", &ga_list[ga_list_len-1].entries,
+				       &ga_list[ga_list_len-1].entries_len,
+				       &ga_list[ga_list_len-1].entries_size, ',');
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				append("ALL", &cm_list[cm_list_len].runas,
@@ -413,9 +413,9 @@ nopasswd	:	/* empty */ {
 
 cmnd		:	ALL {
 			    if (printmatches == TRUE && in_alias == TRUE) {
-				append("ALL", &ca_list[ca_list_len-1].entries,
-				       &ca_list[ca_list_len-1].entries_len,
-				       &ca_list[ca_list_len-1].entries_size, ',');
+				append("ALL", &ga_list[ga_list_len-1].entries,
+				       &ga_list[ga_list_len-1].entries_len,
+				       &ga_list[ga_list_len-1].entries_size, ',');
 			    }
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
@@ -430,9 +430,9 @@ cmnd		:	ALL {
 			}
 		|	ALIAS {
 			    if (printmatches == TRUE && in_alias == TRUE) {
-				append($1, &ca_list[ca_list_len-1].entries,
-				       &ca_list[ca_list_len-1].entries_len,
-				       &ca_list[ca_list_len-1].entries_size, ',');
+				append($1, &ga_list[ga_list_len-1].entries,
+				       &ga_list[ga_list_len-1].entries_len,
+				       &ga_list[ga_list_len-1].entries_size, ',');
 			    }
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
@@ -449,13 +449,13 @@ cmnd		:	ALL {
 			}
 		|	 COMMAND {
 			    if (printmatches == TRUE && in_alias == TRUE) {
-				append($1.cmnd, &ca_list[ca_list_len-1].entries,
-				       &ca_list[ca_list_len-1].entries_len,
-				       &ca_list[ca_list_len-1].entries_size, ',');
+				append($1.cmnd, &ga_list[ga_list_len-1].entries,
+				       &ga_list[ga_list_len-1].entries_len,
+				       &ga_list[ga_list_len-1].entries_size, ',');
 				if ($1.args)
-				    append($1.args, &ca_list[ca_list_len-1].entries,
-					&ca_list[ca_list_len-1].entries_len,
-					&ca_list[ca_list_len-1].entries_size, ' ');
+				    append($1.args, &ga_list[ga_list_len-1].entries,
+					&ga_list[ga_list_len-1].entries_len,
+					&ga_list[ga_list_len-1].entries_size, ' ');
 			    }
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)  {
@@ -506,9 +506,9 @@ cmndalias	:	ALIAS {
 			    push;
 			    if (printmatches == TRUE) {
 				in_alias = TRUE;
-				/* Allocate space for ca_list if necesary. */
-				expand_ca_list();
-				if (!(ca_list[ca_list_len-1].alias = strdup($1))){
+				/* Allocate space for ga_list if necesary. */
+				expand_ga_list();
+				if (!(ga_list[ga_list_len-1].alias = strdup($1))){
 				    perror("malloc");
 				    (void) fprintf(stderr,
 				      "%s: cannot allocate memory!\n", Argv[0]);
@@ -540,9 +540,9 @@ runasalias	:	ALIAS {
 			    push;
 			    if (printmatches == TRUE) {
 				in_alias = TRUE;
-				/* Allocate space for ca_list if necesary. */
-				expand_ca_list();
-				if (!(ca_list[ca_list_len-1].alias = strdup($1))){
+				/* Allocate space for ga_list if necesary. */
+				expand_ga_list();
+				if (!(ga_list[ga_list_len-1].alias = strdup($1))){
 				    perror("malloc");
 				    (void) fprintf(stderr,
 				      "%s: cannot allocate memory!\n", Argv[0]);
@@ -644,18 +644,18 @@ static int aliascmp(a1, a2)
 
 /**********************************************************************
  *
- * cmndaliascmp()
+ * genaliascmp()
  *
- *  This function compares two command_alias structures.
+ *  This function compares two generic_alias structures.
  */
 
-static int cmndaliascmp(entry, key)
+static int genaliascmp(entry, key)
     const VOID *entry, *key;
 {
-    struct command_alias *ca1 = (struct command_alias *) key;
-    struct command_alias *ca2 = (struct command_alias *) entry;
+    struct generic_alias *ga1 = (struct generic_alias *) key;
+    struct generic_alias *ga2 = (struct generic_alias *) entry;
 
-    return(strcmp(ca1->alias, ca2->alias));
+    return(strcmp(ga1->alias, ga2->alias));
 }
 
 
@@ -784,7 +784,7 @@ void dumpaliases()
  *
  * list_matches()
  *
- *  This function lists the contents of cm_list and ca_list for
+ *  This function lists the contents of cm_list and ga_list for
  *  `sudo -l'.
  */
 
@@ -792,7 +792,7 @@ void list_matches()
 {
     int i; 
     char *p;
-    struct command_alias *ca, key;
+    struct generic_alias *ga, key;
 
     (void) puts("You may run the following commands on this host:");
     for (i = 0; i < cm_list_len; i++) {
@@ -806,11 +806,10 @@ void list_matches()
 		if (p != cm_list[i].runas)
 		    (void) fputs(", ", stdout);
 
-		/* XXX - this is disgusting! Make ca_list generic? */
 		key.alias = p;
-		if ((ca = (struct command_alias *) lfind((VOID *) &key,
-		    (VOID *) &ca_list[0], &ca_list_len, sizeof(key), cmndaliascmp)))
-		    (void) fputs(ca->entries, stdout);
+		if ((ga = (struct generic_alias *) lfind((VOID *) &key,
+		    (VOID *) &ga_list[0], &ga_list_len, sizeof(key), genaliascmp)))
+		    (void) fputs(ga->entries, stdout);
 		else
 		    (void) fputs(p, stdout);
 	    } while ((p = strtok(NULL, ":")));
@@ -825,20 +824,20 @@ void list_matches()
 
 	/* Print the actual command or expanded Cmnd_Alias. */
 	key.alias = cm_list[i].cmnd;
-	if ((ca = (struct command_alias *) lfind((VOID *) &key,
-	    (VOID *) &ca_list[0], &ca_list_len, sizeof(key), cmndaliascmp)))
-	    (void) puts(ca->entries);
+	if ((ga = (struct generic_alias *) lfind((VOID *) &key,
+	    (VOID *) &ga_list[0], &ga_list_len, sizeof(key), genaliascmp)))
+	    (void) puts(ga->entries);
 	else
 	    (void) puts(cm_list[i].cmnd);
     }
 
     /* Be nice and free up space now that we are done. */
-    for (i = 0; i < ca_list_len; i++) {
-	(void) free(ca_list[i].alias);
-	(void) free(ca_list[i].entries);
+    for (i = 0; i < ga_list_len; i++) {
+	(void) free(ga_list[i].alias);
+	(void) free(ga_list[i].entries);
     }
-    (void) free(ca_list);
-    ca_list = NULL;
+    (void) free(ga_list);
+    ga_list = NULL;
 
     for (i = 0; i < cm_list_len; i++) {
 	(void) free(cm_list[i].runas);
@@ -919,25 +918,25 @@ void reset_aliases()
 
 /**********************************************************************
  *
- * expand_ca_list()
+ * expand_ga_list()
  *
- *  This function increments ca_list_len, allocating more space as necesary.
+ *  This function increments ga_list_len, allocating more space as necesary.
  */
 
-static void expand_ca_list()
+static void expand_ga_list()
 {
-    if (++ca_list_len > ca_list_size) {
-	while ((ca_list_size += STACKINCREMENT) < ca_list_len);
-	if (ca_list == NULL) {
-	    if ((ca_list = (struct command_alias *)
-		malloc(sizeof(struct command_alias) * ca_list_size)) == NULL) {
+    if (++ga_list_len > ga_list_size) {
+	while ((ga_list_size += STACKINCREMENT) < ga_list_len);
+	if (ga_list == NULL) {
+	    if ((ga_list = (struct generic_alias *)
+		malloc(sizeof(struct generic_alias) * ga_list_size)) == NULL) {
 		perror("malloc");
 		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 		exit(1);
 	    }
 	} else {
-	    if ((ca_list = (struct command_alias *) realloc(ca_list,
-		sizeof(struct command_alias) * ca_list_size)) == NULL) {
+	    if ((ga_list = (struct generic_alias *) realloc(ga_list,
+		sizeof(struct generic_alias) * ga_list_size)) == NULL) {
 		perror("malloc");
 		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 		exit(1);
@@ -945,7 +944,7 @@ static void expand_ca_list()
 	}
     }
 
-    ca_list[ca_list_len - 1].entries = NULL;
+    ga_list[ga_list_len - 1].entries = NULL;
 }
 
 
