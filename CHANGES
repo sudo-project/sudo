@@ -1065,3 +1065,9 @@ Sudo 1.5.9 released.
      stat.  Should be safer.
 
 334) Now set $LOGNAME in addition to $USER.
+
+335) No longer use stdio in tgetpass()
+
+336) Don't use _PASSWD_LEN or PASS_MAX as we can't rely on them corresponding
+     to anything real.  Instead, we just use a max password size of 256
+     everywhere.
