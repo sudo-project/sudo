@@ -559,7 +559,8 @@ AC_ARG_WITH(timedir, [  --with-timedir          path to the sudo timestamp dir],
 		;;
 esac])
 
-AC_ARG_WITH(sendmail, [  --with-sendmail=path    set path to sendmail],
+AC_ARG_WITH(sendmail, [  --with-sendmail=path    set path to sendmail
+  --without-sendmail      do not send mail at all],
 [case $with_sendmail in  
     yes)	with_sendmail=""
 		;;
