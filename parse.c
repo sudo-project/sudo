@@ -82,6 +82,7 @@ LINK tmp_ptr, reset_ptr, save_ptr, list_ptr[NUM_LISTS];
  */
 static int hostcmp	__P((char *));
 static int cmndcmp	__P((char *, char *));
+static void print_cmnds	__P((void));
 
 
 /*
@@ -384,6 +385,69 @@ int cmnd_type_ok()
 
 
 /*
+ * this routine is called from cmnd_list() to print the actual commands
+ * that a user is allowed or forbidden to run on the already.
+ * established host.
+ */
+
+static void print_cmnds()
+{
+    /*
+     * If we have a command or special keyword "ALL", print it out
+     */
+    if (list_ptr[USER_LIST] -> data[0] == '/' ||
+	!strcmp(list_ptr[USER_LIST]->data, "ALL")) {
+	/*
+	 * print the allowed/forbidden command
+	 */
+	if (list_ptr[USER_LIST] -> op == '!')
+	    (void) printf("forbidden: ");
+	else
+	    (void) printf("  allowed: ");
+	(void) printf("%s\n", list_ptr[USER_LIST] -> data);
+    }
+    /*
+     * by now we have a Cmnd_Alias that will have to be expanded
+     */
+    else {
+	save_ptr = list_ptr[CMND_LIST];
+	while (list_ptr[CMND_LIST] != NULL) {
+	    if ((list_ptr[CMND_LIST] -> type == TYPE2) &&
+		(strcmp(list_ptr[CMND_LIST] -> data,
+			list_ptr[USER_LIST] -> data) == 0)) {
+		next_type = list_ptr[CMND_LIST] -> next -> type;
+		tmp_ptr = list_ptr[CMND_LIST];
+		list_ptr[CMND_LIST] = tmp_ptr -> next;
+		while (next_type == TYPE3) {
+		    /*
+		     * print the allowed/forbidden command
+		     */
+		    if (list_ptr[USER_LIST] -> op == '!')
+			(void) printf("forbidden: ");
+		    else
+			(void) printf("  allowed: ");
+		    (void) printf("%s\n", list_ptr[CMND_LIST] -> data);
+
+		    if (list_ptr[CMND_LIST] -> next != NULL) {
+			next_type = list_ptr[CMND_LIST] -> next -> type;
+			tmp_ptr = list_ptr[CMND_LIST];
+			list_ptr[CMND_LIST] = tmp_ptr -> next;
+		    } else {
+			next_type = ~TYPE3;
+		    }
+		}
+	    } else {
+		tmp_ptr = list_ptr[CMND_LIST];
+		list_ptr[CMND_LIST] = tmp_ptr -> next;
+	    }
+	}
+	list_ptr[CMND_LIST] = save_ptr;
+    }
+}
+
+
+
+/*
  * this routine is called from validate() after the call_back() routine
  * has built all the possible lists. this routine steps thru the user list
  * calling on host_type_ok() and cmnd_type_ok() trying to resolve whether
@@ -406,6 +470,39 @@ int cmnd_check()
 		} else if (return_code == QUIT_NOW) {
 		    return (VALIDATE_NOT_OK);
 		}
+		if (list_ptr[USER_LIST] -> next != NULL) {
+		    next_type = list_ptr[USER_LIST] -> next -> type;
+		    tmp_ptr = list_ptr[USER_LIST];
+		    list_ptr[USER_LIST] = tmp_ptr -> next;
+		} else {
+		    next_type = ~TYPE3;
+		}
+	    }
+	} else {
+	    tmp_ptr = list_ptr[USER_LIST];
+	    list_ptr[USER_LIST] = tmp_ptr -> next;
+	}
+    }
+    return (VALIDATE_NOT_OK);
+}
+
+
+
+/*
+ * list commands for a user if got -l
+ */
+
+int cmnd_list()
+{
+
+    while (list_ptr[USER_LIST] != NULL) {
+	if ((list_ptr[USER_LIST] -> type == TYPE2) && host_type_ok()) {
+	    next_type = list_ptr[USER_LIST] -> next -> type;
+	    tmp_ptr = list_ptr[USER_LIST];
+	    list_ptr[USER_LIST] = tmp_ptr -> next;
+	    while (next_type == TYPE3) {
+		/* print out the available commands */
+		print_cmnds();
 		if (list_ptr[USER_LIST] -> next != NULL) {
 		    next_type = list_ptr[USER_LIST] -> next -> type;
 		    tmp_ptr = list_ptr[USER_LIST];
@@ -480,7 +577,11 @@ int validate()
      */
     switch (return_code) {
     case FOUND_USER:
-	return_code = cmnd_check();
+	/* do we want to list available commands or check a given command? */
+	if (strcmp(cmnd, "list") == 0)
+	    return_code = cmnd_list();
+	else
+	    return_code = cmnd_check();
 	delete_list(USER_LIST);
 	delete_list(HOST_LIST);
 	delete_list(CMND_LIST);
