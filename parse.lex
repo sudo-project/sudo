@@ -170,7 +170,7 @@ DEFVAR			[a-z_]+
 
     [#:\,=\n]		{
 			    BEGIN INITIAL;
-			    yyless(1);
+			    yyless(0);
 			    return(COMMAND);
 			}			/* end of command line args */
 
