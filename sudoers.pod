@@ -20,35 +20,35 @@ will be used.
   user access_group [: access_group] ...
 
     access_group ::= host_type = [op]cmnd_type [,[op]cmnd_type] ... 
-       host_type ::= a lower\-case hostname, netgroup, ip address,
-		           network number, or host alias.
+       host_type ::= a lower-case hostname, netgroup, ip address,
+                     network number, or host alias.
        cmnd_type ::= an command OR a command alias.
               op ::= the logical '!' NOT operator.
 
 =head2 host alias section format:
 
-  Host_Alias HOSTALIAS = host\-list
+  Host_Alias HOSTALIAS = host-list
 
       Host_Alias ::= a keyword.
-       HOSTALIAS ::= an upper\-case alias name.
-       host\-list ::= a comma separated list of hosts, netgroups,
-			      ip addresses, networks.
+       HOSTALIAS ::= an upper-case alias name.
+       host-list ::= a comma separated list of hosts, netgroups,
+                     ip addresses, networks.
 
 =head2 user alias section format:
 
-  User_Alias USERALIAS = user\-list
+  User_Alias USERALIAS = user-list
 
       User_Alias ::= a keyword.
-       USERALIAS ::= an upper\-case alias name.
-       user\-list ::= a comma separated list of users, groups and netgroups.
+       USERALIAS ::= an upper-case alias name.
+       user-list ::= a comma separated list of users, groups and netgroups.
 
 =head2 command alias section format:
 
-  Cmnd_Alias CMNDALIAS = cmnd\-list
+  Cmnd_Alias CMNDALIAS = cmnd-list
 
       Cmnd_Alias ::= a keyword.
-       CMNDALIAS ::= an upper\-case alias name.
-       cmnd\-list ::= a comma separated list commands.
+       CMNDALIAS ::= an upper-case alias name.
+       cmnd-list ::= a comma separated list commands.
 
 =head2 command specification:
 
@@ -57,36 +57,36 @@ will be used.
             path ::= a fully qualified pathname.
        arg[1..n] ::= optional command line arguments.
 
-    Text after a pound sign ('#') is considered a comment.
-    Words that begin with a percent sign ('%') are assumed to
-    be UN*X groups (%staff refers to users in the group "staff").
-    Words that begin with a plus sign ('+') are assumed to
-    be netgroups (+cshosts refers to the netgroup "cshosts").
-    Long lines can be newline escaped with the backslash '\\' character.
-    The reserved alias 'ALL' can be used for both {Host,User,Cmnd}_Alias.
+Text after a pound sign (B<#>) is considered a comment.
+Words that begin with a percent sign (B<%>) are assumed to
+be UN*X groups (%staff refers to users in the group I<staff>).
+Words that begin with a plus sign (B<+>) are assumed to
+be netgroups (B<+cshosts> refers to the netgroup I<cshosts>).
+Long lines can be newline escaped with the backslash B<\> character.
+The reserved alias I<ALL> can be used for both {Host,User,Cmnd}_Alias.
 
-    DO NOT define an alias of 'ALL', it will NOT be used.
-    Note that 'ALL' implies the entire universe of hosts/users/commands.
-    You can subtract elements from the universe by using the syntax:
-       user  host=ALL,!ALIAS1,!/etc/halt...
-    Note that the '!' notation only works in a user's command list.  You
-    may not use it to subtract elements in a User_Alias, Host_Alias, or
-    Cmnd_Alias.
+B<DO NOT> define an alias of I<ALL>, it will B<NOT> be used.
+Note that I<ALL> implies the entire universe of hosts/users/commands.
+You can subtract elements from the universe by using the syntax:
+   user  host=ALL,!ALIAS1,!/etc/halt...
+Note that the '!' notation only works in a user's command list.  You
+may not use it to subtract elements in a User_Alias, Host_Alias, or
+Cmnd_Alias.
 
-    Commands may have optional command line arguments.  If they do,
-    then the arguments in the sudoers file must exactly match those
-    on the command line.  It is also possible to have a command's
-    arguments span multiple lines as long as the line continuance
-    character '\\' is used.  The following characters must be escaped
-    with a '\\' if used in command arguments: ',', ':', '=', '\\'.
+Commands may have optional command line arguments.  If they do,
+then the arguments in the sudoers file must exactly match those
+on the command line.  It is also possible to have a command's
+arguments span multiple lines as long as the line continuance
+character '\' is used.  The following characters must be escaped
+with a '\' if used in command arguments: ',', ':', '=', '\'.
 
 =head1 EXAMPLES
 
     # Host alias specification
-    Host_Alias  HUB=houdini:\\
+    Host_Alias  HUB=houdini:\
                 REMOTE=merlin,kodiakthorn,spirit
     Host_Alias  SERVERS=houdini,merlin,kodiakthorn,spirit
-    Host_Alias  CSNETS=128.138.243.0,128.138.204.0,\\
+    Host_Alias  CSNETS=128.138.243.0,128.138.204.0,\
                        128.138.205.192
 
     # User alias specification
@@ -97,7 +97,7 @@ will be used.
     Cmnd_Alias  LPCS=/usr/etc/lpc,/usr/ucb/lprm
     Cmnd_Alias  SHELLS=/bin/sh,/bin/csh,/bin/tcsh,/bin/ksh
     Cmnd_Alias  SU=/bin/su
-    Cmnd_Alias  MISC=/bin/rm,/bin/cat:\\
+    Cmnd_Alias  MISC=/bin/rm,/bin/cat:\
                 SHUTDOWN=/etc/halt,/etc/shutdown
 
     # User specification
@@ -106,18 +106,18 @@ will be used.
     PARTTIME    ALL=ALL,!SHELLS,!SU
     +interns    +openlabs=ALL,!SHELLS,!SU
     britt       REMOTE=SHUTDOWN:ALL=LPCS
-    nieusma     SERVERS=SHUTDOWN,/etc/reboot:\\
+    nieusma     SERVERS=SHUTDOWN,/etc/reboot:\
                 HUB=ALL,!SHELLS
     jill        houdini=/etc/shutdown -r now,MISC
     markm       HUB=ALL,!MISC,!/etc/shutdown,!/etc/halt
-    davehieb    merlin=ALL:SERVERS=/etc/halt:\\
+    davehieb    merlin=ALL:SERVERS=/etc/halt:\
                 kodiakthorn=ALL
     steve       CSNETS=/usr/op_commands/,/bin/su operator
 
 The above I<sudoers> file specification is composed of 4 host alias
 specifications, 2 user alias specifications, 4 command alias
 specifications and 8 user specifications.  Full time staff (those
-in the FULLTIME alias) and anyone in group "wheel" are allowed to
+in the FULLTIME alias) and anyone in group I<wheel> are allowed to
 execute any command on any host.  Part time staff (those in the PARTTIME
 alias) are allowed to execute any command except for the group of SHELL
 and SU commands on any machine.  Britt is permitted to execute /etc/halt,
@@ -125,14 +125,15 @@ and SU commands on any machine.  Britt is permitted to execute /etc/halt,
 kodiakthorn, and spirit).  Nieusma is allowed to run /etc/halt, /etc/shutdown,
 and /etc/halt on all machines and all commands except for the group of SHELL
 commands on the HUB machines.  Jill is permitted to execute /etc/shutdown with
-the "\-r now" flags, /bin/rm, and /bin/cat on houdini.  Davehieb can execute
-any command on machines merlin and kodiakthorn and can halt the SERVERS.  Any
-user in the netgroup "interns" may run any command on the machines in the
-netgroup "openlabs" except for those commands in the groups SHELL and SU.
-Steve can run any command located in the directory /usr/op_commands on all
-machines on the subnets listed in CSNETS (note that the 128.138.192 net has
-a netmask of 255.255.255.192 which is why its network number is
-128.138.192.192).  He may also su to operator but to no one else.
+the I<-r now> flags, F</bin/rm>, and F</bin/cat> on houdini.  Davehieb can
+execute any command on machines merlin and kodiakthorn and can halt the
+SERVERS.  Any user in the netgroup I<interns> may run any command on the
+machines in the netgroup I<openlabs> except for those commands in the groups
+SHELL and SU.  Steve can run any command located in the directory
+F</usr/op_commands/> on all machines on the subnets listed in B<CSNETS>
+(note that the 128.138.192 net has a netmask of 255.255.255.192 which
+is why its network number is 128.138.192.192).  He may also C<su> to
+operator but to no one else.
 
 B<sudo> will do a logical and of a machine's ip address(es) with
 its netmask to decide whether that machine is on a given network).
@@ -143,8 +144,8 @@ will not run with a syntactically incorrect sudoers file.
 
 =head1 FILES
 
-F</etc/sudoers>                 file of authorized users.
-F</etc/netgroup>                list of network groups
+ /etc/sudoers		file of authorized users.
+ /etc/netgroup		list of network groups.
 
 =head1 SEE ALSO
 
