@@ -170,7 +170,7 @@ install-man:
 	$(INSTALL) -o $(owner) -g $(group) -m 0644 $(srcdir)/sudo.$(mantype) $(mandir8)/sudo.$(mansect8)
 	$(INSTALL) -o $(owner) -g $(group) -m 0644 $(srcdir)/visudo.$(mantype) $(mandir8)/visudo.$(mansect8)
 	$(INSTALL) -o $(owner) -g $(group) -m 0644 $(srcdir)/sudoers.$(mantype) $(mandir5)/sudoers.$(mansect5)
-	@MAN_POSTINSTALL@
+@MAN_POSTINSTALL@
 
 tags: $(SRCS)
 	ctags $(SRCS)
@@ -179,7 +179,7 @@ TAGS: $(SRCS)
 	etags $(SRCS)
 
 clean:
-	-rm -f lex.yy.* y.tab.* *.o $(PROGS) core
+	-rm -f lex.yy.* y.tab.* *.o $(PROGS) testsudoers core
 
 mostlyclean: clean
 
