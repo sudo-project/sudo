@@ -555,7 +555,8 @@ up to the end of the line, are ignored.
 
 <P>
 The reserved word <STRONG>ALL</STRONG> is a a built in <EM>alias</EM> that always causes a match to succeed. It can be used wherever one might
-otherwise use a <CODE>Cmnd_Alias</CODE>, <CODE>User_Alias</CODE>, <CODE>Runas_Alias</CODE>, or <CODE>Host_Alias</CODE>. You should not try to define your own <EM>alias</EM> called <STRONG>ALL</STRONG> as the built in alias will be used in preference to your own.
+otherwise use a <CODE>Cmnd_Alias</CODE>, <CODE>User_Alias</CODE>, <CODE>Runas_Alias</CODE>, or <CODE>Host_Alias</CODE>. You should not try to define your own <EM>alias</EM> called <STRONG>ALL</STRONG> as the built in alias will be used in preference to your own. Please note
+that using <STRONG>ALL</STRONG> can be dangerous since in a command context, it allows the user to run <STRONG>any</STRONG> command on the system.
 
 <P>
 An exclamation point ('!') can be used as a logical <EM>not</EM> operator both in an <EM>alias</EM> and in front of a <CODE>Cmnd</CODE>. This allows one to exclude certain values. Note, however, that using a <CODE>!</CODE> in conjunction with the built in <CODE>ALL</CODE> alias to allow a user to run ``all but a few'' commands rarely works as

@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-8/Nov/1999                     1.6                              1
+15/Nov/1999                    1.6                              1
 
 
 
@@ -127,7 +127,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-8/Nov/1999                     1.6                              2
+15/Nov/1999                    1.6                              2
 
 
 
@@ -193,7 +193,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-8/Nov/1999                     1.6                              3
+15/Nov/1999                    1.6                              3
 
 
 
@@ -259,7 +259,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-8/Nov/1999                     1.6                              4
+15/Nov/1999                    1.6                              4
 
 
 
@@ -325,7 +325,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-8/Nov/1999                     1.6                              5
+15/Nov/1999                    1.6                              5
 
 
 
@@ -391,7 +391,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-8/Nov/1999                     1.6                              6
+15/Nov/1999                    1.6                              6
 
 
 
@@ -457,7 +457,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-8/Nov/1999                     1.6                              7
+15/Nov/1999                    1.6                              7
 
 
 
@@ -503,7 +503,9 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        might otherwise use a Cmnd_Alias, User_Alias, Runas_Alias,
        or Host_Alias.  You should not try to define your own
        _a_l_i_a_s called AAAALLLLLLLL as the built in alias will be used in
-       preference to your own.
+       preference to your own.  Please note that using AAAALLLLLLLL can be
+       dangerous since in a command context, it allows the user
+       to run aaaannnnyyyy command on the system.
 
        An exclamation point ('!') can be used as a logical _n_o_t
        operator both in an _a_l_i_a_s and in front of a Cmnd.  This
@@ -519,11 +521,9 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        syntactic characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n ('=', ':',
        '(', ')') is optional.
 
-       The following characters must be escaped with a backslash
 
 
-
-8/Nov/1999                     1.6                              8
+15/Nov/1999                    1.6                              8
 
 
 
@@ -532,6 +532,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
+       The following characters must be escaped with a backslash
        ('\') when used as part of a word (eg. a username or
        hostname): '@', '!', '=', ':', ',', '(', ')', '\'.
 
@@ -588,8 +589,7 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
 
 
-
-8/Nov/1999                     1.6                              9
+15/Nov/1999                    1.6                              9
 
 
 
@@ -655,7 +655,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-8/Nov/1999                     1.6                             10
+15/Nov/1999                    1.6                             10
 
 
 
@@ -721,7 +721,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-8/Nov/1999                     1.6                             11
+15/Nov/1999                    1.6                             11
 
 
 
@@ -787,7 +787,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-8/Nov/1999                     1.6                             12
+15/Nov/1999                    1.6                             12
 
 
 
@@ -853,6 +853,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-8/Nov/1999                     1.6                             13
+15/Nov/1999                    1.6                             13
 
 

@@ -523,7 +523,9 @@ The reserved word B<ALL> is a a built in I<alias> that always causes
 a match to succeed.  It can be used wherever one might otherwise
 use a C<Cmnd_Alias>, C<User_Alias>, C<Runas_Alias>, or C<Host_Alias>.
 You should not try to define your own I<alias> called B<ALL> as the
-built in alias will be used in preference to your own.
+built in alias will be used in preference to your own.  Please note
+that using B<ALL> can be dangerous since in a command context, it
+allows the user to run B<any> command on the system.
 
 An exclamation point ('!') can be used as a logical I<not> operator
 both in an I<alias> and in front of a C<Cmnd>.  This allows one to

@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.14  1999/11/09 00:00:29  millert
-''' Mention what characters need to be escaped in names.
+''' Revision 1.15  1999/11/16 05:23:41  millert
+''' Add warning about using ALL in a command context.
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers 5 "1.6" "8/Nov/1999" "FILE FORMATS"
+.TH sudoers 5 "1.6" "15/Nov/1999" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
@@ -568,7 +568,9 @@ The reserved word \fB\s-1ALL\s0\fR is a a built in \fIalias\fR that always cause
 a match to succeed.  It can be used wherever one might otherwise
 use a \f(CWCmnd_Alias\fR, \f(CWUser_Alias\fR, \f(CWRunas_Alias\fR, or \f(CWHost_Alias\fR.
 You should not try to define your own \fIalias\fR called \fB\s-1ALL\s0\fR as the
-built in alias will be used in preference to your own.
+built in alias will be used in preference to your own.  Please note
+that using \fB\s-1ALL\s0\fR can be dangerous since in a command context, it
+allows the user to run \fBany\fR command on the system.
 .PP
 An exclamation point (\*(R'!') can be used as a logical \fInot\fR operator
 both in an \fIalias\fR and in front of a \f(CWCmnd\fR.  This allows one to
