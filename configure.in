@@ -278,14 +278,18 @@ case "$host" in
 		dnl Don't really need -lnsl
 		LIB_NSL=1
 
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SUNOS4(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SUNOS4(with_C2="yes")
+		fi
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SUNOS4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     *-*-solaris2*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		fi
 		if test "$with_C2" != "no"; then
 		    with_C2="yes"
 		    SHADOW_TYPE="SPW_SVR4"
@@ -306,7 +310,9 @@ case "$host" in
 		# (XXX - should be an option to configure)
 		#STATIC_SUDO=true
 
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
+		fi
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -343,7 +349,9 @@ case "$host" in
 
 		AC_DEFINE(BROKEN_SYSLOG)
 
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_HPUX9(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_HPUX9(with_C2="yes")
+		fi
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_HPUX9"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -394,7 +402,9 @@ case "$host" in
 		# ignore envariables wrt dynamic lib path
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
 
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_DUNIX(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_DUNIX(with_C2="yes")
+		fi
 		# C2 security stuff
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lsecurity -laud"
@@ -404,7 +414,9 @@ case "$host" in
 		fi
 		;;
     *-*-irix*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		fi
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -429,7 +441,9 @@ case "$host" in
 		fi
 		;;
     *-*-linux*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		fi
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -445,7 +459,9 @@ case "$host" in
 		    CFLAGS="${CFLAGS} -D__STDC__"
 		fi
 
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
+		fi
 		if test "$with_C2" = "yes"; then
 		    OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"
 		    SUDO_LIBS="${SUDO_LIBS} -lprot"
@@ -456,7 +472,9 @@ case "$host" in
 		;;
     *-*-ultrix*)
 		OS="ultrix"
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_ULTRIX4(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_ULTRIX4(with_C2="yes")
+		fi
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lauth"
 		    LIBS="${LIBS} -lauth"
@@ -465,7 +483,9 @@ case "$host" in
 		fi
 		;;
     *-*-riscos*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		fi
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -482,7 +502,9 @@ case "$host" in
 		SUDO_LIBS="${SUDO_LIBS} -lcrypt"
 		LIBS="${LIBS} -lcrypt"
 
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		fi
 		if test "$with_C2" = "yes"; then
 		    SUDO_LIBS="${SUDO_LIBS} -lsec"
 		    LIBS="${LIBS} -lsec"
@@ -491,7 +513,9 @@ case "$host" in
 		fi
 		;;
     *-*-sco*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SECUREWARE(with_C2="yes")
+		fi
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SECUREWARE"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -509,21 +533,27 @@ case "$host" in
 		fi
 
 		# This should always be true but why not be careful...
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_BSD(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_BSD(with_C2="yes")
+		fi
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_BSD"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     *-*-*bsd*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_BSD(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_BSD(with_C2="yes")
+		fi
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_BSD"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		fi
 		;;
     *-*-sysv*)
-		test -z "$with_C2" && SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_SVR4(with_C2="yes")
+		fi
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
