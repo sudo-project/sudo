@@ -293,7 +293,7 @@ int command_matches(cmnd, user_args, path, sudoers_args)
 
 	while ((dent = readdir(dirp)) != NULL) {
 	    /* ignore paths > MAXPATHLEN (XXX - log) */
-	    if (plen + strlen(dent->d_name) >= sizeof(buf))
+	    if (plen + NAMLEN(dent) >= sizeof(buf))
 		continue;
 	    strcpy(buf, path);
 	    strcat(buf, dent->d_name);
