@@ -316,9 +316,6 @@
 #undef HAVE_TERMIOS_H
 #endif /* HAVE_TCGETATTR */
 
-/* Define if you have the <sys/sockio.h> header file.  */
-#undef HAVE_SYS_SOCKIO_H
-
 /* Define if you have the <sys/bsdtypes.h> header file.  */
 #undef HAVE_SYS_BSDTYPES_H
 
