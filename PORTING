@@ -32,8 +32,8 @@ it and send in a bug report.)
 Alternately, it may compile but not work (nothing happens at Password: prompt).
 It is possible that your C library contains a broken or unusable crypt()
 function--try linking with -lcrypt if that exists.  Another possibility
-is that select() is not fully functional; setting PASSWORD_TIMEOUT to
-0 in options.h will disable the use of select().  If all else fails
+is that select() is not fully functional; running configure with
+--with-password-timeout=0 will disable the use of select().  If all else fails
 you can run configure with the --with-getpass flag to use the system getpass().
 You'll lose the timeout feature but gain a working sudo.
 NOTE: S/Key and OPIE support will not work with most OS's getpass(3) routine.

@@ -12,7 +12,7 @@ Q) Sudo is setup to log via syslog(3) but I'm not getting any log
    messages.
 A) Make sure you have an entry in your syslog.conf file to save
    the sudo messages.  The default log facility is local2
-   (configurable in options.h) so you would want something like:
+   (configurable via configure) so you would want something like:
 	local2.debug				/var/adm/sudo.log
    or
 	local2.debug				@loghost
@@ -43,15 +43,14 @@ A) There is no support for making an NIS/NIS+ map/table out of
 
 Q) I don't run sendmail on my machine.  Does this mean that I cannot
    use sudo?
-A) No, you just need to comment out the MAILER #define in options.h.
+A) No, you just need to run use the --without-sendmail argument to configure.
 
 Q) When I run visudo it uses vi as the editor and I hate vi.  How
    can I make it use another editor?
-A) Your best bet is to enable the ENV_EDITOR option in options.h.
+A) Your best bet is to run configure with the --with-env-editor switch.
    This will make visudo use the editor specified by the user's
-   EDITOR environmental variable.  Alternately, you can change the
-   default editor by setting the EDITOR macro in options.h to
-   the editor of your choice.
+   EDITOR environmental variable.  Alternately, you can run configure
+   with the --with-editor=path_to_your_editor.
 
 Q) Sudo appears to be removing some variables from my environment, why?
 A) Sudo removes the following "dangerous" environmental variables
@@ -74,14 +73,6 @@ A) Yes, the s/key support requires that you use tgetpass() since
    and s/key needs much mroe than that.  It should be possible
    to get tgetpass() to work, send mail to sudo-bugs@courtesan.com
    if you need help.
-
-Q) My C compiler complains about:
-	"./options.h", line xx "/*" detected in comment
-   Should I be worried?
-A) No, this is due to the way options are commented out in options.h.
-   Some ANSI compilers are just a bit too protective.
-   If anyone have a better way to that is just as easy to uncomment
-   and that doesn't produce a similar warning, please let me know.
 
 Q) I modified parse.lex but the Makefile is not generating a new
    lex.yy.c.

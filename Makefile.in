@@ -86,7 +86,7 @@ mandir5 = $(mandir)/$(mantype)$(mansect5)
 install_uid = 0
 install_gid = 0
 
-# See options.h and OPTIONS for a list of options
+# XXX - should go away
 OPTIONS = @OPTIONS@ -D_PATH_SUDO_SUDOERS=\"$(sudoersdir)/sudoers\" -D_PATH_SUDO_STMP=\"$(sudoersdir)/stmp\" -DSUDOERS_UID=$(install_uid) -DSUDOERS_GID=$(install_gid)
 
 #### End of system configuration section. ####
@@ -109,13 +109,13 @@ TESTOBJS = interfaces.o testsudoers.o
 
 LIBOBJS = @LIBOBJS@ @ALLOCA@
 
-HDRS = sudo.h options.h compat.h version.h insults.h \
+HDRS = sudo.h compat.h version.h insults.h \
        ins_2001.h ins_classic.h ins_goons.h ins_csops.h sudo.tab.h
 
 VERSION = 1.5.7
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL \
-            INSTALL.configure OPTIONS TODO PORTING README RUNSON \
+            INSTALL.configure TODO PORTING README RUNSON \
             FAQ TROUBLESHOOTING Makefile.in acsite.m4 aixcrypt.exp \
             config.h.in configure configure.in config.guess config.sub \
             pathnames.h.in getcwd.c strdup.c indent.pro install-sh \
@@ -129,7 +129,7 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL \
 VERSIONFILES = emul/utime.h check.c compat.h config.h.in dce_pwent.c \
 	       find_path.c getspwuid.c getcwd.c goodpath.c ins_2001.h \
 	       ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.c \
-	       logging.c options.h parse.c parse.lex parse.yacc pathnames.h.in \
+	       logging.c parse.c parse.lex parse.yacc pathnames.h.in \
 	       putenv.c strdup.c sudo.c sudo.h sudo_setenv.c testsudoers.c \
 	       tgetpass.c utime.c visudo.c
 

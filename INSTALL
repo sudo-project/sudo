@@ -35,13 +35,7 @@ For most systems and configurations it is possible simply to:
        change any of the default paths (alternately you could
        have changed the paths via options to `configure'.
 
-    5) Edit `options.h' to enable any particular non-default
-       options you wish to use.  Refer to the OPTIONS file for
-       an explanation of each one.  If you are building in
-       a separate build directory you may make a local copy
-       of options.h in that directory and edit it instead.
-
-    6) Type `make' to compile sudo.  If you are building sudo
+    5) Type `make' to compile sudo.  If you are building sudo
        in a separate build tree (apart from the sudo source)
        GNU make will probably be required.  If `configure' did
        its job properly (and you have a supported configuration)
@@ -50,13 +44,13 @@ For most systems and configurations it is possible simply to:
        on what might have gone wrong.  Please mail us if you have a
        fix or if you are unable to come up with a fix (address at EOF).
 
-    7) Type `make install' (as root) to install sudo, visudo, the
+    6) Type `make install' (as root) to install sudo, visudo, the
        man pages, and a skeleton sudoers file.  Note that the install
        will not overwrite an existing sudoers file.  You can also
        install various pieces the package via the install-binaries,
        install-man, and install-sudoers make targets.
 
-    8) Edit the sudoers file with `visudo' as necessary for your
+    7) Edit the sudoers file with `visudo' as necessary for your
        site.  You will probably want to refer the sample.sudoers
        file and sudoers man page included with the sudo package.
 
@@ -238,7 +232,7 @@ OS dependent notes
 OpenBSD < 2.2 and NetBSD < 1.2.1:
     The fdesc filesystem has a bug wrt /dev/tty handling that
     causes sudo to hang at the password prompt.  The workaround
-    is to set PASSWORD_TIMEOUT (in options.h) to 0.
+    is to run configure with --with-password-timeout=0
 
 Solaris 2.x:
     You need to have a C compiler in order to build sudo.
@@ -284,7 +278,7 @@ Ultrix 4.x:
     (available via anonymous ftp) which is a port if the 4.3BSD
     syslog/syslogd that is backwards compatible with the Ultrix version.
     I recommend it highly.  If you do not do this you probably want
-    to set `LOGGING' to SLOG_FILE in options.h.
+    to run configure with --with-logging=file
 
 Digital UNIX:
     Digital UNIX 4.0 shipped with /usr/include/prot.h including acl.h,
