@@ -1,5 +1,6 @@
 /*
  * CU sudo version 1.5.8 (based on Root Group sudo version 1.1)
+ * Copyright (c) 1994,1996,1998,1999 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * This software comes with no waranty whatsoever, use at your own risk.
  *
