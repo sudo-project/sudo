@@ -69,6 +69,9 @@
   
           SHORT_MESSAGE          - if you don't want a copyright notice when
 				   someone runs sudo for the first time
+  
+          USE_INSULTS            - if you want to be insulted for typing an
+                                   incorrect password like the original sudo(8)
 */
 
 
