@@ -2,9 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.12  1999/10/11 15:55:11  millert
-''' Docuement "Defaults" lines in /etc/sudoers.  Still needs some fleshing
-''' out but this is a start.
+''' Revision 1.13  1999/10/20 15:23:42  millert
+''' change ital to bold
 '''
 '''
 .de Sh
@@ -97,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers 5 "1.6" "10/Oct/1999" "FILE FORMATS"
+.TH SUDOERS 5 "1.6" "11/Oct/1999" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
@@ -368,8 +367,8 @@ value on a matching line takes effect.
 \& Parameter ::= Parameter '=' Value ||
 \&               '!'* Parameter ||
 .Ve
-Parameters may be flags, integer values, or strings.  Flags are
-implicitly boolean and can be turned off via the \*(L'!\*(R' operator.
+Parameters may be \fBflags\fR, \fBinteger\fR values, or \fBstrings\fR.  Flags
+are implicitly boolean and can be turned off via the \*(L'!\*(R' operator.
 Some integer and string parameters may also be used in a boolean
 context to disable them.  Values may be enclosed in double quotes
 (\f(CW"\fR) when they contain multiple words.  Special characters may
@@ -458,11 +457,11 @@ Users in this group are exempt from password and \s-1PATH\s0 requirements
 Value to override user's \f(CW$PATH\fR with
 .PP
 When logging via \fIsyslog\fR\|(3), sudo accepts the following values for the syslog
-facility (the value of the \fIsyslog\fR Parameter): \fIauthpriv\fR (if your \s-1OS\s0
-supports it), \fIauth\fR, \fIdaemon\fR, \fIuser\fR, \fIlocal0\fR, \fIlocal1\fR, \fIlocal2\fR,
-\fIlocal3\fR, \fIlocal4\fR, \fIlocal5\fR, \fIlocal6\fR, and \fIlocal7\fR.  The following
-syslog priorities are supported: \fIalert\fR, \fIcrit\fR, \fIdebug\fR, \fIemerg\fR,
-\fIerr\fR, \fIinfo\fR, \fInotice\fR, and \fIwarning\fR.
+facility (the value of the \fBsyslog\fR Parameter): \fBauthpriv\fR (if your \s-1OS\s0
+supports it), \fBauth\fR, \fBdaemon\fR, \fBuser\fR, \fBlocal0\fR, \fBlocal1\fR, \fBlocal2\fR,
+\fBlocal3\fR, \fBlocal4\fR, \fBlocal5\fR, \fBlocal6\fR, and \fBlocal7\fR.  The following
+syslog priorities are supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\fR,
+\fBerr\fR, \fBinfo\fR, \fBnotice\fR, and \fBwarning\fR.
 .Sh "User Specification"
 .PP
 .Vb 1
@@ -799,7 +798,7 @@ will not run with a syntactically incorrect \fIsudoers\fR file.
 \fIsudo\fR\|(8), \fIvisudo\fR\|(8), \fIsu\fR\|(1), \fIfnmatch\fR\|(3).
 
 .rn }` ''
-.IX Title "sudoers 5"
+.IX Title "SUDOERS 5"
 .IX Name "sudoers - list of which users may execute what"
 
 .IX Header "NAME"

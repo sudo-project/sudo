@@ -1,7 +1,7 @@
 
 
 
-sudoers(5)                 FILE FORMATS                sudoers(5)
+SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
 NNNNAAAAMMMMEEEE
@@ -61,13 +61,13 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-10/Oct/1999                    1.6                              1
+11/Oct/1999                    1.6                              1
 
 
 
 
 
-sudoers(5)                 FILE FORMATS                sudoers(5)
+SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
         Host_Alias ::= NAME '=' Host_List
@@ -127,13 +127,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-10/Oct/1999                    1.6                              2
+11/Oct/1999                    1.6                              2
 
 
 
 
 
-sudoers(5)                 FILE FORMATS                sudoers(5)
+SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
         Host ::= '!'* hostname |
@@ -193,13 +193,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-10/Oct/1999                    1.6                              3
+11/Oct/1999                    1.6                              3
 
 
 
 
 
-sudoers(5)                 FILE FORMATS                sudoers(5)
+SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
        there are conflicting values, the last value on a matching
@@ -214,7 +214,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
         Parameter ::= Parameter '=' Value ||
                       '!'* Parameter ||
 
-       Parameters may be flags, integer values, or strings.
+       Parameters may be ffffllllaaaaggggssss, iiiinnnntttteeeeggggeeeerrrr values, or ssssttttrrrriiiinnnnggggssss.
        Flags are implicitly boolean and can be turned off via the
        '!' operator.  Some integer and string parameters may also
        be used in a boolean context to disable them.  Values may
@@ -259,13 +259,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-10/Oct/1999                    1.6                              4
+11/Oct/1999                    1.6                              4
 
 
 
 
 
-sudoers(5)                 FILE FORMATS                sudoers(5)
+SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
        shell_noargs
@@ -325,13 +325,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-10/Oct/1999                    1.6                              5
+11/Oct/1999                    1.6                              5
 
 
 
 
 
-sudoers(5)                 FILE FORMATS                sudoers(5)
+SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
                    successfully
@@ -358,12 +358,12 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        secure_path Value to override user's $PATH with
 
        When logging via _s_y_s_l_o_g(3), sudo accepts the following
-       values for the syslog facility (the value of the _s_y_s_l_o_g
-       Parameter): _a_u_t_h_p_r_i_v (if your OS supports it), _a_u_t_h,
-       _d_a_e_m_o_n, _u_s_e_r, _l_o_c_a_l_0, _l_o_c_a_l_1, _l_o_c_a_l_2, _l_o_c_a_l_3, _l_o_c_a_l_4,
-       _l_o_c_a_l_5, _l_o_c_a_l_6, and _l_o_c_a_l_7.  The following syslog
-       priorities are supported: _a_l_e_r_t, _c_r_i_t, _d_e_b_u_g, _e_m_e_r_g, _e_r_r,
-       _i_n_f_o, _n_o_t_i_c_e, and _w_a_r_n_i_n_g.
+       values for the syslog facility (the value of the ssssyyyysssslllloooogggg
+       Parameter): aaaauuuutttthhhhpppprrrriiiivvvv (if your OS supports it), aaaauuuutttthhhh,
+       ddddaaaaeeeemmmmoooonnnn, uuuusssseeeerrrr, llllooooccccaaaallll0000, llllooooccccaaaallll1111, llllooooccccaaaallll2222, llllooooccccaaaallll3333, llllooooccccaaaallll4444,
+       llllooooccccaaaallll5555, llllooooccccaaaallll6666, and llllooooccccaaaallll7777.  The following syslog
+       priorities are supported: aaaalllleeeerrrrtttt, ccccrrrriiiitttt, ddddeeeebbbbuuuugggg, eeeemmmmeeeerrrrgggg, eeeerrrrrrrr,
+       iiiinnnnffffoooo, nnnnoooottttiiiicccceeee, and wwwwaaaarrrrnnnniiiinnnngggg.
 
        UUUUsssseeeerrrr SSSSppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnn
 
@@ -391,13 +391,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-10/Oct/1999                    1.6                              6
+11/Oct/1999                    1.6                              6
 
 
 
 
 
-sudoers(5)                 FILE FORMATS                sudoers(5)
+SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
        Runas_Spec in the user specification, a default Runas_Spec
@@ -457,13 +457,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-10/Oct/1999                    1.6                              7
+11/Oct/1999                    1.6                              7
 
 
 
 
 
-sudoers(5)                 FILE FORMATS                sudoers(5)
+SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
        [!...]  Matches any character nnnnooootttt in the specified range.
@@ -523,13 +523,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-10/Oct/1999                    1.6                              8
+11/Oct/1999                    1.6                              8
 
 
 
 
 
-sudoers(5)                 FILE FORMATS                sudoers(5)
+SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
 EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
@@ -589,13 +589,13 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
 
 
-10/Oct/1999                    1.6                              9
+11/Oct/1999                    1.6                              9
 
 
 
 
 
-sudoers(5)                 FILE FORMATS                sudoers(5)
+SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
         root           ALL = (ALL) ALL
@@ -655,13 +655,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-10/Oct/1999                    1.6                             10
+11/Oct/1999                    1.6                             10
 
 
 
 
 
-sudoers(5)                 FILE FORMATS                sudoers(5)
+SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
        machines as any user listed in the _O_P Runas_Alias (rrrrooooooootttt
@@ -721,13 +721,13 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-10/Oct/1999                    1.6                             11
+11/Oct/1999                    1.6                             11
 
 
 
 
 
-sudoers(5)                 FILE FORMATS                sudoers(5)
+SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
         ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
@@ -787,13 +787,13 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-10/Oct/1999                    1.6                             12
+11/Oct/1999                    1.6                             12
 
 
 
 
 
-sudoers(5)                 FILE FORMATS                sudoers(5)
+SUDOERS(5)                 FILE FORMATS                SUDOERS(5)
 
 
 
@@ -853,6 +853,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-10/Oct/1999                    1.6                             13
+11/Oct/1999                    1.6                             13
 
 

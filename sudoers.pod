@@ -210,8 +210,8 @@ value on a matching line takes effect.
  Parameter ::= Parameter '=' Value ||
 	       '!'* Parameter ||
 
-Parameters may be flags, integer values, or strings.  Flags are
-implicitly boolean and can be turned off via the '!' operator.
+Parameters may be B<flags>, B<integer> values, or B<strings>.  Flags
+are implicitly boolean and can be turned off via the '!' operator.
 Some integer and string parameters may also be used in a boolean
 context to disable them.  Values may be enclosed in double quotes
 (C<">) when they contain multiple words.  Special characters may
@@ -392,11 +392,11 @@ Value to override user's $PATH with
 =back 12
 
 When logging via syslog(3), sudo accepts the following values for the syslog
-facility (the value of the I<syslog> Parameter): I<authpriv> (if your OS
-supports it), I<auth>, I<daemon>, I<user>, I<local0>, I<local1>, I<local2>,
-I<local3>, I<local4>, I<local5>, I<local6>, and I<local7>.  The following
-syslog priorities are supported: I<alert>, I<crit>, I<debug>, I<emerg>,
-I<err>, I<info>, I<notice>, and I<warning>.
+facility (the value of the B<syslog> Parameter): B<authpriv> (if your OS
+supports it), B<auth>, B<daemon>, B<user>, B<local0>, B<local1>, B<local2>,
+B<local3>, B<local4>, B<local5>, B<local6>, and B<local7>.  The following
+syslog priorities are supported: B<alert>, B<crit>, B<debug>, B<emerg>,
+B<err>, B<info>, B<notice>, and B<warning>.
 
 =head2 User Specification
 
