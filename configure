@@ -12436,7 +12436,7 @@ fi
 echo "$as_me:$LINENO: result: $ac_cv_lib_dl_main" >&5
 echo "${ECHO_T}$ac_cv_lib_dl_main" >&6
 if test $ac_cv_lib_dl_main = yes; then
-  SUDO_LIBS="${SUDO_LIBS} -ldl -lpam"
+  SUDO_LIBS="${SUDO_LIBS} -lpam -ldl"
 else
   SUDO_LIBS="${SUDO_LIBS} -lpam"
 fi
