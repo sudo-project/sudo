@@ -275,10 +275,15 @@ cmndspec	:	runasspec nopasswd opcmnd {
 				runas_matches = TRUE;
 				if ($2 == TRUE)
 				    no_passwd = TRUE;
+				push;
 			    } else if (printmatches == TRUE) {
 				cm_list[cm_list_len].runas_len = 0;
 				cm_list[cm_list_len].cmnd_len = 0;
 				cm_list[cm_list_len].nopasswd = FALSE;
+			    } else {
+				cmnd_matches = -1;
+				runas_matches = -1;
+				no_passwd = -1;
 			    }
 			}
 		;
