@@ -21,7 +21,7 @@
  */
 
 #ifndef _SUDO_OPTIONS_H
-#define _SUDO_OPTINOS_H
+#define _SUDO_OPTIONS_H
 
 /*
  * DANGER DANGER DANGER!
@@ -47,8 +47,10 @@
 #define PASSWORD_TIMEOUT 5	/* passwd prompt timeout (in minutes) */
 #define TRIES_FOR_PASSWORD 3	/* number of tries to enter passwd correctly */
 /*#define USE_INSULTS		/* insult the user for incorrect passwords */
+/*#define CLASSIC_INSULTS	/* sudo "classic" insults--need USE_INSULTS */
 /*#define HAL_INSULTS		/* 2001-like insults--must define USE_INSULTS */
 /*#define GOONS_INSULTS		/* Goon Show insults--must define USE_INSULTS */
+/*#define CSOPS_INSULTS		/* CSOps insults--must define USE_INSULTS */
 #define EDITOR _PATH_VI		/* default editor to use */
 #define MAILER _PATH_SENDMAIL	/* what mailer to use */
 #define UMASK 0022		/* umask that the root-run prog should use */
@@ -57,6 +59,7 @@
 #define PASSPROMPT "Password:"	/* default password prompt */
 /*#define SECURE_PATH	"/bin:/usr/ucb:/usr/bin:/usr/etc:/etc" /* secure path */
 /*#define USE_EXECV		/* use execv() instead of execvp() */
+/*#define SHELL_IF_NO_ARGS	/* if sudo is given no arguments run a shell */
 #define FAST_MATCH		/* command check fails if basenames not same */
 
 /**********  You probably don't want to modify anything below here  ***********/
