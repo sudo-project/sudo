@@ -165,29 +165,41 @@ char * tgetpass(prompt, timeout)
 	(void) rewind(output);
     }
 
-    /* setup for select(2) */
-    FD_ZERO(&readfds);
-    FD_SET(fileno(input), &readfds);
+    /*
+     * Timeout of <= 0 means no timeout
+     */
+    if (timeout > 0) {
+	/* setup for select(2) */
+	FD_ZERO(&readfds);
+	FD_SET(fileno(input), &readfds);
 
-    /* set timeout for select */
-    tv.tv_sec = timeout;
-    tv.tv_usec = 0;
+	/* set timeout for select */
+	tv.tv_sec = timeout;
+	tv.tv_usec = 0;
 
-    /* how many file descriptors may we have? */
+	/* how many file descriptors may we have? */
 #ifdef HAVE_SYSCONF
-    n = sysconf(_SC_OPEN_MAX);
+	n = sysconf(_SC_OPEN_MAX);
 #else
-    n = getdtablesize();
+	n = getdtablesize();
 #endif /* HAVE_SYSCONF */
 
-    /*
-     * get password or return empty string if nothing to read by timeout
-     */
-    buf[0] = '\0';
-    if (select(n, &readfds, 0, 0, &tv) > 0 && fgets(buf, sizeof(buf), input)) {
-	n = strlen(buf);
-	if (buf[n - 1] == '\n')
-	    buf[n - 1] = '\0';
+	/*
+	 * get password or return empty string if nothing to read by timeout
+	 */
+	buf[0] = '\0';
+	if (select(n, &readfds, 0, 0, &tv) > 0 && fgets(buf, sizeof(buf), input)) {
+	    n = strlen(buf);
+	    if (buf[n - 1] == '\n')
+		buf[n - 1] = '\0';
+	}
+    } else {
+	buf[0] = '\0';
+	if (fgets(buf, sizeof(buf), input)) {
+	    n = strlen(buf);
+	    if (buf[n - 1] == '\n')
+		buf[n - 1] = '\0';
+	}
     }
 
      /* turn on echo */
