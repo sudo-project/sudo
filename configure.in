@@ -88,6 +88,8 @@ case `echo $OS | $TRPROG '[A-Z]' '[a-z]'` in
 		;;
     "bsd/386")	echo "Looks like bsdi BSD/386"
 		;;
+    "mtxinu")	echo "Looks like mt Xinu MORE/BSD"
+		;;
     "4.3bsd")	echo "Looks like HP BSD"
 		;;
     *"bsd"*)	echo "Looks like some kind of BSD"
