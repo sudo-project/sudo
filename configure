@@ -7597,7 +7597,7 @@ EOF
 ;;
 esac
 
-for ac_func in strchr strrchr memchr memcpy memset sysconf sigaction tzset \
+for ac_func in strchr strrchr memchr memcpy memset sysconf tzset \
 	       seteuid setegid strftime setrlimit initgroups fstat
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
@@ -8577,7 +8577,7 @@ else
   LIBOBJS="$LIBOBJS fnmatch.$ac_objext"
 fi
 
-for ac_func in strerror strcasecmp
+for ac_func in strerror strcasecmp sigaction
 do
 ac_ac_var=`echo "ac_cv_func_$ac_func" | $ac_tr_sh`
 echo "$as_me:8583: checking for $ac_func" >&5
