@@ -85,7 +85,7 @@ char * sudo_goodpath(path)
     set_perms(PERM_USER);
 
     /* stat(3) failed */
-    if (!err)
+    if (err)
 	return(NULL);
 
     /* make sure path describes an executable regular file */
