@@ -204,5 +204,10 @@ Ultrix 4.x:
     I recommend it highly.  If you do not do this you probably want
     to set `LOGGING' to SLOG_FILE in options.h.
 
+SCO ODT:
+    You'll probably need libcrypt_i.a available via anonymous ftp
+    from sosco.sco.com.  The necesary files are /SLS/lng225b.Z
+    and /SLS/lng225b.ltr.Z.
+
 Please send changes, bugs, security holes, and gripes to:
     sudo-bugs@cs.colorado.edu
