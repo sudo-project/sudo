@@ -1734,38 +1734,43 @@ Sudo 1.6.8 released.
 
 Sudo 1.6.8p1 released.
 
-549) Bash exported functions and the CDPATH variable are now stripped from
-     the environment passed to the program to be executed.
+549) Bash exported functions are now stripped from the environment passed
+     to the program to be executed.
 
 Sudo 1.6.8p2 released.
 
-550) New monitor functionality for systems with systrace(4).  When tracing
+550) The CDPATH variable is now stripped from the environment passed
+     to the program to be executed.
+
+Sudo 1.6.8p3 released.
+
+551) New monitor functionality for systems with systrace(4).  When tracing
      is enabled sudo will fork a daemon that traces the command and
      intercepts and execve() calls and allows/denies the call based on
      a sudoers lookup.  Also updates the command's environment with
      the SUDO_* variables if supported by the version of systrace(4).
 
-551) Added support for multiple sudoers file via #include.
+552) Added support for multiple sudoers file via #include.
 
-552) An empty sudoers file is no longer a parse error.
+553) An empty sudoers file is no longer a parse error.
 
-553) Fixed error handling if the lexer runs out of memory.
+554) Fixed error handling if the lexer runs out of memory.
 
-554) Optimized lexer slightly by removing use of unput() and removing
+555) Optimized lexer slightly by removing use of unput() and removing
      some ambiguity with the Default keyword.
 
-555) Wildcard matches on commands now use glob() and stat() so 
+556) Wildcard matches on commands now use glob() and stat() so 
      that relative paths work correctly in conjunction with wildcards.
 
-556) Rewritten parser that converts sudoers into a set of data structures.
+557) Rewritten parser that converts sudoers into a set of data structures.
      This eliminates ordering issues and makes it possible to apply
      sudoers Defaults entries before searching for the command.
 
-557) Visudo will now warn about aliases that are defined but not used.
+558) Visudo will now warn about aliases that are defined but not used.
 
-558) "sudo -l" now takes an optional username which lets root see other
+559) "sudo -l" now takes an optional username which lets root see other
      users' privs.
 
-559) The "secure_path" run-time Defaults option has been restored.
+560) The "secure_path" run-time Defaults option has been restored.
 
-560) Password data is now cached for fast lookup.
+561) Password and group data is now cached for fast lookup.
