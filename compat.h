@@ -170,9 +170,6 @@
 #if !defined(HAVE_MEMCPY) && !defined(memcpy)
 # define memcpy(_d, _s, _n)	(bcopy(_s, _d, _n))
 #endif
-#if !defined(HAVE_MEMMOVE) && !defined(memmove)
-# define memmove(_d, _s, _n)	(bcopy(_s, _d, _n))
-#endif
 #if !defined(HAVE_MEMSET) && !defined(memset)
 # define memset(_s, _x, _n)	(bzero(_s, _n))
 #endif

@@ -25887,8 +25887,7 @@ esac
 
 
 
-
-for ac_func in strchr strrchr memchr memcpy memmove memset sysconf tzset \
+for ac_func in strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
 	       setlocale
 do
