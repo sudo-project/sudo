@@ -1,15 +1,25 @@
 This is the CU version of sudo, release 1.3.6 (BETA)
 
+The sudo philosophy
+===================
+
 Sudo is a program designed to allow a sysadmin to give limited root privileges
 to users and log root activity.  The basic philosophy is to give as few
 privileges as possible but still allow people to get their work done.
 
+Where to find sudo
+==================
 Before you try and build sudo, *please* make sure you have the current
 version.  The latest sudo may always be gotten via anonymous ftp
 from ftp.cs.colorado.edu in the directory /pub/sysadmin/utilities/.
-The distribution is cu-sudo.v1.3.6plN.tar.Z where N is the patchlevel
-(for patchlevel 0 there is no plN suffix).
+The distribution is cu-sudo.v1.M.m.tar.Z where `M' is the major
+version number and `m' is the minor version number.
+BETA versions of sudo may also be available.  If you join
+the `sudo-workers' mailing list you will get the BETA announcements
+(see the `Mailing lists' section below).
 
+What's new
+==========
 For a history of CU sudo please see the HISTORY file that came with the
 release.  Please note that while this source is based on the Root
 Group's sudo 1.1, the code has been changed significantly, so please
@@ -22,20 +32,53 @@ a smarter and easier to use visudo, an updated configure script along
 with the usual bug fixes and portability changes.  See the CHANGES file
 for the full scoop.
 
-Note that sudo now uses a "configure script."  You should be able to just
-type "./configure" and to generate the Makefiles, config.h and pathnames.h.
-Sudo should build "out of the box" for the OS's listed in SUPPORTED.
-Regardless, you should read the INSTALL file before proceeding.
+System requirements
+===================
 
-Also note that sudo options are now configured in options.h instead of
-the Makefile or sudo.h.  For more info see the INSTALL file.  If you
-need to make changes, please send them to sudo-bugs@cs.colorado.edu
+Sudo requires a machine running UN*X (most flavors of BSD, SYSV, or
+POSIX will do), a C compiler, and a yacc-compatible parser generator
+(yacc, byacc, bison).  If you wish to modify the tokenizer then a
+version of lex or flex is required (sudo comes with a pre-flex'd
+tokenizer).  Note that there are a lot of broken lex's out there
+so I really recommend using flex (ftp://ftp.ee.lbl.gov/pub/flex*).
 
-MAILING LISTS:
+Building the release
+===================
 
-Please send bugs, problems, comments, etc to sudo-bugs@cs.colorado.edu
+Please read the installation guide in the `INSTALL' file before
+trying to build sudo.  Things have changed quite a bit from the
+previous release (1.3.1pl4).  The `RUNSON' file contains a list of
+of platforms that this version of sudo is known to work on.  If you
+can add to this list, please send mail to sudo-bugs@cs.colorado.edu.
+If something goes wrong you may want to refer to the `TROUBLESHOOTING'
+file.
+
+Copyright
+=========
+
+Sudo is distributed under the `GNU general public license.'
+Please refer to the `COPYING' file included with the release
+for a copy of the license proper.
+
+Mailing lists
+=============
+
 There is a mailing list that receives announcements whenever a new
 version of sudo is released.  You can subscribe to it by sending a
 message to "majordomo@cs.colorado.edu" that includes the line
-"subscribe sudo-announce".  There is also a list for people working
-on sudo.  The command to add yourself is "subscribe sudo-workers".
+"subscribe sudo-announce".
+There is also a list for people working on and porting sudo.  The
+command to add yourself is "subscribe sudo-workers".
+
+Web page
+========
+
+There is a sudo `web page' at http://www.cs.colorado.edu/~millert/sudo
+that contains an overview of sudo as well as pointers to BETA versions
+and other useful info.
+
+Bug reports
+===========
+A list of known bugs may be found in the `BUGS' file.
+Please send (new) bugs, problems, comments, features, ports, etc
+to sudo-bugs@cs.colorado.edu.
