@@ -3,10 +3,10 @@
 sudo, visudo \- execute a command as the superuser and edit the sudoers file
 
 .SH SYNOPSIS
-.B sudo [-v]
+.B sudo [-V] [-v]
 .I command
 .sp
-.B visudo [-v]
+.B visudo [-V]
 
 .SH DESCRIPTION
 .I Sudo
@@ -17,11 +17,15 @@ as the superuser.
 determines who is an authorized user by consulting the file
 .I /etc/sudoers.
 The
-.I -v
+.I -V
 flag will print the version of sudo/visudo you are running.
 Sudo will prompt for a user's password to initiate a validation period
-of N minutes (where N is defined at installation time and defaults 
-to 5 minutes).
+of N minutes (where N is defined at installation time and defaults
+to 5 minutes).  By giving
+.I sudo
+the
+.I -v
+flag a user can update the time stamp without running a command.
 
 The
 .I sudoers
@@ -213,7 +217,7 @@ allow shell escapes.
 
 .SH BUGS
 The
-.I -v
+.I -V
 flag gives the version of the
 .I sudo
 package rather than the individual
