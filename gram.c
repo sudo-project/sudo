@@ -703,6 +703,7 @@ alias_destroy(v)
 	    free(m->name);
 	free(m);
     }
+    free(a);
 }
 
 /*
@@ -808,7 +809,7 @@ init_parser(path, quiet)
     sudolineno = 1;
     verbose = !quiet;
 }
-#line 760 "gram.c"
+#line 761 "gram.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1156,7 +1157,7 @@ break;
 case 28:
 #line 278 "gram.y"
 {
-			    NEW_MEMBER(yyval.member, yyvsp[0].string, HOSTALIAS);
+			    NEW_MEMBER(yyval.member, yyvsp[0].string, ALIAS);
 			}
 break;
 case 29:
@@ -1252,7 +1253,7 @@ break;
 case 44:
 #line 348 "gram.y"
 {
-			    NEW_MEMBER(yyval.member, yyvsp[0].string, RUNASALIAS);
+			    NEW_MEMBER(yyval.member, yyvsp[0].string, ALIAS);
 			}
 break;
 case 45:
@@ -1333,7 +1334,7 @@ break;
 case 57:
 #line 394 "gram.y"
 {
-			    NEW_MEMBER(yyval.member, yyvsp[0].string, CMNDALIAS);
+			    NEW_MEMBER(yyval.member, yyvsp[0].string, ALIAS);
 			}
 break;
 case 58:
@@ -1423,7 +1424,7 @@ break;
 case 79:
 #line 488 "gram.y"
 {
-			    NEW_MEMBER(yyval.member, yyvsp[0].string, USERALIAS);
+			    NEW_MEMBER(yyval.member, yyvsp[0].string, ALIAS);
 			}
 break;
 case 80:
@@ -1450,7 +1451,7 @@ case 83:
 			    NEW_MEMBER(yyval.member, yyvsp[0].string, WORD);
 			}
 break;
-#line 1402 "gram.c"
+#line 1403 "gram.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
