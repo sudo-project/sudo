@@ -155,6 +155,12 @@
 /* Define if you have tcgetattr(3). */
 #undef HAVE_TCGETATTR
 
+/* Define if you have innetgr(3). */
+#undef HAVE_INNETGR
+
+/* Define if you have getdomainname(2). */
+#undef HAVE_GETDOMAINNAME
+
 /* Define if you have utime(2). */
 #undef HAVE_UTIME
 
