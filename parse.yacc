@@ -69,7 +69,7 @@ static char rcsid[] = "$Id$";
 extern int sudolineno, parse_error;
 int errorlineno = -1;
 int clearaliases = 1;
-int printmatches = 0;
+int printmatches = FALSE;
 
 /*
  * Alias types
@@ -79,16 +79,22 @@ int printmatches = 0;
 #define USER			 3
 
 /*
- * The matching stack, we should not have to initialize this,
- * since it is global but some compilers are just too braindamaged...
+ * The matching stack, initial space allocated in init_parser().
  */
-struct matchstack match[MATCHSTACKSIZE] = { FALSE };
-int top = 0;
+struct matchstack *match;
+int top = 0, stacksize = 0;
 
 #define push \
-    if (top > MATCHSTACKSIZE) \
-	yyerror("matching stack overflow"); \
-    else { \
+    { \
+	if (top > stacksize) { \
+	    while ((stacksize += STACKINCREMENT) < top); \
+	    match = (struct matchstack *) realloc(match, sizeof(struct matchstack) * stacksize); \
+	    if (match == NULL) { \
+		perror("malloc"); \
+		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]); \
+		exit(1); \
+	    } \
+	} \
 	match[top].user   = -1; \
 	match[top].cmnd   = -1; \
 	match[top].host   = -1; \
@@ -96,39 +102,26 @@ int top = 0;
 	match[top].nopass = -1; \
 	top++; \
     }
+
 #define pop \
-    if (top == 0) \
-	yyerror("matching stack underflow"); \
-    else \
-	top--;
-
-/*
- * The stack for printmatches.  A list of allowed commands for the user.
- * Space for cmndstack is malloc'd in parse.c
- */
-struct sudo_match *matches;
-int nummatches;
-
-#define cmndpush \
-    if (nummatches++ > MATCHSTACKSIZE) \
-	yyerror("cmnd stack overflow"); \
-    else { \
-	matches[nummatches].runas = matches[nummatches].cmnd = NULL; \
-	matches[nummatches].nopasswd = FALSE; \
+    { \
+	if (top == 0) \
+	    yyerror("matching stack underflow"); \
+	else \
+	    top--; \
     }
 
 /*
- * The list of cmndaliases for MODE_LIST
+ * The stack for printmatches.  A list of allowed commands for the user.
  */
-int in_alias = FALSE, num_command_aliases = 0;
-/* XXX - dynamically size me! */
-struct command_alias command_aliases[1024] = { NULL, NULL, 0, 0 };
+static struct sudo_match *matches = NULL;
+static int nummatches = 0, matches_size = 0;
 
-#define command_alias_push \
-    if (num_command_aliases++ > 1024) \
-	yyerror("command_alias stack overflow"); \
-    else \
-	command_aliases[num_command_aliases].entries = NULL;
+/*
+ * List of Cmnd_Aliases and expansions for `sudo -l'
+ */
+static int in_alias = FALSE, ca_list_len = 0, ca_list_size = 0;
+static struct command_alias *ca_list = NULL;
 
 /*
  * Protoypes
@@ -141,6 +134,9 @@ static int  find_alias		__P((char *, int));
 static int  add_alias		__P((char *, int));
 static int  more_aliases	__P((size_t));
 static void append		__P((char *, char **, size_t *, size_t *, int));
+static void expand_ca_list	__P((void));
+static void expand_match_list	__P((void));
+       void init_parser		__P((void));
        void yyerror		__P((char *));
 
 void yyerror(s)
@@ -270,7 +266,7 @@ cmndspec	:	runasspec nopasswd opcmnd {
 				runas_matches = TRUE;
 				if ($2 == TRUE)
 				    no_passwd = TRUE;
-			    } else if (printmatches) {
+			    } else if (printmatches == TRUE) {
 				matches[nummatches].runas_len = 0;
 				matches[nummatches].cmnd_len = 0;
 				matches[nummatches].nopasswd = FALSE;
@@ -282,9 +278,9 @@ opcmnd		:	cmnd { ; }
 		|	'!' {
 			    if (printmatches == TRUE && in_alias == TRUE) {
 				/* XXX - want a space before first '!' */
-				append("!", &command_aliases[num_command_aliases].entries,
-				       &command_aliases[num_command_aliases].entries_len,
-				       &command_aliases[num_command_aliases].entries_size, 0);
+				append("!", &ca_list[ca_list_len-1].entries,
+				       &ca_list[ca_list_len-1].entries_len,
+				       &ca_list[ca_list_len-1].entries_size, 0);
 			    }
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
@@ -396,16 +392,16 @@ nopasswd	:	/* empty */ {
 
 cmnd		:	ALL {
 			    if (printmatches == TRUE && in_alias == TRUE) {
-				append("ALL", &command_aliases[num_command_aliases].entries,
-				       &command_aliases[num_command_aliases].entries_len,
-				       &command_aliases[num_command_aliases].entries_size, ',');
+				append("ALL", &ca_list[ca_list_len-1].entries,
+				       &ca_list[ca_list_len-1].entries_len,
+				       &ca_list[ca_list_len-1].entries_size, ',');
 			    }
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
 				append("ALL", &matches[nummatches].cmnd,
 				       &matches[nummatches].cmnd_len,
 				       &matches[nummatches].cmnd_size, 0);
-				cmndpush;
+				expand_match_list();
 			    }
 
 			    cmnd_matches = TRUE;
@@ -413,16 +409,16 @@ cmnd		:	ALL {
 			}
 		|	ALIAS {
 			    if (printmatches == TRUE && in_alias == TRUE) {
-				append($1, &command_aliases[num_command_aliases].entries,
-				       &command_aliases[num_command_aliases].entries_len,
-				       &command_aliases[num_command_aliases].entries_size, ',');
+				append($1, &ca_list[ca_list_len-1].entries,
+				       &ca_list[ca_list_len-1].entries_len,
+				       &ca_list[ca_list_len-1].entries_size, ',');
 			    }
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
 				append($1, &matches[nummatches].cmnd,
 				       &matches[nummatches].cmnd_len,
 				       &matches[nummatches].cmnd_size, 0);
-				cmndpush;
+				expand_match_list();
 			    }
 			    if (find_alias($1, CMND)) {
 				cmnd_matches = TRUE;
@@ -432,22 +428,24 @@ cmnd		:	ALL {
 			}
 		|	 COMMAND {
 			    if (printmatches == TRUE && in_alias == TRUE) {
-				append($1.cmnd, &command_aliases[num_command_aliases].entries,
-				       &command_aliases[num_command_aliases].entries_len,
-				       &command_aliases[num_command_aliases].entries_size, ',');
-				/* XXX - ignores args */
+				append($1.cmnd, &ca_list[ca_list_len-1].entries,
+				       &ca_list[ca_list_len-1].entries_len,
+				       &ca_list[ca_list_len-1].entries_size, ',');
+				if ($1.args)
+				    append($1.args, &ca_list[ca_list_len-1].entries,
+					&ca_list[ca_list_len-1].entries_len,
+					&ca_list[ca_list_len-1].entries_size, ' ');
 			    }
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)  {
 				append($1.cmnd, &matches[nummatches].cmnd,
 				       &matches[nummatches].cmnd_len,
 				       &matches[nummatches].cmnd_size, 0);
-				if ($1.args) {
+				if ($1.args)
 				    append($1.args, &matches[nummatches].cmnd,
 					   &matches[nummatches].cmnd_len,
 					   &matches[nummatches].cmnd_size, ' ');
-				}
-				cmndpush;
+				expand_match_list();
 			    }
 
 			    /* if NewArgc > 1 pass ptr to 1st arg, else NULL */
@@ -484,14 +482,14 @@ cmndaliases	:	cmndalias
 
 cmndalias	:	ALIAS {
 			    push;
-			    if (printmatches) {
+			    if (printmatches == TRUE) {
 				in_alias = TRUE;
-				if ((command_aliases[num_command_aliases].alias
-				     = strdup($1)) == NULL) {
-
+				/* Allocate space for ca_list if necesary. */
+				expand_ca_list();
+				if (!(ca_list[ca_list_len-1].alias = strdup($1))){
 				    perror("malloc");
 				    (void) fprintf(stderr,
-					"%s: cannot allocate memory!\n", Argv[0]);
+				      "%s: cannot allocate memory!\n", Argv[0]);
 				    exit(1);
 				 }
 			     }
@@ -501,10 +499,8 @@ cmndalias	:	ALIAS {
 			    pop;
 			    (void) free($1);
 
-			    if (printmatches) {
+			    if (printmatches == TRUE)
 				in_alias = FALSE;
-				command_alias_push;
-			    }
 			}
 		;
 
@@ -718,14 +714,27 @@ void list_matches()
 	/* XXX - this could be faster (check for all upcase) */
 	/* Print the actual command or expanded Cmnd_Alias. */
 	key.alias = matches[i].cmnd;
-	if ((ca = lfind((VOID *)&key, (VOID *)&command_aliases[0],
-	     &num_command_aliases, sizeof(struct command_alias), cmndaliascmp)))
+	if ((ca = lfind((VOID *)&key, (VOID *)&ca_list[0],
+	     &ca_list_len, sizeof(struct command_alias), cmndaliascmp)))
 	    (void) puts(ca->entries);
 	else
 	    (void) puts(matches[i].cmnd);
     }
 
-    /* XXX - free up space */
+    /* Be nice and free up space. */
+    for (i = 0; i < ca_list_len; i++) {
+	(void) free(ca_list[i].alias);
+	(void) free(ca_list[i].entries);
+    }
+    (void) free(ca_list);
+    ca_list = NULL;
+
+    for (i = 0; i < nummatches; i++) {
+	(void) free(matches[i].runas);
+	(void) free(matches[i].cmnd);
+    }
+    (void) free(matches);
+    matches = NULL;
 }
 
 
@@ -778,4 +787,85 @@ void reset_aliases()
     if (aliases)
 	(void) free(aliases);
     naliases = nslots = 0;
+}
+
+
+/* XXX - rename! */
+static void expand_ca_list()
+{
+    if (++ca_list_len > ca_list_size) {
+	while ((ca_list_size += STACKINCREMENT) < ca_list_len);
+	if (ca_list == NULL) {
+	    if ((ca_list = (struct command_alias *)
+		malloc(sizeof(struct command_alias) * ca_list_size)) == NULL) {
+		perror("malloc");
+		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+		exit(1);
+	    }
+	} else {
+	    if ((ca_list = (struct command_alias *) realloc(ca_list,
+		sizeof(struct command_alias) * ca_list_size)) == NULL) {
+		perror("malloc");
+		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+		exit(1);
+	    }
+	}
+    }
+
+    ca_list[ca_list_len - 1].entries = NULL;
+}
+
+
+/* XXX - rename! */
+static void expand_match_list()
+{
+    if (++nummatches > matches_size) {
+	while ((matches_size += STACKINCREMENT) < nummatches);
+	if (matches == NULL) {
+	    if ((matches = (struct sudo_match *)
+		malloc(sizeof(struct sudo_match) * matches_size)) == NULL) {
+		perror("malloc");
+		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+		exit(1);
+	    }
+	    nummatches = 0;
+	} else {
+	    if ((matches = (struct sudo_match *) realloc(matches,
+		sizeof(struct sudo_match) * matches_size)) == NULL) {
+		perror("malloc");
+		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+		exit(1);
+	    }
+	}
+    }
+
+    matches[nummatches].runas = matches[nummatches].cmnd = NULL;
+    matches[nummatches].nopasswd = FALSE;
+}
+
+
+void init_parser()
+{
+    /* Free up old data structures if we run the parser more than once. */
+    if (match) {
+	(void) free(match);
+	match = NULL;
+	top = 0;
+	parse_error = FALSE;
+	errorlineno = -1;   
+	sudolineno = 1;     
+    }
+
+    /* Allocate space for the matching stack. */
+    stacksize = STACKINCREMENT;
+    match = (struct matchstack *) malloc(sizeof(struct matchstack) * stacksize);
+    if (match == NULL) {
+	perror("malloc");
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+
+    /* Allocate space for the match list (for `sudo -l'). */
+    if (printmatches == TRUE)
+	expand_match_list();
 }
