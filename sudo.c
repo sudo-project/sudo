@@ -275,7 +275,9 @@ main(argc, argv)
 static void load_globals()
 {
     struct passwd *pw_ent;
+#ifdef FQDN
     struct hostent *h_ent;
+#endif /* FQDN */
     char *p;
 
     uid = getuid();		/* we need to tuck this away for safe keeping */
@@ -511,8 +513,6 @@ static void rmenv(envp, s, len)
 static void add_env()
 {
     char *uidstr;
-    int len;
-    uid_t n;
 
     /* add the SUDO_USER envariable */
     if (sudo_setenv("SUDO_USER", user)) {
@@ -784,10 +784,11 @@ void set_perms(perm)
 static char *uid2str(uid)
     uid_t uid;
 {
-    int len, n;
+    int len;
+    unsigned n;
     char *uidstr;
 
-    for (len = 1, n = uid; (int) (n = n / 10) != 0; )
+    for (len = 1, n = (unsigned) uid; (unsigned) (n = n / 10) != 0; )
 	++len;
     
     uidstr = (char *) malloc(len+1);
@@ -797,7 +798,7 @@ static char *uid2str(uid)
 	exit(1);
     }
 
-    (void) sprintf(uidstr, "%u", (unsigned)uid);
+    (void) sprintf(uidstr, "%u", (unsigned) uid);
 
     return(uidstr);
 }
