@@ -89,7 +89,7 @@ int ntwk_matches		__P((char *));
  * External globals
  */
 extern FILE *yyin, *yyout;
-extern int errorlineno, sudolineno;
+extern int errorlineno, sudolineno, top;
 
 
 /*
@@ -287,6 +287,7 @@ int main(argc, argv)
 	    parse_error = FALSE;
 	    errorlineno = -1;
 	    sudolineno = 1;
+	    top = 0;
 
 	    /* parse the sudoers file */
 	    if (yyparse()) {
