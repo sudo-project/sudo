@@ -155,7 +155,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		    p = pm->msg;
 		/* Read the password. */
 		pr->resp = estrdup((char *) tgetpass(p,
-		    def_ival(I_PW_TIMEOUT) * 60, tgetpass_flags));
+		    def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags));
 		if (*pr->resp == '\0')
 		    nil_pw = 1;		/* empty password */
 		break;
