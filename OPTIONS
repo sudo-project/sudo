@@ -64,12 +64,6 @@ EXEMPTGROUP
     a password but where Jr. sysadmins need to.
     This is off by default.
 
-NO_PASSWD
-    If this is defined then sudo will *never* ask for a password.
-    It should only be used in an environment where machines are
-    physically secure.  It would be a very bad idea for an open
-    lab.
-
 ENV_EDITOR
     Makes visudo consult the EDITOR and VISUAL environmental variables
     before falling back on the default editor.  Note that this may create
@@ -210,11 +204,19 @@ LONG_SKEY_PROMPT
     find it more convenient.
     This feature is off by default.
 
-SUDOERS_OWNER
-    Who should own the sudoers file.  This must be a username, *not* a uid.
-    This is useful if you want to make the sudoers file NFS-mounted
-    but don't want to let the clients mount the filesystem with
-    root proviledges.  A good choice for SUDOERS_OWNER in this case is
-    "daemon", a bad choice would be nobody.  Note that this is usually
-    set in the Makefile.
-    The default is "root" (remember the quotes).
+SUDOERS_MODE
+    File mode for the sudoers file (octal).  This should be 0440 if
+    you want to be able to share the sudoers file via NFS or 0400
+    if you do not.  The default mode is 0440.
+
+SUDOERS_UID
+    User id that "owns" the sudoers file.  Note that this is the
+    numeric id, *not* the symbolic name.  Also Note that this is
+    usually set in the Makefile.
+    The default is 0.
+
+SUDOERS_GID
+    Group id that "owns" the sudoers file.  Note that this is the
+    numeric id, *not* the symbolic name.  Also note that this is
+    usually set in the Makefile.
+    The default is 0.

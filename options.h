@@ -40,7 +40,6 @@
 #define SEND_MAIL_WHEN_NO_USER	/* send mail when user not in sudoers file */
 /*#define SEND_MAIL_WHEN_NOT_OK	/* send mail if no permissions to run command */
 /*#define EXEMPTGROUP "sudo"	/* no passwd needed for users in this group */
-/*#define NO_PASSWD		/* no passwds are required */
 /*#define ENV_EDITOR		/* visudo honors EDITOR and VISUAL envars */
 #define SHORT_MESSAGE		/* short sudo message, no copyright printed */
 #define TIMEOUT 5		/* minutes before sudo asks for passwd again */
@@ -65,9 +64,15 @@
 /*#define SKEY_ONLY		/* validate user via s/key only */
 /*#define LONG_SKEY_PROMPT	/* use a two line s/key prompt */
 #define FAST_MATCH		/* command check fails if basenames not same */
-#ifndef SUDOERS_OWNER
-#define SUDOERS_OWNER "root"	/* sudoers file owner (usually root) */
-#endif /* SUDOERS_OWNER */
+#ifndef SUDOERS_MODE
+#define SUDOERS_MODE 0440	/* file mode for sudoers (octal) */
+#endif /* SUDOERS_MODE */
+#ifndef SUDOERS_UID
+#define SUDOERS_UID 0		/* user id that owns sudoers (*not* a name) */
+#endif /* SUDOERS_UID */
+#ifndef SUDOERS_GID
+#define SUDOERS_GID 0		/* group id that owns sudoers (*not* a name) */
+#endif /* SUDOERS_GID */
 
 /**********  You probably don't want to modify anything below here  ***********/
 
