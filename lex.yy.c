@@ -2478,8 +2478,10 @@ fill(s, len)
     int i, j;
 
     yylval.string = (char *) malloc(len + 1);
-    if (yylval.string == NULL)
+    if (yylval.string == NULL) {
 	yyerror("unable to allocate memory");
+	return;
+    }
 
     /* Copy the string and collapse any escaped characters. */
     for (i = 0, j = 0; i < len; i++, j++) {
@@ -2499,8 +2501,10 @@ fill_cmnd(s, len)
     arg_len = arg_size = 0;
 
     yylval.command.cmnd = (char *) malloc(len + 1);
-    if (yylval.command.cmnd == NULL)
+    if (yylval.command.cmnd == NULL) {
 	yyerror("unable to allocate memory");
+	return;
+    }
 
     /* copy the string and NULL-terminate it (escapes handled by fnmatch) */
     (void) strncpy(yylval.command.cmnd, s, len);
@@ -2529,10 +2533,14 @@ fill_args(s, len, addspace)
 	while (new_len >= (arg_size += COMMANDARGINC))
 	    ;
 
-	if ((p = (char *) realloc(yylval.command.args, arg_size)) == NULL) {
+	p = yylval.command.args ?
+	    (char *) realloc(yylval.command.args, arg_size) :
+	    (char *) malloc(arg_size);
+	if (p == NULL) {
 	    if (yylval.command.args != NULL)
 		free(yylval.command.args);
 	    yyerror("unable to allocate memory");
+	    return;
 	} else
 	    yylval.command.args = p;
     }
