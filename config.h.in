@@ -113,19 +113,25 @@
 
 /* Define if you have strchr(3).  */
 #undef HAVE_STRCHR
-#ifndef HAVE_STRCHR
+#if !defined(HAVE_STRCHR) && !defined(strchr)
 #  define strchr	index
 #endif
 
 /* Define if you have strrchr(3).  */
 #undef HAVE_STRRCHR
-#ifndef HAVE_STRRCHR
+#if !defined(HAVE_STRRCHR) && !defined(strrchr)
 #  define strrchr	rindex
+#endif
+
+/* Define if you have memcpy(3).  */
+#undef HAVE_MEMCPY
+#if !defined(HAVE_MEMCPY) && !defined(memcpy)
+#  define memcpy(D, S, L)	(bcopy(S, D, L))
 #endif
 
 /* Define if you have bzero(3).  */
 #undef HAVE_BZERO
-#ifndef HAVE_BZERO
+#if !defined(HAVE_BZERO) && !defined(bzero)
 #  define bzero(S, N)	(memset((void *)S, 0, N))
 #endif
 
