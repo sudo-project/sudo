@@ -2,8 +2,9 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.11  1999/08/26 09:00:58  millert
-''' new sudoers(8) man page
+''' Revision 1.12  1999/10/11 15:55:11  millert
+''' Docuement "Defaults" lines in /etc/sudoers.  Still needs some fleshing
+''' out but this is a start.
 '''
 '''
 .de Sh
@@ -96,7 +97,7 @@
 .nr % 0
 .rr F
 .\}
-.TH SUDOERS 5 "1.6" "25/Aug/1999" "FILE FORMATS"
+.TH sudoers 5 "1.6" "10/Oct/1999" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
@@ -229,10 +230,10 @@ There are four kinds of aliases: the \f(CWUser_Alias\fR, \f(CWRunas_Alias\fR,
 \f(CWHost_Alias\fR and \f(CWCmnd_Alias\fR.
 .PP
 .Vb 4
-\& Alias ::= User_Alias = User_Alias (':' User_Alias)* |
-\&           Runas_Alias (':' Runas_Alias)* |
-\&           Host_Alias (':' Host_Alias)* |
-\&           Cmnd_Alias (':' Cmnd_Alias)*
+\& Alias ::= 'User_Alias' = User_Alias (':' User_Alias)* |
+\&           'Runas_Alias' (':' Runas_Alias)* |
+\&           'Host_Alias' (':' Host_Alias)* |
+\&           'Cmnd_Alias' (':' Cmnd_Alias)*
 .Ve
 .Vb 1
 \& User_Alias ::= NAME '=' User_List
@@ -347,6 +348,121 @@ in the \f(CWCmnd\fR must match exactly those given by the user on the command li
 (or match the wildcards if there are any).  Note that the following
 characters must be escaped with a \*(L'\e\*(R' if they are used in command
 arguments: \*(L',\*(R', \*(L':\*(R', \*(L'=\*(R', \*(L'\e\e\*(R'.
+.Sh "Defaults"
+Certain configuration options may be changed from their default
+values at runtime via one or more \f(CWDefault_Entry\fR lines.  These
+may affect all users on any host, all users on a specific host,
+or just a specific user.  When multiple entries match, they are
+applied in order.  Where there are conflicting values, the last
+value on a matching line takes effect.
+.PP
+.Vb 3
+\& Default_Type ::= 'Defaults' ||
+\&                  'Defaults' ':' User ||
+\&                  'Defaults' '@' Host
+.Ve
+.Vb 1
+\& Default_Entry ::= Default_Type Parameter_List
+.Ve
+.Vb 2
+\& Parameter ::= Parameter '=' Value ||
+\&               '!'* Parameter ||
+.Ve
+Parameters may be flags, integer values, or strings.  Flags are
+implicitly boolean and can be turned off via the \*(L'!\*(R' operator.
+Some integer and string parameters may also be used in a boolean
+context to disable them.  Values may be enclosed in double quotes
+(\f(CW"\fR) when they contain multiple words.  Special characters may
+be escaped with a backslash (\f(CW\e\fR).
+.PP
+\fBFlags\fR:
+.Ip "long_otp_prompt" 12
+Put \s-1OTP\s0 prompt on its own line
+.Ip "ignore_dot" 12
+Ignore \*(L'.\*(R' in \f(CW$PATH\fR
+.Ip "mail_always" 12
+Always send mail when sudo is run
+.Ip "mail_no_user" 12
+Send mail if the user is not in sudoers
+.Ip "mail_no_host" 12
+Send mail if the user is not in sudoers for this host
+.Ip "mail_no_perms" 12
+Send mail if the user is not allowed to run a command
+.Ip "tty_tickets" 12
+Use a separate timestamp for each user/tty combo
+.Ip "lecture" 12
+Lecture user the first time they run sudo
+.Ip "authenticate" 12
+Require users to authenticate by default
+.Ip "root_sudo" 12
+Root may run sudo
+.Ip "log_host" 12
+Log the hostname in the (non-syslog) log file
+.Ip "log_year" 12
+Log the year in the (non-syslog) log file
+.Ip "shell_noargs" 12
+If sudo is invoked with no arguments, start a shell
+.Ip "set_home" 12
+Set \f(CW$HOME\fR to the target user when starting a shell with \f(CW-s\fR
+.Ip "path_info" 12
+Allow some information gathering to give useful error messages
+.Ip "fqdn" 12
+Require fully-qualified hostnames in the sudoers file
+.Ip "insults" 12
+Insult the user when they enter an incorrect password
+.Ip "requiretty" 12
+Only allow the user to run sudo if they have a tty
+.PP
+\fBIntegers\fR:
+.Ip "passwd_tries" 12
+Number of tries to enter a password
+.PP
+\fBIntegers that can be used in a boolean context\fR:
+.Ip "loglinelen" 12
+Length at which to wrap log file lines (use 0 or negate for no wrap)
+.Ip "timestamp_timeout" 12
+Authentication timestamp timeout
+.Ip "passwd_timeout" 12
+Password prompt timeout
+.Ip "umask" 12
+Umask to use or 0777 to use user's
+.PP
+\fBStrings\fR:
+.Ip "mailsub" 12
+Subject line for mail messages
+.Ip "badpass_message" 12
+Incorrect password message
+.Ip "timestampdir" 12
+Path to authentication timestamp dir
+.Ip "passprompt" 12
+Default password prompt
+.Ip "runas_default" 12
+Default user to run commands as
+.Ip "syslog_goodpri" 12
+Syslog priority to use when user authenticates successfully
+.Ip "syslog_badpri" 12
+Syslog priority to use when user authenticates unsuccessfully
+.PP
+\fBStrings that can be used in a boolean context\fR:
+.Ip "syslog" 12
+Syslog facility if syslog is being used for logging (negate to disable syslog)
+.Ip "mailerpath" 12
+Path to mail program
+.Ip "mailerflags" 12
+Flags for mail program
+.Ip "mailto" 12
+Address to send mail to
+.Ip "exempt_group" 12
+Users in this group are exempt from password and \s-1PATH\s0 requirements
+.Ip "secure_path" 12
+Value to override user's \f(CW$PATH\fR with
+.PP
+When logging via \fIsyslog\fR\|(3), sudo accepts the following values for the syslog
+facility (the value of the \fIsyslog\fR Parameter): \fIauthpriv\fR (if your \s-1OS\s0
+supports it), \fIauth\fR, \fIdaemon\fR, \fIuser\fR, \fIlocal0\fR, \fIlocal1\fR, \fIlocal2\fR,
+\fIlocal3\fR, \fIlocal4\fR, \fIlocal5\fR, \fIlocal6\fR, and \fIlocal7\fR.  The following
+syslog priorities are supported: \fIalert\fR, \fIcrit\fR, \fIdebug\fR, \fIemerg\fR,
+\fIerr\fR, \fIinfo\fR, \fInotice\fR, and \fIwarning\fR.
 .Sh "User Specification"
 .PP
 .Vb 1
@@ -506,6 +622,21 @@ these are a bit contrived.  First, we define our \fIaliases\fR:
 \&                         /usr/local/bin/tcsh, /usr/bin/rsh, \e
 \&                         /usr/local/bin/zsh
 \& Cmnd_Alias     SU = /usr/bin/su
+.Ve
+Here we override some of the compiled in default values.  We want
+sudo to log via \fIsyslog\fR\|(3) using the \fIauth\fR facility in all cases.
+We don't want to subject the full time staff to the \fBsudo\fR lecture,
+and user \fBmillert\fR need not give a password.  In addition, on the
+machines in the \fISERVERS\fR \f(CWHost_Alias\fR, we keep an additional
+local log file and make sure we log the year in each log line since
+the log entries will be kept around for several years.
+.PP
+.Vb 5
+\& # Override builtin defaults
+\& Defaults               syslog=auth
+\& Defaults:FULLTIMERS    !lecture
+\& Defaults:millert       !authenticate
+\& Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
 .Ve
 The \fIUser specification\fR is the part that actually determines who may
 run what.
@@ -668,7 +799,7 @@ will not run with a syntactically incorrect \fIsudoers\fR file.
 \fIsudo\fR\|(8), \fIvisudo\fR\|(8), \fIsu\fR\|(1), \fIfnmatch\fR\|(3).
 
 .rn }` ''
-.IX Title "SUDOERS 5"
+.IX Title "sudoers 5"
 .IX Name "sudoers - list of which users may execute what"
 
 .IX Header "NAME"
@@ -684,6 +815,80 @@ will not run with a syntactically incorrect \fIsudoers\fR file.
 .IX Item "\f(CW+\fR"
 
 .IX Subsection "Aliases"
+
+.IX Subsection "Defaults"
+
+.IX Item "long_otp_prompt"
+
+.IX Item "ignore_dot"
+
+.IX Item "mail_always"
+
+.IX Item "mail_no_user"
+
+.IX Item "mail_no_host"
+
+.IX Item "mail_no_perms"
+
+.IX Item "tty_tickets"
+
+.IX Item "lecture"
+
+.IX Item "authenticate"
+
+.IX Item "root_sudo"
+
+.IX Item "log_host"
+
+.IX Item "log_year"
+
+.IX Item "shell_noargs"
+
+.IX Item "set_home"
+
+.IX Item "path_info"
+
+.IX Item "fqdn"
+
+.IX Item "insults"
+
+.IX Item "requiretty"
+
+.IX Item "passwd_tries"
+
+.IX Item "loglinelen"
+
+.IX Item "timestamp_timeout"
+
+.IX Item "passwd_timeout"
+
+.IX Item "umask"
+
+.IX Item "mailsub"
+
+.IX Item "badpass_message"
+
+.IX Item "timestampdir"
+
+.IX Item "passprompt"
+
+.IX Item "runas_default"
+
+.IX Item "syslog_goodpri"
+
+.IX Item "syslog_badpri"
+
+.IX Item "syslog"
+
+.IX Item "mailerpath"
+
+.IX Item "mailerflags"
+
+.IX Item "mailto"
+
+.IX Item "exempt_group"
+
+.IX Item "secure_path"
 
 .IX Subsection "User Specification"
 

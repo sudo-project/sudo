@@ -78,3 +78,5 @@ TODO list (most will be addressed in sudo 2.0)
 28) Make syslog stuff work on vanilla ultrix
 
 29) Implement date_format and log_format options.
+
+30) Add support for: Default:user@host

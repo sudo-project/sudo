@@ -89,10 +89,10 @@ string (as opposed to a symbol name).
 There are four kinds of aliases: the C<User_Alias>, C<Runas_Alias>,
 C<Host_Alias> and C<Cmnd_Alias>.
 
- Alias ::= User_Alias = User_Alias (':' User_Alias)* |
-	   Runas_Alias (':' Runas_Alias)* |
-	   Host_Alias (':' Host_Alias)* |
-	   Cmnd_Alias (':' Cmnd_Alias)*
+ Alias ::= 'User_Alias' = User_Alias (':' User_Alias)* |
+	   'Runas_Alias' (':' Runas_Alias)* |
+	   'Host_Alias' (':' Host_Alias)* |
+	   'Cmnd_Alias' (':' Cmnd_Alias)*
 
  User_Alias ::= NAME '=' User_List
 
@@ -191,6 +191,212 @@ in the C<Cmnd> must match exactly those given by the user on the command line
 (or match the wildcards if there are any).  Note that the following
 characters must be escaped with a '\' if they are used in command
 arguments: ',', ':', '=', '\\'.
+
+=head2 Defaults
+
+Certain configuration options may be changed from their default
+values at runtime via one or more C<Default_Entry> lines.  These
+may affect all users on any host, all users on a specific host,
+or just a specific user.  When multiple entries match, they are
+applied in order.  Where there are conflicting values, the last
+value on a matching line takes effect.
+
+ Default_Type ::= 'Defaults' ||
+		  'Defaults' ':' User ||
+		  'Defaults' '@' Host
+
+ Default_Entry ::= Default_Type Parameter_List
+
+ Parameter ::= Parameter '=' Value ||
+	       '!'* Parameter ||
+
+Parameters may be flags, integer values, or strings.  Flags are
+implicitly boolean and can be turned off via the '!' operator.
+Some integer and string parameters may also be used in a boolean
+context to disable them.  Values may be enclosed in double quotes
+(C<">) when they contain multiple words.  Special characters may
+be escaped with a backslash (C<\>).
+
+B<Flags>:
+
+=over 12
+
+=item long_otp_prompt
+
+Put OTP prompt on its own line
+
+=item ignore_dot
+
+Ignore '.' in $PATH
+
+=item mail_always
+
+Always send mail when sudo is run
+
+=item mail_no_user
+
+Send mail if the user is not in sudoers
+
+=item mail_no_host
+
+Send mail if the user is not in sudoers for this host
+
+=item mail_no_perms
+
+Send mail if the user is not allowed to run a command
+
+=item tty_tickets
+
+Use a separate timestamp for each user/tty combo
+
+=item lecture
+
+Lecture user the first time they run sudo
+
+=item authenticate
+
+Require users to authenticate by default
+
+=item root_sudo
+
+Root may run sudo
+
+=item log_host
+
+Log the hostname in the (non-syslog) log file
+
+=item log_year
+
+Log the year in the (non-syslog) log file
+
+=item shell_noargs
+
+If sudo is invoked with no arguments, start a shell
+
+=item set_home
+
+Set $HOME to the target user when starting a shell with C<-s>
+
+=item path_info
+
+Allow some information gathering to give useful error messages
+
+=item fqdn
+
+Require fully-qualified hostnames in the sudoers file
+
+=item insults
+
+Insult the user when they enter an incorrect password
+
+=item requiretty
+
+Only allow the user to run sudo if they have a tty
+
+=back
+
+B<Integers>:
+
+=over 12
+
+=item passwd_tries
+
+Number of tries to enter a password
+
+=back
+
+B<Integers that can be used in a boolean context>:
+
+=over 12
+
+=item loglinelen
+
+Length at which to wrap log file lines (use 0 or negate for no wrap)
+
+=item timestamp_timeout
+
+Authentication timestamp timeout
+
+=item passwd_timeout
+
+Password prompt timeout
+
+=item umask
+
+Umask to use or 0777 to use user's
+
+=back
+
+B<Strings>:
+
+=over 12
+
+=item mailsub
+
+Subject line for mail messages
+
+=item badpass_message
+
+Incorrect password message
+
+=item timestampdir
+
+Path to authentication timestamp dir
+
+=item passprompt
+
+Default password prompt
+
+=item runas_default
+
+Default user to run commands as
+
+=item syslog_goodpri
+
+Syslog priority to use when user authenticates successfully
+
+=item syslog_badpri
+
+Syslog priority to use when user authenticates unsuccessfully
+
+=back 12
+
+B<Strings that can be used in a boolean context>:
+
+=over 12
+
+=item syslog
+
+Syslog facility if syslog is being used for logging (negate to disable syslog)
+
+=item mailerpath
+
+Path to mail program
+
+=item mailerflags
+
+Flags for mail program
+
+=item mailto
+
+Address to send mail to
+
+=item exempt_group
+
+Users in this group are exempt from password and PATH requirements
+
+=item secure_path
+
+Value to override user's $PATH with
+
+=back 12
+
+When logging via syslog(3), sudo accepts the following values for the syslog
+facility (the value of the I<syslog> Parameter): I<authpriv> (if your OS
+supports it), I<auth>, I<daemon>, I<user>, I<local0>, I<local1>, I<local2>,
+I<local3>, I<local4>, I<local5>, I<local6>, and I<local7>.  The following
+syslog priorities are supported: I<alert>, I<crit>, I<debug>, I<emerg>,
+I<err>, I<info>, I<notice>, and I<warning>.
 
 =head2 User Specification
 
@@ -368,6 +574,20 @@ these are a bit contrived.  First, we define our I<aliases>:
 			 /usr/local/bin/tcsh, /usr/bin/rsh, \
 			 /usr/local/bin/zsh
  Cmnd_Alias	SU = /usr/bin/su
+
+Here we override some of the compiled in default values.  We want
+sudo to log via syslog(3) using the I<auth> facility in all cases.
+We don't want to subject the full time staff to the B<sudo> lecture,
+and user B<millert> need not give a password.  In addition, on the
+machines in the I<SERVERS> C<Host_Alias>, we keep an additional
+local log file and make sure we log the year in each log line since
+the log entries will be kept around for several years.
+
+ # Override builtin defaults
+ Defaults		syslog=auth
+ Defaults:FULLTIMERS	!lecture
+ Defaults:millert	!authenticate
+ Defaults@SERVERS	log_year, logfile=/var/log/sudo.log
 
 The I<User specification> is the part that actually determines who may
 run what.

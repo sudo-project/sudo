@@ -16,6 +16,7 @@
 
 		<LI><A HREF="#Quick_guide_to_EBNF">Quick guide to EBNF</A>
 		<LI><A HREF="#Aliases">Aliases</A>
+		<LI><A HREF="#Defaults">Defaults</A>
 		<LI><A HREF="#User_Specification">User Specification</A>
 		<LI><A HREF="#Runas_Spec">Runas_Spec</A>
 		<LI><A HREF="#NOPASSWD_and_PASSWD">NOPASSWD and PASSWD</A>
@@ -95,10 +96,10 @@ There are four kinds of aliases: the <CODE>User_Alias</CODE>, <CODE>Runas_Alias<
 <CODE>Host_Alias</CODE> and <CODE>Cmnd_Alias</CODE>.
 
 <P>
-<PRE> Alias ::= User_Alias = User_Alias (':' User_Alias)* |
-           Runas_Alias (':' Runas_Alias)* |
-           Host_Alias (':' Host_Alias)* |
-           Cmnd_Alias (':' Cmnd_Alias)*
+<PRE> Alias ::= 'User_Alias' = User_Alias (':' User_Alias)* |
+           'Runas_Alias' (':' Runas_Alias)* |
+           'Host_Alias' (':' Host_Alias)* |
+           'Cmnd_Alias' (':' Cmnd_Alias)*
 </PRE>
 <P>
 <PRE> User_Alias ::= NAME '=' User_List
@@ -214,6 +215,213 @@ If a <CODE>Cmnd</CODE> has associated command line arguments, then the arguments
 the wildcards if there are any). Note that the following characters must be
 escaped with a '\' if they are used in command arguments: ',', ':', '=',
 '\\'.
+
+<P>
+<HR>
+<H2><A NAME="Defaults">Defaults</A></H2>
+<P>
+Certain configuration options may be changed from their default values at
+runtime via one or more <CODE>Default_Entry</CODE> lines. These may affect all users on any host, all users on a specific
+host, or just a specific user. When multiple entries match, they are
+applied in order. Where there are conflicting values, the last value on a
+matching line takes effect.
+
+<P>
+<PRE> Default_Type ::= 'Defaults' ||
+                  'Defaults' ':' User ||
+                  'Defaults' '@' Host
+</PRE>
+<P>
+<PRE> Default_Entry ::= Default_Type Parameter_List
+</PRE>
+<P>
+<PRE> Parameter ::= Parameter '=' Value ||
+               '!'* Parameter ||
+</PRE>
+<P>
+Parameters may be flags, integer values, or strings. Flags are implicitly
+boolean and can be turned off via the '!' operator. Some integer and string
+parameters may also be used in a boolean context to disable them. Values
+may be enclosed in double quotes (<CODE>&quot;</CODE>) when they contain multiple words. Special characters may be escaped with
+a backslash (<CODE>\</CODE>).
+
+<P>
+<STRONG>Flags</STRONG>:
+
+<DL>
+<DT><STRONG><A NAME="item_long_otp_prompt">long_otp_prompt</A></STRONG><DD>
+<P>
+Put OTP prompt on its own line
+
+<DT><STRONG><A NAME="item_ignore_dot">ignore_dot</A></STRONG><DD>
+<P>
+Ignore '.' in <CODE>$PATH</CODE>
+
+<DT><STRONG><A NAME="item_mail_always">mail_always</A></STRONG><DD>
+<P>
+Always send mail when sudo is run
+
+<DT><STRONG><A NAME="item_mail_no_user">mail_no_user</A></STRONG><DD>
+<P>
+Send mail if the user is not in sudoers
+
+<DT><STRONG><A NAME="item_mail_no_host">mail_no_host</A></STRONG><DD>
+<P>
+Send mail if the user is not in sudoers for this host
+
+<DT><STRONG><A NAME="item_mail_no_perms">mail_no_perms</A></STRONG><DD>
+<P>
+Send mail if the user is not allowed to run a command
+
+<DT><STRONG><A NAME="item_tty_tickets">tty_tickets</A></STRONG><DD>
+<P>
+Use a separate timestamp for each user/tty combo
+
+<DT><STRONG><A NAME="item_lecture">lecture</A></STRONG><DD>
+<P>
+Lecture user the first time they run sudo
+
+<DT><STRONG><A NAME="item_authenticate">authenticate</A></STRONG><DD>
+<P>
+Require users to authenticate by default
+
+<DT><STRONG><A NAME="item_root_sudo">root_sudo</A></STRONG><DD>
+<P>
+Root may run sudo
+
+<DT><STRONG><A NAME="item_log_host">log_host</A></STRONG><DD>
+<P>
+Log the hostname in the (non-syslog) log file
+
+<DT><STRONG><A NAME="item_log_year">log_year</A></STRONG><DD>
+<P>
+Log the year in the (non-syslog) log file
+
+<DT><STRONG><A NAME="item_shell_noargs">shell_noargs</A></STRONG><DD>
+<P>
+If sudo is invoked with no arguments, start a shell
+
+<DT><STRONG><A NAME="item_set_home">set_home</A></STRONG><DD>
+<P>
+Set <CODE>$HOME</CODE> to the target user when starting a shell with <CODE>-s</CODE>
+
+
+
+<DT><STRONG><A NAME="item_path_info">path_info</A></STRONG><DD>
+<P>
+Allow some information gathering to give useful error messages
+
+<DT><STRONG><A NAME="item_fqdn">fqdn</A></STRONG><DD>
+<P>
+Require fully-qualified hostnames in the sudoers file
+
+<DT><STRONG><A NAME="item_insults">insults</A></STRONG><DD>
+<P>
+Insult the user when they enter an incorrect password
+
+<DT><STRONG><A NAME="item_requiretty">requiretty</A></STRONG><DD>
+<P>
+Only allow the user to run sudo if they have a tty
+
+</DL>
+<P>
+<STRONG>Integers</STRONG>:
+
+<DL>
+<DT><STRONG><A NAME="item_passwd_tries">passwd_tries</A></STRONG><DD>
+<P>
+Number of tries to enter a password
+
+</DL>
+<P>
+<STRONG>Integers that can be used in a boolean context</STRONG>:
+
+<DL>
+<DT><STRONG><A NAME="item_loglinelen">loglinelen</A></STRONG><DD>
+<P>
+Length at which to wrap log file lines (use 0 or negate for no wrap)
+
+<DT><STRONG><A NAME="item_timestamp_timeout">timestamp_timeout</A></STRONG><DD>
+<P>
+Authentication timestamp timeout
+
+<DT><STRONG><A NAME="item_passwd_timeout">passwd_timeout</A></STRONG><DD>
+<P>
+Password prompt timeout
+
+<DT><STRONG><A NAME="item_umask">umask</A></STRONG><DD>
+<P>
+Umask to use or 0777 to use user's
+
+</DL>
+<P>
+<STRONG>Strings</STRONG>:
+
+<DL>
+<DT><STRONG><A NAME="item_mailsub">mailsub</A></STRONG><DD>
+<P>
+Subject line for mail messages
+
+<DT><STRONG><A NAME="item_badpass_message">badpass_message</A></STRONG><DD>
+<P>
+Incorrect password message
+
+<DT><STRONG><A NAME="item_timestampdir">timestampdir</A></STRONG><DD>
+<P>
+Path to authentication timestamp dir
+
+<DT><STRONG><A NAME="item_passprompt">passprompt</A></STRONG><DD>
+<P>
+Default password prompt
+
+<DT><STRONG><A NAME="item_runas_default">runas_default</A></STRONG><DD>
+<P>
+Default user to run commands as
+
+<DT><STRONG><A NAME="item_syslog_goodpri">syslog_goodpri</A></STRONG><DD>
+<P>
+Syslog priority to use when user authenticates successfully
+
+<DT><STRONG><A NAME="item_syslog_badpri">syslog_badpri</A></STRONG><DD>
+<P>
+Syslog priority to use when user authenticates unsuccessfully
+
+</DL>
+<P>
+<STRONG>Strings that can be used in a boolean context</STRONG>:
+
+<DL>
+<DT><STRONG><A NAME="item_syslog">syslog</A></STRONG><DD>
+<P>
+Syslog facility if syslog is being used for logging (negate to disable
+syslog)
+
+<DT><STRONG><A NAME="item_mailerpath">mailerpath</A></STRONG><DD>
+<P>
+Path to mail program
+
+<DT><STRONG><A NAME="item_mailerflags">mailerflags</A></STRONG><DD>
+<P>
+Flags for mail program
+
+<DT><STRONG><A NAME="item_mailto">mailto</A></STRONG><DD>
+<P>
+Address to send mail to
+
+<DT><STRONG><A NAME="item_exempt_group">exempt_group</A></STRONG><DD>
+<P>
+Users in this group are exempt from password and PATH requirements
+
+<DT><STRONG><A NAME="item_secure_path">secure_path</A></STRONG><DD>
+<P>
+Value to override user's <CODE>$PATH</CODE> with
+
+</DL>
+<P>
+When logging via <CODE>syslog(3),</CODE> sudo accepts the following values
+for the syslog facility (the value of the <EM>syslog</EM> Parameter): <EM>authpriv</EM> (if your OS supports it), <EM>auth</EM>, <EM>daemon</EM>, <EM>user</EM>, <EM>local0</EM>, <EM>local1</EM>, <EM>local2</EM>,
+<EM>local3</EM>, <EM>local4</EM>, <EM>local5</EM>, <EM>local6</EM>, and <EM>local7</EM>. The following syslog priorities are supported: <EM>alert</EM>, <EM>crit</EM>, <EM>debug</EM>, <EM>emerg</EM>,
+<EM>err</EM>, <EM>info</EM>, <EM>notice</EM>, and <EM>warning</EM>.
 
 <P>
 <HR>
@@ -404,6 +612,18 @@ our <EM>aliases</EM>:
                          /usr/local/bin/tcsh, /usr/bin/rsh, \
                          /usr/local/bin/zsh
  Cmnd_Alias     SU = /usr/bin/su
+</PRE>
+<P>
+Here we override some of the compiled in default values. We want sudo to
+log via <CODE>syslog(3)</CODE> using the <EM>auth</EM> facility in all cases. We don't want to subject the full time staff to the <STRONG>sudo</STRONG> lecture, and user <STRONG>millert</STRONG> need not give a password. In addition, on the machines in the <EM>SERVERS</EM>  <CODE>Host_Alias</CODE>, we keep an additional local log file and make sure we log the year in
+each log line since the log entries will be kept around for several years.
+
+<P>
+<PRE> # Override builtin defaults
+ Defaults               syslog=auth
+ Defaults:FULLTIMERS    !lecture
+ Defaults:millert       !authenticate
+ Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
 </PRE>
 <P>
 The <EM>User specification</EM> is the part that actually determines who may run what.
