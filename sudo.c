@@ -309,7 +309,7 @@ static int parse_args()
 {
     int opt_ch;
     int V_flag=0, h_flag=0, v_flag=0, k_flag=0, error=0;
-    int ret;
+    int ret=MODE_RUN;
 
     /* no options and no command */
     if (Argc < 2)
