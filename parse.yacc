@@ -282,6 +282,7 @@ entry		:	COMMENT
 		;
 
 defaults_line	:	defaults_type defaults_list
+		;
 
 defaults_type	:	DEFAULTS {
 			    defaults_matches = TRUE;
@@ -302,6 +303,7 @@ defaults_type	:	DEFAULTS {
 
 defaults_list	:	defaults_entry
 		|	defaults_entry ',' defaults_list
+		;
 
 defaults_entry	:	DEFVAR {
 			    if (defaults_matches == TRUE &&
@@ -346,6 +348,7 @@ defaults_entry	:	DEFVAR {
 			    free($1);
 			    free($3);
 			}
+		;
 
 privileges	:	privilege
 		|	privileges ':' privilege
@@ -374,6 +377,7 @@ ophost		:	host {
 			    if ($2 != -1)
 				host_matches = ! $2;
 			}
+		;
 
 host		:	ALL {
 			    $$ = TRUE;
@@ -523,6 +527,7 @@ oprunasuser	:	runasuser { ; }
 			    /* Set $$ to the negation of runasuser */
 			    $$ = ($3 == -1 ? -1 : ! $3);
 			}
+		;
 
 runasuser	:	WORD {
 			    if (printmatches == TRUE) {
@@ -806,6 +811,7 @@ opuser		:	user {
 			    if ($2 != -1)
 				user_matches = ! $2;
 			}
+		;
 
 user		:	WORD {
 			    if (strcmp($1, user_name) == 0)
