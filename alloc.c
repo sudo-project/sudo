@@ -63,14 +63,20 @@
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
+/*
+ * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t
+ * could be signed (as it is on SunOS 4.x).  This just means that
+ * emalloc2() and erealloc3() cannot allocate huge amounts on such a
+ * platform but that is OK since sudo doesn't need to do so anyway.
+ */
 #ifndef SIZE_MAX
 # ifdef SIZE_T_MAX
 #  define SIZE_MAX	SIZE_T_MAX
 # else
-#  ifdef ULONG_MAX
-#   define SIZE_MAX	ULONG_MAX
+#  ifdef INT_MAX
+#   define SIZE_MAX	INT_MAX
 #  else
-#   define SIZE_MAX	((unsigned long)-1)
+#   define SIZE_MAX	0x7fffffff
 #  endif /* ULONG_MAX */
 # endif /* SIZE_T_MAX */
 #endif /* SIZE_MAX */
