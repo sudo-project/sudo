@@ -51,12 +51,16 @@ static char rcsid[] = "$Id$";
 #include <search.h>
 #endif /* HAVE_LSEARCH */
 
-#include "sudo.h"
 #include <options.h>
+#include "sudo.h"
 
 #ifndef HAVE_LSEARCH
 #include "emul/search.h"
 #endif /* HAVE_LSEARCH */
+
+#ifndef HAVE_STRCASECMP
+#define strcasecmp(a,b)		strcmp(a,b)
+#endif /* !HAVE_STRCASECMP */
 
 extern int sudolineno, parse_error;
 int errorlineno = -1;
@@ -195,7 +199,11 @@ hostspec	:	ALL {
 			    (void) free($1);
 			}
 		|	NAME {
-			    if (strcmp(host, $1) == 0)
+#ifdef FQDN
+			    if (strcasecmp(shost, $1) == 0)
+#else
+			    if (strcasecmp(host, $1) == 0)
+#endif /* FQDN */
 				host_matches = TRUE;
 			    (void) free($1);
 			}
@@ -205,13 +213,8 @@ hostspec	:	ALL {
 			    (void) free($1);
 			}
 		|	fqdn {
-#ifdef HAVE_STRCASECMP
 			    if (strcasecmp($1, host) == 0)
 				host_matches = TRUE;
-#else
-			    if (strcmp($1, host) == 0)
-				host_matches = TRUE;
-#endif /* HAVE_STRCASECMP */
 			    (void) free($1);
 			}
 		;
