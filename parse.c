@@ -531,8 +531,8 @@ int validate()
     FILE *sudoers_fp;
     int i, return_code;
 
-    /* become root */
-    set_perms(PERM_ROOT);
+    /* become owner of the sudoers file */
+    set_perms(PERM_SUDOERS);
 
     if ((sudoers_fp = fopen(_PATH_SUDO_SUDOERS, "r")) == NULL) {
 	perror(_PATH_SUDO_SUDOERS);
@@ -557,7 +557,8 @@ int validate()
      */
     (void) fclose(sudoers_fp);
 
-    /* relinquish root */
+    /* go back to user perms */
+    set_perms(PERM_ROOT);
     set_perms(PERM_USER);
 
     /*
