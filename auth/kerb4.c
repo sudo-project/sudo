@@ -101,7 +101,7 @@ kerb4_verify(pw, pass, auth)
      * Set the ticket file to be in sudo sudo timedir so we don't
      * wipe out other (real) kerberos tickets.
      */
-    (void) snprintf(tkfile, sizoef(tkfile), "%s/tkt%lu",
+    (void) snprintf(tkfile, sizeof(tkfile), "%s/tkt%lu",
 	_PATH_SUDO_TIMEDIR, (unsigned long) pw->pw_uid);
     (void) krb_set_tkt_string(tkfile);
 
