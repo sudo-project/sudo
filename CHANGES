@@ -1057,3 +1057,6 @@ Sudo 1.5.9 released.
 331) In estrdup(), do the malloc ourselves so we don't need to rely on the
      system strdup(3) which may or may not exist.  There is now no need to
      provide strdup() for those w/o it.
+
+332) You can now specifiy a host list instead of just a host or alias
+     in a privilege list.  Ie: user=host1,host2,ALIAS,!host3 /bin/ls
