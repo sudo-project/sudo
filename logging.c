@@ -489,6 +489,11 @@ void inform_user(code)
 		    "Intruder Alert!  You don\'t exist in the passwd file\n\n");
 	    break;
 
+	case GLOBAL_NO_AUTH_ENT:
+	    (void) fprintf(stderr,
+		    "Intruder Alert!  You don\'t exist in the auth database\n\n");
+	    break;
+
 	case GLOBAL_NO_HOSTNAME:
 	    (void) fprintf(stderr,
 		    "This machine does not have a hostname\n\n");
