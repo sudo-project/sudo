@@ -193,6 +193,7 @@ void verify_user	__P((struct passwd *, char *));
 int sudoers_lookup	__P((int));
 #ifdef HAVE_LDAP
 int sudo_ldap_check	__P((int));
+void sudo_ldap_list_matches __P((void));
 #endif
 void set_perms_nosuid	__P((int));
 void set_perms_posix	__P((int));
