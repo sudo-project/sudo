@@ -63,7 +63,7 @@ extern char *malloc	__P((size_t));
 extern char *getenv	__P((const char *));
 extern char *strcpy	__P((char *, const char *));
 extern int fprintf	__P((FILE *, const char *, ...));
-extern int readlink	__P((const char *, char *, size_t));
+extern ssize_t readlink	__P((const char *, char *, size_t));
 extern int stat		__P((const char *, struct stat *));
 extern int lstat	__P((const char *, struct stat *));
 #ifdef HAVE_STRDUP

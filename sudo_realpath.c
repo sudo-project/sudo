@@ -55,7 +55,7 @@ static char rcsid[] = "$Id$";
 
 #ifndef STDC_HEADERS
 extern char *strcpy	__P((char *, const char *));
-extern int readlink	__P((const char *, char *, size_t));
+extern ssize_t readlink	__P((const char *, char *, size_t));
 extern int lstat	__P((const char *, struct stat *));
 #endif /* !STDC_HEADERS */
 
