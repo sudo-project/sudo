@@ -393,7 +393,7 @@ runas_setup()
 	    error = setusercontext(lc, runas_pw,
 		runas_pw->pw_uid, flags);
 	    if (error) {
-		if (runas_pw->pw_gid != 0)
+		if (runas_pw->pw_uid != 0)
 		    fatal("unable to set user context", 1);
 		else
 		    perror("unable to set user context");
