@@ -233,7 +233,9 @@ opcmndlist	:	opcmnd
 		|	opcmndlist ',' opcmnd
 		;
 
-opcmnd		:  cmnd { runas_matches = TRUE; } 
+opcmnd		:	cmnd {
+			    runas_matches = TRUE;
+			} 
 		|	'!' {
 			    if (printmatches == TRUE && host_matches == TRUE
 				&& user_matches == TRUE) {
