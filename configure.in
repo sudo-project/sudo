@@ -16,10 +16,18 @@ AC_SUBST(OPTIONS)dnl
 LIBOBJS=""
 AC_SUBST(LIBOBJS)dnl
 dnl
-dnl did they say --with-csops?
+dnl Options for --with
 dnl
+dnl --with-C2
+AC_WITH(C2, AC_DEFINE(HAVE_C2_SECURITY)
+echo 'Configuring for C2 security')
+dnl
+dnl --with-csops
 AC_WITH(csops, OPTIONS="${OPTIONS} -DUSE_INSULTS -DENV_EDITOR -DSHORT_MESSAGE"
 echo 'CSOps--adding options: USE_INSULTS ENV_EDITOR SHORT_MESSAGE')
+dnl
+dnl --with-tgetpass
+AC_WITH(tgetpass, LIBOBJS="$LIBOBJS strdup.o", AC_DEFINE(USE_GETPASS))
 dnl
 dnl C compiler checks
 dnl
@@ -118,7 +126,7 @@ dnl Header file checks
 dnl
 AC_STDC_HEADERS
 AC_HAVE_HEADERS(string.h strings.h unistd.h malloc.h paths.h)
-if [ "$OS" != "ultrix" ]; then
+if test "$OS" != "ultrix" ; then
     AC_HAVE_HEADERS(termio.h termios.h)
 fi
 dnl
