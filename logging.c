@@ -91,9 +91,9 @@ void log_error(code)
     mode_t oldmask;
     register char *p;
     register int count;
+    time_t now;
 #ifdef _PATH_SUDO_LOGFILE
     register FILE *fp;
-    time_t now;
 #endif /* _PATH_SUDO_LOGFILE */
 #ifdef SYSLOG
     register int pri;		/* syslog priority */
@@ -101,12 +101,11 @@ void log_error(code)
 #endif /* SYSLOG */
 
     /*
-     * there is no need to log the date and time twice if using syslog
+     * we will skip this stuff when using syslog(3) but it is
+     * necesary for mail and file logs.
      */
-#ifdef _PATH_SUDO_LOGFILE
     now = time((time_t) 0);
     (void) sprintf(logline, "%19.19s : %8.8s : ", ctime(&now), user);
-#endif /* _PATH_SUDO_LOGFILE */
 
     /*
      * we need a pointer to the end of logline
@@ -242,7 +241,7 @@ void log_error(code)
     /*
      * Log the full line, breaking into multiple syslog(3) calls if necesary
      */
-    p = (char *)logline;
+    p = &logline[33];			/* skip past the date and user */
     for (count=0; count < (strlen(logline) / MAXSYSLOGLEN) + 1; count++) {
 	if (strlen(p) > MAXSYSLOGLEN) {
 	    /*
