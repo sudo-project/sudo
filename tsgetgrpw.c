@@ -53,30 +53,43 @@
 # define LINE_MAX 2048
 #endif
 
-static const char *pwfile = "/etc/passwd";
+#undef GRMEM_MAX
+#define GRMEM_MAX 200
+
 static FILE *pwf;
+static const char *pwfile = "/etc/passwd";
 static int pw_stayopen;
+static struct passwd pwbuf;
 
 static FILE *grf;
 static const char *grfile = "/etc/group";
 static int gr_stayopen;
+static struct group grbuf;
+static char *gr_mem[GRMEM_MAX+1];
 
-extern VOID *pwcache_get		__P((enum cmptype, VOID *));
-extern int  pwcache_put			__P((enum cmptype, VOID *));
-extern struct passwd *sudo_pwdup	__P((const struct passwd *));
-extern struct group  *sudo_grdup	__P((const struct group *));
+void my_setgrfile __P((const char *));
+void my_setgrent __P((void));
+void my_endgrent __P((void));
+struct group *my_getgrnam __P((const char *));
+struct group *my_getgruid __P((gid_t));
+
+void my_setpwfile __P((const char *));
+void my_setpwent __P((void));
+void my_endpwent __P((void));
+struct passwd *my_getpwnam __P((const char *));
+struct passwd *my_getpwuid __P((uid_t));
 
 void
-sudo_setpwfile(file)
+my_setpwfile(file)
     const char *file;
 {
     pwfile = file;
     if (pwf != NULL)
-	sudo_endpwent();
+	my_endpwent();
 }
 
 void
-sudo_setpwent()
+my_setpwent()
 {
     if (pwf == NULL)
 	pwf = fopen(pwfile, "r");
@@ -86,7 +99,7 @@ sudo_setpwent()
 }
 
 void
-sudo_endpwent()
+my_endpwent()
 {
     if (pwf != NULL) {
 	fclose(pwf);
@@ -96,157 +109,109 @@ sudo_endpwent()
 }
 
 struct passwd *
-sudo_getpwnam(name)
+my_getpwnam(name)
     const char *name;
 {
-    struct passwd tpw, *pw = NULL;
+    struct passwd *pw = NULL;
     size_t len, nlen;
     char buf[LINE_MAX], *cp;
 
-    tpw.pw_name = (char *) name;
-    if ((pw = pwcache_get(bypwnam, &tpw)) != NULL)
-	return(pw);
-
-    /* No cached entry, try the passwd file. */
     if (pwf != NULL)
 	rewind(pwf);
     else if ((pwf = fopen(pwfile, "r")) == NULL)
 	return(NULL);
 
-    memset(&tpw, 0, sizeof(tpw));
+    memset(&pwbuf, 0, sizeof(pwbuf));
     nlen = strlen(name);
     while (fgets(buf, sizeof(buf), pwf)) {
 	if (strncmp(buf, name, nlen) != 0 || buf[nlen] != ':')
 	    continue;
-	if ((tpw.pw_name = strtok(buf, ":")) == NULL)
+	if ((pwbuf.pw_name = strtok(buf, ":")) == NULL)
 	    continue;
-	if ((tpw.pw_passwd = strtok(NULL, ":")) == NULL)
+	if ((pwbuf.pw_passwd = strtok(NULL, ":")) == NULL)
 	    continue;
 	if ((cp = strtok(NULL, ":")) == NULL)
 	    continue;
-	tpw.pw_uid = atoi(cp);
+	pwbuf.pw_uid = atoi(cp);
 	if ((cp = strtok(NULL, ":")) == NULL)
 	    continue;
-	tpw.pw_gid = atoi(cp);
-	if ((tpw.pw_gecos = strtok(NULL, ":")) == NULL)
+	pwbuf.pw_gid = atoi(cp);
+	if ((pwbuf.pw_gecos = strtok(NULL, ":")) == NULL)
 	    continue;
-	if ((tpw.pw_dir = strtok(NULL, ":")) == NULL)
+	if ((pwbuf.pw_dir = strtok(NULL, ":")) == NULL)
 	    continue;
-	if ((tpw.pw_shell = strtok(NULL, ":")) != NULL) {
-	    len = strlen(tpw.pw_shell);
-	    if (tpw.pw_shell[len - 1] == '\n')
-		tpw.pw_shell[len - 1] = '\0';
+	if ((pwbuf.pw_shell = strtok(NULL, ":")) != NULL) {
+	    len = strlen(pwbuf.pw_shell);
+	    if (pwbuf.pw_shell[len - 1] == '\n')
+		pwbuf.pw_shell[len - 1] = '\0';
 	}
-	pw = sudo_pwdup(&tpw);
+	pw = &pwbuf;
 	break;
     }
     if (!pw_stayopen) {
 	fclose(pwf);
 	pwf = NULL;
     }
-    if (pw != NULL) {
-	if (!pwcache_put(bypwnam, (VOID *) pw))
-	    errorx(1, "unable to cache user name, already exists");
-	if (!pwcache_put(byuid, (VOID *) pw))
-	    errorx(1, "unable to cache uid, already exists");
-	return(pw);
-    } else {
-	len = strlen(name) + 1;
-	cp = emalloc(sizeof(*pw) + len);
-	memset(cp, 0, sizeof(*pw));
-	pw = (struct passwd *) cp;
-	cp += sizeof(*pw);
-	memcpy(cp, name, len);
-	pw->pw_name = cp;
-	pw->pw_uid = (uid_t) -1;
-	if (!pwcache_put(bypwnam, (VOID *) pw))
-	    errorx(1, "unable to cache user name, already exists");
-	return(NULL);
-    }
+    return(pw);
 }
 
 struct passwd *
-sudo_getpwuid(uid)
+my_getpwuid(uid)
     uid_t uid;
 {
-    struct passwd tpw, *pw = NULL;
+    struct passwd *pw = NULL;
     size_t len;
     char buf[LINE_MAX], *cp;
 
-    tpw.pw_uid = uid;
-    if ((pw = pwcache_get(byuid, &tpw)) != NULL)
-	return(pw);
-
-    /* No cached entry, try the passwd file. */
     if (pwf != NULL)
 	rewind(pwf);
     else if ((pwf = fopen(pwfile, "r")) == NULL)
 	return(NULL);
 
-    memset(&tpw, 0, sizeof(tpw));
+    memset(&pwbuf, 0, sizeof(pwbuf));
     while (fgets(buf, sizeof(buf), pwf)) {
-	if ((tpw.pw_name = strtok(buf, ":")) == NULL)
+	if ((pwbuf.pw_name = strtok(buf, ":")) == NULL)
 	    continue;
-	if ((tpw.pw_passwd = strtok(NULL, ":")) == NULL)
-	    continue;
-	if ((cp = strtok(NULL, ":")) == NULL)
-	    continue;
-	tpw.pw_uid = atoi(cp);
-	if (tpw.pw_uid != uid)
+	if ((pwbuf.pw_passwd = strtok(NULL, ":")) == NULL)
 	    continue;
 	if ((cp = strtok(NULL, ":")) == NULL)
 	    continue;
-	tpw.pw_gid = atoi(cp);
-	if ((tpw.pw_gecos = strtok(NULL, ":")) == NULL)
+	pwbuf.pw_uid = atoi(cp);
+	if (pwbuf.pw_uid != uid)
 	    continue;
-	if ((tpw.pw_dir = strtok(NULL, ":")) == NULL)
+	if ((cp = strtok(NULL, ":")) == NULL)
 	    continue;
-	if ((tpw.pw_shell = strtok(NULL, ":")) != NULL) {
-	    len = strlen(tpw.pw_shell);
-	    if (tpw.pw_shell[len - 1] == '\n')
-		tpw.pw_shell[len - 1] = '\0';
+	pwbuf.pw_gid = atoi(cp);
+	if ((pwbuf.pw_gecos = strtok(NULL, ":")) == NULL)
+	    continue;
+	if ((pwbuf.pw_dir = strtok(NULL, ":")) == NULL)
+	    continue;
+	if ((pwbuf.pw_shell = strtok(NULL, ":")) != NULL) {
+	    len = strlen(pwbuf.pw_shell);
+	    if (pwbuf.pw_shell[len - 1] == '\n')
+		pwbuf.pw_shell[len - 1] = '\0';
 	}
-	pw = sudo_pwdup(&tpw);
+	pw = &pwbuf;
 	break;
     }
     if (!pw_stayopen) {
 	fclose(pwf);
 	pwf = NULL;
     }
-    if (pw != NULL) {
-	if (!pwcache_put(bypwnam, (VOID *) pw))
-	    errorx(1, "unable to cache user name, already exists");
-	if (!pwcache_put(byuid, (VOID *) pw))
-	    errorx(1, "unable to cache uid, already exists");
-	return(pw);
-    } else {
-	pw = emalloc(sizeof(*pw));
-	memset(pw, 0, sizeof(*pw));
-	pw->pw_uid = uid;
-	if (!pwcache_put(byuid, (VOID *) pw))
-	    errorx(1, "unable to cache uid, already exists");
-	return(NULL);
-    }
-}
-
-char *
-sudo_getepw(pw)
-    const struct passwd *pw;
-{
-    return(pw->pw_passwd);
+    return(pw);
 }
 
 void
-sudo_setgrfile(file)
+my_setgrfile(file)
     const char *file;
 {
     grfile = file;
     if (grf != NULL)
-	sudo_endgrent();
+	my_endgrent();
 }
 
 void
-sudo_setgrent()
+my_setgrent()
 {
     if (grf == NULL)
 	grf = fopen(grfile, "r");
@@ -256,7 +221,7 @@ sudo_setgrent()
 }
 
 void
-sudo_endgrent()
+my_endgrent()
 {
     if (grf != NULL) {
 	fclose(grf);
@@ -266,36 +231,31 @@ sudo_endgrent()
 }
 
 struct group *
-sudo_getgrnam(name)
+my_getgrnam(name)
     const char *name;
 {
-    struct group tgr, *gr = NULL;
+    struct group *gr = NULL;
     size_t len, nlen;
     char buf[LINE_MAX], *cp, *m;
     int n;
 
-    tgr.gr_name = (char *) name;
-    if ((gr = pwcache_get(bygrnam, &tgr)) != NULL)
-	return(gr);
-
-    /* No cached entry, try the group file. */
     if (grf != NULL)
 	rewind(grf);
     else if ((grf = fopen(grfile, "r")) == NULL)
 	return(NULL);
 
     nlen = strlen(name);
-    memset(&tgr, 0, sizeof(tgr));
+    memset(&grbuf, 0, sizeof(grbuf));
     while (fgets(buf, sizeof(buf), grf)) {
 	if (strncmp(buf, name, nlen) != 0 || buf[nlen] != ':')
 	    continue;
-	if ((tgr.gr_name = strtok(buf, ":")) == NULL)
+	if ((grbuf.gr_name = strtok(buf, ":")) == NULL)
 	    continue;
-	if ((tgr.gr_passwd = strtok(NULL, ":")) == NULL)
+	if ((grbuf.gr_passwd = strtok(NULL, ":")) == NULL)
 	    continue;
 	if ((cp = strtok(NULL, ":")) == NULL)
 	    continue;
-	tgr.gr_gid = atoi(cp);
+	grbuf.gr_gid = atoi(cp);
 	if ((cp = strtok(NULL, ":")) == NULL)
 	    continue;
 	len = strlen(cp);
@@ -303,74 +263,49 @@ sudo_getgrnam(name)
 	    cp[len - 1] = '\0';
 	/* Fill in group members */
 	if (*cp != '\0') {
-	    for (n = 1, m = cp; (m = strchr(m, ',')) != NULL; m++, n++)
-		continue;
-	    tgr.gr_mem = emalloc2(n + 1, sizeof(char *));
-	    n = 0;
-	    for ((m = strtok(cp, ",")); m != NULL; (m = strtok(NULL, ",")))
-		tgr.gr_mem[n++] = m;
-	    tgr.gr_mem[n++] = NULL;
+	    grbuf.gr_mem = gr_mem;
+	    m = strtok(cp, ",");
+	    for (n = 0; m != NULL && n < GRMEM_MAX; n++) {
+		grbuf.gr_mem[n++] = m;
+		m = strtok(NULL, ",");
+	    }
+	    grbuf.gr_mem[n++] = NULL;
 	} else
-	    tgr.gr_mem = NULL;
-	gr = sudo_grdup(&tgr);
-	if (tgr.gr_mem != NULL)
-	    free(tgr.gr_mem);
+	    grbuf.gr_mem = NULL;
+	gr = &grbuf;
 	break;
     }
     if (!gr_stayopen) {
 	fclose(grf);
 	grf = NULL;
     }
-    if (gr != NULL) {
-	if (!pwcache_put(bygrnam, (VOID *) gr))
-	    errorx(1, "unable to cache group name, already exists");
-	if (!pwcache_put(bygid, (VOID *) gr))
-	    errorx(1, "unable to cache gid, already exists");
-	return(gr);
-    } else {
-	len = strlen(name) + 1;
-	cp = emalloc(sizeof(*gr) + len);
-	memset(cp, 0, sizeof(*gr));
-	gr = (struct group *) cp;
-	cp += sizeof(*gr);
-	memcpy(cp, name, len);
-	gr->gr_name = cp;
-	gr->gr_gid = (gid_t) -1;
-	if (!pwcache_put(bygrnam, (VOID *) gr))
-	    errorx(1, "unable to cache group name, already exists");
-	return(NULL);
-    }
+    return(gr);
 }
 
 struct group *
-sudo_getgrgid(gid)
+my_getgrgid(gid)
     gid_t gid;
 {
-    struct group tgr, *gr = NULL;
+    struct group *gr = NULL;
     size_t len;
     char buf[LINE_MAX], *cp, *m;
     int n;
 
-    tgr.gr_gid = gid;
-    if ((gr = pwcache_get(bygid, &tgr)) != NULL)
-	return(gr);
-
-    /* No cached entry, try the group file. */
     if (grf != NULL)
 	rewind(grf);
     else if ((grf = fopen(grfile, "r")) == NULL)
 	return(NULL);
 
-    memset(&tgr, 0, sizeof(tgr));
+    memset(&grbuf, 0, sizeof(grbuf));
     while (fgets(buf, sizeof(buf), grf)) {
-	if ((tgr.gr_name = strtok(buf, ":")) == NULL)
+	if ((grbuf.gr_name = strtok(buf, ":")) == NULL)
 	    continue;
-	if ((tgr.gr_passwd = strtok(NULL, ":")) == NULL)
+	if ((grbuf.gr_passwd = strtok(NULL, ":")) == NULL)
 	    continue;
 	if ((cp = strtok(NULL, ":")) == NULL)
 	    continue;
-	tgr.gr_gid = atoi(cp);
-	if (tgr.gr_gid != gid)
+	grbuf.gr_gid = atoi(cp);
+	if (grbuf.gr_gid != gid)
 	    continue;
 	if ((cp = strtok(NULL, ":")) == NULL)
 	    continue;
@@ -379,36 +314,21 @@ sudo_getgrgid(gid)
 	    cp[len - 1] = '\0';
 	/* Fill in group members */
 	if (*cp != '\0') {
-	    for (n = 1, m = cp; (m = strchr(m, ',')) != NULL; m++, n++)
-		continue;
-	    tgr.gr_mem = emalloc2(n + 1, sizeof(char *));
-	    n = 0;
-	    for ((m = strtok(cp, ",")); m != NULL; (m = strtok(NULL, ",")))
-		tgr.gr_mem[n++] = m;
-	    tgr.gr_mem[n++] = NULL;
+	    grbuf.gr_mem = gr_mem;
+	    m = strtok(cp, ",");
+	    for (n = 0; m != NULL && n < GRMEM_MAX; n++) {
+		grbuf.gr_mem[n++] = m;
+		m = strtok(NULL, ",");
+	    }
+	    grbuf.gr_mem[n++] = NULL;
 	} else
-	    tgr.gr_mem = NULL;
-	gr = sudo_grdup(&tgr);
-	if (tgr.gr_mem != NULL)
-	    free(tgr.gr_mem);
+	    grbuf.gr_mem = NULL;
+	gr = &grbuf;
 	break;
     }
     if (!gr_stayopen) {
 	fclose(grf);
 	grf = NULL;
     }
-    if (gr != NULL) {
-	if (!pwcache_put(bygrnam, (VOID *) gr))
-	    errorx(1, "unable to cache group name, already exists");
-	if (!pwcache_put(bygid, (VOID *) gr))
-	    errorx(1, "unable to cache gid, already exists");
-	return(gr);
-    } else {
-	gr = emalloc(sizeof(*gr));
-	memset(gr, 0, sizeof(*gr));
-	gr->gr_gid = gid;
-	if (!pwcache_put(bygid, (VOID *) gr))
-	    errorx(1, "unable to cache gid, already exists");
-	return(NULL);
-    }
+    return(gr);
 }
