@@ -1,2 +1,7 @@
 1) Multiple entries per user doesn't work.  Only the first one is
    used.
+
+2) There is a race condition where if . were changed to be non-executable
+   after sudo(8) does its initial getcwd(3) but before sudo does the chdir(2)
+   back to the original working dir.  In this case you will get a misleading
+   error message (command not found).
