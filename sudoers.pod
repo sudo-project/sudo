@@ -208,17 +208,20 @@ specific user, or commands being run as a specific user.  When
 multiple entries match, they are applied in order.  Where there are
 conflicting values, the last value on a matching line takes effect.
 
- Default_Type ::= 'Defaults' ||
-		  'Defaults' '@' Host ||
-		  'Defaults' ':' User ||
+ Default_Type ::= 'Defaults' |
+		  'Defaults' '@' Host |
+		  'Defaults' ':' User |
 		  'Defaults' '>' RunasUser
 
  Default_Entry ::= Default_Type Parameter_List
 
- Parameter ::= Parameter '=' Value ||
-	       Parameter '+=' Value ||
-	       Parameter '-=' Value ||
-	       '!'* Parameter ||
+ Parameter_List ::= Parameter |
+		    Parameter ',' Parameter_List
+
+ Parameter ::= Parameter '=' Value |
+	       Parameter '+=' Value |
+	       Parameter '-=' Value |
+	       '!'* Parameter
 
 Parameters may be B<flags>, B<integer> values, B<strings>, or B<lists>.
 Flags are implicitly boolean and can be turned off via the '!'
