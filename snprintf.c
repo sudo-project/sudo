@@ -739,7 +739,7 @@ vasprintf(str, fmt, ap)
 	va_list ap;
 {
 
-	return (vfprintf(str, 0, 1, fmt, ap));
+	return (xxxprintf(str, 0, 1, fmt, ap));
 }
 #endif /* HAVE_VASPRINTF */
 
