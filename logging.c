@@ -92,13 +92,13 @@ void log_error(code)
     register char *p;
     register int count;
     time_t now;
-#ifdef _PATH_SUDO_LOGFILE
+#if (LOGGING & SLOG_FILE)
     register FILE *fp;
-#endif /* _PATH_SUDO_LOGFILE */
-#ifdef SYSLOG
+#endif /* LOGGING & SLOG_FILE */
+#if (LOGGING & SLOG_SYSLOG)
     register int pri;		/* syslog priority */
     char *tmp, save;
-#endif /* SYSLOG */
+#endif /* LOGGING & SLOG_SYSLOG */
 
     /*
      * we will skip this stuff when using syslog(3) but it is
@@ -116,54 +116,54 @@ void log_error(code)
 
 	case ALL_SYSTEMS_GO:
 	    (void) sprintf(p, "PWD=%s ; COMMAND=", cwd);
-#ifdef SYSLOG
+#if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_OK;
-#endif /* SYSLOG */
+#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case VALIDATE_NO_USER:
 	    (void) sprintf(p, "user NOT in sudoers ; PWD=%s ; COMMAND=", cwd);
-#ifdef SYSLOG
+#if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
-#endif /* SYSLOG */
+#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case VALIDATE_NOT_OK:
 	    (void) sprintf(p, "command not allowed ; PWD=%s ; COMMAND=", cwd);
-#ifdef SYSLOG
+#if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
-#endif /* SYSLOG */
+#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case VALIDATE_ERROR:
 	    (void) sprintf(p, "error in %s ; PWD=%s ; command: ",
 		_PATH_SUDO_SUDOERS, cwd);
-#ifdef SYSLOG
+#if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
-#endif /* SYSLOG */
+#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case GLOBAL_NO_PW_ENT:
 	    (void) sprintf(p, "There is no /etc/passwd entry for uid %d.  ",
 		uid);
-#ifdef SYSLOG
+#if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
-#endif /* SYSLOG */
+#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case PASSWORD_NOT_CORRECT:
 	    (void) sprintf(p, "%d incorrect passwords ; PWD=%s ; COMMAND=",
 		    TRIES_FOR_PASSWORD, cwd);
-#ifdef SYSLOG
+#if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
-#endif /* SYSLOG */
+#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case GLOBAL_NO_HOSTNAME:
 	    strcat(p, "This machine does not have a hostname ");
-#ifdef SYSLOG
+#if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
-#endif /* SYSLOG */
+#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case NO_SUDOERS_FILE:
@@ -181,23 +181,23 @@ void log_error(code)
 			_PATH_SUDO_SUDOERS);
 		    break;
 	    }
-#ifdef SYSLOG
+#if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
-#endif /* SYSLOG */
+#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case GLOBAL_HOST_UNREGISTERED:
 	    (void) sprintf(p, "gethostbyname() cannot find host %s ", host);
-#ifdef SYSLOG
+#if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
-#endif /* SYSLOG */
+#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	default:
 	    strcat(p, "found a wierd error : ");
-#ifdef SYSLOG
+#if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
-#endif /* SYSLOG */
+#endif /* LOGGING & SLOG_SYSLOG */
 	    break;
     }
 
@@ -231,7 +231,7 @@ void log_error(code)
 
     }
 
-#ifdef SYSLOG
+#if (LOGGING & SLOG_SYSLOG)
 #ifdef Syslog_facility
     openlog(Syslog_ident, Syslog_options, Syslog_facility);
 #else
@@ -275,8 +275,8 @@ void log_error(code)
 	}
     }
     closelog();
-#endif /* SYSLOG */
-#ifdef _PATH_SUDO_LOGFILE
+#endif /* LOGGING & SLOG_SYSLOG */
+#if (LOGGING & SLOG_FILE)
 
     /* become root */
     set_perms(PERM_ROOT);
@@ -344,7 +344,7 @@ void log_error(code)
 
     /* relinquish root */
     set_perms(PERM_USER);
-#endif /* _PATH_SUDO_LOGFILE */
+#endif /* LOGGING & SLOG_FILE */
 
     /* send mail if appropriate */
     if (appropriate(code))
