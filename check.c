@@ -457,9 +457,9 @@ remove_timestamp(remove)
 		status = unlink(timestampfile);
 	    else
 		status = rmdir(timestampdir);
-	    if (status == -1) {
+	    if (status == -1 && errno != ENOENT) {
 		log_error(NO_EXIT, "can't remove %s (%s), will reset to epoch",
-		    strerror(errno), ts);
+		    ts, strerror(errno));
 		remove = FALSE;
 	    }
 	}

@@ -163,6 +163,7 @@ main(argc, argv)
     int fd;
     int cmnd_status;
     int sudo_mode;
+    int check_cmnd;
 #ifdef POSIX_SIGNALS
     sigset_t set, oset;
 #else
@@ -217,6 +218,7 @@ main(argc, argv)
     /* Setup defaults data structures. */
     init_defaults();
 
+    check_cmnd = 1;
     if (sudo_mode & MODE_SHELL)
 	user_cmnd = "shell";
     else
@@ -235,10 +237,12 @@ main(argc, argv)
 		break;
 	    case MODE_VALIDATE:
 		user_cmnd = "validate";
+		check_cmnd = 0;
 		break;
 	    case MODE_KILL:
 	    case MODE_INVALIDATE:
 		user_cmnd = "kill";
+		check_cmnd = 0;
 		break;
 	    case MODE_LISTDEFS:
 		list_options();
@@ -247,6 +251,7 @@ main(argc, argv)
 	    case MODE_LIST:
 		user_cmnd = "list";
 		printmatches = 1;
+		check_cmnd = 0;
 		break;
 	}
 
@@ -262,16 +267,16 @@ main(argc, argv)
 
     check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
 
+    add_env(!(sudo_mode & MODE_SHELL));	/* add in SUDO_* envariables */
+
+    /* Validate the user but don't search for pseudo-commands. */
+    validated = sudoers_lookup(check_cmnd);
+
+    /* This goes after the sudoers parse since we honor sudoers options. */
     if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
 	remove_timestamp((sudo_mode == MODE_KILL));
 	exit(0);
     }
-
-    add_env(!(sudo_mode & MODE_SHELL));	/* add in SUDO_* envariables */
-
-    /* Validate the user but don't search for pseudo-commands. */
-    validated =
-	sudoers_lookup((sudo_mode != MODE_VALIDATE && sudo_mode != MODE_LIST));
 
     if (validated & VALIDATE_ERROR)
 	log_error(0, "parse error in %s near line %d", _PATH_SUDOERS,
