@@ -14,10 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <errno.h>
-#include <time.h>
-
 #include <config.h>
+
+#include <errno.h>
+#ifndef HAVE_TIMESPEC
+# include <time.h>
+#endif
+
 #include <compat.h>
 
 #ifndef lint
