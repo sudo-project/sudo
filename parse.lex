@@ -66,9 +66,9 @@ static int sawspace = 0;
 static int arg_len = 0;
 static int arg_size = 0;
 
-static void fill		__P((char *, int));
-static void fill_cmnd		__P((char *, int));
-static void fill_args		__P((char *, int, int));
+static int fill			__P((char *, int));
+static int fill_cmnd		__P((char *, int));
+static int fill_args		__P((char *, int, int));
 static int buffer_frob		__P((const char *));
 extern void reset_aliases	__P((void));
 extern void yyerror		__P((const char *));
@@ -106,7 +106,8 @@ DEFVAR			[a-z_]+
 <STARTDEFS>{DEFVAR}	{
 			    BEGIN INDEFS;
 			    LEXTRACE("DEFVAR ");
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    return(DEFVAR);
 			}
 
@@ -134,13 +135,15 @@ DEFVAR			[a-z_]+
 
     \"([^\"]|\\\")+\"	{
 			    LEXTRACE("WORD(1) ");
-			    fill(yytext + 1, yyleng - 2);
+			    if (!fill(yytext + 1, yyleng - 2))
+				yyterminate();
 			    return(WORD);
 			}
 
     {ENVAR}		{
 			    LEXTRACE("WORD(2) ");
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    return(WORD);
 			}
 }
@@ -149,14 +152,16 @@ DEFVAR			[a-z_]+
     \\[\*\?\[\]\!]	{
 			    /* quoted fnmatch glob char, pass verbatim */
 			    LEXTRACE("QUOTEDCHAR ");
-			    fill_args(yytext, 2, sawspace);
+			    if (!fill_args(yytext, 2, sawspace))
+				yyterminate();
 			    sawspace = FALSE;
 			}
 
     \\[:\\,= \t#]	{
 			    /* quoted sudoers special char, strip backslash */
 			    LEXTRACE("QUOTEDCHAR ");
-			    fill_args(yytext + 1, 1, sawspace);
+			    if (!fill_args(yytext + 1, 1, sawspace))
+				yyterminate();
 			    sawspace = FALSE;
 			}
 
@@ -168,7 +173,8 @@ DEFVAR			[a-z_]+
 
     [^\\:, \t\n]+ 	{
 			    LEXTRACE("ARG ");
-			    fill_args(yytext, yyleng, sawspace);
+			    if (!fill_args(yytext, yyleng, sawspace))
+				yyterminate();
 			    sawspace = FALSE;
 			}			/* a command line arg */
 }
@@ -182,7 +188,8 @@ DEFVAR			[a-z_]+
 				continue;
 			    *ep = '\0';
 			    /* push current buffer and switch to include file */
-			    push_include(cp);
+			    if (!push_include(cp))
+				yyterminate();
 			    LEXTRACE("INCLUDE\n");
 			    BEGIN INITIAL;
 			}
@@ -209,7 +216,8 @@ DEFVAR			[a-z_]+
 			}
 
 <INITIAL>^(Host|Cmnd|User|Runas)_Alias	{
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    switch (*yytext) {
 				case 'H':
 				    LEXTRACE("HOSTALIAS ");
@@ -261,26 +269,30 @@ TRACE[[:blank:]]*:	{
 
 \+{WORD}		{
 			    /* netgroup */
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    LEXTRACE("NETGROUP ");
 			    return(NETGROUP);
 			}
 
 \%{WORD}		{
 			    /* UN*X group */
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    LEXTRACE("GROUP ");
 			    return(USERGROUP);
 			}
 
 {DOTTEDQUAD}(\/{DOTTEDQUAD})? {
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    LEXTRACE("NTWKADDR ");
 			    return(NTWKADDR);
 			}
 
 {DOTTEDQUAD}\/([12][0-9]*|3[0-2]*) {
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    LEXTRACE("NTWKADDR ");
 			    return(NTWKADDR);
 			}
@@ -296,7 +308,8 @@ TRACE[[:blank:]]*:	{
 				LEXTRACE("ALL ");
 				return(ALL);
 			    } else {
-				fill(yytext, yyleng);
+				if (!fill(yytext, yyleng))
+				    yyterminate();
 				LEXTRACE("ALIAS ");
 				return(ALIAS);
 			    }
@@ -304,7 +317,8 @@ TRACE[[:blank:]]*:	{
 
 <GOTRUNAS>(#[0-9-]+|{WORD}) {
 			    /* username/uid that user can run command as */
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    LEXTRACE("WORD(3) ");
 			    return(WORD);
 			}
@@ -316,25 +330,29 @@ TRACE[[:blank:]]*:	{
 sudoedit		{
 			    BEGIN GOTCMND;
 			    LEXTRACE("COMMAND ");
-			    fill_cmnd(yytext, yyleng);
+			    if (!fill_cmnd(yytext, yyleng))
+				yyterminate();
 			}			/* sudo -e */
 
 \/(\\[\,:= \t#]|[^\,:=\\ \t\n#])+	{
 			    /* directories can't have args... */
 			    if (yytext[yyleng - 1] == '/') {
 				LEXTRACE("COMMAND ");
-				fill_cmnd(yytext, yyleng);
+				if (!fill_cmnd(yytext, yyleng))
+				    yyterminate();
 				return(COMMAND);
 			    } else {
 				BEGIN GOTCMND;
 				LEXTRACE("COMMAND ");
-				fill_cmnd(yytext, yyleng);
+				if (!fill_cmnd(yytext, yyleng))
+				    yyterminate();
 			    }
 			}			/* a pathname */
 
 <INITIAL,GOTDEFS>{WORD} {
 			    /* a word */
-			    fill(yytext, yyleng);
+			    if (!fill(yytext, yyleng))
+				yyterminate();
 			    LEXTRACE("WORD(4) ");
 			    return(WORD);
 			}
@@ -399,7 +417,7 @@ sudoedit		{
 			}
 
 %%
-static void
+static int
 fill(s, len)
     char *s;
     int len;
@@ -409,7 +427,7 @@ fill(s, len)
     yylval.string = (char *) malloc(len + 1);
     if (yylval.string == NULL) {
 	yyerror("unable to allocate memory");
-	return;
+	return(FALSE);
     }
 
     /* Copy the string and collapse any escaped characters. */
@@ -420,9 +438,10 @@ fill(s, len)
 	    yylval.string[j] = s[i];
     }
     yylval.string[j] = '\0';
+    return(TRUE);
 }
 
-static void
+static int
 fill_cmnd(s, len)
     char *s;
     int len;
@@ -432,16 +451,17 @@ fill_cmnd(s, len)
     yylval.command.cmnd = (char *) malloc(++len);
     if (yylval.command.cmnd == NULL) {
 	yyerror("unable to allocate memory");
-	return;
+	return(FALSE);
     }
 
     /* copy the string and NULL-terminate it (escapes handled by fnmatch) */
     (void) strlcpy(yylval.command.cmnd, s, len);
 
     yylval.command.args = NULL;
+    return(TRUE);
 }
 
-static void
+static int
 fill_args(s, len, addspace)
     char *s;
     int len;
@@ -468,7 +488,7 @@ fill_args(s, len, addspace)
 	    if (yylval.command.args != NULL)
 		free(yylval.command.args);
 	    yyerror("unable to allocate memory");
-	    return;
+	    return(FALSE);
 	} else
 	    yylval.command.args = p;
     }
@@ -477,38 +497,49 @@ fill_args(s, len, addspace)
     p = yylval.command.args + arg_len;
     if (addspace)
 	*p++ = ' ';
-    if (strlcpy(p, s, arg_size - (p - yylval.command.args)) != len)
+    if (strlcpy(p, s, arg_size - (p - yylval.command.args)) != len) {
 	yyerror("fill_args: buffer overflow");	/* paranoia */
+	return(FALSE);
+    }
     arg_len = new_len;
+    return(TRUE);
 }
 
+#define MAX_INCLUDE_DEPTH	128
 int
 buffer_frob(path)
     const char *path;
 {
-    static size_t maxbuf, nbuf;
+    static size_t stacksize, depth;
     static YY_BUFFER_STATE *bufstack;
     FILE *fp;
 
     if (path != NULL) {
-	/* XXX - have maxdepth */
 	/* push */
-	if (nbuf >= maxbuf) {
-	    maxbuf += 16;
-	    if ((bufstack = realloc(bufstack, maxbuf)) == NULL)
+	if (depth >= stacksize) {
+	    if (depth > MAX_INCLUDE_DEPTH) {
+		yyerror("too many levels of includes");
+		return(FALSE);
+	    }
+	    stacksize += 16;
+	    if ((bufstack = realloc(bufstack, stacksize)) == NULL) {
 		yyerror("unable to allocate memory");
+		return(FALSE);
+	    }
 	}
-	if ((fp = open_sudoers(path)) == NULL)
+	if ((fp = open_sudoers(path)) == NULL) {
 	    yyerror(path);
-	bufstack[nbuf++] = YY_CURRENT_BUFFER;
+	    return(FALSE);
+	}
+	bufstack[depth++] = YY_CURRENT_BUFFER;
 	yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
     } else {
 	/* pop */
-	if (nbuf == 0)
+	if (depth == 0)
 	    return(FALSE);
 	fclose(YY_CURRENT_BUFFER->yy_input_file);
 	yy_delete_buffer(YY_CURRENT_BUFFER);
-	yy_switch_to_buffer(bufstack[--nbuf]);
+	yy_switch_to_buffer(bufstack[--depth]);
     }
     return(TRUE);
 }
