@@ -77,10 +77,19 @@ static int tcollect(timeout, rendition, title, nprompts, prompts)
 	case SIAONELINER:
 	    if (timeout <= 0 || timeout > PASSWORD_TIMEOUT * 60)
 		timeout = PASSWORD_TIMEOUT * 60;
+	    /*
+	     * Substitute custom prompt if a) the sudo prompt is not "Password:"
+	     * and b) the SIA prompt is "Password:" (so we know it is safe).
+	     * This keeps us from overwriting things like s/key challenges.
+	     */
+	    if (strcmp((char *)prompts[0].prompt, "Password:") == 0 &&
+		strcmp(prompt, "Password:") != 0)
+		prompts[0].prompt = (unsigned char *)prompt;
 	    break;
 	default:
 	    break;
     }
+
     return sia_collect_trm(timeout, rendition, title, nprompts, prompts);
 }
 
@@ -106,6 +115,7 @@ void sia_attempt_auth()
 	    inform_user(BAD_ALLOCATION);
 	    exit(1);
 	}
+	/* XXX - need a way to detect user hitting return or EOF at prompt */
 	retval = sia_ses_reauthent(tcollect, siah);
 	(void) sia_ses_release(&siah);
 	if (retval == SIASUCCESS) {
