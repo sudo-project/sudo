@@ -33,12 +33,12 @@
 #define LOGGING SLOG_SYSLOG	/* log via SLOG_SYSLOG, SLOG_FILE, SLOG_BOTH */
 #define LOGFAC LOG_LOCAL2	/* syslog facility for sudo to use */
 #define MAXLOGFILELEN 80	/* max chars per log line (for line wrapping) */
-/*#define NO_ROOT_SUDO		/* root is not allowed to use sudo */
 #define SUDOERS_OWNER "root"	/* sudoers file owner (usually root) */
-/*#define EXEMPTGROUP 100	/* no passwd needed for users in this group */
+/*#define NO_ROOT_SUDO		/* root is not allowed to use sudo */
 #define ALERTMAIL "root"	/* user that gets sudo mail */
 #define SEND_MAIL_WHEN_NO_USER	/* send mail when user not in sudoers file */
 /*#define SEND_MAIL_WHEN_NOT_OK	/* send mail if no permissions to run command */
+/*#define EXEMPTGROUP 100	/* no passwd needed for users in this group */
 /*#define ENV_EDITOR		/* visudo honors EDITOR and VISUAL envars */
 #define SHORT_MESSAGE		/* short sudo message, no copyright printed */
 #define TIMEOUT 5		/* minutes before sudo asks for passwd again */
@@ -46,13 +46,13 @@
 #define TRIES_FOR_PASSWORD 3	/* number of tries to enter passwd correctly */
 /*#define USE_INSULTS		/* insult the user for incorrect passwords */
 /*#define HAL			/* 2001-like insults--must define USE_INSULTS */
-/*#define USE_EXECV		/* use execv() instead of execvp() */
 #define EDITOR _PATH_VI		/* default editor to use */
 #define MAILER _PATH_SENDMAIL	/* what mailer to use */
 #define UMASK 0022		/* umask that the root-run prog should use */
 #define INCORRECT_PASSWORD "Sorry, try again." /* message for bad passwd */
 #define MAILSUBJECT "*** SECURITY information ***" /* subject of mail sent */
 /*#define SECURE_PATH	"/bin:/usr/ucb:/usr/bin:/usr/etc:/etc" /* secure path */
+/*#define USE_EXECV		/* use execv() instead of execvp() */
 
 /**********  You probably don't want to modify anything below here  ***********/
 

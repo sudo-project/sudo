@@ -31,21 +31,14 @@ MAXLOGFILELEN
     if you don't want any word wrapping in your log files.
     The default is 80.
 
-NO_ROOT_SUDO
-    Don't let root run sudo.  This is historical from when doing "sudo sudo"
-    would give you a root shell.  You probably don't want to define this.
-    This is off by default.
-
 SUDOERS_OWNER
     Who should own the sudoers file.  This must be a username, *not* a uid.
     The default is "root" (remember the quotes).
 
-EXEMPTGROUP
-    If this is defined then the gid EXEMPTGROUP is set to doesn't need
-    to enter a password when running sudo.  This may be useful for sites
-    that don't want their "core" sysadmins to have to enter a password
-    but where Jr. sysadmins need to.
-    This is of by default.
+NO_ROOT_SUDO
+    Don't let root run sudo.  This is historical from when doing "sudo sudo"
+    would give you a root shell.  You probably don't want to define this.
+    This is off by default.
 
 ALERTMAIL
     User that mail from sudo is sent to.  This should go to a sysadmin
@@ -62,6 +55,13 @@ SEND_MAIL_WHEN_NOT_OK
     Send mail to ALERMAIL if the user is allowed to use sudo but the
     command they are trying is not listed in their sudoers file entry.
     This is off by default.
+
+EXEMPTGROUP
+    If this is defined then the gid EXEMPTGROUP is set to doesn't need
+    to enter a password when running sudo.  This may be useful for sites
+    that don't want their "core" sysadmins to have to enter a password
+    but where Jr. sysadmins need to.
+    This is of by default.
 
 ENV_EDITOR
     Makes visudo consult the EDITOR and VISUAL environmental variables
@@ -98,14 +98,6 @@ HAL
     define USE_INSULTS as well for this to have any effect.
     This is off by default.
 
-USE_EXECV
-    Use execv() to exec the command instead of execvp().  I can't think of
-    a reason to actually do this since execvp() is passed a fully qualified
-    pathname but someone might thoroughly distrust execvp().  Note that if
-    you define this you lose the ability to exec scripts that are missing the
-    '#!/bin/sh' cookie (like /bin/kill on sunos and /etc/fastboot on 4.3BSD).
-    This is off by default.
-
 EDITOR
     This is the default editor used by visudo (and the only editor used unless
     ENV_EDITOR is defined).
@@ -135,3 +127,11 @@ SECURE_PATH
     the people running sudo to have a sane PATH environmental variable
     you may want to define SECURE_PATH.
     This is turned off by default.
+
+USE_EXECV
+    Use execv() to exec the command instead of execvp().  I can't think of
+    a reason to actually do this since execvp() is passed a fully qualified
+    pathname but someone might thoroughly distrust execvp().  Note that if
+    you define this you lose the ability to exec scripts that are missing the
+    '#!/bin/sh' cookie (like /bin/kill on sunos and /etc/fastboot on 4.3BSD).
+    This is off by default.
