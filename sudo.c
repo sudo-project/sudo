@@ -123,7 +123,7 @@ static void usage			__P((int));
 static void load_globals		__P((int));
 static int check_sudoers		__P((void));
 static void load_cmnd			__P((int));
-static void add_env			__P((void));
+static void add_env			__P((int));
 static void clean_env			__P((char **, struct env_table *));
 extern int user_is_exempt		__P((void));
 extern struct passwd *sudo_getpwuid	__P((uid_t));
@@ -301,7 +301,7 @@ int main(argc, argv)
 	exit(0);
     }
 
-    add_env();			/* add in SUDO_* envariables */
+    add_env(!(sudo_mode & MODE_SHELL));	/* add in SUDO_* envariables */
 
     /* validate the user but don't search for "validate" */
     rtn = validate((sudo_mode != MODE_VALIDATE));
@@ -627,16 +627,55 @@ static void usage(exit_val)
  *  this function adds sudo-specific variables into the environment
  */
 
-static void add_env()
+static void add_env(contiguous)
+    int contiguous;
 {
     char idstr[MAX_UID_T_LEN + 1];
+    size_t size;
+    char *buf;
 
-    /* add the SUDO_COMMAND envariable */
-    if (sudo_setenv("SUDO_COMMAND", cmnd)) {
+    /* add the SUDO_COMMAND envariable (cmnd + args) */
+    size = strlen(cmnd) + 1;
+    if (NewArgc > 1) {
+	char *to, **from;
+
+	if (contiguous) {
+	    fprintf(stderr, "NewArgv is contiguous.\n"); /* XXX */
+	    size += (size_t) NewArgv[NewArgc-1] + strlen(NewArgv[NewArgc-1]) -
+		    (size_t) NewArgv[1] + 1;
+	} else {
+	    for (from = &NewArgv[1]; *from; from++)
+		size += strlen(*from) + 1;
+	}
+
+	fprintf(stderr, "malloc'ing %u bytes.\n", size); /* XXX */
+	if ((buf = (char *) malloc(size)) == NULL) {
+	    perror("malloc");
+	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	    exit(1);
+	}
+
+	/*
+	 * Copy the command and it's arguments info buf
+	 */
+	(void) strcpy(buf, cmnd);
+	to = buf + strlen(cmnd);
+	for (from = &NewArgv[1]; *from; from++) {
+	    *to++ = ' ';
+	    (void) strcpy(to, *from);
+	    to += strlen(*from);
+	}
+    } else {
+	buf = cmnd;
+    }
+    (void) fprintf(stderr, "cmnd + args = '%s'\n", buf);
+    if (sudo_setenv("SUDO_COMMAND", buf)) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
+    if (NewArgc > 1)
+	(void) free(buf);
 
     /* add the SUDO_USER envariable */
     if (sudo_setenv("SUDO_USER", user_name)) {
@@ -654,7 +693,7 @@ static void add_env()
     }
 
     /* add the SUDO_GID envariable */
-    (void) sprintf(idstr, "%ld", (long) getegid());
+    (void) sprintf(idstr, "%ld", (long) user_gid);
     if (sudo_setenv("SUDO_GID", idstr)) {
 	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
