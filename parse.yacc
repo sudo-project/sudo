@@ -59,7 +59,7 @@ static char rcsid[] = "$Id$";
 
 extern int sudolineno, parse_error;
 int errorlineno = -1;
-static char *userent;
+static int user_matched;
 
 /*
  * Alias types
@@ -141,7 +141,9 @@ entry		:	COMMENT
 			{ ; }
                 |       error COMMENT
 			{ yyerrok; }
-		|	NAME { userent = $1; } privileges
+		|	NAME {
+			    user_matched = ($1, user) == 0;
+			} privileges
 		|	HOSTALIAS hostaliases
 			{ ; }
 		|	CMNDALIAS cmndaliases
@@ -154,8 +156,9 @@ privileges	:	privilege
 		;
 
 privilege	:	{ push; } hostspec '=' opcmndlist {
-			    user_matches = strcmp(user, userent) == 0;
-			    if (!user_matches)
+			    if (user_matched)
+				user_matches = TRUE;
+			    else
 				pop;
 			}
 		;
