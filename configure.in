@@ -480,7 +480,7 @@ AC_ARG_WITH(badpri, [  --with-badpri           syslog priority for failures (def
 		;;
 esac])
 AC_DEFINE_UNQUOTED(PRI_FAILURE, "$badpri", [The syslog priority sudo will use for unsuccessful attempts/errors.])
-AC_MSG_RESULT(badpri)
+AC_MSG_RESULT($badpri)
 
 AC_ARG_WITH(logpath, [  --with-logpath          path to the sudo log file],
 [case $with_logpath in  
@@ -787,7 +787,7 @@ AC_MSG_RESULT($passwd_tries)
 
 AC_MSG_CHECKING(time in minutes after which sudo will ask for a password again)
 AC_ARG_WITH(timeout, [  --with-timeout          minutes before sudo asks for passwd again (def is 5 minutes)],
-[echo $with_timeout; case $with_timeout in  
+[case $with_timeout in  
     yes)	;;
     no)		timeout=0
 		;;
