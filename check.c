@@ -135,7 +135,7 @@ void check_user()
  *  user_is_exempt()
  *
  *  this function checks the user is exempt from supplying a password
- *  XXX - should check more that just real gid.
+ *  XXX - should check more that just real gid via getgrnam.
  */
 
 static int user_is_exempt()
