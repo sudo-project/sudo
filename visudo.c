@@ -231,17 +231,24 @@ main(argc, argv)
 		Exit(-1);
 	    }
 
+	/* Add missing newline at EOF if needed. */
+	if (n > 0 && buf[n - 1] != '\n') {
+	    buf[0] = '\n';
+	    write(stmp_fd, buf, 1);
+	}
+
 	(void) close(stmp_fd);
 	(void) touch(stmp, sudoers_sb.st_mtime);
 
 	/* Parse sudoers to pull in editor and env_editor conf values. */
 	if ((yyin = fopen(stmp, "r"))) {
 	    yyout = stdout;
+	    n = quiet;
+	    quiet = 1;
 	    init_parser();
 	    yyparse();
 	    parse_error = FALSE;
-	    yyrestart(yyin);
-	    fclose(yyin);
+	    quiet = n;
 	}
     } else
 	(void) close(stmp_fd);
@@ -390,10 +397,7 @@ main(argc, argv)
 	     * for parse errors.
 	     */
 	    yyout = stdout;
-	    if (parse_error)
-		yyin = freopen(stmp, "r", yyin);
-	    else
-		yyin = fopen(stmp, "r");
+	    yyin = freopen(stmp, "r+", yyin);
 	    if (yyin == NULL) {
 		(void) fprintf(stderr,
 		    "%s: Can't re-open temporary file (%s), %s unchanged.\n",
@@ -401,12 +405,18 @@ main(argc, argv)
 		Exit(-1);
 	    }
 
+	    /* Add missing newline at EOF if needed. */
+	    if (fseek(yyin, -1, SEEK_END) == 0 && (ch = fgetc(yyin)) != '\n')
+		fputc('\n', yyin);
+	    rewind(yyin);
+
 	    /* Clean slate for each parse */
 	    user_runas = NULL;
 	    init_defaults();
 	    init_parser();
 
-	    /* Parse the sudoers file */
+	    /* Parse the sudoers temp file */
+	    yyrestart(yyin);
 	    if (yyparse() && parse_error != TRUE) {
 		(void) fprintf(stderr,
 		    "%s: Failed to parse temporary file (%s), unknown error.\n",
@@ -432,7 +442,6 @@ main(argc, argv)
 				Exit(0);
 				break;
 	    }
-	    yyrestart(yyin);	/* reset lexer */
 	}
     } while (parse_error == TRUE);
 
