@@ -91,6 +91,9 @@
  
            USE_CWD                  if you have getcwd() and not getwd()
                                     (defined by default for hpux)
+
+           HAS_SAVED_UID            if you have saved uid
+                                    (defined by default for hpux)
  
            USE_TERMIO               if you have sysV terminal control
                                     (defined by default for hpux and irix)
@@ -298,16 +301,19 @@ extern int errno;
  * This is to placate hpux
  */
 #ifdef hpux
-#define getdtablesize()	(sysconf(_SC_OPEN_MAX))
-#define seteuid(__EUID)	(setresuid((uid_t)-1, __EUID, (uid_t)-1))
-#ifndef USE_CWD
-#define USE_CWD
-#endif	/* USE_CWD */
+# define getdtablesize()	(sysconf(_SC_OPEN_MAX))
+# define setreuid(__RUID, __EUID)	(setresuid(__RUID, __EUID, (uid_t)-1))
+# ifndef USE_CWD
+#  define USE_CWD
+# endif	/* USE_CWD */
+# ifndef HAS_SAVED_UID
+#  define HAS_SAVED_UID
+# endif	/* HAS_SAVED_UID */
 #endif	/* hpux */
 
 /*
  * Sun's cpp doesn't define this but it should
  */
 #if defined(SOLARIS) && !defined(__svr4__)
-#define __svr4__
+# define __svr4__
 #endif /* SOLARIS */
