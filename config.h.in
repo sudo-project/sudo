@@ -76,6 +76,9 @@
 #  define __svr4__
 #endif /* SVR4 */
 
+/* Define on SunOS 4.x */
+#undef SUNOS4
+
 /* Define if you want to use the system getpass().  */
 #undef USE_GETPASS
 
@@ -127,10 +130,16 @@
 #  define memcpy(D, S, L)	(bcopy(S, D, L))
 #endif
 
-/* Define if you have bzero(3).  */
-#undef HAVE_BZERO
-#if !defined(HAVE_BZERO) && !defined(bzero)
-#  define bzero(S, N)	(memset((void *)S, 0, N))
+/* Define if you have memmove(3).  */
+#undef HAVE_MEMMOVE
+#if !defined(HAVE_MEMMOVE) && !defined(memmove)
+#  define memmove(D, S, L)	(bcopy(S, D, L))
+#endif
+
+/* Define if you have memset(3).  */
+#undef HAVE_MEMSET
+#if !defined(HAVE_MEMSET) && !defined(memset)
+#  define memset(S, 0, N)	(bzero(S, N))
 #endif
 
 /* Define if you have sysconf(3c). */
