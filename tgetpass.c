@@ -144,20 +144,20 @@ char * tgetpass(prompt, timeout)
      */
 #ifdef HAVE_TERMIOS_H
     (void) tcgetattr(fileno(input), &term);
-    if (echo = (term.c_lflag & ECHO)) {
+    if ((echo = (term.c_lflag & ECHO))) {
 	term.c_lflag &= ~ECHO;
 	(void) tcsetattr(fileno(input), TCSAFLUSH|TCSASOFT, &term);
     }
 #else
 #ifdef HAVE_TERMIO_H
     (void) ioctl(fileno(input), TCGETA, &term);
-    if (echo = (term.c_lflag & ECHO)) {
+    if ((echo = (term.c_lflag & ECHO))) {
 	term.c_lflag &= ~ECHO;
 	(void) ioctl(fileno(input), TCSETA, &term);
     }
 #else
     (void) ioctl(fileno(input), TIOCGETP, &ttyb);
-    if (echo = (ttyb.sg_flags & ECHO)) {
+    if ((echo = (ttyb.sg_flags & ECHO))) {
 	ttyb.sg_flags &= ~ECHO;
 	(void) ioctl(fileno(input), TIOCSETP, &ttyb);
     }
