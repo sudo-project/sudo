@@ -26,157 +26,162 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*        The following macros can be defined when compiling
+#include "pathnames.h"
+
+/* Configurable OPTIONS--these can be overridden from the Makefile */
   
-           FQDN                   - if you have fully qualified hostnames
-                                    in your SUDOERS files
- 
-           SYSLOG                 - if you want to use syslog instead
-                                    of a log file
-                                    ( This is a nice feature.  You can
-                                      collect all your sudo logs at a
-                                      single host)
- 
-           NO_ROOT_SUDO           - sudo will exit if called by root
-  
-           SVR4                   - define if using Solaris 2.x or SVR4
-
-           SEND_MAIL_WHEN_NOT_OK  - if you want a message sent to ALERTMAIL
-                                    when the user is in the SUDOERS but
-                                    does not have permission to execute
-                                    the command entered
-                                    ( This can be used at paranoid sites )
- 
-           SEND_MAIL_WHEN_NO_USER - if you want a message sent to ALERTMAIL
-                                    when the user is not in the SUDOERS file
-                                    ( This is generally the case )
- 
-           TIMEDIR                  the directory where the timestamp 
-                                    files are kept.
- 
-           TIMEOUT                  the number of minutes that can elapse
-                                    before sudo will ask for a passwd again
- 
-           TRIES_FOR_PASSWORD       the number of times sudo will let you
-                                    guess are you password before screaming
- 
-           INCORRECT_PASSWORD       the message that is displayed if you 
-                                    incorrectly enter your password
- 
-           MAILSUBJECT              the subject of the mail sent to ALERTMAIL
- 
-           ALERTMAIL                the recipient of mail from sudo
- 
-           SUDOERS                  the location of the sudoers file
- 
-           TMPSUDOERS               the location of the lock file for visudo
- 
-           EDITOR                   the location of the editor
- 
-           ENV_EDITOR               if this variable is defined then the
-                                    EDITOR and VISUAL envariables are consulted
- 
-           LOGFILE                  log file location IF NOT USING SYSLOG
- 
-           SYSLOG                   if this variable is defined, sudo will log
-                                    using the 4.3 BSD style syslog facility
-
-           SECURE_PATH              if this variable is set, its value is
-				    used as the PATH variable
- 
-           UMASK                    umask that sudo should use, comment out
-				    to preserve umask of the caller, default
-                                    is 022
- 
-           BROKEN_GETPASS           if using a os with a broken getpass()
-                                    hpux,aix,irix need this, sudo.h has details
- 
-           HAVE_STRDUP              if your os has strdup(3)
- 
-           HAVE_CWD                 if you have getcwd(3)
-
-           USE_TERMIO               if you have sysV terminal control
-                                    (defined by default for hpux and irix)
- 
-           SHORT_MESSAGE            if you don't want the full copyright message
-                                    with the "we expect you have..." banner
- 
-           USE_INSULTS              if you want to be insulted for typing an
-                                    incorrect password like the original sudo(8)
- 
-           HAL                      if you want lines from 2001 instead of
-                                    insults (must define USE_INSULTS too)
- 
-           STDC_HEADERS             if you have ansi-compliant header files
- 
-           USE_EXECV                if you want to use execv() instead of
-                                    execvp()
-*/
-
-
-#ifndef TIMEDIR
-#  define TIMEDIR		"/tmp/.odus"
+/*
+ *  Define FQDN if you have fully qualified hostnames in your SUDOERS file
+ */
+#ifndef FQDN
+#  undef FQDN
 #endif
 
+/*
+ *  Define SYSLOG if you want to use syslog(3) instead of a log file.
+ *  (This is a nice feature.  You can collect all your sudo logs at
+ *   a single host.)
+ */
+#ifndef SYSLOG
+#  define SYSLOG
+#endif
+
+/*
+ *  If you define NO_ROOT_SUDO, sudo will exit if called by root.
+ */
+#ifndef NO_ROOT_SUDO
+#  undef NO_ROOT_SUDO
+#endif
+  
+/*
+ *  Define SEND_MAIL_WHEN_NO_USER if you want a message sent to ALERTMAIL
+ *  when the user is not in the SUDOERS file.  (This is generally the case.)
+ */
+#ifndef SEND_MAIL_WHEN_NO_USER
+#  define SEND_MAIL_WHEN_NO_USER
+#endif
+  
+/*
+ *  Define SEND_MAIL_WHEN_NOT_OK if you want a message sent to ALERTMAIL
+ *  when the user is in the SUDOERS but does not have permission to execute
+ *  the command entered.  (This can be used at paranoid sites.)
+ */
+#ifndef SEND_MAIL_WHEN_NOT_OK
+#  undef SEND_MAIL_WHEN_NOT_OK
+#endif
+ 
+/*
+ *  Define ENV_EDITOR if you want the EDITOR and VISUAL envariables to
+ *  be consulted by visudo(8).
+ */
+#ifndef ENV_EDITOR
+#  undef ENV_EDITOR
+#endif
+ 
+/*
+ *  Define SHORT_MESSAGE if you don't want the full copyright message
+ *  along with the "we expect you have..." banner.
+ */
+#ifndef SHORT_MESSAGE
+#  undef SHORT_MESSAGE
+#endif
+ 
+/*
+ *  Define USE_INSULTS if you want to be insulted for typing an
+ *  incorrect password just like the original sudo(8).
+ */
+#ifndef USE_INSULTS
+#  undef USE_INSULTS
+#endif
+ 
+/*
+ *  Define HAL if you want lines from 2001 instead of insults.
+ *  (Note: you must define USE_INSULTS too.)
+ */
+#ifndef HAL
+#  undef HAL
+#endif
+ 
+/*
+ *  Define USE_EXECV if you want to use execv() instead of execvp().
+ */
+#ifndef USE_EXECV
+#  undef USE_EXECV
+#endif
+
+/*
+ *  Number of minutes that can elapse before sudo will ask for a passwd again
+ */
 #ifndef TIMEOUT
 #  define TIMEOUT		5
 #endif
 
+/*
+ *  Number of times sudo will let you guess are you password before screaming
+ */
 #ifndef TRIES_FOR_PASSWORD
 #  define TRIES_FOR_PASSWORD	3
 #endif
 
+/*
+ *  Message that is displayed if you incorrectly enter your password
+ */
 #ifndef INCORRECT_PASSWORD
 #  define INCORRECT_PASSWORD	"Sorry, try again."
 #endif
 
 /*
- *  If the MAILER macro is changed make sure it will work in
- *  logging.c  --  there is some sendmail mail specific stuff in
- *  the send_mail() routine  ( e.g.  the argv for the execvp() )
- *  MAILER should ALWAYS be fully quallified.
+ *  If the MAILER macro is changed make sure it will work in logging.c,
+ *  there is some sendmail mail specific stuff in the send_mail() routine
+ *  ( e.g.  the argv for the execvp() ).  MAILER should ALWAYS be fully
+ *  quallified.  (_PATH_SENDMAIL defined in pathanmes.h)
  */
-
 #ifndef MAILER
-#  define MAILER		"/usr/lib/sendmail"
+#  define MAILER		_PATH_SENDMAIL
 #endif
 
+/*
+ *  Subject of the mail sent to ALERTMAIL
+ */
 #ifndef MAILSUBJECT
 #  define MAILSUBJECT		"*** SECURITY information ***"
 #endif
 
+/*
+ *  Recipient of mail from sudo
+ */
 #ifndef ALERTMAIL
 #  define ALERTMAIL		"root"
 #endif
 
-#ifndef SUDOERS
-#  define SUDOERS		"/etc/sudoers"
-#endif
-
-#ifndef TMPSUDOERS
-#  define TMPSUDOERS		"/etc/stmp"
-#endif
-
+/*
+ *  Location of the editor
+ */
 #ifndef EDITOR
-#  if defined(hpux) || defined(__alpha) || defined(_AIX) || defined(__ksr__) \
-   || defined(sgi)
-#    define EDITOR		"/usr/bin/vi"
-#else
-#    define EDITOR		"/usr/ucb/vi"
-#  endif
+#  define EDITOR		_PATH_VI
 #endif
+
+/*
+ *  Uncomment to hardcode the PATH envariable in sudo
+ */
+/*#define SECURE_PATH		"/bin:/usr/ucb:/usr/bin:/usr/etc:/etc" /**/
+
+/*
+ *  Umask that sudo should use, change the "#define" to an "#undef"
+ *  to preserve the umask of the caller.
+ */
+#ifndef UMASK
+#  define UMASK			022
+#endif /* UMASK */
+
+/**********  You probably don't want to modify anything below here  ***********/
+
+/* Max length for a command */
+#define MAXCOMMANDLENGTH	MAXPATHLEN
 
 #ifndef MAXHOSTNAMELEN
 #  define MAXHOSTNAMELEN	64
 #endif
-
-#define MAXCOMMANDLENGTH	MAXPATHLEN
-
-/*#define SECURE_PATH		"/bin:/usr/ucb/:/usr/bin:/usr/etc:/etc" /**/
-
-#ifndef UMASK
-#  define UMASK			022
-#endif /* UMASK */
 
 typedef union {
     int int_val;
@@ -197,7 +202,7 @@ YYSTYPE yylval;
 #endif
 
 /*
- * SYSLOG should be defined in the makefile
+ * Syslog(3) parameters
  */
 #ifdef SYSLOG
 #  include <syslog.h>
@@ -205,7 +210,7 @@ YYSTYPE yylval;
 #    define Syslog_ident	"sudo"
 #  endif
 #  ifndef Syslog_options
-#    define Syslog_options	LOG_PID
+#    define Syslog_options	0
 #  endif
 #  ifndef Syslog_facility
 #    define Syslog_facility	LOG_LOCAL2
@@ -216,14 +221,7 @@ YYSTYPE yylval;
 #  ifndef Syslog_priority_NO
 #    define Syslog_priority_NO	LOG_ALERT
 #  endif
-#else
-#  ifndef LOGFILE
-#    if defined(ultrix) || defined(sun)
-#      define LOGFILE		"/var/adm/sudo.log"
-#    else
-#      define LOGFILE		"/usr/adm/sudo.log"
-#    endif	/* /var vs. /usr */
-#  endif	/* LOGFILE */
+#  undef _PATH_SUDO_LOGFILE
 #endif	/* SYSLOG  */
 
 /*
@@ -234,17 +232,6 @@ YYSTYPE yylval;
  */
 #ifndef MAXSYSLOGLEN
 #  define MAXSYSLOGLEN		960
-#endif
-
-/*
- * Maximum number of characters per physical log file line.
- * This is only used if you are logging to a file.  It basically
- * just means "wrap lines after MAXLOGFILELEN characters."
- * Word wrapping is done where possible.  If you don't want word
- * wrap, set this to be MAXLOGLEN.
- */
-#ifndef MAXLOGFILELEN
-#  define MAXLOGFILELEN		80
 #endif
 
 /*
@@ -264,6 +251,17 @@ YYSTYPE yylval;
 #    endif
 #  endif
 #  define MAXLOGLEN		(49 + MAXPATHLEN + MAXPATHLEN + ARG_MAX)
+#endif
+
+/*
+ * Maximum number of characters per physical log file line.
+ * This is only used if you are logging to a file.  It basically
+ * just means "wrap lines after MAXLOGFILELEN characters."
+ * Word wrapping is done where possible.  If you don't want word
+ * wrap, set this to be MAXLOGLEN.
+ */
+#ifndef MAXLOGFILELEN
+#  define MAXLOGFILELEN		80
 #endif
 
 #define VALIDATE_OK              0x00
@@ -306,6 +304,7 @@ YYSTYPE yylval;
 #define EXTRA_LIST               0x03
 
 /* These are the functions that are called in sudo */
+/* XXX - use __P() */
 #ifndef HAVE_STRDUP
 char *strdup();
 #endif
@@ -318,7 +317,8 @@ void be_root();
 void be_user();
 void be_full_user();
 
-/* Most of these variables are declared in main() so they don't need
+/*
+ * Most of these variables are declared in main() so they don't need
  * to be extern'ed here if this is main...
  */
 #ifndef MAIN
@@ -334,16 +334,9 @@ extern char ** environ;
 
 
 /*
- * This is to placate hpux
+ * Emulate getdtablesize() and seteuid() for HP-UX
  */
 #ifdef hpux
 #  define getdtablesize()	(sysconf(_SC_OPEN_MAX))
 #  define seteuid(__EUID)	(setresuid((uid_t)-1, __EUID, (uid_t)-1))
 #endif	/* hpux */
-
-/*
- * Sun's cpp doesn't define this but it should
- */
-#if defined(SVR4) && !defined(__svr4__)
-#  define __svr4__
-#endif /* SVR4 */
