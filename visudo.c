@@ -242,11 +242,10 @@ main(argc, argv)
 			sudoers, Argv[0]);
 		Exit(0);
 	    }
-#ifdef HAVE_FLEX
-	    yyrestart(sudoers_tmp_fp);
-#else
+#ifdef YY_NEW_FILE
+	    YY_NEW_FILE
+#endif /* YY_NEW_FILE */
 	    yyin = sudoers_tmp_fp;
-#endif /* HAVE_FLEX */
 	    yyout = stdout;
 
 	    /* parse the file */
