@@ -127,7 +127,7 @@ int main(argc, argv)
      * Setup signal handlers
      */
 #ifdef POSIX_SIGNALS
-    (void) bzero((char *)(&action), sizeof(action));
+    (void) memset((VOID *)&action, 0, sizeof(action));
     action.sa_handler = Exit;
     action.sa_flags = SA_RESETHAND;
     (void) sigaction(SIGILL, &action, NULL);

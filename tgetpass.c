@@ -109,7 +109,7 @@ char * tgetpass(prompt, timeout)
      * mask out SIGINT, should probably just catch it.
      */
 #ifdef POSIX_SIGNALS
-    (void) bzero((char *)(&mask), sizeof(mask));
+    (void) memset((VOID *)&mask, 0, sizeof(mask));
     (void) sigaddset(&mask, SIGINT);
     (void) sigprocmask(SIG_BLOCK, &mask, &oldmask);
 #else
