@@ -108,14 +108,16 @@ void check_user()
     oldmask = umask(077);	/* make sure the timestamp files are private */
 
     rtn = check_timestamp();
-    if (rtn && uid)		/* if timestamp is not current... */
+    if (rtn && uid) {		/* if timestamp is not current... */
+	if (rtn == 2)
+	    reminder();		/* do the reminder if ticket file is new */
 	check_passwd();
+    }
 
     update_timestamp();
     (void) umask(oldmask);	/* want a real umask to exec() the command */
 
 }
-
 
 
 
@@ -162,9 +164,7 @@ static int check_timestamp()
      */
     if (timedir_is_good) {
 	if (stat(timestampfile, &statbuf)) {	/* does the file exist?    */
-	    if (uid)
-		reminder();	/* if not, do the reminder */
-	    timestamp_is_old = 1;	/* and return (1)          */
+	    timestamp_is_old = 2;	/* return (2)          */
 	} else {		/* otherwise, check the time */
 	    now = time((time_t *) NULL);
 	    if (now - statbuf.st_mtime < 60 * TIMEOUT)
@@ -177,13 +177,12 @@ static int check_timestamp()
      * there was a problem stat()ing a directory
      */
     else {
-	timestamp_is_old = 1;	/* user has to enter password */
+	timestamp_is_old = 2;	/* user has to enter password + reminder */
 	if (mkdir(_PATH_SUDO_TIMEDIR, 0700)) {	/* make the TIMEDIR directory */
 	    perror("check_timestamp: mkdir");
 	    timedir_is_good = 0;
 	} else {
 	    timedir_is_good = 1;/* _PATH_SUDO_TIMEDIR now exists         */
-	    reminder();
 	}
     }
 
@@ -210,11 +209,36 @@ static void update_timestamp()
     be_root();
 
     if (timedir_is_good) {
-	unlink(timestampfile_p);
+	(void) unlink(timestampfile_p);
 	if ((fd = open(timestampfile_p, O_WRONLY | O_CREAT | O_TRUNC, 0600)) < 0)
 	    perror("update_timestamp: open");
 	close(fd);
     }
+
+    /* relinquish root */
+    be_user();
+}
+
+
+
+/********************************************************************
+ *
+ *  remove_timestamp()
+ *
+ *  This function removes the timestamp ticket file
+ */
+
+void remove_timestamp()
+{
+    char timestampfile[MAXPATHLEN + 1];
+
+    (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR, user);
+
+    /* become root */
+    be_root();
+
+    /* remove the ticket file */
+    (void) unlink(timestampfile);
 
     /* relinquish root */
     be_user();
