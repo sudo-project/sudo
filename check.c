@@ -66,23 +66,10 @@ static char rcsid[] = "$Id$";
 #include "sudo.h"
 #include <options.h>
 #include "insults.h"
-#ifdef SHADOW_TYPE
-#  if (SHADOW_TYPE == SPW_SVR4)
-#    include <shadow.h>
-#  endif /* SVR4 */
-#  if (SHADOW_TYPE == SPW_SECUREWARE)
-#    include <sys/security.h>
-#    include <prot.h>
-#  endif /* SECUREWARE */
-#  if (SHADOW_TYPE == SPW_ULTRIX4)
-#    include <auth.h>
-#  endif /* ULTRIX4 */
-#  if (SHADOW_TYPE == SPW_SUNOS4)
-#    include <sys/label.h>
-#    include <sys/audit.h>
-#    include <pwdadj.h>
-#  endif /* SUNOS4 */
-#endif /* SHADOW_TYPE */
+#if defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
+#  include <sys/security.h>
+#  include <prot.h>
+#endif /* SHADOW_TYPE == SPW_SECUREWARE */
 #ifdef HAVE_KERB4
 #  include <krb.h>
 #endif /* HAVE_KERB4 */
@@ -113,7 +100,7 @@ static void  check_passwd		__P((void));
 static int   touch			__P((char *));
 static void  update_timestamp		__P((void));
 static void  reminder			__P((void));
-static int   sudo_krb_validate_user	__P((char *, char *));
+static int   sudo_krb_validate_user	__P((struct passwd *, char *));
 #if defined(__alpha) && defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
 static char *osf_C2_crypt		__P((char *, char *));
 #endif /* __alpha && (SHADOW_TYPE == SPW_SECUREWARE) */
@@ -155,7 +142,7 @@ void check_user()
     oldmask = umask(077);	/* make sure the timestamp files are private */
 
     rtn = check_timestamp();
-    if (rtn && uid) {		/* if timestamp is not current... */
+    if (rtn && sudo_pw_ent->pw_uid) {	/* if timestamp is not current... */
 	if (rtn == 2)
 	    reminder();		/* do the reminder if ticket file is new */
 	check_passwd();
@@ -188,7 +175,7 @@ int user_is_exempt()
 	return(TRUE);
 
     for (gr_mem = grp->gr_mem; *gr_mem; gr_mem++) {
-	if (strcmp(user, *gr_mem) == 0)
+	if (strcmp(sudo_pw_ent->pw_name, *gr_mem) == 0)
 	    return(TRUE);
     }
 
@@ -221,9 +208,11 @@ static int check_timestamp()
     else
 	p = tty;
 
-    (void) sprintf(timestampfile, "%s/%s.%s", _PATH_SUDO_TIMEDIR, user, p);
+    (void) sprintf(timestampfile, "%s/%s.%s", _PATH_SUDO_TIMEDIR,
+		   sudo_pw_ent->pw_name, p);
 #else
-    (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR, user);
+    (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR,
+		   sudo_pw_ent->pw_name);
 #endif /* USE_TTY_TICKETS */
 
     timedir_is_good = 1;	/* now there's an assumption for ya... */
@@ -378,9 +367,11 @@ void remove_timestamp()
     else
 	p = tty;
 
-    (void) sprintf(timestampfile, "%s/%s.%s", _PATH_SUDO_TIMEDIR, user, p);
+    (void) sprintf(timestampfile, "%s/%s.%s", _PATH_SUDO_TIMEDIR,
+		   sudo_pw_ent->pw_name, p);
 #else
-    (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR, user);
+    (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR,
+		   sudo_pw_ent->pw_name);
 #endif /* USE_TTY_TICKETS */
 
     /* become root */
@@ -451,107 +442,30 @@ static void check_passwd()
 #else /* !HAVE_SECURID */
 static void check_passwd()
 {
+    char *pass;			/* this is what gets entered    */
+    register int counter = TRIES_FOR_PASSWORD;
 #ifdef HAVE_AFS
     int code;
     long password_expires = -1;
     char *reason;
 #endif /* HAVE_AFS */
-#ifdef SHADOW_TYPE
-#  if (SHADOW_TYPE == SPW_SVR4)
-    struct spwd *spw_ent;
-#  endif /* SVR4 */
-#  if (SHADOW_TYPE == SPW_HPUX9)
-    struct s_passwd *spw_ent;
-#  endif /* HPUX9 */
-#  if (SHADOW_TYPE == SPW_SUNOS4)
-    struct passwd_adjunct *spw_ent;
-#  endif /* SUNOS4 */
-#  if (SHADOW_TYPE == SPW_ULTRIX4)
-    AUTHORIZATION *spw_ent;
-#  endif /* ULTRIX4 */
-#  if (SHADOW_TYPE == SPW_SECUREWARE)
+#if defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
     char salt[2];		/* Need the salt to perform the encryption */
     register int i;
-    struct pr_passwd *spw_ent;
-#  endif /* SECUREWARE */
-#endif /* SHADOW_TYPE */
-#ifdef HAVE_SKEY
-    struct passwd *pw_ent;
-#endif /* HAVE_SKEY */
-    char *encrypted=epasswd;	/* this comes from /etc/passwd  */
+#endif /* SHADOW_TYPE == SECUREWARE */
 #if defined(HAVE_KERB4) && defined(USE_GETPASS)
     char kpass[_PASSWD_LEN];
 #endif /* HAVE_KERB4 && USE_GETPASS */
-    char *pass;			/* this is what gets entered    */
-    register int counter = TRIES_FOR_PASSWORD;
-
-#ifdef SHADOW_TYPE
-#  if (SHADOW_TYPE == SPW_HPUX9)
-    /*
-     * grab encrypted password from shadow pw file
-     * or just use the regular one...
-     */
-    set_perms(PERM_ROOT);
-    spw_ent = getspwuid(uid);
-    set_perms(PERM_USER);
-    if (spw_ent && spw_ent -> pw_passwd)
-	encrypted = spw_ent -> pw_passwd;
-#  endif /* HPUX9 */
-#  if (SHADOW_TYPE == SPW_SECUREWARE)
-    /*
-     * grab encrypted password from protected passwd file
-     * or just use the regular one...
-     */
-    set_perms(PERM_ROOT);
-    spw_ent = getprpwuid(uid);
-    set_perms(PERM_USER);
-    if (spw_ent)
-	encrypted = spw_ent -> ufld.fd_encrypt;
-#  endif /* SECUREWARE */
-#  if (SHADOW_TYPE == SPW_ULTRIX4)
-    /*
-     * grab encrypted password from /etc/auth
-     * or just use the regular one...
-     */
-    set_perms(PERM_ROOT);
-    spw_ent = getauthuid(uid);
-    set_perms(PERM_USER);
-    if (spw_ent && spw_ent -> a_password)
-	encrypted = spw_ent -> a_password;
-#  endif /* ULTRIX4 */
-#  if (SHADOW_TYPE == SPW_SVR4)
-    /*
-     * grab encrypted password from protected passwd file
-     * or just use the regular one...
-     */
-    set_perms(PERM_ROOT);
-    spw_ent = getspnam(user);
-    set_perms(PERM_USER);
-    if (spw_ent && spw_ent -> sp_pwdp)
-	encrypted = spw_ent -> sp_pwdp;
-#  endif /* SVR4 */
-#  if (SHADOW_TYPE == SPW_SUNOS4)
-    /*
-     * SunOS with C2 security
-     */
-    set_perms(PERM_ROOT);
-    spw_ent = getpwanam(user);
-    set_perms(PERM_USER);
-    if (spw_ent && spw_ent -> pwa_passwd)
-	encrypted = spw_ent -> pwa_passwd;
-#  endif /* SUNOS4 */
-#endif /* SHADOW_TYPE */
 
     /*
      * you get TRIES_FOR_PASSWORD times to guess your password
      */
-#ifdef HAVE_SKEY
-    pw_ent = getpwuid(uid);
-#endif /* HAVE_SKEY */
     while (counter > 0) {
+
+    /* get a password from the user */
 #ifdef HAVE_SKEY
 	set_perms(PERM_ROOT);
-	pass = skey_getpass(prompt, pw_ent, TRUE);
+	pass = skey_getpass(prompt, sudo_pw_ent, TRUE);
 	set_perms(PERM_USER);
 #else
 #  ifdef USE_GETPASS
@@ -565,48 +479,60 @@ static void check_passwd()
 	pass = tgetpass(prompt, PASSWORD_TIMEOUT * 60);
 #  endif /* USE_GETPASS */
 #endif /* HAVE_SKEY */
-	if (!pass || *pass == '\0')
+
+	/* Exit loop on nil password */
+	if (!pass || *pass == '\0') {
 	    if (counter == TRIES_FOR_PASSWORD)
 		exit(0);
 	    else
 		break;
+	}
+
+	/*
+	 * If we use shadow passwords with a different crypt(3)
+	 * check that here, else use standard crypt(3).
+	 */
 #ifdef SHADOW_TYPE
 #  if (SHADOW_TYPE == SPW_ULTRIX4)
-	if (spw_ent && !strcmp(encrypted, (char *) crypt16(pass, encrypted)))
+	if (!strcmp(sudo_pw_ent->pw_passwd,
+	    (char *) crypt16(pass, sudo_pw_ent->pw_passwd)))
 	    return;		/* if the passwd is correct return() */
 #  endif /* ULTRIX4 */
 #  if (SHADOW_TYPE == SPW_SECUREWARE) && !defined(__alpha)
-	strncpy(salt, spw_ent->ufld.fd_encrypt, 2);
+	strncpy(salt, sudo_pw_ent->pw_passwd, 2);
 	i = AUTH_SALT_SIZE + AUTH_CIPHERTEXT_SEG_CHARS;
-	if (strncmp(encrypted, crypt(pass, salt), i) == 0)
+	if (strncmp(sudo_pw_ent->pw_passwd, crypt(pass, salt), i) == 0)
 	    return;           /* if the passwd is correct return() */
 #  endif /* SECUREWARE && !__alpha */
 #  if (SHADOW_TYPE == SPW_SECUREWARE) && defined(__alpha)
-	if (spw_ent && !strcmp(encrypted, osf_C2_crypt(pass,encrypted)))
+	if (!strcmp(sudo_pw_ent->pw_passwd,
+	    osf_C2_crypt(pass,sudo_pw_ent->pw_passwd)))
 	    return;             /* if the passwd is correct return() */
 #  endif /* SECUREWARE && __alpha */
 #endif /* SHADOW_TYPE */
 
 #ifdef HAVE_SKEY
 	set_perms(PERM_ROOT);
-	if (!strcmp(encrypted, skey_crypt(pass, encrypted, pw_ent, TRUE))) {
+	if (!strcmp(sudo_pw_ent->pw_passwd,
+	    skey_crypt(pass, sudo_pw_ent->pw_passwd, sudo_pw_ent, TRUE))) {
 	    set_perms(PERM_USER);
 	    return;             /* if the passwd is correct return() */
 	}
 	set_perms(PERM_USER);
 #else
-	if (!strcmp(encrypted, (char *) crypt(pass, encrypted)))
+	if (!strcmp(sudo_pw_ent->pw_passwd,
+	    (char *) crypt(pass, sudo_pw_ent->pw_passwd)))
 	    return;		/* if the passwd is correct return() */
 #endif /* HAVE_SKEY */
 
 #ifdef HAVE_KERB4
-	if (uid && sudo_krb_validate_user(user, pass) == 0)
+	if (sudo_pw_ent->pw_uid && sudo_krb_validate_user(sudo_pw_ent, pass) == 0)
 	    return;
 #endif /* HAVE_KERB4 */
 
 #ifdef HAVE_AFS
 	code = ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION+KA_USERAUTH_DOSETPAG,
-                                          user,
+                                          sudo_pw_ent->pw_name,
                                           (char *) 0, 
                                           (char *) 0,
                                           pass,
@@ -619,7 +545,7 @@ static void check_passwd()
 #endif /* HAVE_AFS */
 #ifdef HAVE_DCE
 	/* XXX - this seems wrong... */
-	if (dce_pwent(user, pass))
+	if (dce_pwent(sudo_pw_ent->pw_name, pass))
 	    return;
 #endif /* HAVE_DCE */
 
@@ -704,8 +630,9 @@ static char *osf_C2_crypt(pass, encrypt_salt)
  *
  *  Validate a user via kerberos.
  */
-static int sudo_krb_validate_user(user, pass)
-    char *user, *pass;
+static int sudo_krb_validate_user(pw_ent, pass)
+    struct passwd *pw_ent;
+    char *pass;
 {
     char realm[REALM_SZ];
     char tkfile[MAX_UID_T_LEN + sizeof(_PATH_SUDO_TIMEDIR)];
@@ -719,7 +646,8 @@ static int sudo_krb_validate_user(user, pass)
      * Set the ticket file to be in sudo sudo timedir so we don't
      * wipe out other kerberos tickets.
      */
-    (void) sprintf(tkfile, "%s/tkt%ld", _PATH_SUDO_TIMEDIR, (long) uid);
+    (void) sprintf(tkfile, "%s/tkt%ld", _PATH_SUDO_TIMEDIR,
+		   (long) pw_ent->pw_uid);
     (void) krb_set_tkt_string(tkfile);
 
     /*
@@ -727,7 +655,7 @@ static int sudo_krb_validate_user(user, pass)
      * the ruid and euid to be the same here so we setuid to root.
      */
     set_perms(PERM_ROOT);
-    k_errno = krb_get_pw_in_tkt(user, "", realm, "krbtgt", realm,
+    k_errno = krb_get_pw_in_tkt(pw_ent->pw_name, "", realm, "krbtgt", realm,
 	DEFAULT_TKT_LIFE, pass);
 
     /*
