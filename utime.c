@@ -41,7 +41,7 @@ static char rcsid[] = "$Id$";
 
 #include "pathnames.h"
 #include "compat.h"
-#include "utime.h"
+#include "emul/utime.h"
 
 
 /******************************************************************

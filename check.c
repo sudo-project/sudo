@@ -100,7 +100,7 @@ static char rcsid[] = "$Id$";
 #    include <utime.h>
 #  endif /* HAVE_UTIME_H */
 #else
-#  include "utime.h"
+#  include "emul/utime.h"
 #endif /* HAVE_UTIME */
 
 
