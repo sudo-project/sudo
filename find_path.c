@@ -56,7 +56,9 @@ static char rcsid[] = "$Id$";
 #include "sudo.h"
 
 #ifndef STDC_HEADERS
+#ifndef __GNUC__		/* gcc has its own malloc */
 extern char *malloc	__P((size_t));
+#endif /* __GNUC__ */
 extern char *getenv	__P((const char *));
 extern char *strcpy	__P((char *, const char *));
 extern int fprintf	__P((FILE *, const char *, ...));

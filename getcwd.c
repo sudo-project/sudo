@@ -55,10 +55,12 @@ static char rcsid[] = "$Id$";
 #include <sys/param.h>
 
 #ifndef STDC_HEADERS
+#ifndef __GNUC__		/* gcc has its own malloc */
+extern char *malloc	__P((size_t));
+#endif /* __GNUC__ */
 extern char *strcpy	__P((char *, const char *));
 extern int   strlen	__P((const char *));
 extern char *getwd	__P((char *));
-extern char *malloc	__P((size_t));
 extern FILE *popen	__P((const char *, const char *));
 extern int   pclose	__P((FILE *));
 extern char *fgets	__P((char *, int, FILE *));
