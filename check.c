@@ -104,9 +104,6 @@ static int   touch			__P((char *));
 static void  update_timestamp		__P((void));
 static void  reminder			__P((void));
 static int   sudo_krb_validate_user	__P((struct passwd *, char *));
-#if defined(__alpha) && defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
-static char *osf_C2_crypt		__P((char *, char *));
-#endif /* __alpha && (SHADOW_TYPE == SPW_SECUREWARE) */
 int   user_is_exempt			__P((void));
 
 /*
@@ -117,13 +114,10 @@ static char  timestampfile[MAXPATHLEN + 1];
 #ifdef HAVE_SECURID
 union config_record configure;
 #endif /* HAVE_SECURID */
+#if (SHADOW_TYPE == SPW_SECUREWARE) && defined(__alpha)
+extern uchar_t crypt_type;
+#endif /* SPW_SECUREWARE && __alpha */
 
-/*
- * Defines for Digital Un*x 3.x enhanced security
- */
-#define C2_MAXPASS	100
-#define C2_MAXENPASS	200
-#define C2_SEGSIZE	8
 
 
 /********************************************************************
@@ -508,9 +502,20 @@ static void check_passwd()
 	    return;           /* if the passwd is correct return() */
 #  endif /* SECUREWARE && !__alpha */
 #  if (SHADOW_TYPE == SPW_SECUREWARE) && defined(__alpha)
-	if (!strcmp(sudo_pw_ent->pw_passwd,
-	    osf_C2_crypt(pass,sudo_pw_ent->pw_passwd)))
-	    return;             /* if the passwd is correct return() */
+	if (crypt_type == AUTH_CRYPT_BIGCRYPT) {
+	    if (!strcmp(sudo_pw_ent->pw_passwd,
+		bigcrypt(pass, sudo_pw_ent->pw_passwd)))
+		return;             /* if the passwd is correct return() */
+	} else if (crypt_type == AUTH_CRYPT_CRYPT16) {
+	    if (!strcmp(sudo_pw_ent->pw_passwd,
+		crypt16(pass, sudo_pw_ent->pw_passwd)))
+		return;             /* if the passwd is correct return() */
+	} else {
+	    (void) fprintf(stderr,
+                    "%s: Sorry, I don't know how to deal with crypt type %d.\n",
+                    Argv[0]);
+	    exit(1);
+	}
 #  endif /* SECUREWARE && __alpha */
 #endif /* SHADOW_TYPE */
 
@@ -571,59 +576,6 @@ static void check_passwd()
     exit(1);
 }
 #endif /* HAVE_SECURID */
-
-
-#if defined(__alpha) && defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
-/********************************************************************
- * osf_C2_crypt()  - returns OSF/1 3.0 enhanced security encrypted
- *               password.  crypt() produces, given an eight
- *               character segment, an encrypted 13 character
- *               with the first two the salt and the remaining
- *               11 characters the encrypted password.  OSF/1 uses
- *               crypt() on each 8 character segment appending each
- *               resulting encrypted segment except the first two
- *               character (salt) after the first segement.  See
- *               OSF/1 Security documentation section 16.4.
- * Programmer: Richard Jackson, George Mason University
- */
-static char *osf_C2_crypt(pass, encrypt_salt)
-    char *pass;
-    char *encrypt_salt;
-{
-    static char     enpass[C2_MAXENPASS];
-    char   segpass[C2_MAXPASS];	    /* segment of original password */
-    char   segenpass[C2_MAXENPASS]; /* segment of encrypted password */
-    char   salt[3];		    /* salt for crypt() */
-    int    segnum;		    /* num of 8 char pw segments to process */
-    int    len;			    /* length of passwd */
-    int    i;
-
-    /*
-     * calculate the num of pw segs to process
-     */
-    len = strlen(pass);
-    if ((len % C2_SEGSIZE) > 0)
-	segnum = (len / C2_SEGSIZE) + 1;	/* ie, 9 chars is 2 segments */
-    else
-	segnum = (len / C2_SEGSIZE);		/* ie, 8 chars is 1 segment */
-
-    strncpy(salt, encrypt_salt, 2);		/* starting salt */
-    for (i = 0; i < segnum; i++) {
-	strncpy(segpass, (pass + (i * C2_SEGSIZE)), C2_SEGSIZE);
-
-	strncpy(segenpass, (char *) crypt(segpass, salt), C2_MAXENPASS);
-
-	strncpy(salt, (segenpass + 2), 2);  /* next salt is from previous seg */
-
-	if (i == 0)
-	    strncpy(enpass, segenpass, C2_MAXENPASS);
-	else
-	    strncat(enpass, (segenpass + 2), C2_MAXENPASS);
-    }
-
-    return(enpass);
-}
-#endif /* __alpha && (SHADOW_TYPE == SPW_SECUREWARE) */
 
 
 #ifdef HAVE_KERB4
