@@ -183,7 +183,7 @@ TAGS: $(SRCS)
 	etags $(SRCS)
 
 clean:
-	-rm -f lex.yy.o y.tab.* *.o $(PROGS) testsudoers core
+	-rm -f y.tab.[ch] *.o $(PROGS) testsudoers core
 
 mostlyclean: clean
 
