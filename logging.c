@@ -94,6 +94,7 @@ void log_error(code)
     register char *p;
     register int count;
     time_t now;
+    char *tty;
 #if (LOGGING & SLOG_FILE)
     register FILE *fp;
 #endif /* LOGGING & SLOG_FILE */
@@ -101,6 +102,14 @@ void log_error(code)
     register int pri;		/* syslog priority */
     char *tmp, save;
 #endif /* LOGGING & SLOG_SYSLOG */
+
+    /*
+     * Get our ttyname or set to "none"
+     */
+    if (isatty(0))
+	tty = ttyname(0);
+    else
+	tty = "none";
 
     /*
      * we will skip this stuff when using syslog(3) but it is
@@ -117,52 +126,56 @@ void log_error(code)
     switch (code) {
 
 	case ALL_SYSTEMS_GO:
-	    (void) sprintf(p, "PWD=%s ; COMMAND=", cwd);
+	    (void) sprintf(p, "TTY=%s ; PWD=%s ; COMMAND=", tty, cwd);
 #if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_OK;
 #endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case VALIDATE_NO_USER:
-	    (void) sprintf(p, "user NOT in sudoers ; PWD=%s ; COMMAND=", cwd);
+	    (void) sprintf(p,
+		"user NOT in sudoers ; TTY=%s ; PWD=%s ; COMMAND=", tty, cwd);
 #if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
 #endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case VALIDATE_NOT_OK:
-	    (void) sprintf(p, "command not allowed ; PWD=%s ; COMMAND=", cwd);
+	    (void) sprintf(p,
+		"command not allowed ; TTY=%s ; PWD=%s ; COMMAND=", tty, cwd);
 #if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
 #endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case VALIDATE_ERROR:
-	    (void) sprintf(p, "error in %s, line %d ; PWD=%s.  ",
-		_PATH_SUDO_SUDOERS, errorlineno, cwd);
+	    (void) sprintf(p, "error in %s, line %d ; TTY=%s ; PWD=%s.  ",
+		_PATH_SUDO_SUDOERS, errorlineno, tty, cwd);
 #if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
 #endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case GLOBAL_NO_PW_ENT:
-	    (void) sprintf(p, "There is no /etc/passwd entry for uid %d.  ",
-		uid);
+	    (void) sprintf(p,
+		"There is no passwd entry for uid %d (TTY=%s).  ", uid, tty);
 #if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
 #endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case PASSWORD_NOT_CORRECT:
-	    (void) sprintf(p, "password incorrect ; PWD=%s ; COMMAND=", cwd);
+	    (void) sprintf(p,
+		"password incorrect ; TTY=%s ; PWD=%s ; COMMAND=", tty, cwd);
 #if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
 #endif /* LOGGING & SLOG_SYSLOG */
 	    break;
 
 	case PASSWORDS_NOT_CORRECT:
-	    (void) sprintf(p, "%d incorrect passwords ; PWD=%s ; COMMAND=",
-		    TRIES_FOR_PASSWORD, cwd);
+	    (void) sprintf(p,
+		"%d incorrect passwords ; TTY=%s ; PWD=%s ; COMMAND=",
+		    TRIES_FOR_PASSWORD, tty, cwd);
 #if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
 #endif /* LOGGING & SLOG_SYSLOG */
@@ -234,8 +247,9 @@ void log_error(code)
 	    break;
 
 	case SPOOF_ATTEMPT:
-	    (void) sprintf(p, "probable spoofing attempt; PWD=%s ; COMMAND=",
-		cwd);
+	    (void) sprintf(p,
+		"probable spoofing attempt; TTY=%s ; PWD=%s ; COMMAND=",
+		tty, cwd);
 #if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_NO;
 #endif /* LOGGING & SLOG_SYSLOG */
