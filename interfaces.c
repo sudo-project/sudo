@@ -19,7 +19,9 @@
  *
  *******************************************************************
  *
- *  This module contains XXX
+ *  This module contains load_interfaces() a function that
+ *  fills the interfaces global with a list of active ip
+ *  addresses and their associated netmasks.
  *
  *  Todd C. Miller  Mon May  1 20:48:43 MDT 1995
  */
@@ -108,8 +110,6 @@ void load_interfaces()
     char buf[BUFSIZ];
     int sock, i, j;
 #ifdef _ISC
-    struct ifreq *ifr;
-    struct ifconf *ifc;
     struct strioctl strioctl;
 #endif /* _ISC */
 
@@ -128,17 +128,13 @@ void load_interfaces()
     ifconf.ifc_len = sizeof(buf);
     ifconf.ifc_buf = buf;
 #ifdef _ISC
-    ifc = (struct ifconf *)buf;
-    ifc->ifc_len = sizeof (buf) - sizeof(struct ifconf);
-    STRSET(SIOCGIFCONF, (caddr_t)ifc, sizeof(buf));
-    if (ioctl(sock, I_STR, &strioctl) < 0) {
+    STRSET(SIOCGIFCONF, (caddr_t) &ifconf, sizeof(ifconf));
+    if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0) {
 	/* networking probably not installed in kernel */
 	return;
     }
-    ifconf = *ifc;
-
 #else
-    if (ioctl(sock, SIOCGIFCONF, (char *)(&ifconf)) < 0) {
+    if (ioctl(sock, SIOCGIFCONF, (caddr_t) &ifconf) < 0) {
 	/* networking probably not installed in kernel */
 	return;
     }
@@ -163,31 +159,17 @@ void load_interfaces()
     /*
      * for each interface, get the ip address and netmask
      */
-#ifdef _ISC
-    ifr = (struct ifreq *)(ifc->ifc_req);
-    for (i = 0, j = 0; i < num_interfaces; i++, ifr++) {
-	(void) strncpy(ifreq.ifr_name, ifr->ifr_name,
-	    sizeof(ifr->ifr_name));
-
-	/* get the ip address */
-	STRSET(SIOCGIFADDR, (caddr_t)ifr, sizeof(ifreq));
-	if (ioctl(sock, I_STR, &strioctl) < 0) {
-	    /* non-fatal error if interface is down or not supported */
-	    if (errno == EADDRNOTAVAIL || errno == ENXIO || errno == EAFNOSUPPORT)
-		continue;
-
-	    (void) fprintf(stderr, "%s: Error, ioctl: SIOCGIFADDR ", Argv[0]);
-	    perror("");
-	    exit(1);
-	}
-	sin = (struct sockaddr_in *)&ifr->ifr_addr;
-#else
     for (i = 0, j = 0; i < num_interfaces; i++) {
 	(void) strncpy(ifreq.ifr_name, ifconf.ifc_req[i].ifr_name,
 	    sizeof(ifreq.ifr_name));
 
 	/* get the ip address */
-	if (ioctl(sock, SIOCGIFADDR, (caddr_t)(&ifreq))) {
+#ifdef _ISC
+	STRSET(SIOCGIFADDR, (caddr_t) &ifreq, sizeof(ifreq));
+	if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0) {
+#else
+	if (ioctl(sock, SIOCGIFADDR, (caddr_t) &ifreq)) {
+#endif /* _ISC */
 	    /* non-fatal error if interface is down or not supported */
 	    if (errno == EADDRNOTAVAIL || errno == ENXIO || errno == EAFNOSUPPORT)
 		continue;
@@ -196,8 +178,7 @@ void load_interfaces()
 	    perror("");
 	    exit(1);
 	}
-	sin = (struct sockaddr_in *)&ifreq.ifr_addr;
-#endif /* _ISC */
+	sin = (struct sockaddr_in *) &ifreq.ifr_addr;
 
 	/* make sure we don't have a dupe (usually consecutive) */
 	if (j > 0 && memcmp(&interfaces[j-1].addr, &(sin->sin_addr),
@@ -212,7 +193,12 @@ void load_interfaces()
 #ifdef SIOCGIFNETMASK
 	(void) strncpy(ifreq.ifr_name, ifconf.ifc_req[i].ifr_name,
 	    sizeof(ifreq.ifr_name));
-	if (ioctl(sock, SIOCGIFNETMASK, (char *)(&ifreq)) == 0) {
+#ifdef _ISC
+	STRSET(SIOCGIFNETMASK, (caddr_t) &ifreq, sizeof(ifreq));
+	if (ioctl(sock, I_STR, (caddr_t) &strioctl) == 0) {
+#else
+	if (ioctl(sock, SIOCGIFNETMASK, (caddr_t) &ifreq) == 0) {
+#endif /* _ISC */
 	    /* store the netmask */
 	    (void) memcpy(&interfaces[j].netmask, &(sin->sin_addr),
 		sizeof(struct in_addr));
