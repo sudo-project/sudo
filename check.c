@@ -102,7 +102,7 @@ check_user()
 	prompt = expand_prompt(user_prompt ? user_prompt : def_str(I_PASSPROMPT),
 	    user_name, user_shost);
 
-	verify_user(prompt);
+	verify_user(auth_pw, prompt);
     }
     if (status != TS_ERROR)
 	update_timestamp(timestampdir, timestampfile);

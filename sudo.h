@@ -196,7 +196,7 @@ int sudo_setenv		__P((char *, char *));
 char *tgetpass		__P((const char *, int, int));
 int find_path		__P((char *, char **));
 void check_user		__P((void));
-void verify_user	__P((char *));
+void verify_user	__P((struct passwd *, char *));
 int sudoers_lookup	__P((int));
 void set_perms		__P((int, int));
 void remove_timestamp	__P((int));
@@ -222,6 +222,7 @@ YY_DECL;
 /* Only provide extern declarations outside of sudo.c. */
 #ifndef _SUDO_SUDO_C
 extern struct sudo_user sudo_user;
+extern struct passwd *auth_pw;
 
 extern int Argc;
 extern char **Argv;
