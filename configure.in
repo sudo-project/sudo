@@ -569,7 +569,7 @@ if test "$with_skey" = "yes" ; then
     elif test -f /usr/local/include/skey.h; then
 	CPPFLAGS="${CPPFLAGS} -I/usr/local/include"
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
-    elif test "$CSOPS" = "yes" -a -f /tools/cs/skey/include/skey.h -a -f /tools/cs/skey/lib/libskey.a; then
+    elif test "$with_csops" = "yes" -a -f /tools/cs/skey/include/skey.h -a -f /tools/cs/skey/lib/libskey.a; then
 	CPPFLAGS="${CPPFLAGS} -I/tools/cs/skey/include"
 	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/tools/cs/skey/lib"
     else
