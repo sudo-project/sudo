@@ -48,7 +48,9 @@ static const char rcsid[] = "$Sudo$";
  * few programs actually do that.
  */
 
+#ifndef errno
 extern int errno;
+#endif
 
 #define DUMMY(fn, args, atypes)	\
 int				\
