@@ -315,6 +315,17 @@ AC_ARG_WITH(DCE, [  --with-DCE              enable DCE support],
 		;;
 esac])
 
+AC_ARG_WITH(logincap, [  --with-logincap         enable login class support],
+[case $with_logincap in
+    yes)	AC_DEFINE(HAVE_LOGINCAP)
+		AC_MSG_CHECKING(whether to try BSD login capabilities database)
+		AC_MSG_RESULT(yes)
+		;;
+    no)		;;
+    *)		AC_MSG_ERROR(["--with-logincap does not take an argument."])
+		;;
+esac])
+
 AC_MSG_CHECKING(whether to lecture users the first time they run sudo)
 AC_ARG_WITH(lecture, [  --without-lecture       don't print lecture for first-time sudoer],
 [case $with_lecture in  
@@ -1273,6 +1284,11 @@ case "$host" in
 		    CC="$ac_cv_prog_CC"
 		fi
 		;;
+    *-*-freebsd*)
+		if test "$with_skey" = "yes"; then
+		     SUDO_LIBS="${SUDO_LIBS} -lmd"
+		fi
+		;;
     *-*-*bsd*)
 		if test "$CHECKSHADOW" = "true"; then
 		    CHECKSHADOW="false"
@@ -1519,6 +1535,18 @@ dnl
 if test "$with_DCE" = "yes"; then
     DCE_OBJS="${DCE_OBJS} dce_pwent.o"
     SUDO_LIBS="${SUDO_LIBS} -ldce"
+fi
+
+dnl
+dnl extra login capabilities libs and includes
+dnl
+if test "$with_logincap" = "yes"; then
+    SUDO_LIBS="${SUDO_LIBS} -lutil"
+    if test -f /usr/include/login_cap.h -a -f /usr/include/sys/types.h -a -f /usr/lib/libutil.a; then
+	:
+    else
+	echo 'Unable to locate libutil.a and/or login_cap.h, you will have to edit the Makefile and add -L/path/to/libutil to SUDO_LDFLAGS and/or -I/path/to/login_cap.h to CPPFLAGS'
+    fi
 fi
 
 dnl

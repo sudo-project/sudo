@@ -56,6 +56,7 @@ struct sudo_user {
     char *cmnd_safe;
     char *cmnd;
     char *cmnd_args;
+    char *class_name;
 };
 
 /*
@@ -129,6 +130,7 @@ struct sudo_user {
 #define user_host		(sudo_user.host)
 #define user_shost		(sudo_user.shost)
 #define safe_cmnd		(sudo_user.cmnd_safe)
+#define login_class		(sudo_user.class_name)
 
 /*
  * We used to use the system definition of PASS_MAX or _PASSWD_LEN,

@@ -194,6 +194,9 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"targetpw", T_FLAG,
 	"Prompt for the target user's password, not the users's"
     }, {
+	"use_loginclass", T_FLAG,
+	"Apply defaults in the target user's login class if there is one"
+    }, {
 	"loglinelen", T_INT|T_BOOL,
 	"Length at which to wrap log file lines (0 for no wrap): %d"
     }, {

@@ -76,6 +76,9 @@
 # endif /* __hpux */
 # include <prot.h>
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
+#ifdef HAVE_LOGINCAP
+# include <login_cap.h>
+#endif
 
 #include "sudo.h"
 #include "interfaces.h"
@@ -105,6 +108,7 @@ static void usage			__P((int));
 static void usage_excl			__P((int));
 static void check_sudoers		__P((void));
 static int init_vars			__P((int));
+static int set_loginclass		__P((struct passwd *));
 static void add_env			__P((int));
 static void clean_env			__P((char **, struct env_table *));
 static void initial_setup		__P((void));
@@ -594,6 +598,20 @@ parse_args()
 		NewArgc--;
 		NewArgv++;
 		break;
+#ifdef HAVE_LOGINCAP
+	    case 'c':
+		/* Must have an associated login class. */
+		if (NewArgv[1] == NULL)
+		    usage(1);
+
+		login_class = NewArgv[1];
+		def_flag(I_LOGINCLASS) = TRUE;
+
+		/* Shift Argv over and adjust Argc. */
+		NewArgc--;
+		NewArgv++;
+		break;
+#endif
 	    case 'b':
 		rval |= MODE_BACKGROUND;
 		break;
@@ -938,6 +956,15 @@ set_perms(perm, sudo_mode)
 					exit(1);
 				    }
 
+				    if (def_flag(I_LOGINCLASS)) {
+					/*
+					 * setusercontext() will set uid/gid/etc
+					 * for us so no need to do it below.
+					 */
+					if (set_loginclass(pw) > 0)
+					    break;
+				    }
+
 				    if (setgid(pw->pw_gid)) {
 					(void) fprintf(stderr,
 					    "%s: cannot set gid to %ld: %s\n",
@@ -1050,6 +1077,51 @@ initial_setup()
 #endif /* POSIX_SIGNALS */
 }
 
+#ifdef HAVE_LOGINCAP
+int
+set_loginclass(pw)
+    struct passwd *pw;
+{
+    login_cap_t *lc;
+
+    if (login_class && strcmp(login_class, "-") != 0) {
+	if (strcmp(*user_runas, "root") != 0) {
+	    (void) fprintf(stderr, "%s: only root can use -c %s\n",
+		Argv[0], login_class);
+	    exit(1);
+	}
+
+	lc = login_getclass(login_class);
+	if (!lc || !lc->lc_class || strcmp(lc->lc_class, login_class) != 0)
+	    log_error(NO_MAIL|MSG_ONLY, "unknown login class: %s", login_class);
+    } else if (!(lc = login_getpwclass(pw))) {
+	/*
+	 * This is not a fatal error if the user didn't specify the login
+	 * class themselves.  We do this because if login.conf gets
+	 * corrupted we want the admin to be able to use sudo to fix it.
+	 */
+	log_error(login_class ? NO_MAIL|MSG_ONLY : NO_MAIL|NO_EXIT|MSG_ONLY,
+	    "can't get class for user: %s", user_runas);
+	return(0);
+    }
+    
+    /* Set everything except the environment and umask.  */
+    if (setusercontext(lc, pw, pw->pw_uid,
+	LOGIN_SETUSER|LOGIN_SETGROUP|LOGIN_SETRESOURCES|LOGIN_SETPRIORITY) < 0)
+	log_error(NO_MAIL|USE_ERRNO|MSG_ONLY,
+	    "setusercontext() failed for login class %s", lc);
+
+    login_close(lc);
+    return(1);
+}
+#else
+int set_loginclass(pw)
+    struct passwd *pw;
+{
+    return(0);
+}
+#endif
+
 /*
  * Look up the fully qualified domain name and set user_host and user_shost.
  */
@@ -1137,6 +1209,10 @@ usage(exit_val)
     (void) fprintf(stderr,
 	"usage: %s -V | -h | -L | -l | -v | -k | -K | [-H] [-S] [-b]\n%*s",
 	Argv[0], (int) strlen(Argv[0]) + 8, " ");
+#ifdef HAVE_LOGINCAP
+    (void) fprintf(stderr, "[-p prompt] [-u username/#uid] [-c class] -s | <command>\n");
+#else
     (void) fprintf(stderr, "[-p prompt] [-u username/#uid] -s | <command>\n");
+#endif
     exit(exit_val);
 }
