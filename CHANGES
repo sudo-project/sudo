@@ -1746,5 +1746,17 @@ Sudo 1.6.8p1 released.
 
 552) Fixed error handling if the lexer runs out of memory.
 
-553) Optimize lexer slightly by removing use of unput() and remove
+553) Optimized lexer slightly by removing use of unput() and removing
      some ambiguity with the Default keyword.
+
+554) Wildcard matches on commands now use glob() and stat() so 
+     that relative paths work correctly in conjunction with wildcards.
+
+555) Rewritten parser that converts sudoers into a set of data structures.
+     This eliminates ordering issues and makes it possible to apply
+     sudoers Defaults entries before searching for the command.
+
+556) Visudo will now warn about aliases that are defined but not used.
+
+557) "sudo -l" now takes an optional username which lets root see other
+     users' privs.

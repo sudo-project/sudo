@@ -78,7 +78,7 @@ TODO list (most will be addressed in sudo 2.0)
     the actual user check.
 
 28) Add a flag similar to '-l' but that spits out sudo commands in
-    a format suitable for cut & paste (requires parser overhaul first).
+    a format suitable for cut & paste into sudoers.
 
 29) Someone wants a recursive version of the dir specifier.  Ie:
     SOME_MODIFIER:/usr/local/ to allow anything under /usr/local to be run.
@@ -119,29 +119,31 @@ TODO list (most will be addressed in sudo 2.0)
     line and that have a constant record length (sparse files) for
     easy seeking.
 
-43) Investigate using glob(3) instead of fnmatch(3) for path matching.  That
-    way we can stat each potential match like we normally would.  Patterns
-    ending in '/*' can be replaced with '/basename' as an optimization.
-
-44) Some way of using a new pty for the program run via sudo would prevent
+43) Some way of using a new pty for the program run via sudo would prevent
     access to the caller's /dev/tty (but probably makes job control tricky).
 
-45) Maybe have a database of checksums that commands are verified against.
+44) Maybe have a database of checksums that commands are verified against.
     Basically replace the st_ino/st_dev check with a checksum lookup.
 
-46) Look into testing writability of a file via sudoedit *before* doing
+45) Look into testing writability of a file via sudoedit *before* doing
     the edit; e.g., try opening with O_APPEND.
 
-47) Add Makefile.in bits to autogenerate Solaris and Irix packages
+46) Add Makefile.in bits to autogenerate Solaris and Irix packages
 
-48) Add support for Solaris 10 dtrace ala systrace support
+47) Add support for Solaris 10 dtrace ala systrace support
     or use /proc/$$/ctl w/ PCSENTRY (use PRSABORT flag to indicate failure).
 
-49) Add a session mode where sudo allocates a pty and logs everything
+48) Add a session mode where sudo allocates a pty and logs everything
     that occurs ala script(1).
 
-50) Use pam_open_session() and pam_close_session() (requires a persistent
+49) Use pam_open_session() and pam_close_session() (requires a persistent
     sudo process to call pam_close_session()).  Maybe add xauth support for
     the non-pam case?
 
-51) Should "trace" and TRACE/NOTRACE be disabled for non-systrace?
+50) Should "monitor" and MONITOR/NOMONITOR be disabled for non-systrace?
+
+51) Add substitution mechanism in sudoers to subst, e.g. editors for sudoedit
+
+52) Move prototypes to extern.h
+
+53) Get rid of VALIDATE_NOT_OK and just set/clear VALIDATE_OK
