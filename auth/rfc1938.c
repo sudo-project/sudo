@@ -1,6 +1,6 @@
 /*
  *  CU sudo version 1.6
- *  Copyright (c) 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ *  Copyright (c) 1994,1996,1998,1999 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,10 +18,6 @@
  *
  *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
  */
-
-#ifndef lint
-static const char rcsid[] = "$Sudo$";
-#endif /* lint */
 
 #include "config.h"
 
@@ -41,25 +37,40 @@ static const char rcsid[] = "$Sudo$";
 #include <sys/param.h>
 #include <sys/types.h>
 #include <pwd.h>
+
+#if defined(HAVE_SKEY)
+#include <skey.h>
+#define RFC1938			skey
+#define rfc1938challenge	skeychallenge
+#define rfc1938verify		skeyverify
+#elif defined(HAVE_OPIE)
 #include <opie.h>
+#define RFC1938			opie
+#define rfc1938challenge	opiechallenge
+#define rfc1938verify		opieverify
+#endif
 
 #include "sudo.h"
 #include "sudo_auth.h"
 
+#ifndef lint
+static const char rcsid[] = "$Sudo$";
+#endif /* lint */
+
 int
-opie_setup(pw, promptp, data)
+rfc1938_setup(pw, promptp, data)
     struct passwd *pw;
     char **promptp;
     void **data;
 {
-    char challenge[OPIE_CHALLENGE_MAX];
+    char challenge[256];
     static char *orig_prompt = NULL, *new_prompt = NULL;
     static int op_len, np_size;
-    static struct opie opie;
+    static struct RFC1938 rfc1938;
 
-    /* Stash a pointer to the opie struct if we have not initialized */
+    /* Stash a pointer to the rfc1938 struct if we have not initialized */
     if (!*data)
-	*data = &opie;
+	*data = &rfc1938;
 
     /* Save the original prompt */
     if (orig_prompt == NULL) {
@@ -71,11 +82,17 @@ opie_setup(pw, promptp, data)
 	    op_len--;
     }
 
-    /* Get the opie part of the prompt */
-    if (opiechallenge(&opie, user_name, challenge) != 0) {
+#ifdef HAVE_SKEY
+    /* Close old stream */
+    if (rfc1938.keyfile)
+	(void) fclose(rfc1938.keyfile);
+#endif
+
+    /* Get the rfc1938 part of the prompt */
+    if (rfc1938challenge(&rfc1938, pw->pw_name, challenge) != 0) {
 #ifdef OTP_ONLY
 	(void) fprintf(stderr,
-		       "%s: You do not exist in the s/key database.\n",
+		       "%s: You do not exist in the OTP database.\n",
 		       Argv[0]);
 	return(AUTH_FATAL);
 #else
@@ -100,14 +117,13 @@ opie_setup(pw, promptp, data)
 }
 
 int
-opie_verify(pw, pass, data)
+rfc1938_verify(pw, pass, data)
     struct passwd *pw;
     char *pass;
     void **data;
 {
-    struct opie *opiep = (struct opie *) (*data);
 
-    if (opieverify(opiep, pass) == 0)  
+    if (rfc1938verify((struct RFC1938 *) (*data), pass) == 0)
 	return(AUTH_SUCCESS);
     else
 	return(AUTH_FAILURE);

@@ -33,10 +33,8 @@ int dce_verify __P((struct passwd *pw, char *pass, void **data));
 int passwd_verify __P((struct passwd *pw, char *pass, void **data));
 int secureware_setup __P((struct passwd *pw, char **prompt, void **data));
 int secureware_verify __P((struct passwd *pw, char *pass, void **data));
-int skey_setup __P((struct passwd *pw, char **prompt, void **data));
-int skey_verify __P((struct passwd *pw, char *pass, void **data));
-int opie_setup __P((struct passwd *pw, char **prompt, void **data));
-int opie_verify __P((struct passwd *pw, char *pass, void **data));
+int rfc1938_setup __P((struct passwd *pw, char **prompt, void **data));
+int rfc1938_verify __P((struct passwd *pw, char *pass, void **data));
 int afs_verify __P((struct passwd *pw, char *pass, void **data));
 int kerb4_setup __P((struct passwd *pw, char **prompt, void **data));
 int kerb4_verify __P((struct passwd *pw, char *pass, void **data));
@@ -65,13 +63,9 @@ int kerb5_verify __P((struct passwd *pw, char *pass, void **data));
 #elif defined(HAVE_FWTK)
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(1, "fwtk", fwtk_setup, fwtk_verify, fwtk_cleanup)
-#elif defined(HAVE_SKEY) && defined(OTP_ONLY)
+#elif defined(OTP_ONLY) && (defined(HAVE_SKEY) || defined(HAVE_OPIE))
 #  define AUTH_STANDALONE \
-	AUTH_ENTRY(1, "skey", skey_setup, skey_verify, NULL)
-#  define AUTH_STANDALONE_GETPASS
-#elif defined(HAVE_OPIE) && defined(OTP_ONLY)
-#  define AUTH_STANDALONE \
-	AUTH_ENTRY(1, "opie", opie_setup, opie_verify, NULL)
+	AUTH_ENTRY(1, "rfc1938", rfc1938_setup, rfc1938_verify, NULL)
 #  define AUTH_STANDALONE_GETPASS
 #endif
 
