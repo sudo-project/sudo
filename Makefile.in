@@ -180,7 +180,8 @@ sudo.tab.o: $(HDRS) config.h pathnames.h sudo.tab.h sudo.tab.c
 
 lex.yy.o: $(HDRS) config.h pathnames.h sudo.tab.h lex.yy.c
 
-# XXX - SUDOBJS now includes PARSEOBJS
+$(PARSEOBJS): parse.h
+
 $(SUDOBJS) $(LIBOBJS): $(HDRS) config.h pathnames.h
 
 # Authentication functions live in "auth" dir and so need extra care
