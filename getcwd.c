@@ -22,6 +22,7 @@
  *  This module contains getcwd(3) for those systems that lack it.
  *  getcwd(3) returns a pointer to the current working dir.  It uses
  *  path as a copy-out parameter and malloc(3)s space if path is NULL.
+ *  This implementation of getcwd(3) restricts len(path) to be < MAXPATHLEN.
  *
  *  Todd C. Miller (millert@colorado.edu) Fri Jun  3 18:32:19 MDT 1994
  */
@@ -50,9 +51,9 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/stat.h>
+#include <sys/wait.h>
 #include <sys/param.h>
-#include <netinet/in.h>
+#include <sys/in.h>
 
 #include <pathnames.h>
 #include "compat.h"
@@ -64,15 +65,8 @@ extern char *malloc	__P((size_t));
 extern char *strcpy	__P((char *, const char *));
 extern int   strlen	__P((const char *));
 extern char *getwd	__P((char *));
-extern FILE *popen	__P((const char *, const char *));
-extern int   pclose	__P((FILE *));
 extern char *fgets	__P((char *, int, FILE *));
 #endif /* !STDC_HEADERS */
-
-
-#ifndef _PATH_PWD
-#define _PATH_PWD	"pwd"
-#endif /* _PATH_PWD */
 
 
 /*
@@ -87,20 +81,21 @@ extern int errno;
  *
  *  getcwd() returns a pointer to the current working dir.  It uses
  *  path as a copy-out parameter and malloc(3)s space if path is NULL.
- *  getcwd() will use getwd() if available, else it will use pwd(1).
  */
 
-char * getcwd(path, len)
+char * getcwd(path, psize)
     char * path;				/* path to copy into */
-    size_t len;					/* length of path */
+    size_t psize;				/* size of path */
 {
     char buf[MAXPATHLEN+1];			/* +1 for the newline */
     size_t blen;				/* length of buf */
-#ifndef HAVE_GETWD
-    FILE * pwd;					/* for popen */
-#endif /* HAVE_GETWD */
+    FILE * pwd;					/* stream for "pwd" process */
+    int fd[2];					/* for pipe(2) */
+    pid_t pid;					/* pid of "pwd" process */
+    int status;					/* status from wait(2) */
 
-    if (path && len <= 0) {
+    /* sanity check */
+    if (path && psize == 0) {
 	errno = EINVAL;
 	return(NULL);
     }
@@ -108,15 +103,40 @@ char * getcwd(path, len)
     /*
      * open a pipe to pwd and read a line
      */
-    if (!(pwd = popen(_PATH_PWD, "r")))
+    if (pipe(fd) < 0)
+    	return(NULL);
+    switch ((pid = fork())) {
+	case -1:
+	    /* fork failed */
+	    (void) close(fd[0]);
+	    (void) close(fd[1]);
+	    return(NULL);
+	case 0:
+	    /* in child */
+	    (void) dup2(fd[0], 0);
+	    (void) dup2(fd[1], 1);
+	    (void) close(fd[0]);
+	    (void) close(fd[1]);
+	    execl(_PATH_PWD, "pwd", NULL);
+	    _exit(-1);		/* should not happen */
+    }
+
+    /* in parent */
+    if ((pwd = fdopen(fd[0], "r")) == NULL) {
+	(void) close(fd[0]);
+	(void) close(fd[1]);
 	return(NULL);
+    }
 
     if (!fgets(buf, sizeof(buf), pwd)) {
 	errno = EACCES;				/* what an assumption... */
 	pclose(pwd); 
 	return(NULL);
     }
-    pclose(pwd); 
+
+    /* wait for the pipe to close */
+    while (wait(&status) != pid)
+	;
 
     blen = strlen(buf);
     if (buf[blen - 1] == '\n')
@@ -126,7 +146,8 @@ char * getcwd(path, len)
 	return(NULL);
     }
 
-    if (len < blen + 1) {
+    /* sanity check */
+    if (path && psize < blen + 1) {
 	errno = ERANGE;
 	return(NULL);
     }
