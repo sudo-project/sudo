@@ -146,10 +146,9 @@ case "$OS" in
 		fi
 		;;
     "solaris")	echo "Looks like Solaris"
-		if test -n "$C2"; then
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
+		C2=1
+		SHADOW_TYPE="SPW_SVR4"
+		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		;;
     "aix")	echo "Looks like AIX"
 		AC_DEFINE(_ALL_SOURCE)
@@ -317,18 +316,18 @@ case "$OS" in
     "smp_dc.osx") echo "Looks like Pyramid DC/OSx"
 		LIB_SOCKET=1
 		SUDO_LIBS="${SUDO_LIBS} -lsocket"
-		if test -n "$C2"; then
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
+
+		C2=1
+		SHADOW_TYPE="SPW_SVR4"
+		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		;;
     "unix_sv")	echo "Looks like UnixWare"
 		LIB_SOCKET=1
 		SUDO_LIBS="${SUDO_LIBS} -lsocket"
-		if test -n "$C2" ; then
-		    SHADOW_TYPE="SPW_SVR4"
-		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
-		fi
+
+		C2=1
+		SHADOW_TYPE="SPW_SVR4"
+		AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		;;
     "sco")	echo "Looks like SCO"
 		if test -n "$C2" ; then
