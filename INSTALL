@@ -215,7 +215,7 @@ which must be the only authentication mechanism used.
 OS dependent notes
 ==================
 
-OpenBSD and NetBSD:
+OpenBSD < 2.2 and NetBSD < 1.2.1:
     The fdesc filesystem has a bug wrt /dev/tty handling that
     causes sudo to hang at the password prompt.  The workaround
     is to set PASSWORD_TIMEOUT (in options.h) to 0.
