@@ -135,7 +135,7 @@ verify_user()
 	/* Get the password unless the auth function will do it for us */
 	nil_pw = 0;
 #if defined(AUTH_STANDALONE) && !defined(AUTH_STANDALONE_GETPASS)
-	p = prompt;
+	p = user_prompt;
 #else
 	p = (char *) tgetpass(user_prompt, PASSWORD_TIMEOUT * 60, 1);
 	if (!p || *p == '\0')
