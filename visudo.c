@@ -207,17 +207,6 @@ int main(argc, argv)
     (void) close(stmp_fd);
 
     /*
-     * Change ownership of temp file to SUDOERS_UID, SUDOERS_GID
-     * so when we move it to sudoers things are kosher.
-     */
-    if (chown(stmp, SUDOERS_UID, SUDOERS_GID)) {
-	(void) fprintf(stderr,
-	    "%s: Warning, unable to set (uid, gid) to (%d, %d): ",
-	    Argv[0], SUDOERS_UID, SUDOERS_GID);
-	perror("");
-    }
-
-    /*
      * Edit the temp file and parse it (for sanity checking)
      */
     do {
@@ -296,6 +285,25 @@ int main(argc, argv)
     } while (parse_error == TRUE);
 
     /*
+     * Change mode and ownership of temp file so when
+     * we move it to sudoers things are kosher.
+     */
+    if (chown(stmp, SUDOERS_UID, SUDOERS_GID)) {
+	(void) fprintf(stderr,
+	    "%s: Unable to set (uid, gid) of %s to (%d, %d): ",
+	    Argv[0], stmp, SUDOERS_UID, SUDOERS_GID);
+	perror("");
+	Exit(1);
+    }
+    if (chmod(stmp, SUDOERS_MODE)) {
+	(void) fprintf(stderr,
+	    "%s: Unable to change mode of %s to %o: ",
+	    Argv[0], stmp, SUDOERS_MODE);
+	perror("");
+	Exit(1);
+    }
+
+    /*
      * Now that we have a sane stmp file (parse ok) it needs to be
      * rename(2)'d to sudoers.  If the rename(2) fails we try using
      * mv(1) in case stmp and sudoers are on different filesystems.
@@ -334,17 +342,6 @@ int main(argc, argv)
 	    perror("");
 	    Exit(1);
 	}
-
-    /*
-     * Set the mode on the new sudoers file.
-     * If this fail it is ok since the file is only least rw owner.
-     */
-    if (chmod(sudoers, SUDOERS_MODE)) {
-	(void) fprintf(stderr,
-	    "%s: Warning, unable to change mode of %s to %o: ",
-	    Argv[0], sudoers, SUDOERS_MODE);
-	perror("");
-    }
 
     return(0);
 }
