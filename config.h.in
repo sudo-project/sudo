@@ -188,6 +188,9 @@
 /* Define if you have innetgr(3).  */
 #undef HAVE_INNETGR
 
+/* Define if you have initgroups(3).  */
+#undef HAVE_INITGROUPS
+
 /* Define if you have getdomainname(2).  */
 #undef HAVE_GETDOMAINNAME
 

@@ -1333,7 +1333,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset seteuid ftruncate strftime setrlimit)
+AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset seteuid ftruncate strftime setrlimit initgroups)
 if test -n "$SECUREWARE"; then
     AC_CHECK_FUNCS(bigcrypt)
     AC_CHECK_FUNCS(set_auth_parameters)

@@ -929,7 +929,7 @@ set_perms(perm, sudo_mode)
 					    strerror(errno));
 					exit(1);
 				    }
-
+#ifdef HAVE_INITGROUPS
 				    /*
 				     * Initialize group vector only if are
 				     * going to run as a non-root user.
@@ -942,7 +942,7 @@ set_perms(perm, sudo_mode)
 					    Argv[0], strerror(errno));
 					exit(1);
 				    }
-
+#endif /* HAVE_INITGROUPS */
 				    if (setuid(pw->pw_uid)) {
 					(void) fprintf(stderr,
 					    "%s: cannot set uid to %ld: %s\n",
