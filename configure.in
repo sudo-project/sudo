@@ -392,7 +392,7 @@ AC_ARG_WITH(goodpri, [  --with-goodpri          syslog priority for commands (de
 esac], [AC_DEFINE_UNQUOTED(PRI_SUCCESS, "notice") AC_MSG_RESULT("notice")])
 
 AC_MSG_CHECKING(at which syslog priority to log failures)
-AC_ARG_WITH(badpri, [  --with-badpri           syslog priority for failures (def is LOG_ALERT)],
+AC_ARG_WITH(badpri, [  --with-badpri           syslog priority for failures (def is alert)],
 [case $with_badpri in  
     yes)	AC_MSG_ERROR(["must give --with-badpri an argument."])
 		;;

@@ -62,7 +62,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-goodpri          syslog priority for commands (def is notice)"
 ac_help="$ac_help
-  --with-badpri           syslog priority for failures (def is LOG_ALERT)"
+  --with-badpri           syslog priority for failures (def is alert)"
 ac_help="$ac_help
   --with-logpath          path to the sudo log file"
 ac_help="$ac_help
