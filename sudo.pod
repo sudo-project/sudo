@@ -137,10 +137,35 @@ option you cannot use shell job control to manipulate the process.
 =item -p
 
 The B<-p> (I<prompt>) option allows you to override the default
-password prompt and use a custom one.  If the password prompt
-contains the C<%u> escape, C<%u> will be replaced with the user's
-login name.  Similarly, C<%h> will be replaced with the local
-hostname.
+password prompt and use a custom one.  The following percent (`C<%>')
+escapes are supported:
+
+=over 8
+
+=item C<%u>
+
+expanded to the invoking user's login name
+
+=item C<%U>
+
+expanded to the login name of the user the command will
+be run as (defaults to root)
+
+=item C<%h>
+
+expanded to the local hostname without the domain name
+
+=item C<%H>
+
+expanded to the local hostname including the domain name
+(on if the machine's hostname is fully qualified or the I<fqdn>
+sudoers option is set)
+
+=item C<%%>
+
+two consecutive C<%> characters are collaped into a single C<%> character
+
+=back 8
 
 =item -c
 

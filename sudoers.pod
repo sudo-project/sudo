@@ -525,9 +525,37 @@ The default is C<root>.
 =item passprompt
 
 The default prompt to use when asking for a password; can be overridden
-via the B<-p> option or the C<SUDO_PROMPT> environment variable. Supports
-two escapes: "%u" expands to the user's login name and "%h" expands
-to the local hostname.  The default value is C<@passprompt@>.
+via the B<-p> option or the C<SUDO_PROMPT> environment variable.
+The following percent (`C<%>') escapes are supported:
+
+=over 8
+
+=item C<%u>
+
+expanded to the invoking user's login name
+
+=item C<%U>
+
+expanded to the login name of the user the command will
+be run as (defaults to root)
+
+=item C<%h>
+
+expanded to the local hostname without the domain name
+
+=item C<%H>
+
+expanded to the local hostname including the domain name
+(on if the machine's hostname is fully qualified or the I<fqdn>
+option is set)
+
+=item C<%%>
+
+two consecutive C<%> characters are collaped into a single C<%> character
+
+=back 8
+
+The default value is C<@passprompt@>.
 
 =item runas_default
 
@@ -672,7 +700,9 @@ single value without double-quotes.  The list can be replaced, added
 to, deleted from, or disabled by using the C<=>, C<+=>, C<-=>, and
 C<!> operators respectively.  The default list of environment
 variable to remove is printed when B<sudo> is run by root with the
-I<-V> option.
+I<-V> option.  Note that many operating systems will remove potentially
+dangerous variables from the environment of any setuid process (such
+as B<sudo>).
 
 =item env_keep
 
