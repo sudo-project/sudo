@@ -128,7 +128,8 @@ char *find_path(file)
 	statfailed = stat(fn, &statbuf);
 	if (!statfailed && (statbuf.st_mode & 0000111))
 	    return (qualify(fn));
-	else if (statfailed && errno != ENOENT && errno != ENOTDIR) {
+	else if (statfailed && errno != ENOENT && errno != ENOTDIR &&
+		 errno != EINVAL) {
 	    perror("find_path:  stat");
 	    exit(1);
 	}
