@@ -314,7 +314,7 @@ static void load_globals()
 
 static void usage()
 {
-    (void) fprintf(stderr, "usage: %s [-V] [command]\n", *Argv);
+    (void) fprintf(stderr, "usage: %s [-v] [-V] [command]\n", *Argv);
     exit(1);
 }
 
