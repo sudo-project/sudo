@@ -35,7 +35,7 @@
 
 extern VOID	*lfind __P((const VOID *, const VOID *, size_t *, size_t,
 			      int (*)(const VOID *, const VOID *)));
-extern VOID	*lsearch __P((const VOID *, VOID *, size_t *, size_t,
+extern VOID	*lsearch __P((const VOID *, const VOID *, size_t *, size_t,
 			      int (*)(const VOID *, const VOID *)));
 
 #endif
