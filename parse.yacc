@@ -276,6 +276,8 @@ cmndspec	:	runasspec nopasswd opcmnd {
 				if ($2 == TRUE)
 				    no_passwd = TRUE;
 				push;
+				user_matches = TRUE;
+				host_matches = TRUE;
 			    } else if (printmatches == TRUE) {
 				cm_list[cm_list_len].runas_len = 0;
 				cm_list[cm_list_len].cmnd_len = 0;
