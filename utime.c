@@ -56,9 +56,9 @@ int utime(file, tvp)
     const char *file;					/* file to udpate */
     const struct utimbuf *utp;				/* what to update to */
 {
-    if (upt) {
-	struct timeval tv[2];
+    struct timeval tv[2];
 
+    if (upt) {
 	tv[0].tv_sec = ut.actime;
 	tv[0].tv_usec = 0;
 
@@ -67,6 +67,13 @@ int utime(file, tvp)
 
 	return(utimes(file, tv);
     } else {
+#ifdef HAVE_UTIME_NULL
 	return(utimes(file, NULL);
+#else
+	tv[0].tv_sec = tv[1].tv_sec = time(NULL);
+	tv[0].tv_usec = tv[1].tv_usec = 0;
+
+	return(utimes(file, tv);
+#endif /* HAVE_UTIME_NULL */
     }
 }
