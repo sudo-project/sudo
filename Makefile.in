@@ -38,7 +38,7 @@ YACC = @YACC@
 NROFF = nroff
 
 # Which install program?
-INSTALL = $(srcdir)/install-sh
+INSTALL = $(srcdir)/install-sh -c
 
 # Libraries
 SUDO_LIBS = @SUDO_LIBS@
