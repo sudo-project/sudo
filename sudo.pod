@@ -187,10 +187,6 @@ See the HISTORY file in the B<sudo> distribution for more details.
 
 Please send all bugs, comments, and changes to sudo-bugs@cs.colorado.edu.
 
-=head1 BUGS
-
-The B<-l> (I<list>) option should expand Command Aliases.
-
 =head1 DISCLAIMER
 
 This program is distributed in the hope that it will be useful, but
