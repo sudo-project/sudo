@@ -104,8 +104,10 @@ main(argc, argv)
     /*
      * set up the Editor variable correctly
      */
+#ifndef STATICEDITOR
     if ( (Editor = getenv("EDITOR")) == NULL)
 	if ( (Editor = getenv("VISUAL")) == NULL )
+#endif /* !STATICEDITOR */
 	    Editor = EDITOR;
 
     /*
