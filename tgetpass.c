@@ -52,6 +52,11 @@
 #define	_PASSWD_LEN	8
 #endif /* _PASSWD_LEN */
 
+/*
+ * Local Prototypes
+ */
+static int tgetc	__P((FILE *, int));
+
 
 /******************************************************************
  *
@@ -76,7 +81,7 @@ char * tgetpass(prompt, timeout)
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
     FILE * input, * output;
-    static char buf[_PASSWD_LEN + 1];
+    static char buf[_PASSWD_LEN + 2];
 #ifdef POSIX_SIGNALS
     sigset_t oldmask;
     sigset_t mask;
@@ -138,35 +143,43 @@ char * tgetpass(prompt, timeout)
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
-    /* print the prompt & rewind */
-    (void) write(fileno(output), prompt, strlen(prompt));
+    /* rewind if necesary */
+    if (input == output) {
+	(void) fflush(output);
+	(void) rewind(output);
+    }
+
+    /* print the prompt */
+    (void) fputs(prompt, output);
+
+    /* rewind if necesary */
+    if (input == output) {
+	(void) fflush(output);
+	(void) rewind(output);
+    }
 
     /* setup for select(2) */
     FD_ZERO(&readfds);
 
     /* get the password */
-    for (i=0; i < _PASSWD_LEN; i++) {
-	/* do select */
-	FD_SET(fileno(input), &readfds);
-	tv.tv_sec = timeout;
-	tv.tv_usec = 0;
-#ifdef HAVE_SYSCONF
-	if (select(sysconf(_SC_OPEN_MAX), &readfds, NULL, NULL, &tv) <= 0) {
-#else
-	if (select(getdtablesize(), &readfds, NULL, NULL, &tv) <= 0) {
-#endif /* HAVE_SYSCONF */
+    for (i=0; i <= _PASSWD_LEN; i++) {
+	buf[i] = tgetc(input, timeout);
+	if (buf[i] == EOF) {
 	    buf[0] = '\0';
 	    break;
 	}
-
-	buf[i] = fgetc(input);
-	if (buf[i] == EOF || buf[i] == '\n') {
+	if (buf[i] == '\n') {
 	    buf[i] = '\0';
 	    break;
 	}
     }
-    buf[_PASSWD_LEN - 1] = '\0';
-    (void) fputc('\n', output);
+    buf[_PASSWD_LEN] = '\0';
+
+    /* rewind if necesary and print a newline */
+    if (input == output) {
+	(void) fflush(output);
+	(void) rewind(output);
+    }
 
      /* turn on echo */
 #ifdef HAVE_TERMIOS_H
@@ -181,6 +194,17 @@ char * tgetpass(prompt, timeout)
     (void) ioctl(fileno(input), TIOCSETP, &ttyb);
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
+
+    /* rewind if necesary */
+    if (input == output) {
+	(void) fflush(output);
+	(void) rewind(output);
+    }
+#if 1
+    (void) write(fileno(output), "\n", 1);
+#else
+    (void) fputc('\n', output);
+#endif
 
     /* restore old signal mask */
 #ifdef POSIX_SIGNALS
@@ -197,4 +221,39 @@ char * tgetpass(prompt, timeout)
 	return(buf);
     else
 	return(NULL);
+}
+
+
+/******************************************************************
+ *
+ *  tgetc()
+ *
+ *  this function returns getc(input) unless the input times out
+ *  (based on the value of timeout).
+ */
+
+static int tgetc(stream, timeout)
+    FILE * stream;
+    int timeout;
+{
+    fd_set readfds;
+    struct timeval tv;
+    
+    /* setup for select(2) */
+    FD_ZERO(&readfds);
+    FD_SET(fileno(stream), &readfds);
+
+    /* set timeout for select */
+    tv.tv_sec = timeout;
+    tv.tv_usec = 0;
+
+    /* return EOF if nothing to read by timeout */
+#ifdef HAVE_SYSCONF
+    if (select(sysconf(_SC_OPEN_MAX), &readfds, NULL, NULL, &tv) <= 0)
+#else
+    if (select(getdtablesize(), &readfds, NULL, NULL, &tv) <= 0)
+#endif /* HAVE_SYSCONF */
+	return(EOF);
+
+    return(getc(stream));
 }
