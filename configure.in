@@ -173,8 +173,6 @@ AC_ARG_WITH(logfile, [  --with-logfile          path to the sudo log file],
     no)		echo "Sorry, --without-logfile not supported."
 		exit 1
 		;;
-    *)		echo "Using ${with_logfile} as the path to sudo's log file."
-		;;
 esac])
 
 AC_ARG_WITH(timedir, [  --with-timedir          path to the sudo timestamp dir],
@@ -184,8 +182,6 @@ AC_ARG_WITH(timedir, [  --with-timedir          path to the sudo timestamp dir],
 		;;
     no)		echo "Sorry, --without-timedir not supported."
 		exit 1
-		;;
-    *)		echo "Using ${with_timedir} as the path to sudo's log file."
 		;;
 esac])
 
