@@ -86,7 +86,7 @@ extern char *strdup     __P((const char *));
  * Global variables (yuck)
  */
 #if defined(HAVE_GETPRPWNAM) && defined(__alpha)
-int crypt_type = -1;
+int crypt_type = INT_MAX;
 #endif /* HAVE_GETPRPWNAM && __alpha */
 
 
