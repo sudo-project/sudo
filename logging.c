@@ -441,10 +441,7 @@ void log_error(code)
  *
  */
 
-static char *mail_argv[] = { "sendmail",
-			     "-t",
-			     ALERTMAIL,
-			     (char *) NULL };
+static char *mail_argv[] = { "sendmail", "-t", (char *) NULL };
 
 static void send_mail()
 {
