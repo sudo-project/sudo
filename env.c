@@ -108,6 +108,9 @@ static const char *initial_badenv_table[] = {
 #ifdef _AIX
     "LIBPATH",
 #endif /* _AIX */
+#ifdef __APPLE__
+    "DYLD_*",
+#endif
 #ifdef HAVE_KERB4
     "KRB_CONF*",
     "KRBCONFDIR"
