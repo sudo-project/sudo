@@ -98,7 +98,7 @@ WORD			[[:alnum:]_-]+
 			    LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
 
-<GOTCMND>\\[:\,=\\\" \t] {
+<GOTCMND>\\[:\,=\\ \t] {
 			    LEXTRACE("QUOTEDCHAR ");
 			    fill_args(yytext + 1, 1, sawspace);
 			    sawspace = FALSE;
