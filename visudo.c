@@ -77,10 +77,6 @@ extern char *getenv	__P((const char *));
 extern int stat		__P((const char *, struct stat *));
 #endif /* !STDC_HEADERS */
 
-#if defined(POSIX_SIGNALS) && !defined(SA_RESETHAND)
-#define SA_RESETHAND    0
-#endif /* POSIX_SIGNALS && !SA_RESETHAND */
-
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
@@ -577,8 +573,9 @@ setup_signals()
 	 */
 #ifdef POSIX_SIGNALS
 	(void) memset((VOID *)&action, 0, sizeof(action));
+	sigemptyset(&sact.sa_mask);
+	action.sa_flags = 0;
 	action.sa_handler = Exit;
-	action.sa_flags = SA_RESETHAND;
 	(void) sigaction(SIGTERM, &action, NULL);
 	(void) sigaction(SIGHUP, &action, NULL);
 	(void) sigaction(SIGINT, &action, NULL);
@@ -659,10 +656,7 @@ Exit(sig)
     sigfillset(&mask);
     (void) sigprocmask(SIG_BLOCK, &mask, NULL);
 #else
-    unsigned int mask;
-
-    mask = 0xffffffff;
-    (void) sigblock((int) mask);
+    (void) sigblock(~0);
 #endif /* POSIX_SIGNALS */
 
     (void) unlink(stmp);
