@@ -138,6 +138,7 @@ extern int top;
 #define MODE_VERSION             0x03
 #define MODE_HELP                0x04
 #define MODE_LIST                0x05
+#define MODE_BACKGROUND          0x06
 
 /*
  * Used with set_perms()
