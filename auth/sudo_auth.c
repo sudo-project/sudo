@@ -34,6 +34,9 @@
 
 #include "config.h"
 
+#include <sys/param.h>
+#include <sys/types.h>
+
 #include <stdio.h>
 #ifdef STDC_HEADERS
 #include <stdlib.h>
@@ -47,10 +50,9 @@
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#include <sys/param.h>
-#include <sys/types.h>
 #include <pwd.h>
 #include <time.h>
+#include <signal.h>
 
 #include "sudo.h"
 #include "sudo_auth.h"
@@ -105,6 +107,13 @@ verify_user(pw, prompt)
     int flags;
     char *p;
     sudo_auth *auth;
+    sigaction_t sa, osa;
+
+    /* Enable suspend during password entry. */
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = SIG_DFL;
+    (void) sigaction(SIGTSTP, &sa, &osa);
 
     /* Make sure we have at least one auth method. */
     if (auth_switch[0].name == NULL)
@@ -164,7 +173,7 @@ verify_user(pw, prompt)
 #endif /* AUTH_STANDALONE */
 
 	/* Call authentication functions. */
-	for (auth = auth_switch; auth->name; auth++) {
+	for (auth = auth_switch; p && auth->name; auth++) {
 	    if (!IS_CONFIGURED(auth))
 		continue;
 
@@ -180,7 +189,8 @@ verify_user(pw, prompt)
 		goto cleanup;
 	}
 #ifndef AUTH_STANDALONE
-	(void) memset(p, 0, strlen(p));
+	if (p)
+	    (void) memset(p, 0, strlen(p));
 #endif
 
 	/* Exit loop on nil password, but give it a chance to match first. */
@@ -212,6 +222,7 @@ cleanup:
 
     switch (success) {
 	case AUTH_SUCCESS:
+	    (void) sigaction(SIGTSTP, &osa, NULL);
 	    return;
 	case AUTH_FAILURE:
 	    if (def_flag(I_MAIL_BADPASS) || def_flag(I_MAIL_ALWAYS))
@@ -224,6 +235,7 @@ cleanup:
 	case AUTH_FATAL:
 	    exit(1);
     }
+    /* NOTREACHED */
 }
 
 void

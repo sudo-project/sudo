@@ -119,7 +119,7 @@ fwtk_verify(pw, prompt, auth)
     if (strncmp(resp, "challenge ", 10) == 0) {
 	(void) snprintf(buf, sizeof(buf), "%s\nResponse: ", &resp[10]);
 	pass = tgetpass(buf, def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags);
-	if (!pass || *pass == '\0') {
+	if (pass && *pass == '\0') {
 	    pass = tgetpass("Response [echo on]: ",
 		def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags | TGP_ECHO);
 	}
@@ -130,8 +130,11 @@ fwtk_verify(pw, prompt, auth)
 	(void) fprintf(stderr, "%s: %s\n", Argv[0], resp);
 	return(AUTH_FATAL);
     }
-    if (!pass || *pass == '\0')
-	nil_pw = 1;			/* empty password */
+    if (!pass) {			/* ^C or error */
+	nil_pw = 1;
+	return(AUTH_FAILURE);
+    } else if (*pass == '\0')		/* empty password */
+	nil_pw = 1;
 
     /* Send the user's response to the server */
     (void) snprintf(buf, sizeof(buf), "response '%s'", pass);

@@ -125,7 +125,7 @@ bsdauth_verify(pw, prompt, auth)
 	pass = tgetpass(prompt, def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags);
     } else {
 	pass = tgetpass(s, def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags);
-	if (!pass || *pass == '\0') {
+	if (pass && *pass == '\0') {
 	    if ((prompt = strrchr(s, '\n')))
 		prompt++;
 	    else
@@ -145,10 +145,10 @@ bsdauth_verify(pw, prompt, auth)
 	}
     }
 
-    if (!pass || *pass == '\0')
-	nil_pw = 1;			/* empty password */
+    if (!pass || *pass == '\0')		/* ^C or empty password */
+	nil_pw = 1;
 
-    authok = auth_userresponse(as, pass, 1);
+    authok = pass ? auth_userresponse(as, pass, 1) : 0;
 
     /* restore old signal handler */
     (void)signal(SIGCHLD, childkiller);
