@@ -427,6 +427,9 @@ int validate()
     FILE *sudoers_fp;
     int i, return_code;
 
+    /* become root */
+    be_root();
+
     if ((sudoers_fp = fopen(SUDOERS, "r")) == NULL) {
 	perror(SUDOERS);
 	log_error(NO_SUDOERS_FILE);
@@ -449,6 +452,9 @@ int validate()
      * don't need to keep this open...
      */
     (void) fclose(sudoers_fp);
+
+    /* relinquish root */
+    be_user();
 
     /*
      * if a parsing error occurred, set return_code accordingly

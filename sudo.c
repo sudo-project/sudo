@@ -124,6 +124,13 @@ main(argc, argv, envp)
 
     load_globals();		/* load the user host cmnd and uid variables */
 
+    /*
+     * We only want to be root when we absolutely need it.
+     * This will effectively do setreuid(0, uid) but for portability...
+     */
+    be_root();
+    be_user();
+
     clean_envp(envp);		/* build Envp based on envp (w/o LD_*) */
 
     rtn = validate();
@@ -132,12 +139,10 @@ main(argc, argv, envp)
     case VALIDATE_OK:
 	check_user();
 	log_error(ALL_SYSTEMS_GO);
-	if (setuid(0)) {
-	    perror("setuid(0)");
-	    exit(1);
-	}
+	be_root();
 	execve(cmnd, &Argv[1], Envp);
-	perror(cmnd);
+	perror(cmnd);		/* execve() failed! */
+	exit(-1);
 	break;
 
     case VALIDATE_NO_USER:
@@ -145,19 +150,11 @@ main(argc, argv, envp)
     case VALIDATE_ERROR:
     default:
 	log_error(rtn);
-	if (setuid(uid)) {
-	    perror("setuid(uid)");
-	    exit(1);
-	}
+	be_full_user();
 	inform_user(rtn);
 	exit(1);
 	break;
     }
-
-    /*
-     * If we get here it's an error (execve failed)
-     */
-    return (-1);
 }
 
 
@@ -193,7 +190,10 @@ void load_globals()
      * loading the cmnd global variable from argv[1]
      */
     strncpy(path, Argv[1], MAXPATHLEN)[MAXPATHLEN] = 0;
+    /* become root for find_path() only */
+    be_root();
     cmnd = find_path(path);	/* get the absolute path */
+    be_user();
     if (cmnd == NULL) {
 	(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], Argv[1]);
 	exit(1);
@@ -300,4 +300,60 @@ void clean_envp(envp)
 	    *tenvp++ = *envp;
 
     *tenvp = NULL;
+}
+
+
+
+/**********************************************************************
+ *
+ * be_root()
+ *
+ *  this function sets the real and effective uids to 0
+ */
+
+void be_root()
+{
+    if (setuid(0)) {
+        perror("setuid(0)");
+        exit(1); 
+    }
+}
+
+
+
+/**********************************************************************
+ *
+ * be_user()
+ *
+ *  this function sets the effective uid to the value of uid
+ */
+
+void be_user()
+{
+    if (seteuid(uid)) {
+        perror("seteuid(uid)");
+        exit(1); 
+    }
+}
+
+
+
+/**********************************************************************
+ *
+ * be_full_user()
+ *
+ *  this function sets the real and effective uids to the value of uid
+ *  since our euid is probably already uid we need to setuid(0) first
+ */
+
+void be_full_user()
+{
+    if (setuid(0)) {
+        perror("setuid(0)");
+        exit(1); 
+    }
+    if (setuid(uid)) {
+        perror("setuid(uid)");
+        exit(1); 
+    }
 }

@@ -272,6 +272,9 @@ void inform_user();
 void check_user();
 void clean_envp();
 int validate();
+void be_root();
+void be_user();
+void be_full_user();
 
 /* Most of these variables are declared in main() so they don't need
  * to be extern'ed here if this is main...
@@ -296,6 +299,7 @@ extern int errno;
  */
 #ifdef hpux
 #define getdtablesize()	(sysconf(_SC_OPEN_MAX))
+#define seteuid(__EUID)	(setresuid((uid_t)-1, __EUID, (uid_t)-1))
 #ifndef USE_CWD
 #define USE_CWD
 #endif	/* USE_CWD */

@@ -113,6 +113,8 @@ static int check_timestamp()
 
     timedir_is_good = 1;	/* now there's an assumption for ya... */
 
+    /* become root */
+    be_root();
 
     /*
      * walk through the path one directory at a time
@@ -158,6 +160,9 @@ static int check_timestamp()
 	}
     }
 
+    /* relinquish root */
+    be_user();
+
     return (timestamp_is_old);
 }
 
@@ -174,12 +179,18 @@ static void update_timestamp()
 {
     register int fd;
 
+    /* become root */
+    be_root();
+
     if (timedir_is_good) {
 	unlink(timestampfile_p);
 	if ((fd = open(timestampfile_p, O_WRONLY | O_CREAT | O_TRUNC, 0600)) < 0)
 	    perror("update_timestamp: open");
 	close(fd);
     }
+
+    /* relinquish root */
+    be_user();
 }
 
 
@@ -212,12 +223,14 @@ static void check_passwd()
 	exit(1);
     }
 #ifdef __svr4__
+    be_root();
     if ((spw_ent = getspnam(pw_ent->pw_name)) == NULL) {
 	(void) sprintf(user, "%u", uid);
 	log_error(GLOBAL_NO_PW_ENT);
 	inform_user(GLOBAL_NO_PW_ENT);
 	exit(1);
     }
+    be_user();
     encrypted = spw_ent -> sp_pwdp;
 #else
     encrypted = pw_ent -> pw_passwd;

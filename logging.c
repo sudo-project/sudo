@@ -228,6 +228,9 @@ void log_error(code)
     syslog(pri, logline);
     closelog();
 #else
+    /* become root */
+    be_root();
+
     if ((fp = fopen(LOGFILE, "a")) == NULL) {
 	(void) sprintf(logline, "Can\'t open log file: %s", LOGFILE);
 	send_mail();
@@ -235,6 +238,9 @@ void log_error(code)
 	(void) fprintf(fp, "%s\n", logline);
 	(void) fclose(fp);
     }
+
+    /* relinquish root */
+    be_user();
 #endif
 }
 
@@ -260,10 +266,18 @@ static void send_mail()
     int fd[2];
     char buf[MAXLOGLEN + 1024];
 
+    /* become root for find_path() */
+    be_root();
+
     if ((mailer = find_path(mailer)) == NULL) {
 	(void) fprintf(stderr, "%s not found\n", mailer);
 	exit(1);
     }
+
+    /* relinquish root */
+    be_user();
+
+    /* catch children as they die */
     (void) signal(SIGCHLD, reapchild);
 
     if (fork())
@@ -272,10 +286,8 @@ static void send_mail()
     /*
      * we don't want any security problems ...
      */
-    if (setuid(uid)) {
-	perror("setuid(uid)");
-	exit(1);
-    }
+    be_full_user();
+    
     (void) signal(SIGHUP, SIG_IGN);
     (void) signal(SIGINT, SIG_IGN);
     (void) signal(SIGQUIT, SIG_IGN);
