@@ -60,6 +60,11 @@ static const char rcsid[] = "$Sudo$";
 extern struct userspec *userspecs;
 
 /*
+ * Local prototypes.
+ */
+static void print_member	__P((char *, int, int, int));
+
+/*
  * Parse the specified sudoers file.
  */
 int
@@ -211,7 +216,7 @@ display_privs(pw)
 		for (m = runas; m != NULL; m = m->next) {
 		    if (m != runas)
 			fputs(", ", stdout);
-		    print_member(m);
+		    print_member(m->name, m->type, m->negated, RUNASALIAS);
 		}
 		fputs(") ", stdout);
 	    }
@@ -221,7 +226,8 @@ display_privs(pw)
 		printf("%sEXEC: ", cs->tags.noexec ? "NO" : "");
 	    if (cs->tags.nopasswd != UNSPEC && cs->tags.nopasswd != !def_authenticate)
 		printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
-	    print_member(cs->cmnd);
+	    m = cs->cmnd;
+	    print_member(m->name, m->type, m->negated, CMNDALIAS);
 	    putchar('\n');
 	}
     }
@@ -230,21 +236,37 @@ display_privs(pw)
 /*
  * Print the contents of a struct member to stdout
  */
-void
-print_member(m)
-    struct member *m;
+static void
+print_member(name, type, negated, alias_type)
+    char *name;
+    int type, negated, alias_type;
 {
+    struct alias *a;
+    struct member *m;
     struct sudo_command *c;
 
-    if (m->negated)
-	printf("!");
-    if (m->name == NULL)
-	printf("ALL");
-    else if (m->type != COMMAND)
-	printf("%s", m->name);
-    else {
-	c = (struct sudo_command *) m->name;
-	printf("%s%s%s", c->cmnd, c->args ? " " : "",
-	    c->args ? c->args : "");
+    switch (type) {
+	case ALL:
+	    printf("%sALL", negated ? "!" : "");
+	    break;
+	case COMMAND:
+	    c = (struct sudo_command *) name;
+	    printf("%s%s%s%s", negated ? "!" : "", c->cmnd, c->args ? " " : "",
+		c->args ? c->args : "");
+	    break;
+	case ALIAS:
+	    if ((a = find_alias(name, alias_type)) != NULL) {
+		for (m = a->first_member; m != NULL; m = m->next) {
+		    if (m != a->first_member)
+			fputs(", ", stdout);
+		    print_member(m->name, m->type,
+			negated ? !m->negated : m->negated, alias_type);
+		}
+		break;
+	    }
+	    /* FALLTHROUGH */
+	default:
+	    printf("%s%s", negated ? "!" : "", name);
+	    break;
     }
 }

@@ -169,6 +169,5 @@ int userpw_matches	__P((char *, char *, struct passwd *));
 struct alias *find_alias __P((char *, int));
 void alias_apply	__P((int (*)(VOID *, VOID *), VOID *));
 void init_parser	__P((char *, int));
-void print_member	__P((struct member *m));
 
 #endif /* _SUDO_PARSE_H */
