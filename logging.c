@@ -436,12 +436,13 @@ static void send_mail()
  *
  *  reapchild()
  *
- *  This function gets rid fo all the ugly zombies
+ *  This function gets rid of all the ugly zombies
  */
 
 static RETSIGTYPE reapchild()
 {
-        (void) wait(NULL);
+    (void) wait(NULL);
+    (void) signal(SIGCHLD, reapchild);
 }
 
 
