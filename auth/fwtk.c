@@ -108,8 +108,8 @@ fwtk_verify(pw, prompt, auth)
     char *prompt;
     sudo_auth *auth;
 {
-    char *pass;				/* Password from the user */
-    char buf[SUDO_PASS_MAX + 12];	/* General prupose buffer */
+    volatile char *pass;		/* Password from the user */
+    volatile char buf[SUDO_PASS_MAX + 12]; /* General prupose buffer */
     char resp[128];			/* Response from the server */
     int error;
     extern int nil_pw;

@@ -112,7 +112,8 @@ bsdauth_verify(pw, prompt, auth)
     char *prompt;
     sudo_auth *auth;
 {
-    char *s, *pass;
+    volatile char *pass;
+    char *s;
     size_t len;
     int authok = 0;
     sigaction_t sa, osa;
@@ -159,7 +160,7 @@ bsdauth_verify(pw, prompt, auth)
 	nil_pw = 1;
 
     if (pass) {
-	authok = auth_userresponse(as, pass, 1);
+	authok = auth_userresponse(as, (char *)pass, 1);
 	memset(pass, 0, strlen(pass));
     }
 

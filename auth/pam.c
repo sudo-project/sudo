@@ -201,10 +201,10 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
     struct pam_response **response;
     VOID *appdata_ptr;
 {
-    struct pam_response *pr;
+    volatile struct pam_response *pr;
     PAM_CONST struct pam_message *pm;
     const char *p = def_prompt;
-    char *pass;
+    volatile char *pass;
     int n;
     extern int nil_pw;
 

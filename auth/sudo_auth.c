@@ -113,7 +113,7 @@ verify_user(pw, prompt)
     int success = AUTH_FAILURE;
     int status;
     int flags;
-    char *p;
+    volatile char *p;
     sudo_auth *auth;
     sigaction_t sa, osa;
 
@@ -188,7 +188,7 @@ verify_user(pw, prompt)
 	    if (NEEDS_USER(auth))
 		set_perms(PERM_USER);
 
-	    success = auth->status = (auth->verify)(pw, p, auth);
+	    success = auth->status = (auth->verify)(pw, (char *)p, auth);
 
 	    if (NEEDS_USER(auth))
 		set_perms(PERM_ROOT);

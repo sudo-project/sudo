@@ -70,13 +70,14 @@ aixauth_verify(pw, prompt, auth)
     char *prompt;
     sudo_auth *auth;
 {
-    char *message, *pass;
+    volatile char *pass;
+    char *message;
     int reenter = 1;
     int rval = AUTH_FAILURE;
 
     pass = tgetpass(prompt, def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags);
     if (pass) {
-	if (authenticate(pw->pw_name, pass, &reenter, &message) == 0)
+	if (authenticate(pw->pw_name, (char *)pass, &reenter, &message) == 0)
 	    rval = AUTH_SUCCESS;
 	memset(pass, 0, strlen(pass));
     }
