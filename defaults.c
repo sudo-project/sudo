@@ -169,8 +169,8 @@ list_options()
 		default:
 		    p = strrchr(cur->desc, ':');
 		    if (p)
-			(void) printf("%s: %.*s\n", cur->name, p - cur->desc,
-			    cur->desc);
+			(void) printf("%s: %.*s\n", cur->name,
+			    (int) (p - cur->desc), cur->desc);
 		    else
 			(void) printf("%s: %s\n", cur->name, cur->desc);
 		    break;
