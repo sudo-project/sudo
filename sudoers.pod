@@ -57,6 +57,37 @@ will be used.
             path ::= a fully qualified pathname.
        arg[1..n] ::= optional command line arguments.
 
+=head2 wildcards (aka meta characters):
+
+B<sudo> allows shell-style I<wildcards> along with command arguments
+in the I<sudoers> file.  Wildcard matching is done via Rich
+$alz's C<wildmat(3)> package.
+
+=over 8
+
+=item C<*>
+
+Matches any set of one or more characters.
+
+=item C<?>
+
+Matches any single character.
+
+=item C<[...]>
+
+Matches any character in the specified range.
+
+=item C<[^...]>
+
+Matches any character B<not> in the specified range.
+
+=item C<\x>
+
+For any character "x", evaluates to "x".  This is used to
+escape special characters such as: "*", "?", "[", and "}".
+
+=back
+
 Text after a pound sign (B<#>) is considered a comment.
 Words that begin with a percent sign (B<%>) are assumed to
 be UN*X groups (%staff refers to users in the group I<staff>).
@@ -106,9 +137,10 @@ with a "\" if used in command arguments: ",", ":", "=", "\".
     PARTTIME    ALL=ALL,!SHELLS,!SU
     +interns    +openlabs=ALL,!SHELLS,!SU
     britt       REMOTE=SHUTDOWN:ALL=LPCS
+    jimbo	CSNETS=/bin/su *,!/bin/su root
     nieusma     SERVERS=SHUTDOWN,/etc/reboot:\
                 HUB=ALL,!SHELLS
-    jill        houdini=/etc/shutdown -r now,MISC
+    jill        houdini=/etc/shutdown -[hr] now,MISC
     markm       HUB=ALL,!MISC,!/etc/shutdown,!/etc/halt
     davehieb    merlin=ALL:SERVERS=/etc/halt:\
                 kodiakthorn=ALL
@@ -168,6 +200,11 @@ The user C<britt> may run commands in the C<SHUTDOWN> alias
 on the C<REMOTE> machines and commands in the C<LPCS> alias
 on any machine.
 
+=item jimbo
+
+The user C<jimbo> may C<su> to any user save root on the
+machines on C<CSNETS>.
+
 =item nieusma
 
 The user C<nieusma> may run commands in the C<SHUTDOWN> alias
@@ -177,8 +214,9 @@ machines.
 
 =item jill
 
-The user C<jill> may run C</etc/shutdown -r now> as well as
-the commands in the C<MISC> alias on houdini.
+The user C<jill> may run C</etc/shutdown -h now> or
+C</etc/shutdown -r now> as well as the commands in the
+C<MISC> alias on houdini.
 
 =item markm
 
@@ -212,4 +250,4 @@ will not run with a syntactically incorrect I<sudoers> file.
 
 =head1 SEE ALSO
 
-sudo(8), visudo(8), su(1).
+sudo(8), visudo(8), su(1), wildmat(3).
