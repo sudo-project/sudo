@@ -236,11 +236,12 @@ main(argc, argv)
 			    rval = cmnd_matches(cs->cmnd);
 			    if (rval != UNSPEC)
 				matched = rval;
-			    printf("\tcommand %s\n", rval == ALLOW ? "allowed" :
+			    printf("\tcmnd  %s\n", rval == ALLOW ? "allowed" :
 				rval == DENY ? "denied" : "unmatched");
 			}
 		    }
-		}
+		} else
+		    puts("\thost  unmatched");
 	    }
 	}
     }

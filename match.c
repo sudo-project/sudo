@@ -328,8 +328,9 @@ command_matches(sudoers_cmnd, sudoers_args)
 	    if (strcmp(user_base, base) != 0 ||
 		stat(*ap, &sudoers_stat) == -1)
 		continue;
-	    if (user_stat->st_dev == sudoers_stat.st_dev &&
-		user_stat->st_ino == sudoers_stat.st_ino) {
+	    if (user_stat == NULL ||
+		(user_stat->st_dev == sudoers_stat.st_dev &&
+		user_stat->st_ino == sudoers_stat.st_ino)) {
 		if (safe_cmnd)
 		    free(safe_cmnd);
 		safe_cmnd = estrdup(*ap);
@@ -373,8 +374,9 @@ command_matches(sudoers_cmnd, sudoers_args)
 	     *  b) there are no args on command line and none req by sudoers OR
 	     *  c) there are args in sudoers and on command line and they match
 	     */
-	    if (user_stat->st_dev != sudoers_stat.st_dev ||
-		user_stat->st_ino != sudoers_stat.st_ino)
+	    if (user_stat != NULL &&
+		(user_stat->st_dev != sudoers_stat.st_dev ||
+		user_stat->st_ino != sudoers_stat.st_ino))
 		return(FALSE);
 	    if (!sudoers_args ||
 		(!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
