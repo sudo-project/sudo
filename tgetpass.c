@@ -61,7 +61,7 @@
 
 #ifdef HAVE_KERB4
 #undef _PASSWD_LEN
-#define _PASSWD_LEN	128
+#define _PASSWD_LEN	BUFSIZ
 #else
 #ifndef _PASSWD_LEN
 #ifdef HAVE_C2_SECURITY
