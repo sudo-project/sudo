@@ -94,8 +94,7 @@ char * tgetpass(prompt, timeout)
      * mask out SIGINT
      */
 #ifdef POSIX_SIGNALS
-    (void) bzero(&mask, sizeof(mask));
-    (void) bzero(&oldmask, sizeof(oldmask));
+    (void) bzero((char *)(&mask), sizeof(mask));
     (void) sigaddset(&mask, SIGINT);
     (void) sigprocmask(SIG_BLOCK, &mask, &oldmask);
 #else
