@@ -168,6 +168,11 @@ main(argc, argv)
     Argv = argv;
     Argc = argc;
 
+    if (geteuid() != 0) {
+	(void) fprintf(stderr, "Sorry, %s must be setuid root.\n", Argv[0]);
+	exit(1);
+    }
+
     /*
      * parse our arguments
      */
