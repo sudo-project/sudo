@@ -597,3 +597,99 @@ CHANGES from sudo 1.4
 
 184) Updated sample.sudoers and sudoers.pod to include info
      on wildcards.
+
+CHANGES from sudo 1.4.1
+
+185) compat.h now defines _PASSWD_LEN based on PASS_MAX if it
+     is defined (from limits.h on SYSV).
+
+186) Both short and long hostnames may now be used in the sudoers
+     file if FQDN is defined.  From patches submitted by
+     Michael Meskes <meskes@Informatik.RWTH-Aachen.DE>.
+
+187) Now use skeylookup() instead of skeychallenge().  Hopefully
+     this will work around a problem some people have reported
+     on Solaris 2.5 with sudo and logdaemon 5.0's skey.
+
+188) Now uses /var/run to hold timestamp files if it exists.  This
+     is more secure.
+
+189) configure now puts the timestamp dir in /var/run if it exists.
+     Sugestion by Michael Meskes <meskes@Informatik.RWTH-Aachen.DE>.
+
+190) Both short and long hostnames now exist even if FQDN is not set.
+     This allows machines with fully qualified hostnames set via
+     hostname(1) to use them in the sudoers file.
+
+191) sudo was not honoring "." in $PATH due to a bug in find_path().
+
+192) Added IGNORE_DOT_PATH option to ignore "." in $PATH.
+
+193) tgetpass() now uses raw read(2) and write(2) instead of stdio.
+     This should make it work on more OS's.  Previously, it used
+     stdio (buffered) fgets(3) and fputs(3) with select(2) which
+     may not be legal.  Also got rid of the nasty goto's and
+     generally simplified the code.
+
+194) Parser now supports hostnames like UPPERCASE.foo.com.  Previously,
+     `UPPERCASE' was interpreted as an Alias.  This means that
+     the `fqdn' stuff has been moved to the lexer (FQHOST is used
+     to avoid collision with FQDN option).
+
+195) Reworked --with-FOO in configure.in to support --without-FOO.
+     Made shadow passwords the default for appropriate OS's.  They
+     can be turned off with --without-C2.
+
+196) Added NO_PASSWD option for those who don't want to be bothered
+     by a password prompt from sudo.  This is really just a hack.
+
+197) Added support for double quotes to mean "treat these words as one
+     argument".  This is similar to what most shells do.
+
+198) Added mkinstalldirs to make install destination dirs if
+     they do not already exist.
+
+CHANGES from sudo 1.4.2
+
+199) Added support for --with-CC (which C compiler to use).
+
+200) Added support for NOPASSWD token and running commands a
+     specified users (sudo -u) from Keith Garry Boyce
+     <garp@opustel.com>
+
+201) Only link with -lshadow for Linux if libc lacks getspnam().  Problem
+     pointed out by Michael Meskes <meskes@Informatik.RWTH-Aachen.DE>.
+
+202) Replaced SUDOERS_OWNER with SUDOERS_UID and SUDOERS_GID.  Added
+     SUDOERS_MODE and changed the default to 0440 (from 0400).
+     It is now possible to NFS-mount sudoers without doing anything fancy.
+
+202) If a runas list is specified, a user may only run commands as
+     "root" if "root" is a member of the runas list.  The old behavior
+     was to always allow commands to be run as root, even if a runas
+     list was specified.  Now you can give someone "sudo -u operator"
+     and not have the equivalent of "sudo -u root" as well.
+
+203) Added "USER=%s" to logging functions.
+
+204) configure will now add -lPW to (VI)?SUDO_LIBS if using bison
+     or DCE and alloca(3) is not in libc (or provided by gcc) but
+     is in libPW.a.
+
+205) sudo would give an incorrect error message if the sudoers file
+     didn't exist due to close() stomping errno if the open() failed.
+
+206) Fixed "shell" mode (sudo -s).  When building NewArgv sudo was
+     not allocating space for the NULL.
+
+207) Added support for wildcards in the pathname.  Ie: /bin/*.
+
+208) 'command ""' in sudoers now means no args allowed.
+
+209) Added command line args to SUDO_COMMAND envariable.
+
+210) HP-UX 10.x with C2 now uses bigcrypt().
+     Changes from david_dill@Merck.Com (David Dill).
+
+211) lsearch.c will now compile w/o compiler warnings.
+     (Updated from NetBSD lsearch.c)
