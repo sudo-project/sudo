@@ -118,16 +118,18 @@ HDRS = compat.h def_data.h defaults.h error.h ins_2001.h ins_classic.h \
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
-COMMON_OBJS = alias.o alloc.o defaults.o error.o gram.o match.o pwutil.o \
-	    toke.o redblack.o zero_bytes.o
+COMMON_OBJS = alias.o alloc.o defaults.o error.o gram.o match.o toke.o \
+	      redblack.o zero_bytes.o
 
 SUDO_OBJS = check.o env.o getspwuid.o gettime.o goodpath.o fileops.o \
-	    find_path.o interfaces.o logging.o parse.o set_perms.o sudo.o \
-	    sudo_edit.o tgetpass.o @SUDO_OBJS@ $(AUTH_OBJS) $(COMMON_OBJS)
+	    find_path.o interfaces.o logging.o parse.o pwutil.o set_perms.o \
+	    sudo.o sudo_edit.o tgetpass.o @SUDO_OBJS@ $(AUTH_OBJS) \
+	    $(COMMON_OBJS)
 
-VISUDO_OBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o $(COMMON_OBJS)
+VISUDO_OBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o pwutil.o \
+	      $(COMMON_OBJS)
 
-TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o $(COMMON_OBJS)
+TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o tspwutil.o $(COMMON_OBJS)
 
 LIB_OBJS = @LIBOBJS@ @ALLOCA@
 
@@ -239,6 +241,8 @@ utime.o: utime.c config.h pathnames.h compat.h emul/utime.h
 ldap.o: ldap.c $(SUDODEP) parse.h
 mon_systrace.o: mon_systrace.c $(SUDODEP) mon_systrace.h
 tsgetgrpw.o: tsgetgrpw.c $(SUDODEP)
+tspwutil.o: pwutil.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) -DMYPW -o tspwutil.o $(srcdir)/pwutil.c
 
 # Authentication functions live in "auth" dir and so need extra care
 sudo_auth.o: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
