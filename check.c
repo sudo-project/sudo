@@ -62,8 +62,9 @@ static char rcsid[] = "$Id$";
 #include <sys/file.h>
 #include <netinet/in.h>
 #include <pwd.h>
+#include <grp.h>
 #include "sudo.h"
-#include "options.h"
+#include <options.h>
 #include "insults.h"
 #ifdef SHADOW_TYPE
 #  if (SHADOW_TYPE == SPW_SVR4)
@@ -171,16 +172,26 @@ void check_user()
  *
  *  user_is_exempt()
  *
- *  this function checks the user is exempt from supplying a password
- *  XXX - should check more that just real gid via getgrnam.
+ *  this function checks the user is exempt from supplying a password.
  */
 
 int user_is_exempt()
 {
 #ifdef EXEMPTGROUP
-    return((getgid() == EXEMPTGROUP));
+    struct group *grp;
+    char **gr_mem;
+
+    if ((grp = getgrnam(EXEMPTGROUP)) == NULL)
+	return(FALSE);
+
+    for (gr_mem = grp->gr_mem; *gr_mem; gr_mem++) {
+	if (strcmp(user, *gr_mem) == 0)
+	    return(TRUE);
+    }
+
+    return(FALSE);
 #else
-    return(0);
+    return(FALSE);
 #endif
 }
 
