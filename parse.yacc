@@ -231,13 +231,14 @@ privileges	:	privilege
 		;
 
 privilege	:	hostspec '=' cmndspeclist {
-			    if (user_matches == TRUE) {
-				push;
-				user_matches = TRUE;
-			    } else {
-				no_passwd = -1;
-				runas_matches = -1;
-			    }
+			    /*
+			     * We already did a push if necessary in
+			     * cmndspec so just reset some values so
+			     * the next 'privilege' gets a clean slate.
+			     */
+			    host_matches = -1;
+			    runas_matches = -1;
+			    no_passwd = -1;
 			}
 		;
 
@@ -288,18 +289,21 @@ cmndspeclist	:	cmndspec
 		|	cmndspeclist ',' cmndspec
 		;
 
-cmndspec	:	{   /* Push a new entry onto the stack if needed */
-			    if (user_matches == TRUE && host_matches == TRUE &&
-				cmnd_matches != -1 && runas_matches == TRUE)
-				pushcp;
-			    cmnd_matches = -1;
-			} runasspec nopasswd opcmnd {
+cmndspec	:	runasspec nopasswd opcmnd {
 			    if (printmatches == TRUE &&
 				(runas_matches == -1 || cmnd_matches == -1)) {
 				cm_list[cm_list_len].runas_len = 0;
 				cm_list[cm_list_len].cmnd_len = 0;
 				cm_list[cm_list_len].nopasswd = FALSE;
 			    }
+			    /*
+			     * Push the entry onto the stack if it is worth
+			     * saving and clear match status.
+			     */
+			    if (user_matches == TRUE && host_matches == TRUE &&
+				cmnd_matches != -1 && runas_matches == TRUE)
+				pushcp;
+			    cmnd_matches = -1;
 			}
 		;
 

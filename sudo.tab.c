@@ -214,87 +214,87 @@ typedef union {
 short yylhs[] = {                                        -1,
     0,    0,    3,    3,    5,    3,    3,    3,    3,    3,
     6,    6,   11,   14,   15,   14,   12,   12,   12,   12,
-   12,   12,   13,   13,   18,   16,    2,   20,    2,   17,
-   17,   21,   21,   22,   24,   22,   23,   23,   23,   23,
-   23,   19,   19,   19,    1,    1,    1,    8,    8,   26,
-   25,   27,   27,    9,    9,   29,   28,   30,   30,   10,
-   10,   32,   31,    7,    7,   34,   33,   35,   35,   36,
-   37,   36,    4,    4,    4,    4,    4,
+   12,   12,   13,   13,   16,    2,   19,    2,   17,   17,
+   20,   20,   21,   23,   21,   22,   22,   22,   22,   22,
+   18,   18,   18,    1,    1,    1,    8,    8,   25,   24,
+   26,   26,    9,    9,   28,   27,   29,   29,   10,   10,
+   31,   30,    7,    7,   33,   32,   34,   34,   35,   36,
+   35,    4,    4,    4,    4,    4,
 };
 short yylen[] = {                                         2,
     1,    2,    1,    2,    0,    3,    2,    2,    2,    2,
     1,    3,    3,    1,    0,    3,    1,    1,    1,    1,
-    1,    1,    1,    3,    0,    4,    1,    0,    3,    0,
-    2,    1,    3,    1,    0,    3,    1,    1,    1,    1,
-    1,    0,    1,    1,    1,    1,    1,    1,    3,    0,
-    4,    1,    3,    1,    3,    0,    4,    1,    3,    1,
-    3,    0,    4,    1,    3,    0,    4,    1,    3,    1,
-    0,    3,    1,    1,    1,    1,    1,
+    1,    1,    1,    3,    3,    1,    0,    3,    0,    2,
+    1,    3,    1,    0,    3,    1,    1,    1,    1,    1,
+    0,    1,    1,    1,    1,    1,    1,    3,    0,    4,
+    1,    3,    1,    3,    0,    4,    1,    3,    1,    3,
+    0,    4,    1,    3,    0,    4,    1,    3,    1,    0,
+    3,    1,    1,    1,    1,    1,
 };
 short yydefred[] = {                                      0,
     0,    3,    0,    0,    0,    0,    0,    1,    0,    4,
-   50,    0,   48,   56,    0,   54,   66,    0,   64,   62,
-    0,   60,    2,   76,   75,   74,   73,   77,    0,    0,
+   49,    0,   47,   55,    0,   53,   65,    0,   63,   61,
+    0,   59,    2,   75,   74,   73,   72,   76,    0,    0,
     0,    0,    0,    0,    0,    0,    0,   22,   18,   21,
-   19,   20,   17,    0,   11,    0,    0,   49,    0,   55,
-    0,   65,    0,   61,    0,   25,   15,   14,   52,    0,
-   46,   47,   45,   28,   27,   58,    0,   71,   70,    0,
-   68,   40,   39,   38,   37,   41,   35,    0,   32,   34,
-   12,    0,   23,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,   25,    0,    0,   16,   53,   29,   59,   72,
-   69,   36,   33,   24,    0,   43,   44,    0,   26,
+   19,   20,   17,    0,   11,    0,    0,   48,    0,   54,
+    0,   64,    0,   60,    0,    0,   15,   14,   51,    0,
+   45,   46,   44,   27,   26,   57,    0,   70,   69,    0,
+   67,   39,   38,   37,   36,   40,   34,    0,   31,   33,
+   12,    0,    0,   23,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,   42,   43,    0,   16,   52,
+   28,   58,   71,   68,   35,   32,   24,   25,
 };
 short yydgoto[] = {                                       7,
    65,   66,    8,   69,    9,   44,   18,   12,   15,   21,
-   45,   58,   82,   59,   85,   83,   95,   84,  108,   87,
-   78,   79,   80,   91,   13,   30,   60,   16,   32,   67,
-   22,   36,   19,   34,   70,   71,   89,
+   45,   58,   83,   59,   86,   84,   85,   98,   88,   78,
+   79,   80,   92,   13,   30,   60,   16,   32,   67,   22,
+   36,   19,   34,   70,   71,   90,
 };
-short yysindex[] = {                                   -248,
- -264,    0, -250, -246, -237, -232, -248,    0, -217,    0,
-    0,  -31,    0,    0,  -25,    0,    0,  -24,    0,    0,
-  -16,    0,    0,    0,    0,    0,    0,    0, -221,  -15,
- -250,  -13, -246,  -12, -237,   -5, -232,    0,    0,    0,
-    0,    0,    0,    2,    0,   -4,  -33,    0,   -2,    0,
-  -29,    0,  -20,    0, -221,    0,    0,    0,    0,   14,
-    0,    0,    0,    0,    0,    0,   19,    0,    0,   20,
-    0,    0,    0,    0,    0,    0,    0,   21,    0,    0,
-    0,   22,    0, -201,  -33,  -33,   -2,   -2,  -29,  -29,
-  -20,  -20,    0,  -20, -255,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,   21,    0,    0,   -2,    0,
+short yysindex[] = {                                   -250,
+ -264,    0, -246, -234, -230, -215, -250,    0, -252,    0,
+    0,  -51,    0,    0,  -12,    0,    0,   -8,    0,    0,
+   -5,    0,    0,    0,    0,    0,    0,    0, -221,   -7,
+ -246,   -6, -234,   -4, -230,   -3, -215,    0,    0,    0,
+    0,    0,    0,    2,    0,    3,  -33,    0,   -2,    0,
+  -29,    0,  -20,    0, -221, -207,    0,    0,    0,   17,
+    0,    0,    0,    0,    0,    0,   19,    0,    0,   21,
+    0,    0,    0,    0,    0,    0,    0,   22,    0,    0,
+    0,  -20,   23,    0, -239,  -33,  -33,   -2,   -2,  -29,
+  -29,  -20,  -20,   22, -207,    0,    0,   -2,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,
 };
-short yyrindex[] = {                                   -207,
-    0,    0,    0,    0,    0,    0, -207,    0,    0,    0,
+short yyrindex[] = {                                   -217,
+    0,    0,    0,    0,    0,    0, -217,    0,    0,    0,
     0,   86,    0,    0,  103,    0,    0,  120,    0,    0,
   137,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,  154,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,    1,
+    0,    0,    0,    0,    0,  -21,    0,    0,    0,    1,
     0,    0,    0,    0,    0,    0,   18,    0,    0,   35,
     0,    0,    0,    0,    0,    0,    0,   52,    0,    0,
-    0,   69,    0,  -21,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,   -1,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,  163,    0,    0,    0,    0,
+    0,    0,   69,    0,   -1,    0,    0,    0,    0,    0,
+    0,    0,    0,  163,  -21,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,
 };
 short yygindex[] = {                                      0,
-    0,  -82,   60,   59,    0,    0,    0,    0,    0,    0,
-   15,  -27,    0,  -71,    0,  -22,    0,    0,    0,    0,
-  -19,  -75,    0,    0,   41,    0,    0,   40,    0,    0,
-   37,    0,   42,    0,    0,  -60,    0,
+    0,  -74,   55,   59,    0,    0,    0,    0,    0,    0,
+   15,  -27,    0,  -57,    0,  -24,    0,    0,    0,  -10,
+  -59,    0,    0,   42,    0,    0,   41,    0,    0,   38,
+    0,   43,    0,    0,  -42,    0,
 };
 #define YYTABLESIZE 431
 short yytable[] = {                                      57,
-   51,   46,   10,   68,   98,   99,   11,    1,  106,  107,
-   14,   30,   77,   96,   97,  102,  103,   57,    2,   17,
-    3,    4,    5,    6,   20,  109,   31,   46,  100,  101,
-   64,   42,   33,   35,   67,   38,   39,   40,   41,   24,
-   42,   37,   25,   26,   27,   47,   43,   49,   51,    5,
-   28,   63,    5,    5,    5,   53,   56,   86,   51,   55,
-    5,   94,   88,   90,   92,   93,   23,   29,   13,   81,
-  104,   48,   50,   54,  105,   57,   52,    0,    0,    0,
+   50,   46,   10,   68,   24,    1,   31,   25,   26,   27,
+   11,   29,   77,  101,  102,   28,    2,   56,    3,    4,
+    5,    6,   14,  108,   96,   97,   17,   46,   99,  100,
+   64,   41,  105,  106,   66,   38,   39,   40,   41,    5,
+   42,   20,    5,    5,    5,   33,   43,  103,  104,   35,
+    5,   62,   37,   47,   49,   82,   51,   53,   50,   55,
+   87,   23,   89,   56,   91,   93,   95,   29,   13,   81,
+  107,   94,   48,   50,   54,   56,    0,   52,    0,    0,
     0,    0,    0,    0,    0,    8,    0,    0,    0,    0,
-    0,    0,   67,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    9,    0,    0,    0,    0,    0,    0,   63,
+    0,    0,   66,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    9,    0,    0,    0,    0,    0,    0,   62,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    7,
     0,    0,    0,    0,    0,    0,   13,    0,    0,    0,
     0,    0,    0,    0,    0,    0,   10,    0,    0,    0,
@@ -303,20 +303,20 @@ short yytable[] = {                                      57,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,   31,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,   30,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,   38,   39,   40,   41,   24,   42,    0,
-   25,   26,   27,    0,   43,   30,   72,    0,   28,   73,
-   74,   75,   30,   30,   30,    0,   30,   76,    0,    0,
-    0,    0,    0,    0,   61,   42,   51,   51,    0,    0,
-   51,   51,   51,   62,   42,   63,   42,   51,   51,   51,
-   51,   51,   51,   57,   57,    0,    0,   57,   57,   57,
-    0,    0,    0,    0,   57,   57,   57,   57,   57,   57,
-   67,   67,    0,    0,   67,   67,   67,    0,    0,    0,
-    0,   67,   67,   67,   67,   67,   67,   63,   63,    0,
-    0,   63,   63,   63,    0,    0,    0,    0,   63,   63,
-   63,   63,   63,   63,   13,   13,    0,    0,   13,   13,
+   25,   26,   27,    0,   43,   29,   72,    0,   28,   73,
+   74,   75,   29,   29,   29,    0,   29,   76,    0,    0,
+    0,    0,    0,    0,   61,   41,   50,   50,    0,    0,
+   50,   50,   50,   62,   41,   63,   41,   50,   50,   50,
+   50,   50,   50,   56,   56,    0,    0,   56,   56,   56,
+    0,    0,    0,    0,   56,   56,   56,   56,   56,   56,
+   66,   66,    0,    0,   66,   66,   66,    0,    0,    0,
+    0,   66,   66,   66,   66,   66,   66,   62,   62,    0,
+    0,   62,   62,   62,    0,    0,    0,    0,   62,   62,
+   62,   62,   62,   62,   13,   13,    0,    0,   13,   13,
    13,    0,    0,    0,    0,   13,   13,   13,   13,   13,
    13,    8,    8,    0,    0,    8,    8,    8,    0,    0,
     0,    0,    8,    8,    8,    8,    8,    8,    9,    9,
@@ -325,19 +325,19 @@ short yytable[] = {                                      57,
     7,    7,    0,    0,    0,    0,    7,    7,    7,    7,
     7,    7,   10,   10,    0,    0,   10,   10,   10,    0,
     0,    0,    0,   10,   10,   10,   10,   10,   10,    6,
-    6,    0,    0,    6,    6,    6,    0,    0,    0,   31,
-    6,    6,    6,    6,    6,    6,   31,   31,   31,    0,
-   31,
+    6,    0,    0,    6,    6,    6,    0,    0,    0,   30,
+    6,    6,    6,    6,    6,    6,   30,   30,   30,    0,
+   30,
 };
 short yycheck[] = {                                      33,
-    0,   29,  267,   33,   87,   88,  257,  256,  264,  265,
-  257,   33,   33,   85,   86,   91,   92,    0,  267,  257,
-  269,  270,  271,  272,  257,  108,   58,   55,   89,   90,
-   33,   33,   58,   58,    0,  257,  258,  259,  260,  257,
-  262,   58,  260,  261,  262,   61,  268,   61,   61,  257,
-  268,    0,  260,  261,  262,   61,   61,   44,   58,   58,
-  268,  263,   44,   44,   44,   44,    7,    9,    0,   55,
-   93,   31,   33,   37,   94,   58,   35,   -1,   -1,   -1,
+    0,   29,  267,   33,  257,  256,   58,  260,  261,  262,
+  257,   33,   33,   88,   89,  268,  267,    0,  269,  270,
+  271,  272,  257,   98,  264,  265,  257,   55,   86,   87,
+   33,   33,   92,   93,    0,  257,  258,  259,  260,  257,
+  262,  257,  260,  261,  262,   58,  268,   90,   91,   58,
+  268,    0,   58,   61,   61,  263,   61,   61,   58,   58,
+   44,    7,   44,   61,   44,   44,   44,    9,    0,   55,
+   95,   82,   31,   33,   37,   58,   -1,   35,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,    0,   -1,   -1,   -1,   -1,
    -1,   -1,   58,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,    0,   -1,   -1,   -1,   -1,   -1,   -1,   58,
@@ -419,18 +419,17 @@ char *yyrule[] = {
 "hostspec : ALIAS",
 "cmndspeclist : cmndspec",
 "cmndspeclist : cmndspeclist ',' cmndspec",
-"$$3 :",
-"cmndspec : $$3 runasspec nopasswd opcmnd",
+"cmndspec : runasspec nopasswd opcmnd",
 "opcmnd : cmnd",
-"$$4 :",
-"opcmnd : '!' $$4 opcmnd",
+"$$3 :",
+"opcmnd : '!' $$3 opcmnd",
 "runasspec :",
 "runasspec : RUNAS runaslist",
 "runaslist : oprunasuser",
 "runaslist : runaslist ',' oprunasuser",
 "oprunasuser : runasuser",
-"$$5 :",
-"oprunasuser : '!' $$5 oprunasuser",
+"$$4 :",
+"oprunasuser : '!' $$4 oprunasuser",
 "runasuser : NAME",
 "runasuser : USERGROUP",
 "runasuser : NETGROUP",
@@ -444,29 +443,29 @@ char *yyrule[] = {
 "cmnd : COMMAND",
 "hostaliases : hostalias",
 "hostaliases : hostaliases ':' hostalias",
-"$$6 :",
-"hostalias : ALIAS $$6 '=' hostlist",
+"$$5 :",
+"hostalias : ALIAS $$5 '=' hostlist",
 "hostlist : ophostspec",
 "hostlist : hostlist ',' ophostspec",
 "cmndaliases : cmndalias",
 "cmndaliases : cmndaliases ':' cmndalias",
-"$$7 :",
-"cmndalias : ALIAS $$7 '=' cmndlist",
+"$$6 :",
+"cmndalias : ALIAS $$6 '=' cmndlist",
 "cmndlist : opcmnd",
 "cmndlist : cmndlist ',' opcmnd",
 "runasaliases : runasalias",
 "runasaliases : runasaliases ':' runasalias",
-"$$8 :",
-"runasalias : ALIAS $$8 '=' runaslist",
+"$$7 :",
+"runasalias : ALIAS $$7 '=' runaslist",
 "useraliases : useralias",
 "useraliases : useraliases ':' useralias",
-"$$9 :",
-"useralias : ALIAS $$9 '=' userlist",
+"$$8 :",
+"useralias : ALIAS $$8 '=' userlist",
 "userlist : opuser",
 "userlist : userlist ',' opuser",
 "opuser : user",
-"$$10 :",
-"opuser : '!' $$10 opuser",
+"$$9 :",
+"opuser : '!' $$9 opuser",
 "user : NAME",
 "user : USERGROUP",
 "user : NETGROUP",
@@ -498,7 +497,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 655 "parse.yacc"
+#line 659 "parse.yacc"
 
 
 typedef struct {
@@ -875,7 +874,7 @@ void init_parser()
     if (printmatches == TRUE)
 	expand_match_list();
 }
-#line 879 "sudo.tab.c"
+#line 878 "sudo.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || __STDC__
 static int yygrowstack(void)
@@ -1094,23 +1093,24 @@ break;
 case 13:
 #line 233 "parse.yacc"
 {
-			    if (user_matches == TRUE) {
-				push;
-				user_matches = TRUE;
-			    } else {
-				no_passwd = -1;
-				runas_matches = -1;
-			    }
+			    /*
+			     * We already did a push if necessary in
+			     * cmndspec so just reset some values so
+			     * the next 'privilege' gets a clean slate.
+			     */
+			    host_matches = -1;
+			    runas_matches = -1;
+			    no_passwd = -1;
 			}
 break;
 case 15:
-#line 245 "parse.yacc"
+#line 246 "parse.yacc"
 {
 			    push;
 			}
 break;
 case 16:
-#line 247 "parse.yacc"
+#line 248 "parse.yacc"
 {
 			    pop;
 			    if (host_matched == TRUE)
@@ -1120,13 +1120,13 @@ case 16:
 			}
 break;
 case 17:
-#line 255 "parse.yacc"
+#line 256 "parse.yacc"
 {
 			    host_matches = TRUE;
 			}
 break;
 case 18:
-#line 258 "parse.yacc"
+#line 259 "parse.yacc"
 {
 			    if (addr_matches(yyvsp[0].string))
 				host_matches = TRUE;
@@ -1134,7 +1134,7 @@ case 18:
 			}
 break;
 case 19:
-#line 263 "parse.yacc"
+#line 264 "parse.yacc"
 {
 			    if (netgr_matches(yyvsp[0].string, host, NULL))
 				host_matches = TRUE;
@@ -1142,7 +1142,7 @@ case 19:
 			}
 break;
 case 20:
-#line 268 "parse.yacc"
+#line 269 "parse.yacc"
 {
 			    if (strcasecmp(shost, yyvsp[0].string) == 0)
 				host_matches = TRUE;
@@ -1150,7 +1150,7 @@ case 20:
 			}
 break;
 case 21:
-#line 273 "parse.yacc"
+#line 274 "parse.yacc"
 {
 			    if (strcasecmp(host, yyvsp[0].string) == 0)
 				host_matches = TRUE;
@@ -1158,7 +1158,7 @@ case 21:
 			}
 break;
 case 22:
-#line 278 "parse.yacc"
+#line 279 "parse.yacc"
 {
 			    /* could be an all-caps hostname */
 			    if (find_alias(yyvsp[0].string, HOST_ALIAS) == TRUE ||
@@ -1168,16 +1168,7 @@ case 22:
 			}
 break;
 case 25:
-#line 291 "parse.yacc"
-{   /* Push a new entry onto the stack if needed */
-			    if (user_matches == TRUE && host_matches == TRUE &&
-				cmnd_matches != -1 && runas_matches == TRUE)
-				pushcp;
-			    cmnd_matches = -1;
-			}
-break;
-case 26:
-#line 296 "parse.yacc"
+#line 292 "parse.yacc"
 {
 			    if (printmatches == TRUE &&
 				(runas_matches == -1 || cmnd_matches == -1)) {
@@ -1185,14 +1176,22 @@ case 26:
 				cm_list[cm_list_len].cmnd_len = 0;
 				cm_list[cm_list_len].nopasswd = FALSE;
 			    }
+			    /*
+			     * Push the entry onto the stack if it is worth
+			     * saving and clear match status.
+			     */
+			    if (user_matches == TRUE && host_matches == TRUE &&
+				cmnd_matches != -1 && runas_matches == TRUE)
+				pushcp;
+			    cmnd_matches = -1;
 			}
 break;
-case 27:
-#line 306 "parse.yacc"
+case 26:
+#line 310 "parse.yacc"
 { ; }
 break;
-case 28:
-#line 307 "parse.yacc"
+case 27:
+#line 311 "parse.yacc"
 {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
@@ -1207,8 +1206,8 @@ case 28:
 			    }
 			}
 break;
-case 29:
-#line 319 "parse.yacc"
+case 28:
+#line 323 "parse.yacc"
 {
 			    pop;
 			    if (cmnd_matched == TRUE)
@@ -1218,8 +1217,8 @@ case 29:
 			    yyval.BOOLEAN = cmnd_matches;
 			}
 break;
-case 30:
-#line 329 "parse.yacc"
+case 29:
+#line 333 "parse.yacc"
 {
 			    /*
 			     * If this is the first entry in a command list
@@ -1230,12 +1229,12 @@ case 30:
 				    (strcmp(RUNAS_DEFAULT, runas_user) == 0);
 			}
 break;
-case 31:
-#line 338 "parse.yacc"
+case 30:
+#line 342 "parse.yacc"
 { ; }
 break;
-case 34:
-#line 345 "parse.yacc"
+case 33:
+#line 349 "parse.yacc"
 {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
@@ -1244,8 +1243,8 @@ case 34:
 				       &cm_list[cm_list_len].runas_size, ':');
 			}
 break;
-case 35:
-#line 352 "parse.yacc"
+case 34:
+#line 356 "parse.yacc"
 {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
@@ -1258,8 +1257,8 @@ case 35:
 			    }
 			}
 break;
-case 36:
-#line 362 "parse.yacc"
+case 35:
+#line 366 "parse.yacc"
 {
 			    pop;
 			    if (runas_matched == TRUE)
@@ -1268,8 +1267,8 @@ case 36:
 				runas_matches = TRUE;
 			}
 break;
-case 37:
-#line 370 "parse.yacc"
+case 36:
+#line 374 "parse.yacc"
 {
 			    runas_matches = (strcmp(yyvsp[0].string, runas_user) == 0);
 			    if (printmatches == TRUE && in_alias == TRUE)
@@ -1284,8 +1283,8 @@ case 37:
 			    (void) free(yyvsp[0].string);
 			}
 break;
-case 38:
-#line 383 "parse.yacc"
+case 37:
+#line 387 "parse.yacc"
 {
 			    runas_matches = usergr_matches(yyvsp[0].string, runas_user);
 			    if (printmatches == TRUE && in_alias == TRUE)
@@ -1301,8 +1300,8 @@ case 38:
 			    (void) free(yyvsp[0].string);
 			}
 break;
-case 39:
-#line 397 "parse.yacc"
+case 38:
+#line 401 "parse.yacc"
 {
 			    runas_matches = netgr_matches(yyvsp[0].string, NULL, runas_user);
 			    if (printmatches == TRUE && in_alias == TRUE)
@@ -1318,8 +1317,8 @@ case 39:
 			    (void) free(yyvsp[0].string);
 			}
 break;
-case 40:
-#line 411 "parse.yacc"
+case 39:
+#line 415 "parse.yacc"
 {
 			    /* could be an all-caps username */
 			    if (find_alias(yyvsp[0].string, RUNAS_ALIAS) == TRUE ||
@@ -1339,8 +1338,8 @@ case 40:
 			    (void) free(yyvsp[0].string);
 			}
 break;
-case 41:
-#line 429 "parse.yacc"
+case 40:
+#line 433 "parse.yacc"
 {
 			    runas_matches = TRUE;
 			    if (printmatches == TRUE && in_alias == TRUE)
@@ -1354,14 +1353,14 @@ case 41:
 				       &cm_list[cm_list_len].runas_size, 0);
 			}
 break;
-case 42:
-#line 443 "parse.yacc"
+case 41:
+#line 447 "parse.yacc"
 {
 			    ;
 			}
 break;
-case 43:
-#line 446 "parse.yacc"
+case 42:
+#line 450 "parse.yacc"
 {
 			    no_passwd = TRUE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
@@ -1369,8 +1368,8 @@ case 43:
 				cm_list[cm_list_len].nopasswd = TRUE;
 			}
 break;
-case 44:
-#line 452 "parse.yacc"
+case 43:
+#line 456 "parse.yacc"
 {
 			    no_passwd = FALSE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
@@ -1378,8 +1377,8 @@ case 44:
 				cm_list[cm_list_len].nopasswd = FALSE;
 			}
 break;
-case 45:
-#line 460 "parse.yacc"
+case 44:
+#line 464 "parse.yacc"
 {
 			    if (printmatches == TRUE && in_alias == TRUE) {
 				append("ALL", &ga_list[ga_list_len-1].entries,
@@ -1398,8 +1397,8 @@ case 45:
 			    yyval.BOOLEAN = TRUE;
 			}
 break;
-case 46:
-#line 477 "parse.yacc"
+case 45:
+#line 481 "parse.yacc"
 {
 			    if (printmatches == TRUE && in_alias == TRUE) {
 				append(yyvsp[0].string, &ga_list[ga_list_len-1].entries,
@@ -1420,8 +1419,8 @@ case 46:
 			    (void) free(yyvsp[0].string);
 			}
 break;
-case 47:
-#line 496 "parse.yacc"
+case 46:
+#line 500 "parse.yacc"
 {
 			    if (printmatches == TRUE && in_alias == TRUE) {
 				append(yyvsp[0].command.cmnd, &ga_list[ga_list_len-1].entries,
@@ -1456,12 +1455,12 @@ case 47:
 				(void) free(yyvsp[0].command.args);
 			}
 break;
-case 50:
-#line 535 "parse.yacc"
+case 49:
+#line 539 "parse.yacc"
 { push; }
 break;
-case 51:
-#line 535 "parse.yacc"
+case 50:
+#line 539 "parse.yacc"
 {
 			    if (host_matches == TRUE &&
 				add_alias(yyvsp[-3].string, HOST_ALIAS) == FALSE)
@@ -1469,8 +1468,8 @@ case 51:
 			    pop;
 			}
 break;
-case 56:
-#line 551 "parse.yacc"
+case 55:
+#line 555 "parse.yacc"
 {
 			    push;
 			    if (printmatches == TRUE) {
@@ -1481,8 +1480,8 @@ case 56:
 			     }
 			}
 break;
-case 57:
-#line 559 "parse.yacc"
+case 56:
+#line 563 "parse.yacc"
 {
 			    if (cmnd_matches == TRUE &&
 				add_alias(yyvsp[-3].string, CMND_ALIAS) == FALSE)
@@ -1494,12 +1493,12 @@ case 57:
 				in_alias = FALSE;
 			}
 break;
-case 58:
-#line 571 "parse.yacc"
+case 57:
+#line 575 "parse.yacc"
 { ; }
 break;
-case 62:
-#line 579 "parse.yacc"
+case 61:
+#line 583 "parse.yacc"
 {
 			    push;
 			    if (printmatches == TRUE) {
@@ -1510,8 +1509,8 @@ case 62:
 			    }
 			}
 break;
-case 63:
-#line 587 "parse.yacc"
+case 62:
+#line 591 "parse.yacc"
 {
 			    if (runas_matches > 0 &&
 				add_alias(yyvsp[-3].string, RUNAS_ALIAS) == FALSE)
@@ -1523,12 +1522,12 @@ case 63:
 				in_alias = FALSE;
 			}
 break;
-case 66:
-#line 603 "parse.yacc"
+case 65:
+#line 607 "parse.yacc"
 { push; }
 break;
-case 67:
-#line 603 "parse.yacc"
+case 66:
+#line 607 "parse.yacc"
 {
 			    if (user_matches == TRUE &&
 				add_alias(yyvsp[-3].string, USER_ALIAS) == FALSE)
@@ -1537,18 +1536,18 @@ case 67:
 			    (void) free(yyvsp[-3].string);
 			}
 break;
-case 68:
-#line 612 "parse.yacc"
+case 67:
+#line 616 "parse.yacc"
 { ; }
 break;
-case 71:
-#line 617 "parse.yacc"
+case 70:
+#line 621 "parse.yacc"
 {
 			    push;
 			}
 break;
-case 72:
-#line 619 "parse.yacc"
+case 71:
+#line 623 "parse.yacc"
 {
 			    pop;
 			    if (user_matched == TRUE)
@@ -1557,32 +1556,32 @@ case 72:
 				user_matches = TRUE;
 			}
 break;
-case 73:
-#line 627 "parse.yacc"
+case 72:
+#line 631 "parse.yacc"
 {
 			    if (strcmp(yyvsp[0].string, user_name) == 0)
 				user_matches = TRUE;
 			    (void) free(yyvsp[0].string);
 			}
 break;
-case 74:
-#line 632 "parse.yacc"
+case 73:
+#line 636 "parse.yacc"
 {
 			    if (usergr_matches(yyvsp[0].string, user_name))
 				user_matches = TRUE;
 			    (void) free(yyvsp[0].string);
 			}
 break;
-case 75:
-#line 637 "parse.yacc"
+case 74:
+#line 641 "parse.yacc"
 {
 			    if (netgr_matches(yyvsp[0].string, NULL, user_name))
 				user_matches = TRUE;
 			    (void) free(yyvsp[0].string);
 			}
 break;
-case 76:
-#line 642 "parse.yacc"
+case 75:
+#line 646 "parse.yacc"
 {
 			    /* could be an all-caps username */
 			    if (find_alias(yyvsp[0].string, USER_ALIAS) == TRUE ||
@@ -1591,13 +1590,13 @@ case 76:
 			    (void) free(yyvsp[0].string);
 			}
 break;
-case 77:
-#line 649 "parse.yacc"
+case 76:
+#line 653 "parse.yacc"
 {
 			    user_matches = TRUE;
 			}
 break;
-#line 1601 "sudo.tab.c"
+#line 1600 "sudo.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
