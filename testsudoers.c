@@ -281,6 +281,12 @@ set_perms(i, j)
     return;
 }
 
+void
+set_fqdn()
+{
+    return;
+}
+
 int
 main(argc, argv)
     int argc;
