@@ -174,7 +174,8 @@ date.
  PATH			Set to a sane value if SECURE_PATH is set
  SHELL			Used to determine shell to run with -s option
  HOME			In -s mode, set to homedir of root (or runas user)
-			if built with the SHELL_SETS_HOME option.
+			if built with the SHELL_SETS_HOME option
+ SUDO_PROMPT		Replaces the default password prompt
  SUDO_COMMAND		Set to the command run by sudo
  SUDO_USER		Set to the login of the user who invoked sudo
  SUDO_UID		Set to the uid of the user who invoked sudo
@@ -187,12 +188,12 @@ version consists of code written primarily by:
 
  Jeff Nieusma		<nieusma@FirstLink.com>
  David Hieb		<davehieb@internetone.com>
- Todd Miller		<Todd.Miller@cs.colorado.edu>
+ Todd Miller		<Todd.Miller@courtesan.com>
  Chris Jepeway		<jepeway@cs.utk.edu>
 
 See the HISTORY file in the B<sudo> distribution for more details.
 
-Please send all bugs, comments, and changes to sudo-bugs@cs.colorado.edu.
+Please send all bugs, comments, and changes to sudo-bugs@courtesan.com.
 
 =head1 DISCLAIMER
 

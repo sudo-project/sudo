@@ -67,11 +67,11 @@ I<ENV_EDITOR> option:
 Many people have worked on I<sudo> over the years, this version of
 B<visudo> was written by:
 
- Todd Miller		<Todd.Miller@cs.colorado.edu>
+ Todd Miller		<Todd.Miller@courtesan.com>
 
 See the HISTORY file in the sudo distribution for more details.
 
-Please send all bugs, comments, and changes to sudo-bugs@cs.colorado.edu.
+Please send all bugs, comments, and changes to sudo-bugs@courtesan.com.
 
 =head1 DISCLAIMER
 
