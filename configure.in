@@ -125,8 +125,10 @@ case "$OS" in
 		fi
 		;;
     "linux")	echo "Looks like linux"
-		if test -n "$GCC"; then
-		    STATIC_FLAGS="-static"
+		# C2 security stuff
+		if test -n "$C2"; then
+		    OSDEFS="${OSDEFS} -DSHADOW_PWD -D__svr4__"
+		    LIBS="${LIBS} -lshadow"
 		fi
 		;;
     "convex")	echo "Looks like ConvexOs"
