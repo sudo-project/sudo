@@ -28,6 +28,10 @@
 #include <paths.h>
 #endif /* HAVE_PATHS_H */
 
+#ifndef _PATH_DEV
+#define _PATH_DEV		"/dev/"
+#endif /* _PATH_DEV */
+
 #ifndef _PATH_SUDO_SUDOERS
 #define _PATH_SUDO_SUDOERS	"/etc/sudoers"
 #endif /* _PATH_SUDO_SUDOERS */
