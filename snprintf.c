@@ -713,7 +713,7 @@ snprintf(char *str, size_t n, char const *fmt, ...)
 snprintf(str, n, fmt, va_alist)
 	char *str;
 	size_t n;
-	char *fmt;
+	char const *fmt;
 	va_dcl
 #endif
 {
@@ -750,7 +750,7 @@ asprintf(char **str, char const *fmt, ...)
 #else
 asprintf(str, fmt, va_alist)
 	char **str;
-	char *fmt;
+	char const *fmt;
 	va_dcl
 #endif
 {
