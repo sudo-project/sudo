@@ -1726,7 +1726,7 @@ fi
 dnl
 dnl if crypt(3) not in libc, look elsewhere
 dnl
-if test -z "$LIB_CRYPT"; then
+if test -z "$LIB_CRYPT" -a "$with_pam" != "yes"; then
     AC_CHECK_FUNC(crypt, , [AC_CHECK_LIB(crypt, crypt, [SUDO_LIBS="${SUDO_LIBS} -lcrypt"; LIBS="${LIBS} -lcrypt"], AC_CHECK_LIB(crypt_d, crypt, [SUDO_LIBS="${SUDO_LIBS} -lcrypt_d"; LIBS="${LIBS} -lcrypt_d"], AC_CHECK_LIB(ufc, crypt, [SUDO_LIBS="${SUDO_LIBS} -lufc"; LIBS="${LIBS} -lufc"])))])
 fi
 dnl

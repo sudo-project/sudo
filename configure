@@ -26415,7 +26415,7 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 if test -n "$NEED_SNPRINTF"; then
     LIBOBJS="$LIBOBJS snprintf.$ac_objext"
 fi
-if test -z "$LIB_CRYPT"; then
+if test -z "$LIB_CRYPT" -a "$with_pam" != "yes"; then
     echo "$as_me:$LINENO: checking for crypt" >&5
 echo $ECHO_N "checking for crypt... $ECHO_C" >&6
 if test "${ac_cv_func_crypt+set}" = set; then
