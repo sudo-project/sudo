@@ -113,8 +113,9 @@ user_matches(pw, list)
 	switch (m->type) {
 	    case ALIAS:
 		rval = alias_matches(m->name, USERALIAS, pw, NULL);
-		if (rval != UNSPEC || (rval = !strcmp(m->name, pw->pw_name)))
-		    matched = rval;
+		if (rval == UNSPEC)
+		    rval = !strcmp(m->name, pw->pw_name);
+		matched = m->negated ? !rval : rval;
 		break;
 	    case ALL:
 		matched = !m->negated;
@@ -156,8 +157,9 @@ runas_matches(pw, list)
 	switch (m->type) {
 	    case ALIAS:
 		rval = alias_matches(m->name, RUNASALIAS, pw, NULL);
-		if (rval != UNSPEC || (rval = !strcmp(m->name, pw->pw_name)))
-		    matched = rval;
+		if (rval == UNSPEC)
+		    rval = !strcmp(m->name, pw->pw_name);
+		matched = m->negated ? !rval : rval;
 		break;
 	    case ALL:
 		matched = !m->negated;
@@ -195,8 +197,9 @@ host_matches(shost, lhost, list)
 	switch (m->type) {
 	    case ALIAS:
 		rval = alias_matches(m->name, HOSTALIAS, shost, lhost);
-		if (rval != UNSPEC || (rval = hostname_matches(shost, lhost, m->name)))
-		    matched = rval;
+		if (rval == UNSPEC)
+		    rval = hostname_matches(shost, lhost, m->name);
+		matched = m->negated ? !rval : rval;
 		break;
 	    case ALL:
 		matched = !m->negated;
@@ -237,7 +240,7 @@ cmnd_matches(cmnd, args, list)
 	    case ALIAS:
 		rval = alias_matches(m->name, CMNDALIAS, cmnd, args);
 		if (rval != UNSPEC)
-		    matched = rval;
+		    matched = m->negated ? !rval : rval;
 		break;
 	    case ALL:
 		matched = !m->negated;
