@@ -120,10 +120,7 @@ A) You probably didn't install the gcc-fixed include files.
 
 Q) When I run "visudo" it says "sudoers file busy, try again later."
    and doesn't do anything.
-A) You have a stale sudoers temporary file.  The default location is
-   /etc/sudoers.tmp.  If you delete this file visudo will be happy again,
-   but make sure to check that no one else is running visudo at
-   the time.
+A) Someone else is currently editing the sudoers file with visudo.
 
 Q) When I try to use "cd" with sudo it says "cd: command not found".
 A) "cd" is a shell builtin, you can't run it as a command since

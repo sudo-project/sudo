@@ -43,103 +43,116 @@
 
 /* Deal with ANSI stuff reasonably.  */
 #ifndef  __P
-#  if defined (__cplusplus) || defined (__STDC__)
-#    define __P(args)		args
-#  else
-#    define __P(args)		()
-#  endif
+# if defined (__cplusplus) || defined (__STDC__)
+#  define __P(args)		args
+# else
+#  define __P(args)		()
+# endif
 #endif /* __P */
 
 /*
  * Some systems (ie ISC V/386) do not define MAXPATHLEN even in param.h
  */
 #ifndef MAXPATHLEN
-#  define MAXPATHLEN		1024
+# define MAXPATHLEN		1024
 #endif
 
 /*
  * Some systems do not define MAXHOSTNAMELEN.
  */
 #ifndef MAXHOSTNAMELEN
-#  define MAXHOSTNAMELEN	64
+# define MAXHOSTNAMELEN		64
 #endif
 
 /*
  * 4.2BSD lacks FD_* macros (we only use FD_SET and FD_ZERO)
  */
 #ifndef FD_SETSIZE
-#define FD_SET(fd, fds)		((fds) -> fds_bits[0] |= (1 << (fd)))
-#define FD_ZERO(fds)		((fds) -> fds_bits[0] = 0)
+# define FD_SET(fd, fds)	((fds) -> fds_bits[0] |= (1 << (fd)))
+# define FD_ZERO(fds)		((fds) -> fds_bits[0] = 0)
 #endif /* !FD_SETSIZE */
 
 /*
  * Posix versions for those without...
  */
 #ifndef _S_IFMT
-#  define _S_IFMT		S_IFMT
+# define _S_IFMT		S_IFMT
 #endif /* _S_IFMT */
 #ifndef _S_IFREG
-#  define _S_IFREG		S_IFREG
+# define _S_IFREG		S_IFREG
 #endif /* _S_IFREG */
 #ifndef _S_IFDIR
-#  define _S_IFDIR		S_IFDIR
+# define _S_IFDIR		S_IFDIR
 #endif /* _S_IFDIR */
 #ifndef _S_IFLNK
-#define _S_IFLNK		S_IFLNK
+# define _S_IFLNK		S_IFLNK
 #endif /* _S_IFLNK */
 #ifndef S_ISREG
-#  define S_ISREG(m)		(((m) & _S_IFMT) == _S_IFREG)
+# define S_ISREG(m)		(((m) & _S_IFMT) == _S_IFREG)
 #endif /* S_ISREG */
 #ifndef S_ISDIR
-#  define S_ISDIR(m)		(((m) & _S_IFMT) == _S_IFDIR)
+# define S_ISDIR(m)		(((m) & _S_IFMT) == _S_IFDIR)
 #endif /* S_ISDIR */
 
 /*
  * Some OS's may not have this.
  */
 #ifndef S_IRWXU
-#  define S_IRWXU		0000700		/* rwx for owner */
+# define S_IRWXU		0000700		/* rwx for owner */
 #endif /* S_IRWXU */
 
 /*
  * In case this is not defined in <sys/types.h> or <sys/select.h>
  */
 #ifndef howmany
-#define howmany(x, y)	(((x) + ((y) - 1)) / (y))
+# define howmany(x, y)	(((x) + ((y) - 1)) / (y))
 #endif
 
 /*
  * These should be defined in <unistd.h> but not everyone has them.
  */
 #ifndef STDIN_FILENO
-#  define	STDIN_FILENO	0
+# define	STDIN_FILENO	0
 #endif
 #ifndef STDOUT_FILENO
-#  define	STDOUT_FILENO	1
+# define	STDOUT_FILENO	1
 #endif
 #ifndef STDERR_FILENO
-#  define	STDERR_FILENO	2
+# define	STDERR_FILENO	2
+#endif
+
+/*
+ * These should be defined in <unistd.h> but not everyone has them.
+ */
+#ifndef SEEK_SET
+# define	SEEK_SET	0
+#endif
+#ifndef SEEK_CUR
+# define	SEEK_CUR	1
+#endif
+#ifndef SEEK_END
+# define	SEEK_END	2
 #endif
 
 /*
  * BSD defines these in <sys/param.h> but others may not.
  */
 #ifndef MIN
-#define MIN(a,b) (((a)<(b))?(a):(b))
+# define MIN(a,b) (((a)<(b))?(a):(b))
 #endif
 #ifndef MAX
-#define MAX(a,b) (((a)>(b))?(a):(b))
+# define MAX(a,b) (((a)>(b))?(a):(b))
 #endif
 
 /*
  * Emulate seteuid() for HP-UX via setresuid(2) and seteuid(2) for others.
  */
 #ifndef HAVE_SETEUID
-#  ifdef __hpux
-#    define seteuid(_EUID)	(setresuid((uid_t) -1, _EUID, (uid_t) -1))
-#  else
-#    define seteuid(_EUID)	(setreuid((uid_t) -1, _EUID))
-#  endif /* __hpux */
+# ifdef __hpux
+#  define seteuid(_EUID)	(setresuid((uid_t) -1, _EUID, (uid_t) -1))
+# else
+#  define seteuid(_EUID)	(setreuid((uid_t) -1, _EUID))
+# endif /* __hpux */
 #endif /* HAVE_SETEUID */
 
 #endif /* _SUDO_COMPAT_H */

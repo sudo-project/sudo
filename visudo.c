@@ -56,6 +56,7 @@
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <ctype.h>
 #include <pwd.h>
+#include <time.h>
 #include <signal.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -124,8 +125,9 @@ main(argc, argv)
     int sudoers_fd;			/* sudoers file descriptor */
     int stmp_fd;			/* stmp file descriptor */
     int n;				/* length parameter */
+    time_t now;				/* time now */
+    struct stat stmp_sb, sudoers_sb;	/* to check for changes */
 
-    (void) setbuf(stderr, (char *)NULL);	/* unbuffered stderr */
 
     /*
      * Parse command line options
@@ -166,30 +168,44 @@ main(argc, argv)
 #endif /* ENV_EDITOR */
 
     /*
-     * Copy sudoers file to stmp
+     * Open sudoers temp file and grab a lock.
      */
-    stmp_fd = open(stmp, O_WRONLY | O_CREAT | O_EXCL, 0600);
+    stmp_fd = open(stmp, O_WRONLY | O_CREAT, 0600);
     if (stmp_fd < 0) {
-	if (errno == EEXIST) {
-	    (void) fprintf(stderr, "%s: sudoers file busy, try again later.\n",
-		Argv[0]);
-	    exit(1);
-	}
 	(void) fprintf(stderr, "%s: %s\n", Argv[0], strerror(errno));
+	exit(1);
+    }
+    if (!lock_file(stmp_fd, SUDO_TLOCK)) {
+	(void) fprintf(stderr, "%s: sudoers file busy, try again later.\n",
+	    Argv[0]);
+	exit(1);
+    }
+#ifdef HAVE_FTRUNCATE
+    if (ftruncate(stmp_fd, 0) == -1) {
+#else
+    if (truncate(stmp, 0) == -1) {
+#endif
+	(void) fprintf(stderr, "%s: can't truncate %s: %s\n", Argv[0],
+	    stmp, strerror(errno));
 	Exit(-1);
     }
 
     /* Install signal handlers to clean up stmp if we are killed. */
     setup_signals();
 
+    (void) memset(&sudoers_sb, 0, sizeof(sudoers_sb));
+    if (stat(sudoers, &sudoers_sb) == -1 && errno != ENOENT) {
+	(void) fprintf(stderr, "%s: %s\n", Argv[0], strerror(errno));
+	Exit(-1);
+    }
     sudoers_fd = open(sudoers, O_RDONLY);
-    if (sudoers_fd < 0 && errno != ENOENT) {
+    if (sudoers_fd == -1 && errno != ENOENT) {
 	(void) fprintf(stderr, "%s: %s\n", Argv[0], strerror(errno));
 	Exit(-1);
     }
 
-    /* Copy sudoers -> stmp */
-    if (sudoers_fd >= 0) {
+    /* Copy sudoers -> stmp and reset the mtime */
+    if (sudoers_fd != -1) {
 	while ((n = read(sudoers_fd, buf, sizeof(buf))) > 0)
 	    if (write(stmp_fd, buf, n) != n) {
 		(void) fprintf(stderr, "%s: Write failed: %s\n", Argv[0],
@@ -200,6 +216,7 @@ main(argc, argv)
 	(void) close(sudoers_fd);
     }
     (void) close(stmp_fd);
+    (void) touch(stmp, sudoers_sb.st_mtime);
 
     /*
      * Edit the temp file and parse it (for sanity checking)
@@ -219,20 +236,19 @@ main(argc, argv)
 	    (void) sprintf(buf, "%s %s", Editor, stmp);
 
 	/* Do the edit -- some SYSV editors exit with 1 instead of 0 */
+	now = time(NULL);
 	n = system(buf);
 	if (n != -1 && ((n >> 8) == 0 || (n >> 8) == 1)) {
-	    struct stat statbuf;	/* for sanity checking */
-
 	    /*
 	     * Sanity checks.
 	     */
-	    if (stat(stmp, &statbuf) < 0) {
+	    if (stat(stmp, &stmp_sb) < 0) {
 		(void) fprintf(stderr,
 		    "%s: Can't stat temporary file (%s), %s unchanged.\n",
 		    Argv[0], stmp, sudoers);
 		Exit(-1);
 	    }
-	    if (statbuf.st_size == 0) {
+	    if (stmp_sb.st_size == 0) {
 		(void) fprintf(stderr,
 		    "%s: Zero length temporary file (%s), %s unchanged.\n",
 		    Argv[0], stmp, sudoers);
@@ -284,6 +300,15 @@ main(argc, argv)
 	    }
 	}
     } while (parse_error == TRUE);
+
+    /*
+     * If the user didn't change the temp file, just unlink it.
+     */
+    if (sudoers_sb.st_mtime != now && sudoers_sb.st_mtime == stmp_sb.st_mtime &&
+	sudoers_sb.st_size == stmp_sb.st_size) {
+	(void) fprintf(stderr, "%s: sudoers file unchanged.\n", Argv[0]);
+	Exit(0);
+    }
 
     /*
      * Change mode and ownership of temp file so when
@@ -469,5 +494,5 @@ static void
 usage()
 {
     (void) fprintf(stderr, "usage: %s [-V]\n", Argv[0]);
-    Exit(-1);
+    exit(1);
 }

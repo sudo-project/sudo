@@ -57,13 +57,6 @@
 #include <sys/file.h>
 #include <pwd.h>
 #include <grp.h>
-#ifdef HAVE_UTIME
-#  ifdef HAVE_UTIME_H
-#    include <utime.h>
-#  endif /* HAVE_UTIME_H */
-#else
-#  include "emul/utime.h"
-#endif /* HAVE_UTIME */
 
 #include "sudo.h"
 
@@ -81,7 +74,6 @@ static const char rcsid[] = "$Sudo$";
        int   user_is_exempt	__P((void));
 static void  build_timestamp	__P((char **, char **));
 static int   timestamp_status	__P((char *, char *, char *, int));
-static int   touch		__P((char *, time_t));
 #ifndef NO_PASSWD
 static char *expand_prompt	__P((char *, char *, char *));
 static void  lecture		__P((void));
@@ -263,29 +255,6 @@ user_is_exempt()
 #endif
 
     return(FALSE);
-}
-
-/*
- * Update the access and modify times on a file.
- */
-static int
-touch(path, when)
-    char *path;
-    time_t when;
-{
-#ifdef HAVE_UTIME_POSIX
-    struct utimbuf ut, *utp;
-
-    ut.actime = ut.modtime = when;
-    utp = &ut;
-#else
-    /* BSD <= 4.3 has no struct utimbuf */
-    time_t utp[2];
-
-    utp[0] = utp[1] = when;
-#endif /* HAVE_UTIME_POSIX */
-
-    return(utime(path, utp));
 }
 
 /*

@@ -76,12 +76,19 @@ print_version()
 
     /*
      * Print compile-time options if root.
+     * At some point these will all be in a structure of some kind
+     * to allow overriding the defaults from sudoers.
+     * XXX - reorganize for readability.
      */
     if (getuid() == 0) {
+	(void) printf("\nSudoers file: %s, mode 0%o, uid %d, gid %d\n",
+	    _PATH_SUDOERS, SUDOERS_MODE, SUDOERS_UID, SUDOERS_GID);
+	(void) printf("Sudoers temp file: %s\n", _PATH_SUDOERS_TMP);
+
 #ifdef WITHOUT_PASSWD
-	(void) puts("\nNo Authentication configured\n");
+	(void) puts("No Authentication configured\n");
 #else
-	(void) fputs("\nAuthentication methods:", stdout);
+	(void) fputs("Authentication methods:", stdout);
 	for (auth = auth_switch; auth->name; auth++) {
 	    (void) putchar(' ');
 	    (void) fputs(auth->name, stdout);
@@ -137,6 +144,8 @@ print_version()
 	(void) fputs(" goons", stdout);
 # endif
 	(void) putchar('\n');
+# else
+	(void) printf("Incorrect password message: %s\n", INCORRECT_PASSWORD);
 #endif
 
 #ifdef SUDO_UMASK
@@ -169,14 +178,39 @@ print_version()
 	(void) printf("Editor for visudo: %s\n", EDITOR);
 #endif
 
+#if defined(IGNORE_DOT_PATH) || defined(DONT_LEAK_PATH_INFO) || defined(SECURE_PATH)
+	puts("$PATH options:");
 #ifdef SECURE_PATH
-	(void) printf("Secure PATH: %s\n", SECURE_PATH);
+	(void) printf("    PATH override: %s\n", SECURE_PATH);
+#endif
+# ifdef IGNORE_DOT_PATH
+	(void) puts("    ignore '.'");
+# endif
+# ifdef DONT_LEAK_PATH_INFO
+	(void) puts("    no information leakage");
+# endif
 #endif
 
 #ifdef _PATH_SENDMAIL
 	(void) printf("Mailer path: %s\n", _PATH_SENDMAIL);
 	(void) printf("Send mail to: %s\n", ALERTMAIL);
 	(void) printf("Mail subject: %s\n", MAILSUBJECT);
+	(void) fputs("Send mail on: 'error'", stdout);
+# ifdef SEND_MAIL_WHEN_NO_USER
+	(void) fputs(" 'unlisted user'", stdout);
+# endif
+# ifdef SEND_MAIL_WHEN_NOT_OK
+	(void) fputs(" 'authentication failure'", stdout);
+# endif
+	(void) putchar('\n');
+#endif
+
+#ifdef SHELL_IF_NO_ARGS
+	puts("When invoked with no arguments sudo will start a shell")
+#endif
+
+#ifdef SHELL_SETS_HOME
+	puts("Sudo will set $HOME to the homedir of the target user");
 #endif
 
 	(void) printf("Default password prompt: %s\n", PASSPROMPT);
@@ -187,14 +221,6 @@ print_version()
 #else
 	(void) puts("no");
 #endif
-
-/* stopped at INCORRECT_PASSWORD */
-
-    /* XXX - more */
-
-/*
--D_PATH_SUDO_SUDOERS=\"/etc/sudoers\" -D_PATH_SUDO_STMP=\"/etc/stmp\" -DSUDOERS_UID=0 -DSUDOERS_GID=0 -DSUDOERS_MODE=0440
-*/
     }
 }
 

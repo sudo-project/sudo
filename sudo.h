@@ -134,6 +134,13 @@ struct sudo_user {
 #define SUDO_PASS_MAX	256
 
 /*
+ * Flags for lock_file()
+ */
+#define SUDO_LOCK	1		/* lock a file */
+#define SUDO_TLOCK	2		/* test & lock a file (non-blocking) */
+#define SUDO_UNLOCK	4		/* unlock a file */
+
+/*
  * Function prototypes
  */
 #define YY_DECL int yylex __P((void))
@@ -164,6 +171,8 @@ char *estrdup		__P((const char *));
 void easprintf		__P((char **, const char *, ...));
 void evasprintf		__P((char **, const char *, va_list));
 void print_version	__P((void));
+int lock_file		__P((int, int));
+int touch		__P((char *, time_t));
 YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */

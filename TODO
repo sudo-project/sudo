@@ -47,5 +47,3 @@ TODO list (most will be addressed in the next rewrite)
 
 19) Sudo should have a separate error message for when the user is in sudoers
     but not allowed to run stuff on that host, and send mail.
-
-20) Add configure check for locking functions and lock logfile.

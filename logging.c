@@ -47,7 +47,6 @@
 #ifdef HAVE_STRINGS_H
 #include <strings.h>
 #endif /* HAVE_STRINGS_H */
-#include <fcntl.h>
 #include <pwd.h>
 #include <signal.h>
 #include <time.h>
@@ -68,7 +67,6 @@ static void do_syslog		__P((int, char *));
 #endif
 #if (LOGGING & SLOG_FILE)
 static void do_logfile		__P((char *));
-static int lock_file		__P((FILE *, int));
 #endif
 static void send_mail		__P((char *));
 
@@ -179,7 +177,7 @@ do_logfile(msg)
 	    _PATH_SUDO_LOGFILE, strerror(errno));
 	send_mail(full_line);
 	free(full_line);
-    } else if (!lock_file(fp, TRUE)) {
+    } else if (!lock_file(fileno(fp), SUDO_LOCK)) {
 	easprintf(&full_line, "Can't lock log file: %s: %s",
 	    _PATH_SUDO_LOGFILE, strerror(errno));
 	send_mail(full_line);
@@ -252,7 +250,7 @@ do_logfile(msg)
 	free(full_line);
 # endif
 	(void) fflush(fp);
-	(void) lock_file(fp, FALSE);
+	(void) lock_file(fileno(fp), SUDO_UNLOCK);
 	(void) fclose(fp);
     }
 
@@ -572,50 +570,3 @@ reapchild(sig)
 #endif /* POSIX_SIGNALS */
     errno = serrno;
 }
-
-/*
- * Lock/unlock a file.
- */
-#ifdef HAVE_LOCKF
-static int
-lock_file(fp, lockit)
-    FILE *fp;
-    int lockit;
-{
-    int op;
-
-    op = lockit ? F_LOCK : F_ULOCK;
-    return(lockf(fileno(fp), op, 0) == 0);
-}
-#elif HAVE_FLOCK
-static int
-lock_file(fp, lockit)
-    FILE *fp;
-    int lockit;
-{
-    int op;
-
-    op = lockit ? LOCK_EX : LOCK_UN;
-    return(flock(fileno(fp), op) == 0);
-}
-#else
-static int
-lock_file(fp, lockit)
-    FILE *fp;
-    int lockit;
-{
-#ifdef F_SETLK
-    struct flock lock;
-
-    lock.l_start = 0;
-    lock.l_len = 0;
-    lock.l_pid = getpid();
-    lock.l_type = lockit ? F_WRLCK : F_UNLCK;
-    lock.l_whence = SEEK_SET;
-
-    return(fcntl(fileno(fp), F_SETLKW, &lock) == 0);
-#else
-    return(TRUE);
-#endif
-}
-#endif

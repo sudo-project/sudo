@@ -1106,3 +1106,19 @@ Sudo 1.5.9 released.
 
 346) Sudo is now available under a BSD/Apache style license.  This is
      possible because it no longer contains any of the original 1.1 code.
+
+347) Added configuration info when sudo is run with the -V flag by root.
+
+348) Change visudo tmp file from /etc/stmp -> /etc/sudoers.tmp since
+     Solaris uses stmp for shadow temp file.  Also rename _PATH_SUDO_SUDOERS
+     to _PATH_SUDOERS and _PATH_SUDO_STMP to _PATH_SUDOERS_TMP.
+
+349) Added configure option to set syslog priorities.
+
+350) Sudo now locks its log file to prevent mangled entries.
+
+351) Visudo now locks the sudoers temp file instead of bailing when
+     the temp file already exists.  This fixes the problem of stale
+     temp files but it does *require* that you not try to put the
+     temp file in a world-writable directory.  This shoud not be
+     an issue as the temp file should live in the same dir as sudoers.
