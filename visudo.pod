@@ -151,7 +151,7 @@ was configured with the I<--with-env-editor> option:
 Many people have worked on I<sudo> over the years; this version of
 B<visudo> was written by:
 
- Todd Miller		<Todd.Miller@courtesan.com>
+ Todd Miller
 
 See the HISTORY file in the sudo distribution or visit
 http://www.sudo.ws/sudo/history.html for more details.
