@@ -156,7 +156,12 @@ int main(argc, argv)
 	usage();
 
     /* user_pw_ent needs to point to something... */
-    user_pw_ent = getpwuid(getuid());
+    if ((user_pw_ent = getpwuid(getuid())) == NULL) {
+	(void) fprintf(stderr, "%s: Can't find you in the passwd database: ",
+	    Argv[0]);
+	perror(stmp);
+	exit(1);
+    }
 
 #ifdef ENV_EDITOR
     /*
