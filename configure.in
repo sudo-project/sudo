@@ -68,7 +68,9 @@ SUDO_OSTYPE()
 OS=`echo $OS | $TRPROG '[[A-Z]]' '[[a-z]]'`
 case "$OS" in
     "sunos")	echo "Looks like SunOS 4.x"
-		if test -z "$GCC"; then
+		if test -n "$GCC"; then
+		    STATIC_FLAGS="-static"
+		else
 		    STATIC_FLAGS="-Bstatic"
 		fi
 		;;
@@ -79,12 +81,16 @@ case "$OS" in
 		AC_DEFINE(_ALL_SOURCE)
 		;;
     "hp-ux")	echo "Looks like HP-UX"
-		if test -z "$GCC"; then
+		if test -n "$GCC"; then
+		    STATIC_FLAGS="-static"
+		else
 		    STATIC_FLAGS="-Wl,-a,archive"
 		fi
 		;;
     "osf1")	echo "Looks like OSF/1"
-		if test -z "$GCC"; then
+		if test -n "$GCC"; then
+		    STATIC_FLAGS="-static"
+		else
 		    STATIC_FLAGS="-non_shared"
 		fi
 		# C2 security stuff
@@ -112,6 +118,9 @@ case "$OS" in
 		fi
 		;;
     "linux")	echo "Looks like linux"
+		if test -n "$GCC"; then
+		    STATIC_FLAGS="-static"
+		fi
 		;;
     "convex")	echo "Looks like ConvexOs"
 		AC_DEFINE(_CONVEX_SOURCE)
@@ -144,12 +153,6 @@ case "$OS" in
     *)		echo "Hmmm, I don't recognize $OS offhand, but that's ok"
 		;;
 esac
-dnl
-dnl We can't make a static binary on solaris and it causes probs on AIX
-dnl
-if test -n "$GCC" -a -n "$OS" -a "$OS" != "solaris" -a "$OS" != "aix" ; then
-    STATIC_FLAGS="-static"
-fi
 dnl
 dnl extra AFS libs
 dnl
