@@ -136,8 +136,13 @@ main(argc, argv)
      * close all file descriptors to make sure we have a nice
      * clean slate from which to work.  
      */
+#ifdef HAVE_SYSCONF
+    for (rtn = sysconf(_SC_OPEN_MAX) - 1; rtn > 3; rtn--)
+	(void) close(rtn);
+#else
     for (rtn = getdtablesize() - 1; rtn > 3; rtn--)
 	(void) close(rtn);
+#endif /* HAVE_SYSCONF */
 
     load_globals();		/* load the user host cmnd and uid variables */
 
