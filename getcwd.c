@@ -74,10 +74,6 @@
 
 #include "compat.h"
 
-#ifndef dirfd
-#  define dirfd(dirp)	((dirp)->dd_fd)
-#endif
-
 #define	ISDOT(dp) \
 	(dp->d_name[0] == '.' && (dp->d_name[1] == '\0' || \
 	    (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))

@@ -47,10 +47,6 @@
 
 #include "sudo.h"
 
-#ifndef dirfd
-# define dirfd(dirp)	((dirp)->dd_fd)
-#endif
-
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
