@@ -101,7 +101,6 @@ static const char rcsid[] = "$Sudo$";
  */
 static int init_vars			__P((int));
 static int parse_args			__P((int, char **));
-static void check_sudoers		__P((void));
 static void initial_setup		__P((void));
 static void set_loginclass		__P((struct passwd *));
 static void usage			__P((int));
@@ -259,7 +258,7 @@ main(argc, argv, envp)
     else if (ISSET(validated, VALIDATE_OK) && !printmatches); /* skips */
     else if (ISSET(validated, VALIDATE_OK) && printmatches)
     {
-	check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
+	sudoers_fp = open_sudoers(_PATH_SUDOERS);
 
 	/* User is found in LDAP and we want a list of all sudo commands the
 	 * user can do, so consult sudoers but throw away result.
@@ -269,7 +268,7 @@ main(argc, argv, envp)
     else
 #endif
     {
-	check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
+	sudoers_fp = open_sudoers(_PATH_SUDOERS);
 
 	/* Validate the user but don't search for pseudo-commands. */
 	validated = sudoers_lookup(pwflag);
@@ -852,33 +851,35 @@ parse_args(argc, argv)
  * Sanity check sudoers mode/owner/type.
  * Leaves a file pointer to the sudoers file open in ``fp''.
  */
-static void
-check_sudoers()
+FILE *
+open_sudoers(sudoers)
+    const char *sudoers;
 {
     struct stat statbuf;
-    int rootstat, i;
+    FILE *fp = NULL;
     char c;
+    int rootstat, i;
 
     /*
      * Fix the mode and group on sudoers file from old default.
      * Only works if file system is readable/writable by root.
      */
-    if ((rootstat = stat_sudoers(_PATH_SUDOERS, &statbuf)) == 0 &&
+    if ((rootstat = stat_sudoers(sudoers, &statbuf)) == 0 &&
 	SUDOERS_UID == statbuf.st_uid && SUDOERS_MODE != 0400 &&
 	(statbuf.st_mode & 0007777) == 0400) {
 
-	if (chmod(_PATH_SUDOERS, SUDOERS_MODE) == 0) {
-	    warnx("fixed mode on %s", _PATH_SUDOERS);
+	if (chmod(sudoers, SUDOERS_MODE) == 0) {
+	    warnx("fixed mode on %s", sudoers);
 	    SET(statbuf.st_mode, SUDOERS_MODE);
 	    if (statbuf.st_gid != SUDOERS_GID) {
-		if (!chown(_PATH_SUDOERS,(uid_t) -1,SUDOERS_GID)) {
-		    warnx("set group on %s", _PATH_SUDOERS);
+		if (!chown(sudoers, (uid_t) -1, SUDOERS_GID)) {
+		    warnx("set group on %s", sudoers);
 		    statbuf.st_gid = SUDOERS_GID;
 		} else
-		    warn("unable to set group on %s", _PATH_SUDOERS);
+		    warn("unable to set group on %s", sudoers);
 	    }
 	} else
-	    warn("unable to fix mode on %s", _PATH_SUDOERS);
+	    warn("unable to fix mode on %s", sudoers);
     }
 
     /*
@@ -888,40 +889,41 @@ check_sudoers()
      */
     set_perms(PERM_SUDOERS);
 
-    if (rootstat != 0 && stat_sudoers(_PATH_SUDOERS, &statbuf) != 0)
-	log_error(USE_ERRNO, "can't stat %s", _PATH_SUDOERS);
+    if (rootstat != 0 && stat_sudoers(sudoers, &statbuf) != 0)
+	log_error(USE_ERRNO, "can't stat %s", sudoers);
     else if (!S_ISREG(statbuf.st_mode))
-	log_error(0, "%s is not a regular file", _PATH_SUDOERS);
+	log_error(0, "%s is not a regular file", sudoers);
     else if (statbuf.st_size == 0)
-	log_error(0, "%s is zero length", _PATH_SUDOERS);
+	log_error(0, "%s is zero length", sudoers);
     else if ((statbuf.st_mode & 07777) != SUDOERS_MODE)
-	log_error(0, "%s is mode 0%o, should be 0%o", _PATH_SUDOERS,
+	log_error(0, "%s is mode 0%o, should be 0%o", sudoers,
 	    (statbuf.st_mode & 07777), SUDOERS_MODE);
     else if (statbuf.st_uid != SUDOERS_UID)
-	log_error(0, "%s is owned by uid %lu, should be %lu", _PATH_SUDOERS,
+	log_error(0, "%s is owned by uid %lu, should be %lu", sudoers,
 	    (unsigned long) statbuf.st_uid, SUDOERS_UID);
     else if (statbuf.st_gid != SUDOERS_GID)
-	log_error(0, "%s is owned by gid %lu, should be %lu", _PATH_SUDOERS,
+	log_error(0, "%s is owned by gid %lu, should be %lu", sudoers,
 	    (unsigned long) statbuf.st_gid, SUDOERS_GID);
     else {
 	/* Solaris sometimes returns EAGAIN so try 10 times */
 	for (i = 0; i < 10 ; i++) {
 	    errno = 0;
-	    if ((sudoers_fp = fopen(_PATH_SUDOERS, "r")) == NULL ||
-		fread(&c, sizeof(c), 1, sudoers_fp) != 1) {
-		sudoers_fp = NULL;
+	    if ((fp = fopen(sudoers, "r")) == NULL ||
+		fread(&c, sizeof(c), 1, fp) != 1) {
+		fp = NULL;
 		if (errno != EAGAIN && errno != EWOULDBLOCK)
 		    break;
 	    } else
 		break;
 	    sleep(1);
 	}
-	if (sudoers_fp == NULL)
-	    log_error(USE_ERRNO, "can't open %s", _PATH_SUDOERS);
+	if (fp == NULL)
+	    log_error(USE_ERRNO, "can't open %s", sudoers);
+	(void) fcntl(fileno(fp), F_SETFD, 1);
     }
-    (void) fcntl(fileno(sudoers_fp), F_SETFD, 1);
 
     set_perms(PERM_ROOT);		/* change back to root */
+    return(fp);
 }
 
 /*
