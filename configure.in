@@ -1205,6 +1205,14 @@ case "$host" in
 		CPPFLAGS="${CPPFLAGS} -D_XOPEN_EXTENDED_SOURCE"
 		SUDO_DEFINE(_ALL_SOURCE)
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
+		AC_MSG_CHECKING([if linker accepts -Wl,-blibpath])
+		O_LDFLAGS="$LDFLAGS"
+		LDFLAGS="$LDFLAGS -Wl,-blibpath:/usr/lib:/lib"
+		AC_TRY_LINK([], [], [
+		    blibpath="/usr/lib:/lib"
+		    AC_MSG_RESULT(yes)
+		], [AC_MSG_RESULT(no)])
+		LDFLAGS="$O_LDFLAGS"
 		;;
     *-*-hiuxmpp*)
 		if test "$CHECKSHADOW" = "true"; then
@@ -1947,6 +1955,11 @@ dnl
 if test "$with_authenticate" = "yes"; then
     SUDO_LIBS="${SUDO_LIBS} -ls"
 fi
+
+dnl
+dnl Add $blibpath to SUDO_LDFLAGS
+dnl
+test X"$blibpath" != X"" && SUDO_LDFLAGS="$SUDO_LDFLAGS -Wl,-blibpath:$blibpath"
 
 dnl
 dnl Check for log file and timestamp locations
