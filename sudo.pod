@@ -91,7 +91,7 @@ B<sudo> accepts the following command line options:
 
 The B<-H> (I<HOME>) option sets the C<HOME> environment variable
 to the homedir of the target user (root by default) as specified
-in passwd(5).  By default, B<sudo> does not modify C<HOME>.
+in passwd(@mansectform@).  By default, B<sudo> does not modify C<HOME>.
 
 =item -K
 
@@ -195,8 +195,8 @@ The B<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
 
 =item -i
 
-The C<-i> (I<simulate initial login>) option runs the shell specified
-in the passwd(@mansectform@) entry of the user that the command is
+The B<-i> (I<simulate initial login>) option runs the shell specified
+in the L<passwd(@mansectform@)> entry of the user that the command is
 being run as.  The command name argument given to the shell begins
 with a C<-> to tell the shell to run as a login shell.  B<sudo>
 attempts to change to that user's home directory before running the
@@ -258,7 +258,7 @@ two consecutive C<%> characters are collasped into a single C<%> character
 
 The B<-s> (I<shell>) option runs the shell specified by the I<SHELL>
 environment variable if it is set or the shell as specified
-in passwd(5).
+in L<passwd(@mansectform@)>.
 
 =item -u
 
@@ -289,11 +289,11 @@ will simply be the return value of the program that was executed.
 Otherwise, B<sudo> quits with an exit value of 1 if there is a
 configuration/permission problem or if B<sudo> cannot execute the
 given command.  In the latter case the error string is printed to
-stderr.  If B<sudo> cannot stat(2) one or more entries in the user's
+stderr.  If B<sudo> cannot L<stat(2)> one or more entries in the user's
 C<PATH> an error is printed on stderr.  (If the directory does not
 exist or if it is not really a directory, the entry is ignored and
 no error is printed.)  This should not happen under normal
-circumstances.  The most common reason for stat(2) to return
+circumstances.  The most common reason for L<stat(2)> to return
 "permission denied" is if you are running an automounter and one
 of the directories in your C<PATH> is on a machine that is currently
 unreachable.
@@ -332,7 +332,7 @@ behavior or link B<sudo> statically.
 B<sudo> will check the ownership of its timestamp directory
 (F<@timedir@> by default) and ignore the directory's contents if
 it is not owned by root and only writable by root.  On systems that
-allow non-root users to give away files via chown(2), if the timestamp
+allow non-root users to give away files via L<chown(2)>, if the timestamp
 directory is located in a directory writable by anyone (e.g.: F</tmp>),
 it is possible for a user to create the timestamp directory before
 B<sudo> is run.  However, because B<sudo> checks the ownership and
@@ -363,7 +363,7 @@ the user an effective root shell.
 
 =head1 EXAMPLES
 
-Note: the following examples assume suitable sudoers(5) entries.
+Note: the following examples assume suitable L<sudoers(@mansectform@)> entries.
 
 To get a file listing of an unreadable directory:
 
@@ -419,6 +419,7 @@ B<sudo> utilizes the following environment variables:
 			is specified)
 
  VISUAL			Default editor to use in -e (sudoedit) mode
+
 =head1 FILES
 
  @sysconfdir@/sudoers		List of who can run what
@@ -455,7 +456,7 @@ if that user is allowed to run arbitrary commands via B<sudo>.
 Also, many programs (such as editors) allow the user to run commands
 via shell escapes, thus avoiding B<sudo>'s checks.  However, on
 most systems it is possible to prevent shell escapes with B<sudo>'s
-I<noexec> functionality.  See the sudoers(5) manual for details.
+I<noexec> functionality.  See the L<sudoers(@mansectform@)> manual for details.
 
 If users have sudo C<ALL> there is nothing to prevent them from creating
 their own program that gives them a root shell regardless of any '!'
@@ -468,4 +469,5 @@ are generally safe).
 
 =head1 SEE ALSO
 
-grep(1), su(1), stat(2), login_cap(3), sudoers(5), passwd(5), visudo(8)
+L<grep(1)>, L<su(1)>, L<stat(2)>, L<login_cap(3)>, L<sudoers(@mansectform@)>,
+L<passwd(@mansectform@)>, L<visudo(@mansectsu@)>
