@@ -273,31 +273,19 @@ runaslist	:	runasuser {
 
 
 runasuser	:	NAME {
-			    if (strcmp($1, runas_user) == 0) 
-				$$ = TRUE;
-			    else 
-				$$ = FALSE;
+			    $$ = (strcmp($1, runas_user) == 0);
 			    (void) free($1);
 			}
 		|	USERGROUP {
-			    if (usergr_matches($1, runas_user))
-				$$ = TRUE;
-			    else
-				$$ = FALSE;
+			    $$ = usergr_matches($1, runas_user);
 			    (void) free($1);
 			}
 		|	NETGROUP {
-			    if (netgr_matches($1, NULL, runas_user))
-				$$ = TRUE;
-			    else
-				$$ = FALSE;
+			    $$ = netgr_matches($1, NULL, runas_user);
 			    (void) free($1);
 			}
 		|	ALIAS {
-			    if (find_alias($1, USER))
-				$$ = TRUE;
-			    else
-				$$ = FALSE;
+			    $$ = find_alias($1, USER);
 			    (void) free($1);
 			}
 		|	ALL {
