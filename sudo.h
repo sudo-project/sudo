@@ -301,19 +301,31 @@ typedef struct list {
 #define CMND_LIST                0x02
 #define EXTRA_LIST               0x03
 
-/* These are the functions that are called in sudo */
-/* XXX - use __P() */
-#ifndef HAVE_STRDUP
-char *strdup();
+/*
+ * Prototypes
+ */
+
+/* Deal with ansi stuff reasonably */
+#undef  __P
+#if defined (__cplusplus) || defined (__STDC__)
+#  define __P(args)	args
+#else
+#  define __P(args)	()
 #endif
-char *find_path();
-void log_error();
-void inform_user();
-void check_user();
-int validate();
-void be_root();
-void be_user();
-void be_full_user();
+
+/* These are the functions that are called in sudo(8) */
+
+#ifndef HAVE_STRDUP
+char *strdup		__P((char *));
+#endif
+char *find_path		__P((char *));
+void log_error		__P((int));
+void inform_user	__P((int));
+void check_user		__P((void));
+int validate		__P((void));
+void be_root		__P((void));
+void be_user		__P((void));
+void be_full_user	__P((void));
 
 /*
  * Most of these variables are declared in main() so they don't need
