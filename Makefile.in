@@ -133,7 +133,7 @@ TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o tspwutil.o $(COMMON_OBJS)
 
 LIB_OBJS = @LIBOBJS@ @ALLOCA@
 
-VERSION = 1.6.9
+VERSION = 1.7
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES HISTORY INSTALL INSTALL.configure \
 	    LICENSE Makefile.in PORTING README README.LDAP RUNSON TODO \
