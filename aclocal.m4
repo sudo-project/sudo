@@ -259,7 +259,7 @@ if test -n "$UNAMEPROG"; then
     if test "$OS" = `$UNAMEPROG -n`; then
 	# evil hack for ISC unix (svr4) and SCO
 	if test "`$UNAMEPROG -m`" = "i386"; then
-	    if test -d /usr/admin; then
+	    if test -d /etc/conf/kconfig.d; then
 		OS="isc"
 	    else
 		OS="sco"
