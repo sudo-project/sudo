@@ -915,6 +915,8 @@ AC_ARG_WITH(ldap, [  --with-ldap[[=DIR]]     enable LDAP support],
 		AC_MSG_RESULT(yes)
 		;;
 esac])
+AC_ARG_WITH(ldap-conf-file, [  --with-ldap-conf-file   path to LDAP configuration file],
+[AC_DEFINE_UNQUOTED(_PATH_LDAP_CONF, "$with_ldap_conf_file")])
 
 AC_ARG_WITH(pc-insults, [  --with-pc-insults       replace politically incorrect insults with less offensive ones],
 [case $with_pc_insults in  

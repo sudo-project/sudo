@@ -62,10 +62,6 @@ static const char rcsid[] = "$Sudo$";
 
 /* LDAP code below */
 
-#ifndef LDAP_CONFIG
-#define LDAP_CONFIG "/etc/ldap.conf"
-#endif
-
 #ifndef BUF_SIZ
 #define BUF_SIZ 1024
 #endif
@@ -474,7 +470,7 @@ sudo_ldap_read_config()
   char *keyword;
   char *value;
 
-  f=fopen(LDAP_CONFIG,"r");
+  f=fopen(_PATH_LDAP_CONF,"r");
   if (!f) return 0;
   while (f && fgets(buf,sizeof(buf)-1,f)){
     c=buf;

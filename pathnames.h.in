@@ -108,3 +108,7 @@
 #ifndef _PATH_USRTMP
 #define	_PATH_USRTMP	"/usr/tmp/"
 #endif /* _PATH_USRTMP */
+
+#ifndef _PATH_LDAP_CONF
+#define	_PATH_LDAP_CONF	"/etc/ldap.conf"
+#endif /* _PATH_LDAP_CONF */
