@@ -1,26 +1,22 @@
 TODO list
 
-01) Fix bison warnings on parse.yacc.
+01) Add groups of users to the config file.
 
-02) Add groups of users to the config file.
+02) Nestable command aliases
 
-03) Deal with host aliases (CNAME records) rationally.
+03) Add uid and gid options to sudo and sudoers file.
 
-04) Nestable command aliases
-
-05) Add uid and gid options to sudo and sudoers file.
-
-06) Redo parsing to be more like op(8) with true command aliases where
+04) Redo parsing to be more like op(8) with true command aliases where
     can specify uid, gid(s) and part/all of the environment.
 
-07) Add default options to sudoers file (umask, def uid, def gids, dir, PATH).
+05) Add default options to sudoers file (umask, def uid, def gids, dir, PATH).
 
-08) Add a whatnow-style prompt to visudo.
+06) Add a whatnow-style prompt to visudo.
 
-09) Add a SHELLS reserved word that checks against /etc/shells.
+07) Add a SHELLS reserved word that checks against /etc/shells.
 
-10) Make the sudoers file accessible via NIS, Hesiod, and maybe NetInfo.
+08) Make the sudoers file accessible via NIS, Hesiod, and maybe NetInfo.
 
-11) Flag to sudo to show what a user is allowed to run.
+09) Add a %h field to MAILSUBJECT for the hostname.
 
-12) Add a %h field to MAILSUBJECT for the hostname.
+10) Add a -h flag to sudo for a history mechanism.
