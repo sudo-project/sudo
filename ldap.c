@@ -231,7 +231,7 @@ int sudo_ldap_check_runas(ld,entry)
    */
   if (!v)
   {
-    ret=!strcasecmp(*user_runas,def_str(I_RUNAS_DEFAULT));
+    ret=!strcasecmp(*user_runas,def_runas_default);
   }
 
   /* what about the case where exactly one runas is specified in
@@ -829,12 +829,12 @@ int pwflag;
      * To be extra paranoid, since we haven't read any NOPASSWD options
      * in /etc/sudoers yet, but we have to make the decission now, lets
      * assume the worst and prefer to prompt for password unless the setting
-     * is NEVER. (example verifypw=never or listpw=never)
+     * is "never". (example verifypw=never or listpw=never)
      *
      */
     if (pwflag<0) { /* -k */
       ret=VALIDATE_OK | FLAG_NOPASS;
-    } else if ((def_ival(pwflag) == PWCHECK_NEVER)){ /* see note above */
+    } else if (sudo_defs_table[pwflag].sd_un.tuple == never){ /* see note above */
       ret=VALIDATE_OK | FLAG_NOPASS;
     } else {
       ret=VALIDATE_OK; /* extra paranoid */
@@ -844,7 +844,7 @@ int pwflag;
   if (ret & VALIDATE_OK) {
     /* We have a match.  Should we check the password? */
     /* Note: This could be the global or a rule specific option */
-    if (!def_flag(I_AUTHENTICATE)) ret|=FLAG_NOPASS;
+    if (!def_authenticate) ret|=FLAG_NOPASS;
   } else {
     /* we do not have a match */   
     ret=VALIDATE_NOT_OK;

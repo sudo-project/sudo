@@ -1392,7 +1392,7 @@ password_timeout=5
 sudo_umask=0022
 passprompt="Password:"
 long_otp_prompt=off
-lecture=on
+lecture=once
 logfac=local2
 goodpri=notice
 badpri=alert
@@ -1921,9 +1921,9 @@ echo $ECHO_N "checking whether to lecture users the first time they run sudo... 
 if test "${with_lecture+set}" = set; then
   withval="$with_lecture"
   case $with_lecture in
-    yes|short)	lecture=on
+    yes|short|always)	lecture=once
 		;;
-    no|none)	lecture=off
+    no|none|never)	lecture=never
 		;;
     *)		{ { echo "$as_me:$LINENO: error: \"unknown argument to --with-lecture: $with_lecture\"" >&5
 echo "$as_me: error: \"unknown argument to --with-lecture: $with_lecture\"" >&2;}
@@ -1931,7 +1931,7 @@ echo "$as_me: error: \"unknown argument to --with-lecture: $with_lecture\"" >&2;
 		;;
 esac
 fi;
-if test "$lecture" = "on"; then
+if test "$lecture" = "once"; then
     echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 else

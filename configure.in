@@ -69,7 +69,7 @@ password_timeout=5
 sudo_umask=0022
 passprompt="Password:"
 long_otp_prompt=off
-lecture=on
+lecture=once
 logfac=local2
 goodpri=notice
 badpri=alert
@@ -393,14 +393,14 @@ esac])
 AC_MSG_CHECKING(whether to lecture users the first time they run sudo)
 AC_ARG_WITH(lecture, [  --without-lecture       don't print lecture for first-time sudoer],
 [case $with_lecture in  
-    yes|short)	lecture=on
+    yes|short|always)	lecture=once
 		;;
-    no|none)	lecture=off
+    no|none|never)	lecture=never
 		;;
     *)		AC_MSG_ERROR(["unknown argument to --with-lecture: $with_lecture"])
 		;;
 esac])
-if test "$lecture" = "on"; then
+if test "$lecture" = "once"; then
     AC_MSG_RESULT(yes)
 else
     AC_DEFINE(NO_LECTURE, 1, [Define if you don't want users to get the lecture the first they user sudo.])

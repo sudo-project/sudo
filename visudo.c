@@ -1,203 +1,693 @@
 /*
- * CU sudo version 1.3 (based on Root Group sudo version 1.1)
+ * Copyright (c) 1996, 1998-2003 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- * This software comes with no waranty whatsoever, use at your own risk.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * Please send bugs, changes, problems to sudo-bugs.cs.colorado.edu
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
  *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * 4. Products derived from this software may not be called "Sudo" nor
+ *    may "Sudo" appear in their names without specific prior written
+ *    permission from the author.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Sponsored in part by the Defense Advanced Research Projects
+ * Agency (DARPA) and Air Force Research Laboratory, Air Force
+ * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
 /*
- *  sudo version 1.1 allows users to execute commands as root
- *  Copyright (C) 1991  The Root Group, Inc.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- **************************************************************************
- * visudo.c, sudo project
- * David R. Hieb
- * March 18, 1991
- *
- * edit, lock and parse the sudoers file in a fashion similiar to /etc/vipw.
+ * Lock the sudoers file for safe editing (ala vipw) and check for parse errors.
  */
 
-#ifndef lint
-static char rcsid[] = "$Id$";
-#endif /* lint */
+#define _SUDO_MAIN
+
+#include "config.h"
 
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/file.h>
+#include <sys/wait.h>
 #include <stdio.h>
-#include <errno.h>
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif /* STDC_HEADERS */
+#ifdef HAVE_STRING_H
+# include <string.h>
+#else
+# ifdef HAVE_STRINGS_H
+#  include <strings.h>
+# endif
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#ifdef HAVE_ERR_H
+# include <err.h>
+#else
+# include "emul/err.h"
+#endif /* HAVE_ERR_H */
+#include <ctype.h>
+#include <pwd.h>
+#include <time.h>
 #include <signal.h>
+#include <errno.h>
+#include <fcntl.h>
 
 #include "sudo.h"
+#include "version.h"
 
+#ifndef lint
+static const char rcsid[] = "$Sudo$";
+#endif /* lint */
+
+/*
+ * Function prototypes
+ */
+static void usage		__P((void));
+static char whatnow		__P((void));
+static RETSIGTYPE Exit		__P((int));
+static void setup_signals	__P((void));
+static int run_command		__P((char *, char **));
+static int check_syntax		__P((int));
+int command_matches		__P((char *, char *, char *, char *));
+int addr_matches		__P((char *));
+int hostname_matches		__P((char *, char *, char *));
+int netgr_matches		__P((char *, char *, char *, char *));
+int usergr_matches		__P((char *, char *));
+void init_parser		__P((void));
+void yyrestart			__P((FILE *));
+
+/*
+ * External globals exported by the parser
+ */
 extern FILE *yyin, *yyout;
-extern int errno, yylineno;
+extern int errorlineno;
+extern int pedantic;
+extern int quiet;
 
-char buffer[BUFSIZ];
-char *sudoers = SUDOERS;
-int status = 0, err_line_no = 0;
-char *sudoers_tmp_file = TMPSUDOERS;
-FILE *sudoers_tmp_fp, *sudoers_fp;
+/* For getopt(3) */
+extern char *optarg;
+extern int optind;
 
-void Exit()
-{
-    (void) fclose(sudoers_tmp_fp);
-    (void) unlink(sudoers_tmp_file);
-    exit(1);
-}
+/*
+ * Globals
+ */
+char **Argv;
+char *sudoers = _PATH_SUDOERS;
+char *stmp = _PATH_SUDOERS_TMP;
+struct sudo_user sudo_user;
+int parse_error = FALSE;
 
-
+int
 main(argc, argv)
     int argc;
     char **argv;
 {
-    int fd;
-    struct stat sbuf;
+    char buf[MAXPATHLEN*2];		/* buffer used for copying files */
+    char *Editor;			/* editor to use */
+    char *UserEditor;			/* editor user wants to use */
+    char *EditorPath;			/* colon-separated list of editors */
+    char *av[4];			/* argument vector for run_command */
+    int checkonly;			/* only check existing file? */
+    int sudoers_fd;			/* sudoers file descriptor */
+    int stmp_fd;			/* stmp file descriptor */
+    int n;				/* length parameter */
+    int ch;				/* getopt char */
+    time_t now;				/* time now */
+    struct stat stmp_sb, sudoers_sb;	/* to check for changes */
+
+    /* Warn about aliases that are used before being defined. */
+    pedantic = 1;
+
+    Argv = argv;			/* for warn/err */
 
     /*
-     * handle the signals
+     * Arg handling.
      */
-    (void) signal(SIGILL, Exit);
-    (void) signal(SIGTRAP, Exit);
-    (void) signal(SIGBUS, Exit);
-    (void) signal(SIGSEGV, Exit);
-    (void) signal(SIGTERM, Exit);
-
-    (void) signal(SIGHUP, SIG_IGN);
-    (void) signal(SIGINT, SIG_IGN);
-    (void) signal(SIGQUIT, SIG_IGN);
-
-    setbuf(stderr, NULL);
-
-    /*
-     * we only want root to be able to read/write the sudoers_tmp_file
-     */
-    umask(077);
-
-    /*
-     * open the sudoers file read only
-     */
-    if ((sudoers_fp = fopen(sudoers, "r")) == NULL) {
-	(void) fprintf(stderr, "%s: ", *argv);
-	perror(sudoers);
-	Exit();
-    }
-
-    /*
-     * open the temporary sudoers file with the correct flags
-     */
-    if ((fd = open(sudoers_tmp_file, O_WRONLY | O_CREAT | O_EXCL, 0600)) < 0) {
-	if (errno == EEXIST) {
-	    (void) fprintf(stderr, "%s: sudoers file busy\n", *argv);
-	    exit(1);
+    checkonly = 0;
+    while ((ch = getopt(argc, argv, "Vcf:sq")) != -1) {
+	switch (ch) {
+	    case 'V':
+		(void) printf("%s version %s\n", getprogname(), version);
+		exit(0);
+	    case 'c':
+		checkonly++;		/* check mode */
+		break;
+	    case 'f':
+		sudoers = optarg;	/* sudoers file path */
+		easprintf(&stmp, "%s.tmp", optarg);
+		break;
+	    case 's':
+		pedantic++;		/* strict mode */
+		break;
+	    case 'q':
+		quiet++;		/* quiet mode */
+		break;
+	    default:
+		usage();
 	}
-	(void) fprintf(stderr, "%s: ", *argv);
-	perror(sudoers_tmp_file);
-	exit(1);
     }
+    argc -= optind;
+    argv += optind;
+    if (argc)
+	usage();
+
+    /* Mock up a fake sudo_user struct. */
+    user_host = user_shost = user_cmnd = "";
+    if ((sudo_user.pw = getpwuid(getuid())) == NULL)
+	errx(1, "you don't exist in the passwd database");
+
+    /* Setup defaults data structures. */
+    init_defaults();
+
+    if (checkonly)
+	exit(check_syntax(quiet));
 
     /*
-     * get a STREAM file pointer to the temporary sudoers file
+     * Open sudoers, lock it and stat it.  
+     * sudoers_fd must remain open throughout in order to hold the lock.
      */
-    if ((sudoers_tmp_fp = fdopen(fd, "w")) == NULL) {
-	(void) fprintf(stderr, "%s: ", *argv);
-	perror(sudoers_tmp_file);
-	Exit();
-    }
+    sudoers_fd = open(sudoers, O_RDWR | O_CREAT, SUDOERS_MODE);
+    if (sudoers_fd == -1)
+	err(1, "%s", sudoers);
+    if (!lock_file(sudoers_fd, SUDO_TLOCK))
+	errx(1, "sudoers file busy, try again later");
+#ifdef HAVE_FSTAT
+    if (fstat(sudoers_fd, &sudoers_sb) == -1)
+#else
+    if (stat(sudoers, &sudoers_sb) == -1)
+#endif
+	err(1, "can't stat %s", sudoers);
 
     /*
-     * transfer the contents of the sudoers file to the temporary sudoers file
+     * Open sudoers temp file.
      */
-    while (fgets(buffer, sizeof(buffer) - 1, sudoers_fp) != NULL) {
-	fputs(buffer, sudoers_tmp_fp);
-    }
+    stmp_fd = open(stmp, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    if (stmp_fd < 0)
+	err(1, "%s", stmp);
 
-    (void) fclose(sudoers_fp);
-    (void) fclose(sudoers_tmp_fp);
+    /* Install signal handlers to clean up stmp if we are killed. */
+    setup_signals();
 
-    do {
-	/*
-	 * build strings in buffer to be executed by system()
-	 */
-	(void) sprintf(buffer, "%s +%d %s", EDITOR, err_line_no,
-	    sudoers_tmp_file);
+    /* Copy sudoers -> stmp and reset the mtime */
+    if (sudoers_sb.st_size) {
+	while ((n = read(sudoers_fd, buf, sizeof(buf))) > 0)
+	    if (write(stmp_fd, buf, n) != n)
+		err(1, "write error");
 
-	/* edit the file */
-	if (system(buffer) == 0) {
+	/* Add missing newline at EOF if needed. */
+	if (n > 0 && buf[n - 1] != '\n') {
+	    buf[0] = '\n';
+	    write(stmp_fd, buf, 1);
+	}
 
-	    /* can't stat file */
-	    if (stat(sudoers_tmp_file, &sbuf) < 0) {
-		(void) fprintf(stderr, "%s: can't stat temporary file, %s unchanged\n",
-			sudoers, *argv);
-		Exit();
-	    }
+	(void) close(stmp_fd);
+	(void) touch(stmp, sudoers_sb.st_mtime);
 
-	    /* file has size == 0 */
-	    if (sbuf.st_size == 0) {
-		(void) fprintf(stderr, "%s: bad temporary file, %s unchanged\n",
-			sudoers, *argv);
-		Exit();
-	    }
-
-	    /* re-open the sudoers file for parsing */
-	    if ((sudoers_tmp_fp = fopen(sudoers_tmp_file, "r")) == NULL) {
-		(void) fprintf(stderr, "%s: can't re-open temporary file, %s unchanged\n",
-			sudoers, *argv);
-		Exit();
-	    }
-	    yyin = sudoers_tmp_fp;
+	/* Parse sudoers to pull in editor and env_editor conf values. */
+	if ((yyin = fopen(stmp, "r"))) {
 	    yyout = stdout;
+	    n = quiet;
+	    quiet = 1;
+	    init_parser();
+	    yyparse();
+	    parse_error = FALSE;
+	    quiet = n;
+	    fclose(yyin);
+	}
+    } else
+	(void) close(stmp_fd);
 
-	    /* parse the file */
-	    if (yyparse()) {
-		(void) fprintf(stderr, "yyparse() failed\n");
-		Exit();
+    /*
+     * Check EDITOR and VISUAL environment variables to see which editor
+     * the user wants to use (we may not end up using it though).
+     * If the path is not fully-qualified, make it so and check that
+     * the specified executable actually exists.
+     */
+    if ((UserEditor = getenv("EDITOR")) == NULL || *UserEditor == '\0')
+	UserEditor = getenv("VISUAL");
+    if (UserEditor && *UserEditor == '\0')
+	UserEditor = NULL;
+    else if (UserEditor) {
+	if (find_path(UserEditor, &Editor, getenv("PATH")) == FOUND) {
+	    UserEditor = Editor;
+	} else {
+	    if (def_env_editor) {
+		/* If we are honoring $EDITOR this is a fatal error. */
+		warnx("specified editor (%s) doesn't exist!", UserEditor);
+		Exit(-1);
+	    } else {
+		/* Otherwise, just ignore $EDITOR. */
+		UserEditor = NULL;
+	    }
+	}
+    }
+
+    /*
+     * See if we can use the user's choice of editors either because
+     * we allow any $EDITOR or because $EDITOR is in the allowable list.
+     */
+    Editor = EditorPath = NULL;
+    if (def_env_editor && UserEditor)
+	Editor = UserEditor;
+    else if (UserEditor) {
+	struct stat editor_sb;
+	struct stat user_editor_sb;
+	char *base, *userbase;
+
+	if (stat(UserEditor, &user_editor_sb) != 0) {
+	    /* Should never happen since we already checked above. */
+	    warn("unable to stat editor (%s)", UserEditor);
+	    Exit(-1);
+	}
+	EditorPath = estrdup(def_editor);
+	Editor = strtok(EditorPath, ":");
+	do {
+	    /*
+	     * Both Editor and UserEditor should be fully qualified but
+	     * check anyway...
+	     */
+	    if ((base = strrchr(Editor, '/')) == NULL)
+		continue;
+	    if ((userbase = strrchr(UserEditor, '/')) == NULL) {
+		Editor = NULL;
+		break;
+	    }
+	    base++, userbase++;
+
+	    /*
+	     * We compare the basenames first and then use stat to match
+	     * for sure.
+	     */
+	    if (strcmp(base, userbase) == 0) {
+		if (stat(Editor, &editor_sb) == 0 && S_ISREG(editor_sb.st_mode)
+		    && (editor_sb.st_mode & 0000111) &&
+		    editor_sb.st_dev == user_editor_sb.st_dev &&
+		    editor_sb.st_ino == user_editor_sb.st_ino)
+		    break;
+	    }
+	} while ((Editor = strtok(NULL, ":")));
+    }
+
+    /*
+     * Can't use $EDITOR, try each element of def_editor until we
+     * find one that exists, is regular, and is executable.
+     */
+    if (Editor == NULL || *Editor == '\0') {
+	if (EditorPath != NULL)
+	    free(EditorPath);
+	EditorPath = estrdup(def_editor);
+	Editor = strtok(EditorPath, ":");
+	do {
+	    if (sudo_goodpath(Editor))
+		break;
+	} while ((Editor = strtok(NULL, ":")));
+
+	/* Bleah, none of the editors existed! */
+	if (Editor == NULL || *Editor == '\0') {
+	    warnx("no editor found (editor path = %s)", def_editor);
+	    Exit(-1);
+	}
+    }
+
+    /*
+     * Edit the temp file and parse it (for sanity checking)
+     */
+    do {
+	char linestr[64];
+
+	/* Build up argument vector for the command */
+	if ((av[0] = strrchr(Editor, '/')) != NULL)
+	    av[0]++;
+	else
+	    av[0] = Editor;
+	n = 1;
+	if (parse_error == TRUE) {
+	    (void) snprintf(linestr, sizeof(linestr), "+%d", errorlineno);
+	    av[n++] = linestr;
+	}
+	av[n++] = stmp;
+	av[n++] = NULL;
+
+	/*
+	 * Do the edit:
+	 *  We cannot check the editor's exit value against 0 since
+	 *  XPG4 specifies that vi's exit value is a function of the
+	 *  number of errors during editing (?!?!).
+	 */
+	now = time(NULL);
+	if (run_command(Editor, av) != -1) {
+	    /*
+	     * Sanity checks.
+	     */
+	    if (stat(stmp, &stmp_sb) < 0) {
+		warnx("cannot stat temporary file (%s), %s unchanged",
+		    stmp, sudoers);
+		Exit(-1);
+	    }
+	    if (stmp_sb.st_size == 0) {
+		warnx("zero length temporary file (%s), %s unchanged",
+		    stmp, sudoers);
+		Exit(-1);
 	    }
 
 	    /*
-	     * the first time we get an error, set status to yylineno which
-	     * will be the line number after the line with the error. then,
-	     * if we have gotten an error, set err_line_no to the correct
-	     * line so that when we edit the file err_line_no will be
-	     * correct. at this time we also reset status and yylineno to
-	     * their default values so that the next time yyparse() is
-	     * called, they will be initialized correctly. 
+	     * Passed sanity checks so reopen stmp file and check
+	     * for parse errors.
 	     */
-	    err_line_no = (status == 0) ? 0 : status - 1;
-	    status = 0;
-	    yylineno = 1;
+	    yyout = stdout;
+	    yyin = fopen(stmp, "r+");
+	    if (yyin == NULL) {
+		warnx("can't re-open temporary file (%s), %s unchanged.",
+		    stmp, sudoers);
+		Exit(-1);
+	    }
 
-	    (void) fclose(sudoers_tmp_fp);
+	    /* Add missing newline at EOF if needed. */
+	    if (fseek(yyin, -1, SEEK_END) == 0 && (ch = fgetc(yyin)) != '\n')
+		fputc('\n', yyin);
+	    rewind(yyin);
+
+	    /* Clean slate for each parse */
+	    user_runas = NULL;
+	    init_defaults();
+	    init_parser();
+
+	    /* Parse the sudoers temp file */
+	    yyrestart(yyin);
+	    if (yyparse() && parse_error != TRUE) {
+		warnx("unabled to parse temporary file (%s), unknown error",
+		    stmp);
+		parse_error = TRUE;
+	    }
+	    fclose(yyin);
+	} else {
+	    warnx("editor (%s) failed, %s unchanged", Editor, sudoers);
+	    Exit(-1);
 	}
-    } while (err_line_no);
+
+	/*
+	 * Got an error, prompt the user for what to do now
+	 */
+	if (parse_error == TRUE) {
+	    switch (whatnow()) {
+		case 'Q' :	parse_error = FALSE;	/* ignore parse error */
+				break;
+		case 'x' :	if (sudoers_sb.st_size == 0)
+				    unlink(sudoers);
+				Exit(0);
+				break;
+	    }
+	}
+    } while (parse_error == TRUE);
 
     /*
-     * once the temporary sudoers file is gramatically correct, we can 
-     * rename it to the real sudoers file.
+     * If the user didn't change the temp file, just unlink it.
      */
-    if (rename(sudoers_tmp_file, sudoers) != 0) {
-	(void) fprintf(stderr, "%s: ", *argv);
-	perror("rename");
-    } else {
-	if (chmod(sudoers, 0400) != 0)
-	    perror("chmod: failed");
-	exit(0);
+    if (sudoers_sb.st_mtime != now && sudoers_sb.st_mtime == stmp_sb.st_mtime &&
+	sudoers_sb.st_size == stmp_sb.st_size) {
+	warnx("sudoers file unchanged");
+	Exit(0);
     }
+
+    /*
+     * Change mode and ownership of temp file so when
+     * we move it to sudoers things are kosher.
+     */
+    if (chown(stmp, SUDOERS_UID, SUDOERS_GID)) {
+	warn("unable to set (uid, gid) of %s to (%d, %d)",
+	    stmp, SUDOERS_UID, SUDOERS_GID);
+	Exit(-1);
+    }
+    if (chmod(stmp, SUDOERS_MODE)) {
+	warn("unable to change mode of %s to 0%o", stmp, SUDOERS_MODE);
+	Exit(-1);
+    }
+
+    /*
+     * Now that we have a sane stmp file (parses ok) it needs to be
+     * rename(2)'d to sudoers.  If the rename(2) fails we try using
+     * mv(1) in case stmp and sudoers are on different filesystems.
+     */
+    if (rename(stmp, sudoers)) {
+	if (errno == EXDEV) {
+	    warnx("%s and %s not on the same filesystem, using mv to rename",
+	      stmp, sudoers);
+
+	    /* Build up argument vector for the command */
+	    if ((av[0] = strrchr(_PATH_MV, '/')) != NULL)
+		av[0]++;
+	    else
+		av[0] = _PATH_MV;
+	    av[1] = stmp;
+	    av[2] = sudoers;
+	    av[3] = NULL;
+
+	    /* And run it... */
+	    if (run_command(_PATH_MV, av)) {
+		warnx("command failed: '%s %s %s', %s unchanged",
+		    _PATH_MV, stmp, sudoers, sudoers);
+		Exit(-1);
+	    }
+	} else {
+	    warn("error renaming %s, %s unchanged", stmp, sudoers);
+	    Exit(-1);
+	}
+    }
+
+    exit(0);
+}
+
+/*
+ * Dummy *_matches routines.
+ * These exist to allow us to use the same parser as sudo(8).
+ */
+int
+command_matches(cmnd, cmnd_args, path, sudoers_args)
+    char *cmnd;
+    char *cmnd_args;
+    char *path;
+    char *sudoers_args;
+{
+    return(TRUE);
+}
+
+int
+addr_matches(n)
+    char *n;
+{
+    return(TRUE);
+}
+
+int
+hostname_matches(s, l, p)
+    char *s, *l, *p;
+{
+    return(TRUE);
+}
+
+int
+usergr_matches(g, u)
+    char *g, *u;
+{
+    return(TRUE);
+}
+
+int
+netgr_matches(n, h, sh, u)
+    char *n, *h, *sh, *u;
+{
+    return(TRUE);
+}
+
+void
+set_fqdn()
+{
+    return;
+}
+
+int
+user_is_exempt()
+{
+    return(TRUE);
+}
+
+void
+init_envtables()
+{
+    return;
+}
+
+/*
+ * Assuming a parse error occurred, prompt the user for what they want
+ * to do now.  Returns the first letter of their choice.
+ */
+static char
+whatnow()
+{
+    int choice, c;
+
+    for (;;) {
+	(void) fputs("What now? ", stdout);
+	choice = getchar();
+	for (c = choice; c != '\n' && c != EOF;)
+	    c = getchar();
+
+	switch (choice) {
+	    case EOF:
+		choice = 'x';
+		/* FALLTHROUGH */
+	    case 'e':
+	    case 'x':
+	    case 'Q':
+		return(choice);
+	    default:
+		(void) puts("Options are:");
+		(void) puts("  (e)dit sudoers file again");
+		(void) puts("  e(x)it without saving changes to sudoers file");
+		(void) puts("  (Q)uit and save changes to sudoers file (DANGER!)\n");
+	}
+    }
+}
+
+/*
+ * Install signal handlers for visudo.
+ */
+static void
+setup_signals()
+{
+	sigaction_t sa;
+
+	/*
+	 * Setup signal handlers to cleanup nicely.
+	 */
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART;
+	sa.sa_handler = Exit;
+	(void) sigaction(SIGTERM, &sa, NULL);
+	(void) sigaction(SIGHUP, &sa, NULL);
+	(void) sigaction(SIGINT, &sa, NULL);
+	(void) sigaction(SIGQUIT, &sa, NULL);
+}
+
+static int
+run_command(path, argv)
+    char *path;
+    char **argv;
+{
+    int status;
+    pid_t pid;
+    sigset_t set, oset;
+
+    (void) sigemptyset(&set);
+    (void) sigaddset(&set, SIGCHLD);
+    (void) sigprocmask(SIG_BLOCK, &set, &oset);
+
+    switch (pid = fork()) {
+	case -1:
+	    warn("unable to run %s", path);
+	    Exit(-1);
+	    break;	/* NOTREACHED */
+	case 0:
+	    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
+	    execv(path, argv);
+	    warn("unable to run %s", path);
+	    _exit(127);
+	    break;	/* NOTREACHED */
+    }
+
+#ifdef sudo_waitpid
+    pid = sudo_waitpid(pid, &status, 0);
+#else
+    pid = wait(&status);
+#endif
+
+    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
+
+    /* XXX - should use WEXITSTATUS() */
+    return(pid == -1 ? -1 : (status >> 8));
+}
+
+static int
+check_syntax(quiet)
+    int quiet;
+{
+
+    if ((yyin = fopen(sudoers, "r")) == NULL) {
+	if (!quiet)
+	    warn("unable to open %s", sudoers);
+	exit(1);
+    }
+    yyout = stdout;
+    init_parser();
+    if (yyparse() && parse_error != TRUE) {
+	if (!quiet)
+	    warnx("failed to parse %s file, unknown error", sudoers);
+	parse_error = TRUE;
+    }
+    if (!quiet){
+	if (parse_error)
+	    (void) printf("parse error in %s near line %d\n", sudoers,
+		errorlineno);
+	else
+	    (void) printf("%s file parsed OK\n", sudoers);
+    }
+
+    return(parse_error == TRUE);
+}
+
+/*
+ * Unlink the sudoers temp file (if it exists) and exit.
+ * Used in place of a normal exit() and as a signal handler.
+ * A positive parameter indicates we were called as a signal handler.
+ */
+static RETSIGTYPE
+Exit(sig)
+    int sig;
+{
+    char *emsg = " exiting due to signal.\n";
+
+    (void) unlink(stmp);
+
+    if (sig > 0) {
+	write(STDERR_FILENO, getprogname(), strlen(getprogname()));
+	write(STDERR_FILENO, emsg, sizeof(emsg) - 1);
+	_exit(-sig);
+    }
+    exit(-sig);
+}
+
+static void
+usage()
+{
+    (void) fprintf(stderr, "usage: %s [-c] [-f sudoers] [-q] [-s] [-V]\n",
+	getprogname());
+    exit(1);
 }

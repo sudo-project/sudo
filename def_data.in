@@ -4,17 +4,9 @@
 # var_name
 #	TYPE
 #	description (or NULL)
+#	array of struct def_values if TYPE == T_TUPLE
 #
 
-syslog_ifac
-	T_UINT
-	NULL
-syslog_igoodpri
-	T_UINT
-	NULL
-syslog_ibadpri
-	T_UINT
-	NULL
 syslog
 	T_LOGFAC|T_BOOL
 	"Syslog facility if syslog is being used for logging: %s"
@@ -49,8 +41,9 @@ tty_tickets
 	T_FLAG
 	"Use a separate timestamp for each user/tty combo"
 lecture
-	T_FLAG
+	T_TUPLE|T_BOOL
 	"Lecture user the first time they run sudo"
+	never once always
 authenticate
 	T_FLAG
 	"Require users to authenticate by default"
@@ -171,18 +164,14 @@ env_delete
 env_keep
 	T_LIST|T_BOOL
 	"Environment variables to preserve:"
-listpw_i
-	T_UINT
-	NULL
-verifypw_i
-	T_UINT
-	NULL
 listpw
-	T_PWFLAG
+	T_TUPLE|T_BOOL
 	"When to require a password for 'list' pseudocommand: %s"
+	never any all always
 verifypw
-	T_PWFLAG
+	T_TUPLE|T_BOOL
 	"When to require a password for 'verify' pseudocommand: %s"
+	never any all always
 ignore_local_sudoers
-     T_FLAG
-     "If LDAP directory is up, do we ignore local sudoers file: %s"
+	T_FLAG
+	"If LDAP directory is up, do we ignore local sudoers file: %s"
