@@ -276,17 +276,51 @@ main(argc, argv)
     } while (err_line_no);
 
     /*
-     * once the temporary sudoers file is gramatically correct, we can 
-     * rename it to the real sudoers file.
+     * Once the temporary sudoers file is gramatically correct, we can 
+     * rename it to the real sudoers file.  If the rename(2) fails
+     * we try using mv(1) in case the temp and sudoers files are on
+     * different filesystems.
      */
     if (rename(sudoers_tmp_file, sudoers) != 0) {
+	int status, len;
+	char *tmpbuf;
+
+	/* Print a warning/error */
 	(void) fprintf(stderr, "%s: ", Argv[0]);
 	perror("rename");
-    } else {
-	if (chmod(sudoers, 0400) != 0)
-	    perror("chmod: failed");
-	exit(0);
+
+	/* Allocate just enough space for tmpbuf */
+	len = sizeof(char) * (strlen(_PATH_MV) + strlen(sudoers_tmp_file) +
+	    strlen(sudoers) + 4);
+	if ((tmpbuf = (char *) malloc(len)) == NULL) {
+	    (void) fprintf(stderr, "%s: cannot allocate memory: ", Argv[0]);
+	    perror("");
+	    Exit(0);
+	}
+
+	(void) sprintf(tmpbuf, "%s %s %s", _PATH_MV, sudoers_tmp_file, sudoers);
+	status = system(tmpbuf);
+	status = status >> 8;
+	if (status) {
+	    (void) fprintf(stderr, "Command failed: '%s', %s unchanged.\n",
+		tmpbuf, sudoers);
+	    Exit(0);
+	} else {
+	    (void) fprintf(stderr, "Used '%s' instead.\n", tmpbuf);
+	}
+	(void) free(tmpbuf);
     }
+
+    /*
+     * The chmod is a non-fatal error.
+     */
+    if (chmod(sudoers, 0400) != 0) {
+	(void) fprintf(stderr, "%s: Warning, unable to chmod 0400 %s: ",
+	    Argv[0], sudoers);
+	perror("");
+    }
+
+    exit(0);
 }
 
 
