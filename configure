@@ -5356,10 +5356,10 @@ cat > conftest.$ac_ext <<EOF
 #include "confdefs.h"
 
 int main() {
-long long foo; foo = 1;
+long long foo = 1000; foo /= 10;
 ; return 0; }
 EOF
-if { (eval echo configure:5363: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:5363: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   cat >> confdefs.h <<\EOF
 #define HAVE_LONG_LONG 1
