@@ -1262,8 +1262,7 @@ case "$host" in
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
-		CPPFLAGS="${CPPFLAGS} -D_XOPEN_EXTENDED_SOURCE"
-		SUDO_DEFINE(_ALL_SOURCE)
+		CPPFLAGS="${CPPFLAGS} -D_XOPEN_EXTENDED_SOURCE -D_ALL_SOURCE"
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 		if test X"$with_blibpath" != X"no"; then
 		    AC_MSG_CHECKING([if linker accepts -Wl,-blibpath])
@@ -1428,6 +1427,7 @@ case "$host" in
 		: ${mansectform='4'}
 		;;
     *-*-linux*)
+		CPPFLAGS="${CPPFLAGS} -D_GNU_SOURCE"
 		# Some Linux versions need to link with -lshadow
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_FUNCS(getspnam, , [AC_CHECK_LIB(shadow, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lshadow"; LIBS="${LIBS} -lshadow"])])
@@ -1436,7 +1436,7 @@ case "$host" in
 		: ${with_pam='maybe'}
 		;;
     *-convex-bsd*)
-		SUDO_DEFINE(_CONVEX_SOURCE)
+		CPPFLAGS="${CPPFLAGS} -D_CONVEX_SOURCE"
 		if test -z "$GCC"; then
 		    CFLAGS="${CFLAGS} -D__STDC__"
 		fi
@@ -1602,6 +1602,9 @@ case "$host" in
     *-*-sysv*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		;;
+    *-gnu*)
+		CPPFLAGS="${CPPFLAGS} -D_GNU_SOURCE"
 		;;
 esac
 
@@ -2399,24 +2402,6 @@ AH_TEMPLATE(sig_atomic_t, [Define to `int' if <signal.h> does not define.])
 dnl
 dnl Bits to copy verbatim into config.h.in
 dnl
-AH_VERBATIM([_GNU_SOURCE],
-[/* Enable GNU extensions on systems that have them. */
-#ifndef _GNU_SOURCE
-# define _GNU_SOURCE	1
-#endif])
-
-AH_VERBATIM([_ALL_SOURCE],
-[/* Enable non-POSIX extensions on AIX. */
-#ifndef _ALL_SOURCE
-# undef _ALL_SOURCE
-#endif])
-
-AH_VERBATIM([_CONVEX_SOURCE],
-[/* Enable non-POSIX extensions on ConvexOS. */
-#ifndef _CONVEX_SOURCE
-# undef _CONVEX_SOURCE
-#endif])
-
 AH_TOP([#ifndef _SUDO_CONFIG_H
 #define _SUDO_CONFIG_H])
 

@@ -537,21 +537,6 @@
 /* Define to avoid using the passwd/shadow file for authentication. */
 #undef WITHOUT_PASSWD
 
-/* Enable non-POSIX extensions on AIX. */
-#ifndef _ALL_SOURCE
-# undef _ALL_SOURCE
-#endif
-
-/* Enable non-POSIX extensions on ConvexOS. */
-#ifndef _CONVEX_SOURCE
-# undef _CONVEX_SOURCE
-#endif
-
-/* Enable GNU extensions on systems that have them. */
-#ifndef _GNU_SOURCE
-# define _GNU_SOURCE	1
-#endif
-
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
 

@@ -20469,11 +20469,7 @@ done
 		;;
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
-		CPPFLAGS="${CPPFLAGS} -D_XOPEN_EXTENDED_SOURCE"
-		cat >>confdefs.h <<\EOF
-#define _ALL_SOURCE 1
-EOF
-
+		CPPFLAGS="${CPPFLAGS} -D_XOPEN_EXTENDED_SOURCE -D_ALL_SOURCE"
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 		if test X"$with_blibpath" != X"no"; then
 		    echo "$as_me:$LINENO: checking if linker accepts -Wl,-blibpath" >&5
@@ -21913,6 +21909,7 @@ fi
 		: ${mansectform='4'}
 		;;
     *-*-linux*)
+		CPPFLAGS="${CPPFLAGS} -D_GNU_SOURCE"
 		# Some Linux versions need to link with -lshadow
 		if test "$CHECKSHADOW" = "true"; then
 
@@ -22094,10 +22091,7 @@ done
 		: ${with_pam='maybe'}
 		;;
     *-convex-bsd*)
-		cat >>confdefs.h <<\EOF
-#define _CONVEX_SOURCE 1
-EOF
-
+		CPPFLAGS="${CPPFLAGS} -D_CONVEX_SOURCE"
 		if test -z "$GCC"; then
 		    CFLAGS="${CFLAGS} -D__STDC__"
 		fi
@@ -22854,6 +22848,9 @@ done
     *-*-sysv*)
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
+		;;
+    *-gnu*)
+		CPPFLAGS="${CPPFLAGS} -D_GNU_SOURCE"
 		;;
 esac
 
@@ -33697,15 +33694,6 @@ echo "$as_me: You will need to customize sample.pam and install it as /etc/pam.d
 	    ;;
     esac
 fi
-
-
-
-
-
-
-
-
-
 
 
 
