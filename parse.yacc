@@ -142,12 +142,12 @@ int top = 0, stacksize = 0;
     } while (0)
 
 #define pop \
-    { \
+    do { \
 	if (top == 0) \
 	    yyerror("matching stack underflow"); \
 	else \
 	    top--; \
-    }
+    } while (0)
 
 /*
  * Shortcuts for append()
@@ -433,7 +433,7 @@ cmndspeclist	:	cmndspec
 cmndspec	:	runasspec cmndtag opcmnd {
 			    /*
 			     * Push the entry onto the stack if it is worth
-			     * saving and clear cmnd_matches for next cmnd.
+			     * saving and reset cmnd_matches for next cmnd.
 			     *
 			     * We need to save at least one entry on
 			     * the stack so sudoers_lookup() can tell that
@@ -453,7 +453,7 @@ cmndspec	:	runasspec cmndtag opcmnd {
 				pushcp;
 			    else if (user_matches == TRUE && keepall)
 				pushcp;
-			    cmnd_matches = NOMATCH;
+			    cmnd_matches = UNSPEC;
 			}
 		;
 
