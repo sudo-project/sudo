@@ -49,6 +49,9 @@ static char rcsid[] = "$Id$";
 #endif /* lint */
 
 #include <stdio.h>
+#ifdef STD_HEADERS
+#include <stdlib.h>
+#endif /* STD_HEADERS */
 #include <strings.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -56,6 +59,7 @@ static char rcsid[] = "$Id$";
 #include <sys/stat.h>
 #include "sudo.h"
 
+#ifndef STD_HEADERS
 extern char *malloc();
 extern char *getenv();
 extern char *strcpy();
@@ -71,6 +75,7 @@ extern char *getwd();
 #ifndef NEED_STRDUP
 extern char *strdup();
 #endif
+#endif /* !STD_HEADERS */
 
 
 /*******************************************************************
@@ -121,7 +126,7 @@ char *find_path(file)
 	 * search current dir last if it is in PATH This will miss sneaky
 	 * things like using './' or './/' 
 	 */
-	if (*path == NULL || (*path == '.' && *(path + 1) == NULL)) {
+	if (*path == '\0' || (*path == '.' && *(path + 1) == '\0')) {
 	    checkdot = 1;
 	    path = n + 1;
 	    continue;
