@@ -78,11 +78,10 @@ struct environment {
 /*
  * Prototypes
  */
-char **rebuild_env		__P((char **, char **, int, int));
+char **rebuild_env		__P((char **, int, int));
 char **zero_env			__P((char **));
 static void insert_env		__P((char *, struct environment *, int));
 static char *format_env		__P((char *, ...));
-static int var_ok		__P((char *));
 
 /*
  * Default table of "bad" variables to remove from the environment.
@@ -149,38 +148,6 @@ static const char *initial_keepenv_table[] = {
     "TZ",
     NULL
 };
-
-/*
- * Remove potentially dangerous variables from the environment
- * and returns a vector of what was pruned out.
- */
-char **
-clean_env(envp)
-    char **envp;
-{
-    char **ep, **end;
-    struct environment pruned_env;
-
-    /* Find the end of the environment. */
-    for (end = envp; *end; end++)
-	continue;
-
-    /*
-     * Prune out any bad environment variables and set user_path, user_prompt
-     * and prev_user.
-     */
-    memset(&pruned_env, 0, sizeof(pruned_env));
-    for (ep = envp; *ep; ) {
-	if (var_ok(*ep)) {
-	    ep++;
-	} else {
-	    insert_env(*ep, &pruned_env, 0);
-	    memmove(ep, ep + 1, end - ep);
-	}
-    }
-
-    return (pruned_env.envp);
-}
 
 /*
  * Given a variable and value, allocate and format an environment string.
@@ -268,149 +235,89 @@ insert_env(str, e, dupcheck)
 }
 
 /*
- * Check an environment variable against the env_delete
- * and env_chec lists.  Returns TRUE if allowed, else FALSE.
- */
-static int
-var_ok(var)
-    char *var;
-{
-    struct list_member *cur;
-    size_t len;
-    char *cp;
-    int iswild, okvar = TRUE;
-
-    /* Skip variables with values beginning with () (bash functions) */
-    if ((cp = strchr(var, '=')) != NULL) {
-	if (strncmp(cp, "=() ", 3) == 0)
-	    return (FALSE);
-    }
-
-    /* Skip anything listed in env_delete. */
-    for (cur = def_env_delete; cur && okvar; cur = cur->next) {
-	len = strlen(cur->value);
-	/* Deal with '*' wildcard */
-	if (cur->value[len - 1] == '*') {
-	    len--;
-	    iswild = TRUE;
-	} else
-	    iswild = FALSE;
-	if (strncmp(cur->value, var, len) == 0 &&
-	    (iswild || var[len] == '=')) {
-	    okvar = FALSE;
-	}
-    }
-
-    /* Check certain variables for '%' and '/' characters. */
-    for (cur = def_env_check; cur && okvar; cur = cur->next) {
-	len = strlen(cur->value);
-	/* Deal with '*' wildcard */
-	if (cur->value[len - 1] == '*') {
-	    len--;
-	    iswild = TRUE;
-	} else
-	    iswild = FALSE;
-	if (strncmp(cur->value, var, len) == 0 &&
-	    (iswild || var[len] == '=') &&
-	    strpbrk(var, "/%")) {
-	    okvar = FALSE;
-	}
-    }
-
-    return (okvar);
-}
-
-/*
  * Build a new environment and ether clear potentially dangerous
  * variables from the old one or start with a clean slate.
  * Also adds sudo-specific variables (SUDO_*).
  */
 char **
-rebuild_env(envp1, envp2, sudo_mode, noexec)
-    char **envp1;
-    char **envp2;
+rebuild_env(envp, sudo_mode, noexec)
+    char **envp;
     int sudo_mode;
     int noexec;
 {
+    struct list_member *cur;
     struct environment env;
-    char **envpv[2], **ep, *cp, *ps1;
-    int didvar, i;
+    size_t len;
+    char **ep, *cp, *ps1;
+    int okvar, iswild, didvar;
 
     /*
      * Either clean out the environment or reset to a safe default.
      */
     ps1 = NULL;
     didvar = 0;
-    envpv[0] = envp1;
-    envpv[1] = envp2;
     memset(&env, 0, sizeof(env));
     if (def_env_reset) {
-	struct list_member *cur;
-	size_t len;
-	int iswild, keepit;
+	int keepit;
 
 	/* Pull in vars we want to keep from the old environment. */
-	for (i = 0; i < 2; i++) {
-	    if ((ep = envpv[i]) == NULL)
-		continue;
-	    for (; *ep; ep++) {
-		keepit = 0;
+	for (ep = envp; *ep; ep++) {
+	    keepit = FALSE;
 
-		/* Skip variables with values beginning with () (bash functions) */
-		if ((cp = strchr(*ep, '=')) != NULL) {
-		    if (strncmp(cp, "=() ", 3) == 0)
-			continue;
+	    /* Skip variables with values beginning with () (bash functions) */
+	    if ((cp = strchr(*ep, '=')) != NULL) {
+		if (strncmp(cp, "=() ", 3) == 0)
+		    continue;
+	    }
+
+	    for (cur = def_env_keep; cur; cur = cur->next) {
+		len = strlen(cur->value);
+		/* Deal with '*' wildcard */
+		if (cur->value[len - 1] == '*') {
+		    len--;
+		    iswild = TRUE;
+		} else
+		    iswild = FALSE;
+		if (strncmp(cur->value, *ep, len) == 0 &&
+		    (iswild || (*ep)[len] == '=')) {
+		    keepit = TRUE;
+		    break;
 		}
+	    }
 
-		for (cur = def_env_keep; cur; cur = cur->next) {
-		    len = strlen(cur->value);
-		    /* Deal with '*' wildcard */
-		    if (cur->value[len - 1] == '*') {
-			len--;
-			iswild = 1;
-		    } else
-			iswild = 0;
-		    if (strncmp(cur->value, *ep, len) == 0 &&
-			(iswild || (*ep)[len] == '=')) {
-			keepit = 1;
+	    /* For SUDO_PS1 -> PS1 conversion. */
+	    if (strncmp(*ep, "SUDO_PS1=", 8) == 0)
+		ps1 = *ep + 5;
+
+	    if (keepit) {
+		/* Preserve variable. */
+		switch (**ep) {
+		    case 'H':
+			if (strncmp(*ep, "HOME=", 5) == 0)
+			    SET(didvar, DID_HOME);
 			break;
-		    }
+		    case 'L':
+			if (strncmp(*ep, "LOGNAME=", 8) == 0)
+			    SET(didvar, DID_LOGNAME);
+			break;
+		    case 'P':
+			if (strncmp(*ep, "PATH=", 5) == 0)
+			    SET(didvar, DID_PATH);
+			break;
+		    case 'S':
+			if (strncmp(*ep, "SHELL=", 6) == 0)
+			    SET(didvar, DID_SHELL);
+			break;
+		    case 'T':
+			if (strncmp(*ep, "TERM=", 5) == 0)
+			    SET(didvar, DID_TERM);
+			break;
+		    case 'U':
+			if (strncmp(*ep, "USER=", 5) == 0)
+			    SET(didvar, DID_USER);
+			break;
 		}
-
-		/* For SUDO_PS1 -> PS1 conversion. */
-		if (strncmp(*ep, "SUDO_PS1=", 8) == 0)
-		    ps1 = *ep + 5;
-
-		if (keepit) {
-		    /* Preserve variable. */
-		    switch (**ep) {
-			case 'H':
-			    if (strncmp(*ep, "HOME=", 5) == 0)
-				SET(didvar, DID_HOME);
-			    break;
-			case 'L':
-			    if (strncmp(*ep, "LOGNAME=", 8) == 0)
-				SET(didvar, DID_LOGNAME);
-			    break;
-			case 'P':
-			    if (strncmp(*ep, "PATH=", 5) == 0)
-				SET(didvar, DID_PATH);
-			    break;
-			case 'S':
-			    if (strncmp(*ep, "SHELL=", 6) == 0)
-				SET(didvar, DID_SHELL);
-			    break;
-			case 'T':
-			    if (strncmp(*ep, "TERM=", 5) == 0)
-				SET(didvar, DID_TERM);
-			    break;
-			case 'U':
-			    if (strncmp(*ep, "USER=", 5) == 0)
-				SET(didvar, DID_USER);
-			    break;
-		    }
-		    insert_env(*ep, &env, 0);
-		}
+		insert_env(*ep, &env, 0);
 	    }
 	}
 
@@ -444,19 +351,54 @@ rebuild_env(envp1, envp2, sudo_mode, noexec)
 	 * Copy envp entries as long as they don't match env_delete or
 	 * env_check.
 	 */
-	for (i = 0; i < 2; i++) {
-	    if ((ep = envpv[i]) == NULL)
-		continue;
-	    for (; *ep; ep++) {
-		if (var_ok(*ep)) {
-		    if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
-			ps1 = *ep + 5;
-		    else if (strncmp(*ep, "PATH=", 5) == 0)
-			SET(didvar, DID_PATH);
-		    else if (strncmp(*ep, "TERM=", 5) == 0)
-			SET(didvar, DID_TERM);
-		    insert_env(*ep, &env, 0);
+	for (ep = envp; *ep; ep++) {
+	    okvar = TRUE;
+
+	    /* Skip variables with values beginning with () (bash functions) */
+	    if ((cp = strchr(*ep, '=')) != NULL) {
+		if (strncmp(cp, "=() ", 3) == 0)
+		    continue;
+	    }
+
+	    /* Skip anything listed in env_delete. */
+	    for (cur = def_env_delete; cur && okvar; cur = cur->next) {
+		len = strlen(cur->value);
+		/* Deal with '*' wildcard */
+		if (cur->value[len - 1] == '*') {
+		    len--;
+		    iswild = TRUE;
+		} else
+		    iswild = FALSE;
+		if (strncmp(cur->value, *ep, len) == 0 &&
+		    (iswild || (*ep)[len] == '=')) {
+		    okvar = FALSE;
 		}
+	    }
+
+	    /* Check certain variables for '%' and '/' characters. */
+	    for (cur = def_env_check; cur && okvar; cur = cur->next) {
+		len = strlen(cur->value);
+		/* Deal with '*' wildcard */
+		if (cur->value[len - 1] == '*') {
+		    len--;
+		    iswild = TRUE;
+		} else
+		    iswild = FALSE;
+		if (strncmp(cur->value, *ep, len) == 0 &&
+		    (iswild || (*ep)[len] == '=') &&
+		    strpbrk(*ep, "/%")) {
+		    okvar = FALSE;
+		}
+	    }
+
+	    if (okvar) {
+		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
+		    ps1 = *ep + 5;
+		else if (strncmp(*ep, "PATH=", 5) == 0)
+		    SET(didvar, DID_PATH);
+		else if (strncmp(*ep, "TERM=", 5) == 0)
+		    SET(didvar, DID_TERM);
+		insert_env(*ep, &env, 0);
 	    }
 	}
     }

@@ -110,7 +110,7 @@ static void usage_excl			__P((int))
 					    __attribute__((__noreturn__));
 static struct passwd *get_authpw	__P((void));
 extern int sudo_edit			__P((int, char **));
-extern char **rebuild_env		__P((char **, char **, int, int));
+extern char **rebuild_env		__P((char **, int, int));
 extern char **clean_env			__P((char **));
 
 /*
@@ -151,7 +151,6 @@ main(argc, argv)
     int cmnd_status;
     int sudo_mode;
     int pwflag;
-    char **new_environ, **pruned_environ;
     sigaction_t sa;
 #ifdef HAVE_LDAP
     VOID *ld;
@@ -292,8 +291,6 @@ main(argc, argv)
 	    def_closefrom = user_closefrom;
     }
 
-    pruned_environ = clean_env(environ);
-
     cmnd_status = set_cmnd(sudo_mode);
 
 #ifdef HAVE_LDAP
@@ -360,9 +357,7 @@ main(argc, argv)
 
     /* Build a new environment based on the rules in sudoers. */
     if (ISSET(sudo_mode, MODE_RUN))
-	new_environ = rebuild_env(pruned_environ, environ, sudo_mode, def_noexec);
-    else
-	new_environ = environ;
+	environ = rebuild_env(environ, sudo_mode, def_noexec);
 
     if (ISSET(validated, VALIDATE_OK)) {
 	/* Finally tell the user if the command did not exist. */
@@ -438,7 +433,7 @@ main(argc, argv)
 	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0)
 	    exit(0);
 	else
-	    execve(safe_cmnd, NewArgv, new_environ);
+	    execve(safe_cmnd, NewArgv, environ);
 #else
 	exit(0);
 #endif /* PROFILING */
@@ -449,7 +444,7 @@ main(argc, argv)
 	    NewArgv--;			/* at least one extra slot... */
 	    NewArgv[0] = "sh";
 	    NewArgv[1] = safe_cmnd;
-	    execve(_PATH_BSHELL, NewArgv, new_environ);
+	    execve(_PATH_BSHELL, NewArgv, environ);
 	}
 	warning("unable to execute %s", safe_cmnd);
 	exit(127);
