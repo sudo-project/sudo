@@ -455,6 +455,9 @@ C<@loglen@> (use 0 or negate the option to disable word wrap).
 Number of minutes that can elapse before B<sudo> will ask for a
 passwd again.  The default is C<@timeout@>.  Set this to C<0> to always
 prompt for a password.
+If set to a value less than C<0> the user's timestamp will never
+expire.  This can be used to allow users to create or delete their
+own timestamps via C<sudo -v> and C<sudo -k> respectively.
 
 =item passwd_timeout
 
@@ -865,7 +868,7 @@ command on any host but they must authenticate themselves first
 
 The user B<jack> may run any command on the machines in the I<CSNETS> alias
 (the networks C<128.138.243.0>, C<128.138.204.0>, and C<128.138.242.0>).
-Of those networks, only <128.138.204.0> has an explicit netmask (in
+Of those networks, only C<128.138.204.0> has an explicit netmask (in
 CIDR notation) indicating it is a class C network.  For the other
 networks in I<CSNETS>, the local machine's netmask will be used
 during matching.
