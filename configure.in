@@ -89,10 +89,10 @@ DCE=1
 echo 'Configuring for use with DCE')
 
 dnl --with-csops
-AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options], OPTIONS="${OPTIONS} -DUSE_INSULTS -DCLASSIC_INSULTS -DCSOPS_INSULTS -DENV_EDITOR"
+AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options], OPTIONS="${OPTIONS} -DIGNORE_DOT_PATH -DUSE_INSULTS -DCLASSIC_INSULTS -DCSOPS_INSULTS -DENV_EDITOR"
 sbindir='$(exec_prefix)/sbin'
 CSOPS=1
-echo 'CSOps--adding options: USE_INSULTS CLASSIC_INSULTS CSOPS_INSULTS ENV_EDITOR')
+echo 'CSOps--adding options: IGNORE_DOT_PATH USE_INSULTS CLASSIC_INSULTS CSOPS_INSULTS ENV_EDITOR')
 
 dnl
 dnl If we don't have egrep we can't do anything...
@@ -123,11 +123,13 @@ fi
 
 dnl
 dnl Is this OS using shadow passwords?
-dnl (Cannot check for C2 if using AFS or DCE)
+dnl (Cannot auto-check for C2 if using non-passwd based authentication)
 dnl
-if test -z "$C2" -a -z "$AFS" -a -z "$DCE"; then
+if test -z "$C2" -a -z "$SKEY" -a -z "$SECURID" -a -z "$AFS" -a -z "$DCE" -a -z "$KERB4" -a -z "$KERB5"; then
     SUDO_CHECK_SHADOW(AC_DEFINE(HAVE_C2_SECURITY)
     C2=1)
+elif test -z "$C2"; then
+    echo "Unable to check for shadow passwords. If you have them you should use --with-C2"
 fi
 
 dnl
@@ -137,6 +139,7 @@ SUDO_OSTYPE
 OS=`echo $OS | $TRPROG '[[A-Z]]' '[[a-z]]'`
 case "$OS" in
     "sunos")	echo "Looks like SunOS 4.x"
+		LIB_NSL=1
 		if test -n "$C2"; then
 		    SHADOW_TYPE="SPW_SUNOS4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -302,6 +305,7 @@ case "$OS" in
 		OSDEFS="${OSDEFS} -D_MIPS"
 		;;
     "isc")	echo "Looks like INTERACTIVE"
+		LIB_CRYPT=1
 		SUDO_LIBS="${SUDO_LIBS} -lcrypt"
 		if test -n "$C2" ; then
 		    SUDO_LIBS="${SUDO_LIBS} -lsec"
@@ -311,6 +315,8 @@ case "$OS" in
 		OSDEFS="${OSDEFS} -D_ISC"
 		;;
     "unix_sv")	echo "Looks like UnixWare"
+		LIB_SOCKET=1
+		SUDO_LIBS="${SUDO_LIBS} -lsocket"
 		if test -n "$C2" ; then
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
@@ -349,10 +355,9 @@ esac
 
 dnl
 dnl search for various shadow password types unless we already know
-dnl XXX - need to ACDEFINE *something* right???
+dnl XXX - need a better default case (define SHADOW_TYPE to *something*)
 dnl
-if test -z "$SKEY" -a -z "$SECURID" -a -z "$AFS" -a -z "$DCE" -a -z "$KERB4" -a -z "$KERB5" -a -n "$C2" -a -z "$SHADOW_TYPE"
-    then
+if test -n "$C2" -a -z "$SHADOW_TYPE"; then
     echo "checking for shadow password type..."
     AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SPW_SVR4", AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SPW_SECUREWARE", [test -f /etc/master.passwd && SHADOW_TYPE="SPW_BSD"]))
     case "$SHADOW_TYPE" in
@@ -425,14 +430,20 @@ AC_FUNC_UTIME_NULL, LIBOBJS="$LIBOBJS utime.o")
 dnl
 dnl if crypt(3) not in libc, look elsewhere
 dnl
-AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt", AC_CHECK_LIB(crypt_d, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt_d", AC_CHECK_LIB(crypt, ufc, SUDO_LIBS="${SUDO_LIBS} -lufc"))))
+if test -z "$LIB_CRYPT"; then
+    AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt", AC_CHECK_LIB(crypt_d, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt_d", AC_CHECK_LIB(crypt, ufc, SUDO_LIBS="${SUDO_LIBS} -lufc"))))
+fi
 dnl
 dnl library checks
 dnl
 dnl Irix doesn't want -lnsl or -lsocket (and Irix 4 needs -lsun)
 if test "$OS" != "irix" ; then
-    AC_CHECK_LIB(nsl, main, SUDO_LIBS="${SUDO_LIBS} -lnsl")
-    AC_CHECK_LIB(socket, main, SUDO_LIBS="${SUDO_LIBS} -lsocket")
+    if test -z "$LIB_NSL"; then
+	AC_CHECK_LIB(nsl, main, SUDO_LIBS="${SUDO_LIBS} -lnsl")
+    fi
+    if test -z "$LIB_SOCKET"; then
+	AC_CHECK_LIB(socket, main, SUDO_LIBS="${SUDO_LIBS} -lsocket")
+    fi
 elif test "$OSREV" -lt 5 ; then
     AC_CHECK_LIB(sun, getpwnam, [SUDO_LIBS="${SUDO_LIBS} -lsun"
 VISUDO_LIBS="${VISUDO_LIBS} -lsun"]
