@@ -157,7 +157,11 @@ load_interfaces()
 		break;
 	}
     }
+#ifdef HAVE_FREEIFADDRS
     freeifaddrs(ifaddrs);
+#else
+    free(ifaddrs);
+#endif
 }
 
 #elif defined(SIOCGIFCONF) && !defined(STUB_LOAD_INTERFACES)
