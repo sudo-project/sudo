@@ -52,24 +52,32 @@ dnl --with-csops
 AC_ARG_WITH(csops, [  --with-csops            add CSops standard options], OPTIONS="${OPTIONS} -DUSE_INSULTS -DENV_EDITOR"
 echo 'CSOps--adding options: USE_INSULTS ENV_EDITOR')
 dnl
+dnl If we don't have egrep we can't do anything...
+dnl
+AC_CHECK_PROG(EGREPPROG, egrep, egrep, )
+if test -z "$EGREPPROG"; then
+    echo "Sorry, configure requires egrep to run."
+    exit
+fi
+dnl
 dnl C compiler checks
 dnl
 AC_PROG_CC
 AC_PROG_CPP
 dnl
-dnl find "uname"
+dnl find programs we use
 dnl
-AC_PROGRAM_CHECK(UNAMEPROG, uname, uname, )
-AC_PROGRAM_CHECK(TRPROG, tr, tr, )
-AC_PROGRAM_CHECK(SEDPROG, sed, sed, )
-AC_PROGRAM_CHECK(NROFFPROG, nroff, nroff, )
+AC_CHECK_PROG(UNAMEPROG, uname, uname, )
+AC_CHECK_PROG(TRPROG, tr, tr, )
+AC_CHECK_PROG(SEDPROG, sed, sed, )
+AC_CHECK_PROG(NROFFPROG, nroff, nroff, )
 if test -z "$NROFFPROG"; then
     MANTYPE="cat"
 fi
 dnl
 dnl what architecture are we on?
 dnl
-SUDO_OSTYPE()
+SUDO_OSTYPE
 OS=`echo $OS | $TRPROG '[[A-Z]]' '[[a-z]]'`
 case "$OS" in
     "sunos")	echo "Looks like SunOS 4.x"
@@ -208,8 +216,8 @@ dnl typedef checks
 dnl
 AC_TYPE_MODE_T
 AC_TYPE_UID_T
-AC_TYPE_SIZE_T
-SUDO_SSIZE_T
+SUDO_TYPE_SIZE_T
+SUDO_TYPE_SSIZE_T
 SUDO_FULL_VOID
 dnl
 dnl only set RETSIGTYPE if it is not set already
@@ -240,6 +248,10 @@ dnl
 dnl OS-dependent libraries
 dnl
 AC_CHECK_LIB(sun, getpwnam)
+dnl
+dnl Check for log file location
+dnl
+SUDO_LOGFILE
 dnl
 dnl Substitute into the Makefiles
 dnl
