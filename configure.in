@@ -34,12 +34,14 @@ AC_SUBST(TIMEDIR)
 AC_SUBST(DEV)
 AC_SUBST(mansectsu)
 AC_SUBST(mansectform)
+AC_SUBST(mansrcdir)
 dnl
 dnl Initial values for Makefile variables listed above
 dnl Some may be overridden by environment variables..
 dnl
 PROGS="sudo visudo"
 test -n "$MANTYPE" || MANTYPE="man"
+test -n "$mansrcdir" || mansrcdir="."
 test -n "$SUDOERS_MODE" || SUDOERS_MODE=0440
 test -n "$SUDOERS_UID" || SUDOERS_UID=0
 test -n "$SUDOERS_GID" || SUDOERS_GID=0
@@ -968,6 +970,7 @@ AC_CHECK_PROG(SEDPROG, sed, sed, )
 AC_CHECK_PROG(NROFFPROG, nroff, nroff, )
 if test -z "$NROFFPROG"; then
     MANTYPE="cat"
+    mansrcdir='$(srcdir)'
 fi
 
 dnl

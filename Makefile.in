@@ -299,9 +299,9 @@ install-sudoers:
 	fi
 
 install-man:
-	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 $(srcdir)/sudo.$(mantype) $(mandirsu)/sudo.$(mansectsu)
-	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 $(srcdir)/visudo.$(mantype) $(mandirsu)/visudo.$(mansectsu)
-	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 $(srcdir)/sudoers.$(mantype) $(mandirform)/sudoers.$(mansectform)
+	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 @mansrcdir@/sudo.$(mantype) $(mandirsu)/sudo.$(mansectsu)
+	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 @mansrcdir@/visudo.$(mantype) $(mandirsu)/visudo.$(mansectsu)
+	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 @mansrcdir@/sudoers.$(mantype) $(mandirform)/sudoers.$(mansectform)
 @MAN_POSTINSTALL@
 
 check:
@@ -314,13 +314,13 @@ TAGS: $(SRCS)
 	etags $(SRCS)
 
 clean:
-	-rm -f *.o $(PROGS) *.man testsudoers core sudo.core visudo.core \
+	-rm -f *.o $(PROGS) testsudoers core sudo.core visudo.core \
 	       testsudoers.core
 
 mostlyclean: clean
 
 distclean: clean
-	-rm -f Makefile pathnames.h config.h config.status config.cache \
+	-rm -f Makefile *.man pathnames.h config.h config.status config.cache \
 	       config.log $(PARSESRCS)
 
 clobber: distclean
