@@ -233,7 +233,6 @@ static void check_passwd()
     int code;
     long password_expires = -1;
     char *reason;
-    char username[20];
 #endif /* HAVE_AFS */
 #ifdef __svr4__
     struct spwd *spw_ent;
@@ -314,9 +313,8 @@ static void check_passwd()
 	    return;		/* if the passwd is correct return() */
 #endif /* __convex__ && HAVE_C2_SECURITY */
 #ifdef HAVE_AFS
-	strcpy(username, IDtouser(uid));
 	code = ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION+KA_USERAUTH_DOSETPAG,
-                                          username,
+                                          user,
                                           (char *) 0, 
                                           (char *) 0,
                                           pass,
