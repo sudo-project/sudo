@@ -105,23 +105,12 @@ CHECKSHADOW=true
 CHECKSIA=true
 
 dnl
-dnl Fix up some Makefile ugliness
+dnl Override default configure dirs...
 dnl
 test "$mandir" = '${prefix}/man' && mandir='$(prefix)/man'
 test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
 test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
-
-dnl
-dnl Sudoers should go in /etc unless either prefix or sysconfdir have been
-dnl explicitly specified by the user.
-dnl
-if test "$sysconfdir" = '${prefix}/etc'; then
-    if test "$prefix" = "NONE"; then
-	sysconfdir='/etc'
-    else
-	sysconfdir='$(prefix)/etc'
-    fi
-fi
+test "$sysconfdir" = '${prefix}/etc' && sysconfdir='/etc'
 
 dnl
 dnl Deprecated --with options (these all warn or generate an error)
