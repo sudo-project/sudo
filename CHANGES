@@ -85,7 +85,7 @@ CHANGES from sudo 1.3
 27) There is now a "configure" script.
 
 28) Sudo will use ultra fast crypt (ufc) if it finds it for systems w/o
-    a real crypt(3) (non-US ConvexOs/Secure for instance).
+    a real crypt(3) (non-US ConvexOS/Secure for instance).
 
 29) _BSD_COMPAT is now defined for Irix.
 
@@ -248,7 +248,7 @@ CHANGES from sudo 1.3.1pl4
 83) Fixed bison warnings from new parse.yacc.
 
 84) Added a default case to parse.lex to error on unmatched tokens as Chris
-    sugggested.
+    suggested.
 
 85) Converted configure.in and acsite.m4 to autoconf 2.1.
 
@@ -272,7 +272,7 @@ CHANGES from sudo 1.3.1pl4
 92) Added support for SunOS 4.x C2 security (shadow passwords) from
     Kendall Libby (fubar@shore.net)
 
-93) Changed all occurences of bzero() to memset() and bcopy() to
+93) Changed all occurrences of bzero() to memset() and bcopy() to
     memmove().
 
 94) Fixed a bug in sudo.c.  If a user has no passwd entry sudo would
@@ -736,7 +736,7 @@ CHANGES from sudo 1.4.3
 
 226) Fixed a typo/thinko that broke BSD > 4.3reno wrt interfaces.c.
 
-227) Hpux10 shadow password stuff now uses SecureWare routines.
+227) HPUX 10.X shadow password stuff now uses SecureWare routines.
 
 228) SecureWare passwd checking now uses bigcrypt() if available.
      Now uses AUTH_MAX_PASSWD_LENGTH if defined.
@@ -837,7 +837,7 @@ Sudo 1.5.2 released.
 
 260) Fixed bug with > 32 saved aliases.  Reported by BHH@capgroup.com.
 
-261) Code that uses sprintf() is now more paraniod about buffer
+261) Code that uses sprintf() is now more paranoid about buffer
      overflows.
 
 262) Whitespace is now allowed after a line continuation character before
@@ -945,7 +945,7 @@ Sudo 1.5.6 released.
 294) We now remove a timestamp file with a bogus date when it is detected.
      From Steve Fobes <sfobes@uswest.com>.
 
-295) In tgetpass(), restart select if it is interupted.  This really fixes a
+295) In tgetpass(), restart select if it is interrupted.  This really fixes a
      problem where a user sometimes is not given a change to enter a password.
 
 296) All options have moved from options.h -> configure.
@@ -1058,7 +1058,7 @@ Sudo 1.5.9 released.
      system strdup(3) which may or may not exist.  There is now no need to
      provide strdup() for those w/o it.
 
-332) You can now specifiy a host list instead of just a host or alias
+332) You can now specify a host list instead of just a host or alias
      in a privilege list.  Ie: user=host1,host2,ALIAS,!host3 /bin/ls
 
 333) Stash the "safe" path to the command instead of stashing the struct
@@ -1174,7 +1174,7 @@ Sudo 1.5.9 released.
 
 369) Sudo will now accept a hostname/username/netgroupname that contains
      almost any character in it.  It seems many people want to use '.'
-     and other non-alphanumberics in usernames.
+     and other non-alphanumerics in usernames.
 
 370) Fixed the root_sudo option.  Sudo was always complaining that root
      was not allowed to run sudo if the root_sudo flag was turned off.
