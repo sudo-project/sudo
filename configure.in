@@ -190,7 +190,7 @@ dnl
 AC_MODE_T
 AC_UID_T
 AC_SIZE_T
-AC_SSIZE_T
+SUDO_SSIZE_T
 dnl
 dnl only set RETSIGTYPE if it is not set already
 dnl
