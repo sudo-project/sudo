@@ -124,6 +124,7 @@ int top = 0, stacksize = 0;
 	match[top].runas  = UNSPEC; \
 	match[top].nopass = def_authenticate ? UNSPEC : TRUE; \
 	match[top].noexec = def_noexec ? TRUE : UNSPEC; \
+	match[top].trace  = def_trace ? TRUE : UNSPEC; \
 	top++; \
     } while (0)
 
@@ -139,6 +140,7 @@ int top = 0, stacksize = 0;
 	match[top].runas  = match[top-1].runas; \
 	match[top].nopass = match[top-1].nopass; \
 	match[top].noexec = match[top-1].noexec; \
+	match[top].trace  = match[top-1].trace; \
 	top++; \
     } while (0)
 
@@ -242,6 +244,8 @@ yyerror(s)
 %token <tok> 	 PASSWD			/* passwd req for command (default) */
 %token <tok> 	 NOEXEC			/* preload dummy execve() for cmnd */
 %token <tok> 	 EXEC			/* don't preload dummy execve() */
+%token <tok> 	 TRACE			/* trace children of cmnd */
+%token <tok> 	 NOTRACE		/* disable tracing of children */
 %token <tok>	 ALL			/* ALL keyword */
 %token <tok>	 COMMENT		/* comment and/or carriage return */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
@@ -374,6 +378,7 @@ privilege	:	hostlist '=' cmndspeclist {
 			    runas_matches = UNSPEC;
 			    no_passwd = def_authenticate ? UNSPEC : TRUE;
 			    no_execve = def_noexec ? TRUE : UNSPEC;
+			    trace_cmnd = def_trace ? TRUE : UNSPEC;
 			}
 		;
 
@@ -625,7 +630,7 @@ runasuser	:	WORD {
 		;
 
 cmndtag		:	/* empty */ {
-			    /* Inherit {NOPASSWD,PASSWD,NOEXEC,EXEC} status. */
+			    /* Inherit tags. */
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
 				if (no_passwd == TRUE)
@@ -636,6 +641,10 @@ cmndtag		:	/* empty */ {
 				    cm_list[cm_list_len].noexecve = TRUE;
 				else
 				    cm_list[cm_list_len].noexecve = FALSE;
+				if (trace_cmnd == TRUE)
+				    cm_list[cm_list_len].trace = TRUE;
+				else
+				    cm_list[cm_list_len].trace = FALSE;
 			    }
 			}
 		|	cmndtag NOPASSWD {
@@ -661,6 +670,18 @@ cmndtag		:	/* empty */ {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				cm_list[cm_list_len].noexecve = FALSE;
+			}
+		|	cmndtag TRACE {
+			    trace_cmnd = TRUE;
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				cm_list[cm_list_len].trace = TRUE;
+			}
+		|	cmndtag NOTRACE {
+			    trace_cmnd = FALSE;
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				cm_list[cm_list_len].trace = FALSE;
 			}
 		;
 
@@ -1082,6 +1103,12 @@ list_matches()
 	else if (cm_list[count].noexecve == FALSE && def_noexec)
 	    (void) fputs("EXEC: ", stdout);
 
+	/* Is tracing enabled? */
+	if (cm_list[count].trace == TRUE && !def_trace)
+	    (void) fputs("TRACE: ", stdout);
+	else if (cm_list[count].trace == FALSE && def_trace)
+	    (void) fputs("NOTRACE: ", stdout);
+
 	/* Is a password required? */
 	if (cm_list[count].nopasswd == TRUE && def_authenticate)
 	    (void) fputs("NOPASSWD: ", stdout);
@@ -1215,6 +1242,7 @@ expand_match_list()
     cm_list[cm_list_len].runas = cm_list[cm_list_len].cmnd = NULL;
     cm_list[cm_list_len].nopasswd = FALSE;
     cm_list[cm_list_len].noexecve = FALSE;
+    cm_list[cm_list_len].trace    = FALSE;
 }
 
 /*

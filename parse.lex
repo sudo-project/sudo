@@ -228,6 +228,16 @@ EXEC[[:blank:]]*:	{
 			    	return(EXEC);
 			}
 
+NOTRACE[[:blank:]]*:	{
+			    	LEXTRACE("NOTRACE ");
+			    	return(NOTRACE);
+			}
+
+TRACE[[:blank:]]*:	{
+			    	LEXTRACE("TRACE ");
+			    	return(TRACE);
+			}
+
 \+{WORD}		{
 			    /* netgroup */
 			    fill(yytext, yyleng);

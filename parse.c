@@ -124,7 +124,6 @@ sudoers_lookup(pwflag)
     /* Need to be runas user while stat'ing things in the parser. */
     set_perms(PERM_RUNAS);
     error = yyparse();
-
     if (error || parse_error) {
 	set_perms(PERM_ROOT);
 	return(VALIDATE_ERROR);
@@ -196,7 +195,8 @@ sudoers_lookup(pwflag)
 		    set_perms(PERM_ROOT);
 		    return(VALIDATE_OK |
 			(no_passwd == TRUE ? FLAG_NOPASS : 0) |
-			(no_execve == TRUE ? FLAG_NOEXEC : 0));
+			(no_execve == TRUE ? FLAG_NOEXEC : 0) |
+			(trace_cmnd == TRUE ? FLAG_TRACE : 0));
 		} else if ((runas_matches == TRUE && cmnd_matches == FALSE) ||
 		    (runas_matches == FALSE && cmnd_matches == TRUE)) {
 		    /*
@@ -205,7 +205,8 @@ sudoers_lookup(pwflag)
 		    set_perms(PERM_ROOT);
 		    return(VALIDATE_NOT_OK |
 			(no_passwd == TRUE ? FLAG_NOPASS : 0) |
-			(no_execve == TRUE ? FLAG_NOEXEC : 0));
+			(no_execve == TRUE ? FLAG_NOEXEC : 0) |
+			(trace_cmnd == TRUE ? FLAG_TRACE : 0));
 		}
 	    }
 	    top--;
