@@ -464,7 +464,7 @@ Solaris 2.x:
     C compiler or have a copy of the GNU C compiler (gcc).
     The SunSoft Catalyst CD should contain gcc binaries for
     Solaris.  You can also get them from various places on the
-    net, including http://smc.vnet.net/solaris_2.5.html.
+    net, including http://www.sunfreeware.com/
     NOTE: sudo will *not* build with the sun C compiler in BSD
           compatibility mode (/usr/ucb/cc).  Sudo is designed to
           compile with the standard C compiler (or gcc) and will
