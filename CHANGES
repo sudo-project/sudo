@@ -1702,3 +1702,6 @@ Sudo 1.6.7p5 released.
      was set.
 
 536) If the target user == invoking user a password is no longer required.
+
+537) PAM support now uses Use pam_acct_mgmt() to check for disabled accounts
+    (from Brian Farrell).
