@@ -96,10 +96,10 @@ HDRS = sudo.h version.h insults.h
 VERSION = 1.3.1pl5
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING INSTALL Makefile.in PORTING \
-            README SUPPORTED TODO HISTORY aclocal.m4 getcwd.c \
-            putenv.c strdup.c tgetpass.c config.h.in configure configure.in \
-            indent.pro installbsd pathnames.h.in sample.sudoers sudo.man \
-            sudo.cat sudoers aixcrypt.exp visudoers/Makefile.in \
+            README SUPPORTED TODO OPTIONS HISTORY aclocal.m4 getcwd.c \
+            putenv.c strdup.c tgetpass.c config.h.in options.h configure.in \
+            configure indent.pro installbsd pathnames.h.in sample.sudoers \
+            sudo.man sudo.cat sudoers aixcrypt.exp visudoers/Makefile.in \
             visudoers/config.h visudoers/pathnames.h visudoers/sudo.h \
             visudoers/version.h visudoers/visudo.c visudoers/visudo.lex \
             visudoers/visudo.yacc visudoers/aixcrypt.exp
