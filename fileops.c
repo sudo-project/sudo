@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999, 2001 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,23 +34,23 @@
 
 #include "config.h"
 
-#include <stdio.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-#include <fcntl.h>
-#include <time.h>
 #include <sys/types.h>
 #include <sys/param.h>
 #ifdef HAVE_FLOCK
-#include <sys/file.h>
+# include <sys/file.h>
 #endif /* HAVE_FLOCK */
+#include <stdio.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#include <fcntl.h>
+#include <time.h>
 #ifdef HAVE_UTIME
 # ifdef HAVE_UTIME_H
 #  include <utime.h>
 # endif /* HAVE_UTIME_H */
 #else
-#  include "emul/utime.h"
+# include "emul/utime.h"
 #endif /* HAVE_UTIME */
 
 #include "sudo.h"

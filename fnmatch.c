@@ -45,14 +45,15 @@ static char rcsid[] = "$OpenBSD: fnmatch.c,v 1.6 1998/03/19 00:29:59 millert Exp
 
 #include "config.h"
 
-#include <ctype.h>
 #include <stdio.h>
+#include <ctype.h>
 #ifdef HAVE_STRING_H
-#include <string.h>
+# include <string.h>
+#else
+# ifdef HAVE_STRINGS_H
+#  include <strings.h>
+# endif
 #endif /* HAVE_STRING_H */
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif /* HAVE_STRINGS_H */
 
 #include "compat.h"
 #include "emul/fnmatch.h"
