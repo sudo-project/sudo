@@ -9,3 +9,6 @@ Known bugs in sudo version 1.4
    directories if necesary.
 
 4) Sudo should log when removing "dangerous" envariables.
+
+5) Sudo cannot distinguish between an Alias name and an all-caps
+   host or user name.
