@@ -50,6 +50,9 @@ static char rcsid[] = "$Id$";
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 #  include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
+#ifdef HAVE_NETGROUP_H
+#  include <netgroup.h>
+#endif /* HAVE_NETGROUP_H */
 #include <ctype.h>
 #include <pwd.h>
 #include <grp.h>
