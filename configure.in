@@ -44,7 +44,8 @@ SUDOERS_UID=0
 AC_SUBST(SUDOERS_UID)dnl
 SUDOERS_GID=0
 AC_SUBST(SUDOERS_GID)dnl
-CHECKSHADOW="true"
+CHECKSHADOW=true
+CHECKSIA=true
 
 dnl
 dnl Override default configure dirs...
@@ -128,6 +129,7 @@ esac])
 AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
 [case $with_csops in  
     yes)	echo 'Adding CSOps standard options'
+		CHECKSIA=false
 		with_ignore_dot=yes
 		with_insults=yes
 		with_classic_insults=yes
@@ -229,18 +231,6 @@ AC_ARG_WITH(authenticate, [  --with-authenticate     enable AIX general authenti
 		;;
     no)		;;
     *)		echo "Sorry, --with-authenticate does not take an argument."
-		exit 1
-		;;
-esac])
-
-AC_ARG_WITH(sia, [  --with-sia              enable SIA support],
-[case $with_sia in
-    yes)	AC_DEFINE(HAVE_SIA)
-		AC_MSG_CHECKING(whether to use SIA authentication)
-		AC_MSG_RESULT(yes)
-		;;
-    no)		;;
-    *)		echo "Sorry, --with-sia does not take an argument."
 		exit 1
 		;;
 esac])
@@ -797,7 +787,7 @@ AC_ARG_ENABLE(shadow,
 		CHECKSHADOW="false"
 		;;
     *)		AC_MSG_RESULT(no)
-    		echo "Ignoring unknown argument to --enable-tgetpass: $enableval"
+    		echo "Ignoring unknown argument to --enable-shadow: $enableval"
 		;;
   esac
 ], AC_MSG_RESULT(no))
@@ -1076,10 +1066,32 @@ case "$host" in
 		# ignore envariables wrt dynamic lib path
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
 
+		AC_MSG_CHECKING(whether to disable sia support on Digital UNIX)
+		AC_ARG_ENABLE(sia,
+		[  --disable-sia           Never use SIA on Digital UNIX],
+		[ case "$enableval" in
+		    yes)	AC_MSG_RESULT(no)
+				;;
+		    no)		AC_MSG_RESULT(yes)
+				CHECKSIA=false
+				;;
+		    *)		AC_MSG_RESULT(no)
+				echo "Ignoring unknown argument to --enable-sia: $enableval"
+				;;
+		  esac
+		], AC_MSG_RESULT(no))
+
+		# use SIA by default, if we have it, else SecureWare
+		# unless overridden on the command line
+		if test "$CHECKSIA" = "true"; then
+		    AC_CHECK_FUNC(sia_ses_init, AC_DEFINE(HAVE_SIA))
+		    CHECKSHADOW="false"
+		fi
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_LIB(security, getprpwnam, SECUREWARE=1)
 		    CHECKSHADOW="false"
 		fi
+
 		if test -n "$SECUREWARE"; then
 		    # 4.x and higher need -ldb too...
 		    AC_CHECK_LIB(db, dbopen, [SUDO_LIBS="${SUDO_LIBS} -lsecurity -ldb -laud -lm"; LIBS="${LIBS} -lsecurity -ldb -laud -lm"], [SUDO_LIBS="${SUDO_LIBS} -lsecurity -ldb -laud -lm"; LIBS="${LIBS} -lsecurity -ldb -laud -lm"])
