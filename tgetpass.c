@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2002 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -29,9 +29,6 @@
 #ifdef HAVE_SYS_BSDTYPES_H
 # include <sys/bsdtypes.h>
 #endif /* HAVE_SYS_BSDTYPES_H */
-#ifdef HAVE_SYS_SELECT_H
-# include <sys/select.h>
-#endif /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -117,7 +114,6 @@ static const char rcsid[] = "$Sudo$";
 
 static volatile sig_atomic_t signo;
 
-static char *tgetline __P((int, char *, size_t, int));
 static void handler __P((int));
 
 /*
@@ -129,19 +125,22 @@ tgetpass(prompt, timeout, flags)
     int timeout;
     int flags;
 {
-    sigaction_t sa, saveint, savehup, savequit, saveterm;
+    sigaction_t sa, savealrm, saveint, savehup, savequit, saveterm;
     sigaction_t savetstp, savettin, savettou;
-    static char buf[SUDO_PASS_MAX + 1];
-    int input, output, save_errno;
+    FILE *input, *output;
     struct TERM term, oterm;
-    char *pass;
+    char *pass, *ep;
+    static char buf[SUDO_PASS_MAX + 1];
+    int fd, save_errno;
 
 restart:
     /* Open /dev/tty for reading/writing if possible else use stdin/stderr. */
     if (ISSET(flags, TGP_STDIN) ||
-	(input = output = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1) {
-	input = STDIN_FILENO;
-	output = STDERR_FILENO;
+	(fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1 ||
+	(input = output = fdopen(fd, "r+")) == NULL) {
+	input = stdin;
+	output = stderr;
+	(void) fflush(output);
     }
 
     /*
@@ -152,6 +151,7 @@ restart:
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;		/* don't restart system calls */
     sa.sa_handler = handler;
+    (void) sigaction(SIGALRM, &sa, &savealrm);
     (void) sigaction(SIGINT, &sa, &saveint);
     (void) sigaction(SIGHUP, &sa, &savehup);
     (void) sigaction(SIGQUIT, &sa, &savequit);
@@ -161,31 +161,44 @@ restart:
     (void) sigaction(SIGTTOU, &sa, &savettou);
 
     /* Turn echo off/on as specified by flags.  */
-    if (term_getattr(input, &oterm) == 0) {
+    if (term_getattr(fileno(input), &oterm) == 0) {
 	(void) memcpy(&term, &oterm, sizeof(term));
 	if (!ISSET(flags, TGP_ECHO))
 	    CLR(term.tflags, (ECHO | ECHONL));
 #ifdef VSTATUS
 	term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-	(void) term_setattr(input, &term);
+	(void) term_setattr(fileno(input), &term);
     } else {
 	memset(&term, 0, sizeof(term));
 	memset(&oterm, 0, sizeof(oterm));
     }
 
-    if (prompt)
-	(void) write(output, prompt, strlen(prompt));
+    if (prompt) {
+	(void) fputs(prompt, output);
+	(void) fflush(output);
+	if (input == output)
+	    (void) rewind(input);
+    }
 
-    pass = tgetline(input, buf, sizeof(buf), timeout);
+    if (timeout > 0)
+	alarm(timeout);
+    pass = fgets(buf, sizeof(buf), input);
+    alarm(0);
+    if (pass != NULL) {
+	ep = pass + strlen(pass);
+	while (ep > pass && (*--ep == '\n' || *ep == '\r'))
+		*ep = '\0';
+    }
     save_errno = errno;
 
     if (!ISSET(term.tflags, ECHO))
-	(void) write(output, "\n", 1);
+	fputc('\n', output);
 
     /* Restore old tty settings and signals. */
     if (memcmp(&term, &oterm, sizeof(term)) != 0)
-	(void) term_setattr(input, &oterm);
+	(void) term_setattr(fileno(input), &oterm);
+    (void) sigaction(SIGALRM, &savealrm, NULL);
     (void) sigaction(SIGINT, &saveint, NULL);
     (void) sigaction(SIGHUP, &savehup, NULL);
     (void) sigaction(SIGQUIT, &savequit, NULL);
@@ -193,8 +206,8 @@ restart:
     (void) sigaction(SIGTSTP, &savetstp, NULL);
     (void) sigaction(SIGTTIN, &savettin, NULL);
     (void) sigaction(SIGTTOU, &savettou, NULL);
-    if (input != STDIN_FILENO)
-	(void) close(input);
+    if (input != stdin)
+	(void) fclose(input);
 
     /*
      * If we were interrupted by a signal, resend it to ourselves
@@ -215,76 +228,10 @@ restart:
     return(pass);
 }
 
-/*
- * Get a line of input (optionally timing out) and place it in buf.
- */
-static char *
-tgetline(fd, buf, bufsiz, timeout)
-    int fd;
-    char *buf;
-    size_t bufsiz;
-    int timeout;
-{
-    fd_set *readfds = NULL;
-    struct timeval tv;
-    size_t left;
-    char *cp;
-    char c;
-    int n;
-
-    if (bufsiz == 0) {
-	errno = EINVAL;
-	return(NULL);			/* sanity */
-    }
-
-    cp = buf;
-    left = bufsiz;
-
-    /*
-     * Timeout of <= 0 means no timeout.
-     */
-    if (timeout > 0) {
-	/* Setup for select(2) */
-	n = howmany(fd + 1, NFDBITS) * sizeof(fd_mask);
-	readfds = (fd_set *) emalloc(n);
-	(void) memset((VOID *)readfds, 0, n);
-
-	/* Set timeout for select */
-	tv.tv_sec = timeout;
-	tv.tv_usec = 0;
-
-	while (--left) {
-	    FD_SET(fd, readfds);
-
-	    /* Make sure there is something to read (or timeout) */
-	    while ((n = select(fd + 1, readfds, 0, 0, &tv)) == -1 &&
-		errno == EAGAIN)
-		;
-	    if (n <= 0) {
-		free(readfds);
-		return(NULL);		/* timeout or interrupt */
-	    }
-
-	    /* Read a character, exit loop on error, EOF or EOL */
-	    n = read(fd, &c, 1);
-	    if (n != 1 || c == '\n' || c == '\r')
-		break;
-	    *cp++ = c;
-	}
-	free(readfds);
-    } else {
-	/* Keep reading until out of space, EOF, error, or newline */
-	n = -1;
-	while (--left && (n = read(fd, &c, 1)) == 1 && c != '\n' && c != '\r')
-	    *cp++ = c;
-    }
-    *cp = '\0';
-
-    return(n == -1 ? NULL : buf);
-}
-
-static void handler(s)
+static void
+handler(s)
     int s;
 {
-    signo = s;
+    if (s != SIGALRM)
+	signo = s;
 }
