@@ -418,7 +418,8 @@ init_vars(sudo_mode)
 #endif /* SUDO_UMASK */
 
     /* Default values for runas and cmnd, overridden later. */
-    user_runas = RUNAS_DEFAULT;
+    if (user_runas == NULL)
+	user_runas = RUNAS_DEFAULT;
     if (user_cmnd == NULL)
 	user_cmnd = NewArgv[0];
     (void) strcpy(user_cwd, "unknown");
