@@ -562,3 +562,38 @@ CHANGES from sudo 1.3.7 GAMMA
      fd_set in <sys/bsdtypes.h>
 
 CHANGES from sudo 1.4
+
+176) Command args in sudoers are now stored in an argument vector
+     instead of a flat string to make wildcard matching simpler.
+
+177) Added NewArgv and NewArgc that describe the command to be
+     executed.  The copy of args in cmnd_args is no longer necesary
+     and has been removed.
+
+178) Using strcmp(3) for argument matching in command_matches()
+     (was path_matches()) is no longer sufficient since we don't
+     have a flat string.  compare_args() is used instead which
+     calls either strcmp(3) or wildmat(3l) depending on whether
+     there are shell-style meta chars (wildcards) present.
+
+179) Shell-style wildcard matches are now available in the sudoers
+     file.  Matches are done via Rich $alz's wildmat(3).
+     This required the tweaks described in #176-178 as well as
+     other, more minor, changes.
+
+180) Commented out rule to build lex.yy.c from parse.lex since
+     we ship with a pre-flex'd parser and can't rely on file
+     dates being set correctly.
+
+181) Fixed visudo and testsudoers to deal with new argument
+     vector handling.
+
+182) A null string ("") as shell in passwd file (or $SHELL) is
+     now treated as the bourne shell.
+
+183) Converted *.man to pod format for easy conversion to man,
+     html, latex, and just plain text.  Tried to make the
+     sudoers manual easier to read in the process.
+
+184) Updated sample.sudoers and sudoers.pod to include info
+     on wildcards.
