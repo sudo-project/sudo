@@ -63,6 +63,9 @@
 #include <sys/param.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#ifdef HAVE_SETRLIMIT
+#include <sys/resource.h>
+#endif
 #if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
 # ifdef __hpux
 #  undef MAXINT
@@ -103,6 +106,7 @@ static void check_sudoers		__P((void));
 static int init_vars			__P((int));
 static void add_env			__P((int));
 static void clean_env			__P((char **, struct env_table *));
+static void initial_setup		__P((void));
 extern int  user_is_exempt		__P((void));
 extern struct passwd *sudo_getpwuid	__P((uid_t));
 extern void list_matches		__P((void));
@@ -160,7 +164,6 @@ main(argc, argv)
     int sudo_mode;
 #ifdef POSIX_SIGNALS
     sigset_t set, oset;
-    struct sigaction sa;
 #else
     int omask;
 #endif /* POSIX_SIGNALS */
@@ -183,15 +186,6 @@ main(argc, argv)
 	exit(1);
     }
 
-    /* Catch children as they die... */
-#ifdef POSIX_SIGNALS
-    (void) memset((VOID *)&sa, 0, sizeof(sa));
-    sa.sa_handler = reapchild;
-    (void) sigaction(SIGCHLD, &sa, NULL);
-#else
-    (void) signal(SIGCHLD, reapchild);
-#endif /* POSIX_SIGNALS */
-
     /*
      * Block signals so the user cannot interrupt us at some point and
      * avoid the logging.
@@ -207,15 +201,9 @@ main(argc, argv)
 #endif /* POSIX_SIGNALS */
 
     /*
-     * Close any open fd's other than stdin, stdout and stderr.
+     * Setup signal handlers, turn off core dumps, and close open files.
      */
-#ifdef HAVE_SYSCONF
-    for (fd = sysconf(_SC_OPEN_MAX) - 1; fd > 2; fd--)
-	(void) close(fd);
-#else
-    for (fd = getdtablesize() - 1; fd > 2; fd--)
-	(void) close(fd);
-#endif /* HAVE_SYSCONF */
+    initial_setup();
 
     /*
      * Set the prompt based on $SUDO_PROMPT (can be overridden by `-p')
@@ -995,6 +983,55 @@ set_perms(perm, sudo_mode)
 				}
 			      	break;
     }
+}
+
+/*
+ * Close all open files (except std*) and turn off core dumps.
+ */
+static void
+initial_setup()
+{
+    int fd, maxfd;
+#ifdef HAVE_SETRLIMIT
+    struct rlimit rl;
+#endif
+#ifdef POSIX_SIGNALS
+    struct sigaction sa;
+#endif
+
+#if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
+    /*
+     * Turn off core dumps.
+     */
+    rl.rlim_cur = rl.rlim_max = 0;
+    (void) setrlimit(RLIMIT_CORE, &rl);
+#endif /* RLIMIT_CORE */
+
+    /*
+     * Close any open fd's other than stdin, stdout and stderr.
+     */
+#ifdef RLIMIT_NOFILE
+    if (getrlimit(RLIMIT_NOFILE, &rl) == 0)
+	maxfd = rl.rlim_max - 1;
+    else
+#endif /* RLIMIT_NOFILE */
+#ifdef HAVE_SYSCONF
+	maxfd = sysconf(_SC_OPEN_MAX) - 1;
+#else
+	maxfd = getdtablesize() - 1;
+#endif /* HAVE_SYSCONF */
+
+    for (fd = maxfd; fd > STDERR_FILENO; fd--)
+	(void) close(fd);
+
+    /* Catch children as they die... */
+#ifdef POSIX_SIGNALS
+    (void) memset((VOID *)&sa, 0, sizeof(sa));
+    sa.sa_handler = reapchild;
+    (void) sigaction(SIGCHLD, &sa, NULL);
+#else
+    (void) signal(SIGCHLD, reapchild);
+#endif /* POSIX_SIGNALS */
 }
 
 /*

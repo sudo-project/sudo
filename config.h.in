@@ -251,6 +251,9 @@
 /* Define if you have ftruncate(2).  */
 #undef HAVE_FTRUNCATE
 
+/* Define if you have setrlimit(2).  */
+#undef HAVE_SETRLIMIT
+
 /* Define if you have strftime(2).  */
 #undef HAVE_STRFTIME
 

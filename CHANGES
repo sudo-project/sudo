@@ -1182,3 +1182,5 @@ Sudo 1.5.9 released.
 371) tgetpass() now uses a function to read up until the end of line.
      Fixes problems in a pipeline when a program sets the tty mode
      to be character at a time.
+
+372) sudo now turns off core dumps via setrlimit (probably paranoia).

@@ -150,6 +150,7 @@ AC_ARG_WITH(devel, [  --with-devel            add developement options],
 [case $with_devel in  
     yes)	echo 'Setting up for developement: -Wall, flex, yacc'
 		PROGS="${PROGS} testsudoers"
+		OSDEFS="${OSDEFS} -DSUDO_DEVEL"
 		DEV=""
 		;;
     no)		;;
@@ -1011,7 +1012,7 @@ AC_PROG_CPP
 AC_ISC_POSIX
 
 dnl
-dnl It is now safe to modify CFLAGS
+dnl It is now safe to modify CFLAGS and CPPFLAGS
 dnl
 if test "$with_devel" = "yes" -a -n "$GCC"; then
     CFLAGS="${CFLAGS} -Wall"
@@ -1403,7 +1404,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset seteuid ftruncate strftime)
+AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf sigaction tzset seteuid ftruncate strftime setrlimit)
 if test -n "$SECUREWARE"; then
     AC_CHECK_FUNCS(bigcrypt)
     AC_CHECK_FUNCS(set_auth_parameters)
