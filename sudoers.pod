@@ -161,8 +161,8 @@ network numbers, netgroups (prefixed with '+') and other aliases.
 Again, the value of an item may be negated with the '!' operator.
 If you do not specify a netmask with a network number, the netmask
 of the host's ethernet interface(s) will be used when matching.
-The netmask may be specified either in dotted quad notation (eg.
-255.255.255.0) or CIDR notation (number of bits, eg. 24).  A hostname
+The netmask may be specified either in dotted quad notation (e.g.
+255.255.255.0) or CIDR notation (number of bits, e.g. 24).  A hostname
 may include shell-style wildcards (see `Wildcards' section below),
 but unless the C<hostname> command on your machine returns the fully
 qualified hostname, you'll need to use the I<fqdn> option for wildcards
@@ -772,7 +772,7 @@ Whitespace between elements in a list as well as specicial syntactic
 characters in a I<User Specification> ('=', ':', '(', ')') is optional.
 
 The following characters must be escaped with a backslash ('\') when
-used as part of a word (eg. a username or hostname):
+used as part of a word (e.g. a username or hostname):
 '@', '!', '=', ':', ',', '(', ')', '\'.
 
 =head1 EXAMPLES
