@@ -121,7 +121,8 @@
 #endif
 
 #ifndef EDITOR
-#if defined(hpux) || defined(__alpha) || defined(_AIX) || defined(__ksr__)
+#if defined(hpux) || defined(__alpha) || defined(_AIX) || defined(__ksr__) || \
+    defined(sgi)
 #define EDITOR			"/usr/bin/vi"
 #else
 #define EDITOR			"/usr/ucb/vi"
