@@ -252,7 +252,7 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
     char *path;
     char *sudoers_args;
 {
-    int plen;
+    int plen, error;
     static struct stat cst;
     struct stat pst;
     DIR *dirp;
@@ -268,8 +268,15 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
 
     /* Only need to stat cmnd once since it never changes */
     if (cst.st_dev == 0) {
-	if (stat(cmnd, &cst) == -1)
-	    return(FALSE);
+	if ((error = stat(cmnd, &cst))) {
+	    if (runas_pw->pw_uid != 0) {
+		set_perms(PERM_RUNAS);
+		error = stat(cmnd, &cst);
+		set_perms(PERM_ROOT);
+	    }
+	    if (error)
+		return(FALSE);
+	}
 	if ((cmnd_base = strrchr(cmnd, '/')) == NULL)
 	    cmnd_base = cmnd;
 	else
