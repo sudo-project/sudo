@@ -67,7 +67,11 @@ static char rcsid[] = "$Id$";
 #include <options.h>
 #include "insults.h"
 #if defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
-#  include <sys/security.h>
+#  ifdef __hpux
+#    include <hpsecurity.h>
+#  else
+#    include <sys/security.h>
+#  endif /* __hpux */
 #  include <prot.h>
 #endif /* SHADOW_TYPE == SPW_SECUREWARE */
 #ifdef HAVE_KERB4
@@ -445,12 +449,8 @@ static void check_passwd()
 {
     char *pass;			/* this is what gets entered    */
     register int counter = TRIES_FOR_PASSWORD;
-#if defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
-    char salt[2];		/* Need the salt to perform the encryption */
-    register int i;
-#endif /* SHADOW_TYPE == SECUREWARE */
 #if defined(HAVE_KERB4) && defined(USE_GETPASS)
-    char kpass[_PASSWD_LEN];
+    char kpass[_PASSWD_LEN + 1];
 #endif /* HAVE_KERB4 && USE_GETPASS */
 
 #ifdef HAVE_SKEY
@@ -507,14 +507,17 @@ static void check_passwd()
 	 */
 #  ifdef SHADOW_TYPE
 #    if (SHADOW_TYPE == SPW_ULTRIX4)
-	if (!strcmp(user_passwd, (char *)crypt16(pass, user_passwd)))
+	if (!strcmp(user_passwd, (char *) crypt16(pass, user_passwd)))
 	    return;		/* if the passwd is correct return() */
 #    endif /* ULTRIX4 */
 #    if (SHADOW_TYPE == SPW_SECUREWARE) && !defined(__alpha)
-	strncpy(salt, user_passwd, 2);
-	i = AUTH_SALT_SIZE + AUTH_CIPHERTEXT_SEG_CHARS;
-	if (strncmp(user_passwd, crypt(pass, salt), i) == 0)
+#      ifdef HAVE_BIGCRYPT
+	if (strcmp(user_passwd, (char *) bigcrypt(pass, user_passwd)) == 0)
 	    return;           /* if the passwd is correct return() */
+#      else
+	if (strcmp(user_passwd, crypt(pass, user_passwd)) == 0)
+	    return;           /* if the passwd is correct return() */
+#      endif /* HAVE_BIGCRYPT */
 #    endif /* SECUREWARE && !__alpha */
 #    if (SHADOW_TYPE == SPW_SECUREWARE) && defined(__alpha)
 	if (crypt_type == AUTH_CRYPT_BIGCRYPT) {
@@ -530,10 +533,6 @@ static void check_passwd()
 	    exit(1);
 	}
 #    endif /* SECUREWARE && __alpha */
-#    if (SHADOW_TYPE == SPW_HPUX10)
-	if (strcmp(user_passwd, (char *) bigcrypt(pass, user_passwd)) == 0)
-	    return;           /* if the passwd is correct return() */
-#    endif /* HPUX10 */
 #  endif /* SHADOW_TYPE */
 
 	/* Normal UN*X password check */
