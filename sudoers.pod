@@ -27,12 +27,17 @@ sudoers - list of which users may execute what
 
 =head1 DESCRIPTION
 
-The I<sudoers> file is composed of two types of entries:
-aliases (basically variables) and user specifications
-(which specify who may run what).  The grammar of I<sudoers>
-will be described below in Extended Backus-Naur Form (EBNF).
-Don't despair if you don't know what EBNF is; it is fairly
-simple, and the definitions below are annotated.
+The I<sudoers> file is composed of two types of entries: aliases
+(basically variables) and user specifications (which specify who
+may run what).
+
+When multiple entries match for a user, they are applied in order.
+Where there are conflicting values, the last match is used (which
+is not necessarily the most specific match).
+
+The I<sudoers> grammar will be described below in Extended Backus-Naur
+Form (EBNF).  Don't despair if you don't know what EBNF is; it is
+fairly simple, and the definitions below are annotated.
 
 =head2 Quick guide to EBNF
 
@@ -193,9 +198,7 @@ a normal command does.
 Certain configuration options may be changed from their default
 values at runtime via one or more C<Default_Entry> lines.  These
 may affect all users on any host, all users on a specific host, a
-specific user, or commands being run as a specific user.  When
-multiple entries match, they are applied in order.  Where there are
-conflicting values, the last value on a matching line takes effect.
+specific user, or commands being run as a specific user.
 
  Default_Type ::= 'Defaults' |
 		  'Defaults' '@' Host |
@@ -223,11 +226,6 @@ Lists have two additional assignment operators, C<+=> and C<-=>.
 These operators are used to add to and delete from a list respectively.
 It is not an error to use the C<-=> operator to remove an element
 that does not exist in a list.
-
-Note that since the I<sudoers> file is parsed in order the best place
-to put the Defaults section is after the C<Host_Alias>, C<User_Alias>,
-and C<Cmnd_Alias> specifications but before any C<Runas_Alias> or user
-specifications.
 
 B<Flags>:
 
@@ -913,6 +911,28 @@ wildcards.  This is to make a path like:
 
 match F</usr/bin/who> but not F</usr/bin/X11/xterm>.
 
+WARNING: a pathname with wildcards will B<not> match a user command
+that consists of a relative path.  In other words, given the
+following I<sudoers> entry:
+
+    billy  workstation = /usr/bin/*
+
+user billy will be able to run any command in /usr/bin as root, such
+as F</usr/bin/w>.  The following two command will be allowed (the first
+assumes that F</usr/bin> is in the user's path):
+
+    $ sudo w
+    $ sudo /usr/bin/w
+
+However, this will not:
+
+    $ cd /usr/bin
+    $ sudo ./w
+
+For this reason you should only B<grant> access to commands using
+wildcards and never B<restrict> access using them.  This limitation
+will be removed in a future version of B<sudo>.
+
 =head2 Exceptions to wildcard rules
 
 The following exceptions apply to the above rules:
@@ -962,6 +982,13 @@ used as part of a word (e.g. a username or hostname):
 
 =head1 EXAMPLES
 
+Since the I<sudoers> file is parsed in a single pass, order is
+important.  In general, you should structure I<sudoers> such that
+the C<Host_Alias>, C<User_Alias>, and C<Cmnd_Alias> specifications
+come first, followed by any C<Default_Entry> lines, and finally the
+C<Runas_Alias> and user specifications.  The basic rule of thumb
+is you cannot reference an Alias that has not already been defined.
+
 Below are example I<sudoers> entries.  Admittedly, some of
 these are a bit contrived.  First, we define our I<aliases>:
 
@@ -1001,7 +1028,7 @@ Here we override some of the compiled in default values.  We want
 B<sudo> to log via L<syslog(3)> using the I<auth> facility in all
 cases.  We don't want to subject the full time staff to the B<sudo>
 lecture, user B<millert> need not give a password, and we don't
-want to set the C<LOGNAME> or C<USER> environment variables when
+want to reset the C<LOGNAME> or C<USER> environment variables when
 running commands as root.  Additionally, on the machines in the
 I<SERVERS> C<Host_Alias>, we keep an additional local log file and
 make sure we log the year in each log line since the log entries
