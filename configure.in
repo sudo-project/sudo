@@ -989,6 +989,8 @@ case "$host" in
 		fi
 		;;
     *-*-solaris2*)
+		# To get the crypt(3) prototype (so we pass -Wall)
+		CFLAGS="${CFLAGS} -D__EXTENSIONS__"
 		# AFS support needs -lucb
 		if test "$with_AFS" = "yes"; then
 		    AFS_LIBS="-lc -lucb"
