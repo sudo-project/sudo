@@ -65,4 +65,4 @@ o Upgrading from a version prior to 1.5:
     that if have a means of distributing sudo you distribute the
     new binaries first, then the new sudoers file (or you can leave
     sudoers as is and sudo will fix the permissions itself as long
-    as sudoers is on a local filesystem).
+    as sudoers is on a local file system).

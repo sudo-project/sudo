@@ -851,7 +851,7 @@ check_sudoers()
 
     /*
      * Fix the mode and group on sudoers file from old default.
-     * Only works if filesystem is readable/writable by root.
+     * Only works if file system is readable/writable by root.
      */
     if ((rootstat = stat_sudoers(_PATH_SUDOERS, &statbuf)) == 0 &&
 	SUDOERS_UID == statbuf.st_uid && SUDOERS_MODE != 0400 &&

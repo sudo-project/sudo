@@ -443,11 +443,11 @@ main(argc, argv)
     /*
      * Now that we have a sane stmp file (parses ok) it needs to be
      * rename(2)'d to sudoers.  If the rename(2) fails we try using
-     * mv(1) in case stmp and sudoers are on different filesystems.
+     * mv(1) in case stmp and sudoers are on different file systems.
      */
     if (rename(stmp, sudoers)) {
 	if (errno == EXDEV) {
-	    warnx("%s and %s not on the same filesystem, using mv to rename",
+	    warnx("%s and %s not on the same file system, using mv to rename",
 	      stmp, sudoers);
 
 	    /* Build up argument vector for the command */
