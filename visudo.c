@@ -86,6 +86,7 @@ int command_matches		__P((char *, char *, char *, char *));
 int addr_matches		__P((char *));
 int netgr_matches		__P((char *, char *, char *));
 int usergr_matches		__P((char *, char *));
+void init_parser		__P((void));
 
 
 /*
@@ -266,10 +267,7 @@ int main(argc, argv)
 	    }
 
 	    /* clean slate for each parse */
-	    parse_error = FALSE;
-	    errorlineno = -1;
-	    sudolineno = 1;
-	    top = 0;
+	    init_parser();
 
 	    /* parse the sudoers file */
 	    if (yyparse()) {
