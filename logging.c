@@ -88,6 +88,12 @@ static char *logline;
 extern int errorlineno;
 
 
+/*
+ * length of syslog-like header info used for mail and file logs
+ * is len("Mon MM HH:MM:SS : username : ")
+ */
+#define LOG_HEADER_LEN		29
+
 #ifdef BROKEN_SYSLOG
 #define MAXSYSLOGTRIES		16	/* num of retries for broken syslogs */
 #define SYSLOG(a,b,c,d)		syslog_wrapper(a,b,c,d)
@@ -145,9 +151,8 @@ void log_error(code)
 
     /*
      * Allocate enough memory for logline so we won't overflow it
-     * XXX - don't use 33, use a macro!
      */
-    count = 33 + 128 + 2 * MAXPATHLEN + strlen(tty) + strlen(cwd);
+    count = LOG_HEADER_LEN + 128 + 2 * MAXPATHLEN + strlen(tty) + strlen(cwd);
     if (NewArgc > 1)
 	for (a = &NewArgv[1]; *a; a++)
 	    count += strlen(*a) + 1;
@@ -164,12 +169,13 @@ void log_error(code)
      * necesary for mail and file logs.
      */
     now = time((time_t) 0);
-    (void) sprintf(logline, "%19.19s : %8.8s : ", ctime(&now), user_name);
+    p = ctime(&now) + 4;
+    (void) sprintf(logline, "%15.15s : %8.8s : ", p, user_name);
 
     /*
-     * we need a pointer to the end of logline (XXX - use a #define not 33)
+     * we need a pointer to the end of logline for cheap appends.
      */
-    p = logline + 33;
+    p = logline + LOG_HEADER_LEN;
 
     switch (code) {
 
@@ -314,13 +320,12 @@ void log_error(code)
     /*
      * Log the full line, breaking into multiple syslog(3) calls if necesary
      */
-    p = &logline[33];			/* skip past the date and user */
+    p = &logline[LOG_HEADER_LEN];	/* skip past the date and user */
     for (count = 0; count < strlen(logline) / MAXSYSLOGLEN + 1; count++) {
 	if (strlen(p) > MAXSYSLOGLEN) {
 	    /*
 	     * Break up the line into what will fit on one syslog(3) line
 	     * Try to break on a word boundary if possible.
-	     * XXX - speed this up!
 	     */
 	    for (tmp = p + MAXSYSLOGLEN; tmp > p && *tmp != ' '; tmp--)
 		;
