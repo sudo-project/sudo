@@ -138,6 +138,9 @@ sudo: $(PARSEOBJS) $(SUDOBJS) $(LIBOBJS)
 visudo: $(PARSEOBJS) $(VISUDOBJS)
 	$(CC) -o $@ $(PARSEOBJS) $(VISUDOBJS) $(LIBOBJS) $(VISUDO_LDFLAGS) $(VISUDO_LIBS)
 
+testsudoers: $(PARSEOBJS) $(TESTOBJS)
+	$(CC) -o $@ $(PARSEOBJS) $(TESTOBJS) $(VISUDO_LDFLAGS) $(VISUDO_LIBS)
+
 y.tab.c y.tab.h: parse.yacc
 	$(YACC) -d $(srcdir)/parse.yacc
 
@@ -149,9 +152,6 @@ lex.yy.c: parse.lex
 	$(LEX) $(srcdir)/parse.lex
 
 lex.yy.o: lex.yy.c y.tab.h $(HDRS)
-
-testsudoers: $(PARSEOBJS) $(TESTOBJS)
-	$(CC) -o $@ $(PARSEOBJS) $(TESTOBJS)
 
 $(SUDOBJS) $(LIBOBJS) : $(HDRS) config.h
 
