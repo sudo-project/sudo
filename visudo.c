@@ -249,6 +249,7 @@ main(argc, argv)
 	    yyparse();
 	    parse_error = FALSE;
 	    quiet = n;
+	    fclose(yyin);
 	}
     } else
 	(void) close(stmp_fd);
@@ -397,7 +398,7 @@ main(argc, argv)
 	     * for parse errors.
 	     */
 	    yyout = stdout;
-	    yyin = freopen(stmp, "r+", yyin);
+	    yyin = fopen(stmp, "r+");
 	    if (yyin == NULL) {
 		(void) fprintf(stderr,
 		    "%s: Can't re-open temporary file (%s), %s unchanged.\n",
@@ -423,6 +424,7 @@ main(argc, argv)
 		    Argv[0], stmp);
 		parse_error = TRUE;
 	    }
+	    fclose(yyin);
 	} else {
 	    (void) fprintf(stderr,
 		"%s: Editor (%s) failed, %s unchanged.\n", Argv[0],
