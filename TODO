@@ -15,16 +15,25 @@ TODO list
 
 07) Add a -h flag to sudo for a history mechanism.
 
-08) Fully integrate riscos and isc support
+08) Make parse.lex in the same coding style as everything else...
 
-09) Make parse.lex in the same coding style as everything else...
+09) Make -l expand Command Aliases.
 
-10) Make -l work with the new parser.
+10) Cleanup check.c and logging.c.
 
-11) Cleanup check.c and logging.c.
+11) Add an option to hard-code LD_LIBRARY_PATH?
 
-12) Add an option to hard-code LD_LIBRARY_PATH?
+12) Add Prog_Alias facility (Prog_Alias VI = /usr/secure/bin/vi +args).
 
-13) Add Prog_Alias facility (Prog_Alias VI = /usr/secure/bin/vi +args).
+13) Make '!' work in Cmnd_Alias, Host_Alias and User_Alias.
 
-14) Make '!' work in Cmnd_Alias, Host_Alias and User_Alias.
+14) check for <net/errno.h> in configure and include it in sudo.c if it exists.
+
+15) Add generic STREAMS support for getting interfaces and netmasks.
+
+16) open(2) sudo ticket file with O_EXCL flag to eliminate race condition
+    that can cause a user to be prompted when they should not be.
+
+17) Decrease MAXLOGLEN if possible.
+
+18) Netgroups support.

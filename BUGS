@@ -1,3 +1,9 @@
-1) Sudo -l does not work with the new parser (yet).
+1) Sudo -l does not expand Command Aliases.
 
-2) Signal handler setup in visudo should be done after stmp is opened.
+2) When doing two sudo's in a pipe, the ticket file update of one
+   sudo may clobber the other's, resulting in the second sudo asking
+   for a password when it should not.  (May be fixed now...)
+
+3) Under SunOS at least, if the argv is long and takes several syslog()
+   calls to log it takes a *long* time before the command is actually
+   executed.
