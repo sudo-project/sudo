@@ -49,7 +49,7 @@ AFS=1
 echo 'Configuring for use with AFS')
 dnl
 dnl --with-csops
-AC_WITH(csops, OPTIONS="${OPTIONS} -DUSE_INSULTS -DENV_EDITOR -DSHORT_MESSAGE"
+AC_WITH(csops, OPTIONS="${OPTIONS} -DUSE_INSULTS -DENV_EDITOR"
 echo 'CSOps--adding options: USE_INSULTS ENV_EDITOR SHORT_MESSAGE')
 dnl
 dnl C compiler checks
@@ -143,6 +143,15 @@ case "$OS" in
 		    LIBS="${LIBS} -lauth"
 		fi
 		;;
+    "riscos")	echo "Looks like RISCos"
+		LIBS="${LIBS} -lsun -lbsd"
+		INC_FLAGS="${INC_FLAGS} -I/usr/include -I/usr/include/bsd"
+		OSDEFS="${OSDEFS} -D_MIPS"
+		;;
+    "isc")	echo "Looks like INTERACTIVE"
+		LIBS="${LIBS} -lsec -linet"
+		OSDEFS="${OSDEFS} -D_ISC"
+		;;
     "ksr"*)	echo "Looks like a KSR"
 		;;
     "next")	echo "Looks like NeXTstep"
@@ -187,6 +196,7 @@ fi
 SUDO_PROG_INSTALL
 SUDO_PROG_SENDMAIL
 SUDO_PROG_PWD
+SUDO_PROG_MV
 SUDO_PROG_VI
 dnl
 dnl Header file checks
