@@ -218,11 +218,10 @@ load_interfaces()
 	    break;
 	len += BUFSIZ;
     }
-    if (n == 0)
-	return;
 
     /* Allocate space for the maximum number of interfaces that could exist. */
-    n = ifconf->ifc_len / sizeof(struct ifreq);
+    if ((n = ifconf->ifc_len / sizeof(struct ifreq)) == 0)
+	return;
     interfaces = (struct interface *) emalloc2(n, sizeof(struct interface));
 
     /* For each interface, store the ip address and netmask. */
