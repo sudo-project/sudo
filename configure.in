@@ -81,6 +81,7 @@ SUDO_OSTYPE
 OS=`echo $OS | $TRPROG '[[A-Z]]' '[[a-z]]'`
 case "$OS" in
     "sunos")	echo "Looks like SunOS 4.x"
+		AC_DEFINE(SUNOS4)
 		;;
     "solaris")	echo "Looks like Solaris"
 		AC_DEFINE(SVR4)
@@ -229,7 +230,7 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_CHECK_FUNCS(getwd strchr strrchr memcpy sysconf sigaction bzero tzset tcsetattr strcasecmp)
+AC_CHECK_FUNCS(getwd strchr strrchr memcpy memmove sysconf sigaction memset tzset tcsetattr strcasecmp)
 AC_CHECK_FUNC(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
 AC_CHECK_FUNC(getcwd, AC_DEFINE(HAVE_GETCWD), LIBOBJS="$LIBOBJS getcwd.o")
 AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), LIBOBJS="$LIBOBJS lsearch.o")
