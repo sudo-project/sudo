@@ -217,7 +217,7 @@ interfaces.o: interfaces.c $(SUDODEP) interfaces.h
 testsudoers.o: testsudoers.c $(SUDODEP) parse.h interfaces.h
 parse.o: parse.c $(SUDODEP) parse.h interfaces.h
 lex.yy.o: lex.yy.c $(SUDODEP) parse.h sudo.tab.h
-sudo.tab.o: sudo.tab.c $(SUDODEP) parse.h
+sudo.tab.o: sudo.tab.c $(SUDODEP) parse.h sudo.tab.c sudo.tab.h
 defaults.o: defaults.c $(SUDODEP) def_data.c auth/sudo_auth.h
 fnmatch.o: fnmatch.c config.h compat.h emul/fnmatch.h
 getcwd.o: getcwd.c config.h compat.h
