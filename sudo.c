@@ -263,7 +263,7 @@ main(argc, argv)
     add_env(!(sudo_mode & MODE_SHELL));	/* add in SUDO_* envariables */
 
     /* Validate the user but don't search for pseudo-commands. */
-    validated = validate((sudo_mode != MODE_VALIDATE && sudo_mode != MODE_LIST));
+    validated = sudoers_lookup((sudo_mode != MODE_VALIDATE && sudo_mode != MODE_LIST));
 
     switch (validated) {
 	case VALIDATE_OK:

@@ -107,11 +107,11 @@ static int has_meta	__P((char *));
        void init_parser	__P((void));
 
 /*
- * This routine is called from the sudo.c module and tries to validate
- * the user, host and command triplet.
+ * Look up the user in the sudoers file and check to see if they are
+ * allowed to run the specified command on this host as the target user.
  */
 int
-validate(check_cmnd)
+sudoers_lookup(check_cmnd)
     int check_cmnd;
 {
     int return_code;
