@@ -143,6 +143,7 @@ esac])
 AC_ARG_WITH(devel, [  --with-devel            add developement options],
 [case $with_devel in  
     yes)	echo 'Setting up for developement: -Wall, flex, yacc'
+		PROGS="${PROGS} testsudoers"
 		DEV=""
 		;;
     no)		;;

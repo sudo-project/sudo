@@ -306,7 +306,7 @@ TAGS: $(SRCS)
 
 clean:
 	-rm -f *.o $(PROGS) testsudoers core sudo.core visudo.core \
-	       testsudoers.core $(PARSESRCS)
+	       testsudoers.core
 
 mostlyclean: clean
 
