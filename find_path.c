@@ -160,8 +160,7 @@ char * find_path(file)
 	/*
 	 * resolve the path and exit the loop if found
 	 */
-	if (strlen(path) + strlen(file) >= MAXPATHLEN) {
-	    errno = ENAMETOOLONG;
+	if (strlen(path) + strlen(file) + 1 >= MAXPATHLEN) {
 	    (void) fprintf(stderr, "%s:  path too long:  %s\n", Argv[0], file);
 	    exit(1);
 	}
