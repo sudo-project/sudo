@@ -89,13 +89,16 @@ static const char rcsid[] = "$Sudo$";
 #undef DID_USER    
 #define DID_USER    	0x12
 
+#undef VNULL
+#define	VNULL	(VOID *)NULL
+
 /*
  * Prototypes
  */
 char **rebuild_env		__P((char **, int, int));
 char **zero_env			__P((char **));
 static void insert_env		__P((char *, int));
-static char *format_env		__P((char *, char *));
+static char *format_env		__P((char *, ...));
 
 /*
  * Default table of "bad" variables to remove from the environment.
@@ -217,23 +220,48 @@ zero_env(envp)
  * Given a variable and value, allocate and format an environment string.
  */
 static char *
-format_env(var, val)
+#ifdef __STDC__
+format_env(char *var, ...)
+#else
+format_env(var, va_alist)
     char *var;
-    char *val;
+    va_dcl
+#endif
 {
     char *estring;
+    char *val;
     size_t esize;
+    va_list ap;
 
-    esize = strlen(var) + 1 + strlen(val) + 1;
+#ifdef __STDC__
+    va_start(ap, var);
+#else
+    va_start(ap);
+#endif
+    esize = strlen(var) + 2;
+    while ((val = va_arg(ap, char *)) != NULL)
+	esize += strlen(val);
+    va_end(ap);
     estring = (char *) emalloc(esize);
 
-    /* We pre-allocate enough space, so this should never overflow. */
+    /* Store variable name and the '=' separator.  */
     if (strlcpy(estring, var, esize) >= esize ||
-	strlcat(estring, "=", esize) >= esize ||
-	strlcat(estring, val, esize) >= esize) {
+	strlcat(estring, "=", esize) >= esize) {
 
 	errx(1, "internal error, format_env() overflow");
     }
+
+    /* Now store the variable's value (if any) */
+#ifdef __STDC__
+    va_start(ap, var);
+#else
+    va_start(ap);
+#endif
+    while ((val = va_arg(ap, char *)) != NULL) {
+	if (strlcat(estring, val, esize) >= esize)
+	    errx(1, "internal error, format_env() overflow");
+    }
+    va_end(ap);
 
     return(estring);
 }
@@ -359,13 +387,13 @@ rebuild_env(envp, reset_home, noexec)
 	 * user's environment.
 	 */
 	if (!(didvar & DID_HOME))
-	    insert_env(format_env("HOME", user_dir), 0);
+	    insert_env(format_env("HOME", user_dir, VNULL), 0);
 	if (!(didvar & DID_SHELL))
-	    insert_env(format_env("SHELL", sudo_user.pw->pw_shell), 0);
+	    insert_env(format_env("SHELL", sudo_user.pw->pw_shell, VNULL), 0);
 	if (!(didvar & DID_LOGNAME))
-	    insert_env(format_env("LOGNAME", user_name), 0);
+	    insert_env(format_env("LOGNAME", user_name, VNULL), 0);
 	if (!(didvar & DID_USER))
-	    insert_env(format_env("USER", user_name), 0);
+	    insert_env(format_env("USER", user_name, VNULL), 0);
     } else {
 	/*
 	 * Copy envp entries as long as they don't match env_delete or
@@ -420,41 +448,52 @@ rebuild_env(envp, reset_home, noexec)
     if (!(didvar & DID_TERM))
 	insert_env("TERM=unknown", 0);
     if (!(didvar & DID_PATH))
-	insert_env(format_env("PATH", _PATH_DEFPATH), 0);
+	insert_env(format_env("PATH", _PATH_DEFPATH, VNULL), 0);
 
 #ifdef SECURE_PATH
     /* Replace the PATH envariable with a secure one. */
-    insert_env(format_env("PATH", SECURE_PATH), 1);
+    insert_env(format_env("PATH", SECURE_PATH, VNULL), 1);
 #endif
 
     /* Set $USER and $LOGNAME to target if "set_logname" is true. */
     if (def_set_logname && runas_pw->pw_name) {
-	insert_env(format_env("LOGNAME", runas_pw->pw_name), 1);
-	insert_env(format_env("USER", runas_pw->pw_name), 1);
+	insert_env(format_env("LOGNAME", runas_pw->pw_name, VNULL), 1);
+	insert_env(format_env("USER", runas_pw->pw_name, VNULL), 1);
     }
 
     /* Set $HOME for `sudo -H'.  Only valid at PERM_RUNAS. */
     if (reset_home && runas_pw->pw_dir)
-	insert_env(format_env("HOME", runas_pw->pw_dir), 1);
+	insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), 1);
 
-    /* Point LD_PRELOAD to noexec_file? */
-    /* XXX - what to use for HP-UX and AIX? */
+    /*
+     * Preload a noexec file?  For a list of LD_PRELOAD-alikes, see
+     * http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
+     * XXX - should prepend to original value, if any
+     */
     if (noexec && def_noexec_file != NULL)
-	insert_env(format_env("LD_PRELOAD", def_noexec_file), 1);
+#if defined(__darwin__) || defined(__APPLE__)
+	insert_env(format_env("DYLD_INSERT_LIBRARIES", def_noexec_file, VNULL), 1);
+	insert_env(format_env("DYLD_FORCE_FLAT_NAMESPACE", VNULL), 1);
+#else
+# if defined(__osf__) || defined(__sgi)
+	insert_env(format_env("_RLD_LIST", def_noexec_file, ":DEFAULT", VNULL), 1);
+# else
+	insert_env(format_env("LD_PRELOAD", def_noexec_file, VNULL), 1);
+# endif
+#endif
 
     /* Set PS1 if SUDO_PS1 is set. */
     if (ps1)
 	insert_env(ps1, 1);
 
     /* Add the SUDO_COMMAND envariable (cmnd + args). */
-    if (user_args) {
-	easprintf(&cp, "SUDO_COMMAND=%s %s", user_cmnd, user_args);
-	insert_env(cp, 1);
-    } else
-	insert_env(format_env("SUDO_COMMAND", user_cmnd), 1);
+    if (user_args)
+	insert_env(format_env("SUDO_COMMAND", user_cmnd, " ", user_args, VNULL), 1);
+    else
+	insert_env(format_env("SUDO_COMMAND", user_cmnd, VNULL), 1);
 
     /* Add the SUDO_USER, SUDO_UID, SUDO_GID environment variables. */
-    insert_env(format_env("SUDO_USER", user_name), 1);
+    insert_env(format_env("SUDO_USER", user_name, VNULL), 1);
     easprintf(&cp, "SUDO_UID=%lu", (unsigned long) user_uid);
     insert_env(cp, 1);
     easprintf(&cp, "SUDO_GID=%lu", (unsigned long) user_gid);
