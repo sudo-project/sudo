@@ -363,9 +363,9 @@ static void send_mail()
     char buf[MAXLOGLEN + 1024];
 #ifdef POSIX_SIGNALS
     struct sigaction action;
-#endif /* POSIX_SIGNALS */
 
     (void) bzero((char *)(&action), sizeof(action));
+#endif /* POSIX_SIGNALS */
 
     /* become root for find_path() */
     be_root();
