@@ -461,7 +461,7 @@ rebuild_env(envp, reset_home, noexec)
 	insert_env(format_env("USER", runas_pw->pw_name, VNULL), 1);
     }
 
-    /* Set $HOME for `sudo -H'.  Only valid at PERM_RUNAS. */
+    /* Set $HOME for `sudo -H'.  Only valid at PERM_FULL_RUNAS. */
     if (reset_home && runas_pw->pw_dir)
 	insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), 1);
 

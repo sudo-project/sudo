@@ -399,7 +399,7 @@ main(argc, argv, envp)
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
 
 	/* Become specified user or root. */
-	set_perms(PERM_RUNAS);
+	set_perms(PERM_FULL_RUNAS);
 
 	/* Close the password and group files */
 	endpwent();
