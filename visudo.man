@@ -2,7 +2,7 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.7  1999/07/22 13:10:46  millert
+''' Revision 1.8  1999/08/01 16:26:16  millert
 ''' regen
 '''
 '''
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH .::visudo 8 "1.6" "22/Jul/1999" "MAINTENANCE COMMANDS"
+.TH VISUDO 8 "1.6" "1/Aug/1999" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -235,16 +235,16 @@ Your userid does not appear in the passwd file.
 .SH "FILES"
 .Sp
 .Vb 2
-\& /etc/sudoers           file of authorized users.
-\& /etc/stmp              lock file for visudo.
+\& /etc/sudoers           List of who can run what
+\& /etc/stmp              Lock file for visudo
 .Ve
 .SH "ENVIRONMENT VARIABLES"
-The following are used only if \fBvisudo\fR was compiled with the
-\fIENV_EDITOR\fR option:
+The following are used only if \fBvisudo\fR was configured with the
+\fI--with-env-editor\fR option:
 .Sp
 .Vb 2
-\& EDITOR                 Used by visudo as the editor to use.
-\& VISUAL                 Used by visudo if EDITOR is not set.
+\& EDITOR                 Used by visudo as the editor to use
+\& VISUAL                 Used by visudo if EDITOR is not set
 .Ve
 .SH "AUTHOR"
 Many people have worked on \fIsudo\fR over the years, this version of
@@ -256,15 +256,17 @@ Many people have worked on \fIsudo\fR over the years, this version of
 See the HISTORY file in the sudo distribution for more details.
 .Sp
 Please send all bugs, comments, and changes to sudo-bugs@courtesan.com.
+Be sure to include the version of \fBsudo\fR you are using and the platform     
+you are running it on.
 .SH "DISCLAIMER"
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the LICENSE
-file distributed with sudo for more details.
+\fBVisudo\fR is provided ``AS IS'\*(R' and any express or implied warranties,
+including, but not limited to, the implied warranties of merchantability
+and fitness for a particular purpose are disclaimed.
+See the LICENSE file distributed with \fBsudo\fR for complete details.
 .SH "CAVEATS"
-Due to the syntax of the \fIsudoers\fR file, there is no way
-for \fBvisudo\fR to tell the difference between a mistyped
-{Host,User,Cmnd}_Alias and a user or host name.
+Due to the syntax of the \fIsudoers\fR file, there is no way for
+\fBvisudo\fR to tell the difference between a mistyped {Host,User,Cmnd}_Alias
+and a user or host name.
 .Sp
 There is no easy way to prevent a user from gaining a root shell if 
 the editor used by \fBvisudo\fR allows shell escapes.
@@ -275,7 +277,7 @@ the individual \fBvisudo\fR program.
 \fIsudo\fR\|(8), \fIvipw\fR\|(8).
 
 .rn }` ''
-.IX Title ".::visudo 8"
+.IX Title "VISUDO 8"
 .IX Name "visudo - edit the sudoers file"
 
 .IX Header "NAME"

@@ -1,7 +1,7 @@
 
 
 
-.::visudo(8)           MAINTENANCE COMMANDS          .::visudo(8)
+VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
 
 
 NNNNAAAAMMMMEEEE
@@ -56,26 +56,26 @@ EEEERRRRRRRROOOORRRRSSSS
            Your userid does not appear in the passwd file.
 
 FFFFIIIILLLLEEEESSSS
-        /etc/sudoers           file of authorized users.
-        /etc/stmp              lock file for visudo.
+        /etc/sudoers           List of who can run what
+        /etc/stmp              Lock file for visudo
 
 
 
-22/Jul/1999                    1.6                              1
+1/Aug/1999                     1.6                              1
 
 
 
 
 
-.::visudo(8)           MAINTENANCE COMMANDS          .::visudo(8)
+VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
 
 
 EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT VVVVAAAARRRRIIIIAAAABBBBLLLLEEEESSSS
-       The following are used only if vvvviiiissssuuuuddddoooo was compiled with
-       the _E_N_V___E_D_I_T_O_R option:
+       The following are used only if vvvviiiissssuuuuddddoooo was configured with
+       the _-_-_w_i_t_h_-_e_n_v_-_e_d_i_t_o_r option:
 
-        EDITOR                 Used by visudo as the editor to use.
-        VISUAL                 Used by visudo if EDITOR is not set.
+        EDITOR                 Used by visudo as the editor to use
+        VISUAL                 Used by visudo if EDITOR is not set
 
 
 AAAAUUUUTTTTHHHHOOOORRRR
@@ -88,14 +88,15 @@ AAAAUUUUTTTTHHHHOOOORRRR
        details.
 
        Please send all bugs, comments, and changes to sudo-
-       bugs@courtesan.com.
+       bugs@courtesan.com.  Be sure to include the version of
+       ssssuuuuddddoooo you are using and the platform you are running it on.
 
 DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
-       This program is distributed in the hope that it will be
-       useful, but WITHOUT ANY WARRANTY; without even the implied
-       warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-       PURPOSE.  See the LICENSE file distributed with sudo for
-       more details.
+       VVVViiiissssuuuuddddoooo is provided ``AS IS'' and any express or implied
+       warranties, including, but not limited to, the implied
+       warranties of merchantability and fitness for a particular
+       purpose are disclaimed.  See the LICENSE file distributed
+       with ssssuuuuddddoooo for complete details.
 
 CCCCAAAAVVVVEEEEAAAATTTTSSSS
        Due to the syntax of the _s_u_d_o_e_r_s file, there is no way for
@@ -126,14 +127,14 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
+1/Aug/1999                     1.6                              2
 
-22/Jul/1999                    1.6                              2
 
 
 
 
+VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
 
-.::visudo(8)           MAINTENANCE COMMANDS          .::visudo(8)
 
 
 
@@ -192,7 +193,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-22/Jul/1999                    1.6                              3
+1/Aug/1999                     1.6                              3
 
 
