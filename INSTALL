@@ -292,14 +292,6 @@ Special features/options:
 	the numeric id, *not* the symbolic name.  Also note that
 	this is actually set in the Makefile.  The default is 0.
 
-  --with-execv
-	Use execv() to exec the command instead of execvp().  I can't think of
-	a reason to actually do this since execvp() is passed a fully qualified
-	pathname but someone might thoroughly distrust execvp().  Note that if
-	you define this you lose the ability to exec scripts that are missing
-	the '#!/bin/sh' cookie (like /bin/kill on SunOS and /etc/fastboot on
-	4.3BSD).  This is off by default.
-
   --without-interfaces
 	This option keeps sudo from trying to glean the ip address
 	from each attached ethernet interface.  It is only useful
@@ -653,10 +645,6 @@ Digital UNIX:
     edit that.
 
 Linux:
-    NOTE: Reportedly, Linux's execvp(3) doesn't always execute
-	  scripts that lack the "#!/some/shell" header correctly.
-	  The workaround is to give all your scripts a proper
-	  header.
     Versions of glibc 2.x previous to 2.0.7 have a broken lsearch().
     You will need to either upgrade to glibc-2.0.7 or use sudo's
     version of lsearch().  To use sudo's lsearch(), comment out

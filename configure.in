@@ -827,17 +827,6 @@ esac])
 AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $password_timeout, [The passwd prompt timeout (in minutes).])
 AC_MSG_RESULT($password_timeout)
 
-AC_ARG_WITH(execv, [  --with-execv            use execv() instead of execvp()],
-[case $with_execv in
-    yes)	AC_MSG_CHECKING(whether to use execvp or execv)
-		AC_MSG_RESULT(execv)
-		AC_DEFINE(USE_EXECV)
-		;;
-    no)		;;
-    *)		AC_MSG_ERROR(["--with-execv does not take an argument."])
-		;;
-esac])
-
 AC_MSG_CHECKING(whether to use per-tty ticket files)
 AC_ARG_WITH(tty-tickets, [  --with-tty-tickets      use a different ticket file for each tty],
 [case $with_tty_tickets in
@@ -2392,7 +2381,6 @@ AH_TEMPLATE(SEND_MAIL_WHEN_NO_USER, [Define to 1 to send mail when the user is n
 AH_TEMPLATE(SHELL_IF_NO_ARGS, [Define to 1 if you want sudo to start a shell if given no arguments.])
 AH_TEMPLATE(SHELL_SETS_HOME, [Define to 1 if you want sudo to set $HOME in shell mode.])
 AH_TEMPLATE(STUB_LOAD_INTERFACES, [Define to 1 if the code in interfaces.c does not compile for you.])
-AH_TEMPLATE(USE_EXECV, [Define to 1 if you wish to use execv() instead of execvp() when running programs.])
 AH_TEMPLATE(USE_INSULTS, [Define to 1 if you want to insult the user for entering an incorrect password.])
 AH_TEMPLATE(USE_STOW, [Define to 1 if you use GNU stow packaging.])
 AH_TEMPLATE(USE_TTY_TICKETS, [Define to 1 if you want a different ticket file for each tty.])
@@ -2438,12 +2426,6 @@ AH_BOTTOM([/*
 #else
 # define stat_sudoers	lstat
 #endif
-
-#ifdef USE_EXECV
-# define EXECV	execv
-#else
-# define EXECV	execvp
-#endif /* USE_EXECV */
 
 /* Macros to set/clear/test flags. */
 #undef SET

@@ -409,9 +409,6 @@ main(argc, argv, envp)
 	sudo_endpwent();
 	sudo_endgrent();
 
-	/* Install the real environment. */
-	environ = new_environ;
-
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	    char *p;
 
@@ -441,13 +438,20 @@ main(argc, argv, envp)
 	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0)
 	    exit(0);
 	else
-	    EXECV(safe_cmnd, NewArgv);	/* run the command */
+	    execve(safe_cmnd, NewArgv, new_environ);
 #else
 	exit(0);
 #endif /* PROFILING */
 	/*
-	 * If we got here then the exec() failed...
+	 * If we got here then execve() failed...
 	 */
+	if (errno == ENOEXEC) {
+	    char **av = emalloc2(NewArgc + 2, sizeof(char *));
+	    av[0] = "sh";
+	    av[1] = safe_cmnd;
+	    memcpy(av + 2, NewArgv + 1, NewArgc * sizeof(char *));
+	    execve(_PATH_BSHELL, av, new_environ);
+	}
 	warning("unable to execute %s", safe_cmnd);
 	exit(127);
     } else if (ISSET(validated, FLAG_NO_USER) || (validated & FLAG_NO_HOST)) {
