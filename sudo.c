@@ -76,6 +76,7 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_MALLOC_H */ 
 #include <pwd.h>
 #include <netdb.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -534,19 +535,16 @@ static void add_env()
 
 static void load_cmnd()
 {
-    char path[MAXPATHLEN + 1];
-
-    if (strlen(Argv[1]) >= sizeof(path)) {
+    if (strlen(Argv[1]) > MAXPATHLEN) {
+	errno = ENAMETOOLONG;
 	(void) fprintf(stderr, "%s: %s: Pathname too long\n", Argv[0], Argv[1]);
 	exit(1);
     }
 
-    (void) strcpy(path, Argv[1]);
-
     /*
-     * Resolved the path (cmnd == resolved, ocmnd == unresolved).
+     * Resolve the path
      */
-    if (find_path(path, &cmnd, &ocmnd) == FALSE) {
+    if ((cmnd = find_path(Argv[1])) == NULL) {
 	(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0], Argv[1]);
 	exit(1);
     }
