@@ -1,4 +1,37 @@
 =cut
+Copyright (c) 1996,1998-1999 Todd C. Miller <Todd.Miller@courtesan.com>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+3. The name of the author may not be used to endorse or promote products
+   derived from this software without specific prior written permission
+   from the author.
+
+4. Products derived from this software may not be called "Sudo" nor
+   may "Sudo" appear in their names without specific prior written
+   permission from the author.
+
+THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 $Sudo$
 =pod
 
@@ -69,16 +102,16 @@ Your userid does not appear in the passwd file.
 
 =head1 FILES
 
- /etc/sudoers		file of authorized users.
- /etc/stmp		lock file for visudo.
+ /etc/sudoers		List of who can run what
+ /etc/stmp		Lock file for visudo
 
 =head1 ENVIRONMENT VARIABLES
 
-The following are used only if B<visudo> was compiled with the
-I<ENV_EDITOR> option:
+The following are used only if B<visudo> was configured with the
+I<--with-env-editor> option:
 
- EDITOR			Used by visudo as the editor to use.
- VISUAL			Used by visudo if EDITOR is not set.
+ EDITOR			Used by visudo as the editor to use
+ VISUAL			Used by visudo if EDITOR is not set
 
 =head1 AUTHOR
 
@@ -90,19 +123,21 @@ B<visudo> was written by:
 See the HISTORY file in the sudo distribution for more details.
 
 Please send all bugs, comments, and changes to sudo-bugs@courtesan.com.
+Be sure to include the version of B<sudo> you are using and the platform     
+you are running it on.
 
 =head1 DISCLAIMER
 
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the LICENSE
-file distributed with sudo for more details.
+B<Visudo> is provided ``AS IS'' and any express or implied warranties,
+including, but not limited to, the implied warranties of merchantability
+and fitness for a particular purpose are disclaimed.
+See the LICENSE file distributed with B<sudo> for complete details.
 
 =head1 CAVEATS
 
-Due to the syntax of the I<sudoers> file, there is no way
-for B<visudo> to tell the difference between a mistyped
-{Host,User,Cmnd}_Alias and a user or host name.
+Due to the syntax of the I<sudoers> file, there is no way for
+B<visudo> to tell the difference between a mistyped {Host,User,Cmnd}_Alias
+and a user or host name.
 
 There is no easy way to prevent a user from gaining a root shell if 
 the editor used by B<visudo> allows shell escapes.

@@ -1,10 +1,43 @@
 =cut
+Copyright (c) 1994-1996,1998-1999 Todd C. Miller <Todd.Miller@courtesan.com>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+3. The name of the author may not be used to endorse or promote products
+   derived from this software without specific prior written permission
+   from the author.
+
+4. Products derived from this software may not be called "Sudo" nor
+   may "Sudo" appear in their names without specific prior written
+   permission from the author.
+
+THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 $Sudo$
 =pod
 
 =head1 NAME
 
-sudo - execute a command as the superuser
+sudo - execute a command as another user
 
 =head1 SYNOPSIS
 
@@ -13,22 +46,29 @@ B<sudo> B<-V> | B<-h> | B<-l> | B<-v> | B<-k> | B<-K> | B<-s> | B<-H> |
 
 =head1 DESCRIPTION
 
-B<sudo> allows a permitted user to execute a I<command>
-as the superuser (real and effective uid and gid are set
-to C<0> and root's group as set in the passwd file respectively).
+B<sudo> allows a permitted user to execute a I<command> as the
+superuser or another user, as specified in the sudoers file.  The
+real and effective uid and gid are set to match those of the target
+user as specified in the passwd file (the group vector is also
+initialized when the target user is not root).
 
 B<sudo> determines who is an authorized user by consulting the
-file I</etc/sudoers>.  By giving B<sudo> the C<-v> flag a user
+file F</etc/sudoers>.  By giving B<sudo> the C<-v> flag a user
 can update the time stamp without running a I<command.>
 The password prompt itself will also time out if the user's password is
-not entered with N minutes (again, this is defined at installation
+not entered with N minutes (again, this is defined at configure
 time and defaults to 5 minutes).
 
-If an unauthorized user executes B<sudo>, mail will be sent from the
-user to the local authorities (defined at installation time).
+If a user that is not listed in the I<sudoers> file tries to run
+a command via B<sudo>, mail is sent to the proper authorities,
+as defined at configure time (defaults to root).  Note that the
+mail will not be sent if an unauthorized user tries to run sudo
+with the C<-l> or C<-v> flags.  This allows users to determine
+for themselves whether or not they are allowed to use B<sudo>.
 
-B<sudo> was designed to log via the 4.3 BSD syslog(3) facility but
-can log to a file instead if so desired (or to both syslog and a file).
+B<sudo> can log both successful an unsuccessful attempts (as well
+as errors) to syslog(3), a log file, or both.  By default B<sudo>
+will log via syslog(3) but this is changeable at configure time.
 
 =head1 OPTIONS
 
@@ -54,7 +94,7 @@ of B<sudo> and a usage message before exiting.
 =item -v
 
 If given the C<-v> (I<validate>) option, B<sudo> will update the
-user's timestamp file, prompting for the user's password if necessary.
+user's timestamp, prompting for the user's password if necessary.
 This extends the B<sudo> timeout to for another N minutes
 (where N is defined at installation time and defaults to 5
 minutes) but does not run a command.
@@ -89,8 +129,8 @@ the user via B<Kerberos>.
 
 The C<-p> (I<prompt>) option allows you to override the default
 password prompt and use a custom one.  If the password prompt
-contains the C<%u> escape, C<%u> will be replaced by the user's
-login name.  Similarly, C<%h> will be replaced by the local
+contains the C<%u> escape, C<%u> will be replaced with the user's
+login name.  Similarly, C<%h> will be replaced with the local
 hostname.
 
 =item -u
@@ -109,7 +149,7 @@ in passwd(5).
 
 The C<-H> (I<HOME>) option sets the I<HOME> environment variable
 to the homedir of the target user (root by default) as specified
-in passwd(5).
+in passwd(5).  By default, B<sudo> does not modify I<HOME>.
 
 =item --
 
@@ -123,14 +163,14 @@ line arguments.  It is most useful in conjunction with the C<-s> flag.
 B<sudo> quits with an exit value of 1 if there is a
 configuration/permission problem or if B<sudo> cannot execute the
 given command.  In the latter case the error string is printed to
-stderr via perror(3).  If B<sudo> cannot stat(2) one or more entries
-in the user's PATH the error is printed on stderr via perror(3).
-(If the directory does not exist or if it is not really a directory,
-the entry is ignored and no error is printed.)  This should not
-happen under normal circumstances.  The most common reason for
-stat(3) to return "permission denied" is if you are running an
-automounter and one of the directories in your PATH is on a machine
-that is currently unreachable.
+stderr.  If B<sudo> cannot stat(2) one or more entries in the user's
+C<PATH> an error is printed on stderr.  (If the directory does not
+exist or if it is not really a directory, the entry is ignored and
+no error is printed.)  This should not happen under normal
+circumstances.  The most common reason for stat(2) to return
+"permission denied" is if you are running an automounter and one
+of the directories in your C<PATH> is on a machine that is currently
+unreachable.
 
 =head1 SECURITY NOTES
 
@@ -141,12 +181,13 @@ C<LD_*>, C<_RLD_*>, C<SHLIB_PATH> (HP-UX only), and C<LIBPATH> (AIX
 only) environment variables are removed from the environment passed
 on to all commands executed.  B<sudo> will also remove the C<IFS>,
 C<ENV>, C<BASH_ENV>, C<KRB_CONF>, C<KRB5_CONFIG>, C<LOCALDOMAIN>,
-C<RES_OPTIONS> and C<HOSTALIASES> variables as they too can pose a threat.
+C<RES_OPTIONS> and C<HOSTALIASES> variables as they too can pose a
+threat.
 
 To prevent command spoofing, B<sudo> checks "." and "" (both denoting
 current directory) last when searching for a command in the user's
 PATH (if one or both are in the PATH).  Note, however, that the
-actual PATH environment variable is I<not> modified and is passed
+actual C<PATH> environment variable is I<not> modified and is passed
 unchanged to the program that B<sudo> executes.
 
 For security reasons, if your OS supports shared libraries and does
@@ -156,30 +197,32 @@ behavior or link B<sudo> statically.
 
 B<sudo> will check the ownership of its timestamp directory
 (F</var/run/sudo> or F</tmp/.odus> by default) and ignore the
-directory's contents if it is not owned by root and only read,
-writable, and executable by root.  On systems that allow users to
-give files away to root (via chown), if the timestamp directory is
-located in a directory writable by anyone (ie: F</tmp>), it is
-possible for a user to create the timestamp directory before B<sudo>
-is run.  However, because B<sudo> checks the ownership and mode of
-the directory, the only damage that can be done is to "hide" files
+directory's contents if it is not owned by root and only writable
+by root.  On systems that allow non-root users to give away files
+via chown(2), if the timestamp directory is located in a directory
+writable by anyone (ie: F</tmp>), it is possible for a user to
+create the timestamp directory before B<sudo> is run.  However,
+because B<sudo> checks the ownership and mode of the directory and
+its contents, the only damage that can be done is to "hide" files
 by putting them in the timestamp dir.  This is unlikely to happen
 since once the timestamp dir is owned by root and inaccessible by
 any other user the user placing files there would be unable to get
 them back out.  To get around this issue you can use a directory
 that is not world-writable for the timestamps (F</var/adm/sudo> for
-instance) or create /tmp/.odus with the appropriate owner (root) and
-permissions (0700) in the system startup files.
+instance) or create /tmp/.odus with the appropriate owner (root)
+and permissions (0700) in the system startup files.
 
-C<sudo> will not honor timestamp files set far in the future.
-Timestamp files with a date greater than current_time + 2 * C<TIMEOUT>
+C<sudo> will not honor timestamps set far in the future.
+Timestamps with a date greater than current_time + 2 * C<TIMEOUT>
 will be ignored and sudo will log and complain.  This is done to
-keep a user from creating his/her own timestamp file with a bogus
+keep a user from creating his/her own timestamp with a bogus
 date on system that allow users to give away files.
 
 =head1 FILES
 
- /etc/sudoers		file of authorized users.
+ /etc/sudoers		List of who can run what
+ /var/run/sudo		Directory containing timestamps
+ /tmp/.odus		Same as above if no /var/run exists
 
 =head1 ENVIRONMENT VARIABLES
 
@@ -187,9 +230,10 @@ date on system that allow users to give away files.
  SHELL			Used to determine shell to run with -s option
  USER			Set to the target user (root unless the -u option
 			is specified)
- HOME			In -s mode, set to homedir of root (or runas user)
-			if built with the SHELL_SETS_HOME option
- SUDO_PROMPT		Replaces the default password prompt
+ HOME			In -s or -H mode (or if sudo was configured with
+			the --enable-shell-sets-home option), set to
+			homedir of the target user.
+ SUDO_PROMPT		Used as the default password prompt
  SUDO_COMMAND		Set to the command run by sudo
  SUDO_USER		Set to the login of the user who invoked sudo
  SUDO_UID		Set to the uid of the user who invoked sudo
@@ -208,13 +252,15 @@ See the HISTORY file in the B<sudo> distribution for a short history
 of B<sudo>.
 
 Please send all bugs, comments, and changes to sudo-bugs@courtesan.com.
+Be sure to include the version of B<sudo> you are using and the platform
+you are running it on.
 
 =head1 DISCLAIMER
 
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the LICENSE
-file distributed with sudo for more details.
+B<Sudo> is provided ``AS IS'' and any express or implied warranties,
+including, but not limited to, the implied warranties of merchantability
+and fitness for a particular purpose are disclaimed.
+See the LICENSE file distributed with B<sudo> for complete details.
 
 =head1 CAVEATS
 
