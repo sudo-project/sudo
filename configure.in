@@ -193,13 +193,10 @@ esac
 dnl
 dnl Function checks
 dnl
-AC_HAVE_FUNCS(getwd strchr strrchr sysconf sigaction bzero tzset putenv setenv)
+AC_HAVE_FUNCS(getwd strchr strrchr memcpy sysconf sigaction bzero tzset)
 AC_FUNC_CHECK(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
 AC_FUNC_CHECK(getcwd, AC_DEFINE(HAVE_GETCWD), LIBOBJS="$LIBOBJS getcwd.o")
-dnl
-dnl Function checks w/ replacements - XXX
-dnl
-dnl AC_REPLACE_FUNCS(strdup getcwd)
+AC_FUNC_CHECK(setenv, AC_DEFINE(HAVE_SETENV), AC_FUNC_CHECK(putenv, AC_DEFINE(HAVE_PUTENV), LIBOBJS="$LIBOBJS putenv.o"))
 dnl
 dnl library checks
 dnl
