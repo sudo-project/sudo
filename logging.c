@@ -343,7 +343,7 @@ void log_error(code)
  *
  */
 
-char *exec_argv[] = {"sendmail",
+char *mail_argv[] = {"sendmail",
 		     "-t",
 		     ALERTMAIL,
 		     (char *) NULL};
@@ -393,9 +393,9 @@ static void send_mail()
     if (!fork()) {		/* child */
 	(void) close(1);
 #ifdef USE_EXECV
-	execv(mailer, exec_argv);
+	execv(mailer, mail_argv);
 #else /* USE_EXECV */
-	execvp(mailer, exec_argv);
+	execvp(mailer, mail_argv);
 #endif /* USE_EXECV */
 
 	/* this should not happen */
