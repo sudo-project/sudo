@@ -26,8 +26,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef _SUDO_SUDO_h
-#define _SUDO_SUDO_h
+#ifndef _SUDO_SUDO_H
+#define _SUDO_SUDO_H
 
 #include "pathnames.h"
 
@@ -337,6 +337,11 @@ struct interface {
 #define MODE_HELP                0x04
 #define MODE_LIST                0x05
 
+#define PERM_ROOT		0x00
+#define PERM_FULL_ROOT		0x01
+#define PERM_USER		0x02
+#define PERM_FULL_USER		0x03
+
 /*
  * Prototypes
  */
@@ -361,10 +366,12 @@ void log_error		__P((int));
 void inform_user	__P((int));
 void check_user		__P((void));
 int validate		__P((void));
-void be_root		__P((void));
-void be_user		__P((void));
-void be_full_user	__P((void));
+void set_perms		__P((int));
 void remove_timestamp	__P((void));
+#ifdef HAVE_SKEY
+char *skey_getpass	__P((char *, struct passwd *, int));
+char *skey_crypt	__P((char *, char *, struct passwd *, int));
+#endif /* HAVE_SKEY */
 
 
 /*
@@ -387,10 +394,19 @@ extern int errno;
 
 
 /*
- * Emulate seteuid() for HP-UX
+ * Emulate seteuid() and setegid() for HP-UX
  */
 #ifdef __hpux
 #  define seteuid(__EUID)	(setresuid((uid_t)-1, __EUID, (uid_t)-1))
+#  define setegid(__EGID)	(setresgid((gid_t)-1, __EGID, (gid_t)-1))
 #endif	/* __hpux */
+
+/*
+ * Emulate seteuid() and setegid() for AIX
+ */
+#ifdef _AIX
+#  define seteuid(__EUID)	(setuidx(ID_EFFECTIVE|ID_REAL, __EUID))
+#  define setegid(__EGID)	(setgidx(ID_EFFECTIVE|ID_REAL, __EGID))
+#endif	/* _AIX */
 
 #endif /* _SUDO_SUDO_H */
