@@ -644,6 +644,7 @@ alias_destroy(v)
 	    free(m->name);
 	free(m);
     }
+    free(a);
 }
 
 /*
