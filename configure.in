@@ -15,8 +15,15 @@ OPTIONS=""
 AC_SUBST(OPTIONS)dnl
 LIBOBJS=""
 AC_SUBST(LIBOBJS)dnl
+TGETPASS="tgetpass.o"
+AC_SUBST(TGETPASS)dnl
 dnl
-dnl Options for --with
+dnl Options for --with(out)
+dnl
+dnl --with-getpass
+AC_WITH(getpass, AC_DEFINE(USE_GETPASS)
+echo 'Using system getpass'
+TGETPASS="")
 dnl
 dnl --with-C2
 AC_WITH(C2, AC_DEFINE(HAVE_C2_SECURITY)
@@ -25,9 +32,6 @@ dnl
 dnl --with-csops
 AC_WITH(csops, OPTIONS="${OPTIONS} -DUSE_INSULTS -DENV_EDITOR -DSHORT_MESSAGE"
 echo 'CSOps--adding options: USE_INSULTS ENV_EDITOR SHORT_MESSAGE')
-dnl
-dnl --with-tgetpass
-AC_WITH(tgetpass, LIBOBJS="$LIBOBJS strdup.o", AC_DEFINE(USE_GETPASS))
 dnl
 dnl C compiler checks
 dnl
