@@ -1,9 +1,11 @@
+Known bugs in sudo version 1.3.6
+================================
+
 1) Sudo -l does not expand Command Aliases.
 
-2) When doing two sudo's in a pipe, the ticket file update of one
-   sudo may clobber the other's, resulting in the second sudo asking
-   for a password when it should not.  (May be fixed now...)
+2) "make install-man" should substitute correct paths into man pages.
 
-3) Under SunOS at least, if the argv is long and takes several syslog()
-   calls to log it takes a *long* time before the command is actually
-   executed.
+3) When installing binaries and man pages, the Makefile should make the
+   directories if necesary.
+
+4) Sudo should log when removing "dangerous" envariables.
