@@ -135,26 +135,19 @@ You didn't run B<visudo> as root.
 
 Your userid does not appear in the system passwd file.
 
-=item Warning: undeclared Alias referenced near ...
+=item Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined
 
-Either you are using a {User,Runas,Host,Cmnd}_Alias before
-defining it or you have a user or hostname listed that
-consists solely of uppercase letters, digits, and the
-underscore ('_') character.  If the latter, you can ignore
-the warnings (B<sudo> will not complain).  In B<-s> (strict)
-mode these are errors, not warnings.
+Either you are trying to use an undeclare {User,Runas,Host,Cmnd}_Alias
+or you have a user or hostname listed that consists solely of
+uppercase letters, digits, and the underscore ('_') character.  In
+the latter case, you can ignore the warnings (B<sudo> will not
+complain).  In B<-s> (strict) mode these are errors, not warnings.
 
-=item Warning: runas_default set after old value is in use ...
+=item Warning: unused {User,Runas,Host,Cmnd}_Alias
 
-You have a I<runas_default> Defaults setting listed in the I<sudoers>
-file after its value has already been used.  This means that entries
-prior to the I<runas_default> setting will match based on the default
-value of I<runas_default> (C<@runas_default@>) whereas entries
-B<after> the I<runas_default> setting will match based on the new
-value.  This is usually unintentional and in most cases the
-<runas_default> setting should be placed before any C<Runas_Alias>
-or User specifications.  In B<-s> (strict) mode this is an error,
-not a warning.
+The specified {User,Runas,Host,Cmnd}_Alias was defined but never
+used.  You may wish to comment out or remove the unused alias.  In
+B<-s> (strict) mode this is an error, not a warning.
 
 =back
 
