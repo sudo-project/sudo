@@ -48,6 +48,18 @@ dnl
 dnl Options for --with
 dnl
 
+AC_ARG_WITH(CC, [  --with-CC               C compiler to use],
+[case $with_CC in
+    yes)	echo "Must give --with-CC an argument."
+		exit 1
+		;;
+    no)		echo "Illegal argument: --without-CC."
+		exit 1
+		;;
+    *)		CC=$with_CC
+		;;
+esac])
+
 AC_ARG_WITH(getpass, [  --with-getpass          use system getpass(3)],
 [case $with_getpass in
     yes)	AC_DEFINE(USE_GETPASS)
@@ -109,7 +121,7 @@ AC_ARG_WITH(kerb5, [  --with-kerb5            enable kerberos v5 support],
 		;;
 esac])
 
-AC_ARG_WITH(AFS, [  --with-AFS            enable AFS support],
+AC_ARG_WITH(AFS, [  --with-AFS              enable AFS support],
 [case $with_AFS in
     yes)	AC_DEFINE(HAVE_AFS)
 		echo 'Configuring for use with AFS'
@@ -119,7 +131,7 @@ AC_ARG_WITH(AFS, [  --with-AFS            enable AFS support],
 		;;
 esac])
 
-AC_ARG_WITH(DCE, [  --with-DCE            enable DCE support],
+AC_ARG_WITH(DCE, [  --with-DCE              enable DCE support],
 [case $with_DCE in
     yes)	AC_DEFINE(HAVE_DCE)
 		echo 'Configuring for use with DCE'
@@ -320,7 +332,7 @@ case "$OS" in
 		    SHADOW_TYPE="SPW_SVR4"
 		    AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    OSDEFS="${OSDEFS} -DSHADOW_PWD"
-		    SUDO_LIBS="${SUDO_LIBS} -lshadow"
+		    AC_CHECK_FUNC(getspnam, , SUDO_LIBS="${SUDO_LIBS} -lshadow")
 		fi
 		;;
     "convex")	echo "Looks like ConvexOs"
