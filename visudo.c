@@ -212,7 +212,11 @@ int main(argc, argv)
      * Change ownership of temp file to SUDOERS_OWNER
      * so when we move it to sudoers things are kosher.
      */
-    (void) chown(stmp, pwd -> pw_uid, -1);
+    if (chown(stmp, pwd -> pw_uid, -1)) {
+	(void) fprintf(stderr, "%s: Warning, unable to set owner to %s: ",
+	    Argv[0], SUDOERS_OWNER);
+	perror("");
+    }
 
     /*
      * Edit the temp file and parse it (for sanity checking)
