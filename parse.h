@@ -155,6 +155,7 @@ struct defaults {
 /*
  * Prototypes
  */
+char *alias_add		__P((char *, int, struct member *));
 int addr_matches	__P((char *));
 int alias_remove	__P((char *, int));
 int cmnd_matches	__P((char *, char *, struct member *));
@@ -169,6 +170,7 @@ int usergr_matches	__P((char *, char *, struct passwd *));
 int userpw_matches	__P((char *, char *, struct passwd *));
 struct alias *find_alias __P((char *, int));
 void alias_apply	__P((int (*)(VOID *, VOID *), VOID *));
+void init_aliases	__P((void));
 void init_parser	__P((char *, int));
 
 #endif /* _SUDO_PARSE_H */

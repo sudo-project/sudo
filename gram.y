@@ -44,17 +44,12 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#include <pwd.h>
-#if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
-# include <malloc.h>
-#endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #if defined(YYBISON) && defined(HAVE_ALLOCA_H) && !defined(__GNUC__)
 # include <alloca.h>
 #endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
 
 #include "sudo.h"
 #include "parse.h"
-#include "redblack.h"
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
@@ -71,18 +66,14 @@ int verbose = FALSE;
 int errorlineno = -1;
 char *errorfile = NULL;
 
-struct rbtree *aliases;
 struct defaults *defaults;
 struct userspec *userspecs;
 
 /*
  * Local protoypes
  */
-static int   alias_compare	__P((const VOID *, const VOID *));
-static char *add_alias		__P((char *, int, struct member *));
 static void  add_defaults	__P((int, struct member *, struct defaults *));
 static void  add_userspec	__P((struct member *, struct privilege *));
-static void  alias_destroy	__P((VOID *));
        void  yyerror		__P((const char *));
 
 void
@@ -408,7 +399,7 @@ hostaliases	:	hostalias
 
 hostalias	:	ALIAS '=' hostlist {
 			    char *s;
-			    if ((s = add_alias($1, HOSTALIAS, $3)) != NULL) {
+			    if ((s = alias_add($1, HOSTALIAS, $3)) != NULL) {
 				yyerror(s);
 				YYERROR;
 			    }
@@ -428,7 +419,7 @@ cmndaliases	:	cmndalias
 
 cmndalias	:	ALIAS '=' cmndlist {
 			    char *s;
-			    if ((s = add_alias($1, CMNDALIAS, $3)) != NULL) {
+			    if ((s = alias_add($1, CMNDALIAS, $3)) != NULL) {
 				yyerror(s);
 				YYERROR;
 			    }
@@ -448,7 +439,7 @@ runasaliases	:	runasalias
 
 runasalias	:	ALIAS '=' runaslist {
 			    char *s;
-			    if ((s = add_alias($1, RUNASALIAS, $3)) != NULL) {
+			    if ((s = alias_add($1, RUNASALIAS, $3)) != NULL) {
 				yyerror(s);
 				YYERROR;
 			    }
@@ -461,7 +452,7 @@ useraliases	:	useralias
 
 useralias	:	ALIAS '=' userlist {
 			    char *s;
-			    if ((s = add_alias($1, USERALIAS, $3)) != NULL) {
+			    if ((s = alias_add($1, USERALIAS, $3)) != NULL) {
 				yyerror(s);
 				YYERROR;
 			    }
@@ -503,62 +494,6 @@ user		:	ALIAS {
 		;
 
 %%
-static int
-alias_compare(v1, v2)
-    const VOID *v1, *v2;
-{
-    const struct alias *a1 = (const struct alias *)v1;
-    const struct alias *a2 = (const struct alias *)v2;
-    int res;
-
-    if (v1 == NULL)
-	res = -1;
-    else if (v2 == NULL)
-	res = 1;
-    else if ((res = strcmp(a1->name, a2->name)) == 0)
-	res = a1->type - a2->type;
-    return(res);
-}
-
-struct alias *
-find_alias(name, type)
-    char *name;
-    int type;
-{
-    struct alias key;
-    struct rbnode *node;
-
-    key.name = name;
-    key.type = type;
-    node = rbfind(aliases, &key);
-    return(node ? node->data : NULL);
-}
-
-/*
- * Add an alias to the aliases redblack tree.
- * Returns NULL on success and an error string on failure.
- */
-static char *
-add_alias(name, type, members)
-    char *name;
-    int type;
-    struct member *members;
-{
-    static char errbuf[512];
-    struct alias *a;
-
-    a = emalloc(sizeof(*a));
-    a->name = name;
-    a->type = type;
-    a->first_member = members;
-    if (rbinsert(aliases, a)) {
-	free(a);
-	snprintf(errbuf, sizeof(errbuf), "Alias `%s' already defined", name);
-	return(errbuf);
-    }
-    return(NULL);
-}
-
 /*
  * Add a list of defaults structures to the defaults list.
  * The binding, if non-NULL, specifies a list of hosts, users, or
@@ -608,66 +543,6 @@ add_userspec(members, privs)
 }
 
 /*
- * Apply a function to each alias entry and pass in a cookie.
- */
-void
-alias_apply(func, cookie)
-    int (*func)(VOID *, VOID *);
-    VOID *cookie;
-{
-    rbapply(aliases, func, cookie, inorder);
-}
-
-/*
- * Returns TRUE if there are no aliases, else FALSE.
- */
-int
-no_aliases()
-{
-    return(rbisempty(aliases));
-}
-
-/*
- * Free memory used by an alias struct and its members.
- */
-static void
-alias_destroy(v)
-    VOID *v;
-{
-    struct alias *a = (struct alias *)v;
-    struct member *m;
-    VOID *next;
-
-    for (m = a->first_member; m != NULL; m = next) {
-	next = m->next;
-	if (m->name != NULL)
-	    free(m->name);
-	free(m);
-    }
-    free(a);
-}
-
-/*
- * Find the named alias, delete it from the tree and recover its resources.
- */
-int
-alias_remove(name, type)
-    char *name;
-    int type;
-{
-    struct rbnode *node;
-    struct alias key;
-
-    key.name = name;
-    key.type = type;
-    if ((node = rbfind(aliases, &key)) == NULL)
-	return(FALSE);
-    rbdelete(aliases, node);
-    alias_destroy(node->data);
-    return(TRUE);
-}
-
-/*
  * Free up space used by data structures from a previous parser run and sets
  * the current sudoers file to path.
  */
@@ -682,10 +557,6 @@ init_parser(path, quiet)
     struct privilege *priv;
     struct cmndspec *cs;
     VOID *next;
-
-    if (aliases != NULL)
-	rbdestroy(aliases, alias_destroy);
-    aliases = rbcreate(alias_compare);
 
     for (us = userspecs; us != NULL; us = next) {
 	for (m = us->user; m != NULL; m = next) {
@@ -740,6 +611,8 @@ init_parser(path, quiet)
 	free(d);
     }
     defaults = NULL;
+
+    init_aliases();
 
     if (sudoers != NULL)
 	free(sudoers);

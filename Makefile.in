@@ -118,7 +118,7 @@ HDRS = compat.h def_data.h defaults.h error.h ins_2001.h ins_classic.h \
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
-PARSEOBJS = error.o alloc.o gram.o toke.o match.o defaults.o redblack.o
+PARSEOBJS = alias.o alloc.o defaults.o error.o gram.o match.o toke.o redblack.o
 
 SUDOBJS = check.o env.o getspwuid.o gettime.o goodpath.o fileops.o \
 	  find_path.o interfaces.o logging.o parse.o set_perms.o sudo.o \
@@ -151,7 +151,7 @@ BINFILES= BUGS CHANGES HISTORY LICENSE README TODO TROUBLESHOOTING \
 BINSPECIAL= INSTALL.binary Makefile.binary.in libtool
 
 SUDODEP = $(srcdir)/sudo.h $(srcdir)/compat.h $(srcdir)/defaults.h \
-	  $(srcdir)/logging.h config.h def_data.h pathnames.h
+	  $(srcdir)/error.h $(srcdir)/logging.h config.h def_data.h pathnames.h
 
 AUTHDEP = $(SUDODEP) $(authdir)/sudo_auth.h
 
@@ -191,7 +191,7 @@ sudo_noexec.la: sudo_noexec.lo
 gram.c gram.h: gram.y
 @DEV@	$(YACC) -d $(srcdir)/gram.y
 @DEV@	mv -f y.tab.c gram.c
-@DEV@	if cmp -s y.tab.h gram.h; then rm -f y.tab.h; else mv -f y.tab.h gram.h; fi
+@DEV@	mv -f y.tab.h gram.h
 	-@true
 
 # Uncomment the $(LEX) and mv lines if you intend to modify toke.l
