@@ -100,15 +100,16 @@ check_user()
 	    lecture();		/* first time through they get a lecture */
 
 	/* Expand any escapes in the prompt. */
-	prompt = expand_prompt(user_prompt ? user_prompt : sudo_strtable[I_PASSPROMPT], user_name, user_shost);
+	prompt = expand_prompt(user_prompt ? user_prompt : def_str(I_PASSPROMPT),
+	    user_name, user_shost);
 
 	verify_user(prompt);
     }
     if (status != TS_ERROR)
 	update_timestamp(timestampdir, timestampfile);
-    (void) free(timestampdir);
+    free(timestampdir);
     if (timestampfile)
-	(void) free(timestampfile);
+	free(timestampfile);
 }
 
 /*
@@ -119,7 +120,7 @@ static void
 lecture()
 {
 
-    if (sudo_flag_set(FL_LECTURE)) {
+    if (def_flag(I_LECTURE)) {
 	(void) fputs("\n\
 We trust you have received the usual lecture from the local System\n\
 Administrator. It usually boils down to these two things:\n\
@@ -226,10 +227,10 @@ user_is_exempt()
     struct group *grp;
     char **gr_mem;
 
-    if (!sudo_strtable[I_EXEMPT_GRP])
+    if (!def_str(I_EXEMPT_GRP))
 	return(FALSE);
 
-    if (!(grp = getgrnam(sudo_strtable[I_EXEMPT_GRP])))
+    if (!(grp = getgrnam(def_str(I_EXEMPT_GRP))))
 	return(FALSE);
 
     if (getgid() == grp->gr_gid)
@@ -251,9 +252,9 @@ build_timestamp(timestampdir, timestampfile)
     char **timestampdir;
     char **timestampfile;
 {
-    char *dirparent = sudo_strtable[I_TIMESTAMPDIR];
+    char *dirparent = def_str(I_TIMESTAMPDIR);
 
-    if (sudo_flag_set(FL_TTY_TICKETS)) {
+    if (def_flag(I_TTY_TICKETS)) {
 	char *p;
 
 	if ((p = strrchr(user_tty, '/')))
@@ -285,7 +286,7 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 {
     struct stat sb;
     time_t now;
-    char *dirparent = sudo_strtable[I_TIMESTAMPDIR];
+    char *dirparent = def_str(I_TIMESTAMPDIR);
     int status = TS_ERROR;		/* assume the worst */
 
     /*
@@ -412,13 +413,13 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
      */
     if (status == TS_OLD) {
 	now = time(NULL);
-	if (sudo_inttable[I_TS_TIMEOUT] && 
-	    now - sb.st_mtime < 60 * sudo_inttable[I_TS_TIMEOUT]) {
+	if (def_ival(I_TS_TIMEOUT) && 
+	    now - sb.st_mtime < 60 * def_ival(I_TS_TIMEOUT)) {
 	    /*
 	     * Check for bogus time on the stampfile.  The clock may
 	     * have been set back or someone could be trying to spoof us.
 	     */
-	    if (sb.st_mtime > now + 60 * sudo_inttable[I_TS_TIMEOUT] * 2) {
+	    if (sb.st_mtime > now + 60 * def_ival(I_TS_TIMEOUT) * 2) {
 		log_error(NO_EXIT,
 		    "timestamp too far in the future: %20.20s",
 		    4 + ctime(&sb.st_mtime));
@@ -468,7 +469,7 @@ remove_timestamp(remove)
 	}
     }
 
-    (void) free(timestampdir);
+    free(timestampdir);
     if (timestampfile)
-	(void) free(timestampfile);
+	free(timestampfile);
 }

@@ -154,32 +154,32 @@ do_logfile(msg)
     char *beg, *oldend, *end;
     FILE *fp;
     mode_t oldmask;
-    int maxlen = sudo_inttable[I_LOGLEN];
+    int maxlen = def_ival(I_LOGLEN);
 
     oldmask = umask(077);
-    fp = fopen(sudo_strtable[I_LOGFILE], "a");
+    fp = fopen(def_str(I_LOGFILE), "a");
     (void) umask(oldmask);
     if (fp == NULL) {
 	easprintf(&full_line, "Can't open log file: %s: %s",
-	    sudo_strtable[I_LOGFILE], strerror(errno));
+	    def_str(I_LOGFILE), strerror(errno));
 	send_mail(full_line);
 	free(full_line);
     } else if (!lock_file(fileno(fp), SUDO_LOCK)) {
 	easprintf(&full_line, "Can't lock log file: %s: %s",
-	    sudo_strtable[I_LOGFILE], strerror(errno));
+	    def_str(I_LOGFILE), strerror(errno));
 	send_mail(full_line);
 	free(full_line);
     } else {
-	if (sudo_inttable[I_LOGLEN] == 0) {
+	if (def_ival(I_LOGLEN) == 0) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
-	    if (sudo_flag_set(FL_LOG_HOST))
+	    if (def_flag(I_LOG_HOST))
 		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n", get_timestr(),
 		    user_name, user_shost, msg);
 	    else
 		(void) fprintf(fp, "%s : %s : %s\n", get_timestr(),
 		    user_name, msg);
 	} else {
-	    if (sudo_flag_set(FL_LOG_HOST))
+	    if (def_flag(I_LOG_HOST))
 		easprintf(&full_line, "%s : %s : HOST=%s : %s", get_timestr(),
 		    user_name, user_shost, msg);
 	    else
@@ -255,9 +255,9 @@ log_auth(status, inform_user)
     int pri;
 
     if (status & VALIDATE_OK)
-	pri = PRI_SUCCESS;
+	pri = def_ival(I_GOODPRI);
     else
-	pri = PRI_FAILURE;
+	pri = def_ival(I_BADPRI);
 
     /* Set error message, if any. */
     if (status & VALIDATE_OK)
@@ -298,9 +298,9 @@ log_auth(status, inform_user)
     /*
      * Log via syslog and/or a file.
      */
-    if (sudo_inttable[I_LOGFAC] != (unsigned int)-1)
+    if (def_str(I_LOGFACSTR))
 	do_syslog(pri, logline);
-    if (sudo_strtable[I_LOGFILE])
+    if (def_str(I_LOGFILE))
 	do_logfile(logline);
 
     free(logline);
@@ -379,9 +379,9 @@ log_error(va_alist)
     /*
      * Log to syslog and/or a file.
      */
-    if (sudo_inttable[I_LOGFAC] != (unsigned int)-1)
-	do_syslog(PRI_FAILURE, logline);
-    if (sudo_strtable[I_LOGFILE])
+    if (def_str(I_LOGFACSTR))
+	do_syslog(def_ival(I_BADPRI), logline);
+    if (def_str(I_LOGFILE))
 	do_logfile(logline);
 
     free(logline);
@@ -389,8 +389,10 @@ log_error(va_alist)
 	free(message);
 }
 
+#define MAX_MAILFLAGS	63
+
 /*
- * Send a message to ALERTMAIL
+ * Send a message to MAILTO user
  */
 static void
 send_mail(line)
@@ -401,7 +403,7 @@ send_mail(line)
     int pfd[2], pid;
 
     /* Just return if mailer is disabled. */
-    if (!sudo_strtable[I_MAILERPATH])
+    if (!def_str(I_MAILERPATH) || !def_str(I_MAILTO))
 	return;
 
     if ((pid = fork()) > 0) {	/* Child. */
@@ -425,15 +427,37 @@ send_mail(line)
 		exit(1);
 		break;
 	    case 0:
-		/* Grandchild. */
-		(void) close(pfd[1]);
-		(void) dup2(pfd[0], STDIN_FILENO);
-		(void) close(pfd[0]);
+		{
+		    char *argv[MAX_MAILFLAGS + 1];
+		    char *mpath, *mflags;
+		    int i;
 
-		/* Run sendmail as root so user cannot kill it. */
-		set_perms(PERM_ROOT, 0);
-		execl(_PATH_SENDMAIL, "sendmail", "-t", NULL);
-		_exit(127);
+		    /* Grandchild. */
+		    (void) close(pfd[1]);
+		    (void) dup2(pfd[0], STDIN_FILENO);
+		    (void) close(pfd[0]);
+
+		    /* Build up an argv based the mailer path and flags */
+		    mflags = estrdup(def_str(I_MAILERFLAGS));
+		    mpath = estrdup(def_str(I_MAILERPATH));
+		    if ((argv[0] = strrchr(mpath, ' ')))
+			argv[0]++;
+		    else
+			argv[0] = mpath;
+
+		    i = 1;
+		    if ((p = strtok(mflags, " \t"))) {
+			do {
+			    argv[i] = p;
+			} while (++i < MAX_MAILFLAGS && (p = strtok(NULL, " \t")));
+		    }
+		    argv[i] = NULL;
+
+		    /* Run mailer as root so user cannot kill it. */
+		    set_perms(PERM_ROOT, 0);
+		    execv(mpath, argv);
+		    _exit(127);
+		}
 		break;
 	}
 
@@ -442,8 +466,8 @@ send_mail(line)
 
 	/* Pipes are all setup, send message via sendmail. */
 	(void) fprintf(mail, "To: %s\nFrom: %s\nSubject: ",
-	    sudo_strtable[I_ALERTMAIL], user_name);
-	for (p = sudo_strtable[I_MAILSUB]; *p; p++) {
+	    def_str(I_MAILTO), user_name);
+	for (p = def_str(I_MAILSUB); *p; p++) {
 	    /* Expand escapes in the subject */
 	    if (*p == '%' && *(p+1) != '%') {
 		switch (*(++p)) {
@@ -486,16 +510,16 @@ mail_auth(status, line)
     int mail_mask;
 
     /* If any of these bits are set in status, we send mail. */
-    if (sudo_flag_set(FL_MAIL_ALWAYS))
+    if (def_flag(I_MAIL_ALWAYS))
 	mail_mask =
 	    VALIDATE_ERROR|VALIDATE_OK|FLAG_NO_USER|FLAG_NO_HOST|VALIDATE_NOT_OK;
     else {
 	mail_mask = VALIDATE_ERROR;
-	if (sudo_flag_set(FL_MAIL_IF_NOUSER))
+	if (def_flag(I_MAIL_IF_NOUSER))
 	    mail_mask |= FLAG_NO_USER;
-	if (sudo_flag_set(FL_MAIL_IF_NOHOST))
+	if (def_flag(I_MAIL_IF_NOHOST))
 	    mail_mask |= FLAG_NO_HOST;
-	if (sudo_flag_set(FL_MAIL_IF_NOPERMS))
+	if (def_flag(I_MAIL_IF_NOPERMS))
 	    mail_mask |= VALIDATE_NOT_OK;
     }
 
@@ -538,24 +562,23 @@ get_timestr()
     struct tm *timeptr;
 
     timeptr = localtime(&now);
-    if (sudo_flag_set(FL_LOG_YEAR))
+    if (def_flag(I_LOG_YEAR))
 	s = "%h %e %T %Y";
     else
 	s = "%h %e %T";
 
     /* strftime() does not guarantee to NUL-terminate so we must check. */
     buf[sizeof(buf) - 1] = '\0';
-    if (strftime(buf, sizeof(buf), s, timeptr) && !buf[sizeof(buf) - 1])
+    if (strftime(buf, sizeof(buf), s, timeptr) && buf[sizeof(buf) - 1] == '\0')
 	return(buf);
 
-#else
+#endif /* HAVE_STRFTIME */
 
     s = ctime(&now) + 4;		/* skip day of the week */
-    if (sudo_flag_set(FL_LOG_YEAR))
+    if (def_flag(I_LOG_YEAR))
 	s[20] = '\0';			/* avoid the newline */
     else
 	s[15] = '\0';			/* don't care about year */
 
     return(s);
-#endif /* HAVE_STRFTIME */
 }

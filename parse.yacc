@@ -115,7 +115,7 @@ int top = 0, stacksize = 0;
 	match[top].cmnd   = -1; \
 	match[top].host   = -1; \
 	match[top].runas  = -1; \
-	match[top].nopass = sudo_flag_set(FL_AUTHENTICATE) ? -1 : TRUE; \
+	match[top].nopass = def_flag(I_AUTHENTICATE) ? -1 : TRUE; \
 	top++; \
     } while (0)
 
@@ -324,7 +324,7 @@ privilege	:	hostlist '=' cmndspeclist {
 			     */
 			    host_matches = -1;
 			    runas_matches = -1;
-			    if (sudo_flag_set(FL_AUTHENTICATE))
+			    if (def_flag(I_AUTHENTICATE))
 				no_passwd = -1;
 			    else
 				no_passwd = TRUE;
@@ -460,7 +460,7 @@ runasspec	:	/* empty */ {
 			     */
 			    if (runas_matches == -1)
 				runas_matches = (strcmp(*user_runas,
-				    sudo_strtable[I_RUNAS_DEF]) == 0);
+				    def_str(I_RUNAS_DEF)) == 0);
 			}
 		|	RUNAS runaslist { ; }
 		;
@@ -996,13 +996,13 @@ list_matches()
 	    } while ((p = strtok(NULL, ", ")));
 	    (void) fputs(") ", stdout);
 	} else {
-	    (void) printf("(%s) ", sudo_strtable[I_RUNAS_DEF]);
+	    (void) printf("(%s) ", def_str(I_RUNAS_DEF));
 	}
 
 	/* Is a password required? */
-	if (cm_list[i].nopasswd == TRUE && sudo_flag_set(FL_AUTHENTICATE))
+	if (cm_list[i].nopasswd == TRUE && def_flag(I_AUTHENTICATE))
 	    (void) fputs("NOPASSWD: ", stdout);
-	else if (cm_list[i].nopasswd == FALSE && !sudo_flag_set(FL_AUTHENTICATE))
+	else if (cm_list[i].nopasswd == FALSE && !def_flag(I_AUTHENTICATE))
 	    (void) fputs("PASSWD: ", stdout);
 
 	/* Print the actual command or expanded Cmnd_Alias. */

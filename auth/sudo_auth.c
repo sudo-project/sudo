@@ -98,7 +98,7 @@ void
 verify_user(prompt)
     char *prompt;
 {
-    short counter = sudo_inttable[I_PW_TRIES] + 1;
+    short counter = def_ival(I_PW_TRIES) + 1;
     short success = AUTH_FAILURE;
     short status;
     char *p;
@@ -155,7 +155,7 @@ verify_user(prompt)
 #ifdef AUTH_STANDALONE
 	p = prompt;
 #else
-	p = (char *) tgetpass(prompt, sudo_inttable[I_PW_TIMEOUT] * 60, 1);
+	p = (char *) tgetpass(prompt, def_ival(I_PW_TIMEOUT) * 60, 1);
 	if (!p || *p == '\0')
 	    nil_pw = 1;
 #endif /* AUTH_STANDALONE */
@@ -182,7 +182,7 @@ verify_user(prompt)
 
 	/* Exit loop on nil password, but give it a chance to match first. */
 	if (nil_pw) {
-	    if (counter == sudo_inttable[I_PW_TRIES])
+	    if (counter == def_ival(I_PW_TRIES))
 		exit(1);
 	    else
 		break;
@@ -212,8 +212,8 @@ cleanup:
 	    return;
 	case AUTH_FAILURE:
 	    log_error(NO_MAIL, "%d incorrect password attempt%s",
-		sudo_inttable[I_PW_TRIES] - counter,
-		(sudo_inttable[I_PW_TRIES] - counter == 1) ? "" : "s");
+		def_ival(I_PW_TRIES) - counter,
+		(def_ival(I_PW_TRIES) - counter == 1) ? "" : "s");
 	case AUTH_FATAL:
 	    exit(1);
     }
@@ -227,7 +227,7 @@ pass_warn(fp)
 #ifdef USE_INSULTS
     (void) fprintf(fp, "%s\n", INSULT);
 #else
-    (void) fprintf(fp, "%s\n", sudo_strtable[I_BADPASS_MSG]);
+    (void) fprintf(fp, "%s\n", def_str(I_BADPASS_MSG));
 #endif /* USE_INSULTS */
 }
 

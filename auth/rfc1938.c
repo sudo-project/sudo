@@ -126,7 +126,7 @@ rfc1938_setup(pw, promptp, auth)
 	new_prompt = (char *) erealloc(new_prompt, np_size);
     }
 
-    if (sudo_flag_set(FL_LONG_OTP_PROMPT))
+    if (def_flag(I_LONG_OTP_PROMPT))
 	(void) sprintf(new_prompt, "%s\n%s", challenge, orig_prompt);
     else
 	(void) sprintf(new_prompt, "%.*s [ %s ]:", op_len, orig_prompt,

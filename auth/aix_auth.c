@@ -67,7 +67,7 @@ aixauth_verify(pw, prompt, auth)
     char *message, *pass;
     int reenter = 1;
 
-    pass = tgetpass(prompt, sudo_inttable[I_PW_TIMEOUT] * 60, 1);
+    pass = tgetpass(prompt, def_ival(I_PW_TIMEOUT) * 60, 1);
     if (authenticate(pw->pw_name, pass, &reenter, &message) == 0)
 	return(AUTH_SUCCESS);
     else

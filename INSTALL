@@ -219,12 +219,12 @@ Special features/options:
 	If set, sudo will ignore '.' or '' (current dir) in $PATH.
 	The $PATH itself is not modified.
 
-  --with-alertmail
+  --with-mailto
 	User that mail from sudo is sent to.  This should go to a sysadmin at
 	your site.  The default is "root".
 
   --with-mailsubject
-	Subject of the mail sent to the "alertmail" user. The token "%h"
+	Subject of the mail sent to the "mailto" user. The token "%h"
 	will expand to the hostname of the machine.
 	Default is "*** SECURITY information for %h ***".
 
@@ -268,7 +268,7 @@ Special features/options:
 	Override configure's guess as to the location of sendmail.
 
   --without-sendmail
-	Do not use sendmail to mail messages to the "alertmail" user.
+	Do not use sendmail to mail messages to the "mailto" user.
 	Use only if don't run sendmail or the equivalent.
 
   --with-sudoers-mode=mode

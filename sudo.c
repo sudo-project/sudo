@@ -229,9 +229,9 @@ main(argc, argv)
     init_defaults();
 
     /* Initialize syslog(3) if we are using it. */
-    if (sudo_inttable[I_LOGFAC] != (unsigned int)-1) {
+    if (def_str(I_LOGFACSTR)) {
 #ifdef LOG_NFACILITIES
-	openlog("sudo", 0, sudo_inttable[I_LOGFAC]);
+	openlog("sudo", 0, def_ival(I_LOGFAC));
 #else
 	openlog("sudo", 0);
 #endif /* LOG_NFACILITIES */
@@ -298,7 +298,7 @@ main(argc, argv)
 	    errorlineno);
 
     /* Is root even allowed to run sudo? */
-    if (getuid() == 0 && !sudo_flag_set(FL_ROOT_SUDO)) {
+    if (getuid() == 0 && !def_flag(I_ROOT_SUDO)) {
 	(void) fputs("You are already root, you don't need to use sudo.\n",
 	    stderr);
 	exit(1);
@@ -342,7 +342,7 @@ main(argc, argv)
 		"please report this error to sudo-bugs@courtesan.com");
 	}
 
-	if (sudo_inttable[I_LOGFAC] != (unsigned int)-1)
+	if (def_ival(I_LOGFACSTR))
 	    closelog();
 
 	/* Reset signal mask before we exec. */
@@ -353,12 +353,12 @@ main(argc, argv)
 #endif /* POSIX_SIGNALS */
 
 	/* Override user's umask if configured to do so. */
-	if (sudo_inttable[I_UMASK] != 0777)
-	    (void) umask((mode_t)sudo_inttable[I_UMASK]);
+	if (def_ival(I_UMASK) != 0777)
+	    (void) umask(def_mode(I_UMASK));
 
 	/* Replace the PATH envariable with a secure one. */
-	if (sudo_strtable[I_SECURE_PATH] && !user_is_exempt())
-	    if (sudo_setenv("PATH", sudo_strtable[I_SECURE_PATH])) {
+	if (def_str(I_SECURE_PATH) && !user_is_exempt())
+	    if (sudo_setenv("PATH", def_str(I_SECURE_PATH))) {
 		(void) fprintf(stderr, "%s: cannot allocate memory!\n",
 		    Argv[0]);
 		exit(1);
@@ -382,7 +382,7 @@ main(argc, argv)
 	log_auth(validated, 1);
 	exit(1);
     } else if (validated & VALIDATE_NOT_OK) {
-	if (sudo_flag_set(FL_PATH_INFO)) {
+	if (def_flag(I_PATH_INFO)) {
 	    /*
 	     * We'd like to not leak path info at all here, but that can
 	     * *really* confuse the users.  To really close the leak we'd
@@ -448,7 +448,7 @@ init_vars(sudo_mode)
 	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
     } else
 	user_host = estrdup(thost);
-    if (sudo_flag_set(FL_FQDN)) {
+    if (def_flag(I_FQDN)) {
 	if (!(hp = gethostbyname(user_host))) {
 	    log_error(USE_ERRNO|MSG_ONLY|NO_EXIT,
 		"unable to lookup %s via gethostbyname()", user_host);
@@ -556,7 +556,7 @@ parse_args()
     NewArgc = Argc - 1;
 
     if (Argc < 2) {			/* no options and no command */
-	if (!sudo_flag_set(FL_SHELL_NOARGS))
+	if (!def_flag(I_SHELL_NOARGS))
 	    usage(1);
 	rval |= MODE_SHELL;
 	return(rval);
@@ -652,7 +652,7 @@ parse_args()
 		break;
 	    case 's':
 		rval |= MODE_SHELL;
-		if (sudo_flag_set(FL_SET_HOME))
+		if (def_flag(I_SET_HOME))
 		    rval |= MODE_RESET_HOME;
 		break;
 	    case 'H':
@@ -661,7 +661,7 @@ parse_args()
 	    case '-':
 		NewArgc--;
 		NewArgv++;
-		if (sudo_flag_set(FL_SHELL_NOARGS) && rval == MODE_RUN)
+		if (def_flag(I_SHELL_NOARGS) && rval == MODE_RUN)
 		    rval |= MODE_SHELL;
 		return(rval);
 	    case '\0':

@@ -144,9 +144,9 @@ sudo_getepw(pw)
 
 	spw = getprpwnam(pw->pw_name);
 	if (spw != NULL && spw->ufld.fd_encrypt != NULL) {
-#  ifdef __alpha
+# ifdef __alpha
 	    crypt_type = spw->ufld.fd_oldcrypt;
-#  endif /* __alpha */
+# endif /* __alpha */
 	    return(spw->ufld.fd_encrypt);
 	}
     }

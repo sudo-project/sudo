@@ -125,63 +125,6 @@
 /* Define if you want to use execv() instead of execvp().  */
 #undef USE_EXECV
 
-/* Define if you a different ticket file for each tty.  */
-#undef USE_TTY_TICKETS
-
-/* Define if you want to insult the user for entering an incorrect password.  */
-#undef USE_INSULTS
-
-/* Define if you want the insults from the "classic" version sudo.  */
-#undef CLASSIC_INSULTS
-
-/* Define if you want 2001-like insults.  */
-#undef HAL_INSULTS
-
-/* Define if you want insults from the "Goon Show" */
-#undef GOONS_INSULTS
-
-/* Define if you want insults culled from the twisted minds of CSOps.  */
-#undef CSOPS_INSULTS
-
-/* Define to override the user's path with a builtin one.  */
-#undef SECURE_PATH
-
-/* Define if you use S/Key.  */
-#undef HAVE_SKEY
-
-/* Define if you use NRL OPIE.  */
-#undef HAVE_OPIE
-
-/* Define if you want a two line OTP (skey/opie) prompt.  */
-#undef LONG_OTP_PROMPT
-
-/* Define if you use SecurID.  */
-#undef HAVE_SECURID
-
-/* Define if you use AIX general authentication.  */
-#undef HAVE_AUTHENTICATE
-
-/* Define if you use Kerberos IV or Kerberos V < 1.1.  */
-#undef HAVE_KERB4
-  
-/* Define if you use Kerberos V version 1.1 or higher.  */
-#undef HAVE_KERB5
-
-/* Define if you use SIA.  */
-#undef HAVE_SIA
-
-/* Define if you use PAM.  */
-#undef HAVE_PAM
-
-/* Define if you use AFS.  */
-#undef HAVE_AFS
-
-/* Define if you use OSF DCE.  */
-#undef HAVE_DCE
-
-/* Define if you use the FWTK authsrv daemon.  */
-#undef HAVE_FWTK
-
 /* Define if you have POSIX signals.  */
 #undef HAVE_SIGACTION
 #ifdef HAVE_SIGACTION
@@ -378,11 +321,11 @@
 /* Define if your struct sockadr has an sa_len field.  */
 #undef HAVE_SA_LEN
 
+/* Define if you want visudo to honor EDITOR and VISUAL env variables.  */
+#undef ENV_EDITOR
+
 /* Define to avoid using the passwd/shadow file for authentication.  */
 #undef WITHOUT_PASSWD
-
-/* Define if you don't want sudo to prompt for a password by default.  */
-#undef NO_AUTHENTICATION
 
 /* Define to void if your C compiler fully groks void, else char */
 #undef VOID
@@ -393,6 +336,38 @@
 /* Define if your syslog(3) does not guarantee the message will be logged */
 /* and syslog(3) returns non-zero to denote failure */
 #undef BROKEN_SYSLOG
+
+/* Define if the code in interfaces.c does not compile for you.  */
+#undef STUB_LOAD_INTERFACES
+
+/*
+ * Defaults for options.  These may be overridden via a "Defaults" line
+ * in the sudoers file.
+ */
+
+/* Define if you a different ticket file for each tty.  */
+#undef USE_TTY_TICKETS
+
+/* Define if you want to insult the user for entering an incorrect password.  */
+#undef USE_INSULTS
+
+/* Define if you want the insults from the "classic" version sudo.  */
+#undef CLASSIC_INSULTS
+
+/* Define if you want 2001-like insults.  */
+#undef HAL_INSULTS
+
+/* Define if you want insults from the "Goon Show" */
+#undef GOONS_INSULTS
+
+/* Define if you want insults culled from the twisted minds of CSOps.  */
+#undef CSOPS_INSULTS
+
+/* Define to override the user's path with a builtin one.  */
+#undef SECURE_PATH
+
+/* Define if you want a two line OTP (skey/opie) prompt.  */
+#undef LONG_OTP_PROMPT
 
 /* The umask that the root-run prog should use */
 #undef SUDO_UMASK
@@ -425,9 +400,9 @@
 #undef NO_ROOT_SUDO
 
 /* Define to be the user that gets sudo mail.  */
-#undef ALERTMAIL
+#undef MAILTO
 
-/* Define to be the subject of the mail sent to ALERTMAIL by sudo.  */
+/* Define to be the subject of the mail sent to MAILTO by sudo.  */
 #undef MAILSUBJECT
 
 /* Define to be the message given for a bad password.  */
@@ -435,9 +410,6 @@
 
 /* Define to be the password prompt.  */
 #undef PASSPROMPT
-
-/* Define if you want visudo to honor EDITOR and VISUAL env variables.  */
-#undef ENV_EDITOR
 
 /* Define to SLOG_SYSLOG, SLOG_FILE, or SLOG_BOTH */
 #undef LOGGING
@@ -478,8 +450,47 @@
 /* Define if you want sudo to set $HOME in shell mode.  */
 #undef SHELL_SETS_HOME
 
-/* Define if the code in interfaces.c does not compile for you.  */
-#undef STUB_LOAD_INTERFACES
+/* Define if you don't want sudo to prompt for a password by default.  */
+#undef NO_AUTHENTICATION
+
+
+/*
+ * Authentication methods.
+ */
+
+/* Define if you use S/Key.  */
+#undef HAVE_SKEY
+
+/* Define if you use NRL OPIE.  */
+#undef HAVE_OPIE
+
+/* Define if you use SecurID.  */
+#undef HAVE_SECURID
+
+/* Define if you use AIX general authentication.  */
+#undef HAVE_AUTHENTICATE
+
+/* Define if you use Kerberos IV or Kerberos V < 1.1.  */
+#undef HAVE_KERB4
+  
+/* Define if you use Kerberos V version 1.1 or higher.  */
+#undef HAVE_KERB5
+
+/* Define if you use SIA.  */
+#undef HAVE_SIA
+
+/* Define if you use PAM.  */
+#undef HAVE_PAM
+
+/* Define if you use AFS.  */
+#undef HAVE_AFS
+
+/* Define if you use OSF DCE.  */
+#undef HAVE_DCE
+
+/* Define if you use the FWTK authsrv daemon.  */
+#undef HAVE_FWTK
+
 
 /**********  You probably don't want to modify anything below here  ***********/
 

@@ -71,6 +71,14 @@ AC_ARG_WITH(otp-only, [  --with-otp-only         deprecated],
 		;;
 esac])
 
+AC_ARG_WITH(alertmail, [  --with-alertmail        deprecated],
+[case $with_alertmail in
+    *)		with_mailto="$with_alertmail"
+		AC_DEFINE(WITHOUT_PASSWD)
+		AC_MSG_WARN([--with-alertmail option deprecated, treating as --mailto])
+		;;
+esac])
+
 dnl
 dnl Options for --with
 dnl
@@ -364,7 +372,7 @@ AC_ARG_WITH(logging, [  --with-logging          log via syslog, file, or both],
 esac], [AC_DEFINE(LOGGING, SLOG_SYSLOG) AC_MSG_RESULT(syslog)])
 
 AC_MSG_CHECKING(which syslog facility sudo should log with)
-AC_ARG_WITH(logfac, [  --with-logfac           syslog facility to log with (default is LOG_LOCAL2)],
+AC_ARG_WITH(logfac, [  --with-logfac           syslog facility to log with (default is local2)],
 [case $with_logfac in  
     yes)	echo "Must give --with-logfac an argument."
 		exit 1
@@ -372,13 +380,13 @@ AC_ARG_WITH(logfac, [  --with-logfac           syslog facility to log with (defa
     no)		echo "Sorry, --without-logfac not supported."
 		exit 1
 		;;
-    *)		AC_DEFINE_UNQUOTED(LOGFAC, $with_logfac)
+    *)		AC_DEFINE_UNQUOTED(LOGFAC, "$with_logfac")
 		AC_MSG_RESULT([$with_logfac])
 		;;
-esac], [AC_DEFINE(LOGFAC, LOG_LOCAL2) AC_MSG_RESULT(LOG_LOCAL2)])
+esac], [AC_DEFINE_UNQUOTED(LOGFAC, "local2") AC_MSG_RESULT("local2")])
 
 AC_MSG_CHECKING(at which syslog priority to log commands)
-AC_ARG_WITH(goodpri, [  --with-goodpri          syslog priority for commands (def is LOG_NOTICE)],
+AC_ARG_WITH(goodpri, [  --with-goodpri          syslog priority for commands (def is notice)],
 [case $with_goodpri in  
     yes)	echo "Must give --with-goodpri an argument."
 		exit 1
@@ -386,10 +394,10 @@ AC_ARG_WITH(goodpri, [  --with-goodpri          syslog priority for commands (de
     no)		echo "Sorry, --without-goodpri not supported."
 		exit 1
 		;;
-    *)		AC_DEFINE_UNQUOTED(LOGFAC, $with_goodpri)
+    *)		AC_DEFINE_UNQUOTED(LOGFAC, "$with_goodpri")
 		AC_MSG_RESULT([$with_goodpri])
 		;;
-esac], [AC_DEFINE(PRI_SUCCESS, LOG_NOTICE) AC_MSG_RESULT(LOG_NOTICE)])
+esac], [AC_DEFINE_UNQUOTED(PRI_SUCCESS, "notice") AC_MSG_RESULT("notice")])
 
 AC_MSG_CHECKING(at which syslog priority to log failures)
 AC_ARG_WITH(badpri, [  --with-badpri           syslog priority for failures (def is LOG_ALERT)],
@@ -400,10 +408,10 @@ AC_ARG_WITH(badpri, [  --with-badpri           syslog priority for failures (def
     no)		echo "Sorry, --without-badpri not supported."
 		exit 1
 		;;
-    *)		AC_DEFINE_UNQUOTED(LOGFAC, $with_badpri)
+    *)		AC_DEFINE_UNQUOTED(LOGFAC, "$with_badpri")
 		AC_MSG_RESULT([$with_badpri])
 		;;
-esac], [AC_DEFINE(PRI_FAILURE, LOG_ALERT) AC_MSG_RESULT(LOG_ALERT)])
+esac], [AC_DEFINE_UNQUOTED(PRI_FAILURE, "alert") AC_MSG_RESULT("alert")])
 
 AC_ARG_WITH(logpath, [  --with-logpath          path to the sudo log file],
 [case $with_logpath in  
@@ -446,17 +454,17 @@ AC_ARG_WITH(ignore-dot, [  --with-ignore-dot       ignore '.' in the PATH],
 esac], AC_MSG_RESULT(no))
 
 AC_MSG_CHECKING(who should get the mail that sudo sends)
-AC_ARG_WITH(alertmail, [  --with-alertmail        who should get sudo mail (default is "root")],
-[case $with_alertmail in  
-    yes)	echo "Must give --with-alertmail an argument."
+AC_ARG_WITH(mailto, [  --with-mailto           who should get sudo mail (default is "root")],
+[case $with_mailto in  
+    yes)	echo "Must give --with-mailto an argument."
 		exit 1
 		;;
-    no)		echo "Sorry, --without-alertmail not supported."
+    no)		echo "Sorry, --without-mailto not supported."
 		;;
-    *)		AC_DEFINE_UNQUOTED(ALERTMAIL, "$with_alertmail")
-		AC_MSG_RESULT([$with_alertmail])
+    *)		AC_DEFINE_UNQUOTED(MAILTO, "$with_mailto")
+		AC_MSG_RESULT([$with_mailto])
 		;;
-esac], [AC_DEFINE(ALERTMAIL, "root") AC_MSG_RESULT(root)])
+esac], [AC_DEFINE(MAILTO, "root") AC_MSG_RESULT(root)])
 
 AC_ARG_WITH(mailsubject, [  --with-mailsubject      subject of sudo mail],
 [case $with_mailsubject in  

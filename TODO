@@ -74,3 +74,7 @@ TODO list (most will be addressed in sudo 2.0)
 26) Look into %e, %p, %k in parse.lex
 
 27) Document Defaults stuff in sudoers.pod
+
+28) Make syslog stuff work on vanilla ultrix
+
+29) Implement date_format and log_format options.

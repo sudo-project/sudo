@@ -38,74 +38,94 @@
 #define _SUDO_DEFAULTS_H
 
 /*
- * Four types of defaults: strings, integers, booleans, and flags.
- * Note that flags have their value in the index field.
+ * Structure describing compile-time and run-time options.
+ */
+struct sudo_defs_types {
+    char *name;
+    int type;
+    union {
+	int flag;
+	char *str;
+	unsigned int ival;
+	mode_t mode;
+    } sd_un;
+    char *desc;
+};
+
+/*
+ * Four types of defaults: strings, integers, and flags.
  * Also, T_INT or T_STR may be ANDed with T_BOOL to indicate that
- * a value is not required.
+ * a value is not required.  Flags are boolean by nature...
  */
-#define T_INT	0x01
-#define T_STR	0x02
-#define T_FLAG	0x08
-#define T_MASK	0x0F
-#define T_BOOL	0x10
+#define T_INT		0x001
+#define T_STR		0x002
+#define T_FLAG		0x003
+#define T_MODE		0x004
+#define T_LOGFAC	0x005
+#define T_LOGPRI	0x006
+#define T_MASK		0x0FF
+#define T_BOOL		0x100
 
 /*
- * Flag values
+ * Indexes into sudo_defs_table
  */
-#define FL_LONG_OTP_PROMPT	0x00001
-#define FL_IGNORE_DOT		0x00002
-#define FL_MAIL_ALWAYS		0x00004
-#define FL_MAIL_IF_NOUSER	0x00008
-#define FL_MAIL_IF_NOHOST	0x00010
-#define FL_MAIL_IF_NOPERMS	0x00020
-#define FL_TTY_TICKETS		0x00040
-#define FL_LECTURE		0x00080
-#define FL_AUTHENTICATE		0x00100
-#define FL_ROOT_SUDO		0x00200
-#define FL_LOG_HOST		0x00400
-#define FL_SHELL_NOARGS		0x00800
-#define FL_SET_HOME		0x01000
-#define FL_PATH_INFO		0x02000
-#define FL_FQDN			0x04000
-#define FL_INSULTS		0x08000
-#define FL_LOG_YEAR		0x10000
-#define FL_MAX			0xFFFFF
+
+/* Integer versions of syslog options.  */
+#define	I_LOGFAC	0	/* syslog facility */
+#define	I_GOODPRI	1	/* syslog priority for successful auth */
+#define	I_BADPRI	2	/* syslog priority for unsuccessful auth */
+
+/* String versions of syslog options.  */
+#define	I_LOGFACSTR	3	/* syslog facility */
+#define	I_GOODPRISTR	4	/* syslog priority for successful auth */
+#define	I_BADPRISTR	5	/* syslog priority for unsuccessful auth */
+
+/* Booleans */
+#define I_LONG_OTP_PROMPT	6
+#define I_IGNORE_DOT		7
+#define I_MAIL_ALWAYS		8
+#define I_MAIL_IF_NOUSER	9
+#define I_MAIL_IF_NOHOST	10
+#define I_MAIL_IF_NOPERMS	11
+#define I_TTY_TICKETS		12
+#define I_LECTURE		13
+#define I_AUTHENTICATE		14
+#define I_ROOT_SUDO		15
+#define I_LOG_HOST		16
+#define I_LOG_YEAR		17
+#define I_SHELL_NOARGS		18
+#define I_SET_HOME		19
+#define I_PATH_INFO		20
+#define I_FQDN			21
+#define I_INSULTS		22
+
+/* Integer values */
+#define	I_LOGLEN	23	/* wrap log file line after N chars */
+#define	I_TS_TIMEOUT	24	/* timestamp stale after N minutes */
+#define	I_PW_TIMEOUT	25	/* exit if pass not entered in N minutes */
+#define	I_PW_TRIES	26	/* exit after N bad password tries */
+#define	I_UMASK		27	/* umask to use or 0777 to use user's */
+
+/* Strings */
+#define	I_LOGFILE	28	/* path to logfile (or NULL for none) */
+#define	I_MAILERPATH	29	/* path to sendmail or other mailer */
+#define	I_MAILERFLAGS	30	/* flags to pass to the mailer */
+#define	I_MAILTO	31	/* who to send bitch mail to */
+#define	I_MAILSUB	32	/* subject line of mail msg */
+#define	I_BADPASS_MSG	33	/* what to say when passwd is wrong */
+#define	I_TIMESTAMPDIR	34	/* path to timestamp dir */
+#define	I_EXEMPT_GRP	35	/* no password or PATH override for these */
+#define	I_PASSPROMPT	36	/* password prompt */
+#define	I_RUNAS_DEF	37	/* default user to run commands as */
+#define	I_SECURE_PATH	38	/* set $PATH to this if not NULL */
 
 /*
- * Indexes into sudo_inttable
+ * Macros for accessing sudo_defs_table.
  */
-#define	I_FLAGS		0	/* various flags, as listed above */
-#define	I_LOGFAC	1	/* syslog facility */
-#define	I_GOODPRI	2	/* syslog priority for successful auth */
-#define	I_BADPRI	3	/* syslog priority for unsuccessful auth */
-#define	I_LOGLEN	4	/* wrap log file line after N chars */
-#define	I_TS_TIMEOUT	5	/* timestamp stale after N minutes */
-#define	I_PW_TIMEOUT	6	/* exit if pass not entered in N minutes */
-#define	I_PW_TRIES	7	/* exit after N bad password tries */
-#define	I_UMASK		8	/* umask to use or 0777 to use user's */
-
-/*
- * Indexes into sudo_strtable
- */
-#define	I_LOGFILE	0	/* path to logfile (or NULL for none) */
-#define	I_MAILERPATH	1	/* path to sendmail or other mailer */
-#define	I_MAILERARGS	2	/* flags to pass to the mailer */
-#define	I_ALERTMAIL	3	/* who to send bitch mail to */
-#define	I_MAILSUB	4	/* subject line of mail msg */
-#define	I_BADPASS_MSG	5	/* what to say when passwd is wrong */
-#define	I_TIMESTAMPDIR	6	/* path to timestamp dir */
-#define	I_EXEMPT_GRP	7	/* no password or PATH override for these */
-#define	I_PASSPROMPT	8	/* password prompt */
-#define	I_RUNAS_DEF	9	/* default user to run commands as */
-#define	I_SECURE_PATH	10	/* set $PATH to this if not NULL */
-
-#define SUDO_INTTABLE_LAST	9
-#define SUDO_STRTABLE_LAST	11
-
-#define sudo_flag_set(_f)	(sudo_inttable[I_FLAGS] & (_f))
-
-extern unsigned int sudo_inttable[SUDO_INTTABLE_LAST];
-extern char *sudo_strtable[SUDO_STRTABLE_LAST];
+#define def_flag(_i)	(sudo_defs_table[(_i)].sd_un.flag)
+#define def_ival(_i)	(sudo_defs_table[(_i)].sd_un.ival)
+#define def_str(_i)	(sudo_defs_table[(_i)].sd_un.str)
+#define def_mode(_i)	(sudo_defs_table[(_i)].sd_un.mode)
 
 /*
  * Prototypes
@@ -114,5 +134,7 @@ void dump_default	__P((void));
 int set_default		__P((char *, char *, int));
 void init_defaults	__P((void));
 void list_options	__P((void));
+
+extern struct sudo_defs_types sudo_defs_table[];
 
 #endif /* _SUDO_DEFAULTS_H */
