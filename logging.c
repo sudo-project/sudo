@@ -86,7 +86,6 @@ static void syslog_wrapper	__P((int, char *, char *, char *));
  */
 static char *logline;
 extern int errorlineno;
-extern char *runas_user;
 
 /*
  * length of syslog-like header info used for mail and file logs
@@ -152,7 +151,8 @@ void log_error(code)
     /*
      * Allocate enough memory for logline so we won't overflow it
      */
-    count = LOG_HEADER_LEN + 128 + 2 * MAXPATHLEN + strlen(tty) + strlen(cwd);
+    count = LOG_HEADER_LEN + 136 + 2 * MAXPATHLEN + strlen(tty) + strlen(cwd) +
+	    strlen(runas_user);
     if (NewArgc > 1)
 	for (a = &NewArgv[1]; *a; a++)
 	    count += strlen(*a) + 1;
@@ -180,7 +180,8 @@ void log_error(code)
     switch (code) {
 
 	case ALL_SYSTEMS_GO:
-	    (void) sprintf(p, "TTY=%s ; PWD=%s ; COMMAND=", tty, cwd);
+	    (void) sprintf(p, "TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
+	    tty, cwd, runas_user);
 #if (LOGGING & SLOG_SYSLOG)
 	    pri = Syslog_priority_OK;
 #endif /* LOGGING & SLOG_SYSLOG */
@@ -188,17 +189,19 @@ void log_error(code)
 
 	case VALIDATE_NO_USER:
 	    (void) sprintf(p,
-		"user NOT in sudoers ; TTY=%s ; PWD=%s ; COMMAND=", tty, cwd);
+		"user NOT in sudoers ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
+		tty, cwd, runas_user);
 	    break;
 
 	case VALIDATE_NOT_OK:
 	    (void) sprintf(p,
-		"command not allowed ; TTY=%s ; PWD=%s ; COMMAND=", tty, cwd);
+		"command not allowed ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
+		tty, cwd, runas_user);
 	    break;
 
 	case VALIDATE_ERROR:
-	    (void) sprintf(p, "error in %s, line %d ; TTY=%s ; PWD=%s.  ",
-		_PATH_SUDO_SUDOERS, errorlineno, tty, cwd);
+	    (void) sprintf(p, "error in %s, line %d ; TTY=%s ; PWD=%s ; USER=%s.  ",
+		_PATH_SUDO_SUDOERS, errorlineno, tty, cwd, runas_user);
 	    break;
 
 	case GLOBAL_NO_PW_ENT:
@@ -209,13 +212,14 @@ void log_error(code)
 
 	case PASSWORD_NOT_CORRECT:
 	    (void) sprintf(p,
-		"password incorrect ; TTY=%s ; PWD=%s ; COMMAND=", tty, cwd);
+		"password incorrect ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
+		tty, cwd, runas_user);
 	    break;
 
 	case PASSWORDS_NOT_CORRECT:
 	    (void) sprintf(p,
-		"%d incorrect passwords ; TTY=%s ; PWD=%s ; COMMAND=",
-		    TRIES_FOR_PASSWORD, tty, cwd);
+		"%d incorrect passwords ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
+		TRIES_FOR_PASSWORD, tty, cwd, runas_user);
 	    break;
 
 	case GLOBAL_NO_HOSTNAME:
@@ -258,20 +262,20 @@ void log_error(code)
 
 	case SPOOF_ATTEMPT:
 	    (void) sprintf(p,
-		"probable spoofing attempt; TTY=%s ; PWD=%s ; COMMAND=",
-		tty, cwd);
+		"probable spoofing attempt; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
+		tty, cwd, runas_user);
 	    break;
 
 	case BAD_STAMPDIR:
 	    (void) sprintf(p,
-	    "%s owned by non-root or not mode 0700; TTY=%s ; PWD=%s ; COMMAND=",
-	    _PATH_SUDO_TIMEDIR, tty, cwd);
+	    "%s owned by non-root or not mode 0700; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
+	    _PATH_SUDO_TIMEDIR, tty, cwd, runas_user);
 	    break;
 
 	case BAD_STAMPFILE:
 	    (void) sprintf(p,
-		"preposterous stampfile date; TTY=%s ; PWD=%s ; COMMAND=",
-		tty, cwd);
+		"preposterous stampfile date; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
+		tty, cwd, runas_user);
 	    break;
 
 	default:
@@ -563,10 +567,7 @@ void inform_user(code)
 		    fputs(*a, stderr);
 		}
 
-	    if (runas_user != NULL)
-	    	(void) fprintf(stderr, "\" as %s on %s.\n\n", runas_user, host);
-	    else
-	    	(void) fprintf(stderr, "\" on %s.\n\n", host);
+	    (void) fprintf(stderr, "\" as %s on %s.\n\n", runas_user, host);
 	    break;
 
 	case VALIDATE_ERROR:
