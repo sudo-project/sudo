@@ -161,7 +161,7 @@ extern int printmatches;
 struct env_table badenv_table[] = {
     { "IFS=", 4 },
     { "LD_", 3 },
-    { "_RLD_", 5 },
+    { "_RLD", 4 },
 #ifdef __hpux
     { "SHLIB_PATH=", 11 },
 #endif /* __hpux */
