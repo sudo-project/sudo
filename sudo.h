@@ -52,6 +52,8 @@ struct matchstack {
 	int user;
 	int cmnd;
 	int host;
+	int runas;
+	int nopass;
 };
 
 /*
@@ -70,6 +72,8 @@ extern int top;
 #define user_matches	(match[top-1].user)
 #define cmnd_matches	(match[top-1].cmnd)
 #define host_matches	(match[top-1].host)
+#define runas_matches	(match[top-1].runas)
+#define no_passwd	(match[top-1].nopass)
 
 /*
  * Maximum number of characters to log per entry.  The syslogger
@@ -88,6 +92,7 @@ extern int top;
 #define VALIDATE_OK              0x00
 #define VALIDATE_NO_USER         0x01
 #define VALIDATE_NOT_OK          0x02
+#define VALIDATE_OK_NOPASS       0x03
 #define VALIDATE_ERROR          -1
 
 /*
@@ -104,10 +109,9 @@ extern int top;
 #define PASSWORDS_NOT_CORRECT    0x06
 #define NO_SUDOERS_FILE          ( 0x07 | GLOBAL_PROBLEM )
 #define BAD_SUDOERS_FILE         ( 0x08 | GLOBAL_PROBLEM )
-#define SUDOERS_NO_OWNER         ( 0x09 | GLOBAL_PROBLEM )
-#define SUDOERS_WRONG_OWNER      ( 0x0A | GLOBAL_PROBLEM )
+#define SUDOERS_WRONG_OWNER      ( 0x09 | GLOBAL_PROBLEM )
+#define SUDOERS_WRONG_MODE       ( 0x0A | GLOBAL_PROBLEM )
 #define SUDOERS_NOT_FILE         ( 0x0B | GLOBAL_PROBLEM )
-#define SUDOERS_RW_OTHER         ( 0x0C | GLOBAL_PROBLEM )
 #define SPOOF_ATTEMPT            0x0D
 #define BAD_STAMPDIR             0x0E
 #define BAD_STAMPFILE            0x0F
@@ -140,6 +144,7 @@ extern int top;
 #define PERM_USER                0x02
 #define PERM_FULL_USER           0x03
 #define PERM_SUDOERS             0x04
+#define PERM_RUN_AS	         0x05
 
 /*
  * Shortcuts for user_pw_ent
@@ -191,6 +196,7 @@ extern char cwd[];
 extern struct interface *interfaces;
 extern int num_interfaces;
 extern struct passwd *user_pw_ent;
+extern char *runas_user;
 extern char *tty;
 extern char *cmnd;
 extern char *prompt;
