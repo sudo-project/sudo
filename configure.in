@@ -194,8 +194,6 @@ case "$OS" in
 			AC_DEFINE_UNQUOTED(SHADOW_TYPE, $SHADOW_TYPE)
 		    fi
 		elif test "$OSREV" -eq 10 ; then
-		    AC_DEFINE(BROKEN_SYSLOG)
-
 		    if test -n "$STATIC_SUDO" ; then
 			if test -n "$GCC" ; then
 			    SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
