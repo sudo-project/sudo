@@ -35,12 +35,6 @@
 #include "pathnames.h"
 
 /*
- * Max length for a command + args in the sudoers file.
- * This is fairly arbitrary but 1K should be enough.
- */
-#define MAXCOMMANDLENGTH	1024
-
-/*
  * IP address and netmask pairs for checking against local interfaces.
  */
 struct interface {
