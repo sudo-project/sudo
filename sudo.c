@@ -724,8 +724,8 @@ void set_perms(perm)
 
 				if (!(pw_ent = getpwuid(0))) {
 				    perror("getpwuid(0)");
-				} else if (setegid(pw_ent->pw_gid)) {
-				    perror("setegid");
+				} else if (setgid(pw_ent->pw_gid)) {
+				    perror("setgid");
     	    	    	    	}
 			      	break;
 
