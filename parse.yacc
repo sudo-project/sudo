@@ -93,7 +93,6 @@ int top = 0, stacksize = 0;
 	    while ((stacksize += STACKINCREMENT) < top); \
 	    match = (struct matchstack *) realloc(match, sizeof(struct matchstack) * stacksize); \
 	    if (match == NULL) { \
-		perror("malloc"); \
 		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]); \
 		exit(1); \
 	    } \
@@ -511,7 +510,6 @@ cmndalias	:	ALIAS {
 				/* Allocate space for ga_list if necesary. */
 				expand_ga_list();
 				if (!(ga_list[ga_list_len-1].alias = strdup($1))){
-				    perror("malloc");
 				    (void) fprintf(stderr,
 				      "%s: cannot allocate memory!\n", Argv[0]);
 				    exit(1);
@@ -545,7 +543,6 @@ runasalias	:	ALIAS {
 				/* Allocate space for ga_list if necesary. */
 				expand_ga_list();
 				if (!(ga_list[ga_list_len-1].alias = strdup($1))){
-				    perror("malloc");
 				    (void) fprintf(stderr,
 				      "%s: cannot allocate memory!\n", Argv[0]);
 				    exit(1);
@@ -870,7 +867,6 @@ static void append(src, dstp, dst_len, dst_size, separator)
     /* Assumes dst will be NULL if not set. */
     if (dst == NULL) {
 	if ((dst = (char *) malloc(BUFSIZ)) == NULL) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
@@ -886,7 +882,6 @@ static void append(src, dstp, dst_len, dst_size, separator)
 	    *dst_size += BUFSIZ;
 
 	if (!(dst = (char *) realloc(dst, *dst_size))) {
-	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
@@ -932,14 +927,12 @@ static void expand_ga_list()
 	if (ga_list == NULL) {
 	    if ((ga_list = (struct generic_alias *)
 		malloc(sizeof(struct generic_alias) * ga_list_size)) == NULL) {
-		perror("malloc");
 		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 		exit(1);
 	    }
 	} else {
 	    if ((ga_list = (struct generic_alias *) realloc(ga_list,
 		sizeof(struct generic_alias) * ga_list_size)) == NULL) {
-		perror("malloc");
 		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 		exit(1);
 	    }
@@ -964,7 +957,6 @@ static void expand_match_list()
 	if (cm_list == NULL) {
 	    if ((cm_list = (struct command_match *)
 		malloc(sizeof(struct command_match) * cm_list_size)) == NULL) {
-		perror("malloc");
 		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 		exit(1);
 	    }
@@ -972,7 +964,6 @@ static void expand_match_list()
 	} else {
 	    if ((cm_list = (struct command_match *) realloc(cm_list,
 		sizeof(struct command_match) * cm_list_size)) == NULL) {
-		perror("malloc");
 		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 		exit(1);
 	    }
@@ -1008,7 +999,6 @@ void init_parser()
     stacksize = STACKINCREMENT;
     match = (struct matchstack *) malloc(sizeof(struct matchstack) * stacksize);
     if (match == NULL) {
-	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
