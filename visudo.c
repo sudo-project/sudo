@@ -112,6 +112,7 @@ char *runas_user = "root";
 char host[] = "";
 char *shost = "";
 char *cmnd = "";
+char *cmnd_args = NULL;
 struct passwd *user_pw_ent;
 
 
