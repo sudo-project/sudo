@@ -110,8 +110,8 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
             PORTING README RUNSON TROUBLESHOOTING Makefile.in acsite.m4 \
             aixcrypt.exp config.h.in configure configure.in getwd.c strdup.c \
             indent.pro install-sh lsearch.c putenv.c tgetpass.c search.h \
-	    utime.h utime.c testsudoers.c \
-            sudoers sample.sudoers sudo.cat sudo.man visudo.cat visudo.man
+	    utime.h utime.c testsudoers.c sudoers sample.sudoers \
+	    sudo.cat sudo.man visudo.cat visudo.man sudoers.cat sudoers.man
 
 all: $(PROGS)
 
