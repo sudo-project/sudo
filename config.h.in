@@ -70,6 +70,12 @@
 #  define __svr4__
 #endif /* SVR4 */
 
+/* Define if you have POSIX signals.  */
+#undef HAVE_SIGACTION
+#ifdef HAVE_SIGACTION
+#  define POSIX_SIGNALS
+#endif /* HAVE_SIGACTION */
+
 /* Define if you have realpath(3).  */
 #undef HAVE_REALPATH
 
