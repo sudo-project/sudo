@@ -38,9 +38,9 @@
 #endif
 
 /* Define if on IRIX.
-   We want BSD compatibility to use BSD signals.	*/
-#ifndef _BSD_COMPAT
-#undef _BSD_COMPAT
+   We want use BSD signals.	*/
+#ifndef _BSD_SIGNALS
+#undef _BSD_SIGNALS
 #endif
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
@@ -54,6 +54,9 @@
 
 /* Define to `unsigned' if <sys/types.h> doesn't define.  */
 #undef size_t
+
+/* Define to be nil if C compiler doesn't support "const."  */
+#undef const
 
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
