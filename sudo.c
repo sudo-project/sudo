@@ -597,14 +597,12 @@ static void load_interfaces()
     }
 
     /*
-     * get interface configuration
+     * get interface configuration or return (leaving interfaces NULL)
      */
     ifconf.ifc_len = sizeof(buf);
     ifconf.ifc_buf = buf;
     if (ioctl(sock, SIOCGIFCONF, (char *)(&ifconf)) < 0) {
-	(void) fprintf(stderr, "%s: cannot get interface configuration: ",
-	    Argv[0]);
-	perror("");
+	/* networking probably not installed in kernel */
 	return;
     }
 
@@ -649,23 +647,21 @@ static void load_interfaces()
 	/* get the netmask */
 #ifdef SIOCGIFNETMASK
 	(void) strcpy(ifreq.ifr_name, ifconf.ifc_req[i].ifr_name);
-	if (ioctl(sock, SIOCGIFNETMASK, (char *)(&ifreq)) < 0) {
-	    (void) free(interfaces);
-	    num_interfaces = 0;
-	    perror("");
-	    return;
-	}
-	(void) memcpy(&interfaces[j].netmask,
-	    &(((struct sockaddr_in *)&ifreq.ifr_addr)->sin_addr),
-	    sizeof(struct in_addr));
+	if (ioctl(sock, SIOCGIFNETMASK, (char *)(&ifreq)) >= 0) {
+	    (void) memcpy(&interfaces[j].netmask,
+			  &(((struct sockaddr_in *)&ifreq.ifr_addr)->sin_addr),
+			  sizeof(struct in_addr));
+	} else {
 #else
-	if (IN_CLASSC(interfaces[j].addr.s_addr))
-	    interfaces[j].netmask.s_addr = htonl(IN_CLASSC_NET);
-	else if (IN_CLASSB(interfaces[j].addr.s_addr))
-	    interfaces[j].netmask.s_addr = htonl(IN_CLASSB_NET);
-	else
-	    interfaces[j].netmask.s_addr = htonl(IN_CLASSA_NET);
+	{
 #endif /* SIOCGIFNETMASK */
+	    if (IN_CLASSC(interfaces[j].addr.s_addr))
+		interfaces[j].netmask.s_addr = htonl(IN_CLASSC_NET);
+	    else if (IN_CLASSB(interfaces[j].addr.s_addr))
+		interfaces[j].netmask.s_addr = htonl(IN_CLASSB_NET);
+	    else
+		interfaces[j].netmask.s_addr = htonl(IN_CLASSA_NET);
+	}
 	++j;
     }
 }
