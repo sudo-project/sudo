@@ -57,7 +57,7 @@ err(eval, fmt, va_alist)
 #endif
 {
 	va_list ap;
-#if __STDC__
+#ifdef __STDC__
 	va_start(ap, fmt);
 #else
 	va_start(ap);
@@ -85,7 +85,7 @@ verr(eval, fmt, ap)
 }
 
 void
-#if __STDC__
+#ifdef __STDC__
 errx(int eval, const char *fmt, ...)
 #else
 errx(eval, fmt, va_alist)
@@ -95,7 +95,7 @@ errx(eval, fmt, va_alist)
 #endif
 {
 	va_list ap;
-#if __STDC__
+#ifdef __STDC__
 	va_start(ap, fmt);
 #else
 	va_start(ap);
@@ -118,7 +118,7 @@ verrx(eval, fmt, ap)
 }
 
 void
-#if __STDC__
+#ifdef __STDC__
 warn(const char *fmt, ...)
 #else
 warn(fmt, va_alist)
@@ -127,7 +127,7 @@ warn(fmt, va_alist)
 #endif
 {
 	va_list ap;
-#if __STDC__
+#ifdef __STDC__
 	va_start(ap, fmt);
 #else
 	va_start(ap);
