@@ -48,6 +48,13 @@
 #undef _CONVEX_SOURCE
 #endif
 
+/* Define if nneded to get POSIX functionality.
+   System headers sometimes define this.
+   We just want to avoid a redefinition error message.  */
+#ifndef _POSIX_SOURCE
+#undef _POSIX_SOURCE
+#endif
+
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef uid_t
 
