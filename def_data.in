@@ -182,3 +182,6 @@ env_delete
 env_keep
 	T_LIST|T_BOOL
 	"Environment variables to preserve:"
+ignore_local_sudoers
+	T_FLAG
+	"If LDAP directory is up, do we ignore local sudoers file"
