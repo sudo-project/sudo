@@ -50,6 +50,7 @@ struct matchstack {
 	int host;
 	int runas;
 	int nopass;
+	int noexec;
 };
 
 /*
@@ -66,6 +67,7 @@ struct sudo_command {
 #define host_matches	(match[top-1].host)
 #define runas_matches	(match[top-1].runas)
 #define no_passwd	(match[top-1].nopass)
+#define no_execve	(match[top-1].noexec)
 
 /*
  * Structure containing command matches if "sudo -l" is used.
@@ -78,6 +80,7 @@ struct command_match {
     size_t cmnd_len;
     size_t cmnd_size;
     int nopasswd;
+    int noexecve;
 };
 
 /*

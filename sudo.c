@@ -122,7 +122,7 @@ static void usage			__P((int));
 static void usage_excl			__P((int));
 static struct passwd *get_authpw	__P((void));
 extern void list_matches		__P((void));
-extern char **rebuild_env		__P((int, char **));
+extern char **rebuild_env		__P((char **, int, int));
 extern char **zero_env			__P((char **));
 extern struct passwd *sudo_getpwnam	__P((const char *));
 extern struct passwd *sudo_getpwuid	__P((uid_t));
@@ -360,7 +360,8 @@ main(argc, argv, envp)
 	check_user(validated & FLAG_CHECK_USER);
 
     /* Build up custom environment that avoids any nasty bits. */
-    new_environ = rebuild_env(sudo_mode, envp);
+    new_environ = rebuild_env(envp, (sudo_mode & MODE_RESET_HOME),
+	(validated & FLAG_NOEXEC));
 
     if (validated & VALIDATE_OK) {
 	/* Finally tell the user if the command did not exist. */

@@ -191,6 +191,12 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"When to require a password for 'verify' pseudocommand: %s",
 	def_data_verifypw,
     }, {
+	"noexec", T_FLAG,
+	"Preload the dummy execve() function contained in 'noexec_file'",
+    }, {
+	"noexec_file", T_STR|T_PATH,
+	"Path to a file containing a dummy execve() function: %s",
+    }, {
 	NULL, 0, NULL
     }
 };

@@ -12,13 +12,15 @@
 #define RUNAS 268
 #define NOPASSWD 269
 #define PASSWD 270
-#define ALL 271
-#define COMMENT 272
-#define HOSTALIAS 273
-#define CMNDALIAS 274
-#define USERALIAS 275
-#define RUNASALIAS 276
-#define ERROR 277
+#define NOEXEC 271
+#define EXEC 272
+#define ALL 273
+#define COMMENT 274
+#define HOSTALIAS 275
+#define CMNDALIAS 276
+#define USERALIAS 277
+#define RUNASALIAS 278
+#define ERROR 279
 typedef union {
     char *string;
     int BOOLEAN;

@@ -108,6 +108,10 @@
 #define I_LISTPW                53
 #define def_verifypw            (sudo_defs_table[54].sd_un.tuple)
 #define I_VERIFYPW              54
+#define def_noexec              (sudo_defs_table[55].sd_un.flag)
+#define I_NOEXEC                55
+#define def_noexec_file         (sudo_defs_table[56].sd_un.str)
+#define I_NOEXEC_FILE           56
 
 enum def_tupple {
 	never,

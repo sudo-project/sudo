@@ -92,7 +92,7 @@ static const char rcsid[] = "$Sudo$";
 /*
  * Prototypes
  */
-char **rebuild_env		__P((int, char **));
+char **rebuild_env		__P((char **, int, int));
 char **zero_env			__P((char **));
 static void insert_env		__P((char *, int));
 static char *format_env		__P((char *, char *));
@@ -279,9 +279,10 @@ insert_env(str, dupcheck)
  * Also adds sudo-specific variables (SUDO_*).
  */
 char **
-rebuild_env(sudo_mode, envp)
-    int sudo_mode;
+rebuild_env(envp, reset_home, noexec)
     char **envp;
+    int reset_home;
+    int noexec;
 {
     char **ep, *cp, *ps1;
     int okvar, iswild, didvar;
@@ -433,8 +434,13 @@ rebuild_env(sudo_mode, envp)
     }
 
     /* Set $HOME for `sudo -H'.  Only valid at PERM_RUNAS. */
-    if ((sudo_mode & MODE_RESET_HOME) && runas_pw->pw_dir)
+    if (reset_home && runas_pw->pw_dir)
 	insert_env(format_env("HOME", runas_pw->pw_dir), 1);
+
+    /* Point LD_PRELOAD to noexec_file? */
+    /* XXX - what to use for HP-UX and AIX? */
+    if (noexec)
+	insert_env(format_env("LD_PRELOAD", def_noexec_file), 1);
 
     /* Set PS1 if SUDO_PS1 is set. */
     if (ps1)

@@ -128,6 +128,7 @@ int top = 0, stacksize = 0;
 	match[top].host   = -1; \
 	match[top].runas  = -1; \
 	match[top].nopass = def_authenticate ? -1 : TRUE; \
+	match[top].noexec = def_noexec ? TRUE : -1; \
 	top++; \
     } while (0)
 
@@ -142,6 +143,7 @@ int top = 0, stacksize = 0;
 	match[top].host   = match[top-1].host; \
 	match[top].runas  = match[top-1].runas; \
 	match[top].nopass = match[top-1].nopass; \
+	match[top].noexec = match[top-1].noexec; \
 	top++; \
     } while (0)
 
@@ -237,6 +239,8 @@ yyerror(s)
 %token <tok> 	 RUNAS			/* ( runas_list ) */
 %token <tok> 	 NOPASSWD		/* no passwd req for command */
 %token <tok> 	 PASSWD			/* passwd req for command (default) */
+%token <tok> 	 NOEXEC			/* preload dummy execve() for cmnd */
+%token <tok> 	 EXEC			/* don't preload dummy execve() */
 %token <tok>	 ALL			/* ALL keyword */
 %token <tok>	 COMMENT		/* comment and/or carriage return */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
@@ -366,10 +370,8 @@ privilege	:	hostlist '=' cmndspeclist {
 			     */
 			    host_matches = -1;
 			    runas_matches = -1;
-			    if (def_authenticate)
-				no_passwd = -1;
-			    else
-				no_passwd = TRUE;
+			    no_passwd = def_authenticate ? -1 : TRUE;
+			    no_execve = def_noexec ? TRUE : -1;
 			}
 		;
 
@@ -435,7 +437,7 @@ cmndspeclist	:	cmndspec
 		|	cmndspeclist ',' cmndspec
 		;
 
-cmndspec	:	runasspec nopasswd opcmnd {
+cmndspec	:	runasspec noexec nopasswd opcmnd {
 			    /*
 			     * Push the entry onto the stack if it is worth
 			     * saving and clear cmnd_matches for next cmnd.
@@ -637,6 +639,30 @@ nopasswd	:	/* empty */ {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				cm_list[cm_list_len].nopasswd = FALSE;
+			}
+		;
+
+noexec	:	/* empty */ {
+			    /* Inherit NOEXEC/EXEC status. */
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE) {
+				if (no_execve == TRUE)
+				    cm_list[cm_list_len].noexecve = TRUE;
+				else
+				    cm_list[cm_list_len].noexecve = FALSE;
+			    }
+			}
+		|	NOEXEC {
+			    no_execve = TRUE;
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				cm_list[cm_list_len].noexecve = TRUE;
+			}
+		|	EXEC {
+			    no_execve = FALSE;
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				cm_list[cm_list_len].noexecve = FALSE;
 			}
 		;
 
@@ -1055,6 +1081,12 @@ list_matches()
 	    (void) printf("(%s) ", def_runas_default);
 	}
 
+	/* Is execve(2) disabled? */
+	if (cm_list[count].noexecve == TRUE && !def_noexec)
+	    (void) fputs("NOEXEC: ", stdout);
+	else if (cm_list[count].noexecve == FALSE && def_noexec)
+	    (void) fputs("EXEC: ", stdout);
+
 	/* Is a password required? */
 	if (cm_list[count].nopasswd == TRUE && def_authenticate)
 	    (void) fputs("NOPASSWD: ", stdout);
@@ -1187,6 +1219,7 @@ expand_match_list()
 
     cm_list[cm_list_len].runas = cm_list[cm_list_len].cmnd = NULL;
     cm_list[cm_list_len].nopasswd = FALSE;
+    cm_list[cm_list_len].noexecve = FALSE;
 }
 
 /*

@@ -228,6 +228,16 @@ PASSWD[[:blank:]]*:	{
 			    	return(PASSWD);
 			}
 
+NOEXEC[[:blank:]]*:	{
+			    	LEXTRACE("NOEXEC ");
+			    	return(NOEXEC);
+			}
+
+EXEC[[:blank:]]*:	{
+			    	LEXTRACE("EXEC ");
+			    	return(EXEC);
+			}
+
 \+{WORD}		{
 			    /* netgroup */
 			    fill(yytext, yyleng);

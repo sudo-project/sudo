@@ -175,3 +175,9 @@ verifypw
 	T_TUPLE|T_BOOL
 	"When to require a password for 'verify' pseudocommand: %s"
 	never any all always
+noexec
+	T_FLAG
+	"Preload the dummy execve() function contained in 'noexec_file'"
+noexec_file
+	T_STR|T_PATH
+	"Path to a file containing a dummy execve() function: %s"

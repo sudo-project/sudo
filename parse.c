@@ -215,20 +215,17 @@ sudoers_lookup(pwflag)
 		    if (cmnd_matches == TRUE) {
 		    	/*
 			 * User was granted access to cmnd on host.
-		    	 * If no passwd required return as such.
 			 */
-		    	if (no_passwd == TRUE)
-			    return(VALIDATE_OK | FLAG_NOPASS);
-		    	else
-			    return(VALIDATE_OK);
+			return(VALIDATE_OK |
+			    (no_passwd == TRUE ? FLAG_NOPASS : 0) |
+			    (no_execve == TRUE ? FLAG_NOEXEC : 0));
 		    } else if (cmnd_matches == FALSE) {
 			/*
 			 * User was explicitly denied access to cmnd on host.
 			 */
-			if (no_passwd == TRUE)
-			    return(VALIDATE_NOT_OK | FLAG_NOPASS);
-			else
-			    return(VALIDATE_NOT_OK);
+			return(VALIDATE_NOT_OK |
+			    (no_passwd == TRUE ? FLAG_NOPASS : 0) |
+			    (no_execve == TRUE ? FLAG_NOEXEC : 0));
 		    }
 		}
 	    }
@@ -237,7 +234,7 @@ sudoers_lookup(pwflag)
     }
 
     /*
-     * The user was not explicitly granted nor denied access.
+     * The user was neither explicitly granted nor denied access.
      */
     if (nopass == -1)
 	nopass = 0;
