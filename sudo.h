@@ -205,6 +205,7 @@ int validate		__P((int));
 void set_perms		__P((int, int));
 void remove_timestamp	__P((void));
 void load_interfaces	__P((void));
+int check_secureware	__P((char *));
 int yyparse		__P((void));
 YY_DECL;
 
