@@ -213,7 +213,7 @@ int path_matches(cmnd, path)
 	 * else return false.
 	 */
 	if (cmnd_st.st_dev == pst.st_dev && cmnd_st.st_ino == pst.st_ino) {
-	    if (!cmnd_args && !args)
+	    if (!args)
 		return(TRUE);
 	    else if (cmnd_args && args)
 		return((strcmp(cmnd_args, args) == 0));
