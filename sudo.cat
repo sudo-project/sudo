@@ -1,7 +1,7 @@
 
 
 
-SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
+sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
 NNNNAAAAMMMMEEEE
@@ -61,13 +61,13 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-12/Oct/1999                    1.6                              1
+15/Nov/1999                    1.6                              1
 
 
 
 
 
-SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
+sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
            password if necessary.  This extends the ssssuuuuddddoooo timeout
@@ -127,13 +127,13 @@ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEES
 
 
 
-12/Oct/1999                    1.6                              2
+15/Nov/1999                    1.6                              2
 
 
 
 
 
-SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
+sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
        denied" is if you are running an automounter and one of
@@ -193,13 +193,13 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 
 
 
-12/Oct/1999                    1.6                              3
+15/Nov/1999                    1.6                              3
 
 
 
 
 
-SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
+sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
 EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
@@ -259,13 +259,13 @@ FFFFIIIILLLLEEEESSSS
 
 
 
-12/Oct/1999                    1.6                              4
+15/Nov/1999                    1.6                              4
 
 
 
 
 
-SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
+sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
         PATH                   Set to a sane value if SECURE_PATH is set
@@ -300,9 +300,8 @@ AAAAUUUUTTTTHHHHOOOORRRRSSSS
        history of ssssuuuuddddoooo.
 
 BBBBUUUUGGGGSSSS
-       Please send all bugs, comments, and changes to sudo-
-       bugs@courtesan.com.  Be sure to include the version of
-       ssssuuuuddddoooo you are using and the platform you are running it on.
+       If you feel you have found a bug in sudo, please submit a
+       bug report at http://www.courtesan.com/sudo/bugs/.
 
 DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
        SSSSuuuuddddoooo is provided ``AS IS'' and any express or implied
@@ -322,19 +321,19 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        specification.
 
        Running shell scripts via ssssuuuuddddoooo can expose the same kernel
-
-
-
-12/Oct/1999                    1.6                              5
-
-
-
-
-
-SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
-
-
        bugs that make setuid shell scripts unsafe on some
+
+
+
+15/Nov/1999                    1.6                              5
+
+
+
+
+
+sudo(8)                MAINTENANCE COMMANDS               sudo(8)
+
+
        operating systems (if your OS supports the /dev/fd/
        directory, setuid shell scripts are generally safe).
 
@@ -391,6 +390,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-12/Oct/1999                    1.6                              6
+
+15/Nov/1999                    1.6                              6
 
 

@@ -123,7 +123,7 @@ SVR4	4.4	m88k	bundled gcc	1.5.7p4	Gerry Belanger	 CFLAGS=
 NonStop-UX B32	CO-1475	cc		1.5.9p3	Andrei Panfilenko none
 
 Systems on which Sudo is expected to run on but hasn't been tested.
-If you can verify any of these, please send mail to sudo-bugs@courtesan.com
+If you can verify any of these, please send mail to sudo@courtesan.com
 
  Op. System	CPU	Compilers	Sudo	Reported	 Special
 Name	Rev	Arch	Used		Version	By		 Options

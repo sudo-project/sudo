@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.38  1999/10/13 04:18:40  millert
-''' Remove -r realm option
+''' Revision 1.39  1999/11/16 05:42:28  millert
+''' get rid of references to sudo-bugs.  Now mention the web site or the sudo@ alias
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH SUDO 8 "1.6" "12/Oct/1999" "MAINTENANCE COMMANDS"
+.TH sudo 8 "1.6" "15/Nov/1999" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -419,9 +419,8 @@ version consists of code written primarily by:
 See the HISTORY file in the \fBsudo\fR distribution for a short history
 of \fBsudo\fR.
 .SH "BUGS"
-Please send all bugs, comments, and changes to sudo-bugs@courtesan.com.
-Be sure to include the version of \fBsudo\fR you are using and the platform
-you are running it on.
+If you feel you have found a bug in sudo, please submit a bug report
+at http://www.courtesan.com/sudo/bugs/.
 .SH "DISCLAIMER"
 \fBSudo\fR is provided ``AS IS'\*(R' and any express or implied warranties,
 including, but not limited to, the implied warranties of merchantability
@@ -443,7 +442,7 @@ are generally safe).
 \fIsudoers\fR\|(5), \fIvisudo\fR\|(8), \fIsu\fR\|(1).
 
 .rn }` ''
-.IX Title "SUDO 8"
+.IX Title "sudo 8"
 .IX Name "sudo - execute a command as another user"
 
 .IX Header "NAME"

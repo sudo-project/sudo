@@ -1,7 +1,7 @@
 
 
 
-VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
+visudo(8)              MAINTENANCE COMMANDS             visudo(8)
 
 
 NNNNAAAAMMMMEEEE
@@ -61,13 +61,13 @@ EEEERRRRRRRROOOORRRRSSSS
 
 
 
-25/Aug/1999                    1.6                              1
+15/Nov/1999                    1.6                              1
 
 
 
 
 
-VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
+visudo(8)              MAINTENANCE COMMANDS             visudo(8)
 
 
        Can't find you in the passwd database
@@ -105,9 +105,8 @@ AAAAUUUUTTTTHHHHOOOORRRR
        details.
 
 BBBBUUUUGGGGSSSS
-       Please send all bugs, comments, and changes to sudo-
-       bugs@courtesan.com.  Be sure to include the version of
-       ssssuuuuddddoooo you are using and the platform you are running it on.
+       If you feel you have found a bug in sudo, please submit a
+       bug report at http://www.courtesan.com/sudo/bugs/.
 
 DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
        VVVViiiissssuuuuddddoooo is provided ``AS IS'' and any express or implied
@@ -127,14 +126,14 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-25/Aug/1999                    1.6                              2
 
+15/Nov/1999                    1.6                              2
 
 
 
 
-VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
 
+visudo(8)              MAINTENANCE COMMANDS             visudo(8)
 
 
 
@@ -193,6 +192,7 @@ VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
 
 
 
-25/Aug/1999                    1.6                              3
+
+15/Nov/1999                    1.6                              3
 
 

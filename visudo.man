@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.11  1999/08/26 09:08:31  millert
-''' rename "ENVIRONMENT VARIABLES" section to "ENVIRONMENT" to be more standard
+''' Revision 1.12  1999/11/16 05:42:28  millert
+''' get rid of references to sudo-bugs.  Now mention the web site or the sudo@ alias
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH VISUDO 8 "1.6" "25/Aug/1999" "MAINTENANCE COMMANDS"
+.TH visudo 8 "1.6" "15/Nov/1999" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -266,9 +266,8 @@ Many people have worked on \fIsudo\fR over the years, this version of
 .Ve
 See the HISTORY file in the sudo distribution for more details.
 .SH "BUGS"
-Please send all bugs, comments, and changes to sudo-bugs@courtesan.com.
-Be sure to include the version of \fBsudo\fR you are using and the platform     
-you are running it on.
+If you feel you have found a bug in sudo, please submit a bug report
+at http://www.courtesan.com/sudo/bugs/.
 .SH "DISCLAIMER"
 \fBVisudo\fR is provided ``AS IS'\*(R' and any express or implied warranties,
 including, but not limited to, the implied warranties of merchantability
@@ -281,7 +280,7 @@ the editor used by \fBvisudo\fR allows shell escapes.
 \fIsudo\fR\|(8), \fIvipw\fR\|(8).
 
 .rn }` ''
-.IX Title "VISUDO 8"
+.IX Title "visudo 8"
 .IX Name "visudo - edit the sudoers file"
 
 .IX Header "NAME"

@@ -139,9 +139,8 @@ See the HISTORY file in the sudo distribution for more details.
 
 =head1 BUGS
 
-Please send all bugs, comments, and changes to sudo-bugs@courtesan.com.
-Be sure to include the version of B<sudo> you are using and the platform     
-you are running it on.
+If you feel you have found a bug in sudo, please submit a bug report
+at http://www.courtesan.com/sudo/bugs/.
 
 =head1 DISCLAIMER
 

@@ -335,7 +335,7 @@ main(argc, argv)
 	    log_error(MSG_ONLY,
 		"internal error, cmnd_safe never got set for %s; %s",
 		user_cmnd,
-		"please report this error to sudo-bugs@courtesan.com");
+		"please report this error at http://courtesan.com/sudo/bugs/");
 	}
 
 	if (def_ival(I_LOGFACSTR))

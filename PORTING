@@ -46,8 +46,8 @@ and network address support, you can just run configure with the
 
 If you port sudo to a new architecture, please send the output of
 "configure", the config.log file and your changes to:
-    sudo-bugs@courtesan.com
+    sudo@courtesan.com
 
 If you are unable to get sudo working, and you are willing to
-give me an account on a machine, send mail to sudo-bugs@courtesan.com.
+give me an account on a machine, send mail to sudo@courtesan.com.
 Note, however, that I can't make any promises.
