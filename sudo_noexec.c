@@ -20,6 +20,11 @@
 #ifndef HAVE_TIMESPEC
 # include <time.h>
 #endif
+#ifdef __STDC__
+# include <stdarg.h>
+#else
+# include <varargs.h>
+#endif
 
 #include <compat.h>
 
@@ -39,24 +44,64 @@ __unused static const char rcsid[] = "$Sudo$";
 extern int errno;
 #endif
 
-#define DUMMY(fn, args, atypes)	\
-int				\
-fn args				\
-    atypes			\
-{				\
-    errno = EACCES;		\
-    return(-1);			\
+#define DUMMY_BODY				\
+{						\
+    errno = EACCES;				\
+    return(-1);					\
 }
 
-DUMMY(execve, (path, argv, envp),
-      const char *path; char *const argv[]; char *const envp[];)
-DUMMY(_execve, (path, argv, envp),
-      const char *path; char *const argv[]; char *const envp[];)
-DUMMY(execv, (path, argv, envp),
-      const char *path; char *const argv[];)
-DUMMY(_execv, (path, argv, envp),
-      const char *path; char *const argv[];)
-DUMMY(fexecve, (fd, argv, envp),
-      int fd; char *const argv[]; char *const envp[];)
-DUMMY(_fexecve, (fd, argv, envp),
-      int fd; char *const argv[]; char *const envp[];)
+#ifdef __STDC__
+
+#define DUMMY2(fn, t1, t2)			\
+int						\
+fn(t1 a1, t2 a2)				\
+DUMMY_BODY
+
+#define DUMMY3(fn, t1, t2, t3)			\
+int						\
+fn(t1 a1, t2 a2, t3 a3)				\
+DUMMY_BODY
+
+#define DUMMY_VA(fn, t1, t2)			\
+int						\
+fn(t1 a1, t2 a2, ...)				\
+DUMMY_BODY
+
+#else /* !__STDC__ */
+
+#define DUMMY2(fn, t1, t2)			\
+int						\
+fn(a1, a2)					\
+t1 a1; t2 a2;					\
+DUMMY_BODY
+
+#define DUMMY3(fn, t1, t2, t3)			\
+int						\
+fn(a1, a2, a3)					\
+t1 a1; t2 a2; t3 a3;				\
+DUMMY_BODY
+
+#define DUMMY_VA(fn, t1, t2)			\
+int						\
+fn(a1, a2, va_alist)				\
+t1 a1; t2 a2; va_dcl				\
+DUMMY_BODY
+
+#endif /* !__STDC__ */
+
+DUMMY_VA(execl, const char *, const char *)
+DUMMY_VA(_execl, const char *, const char *)
+DUMMY_VA(execle, const char *, const char *)
+DUMMY_VA(_execle, const char *, const char *)
+DUMMY_VA(execlp, const char *, const char *)
+DUMMY_VA(_execlp, const char *, const char *)
+DUMMY2(execv, const char *, char * const *)
+DUMMY2(_execv, const char *, char * const *)
+DUMMY2(execvp, const char *, char * const *)
+DUMMY2(_execvp, const char *, char * const *)
+DUMMY3(execvP, const char *, const char *, char * const *)
+DUMMY3(_execvP, const char *, const char *, char * const *)
+DUMMY3(execve, const char *, char * const *, char * const *)
+DUMMY3(_execve, const char *, char * const *, char * const *)
+DUMMY3(fexecve, int , char * const *, char * const *)
+DUMMY3(_fexecve, int , char * const *, char * const *)
