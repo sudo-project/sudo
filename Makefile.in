@@ -139,7 +139,7 @@ LIBOBJS = @LIBOBJS@ @ALLOCA@
 
 VERSION = 1.6.4
 
-DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES FAQ HISTORY INSTALL INSTALL.configure \
+DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES HISTORY INSTALL INSTALL.configure \
 	    LICENSE Makefile.in PORTING README RUNSON TODO TROUBLESHOOTING \
 	    UPGRADE acsite.m4 aixcrypt.exp config.guess config.h.in config.sub \
 	    configure configure.in fnmatch.3 indent.pro install-sh \
@@ -355,16 +355,6 @@ bindist:
 	      cp $(srcdir)/$$i . ; \
 	    else \
 	      cp ../../$(srcdir)/$$i . ; \
-	    fi ; \
-	  done ; \
-	  ln -s TROUBLESHOOTING FAQ ; \
-	  for i in $(BINSPECIAL) ; do \
-	    if [ -f ../../$$i ]; then \
-	      cp ../../$$i `basename $$i .binary` ; \
-	    elif [ -f $(srcdir)/$$i ]; then \
-	      cp $(srcdir)/$$i `basename $$i .binary` ; \
-	    else \
-	      cp ../../$(srcdir)/$$i `basename $$i .binary` ; \
 	    fi ; \
 	  done ; \
 	  strip sudo ; \
