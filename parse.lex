@@ -123,7 +123,7 @@ WORD			[[:alnum:]_-]+
 			}			/* return comments */
 
 <GOTCMND>\"[^\n]*\"	{
-			    /* XXX - should be able to span lines? */
+			    /* XXX - this should go away */
 			    LEXTRACE("ARG ");
 			    fill_args(yytext+1, yyleng-2, sawspace);
 			    sawspace = FALSE;
@@ -158,8 +158,7 @@ WORD			[[:alnum:]_-]+
 			    return('.');
 			}
 
-NOPASSWD:		{ 
-				/* XXX - is this the best way? */
+NOPASSWD[[:blank:]]*:	{ 
 				/* cmnd does not require passwd for this user */
 			    	LEXTRACE("NOPASSWD ");
 			    	return(NOPASSWD);
@@ -189,8 +188,7 @@ NOPASSWD:		{
 			    return(FQHOST);
 			}
 
-\(			{
-				/* XXX - what about '(' in command args? */
+<INITIAL>\(		{
 				BEGIN GOTRUNAS;
 				LEXTRACE("RUNAS ");
 				return (RUNAS);
@@ -215,7 +213,7 @@ NOPASSWD:		{
 			    return(NAME);
 			}
 
-<GOTRUNAS>\)		BEGIN INITIAL; /* XXX - will newlines be treated correctly? */
+<GOTRUNAS>\)		BEGIN INITIAL;
 
 
 \/[^\,:=\\ \t\n#]+	{
