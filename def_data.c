@@ -99,16 +99,16 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"env_reset", T_FLAG,
 	"Reset the environment to a default set of variables"
     }, {
-	"loglinelen", T_INT|T_BOOL,
+	"loglinelen", T_UINT|T_BOOL,
 	"Length at which to wrap log file lines (0 for no wrap): %d"
     }, {
 	"timestamp_timeout", T_INT|T_BOOL,
 	"Authentication timestamp timeout: %d minutes"
     }, {
-	"passwd_timeout", T_INT|T_BOOL,
+	"passwd_timeout", T_UINT|T_BOOL,
 	"Password prompt timeout: %d minutes"
     }, {
-	"passwd_tries", T_INT,
+	"passwd_tries", T_UINT,
 	"Number of tries to enter a password: %d"
     }, {
 	"umask", T_MODE|T_BOOL,
