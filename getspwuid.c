@@ -20,7 +20,7 @@
  *******************************************************************
  *
  *  This module contains get_pwuid(), a function that
- *  Makes a dyname copy of the struct passwd returned by
+ *  Makes a dynamic copy of the struct passwd returned by
  *  getpwuid() and substitutes the shadow password if
  *  necesary.
  *
@@ -104,9 +104,11 @@ static char *sudo_getshell(pw_ent)
 
 /**********************************************************************
  *
- *  sudo_getpwuid()
+ *  sudo_getspwd()
  *
- *  This function ...
+ *  This function returns the shadow password for the user described
+ *  by pw_ent.  If there is no shadow password the normal UN*X password
+ *  is returned instead.
  */
 
 static char *sudo_getspwd(pw_ent)
@@ -173,7 +175,9 @@ static char *sudo_getspwd(pw_ent)
  *
  *  sudo_getpwuid()
  *
- *  This function ...
+ *  This function dynamically allocates space for a struct password
+ *  and the constituent parts that we care about.  If shadow passwords
+ *  are in use, it substitutes the shadow password for pw_passwd.
  */
 
 struct passwd *sudo_getpwuid(uid)
