@@ -128,7 +128,7 @@ user_matches(pw, list)
 		    matched = !m->negated;
 		break;
 	    case WORD:
-		if (strcmp(m->name, pw->pw_name) == 0)
+		if (userpw_matches(m->name, pw->pw_name, pw))
 		    matched = !m->negated;
 		break;
 	}
@@ -147,7 +147,7 @@ runas_matches(pw, list)
     struct member *list;
 {
     if (list == NULL)
-	return(strcmp(pw->pw_name, def_runas_default) == 0);
+	return(userpw_matches(def_runas_default, pw->pw_name, pw));
     return(user_matches(pw, list));
 }
 
