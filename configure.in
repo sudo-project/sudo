@@ -231,7 +231,7 @@ dnl
 dnl library checks
 dnl
 dnl Irix 5.2 (at least) has bugs in -lnsl and -lsocket
-if test -n "$OS" -a "$OS" = "irix" -a $OSREV -ne 5 ; then
+if test "$OS" != "irix" -o $OSREV -ne 5 ; then
     AC_CHECK_LIB(nsl)
     AC_CHECK_LIB(socket)
 fi
@@ -240,7 +240,7 @@ AC_CHECK_LIB(ufc)
 dnl
 dnl OS-dependent libraries
 dnl
-if test -n "$OS" -a "$OS" = "irix" -a $OSREV -le 4 ; then
+if test "$OS" = "irix" -a $OSREV -le 4 ; then
     AC_IRIX_SUN
 fi
 dnl
