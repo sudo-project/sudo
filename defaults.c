@@ -360,9 +360,9 @@ init_defaults()
     static int firsttime = 1;
     struct sudo_defs_types *def;
 
-    /* Free any strings that were set. */
+    /* Clear any old settings. */
     if (!firsttime) {
-	for (def = sudo_defs_table; def->name; def++)
+	for (def = sudo_defs_table; def->name; def++) {
 	    switch (def->type & T_MASK) {
 		case T_STR:
 		    if (def->sd_un.str) {
@@ -374,6 +374,8 @@ init_defaults()
 		    list_op(NULL, 0, def, freeall);
 		    break;
 	    }
+	    memset(&def->sd_un, 0, sizeof(def->sd_un));
+	}
     }
 
     /* First initialize the flags. */
