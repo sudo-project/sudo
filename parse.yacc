@@ -923,7 +923,7 @@ void reset_aliases()
 
 static void expand_ga_list()
 {
-    if (++ga_list_len > ga_list_size) {
+    if (++ga_list_len >= ga_list_size) {
 	while ((ga_list_size += STACKINCREMENT) < ga_list_len);
 	if (ga_list == NULL) {
 	    if ((ga_list = (struct generic_alias *)
@@ -953,7 +953,7 @@ static void expand_ga_list()
 
 static void expand_match_list()
 {
-    if (++cm_list_len > cm_list_size) {
+    if (++cm_list_len >= cm_list_size) {
 	while ((cm_list_size += STACKINCREMENT) < cm_list_len);
 	if (cm_list == NULL) {
 	    if ((cm_list = (struct command_match *)
