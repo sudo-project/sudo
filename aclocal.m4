@@ -81,55 +81,39 @@ elif test -f "/usr/local/bin/vi"; then
 fi
 ])dnl
 dnl
-dnl checks for UNIX variants
+dnl check for known UNIX variants
+dnl XXX - check to see that uname was checked first
 dnl
-dnl SUDO_AIX
-dnl
-define(SUDO_AIX,
-[echo checking for AIX 
-AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
-$0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
-[#ifdef _AIX
-  yes
-#endif
-], AC_DEFINE(_ALL_SOURCE) [$1], [$2])
+define(SUDO_OSTYPE,
+AC_BEFORE([$0], [AC_PROGRAM_CHECK])
+[echo trying to figure out what OS you are running
+if test -n "$UNAMEPROG"; then
+    OS=`$UNAMEPROG -s`
+    OSREV=`$UNAMEPROG -r`
+
+    if test "$OS" = "SunOS" -a "$OSREV" -ge 5 ; then
+	OS="solaris"
+    fi
+else
+    if test -z "$OS"; then
+	SUDO_CONVEX(OS="convex")
+    fi
+    if test -z "$OS"; then
+	SUDO_MTXINU(OS="mtxinu")
+    fi
+    if test -z "$OS"; then
+	SUDO_NEXT(OS="NeXT")
+    fi
+    if test -z "$OS"; then
+	SUDO_BSD(OS="bsd")
+    fi
+    if test -z "$OS"; then
+	OS="unknown"
+    fi
+fi
 ])dnl
 dnl
-dnl SUDO_HPUX
-dnl
-define(SUDO_HPUX,
-[echo checking for HP-UX 
-AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
-$0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
-[#if defined(hpux) || defined(__hpux)
-  yes
-#endif
-], [$1], [$2])
-])dnl
-dnl
-dnl SUDO_DEC_OSF1
-dnl
-define(SUDO_DEC_OSF1,
-[echo checking for DEC OSF/1 
-AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
-$0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
-[#ifdef __alpha
-  yes
-#endif
-], [$1], [$2])
-])dnl
-dnl
-dnl SUDO_LINUX
-dnl
-define(SUDO_LINUX,
-[echo checking for linux
-AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
-$0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
-[#if defined(linux) || defined(__linux)
-  yes
-#endif
-], [$1], [$2])
-])dnl
+dnl checks for UNIX variants that lack uname
 dnl
 dnl SUDO_CONVEX
 dnl
@@ -143,71 +127,40 @@ $0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
 ], AC_DEFINE(_CONVEX_SOURCE) [$1], [$2])
 ])dnl
 dnl
-dnl SUDO_KSR
+dnl SUDO_MTXINU
 dnl
-define(SUDO_KSR,
-[echo checking for KSROS 
+define(SUDO_MTXINU,
+[echo checking for MORE/BSD
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
 $0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
-[#ifdef __ksr__
+[#include <sys/param.h>
+#ifdef MORE_BSD
   yes
 #endif
-], INSTALL=/usr/sbin/install [$1], [$2])
+], [$1], [$2])
 ])dnl
 dnl
-dnl SUDO_SUNOS
+dnl SUDO_NEXT
 dnl
-define(SUDO_SUNOS,
-[echo checking for SunOS 4.x
-AC_BEFORE([$0], [AC_PROGRAM_CHECK])
-if test -n "$UNAMEPROG"; then
-    if test "`$UNAMEPROG -s`" = "SunOS"; then
-	SUNOS="`uname -r | cut -c1`"
-	if test "$SUNOS" -le 4; then
-	    :
-	    [$1]
-	else
-	    :
-	    [$2]
-	fi
-    else
-	:
-	[$2]
-    fi
-fi
-])dnl
-dnl
-dnl SUDO_SOLARIS
-dnl
-define(SUDO_SOLARIS,
-[echo checking for Solaris
-AC_BEFORE([$0], [AC_PROGRAM_CHECK])
-if test -n "$UNAMEPROG"; then
-    if test "`$UNAMEPROG -s`" = "SunOS"; then
-	SUNOS="`uname -r | cut -c1`"
-	if test "$SUNOS" -ge 5; then
-	    AC_DEFINE(SVR4)
-	    [$1]
-	else
-	    :
-	    [$2]
-	fi
-    else
-	:
-	[$2]
-    fi
-fi
-])dnl
-dnl
-dnl SUDO_IRIX
-dnl
-define(SUDO_IRIX,
-[echo checking for Irix
+define(SUDO_NEXT,
+[echo checking for NeXTstep 
 AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
 $0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
-[
-#ifdef sgi
+[#ifdef NeXT
   yes
 #endif
-], AC_DEFINE(_BSD_COMPAT) AC_DEFINE(RETSIGTYPE, int) AC_DEFINE(STDC_HEADERS) [$1], [$2])
+], [$1], [$2])
+])dnl
+dnl
+dnl SUDO_BSD
+dnl
+define(SUDO_BSD,
+[echo checking for BSD 
+AC_BEFORE([$0], [AC_COMPILE_CHECK])AC_BEFORE([$0], [AC_TEST_PROGRAM])AC_BEFORE([
+$0], [AC_HEADER_EGREP])AC_BEFORE([$0], [AC_TEST_CPP])AC_PROGRAM_EGREP(yes,
+[#include <sys/param.h>
+#ifdef BSD
+  yes
+#endif
+], [$1], [$2])
 ])dnl
