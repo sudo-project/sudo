@@ -41,15 +41,31 @@ Host_Alias	CSNETS=128.138.243.0,128.138.204.0,128.138.242.0
 ##
 # User specification
 ##
+
+# root and users in group wheel can run anything on any machine
 root		ALL=ALL
 %wheel		ALL=ALL
 
+# full time sysadmins can run anything on any machine
 FULLTIMERS	ALL=ALL
+# part time sysadmins may run anything except root shells or su
 PARTTIMERS	ALL=ALL,!SU,!SHELLS
+
+# rodney may run anything except root shells or su on machines in CSNETS
 rodney		CSNETS=ALL,!SU,!SHELLS
-operator	ALL=DUMPS,KILL,PRINTING,SHUTDOWN,HALT,REBOOT,/usr/bin/su \
-		operator,/usr/oper/bin/
+
+# operator may run maintenance commands and anything in /usr/oper/bin/
+operator	ALL=DUMPS,KILL,PRINTING,SHUTDOWN,HALT,REBOOT,/usr/oper/bin/
+
+# joe may su only to operator
+joe		/usr/bin/su operator
+
+# bob may run anything except root shells or su on the sun3 and sun4 machines
 bob		SUN4=ALL,!SU,!SHELLS:\
 		SUN3=ALL,!SU,!SHELLS
+
+# jim may run anything on machines in the biglab netgroup
 jim		+biglab=ALL
+
+# users in the secretaries netgroup need to help manage the printers
 +secretaries	ALL=PRINTING
