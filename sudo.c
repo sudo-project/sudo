@@ -688,7 +688,7 @@ static void check_sudoers()
     } else if (statbuf.st_uid != pw_ent -> pw_uid) {
 	(void) fprintf(stderr, "%s: %s is not owned by %s!\n", Argv[0], _PATH_SUDO_SUDOERS, SUDOERS_OWNER);
 	exit(1);
-    } else if (statbuf.st_mode & (0000066)) {
+    } else if ((statbuf.st_mode & 0000066)) {
 	(void) fprintf(stderr, "%s: %s is readable or writeable by other than %s!\n", Argv[0], _PATH_SUDO_SUDOERS, SUDOERS_OWNER);
 	exit(1);
     }
