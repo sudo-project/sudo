@@ -469,13 +469,13 @@ static void check_passwd()
     while (counter > 0) {
 
 #ifdef HAVE_SKEY
-    /* rewrite the prompt if using s/key since the challenge can change */
-    set_perms(PERM_ROOT);
-    prompt = sudo_skeyprompt(&skey, prompt);
-    set_perms(PERM_USER);
+	/* rewrite the prompt if using s/key since the challenge can change */
+	set_perms(PERM_ROOT);
+	prompt = sudo_skeyprompt(&skey, prompt);
+	set_perms(PERM_USER);
 #endif /* HAVE_SKEY */
 
-    /* get a password from the user */
+	/* get a password from the user */
 #ifdef USE_GETPASS
 #  ifdef HAVE_KERB4
 	(void) des_read_pw_string(kpass, sizeof(kpass) - 1, prompt, 0);
