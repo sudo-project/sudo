@@ -99,6 +99,7 @@ N			{D}{1,3}
 			}			/* return comments */
 [@$%^&*()"'`/_+.]*	{ return ERROR; }	/* return error */
 [?;<>\[\]{}|~-]*	{ return ERROR; }	/* return error */
+[0-9_]+			{ return ERROR; }	/* return error */
 
 {N}\.{N}\.{N}\.{N}	{ fill(); return NTWKADDR; }
 
