@@ -1295,3 +1295,5 @@ Sudo 1.6.2 released.
 
 408) Fixed a bug where host and user qualifiers in a Defaults entry were
      not being used correctly and the entry was being applied globally.
+
+Sudo 1.6.3 released.
