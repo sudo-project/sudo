@@ -176,6 +176,9 @@ main(argc, argv)
 	case MODE_LIST :
 	    cmnd = "list";
 	    break;
+	case MODE_BACKGROUND :
+	    if (Argc == 1)
+		usage(1);
     }
 
     /*
@@ -202,7 +205,7 @@ main(argc, argv)
 	exit(1);
     }
 
-    if (sudo_mode == MODE_RUN) {
+    if (sudo_mode == MODE_RUN || sudo_mode == MODE_BACKGROUND) {
 	load_cmnd();		/* load the cmnd global variable */
     } else if (sudo_mode == MODE_KILL) {
 	remove_timestamp();	/* remove the timestamp ticket file */
@@ -229,7 +232,10 @@ main(argc, argv)
 		exit(0);
 	    set_perms(PERM_FULL_ROOT);
 #ifndef GPROF
-	    EXEC(cmnd, &Argv[1]);
+	    if (sudo_mode == MODE_BACKGROUND && fork() > 0)
+		exit(0);
+	    else
+		EXEC(cmnd, &Argv[1]);
 #else
 	    exit(0);
 #endif /* GPROF */
@@ -363,13 +369,14 @@ static void load_globals()
 static int parse_args()
 {
     int ret=MODE_RUN;			/* what mode is suod to be run in? */
+    int i;
 
     if (Argc < 2)			/* no options and no command */
 	usage(1);
 
     if (Argv[1][0] == '-') {
-	if (Argc > 2)			/* only one -? option allowed */
-	    usage(1);
+	if (Argc > 2 && Argv[2][0] == '-')
+	    usage(1);			/* only one -? option allowed */
 
 	if (Argv[1][1] != '\0' && Argv[1][2] != '\0') {
 	    (void) fprintf(stderr, "%s: Please use single character options\n", Argv[0]);
@@ -377,6 +384,14 @@ static int parse_args()
 	}
 
 	switch (Argv[1][1]) {
+	    case 'b':
+		ret = MODE_BACKGROUND;
+		/* shift Argv over and adjust Argc */
+		for (i=1; i < Argc; i++) {
+		    Argv[i] = Argv[i+1];
+		}
+		Argc--;
+		break;
 	    case 'v':
 		ret = MODE_VALIDATE;
 		break;
@@ -418,7 +433,7 @@ static int parse_args()
 static void usage(exit_val)
     int exit_val;
 {
-    (void) fprintf(stderr, "usage: %s -V | -h | -l | -v | -k | <command>\n", Argv[0]);
+    (void) fprintf(stderr, "usage: %s -V | -h | -l | -b | -v | -k | <command>\n", Argv[0]);
     exit(exit_val);
 }
 
