@@ -1611,6 +1611,8 @@ echo "$as_me: Adding CSOps standard options" >&6;}
 		with_classic_insults=yes
 		with_csops_insults=yes
 		with_env_editor=yes
+		test -n "$mansectsu" || mansectsu=8
+		test -n "$mansectform" || mansectform=5
 		;;
     no)		;;
     *)		{ echo "$as_me:$LINENO: WARNING: Ignoring unknown argument to --with-csops: $with_csops" >&5
