@@ -35,6 +35,7 @@
 #ifndef _LOGGING_H
 #define _LOGGING_H
 
+#include <syslog.h>
 #ifdef __STDC__
 # include <stdarg.h>
 #else
@@ -45,10 +46,6 @@
 #define SLOG_SYSLOG		0x01
 #define SLOG_FILE		0x02
 #define SLOG_BOTH		0x03
-
-#if (LOGGING & SLOG_SYSLOG)
-# include <syslog.h>
-#endif
 
 /* Flags for log_error() */
 #define MSG_ONLY		0x01
