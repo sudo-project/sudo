@@ -110,7 +110,7 @@ WORD			([^@!=:,\(\) \t\n\\]|\\[^\n])+
 			    LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
 
-<GOTCMND>\\[:\,=\\ \t]	{
+<GOTCMND>\\[:\,=\\ \t#]	{
 			    LEXTRACE("QUOTEDCHAR ");
 			    fill_args(yytext + 1, 1, sawspace);
 			    sawspace = FALSE;
@@ -296,7 +296,7 @@ PASSWD[[:blank:]]*:	{
 			    }
 			}
 
-\/[^\,:=\\ \t\n#]+	{
+\/(\\[\,:= \t#]|[^\,:=\\ \t\n#])+	{
 			    /* directories can't have args... */
 			    if (yytext[yyleng - 1] == '/') {
 				LEXTRACE("COMMAND ");
@@ -354,7 +354,7 @@ fill_cmnd(s, len)
     if (yylval.command.cmnd == NULL)
 	yyerror("unable to allocate memory");
 
-    /* copy the string and NULL-terminate it */
+    /* copy the string and NULL-terminate it (escapes handled by fnmatch) */
     (void) strncpy(yylval.command.cmnd, s, len);
     yylval.command.cmnd[len] = '\0';
 
