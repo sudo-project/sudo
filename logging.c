@@ -160,7 +160,6 @@ void log_error(code)
 
     logline = (char *) malloc(count);
     if (logline == NULL) {
-	perror("malloc");
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
