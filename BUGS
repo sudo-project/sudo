@@ -1,4 +1,4 @@
-Known bugs in sudo version 1.5.3
+Known bugs in sudo version 1.5.4
 ================================
 
 1) "make install-man" should substitute correct paths into the
@@ -9,3 +9,6 @@ Known bugs in sudo version 1.5.3
 3) configure variables that have been cached cannot be overridden
    in subsequent configure runs, even if other --with-* options are
    given.  This is a flaw in GNU autoconf.
+
+4) Cmnd_Alias's need to precede permissions specs.  At the very least,
+   visudo should give an error if you get this wrong.
