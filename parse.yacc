@@ -562,7 +562,7 @@ cmnd		:	ALL {
 			    else {
 				if (pedantic)
 				    (void) fprintf(stderr,
-					"Warning: undeclared Cmnd_Alias `%s' referenced near line %d", $1, sudolineno);
+					"Warning: undeclared Cmnd_Alias `%s' referenced near line %d\n", $1, sudolineno);
 				$$ = -1;
 			    }
 			    free($1);
@@ -600,7 +600,7 @@ hostaliases	:	hostalias
 		;
 
 hostalias	:	ALIAS { push; } '=' hostlist {
-			    if (host_matches != -1 &&
+			    if ((host_matches != -1 || pedantic) &&
 				!add_alias($1, HOST_ALIAS, host_matches))
 				YYERROR;
 			    pop;
@@ -624,7 +624,7 @@ cmndalias	:	ALIAS {
 				ga_list[ga_list_len-1].alias = estrdup($1);
 			     }
 			} '=' cmndlist {
-			    if (cmnd_matches != -1 &&
+			    if ((cmnd_matches != -1 || pedantic) &&
 				!add_alias($1, CMND_ALIAS, cmnd_matches))
 				YYERROR;
 			    pop;
@@ -652,7 +652,7 @@ runasalias	:	ALIAS {
 				ga_list[ga_list_len-1].alias = estrdup($1);
 			    }
 			} '=' runaslist {
-			    if (runas_matches != -1 &&
+			    if ((runas_matches != -1 || pedantic) &&
 				!add_alias($1, RUNAS_ALIAS, runas_matches))
 				YYERROR;
 			    pop;
@@ -668,7 +668,7 @@ useraliases	:	useralias
 		;
 
 useralias	:	ALIAS { push; }	'=' userlist {
-			    if (user_matches != -1 &&
+			    if ((user_matches != -1 || pedantic) &&
 				!add_alias($1, USER_ALIAS, user_matches))
 				YYERROR;
 			    pop;

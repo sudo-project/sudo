@@ -1440,7 +1440,7 @@ case 44:
 			    else {
 				if (pedantic)
 				    (void) fprintf(stderr,
-					"Warning: undeclared Cmnd_Alias `%s' referenced near line %d", yyvsp[0].string, sudolineno);
+					"Warning: undeclared Cmnd_Alias `%s' referenced near line %d\n", yyvsp[0].string, sudolineno);
 				yyval.BOOLEAN = -1;
 			    }
 			    free(yyvsp[0].string);
@@ -1482,7 +1482,7 @@ break;
 case 49:
 #line 602 "parse.yacc"
 {
-			    if (host_matches != -1 &&
+			    if ((host_matches != -1 || pedantic) &&
 				!add_alias(yyvsp[-3].string, HOST_ALIAS, host_matches))
 				YYERROR;
 			    pop;
@@ -1503,7 +1503,7 @@ break;
 case 55:
 #line 626 "parse.yacc"
 {
-			    if (cmnd_matches != -1 &&
+			    if ((cmnd_matches != -1 || pedantic) &&
 				!add_alias(yyvsp[-3].string, CMND_ALIAS, cmnd_matches))
 				YYERROR;
 			    pop;
@@ -1532,7 +1532,7 @@ break;
 case 61:
 #line 654 "parse.yacc"
 {
-			    if (runas_matches != -1 &&
+			    if ((runas_matches != -1 || pedantic) &&
 				!add_alias(yyvsp[-3].string, RUNAS_ALIAS, runas_matches))
 				YYERROR;
 			    pop;
@@ -1549,7 +1549,7 @@ break;
 case 65:
 #line 670 "parse.yacc"
 {
-			    if (user_matches != -1 &&
+			    if ((user_matches != -1 || pedantic) &&
 				!add_alias(yyvsp[-3].string, USER_ALIAS, user_matches))
 				YYERROR;
 			    pop;
