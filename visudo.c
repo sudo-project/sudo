@@ -222,7 +222,7 @@ int main(argc, argv)
 	 */
 	if (strlen(Editor) + strlen(stmp) + 30 > sizeof(buf)) {
 	    (void) fprintf(stderr, "%s: Buffer too short (line %d).\n",
-			   __LINE__, Argv[0]);
+			   Argv[0], __LINE__);
 	    Exit(-1);
 	}
 	if (parse_error == TRUE)
@@ -274,7 +274,7 @@ int main(argc, argv)
 	    if (yyparse() && parse_error != TRUE) {
 		(void) fprintf(stderr,
 		    "%s: Failed to parse temporary file (%s), unknown error.\n",
-		    Argv[0], stmp, sudoers);
+		    Argv[0], stmp);
 		parse_error = TRUE;
 	    }
 	} else {
