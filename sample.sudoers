@@ -1,5 +1,5 @@
 #
-# Sample /etc/sudoers file.  (Assumes SunOS paths)
+# Sample /etc/sudoers file.  (Assumes SunOS 4.x paths)
 #
 # This file MUST be edited with the 'visudo' command as root.
 #
@@ -18,7 +18,7 @@ User_Alias	PARTTIMERS=bostley,jwfox,mccreary
 Cmnd_Alias      DUMPS=/usr/etc/dump,/usr/etc/rdump,/usr/etc/restore,\
 		      /usr/etc/rrestore,/usr/bin/mt
 Cmnd_Alias	KILL=/usr/bin/kill
-Cmnd_Alias	LPC=/usr/etc/lpc,/usr/ucb/lprm
+Cmnd_Alias	PRINTING=/usr/etc/lpc,/usr/ucb/lprm
 Cmnd_Alias	SHUTDOWN=/usr/etc/shutdown
 Cmnd_Alias	HALT=/usr/etc/halt,/usr/etc/fasthalt
 Cmnd_Alias	REBOOT=/usr/etc/reboot,/usr/etc/fastboot
@@ -46,6 +46,9 @@ root		ALL=ALL
 FULLTIMERS	ALL=ALL
 PARTTIMERS	ALL=ALL,!SU,!SHELLS
 rodney		CSNETS=ALL,!SU,!SHELLS
-operator	ALL=DUMPS,KILL,LPC,SHUTDOWN,HALT,REBOOT,/usr/oper/bin/
+operator	ALL=DUMPS,KILL,PRINTING,SHUTDOWN,HALT,REBOOT,/usr/bin/su \
+		operator,/usr/oper/bin/
 bob		SUN4=ALL,!SU,!SHELLS:\
 		SUN3=ALL,!SU,!SHELLS
+jim		+biglab=ALL
++secretaries	ALL=PRINTING
