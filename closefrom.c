@@ -59,6 +59,7 @@ closefrom(lowfd)
     int lowfd;
 {
     long fd, maxfd;
+#ifdef HAVE_DIRFD
     char fdpath[PATH_MAX], *endp;
     struct dirent *dent;
     DIR *dirp;
@@ -73,8 +74,10 @@ closefrom(lowfd)
 		fd >= 0 && fd < INT_MAX && fd >= lowfd && fd != dirfd(dirp))
 		(void) close((int) fd);
 	}
-	closedir(dirp);
-    } else {
+	(void) closedir(dirp);
+    } else
+#endif
+    {
 	/*
 	 * Fall back on sysconf() or getdtablesize().  We avoid checking
 	 * resource limits since it is possible to open a file descriptor
