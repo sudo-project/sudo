@@ -61,7 +61,7 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-December 12, 2001             1.6.4                             1
+January 12, 2002              1.6.4                             1
 
 
 
@@ -127,7 +127,7 @@ AAAAUUUUTTTTHHHHOOOORRRR
 
 
 
-December 12, 2001             1.6.4                             2
+January 12, 2002              1.6.4                             2
 
 
 
@@ -139,12 +139,11 @@ visudo(1m)             MAINTENANCE COMMANDS            visudo(1m)
         Todd Miller            <Todd.Miller@courtesan.com>
 
        See the HISTORY file in the sudo distribution or visit
-       http://www.courtesan.com/sudo/history.html for more
-       details.
+       http://www.sudo.ws/sudo/history.html for more details.
 
 BBBBUUUUGGGGSSSS
        If you feel you have found a bug in sudo, please submit a
-       bug report at http://www.courtesan.com/sudo/bugs/
+       bug report at http://www.sudo.ws/sudo/bugs/
 
 DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
        VVVViiiissssuuuuddddoooo is provided ``AS IS'' and any express or implied
@@ -193,6 +192,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-December 12, 2001             1.6.4                             3
+
+January 12, 2002              1.6.4                             3
 
 
