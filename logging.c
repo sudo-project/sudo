@@ -184,6 +184,7 @@ void log_error(code)
 	    break;
 
 	case VALIDATE_NOT_OK:
+	case VALIDATE_NOT_OK_NOPASS:
 	    (void) sprintf(p,
 		"command not allowed ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=",
 		tty, cwd, runas_user);
@@ -580,6 +581,7 @@ void inform_user(code)
 	    break;
 
 	case VALIDATE_NOT_OK:
+	case VALIDATE_NOT_OK_NOPASS:
 	    (void) fprintf(stderr,
 		"Sorry, user %s is not allowed to execute \"%s",
 		user_name, cmnd);
@@ -719,6 +721,7 @@ static int appropriate(code)
 	break;
 
     case VALIDATE_NOT_OK:
+    case VALIDATE_NOT_OK_NOPASS:
 #ifdef SEND_MAIL_WHEN_NOT_OK
 	return (1);
 #else

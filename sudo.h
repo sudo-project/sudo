@@ -65,9 +65,13 @@ extern struct matchstack *match;
 extern int top;
 
 #define user_matches	(match[top-1].user)
+#define user_matched	(match[top-2].user)
 #define cmnd_matches	(match[top-1].cmnd)
+#define cmnd_matched	(match[top-2].cmnd)
 #define host_matches	(match[top-1].host)
+#define host_matched	(match[top-2].host)
 #define runas_matches	(match[top-1].runas)
+#define runas_matched	(match[top-2].runas)
 #define no_passwd	(match[top-1].nopass)
 
 /*
@@ -131,9 +135,10 @@ struct generic_alias {
 #endif	/* LOGGING & SLOG_SYSLOG */
 
 #define VALIDATE_OK              0x00
-#define VALIDATE_NO_USER         0x01
-#define VALIDATE_NOT_OK          0x02
-#define VALIDATE_OK_NOPASS       0x03
+#define VALIDATE_OK_NOPASS       0x01
+#define VALIDATE_NO_USER         0x02
+#define VALIDATE_NOT_OK          0x03
+#define VALIDATE_NOT_OK_NOPASS   0x04
 #define VALIDATE_ERROR          -1
 
 /*

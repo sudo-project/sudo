@@ -375,6 +375,7 @@ int main(argc, argv)
 	case VALIDATE_NOT_OK:
 	    check_user();
 
+	case VALIDATE_NOT_OK_NOPASS:
 #ifndef DONT_LEAK_PATH_INFO
 	    log_error(rtn);
 	    if (cmnd_status == NOT_FOUND_DOT)

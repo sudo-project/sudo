@@ -199,10 +199,6 @@ void yyerror(s)
 
 %type <BOOLEAN>	 cmnd
 %type <BOOLEAN>	 opcmnd
-%type <BOOLEAN>	 runasspec
-%type <BOOLEAN>	 runaslist
-%type <BOOLEAN>	 runasuser
-%type <BOOLEAN>	 nopasswd
 
 %%
 
@@ -287,8 +283,8 @@ cmndspec	:	{   /* Push a new entry onto the stack if needed */
 				pushcp;
 			    cmnd_matches = -1;
 			} runasspec nopasswd opcmnd {
-			    /* XXX - test runas_matches and cmnd_matches instead? */
-			    if (($2 == -1 || $4 == -1) && printmatches == TRUE) {
+			    if (printmatches == TRUE &&
+				(runas_matches == -1 || cmnd_matches == -1)) {
 				cm_list[cm_list_len].runas_len = 0;
 				cm_list[cm_list_len].cmnd_len = 0;
 				cm_list[cm_list_len].nopasswd = FALSE;
@@ -310,7 +306,6 @@ opcmnd		:	cmnd { ; }
 				push;
 			    }
 			} opcmnd {
-			    int cmnd_matched = cmnd_matches;
 			    pop;
 			    if (cmnd_matched == TRUE)
 				cmnd_matches = FALSE;
@@ -328,25 +323,41 @@ runasspec	:	/* empty */ {
 			    if (runas_matches == -1)
 				runas_matches =
 				    (strcmp(RUNAS_DEFAULT, runas_user) == 0);
-			    $$ = runas_matches;
 			}
-		|	RUNAS runaslist {
-			    runas_matches = ($2 > 0);
-			    $$ = runas_matches;
-			}
+		|	RUNAS runaslist { ; }
 		;
 
-runaslist	:	runasuser {
-			    $$ = $1;
-			}
-		|	runaslist ',' runasuser	{
-			    $$ = $1 + $3;
-			}
+runaslist	:	oprunasuser
+		|	runaslist ',' oprunasuser
 		;
 
+oprunasuser	:	runasuser {
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				append("", &cm_list[cm_list_len].runas,
+				       &cm_list[cm_list_len].runas_len,
+				       &cm_list[cm_list_len].runas_size, ':');
+			}
+		|	'!' {
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE) {
+				append("!", &cm_list[cm_list_len].runas,
+				       &cm_list[cm_list_len].runas_len,
+				       &cm_list[cm_list_len].runas_size, ':');
+				pushcp;
+			    } else {
+				push;
+			    }
+			} oprunasuser {
+			    pop;
+			    if (runas_matched == TRUE)
+				runas_matches = FALSE;
+			    else if (runas_matched == FALSE)
+				runas_matches = TRUE;
+			}
 
 runasuser	:	NAME {
-			    $$ = (strcmp($1, runas_user) == 0);
+			    runas_matches = (strcmp($1, runas_user) == 0);
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append($1, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -355,20 +366,17 @@ runasuser	:	NAME {
 				user_matches == TRUE)
 				append($1, &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
-				       &cm_list[cm_list_len].runas_size, ':');
+				       &cm_list[cm_list_len].runas_size, 0);
 			    (void) free($1);
 			}
 		|	USERGROUP {
-			    $$ = usergr_matches($1, runas_user);
+			    runas_matches = usergr_matches($1, runas_user);
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append($1, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
 				       &ga_list[ga_list_len-1].entries_size, ',');
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
-				append("%", &cm_list[cm_list_len].runas,
-				       &cm_list[cm_list_len].runas_len,
-				       &cm_list[cm_list_len].runas_size, ':');
 				append($1, &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
@@ -376,16 +384,13 @@ runasuser	:	NAME {
 			    (void) free($1);
 			}
 		|	NETGROUP {
-			    $$ = netgr_matches($1, NULL, runas_user);
+			    runas_matches = netgr_matches($1, NULL, runas_user);
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append($1, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
 				       &ga_list[ga_list_len-1].entries_size, ',');
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
-				append("+", &cm_list[cm_list_len].runas,
-				       &cm_list[cm_list_len].runas_len,
-				       &cm_list[cm_list_len].runas_size, ':');
 				append($1, &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
 				       &cm_list[cm_list_len].runas_size, 0);
@@ -396,9 +401,9 @@ runasuser	:	NAME {
 			    /* could be an all-caps username */
 			    if (find_alias($1, RUNAS_ALIAS) == TRUE ||
 				strcmp($1, runas_user) == 0)
-				$$ = TRUE;
+				runas_matches = TRUE;
 			    else
-				$$ = FALSE;
+				runas_matches = FALSE;
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append($1, &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -407,11 +412,11 @@ runasuser	:	NAME {
 				user_matches == TRUE)
 				append($1, &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
-				       &cm_list[cm_list_len].runas_size, ':');
+				       &cm_list[cm_list_len].runas_size, 0);
 			    (void) free($1);
 			}
 		|	ALL {
-			    $$ = TRUE;
+			    runas_matches = TRUE;
 			    if (printmatches == TRUE && in_alias == TRUE)
 				append("ALL", &ga_list[ga_list_len-1].entries,
 				       &ga_list[ga_list_len-1].entries_len,
@@ -420,7 +425,7 @@ runasuser	:	NAME {
 				user_matches == TRUE)
 				append("ALL", &cm_list[cm_list_len].runas,
 				       &cm_list[cm_list_len].runas_len,
-				       &cm_list[cm_list_len].runas_size, ':');
+				       &cm_list[cm_list_len].runas_size, 0);
 			}
 		;
 
@@ -428,13 +433,13 @@ nopasswd	:	/* empty */ {
 			    ;
 			}
 		|	NOPASSWD {
-			    no_passwd = $$ = TRUE;
+			    no_passwd = TRUE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				cm_list[cm_list_len].nopasswd = TRUE;
 			}
 		|	PASSWD {
-			    no_passwd = $$ = FALSE;
+			    no_passwd = FALSE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				cm_list[cm_list_len].nopasswd = FALSE;
@@ -570,7 +575,8 @@ runasalias	:	ALIAS {
 				ga_list[ga_list_len-1].alias = estrdup($1);
 			    }
 			} '=' runaslist {
-			    if ($4 > 0 && add_alias($1, RUNAS_ALIAS) == FALSE)
+			    if (runas_matches > 0 &&
+				add_alias($1, RUNAS_ALIAS) == FALSE)
 				YYERROR;
 			    pop;
 			    (void) free($1);

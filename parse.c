@@ -178,7 +178,10 @@ int validate(check_cmnd)
 			    return(VALIDATE_OK);
 		    } else if (cmnd_matches == FALSE) {
 			/* User was explicitly denied acces to cmnd on host. */
-			return(VALIDATE_NOT_OK);
+			if (no_passwd == TRUE)
+			    return(VALIDATE_NOT_OK_NOPASS);
+			else
+			    return(VALIDATE_NOT_OK);
 		    }
 		}
 	    }
