@@ -125,6 +125,14 @@ Special features/options:
 	passing library paths to the loader.  This option is on
 	by default for Solaris and SVR4.
 
+  --with-blibpath[=PATH]
+        Tells configure to construct a -blibpath argument to the
+        loader.  If a PATH is specified, it will be used as the
+        base.  Otherwise, "/usr/lib:/lib:/usr/local/lib" will be
+        used for gcc and "/usr/lib:/lib" for non-gcc.  Additional
+        library paths will be appended as needed by configure.
+	This option is only valid for AIX where it is on by default.
+
   --with-libraries=LIBRARY
         Adds the specified library (or libaries) to SUDO_LIBS and
         and VISUDO_LIBS so sudo will link against them.  If the
