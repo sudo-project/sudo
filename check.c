@@ -114,7 +114,7 @@ check_user()
 	    lecture();		/* first time through they get a lecture */
 
 	/* Expand any escapes in the prompt. */
-	prompt = expand_prompt(user_prompt ? user_prompt : def_str(I_PASSPROMPT),
+	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
 	    user_name, user_shost);
 
 	verify_user(auth_pw, prompt);
@@ -134,7 +134,7 @@ static void
 lecture()
 {
 
-    if (def_flag(I_LECTURE)) {
+    if (def_lecture) {
 	(void) fputs("\n\
 We trust you have received the usual lecture from the local System\n\
 Administrator. It usually boils down to these two things:\n\
@@ -290,10 +290,10 @@ user_is_exempt()
     struct group *grp;
     char **gr_mem;
 
-    if (!def_str(I_EXEMPT_GROUP))
+    if (!def_exempt_group)
 	return(FALSE);
 
-    if (!(grp = getgrnam(def_str(I_EXEMPT_GROUP))))
+    if (!(grp = getgrnam(def_exempt_group)))
 	return(FALSE);
 
     if (user_gid == grp->gr_gid)
@@ -318,7 +318,7 @@ build_timestamp(timestampdir, timestampfile)
     char *dirparent;
     int len;
 
-    dirparent = def_str(I_TIMESTAMPDIR);
+    dirparent = def_timestampdir;
     len = easprintf(timestampdir, "%s/%s", dirparent, user_name);
     if (len >= MAXPATHLEN)
 	log_error(0, "timestamp path too long: %s", timestampdir);
@@ -327,21 +327,21 @@ build_timestamp(timestampdir, timestampfile)
      * Timestamp file may be a file in the directory or NUL to use
      * the directory as the timestamp.
      */
-    if (def_flag(I_TTY_TICKETS)) {
+    if (def_tty_tickets) {
 	char *p;
 
 	if ((p = strrchr(user_tty, '/')))
 	    p++;
 	else
 	    p = user_tty;
-	if (def_flag(I_TARGETPW))
+	if (def_targetpw)
 	    len = easprintf(timestampfile, "%s/%s/%s:%s", dirparent, user_name,
 		p, *user_runas);
 	else
 	    len = easprintf(timestampfile, "%s/%s/%s", dirparent, user_name, p);
 	if (len >= MAXPATHLEN)
 	    log_error(0, "timestamp path too long: %s", timestampfile);
-    } else if (def_flag(I_TARGETPW)) {
+    } else if (def_targetpw) {
 	len = easprintf(timestampfile, "%s/%s/%s", dirparent, user_name,
 	    *user_runas);
 	if (len >= MAXPATHLEN)
@@ -362,7 +362,7 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 {
     struct stat sb;
     time_t now;
-    char *dirparent = def_str(I_TIMESTAMPDIR);
+    char *dirparent = def_timestampdir;
     int status = TS_ERROR;		/* assume the worst */
 
     if (timestamp_uid != 0)
@@ -498,17 +498,17 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
      */
     if (status == TS_OLD) {
 	/* Negative timeouts only expire manually (sudo -k). */
-	if (def_ival(I_TIMESTAMP_TIMEOUT) < 0 && sb.st_mtime != 0)
+	if (def_timestamp_timeout < 0 && sb.st_mtime != 0)
 	    status = TS_CURRENT;
 	else {
 	    now = time(NULL);
-	    if (def_ival(I_TIMESTAMP_TIMEOUT) && 
-		now - sb.st_mtime < 60 * def_ival(I_TIMESTAMP_TIMEOUT)) {
+	    if (def_timestamp_timeout && 
+		now - sb.st_mtime < 60 * def_timestamp_timeout) {
 		/*
 		 * Check for bogus time on the stampfile.  The clock may
 		 * have been set back or someone could be trying to spoof us.
 		 */
-		if (sb.st_mtime > now + 60 * def_ival(I_TIMESTAMP_TIMEOUT) * 2) {
+		if (sb.st_mtime > now + 60 * def_timestamp_timeout * 2) {
 		    log_error(NO_EXIT,
 			"timestamp too far in the future: %20.20s",
 			4 + ctime(&sb.st_mtime));

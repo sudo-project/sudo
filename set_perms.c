@@ -121,7 +121,7 @@ set_perms_posix(perm)
 	case PERM_RUNAS:
 				/* headed for exec(), assume euid == 0 */
 				runas_setup();
-				if (def_flag(I_STAY_SETUID))
+				if (def_stay_setuid)
 				    error = seteuid(runas_pw->pw_uid);
 				else
 				    error = setuid(runas_pw->pw_uid);
@@ -194,7 +194,7 @@ set_perms_suid(perm)
 	case PERM_RUNAS:
 				/* headed for exec(), assume euid == 0 */
 				runas_setup();
-				error = setresuid(def_flag(I_STAY_SETUID) ?
+				error = setresuid(def_stay_setuid ?
 				    user_uid : runas_pw->pw_uid,
 				    runas_pw->pw_uid, runas_pw->pw_uid);
 				if (error)
@@ -266,7 +266,7 @@ set_perms_suid(perm)
 	case PERM_RUNAS:
 				/* headed for exec(), assume euid == 0 */
 				runas_setup();
-				error = setreuid(def_flag(I_STAY_SETUID) ?
+				error = setreuid(def_stay_setuid ?
 				    user_uid : runas_pw->pw_uid,
 				    runas_pw->pw_uid);
 				if (error)
@@ -382,7 +382,7 @@ runas_setup()
 #endif /* HAVE_PAM */
 
 #ifdef HAVE_LOGIN_CAP_H
-	if (def_flag(I_USE_LOGINCLASS)) {
+	if (def_use_loginclass) {
 	    /*
              * We don't have setusercontext() set the user since we
              * may only want to set the effective uid.  Depending on
@@ -390,7 +390,7 @@ runas_setup()
              * setusercontext() to call initgroups().
 	     */
 	    flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
-	    if (!def_flag(I_PRESERVE_GROUPS))
+	    if (!def_preserve_groups)
 		flags |= LOGIN_SETGROUP;
 	    else if (setgid(runas_pw->pw_gid))
 		perror("cannot set gid to runas gid");
@@ -411,7 +411,7 @@ runas_setup()
 	    /*
 	     * Initialize group vector unless asked not to.
 	     */
-	    if (!def_flag(I_PRESERVE_GROUPS) &&
+	    if (!def_preserve_groups &&
 		initgroups(*user_runas, runas_pw->pw_gid) < 0)
 		perror("cannot set group vector");
 #endif /* HAVE_INITGROUPS */

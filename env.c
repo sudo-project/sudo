@@ -293,13 +293,13 @@ rebuild_env(sudo_mode, envp)
      */
     ps1 = NULL;
     didvar = 0;
-    if (def_flag(I_ENV_RESET)) {
+    if (def_env_reset) {
 	int keepit;
 
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = envp; *ep; ep++) {
 	    keepit = 0;
-	    for (cur = def_list(I_ENV_KEEP); cur; cur = cur->next) {
+	    for (cur = def_env_keep; cur; cur = cur->next) {
 		len = strlen(cur->value);
 		/* Deal with '*' wildcard */
 		if (cur->value[len - 1] == '*') {
@@ -374,7 +374,7 @@ rebuild_env(sudo_mode, envp)
 	    okvar = 1;
 
 	    /* Skip anything listed in env_delete. */
-	    for (cur = def_list(I_ENV_DELETE); cur && okvar; cur = cur->next) {
+	    for (cur = def_env_delete; cur && okvar; cur = cur->next) {
 		len = strlen(cur->value);
 		/* Deal with '*' wildcard */
 		if (cur->value[len - 1] == '*') {
@@ -389,7 +389,7 @@ rebuild_env(sudo_mode, envp)
 	    }
 
 	    /* Check certain variables for '%' and '/' characters. */
-	    for (cur = def_list(I_ENV_CHECK); cur && okvar; cur = cur->next) {
+	    for (cur = def_env_check; cur && okvar; cur = cur->next) {
 		len = strlen(cur->value);
 		/* Deal with '*' wildcard */
 		if (cur->value[len - 1] == '*') {
@@ -427,7 +427,7 @@ rebuild_env(sudo_mode, envp)
 #endif
 
     /* Set $USER and $LOGNAME to target if "set_logname" is true. */
-    if (def_flag(I_SET_LOGNAME) && runas_pw->pw_name) {
+    if (def_set_logname && runas_pw->pw_name) {
 	insert_env(format_env("LOGNAME", runas_pw->pw_name), 1);
 	insert_env(format_env("USER", runas_pw->pw_name), 1);
     }
@@ -467,15 +467,15 @@ init_envtables()
     for (p = initial_badenv_table; *p; p++) {
 	cur = emalloc(sizeof(struct list_member));
 	cur->value = estrdup(*p);
-	cur->next = def_list(I_ENV_DELETE);
-	def_list(I_ENV_DELETE) = cur;
+	cur->next = def_env_delete;
+	def_env_delete = cur;
     }
 
     /* Fill in "env_check" variable. */
     for (p = initial_checkenv_table; *p; p++) {
 	cur = emalloc(sizeof(struct list_member));
 	cur->value = estrdup(*p);
-	cur->next = def_list(I_ENV_CHECK);
-	def_list(I_ENV_CHECK) = cur;
+	cur->next = def_env_check;
+	def_env_check = cur;
     }
 }

@@ -116,7 +116,7 @@ mysyslog(pri, fmt, va_alist)
     va_start(ap);
 #endif
 #ifdef LOG_NFACILITIES
-    openlog("sudo", 0, def_ival(I_LOGFAC));
+    openlog("sudo", 0, def_syslog_ifac);
 #else
     openlog("sudo", 0);
 #endif
@@ -200,30 +200,30 @@ do_logfile(msg)
     size_t maxlen;
 
     oldmask = umask(077);
-    maxlen = def_ival(I_LOGLINELEN) > 0 ? def_ival(I_LOGLINELEN) : 0;
-    fp = fopen(def_str(I_LOGFILE), "a");
+    maxlen = def_loglinelen > 0 ? def_loglinelen : 0;
+    fp = fopen(def_logfile, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
 	easprintf(&full_line, "Can't open log file: %s: %s",
-	    def_str(I_LOGFILE), strerror(errno));
+	    def_logfile, strerror(errno));
 	send_mail(full_line);
 	free(full_line);
     } else if (!lock_file(fileno(fp), SUDO_LOCK)) {
 	easprintf(&full_line, "Can't lock log file: %s: %s",
-	    def_str(I_LOGFILE), strerror(errno));
+	    def_logfile, strerror(errno));
 	send_mail(full_line);
 	free(full_line);
     } else {
-	if (def_ival(I_LOGLINELEN) == 0) {
+	if (def_loglinelen == 0) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
-	    if (def_flag(I_LOG_HOST))
+	    if (def_log_host)
 		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n", get_timestr(),
 		    user_name, user_shost, msg);
 	    else
 		(void) fprintf(fp, "%s : %s : %s\n", get_timestr(),
 		    user_name, msg);
 	} else {
-	    if (def_flag(I_LOG_HOST))
+	    if (def_log_host)
 		easprintf(&full_line, "%s : %s : HOST=%s : %s", get_timestr(),
 		    user_name, user_shost, msg);
 	    else
@@ -299,9 +299,9 @@ log_auth(status, inform_user)
     int pri;
 
     if (status & VALIDATE_OK)
-	pri = def_ival(I_GOODPRI);
+	pri = def_syslog_igoodpri;
     else
-	pri = def_ival(I_BADPRI);
+	pri = def_syslog_ibadpri;
 
     /* Set error message, if any. */
     if (status & VALIDATE_OK)
@@ -342,9 +342,9 @@ log_auth(status, inform_user)
     /*
      * Log via syslog and/or a file.
      */
-    if (def_str(I_SYSLOG))
+    if (def_syslog)
 	do_syslog(pri, logline);
-    if (def_str(I_LOGFILE))
+    if (def_logfile)
 	do_logfile(logline);
 
     free(logline);
@@ -423,9 +423,9 @@ log_error(va_alist)
     /*
      * Log to syslog and/or a file.
      */
-    if (def_str(I_SYSLOG))
-	do_syslog(def_ival(I_BADPRI), logline);
-    if (def_str(I_LOGFILE))
+    if (def_syslog)
+	do_syslog(def_syslog_ibadpri, logline);
+    if (def_logfile)
 	do_logfile(logline);
 
     free(message);
@@ -461,7 +461,7 @@ send_mail(line)
 #endif
 
     /* Just return if mailer is disabled. */
-    if (!def_str(I_MAILERPATH) || !def_str(I_MAILTO))
+    if (!def_mailerpath || !def_mailto)
 	return;
 
     (void) sigemptyset(&set);
@@ -490,8 +490,8 @@ send_mail(line)
 		(void) close(pfd[1]);
 
 		/* Build up an argv based the mailer path and flags */
-		mflags = estrdup(def_str(I_MAILERFLAGS));
-		mpath = estrdup(def_str(I_MAILERPATH));
+		mflags = estrdup(def_mailerflags);
+		mpath = estrdup(def_mailerpath);
 		if ((argv[0] = strrchr(mpath, ' ')))
 		    argv[0]++;
 		else
@@ -529,8 +529,8 @@ send_mail(line)
 
     /* Pipes are all setup, send message via sendmail. */
     (void) fprintf(mail, "To: %s\nFrom: %s\nSubject: ",
-	def_str(I_MAILTO), user_name);
-    for (p = def_str(I_MAILSUB); *p; p++) {
+	def_mailto, user_name);
+    for (p = def_mailsub; *p; p++) {
 	/* Expand escapes in the subject */
 	if (*p == '%' && *(p+1) != '%') {
 	    switch (*(++p)) {
@@ -567,16 +567,16 @@ mail_auth(status, line)
     int mail_mask;
 
     /* If any of these bits are set in status, we send mail. */
-    if (def_flag(I_MAIL_ALWAYS))
+    if (def_mail_always)
 	mail_mask =
 	    VALIDATE_ERROR|VALIDATE_OK|FLAG_NO_USER|FLAG_NO_HOST|VALIDATE_NOT_OK;
     else {
 	mail_mask = VALIDATE_ERROR;
-	if (def_flag(I_MAIL_NO_USER))
+	if (def_mail_no_user)
 	    mail_mask |= FLAG_NO_USER;
-	if (def_flag(I_MAIL_NO_HOST))
+	if (def_mail_no_host)
 	    mail_mask |= FLAG_NO_HOST;
-	if (def_flag(I_MAIL_NO_PERMS))
+	if (def_mail_no_perms)
 	    mail_mask |= VALIDATE_NOT_OK;
     }
 
@@ -618,7 +618,7 @@ get_timestr()
     struct tm *timeptr;
 
     timeptr = localtime(&now);
-    if (def_flag(I_LOG_YEAR))
+    if (def_log_year)
 	s = "%h %e %T %Y";
     else
 	s = "%h %e %T";
@@ -631,7 +631,7 @@ get_timestr()
 #endif /* HAVE_STRFTIME */
 
     s = ctime(&now) + 4;		/* skip day of the week */
-    if (def_flag(I_LOG_YEAR))
+    if (def_log_year)
 	s[20] = '\0';			/* avoid the newline */
     else
 	s[15] = '\0';			/* don't care about year */

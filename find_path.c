@@ -151,7 +151,7 @@ find_path(infile, outfile, path)
      */
     if (!result && checkdot) {
 	result = sudo_goodpath(infile);
-	if (result && def_flag(I_IGNORE_DOT))
+	if (result && def_ignore_dot)
 	    return(NOT_FOUND_DOT);
     }
 

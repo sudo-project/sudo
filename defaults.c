@@ -385,57 +385,57 @@ init_defaults()
 
     /* First initialize the flags. */
 #ifdef LONG_OTP_PROMPT
-    def_flag(I_LONG_OTP_PROMPT) = TRUE;
+    def_long_otp_prompt = TRUE;
 #endif
 #ifdef IGNORE_DOT_PATH
-    def_flag(I_IGNORE_DOT) = TRUE;
+    def_ignore_dot = TRUE;
 #endif
 #ifdef ALWAYS_SEND_MAIL
-    def_flag(I_MAIL_ALWAYS) = TRUE;
+    def_mail_always = TRUE;
 #endif
 #ifdef SEND_MAIL_WHEN_NO_USER
-    def_flag(I_MAIL_NO_USER) = TRUE;
+    def_mail_no_user = TRUE;
 #endif
 #ifdef SEND_MAIL_WHEN_NO_HOST
-    def_flag(I_MAIL_NO_HOST) = TRUE;
+    def_mail_no_host = TRUE;
 #endif
 #ifdef SEND_MAIL_WHEN_NOT_OK
-    def_flag(I_MAIL_NO_PERMS) = TRUE;
+    def_mail_no_perms = TRUE;
 #endif
 #ifdef USE_TTY_TICKETS
-    def_flag(I_TTY_TICKETS) = TRUE;
+    def_tty_tickets = TRUE;
 #endif
 #ifndef NO_LECTURE
-    def_flag(I_LECTURE) = TRUE;
+    def_lecture = TRUE;
 #endif
 #ifndef NO_AUTHENTICATION
-    def_flag(I_AUTHENTICATE) = TRUE;
+    def_authenticate = TRUE;
 #endif
 #ifndef NO_ROOT_SUDO
-    def_flag(I_ROOT_SUDO) = TRUE;
+    def_root_sudo = TRUE;
 #endif
 #ifdef HOST_IN_LOG
-    def_flag(I_LOG_HOST) = TRUE;
+    def_log_host = TRUE;
 #endif
 #ifdef SHELL_IF_NO_ARGS
-    def_flag(I_SHELL_NOARGS) = TRUE;
+    def_shell_noargs = TRUE;
 #endif
 #ifdef SHELL_SETS_HOME
-    def_flag(I_SET_HOME) = TRUE;
+    def_set_home = TRUE;
 #endif
 #ifndef DONT_LEAK_PATH_INFO
-    def_flag(I_PATH_INFO) = TRUE;
+    def_path_info = TRUE;
 #endif
 #ifdef FQDN
-    def_flag(I_FQDN) = TRUE;
+    def_fqdn = TRUE;
 #endif
 #ifdef USE_INSULTS
-    def_flag(I_INSULTS) = TRUE;
+    def_insults = TRUE;
 #endif
 #ifdef ENV_EDITOR
-    def_flag(I_ENV_EDITOR) = TRUE;
+    def_env_editor = TRUE;
 #endif
-    def_flag(I_SET_LOGNAME) = TRUE;
+    def_set_logname = TRUE;
 
     /* Syslog options need special care since they both strings and ints */
 #if (LOGGING & SLOG_SYSLOG)
@@ -452,33 +452,33 @@ init_defaults()
 
     /* Then initialize the int-like things. */
 #ifdef SUDO_UMASK
-    def_mode(I_UMASK) = SUDO_UMASK;
+    def_umask = SUDO_UMASK;
 #else
-    def_mode(I_UMASK) = 0777;
+    def_umask = 0777;
 #endif
-    def_ival(I_LOGLINELEN) = MAXLOGFILELEN;
-    def_ival(I_TIMESTAMP_TIMEOUT) = TIMEOUT;
-    def_ival(I_PASSWD_TIMEOUT) = PASSWORD_TIMEOUT;
-    def_ival(I_PASSWD_TRIES) = TRIES_FOR_PASSWORD;
+    def_loglinelen = MAXLOGFILELEN;
+    def_timestamp_timeout = TIMEOUT;
+    def_passwd_timeout = PASSWORD_TIMEOUT;
+    def_passwd_tries = TRIES_FOR_PASSWORD;
 
     /* Now do the strings */
-    def_str(I_MAILTO) = estrdup(MAILTO);
-    def_str(I_MAILSUB) = estrdup(MAILSUBJECT);
-    def_str(I_BADPASS_MESSAGE) = estrdup(INCORRECT_PASSWORD);
-    def_str(I_TIMESTAMPDIR) = estrdup(_PATH_SUDO_TIMEDIR);
-    def_str(I_PASSPROMPT) = estrdup(PASSPROMPT);
-    def_str(I_RUNAS_DEFAULT) = estrdup(RUNAS_DEFAULT);
+    def_mailto = estrdup(MAILTO);
+    def_mailsub = estrdup(MAILSUBJECT);
+    def_badpass_message = estrdup(INCORRECT_PASSWORD);
+    def_timestampdir = estrdup(_PATH_SUDO_TIMEDIR);
+    def_passprompt = estrdup(PASSPROMPT);
+    def_runas_default = estrdup(RUNAS_DEFAULT);
 #ifdef _PATH_SUDO_SENDMAIL
-    def_str(I_MAILERPATH) = estrdup(_PATH_SUDO_SENDMAIL);
-    def_str(I_MAILERFLAGS) = estrdup("-t");
+    def_mailerpath = estrdup(_PATH_SUDO_SENDMAIL);
+    def_mailerflags = estrdup("-t");
 #endif
 #if (LOGGING & SLOG_FILE)
-    def_str(I_LOGFILE) = estrdup(_PATH_SUDO_LOGFILE);
+    def_logfile = estrdup(_PATH_SUDO_LOGFILE);
 #endif
 #ifdef EXEMPTGROUP
-    def_str(I_EXEMPT_GROUP) = estrdup(EXEMPTGROUP);
+    def_exempt_group = estrdup(EXEMPTGROUP);
 #endif
-    def_str(I_EDITOR) = estrdup(EDITOR);
+    def_editor = estrdup(EDITOR);
 
     /* Finally do the lists (currently just environment tables). */
     init_envtables();
@@ -489,7 +489,7 @@ init_defaults()
      * value changes we get the change.
      */
     if (user_runas == NULL)
-	user_runas = &def_str(I_RUNAS_DEFAULT);
+	user_runas = &def_runas_default;
 
     firsttime = 0;
 }

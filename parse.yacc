@@ -127,7 +127,7 @@ int top = 0, stacksize = 0;
 	match[top].cmnd   = -1; \
 	match[top].host   = -1; \
 	match[top].runas  = -1; \
-	match[top].nopass = def_flag(I_AUTHENTICATE) ? -1 : TRUE; \
+	match[top].nopass = def_authenticate ? -1 : TRUE; \
 	top++; \
     } while (0)
 
@@ -366,7 +366,7 @@ privilege	:	hostlist '=' cmndspeclist {
 			     */
 			    host_matches = -1;
 			    runas_matches = -1;
-			    if (def_flag(I_AUTHENTICATE))
+			    if (def_authenticate)
 				no_passwd = -1;
 			    else
 				no_passwd = TRUE;
@@ -501,7 +501,7 @@ runasspec	:	/* empty */ {
 			     */
 			    if (runas_matches == -1)
 				runas_matches = (strcmp(*user_runas,
-				    def_str(I_RUNAS_DEFAULT)) == 0);
+				    def_runas_default) == 0);
 			}
 		|	RUNAS runaslist {
 			    runas_matches = ($2 == TRUE ? TRUE : FALSE);
@@ -1052,13 +1052,13 @@ list_matches()
 	    } while ((p = strtok(NULL, ", ")));
 	    (void) fputs(") ", stdout);
 	} else {
-	    (void) printf("(%s) ", def_str(I_RUNAS_DEFAULT));
+	    (void) printf("(%s) ", def_runas_default);
 	}
 
 	/* Is a password required? */
-	if (cm_list[count].nopasswd == TRUE && def_flag(I_AUTHENTICATE))
+	if (cm_list[count].nopasswd == TRUE && def_authenticate)
 	    (void) fputs("NOPASSWD: ", stdout);
-	else if (cm_list[count].nopasswd == FALSE && !def_flag(I_AUTHENTICATE))
+	else if (cm_list[count].nopasswd == FALSE && !def_authenticate)
 	    (void) fputs("PASSWD: ", stdout);
 
 	/* Print the actual command or expanded Cmnd_Alias. */

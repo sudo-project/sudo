@@ -71,6 +71,19 @@ close(HEADER);
 close(CFILE);
 
 sub print_record {
+    my ($v, $defname);
+    # each variable gets a macro to access its value
+    for ($type) {
+	if    (/^T_U?INT/)  { $v = "ival"; }
+	elsif (/^(T_STR|T_PWFLAG|T_LOG)/)    { $v = "str"; }
+	elsif (/^T_FLAG/)   { $v = "flag"; }
+	elsif (/^T_MODE/)   { $v = "mode"; }
+	elsif (/^T_LIST/)   { $v = "list"; }
+	else { die "$0: unknown defaults type: $type\n"; }
+    }
+    printf HEADER "#define %-24s(sudo_defs_table[$count].sd_un.${v})\n",
+	"def_${var}";
+
     $defname = "I_" . uc($var);
     printf HEADER "#define %-24s%d", $defname, $count;
     #print HEADER "\t/* $desc */" if defined($desc);

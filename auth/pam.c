@@ -212,7 +212,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		    && (pm->msg[9] != ' ' || pm->msg[10] != '\0')))
 		    p = pm->msg;
 		/* Read the password. */
-		pass = tgetpass(p, def_ival(I_PASSWD_TIMEOUT) * 60, flags);
+		pass = tgetpass(p, def_passwd_timeout * 60, flags);
 		pr->resp = estrdup(pass ? pass : "");
 		if (*pr->resp == '\0')
 		    nil_pw = 1;		/* empty password */

@@ -159,7 +159,7 @@ sudoers_lookup(pwflag)
      * wait until now to set this.
      */
     if (pwflag)
-	pwcheck = (pwflag == -1) ? PWCHECK_NEVER : def_ival(pwflag);
+	pwcheck = (pwflag == -1) ? PWCHECK_NEVER : sudo_defs_table[pwflag].sd_un.ival;
     else
 	pwcheck = 0;
 
@@ -167,7 +167,7 @@ sudoers_lookup(pwflag)
      * Assume the worst.  If the stack is empty the user was
      * not mentioned at all.
      */
-    if (def_flag(I_AUTHENTICATE))
+    if (def_authenticate)
 	error = VALIDATE_NOT_OK;
     else
 	error = VALIDATE_NOT_OK | FLAG_NOPASS;
@@ -188,7 +188,7 @@ sudoers_lookup(pwflag)
     if (pwcheck) {
 	int found;
 
-	if (pwcheck == PWCHECK_NEVER || !def_flag(I_AUTHENTICATE))
+	if (pwcheck == PWCHECK_NEVER || !def_authenticate)
 	    nopass = FLAG_NOPASS;
 	found = 0;
 	while (top) {

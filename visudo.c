@@ -259,7 +259,7 @@ main(argc, argv)
 	if (find_path(UserEditor, &Editor, getenv("PATH")) == FOUND) {
 	    UserEditor = Editor;
 	} else {
-	    if (def_flag(I_ENV_EDITOR)) {
+	    if (def_env_editor) {
 		/* If we are honoring $EDITOR this is a fatal error. */
 		warnx("specified editor (%s) doesn't exist!", UserEditor);
 		Exit(-1);
@@ -275,7 +275,7 @@ main(argc, argv)
      * we allow any $EDITOR or because $EDITOR is in the allowable list.
      */
     Editor = EditorPath = NULL;
-    if (def_flag(I_ENV_EDITOR) && UserEditor)
+    if (def_env_editor && UserEditor)
 	Editor = UserEditor;
     else if (UserEditor) {
 	struct stat editor_sb;
@@ -287,7 +287,7 @@ main(argc, argv)
 	    warn("unable to stat editor (%s)", UserEditor);
 	    Exit(-1);
 	}
-	EditorPath = estrdup(def_str(I_EDITOR));
+	EditorPath = estrdup(def_editor);
 	Editor = strtok(EditorPath, ":");
 	do {
 	    /*
@@ -317,13 +317,13 @@ main(argc, argv)
     }
 
     /*
-     * Can't use $EDITOR, try each element of I_EDITOR until we
+     * Can't use $EDITOR, try each element of def_editor until we
      * find one that exists, is regular, and is executable.
      */
     if (Editor == NULL || *Editor == '\0') {
 	if (EditorPath != NULL)
 	    free(EditorPath);
-	EditorPath = estrdup(def_str(I_EDITOR));
+	EditorPath = estrdup(def_editor);
 	Editor = strtok(EditorPath, ":");
 	do {
 	    if (sudo_goodpath(Editor))
@@ -332,7 +332,7 @@ main(argc, argv)
 
 	/* Bleah, none of the editors existed! */
 	if (Editor == NULL || *Editor == '\0') {
-	    warnx("no editor found (editor path = %s)", def_str(I_EDITOR));
+	    warnx("no editor found (editor path = %s)", def_editor);
 	    Exit(-1);
 	}
     }

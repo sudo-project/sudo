@@ -271,7 +271,7 @@ main(argc, argv, envp)
      */
 #if !defined(HAVE_SETRESUID) && !defined(HAVE_SETREUID) && \
     !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
-    if (!def_flag(I_STAY_SETUID) && set_perms == set_perms_posix) {
+    if (!def_stay_setuid && set_perms == set_perms_posix) {
 	if (setuid(0)) {
 	    perror("setuid(0)");
 	    exit(1);
@@ -300,16 +300,16 @@ main(argc, argv, envp)
     /*
      * Look up the timestamp dir owner if one is specified.
      */
-    if (def_str(I_TIMESTAMPOWNER)) {
+    if (def_timestampowner) {
 	struct passwd *pw;
 
-	if (*def_str(I_TIMESTAMPOWNER) == '#')
-	    pw = getpwuid(atoi(def_str(I_TIMESTAMPOWNER) + 1));
+	if (*def_timestampowner == '#')
+	    pw = getpwuid(atoi(def_timestampowner + 1));
 	else
-	    pw = getpwnam(def_str(I_TIMESTAMPOWNER));
+	    pw = getpwnam(def_timestampowner);
 	if (!pw)
 	    log_error(0, "timestamp owner (%s): No such user",
-		def_str(I_TIMESTAMPOWNER));
+		def_timestampowner);
 	timestamp_uid = pw->pw_uid;
     }
 
@@ -324,7 +324,7 @@ main(argc, argv, envp)
 	    errorlineno);
 
     /* Is root even allowed to run sudo? */
-    if (user_uid == 0 && !def_flag(I_ROOT_SUDO)) {
+    if (user_uid == 0 && !def_root_sudo) {
 	(void) fprintf(stderr,
 	    "Sorry, %s has been configured to not allow root to run it.\n",
 	    getprogname());
@@ -333,19 +333,19 @@ main(argc, argv, envp)
 
     /* If given the -P option, set the "preserve_groups" flag. */
     if (sudo_mode & MODE_PRESERVE_GROUPS)
-	def_flag(I_PRESERVE_GROUPS) = TRUE;
+	def_preserve_groups = TRUE;
 
     /* If no command line args and "set_home" is not set, error out. */
-    if ((sudo_mode & MODE_IMPLIED_SHELL) && !def_flag(I_SHELL_NOARGS))
+    if ((sudo_mode & MODE_IMPLIED_SHELL) && !def_shell_noargs)
 	usage(1);
 
     /* May need to set $HOME to target user if we are running a command. */
-    if ((sudo_mode & MODE_RUN) && (def_flag(I_ALWAYS_SET_HOME) ||
-	((sudo_mode & MODE_SHELL) && def_flag(I_SET_HOME))))
+    if ((sudo_mode & MODE_RUN) && (def_always_set_home ||
+	((sudo_mode & MODE_SHELL) && def_set_home)))
 	sudo_mode |= MODE_RESET_HOME;
 
     /* Bail if a tty is required and we don't have one.  */
-    if (def_flag(I_REQUIRETTY)) {
+    if (def_requiretty) {
 	if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1)
 	    log_error(NO_MAIL, "sorry, you must have a tty to run sudo");
 	else
@@ -389,8 +389,8 @@ main(argc, argv, envp)
 	}
 
 	/* Override user's umask if configured to do so. */
-	if (def_ival(I_UMASK) != 0777)
-	    (void) umask(def_mode(I_UMASK));
+	if (def_umask != 0777)
+	    (void) umask(def_umask);
 
 	/* Restore coredumpsize resource limit. */
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
@@ -430,7 +430,7 @@ main(argc, argv, envp)
 	log_auth(validated, 1);
 	exit(1);
     } else if (validated & VALIDATE_NOT_OK) {
-	if (def_flag(I_PATH_INFO)) {
+	if (def_path_info) {
 	    /*
 	     * We'd like to not leak path info at all here, but that can
 	     * *really* confuse the users.  To really close the leak we'd
@@ -492,7 +492,7 @@ init_vars(sudo_mode)
 	user_host = user_shost = "localhost";
     else {
 	user_host = estrdup(thost);
-	if (def_flag(I_FQDN)) {
+	if (def_fqdn) {
 	    /* Defer call to set_fqdn() until log_error() is safe. */
 	    user_shost = user_host;
 	} else {
@@ -546,7 +546,7 @@ init_vars(sudo_mode)
     /*
      * Must defer set_fqdn() until it is safe to call log_error()
      */
-    if (def_flag(I_FQDN))
+    if (def_fqdn)
 	set_fqdn();
 
     if (nohostname)
@@ -691,7 +691,7 @@ parse_args(argc, argv)
 		    usage(1);
 
 		login_class = NewArgv[1];
-		def_flag(I_USE_LOGINCLASS) = TRUE;
+		def_use_loginclass = TRUE;
 
 		NewArgc--;
 		NewArgv++;
@@ -992,14 +992,14 @@ get_authpw()
 {
     struct passwd *pw;
 
-    if (def_ival(I_ROOTPW)) {
+    if (def_rootpw) {
 	if ((pw = sudo_getpwuid(0)) == NULL)
 	    log_error(0, "uid 0 does not exist in the passwd file!");
-    } else if (def_ival(I_RUNASPW)) {
-	if ((pw = sudo_getpwnam(def_str(I_RUNAS_DEFAULT))) == NULL)
+    } else if (def_runaspw) {
+	if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
 	    log_error(0, "user %s does not exist in the passwd file!",
-		def_str(I_RUNAS_DEFAULT));
-    } else if (def_ival(I_TARGETPW)) {
+		def_runas_default);
+    } else if (def_targetpw) {
 	if (**user_runas == '#') {
 	    if ((pw = sudo_getpwuid(atoi(*user_runas + 1))) == NULL)
 		log_error(0, "uid %s does not exist in the passwd file!",

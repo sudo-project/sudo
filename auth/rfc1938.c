@@ -143,7 +143,7 @@ rfc1938_setup(pw, promptp, auth)
 	new_prompt = (char *) erealloc(new_prompt, np_size);
     }
 
-    if (def_flag(I_LONG_OTP_PROMPT))
+    if (def_long_otp_prompt)
 	(void) snprintf(new_prompt, np_size, "%s\n%s", challenge, orig_prompt);
     else
 	(void) snprintf(new_prompt, np_size, "%.*s [ %s ]:", op_len,

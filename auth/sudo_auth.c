@@ -113,7 +113,7 @@ verify_user(pw, prompt)
     struct passwd *pw;
     char *prompt;
 {
-    int counter = def_ival(I_PASSWD_TRIES) + 1;
+    int counter = def_passwd_tries + 1;
     int success = AUTH_FAILURE;
     int status;
     int flags;
@@ -178,7 +178,7 @@ verify_user(pw, prompt)
 #ifdef AUTH_STANDALONE
 	p = prompt;
 #else
-	p = (char *) tgetpass(prompt, def_ival(I_PASSWD_TIMEOUT) * 60,
+	p = (char *) tgetpass(prompt, def_passwd_timeout * 60,
 	    tgetpass_flags);
 	if (!p || *p == '\0')
 	    nil_pw = 1;
@@ -207,7 +207,7 @@ verify_user(pw, prompt)
 
 	/* Exit loop on nil password, but give it a chance to match first. */
 	if (nil_pw) {
-	    if (counter == def_ival(I_PASSWD_TRIES))
+	    if (counter == def_passwd_tries)
 		exit(1);
 	    else
 		break;
@@ -237,13 +237,13 @@ cleanup:
 	    (void) sigaction(SIGTSTP, &osa, NULL);
 	    return;
 	case AUTH_FAILURE:
-	    if (def_flag(I_MAIL_BADPASS) || def_flag(I_MAIL_ALWAYS))
+	    if (def_mail_badpass || def_mail_always)
 		flags = 0;
 	    else
 		flags = NO_MAIL;
 	    log_error(flags, "%d incorrect password attempt%s",
-		def_ival(I_PASSWD_TRIES) - counter,
-		(def_ival(I_PASSWD_TRIES) - counter == 1) ? "" : "s");
+		def_passwd_tries - counter,
+		(def_passwd_tries - counter == 1) ? "" : "s");
 	case AUTH_FATAL:
 	    exit(1);
     }
@@ -256,11 +256,11 @@ pass_warn(fp)
 {
 
 #ifdef INSULT
-    if (def_flag(I_INSULTS))
+    if (def_insults)
 	(void) fprintf(fp, "%s\n", INSULT);
     else
 #endif
-	(void) fprintf(fp, "%s\n", def_str(I_BADPASS_MESSAGE));
+	(void) fprintf(fp, "%s\n", def_badpass_message);
 }
 
 void

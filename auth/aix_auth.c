@@ -79,7 +79,7 @@ aixauth_verify(pw, prompt, auth)
     int reenter = 1;
     int rval = AUTH_FAILURE;
 
-    pass = tgetpass(prompt, def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags);
+    pass = tgetpass(prompt, def_passwd_timeout * 60, tgetpass_flags);
     if (pass) {
 	if (authenticate(pw->pw_name, (char *)pass, &reenter, &message) == 0)
 	    rval = AUTH_SUCCESS;

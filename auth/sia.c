@@ -90,8 +90,8 @@ sudo_collect(timeout, rendition, title, nprompts, prompts)
     switch (rendition) {
 	case SIAFORM:
 	case SIAONELINER:
-	    if (timeout <= 0 || timeout > def_ival(I_PASSWD_TIMEOUT) * 60)
-		timeout = def_ival(I_PASSWD_TIMEOUT) * 60;
+	    if (timeout <= 0 || timeout > def_passwd_timeout * 60)
+		timeout = def_passwd_timeout * 60;
 	    /*
 	     * Substitute custom prompt if a) the sudo prompt is not "Password:"
 	     * and b) the SIA prompt is "Password:" (so we know it is safe).

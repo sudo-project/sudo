@@ -137,9 +137,9 @@ bsdauth_verify(pw, prompt, auth)
      * S/Key.
      */
     if ((s = auth_challenge(as)) == NULL) {
-	pass = tgetpass(prompt, def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags);
+	pass = tgetpass(prompt, def_passwd_timeout * 60, tgetpass_flags);
     } else {
-	pass = tgetpass(s, def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags);
+	pass = tgetpass(s, def_passwd_timeout * 60, tgetpass_flags);
 	if (pass && *pass == '\0') {
 	    if ((prompt = strrchr(s, '\n')))
 		prompt++;
@@ -154,7 +154,7 @@ bsdauth_verify(pw, prompt, auth)
 	    while (isspace(prompt[len]) || prompt[len] == ':')
 		prompt[len--] = '\0';
 	    easprintf(&s, "%s [echo on]: ", prompt);
-	    pass = tgetpass(s, def_ival(I_PASSWD_TIMEOUT) * 60,
+	    pass = tgetpass(s, def_passwd_timeout * 60,
 		tgetpass_flags | TGP_ECHO);
 	    free(s);
 	}

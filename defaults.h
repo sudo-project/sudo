@@ -107,15 +107,6 @@ struct sudo_defs_types {
 #define I_BADPRI	I_SYSLOG_IBADPRI 
 
 /*
- * Macros for accessing sudo_defs_table.
- */
-#define def_flag(_i)	(sudo_defs_table[(_i)].sd_un.flag)
-#define def_ival(_i)	(sudo_defs_table[(_i)].sd_un.ival)
-#define def_str(_i)	(sudo_defs_table[(_i)].sd_un.str)
-#define def_list(_i)	(sudo_defs_table[(_i)].sd_un.list)
-#define def_mode(_i)	(sudo_defs_table[(_i)].sd_un.mode)
-
-/*
  * Prototypes
  */
 void dump_default	__P((void));

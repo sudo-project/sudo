@@ -184,7 +184,7 @@ securid_verify(pw, pass, auth)
     int rval;
 
     pass = (char *) tgetpass("Enter your PASSCODE: ",
-	def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags);
+	def_passwd_timeout * 60, tgetpass_flags);
 
     /* Have ACE verify password */
     switch (SD_Check(*sd, pass, pw->pw_name)) {
@@ -214,7 +214,7 @@ securid_verify(pw, pass, auth)
 !!! ATTENTION !!!\n\
 Wait for the token code to change, \n\
 then enter the new token code.\n", \
-		def_ival(I_PASSWD_TIMEOUT) * 60, tgetpass_flags);
+		def_passwd_timeout * 60, tgetpass_flags);
 
 		if (SD_Next(*sd, pass) == ACM_OK) {
 			rval = AUTH_SUCCESS;
