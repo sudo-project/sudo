@@ -27,7 +27,6 @@
  */
 
 #include "config.h"
-#include "pathnames.h"
 
 #include <stdio.h>
 #ifdef HAVE_UNISTD_H
@@ -57,6 +56,7 @@
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
+#include "pathnames.h"
 #include "compat.h"
 
 #ifndef _PASSWD_LEN
