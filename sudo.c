@@ -238,23 +238,27 @@ main(argc, argv)
 	    if (sudo_mode == MODE_BACKGROUND && fork() > 0) {
 		exit(0);
 	    } else {
-		struct stat st;
-
 		/*
 		 * Make sure we are not being spoofed.  The stat should
 		 * be cheap enough to make this almost bulletproof.
 		 */
-		if (stat(cmnd, &st) < 0) {
-		    fprintf(stderr, "%s: unable to stat %s:", Argv[0], cmnd);
-		    perror("");
-		    exit(1);
-		}
+		if (cmnd_st.st_dev) {
+		    struct stat st;
 
-		if (st.st_dev != cmnd_st.st_dev || st.st_ino != cmnd_st.st_ino) {
-		    /* log and send mail, then bitch */
-		    log_error(SPOOF_ATTEMPT);
-		    inform_user(SPOOF_ATTEMPT);
-		    exit(1);
+		    if (stat(cmnd, &st) < 0) {
+			fprintf(stderr, "%s: unable to stat %s:", Argv[0],
+					cmnd);
+			perror("");
+			exit(1);
+		    }
+
+		    if (st.st_dev != cmnd_st.st_dev ||
+			st.st_ino != cmnd_st.st_ino) {
+			/* log and send mail, then bitch */
+			log_error(SPOOF_ATTEMPT);
+			inform_user(SPOOF_ATTEMPT);
+			exit(1);
+		    }
 		}
 
 		EXEC(cmnd, &Argv[1]);
