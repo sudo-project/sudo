@@ -124,5 +124,5 @@ enum def_tupple {
 	once,
 	always,
 	any,
-	all,
+	all
 };
