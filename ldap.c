@@ -551,7 +551,7 @@ sudo_ldap_read_config()
 /*
   like perl's join(sep,@ARGS)
 */
-char * 
+char *
 _ldap_join_values(sep,v)
   char *sep;
   char **v;
@@ -584,7 +584,7 @@ size_t sudo_ldap_cm_list_size;
  * Walks through search result and returns true if we have a
  * command match
  */
-int 
+int
 sudo_ldap_add_match(ld,entry)
   LDAP *ld;
   LDAPMessage *entry;
@@ -595,7 +595,7 @@ sudo_ldap_add_match(ld,entry)
 
   /* if we are not collecting matches, then don't print them */
   if (printmatches != TRUE) return 1;
- 
+
   /* collect the dn, only show the rdn */
   dn=ldap_get_dn(ld,entry);
   edn=dn ? ldap_explode_dn(dn,1) : NULL;
@@ -827,7 +827,7 @@ int pwflag;
   if (pwflag && ldap_user_matches && ldap_host_matches){
     /*
      * Handle verifypw & listpw
-     * 
+     *
      * To be extra paranoid, since we haven't read any NOPASSWD options
      * in /etc/sudoers yet, but we have to make the decission now, lets
      * assume the worst and prefer to prompt for password unless the setting
@@ -850,7 +850,7 @@ int pwflag;
     /* Same logic with noexec */
     if (def_noexec)        SET(ret,FLAG_NOEXEC);
   } else {
-    /* we do not have a match */   
+    /* we do not have a match */
     ret=VALIDATE_NOT_OK;
     if (!ldap_user_matches) SET(ret,FLAG_NO_USER);
     else if (!ldap_host_matches) SET(ret,FLAG_NO_HOST);

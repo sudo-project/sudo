@@ -38,13 +38,13 @@
 /*
  * Maximum number of characters to log per entry.  The syslogger
  * will log this much, after that, it truncates the log line.
- * We need this here to make sure that we continue with another   
+ * We need this here to make sure that we continue with another
  * syslog(3) call if the internal buffer is more than 1023 characters.
  */
 #ifndef MAXSYSLOGLEN
 # define MAXSYSLOGLEN		960
 #endif
-      
+
 void log_auth			__P((int, int));
 void log_error			__P((int flags, const char *fmt, ...));
 RETSIGTYPE reapchild		__P((int));

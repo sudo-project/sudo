@@ -480,7 +480,7 @@ usergr_matches(group, user, pw)
 	return(FALSE);
     pw_gid = pw->pw_gid;
 
-    if ((grp = getgrnam(group)) == NULL) 
+    if ((grp = getgrnam(group)) == NULL)
 	return(FALSE);
 
     /* check against user's primary (passwd file) gid */
@@ -548,7 +548,7 @@ has_meta(s)
     char *s;
 {
     char *t;
-    
+ 
     for (t = s; *t; t++) {
 	if (*t == '\\' || *t == '?' || *t == '*' || *t == '[' || *t == ']')
 	    return(TRUE);

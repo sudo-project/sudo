@@ -245,7 +245,7 @@ yyerror(s)
 %token <tok>	 ERROR
 
 /*
- * NOTE: these are not true booleans as there are actually 4 possible values: 
+ * NOTE: these are not true booleans as there are actually 4 possible values:
  *        1) TRUE (positive match)
  *        0) FALSE (negative match due to a '!' somewhere)
  *       -1) NOMATCH (don't change the value of *_matches)
@@ -1034,7 +1034,7 @@ dumpaliases()
 void
 list_matches()
 {
-    size_t count; 
+    size_t count;
     char *p;
     struct generic_alias *ga, key;
 
@@ -1219,8 +1219,8 @@ init_parser()
 	match = NULL;
 	top = 0;
 	parse_error = FALSE;
-	errorlineno = -1;   
-	sudolineno = 1;     
+	errorlineno = -1;
+	sudolineno = 1;
     }
 
     /* Allocate space for the matching stack. */

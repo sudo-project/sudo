@@ -108,7 +108,7 @@ has_meta(s)
     char *s;
 {
     char *t;
-    
+
     for (t = s; *t; t++) {
 	if (*t == '\\' || *t == '?' || *t == '*' || *t == '[' || *t == ']')
 	    return(TRUE);
@@ -133,7 +133,7 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
     if (cmnd == NULL)
 	return(FALSE);
 
-    if ((args = strchr(path, ' ')))  
+    if ((args = strchr(path, ' ')))
 	*args++ = '\0';
 
     if (has_meta(path)) {
@@ -198,7 +198,7 @@ addr_matches(n)
 	    mask.s_addr <<= i;
 	    mask.s_addr = htonl(mask.s_addr);
 	}
-	*(m - 1) = '/';               
+	*(m - 1) = '/';
 
 	for (i = 0; i < num_interfaces; i++)
 	    if ((interfaces[i].addr.s_addr & mask.s_addr) == addr.s_addr)
@@ -222,8 +222,8 @@ hostname_matches(shost, lhost, pattern)
     char *lhost;
     char *pattern;
 {
-    if (has_meta(pattern)) {  
-        if (strchr(pattern, '.'))   
+    if (has_meta(pattern)) {
+        if (strchr(pattern, '.'))
             return(fnmatch(pattern, lhost, FNM_CASEFOLD));
         else
             return(fnmatch(pattern, shost, FNM_CASEFOLD));
@@ -262,7 +262,7 @@ usergr_matches(group, user, pw)
     if (*group++ != '%')
 	return(FALSE);
 
-    if ((grp = getgrnam(group)) == NULL) 
+    if ((grp = getgrnam(group)) == NULL)
 	return(FALSE);
 
     /*
@@ -331,12 +331,12 @@ set_fqdn()
     return;
 }
 
-int 
+int
 set_runaspw(user)
     char *user;
 {
     return(TRUE);
-} 
+}
 
 void
 init_envtables()
