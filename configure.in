@@ -70,9 +70,6 @@ case "$OS" in
 		if test -z "$GCC"; then
 		    STATIC_FLAGS="-bnso -bI:/lib/syscalls.exp -bI:./aixcrypt.exp -liconv -bnodelcsect"
 		fi
-		if test -n "$AFS" ; then
-		    LIBS="${LIBS} -ls"
-		fi
 		;;
     "hp-ux")	echo "Looks like HP-UX"
 		if test -z "$GCC"; then
