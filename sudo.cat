@@ -1,7 +1,7 @@
 
 
 
-sudo(8)                MAINTENANCE COMMANDS               sudo(8)
+sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
 NNNNAAAAMMMMEEEE
@@ -67,7 +67,7 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-sudo(8)                MAINTENANCE COMMANDS               sudo(8)
+sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
        -h  The -h (_h_e_l_p) option causes ssssuuuuddddoooo to print a usage
@@ -133,7 +133,7 @@ sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
 
-sudo(8)                MAINTENANCE COMMANDS               sudo(8)
+sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
        -H  The -H (_H_O_M_E) option sets the _H_O_M_E environment
@@ -199,7 +199,7 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 
 
 
-sudo(8)                MAINTENANCE COMMANDS               sudo(8)
+sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
        files via _c_h_o_w_n(2), if the timestamp directory is located
@@ -265,7 +265,7 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
 
 
 
-sudo(8)                MAINTENANCE COMMANDS               sudo(8)
+sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
         PATH                   Set to a sane value if SECURE_PATH is set
@@ -331,7 +331,7 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 
 
 
-sudo(8)                MAINTENANCE COMMANDS               sudo(8)
+sudo(1m)               MAINTENANCE COMMANDS              sudo(1m)
 
 
        directory, setuid shell scripts are generally safe).
