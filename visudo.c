@@ -1,15 +1,5 @@
 /*
- * CU sudo version 1.3.1 (based on Root Group sudo version 1.1)
- *
- * This software comes with no waranty whatsoever, use at your own risk.
- *
- * Please send bugs, changes, problems to sudo-bugs@cs.colorado.edu
- *
- */
-
-/*
- *  sudo version 1.1 allows users to execute commands as root
- *  Copyright (C) 1991  The Root Group, Inc.
+ *  CU sudo version 1.3.1
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,12 +15,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- **************************************************************************
- * visudo.c, sudo project
- * David R. Hieb
- * March 18, 1991
+ *  Please send bugs, changes, problems to sudo-bugs@cs.colorado.edu
  *
- * edit, lock and parse the sudoers file in a fashion similiar to /etc/vipw.
+ *******************************************************************
+ *
+ *  visudo.c -- locks the sudoers file for safe editing and check
+ *  for parse errors.
+ *
+ *  Todd C. Miller (millert@colorado.edu) Sat Mar 25 21:50:36 MST 1995
  */
 
 #ifndef lint
@@ -46,10 +38,17 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif /* HAVE_STRINGS_H */
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif /* HAVE_MALLOC_H */
 #include <pwd.h>
 #include <errno.h>
-#include <signal.h>
-#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
@@ -61,85 +60,67 @@ static char rcsid[] = "$Id$";
 #include "version.h"
 
 #ifndef STDC_HEADERS
+#ifndef __GNUC__	/* gcc has its own malloc */
+extern char *malloc	__P((size_t));
+#endif /* __GNUC__ */
 extern char *getenv	__P((const char *));
+extern int stat		__P((const char *, struct stat *));
 #endif /* !STDC_HEADERS */
 
-extern FILE *yyin, *yyout;
-extern int errorlineno;
+#if defined(POSIX_SIGNALS) && !defined(SA_RESETHAND)
+#define SA_RESETHAND    0
+#endif /* POSIX_SIGNALS && !SA_RESETHAND */
 
-#ifndef SA_RESETHAND
-#define SA_RESETHAND	0
-#endif /* SA_RESETHAND */
+/*
+ * Function prototypes
+ */
+static void usage	__P((void));
+static RETSIGTYPE Exit	__P((int));
+int path_matches	__P((char *, char *));
+int ntwk_matches	__P((char *));
+
+
+/*
+ * External globals
+ */
+extern FILE *yyin, *yyout;
+extern int errorlineno, sudolineno;
+
 
 /*
  * Globals
  */
 char **Argv;
-char buffer[BUFSIZ];
 char *sudoers = _PATH_SUDO_SUDOERS;
-char *sudoers_tmp_file = _PATH_SUDO_STMP;
+char *stmp = _PATH_SUDO_STMP;
 int parse_error = FALSE;
 
+
+/*
+ * For the parsing routines
+ */
 char host[] = "";
 char *user = "";
 char *cmnd = "";
 
 
-/*
- * local functions not visible outside visudo.c
- */
-static void usage	__P((void));
-static RETSIGTYPE Exit	__P((int));
-
-
-/* dummy *_matches routines */
-int
-path_matches(cmnd, path)
-char *cmnd, *path;
-{
-    return(TRUE);
-}
-
-int
-ntwk_matches(n)
-char *n;
-{
-    return(TRUE);
-}
-
-
-main(argc, argv)
+int main(argc, argv)
     int argc;
     char **argv;
 {
-    int sudoers_fd;
-    int sudoers_tmp_fd;
-    FILE *sudoers_tmp_fp;
-    int num_chars;
-    struct stat sbuf;
-    struct passwd *sudoers_pw;
-    char * Editor = EDITOR;
+    char buf[BUFSIZ];			/* buffer used for copying files */
+    char * Editor = EDITOR;		/* Editor to use (default is EDITOR */
+    int sudoers_fd;			/* sudoers file descriptor */
+    int stmp_fd;			/* stmp file descriptor */
+    int n;				/* length parameter */
+    struct passwd *pwd;			/* to look up info for SUDOERS_OWNER */
 #ifdef POSIX_SIGNALS
-    struct sigaction action;
+    struct sigaction action;		/* posix signal structure */
 #endif /* POSIX_SIGNALS */
 
-    Argv = argv;
-
-    if (argc > 1) {
-	/*
-	 * print version string and exit if we got -V
-	 */
-	if (!strcmp(Argv[1], "-V")) {
-	    (void) printf("visudo version %s\n", version);
-	    exit(0);
-	} else {
-	    usage();
-	}
-
-    }
 
     /*
-     * handle the signals
+     * Setup signal handlers
      */
 #ifdef POSIX_SIGNALS
     (void) bzero((char *)(&action), sizeof(action));
@@ -168,194 +149,243 @@ main(argc, argv)
     (void) signal(SIGQUIT, SIG_IGN);
 #endif /* POSIX_SIGNALS */
 
-    /*
-     * need to lookup passwd entry for sudoers file owner
-     */
-    if (!(sudoers_pw = getpwnam(SUDOERS_OWNER))) {
-	(void) fprintf(stderr,
-                       "%s:  no passwd entry for sudoers file owner (%s)\n",
-		       Argv[0], SUDOERS_OWNER);
-	exit(1);
-    }
-
-    setbuf(stderr, NULL);
+    (void) setbuf(stderr, (char *)NULL);	/* unbuffered stderr */
 
     /*
-     * we only want SUDOERS_OWNER to be able to read/write the sudoers_tmp_file
+     * Parse command line options
      */
-    umask(077);
+    Argv = argv;
+
+    /*
+     * If passesd -V then print version, else print usage
+     * if any other option...
+     */
+    if (argc == 2)
+	if (!strcmp(Argv[1], "-V")) {
+	    (void) printf("visudo version %s\n", version);
+	    Exit(0);
+	} else {
+	    usage();
+	}
+    else if (argc != 1)
+	usage();
 
 #ifdef ENV_EDITOR
     /*
-     * set up the Editor variable correctly
+     * If we are allowing EDITOR and VISUAL envariables set Editor
+     * base on whichever exists...
      */
-    if ( (Editor = getenv("EDITOR")) == NULL)
-	if ( (Editor = getenv("VISUAL")) == NULL )
+    if (!(Editor = getenv("EDITOR")))
+	if (!(Editor = getenv("VISUAL")))
 	    Editor = EDITOR;
 #endif /* ENV_EDITOR */
 
     /*
-     * open the sudoers file read only
+     * Need to find who should own the sudoers file
      */
-    if ((sudoers_fd = open(sudoers, O_RDONLY)) < 0) {
+    if (!(pwd = getpwnam(SUDOERS_OWNER))) {
+	(void) fprintf(stderr,
+		       "%s:  no passwd entry for sudoers file owner (%s)\n",
+		       Argv[0], SUDOERS_OWNER);
+	Exit(1);
+    }
+
+    /*
+     * Copy sudoers file to stmp
+     */
+    stmp_fd = open(stmp, O_WRONLY | O_CREAT | O_EXCL, 0600);
+    if (stmp_fd < 0) {
+	if (errno == EEXIST) {
+	    (void) fprintf(stderr, "%s: sudoers file busy\n", Argv[0]);
+	    Exit(1);
+	}
+	(void) fprintf(stderr, "%s: ", Argv[0]);
+	perror(stmp);
+	Exit(1);
+    }
+
+    sudoers_fd = open(sudoers, O_RDONLY);
+    if (sudoers_fd < 0) {
 	(void) fprintf(stderr, "%s: ", Argv[0]);
 	perror(sudoers);
 	Exit(1);
     }
 
     /*
-     * open the temporary sudoers file with the correct flags
+     * Copy the data
      */
-    if ((sudoers_tmp_fd = open(sudoers_tmp_file, O_WRONLY | O_CREAT | O_EXCL,
-        0600)) < 0) {
-	if (errno == EEXIST) {
-	    (void) fprintf(stderr, "%s: sudoers file busy\n", Argv[0]);
-	    exit(1);
-	}
-	(void) fprintf(stderr, "%s: ", Argv[0]);
-	perror(sudoers_tmp_file);
-	exit(1);
-    }
-
-    /*
-     * transfer the contents of the sudoers file to the temporary sudoers file
-     */
-    while ((num_chars = read(sudoers_fd, buffer, sizeof(buffer))) > 0)
-	(void) write(sudoers_tmp_fd, buffer, num_chars);
-
-    (void) close(sudoers_fd);
-    (void) close(sudoers_tmp_fd);
-
-    /*
-     * make sudoers_tmp_file owned by SUDOERS_OWNER so sudo(8) can read it.
-     */
-    (void) chown(sudoers_tmp_file, sudoers_pw -> pw_uid, -1);
-
-    do {
-	/*
-	 * build strings in buffer to be executed by system()
-	 */
-	if (parse_error)
-	    (void) sprintf(buffer, "%s +%d %s", Editor, errorlineno,
-		sudoers_tmp_file);
-	else
-	    (void) sprintf(buffer, "%s %s", Editor, sudoers_tmp_file);
-
-	/* edit the file */
-	if (system(buffer) == 0) {
-
-	    /* can't stat file */
-	    if (stat(sudoers_tmp_file, &sbuf) < 0) {
-		(void) fprintf(stderr,
-		    "%s: can't stat temporary file, %s unchanged\n", sudoers,
-		    Argv[0]);
-		Exit(1);
-	    }
-
-	    /* file has size == 0 */
-	    if (sbuf.st_size == 0) {
-		(void) fprintf(stderr, "%s: bad temporary file, %s unchanged\n",
-                               sudoers, Argv[0]);
-		Exit(1);
-	    }
-
-	    /* re-open the sudoers file for parsing */
-	    if ((sudoers_tmp_fp = fopen(sudoers_tmp_file, "r")) == NULL) {
-		(void) fprintf(stderr,
-		    "%s: can't re-open temporary file, %s unchanged\n",
-		    sudoers, Argv[0]);
-		Exit(1);
-	    }
-
-	    yyin = sudoers_tmp_fp;
-	    yyout = stdout;
-
-	    /* clean slate for each parse */
-	    parse_error = FALSE;
-
-	    /* parse the file */
-	    if (yyparse()) {
-		(void) fprintf(stderr, "yyparse() failed\n");
-		Exit(1);
-	    }
-
-	    (void) fclose(sudoers_tmp_fp);
-	}
-    } while (parse_error);
-
-    /*
-     * Once the temporary sudoers file is gramatically correct, we can 
-     * rename it to the real sudoers file.  If the rename(2) fails
-     * we try using mv(1) in case the temp and sudoers files are on
-     * different filesystems.
-     */
-    if (rename(sudoers_tmp_file, sudoers) != 0) {
-	int status, len;
-	char *tmpbuf;
-
-	/* Print a warning/error */
-	(void) fprintf(stderr, "%s: ", Argv[0]);
-	perror("rename");
-
-	/* Allocate just enough space for tmpbuf */
-	len = sizeof(char) * (strlen(_PATH_MV) + strlen(sudoers_tmp_file) +
-	    strlen(sudoers) + 4);
-	if ((tmpbuf = (char *) malloc(len)) == NULL) {
-	    (void) fprintf(stderr, "%s: cannot allocate memory: ", Argv[0]);
+    while ((n = read(sudoers_fd, buf, sizeof(buf))) > 0)
+	if (write(stmp_fd, buf, n) != n) {
+	    (void) fprintf(stderr, "%s: Write failed: ", Argv[0]);
 	    perror("");
 	    Exit(1);
 	}
 
-	(void) sprintf(tmpbuf, "%s %s %s", _PATH_MV, sudoers_tmp_file, sudoers);
-	status = system(tmpbuf);
-	status = status >> 8;
-	if (status) {
-	    (void) fprintf(stderr, "Command failed: '%s', %s unchanged.\n",
-		tmpbuf, sudoers);
-	    Exit(1);
-	} else {
-	    (void) fprintf(stderr, "Used '%s' instead.\n", tmpbuf);
-	}
-	(void) free(tmpbuf);
-    }
+    (void) close(sudoers_fd);
+    (void) close(stmp_fd);
 
     /*
-     * The chmod is a non-fatal error.
+     * Change ownership of temp file to SUDOERS_OWNER
+     * so when we move it to sudoers things are kosher.
      */
-    if (chmod(sudoers, 0400) != 0) {
+    (void) chown(stmp, pwd -> pw_uid, -1);
+
+    /*
+     * Edit the temp file and parse it (for sanity checking)
+     */
+    do {
+	/*
+	 * Build up a buffer to execute
+	 */
+	if (parse_error == TRUE)
+	    (void) sprintf(buf, "%s +%d %s", Editor, errorlineno, stmp);
+	else
+	    (void) sprintf(buf, "%s %s", Editor, stmp);
+
+	/* do the edit */
+	if (system(buf) == 0) {
+	    struct stat statbuf;	/* for sanity checking */
+
+	    /* make sure stmp exists */
+	    if (stat(stmp, &statbuf) < 0) {
+		(void) fprintf(stderr,
+		    "%s: Can't stat temporary file (%s), %s unchanged.\n",
+		    Argv[0], stmp, sudoers);
+		Exit(1);
+	    }
+
+	    /* check for zero length file */
+	    if (statbuf.st_size == 0) {
+		(void) fprintf(stderr,
+		    "%s: Zero length temporary file (%s), %s unchanged.\n",
+		    Argv[0], stmp, sudoers);
+		Exit(1);
+	    }
+
+	    /*
+	     * passed sanity checks so reopen stmp file and check
+	     * for parse errors.
+	     */
+	    yyout = stdout;
+	    yyin = fopen(stmp, "r");
+	    if (yyin == NULL) {
+		(void) fprintf(stderr,
+		    "%s: Can't re-open temporary file (%s), %s unchanged.\n",
+		    Argv[0], stmp, sudoers);
+		Exit(1);
+	    }
+
+	    /* clean slate for each parse */
+	    parse_error = FALSE;
+	    errorlineno = -1;
+	    sudolineno = 1;
+
+	    /* parse the sudoers file */
+	    if (yyparse()) {
+		(void) fprintf(stderr,
+		    "%s: Failed to parse temporary file (%s), %s unchanged.\n",
+		    Argv[0], stmp, sudoers);
+		Exit(1);
+	    }
+
+	    (void) fclose(yyin);
+	} else {
+	    (void) fprintf(stderr, "%s: Editor (%s) failed, %s unchanged.\n",
+		Argv[0], Editor, sudoers);
+	    Exit(1);
+	}
+
+	/* XXX - do whatnow() here */
+    } while (parse_error == TRUE);
+
+    /*
+     * Now that we have a sane stmp file (parse ok) it needs to be
+     * rename(2)'d to sudoers.  If the rename(2) fails we try using
+     * mv(1) in case stmp and sudoers are on different filesystems.
+     */
+    if (rename(stmp, sudoers))
+	if (errno == EXDEV) {
+	    char *tmpbuf;
+
+	    (void) fprintf(stderr,
+	      "%s: %s and %s not on the same filesystem, using mv to rename.\n",
+	      Argv[0], stmp, sudoers);
+
+	    /* Allocate just enough space for tmpbuf */
+	    n = sizeof(char) * (strlen(_PATH_MV) + strlen(stmp) +
+		  strlen(sudoers) + 4);
+	    if ((tmpbuf = (char *) malloc(n)) == NULL) {
+		(void) fprintf(stderr,
+			      "%s: Cannot alocate memory, %s unchanged: ",
+			      Argv[0], sudoers);
+		perror("");
+		Exit(1);
+	    }
+
+	    /* Build up command and execute it */
+	    (void) sprintf(tmpbuf, "%s %s %s", _PATH_MV, stmp, sudoers);
+	    if (system(tmpbuf)) {
+		(void) fprintf(stderr,
+			       "%s: Command failed: '%s', %s unchanged.\n",
+			       Argv[0], tmpbuf, sudoers);
+		Exit(1);
+	    }
+	    (void) free(tmpbuf);
+	} else {
+	    (void) fprintf(stderr, "%s: Error renaming %s, %s unchanged: ",
+				   Argv[0], stmp, sudoers);
+	    perror("");
+	    Exit(1);
+	}
+
+    /*
+     * Make the new sudoers file readable only by owner.
+     * If this fail it is ok since the file is only least rw owner.
+     */
+    if (chmod(sudoers, 0400)) {
 	(void) fprintf(stderr, "%s: Warning, unable to chmod 0400 %s: ",
 	    Argv[0], sudoers);
 	perror("");
     }
 
-    exit(0);
+    return(0);
 }
 
 
-/**********************************************************************
- *
- * usage()
- *
- *  this function just gives you instructions and exits
+/*
+ * dummy *_matches routines
  */
+int path_matches(cmnd, path)
+    char *cmnd, *path;
+{
+    return(TRUE);
+}
 
+
+int ntwk_matches(n)
+    char *n;
+{
+    return(TRUE);
+}
+
+
+/*
+ * usage() -- prints a help message and exits.
+ */
 static void usage()
 {
     (void) fprintf(stderr, "usage: %s [-V]\n", Argv[0]);
-    exit(1);
+    Exit(1);
 }
 
 
-/**********************************************************************
- *
- * Exit()
- *
- *  this function cleans up and exits
+/*
+ * Exit() -- unlinks the sudoers temp file (if there) and exits.
+ *           Used in place of a normal exit() and as a signal handler.
  */
-
 static RETSIGTYPE Exit(sig)
     int sig;
 {
-    (void) unlink(sudoers_tmp_file);
+    (void) unlink(stmp);
     exit(sig);
 }
