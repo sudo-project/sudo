@@ -47,19 +47,22 @@
 #include <siad.h>
 
 #include "sudo.h"
+#include "sudo_auth.h"
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-static int tcollect	__P((int, int, uchar_t *, int, prompt_t *));
+static int sudo_collect	__P((int, int, uchar_t *, int, prompt_t *));
+
+static char *def_prompt;
 
 /*
  * Collection routine (callback) for limiting the timeouts in SIA
  * prompts and (possibly) setting a custom prompt.
  */
 static int
-tcollect(timeout, rendition, title, nprompts, prompts)
+sudo_collect(timeout, rendition, title, nprompts, prompts)
     int timeout;
     int rendition;
     uchar_t *title;
@@ -76,10 +79,9 @@ tcollect(timeout, rendition, title, nprompts, prompts)
 	     * and b) the SIA prompt is "Password:" (so we know it is safe).
 	     * This keeps us from overwriting things like S/Key challenges.
 	     */
-	    /* XXX avoid "prompt" global */
 	    if (strcmp((char *)prompts[0].prompt, "Password:") == 0 &&
-		strcmp(prompt, "Password:") != 0)
-		prompts[0].prompt = (unsigned char *)prompt;
+		strcmp(def_prompt, "Password:") != 0)
+		prompts[0].prompt = (unsigned char *)def_prompt;
 	    break;
 	default:
 	    break;
@@ -94,7 +96,7 @@ sia_setup(pw, promptp, data)
     char **promptp;
     void **data;
 {
-    SIAENTITY *siah;
+    SIAENTITY *siah = NULL;
 
     if (sia_ses_init(&siah, Argc, Argv, NULL, pw->pw_name, ttyname(0), 1, NULL)
 	!= SIASUCCESS) {
@@ -115,10 +117,12 @@ sia_verify(pw, prompt, data)
     char *prompt;
     void **data;
 {
-    SIAENTITY *siah = *data;
+    SIAENTITY *siah = (SIAENTITY *)(*data);
+
+    def_prompt = prompt;		/* for sudo_collect */
 
     /* XXX - need a way to detect user hitting return or EOF at prompt */
-    if (sia_ses_reauthent(tcollect, siah) == SIASUCCESS)
+    if (sia_ses_reauthent(sudo_collect, siah) == SIASUCCESS)
 	return(AUTH_SUCCESS);
     else
 	return(AUTH_FAILURE);
@@ -130,7 +134,7 @@ sia_cleanup(pw, status, data)
     int status;
     void **data;
 {
-    SIAENTITY *siah = *data;
+    SIAENTITY *siah = (SIAENTITY *)(*data);
 
     (void) sia_ses_release(&siah);
 }
