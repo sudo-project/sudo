@@ -82,7 +82,7 @@ static char whatnow		__P((void));
 static void whatnow_help	__P((void));
 static RETSIGTYPE Exit		__P((int));
 static void setup_signals	__P((void));
-int path_matches		__P((char *, char *));
+int path_matches		__P((char *, char **, char *, char **));
 int addr_matches		__P((char *));
 int netgr_matches		__P((char *, char *, char *));
 int usergr_matches		__P((char *, char *));
@@ -99,6 +99,8 @@ extern int errorlineno, sudolineno;
  * Globals
  */
 char **Argv;
+char **NewArgv = NULL;
+int NewArgc = 0;
 char *sudoers = _PATH_SUDO_SUDOERS;
 char *stmp = _PATH_SUDO_STMP;
 int parse_error = FALSE;
@@ -363,8 +365,11 @@ int main(argc, argv)
  *  These exist to allow us to use the same parser as sudo(8).
  */
 
-int path_matches(cmnd, path)
-    char *cmnd, *path;
+int path_matches(cmnd, user_args, path, sudoers_args)
+    char *cmnd;
+    char **user_args;
+    char *path;
+    char **sudoers_args;
 {
     return(TRUE);
 }
