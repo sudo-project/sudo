@@ -18,7 +18,9 @@ A) Make sure you have an entry in your syslog.conf file to save
 	local2.debug				@loghost
     depending whether you want to forward the messages to another
     host or keep them locally.  Don't forget to send a SIGHUP to
-    your syslogd so that it re-reads its conf file.
+    your syslogd so that it re-reads its conf file.  Also, remember
+    that syslogd does not create log files, you need to create the
+    file before syslogd will log to it (ie: touch /var/adm/sudo.log).
     Note:  the facility ("local2.debug") must be separated from the 
 	   destination ("/var/adm/sudo.log" or "@loghost") by
 	   tabs, *not* spaces.  This is a common error.
@@ -127,7 +129,20 @@ A) You probably didn't install the gcc-fixed include files.
 Q) When I run "visudo" it says "sudoers file busy, try again later."
    and doesn't do anything.
 A) You have a stale sudoers temporary file.  The default location is
-   /etc/stmp.  If you delete this file visudo will be happy again.
+   /etc/stmp.  If you delete this file visudo will be happy again,
+   but make sure to check that no one else is running visudo at
+   the time.
+
+Q) When I try to use "cd" with sudo it says "cd: command not found".
+A) "cd" is a shell builtin, you can't run it as a command since
+   a child process (sudo) cannot affect the current working directory
+   of the parent (your shell).
+
+Q) When I try to use "cd" with sudo the command completes without
+   errors but nothing happens.
+A) Some SVR4-derived OS's include a /usr/bin/cd command for reasons
+   unfathomable.  A "cd" command is totally useless since a child process
+   cannot affect the current working directory of the parent (your shell).
 
 Q) How do you pronounce `sudo'?
 A) soo-doo (for superuser do).
