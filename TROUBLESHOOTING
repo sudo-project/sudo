@@ -29,12 +29,14 @@ Q) When sudo asks me for my password it never accepts what I enter even
    though I know I entered my password correctly.
 A) Try running configure with the --with-getpass option.  After this
    when you build sudo it will use the system's getpass() routine instead
-   of sudo's own version.  If that doesn't work, and your OS uses shadow
-   passwords, re-run configure and add the --with-C2 option.  Configure
-   tries to guess whether or not you are using shadow passwords but
-   it is not bulletproof.
-   (see the INSTALL doc for a list of OS's that sudo knows how to get
-   shadow password info for).
+   of sudo's own version.  If your system uses shadow passwords, it
+   is possible that sudo didn't detect this.  Take a look at the
+   generated config.h file and verify that the C function used for
+   shadow password lookups was detected.  For instance, for SVR4-style
+   shadow passwords, HAVE_GETSPNAM should be defined (you can search
+   for the string "shadow passwords" in config.h with your editor).
+   Note that there is no define for 4.4BSD-based shadow passwords
+   since that just uses the standard getpw* routines.
 
 Q) I don't want the sudoers file in /etc, how can I specify where it
    should go?
