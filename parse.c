@@ -245,7 +245,7 @@ command_matches(cmnd, cmnd_args, path, sudoers_args)
     static char *cmnd_base;
 
     /* Check for pseudo-commands */
-    if (*cmnd != '/') {
+    if (strchr(cmnd, '/') == NULL) {
 	/*
 	 * Return true if cmnd is "sudoedit" AND
 	 *  a) there are no args in sudoers OR
