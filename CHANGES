@@ -62,7 +62,7 @@ CHANGES between sudo 1.2 (unofficial version)
     I think that the broken scripts should be fixed rather than changing
     sudo, but vendors will be broken.  Sigh.
 
-21) Added USE_EXECVE define so you can make sudo use execve() if you
+21) Added USE_EXECV define so you can make sudo use execv() if you
     want.  Using execvp() shouldn't be a problem since it is always
     handed a non-relative path that begins with '/' but some people
     may not trust execvp().
