@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.39  1999/11/16 05:42:28  millert
-''' get rid of references to sudo-bugs.  Now mention the web site or the sudo@ alias
+''' Revision 1.40  1999/11/23 05:43:16  millert
+''' Be very clear that the password required is the user's not root's
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudo 8 "1.6" "15/Nov/1999" "MAINTENANCE COMMANDS"
+.TH sudo 8 "1.6" "22/Nov/1999" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -200,7 +200,12 @@ sudo \- execute a command as another user
 superuser or another user, as specified in the sudoers file.  The
 real and effective uid and gid are set to match those of the target
 user as specified in the passwd file (the group vector is also
-initialized when the target user is not root).
+initialized when the target user is not root).  By default, \fBsudo\fR
+requires that users authenticate themselves with a password
+(NOTE: this is the user's password, not the root password).  Once
+a user has been authenticated, a timestamp is updated and the
+user may then use sudo without a password for a short period of time
+(five minutes by default).
 .PP
 \fBsudo\fR determines who is an authorized user by consulting the
 file \fI/etc/sudoers\fR.  By giving \fBsudo\fR the \f(CW-v\fR flag a user

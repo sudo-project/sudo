@@ -17,7 +17,12 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        file.  The real and effective uid and gid are set to match
        those of the target user as specified in the passwd file
        (the group vector is also initialized when the target user
-       is not root).
+       is not root).  By default, ssssuuuuddddoooo requires that users
+       authenticate themselves with a password (NOTE: this is the
+       user's password, not the root password).  Once a user has
+       been authenticated, a timestamp is updated and the user
+       may then use sudo without a password for a short period of
+       time (five minutes by default).
 
        ssssuuuuddddoooo determines who is an authorized user by consulting
        the file _/_e_t_c_/_s_u_d_o_e_r_s.  By giving ssssuuuuddddoooo the -v flag a user
@@ -53,15 +58,10 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
            with a short description for each.  This option is
            useful in conjunction with _g_r_e_p(1).
 
-       -h  The -h (_h_e_l_p) option causes ssssuuuuddddoooo to print a usage
-           message and exit.
-
-       -v  If given the -v (_v_a_l_i_d_a_t_e) option, ssssuuuuddddoooo will update
-           the user's timestamp, prompting for the user's
 
 
 
-15/Nov/1999                    1.6                              1
+22/Nov/1999                    1.6                              1
 
 
 
@@ -70,6 +70,11 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
+       -h  The -h (_h_e_l_p) option causes ssssuuuuddddoooo to print a usage
+           message and exit.
+
+       -v  If given the -v (_v_a_l_i_d_a_t_e) option, ssssuuuuddddoooo will update
+           the user's timestamp, prompting for the user's
            password if necessary.  This extends the ssssuuuuddddoooo timeout
            to for another N minutes (where N is defined at
            installation time and defaults to 5 minutes) but does
@@ -119,15 +124,10 @@ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEES
        configuration/permission problem or if ssssuuuuddddoooo cannot execute
        the given command.  In the latter case the error string is
        printed to stderr.  If ssssuuuuddddoooo cannot _s_t_a_t(2) one or more
-       entries in the user's PATH an error is printed on stderr.
-       (If the directory does not exist or if it is not really a
-       directory, the entry is ignored and no error is printed.)
-       This should not happen under normal circumstances.  The
-       most common reason for _s_t_a_t(2) to return "permission
 
 
 
-15/Nov/1999                    1.6                              2
+22/Nov/1999                    1.6                              2
 
 
 
@@ -136,6 +136,11 @@ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEES
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
+       entries in the user's PATH an error is printed on stderr.
+       (If the directory does not exist or if it is not really a
+       directory, the entry is ignored and no error is printed.)
+       This should not happen under normal circumstances.  The
+       most common reason for _s_t_a_t(2) to return "permission
        denied" is if you are running an automounter and one of
        the directories in your PATH is on a machine that is
        currently unreachable.
@@ -185,15 +190,10 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 
        ssssuuuuddddoooo will not honor timestamps set far in the future.
        Timestamps with a date greater than current_time + 2 *
-       TIMEOUT will be ignored and sudo will log and complain.
-       This is done to keep a user from creating his/her own
-       timestamp with a bogus date on system that allow users to
-       give away files.
 
 
 
-
-15/Nov/1999                    1.6                              3
+22/Nov/1999                    1.6                              3
 
 
 
@@ -201,6 +201,11 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
+
+       TIMEOUT will be ignored and sudo will log and complain.
+       This is done to keep a user from creating his/her own
+       timestamp with a bogus date on system that allow users to
+       give away files.
 
 EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
        Note: the following examples assume suitable _s_u_d_o_e_r_s(5)
@@ -250,16 +255,11 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
 
 
 FFFFIIIILLLLEEEESSSS
-        /etc/sudoers           List of who can run what
-        /var/run/sudo          Directory containing timestamps
-
-       ssssuuuuddddoooo utilizes the following environment variables:
 
 
 
 
-
-15/Nov/1999                    1.6                              4
+22/Nov/1999                    1.6                              4
 
 
 
@@ -267,6 +267,11 @@ FFFFIIIILLLLEEEESSSS
 
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
+
+        /etc/sudoers           List of who can run what
+        /var/run/sudo          Directory containing timestamps
+
+       ssssuuuuddddoooo utilizes the following environment variables:
 
         PATH                   Set to a sane value if SECURE_PATH is set
         SHELL                  Used to determine shell to run with -s option
@@ -317,15 +322,10 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 
        If users have sudo ALL there is nothing to prevent them
        from creating their own program that gives them a root
-       shell regardless of any '!'  elements in the user
-       specification.
-
-       Running shell scripts via ssssuuuuddddoooo can expose the same kernel
-       bugs that make setuid shell scripts unsafe on some
 
 
 
-15/Nov/1999                    1.6                              5
+22/Nov/1999                    1.6                              5
 
 
 
@@ -334,6 +334,11 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
+       shell regardless of any '!'  elements in the user
+       specification.
+
+       Running shell scripts via ssssuuuuddddoooo can expose the same kernel
+       bugs that make setuid shell scripts unsafe on some
        operating systems (if your OS supports the /dev/fd/
        directory, setuid shell scripts are generally safe).
 
@@ -386,11 +391,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-
-
-
-
-15/Nov/1999                    1.6                              6
+22/Nov/1999                    1.6                              6
 
 

@@ -50,7 +50,12 @@ B<sudo> allows a permitted user to execute a I<command> as the
 superuser or another user, as specified in the sudoers file.  The
 real and effective uid and gid are set to match those of the target
 user as specified in the passwd file (the group vector is also
-initialized when the target user is not root).
+initialized when the target user is not root).  By default, B<sudo>
+requires that users authenticate themselves with a password
+(NOTE: this is the user's password, not the root password).  Once
+a user has been authenticated, a timestamp is updated and the
+user may then use sudo without a password for a short period of time
+(five minutes by default).
 
 B<sudo> determines who is an authorized user by consulting the
 file F</etc/sudoers>.  By giving B<sudo> the C<-v> flag a user
