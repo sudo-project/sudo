@@ -50,35 +50,33 @@ static char sccsid[] = "@(#)lsearch.c	8.1 (Berkeley) 6/4/93";
 #include "emul/search.h"
 
 
-static VOID *linear_base __P((const VOID *, VOID *, size_t *, size_t,
-                              int (*)(const VOID *, const VOID *), int));
+typedef int (*cmp_fn_t) __P((const VOID *, const VOID *));
+static VOID *linear_base __P((const VOID *, const VOID *, size_t *, size_t,
+			     cmp_fn_t, int));
 
 VOID *
 lsearch(key, base, nelp, width, compar)
-	const VOID *key;
-	VOID *base;
+	const VOID *key, *base;
 	size_t *nelp, width;
-	int (*compar) __P((const VOID *, const VOID *));
+	cmp_fn_t compar;
 {
 	return(linear_base(key, base, nelp, width, compar, 1));
 }
 
 VOID *
 lfind(key, base, nelp, width, compar)
-	const VOID *key;
-	const VOID *base;
+	const VOID *key, *base;
 	size_t *nelp, width;
-	int (*compar) __P((const VOID *, const VOID *));
+	cmp_fn_t compar;
 {
 	return(linear_base(key, base, nelp, width, compar, 0));
 }
 
 static VOID *
 linear_base(key, base, nelp, width, compar, add_flag)
-	const VOID *key;
-	VOID *base;
+	const VOID *key, *base;
 	size_t *nelp, width;
-	int (*compar) __P((const VOID *, const VOID *));
+	cmp_fn_t compar;
 	int add_flag;
 {
 	/* strict ANSI does not allow pointer arithmetic on void *'s */
@@ -101,6 +99,6 @@ linear_base(key, base, nelp, width, compar, add_flag)
 	 * manual.
 	 */
 	++*nelp;
-	(void) memcpy(end, key, width);
+	(void) memcpy((VOID *)end, key, width);
 	return((VOID *) end);
 }
