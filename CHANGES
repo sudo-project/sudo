@@ -32,3 +32,5 @@ CHANGES between sudo 1.2 (unofficial version)
     like './' but if that's in your path you deserve all the trojans you get.
 
 11) Added in linux patches from drew + flex support.
+
+12) Added insults back in from original sudo(8) (define USE_INSULTS).
