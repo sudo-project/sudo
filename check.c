@@ -256,6 +256,7 @@ static void reminder()
 #else
     (void) fprintf(stderr, "\n%s\n%s\n%s\n\n%s\n%s\n\n%s\n%s\n\n",
 	"    CU sudo version 1.3, based on Root Group sudo version 1.1",
+	"    sudo version 1.1, Copyright (C) 1991 The Root Group, Inc.",
 	"    sudo comes with ABSOLUTELY NO WARRANTY.  This is free software,",
 	"    and you are welcome to redistribute it under certain conditions.",
 #endif
@@ -264,4 +265,6 @@ static void reminder()
 	"        #1) Respect the privacy of others.",
 	"        #2) Think before you type."
     );
+    
+    (void)fflush(stderr);
 }
