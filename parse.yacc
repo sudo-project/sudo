@@ -276,12 +276,6 @@ cmndspec	:	runasspec nopasswd opcmnd {
 
 opcmnd		:	cmnd { ; }
 		|	'!' {
-			    if (printmatches == TRUE && in_alias == TRUE) {
-				/* XXX - want a space before first '!' */
-				append("!", &ca_list[ca_list_len-1].entries,
-				       &ca_list[ca_list_len-1].entries_len,
-				       &ca_list[ca_list_len-1].entries_size, 0);
-			    }
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
 				append("!", &cm_list[cm_list_len].cmnd,
@@ -742,9 +736,11 @@ void list_matches()
     char *p;
     struct command_alias *ca, key;
 
+    (void) puts("You may run the following commands on this host:");
     for (i = 0; i < cm_list_len; i++) {
 
 	/* Print the runas list. */
+	(void) fputs("    ", stdout);
 	if (cm_list[i].runas) {
 	    (void) putchar('(');
 	    if ((p = strtok(cm_list[i].runas, ":")))
@@ -762,7 +758,6 @@ void list_matches()
 	if (cm_list[i].nopasswd == TRUE)
 	    (void) fputs("NOPASSWD: ", stdout);
 
-	/* XXX - this could be faster (check for all upcase) */
 	/* Print the actual command or expanded Cmnd_Alias. */
 	key.alias = cm_list[i].cmnd;
 	if ((ca = lfind((VOID *)&key, (VOID *)&ca_list[0],
@@ -772,7 +767,7 @@ void list_matches()
 	    (void) puts(cm_list[i].cmnd);
     }
 
-    /* Be nice and free up space. */
+    /* Be nice and free up space now that we are done. */
     for (i = 0; i < ca_list_len; i++) {
 	(void) free(ca_list[i].alias);
 	(void) free(ca_list[i].entries);
