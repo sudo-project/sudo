@@ -1675,3 +1675,6 @@ Sudo 1.6.7p6 released.
 
 525) Added the --with-pc-insults configure to replace politically
      incorrect insults with other ones.
+
+526) Added start_tls support from Gudleik Rasch <gudleik@rastamatra.org>.
+

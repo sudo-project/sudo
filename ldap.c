@@ -81,6 +81,7 @@ struct ldap_config {
   char *binddn;
   char *bindpw;
   char *base;
+  char *ssl;
   int debug;
 } ldap_conf;
 
@@ -493,6 +494,7 @@ sudo_ldap_read_config()
      * if else if else if else if else ... */
          MATCH_S("host",    ldap_conf.host)
     else MATCH_I("port",    ldap_conf.port)
+    else MATCH_S("ssl",     ldap_conf.ssl)
     else MATCH_I("ldap_version", ldap_conf.version)
     else MATCH_S("uri",     ldap_conf.uri)
     else MATCH_S("binddn",  ldap_conf.binddn)
@@ -533,6 +535,10 @@ sudo_ldap_read_config()
                  ldap_conf.binddn : "(anonymous)");
     printf("bindpw       %s\n", ldap_conf.bindpw ?
                  ldap_conf.bindpw : "(anonymous)");
+#ifdef HAVE_LDAP_START_TLS_S
+    printf("ssl			%s\n", ldap_conf.ssl ?
+                 ldap_conf.ssl    : "(no)");
+#endif
     printf("===================\n");
   }
 
@@ -697,6 +703,20 @@ int pwflag;
   }
 
 #endif /* LDAP_OPT_PROTOCOL_VERSION */
+
+#ifdef HAVE_LDAP_START_TLS_S
+  /* Turn on TLS */
+  if (ldap_conf.ssl && !strcasecmp(ldap_conf.ssl, "start_tls")){
+    rc = ldap_start_tls_s(ld, NULL, NULL);
+    if (rc != LDAP_SUCCESS) {
+      fprintf(stderr, "ldap_start_tls_s(): %d: %s\n", rc, ldap_err2string(rc));
+      ldap_unbind(ld);
+      return VALIDATE_ERROR;
+    }
+
+    if (ldap_conf.debug) printf("ldap_start_tls_s() ok\n");
+  }
+#endif /* HAVE_LDAP_START_TLS_S */
 
   /* Actually connect */
 

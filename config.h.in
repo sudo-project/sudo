@@ -171,6 +171,9 @@
 /* Define if your LDAP Supports URLs. (OpenLDAP does) */
 #define HAVE_LDAP_INITIALIZE
 
+/* Define if your LDAP Supports start_tls_s. (OpenLDAP does) */
+#define HAVE_LDAP_START_TLS_S
+
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF
 
