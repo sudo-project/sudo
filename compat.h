@@ -16,6 +16,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  *  Please send bugs, changes, problems to sudo-bugs@cs.colorado.edu
+ *
+ *  $Id$
  */
 
 #ifndef _SUDO_COMPAT_H
