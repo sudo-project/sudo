@@ -57,7 +57,7 @@ static char rcsid[] = "$Id$";
 #    include <shadow.h>
 #  endif /* SVR4 */
 #  if (SHADOW_TYPE == SPW_SECUREWARE)
-#    ifndef __hpux
+#    ifdef __hpux
 #      include <hpsecurity.h>
 #    else
 #      include <sys/security.h>
