@@ -215,6 +215,7 @@ yyerror(s)
 %start file				/* special start symbol */
 %token <command> COMMAND		/* absolute pathname w/ optional args */
 %token <string>  ALIAS			/* an UPPERCASE alias name */
+%token <string>	 DEFVAR			/* a Defaults variable name */
 %token <string>  NTWKADDR		/* w.x.y.z */
 %token <string>  NETGROUP		/* a netgroup (+NAME) */
 %token <string>  USERGROUP		/* a usergroup (%NAME) */
@@ -231,7 +232,7 @@ yyerror(s)
 %token <tok>	 CMNDALIAS		/* Cmnd_Alias keyword */
 %token <tok>	 USERALIAS		/* User_Alias keyword */
 %token <tok>	 RUNASALIAS		/* Runas_Alias keyword */
-%token <tok>	 ':' '=' ',' '!'	/* union member tokens */
+%token <tok>	 ':' '=' ',' '!' '+' '-' /* union member tokens */
 %token <tok>	 ERROR
 
 /*
@@ -291,26 +292,46 @@ defaults_type	:	DEFAULTS {
 defaults_list	:	defaults_entry
 		|	defaults_entry ',' defaults_list
 
-defaults_entry	:	WORD {
+defaults_entry	:	DEFVAR {
 			    if (defaults_matches == TRUE &&
-				!set_default($1, NULL, 1)) {
+				!set_default($1, NULL, TRUE)) {
 				yyerror(NULL);
 				YYERROR;
 			    }
 			    free($1);
 			}
-		|	'!' WORD {
+		|	'!' DEFVAR {
 			    if (defaults_matches == TRUE &&
-				!set_default($2, NULL, 0)) {
+				!set_default($2, NULL, FALSE)) {
 				yyerror(NULL);
 				YYERROR;
 			    }
 			    free($2);
 			}
-		|	WORD '=' WORD {
+		|	DEFVAR '=' WORD {
 			    /* XXX - need to support quoted values */
 			    if (defaults_matches == TRUE &&
-				!set_default($1, $3, 1)) {
+				!set_default($1, $3, TRUE)) {
+				yyerror(NULL);
+				YYERROR;
+			    }
+			    free($1);
+			    free($3);
+			}
+		|	DEFVAR '+' WORD {
+			    /* XXX - need to support quoted values */
+			    if (defaults_matches == TRUE &&
+				!set_default($1, $3, '+')) {
+				yyerror(NULL);
+				YYERROR;
+			    }
+			    free($1);
+			    free($3);
+			}
+		|	DEFVAR '-' WORD {
+			    /* XXX - need to support quoted values */
+			    if (defaults_matches == TRUE &&
+				!set_default($1, $3, '-')) {
 				yyerror(NULL);
 				YYERROR;
 			    }
