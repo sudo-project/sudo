@@ -116,7 +116,7 @@ static const char rcsid[] = "$Sudo$";
 # define TERM			termio
 # define tflags			c_lflag
 # define term_getattr(f, t)	ioctl(f, TCGETA, t)
-# define term_setattr(f, t)	ioctl(f, TCSETA, t)
+# define term_setattr(f, t)	ioctl(f, TCSETAF, t)
 # else
 #  define TERM			sgttyb
 #  define tflags		sg_flags
