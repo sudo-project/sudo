@@ -52,6 +52,8 @@ static char rcsid[] = "$Id$";
 #include <malloc.h>
 #endif /* HAVE_MALLOC_H */
 
+#include "compat.h"
+
 #ifndef STDC_HEADERS
 #ifndef __GNUC__		/* gcc has its own malloc */
 extern char *malloc	__P((size_t));
