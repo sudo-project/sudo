@@ -1016,4 +1016,8 @@ Sudo 1.5.8 released.
 
 318) Add dirfd() macro for systems without it.
 
-319) Better check for socket() in -lsocket -lnsl.
+319) Better check for socket() in -lsocket -lnsl in configure.
+
+320) Minor configure fixes.
+
+Sudo 1.5.8p1 released.
