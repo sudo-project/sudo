@@ -221,7 +221,7 @@ VISUAL                       Used by visudo if EDITOR is not set.
 .SH AUTHORS
 Many people have worked on
 .I sudo
-over the years, this version is done by:
+over the years, this version was written by:
 .nf
 
 Jeff Nieusma                 <nieusma@csn.org>
@@ -231,6 +231,14 @@ See the HISTORY file in the sudo distribution for more details.
 .fi
 
 Please send all bugs, comments, and changes to sudo-bugs@cs.colorado.edu.
+
+.SH MAINTAINER
+.I sudo
+versions 1.3 and higher are being maintained by:
+.nf
+
+Todd Miller                  <Todd.Miller@cs.colorado.edu>
+.fi
 
 .SH DISCLAIMER
 This program is distributed in the hope that it will be useful, but
