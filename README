@@ -1,4 +1,4 @@
-This is the CU version of sudo, release 1.3.1 patchlevel5.
+This is the CU version of sudo, release 1.3.5 (BETA)
 
 Sudo is a program designed to allow a sysadmin to give limited root privileges
 to users and log root activity.  The basic philosophy is to give as few
