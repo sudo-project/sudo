@@ -95,7 +95,9 @@
 #undef HAVE_STRING_H
 
 /* Define if you have the <strings.h> header file.  */
+#if !defined(__convex__) && !defined(convex)
 #undef HAVE_STRINGS_H
+#endif /* convex */
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
