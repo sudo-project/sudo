@@ -147,9 +147,10 @@ void yyerror(s)
 {
     /* save the line the first error occured on */
     if (errorlineno == -1)
-	errorlineno = sudolineno;
+	errorlineno = sudolineno - 1;
 #ifndef TRACELEXER
-    (void) fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s, sudolineno);
+    (void) fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s,
+	sudolineno - 1);
 #else
     (void) fprintf(stderr, "<*> ");
 #endif
