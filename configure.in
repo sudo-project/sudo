@@ -127,12 +127,12 @@ esac])
 
 AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
 [case $with_csops in  
-    yes)	AC_DEFINE(IGNORE_DOT_PATH)
-		AC_DEFINE(USE_INSULTS)
-		AC_DEFINE(CLASSIC_INSULTS)
-		AC_DEFINE(CSOPS_INSULTS)
-		AC_DEFINE(ENV_EDITOR)
-		echo 'CSOps--adding options: IGNORE_DOT_PATH USE_INSULTS CLASSIC_INSULTS CSOPS_INSULTS ENV_EDITOR'
+    yes)	echo 'Adding CSOps standard options'
+		with_ignore_dot=yes
+		with_insults=yes
+		with_classic_insults=yes
+		with_csops_insults=yes
+		with_env_editor=yes
 		;;
     no)		;;
     *)		echo "Ignoring unknown argument to --with-csops: $with_csops"
@@ -350,7 +350,7 @@ AC_ARG_WITH(loglen, [  --with-loglen           maximum length of a log file line
 		;;
 esac], [AC_DEFINE(MAXLOGFILELEN, 80) AC_MSG_RESULT(80)])
 
-AC_MSG_CHECKING(if sudo should ignore '.' or '' in \$PATH)
+AC_MSG_CHECKING(whether sudo should ignore '.' or '' in \$PATH)
 AC_ARG_WITH(ignore-dot, [  --with-ignore-dot       ignore '.' in the PATH],
 [case $with_ignore_dot in  
     yes)	AC_DEFINE(IGNORE_DOT_PATH)
@@ -623,45 +623,73 @@ AC_ARG_WITH(timeout, [  --with-timeout          minutes before sudo asks for pas
 		;;
 esac], [AC_DEFINE(TIMEOUT, 5) AC_MSG_RESULT(5)])
 
+AC_MSG_CHECKING(time in minutes after the password prompt will time out)
 AC_ARG_WITH(password-timeout, [  --with-password-timeout passwd prompt timeout in minutes (default is 5)],
 [case $with_password_timeout in  
     yes)	AC_DEFINE(PASSWORD_TIMEOUT, 5)
+		AC_MSG_RESULT(5)
 		;;
     no)		AC_DEFINE(PASSWORD_TIMEOUT, 0)
+		AC_MSG_RESULT([no timeout])
 		;;
     [0-9]*)	AC_DEFINE_UNQUOTED(PASSWORD_TIMEOUT, $with_password_timeout)
+		AC_MSG_RESULT([$with_timeout])
 		;;
     *)		echo "You must enter the numer of minutes."
 		exit 1
 		;;
-esac], AC_DEFINE(PASSWORD_TIMEOUT, 5))
+esac], [AC_DEFINE(PASSWORD_TIMEOUT, 5) AC_MSG_RESULT(5)])
 
+AC_MSG_CHECKING(whether to use execvp or execv)
 AC_ARG_WITH(execv, [  --with-execv            use execv() instead of execvp()],
 [case $with_execv in  
     yes)	AC_DEFINE(USE_EXECV)
+		AC_MSG_RESULT(execv)
 		;;
-    no)		;;
+    no)		AC_MSG_RESULT(execvp)
+		;;
     *)		echo "Sorry, --with-execv does not take an argument."
 		exit 1
 		;;
-esac])
+esac], AC_MSG_RESULT(execvp))
 
+AC_MSG_CHECKING(whether to use per-tty ficket files)
 AC_ARG_WITH(tty-tickets, [  --with-tty-tickets      use a different ticket file for each tty],
 [case $with_tty_tickets in  
     yes)	AC_DEFINE(USE_TTY_TICKETS)
+		AC_MSG_RESULT(yes)
 		;;
-    no)		;;
+    no)		AC_MSG_RESULT(no)
+		;;
     *)		echo "Sorry, --with-tty-tickets does not take an argument."
 		exit 1
 		;;
-esac])
+esac], AC_MSG_RESULT(no))
 
+AC_MSG_CHECKING(whether to include insults)
 AC_ARG_WITH(insults, [  --with-insults          insult the user for entering an incorrect password],
 [case $with_insults in  
     yes)	AC_DEFINE(USE_INSULTS)
+		AC_MSG_RESULT(yes)
+		with_classic_insults=yes
+		with_csops_insults=yes
+		;;
+    no)		AC_MSG_RESULT(no)
+		;;
+    *)		echo "Sorry, --with-insults does not take an argument."
+		exit 1
+		;;
+esac], AC_MSG_RESULT(no))
+
+AC_ARG_WITH(all-insults, [  --with-all-insults      include all the sudo insult sets],
+[case $with_all_insults in  
+    yes)	with_classic_insults=yes
+		with_csops_insults=yes
+		with_hal_insults=yes
+		with_goons_insults=yes
 		;;
     no)		;;
-    *)		echo "Sorry, --with-insults does not take an argument."
+    *)		echo "Sorry, --with-all-insults does not take an argument."
 		exit 1
 		;;
 esac])
@@ -706,24 +734,42 @@ AC_ARG_WITH(goons-insults, [  --with-goons-insults    include the insults from t
 		;;
 esac])
 
+dnl include all insult sets on one line
+if test "$with_insults" = "yes"; then
+    AC_MSG_CHECKING(which insult sets to include)
+    i=""
+    test "$with_classic_insults" = "yes" && i="classic ${i}"
+    test "$with_csops_insults" = "yes" && i="csops ${i}"
+    test "$with_hal_insults" = "yes" && i="hal ${i}"
+    test "$with_goons_insults" = "yes" && i="goons ${i}"
+    AC_MSG_RESULT([$i])
+fi
+
+AC_MSG_CHECKING(whether to override the user's path)
 AC_ARG_WITH(secure-path, [  --with-secure-path      override the user's path with a builtin one],
 [case $with_secure_path in  
     yes)	AC_DEFINE_UNQUOTED(SECURE_PATH, "/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc")
+		AC_MSG_RESULT([:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc])
 		;;
-    no)		;;
+    no)		AC_MSG_RESULT(no)
+		;;
     *)		AC_DEFINE_UNQUOTED(SECURE_PATH, "$with_secure_path")
+		AC_MSG_RESULT([$with_secure_path])
 		;;
-esac])
+esac], AC_MSG_RESULT(no))
 
+AC_MSG_CHECKING(whether to get ip addresses from the network interfaces)
 AC_ARG_WITH(interfaces, [  --without-interfaces    don't try to read the ip addr of ether interfaces],
 [case $with_interfaces in  
-    yes)	;;
+    yes)	AC_MSG_RESULT(yes)
+		;;
     no)		AC_DEFINE(STUB_LOAD_INTERFACES)
+		AC_MSG_RESULT(no)
 		;;
     *)		echo "Sorry, --with-interfaces does not take an argument."
 		exit 1
 		;;
-esac])
+esac], AC_MSG_RESULT(yes))
 
 dnl
 dnl Options for --enable
@@ -744,7 +790,7 @@ AC_ARG_ENABLE(tgetpass,
   esac
 ], AC_MSG_RESULT(no))
 
-AC_MSG_CHECKING(where root should be allowed to use sudo)
+AC_MSG_CHECKING(whether root should be allowed to use sudo)
 AC_ARG_ENABLE(root-sudo,
 [  --disable-root-sudo     don't allow root to run sudo],
 [ case "$enableval" in  
