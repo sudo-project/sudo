@@ -449,6 +449,7 @@ init_vars(sudo_mode)
     int sudo_mode;
 {
     char *p, thost[MAXHOSTNAMELEN];
+    int nohostname;
 
     /* Sanity check command from user. */
     if (user_cmnd == NULL && strlen(NewArgv[0]) >= MAXPATHLEN) {
@@ -472,20 +473,22 @@ init_vars(sudo_mode)
      * "host" is the (possibly fully-qualified) hostname and
      * "shost" is the unqualified form of the hostname.
      */
-    if ((gethostname(thost, sizeof(thost)))) {
-	user_host = "localhost";
-	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
-    } else
-	user_host = estrdup(thost);
-    if (def_flag(I_FQDN))
-	set_fqdn();
+    /* nohostname = gethostname(thost, sizeof(thost)); */
+    nohostname = -1;
+    if (nohostname)
+	user_host = user_shost = "localhost";
     else {
-	if ((p = strchr(user_host, '.'))) {
-	    *p = '\0';
-	    user_shost = estrdup(user_host);
-	    *p = '.';
-	} else {
-	    user_shost = user_host;
+	user_host = estrdup(thost);
+	if (def_flag(I_FQDN))
+	    set_fqdn();
+	else {
+	    if ((p = strchr(user_host, '.'))) {
+		*p = '\0';
+		user_shost = estrdup(user_host);
+		*p = '.';
+	    } else {
+		user_shost = user_host;
+	    }
 	}
     }
 
@@ -516,6 +519,9 @@ init_vars(sudo_mode)
     }
 
     /* It is now safe to use log_error() and set_perms() */
+
+    if (nohostname)
+	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
 
     /*
      * Get current working directory.  Try as user, fall back to root.
@@ -1116,7 +1122,7 @@ set_loginclass(pw)
 	log_error(errflags, "unknown login class: %s", login_class);
 }
 #else
-static int
+static void
 set_loginclass(pw)
     struct passwd *pw;
 {
@@ -1203,10 +1209,9 @@ static void
 usage(exit_val)
     int exit_val;
 {
-    (void) fprintf(stderr,
-	"usage: %s -V | -h | -L | -l | -v | -k | -K | [-H] [-S] [-b]\n%*s",
-	Argv[0], (int) strlen(Argv[0]) + 8, " ");
-    (void) fprintf(stderr, "[-p prompt] [-u username/#uid] ");
+
+    (void) fprintf(stderr, "usage: sudo -V | -h | -L | -l | -v | -k | -K | %s",
+	"[-H] [-S] [-b] [-p prompt]\n            [-u username/#uid] ");
 #ifdef HAVE_LOGIN_CAP_H
     (void) fprintf(stderr, "[-c class] ");
 #endif
