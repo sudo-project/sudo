@@ -125,7 +125,7 @@ pam_verify(pw, prompt, auth)
 			*pam_status);
 		    return(AUTH_FAILURE);
 		case PAM_NEW_AUTHTOK_REQD:
-		    log_error(NO_EXIT|NO_MAIL, "%s, %s"
+		    log_error(NO_EXIT|NO_MAIL, "%s, %s",
 			"Account or password is expired",
 			"reset your password and try again");
 		    *pam_status = pam_chauthtok(pamh, PAM_CHANGE_EXPIRED_AUTHTOK);
@@ -135,7 +135,7 @@ pam_verify(pw, prompt, auth)
 			log_error(NO_EXIT|NO_MAIL, "pam_chauthtok: %s",s);
 		    return(AUTH_FAILURE);
 		case PAM_ACCT_EXPIRED:
-		    log_error(NO_EXIT|NO_MAIL, "%s, %s"
+		    log_error(NO_EXIT|NO_MAIL, "%s, %s",
 			"Account or password is expired",
 			"contact your system administrator");
 		    /* FALLTHROUGH */
