@@ -69,3 +69,13 @@ CHANGES between sudo 1.2 (unofficial version)
 
 22) Log file lines will no longer get truncated.  Syslog entries that
     would overrun the syslog(3) line limit are continued on another entry.
+
+23) When logging to a log file, long entries are indented to improve
+    readability.
+
+24) Whenever the umask is changed, it is changed back to what it was
+    before.
+
+25) Log file is written as mode 600 instead of 644
+
+26) Umask that sudo runs with can now be specified.
