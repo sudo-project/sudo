@@ -5,10 +5,8 @@ TODO list
 
 02) Add groups of users to the config file.
 
-03) Solaris 2.x support.
+03) Deal with host aliases rationally.
 
-04) Deal with host aliases rationally.
+04) Nestable command aliases
 
-05) Nestable command aliases
-
-06) POSIX signals (plus emulation where they are lacking)
+05) POSIX signals (plus emulation where they are lacking)
