@@ -1,99 +1,99 @@
 
 
 
-visudo(1m)             MAINTENANCE COMMANDS            visudo(1m)
+VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
-NNNNAAAAMMMMEEEE
+NNAAMMEE
        visudo - edit the sudoers file
 
-SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
-       vvvviiiissssuuuuddddoooo [ ----cccc ] [ ----ffff _s_u_d_o_e_r_s ] [ ----qqqq ] [ ----ssss ] [ ----VVVV ]
+SSYYNNOOPPSSIISS
+       vviissuuddoo [ --cc ] [ --ff _s_u_d_o_e_r_s ] [ --qq ] [ --ss ] [ --VV ]
 
-DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
-       vvvviiiissssuuuuddddoooo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous
-       to _v_i_p_w(1m).  vvvviiiissssuuuuddddoooo locks the _s_u_d_o_e_r_s file against multi­
+DDEESSCCRRIIPPTTIIOONN
+       vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous
+       to _v_i_p_w(1m).  vviissuuddoo locks the _s_u_d_o_e_r_s file against multi­
        ple simultaneous edits, provides basic sanity checks, and
        checks for parse errors.  If the _s_u_d_o_e_r_s file is currently
        being edited you will receive a message to try again
        later.
 
-       There is a hard-coded list of editors that vvvviiiissssuuuuddddoooo will use
+       There is a hard-coded list of editors that vviissuuddoo will use
        set at compile-time that may be overridden via the _e_d_i_t_o_r
        _s_u_d_o_e_r_s Default variable.  This list defaults to the path
        to _v_i(1) on your system, as determined by the _c_o_n_f_i_g_u_r_e
-       script.  Normally, vvvviiiissssuuuuddddoooo does not honor the EDITOR or
+       script.  Normally, vviissuuddoo does not honor the EDITOR or
        VISUAL environment variables unless they contain an editor
-       in the aforementioned editors list.  However, if vvvviiiissssuuuuddddoooo is
+       in the aforementioned editors list.  However, if vviissuuddoo is
        configured with the _-_-_w_i_t_h_-_e_n_v_e_d_i_t_o_r flag or the _e_n_v_e_d_i_t_o_r
-       Default variable is set in _s_u_d_o_e_r_s, vvvviiiissssuuuuddddoooo will use any
+       Default variable is set in _s_u_d_o_e_r_s, vviissuuddoo will use any
        the editor defines by EDITOR or VISUAL.  Note that this
        can be a security hole since it allows the user to execute
        any program they wish simply by setting EDITOR or VISUAL.
 
-       vvvviiiissssuuuuddddoooo parses the _s_u_d_o_e_r_s file after the edit and will not
+       vviissuuddoo parses the _s_u_d_o_e_r_s file after the edit and will not
        save the changes if there is a syntax error.  Upon finding
-       an error, vvvviiiissssuuuuddddoooo will print a message stating the line
-       _n_u_m_b_e_r(s) where the error occurred and the user will
+       an error, vviissuuddoo will print a message stating the line
+       number(s) where the error occurred and the user will
        receive the "What now?" prompt.  At this point the user
        may enter "e" to re-edit the _s_u_d_o_e_r_s file, "x" to exit
        without saving the changes, or "Q" to quit and save
        changes.  The "Q" option should be used with extreme care
-       because if vvvviiiissssuuuuddddoooo believes there to be a parse error, so
-       will ssssuuuuddddoooo and no one will be able to ssssuuuuddddoooo again until the
+       because if vviissuuddoo believes there to be a parse error, so
+       will ssuuddoo and no one will be able to ssuuddoo again until the
        error is fixed.  If "e" is typed to edit the  _s_u_d_o_e_r_s file
        after a parse error has been detected, the cursor will be
        placed on the line where the error occurred (if the editor
        supports this feature).
 
-OOOOPPPPTTTTIIIIOOOONNNNSSSS
-       vvvviiiissssuuuuddddoooo accepts the following command line options:
+OOPPTTIIOONNSS
+       vviissuuddoo accepts the following command line options:
 
-       -c  Enable cccchhhheeeecccckkkk----oooonnnnllllyyyy mode.  The existing _s_u_d_o_e_r_s file
+       -c  Enable cchheecckk--oonnllyy mode.  The existing _s_u_d_o_e_r_s file
            will be checked for syntax and a message will be
            printed to the standard output detailing the status of
            _s_u_d_o_e_r_s.  If the syntax check completes successfully,
-           vvvviiiissssuuuuddddoooo will exit with a value of 0.  If a syntax error
-           is encountered, vvvviiiissssuuuuddddoooo will exit with a value of 1.
+           vviissuuddoo will exit with a value of 0.  If a syntax error
+           is encountered, vviissuuddoo will exit with a value of 1.
 
        -f  Specify and alternate _s_u_d_o_e_r_s file location.  With
-           this option vvvviiiissssuuuuddddoooo will edit (or check) the _s_u_d_o_e_r_s
+           this option vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s
 
 
 
-April 25, 2002                1.6.6                             1
+1.6.7                     March 13, 2003                        1
 
 
 
 
 
-visudo(1m)             MAINTENANCE COMMANDS            visudo(1m)
+VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
            file of your choice, instead of the default,
            @sysconfdir@/sudoers.  The lock file used is the spec­
            ified _s_u_d_o_e_r_s file with ".tmp" appended to it.
 
-       -q  Enable qqqquuuuiiiieeeetttt mode.  In this mode details about syntax
+       -q  Enable qquuiieett mode.  In this mode details about syntax
            errors are not printed.  This option is only useful
-           when combined with the ----cccc flag.
+           when combined with the --cc flag.
 
-       -s  Enable ssssttttrrrriiiicccctttt checking of the _s_u_d_o_e_r_s file.  If an
-           alias is used before it is defined, vvvviiiissssuuuuddddoooo will con­
+       -s  Enable ssttrriicctt checking of the _s_u_d_o_e_r_s file.  If an
+           alias is used before it is defined, vviissuuddoo will con­
            sider this a parse error.  Note that it is not possi­
            ble to differentiate between an alias and a hostname
            or username that consists solely of uppercase letters,
            digits, and the underscore ('_') character.
 
-       -V  The ----VVVV (version) option causes vvvviiiissssuuuuddddoooo to print its
+       -V  The --VV (version) option causes vviissuuddoo to print its
            version number and exit.
 
-EEEERRRRRRRROOOORRRRSSSS
+EERRRROORRSS
        sudoers file busy, try again later.
            Someone else is currently editing the _s_u_d_o_e_r_s file.
 
        /etc/sudoers.tmp: Permission denied
-           You didn't run vvvviiiissssuuuuddddoooo as root.
+           You didn't run vviissuuddoo as root.
 
        Can't find you in the passwd database
            Your userid does not appear in the system passwd file.
@@ -103,63 +103,59 @@ EEEERRRRRRRROOOORRRRSSSS
            before defining it or you have a user or hostname
            listed that consists solely of uppercase letters, dig­
            its, and the underscore ('_') character.  If the lat­
-           ter, you can ignore the warnings (ssssuuuuddddoooo will not com­
-           plain).  In ----ssss (strict) mode these are errors, not
+           ter, you can ignore the warnings (ssuuddoo will not com­
+           plain).  In --ss (strict) mode these are errors, not
            warnings.
 
-EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
+EENNVVIIRROONNMMEENNTT
        The following environment variables are used only if
-       vvvviiiissssuuuuddddoooo was configured with the _-_-_w_i_t_h_-_e_n_v_-_e_d_i_t_o_r option:
+       vviissuuddoo was configured with the _-_-_w_i_t_h_-_e_n_v_-_e_d_i_t_o_r option:
 
         EDITOR                 Invoked by visudo as the editor to use
         VISUAL                 Used Invoked visudo if EDITOR is not set
 
-
-FFFFIIIILLLLEEEESSSS
+FFIILLEESS
         /etc/sudoers           List of who can run what
         /etc/sudoers.tmp       Lock file for visudo
 
-
-AAAAUUUUTTTTHHHHOOOORRRR
+AAUUTTHHOORR
        Many people have worked on _s_u_d_o over the years; this ver­
-       sion of vvvviiiissssuuuuddddoooo was written by:
-
-
-
-
-April 25, 2002                1.6.6                             2
-
-
-
-
-
-visudo(1m)             MAINTENANCE COMMANDS            visudo(1m)
-
+       sion of vviissuuddoo was written by:
 
         Todd Miller            <Todd.Miller@courtesan.com>
+
+
+
+
+1.6.7                     March 13, 2003                        2
+
+
+
+
+
+VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
+
 
        See the HISTORY file in the sudo distribution or visit
        http://www.sudo.ws/sudo/history.html for more details.
 
-BBBBUUUUGGGGSSSS
+BBUUGGSS
        If you feel you have found a bug in sudo, please submit a
        bug report at http://www.sudo.ws/sudo/bugs/
 
-DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
-       VVVViiiissssuuuuddddoooo is provided ``AS IS'' and any express or implied
+DDIISSCCLLAAIIMMEERR
+       VViissuuddoo is provided ``AS IS'' and any express or implied
        warranties, including, but not limited to, the implied
        warranties of merchantability and fitness for a particular
        purpose are disclaimed.  See the LICENSE file distributed
-       with ssssuuuuddddoooo for complete details.
+       with ssuuddoo for complete details.
 
-CCCCAAAAVVVVEEEEAAAATTTTSSSS
+CCAAVVEEAATTSS
        There is no easy way to prevent a user from gaining a root
-       shell if the editor used by vvvviiiissssuuuuddddoooo allows shell escapes.
+       shell if the editor used by vviissuuddoo allows shell escapes.
 
-SSSSEEEEEEEE AAAALLLLSSSSOOOO
-       _v_i(1), _s_u_d_o(1m), _v_i_p_w(8).
-
-
+SSEEEE AALLSSOO
+       _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(8)
 
 
 
@@ -193,6 +189,10 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-April 25, 2002                1.6.6                             3
+
+
+
+
+1.6.7                     March 13, 2003                        3
 
 
