@@ -240,8 +240,7 @@ dnl
 dnl Function checks
 dnl
 AC_CHECK_FUNCS(strchr strrchr memcpy memmove memset sysconf sigaction tzset tcsetattr strcasecmp)
-AC_CHECK_FUNC(getwd, AC_DEFINE(HAVE_GETWD), LIBOBJS="$LIBOBJS getwd.o"
-getcwd)
+AC_CHECK_FUNC(getwd, AC_DEFINE(HAVE_GETWD), LIBOBJS="$LIBOBJS getwd.o")
 AC_CHECK_FUNC(strdup, AC_DEFINE(HAVE_STRDUP), LIBOBJS="$LIBOBJS strdup.o")
 AC_CHECK_FUNC(lsearch, AC_DEFINE(HAVE_LSEARCH), LIBOBJS="$LIBOBJS lsearch.o")
 AC_CHECK_FUNC(setenv, AC_DEFINE(HAVE_SETENV), AC_FUNC_CHECK(putenv, AC_DEFINE(HAVE_PUTENV), LIBOBJS="$LIBOBJS putenv.o"))
