@@ -53,22 +53,17 @@ TODO list (most will be addressed in the next rewrite)
     where PASSWD was defined to be /usr/bin/passwd.
     This requires the arg parsing to happen in the yacc grammer.
 
-23) Should be able to set _CONFIG_PATH_TIMEDIR via configure or the Makefile
-    so folks with sysV chown can set to a secure location.
+23) Add a per-tty restriction?  Ie: only can run foo from /dev/console.
 
-24) Add a per-tty restriction?  Ie: only can run foo from /dev/console.
-
-25) Use popen.c instead of rolling own in logging.c
+24) Use popen.c instead of rolling own in logging.c
     Need to make popen.c portable first...
 
-26) Add test for how to read ether interfaces in configure script
+25) Add test for how to read ether interfaces in configure script
 
-27) If an OS is capable of using shadow password, try the shadow
-    functions first and fallback on getpw*().
+26) Add configure check for $(CC) -R and use it in addition to -L
 
-28) Add configure check for $(CC) -R and use it in addition to -L
-
-29) Change things in options.h -> --with-FOO options to configure.
-
-30) An option to make "sudo -s" use the target user's shell might be nice
+27) An option to make "sudo -s" use the target user's shell might be nice
     (and more like su).
+
+28) Sudo should have a separate error message for when the user is in sudoers
+    but not allowed to run stuff on that host, and send mail.

@@ -934,3 +934,72 @@ Sudo 1.5.5 released.
 
 291) With sudo -s, set command the full path of the shell, not the basename.
      Noted by Peter W. Osel <pwo@guug.de>
+
+Sudo 1.5.6 released.
+
+292) Pam auth now runs as root; necessary for shadow passwords.
+
+293) Shadow password support is now compiled in by default.  You can disable
+     it via --disable-shadow.
+
+294) We now remove a timestamp file with a bogus date when it is detected.
+     From Steve Fobes <sfobes@uswest.com>.
+
+295) In tgetpass(), restart select if it is interupted.  This really fixes a
+     problem where a user sometimes is not given a change to enter a password.
+
+296) All options have moved from options.h -> configure.
+
+297) visudo is now installed in /usr/local/sbin where it belongs.
+
+298) Lots of configure changes.  Instead of checking for the existence
+     of -lsocket, -lnsl, or -linet, we instead check them for the
+     functions we need only if they are not already in libc.
+
+299) Added DUNIX SIA (Security Integration Architecture) support from
+     Spider Boardman <spider@Orb.Nashua.NH.US>.
+
+300) Added test for broken Digital UNIX 4.0 prot.h.
+
+301) Better support for C2 security on Digital UNIX.
+
+302) Hacked autoconf so that you have have single quotes in
+     --with-passprompt.
+
+303) For SecureWare-style shadow passwords use getprpwnam() instead
+     of getprpwuid() since getprpwuid is broken in HP-UX 10.20 at
+     least (it sleeps for 2 minutes if the shadow files don't exist).
+
+304) We can't really trust UID_MAX or MAXUID since they may only exist for
+     backwards compatibility; spider-both@Orb.Nashua.NH.US
+
+305) Make %groups work as RunAs specifiers; Ray Bellis <rpb@community.net.uk>.
+
+306) Set USER environment variable to target user.
+     Suggested by Ray Bellis <rpb@community.net.uk>.
+
+307) Go back to printing "command not found" unless --disable-path-info
+     specified.  Also, tell user when we ignore '.' in their path and it
+     would have been used but for --with-ignore-dot.
+
+308) When using tty tickets make it user:tty not user.tty as a username
+     could have a '.' in it.
+
+309) Define BSD_COMP for svr4 to get BSD ioctl defs.  Also, if we have
+     sys/sockio.h but SIOCGIFCONF is not defined by including sys/ioctl.h
+     include sys/sockio.h directly.
+
+310) Fixed a bug that could cause "sudo -l" to segfault or complain
+     about non-existent syntax errors.
+
+Sudo 1.5.7 released.
+
+311) Fixed square bracket quoting in configure and moved check for -lnsl
+     to be before -lsocket.
+
+312) In load_interfaces(), close sock after bwe are done with it.  Leak
+     noticed by Mike Kienenberger <mkienenb@arsc.edu>.
+
+313) Missing pieces from change #308; from Mike Kienenberger.
+
+314) Real Kerberos 5 support from Frank Cusack <fcusack@iconnet.net>.

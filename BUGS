@@ -13,8 +13,4 @@ Known bugs in sudo version 1.5.8
 4) Cmnd_Alias's need to precede permissions specs.  At the very least,
    visudo should give an error if you get this wrong.
 
-5) A user can use sudo to gather information on what executables
-   exist on a system, even ones that would not normally be accessible.
-
-6) There is still a bug in the ``sudo -l'' processing code that can
-   cause sudo to get a SEGV.  I've not been able to track it down yet.
+5) On DUNIX in sia mode, hitting return at the prompt does not quit.
