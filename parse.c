@@ -22,7 +22,8 @@
  *
  * parse.c -- sudo parser frontend and comparison routines.
  *
- * Chris Jepeway <jepeway@cs.utk.edu>
+ * This code is derived from software contributed by Chris Jepeway
+ * <jepeway@cs.utk.edu>
  */
 
 #include "config.h"

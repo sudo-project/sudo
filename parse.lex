@@ -23,7 +23,8 @@
  *
  * parse.lex -- lexigraphical analyzer for sudo.
  *
- * Chris Jepeway <jepeway@cs.utk.edu>
+ * This code is derived from software contributed by Chris Jepeway
+ * <jepeway@cs.utk.edu>
  */
 
 #include "config.h"

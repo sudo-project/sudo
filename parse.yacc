@@ -24,7 +24,8 @@
  *
  * parse.yacc -- yacc parser and alias manipulation routines for sudo.
  *
- * Chris Jepeway <jepeway@cs.utk.edu>
+ * This code is derived from software contributed by Chris Jepeway
+ * <jepeway@cs.utk.edu>
  */
 
 #include "config.h"
