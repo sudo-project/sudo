@@ -66,6 +66,7 @@ static int user_matched;
  */
 #define HOST			 1
 #define CMND			 2
+#define USER			 3
 
 /*
  * the matching stack
@@ -125,6 +126,7 @@ char *s;
 %token <tok>	ALL			/* ALL keyword */
 %token <tok>	HOSTALIAS		/* Host_Alias keyword */
 %token <tok>	CMNDALIAS		/* Cmnd_Alias keyword */
+%token <tok>	USERALIAS		/* User_Alias keyword */
 %token <tok>	':' '=' ',' '!' '.'	/* union member tokens */
 %token <tok>	ERROR
 
@@ -143,6 +145,8 @@ entry		:	COMMENT
 		|	NAME {
 			    user_matched = strcmp($1, user) == 0;
 			} privileges
+		|	USERALIAS useraliases
+			{ ; }
 		|	HOSTALIAS hostaliases
 			{ ; }
 		|	CMNDALIAS cmndaliases
@@ -256,6 +260,28 @@ cmndalias	:	ALIAS { push; }	'=' cmndlist {
 cmndlist	:	cmnd
 			{ ; }
 		|	cmndlist ',' cmnd
+		;
+
+useraliases	:	useralias
+		|	useraliases ':' useralias
+		;
+
+useralias	:	ALIAS { push; }	'=' userlist {
+			    if (user_matches == TRUE && !add_alias($1, CMND))
+				YYERROR;
+			    pop;
+			}
+		;
+
+userlist	:	user
+			{ ; }
+		|	userlist ',' user
+		;
+
+user		:	NAME {
+			    /* XXX need to set user_matched */
+			    user_matches = strcmp($1, user) == 0;
+			}
 		;
 
 %%
