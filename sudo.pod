@@ -91,7 +91,8 @@ is set, B<sudo> will use this value to determine who the actual
 user is.  This can be used by a user to log commands through sudo
 even when a root shell has been invoked.  It also allows the B<-e>
 flag to remain useful even when being run via a sudo-run script or
-program.
+program.  Note however, that the sudoers lookup is still done for
+root, not the user specified by C<SUDO_USER>.
 
 B<sudo> can log both successful and unsuccessful attempts (as well
 as errors) to syslog(3), a log file, or both.  By default B<sudo>
