@@ -4,14 +4,17 @@
  *    The code below basically comes from the examples supplied on
  * the OSF DCE 1.0.3 manpages for the sec_login routines, with 
  * enough additional polishing to make the routine work with the
- * reset of sudo.  
+ * rest of sudo.  
  *   This code is known to work on HP 700 and 800 series systems
- * running HP-UX 10.0, with HP's version 1.2.1 of DCE.
+ * running HP-UX 9.X and 10.X, with either HP's version 1.2.1 of DCE.
+ * (aka, OSF DCE 1.0.3) or with HP's version 1.4 of DCE (aka, OSF
+ * DCE 1.1).
  *
  * Use at your own risk!!!  (But I would like to hear about bugs.)
  */
 
 #include "config.h"
+#include "compat.h"
 
 #ifdef HAVE_DCE
 
@@ -56,6 +59,8 @@ int dce_pwent(username, plain_pw)
 
 	password_rec.key.key_type = sec_passwd_plain;
 	password_rec.key.tagged_union.plain = (idl_char *) plain_pw;
+	password_rec.pepper = NULL;   
+	password_rec.version_number = sec_passwd_c_version_none;
 
 	if(sec_login_validate_identity(login_context, &password_rec,
 	    &reset_passwd, &auth_src, &status)) {
@@ -89,9 +94,9 @@ int dce_pwent(username, plain_pw)
 	    nbytes = sizeof(struct passwd);
 	    if ((pwd = (struct passwd *) malloc(nbytes)) == NULL) {
 		(void) fprintf(stderr, "malloc for passwd struct failed\n");
-		return(0);;
+		return(0);
 	    }
-	    (void) sec_login_get_pwent(login_context, &pwd, &status);
+	    (void) sec_login_get_pwent(login_context, (sec_login_passwd_t) pwd, &status);
 	    (void) free(pwd);
 
 	    if (check_dce_status(status, "sec_login_get_pwent:"))
