@@ -1038,4 +1038,7 @@ Sudo 1.5.8p2 released.
 
 326) New PAM code that should work on both Solaris and Linux.
 
+327) Make sudo's usage info better when mutually exclusive args are given
+     and don't rely on argument order to detect this.  From Nick Andrew.
+
 Sudo 1.5.9 released.
