@@ -77,7 +77,7 @@ N			[0-9][0-9]?[0-9]?
 <GOTCMND>[:,=\n]	{
 			  BEGIN 0;
 			  unput(yytext[0]);
-			  return(PATH);
+			  return(COMMAND);
 			}			/* end of command line args */
 
 \n			{ 
@@ -126,9 +126,15 @@ N			[0-9][0-9]?[0-9]?
 			  return NTWKADDR;
 			}
 
+\/[^\,:=\\ \t\n#]+\/	{
+			  LEXTRACE("COMMAND ");
+			  fill();
+			  return COMMAND;
+			}			/* a directory */
+
 \/[^\,:=\\ \t\n#]+	{
 			  BEGIN GOTCMND;
-			  LEXTRACE("PATH ");
+			  LEXTRACE("COMMAND ");
 			  fill();
 			}			/* a pathname */
 
