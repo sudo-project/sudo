@@ -1143,16 +1143,20 @@ case "$host" in
 		AC_DEFINE(STDC_HEADERS)
 		if test -z "$NROFFPROG"; then
 		    MAN_POSTINSTALL='	/bin/rm -f $(mandir8)/sudo.$(mansect8).z $(mandir8)/visudo.$(mansect8).z $(mandir5)/sudoers.$(mansect5).z ; /usr/bin/pack $(mandir8)/sudo.$(mansect8) $(mandir8)/visudo.$(mansect8) $(mandir5)/sudoers.$(mansect5)'
-		    if test -d /usr/share/catman/local; then
-			mandir="/usr/share/catman/local"
-		    else
-			mandir="/usr/catman/local"
+		    if test "$prefix" = "/usr/local" -a "$mandir" = '$(prefix)/man'; then
+			if test -d /usr/share/catman/local; then
+			    mandir="/usr/share/catman/local"
+			else
+			    mandir="/usr/catman/local"
+			fi
 		    fi
 		else
-		    if test -d "/usr/share/man/local"; then
-			mandir="/usr/share/man/local"
-		    else
-			mandir="/usr/man/local"
+		    if test "$prefix" = "/usr/local" -a "$mandir" = '$(prefix)/man'; then
+			if test -d "/usr/share/man/local"; then
+			    mandir="/usr/share/man/local"
+			else
+			    mandir="/usr/man/local"
+			fi
 		    fi
 		fi
 		;;
