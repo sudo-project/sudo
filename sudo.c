@@ -148,6 +148,8 @@ static struct env_table badenv_table[] = {
     { "LOCALDOMAIN=", 12 },
     { "RES_OPTIONS=", 12 },
     { "HOSTALIASES=", 12 },
+    { "NLSPATH=", 8 },
+    { "PATH_LOCALE=", 12 },
     { "LD_", 3 },
     { "_RLD", 4 },
 #ifdef __hpux
