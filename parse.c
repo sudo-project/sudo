@@ -126,16 +126,29 @@ int validate()
 	 */
 	return(VALIDATE_NO_USER);
 
-    while (top) {
-	if (host_matches == TRUE)
-	    if (cmnd_matches == TRUE)
-		/* user was granted access to cmnd on host */
+    /*
+     * if the cmnd is the pseudo-command "validate"
+     * return VALIDATE_OK if the host matches, else
+     * check host and command.
+     */
+    if (!strcmp(cmnd, "validate"))
+	while (top) {
+	    if (host_matches == TRUE)
+		/* user may always do validate on allowed hosts */
 		return(VALIDATE_OK);
-	    else if (cmnd_matches == FALSE)
-		/* user was explicitly denied acces to cmnd on host */
-		return(VALIDATE_NOT_OK);
-	top--;
-    }
+	    top--;
+	}
+    else
+	while (top) {
+	    if (host_matches == TRUE)
+		if (cmnd_matches == TRUE)
+		    /* user was granted access to cmnd on host */
+		    return(VALIDATE_OK);
+		else if (cmnd_matches == FALSE)
+		    /* user was explicitly denied acces to cmnd on host */
+		    return(VALIDATE_NOT_OK);
+	    top--;
+	}
 
     /*
      * we popped everything off the stack =>
