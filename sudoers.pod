@@ -129,7 +129,7 @@ The reserved alias I<ALL> can be used for both {Host,User,Cmnd}_Alias.
 B<DO NOT> define an alias of I<ALL>, it will B<NOT> be used.
 Note that I<ALL> implies the entire universe of hosts/users/commands.
 You can subtract elements from the universe by using the syntax:
-   user  host=ALL,!ALIAS1,!/etc/halt...
+   user  host=ALL,!ALIAS1,!/sbin/halt...
 Note that the "!" notation only works in a user's command list.  You
 may not use it to subtract elements in a User_Alias, Host_Alias,
 Cmnd_Alias or user list.
@@ -159,11 +159,11 @@ with a "\" if used in command arguments: ",", ":", "=", "\".
     Runas_Alias	OP=root,operator
 
     # Command alias specification
-    Cmnd_Alias  LPCS=/usr/etc/lpc,/usr/ucb/lprm
+    Cmnd_Alias  LPCS=/usr/sbin/lpc,/usr/bin/lprm
     Cmnd_Alias  SHELLS=/bin/sh,/bin/csh,/bin/tcsh,/bin/ksh
-    Cmnd_Alias  SU=/bin/su
+    Cmnd_Alias  SU=/usr/bin/su
     Cmnd_Alias  MISC=/bin/rm,/bin/cat:\
-                SHUTDOWN=/etc/halt,/etc/shutdown
+                SHUTDOWN=/sbin/halt,/sbin/shutdown
 
     # User specification
     FULLTIME    ALL=(ALL) NOPASSWD: ALL
@@ -171,12 +171,12 @@ with a "\" if used in command arguments: ",", ":", "=", "\".
     PARTTIME    ALL=ALL,!SHELLS,!SU
     +interns    +openlabs=ALL,!SHELLS,!SU
     britt       REMOTE=SHUTDOWN:ALL=LPCS
-    jimbo	CUNETS=/bin/su ?*,!/bin/su *root*
-    nieusma     SERVERS=SHUTDOWN,/etc/reboot:\
+    jimbo	CUNETS=/usr/bin/su [!-]*,!/usr/bin/su *root*
+    nieusma     SERVERS=SHUTDOWN,/sbin/reboot:\
                 HUB=ALL,!SHELLS
-    jill        houdini=/etc/shutdown -[hr] now,MISC
-    markm       HUB=ALL,!MISC,!/etc/shutdown,!/etc/halt
-    davehieb    merlin=(OP) ALL:SERVERS=/etc/halt:\
+    jill        houdini=/sbin/shutdown -[hr] now,MISC
+    markm       HUB=ALL,!MISC,!/sbin/shutdown,!/sbin/halt
+    davehieb    merlin=(OP) ALL:SERVERS=/sbin/halt:\
                 kodiakthorn=NOPASSWD: ALL
     steve       CSNETS=(operator) /usr/op_commands/
 
@@ -244,27 +244,27 @@ B network).
 =item nieusma
 
 The user C<nieusma> may run commands in the C<SHUTDOWN> alias
-as well as F</etc/reboot> on the C<SERVER> machines and
+as well as F</sbin/reboot> on the C<SERVER> machines and
 any command except those in the C<SHELLS> alias on the C<HUB>
 machines.
 
 =item jill
 
-The user C<jill> may run C</etc/shutdown -h now> or
-C</etc/shutdown -r now> as well as the commands in the
+The user C<jill> may run C</sbin/shutdown -h now> or
+C</sbin/shutdown -r now> as well as the commands in the
 C<MISC> alias on houdini.
 
 =item markm
 
 The user C<markm> may run any command on the C<HUB> machines
-except F</etc/shutdown>, F</etc/halt>, and commands listed
+except F</sbin/shutdown>, F</sbin/halt>, and commands listed
 in the C<MISC> alias.
 
 =item davehieb
 
 The user C<davehieb> may run any command on C<merlin> as any
 user in the Runas_Alias OP (ie: root or operator).  He may
-also run F</etc/halt> on the C<SERVERS> and any command
+also run F</sbin/halt> on the C<SERVERS> and any command
 on C<kodiakthorn> (no password required on C<kodiakthorn>).
 
 =item steve
