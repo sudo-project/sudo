@@ -25,6 +25,9 @@
  *             NOT using configure.
  */
 
+#ifndef _SUDO_CONFIG_H
+#define _SUDO_CONFIG_H
+
 /* New ANSI-style OS defs.  */
 #if defined(hpux) && !defined(__hpux)
 #  define __hpux	1
@@ -88,11 +91,41 @@
 /* Define if you want to use the system getpass().  */
 #undef USE_GETPASS
 
+/* Define if you want to use execv() instead of execvp().  */
+#undef USE_EXECV
+
+/* Define if you a different ticket file for each tty.  */
+#undef USE_TTY_TICKETS
+
+/* Define if you want to insult the user for entering an incorrect password.  */
+#undef USE_INSULTS
+
+/* Define if you want the insults from the "classic" version sudo.  */
+#undef CLASSIC_INSULTS
+
+/* Define if you want 2001-like insults.  */
+#undef HAL_INSULTS
+
+/* Define if you want insults from the "Goon Show" */
+#undef GOONS_INSULTS
+
+/* Define if you want insults culled from the twisted minds of CSOps.  */
+#undef CSOPS_INSULTS
+
+/* Define to override the user's path with a builtin one.  */
+#undef SECURE_PATH
+
 /* Define if you use S/Key.  */
 #undef HAVE_SKEY
 
 /* Define if you use NRL OPIE.  */
 #undef HAVE_OPIE
+
+/* Define if you want a two line OTP (skey/opie) prompt.  */
+#undef LONG_OTP_PROMPT
+
+/* Define if you want to validate users via OTP (skey/opie) only.  */
+#undef OTP_ONLY
 
 /* Define if you use SecurID.  */
 #undef HAVE_SECURID
@@ -165,28 +198,28 @@
 #  define memset(S, X, N)	(bzero(S, N))
 #endif
 
-/* Define if you have sysconf(3c). */
+/* Define if you have sysconf(3c).  */
 #undef HAVE_SYSCONF
 
-/* Define if you have putenv(3). */
+/* Define if you have putenv(3).  */
 #undef HAVE_PUTENV
 
-/* Define if you have setenv(3). */
+/* Define if you have setenv(3).  */
 #undef HAVE_SETENV
 
-/* Define if you have strcasecmp(3). */
+/* Define if you have strcasecmp(3).  */
 #undef HAVE_STRCASECMP
 
-/* Define if you have tcgetattr(3). */
+/* Define if you have tcgetattr(3).  */
 #undef HAVE_TCGETATTR
 
-/* Define if you have innetgr(3). */
+/* Define if you have innetgr(3).  */
 #undef HAVE_INNETGR
 
-/* Define if you have getdomainname(2). */
+/* Define if you have getdomainname(2).  */
 #undef HAVE_GETDOMAINNAME
 
-/* Define if you have utime(2). */
+/* Define if you have utime(2).  */
 #undef HAVE_UTIME
 
 /* Define if you have a POSIX utime() (uses struct utimbuf) */
@@ -195,10 +228,10 @@
 /* Define if utime(file, NULL) sets timestamp to current */
 #undef HAVE_UTIME_NULL
 
-/* Define if you have bigcrypt(3). */
+/* Define if you have bigcrypt(3).  */
 #undef HAVE_BIGCRYPT
 
-/* Define if you have set_auth_parameters(3). */
+/* Define if you have set_auth_parameters(3).  */
 #undef HAVE_SET_AUTH_PARAMETERS
 
 /* Define if you have getspnam(3).  [SVR4-style shadow passwords] */
@@ -216,13 +249,13 @@
 /* Define if you have getauthuid(3).  [ULTRIX 4.x shadow passwords] */
 #undef HAVE_GETAUTHUID
 
-/* Define if you have seteuid(3). */
+/* Define if you have seteuid(3).  */
 #undef HAVE_SETEUID
 
-/* Define if you have waitpid(2). */
+/* Define if you have waitpid(2).  */
 #undef HAVE_WAITPID
 
-/* Define if you have wait3(2). */
+/* Define if you have wait3(2).  */
 #undef HAVE_WAIT3
 
 /* Define if you have the <malloc.h> header file.  */
@@ -277,32 +310,140 @@
 /* Define if you have the <sys/select.h> header file.  */
 #undef HAVE_SYS_SELECT_H
 
-/* Define if your struct sockadr has an sa_len field. */
+/* Define if your struct sockadr has an sa_len field.  */
 #undef HAVE_SA_LEN
 
 /* Define to void if your C compiler fully groks void, else char */
 #undef VOID
 
-/* Define to the max length of a uid_t in string context (excluding the NULL */
+/* Define to the max length of a uid_t in string context (excluding the NUL) */
 #undef MAX_UID_T_LEN
 
 /* Define if your syslog(3) does not guarantee the message will be logged */
 /* and syslog(3) returns non-zero to denote failure */
 #undef BROKEN_SYSLOG
 
-/*
- * Emulate a subset of waitpid() if we don't have it.
- */
-#ifdef HAVE_WAITPID
-#define sudo_waitpid(p, s, o)	waitpid(p, s, o)
-#else
-#ifdef HAVE_WAIT3
-#define sudo_waitpid(p, s, o)	wait3(s, o, NULL)
-#endif
-#endif
+/* The file mode, user id, and group id of the sudoers file */
+#undef SUDOERS_MODE
+#undef SUDOERS_UID
+#undef SUDOERS_GID
+
+/* The umask that the root-run prog should use */
+#undef SUDO_UMASK
 
 /* Define if you want the hostname to be entered into the log file */
 #undef HOST_IN_LOG
 
 /* Define if you want the log file line to be wrapped */
 #undef WRAP_LOG
+
+/* Define to be the number of minutes before sudo asks for passwd again.  */
+#undef TIMEOUT
+
+/* Define to be the passwd prompt timeout (in minutes).  */
+#undef PASSWORD_TIMEOUT
+
+/* Define to be the number of tries the user gets to enter the passwd.  */
+#undef TRIES_FOR_PASSWORD
+
+/* Define to be the user sudo should run commands as by default.  */
+#undef RUNAS_DEFAULT
+
+/* Define if you want to require fully qualified hosts in sudoers.  */
+#undef FQDN
+
+/* If defined, users in this group need not enter a passwd (ie "sudo").  */
+#undef EXEMPTGROUP
+
+/* Define to the path of the editor visudo should use. */
+#undef EDITOR
+
+/* Define to be the user that gets sudo mail.  */
+#undef ALERTMAIL
+
+/* Define to be the subject of the mail sent to ALERTMAIL by sudo.  */
+#undef MAILSUBJECT
+
+/* Define to be the message given for a bad password.  */
+#undef INCORRECT_PASSWORD
+
+/* Define to be the password prompt.  */
+#undef PASSPROMPT
+
+/* Define if you want visudo to honor EDITOR and VISUAL env variables.  */
+#undef ENV_EDITOR
+
+/* Define to SLOG_SYSLOG, SLOG_FILE, or SLOG_BOTH */
+#undef LOGGING
+
+/* Define to be the syslog facility to use.  */
+#undef LOGFAC
+
+/* Define to be the max chars per log line (for line wrapping).  */
+#undef MAXLOGFILELEN
+
+/* Define if you want to ignore '.' and '' in $PATH */
+#undef IGNORE_DOT_PATH
+
+/* Define SHORT_MESSAGE for a short lecture or NO_MESSAGE for none.  */
+#undef SHORT_MESSAGE
+#undef NO_MESSAGE
+
+/* Define SEND_MAIL_WHEN_NO_USER to send mail when user not in sudoers file */
+#undef SEND_MAIL_WHEN_NO_USER
+
+/* Define SEND_MAIL_WHEN_NOT_OK to send mail when not allowed to run command */
+#undef SEND_MAIL_WHEN_NOT_OK
+
+/* Define if you want sudo to start a shell if given no arguments.  */
+#undef SHELL_IF_NO_ARGS
+
+/* Define if you want sudo to set $HOME in shell mode.  */
+#undef SHELL_SETS_HOME
+
+/* Define if the code in interfaces.c does not compile for you.  */
+#undef STUB_LOAD_INTERFACES
+
+/**********  You probably don't want to modify anything below here  ***********/
+
+/*
+ * Emulate a subset of waitpid() if we don't have it.
+ */
+#ifdef HAVE_WAITPID
+#  define sudo_waitpid(p, s, o)		waitpid(p, s, o)
+#else
+#  ifdef HAVE_WAIT3
+#    define sudo_waitpid(p, s, o)	wait3(s, o, NULL)
+#  endif
+#endif
+
+#ifdef USE_EXECV
+#  define EXEC	execv
+#else
+#  define EXEC	execvp
+#endif /* USE_EXECV */
+
+/*
+ * syslog(3) parameters
+ */
+
+#if (LOGGING & SLOG_SYSLOG)
+#  include <syslog.h>
+#  ifndef Syslog_ident
+#    define Syslog_ident	"sudo"
+#  endif
+#  ifndef Syslog_options
+#    define Syslog_options	0
+#  endif
+#  if !defined(Syslog_facility) && defined(LOG_NFACILITIES)
+#    define Syslog_facility	LOGFAC
+#  endif
+#  ifndef Syslog_priority_OK
+#    define Syslog_priority_OK	LOG_NOTICE
+#  endif
+#  ifndef Syslog_priority_NO
+#    define Syslog_priority_NO	LOG_ALERT
+#  endif
+#endif	/* LOGGING & SLOG_SYSLOG */
+
+#endif /* _SUDO_CONFIG_H */
