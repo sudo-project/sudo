@@ -1,5 +1,5 @@
 This file explains how to use the optional LDAP functionality of SUDO to
-store /etc/sudoers information.  This feature is separate from LDAP passwords.
+store /etc/sudoers information.  This feature is distinct from LDAP passwords.
 
 LDAP philosophy
 ===============
@@ -18,78 +18,75 @@ Many times the word 'Directory' is used in the document to refer to the LDAP
 server, structure and contents.
 
 Many times 'options' are used in this document to refer to sudoer 'defaults'.
-They are on in the same.
+They are one and the same.
 
 Design Features
 ===============
 
-  * Sudo no longer needs to read all sudoers.  Parsing of /etc/sudoers requires
-      the entire file to be read.  The LDAP feature of sudo uses two
-      (sometimes three) LDAP queries per invocation.  It never reads the
-      all the sudoer entries in the LDAP store.  This makes it
-      especially fast and particularly usable in LDAP environments.
-      The first query is to parse default options (see below).  The second
-      is to match against the username or groups a user belongs to.
-      (The special ALL tag is matched in this query too.)
-      If not match is against the username, the third query pulls the entries
-      that match against user netgroups to compare back to the user.
+  * Sudo no longer needs to read sudoers in its entirety.  Parsing of
+    /etc/sudoers requires the entire file to be read.  The LDAP feature of sudo
+    uses two (sometimes three) LDAP queries per invocation.  It never reads all
+    the sudoer entries in the LDAP store.  This makes it especially fast and
+    particularly usable in LDAP environments.  The first query is to parse
+    default options (see below).  The second is to match against the username or
+    groups a user belongs to.  (The special ALL tag is matched in this query
+    too.) If no match is made against the username, the third query pulls the
+    entries that match against user netgroups to compare back to the user.
 
   * Sudo no longer blows up if there is a typo.  Parsing of /etc/sudoers can
-      still blow up when sudo is invoked.  However when using the LDAP feature
-      of sudo, LDAP syntax rules are applied before the data is uploaded into
-      the LDAP server, so proper syntax is always guaranteed!
-      One can of course still insert a bogus hostname or username,
-      but sudo will not care.
+    still blow up when sudo is invoked.  However when using the LDAP feature of
+    sudo, LDAP syntax rules are applied before the data is uploaded into the
+    LDAP server, so proper syntax is always guaranteed!  One can of course still
+    insert a bogus hostname or username, but sudo will not care.
 
   * Options inside of entries now override global default options.
-      /etc/sudoers allowed for only default options and limited options
-      associated with user/host/command aliases.  The syntax can be difficult
-      for the newbie.  The LDAP feature attempts to simplify this and yet
-      still provide maximum flexibility.
+    /etc/sudoers allowed for only default options and limited options associated
+    with user/host/command aliases.  The syntax can be difficult for the newbie.
+    The LDAP feature attempts to simplify this and yet still provide maximum
+    flexibility.
 
-      Sudo first looks for an entry called 'cn=default' in the SUDOers
-      container.  If found, the multi-valued sudoOption attribute is parsed
-      the same way the global 'Defaults' line in /etc/sudoers is parsed.
+    Sudo first looks for an entry called 'cn=default' in the SUDOers container.
+    If found, the multi-valued sudoOption attribute is parsed the same way the
+    global 'Defaults' line in /etc/sudoers is parsed.
 
-      If on the second or third query, a response containing a sudoRole
-      which matches against the user, host, and command, then the matched
-      object is scanned for a additional options to override the top-level
-      defaults.  See the Example LDAP content below for more information.
+    If on the second or third query, a response contains a sudoRole which
+    matches against the user, host, and command, then the matched object is
+    scanned for a additional options to override the top-level defaults.  See
+    the example LDAP content below for more information.
 
   * Visudo is no longer needed.  Visudo provides locking and syntax checking
-      against the /etc/sudoers file.  Since LDAP updates are atomic, locking
-      is no longer necessary.  Because syntax is checked when the data is
-      inserted into LDAP, the sudoers syntax check becomes unnecessary.
+    against the /etc/sudoers file.  Since LDAP updates are atomic, locking is no
+    longer necessary.  Because syntax is checked when the data is inserted into
+    LDAP, the sudoers syntax check becomes unnecessary.
 
   * Aliases are no longer needed.  User, Host, and Command Aliases were setup
-      to allow simplification and readability of the sudoers files.  Since the
-      LDAP sudoer entry allows multiple values for each of its attributes and
-      since most LDAP browsers are graphical and easy to work with, original
-      aliases are no longer needed.
+    to allow simplification and readability of the sudoers files.  Since the
+    LDAP sudoer entry allows multiple values for each of its attributes and
+    since most LDAP browsers are graphical and easy to work with, original
+    aliases are no longer needed.
 
-      If you want to specify lots of users into an entry or want to have
-      similar entries with identical users, then use either groups or user
-      netgroups.  Thats what groups and netgroups are for and Sudo handles
-      this well.  Or just paste them all into the LDAP record.
+    If you want to specify lots of users into an entry or want to have similar
+    entries with identical users, then use either groups or user netgroups.
+    Thats what groups and netgroups are for and Sudo handles this well.
+    Alternately, one can just paste them all into the LDAP record.
 
-      If you want to specify lots of hosts into an entry, use netgroups or
-      IP address matches (10.2.3.4/255.255.0.0).  Thats what netgroups are
-      for and Sudo handles this well.  Or just past them all into the LDAP
-      record.
+    If you want to specify lots of hosts into an entry, use netgroups or IP
+    address matches (10.2.3.4/255.255.0.0).  Thats what netgroups are for and
+    Sudo handles this well.  Or just past them all into the LDAP record.
 
-      If you want to specify lots of commands, use directories or wildcards,
-      or just paste them all into LDAP.  That's what it's for.
+    If you want to specify lots of commands, use directories or wildcards, or
+    just paste them all into LDAP.  That's what it's for.
 
   * The /etc/sudoers file can be disabled.  Paranoid security administrators
-      can now disallow parsing of any local /etc/sudoers file by an LDAP
-      sudoOption '!local_sudoers'.  This way all sudoers can be controlled
-      and audited in one place because local entries are not allowed.
-      In the future, this file may not be present.
+    can now disallow parsing of any local /etc/sudoers file by an LDAP
+    sudoOption '!local_sudoers'.  This way all sudoers can be controlled and
+    audited in one place because local entries are not allowed.
+    In the future, this file may not be present.
       BUG: THIS OPTION IS NOT IMPLEMENTED YET.
 
-  * The sudo binary compiled with LDAP support should be totally
-      backward compatible and be syntactically and source code equivalent
-      to its non LDAP-enabled build.
+  * The sudo binary compiled with LDAP support should be totally backward
+    compatible and be syntactically and source code equivalent to its non
+    LDAP-enabled build.
 
 
 Build instructions
@@ -108,22 +105,18 @@ to specify them at configure time.
   > LDFLAGS="-L/usr/local/ldapsdk/lib" \
   > ./configure --with-ldap --with-pam
 
-In early revs of sudo where the '--with-ldap' option is not available, you
-need to manually append '#define HAVE_LDAP 1' to config.h and set
-LIBS='-lldap' in Makefile.
-
-Sudo by default builds against OpenLDAP's libraries.  For others LDAP
-libraries such as Netscape, iPlanet, Mozilla, SecureWay, add these lines
-to config.h before running make:
+Sudo by default builds against OpenLDAP's libraries.  For others LDAP libraries
+such as Netscape, iPlanet, Mozilla, SecureWay, add these lines to config.h
+before running make:
 
   #undef HAVE_LDAP_INITIALIZE
   #define HAVE_LBER_H
 
 You might have to also include '-llber' or '-lldif' in your LIBS.
 
-Your Mileage may vary.  Please let Aaron Spangler <aaron@spangler.ods.org>
-know what combinations worked best for your OS & LDAP Combinations so
-we can improve sudo.
+Your Mileage may vary.  Please let Aaron Spangler <aaron@spangler.ods.org> know
+what combinations worked best for your OS & LDAP Combinations so we can improve
+sudo.
 
 More Build Notes:
 HP-UX 11.23 (gcc3) Galen Johnson <Galen.Johnson@sas.com>
@@ -217,17 +210,16 @@ need to make minor changes on a daily basis?  It doesn't make sense to delete
 and re-add objects.  (You can, but this is tedious).
 
 I recommend using any of the following LDAP browsers to administer your SUDOers.
-  * GQ - The gentleman's LDAP client - Open Source - I use this a lot on
-         Linux and since it is Schema aware, I don't need to create a sudoRole
-      template.
-    http://biot.com/gq/
+  * GQ - The gentleman's LDAP client - Open Source - I use this a lot on Linux
+    and since it is Schema aware, I don't need to create a sudoRole template.
+	http://biot.com/gq/
 
   * LDAP Browser/Editor - by Jarek Gawor - I use this a lot on Windows
     and Solaris.  It runs anywhere in a Java Virtual Machine including
     web pages.  You have to make a template from an existing sudoRole entry.
-    http://www.iit.edu/~gawojar/ldap
-    http://www.mcs.anl.gov/~gawor/ldap
-    http://ldapmanager.com
+	http://www.iit.edu/~gawojar/ldap
+	http://www.mcs.anl.gov/~gawor/ldap
+	http://ldapmanager.com
 
   There are dozens of others, some open source, some free, some not.
 
@@ -263,7 +255,7 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
 
 Debugging your LDAP configuration
 =================================
-Enable debugging if you think sudo is not parsing LDAP the way you think it
+Enable debugging if you believe sudo is not parsing LDAP the way you think it
 it should.  A value of 1 shows moderate debugging.  A value of 2 shows the
 results of the matches themselves.  Make sure to set the value back to zero
 so that other users don't get confused by the debugging messages.  This value
@@ -276,4 +268,3 @@ search order.  But if it did, it would look like this:
 This might be implemented in the future.  For now just skip this step.
 
   sudoers: files ldap
-
