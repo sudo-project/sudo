@@ -260,7 +260,7 @@ static void reminder()
 #ifdef SHORT_MESSAGE
     (void) fprintf(stderr, "\n%s\n%s\n\n%s\n%s\n\n",
 #else
-    (void) fprintf(stderr, "\n%s\n%s\n%s\n\n%s\n%s\n\n%s\n%s\n\n",
+    (void) fprintf(stderr, "\n%s\n%s\n%s\n%s\n\n%s\n%s\n\n%s\n%s\n\n",
 	"    CU sudo version 1.3, based on Root Group sudo version 1.1",
 	"    sudo version 1.1, Copyright (C) 1991 The Root Group, Inc.",
 	"    sudo comes with ABSOLUTELY NO WARRANTY.  This is free software,",
