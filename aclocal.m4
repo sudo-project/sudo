@@ -182,9 +182,9 @@ AC_DEFUN(SUDO_FUNC_UTIME_POSIX,
 [AC_MSG_CHECKING(for POSIX utime)
 AC_CACHE_VAL(sudo_cv_func_utime_posix,
 [rm -f conftestdata; > conftestdata
-AC_TRY_RUN([#include <utime.h>
-#include <sys/types.h>
+AC_TRY_RUN([#include <sys/types.h>
 #include <sys/time.h>
+#include <utime.h>
 main() {
 struct utimbuf ut;
 ut.actime = ut.modtime = time(0);
