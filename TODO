@@ -36,104 +36,94 @@ TODO list (most will be addressed in sudo 2.0)
 
 13) Add test for how to read ether interfaces in configure script
 
-14) Add configure option to enable old behavior of visudo (O_EXCL)?
-    --without-sudoers-lock?
+14) Use strtol() and strtoul(), not atoi()
 
-15) Use strtol() and strtoul(), not atoi()
+15) Make syslog stuff work on vanilla ultrix
 
-16) Look into %e, %p, %k in parse.lex
+16) Implement date_format and log_format options.
 
-17) Make syslog stuff work on vanilla ultrix
+17) Add support for: Default:user@host
 
-18) Implement date_format and log_format options.
+18) Make visudo rcs-aware
 
-19) Add support for: Default:user@host
-
-20) Make visudo rcs-aware
-
-21) Some people want to be able to specify a special password in sudoers
+19) Some people want to be able to specify a special password in sudoers
     in addition or instead of the normal one.  The best argument for
     this so far is to be able to use separate passwords for the
     target users that are not the passwd file ones.
 
-22) Add support for trusted users.  E.g. allow user to run a certain
+20) Add support for trusted users.  E.g. allow user to run a certain
     command regardless of what dir it is in if it is owned by the
     trusted user.
 
-23) Add a flag similar to '-l' but that spits out sudo commands in
+21) Add a flag similar to '-l' but that spits out sudo commands in
     a format suitable for cut & paste into sudoers.
 
-24) Someone wants a recursive version of the dir specifier.  Ie:
+22) Someone wants a recursive version of the dir specifier.  Ie:
     SOME_MODIFIER:/usr/local/ to allow anything under /usr/local to be run.
 
-25) An option to set the shell to the target user would make sense.
+23) An option to set the shell to the target user would make sense.
     See other target user-related issues above.
 
-26) Add an option (-D) to dump the defaults after the sudoers file
+24) Add an option (-D) to dump the defaults after the sudoers file
     has been parsed.  Should only be available to root and should
     allow a -u user modifier.  Maybe dump all of sudoers?
 
-27) For sudo 1.7 wipe out the environment by default.
+25) For sudo 1.7 wipe out the environment by default.
 
-28) Allow /etc/sudoers to be a symlink but require the parent dir to
+26) Allow /etc/sudoers to be a symlink but require the parent dir to
     be root-owned and not writable by anything else.  Should really
     traverse the tree to the root doing this.
 
-29) Improve interfaces.c STREAMS code (see ntpd's ntp_io.c for hints)
+27) Improve interfaces.c STREAMS code (see ntpd's ntp_io.c for hints)
 
-30) Wildcard support for user and group names? (netgroup too?)
+28) Wildcard support for user and group names? (netgroup too?)
 
-31) If root_sudo is off, still allow sudo -u to non-root users?
+29) If root_sudo is off, still allow sudo -u to non-root users?
 
-32) Add configure option to id user based on euid not ruid?
+30) Use proper links in .pod files
 
-33) Split $EDITOR/$VISUAL in visudo into an argument vector based on whitespace
+31) Parse gids like %#0
 
-34) Use proper links in .pod files
-
-35) Parse gids like %#0
-
-36) For AIX, call getuserattr() to get resource limits and set them
+32) For AIX, call getuserattr() to get resource limits and set them
     as appropriate, see:
     http://nscp.upenn.edu/aix4.3html/libs/basetrf1/getuserattr.htm#A16691a89
 
-37) Add an insult_path variable that is intialized to "builtin" but that
+33) Add an insult_path variable that is intialized to "builtin" but that
     can point to other files containing an insult count as the first
     line and that have a constant record length (sparse files) for
     easy seeking.
 
-38) Some way of using a new pty for the program run via sudo would prevent
+34) Some way of using a new pty for the program run via sudo would prevent
     access to the caller's /dev/tty (but probably makes job control tricky).
 
-39) Maybe have a database of checksums that commands are verified against.
+35) Maybe have a database of checksums that commands are verified against.
     Basically replace the st_ino/st_dev check with a checksum lookup.
 
-40) Look into testing writability of a file via sudoedit *before* doing
+36) Look into testing writability of a file via sudoedit *before* doing
     the edit; e.g., try opening with O_APPEND.
 
-41) Add Makefile.in bits to autogenerate Solaris and Irix packages
+37) Add Makefile.in bits to autogenerate Solaris and Irix packages
 
-42) Add monitor support for Solaris using /proc/$$/ctl w/ PCSENTRY
+38) Add monitor support for Solaris using /proc/$$/ctl w/ PCSENTRY
     (use PRSABORT flag to indicate failure).
 
-43) Add a session mode where sudo allocates a pty and logs everything
+39) Add a session mode where sudo allocates a pty and logs everything
     that occurs ala script(1).
 
-44) Use pam_open_session() and pam_close_session() (requires a persistent
+40) Use pam_open_session() and pam_close_session() (requires a persistent
     sudo process to call pam_close_session()).  Maybe add xauth support for
     the non-pam case?
 
-45) Should "monitor" and MONITOR/NOMONITOR be disabled for non-systrace?
+41) Should "monitor" and MONITOR/NOMONITOR be disabled for non-systrace?
 
-46) Add substitution mechanism in sudoers to subst, e.g. editors for sudoedit
+42) Add substitution mechanism in sudoers to subst, e.g. editors for sudoedit
 
-47) Move prototypes to extern.h
+43) Move prototypes to extern.h
 
-48) Get rid of VALIDATE_NOT_OK and just set/clear VALIDATE_OK
+44) Get rid of VALIDATE_NOT_OK and just set/clear VALIDATE_OK
 
-49) visudo -c should also sanity check aliases
+45) visudo -c should also sanity check aliases
 
-50) Make testsudoers stat files?  Needed to deal with glob() in parser.
+46) Use AC_CHECK_DECLS for systems w/o proper prototypes?  Maybe errno too?
 
-51) Allow arguments to the -l flag so users can check to see if they can
-    run specific commands.
+47) nicer defaults output for "sudo -l" and implement for LDAP too
