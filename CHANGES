@@ -26,7 +26,7 @@ CHANGES between sudo 1.2 (unofficial version)
 08) Added a define NEED_STRDUP so we don't conflict with the system's strdup(3)
 
 09) Now does *not* pass LD_* environmental vars on to programs that get
-	exec'd.  Also removes SHLIB_PATH for hpux.
+	exec'd.  Also removes SHLIB_PATH for hpux and _RLD_* for dec osf.
 
 10) Now searches current dir last if '.' or '' are in PATH.  Misses braindeath
     like './' but if that's in your path you deserve all the trojans you get.
@@ -39,3 +39,10 @@ CHANGES between sudo 1.2 (unofficial version)
 
 14) you can now specify a dir containing commands that a sudoer can do.
     (from John_Rouillard@dl5000.bc.edu)
+
+15) Ported to Solaris 2.x (based on a port of sudo 1.1 done by UnixOps).
+
+16) Took out setuid(0); setruid(uid); pairs that bracketed calls to
+    update_timestamp() since they are unnecesary and setruid() is
+    broken on systems without a setreuid(2) or setresuid(2) system call.
+    (Ie: AIX and Solaris 2.x).
