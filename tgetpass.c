@@ -128,7 +128,7 @@ tgetpass(prompt, timeout)
      * open /dev/tty for reading/writing if possible or use
      * stdin and stderr instead.
      */
-    if ((input = output = open(_PATH_TTY, O_RDWR)) == NULL) {
+    if ((input = output = open(_PATH_TTY, O_RDWR)) == -1) {
 	input = STDIN_FILENO;
 	output = STDERR_FILENO;
     }
