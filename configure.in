@@ -82,9 +82,6 @@ case "$OS" in
     "ksr"*)	echo "Looks like a KSR"
 		;;
     "next")	echo "Looks like NeXTstep"
-		if test -n "$GCC"; then
-		    STATIC_FLAGS="-static"
-		fi
 		;;
     "bsd/386")	echo "Looks like bsdi BSD/386"
 		;;
