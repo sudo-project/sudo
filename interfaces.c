@@ -50,6 +50,9 @@
 #include <sys/socket.h>
 #include <sys/param.h>
 #include <sys/ioctl.h>
+#if defined(HAVE_SYS_SOCKIO_H) && !defined(SIOCGIFCONF)
+#include <sys/sockio.h>
+#endif
 #ifdef _ISC
 #include <sys/stream.h>
 #include <sys/sioctl.h>
