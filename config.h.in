@@ -476,6 +476,9 @@
 /* Define if you use S/Key.  */
 #undef HAVE_SKEY
 
+/* Define if you have skeyaccess(3).  */
+#undef HAVE_SKEYACCESS
+
 /* Define if you use NRL OPIE.  */
 #undef HAVE_OPIE
 
