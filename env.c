@@ -54,17 +54,34 @@ __unused static const char rcsid[] = "$Sudo$";
  * Flags used in rebuild_env()
  */
 #undef DID_TERM
-#define DID_TERM	0x01
+#define DID_TERM	0x0001
 #undef DID_PATH
-#define DID_PATH	0x02
+#define DID_PATH	0x0002
 #undef DID_HOME
-#define DID_HOME	0x04
+#define DID_HOME	0x0004
 #undef DID_SHELL
-#define DID_SHELL	0x08
+#define DID_SHELL	0x0008
 #undef DID_LOGNAME
-#define DID_LOGNAME	0x10
+#define DID_LOGNAME	0x0010
 #undef DID_USER
-#define DID_USER    	0x20
+#define DID_USER    	0x0020
+#undef DID_MAX
+#define DID_MAX    	0x00ff
+
+#undef KEPT_TERM
+#define KEPT_TERM	0x0100
+#undef KEPT_PATH
+#define KEPT_PATH	0x0200
+#undef KEPT_HOME
+#define KEPT_HOME	0x0400
+#undef KEPT_SHELL
+#define KEPT_SHELL	0x0800
+#undef KEPT_LOGNAME
+#define KEPT_LOGNAME	0x1000
+#undef KEPT_USER
+#define KEPT_USER    	0x2000
+#undef KEPT_MAX
+#define KEPT_MAX    	0xff00
 
 #undef VNULL
 #define	VNULL	(VOID *)NULL
@@ -249,7 +266,7 @@ rebuild_env(envp, sudo_mode, noexec)
     struct environment env;
     size_t len;
     char **ep, *cp, *ps1;
-    int okvar, iswild, didvar;
+    unsigned int okvar, iswild, didvar;
 
     /*
      * Either clean out the environment or reset to a safe default.
@@ -320,6 +337,7 @@ rebuild_env(envp, sudo_mode, noexec)
 		insert_env(*ep, &env, 0);
 	    }
 	}
+	didvar |= didvar << 8;		/* convert DID_* to KEPT_* */
 
 	/*
 	 * Add in defaults.  In -i mode these come from the runas user,
@@ -409,9 +427,11 @@ rebuild_env(envp, sudo_mode, noexec)
     }
 
     /* Set $USER and $LOGNAME to target if "set_logname" is true. */
-    if (def_env_reset && runas_pw->pw_name) {
-	insert_env(format_env("LOGNAME", runas_pw->pw_name, VNULL), &env, 1);
-	insert_env(format_env("USER", runas_pw->pw_name, VNULL), &env, 1);
+    if (def_set_logname && runas_pw->pw_name) {
+	if (!ISSET(didvar, KEPT_LOGNAME))
+	    insert_env(format_env("LOGNAME", runas_pw->pw_name, VNULL), &env, 1);
+	if (!ISSET(didvar, KEPT_USER))
+	    insert_env(format_env("USER", runas_pw->pw_name, VNULL), &env, 1);
     }
 
     /* Set $HOME for `sudo -H'.  Only valid at PERM_FULL_RUNAS. */
