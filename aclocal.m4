@@ -15,6 +15,9 @@ elif test -f "/usr/lib/sendmail"; then
 elif test -f "/usr/etc/sendmail"; then
     AC_MSG_RESULT(/usr/etc/sendmail)
     AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/etc/sendmail")
+elif test -f "/usr/ucblib/sendmail"; then
+    AC_MSG_RESULT(/usr/ucblib/sendmail)
+    AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/ucblib/sendmail")
 elif test -f "/usr/local/lib/sendmail"; then
     AC_MSG_RESULT(/usr/local/lib/sendmail)
     AC_DEFINE(_SUDO_PATH_SENDMAIL, "/usr/local/lib/sendmail")
