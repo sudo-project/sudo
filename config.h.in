@@ -441,9 +441,8 @@
 /* Define if you want "command not allowed" instead of "command not found" */
 #undef DONT_LEAK_PATH_INFO
 
-/* Define SHORT_MESSAGE for a short lecture or NO_MESSAGE for none.  */
-#undef SHORT_MESSAGE
-#undef NO_MESSAGE
+/* Define if you don't want users to get the lecture the first they user sudo */
+#undef NO_LECTURE
 
 /* Define SEND_MAIL_WHEN_NO_USER to send mail when user not in sudoers file */
 #undef SEND_MAIL_WHEN_NO_USER

@@ -177,10 +177,6 @@ Special features/options:
 	Enable DCE support.  Known to work on HP-UX 9.X and 10.0.  Other
 	platforms may require source code and/or `configure' changes.
 
-  --with-message=TYPE
-	Set message for first time sudo to be "short", "full", or "none".
-	Default is "short.
-
   --with-logging=TYPE
 	How you want to do your logging.  You may choose "syslog", "file",
 	or "both".  Setting this to "syslog" is nice because you can keep all
@@ -373,6 +369,9 @@ Special features/options:
 	for your site.  NOTE: this is not applied to users in the group
 	specified by --with-exemptgroup.  If you do not specify a path,
 	"/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc" is used.
+
+  --without-lecture
+	Don't print the lecture the first time a user runs sudo.
 
   --without-interfaces
 	This option keeps sudo from trying to glean the ip address from each

@@ -53,6 +53,7 @@
 
 #include "sudo.h"
 #include "version.h"
+#include "auth/sudo_auth.h"
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
@@ -68,6 +69,8 @@ static char *num_to_name __P((int, CODE *));
 void
 print_version()
 {
+    extern sudo_auth auth_switch[];
+    sudo_auth *auth;
 
     (void) printf("Sudo version %s\n", version);
 
@@ -75,7 +78,18 @@ print_version()
      * Print compile-time options if root.
      */
     if (getuid() == 0) {
-	(void) fputs("\nLogging:\n", stdout);
+#ifdef WITHOUT_PASSWD
+	(void) puts("\nNo Authentication configured\n");
+#else
+	(void) fputs("\nAuthentication methods:", stdout);
+	for (auth = auth_switch; auth->name; auth++) {
+	    (void) putchar(' ');
+	    (void) fputs(auth->name, stdout);
+	}
+	(void) putchar('\n');
+#endif
+
+	(void) fputs("Logging:\n", stdout);
 #if (LOGGING & SLOG_SYSLOG)
 # ifdef HAVE_SYSLOG_NAMES
 	printf("    syslog: facility %s, failures to %s, success to %s\n",
@@ -83,23 +97,104 @@ print_version()
 	    num_to_name(PRI_FAILURE, prioritynames),
 	    num_to_name(PRI_SUCCESS, prioritynames));
 # else
-	printf("    syslog: facility %d, failures to %d, success to %d\n",
+	printf("    syslog: facility #%d, failures to #%d, success to #%d\n",
 	    LOGFAC, PRI_FAILURE, PRI_SUCCESS);
 # endif /* HAVE_SYSLOG_NAMES */
 #endif /* SLOG_SYSLOG */
 #if (LOGGING & SLOG_FILE)
-	printf("    log file: %s", _PATH_SUDO_LOGFILE);
+	(void) printf("    log file: %s", _PATH_SUDO_LOGFILE);
 # ifdef HOST_IN_LOG
-	fputs(", host in log", stdout);
+	(void) fputs(", host in log", stdout);
 # endif
 # ifdef WRAP_LOG
-	printf(", lines wrap after %d characters", MAXLOGFILELEN);
+	(void) printf(", lines wrap after %d characters", MAXLOGFILELEN);
 # endif
-	putchar('\n');
+	(void) putchar('\n');
 #endif /* SLOG_FILE */
 
-    /* XXX - add more */
+#ifdef USE_TTY_TICKETS
+	(void) puts("Timestamp type: userdir/tty");
+#else
+	(void) puts("Timestamp type: userdir");
+#endif
 
+#if TIMEOUT
+	(void) printf("Ticket file timeout: %d minutes\n", TIMEOUT);
+#endif
+
+#ifdef USE_INSULTS
+	(void) fputs("Insult types:", stdout);
+# ifdef CLASSIC_INSULTS
+	(void) fputs(" classic", stdout);
+# endif
+# ifdef CSOPS_INSULTS
+	(void) fputs(" CSOps", stdout);
+# endif
+# ifdef HAL_INSULTS
+	(void) fputs(" hal", stdout);
+# endif
+# ifdef GOONS_INSULTS
+	(void) fputs(" goons", stdout);
+# endif
+	(void) putchar('\n');
+#endif
+
+#ifdef SUDO_UMASK
+	(void) printf("Umask to enforce: 0%o\n", SUDO_UMASK);
+#endif
+
+#if !defined(WITHOUT_PASSWD) && PASSWORD_TIMEOUT
+	(void) printf("Password timeout: %d minutes\n", PASSWORD_TIMEOUT);
+#endif
+
+	(void) printf("Password attempts allowed: %d\n", TRIES_FOR_PASSWORD);
+
+	(void) printf("Default user to run commands as: %s\n", RUNAS_DEFAULT);
+
+#ifdef FQDN
+	(void) puts("Fully qualified hostnames required in sudoers");
+#endif
+
+#ifdef NO_ROOT_SUDO
+	(void) puts("Root may not run sudo");
+#endif
+
+#ifdef EXEMPTGROUP
+	(void) printf("Users in group %s are exempt from password and PATH requirements\n", EXEMPTGROUP);
+#endif
+
+#ifdef ENV_EDITOR
+	(void) printf("Default editor for visudo: %s\n", EDITOR);
+#else
+	(void) printf("Editor for visudo: %s\n", EDITOR);
+#endif
+
+#ifdef SECURE_PATH
+	(void) printf("Secure PATH: %s\n", SECURE_PATH);
+#endif
+
+#ifdef _PATH_SENDMAIL
+	(void) printf("Mailer path: %s\n", _PATH_SENDMAIL);
+	(void) printf("Send mail to: %s\n", ALERTMAIL);
+	(void) printf("Mail subject: %s\n", MAILSUBJECT);
+#endif
+
+	(void) printf("Default password prompt: %s\n", PASSPROMPT);
+
+	(void) fputs("Lecture user the first time they run sudo? ", stdout);
+#ifndef NO_LECTURE
+	(void) puts("yes");
+#else
+	(void) puts("no");
+#endif
+
+/* stopped at INCORRECT_PASSWORD */
+
+    /* XXX - more */
+
+/*
+-D_PATH_SUDO_SUDOERS=\"/etc/sudoers\" -D_PATH_SUDO_STMP=\"/etc/stmp\" -DSUDOERS_UID=0 -DSUDOERS_GID=0 -DSUDOERS_MODE=0440
+*/
     }
 }
 

@@ -126,7 +126,7 @@ check_user()
 static void
 lecture()
 {
-#ifndef NO_MESSAGE
+#ifndef NO_LECTURE
     (void) fputs("\n\
 We trust you have received the usual lecture from the local System\n\
 Administrator. It usually boils down to these two things:\n\
@@ -134,7 +134,7 @@ Administrator. It usually boils down to these two things:\n\
 	#1) Respect the privacy of others.\n\
 	#2) Think before you type.\n\n",
 	stderr);
-#endif /* NO_MESSAGE */
+#endif /* NO_LECTURE */
 }
 
 /*

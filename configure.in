@@ -268,7 +268,7 @@ AC_ARG_WITH(authenticate, [  --with-authenticate     enable AIX general authenti
     yes)	AC_DEFINE(HAVE_AUTHENTICATE)
 		AC_MSG_CHECKING(whether to use AIX general authentication)
 		AC_MSG_RESULT(yes)
-		AUTH_OBJS="aix_auth.o"
+		AUTH_OBJS="authenticate.o"
 		;;
     no)		;;
     *)		echo "Sorry, --with-authenticate does not take an argument."
@@ -315,22 +315,18 @@ AC_ARG_WITH(DCE, [  --with-DCE              enable DCE support],
 		;;
 esac])
 
-AC_MSG_CHECKING(which message/lecture type sudo should use)
-AC_ARG_WITH(message, [  --with-message          short, full, or none],
-[case $with_message in  
-    yes|short)	AC_DEFINE(SHORT_MESSAGE)
-		AC_MSG_RESULT(short)
+AC_MSG_CHECKING(whether to lecture users the first time they run sudo)
+AC_ARG_WITH(lecture, [  --without-lecture       don't print lecture for first-time sudoer],
+[case $with_lecture in  
+    yes|short)	AC_MSG_RESULT(yes)
 		;;
-    no|none)	AC_DEFINE(NO_MESSAGE)
-		AC_MSG_RESULT(none)
+    no|none)	AC_DEFINE(NO_LECTURE)
+		AC_MSG_RESULT(no)
 		;;
-    full)	echo "Using long sudo message/lecture for new users"
-		AC_MSG_RESULT(full)
-		;;
-    *)		echo "Unknown argument to --with-message: $with_message"
+    *)		echo "Unknown argument to --with-lecture: $with_lecture"
 		exit 1
 		;;
-esac], [AC_DEFINE(SHORT_MESSAGE) AC_MSG_RESULT(short)])
+esac], [AC_MSG_RESULT(yes)])
 
 AC_MSG_CHECKING(whether sudo should log via syslog or to a file)
 AC_ARG_WITH(logging, [  --with-logging          log via syslog, file, or both],
