@@ -518,7 +518,6 @@ usergr_matches(group, user, pw)
     struct passwd *pw;
 {
     struct group *grp;
-    gid_t pw_gid;
     char **cur;
     int n;
 
@@ -529,28 +528,26 @@ usergr_matches(group, user, pw)
     /* look up user's primary gid in the passwd file */
     if (pw == NULL && (pw = sudo_getpwnam(user)) == NULL)
 	return(FALSE);
-    pw_gid = pw->pw_gid;
 
     if ((grp = sudo_getgrnam(group)) == NULL)
 	return(FALSE);
 
     /* check against user's primary (passwd file) gid */
-    if (grp->gr_gid == pw_gid)
+    if (grp->gr_gid == pw->pw_gid)
 	return(TRUE);
 
     /*
-     * If the user has a supplementary group vector, check it.
-     * Otherwise, check the member list in struct group for the user name.
+     * If we are matching the invoking or list user and that user has a
+     * supplementary group vector, check it first.
      */
-    if ((n = user_ngroups) > 0) {
-	while (n--)
+    if (strcmp(user, list_pw ? list_pw->pw_name : user_name) == 0) {
+	for (n = user_ngroups; n != 0; n--)
 	    if (grp->gr_gid == user_groups[n])
 		return(TRUE);
-    } else {
-	for (cur = grp->gr_mem; *cur; cur++)
-	    if (strcmp(*cur, user) == 0)
-		return(TRUE);
     }
+    for (cur = grp->gr_mem; *cur; cur++)
+	if (strcmp(*cur, user) == 0)
+	    return(TRUE);
 
     return(FALSE);
 }

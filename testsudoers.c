@@ -82,6 +82,7 @@ char **Argv, **NewArgv;
 int num_interfaces;
 struct interface *interfaces;
 struct sudo_user sudo_user;
+struct passwd *list_pw;
 extern int parse_error;
 
 /* For getopt(3) */

@@ -136,6 +136,7 @@ char **Argv;
 int num_interfaces;
 struct interface *interfaces;
 struct sudo_user sudo_user;
+struct passwd *list_pw;
 static struct sudoerslist {
     struct sudoersfile *first, *last;
 } sudoerslist;
