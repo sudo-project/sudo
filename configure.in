@@ -189,13 +189,10 @@ esac])
 
 AC_ARG_WITH(SecurID, [  --with-SecurID          enable SecurID support],
 [case $with_SecurID in
-    yes)	AC_DEFINE(HAVE_SECURID)
+    no)		;;
+    *)		AC_DEFINE(HAVE_SECURID)
 		AC_MSG_CHECKING(whether to use SecurID for authentication)
 		AC_MSG_RESULT(yes)
-		;;
-    no)		;;
-    *)		echo "Sorry, --with-SecurID does not take an argument."
-		exit 1
 		;;
 esac])
 
@@ -207,7 +204,8 @@ AC_ARG_WITH(AuthSRV, [  --with-AuthSRV          enable FWTK AuthSRV support],
 		;;
     no)		;;
     *)		AC_DEFINE(HAVE_AUTHSRV)
-		LDFLAGS="${LDFLAGS} -L${with-AuthSRV}"
+		AC_MSG_CHECKING(whether to use FWTK AuthSRV for authentication)
+		AC_MSG_RESULT(yes)
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with-AuthSRV}"
     		CPPFLAGS="${CPPFLAGS} -I${with-AuthSRV}"
 		;;
@@ -1477,15 +1475,23 @@ fi
 dnl
 dnl extra SecurID lib + includes
 dnl
-if test "$with_SecurID" = "yes"; then
-    SUDO_LIBS="${SUDO_LIBS} /usr/ace/sdiclient.a"
-    CPPFLAGS="${CPPFLAGS} -I/usr/ace"
+if test -n "$with_SecurID" -a "$with_SecurID" != "no"; then
+    if test "$with_SecurID" != "yes"; then
+	SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"
+	CPPFLAGS="${CPPFLAGS} -I${with_SecurID}"
+    elif test -f /usr/ace/examples/sdiclient.a; then
+	SUDO_LIBS="${SUDO_LIBS} /usr/ace/examples/sdiclient.a"
+	CPPFLAGS="${CPPFLAGS} -I/usr/ace/examples"
+    else
+	SUDO_LIBS="${SUDO_LIBS} /usr/ace/sdiclient.a"
+	CPPFLAGS="${CPPFLAGS} -I/usr/ace"
+    fi
 fi
 
 dnl
 dnl extra AuthSRV lib + includes
 dnl
-if test "$with_AuthSRV = "yes"; then
+if test "$with_AuthSRV" = "yes"; then
     SUDO_LIBS="${SUDO_LIBS} -lauth -lfwall"
 fi
 
