@@ -63,11 +63,7 @@ static const char rcsid[] = "$Sudo$";
 # ifdef SIZE_T_MAX
 #  define SIZE_MAX	SIZE_T_MAX
 # else
-#  ifdef INT_MAX
-#   define SIZE_MAX	INT_MAX
-#  else
-#   define SIZE_MAX	0x7fffffff
-#  endif /* ULONG_MAX */
+#  define SIZE_MAX	INT_MAX
 # endif /* SIZE_T_MAX */
 #endif /* SIZE_MAX */
 
