@@ -54,6 +54,8 @@ A) Sudo removes the following "dangerous" environmental variables
    to guard against shared library spoofing, shell voodoo, and
    kerberos server spoofing.
      IFS
+     ENV
+     BASH_ENV
      LD_*
      _RLD_*
      SHLIB_PATH (HP-UX only)
@@ -84,15 +86,6 @@ A) You need to uncomment the rule in Makefile (or Makefile.in)
    by default since sudo comes with a pre-flex'd parse.lex.
    May sure you are using flex version 2.5.2 or higher--the
    lex that came with your OS may not like parse.lex.
-
-Q) I have a user whose login name is all capital letters or
-   a mix or all capitals and numbers.  When they try to run
-   sudo it says that they are not in the sudoers file but
-   they really are.  What's wrong.
-A) In sudo, a string consisting of all caps and numbers is
-   considered to be an Alias.  Therefore, sudo will never treat
-   it as a username (or a hostname).  There is no way to fix
-   this will the current sudoers syntax.
 
 Q) How can I keep sudo from asking for a password?
 A) Use the 'NOPASSWD' reserved word right before the command list in
