@@ -26,6 +26,7 @@ int pam_cleanup __P((struct passwd *pw, int status, void **data));
 int sia_setup __P((struct passwd *pw, char **prompt, void **data));
 int sia_verify __P((struct passwd *pw, char *prompt, void **data));
 int sia_cleanup __P((struct passwd *pw, int status, void **data));
+int aixauth_verify __P((struct passwd *pw, char *prompt, void **data));
 
 /* Prototypes for normal methods */
 int passwd_verify __P((struct passwd *pw, char *pass, void **data));
@@ -54,6 +55,9 @@ int kerb5_verify __P((struct passwd *pw, char *pass, void **data));
 #elif defined(HAVE_SIA)
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(1, "sia", sia_setup, sia_verify, sia_cleanup)
+#elif defined(HAVE_AUTHENTICATE)
+#  define AUTH_STANDALONE \
+	AUTH_ENTRY(1, "aixauth", NULL, aixauth_verify, NULL)
 #elif defined(HAVE_FWTK)
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(1, "fwtk", fwtk_setup, fwtk_verify, fwtk_cleanup)
