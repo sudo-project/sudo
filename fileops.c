@@ -42,6 +42,9 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/param.h>
+#ifdef HAVE_FLOCK
+#include <sys/file.h>
+#endif /* HAVE_FLOCK */
 #ifdef HAVE_UTIME
 # ifdef HAVE_UTIME_H
 #  include <utime.h>
@@ -119,7 +122,7 @@ lock_file(fd, lockit)
 	    op = LOCK_EX | LOCK_NB;
 	    break;
 	case SUDO_UNLOCK:
-	    op = LOCK_EX;
+	    op = LOCK_UN;
 	    break;
     }
     return(flock(fd, op) == 0);
