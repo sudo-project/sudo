@@ -1,5 +1,5 @@
 #
-# Copyright (c) 1996, 1998-2001 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 1996, 1998-2002 Todd C. Miller <Todd.Miller@courtesan.com>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -58,12 +58,11 @@ visudodir = $(sbindir)
 sudoersdir = $(sysconfdir)
 
 # Directory in which to install the man page
-# set mansect5 to 4 on sysV machines.
-mantype = man
-mansect8 = 8
-mansect5 = 5
-mandir8 = $(mandir)/$(mantype)$(mansect8)
-mandir5 = $(mandir)/$(mantype)$(mansect5)
+mantype = @MANTYPE@
+mansectsu = @mansectsu@
+mansectform = @mansectform@
+mandirsu = $(mandir)/$(mantype)$(mansectsu)
+mandirform = $(mandir)/$(mantype)$(mansectform)
 
 # User and group ids the installed files should be "owned" by
 install_uid = 0
@@ -84,27 +83,26 @@ all: $(PROGS)
 install: install-dirs install-binaries install-sudoers install-man
 
 install-dirs:
-	$(srcdir)/mkinstalldirs $(sudodir) $(visudodir) $(sudoersdir) $(mandir8) $(mandir5)
+	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)/$(sudodir) \
+	    $(DESTDIR)/$(visudodir) $(DESTDIR)/$(sudoersdir) \
+	    $(DESTDIR)/$(mandirsu) $(DESTDIR)/$(mandirform)
 
 install-binaries: $(PROGS)
-	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 4111 -s sudo $(sudodir)/sudo
-	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0111 -s visudo $(visudodir)/visudo
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 sudo $(DESTDIR)/$(sudodir)/sudo
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 visudo $(DESTDIR)/$(visudodir)/visudo
 
 install-sudoers:
-	@ if [ -f $(sudoersdir)/sudoers ]; then  \
-	    echo "Setting user/group and mode on existing $(sudoersdir)/sudoers file."; \
-	    chown $(sudoers_uid) $(sudoersdir)/sudoers; \
-	    chgrp $(sudoers_gid) $(sudoersdir)/sudoers; \
-	    chmod $(sudoers_mode) $(sudoersdir)/sudoers; \
-	else \
-	    $(INSTALL) -o $(sudoers_uid) -g $(sudoers_gid) -m $(sudoers_mode) \
-		$(srcdir)/sudoers $(sudoersdir)/sudoers; \
-	fi
+	test -f $(DESTDIR)/$(sudoersdir)/sudoers || \
+	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
+		$(srcdir)/sudoers $(DESTDIR)/$(sudoersdir)/sudoers
 
 install-man:
-	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 $(srcdir)/sudo.$(mantype) $(mandir8)/sudo.$(mansect8)
-	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 $(srcdir)/visudo.$(mantype) $(mandir8)/visudo.$(mansect8)
-	$(INSTALL) -o $(install_uid) -g $(install_gid) -m 0444 $(srcdir)/sudoers.$(mantype) $(mandir5)/sudoers.$(mansect5)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/sudo.$(mantype) $(DESTDIR)/$(mandirsu)/sudo.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/visudo.$(mantype) $(DESTDIR)/$(mandirsu)/visudo.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/sudoers.$(mantype) $(DESTDIR)/$(mandirform)/sudoers.$(mansectform)
+
+check:
+	@echo nothing to check
 
 clean:
 	@echo nothing to clean
