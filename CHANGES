@@ -401,3 +401,151 @@ CHANGES from sudo 1.3.3
      there (may be a library problem).
 
 130) Updated man page to reflect two more security issues.
+
+131) Cleaned up shadow password support in check.c.  It should now
+     be readable.
+
+132) Added SCO support.
+
+133) Added check to configure to find the max length of a uid_t
+     in characters.
+
+134) Removed uid2str() since we now know how big a uid_t/gid_t
+     can be.  This elminates a few malloc()'s.
+
+135) Added support for multiple insult types.  Based on code and
+     a suggestion from Dieter Dworkin Muller <dworkin@village.org>.
+
+136) Replaced clean_env() and rmenv() with a rewritten clean_env()
+     that should be a little faster.  This also makes it easier to
+     add to the list of "dangerous" envariables.
+
+137) Added netgroup support.  Netgroups must start with a leading
+     "+" to that sudo knows it is a netgroup.
+
+138) Split out sudoers file format into its own man page.
+     As suggested by Andy Smith <abs@maunsell.co.uk>.
+
+139) Updated testsudoers.c to grok netgroups.
+
+CHANGES from sudo 1.3.4
+
+140) Added SecurID support from Giles Todd <giles@gt.demon.co.uk>.
+
+141) Added -s flag to start a root shell and -- to signify end of args.
+
+142) Sped up logging routines by replacing strncpy()'s with strcat()'s.
+     This is safe because we dyanically allocate logline to be big enough.
+
+143) Now support command line arguments in the sudoers file.
+
+144) Sped up the loading on command line arguments.  This fixes the
+     "commands with large argc's take forever to run" bug.
+
+145) Expanded MAXCOMMANDLEN to 8K since we now have to deal with
+     command line arguments.  Added bounds checking in fill() and
+     append() so we don't drop core.
+     XXX - 8k makes sudo *SLOW*
+
+146) Added support in the lexer for "termination characters" to be
+     escaped.  Ie: you can now use [\,:=] in command line args
+     as long as you escape with a \.
+
+147) Testsudoers can now deal with commands that have arguments.
+
+148) If a file is not executable or not a regular file sudo will
+     now give the appropriate error message instead of just
+     "command not found" which is misleading.
+
+149) Fixed a bug where if FQDN is set, load_interfaces() was never
+     called.
+
+150) tty is now a global so it can be used in the ticket file
+     at a later date.
+
+151) Strings in the parser are now allocated dynamically.  This results
+     in a large speedup as compared to a 1K array on the stack. I
+     have freed the strings in the parser where appropriate but that
+     may not catch all instances.  Even so, the average sudo now
+     takes up less memory than the 1K array version.
+
+152) Fixed a bug in tgetpass() and configure that broke termio/termios
+     support for some OS's.
+
+153) Added cheapo implementation of tty-based timestamps.  The correct
+     way is to have username be a directory with the tty tickets
+     inside.  However, the current code does not take to that very
+     well, and it does not allow the two systems to coexist. Therefore,
+     instead of timestampdir/user/tty it is timestampdir/user.tty.
+
+154) Added support for building in other than the source directory.
+     Based on changes from "Simon J. Gerraty" <sjg@frodo.dn.itg.telecom.com.au>
+
+155) options.h and pathnames.h are now included via angle brackets
+     (<>) so as to use the -I include path.  This way, those using
+     a shadow build tree may have local copies of these headers
+     w/o clobbering the distribution ones.
+
+156) EXEMPTGROUP is now a string (group name) and user_is_exempt()
+     is now less of a hack.  It uses getgrnam(EXEMPTGROUP) to
+     get a list of users in the exempted group.
+
+157) --prefix and --exe_prefix are now honored in the Makefile.
+
+158) Sudo will now behave reasonably in the case where the sudoers
+     file location is mounted via NFS and the client does not
+     have "root" NFS privs.
+
+159) _PATH_SUDO_SUDOERS, _PATH_SUDO_STMP, and SUDOERS_OWNER are
+     now set via the Makefile since that appears to be what
+     most people expect...
+
+160) Now include a pre-generated version of parse.lex since so many
+     versions of lex are brain damaged.  If parse.lex is changed
+     a new lex.yy.c will be generated.  The distribution copy is
+     sudo-lex.yy.c.
+
+161) Upgraded to GNU autoconf version 1.5.  There are now even
+     *more* options.
+
+CHANGES from sudo 1.3.5
+
+162) Fixed S/Key support.
+
+163) Cleaned up shadow password support further by moving much of
+     it to sudo_getpwuid.c.
+
+164) First cut at DCE support. [needs work to be functional]
+
+165) New Digital UNIX C2 support based on code from
+     "Randy M. Hayman" <haymanr@icefog.sois.alaska.edu>
+
+166) S/key support now works with the generic bellcore s/key
+     as well as the s/key from Wietse Venema's logdaemon.
+     (Previously only worked with the logdaemon s/key).
+     As an added bonus the s/key challenge is now embedded
+     in the password prompt for a cleaner look.
+
+167) lsearch.c will now compile on a strict ANSI C compiler.
+     ANSI doesn't allow pointer arithmetic on a "void *"
+     but gcc does.
+
+168) Bought back latest HP-UX DCE support from Jeff Earickson
+     <jaearick@colby.edu>.
+
+169) configure now comletely groks $SUDO_LIBS and $VISUDO_LIBS.
+     Plain old $LIBS is no longer used.  LDFLAGS has also been
+     split up into $SUDO_LDFLAGS and $VISUDO_LDFLAGS.
+     The reason for this is that sudo often needs extra libs
+     for alternate authentication schemes but visudo rarely does.
+
+170) The code to copy command arguments flaied for large values of
+     argc due to realloc() lossage.  We now cheat and treat argv[]
+     as a flat string (since that's what it is) and use pointer
+     arithmetic to compute the length.  Kind of sneaky but it
+     works (and is relatively fast).
+
+CHANGES from sudo 1.3.6
+
+171) Added support for UN*X groups in sudoers based on code from
+     Dougal Scott <dwagon@aaii.oz.au>.
