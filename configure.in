@@ -563,28 +563,41 @@ case "$host" in
 		fi
 
 		dnl
-		dnl XXX - this should just check for svr4, bsd, or secureware
 		dnl Is this OS using shadow passwords?
-		dnl (Cannot auto-check for C2 if using non-passwd based authentication)
+		dnl Just check the most common schemes.
 		dnl
-		if test -z "$with_C2" -a "$with_skey" != "yes" -a \
-			   "$with_SecurID" != "yes" -a "$with_AFS" != "yes" -a \
-			   "$with_DCE" != "yes" -a "$with_kerb4" != "yes" -a \
-			   "$with_kerb5" != "yes"; then
-		    SUDO_CHECK_SHADOW_GENERIC(AC_DEFINE(HAVE_C2_SECURITY)
-		    with_C2="yes")
-		elif test -z "$with_C2"; then
-		    echo "Unable to check for shadow passwords. If you have them you should use --with-C2 (unless they are on by default for your OS, see INSTALL)."
+		if test -z "$with_C2"; then
+		    SUDO_CHECK_SHADOW_GENERIC([
+			AC_DEFINE(HAVE_C2_SECURITY)
+			with_C2="yes"
+		    ])
+		    AC_MSG_CHECKING(for shadow passwords and type)
+		    case "$SHADOW_TYPE" in
+			"SPW_SVR4")
+			    echo "SVR4"
+			    ;;
+			"SPW_BSD")
+			    echo "BSD"
+			    ;;
+			"SPW_SECUREWARE")
+			    echo "SecureWare"
+			    SUDO_LIBS="${SUDO_LIBS} -lprot -lx"
+			    LIBS="${LIBS} -lprot -lx"
+			    ;;
+			"SPW_NONE")
+			    echo "none"
+		    esac
 		fi
 		;;
 esac
 
 dnl
 dnl Guess shadow password type unless we already know it.
+dnl This is used when the user specified --with-C2 option.
 dnl
 if test "$with_C2" = "yes" -a -z "$SHADOW_TYPE"; then
     AC_CHECK_FUNC(getprpwuid, SHADOW_TYPE="SPW_SECUREWARE", [AC_CHECK_FUNC(getspnam, SHADOW_TYPE="SPW_SVR4", [test -f /etc/master.passwd && SHADOW_TYPE="SPW_BSD"])])
-    echo $ac_n "checking for shadow password type... $ac_c"
+    AC_MSG_CHECKING(for shadow password type)
     case "$SHADOW_TYPE" in
 	"SPW_SVR4")
 		echo "SVR4"
