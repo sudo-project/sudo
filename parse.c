@@ -117,6 +117,7 @@ sudoers_lookup(pwflag)
 {
     int error;
     int pwcheck;
+    int nopass;
 
     /* Become sudoers file owner */
     set_perms(PERM_SUDOERS, 0);
@@ -174,13 +175,12 @@ sudoers_lookup(pwflag)
      * It is set for the "validate", "list" and "kill" pseudo-commands.
      * Always check the host and user.
      */
+    nopass = -1;
     if (pwcheck) {
-	int nopass, found;
+	int found;
 
 	if (pwcheck == PWCHECK_NEVER || !def_flag(I_AUTHENTICATE))
 	    nopass = FLAG_NOPASS;
-	else
-	    nopass = -1;
 	found = 0;
 	while (top) {
 	    if (host_matches == TRUE) {
@@ -229,7 +229,9 @@ sudoers_lookup(pwflag)
     /*
      * The user was not explicitly granted nor denied access.
      */
-    return(error);
+    if (nopass == -1)
+	nopass = 0;
+    return(error | nopass);
 }
 
 /*
