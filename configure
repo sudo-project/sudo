@@ -8020,10 +8020,6 @@ test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 if test "$with_pam" = "yes"; then
     echo ""
     case $host in
-	*-*-solaris2*)
-	    echo "You will need to add a line like the following to /etc/pam.conf"
-	    echo "sudo	auth required	/usr/lib/security/pam_unix.so.1"
-	    ;;
 	*-*-linux*)
 	    echo "You will need to customize sample.pam and install it as /etc/pam.d/sudo"
 	    ;;
