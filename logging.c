@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996,1998-2003 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996,1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -171,9 +171,9 @@ do_syslog(pri, msg)
 	    *tmp = '\0';
 
 	    if (count == 0)
-		mysyslog(pri, "%8.8s : %s", user_name, p);
+		mysyslog(pri, "%8s : %s", user_name, p);
 	    else
-		mysyslog(pri, "%8.8s : (command continued) %s", user_name, p);
+		mysyslog(pri, "%8s : (command continued) %s", user_name, p);
 
 	    *tmp = save;			/* restore saved character */
 
@@ -182,9 +182,9 @@ do_syslog(pri, msg)
 		;
 	} else {
 	    if (count == 0)
-		mysyslog(pri, "%8.8s : %s", user_name, p);
+		mysyslog(pri, "%8s : %s", user_name, p);
 	    else
-		mysyslog(pri, "%8.8s : (command continued) %s", user_name, p);
+		mysyslog(pri, "%8s : (command continued) %s", user_name, p);
 	}
     }
 }
