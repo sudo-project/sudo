@@ -1,50 +1,34 @@
 /*
- *  CU sudo version 1.6 -- allows users to execute commands as root and others
- *  Copyright (c) 1991  The Root Group, Inc.
- *  Copyright (c) 1994,1996,1998,1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994,1996,1998,1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- **************************************************************************
- *
- *   sudo.c
- *
- *   This is the main() routine for sudo
- *
- *   sudo is a program to allow users to execute commands
- *   as root.  The commands are defined in a global network-
- *   wide file and can be distributed.
- *
- *   sudo has been hacked far and wide.  Too many people to
- *   know about.  It's about time to come up with a secure
- *   version that will work well in a network.
- *
- *   This most recent version is done by:
- *
- *              Jeff Nieusma <nieusma@rootgroup.com>
- *              Dave Hieb    <davehieb@rootgroup.com>
- *
- *   However, due to the fact that both of the above are no longer
- *   working at Root Group, I am maintaining the "CU version" of
- *   sudo.
- *		Todd Miller  <Todd.Miller@courtesan.com>
+ * For a brief history of sudo, please see the HISTORY file included
+ * with this distribution.
  */
 
-#define MAIN
+#define _SUDO_SUDO_C
 
 #include "config.h"
 
@@ -64,18 +48,13 @@
 #include <pwd.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <grp.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/param.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#ifdef HAVE_DCE
-#include <pthread.h>
-#endif /* HAVE_DCE */
-#ifdef HAVE_KERB5
-#include <krb5.h>
-#endif /* HAVE_KERB5 */
 
 #include "sudo.h"
 #include "interfaces.h"
@@ -89,7 +68,6 @@ extern char *getenv	__P((char *));
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-
 /*
  * Local type declarations
  */
@@ -98,16 +76,14 @@ struct env_table {
     int len;
 };
 
-
 /*
  * Prototypes
  */
 static int  parse_args			__P((void));
 static void usage			__P((int));
 static void usage_excl			__P((int));
-static void load_globals		__P((int));
-static int check_sudoers		__P((void));
-static int load_cmnd			__P((int));
+static void check_sudoers		__P((void));
+static int init_vars			__P((int));
 static void add_env			__P((int));
 static void clean_env			__P((char **, struct env_table *));
 extern int  user_is_exempt		__P((void));
@@ -121,33 +97,21 @@ int Argc;
 char **Argv;
 int NewArgc = 0;
 char **NewArgv = NULL;
-struct passwd *user_pw_ent;
-char *runas_user = RUNAS_DEFAULT;
-char *cmnd = NULL;
-char *cmnd_safe = NULL;
-char *cmnd_args = NULL;
-char *tty = "unknown";
-char *prompt;
-char host[MAXHOSTNAMELEN];
-char *shost;
-char cwd[MAXPATHLEN];
+struct sudo_user sudo_user;
 FILE *sudoers_fp = NULL;
-static char *runas_homedir = NULL;
+static char *runas_homedir = NULL;	/* XXX */
 struct interface *interfaces;
 int num_interfaces;
-extern int printmatches;
-int arg_prompt = 0;	/* was -p used? */
-#ifdef HAVE_KERB5
-krb5_context sudo_context = NULL;
-char *realm = NULL;
-int xrealm = 0;
-#endif /* HAVE_KERB5 */
+extern int errorlineno;
 
 /*
  * Table of "bad" envariables to remove and len for strncmp()
  */
-struct env_table badenv_table[] = {
+static struct env_table badenv_table[] = {
     { "IFS=", 4 },
+    { "LOCALDOMAIN=", 12 },
+    { "RES_OPTIONS=", 12 },
+    { "HOSTALIASES=", 12 },
     { "LD_", 3 },
     { "_RLD", 4 },
 #ifdef __hpux
@@ -168,28 +132,29 @@ struct env_table badenv_table[] = {
 };
 
 
-/********************************************************************
- *
- *  main()
- *
- *  the driving force behind sudo...
- */
-
 int
 main(argc, argv)
     int argc;
     char **argv;
 {
-    int rtn, serrno;
-    int cmnd_status = FOUND;
-    int sudo_mode = MODE_RUN;
-    extern char ** environ;
+    int validated;
+    int fd;
+    int cmnd_status;
+    int sudo_mode;
+#ifdef POSIX_SIGNALS
+    sigset_t set, oset;
+#else
+    int omask;
+#endif /* POSIX_SIGNALS */
+    extern char **environ;
+    extern int printmatches;
 
+    /* Must be done as the first thing... */
 #if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
     (void) set_auth_parameters(argc, argv);
-#  ifdef HAVE_INITPRIVS
+# ifdef HAVE_INITPRIVS
     initprivs();
-#  endif
+# endif
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
     Argv = argv;
@@ -200,27 +165,50 @@ main(argc, argv)
 	exit(1);
     }
 
+    /* Initialize syslog(3) if we are using it. */
+#if (LOGGING & SLOG_SYSLOG)
+# ifdef Syslog_facility
+    openlog(Syslog_ident, Syslog_options, Syslog_facility);
+# else
+    openlog(Syslog_ident, Syslog_options);
+# endif /* Syslog_facility */
+#endif /* LOGGING & SLOG_SYSLOG */
+
     /*
-     * Close all file descriptors to make sure we have a nice
-     * clean slate from which to work.
+     * Block signals so the user cannot kill us at some point and
+     * avoid the logging.
+     * XXX - this list is not complete!
+     */
+#ifdef POSIX_SIGNALS
+    (void) sigemptyset(&set);
+    (void) sigaddset(&set, SIGHUP);
+    (void) sigaddset(&set, SIGINT);
+    (void) sigaddset(&set, SIGQUIT);
+    (void) sigaddset(&set, SIGILL);
+    (void) sigaddset(&set, SIGTSTP);
+    (void) sigprocmask(SIG_BLOCK, &set, &oset);
+#else
+    omask = sigblock(sigmask(SIGHUP)|sigmask(SIGINT)|sigmask(SIGQUIT)|sigmask(SIGILL)|sigmask(SIGTSTP));
+#endif /* POSIX_SIGNALS */
+
+    /*
+     * Close any open fd's other than stdin, stdout and stderr.
      */
 #ifdef HAVE_SYSCONF
-    for (rtn = sysconf(_SC_OPEN_MAX) - 1; rtn > 2; rtn--)
-	(void) close(rtn);
+    for (fd = sysconf(_SC_OPEN_MAX) - 1; fd > 2; fd--)
+	(void) close(fd);
 #else
-    for (rtn = getdtablesize() - 1; rtn > 2; rtn--)
-	(void) close(rtn);
+    for (fd = getdtablesize() - 1; fd > 2; fd--)
+	(void) close(fd);
 #endif /* HAVE_SYSCONF */
 
     /*
-     * set the prompt based on $SUDO_PROMPT (can be overridden by `-p')
+     * Set the prompt based on $SUDO_PROMPT (can be overridden by `-p')
      */
-    if ((prompt = getenv("SUDO_PROMPT")) == NULL)
-	prompt = PASSPROMPT;
+    if ((user_prompt = getenv("SUDO_PROMPT")) == NULL)
+	user_prompt = PASSPROMPT;
 
-    /*
-     * parse our arguments
-     */
+    /* Parse our arguments. */
     sudo_mode = parse_args();
 
     switch (sudo_mode) {
@@ -233,95 +221,60 @@ main(argc, argv)
 		usage(0);
 	    break;
 	case MODE_VALIDATE:
-	    cmnd = "validate";
+	    user_cmnd = "validate";
 	    break;
     	case MODE_KILL:
-	    cmnd = "kill";
+    	case MODE_INVALIDATE:
+	    user_cmnd = "kill";
+	    break;
+    	case MODE_SHELL:
+	    user_cmnd = "shell";
 	    break;
 	case MODE_LIST:
-	    cmnd = "list";
+	    user_cmnd = "list";
 	    printmatches = 1;
 	    break;
     }
 
-    /* must have a command to run unless got -s */
-    if (cmnd == NULL && NewArgc == 0 && !(sudo_mode & MODE_SHELL))
+    /* Must have a command to run... */
+    if (user_cmnd == NULL && NewArgc == 0)
 	usage(1);
 
     clean_env(environ, badenv_table);
 
-    load_globals(sudo_mode);	/* load global variables used throughout sudo */
+    cmnd_status = init_vars(sudo_mode);
 
-    /*
-     * If we got the '-s' option (run shell) we need to redo NewArgv
-     * and NewArgc.  This can only be done after load_globals().
-     */
-    if ((sudo_mode & MODE_SHELL)) {
-	char **dst, **src = NewArgv;
+    set_perms(PERM_USER, sudo_mode);
 
-	NewArgv = (char **) emalloc (sizeof(char *) * (++NewArgc + 1));
+    check_sudoers();	/* check mode/owner on _PATH_SUDO_SUDOERS */
 
-	/* add the shell as argv[0] */
-	if (user_shell && *user_shell) {
-	    NewArgv[0] = user_shell;
-	} else {
-	    (void) fprintf(stderr, "%s: Unable to determine shell.", Argv[0]);
-	    exit(1);
-	}
-
-	/* copy the args from Argv */
-	for (dst = NewArgv + 1; (*dst = *src) != NULL; ++src, ++dst)
-	    ;
-    }
-
-    rtn = check_sudoers();	/* check mode/owner on _PATH_SUDO_SUDOERS */
-    if (rtn != ALL_SYSTEMS_GO) {
-	serrno = errno;
-	log_error(rtn);
-	set_perms(PERM_FULL_USER, sudo_mode);
-	errno = serrno;
-	inform_user(rtn);
-	exit(1);
-    }
-
-#ifdef SECURE_PATH
-    /* replace the PATH envariable with a secure one */
-    if (!user_is_exempt() && sudo_setenv("PATH", SECURE_PATH)) {
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
-#endif /* SECURE_PATH */
-
-    if ((sudo_mode & MODE_RUN)) {
-	cmnd_status = load_cmnd(sudo_mode); /* load the cmnd global variable */
-    } else if (sudo_mode == MODE_KILL) {
-	remove_timestamp();	/* remove the timestamp ticket file */
+    if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
+	remove_timestamp((sudo_mode == MODE_KILL));
 	exit(0);
     }
 
     add_env(!(sudo_mode & MODE_SHELL));	/* add in SUDO_* envariables */
 
-    /* validate the user but don't search for pseudo-commands */
-    rtn = validate((sudo_mode != MODE_VALIDATE && sudo_mode != MODE_LIST));
+    /* Validate the user but don't search for pseudo-commands. */
+    validated = validate((sudo_mode != MODE_VALIDATE && sudo_mode != MODE_LIST));
 
-    switch (rtn) {
-
+    switch (validated) {
 	case VALIDATE_OK:
 	    check_user();
 	    /* fallthrough */
 
 	case VALIDATE_OK_NOPASS:
-	    /* finally tell the user if the command did not exist */
+	    /* Finally tell the user if the command did not exist. */
 	    if (cmnd_status == NOT_FOUND_DOT) {
-		(void) fprintf(stderr, "%s: ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.\n", Argv[0], cmnd, cmnd, cmnd);
+		(void) fprintf(stderr, "%s: ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.\n", Argv[0], user_cmnd, user_cmnd, user_cmnd);
 		exit(1);
 	    } else if (cmnd_status == NOT_FOUND) {
 		(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0],
-		    cmnd);
+		    user_cmnd);
 		exit(1);
 	    }
 
-	    log_error(ALL_SYSTEMS_GO);
+	    log_auth(validated, 1);
 	    if (sudo_mode == MODE_VALIDATE)
 		exit(0);
 	    else if (sudo_mode == MODE_LIST) {
@@ -329,32 +282,52 @@ main(argc, argv)
 		exit(0);
 	    }
 
-	    /* become specified user or root */
+	    /* Become specified user or root. */
 	    set_perms(PERM_RUNAS, sudo_mode);
 
-	    /* set $HOME for `sudo -H' */
+	    /* Set $HOME for `sudo -H' */
 	    if ((sudo_mode & MODE_RESET_HOME) && runas_homedir)
 		(void) sudo_setenv("HOME", runas_homedir);
 
-	    /* this *must* have been set if we got a match but... */
-	    if (cmnd_safe == NULL) {
-		inform_user(NO_CMND_SAFE);
-		exit(1);
+	    /* This *must* have been set if we got a match but... */
+	    if (safe_cmnd == NULL) {
+		log_error(MSG_ONLY,
+		    "internal error, cmnd_safe never got set for %s; %s",
+		    user_cmnd,
+		    "please report this error to sudo-bugs@courtesan.com");
 	    }
+
+#if (LOGGING & SLOG_SYSLOG)
+	    closelog();
+#endif
+
+	    /* Reset signal mask. */
+#ifdef POSIX_SIGNALS
+	    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
+#else
+	    (void) sigsetmask(omask);
+#endif /* POSIX_SIGNALS */
+
 #ifndef PROFILING
 	    if ((sudo_mode & MODE_BACKGROUND) && fork() > 0)
 		exit(0);
 	    else
-		EXEC(cmnd_safe, NewArgv);	/* run the command */
+		EXEC(safe_cmnd, NewArgv);	/* run the command */
 #else
 	    exit(0);
 #endif /* PROFILING */
 	    /*
 	     * If we got here then the exec() failed...
 	     */
-	    (void) fprintf(stderr, "%s: ", Argv[0]);
-	    perror(cmnd);
+	    (void) fprintf(stderr, "%s: unable to exec %s: %s\n",
+		Argv[0], safe_cmnd, strerror(errno));
 	    exit(-1);
+	    break;
+
+	case VALIDATE_NO_USER:
+	    check_user();
+	    log_auth(validated, 1);
+	    exit(1);
 	    break;
 
 	case VALIDATE_NOT_OK:
@@ -369,207 +342,200 @@ main(argc, argv)
 	     * their path to just contain a single dir.
 	     */
 #ifndef DONT_LEAK_PATH_INFO
-	    log_error(rtn);
-	    if (cmnd_status == NOT_FOUND_DOT)
-		(void) fprintf(stderr, "%s: ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.\n", Argv[0], cmnd, cmnd, cmnd);
-	    else if (cmnd_status == NOT_FOUND)
+	    log_auth(validated,
+		!(cmnd_status == NOT_FOUND_DOT || cmnd_status == NOT_FOUND));
+	    if (cmnd_status == NOT_FOUND)
 		(void) fprintf(stderr, "%s: %s: command not found\n", Argv[0],
-		    cmnd);
-	    else
-		inform_user(rtn);
+		    user_cmnd);
+	    else if (cmnd_status == NOT_FOUND_DOT)
+		(void) fprintf(stderr, "%s: ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.\n", Argv[0], user_cmnd, user_cmnd, user_cmnd);
 	    exit(1);
 	    break;
 #endif /* DONT_LEAK_PATH_INFO */
 
+	case VALIDATE_ERROR:
+	    log_error(0, "parse error in %s around line %d", _PATH_SUDO_SUDOERS,
+		errorlineno);
+	    break;
+
 	default:
-	    log_error(rtn);
-	    inform_user(rtn);
+	    log_auth(validated, 1);
 	    exit(1);
 	    break;
     }
+    exit(0);	/* not reached */
 }
 
-
-
-/**********************************************************************
- *
- *  load_globals()
- *
- *  This function primes these important global variables:
- *  user_pw_ent, host, cwd, interfaces.
+/*
+ * Initialize timezone, set umask, fill in ``sudo_user'' struct and
+ * load the ``interfaces'' array.
  */
-
-static void
-load_globals(sudo_mode)
+static int
+init_vars(sudo_mode)
     int sudo_mode;
 {
-    char *p;
+    char *p, thost[MAXHOSTNAMELEN];
 #ifdef FQDN
-    struct hostent *h_ent;
+    struct hostent *hp;
 #endif /* FQDN */
-#ifdef HAVE_KERB5
-    krb5_error_code retval;
-    char *lrealm;
-#endif /* HAVE_KERB5 */
 
-#ifdef HOST_IN_LOG
-    /*
-     * Logging routines may use shost so set to a dummy value for now.
-     */
-    shost = strcpy(host, "localhost");
+#ifdef NO_ROOT_SUDO
+    if (getuid() == 0) {
+	(void) fputs("You are already root, you don't need to use sudo.\n",
+	    stderr);
+	exit(1);
+    }
 #endif
+
+    /* Sanity check command from user. */
+    if (user_cmnd == NULL && strlen(NewArgv[0]) >= MAXPATHLEN) {
+	(void) fprintf(stderr, "%s: %s: Pathname too long\n", Argv[0],
+	    NewArgv[0]);
+	exit(1);
+    }
+
+#ifdef HAVE_TZSET
+    (void) tzset();		/* set the timezone if applicable */
+#endif /* HAVE_TZSET */
+
+#ifdef SECURE_PATH
+    /* Replace the PATH envariable with a secure one. */
+    if (!user_is_exempt() && sudo_setenv("PATH", SECURE_PATH)) {
+	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+	exit(1);
+    }
+#endif /* SECURE_PATH */
+
+#ifdef SUDO_UMASK
+    (void) umask((mode_t)SUDO_UMASK);
+#endif /* SUDO_UMASK */
+
+    /* Default values for runas and cmnd, overridden later. */
+    user_runas = RUNAS_DEFAULT;
+    if (user_cmnd == NULL)
+	user_cmnd = NewArgv[0];
+    (void) strcpy(user_cwd, "unknown");
+
+    /*
+     * We avoid gethostbyname() if possible since we don't want
+     * sudo to block if DNS or NIS is hosed.
+     * "host" is the (possibly fully-qualified) hostname and
+     * "shost" is the unqualified form of the hostname.
+     */
+    if ((gethostname(thost, sizeof(thost)))) {
+	user_host = "localhost";
+	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
+    } else
+	user_host = estrdup(thost);
+#ifdef FQDN
+    if (!(hp = gethostbyname(user_host)))
+	log_error(USE_ERRNO|MSG_ONLY|NO_EXIT,
+	    "unable to lookup %s via gethostbyname()", user_host);
+    else
+	user_host = estrdup(hp->h_name);
+#endif /* FQDN */
+    if ((p = strchr(user_host, '.'))) {
+	*p = '\0';
+	user_shost = estrdup(user_host);
+	*p = '.';
+    } else {
+	user_shost = user_host;
+    }
+
+    if ((p = ttyname(STDIN_FILENO)) || (p = ttyname(STDOUT_FILENO))) {
+	if (strncmp(p, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
+	    p += sizeof(_PATH_DEV) - 1;
+	user_tty = estrdup(p);
+    } else
+	user_tty = "unknown";
 
     /*
      * Get a local copy of the user's struct passwd with the shadow password
      * if necessary.  It is assumed that euid is 0 at this point so we
      * can read the shadow passwd file if necessary.
      */
-    if ((user_pw_ent = sudo_getpwuid(getuid())) == NULL) {
-	/* need to make a fake user_pw_ent */
+    if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL) {
+	/* Need to make a fake struct passwd for logging to work. */
 	struct passwd pw;
 	char pw_name[MAX_UID_T_LEN + 1];
 
-	/* fill in uid and name fields with the uid */
 	pw.pw_uid = getuid();
 	(void) sprintf(pw_name, "%ld", (long) pw.pw_uid);
 	pw.pw_name = pw_name;
-	user_pw_ent = &pw;
+	sudo_user.pw = &pw;
 
-	/* complain, log, and die */
-	log_error(GLOBAL_NO_PW_ENT);
-	inform_user(GLOBAL_NO_PW_ENT);
-	exit(1);
+	log_error(0, "uid %ld does not exist in the passwd file!",
+	    (long) pw.pw_uid);
     }
 
-#ifdef HAVE_KERB5
-    if (retval = krb5_init_context(&sudo_context)) {
-	log_error(GLOBAL_KRB5_INIT_ERR);
-	inform_user(GLOBAL_KRB5_INIT_ERR);
-	exit(1);
-    }
-    krb5_init_ets(sudo_context);
+    /* It is now safe to use log_error() and set_perms() */
 
-    if (retval = krb5_get_default_realm(sudo_context, &lrealm)) {
-	log_error(GLOBAL_KRB5_INIT_ERR);
-	inform_user(GLOBAL_KRB5_INIT_ERR);
-	exit(1);
-    }
-
-    if (realm) {
-	if (strcmp(realm, lrealm) != 0)
-	    xrealm = 1; /* User supplied realm is not the system default */
-	free(lrealm);
-    } else
-	realm = lrealm;
-
-    if (!arg_prompt) {
-	p = emalloc(strlen(user_name) + strlen(realm) + 17);
-	sprintf(p, "Password for %s@%s: ", user_name, realm);
-	prompt = p;
-    }
-#endif /* HAVE_KERB5 */
-
-    /* Set euid == user and ruid == root */
-    set_perms(PERM_ROOT, sudo_mode);
+    /*
+     * Get current working directory.  Try as user, fall back to root.
+     */
     set_perms(PERM_USER, sudo_mode);
-
-#ifdef HAVE_TZSET
-    (void) tzset();		/* set the timezone if applicable */
-#endif /* HAVE_TZSET */
-
-    /*
-     * Need to get tty early since it's used for logging
-     */
-    if ((p = (char *) ttyname(0)) || (p = (char *) ttyname(1))) {
-	if (strncmp(p, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
-	    p += sizeof(_PATH_DEV) - 1;
-	tty = estrdup(p);
-    }
-
-#ifdef SUDO_UMASK
-    (void) umask((mode_t)SUDO_UMASK);
-#endif /* SUDO_UMASK */
-
-#ifdef NO_ROOT_SUDO
-    if (user_uid == 0) {
-	(void) fprintf(stderr,
-		       "You are already root, you don't need to use sudo.\n");
-	exit(1);
-    }
-#endif
-
-    /*
-     * so we know where we are... (do as user)
-     */
-    if (!getcwd(cwd, sizeof(cwd))) {
-	/* try as root... */
+    if (!getcwd(user_cwd, sizeof(user_cwd))) {
 	set_perms(PERM_ROOT, sudo_mode);
-	if (!getcwd(cwd, sizeof(cwd))) {
+	if (!getcwd(user_cwd, sizeof(user_cwd))) {
 	    (void) fprintf(stderr, "%s: Can't get working directory!\n",
 			   Argv[0]);
-	    (void) strcpy(cwd, "unknown");
+	    (void) strcpy(user_cwd, "unknown");
 	}
-	set_perms(PERM_USER, sudo_mode);
-    }
+    } else
+	set_perms(PERM_ROOT, sudo_mode);
 
     /*
-     * load the host global variable from gethostname() and use
-     * gethostbyname() if we want to be sure it is fully qualified.
-     */
-    if ((gethostname(host, sizeof(host)))) {
-	strcpy(host, "localhost");
-	log_error(GLOBAL_NO_HOSTNAME);
-	inform_user(GLOBAL_NO_HOSTNAME);
-	exit(2);
-    }
-#ifdef FQDN
-    if ((h_ent = gethostbyname(host)) == NULL)
-	log_error(GLOBAL_HOST_UNREGISTERED);
-    else
-	strcpy(host, h_ent -> h_name);
-#endif /* FQDN */
-
-    /*
-     * "host" is the (possibly fully-qualified) hostname and
-     * "shost" is the unqualified form of the hostname.
-     */
-    if ((p = strchr(host, '.'))) {
-	*p = '\0';
-	shost = estrdup(host);
-	*p = '.';
-    } else {
-	shost = &host[0];
-    }
-
-    /*
-     * load a list of ip addresses and netmasks into
+     * Load the list of local ip addresses and netmasks into
      * the interfaces array.
      */
     load_interfaces();
+
+    /*
+     * If we were given the '-s' option (run shell) we need to redo
+     * NewArgv and NewArgc.
+     */
+    if ((sudo_mode & MODE_SHELL)) {
+	char **dst, **src = NewArgv;
+
+	NewArgv = (char **) emalloc (sizeof(char *) * (++NewArgc + 1));
+	if (user_shell && *user_shell) {
+	    NewArgv[0] = user_shell;
+	} else {
+	    (void) fprintf(stderr, "%s: Unable to determine shell.", Argv[0]);
+	    exit(1);
+	}
+
+	/* copy the args from Argv */
+	for (dst = NewArgv + 1; (*dst = *src) != NULL; ++src, ++dst)
+	    ;
+    }
+
+    /* Resolve the path and return. */
+    if ((sudo_mode & MODE_RUN))
+	return(find_path(NewArgv[0], &user_cmnd));
+    else
+	return(FOUND);
 }
 
-
-
-/**********************************************************************
- *
- * parse_args()
- *
- *  this function parses the arguments to sudo
+/*
+ * Command line argument parsing, can't use getopt(3).
  */
-
 static int
 parse_args()
 {
-    int ret = MODE_RUN;			/* what mode is suod to be run in? */
+    int rval = MODE_RUN;		/* what mode is suod to be run in? */
     int excl = 0;			/* exclusive arg, no others allowed */
+#ifdef HAVE_KERB5
+    extern char *realm;			/* kerb5 realm (may be user-specified */
+#endif /* HAVE_KERB5 */
 
     NewArgv = Argv + 1;
     NewArgc = Argc - 1;
 
 #ifdef SHELL_IF_NO_ARGS
     if (Argc < 2) {			/* no options and no command */
-	ret |= MODE_SHELL;
-	return(ret);
+	rval |= MODE_SHELL;
+	return(rval);
     }
 #else
     if (Argc < 2)			/* no options and no command */
@@ -586,90 +552,95 @@ parse_args()
 	switch (NewArgv[0][1]) {
 #ifdef HAVE_KERB5
 	    case 'r':
-		/* must have an associated realm */
+		/* Must have an associated realm. */
 		if (NewArgv[1] == NULL)
 		    usage(1);
 
 		realm = NewArgv[1];
 
-		/* shift Argv over and adjust Argc */
+		/* Shift Argv over and adjust Argc. */
 		NewArgc--;
 		NewArgv++;
 		break;
 #endif /* HAVE_KERB5 */
 	    case 'p':
-		/* must have an associated prompt */
+		/* Must have an associated prompt. */
 		if (NewArgv[1] == NULL)
 		    usage(1);
 
-		prompt = NewArgv[1];
-		arg_prompt = 1;
+		user_prompt = NewArgv[1];
 
-		/* shift Argv over and adjust Argc */
+		/* Shift Argv over and adjust Argc. */
 		NewArgc--;
 		NewArgv++;
 		break;
 	    case 'u':
-		/* must have an associated runas user */
+		/* Must have an associated runas user. */
 		if (NewArgv[1] == NULL)
 		    usage(1);
 
-		runas_user = NewArgv[1];
+		user_runas = NewArgv[1];
 
-		/* shift Argv over and adjust Argc */
+		/* Shift Argv over and adjust Argc. */
 		NewArgc--;
 		NewArgv++;
 		break;
 	    case 'b':
-		ret |= MODE_BACKGROUND;
+		rval |= MODE_BACKGROUND;
 		break;
 	    case 'v':
-		ret = MODE_VALIDATE;
+		rval = MODE_VALIDATE;
 		if (excl && excl != 'v')
 		    usage_excl(1);
 		excl = 'v';
 		break;
 	    case 'k':
-		ret = MODE_KILL;
+		rval = MODE_INVALIDATE;
 		if (excl && excl != 'k')
 		    usage_excl(1);
 		excl = 'k';
 		break;
+	    case 'K':
+		rval = MODE_KILL;
+		if (excl && excl != 'K')
+		    usage_excl(1);
+		excl = 'K';
+		break;
 	    case 'l':
-		ret = MODE_LIST;
+		rval = MODE_LIST;
 		if (excl && excl != 'l')
 		    usage_excl(1);
 		excl = 'l';
 		break;
 	    case 'V':
-		ret = MODE_VERSION;
+		rval = MODE_VERSION;
 		if (excl && excl != 'V')
 		    usage_excl(1);
 		excl = 'V';
 		break;
 	    case 'h':
-		ret = MODE_HELP;
+		rval = MODE_HELP;
 		if (excl && excl != 'h')
 		    usage_excl(1);
 		excl = 'h';
 		break;
 	    case 's':
-		ret |= MODE_SHELL;
+		rval |= MODE_SHELL;
 #ifdef SHELL_SETS_HOME
-		ret |= MODE_RESET_HOME;
+		rval |= MODE_RESET_HOME;
 #endif /* SHELL_SETS_HOME */
 		break;
 	    case 'H':
-		ret |= MODE_RESET_HOME;
+		rval |= MODE_RESET_HOME;
 		break;
 	    case '-':
 		NewArgc--;
 		NewArgv++;
 #ifdef SHELL_IF_NO_ARGS
-		if (ret == MODE_RUN)
-		    ret |= MODE_SHELL;
+		if (rval == MODE_RUN)
+		    rval |= MODE_SHELL;
 #endif /* SHELL_IF_NO_ARGS */
-		return(ret);
+		return(rval);
 	    case '\0':
 		(void) fprintf(stderr, "%s: '-' requires an argument\n",
 		    Argv[0]);
@@ -683,60 +654,16 @@ parse_args()
 	NewArgv++;
     }
 
-    if (NewArgc > 0 && (ret == MODE_VALIDATE || ret == MODE_KILL ||
-			ret == MODE_LIST))
+    if (NewArgc > 0 && !(rval & MODE_RUN))
 	usage(1);
 
-    return(ret);
+    return(rval);
 }
 
-
-
-/**********************************************************************
- *
- * usage_excl()
- *
- *  Tell which options are mutually exclusive and exit
+/*
+ * Add sudo-specific variables into the environment.
+ * Sets ``cmnd_args'' as a side effect.
  */
-
-static void
-usage_excl(exit_val)
-    int exit_val;
-{
-    (void) fprintf(stderr, "Only one of the -v, -k, -l, -V and -h options may be used\n");
-    usage(exit_val);
-}
-
-/**********************************************************************
- *
- * usage()
- *
- *  this function just gives you instructions and exits
- */
-
-static void
-usage(exit_val)
-    int exit_val;
-{
-    (void) fprintf(stderr,
-		   "usage: %s -V | -h | -l | -v | -k | -H | [-b] [-p prompt] ",
-		   Argv[0]);
-#ifdef HAVE_KERB5
-    (void) fprintf(stderr, "[-r realm] ");
-#endif /* HAVE_KERB5 */
-    (void) fprintf(stderr, "[-u username/#uid] -s | <command>\n");
-    exit(exit_val);
-}
-
-
-
-/**********************************************************************
- *
- * add_env()
- *
- *  this function adds sudo-specific variables into the environment
- */
-
 static void
 add_env(contiguous)
     int contiguous;
@@ -745,8 +672,8 @@ add_env(contiguous)
     size_t size;
     char *buf;
 
-    /* add the SUDO_COMMAND envariable (cmnd + args) */
-    size = strlen(cmnd) + 1;
+    /* Add the SUDO_COMMAND envariable (cmnd + args). */
+    size = strlen(user_cmnd) + 1;
     if (NewArgc > 1) {
 	char *to, **from;
 
@@ -761,17 +688,17 @@ add_env(contiguous)
 	buf = (char *) emalloc(size);
 
 	/*
-	 * Copy the command and it's arguments info buf
+	 * Copy the command and it's arguments info buf.
 	 */
-	(void) strcpy(buf, cmnd);
-	to = buf + strlen(cmnd);
+	(void) strcpy(buf, user_cmnd);
+	to = buf + strlen(user_cmnd);
 	for (from = &NewArgv[1]; *from; from++) {
 	    *to++ = ' ';
 	    (void) strcpy(to, *from);
 	    to += strlen(*from);
 	}
     } else {
-	buf = cmnd;
+	buf = user_cmnd;
     }
     if (sudo_setenv("SUDO_COMMAND", buf)) {
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
@@ -780,35 +707,35 @@ add_env(contiguous)
     if (NewArgc > 1)
 	free(buf);
 
-    /* grab a pointer to the flat arg string from the environment */
-    if (NewArgc > 1 && (cmnd_args = getenv("SUDO_COMMAND"))) {
-	if ((cmnd_args = strchr(cmnd_args, ' ')))
-	    cmnd_args++;
+    /* Grab a pointer to the flat arg string from the environment. */
+    if (NewArgc > 1 && (user_args = getenv("SUDO_COMMAND"))) {
+	if ((user_args = strchr(user_args, ' ')))
+	    user_args++;
 	else
-	    cmnd_args = NULL;
+	    user_args = NULL;
     }
 
-    /* add the SUDO_USER envariable */
+    /* Add the SUDO_USER environment variable. */
     if (sudo_setenv("SUDO_USER", user_name)) {
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
 
-    /* add the SUDO_UID envariable */
+    /* Add the SUDO_UID environment variable. */
     (void) sprintf(idstr, "%ld", (long) user_uid);
     if (sudo_setenv("SUDO_UID", idstr)) {
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
 
-    /* add the SUDO_GID envariable */
+    /* Add the SUDO_GID environment variable. */
     (void) sprintf(idstr, "%ld", (long) user_gid);
     if (sudo_setenv("SUDO_GID", idstr)) {
 	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	exit(1);
     }
 
-    /* set PS1 if SUDO_PS1 is set */
+    /* Set PS1 if SUDO_PS1 is set. */
     if ((buf = getenv("SUDO_PS1")))
 	if (sudo_setenv("PS1", buf)) {
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
@@ -816,54 +743,16 @@ add_env(contiguous)
 	}
 }
 
-
-
-/**********************************************************************
- *
- *  load_cmnd()
- *
- *  This function sets the cmnd global variable
- *  Returns 1 on success, 0 on failure.
+/*
+ * Sanity check sudoers mode/owner/type.
+ * Leaves a file pointer to the sudoers file open in ``fp''.
  */
-
-static int
-load_cmnd(sudo_mode)
-    int sudo_mode;
-{
-    int retval;
-
-    if (strlen(NewArgv[0]) >= MAXPATHLEN) {
-	errno = ENAMETOOLONG;
-	(void) fprintf(stderr, "%s: %s: Pathname too long\n", Argv[0],
-		       NewArgv[0]);
-	exit(1);
-    }
-
-    /*
-     * Resolve the path
-     */
-    if ((retval = find_path(NewArgv[0], &cmnd)) != FOUND)
-	cmnd = NewArgv[0];
-    return(retval);
-}
-
-
-
-/**********************************************************************
- *
- *  check_sudoers()
- *
- *  This function check to see that the sudoers file is owned by
- *  uid SUDOERS_UID, gid SUDOERS_GID and is mode SUDOERS_MODE.
- */
-
-static int
+static void
 check_sudoers()
 {
     struct stat statbuf;
     int rootstat, i;
     char c;
-    int rtn = ALL_SYSTEMS_GO;
 
     /*
      * Fix the mode and group on sudoers file from old default.
@@ -883,15 +772,13 @@ check_sudoers()
 			Argv[0], _PATH_SUDO_SUDOERS);
 		    statbuf.st_gid = SUDOERS_GID;
 		} else {
-		    (void) fprintf(stderr,"%s: Unable to set group on %s: ",
-			Argv[0], _PATH_SUDO_SUDOERS);
-		    perror("");
+		    (void) fprintf(stderr,"%s: Unable to set group on %s: %s\n",
+			Argv[0], _PATH_SUDO_SUDOERS, strerror(errno));
 		}
 	    }
 	} else {
-	    (void) fprintf(stderr, "%s: Unable to fix mode on %s: ",
-		Argv[0], _PATH_SUDO_SUDOERS);
-	    perror("");
+	    (void) fprintf(stderr, "%s: Unable to fix mode on %s: %s\n",
+		Argv[0], _PATH_SUDO_SUDOERS, strerror(errno));
 	}
     }
 
@@ -903,13 +790,18 @@ check_sudoers()
     set_perms(PERM_SUDOERS, 0);
 
     if (rootstat != 0 && lstat(_PATH_SUDO_SUDOERS, &statbuf) != 0)
-	rtn = NO_SUDOERS_FILE;
+	log_error(USE_ERRNO, "can't stat %s", _PATH_SUDO_SUDOERS);
     else if (!S_ISREG(statbuf.st_mode))
-	rtn = SUDOERS_NOT_FILE;
-    else if ((statbuf.st_mode & 0007777) != SUDOERS_MODE)
-	rtn = SUDOERS_WRONG_MODE;
-    else if (statbuf.st_uid != SUDOERS_UID || statbuf.st_gid != SUDOERS_GID)
-	rtn = SUDOERS_WRONG_OWNER;
+	log_error(0, "%s is not a regular file", _PATH_SUDO_SUDOERS);
+    else if ((statbuf.st_mode & 07777) != SUDOERS_MODE)
+	log_error(0, "%s is mode 0%o, should be 0%o", _PATH_SUDO_SUDOERS,
+	    (statbuf.st_mode & 07777), SUDOERS_MODE);
+    else if (statbuf.st_uid != SUDOERS_UID)
+	log_error(0, "%s is owned by uid %ld, should be %d", _PATH_SUDO_SUDOERS,
+	    (long) statbuf.st_uid, SUDOERS_UID);
+    else if (statbuf.st_gid != SUDOERS_GID)
+	log_error(0, "%s is owned by gid %ld, should be %d", _PATH_SUDO_SUDOERS,
+	    (long) statbuf.st_gid, SUDOERS_GID);
     else {
 	/* Solaris sometimes returns EAGAIN so try 10 times */
 	for (i = 0; i < 10 ; i++) {
@@ -923,28 +815,48 @@ check_sudoers()
 		break;
 	    sleep(1);
 	}
-	if (sudoers_fp == NULL) {
-	    fprintf(stderr, "%s: cannot open %s: ", Argv[0], _PATH_SUDO_SUDOERS);
-	    perror("");
-	    rtn = NO_SUDOERS_FILE;
-	}
+	if (sudoers_fp == NULL)
+	    log_error(USE_ERRNO, "can't open %s", _PATH_SUDO_SUDOERS);
     }
 
     set_perms(PERM_ROOT, 0);
     set_perms(PERM_USER, 0);
-
-    return(rtn);
 }
 
-
-
-/**********************************************************************
- *
- * set_perms()
- *
- *  this function sets real and effective uids and gids based on perm.
+/*
+ * Remove environment variables that match the entries in badenv_table.
  */
+static void
+clean_env(envp, badenv_table)
+    char **envp;
+    struct env_table *badenv_table;
+{
+    struct env_table *bad;
+    char **cur;
 
+    /*
+     * Remove any envars that match entries in badenv_table.
+     */
+    for (cur = envp; *cur; cur++) {
+	for (bad = badenv_table; bad->name; bad++) {
+	    if (strncmp(*cur, bad->name, bad->len) == 0) {
+		/* Got a match so remove it. */
+		char **move;
+
+		for (move = cur; *move; move++)
+		    *move = *(move + 1);
+
+		cur--;
+
+		break;
+	    }
+	}
+    }
+}
+
+/*
+ * Set real and effective uids and gids based on perm.
+ */
 void
 set_perms(perm, sudo_mode)
     int perm;
@@ -963,7 +875,7 @@ set_perms(perm, sudo_mode)
 	case PERM_USER:
     	    	    	        (void) setgid(user_gid);
 
-    	    	    	        if (seteuid(user_uid)) {
+    	    	    	        if (geteuid() != user_uid && seteuid(user_uid)) {
     	    	    	            perror("seteuid(user_uid)");
     	    	    	            exit(1);
     	    	    	        }
@@ -990,19 +902,18 @@ set_perms(perm, sudo_mode)
 				}
 				
 				/* XXX - add group/gid support */
-				if (*runas_user == '#') {
-				    if (setuid(atoi(runas_user + 1))) {
+				if (*user_runas == '#') {
+				    if (setuid(atoi(user_runas + 1))) {
 					(void) fprintf(stderr,
-					    "%s: cannot set uid to %s: ",
-					    Argv[0], runas_user);
-					perror("");
+					    "%s: cannot set uid to %s: %s\n",
+					    Argv[0], user_runas, strerror(errno));
 					exit(1);
 				    }
 				} else {
-				    if (!(pw = getpwnam(runas_user))) {
+				    if (!(pw = getpwnam(user_runas))) {
 					(void) fprintf(stderr,
 					    "%s: no passwd entry for %s!\n",
-					    Argv[0], runas_user);
+					    Argv[0], user_runas);
 					exit(1);
 				    }
 
@@ -1022,9 +933,9 @@ set_perms(perm, sudo_mode)
 
 				    if (setgid(pw->pw_gid)) {
 					(void) fprintf(stderr,
-					    "%s: cannot set gid to %ld: ",
-					    Argv[0], (long) pw->pw_gid);
-					perror("");
+					    "%s: cannot set gid to %ld: %s\n",
+					    Argv[0], (long) pw->pw_gid,
+					    strerror(errno));
 					exit(1);
 				    }
 
@@ -1032,21 +943,20 @@ set_perms(perm, sudo_mode)
 				     * Initialize group vector only if are
 				     * going to run as a non-root user.
 				     */
-				    if (strcmp(runas_user, "root") != 0 &&
-					initgroups(runas_user, pw->pw_gid)
+				    if (strcmp(user_runas, "root") != 0 &&
+					initgroups(user_runas, pw->pw_gid)
 					== -1) {
 					(void) fprintf(stderr,
-					    "%s: cannot set group vector ",
-					    Argv[0]);
-					perror("");
+					    "%s: cannot set group vector: %s\n",
+					    Argv[0], strerror(errno));
 					exit(1);
 				    }
 
 				    if (setuid(pw->pw_uid)) {
 					(void) fprintf(stderr,
-					    "%s: cannot set uid to %ld: ",
-					    Argv[0], (long) pw->pw_uid);
-					perror("");
+					    "%s: cannot set uid to %ld: %s\n",
+					    Argv[0], (long) pw->pw_uid,
+					    strerror(errno));
 					exit(1);
 				    }
 				    if (sudo_mode & MODE_RESET_HOME)
@@ -1088,41 +998,31 @@ set_perms(perm, sudo_mode)
     }
 }
 
-
-
-/**********************************************************************
- *
- * clean_env()
- *
- *  This function removes things from the environment that match the
- *  entries in badenv_table.  It would be nice to add in the SUDO_*
- *  variables here as well but cmnd has not been defined at this point.
+/*
+ * Tell which options are mutually exclusive and exit.
  */
-
 static void
-clean_env(envp, badenv_table)
-    char **envp;
-    struct env_table *badenv_table;
+usage_excl(exit_val)
+    int exit_val;
 {
-    struct env_table *bad;
-    char **cur;
+    (void) fprintf(stderr,
+	"Only one of the -v, -k, -K, -l, -V and -h options may be used\n");
+    usage(exit_val);
+}
 
-    /*
-     * Remove any envars that match entries in badenv_table
-     */
-    for (cur = envp; *cur; cur++) {
-	for (bad = badenv_table; bad -> name; bad++) {
-	    if (strncmp(*cur, bad -> name, bad -> len) == 0) {
-		/* got a match so remove it */
-		char **move;
-
-		for (move = cur; *move; move++)
-		    *move = *(move + 1);
-
-		cur--;
-
-		break;
-	    }
-	}
-    }
+/*
+ * Give usage message and exit.
+ */
+static void
+usage(exit_val)
+    int exit_val;
+{
+    (void) fprintf(stderr,
+	"usage: %s -V | -h | -l | -v | -k | -K | -H | [-b] [-p prompt]\n%*s",
+	Argv[0], strlen(Argv[0]) + 8, " ");
+#ifdef HAVE_KERB5
+    (void) fprintf(stderr, "[-r realm] ");
+#endif /* HAVE_KERB5 */
+    (void) fprintf(stderr, "[-u username/#uid] -s | <command>\n");
+    exit(exit_val);
 }
