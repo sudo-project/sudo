@@ -926,10 +926,13 @@ fi
 
 dnl
 dnl C compiler checks
+dnl XXX - the cross-compiler check gets false positives so we override it
 dnl
 ac_cv_prog_cc_cross="no"
 cross_compiling="no"
 AC_PROG_CC
+ac_cv_prog_cc_cross="no"
+cross_compiling="no"
 AC_PROG_CPP
 AC_ISC_POSIX
 
