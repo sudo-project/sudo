@@ -115,7 +115,7 @@ emalloc2(nmemb, size)
 	    Argv[0]);
 	exit(1);
     }
-    if (nmemb >= SIZE_MAX / size) {
+    if (nmemb > SIZE_MAX / size) {
 	(void) fprintf(stderr, "%s: internal error, emalloc2() overflow\n",
 	    Argv[0]);
 	exit(1);
@@ -170,7 +170,7 @@ erealloc3(ptr, nmemb, size)
 	    Argv[0]);
 	exit(1);
     }
-    if (nmemb >= SIZE_MAX / size) {
+    if (nmemb > SIZE_MAX / size) {
 	(void) fprintf(stderr, "%s: internal error, erealloc3() overflow\n",
 	    Argv[0]);
 	exit(1);
@@ -193,10 +193,12 @@ estrdup(src)
     const char *src;
 {
     char *dst = NULL;
+    size_t size;
 
     if (src != NULL) {
-	dst = (char *) emalloc(strlen(src) + 1);
-	(void) strcpy(dst, src);
+	size = strlen(src) + 1;
+	dst = (char *) emalloc(size);
+	(void) memcpy(dst, src, size);
     }
     return(dst);
 }
