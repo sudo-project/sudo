@@ -156,11 +156,9 @@ extern int top;
 #define user_dir		(user_pw_ent -> pw_dir)
 
 /*
- * Prototypes
+ * Function prototypes
  */
-
-
-/* These are the functions that are called in sudo(8) */
+#define YY_DECL int yylex __P((void))
 
 #ifndef HAVE_STRDUP
 char *strdup		__P((const char *));
@@ -182,6 +180,8 @@ int validate		__P((int));
 void set_perms		__P((int));
 void remove_timestamp	__P((void));
 void load_interfaces	__P((void));
+int yyparse		__P((void));
+YY_DECL;
 
 
 /*
