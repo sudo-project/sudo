@@ -109,3 +109,6 @@ A) configure caches the results of its tests in a file called
    You can do this by "rm config.cache" or "make realclean".
    Note that "make realclean" will also remove any object files
    and configure temp files that are laying around as well.
+
+Q) How do you pronounce `sudo'?
+A) soo-doo (for superuser do).
