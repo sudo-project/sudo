@@ -395,10 +395,12 @@ log_error(va_alist)
     /*
      * Tell the user.
      */
-    if (flags & USE_ERRNO)
-	warn("%s", message);
-    else
-	warnx("%s", message);
+    if (!ISSET(flags, NO_STDERR)) {
+	if (flags & USE_ERRNO)
+	    warn("%s", message);
+	else
+	    warnx("%s", message);
+    }
 
     /*
      * Send a copy of the error via mail.

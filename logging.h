@@ -34,6 +34,7 @@
 #define USE_ERRNO		0x02
 #define NO_MAIL			0x04
 #define NO_EXIT			0x08
+#define NO_STDERR		0x10
 
 /*
  * Maximum number of characters to log per entry.  The syslogger
