@@ -1,32 +1,30 @@
 TODO list
 
-01) Add groups of users to the config file.
+01) Add uid and gid options to sudo and sudoers file.
 
-02) Nestable command aliases
-
-03) Add uid and gid options to sudo and sudoers file.
-
-04) Redo parsing to be more like op(8) with true command aliases where
+02) Redo parsing to be more like op(8) with true command aliases where
     can specify uid, gid(s) and part/all of the environment.
 
-05) Add default options to sudoers file (umask, def uid, def gids, dir, PATH).
+03) Add default options to sudoers file (umask, def uid, def gids, dir, PATH).
 
-06) Add a SHELLS reserved word that checks against /etc/shells.
+04) Add a SHELLS reserved word that checks against /etc/shells.
 
-07) Make the sudoers file accessible via NIS, Hesiod, and maybe NetInfo.
+05) Make the sudoers file accessible via NIS, Hesiod, and maybe NetInfo.
 
-08) Add a %h field to MAILSUBJECT for the hostname.
+06) Add a %h field to MAILSUBJECT for the hostname.
 
-09) Add a -h flag to sudo for a history mechanism.
+07) Add a -h flag to sudo for a history mechanism.
 
-10) Fully integrate riscos and isc support
+08) Fully integrate riscos and isc support
 
-11) Make parse.lex in the same coding style as everything else...
+09) Make parse.lex in the same coding style as everything else...
 
-12) Make -l work in sudo.
+10) Make -l work with the new parser.
 
-13) Cleanup check.c and logging.c.
+11) Cleanup check.c and logging.c.
 
-14) Fixed network address support.
+12) Add an option to hard-code LD_LIBRARY_PATH?
 
-15) Add an option to hard-code LD_LIBRARY_PATH?
+13) Add Prog_Alias facility (Prog_Alias VI = /usr/secure/bin/vi +args).
+
+14) Make '!' work in Cmnd_Alias, Host_Alias and User_Alias.
