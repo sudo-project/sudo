@@ -57,3 +57,7 @@
 #ifndef _PATH_PWD
 #undef _PATH_PWD
 #endif /* _PATH_PWD */
+
+#ifndef _PATH_MV
+#undef _PATH_MV
+#endif /* _PATH_MV */
