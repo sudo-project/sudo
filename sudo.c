@@ -83,10 +83,14 @@ static char rcsid[] = "$Id$";
 #include <sys/param.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#if defined(__osf__) && defined(HAVE_C2_SECURITY)
-#include <sys/security.h>
-#include <prot.h>
-#endif /* __osf__ && HAVE_C2_SECURITY */
+#if (SHADOW_TYPE == SPW_SECUREWARE)
+#  ifdef __hpux
+#    include <hpsecurity.h>
+#  else
+#    include <sys/security.h>
+#  endif /* __hpux */
+#  include <prot.h>
+#endif /* SPW_SECUREWARE */
 #ifdef HAVE_DCE
 #include <pthread.h>
 #endif /* HAVE_DCE */
@@ -184,9 +188,9 @@ int main(argc, argv)
     int sudo_mode = MODE_RUN;
     extern char ** environ;
 
-#if defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
+#if (SHADOW_TYPE == SPW_SECUREWARE)
     (void) set_auth_parameters(argc, argv);
-#endif /* SHADOW_TYPE && SPW_SECUREWARE */
+#endif /* SPW_SECUREWARE */
 
     Argv = argv;
     Argc = argc;

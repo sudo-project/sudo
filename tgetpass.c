@@ -64,14 +64,14 @@ static char rcsid[] = "$Id$";
 #include <sys/ioctl.h>
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
-#if defined(SHADOW_TYPE) && (SHADOW_TYPE == SPW_SECUREWARE)
+#if (SHADOW_TYPE == SPW_SECUREWARE)
 #  ifdef __hpux
 #    include <hpsecurity.h>
 #  else
 #    include <sys/security.h>
 #  endif /* __hpux */ 
 #  include <prot.h>
-#endif /* SHADOW_TYPE == SPW_SECUREWARE */
+#endif /* SPW_SECUREWARE */
 
 #include <pathnames.h>
 #include "compat.h"

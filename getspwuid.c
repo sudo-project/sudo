@@ -52,7 +52,7 @@ static char rcsid[] = "$Id$";
 #include <pwd.h>
 #include "sudo.h"
 #include <options.h>
-#ifdef SHADOW_TYPE
+#if (SHADOW_TYPE != SPW_NONE) && (SHADOW_TYPE != SPW_BSD)
 #  if (SHADOW_TYPE == SPW_SVR4)
 #    include <shadow.h>
 #  endif /* SVR4 */
@@ -72,7 +72,7 @@ static char rcsid[] = "$Id$";
 #    include <sys/audit.h>
 #    include <pwdadj.h>
 #  endif /* SUNOS4 */
-#endif /* SHADOW_TYPE */
+#endif /* SHADOW_TYPE != SPW_NONE && SHADOW_TYPE != SPW_BSD */
 
 #ifndef STDC_HEADERS
 #ifndef __GNUC__                /* gcc has its own malloc */
@@ -137,7 +137,7 @@ static char *sudo_getshell(pw_ent)
 
 static char *sudo_getspwd(pw_ent)
     struct passwd *pw_ent;
-#ifdef SHADOW_TYPE
+#if (SHADOW_TYPE != SPW_NONE) && (SHADOW_TYPE != SPW_BSD)
 #  if (SHADOW_TYPE == SPW_SVR4)
 {
     struct spwd *spw_ent;
@@ -183,9 +183,9 @@ static char *sudo_getspwd(pw_ent)
     struct pr_passwd *spw_ent;
 
     if ((spw_ent = getprpwuid(pw_ent->pw_uid)) && spw_ent->ufld.fd_encrypt) {
-#ifdef __alpha
+#    ifdef __alpha
 	crypt_type = spw_ent -> ufld.fd_oldcrypt;
-#endif /* __alpha */
+#    endif /* __alpha */
 	return(spw_ent -> ufld.fd_encrypt);
     } else
 	return(pw_ent -> pw_passwd);
@@ -195,7 +195,7 @@ static char *sudo_getspwd(pw_ent)
 {
     return(pw_ent->pw_passwd);
 }
-#endif /* SHADOW_TYPE */
+#endif /* SHADOW_TYPE != SPW_NONE && SHADOW_TYPE != SPW_BSD */
 
 
 /**********************************************************************
