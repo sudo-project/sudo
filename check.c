@@ -425,7 +425,7 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
      */
     if (status == TS_OLD) {
 	/* Negative timeouts only expire manually (sudo -k). */
-	if (def_ival(I_TS_TIMEOUT) < 0 && sb.st_mtime != 0)
+	if (def_ival(I_TIMESTAMP_TIMEOUT) < 0 && sb.st_mtime != 0)
 	    status = TS_CURRENT;
 	else {
 	    now = time(NULL);
