@@ -110,7 +110,7 @@ if test -n "$UNAMEPROG"; then
     echo "checking OS based on uname(1)"
     OS=`$UNAMEPROG -s`
     # this is yucky but we want to make sure $OSREV is an int...
-    OSREV=`$UNAMEPROG -r | $SEDPROG -e 's/^[A-z \.0]*//' -e 's/\..*//'`
+    OSREV=`$UNAMEPROG -r | $SEDPROG -e 's/^[[ \.0A-z]]*//' -e 's/\..*//'`
 
     if test "$OS" = "SunOS" -a "$OSREV" -ge 5 ; then
 	OS="solaris"
