@@ -99,17 +99,19 @@ void print_privilege __P((struct privilege *));
 void print_userspecs __P((void));
 void usage __P((void)) __attribute__((__noreturn__));
 
+extern void my_setpwfile __P((const char *));
+extern void my_setgrfile __P((const char *));
+
 int
 main(argc, argv)
     int argc;
     char **argv;
 {
     struct cmndspec *cs;
-    struct passwd pw, rpw;
     struct member *runas;
     struct privilege *priv;
     struct userspec *us;
-    char *p, hbuf[MAXHOSTNAMELEN];
+    char *p, *grfile, *pwfile, *uflag, hbuf[MAXHOSTNAMELEN];
     int ch, dflag, rval, matched;
 #ifdef	YYDEBUG
     extern int yydebug;
@@ -119,17 +121,9 @@ main(argc, argv)
     Argv = argv;
     Argc = argc;
 
-    setpwent();
-    setgrent();
-    pwcache_init();
-
-    memset(&pw, 0, sizeof(pw));
-    sudo_user.pw = &pw;
-    memset(&rpw, 0, sizeof(rpw));
-    runas_pw = &rpw;
-
     dflag = 0;
-    while ((ch = getopt(argc, argv, "dh:u:")) != -1) {
+    grfile = pwfile = uflag = NULL;
+    while ((ch = getopt(argc, argv, "dg:h:p:u:")) != -1) {
 	switch (ch) {
 	    case 'd':
 		dflag = 1;
@@ -137,9 +131,15 @@ main(argc, argv)
 	    case 'h':
 		user_host = optarg;
 		break;
+	    case 'g':
+		grfile = optarg;
+		break;
+	    case 'p':
+		pwfile = optarg;
+		break;
 	    case 'u':
-		/* XXX - call getpwnam() */
-		runas_pw->pw_name = optarg;
+		uflag = optarg;
+		user_runas = &uflag;
 		break;
 	    default:
 		usage();
@@ -150,14 +150,25 @@ main(argc, argv)
     argv += optind;
     NewArgc = argc;
     NewArgv = argv;
+
+    /* Set group/passwd file and init the cache. */
+    if (grfile)
+	my_setgrfile(grfile);
+    if (pwfile)
+	my_setpwfile(pwfile);
+    sudo_setpwent();
+    sudo_setgrent();
+
     if (argc < 2) {
 	if (!dflag)
 	    usage();
-	user_name = "nobody";
+	if ((sudo_user.pw = sudo_getpwnam("nobody")) == NULL)
+            errorx(1, "no passwd entry for nobody!");
 	user_cmnd = user_base = "true";
     } else {
-	user_name = *argv++;
-	user_cmnd = *argv;
+	if ((sudo_user.pw = sudo_getpwnam(*argv)) == NULL)
+            errorx(1, "no passwd entry for %s!", *argv);
+	user_cmnd = *++argv;
 	if ((p = strrchr(user_cmnd, '/')) != NULL)
 	    user_base = p + 1;
 	else
@@ -198,10 +209,13 @@ main(argc, argv)
 
     /* Initialize default values. */
     init_defaults();
-    if (runas_pw->pw_name)
-	user_runas = &runas_pw->pw_name;
-    else
-	runas_pw->pw_name = *user_runas;
+    if (**user_runas == '#') {
+        if ((runas_pw = sudo_getpwuid(atoi(*user_runas + 1))) == NULL)
+            runas_pw = sudo_fakepwnam(*user_runas);
+    } else {
+        if ((runas_pw = sudo_getpwnam(*user_runas)) == NULL)
+            errorx(1, "no passwd entry for %s!", *user_runas);
+    }
 
     /* Load ip addr/mask for each interface. */
     load_interfaces();
@@ -261,6 +275,25 @@ main(argc, argv)
 }
 
 void
+sudo_setspent()
+{
+    return;
+}
+
+void
+sudo_endspent()
+{
+    return;
+}
+
+char *
+sudo_getepw(pw)
+    const struct passwd *pw;
+{
+    return (pw->pw_passwd);
+}
+
+void
 set_fqdn()
 {
     return;
@@ -297,7 +330,8 @@ set_perms(perm)
 void
 cleanup()
 {
-    pwcache_destroy();
+    sudo_endpwent();
+    sudo_endgrent();
 }
 
 void
@@ -466,8 +500,6 @@ dump_sudoers()
 void
 usage()
 {
-    (void) fprintf(stderr,
-	"usage: %s [-h host] [-u user] <user> <command> [args]\n",
-	    getprogname());
+    (void) fprintf(stderr, "usage: %s [-d] [-g grfile] [-h host] [-p pwfile] [-u user] <user> <command> [args]\n", getprogname());
     exit(1);
 }
