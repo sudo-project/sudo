@@ -37,6 +37,12 @@
 #undef _CONVEX_SOURCE
 #endif
 
+/* Define if on IRIX.
+   We want BSD compatibility to use BSD signals.	*/
+#ifndef _BSD_COMPAT
+#undef _BSD_COMPAT
+#endif
+
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef uid_t
 
