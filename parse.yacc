@@ -196,12 +196,14 @@ yyerror(s)
     /* Save the line the first error occured on. */
     if (errorlineno == -1)
 	errorlineno = sudolineno ? sudolineno - 1 : 0;
+    if (s) {
 #ifndef TRACELEXER
-    (void) fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s,
-	sudolineno ? sudolineno - 1 : 0);
+	(void) fprintf(stderr, ">>> sudoers file: %s, line %d <<<\n", s,
+	    sudolineno ? sudolineno - 1 : 0);
 #else
-    (void) fprintf(stderr, "<*> ");
+	(void) fprintf(stderr, "<*> ");
 #endif
+    }
     parse_error = TRUE;
 }
 %}
@@ -334,9 +336,15 @@ host		:	ALL {
 			    else if (strcasecmp(user_shost, $1) == 0)
 				$$ = TRUE;
 			    else {
-				if (pedantic)
+				if (pedantic) {
 				    (void) fprintf(stderr,
-					"Warning: undeclared Host_Alias `%s' referenced near line %d\n", $1, sudolineno);
+					"%s: undeclared Host_Alias `%s' referenced near line %d\n",
+					(pedantic == 1) ? "Warning" : "Error", $1, sudolineno);
+				    if (pedantic > 1) {
+					yyerror(NULL);
+					YYERROR;
+				    }
+				}
 				$$ = -1;
 			    }
 			    free($1);
@@ -484,9 +492,15 @@ runasuser	:	NAME {
 			    else if (strcmp($1, user_runas) == 0)
 				$$ = TRUE;
 			    else {
-				if (pedantic)
+				if (pedantic) {
 				    (void) fprintf(stderr,
-					"Warning: undeclared Runas_Alias `%s' referenced near line %d\n", $1, sudolineno);
+					"%s: undeclared Runas_Alias `%s' referenced near line %d\n",
+					(pedantic == 1) ? "Warning" : "Error", $1, sudolineno);
+				    if (pedantic > 1) {
+					yyerror(NULL);
+					YYERROR;
+				    }
+				}
 				$$ = -1;
 			    }
 			    free($1);
@@ -560,9 +574,15 @@ cmnd		:	ALL {
 			    if ((aip = find_alias($1, CMND_ALIAS)))
 				$$ = aip->val;
 			    else {
-				if (pedantic)
+				if (pedantic) {
 				    (void) fprintf(stderr,
-					"Warning: undeclared Cmnd_Alias `%s' referenced near line %d\n", $1, sudolineno);
+					"%s: undeclared Cmnd_Alias `%s' referenced near line %d\n",
+					(pedantic == 1) ? "Warning" : "Error", $1, sudolineno);
+				    if (pedantic > 1) {
+					yyerror(NULL);
+					YYERROR;
+				    }
+				}
 				$$ = -1;
 			    }
 			    free($1);
@@ -719,9 +739,13 @@ user		:	NAME {
 			    else if (strcmp($1, user_name) == 0)
 				$$ = TRUE;
 			    else {
-				if (pedantic)
+				if (pedantic) {
 				    (void) fprintf(stderr,
-					"Warning: undeclared User_Alias `%s' referenced near line %d\n", $1, sudolineno);
+					"%s: undeclared User_Alias `%s' referenced near line %d\n",
+					(pedantic == 1) ? "Warning" : "Error", $1, sudolineno);
+				    if (pedantic > 1)
+					YYERROR;
+				}
 				$$ = -1;
 			    }
 			    free($1);
@@ -857,6 +881,9 @@ dumpaliases()
     size_t n;
 
     for (n = 0; n < naliases; n++) {
+	if (aliases[n].val == -1)
+	    continue;
+
 	switch (aliases[n].type) {
 	case HOST_ALIAS:
 	    (void) puts("HOST_ALIAS");

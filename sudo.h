@@ -193,8 +193,6 @@ extern struct sudo_user sudo_user;
 
 extern int Argc;
 extern char **Argv;
-extern int NewArgc;
-extern char **NewArgv;
 extern FILE *sudoers_fp;
 #endif
 extern int errno;

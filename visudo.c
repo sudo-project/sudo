@@ -108,8 +108,6 @@ extern int pedantic;
  * Globals
  */
 char **Argv;
-char **NewArgv = NULL;
-int NewArgc = 0;
 char *sudoers = _PATH_SUDOERS;
 char *stmp = _PATH_SUDOERS_TMP;
 struct sudo_user sudo_user;
@@ -129,23 +127,26 @@ main(argc, argv)
     time_t now;				/* time now */
     struct stat stmp_sb, sudoers_sb;	/* to check for changes */
 
+    /* Warn about aliases that are used before being defined. */
+    pedantic = 1;
+
     /*
      * Parse command line options
      */
     Argv = argv;
 
     /*
-     * Arg handling.  For -V print version, else usage...
+     * Arg handling.
      */
-    if (argc == 2) {
-	if (!strcmp(Argv[1], "-V")) {
+    while (--argc) {
+	if (!strcmp(argv[argc], "-V")) {
 	    (void) printf("visudo version %s\n", version);
 	    exit(0);
+	} else if (!strcmp(argv[argc], "-s")) {
+	    pedantic++;			/* strict mode */
 	} else {
 	    usage();
 	}
-    } else if (argc != 1) {
-	usage();
     }
 
     /* Mock up a fake sudo_user struct. */
@@ -156,9 +157,6 @@ main(argc, argv)
 	    Argv[0]);
 	exit(1);
     }
-
-    /* Warn about aliases that are used before being defined. */
-    pedantic = TRUE;
 
 #ifdef ENV_EDITOR
     /*
@@ -496,6 +494,6 @@ Exit(sig)
 static void
 usage()
 {
-    (void) fprintf(stderr, "usage: %s [-V]\n", Argv[0]);
+    (void) fprintf(stderr, "usage: %s [-s] [-V]\n", Argv[0]);
     exit(1);
 }

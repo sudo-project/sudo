@@ -8,7 +8,7 @@ NNNNAAAAMMMMEEEE
        visudo - edit the sudoers file
 
 SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
-       vvvviiiissssuuuuddddoooo [ ----VVVV ]
+       vvvviiiissssuuuuddddoooo [ ----ssss ] [ ----VVVV ]
 
 DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        vvvviiiissssuuuuddddoooo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous
@@ -40,34 +40,51 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 OOOOPPPPTTTTIIIIOOOONNNNSSSS
        vvvviiiissssuuuuddddoooo accepts the following command line option:
 
+       -s  Enable ssssttttrrrriiiicccctttt checking of the _s_u_d_o_e_r_s file.  If an
+           alias is used before it is defined, vvvviiiissssuuuuddddoooo will
+           consider this a parse error.  Note that it is not
+           possible to differentiate between an alias and a
+           hostname or username that consists solely of upper
+           case letters, digits, and the underscore ('_')
+           character.
+
        -V  The -V (version) option causes vvvviiiissssuuuuddddoooo to print the
            version number and exit.
 
 EEEERRRRRRRROOOORRRRSSSS
        sudoers file busy, try again later.
-           Either someone is currently editing the _s_u_d_o_e_r_s file
-           or there is a stale sudoers lock file
-           (/etc/sudoers.tmp by default) that you need to delete.
+           Someone else is currently editing the _s_u_d_o_e_r_s file.
 
        /etc/sudoers.tmp: Permission denied
            You didn't run vvvviiiissssuuuuddddoooo as root.
 
-       Can't find you in the passwd database
-           Your userid does not appear in the passwd file.
-
-FFFFIIIILLLLEEEESSSS
-        /etc/sudoers           List of who can run what
-        /etc/sudoers.tmp       Lock file for visudo
 
 
 
-6/Aug/1999                     1.6                              1
+17/Aug/1999                    1.6                              1
 
 
 
 
 
 VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
+
+
+       Can't find you in the passwd database
+           Your userid does not appear in the system passwd file.
+
+       Warning: undeclared Alias referenced near ...
+           Either you are using a {User,Runas,Host,Cmnd}_Alias
+           before defining it or you have a user or hostname
+           listed that consists solely of upper case letters,
+           digits, and the underscore ('_') character.  If the
+           latter, you can ignore the warnings (ssssuuuuddddoooo will not
+           complain).  In ----ssss (strict) mode these are errors not
+           warnings.
+
+FFFFIIIILLLLEEEESSSS
+        /etc/sudoers           List of who can run what
+        /etc/sudoers.tmp       Lock file for visudo
 
 
 EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT VVVVAAAARRRRIIIIAAAABBBBLLLLEEEESSSS
@@ -87,6 +104,7 @@ AAAAUUUUTTTTHHHHOOOORRRR
        See the HISTORY file in the sudo distribution for more
        details.
 
+BBBBUUUUGGGGSSSS
        Please send all bugs, comments, and changes to sudo-
        bugs@courtesan.com.  Be sure to include the version of
        ssssuuuuddddoooo you are using and the platform you are running it on.
@@ -99,16 +117,8 @@ DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
        with ssssuuuuddddoooo for complete details.
 
 CCCCAAAAVVVVEEEEAAAATTTTSSSS
-       Due to the syntax of the _s_u_d_o_e_r_s file, there is no way for
-       vvvviiiissssuuuuddddoooo to tell the difference between a mistyped
-       {Host,User,Cmnd}_Alias and a user or host name.
-
        There is no easy way to prevent a user from gaining a root
        shell if the editor used by vvvviiiissssuuuuddddoooo allows shell escapes.
-
-BBBBUUUUGGGGSSSS
-       The _-_V flag gives the version of the _s_u_d_o package rather
-       than the individual vvvviiiissssuuuuddddoooo program.
 
 SSSSEEEEEEEE AAAALLLLSSSSOOOO
        _s_u_d_o(8), _v_i_p_w(8).
@@ -117,17 +127,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-
-
-
-
-
-
-
-
-
-6/Aug/1999                     1.6                              2
+17/Aug/1999                    1.6                              2
 
 
 
@@ -193,6 +193,6 @@ VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
 
 
 
-6/Aug/1999                     1.6                              3
+17/Aug/1999                    1.6                              3
 
 

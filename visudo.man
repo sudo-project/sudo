@@ -2,9 +2,10 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.9  1999/08/06 09:37:02  millert
-''' o /etc/stmp -> /etc/sudoers.tmp since solaris uses stmp as shadow temp file
-''' o _PATH_SUDO_SUDOERS -> _PATH_SUDOERS and _PATH_SUDO_STMP -> _PATH_SUDOERS_TMP
+''' Revision 1.10  1999/08/17 15:29:47  millert
+''' o NewArgv and NewArgc don't need to be externally visible.
+''' o If pedantic > 1, it is a parse error.
+''' o Add -s (strict) option to visudo which sets pedantic to 2.
 '''
 '''
 .de Sh
@@ -97,7 +98,7 @@
 .nr % 0
 .rr F
 .\}
-.TH VISUDO 8 "1.6" "6/Aug/1999" "MAINTENANCE COMMANDS"
+.TH VISUDO 8 "1.6" "17/Aug/1999" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -194,7 +195,7 @@
 .SH "NAME"
 visudo \- edit the sudoers file
 .SH "SYNOPSIS"
-\fBvisudo\fR [ \fB\-V\fR ]
+\fBvisudo\fR [ \fB\-s\fR ] [ \fB\-V\fR ]
 .SH "DESCRIPTION"
 \fBvisudo\fR edits the \fIsudoers\fR file in a safe fashion, analogous to
 \fIvipw\fR\|(8).  \fBvisudo\fR locks the \fIsudoers\fR file against multiple
@@ -221,18 +222,29 @@ detected the cursor will be placed on the line where the error
 occurred (if the editor supports this feature).
 .SH "OPTIONS"
 \fBvisudo\fR accepts the following command line option:
+.Ip "-s" 4
+Enable \fBstrict\fR checking of the \fIsudoers\fR file.  If an alias is
+used before it is defined, \fBvisudo\fR will consider this a parse
+error.  Note that it is not possible to differentiate between an
+alias and a hostname or username that consists solely of upper case
+letters, digits, and the underscore ('_') character.
 .Ip "-V" 4
 The \f(CW-V\fR (version) option causes \fBvisudo\fR to print the version number
 and exit.
 .SH "ERRORS"
 .Ip "sudoers file busy, try again later." 4
-Either someone is currently editing the \fIsudoers\fR file
-or there is a stale sudoers lock file (/etc/sudoers.tmp by default)
-that you need to delete.
+Someone else is currently editing the \fIsudoers\fR file.
 .Ip "/etc/sudoers.tmp: Permission denied" 4
 You didn't run \fBvisudo\fR as root.
 .Ip "Can't find you in the passwd database" 4
-Your userid does not appear in the passwd file.
+Your userid does not appear in the system passwd file.
+.Ip "Warning: undeclared Alias referenced near ..." 4
+Either you are using a {User,Runas,Host,Cmnd}_Alias before
+defining it or you have a user or hostname listed that
+consists solely of upper case letters, digits, and the
+underscore ('_') character.  If the latter, you can ignore
+the warnings (\fBsudo\fR will not complain).  In \fB\-s\fR (strict)
+mode these are errors not warnings.
 .SH "FILES"
 .Sp
 .Vb 2
@@ -255,7 +267,7 @@ Many people have worked on \fIsudo\fR over the years, this version of
 \& Todd Miller            <Todd.Miller@courtesan.com>
 .Ve
 See the HISTORY file in the sudo distribution for more details.
-.Sp
+.SH "BUGS"
 Please send all bugs, comments, and changes to sudo-bugs@courtesan.com.
 Be sure to include the version of \fBsudo\fR you are using and the platform     
 you are running it on.
@@ -265,15 +277,8 @@ including, but not limited to, the implied warranties of merchantability
 and fitness for a particular purpose are disclaimed.
 See the LICENSE file distributed with \fBsudo\fR for complete details.
 .SH "CAVEATS"
-Due to the syntax of the \fIsudoers\fR file, there is no way for
-\fBvisudo\fR to tell the difference between a mistyped {Host,User,Cmnd}_Alias
-and a user or host name.
-.Sp
 There is no easy way to prevent a user from gaining a root shell if 
 the editor used by \fBvisudo\fR allows shell escapes.
-.SH "BUGS"
-The \fI\-V\fR flag gives the version of the \fIsudo\fR package rather than
-the individual \fBvisudo\fR program.
 .SH "SEE ALSO"
 \fIsudo\fR\|(8), \fIvipw\fR\|(8).
 
@@ -289,6 +294,8 @@ the individual \fBvisudo\fR program.
 
 .IX Header "OPTIONS"
 
+.IX Item "-s"
+
 .IX Item "-V"
 
 .IX Header "ERRORS"
@@ -299,17 +306,19 @@ the individual \fBvisudo\fR program.
 
 .IX Item "Can't find you in the passwd database"
 
+.IX Item "Warning: undeclared Alias referenced near ..."
+
 .IX Header "FILES"
 
 .IX Header "ENVIRONMENT VARIABLES"
 
 .IX Header "AUTHOR"
 
+.IX Header "BUGS"
+
 .IX Header "DISCLAIMER"
 
 .IX Header "CAVEATS"
-
-.IX Header "BUGS"
 
 .IX Header "SEE ALSO"
 
