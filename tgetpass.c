@@ -100,32 +100,30 @@ char * tgetpass(prompt, timeout)
 #else
     int oldmask;
 #endif /* POSIX_SIGNALS */
-    FILE * input, * output;
+    int input, output, n;
     static char buf[_PASSWD_LEN + 1];
     fd_set readfds;
     struct timeval tv;
-    char *tmp;
 
     /*
-     * mask out SIGINT, should probably just catch it.
+     * mask out SIGINT and SIGTSTP, should probably just catch and deal.
      */
 #ifdef POSIX_SIGNALS
     (void) memset((VOID *)&mask, 0, sizeof(mask));
     (void) sigaddset(&mask, SIGINT);
+    (void) sigaddset(&mask, SIGTSTP);
     (void) sigprocmask(SIG_BLOCK, &mask, &oldmask);
 #else
-    oldmask = sigblock(sigmask(SIGINT));
+    oldmask = sigblock(sigmask(SIGINT)|sigmask(SIGTSTP));
 #endif
 
     /*
      * open /dev/tty for reading/writing if possible or use
      * stdin and stderr instead.
      */
-    input = fopen(_PATH_TTY, "r+");
-    if (!input) {
-	input = stdin;
-	output = stderr;
-	(void) fflush(output);
+    if ((input = open(_PATH_TTY, O_RDWR) < 0)) {
+	input = fileno(stdin);
+	output = fileno(stderr);
     } else {
 	output = input;
     }
@@ -134,82 +132,67 @@ char * tgetpass(prompt, timeout)
      * turn off echo
      */
 #ifdef HAVE_TERMIOS_H
-    (void) tcgetattr(fileno(input), &term);
+    (void) tcgetattr(input, &term);
     svflagval = term.c_lflag;
     term.c_lflag &= ~ECHO;
-    (void) tcsetattr(fileno(input), TCSAFLUSH, &term);
+    (void) tcsetattr(input, TCSAFLUSH|TCSASOFT, &term);
 #else
 #ifdef HAVE_TERMIO_H
-    (void) ioctl(fileno(input), TCGETA, &term);
+    (void) ioctl(input, TCGETA, &term);
     svflagval = term.c_lflag;
     term.c_lflag &= ~ECHO;
-    (void) ioctl(fileno(input), TCSETA, &term);
+    (void) ioctl(input, TCSETA, &term);
 #else
-    (void) ioctl(fileno(input), TIOCGETP, &ttyb);
+    (void) ioctl(input, TIOCGETP, &ttyb);
     svflagval = ttyb.sg_flags;
     ttyb.sg_flags &= ~ECHO;
-    (void) ioctl(fileno(input), TIOCSETP, &ttyb);
+    (void) ioctl(input, TIOCSETP, &ttyb);
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
     /* print the prompt */
-    (void) fputs(prompt, output);
-
-    /* rewind if necesary */
-    if (input == output) {
-	(void) fflush(output);
-	(void) rewind(output);
-    }
+    (void) write(output, prompt, strlen(prompt));
 
     /* setup for select(2) */
     FD_ZERO(&readfds);
-    FD_SET(fileno(input), &readfds);
+    FD_SET(input, &readfds);
 
     /* set timeout for select */
     tv.tv_sec = timeout;
     tv.tv_usec = 0;
 
-    /* return NULL if nothing to read by timeout */
+    /* how many file descriptors may we have? */
 #ifdef HAVE_SYSCONF
-    if (select(sysconf(_SC_OPEN_MAX), &readfds, NULL, NULL, &tv) <= 0) {
+    n = sysconf(_SC_OPEN_MAX);
 #else
-    if (select(getdtablesize(), &readfds, NULL, NULL, &tv) <= 0) {
+    n = getdtablesize();
 #endif /* HAVE_SYSCONF */
-	buf[0] = '\0';
-	goto cleanup;			/* XXX - goto considered harmful */
+
+    /*
+     * get password or return empty string if nothing to read by timeout
+     */
+    buf[0] = '\0';
+    if (select(n, &readfds, NULL, NULL, &tv) > 0 &&
+	(n = read(input, buf, sizeof(buf))) > 0) {
+	buf[n - 1] = '\0';
     }
-
-    /* get the password */
-    if (!fgets(buf, sizeof(buf), input)) {
-	buf[0] = '\0';
-	goto cleanup;			/* XXX - goto considered harmful */
-    }
-
-    if (*(tmp = &buf[strlen(buf)-1]) == '\n')
-	*tmp = '\0';
-
-cleanup:
 
      /* turn on echo */
 #ifdef HAVE_TERMIOS_H
     term.c_lflag = svflagval;
-    (void) tcsetattr(fileno(input), TCSAFLUSH, &term);
+    (void) tcsetattr(input, TCSAFLUSH|TCSASOFT, &term);
 #else
 #ifdef HAVE_TERMIO_H
     term.c_lflag = svflagval;
-    (void) ioctl(fileno(input), TCSETA, &term);
+    (void) ioctl(input, TCSETA, &term);
 #else
     ttyb.sg_flags = svflagval;
-    (void) ioctl(fileno(input), TIOCSETP, &ttyb);
+    (void) ioctl(input, TIOCSETP, &ttyb);
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
-    /* rewind if necesary */
-    if (input == output) {
-	(void) fflush(output);
-	(void) rewind(output);
-    }
-    (void) fputc('\n', output);
+    /* print a newline since echo is turned off */
+    (void) write(output, "\n", 1);
 
     /* restore old signal mask */
 #ifdef POSIX_SIGNALS
@@ -219,8 +202,8 @@ cleanup:
 #endif
 
     /* close /dev/tty if that's what we opened */
-    if (input != stdin)
-	(void) fclose(input);
+    if (input != fileno(stdin))
+	(void) close(input);
 
     return(buf);
 }
