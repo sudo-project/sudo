@@ -119,7 +119,8 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL OPTIONS TODO \
             aixcrypt.exp config.h.in configure configure.in getwd.c strdup.c \
             indent.pro install-sh lsearch.c putenv.c tgetpass.c emul/search.h \
 	    emul/utime.h utime.c testsudoers.c sudoers sample.sudoers \
-	    sudo.cat sudo.man visudo.cat visudo.man sudoers.cat sudoers.man \
+	    sudo.pod sudo.man sudo.cat visudo.pod visudo.man visudo.cat \
+	    sudoers.pod sudoers.man sudoers.pod \
 	    lex.yy.c sudo-lex.yy.c dce_pwent.c wildmat.3
 
 all: $(PROGS)
@@ -130,7 +131,9 @@ all: $(PROGS)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) $<
 
 .man.cat:
-	$(NROFF) -man $< > $@
+	@rm -f $(srcdir)/$@
+	$(NROFF) -man $< > $(srcdir)/$@
+	@chmod 444 $(srcdir)/$@
 
 sudo: $(PARSEOBJS) $(SUDOBJS) $(LIBOBJS)
 	$(CC) -o $@ $(PARSEOBJS) $(SUDOBJS) $(LIBOBJS) $(SUDO_LDFLAGS) $(SUDO_LIBS)
@@ -156,9 +159,41 @@ lex.yy.o: lex.yy.c y.tab.h $(HDRS)
 
 $(SUDOBJS) $(LIBOBJS) : $(HDRS) config.h
 
+sudo.html: $(srcdir)/sudo.pod
+	@rm -f $(srcdir)/$@
+	pod2html --title="Sudo Manual" --infile=$< --outfile=$(srcdir)/$@
+	@chmod 444 $(srcdir)/$@
+
+sudo.man: $(srcdir)/sudo.pod
+	@rm -f $(srcdir)/$@
+	pod2man --section $(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" $< > $(srcdir)/$@
+	@chmod 444 $(srcdir)/$@
+
 sudo.cat: $(srcdir)/sudo.man
 
+visudo.html: $(srcdir)/visudo.pod
+	@rm -f $(srcdir)/$@
+	pod2html --title="Visudo Manual" --infile=$< --outfile=$(srcdir)/$@
+	@chmod 444 $(srcdir)/$@
+
+visudo.man: $(srcdir)/visudo.pod
+	@rm -f $(srcdir)/$@
+	pod2man --section $(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" $< > $(srcdir)/$@
+	@chmod 444 $(srcdir)/$@
+
 visudo.cat: $(srcdir)/visudo.man
+
+sudoers.html: $(srcdir)/sudoers.pod
+	@rm -f $(srcdir)/$@
+	pod2html --title="Sudoers Manual" --infile=$< --outfile=$(srcdir)/$@
+	@chmod 444 $(srcdir)/$@
+
+sudoers.man: $(srcdir)/sudoers.pod
+	@rm -f $(srcdir)/$@
+	pod2man --section $(mansect5) --release=$(VERSION) --center="FILE FORMATS" $< > $(srcdir)/$@
+	@chmod 444 $(srcdir)/$@
+
+sudoers.cat: $(srcdir)/sudoers.man
 
 install: install-binaries install-sudoers install-man
 
