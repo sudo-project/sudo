@@ -169,6 +169,7 @@ AC_DEFUN(SUDO_CHECK_TYPE,
 AC_MSG_CHECKING(for $1)
 AC_CACHE_VAL(sudo_cv_type_$1,
 [AC_EGREP_CPP($1, [#include <sys/types.h>
+#include <stdio.h>
 #if STDC_HEADERS
 #include <stdlib.h>
 #endif
