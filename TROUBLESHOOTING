@@ -4,7 +4,7 @@ Troubleshooting tips for CU sudo
 Q) Sudo compiles but when I run it I get "Sorry, sudo must be setuid root."
    and sudo quits.
 A) Sudo must be setuid root to do its work.  You need to do something like
-   "chmod 4111 /usr/local/bin/sudo".  Also, the filesystem sudo resides
+   `chmod 4111 /usr/local/bin/sudo'.  Also, the filesystem sudo resides
    on must *not* be mounted with the nosuid mount option or sudo will
    not be able to work.
 
@@ -39,3 +39,23 @@ A) Your best bet is to enable the ENV_EDITOR option in options.h.
    EDITOR environmental variable.  Alternately, you can change the
    default editor by setting the EDITOR macro in options.h to
    the editor of your choice.
+
+Q) Sudo appears to be removing some variables from my environment, why?
+A) Sudo removes the following "dangerous" environmental variables
+   to guard against shared library spoofing, shell voodoo, and
+   kerberos server spoofing.
+     IFS
+     LD_*
+     _RLD_*
+     SHLIB_PATH (HP-UX only)
+     LIB_PATH (AIX only)
+     KRB_CONF (kerberos only)
+
+Q) I can't get the s/key support to work, whatever I do sudo won't
+   accept my key.  I had to run configure with --with-getpass,
+   could that have something to do with it?
+A) Yes, the s/key support requires that you use tgetpass() since
+   most system getpass()'s only grab eight characters or so
+   and s/key needs much mroe than that.  It should be possible
+   to get tgetpass() to work, send mail to sudo-bugs@cs.colorado.edu
+   if you need help.
