@@ -41,8 +41,9 @@ sudo - execute a command as another user
 
 =head1 SYNOPSIS
 
-B<sudo> B<-V> | B<-h> | B<-l> | B<-L> | B<-v> | B<-k> | B<-K> | B<-s> | B<-H> |
-[ B<-b> ] | [ B<-p> prompt ] [ B<-u> username/#uid] I<command>
+B<sudo> B<-V> | B<-h> | B<-l> | B<-L> | B<-v> | B<-k> | B<-K> | B<-s> |
+[ B<-H> ] [B<-S> ] [ B<-b> ] | [ B<-p> prompt ]
+[ B<-u> username/#uid ] I<command>
 
 =head1 DESCRIPTION
 
@@ -153,6 +154,11 @@ in passwd(5).
 The C<-H> (I<HOME>) option sets the I<HOME> environment variable
 to the homedir of the target user (root by default) as specified
 in passwd(5).  By default, B<sudo> does not modify I<HOME>.
+
+=item -S
+
+The C<-S> (I<stdin>) option causes B<sudo> to read the password from
+standard input instead of the terminal device.
 
 =item --
 

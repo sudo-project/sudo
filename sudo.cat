@@ -8,8 +8,8 @@ NNNNAAAAMMMMEEEE
        sudo - execute a command as another user
 
 SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
-       ssssuuuuddddoooo ----VVVV | ----hhhh | ----llll | ----LLLL | ----vvvv | ----kkkk | ----KKKK | ----ssss | ----HHHH | [ ----bbbb ] |
-       [ ----pppp prompt ] [ ----uuuu username/#uid] _c_o_m_m_a_n_d
+       ssssuuuuddddoooo ----VVVV | ----hhhh | ----llll | ----LLLL | ----vvvv | ----kkkk | ----KKKK | ----ssss | [ ----HHHH ] [----SSSS ]
+       [ ----bbbb ] | [ ----pppp prompt ] [ ----uuuu username/#uid ] _c_o_m_m_a_n_d
 
 DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
        ssssuuuuddddoooo allows a permitted user to execute a _c_o_m_m_a_n_d as the
@@ -61,7 +61,7 @@ OOOOPPPPTTTTIIIIOOOONNNNSSSS
 
 
 
-15/Feb/2000                   1.6.3                             1
+26/Feb/2000                   1.6.3                             1
 
 
 
@@ -115,19 +115,19 @@ sudo(8)                MAINTENANCE COMMANDS               sudo(8)
            default) as specified in _p_a_s_s_w_d(5).  By default, ssssuuuuddddoooo
            does not modify _H_O_M_E.
 
+       -S  The -S (_s_t_d_i_n) option causes ssssuuuuddddoooo to read the password
+           from standard input instead of the terminal device.
+
        --  The -- flag indicates that ssssuuuuddddoooo should stop processing
            command line arguments.  It is most useful in
            conjunction with the -s flag.
 
 RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEESSSS
        ssssuuuuddddoooo quits with an exit value of 1 if there is a
-       configuration/permission problem or if ssssuuuuddddoooo cannot execute
-       the given command.  In the latter case the error string is
-       printed to stderr.  If ssssuuuuddddoooo cannot _s_t_a_t(2) one or more
 
 
 
-15/Feb/2000                   1.6.3                             2
+26/Feb/2000                   1.6.3                             2
 
 
 
@@ -136,6 +136,9 @@ RRRREEEETTTTUUUURRRRNNNN VVVVAAAALLLLUUUUEEEES
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
+       configuration/permission problem or if ssssuuuuddddoooo cannot execute
+       the given command.  In the latter case the error string is
+       printed to stderr.  If ssssuuuuddddoooo cannot _s_t_a_t(2) one or more
        entries in the user's PATH an error is printed on stderr.
        (If the directory does not exist or if it is not really a
        directory, the entry is ignored and no error is printed.)
@@ -188,12 +191,9 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
        instance) or create /tmp/.odus with the appropriate owner
        (root) and permissions (0700) in the system startup files.
 
-       ssssuuuuddddoooo will not honor timestamps set far in the future.
-       Timestamps with a date greater than current_time + 2 *
 
 
-
-15/Feb/2000                   1.6.3                             3
+26/Feb/2000                   1.6.3                             3
 
 
 
@@ -202,6 +202,8 @@ SSSSEEEECCCCUUUURRRRIIIITTTTYYYY NNNNOOOOTTTTE
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
+       ssssuuuuddddoooo will not honor timestamps set far in the future.
+       Timestamps with a date greater than current_time + 2 *
        TIMEOUT will be ignored and sudo will log and complain.
        This is done to keep a user from creating his/her own
        timestamp with a bogus date on system that allow users to
@@ -254,12 +256,10 @@ EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT
         SUDO_PS1               If set, PS1 will be set to its value
 
 
-FFFFIIIILLLLEEEESSSS
 
 
 
-
-15/Feb/2000                   1.6.3                             4
+26/Feb/2000                   1.6.3                             4
 
 
 
@@ -268,6 +268,7 @@ FFFFIIIILLLLEEEESSSS
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
+FFFFIIIILLLLEEEESSSS
         /etc/sudoers           List of who can run what
         /var/run/sudo          Directory containing timestamps
 
@@ -321,11 +322,10 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
        escapes.
 
        If users have sudo ALL there is nothing to prevent them
-       from creating their own program that gives them a root
 
 
 
-15/Feb/2000                   1.6.3                             5
+26/Feb/2000                   1.6.3                             5
 
 
 
@@ -334,6 +334,7 @@ CCCCAAAAVVVVEEEEAAAATTTTSSSS
 sudo(8)                MAINTENANCE COMMANDS               sudo(8)
 
 
+       from creating their own program that gives them a root
        shell regardless of any '!'  elements in the user
        specification.
 
@@ -390,7 +391,6 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-15/Feb/2000                   1.6.3                             6
+26/Feb/2000                   1.6.3                             6
 
 

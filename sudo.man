@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.44  2000/02/16 00:07:28  millert
-''' crank versino to 1.6.3
+''' Revision 1.45  2000/02/27 03:56:40  millert
+''' document -S flag
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudo 8 "1.6.3" "15/Feb/2000" "MAINTENANCE COMMANDS"
+.TH sudo 8 "1.6.3" "26/Feb/2000" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na
@@ -193,8 +193,9 @@
 .SH "NAME"
 sudo \- execute a command as another user
 .SH "SYNOPSIS"
-\fBsudo\fR \fB\-V\fR | \fB\-h\fR | \fB\-l\fR | \fB\-L\fR | \fB\-v\fR | \fB\-k\fR | \fB\-K\fR | \fB\-s\fR | \fB\-H\fR |
-[ \fB\-b\fR ] | [ \fB\-p\fR prompt ] [ \fB\-u\fR username/#uid] \fIcommand\fR
+\fBsudo\fR \fB\-V\fR | \fB\-h\fR | \fB\-l\fR | \fB\-L\fR | \fB\-v\fR | \fB\-k\fR | \fB\-K\fR | \fB\-s\fR |
+[ \fB\-H\fR ] [\fB\-S\fR ] [ \fB\-b\fR ] | [ \fB\-p\fR prompt ]
+[ \fB\-u\fR username/#uid ] \fIcommand\fR
 .SH "DESCRIPTION"
 \fBsudo\fR allows a permitted user to execute a \fIcommand\fR as the
 superuser or another user, as specified in the sudoers file.  The
@@ -275,6 +276,9 @@ in \fIpasswd\fR\|(5).
 The \f(CW-H\fR (\fI\s-1HOME\s0\fR) option sets the \fI\s-1HOME\s0\fR environment variable
 to the homedir of the target user (root by default) as specified
 in \fIpasswd\fR\|(5).  By default, \fBsudo\fR does not modify \fI\s-1HOME\s0\fR.
+.Ip "-S" 4
+The \f(CW-S\fR (\fIstdin\fR) option causes \fBsudo\fR to read the password from
+standard input instead of the terminal device.
 .Ip "--" 4
 The \f(CW--\fR flag indicates that \fBsudo\fR should stop processing command
 line arguments.  It is most useful in conjunction with the \f(CW-s\fR flag.
@@ -481,6 +485,8 @@ are generally safe).
 .IX Item "-s"
 
 .IX Item "-H"
+
+.IX Item "-S"
 
 .IX Item "--"
 
