@@ -332,11 +332,6 @@ main(argc, argv)
     if (ISSET(sudo_mode, MODE_IMPLIED_SHELL) && !def_shell_noargs)
 	usage(1);
 
-    /* May need to set $HOME to target user if we are running a command. */
-    if (ISSET(sudo_mode, MODE_RUN) && (def_always_set_home ||
-	(ISSET(sudo_mode, MODE_SHELL) && def_set_home)))
-	SET(sudo_mode, MODE_RESET_HOME);
-
     /* Bail if a tty is required and we don't have one.  */
     if (def_requiretty) {
 	if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1)

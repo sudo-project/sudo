@@ -420,10 +420,14 @@ rebuild_env(envp1, envp2, sudo_mode, noexec)
 	 * on sudoers options).
 	 */
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-	    insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), &env, 0);
-	    insert_env(format_env("SHELL", runas_pw->pw_shell, VNULL), &env, 0);
-	    insert_env(format_env("LOGNAME", runas_pw->pw_name, VNULL), &env, 0);
-	    insert_env(format_env("USER", runas_pw->pw_name, VNULL), &env, 0);
+	    insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), &env,
+		ISSET(didvar, DID_HOME));
+	    insert_env(format_env("SHELL", runas_pw->pw_shell, VNULL), &env,
+		ISSET(didvar, DID_SHELL));
+	    insert_env(format_env("LOGNAME", runas_pw->pw_name, VNULL), &env,
+		ISSET(didvar, DID_LOGNAME));
+	    insert_env(format_env("USER", runas_pw->pw_name, VNULL), &env,
+		ISSET(didvar, DID_USER));
 	} else {
 	    if (!ISSET(didvar, DID_HOME))
 		insert_env(format_env("HOME", user_dir, VNULL), &env, 0);
@@ -469,8 +473,12 @@ rebuild_env(envp1, envp2, sudo_mode, noexec)
     }
 
     /* Set $HOME for `sudo -H'.  Only valid at PERM_FULL_RUNAS. */
-    if ((def_env_reset || ISSET(sudo_mode, MODE_RESET_HOME)) && runas_pw->pw_dir)
-	insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), &env, 1);
+    if (runas_pw->pw_dir) {
+	if (ISSET(sudo_mode, MODE_RESET_HOME) ||
+	    (ISSET(sudo_mode, MODE_RUN) && (def_always_set_home ||
+	    (ISSET(sudo_mode, MODE_SHELL) && def_set_home))))
+	    insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), &env, 1);
+    }
 
     /* Provide default values for $TERM and $PATH if they are not set. */
     if (!ISSET(didvar, DID_TERM))
