@@ -67,6 +67,9 @@
 #include <netdb.h>
 #include <errno.h>
 #include <ldap.h>
+#ifdef HAVE_LBER_H
+#include <lber.h>
+#endif
 
 #include "sudo.h"
 #include "parse.h"
@@ -552,6 +555,7 @@ int pwflag;
 
 
   /* attempt connect */
+#ifdef HAVE_LDAP_INITIALIZE
   if (ldap_conf.uri) {
 
     if (ldap_conf.debug>1) fprintf(stderr,
@@ -563,7 +567,9 @@ int pwflag;
            rc,ldap_err2string(rc));
       return VALIDATE_ERROR;
     }
-  } else if (ldap_conf.host) {
+  } else
+#endif /* HAVE_LDAP_INITIALIZE */
+  if (ldap_conf.host) {
 
     if (ldap_conf.debug>1) fprintf(stderr,
            "ldap_init(%s,%d)\n",ldap_conf.host,ldap_conf.port);
@@ -576,7 +582,7 @@ int pwflag;
     }
   }
 
-  /* Acutally connect */
+  /* Actually connect */
 
   rc=ldap_simple_bind_s(ld,ldap_conf.binddn,ldap_conf.bindpw);
   if(rc){

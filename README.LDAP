@@ -111,9 +111,18 @@ In early revs of sudo where the '--with-ldap' option is not available, you
 need to manually append '#define HAVE_LDAP 1' to config.h and set
 LIBS='-lldap' in Makefile.
 
-This *should* build against most LDAP libraries such as OpenLDAP, Netscape,
-Iplanet, Mozilla, SecureWay, and others.  You might have to also include
-'-llber' or '-lldif' in your LIBS depending on your LDAP libraries.
+Sudo by default builds against OpenLDAP's libraries.  For others LDAP
+libraries such as Netscape, iPlanet, Mozilla, SecureWay, add these lines
+to config.h before running make:
+
+  #undef HAVE_LDAP_INITIALIZE
+  #define HAVE_LBER_H
+
+You might have to also include '-llber' or '-lldif' in your LIBS.
+
+Your Mileage may vary.  Please let Aaron Spangler <aaron@spangler.ods.org>
+know what combinations worked best for your OS & LDAP Combinations so
+we can improve sudo.
 
 Schema Changes
 ==============
