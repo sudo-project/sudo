@@ -40,10 +40,16 @@ INSTALL = @INSTALL@
 # Libraries
 LIBS = @LIBS@ @LEXLIB@
 
+# OS defines
+OSDEFS = @OSDEFS@
+
 # Usually -g or -O
 CFLAGS = -O @INC_FLAGS@
+
+# How to make a static binary
 LDFLAGS = @STATIC_FLAGS@
 
+# Where to install things...
 prefix = /usr/local
 exec_prefix = $(prefix)
 man_prefix = $(prefix)
@@ -94,18 +100,18 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING INSTALL Makefile.in PORTING \
 all: $(PROGS)
 
 .c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) -I$(srcdir) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) -I$(srcdir) $<
 
 sudo : $(OBJS) $(LIBOBJS)
 	$(CC) -o $@ $(OBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS)
 
 y.tab.o y.tab.h: parse.yacc $(HDRS)
 	$(YACC) -d parse.yacc
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) -I$(srcdir) y.tab.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) -I$(srcdir) y.tab.c
 
 lex.yy.o: parse.lex y.tab.h $(HDRS)
 	$(LEX) parse.lex
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) -I$(srcdir) lex.yy.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(OSDEFS) $(OPTIONS) -I$(srcdir) lex.yy.c
 
 $(OBJS) $(LIBOBJS) : $(HDRS)
 
