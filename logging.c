@@ -69,12 +69,43 @@ static char rcsid[] = "$Id$";
 static void send_mail		__P((void));
 static RETSIGTYPE reapchild	__P((int));
 static int appropriate		__P((int));
+static void syslog_wrapper	__P((int, char *, char *, char *));
 
 /*
  * Globals
  */
 static char logline[MAXLOGLEN + 8];
 extern int errorlineno;
+
+
+#ifdef BROKEN_SYSLOG
+#define MAXSYSLOGTRIES		16	/* num of retries for broken syslogs */
+
+/****************************************************************
+ *
+ *  syslog_wrapper()
+ *
+ *  This function logs via syslog w/ a priority and 3 strings args.
+ *  It really shouldn't be necesary but some syslog()'s don't
+ *  guarantee that the syslog() operation will succeed!
+ */
+
+static void syslog_wrapper(pri, fmt, arg1, arg2)
+    int pri;
+    char *fmt;
+    char *arg1;
+    char *arg2;
+{
+    int i;
+
+    for (i = 0; i < MAXSYSLOGTRIES; i++)
+	if (syslog(pri, fmt, arg1, arg2) == 0)
+	    break;
+}
+
+#define syslog			syslog_wrapper
+#endif /* BROKEN_SYSLOG */
+
 
 
 /**********************************************************************
