@@ -98,9 +98,9 @@ main(argc, argv)
 
     if (argc > 1) {
 	/*
-	 * print version string and exit if we got -v
+	 * print version string and exit if we got -V
 	 */
-	if (!strcmp(argv[1], "-v")) {
+	if (!strcmp(argv[1], "-V")) {
 	    (void) printf("visudo version %s\n", version);
 	    exit(0);
 	} else {
@@ -264,7 +264,7 @@ main(argc, argv)
 
 static void usage()
 {
-    (void) fprintf(stderr, "usage: %s [-v]\n", *Argv);
+    (void) fprintf(stderr, "usage: %s [-V]\n", *Argv);
     exit(1);
 }
 
