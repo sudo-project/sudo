@@ -89,21 +89,22 @@ void log_error(code)
     mode_t oldmask;
     register char *p;
     register int count;
-#ifndef SYSLOG
+#ifdef _PATH_SUDO_LOGFILE
     register FILE *fp;
     time_t now;
-#else
+#endif /* _PATH_SUDO_LOGFILE */
+#ifdef SYSLOG
     register int pri;		/* syslog priority */
     char *tmp, save;
-#endif
+#endif /* SYSLOG */
 
     /*
      * there is no need to log the date and time twice if using syslog
      */
-#ifndef SYSLOG
+#ifdef _PATH_SUDO_LOGFILE
     now = time((time_t) 0);
     (void) sprintf(logline, "%19.19s : %8.8s : ", ctime(&now), user);
-#endif
+#endif /* _PATH_SUDO_LOGFILE */
 
     /*
      * we need a pointer to the end of logline
@@ -116,21 +117,21 @@ void log_error(code)
 	    (void) sprintf(p, "PWD=%s ; COMMAND=", cwd);
 #ifdef SYSLOG
 	    pri = Syslog_priority_OK;
-#endif
+#endif /* SYSLOG */
 	    break;
 
 	case VALIDATE_NO_USER:
 	    (void) sprintf(p, "user NOT in sudoers ; PWD=%s ; COMMAND=", cwd);
 #ifdef SYSLOG
 	    pri = Syslog_priority_NO;
-#endif
+#endif /* SYSLOG */
 	    break;
 
 	case VALIDATE_NOT_OK:
 	    (void) sprintf(p, "command not allowed ; PWD=%s ; COMMAND=", cwd);
 #ifdef SYSLOG
 	    pri = Syslog_priority_NO;
-#endif
+#endif /* SYSLOG */
 	    break;
 
 	case VALIDATE_ERROR:
@@ -138,7 +139,7 @@ void log_error(code)
 		_PATH_SUDO_SUDOERS, cwd);
 #ifdef SYSLOG
 	    pri = Syslog_priority_NO;
-#endif
+#endif /* SYSLOG */
 	    break;
 
 	case GLOBAL_NO_PW_ENT:
@@ -146,7 +147,7 @@ void log_error(code)
 		uid);
 #ifdef SYSLOG
 	    pri = Syslog_priority_NO;
-#endif
+#endif /* SYSLOG */
 	    break;
 
 	case PASSWORD_NOT_CORRECT:
@@ -154,14 +155,14 @@ void log_error(code)
 		    TRIES_FOR_PASSWORD, cwd);
 #ifdef SYSLOG
 	    pri = Syslog_priority_NO;
-#endif
+#endif /* SYSLOG */
 	    break;
 
 	case GLOBAL_NO_HOSTNAME:
 	    strcat(p, "This machine does not have a hostname ");
 #ifdef SYSLOG
 	    pri = Syslog_priority_NO;
-#endif
+#endif /* SYSLOG */
 	    break;
 
 	case NO_SUDOERS_FILE:
@@ -181,21 +182,21 @@ void log_error(code)
 	    }
 #ifdef SYSLOG
 	    pri = Syslog_priority_NO;
-#endif
+#endif /* SYSLOG */
 	    break;
 
 	case GLOBAL_HOST_UNREGISTERED:
 	    (void) sprintf(p, "gethostbyname() cannot find host %s ", host);
 #ifdef SYSLOG
 	    pri = Syslog_priority_NO;
-#endif
+#endif /* SYSLOG */
 	    break;
 
 	default:
 	    strcat(p, "found a wierd error : ");
 #ifdef SYSLOG
 	    pri = Syslog_priority_NO;
-#endif
+#endif /* SYSLOG */
 	    break;
     }
 
@@ -270,7 +271,8 @@ void log_error(code)
 	}
     }
     closelog();
-#else
+#endif /* SYSLOG */
+#ifdef _PATH_SUDO_LOGFILE
     /* become root */
     be_root();
 
@@ -337,7 +339,7 @@ void log_error(code)
 
     /* relinquish root */
     be_user();
-#endif
+#endif /* _PATH_SUDO_LOGFILE */
 }
 
 
