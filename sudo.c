@@ -644,8 +644,8 @@ static void load_cmnd(sudo_mode)
     /*
      * Find the length of cmnd_args and allocate space, then fill it in.
      */
-    if (Argc > 1) {
-	for (cur_arg = &Argv[1]; *cur_arg; cur_arg++)
+    if (Argc > 2) {
+	for (cur_arg = &Argv[2]; *cur_arg; cur_arg++)
 	    args_len += strlen(*cur_arg) + 1;
 
 	cmnd_args = (char *)malloc(args_len);
@@ -658,11 +658,11 @@ static void load_cmnd(sudo_mode)
 
 	/* XXX - speed this up, slow for very long Argv's */
 	cmnd_args[0] = '\0';
-	for (cur_arg = &Argv[1]; *cur_arg; cur_arg++) {
+	for (cur_arg = &Argv[2]; *cur_arg; cur_arg++) {
 	    (void) strcat(cmnd_args, *cur_arg);
 	    (void) strcat(cmnd_args, " ");
 	}
-	cmnd_args[args_len - 1] = '\0';		/* XXX - is this correct? */
+	cmnd_args[args_len - 1] = '\0';
     }
 
     /*
