@@ -232,7 +232,7 @@ NOPASSWD[[:blank:]]*:	{
 			    return(ALIAS);
 			}
 
-[[:alpha:]][[:alnum:]_-]*	{
+[[:alnum:]][[:alnum:]_-]*	{
 			    int l;
 
 			    fill(yytext, yyleng);
