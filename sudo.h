@@ -153,16 +153,6 @@ extern int top;
 #define PERM_SUDOERS             0x04
 
 /*
- * Shadow password types
- */
-#define SPW_NONE		0x00
-#define SPW_SECUREWARE		0x01
-#define SPW_HPUX9		0x02
-#define SPW_SUNOS4		0x03
-#define SPW_SVR4		0x04
-#define SPW_ULTRIX4		0x05
-
-/*
  * Prototypes
  */
 
