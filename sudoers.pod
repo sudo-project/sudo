@@ -1,5 +1,5 @@
 =cut
-Copyright (c) 1994-1996,1998-2000 Todd C. Miller <Todd.Miller@courtesan.com>
+Copyright (c) 1994-1996,1998-2001 Todd C. Miller <Todd.Miller@courtesan.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -212,14 +212,21 @@ value on a matching line takes effect.
  Default_Entry ::= Default_Type Parameter_List
 
  Parameter ::= Parameter '=' Value ||
+	       Parameter '+=' Value ||
+	       Parameter '-=' Value ||
 	       '!'* Parameter ||
 
-Parameters may be B<flags>, B<integer> values, or B<strings>.  Flags
-are implicitly boolean and can be turned off via the '!' operator.
-Some integer and string parameters may also be used in a boolean
-context to disable them.  Values may be enclosed in double quotes
-(C<">) when they contain multiple words.  Special characters may
-be escaped with a backslash (C<\>).
+Parameters may be B<flags>, B<integer> values, B<strings>, or B<lists>.
+Flags are implicitly boolean and can be turned off via the '!'
+operator.  Some integer, string and list parameters may also be
+used in a boolean context to disable them.  Values may be enclosed
+in double quotes (C<">) when they contain multiple words.  Special
+characters may be escaped with a backslash (C<\>).
+
+Lists have two additional assignment operators, C<+=> and C<-=>.
+These operators are used to add to and delete from a list respectively.
+It is not an error to use the C<-=> operator to remove an element
+that does not exist in a list.
 
 B<Flags>:
 
@@ -513,25 +520,6 @@ Defaults to C<@goodpri@>.
 Syslog priority to use when user authenticates unsuccessfully.
 Defaults to C<@badpri@>.
 
-=item env_delete
-
-A double-quoted, space-separated list of environment variables
-to be removed from the user's environment.  By default this list
-will B<replace> sudo's builtin list of environment variables to remove.
-To B<append> to the builtin list instead of replacing it, the argument
-to I<env_delete> should start with a I<+> (think "add").
-The default list of environment variable to remove is printed
-when B<sudo> is run by root with the I<-V> option.
-
-=item env_keep
-
-A double-quoted, space-separated list of environment variables
-to be preserved in the user's environment.  When used in conjuction
-with the I<env_reset> option, this allows fine control over the
-environment B<sudo>-spawned processes will get.  If the I<env_reset>
-option is not used, I<env_keep> can be used to make exceptions to
-the built in list of "dangerous" environment variables.
-
 =item editor
 
 A colon (':') separated list of editors allowed to be used with
@@ -626,6 +614,41 @@ user runs B<sudo> with the B<-l>.  It has the following possible values:
 		the B<-l> flag.
 
 The default value is `any'.
+
+=back 12
+
+B<Lists that can be used in a boolean context>:
+
+=over 12
+
+=item env_check
+
+A double-quoted, space-separated list of environment variables to
+be removed from the user's environment if the variable's value
+contains C<%> or C</> characters.  This can be used to guard against
+printf-style format vulnerabilties in poorly-written programs.  The
+list can be replaced, added to, deleted from, or disabled by using
+the C<=>, C<+=>, C<-=>, and <!> operators respectively.  The default
+list of environment variable to check is printed when B<sudo> is
+run by root with the I<-V> option.
+
+=item env_delete
+
+A double-quoted, space-separated list of environment variables to
+be removed from the user's environment.  The list can be replaced,
+added to, deleted from, or disabled by using the C<=>, C<+=>, C<-=>,
+and <!> operators respectively.  The default list of environment
+variable to remove is printed when B<sudo> is run by root with the
+I<-V> option.
+
+=item env_keep
+
+A double-quoted, space-separated list of environment variables to
+be preserved in the user's environment when the I<env_reset> option
+is in effect.  This allows fine-grained control over the environment
+B<sudo>-spawned processes will get.  The list can be replaced, added
+to, deleted from, or disabled by using the C<=>, C<+=>, C<-=>, and
+<!> operators respectively.  This list has no default members.
 
 =back 12
 
