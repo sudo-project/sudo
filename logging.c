@@ -490,6 +490,9 @@ send_mail(line)
 		}
 		argv[i] = NULL;
 
+		/* Close password file so we don't leak the fd. */
+		endpwent();
+
 		/* Run mailer as root so user cannot kill it. */
 		set_perms(PERM_ROOT, 0);
 		execv(mpath, argv);

@@ -191,6 +191,7 @@ main(argc, argv, envp)
      * Setup signal handlers, turn off core dumps, and close open files.
      */
     initial_setup();
+    setpwent();
 
     /* Parse our arguments. */
     sudo_mode = parse_args();
@@ -337,6 +338,9 @@ main(argc, argv, envp)
 		user_cmnd,
 		"please report this error at http://courtesan.com/sudo/bugs/");
 	}
+
+	/* Close the password file */
+	endpwent();
 
 	/* Reset signal mask before we exec. */
 #ifdef POSIX_SIGNALS

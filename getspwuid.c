@@ -114,72 +114,93 @@ sudo_getshell(pw)
 }
 
 /*
- * Return the encrypted password for the user described by pw.  If shadow
- * passwords are in use, look in the shadow file.
+ * Return a copy of the encrypted password for the user described by pw.
+ * If shadow passwords are in use, look in the shadow file.
  */
 char *
 sudo_getepw(pw)
     struct passwd *pw;
 {
+    char *epw;
 
     /* If there is a function to check for shadow enabled, use it... */
 #ifdef HAVE_ISCOMSEC
     if (!iscomsec())
-	return(pw->pw_passwd);
+	return(estrdup(pw->pw_passwd));
 #endif /* HAVE_ISCOMSEC */
 #ifdef HAVE_ISSECURE
     if (!issecure())
-	return(pw->pw_passwd);
+	return(estrdup(pw->pw_passwd));
 #endif /* HAVE_ISSECURE */
 
+    epw = NULL;
 #ifdef HAVE_GETPRPWNAM
     {
 	struct pr_passwd *spw;
 
-	spw = getprpwnam(pw->pw_name);
-	if (spw != NULL && spw->ufld.fd_encrypt != NULL) {
+	setprpwent();
+	if ((spw = getprpwnam(pw->pw_name)) && spw->ufld.fd_encrypt) {
 # ifdef __alpha
 	    crypt_type = spw->ufld.fd_oldcrypt;
 # endif /* __alpha */
-	    return(spw->ufld.fd_encrypt);
+	    epw = estrdup(spw->ufld.fd_encrypt);
 	}
+	endprpwent();
+	if (epw)
+	    return(epw);
     }
 #endif /* HAVE_GETPRPWNAM */
 #ifdef HAVE_GETSPNAM
     {
 	struct spwd *spw;
 
+	setspent();
 	if ((spw = getspnam(pw->pw_name)) && spw->sp_pwdp)
-	    return(spw->sp_pwdp);
+	    epw = estrdup(spw->sp_pwdp);
+	endspent();
+	if (epw)
+	    return(epw);
     }
 #endif /* HAVE_GETSPNAM */
 #ifdef HAVE_GETSPWUID
     {
 	struct s_passwd *spw;
 
+	setspwent();
 	if ((spw = getspwuid(pw->pw_uid)) && spw->pw_passwd)
-	    return(spw->pw_passwd);
+	    epw = estrdup(spw->pw_passwd);
+	endspwent();
+	if (epw)
+	    return(epw);
     }
 #endif /* HAVE_GETSPWUID */
 #ifdef HAVE_GETPWANAM
     {
 	struct passwd_adjunct *spw;
 
+	setpwaent();
 	if ((spw = getpwanam(pw->pw_name)) && spw->pwa_passwd)
-	    return(spw->pwa_passwd);
+	    epw = estrdup(spw->pwa_passwd);
+	endpwaent();
+	if (epw)
+	    return(epw);
     }
 #endif /* HAVE_GETPWANAM */
 #ifdef HAVE_GETAUTHUID
     {
 	AUTHORIZATION *spw;
 
+	setauthent();
 	if ((spw = getauthuid(pw->pw_uid)) && spw->a_password)
-	    return(spw->a_password);
+	    epw = estrdup(spw->a_password);
+	endauthent();
+	if (epw)
+	    return(epw);
     }
 #endif /* HAVE_GETAUTHUID */
 
     /* Fall back on normal password. */
-    return(pw->pw_passwd);
+    return(estrdup(pw->pw_passwd));
 }
 
 /*
@@ -210,7 +231,7 @@ sudo_pwdup(pw)
     local_pw->pw_shell = estrdup(sudo_getshell(pw));
 
     /* pw_passwd gets a shadow password if applicable */
-    local_pw->pw_passwd = estrdup(sudo_getepw(pw));
+    local_pw->pw_passwd = sudo_getepw(pw);
 
     return(local_pw);
 }
