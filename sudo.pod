@@ -27,7 +27,7 @@ sudo, sudoedit - execute a command as another user
 
 =head1 SYNOPSIS
 
-B<sudo> B<-K> | B<-L> | B<-V> | B<-h> | B<-k> | B<-l> | B<-v>
+B<sudo> B<-K> | B<-L> | B<-V> | B<-h> | B<-k> | B<-l> [I<username>] | B<-v>
 
 B<sudo> [B<-HPSb>] S<[B<-a> I<auth_type>]> S<[B<-c> I<class>|I<->]>
 S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
@@ -203,15 +203,11 @@ The B<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
 The B<-i> (I<simulate initial login>) option runs the shell specified
 in the L<passwd(@mansectform@)> entry of the user that the command is
 being run as.  The command name argument given to the shell begins
-with a C<-> to tell the shell to run as a login shell.  B<sudo>
+with a `C<->' to tell the shell to run as a login shell.  B<sudo>
 attempts to change to that user's home directory before running the
 shell.  It also initializes the environment, leaving I<TERM>
 unchanged, setting I<HOME>, I<SHELL>, I<USER>, I<LOGNAME>, and
-I<PATH>, and unsetting all other environment variables.  Note that
-because the shell to use is determined before the I<sudoers> file
-is parsed, a I<runas_default> setting in I<sudoers> will specify
-the user to run the shell as but will not affect which shell is
-actually run.
+I<PATH>, and unsetting all other environment variables.
 
 =item -k
 
@@ -221,10 +217,12 @@ run a password will be required.  This option does not require a password
 and was added to allow a user to revoke B<sudo> permissions from a .logout
 file.
 
-=item -l
+=item -l [I<username>]
 
-The B<-l> (I<list>) option will list out the allowed (and
-forbidden) commands for the user on the current host.
+The B<-l> (I<list>) option will list out the allowed (and forbidden)
+commands for I<username> on the current host.  If I<username> is
+ommitted, the information listed will be for the invoking user.
+Only the superuser may list other user's commands.
 
 =item -p
 
