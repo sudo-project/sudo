@@ -144,14 +144,14 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES FAQ HISTORY INSTALL INSTALL.configure \
 	    LICENSE Makefile.in PORTING README RUNSON TODO TROUBLESHOOTING \
 	    UPGRADE acsite.m4 aixcrypt.exp config.guess config.h.in config.sub \
 	    configure configure.in fnmatch.3 indent.pro install-sh \
-	    mkinstalldirs pathnames.h.in sample.pam sample.sudoers sudo.cat \
-	    sudo.man sudo.pod sudoers sudoers.cat sudoers.man sudoers.pod \
-	    visudo.cat visudo.man visudo.pod auth/API
+	    mkinstalldirs pathnames.h.in sample.pam sample.syslog.conf \
+	    sample.sudoers sudo.cat sudo.man sudo.pod sudoers sudoers.cat \
+	    sudoers.man sudoers.pod visudo.cat visudo.man visudo.pod auth/API
 
 BINFILES= BUGS CHANGES FAQ HISTORY LICENSE README TODO TROUBLESHOOTING \
-	  UPGRADE install-sh mkinstalldirs sample.sudoers sudo sudo.cat \
-	  sudo.man sudo.pod sudoers sudoers.cat sudoers.man sudoers.pod \
-	  visudo visudo.cat visudo.man visudo.pod
+	  UPGRADE install-sh mkinstalldirs sample.syslog.conf sample.sudoers \
+	  sudo sudo.cat sudo.man sudo.pod sudoers sudoers.cat sudoers.man \
+	  sudoers.pod visudo visudo.cat visudo.man visudo.pod
 
 BINSPECIAL= INSTALL.binary Makefile.binary
 
