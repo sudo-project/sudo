@@ -34,8 +34,11 @@
 #include "compat.h"
 #include "pathnames.h"
 
-/* Max length for a command */
-#define MAXCOMMANDLENGTH	MAXPATHLEN
+/*
+ * Max length for a command + args in the sudoers file.
+ * This is fairly arbitrary but 8K should be enough.
+ */
+#define MAXCOMMANDLENGTH	8192
 
 /*
  * IP address and netmask pairs for checking against local interfaces.
@@ -144,8 +147,8 @@ extern int top;
 #ifndef HAVE_STRDUP
 char *strdup		__P((const char *));
 #endif
-#ifndef HAVE_GETCWD
-char *getcwd		__P((char *, size_t));
+#ifndef HAVE_GETWD
+char *getwd		__P((char *));
 #endif
 #if !defined(HAVE_PUTENV) && !defined(HAVE_SETENV)
 int putenv		__P((const char *));
