@@ -88,13 +88,13 @@ N			[0-9][0-9]?[0-9]?
 \n			{ 
 			  ++sudolineno; 
 			  LEXTRACE("\n");
-			  return COMMENT;
+			  return(COMMENT);
 			}			/* return newline */
 
 #.*\n			{
 			  ++sudolineno;
 			  LEXTRACE("\n");
-			  return COMMENT;
+			  return(COMMENT);
 			}			/* return comments */
 
 <GOTCMND>((\\[\,:=\\])|([^\,:=\\ \t\n#]))+ {
@@ -104,37 +104,37 @@ N			[0-9][0-9]?[0-9]?
 
 \,			{
 			  LEXTRACE(", ");
-			  return ',';
+			  return(',');
 			}			/* return ',' */
 
-\!			{ return '!'; }		/* return '!' */
+\!			{ return('!'); }		/* return '!' */
 
 =			{
 			  LEXTRACE("= ");
-			  return '=';
+			  return('=');
 			}			/* return '=' */
 
 :			{
 			  LEXTRACE(": ");
-			  return ':';
+			  return(':');
 			}			/* return ':' */
 
-\.			{ return '.'; }
+\.			{ return('.'); }
 
 \+[a-zA-Z][a-zA-Z0-9_-]* {
 			  fill();
-			  return NETGROUP;
+			  return(NETGROUP);
 			 }
 
 {N}\.{N}\.{N}\.{N}	{
 			  fill();
-			  return NTWKADDR;
+			  return(NTWKADDR);
 			}
 
 \/[^\,:=\\ \t\n#]+\/	{
 			  LEXTRACE("COMMAND ");
 			  fill();
-			  return COMMAND;
+			  return(COMMAND);
 			}			/* a directory */
 
 \/[^\,:=\\ \t\n#]+	{
@@ -147,10 +147,10 @@ N			[0-9][0-9]?[0-9]?
 			  fill();
 			  if (strcmp(yytext, "ALL") == 0) {
 			      LEXTRACE("ALL ");
-			      return ALL;
+			      return(ALL);
 			  }
 			  LEXTRACE("ALIAS ");
-			  return ALIAS;
+			  return(ALIAS);
 			}
 
 [a-zA-Z][a-zA-Z0-9_-]*	{
@@ -159,28 +159,28 @@ N			[0-9][0-9]?[0-9]?
 			  fill();
 			  if (strcmp(yytext, "Host_Alias") == 0) {
 			      LEXTRACE("HOSTALIAS ");
-			      return HOSTALIAS;
+			      return(HOSTALIAS);
 			  }
 			  if (strcmp(yytext, "Cmnd_Alias") == 0) {
 			      LEXTRACE("CMNDALIAS ");
-			      return CMNDALIAS;
+			      return(CMNDALIAS);
 			  }
 			  if (strcmp(yytext, "User_Alias") == 0) {
 			      LEXTRACE("USERALIAS ");
-			      return USERALIAS;
+			      return(USERALIAS);
 			  }
 
 			  l = yyleng - 1;
 			  if (isalpha(yytext[l]) || isdigit(yytext[l])) {
 			      /* NAME is what RFC1034 calls a label */
 			      LEXTRACE("NAME ");
-			      return NAME;
+			      return(NAME);
 			  }
 
-			  return ERROR;
+			  return(ERROR);
 			}
 
-.			{ return ERROR; }	/* return error */
+.			{ return(ERROR); }	/* return error */
 
 %%
 static void fill() {
@@ -219,5 +219,5 @@ int yywrap()
     if (clearaliases)
 	reset_aliases();
 
-    return(1);
+    return(TRUE);
 }
