@@ -74,7 +74,7 @@ aixauth_verify(pw, prompt, auth)
     char *prompt;
     sudo_auth *auth;
 {
-    volatile char *pass;
+    char *pass;
     char *message;
     int reenter = 1;
     int rval = AUTH_FAILURE;
@@ -83,7 +83,7 @@ aixauth_verify(pw, prompt, auth)
     if (pass) {
 	if (authenticate(pw->pw_name, (char *)pass, &reenter, &message) == 0)
 	    rval = AUTH_SUCCESS;
-	memset(pass, 0, strlen(pass));
+	zero_bytes(pass, strlen(pass));
     }
     return(rval);
 }
