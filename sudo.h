@@ -329,9 +329,8 @@ extern char ** environ;
 
 
 /*
- * Emulate getdtablesize() and seteuid() for HP-UX
+ * Emulate seteuid() for HP-UX
  */
 #ifdef hpux
-#  define getdtablesize()	(sysconf(_SC_OPEN_MAX))
 #  define seteuid(__EUID)	(setresuid((uid_t)-1, __EUID, (uid_t)-1))
 #endif	/* hpux */
