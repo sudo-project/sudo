@@ -115,12 +115,13 @@ int top = 0, stacksize = 0;
  * The stack for printmatches.  A list of allowed commands for the user.
  */
 static struct command_match *cm_list = NULL;
-static int cm_list_len = 0, cm_list_size = 0;
+static size_t cm_list_len = 0, cm_list_size = 0;
 
 /*
  * List of Cmnd_Aliases and expansions for `sudo -l'
  */
-static int in_alias = FALSE, ca_list_len = 0, ca_list_size = 0;
+static int in_alias = FALSE;
+static size_t ca_list_len = 0, ca_list_size = 0;
 static struct command_alias *ca_list = NULL;
 
 /*
