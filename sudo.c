@@ -1126,8 +1126,8 @@ usage(exit_val)
     int exit_val;
 {
     (void) fprintf(stderr,
-	"usage: %s -V | -h | -L | -l | -v | -k | -K | -H | [-S] [-b] [-p prompt]\n%*s",
+	"usage: %s -V | -h | -L | -l | -v | -k | -K | [-H] [-S] [-b]\n%*s",
 	Argv[0], (int) strlen(Argv[0]) + 8, " ");
-    (void) fprintf(stderr, "[-u username/#uid] -s | <command>\n");
+    (void) fprintf(stderr, "[-p prompt] [-u username/#uid] -s | <command>\n");
     exit(exit_val);
 }
