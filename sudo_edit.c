@@ -95,10 +95,7 @@ int sudo_edit(argc, argv)
 
     /*
      * For each file specified by the user, make a temporary version
-     * and copy the contents of the original to it.  We make these files
-     * as root so the user can't steal them out from under us until we are
-     * done writing (and at that point the user will be able to edit the
-     * file anyway).
+     * and copy the contents of the original to it.
      * XXX - It would be nice to lock the original files but that means
      *       keeping an extra fd open for each file.
      */
@@ -136,7 +133,10 @@ int sudo_edit(argc, argv)
 	else
 	    cp = tf[i].ofile;
 	easprintf(&tf[i].tfile, "%s%s.XXXXXXXX", tmpdir, cp);
-	if ((tf[i].tfd = mkstemp(tf[i].tfile)) == -1) {
+	set_perms(PERM_USER);
+	tf[i].tfd = mkstemp(tf[i].tfile);
+	set_perms(PERM_ROOT);
+	if (tf[i].tfd == -1) {
 	    warn("mkstemp");
 	    goto cleanup;
 	}
@@ -152,12 +152,18 @@ int sudo_edit(argc, argv)
 	    }
 	    close(ofd);
 	}
-#ifdef HAVE_FCHOWN
-	fchown(tf[i].tfd, user_uid, user_gid);
-#else
-	chown(tf[i].tfile, user_uid, user_gid);
+#ifdef HAVE_FSTAT
+	/*
+	 * If we are unable to set the mtime on the temp file to the value
+	 * of the original file just make the stashed mtime match the temp
+	 * file's mtime.  It is better than nothing and we only use the info
+	 * to determine whether or not a file has been modified.
+	 */
+	if (touch(tf[i].tfd, NULL, tf[i].omtime) == -1) {
+	    if (fstat(tf[i].tfd, &sb) == 0)
+		tf[i].omtime = sb.st_mtime;
+	}
 #endif
-	touch(tf[i].tfd, tf[i].tfile, tf[i].omtime);
     }
     if (argc == 1)
 	return(1);			/* no files readable, you lose */
@@ -256,9 +262,6 @@ int sudo_edit(argc, argv)
 	}
 #ifdef HAVE_FSTAT
 	if (fstat(tf[i].tfd, &sb) == 0) {
-#else
-	if (stat(tf[i].tfile, &sb) == 0) {
-#endif
 	    if (tf[i].osize == sb.st_size && tf[i].omtime == sb.st_mtime) {
 		warnx("%s unchanged", tf[i].ofile);
 		unlink(tf[i].tfile);
@@ -266,6 +269,7 @@ int sudo_edit(argc, argv)
 		continue;
 	    }
 	}
+#endif
 	set_perms(PERM_RUNAS);
 	ofd = open(tf[i].ofile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
 	set_perms(PERM_ROOT);
@@ -275,7 +279,7 @@ int sudo_edit(argc, argv)
 	    close(tf[i].tfd);
 	    continue;
 	}
-	while ((nread = read(tf[i].tfd, buf, sizeof(buf))) != 0) {
+	while ((nread = read(tf[i].tfd, buf, sizeof(buf))) > 0) {
 	    if ((nwritten = write(ofd, buf, nread)) != nread) {
 		if (nwritten == -1)
 		    warn("%s", tf[i].ofile);
@@ -284,9 +288,13 @@ int sudo_edit(argc, argv)
 		break;
 	    }
 	}
-	if (nread == 0)
+	if (nread == 0) {
+	    /* success, got EOF */
 	    unlink(tf[i].tfile);
-	else {
+	} else if (nread < 0) {
+	    warn("unable to read temporary file");
+	    warnx("contents of edit session left in %s", tf[i].tfile);
+	} else {
 	    warn("unable to write to %s", tf[i].ofile);
 	    warnx("contents of edit session left in %s", tf[i].tfile);
 	}
