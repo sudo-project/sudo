@@ -470,3 +470,22 @@ rebuild_env(sudo_mode, envp)
     }
     return(newenvp);
 }
+
+void
+dump_badenv()
+{
+    struct env_table *entry;
+    int len, iswild;
+
+    /* XXX - mark the ones that are just 'check' */
+    puts("Default table of environment variables to clear");
+    for (entry = sudo_badenv_table; entry->name; entry++) {
+	len = strlen(entry->name);
+	if (entry->name[len - 1] == '=') {
+	    iswild = 0;
+	    len--;
+	} else
+	    iswild = 1;
+	printf("\t%.*s%s\n", len, entry->name, iswild ? "*" : "");
+    }
+}

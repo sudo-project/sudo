@@ -214,6 +214,7 @@ main(argc, argv, envp)
 		    dump_auth_methods();
 		    dump_defaults();
 		    dump_interfaces();
+		    dump_badenv();
 		}
 		exit(0);
 		break;
