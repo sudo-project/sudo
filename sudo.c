@@ -144,11 +144,11 @@ main(argc, argv)
 	check_user();
 	log_error(ALL_SYSTEMS_GO);
 	be_root();
-#ifdef USE_EXECVE
-	execve(cmnd, &Argv[1]);
-#else /* USE_EXECVE */
+#ifdef USE_EXECV
+	execv(cmnd, &Argv[1]);
+#else /* USE_EXECV */
 	execvp(cmnd, &Argv[1]);
-#endif /* USE_EXECVE */
+#endif /* USE_EXECV */
 	perror(cmnd);		/* exec failed! */
 	exit(-1);
 	break;
@@ -276,7 +276,7 @@ static void usage()
  *
  *  clean_env()
  *
- *  This function builds cleans up the environ pointer so that all execvp()'s
+ *  This function builds cleans up the environ pointer so that all execv*()'s
  *  omit LD_* variables and hard-code PATH if SECURE_PATH is defined.
  */
 

@@ -392,18 +392,18 @@ static void send_mail()
 
     if (!fork()) {		/* child */
 	(void) close(1);
-#ifdef USE_EXECVE
-	execve(mailer, exec_argv, environ);
-#else /* USE_EXECVE */
+#ifdef USE_EXECV
+	execv(mailer, exec_argv);
+#else /* USE_EXECV */
 	execvp(mailer, exec_argv);
-#endif /* USE_EXECVE */
+#endif /* USE_EXECV */
 
 	/* this should not happen */
-#ifdef USE_EXECVE
-	perror("execve");
-#else /* USE_EXECVE */
+#ifdef USE_EXECV
+	perror("execv");
+#else /* USE_EXECV */
 	perror("execvp");
-#endif /* USE_EXECVE */
+#endif /* USE_EXECV */
 	exit(1);
     } else {			/* parent */
 	(void) close(0);

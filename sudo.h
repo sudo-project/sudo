@@ -110,7 +110,7 @@
  
            STD_HEADERS              if you have ansi-compliant header files
  
-           USE_EXECVE               if you want to use execve() instead of
+           USE_EXECV                if you want to use execv() instead of
                                     execvp()
 */
 
@@ -337,7 +337,7 @@ extern char ** environ;
  * For OS's w/o mode_t
  */
 #ifdef NO_MODE_T
-typedef int mode_t
+typedef int mode_t;
 #endif
 
 /*
