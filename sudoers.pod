@@ -89,7 +89,7 @@ Matches any single character.
 
 Matches any character in the specified range.
 
-=item C<[^...]>
+=item C<[!...]>
 
 Matches any character B<not> in the specified range.
 
