@@ -212,12 +212,6 @@ PASSWD[[:blank:]]*:	{
 			    return(NTWKADDR);
 			}
 
-[[:alpha:]][[:alnum:]_-]*(\.{HOSTNAME})+ {
-			    fill(yytext, yyleng);
-			    LEXTRACE("FQHOST ");
-			    return(FQHOST);
-			}
-
 <INITIAL>\(		{
 				BEGIN GOTRUNAS;
 				LEXTRACE("RUNAS ");

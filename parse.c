@@ -389,15 +389,22 @@ addr_matches(n)
  * Returns 0 if the hostname matches the pattern and non-zero otherwise.
  */
 int
-hostname_matches(host, pattern)
-    char *host;
+hostname_matches(shost, lhost, pattern)
+    char *shost;
+    char *lhost;
     char *pattern;
 {
-
-    if (has_meta(pattern))
-	return(fnmatch(pattern, host, FNM_CASEFOLD));
-    else
-	return(strcasecmp(host, pattern));
+    if (has_meta(pattern)) {
+	if (strchr(pattern, '.'))
+	    return(fnmatch(pattern, lhost, FNM_CASEFOLD));
+	else
+	    return(fnmatch(pattern, shost, FNM_CASEFOLD));
+    } else {
+	if (strchr(pattern, '.'))
+	    return(strcasecmp(lhost, pattern));
+	else
+	    return(strcasecmp(shost, pattern));
+    }
 }
 
 /*

@@ -215,7 +215,6 @@ yyerror(s)
 %token <command> COMMAND		/* absolute pathname w/ optional args */
 %token <string>  ALIAS			/* an UPPERCASE alias name */
 %token <string>  NTWKADDR		/* w.x.y.z */
-%token <string>  FQHOST			/* foo.bar.com */
 %token <string>  NETGROUP		/* a netgroup (+NAME) */
 %token <string>  USERGROUP		/* a usergroup (%NAME) */
 %token <string>  WORD			/* a word */
@@ -361,14 +360,7 @@ host		:	ALL {
 			    free($1);
 			}
 		|	WORD {
-			    if (hostname_matches(user_shost, $1) == 0)
-				$$ = TRUE;
-			    else
-				$$ = -1;
-			    free($1);
-			}
-		|	FQHOST {
-			    if (hostname_matches(user_host, $1) == 0)
+			    if (hostname_matches(user_shost, user_host, $1) == 0)
 				$$ = TRUE;
 			    else
 				$$ = -1;
@@ -380,7 +372,7 @@ host		:	ALL {
 			    /* could be an all-caps hostname */
 			    if (aip)
 				$$ = aip->val;
-			    else if (hostname_matches(user_shost, $1) == 0)
+			    else if (strcasecmp(user_shost, $1) == 0)
 				$$ = TRUE;
 			    else {
 				if (pedantic) {
