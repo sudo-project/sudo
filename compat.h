@@ -67,9 +67,15 @@
 #ifndef _S_IFREG
 #  define _S_IFREG		S_IFREG
 #endif /* _S_IFREG */
+#ifndef _S_IFDIR
+#  define _S_IFDIR		S_IFDIR
+#endif /* _S_IFDIR */
 #ifndef S_ISREG
 #  define S_ISREG(m)		(((m) & _S_IFMT) == _S_IFREG)
 #endif /* S_ISREG */
+#ifndef S_ISDIR
+#  define S_ISDIR(m)		(((m) & _S_IFMT) == _S_IFDIR)
+#endif /* S_ISDIR */
 
 /*
  * Some OS's may not have this.
