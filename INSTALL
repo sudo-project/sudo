@@ -11,5 +11,9 @@ sudo and visudo binaries, the sudo man page, and a sample sudoers file
 (if one does not already exist).  You can also install various pieces of
 the package via install-binaries, install-man, install-sudoers.
 
+    Note that to use syslog with the ultrix version you may need to grab
+and install pub/DEC/jtkohl-syslog-complete.tar.Z available from
+gatekeeper.dec.com via anonymous ftp.  All our decs have this installed.
+
 Please send changes, bugs, security holes, and gripes to:
     sudo-bugs@cs.colorado.edu
