@@ -31,20 +31,15 @@
 
 /* User-configurable Sudo runtime options */
 
-#define LOGGING SLOG_SYSLOG	/* log via SLOG_SYSLOG, SLOG_FILE, SLOG_BOTH */
-#define LOGFAC LOG_LOCAL2	/* syslog facility for sudo to use */
-#define MAXLOGFILELEN 80	/* max chars per log line (for line wrapping) */
 #define SEND_MAIL_WHEN_NO_USER	/* send mail when user not in sudoers file */
 /*#define SEND_MAIL_WHEN_NOT_OK	/* send mail if no permissions to run command */
 #define SHORT_MESSAGE		/* short sudo message, no copyright printed */
 /*#define NO_MESSAGE		/* no sudo "lecture" message */
 #define MAILSUBJECT "*** SECURITY information for %h ***" /* mail subject */
-/*#define IGNORE_DOT_PATH	/* ignore '.' in $PATH if it exists */
 /*#define SHELL_IF_NO_ARGS	/* if sudo is given no arguments run a shell */
 /*#define SHELL_SETS_HOME	/* -s sets $HOME to runas user's homedir */
 /*#define OTP_ONLY		/* validate user via OTP (skey/opie) only */
 /*#define STUB_LOAD_INTERFACES	/* don't try to read ether interfaces */
-#define FAST_MATCH		/* command check fails if basenames not same */
 
 /**********  You probably don't want to modify anything below here  ***********/
 
