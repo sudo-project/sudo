@@ -49,3 +49,7 @@
 #ifndef _PATH_VI
 #undef _PATH_VI
 #endif /* _PATH_VI */
+
+#ifndef _PATH_PWD
+#undef _PATH_PWD
+#endif /* _PATH_PWD */
