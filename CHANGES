@@ -1041,4 +1041,6 @@ Sudo 1.5.8p2 released.
 327) Make sudo's usage info better when mutually exclusive args are given
      and don't rely on argument order to detect this.  From Nick Andrew.
 
+328) In visudo, shift return value of system() by 8 to get the real exit value.
+
 Sudo 1.5.9 released.
