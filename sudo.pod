@@ -8,8 +8,8 @@ sudo - execute a command as the superuser
 
 =head1 SYNOPSIS
 
-B<sudo> B<-V> | B<-h> | B<-l> | B<-v> | B<-k> | B<-s> | [ B<-b> ]
-[ B<-p> prompt ] [ B<-u> username/#uid] I<command>
+B<sudo> B<-V> | B<-h> | B<-l> | B<-v> | B<-k> | B<-s> | B<-H> |
+[ B<-b> ] | [ B<-p> prompt ] [ B<-u> username/#uid] I<command>
 
 =head1 DESCRIPTION
 
@@ -96,6 +96,12 @@ The C<-s> (I<shell>) option runs the shell specified by the I<SHELL>
 environmental variable if it is set or the shell as specified
 in passwd(5).
 
+=item -H
+
+The C<-H> (I<HOME>) option sets the I<HOME> environmental variable
+to the homedir of the target user (root by default) as specified 
+in passwd(5).
+
 =item --
 
 The C<--> flag indicates that B<sudo> should stop processing command
@@ -180,6 +186,7 @@ date.
  SUDO_USER		Set to the login of the user who invoked sudo
  SUDO_UID		Set to the uid of the user who invoked sudo
  SUDO_GID		Set to the gid of the user who invoked sudo
+ SUDO_PS1		If set, PS1 will be set to its value
 
 =head1 AUTHORS
 
