@@ -145,7 +145,7 @@ AC_ARG_WITH(AFS, [  --with-AFS              enable AFS support],
 		;;
 esac])
 
-AC_ARG_WITH(authenticate, [  --with-authenticate              enable AIX general authentication support],
+AC_ARG_WITH(authenticate, [  --with-authenticate     enable AIX general authentication support],
 [case $with_authenticate in
     yes)	AC_DEFINE(HAVE_AUTHENTICATE)
 		echo 'Configuring for use with AIX general authentication'
