@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-16/Jan/2000                   1.6.1                             1
+17/Jan/2000                   1.6.2                             1
 
 
 
@@ -127,7 +127,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-16/Jan/2000                   1.6.1                             2
+17/Jan/2000                   1.6.2                             2
 
 
 
@@ -193,7 +193,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-16/Jan/2000                   1.6.1                             3
+17/Jan/2000                   1.6.2                             3
 
 
 
@@ -259,7 +259,7 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-16/Jan/2000                   1.6.1                             4
+17/Jan/2000                   1.6.2                             4
 
 
 
@@ -267,6 +267,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+       shell_noargs
+                   If sudo is invoked with no arguments, start a
+                   shell
 
        set_home    Set $HOME to the target user when starting a
                    shell with -s
@@ -318,14 +322,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        syslog_goodpri
                    Syslog priority to use when user authenticates
-                   successfully
-
-       syslog_badpri
-                   Syslog priority to use when user authenticates
 
 
 
-16/Jan/2000                   1.6.1                             5
+17/Jan/2000                   1.6.2                             5
 
 
 
@@ -334,6 +334,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
+                   successfully
+
+       syslog_badpri
+                   Syslog priority to use when user authenticates
                    unsuccessfully
 
        SSSSttttrrrriiiinnnnggggssss tttthhhhaaaatttt ccccaaaannnn bbbbeeee uuuusssseeeedddd iiiinnnn aaaa bbbboooooooolllleeeeaaaannnn ccccoooonnnntttteeeexxxxtttt:
@@ -382,16 +386,12 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                                    current host must have the C<NOPASSWD>
                                    flag set to avoid entering a password.
 
-                       any         At least one of the user's sudoers entries
-                                   for the current host must have the
-                                   C<NOPASSWD> flag set to avoid entering a
-                                   password.
 
 
 
 
 
-16/Jan/2000                   1.6.1                             6
+17/Jan/2000                   1.6.2                             6
 
 
 
@@ -399,6 +399,11 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+                       any         At least one of the user's sudoers entries
+                                   for the current host must have the
+                                   C<NOPASSWD> flag set to avoid entering a
+                                   password.
 
                        never       The user need never enter a password to use
                                    the B<-l> flag.
@@ -450,14 +455,9 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        The user ddddggggbbbb may run _/_b_i_n_/_l_s, _/_b_i_n_/_k_i_l_l, and _/_u_s_r_/_b_i_n_/_l_p_r_m
        -- but only as ooooppppeeeerrrraaaattttoooorrrr.  Eg.
 
-           sudo -u operator /bin/ls.
-
-       It is also possible to override a Runas_Spec later on in
-       an entry.  If we modify the entry like so:
 
 
-
-16/Jan/2000                   1.6.1                             7
+17/Jan/2000                   1.6.2                             7
 
 
 
@@ -465,6 +465,11 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+           sudo -u operator /bin/ls.
+
+       It is also possible to override a Runas_Spec later on in
+       an entry.  If we modify the entry like so:
 
         dgb    boulder = (operator) /bin/ls, (root) /bin/kill, /usr/bin/lprm
 
@@ -514,16 +519,11 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        [...]   Matches any character in the specified range.
 
-       [!...]  Matches any character nnnnooootttt in the specified range.
-
-       \x      For any character "x", evaluates to "x".  This is
-               used to escape special characters such as: "*",
-               "?", "[", and "}".
 
 
 
 
-16/Jan/2000                   1.6.1                             8
+17/Jan/2000                   1.6.2                             8
 
 
 
@@ -531,6 +531,12 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+       [!...]  Matches any character nnnnooootttt in the specified range.
+
+       \x      For any character "x", evaluates to "x".  This is
+               used to escape special characters such as: "*",
+               "?", "[", and "}".
 
        Note that a forward slash ('/') will nnnnooootttt be matched by
        wildcards used in the pathname.  When matching the command
@@ -581,15 +587,9 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        syntactic characters in a _U_s_e_r _S_p_e_c_i_f_i_c_a_t_i_o_n ('=', ':',
        '(', ')') is optional.
 
-       The following characters must be escaped with a backslash
-       ('\') when used as part of a word (eg. a username or
-       hostname): '@', '!', '=', ':', ',', '(', ')', '\'.
 
 
-
-
-
-16/Jan/2000                   1.6.1                             9
+17/Jan/2000                   1.6.2                             9
 
 
 
@@ -597,6 +597,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+       The following characters must be escaped with a backslash
+       ('\') when used as part of a word (eg. a username or
+       hostname): '@', '!', '=', ':', ',', '(', ')', '\'.
 
 EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
        Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of
@@ -649,13 +653,9 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
         Defaults:millert       !authenticate
         Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
 
-       The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually
-       determines who may run what.
 
 
-
-
-16/Jan/2000                   1.6.1                            10
+17/Jan/2000                   1.6.2                            10
 
 
 
@@ -663,6 +663,9 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+       The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually
+       determines who may run what.
 
         root           ALL = (ALL) ALL
         %wheel         ALL = (ALL) ALL
@@ -715,13 +718,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        assumes _p_a_s_s_w_d(1) does not take multiple usernames on the
        command line.
 
-        bob            SPARC = (OP) ALL : SGI = (OP) ALL
-
-       The user bbbboooobbbb may run anything on the _S_P_A_R_C and _S_G_I
 
 
 
-16/Jan/2000                   1.6.1                            11
+17/Jan/2000                   1.6.2                            11
 
 
 
@@ -730,6 +730,9 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
+        bob            SPARC = (OP) ALL : SGI = (OP) ALL
+
+       The user bbbboooobbbb may run anything on the _S_P_A_R_C and _S_G_I
        machines as any user listed in the _O_P Runas_Alias (rrrrooooooootttt
        and ooooppppeeeerrrraaaattttoooorrrr).
 
@@ -781,13 +784,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        On the host www, any user in the _W_E_B_M_A_S_T_E_R_S User_Alias
        (will, wendy, and wim), may run any command as user www
-       (which owns the web pages) or simply _s_u(1) to www.
 
 
 
-
-
-16/Jan/2000                   1.6.1                            12
+17/Jan/2000                   1.6.2                            12
 
 
 
@@ -795,6 +795,8 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
+
+       (which owns the web pages) or simply _s_u(1) to www.
 
         ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
                        /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
@@ -851,9 +853,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-
-16/Jan/2000                   1.6.1                            13
+17/Jan/2000                   1.6.2                            13
 
 
 
@@ -919,6 +919,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-16/Jan/2000                   1.6.1                            14
+17/Jan/2000                   1.6.2                            14
 
 
