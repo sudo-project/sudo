@@ -217,15 +217,6 @@ main(argc, argv)
     /* Setup defaults data structures. */
     init_defaults();
 
-    /* Initialize syslog(3) if we are using it. */
-    if (def_str(I_LOGFACSTR)) {
-#ifdef LOG_NFACILITIES
-	openlog("sudo", 0, def_ival(I_LOGFAC));
-#else
-	openlog("sudo", 0);
-#endif /* LOG_NFACILITIES */
-    }
-
     if (sudo_mode & MODE_SHELL)
 	user_cmnd = "shell";
     else
@@ -292,6 +283,10 @@ main(argc, argv)
 	    stderr);
 	exit(1);
     }
+
+    /* May need to set $HOME to target user. */
+    if ((sudo_mode & MODE_SHELL) && def_flag(I_SET_HOME))
+	sudo_mode |= MODE_RESET_HOME;
 
     /* Bail if a tty is required and we don't have one.  */
     if (def_flag(I_REQUIRETTY)) {
@@ -416,7 +411,6 @@ init_vars(sudo_mode)
     int sudo_mode;
 {
     char *p, thost[MAXHOSTNAMELEN];
-    struct hostent *hp;
 
     /* Sanity check command from user. */
     if (user_cmnd == NULL && strlen(NewArgv[0]) >= MAXPATHLEN) {
@@ -445,21 +439,16 @@ init_vars(sudo_mode)
 	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
     } else
 	user_host = estrdup(thost);
-    if (def_flag(I_FQDN)) {
-	if (!(hp = gethostbyname(user_host))) {
-	    log_error(USE_ERRNO|MSG_ONLY|NO_EXIT,
-		"unable to lookup %s via gethostbyname()", user_host);
+    if (def_flag(I_FQDN))
+	set_fqdn();
+    else {
+	if ((p = strchr(user_host, '.'))) {
+	    *p = '\0';
+	    user_shost = estrdup(user_host);
+	    *p = '.';
 	} else {
-	    free(user_host);
-	    user_host = estrdup(hp->h_name);
+	    user_shost = user_host;
 	}
-    }
-    if ((p = strchr(user_host, '.'))) {
-	*p = '\0';
-	user_shost = estrdup(user_host);
-	*p = '.';
-    } else {
-	user_shost = user_host;
     }
 
     if ((p = ttyname(STDIN_FILENO)) || (p = ttyname(STDOUT_FILENO))) {
@@ -549,12 +538,12 @@ parse_args()
     NewArgv = Argv + 1;
     NewArgc = Argc - 1;
 
-    if (Argc < 2) {			/* no options and no command */
-	if (!def_flag(I_SHELL_NOARGS))
-	    usage(1);
+#ifdef SHELL_IF_NO_ARGS
+    if (NewArgc == 0) {			/* no options and no command */
 	rval |= MODE_SHELL;
 	return(rval);
     }
+#endif
 
     while (NewArgc > 0 && NewArgv[0][0] == '-') {
 	if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0') {
@@ -636,8 +625,6 @@ parse_args()
 		if (excl && excl != 's')
 		    usage_excl(1);
 		excl = 's';
-		if (def_flag(I_SET_HOME))
-		    rval |= MODE_RESET_HOME;
 		break;
 	    case 'H':
 		rval |= MODE_RESET_HOME;
@@ -645,8 +632,10 @@ parse_args()
 	    case '-':
 		NewArgc--;
 		NewArgv++;
-		if (def_flag(I_SHELL_NOARGS) && rval == MODE_RUN)
+#ifdef SHELL_IF_NO_ARGS
+		if (rval == MODE_RUN)
 		    rval |= MODE_SHELL;
+#endif
 		return(rval);
 	    case '\0':
 		(void) fprintf(stderr, "%s: '-' requires an argument\n",
@@ -1036,6 +1025,35 @@ initial_setup()
 #else
     (void) signal(SIGCHLD, reapchild);
 #endif /* POSIX_SIGNALS */
+}
+
+/*
+ * Look up the fully qualified domain name and set user_host and user_shost.
+ */
+void
+set_fqdn()
+{
+    struct hostent *hp;
+    char *p;
+
+    if (def_flag(I_FQDN)) {
+	if (!(hp = gethostbyname(user_host))) {
+	    log_error(USE_ERRNO|MSG_ONLY|NO_EXIT,
+		"unable to lookup %s via gethostbyname()", user_host);
+	} else {
+	    free(user_host);
+	    user_host = estrdup(hp->h_name);
+	}
+    }
+    if (user_shost != user_host)
+	free(user_shost);
+    if ((p = strchr(user_host, '.'))) {
+	*p = '\0';
+	user_shost = estrdup(user_host);
+	*p = '.';
+    } else {
+	user_shost = user_host;
+    }
 }
 
 /*

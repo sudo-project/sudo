@@ -407,6 +407,12 @@ netgr_matches(n, h, u)
     return(TRUE);
 }
 
+void
+set_fqdn()
+{
+    return;
+}
+
 /*
  * Assuming a parse error occurred, prompt the user for what they want
  * to do now.  Returns the first letter of their choice.
