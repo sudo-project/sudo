@@ -1,30 +1,22 @@
-
-/*  A Bison parser, made from ./parse.yacc
- by  GNU Bison version 1.27
-  */
-
-#define YYBISON 1  /* Identify Bison output.  */
-
-#define	COMMAND	257
-#define	ALIAS	258
-#define	NTWKADDR	259
-#define	FQHOST	260
-#define	NETGROUP	261
-#define	USERGROUP	262
-#define	NAME	263
-#define	RUNAS	264
-#define	NOPASSWD	265
-#define	PASSWD	266
-#define	ALL	267
-#define	COMMENT	268
-#define	HOSTALIAS	269
-#define	CMNDALIAS	270
-#define	USERALIAS	271
-#define	RUNASALIAS	272
-#define	ERROR	273
-
-#line 1 "./parse.yacc"
-
+#ifndef lint
+/*static char yysccsid[] = "from: @(#)yaccpar	1.9 (Berkeley) 02/21/93";*/
+static char yyrcsid[]
+#if __GNUC__ == 2
+  __attribute__ ((unused))
+#endif /* __GNUC__ == 2 */
+  = "$OpenBSD: skeleton.c,v 1.13 1998/11/18 15:45:12 dm Exp $";
+#endif
+#include <stdlib.h>
+#define YYBYACC 1
+#define YYMAJOR 1
+#define YYMINOR 9
+#define YYLEX yylex()
+#define YYEMPTY -1
+#define yyclearin (yychar=(YYEMPTY))
+#define yyerrok (yyerrflag=0)
+#define YYRECOVERING() (yyerrflag!=0)
+#define YYPREFIX "yy"
+#line 2 "./parse.yacc"
 /*
  * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
  * All rights reserved.
@@ -232,7 +224,6 @@ yyerror(s)
     }
     parse_error = TRUE;
 }
-
 #line 211 "./parse.yacc"
 typedef union {
     char *string;
@@ -240,1586 +231,312 @@ typedef union {
     struct sudo_command command;
     int tok;
 } YYSTYPE;
-#include <stdio.h>
-
-#ifndef __cplusplus
-#ifndef __STDC__
-#define const
-#endif
-#endif
-
-
-
-#define	YYFINAL		108
-#define	YYFLAG		-32768
-#define	YYNTBASE	24
-
-#define YYTRANSLATE(x) ((unsigned)(x) <= 273 ? yytranslate[x] : 59)
-
-static const char yytranslate[] = {     0,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,    22,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,    21,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,    19,     2,     2,
-    20,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     1,     3,     4,     5,     6,
-     7,     8,     9,    10,    11,    12,    13,    14,    15,    16,
-    17,    18,    23
+#line 235 "sudo.tab.c"
+#define COMMAND 257
+#define ALIAS 258
+#define NTWKADDR 259
+#define FQHOST 260
+#define NETGROUP 261
+#define USERGROUP 262
+#define NAME 263
+#define RUNAS 264
+#define NOPASSWD 265
+#define PASSWD 266
+#define ALL 267
+#define COMMENT 268
+#define HOSTALIAS 269
+#define CMNDALIAS 270
+#define USERALIAS 271
+#define RUNASALIAS 272
+#define ERROR 273
+#define YYERRCODE 256
+short yylhs[] = {                                        -1,
+    0,    0,    5,    5,    7,    5,    5,    5,    5,    5,
+    8,    8,   13,   16,   16,    2,    2,    2,    2,    2,
+    2,   15,   15,   17,   20,   21,   20,   18,   18,   22,
+   22,   23,   24,   23,    3,    3,    3,    3,    3,   19,
+   19,   19,    1,    1,    1,   10,   10,   26,   25,   14,
+   14,   11,   11,   28,   27,   29,   29,   12,   12,   31,
+   30,    9,    9,   33,   32,    6,    6,   34,   34,    4,
+    4,    4,    4,    4,
 };
-
-#if YYDEBUG != 0
-static const short yyprhs[] = {     0,
-     0,     2,     5,     7,    10,    11,    15,    18,    21,    24,
-    27,    29,    33,    37,    39,    42,    44,    46,    48,    50,
-    52,    54,    56,    60,    64,    66,    67,    71,    72,    75,
-    77,    81,    83,    84,    88,    90,    92,    94,    96,    98,
-    99,   101,   103,   105,   107,   109,   111,   115,   116,   121,
-   123,   127,   129,   133,   134,   139,   141,   145,   147,   151,
-   152,   157,   159,   163,   164,   169,   171,   175,   177,   180,
-   182,   184,   186,   188
+short yylen[] = {                                         2,
+    1,    2,    1,    2,    0,    3,    2,    2,    2,    2,
+    1,    3,    3,    1,    2,    1,    1,    1,    1,    1,
+    1,    1,    3,    3,    1,    0,    3,    0,    2,    1,
+    3,    1,    0,    3,    1,    1,    1,    1,    1,    0,
+    1,    1,    1,    1,    1,    1,    3,    0,    4,    1,
+    3,    1,    3,    0,    4,    1,    3,    1,    3,    0,
+    4,    1,    3,    0,    4,    1,    3,    1,    2,    1,
+    1,    1,    1,    1,
 };
-
-static const short yyrhs[] = {    25,
-     0,    24,    25,     0,    14,     0,     1,    14,     0,     0,
-    26,    56,    27,     0,    17,    53,     0,    15,    42,     0,
-    16,    46,     0,    18,    50,     0,    28,     0,    27,    19,
-    28,     0,    45,    20,    31,     0,    30,     0,    22,    30,
-     0,    13,     0,     5,     0,     7,     0,     9,     0,     6,
-     0,     4,     0,    32,     0,    31,    21,    32,     0,    35,
-    40,    33,     0,    41,     0,     0,    22,    34,    41,     0,
-     0,    10,    36,     0,    37,     0,    36,    21,    37,     0,
-    39,     0,     0,    22,    38,    39,     0,     9,     0,     8,
-     0,     7,     0,     4,     0,    13,     0,     0,    11,     0,
-    12,     0,    13,     0,     4,     0,     3,     0,    43,     0,
-    42,    19,    43,     0,     0,     4,    44,    20,    45,     0,
-    29,     0,    45,    21,    29,     0,    47,     0,    46,    19,
-    47,     0,     0,     4,    48,    20,    49,     0,    33,     0,
-    49,    21,    33,     0,    51,     0,    50,    19,    51,     0,
-     0,     4,    52,    20,    36,     0,    54,     0,    53,    19,
-    54,     0,     0,     4,    55,    20,    56,     0,    57,     0,
-    56,    21,    57,     0,    58,     0,    22,    58,     0,     9,
-     0,     8,     0,     7,     0,     4,     0,    13,     0
+short yydefred[] = {                                      0,
+    0,    3,    0,    0,    0,    0,    0,    1,    0,    4,
+   48,    0,   46,   54,    0,   52,   64,    0,   62,   60,
+    0,   58,    2,   73,   72,   71,   70,   74,    0,   68,
+    0,   66,    0,    0,    0,    0,    0,    0,    0,    0,
+   69,   21,   17,   20,   18,   19,   16,    0,    0,   14,
+    0,   11,    0,   50,    0,   47,    0,   53,    0,   63,
+    0,   59,   67,   15,    0,    0,    0,    0,   45,   44,
+   43,   26,   25,   56,    0,    0,   38,   37,   36,   35,
+   39,   33,   32,    0,   30,   12,    0,    0,   22,    0,
+   51,    0,    0,    0,    0,    0,    0,   41,   42,    0,
+   27,   57,   34,   31,   23,   24,
 };
-
+short yydgoto[] = {                                       7,
+   73,   50,   83,   30,    8,   31,    9,   51,   18,   12,
+   15,   21,   52,   53,   88,   54,   89,   90,  100,   74,
+   92,   84,   85,   94,   13,   33,   16,   35,   75,   22,
+   39,   19,   37,   32,
+};
+short yysindex[] = {                                   -243,
+ -265,    0, -252, -249, -246, -242, -243,    0,  -16,    0,
+    0,  -36,    0,    0,  -35,    0,    0,  -28,    0,    0,
+  -25,    0,    0,    0,    0,    0,    0,    0, -214,    0,
+  -33,    0,  -29, -252,  -21, -249,  -19, -246,  -18, -242,
+    0,    0,    0,    0,    0,    0,    0,  -16, -222,    0,
+  -12,    0,  -42,    0,  -23,    0,  -26,    0,  -16,    0,
+   -9,    0,    0,    0,  -23, -210,  -23,    6,    0,    0,
+    0,    0,    0,    0,   11,   12,    0,    0,    0,    0,
+    0,    0,    0,   14,    0,    0,   -9,   19,    0, -245,
+    0, -253,  -26, -201,   -9,   14, -210,    0,    0,  -26,
+    0,    0,    0,    0,    0,    0,
+};
+short yyrindex[] = {                                    169,
+    0,    0,    0,    0,    0,    0,  169,    0,    0,    0,
+    0,   86,    0,    0,  103,    0,    0,  120,    0,    0,
+  137,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+  154,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,  176,    0,    1,    0,    0,
+    0,    0,    0,    0,   18,   35,    0,    0,    0,    0,
+    0,    0,    0,   52,    0,    0,    0,   69,    0,   -2,
+    0,    0,    0,    0,    0,  180,  176,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,
+};
+short yygindex[] = {                                      0,
+  -27,   15,  -24,   38,   64,   13,    0,    0,    0,    0,
+    0,    0,    8,   20,    0,    7,  -20,    0,    0,  -85,
+    0,   -8,  -17,    0,   46,    0,   45,    0,    0,   42,
+    0,   49,    0,   36,
+};
+#define YYTABLESIZE 447
+short yytable[] = {                                      49,
+   49,   67,   10,   69,   70,   11,   72,  102,   14,   49,
+   48,   17,    1,   71,  106,   20,   29,   55,   66,   98,
+   99,   34,   36,   82,    2,    3,    4,    5,    6,   38,
+   40,   55,   40,   49,   65,   42,   43,   44,   45,   57,
+   46,   59,   61,   24,   47,   65,   25,   26,   27,   67,
+   55,   61,   28,   87,   93,   48,   77,   95,   49,   78,
+   79,   80,   97,   64,  101,   81,   41,   65,   13,  103,
+   23,   76,   86,   91,   68,   55,  105,  104,   96,   56,
+   58,   62,    0,   63,   61,    8,   60,    0,    0,    0,
+    0,    0,   65,    0,    0,    0,    0,    0,    0,    0,
+    0,   13,    9,    0,    0,    0,    0,    0,    0,   61,
+    0,    0,    0,    0,    0,    0,    0,    0,    8,    7,
+    0,    0,    0,    0,    0,    0,   13,    0,    0,    0,
+    0,    0,    0,    0,    0,    9,   10,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    7,    6,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,   10,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    6,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    5,    0,    0,    0,    0,    0,    0,   28,    0,
+    0,    0,   29,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,   42,   43,   44,   45,    0,   46,
+   69,   70,    0,   47,   42,   43,   44,   45,    0,   46,
+   71,   24,    0,   47,   25,   26,   27,    0,   77,    0,
+   28,   78,   79,   80,   40,   40,   49,   81,   49,    0,
+    0,   49,   49,   49,   40,    0,    0,   49,   49,   49,
+   49,   49,   49,   55,    0,   55,    0,    0,   55,   55,
+   55,    0,    0,    0,   55,   55,   55,   55,   55,   55,
+   65,    0,   65,    0,    0,   65,   65,   65,    0,    0,
+    0,   65,   65,   65,   65,   65,   65,   61,    0,   61,
+    0,    0,   61,   61,   61,    0,    0,    0,   61,   61,
+   61,   61,   61,   61,   13,    0,   13,    0,    0,   13,
+   13,   13,    0,    0,    0,   13,   13,   13,   13,   13,
+   13,    8,    0,    8,    0,    0,    8,    8,    8,    0,
+    0,    0,    8,    8,    8,    8,    8,    8,    9,    0,
+    9,    0,    0,    9,    9,    9,    0,    0,    0,    9,
+    9,    9,    9,    9,    9,    7,    0,    7,    0,    0,
+    7,    7,    7,    0,    0,    0,    7,    7,    7,    7,
+    7,    7,   10,    0,   10,    0,    0,   10,   10,   10,
+    0,    0,    0,   10,   10,   10,   10,   10,   10,    6,
+    0,    6,    0,    0,    6,    6,    6,    0,    0,    0,
+    6,    6,    6,    6,    6,    6,    5,    0,    0,    5,
+    5,    5,   28,   28,    0,    5,   29,   29,    0,    0,
+   28,   28,   28,    0,   29,   29,   29,
+};
+short yycheck[] = {                                      33,
+    0,   44,  268,  257,  258,  258,   33,   93,  258,   33,
+   44,  258,  256,  267,  100,  258,   33,    0,   61,  265,
+  266,   58,   58,   33,  268,  269,  270,  271,  272,   58,
+   33,   61,   58,   33,    0,  258,  259,  260,  261,   61,
+  263,   61,   61,  258,  267,   58,  261,  262,  263,   44,
+   33,    0,  267,  264,   44,   44,  258,   44,   58,  261,
+  262,  263,   44,   49,   92,  267,   29,   33,    0,   94,
+    7,   59,   65,   67,   55,   58,   97,   95,   87,   34,
+   36,   40,   -1,   48,   33,    0,   38,   -1,   -1,   -1,
+   -1,   -1,   58,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+   -1,   33,    0,   -1,   -1,   -1,   -1,   -1,   -1,   58,
+   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   33,    0,
+   -1,   -1,   -1,   -1,   -1,   -1,   58,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,   -1,   33,    0,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+   -1,   -1,   33,    0,   -1,   -1,   -1,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   33,
+   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,   -1,   -1,   33,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+   -1,   33,   -1,   -1,   -1,   -1,   -1,   -1,   33,   -1,
+   -1,   -1,   33,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,  258,  259,  260,  261,   -1,  263,
+  257,  258,   -1,  267,  258,  259,  260,  261,   -1,  263,
+  267,  258,   -1,  267,  261,  262,  263,   -1,  258,   -1,
+  267,  261,  262,  263,  257,  258,  256,  267,  258,   -1,
+   -1,  261,  262,  263,  267,   -1,   -1,  267,  268,  269,
+  270,  271,  272,  256,   -1,  258,   -1,   -1,  261,  262,
+  263,   -1,   -1,   -1,  267,  268,  269,  270,  271,  272,
+  256,   -1,  258,   -1,   -1,  261,  262,  263,   -1,   -1,
+   -1,  267,  268,  269,  270,  271,  272,  256,   -1,  258,
+   -1,   -1,  261,  262,  263,   -1,   -1,   -1,  267,  268,
+  269,  270,  271,  272,  256,   -1,  258,   -1,   -1,  261,
+  262,  263,   -1,   -1,   -1,  267,  268,  269,  270,  271,
+  272,  256,   -1,  258,   -1,   -1,  261,  262,  263,   -1,
+   -1,   -1,  267,  268,  269,  270,  271,  272,  256,   -1,
+  258,   -1,   -1,  261,  262,  263,   -1,   -1,   -1,  267,
+  268,  269,  270,  271,  272,  256,   -1,  258,   -1,   -1,
+  261,  262,  263,   -1,   -1,   -1,  267,  268,  269,  270,
+  271,  272,  256,   -1,  258,   -1,   -1,  261,  262,  263,
+   -1,   -1,   -1,  267,  268,  269,  270,  271,  272,  256,
+   -1,  258,   -1,   -1,  261,  262,  263,   -1,   -1,   -1,
+  267,  268,  269,  270,  271,  272,  258,   -1,   -1,  261,
+  262,  263,  257,  258,   -1,  267,  257,  258,   -1,   -1,
+  265,  266,  267,   -1,  265,  266,  267,
+};
+#define YYFINAL 7
+#ifndef YYDEBUG
+#define YYDEBUG 0
 #endif
-
-#if YYDEBUG != 0
-static const short yyrline[] = { 0,
-   251,   252,   255,   257,   259,   259,   263,   265,   267,   269,
-   274,   275,   278,   290,   294,   299,   302,   309,   316,   323,
-   330,   354,   355,   358,   380,   384,   392,   398,   421,   424,
-   425,   428,   432,   440,   445,   459,   473,   487,   516,   528,
-   538,   544,   552,   569,   598,   626,   627,   630,   630,   638,
-   639,   642,   643,   646,   655,   667,   668,   671,   672,   675,
-   684,   696,   697,   700,   700,   709,   710,   713,   717,   722,
-   729,   736,   743,   763
-};
-#endif
-
-
-#if YYDEBUG != 0 || defined (YYERROR_VERBOSE)
-
-static const char * const yytname[] = {   "$","error","$undefined.","COMMAND",
+#define YYMAXTOKEN 273
+#if YYDEBUG
+char *yyname[] = {
+"end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+"'!'",0,0,0,0,0,0,0,0,0,0,"','",0,0,0,0,0,0,0,0,0,0,0,0,0,"':'",0,0,"'='",0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"COMMAND",
 "ALIAS","NTWKADDR","FQHOST","NETGROUP","USERGROUP","NAME","RUNAS","NOPASSWD",
-"PASSWD","ALL","COMMENT","HOSTALIAS","CMNDALIAS","USERALIAS","RUNASALIAS","':'",
-"'='","','","'!'","ERROR","file","entry","@1","privileges","privilege","ophost",
-"host","cmndspeclist","cmndspec","opcmnd","@2","runasspec","runaslist","oprunasuser",
-"@3","runasuser","nopasswd","cmnd","hostaliases","hostalias","@4","hostlist",
-"cmndaliases","cmndalias","@5","cmndlist","runasaliases","runasalias","@6","useraliases",
-"useralias","@7","userlist","opuser","user", NULL
+"PASSWD","ALL","COMMENT","HOSTALIAS","CMNDALIAS","USERALIAS","RUNASALIAS",
+"ERROR",
+};
+char *yyrule[] = {
+"$accept : file",
+"file : entry",
+"file : file entry",
+"entry : COMMENT",
+"entry : error COMMENT",
+"$$1 :",
+"entry : $$1 userlist privileges",
+"entry : USERALIAS useraliases",
+"entry : HOSTALIAS hostaliases",
+"entry : CMNDALIAS cmndaliases",
+"entry : RUNASALIAS runasaliases",
+"privileges : privilege",
+"privileges : privileges ':' privilege",
+"privilege : hostlist '=' cmndspeclist",
+"ophost : host",
+"ophost : '!' host",
+"host : ALL",
+"host : NTWKADDR",
+"host : NETGROUP",
+"host : NAME",
+"host : FQHOST",
+"host : ALIAS",
+"cmndspeclist : cmndspec",
+"cmndspeclist : cmndspeclist ',' cmndspec",
+"cmndspec : runasspec nopasswd opcmnd",
+"opcmnd : cmnd",
+"$$2 :",
+"opcmnd : '!' $$2 cmnd",
+"runasspec :",
+"runasspec : RUNAS runaslist",
+"runaslist : oprunasuser",
+"runaslist : runaslist ',' oprunasuser",
+"oprunasuser : runasuser",
+"$$3 :",
+"oprunasuser : '!' $$3 runasuser",
+"runasuser : NAME",
+"runasuser : USERGROUP",
+"runasuser : NETGROUP",
+"runasuser : ALIAS",
+"runasuser : ALL",
+"nopasswd :",
+"nopasswd : NOPASSWD",
+"nopasswd : PASSWD",
+"cmnd : ALL",
+"cmnd : ALIAS",
+"cmnd : COMMAND",
+"hostaliases : hostalias",
+"hostaliases : hostaliases ':' hostalias",
+"$$4 :",
+"hostalias : ALIAS $$4 '=' hostlist",
+"hostlist : ophost",
+"hostlist : hostlist ',' ophost",
+"cmndaliases : cmndalias",
+"cmndaliases : cmndaliases ':' cmndalias",
+"$$5 :",
+"cmndalias : ALIAS $$5 '=' cmndlist",
+"cmndlist : opcmnd",
+"cmndlist : cmndlist ',' opcmnd",
+"runasaliases : runasalias",
+"runasaliases : runasaliases ':' runasalias",
+"$$6 :",
+"runasalias : ALIAS $$6 '=' runaslist",
+"useraliases : useralias",
+"useraliases : useraliases ':' useralias",
+"$$7 :",
+"useralias : ALIAS $$7 '=' userlist",
+"userlist : opuser",
+"userlist : userlist ',' opuser",
+"opuser : user",
+"opuser : '!' user",
+"user : NAME",
+"user : USERGROUP",
+"user : NETGROUP",
+"user : ALIAS",
+"user : ALL",
 };
 #endif
-
-static const short yyr1[] = {     0,
-    24,    24,    25,    25,    26,    25,    25,    25,    25,    25,
-    27,    27,    28,    29,    29,    30,    30,    30,    30,    30,
-    30,    31,    31,    32,    33,    34,    33,    35,    35,    36,
-    36,    37,    38,    37,    39,    39,    39,    39,    39,    40,
-    40,    40,    41,    41,    41,    42,    42,    44,    43,    45,
-    45,    46,    46,    48,    47,    49,    49,    50,    50,    52,
-    51,    53,    53,    55,    54,    56,    56,    57,    57,    58,
-    58,    58,    58,    58
-};
-
-static const short yyr2[] = {     0,
-     1,     2,     1,     2,     0,     3,     2,     2,     2,     2,
-     1,     3,     3,     1,     2,     1,     1,     1,     1,     1,
-     1,     1,     3,     3,     1,     0,     3,     0,     2,     1,
-     3,     1,     0,     3,     1,     1,     1,     1,     1,     0,
-     1,     1,     1,     1,     1,     1,     3,     0,     4,     1,
-     3,     1,     3,     0,     4,     1,     3,     1,     3,     0,
-     4,     1,     3,     0,     4,     1,     3,     1,     2,     1,
-     1,     1,     1,     1
-};
-
-static const short yydefact[] = {     0,
-     0,     3,     0,     0,     0,     0,     0,     1,     0,     4,
-    48,     8,    46,    54,     9,    52,    64,     7,    62,    60,
-    10,    58,     2,    73,    72,    71,    70,    74,     0,     0,
-    66,    68,     0,     0,     0,     0,     0,     0,     0,     0,
-    69,    21,    17,    20,    18,    19,    16,     0,     0,     6,
-    11,    50,    14,     0,     0,    47,     0,    53,     0,    63,
-     0,    59,    67,    15,     0,    28,     0,    49,    45,    44,
-    43,    26,    56,    25,    55,    65,    38,    37,    36,    35,
-    39,    33,    61,    30,    32,    12,     0,    13,    22,    40,
-    51,     0,     0,     0,     0,    29,    28,    41,    42,     0,
-    27,    57,    34,    31,    23,    24,     0,     0
-};
-
-static const short yydefgoto[] = {     7,
-     8,     9,    50,    51,    52,    53,    88,    89,    73,    92,
-    90,    83,    84,    94,    85,   100,    74,    12,    13,    33,
-    54,    15,    16,    35,    75,    21,    22,    39,    18,    19,
-    37,    30,    31,    32
-};
-
-static const short yypact[] = {    19,
-    -4,-32768,     7,    15,    21,    34,     0,-32768,    58,-32768,
--32768,    27,-32768,-32768,    31,-32768,-32768,    39,-32768,-32768,
-    44,-32768,-32768,-32768,-32768,-32768,-32768,-32768,    84,    38,
--32768,-32768,    20,     7,    36,    15,    55,    21,    56,    34,
--32768,-32768,-32768,-32768,-32768,-32768,-32768,    58,    77,    45,
--32768,-32768,-32768,   -15,    48,-32768,    -1,-32768,    58,-32768,
-    65,-32768,-32768,-32768,    48,    67,    48,    47,-32768,-32768,
--32768,-32768,-32768,-32768,    64,    68,-32768,-32768,-32768,-32768,
--32768,-32768,    73,-32768,-32768,-32768,    65,    75,-32768,    37,
--32768,    26,    -1,    91,    65,    73,    67,-32768,-32768,    -1,
--32768,-32768,-32768,-32768,-32768,-32768,    79,-32768
-};
-
-static const short yypgoto[] = {-32768,
-    94,-32768,-32768,    40,    35,    54,-32768,     9,   -69,-32768,
--32768,    22,    12,-32768,    14,-32768,    18,-32768,    78,-32768,
-    59,-32768,    80,-32768,-32768,-32768,    71,-32768,-32768,    81,
--32768,    61,    69,    86
-};
-
-
-#define	YYLAST		120
-
-
-static const short yytable[] = {   107,
-     1,    69,    70,    -5,    66,    67,    -5,    -5,    -5,    10,
-    11,    71,    -5,     2,     3,     4,     5,     6,    14,     1,
-    72,    -5,    -5,   102,    17,    -5,    -5,    -5,    69,    70,
-   106,    -5,     2,     3,     4,     5,     6,    20,    71,    55,
-    -5,    42,    43,    44,    45,    34,    46,    98,    99,    36,
-    47,    42,    43,    44,    45,    57,    46,    38,    48,    49,
-    47,    24,    40,    65,    25,    26,    27,    67,    77,    49,
-    28,    78,    79,    80,    59,    61,    87,    81,   108,    29,
-    42,    43,    44,    45,    93,    46,    82,    24,    48,    47,
-    25,    26,    27,    95,    77,    97,    28,    78,    79,    80,
-    23,    91,    64,    81,    86,   105,   104,   103,    96,   101,
-    62,    56,     0,    68,    41,    58,    63,     0,    60,    76
-};
-
-static const short yycheck[] = {     0,
-     1,     3,     4,     4,    20,    21,     7,     8,     9,    14,
-     4,    13,    13,    14,    15,    16,    17,    18,     4,     1,
-    22,    22,     4,    93,     4,     7,     8,     9,     3,     4,
-   100,    13,    14,    15,    16,    17,    18,     4,    13,    20,
-    22,     4,     5,     6,     7,    19,     9,    11,    12,    19,
-    13,     4,     5,     6,     7,    20,     9,    19,    21,    22,
-    13,     4,    19,    19,     7,     8,     9,    21,     4,    22,
-    13,     7,     8,     9,    20,    20,    10,    13,     0,    22,
-     4,     5,     6,     7,    21,     9,    22,     4,    21,    13,
-     7,     8,     9,    21,     4,    21,    13,     7,     8,     9,
-     7,    67,    49,    13,    65,    97,    95,    94,    87,    92,
-    40,    34,    -1,    55,    29,    36,    48,    -1,    38,    59
-};
-/* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
-#line 3 "/usr/local/share/bison.simple"
-/* This file comes from bison-1.27.  */
-
-/* Skeleton output parser for bison,
-   Copyright (C) 1984, 1989, 1990 Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
-
-/* As a special exception, when this file is copied by Bison into a
-   Bison output file, you may use that output file without restriction.
-   This special exception was added by the Free Software Foundation
-   in version 1.24 of Bison.  */
-
-/* This is the parser code that is written into each bison parser
-  when the %semantic_parser declaration is not specified in the grammar.
-  It was written by Richard Stallman by simplifying the hairy parser
-  used when %semantic_parser is specified.  */
-
-#ifndef YYSTACK_USE_ALLOCA
-#ifdef alloca
-#define YYSTACK_USE_ALLOCA
-#else /* alloca not defined */
-#ifdef __GNUC__
-#define YYSTACK_USE_ALLOCA
-#define alloca __builtin_alloca
-#else /* not GNU C.  */
-#if (!defined (__STDC__) && defined (sparc)) || defined (__sparc__) || defined (__sparc) || defined (__sgi) || (defined (__sun) && defined (__i386))
-#define YYSTACK_USE_ALLOCA
-#include <alloca.h>
-#else /* not sparc */
-/* We think this test detects Watcom and Microsoft C.  */
-/* This used to test MSDOS, but that is a bad idea
-   since that symbol is in the user namespace.  */
-#if (defined (_MSDOS) || defined (_MSDOS_)) && !defined (__TURBOC__)
-#if 0 /* No need for malloc.h, which pollutes the namespace;
-	 instead, just don't use alloca.  */
-#include <malloc.h>
-#endif
-#else /* not MSDOS, or __TURBOC__ */
-#if defined(_AIX)
-/* I don't know what this was needed for, but it pollutes the namespace.
-   So I turned it off.   rms, 2 May 1997.  */
-/* #include <malloc.h>  */
- #pragma alloca
-#define YYSTACK_USE_ALLOCA
-#else /* not MSDOS, or __TURBOC__, or _AIX */
-#if 0
-#ifdef __hpux /* haible@ilog.fr says this works for HPUX 9.05 and up,
-		 and on HPUX 10.  Eventually we can turn this on.  */
-#define YYSTACK_USE_ALLOCA
-#define alloca __builtin_alloca
-#endif /* __hpux */
-#endif
-#endif /* not _AIX */
-#endif /* not MSDOS, or __TURBOC__ */
-#endif /* not sparc */
-#endif /* not GNU C */
-#endif /* alloca not defined */
-#endif /* YYSTACK_USE_ALLOCA not defined */
-
-#ifdef YYSTACK_USE_ALLOCA
-#define YYSTACK_ALLOC alloca
-#else
-#define YYSTACK_ALLOC malloc
-#endif
-
-/* Note: there must be only one dollar sign in this file.
-   It is replaced by the list of actions, each action
-   as one case of the switch.  */
-
-#define yyerrok		(yyerrstatus = 0)
-#define yyclearin	(yychar = YYEMPTY)
-#define YYEMPTY		-2
-#define YYEOF		0
-#define YYACCEPT	goto yyacceptlab
-#define YYABORT 	goto yyabortlab
-#define YYERROR		goto yyerrlab1
-/* Like YYERROR except do call yyerror.
-   This remains here temporarily to ease the
-   transition to the new meaning of YYERROR, for GCC.
-   Once GCC version 2 has supplanted version 1, this can go.  */
-#define YYFAIL		goto yyerrlab
-#define YYRECOVERING()  (!!yyerrstatus)
-#define YYBACKUP(token, value) \
-do								\
-  if (yychar == YYEMPTY && yylen == 1)				\
-    { yychar = (token), yylval = (value);			\
-      yychar1 = YYTRANSLATE (yychar);				\
-      YYPOPSTACK;						\
-      goto yybackup;						\
-    }								\
-  else								\
-    { yyerror ("syntax error: cannot back up"); YYERROR; }	\
-while (0)
-
-#define YYTERROR	1
-#define YYERRCODE	256
-
-#ifndef YYPURE
-#define YYLEX		yylex()
-#endif
-
-#ifdef YYPURE
-#ifdef YYLSP_NEEDED
-#ifdef YYLEX_PARAM
-#define YYLEX		yylex(&yylval, &yylloc, YYLEX_PARAM)
-#else
-#define YYLEX		yylex(&yylval, &yylloc)
-#endif
-#else /* not YYLSP_NEEDED */
-#ifdef YYLEX_PARAM
-#define YYLEX		yylex(&yylval, YYLEX_PARAM)
-#else
-#define YYLEX		yylex(&yylval)
-#endif
-#endif /* not YYLSP_NEEDED */
-#endif
-
-/* If nonreentrant, generate the variables here */
-
-#ifndef YYPURE
-
-int	yychar;			/*  the lookahead symbol		*/
-YYSTYPE	yylval;			/*  the semantic value of the		*/
-				/*  lookahead symbol			*/
-
-#ifdef YYLSP_NEEDED
-YYLTYPE yylloc;			/*  location data for the lookahead	*/
-				/*  symbol				*/
-#endif
-
-int yynerrs;			/*  number of parse errors so far       */
-#endif  /* not YYPURE */
-
-#if YYDEBUG != 0
-int yydebug;			/*  nonzero means print parse trace	*/
-/* Since this is uninitialized, it does not stop multiple parsers
-   from coexisting.  */
-#endif
-
-/*  YYINITDEPTH indicates the initial size of the parser's stacks	*/
-
-#ifndef	YYINITDEPTH
-#define YYINITDEPTH 200
-#endif
-
-/*  YYMAXDEPTH is the maximum size the stacks can grow to
-    (effective only if the built-in stack extension method is used).  */
-
-#if YYMAXDEPTH == 0
+#ifdef YYSTACKSIZE
 #undef YYMAXDEPTH
-#endif
-
-#ifndef YYMAXDEPTH
+#define YYMAXDEPTH YYSTACKSIZE
+#else
+#ifdef YYMAXDEPTH
+#define YYSTACKSIZE YYMAXDEPTH
+#else
+#define YYSTACKSIZE 10000
 #define YYMAXDEPTH 10000
 #endif
-
-/* Define __yy_memcpy.  Note that the size argument
-   should be passed with type unsigned int, because that is what the non-GCC
-   definitions require.  With GCC, __builtin_memcpy takes an arg
-   of type size_t, but it can handle unsigned int.  */
-
-#if __GNUC__ > 1		/* GNU C and GNU C++ define this.  */
-#define __yy_memcpy(TO,FROM,COUNT)	__builtin_memcpy(TO,FROM,COUNT)
-#else				/* not GNU C or C++ */
-#ifndef __cplusplus
-
-/* This is the most reliable way to avoid incompatibilities
-   in available built-in functions on various systems.  */
-static void
-__yy_memcpy (to, from, count)
-     char *to;
-     char *from;
-     unsigned int count;
-{
-  register char *f = from;
-  register char *t = to;
-  register int i = count;
-
-  while (i-- > 0)
-    *t++ = *f++;
-}
-
-#else /* __cplusplus */
-
-/* This is the most reliable way to avoid incompatibilities
-   in available built-in functions on various systems.  */
-static void
-__yy_memcpy (char *to, char *from, unsigned int count)
-{
-  register char *t = to;
-  register char *f = from;
-  register int i = count;
-
-  while (i-- > 0)
-    *t++ = *f++;
-}
-
 #endif
-#endif
-
-#line 216 "/usr/local/share/bison.simple"
-
-/* The user can define YYPARSE_PARAM as the name of an argument to be passed
-   into yyparse.  The argument should have type void *.
-   It should actually point to an object.
-   Grammar actions can access the variable by casting it
-   to the proper pointer type.  */
-
-#ifdef YYPARSE_PARAM
-#ifdef __cplusplus
-#define YYPARSE_PARAM_ARG void *YYPARSE_PARAM
-#define YYPARSE_PARAM_DECL
-#else /* not __cplusplus */
-#define YYPARSE_PARAM_ARG YYPARSE_PARAM
-#define YYPARSE_PARAM_DECL void *YYPARSE_PARAM;
-#endif /* not __cplusplus */
-#else /* not YYPARSE_PARAM */
-#define YYPARSE_PARAM_ARG
-#define YYPARSE_PARAM_DECL
-#endif /* not YYPARSE_PARAM */
-
-/* Prevent warning if -Wstrict-prototypes.  */
-#ifdef __GNUC__
-#ifdef YYPARSE_PARAM
-int yyparse (void *);
-#else
-int yyparse (void);
-#endif
-#endif
-
-int
-yyparse(YYPARSE_PARAM_ARG)
-     YYPARSE_PARAM_DECL
-{
-  register int yystate;
-  register int yyn;
-  register short *yyssp;
-  register YYSTYPE *yyvsp;
-  int yyerrstatus;	/*  number of tokens to shift before error messages enabled */
-  int yychar1 = 0;		/*  lookahead token as an internal (translated) token number */
-
-  short	yyssa[YYINITDEPTH];	/*  the state stack			*/
-  YYSTYPE yyvsa[YYINITDEPTH];	/*  the semantic value stack		*/
-
-  short *yyss = yyssa;		/*  refer to the stacks thru separate pointers */
-  YYSTYPE *yyvs = yyvsa;	/*  to allow yyoverflow to reallocate them elsewhere */
-
-#ifdef YYLSP_NEEDED
-  YYLTYPE yylsa[YYINITDEPTH];	/*  the location stack			*/
-  YYLTYPE *yyls = yylsa;
-  YYLTYPE *yylsp;
-
-#define YYPOPSTACK   (yyvsp--, yyssp--, yylsp--)
-#else
-#define YYPOPSTACK   (yyvsp--, yyssp--)
-#endif
-
-  int yystacksize = YYINITDEPTH;
-  int yyfree_stacks = 0;
-
-#ifdef YYPURE
-  int yychar;
-  YYSTYPE yylval;
-  int yynerrs;
-#ifdef YYLSP_NEEDED
-  YYLTYPE yylloc;
-#endif
-#endif
-
-  YYSTYPE yyval;		/*  the variable used to return		*/
-				/*  semantic values from the action	*/
-				/*  routines				*/
-
-  int yylen;
-
-#if YYDEBUG != 0
-  if (yydebug)
-    fprintf(stderr, "Starting parse\n");
-#endif
-
-  yystate = 0;
-  yyerrstatus = 0;
-  yynerrs = 0;
-  yychar = YYEMPTY;		/* Cause a token to be read.  */
-
-  /* Initialize stack pointers.
-     Waste one element of value and location stack
-     so that they stay on the same level as the state stack.
-     The wasted elements are never initialized.  */
-
-  yyssp = yyss - 1;
-  yyvsp = yyvs;
-#ifdef YYLSP_NEEDED
-  yylsp = yyls;
-#endif
-
-/* Push a new state, which is found in  yystate  .  */
-/* In all cases, when you get here, the value and location stacks
-   have just been pushed. so pushing a state here evens the stacks.  */
-yynewstate:
-
-  *++yyssp = yystate;
-
-  if (yyssp >= yyss + yystacksize - 1)
-    {
-      /* Give user a chance to reallocate the stack */
-      /* Use copies of these so that the &'s don't force the real ones into memory. */
-      YYSTYPE *yyvs1 = yyvs;
-      short *yyss1 = yyss;
-#ifdef YYLSP_NEEDED
-      YYLTYPE *yyls1 = yyls;
-#endif
-
-      /* Get the current used size of the three stacks, in elements.  */
-      int size = yyssp - yyss + 1;
-
-#ifdef yyoverflow
-      /* Each stack pointer address is followed by the size of
-	 the data in use in that stack, in bytes.  */
-#ifdef YYLSP_NEEDED
-      /* This used to be a conditional around just the two extra args,
-	 but that might be undefined if yyoverflow is a macro.  */
-      yyoverflow("parser stack overflow",
-		 &yyss1, size * sizeof (*yyssp),
-		 &yyvs1, size * sizeof (*yyvsp),
-		 &yyls1, size * sizeof (*yylsp),
-		 &yystacksize);
-#else
-      yyoverflow("parser stack overflow",
-		 &yyss1, size * sizeof (*yyssp),
-		 &yyvs1, size * sizeof (*yyvsp),
-		 &yystacksize);
-#endif
-
-      yyss = yyss1; yyvs = yyvs1;
-#ifdef YYLSP_NEEDED
-      yyls = yyls1;
-#endif
-#else /* no yyoverflow */
-      /* Extend the stack our own way.  */
-      if (yystacksize >= YYMAXDEPTH)
-	{
-	  yyerror("parser stack overflow");
-	  if (yyfree_stacks)
-	    {
-	      free (yyss);
-	      free (yyvs);
-#ifdef YYLSP_NEEDED
-	      free (yyls);
-#endif
-	    }
-	  return 2;
-	}
-      yystacksize *= 2;
-      if (yystacksize > YYMAXDEPTH)
-	yystacksize = YYMAXDEPTH;
-#ifndef YYSTACK_USE_ALLOCA
-      yyfree_stacks = 1;
-#endif
-      yyss = (short *) YYSTACK_ALLOC (yystacksize * sizeof (*yyssp));
-      __yy_memcpy ((char *)yyss, (char *)yyss1,
-		   size * (unsigned int) sizeof (*yyssp));
-      yyvs = (YYSTYPE *) YYSTACK_ALLOC (yystacksize * sizeof (*yyvsp));
-      __yy_memcpy ((char *)yyvs, (char *)yyvs1,
-		   size * (unsigned int) sizeof (*yyvsp));
-#ifdef YYLSP_NEEDED
-      yyls = (YYLTYPE *) YYSTACK_ALLOC (yystacksize * sizeof (*yylsp));
-      __yy_memcpy ((char *)yyls, (char *)yyls1,
-		   size * (unsigned int) sizeof (*yylsp));
-#endif
-#endif /* no yyoverflow */
-
-      yyssp = yyss + size - 1;
-      yyvsp = yyvs + size - 1;
-#ifdef YYLSP_NEEDED
-      yylsp = yyls + size - 1;
-#endif
-
-#if YYDEBUG != 0
-      if (yydebug)
-	fprintf(stderr, "Stack size increased to %d\n", yystacksize);
-#endif
-
-      if (yyssp >= yyss + yystacksize - 1)
-	YYABORT;
-    }
-
-#if YYDEBUG != 0
-  if (yydebug)
-    fprintf(stderr, "Entering state %d\n", yystate);
-#endif
-
-  goto yybackup;
- yybackup:
-
-/* Do appropriate processing given the current state.  */
-/* Read a lookahead token if we need one and don't already have one.  */
-/* yyresume: */
-
-  /* First try to decide what to do without reference to lookahead token.  */
-
-  yyn = yypact[yystate];
-  if (yyn == YYFLAG)
-    goto yydefault;
-
-  /* Not known => get a lookahead token if don't already have one.  */
-
-  /* yychar is either YYEMPTY or YYEOF
-     or a valid token in external form.  */
-
-  if (yychar == YYEMPTY)
-    {
-#if YYDEBUG != 0
-      if (yydebug)
-	fprintf(stderr, "Reading a token: ");
-#endif
-      yychar = YYLEX;
-    }
-
-  /* Convert token to internal form (in yychar1) for indexing tables with */
-
-  if (yychar <= 0)		/* This means end of input. */
-    {
-      yychar1 = 0;
-      yychar = YYEOF;		/* Don't call YYLEX any more */
-
-#if YYDEBUG != 0
-      if (yydebug)
-	fprintf(stderr, "Now at end of input.\n");
-#endif
-    }
-  else
-    {
-      yychar1 = YYTRANSLATE(yychar);
-
-#if YYDEBUG != 0
-      if (yydebug)
-	{
-	  fprintf (stderr, "Next token is %d (%s", yychar, yytname[yychar1]);
-	  /* Give the individual parser a way to print the precise meaning
-	     of a token, for further debugging info.  */
-#ifdef YYPRINT
-	  YYPRINT (stderr, yychar, yylval);
-#endif
-	  fprintf (stderr, ")\n");
-	}
-#endif
-    }
-
-  yyn += yychar1;
-  if (yyn < 0 || yyn > YYLAST || yycheck[yyn] != yychar1)
-    goto yydefault;
-
-  yyn = yytable[yyn];
-
-  /* yyn is what to do for this token type in this state.
-     Negative => reduce, -yyn is rule number.
-     Positive => shift, yyn is new state.
-       New state is final state => don't bother to shift,
-       just return success.
-     0, or most negative number => error.  */
-
-  if (yyn < 0)
-    {
-      if (yyn == YYFLAG)
-	goto yyerrlab;
-      yyn = -yyn;
-      goto yyreduce;
-    }
-  else if (yyn == 0)
-    goto yyerrlab;
-
-  if (yyn == YYFINAL)
-    YYACCEPT;
-
-  /* Shift the lookahead token.  */
-
-#if YYDEBUG != 0
-  if (yydebug)
-    fprintf(stderr, "Shifting token %d (%s), ", yychar, yytname[yychar1]);
-#endif
-
-  /* Discard the token being shifted unless it is eof.  */
-  if (yychar != YYEOF)
-    yychar = YYEMPTY;
-
-  *++yyvsp = yylval;
-#ifdef YYLSP_NEEDED
-  *++yylsp = yylloc;
-#endif
-
-  /* count tokens shifted since error; after three, turn off error status.  */
-  if (yyerrstatus) yyerrstatus--;
-
-  yystate = yyn;
-  goto yynewstate;
-
-/* Do the default action for the current state.  */
-yydefault:
-
-  yyn = yydefact[yystate];
-  if (yyn == 0)
-    goto yyerrlab;
-
-/* Do a reduction.  yyn is the number of a rule to reduce with.  */
-yyreduce:
-  yylen = yyr2[yyn];
-  if (yylen > 0)
-    yyval = yyvsp[1-yylen]; /* implement default value of the action */
-
-#if YYDEBUG != 0
-  if (yydebug)
-    {
-      int i;
-
-      fprintf (stderr, "Reducing via rule %d (line %d), ",
-	       yyn, yyrline[yyn]);
-
-      /* Print the symbols being reduced, and their result.  */
-      for (i = yyprhs[yyn]; yyrhs[i] > 0; i++)
-	fprintf (stderr, "%s ", yytname[yyrhs[i]]);
-      fprintf (stderr, " -> %s\n", yytname[yyr1[yyn]]);
-    }
-#endif
-
-
-  switch (yyn) {
-
-case 3:
-#line 256 "./parse.yacc"
-{ ; ;
-    break;}
-case 4:
-#line 258 "./parse.yacc"
-{ yyerrok; ;
-    break;}
-case 5:
-#line 259 "./parse.yacc"
-{ push; ;
-    break;}
-case 6:
-#line 259 "./parse.yacc"
-{
-			    while (top && user_matches != TRUE)
-				pop;
-			;
-    break;}
-case 7:
-#line 264 "./parse.yacc"
-{ ; ;
-    break;}
-case 8:
-#line 266 "./parse.yacc"
-{ ; ;
-    break;}
-case 9:
-#line 268 "./parse.yacc"
-{ ; ;
-    break;}
-case 10:
-#line 270 "./parse.yacc"
-{ ; ;
-    break;}
-case 13:
-#line 278 "./parse.yacc"
-{
-			    /*
-			     * We already did a push if necessary in
-			     * cmndspec so just reset some values so
-			     * the next 'privilege' gets a clean slate.
-			     */
-			    host_matches = -1;
-			    runas_matches = -1;
-			    no_passwd = pwdef;
-			;
-    break;}
-case 14:
-#line 290 "./parse.yacc"
-{
-			    if (yyvsp[0].BOOLEAN != -1)
-				host_matches = yyvsp[0].BOOLEAN;
-			;
-    break;}
-case 15:
-#line 294 "./parse.yacc"
-{
-			    if (yyvsp[0].BOOLEAN != -1)
-				host_matches = ! yyvsp[0].BOOLEAN;
-			;
-    break;}
-case 16:
-#line 299 "./parse.yacc"
-{
-			    yyval.BOOLEAN = TRUE;
-			;
-    break;}
-case 17:
-#line 302 "./parse.yacc"
-{
-			    if (addr_matches(yyvsp[0].string))
-				yyval.BOOLEAN = TRUE;
-			    else
-				yyval.BOOLEAN = -1;
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 18:
-#line 309 "./parse.yacc"
-{
-			    if (netgr_matches(yyvsp[0].string, user_host, NULL))
-				yyval.BOOLEAN = TRUE;
-			    else
-				yyval.BOOLEAN = -1;
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 19:
-#line 316 "./parse.yacc"
-{
-			    if (strcasecmp(user_shost, yyvsp[0].string) == 0)
-				yyval.BOOLEAN = TRUE;
-			    else
-				yyval.BOOLEAN = -1;
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 20:
-#line 323 "./parse.yacc"
-{
-			    if (strcasecmp(user_host, yyvsp[0].string) == 0)
-				yyval.BOOLEAN = TRUE;
-			    else
-				yyval.BOOLEAN = -1;
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 21:
-#line 330 "./parse.yacc"
-{
-			    aliasinfo *aip = find_alias(yyvsp[0].string, HOST_ALIAS);
-
-			    /* could be an all-caps hostname */
-			    if (aip)
-				yyval.BOOLEAN = aip->val;
-			    else if (strcasecmp(user_shost, yyvsp[0].string) == 0)
-				yyval.BOOLEAN = TRUE;
-			    else {
-				if (pedantic) {
-				    (void) fprintf(stderr,
-					"%s: undeclared Host_Alias `%s' referenced near line %d\n",
-					(pedantic == 1) ? "Warning" : "Error", yyvsp[0].string, sudolineno);
-				    if (pedantic > 1) {
-					yyerror(NULL);
-					YYERROR;
-				    }
-				}
-				yyval.BOOLEAN = -1;
-			    }
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 24:
-#line 358 "./parse.yacc"
-{
-			    /*
-			     * Push the entry onto the stack if it is worth
-			     * saving and clear cmnd_matches for next cmnd.
-			     *
-			     * We need to save at least one entry on
-			     * the stack so sudoers_lookup() can tell that
-			     * the user was listed in sudoers.  Also, we
-			     * need to be able to tell whether or not a
-			     * user was listed for this specific host.
-			     */
-			    if (user_matches != -1 && host_matches != -1 &&
-				cmnd_matches != -1 && runas_matches != -1)
-				pushcp;
-			    else if (user_matches != -1 && (top == 1 ||
-				(top == 2 && host_matches != -1 &&
-				match[0].host == -1)))
-				pushcp;
-			    cmnd_matches = -1;
-			;
-    break;}
-case 25:
-#line 380 "./parse.yacc"
-{
-			    if (yyvsp[0].BOOLEAN != -1)
-				cmnd_matches = yyvsp[0].BOOLEAN;
-			;
-    break;}
-case 26:
-#line 384 "./parse.yacc"
-{
-			    if (printmatches == TRUE) {
-				if (in_alias == TRUE)
-				    append_entries("!", ", ");
-				else if (host_matches == TRUE &&
-				    user_matches == TRUE)
-				    append_cmnd("!", NULL);
-			    }
-			;
-    break;}
-case 27:
-#line 392 "./parse.yacc"
-{
-			    if (yyvsp[0].BOOLEAN != -1)
-				cmnd_matches = ! yyvsp[0].BOOLEAN;
-			;
-    break;}
-case 28:
-#line 398 "./parse.yacc"
-{
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE) {
-				if (runas_matches == -1) {
-				    cm_list[cm_list_len].runas_len = 0;
-				} else {
-				    /* Inherit runas data. */
-				    cm_list[cm_list_len].runas =
-					estrdup(cm_list[cm_list_len-1].runas);
-				    cm_list[cm_list_len].runas_len =
-					cm_list[cm_list_len-1].runas_len;
-				    cm_list[cm_list_len].runas_size =
-					cm_list[cm_list_len-1].runas_size;
-				}
-			    }
-			    /*
-			     * If this is the first entry in a command list
-			     * then check against RUNAS_DEFAULT.
-			     */
-			    if (runas_matches == -1)
-				runas_matches =
-				    (strcmp(RUNAS_DEFAULT, user_runas) == 0);
-			;
-    break;}
-case 29:
-#line 421 "./parse.yacc"
-{ ; ;
-    break;}
-case 32:
-#line 428 "./parse.yacc"
-{
-			    if (yyvsp[0].BOOLEAN != -1)
-				runas_matches = yyvsp[0].BOOLEAN;
-			;
-    break;}
-case 33:
-#line 432 "./parse.yacc"
-{
-			    if (printmatches == TRUE) {
-				if (in_alias == TRUE)
-				    append_entries("!", ", ");
-				else if (host_matches == TRUE &&
-				    user_matches == TRUE)
-				    append_runas("!", ", ");
-			    }
-			;
-    break;}
-case 34:
-#line 440 "./parse.yacc"
-{
-			    if (yyvsp[0].BOOLEAN != -1)
-				runas_matches = ! yyvsp[0].BOOLEAN;
-			;
-    break;}
-case 35:
-#line 445 "./parse.yacc"
-{
-			    if (printmatches == TRUE) {
-				if (in_alias == TRUE)
-				    append_entries(yyvsp[0].string, ", ");
-				else if (host_matches == TRUE &&
-				    user_matches == TRUE)
-				    append_runas(yyvsp[0].string, ", ");
-			    }
-			    if (strcmp(yyvsp[0].string, user_runas) == 0)
-				yyval.BOOLEAN = TRUE;
-			    else
-				yyval.BOOLEAN = -1;
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 36:
-#line 459 "./parse.yacc"
-{
-			    if (printmatches == TRUE) {
-				if (in_alias == TRUE)
-				    append_entries(yyvsp[0].string, ", ");
-				else if (host_matches == TRUE &&
-				    user_matches == TRUE)
-				    append_runas(yyvsp[0].string, ", ");
-			    }
-			    if (usergr_matches(yyvsp[0].string, user_runas))
-				yyval.BOOLEAN = TRUE;
-			    else
-				yyval.BOOLEAN = -1;
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 37:
-#line 473 "./parse.yacc"
-{
-			    if (printmatches == TRUE) {
-				if (in_alias == TRUE)
-				    append_entries(yyvsp[0].string, ", ");
-				else if (host_matches == TRUE &&
-				    user_matches == TRUE)
-				    append_runas(yyvsp[0].string, ", ");
-			    }
-			    if (netgr_matches(yyvsp[0].string, NULL, user_runas))
-				yyval.BOOLEAN = TRUE;
-			    else
-				yyval.BOOLEAN = -1;
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 38:
-#line 487 "./parse.yacc"
-{
-			    aliasinfo *aip = find_alias(yyvsp[0].string, RUNAS_ALIAS);
-
-			    if (printmatches == TRUE) {
-				if (in_alias == TRUE)
-				    append_entries(yyvsp[0].string, ", ");
-				else if (host_matches == TRUE &&
-				    user_matches == TRUE)
-				    append_runas(yyvsp[0].string, ", ");
-			    }
-			    /* could be an all-caps username */
-			    if (aip)
-				yyval.BOOLEAN = aip->val;
-			    else if (strcmp(yyvsp[0].string, user_runas) == 0)
-				yyval.BOOLEAN = TRUE;
-			    else {
-				if (pedantic) {
-				    (void) fprintf(stderr,
-					"%s: undeclared Runas_Alias `%s' referenced near line %d\n",
-					(pedantic == 1) ? "Warning" : "Error", yyvsp[0].string, sudolineno);
-				    if (pedantic > 1) {
-					yyerror(NULL);
-					YYERROR;
-				    }
-				}
-				yyval.BOOLEAN = -1;
-			    }
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 39:
-#line 516 "./parse.yacc"
-{
-			    if (printmatches == TRUE) {
-				if (in_alias == TRUE)
-				    append_entries("ALL", ", ");
-				else if (host_matches == TRUE &&
-				    user_matches == TRUE)
-				    append_runas("ALL", ", ");
-			    }
-			    yyval.BOOLEAN = TRUE;
-			;
-    break;}
-case 40:
-#line 528 "./parse.yacc"
-{
-			    /* Inherit NOPASSWD/PASSWD status. */
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE) {
-				if (no_passwd == TRUE)
-				    cm_list[cm_list_len].nopasswd = TRUE;
-				else
-				    cm_list[cm_list_len].nopasswd = FALSE;
-			    }
-			;
-    break;}
-case 41:
-#line 538 "./parse.yacc"
-{
-			    no_passwd = TRUE;
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE)
-				cm_list[cm_list_len].nopasswd = TRUE;
-			;
-    break;}
-case 42:
-#line 544 "./parse.yacc"
-{
-			    no_passwd = FALSE;
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE)
-				cm_list[cm_list_len].nopasswd = FALSE;
-			;
-    break;}
-case 43:
-#line 552 "./parse.yacc"
-{
-			    if (printmatches == TRUE) {
-				if (in_alias == TRUE)
-				    append_entries("ALL", ", ");
-				else if (host_matches == TRUE &&
-				    user_matches == TRUE) {
-				    append_cmnd("ALL", NULL);
-				    expand_match_list();
-				}
-			    }
-
-			    yyval.BOOLEAN = TRUE;
-
-			    if (safe_cmnd)
-				free(safe_cmnd);
-			    safe_cmnd = estrdup(user_cmnd);
-			;
-    break;}
-case 44:
-#line 569 "./parse.yacc"
-{
-			    aliasinfo *aip;
-
-			    if (printmatches == TRUE) {
-				if (in_alias == TRUE)
-				    append_entries(yyvsp[0].string, ", ");
-				else if (host_matches == TRUE &&
-				    user_matches == TRUE) {
-				    append_cmnd(yyvsp[0].string, NULL);
-				    expand_match_list();
-				}
-			    }
-
-			    if ((aip = find_alias(yyvsp[0].string, CMND_ALIAS)))
-				yyval.BOOLEAN = aip->val;
-			    else {
-				if (pedantic) {
-				    (void) fprintf(stderr,
-					"%s: undeclared Cmnd_Alias `%s' referenced near line %d\n",
-					(pedantic == 1) ? "Warning" : "Error", yyvsp[0].string, sudolineno);
-				    if (pedantic > 1) {
-					yyerror(NULL);
-					YYERROR;
-				    }
-				}
-				yyval.BOOLEAN = -1;
-			    }
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 45:
-#line 598 "./parse.yacc"
-{
-			    if (printmatches == TRUE) {
-				if (in_alias == TRUE) {
-				    append_entries(yyvsp[0].command.cmnd, ", ");
-				    if (yyvsp[0].command.args)
-					append_entries(yyvsp[0].command.args, " ");
-				}
-				if (host_matches == TRUE &&
-				    user_matches == TRUE)  {
-				    append_cmnd(yyvsp[0].command.cmnd, NULL);
-				    if (yyvsp[0].command.args)
-					append_cmnd(yyvsp[0].command.args, " ");
-				    expand_match_list();
-				}
-			    }
-
-			    if (command_matches(user_cmnd, user_args,
-				yyvsp[0].command.cmnd, yyvsp[0].command.args))
-				yyval.BOOLEAN = TRUE;
-			    else
-				yyval.BOOLEAN = -1;
-
-			    free(yyvsp[0].command.cmnd);
-			    if (yyvsp[0].command.args)
-				free(yyvsp[0].command.args);
-			;
-    break;}
-case 48:
-#line 630 "./parse.yacc"
-{ push; ;
-    break;}
-case 49:
-#line 630 "./parse.yacc"
-{
-			    if ((host_matches != -1 || pedantic) &&
-				!add_alias(yyvsp[-3].string, HOST_ALIAS, host_matches))
-				YYERROR;
-			    pop;
-			;
-    break;}
-case 54:
-#line 646 "./parse.yacc"
-{
-			    push;
-			    if (printmatches == TRUE) {
-				in_alias = TRUE;
-				/* Allocate space for ga_list if necessary. */
-				expand_ga_list();
-				ga_list[ga_list_len-1].type = CMND_ALIAS;
-				ga_list[ga_list_len-1].alias = estrdup(yyvsp[0].string);
-			     }
-			;
-    break;}
-case 55:
-#line 655 "./parse.yacc"
-{
-			    if ((cmnd_matches != -1 || pedantic) &&
-				!add_alias(yyvsp[-3].string, CMND_ALIAS, cmnd_matches))
-				YYERROR;
-			    pop;
-			    free(yyvsp[-3].string);
-
-			    if (printmatches == TRUE)
-				in_alias = FALSE;
-			;
-    break;}
-case 56:
-#line 667 "./parse.yacc"
-{ ; ;
-    break;}
-case 60:
-#line 675 "./parse.yacc"
-{
-			    push;
-			    if (printmatches == TRUE) {
-				in_alias = TRUE;
-				/* Allocate space for ga_list if necessary. */
-				expand_ga_list();
-				ga_list[ga_list_len-1].type = RUNAS_ALIAS;
-				ga_list[ga_list_len-1].alias = estrdup(yyvsp[0].string);
-			    }
-			;
-    break;}
-case 61:
-#line 684 "./parse.yacc"
-{
-			    if ((runas_matches != -1 || pedantic) &&
-				!add_alias(yyvsp[-3].string, RUNAS_ALIAS, runas_matches))
-				YYERROR;
-			    pop;
-			    free(yyvsp[-3].string);
-
-			    if (printmatches == TRUE)
-				in_alias = FALSE;
-			;
-    break;}
-case 64:
-#line 700 "./parse.yacc"
-{ push; ;
-    break;}
-case 65:
-#line 700 "./parse.yacc"
-{
-			    if ((user_matches != -1 || pedantic) &&
-				!add_alias(yyvsp[-3].string, USER_ALIAS, user_matches))
-				YYERROR;
-			    pop;
-			    free(yyvsp[-3].string);
-			;
-    break;}
-case 66:
-#line 709 "./parse.yacc"
-{ ; ;
-    break;}
-case 68:
-#line 713 "./parse.yacc"
-{
-			    if (yyvsp[0].BOOLEAN != -1)
-				user_matches = yyvsp[0].BOOLEAN;
-			;
-    break;}
-case 69:
-#line 717 "./parse.yacc"
-{
-			    if (yyvsp[0].BOOLEAN != -1)
-				user_matches = ! yyvsp[0].BOOLEAN;
-			;
-    break;}
-case 70:
-#line 722 "./parse.yacc"
-{
-			    if (strcmp(yyvsp[0].string, user_name) == 0)
-				yyval.BOOLEAN = TRUE;
-			    else
-				yyval.BOOLEAN = -1;
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 71:
-#line 729 "./parse.yacc"
-{
-			    if (usergr_matches(yyvsp[0].string, user_name))
-				yyval.BOOLEAN = TRUE;
-			    else
-				yyval.BOOLEAN = -1;
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 72:
-#line 736 "./parse.yacc"
-{
-			    if (netgr_matches(yyvsp[0].string, NULL, user_name))
-				yyval.BOOLEAN = TRUE;
-			    else
-				yyval.BOOLEAN = -1;
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 73:
-#line 743 "./parse.yacc"
-{
-			    aliasinfo *aip = find_alias(yyvsp[0].string, USER_ALIAS);
-
-			    /* could be an all-caps username */
-			    if (aip)
-				yyval.BOOLEAN = aip->val;
-			    else if (strcmp(yyvsp[0].string, user_name) == 0)
-				yyval.BOOLEAN = TRUE;
-			    else {
-				if (pedantic) {
-				    (void) fprintf(stderr,
-					"%s: undeclared User_Alias `%s' referenced near line %d\n",
-					(pedantic == 1) ? "Warning" : "Error", yyvsp[0].string, sudolineno);
-				    if (pedantic > 1)
-					YYERROR;
-				}
-				yyval.BOOLEAN = -1;
-			    }
-			    free(yyvsp[0].string);
-			;
-    break;}
-case 74:
-#line 763 "./parse.yacc"
-{
-			    yyval.BOOLEAN = TRUE;
-			;
-    break;}
-}
-   /* the action file gets copied in in place of this dollarsign */
-#line 542 "/usr/local/share/bison.simple"
-
-  yyvsp -= yylen;
-  yyssp -= yylen;
-#ifdef YYLSP_NEEDED
-  yylsp -= yylen;
-#endif
-
-#if YYDEBUG != 0
-  if (yydebug)
-    {
-      short *ssp1 = yyss - 1;
-      fprintf (stderr, "state stack now");
-      while (ssp1 != yyssp)
-	fprintf (stderr, " %d", *++ssp1);
-      fprintf (stderr, "\n");
-    }
-#endif
-
-  *++yyvsp = yyval;
-
-#ifdef YYLSP_NEEDED
-  yylsp++;
-  if (yylen == 0)
-    {
-      yylsp->first_line = yylloc.first_line;
-      yylsp->first_column = yylloc.first_column;
-      yylsp->last_line = (yylsp-1)->last_line;
-      yylsp->last_column = (yylsp-1)->last_column;
-      yylsp->text = 0;
-    }
-  else
-    {
-      yylsp->last_line = (yylsp+yylen-1)->last_line;
-      yylsp->last_column = (yylsp+yylen-1)->last_column;
-    }
-#endif
-
-  /* Now "shift" the result of the reduction.
-     Determine what state that goes to,
-     based on the state we popped back to
-     and the rule number reduced by.  */
-
-  yyn = yyr1[yyn];
-
-  yystate = yypgoto[yyn - YYNTBASE] + *yyssp;
-  if (yystate >= 0 && yystate <= YYLAST && yycheck[yystate] == *yyssp)
-    yystate = yytable[yystate];
-  else
-    yystate = yydefgoto[yyn - YYNTBASE];
-
-  goto yynewstate;
-
-yyerrlab:   /* here on detecting error */
-
-  if (! yyerrstatus)
-    /* If not already recovering from an error, report this error.  */
-    {
-      ++yynerrs;
-
-#ifdef YYERROR_VERBOSE
-      yyn = yypact[yystate];
-
-      if (yyn > YYFLAG && yyn < YYLAST)
-	{
-	  int size = 0;
-	  char *msg;
-	  int x, count;
-
-	  count = 0;
-	  /* Start X at -yyn if nec to avoid negative indexes in yycheck.  */
-	  for (x = (yyn < 0 ? -yyn : 0);
-	       x < (sizeof(yytname) / sizeof(char *)); x++)
-	    if (yycheck[x + yyn] == x)
-	      size += strlen(yytname[x]) + 15, count++;
-	  msg = (char *) malloc(size + 15);
-	  if (msg != 0)
-	    {
-	      strcpy(msg, "parse error");
-
-	      if (count < 5)
-		{
-		  count = 0;
-		  for (x = (yyn < 0 ? -yyn : 0);
-		       x < (sizeof(yytname) / sizeof(char *)); x++)
-		    if (yycheck[x + yyn] == x)
-		      {
-			strcat(msg, count == 0 ? ", expecting `" : " or `");
-			strcat(msg, yytname[x]);
-			strcat(msg, "'");
-			count++;
-		      }
-		}
-	      yyerror(msg);
-	      free(msg);
-	    }
-	  else
-	    yyerror ("parse error; also virtual memory exceeded");
-	}
-      else
-#endif /* YYERROR_VERBOSE */
-	yyerror("parse error");
-    }
-
-  goto yyerrlab1;
-yyerrlab1:   /* here on error raised explicitly by an action */
-
-  if (yyerrstatus == 3)
-    {
-      /* if just tried and failed to reuse lookahead token after an error, discard it.  */
-
-      /* return failure if at end of input */
-      if (yychar == YYEOF)
-	YYABORT;
-
-#if YYDEBUG != 0
-      if (yydebug)
-	fprintf(stderr, "Discarding token %d (%s).\n", yychar, yytname[yychar1]);
-#endif
-
-      yychar = YYEMPTY;
-    }
-
-  /* Else will try to reuse lookahead token
-     after shifting the error token.  */
-
-  yyerrstatus = 3;		/* Each real token shifted decrements this */
-
-  goto yyerrhandle;
-
-yyerrdefault:  /* current state does not do anything special for the error token. */
-
-#if 0
-  /* This is wrong; only states that explicitly want error tokens
-     should shift them.  */
-  yyn = yydefact[yystate];  /* If its default is to accept any token, ok.  Otherwise pop it.*/
-  if (yyn) goto yydefault;
-#endif
-
-yyerrpop:   /* pop the current state because it cannot handle the error token */
-
-  if (yyssp == yyss) YYABORT;
-  yyvsp--;
-  yystate = *--yyssp;
-#ifdef YYLSP_NEEDED
-  yylsp--;
-#endif
-
-#if YYDEBUG != 0
-  if (yydebug)
-    {
-      short *ssp1 = yyss - 1;
-      fprintf (stderr, "Error: state stack now");
-      while (ssp1 != yyssp)
-	fprintf (stderr, " %d", *++ssp1);
-      fprintf (stderr, "\n");
-    }
-#endif
-
-yyerrhandle:
-
-  yyn = yypact[yystate];
-  if (yyn == YYFLAG)
-    goto yyerrdefault;
-
-  yyn += YYTERROR;
-  if (yyn < 0 || yyn > YYLAST || yycheck[yyn] != YYTERROR)
-    goto yyerrdefault;
-
-  yyn = yytable[yyn];
-  if (yyn < 0)
-    {
-      if (yyn == YYFLAG)
-	goto yyerrpop;
-      yyn = -yyn;
-      goto yyreduce;
-    }
-  else if (yyn == 0)
-    goto yyerrpop;
-
-  if (yyn == YYFINAL)
-    YYACCEPT;
-
-#if YYDEBUG != 0
-  if (yydebug)
-    fprintf(stderr, "Shifting error token, ");
-#endif
-
-  *++yyvsp = yylval;
-#ifdef YYLSP_NEEDED
-  *++yylsp = yylloc;
-#endif
-
-  yystate = yyn;
-  goto yynewstate;
-
- yyacceptlab:
-  /* YYACCEPT comes here.  */
-  if (yyfree_stacks)
-    {
-      free (yyss);
-      free (yyvs);
-#ifdef YYLSP_NEEDED
-      free (yyls);
-#endif
-    }
-  return 0;
-
- yyabortlab:
-  /* YYABORT comes here.  */
-  if (yyfree_stacks)
-    {
-      free (yyss);
-      free (yyvs);
-#ifdef YYLSP_NEEDED
-      free (yyls);
-#endif
-    }
-  return 1;
-}
-#line 768 "./parse.yacc"
-
+#define YYINITSTACKSIZE 200
+int yydebug;
+int yynerrs;
+int yyerrflag;
+int yychar;
+short *yyssp;
+YYSTYPE *yyvsp;
+YYSTYPE yyval;
+YYSTYPE yylval;
+short *yyss;
+short *yysslim;
+YYSTYPE *yyvs;
+int yystacksize;
+#line 769 "./parse.yacc"
 
 #define MOREALIASES (32)
 aliasinfo *aliases = NULL;
@@ -2168,4 +885,847 @@ init_parser()
     /* Allocate space for the match list (for `sudo -l'). */
     if (printmatches == TRUE)
 	expand_match_list();
+}
+#line 890 "sudo.tab.c"
+/* allocate initial stack or double stack size, up to YYMAXDEPTH */
+#if defined(__cplusplus) || __STDC__
+static int yygrowstack(void)
+#else
+static int yygrowstack()
+#endif
+{
+    int newsize, i;
+    short *newss;
+    YYSTYPE *newvs;
+
+    if ((newsize = yystacksize) == 0)
+        newsize = YYINITSTACKSIZE;
+    else if (newsize >= YYMAXDEPTH)
+        return -1;
+    else if ((newsize *= 2) > YYMAXDEPTH)
+        newsize = YYMAXDEPTH;
+    i = yyssp - yyss;
+    newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
+      (short *)malloc(newsize * sizeof *newss);
+    if (newss == NULL)
+        return -1;
+    yyss = newss;
+    yyssp = newss + i;
+    newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
+      (YYSTYPE *)malloc(newsize * sizeof *newvs);
+    if (newvs == NULL)
+        return -1;
+    yyvs = newvs;
+    yyvsp = newvs + i;
+    yystacksize = newsize;
+    yysslim = yyss + newsize - 1;
+    return 0;
+}
+
+#define YYABORT goto yyabort
+#define YYREJECT goto yyabort
+#define YYACCEPT goto yyaccept
+#define YYERROR goto yyerrlab
+int
+#if defined(__cplusplus) || __STDC__
+yyparse(void)
+#else
+yyparse()
+#endif
+{
+    register int yym, yyn, yystate;
+#if YYDEBUG
+    register char *yys;
+
+    if ((yys = getenv("YYDEBUG")))
+    {
+        yyn = *yys;
+        if (yyn >= '0' && yyn <= '9')
+            yydebug = yyn - '0';
+    }
+#endif
+
+    yynerrs = 0;
+    yyerrflag = 0;
+    yychar = (-1);
+
+    if (yyss == NULL && yygrowstack()) goto yyoverflow;
+    yyssp = yyss;
+    yyvsp = yyvs;
+    *yyssp = yystate = 0;
+
+yyloop:
+    if ((yyn = yydefred[yystate]) != 0) goto yyreduce;
+    if (yychar < 0)
+    {
+        if ((yychar = yylex()) < 0) yychar = 0;
+#if YYDEBUG
+        if (yydebug)
+        {
+            yys = 0;
+            if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
+            if (!yys) yys = "illegal-symbol";
+            printf("%sdebug: state %d, reading %d (%s)\n",
+                    YYPREFIX, yystate, yychar, yys);
+        }
+#endif
+    }
+    if ((yyn = yysindex[yystate]) && (yyn += yychar) >= 0 &&
+            yyn <= YYTABLESIZE && yycheck[yyn] == yychar)
+    {
+#if YYDEBUG
+        if (yydebug)
+            printf("%sdebug: state %d, shifting to state %d\n",
+                    YYPREFIX, yystate, yytable[yyn]);
+#endif
+        if (yyssp >= yysslim && yygrowstack())
+        {
+            goto yyoverflow;
+        }
+        *++yyssp = yystate = yytable[yyn];
+        *++yyvsp = yylval;
+        yychar = (-1);
+        if (yyerrflag > 0)  --yyerrflag;
+        goto yyloop;
+    }
+    if ((yyn = yyrindex[yystate]) && (yyn += yychar) >= 0 &&
+            yyn <= YYTABLESIZE && yycheck[yyn] == yychar)
+    {
+        yyn = yytable[yyn];
+        goto yyreduce;
+    }
+    if (yyerrflag) goto yyinrecovery;
+#if defined(lint) || defined(__GNUC__)
+    goto yynewerror;
+#endif
+yynewerror:
+    yyerror("syntax error");
+#if defined(lint) || defined(__GNUC__)
+    goto yyerrlab;
+#endif
+yyerrlab:
+    ++yynerrs;
+yyinrecovery:
+    if (yyerrflag < 3)
+    {
+        yyerrflag = 3;
+        for (;;)
+        {
+            if ((yyn = yysindex[*yyssp]) && (yyn += YYERRCODE) >= 0 &&
+                    yyn <= YYTABLESIZE && yycheck[yyn] == YYERRCODE)
+            {
+#if YYDEBUG
+                if (yydebug)
+                    printf("%sdebug: state %d, error recovery shifting\
+ to state %d\n", YYPREFIX, *yyssp, yytable[yyn]);
+#endif
+                if (yyssp >= yysslim && yygrowstack())
+                {
+                    goto yyoverflow;
+                }
+                *++yyssp = yystate = yytable[yyn];
+                *++yyvsp = yylval;
+                goto yyloop;
+            }
+            else
+            {
+#if YYDEBUG
+                if (yydebug)
+                    printf("%sdebug: error recovery discarding state %d\n",
+                            YYPREFIX, *yyssp);
+#endif
+                if (yyssp <= yyss) goto yyabort;
+                --yyssp;
+                --yyvsp;
+            }
+        }
+    }
+    else
+    {
+        if (yychar == 0) goto yyabort;
+#if YYDEBUG
+        if (yydebug)
+        {
+            yys = 0;
+            if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
+            if (!yys) yys = "illegal-symbol";
+            printf("%sdebug: state %d, error recovery discards token %d (%s)\n",
+                    YYPREFIX, yystate, yychar, yys);
+        }
+#endif
+        yychar = (-1);
+        goto yyloop;
+    }
+yyreduce:
+#if YYDEBUG
+    if (yydebug)
+        printf("%sdebug: state %d, reducing by rule %d (%s)\n",
+                YYPREFIX, yystate, yyn, yyrule[yyn]);
+#endif
+    yym = yylen[yyn];
+    yyval = yyvsp[1-yym];
+    switch (yyn)
+    {
+case 3:
+#line 256 "./parse.yacc"
+{ ; }
+break;
+case 4:
+#line 258 "./parse.yacc"
+{ yyerrok; }
+break;
+case 5:
+#line 259 "./parse.yacc"
+{ push; }
+break;
+case 6:
+#line 259 "./parse.yacc"
+{
+			    while (top && user_matches != TRUE)
+				pop;
+			}
+break;
+case 7:
+#line 264 "./parse.yacc"
+{ ; }
+break;
+case 8:
+#line 266 "./parse.yacc"
+{ ; }
+break;
+case 9:
+#line 268 "./parse.yacc"
+{ ; }
+break;
+case 10:
+#line 270 "./parse.yacc"
+{ ; }
+break;
+case 13:
+#line 278 "./parse.yacc"
+{
+			    /*
+			     * We already did a push if necessary in
+			     * cmndspec so just reset some values so
+			     * the next 'privilege' gets a clean slate.
+			     */
+			    host_matches = -1;
+			    runas_matches = -1;
+			    no_passwd = pwdef;
+			}
+break;
+case 14:
+#line 290 "./parse.yacc"
+{
+			    if (yyvsp[0].BOOLEAN != -1)
+				host_matches = yyvsp[0].BOOLEAN;
+			}
+break;
+case 15:
+#line 294 "./parse.yacc"
+{
+			    if (yyvsp[0].BOOLEAN != -1)
+				host_matches = ! yyvsp[0].BOOLEAN;
+			}
+break;
+case 16:
+#line 299 "./parse.yacc"
+{
+			    yyval.BOOLEAN = TRUE;
+			}
+break;
+case 17:
+#line 302 "./parse.yacc"
+{
+			    if (addr_matches(yyvsp[0].string))
+				yyval.BOOLEAN = TRUE;
+			    else
+				yyval.BOOLEAN = -1;
+			    free(yyvsp[0].string);
+			}
+break;
+case 18:
+#line 309 "./parse.yacc"
+{
+			    if (netgr_matches(yyvsp[0].string, user_host, NULL))
+				yyval.BOOLEAN = TRUE;
+			    else
+				yyval.BOOLEAN = -1;
+			    free(yyvsp[0].string);
+			}
+break;
+case 19:
+#line 316 "./parse.yacc"
+{
+			    if (strcasecmp(user_shost, yyvsp[0].string) == 0)
+				yyval.BOOLEAN = TRUE;
+			    else
+				yyval.BOOLEAN = -1;
+			    free(yyvsp[0].string);
+			}
+break;
+case 20:
+#line 323 "./parse.yacc"
+{
+			    if (strcasecmp(user_host, yyvsp[0].string) == 0)
+				yyval.BOOLEAN = TRUE;
+			    else
+				yyval.BOOLEAN = -1;
+			    free(yyvsp[0].string);
+			}
+break;
+case 21:
+#line 330 "./parse.yacc"
+{
+			    aliasinfo *aip = find_alias(yyvsp[0].string, HOST_ALIAS);
+
+			    /* could be an all-caps hostname */
+			    if (aip)
+				yyval.BOOLEAN = aip->val;
+			    else if (strcasecmp(user_shost, yyvsp[0].string) == 0)
+				yyval.BOOLEAN = TRUE;
+			    else {
+				if (pedantic) {
+				    (void) fprintf(stderr,
+					"%s: undeclared Host_Alias `%s' referenced near line %d\n",
+					(pedantic == 1) ? "Warning" : "Error", yyvsp[0].string, sudolineno);
+				    if (pedantic > 1) {
+					yyerror(NULL);
+					YYERROR;
+				    }
+				}
+				yyval.BOOLEAN = -1;
+			    }
+			    free(yyvsp[0].string);
+			}
+break;
+case 24:
+#line 358 "./parse.yacc"
+{
+			    /*
+			     * Push the entry onto the stack if it is worth
+			     * saving and clear cmnd_matches for next cmnd.
+			     *
+			     * We need to save at least one entry on
+			     * the stack so sudoers_lookup() can tell that
+			     * the user was listed in sudoers.  Also, we
+			     * need to be able to tell whether or not a
+			     * user was listed for this specific host.
+			     */
+			    if (user_matches != -1 && host_matches != -1 &&
+				cmnd_matches != -1 && runas_matches != -1)
+				pushcp;
+			    else if (user_matches != -1 && (top == 1 ||
+				(top == 2 && host_matches != -1 &&
+				match[0].host == -1)))
+				pushcp;
+			    cmnd_matches = -1;
+			}
+break;
+case 25:
+#line 380 "./parse.yacc"
+{
+			    if (yyvsp[0].BOOLEAN != -1)
+				cmnd_matches = yyvsp[0].BOOLEAN;
+			}
+break;
+case 26:
+#line 384 "./parse.yacc"
+{
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries("!", ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_cmnd("!", NULL);
+			    }
+			}
+break;
+case 27:
+#line 392 "./parse.yacc"
+{
+			    if (yyvsp[0].BOOLEAN != -1)
+				cmnd_matches = ! yyvsp[0].BOOLEAN;
+			}
+break;
+case 28:
+#line 398 "./parse.yacc"
+{
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE) {
+				if (runas_matches == -1) {
+				    cm_list[cm_list_len].runas_len = 0;
+				} else {
+				    /* Inherit runas data. */
+				    cm_list[cm_list_len].runas =
+					estrdup(cm_list[cm_list_len-1].runas);
+				    cm_list[cm_list_len].runas_len =
+					cm_list[cm_list_len-1].runas_len;
+				    cm_list[cm_list_len].runas_size =
+					cm_list[cm_list_len-1].runas_size;
+				}
+			    }
+			    /*
+			     * If this is the first entry in a command list
+			     * then check against RUNAS_DEFAULT.
+			     */
+			    if (runas_matches == -1)
+				runas_matches =
+				    (strcmp(RUNAS_DEFAULT, user_runas) == 0);
+			}
+break;
+case 29:
+#line 421 "./parse.yacc"
+{ ; }
+break;
+case 32:
+#line 428 "./parse.yacc"
+{
+			    if (yyvsp[0].BOOLEAN != -1)
+				runas_matches = yyvsp[0].BOOLEAN;
+			}
+break;
+case 33:
+#line 432 "./parse.yacc"
+{
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries("!", ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_runas("!", ", ");
+			    }
+			}
+break;
+case 34:
+#line 440 "./parse.yacc"
+{
+			    if (yyvsp[0].BOOLEAN != -1)
+				runas_matches = ! yyvsp[0].BOOLEAN;
+			}
+break;
+case 35:
+#line 445 "./parse.yacc"
+{
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries(yyvsp[0].string, ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_runas(yyvsp[0].string, ", ");
+			    }
+			    if (strcmp(yyvsp[0].string, user_runas) == 0)
+				yyval.BOOLEAN = TRUE;
+			    else
+				yyval.BOOLEAN = -1;
+			    free(yyvsp[0].string);
+			}
+break;
+case 36:
+#line 459 "./parse.yacc"
+{
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries(yyvsp[0].string, ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_runas(yyvsp[0].string, ", ");
+			    }
+			    if (usergr_matches(yyvsp[0].string, user_runas))
+				yyval.BOOLEAN = TRUE;
+			    else
+				yyval.BOOLEAN = -1;
+			    free(yyvsp[0].string);
+			}
+break;
+case 37:
+#line 473 "./parse.yacc"
+{
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries(yyvsp[0].string, ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_runas(yyvsp[0].string, ", ");
+			    }
+			    if (netgr_matches(yyvsp[0].string, NULL, user_runas))
+				yyval.BOOLEAN = TRUE;
+			    else
+				yyval.BOOLEAN = -1;
+			    free(yyvsp[0].string);
+			}
+break;
+case 38:
+#line 487 "./parse.yacc"
+{
+			    aliasinfo *aip = find_alias(yyvsp[0].string, RUNAS_ALIAS);
+
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries(yyvsp[0].string, ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_runas(yyvsp[0].string, ", ");
+			    }
+			    /* could be an all-caps username */
+			    if (aip)
+				yyval.BOOLEAN = aip->val;
+			    else if (strcmp(yyvsp[0].string, user_runas) == 0)
+				yyval.BOOLEAN = TRUE;
+			    else {
+				if (pedantic) {
+				    (void) fprintf(stderr,
+					"%s: undeclared Runas_Alias `%s' referenced near line %d\n",
+					(pedantic == 1) ? "Warning" : "Error", yyvsp[0].string, sudolineno);
+				    if (pedantic > 1) {
+					yyerror(NULL);
+					YYERROR;
+				    }
+				}
+				yyval.BOOLEAN = -1;
+			    }
+			    free(yyvsp[0].string);
+			}
+break;
+case 39:
+#line 516 "./parse.yacc"
+{
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries("ALL", ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE)
+				    append_runas("ALL", ", ");
+			    }
+			    yyval.BOOLEAN = TRUE;
+			}
+break;
+case 40:
+#line 528 "./parse.yacc"
+{
+			    /* Inherit NOPASSWD/PASSWD status. */
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE) {
+				if (no_passwd == TRUE)
+				    cm_list[cm_list_len].nopasswd = TRUE;
+				else
+				    cm_list[cm_list_len].nopasswd = FALSE;
+			    }
+			}
+break;
+case 41:
+#line 538 "./parse.yacc"
+{
+			    no_passwd = TRUE;
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				cm_list[cm_list_len].nopasswd = TRUE;
+			}
+break;
+case 42:
+#line 544 "./parse.yacc"
+{
+			    no_passwd = FALSE;
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				cm_list[cm_list_len].nopasswd = FALSE;
+			}
+break;
+case 43:
+#line 552 "./parse.yacc"
+{
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries("ALL", ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE) {
+				    append_cmnd("ALL", NULL);
+				    expand_match_list();
+				}
+			    }
+
+			    yyval.BOOLEAN = TRUE;
+
+			    if (safe_cmnd)
+				free(safe_cmnd);
+			    safe_cmnd = estrdup(user_cmnd);
+			}
+break;
+case 44:
+#line 569 "./parse.yacc"
+{
+			    aliasinfo *aip;
+
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE)
+				    append_entries(yyvsp[0].string, ", ");
+				else if (host_matches == TRUE &&
+				    user_matches == TRUE) {
+				    append_cmnd(yyvsp[0].string, NULL);
+				    expand_match_list();
+				}
+			    }
+
+			    if ((aip = find_alias(yyvsp[0].string, CMND_ALIAS)))
+				yyval.BOOLEAN = aip->val;
+			    else {
+				if (pedantic) {
+				    (void) fprintf(stderr,
+					"%s: undeclared Cmnd_Alias `%s' referenced near line %d\n",
+					(pedantic == 1) ? "Warning" : "Error", yyvsp[0].string, sudolineno);
+				    if (pedantic > 1) {
+					yyerror(NULL);
+					YYERROR;
+				    }
+				}
+				yyval.BOOLEAN = -1;
+			    }
+			    free(yyvsp[0].string);
+			}
+break;
+case 45:
+#line 598 "./parse.yacc"
+{
+			    if (printmatches == TRUE) {
+				if (in_alias == TRUE) {
+				    append_entries(yyvsp[0].command.cmnd, ", ");
+				    if (yyvsp[0].command.args)
+					append_entries(yyvsp[0].command.args, " ");
+				}
+				if (host_matches == TRUE &&
+				    user_matches == TRUE)  {
+				    append_cmnd(yyvsp[0].command.cmnd, NULL);
+				    if (yyvsp[0].command.args)
+					append_cmnd(yyvsp[0].command.args, " ");
+				    expand_match_list();
+				}
+			    }
+
+			    if (command_matches(user_cmnd, user_args,
+				yyvsp[0].command.cmnd, yyvsp[0].command.args))
+				yyval.BOOLEAN = TRUE;
+			    else
+				yyval.BOOLEAN = -1;
+
+			    free(yyvsp[0].command.cmnd);
+			    if (yyvsp[0].command.args)
+				free(yyvsp[0].command.args);
+			}
+break;
+case 48:
+#line 630 "./parse.yacc"
+{ push; }
+break;
+case 49:
+#line 630 "./parse.yacc"
+{
+			    if ((host_matches != -1 || pedantic) &&
+				!add_alias(yyvsp[-3].string, HOST_ALIAS, host_matches))
+				YYERROR;
+			    pop;
+			}
+break;
+case 54:
+#line 646 "./parse.yacc"
+{
+			    push;
+			    if (printmatches == TRUE) {
+				in_alias = TRUE;
+				/* Allocate space for ga_list if necessary. */
+				expand_ga_list();
+				ga_list[ga_list_len-1].type = CMND_ALIAS;
+				ga_list[ga_list_len-1].alias = estrdup(yyvsp[0].string);
+			     }
+			}
+break;
+case 55:
+#line 655 "./parse.yacc"
+{
+			    if ((cmnd_matches != -1 || pedantic) &&
+				!add_alias(yyvsp[-3].string, CMND_ALIAS, cmnd_matches))
+				YYERROR;
+			    pop;
+			    free(yyvsp[-3].string);
+
+			    if (printmatches == TRUE)
+				in_alias = FALSE;
+			}
+break;
+case 56:
+#line 667 "./parse.yacc"
+{ ; }
+break;
+case 60:
+#line 675 "./parse.yacc"
+{
+			    push;
+			    if (printmatches == TRUE) {
+				in_alias = TRUE;
+				/* Allocate space for ga_list if necessary. */
+				expand_ga_list();
+				ga_list[ga_list_len-1].type = RUNAS_ALIAS;
+				ga_list[ga_list_len-1].alias = estrdup(yyvsp[0].string);
+			    }
+			}
+break;
+case 61:
+#line 684 "./parse.yacc"
+{
+			    if ((runas_matches != -1 || pedantic) &&
+				!add_alias(yyvsp[-3].string, RUNAS_ALIAS, runas_matches))
+				YYERROR;
+			    pop;
+			    free(yyvsp[-3].string);
+
+			    if (printmatches == TRUE)
+				in_alias = FALSE;
+			}
+break;
+case 64:
+#line 700 "./parse.yacc"
+{ push; }
+break;
+case 65:
+#line 700 "./parse.yacc"
+{
+			    if ((user_matches != -1 || pedantic) &&
+				!add_alias(yyvsp[-3].string, USER_ALIAS, user_matches))
+				YYERROR;
+			    pop;
+			    free(yyvsp[-3].string);
+			}
+break;
+case 66:
+#line 709 "./parse.yacc"
+{ ; }
+break;
+case 68:
+#line 713 "./parse.yacc"
+{
+			    if (yyvsp[0].BOOLEAN != -1)
+				user_matches = yyvsp[0].BOOLEAN;
+			}
+break;
+case 69:
+#line 717 "./parse.yacc"
+{
+			    if (yyvsp[0].BOOLEAN != -1)
+				user_matches = ! yyvsp[0].BOOLEAN;
+			}
+break;
+case 70:
+#line 722 "./parse.yacc"
+{
+			    if (strcmp(yyvsp[0].string, user_name) == 0)
+				yyval.BOOLEAN = TRUE;
+			    else
+				yyval.BOOLEAN = -1;
+			    free(yyvsp[0].string);
+			}
+break;
+case 71:
+#line 729 "./parse.yacc"
+{
+			    if (usergr_matches(yyvsp[0].string, user_name))
+				yyval.BOOLEAN = TRUE;
+			    else
+				yyval.BOOLEAN = -1;
+			    free(yyvsp[0].string);
+			}
+break;
+case 72:
+#line 736 "./parse.yacc"
+{
+			    if (netgr_matches(yyvsp[0].string, NULL, user_name))
+				yyval.BOOLEAN = TRUE;
+			    else
+				yyval.BOOLEAN = -1;
+			    free(yyvsp[0].string);
+			}
+break;
+case 73:
+#line 743 "./parse.yacc"
+{
+			    aliasinfo *aip = find_alias(yyvsp[0].string, USER_ALIAS);
+
+			    /* could be an all-caps username */
+			    if (aip)
+				yyval.BOOLEAN = aip->val;
+			    else if (strcmp(yyvsp[0].string, user_name) == 0)
+				yyval.BOOLEAN = TRUE;
+			    else {
+				if (pedantic) {
+				    (void) fprintf(stderr,
+					"%s: undeclared User_Alias `%s' referenced near line %d\n",
+					(pedantic == 1) ? "Warning" : "Error", yyvsp[0].string, sudolineno);
+				    if (pedantic > 1)
+					YYERROR;
+				}
+				yyval.BOOLEAN = -1;
+			    }
+			    free(yyvsp[0].string);
+			}
+break;
+case 74:
+#line 763 "./parse.yacc"
+{
+			    yyval.BOOLEAN = TRUE;
+			}
+break;
+#line 1676 "sudo.tab.c"
+    }
+    yyssp -= yym;
+    yystate = *yyssp;
+    yyvsp -= yym;
+    yym = yylhs[yyn];
+    if (yystate == 0 && yym == 0)
+    {
+#if YYDEBUG
+        if (yydebug)
+            printf("%sdebug: after reduction, shifting from state 0 to\
+ state %d\n", YYPREFIX, YYFINAL);
+#endif
+        yystate = YYFINAL;
+        *++yyssp = YYFINAL;
+        *++yyvsp = yyval;
+        if (yychar < 0)
+        {
+            if ((yychar = yylex()) < 0) yychar = 0;
+#if YYDEBUG
+            if (yydebug)
+            {
+                yys = 0;
+                if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
+                if (!yys) yys = "illegal-symbol";
+                printf("%sdebug: state %d, reading %d (%s)\n",
+                        YYPREFIX, YYFINAL, yychar, yys);
+            }
+#endif
+        }
+        if (yychar == 0) goto yyaccept;
+        goto yyloop;
+    }
+    if ((yyn = yygindex[yym]) && (yyn += yystate) >= 0 &&
+            yyn <= YYTABLESIZE && yycheck[yyn] == yystate)
+        yystate = yytable[yyn];
+    else
+        yystate = yydgoto[yym];
+#if YYDEBUG
+    if (yydebug)
+        printf("%sdebug: after reduction, shifting from state %d \
+to state %d\n", YYPREFIX, *yyssp, yystate);
+#endif
+    if (yyssp >= yysslim && yygrowstack())
+    {
+        goto yyoverflow;
+    }
+    *++yyssp = yystate;
+    *++yyvsp = yyval;
+    goto yyloop;
+yyoverflow:
+    yyerror("yacc stack overflow");
+yyabort:
+    return (1);
+yyaccept:
+    return (0);
 }
