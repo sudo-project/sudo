@@ -85,3 +85,11 @@ A) The simplest thing to do is "rm -f lex.yy.c ; ln sudo-lex.yy.c lex.yy.c"
    which will set you back up with a pre-flexed lex.yy.c.
    If you want to hack on the lexer you should get a copy of flex
    from ftp.ee.lbl.gov
+
+Q) My C compiler complains about:
+	"./options.h", line xx "/*" detected in comment
+   Should I be worried?
+A) No, this is due to the way options are commented out in options.h.
+   Some ANSI compilers are just a bit too protective.
+   If anyone have a better way to that is just as easy to uncomment
+   and that doesn't produce a similar warning, please let me know.
