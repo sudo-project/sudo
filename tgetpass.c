@@ -56,6 +56,7 @@ static char rcsid[] = "$Id$";
 #include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
+#include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
 #ifdef HAVE_TERMIOS_H
@@ -216,8 +217,10 @@ char * tgetpass(prompt, timeout, user, host)
 	 * get password or return empty string if nothing to read by timeout
 	 */
 	buf[0] = '\0';
-	if (select(fileno(input) + 1, readfds, 0, 0, &tv) > 0 &&
-	    fgets(buf, sizeof(buf), input)) {
+	while ((n = select(fileno(input) + 1, readfds, 0, 0, &tv)) == -1 &&
+	    errno == EINTR)
+	    ;
+	if (n > 0 && fgets(buf, sizeof(buf), input)) {
 	    n = strlen(buf);
 	    if (buf[n - 1] == '\n')
 		buf[n - 1] = '\0';
