@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "October  7, 2004" "1.6.9" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "October 13, 2004" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -563,11 +563,9 @@ UIDs are set to the target user (root by default).  This option
 changes that behavior such that the real \s-1UID\s0 is left as the invoking
 user's \s-1UID\s0.  In other words, this makes \fBsudo\fR act as a setuid
 wrapper.  This can be useful on systems that disable some potentially
-dangerous functionality when a program is run setuid.  Note, however,
-that this means that \fBsudo\fR will run with the real uid of the invoking
-user which may allow that user to kill \fBsudo\fR before it can log a
-failure, depending on how your \s-1OS\s0 defines the interaction between
-signals and setuid processes.
+dangerous functionality when a program is run setuid.  This option
+is only effective on systems with either the \fIsetreuid()\fR or \fIsetresuid()\fR
+function.
 .IP "env_reset" 12
 .IX Item "env_reset"
 If set, \fBsudo\fR will reset the environment to only contain the
