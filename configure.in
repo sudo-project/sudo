@@ -75,7 +75,7 @@ echo 'Configuring for use with AFS')
 
 dnl --with-csops
 AC_ARG_WITH(csops, [  --with-csops            add CSops standard options], OPTIONS="${OPTIONS} -DUSE_INSULTS -DCLASSIC_INSULTS -DCSOPS_INSULTS -DENV_EDITOR"
-sbin_dir='$(exec_prefix)/sbin'
+sbindir='$(exec_prefix)/sbin'
 echo 'CSOps--adding options: USE_INSULTS CLASSIC_INSULTS CSOPS_INSULTS ENV_EDITOR')
 
 dnl
