@@ -453,6 +453,14 @@ case "$OS" in
     "next")	echo "Looks like NeXTstep"
 		;;
     "bsd/386" | "bsd/os") echo "Looks like BSDi BSD/OS"
+		# Use shlicc unless asked to do otherwise
+		if test "$OSREV" -ge 2 -a "${with_CC+set}" != set -a \
+			"$ac_cv_prog_CC" = "gcc"; then
+		    echo 'using shlicc as CC'
+		    ac_cv_prog_CC=shlicc
+		    CC="$ac_cv_prog_CC"
+		fi  
+		# This should always be true but why not be careful...
 		if test "$with_C2" = "yes"; then
 		    SHADOW_TYPE="SPW_BSD"
 		fi
