@@ -43,6 +43,9 @@ elif test -f "/usr/ucb/vi"; then
 elif test -f "/usr/bsd/vi"; then
     AC_MSG_RESULT(/usr/bsd/vi)
     AC_DEFINE(_SUDO_PATH_VI, "/usr/bsd/vi")
+elif test -f "/bin/vi"; then
+    AC_MSG_RESULT(/bin/vi)
+    AC_DEFINE(_SUDO_PATH_VI, "/bin/vi")
 elif test -f "/usr/local/bin/vi"; then
     AC_MSG_RESULT(/usr/local/bin/vi)
     AC_DEFINE(_SUDO_PATH_VI, "/usr/local/bin/vi")
@@ -88,6 +91,27 @@ elif test -f "/usr/ucb/mv"; then
 elif test -f "/usr/sbin/mv"; then
     AC_MSG_RESULT(/usr/sbin/mv)
     AC_DEFINE(_SUDO_PATH_MV, "/usr/sbin/mv")
+else
+    AC_MSG_RESULT(not found)
+fi
+])dnl
+
+dnl
+dnl check for bourne shell
+dnl
+AC_DEFUN(SUDO_PROG_BSHELL, [AC_MSG_CHECKING(for bourne shell)
+if test -f "/bin/sh"; then
+    AC_MSG_RESULT(/bin/sh)
+    AC_DEFINE(_SUDO_PATH_BSHELL, "/bin/sh")
+elif test -f "/usr/bin/sh"; then
+    AC_MSG_RESULT(/usr/bin/sh)
+    AC_DEFINE(_SUDO_PATH_BSHELL, "/usr/bin/sh")
+elif test -f "/sbin/sh"; then
+    AC_MSG_RESULT(/sbin/sh)
+    AC_DEFINE(_SUDO_PATH_BSHELL, "/sbin/sh")
+elif test -f "/sbin/sh"; then
+    AC_MSG_RESULT(/usr/sbin/sh)
+    AC_DEFINE(_SUDO_PATH_BSHELL, "/usr/sbin/sh")
 else
     AC_MSG_RESULT(not found)
 fi
