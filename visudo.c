@@ -238,7 +238,11 @@ main(argc, argv)
 			sudoers, *argv);
 		Exit(0);
 	    }
+#ifdef HAVE_FLEX
+	    yyrestart(sudoers_tmp_fp);
+#else
 	    yyin = sudoers_tmp_fp;
+#endif /* HAVE_FLEX */
 	    yyout = stdout;
 
 	    /* parse the file */
@@ -258,7 +262,7 @@ main(argc, argv)
 	     */
 	    err_line_no = (status == 0) ? 0 : status - 1;
 	    status = 0;
-	    yylineno = 1;
+	    yylineno = 0;
 
 	    (void) fclose(sudoers_tmp_fp);
 	}
