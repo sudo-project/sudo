@@ -260,27 +260,27 @@ static int check_timestamp()
 static void update_timestamp()
 {
 #if defined(HAVE_UTIME) && !defined(HAVE_UTIME_NULL)
-#ifdef HAVE_UTIME_H
+#ifdef HAVE_UTIME_POSIX
+#define UTP		(&ut)
     struct utimbuf ut;
-    struct utimbuf *utp;
 
     ut.actime = ut.modtime = time(NULL);
-    utp = &ut;
 #else
+#define UTP		(ut)
     /* old BSD <= 4.3 has no struct utimbuf */
-    time_t utp[2];
+    time_t ut[2];
 
-    utp[0] = utp[1] = time(NULL);
-#endif /* HAVE_UTIME_H */
+    ut[0] = ut[1] = time(NULL);
+#endif /* HAVE_UTIME_POSIX */
 #else
-    struct utimbuf *utp = (struct utimbuf *) NULL;
+#define UTP		NULL
 #endif /* HAVE_UTIME && !HAVE_UTIME_NULL */
 
     /* become root */
     set_perms(PERM_ROOT);
 
     if (timedir_is_good) {
-	if (utime(timestampfile_p, utp) < 0) {
+	if (utime(timestampfile_p, UTP) < 0) {
 	    int fd = open(timestampfile_p, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 
 	    if (fd < 0)
@@ -292,6 +292,7 @@ static void update_timestamp()
     /* relinquish root */
     set_perms(PERM_USER);
 }
+#undef UTP
 
 
 
