@@ -47,7 +47,7 @@ static char sccsid[] = "@(#)lsearch.c	8.1 (Berkeley) 6/4/93";
 #endif /* HAVE_UNISTD_H */
 
 #include "compat.h"
-#include "search.h"
+#include "emul/search.h"
 
 
 static VOID *linear_base __P((const VOID *, VOID *, size_t *, size_t,
