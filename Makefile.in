@@ -85,14 +85,14 @@ SHELL = /bin/sh
 
 PROGS = @PROGS@
 
-SRCS = check.c find_path.c logging.c parse.c sudo.c sudo_realpath.c \
+SRCS = check.c find_path.c logging.c parse.c sudo.c sudo_goodpath.c \
        sudo_setenv.c parse.yacc parse.lex
 
 PARSEOBJS = y.tab.o lex.yy.o
 
 TESTOBJS = testsudoers.o
 
-SUDOBJS = check.o find_path.o logging.o parse.o sudo.o sudo_realpath.o \
+SUDOBJS = check.o find_path.o logging.o parse.o sudo.o sudo_goodpath.o \
           sudo_setenv.o
 
 VISUDOBJS = visudo.o
