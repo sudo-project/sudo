@@ -154,6 +154,13 @@ void log_error(code)
 	    break;
 
 	case PASSWORD_NOT_CORRECT:
+	    (void) sprintf(p, "password incorrect ; PWD=%s ; COMMAND=", cwd);
+#if (LOGGING & SLOG_SYSLOG)
+	    pri = Syslog_priority_NO;
+#endif /* LOGGING & SLOG_SYSLOG */
+	    break;
+
+	case PASSWORDS_NOT_CORRECT:
 	    (void) sprintf(p, "%d incorrect passwords ; PWD=%s ; COMMAND=",
 		    TRIES_FOR_PASSWORD, cwd);
 #if (LOGGING & SLOG_SYSLOG)
@@ -552,6 +559,11 @@ void inform_user(code)
 	    break;
 
 	case PASSWORD_NOT_CORRECT:
+	    (void) fprintf(stderr, "Password not entered correctly\n\n",
+		TRIES_FOR_PASSWORD);
+	    break;
+
+	case PASSWORDS_NOT_CORRECT:
 	    (void) fprintf(stderr, "Password not entered correctly after %d tries\n\n",
 		TRIES_FOR_PASSWORD);
 	    break;
@@ -609,6 +621,7 @@ static int appropriate(code)
      */
     case VALIDATE_OK:
     case PASSWORD_NOT_CORRECT:
+    case PASSWORDS_NOT_CORRECT:
 /*  case ALL_SYSTEMS_GO:               this is the same as OK */
 	return (0);
 	break;
