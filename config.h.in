@@ -286,6 +286,12 @@
 /* Define if you have strerror(3).  */
 #undef HAVE_STRERROR
 
+/* Define if you have lockf(3).  */
+#undef HAVE_LOCKF
+
+/* Define if you have flock(2).  */
+#undef HAVE_FLOCK
+
 /* Define if you have snprintf(3).  */
 #undef HAVE_SNPRINTF
 
