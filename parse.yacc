@@ -106,7 +106,7 @@ int top = 0;
 /*
  * Protoypes
  */
-extern int  command_matches	__P((char *, char **, char *, char **));
+extern int  command_matches	__P((char *, char **, char *, char *));
 extern int  addr_matches	__P((char *));
 extern int  netgr_matches	__P((char *, char *, char *));
 extern int  usergr_matches	__P((char *, char *));
@@ -335,22 +335,22 @@ cmnd		:	ALL {
 
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)  {
-				(void) printf("%s ", $1.cmnd);
-			    	for (t = $1.args; t && *t; t++)
-					(void) printf("%s ",*t);
+				(void) fputs($1.cmnd, stdout);
+				if (NewArgc > 1) {
+				    (void) putchar(' ');
+				    (void) fputs($1.args, stdout);
+				}
 				(void) putchar('\n');
 			    }
 
 			    /* if NewArgc > 1 pass ptr to 1st arg, else NULL */
 			    if (command_matches(cmnd, (NewArgc > 1) ?
-				    &NewArgv[1] : NULL, $1.cmnd, $1.args)) {
+				    cmnd_args : NULL, $1.cmnd, $1.args)) {
 				cmnd_matches = TRUE;
 				$$ = TRUE;
 			    }
 
 			    (void) free($1.cmnd);
-			    for (t = $1.args; t && *t; t++)
-				(void) free(*t);
 			    (void) free($1.args);
 			}
 		;
