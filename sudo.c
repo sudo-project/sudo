@@ -893,19 +893,17 @@ void set_perms(perm)
 				/*
 				 * If SUDOERS_UID == 0 we need to use
 				 * a different uid in order to avoid
-				 * NFS lossage.  Sigh.
+				 * NFS lossage.  Using uid 1 is a bit
+				 * bogus but should be safe.
 				 */
-				if (SUDOERS_UID) {
-				    if (seteuid(SUDOERS_UID)) {
-					perror("seteuid(SUDOERS_UID)");
+				if (SUDOERS_UID == 0) {
+				    if (seteuid(1)) {
+					perror("seteuid(1)");
 					exit(1);
 				    }
 				} else {
-				    if (!(pw_ent = getpwnam("nobody")))
-					pw_ent->pw_uid = (uid_t) -2;
-
-				    if (seteuid(pw_ent->pw_uid)) {
-					perror("seteuid(nobody)");
+				    if (seteuid(SUDOERS_UID)) {
+					perror("seteuid(SUDOERS_UID)");
 					exit(1);
 				    }
 				}
