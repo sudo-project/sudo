@@ -176,6 +176,27 @@ fi
 ])
 
 dnl
+dnl check for sa_len field in struct sockaddr
+dnl
+AC_DEFUN(SUDO_SOCK_SA_LEN,
+[AC_MSG_CHECKING(for sa_len field in struct sockaddr)
+AC_CACHE_VAL(sudo_cv_sock_sa_len,
+[AC_TRY_RUN([#include <sys/types.h>
+#include <sys/socket.h>
+main() {
+struct sockaddr s;
+s.sa_len = 0;
+exit(0);
+}], sudo_cv_sock_sa_len=yes, sudo_cv_sock_sa_len=no,
+  sudo_cv_sock_sa_len=no)
+rm -f core core.* *.core])dnl
+AC_MSG_RESULT($sudo_cv_sock_sa_len)
+if test $sudo_cv_sock_sa_len = yes; then
+  AC_DEFINE(HAVE_SA_LEN)
+fi
+])
+
+dnl
 dnl check for known UNIX variants
 dnl XXX - check to see that uname was checked first
 dnl
