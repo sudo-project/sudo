@@ -145,6 +145,29 @@
 #endif
 
 /*
+ * Simple isblank() macro for systems without it.
+ */
+#ifndef HAVE_ISBLANK
+# define isblank(_x)	((_x) == ' ' || (_x) == '\t')
+#endif
+
+/*
+ * Old BSD systems lack strchr(), strrchr(), memset() and memcpy()
+ */
+#if !defined(HAVE_STRCHR) && !defined(strchr)
+# define strchr(_s, _c)	index(_s, _c)
+#endif
+#if !defined(HAVE_STRRCHR) && !defined(strrchr)
+# define strrchr(_s, _c)	rindex(_s, _c)
+#endif
+#if !defined(HAVE_MEMCPY) && !defined(memcpy)
+# define memcpy(_d, _s, _n)	(bcopy(_s, _d, _n))
+#endif
+#if !defined(HAVE_MEMSET) && !defined(memset)
+# define memset(_s, _x, _n)	(bzero(_s, _n))
+#endif
+
+/*
  * Emulate sete[ug]id() via setres[ug]id(2) or setre[ug]id(2)
  */
 #ifndef HAVE_SETEUID
@@ -175,6 +198,7 @@
  */
 #ifdef HAVE__INNETGR
 # define innetgr(n, h, u, d)	(_innetgr(n, h, u, d))
+# define HAVE_INNETGR 1
 #endif /* HAVE__INNETGR */
 
 /*
