@@ -153,14 +153,15 @@ set_perms_posix(perm)
 }
 #endif /* !NO_SAVED_IDS && _SC_SAVED_IDS && _SC_VERSION */
 
-#ifdef HAVE_SETREUID
+#ifdef HAVE_SETRESUID
 /*
- * Set real and effective uids and gids based on perm.
- * We always retain a real or effective uid of 0 unless
- * we are headed for an exec().
+ * Set real and effective and saved uids and gids based on perm.
+ * We always retain a saved uid of 0 unless we are headed for an exec().
+ * We only flip the effective gid since it only changes for PERM_SUDOERS.
+ * This version of set_perms() works fine with the "stay_setuid" option.
  */
 void
-set_perms_fallback(perm)
+set_perms_suid(perm)
     int perm;
 {
     int error;
@@ -168,12 +169,84 @@ set_perms_fallback(perm)
     switch (perm) {
 	case PERM_FULL_ROOT:
 	case PERM_ROOT:
-				if (setuid(0))
-				    fatal("setuid(0) failed, your operating system may have broken POSIX saved ID support\nTry running configure with --disable-setreuid", 0);
+				if (setresuid(0, 0, 0))
+				    fatal("setresuid(0, 0, 0) failed, your operating system may have a broken setresuid() function\nTry running configure with --disable-setresuid", 0);
 			      	break;
 
 	case PERM_USER:
-    	    	    	        (void) setegid(user_gid);
+    	    	    	        (void) setresgid(user_gid, -1, -1);
+				if (setresuid(user_uid, user_uid, 0))
+				    fatal("setresuid(user_uid, user_uid, 0)", 1);
+			      	break;
+				
+	case PERM_FULL_USER:
+				/* headed for exec() */
+    	    	    	        (void) setgid(user_gid);
+				if (setresuid(user_uid, user_uid, user_uid))
+				    fatal("setresuid(user_uid, user_uid, user_uid)", 1);
+			      	break;
+				
+	case PERM_RUNAS:
+				/* headed for exec(), assume euid == 0 */
+				runas_setup();
+				error = setresuid(def_flag(I_STAY_SETUID) ?
+				    user_uid : runas_pw->pw_uid,
+				    runas_pw->pw_uid, runas_pw->pw_uid);
+				if (error)
+				    fatal("unable to change to runas uid", 1);
+				break;
+
+	case PERM_SUDOERS:
+				/* assume euid == 0, ruid == user */
+				if (setresgid(SUDOERS_GID, -1, -1))
+				    fatal("unable to change to sudoers gid", 1);
+
+				/*
+				 * If SUDOERS_UID == 0 and SUDOERS_MODE
+				 * is group readable we use a non-zero
+				 * uid in order to avoid NFS lossage.
+				 * Using uid 1 is a bit bogus but should
+				 * work on all OS's.
+				 */
+				if (SUDOERS_UID == 0) {
+				    if ((SUDOERS_MODE & 040) && setresuid(0, 1, 0))
+					fatal("setresuid(0, 1, 0)", 1);
+				} else {
+				    if (setresuid(0, SUDOERS_UID, 0))
+					fatal("setresuid(0, SUDOERS_UID, 0)", 1);
+				}
+			      	break;
+	case PERM_TIMESTAMP:
+				if (setresuid(0, timestamp_uid, 0))
+				    fatal("setresuid(0, timestamp_uid, 0)", 1);
+			      	break;
+    }
+}
+
+#else
+# ifdef HAVE_SETREUID
+
+/*
+ * Set real and effective uids and gids based on perm.
+ * We always retain a real or effective uid of 0 unless
+ * we are headed for an exec().
+ * This version of set_perms() works fine with the "stay_setuid" option.
+ */
+void
+set_perms_suid(perm)
+    int perm;
+{
+    int error;
+
+    switch (perm) {
+	case PERM_FULL_ROOT:
+	case PERM_ROOT:
+				if (setreuid(0, 0))
+				    fatal("setreuid(0, 0) failed, your operating system may have a broken setreuid() function\nTry running configure with --disable-setreuid", 0);
+			      	break;
+
+	case PERM_USER:
+    	    	    	        (void) setregid(user_gid, -1);
 				if (setreuid(0, user_uid))
 				    fatal("setreuid(0, user_uid)", 1);
 			      	break;
@@ -181,24 +254,23 @@ set_perms_fallback(perm)
 	case PERM_FULL_USER:
 				/* headed for exec() */
     	    	    	        (void) setgid(user_gid);
-				if (setuid(user_uid))
-				    fatal("setuid(user_uid)", 1);
+				if (setreuid(user_uid, user_uid))
+				    fatal("setreuid(user_uid, user_uid)", 1);
 			      	break;
 				
 	case PERM_RUNAS:
 				/* headed for exec(), assume euid == 0 */
 				runas_setup();
-				if (def_flag(I_STAY_SETUID))
-				    error = setreuid(user_uid, runas_pw->pw_uid);
-				else
-				    error = setuid(runas_pw->pw_uid);
+				error = setreuid(def_flag(I_STAY_SETUID) ?
+				    user_uid : runas_pw->pw_uid,
+				    runas_pw->pw_uid);
 				if (error)
 				    fatal("unable to change to runas uid", 1);
 				break;
 
 	case PERM_SUDOERS:
 				/* assume euid == 0, ruid == user */
-				if (setegid(SUDOERS_GID))
+				if (setregid(SUDOERS_GID, -1))
 				    fatal("unable to change to sudoers gid", 1);
 
 				/*
@@ -223,20 +295,20 @@ set_perms_fallback(perm)
     }
 }
 
-#else
+# else
 
 /*
  * Set real and effective uids and gids based on perm.
  * NOTE: does not support the "stay_setuid" option.
  */
 void
-set_perms_fallback(perm)
+set_perms_nosuid(perm)
     int perm;
 {
 
     /*
      * Since we only have setuid() and seteuid() we have to set
-     * real and effective uidss to 0 initially.
+     * real and effective uids to 0 initially.
      */
     if (setuid(0))
 	fatal("setuid(0)", 1);
@@ -288,7 +360,8 @@ set_perms_fallback(perm)
 			      	break;
     }
 }
-#endif /* HAVE_SETREUID */
+# endif /* HAVE_SETREUID */
+#endif /* HAVE_SETRESUID */
 
 static void
 runas_setup()

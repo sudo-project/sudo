@@ -260,17 +260,18 @@ main(argc, argv, envp)
     validated = sudoers_lookup(pwflag);
 
     /*
-     * If we have POSIX saved uids and the stay_setuid flag was not set,
-     * set the real, effective and saved uids to 0 and use set_perms_fallback()
+     * If we are using set_perms_posix() and the stay_setuid flag was not set,
+     * set the real, effective and saved uids to 0 and use set_perms_nosuid()
      * instead of set_perms_posix().
      */
-#if !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
+#if !defined(HAVE_SETRESUID) && !defined(HAVE_SETREUID) && \
+    !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
     if (!def_flag(I_STAY_SETUID) && set_perms == set_perms_posix) {
 	if (setuid(0)) {
 	    perror("setuid(0)");
 	    exit(1);
 	}
-	set_perms = set_perms_fallback;
+	set_perms = set_perms_nosuid;
     }
 #endif
 
@@ -901,13 +902,23 @@ initial_setup()
     for (fd = maxfd; fd > STDERR_FILENO; fd--)
 	(void) close(fd);
 
-    /* Set set_perms pointer to the correct function */
-#if !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
+    /*
+     * Make set_perms point to the correct function.
+     * If we are using setresuid() or setreuid() we only need to set this
+     * once.  If we are using POSIX saved uids we will switch to
+     * set_perms_nosuid after sudoers has been parsed if the "stay_suid"
+     * option is not set.
+     */
+#if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID)
+    set_perms = set_perms_suid;
+#else
+# if !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
     if (sysconf(_SC_SAVED_IDS) == 1 && sysconf(_SC_VERSION) >= 199009)
 	set_perms = set_perms_posix;
     else
-#endif
-	set_perms = set_perms_fallback;
+# endif
+	set_perms = set_perms_nosuid;
+#endif /* HAVE_SETRESUID || HAVE_SETREUID */
 }
 
 #ifdef HAVE_LOGIN_CAP_H

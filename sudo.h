@@ -202,8 +202,9 @@ int find_path		__P((char *, char **, char *));
 void check_user		__P((void));
 void verify_user	__P((struct passwd *, char *));
 int sudoers_lookup	__P((int));
+void set_perms_nosuid	__P((int));
 void set_perms_posix	__P((int));
-void set_perms_fallback	__P((int));
+void set_perms_suid	__P((int));
 void remove_timestamp	__P((int));
 int check_secureware	__P((char *));
 void sia_attempt_auth	__P((void));
@@ -235,7 +236,7 @@ extern int Argc;
 extern char **Argv;
 extern FILE *sudoers_fp;
 extern int tgetpass_flags;
-extern int timestamp_uid;
+extern uid_t timestamp_uid;
 
 extern void (*set_perms) __P((int));
 #endif
