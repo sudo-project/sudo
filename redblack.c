@@ -35,6 +35,8 @@
 static void rbrepair		__P((struct rbtree *, struct rbnode *));
 static void rotate_left		__P((struct rbtree *, struct rbnode *));
 static void rotate_right	__P((struct rbtree *, struct rbnode *));
+static void _rbdestroy		__P((struct rbtree *, struct rbnode *,
+				    void (*)(VOID *)));
 
 /*
  * Red-Black tree, see http://en.wikipedia.org/wiki/Red-black_tree
@@ -307,30 +309,33 @@ rbsuccessor(tree, node)
 }
 
 /*
- * Helper function for rbdestroy()
+ * Recursive portion of rbdestroy().
  */
-static int
-_rbdestroy(v1, v2)
-    VOID *v1, *v2;
+static void
+_rbdestroy(tree, node, destroy)
+    struct rbtree *tree;
+    struct rbnode *node;
+    void (*destroy)__P((VOID *));
 {
-    struct rbnode *node = (struct rbnode *) v1;
-    void (*destroy)__P((VOID *)) = (void (*)__P((VOID *))) v2;
-
-    destroy(node);
-    free(node);
-    return(0);
+    if (node != rbnil(tree)) {
+	_rbdestroy(tree, node->left, destroy);
+	_rbdestroy(tree, node->right, destroy);
+	if (destroy != NULL)
+	    destroy(node->data);
+	free(node);
+    }
 }
 
 /*
  * Destroy the specified tree, calling the destructor destroy
- * for each node and then freeing it.
+ * for each node and then freeing the tree itself.
  */
 void
 rbdestroy(tree, destroy)
     struct rbtree *tree;
     void (*destroy)__P((VOID *));
 {
-    rbapply(tree, _rbdestroy, (VOID *)destroy, postorder);
+    _rbdestroy(tree, rbfirst(tree), destroy);
     free(tree);
 }
 
