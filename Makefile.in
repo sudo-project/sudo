@@ -94,6 +94,8 @@ SUDOBJS = check.o find_path.o logging.o parse.o sudo.o sudo_goodpath.o \
 
 VISUDOBJS = visudo.o
 
+TESTOBJS = testsudoers.o
+
 LIBOBJS = @TGETPASS@ @LIBOBJS@
 
 HDRS = sudo.h pathnames.h options.h compat.h version.h insults.h
@@ -132,7 +134,10 @@ lex.yy.o: lex.yy.c y.tab.h $(HDRS)
 lex.yy.c: parse.lex
 	$(LEX) parse.lex
 
-$(SUDOOBJS) $(LIBOBJS) : $(HDRS) config.h
+testsudoers: $(PARSEOBJS) $(TESTOBJS)
+	$(CC) -o $@ $(PARSEOBJS) $(TESTOBJS) $(LDFLAGS) $(LIBS)
+
+$(SUDOBJS) $(LIBOBJS) : $(HDRS) config.h
 
 sudo.cat: sudo.man
 
