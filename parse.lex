@@ -52,9 +52,10 @@ extern int clearaliases;
 int sudolineno = 1;
 static int string_len = 0;
 static int string_size = 0;
+static int sawspace = 0;
 
-static void fill		__P((void));
-static void append		__P((void));
+static void fill		__P((char *, int));
+static void append		__P((char *, int, int));
 extern void reset_aliases	__P((void));
 
 /* realloc() to size + COMMANDARGINC to make room for command args */
@@ -76,134 +77,157 @@ N			[0-9][0-9]?[0-9]?
 %s	GOTCMND
 
 %%
-[ \t]+			{ ; }			/* throw away space/tabs */
+[ \t]+			{			/* throw away space/tabs */
+			    sawspace = TRUE;	/* but remember for append */
+			}
 
 \\\n			{ 
-			  ++sudolineno;
-			  LEXTRACE("\n\t");
+			    sawspace = TRUE;	/* remember for append */
+			    ++sudolineno;
+			    LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
 
-<GOTCMND>[:,=\n]	{
-			  BEGIN 0;
-			  unput(yytext[0]);
-			  return(COMMAND);
+<GOTCMND>\\[:\,=\\]	{
+			    LEXTRACE("QUOTEDCHAR ");
+			    append(yytext + 1, 1, sawspace);
+			    sawspace = FALSE;
+			}
+
+<GOTCMND>[:\,=\n]	{
+			    BEGIN 0;
+			    unput(*yytext);
+			    return(COMMAND);
 			}			/* end of command line args */
 
 \n			{ 
-			  ++sudolineno; 
-			  LEXTRACE("\n");
-			  return(COMMENT);
+			    ++sudolineno; 
+			    LEXTRACE("\n");
+			    return(COMMENT);
 			}			/* return newline */
 
 #.*\n			{
-			  ++sudolineno;
-			  LEXTRACE("\n");
-			  return(COMMENT);
+			    ++sudolineno;
+			    LEXTRACE("\n");
+			    return(COMMENT);
 			}			/* return comments */
 
-<GOTCMND>((\\[\,:=\\])|([^\,:=\\ \t\n#]))+ {
+<GOTCMND>[^\,:=\\ \t\n#]+ {
 			    LEXTRACE("ARG ");
-			    append();
+			    append(yytext, yyleng, sawspace);
+			    sawspace = FALSE;
 			  }			/* a command line arg */
 
 \,			{
-			  LEXTRACE(", ");
-			  return(',');
+			    LEXTRACE(", ");
+			    return(',');
 			}			/* return ',' */
 
-\!			{ return('!'); }		/* return '!' */
+\!			{
+			    return('!');		/* return '!' */
+			}
 
 =			{
-			  LEXTRACE("= ");
-			  return('=');
+			    LEXTRACE("= ");
+			    return('=');
 			}			/* return '=' */
 
 :			{
-			  LEXTRACE(": ");
-			  return(':');
+			    LEXTRACE(": ");
+			    return(':');
 			}			/* return ':' */
 
-\.			{ return('.'); }
+\.			{
+			    return('.');
+			}
 
 \+[a-zA-Z][a-zA-Z0-9_-]* {
-			  fill();
-			  return(NETGROUP);
+			    fill(yytext, yyleng);
+			    return(NETGROUP);
 			 }
 
 {N}\.{N}\.{N}\.{N}	{
-			  fill();
-			  return(NTWKADDR);
+			    fill(yytext, yyleng);
+			    return(NTWKADDR);
 			}
 
 \/[^\,:=\\ \t\n#]+\/	{
-			  LEXTRACE("COMMAND ");
-			  fill();
-			  return(COMMAND);
+			    LEXTRACE("COMMAND ");
+			    fill(yytext, yyleng);
+			    return(COMMAND);
 			}			/* a directory */
 
 \/[^\,:=\\ \t\n#]+	{
-			  BEGIN GOTCMND;
-			  LEXTRACE("COMMAND ");
-			  fill();
+			    BEGIN GOTCMND;
+			    LEXTRACE("COMMAND ");
+			    fill(yytext, yyleng);
 			}			/* a pathname */
 
 [A-Z][A-Z0-9_]*		{
-			  fill();
-			  if (strcmp(yytext, "ALL") == 0) {
-			      LEXTRACE("ALL ");
-			      return(ALL);
-			  }
-			  LEXTRACE("ALIAS ");
-			  return(ALIAS);
+			    fill(yytext, yyleng);
+			    if (strcmp(yytext, "ALL") == 0) {
+				LEXTRACE("ALL ");
+				return(ALL);
+			    }
+			    LEXTRACE("ALIAS ");
+			    return(ALIAS);
 			}
 
 [a-zA-Z][a-zA-Z0-9_-]*	{
-			  int l;
+			    int l;
 
-			  fill();
-			  if (strcmp(yytext, "Host_Alias") == 0) {
-			      LEXTRACE("HOSTALIAS ");
-			      return(HOSTALIAS);
-			  }
-			  if (strcmp(yytext, "Cmnd_Alias") == 0) {
-			      LEXTRACE("CMNDALIAS ");
-			      return(CMNDALIAS);
-			  }
-			  if (strcmp(yytext, "User_Alias") == 0) {
-			      LEXTRACE("USERALIAS ");
-			      return(USERALIAS);
-			  }
+			    fill(yytext, yyleng);
+			    if (strcmp(yytext, "Host_Alias") == 0) {
+				LEXTRACE("HOSTALIAS ");
+				return(HOSTALIAS);
+			    }
+			    if (strcmp(yytext, "Cmnd_Alias") == 0) {
+				LEXTRACE("CMNDALIAS ");
+				return(CMNDALIAS);
+			    }
+			    if (strcmp(yytext, "User_Alias") == 0) {
+				LEXTRACE("USERALIAS ");
+				return(USERALIAS);
+			    }
 
-			  l = yyleng - 1;
-			  if (isalpha(yytext[l]) || isdigit(yytext[l])) {
-			      /* NAME is what RFC1034 calls a label */
-			      LEXTRACE("NAME ");
-			      return(NAME);
-			  }
+			    l = yyleng - 1;
+			    if (isalpha(yytext[l]) || isdigit(yytext[l])) {
+				/* NAME is what RFC1034 calls a label */
+				LEXTRACE("NAME ");
+				return(NAME);
+			    }
 
-			  return(ERROR);
+			    return(ERROR);
 			}
 
-.			{ return(ERROR); }	/* return error */
+.			{
+			    return(ERROR);
+			}	/* parse error */
 
 %%
-static void fill() {
+static void fill(s, len)
+    char *s;
+    int len;
+{
 
-    string_len = yyleng;	/* length of copied string */
-    string_size = yyleng + 1;	/* leave room for the NULL */
+    string_len = len;		/* length of copied string */
+    string_size = len + 1;	/* leave room for the NULL */
 
     yylval.string = (char *) malloc(string_size);
     if (yylval.string == NULL)
 	yyerror("unable to allocate memory");
-    (void) strcpy(yylval.string, yytext);
+    (void) strcpy(yylval.string, s);
 }
 
 
-static void append() {
+static void append(s, len, addspace)
     char *s;
+    int len;
+    int addspace;
+{
+    char *p;
     int new_len;
 
-    new_len = string_len + yyleng + 1;
+    new_len = string_len + len + addspace;
 
     /*
      * If we don't have enough space realloc() some more
@@ -219,9 +243,10 @@ static void append() {
     }
 
     /* Efficiently append the arg (with a leading space) */
-    s = yylval.string + string_len;
-    *s++ = ' ';
-    (void) strcpy(s, yytext);
+    p = yylval.string + string_len;
+    if (addspace)
+	*p++ = ' ';
+    (void) strcpy(p, s);
     string_len = new_len;
 }
 
