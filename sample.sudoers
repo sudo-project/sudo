@@ -13,6 +13,11 @@ User_Alias	FULLTIMERS=millert,mikef,dowdy
 User_Alias	PARTTIMERS=bostley,jwfox,mccreary
 
 ##
+# Runas alias specification
+##
+Runas_Alias	OP=root,operator
+
+##
 # Cmnd alias specification
 ##
 Cmnd_Alias      DUMPS=/usr/etc/dump,/usr/etc/rdump,/usr/etc/restore,\
@@ -62,14 +67,15 @@ smartguy	CUNETS=ALL
 operator	ALL=DUMPS,KILL,PRINTING,SHUTDOWN,HALT,REBOOT,/usr/oper/bin/
 
 # joe may su only to operator
-joe		/usr/bin/su operator
+joe		ALL=/usr/bin/su operator
 
 # pete may change passwords for anyone but root
-pete		/bin/passwd [A-z]*,!/bin/passwd root
+pete		ALL=/bin/passwd [A-z]*,!/bin/passwd root
 
 # bob may run anything except root shells or su on the sun3 and sun4 machines
-bob		SUN4=ALL,!SU,!SHELLS:\
-		SUN3=ALL,!SU,!SHELLS
+# as any user in then Runas_Alias "OP" (contains root and operator)
+bob		SUN4=(OP) ALL,!SU,!SHELLS:\
+		SUN3=(OP) ALL,!SU,!SHELLS
 
 # jim may run anything on machines in the biglab netgroup
 jim		+biglab=ALL
