@@ -122,6 +122,8 @@ Special features/options:
 
   --with-skey             Enable S/Key support.
 
+  --with-opie             Enable NRL OPIE support.
+
   --with-SecurID          Enable SecurID support.
 
   --with-kerb4            Enable kerberos v4 support
