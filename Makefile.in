@@ -1,26 +1,32 @@
 #
-#  CU sudo version 1.6
-#  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
-# 
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 1, or (at your option)
-#  any later version.
-# 
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-# 
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-# 
-#  Please send bugs, changes, problems to sudo-bugs@courtesan.com
-# 
-#  @configure_input@
-# 
-#  $Sudo$
+# Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 3. The name of the author may not be used to endorse or promote products
+#    derived from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+# THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @configure_input@
+#
+# $Sudo$
 #
 
 #### Start of system configuration section. ####
@@ -94,45 +100,42 @@ SHELL = /bin/sh
 
 PROGS = @PROGS@
 
-SRCS = auth.c check.c getspwuid.c find_path.c logging.c parse.c sudo.c \
-       secureware.c goodpath.c sudo_setenv.c parse.yacc parse.lex visudo.c \
-       interfaces.c check_sia.c alloc.c
+SRCS = alloc.c check.c find_path.c getspwuid.c goodpath.c interfaces.c \
+       logging.c parse.c parse.lex parse.yacc sudo.c sudo_setenv.c tgetpass.c \
+       visudo.c $(AUTH_SRCS)
+
+AUTH_SRCS = auth/afs.c auth/authenticate.c auth/dce.c auth/fwtk.c auth/kerb4.c \
+	    auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
+	    auth/secureware.c auth/securid.c auth/sia.c auth/sudo_auth.c
+
+AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
 PARSEOBJS = sudo.tab.o lex.yy.o alloc.o
 
-SUDOBJS = auth.o check.o getspwuid.o find_path.o logging.o parse.o sudo.o \
-          secureware.o goodpath.o sudo_setenv.o interfaces.o \
-	  check_sia.o @DCE_OBJS@ @TGETPASS@
+SUDOBJS = check.o getspwuid.o goodpath.o find_path.o interfaces.o logging.o \
+	  parse.o sudo.o sudo_setenv.o tgetpass.o $(AUTH_OBJS) $(PARSEOBJS)
 
-VISUDOBJS = visudo.o
+VISUDOBJS = visudo.o $(PARSEOBJS)
 
-TESTOBJS = interfaces.o testsudoers.o
+TESTOBJS = interfaces.o testsudoers.o $(PARSEOBJS)
 
 LIBOBJS = @LIBOBJS@ @ALLOCA@
 
-HDRS = sudo.h compat.h version.h insults.h ins_2001.h ins_classic.h \
-       ins_goons.h ins_csops.h interfaces.h sudo.tab.h
+HDRS = compat.h ins_2001.h ins_classic.h ins_csops.h ins_goons.h insults.h \
+       interfaces.h logging.h sudo.h version.h
 
 VERSION = 1.6
 
-DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES COPYING HISTORY INSTALL \
-            INSTALL.configure UPGRADE TODO PORTING README RUNSON \
-            FAQ TROUBLESHOOTING Makefile.in acsite.m4 aixcrypt.exp \
-            config.h.in configure configure.in config.guess config.sub \
-            pathnames.h.in getcwd.c indent.pro install-sh \
-            mkinstalldirs lsearch.c putenv.c sudo.tab.c tgetpass.c \
-            emul/search.h emul/utime.h utime.c fnmatch.c emul/fnmatch.h \
-            fnmatch.3 testsudoers.c sample.pam sample.sudoers \
-            sudo.pod sudo.man sudo.cat visudo.pod visudo.man \
-            visudo.cat sudoers.pod sudoers.man sudoers.cat lex.yy.c \
-            sudoers dce_pwent.c alloca.c
-
-VERSIONFILES = emul/utime.h auth.c check.c compat.h config.h.in dce_pwent.c \
-	       find_path.c getspwuid.c getcwd.c goodpath.c ins_2001.h \
-	       ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.h \
-	       logging.c parse.c parse.lex parse.yacc pathnames.h.in \
-	       putenv.c sudo.c sudo.h sudo_setenv.c testsudoers.c interfaces.c \
-	       tgetpass.c utime.c visudo.c secureware.c check_sia.c alloc.c
+DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES FAQ HISTORY INSTALL INSTALL.configure \
+	    LICENSE Makefile.in PORTING README RUNSON TODO TROUBLESHOOTING \
+	    UPGRADE acsite.m4 aixcrypt.exp alloca.c config.guess config.h.in \
+	    config.sub configure configure.in fnmatch.3 fnmatch.c getcwd.c \
+	    indent.pro install-sh lex.yy.c lsearch.c mkinstalldirs \
+	    pathnames.h.in putenv.c sample.pam sample.sudoers snprintf.c \
+	    strerror.c sudo.cat sudo.man sudo.pod sudo.tab.c sudo.tab.c \
+	    sudoers sudoers.cat sudoers.man sudoers.pod testsudoers.c utime.c \
+	    visudo.cat visudo.man visudo.pod auth/sudo_auth.h emul/fnmatch.h \
+	    emul/search.h emul/utime.h
 
 all: $(PROGS)
 
@@ -145,58 +148,88 @@ all: $(PROGS)
 	@rm -f $(srcdir)/$@
 	$(NROFF) -man $< > $(srcdir)/$@
 
-sudo: $(PARSEOBJS) $(SUDOBJS) $(LIBOBJS)
-	$(CC) -o $@ $(PARSEOBJS) $(SUDOBJS) $(LIBOBJS) $(SUDO_LDFLAGS) $(SUDO_LIBS)
+sudo: $(SUDOBJS) $(LIBOBJS)
+	$(CC) -o $@ $(SUDOBJS) $(LIBOBJS) $(SUDO_LDFLAGS) $(SUDO_LIBS)
 
-visudo: $(PARSEOBJS) $(VISUDOBJS) $(LIBOBJS)
-	$(CC) -o $@ $(PARSEOBJS) $(VISUDOBJS) $(LIBOBJS) $(VISUDO_LDFLAGS) $(VISUDO_LIBS)
+visudo: $(VISUDOBJS) $(LIBOBJS)
+	$(CC) -o $@ $(VISUDOBJS) $(LIBOBJS) $(VISUDO_LDFLAGS) $(VISUDO_LIBS)
 
-testsudoers: $(PARSEOBJS) $(TESTOBJS) $(LIBOBJS)
-	$(CC) -o $@ $(PARSEOBJS) $(TESTOBJS) $(VISUDO_LDFLAGS) $(VISUDO_LIBS)
+testsudoers: $(TESTOBJS) $(LIBOBJS)
+	$(CC) -o $@ $(TESTOBJS) $(LIBOBJS) $(VISUDO_LDFLAGS) $(VISUDO_LIBS)
 
 # Uncomment the following if you intend to modify parse.yacc
 #sudo.tab.c sudo.tab.h: parse.yacc
 #	rm -f sudo.tab.h sudo.tab.c
 #	$(YACC) -d -b sudo $(srcdir)/parse.yacc
 
-sudo.tab.o: $(HDRS) config.h pathnames.h sudo.tab.c
+sudo.tab.o: $(HDRS) config.h pathnames.h sudo.tab.h sudo.tab.c
 
 # Uncomment the following if you intend to modify parse.lex
 #lex.yy.c: parse.lex
 #	rm -f lex.yy.c
 #	$(LEX) $(srcdir)/parse.lex
 
-lex.yy.o: lex.yy.c $(HDRS)
+lex.yy.o: $(HDRS) config.h pathnames.h sudo.tab.h lex.yy.c
 
-$(SUDOBJS) $(LIBOBJS) : $(HDRS) config.h
+# XXX - SUDOBJS now includes PARSEOBJS
+$(SUDOBJS) $(LIBOBJS): $(HDRS) config.h pathnames.h
+
+# Authentication functions live in "auth" dir and so need extra care
+$(AUTH_OBJS): logging.h sudo.h auth/sudo_auth.h
+sudo_auth.o: $(srcdir)/auth/sudo_auth.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+afs.o: $(srcdir)/auth/afs.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+authenticate.o: $(srcdir)/auth/authenticate.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+dce.o: $(srcdir)/auth/dce.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+fwtk.o: $(srcdir)/auth/fwtk.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+kerb4.o: $(srcdir)/auth/kerb4.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+kerb5.o: $(srcdir)/auth/kerb5.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+pam.o: $(srcdir)/auth/pam.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+passwd.o: $(srcdir)/auth/passwd.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+rfc1938.o: $(srcdir)/auth/rfc1938.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+secureware.o: $(srcdir)/auth/secureware.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+securid.o: $(srcdir)/auth/securid.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+sia.o: $(srcdir)/auth/sia.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 
 sudo.html: $(srcdir)/sudo.pod
 	@rm -f $(srcdir)/$@
-	pod2html --title="Sudo Manual" --infile=$< --outfile=$(srcdir)/$@
+	pod2html --title="Sudo Manual" --infile=$> --outfile=$(srcdir)/$@
 
 sudo.man: $(srcdir)/sudo.pod
 	@rm -f $(srcdir)/$@
-	pod2man --section=$(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" $< > $(srcdir)/$@
+	pod2man --section=$(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" $> > $(srcdir)/$@
 
 sudo.cat: $(srcdir)/sudo.man
 
 visudo.html: $(srcdir)/visudo.pod
 	@rm -f $(srcdir)/$@
-	pod2html --title="Visudo Manual" --infile=$< --outfile=$(srcdir)/$@
+	pod2html --title="Visudo Manual" --infile=$> --outfile=$(srcdir)/$@
 
 visudo.man: $(srcdir)/visudo.pod
 	@rm -f $(srcdir)/$@
-	pod2man --section=$(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" $< > $(srcdir)/$@
+	pod2man --section=$(mansect8) --release=$(VERSION) --center="MAINTENANCE COMMANDS" $> > $(srcdir)/$@
 
 visudo.cat: $(srcdir)/visudo.man
 
 sudoers.html: $(srcdir)/sudoers.pod
 	@rm -f $(srcdir)/$@
-	pod2html --title="Sudoers Manual" --infile=$< --outfile=$(srcdir)/$@
+	pod2html --title="Sudoers Manual" --infile=$> --outfile=$(srcdir)/$@
 
 sudoers.man: $(srcdir)/sudoers.pod
 	@rm -f $(srcdir)/$@
-	pod2man --section=$(mansect5) --release=$(VERSION) --center="FILE FORMATS" $< > $(srcdir)/$@
+	pod2man --section=$(mansect5) --release=$(VERSION) --center="FILE FORMATS" $> > $(srcdir)/$@
 
 sudoers.cat: $(srcdir)/sudoers.man
 
@@ -238,7 +271,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	rm -f Makefile pathnames.h config.h config.status config.cache config.log
+	rm -f Makefile pathnames.h config.h config.status config.cache config.log pod2html-dircache pod2html-itemcache
 
 clobber: distclean
 
@@ -254,13 +287,3 @@ dist: $(DISTFILES)
 	  tar Ocf cu-sudo.v$(VERSION).tar \
 	  `cat $$TF` && gzip --best cu-sudo.v$(VERSION).tar && rm -f $$TF)
 	ls -l ../cu-sudo.v$(VERSION).tar.gz
-
-# Update version strings based on version specified in version.h
-# This is ugly but it works...
-update_version:
-	for f in Makefile.in $(VERSIONFILES); do \
-	    VERSION=`sed -n 's/static const char version\[\] = "\([^"]*\)".*$$/\1/p' < version.h`; \
-	    sed -e 's/\(VERSION =\) [^ ,:][^ ,:]*/\1 '$$VERSION'/' -e 's/\(CU sudo version\) [^ ,:][^ ,:]*/\1 '$$VERSION'/' < $$f > $$f.$$$$; \
-	    mv -f $$f.$$$$ $$f; \
-	    chmod 644 $$f; \
-	done
