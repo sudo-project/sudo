@@ -61,5 +61,8 @@ c) If you have a sense of humor you may want to define USE_INSULTS to
    their machine across the room and dash it to tiny pieces.
    Sci fi fans may want to define HAL as well (see insults.h).
 
+d) If you are *not* running sendmail or some other mailer, you should
+   comment out the MAILER #define in sudo.h.
+
 Please send changes, bugs, security holes, and gripes to:
     sudo-bugs@cs.colorado.edu
