@@ -1,12 +1,12 @@
 .TH SUDO 8
 .SH NAME
-sudo, visudo \- execute a command as the superuser and edit the suoders file
+sudo, visudo \- execute a command as the superuser and edit the sudoers file
 
 .SH SYNOPSIS
-.B sudo 
+.B sudo [-v]
 .I command
 .sp
-.B visudo 
+.B visudo [-v]
 
 .SH DESCRIPTION
 .I Sudo
@@ -16,6 +16,9 @@ as the superuser.
 .I Sudo 
 determines who is an authorized user by consulting the file
 .I /etc/sudoers.
+The
+.I -v
+flag will print the version of sudo/visudo you are running.
 Sudo will prompt for a user's password to initiate a validation period
 of N minutes (where N is defined at installation time and defaults 
 to 5 minutes).
@@ -207,6 +210,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 There is no easy way to prevent a user from gaining a root shell if 
 that user has access to commands that are shell scripts or that 
 allow shell escapes.
+
+.SH BUGS
+The
+.I -v
+flag gives the version of the
+.I sudo
+package rather than the individual
+.I sudo
+or
+.I visudo
+program.
 
 .SH SEE ALSO
 su(1)
