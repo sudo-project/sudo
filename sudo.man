@@ -224,8 +224,8 @@ Many people have worked on
 over the years, this version was written by:
 .nf
 
-Jeff Nieusma                 <nieusma@csn.org>
-David Hieb                   <davehieb@csn.org>
+Jeff Nieusma                 <nieusma@internetone.com>
+David Hieb                   <davehieb@internetone.com>
 
 See the HISTORY file in the sudo distribution for more details.
 .fi
