@@ -70,8 +70,6 @@ static const char rcsid[] = "$Sudo$";
 #define LDAP_OPT_SUCCESS LDAP_SUCCESS
 #endif
 
-extern int printmatches;
-
 /* ldap configuration structure */
 struct ldap_config {
   char *host;
@@ -639,16 +637,17 @@ size_t sudo_ldap_cm_list_size;
  * command match
  */
 int
-sudo_ldap_add_match(ld,entry)
+sudo_ldap_add_match(ld,entry, pwflag)
   LDAP *ld;
   LDAPMessage *entry;
+  int pwflag;
 {
   char **v=NULL;
   char *dn;
   char **edn;
 
-  /* if we are not collecting matches, then don't print them */
-  if (printmatches != TRUE) return 1;
+  /* if we are not collecting matches, then don't save them */
+  if (pwflag != I_LISTPW) return 1;
 
   /* collect the dn, only show the rdn */
   dn=ldap_get_dn(ld,entry);
@@ -684,37 +683,24 @@ sudo_ldap_add_match(ld,entry)
 #undef SAVE_LIST
 
 void
-sudo_ldap_list_matches()
+sudo_ldap_display_privs()
 {
   if (sudo_ldap_cm_list!=NULL) printf("%s",sudo_ldap_cm_list);
 }
 
 /*
- * like sudoers_lookup() - only LDAP style
- *
+ * Open a connection to the LDAP server
  */
 
-int
-sudo_ldap_check(pwflag)
-int pwflag;
+VOID *
+sudo_ldap_open()
 {
 
   LDAP *ld=NULL;
+  /* temp return value */
+  int rc;
 
-  /* Used for searches */
-  LDAPMessage *result=NULL;
-  LDAPMessage *entry=NULL;
-  /* used to parse attributes */
-  char *filt;
-  /* temp/final return values */
-  int rc=0;
-  int ret=0;
-  int pass=0;
-  /* flags */
-  int ldap_user_matches=0;
-  int ldap_host_matches=0;
-
-  if (!sudo_ldap_read_config())  return VALIDATE_ERROR;
+  if (!sudo_ldap_read_config())  return NULL;
 
   /* macro to set option, error on failure plus consistent debugging */
 #define SET_OPT(opt,optname,val) \
@@ -725,7 +711,7 @@ int pwflag;
     if(rc != LDAP_OPT_SUCCESS){ \
       fprintf(stderr,"ldap_set_option(LDAP_OPT_%s,\"%s\")=%d: %s\n", \
            optname, ldap_conf.val, rc, ldap_err2string(rc)); \
-      return VALIDATE_ERROR ; \
+      return NULL ; \
     } \
   } \
 
@@ -737,9 +723,10 @@ int pwflag;
     if(rc != LDAP_OPT_SUCCESS){ \
       fprintf(stderr,"ldap_set_option(LDAP_OPT_%s,0x%02x)=%d: %s\n", \
            optname, ldap_conf.val, rc, ldap_err2string(rc)); \
-      return VALIDATE_ERROR ; \
+      return NULL ; \
     } \
 
+  /* Parse Default Options */
   /* attempt to setup ssl options */
 #ifdef    LDAP_OPT_X_TLS_CACERTFILE
   SET_OPT(LDAP_OPT_X_TLS_CACERTFILE,   "X_TLS_CACERTFILE",   tls_cacertfile);
@@ -783,7 +770,7 @@ int pwflag;
     if(rc){
       fprintf(stderr, "ldap_initialize()=%d : %s\n",
            rc,ldap_err2string(rc));
-      return VALIDATE_ERROR;
+      return NULL;
     }
   } else
 #endif /* HAVE_LDAP_INITIALIZE */
@@ -796,7 +783,7 @@ int pwflag;
     if (!ld) {
       fprintf(stderr, "ldap_init(): errno=%d : %s\n",
                  errno, strerror(errno));
-      return VALIDATE_ERROR;
+      return NULL;
     }
   }
 
@@ -814,7 +801,7 @@ int pwflag;
     if (rc != LDAP_SUCCESS) {
       fprintf(stderr, "ldap_start_tls_s(): %d: %s\n", rc, ldap_err2string(rc));
       ldap_unbind(ld);
-      return VALIDATE_ERROR;
+      return NULL;
     }
 
     if (ldap_conf.debug) printf("ldap_start_tls_s() ok\n");
@@ -827,13 +814,24 @@ int pwflag;
   if(rc){
     fprintf(stderr,"ldap_simple_bind_s()=%d : %s\n",
            rc, ldap_err2string(rc));
-    return VALIDATE_ERROR ;
+    return NULL ;
   }
 
   if (ldap_conf.debug) printf("ldap_bind() ok\n");
 
+  return (VOID *)ld;
+}
 
-  /* Parse Default Options */
+void
+sudo_ldap_update_defaults(v)
+VOID *v;
+{
+  LDAP *ld = (LDAP *)v;
+  /* Used for searches */
+  LDAPMessage *result=NULL;
+  LDAPMessage *entry=NULL;
+  /* temp return value */
+  int rc;
 
   rc=ldap_search_s(ld,ldap_conf.base,LDAP_SCOPE_ONELEVEL,
              "cn=defaults",NULL,0,&result);
@@ -845,7 +843,30 @@ int pwflag;
   }
 
   if (result) ldap_msgfree(result);
-  result=NULL;
+}
+
+/*
+ * like sudoers_lookup() - only LDAP style
+ */
+
+int
+sudo_ldap_check(v, pwflag)
+VOID *v;
+int pwflag;
+{
+  LDAP *ld = (LDAP *)v;
+  /* Used for searches */
+  LDAPMessage *result=NULL;
+  LDAPMessage *entry=NULL;
+  /* used to parse attributes */
+  char *filt;
+  /* temp/final return values */
+  int rc=0;
+  int ret=0;
+  int pass=0;
+  /* flags */
+  int ldap_user_matches=0;
+  int ldap_host_matches=0;
 
   /*
    * Okay - time to search for anything that matches this user
@@ -896,7 +917,7 @@ int pwflag;
        /* remember that host matched */
        (ldap_host_matches=-1) &&
           /* add matches for listing later */
-          sudo_ldap_add_match(ld,entry) &&
+          sudo_ldap_add_match(ld,entry, pwflag) &&
           /* verify command match */
           sudo_ldap_check_command(ld,entry) &&
           /* verify runas match */
