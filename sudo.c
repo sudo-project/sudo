@@ -114,7 +114,7 @@ static void check_sudoers		__P((void));
 static int init_vars			__P((int));
 static void set_loginclass		__P((struct passwd *));
 static void add_env			__P((int));
-static void clean_env			__P((char **, struct env_table *));
+static void clean_env			__P((char **, struct env_table *, struct env_table *));
 static void initial_setup		__P((void));
 static struct passwd *get_authpw	__P((void));
 extern struct passwd *sudo_getpwuid	__P((uid_t));
@@ -166,12 +166,31 @@ static struct env_table badenv_table[] = {
 #endif /* _AIX */
 #ifdef HAVE_KERB4
     { "KRB_CONF", 8 },
+    { "KRBCONFDIR=", 11 },
+    { "KRBTKFILE=", 10 },
 #endif /* HAVE_KERB4 */
 #ifdef HAVE_KERB5
     { "KRB5_CONFIG", 11 },
 #endif /* HAVE_KERB5 */
+#ifdef HAVE_SECURID
+    { "VAR_ACE=", 8 },
+    { "USR_ACE=", 8 },
+    { "DLC_ACE=", 8 },
+#endif /* HAVE_SECURID */
+    { "TERMINFO=", 9 },
+    { "TERMINFO_DIRS=", 14 },
+    { "TERMPATH=", 9 },
+    { "TERMCAP=/", 9 },
     { "ENV=", 4 },
     { "BASH_ENV=", 9 },
+    { (char *) NULL, 0 }
+};
+/*
+ * Table of envariables to remove if they contain '/' or '%'
+ */
+static struct env_table naughtyenv_table[] = {
+    { "LC_=", 4 },
+    { "LANG=", 5 },
     { (char *) NULL, 0 }
 };
 
@@ -203,7 +222,7 @@ main(argc, argv)
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
     /* Get rid of any nasty bits in the environment. */
-    clean_env(environ, badenv_table);
+    clean_env(environ, badenv_table, naughtyenv_table);
 
     Argv = argv;
     Argc = argc;
@@ -869,19 +888,35 @@ check_sudoers()
  * Remove environment variables that match the entries in badenv_table.
  */
 static void
-clean_env(envp, badenv_table)
+clean_env(envp, badenv_table, naughtyenv_table)
     char **envp;
     struct env_table *badenv_table;
+    struct env_table *naughtyenv_table;
 {
-    struct env_table *bad;
+    struct env_table *entry;
     char **cur;
 
     /*
      * Remove any envars that match entries in badenv_table.
      */
     for (cur = envp; *cur; cur++) {
-	for (bad = badenv_table; bad->name; bad++) {
-	    if (strncmp(*cur, bad->name, bad->len) == 0) {
+	for (entry = badenv_table; entry->name; entry++) {
+	    if (strncmp(*cur, entry->name, entry->len) == 0) {
+		/* Got a match so remove it. */
+		char **move;
+
+		for (move = cur; *move; move++)
+		    *move = *(move + 1);
+
+		cur--;
+
+		break;
+	    }
+	}
+	for (entry = naughtyenv_table; entry->name; entry++) {
+	    if (strncmp(*cur, entry->name, entry->len) == 0 &&
+		strpbrk((const char *)cur, "/%") != NULL) {
+
 		/* Got a match so remove it. */
 		char **move;
 
