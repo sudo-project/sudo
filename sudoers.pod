@@ -291,11 +291,6 @@ the user running it.  With this flag enabled, B<sudo> will use a
 file named for the tty the user is logged in on in that directory.
 This flag is I<@tty_tickets@> by default.
 
-=item lecture
-
-If set, a user will receive a short lecture the first time he/she
-runs B<sudo>.  This flag is I<@lecture@> by default.
-
 =item authenticate
 
 If set, users must authenticate themselves via a password (or other
@@ -590,6 +585,30 @@ on your system.
 B<Strings that can be used in a boolean context>:
 
 =over 12
+
+=item lecture
+
+This option controls when a short lecture will be printed along with
+the password prompt.  It has the following possible values:
+
+=over 8
+
+=item never
+
+Never lecture the user.
+
+=item once
+
+Only lecture the user the first time they run B<sudo>.
+
+=item always
+
+Always lecture the user.
+
+=back
+
+The default value is I<@lecture@>.
+
 
 =item logfile
 
