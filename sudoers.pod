@@ -856,18 +856,18 @@ more digits, in which case it is treated as a uid).  Both the
 comment character and any text after it, up to the end of the line,
 are ignored.
 
-The reserved word B<ALL> is a built in I<alias> that always causes
+The reserved word B<ALL> is a built-in I<alias> that always causes
 a match to succeed.  It can be used wherever one might otherwise
 use a C<Cmnd_Alias>, C<User_Alias>, C<Runas_Alias>, or C<Host_Alias>.
 You should not try to define your own I<alias> called B<ALL> as the
-built in alias will be used in preference to your own.  Please note
+built-in alias will be used in preference to your own.  Please note
 that using B<ALL> can be dangerous since in a command context, it
 allows the user to run B<any> command on the system.
 
 An exclamation point ('!') can be used as a logical I<not> operator
 both in an I<alias> and in front of a C<Cmnd>.  This allows one to
 exclude certain values.  Note, however, that using a C<!> in
-conjunction with the built in C<ALL> alias to allow a user to
+conjunction with the built-in C<ALL> alias to allow a user to
 run "all but a few" commands rarely works as intended (see SECURITY
 NOTES below).
 
@@ -928,7 +928,7 @@ I<SERVERS> C<Host_Alias>, we keep an additional local log file and
 make sure we log the year in each log line since the log entries
 will be kept around for several years.
 
- # Override built in defaults
+ # Override built-in defaults
  Defaults		syslog=auth
  Defaults>root		!set_logname
  Defaults:FULLTIMERS	!lecture
