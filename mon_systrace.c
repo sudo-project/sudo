@@ -161,7 +161,7 @@ systrace_attach(pid)
     }
     (void) chdir("/");
 #ifdef HAVE_SETPROCTITLE
-    setproctitle("systrace %s%s%s", user_base, user_args ? " " : "",
+    setproctitle("monitor %s%s%s", user_base, user_args ? " " : "",
 	user_args ? user_args : "");
 #endif
 
