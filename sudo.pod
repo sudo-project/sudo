@@ -42,13 +42,16 @@ file [...]
 B<sudo> allows a permitted user to execute a I<command> as the
 superuser or another user, as specified in the I<sudoers> file.
 The real and effective uid and gid are set to match those of the
-target user as specified in the passwd file (the group vector is
-also initialized when the target user is not root).  By default,
+target user as specified in the passwd file and the group vector
+is initialized based on the group file (unless the B<-P> option was
+specified).  If the invoking user is root or if the target user is
+the same as the invoking user, no password is required.  Otherwise,
 B<sudo> requires that users authenticate themselves with a password
-(NOTE: by default this is the user's password, not the root password).
-Once a user has been authenticated, a timestamp is updated and the
-user may then use sudo without a password for a short period of
-time (C<@timeout@> minutes unless overridden in I<sudoers>).
+by default (NOTE: in the default configuration this is the user's
+password, not the root password).  Once a user has been authenticated,
+a timestamp is updated and the user may then use sudo without a
+password for a short period of time (C<@timeout@> minutes unless
+overridden in I<sudoers>).
 
 When invoked as B<sudoedit>, the B<-e> option (described below),
 is implied.
@@ -62,11 +65,11 @@ I<sudoers>).
 
 If a user who is not listed in the I<sudoers> file tries to run a
 command via B<sudo>, mail is sent to the proper authorities, as
-defined at configure time or the I<sudoers> file (defaults to root).
-Note that the mail will not be sent if an unauthorized user tries
-to run sudo with the B<-l> or B<-v> flags.  This allows users to
-determine for themselves whether or not they are allowed to use
-B<sudo>.
+defined at configure time or in the I<sudoers> file (defaults to
+C<@mailto@>).  Note that the mail will not be sent if an unauthorized
+user tries to run sudo with the B<-l> or B<-v> flags.  This allows
+users to determine for themselves whether or not they are allowed
+to use B<sudo>.
 
 If B<sudo> is run by root and the C<SUDO_USER> environment variable
 is set, B<sudo> will use this value to determine who the actual
@@ -91,12 +94,14 @@ B<sudo> accepts the following command line options:
 
 The B<-H> (I<HOME>) option sets the C<HOME> environment variable
 to the homedir of the target user (root by default) as specified
-in passwd(@mansectform@).  By default, B<sudo> does not modify C<HOME>.
+in passwd(@mansectform@).  By default, B<sudo> does not modify C<HOME>
+(see I<set_home> and I<always_set_home> in L<sudoers(@mansectform@)>).
 
 =item -K
 
-The B<-K> (sure I<kill>) option to B<sudo> removes the user's timestamp
-entirely.  Likewise, this option does not require a password.
+The B<-K> (sure I<kill>) option is like B<-k> except that it removes
+the user's timestamp entirely.  Like B<-k>, this option does not
+require a password.
 
 =item -L
 
@@ -106,23 +111,23 @@ for each.  This option is useful in conjunction with grep(1).
 
 =item -P
 
-The B<-P> (I<preserve group vector>) option causes B<sudo> to preserve
-the user's group vector unaltered.  By default, B<sudo> will initialize
-the group vector to the list of groups the target user is in.
-The real and effective group IDs, however, are still set to match
-the target user.
+The B<-P> (I<preserve group vector>) option causes B<sudo> to
+preserve the invoking user's group vector unaltered.  By default,
+B<sudo> will initialize the group vector to the list of groups the
+target user is in.  The real and effective group IDs, however, are
+still set to match the target user.
 
 =item -S
 
 The B<-S> (I<stdin>) option causes B<sudo> to read the password from
-standard input instead of the terminal device.
+the standard input instead of the terminal device.
 
 =item -V
 
-The B<-V> (I<version>) option causes B<sudo> to print the
-version number and exit.  If the invoking user is already root
-the B<-V> option will print out a list of the defaults B<sudo>
-was compiled with as well as the machine's local network addresses.
+The B<-V> (I<version>) option causes B<sudo> to print the version
+number and exit.  If the invoking user is already root the B<-V>
+option will print out a list of the defaults B<sudo> was compiled
+with as well as the machine's local network addresses.
 
 =item -a
 
@@ -165,8 +170,8 @@ the following steps are taken:
 
 =item 1.
 
-Temporary copies are made of the files to be edited, owned by the
-invoking user.
+Temporary copies are made of the files to be edited with the owner
+set to the invoking user.
 
 =item 2.
 
@@ -367,26 +372,26 @@ Note: the following examples assume suitable L<sudoers(@mansectform@)> entries.
 
 To get a file listing of an unreadable directory:
 
- % sudo ls /usr/local/protected
+ $ sudo ls /usr/local/protected
 
 To list the home directory of user yazza on a machine where the
 file system holding ~yazza is not exported as root:
 
- % sudo -u yazza ls ~yazza
+ $ sudo -u yazza ls ~yazza
 
 To edit the F<index.html> file as user www:
 
- % sudo -u www vi ~www/htdocs/index.html
+ $ sudo -u www vi ~www/htdocs/index.html
 
 To shutdown a machine:
 
- % sudo shutdown -r +15 "quick reboot"
+ $ sudo shutdown -r +15 "quick reboot"
 
 To make a usage listing of the directories in the /home
 partition.  Note that this runs the commands in a sub-shell
 to make the C<cd> and file redirection work.
 
- % sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
+ $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 
 =head1 ENVIRONMENT
 
@@ -456,11 +461,19 @@ if that user is allowed to run arbitrary commands via B<sudo>.
 Also, many programs (such as editors) allow the user to run commands
 via shell escapes, thus avoiding B<sudo>'s checks.  However, on
 most systems it is possible to prevent shell escapes with B<sudo>'s
-I<noexec> functionality.  See the L<sudoers(@mansectform@)> manual for details.
+I<noexec> functionality.  See the L<sudoers(@mansectform@)> manual
+for details.
 
-If users have sudo C<ALL> there is nothing to prevent them from creating
-their own program that gives them a root shell regardless of any '!'
-elements in the user specification.
+It is not meaningful to run the C<cd> command directly via sudo, e.g.
+
+ $ sudo cd /usr/local/protected
+
+since when whe command exits the parent process (your shell) will
+still be the same.  Please see the EXAMPLES section for more information.
+
+If users have sudo C<ALL> there is nothing to prevent them from
+creating their own program that gives them a root shell regardless
+of any '!' elements in the user specification.
 
 Running shell scripts via B<sudo> can expose the same kernel bugs
 that make setuid shell scripts unsafe on some operating systems
