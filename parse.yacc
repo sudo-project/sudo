@@ -60,6 +60,7 @@ static char rcsid[] = "$Id$";
 extern int sudolineno, parse_error;
 int errorlineno = -1;
 int clearaliases = 1;
+int printmatches = 0;
 
 /*
  * Alias types
@@ -210,9 +211,22 @@ opcmndlist	:	opcmnd
 		|	opcmndlist ',' opcmnd
 		;
 
-opcmnd		:	cmnd
-			{ ; }
-		|	'!' { push; } opcmnd {
+opcmnd		:	cmnd {
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				(void) puts($1);
+			     }
+		|	'!' {
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE) {
+				(void) putchar('!');
+				push;
+				user_matches = TRUE;
+				host_matches = TRUE;
+			    } else {
+				push;
+			    }
+			    } opcmnd {
 			    int cmnd_matched = cmnd_matches;
 			    pop;
 			    if (cmnd_matched == TRUE)
