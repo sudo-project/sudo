@@ -229,12 +229,17 @@ hostspec	:	ALL {
 			}
 		;
 
-opcmndlist	:	opcmnd
-		|	opcmndlist ',' opcmnd
+opcmndlist	:	{
+			    cmnd_matches = no_passwd = runas_matches = -1;
+			} opcmnd
+		|	opcmndlist ',' {
+			    cmnd_matches = no_passwd = runas_matches = -1;
+			} opcmnd
 		;
 
 opcmnd		:	cmnd {
-			    runas_matches = TRUE;
+			    if (strcmp("root", runas_user) == 0)
+				runas_matches = TRUE;
 			} 
 		|	'!' {
 			    if (printmatches == TRUE && host_matches == TRUE
@@ -295,19 +300,19 @@ runasuser	:	NAME {
 
 
 chkcmnd		:	cmnd {
-			    $$=$1;
+			    $$ = $1;
 			}
 		|	nopassreq {
-			    $$=$1;
+			    $$ = $1;
 			}
 		;
 
 nopassreq	:	NOPASSWD cmnd {
-			    if (host_matches == TRUE && user_matches == TRUE && 
-				$2 == TRUE)  {
-				no_passwd=TRUE;
-				$$ = TRUE;
-			    }
+			    if (host_matches == TRUE && user_matches == TRUE &&
+				$2 == TRUE) {
+				    no_passwd = TRUE;
+				    $$ = TRUE;
+				}
 			}
 		;
 
@@ -317,7 +322,7 @@ cmnd		:	ALL {
 				(void) puts("ALL");
 
 			    cmnd_matches = TRUE;
-			    $$=TRUE;
+			    $$ = TRUE;
 			}
 		|	ALIAS {
 			    if (printmatches == TRUE && host_matches == TRUE &&
@@ -325,7 +330,7 @@ cmnd		:	ALL {
 				(void) puts($1);
 			    if (find_alias($1, CMND)) {
 				cmnd_matches = TRUE;
-				$$=TRUE;
+				$$ = TRUE;
 			    }
 			    (void) free($1);
 			}
@@ -344,7 +349,7 @@ cmnd		:	ALL {
 			    if (command_matches(cmnd, (NewArgc > 1) ?
 				    &NewArgv[1] : NULL, $1.cmnd, $1.args)) {
 				cmnd_matches = TRUE;
-				$$=TRUE;
+				$$ = TRUE;
 			    }
 
 			    (void) free($1.cmnd);
