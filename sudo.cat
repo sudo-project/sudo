@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.6.8                    August  6, 2004                        1
+1.6.8                    August 17, 2004                        1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.8                    August  6, 2004                        2
+1.6.8                    August 17, 2004                        2
 
 
 
@@ -152,7 +152,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
        -e  The --ee (_e_d_i_t) option indicates that, instead of run­
            ning a command, the user wishes to edit one or more
-           files.  In lieu of a command, the string _"_s_u_d_o_e_d_i_t_" is
+           files.  In lieu of a command, the string "sudoedit" is
            used when consulting the _s_u_d_o_e_r_s file.  If the user is
            authorized by _s_u_d_o_e_r_s the following steps are taken:
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.6.8                    August  6, 2004                        3
+1.6.8                    August 17, 2004                        3
 
 
 
@@ -259,7 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.6.8                    August  6, 2004                        4
+1.6.8                    August 17, 2004                        4
 
 
 
@@ -325,7 +325,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.6.8                    August  6, 2004                        5
+1.6.8                    August 17, 2004                        5
 
 
 
@@ -391,7 +391,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.6.8                    August  6, 2004                        6
+1.6.8                    August 17, 2004                        6
 
 
 
@@ -457,7 +457,7 @@ AAUUTTHHOORRSS
 
 
 
-1.6.8                    August  6, 2004                        7
+1.6.8                    August 17, 2004                        7
 
 
 
@@ -523,6 +523,6 @@ SSEEEE AALLSSOO
 
 
 
-1.6.8                    August  6, 2004                        8
+1.6.8                    August 17, 2004                        8
 
 
