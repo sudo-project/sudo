@@ -1,0 +1,8 @@
+TODO list
+
+01) Find out why bison -y warns on parse.yacc and fix the problem if it is
+	indeed a problem.
+
+02) Add groups of users to the config file.
+
+03) Solaris 2.x support.

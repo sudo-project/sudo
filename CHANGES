@@ -1,0 +1,34 @@
+CHANGES between sudo 1.2 (unofficial version)
+
+01) sudo now works under hpux, aix, sunos, bsd43, ultrix, linux, osf and irix.
+
+02) Files w/o the executable bit will be ignored if they are in your PATH.
+
+03) If execv() fails, perror is called (which prints out an error based on
+	errno) and sudo exits with -1.
+
+04) Included in this shar should also be a version of getpass() derived from
+	the bsd net-2 source which works on bsd, ultrix, hpux, aix, and irix
+	at least.  The latter three unixes have what i consider to be a broken
+	getpass() in that if /dev/tty can't be opened it doesn't just use stdin
+	like bsd getpass().  This means you cannot do: rsh host "sudo command"
+	and have it work if your ticket has expired.
+
+05) The Makefile has changed significantly.  It now has defines for all
+	supported architectures.
+
+06) Changed MAXCOMMANDLENGTH from 48 bytes to MAXPATHLEN and included
+	sys/param.h where appropriate.
+
+07) Rewrote the code that expands links & paths.  It now works correctly.
+	(rewrote find_path.c)
+
+08) Added a define NEED_STRDUP so we don't conflict with the system's strdup(3)
+
+09) Now does *not* pass LD_* environmental vars on to programs that get
+	exec'd.  Also removes SHLIB_PATH for hpux.
+
+10) Now searches current dir last if '.' or '' are in PATH.  Misses braindeath
+    like './' but if that's in your path you deserve all the trojans you get.
+
+11) Added in linux patches from drew + flex support.
