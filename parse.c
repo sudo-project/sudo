@@ -389,7 +389,6 @@ addr_matches(n)
 	    mask.s_addr >>= i;
 	    mask.s_addr <<= i;
 	    mask.s_addr = htonl(mask.s_addr);
-
 	}
 	*(m - 1) = '/';
 
