@@ -1025,6 +1025,8 @@ dnl
 if test "$with_devel" = "yes" -a -n "$GCC"; then
     CFLAGS="${CFLAGS} -Wall"
 fi
+dnl for crypt() macro in unistd.h
+CFLAGS="${CFLAGS} -D_XOPEN_SOURCE"
 
 dnl
 dnl Find programs we use
