@@ -112,3 +112,7 @@
 #ifndef _PATH_LDAP_CONF
 #define	_PATH_LDAP_CONF	"/etc/ldap.conf"
 #endif /* _PATH_LDAP_CONF */
+
+#ifndef _PATH_DEV_SYSTRACE
+#define	_PATH_DEV_SYSTRACE	"/dev/systrace"
+#endif /* _PATH_DEV_SYSTRACE */
