@@ -190,6 +190,9 @@
 
 /* Define if you have _innetgr(3).  */
 #undef HAVE__INNETGR
+#ifdef HAVE__INNETGR
+# define HAVE_INNETGR 1
+#endif
 
 /* Define if you have initgroups(3).  */
 #undef HAVE_INITGROUPS
