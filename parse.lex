@@ -143,6 +143,6 @@ N			{D}{1,3}
 			}
 
 %%
-static int fill(void) {
+static int fill() {
     (void) strcpy(yylval.string, yytext);
 }
