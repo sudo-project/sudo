@@ -562,8 +562,10 @@ Linux:
 
     It is not possible to access the sudoers file via NFS on Linux.
     This is due to a bug in the Linux client-side NFS implementation.
-    It has been fixed in the developement kernel but, as of Aug 27, 1999,
-    the fixes have not made it into the mainstream kernel.
+    It has been fixed in the developement kernel but, as of Aug 27,
+    1999, the fixes have not made it into the mainstream kernel.
+    There is a workaround on the sudo ftp site, linux_nfs.patch,
+    if you need to NFS-mount sudoers on Linux.
 
 Mac OS X:
     It has been reported that for sudo to work on Mac OS X it must
@@ -577,3 +579,10 @@ SCO ODT:
     You'll probably need libcrypt_i.a available via anonymous ftp
     from sosco.sco.com.  The necessary files are /SLS/lng225b.Z
     and /SLS/lng225b.ltr.Z.
+
+Dynix:
+    Some people have experienced problems building sudo with gcc
+    on Dynix.  If you experience problems compiling sudo using gcc
+    on Dynix, try using the native compiler (cc).  You can do so
+    by removing the config.cache file and then re-running configure
+    with the --with-CC=cc option.
