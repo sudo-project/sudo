@@ -167,7 +167,7 @@ do_logfile(msg)
     fp = fopen(_PATH_SUDO_LOGFILE, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
-	(void) asprintf(&full_line, "Can't open log file: %s: %s",
+	easprintf(&full_line, "Can't open log file: %s: %s",
 	    _PATH_SUDO_LOGFILE, strerror(errno));
 	send_mail(full_line);
 	free(full_line);
@@ -182,10 +182,10 @@ do_logfile(msg)
 #  endif
 # else
 #  ifdef HOST_IN_LOG
-	(void) asprintf(&full_line, "%15.15s : %s : HOST=%s : %s",
+	easprintf(&full_line, "%15.15s : %s : HOST=%s : %s",
 	    ctime(&now) + 4, user_name, user_shost, msg);
 #  else
-	(void) asprintf(&full_line, "%15.15s : %s : %s", ctime(&now) + 4,
+	easprintf(&full_line, "%15.15s : %s : %s", ctime(&now) + 4,
 	    user_name, msg);
 #  endif
 
@@ -279,10 +279,10 @@ log_auth(status, inform_user)
     }
 
     if (user_args)
-	(void) asprintf(&logline, "%sTTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s %s",
+	easprintf(&logline, "%sTTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s %s",
 	    message, user_tty, user_cwd, user_runas, user_cmnd, user_args);
     else
-	(void) asprintf(&logline, "%sTTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s",
+	easprintf(&logline, "%sTTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s",
 	    message, user_tty, user_cwd, user_runas, user_cmnd);
 
     /*
@@ -367,29 +367,29 @@ log_error(va_alist)
 #endif
 
     /* Expand printf-style format + args. */
-    (void) vasprintf(&message, fmt, ap);
+    evasprintf(&message, fmt, ap);
     va_end(ap);
 
     if (flags & MSG_ONLY)
 	logline = message;
     else if (flags & USE_ERRNO) {
 	if (user_args) {
-	    (void) asprintf(&logline,
+	    easprintf(&logline,
 		"%s: %s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s %s",
 		message, strerror(serrno), user_tty, user_cwd, user_runas,
 		user_cmnd, user_args);
 	} else {
-	    (void) asprintf(&logline,
+	    easprintf(&logline,
 		"%s: %s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s", message,
 		strerror(serrno), user_tty, user_cwd, user_runas, user_cmnd);
 	}
     } else {
 	if (user_args) {
-	    (void) asprintf(&logline,
+	    easprintf(&logline,
 		"%s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s %s", message,
 		user_tty, user_cwd, user_runas, user_cmnd, user_args);
 	} else {
-	    (void) asprintf(&logline,
+	    easprintf(&logline,
 		"%s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s", message,
 		user_tty, user_cwd, user_runas, user_cmnd);
 	}
@@ -400,8 +400,8 @@ log_error(va_alist)
      */
     (void) fprintf(stderr, "%s: %s", Argv[0], message);
     if (flags & USE_ERRNO)
-	fprintf(stderr, ": %s", strerror(serrno));
-    fputc('\n', stderr);
+	(void) fprintf(stderr, ": %s", strerror(serrno));
+    (void) fputc('\n', stderr);
 
     /*
      * Send a copy of the error via mail.

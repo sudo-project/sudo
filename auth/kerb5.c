@@ -101,7 +101,7 @@ kerb5_setup(pw, promptp, data)
 
     /* Only rewrite prompt if user didn't specify their own. */
     if (!strcmp(prompt, PASSPROMPT))
-	asprintf(promptp, "Password for %s@%s: ", pw->pw_name, realm);
+	easprintf(promptp, "Password for %s@%s: ", pw->pw_name, realm);
     return(AUTH_SUCCESS);
 }
 
