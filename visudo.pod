@@ -27,8 +27,8 @@ an error, a message will be printed stating the line number(s)
 that the error occurred on and the user will receive the
 "What now?" prompt.  At this point the user may enter "e"
 to re-edit the I<sudoers> file, enter "x" to exit without
-saving the changes, or "q" to quit and save changes.  The
-"q" option should be used with extreme care because if B<visudo>
+saving the changes, or "Q" to quit and save changes.  The
+"Q" option should be used with extreme care because if B<visudo>
 believes there to be a parse error, so will B<sudo> and no one
 will be able to execute B<sudo> again until the error is fixed.
 Any other command at this prompt will print a short help message.
