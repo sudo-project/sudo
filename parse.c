@@ -173,11 +173,14 @@ sudoers_lookup(pwflag)
 	CLR(validated, VALIDATE_NOT_OK);
 	SET(validated, VALIDATE_OK);
 	if (tags != NULL) {
-	    if (tags->nopasswd == TRUE)
+	    if (tags->nopasswd == TRUE ||
+		(tags->nopasswd == UNSPEC && !def_authenticate))
 		SET(validated, FLAG_NOPASS);
-	    if (tags->noexec == TRUE)
+	    if (tags->noexec == TRUE ||
+		(tags->noexec == UNSPEC && def_noexec))
 		SET(validated, FLAG_NOEXEC);
-	    if (tags->monitor == TRUE)
+	    if (tags->monitor == TRUE ||
+		(tags->monitor == UNSPEC && def_monitor))
 		SET(validated, FLAG_MONITOR);
 	}
     }
