@@ -1,0 +1,113 @@
+.TH VISUDO 8
+.SH NAME
+visudo \- edit the sudoers file
+
+.SH SYNOPSIS
+.B visudo
+[-V]
+
+.SH DESCRIPTION
+.I visudo
+edits the
+.I sudoers
+file in a safe fashion, analogous to
+.BR vipw (8).
+.I visudo
+locks the
+.I sudoers
+file against multiple simultaneous edits, provides basic sanity checks,
+and guards against parse errors.  If the
+.I sudoers
+file is currently being edited you will receive a message to try
+again later.  In the default configuration, the
+.BR vi (1)
+editor is used, but there is a compile time option to allow use
+of whatever editor the environmental variables EDITOR or VISUAL are
+set to.
+.sp
+.I visudo
+parses the
+.I sudoers
+file after the edit and will not save the changes if there is a
+syntax error.  Upon finding an error, a message will be printed
+stating the line number(s) that the error occurred on
+and the user will receive the "What now?" prompt.  At this point
+the user may enter "e" to re-edit the
+.I sudoers
+file, enter "x" to exit without saving the changes, or "q" to quit
+and save changes.  The "q" option should be used with extreme care
+because if
+.I visudo
+believes there to be a parse error, so will
+.I sudo
+and no one will be able to execute sudo again until the error is
+fixed.  Any other command at this prompt will print a short help message.
+When editing the
+.I sudoers
+file after a parse error has been detected the cursor will be placed on the
+line where the error occurred (if the editor supports this feature).
+
+.SH OPTIONS
+.I visudo
+accepts the following command line option:
+.IP -V
+The -V (version) option causes visudo to print the version number
+and exit.
+
+.SH FILES
+.nf
+/etc/sudoers                 file of authorized users.
+/etc/stmp                    lock file for visudo.
+.fi
+
+.SH ENVIRONMENT VARIABLES
+The following are used only if
+.I visudo
+was compiled with the ENV_EDITOR option:
+.nf
+
+EDITOR                       Used by visudo as the editor to use.
+VISUAL                       Used by visudo if EDITOR is not set.
+.fi
+
+.SH AUTHOR
+Many people have worked on
+.I sudo
+over the years, this version of
+.I visudo
+was written by:
+.nf
+
+Todd Miller                   <Todd.Miller@cs.colorado.edu>
+
+See the HISTORY file in the sudo distribution for more details.
+.fi
+
+Please send all bugs, comments, and changes to sudo-bugs@cs.colorado.edu.
+
+.SH DISCLAIMER
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+675 Mass Ave, Cambridge, MA 02139, USA.
+
+.SH CAVEATS
+There is no easy way to prevent a user from gaining a root shell if 
+the editor used by visudo allows shell escapes.
+
+.SH BUGS
+The
+.I -V
+flag gives the version of the
+.I sudo
+package rather than the individual
+.I visudo
+program.
+
+.SH SEE ALSO
+.BR sudo (8),
+.BR vipw (8)
