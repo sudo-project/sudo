@@ -63,9 +63,6 @@ pam_setup(pw, promptp, data)
     if (*data)
 	return(AUTH_SUCCESS);		/* Already initialized */
 
-    /* Stash prompt */
-    def_prompt = *promptp;
-
     /* Initial PAM setup */
     pam_conv.conv = sudo_conv;
     PAM_nullpw = 0;
@@ -80,12 +77,14 @@ pam_setup(pw, promptp, data)
 }
 
 int
-pam_verify(pw, pass, data)
+pam_verify(pw, prompt, data)
     struct passwd *pw;
-    char *pass;
+    char *prompt;
     void **data;
 {
     pam_handle_t *pamh = (pam_handle_t *)(*data);
+
+    def_prompt = prompt;	/* for sudo_conv */
 
     /* PAM_SILENT prevents error messages from going to syslog(3) */
     if (pam_authenticate(pamh, PAM_SILENT) == PAM_SUCCESS)
@@ -122,7 +121,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 {
     struct pam_response *pr;
     struct pam_message *pm;
-    char *p = prompt;
+    char *p = def_prompt;
     int echo = 0;
     extern int nil_pw;
 
