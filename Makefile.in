@@ -206,7 +206,10 @@ install-binaries: $(PROGS)
 
 install-sudoers:
 	@ if [ -f $(sudoersdir)/sudoers ]; then  \
-	    echo "Will not overwrite existing $(sudoersdir)/sudoers file."; \
+	    echo "Setting user/group and mode on existing $(sudoersdir)/sudoers file."; \
+	    chown $(install_uid) $(sudoersdir)/sudoers; \
+	    chgrp $(install_gid) $(sudoersdir)/sudoers; \
+	    chmod 0440 $(sudoersdir)/sudoers; \
 	else \
 	    $(INSTALL) -o $(install_uid) -g $(install_gid) -m 0440 $(srcdir)/sudoers $(sudoersdir)/sudoers; \
 	fi
