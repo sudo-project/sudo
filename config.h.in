@@ -100,6 +100,12 @@
 #  define strrchr	rindex
 #endif
 
+/* Define if you have bzero(3).  */
+#undef HAVE_BZERO
+#ifndef HAVE_BZERO
+#  define bzero(S, N)	(memset((void *)S, 0, N))
+#endif
+
 /* Define if you have sysconf(3c). */
 #undef HAVE_SYSCONF
 
