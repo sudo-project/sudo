@@ -307,7 +307,7 @@ install-binaries: $(PROGS)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s visudo $(DESTDIR)$(visudodir)/visudo
 
 install-noexec: sudo_noexec.la
-	$(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la $(noexecdir)
+	$(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la $(DESTDIR)$(noexecdir)
 
 install-sudoers:
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
