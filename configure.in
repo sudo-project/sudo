@@ -9,7 +9,7 @@ AC_CONFIG_HEADER(config.h pathnames.h)
 dnl
 dnl This won't work before AC_INIT()
 dnl
-echo "Configuring Sudo version 1.6.7"
+AC_MSG_NOTICE([Configuring Sudo version 1.6.7])
 dnl
 dnl Variables that get substituted in the Makefile and man pages
 dnl
@@ -120,14 +120,14 @@ AC_ARG_WITH(otp-only, [  --with-otp-only         deprecated],
 [case $with_otp_only in
     yes)	with_passwd=no
 		AC_DEFINE(WITHOUT_PASSWD, 1, [Define to avoid using the passwd/shadow file for authentication.])
-		AC_MSG_WARN([--with-otp-only option deprecated, treating as --without-passwd])
+		AC_MSG_NOTICE([--with-otp-only option deprecated, treating as --without-passwd])
 		;;
 esac])
 
 AC_ARG_WITH(alertmail, [  --with-alertmail        deprecated],
 [case $with_alertmail in
     *)		with_mailto="$with_alertmail"
-		AC_MSG_WARN([--with-alertmail option deprecated, treating as --mailto])
+		AC_MSG_NOTICE([--with-alertmail option deprecated, treating as --mailto])
 		;;
 esac])
 
@@ -151,7 +151,7 @@ AC_ARG_WITH(incpath, [  --with-incpath          additional places to look for in
 		;;
     no)		AC_MSG_ERROR(["--without-incpath not supported."])
 		;;
-    *)		echo "Adding ${with_incpath} to CPPFLAGS"
+    *)		AC_MSG_NOTICE([Adding ${with_incpath} to CPPFLAGS])
 		for i in ${with_incpath}; do
 		    CPPFLAGS="${CPPFLAGS} -I${i}"
 		done
@@ -164,7 +164,7 @@ AC_ARG_WITH(libpath, [  --with-libpath          additional places to look for li
 		;;
     no)		AC_MSG_ERROR(["--without-libpath not supported."])
 		;;
-    *)		echo "Adding ${with_libpath} to LDFLAGS"
+    *)		AC_MSG_NOTICE([Adding ${with_libpath} to LDFLAGS])
 		for i in ${with_libpath}; do
 		    LDFLAGS="${LDFLAGS} -L${i}"
 		done
@@ -177,7 +177,7 @@ AC_ARG_WITH(libraries, [  --with-libraries        additional libraries to link w
 		;;
     no)		AC_MSG_ERROR(["--without-libraries not supported."])
 		;;
-    *)		echo "Adding ${with_libraries} to LIBS"
+    *)		AC_MSG_NOTICE([Adding ${with_libraries} to LIBS])
 		for i in ${with_libraries}; do
 		    case $i in
 			-l*)	;;
@@ -192,32 +192,32 @@ esac])
 
 AC_ARG_WITH(devel, [  --with-devel            add development options],
 [case $with_devel in  
-    yes)	echo 'Setting up for development: -Wall, flex, yacc'
+    yes)	AC_MSG_NOTICE([Setting up for development: -Wall, flex, yacc])
 		PROGS="${PROGS} testsudoers"
 		OSDEFS="${OSDEFS} -DSUDO_DEVEL"
 		DEV=""
 		;;
     no)		;;
-    *)		echo "Ignoring unknown argument to --with-devel: $with_devel"
+    *)		AC_MSG_WARN([Ignoring unknown argument to --with-devel: $with_devel])
 		;;
 esac])
 
 AC_ARG_WITH(efence, [  --with-efence           link with -lefence for malloc() debugging],
 [case $with_efence in  
-    yes)	echo 'Sudo will link with -lefence (Electric Fence)'
+    yes)	AC_MSG_NOTICE([Sudo will link with -lefence (Electric Fence)])
 		LIBS="${LIBS} -lefence"
 		if test -f /usr/local/lib/libefence.a; then
 		    LDFLAGS="${LDFLAGS} -L/usr/local/lib"
 		fi
 		;;
     no)		;;
-    *)		echo "Ignoring unknown argument to --with-efence: $with_efence"
+    *)		AC_MSG_WARN([Ignoring unknown argument to --with-efence: $with_efence])
 		;;
 esac])
 
 AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
 [case $with_csops in  
-    yes)	echo 'Adding CSOps standard options'
+    yes)	AC_MSG_NOTICE([Adding CSOps standard options])
 		CHECKSIA=false
 		with_ignore_dot=yes
 		insults=on
@@ -226,7 +226,7 @@ AC_ARG_WITH(csops, [  --with-csops            add CSOps standard options],
 		with_env_editor=yes
 		;;
     no)		;;
-    *)		echo "Ignoring unknown argument to --with-csops: $with_csops"
+    *)		AC_MSG_WARN([Ignoring unknown argument to --with-csops: $with_csops])
 		;;
 esac])
 
@@ -252,7 +252,7 @@ AC_ARG_WITH(skey, [  --with-skey             enable S/Key support ],
 		AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
 		;;
     no)		;;
-    *)		echo "Ignoring unknown argument to --with-skey: $with_skey"
+    *)		AC_MSG_WARN([Ignoring unknown argument to --with-skey: $with_skey])
 		;;
 esac])
 
@@ -267,7 +267,7 @@ AC_ARG_WITH(opie, [  --with-opie             enable OPIE support ],
 		AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
 		;;
     no)		;;
-    *)		echo "Ignoring unknown argument to --with-opie: $with_opie"
+    *)		AC_MSG_WARN([Ignoring unknown argument to --with-opie: $with_opie])
 		;;
 esac])
 
@@ -284,9 +284,9 @@ AC_ARG_WITH(long-otp-prompt, [  --with-long-otp-prompt  use a two line OTP (skey
 		;;
 esac])
 
-AC_ARG_WITH(SecurID, [  --with-SecurID          enable SecurID support],
+AC_ARG_WITH(SecurID, [  --with-SecurID=DIR      enable SecurID support],
 [case $with_SecurID in
-    no)		;;
+    no)		with_SecurID="";;
     *)		AC_DEFINE(HAVE_SECURID, 1, [Define if you use SecurID.])
 		AC_MSG_CHECKING(whether to use SecurID for authentication)
 		AC_MSG_RESULT(yes)
@@ -294,9 +294,9 @@ AC_ARG_WITH(SecurID, [  --with-SecurID          enable SecurID support],
 		;;
 esac])
 
-AC_ARG_WITH(fwtk, [  --with-fwtk             enable FWTK AuthSRV support],
+AC_ARG_WITH(fwtk, [  --with-fwtk=DIR         enable FWTK AuthSRV support],
 [case $with_fwtk in
-    no)		;;
+    no)		with_fwtk="";;
     *)		AC_DEFINE(HAVE_FWTK, 1, [Define if you use the FWTK authsrv daemon.])
 		AC_MSG_CHECKING(whether to use FWTK AuthSRV for authentication)
 		AC_MSG_RESULT(yes)
@@ -310,23 +310,19 @@ AC_ARG_WITH(fwtk, [  --with-fwtk             enable FWTK AuthSRV support],
 		;;
 esac])
 
-AC_ARG_WITH(kerb4, [  --with-kerb4            enable kerberos v4 support],
+AC_ARG_WITH(kerb4, [  --with-kerb4=DIR        enable Kerberos IV support],
 [case $with_kerb4 in
-    yes)	AC_MSG_CHECKING(whether to try Kerberos 4 authentication)
+    no)		with_kerb4="";;
+    *)		AC_MSG_CHECKING(whether to try kerberos IV authentication)
 		AC_MSG_RESULT(yes)
-		;;
-    no)		;;
-    *)		AC_MSG_ERROR(["--with-kerb4 does not take an argument."])
 		;;
 esac])
 
-AC_ARG_WITH(kerb5, [  --with-kerb5            enable kerberos v5 support],
+AC_ARG_WITH(kerb5, [  --with-kerb5=DIR        enable Kerberos V support],
 [case $with_kerb5 in
-    yes)	AC_MSG_CHECKING(whether to try Kerberos 5 authentication)
+    no)		with_kerb5="";;
+    *)		AC_MSG_CHECKING(whether to try Kerberos V authentication)
 		AC_MSG_RESULT(yes)
-		;;
-    no)		;;
-    *)		AC_MSG_ERROR(["--with-kerb5 does not take an argument."])
 		;;
 esac])
 
@@ -588,7 +584,7 @@ AC_ARG_WITH(mailsubject, [  --with-mailsubject      subject of sudo mail],
 [case $with_mailsubject in  
     yes)	AC_MSG_ERROR(["must give --with-mailsubject an argument."])
 		;;
-    no)		echo "Sorry, --without-mailsubject not supported."
+    no)		AC_MSG_WARN([Sorry, --without-mailsubject not supported.])
 		;;
     *)		mailsub="$with_mailsubject"
 		AC_MSG_CHECKING(sudo mail subject)
@@ -602,7 +598,7 @@ AC_ARG_WITH(passprompt, [  --with-passprompt       default password prompt],
 [case $with_passprompt in  
     yes)	AC_MSG_ERROR(["must give --with-passprompt an argument."])
 		;;
-    no)		echo "Sorry, --without-passprompt not supported."
+    no)		AC_MSG_WARN([Sorry, --without-passprompt not supported.])
 		;;
     *)		passprompt="$with_passprompt"
 esac])
@@ -614,7 +610,7 @@ AC_ARG_WITH(badpass-message, [  --with-badpass-message  message the user sees wh
 [case $with_badpass_message in  
     yes)	AC_MSG_ERROR(["Must give --with-badpass-message an argument."])
 		;;
-    no)		echo "Sorry, --without-badpass-message not supported."
+    no)		AC_MSG_WARN([Sorry, --without-badpass-message not supported.])
 		;;
     *)		badpass_message="$with_badpass_message"
 		;;
@@ -969,7 +965,7 @@ AC_ARG_ENABLE(authentication,
 		AC_DEFINE(NO_AUTHENTICATION, 1, [Define if you don't want sudo to prompt for a password by default.])
 		;;
     *)		AC_MSG_RESULT(no)
-    		echo "Ignoring unknown argument to --enable-authentication: $enableval"
+    		AC_MSG_WARN([Ignoring unknown argument to --enable-authentication: $enableval])
 		;;
   esac
 ], AC_MSG_RESULT(yes))
@@ -984,7 +980,7 @@ AC_ARG_ENABLE(root-mailer,
 		AC_DEFINE(NO_ROOT_MAILER, 1, [Define to avoid runing the mailer as root.])
 		;;
     *)		AC_MSG_RESULT(no)
-    		echo "Ignoring unknown argument to --enable-root-mailer: $enableval"
+    		AC_MSG_WARN([Ignoring unknown argument to --enable-root-mailer: $enableval])
 		;;
   esac
 ], AC_MSG_RESULT(no))
@@ -1017,7 +1013,7 @@ AC_ARG_ENABLE(saved-ids,
 		AC_DEFINE(NO_SAVED_IDS, 1, [Define to avoid using POSIX saved ids.])
 		;;
     *)		AC_MSG_RESULT(no)
-    		echo "Ignoring unknown argument to --enable-saved-ids: $enableval"
+    		AC_MSG_WARN([Ignoring unknown argument to --enable-saved-ids: $enableval])
 		;;
   esac
 ], AC_MSG_RESULT(no))
@@ -1032,7 +1028,7 @@ AC_ARG_ENABLE(shadow,
 		CHECKSHADOW="false"
 		;;
     *)		AC_MSG_RESULT(no)
-    		echo "Ignoring unknown argument to --enable-shadow: $enableval"
+    		AC_MSG_WARN([Ignoring unknown argument to --enable-shadow: $enableval])
 		;;
   esac
 ], AC_MSG_RESULT(no))
@@ -1061,7 +1057,7 @@ AC_ARG_ENABLE(log-host,
     no)		AC_MSG_RESULT(no)
 		;;
     *)		AC_MSG_RESULT(no)
-    		echo "Ignoring unknown argument to --enable-log-host: $enableval"
+    		AC_MSG_WARN([Ignoring unknown argument to --enable-log-host: $enableval])
 		;;
   esac
 ], AC_MSG_RESULT(no))
@@ -1076,7 +1072,7 @@ AC_ARG_ENABLE(noargs-shell,
     no)		AC_MSG_RESULT(no)
 		;;
     *)		AC_MSG_RESULT(no)
-    		echo "Ignoring unknown argument to --enable-noargs-shell: $enableval"
+    		AC_MSG_WARN([Ignoring unknown argument to --enable-noargs-shell: $enableval])
 		;;
   esac
 ], AC_MSG_RESULT(no))
@@ -1092,7 +1088,7 @@ AC_ARG_ENABLE(shell-sets-home,
     no)		AC_MSG_RESULT(no)
 		;;
     *)		AC_MSG_RESULT(no)
-    		echo "Ignoring unknown argument to --enable-shell-sets-home: $enableval"
+    		AC_MSG_WARN([Ignoring unknown argument to --enable-shell-sets-home: $enableval])
 		;;
   esac
 ], AC_MSG_RESULT(no))
@@ -1107,7 +1103,7 @@ AC_ARG_ENABLE(path_info,
 		AC_DEFINE(DONT_LEAK_PATH_INFO, 1, [Define if you want sudo to display "command not allowed" instead of "command not found" when a command cannot be found.])
 		;;
     *)		AC_MSG_RESULT(no)
-		echo "Ignoring unknown argument to --enable-path-info: $enableval"
+		AC_MSG_WARN([Ignoring unknown argument to --enable-path-info: $enableval])
 		;;
   esac
 ], AC_MSG_RESULT(no))
@@ -1117,8 +1113,7 @@ dnl If we don't have egrep we can't do anything...
 dnl
 AC_CHECK_PROG(EGREPPROG, egrep, egrep, )
 if test -z "$EGREPPROG"; then
-    echo "Sorry, configure requires egrep to run."
-    exit
+    AC_MSG_ERROR([Sorry, configure requires egrep to run.])
 fi
 
 dnl
@@ -1166,15 +1161,11 @@ dnl
 AC_CANONICAL_HOST
 if test -n "$sudo_cv_prev_host"; then
     if test "$sudo_cv_prev_host" != "$host"; then
-	echo ""
-	echo "Fatal Error: config.cache exists from another platform!"
-	echo "Please remove it and re-run configure."
-	echo ""
-	exit 1
+	AC_MSG_ERROR([config.cache was created on a different host; remove it and re-run configure.])
     else
 	AC_MSG_CHECKING(previous host type)
 	AC_CACHE_VAL(sudo_cv_prev_host, sudo_cv_prev_host="$host")
-	echo $sudo_cv_prev_host
+	AC_MSG_RESULT([$sudo_cv_prev_host])
     fi
 else
     # this will produce no output since there is no cached value
@@ -1302,7 +1293,7 @@ case "$host" in
 				CHECKSIA=false
 				;;
 		    *)		AC_MSG_RESULT(no)
-				echo "Ignoring unknown argument to --enable-sia: $enableval"
+				AC_MSG_WARN([Ignoring unknown argument to --enable-sia: $enableval])
 				;;
 		  esac
 		], AC_MSG_RESULT(no))
@@ -1455,7 +1446,7 @@ case "$host" in
 		# Use shlicc for BSD/OS [23].x unless asked to do otherwise
 		if test "${with_CC+set}" != set -a "$ac_cv_prog_CC" = gcc; then
 		    case "$OSREV" in
-			2|3)	echo 'using shlicc as CC'
+			2|3)	AC_MSG_NOTICE([using shlicc as CC])
 				ac_cv_prog_CC=shlicc
 				CC="$ac_cv_prog_CC"
 				;;
@@ -1661,35 +1652,84 @@ if test "$with_DCE" = "yes" -o "$ac_cv_prog_YACC" = "bison -y"; then
 fi
 
 dnl
-dnl Kerberos 5
+dnl Kerberos IV
 dnl
-if test "$with_kerb5" = "yes"; then
+if test -n "$with_kerb4"; then
+    AC_DEFINE(HAVE_KERB4, 1, [Define if you use Kerberos IV.])
+    dnl
+    dnl Use the specified directory, if any, else search for correct inc dir
+    dnl
+    if test "$with_kerb4" = "yes"; then
+	found=no
+	O_CPPFLAGS="$CPPFLAGS"
+	for dir in "" "kerberosIV/" "krb4/" "kerberos4/" "kerberosv4/"; do
+	    CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
+	    AC_PREPROC_IFELSE([#include <krb.h>], [found=yes; break], )
+	done
+	test X"$found" = X"no" && CPPFLAGS="$O_CPPFLAGS"
+    else
+	SUDO_LDFLAGS="$LDFLAGS -L${with_kerb4}/lib"
+	CPPFLAGS="$CPPFLAGS -I${with_kerb4}/include"
+	AC_CHECK_HEADER([krb.h], [found=yes], [found=no])
+    fi
+    if test X"$found" = X"no"; then
+	AC_MSG_WARN([Unable to locate Kerberos IV include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS])
+    fi
+
+    dnl
+    dnl Check for -ldes vs. -ldes425 and -lkrb vs. -lkrb4
+    dnl
+    AC_CHECK_LIB(des, des_cbc_encrypt, [K4LIBS="-ldes"], [
+	AC_CHECK_LIB(des425, des_cbc_encrypt, [K4LIBS="-ldes425"], [K4LIBS=""])
+    ])
+    AC_CHECK_LIB(krb, main, [K4LIBS="$K4LIBS -lkrb"], [
+	AC_CHECK_LIB(krb4, main, [K4LIBS="$K4LIBS -lkrb4"],
+	    [K4LIBS="$K4LIBS -lkrb"]
+	    [AC_MSG_WARN([Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS and possibly add Kerberos libs to SUDO_LIBS])]
+	, [$K4LIBS])
+    ], [$K4LIBS])
+    SUDO_LIBS="${SUDO_LIBS} $K4LIBS"
+    AUTH_OBJS="${AUTH_OBJS} kerb4.o"
+fi
+
+dnl
+dnl Kerberos V
+dnl
+if test -n "$with_kerb5"; then
     AC_DEFINE(HAVE_KERB5, 1, [Define if you use Kerberos V.])
-    if test -f "/usr/local/include/krb5.h"; then
-	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
-    elif test -f "/usr/local/kerberos/include/krb5.h"; then
-	CPPFLAGS="$CPPFLAGS -I/usr/local/kerberos/include"
-    elif test -f "/usr/krb5/include/krb5.h"; then
-	CPPFLAGS="$CPPFLAGS -I/usr/krb5/include"
-    elif test -f "/usr/local/krb5/include/krb5.h"; then
-	CPPFLAGS="$CPPFLAGS -I/usr/local/krb5/include"
+    dnl
+    dnl Use the specified directory, if any, else search for correct inc dir
+    dnl
+    if test "$with_kerb5" = "yes"; then
+	found=no
+	O_CPPFLAGS="$CPPFLAGS"
+	for dir in "" "kerberosV/" "krb5/" "kerberos5/" "kerberosv5/"; do
+	    CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
+	    AC_PREPROC_IFELSE([#include <krb5.h>], [found=yes; break], )
+	done
+	if test X"$found" = X"no"; then
+	    CPPFLAGS="$O_CPPFLAGS"
+	    AC_MSG_WARN([Unable to locate Kerberos V include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS])
+	fi
     else
-	echo 'Unable to locate kerberos 5 include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS'
+	dnl XXX - try to include krb5.h here too
+	SUDO_LDFLAGS="$LDFLAGS -L${with_kerb5}/lib"
+	CPPFLAGS="$CPPFLAGS -I${with_kerb5}/include"
     fi
 
-    if test -f "/usr/local/lib/libkrb5.a"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
-    elif test -f "/usr/local/kerberos/lib/libkrb5.a"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/kerberos/lib"
-    elif test -f "/usr/krb5/lib/libkrb5.a"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/krb5/lib"
-    elif test -f "/usr/local/krb5/lib/libkrb5.a"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/krb5/lib"
-    else
-	echo 'Unable to locate kerberos 5 libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS'
-    fi
-
-    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
+    dnl
+    dnl Try to determine whether we have Heimdal or MIT Kerberos
+    dnl
+    AC_MSG_CHECKING(whether we are using Heimdal)
+    AC_TRY_COMPILE([#include <krb5.h>], [const char *tmp = heimdal_version;],
+	[
+	    AC_MSG_RESULT(yes)
+	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -ldes -lcom_err -lasn1 -lroken"
+	], [
+	    AC_MSG_RESULT(no)
+	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
+	]
+    )
     AUTH_OBJS="${AUTH_OBJS} kerb5.o"
 fi
 
@@ -1698,37 +1738,6 @@ dnl PAM libs
 dnl
 if test "$with_pam" = "yes"; then
     AC_HAVE_LIBRARY(dl, SUDO_LIBS="${SUDO_LIBS} -lpam -ldl", SUDO_LIBS="${SUDO_LIBS} -lpam")
-fi
-
-dnl
-dnl Find kerberos 4 includes and libs or complain
-dnl
-if test "$with_kerb4" = "yes"; then
-    AC_DEFINE(HAVE_KERB4, 1, [Define if you use Kerberos IV.])
-    if test -f "/usr/include/kerberosIV/krb.h"; then
-	CPPFLAGS="${CPPFLAGS} -I/usr/include/kerberosIV"
-    elif test -f "/usr/local/include/kerberosIV/krb.h"; then
-	CPPFLAGS="${CPPFLAGS} -I/usr/local/include/kerberosIV"
-    elif test -f "/usr/kerberos/include/krb.h"; then
-	CPPFLAGS="${CPPFLAGS} -I/usr/kerberos/include"
-    elif test -f "/usr/local/kerberos/include/krb.h"; then
-	CPPFLAGS="${CPPFLAGS} -I/usr/local/kerberos/include"
-    else
-	echo 'Unable to locate kerberos 4 include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS'
-    fi
-
-    if test -d "/usr/kerberos/lib"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/kerberos/lib"
-    elif test -d "/usr/lib/kerberos"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/lib/kerberos"
-    elif test -f "/usr/local/lib/libkrb.a"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L/usr/local/lib"
-    elif test ! -f "/usr/lib/libkrb.a"; then
-	echo 'Unable to locate kerberos 4 libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS'
-    fi
-
-    AC_HAVE_LIBRARY(des, SUDO_LIBS="${SUDO_LIBS} -lkrb -ldes", SUDO_LIBS="${SUDO_LIBS} -lkrb")
-    AUTH_OBJS="${AUTH_OBJS} kerb4.o"
 fi
 
 dnl
