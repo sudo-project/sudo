@@ -195,10 +195,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"umask", T_MODE|T_BOOL, { 0 },
 	"Umask to use or 0777 to use user's: 0%o"
     }, {
-	"logfile", T_STR|T_BOOL, { 0 },
+	"logfile", T_STR|T_BOOL|T_PATH, { 0 },
 	"Path to log file: %s"
     }, {
-	"mailerpath", T_STR|T_BOOL, { 0 },
+	"mailerpath", T_STR|T_BOOL|T_PATH, { 0 },
 	"Path to mail program: %s"
     }, {
 	"mailerflags", T_STR|T_BOOL, { 0 },
@@ -213,7 +213,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"badpass_message", T_STR, { 0 },
 	"Incorrect password message: %s"
     }, {
-	"timestampdir", T_STR, { 0 },
+	"timestampdir", T_STR|T_PATH, { 0 },
 	"Path to authentication timestamp dir: %s"
     }, {
 	"exempt_group", T_STR|T_BOOL, { 0 },
@@ -354,6 +354,12 @@ set_default(var, val, op)
 		    return(FALSE);
 		}
 	    }
+	    if ((cur->type & T_PATH) && *val != '/') {
+		(void) fprintf(stderr,
+		    "%s: values for `%s' must start with a '/'\n", Argv[0],
+		    var);
+		return(FALSE);
+	    }
 	    if (!store_str(val, cur, op)) {
 		(void) fprintf(stderr,
 		    "%s: value '%s' is invalid for option '%s'\n", Argv[0],
@@ -426,8 +432,10 @@ init_defaults()
 		case T_STR:
 		case T_LOGFAC:
 		case T_LOGPRI:
-		    if (def->sd_un.str)
+		    if (def->sd_un.str) {
 			free(def->sd_un.str);
+			def->sd_un.str = NULL;
+		    }
 		    break;
 	    }
     }

@@ -65,6 +65,7 @@ struct sudo_defs_types {
 #define T_LOGPRI	0x006
 #define T_MASK		0x0FF
 #define T_BOOL		0x100
+#define T_PATH		0x200
 
 /*
  * Indexes into sudo_defs_table
