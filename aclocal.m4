@@ -9,22 +9,22 @@ dnl
 AC_DEFUN(SUDO_PROG_SENDMAIL, [AC_MSG_CHECKING(for sendmail)
 if test -f "/usr/sbin/sendmail"; then
     AC_MSG_RESULT(/usr/sbin/sendmail)
-    AC_DEFINE(_CONFIG_PATH_SENDMAIL, "/usr/sbin/sendmail")
+    AC_DEFINE(_PATH_SENDMAIL, "/usr/sbin/sendmail")
 elif test -f "/usr/lib/sendmail"; then
     AC_MSG_RESULT(/usr/lib/sendmail)
-    AC_DEFINE(_CONFIG_PATH_SENDMAIL, "/usr/lib/sendmail")
+    AC_DEFINE(_PATH_SENDMAIL, "/usr/lib/sendmail")
 elif test -f "/usr/etc/sendmail"; then
     AC_MSG_RESULT(/usr/etc/sendmail)
-    AC_DEFINE(_CONFIG_PATH_SENDMAIL, "/usr/etc/sendmail")
+    AC_DEFINE(_PATH_SENDMAIL, "/usr/etc/sendmail")
 elif test -f "/usr/ucblib/sendmail"; then
     AC_MSG_RESULT(/usr/ucblib/sendmail)
-    AC_DEFINE(_CONFIG_PATH_SENDMAIL, "/usr/ucblib/sendmail")
+    AC_DEFINE(_PATH_SENDMAIL, "/usr/ucblib/sendmail")
 elif test -f "/usr/local/lib/sendmail"; then
     AC_MSG_RESULT(/usr/local/lib/sendmail)
-    AC_DEFINE(_CONFIG_PATH_SENDMAIL, "/usr/local/lib/sendmail")
+    AC_DEFINE(_PATH_SENDMAIL, "/usr/local/lib/sendmail")
 elif test -f "/usr/local/bin/sendmail"; then
     AC_MSG_RESULT(/usr/local/bin/sendmail)
-    AC_DEFINE(_CONFIG_PATH_SENDMAIL, "/usr/local/bin/sendmail")
+    AC_DEFINE(_PATH_SENDMAIL, "/usr/local/bin/sendmail")
 else
     AC_MSG_RESULT(not found)
 fi
@@ -36,40 +36,19 @@ dnl
 AC_DEFUN(SUDO_PROG_VI, [AC_MSG_CHECKING(for vi)
 if test -f "/usr/bin/vi"; then
     AC_MSG_RESULT(/usr/bin/vi)
-    AC_DEFINE(_CONFIG_PATH_VI, "/usr/bin/vi")
+    AC_DEFINE(_PATH_VI, "/usr/bin/vi")
 elif test -f "/usr/ucb/vi"; then
     AC_MSG_RESULT(/usr/ucb/vi)
-    AC_DEFINE(_CONFIG_PATH_VI, "/usr/ucb/vi")
+    AC_DEFINE(_PATH_VI, "/usr/ucb/vi")
 elif test -f "/usr/bsd/vi"; then
     AC_MSG_RESULT(/usr/bsd/vi)
-    AC_DEFINE(_CONFIG_PATH_VI, "/usr/bsd/vi")
+    AC_DEFINE(_PATH_VI, "/usr/bsd/vi")
 elif test -f "/bin/vi"; then
     AC_MSG_RESULT(/bin/vi)
-    AC_DEFINE(_CONFIG_PATH_VI, "/bin/vi")
+    AC_DEFINE(_PATH_VI, "/bin/vi")
 elif test -f "/usr/local/bin/vi"; then
     AC_MSG_RESULT(/usr/local/bin/vi)
-    AC_DEFINE(_CONFIG_PATH_VI, "/usr/local/bin/vi")
-else
-    AC_MSG_RESULT(not found)
-fi
-])dnl
-
-dnl
-dnl check for pwd
-dnl
-AC_DEFUN(SUDO_PROG_PWD, [AC_MSG_CHECKING(for pwd)
-if test -f "/usr/bin/pwd"; then
-    AC_MSG_RESULT(/usr/bin/pwd)
-    AC_DEFINE(_CONFIG_PATH_PWD, "/usr/bin/pwd")
-elif test -f "/bin/pwd"; then
-    AC_MSG_RESULT(/bin/pwd)
-    AC_DEFINE(_CONFIG_PATH_PWD, "/bin/pwd")
-elif test -f "/usr/ucb/pwd"; then
-    AC_MSG_RESULT(/usr/ucb/pwd)
-    AC_DEFINE(_CONFIG_PATH_PWD, "/usr/ucb/pwd")
-elif test -f "/usr/sbin/pwd"; then
-    AC_MSG_RESULT(/usr/sbin/pwd)
-    AC_DEFINE(_CONFIG_PATH_PWD, "/usr/sbin/pwd")
+    AC_DEFINE(_PATH_VI, "/usr/local/bin/vi")
 else
     AC_MSG_RESULT(not found)
 fi
@@ -81,16 +60,16 @@ dnl
 AC_DEFUN(SUDO_PROG_MV, [AC_MSG_CHECKING(for mv)
 if test -f "/usr/bin/mv"; then
     AC_MSG_RESULT(/usr/bin/mv)
-    AC_DEFINE(_CONFIG_PATH_MV, "/usr/bin/mv")
+    AC_DEFINE(_PATH_MV, "/usr/bin/mv")
 elif test -f "/bin/mv"; then
     AC_MSG_RESULT(/bin/mv)
-    AC_DEFINE(_CONFIG_PATH_MV, "/bin/mv")
+    AC_DEFINE(_PATH_MV, "/bin/mv")
 elif test -f "/usr/ucb/mv"; then
     AC_MSG_RESULT(/usr/ucb/mv)
-    AC_DEFINE(_CONFIG_PATH_MV, "/usr/ucb/mv")
+    AC_DEFINE(_PATH_MV, "/usr/ucb/mv")
 elif test -f "/usr/sbin/mv"; then
     AC_MSG_RESULT(/usr/sbin/mv)
-    AC_DEFINE(_CONFIG_PATH_MV, "/usr/sbin/mv")
+    AC_DEFINE(_PATH_MV, "/usr/sbin/mv")
 else
     AC_MSG_RESULT(not found)
 fi
@@ -102,28 +81,28 @@ dnl
 AC_DEFUN(SUDO_PROG_BSHELL, [AC_MSG_CHECKING(for bourne shell)
 if test -f "/bin/sh"; then
     AC_MSG_RESULT(/bin/sh)
-    AC_DEFINE(_CONFIG_PATH_BSHELL, "/bin/sh")
+    AC_DEFINE(_PATH_BSHELL, "/bin/sh")
 elif test -f "/usr/bin/sh"; then
     AC_MSG_RESULT(/usr/bin/sh)
-    AC_DEFINE(_CONFIG_PATH_BSHELL, "/usr/bin/sh")
+    AC_DEFINE(_PATH_BSHELL, "/usr/bin/sh")
 elif test -f "/sbin/sh"; then
     AC_MSG_RESULT(/sbin/sh)
-    AC_DEFINE(_CONFIG_PATH_BSHELL, "/sbin/sh")
+    AC_DEFINE(_PATH_BSHELL, "/sbin/sh")
 elif test -f "/usr/sbin/sh"; then
     AC_MSG_RESULT(/usr/sbin/sh)
-    AC_DEFINE(_CONFIG_PATH_BSHELL, "/usr/sbin/sh")
+    AC_DEFINE(_PATH_BSHELL, "/usr/sbin/sh")
 elif test -f "/bin/ksh"; then
     AC_MSG_RESULT(/bin/ksh)
-    AC_DEFINE(_CONFIG_PATH_BSHELL, "/bin/ksh")
+    AC_DEFINE(_PATH_BSHELL, "/bin/ksh")
 elif test -f "/usr/bin/ksh"; then
     AC_MSG_RESULT(/usr/bin/ksh)
-    AC_DEFINE(_CONFIG_PATH_BSHELL, "/usr/bin/ksh")
+    AC_DEFINE(_PATH_BSHELL, "/usr/bin/ksh")
 elif test -f "/bin/bash"; then
     AC_MSG_RESULT(/bin/bash)
-    AC_DEFINE(_CONFIG_PATH_BSHELL, "/bin/bash")
+    AC_DEFINE(_PATH_BSHELL, "/bin/bash")
 elif test -f "/usr/bin/bash"; then
     AC_MSG_RESULT(/usr/bin/bash)
-    AC_DEFINE(_CONFIG_PATH_BSHELL, "/usr/bin/bash")
+    AC_DEFINE(_PATH_BSHELL, "/usr/bin/bash")
 else
     AC_MSG_RESULT(not found)
 fi
@@ -135,16 +114,16 @@ dnl
 AC_DEFUN(SUDO_LOGFILE, [AC_MSG_CHECKING(for log file location)
 if test -n "$with_logfile"; then
     AC_MSG_RESULT($with_logfile)
-    AC_DEFINE_UNQUOTED(_CONFIG_PATH_LOGFILE, "$with_logfile")
+    AC_DEFINE_UNQUOTED(_PATH_SUDO_LOGFILE, "$with_logfile")
 elif test -d "/var/log"; then
     AC_MSG_RESULT(/var/log/sudo.log)
-    AC_DEFINE(_CONFIG_PATH_LOGFILE, "/var/log/sudo.log")
+    AC_DEFINE(_PATH_SUDO_LOGFILE, "/var/log/sudo.log")
 elif test -d "/var/adm"; then
     AC_MSG_RESULT(/var/adm/sudo.log)
-    AC_DEFINE(_CONFIG_PATH_LOGFILE, "/var/adm/sudo.log")
+    AC_DEFINE(_PATH_SUDO_LOGFILE, "/var/adm/sudo.log")
 elif test -d "/usr/adm"; then
     AC_MSG_RESULT(/usr/adm/sudo.log)
-    AC_DEFINE(_CONFIG_PATH_LOGFILE, "/usr/adm/sudo.log")
+    AC_DEFINE(_PATH_SUDO_LOGFILE, "/usr/adm/sudo.log")
 else
     AC_MSG_RESULT(unknown, you will have to set _PATH_SUDO_LOGFILE by hand)
 fi
@@ -156,13 +135,13 @@ dnl
 AC_DEFUN(SUDO_TIMEDIR, [AC_MSG_CHECKING(for timestamp file location)
 if test -n "$with_timedir"; then
     AC_MSG_RESULT($with_timedir)
-    AC_DEFINE_UNQUOTED(_CONFIG_PATH_TIMEDIR, "$with_timedir")
+    AC_DEFINE_UNQUOTED(_PATH_SUDO_TIMEDIR, "$with_timedir")
 elif test -d "/var/run"; then
     AC_MSG_RESULT(/var/run/sudo)
-    AC_DEFINE(_CONFIG_PATH_TIMEDIR, "/var/run/sudo")
+    AC_DEFINE(_PATH_SUDO_TIMEDIR, "/var/run/sudo")
 elif test -d "/tmp"; then
     AC_MSG_RESULT(/tmp/.odus)
-    AC_DEFINE(_CONFIG_PATH_TIMEDIR, "/tmp/.odus")
+    AC_DEFINE(_PATH_SUDO_TIMEDIR, "/tmp/.odus")
 else
     AC_MSG_RESULT(unknown, you will have to set _PATH_SUDO_TIMEDIR by hand)
 fi
