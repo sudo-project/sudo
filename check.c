@@ -307,7 +307,7 @@ static void check_passwd()
     (void) set_auth_parameters();
     spw_ent = getprpwuid(uid);
     be_user();
-    if (spw_ent && spw_ent -> ufld)
+    if (spw_ent)
 	encrypted = spw_ent -> ufld.fd_encrypt;
 #endif /* __osf__ && HAVE_C2_SECURITY */
 #if defined(ultrix) && defined(HAVE_C2_SECURITY)
