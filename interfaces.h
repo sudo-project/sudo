@@ -58,7 +58,7 @@ void dump_interfaces	__P((void));
 /*
  * Definitions for external variables.
  */
-#ifndef MAIN
+#ifndef _SUDO_MAIN
 extern struct interface *interfaces;
 extern int num_interfaces;
 #endif
