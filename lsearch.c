@@ -84,7 +84,7 @@ linear_base(key, base, nelp, width, compar, add_flag)
 
 	end = (const char *) base + *nelp * width;
 	for (element = (const char *) base; element < end; element += width)
-		if (!compar((VOID *) element, key))	/* key found */
+		if (!compar(key, (VOID *) element))	/* key found */
 			return((VOID *) element);
 	if (!add_flag)					/* key not found */
 		return(NULL);
