@@ -61,7 +61,7 @@ DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
 
 
 
-7/Apr/99                       1.6                              1
+22/Jun/1999                    1.6                              1
 
 
 
@@ -103,31 +103,31 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        When a _r_u_n_a_s_-_l_i_s_t is specified for an _a_c_c_e_s_s___g_r_o_u_p, it
        affects all commands in the _a_c_c_e_s_s___g_r_o_u_p.  For example,
        given:
+
            oper bigserver = (root, sysadm) /usr/bin/kill, /bin/rm
+
        User oper will be able to run /usr/bin/kill and /bin/rm as
        rrrrooooooootttt or ssssyyyyssssaaaaddddmmmm on the machine, bigserver.  The _r_u_n_a_s_-_l_i_s_t
        is "sticky" across entries in the comma-separated
        _a_c_c_e_s_s___g_r_o_u_p.  You can override the _r_u_n_a_s_-_l_i_s_t with
        another one, at which point the new _r_u_n_a_s_-_l_i_s_t becomes the
        default for that _a_c_c_e_s_s___g_r_o_u_p.  For example, given:
-           oper bigserver = (root, sysadm) /usr/bin/kill, (root)
-       /bin/rm, \      /bin/rmdir User oper can still run
-       /usr/bin/kill as rrrrooooooootttt or ssssyyyyssssaaaaddddmmmm but can only run /bin/rm
-       and /bin/rmdir as rrrrooooooootttt.
+
+           oper bigserver = (root, sysadm) /usr/bin/kill, (root) /bin/rm, \
+               /bin/rmdir
+
+       User oper can still run /usr/bin/kill as rrrrooooooootttt or ssssyyyyssssaaaaddddmmmm
+       but can only run /bin/rm and /bin/rmdir as rrrrooooooootttt.
 
        Similarly, the NNNNOOOOPPPPAAAASSSSSSSSWWWWDDDD modifier is also persistent across
        an _a_c_c_e_s_s___g_r_o_u_p. For example given:
-           oper bigserver = NOPASSWD: /usr/bin/kill, /bin/rm,
-       /bin/rmdir User oper will be able to run /usr/bin/kill,
-       /bin/rm, and /bin/rmdir as rrrrooooooootttt without a password.  If we
-       change that to:
-           oper bigserver = NOPASSWD: /usr/bin/kill, PASSWD:
-       /bin/rm, /bin/rmdir User oper can still run /usr/bin/kill
-       without a password but must give a password to run /bin/rm
+
+           oper bigserver = NOPASSWD: /usr/bin/kill, /bin/rm, /bin/rmdir
 
 
 
-7/Apr/99                       1.6                              2
+
+22/Jun/1999                    1.6                              2
 
 
 
@@ -136,7 +136,14 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
-       and /bin/rmdir.
+       User oper will be able to run /usr/bin/kill, /bin/rm, and
+       /bin/rmdir as rrrrooooooootttt without a password.  If we change that
+       to:
+
+           oper bigserver = NOPASSWD: /usr/bin/kill, PASSWD: /bin/rm, /bin/rmdir
+
+       User oper can still run /usr/bin/kill without a password
+       but must give a password to run /bin/rm and /bin/rmdir.
 
        wwwwiiiillllddddccccaaaarrrrddddssss ((((aaaakkkkaaaa mmmmeeeettttaaaa cccchhhhaaaarrrraaaacccctttteeeerrrrssss))))::::
 
@@ -183,17 +190,10 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
        {Host,User,Cmnd}_Alias.  DDDDOOOO NNNNOOOOTTTT define an alias of _A_L_L, it
        will NNNNOOOOTTTT be used.  Note that _A_L_L implies the entire
        universe of hosts/users/commands.  You can subtract
-       elements from the universe by using the syntax:
-          user  host=ALL,!ALIAS1,!/sbin/halt...
-
-       Commands may have optional command line arguments.  If
-       they do, then the arguments in the _s_u_d_o_e_r_s file must
-       exactly match those on the command line.  It is also
-       possible to have a command's arguments span multiple lines
 
 
 
-7/Apr/99                       1.6                              3
+22/Jun/1999                    1.6                              3
 
 
 
@@ -202,6 +202,14 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
+       elements from the universe by using the syntax:
+
+          user  host=ALL,!ALIAS1,!/sbin/halt...
+
+       Commands may have optional command line arguments.  If
+       they do, then the arguments in the _s_u_d_o_e_r_s file must
+       exactly match those on the command line.  It is also
+       possible to have a command's arguments span multiple lines
        as long as the line continuance character "\" is used.
        The following characters must be escaped with a "\" if
        used in command arguments: ",", ":", "=", "\".
@@ -245,6 +253,21 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
            steve       CSNETS=(operator) /usr/op_commands/
 
 
+
+
+
+
+
+
+22/Jun/1999                    1.6                              4
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        HHHHoooosssstttt AAAAlllliiiiaaaassss ssssppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnnssss::::
 
        The are four _h_o_s_t _a_l_i_a_s_e_s.  The first actually contains
@@ -256,18 +279,6 @@ EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
        128.138.205.192 nets.  The CUNETS alias will match any
        host on the 128.138.0.0 (class B) network.  Note that
        these are nnnneeeettttwwwwoooorrrrkkkk addresses, not ip addresses.  Unless an
-
-
-
-7/Apr/99                       1.6                              4
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
-
        explicit netmask is given, the local _n_e_t_m_a_s_k is used to
        determine whether or not the current host belongs to a
        network.
@@ -310,6 +321,19 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
                        root on the machines on CUNETS (which is
                        explicitly listed as a class B network).
 
+
+
+
+
+22/Jun/1999                    1.6                              5
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
        nieusma         The user nieusma may run commands in the
                        SHUTDOWN alias as well as _/_s_b_i_n_/_r_e_b_o_o_t on
                        the SERVER machines and any command except
@@ -322,18 +346,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
        markm           The user markm may run any command on the
                        HUB machines except _/_s_b_i_n_/_s_h_u_t_d_o_w_n,
-
-
-
-7/Apr/99                       1.6                              5
-
-
-
-
-
-sudoers(5)                 FILE FORMATS                sudoers(5)
-
-
                        _/_s_b_i_n_/_h_a_l_t, and commands listed in the
                        MISC alias.
 
@@ -379,19 +391,7 @@ SSSSEEEEEEEE AAAALLLLSSSSOOOO
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-7/Apr/99                       1.6                              6
+22/Jun/1999                    1.6                              6
 
 
 
@@ -457,6 +457,6 @@ sudoers(5)                 FILE FORMATS                sudoers(5)
 
 
 
-7/Apr/99                       1.6                              7
+22/Jun/1999                    1.6                              7
 
 

@@ -2,10 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.9  1999/04/07 23:18:51  millert
-''' You can now specifiy a host list instead of just a host or alias.
-''' Ie: user = host1,host2,ALIAS,!host3 my_command
-''' now works.
+''' Revision 1.10  1999/06/22 10:38:38  millert
+''' typos
 '''
 '''
 .de Sh
@@ -98,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudoers 5 "1.6" "7/Apr/99" "FILE FORMATS"
+.TH sudoers 5 "1.6" "22/Jun/1999" "FILE FORMATS"
 .UC
 .if n .hy 0
 .if n .na
@@ -274,24 +272,36 @@ will be allowed to run the command.
 .Sh "persistence of modifiers"
 When a \fIrunas-list\fR is specified for an \fIaccess_group\fR, it
 affects all commands in the \fIaccess_group\fR.  For example, given:
-    oper bigserver = (root, sysadm) /usr/bin/kill, /bin/rm
+.PP
+.Vb 1
+\&    oper bigserver = (root, sysadm) /usr/bin/kill, /bin/rm
+.Ve
 User \f(CWoper\fR will be able to run \f(CW/usr/bin/kill\fR and \f(CW/bin/rm\fR
 as \fBroot\fR or \fBsysadm\fR on the machine, \f(CWbigserver\fR.  The
 \fIrunas-list\fR is \*(L"sticky\*(R" across entries in the comma-separated
 \fIaccess_group\fR.  You can override the \fIrunas-list\fR with another
 one, at which point the new \fIrunas-list\fR becomes the default for
 that \fIaccess_group\fR.  For example, given:
-    oper bigserver = (root, sysadm) /usr/bin/kill, (root) /bin/rm, \e
-	/bin/rmdir
+.PP
+.Vb 2
+\&    oper bigserver = (root, sysadm) /usr/bin/kill, (root) /bin/rm, \e
+\&        /bin/rmdir
+.Ve
 User \f(CWoper\fR can still run \f(CW/usr/bin/kill\fR as \fBroot\fR or \fBsysadm\fR but
 can only run \f(CW/bin/rm\fR and \f(CW/bin/rmdir\fR as \fBroot\fR.
 .PP
 Similarly, the \fB\s-1NOPASSWD\s0\fR modifier is also persistent across an
 \fIaccess_group\fR. For example given:
-    oper bigserver = \s-1NOPASSWD\s0: /usr/bin/kill, /bin/rm, /bin/rmdir
+.PP
+.Vb 1
+\&    oper bigserver = NOPASSWD: /usr/bin/kill, /bin/rm, /bin/rmdir
+.Ve
 User \f(CWoper\fR will be able to run \f(CW/usr/bin/kill\fR, \f(CW/bin/rm\fR, and
 \f(CW/bin/rmdir\fR as \fBroot\fR without a password.  If we change that to:
-    oper bigserver = \s-1NOPASSWD\s0: /usr/bin/kill, \s-1PASSWD\s0: /bin/rm, /bin/rmdir
+.PP
+.Vb 1
+\&    oper bigserver = NOPASSWD: /usr/bin/kill, PASSWD: /bin/rm, /bin/rmdir
+.Ve
 User \f(CWoper\fR can still run \f(CW/usr/bin/kill\fR without a password but
 must give a password to run \f(CW/bin/rm\fR and \f(CW/bin/rmdir\fR.
 .Sh "wildcards (aka meta characters):"
@@ -331,8 +341,10 @@ The reserved alias \fI\s-1ALL\s0\fR can be used for both {Host,User,Cmnd}_Alias.
 \fB\s-1DO\s0 \s-1NOT\s0\fR define an alias of \fI\s-1ALL\s0\fR, it will \fB\s-1NOT\s0\fR be used.
 Note that \fI\s-1ALL\s0\fR implies the entire universe of hosts/users/commands.
 You can subtract elements from the universe by using the syntax:
-   user  host=\s-1ALL\s0,!\s-1ALIAS1\s0,!/sbin/halt...
 .PP
+.Vb 1
+\&   user  host=ALL,!ALIAS1,!/sbin/halt...
+.Ve
 Commands may have optional command line arguments.  If they do,
 then the arguments in the \fIsudoers\fR file must exactly match those
 on the command line.  It is also possible to have a command's

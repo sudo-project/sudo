@@ -77,24 +77,32 @@ will be allowed to run the command.
 
 When a I<runas-list> is specified for an I<access_group>, it
 affects all commands in the I<access_group>.  For example, given:
+
     oper bigserver = (root, sysadm) /usr/bin/kill, /bin/rm
+
 User C<oper> will be able to run C</usr/bin/kill> and C</bin/rm>
 as B<root> or B<sysadm> on the machine, C<bigserver>.  The
 I<runas-list> is "sticky" across entries in the comma-separated
 I<access_group>.  You can override the I<runas-list> with another
 one, at which point the new I<runas-list> becomes the default for
 that I<access_group>.  For example, given:
+
     oper bigserver = (root, sysadm) /usr/bin/kill, (root) /bin/rm, \
 	/bin/rmdir
+
 User C<oper> can still run C</usr/bin/kill> as B<root> or B<sysadm> but
 can only run C</bin/rm> and C</bin/rmdir> as B<root>.
 
 Similarly, the B<NOPASSWD> modifier is also persistent across an
 I<access_group>. For example given:
+
     oper bigserver = NOPASSWD: /usr/bin/kill, /bin/rm, /bin/rmdir
+
 User C<oper> will be able to run C</usr/bin/kill>, C</bin/rm>, and
 C</bin/rmdir> as B<root> without a password.  If we change that to:
+
     oper bigserver = NOPASSWD: /usr/bin/kill, PASSWD: /bin/rm, /bin/rmdir
+
 User C<oper> can still run C</usr/bin/kill> without a password but
 must give a password to run C</bin/rm> and C</bin/rmdir>.
 
@@ -160,6 +168,7 @@ The reserved alias I<ALL> can be used for both {Host,User,Cmnd}_Alias.
 B<DO NOT> define an alias of I<ALL>, it will B<NOT> be used.
 Note that I<ALL> implies the entire universe of hosts/users/commands.
 You can subtract elements from the universe by using the syntax:
+
    user  host=ALL,!ALIAS1,!/sbin/halt...
 
 Commands may have optional command line arguments.  If they do,

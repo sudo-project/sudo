@@ -26,7 +26,7 @@ o Upgrading from a version prior to 1.6:
 
     millert can run /usr/bin/whoami as daemon and /bin/ls and
     /sbin/dump as root.  No password need be given for either
-    command.  In other words, the "(root)" sets the dfault runas
+    command.  In other words, the "(root)" sets the default runas
     user to root for the rest of the list.  If we wanted to require
     a password for /bin/ls and /sbin/dump the line could be written
     thusly:
