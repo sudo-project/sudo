@@ -126,5 +126,3 @@ TODO list (most will be addressed in sudo 2.0)
     can point to other files containing an insult count as the first
     line and that have a constant record length (sparse files) for
     easy seeking.
-
-46) Make sudo work on nsr-tandem-nsk (partially done)
