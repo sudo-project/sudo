@@ -49,6 +49,14 @@
 #endif
 
 /*
+ * 4.2BSD lacks FD_* macros (we only use FD_SET and FD_ZERO)
+ */
+#ifndef FD_SETSIZE
+#define FD_SET(fd, fds)		((fds) -> fds_bits[0] |= (1 << (fd)))
+#define FD_ZERO(fds)		((fds) -> fds_bits[0] = 0)
+#endif /* !FD_SETSIZE */
+
+/*
  * Posix versions for those without...
  */
 #ifndef _S_IFMT
