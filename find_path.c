@@ -143,7 +143,7 @@ char *find_path(file)
 	    return (qualify(fn));
 	else if (statfailed && errno != ENOENT && errno != ENOTDIR &&
 		 errno != EINVAL) {
-	    fprintf(stderr, "sudo: Can't stat %s", fn);
+	    fprintf(stderr, "sudo: Can't stat %s: ", fn);
 	    perror("");
 	}
 
