@@ -59,6 +59,7 @@
 # ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <pwd.h>
 #ifdef HAVE_ERR_H
 # include <err.h>
 #else
@@ -538,6 +539,8 @@ store_int(val, def, op)
 	/* XXX - should check against INT_MAX */
 	def->sd_un.ival = (unsigned int)l;
     }
+    if (def->callback)
+	return(def->callback(val));
     return(TRUE);
 }
 
@@ -559,6 +562,8 @@ store_uint(val, def, op)
 	/* XXX - should check against INT_MAX */
 	def->sd_un.ival = (unsigned int)l;
     }
+    if (def->callback)
+	return(def->callback(val));
     return(TRUE);
 }
 
@@ -589,6 +594,8 @@ store_tuple(val, def, op)
 	if (v == NULL)
 	    return(FALSE);
     }
+    if (def->callback)
+	return(def->callback(val));
     return(TRUE);
 }
 
@@ -605,6 +612,8 @@ store_str(val, def, op)
 	def->sd_un.str = NULL;
     else
 	def->sd_un.str = estrdup(val);
+    if (def->callback)
+	return(def->callback(val));
     return(TRUE);
 }
 
@@ -729,6 +738,8 @@ store_mode(val, def, op)
 	    return(FALSE);
 	def->sd_un.mode = (mode_t)l;
     }
+    if (def->callback)
+	return(def->callback(val));
     return(TRUE);
 }
 
