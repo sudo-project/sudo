@@ -515,7 +515,7 @@ AC_ARG_WITH(ignore-dot, [  --with-ignore-dot       ignore '.' in the PATH],
 		;;
 esac])
 if test "$ignore_dot" = "on"; then
-    AC_DEFINE(IGNORE_DOT_PATH, 1, [Define if you want to ignore '.' and empty \$PATH elements])
+    AC_DEFINE(IGNORE_DOT_PATH, 1, [Define if you want to ignore '.' and empty PATH elements])
     AC_MSG_RESULT(yes)
 else
     AC_MSG_RESULT(no)
@@ -916,7 +916,7 @@ AC_ARG_WITH(ldap, [  --with-ldap[[=DIR]]     enable LDAP support],
 		;;
 esac])
 AC_ARG_WITH(ldap-conf-file, [  --with-ldap-conf-file   path to LDAP configuration file],
-[AC_DEFINE_UNQUOTED(_PATH_LDAP_CONF, "$with_ldap_conf_file")])
+[AC_DEFINE_UNQUOTED(_PATH_LDAP_CONF, "$with_ldap_conf_file", [Path to the ldap.conf file])])
 
 AC_ARG_WITH(pc-insults, [  --with-pc-insults       replace politically incorrect insults with less offensive ones],
 [case $with_pc_insults in  
@@ -1704,7 +1704,7 @@ AC_CHECK_FUNCS(lockf flock, [break])
 AC_CHECK_FUNCS(waitpid wait3, [break])
 AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])
 AC_CHECK_FUNCS(lsearch, , [AC_CHECK_LIB(compat, lsearch, AC_CHECK_HEADER(search.h, AC_DEFINE(HAVE_LSEARCH) [LIBS="${LIBS} -lcompat"], AC_LIBOBJ(lsearch), -), AC_LIBOBJ(lsearch))])
-AC_CHECK_FUNCS(utime, [SUDO_FUNC_UTIME_POSIX], [AC_LIBOBJ(utime)])
+AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_FUNCS(futime) AC_LIBOBJ(utimes)])
 SUDO_FUNC_FNMATCH(AC_DEFINE(HAVE_FNMATCH, 1, [Define if you have the `fnmatch' function.]), AC_LIBOBJ(fnmatch))
 SUDO_FUNC_ISBLANK
 AC_REPLACE_FUNCS(strerror strcasecmp sigaction strlcpy strlcat closefrom)
@@ -2115,7 +2115,7 @@ if test -n "$with_ldap"; then
     AC_TRY_LINK([#include <sys/types.h>
     #include <ldap.h>], [(void)ldap_init(0, 0)], [AC_MSG_RESULT([no])], [
     AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_LBER_H)])
+    AC_DEFINE(HAVE_LBER_H, 1, [Define to 1 if your LDAP needs <lber.h>. (OpenLDAP does not)])])
 
     AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s)
 

@@ -157,7 +157,7 @@ int sudo_edit(argc, argv)
 #else
 	chown(tf[i].tfile, user_uid, user_gid);
 #endif
-	touch(tf[i].tfile, tf[i].omtime);
+	touch(tf[i].tfd, tf[i].tfile, tf[i].omtime);
     }
     if (argc == 1)
 	return(1);			/* no files readable, you lose */

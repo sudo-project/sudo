@@ -212,6 +212,14 @@ typedef struct sigaction sigaction_t;
 #endif
 
 /*
+ * Define futimes() in terms of futimesat() if needed.
+ */
+#if !defined(HAVE_FUTIMES) && defined(HAVE_FUTIMESAT)
+# define futimes(_f, _p, _tv)	futimesat(_f, NULL, _tv)
+# define HAVE_FUTIMES
+#endif
+
+/*
  * If we lack getprogname(), emulate with __progname if possible.
  * Otherwise, add a prototype for use with our own getprogname.c.
  */

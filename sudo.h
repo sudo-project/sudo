@@ -172,6 +172,12 @@ void closefrom		__P((int));
 #ifndef HAVE_GETCWD
 char *getcwd		__P((char *, size_t size));
 #endif
+#ifndef HAVE_UTIMES
+int utimes		__P((const char *, const struct timeval *));
+#endif
+#ifdef HAVE_FUTIME
+int futimes		__P((int, const struct timeval *));
+#endif
 #ifndef HAVE_SNPRINTF
 int snprintf		__P((char *, size_t, const char *, ...));
 #endif
@@ -223,7 +229,7 @@ void dump_defaults	__P((void));
 void dump_auth_methods	__P((void));
 void init_envtables	__P((void));
 int lock_file		__P((int, int));
-int touch		__P((char *, time_t));
+int touch		__P((int, char *, time_t));
 int user_is_exempt	__P((void));
 void set_fqdn		__P((void));
 int set_runaspw		__P((char *));

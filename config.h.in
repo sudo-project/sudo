@@ -71,15 +71,15 @@
 /* Define if you use OSF DCE. */
 #undef HAVE_DCE
 
+/* Define to 1 if your `DIR' contains dd_fd. */
+#undef HAVE_DD_FD
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
 
-/* Define to 1 if you have the `dirfd' function (not macro). */
+/* Define if you have the `fnmatch' function or macro. */
 #undef HAVE_DIRFD
-
-/* Define to 1 if your `DIR' contains dd_fd. */
-#undef HAVE_DD_FD
 
 /* Define to 1 if you have the `dispcrypt' function. */
 #undef HAVE_DISPCRYPT
@@ -101,6 +101,15 @@
 
 /* Define to 1 if you have the `fstat' function. */
 #undef HAVE_FSTAT
+
+/* Define to 1 if you have the `futime' function. */
+#undef HAVE_FUTIME
+
+/* Define to 1 if you have the `futimes' function. */
+#undef HAVE_FUTIMES
+
+/* Define to 1 if you have the `futimesat' function. */
+#undef HAVE_FUTIMESAT
 
 /* Define if you use the FWTK authsrv daemon. */
 #undef HAVE_FWTK
@@ -168,16 +177,16 @@
 /* Define if you use Kerberos V. */
 #undef HAVE_KERB5
 
-/* Define if you use LDAP. */
-#undef HAVE_LDAP
-
 /* Define if your LDAP needs <lber.h>. (OpenLDAP does not) */
 #undef HAVE_LBER_H
 
-/* Define if your LDAP Supports URLs. (OpenLDAP does) */
+/* Define if you use LDAP. */
+#undef HAVE_LDAP
+
+/* Define to 1 if you have the `ldap_initialize' function. */
 #undef HAVE_LDAP_INITIALIZE
 
-/* Define if your LDAP Supports start_tls_s. (OpenLDAP does) */
+/* Define to 1 if you have the `ldap_start_tls_s' function. */
 #undef HAVE_LDAP_START_TLS_S
 
 /* Define to 1 if you have the `lockf' function. */
@@ -339,14 +348,11 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define to 1 if you have the `utime' function. */
-#undef HAVE_UTIME
+/* Define to 1 if you have the `utimes' function. */
+#undef HAVE_UTIMES
 
 /* Define to 1 if you have the <utime.h> header file. */
 #undef HAVE_UTIME_H
-
-/* Define if you have a POSIX utime() (uses struct utimbuf). */
-#undef HAVE_UTIME_POSIX
 
 /* Define to 1 if you have the `vasprintf' function. */
 #undef HAVE_VASPRINTF

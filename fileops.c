@@ -22,6 +22,7 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
+#include <sys/time.h>
 #ifdef HAVE_FLOCK
 # include <sys/file.h>
 #endif /* HAVE_FLOCK */
@@ -31,13 +32,6 @@
 #endif /* HAVE_UNISTD_H */
 #include <fcntl.h>
 #include <time.h>
-#ifdef HAVE_UTIME
-# ifdef HAVE_UTIME_H
-#  include <utime.h>
-# endif /* HAVE_UTIME_H */
-#else
-# include "emul/utime.h"
-#endif /* HAVE_UTIME */
 
 #include "sudo.h"
 
@@ -46,26 +40,25 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
- * Update the access and modify times on a file.
+ * Update the access and modify times on an fd or file.
  */
 int
-touch(path, when)
+touch(fd, path, when)
+    int fd;
     char *path;
     time_t when;
 {
-#ifdef HAVE_UTIME_POSIX
-    struct utimbuf ut, *utp;
+    struct timeval times[2];
 
-    ut.actime = ut.modtime = when;
-    utp = &ut;
-#else
-    /* BSD <= 4.3 has no struct utimbuf */
-    time_t utp[2];
+    times[0].tv_sec = times[1].tv_sec = when;
+    times[0].tv_usec = times[1].tv_usec = 0;
 
-    utp[0] = utp[1] = when;
-#endif /* HAVE_UTIME_POSIX */
-
-    return(utime(path, utp));
+#if defined(HAVE_FUTIME) || defined(HAVE_FUTIMES)
+    if (fd != -1)
+	return(futimes(fd, times));
+    else
+#endif
+	return(utimes(path, times));
 }
 
 /*

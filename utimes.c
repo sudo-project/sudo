@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 1996, 1998, 1999, 2001
- *	Todd C. Miller <Todd.Miller@courtesan.com>.
+ * Copyright (c) 2004 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,43 +18,58 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#include "config.h"
-
 #include <sys/types.h>
 #include <sys/time.h>
+#include <time.h>
 #include <stdio.h>
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+#ifdef HAVE_UTIME_H
+# include <utime.h>
+#else
+# include <emul/utime.h>
+#endif
 
-#include "compat.h"
-#include "emul/utime.h"
+#include "config.h"
 
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-
+#ifndef HAVE_UTIMES
 /*
- * Emulate utime(3) via utimes(2).
- * utime(3) sets the access and mod times of the named file.
+ * Emulate utimes() via utime()
  */
 int
-utime(file, tvp)
+utimes(file, times)
     const char *file;
-    const struct utimbuf *utp;
+    const struct timeval *times;
 {
-    if (upt) {
-	struct timeval tv[2];
+    if (times != NULL) {
+	struct utimbuf utb;
 
-	tv[0].tv_sec = ut.actime;
-	tv[0].tv_usec = 0;
-
-	tv[1].tv_sec = ut.modtime;
-	tv[1].tv_usec = 0;
-
-	return(utimes(file, tv);
-    } else {
-	return(utimes(file, NULL);
-    }
+	utb.actime = (time_t)times[0].tv_sec;
+	utb.modtime = (time_t)times[1].tv_sec;
+	return(utime(file, &utb));
+    } else
+	return(utime(file, NULL));
 }
+#endif /* !HAVE_UTIMES */
+
+#ifdef HAVE_FUTIME
+/*
+ * Emulate futimes() via futime()
+ */
+int
+futimes(fd, times)
+    int fd;
+    const struct timeval *times;
+{
+    if (times != NULL) {
+	struct utimbuf utb;
+
+	utb.actime = (time_t)times[0].tv_sec;
+	utb.modtime = (time_t)times[1].tv_sec;
+	return(futime(fd, &utb));
+    } else
+	return(futime(fd, NULL));
+}
+#endif /* HAVE_FUTIME */
