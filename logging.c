@@ -148,8 +148,9 @@ void log_error(code)
      * XXX - don't use 33, use a macro!
      */
     count = 33 + 128 + 2 * MAXPATHLEN + strlen(tty) + strlen(cwd);
-    for (a = &NewArgv[1]; *a; a++)
-	count += strlen(*a) + 1;
+    if (NewArgc > 1)
+	for (a = &NewArgv[1]; *a; a++)
+	    count += strlen(*a) + 1;
 
     logline = (char *) malloc(count);
     if (logline == NULL) {
@@ -288,10 +289,11 @@ void log_error(code)
 	/* XXX - this could be sped up */
 	strcat(logline, cmnd);
 	strcat(logline, " ");
-	for (a = &NewArgv[1]; *a; a++) {
-	    strcat(logline, *a);
-	    strcat(logline, " ");
-	}
+	if (NewArgc > 1)
+	    for (a = &NewArgv[1]; *a; a++) {
+		strcat(logline, *a);
+		strcat(logline, " ");
+	    }
     }
 
 #if (LOGGING & SLOG_SYSLOG)
@@ -550,10 +552,11 @@ void inform_user(code)
 		"Sorry, user %s is not allowed to execute \"%s",
 		user_name, cmnd);
 
-	    for (a = &NewArgv[1]; *a; a++) {
-		fputc(' ', stderr);
-		fputs(*a, stderr);
-	    }
+	    if (NewArgc > 1)
+		for (a = &NewArgv[1]; *a; a++) {
+		    fputc(' ', stderr);
+		    fputs(*a, stderr);
+		}
 
 	    (void) fprintf(stderr, "\" on %s.\n\n", host);
 	    break;
