@@ -26,38 +26,47 @@
 #include <paths.h>
 #endif /* HAVE_PATHS_H */
 
-#ifndef _PATH_SENDMAIL
-#undef _PATH_SENDMAIL
-#endif /* _PATH_SENDMAIL */
+#ifndef _PATH_SUDO_SUDOERS
+#define _PATH_SUDO_SUDOERS	"/etc/sudoers"
+#endif /* _PATH_SUDO_SUDOERS */
+
+/*
+ * NOTE:  _PATH_SUDO_STMP *MUST* be on the same partition
+ *        as _PATH_SUDO_SUDOERS!
+ */
+#ifndef _PATH_SUDO_STMP
+#define _PATH_SUDO_STMP		"/etc/stmp"
+#endif /* _PATH_SUDO_STMP */
 
 #ifndef _PATH_SUDO_TIMEDIR
 #define _PATH_SUDO_TIMEDIR	"/tmp/.odus"
 #endif /* _PATH_SUDO_TIMEDIR */
 
-#ifndef _PATH_SUDO_SUDOERS
-#define _PATH_SUDO_SUDOERS	"/etc/sudoers"
-#endif /* _PATH_SUDO_SUDOERS */
-
 #ifndef _PATH_SUDO_LOGFILE
 #define _PATH_SUDO_LOGFILE	"/var/adm/sudo.log"
 #endif /* _PATH_SUDO_LOGFILE */
-
-#ifndef _PATH_SUDO_STMP
-#define _PATH_SUDO_STMP		"/etc/stmp"
-#endif /* _PATH_SUDO_STMP */
 
 #ifndef _PATH_TTY
 #define _PATH_TTY		"/dev/tty"
 #endif /* _PATH_TTY */
 
+/*
+ * The following paths are gleaned via configure but you can override
+ * configure's values here if you want.
+ */
+
+#ifndef _PATH_SENDMAIL
+#define _PATH_SENDMAIL		_SUDO_PATH_SENDMAIL
+#endif /* _PATH_SENDMAIL */
+
 #ifndef _PATH_VI
-#undef _PATH_VI
+#define _PATH_VI		_SUDO_PATH_VI
 #endif /* _PATH_VI */
 
 #ifndef _PATH_PWD
-#undef _PATH_PWD
+#define _PATH_PWD		_SUDO_PATH_PWD
 #endif /* _PATH_PWD */
 
 #ifndef _PATH_MV
-#undef _PATH_MV
+#define _PATH_MV		_SUDO_PATH_MV
 #endif /* _PATH_MV */
