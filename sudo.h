@@ -166,6 +166,8 @@
 
 #define MAXCOMMANDLENGTH         MAXPATHLEN
 
+/*#define SECURE_PATH		"/bin:/usr/ucb/:/usr/bin:/usr/etc:/etc" /**/
+
 typedef union {
     int int_val;
     char char_val[MAXCOMMANDLENGTH];

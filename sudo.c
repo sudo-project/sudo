@@ -288,16 +288,21 @@ void clean_envp(envp)
      */
     for (tenvp = Envp; *envp; envp++)
 #ifdef hpux
-	if (strncmp("LD_", *envp, 3) && strncmp("SHLIB_PATH", *envp, 10))
+	if (strncmp("LD_", *envp, 3) && strncmp("SHLIB_PATH", *envp, 10)) {
 #else
 #ifdef __alpha
-	if (strncmp("LD_", *envp, 3) && strncmp("_RLD_", *envp, 5))
+	if (strncmp("LD_", *envp, 3) && strncmp("_RLD_", *envp, 5)) {
 #else
-	if (strncmp("LD_", *envp, 3))
+	if (strncmp("LD_", *envp, 3)) {
 #endif /* __alpha */
 #endif /* hpux */
-	    *tenvp++ = *envp;
-
+#ifdef SECURE_PATH
+	    if (!strncmp("PATH=", *envp, 5))
+		*tenvp++ = "PATH=" SECURE_PATH;
+	    else
+#endif /* SECURE_PATH */
+		*tenvp++ = *envp;
+	}
     *tenvp = NULL;
 }
 
