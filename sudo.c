@@ -57,18 +57,23 @@ static char rcsid[] = "$Id$";
 #define MAIN
 
 #include <stdio.h>
-#if defined(hpux) || defined(linux)
+#ifdef STD_HEADERS
+#include <stdlib.h>
+#ifndef NeXT
 #include <unistd.h>
-#endif
+#endif /* !NeXT */
+#endif /* STD_HEADERS */
 #include <string.h>
 #include <strings.h>
 #include <pwd.h>
 #include <netdb.h>
 #include <sys/param.h>
 #include "sudo.h"
+#ifndef STD_HEADERS
 extern char *malloc();
 #ifndef NEED_STRDUP
 extern char *strdup();
+#endif
 #endif
 
 int Argc;
