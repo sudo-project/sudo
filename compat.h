@@ -138,7 +138,7 @@
 #  ifdef __hpux
 #    define seteuid(_EUID)	(setresuid(UID_NO_CHANGE, _EUID, UID_NO_CHANGE))
 #  else
-#    define seteuid(_EUID)	(setresuid(UID_NO_CHANGE, _EUID))
+#    define seteuid(_EUID)	(setreuid(UID_NO_CHANGE, _EUID))
 #  endif /* __hpux */
 #endif /* HAVE_SETEUID */
 
