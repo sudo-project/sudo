@@ -265,10 +265,29 @@ main(argc, argv, envp)
 
     cmnd_status = init_vars(sudo_mode);
 
-    check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
+#ifdef HAVE_LDAP
+    validated = sudo_ldap_check(pwflag);
 
-    /* Validate the user but don't search for pseudo-commands. */
-    validated = sudoers_lookup(pwflag);
+    /* Skip reading /etc/sudoers if LDAP told us to */
+    if (def_ignore_local_sudoers); /* skips */
+    else if (ISSET(validated, VALIDATE_OK) && !printmatches); /* skips */
+    else if (ISSET(validated, VALIDATE_OK) && printmatches)
+    {
+	check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
+
+	/* User is found in LDAP and we want a list of all sudo commands the
+	 * user can do, so consult sudoers but throw away result.
+	 */
+	sudoers_lookup(pwflag);
+    }
+    else
+#endif
+    {
+	check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
+
+	/* Validate the user but don't search for pseudo-commands. */
+	validated = sudoers_lookup(pwflag);
+    }
 
     /*
      * If we are using set_perms_posix() and the stay_setuid flag was not set,
@@ -379,6 +398,9 @@ main(argc, argv, envp)
 	    exit(0);
 	else if (sudo_mode == MODE_LIST) {
 	    list_matches();
+#ifdef HAVE_LDAP
+	    sudo_ldap_list_matches();
+#endif
 	    exit(0);
 	}
 

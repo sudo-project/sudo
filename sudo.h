@@ -208,6 +208,9 @@ int find_path		__P((char *, char **, char *));
 void check_user		__P((int));
 void verify_user	__P((struct passwd *, char *));
 int sudoers_lookup	__P((int));
+#ifdef HAVE_LDAP
+int sudo_ldap_check	__P((int));
+#endif
 void set_perms_nosuid	__P((int));
 void set_perms_posix	__P((int));
 void set_perms_suid	__P((int));
