@@ -81,6 +81,7 @@
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
+static char *tgetline __P((int, char *, size_t, int));
 
 /*
  * Like getpass(3) but with timeout and echo flags.
@@ -100,10 +101,8 @@ tgetpass(prompt, timeout, echo_off)
     struct sgttyb ttyb;
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
-    int n, input, output;
+    int input, output;
     static char buf[SUDO_PASS_MAX + 1];
-    fd_set *readfds;
-    struct timeval tv;
 
     /* Open /dev/tty for reading/writing if possible else use stdin/stderr. */
     if ((input = output = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1) {
@@ -138,41 +137,8 @@ tgetpass(prompt, timeout, echo_off)
 #endif /* HAVE_TERMIOS_H */
     }
 
-    /*
-     * Timeout of <= 0 means no timeout.
-     */
-    if (timeout > 0) {
-	/* setup for select(2) */
-	n = howmany(input + 1, NFDBITS) * sizeof(fd_mask);
-	readfds = (fd_set *) emalloc(n);
-	(void) memset((VOID *)readfds, 0, n);
-	FD_SET(input, readfds);
-
-	/* set timeout for select */
-	tv.tv_sec = timeout;
-	tv.tv_usec = 0;
-
-	/*
-	 * Get password or return empty string if nothing to read by timeout
-	 */
-	buf[0] = '\0';
-	while ((n = select(input + 1, readfds, 0, 0, &tv)) == -1 &&
-	    errno == EINTR)
-	    ;
-	if (n != 0 && (n = read(input, buf, sizeof(buf) - 1)) > 0) {
-	    if (buf[n - 1] == '\n')
-		n--;
-	    buf[n] = '\0';
-	}
-	free(readfds);
-    } else {
-	buf[0] = '\0';
-	if ((n = read(input, buf, sizeof(buf) - 1)) > 0) {
-	    if (buf[n - 1] == '\n')
-		n--;
-	    buf[n] = '\0';
-	}
-    }
+    buf[0] = '\0';
+    tgetline(input, buf, sizeof(buf), timeout);
 
 #ifdef HAVE_TERMIOS_H
     if (echo_off) {
@@ -200,4 +166,60 @@ tgetpass(prompt, timeout, echo_off)
 	(void) close(input);
 
     return(buf);
+}
+
+/*
+ * Get a line of input (optionally timing out) and place it in buf.
+ */
+static char *
+tgetline(fd, buf, bufsiz, timeout)
+    int fd;
+    char *buf;
+    size_t bufsiz;
+    int timeout;
+{
+    size_t left;
+    int n;
+    fd_set *readfds = NULL;
+    struct timeval tv;
+    char *cp;
+
+    /*
+     * Timeout of <= 0 means no timeout.
+     */
+    if (timeout > 0) {
+	/* Setup for select(2) */
+	n = howmany(fd + 1, NFDBITS) * sizeof(fd_mask);
+	readfds = (fd_set *) emalloc(n);
+	(void) memset((VOID *)readfds, 0, n);
+	FD_SET(fd, readfds);
+
+	/* Set timeout for select */
+	tv.tv_sec = timeout;
+	tv.tv_usec = 0;
+
+	/*
+	 * Make sure there is something to read or timeout
+	 */
+	while ((n = select(fd + 1, readfds, 0, 0, &tv)) == -1 &&
+	    errno == EINTR)
+	    ;
+	if (n == 0)
+	    return(NULL);		/* timeout */
+    }
+    if (readfds)
+	free(readfds);
+
+    /* Get a line of input */
+    left = bufsiz;
+    cp = buf;
+    do {
+	if ((n = read(fd, cp, left)) > 0) {
+	    cp += n;
+	    left -= n;
+	}
+    } while (n > 0 && left != 0 && *(cp - 1) != '\n');
+    *(cp - 1) = '\0';
+
+    return(left == bufsiz ? NULL : buf);
 }
