@@ -22,7 +22,10 @@ INSTALL NOTES
    You can also install various pieces the package via install-binaries,
    install-man, install-sudoers.
 
-4) You're done.
+4) Customize /etc/sudoers for your site.  Read the man page and take a
+   look at sample.sudoers to see how to do this.
+
+5) You're done.
 
 A few notes:
 
