@@ -142,8 +142,10 @@ char *find_path(file)
 	if (!statfailed && (statbuf.st_mode & 0000111))
 	    return (qualify(fn));
 	else if (statfailed && errno != ENOENT && errno != ENOTDIR &&
-		 errno != EINVAL)
-	    perror("find_path:  stat");
+		 errno != EINVAL) {
+	    fprintf(stderr, "sudo: Can't stat %s", fn);
+	    perror("");
+	}
 
 	path = n + 1;
 
@@ -163,7 +165,8 @@ char *find_path(file)
 	    return (qualify(fn));
 	else if (statfailed && errno != ENOENT && errno != ENOTDIR &&
 		 errno != EINVAL) {
-	    perror("find_path:  stat");
+	    fprintf(stderr, "sudo: Can't stat %s: ", fn);
+	    perror("");
 	    return (NULL);
 	}
     }
@@ -193,8 +196,10 @@ char *qualify(n)
      * is it a bogus path?
      */
     if (stat(n, &statbuf)) {
-	if (errno != ENOENT)
-	    perror("qualify:  stat");
+	if (errno != ENOENT) {
+	    fprintf(stderr, "sudo: Can't stat %s: ", n);
+	    perror("");
+	}
 	return (NULL);
     }
 
@@ -249,7 +254,8 @@ char *qualify(n)
 	 * check for symbolic links
 	 */
 	if (lstat(full, &statbuf)) {
-	    perror("qualify:  lstat");
+	    fprintf(stderr, "sudo: Can't lstat %s: ", full);
+	    perror("");
 	    return (NULL);
 	}
 
