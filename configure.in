@@ -7,10 +7,10 @@ dnl Variables that get substituted in the Makefile
 dnl
 PROGS="sudo visudo"
 AC_SUBST(PROGS)dnl
-STATIC_FLAGS=""
-AC_SUBST(STATIC_FLAGS)dnl
-INC_FLAGS=""
-AC_SUBST(INC_FLAGS)dnl
+LDFLAGS=""
+AC_SUBST(LDFLAGS)dnl
+CPPFLAGS=""
+AC_SUBST(CPPFLAGS)dnl
 OSDEFS=""
 AC_SUBST(OSDEFS)dnl
 OPTIONS=""
@@ -25,50 +25,60 @@ MANTYPE="man"
 MAN_POSTINSTALL=""
 AC_SUBST(MAN_POSTINSTALL)dnl
 AC_SUBST(MANTYPE)dnl
+
 dnl
 dnl Options for --with
 dnl
+
 dnl --with-getpass
 AC_ARG_WITH(getpass, [  --with-getpass          use system getpass(3)], AC_DEFINE(USE_GETPASS)
 echo 'Using system getpass'
 TGETPASS="")
-dnl
+
 dnl --with-C2
 AC_ARG_WITH(C2, [  --with-C2               enable C2 security (shadow password) support], AC_DEFINE(HAVE_C2_SECURITY)
 C2=1
 echo 'Configuring for C2 security')
-dnl
+
 dnl --with-Skey
 AC_ARG_WITH(SKEY, [  --with-SKEY             enable Skey support (untested)], AC_DEFINE(HAVE_SKEY)
 SKEY=1
 echo 'Configuring for use with Skey')
-dnl
+
 dnl --with-kerb4
 AC_ARG_WITH(kerb4, [  --with-kerb4            enable kerberos v4 support], AC_DEFINE(HAVE_KERB4)
 KERB4=1
 echo 'Configuring for use with Kerberos version 4')
-dnl
+
+dnl --with-kerb5
+AC_ARG_WITH(kerb5, [  --with-kerb5            enable kerberos v5 support], AC_DEFINE(HAVE_KERB5)
+KERB4=1
+echo 'Configuring for use with Kerberos version 5')
+
 dnl --with-AFS
 AC_ARG_WITH(AFS, [  --with-AFS              enable AFS support], AC_DEFINE(HAVE_AFS)
 AFS=1
 echo 'Configuring for use with AFS')
-dnl
+
 dnl --with-csops
 AC_ARG_WITH(csops, [  --with-csops            add CSops standard options], OPTIONS="${OPTIONS} -DUSE_INSULTS -DENV_EDITOR"
 echo 'CSOps--adding options: USE_INSULTS ENV_EDITOR')
+
 dnl
 dnl If we don't have egrep we can't do anything...
 dnl
 AC_CHECK_PROG(EGREPPROG, egrep, egrep, )
-if test -z "$EGREPPROG"; then
+if test -z "$EGREPPROG" ; then
     echo "Sorry, configure requires egrep to run."
     exit
 fi
+
 dnl
 dnl C compiler checks
 dnl
 AC_PROG_CC
 AC_PROG_CPP
+
 dnl
 dnl find programs we use
 dnl
@@ -76,9 +86,10 @@ AC_CHECK_PROG(UNAMEPROG, uname, uname, )
 AC_CHECK_PROG(TRPROG, tr, tr, )
 AC_CHECK_PROG(SEDPROG, sed, sed, )
 AC_CHECK_PROG(NROFFPROG, nroff, nroff, )
-if test -z "$NROFFPROG"; then
+if test -z "$NROFFPROG" ; then
     MANTYPE="cat"
 fi
+
 dnl
 dnl what architecture are we on?
 dnl
@@ -93,14 +104,14 @@ case "$OS" in
 		;;
     "aix")	echo "Looks like AIX"
 		AC_DEFINE(_ALL_SOURCE)
-		STATIC_FLAGS="-Wl,-bI:./aixcrypt.exp"
+		LDFLAGS="${LDFLAGS} -Wl,-bI:./aixcrypt.exp"
 		;;
     "hp-ux")	echo "Looks like HP-UX"
 		if test "$OSREV" -lt 9 ; then
-		    if test -n "$GCC"; then
-			STATIC_FLAGS="-static"
+		    if test -n "$GCC" ; then
+			LDFLAGS="${LDFLAGS} -static"
 		    else
-			STATIC_FLAGS="-Wl,-a,archive"
+			LDFLAGS="${LDFLAGS} -Wl,-a,archive"
 		    fi
 		fi
 		if test -n "$AFS" ; then
@@ -108,9 +119,9 @@ case "$OS" in
 		fi
 		;;
     "osf1")	echo "Looks like OSF/1"
-		STATIC_FLAGS="-Wl,-no_library_replacement"
+		LDFLAGS="${LDFLAGS} -Wl,-no_library_replacement"
 		# C2 security stuff
-		if test -n "$C2"; then
+		if test -n "$C2" ; then
 		    LIBS="${LIBS} -lsecurity -laud"
 		fi
 		;;
@@ -118,7 +129,7 @@ case "$OS" in
 		# configure doesn't think irix has stdc headers
 		# but it's good enough for sudo
 		AC_DEFINE(STDC_HEADERS)
-		if test -z "$NROFFPROG"; then
+		if test -z "$NROFFPROG" ; then
 		    MAN_POSTINSTALL='/bin/rm -f $(mandir)/sudo.$(mansect).z ; /usr/bin/pack $(mandir)/sudo.$(mansect)'
 		    if test -d /usr/share/catman/local; then
 			MAN_PREFIX="/usr/share/catman/local"
@@ -126,7 +137,7 @@ case "$OS" in
 			MAN_PREFIX="/usr/catman/local"
 		    fi
 		else
-		    if test -d /usr/share/man/local; then
+		    if test -d "/usr/share/man/local" ; then
 			MAN_PREFIX="/usr/share/man/local"
 		    else
 			MAN_PREFIX="/usr/man/local"
@@ -135,7 +146,7 @@ case "$OS" in
 		;;
     "linux")	echo "Looks like linux"
 		# C2 security stuff
-		if test -n "$C2"; then
+		if test -n "$C2" ; then
 		    AC_DEFINE(SVR4)
 		    OSDEFS="${OSDEFS} -DSHADOW_PWD"
 		    LIBS="${LIBS} -lshadow"
@@ -144,20 +155,20 @@ case "$OS" in
     "convex")	echo "Looks like ConvexOs"
 		AC_DEFINE(_CONVEX_SOURCE)
 		# C2 security stuff
-		if test -n "$C2"; then
+		if test -n "$C2" ; then
 		    OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"
 		    LIBS="${LIBS} -lprot"
 		fi
 		;;
     "ultrix"*)	echo "Looks like ultrix"
 		# C2 security stuff
-		if test -n "$C2"; then
+		if test -n "$C2" ; then
 		    LIBS="${LIBS} -lauth"
 		fi
 		;;
     "riscos")	echo "Looks like RISCos"
 		LIBS="${LIBS} -lsun -lbsd"
-		INC_FLAGS="${INC_FLAGS} -I/usr/include -I/usr/include/bsd"
+		CPPFLAGS="${CPPFLAGS} -I/usr/include -I/usr/include/bsd"
 		OSDEFS="${OSDEFS} -D_MIPS"
 		;;
     "isc")	echo "Looks like INTERACTIVE"
@@ -184,24 +195,7 @@ case "$OS" in
     *)		echo "Hmmm, I don't recognize $OS offhand, but that's ok"
 		;;
 esac
-dnl
-dnl extra kerberos libs
-dnl
-if test -n "$KERB4" ; then
-    LIBS="${LIBS} -L/usr/kerberos/lib -lkrb -ldes"
-    INC_FLAGS="${INC_FLAGS} -I/usr/kerberos/include"
-fi
-dnl
-dnl extra AFS libs
-dnl
-if test -n "$AFS" ; then
-    LIBS="${LIBS} -L/usr/lib/afs -lkauth -lprot -lauth -lubik -lrxkad -lsys -ldes -lrx -llwp -lcom_err -laudit -lutil"
-fi
-dnl
-dnl extra Skey lib
-if test -n "$SKEY" ; then
-    LIBS="${LIBS} -lskey"
-fi
+
 dnl
 dnl C compiler checks (to be done after os checks)
 dnl
@@ -270,9 +264,59 @@ dnl OS-dependent libraries
 dnl
 AC_CHECK_LIB(sun, getpwnam)
 dnl
+dnl Find kerberos includes and libs or complain
+dnl
+if test -n "$KERB4" -o -n "$KERB5" ; then
+    if test -d "/usr/include/kerberosIV" ; then
+	CPPFLAGS="${CPPFLAGS} -I/usr/include/kerberosIV"
+    elif test -d "/usr/local/include/kerberosIV" ; then
+	CPPFLAGS="${CPPFLAGS} -I/usr/local/include/kerberosIV"
+    elif test -d "/usr/kerberos/include" ; then
+	CPPFLAGS="${CPPFLAGS} -I/usr/kerberos/include"
+    else
+	echo "Unable to locate kerberos include files, you will have to edit the Makefile and add -I/path/to/krb/includes to CPPFLAGS"
+    fi
+
+    if test -d "/usr/kerberos/lib" ; then
+	LDFLAGS="${LDFLAGS} -L/usr/kerberos/lib"
+    elif test -d "/usr/lib/kerberos" ; then
+	LDFLAGS="${LDFLAGS} -L/usr/lib/kerberos"
+    elif test -f "/usr/local/lib/libkrb.a" ; then
+	LDFLAGS="${LDFLAGS} -L/usr/local/lib"
+    elif test ! -f "/usr/lib/libkrb.a" ; then
+	echo "Unable to locate kerberos libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to LDFLAGS"
+    fi
+
+    LIBS="${LIBS} -lkrb -ldes"
+    if test -n "$KERB5" ; then
+	LIBS="${LIBS} -ldes425 -lkrb5 -lcrypto -lcom_err"
+    fi
+fi
+
+dnl
+dnl extra AFS libs
+dnl
+if test -n "$AFS" ; then
+    if test -d "/usr/lib/afs" ; then
+	LDFLAGS="${LDFLAGS} -L/usr/lib/afs"
+    else
+	echo "Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to LDFLAGS"
+    fi
+
+    LIBS="${LIBS} -lkauth -lprot -lauth -lubik -lrxkad -lsys -ldes -lrx -llwp -lcom_err -laudit -lutil"
+fi
+
+dnl
+dnl extra Skey lib
+if test -n "$SKEY" ; then
+    LIBS="${LIBS} -lskey"
+fi
+
+dnl
 dnl Check for log file location
 dnl
 SUDO_LOGFILE
+
 dnl
 dnl Substitute into the Makefiles
 dnl
