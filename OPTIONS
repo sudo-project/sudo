@@ -183,6 +183,13 @@ FAST_MATCH
     this off, but it will make things take a little longer.
     This is on by default.
 
+SKEY_ONLY
+    When validating the user, only allow an s/key passkey.  Do not
+    compare against the passwd file or use any other authentication
+    scheme.  This is only useful if you want to force people to
+    use s/key.
+    This feature is off by default.
+
 SUDOERS_OWNER
     Who should own the sudoers file.  This must be a username, *not* a uid.
     This is useful if you want to make the sudoers file NFS-mounted
