@@ -186,12 +186,6 @@
 #  define UMASK			022
 #endif /* UMASK */
 
-/*
- *  Uncomment if you use AFS
- */
-/* #define AFS */
-
-
 /**********  You probably don't want to modify anything below here  ***********/
 
 #ifdef USE_EXECV
