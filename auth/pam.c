@@ -205,7 +205,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
     PAM_CONST struct pam_message *pm;
     const char *p = def_prompt;
     volatile char *pass;
-    int n;
+    int n, flags;
     extern int nil_pw;
 
     if ((*response = malloc(num_msg * sizeof(struct pam_response))) == NULL)
@@ -213,17 +213,17 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
     (void) memset(*response, 0, num_msg * sizeof(struct pam_response));
 
     for (pr = *response, pm = *msg, n = num_msg; n--; pr++, pm++) {
+	flags = tgetpass_flags;
 	switch (pm->msg_style) {
 	    case PAM_PROMPT_ECHO_ON:
-		tgetpass_flags |= TGP_ECHO;
+		flags |= TGP_ECHO;
 	    case PAM_PROMPT_ECHO_OFF:
 		/* Only override PAM prompt if it matches /^Password: ?/ */
 		if (strncmp(pm->msg, "Password:", 9) || (pm->msg[9] != '\0'
 		    && (pm->msg[9] != ' ' || pm->msg[10] != '\0')))
 		    p = pm->msg;
 		/* Read the password. */
-		pass = tgetpass(p, def_ival(I_PASSWD_TIMEOUT) * 60,
-		    tgetpass_flags);
+		pass = tgetpass(p, def_ival(I_PASSWD_TIMEOUT) * 60, flags);
 		pr->resp = estrdup(pass ? pass : "");
 		if (*pr->resp == '\0')
 		    nil_pw = 1;		/* empty password */
