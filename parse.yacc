@@ -37,6 +37,7 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <pwd.h>
 #include <sys/types.h>
 #include <sys/param.h>
 #include <netinet/in.h>
@@ -328,13 +329,13 @@ userlist	:	user
 		;
 
 user		:	NAME {
-			    if (strcmp($1, user) == 0)
+			    if (strcmp($1, sudo_pw_ent->pw_name) == 0)
 				user_matches = TRUE;
 			    (void) free($1);
 			    $1 = NULL; /* XXX */
 			}
 		|	NETGROUP {
-			    if (netgr_matches($1, NULL, user))
+			    if (netgr_matches($1, NULL, sudo_pw_ent->pw_name))
 				user_matches = TRUE;
 			    (void) free($1);
 			    $1 = NULL; /* XXX */
