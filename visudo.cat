@@ -1,0 +1,198 @@
+
+
+
+visudo(8)              MAINTENANCE COMMANDS             visudo(8)
+
+
+NNNNAAAAMMMMEEEE
+       visudo - edit the sudoers file
+
+SSSSYYYYNNNNOOOOPPPPSSSSIIIISSSS
+       vvvviiiissssuuuuddddoooo [ ----VVVV ]
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+       vvvviiiissssuuuuddddoooo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous
+       to _v_i_p_w(8).  vvvviiiissssuuuuddddoooo locks the _s_u_d_o_e_r_s file against
+       multiple simultaneous edits, provides basic sanity checks,
+       and checks for parse errors.  If the _s_u_d_o_e_r_s file is
+       currently being edited you will receive a message to try
+       again later.  In the default configuration, the _v_i(1)
+       editor is used, but there is a compile time option to
+       allow use of whatever editor the environment variables
+       EDITOR or VISUAL are set to.
+
+       vvvviiiissssuuuuddddoooo parses the _s_u_d_o_e_r_s file after the edit and will not
+       save the changes if there is a syntax error.  Upon finding
+       an error, a message will be printed stating the line
+       _n_u_m_b_e_r(s) that the error occurred on and the user will
+       receive the "What now?" prompt.  At this point the user
+       may enter "e" to re-edit the _s_u_d_o_e_r_s file, enter "x" to
+       exit without saving the changes, or "Q" to quit and save
+       changes.  The "Q" option should be used with extreme care
+       because if vvvviiiissssuuuuddddoooo believes there to be a parse error, so
+       will ssssuuuuddddoooo and no one will be able to execute ssssuuuuddddoooo again
+       until the error is fixed.  Any other command at this
+       prompt will print a short help message.  When editing the
+       _s_u_d_o_e_r_s file after a parse error has been detected the
+       cursor will be placed on the line where the error occurred
+       (if the editor supports this feature).
+
+OOOOPPPPTTTTIIIIOOOONNNNSSSS
+       vvvviiiissssuuuuddddoooo accepts the following command line option:
+
+       -V  The -V (version) option causes vvvviiiissssuuuuddddoooo to print the
+           version number and exit.
+
+EEEERRRRRRRROOOORRRRSSSS
+       sudoers file busy, try again later.
+           Either someone is currently editing the _s_u_d_o_e_r_s file
+           or there is a stale sudoers lock file (/etc/stmp by
+           default) that you need to delete.
+
+       /etc/stmp: Permission denied
+           You didn't run vvvviiiissssuuuuddddoooo as root.
+
+       Can't find you in the passwd database
+           Your userid does not appear in the passwd file.
+
+FFFFIIIILLLLEEEESSSS
+        /etc/sudoers           file of authorized users.
+        /etc/stmp              lock file for visudo.
+
+
+
+17/Oct/98                     1.5.7                             1
+
+
+
+
+
+visudo(8)              MAINTENANCE COMMANDS             visudo(8)
+
+
+EEEENNNNVVVVIIIIRRRROOOONNNNMMMMEEEENNNNTTTT VVVVAAAARRRRIIIIAAAABBBBLLLLEEEESSSS
+       The following are used only if vvvviiiissssuuuuddddoooo was compiled with
+       the _E_N_V___E_D_I_T_O_R option:
+
+        EDITOR                 Used by visudo as the editor to use.
+        VISUAL                 Used by visudo if EDITOR is not set.
+
+
+AAAAUUUUTTTTHHHHOOOORRRR
+       Many people have worked on _s_u_d_o over the years, this
+       version of vvvviiiissssuuuuddddoooo was written by:
+
+        Todd Miller            <Todd.Miller@courtesan.com>
+
+       See the HISTORY file in the sudo distribution for more
+       details.
+
+       Please send all bugs, comments, and changes to sudo-
+       bugs@courtesan.com.
+
+DDDDIIIISSSSCCCCLLLLAAAAIIIIMMMMEEEERRRR
+       This program is distributed in the hope that it will be
+       useful, but WITHOUT ANY WARRANTY; without even the implied
+       warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+       PURPOSE.  See the GNU General Public License for more
+       details.
+
+       You should have received a copy of the GNU General Public
+       License along with this program; if not, write to the Free
+       Software Foundation, Inc., 675 Mass Ave, Cambridge, MA
+       02139, USA.
+
+CCCCAAAAVVVVEEEEAAAATTTTSSSS
+       Due to the syntax of the _s_u_d_o_e_r_s file, there is no way for
+       vvvviiiissssuuuuddddoooo to tell the difference between a mistyped
+       {Host,User,Cmnd}_Alias and a user or host name.
+
+       There is no easy way to prevent a user from gaining a root
+       shell if the editor used by vvvviiiissssuuuuddddoooo allows shell escapes.
+
+BBBBUUUUGGGGSSSS
+       The _-_V flag gives the version of the _s_u_d_o package rather
+       than the individual vvvviiiissssuuuuddddoooo program.
+
+SSSSEEEEEEEE AAAALLLLSSSSOOOO
+       _s_u_d_o(8), _v_i_p_w(8).
+
+
+
+
+
+
+
+
+
+
+
+17/Oct/98                     1.5.7                             2
+
+
+
+
+
+visudo(8)              MAINTENANCE COMMANDS             visudo(8)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+17/Oct/98                     1.5.7                             3
+
+

@@ -1,0 +1,396 @@
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
+NNNNAAAAMMMMEEEE
+       sudoers - list of which users may execute what as root
+
+DDDDEEEESSSSCCCCRRRRIIIIPPPPTTTTIIIIOOOONNNN
+       The _s_u_d_o_e_r_s file is composed of an optional host alias
+       section, an optional command alias section and the user
+       specification section.  All command or host aliases need
+       to start with their respective keywords (ie: Host_Alias,
+       User_Alias, Runas_Alias or Cmnd_Alias).  If there are
+       multiple occurrences of a user, the union of the entries
+       will be used.
+
+       uuuusssseeeerrrr ssssppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnn ffffoooorrrrmmmmaaaatttt::::
+
+
+         user access_group [: access_group] ...
+
+           access_group ::= host_type = [(runas_list)] [NOPASSWD:] [op]cmnd_type
+                            [,[(user_list)] [NOPASSWD:] [op]cmnd_type] ...
+              host_type ::= a lower-case hostname, netgroup, ip address,
+                            network number, network number/netmask,
+                            or host alias.
+              runas_list ::= comma-separated list of users, groups,
+                             netgroups or Runas_Aliases the user may run
+                             commands as (default is root).
+              cmnd_type ::= a command OR a command alias.
+                     op ::= the logical "!" NOT operator.
+
+
+       hhhhoooosssstttt aaaalllliiiiaaaassss sssseeeeccccttttiiiioooonnnn ffffoooorrrrmmmmaaaatttt::::
+
+
+         Host_Alias HOSTALIAS = host-list
+
+             Host_Alias ::= a keyword.
+              HOSTALIAS ::= an upper-case alias name.
+              host-list ::= a comma separated list of hosts, netgroups,
+                            ip addresses, networks.
+
+
+       uuuusssseeeerrrr aaaalllliiiiaaaassss sssseeeeccccttttiiiioooonnnn ffffoooorrrrmmmmaaaatttt::::
+
+
+         User_Alias USERALIAS = user-list
+
+             User_Alias ::= a keyword.
+              USERALIAS ::= an upper-case alias name.
+              user-list ::= a comma separated list of users, groups, netgroups.
+
+
+       rrrruuuunnnnaaaassss aaaalllliiiiaaaassss sssseeeeccccttttiiiioooonnnn ffffoooorrrrmmmmaaaatttt::::
+
+
+         Runas_Alias RUNASALIAS = runas-list
+
+
+
+17/Oct/98                     1.5.7                             1
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
+             Runas_Alias ::= a keyword.
+              RUNASALIAS ::= an upper-case alias name.
+              runas-list ::= a comma separated list of users, groups, netgroups.
+
+
+       ccccoooommmmmmmmaaaannnndddd aaaalllliiiiaaaassss sssseeeeccccttttiiiioooonnnn ffffoooorrrrmmmmaaaatttt::::
+
+
+         Cmnd_Alias CMNDALIAS = cmnd-list
+
+             Cmnd_Alias ::= a keyword.
+              CMNDALIAS ::= an upper-case alias name.
+              cmnd-list ::= a comma separated list commands.
+
+
+       ccccoooommmmmmmmaaaannnndddd ssssppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnn::::
+
+
+         path arg1 arg2 .. argn = command
+
+                   path ::= a fully qualified pathname.
+              arg[1..n] ::= optional command line arguments.
+
+
+       wwwwiiiillllddddccccaaaarrrrddddssss ((((aaaakkkkaaaa mmmmeeeettttaaaa cccchhhhaaaarrrraaaacccctttteeeerrrrssss))))::::
+
+       ssssuuuuddddoooo allows shell-style _w_i_l_d_c_a_r_d_s along with command
+       arguments in the _s_u_d_o_e_r_s file.  Wildcard matching is done
+       via the PPPPOOOOSSSSIIIIXXXX fnmatch(3) routine.
+
+       *       Matches any set of zero or more characters.
+
+       ?       Matches any single character.
+
+       [...]   Matches any character in the specified range.
+
+       [!...]  Matches any character nnnnooootttt in the specified range.
+
+       \x      For any character "x", evaluates to "x".  This is
+               used to escape special characters such as: "*",
+               "?", "[", and "}".
+
+       eeeexxxxcccceeeeppppttttiiiioooonnnnssss ttttoooo wwwwiiiillllddddccccaaaarrrrdddd rrrruuuulllleeeessss::::
+
+       The following exceptions apply to the above rules:
+
+       "       If the empty string "" is the only command line
+               argument in the _s_u_d_o_e_r_s entry it means that
+               command may take nnnnoooo arguments.
+
+       ooootttthhhheeeerrrr ssssppppeeeecccciiiiaaaallll cccchhhhaaaarrrraaaacccctttteeeerrrrssss aaaannnndddd rrrreeeesssseeeerrrrvvvveeeedddd wwwwoooorrrrddddssss::::
+
+       Text after a pound sign (####) is considered a comment.
+       Words that begin with a percent sign (%%%%) are assumed to be
+
+
+
+17/Oct/98                     1.5.7                             2
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
+       UN*X groups (%staff refers to users in the group _s_t_a_f_f).
+       Words that begin with a plus sign (++++) are assumed to be
+       netgroups (++++ccccsssshhhhoooossssttttssss refers to the netgroup _c_s_h_o_s_t_s).  Long
+       lines can be newline escaped with the backslash \\\\
+       character.  The reserved word NNNNOOOOPPPPAAAASSSSSSSSWWWWDDDD indicates that a
+       user need not enter a password for the command listed in
+       that entry.
+
+       The reserved alias _A_L_L can be used for both
+       {Host,User,Cmnd}_Alias.  DDDDOOOO NNNNOOOOTTTT define an alias of _A_L_L, it
+       will NNNNOOOOTTTT be used.  Note that _A_L_L implies the entire
+       universe of hosts/users/commands.  You can subtract
+       elements from the universe by using the syntax:
+          user  host=ALL,!ALIAS1,!/etc/halt...  Note that the "!"
+       notation only works in a user's command list.  You may not
+       use it to subtract elements in a User_Alias, Host_Alias,
+       Cmnd_Alias or user list.
+
+       Commands may have optional command line arguments.  If
+       they do, then the arguments in the _s_u_d_o_e_r_s file must
+       exactly match those on the command line.  It is also
+       possible to have a command's arguments span multiple lines
+       as long as the line continuance character "\" is used.
+       The following characters must be escaped with a "\" if
+       used in command arguments: ",", ":", "=", "\".
+
+EEEEXXXXAAAAMMMMPPPPLLLLEEEESSSS
+           # Host alias specification
+           Host_Alias  HUB=houdini:\
+                       REMOTE=merlin,kodiakthorn,spirit
+           Host_Alias  SERVERS=houdini,merlin,kodiakthorn,spirit
+           Host_Alias  CUNETS=128.138.0.0/255.255.0.0
+           Host_Alias  CSNETS=128.138.243.0,128.138.204.0,\
+                              128.138.205.192
+
+           # User alias specification
+           User_Alias  FULLTIME=millert,dowdy,mikef
+           User_Alias  PARTTIME=juola,mccreary,tor
+
+           # Runas alias specification
+           Runas_Alias OP=root,operator
+
+           # Command alias specification
+           Cmnd_Alias  LPCS=/usr/etc/lpc,/usr/ucb/lprm
+           Cmnd_Alias  SHELLS=/bin/sh,/bin/csh,/bin/tcsh,/bin/ksh
+           Cmnd_Alias  SU=/bin/su
+           Cmnd_Alias  MISC=/bin/rm,/bin/cat:\
+                       SHUTDOWN=/etc/halt,/etc/shutdown
+
+
+
+
+
+
+
+
+
+17/Oct/98                     1.5.7                             3
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
+           # User specification
+           FULLTIME    ALL=(ALL) NOPASSWD: ALL
+           %wheel      ALL=ALL
+           PARTTIME    ALL=ALL,!SHELLS,!SU
+           +interns    +openlabs=ALL,!SHELLS,!SU
+           britt       REMOTE=SHUTDOWN:ALL=LPCS
+           jimbo       CUNETS=/bin/su ?*,!/bin/su *root*
+           nieusma     SERVERS=SHUTDOWN,/etc/reboot:\
+                       HUB=ALL,!SHELLS
+           jill        houdini=/etc/shutdown -[hr] now,MISC
+           markm       HUB=ALL,!MISC,!/etc/shutdown,!/etc/halt
+           davehieb    merlin=(OP) ALL:SERVERS=/etc/halt:\
+                       kodiakthorn=NOPASSWD: ALL
+           steve       CSNETS=(operator) /usr/op_commands/
+
+
+       HHHHoooosssstttt AAAAlllliiiiaaaassss ssssppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnnssss::::
+
+       The are four _h_o_s_t _a_l_i_a_s_e_s.  The first actually contains
+       two _a_l_i_a_s_e_s.  It sets HUB to be houdini and REMOTE to the
+       three machines merlin, kodiakthorn and spirit.  Similarly,
+       SERVERS is set to the machines houdini, merlin,
+       kodiakthorn and spirit.  The CSNETS alias will match any
+       host on the 128.138.243.0, 128.138.204.0, or
+       128.138.205.192 nets.  The CUNETS alias will match any
+       host on the 128.138.0.0 (class B) network.  Note that
+       these are nnnneeeettttwwwwoooorrrrkkkk addresses, not ip addresses.  Unless an
+       explicate netmask is given, the local _n_e_t_m_a_s_k is used to
+       determine whether or not the current host belongs to a
+       network.
+
+       UUUUsssseeeerrrr AAAAlllliiiiaaaassss ssssppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnnssss::::
+
+       The two _u_s_e_r _a_l_i_a_s_e_s simply groups the FULLTIME and
+       PARTTIME folks into two separate aliases.
+
+       CCCCoooommmmmmmmaaaannnndddd aaaalllliiiiaaaassss ssssppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnnssss::::
+
+       Command aliases are lists of commands with or without
+       associated command line arguments.  The entries above
+       should be self-explanatory.
+
+       UUUUsssseeeerrrr ssssppppeeeecccciiiiffffiiiiccccaaaattttiiiioooonnnnssss::::
+
+
+       FULLTIME        Full-time sysadmins in the FULLTIME alias
+                       may run any command on any host as any
+                       user without a password.
+
+       %wheel          Any user in the UN*X group wheel may run
+                       any command on any host.
+
+       PARTTIME        Part-time sysadmins in the PARTTIME alias
+                       may run any command except those in the
+
+
+
+17/Oct/98                     1.5.7                             4
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
+                       SHELLS and SU aliases on any host.
+
+       +interns        Any user in the netgroup interns may run
+                       any command except those in the SHELLS and
+                       SU aliases on any host that is in the
+                       openlabs netgroup.
+
+       britt           The user britt may run commands in the
+                       SHUTDOWN alias on the REMOTE machines and
+                       commands in the LPCS alias on any machine.
+
+       jimbo           The user jimbo may su to any user save
+                       root on the machines on CUNETS (which is
+                       explicately listed as a class B network).
+
+       nieusma         The user nieusma may run commands in the
+                       SHUTDOWN alias as well as _/_e_t_c_/_r_e_b_o_o_t on
+                       the SERVER machines and any command except
+                       those in the SHELLS alias on the HUB
+                       machines.
+
+       jill            The user jill may run /etc/shutdown -h now
+                       or /etc/shutdown -r now as well as the
+                       commands in the MISC alias on houdini.
+
+       markm           The user markm may run any command on the
+                       HUB machines except _/_e_t_c_/_s_h_u_t_d_o_w_n,
+                       _/_e_t_c_/_h_a_l_t, and commands listed in the MISC
+                       alias.
+
+       davehieb        The user davehieb may run any command on
+                       merlin as any user in the Runas_Alias OP
+                       (ie: root or operator).  He may also run
+                       _/_e_t_c_/_h_a_l_t on the SERVERS and any command
+                       on kodiakthorn (no password required on
+                       kodiakthorn).
+
+       steve           The user steve may run any command in the
+                       _/_u_s_r_/_o_p___c_o_m_m_a_n_d_s_/ directory as user
+                       operator on the machines on CSNETS.
+
+CCCCAAAAVVVVEEEEAAAATTTTSSSS
+       The _s_u_d_o_e_r_s file should aaaallllwwwwaaaayyyyssss be edited by the vvvviiiissssuuuuddddoooo
+       command which locks the file and does grammatical
+       checking. It is imperative that the _s_u_d_o_e_r_s be free of
+       syntax errors since sudo will not run with a syntactically
+       incorrect _s_u_d_o_e_r_s file.
+
+FFFFIIIILLLLEEEESSSS
+        /etc/sudoers           file of authorized users.
+        /etc/netgroup          list of network groups.
+
+
+
+
+
+
+17/Oct/98                     1.5.7                             5
+
+
+
+
+
+sudoers(5)                 FILE FORMATS                sudoers(5)
+
+
+SSSSEEEEEEEE AAAALLLLSSSSOOOO
+       _s_u_d_o(8), _v_i_s_u_d_o(8), _s_u(1), _f_n_m_a_t_c_h(3).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+17/Oct/98                     1.5.7                             6
+
+

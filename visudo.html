@@ -1,0 +1,223 @@
+    <HTML> 
+	<HEAD> 
+	    <TITLE>visudo - edit the sudoers file
+
+</TITLE> 
+	</HEAD>
+
+	<BODY>
+
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#NAME">NAME</A>
+	<LI><A HREF="#SYNOPSIS">SYNOPSIS</A>
+	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
+	<LI><A HREF="#OPTIONS">OPTIONS</A>
+	<LI><A HREF="#ERRORS">ERRORS</A>
+	<LI><A HREF="#FILES">FILES</A>
+	<LI><A HREF="#ENVIRONMENT_VARIABLES">ENVIRONMENT VARIABLES</A>
+	<LI><A HREF="#AUTHOR">AUTHOR</A>
+	<LI><A HREF="#DISCLAIMER">DISCLAIMER</A>
+	<LI><A HREF="#CAVEATS">CAVEATS</A>
+	<LI><A HREF="#BUGS">BUGS</A>
+	<LI><A HREF="#SEE_ALSO">SEE ALSO</A>
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<HR>
+<H1><A NAME="NAME">NAME
+
+</A></H1>
+visudo - edit the sudoers file
+
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="SYNOPSIS">SYNOPSIS
+
+</A></H1>
+<STRONG>visudo</STRONG> [ <STRONG>-V</STRONG> ]
+
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="DESCRIPTION">DESCRIPTION
+
+</A></H1>
+<STRONG>visudo</STRONG> edits the <EM>sudoers</EM> file in a safe fashion, analogous to <CODE>vipw(8).</CODE>  <STRONG>visudo</STRONG> locks the <EM>sudoers</EM> file against multiple simultaneous edits, provides basic sanity checks, and
+checks for parse errors. If the <EM>sudoers</EM> file is currently being edited you will receive a message to try again
+later. In the default configuration, the <CODE>vi(1)</CODE> editor is used,
+but there is a compile time option to allow use of whatever editor the
+environment variables <CODE>EDITOR</CODE> or <CODE>VISUAL</CODE> are set to.
+
+
+<P>
+
+<STRONG>visudo</STRONG> parses the <EM>sudoers</EM> file after the edit and will not save the changes if there is a syntax
+error. Upon finding an error, a message will be printed stating the line
+<CODE>number(s)</CODE> that the error occurred on and the user will receive
+the ``What now?'' prompt. At this point the user may enter ``e'' to re-edit
+the <EM>sudoers</EM> file, enter ``x'' to exit without saving the changes, or ``Q'' to quit and
+save changes. The ``Q'' option should be used with extreme care because if <STRONG>visudo</STRONG>
+believes there to be a parse error, so will <STRONG>sudo</STRONG> and no one will be able to execute <STRONG>sudo</STRONG> again until the error is fixed. Any other command at this prompt will print
+a short help message. When editing the <EM>sudoers</EM> file after a parse error has been detected the cursor will be placed on the
+line where the error occurred (if the editor supports this feature).
+
+
+<P>
+
+<P>
+<HR>
+<H1><A NAME="OPTIONS">OPTIONS
+
+</A></H1>
+<STRONG>visudo</STRONG> accepts the following command line option:
+
+
+<P>
+
+<DL>
+<DT><STRONG><A NAME="item__V">-V
+
+</A></STRONG><DD>
+The <CODE>-V</CODE> (version) option causes <STRONG>visudo</STRONG> to print the version number and exit.
+
+
+<P>
+
+</DL>
+<P>
+<HR>
+<H1><A NAME="ERRORS">ERRORS
+
+</A></H1>
+<DL>
+<DT><STRONG><A NAME="item_sudoers">sudoers file busy, try again later.
+
+</A></STRONG><DD>
+Either someone is currently editing the <EM>sudoers</EM> file or there is a stale sudoers lock file (/etc/stmp by default) that you
+need to delete.
+
+
+<P>
+
+You didn't run <STRONG>visudo</STRONG> as root.
+
+
+<P>
+
+Your userid does not appear in the passwd file.
+
+
+<P>
+
+<H1><A NAME="FILES">FILES
+
+</A></H1>
+<PRE> /etc/sudoers           file of authorized users.
+ /etc/stmp              lock file for visudo.
+</PRE>
+
+<P>
+
+<H1><A NAME="ENVIRONMENT_VARIABLES">ENVIRONMENT VARIABLES
+
+</A></H1>
+The following are used only if <STRONG>visudo</STRONG> was compiled with the
+<EM>ENV_EDITOR</EM> option:
+
+
+<P>
+
+<PRE> EDITOR                 Used by visudo as the editor to use.
+ VISUAL                 Used by visudo if EDITOR is not set.
+</PRE>
+
+<P>
+
+<H1><A NAME="AUTHOR">AUTHOR
+
+</A></H1>
+Many people have worked on <EM>sudo</EM> over the years, this version of
+<STRONG>visudo</STRONG> was written by:
+
+
+<P>
+
+<PRE> Todd Miller            &lt;Todd.Miller@courtesan.com&gt;
+</PRE>
+
+<P>
+
+See the HISTORY file in the sudo distribution for more details.
+
+
+<P>
+
+Please send all bugs, comments, and changes to <A
+HREF="MAILTO:sudo-bugs@courtesan.com.">sudo-bugs@courtesan.com.</A>
+
+
+<P>
+
+<H1><A NAME="DISCLAIMER">DISCLAIMER
+
+</A></H1>
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+more details.
+
+
+<P>
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc., 675
+Mass Ave, Cambridge, MA 02139, USA.
+
+
+<P>
+
+<H1><A NAME="CAVEATS">CAVEATS
+
+</A></H1>
+Due to the syntax of the <EM>sudoers</EM> file, there is no way for <STRONG>visudo</STRONG> to tell the difference between a mistyped {Host,User,Cmnd}_Alias and a user
+or host name.
+
+
+<P>
+
+There is no easy way to prevent a user from gaining a root shell if the
+editor used by <STRONG>visudo</STRONG> allows shell escapes.
+
+
+<P>
+
+<H1><A NAME="BUGS">BUGS
+
+</A></H1>
+The <EM>-V</EM> flag gives the version of the <EM>sudo</EM> package rather than the individual <STRONG>visudo</STRONG> program.
+
+
+<P>
+
+<H1><A NAME="SEE_ALSO">SEE ALSO
+
+</A></H1>
+<CODE><A HREF="sudo.html">sudo(8)</A>, <CODE>vipw(8).</CODE>
+
+<P>
+
+</DL>
+</DL>
+    </BODY>
+
+    </HTML>
