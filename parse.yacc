@@ -106,7 +106,7 @@ int top = 0;
 /*
  * Protoypes
  */
-extern int  command_matches	__P((char *, char **, char *, char *));
+extern int  command_matches	__P((char *, char *, char *, char *));
 extern int  addr_matches	__P((char *));
 extern int  netgr_matches	__P((char *, char *, char *));
 extern int  usergr_matches	__P((char *, char *));
