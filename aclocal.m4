@@ -81,6 +81,20 @@ elif test -f "/usr/local/bin/vi"; then
 fi
 ])dnl
 dnl
+dnl check for pwd
+dnl
+define(SUDO_PROG_PWD,
+[if test -f "/usr/bin/pwd"; then
+    AC_DEFINE(_PATH_PWD, "/usr/bin/pwd")
+elif test -f "/bin/pwd"; then
+    AC_DEFINE(_PATH_PWD, "/bin/pwd")
+elif test -f "/usr/ucb/pwd"; then
+    AC_DEFINE(_PATH_PWD, "/usr/ucb/pwd")
+elif test -f "/usr/sbin/pwd"; then
+    AC_DEFINE(_PATH_PWD, "/usr/sbin/pwd")
+fi
+])dnl
+dnl
 dnl check for known UNIX variants
 dnl XXX - check to see that uname was checked first
 dnl
