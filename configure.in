@@ -1073,6 +1073,11 @@ case "$host" in
 		# getcwd(3) opens a pipe to getpwd(1)!?!
 		BROKEN_GETCWD=1
 
+		# system headers lack prototypes but gcc helps...
+		if test -n "$GCC"; then
+		    CPPFLAGS="${CPPFLAGS} -D__USE_FIXED_PROTOTYPES__"
+		fi
+
 		# check for password adjunct functions (shadow passwords)
 		if test "$CHECKSHADOW" = "true"; then
 		    AC_CHECK_FUNC(getpwanam, AC_DEFINE(HAVE_GETPWANAM) AC_CHECK_FUNCS(issecure))
@@ -1088,6 +1093,8 @@ case "$host" in
 		fi
 		;;
     *-*-aix*)
+		# To get all prototypes (so we pass -Wall)
+		CPPFLAGS="${CPPFLAGS} -D_XOPEN_EXTENDED_SOURCE"
 		AC_DEFINE(_ALL_SOURCE)
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 		;;
