@@ -433,10 +433,10 @@ static void load_globals(sudo_mode)
     /*
      * Need to get tty early since it's used for logging
      */
-    if ((tty = (char *) ttyname(0)) || (tty = (char *) ttyname(1))) {
-	if (strncmp(tty, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
-	    tty += sizeof(_PATH_DEV) - 1;
-	if ((tty = (char *) strdup(tty)) == NULL) {
+    if ((p = (char *) ttyname(0)) || (p = (char *) ttyname(1))) {
+	if (strncmp(p, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
+	    p += sizeof(_PATH_DEV) - 1;
+	if ((tty = (char *) strdup(p)) == NULL) {
 	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
