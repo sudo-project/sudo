@@ -106,10 +106,11 @@ char * sudo_goodpath(path)
 
     /* make sure path describes an executable regular file */
     if (!err && S_ISREG(statbuf.st_mode) &&(statbuf.st_mode & 0000111))
-	return(path);
+	return((char *)path);
     else
 	return(NULL);
 }
+
 
 
 #ifdef USE_REALPATH
@@ -224,6 +225,7 @@ char * sudo_realpath(old, new)
     realpath_restore(cwd);
     return(new);
 }
+
 
 
 /******************************************************************
