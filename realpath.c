@@ -104,7 +104,8 @@ char * realpath(old, new)
      * Resolve the last component of the path if it is a link
      * until it is a non-link.
      */
-    while ((statbuf.st_mode & _S_IFMT) == _S_IFLNK) {
+    errno = 0;
+    while (!lstat(new, &statbuf) && (statbuf.st_mode & _S_IFMT) == _S_IFLNK) {
 	/* it's a link */
 
 	if ((len = readlink(new, buf, sizeof(buf))) <= 0)
@@ -129,6 +130,10 @@ char * realpath(old, new)
 	    (void) strcat(new, buf);
 	}
     }
+
+    /* did an lstat() fail? */
+    if (errno)
+	return(realpath_ret(NULL, cwd));
 
     /*
      * separate the last component from the rest of the path
@@ -155,7 +160,7 @@ char * realpath(old, new)
     /* append "/" and buf to new but watch for double '/' */
     len = strlen(new);
     if (len) {
-	temp = new + len;
+	temp = new + len - 1;
 	if (*temp != '/') {
 	    *(++temp) = '/';
 	    *(++temp) = '\0';
