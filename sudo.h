@@ -74,25 +74,6 @@ extern int top;
 #  define MAXSYSLOGLEN		960
 #endif
 
-/*
- * Maximum number of characters to log per entry.
- * This is the largest possible line length (worst case)
- */
-#ifndef MAXLOGLEN
-#  ifndef ARG_MAX
-#    ifdef NCARGS
-#      define ARG_MAX		NCARGS
-#    else
-#      ifdef _POSIX_ARG_MAX
-#        define ARG_MAX		_POSIX_ARG_MAX
-#      else
-#        define ARG_MAX		4096
-#      endif
-#    endif
-#  endif
-#  define MAXLOGLEN		(49 + 3 * MAXPATHLEN + ARG_MAX)
-#endif
-
 #define SLOG_SYSLOG              0x01
 #define SLOG_FILE                0x02
 #define SLOG_BOTH                0x03
