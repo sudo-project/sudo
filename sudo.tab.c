@@ -801,6 +801,8 @@ static void expand_match_list()
     if (++cm_list_len >= cm_list_size) {
 	while ((cm_list_size += STACKINCREMENT) < cm_list_len)
 	    ;
+	if (cm_list == NULL)
+	    cm_list_len = 0;		/* start at 0 since it is a subscript */
 	cm_list = (struct command_match *)
 	    erealloc(cm_list, sizeof(struct command_match) * cm_list_size);
     }
@@ -838,7 +840,7 @@ void init_parser()
     if (printmatches == TRUE)
 	expand_match_list();
 }
-#line 842 "sudo.tab.c"
+#line 844 "sudo.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || __STDC__
 static int yygrowstack(void)
@@ -1508,7 +1510,7 @@ case 67:
 			    user_matches = TRUE;
 			}
 break;
-#line 1512 "sudo.tab.c"
+#line 1514 "sudo.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

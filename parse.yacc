@@ -943,6 +943,8 @@ static void expand_match_list()
     if (++cm_list_len >= cm_list_size) {
 	while ((cm_list_size += STACKINCREMENT) < cm_list_len)
 	    ;
+	if (cm_list == NULL)
+	    cm_list_len = 0;		/* start at 0 since it is a subscript */
 	cm_list = (struct command_match *)
 	    erealloc(cm_list, sizeof(struct command_match) * cm_list_size);
     }
