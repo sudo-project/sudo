@@ -55,6 +55,7 @@
 #define MAILSUBJECT "*** SECURITY information ***" /* subject of mail sent */
 /*#define SECURE_PATH	"/bin:/usr/ucb:/usr/bin:/usr/etc:/etc" /* secure path */
 /*#define USE_EXECV		/* use execv() instead of execvp() */
+#define FAST_MATCH		/* command check fails if basenames not same */
 
 /**********  You probably don't want to modify anything below here  ***********/
 

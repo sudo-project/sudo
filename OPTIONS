@@ -138,3 +138,10 @@ USE_EXECV
     you define this you lose the ability to exec scripts that are missing the
     '#!/bin/sh' cookie (like /bin/kill on sunos and /etc/fastboot on 4.3BSD).
     This is off by default.
+
+FAST_MATCH
+    When matching a given command to a path listed in the sudoers file,
+    only check the inodes for a match if the basenames match.
+    If you want links to a command to be allowed then you should turn
+    this off, but it will make things take a little longer.
+    This is on by default.
