@@ -1532,7 +1532,7 @@ if test "$with_pam" = "yes"; then
     echo ""
     case $host in
 	*-*-solaris2*)
-	    echo "You will need to add the following line to /etc/pam.conf"
+	    echo "You will need to add a line like the following to /etc/pam.conf"
 	    echo "sudo	auth required	/usr/lib/security/pam_unix.so.1"
 	    ;;
 	*-*-linux*)
