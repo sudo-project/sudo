@@ -1,16 +1,9 @@
 /*
- * CU sudo version 1.5.9 (based on Root Group sudo version 1.1)
- * Copyright (c) 1994,1996,1998,1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ *  CU sudo version 1.6 -- allows users to execute commands as root and others
+ *  Copyright (c) 1991  The Root Group, Inc.
+ *  Copyright (c) 1994,1996,1998,1999 Todd C. Miller <Todd.Miller@courtesan.com>
  *
- * This software comes with no waranty whatsoever, use at your own risk.
- *
- * Please send bugs, changes, problems to sudo-bugs@courtesan.com
- *
- */
-
-/*
- *  sudo version 1.1 allows users to execute commands as root
- *  Copyright (C) 1991  The Root Group, Inc.
+ *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

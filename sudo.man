@@ -2,8 +2,8 @@
 ''' $RCSfile$$Revision$$Date$
 '''
 ''' $Log$
-''' Revision 1.31  1999/03/29 04:05:13  millert
-''' ++version
+''' Revision 1.32  1999/04/05 20:57:23  millert
+''' Crank version to 1.6 and combine copyright statements
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH sudo 8 "1.5.9" "17/Feb/99" "MAINTENANCE COMMANDS"
+.TH sudo 8 "1.6" "17/Feb/99" "MAINTENANCE COMMANDS"
 .UC
 .if n .hy 0
 .if n .na

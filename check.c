@@ -1,16 +1,9 @@
 /*
- * CU sudo version 1.5.9 (based on Root Group sudo version 1.1)
- * Copyright (c) 1994,1996,1998,1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ *  CU sudo version 1.6 -- allows users to execute commands as root and others
+ *  Copyright (c) 1991  The Root Group, Inc.
+ *  Copyright (c) 1994,1996,1998,1999 Todd C. Miller <Todd.Miller@courtesan.com>
  *
- * This software comes with no waranty whatsoever, use at your own risk.
- *
- * Please send bugs, changes, problems to sudo-bugs@courtesan.com
- *
- */
-
-/*
- *  sudo version 1.1 allows users to execute commands as root
- *  Copyright (C) 1991  The Root Group, Inc.
+ *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -1195,8 +1188,9 @@ static void reminder()
     (void) fprintf(stderr, "\n%s\n%s\n\n%s\n%s\n\n",
 #else
     (void) fprintf(stderr, "\n%s%s%s\n%s\n%s\n%s\n\n%s\n%s\n\n%s\n%s\n\n",
-	"    CU Sudo version ", version, ", based on Root Group sudo version 1.1.",
-	"    sudo version 1.1 is Copyright (C) 1991 The Root Group, Inc.",
+	"    CU Sudo version ", version,
+	", Copyright (c) 1991 The Root Group, Inc.",
+	"    Copyright (c) 1994, 1996, 1998, 1999 Todd C. Miller.",
 	"    sudo comes with ABSOLUTELY NO WARRANTY.  This is free software,",
 	"    and you are welcome to redistribute it under certain conditions.",
 #endif
