@@ -204,6 +204,13 @@ typedef struct sigaction sigaction_t;
 #endif
 
 /*
+ * If dirfd() does not exists, hopefully dd_fd does.
+ */
+#if !defined(HAVE_DIRFD) && !defined(dirfd)
+# define dirfd(_d)	((_d)->dd_fd)
+#endif
+
+/*
  * If we lack getprogname(), emulate with __progname if possible.
  * Otherwise, add a prototype for use with our own getprogname.c.
  */
