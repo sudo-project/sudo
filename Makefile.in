@@ -289,9 +289,9 @@ realclean: distclean
 cleandir: realclean
 
 dist: $(DISTFILES)
-	rm -f ../cu-sudo.v$(VERSION).tar.gz
+	rm -f ../sudo-$(VERSION).tar.gz
 	( cd .. ; TF="/tmp/sudo.dist$$$$" ; rm -f $$TF ; for i in $(DISTFILES) ; \
-	  do echo sudo.v$(VERSION)/$$i >> $$TF ; done ; \
-	  tar Ocf cu-sudo.v$(VERSION).tar \
-	  `cat $$TF` && gzip --best cu-sudo.v$(VERSION).tar && rm -f $$TF)
-	ls -l ../cu-sudo.v$(VERSION).tar.gz
+	  do echo sudo-$(VERSION)/$$i >> $$TF ; done ; \
+	  tar Ocf sudo-$(VERSION).tar \
+	  `cat $$TF` && gzip --best sudo-$(VERSION).tar && rm -f $$TF)
+	ls -l ../sudo-$(VERSION).tar.gz

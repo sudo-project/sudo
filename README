@@ -1,4 +1,4 @@
-This is the CU version of sudo, release 1.6
+This is Sudo version 1.6
 
 The sudo philosophy
 ===================
@@ -19,14 +19,14 @@ the `sudo-workers' mailing list you will get the BETA announcements
 
 What's new
 ==========
-For a history of CU sudo please see the HISTORY file that came with the
-release.  Please note that while this source is based on the Root
-Group's sudo 1.1, the code has been changed significantly, so please
-do not bother them with bugs in CU sudo.  Bug reports for this sudo
-should be sent to sudo-bugs@courtesan.com.
+For a history of sudo please see the HISTORY file that came with this
+release.
 
 For a complete list of changes, see the CHANGES file.  For a summary,
 see the web page, http://www.courtesan.com/sudo/.
+
+If you are upgrading from an earlier version of Sudo, please see
+the UPGRADE file.
 
 NOTE: Starting with sudo 1.5.7 the configuration method has changed
       significantly as compared to previous versions.  All options

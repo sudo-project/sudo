@@ -1,4 +1,4 @@
-Systems that CU sudo is known to run on.
+Systems that Sudo is known to run on.
 Just because a specific version of your OS is not listed with
 the current version of sudo does not mean it won't work...
 
@@ -63,6 +63,7 @@ DEC UNIX 3.2c	alpha	bundled cc	1.5.3	Todd Miller	 none
 DEC UNIX 4.0D	alpha	gcc-2.7.2.1	1.5.9	Todd Miller	 --with-skey
 DEC UNIX 4.0	alpha	gcc-2.7.2.1	1.5.3	Todd Miller	 --with-kerb4
 DEC UNIX 4.0D	alpha	bundled cc	1.5.3	Randall R. Cable --with-C2
+DEC UNIX 4.0E	alpha	bundled cc	1.5.9p2	Vangelis Haniotakis none
 AIX	3.2.X	rs6000	bundled cc	1.4	Todd Miller	 none
 AIX	4.1.5	rs6000	gcc-2.7.2.3	1.4.4	Daniel Robitaille none
 AIX	4.1.3	PowerPC	gcc-2.7.0	1.4	Bob Shair	 none
@@ -113,7 +114,7 @@ DC-OSx	1.1-9x	mips	PyrC 4.0A20	1.5.6p2	Brian Jackson	 none
 HI-UX/MPP 02-03	sr2201	bundled cc	1.5.4	Ben Edgington	 none
 SVR4	4.4	m88k	bundled gcc	1.5.7p4	Gerry Belanger	 CFLAGS=
 
-Systems on which CU sudo is expected to run on but hasn't been tested.
+Systems on which Sudo is expected to run on but hasn't been tested.
 If you can verify any of these, please send mail to sudo-bugs@courtesan.com
 
  Op. System	CPU	Compilers	Sudo	Reported	 Special

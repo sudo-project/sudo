@@ -1,5 +1,5 @@
-FAQ and troubleshooting tips for CU sudo
-========================================
+FAQ and troubleshooting tips for Sudo
+=====================================
 
 Q) Sudo compiles but when I run it I get "Sorry, sudo must be setuid root."
    and sudo quits.

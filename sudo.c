@@ -221,7 +221,7 @@ main(argc, argv)
     switch (sudo_mode) {
 	case MODE_VERSION:
 	case MODE_HELP:
-	    (void) printf("CU Sudo version %s\n", version);
+	    (void) printf("Sudo version %s\n", version);
 	    if (sudo_mode == MODE_VERSION)
 		exit(0);
 	    else

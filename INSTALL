@@ -1,5 +1,5 @@
-Installation instructions for CU sudo 1.6
-=========================================
+Installation instructions for Sudo 1.6
+======================================
 
 Sudo uses a `configure' script to probe the capabilities and type
 of the system in question.  In this release, `configure' takes many

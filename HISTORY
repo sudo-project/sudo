@@ -17,12 +17,13 @@ of his consulting firm, Courtesan Consulting.  Courtesan remains
 committed to a free sudo and is sponsoring another sudo rewrite as
 well as continued development of the sudo 1.x code base.  As of
 version 1.6, Sudo no longer contains any of the original "Root
-Group" code and is available with a BSD-style license.
+Group" code and is available with a BSD-style license.  As there
+has been no public release of Sudo from the "Root Group" I've dropped
+the `CU' from the name.
 
 sudo, in its current form, is maintained by:
 
-	Todd Miller
-	<Todd.Miller@courtesan.com>
+	Todd Miller <Todd.Miller@courtesan.com>
 
 Todd continues to enhance sudo and fix bugs.  Bug reports and fixes
 should be mailed to sudo-bugs@courtesan.com.  Please include the version
