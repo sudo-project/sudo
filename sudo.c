@@ -169,11 +169,7 @@ main(argc, argv)
 	check_user();
 	log_error(ALL_SYSTEMS_GO);
 	be_root();
-#ifdef USE_EXECV
-	execv(cmnd, (const char **) &Argv[1]);
-#else /* USE_EXECV */
-	execvp(cmnd, (const char **) &Argv[1]);
-#endif /* USE_EXECV */
+	EXEC(cmnd, &Argv[1]);
 	perror(cmnd);		/* exec failed! */
 	exit(-1);
 	break;
@@ -271,26 +267,29 @@ static void load_globals()
 
 
     /*
-     * loading the host global variable from gethostname() & gethostbyname()
+     * load the host global variable from gethostname()
+     * and use gethostbyname() if we want it to be fully qualified.
      */
     if ((gethostname(host, MAXHOSTNAMELEN))) {
 	strcpy(host, "localhost");
 	log_error(GLOBAL_NO_HOSTNAME);
 	inform_user(GLOBAL_NO_HOSTNAME);
+#ifdef FQDN
     } else {
 	if ((h_ent = gethostbyname(host)) == NULL)
 	    log_error(GLOBAL_HOST_UNREGISTERED);
 	else
 	    strcpy(host, h_ent -> h_name);
+    }
+#else
+    }
 
     /*
-     * We don't want to return the fully quallified name all the time...
+     * We don't want to return the fully quallified name unless FQDN is set
      */
-#ifndef FQDN
-	if ((p = strchr(host, '.')))
-	    *p = '\0';
-#endif
-    }
+    if ((p = strchr(host, '.')))
+	*p = '\0';
+#endif /* FQDN */
 
 }
 
