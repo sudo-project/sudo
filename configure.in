@@ -36,10 +36,10 @@ dnl Initial values for Makefile variables listed above
 dnl Some may be overridden by environment variables..
 dnl
 PROGS="sudo visudo"
-test -n "$MANTYPE" && MANTYPE="man"
-test -n "$SUDOERS_MODE" && SUDOERS_MODE=0440
-test -n "$SUDOERS_UID" && SUDOERS_UID=0
-test -n "$SUDOERS_GID" && SUDOERS_GID=0
+test -n "$MANTYPE" || MANTYPE="man"
+test -n "$SUDOERS_MODE" || SUDOERS_MODE=0440
+test -n "$SUDOERS_UID" || SUDOERS_UID=0
+test -n "$SUDOERS_GID" || SUDOERS_GID=0
 DEV="#"
 
 dnl
