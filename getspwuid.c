@@ -53,14 +53,14 @@ static char rcsid[] = "$Id$";
 #ifdef HAVE_GETSPNAM
 #  include <shadow.h>
 #endif /* HAVE_GETSPNAM */
-#ifdef HAVE_GETPRPWUID
+#ifdef HAVE_GETPRPWNAM
 #  ifdef __hpux
 #    include <hpsecurity.h>
 #  else
 #    include <sys/security.h>
 #  endif /* __hpux */
 #  include <prot.h>
-#endif /* HAVE_GETPRPWUID */
+#endif /* HAVE_GETPRPWNAM */
 #ifdef HAVE_GETPWANAM
 #  include <sys/label.h>
 #  include <sys/audit.h>
@@ -85,9 +85,9 @@ extern char *strdup     __P((const char *));
 /*
  * Global variables (yuck)
  */
-#if defined(HAVE_GETPRPWUID) && defined(__alpha)
+#if defined(HAVE_GETPRPWNAM) && defined(__alpha)
 int crypt_type = -1;
-#endif /* HAVE_GETPRPWUID && __alpha */
+#endif /* HAVE_GETPRPWNAM && __alpha */
 
 
 /*
@@ -136,11 +136,11 @@ static char *sudo_getshell(pw_ent)
 static char *sudo_getepw(pw_ent)
     struct passwd *pw_ent;
 {
-#ifdef HAVE_GETPRPWUID
+#ifdef HAVE_GETPRPWNAM
     {
 	struct pr_passwd *spw_ent;
 
-	spw_ent = getprpwuid(pw_ent->pw_uid);
+	spw_ent = getprpwnam(pw_ent->pw_name);
 	if (spw_ent != NULL && spw_ent->ufld.fd_encrypt != NULL) {
 #  ifdef __alpha
 	    crypt_type = spw_ent -> ufld.fd_oldcrypt;
@@ -148,7 +148,7 @@ static char *sudo_getepw(pw_ent)
 	    return(spw_ent -> ufld.fd_encrypt);
 	}
     }
-#endif /* HAVE_GETPRPWUID */
+#endif /* HAVE_GETPRPWNAM */
 #ifdef HAVE_GETSPNAM
     {
 	struct spwd *spw_ent;

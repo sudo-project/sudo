@@ -30,7 +30,7 @@ static char rcsid[] = "$Id$";
 
 #include "config.h"
 
-#ifdef HAVE_GETPRPWUID
+#ifdef HAVE_GETPRPWNAM
 
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -84,4 +84,4 @@ int check_secureware(pass)
 	return(0);
 }
 
-#endif /* HAVE_GETPRPWUID */
+#endif /* HAVE_GETPRPWNAM */

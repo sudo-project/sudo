@@ -100,7 +100,7 @@
 #  undef _PASSWD_LEN
 #  define _PASSWD_LEN		256
 #else
-#  ifdef  HAVE_GETPRPWUID
+#  ifdef  HAVE_GETPRPWNAM
 #    undef _PASSWD_LEN
 #    define _PASSWD_LEN		AUTH_MAX_PASSWD_LENGTH
 #  else
@@ -115,8 +115,8 @@
 #        endif /* SHADOW_TYPE != SPW_NONE */
 #      endif /* PASS_MAX */
 #    endif /* !_PASSWD_LEN */
-#  endif /* HAVE_KERB4 || HAVE_AFS || HAVE_DCE || HAVE_SKEY || HAVE_OPIE */
-#endif /* HAVE_GETPRPWUID */
+#  endif /* HAVE_GETPRPWNAM */
+#endif /* HAVE_KERB4 || HAVE_AFS || HAVE_DCE || HAVE_SKEY || HAVE_OPIE */
 
 /*
  * Some OS's lack these

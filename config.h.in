@@ -243,8 +243,8 @@
 /* Define if you have getspnam(3).  [SVR4-style shadow passwords] */
 #undef HAVE_GETSPNAM
 
-/* Define if you have getprpwuid(3).  [SecureWare-style shadow passwords] */
-#undef HAVE_GETPRPWUID
+/* Define if you have getprpwnam(3).  [SecureWare-style shadow passwords] */
+#undef HAVE_GETPRPWNAM
 
 /* Define if you have getspwuid(3).  [HP-UX <= 9.X shadow passwords] */
 #undef HAVE_GETSPWUID

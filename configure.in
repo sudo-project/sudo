@@ -982,7 +982,7 @@ case "$host" in
 		;;
     *-*-hiuxmpp*)
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1], AC_CHECK_LIB(security, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"; SECUREWARE=1]))
+		    AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1], AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"; SECUREWARE=1]))
 		    CHECKSHADOW="false"
 		fi
 		;;
@@ -992,7 +992,7 @@ case "$host" in
 		#STATIC_SUDO=true
 
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1])
+		    AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"; SECUREWARE=1])
 		    CHECKSHADOW="false"
 		fi
 
@@ -1077,7 +1077,7 @@ case "$host" in
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
 
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(security, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"; SECUREWARE=1])
+		    AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"; SECUREWARE=1])
 		    AC_MSG_CHECKING([for broken /usr/include/prot.h])
 		    AC_TRY_COMPILE([
 #include <sys/types.h>
@@ -1123,7 +1123,7 @@ case "$host" in
 		fi
 
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lprot"; LIBS="${LIBS} -lprot"; OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"; SECUREWARE=1])
+		    AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lprot"; LIBS="${LIBS} -lprot"; OSDEFS="${OSDEFS} -D_AUDIT -D_ACL -DSecureWare"; SECUREWARE=1])
 		    CHECKSHADOW="false"
 		fi
 		;;
@@ -1153,7 +1153,7 @@ case "$host" in
 		;;
     *-*-sco*)
 		if test "$CHECKSHADOW" = "true"; then
-		    AC_CHECK_LIB(prot, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [SUDO_LIBS="${SUDO_LIBS} -lprot -lx"; LIBS="${LIBS} -lprot -lx"; SECUREWARE=1])
+		    AC_CHECK_LIB(prot, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [SUDO_LIBS="${SUDO_LIBS} -lprot -lx"; LIBS="${LIBS} -lprot -lx"; SECUREWARE=1])
 		    CHECKSHADOW="false"
 		fi
 		;;
@@ -1197,7 +1197,7 @@ if test "$CHECKSHADOW" = "true"; then
     AC_CHECK_FUNC(getspnam, AC_DEFINE(HAVE_GETSPNAM) [CHECKSHADOW="false"])
 fi
 if test "$CHECKSHADOW" = "true"; then
-    AC_CHECK_FUNC(getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SECUREWARE=1], AC_CHECK_LIB(sec, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"], AC_CHECK_LIB(security, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"], AC_CHECK_LIB(prot, getprpwuid, AC_DEFINE(HAVE_GETPRPWUID) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lprot"; LIBS="${LIBS} -lprot"]))))
+    AC_CHECK_FUNC(getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1], AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"], AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"], AC_CHECK_LIB(prot, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lprot"; LIBS="${LIBS} -lprot"]))))
 fi
 
 dnl

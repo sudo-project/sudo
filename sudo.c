@@ -183,12 +183,12 @@ int main(argc, argv)
     int sudo_mode = MODE_RUN;
     extern char ** environ;
 
-#if defined(HAVE_GETPRPWUID) && defined(HAVE_SET_AUTH_PARAMETERS)
+#if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
     (void) set_auth_parameters(argc, argv);
 #  ifdef HAVE_INITPRIVS
     initprivs();
 #  endif
-#endif /* HAVE_GETPRPWUID && HAVE_SET_AUTH_PARAMETERS */
+#endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
     Argv = argv;
     Argc = argc;

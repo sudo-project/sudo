@@ -583,10 +583,10 @@ static void check_passwd()
 	    return;		/* if the passwd is correct return() */
 #    endif /* HAVE_GETAUTHUID */
 
-#    ifdef HAVE_GETPRPWUID
+#    ifdef HAVE_GETPRPWNAM
 	if (check_secureware(pass))
 	    return;		/* if the passwd is correct return() */
-#    endif /* HAVE_GETPRPWUID */
+#    endif /* HAVE_HAVE_GETPRPWNAM */
 
 	/* Normal UN*X password check */
 	if (!strcmp(user_passwd, (char *) crypt(pass, user_passwd)))
