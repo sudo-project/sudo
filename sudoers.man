@@ -1,0 +1,138 @@
+.\" $Id$
+.TH SUDOERS 5
+.SH NAME
+sudoers \- list of which users may execute what as root
+.SH DESCRIPTION
+The
+.I sudoers
+file is composed of an optional host alias section, an optional command
+alias section and the user specification section. All command or host
+aliases need to start with their respective keywords
+(ie: Host_Alias, User_Alias, or Cmnd_Alias).
+If there are multiple occurrences of a user, the union of the entries
+will be used.
+.nf
+
+user specification format: 
+  user access_group [: access_group] ...
+
+    access_group ::= host_type = [op]cmnd_type [,[op]cmnd_type] ... 
+       host_type ::= a lower\-case hostname, netgroup, ip address,
+		           network number, or host alias.
+       cmnd_type ::= an command OR a command alias.
+              op ::= the logical '!' NOT operator.
+
+host alias section format:
+  Host_Alias HOSTALIAS = host\-list
+
+      Host_Alias ::= a keyword.
+       HOSTALIAS ::= an upper\-case alias name.
+       host\-list ::= a comma separated list of hosts, netgroups,
+			      ip addresses, networks.
+
+user alias section format:
+  User_Alias USERALIAS = user\-list
+
+      User_Alias ::= a keyword.
+       USERALIAS ::= an upper\-case alias name.
+       user\-list ::= a comma separated list of users and netgroups.
+
+command alias section format:
+  Cmnd_Alias CMNDALIAS = cmnd\-list
+
+      Cmnd_Alias ::= a keyword.
+       CMNDALIAS ::= an upper\-case alias name.
+       cmnd\-list ::= a comma separated list commands.
+
+Text after a pound sign '#' is considered a comment.
+Words that begin with a plus sign '+' are assumed to
+be netgroups
+Long lines can be newline escaped with the backslash '\\' character.
+The reserved alias 'ALL' can be used for both {Host,User,Cmnd}_Alias'.
+
+    DO NOT define an alias of 'ALL', it will NOT be used.
+    Note that 'ALL' implies the entire universe of hosts/users/commands.
+    You can subtract elements from the universe by using the syntax:
+       user  host=ALL,!ALIAS1,!/etc/halt...
+    Note that the '!' notation only works in a user's command list.  You
+    may not use it to subtract elements in a User_Alias, Host_Alias, or
+    Cmnd_Alias.
+.fi
+.SH EXAMPLES
+.nf
+    # Host alias specification
+    Host_Alias  HUB=houdini:\\
+                REMOTE=merlin,kodiakthorn,spirit
+    Host_Alias  SERVERS=houdini,merlin,kodiakthorn,spirit
+    Host_Alias  CSNETS=128.138.243.0,128.138.204.0,\\
+                       128.138.205.192
+
+    # User alias specification
+    User_Alias  FULLTIME=millert,dowdy,mikef
+    User_Alias  PARTTIME=juola,mccreary,tor
+
+    # Command alias specification
+    Cmnd_Alias  LPCS=/usr/etc/lpc,/usr/ucb/lprm
+    Cmnd_Alias  SHELLS=/bin/sh,/bin/csh,/bin/tcsh,/bin/ksh
+    Cmnd_Alias  SU=/bin/su
+    Cmnd_Alias  MISC=/bin/rm,/bin/cat:\\
+                SHUTDOWN=/etc/halt,/etc/shutdown
+
+    # User specification
+    FULLTIME    ALL=ALL
+    PARTTIME    ALL=ALL,!SHELLS,!SU
+    +interns    +openlabs=ALL,!SHELLS,!SU
+    britt       REMOTE=SHUTDOWN:ALL=LPCS
+    nieusma     SERVERS=SHUTDOWN,/etc/reboot:\\
+                HUB=ALL,!SHELLS
+    jill        houdini=/etc/shutdown,MISC
+    markm       HUB=ALL,!MISC,!/etc/shutdown,!/etc/halt
+    davehieb    merlin=ALL:SERVERS=/etc/halt:\\
+                kodiakthorn=ALL
+    steve       CSNETS=/usr/su_commands/
+.fi
+.sp
+The above
+.I sudoers
+file specification is composed of 4 host alias specifications, 2 user alias
+specifications, 4 command alias specifications and 8 user specifications.  Full
+time staff (those in the FULLTIME alias) are allowed to execute any command on
+any host.  Part time staff (those in the PARTTIME alias) are allowed to execute
+any command except for the group of SHELL and SU commands on any machine.
+Britt is permitted to execute /etc/halt, /etc/shutdown, /usr/etc/lpc and
+/usr/ucb/lprm on the REMOTE machines (merlin, kodiakthorn, and spirit).
+Nieusma is allowed to run /etc/halt, /etc/shutdown, and /etc/halt on all
+machines and all commands except for the group of SHELL commands on the HUB
+machines.  Jill is permitted to execute /etc/shutdown, /bin/rm, and /bin/cat
+on houdini.  Davehieb can execute any command on machines merlin and kodiakthorn
+and can halt the SERVERS.  Any user in the netgroup "interns" may run any
+command on the machines in the netgroup "openlabs" except for those commands
+in the groups SHELL and SU.  Steve can run any command located in the
+directory /usr/su_commands on all machines on the subnets listed in CSNETS
+(note that the 128.138.192 net has a netmask of 255.255.255.192 which is
+why its network number is 128.138.192.192.
+.sp
+.B sudo
+will do a logical and of a machine's ip address(es) with its netmask to decide
+whether that machine is on a given network).
+.sp
+The
+.I sudoers
+file should 
+.B always
+be edited by the 
+.B visudo 
+command which locks the file and does grammatical checking. It is
+imperative that the
+.I sudoers
+be free of syntax errors since sudo will not run with a syntactically
+incorrect sudoers file.
+.SH FILES
+.nf
+/etc/sudoers                 file of authorized users.
+/etc/netgroup                list of network groups
+.fi
+.SH SEE ALSO
+.BR sudo (8),
+.BR visudo (8),
+.BR su (1)
