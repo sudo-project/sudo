@@ -136,7 +136,7 @@ LIB_OBJS = @LIBOBJS@ @ALLOCA@
 VERSION = 1.7
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES HISTORY INSTALL INSTALL.configure \
-	    LICENSE Makefile.in PORTING README README.LDAP RUNSON TODO \
+	    LICENSE Makefile.in PORTING README README.LDAP TODO \
 	    TROUBLESHOOTING UPGRADE aclocal.m4 acsite.m4 aixcrypt.exp \
 	    config.guess config.h.in config.sub configure configure.in \
 	    def_data.in indent.pro install-sh ltmain.sh mkdefaults \
