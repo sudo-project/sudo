@@ -31,6 +31,7 @@
 * Lex Specification file for the sudo project.
 *******************************************************************************/
 #include <sys/types.h>
+#include <sys/param.h>
 #include "y.tab.h"
 #include "sudo.h"
 %}
@@ -48,7 +49,7 @@
 [?;<>\[\]{}|~.-]*	{ return ERROR; }         /* return error */
 ^[a-zA-Z0-9_-]+		{ fill(); return IDENT1;} /* user/{Host,Cmnd}_Alias */
 [a-zA-Z0-9_.+-]+	{ fill(); return IDENT2;} /* host_type/ALIASES */
-(\/[a-zA-Z0-9_.+-]+)+	{ fill(); return IDENT3;} /* absolute command path */
+(\/[a-zA-Z0-9_.+-]+)+\/? { fill(); return IDENT3;} /* absolute command path */
 %%
 fill() {
 strcpy(yylval.char_val, yytext);
