@@ -144,7 +144,7 @@ struct passwd *user_pw_ent;
 char *runas_user = "root";
 char *cmnd = NULL;
 char *cmnd_args = NULL;
-char *tty = NULL;
+char *tty = "unknown";
 char *prompt;
 char host[MAXHOSTNAMELEN + 1];
 char *shost;
@@ -441,8 +441,7 @@ static void load_globals(sudo_mode)
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
-    } else
-	tty = "none";
+    }
 
 #ifdef UMASK
     (void) umask((mode_t)UMASK);
