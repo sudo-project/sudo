@@ -130,7 +130,7 @@ dnl check for fullly working void
 dnl
 AC_DEFUN(SUDO_FULL_VOID, [AC_MSG_CHECKING(for full void implementation)
 AC_TRY_COMPILE(, [void *foo;
-foo = (void *)0; foo += 0;], AC_DEFINE(VOID, void)
+foo = (void *)0; (void *)"test";], AC_DEFINE(VOID, void)
 AC_MSG_RESULT(yes), AC_DEFINE(VOID, char)
 AC_MSG_RESULT(no))])
 
