@@ -1,30 +1,28 @@
 /*
- *  CU sudo version 1.6
- *  Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998, 1999 Todd C. Miller <Todd.Miller@courtesan.com>
+ * All rights reserved.
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- *  Please send bugs, changes, problems to sudo-bugs@courtesan.com
- *
- *******************************************************************
- *
- *  This module contains tgetpass(), getpass(3) with a timeout.
- *  It should work on any OS that supports sgtty (4BSD), termio (SYSV),
- *  or termios (POSIX) line disciplines.
- *
- *  Todd C. Miller  Sun Jun  5 17:22:31 MDT 1994
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+ * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "config.h"
@@ -78,15 +76,9 @@ static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 
-/******************************************************************
- *
- *  tgetpass()
- *
- *  this function prints a prompt and gets a password from /dev/tty
- *  or stdin.  Echo is turned off (if possible) during password entry
- *  and input will time out based on the value of timeout.
+/*
+ * Like getpass(3) but with timeout and echo flags.
  */
-
 char *
 tgetpass(prompt, timeout, echo_off)
     const char *prompt;
@@ -102,44 +94,20 @@ tgetpass(prompt, timeout, echo_off)
     struct sgttyb ttyb;
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
-#ifdef POSIX_SIGNALS
-    sigset_t set, oset;
-#else
-    int omask;
-#endif /* POSIX_SIGNALS */
     int n, input, output;
     static char buf[SUDO_PASS_MAX + 1];
     fd_set *readfds;
     struct timeval tv;
 
-    /*
-     * mask out SIGINT and SIGTSTP, should probably just catch and deal.
-     */
-#ifdef POSIX_SIGNALS
-    (void) sigemptyset(&set);
-    (void) sigaddset(&set, SIGINT);
-    (void) sigaddset(&set, SIGTSTP);
-    (void) sigprocmask(SIG_BLOCK, &set, &oset);
-#else
-    omask = sigblock(sigmask(SIGINT)|sigmask(SIGTSTP));
-#endif /* POSIX_SIGNALS */
-
-    /*
-     * open /dev/tty for reading/writing if possible or use
-     * stdin and stderr instead.
-     */
+    /* Open /dev/tty for reading/writing if possible else use stdin/stderr. */
     if ((input = output = open(_PATH_TTY, O_RDWR)) == -1) {
 	input = STDIN_FILENO;
 	output = STDERR_FILENO;
     }
 
-    /* print the prompt */
     if (prompt)
 	(void) write(output, prompt, strlen(prompt) + 1);
 
-    /*
-     * turn off echo unless asked to keep it on
-     */
     if (echo_off) {
 #ifdef HAVE_TERMIOS_H
 	(void) tcgetattr(input, &term);
@@ -165,7 +133,7 @@ tgetpass(prompt, timeout, echo_off)
     }
 
     /*
-     * Timeout of <= 0 means no timeout
+     * Timeout of <= 0 means no timeout.
      */
     if (timeout > 0) {
 	/* setup for select(2) */
@@ -179,7 +147,7 @@ tgetpass(prompt, timeout, echo_off)
 	tv.tv_usec = 0;
 
 	/*
-	 * get password or return empty string if nothing to read by timeout
+	 * Get password or return empty string if nothing to read by timeout
 	 */
 	buf[0] = '\0';
 	while ((n = select(input + 1, readfds, 0, 0, &tv)) == -1 &&
@@ -200,7 +168,6 @@ tgetpass(prompt, timeout, echo_off)
 	}
     }
 
-     /* turn on echo if we turned it off above */
 #ifdef HAVE_TERMIOS_H
     if (echo_off) {
 	term.c_lflag |= ECHO;
@@ -220,18 +187,9 @@ tgetpass(prompt, timeout, echo_off)
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
-    /* print a newline since echo is turned off */
     if (echo_off)
 	(void) write(output, "\n", 1);
 
-    /* restore old signal mask */
-#ifdef POSIX_SIGNALS
-    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
-#else
-    (void) sigsetmask(omask);
-#endif /* POSIX_SIGNALS */
-
-    /* close /dev/tty if that's what we opened */
     if (input != STDIN_FILENO)
 	(void) close(input);
 
