@@ -34,6 +34,11 @@ A) Try running configure with the --with-getpass option.  After this
    (see the INSTALL doc for a list of OS's that sudo knows how to get
    shadow password info for).
 
+Q) I don't want the sudoers file in /etc, how can I specify where it
+   should go?
+A) Use the --sysconfdir option to configure.  Ie:
+   configure --sysconfdir=/dir/you/want/sudoers/in
+
 Q) Can I put the sudoers file in NIS/NIS+ or do I have to have a
    copy on each machine?
 A) There is no support for making an NIS/NIS+ map/table out of
