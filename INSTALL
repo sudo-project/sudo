@@ -11,16 +11,19 @@ Simple sudo installation
 
 For most systems and configurations it is possible simply to:
 
-    0) If you previously ran `configure' on a different host
+    0) If you are upgrading from a previous version of sudo
+       please read the section "Notes on upgrading from an older release".
+
+    1) If you previously ran `configure' on a different host
        you will probably want to do a `make distclean' to remove
        the old `config.cache' file.  Otherwise, `configure'
        will complain and refuse to run.  Alternately, one can
        simply `rm config.cache'.
 
-    1) Read the `OS dependent notes' section for any particular
+    2) Read the `OS dependent notes' section for any particular
        "gotchas" relating to your operating system.
 
-    2) `cd' to the source or build directory and type `./configure'
+    3) `cd' to the source or build directory and type `./configure'
        to generate a Makefile and config.h file suitable for
        building sudo.  Before you actually run configure you
        should read the `Available configure options' section
@@ -28,17 +31,17 @@ For most systems and configurations it is possible simply to:
        or need.  Also of interest may be the section on
        `Mixing password authentication schemes'.
 
-    3) Edit the configure-generated Makefile if you wish to
+    4) Edit the configure-generated Makefile if you wish to
        change any of the default paths (alternately you could
        have changed the paths via options to `configure'.
 
-    4) Edit `options.h' to enable any particular non-default
+    5) Edit `options.h' to enable any particular non-default
        options you wish to use.  Refer to the OPTIONS file for
        an explanation of each one.  If you are building in
        a separate build directory you may make a local copy
        of options.h in that directory and edit it instead.
 
-    5) Type `make' to compile sudo.  If you are building sudo
+    6) Type `make' to compile sudo.  If you are building sudo
        in a separate build tree (apart from the sudo source)
        GNU make will probably be required.  If `configure' did
        its job properly (and you have a supported configuration)
@@ -47,15 +50,29 @@ For most systems and configurations it is possible simply to:
        on what might have gone wrong.  Please mail us if you have a
        fix or if you are unable to come up with a fix (address at EOF).
 
-    6) Type `make install' (as root) to install sudo, visudo, the
+    7) Type `make install' (as root) to install sudo, visudo, the
        man pages, and a skeleton sudoers file.  Note that the install
        will not overwrite an existing sudoers file.  You can also
        install various pieces the package via the install-binaries,
        install-man, and install-sudoers make targets.
 
-    7) Edit the sudoers file with `visudo' as necessary for your
+    8) Edit the sudoers file with `visudo' as necessary for your
        site.  You will probably want to refer the sample.sudoers
        file and sudoers man page included with the sudo package.
+
+Notes on upgrading from an older release
+========================================
+Sudo 1.5 expects the sudoers file to have different permissions
+(mode 0440) and be owned by user and group 0.  This differs from
+version 1.4 and below which expected the sudoers file to be owned
+by root and mode 0400.  If sudo 1.5 encounters a sudoers file with
+the old permissions it will attempt to update it to the new scheme.
+You cannot, however, use a sudoers file with the new permissions
+with an old sudo binary.  It is suggested that if have a means of
+distributing sudo you distribute the new binaries first, then the
+new sudoers file (or you can leave sudoers as is and sudo will
+fix the permissions itself as long as sudoers is on a local
+filesystem).
 
 Available configure options
 ===========================
@@ -173,7 +190,7 @@ Shadow passwords are supported on the following platforms:
     Pyramid DC/OSx
     UnixWare
     SVR4 (and variants using standard SVR4 shadow passwords)
-    4.4BSD based systems (including OpenBSD, NetBSD, FreeBSD)
+    4.4BSD based systems (including OpenBSD, NetBSD, FreeBSD, and BSD/OS)
     OS's using SecureWare's C2 security.
 
 It is possible to configure in shadow password support even
@@ -252,7 +269,7 @@ Linux:
 
 SCO ODT:
     You'll probably need libcrypt_i.a available via anonymous ftp
-    from sosco.sco.com.  The necesary files are /SLS/lng225b.Z
+    from sosco.sco.com.  The necessary files are /SLS/lng225b.Z
     and /SLS/lng225b.ltr.Z.
 
 Please send changes, bugs, security holes, and gripes to:
