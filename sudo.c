@@ -740,7 +740,6 @@ static void load_cmnd(sudo_mode)
  *
  *  This function check to see that the sudoers file is readable,
  *  owned by SUDOERS_OWNER, and not writable by anyone else.
- *  It should really check for a zero length sudoers file too.  (XXX)
  */
 
 static int check_sudoers()
@@ -756,7 +755,7 @@ static int check_sudoers()
 
     set_perms(PERM_SUDOERS);
 
-    if ((fd = open(_PATH_SUDO_SUDOERS, O_RDONLY)) < 0 || read(fd, &c, 1) != 1)
+    if ((fd = open(_PATH_SUDO_SUDOERS, O_RDONLY)) < 0 || read(fd, &c, 1) == -1)
 	rtn = NO_SUDOERS_FILE;
     else if (lstat(_PATH_SUDO_SUDOERS, &statbuf))
 	rtn = NO_SUDOERS_FILE;
@@ -769,6 +768,7 @@ static int check_sudoers()
 
     (void) close(fd);
 
+    set_perms(PERM_ROOT);
     set_perms(PERM_USER);
 
     return(rtn);
