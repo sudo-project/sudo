@@ -2500,15 +2500,14 @@ fill_cmnd(s, len)
 {
     arg_len = arg_size = 0;
 
-    yylval.command.cmnd = (char *) malloc(len + 1);
+    yylval.command.cmnd = (char *) malloc(++len);
     if (yylval.command.cmnd == NULL) {
 	yyerror("unable to allocate memory");
 	return;
     }
 
     /* copy the string and NULL-terminate it (escapes handled by fnmatch) */
-    (void) strncpy(yylval.command.cmnd, s, len);
-    yylval.command.cmnd[len] = '\0';
+    (void) strlcpy(yylval.command.cmnd, s, len);
 
     yylval.command.args = NULL;
 }
