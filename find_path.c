@@ -176,8 +176,10 @@ int find_path(file, command, ocommand)
     /*
      * check current dir if dot was in the PATH
      */
-    if (!result && checkdot)
-	result = realpath_exec(".", file, *command);
+    if (!result && checkdot) {
+	path = ".";
+	result = realpath_exec(path, file, *command);
+    }
 
     /*
      * save old (unresolved) command
@@ -220,8 +222,9 @@ static char * realpath_exec(path, file, command)
     /* resolve the path */
     errno = 0;
     if (sudo_realpath(fn, command)) {
-	/* stat the file to make sure it is executable */
-	if (stat(command, &statbuf) == 0 && (statbuf.st_mode & 0000111))
+	/* stat the file to make sure it is executable and a file */
+	if (stat(command, &statbuf) == 0 && S_ISREG(statbuf.st_mode) &&
+	    (statbuf.st_mode & 0000111))
 	    return(command);
     } else if (errno && errno != ENOENT && errno != ENOTDIR && errno != EINVAL
 	&& errno != EPERM && errno != EACCES) {
