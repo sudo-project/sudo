@@ -1705,3 +1705,6 @@ Sudo 1.6.7p5 released.
 
 537) PAM support now uses Use pam_acct_mgmt() to check for disabled accounts
     (from Brian Farrell).
+
+538) The sudoers file is now parsed as the runas user in all cases instead
+     of not root.  This fixes some issues with running NFS-mounted commands.
