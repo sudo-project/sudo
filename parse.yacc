@@ -437,7 +437,7 @@ cmndspeclist	:	cmndspec
 		|	cmndspeclist ',' cmndspec
 		;
 
-cmndspec	:	runasspec noexec nopasswd opcmnd {
+cmndspec	:	runasspec cmndtag opcmnd {
 			    /*
 			     * Push the entry onto the stack if it is worth
 			     * saving and clear cmnd_matches for next cmnd.
@@ -618,47 +618,39 @@ runasuser	:	WORD {
 			}
 		;
 
-nopasswd	:	/* empty */ {
-			    /* Inherit NOPASSWD/PASSWD status. */
+cmndtag		:	/* empty */ {
+			    /* Inherit {NOPASSWD,PASSWD,NOEXEC,EXEC} status. */
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
 				if (no_passwd == TRUE)
 				    cm_list[cm_list_len].nopasswd = TRUE;
 				else
 				    cm_list[cm_list_len].nopasswd = FALSE;
-			    }
-			}
-		|	NOPASSWD {
-			    no_passwd = TRUE;
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE)
-				cm_list[cm_list_len].nopasswd = TRUE;
-			}
-		|	PASSWD {
-			    no_passwd = FALSE;
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE)
-				cm_list[cm_list_len].nopasswd = FALSE;
-			}
-		;
-
-noexec	:	/* empty */ {
-			    /* Inherit NOEXEC/EXEC status. */
-			    if (printmatches == TRUE && host_matches == TRUE &&
-				user_matches == TRUE) {
 				if (no_execve == TRUE)
 				    cm_list[cm_list_len].noexecve = TRUE;
 				else
 				    cm_list[cm_list_len].noexecve = FALSE;
 			    }
 			}
-		|	NOEXEC {
+		|	cmndtag NOPASSWD {
+			    no_passwd = TRUE;
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				cm_list[cm_list_len].nopasswd = TRUE;
+			}
+		|	cmndtag PASSWD {
+			    no_passwd = FALSE;
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				cm_list[cm_list_len].nopasswd = FALSE;
+			}
+		|	cmndtag NOEXEC {
 			    no_execve = TRUE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				cm_list[cm_list_len].noexecve = TRUE;
 			}
-		|	EXEC {
+		|	cmndtag EXEC {
 			    no_execve = FALSE;
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
