@@ -334,6 +334,13 @@ set_fqdn()
     return;
 }
 
+int 
+set_runaspw(user)
+    char *user;
+{
+    return(TRUE);
+} 
+
 void
 init_envtables()
 {

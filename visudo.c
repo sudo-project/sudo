@@ -534,6 +534,13 @@ set_fqdn()
 }
 
 int
+set_runaspw(user)
+    char *user;
+{
+    return(TRUE);
+}
+
+int
 user_is_exempt()
 {
     return(TRUE);
