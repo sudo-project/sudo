@@ -71,6 +71,7 @@ static char rcsid[] = "$Id$";
 #endif /* HAVE_KERB4 */
 #ifdef HAVE_PAM
 #  include <security/pam_appl.h>
+#  include <security/pam_misc.h>
 #endif /* HAVE_PAM */
 #ifdef HAVE_AFS
 #  include <afs/stds.h>
