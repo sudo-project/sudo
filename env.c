@@ -234,9 +234,11 @@ rebuild_env(sudo_mode, envp)
 {
     char **newenvp, **ep, **nep, **ek, *cp;
     char *ekflat, *ps1, **env_keep;
+    int okvar;
     size_t env_size, eklen;
     struct env_table *entry;
 
+    okvar = 0;
     eklen = 0;
     ekflat = ps1 = NULL;
     env_keep = NULL;
@@ -315,16 +317,34 @@ rebuild_env(sudo_mode, envp)
 	    ;
 	nep = newenvp = (char **) emalloc(env_size * sizeof(char *));
 
-	/* Copy envp entries as long as they don't match badenv_table. */
+	/*
+	 * Copy envp entries as long as they don't match badenv_table
+	 * (unless excepted by env_keep).
+	 */
 	for (ep = envp; *ep; ep++) {
-	    for (entry = badenv_table; entry->name; entry++) {
-		if (strncmp(*ep, entry->name, entry->len) != 0 ||
-		    (entry->check && !strpbrk(*ep, "/%"))) {
-		    if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
-			ps1 = *ep + 5;
-		    *nep++ = *ep;
-		    break;
+	    /* env_keep overrides badenv_table */
+	    if (env_keep) {
+		for (ek = env_keep; *ek; ek++) {
+		    eklen = strlen(*ek);
+		    if (strncmp(*ek, *ep, eklen) == 0 && (*ep)[eklen] == '=') {
+			okvar = 1;
+			break;
+		    }
 		}
+	    }
+	    if (!okvar) {
+		for (okvar = 1, entry = badenv_table; entry->name; entry++) {
+		    if (strncmp(*ep, entry->name, entry->len) == 0 &&
+			(!entry->check || strpbrk(*ep, "/%"))) {
+			okvar = 0;
+			break;
+		    }
+		}
+	    }
+	    if (okvar) {
+		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
+		    ps1 = *ep + 5;
+		*nep++ = *ep;
 	    }
 	}
     }
