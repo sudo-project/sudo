@@ -1193,7 +1193,7 @@ Sudo 1.6 released.
      be set before sudoers is parsed.
 
 375) Fixed the following Defaults options: set_home, fqdn, syslog, tty_tickets,
-     ticket_dir.
+     ticket_dir, insults.
 
 376) When using select() in tgetpass(), do a separate select before
      each read to be sure we can timeout correctly.
