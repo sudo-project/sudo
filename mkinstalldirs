@@ -5,6 +5,7 @@
 # Last modified: 1994-03-25
 # Public domain
 
+umask 022
 errstatus=0
 
 for file in ${1+"$@"} ; do 
