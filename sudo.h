@@ -56,6 +56,16 @@
 				   rsh hostname "sudo whoami" and see if getpass
 				   will read from stdin as well as /dev/tty.
 				   If not, define BROKEN_GETPASS.
+
+          USE_CWD                - if your os has getcwd() and not getwd()
+				   you should define this (done automatically
+				   for hpux)
+
+          NEED_STRDUP            - if your os lacks strdup(3) you need to
+				   define this
+
+          SHORT_MESSAGE          - if you don't want a copyright notice when
+				   someone runs sudo for the first time
 */
 
 
@@ -110,7 +120,8 @@
 #define MAXHOSTNAMELEN 64
 #endif
 
-#define MAXCOMMANDLENGTH         0x030
+/* 48 chars is not enough */
+#define MAXCOMMANDLENGTH         MAXPATHLEN
 
 typedef union {
     int int_val;
@@ -207,12 +218,15 @@ YYSTYPE yylval;
 #define EXTRA_LIST               0x03
 
 /* These are the functions that are called in sudo */
-char *find_path();
+#ifdef NEED_STRDUP
 char *strdup();
+#endif
+char *find_path();
 void load_globals();
 void log_error();
 void inform_user();
 void check_user();
+void clean_envp();
 int validate();
 
 /* Most of these variables are declared in main() so they don't need
@@ -227,8 +241,9 @@ extern uid_t uid;
 extern char *host;
 extern char *user;
 extern char *cmnd;
-extern char **Argv;
 extern int  Argc;
+extern char **Argv;
+extern char **Envp;
 #endif
 extern int errno;
 
@@ -236,4 +251,7 @@ extern int errno;
 #ifdef hpux
 #define setruid(__RUID)  (setresuid((uid_t)(__RUID), (uid_t) -1, (uid_t) -1))
 #define getdtablesize()  (sysconf(_SC_OPEN_MAX))
+#ifndef USE_CWD
+#define USE_CWD
+#endif
 #endif
