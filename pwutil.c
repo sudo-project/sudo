@@ -215,6 +215,7 @@ sudo_getpwuid(uid)
 {
     struct passwd key, *pw;
     struct rbnode *node;
+    char *cp;
 
     key.pw_uid = uid;
     if ((node = rbfind(pwcache_byuid, &key)) != NULL) {
@@ -226,7 +227,11 @@ sudo_getpwuid(uid)
      */
     if ((pw = getpwuid(uid)) != NULL) {
 	pw = sudo_pwdup(pw);
-	pw->pw_passwd = sudo_getepw(pw);	/* get shadow password */
+	cp = sudo_getepw(pw);		/* get shadow password */
+	if (pw->pw_passwd != NULL)
+	    zero_bytes(pw->pw_passwd, strlen(pw->pw_passwd));
+	pw->pw_passwd = cp;
+
 	if (rbinsert(pwcache_byname, (VOID *) pw) != NULL)
 	    errorx(1, "unable to cache user name, already exists");
 	if (rbinsert(pwcache_byuid, (VOID *) pw) != NULL)
@@ -265,7 +270,11 @@ sudo_getpwnam(name)
      */
     if ((pw = getpwnam(name)) != NULL) {
 	pw = sudo_pwdup(pw);
-	pw->pw_passwd = sudo_getepw(pw);	/* get shadow password */
+	cp = sudo_getepw(pw);		/* get shadow password */
+	if (pw->pw_passwd != NULL)
+	    zero_bytes(pw->pw_passwd, strlen(pw->pw_passwd));
+	pw->pw_passwd = cp;
+
 	if (rbinsert(pwcache_byname, (VOID *) pw) != NULL)
 	    errorx(1, "unable to cache user name, already exists");
 	if (rbinsert(pwcache_byuid, (VOID *) pw) != NULL)
