@@ -109,6 +109,7 @@ static char rcsid[] = "$Id$";
  */
 static int   check_timestamp		__P((void));
 static void  check_passwd		__P((void));
+static int   touch			__P((char *));
 static void  update_timestamp		__P((void));
 static void  reminder			__P((void));
 static char *osf_C2_crypt		__P((char *, char *));
@@ -199,7 +200,16 @@ static int check_timestamp()
     register int timestamp_is_old = -1;
     time_t now;
 
+#ifdef USE_TTY_TICKETS
+    if (p = strrchr(tty, '/'))
+	p++;
+    else
+	p = tty;
+
+    (void) sprintf(timestampfile, "%s/%s.%s", _PATH_SUDO_TIMEDIR, user, p);
+#else
     (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR, user);
+#endif /* USE_TTY_TICKETS */
     timestampfile_p = timestampfile;
 
     timedir_is_good = 1;	/* now there's an assumption for ya... */
@@ -277,12 +287,14 @@ static int check_timestamp()
 
 /********************************************************************
  *
- *  update_timestamp()
+ *  touch()
  *
- *  This function changes the timestamp to now
+ *  This function updates the access and modify times on a file
+ *  via utime(2).
  */
 
-static void update_timestamp()
+static int touch(file)
+    char *file;
 {
 #if defined(HAVE_UTIME) && !defined(HAVE_UTIME_NULL)
 #ifdef HAVE_UTIME_POSIX
@@ -301,11 +313,26 @@ static void update_timestamp()
 #define UTP		NULL
 #endif /* HAVE_UTIME && !HAVE_UTIME_NULL */
 
+    return(utime(file, UTP));
+}
+#undef UTP
+
+
+
+/********************************************************************
+ *
+ *  update_timestamp()
+ *
+ *  This function changes the timestamp to "now"
+ */
+
+static void update_timestamp()
+{
     if (timedir_is_good) {
 	/* become root */
 	set_perms(PERM_ROOT);
 
-	if (utime(timestampfile_p, UTP) < 0) {
+	if (touch(timestampfile_p) < 0) {
 	    int fd = open(timestampfile_p, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 
 	    if (fd < 0)
@@ -317,7 +344,6 @@ static void update_timestamp()
 	set_perms(PERM_USER);
     }
 }
-#undef UTP
 
 
 
@@ -331,8 +357,18 @@ static void update_timestamp()
 void remove_timestamp()
 {
     char timestampfile[MAXPATHLEN + 1];
+    char *p;
 
+#ifdef USE_TTY_TICKETS
+    if (p = strrchr(tty, '/'))
+	p++;
+    else
+	p = tty;
+
+    (void) sprintf(timestampfile, "%s/%s.%s", _PATH_SUDO_TIMEDIR, user, p);
+#else
     (void) sprintf(timestampfile, "%s/%s", _PATH_SUDO_TIMEDIR, user);
+#endif /* USE_TTY_TICKETS */
 
     /* become root */
     set_perms(PERM_ROOT);
