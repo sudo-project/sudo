@@ -77,6 +77,10 @@
 #define TCSASOFT	0
 #endif /* TCSASOFT */
 
+#ifndef O_NOCTTY
+#define O_NOCTTY	0
+#endif /* O_NOCTTY */
+
 #ifndef lint
 static const char rcsid[] = "$Sudo$";
 #endif /* lint */
@@ -106,7 +110,7 @@ tgetpass(prompt, timeout, echo_off)
     struct timeval tv;
 
     /* Open /dev/tty for reading/writing if possible else use stdin/stderr. */
-    if ((input = output = open(_PATH_TTY, O_RDWR)) == -1) {
+    if ((input = output = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1) {
 	input = STDIN_FILENO;
 	output = STDERR_FILENO;
     }
