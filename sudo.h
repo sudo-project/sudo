@@ -181,6 +181,7 @@ extern char cwd[];
 extern struct interface *interfaces;
 extern int num_interfaces;
 extern char *user;
+extern char *tty;
 extern char *epasswd;
 extern char *cmnd;
 extern char *cmnd_args;
