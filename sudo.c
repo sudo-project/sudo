@@ -136,7 +136,7 @@ char **Argv;
 int NewArgc = 0;
 char **NewArgv = NULL;
 struct passwd *user_pw_ent;
-char *runas_user = NULL;
+char *runas_user = "root";
 char *cmnd = NULL;
 char *tty = NULL;
 char *prompt = PASSPROMPT;
@@ -317,7 +317,9 @@ int main(argc, argv)
 	    log_error(ALL_SYSTEMS_GO);
 	    if (sudo_mode == MODE_VALIDATE)
 		exit(0);
-	    set_perms(PERM_FULL_ROOT);
+
+	    /* become specified user or root */
+	    set_perms(PERM_RUNAS);
 #ifndef PROFILING
 	    if ((sudo_mode & MODE_BACKGROUND) && fork() > 0) {
 		exit(0);
@@ -344,8 +346,6 @@ int main(argc, argv)
 			exit(1);
 		    }
 		}
-		if (runas_matches == TRUE)
-			set_perms(PERM_RUN_AS);
 		EXEC(cmnd, NewArgv);	/* run the command */
 	    }
 #else
@@ -355,9 +355,6 @@ int main(argc, argv)
 	    exit(-1);
 	    break;
 
-	case VALIDATE_NO_USER:
-	case VALIDATE_NOT_OK:
-	case VALIDATE_ERROR:
 	default:
 	    log_error(rtn);
 	    set_perms(PERM_FULL_USER);
@@ -753,19 +750,6 @@ void set_perms(perm)
 				}
 			      	break;
 
-	case PERM_FULL_ROOT:
-				if (setuid(0)) {  
-				    perror("setuid(0)");
-				    exit(1);
-				}
-
-				if (!(pw_ent = getpwuid(0))) {
-				    perror("getpwuid(0)");
-				} else if (setgid(pw_ent->pw_gid)) {
-				    perror("setgid");
-    	    	    	    	}
-			      	break;
-
 	case PERM_USER: 
     	    	    	        if (seteuid(user_uid)) {
     	    	    	            perror("seteuid(user_uid)");
@@ -785,7 +769,12 @@ void set_perms(perm)
 				}
 
 			      	break;
-	case PERM_RUN_AS:
+	case PERM_RUNAS:
+				if (setuid(0)) {
+				    perror("setuid(0)");
+				    exit(1);
+				}
+				
 				/* XXX - add group/gid support */
 				if (*runas_user == '#') {
 				    if (setuid(atoi(runas_user + 1))) {
