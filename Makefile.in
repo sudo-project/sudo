@@ -82,7 +82,7 @@ owner = root
 group = staff
 
 # See options.h and OPTIONS for a list of options
-OPTIONS = @OPTIONS@
+OPTIONS = @OPTIONS@ -D_PATH_SUDO_SUDOERS=\"$(sudoersdir)/sudoers\" -D_PATH_SUDO_STMP=\"$(sudoersdir)/stmp\" -DSUDOERS_OWNER=\"$(owner)\"
 
 #### End of system configuration section. ####
 
