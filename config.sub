@@ -235,7 +235,7 @@ case $basic_machine in
 		| we32k | ns16k | clipper | i370 | sh | sh[34] \
 		| powerpc | powerpcle \
 		| 1750a | dsp16xx | pdp10 | pdp11 \
-		| mips16 | mips64 | mipsel | mips64el \
+		| mips16 | mips64 | mipseb | mipsel | mips64el \
 		| mips64orion | mips64orionel | mipstx39 | mipstx39el \
 		| mips64vr4300 | mips64vr4300el | mips64vr4100 | mips64vr4100el \
 		| mips64vr5000 | mips64vr5000el | mcore | s390 | s390x \
@@ -281,7 +281,7 @@ case $basic_machine in
 	      | clipper-* | orion-* \
 	      | sparclite-* | pdp10-* | pdp11-* | sh-* | sh[34]-* | sh[34]eb-* \
 	      | powerpc-* | powerpcle-* | sparc64-* | sparcv9-* | sparcv9b-* | sparc86x-* \
-	      | mips16-* | mips64-* | mipsel-* \
+	      | mips16-* | mips64-* | mipseb-* | mipsel-* \
 	      | mips64el-* | mips64orion-* | mips64orionel-* \
 	      | mips64vr4100-* | mips64vr4100el-* | mips64vr4300-* | mips64vr4300el-* \
 	      | mipstx39-* | mipstx39el-* | mcore-* \
