@@ -147,6 +147,9 @@
 /* Define if you have setenv(3). */
 #undef HAVE_SETENV
 
+/* Define if you have tcgetattr(3). */
+#undef HAVE_TCGETATTR
+
 /* Define if you have the <malloc.h> header file.  */
 #undef HAVE_MALLOC_H
 
