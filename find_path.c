@@ -91,6 +91,14 @@ extern char *strdup();
 #endif /* !STDC_HEADERS */
 
 
+#ifndef _S_IFMT
+#define _S_IFMT		S_IFMT
+#endif /* _S_IFMT */
+#ifndef _S_IFLNK
+#define _S_IFLNK	S_IFLNK
+#endif /* _S_IFLNK */
+
+
 /*******************************************************************
  *
  *  find_path()
@@ -271,7 +279,7 @@ char *qualify(n)
 	    return (NULL);
 	}
 
-	if ((statbuf.st_mode & S_IFMT) == S_IFLNK) {
+	if ((statbuf.st_mode & _S_IFMT) == _S_IFLNK) {
 	    int linklen;	/* length of link contents */
 	    char newname[MAXPATHLEN + 1];	/* temp storage to build new
 						 * name */
