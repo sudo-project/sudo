@@ -49,6 +49,7 @@ c) If you have a sense of humor you may want to define USE_INSULTS to
    get the insults from the "old" sudo when you enter an incorrect
    password.  Beware, this feature causes some people to want to throw
    their machine across the room and dash it to tiny pieces.
+   Sci fi fans may want to define HAL as well (see insults.h).
 
 d) When creating a config file for a new os type, you should use the loader
    options that cause sudo to be statically linked.  That way, you're
