@@ -498,14 +498,11 @@ if test -z "$LIB_CRYPT"; then
     AC_CHECK_FUNC(crypt, ,AC_CHECK_LIB(crypt, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt", AC_CHECK_LIB(crypt_d, crypt, SUDO_LIBS="${SUDO_LIBS} -lcrypt_d", AC_CHECK_LIB(crypt, ufc, SUDO_LIBS="${SUDO_LIBS} -lufc"))))
 fi
 dnl
-dnl Bison and DCE use alloca(3), if not in libc, look in -lPW
+dnl Bison and DCE use alloca(3), if not in libc, use the sudo one (from gcc)
 dnl (gcc includes its own alloca(3) but other compilers may not)
 dnl
 if test "$with_DCE" = "yes" -o "$ac_cv_prog_YACC" = "bison -y"; then
     AC_FUNC_ALLOCA
-    if test "$ALLOCA" = "alloca.o"; then
-	AC_CHECK_FUNC(alloca, ,AC_CHECK_LIB(PW, alloca, SUDO_LIBS="${SUDO_LIBS} -lPW"; VISUDO_LIBS="${VISUDO_LIBS} -lPW"))
-    fi
 fi
 dnl
 dnl library checks
