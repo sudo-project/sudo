@@ -127,6 +127,8 @@ extern int  usergr_matches	__P((char *, char *));
 static int  find_alias		__P((char *, int));
 static int  add_alias		__P((char *, int));
 static int  more_aliases	__P((size_t));
+static void append_runas	__P((struct sudo_match *, char *));
+static void append_cmnd		__P((struct sudo_match *, char *));
        void yyerror		__P((char *));
 
 void yyerror(s)
@@ -240,7 +242,8 @@ hostspec	:	ALL {
 			    (void) free($1);
 			}
 		|	ALIAS {
-			    if (find_alias($1, HOST))
+			    /* could be an all-caps hostname */
+			    if (find_alias($1, HOST) || !strcasecmp(shost, $1))
 				host_matches = TRUE;
 			    (void) free($1);
 			}
@@ -328,7 +331,11 @@ runasuser	:	NAME {
 			    (void) free($1);
 			}
 		|	ALIAS {
-			    $$ = find_alias($1, USER);
+			    /* could be an all-caps username */
+			    if (find_alias($1, USER) || !strcmp($1, runas_user))
+				$$ = TRUE;
+			    else
+				$$ = FALSE;
 			    if (printmatches == TRUE && host_matches == TRUE
 				&& user_matches == TRUE)
 				append_runas(&matches[nummatches], $1);
@@ -464,7 +471,8 @@ user		:	NAME {
 			    (void) free($1);
 			}
 		|	ALIAS {
-			    if (find_alias($1, USER))
+			    /* could be an all-caps username */
+			    if (find_alias($1, USER) || !strcmp($1, user_name))
 				user_matches = TRUE;
 			    (void) free($1);
 			}
@@ -637,69 +645,69 @@ void reset_aliases()
 
 /* XXX - merge into one function? (note: one always adds a ':' */
 static void append_runas(match, runas)
-struct sudo_match *match;
-char *runas;
+    struct sudo_match *match;
+    char *runas;
 {
-size_t len = strlen(runas) + 1;
+    size_t len = strlen(runas) + 1;
 
-if (match->runas == NULL) {
-    if (!(match->runas = (char *) malloc(BUFSIZ))) {
-	perror("malloc");
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
-
-    /* Assumes BUFSIZ > max username length */
-    match->runas_size = BUFSIZ;
-    match->runas_len = len - 1;
-    (void) strcpy(match->runas, runas);
-} else {
-    /* Allocate more space if necesary. */
-    while (match->runas_size <= match->runas_len + len) {
-	match->runas_size += BUFSIZ;
-	if (!(match->runas = (char *) realloc(match->runas, match->runas_size))) {
+    if (match->runas == NULL) {
+	if (!(match->runas = (char *) malloc(BUFSIZ))) {
 	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
-    }
 
-    *(match->runas + match->runas_len) = ':';
-    (void) strcpy(match->runas + match->runas_len + 1, runas);
-    match->runas_len += len;
-}
+	/* Assumes BUFSIZ > max username length */
+	match->runas_size = BUFSIZ;
+	match->runas_len = len - 1;
+	(void) strcpy(match->runas, runas);
+    } else {
+	/* Allocate more space if necesary. */
+	while (match->runas_size <= match->runas_len + len) {
+	    match->runas_size += BUFSIZ;
+	    if (!(match->runas = (char *) realloc(match->runas, match->runas_size))) {
+		perror("malloc");
+		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+		exit(1);
+	    }
+	}
+
+	*(match->runas + match->runas_len) = ':';
+	(void) strcpy(match->runas + match->runas_len + 1, runas);
+	match->runas_len += len;
+    }
 }
 
 
 static void append_cmnd(match, cmnd)
-struct sudo_match *match;
-char *cmnd;
+    struct sudo_match *match;
+    char *cmnd;
 {
-size_t len = strlen(cmnd);
+    size_t len = strlen(cmnd);
 
-if (match->cmnd == NULL) {
-    if (!(match->cmnd = (char *) malloc(BUFSIZ))) {
-	perror("malloc");
-	(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
-	exit(1);
-    }
-
-    /* Assumes BUFSIZ > max username length */
-    match->cmnd_size = BUFSIZ;
-    match->cmnd_len = len;
-    (void) strcpy(match->cmnd, cmnd);
-} else {
-    /* Allocate more space if necesary. */
-    while (match->cmnd_size <= match->cmnd_len + len) {
-	match->cmnd_size += BUFSIZ;
-	if (!(match->cmnd = (char *) realloc(match->cmnd, match->cmnd_size))) {
+    if (match->cmnd == NULL) {
+	if (!(match->cmnd = (char *) malloc(BUFSIZ))) {
 	    perror("malloc");
 	    (void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
 	    exit(1);
 	}
-    }
 
-    (void) strcpy(match->cmnd + match->cmnd_len, cmnd);
-    match->cmnd_len += len;
-}
+	/* Assumes BUFSIZ > max username length */
+	match->cmnd_size = BUFSIZ;
+	match->cmnd_len = len;
+	(void) strcpy(match->cmnd, cmnd);
+    } else {
+	/* Allocate more space if necesary. */
+	while (match->cmnd_size <= match->cmnd_len + len) {
+	    match->cmnd_size += BUFSIZ;
+	    if (!(match->cmnd = (char *) realloc(match->cmnd, match->cmnd_size))) {
+		perror("malloc");
+		(void) fprintf(stderr, "%s: cannot allocate memory!\n", Argv[0]);
+		exit(1);
+	    }
+	}
+
+	(void) strcpy(match->cmnd + match->cmnd_len, cmnd);
+	match->cmnd_len += len;
+    }
 }
