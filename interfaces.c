@@ -104,11 +104,11 @@ extern char **Argv;
 
 void load_interfaces()
 {
-    unsigned long localhost_mask;
     struct ifconf *ifconf;
     char ifconf_buf[sizeof(struct ifconf) + BUFSIZ];
-    struct ifreq ifreq;
+    struct ifreq ifreq, *ifr;
     struct sockaddr_in *sin;
+    unsigned long localhost_mask;
     int sock, n, i;
 #ifdef _ISC
     struct strioctl strioctl;
@@ -129,18 +129,15 @@ void load_interfaces()
     ifconf = (struct ifconf *) ifconf_buf;
     ifconf->ifc_buf = (caddr_t) (ifconf_buf + sizeof(struct ifconf));
     ifconf->ifc_len = sizeof(ifconf_buf) - sizeof(struct ifconf);
+
+    /* networking may not be installed in kernel */
 #ifdef _ISC
     STRSET(SIOCGIFCONF, (caddr_t) ifconf, sizeof(ifconf_buf));
-    if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0) {
-	/* networking probably not installed in kernel */
-	return;
-    }
+    if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0)
 #else
-    if (ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0) {
-	/* networking probably not installed in kernel */
-	return;
-    }
+    if (ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0)
 #endif /* _ISC */
+	return;
 
     /*
      * get the maximum number of interfaces that *could* exist.
@@ -160,18 +157,25 @@ void load_interfaces()
     /*
      * for each interface, get the ip address and netmask
      */
-    for (i = 0; i < ifconf->ifc_len; ) {
-	/* setup ifreq struct */
-	ifreq = *((struct ifreq *) &ifconf->ifc_buf[i]);
+    for (ifreq.ifr_name[0] = '\0', i = 0; i < ifconf->ifc_len; ) {
+	/* get a pointer to the current interface */
+	ifr = (struct ifreq *) ((caddr_t) ifconf->ifc_req + i);
 
 	/* set i to the subscript of the next interface */
 #ifdef HAVE_SA_LEN
-	if (ifreq.ifr_addr.sa_len > sizeof(ifreq.ifr_addr))
-	    i += sizeof(ifreq.ifr_name) + ifreq.ifr_addr.sa_len;
-	else
+	i += sizeof(ifreq.ifr_name) + ifreq.ifr_addr.sa_len;
+#else
+	i += sizeof(struct ifreq);
 #endif /* HAVE_SA_LEN */
-	    i += sizeof(ifreq);
 
+	/* skip duplicates and interfaces with NULL addresses */
+	sin = (struct sockaddr_in *) &ifr->ifr_addr;
+	if (sin->sin_addr.s_addr == 0 ||
+	    strncmp(ifr->ifr_name, ifreq.ifr_name, sizeof(ifr->ifr_name)) == 0)
+	    continue;
+
+	/* make a working copy... */
+	ifreq = *ifr;
 
 	/* get the ip address */
 #ifdef _ISC
@@ -190,11 +194,6 @@ void load_interfaces()
 	}
 	sin = (struct sockaddr_in *) &ifreq.ifr_addr;
 
-	/* make sure we don't have a dup (usually consecutive) */
-	if (num_interfaces && interfaces[num_interfaces - 1].addr.s_addr ==
-	    sin->sin_addr.s_addr)
-	    continue;
-
 	/* store the ip address */
 	interfaces[num_interfaces].addr.s_addr = sin->sin_addr.s_addr;
 
@@ -206,6 +205,8 @@ void load_interfaces()
 #else
 	if (ioctl(sock, SIOCGIFNETMASK, (caddr_t) &ifreq) == 0) {
 #endif /* _ISC */
+	    sin = (struct sockaddr_in *) &ifreq.ifr_addr;
+
 	    /* store the netmask */
 	    interfaces[num_interfaces].netmask.s_addr = sin->sin_addr.s_addr;
 	} else {
