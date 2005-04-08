@@ -46,8 +46,8 @@ utimes(file, times)
     if (times != NULL) {
 	struct utimbuf utb;
 
-	utb.actime = (time_t)times[0].tv_sec;
-	utb.modtime = (time_t)times[1].tv_sec;
+	utb.actime = (time_t)(times[0].tv_sec + times[0].tv_usec / 1000000);
+	utb.modtime = (time_t)(times[1].tv_sec + times[1].tv_usec / 1000000);
 	return(utime(file, &utb));
     } else
 	return(utime(file, NULL));
@@ -66,8 +66,8 @@ futimes(fd, times)
     if (times != NULL) {
 	struct utimbuf utb;
 
-	utb.actime = (time_t)times[0].tv_sec;
-	utb.modtime = (time_t)times[1].tv_sec;
+	utb.actime = (time_t)(times[0].tv_sec + times[0].tv_usec / 1000000);
+	utb.modtime = (time_t)(times[1].tv_sec + times[1].tv_usec / 1000000);
 	return(futime(fd, &utb));
     } else
 	return(futime(fd, NULL));
