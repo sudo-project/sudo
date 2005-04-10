@@ -228,7 +228,7 @@ display_privs(pw)
 
     display_defaults(pw);
 
-    print_priv4("\n", "User ", pw->pw_name,
+    print_priv3("User ", pw->pw_name,
 	" may run the following commands on this host:\n");
 
     for (us = userspecs; us != NULL; us = us->next) {
@@ -284,8 +284,6 @@ display_defaults(pw)
     int per_runas = 0, per_cmnd = 0;
 
     opstr[1] = '\0';
-    print_def3("Matching Defaults entries for ", pw->pw_name, " on this host:\n");
-    print_def("    ");
     for (d = defaults, prefix = NULL; d != NULL; d = d->next) {
 	switch (d->type) {
 	    case DEFAULTS_HOST:
@@ -303,8 +301,12 @@ display_defaults(pw)
 		per_cmnd = 1;
 		continue;
 	}
-	if (prefix)
+	if (prefix == NULL) {
+	    print_def4("Matching Defaults entries for ", pw->pw_name,
+		" on this host:\n", "    ");
+	} else {
 	    print_def(prefix);
+	}
 	if (d->val != NULL) {
 	    opstr[0] = d->op == TRUE ? '=' : d->op;
 	    print_def4(d->op == FALSE ? "!" : "", d->var, opstr, d->val);
@@ -312,7 +314,8 @@ display_defaults(pw)
 	    print_def2(d->op == FALSE ? "!" : "", d->var);
 	prefix = ", ";
     }
-    print_priv("\n");
+    if (prefix)
+	print_priv("\n\n");
 
     if (per_runas)
 	display_bound_defaults(DEFAULTS_RUNAS);
@@ -357,7 +360,7 @@ display_bound_defaults(dtype)
 	default:
 	    return;
     }
-    print_def4("\n", "Per-", dname, " Defaults entries:");
+    print_def3("Per-", dname, " Defaults entries:");
     for (d = defaults, binding = NULL; d != NULL; d = d->next) {
 	if (d->type != dtype)
 	    continue;
@@ -379,7 +382,7 @@ display_bound_defaults(dtype)
 	} else
 	    print_def2(d->op == FALSE ? "!" : "", d->var);
     }
-    print_priv("\n");
+    print_priv("\n\n");
 }
 
 /*
