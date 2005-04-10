@@ -200,6 +200,8 @@ sudoers_lookup(pwflag)
     return(validated);
 }
 
+#define	TAG_CHANGED(t)	(cs->tags.t != UNSPEC && cs->tags.t != tags.t)
+
 /*
  * Print out privileges for the specified user.
  */
@@ -252,15 +254,15 @@ display_privs(pw)
 		    }
 		    print_priv(") ");
 		}
-		if (cs->tags.monitor != UNSPEC && cs->tags.monitor != tags.monitor) {
+		if (TAG_CHANGED(monitor)) {
 		    print_priv(cs->tags.monitor ? "MONITOR: " : "NOMONITOR: ");
 		    tags.monitor = cs->tags.monitor;
 		}
-		if (cs->tags.noexec != UNSPEC && cs->tags.noexec != tags.noexec) {
+		if (TAG_CHANGED(noexec)) {
 		    print_priv(cs->tags.monitor ? "EXEC: " : "NOEXEC: ");
 		    tags.noexec = cs->tags.noexec;
 		}
-		if (cs->tags.nopasswd != UNSPEC && cs->tags.nopasswd != tags.nopasswd) {
+		if (TAG_CHANGED(nopasswd)) {
 		    print_priv(cs->tags.monitor ? "PASSWD: " : "NOPASSWD: ");
 		    tags.nopasswd = cs->tags.nopasswd;
 		}
