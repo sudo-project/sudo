@@ -113,19 +113,19 @@ cmp_pwnam(v1, v2)
     return(strcmp(pw1->pw_name, pw2->pw_name));
 }
 
-#define PW_SIZE(name, size)				\
+#define FIELD_SIZE(src, name, size)			\
 do {							\
-	if (pw->name) {					\
-		size = strlen(pw->name) + 1;		\
+	if (src->name) {				\
+		size = strlen(src->name) + 1;		\
 		total += size;				\
 	}                                               \
 } while (0)
 
-#define PW_COPY(name, size)				\
+#define FIELD_COPY(src, dst, name, size)		\
 do {							\
-	if (pw->name) {					\
-		memcpy(cp, pw->name, size);		\
-		newpw->name = cp;			\
+	if (src->name) {				\
+		memcpy(cp, src->name, size);		\
+		dst->name = cp;				\
 		cp += size;				\
 	}						\
 } while (0)
@@ -150,14 +150,14 @@ sudo_pwdup(pw)
     /* Allocate in one big chunk for easy freeing. */
     nsize = psize = csize = gsize = dsize = ssize = 0;
     total = sizeof(struct passwd);
-    PW_SIZE(pw_name, nsize);
-    PW_SIZE(pw_passwd, psize);
+    FIELD_SIZE(pw, pw_name, nsize);
+    FIELD_SIZE(pw, pw_passwd, psize);
 #ifdef HAVE_LOGIN_CAP_H
-    PW_SIZE(pw_class, csize);
+    FIELD_SIZE(pw, pw_class, csize);
 #endif
-    PW_SIZE(pw_gecos, gsize);
-    PW_SIZE(pw_dir, dsize);
-    PW_SIZE(pw_shell, ssize);
+    FIELD_SIZE(pw, pw_gecos, gsize);
+    FIELD_SIZE(pw, pw_dir, dsize);
+    FIELD_SIZE(pw, pw_shell, ssize);
 
     if ((cp = malloc(total)) == NULL)
 	    return(NULL);
@@ -169,14 +169,14 @@ sudo_pwdup(pw)
      */
     memcpy(newpw, pw, sizeof(struct passwd));
     cp += sizeof(struct passwd);
-    PW_COPY(pw_name, nsize);
-    PW_COPY(pw_passwd, psize);
+    FIELD_COPY(pw, newpw, pw_name, nsize);
+    FIELD_COPY(pw, newpw, pw_passwd, psize);
 #ifdef HAVE_LOGIN_CAP_H
-    PW_COPY(pw_class, csize);
+    FIELD_COPY(pw, newpw, pw_class, csize);
 #endif
-    PW_COPY(pw_gecos, gsize);
-    PW_COPY(pw_dir, dsize);
-    PW_COPY(pw_shell, ssize);
+    FIELD_COPY(pw, newpw, pw_gecos, gsize);
+    FIELD_COPY(pw, newpw, pw_dir, dsize);
+    FIELD_COPY(pw, newpw, pw_shell, ssize);
 
     return(newpw);
 }
@@ -398,25 +398,19 @@ sudo_grdup(gr)
     const struct group *gr;
 {
     char *cp;
-    size_t nsize, psize, csize, num, total, len;
+    size_t nsize, psize, nmem, total, len;
     struct group *newgr;
 
     /* Allocate in one big chunk for easy freeing. */
-    nsize = psize = csize = num = 0;
+    nsize = psize = nmem = 0;
     total = sizeof(struct group);
-    if (gr->gr_name) {
-	    nsize = strlen(gr->gr_name) + 1;
-	    total += nsize;
-    }
-    if (gr->gr_passwd) {
-	    psize = strlen(gr->gr_passwd) + 1;
-	    total += psize;
-    }
+    FIELD_SIZE(gr, gr_name, nsize);
+    FIELD_SIZE(gr, gr_passwd, psize);
     if (gr->gr_mem) {
-	for (num = 0; gr->gr_mem[num] != NULL; num++)
-	    total += strlen(gr->gr_mem[num]) + 1;
-	num++;
-	total += sizeof(char *) * num;
+	for (nmem = 0; gr->gr_mem[nmem] != NULL; nmem++)
+	    total += strlen(gr->gr_mem[nmem]) + 1;
+	nmem++;
+	total += sizeof(char *) * nmem;
     }
     if ((cp = malloc(total)) == NULL)
 	    return(NULL);
@@ -428,26 +422,18 @@ sudo_grdup(gr)
      */
     (void)memcpy(newgr, gr, sizeof(struct group));
     cp += sizeof(struct group);
-    if (nsize) {
-	(void)memcpy(cp, gr->gr_name, nsize);
-	newgr->gr_name = cp;
-	cp += nsize;
-    }
-    if (psize) {
-	(void)memcpy(cp, gr->gr_passwd, psize);
-	newgr->gr_passwd = cp;
-	cp += psize;
-    }
+    FIELD_COPY(gr, newgr, gr_name, nsize);
+    FIELD_COPY(gr, newgr, gr_passwd, psize);
     if (gr->gr_mem) {
 	newgr->gr_mem = (char **)cp;
-	cp += sizeof(char *) * num;
-	for (num = 0; gr->gr_mem[num] != NULL; num++) {
-	    len = strlen(gr->gr_mem[num]) + 1;
-	    memcpy(cp, gr->gr_mem[num], len);
-	    newgr->gr_mem[num] = cp;
+	cp += sizeof(char *) * nmem;
+	for (nmem = 0; gr->gr_mem[nmem] != NULL; nmem++) {
+	    len = strlen(gr->gr_mem[nmem]) + 1;
+	    memcpy(cp, gr->gr_mem[nmem], len);
+	    newgr->gr_mem[nmem] = cp;
 	    cp += len;
 	}
-	newgr->gr_mem[num] = NULL;
+	newgr->gr_mem[nmem] = NULL;
     }
 
     return(newgr);
