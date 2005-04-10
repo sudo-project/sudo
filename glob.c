@@ -796,9 +796,10 @@ g_opendir(str, pglob)
 {
 	char buf[PATH_MAX];
 
-	if (!*str)
-		strlcpy(buf, ".", sizeof buf);
-	else {
+	if (!*str) {
+		buf[0] = '.';
+		buf[1] = '\0';
+	} else {
 		if (g_Ctoc(str, buf, sizeof(buf)))
 			return(NULL);
 	}
