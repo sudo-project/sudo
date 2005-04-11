@@ -843,7 +843,7 @@ sudo_ldap_check(v, pwflag)
     LDAP *ld = (LDAP *) v;
     LDAPMessage *entry = NULL, *result = NULL;	/* used for searches */
     char *filt;					/* used to parse attributes */
-    int rc = FALSE, ret = FALSE, pass = FALSE;	/* temp/final return values */
+    int rc = FALSE, ret = FALSE, do_netgr;	/* temp/final return values */
     int ldap_user_matches = FALSE, ldap_host_matches = FALSE; /* flags */
 
     /*
@@ -861,14 +861,8 @@ sudo_ldap_check(v, pwflag)
      * try to match them against the username.
      */
 
-    for (pass = 1; !ret && pass <= 2; pass++) {
-	if (pass == 1) {
-	    /* Want the entries that match our usernames or groups */
-	    filt = sudo_ldap_build_pass1();
-	} else {		/* pass=2 */
-	    /* Want the entries that have user netgroups in them. */
-	    filt = estrdup("sudoUser=+*");
-	}
+    for (do_netgr = 0; !ret && do_netgr < 2; do_netgr++) {
+	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1();
 	DPRINTF(("ldap search '%s'", filt), 1);
 	rc = ldap_search_s(ld, ldap_conf.base, LDAP_SCOPE_ONELEVEL, filt,
 	    NULL, 0, &result);
@@ -882,7 +876,7 @@ sudo_ldap_check(v, pwflag)
 	    DPRINTF(("found:%s", ldap_get_dn(ld, entry)), 1);
 	    if (
 	    /* first verify user netgroup matches - only if in pass 2 */
-		(pass != 2 || sudo_ldap_check_user_netgroup(ld, entry)) &&
+		(!do_netgr || sudo_ldap_check_user_netgroup(ld, entry)) &&
 	    /* remember that user matched */
 		(ldap_user_matches = -1) &&
 	    /* verify host match */
