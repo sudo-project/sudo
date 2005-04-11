@@ -894,7 +894,7 @@ sudo_ldap_check(v, pwflag)
 	    filt = sudo_ldap_build_pass1();
 	} else {		/* pass=2 */
 	    /* Want the entries that have user netgroups in them. */
-	    filt = strdup("sudoUser=+*");
+	    filt = estrdup("sudoUser=+*");
 	}
 	if (ldap_conf.debug)
 	    printf("ldap search '%s'\n", filt);
