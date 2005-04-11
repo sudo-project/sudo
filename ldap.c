@@ -49,6 +49,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <err.h>
 #include <errno.h>
 #ifdef HAVE_LBER_H
 # include <lber.h>
@@ -62,8 +63,6 @@
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-/* LDAP code below */
-
 #ifndef BUF_SIZ
 # define BUF_SIZ 1024
 #endif
@@ -71,6 +70,8 @@ __unused static const char rcsid[] = "$Sudo$";
 #ifndef LDAP_OPT_SUCCESS
 # define LDAP_OPT_SUCCESS LDAP_SUCCESS
 #endif
+
+#define	DPRINTF(args, level)	if (ldap_conf.debug >= level) warnx args
 
 /* ldap configuration structure */
 struct ldap_config {
@@ -112,15 +113,11 @@ sudo_ldap_check_user_netgroup(ld, entry)
 
     /* walk through values */
     for (p = v; p && *p && !ret; p++) {
-	if (ldap_conf.debug > 1)
-	    printf("ldap sudoUser netgroup '%s' ...", *p);
-
 	/* match any */
 	if (netgr_matches(*p, NULL, NULL, user_name))
 	    ret = TRUE;
-
-	if (ldap_conf.debug > 1)
-	    printf(" %s\n", ret ? "MATCH!" : "not");
+	DPRINTF(("ldap sudoUser netgroup '%s' ... %s", *p,
+	    ret ? "MATCH!" : "not"), 2);
     }
 
     if (v)
@@ -149,17 +146,13 @@ sudo_ldap_check_host(ld, entry)
 
     /* walk through values */
     for (p = v; p && *p && !ret; p++) {
-	if (ldap_conf.debug > 1)
-	    printf("ldap sudoHost '%s' ...", *p);
-
 	/* match any or address or netgroup or hostname */
 	if (!strcasecmp(*p, "ALL") || addr_matches(*p) ||
 	    netgr_matches(*p, user_host, user_shost, NULL) ||
 	    !hostname_matches(user_shost, user_host, *p))
 	    ret = TRUE;
-
-	if (ldap_conf.debug > 1)
-	    printf(" %s\n", ret ? "MATCH!" : "not");
+	DPRINTF(("ldap sudoHost '%s' ... %s", *p,
+	    ret ? "MATCH!" : "not"), 2);
     }
 
     if (v)
@@ -220,14 +213,10 @@ sudo_ldap_check_runas(ld, entry)
 
     /* walk through values returned, looking for a match */
     for (p = v; p && *p && !ret; p++) {
-	if (ldap_conf.debug > 1)
-	    printf("ldap sudoRunAs '%s' ...", *p);
-
 	if (!strcasecmp(*p, *user_runas) || !strcasecmp(*p, "ALL")) 
 	    ret = TRUE;
-
-	if (ldap_conf.debug > 1)
-	    printf(" %s\n", ret ? "MATCH!" : "not");
+	DPRINTF(("ldap sudoRunAs '%s' ... %s", *p,
+	    ret ? "MATCH!" : "not"), 2);
     }
 
     if (v)
@@ -254,16 +243,12 @@ sudo_ldap_check_command(ld, entry)
 
     /* get_first_entry */
     for (p = v; p && *p && ret >= 0; p++) {
-	if (ldap_conf.debug > 1)
-	    printf("ldap sudoCommand '%s' ...", *p);
-
 	/* Match against ALL ? */
 	if (!strcasecmp(*p, "ALL")) {
 	    ret = TRUE;
 	    efree(safe_cmnd);
 	    safe_cmnd = estrdup(user_cmnd);
-	    if (ldap_conf.debug > 1)
-		printf(" MATCH!\n");
+	    DPRINTF(("ldap sudoCommand '%s' ... MATCH!", *p), 2);
 	    continue;
 	}
 
@@ -288,11 +273,9 @@ sudo_ldap_check_command(ld, entry)
 	     * If disallowed (bang), exit loop.
 	     */
 	    ret = foundbang ? -1 : TRUE;
-	    if (ldap_conf.debug > 1)
-		printf(" MATCH!\n");
-	} else if (ldap_conf.debug > 1) {
-	    printf(" not\n");
 	}
+	DPRINTF(("ldap sudoCommand '%s' ... %s", *p,
+	    ret == TRUE ? "MATCH!" : "not"), 2);
 
 	efree(allowed_cmnd);	/* cleanup */
     }
@@ -323,8 +306,7 @@ sudo_ldap_parse_options(ld, entry)
     /* walk through options */
     for (p = v; p && *p; p++) {
 
-	if (ldap_conf.debug > 1)
-	    printf("ldap sudoOption: '%s'\n", *p);
+	DPRINTF(("ldap sudoOption: '%s'", *p), 2);
 	var = estrdup(*p);
 
 	/* check for equals sign past first char */
@@ -583,31 +565,31 @@ sudo_ldap_read_config()
 	ldap_conf.host = estrdup("localhost");
 
     if (ldap_conf.debug > 1) {
-	printf("LDAP Config Summary\n");
-	printf("===================\n");
+	fprintf(stderr, "LDAP Config Summary\n");
+	fprintf(stderr, "===================\n");
 #ifdef HAVE_LDAP_INITIALIZE
 	if (ldap_conf.uri) {
-	    printf("uri          %s\n", ldap_conf.uri);
+	    fprintf(stderr, "uri          %s\n", ldap_conf.uri);
 	} else
 #endif
 	{
-	    printf("host         %s\n", ldap_conf.host ?
+	    fprintf(stderr, "host         %s\n", ldap_conf.host ?
 		ldap_conf.host : "(NONE)");
-	    printf("port         %d\n", ldap_conf.port);
+	    fprintf(stderr, "port         %d\n", ldap_conf.port);
 	}
-	printf("ldap_version %d\n", ldap_conf.version);
+	fprintf(stderr, "ldap_version %d\n", ldap_conf.version);
 
-	printf("sudoers_base %s\n", ldap_conf.base ?
+	fprintf(stderr, "sudoers_base %s\n", ldap_conf.base ?
 	    ldap_conf.base : "(NONE) <---Sudo will ignore ldap)");
-	printf("binddn       %s\n", ldap_conf.binddn ?
+	fprintf(stderr, "binddn       %s\n", ldap_conf.binddn ?
 	    ldap_conf.binddn : "(anonymous)");
-	printf("bindpw       %s\n", ldap_conf.bindpw ?
+	fprintf(stderr, "bindpw       %s\n", ldap_conf.bindpw ?
 	    ldap_conf.bindpw : "(anonymous)");
 #ifdef HAVE_LDAP_START_TLS_S
-	printf("ssl          %s\n", ldap_conf.ssl ?
+	fprintf(stderr, "ssl          %s\n", ldap_conf.ssl ?
 	    ldap_conf.ssl : "(no)");
 #endif
-	printf("===================\n");
+	fprintf(stderr, "===================\n");
     }
     if (!ldap_conf.base)
 	return(FALSE);		/* if no base is defined, ignore LDAP */
@@ -778,9 +760,7 @@ sudo_ldap_open()
 #ifdef HAVE_LDAP_INITIALIZE
     if (ldap_conf.uri) {
 
-	if (ldap_conf.debug > 1)
-	    fprintf(stderr,
-		"ldap_initialize(ld,%s)\n", ldap_conf.uri);
+	DPRINTF(("ldap_initialize(ld,%s)", ldap_conf.uri), 2);
 
 	rc = ldap_initialize(&ld, ldap_conf.uri);
 	if (rc) {
@@ -792,9 +772,7 @@ sudo_ldap_open()
 #endif /* HAVE_LDAP_INITIALIZE */
     if (ldap_conf.host) {
 
-	if (ldap_conf.debug > 1)
-	    fprintf(stderr,
-		"ldap_init(%s,%d)\n", ldap_conf.host, ldap_conf.port);
+	DPRINTF(("ldap_init(%s,%d)", ldap_conf.host, ldap_conf.port), 2);
 
 	if ((ld = ldap_init(ldap_conf.host, ldap_conf.port)) == NULL) {
 	    fprintf(stderr, "ldap_init(): errno=%d : %s\n",
@@ -819,8 +797,7 @@ sudo_ldap_open()
 	    ldap_unbind(ld);
 	    return(NULL);
 	}
-	if (ldap_conf.debug)
-	    printf("ldap_start_tls_s() ok\n");
+	DPRINTF(("ldap_start_tls_s() ok"), 1);
     }
 #endif /* HAVE_LDAP_START_TLS_S */
 
@@ -830,8 +807,7 @@ sudo_ldap_open()
 	    rc, ldap_err2string(rc));
 	return(NULL);
     }
-    if (ldap_conf.debug)
-	printf("ldap_bind() ok\n");
+    DPRINTF(("ldap_bind() ok"), 1);
 
     return((VOID *) ld);
 }
@@ -847,13 +823,10 @@ sudo_ldap_update_defaults(v)
     rc = ldap_search_s(ld, ldap_conf.base, LDAP_SCOPE_ONELEVEL,
 	"cn=defaults", NULL, 0, &result);
     if (!rc && (entry = ldap_first_entry(ld, result))) {
-	if (ldap_conf.debug)
-	    printf("found:%s\n", ldap_get_dn(ld, entry));
+	DPRINTF(("found:%s", ldap_get_dn(ld, entry)), 1);
 	sudo_ldap_parse_options(ld, entry);
-    } else {
-	if (ldap_conf.debug)
-	    printf("no default options found!\n");
-    }
+    } else
+	DPRINTF(("no default options found!"), 1);
 
     if (result)
 	ldap_msgfree(result);
@@ -896,21 +869,17 @@ sudo_ldap_check(v, pwflag)
 	    /* Want the entries that have user netgroups in them. */
 	    filt = estrdup("sudoUser=+*");
 	}
-	if (ldap_conf.debug)
-	    printf("ldap search '%s'\n", filt);
+	DPRINTF(("ldap search '%s'", filt), 1);
 	rc = ldap_search_s(ld, ldap_conf.base, LDAP_SCOPE_ONELEVEL, filt,
 	    NULL, 0, &result);
-	if (rc) {
-	    if (ldap_conf.debug)
-		printf("nothing found for '%s'\n", filt);
-	}
+	if (rc)
+	    DPRINTF(("nothing found for '%s'", filt), 1);
 	efree(filt);
 
 	/* parse each entry returned from this most recent search */
 	entry = rc ? NULL : ldap_first_entry(ld, result);
 	while (entry != NULL) {
-	    if (ldap_conf.debug)
-		printf("found:%s\n", ldap_get_dn(ld, entry));
+	    DPRINTF(("found:%s", ldap_get_dn(ld, entry)), 1);
 	    if (
 	    /* first verify user netgroup matches - only if in pass 2 */
 		(pass != 2 || sudo_ldap_check_user_netgroup(ld, entry)) &&
@@ -928,8 +897,7 @@ sudo_ldap_check(v, pwflag)
 		sudo_ldap_check_runas(ld, entry)
 		) {
 		/* We have a match! */
-		if (ldap_conf.debug)
-		    printf("Perfect Matched!\n");
+		DPRINTF(("Perfect Matched!"), 1);
 		/* pick up any options */
 		sudo_ldap_parse_options(ld, entry);
 		/* make sure we don't reenter loop */
@@ -944,10 +912,8 @@ sudo_ldap_check(v, pwflag)
 	result = NULL;
     }
 
-    if (ldap_conf.debug)
-	printf("user_matches=%d\n", ldap_user_matches);
-    if (ldap_conf.debug)
-	printf("host_matches=%d\n", ldap_host_matches);
+    DPRINTF(("user_matches=%d", ldap_user_matches), 1);
+    DPRINTF(("host_matches=%d", ldap_host_matches), 1);
 
     /* Check for special case for -v, -k, -l options */
     if (pwflag && ldap_user_matches && ldap_host_matches) {
@@ -985,8 +951,7 @@ sudo_ldap_check(v, pwflag)
 	else if (!ldap_host_matches)
 	    SET(ret, FLAG_NO_HOST);
     }
-    if (ldap_conf.debug)
-	printf("sudo_ldap_check(%d)=0x%02x\n", pwflag, ret);
+    DPRINTF(("sudo_ldap_check(%d)=0x%02x", pwflag, ret), 1);
 
     return(ret);
 }
