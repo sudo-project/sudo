@@ -152,9 +152,7 @@ main(argc, argv)
     int sudo_mode;
     int pwflag;
     sigaction_t sa;
-#ifdef HAVE_LDAP
-    VOID *ld;
-#endif
+    VOID *ld = NULL;
     extern char **environ;
 
 #ifdef HAVE_SETLOCALE
@@ -294,10 +292,8 @@ main(argc, argv)
     cmnd_status = set_cmnd(sudo_mode);
 
 #ifdef HAVE_LDAP
-    if (ld != NULL) {
+    if (ld != NULL)
 	validated = sudo_ldap_check(ld, pwflag);
-	sudo_ldap_close(ld);
-    }
     /* Fallback to sudoers if we are allowed to and we aren't validated. */
     if (!def_ignore_local_sudoers && !ISSET(validated, VALIDATE_OK))
 #endif
@@ -373,14 +369,18 @@ main(argc, argv)
 	if (sudo_mode == MODE_VALIDATE)
 	    exit(0);
 	else if (sudo_mode == MODE_CHECK)
-	    exit(display_cmnd(list_pw ? list_pw : sudo_user.pw));
+	    exit(display_cmnd(ld, list_pw ? list_pw : sudo_user.pw));
 	else if (sudo_mode == MODE_LIST) {
-	    display_privs(list_pw ? list_pw : sudo_user.pw);
-#ifdef HAVE_LDAP
-	    sudo_ldap_display_privs();	/* XXX - use list_pw */
-#endif
+	    display_privs(ld, list_pw ? list_pw : sudo_user.pw);
 	    exit(0);
 	}
+
+#ifdef HAVE_LDAP
+	if (ld != NULL) {
+	    sudo_ldap_close(ld);
+	    ld = NULL;
+	}
+#endif
 
 #ifdef HAVE_SYSTRACE 
 	if (def_monitor)

@@ -206,7 +206,8 @@ sudoers_lookup(pwflag)
  * Print out privileges for the specified user.
  */
 void
-display_privs(pw)
+display_privs(v, pw)
+    VOID *v;
     struct passwd *pw;
 {
     struct cmndspec *cs;
@@ -218,60 +219,66 @@ display_privs(pw)
 #if defined(HAVE_INITGROUPS) && defined(HAVE_GETGROUPS)
     /* Set group vector so group matching works correctly. */
     if (pw != sudo_user.pw) {
-       (void) initgroups(pw->pw_name, pw->pw_gid);
-       if ((user_ngroups = getgroups(0, NULL)) > 0) {
-	   user_groups = erealloc3(user_groups, user_ngroups, sizeof(gid_t));
-	   if (getgroups(user_ngroups, user_groups) < 0)
-	       log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
-       } else
-	   user_ngroups = 0;
+	(void) initgroups(pw->pw_name, pw->pw_gid);
+	if ((user_ngroups = getgroups(0, NULL)) > 0) {
+	    user_groups = erealloc3(user_groups, user_ngroups, sizeof(gid_t));
+	    if (getgroups(user_ngroups, user_groups) < 0)
+		log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
+	} else
+	    user_ngroups = 0;
     }
 #endif
 
-    display_defaults(pw);
+    if (!def_ignore_local_sudoers) {
+	display_defaults(pw);
 
-    print_priv3("User ", pw->pw_name,
-	" may run the following commands on this host:\n");
+	print_priv3("User ", pw->pw_name,
+	    " may run the following commands on this host:\n");
 
-    for (us = userspecs; us != NULL; us = us->next) {
-	if (user_matches(pw, us->user) != TRUE ||
-	  host_matches(us->privileges->hostlist) != TRUE)
-	    continue;
+	for (us = userspecs; us != NULL; us = us->next) {
+	    if (user_matches(pw, us->user) != TRUE ||
+	      host_matches(us->privileges->hostlist) != TRUE)
+		continue;
 
-	for (priv = us->privileges; priv != NULL; priv = priv->next) {
-	    tags.monitor = def_monitor;
-	    tags.noexec = def_noexec;
-	    tags.nopasswd = !def_authenticate;
-	    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
-		if (cs != priv->cmndlist)
-		    print_priv(", ");
-		if (cs->runaslist != NULL) {
-		    print_priv("    (");
-		    for (m = cs->runaslist; m != NULL; m = m->next) {
-			if (m != cs->runaslist)
-			    print_priv(", ");
-			print_member(m->name, m->type, m->negated, RUNASALIAS);
+	    for (priv = us->privileges; priv != NULL; priv = priv->next) {
+		tags.monitor = def_monitor;
+		tags.noexec = def_noexec;
+		tags.nopasswd = !def_authenticate;
+		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
+		    if (cs != priv->cmndlist)
+			print_priv(", ");
+		    if (cs->runaslist != NULL) {
+			print_priv("    (");
+			for (m = cs->runaslist; m != NULL; m = m->next) {
+			    if (m != cs->runaslist)
+				print_priv(", ");
+			    print_member(m->name, m->type, m->negated, RUNASALIAS);
+			}
+			print_priv(") ");
 		    }
-		    print_priv(") ");
+		    if (TAG_CHANGED(monitor)) {
+			print_priv(cs->tags.monitor ? "MONITOR: " : "NOMONITOR: ");
+			tags.monitor = cs->tags.monitor;
+		    }
+		    if (TAG_CHANGED(noexec)) {
+			print_priv(cs->tags.monitor ? "EXEC: " : "NOEXEC: ");
+			tags.noexec = cs->tags.noexec;
+		    }
+		    if (TAG_CHANGED(nopasswd)) {
+			print_priv(cs->tags.monitor ? "PASSWD: " : "NOPASSWD: ");
+			tags.nopasswd = cs->tags.nopasswd;
+		    }
+		    m = cs->cmnd;
+		    print_member(m->name, m->type, m->negated, CMNDALIAS);
 		}
-		if (TAG_CHANGED(monitor)) {
-		    print_priv(cs->tags.monitor ? "MONITOR: " : "NOMONITOR: ");
-		    tags.monitor = cs->tags.monitor;
-		}
-		if (TAG_CHANGED(noexec)) {
-		    print_priv(cs->tags.monitor ? "EXEC: " : "NOEXEC: ");
-		    tags.noexec = cs->tags.noexec;
-		}
-		if (TAG_CHANGED(nopasswd)) {
-		    print_priv(cs->tags.monitor ? "PASSWD: " : "NOPASSWD: ");
-		    tags.nopasswd = cs->tags.nopasswd;
-		}
-		m = cs->cmnd;
-		print_member(m->name, m->type, m->negated, CMNDALIAS);
+		print_priv("\n");
 	    }
-	    print_priv("\n");
 	}
     }
+#ifdef HAVE_LDAP
+    if (v != NULL)
+	sudo_ldap_display_privs(v, pw);
+#endif
 }
 
 /*
@@ -392,35 +399,43 @@ display_bound_defaults(dtype)
  * command is allowed.
  */
 int
-display_cmnd(pw)
+display_cmnd(v, pw)
+    VOID *v;
     struct passwd *pw;
 {
     struct cmndspec *cs;
     struct member *match, *runas;
     struct privilege *priv;
     struct userspec *us;
+    int rval = 1;
 
-    for (match = NULL, us = userspecs; us != NULL; us = us->next) {
-	if (user_matches(pw, us->user) != TRUE ||
-	  host_matches(us->privileges->hostlist) != TRUE)
-	    continue;
+#ifdef HAVE_LDAP
+    rval = sudo_ldap_display_cmnd(v, pw);
+#endif
+    if (rval != 0 && !def_ignore_local_sudoers) {
+	for (match = NULL, us = userspecs; us != NULL; us = us->next) {
+	    if (user_matches(pw, us->user) != TRUE ||
+	      host_matches(us->privileges->hostlist) != TRUE)
+		continue;
 
-	for (priv = us->privileges; priv != NULL; priv = priv->next) {
-	    runas = NULL;
-	    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
-		if (cs->runaslist != NULL)
-		    runas = cs->runaslist;
-		if (runas_matches(runas) == TRUE &&
-		  cmnd_matches(cs->cmnd) != UNSPEC) 
-		    match = cs->cmnd;
+	    for (priv = us->privileges; priv != NULL; priv = priv->next) {
+		runas = NULL;
+		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
+		    if (cs->runaslist != NULL)
+			runas = cs->runaslist;
+		    if (runas_matches(runas) == TRUE &&
+		      cmnd_matches(cs->cmnd) != UNSPEC) 
+			match = cs->cmnd;
+		}
 	    }
 	}
+	if (match != NULL && !match->negated) {
+	    printf("%s%s%s\n", safe_cmnd, user_args ? " " : "",
+		user_args ? user_args : "");
+	    rval = 0;
+	}
     }
-    if (match == NULL || match->negated)
-	return(1);
-    printf("%s%s%s\n", safe_cmnd, user_args ? " " : "",
-	user_args ? user_args : "");
-    return(0);
+    return(rval);
 }
 
 /*
