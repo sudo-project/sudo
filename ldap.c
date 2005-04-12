@@ -50,7 +50,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <err.h>
-#include <errno.h>
 #ifdef HAVE_LBER_H
 # include <lber.h>
 #endif
@@ -70,6 +69,11 @@ __unused static const char rcsid[] = "$Sudo$";
 #ifndef LDAP_OPT_SUCCESS
 # define LDAP_OPT_SUCCESS LDAP_SUCCESS
 #endif
+
+#define LDAP_FOREACH(var, ld, res)					\
+    for ((var) = ldap_first_entry((ld), (res));				\
+	(var) != NULL;							\
+	(var) = ldap_next_entry((ld), (var)))
 
 #define	DPRINTF(args, level)	if (ldap_conf.debug >= level) warnx args
 
@@ -98,9 +102,10 @@ struct ldap_config {
  * netgroup, else FALSE.
  */
 int
-sudo_ldap_check_user_netgroup(ld, entry)
+sudo_ldap_check_user_netgroup(ld, entry, user)
     LDAP *ld;
     LDAPMessage *entry;
+    char *user;
 {
     char **v = NULL, **p = NULL;
     int ret = FALSE;
@@ -114,7 +119,7 @@ sudo_ldap_check_user_netgroup(ld, entry)
     /* walk through values */
     for (p = v; p && *p && !ret; p++) {
 	/* match any */
-	if (netgr_matches(*p, NULL, NULL, user_name))
+	if (netgr_matches(*p, NULL, NULL, user))
 	    ret = TRUE;
 	DPRINTF(("ldap sudoUser netgroup '%s' ... %s", *p,
 	    ret ? "MATCH!" : "not"), 2);
@@ -199,15 +204,15 @@ sudo_ldap_check_runas(ld, entry)
      */
 
     /*
-     * If there are no runas entries, then match the runas_default with whats
-     * on the command line
+     * If there are no runas entries, then match the runas_default with
+     * what's on the command line.
      */
     if (!v)
 	ret = !strcasecmp(*user_runas, def_runas_default);
 
     /*
-     * What about the case where exactly one runas is specified in the config
-     * and the user forgets the -u option, should we switch it?
+     * What about the case where exactly one runas is specified in the
+     * config and the user forgets the -u option, should we switch it?
      * Probably not...
      */
 
@@ -241,7 +246,6 @@ sudo_ldap_check_command(ld, entry)
 
     v = ldap_get_values(ld, entry, "sudoCommand");
 
-    /* get_first_entry */
     for (p = v; p && *p && ret >= 0; p++) {
 	/* Match against ALL ? */
 	if (!strcasecmp(*p, "ALL")) {
@@ -288,6 +292,40 @@ sudo_ldap_check_command(ld, entry)
 }
 
 /*
+ * Search for boolean "option" in sudoOption.
+ * Returns TRUE if found and allowed, FALSE if negated, else UNSPEC.
+ */
+int
+sudo_ldap_check_bool(ld, entry, option)
+    LDAP *ld;
+    LDAPMessage *entry;
+    char *option;
+{
+    char ch, *var, **v, **p;
+    int ret = UNSPEC;
+
+    if (entry == NULL)
+	return(UNSPEC);
+
+    /* walk through options */
+    v = ldap_get_values(ld, entry, "sudoOption");
+    for (p = v; p && *p; p++) {
+	var = *p;
+	DPRINTF(("ldap sudoOption: '%s'", var), 2);
+
+	if ((ch = *var) == '!')
+	    var++;
+	if (strcmp(var, option) == 0)
+	    ret = (ch != '!');
+    }
+
+    if (v)
+	ldap_value_free(v);
+
+    return(ret);
+}
+
+/*
  * Read sudoOption and modify the defaults as we go.  This is used once
  * from the cn=defaults entry and also once when a final sudoRole is matched.
  */
@@ -296,9 +334,9 @@ sudo_ldap_parse_options(ld, entry)
     LDAP *ld;
     LDAPMessage *entry;
 {
-    char op, *var, *val, **v = NULL, **p = NULL;
+    char op, *var, *val, **v, **p;
 
-    if (!entry)
+    if (entry == NULL)
 	return;
 
     v = ldap_get_values(ld, entry, "sudoOption");
@@ -381,7 +419,8 @@ ncat(s, sz, src)
  * builds together a filter to check against ldap
  */
 char *
-sudo_ldap_build_pass1()
+sudo_ldap_build_pass1(pw)
+    struct passwd *pw;
 {
     struct group *grp;
     size_t sz;
@@ -393,14 +432,14 @@ sudo_ldap_build_pass1()
 
     /* build filter sudoUser=user_name */
     ncat(&b, &sz, "(sudoUser=");
-    ncat(&b, &sz, user_name);
+    ncat(&b, &sz, pw->pw_name);
     ncat(&b, &sz, ")");
 
     /* Append primary group */
-    grp = sudo_getgrgid(getgid());
+    grp = sudo_getgrgid(pw->pw_gid);
     if (grp != NULL) {
 	ncat(&b, &sz, "(sudoUser=%");
-	ncat(&b, &sz, grp -> gr_name);
+	ncat(&b, &sz, grp->gr_name);
 	ncat(&b, &sz, ")");
     }
 
@@ -408,7 +447,7 @@ sudo_ldap_build_pass1()
     for (i = 0; i < user_ngroups; i++) {
 	if ((grp = sudo_getgrgid(user_groups[i])) != NULL) {
 	    ncat(&b, &sz, "(sudoUser=%");
-	    ncat(&b, &sz, grp -> gr_name);
+	    ncat(&b, &sz, grp->gr_name);
 	    ncat(&b, &sz, ")");
 	}
     }
@@ -597,94 +636,177 @@ sudo_ldap_read_config()
 }
 
 /*
- * like perl's join(sep,@ARGS)
+ * Like sudo_ldap_check(), except we just print entries.
  */
-char *
- _ldap_join_values(sep, v)
-    char *sep;
-    char **v;
-{
-    char *b = NULL, **p = NULL;
-    size_t sz = 0;
-
-    /* paste values together */
-    for (p = v; p && *p; p++) {
-	if (p != v && sep != NULL)
-	    ncat(&b, &sz, sep);	/* append seperator */
-	ncat(&b, &sz, *p);	/* append value */
-    }
-
-    /* sanity check */
-    if (b[0] == '\0') {
-	/* something went wrong, put something here */
-	ncat(&b, &sz, "(empty list)");	/* append value */
-    }
-
-    return(b);
-}
-
-char *sudo_ldap_cm_list = NULL;
-size_t sudo_ldap_cm_list_size;
-
-#define SAVE_LIST(x) ncat(&sudo_ldap_cm_list,&sudo_ldap_cm_list_size,(x))
-/*
- * Walks through search result and returns TRUE if we have a
- * command match
- */
-int
-sudo_ldap_add_match(ld, entry, pwflag)
-    LDAP *ld;
-    LDAPMessage *entry;
-    int pwflag;
-{
-    char *dn, **edn, **v = NULL;
-
-    /* if we are not collecting matches, then don't save them */
-    if (pwflag != I_LISTPW)
-	return(TRUE);
-
-    /* collect the dn, only show the rdn */
-    dn = ldap_get_dn(ld, entry);
-    edn = dn ? ldap_explode_dn(dn, 1) : NULL;
-    SAVE_LIST("\nLDAP Role: ");
-    SAVE_LIST((edn && *edn) ? *edn : "UNKNOWN");
-    SAVE_LIST("\n");
-    if (dn)
-	ldap_memfree(dn);
-    if (edn)
-	ldap_value_free(edn);
-
-    /* get the Runas Values from the entry */
-    v = ldap_get_values(ld, entry, "sudoRunAs");
-    if (v && *v) {
-	SAVE_LIST("  RunAs: (");
-	SAVE_LIST(_ldap_join_values(", ", v));
-	SAVE_LIST(")\n");
-    }
-    if (v)
-	ldap_value_free(v);
-
-    /* get the Command Values from the entry */
-    v = ldap_get_values(ld, entry, "sudoCommand");
-    if (v && *v) {
-	SAVE_LIST("  Commands:\n    ");
-	SAVE_LIST(_ldap_join_values("\n    ", v));
-	SAVE_LIST("\n");
-    } else {
-	SAVE_LIST("  Commands: NONE\n");
-    }
-    if (v)
-	ldap_value_free(v);
-
-    return(FALSE);		/* Don't stop at the first match */
-}
-#undef SAVE_LIST
-
 void
-sudo_ldap_display_privs()
+sudo_ldap_display_privs(ldv, pw)
+    VOID *ldv;
+    struct passwd *pw;
 {
-    if (sudo_ldap_cm_list != NULL)
-	printf("%s", sudo_ldap_cm_list);
+    LDAP *ld = (LDAP *) ldv;
+    LDAPMessage *entry = NULL, *result = NULL;	/* used for searches */
+    char *filt;					/* used to parse attributes */
+    char *dn, **edn, **v, **p;
+    int rc, do_netgr;
+
+    /*
+     * First, get (and display) the global Options.
+     */
+    rc = ldap_search_s(ld, ldap_conf.base, LDAP_SCOPE_ONELEVEL,
+	"cn=defaults", NULL, 0, &result);
+    if (rc == 0 && (entry = ldap_first_entry(ld, result))) {
+	v = ldap_get_values(ld, entry, "sudoOption");
+	if (v != NULL) {
+	    fputs("Global options:\n  ", stdout);
+	    for (p = v; *p != NULL; p++) {
+		if (p != v)
+		    fputs("\n  ", stdout);
+		fputs(*p, stdout);
+	    }
+	    putchar('\n');
+	    ldap_value_free(v);
+	}
+    }
+    if (result)
+	ldap_msgfree(result);
+
+    /*
+     * Okay - time to search for anything that matches this user
+     * Lets limit it to only two queries of the LDAP server
+     *
+     * The first pass will look by the username, groups, and
+     * the keyword ALL.  We will then inspect the results that
+     * came back from the query.  We don't need to inspect the
+     * sudoUser in this pass since the LDAP server already scanned
+     * it for us.
+     *
+     * The second pass will return all the entries that contain
+     * user netgroups.  Then we take the netgroups returned and
+     * try to match them against the username.
+     */
+    for (do_netgr = 0; do_netgr < 2; do_netgr++) {
+	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
+	DPRINTF(("ldap search '%s'", filt), 1);
+	rc = ldap_search_s(ld, ldap_conf.base, LDAP_SCOPE_ONELEVEL, filt,
+	    NULL, 0, &result);
+	efree(filt);
+	if (rc != 0)
+	    continue;	/* no entries for this pass */
+
+	/* print each matching entry */
+	LDAP_FOREACH(entry, ld, result) {
+	    if ((!do_netgr ||
+		sudo_ldap_check_user_netgroup(ld, entry, pw->pw_passwd)) &&
+		sudo_ldap_check_host(ld, entry)) {
+
+		/* collect the dn, only show the rdn */
+		dn = ldap_get_dn(ld, entry);
+		edn = dn ? ldap_explode_dn(dn, 1) : NULL;
+		printf("\nLDAP Role: %s\n", (edn && *edn) ? *edn : "UNKNOWN");
+		if (dn)
+		    ldap_memfree(dn);
+		if (edn)
+		    ldap_value_free(edn);
+
+		/* get the Option Values from the entry */
+		v = ldap_get_values(ld, entry, "sudoOption");
+		if (v != NULL) {
+		    fputs("  Options:\n    ", stdout);
+		    for (p = v; *p != NULL; p++) {
+			if (p != v)
+			    fputs("\n    ", stdout);
+			fputs(*p, stdout);
+		    }
+		    putchar('\n');
+		    ldap_value_free(v);
+		}
+
+		/* get the RunAs Values from the entry */
+		v = ldap_get_values(ld, entry, "sudoRunAs");
+		if (v != NULL) {
+		    printf("  RunAs: (");
+		    for (p = v; *p != NULL; p++) {
+			if (p != v)
+			    fputs(", ", stdout);
+			fputs(*p, stdout);
+		    }
+		    puts(")");
+		    ldap_value_free(v);
+		}
+
+		/* get the Command Values from the entry */
+		v = ldap_get_values(ld, entry, "sudoCommand");
+		if (v != NULL) {
+		    fputs("  Commands:\n    ", stdout);
+		    for (p = v; *p != NULL; p++) {
+			if (p != v)
+			    fputs("\n    ", stdout);
+			fputs(*p, stdout);
+		    }
+		    putchar('\n');
+		    ldap_value_free(v);
+		} else {
+		    puts("  Commands: NONE");
+		}
+	    }
+	}
+	ldap_msgfree(result);
+    }
+}
+
+int
+sudo_ldap_display_cmnd(ldv, pw)
+    VOID *ldv;
+    struct passwd *pw;
+{
+    LDAP *ld = (LDAP *) ldv;
+    LDAPMessage *entry = NULL, *result = NULL;	/* used for searches */
+    char *filt;					/* used to parse attributes */
+    int rc, found, do_netgr;			/* temp/final return values */
+
+    /*
+     * Okay - time to search for anything that matches this user
+     * Lets limit it to only two queries of the LDAP server
+     *
+     * The first pass will look by the username, groups, and
+     * the keyword ALL.  We will then inspect the results that
+     * came back from the query.  We don't need to inspect the
+     * sudoUser in this pass since the LDAP server already scanned
+     * it for us.
+     *
+     * The second pass will return all the entries that contain
+     * user netgroups.  Then we take the netgroups returned and
+     * try to match them against the username.
+     */
+    for (found = FALSE, do_netgr = 0; !found && do_netgr < 2; do_netgr++) {
+	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
+	DPRINTF(("ldap search '%s'", filt), 1);
+	rc = ldap_search_s(ld, ldap_conf.base, LDAP_SCOPE_ONELEVEL, filt,
+	    NULL, 0, &result);
+	efree(filt);
+	if (rc != 0)
+	    continue;	/* no entries for this pass */
+
+	LDAP_FOREACH(entry, ld, result) {
+	    if ((!do_netgr ||
+		sudo_ldap_check_user_netgroup(ld, entry, pw->pw_name)) &&
+		sudo_ldap_check_host(ld, entry) &&
+		sudo_ldap_check_command(ld, entry) &&
+		sudo_ldap_check_runas(ld, entry)) {
+
+		found = TRUE;
+		break;
+	    }
+	}
+	if (result)
+	    ldap_msgfree(result);
+	result = NULL;
+    }
+
+    if (found)
+	printf("%s%s%s\n", safe_cmnd, user_args ? " " : "",
+	    user_args ? user_args : "");
+   return(!found);
 }
 
 /*
@@ -710,7 +832,7 @@ sudo_ldap_open()
            optname, ldap_conf.val, rc, ldap_err2string(rc)); \
       return(NULL) ; \
     } \
-  } \
+  }
 
     /* like above, but assumes val is in int */
 #define SET_OPTI(opt,optname,val) \
@@ -721,7 +843,7 @@ sudo_ldap_open()
       fprintf(stderr,"ldap_set_option(LDAP_OPT_%s,0x%02x)=%d: %s\n", \
            optname, ldap_conf.val, rc, ldap_err2string(rc)); \
       return(NULL) ; \
-    } \
+    }
 
     /* attempt to setup ssl options */
 #ifdef LDAP_OPT_X_TLS_CACERTFILE
@@ -771,20 +893,16 @@ sudo_ldap_open()
     } else
 #endif /* HAVE_LDAP_INITIALIZE */
     if (ldap_conf.host) {
-
 	DPRINTF(("ldap_init(%s,%d)", ldap_conf.host, ldap_conf.port), 2);
-
 	if ((ld = ldap_init(ldap_conf.host, ldap_conf.port)) == NULL) {
-	    fprintf(stderr, "ldap_init(): errno=%d : %s\n",
-		errno, strerror(errno));
+	    warn("ldap_init()");
 	    return(NULL);
 	}
     }
-#ifdef LDAP_OPT_PROTOCOL_VERSION
 
+#ifdef LDAP_OPT_PROTOCOL_VERSION
     /* Set the LDAP Protocol version */
     SET_OPTI(LDAP_OPT_PROTOCOL_VERSION, "PROTOCOL_VERSION", version);
-
 #endif /* LDAP_OPT_PROTOCOL_VERSION */
 
 #ifdef HAVE_LDAP_START_TLS_S
@@ -822,7 +940,7 @@ sudo_ldap_update_defaults(v)
 
     rc = ldap_search_s(ld, ldap_conf.base, LDAP_SCOPE_ONELEVEL,
 	"cn=defaults", NULL, 0, &result);
-    if (!rc && (entry = ldap_first_entry(ld, result))) {
+    if (rc == 0 && (entry = ldap_first_entry(ld, result))) {
 	DPRINTF(("found:%s", ldap_get_dn(ld, entry)), 1);
 	sudo_ldap_parse_options(ld, entry);
     } else
@@ -843,8 +961,74 @@ sudo_ldap_check(v, pwflag)
     LDAP *ld = (LDAP *) v;
     LDAPMessage *entry = NULL, *result = NULL;	/* used for searches */
     char *filt;					/* used to parse attributes */
-    int rc = FALSE, ret = FALSE, do_netgr;	/* temp/final return values */
+    int do_netgr, rc, ret;			/* temp/final return values */
     int ldap_user_matches = FALSE, ldap_host_matches = FALSE; /* flags */
+    struct passwd *pw = list_pw ? list_pw : sudo_user.pw;
+
+    if (pwflag) {
+	int doauth = UNSPEC;
+	enum def_tupple pwcheck = 
+	    (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
+
+	for (ret = 0, do_netgr = 0; !ret && do_netgr < 2; do_netgr++) {
+	    filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
+	    rc = ldap_search_s(ld, ldap_conf.base, LDAP_SCOPE_ONELEVEL, filt,
+		NULL, 0, &result);
+	    efree(filt);
+	    if (rc != 0)
+		continue;
+
+	    LDAP_FOREACH(entry, ld, result) {
+		/* only verify netgroup matches in pass 2 */
+		if (do_netgr && !sudo_ldap_check_user_netgroup(ld, entry, pw->pw_name))
+		    continue;
+
+		ldap_user_matches = TRUE;
+		if (sudo_ldap_check_host(ld, entry)) {
+		    ldap_host_matches = TRUE;
+		    if ((pwcheck == any && doauth != FALSE) ||
+			(pwcheck == all && doauth == FALSE))
+			doauth = sudo_ldap_check_bool(ld, entry, "authenticate");
+		    /* Only check the command when listing another user. */
+		    if (user_uid == 0 || list_pw == NULL ||
+			user_uid == list_pw->pw_uid ||
+			sudo_ldap_check_command(ld, entry)) {
+			ret = 1;
+			break;	/* end foreach */
+		    }
+		}
+	    }
+	    ldap_msgfree(result);
+	}
+	if (ret || user_uid == 0) {
+	    ret = VALIDATE_OK;
+	    if (def_authenticate) {
+		switch (pwcheck) {
+		    case always:
+			SET(ret, FLAG_CHECK_USER);
+			break;
+		    case all:
+			/*
+			 * If we are not ignoring local sudoers we
+			 * can't make a decision yet. (XXX)
+			 */
+			if (!def_ignore_local_sudoers && doauth == FALSE)
+			    def_authenticate = FALSE;
+			break;
+		    case any:
+			if (doauth == FALSE)
+			    def_authenticate = FALSE;
+			break;
+		    case never:
+			def_authenticate = FALSE;
+			break;
+		    default:
+			break;
+		}
+	    }
+	}
+	goto done;
+    }
 
     /*
      * Okay - time to search for anything that matches this user
@@ -860,9 +1044,8 @@ sudo_ldap_check(v, pwflag)
      * user netgroups.  Then we take the netgroups returned and
      * try to match them against the username.
      */
-
-    for (do_netgr = 0; !ret && do_netgr < 2; do_netgr++) {
-	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1();
+    for (ret = 0, do_netgr = 0; !ret && do_netgr < 2; do_netgr++) {
+	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
 	DPRINTF(("ldap search '%s'", filt), 1);
 	rc = ldap_search_s(ld, ldap_conf.base, LDAP_SCOPE_ONELEVEL, filt,
 	    NULL, 0, &result);
@@ -871,74 +1054,45 @@ sudo_ldap_check(v, pwflag)
 	efree(filt);
 
 	/* parse each entry returned from this most recent search */
-	entry = rc ? NULL : ldap_first_entry(ld, result);
-	while (entry != NULL) {
-	    DPRINTF(("found:%s", ldap_get_dn(ld, entry)), 1);
-	    if (
-	    /* first verify user netgroup matches - only if in pass 2 */
-		(!do_netgr || sudo_ldap_check_user_netgroup(ld, entry)) &&
-	    /* remember that user matched */
-		(ldap_user_matches = -1) &&
-	    /* verify host match */
-		sudo_ldap_check_host(ld, entry) &&
-	    /* remember that host matched */
-		(ldap_host_matches = -1) &&
-	    /* add matches for listing later */
-		sudo_ldap_add_match(ld, entry, pwflag) &&
-	    /* verify command match */
-		sudo_ldap_check_command(ld, entry) &&
-	    /* verify runas match */
-		sudo_ldap_check_runas(ld, entry)
-		) {
-		/* We have a match! */
-		DPRINTF(("Perfect Matched!"), 1);
-		/* pick up any options */
-		sudo_ldap_parse_options(ld, entry);
-		/* make sure we don't reenter loop */
-		ret = VALIDATE_OK;
-		/* break from inside for loop */
-		break;
+	if (rc == 0) {
+	    LDAP_FOREACH(entry, ld, result) {
+		DPRINTF(("found:%s", ldap_get_dn(ld, entry)), 1);
+		if (
+		/* first verify user netgroup matches - only if in pass 2 */
+		    (!do_netgr || sudo_ldap_check_user_netgroup(ld, entry, pw->pw_name)) &&
+		/* remember that user matched */
+		    (ldap_user_matches = TRUE) &&
+		/* verify host match */
+		    sudo_ldap_check_host(ld, entry) &&
+		/* remember that host matched */
+		    (ldap_host_matches = TRUE) &&
+		/* verify command match */
+		    sudo_ldap_check_command(ld, entry) &&
+		/* verify runas match */
+		    sudo_ldap_check_runas(ld, entry)
+		    ) {
+		    /* We have a match! */
+		    DPRINTF(("Perfect Match!"), 1);
+		    /* pick up any options */
+		    sudo_ldap_parse_options(ld, entry);
+		    /* make sure we don't reenter loop */
+		    ret = VALIDATE_OK;
+		    /* break from inside for loop */
+		    break;
+		}
 	    }
-	    entry = ldap_next_entry(ld, entry);
-	}
-	if (result)
 	    ldap_msgfree(result);
-	result = NULL;
+	}
     }
 
+done:
     DPRINTF(("user_matches=%d", ldap_user_matches), 1);
     DPRINTF(("host_matches=%d", ldap_host_matches), 1);
 
-    /* Check for special case for -v, -k, -l options */
-    if (pwflag && ldap_user_matches && ldap_host_matches) {
-	/*
-         * Handle verifypw & listpw
-         *
-         * To be extra paranoid, since we haven't read any NOPASSWD options
-         * in /etc/sudoers yet, but we have to make the decission now, lets
-         * assume the worst and prefer to prompt for password unless the setting
-         * is "never". (example verifypw=never or listpw=never)
-         *
-         */
-	ret = VALIDATE_OK;
-	if (pwflag != -1) {
-	    switch (sudo_defs_table[pwflag].sd_un.tuple) {
-	    case never:
-		def_authenticate = FALSE;
-		break;
-	    case always:
-		if (def_authenticate)
-		    SET(ret, FLAG_CHECK_USER);
-		break;
-	    default:
-		break;
-	    }
-	}
-    }
     if (!ISSET(ret, VALIDATE_OK)) {
 	/* we do not have a match */
 	ret = VALIDATE_NOT_OK;
-	if (pwflag)
+	if (pwflag && list_pw == NULL)
 	    SET(ret, FLAG_NO_CHECK);
 	else if (!ldap_user_matches)
 	    SET(ret, FLAG_NO_USER);
@@ -957,6 +1111,6 @@ void
 sudo_ldap_close(v)
     VOID *v;
 {
-    if (v)
+    if (v != NULL)
 	ldap_unbind_s((LDAP *) v);
 }
