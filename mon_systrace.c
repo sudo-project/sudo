@@ -497,7 +497,7 @@ read_string(fd, pid, addr, buf, bufsiz)
 	} else {
 	    if (errno != EINVAL || chunksiz == 4)
 		    return(-1);
-	    chunksiz >>= 1;	/* chunksiz too big, half it */
+	    chunksiz >>= 1;	/* chunksiz too big, halve it */
 	}
     }
     *cp = '\0';
@@ -583,6 +583,7 @@ update_env(fd, pid, seqnr, askp)
 	}
 	if ((*envp = ap) == NULL)
 	    break;
+	memset(buf, 0, sizeof(buf));
 	if ((len = read_string(fd, pid, ap, buf, sizeof(buf))) == -1)
 	    return(-1);
 	if (buf[0] == 'S') {
@@ -785,6 +786,7 @@ decode_args(fd, pid, askp)
      * Loop through argv, collapsing it into a single string and reading
      * until we hit the terminating NULL.  We skip argv[0].
      */
+    memset(abuf, 0, sizeof(abuf));
     off = (char *)askp->args[1];
     for (cp = abuf, ep = abuf + sizeof(abuf); cp < ep; off += sizeof(char *)) {
 	if (systrace_read(fd, pid, off, &ap, sizeof(ap)) != 0) {
@@ -821,7 +823,7 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
     int *policyp;
     int *errorp;
 {
-    int error, validated = VALIDATE_NOT_OK;
+    int rval, validated = VALIDATE_NOT_OK;
     struct childinfo *info;
 #ifdef HAVE_LDAP
     void *ld;
@@ -849,11 +851,15 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
     }
 
     /* Fill in user_cmnd, user_base, user_args and user_stat.  */
-    decode_args(fd, pid, askp);
+    if (decode_args(fd, pid, askp) != 0) {
+	*policyp = SYSTR_POLICY_NEVER;
+	*errorp = errno;
+	return(0);
+    }
 
     /* Get processes's cwd. */
-    error = ioctl(fd, STRIOCGETCWD, &pid);
-    if (error == -1 || !getcwd(user_cwd, sizeof(user_cwd))) {
+    rval = ioctl(fd, STRIOCGETCWD, &pid);
+    if (rval == -1 || !getcwd(user_cwd, sizeof(user_cwd))) {
 	warningx("cannot get working directory");
 	(void) strlcpy(user_cwd, "unknown", sizeof(user_cwd));
     }
@@ -861,14 +867,15 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
     /*
      * Stat user_cmnd and restore cwd
      */
-    validated = sudo_goodpath(user_cmnd, user_stat) != NULL;
-    if (error != -1)
-	(void) ioctl(fd, STRIOCRESCWD, 0);
-    if (!validated) {
+    if (sudo_goodpath(user_cmnd, user_stat) == NULL) {
+	if (rval != -1)
+	    (void) ioctl(fd, STRIOCRESCWD, 0);
 	*policyp = SYSTR_POLICY_NEVER;
 	*errorp = EACCES;
 	return(0);
     }
+    if (rval != -1)
+	(void) ioctl(fd, STRIOCRESCWD, 0);
 
     /* Check sudoers and log the result. */
     init_defaults();
@@ -916,7 +923,8 @@ check_execve(fd, pid, seqnr, askp, cookie, policyp, errorp)
 #ifdef STRIOCINJECT
     if (rval > 0 && *policyp == SYSTR_POLICY_PERMIT) {
 	/* read environment into buf, munge, and bung it back */
-	update_env(fd, pid, seqnr, askp);
+	if (update_env(fd, pid, seqnr, askp) != 0)
+	    rval = -1;
     }
 #endif
     return(rval);
