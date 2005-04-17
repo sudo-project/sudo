@@ -566,6 +566,9 @@ update_env(fd, pid, seqnr, askp)
     char buf[ARG_MAX], *ap, *cp, *off, *envptrs[4], *offsets[4], *replace[4];
     int len, n;
 
+    if (askp->argsize < sizeof(char *) * 3)
+	return(-1);				/* need at least 3 args */
+
     /*
      * Iterate through the environment, copying the data pointers and
      * attempting to update the SUDO_* variables (space permitting).
@@ -770,6 +773,9 @@ decode_args(fd, pid, askp)
     int len;
     char *off, *ap, *cp, *ep;
     static char pbuf[PATH_MAX], abuf[ARG_MAX];
+
+    if (askp->argsize < sizeof(char *) * 2)
+	return(-1);				/* need at least 2 args */
 
     memset(pbuf, 0, sizeof(pbuf));
     if (read_string(fd, pid, (void *)askp->args[0], pbuf, sizeof(pbuf)) == -1)
