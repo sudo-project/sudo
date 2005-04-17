@@ -30,13 +30,13 @@ static int decode_args		__P((int, pid_t, struct str_msg_ask *));
 static int set_policy		__P((int, struct childinfo *));
 static int switch_emulation	__P((int, struct str_message *));
 static int systrace_open	__P((void));
-static int systrace_read	__P((int, pid_t, void *, void *, size_t));
+static int systrace_read	__P((int, pid_t, char *, void *, int));
 #ifdef STRIOCINJECT
-static int systrace_write	__P((int, pid_t, void *, void *, size_t));
+static int systrace_write	__P((int, pid_t, char *, void *, int));
 static int update_env		__P((int, pid_t, u_int16_t, struct str_msg_ask *));
 #endif
 static schandler_t find_handler	__P((pid_t, int));
-static ssize_t read_string	__P((int, pid_t, void *, char *, size_t));
+static int read_string		__P((int, pid_t, char *, char *, int));
 static struct childinfo *find_child __P((pid_t));
 static void catchsig		__P((int));
 static void detachall		__P((int));

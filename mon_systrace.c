@@ -200,8 +200,7 @@ systrace_attach(pid)
 
     /* handle systrace events until the child finishes */
     for (;;) {
-	nread = read(fd, &msg, sizeof(msg));
-	if (nread != sizeof(msg)) {
+	if ((nread = read(fd, &msg, sizeof(msg))) != sizeof(msg)) {
 	    if (dodetach) {
 		detachall(fd);
 		_exit(0);
@@ -453,9 +452,9 @@ static int
 systrace_read(fd, pid, addr, buf, bufsiz)
     int fd;
     pid_t pid;
-    void *addr;
+    char *addr;
     void *buf;
-    size_t bufsiz;
+    int bufsiz;
 {
     struct systrace_io io;
 
@@ -474,15 +473,15 @@ systrace_read(fd, pid, addr, buf, bufsiz)
  * handle a strio_len > the actual kernel buffer.  It might be nice
  * to pass a starting chunksize though.
  */
-static ssize_t
+static int
 read_string(fd, pid, addr, buf, bufsiz)
     int fd;
     pid_t pid;
-    void *addr;
+    char *addr;
     char *buf;
-    size_t bufsiz;
+    int bufsiz;
 {
-    size_t chunksiz = 32;
+    int chunksiz = 32;
     char *cp = buf, *ep;
 
     while (bufsiz >= chunksiz) {
@@ -537,9 +536,9 @@ static int
 systrace_write(fd, pid, addr, buf, len)
     int fd;
     pid_t pid;
-    void *addr;
+    char *addr;
     void *buf;
-    size_t len;
+    int len;
 {
     struct systrace_io io;
 
@@ -563,10 +562,9 @@ update_env(fd, pid, seqnr, askp)
     struct str_msg_ask *askp;
 {
     struct systrace_replace repl;
-    ssize_t len;
     char *envbuf[ARG_MAX / sizeof(char *)], **envp, **envep;
     char buf[ARG_MAX], *ap, *cp, *off, *envptrs[4], *offsets[4], *replace[4];
-    int n;
+    int len, n;
 
     /*
      * Iterate through the environment, copying the data pointers and
@@ -769,7 +767,7 @@ decode_args(fd, pid, askp)
     pid_t pid;
     struct str_msg_ask *askp;
 {
-    ssize_t len;
+    int len;
     char *off, *ap, *cp, *ep;
     static char pbuf[PATH_MAX], abuf[ARG_MAX];
 
