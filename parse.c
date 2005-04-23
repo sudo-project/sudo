@@ -289,10 +289,9 @@ display_defaults(pw)
     struct passwd *pw;
 {
     struct defaults *d;
-    char opstr[2], *prefix;
+    char *prefix;
     int per_runas = 0, per_cmnd = 0;
 
-    opstr[1] = '\0';
     for (d = defaults, prefix = NULL; d != NULL; d = d->next) {
 	switch (d->type) {
 	    case DEFAULTS_HOST:
@@ -317,8 +316,8 @@ display_defaults(pw)
 	    print_def(prefix);
 	}
 	if (d->val != NULL) {
-	    opstr[0] = d->op == TRUE ? '=' : d->op;
-	    print_def4(d->op == FALSE ? "!" : "", d->var, opstr, d->val);
+	    print_def3(d->var, d->op == '+' ? "+=" : d->op == '-' ? "-=" : "=",
+		d->val);
 	} else
 	    print_def2(d->op == FALSE ? "!" : "", d->var);
 	prefix = ", ";
@@ -341,10 +340,9 @@ display_bound_defaults(dtype)
 {
     struct defaults *d;
     struct member *m, *binding;
-    char *dname, *dsep, opstr[2];
+    char *dname, *dsep;
     int atype;
 
-    opstr[1] = '\0';
     switch (dtype) {
 	case DEFAULTS_HOST:
 	    atype = HOSTALIAS;
@@ -386,8 +384,8 @@ display_bound_defaults(dtype)
 	} else
 	    print_def(", ");
 	if (d->val != NULL) {
-	    opstr[0] = d->op == TRUE ? '=' : d->op;
-	    print_def4(d->op == FALSE ? "!" : "", d->var, opstr, d->val);
+	    print_def3(d->var, d->op == '+' ? "+=" : d->op == '-' ? "-=" : "=",
+		d->val);
 	} else
 	    print_def2(d->op == FALSE ? "!" : "", d->var);
     }
