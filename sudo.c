@@ -964,7 +964,8 @@ open_sudoers(sudoers, keepopen)
 	log_error(0, "%s is zero length", sudoers);
     else if ((statbuf.st_mode & 07777) != SUDOERS_MODE)
 	log_error(0, "%s is mode 0%o, should be 0%o", sudoers,
-	    (statbuf.st_mode & 07777), SUDOERS_MODE);
+	    (unsigned int) (statbuf.st_mode & 07777),
+	    (unsigned int) SUDOERS_MODE);
     else if (statbuf.st_uid != SUDOERS_UID)
 	log_error(0, "%s is owned by uid %lu, should be %lu", sudoers,
 	    (unsigned long) statbuf.st_uid, (unsigned long) SUDOERS_UID);
