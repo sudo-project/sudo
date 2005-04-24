@@ -42,6 +42,7 @@
 #endif /* HAVE_UNISTD_H */
 #include <ctype.h>
 #include <pwd.h>
+#include <grp.h>
 
 #include "sudo.h"
 #include "parse.h"
