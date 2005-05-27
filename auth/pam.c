@@ -195,6 +195,18 @@ pam_prep_user(pw)
      */
     (void) pam_setcred(pamh, PAM_ESTABLISH_CRED);
 
+    /*
+     * To fully utilize PAM sessions we would need to keep a
+     * sudo process around until the command exits.  However, we
+     * can at least cause pam_limits to be run by opening and then
+     * immediately closing the session.
+     */
+    if (pam_open_session(pamh, 0) != PAM_SUCCESS) {
+	(void) pam_end(pamh, error);
+	return(AUTH_FAILURE);
+    }
+    (void) pam_close_session(pamh, 0);
+
     if (pam_end(pamh, PAM_SUCCESS | PAM_DATA_SILENT) == PAM_SUCCESS)
 	return(AUTH_SUCCESS);
     else
