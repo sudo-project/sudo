@@ -51,6 +51,9 @@
 #include <time.h>
 #include <pwd.h>
 #include <grp.h>
+#ifndef HAVE_TIMESPEC
+# include <emul/timespec.h>
+#endif
 
 #include "sudo.h"
 
