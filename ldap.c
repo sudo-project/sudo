@@ -250,8 +250,6 @@ sudo_ldap_check_command(ld, entry)
 	/* Match against ALL ? */
 	if (!strcasecmp(*p, "ALL")) {
 	    ret = TRUE;
-	    efree(safe_cmnd);
-	    safe_cmnd = estrdup(user_cmnd);
 	    DPRINTF(("ldap sudoCommand '%s' ... MATCH!", *p), 2);
 	    continue;
 	}
@@ -804,8 +802,8 @@ sudo_ldap_display_cmnd(ldv, pw)
     }
 
     if (found)
-	printf("%s%s%s\n", safe_cmnd, user_args ? " " : "",
-	    user_args ? user_args : "");
+	printf("%s%s%s\n", safe_cmnd ? safe_cmnd : user_cmnd,
+	    user_args ? " " : "", user_args ? user_args : "");
    return(!found);
 }
 
