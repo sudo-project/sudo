@@ -409,7 +409,8 @@ display_cmnd(v, pw)
     int rval = 1;
 
 #ifdef HAVE_LDAP
-    rval = sudo_ldap_display_cmnd(v, pw);
+    if (v != NULL)
+	rval = sudo_ldap_display_cmnd(v, pw);
 #endif
     if (rval != 0 && !def_ignore_local_sudoers) {
 	for (match = NULL, us = userspecs; us != NULL; us = us->next) {
