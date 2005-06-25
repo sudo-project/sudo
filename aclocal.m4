@@ -1,4 +1,4 @@
-dnl Local m4 macors for autoconf (used by sudo)
+dnl Local m4 macros for autoconf (used by sudo)
 dnl
 dnl Copyright (c) 1994-1996,1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
