@@ -1614,7 +1614,7 @@ if test "$withGCC" = yes; then
 else
   sys_lib_search_path_spec="/lib /usr/lib /usr/local/lib"
 fi
-need_lib_prefix=unknown
+need_lib_prefix=no
 hardcode_into_libs=no
 
 # when you set need_version to no, make sure it does not cause -set_version
