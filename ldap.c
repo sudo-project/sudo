@@ -85,6 +85,7 @@ struct ldap_config {
     char *uri;
     char *binddn;
     char *bindpw;
+    char *rootbinddn;
     char *base;
     char *ssl;
     int tls_checkpeer;
@@ -578,6 +579,8 @@ sudo_ldap_read_config()
 	    else
 	MATCH_S("bindpw", ldap_conf.bindpw)
 	    else
+	MATCH_S("rootbinddn", ldap_conf.rootbinddn)
+	    else
 	MATCH_S("sudoers_base", ldap_conf.base)
 	    else
 	MATCH_I("sudoers_debug", ldap_conf.debug)
@@ -630,6 +633,25 @@ sudo_ldap_read_config()
     }
     if (!ldap_conf.base)
 	return(FALSE);		/* if no base is defined, ignore LDAP */
+
+    /* If rootbinddn set, read in /etc/ldap.secret if it exists. */
+    if (ldap_conf.rootbinddn) {
+	if ((f = fopen(_PATH_LDAP_SECRET, "r")) != NULL) {
+	    if (fgets(buf, sizeof(buf), f) != NULL) {
+		/* removing trailing newlines */
+		for (c = buf; *c != '\0'; c++)
+		    continue;
+		while (--c > buf && *c == '\n')
+		    *c = '\0';
+		/* copy to bindpw and binddn */
+		efree(ldap_conf.bindpw);
+		ldap_conf.bindpw = estrdup(buf);
+		efree(ldap_conf.binddn);
+		ldap_conf.binddn = ldap_conf.rootbinddn;
+		ldap_conf.rootbinddn = NULL;
+	    }
+	}
+    }
     return(TRUE);
 }
 

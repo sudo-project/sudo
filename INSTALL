@@ -180,9 +180,14 @@ Special features/options:
 	containing the LDAP include and lib directories.  Please see
 	README.LDAP for more information.
 
-  --with-ldap-conf-file
+  --with-ldap-conf-file=filename
 	Path to LDAP configuration file.  If specified, sudo reads
 	this file instead of /etc/ldap.conf to locate the LDAP server.
+
+  --with-ldap-secret-file=filename
+	Path to LDAP secret password file.  If specified, sudo uses
+	this file instead of /etc/ldap.secret to read the secret password
+	when rootbinddn is specified in the ldap config file.
 
   --with-aixauth
 	Enable support for the AIX 4.x general authentication function.

@@ -1087,6 +1087,7 @@ Optional Packages:
   --with-goons-insults    include the insults from the "Goon Show"
   --with-ldap[=DIR]       enable LDAP support
   --with-ldap-conf-file   path to LDAP configuration file
+  --with-ldap-secret-file path to LDAP secret pasdword file
   --with-pc-insults       replace politically incorrect insults with less offensive ones
   --with-secure-path      override the user's path with a built-in one
   --without-interfaces    don't try to read the ip addr of ether interfaces
@@ -3088,6 +3089,16 @@ if test "${with_ldap_conf_file+set}" = set; then
 
 cat >>confdefs.h <<_ACEOF
 #define _PATH_LDAP_CONF "$with_ldap_conf_file"
+_ACEOF
+
+fi;
+
+# Check whether --with-ldap-secret-file or --without-ldap-secret-file was given.
+if test "${with_ldap_secret_file+set}" = set; then
+  withval="$with_ldap_secret_file"
+
+cat >>confdefs.h <<_ACEOF
+#define _PATH_LDAP_SECRET "$with_ldap_secret_file"
 _ACEOF
 
 fi;
@@ -6982,7 +6993,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 6985 "configure"
+#line 6996 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7080,7 +7091,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 7083 "configure"
+#line 7094 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7229,7 +7240,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  $ECHO '#line 7232 "configure"' > conftest.$ac_ext
+  $ECHO '#line 7243 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7880,11 +7891,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7883: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7894: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7887: \$? = $ac_status" >&5
+   echo "$as_me:7898: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -8155,11 +8166,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8158: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8169: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8162: \$? = $ac_status" >&5
+   echo "$as_me:8173: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -8252,11 +8263,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8255: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8266: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8259: \$? = $ac_status" >&5
+   echo "$as_me:8270: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8306,11 +8317,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8309: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8320: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8313: \$? = $ac_status" >&5
+   echo "$as_me:8324: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
