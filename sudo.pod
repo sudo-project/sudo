@@ -185,8 +185,8 @@ in the L<passwd(@mansectform@)> entry of the user that the command is
 being run as.  The command name argument given to the shell begins
 with a `C<->' to tell the shell to run as a login shell.  B<sudo>
 attempts to change to that user's home directory before running the
-shell.  It also initializes the environment, leaving I<TERM>
-unchanged, setting I<HOME>, I<SHELL>, I<USER>, I<LOGNAME>, and
+shell.  It also initializes the environment, leaving I<DISPLAY>
+and I<TERM> unchanged, setting I<HOME>, I<SHELL>, I<USER>, I<LOGNAME>, and
 I<PATH>, and unsetting all other environment variables.
 
 =item -K

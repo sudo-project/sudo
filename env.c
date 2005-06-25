@@ -160,6 +160,7 @@ static const char *initial_checkenv_table[] = {
  */
 static const char *initial_keepenv_table[] = {
     "KRB5CCNAME",
+    "DISPLAY",
     "PATH",
     "TERM",
     "TZ",

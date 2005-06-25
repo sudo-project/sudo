@@ -437,13 +437,14 @@ function.
 =item env_reset
 
 If set, B<sudo> will reset the environment to only contain the
-following variables: C<HOME>, C<LOGNAME>, C<PATH>, C<SHELL>, C<TERM>,
-C<TZ> and C<USER> (in addition to the C<SUDO_*> variables).
-Of these, only C<PATH>, C<TZ> and C<TERM> are copied unaltered from the old
-environment.  The other variables are set to default values (possibly
-modified by the value of the I<set_logname> option).  If the I<secure_path>
-option is set, its value will be used for the C<PATH> environment variable.
-Other variables may be preserved via the I<env_keep> option.
+following variables: C<DISPLAY>, C<HOME>, C<LOGNAME>, C<PATH>,
+C<SHELL>, C<TERM>, C<TZ> and C<USER> (in addition to the C<SUDO_*>
+variables).  Of these, only C<DISPLAY>, C<PATH>, C<TZ> and C<TERM>
+are copied unaltered from the old environment.  The other variables
+are set to default values (possibly modified by the value of the
+I<set_logname> option).  If the I<secure_path> option is set, its
+value will be used for the C<PATH> environment variable.  Other
+variables may be preserved via the I<env_keep> option.
 This flag is I<on> by default.
 
 =item use_loginclass
