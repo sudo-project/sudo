@@ -2000,7 +2000,8 @@ func_mode_finish ()
     fi
 
     # Exit here if they wanted silent mode.
-    test "$show" = : && exit $EXIT_SUCCESS
+    exit 0
+    #test "$show" = : && exit $EXIT_SUCCESS
 
     $ECHO "X----------------------------------------------------------------------" | $Xsed
     $ECHO "Libraries have been installed in:"
@@ -2490,16 +2491,7 @@ func_mode_install ()
       IFS="$save_ifs"
     done
 
-    test -n "$future_libdirs" && \
-      func_warning "remember to run \`$progname --finish$future_libdirs'"
-
-    if test -n "$current_libdirs"; then
-      # Maybe just do a dry run.
-      test -n "$run" && current_libdirs=" -n$current_libdirs"
-      exec_cmd='$SHELL $progpath $preserve_args --finish$current_libdirs'
-    else
-      exit $EXIT_SUCCESS
-    fi
+    exit $EXIT_SUCCESS
 }
 
 
@@ -4517,9 +4509,6 @@ func_mode_link ()
 	eval libname=\"$libname_spec\"
 	;;
       *)
-	test "$module" = no && \
-	  func_fatal_help "libtool library \`$output' must begin with \`lib'"
-
 	if test "$need_lib_prefix" != no; then
 	  # Add the "lib" prefix for modules if required
 	  name=`$ECHO "X$outputname" | $Xsed -e 's/\.la$//'`

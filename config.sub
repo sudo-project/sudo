@@ -2,6 +2,8 @@
 # Configuration validation subroutine script.
 #   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
 #   2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+#
+# $Sudo$
 
 timestamp='2004-08-29'
 
@@ -145,7 +147,7 @@ case $os in
 	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | -hitachi* |\
 	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
 	-harris | -dolphin | -highlevel | -gould | -cbm | -ns | -masscomp | \
-	-apple | -axis | -knuth | -cray)
+	-apple | -axis | -knuth | -cray | -sr2201*)
 		os=
 		basic_machine=$1
 		;;
@@ -541,6 +543,10 @@ case $basic_machine in
 	h8500hms)
 		basic_machine=h8500-hitachi
 		os=-hms
+		;;
+	sr2201*)
+		basic_machine=harp1e-hitachi
+		os=-hiuxmpp
 		;;
 	harris)
 		basic_machine=m88k-harris
