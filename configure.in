@@ -1540,6 +1540,16 @@ case "$host" in
 		dnl future versions of NetBSD (> 2.0) may include pam
 		: ${with_pam='maybe'}
 		;;
+    *-*-dragonfly*)
+		if test "$with_skey" = "yes"; then
+		     SUDO_LIBS="${SUDO_LIBS} -lmd"
+		fi
+		if test "$CHECKSHADOW" = "true"; then
+		    CHECKSHADOW="false"
+		fi
+		: ${with_pam='yes'}
+		: ${with_logincap='yes'}
+		;;
     *-*-*bsd*)
 		if test "$CHECKSHADOW" = "true"; then
 		    CHECKSHADOW="false"
