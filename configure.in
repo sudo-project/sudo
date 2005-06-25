@@ -4,10 +4,10 @@ dnl $Sudo$
 dnl
 dnl Copyright (c) 1994-1996,1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT(sudo, 1.7)
+AC_INIT([sudo], [1.7])
 AC_CONFIG_HEADER(config.h pathnames.h)
 dnl
-dnl This won't work before AC_INIT()
+dnl This won't work before AC_INIT
 dnl
 AC_MSG_NOTICE([Configuring Sudo version 1.7])
 dnl
@@ -1130,7 +1130,7 @@ AC_ARG_ENABLE(path_info,
 dnl
 dnl If we don't have egrep we can't do anything...
 dnl
-AC_CHECK_PROG(EGREPPROG, egrep, egrep, )
+AC_CHECK_PROG(EGREPPROG, egrep, egrep)
 if test -z "$EGREPPROG"; then
     AC_MSG_ERROR([Sorry, configure requires egrep to run.])
 fi
@@ -1146,17 +1146,16 @@ dnl
 dnl C compiler checks
 dnl
 AC_ISC_POSIX
-AC_PROG_CC_STDC
 AC_PROG_CPP
 
 dnl
 dnl Libtool magic; enable shared libs and disable static libs
+dnl XXX - disable static, require shared
 dnl
 AC_CANONICAL_HOST
-AC_CANONICAL_SYSTEM
-AC_ENABLE_SHARED
-AC_DISABLE_STATIC
-AC_PROG_LIBTOOL
+AC_CANONICAL_TARGET([])
+LT_PREREQ([1.9f])
+LT_INIT([disable-static])
 
 dnl
 dnl Defer with_noexec until after libtool magic runs
@@ -1187,9 +1186,9 @@ fi
 dnl
 dnl Find programs we use
 dnl
-AC_CHECK_PROG(UNAMEPROG, uname, uname, )
-AC_CHECK_PROG(TRPROG, tr, tr, )
-AC_CHECK_PROG(NROFFPROG, nroff, nroff, )
+AC_CHECK_PROG(UNAMEPROG, uname, uname)
+AC_CHECK_PROG(TRPROG, tr, tr)
+AC_CHECK_PROG(NROFFPROG, nroff, nroff)
 if test -z "$NROFFPROG"; then
     MANTYPE="cat"
     mansrcdir='$(srcdir)'
@@ -1256,8 +1255,8 @@ case "$host" in
 		if test X"$with_blibpath" != X"no"; then
 		    AC_MSG_CHECKING([if linker accepts -Wl,-blibpath])
 		    O_LDFLAGS="$LDFLAGS"
-		    LDFLAGS="$LDFLAGS -Wl,-blibpath:/usr/lib:/lib"
-		    AC_TRY_LINK([], [], [
+		    LDFLAGS="$O_LDFLAGS -Wl,-blibpath:/usr/lib:/lib"
+		    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[]])], [
 			if test -n "$with_blibpath" -a "$with_blibpath" != "yes"; then
 			    blibpath="$with_blibpath"
 			elif test -n "$GCC"; then
@@ -1364,12 +1363,11 @@ case "$host" in
 		if test "$CHECKSHADOW" = "true"; then
 		    # prot.h is included when using shadow passwords
 		    AC_MSG_CHECKING([for broken prot.h])
-		    AC_TRY_COMPILE([
+		    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <sys/security.h>
 #include <prot.h>
-		    ], [exit(0);], AC_MSG_RESULT(no),
-		    [AC_MSG_RESULT([yes, fixing locally])
+		    ]], [[exit(0);]])], [AC_MSG_RESULT(no)], [AC_MSG_RESULT([yes, fixing locally])
 		    sed 's:<acl.h>:<sys/acl.h>:g' < /usr/include/prot.h > prot.h
 		    ])
 		fi
@@ -1652,9 +1650,9 @@ AC_TYPE_MODE_T
 AC_TYPE_UID_T
 AC_CHECK_TYPES([sig_atomic_t], , [AC_DEFINE(sig_atomic_t, int)], [#include <sys/types.h>
 #include <signal.h>])
-AC_CHECK_TYPES([sigaction_t], [AC_DEFINE(HAVE_SIGACTION_T)], ,[#include <sys/types.h>
+AC_CHECK_TYPES([sigaction_t], [AC_DEFINE(HAVE_SIGACTION_T)], [], [#include <sys/types.h>
 #include <signal.h>])
-AC_CHECK_TYPE([struct timespec], [AC_DEFINE(HAVE_TIMESPEC)], , [#include <sys/types.h>
+AC_CHECK_TYPE([struct timespec], [AC_DEFINE(HAVE_TIMESPEC)], [], [#include <sys/types.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -1695,10 +1693,9 @@ if test -z "$BROKEN_GETCWD"; then
     AC_REPLACE_FUNCS(getcwd)
 fi
 AC_CHECK_FUNCS(glob, [AC_MSG_CHECKING(for GLOB_BRACE and GLOB_TILDE in glob.h)
-AC_TRY_COMPILE([#include <glob.h>], [int i = GLOB_BRACE | GLOB_TILDE; (void)i;],
-    [AC_DEFINE(HAVE_EXTENDED_GLOB)
-    AC_MSG_RESULT(yes)], [AC_LIBOBJ(glob)]
-    [AC_MSG_RESULT(no)])], [AC_LIBOBJ(glob)])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <glob.h>]], [[int i = GLOB_BRACE | GLOB_TILDE; (void)i;]])], [AC_DEFINE(HAVE_EXTENDED_GLOB)
+    AC_MSG_RESULT(yes)], [AC_LIBOBJ(glob)
+    AC_MSG_RESULT(no)])], [AC_LIBOBJ(glob)])
 AC_CHECK_FUNCS(lockf flock, [break])
 AC_CHECK_FUNCS(waitpid wait3, [break])
 AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])
@@ -1710,22 +1707,21 @@ AC_CHECK_FUNCS(snprintf vsnprintf asprintf vasprintf, , [NEED_SNPRINTF=1])
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
     AC_CHECK_MEMBER([struct stat.st_mtim], AC_DEFINE(HAVE_ST_MTIM), [AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
     AC_MSG_CHECKING([for two-parameter timespecsub])
-    AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/time.h>], [struct timespec ts1, ts2;
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+#include <sys/time.h>]], [[struct timespec ts1, ts2;
 ts1.tv_sec = 1; ts1.tv_nsec = 0; ts2.tv_sec = 0; ts2.tv_nsec = 0;
 #ifndef timespecsub
 #error missing timespecsub
 #endif
-timespecsub(&ts1, &ts2);],
-	[AC_DEFINE(HAVE_TIMESPECSUB2)
-	AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)])
+timespecsub(&ts1, &ts2);]])], [AC_DEFINE(HAVE_TIMESPECSUB2)
+    AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)])
 fi
 dnl
 dnl Check for the dirfd function/macro.  If not found, look for dd_fd in DIR.
 dnl
-AC_TRY_LINK([#include <sys/types.h>
-#include <$ac_header_dirent>], [DIR d; (void)dirfd(&d);], [AC_DEFINE(HAVE_DIRFD)], [AC_TRY_LINK([#include <sys/types.h>
-#include <$ac_header_dirent>], [DIR d; (void)&d.dd_fd;], [AC_DEFINE(HAVE_DD_FD)], [])])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+#include <$ac_header_dirent>]], [[DIR d; (void)dirfd(&d);]])], [AC_DEFINE(HAVE_DIRFD)], [AC_TRY_LINK([#include <sys/types.h>
+#include <$ac_header_dirent>], [DIR d; (void)&d.dd_fd;], [AC_DEFINE(HAVE_DD_FD)])])
 dnl
 dnl If NEED_SNPRINTF is set, add snprintf.c to LIBOBJS
 dnl (it contains snprintf, vsnprintf, asprintf, and vasprintf)
@@ -1769,8 +1765,7 @@ dnl
 AC_CHECK_FUNCS(getprogname, , [
     AC_MSG_CHECKING([for __progname])
     AC_CACHE_VAL(sudo_cv___progname, [
-    AC_TRY_LINK(, [extern char *__progname; (void)puts(__progname);],
-    [sudo_cv___progname=yes], [sudo_cv___progname=no])])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *__progname; (void)puts(__progname);]])], [sudo_cv___progname=yes], [sudo_cv___progname=no])])
     if test "$sudo_cv___progname" = "yes"; then
 	AC_DEFINE(HAVE___PROGNAME)
     else
@@ -1805,7 +1800,7 @@ if test -n "$with_kerb4"; then
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "kerberosIV/" "krb4/" "kerberos4/" "kerberosv4/"; do
 	    CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
-	    AC_PREPROC_IFELSE([#include <krb.h>], [found=yes; break], )
+	    AC_PREPROC_IFELSE([#include <krb.h>], [found=yes; break])
 	done
 	test X"$found" = X"no" && CPPFLAGS="$O_CPPFLAGS"
     else
@@ -1828,8 +1823,7 @@ if test -n "$with_kerb4"; then
     dnl Try to determine whether we have KTH or MIT/CNS Kerberos IV
     dnl
     AC_MSG_CHECKING(whether we are using KTH Kerberos IV)
-    AC_TRY_COMPILE([#include <krb.h>], [const char *tmp = krb4_version;],
-	[
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <krb.h>]], [[const char *tmp = krb4_version;]])], [
 	    AC_MSG_RESULT(yes)
 	    K4LIBS="${K4LIBS} -lcom_err"
 	    AC_CHECK_LIB(roken, main, [K4LIBS="${K4LIBS} -lroken"])
@@ -1874,8 +1868,7 @@ if test "$with_kerb5" = "yes"; then
 	dnl Try to determine whether we have Heimdal or MIT Kerberos
 	dnl
 	AC_MSG_CHECKING(whether we are using Heimdal)
-	AC_TRY_COMPILE([#include <krb5.h>], [const char *tmp = heimdal_version;],
-	    [
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <krb5.h>]], [[const char *tmp = heimdal_version;]])], [
 		AC_MSG_RESULT(yes)
 		AC_DEFINE(HAVE_HEIMDAL)
 	    ]
@@ -1892,7 +1885,7 @@ if test -n "$with_kerb5" -a -z "$KRB5CONFIG"; then
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "kerberosV/" "krb5/" "kerberos5/" "kerberosv5/"; do
 	    CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
-	    AC_PREPROC_IFELSE([#include <krb5.h>], [found=yes; break], )
+	    AC_PREPROC_IFELSE([#include <krb5.h>], [found=yes; break])
 	done
 	if test X"$found" = X"no"; then
 	    CPPFLAGS="$O_CPPFLAGS"
@@ -1908,8 +1901,7 @@ if test -n "$with_kerb5" -a -z "$KRB5CONFIG"; then
     dnl Try to determine whether we have Heimdal or MIT Kerberos
     dnl
     AC_MSG_CHECKING(whether we are using Heimdal)
-    AC_TRY_COMPILE([#include <krb5.h>], [const char *tmp = heimdal_version;],
-	[
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <krb5.h>]], [[const char *tmp = heimdal_version;]])], [
 	    AC_MSG_RESULT(yes)
 	    AC_DEFINE(HAVE_HEIMDAL)
 	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -ldes -lcom_err -lasn1"
@@ -1917,8 +1909,8 @@ if test -n "$with_kerb5" -a -z "$KRB5CONFIG"; then
 	], [
 	    AC_MSG_RESULT(no)
 	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
-	]
-    )
+	
+    ])
     if test X"$AUTH_OBJS" = X""; then
 	AUTH_OBJS="kerb5.o"
     else
@@ -1958,7 +1950,9 @@ if test ${with_pam-'no'} != "no"; then
     dnl
     dnl Linux may need this
     dnl
-    AC_HAVE_LIBRARY(dl, SUDO_LIBS="${SUDO_LIBS} -lpam -ldl", SUDO_LIBS="${SUDO_LIBS} -lpam")
+    AC_CHECK_LIB([dl], [main], [SUDO_LIBS="${SUDO_LIBS} -lpam -ldl"], [SUDO_LIBS="${SUDO_LIBS} -lpam"])
+    ac_cv_lib_dl=ac_cv_lib_dl_main
+
     dnl
     dnl Some PAM implementations (MacOS X for example) put the PAM headers
     dnl in /usr/include/pam instead of /usr/include/security...
@@ -2084,7 +2078,7 @@ if test -n "$with_skey"; then
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "/usr/local" "/usr/contrib"; do
 	    test -n "$dir" && CPPFLAGS="$O_CPPFLAGS -I${dir}/include"
-	    AC_PREPROC_IFELSE([#include <skey.h>], [found=yes; break], )
+	    AC_PREPROC_IFELSE([#include <skey.h>], [found=yes; break])
 	done
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
@@ -2117,7 +2111,7 @@ if test -n "$with_opie"; then
 	O_CPPFLAGS="$CPPFLAGS"
 	for dir in "" "/usr/local" "/usr/contrib"; do
 	    test -n "$dir" && CPPFLAGS="$O_CPPFLAGS -I${dir}/include"
-	    AC_PREPROC_IFELSE([#include <opie.h>], [found=yes; break], )
+	    AC_PREPROC_IFELSE([#include <opie.h>], [found=yes; break])
 	done
 	if test "$found" = "no" -o -z "$dir"; then
 	    CPPFLAGS="$O_CPPFLAGS"
@@ -2205,9 +2199,9 @@ if test -n "$with_ldap"; then
     for l in -lldap -llber '-lssl -lcrypto'; do
 	LIBS="${LIBS} $l"
 	LDAP_LIBS="${LDAP_LIBS} $l"
-	AC_TRY_LINK([#include <sys/types.h>
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 	#include <lber.h>
-	#include <ldap.h>], [(void)ldap_init(0, 0)], [found=yes; break], [])
+	#include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [found=yes; break])
     done
     dnl if nothing linked just try with -ldap
     if test "$found" = "no"; then
@@ -2218,8 +2212,8 @@ if test -n "$with_ldap"; then
     fi
     dnl try again w/o explicitly including lber.h
     AC_MSG_CHECKING([whether lber.h is needed])
-    AC_TRY_LINK([#include <sys/types.h>
-    #include <ldap.h>], [(void)ldap_init(0, 0)], [AC_MSG_RESULT([no])], [
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+    #include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [AC_MSG_RESULT([no])], [
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_LBER_H)])
 
@@ -2308,7 +2302,8 @@ fi
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-AC_OUTPUT([Makefile sudo.man visudo.man sudoers.man])
+AC_CONFIG_FILES([Makefile sudo.man visudo.man sudoers.man])
+AC_OUTPUT
 
 dnl
 dnl Spew any text the user needs to know about
