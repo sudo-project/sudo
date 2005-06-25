@@ -1619,7 +1619,7 @@ hardcode_into_libs=no
 
 # when you set need_version to no, make sure it does not cause -set_version
 # flags to be left without arguments
-need_version=unknown
+need_version=no
 
 case $host_os in
 aix3*)
@@ -1818,7 +1818,7 @@ freebsd*)
       ;;
     freebsd-*)
       library_names_spec='${libname}${release}${shared_ext}$versuffix $libname${shared_ext}$versuffix'
-      need_version=yes
+      need_version=no
       ;;
   esac
   shlibpath_var=LD_LIBRARY_PATH
@@ -2019,7 +2019,7 @@ openbsd*)
   need_lib_prefix=no
   # Some older versions of OpenBSD (3.3 at least) *do* need versioned libs.
   case $host_os in
-    openbsd3.3 | openbsd3.3.*)	need_version=yes ;;
+    openbsd3.3 | openbsd3.3.*)	need_version=no ;;
     *)				need_version=no  ;;
   esac
   library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${shared_ext}$versuffix'
@@ -2088,7 +2088,7 @@ sunos4*)
   if test "$with_gnu_ld" = yes; then
     need_lib_prefix=no
   fi
-  need_version=yes
+  need_version=no
   ;;
 
 sysv4 | sysv4.2uw2* | sysv4.3* | sysv5*)
