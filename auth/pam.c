@@ -175,6 +175,8 @@ int
 pam_prep_user(pw)
     struct passwd *pw;
 {
+    int eval;
+
     if (pamh == NULL)
 	pam_init(pw, NULL, NULL);
 
@@ -201,8 +203,8 @@ pam_prep_user(pw)
      * can at least cause pam_limits to be run by opening and then
      * immediately closing the session.
      */
-    if (pam_open_session(pamh, 0) != PAM_SUCCESS) {
-	(void) pam_end(pamh, error);
+    if ((eval = pam_open_session(pamh, 0)) != PAM_SUCCESS) {
+	(void) pam_end(pamh, eval | PAM_DATA_SILENT);
 	return(AUTH_FAILURE);
     }
     (void) pam_close_session(pamh, 0);
