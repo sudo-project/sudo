@@ -12,6 +12,8 @@ Some have attempted to workaround this by synchronizing changes via
 RCS/CVS/RSYNC/RDIST/RCP/SCP and even NFS.  Many have asked for a Hesiod, NIS,
 or LDAP patch for sudo, so here is my attempt at LDAP'izing sudo.
 
+For information on OpenLDAP, please see http://www.openldap.org/.
+
 Definitions
 ===========
 Many times the word 'Directory' is used in the document to refer to the LDAP
@@ -186,6 +188,14 @@ Importing is a two step process.
 
 Step 1:
 Ask your LDAP Administrator where to create the ou=SUDOers container.
+
+For instance, if using OpenLDAP:
+
+  dn: ou=SUDOers,dc=example,dc=com
+  objectClass: top
+  objectClass: organizationalUnit
+  ou: SUDOers
+
 (An example location is shown below).  Then use the provided script to convert
 your sudoers file into LDIF format.  The script will also convert any default
 options.
@@ -258,6 +268,7 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
   # optional proxy credentials
   #binddn        <who to search as>
   #bindpw        <password>
+  #rootbinddn    <who to search as, uses /etc/ldap.passwd for bindpw>
   #
   # LDAP Protocol Version defaults to 3
   #ldap_version 3
