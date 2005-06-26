@@ -62,8 +62,8 @@
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-#ifndef BUF_SIZ
-# define BUF_SIZ 1024
+#ifndef LINE_MAX
+# define LINE_MAX 2048
 #endif
 
 #ifndef LDAP_OPT_SUCCESS
@@ -503,7 +503,7 @@ int
 sudo_ldap_read_config()
 {
     FILE *f;
-    char buf[BUF_SIZ], *c, *keyword, *value;
+    char buf[LINE_MAX], *c, *keyword, *value;
 
     ldap_conf.tls_checkpeer = -1;	/* default */
 
