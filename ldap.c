@@ -79,23 +79,23 @@ __unused static const char rcsid[] = "$Sudo$";
 
 /* ldap configuration structure */
 struct ldap_config {
-    char *host;
     int port;
     int version;
+    int debug;
+    int tls_checkpeer;
+    char *host;
     char *uri;
     char *binddn;
     char *bindpw;
     char *rootbinddn;
     char *base;
     char *ssl;
-    int tls_checkpeer;
     char *tls_cacertfile;
     char *tls_cacertdir;
     char *tls_random_file;
     char *tls_cipher_suite;
     char *tls_certfile;
     char *tls_keyfile;
-    int debug;
 } ldap_conf;
 
 /*
