@@ -189,33 +189,26 @@ sudo_ldap_check_runas(ld, entry)
     /*
      * BUG:
      * 
-     * if runas is not specified on the command line, the only information as to
-     * which user to run as is in the runas_default option. We should check
-     * check to see if we have the local option present. Unfortunately we
-     * don't parse these options until after this routine says yes * or no.
+     * if runas is not specified on the command line, the only information
+     * as to which user to run as is in the runas_default option.  We should
+     * check to see if we have the local option present.  Unfortunately we
+     * don't parse these options until after this routine says yes or no.
      * The query has already returned, so we could peek at the attribute
      * values here though.
      * 
-     * For now just require users to always use -u option unless its set in the
-     * global defaults. This behaviour is no different than the global
+     * For now just require users to always use -u option unless its set
+     * in the global defaults. This behaviour is no different than the global
      * /etc/sudoers.
      * 
      * Sigh - maybe add this feature later
-     * 
      */
 
     /*
-     * If there are no runas entries, then match the runas_default with
-     * what's on the command line.
+     * If there are no runas entries, match runas_default against
+     * what the user specified on the command line.
      */
     if (!v)
 	ret = !strcasecmp(*user_runas, def_runas_default);
-
-    /*
-     * What about the case where exactly one runas is specified in the
-     * config and the user forgets the -u option, should we switch it?
-     * Probably not...
-     */
 
     /* walk through values returned, looking for a match */
     for (p = v; p && *p && !ret; p++) {
@@ -650,6 +643,7 @@ sudo_ldap_read_config()
 		ldap_conf.binddn = ldap_conf.rootbinddn;
 		ldap_conf.rootbinddn = NULL;
 	    }
+	    fclose(f);
 	}
     }
     return(TRUE);
