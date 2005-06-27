@@ -367,47 +367,6 @@ sudo_ldap_parse_options(ld, entry)
 }
 
 /*
- * Concatenate strings, dynamically growing them as necessary.
- * Strings can be arbitrarily long and are allocated/reallocated on
- * the fly.  Make sure to free them when you are done.
- *
- * Usage:
- *
- * char *s=NULL;
- * size_t sz;
- *
- * ncat(&s,&sz,"This ");
- * ncat(&s,&sz,"is ");
- * ncat(&s,&sz,"an ");
- * ncat(&s,&sz,"arbitrarily ");
- * ncat(&s,&sz,"long ");
- * ncat(&s,&sz,"string!");
- *
- * printf("String Value='%s', but has %d bytes allocated\n",s,sz);
- *
- */
-void
-ncat(s, sz, src)
-    char **s;
-    size_t *sz;
-    char *src;
-{
-    size_t nsz;
-
-    /* handle initial alloc */
-    if (*s == NULL) {
-	*s = estrdup(src);
-	*sz = strlen(src) + 1;
-	return;
-    }
-    /* handle realloc */
-    nsz = strlen(*s) + strlen(src) + 1;
-    if (*sz < nsz)
-	*s = erealloc((void *) *s, *sz = nsz * 2);
-    strlcat(*s, src, *sz);
-}
-
-/*
  * builds together a filter to check against ldap
  */
 char *
@@ -416,41 +375,47 @@ sudo_ldap_build_pass1(pw)
 {
     struct group *grp;
     size_t sz;
-    char *b = NULL;
+    char *buf;
     int i;
 
-    /* global OR */
-    ncat(&b, &sz, "(|");
+    /* Start with (|(sudoUser=USERNAME)(sudoUser=ALL)) + NUL */
+    sz = 29 + strlen(pw->pw_name);
 
-    /* build filter sudoUser=user_name */
-    ncat(&b, &sz, "(sudoUser=");
-    ncat(&b, &sz, pw->pw_name);
-    ncat(&b, &sz, ")");
+    /* Add space for groups */
+    if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL)
+	sz += 12 + strlen(grp->gr_name);	/* primary group */
+    for (i = 0; i < user_ngroups; i++) {
+	if ((grp = sudo_getgrgid(user_groups[i])) != NULL)
+	    sz += 12 + strlen(grp->gr_name);	/* supplementary group */
+    }
+    buf = emalloc(sz);
+
+    /* Global OR + sudoUser=user_name filter */
+    (void) strlcpy(buf, "(|(sudoUser=", sz);
+    (void) strlcat(buf, pw->pw_name, sz);
+    (void) strlcat(buf, ")", sz);
 
     /* Append primary group */
-    grp = sudo_getgrgid(pw->pw_gid);
-    if (grp != NULL) {
-	ncat(&b, &sz, "(sudoUser=%");
-	ncat(&b, &sz, grp->gr_name);
-	ncat(&b, &sz, ")");
+    if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL) {
+	(void) strlcat(buf, "(sudoUser=%", sz);
+	(void) strlcat(buf, grp->gr_name, sz);
+	(void) strlcat(buf, ")", sz);
     }
 
     /* Append supplementary groups */
     for (i = 0; i < user_ngroups; i++) {
 	if ((grp = sudo_getgrgid(user_groups[i])) != NULL) {
-	    ncat(&b, &sz, "(sudoUser=%");
-	    ncat(&b, &sz, grp->gr_name);
-	    ncat(&b, &sz, ")");
+	    (void) strlcat(buf, "(sudoUser=%", sz);
+	    (void) strlcat(buf, grp->gr_name, sz);
+	    (void) strlcat(buf, ")", sz);
 	}
     }
 
-    /* Add ALL to list */
-    ncat(&b, &sz, "(sudoUser=ALL)");
+    /* Add ALL to list and end the global OR */
+    if (strlcat(buf, "(sudoUser=ALL))", sz) >= sz)
+	errorx(1, "sudo_ldap_build_pass1 allocation mismatch");
 
-    /* End of OR List */
-    ncat(&b, &sz, ")");
-
-    return(b);
+    return(buf);
 }
 
 /*
