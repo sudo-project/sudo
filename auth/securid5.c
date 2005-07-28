@@ -121,6 +121,10 @@ securid_setup(pw, promptp, auth)
     retval = SD_Lock(*sd, pw->pw_name);
 
     switch (retval) {
+	case ACM_OK:
+		warningx("User ID locked for SecurID Authentication");
+		return(AUTH_SUCCESS);
+
         case ACE_UNDEFINED_USERNAME:
 		warningx("invalid username length for SecurID");
 		return(AUTH_FATAL);
@@ -133,9 +137,9 @@ securid_setup(pw, promptp, auth)
 		warningx("SecurID communication failed");
 		return(AUTH_FATAL);
 
-	case ACM_OK:
-		warningx("User ID locked for SecurID Authentication");
-		return(AUTH_SUCCESS);
+	default:
+		warningx("unknown SecurID error");
+		return(AUTH_FATAL);
 	}
 }
 
@@ -165,6 +169,10 @@ securid_verify(pw, pass, auth)
 
     /* Have ACE verify password */
     switch (SD_Check(*sd, pass, pw->pw_name)) {
+	case ACM_OK:
+		rval = AUTH_SUCESS;
+		break;
+
 	case ACE_UNDEFINED_PASSCODE:
 		warningx("invalid passcode length for SecurID");
 		rval = AUTH_FATAL;
@@ -178,6 +186,7 @@ securid_verify(pw, pass, auth)
 	case ACE_ERR_INVALID_HANDLE:
 		warningx("invalid Authentication Handle for SecurID");
 		rval = AUTH_FATAL;
+		break;
 
 	case ACM_ACCESS_DENIED:
 		rval = AUTH_FAILURE;
@@ -210,6 +219,11 @@ then enter the new token code.\n", \
 		SD_Pin(*sd, "");
 		fprintf(stderr, "Your SecurID access has not yet been set up.\n");
 		fprintf(stderr, "Please set up a PIN before you try to authenticate.\n");
+		rval = AUTH_FATAL;
+		break;
+
+	default:
+		warningx("unknown SecurID error");
 		rval = AUTH_FATAL;
 		break;
     }
