@@ -59,13 +59,10 @@
 static FILE *pwf;
 static const char *pwfile = "/etc/passwd";
 static int pw_stayopen;
-static struct passwd pwbuf;
 
 static FILE *grf;
 static const char *grfile = "/etc/group";
 static int gr_stayopen;
-static struct group grbuf;
-static char *gr_mem[GRMEM_MAX+1];
 
 void ts_setgrfile __P((const char *));
 void ts_setgrent __P((void));
@@ -113,42 +110,44 @@ ts_endpwent()
 struct passwd *
 ts_getpwent()
 {
+    static struct passwd pw;
+    static char pwbuf[LINE_MAX];
     size_t len;
-    char buf[LINE_MAX], *cp, *colon;
+    char *cp, *colon;
 
-    if ((colon = fgets(buf, sizeof(buf), pwf)) == NULL)
+    if ((colon = fgets(pwbuf, sizeof(pwbuf), pwf)) == NULL)
 	return(NULL);
 
-    memset(&pwbuf, 0, sizeof(pwbuf));
+    memset(&pw, 0, sizeof(pw));
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	return(NULL);
     *colon++ = '\0';
-    pwbuf.pw_name = cp;
+    pw.pw_name = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	return(NULL);
     *colon++ = '\0';
-    pwbuf.pw_passwd = cp;
+    pw.pw_passwd = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	return(NULL);
     *colon++ = '\0';
-    pwbuf.pw_uid = atoi(cp);
+    pw.pw_uid = atoi(cp);
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	return(NULL);
     *colon++ = '\0';
-    pwbuf.pw_gid = atoi(cp);
+    pw.pw_gid = atoi(cp);
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	return(NULL);
     *colon++ = '\0';
-    pwbuf.pw_gecos = cp;
+    pw.pw_gecos = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	return(NULL);
     *colon++ = '\0';
-    pwbuf.pw_dir = cp;
-    pwbuf.pw_shell = colon;
+    pw.pw_dir = cp;
+    pw.pw_shell = colon;
     len = strlen(colon);
     if (len > 0 && colon[len - 1] == '\n')
 	colon[len - 1] = '\0';
-    return(&pwbuf);
+    return(&pw);
 }
 
 struct passwd *
@@ -225,40 +224,42 @@ ts_endgrent()
 struct group *
 ts_getgrent()
 {
+    static struct group gr;
+    static char grbuf[LINE_MAX], *gr_mem[GRMEM_MAX+1];
     size_t len;
-    char buf[LINE_MAX], *cp, *colon;
+    char *cp, *colon;
     int n;
 
-    if ((colon = fgets(buf, sizeof(buf), grf)) == NULL)
+    if ((colon = fgets(grbuf, sizeof(grbuf), grf)) == NULL)
 	return(NULL);
 
-    memset(&grbuf, 0, sizeof(grbuf));
+    memset(&gr, 0, sizeof(gr));
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	return(NULL);
     *colon++ = '\0';
-    grbuf.gr_name = cp;
+    gr.gr_name = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	return(NULL);
     *colon++ = '\0';
-    grbuf.gr_passwd = cp;
+    gr.gr_passwd = cp;
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	return(NULL);
     *colon++ = '\0';
-    grbuf.gr_gid = atoi(cp);
+    gr.gr_gid = atoi(cp);
     len = strlen(colon);
     if (len > 0 && colon[len - 1] == '\n')
 	colon[len - 1] = '\0';
     if (*colon != '\0') {
-	grbuf.gr_mem = gr_mem;
+	gr.gr_mem = gr_mem;
 	cp = strtok(colon, ",");
 	for (n = 0; cp != NULL && n < GRMEM_MAX; n++) {
-	    grbuf.gr_mem[n] = cp;
+	    gr.gr_mem[n] = cp;
 	    cp = strtok(NULL, ",");
 	}
-	grbuf.gr_mem[n++] = NULL;
+	gr.gr_mem[n++] = NULL;
     } else
-	grbuf.gr_mem = NULL;
-    return(&grbuf);
+	gr.gr_mem = NULL;
+    return(&gr);
 }
 
 struct group *
