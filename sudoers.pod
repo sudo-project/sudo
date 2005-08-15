@@ -379,7 +379,7 @@ password.  This flag is I<@insults@> by default.
 If set, B<sudo> will only run when the user is logged in to a real
 tty.  This will disallow things like C<"rsh somehost sudo ls"> since
 L<rsh(1)> does not allocate a tty.  Because it is not possible to turn
-off echo when there is no tty present, some sites may with to set
+off echo when there is no tty present, some sites may wish to set
 this flag to prevent a user from entering a visible password.  This
 flag is I<off> by default.
 
