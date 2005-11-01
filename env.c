@@ -144,6 +144,7 @@ static const char *initial_badenv_table[] = {
     "BASH_ENV",
     "PS4",
     "SHELLOPTS",
+    "JAVA_TOOL_OPTIONS",
     NULL
 };
 
