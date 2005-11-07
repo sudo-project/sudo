@@ -145,6 +145,9 @@ static const char *initial_badenv_table[] = {
     "PS4",
     "SHELLOPTS",
     "JAVA_TOOL_OPTIONS",
+    "PERLLIB",
+    "PERL5LIB",
+    "PERL5OPT",
     NULL
 };
 
