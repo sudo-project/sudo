@@ -154,6 +154,10 @@ main(argc, argv)
     sigaction_t sa;
     VOID *ld = NULL;
     extern char **environ;
+#if defined(SUDO_DEVEL) && defined(__OpenBSD__)
+    extern char *malloc_options;
+    malloc_options = "AFGJPR";
+#endif
 
 #ifdef HAVE_SETLOCALE
     setlocale(LC_ALL, "C");
