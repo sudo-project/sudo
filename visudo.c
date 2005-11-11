@@ -650,6 +650,9 @@ run_command(path, argv)
 	    break;	/* NOTREACHED */
 	case 0:
 	    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
+	    sudo_endpwent();
+	    sudo_endgrent();
+	    closefrom(STDERR_FILENO + 1);
 	    execv(path, argv);
 	    warning("unable to run %s", path);
 	    _exit(127);
