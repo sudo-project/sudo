@@ -240,6 +240,9 @@ int sudo_edit(argc, argv)
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
 	set_perms(PERM_FULL_USER);
+	sudo_endpwent();
+	sudo_endgrent();
+	closefrom(def_closefrom + 1);
 	execvp(nargv[0], nargv);
 	warning("unable to execute %s", nargv[0]);
 	_exit(127);

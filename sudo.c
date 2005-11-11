@@ -404,10 +404,6 @@ main(argc, argv)
 	if (ISSET(sudo_mode, MODE_RUN))
 	    set_perms(PERM_FULL_RUNAS);
 
-	/* Close the password and group files */
-	sudo_endpwent();
-	sudo_endgrent();
-
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	    char *p;
 
@@ -430,6 +426,10 @@ main(argc, argv)
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	(void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
 	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
+
+	/* Close the password and group files and free up memory. */
+	sudo_endpwent();
+	sudo_endgrent();
 
 	closefrom(def_closefrom + 1);
 
