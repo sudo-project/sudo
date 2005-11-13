@@ -96,13 +96,13 @@ void
 systrace_attach(pid)
     pid_t pid;
 {
-    schandler_t handler;
+    struct syscallhandler *handler;
     struct systrace_answer ans;
     struct str_message msg;
     sigaction_t sa, osa;
     sigset_t set, oset;
     ssize_t nread;
-    int fd, cookie;
+    int fd, status;
 
     if ((fd = systrace_open()) == -1)
 	error(1, "unable to open systrace");
@@ -239,21 +239,17 @@ systrace_attach(pid)
 		ans.stra_seqnr = msg.msg_seqnr;
 		ans.stra_policy = SYSTR_POLICY_PERMIT;
 		handler = find_handler(msg.msg_pid, msg.msg_data.msg_ask.code);
-		if (handler != NULL) {
-		    /*
-		     * The handler is run twice, once before we answer and
-		     * once after.  We only want to log attempts when our
-		     * answer is accepted; otherwise we can get dupes.
-		     */
-		    cookie = handler(fd, msg.msg_pid, msg.msg_seqnr,
-			&msg.msg_data.msg_ask, -1, &ans.stra_policy,
+		if (handler != NULL && handler->checker != NULL) {
+		    status = handler->checker(fd, msg.msg_pid, msg.msg_seqnr,
+			&msg.msg_data.msg_ask, &ans.stra_policy,
 			&ans.stra_error);
-			if (ioctl(fd, STRIOCANSWER, &ans) == 0)
-			    handler(fd, msg.msg_pid, msg.msg_seqnr,
-				&msg.msg_data.msg_ask, cookie,
-				&ans.stra_policy, &ans.stra_error);
+		    if (status >= 0 && ioctl(fd, STRIOCANSWER, &ans) == 0) {
+			if (handler->logger != NULL)
+			    handler->logger(status);
+		    }
 		} else
-		    (void) ioctl(fd, STRIOCANSWER, &ans);
+		    if (ioctl(fd, STRIOCANSWER, &ans) == -1)
+			warning("STRIOCANSWER");
 		break;
 
 	    case SYSTR_MSG_EMUL:
@@ -268,7 +264,8 @@ systrace_attach(pid)
 			msg.msg_data.msg_emul.emul);
 		    ans.stra_policy = SYSTR_POLICY_NEVER;
 		}
-		(void) ioctl(fd, STRIOCANSWER, &ans);
+		if (ioctl(fd, STRIOCANSWER, &ans) == -1)
+		    warning("STRIOCANSWER");
 		break;
 
 #ifdef SYSTR_MSG_POLICYFREE
@@ -284,7 +281,8 @@ systrace_attach(pid)
 		ans.stra_pid = msg.msg_pid;
 		ans.stra_seqnr = msg.msg_seqnr;
 		ans.stra_policy = SYSTR_POLICY_PERMIT;
-		(void) ioctl(fd, STRIOCANSWER, &ans);
+		if (ioctl(fd, STRIOCANSWER, &ans) == -1)
+		    warning("STRIOCANSWER");
 		break;
 	}
     }
@@ -452,11 +450,12 @@ static int
 systrace_read(fd, pid, addr, buf, bufsiz)
     int fd;
     pid_t pid;
-    char *addr;
+    void *addr;
     void *buf;
-    int bufsiz;
+    size_t bufsiz;
 {
     struct systrace_io io;
+    int rval;
 
     memset(&io, 0, sizeof(io));
     io.strio_pid = pid;
@@ -464,7 +463,9 @@ systrace_read(fd, pid, addr, buf, bufsiz)
     io.strio_len = bufsiz;
     io.strio_offs = addr;
     io.strio_op = SYSTR_READ;
-    return(ioctl(fd, STRIOCIO, &io));
+    if ((rval = ioctl(fd, STRIOCIO, &io)) != 0)
+	warning("systrace_read: STRIOCIO");
+    return(rval ? -1 : (ssize_t)io.strio_len);
 }
 
 /*
@@ -473,37 +474,41 @@ systrace_read(fd, pid, addr, buf, bufsiz)
  * handle a strio_len > the actual kernel buffer.  It might be nice
  * to pass a starting chunksize though.
  */
-static int
+static ssize_t
 read_string(fd, pid, addr, buf, bufsiz)
     int fd;
     pid_t pid;
-    char *addr;
+    void *addr;
     char *buf;
-    int bufsiz;
+    size_t bufsiz;
 {
-    int chunksiz = 32;
+    size_t chunksiz = 32;
+    ssize_t nread;
     char *cp = buf, *ep;
 
     while (bufsiz >= chunksiz) {
-	if (systrace_read(fd, pid, addr, cp, chunksiz) == 0) {
-	    if ((ep = memchr(cp, '\0', chunksiz)) != NULL) {
+	if ((nread = systrace_read(fd, pid, addr, cp, chunksiz)) != -1) {
+	    if ((ep = memchr(cp, '\0', nread)) != NULL) {
 		cp = ep;	/* found NUL byte in chunk, done */
 		break;
 	    }
-	    cp += chunksiz;
-	    addr += chunksiz;
-	    bufsiz -= chunksiz;
+	    cp += nread;
+	    addr += nread;
+	    bufsiz -= nread;
 	} else {
 	    if (errno != EINVAL || chunksiz == 4)
 		    return(-1);
 	    chunksiz >>= 1;	/* chunksiz too big, halve it */
 	}
     }
-    *cp = '\0';
+#ifdef  SUDO_DEVEL
+    if (cp == buf)
+	warningx("read empty string, chunksize == %d", chunksiz); /* XXX, should not happen but does */
+#endif
     return(bufsiz >= chunksiz ? cp - buf : -1);
 }
 
-static schandler_t
+static struct syscallhandler *
 find_handler(pid, code)
     pid_t pid;
     int code;
@@ -517,7 +522,7 @@ find_handler(pid, code)
     }
     for (sca = child->action; sca->code != -1; sca++) {
 	if (sca->code == code)
-	    return(sca->handler);
+	    return(&sca->handler);
     }
     return(NULL);
 }
@@ -532,15 +537,16 @@ find_handler(pid, code)
  * Write buf to a kernel address.
  * XXX - should deal with EBUSY from STRIOCIO
  */
-static int
+static ssize_t
 systrace_write(fd, pid, addr, buf, len)
     int fd;
     pid_t pid;
-    char *addr;
+    void *addr;
     void *buf;
-    int len;
+    size_t len;
 {
     struct systrace_io io;
+    int rval;
 
     memset(&io, 0, sizeof(io));
     io.strio_pid = pid;
@@ -548,7 +554,9 @@ systrace_write(fd, pid, addr, buf, len)
     io.strio_len = len;
     io.strio_offs = addr;
     io.strio_op = SYSTR_WRITE;
-    return(ioctl(fd, STRIOCIO, &io));
+    if ((rval = ioctl(fd, STRIOCIO, &io)) != 0)
+	warning("systrace_read: STRIOCIO");
+    return(rval ? -1 : (ssize_t)io.strio_len);
 }
 
 /*
@@ -562,12 +570,10 @@ update_env(fd, pid, seqnr, askp)
     struct str_msg_ask *askp;
 {
     struct systrace_replace repl;
+    ssize_t len;
     char *envbuf[ARG_MAX / sizeof(char *)], **envp, **envep;
     char buf[ARG_MAX], *ap, *cp, *off, *envptrs[4], *offsets[4], *replace[4];
-    int len, n;
-
-    if (askp->argsize < sizeof(char *) * 3)
-	return(-1);				/* need at least 3 args */
+    int n;
 
     /*
      * Iterate through the environment, copying the data pointers and
@@ -578,10 +584,8 @@ update_env(fd, pid, seqnr, askp)
     off = (char *)askp->args[2];
     envep = envbuf + (sizeof(envbuf) / sizeof(char *));
     for (envp = envbuf; envp < envep; envp++, off += sizeof(char *)) {
-	if (systrace_read(fd, pid, off, &ap, sizeof(ap)) != 0) {
-	    warning("STRIOCIO");
+	if (systrace_read(fd, pid, off, &ap, sizeof(ap)) == -1)
 	    return(-1);
-	}
 	if ((*envp = ap) == NULL)
 	    break;
 	memset(buf, 0, sizeof(buf));
@@ -597,7 +601,7 @@ update_env(fd, pid, seqnr, askp)
 		    len = strlen(buf);
 		    n = snprintf(buf, len + 1, "SUDO_USER=%s", user_name);
 		    if (n > 0 && n <= len &&
-			systrace_write(fd, pid, ap, buf, len + 1) == 0)
+			systrace_write(fd, pid, ap, buf, len + 1) != -1)
 			replace[SUDO_USER] = NULL;
 		}
 	    } else if (strncmp(buf, "SUDO_COMMAND=", 13) == 0) {
@@ -619,7 +623,7 @@ update_env(fd, pid, seqnr, askp)
 			user_cmnd, user_args ? " " : "",
 			user_args ? user_args : "");
 		    if (n > 0 && n <= len &&
-			systrace_write(fd, pid, ap, buf, len + 1) == 0)
+			systrace_write(fd, pid, ap, buf, len + 1) != -1)
 			replace[SUDO_COMMAND] = NULL;
 		}
 	    } else if (strncmp(buf, "SUDO_UID=", 9) == 0) {
@@ -632,7 +636,7 @@ update_env(fd, pid, seqnr, askp)
 		    n = snprintf(buf, len + 1,
 			"SUDO_UID=%lu", (unsigned long) user_uid);
 		    if (n > 0 && n <= len &&
-			systrace_write(fd, pid, ap, buf, len + 1) == 0)
+			systrace_write(fd, pid, ap, buf, len + 1) != -1)
 			replace[SUDO_UID] = NULL;
 		}
 	    } else if (strncmp(buf, "SUDO_GID=", 9) == 0) {
@@ -645,7 +649,7 @@ update_env(fd, pid, seqnr, askp)
 		    n = snprintf(buf, len + 1,
 			"SUDO_GID=%lu", (unsigned long) user_gid);
 		    if (n > 0 && n <= len &&
-			systrace_write(fd, pid, ap, buf, len + 1) == 0)
+			systrace_write(fd, pid, ap, buf, len + 1) != -1)
 			replace[SUDO_GID] = NULL;
 		}
 	    }
@@ -710,10 +714,8 @@ update_env(fd, pid, seqnr, askp)
 		if (replace[n] == NULL)
 		    continue;
 		ap = inject.stri_addr + (replace[n] - buf);
-		if (systrace_write(fd, pid, offsets[n], &ap, sizeof(ap)) != 0) {
-		    warning("STRIOCIO");
+		if (systrace_write(fd, pid, offsets[n], &ap, sizeof(ap)) == -1)
 		    return(-1);
-		}
 	    }
 	} else {
 	    /*
@@ -758,7 +760,7 @@ update_env(fd, pid, seqnr, askp)
     }
     return(0);
 }
-#endif
+#endif /* STRIOCINJECT */
 
 /*
  * Decode path and argv from systrace and fill in user_cmnd,
@@ -770,12 +772,9 @@ decode_args(fd, pid, askp)
     pid_t pid;
     struct str_msg_ask *askp;
 {
-    int len;
+    ssize_t len;
     char *off, *ap, *cp, *ep;
     static char pbuf[PATH_MAX], abuf[ARG_MAX];
-
-    if (askp->argsize < sizeof(char *) * 2)
-	return(-1);				/* need at least 2 args */
 
     memset(pbuf, 0, sizeof(pbuf));
     if (read_string(fd, pid, (void *)askp->args[0], pbuf, sizeof(pbuf)) == -1)
@@ -793,10 +792,8 @@ decode_args(fd, pid, askp)
     memset(abuf, 0, sizeof(abuf));
     off = (char *)askp->args[1];
     for (cp = abuf, ep = abuf + sizeof(abuf); cp < ep; off += sizeof(char *)) {
-	if (systrace_read(fd, pid, off, &ap, sizeof(ap)) != 0) {
-	    warning("STRIOCIO");
+	if (systrace_read(fd, pid, off, &ap, sizeof(ap)) == -1)
 	    return(-1);
-	}
 	if (ap == NULL) {
 	    if (cp != abuf) {
 		cp[-1] = '\0';	/* replace final space with a NUL */
@@ -814,31 +811,31 @@ decode_args(fd, pid, askp)
     return(0);
 }
 
+static void
+log_exec(status)
+    int status;
+{
+    if (status > 0)
+	log_auth(status, TRUE);
+}
+
 /*
  * Decode the args to exec and check the command in sudoers.
  */
 static int
-check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
+check_execv(fd, pid, seqnr, askp, policyp, errorp)
     int fd;
     pid_t pid;
     u_int16_t seqnr;
     struct str_msg_ask *askp;
-    int cookie;
     int *policyp;
     int *errorp;
 {
-    int rval, validated = VALIDATE_NOT_OK;
+    int rval, validated;
     struct childinfo *info;
 #ifdef HAVE_LDAP
     void *ld;
 #endif
-
-    /* If we have a cookie we take special action. */
-    if (cookie != -1) {
-	if (cookie != 0)
-	    log_auth(cookie, 1);
-	return(0);
-    }
 
     /* We're not really initialized until the first exec finishes. */
     if (initialized == 0) {
@@ -856,6 +853,8 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
 
     /* Fill in user_cmnd, user_base, user_args and user_stat.  */
     if (decode_args(fd, pid, askp) != 0) {
+	if (errno == EBUSY)
+	    return(-1);
 	*policyp = SYSTR_POLICY_NEVER;
 	*errorp = errno;
 	return(0);
@@ -863,7 +862,9 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
 
     /* Get processes's cwd. */
     rval = ioctl(fd, STRIOCGETCWD, &pid);
-    if (rval == -1 || !getcwd(user_cwd, sizeof(user_cwd))) {
+    if (rval == -1 || getcwd(user_cwd, sizeof(user_cwd)) != 0) {
+	if (rval == -1 && errno == EBUSY)
+	    return(-1);
 	warningx("cannot get working directory");
 	(void) strlcpy(user_cwd, "unknown", sizeof(user_cwd));
     }
@@ -872,20 +873,21 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
      * Stat user_cmnd and restore cwd
      */
     if (sudo_goodpath(user_cmnd, user_stat) == NULL) {
-	if (rval != -1)
-	    (void) ioctl(fd, STRIOCRESCWD, 0);
+	if (rval != -1 && ioctl(fd, STRIOCRESCWD, 0) != 0)
+	    warning("can't restore cwd");
 	*policyp = SYSTR_POLICY_NEVER;
 	*errorp = EACCES;
 	return(0);
     }
-    if (rval != -1)
-	(void) ioctl(fd, STRIOCRESCWD, 0);
+    if (rval != -1 && ioctl(fd, STRIOCRESCWD, 0) != 0)
+	warning("can't restore cwd");
 
     /* Check sudoers and log the result. */
     init_defaults();
     def_authenticate = FALSE;
     runas_pw = info->pw;
     user_runas = &info->pw->pw_name;
+    validated = VALIDATE_NOT_OK;
 #ifdef HAVE_LDAP
     if ((ld = sudo_ldap_open()) != NULL) {
 	sudo_ldap_update_defaults(ld);
@@ -912,18 +914,17 @@ check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp)
  * the SUDO_* environment variables.
  */
 static int
-check_execve(fd, pid, seqnr, askp, cookie, policyp, errorp)
+check_execve(fd, pid, seqnr, askp, policyp, errorp)
     int fd;
     u_int16_t seqnr;
     pid_t pid;
     struct str_msg_ask *askp;
-    int cookie;
     int *policyp;
     int *errorp;
 {
     int rval;
 
-    rval = check_execv(fd, pid, seqnr, askp, cookie, policyp, errorp);
+    rval = check_execv(fd, pid, seqnr, askp, policyp, errorp);
 #ifdef STRIOCINJECT
     if (rval > 0 && *policyp == SYSTR_POLICY_PERMIT) {
 	/* read environment into buf, munge, and bung it back */

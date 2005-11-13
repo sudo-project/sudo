@@ -16,27 +16,26 @@
 
 #define	SYSTRACE_MAXENTS	1024
 
-typedef int (*schandler_t)
-    __P((int, pid_t, u_int16_t, struct str_msg_ask *, int, int *, int *));
-
 struct childinfo;
 struct listhead;
+struct syscallhandler;
 
 static int check_execv		__P((int, pid_t, u_int16_t,
-				    struct str_msg_ask *, int, int *, int *));
+				    struct str_msg_ask *, int *, int *));
 static int check_execve		__P((int, pid_t, u_int16_t,
-				    struct str_msg_ask *, int, int *, int *));
+				    struct str_msg_ask *, int *, int *));
+static void log_exec		__P((int));
 static int decode_args		__P((int, pid_t, struct str_msg_ask *));
 static int set_policy		__P((int, struct childinfo *));
 static int switch_emulation	__P((int, struct str_message *));
 static int systrace_open	__P((void));
-static int systrace_read	__P((int, pid_t, char *, void *, int));
+static ssize_t systrace_read	__P((int, pid_t, void *, void *, size_t));
 #ifdef STRIOCINJECT
-static int systrace_write	__P((int, pid_t, char *, void *, int));
+static ssize_t systrace_write	__P((int, pid_t, void *, void *, size_t));
 static int update_env		__P((int, pid_t, u_int16_t, struct str_msg_ask *));
 #endif
-static schandler_t find_handler	__P((pid_t, int));
-static int read_string		__P((int, pid_t, char *, char *, int));
+static struct syscallhandler *find_handler __P((pid_t, int));
+static ssize_t read_string	__P((int, pid_t, void *, char *, size_t));
 static struct childinfo *find_child __P((pid_t));
 static void catchsig		__P((int));
 static void detachall		__P((int));
@@ -61,123 +60,130 @@ struct childinfo {
     struct childinfo *next;
 };
 
+struct syscallhandler {
+    int (*checker)
+	__P((int, pid_t, u_int16_t, struct str_msg_ask *, int *, int *));
+    void (*logger)
+	__P((int));
+};
+
 /*
  * Each emulation has a list of actionable syscalls.
  */
 struct syscallaction {
     int code;
     int policy;
-    schandler_t handler;
+    struct syscallhandler handler;
 };
 
 static struct syscallaction syscalls_openbsd[] = {
-	{  23, SYSTR_POLICY_ASK, NULL},		/* OPENBSD_SYS_setuid */
-	{  59, SYSTR_POLICY_ASK, check_execve},	/* OPENBSD_SYS_execve */
-	{ 126, SYSTR_POLICY_ASK, NULL},		/* OPENBSD_SYS_setreuid */
-	{ 183, SYSTR_POLICY_ASK, NULL},		/* OPENBSD_SYS_seteuid */
-	{ 282, SYSTR_POLICY_ASK, NULL},		/* OPENBSD_SYS_setresuid */
-	{ -1, -1, NULL} 
+	{  23, SYSTR_POLICY_ASK },		/* OPENBSD_SYS_setuid */
+	{  59, SYSTR_POLICY_ASK, { check_execve, log_exec } }, /* OPENBSD_SYS_execve */
+	{ 126, SYSTR_POLICY_ASK },		/* OPENBSD_SYS_setreuid */
+	{ 183, SYSTR_POLICY_ASK },		/* OPENBSD_SYS_seteuid */
+	{ 282, SYSTR_POLICY_ASK },		/* OPENBSD_SYS_setresuid */
+	{ -1, -1 } 
 };
  
 static struct syscallaction syscalls_bsdos[] = {
-	{ 23, SYSTR_POLICY_ASK, NULL},		/* BSDOS_SYS_setuid */
-	{ 59, SYSTR_POLICY_ASK, check_execve},	/* BSDOS_SYS_execve */
-	{ 126, SYSTR_POLICY_ASK, NULL},		/* BSDOS_SYS_setreuid */
-	{ 183, SYSTR_POLICY_ASK, NULL},		/* BSDOS_SYS_seteuid */
-	{ -1, -1, NULL} 
+	{ 23, SYSTR_POLICY_ASK },		/* BSDOS_SYS_setuid */
+	{ 59, SYSTR_POLICY_ASK, { check_execve, log_exec } },	/* BSDOS_SYS_execve */
+	{ 126, SYSTR_POLICY_ASK },		/* BSDOS_SYS_setreuid */
+	{ 183, SYSTR_POLICY_ASK },		/* BSDOS_SYS_seteuid */
+	{ -1, -1 } 
 };
  
 static struct syscallaction syscalls_freebsd[] = {
-	{ 23, SYSTR_POLICY_ASK, NULL},		/* FREEBSD_SYS_setuid */
-	{ 59, SYSTR_POLICY_ASK, check_execve},	/* FREEBSD_SYS_execve */
-	{ 126, SYSTR_POLICY_ASK, NULL},		/* FREEBSD_SYS_setreuid */
-	{ 183, SYSTR_POLICY_ASK, NULL},		/* FREEBSD_SYS_seteuid */
-	{ 311, SYSTR_POLICY_ASK, NULL},		/* FREEBSD_SYS_setresuid */
-	{ -1, -1, NULL} 
+	{ 23, SYSTR_POLICY_ASK },		/* FREEBSD_SYS_setuid */
+	{ 59, SYSTR_POLICY_ASK, { check_execve, log_exec } },	/* FREEBSD_SYS_execve */
+	{ 126, SYSTR_POLICY_ASK },		/* FREEBSD_SYS_setreuid */
+	{ 183, SYSTR_POLICY_ASK },		/* FREEBSD_SYS_seteuid */
+	{ 311, SYSTR_POLICY_ASK },		/* FREEBSD_SYS_setresuid */
+	{ -1, -1 } 
 };
  
 static struct syscallaction syscalls_netbsd[] = {
-	{ 23, SYSTR_POLICY_ASK, NULL},		/* NETBSD_SYS_setuid */
-	{ 59, SYSTR_POLICY_ASK, check_execve},	/* NETBSD_SYS_execve */
-	{ 126, SYSTR_POLICY_ASK, NULL},		/* NETBSD_SYS_setreuid */
-	{ 183, SYSTR_POLICY_ASK, NULL},		/* NETBSD_SYS_seteuid */
-	{ -1, -1, NULL} 
+	{ 23, SYSTR_POLICY_ASK },		/* NETBSD_SYS_setuid */
+	{ 59, SYSTR_POLICY_ASK, { check_execve, log_exec } },	/* NETBSD_SYS_execve */
+	{ 126, SYSTR_POLICY_ASK },		/* NETBSD_SYS_setreuid */
+	{ 183, SYSTR_POLICY_ASK },		/* NETBSD_SYS_seteuid */
+	{ -1, -1 } 
 };
  
 static struct syscallaction syscalls_hpux[] = {
-	{ 11, SYSTR_POLICY_ASK, check_execv},	/* HPUX_SYS_execv */
-	{ 23, SYSTR_POLICY_ASK, NULL},		/* HPUX_SYS_setuid */
-	{ 59, SYSTR_POLICY_ASK, check_execve},	/* HPUX_SYS_execve */
-	{ 126, SYSTR_POLICY_ASK, NULL},		/* HPUX_SYS_setresuid */
-	{ -1, -1, NULL} 
+	{ 11, SYSTR_POLICY_ASK, { check_execv, log_exec } },	/* HPUX_SYS_execv */
+	{ 23, SYSTR_POLICY_ASK },		/* HPUX_SYS_setuid */
+	{ 59, SYSTR_POLICY_ASK, { check_execve, log_exec } },	/* HPUX_SYS_execve */
+	{ 126, SYSTR_POLICY_ASK },		/* HPUX_SYS_setresuid */
+	{ -1, -1 } 
 };
  
 static struct syscallaction syscalls_ibsc2[] = {
-	{ 11, SYSTR_POLICY_ASK, check_execv},	/* ISCS2_SYS_execv */
-	{ 23, SYSTR_POLICY_ASK, NULL},		/* ISCS2_SYS_setuid */
-	{ 59, SYSTR_POLICY_ASK, check_execve},	/* ISCS2_SYS_execve */
-	{ -1, -1, NULL} 
+	{ 11, SYSTR_POLICY_ASK, { check_execv, log_exec } },	/* ISCS2_SYS_execv */
+	{ 23, SYSTR_POLICY_ASK },		/* ISCS2_SYS_setuid */
+	{ 59, SYSTR_POLICY_ASK, { check_execve, log_exec } },	/* ISCS2_SYS_execve */
+	{ -1, -1 } 
 };
  
 static struct syscallaction syscalls_linux[] = {
-	{ 11, SYSTR_POLICY_ASK, check_execve},	/* LINUX_SYS_execve */
-	{ 23, SYSTR_POLICY_ASK, NULL},		/* LINUX_SYS_setuid16 */
-	{ 70, SYSTR_POLICY_ASK, NULL},		/* LINUX_SYS_setreuid16 */
-	{ 138, SYSTR_POLICY_ASK, NULL},		/* LINUX_SYS_setfsuid16 */
-	{ 164, SYSTR_POLICY_ASK, NULL},		/* LINUX_SYS_setresuid16 */
-	{ 203, SYSTR_POLICY_ASK, NULL},		/* LINUX_SYS_setreuid */
-	{ 208, SYSTR_POLICY_ASK, NULL},		/* LINUX_SYS_setresuid */
-	{ 213, SYSTR_POLICY_ASK, NULL},		/* LINUX_SYS_setuid */
-	{ 215, SYSTR_POLICY_ASK, NULL},		/* LINUX_SYS_setfsuid */
-	{ -1, -1, NULL} 
+	{ 11, SYSTR_POLICY_ASK, { check_execve, log_exec } },	/* LINUX_SYS_execve */
+	{ 23, SYSTR_POLICY_ASK },		/* LINUX_SYS_setuid16 */
+	{ 70, SYSTR_POLICY_ASK },		/* LINUX_SYS_setreuid16 */
+	{ 138, SYSTR_POLICY_ASK },		/* LINUX_SYS_setfsuid16 */
+	{ 164, SYSTR_POLICY_ASK },		/* LINUX_SYS_setresuid16 */
+	{ 203, SYSTR_POLICY_ASK },		/* LINUX_SYS_setreuid */
+	{ 208, SYSTR_POLICY_ASK },		/* LINUX_SYS_setresuid */
+	{ 213, SYSTR_POLICY_ASK },		/* LINUX_SYS_setuid */
+	{ 215, SYSTR_POLICY_ASK },		/* LINUX_SYS_setfsuid */
+	{ -1, -1 } 
 };
  
 static struct syscallaction syscalls_osf1[] = {
-	{ 23, SYSTR_POLICY_ASK, NULL},		/* OSF1_SYS_setuid */
-	{ 59, SYSTR_POLICY_ASK, check_execve},	/* OSF1_SYS_execve */
-	{ 126, SYSTR_POLICY_ASK, NULL},		/* OSF1_SYS_setreuid */
-	{ -1, -1, NULL} 
+	{ 23, SYSTR_POLICY_ASK },		/* OSF1_SYS_setuid */
+	{ 59, SYSTR_POLICY_ASK, { check_execve, log_exec } },	/* OSF1_SYS_execve */
+	{ 126, SYSTR_POLICY_ASK },		/* OSF1_SYS_setreuid */
+	{ -1, -1 } 
 };
  
 static struct syscallaction syscalls_sunos[] = {
-	{ 11, SYSTR_POLICY_ASK, check_execv},	/* SUNOS_SYS_execv */
-	{ 23, SYSTR_POLICY_ASK, NULL},		/* SUNOS_SYS_setuid */
-	{ 59, SYSTR_POLICY_ASK, check_execve},	/* SUNOS_SYS_execve */
-	{ 126, SYSTR_POLICY_ASK, NULL},		/* SUNOS_SYS_setreuid */
-	{ -1, -1, NULL} 
+	{ 11, SYSTR_POLICY_ASK, { check_execv, log_exec } },	/* SUNOS_SYS_execv */
+	{ 23, SYSTR_POLICY_ASK },		/* SUNOS_SYS_setuid */
+	{ 59, SYSTR_POLICY_ASK, { check_execve, log_exec } },	/* SUNOS_SYS_execve */
+	{ 126, SYSTR_POLICY_ASK },		/* SUNOS_SYS_setreuid */
+	{ -1, -1 } 
 };
  
 static struct syscallaction syscalls_svr4[] = {
-	{ 11, SYSTR_POLICY_ASK, check_execv},	/* SVR4_SYS_execv */
-	{ 23, SYSTR_POLICY_ASK, NULL},		/* SVR4_SYS_setuid */
-	{ 59, SYSTR_POLICY_ASK, check_execve},	/* SVR4_SYS_execve */
-	{ 141, SYSTR_POLICY_ASK, NULL},		/* SVR4_SYS_seteuid */
-	{ 202, SYSTR_POLICY_ASK, NULL},		/* SVR4_SYS_setreuid */
-	{ -1, -1, NULL} 
+	{ 11, SYSTR_POLICY_ASK, { check_execv, log_exec } },	/* SVR4_SYS_execv */
+	{ 23, SYSTR_POLICY_ASK },		/* SVR4_SYS_setuid */
+	{ 59, SYSTR_POLICY_ASK, { check_execve, log_exec } },	/* SVR4_SYS_execve */
+	{ 141, SYSTR_POLICY_ASK },		/* SVR4_SYS_seteuid */
+	{ 202, SYSTR_POLICY_ASK },		/* SVR4_SYS_setreuid */
+	{ -1, -1 } 
 };
 
 static struct syscallaction syscalls_ultrix[] = {
-	{ 11, SYSTR_POLICY_ASK, check_execv},	/* ULTRIX_SYS_execv */
-	{ 23, SYSTR_POLICY_ASK, NULL},		/* ULTRIX_SYS_setuid */
-	{ 59, SYSTR_POLICY_ASK, check_execve},	/* ULTRIX_SYS_execve */
-	{ 126, SYSTR_POLICY_ASK, NULL},		/* ULTRIX_SYS_setreuid */
-	{ -1, -1, NULL} 
+	{ 11, SYSTR_POLICY_ASK, { check_execv, log_exec } },	/* ULTRIX_SYS_execv */
+	{ 23, SYSTR_POLICY_ASK },		/* ULTRIX_SYS_setuid */
+	{ 59, SYSTR_POLICY_ASK, { check_execve, log_exec } },	/* ULTRIX_SYS_execve */
+	{ 126, SYSTR_POLICY_ASK },		/* ULTRIX_SYS_setreuid */
+	{ -1, -1 } 
 };
  
 static struct syscallaction syscalls_irix[] = {
-	{ 11, SYSTR_POLICY_ASK, check_execv},	/* IRIX_SYS_execv */
-	{ 23, SYSTR_POLICY_ASK, NULL},		/* IRIX_SYS_setuid */
-	{ 59, SYSTR_POLICY_ASK, check_execve},	/* IRIX_SYS_execve */
-	{ 124, SYSTR_POLICY_ASK, NULL},		/* IRIX_SYS_setreuid */
-	{ -1, -1, NULL} 
+	{ 11, SYSTR_POLICY_ASK, { check_execv, log_exec } },	/* IRIX_SYS_execv */
+	{ 23, SYSTR_POLICY_ASK },		/* IRIX_SYS_setuid */
+	{ 59, SYSTR_POLICY_ASK, { check_execve, log_exec } },	/* IRIX_SYS_execve */
+	{ 124, SYSTR_POLICY_ASK },		/* IRIX_SYS_setreuid */
+	{ -1, -1 } 
 };
 
 static struct syscallaction syscalls_darwin[] = {
-	{ 23, SYSTR_POLICY_ASK, NULL},		/* DARWIN_SYS_setuid */
-	{ 59, SYSTR_POLICY_ASK, check_execve},	/* DARWIN_SYS_execve */
-	{ 126, SYSTR_POLICY_ASK, NULL},		/* DARWIN_SYS_setreuid */
-	{ 183, SYSTR_POLICY_ASK, NULL},		/* DARWIN_SYS_seteuid */
-	{ -1, -1, NULL} 
+	{ 23, SYSTR_POLICY_ASK },		/* DARWIN_SYS_setuid */
+	{ 59, SYSTR_POLICY_ASK, { check_execve, log_exec } },	/* DARWIN_SYS_execve */
+	{ 126, SYSTR_POLICY_ASK },		/* DARWIN_SYS_setreuid */
+	{ 183, SYSTR_POLICY_ASK },		/* DARWIN_SYS_seteuid */
+	{ -1, -1 } 
 };
 
 /*
