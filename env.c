@@ -136,18 +136,30 @@ static const char *initial_badenv_table[] = {
     "USR_ACE",
     "DLC_ACE",
 #endif /* HAVE_SECURID */
-    "TERMINFO",
-    "TERMINFO_DIRS",
-    "TERMPATH",
+    "TERMINFO",			/* terminfo, exclusive path to terminfo files */
+    "TERMINFO_DIRS",		/* terminfo, path(s) to terminfo files */
+    "TERMPATH",			/* termcap, path(s) to termcap files */
     "TERMCAP",			/* XXX - only if it starts with '/' */
-    "ENV",
-    "BASH_ENV",
-    "PS4",
-    "SHELLOPTS",
-    "JAVA_TOOL_OPTIONS",
-    "PERLLIB",
-    "PERL5LIB",
-    "PERL5OPT",
+    "ENV",			/* ksh, file to source before script runs */
+    "BASH_ENV",			/* bash, file to source before script runs */
+    "PS4",			/* bash, prefix for lines in xtrace mode */
+    "GLOBIGNORE",		/* bash, globbing patterns to ignore */
+    "SHELLOPTS",		/* bash, extra command line options */
+    "JAVA_TOOL_OPTIONS",	/* java, extra command line options */
+    "PERLIO_DEBUG ",		/* perl, debugging output file */
+    "PERLLIB",			/* perl, search path for modules/includes */
+    "PERL5LIB",			/* perl 5, search path for modules/includes */
+    "PERL5OPT",			/* perl 5, extra command line options */
+    "FPATH",			/* ksh, search path for functions */
+    "NULLCMD",			/* zsh, command for null file redirection */
+    "READNULLCMD",		/* zsh, command for null file redirection */
+    "ZDOTDIR",			/* zsh, search path for dot files */
+    "TMPPREFIX",		/* zsh, prefix for temporary files */
+    "PYTHONHOME",		/* python, module search path */
+    "PYTHONPATH",		/* python, search path */
+    "PYTHONINSPEC",		/* python, allow inspection */
+    "RUBYLIB",			/* ruby, library load path */
+    "RUBYOPT",			/* ruby, extra command line options */
     NULL
 };
 
