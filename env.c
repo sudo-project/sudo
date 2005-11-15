@@ -150,6 +150,7 @@ static const char *initial_badenv_table[] = {
     "PERLLIB",			/* perl, search path for modules/includes */
     "PERL5LIB",			/* perl 5, search path for modules/includes */
     "PERL5OPT",			/* perl 5, extra command line options */
+    "PERL5DB",			/* perl 5, command used to load debugger */
     "FPATH",			/* ksh, search path for functions */
     "NULLCMD",			/* zsh, command for null file redirection */
     "READNULLCMD",		/* zsh, command for null file redirection */
