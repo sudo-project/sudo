@@ -47,6 +47,9 @@
 /* Define to 1 if you use AFS. */
 #undef HAVE_AFS
 
+/* Define to 1 if you use AIX general authentication. */
+#undef HAVE_AIXAUTH
+
 /* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
 
@@ -56,9 +59,6 @@
 
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
-
-/* Define to 1 if you use AIX general authentication. */
-#undef HAVE_AIXAUTH
 
 /* Define to 1 if you have the `bigcrypt' function. */
 #undef HAVE_BIGCRYPT
@@ -212,6 +212,9 @@
 /* Define if your compiler supports the "long long" type. */
 #undef HAVE_LONG_LONG
 
+/* Define to 1 if you have the `lrand48' function. */
+#undef HAVE_LRAND48
+
 /* Define to 1 if you have the <malloc.h> header file. */
 #undef HAVE_MALLOC_H
 
@@ -226,6 +229,9 @@
 
 /* Define to 1 if you have the `memset' function. */
 #undef HAVE_MEMSET
+
+/* Define to 1 if you have the `mkstemp' function. */
+#undef HAVE_MKSTEMP
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #undef HAVE_NDIR_H
@@ -244,6 +250,9 @@
 
 /* Define to 1 if you have the <paths.h> header file. */
 #undef HAVE_PATHS_H
+
+/* Define to 1 if you have the `random' function. */
+#undef HAVE_RANDOM
 
 /* Define if your struct sockadr has an sa_len field. */
 #undef HAVE_SA_LEN
