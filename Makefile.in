@@ -255,6 +255,8 @@ logging.o: $(srcdir)/logging.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/logging.c
 match.o: $(srcdir)/match.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/interfaces.h $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/match.c
+mkstemp.o: $(srcdir)/mkstemp.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mkstemp.c
 mon_solaris.o: $(srcdir)/mon_solaris.c $(SUDODEP) $(srcdir)/mon_solaris.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mon_solaris.c
 mon_systrace.o: $(srcdir)/mon_systrace.c $(SUDODEP) $(srcdir)/mon_systrace.h
