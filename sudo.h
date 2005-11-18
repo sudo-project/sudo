@@ -260,7 +260,7 @@ void sudo_setpwent	__P((void));
 void sudo_endpwent	__P((void));
 void sudo_setspent	__P((void));
 void sudo_endspent	__P((void));
-void cleanup		__P((void));
+void cleanup		__P((int));
 struct passwd *sudo_getpwnam __P((const char *));
 struct passwd *sudo_fakepwnam __P((const char *));
 struct passwd *sudo_getpwuid __P((uid_t));

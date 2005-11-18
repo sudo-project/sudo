@@ -28,7 +28,7 @@ __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 static void _warning	__P((int, const char *, va_list));
-       void cleanup	__P((void));
+       void cleanup	__P((int));
 
 void
 #ifdef __STDC__
@@ -48,7 +48,7 @@ error(eval, fmt, va_alist)
 #endif
 	_warning(1, fmt, ap);
 	va_end(ap);
-	cleanup();
+	cleanup(0);
 	exit(eval);
 }
 
@@ -70,7 +70,7 @@ errorx(eval, fmt, va_alist)
 #endif
 	_warning(0, fmt, ap);
 	va_end(ap);
-	cleanup();
+	cleanup(0);
 	exit(eval);
 }
 

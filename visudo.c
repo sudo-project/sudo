@@ -435,7 +435,7 @@ reparse_sudoers(editor, args, strict, quiet)
 	    switch (whatnow()) {
 		case 'Q' :	parse_error = FALSE;	/* ignore parse error */
 				break;
-		case 'x' :	cleanup();
+		case 'x' :	cleanup(0);
 				exit(0);
 				break;
 	    }
@@ -978,7 +978,8 @@ print_unused(v1, v2)
  * Unlink any sudoers temp files that remain.
  */
 void
-cleanup()
+cleanup(gotsignal)
+    int gotsignal;
 {
     struct sudoersfile *sp;
 
@@ -986,12 +987,10 @@ cleanup()
 	if (sp->tpath != NULL)
 	    (void) unlink(sp->tpath);
     }
-    /*
-     * XXX - would like to call sudo_endpwent/sudo_endgrent but they
-     *       are not signal-safe.
-    sudo_endpwent();
-    sudo_endgrent();
-     */
+    if (!gotsignal) {
+	sudo_endpwent();
+	sudo_endgrent();
+    }
 }
 
 /*
@@ -1001,7 +1000,7 @@ static RETSIGTYPE
 quit(signo)
     int signo;
 {
-    cleanup();
+    cleanup(signo);
 #define	emsg	 " exiting due to signal.\n"
     write(STDERR_FILENO, getprogname(), strlen(getprogname()));
     write(STDERR_FILENO, emsg, sizeof(emsg) - 1);

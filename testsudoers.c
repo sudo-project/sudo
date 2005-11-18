@@ -358,10 +358,13 @@ set_perms(perm)
 }
 
 void
-cleanup()
+cleanup(gotsignal)
+    int gotsignal;
 {
-    sudo_endpwent();
-    sudo_endgrent();
+    if (!gotsignal) {
+	sudo_endpwent();
+	sudo_endgrent();
+    }
 }
 
 void

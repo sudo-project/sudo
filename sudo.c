@@ -1163,10 +1163,13 @@ get_authpw()
  * Stub for error()/errorx()
  */
 void
-cleanup()
+cleanup(gotsignal)
+    int gotsignal;
 {
-    sudo_endpwent();
-    sudo_endgrent();
+    if (!gotsignal) {
+	sudo_endpwent();
+	sudo_endgrent();
+    }
 }
 
 /*
