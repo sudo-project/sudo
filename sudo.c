@@ -584,7 +584,7 @@ init_vars(sudo_mode, envp)
 	log_error(0, "uid %s does not exist in the passwd file!", pw_name);
     }
     if (user_shell == NULL || *user_shell == '\0')
-	user_shell = sudo_user.pw->pw_shell;
+	user_shell = estrdup(sudo_user.pw->pw_shell);
 
     /* It is now safe to use log_error() and set_perms() */
 
@@ -633,7 +633,7 @@ init_vars(sudo_mode, envp)
 	if (ISSET(sudo_mode, MODE_EDIT))
 	    NewArgv[0] = "sudoedit";
 	else if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
-	    NewArgv[0] = runas_pw->pw_shell;
+	    NewArgv[0] = estrdup(runas_pw->pw_shell);
 	else if (user_shell && *user_shell)
 	    NewArgv[0] = user_shell;
 	else
