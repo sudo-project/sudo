@@ -2237,6 +2237,8 @@ if test -n "$with_ldap"; then
     SUDO_LIBS="${SUDO_LIBS}${LDAP_LIBS}"
     LIBS="$_LIBS"
     LDFLAGS="$_LDFLAGS"
+    # XXX - OpenLDAP has deprecated ldap_get_values()
+    CPPFLAGS="${CPPFLAGS} -DLDAP_DEPRECATED"
 fi
 
 dnl

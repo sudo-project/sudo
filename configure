@@ -21315,6 +21315,8 @@ done
     SUDO_LIBS="${SUDO_LIBS}${LDAP_LIBS}"
     LIBS="$_LIBS"
     LDFLAGS="$_LDFLAGS"
+    # XXX - OpenLDAP has deprecated ldap_get_values()
+    CPPFLAGS="${CPPFLAGS} -DLDAP_DEPRECATED"
 fi
 
 if test -n "$blibpath"; then
