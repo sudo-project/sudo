@@ -468,20 +468,19 @@ sudo_ldap_read_config()
     if ((f = fopen(_PATH_LDAP_CONF, "r")) == NULL)
 	return(FALSE);
     while (fgets(buf, sizeof(buf), f)) {
-	c = buf;
-	if (*c == '#')
-	    continue;		/* ignore comment */
-	if (*c == '\n')
-	    continue;		/* skip newline */
-	if (!*c)
-	    continue;		/* incomplete last line */
+	/* ignore text after comment character */
+	if ((c = strchr(buf, '#')) != NULL)
+	    *c = '\0';
 
-	/* skip whitespace before keyword */
-	while (isspace((unsigned char) *c))
-	    c++;
-	keyword = c;
+	/* skip leading whitespace */
+	for (c = buf; isspace((unsigned char) *c); c++)
+	    /* nothing */;
+
+	if (*c == '\0' || *c == '\n')
+	    continue;		/* skip empty line */
 
 	/* properly terminate keyword string */
+	keyword = c;
 	while (*c && !isspace((unsigned char) *c))
 	    c++;
 	if (*c)
