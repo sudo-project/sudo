@@ -19,6 +19,7 @@
 #include <config.h>
 
 #include <sys/types.h>
+#include <sys/time.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -70,6 +71,10 @@ __unused static const char rcsid[] = "$Sudo$";
 # define LDAP_OPT_SUCCESS LDAP_SUCCESS
 #endif
 
+#if defined(LDAP_X_OPT_CONNECT_TIMEOUT) && !defined(LDAP_OPT_X_CONNECT_TIMEOUT)
+#define LDAP_OPT_X_CONNECT_TIMEOUT	LDAP_OPT_X_CONNECT_TIMEOUT
+#endif
+
 #define LDAP_FOREACH(var, ld, res)					\
     for ((var) = ldap_first_entry((ld), (res));				\
 	(var) != NULL;							\
@@ -83,6 +88,8 @@ struct ldap_config {
     int version;
     int debug;
     int tls_checkpeer;
+    int timelimit;
+    int bind_timelimit;
     char *host;
     char *uri;
     char *binddn;
@@ -463,7 +470,12 @@ sudo_ldap_read_config()
     FILE *f;
     char buf[LINE_MAX], *c, *keyword, *value;
 
-    ldap_conf.tls_checkpeer = -1;	/* default */
+    /* defaults */
+    ldap_conf.version = 3;
+    ldap_conf.port = 389;
+    ldap_conf.tls_checkpeer = -1;
+    ldap_conf.timelimit = -1;
+    ldap_conf.bind_timelimit = -1;
 
     if ((f = fopen(_PATH_LDAP_CONF, "r")) == NULL)
 	return(FALSE);
@@ -530,6 +542,10 @@ sudo_ldap_read_config()
 	    else
 	MATCH_I("ldap_version", ldap_conf.version)
 	    else
+	MATCH_I("bind_timelimit", ldap_conf.bind_timelimit)
+	    else
+	MATCH_I("timelimit", ldap_conf.timelimit)
+	    else
 	MATCH_S("uri", ldap_conf.uri)
 	    else
 	MATCH_S("binddn", ldap_conf.binddn)
@@ -553,13 +569,11 @@ sudo_ldap_read_config()
     }
     fclose(f);
 
-    /* defaults */
-    if (!ldap_conf.version)
-	ldap_conf.version = 3;
-    if (!ldap_conf.port)
-	ldap_conf.port = 389;
     if (!ldap_conf.host)
 	ldap_conf.host = estrdup("localhost");
+
+    if (ldap_conf.bind_timelimit > 0)
+	ldap_conf.bind_timelimit *= 1000;	/* convert to ms */
 
     if (ldap_conf.debug > 1) {
 	fprintf(stderr, "LDAP Config Summary\n");
@@ -582,6 +596,8 @@ sudo_ldap_read_config()
 	    ldap_conf.binddn : "(anonymous)");
 	fprintf(stderr, "bindpw       %s\n", ldap_conf.bindpw ?
 	    ldap_conf.bindpw : "(anonymous)");
+	fprintf(stderr, "bind_timelimit  %d\n", ldap_conf.bind_timelimit);
+	fprintf(stderr, "timelimit    %d\n", ldap_conf.timelimit);
 #ifdef HAVE_LDAP_START_TLS_S
 	fprintf(stderr, "ssl          %s\n", ldap_conf.ssl ?
 	    ldap_conf.ssl : "(no)");
@@ -787,6 +803,34 @@ sudo_ldap_display_cmnd(ldv, pw)
    return(!found);
 }
 
+/* macros to set option, error on failure plus consistent debugging */
+#define SET_OPTS(opt, val) do { \
+    if (ldap_conf.val != NULL) { \
+	if (ldap_conf.debug > 1) \
+	    fprintf(stderr, \
+		"ldap_set_option(LDAP_OPT_%s, \"%s\")\n", #opt, ldap_conf.val);\
+	rc = ldap_set_option(ld, LDAP_OPT_ ## opt, ldap_conf.val); \
+	if (rc != LDAP_OPT_SUCCESS) { \
+	    fprintf(stderr,"ldap_set_option(LDAP_OPT_%s, \"%s\")=%d: %s\n", \
+		#opt, ldap_conf.val, rc, ldap_err2string(rc)); \
+	    return(NULL); \
+	} \
+    } \
+} while(0)
+#define SET_OPTI(opt, val) do { \
+    if (ldap_conf.val >= 0) { \
+	if (ldap_conf.debug > 1) \
+	    fprintf(stderr, \
+		"ldap_set_option(LDAP_OPT_%s, %d)\n", #opt, ldap_conf.val); \
+	rc = ldap_set_option(ld, LDAP_OPT_ ## opt, &ldap_conf.val); \
+	if (rc != LDAP_OPT_SUCCESS) { \
+	    fprintf(stderr,"ldap_set_option(LDAP_OPT_%s, %d)=%d: %s\n", \
+		#opt, ldap_conf.val, rc, ldap_err2string(rc)); \
+	    return(NULL); \
+	} \
+    } \
+} while(0)
+
 /*
  * Open a connection to the LDAP server.
  */
@@ -794,67 +838,64 @@ VOID *
 sudo_ldap_open()
 {
     LDAP *ld = NULL;
-    int rc;					/* temp return value */
+    int rc;
 
     if (!sudo_ldap_read_config())
 	return(NULL);
 
-    /* macro to set option, error on failure plus consistent debugging */
-#define SET_OPT(opt,optname,val) \
-  if (ldap_conf.val!=NULL) { \
-    if (ldap_conf.debug>1) fprintf(stderr, \
-           "ldap_set_option(LDAP_OPT_%s,\"%s\")\n",optname,ldap_conf.val); \
-    rc=ldap_set_option(ld,opt,ldap_conf.val); \
-    if(rc != LDAP_OPT_SUCCESS){ \
-      fprintf(stderr,"ldap_set_option(LDAP_OPT_%s,\"%s\")=%d: %s\n", \
-           optname, ldap_conf.val, rc, ldap_err2string(rc)); \
-      return(NULL) ; \
-    } \
-  }
-
-    /* like above, but assumes val is in int */
-#define SET_OPTI(opt,optname,val) \
-    if (ldap_conf.debug>1) fprintf(stderr, \
-           "ldap_set_option(LDAP_OPT_%s,0x%02x)\n",optname,ldap_conf.val); \
-    rc=ldap_set_option(ld,opt,&ldap_conf.val); \
-    if(rc != LDAP_OPT_SUCCESS){ \
-      fprintf(stderr,"ldap_set_option(LDAP_OPT_%s,0x%02x)=%d: %s\n", \
-           optname, ldap_conf.val, rc, ldap_err2string(rc)); \
-      return(NULL) ; \
-    }
-
     /* attempt to setup ssl options */
 #ifdef LDAP_OPT_X_TLS_CACERTFILE
-    SET_OPT(LDAP_OPT_X_TLS_CACERTFILE, "X_TLS_CACERTFILE", tls_cacertfile);
+    SET_OPTS(X_TLS_CACERTFILE, tls_cacertfile);
 #endif /* LDAP_OPT_X_TLS_CACERTFILE */
 
 #ifdef LDAP_OPT_X_TLS_CACERTDIR
-    SET_OPT(LDAP_OPT_X_TLS_CACERTDIR, "X_TLS_CACERTDIR", tls_cacertdir);
+    SET_OPTS(X_TLS_CACERTDIR, tls_cacertdir);
 #endif /* LDAP_OPT_X_TLS_CACERTDIR */
 
 #ifdef LDAP_OPT_X_TLS_CERTFILE
-    SET_OPT(LDAP_OPT_X_TLS_CERTFILE, "X_TLS_CERTFILE", tls_certfile);
+    SET_OPTS(X_TLS_CERTFILE, tls_certfile);
 #endif /* LDAP_OPT_X_TLS_CERTFILE */
 
 #ifdef LDAP_OPT_X_TLS_KEYFILE
-    SET_OPT(LDAP_OPT_X_TLS_KEYFILE, "X_TLS_KEYFILE", tls_keyfile);
+    SET_OPTS(X_TLS_KEYFILE, tls_keyfile);
 #endif /* LDAP_OPT_X_TLS_KEYFILE */
 
 #ifdef LDAP_OPT_X_TLS_CIPHER_SUITE
-    SET_OPT(LDAP_OPT_X_TLS_CIPHER_SUITE, "X_TLS_CIPHER_SUITE", tls_cipher_suite);
+    SET_OPTS(X_TLS_CIPHER_SUITE, tls_cipher_suite);
 #endif /* LDAP_OPT_X_TLS_CIPHER_SUITE */
 
 #ifdef LDAP_OPT_X_TLS_RANDOM_FILE
-    SET_OPT(LDAP_OPT_X_TLS_RANDOM_FILE, "X_TLS_RANDOM_FILE", tls_random_file);
+    SET_OPTS(X_TLS_RANDOM_FILE, tls_random_file);
 #endif /* LDAP_OPT_X_TLS_RANDOM_FILE */
 
 #ifdef LDAP_OPT_X_TLS_REQUIRE_CERT
     /* check the server certificate? */
-    if (ldap_conf.tls_checkpeer != -1) {
-	SET_OPTI(LDAP_OPT_X_TLS_REQUIRE_CERT, "X_TLS_REQUIRE_CERT",
-	    tls_checkpeer);
-    }
+    SET_OPTI(X_TLS_REQUIRE_CERT, tls_checkpeer);
 #endif /* LDAP_OPT_X_TLS_REQUIRE_CERT */
+
+    /* set timelimit options */
+    SET_OPTI(TIMELIMIT, timelimit);
+
+#ifdef LDAP_OPT_X_CONNECT_TIMEOUT
+    SET_OPTI(X_CONNECT_TIMEOUT, bind_timeout);
+#endif  
+
+#ifdef LDAP_OPT_NETWORK_TIMEOUT
+    if (ldap_conf.bind_timelimit > 0) {
+	struct timeval tv;
+	tv.tv_sec = ldap_conf.bind_timelimit / 1000;
+	tv.tv_usec = 0;
+	if (ldap_conf.debug > 1)
+	    fprintf(stderr, "ldap_set_option(LDAP_OPT_NETWORK_TIMEOUT, %ld)\n",
+		tv.tv_sec);
+	rc = ldap_set_option(ld, LDAP_OPT_NETWORK_TIMEOUT, &tv);
+	if (rc != LDAP_OPT_SUCCESS) {
+	    fprintf(stderr,"ldap_set_option(NETWORK_TIMEOUT, %ld)=%d: %s\n",
+		tv.tv_sec, rc, ldap_err2string(rc));
+	    return(NULL);
+	}
+    }
+#endif
 
     /* attempt connect */
 #ifdef HAVE_LDAP_INITIALIZE
@@ -880,7 +921,7 @@ sudo_ldap_open()
 
 #ifdef LDAP_OPT_PROTOCOL_VERSION
     /* Set the LDAP Protocol version */
-    SET_OPTI(LDAP_OPT_PROTOCOL_VERSION, "PROTOCOL_VERSION", version);
+    SET_OPTI(PROTOCOL_VERSION, version);
 #endif /* LDAP_OPT_PROTOCOL_VERSION */
 
 #ifdef HAVE_LDAP_START_TLS_S
