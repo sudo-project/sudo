@@ -487,7 +487,7 @@ It is not meaningful to run the C<cd> command directly via sudo, e.g.,
 
  $ sudo cd /usr/local/protected
 
-since when whe command exits the parent process (your shell) will
+since when the command exits the parent process (your shell) will
 still be the same.  Please see the EXAMPLES section for more information.
 
 If users have sudo C<ALL> there is nothing to prevent them from
