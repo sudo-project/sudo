@@ -220,6 +220,7 @@ main(argc, argv)
 		(void) printf("Sudo version %s\n", version);
 		if (getuid() == 0) {
 		    putchar('\n');
+		    (void) printf("Sudoers path: %s\n", _PATH_SUDOERS);
 		    dump_auth_methods();
 		    dump_defaults();
 		    dump_interfaces();
