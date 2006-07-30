@@ -21144,9 +21144,9 @@ rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
     done
         if test "$found" = "no"; then
-	LDAP_LIBS=" -ldap"
-	echo "$as_me:$LINENO: result: not found, using -ldap" >&5
-echo "${ECHO_T}not found, using -ldap" >&6
+	LDAP_LIBS=" -lldap"
+	echo "$as_me:$LINENO: result: not found, using -lldap" >&5
+echo "${ECHO_T}not found, using -lldap" >&6
     else
 	echo "$as_me:$LINENO: result: $LDAP_LIBS" >&5
 echo "${ECHO_T}$LDAP_LIBS" >&6

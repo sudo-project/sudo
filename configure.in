@@ -2218,10 +2218,10 @@ if test -n "$with_ldap"; then
 	#include <lber.h>
 	#include <ldap.h>]], [[(void)ldap_init(0, 0)]])], [found=yes; break])
     done
-    dnl if nothing linked just try with -ldap
+    dnl if nothing linked just try with -lldap
     if test "$found" = "no"; then
-	LDAP_LIBS=" -ldap"
-	AC_MSG_RESULT([not found, using -ldap])
+	LDAP_LIBS=" -lldap"
+	AC_MSG_RESULT([not found, using -lldap])
     else
 	AC_MSG_RESULT([$LDAP_LIBS])
     fi
