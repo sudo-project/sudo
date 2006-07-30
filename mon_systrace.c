@@ -446,7 +446,7 @@ set_policy(fd, child)
  * Read from an address and store in buf.
  * XXX - should deal with EBUSY from STRIOCIO
  */
-static int
+static ssize_t
 systrace_read(fd, pid, addr, buf, bufsiz)
     int fd;
     pid_t pid;
