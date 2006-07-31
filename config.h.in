@@ -260,6 +260,9 @@
 /* Define to 1 if you use SecurID for authentication. */
 #undef HAVE_SECURID
 
+/* Define to 1 if you have the `seteuid' function. */
+#undef HAVE_SETEUID
+
 /* Define to 1 if you have the `setlocale' function. */
 #undef HAVE_SETLOCALE
 

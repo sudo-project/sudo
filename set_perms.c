@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996,1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996,1998-2006 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -214,6 +214,84 @@ set_perms(perm)
 }
 
 # else /* !HAVE_SETRESUID && !HAVE_SETREUID */
+# ifdef HAVE_SETEUID
+
+/*
+ * Set real and effective uids and gids based on perm.
+ * NOTE: does not support the "stay_setuid" option.
+ */
+void
+set_perms(perm)
+    int perm;
+{
+    /*
+     * Since we only have setuid() and seteuid() and semantics
+     * for these calls differ on various systems, we set
+     * real and effective uids to ROOT_UID initially to be safe.
+     */
+    if (seteuid(ROOT_UID))
+	error(1, "seteuid(ROOT_UID)");
+    if (setuid(ROOT_UID))
+	error(1, "setuid(ROOT_UID)");
+
+    switch (perm) {
+	case PERM_FULL_ROOT:
+	case PERM_ROOT:
+				/* already set above */
+			      	break;
+
+	case PERM_USER:
+    	    	    	        (void) setegid(user_gid);
+				if (seteuid(user_uid))
+				    error(1, "seteuid(user_uid)");
+			      	break;
+				
+	case PERM_FULL_USER:
+				/* headed for exec() */
+    	    	    	        (void) setgid(user_gid);
+				if (setuid(user_uid))
+				    error(1, "setuid(user_uid)");
+			      	break;
+				
+	case PERM_RUNAS:
+				if (seteuid(runas_pw->pw_uid))
+				    error(1, "unable to change to runas uid");
+			      	break;
+
+	case PERM_FULL_RUNAS:
+				/* headed for exec() */
+				runas_setup();
+				if (setuid(runas_pw->pw_uid))
+				    error(1, "unable to change to runas uid");
+				break;
+
+	case PERM_SUDOERS:
+				if (setegid(SUDOERS_GID))
+				    error(1, "unable to change to sudoers gid");
+
+				/*
+				 * If SUDOERS_UID == ROOT_UID and SUDOERS_MODE
+				 * is group readable we use a non-zero
+				 * uid in order to avoid NFS lossage.
+				 * Using uid 1 is a bit bogus but should
+				 * work on all OS's.
+				 */
+				if (SUDOERS_UID == ROOT_UID) {
+				    if ((SUDOERS_MODE & 040) && seteuid(1))
+					error(1, "seteuid(1)");
+				} else {
+				    if (seteuid(SUDOERS_UID))
+					error(1, "seteuid(SUDOERS_UID)");
+				}
+			      	break;
+	case PERM_TIMESTAMP:
+				if (seteuid(timestamp_uid))
+				    error(1, "seteuid(timestamp_uid)");
+			      	break;
+    }
+}
+
+# else /* !HAVE_SETRESUID && !HAVE_SETREUID && !HAVE_SETEUID */
 
 /*
  * Set uids and gids based on perm via setuid() and setgid().
@@ -252,6 +330,7 @@ set_perms(perm)
 				break;
     }
 }
+#  endif /* HAVE_SETEUID */
 # endif /* HAVE_SETREUID */
 #endif /* HAVE_SETRESUID */
 

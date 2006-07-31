@@ -1696,7 +1696,10 @@ if test -z "$SKIP_SETRESUID"; then
     AC_CHECK_FUNCS(setresuid, [SKIP_SETREUID=yes])
 fi
 if test -z "$SKIP_SETREUID"; then
-    AC_CHECK_FUNCS(setreuid)
+    AC_CHECK_FUNCS(setreuid, [SKIP_SETEUID=yes])
+fi
+if test -z "$SKIP_SETEUID"; then
+    AC_CHECK_FUNCS(seteuid)
 fi
 if test X"$with_interfaces" != X"no"; then
     AC_CHECK_FUNCS(getifaddrs, [AC_CHECK_FUNCS(freeifaddrs)])
