@@ -100,10 +100,15 @@ int sudo_edit(argc, argv)
 	tmplen--;
 
     /*
+     * Close password, shadow, and group files before we try to open
+     * user-specified files to prevent the opening of things like /dev/fd/4
+     */
+    sudo_endpwent();
+    sudo_endgrent();
+
+    /*
      * For each file specified by the user, make a temporary version
      * and copy the contents of the original to it.
-     * XXX - It would be nice to lock the original files but that means
-     *       keeping an extra fd open for each file.
      */
     tf = emalloc2(argc - 1, sizeof(*tf));
     memset(tf, 0, (argc - 1) * sizeof(*tf));
@@ -240,8 +245,6 @@ int sudo_edit(argc, argv)
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
 	set_perms(PERM_FULL_USER);
-	sudo_endpwent();
-	sudo_endgrent();
 	closefrom(def_closefrom + 1);
 	execvp(nargv[0], nargv);
 	warning("unable to execute %s", nargv[0]);
@@ -251,7 +254,7 @@ int sudo_edit(argc, argv)
     /*
      * Wait for status from the child.  Most modern kernels
      * will not let an unprivileged child process send a
-     * signal to its privileged parent to we have to request
+     * signal to its privileged parent so we have to request
      * status when the child is stopped and then send the
      * same signal to our own pid.
      */
