@@ -54,6 +54,14 @@ __unused static const char rcsid[] = "$Sudo$";
 /*
  * Close all file descriptors greater than or equal to lowfd.
  */
+#ifdef HAVE_FCNTL_CLOSEM
+void
+closefrom(lowfd)
+    int lowfd;
+{
+    (void) fcntl(lowfd, F_CLOSEM, 0);
+}
+#else
 void
 closefrom(lowfd)
     int lowfd;
@@ -95,3 +103,4 @@ closefrom(lowfd)
 	    (void) close((int) fd);
     }
 }
+#endif /* !HAVE_FCNTL_CLOSEM */

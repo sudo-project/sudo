@@ -1717,7 +1717,12 @@ AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])
 AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_FUNCS(futime) AC_LIBOBJ(utimes)])
 SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)])
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(strerror strcasecmp sigaction strlcpy strlcat closefrom)
+AC_REPLACE_FUNCS(strerror strcasecmp sigaction strlcpy strlcat)
+AC_CHECK_FUNCS(closefrom, [], [SUDO_OBJS="${SUDO_OBJS} closefrom.o"
+    AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [],
+	[ #include <limits.h>
+	  #include <fcntl.h> ])
+])
 AC_CHECK_FUNCS(mkstemp, [], [SUDO_OBJS="${SUDO_OBJS} mkstemp.o"
     AC_CHECK_FUNCS(random lrand48, [break])
 ])
@@ -2353,7 +2358,9 @@ AH_TEMPLATE(HAVE_BSD_AUTH_H, [Define to 1 if you use BSD authentication.])
 AH_TEMPLATE(HAVE_DCE, [Define to 1 if you use OSF DCE.])
 AH_TEMPLATE(HAVE_DD_FD, [Define to 1 if your `DIR' contains dd_fd.])
 AH_TEMPLATE(HAVE_DIRFD, [Define to 1 if you have the `dirfd' function or macro.])
+AH_TEMPLATE(HAVE_DISPCRYPT, [Define to 1 if you have the `dispcrypt' function.])
 AH_TEMPLATE(HAVE_EXTENDED_GLOB, [Define to 1 if your glob.h defines the GLOB_BRACE and GLOB_TILDE flags.])
+AH_TEMPLATE(HAVE_FCNTL_CLOSEM, [Define to 1 if your system has the F_CLOSEM fcntl.])
 AH_TEMPLATE(HAVE_FNMATCH, [Define to 1 if you have the `fnmatch' function.])
 AH_TEMPLATE(HAVE_FWTK, [Define to 1 if you use the FWTK authsrv daemon.])
 AH_TEMPLATE(HAVE_GETAUTHUID, [Define to 1 if you have the `getauthuid' function. (ULTRIX 4.x  shadow passwords)])

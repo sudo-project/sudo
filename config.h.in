@@ -91,6 +91,9 @@
 /* Define to 1 if your glob.h defines the GLOB_BRACE and GLOB_TILDE flags. */
 #undef HAVE_EXTENDED_GLOB
 
+/* Define to 1 if your system has the F_CLOSEM fcntl. */
+#undef HAVE_FCNTL_CLOSEM
+
 /* Define to 1 if you have the `flock' function. */
 #undef HAVE_FLOCK
 
