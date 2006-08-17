@@ -354,14 +354,6 @@ sudo_freepwcache()
 	pwcache_byname = NULL;
     }
 }
-#endif
-
-void
-sudo_endpwent()
-{
-    endpwent();
-    sudo_endspent();
-}
 
 static void
 pw_free(v)
@@ -374,6 +366,14 @@ pw_free(v)
 	efree(pw->pw_passwd);
     }
     efree(pw);
+}
+#endif
+
+void
+sudo_endpwent()
+{
+    endpwent();
+    sudo_endspent();
 }
 
 /*
