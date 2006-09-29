@@ -249,7 +249,12 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		    p = pm->msg;
 		/* Read the password. */
 		pass = tgetpass(p, def_passwd_timeout * 60, flags);
-		pr->resp = estrdup(pass ? pass : "");
+		if (pass == NULL) {
+		    /* We got ^C instead of a password; abort quickly. */
+		    nil_pw = 1;
+		    return(PAM_CONV_ERR);
+		}
+		pr->resp = estrdup(pass);
 		if (*pr->resp == '\0')
 		    nil_pw = 1;		/* empty password */
 		else
