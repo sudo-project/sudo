@@ -85,7 +85,6 @@ static int  cmp_pwuid	__P((const VOID *, const VOID *));
 static int  cmp_pwnam	__P((const VOID *, const VOID *));
 static int  cmp_grgid	__P((const VOID *, const VOID *));
 static int  cmp_grnam	__P((const VOID *, const VOID *));
-static void pw_free	__P((VOID *));
 
 /*
  * Compare by uid.
@@ -341,7 +340,9 @@ sudo_setpwent()
 	pwcache_byname = rbcreate(cmp_pwnam);
 }
 
-#if 0
+#ifdef notyet
+static void pw_free	__P((VOID *));
+
 void
 sudo_freepwcache()
 {
