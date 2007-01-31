@@ -96,7 +96,6 @@ struct environment {
  * Prototypes
  */
 char **rebuild_env		__P((char **, int, int));
-char **zero_env			__P((char **));
 static void insert_env		__P((char *, struct environment *, int));
 static char *format_env		__P((char *, ...));
 
@@ -118,8 +117,9 @@ static const char *initial_badenv_table[] = {
     "SHLIB_PATH",
 #endif /* __hpux */
 #ifdef _AIX
+    "LDR_*",
     "LIBPATH",
-#endif /* _AIX */
+#endif
 #ifdef __APPLE__
     "DYLD_*",
 #endif
@@ -483,9 +483,13 @@ rebuild_env(envp, sudo_mode, noexec)
 	insert_env(format_env("_RLD_LIST", def_noexec_file, ":DEFAULT", VNULL),
 	    &env, 1);
 # else
+#  ifdef _AIX
+	insert_env(format_env("LDR_PRELOAD", def_noexec_file, VNULL), &env, 1);
+#  else
 	insert_env(format_env("LD_PRELOAD", def_noexec_file, VNULL), &env, 1);
-# endif
-#endif
+#  endif /* _AIX */
+# endif /* __osf__ || __sgi */
+#endif /* __darwin__ || __APPLE__ */
     }
 
     /* Set PS1 if SUDO_PS1 is set. */
