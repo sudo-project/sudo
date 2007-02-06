@@ -535,9 +535,9 @@ send_mail(line)
 	get_timestr(), user_name, line);
     fclose(mail);
 
+    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
     /* If mailer is done, wait for it now.  If not, we'll get it later.  */
     reapchild(SIGCHLD);
-    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
 }
 
 /*
