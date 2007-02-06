@@ -212,7 +212,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            _P_A_T_H, and unsetting all other environment variables.
 
        -k  The --kk (_k_i_l_l) option to ssuuddoo invalidates the user's
-           timestamp by setting the time on it to the epoch.  The
+           timestamp by setting the time on it to the Epoch.  The
            next time ssuuddoo is run a password will be required.
            This option does not require a password and was added
            to allow a user to revoke ssuuddoo permissions from a

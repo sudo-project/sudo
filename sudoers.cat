@@ -564,7 +564,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    who would attempt to add roles to
                    @sysconfdir@/sudoers.  When this option is
                    present, @sysconfdir@/sudoers does not even
-                   need to exist.  Since this options tells ssuuddoo
+                   need to exist.  Since this option tells ssuuddoo
                    how to behave when no specific LDAP entries
                    have been matched, this sudoOption is only
                    meaningful for the cn=defaults section.  This
