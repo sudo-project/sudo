@@ -1180,7 +1180,7 @@ static void
 usage_excl(exit_val)
     int exit_val;
 {
-    warningx("Only one of the -e, -h, -k, -K, -l, -s, -v or -V options may be used");
+    warningx("Only one of the -e, -h, -i, -k, -K, -l, -s, -v or -V options may be specified");
     usage(exit_val);
 }
 
