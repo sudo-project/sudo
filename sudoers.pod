@@ -152,14 +152,16 @@ can use a uid instead (#0 in the example given).
 A C<Host_List> is made up of one or more hostnames, IP addresses,
 network numbers, netgroups (prefixed with '+') and other aliases.
 Again, the value of an item may be negated with the '!' operator.
-If you do not specify a netmask with a network number, the netmask
-of the host's ethernet interface(s) will be used when matching.
-The netmask may be specified either in dotted quad notation
-(e.g.E<nbsp>255.255.255.0) or CIDR notation (number of bits, e.g.E<nbsp>24). 
-A hostname may include shell-style wildcards (see the L<Wildcards> section
-below), but unless the C<hostname> command on your machine returns the fully
-qualified hostname, you'll need to use the I<fqdn> option for wildcards
-to be useful.
+If you do not specify a netmask along with the network number,
+B<sudo> will query each of the local host's network interfaces and,
+if the network number corresponds to one of the hosts's network
+interfaces, the corresponding netmask will be used.  The netmask
+may be specified either in dotted quad notation (e.g.E<nbsp>255.255.255.0)
+or CIDR notation (number of bits, e.g.E<nbsp>24).  A hostname may
+include shell-style wildcards (see the L<Wildcards> section below),
+but unless the C<hostname> command on your machine returns the fully
+qualified hostname, you'll need to use the I<fqdn> option for
+wildcards to be useful.
 
  Cmnd_List ::= Cmnd |
 	       Cmnd ',' Cmnd_List
