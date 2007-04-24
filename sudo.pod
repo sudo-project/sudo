@@ -360,20 +360,20 @@ behavior or link B<sudo> statically.
 
 B<sudo> will check the ownership of its timestamp directory
 (F<@timedir@> by default) and ignore the directory's contents if
-it is not owned by root and only writable by root.  On systems that
-allow non-root users to give away files via L<chown(2)>, if the timestamp
-directory is located in a directory writable by anyone (e.g., F</tmp>),
-it is possible for a user to create the timestamp directory before
-B<sudo> is run.  However, because B<sudo> checks the ownership and
-mode of the directory and its contents, the only damage that can
-be done is to "hide" files by putting them in the timestamp dir.
-This is unlikely to happen since once the timestamp dir is owned
-by root and inaccessible by any other user the user placing files
-there would be unable to get them back out.  To get around this
-issue you can use a directory that is not world-writable for the
-timestamps (F</var/adm/sudo> for instance) or create F<@timedir@>
-with the appropriate owner (root) and permissions (0700) in the
-system startup files.
+it is not owned by root or if it is writable by a user other than
+root.  On systems that allow non-root users to give away files via
+L<chown(2)>, if the timestamp directory is located in a directory
+writable by anyone (e.g., F</tmp>), it is possible for a user to
+create the timestamp directory before B<sudo> is run.  However,
+because B<sudo> checks the ownership and mode of the directory and
+its contents, the only damage that can be done is to "hide" files
+by putting them in the timestamp dir.  This is unlikely to happen
+since once the timestamp dir is owned by root and inaccessible by
+any other user, the user placing files there would be unable to get
+them back out.  To get around this issue you can use a directory
+that is not world-writable for the timestamps (F</var/adm/sudo> for
+instance) or create F<@timedir@> with the appropriate owner (root)
+and permissions (0700) in the system startup files.
 
 B<sudo> will not honor timestamps set far in the future.
 Timestamps with a date greater than current_time + 2 * C<TIMEOUT>
