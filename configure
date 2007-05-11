@@ -15912,7 +15912,14 @@ if test `eval echo '${'$as_ac_var'}'` = yes; then
 _ACEOF
 
 else
-  SUDO_OBJS="${SUDO_OBJS} closefrom.o"
+  case $LIBOBJS in
+    "closefrom.o.$ac_objext"   | \
+  *" closefrom.o.$ac_objext"   | \
+    "closefrom.o.$ac_objext "* | \
+  *" closefrom.o.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS closefrom.o.$ac_objext" ;;
+esac
+
     echo "$as_me:$LINENO: checking whether F_CLOSEM is declared" >&5
 echo $ECHO_N "checking whether F_CLOSEM is declared... $ECHO_C" >&6
 if test "${ac_cv_have_decl_F_CLOSEM+set}" = set; then

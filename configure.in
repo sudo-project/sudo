@@ -1718,7 +1718,7 @@ AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_F
 SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)])
 SUDO_FUNC_ISBLANK
 AC_REPLACE_FUNCS(strerror strcasecmp sigaction strlcpy strlcat)
-AC_CHECK_FUNCS(closefrom, [], [SUDO_OBJS="${SUDO_OBJS} closefrom.o"
+AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom.o)
     AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [],
 	[ #include <limits.h>
 	  #include <fcntl.h> ])
