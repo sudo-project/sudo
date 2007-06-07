@@ -274,7 +274,6 @@ verify_krb_v5_tgt(sudo_context, ccache, auth_name)
 	log_error(NO_EXIT,
 		  "%s: host service key not found: %s", auth_name,
 		  error_message(error));
-	error = 0;
 	goto cleanup;
     }
     if (keyblock)
