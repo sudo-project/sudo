@@ -130,6 +130,7 @@ static const char *initial_badenv_table[] = {
 #endif /* HAVE_KERB4 */
 #ifdef HAVE_KERB5
     "KRB5_CONFIG*",
+    "KRB5_KTNAME",
 #endif /* HAVE_KERB5 */
 #ifdef HAVE_SECURID
     "VAR_ACE",
@@ -182,6 +183,7 @@ static const char *initial_keepenv_table[] = {
     "DISPLAY",
     "PATH",
     "TERM",
+    "COLORTERM",
     "TZ",
     NULL
 };
