@@ -1897,6 +1897,8 @@ if test "$with_kerb5" = "yes"; then
 	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <krb5.h>]], [[const char *tmp = heimdal_version;]])], [
 		AC_MSG_RESULT(yes)
 		AC_DEFINE(HAVE_HEIMDAL)
+	    ], [
+		AC_MSG_RESULT(no)
 	    ]
 	)
     fi
@@ -1930,7 +1932,8 @@ if test -n "$with_kerb5" -a -z "$KRB5CONFIG"; then
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <krb5.h>]], [[const char *tmp = heimdal_version;]])], [
 	    AC_MSG_RESULT(yes)
 	    AC_DEFINE(HAVE_HEIMDAL)
-	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -ldes -lcom_err -lasn1"
+	    # XXX - need to check whether -lcrypo is needed!
+	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lcrypto -ldes -lcom_err -lasn1"
 	    AC_CHECK_LIB(roken, main, [SUDO_LIBS="${SUDO_LIBS} -lroken"])
 	], [
 	    AC_MSG_RESULT(no)
@@ -1942,6 +1945,10 @@ if test -n "$with_kerb5" -a -z "$KRB5CONFIG"; then
     else
 	AUTH_OBJS="${AUTH_OBJS} kerb5.o"
     fi
+    _LIBS="$LIBS"
+    LIBS="${LIBS} ${SUDO_LIBS}"
+    AC_CHECK_FUNCS(krb5_verify_user krb5_init_secure_context)
+    LIBS="$_LIBS"
 fi
 
 dnl
