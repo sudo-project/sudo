@@ -172,6 +172,8 @@ static const char *initial_checkenv_table[] = {
     "LC_*",
     "LANG",
     "LANGUAGE",
+    "TERM",
+    "COLORTERM",
     NULL
 };
 
