@@ -175,4 +175,5 @@ A) The default user sudo tries to run things as is always root, even if
    would achieve the desired result ofr the preceding sudoers fragment.
 
 Q) How do you pronounce `sudo'?
-A) soo-doo (for superuser do).
+A) The official pronunciation is soo-doo (for su "do").  However, an
+   alternate pronunciation, a homophone of "pseudo", is also common.
