@@ -58,7 +58,7 @@
 #undef HAVE_ASPRINTF
 
 /* Define to 1 if you use AIX general authentication. */
-#undef HAVE_AUTHENTICATE
+#undef HAVE_AIXAUTH
 
 /* Define to 1 if you have the `bigcrypt' function. */
 #undef HAVE_BIGCRYPT
