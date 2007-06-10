@@ -69,7 +69,9 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <grp.h>
-#include <time.h>
+#if TIME_WITH_SYS_TIME
+# include <time.h>
+#endif
 #include <netinet/in.h>
 #include <netdb.h>
 #if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
