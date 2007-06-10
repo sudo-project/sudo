@@ -549,6 +549,15 @@ init_vars(sudo_mode)
 
     /* It is now safe to use log_error() and set_perms() */
 
+#ifdef HAVE_GETGROUPS
+    if ((user_ngroups = getgroups(0, NULL)) > 0) {
+	user_groups = emalloc2(user_ngroups, sizeof(gid_t));
+	if (getgroups(user_ngroups, user_groups) < 0)
+	    log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
+    } else
+	user_ngroups = 0;
+#endif
+
     if (def_fqdn)
 	set_fqdn();			/* may call log_error() */
 

@@ -456,6 +456,7 @@ usergr_matches(group, user, pw)
     struct group *grp;
     gid_t pw_gid;
     char **cur;
+    int n;
 
     /* make sure we have a valid usergroup, sudo style */
     if (*group++ != '%')
@@ -473,7 +474,13 @@ usergr_matches(group, user, pw)
     if (grp->gr_gid == pw_gid)
 	return(TRUE);
 
-    /* check to see if user is explicitly listed in the group */
+    /*
+     * If the user has a supplementary group vector, check it first.
+     */
+    for (n = user_ngroups; n != 0; n--) {
+	if (grp->gr_gid == user_groups[n])
+	    return(TRUE);
+    }
     for (cur = grp->gr_mem; *cur; cur++) {
 	if (strcmp(*cur, user) == 0)
 	    return(TRUE);

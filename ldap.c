@@ -424,8 +424,6 @@ char *
 sudo_ldap_build_pass1()
 {
   struct group *grp;
-  gid_t *grplist=NULL;
-  int ngrps;
   int i;
 
   char *b=NULL;
@@ -440,7 +438,7 @@ sudo_ldap_build_pass1()
   ncat(&b,&sz,")");
 
   /* Append primary group */
-  grp=getgrgid(getgid());
+  grp=getgrgid(pw->pw_gid);
   if (grp!=NULL){
     ncat(&b,&sz,"(sudoUser=%");
     ncat(&b,&sz,grp->gr_name);
@@ -448,18 +446,13 @@ sudo_ldap_build_pass1()
   }
 
   /* handle arbitrary number of groups */
-  if (0<(ngrps=getgroups(0,NULL))){
-    grplist=calloc(ngrps,sizeof(gid_t));
-    if (grplist!=NULL && (0<getgroups(ngrps,grplist)))
-      for(i=0;i<ngrps;i++){
-        if((grp=getgrgid(grplist[i]))!=NULL){
-          ncat(&b,&sz,"(sudoUser=%");
-          ncat(&b,&sz,grp->gr_name);
-          ncat(&b,&sz,")");
-        }
-      }
+  for(i=0;i<user_ngroups;i++){
+    if((grp=getgrgid(user_groups[i]))!=NULL){
+      ncat(&b,&sz,"(sudoUser=%");
+      ncat(&b,&sz,grp->gr_name);
+      ncat(&b,&sz,")");
+    }
   }
-
 
   /* Add ALL to list */
   ncat(&b,&sz,"(sudoUser=ALL)");

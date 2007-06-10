@@ -49,6 +49,8 @@ struct sudo_user {
     char *cmnd_base;
     char *cmnd_safe;
     char *class_name;
+    int ngroups;
+    gid_t *groups;
 };
 
 /*
@@ -125,6 +127,8 @@ struct sudo_user {
 #define user_gid		(sudo_user.pw->pw_gid)
 #define user_dir		(sudo_user.pw->pw_dir)
 #define user_shell		(sudo_user.shell)
+#define user_ngroups		(sudo_user.ngroups)
+#define user_groups		(sudo_user.groups)
 #define user_tty		(sudo_user.tty)
 #define user_cwd		(sudo_user.cwd)
 #define user_runas		(sudo_user.runas)
