@@ -1,456 +1,543 @@
 /*
- * CU sudo version 1.3 (based on Root Group sudo version 1.1)
+ * Copyright (c) 1996, 1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
  *
- * This software comes with no waranty whatsoever, use at your own risk.
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
  *
- * Please send bugs, changes, problems to sudo-bugs.cs.colorado.edu
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
+ * Sponsored in part by the Defense Advanced Research Projects
+ * Agency (DARPA) and Air Force Research Laboratory, Air Force
+ * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-/*
- *  sudo version 1.1 allows users to execute commands as root
- *  Copyright (C) 1991  The Root Group, Inc.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 1, or (at your option)
- *  any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- **************************************************************************
- *
- * parse.c, sudo project
- * David R. Hieb
- * March 18, 1991
- *
- * routines to implement and maintain the parsing and list management.
- */
+#include "config.h"
 
-#ifndef lint
-static char rcsid[] = "$Id$";
-#endif /* lint */
-
-#include <stdio.h>
-#include <strings.h>
-#include <ctype.h>
-#include <sys/param.h>
 #include <sys/types.h>
+#include <sys/param.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif /* STDC_HEADERS */
+#ifdef HAVE_STRING_H
+# include <string.h>
+#else
+# ifdef HAVE_STRINGS_H
+#  include <strings.h>
+# endif
+#endif /* HAVE_STRING_H */
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#ifdef HAVE_FNMATCH
+# include <fnmatch.h>
+#endif /* HAVE_FNMATCH */
+#ifdef HAVE_NETGROUP_H
+# include <netgroup.h>
+#endif /* HAVE_NETGROUP_H */
+#include <ctype.h>
+#include <pwd.h>
+#include <grp.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#ifdef HAVE_DIRENT_H
+# include <dirent.h>
+# define NAMLEN(dirent) strlen((dirent)->d_name)
+#else
+# define dirent direct
+# define NAMLEN(dirent) (dirent)->d_namlen
+# ifdef HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# ifdef HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# ifdef HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
 
 #include "sudo.h"
+#include "parse.h"
+#include "interfaces.h"
+
+#ifndef HAVE_FNMATCH
+# include "emul/fnmatch.h"
+#endif /* HAVE_FNMATCH */
+
+#ifndef lint
+static const char rcsid[] = "$Sudo$";
+#endif /* lint */
 
 /*
- * there are 3 main lists (User, Host_Alias, Cmnd_Alias) and 1 extra list
+ * Globals
  */
-#define NUM_LISTS 3+1
-
-extern char *user, *host, *cmnd;
+int parse_error = FALSE;
+extern int keepall;
 extern FILE *yyin, *yyout;
 
-int user_list_found = FALSE;
-int list_num, new_list[NUM_LISTS];
-int parse_error = FALSE, found_user = FALSE;
-int next_type, num_host_alias = 0, num_cmnd_alias = 0;
-LINK tmp_ptr, reset_ptr, save_ptr, list_ptr[NUM_LISTS];
-
+/*
+ * Prototypes
+ */
+static int has_meta	__P((char *));
+       void init_parser	__P((void));
 
 /*
- * inserts a node into list 'list_num' and updates list_ptr[list_num]
+ * Look up the user in the sudoers file and check to see if they are
+ * allowed to run the specified command on this host as the target user.
  */
-
-void insert_member(list_num, token_type, op_type, data_string)
-    int token_type, list_num;
-    char op_type;
-    char *data_string;
+int
+sudoers_lookup(pwflag)
+    int pwflag;
 {
-    tmp_ptr = (LINK) malloc(sizeof(LIST));
-    tmp_ptr -> type = token_type;
-    tmp_ptr -> op = op_type;
-    tmp_ptr -> data = (char *) malloc(strlen(data_string) + 1);
-    strcpy(tmp_ptr -> data, data_string);
-    tmp_ptr -> next = (new_list[list_num] == TRUE) ? NULL : list_ptr[list_num];
+    int error, nopass;
+    enum def_tupple pwcheck;
 
-    list_ptr[list_num] = list_ptr[EXTRA_LIST] = tmp_ptr;
-}
-
-
-
-/*
- * diagnostic list printing utility that prints list 'list_num'
- */
-
-void print_list(list_num)
-    int list_num;
-{
-    LINK tmptmp_ptr;
-
-    tmptmp_ptr = list_ptr[list_num];
-
-    while (list_ptr[list_num] != NULL) {
-	(void) printf("type = %d, op = %c, data = %s\n",
-	    list_ptr[list_num] -> type,
-	    list_ptr[list_num] -> op, list_ptr[list_num] -> data);
-	tmp_ptr = list_ptr[list_num];
-	list_ptr[list_num] = tmp_ptr -> next;
-    }
-    list_ptr[list_num] = tmptmp_ptr;
-}
-
-
-
-/*
- * delete list utility that deletes list 'list_num'
- */
-
-void delete_list(list_num)
-    int list_num;
-{
-    while (list_ptr[list_num] != NULL) {
-	tmp_ptr = list_ptr[list_num];
-	list_ptr[list_num] = tmp_ptr -> next;
-	/*  free(tmp_ptr);   */
-    }
-}
-
-
-
-/*
- * this routine is what the lex/yacc code calls to build the different lists.
- * once the lists are all built, control eventually returns to validate().
- */
-
-int call_back(token_type, op_type, data_string)
-    int token_type;
-    char op_type;
-    char *data_string;
-{
-    /*
-     * all nodes start out in the extra list since the node name
-     * is received last
-     */
-    list_num = EXTRA_LIST;
-
-    /*
-     * if the last received node is TYPE1, then we can classify the list
-     * and effectively transfer the extra list to the correct list type.
-     */
-    if (token_type == TYPE1) {
-	/*
-	 * we have just build a "Host_Alias" list
-	 */
-	if (strcmp(data_string, "Host_Alias") == 0) {
-	    list_num = HOST_LIST;
-	    if (num_host_alias > 0) {
-		reset_ptr -> next = list_ptr[HOST_LIST];
-	    }
-	    num_host_alias++;
-	}
-	/*
-	 * we have just build a "Cmnd_Alias" list
-	 */
-	else if (strcmp(data_string, "Cmnd_Alias") == 0) {
-	    list_num = CMND_LIST;
-	    if (num_cmnd_alias > 0) {
-		reset_ptr -> next = list_ptr[CMND_LIST];
-	    }
-	    num_cmnd_alias++;
-	}
-	/*
-	 * we have just build a "User" list
-	 */
-	else {
-	    list_num = USER_LIST;
-	    user_list_found = TRUE;
-	}
-	new_list[EXTRA_LIST] = TRUE;
-	new_list[list_num] = FALSE;
-	list_ptr[list_num] = list_ptr[EXTRA_LIST];
-    }
-    /*
-     * actually link the new node into list 'list_num'
-     */
-    insert_member(list_num, token_type, op_type, data_string);
-
-    if (new_list[list_num] == TRUE) {
-	reset_ptr = list_ptr[list_num];
-	new_list[list_num] = FALSE;
-    }
-    /*
-     * we process one user record at a time from the sudoers file. if we
-     * find the user were looking for, we return to lex/yacc declaring 
-     * that we have done so. otherwise, we reset the user list, delete the 
-     * nodes and start over again looking for the user.
-     */
-    if (user_list_found == TRUE) {
-	if (list_ptr[list_num] -> type == TYPE1 &&
-	    strcmp(list_ptr[list_num] -> data, user) == 0) {
-	    return (FOUND_USER);
-	} else {
-	    new_list[list_num] = TRUE;
-	    user_list_found = FALSE;
-	    delete_list(list_num);
-	}
-    }
-    return (NOT_FOUND_USER);
-}
-
-
-
-/*
- * this routine is called from cmnd_check() to resolve whether or not
- * a user is permitted to perform a to-yet-be-determined command for
- * a certain host name.
- */
-
-int host_type_ok()
-{
-    /*
-     * check for the reserved keyword 'ALL'. if so, don't check the host name
-     */
-    if  (strcmp(list_ptr[USER_LIST] -> data, "ALL") == 0) {
-	    return (TRUE);
-    }
-    /*
-     * this case is the normal lowercase hostname
-     */
-    else if (isupper(list_ptr[USER_LIST] -> data[0]) == FALSE) {
-	return (strcmp(list_ptr[USER_LIST] -> data, host) == 0);
-    }
-    /*
-     * by now we have a Host_Alias that will have to be expanded
-     */
-    else {
-	save_ptr = list_ptr[HOST_LIST];
-	while (list_ptr[HOST_LIST] != NULL) {
-	    if ((list_ptr[HOST_LIST] -> type == TYPE2) &&
-		(strcmp(list_ptr[HOST_LIST] -> data,
-			list_ptr[USER_LIST] -> data) == 0)) {
-		next_type = list_ptr[HOST_LIST] -> next -> type;
-		tmp_ptr = list_ptr[HOST_LIST];
-		list_ptr[HOST_LIST] = tmp_ptr -> next;
-		while (next_type == TYPE3) {
-		    if (strcmp(list_ptr[HOST_LIST] -> data, host) == 0) {
-			list_ptr[HOST_LIST] = save_ptr;
-			return (TRUE);
-		    }
-		    if (list_ptr[HOST_LIST] -> next != NULL) {
-			next_type = list_ptr[HOST_LIST] -> next -> type;
-			tmp_ptr = list_ptr[HOST_LIST];
-			list_ptr[HOST_LIST] = tmp_ptr -> next;
-		    } else {
-			next_type = ~TYPE3;
-		    }
-		}
-	    } else {
-		tmp_ptr = list_ptr[HOST_LIST];
-		list_ptr[HOST_LIST] = tmp_ptr -> next;
-	    }
-	}
-	list_ptr[HOST_LIST] = save_ptr;
-	return (FALSE);
-    }
-}
-
-
-
-/*
- * this routine is called from cmnd_check() to resolve whether or not
- * a user is permitted to perform a certain command on the already
- * established host.
- */
-
-int cmnd_type_ok()
-{
-    /*
-     * check for the reserved keyword 'ALL'.
-     */
-    if  (strcmp(list_ptr[USER_LIST] -> data, "ALL") == 0) {
-	/* if the command has an absolute path, let them do it */
-	if  (cmnd[0] == '/') {
-	        return (MATCH);
-	}
-	/* if the command does not have an absolute path, forget it */
-	else {
-	    return (NO_MATCH);
-	}
-    }
-    /*
-     * if the command has an absolute path, check it out
-     */
-    else if (list_ptr[USER_LIST] -> data[0] == '/') {
-	/*
-	 * op  |   data   | return value
-	 * --------------------------------- 
-	 * ' ' | No Match | return(NO_MATCH)
-	 * '!' | No Match | return(NO_MATCH)
-	 * ' ' |  A Match | return(MATCH)
-	 * '!' |  A Match | return(QUIT_NOW) 
-	 *
-	 * these special cases are important in subtracting from the Universe
-	 * of commands in something like:
-	 *    user machine=ALL,!/bin/rm,!/etc/named ... 
-	 */
-	if (strcmp(list_ptr[USER_LIST] -> data, cmnd) == 0) {
-	    if (list_ptr[USER_LIST] -> op == '!') {
-		return (QUIT_NOW);
-	    } else {
-		return (MATCH);
-	    }
-	} else {
-	    return (NO_MATCH);
-	}
-    }
-    /*
-     * by now we have a Cmnd_Alias that will have to be expanded
-     */
-    else {
-	save_ptr = list_ptr[CMND_LIST];
-	while (list_ptr[CMND_LIST] != NULL) {
-	    if ((list_ptr[CMND_LIST] -> type == TYPE2) &&
-		(strcmp(list_ptr[CMND_LIST] -> data,
-			list_ptr[USER_LIST] -> data) == 0)) {
-		next_type = list_ptr[CMND_LIST] -> next -> type;
-		tmp_ptr = list_ptr[CMND_LIST];
-		list_ptr[CMND_LIST] = tmp_ptr -> next;
-		while (next_type == TYPE3) {
-		    if (strcmp(list_ptr[CMND_LIST] -> data, cmnd) == 0) {
-			if (list_ptr[USER_LIST] -> op == '!') {
-			    list_ptr[CMND_LIST] = save_ptr;
-			    return (QUIT_NOW);
-			} else {
-			    list_ptr[CMND_LIST] = save_ptr;
-			    return (MATCH);
-			}
-		    }
-		    if (list_ptr[CMND_LIST] -> next != NULL) {
-			next_type = list_ptr[CMND_LIST] -> next -> type;
-			tmp_ptr = list_ptr[CMND_LIST];
-			list_ptr[CMND_LIST] = tmp_ptr -> next;
-		    } else {
-			next_type = ~TYPE3;
-		    }
-		}
-	    } else {
-		tmp_ptr = list_ptr[CMND_LIST];
-		list_ptr[CMND_LIST] = tmp_ptr -> next;
-	    }
-	}
-	list_ptr[CMND_LIST] = save_ptr;
-	return (NO_MATCH);
-    }
-}
-
-
-
-/*
- * this routine is called from validate() after the call_back() routine
- * has built all the possible lists. this routine steps thru the user list
- * calling on host_type_ok() and cmnd_type_ok() trying to resolve whether
- * or not the user will be able to execute the command on the host.
- */
-
-int cmnd_check()
-{
-    int return_code;
-
-    while (list_ptr[USER_LIST] != NULL) {
-	if ((list_ptr[USER_LIST] -> type == TYPE2) && host_type_ok()) {
-	    next_type = list_ptr[USER_LIST] -> next -> type;
-	    tmp_ptr = list_ptr[USER_LIST];
-	    list_ptr[USER_LIST] = tmp_ptr -> next;
-	    while (next_type == TYPE3) {
-		return_code = cmnd_type_ok();
-		if (return_code == MATCH) {
-		    return (VALIDATE_OK);
-		} else if (return_code == QUIT_NOW) {
-		    return (VALIDATE_NOT_OK);
-		}
-		if (list_ptr[USER_LIST] -> next != NULL) {
-		    next_type = list_ptr[USER_LIST] -> next -> type;
-		    tmp_ptr = list_ptr[USER_LIST];
-		    list_ptr[USER_LIST] = tmp_ptr -> next;
-		} else {
-		    next_type = ~TYPE3;
-		}
-	    }
-	} else {
-	    tmp_ptr = list_ptr[USER_LIST];
-	    list_ptr[USER_LIST] = tmp_ptr -> next;
-	}
-    }
-    return (VALIDATE_NOT_OK);
-}
-
-
-
-/*
- * this routine is called from the sudo.c module and tries to validate
- * the user, host and command triplet.
- */
-
-int validate()
-{
-    FILE *sudoers_fp;
-    int i, return_code;
-
-    if ((sudoers_fp = fopen(SUDOERS, "r")) == NULL) {
-	perror(SUDOERS);
-	log_error(NO_SUDOERS_FILE);
-	exit(1);
-    }
+    /* We opened _PATH_SUDOERS in check_sudoers() so just rewind it. */
+    rewind(sudoers_fp);
     yyin = sudoers_fp;
     yyout = stdout;
 
-    for (i = 0; i < NUM_LISTS; i++)
-	new_list[i] = TRUE;
+    /* Allocate space for data structures in the parser. */
+    init_parser();
 
-    /*
-     * yyparse() returns with one of 3 values: 0) yyparse() worked fine; 
-     * 1) yyparse() failed; FOUND_USER) the user was found and yyparse()
-     * was returned from prematurely.
-     */
-    return_code = yyparse();
+    /* If pwcheck *could* be "all" or "any", keep more state. */
+    if (pwflag > 0)
+	keepall = TRUE;
 
-    /*
-     * don't need to keep this open...
-     */
+    /* Need to be runas user while stat'ing things in the parser. */
+    set_perms(PERM_RUNAS);
+    error = yyparse();
+
+    /* Close the sudoers file now that we are done with it. */
     (void) fclose(sudoers_fp);
+    sudoers_fp = NULL;
+
+    if (error || parse_error) {
+	set_perms(PERM_ROOT);
+	return(VALIDATE_ERROR);
+    }
 
     /*
-     * if a parsing error occurred, set return_code accordingly
+     * The pw options may have changed during sudoers parse so we
+     * wait until now to set this.
      */
-    if (parse_error == TRUE) {
-	return_code = PARSE_ERROR;
-    }
+    if (pwflag)
+	pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
+    else
+	pwcheck = 0;
+
     /*
-     * if the user was not found, set the return_code accordingly
+     * Assume the worst.  If the stack is empty the user was
+     * not mentioned at all.
      */
-    if (found_user == FALSE) {
-	return_code = NOT_FOUND_USER;
+    if (def_authenticate)
+	error = VALIDATE_NOT_OK;
+    else
+	error = VALIDATE_NOT_OK | FLAG_NOPASS;
+    if (pwcheck) {
+	SET(error, FLAG_NO_CHECK);
+    } else {
+	SET(error, FLAG_NO_HOST);
+	if (!top)
+	    SET(error, FLAG_NO_USER);
     }
+
     /*
-     * handle the 3 cases individually
+     * Only check the actual command if pwflag is not set.
+     * It is set for the "validate", "list" and "kill" pseudo-commands.
+     * Always check the host and user.
      */
-    switch (return_code) {
-    case FOUND_USER:
-	return_code = cmnd_check();
-	delete_list(USER_LIST);
-	delete_list(HOST_LIST);
-	delete_list(CMND_LIST);
-	return (return_code);
-	break;
-    case NOT_FOUND_USER:
-	return (VALIDATE_NO_USER);
-	break;
-    case PARSE_ERROR:
-	return (VALIDATE_ERROR);
-	break;
+    nopass = -1;
+    if (pwflag) {
+	int found;
+
+	if (pwcheck == always && def_authenticate)
+	    nopass = FLAG_CHECK_USER;
+	else if (pwcheck == never || !def_authenticate)
+	    nopass = FLAG_NOPASS;
+	found = 0;
+	while (top) {
+	    if (host_matches == TRUE) {
+		found = 1;
+		if (pwcheck == any && no_passwd == TRUE)
+		    nopass = FLAG_NOPASS;
+		else if (pwcheck == all && nopass != 0)
+		    nopass = (no_passwd == TRUE) ? FLAG_NOPASS : 0;
+	    }
+	    top--;
+	}
+	if (found) {
+	    set_perms(PERM_ROOT);
+	    if (nopass == -1)
+		nopass = 0;
+	    return(VALIDATE_OK | nopass);
+	}
+    } else {
+	while (top) {
+	    if (host_matches == TRUE) {
+		CLR(error, FLAG_NO_HOST);
+		if (runas_matches == TRUE && cmnd_matches == TRUE) {
+		    /*
+		     * User was granted access to cmnd on host as user.
+		     */
+		    set_perms(PERM_ROOT);
+		    return(VALIDATE_OK |
+			(no_passwd == TRUE ? FLAG_NOPASS : 0) |
+			(no_execve == TRUE ? FLAG_NOEXEC : 0));
+		} else if ((runas_matches == TRUE && cmnd_matches == FALSE) ||
+		    (runas_matches == FALSE && cmnd_matches == TRUE)) {
+		    /*
+		     * User was explicitly denied access to cmnd on host.
+		     */
+		    set_perms(PERM_ROOT);
+		    return(VALIDATE_NOT_OK |
+			(no_passwd == TRUE ? FLAG_NOPASS : 0) |
+			(no_execve == TRUE ? FLAG_NOEXEC : 0));
+		}
+	    }
+	    top--;
+	}
     }
+    set_perms(PERM_ROOT);
+
+    /*
+     * The user was neither explicitly granted nor denied access.
+     */
+    if (nopass == -1)
+	nopass = 0;
+    return(error | nopass);
+}
+
+/*
+ * If path doesn't end in /, return TRUE iff cmnd & path name the same inode;
+ * otherwise, return TRUE if user_cmnd names one of the inodes in path.
+ */
+int
+command_matches(sudoers_cmnd, sudoers_args)
+    char *sudoers_cmnd;
+    char *sudoers_args;
+{
+    struct stat sudoers_stat;
+    struct dirent *dent;
+    char buf[PATH_MAX];
+    DIR *dirp;
+
+    /* Check for pseudo-commands */
+    if (strchr(user_cmnd, '/') == NULL) {
+	/*
+	 * Return true if both sudoers_cmnd and user_cmnd are "sudoedit" AND
+	 *  a) there are no args in sudoers OR
+	 *  b) there are no args on command line and none req by sudoers OR
+	 *  c) there are args in sudoers and on command line and they match
+	 */
+	if (strcmp(sudoers_cmnd, "sudoedit") != 0 ||
+	    strcmp(user_cmnd, "sudoedit") != 0)
+	    return(FALSE);
+	if (!sudoers_args ||
+	    (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
+	    (sudoers_args &&
+	     fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
+	    if (safe_cmnd)
+		free(safe_cmnd);
+	    safe_cmnd = estrdup(sudoers_cmnd);
+	    return(TRUE);
+	} else
+	    return(FALSE);
+    }
+
+    /*
+     * If sudoers_cmnd has meta characters in it, use fnmatch(3)
+     * to do the matching.
+     */
+    if (has_meta(sudoers_cmnd)) {
+	/*
+	 * Return true if fnmatch(3) succeeds AND
+	 *  a) there are no args in sudoers OR
+	 *  b) there are no args on command line and none required by sudoers OR
+	 *  c) there are args in sudoers and on command line and they match
+	 * else return false.
+	 */
+	if (fnmatch(sudoers_cmnd, user_cmnd, FNM_PATHNAME) != 0)
+	    return(FALSE);
+	if (!sudoers_args ||
+	    (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
+	    (sudoers_args &&
+	     fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
+	    if (safe_cmnd)
+		free(safe_cmnd);
+	    safe_cmnd = estrdup(user_cmnd);
+	    return(TRUE);
+	} else
+	    return(FALSE);
+    } else {
+	size_t dlen = strlen(sudoers_cmnd);
+
+	/*
+	 * No meta characters
+	 * Check to make sure this is not a directory spec (doesn't end in '/')
+	 */
+	if (sudoers_cmnd[dlen - 1] != '/') {
+	    char *base;
+
+	    /* Only proceed if user_base and basename(sudoers_cmnd) match */
+	    if ((base = strrchr(sudoers_cmnd, '/')) == NULL)
+		base = sudoers_cmnd;
+	    else
+		base++;
+	    if (strcmp(user_base, base) != 0 ||
+		stat(sudoers_cmnd, &sudoers_stat) == -1)
+		return(FALSE);
+
+	    /*
+	     * Return true if inode/device matches AND
+	     *  a) there are no args in sudoers OR
+	     *  b) there are no args on command line and none req by sudoers OR
+	     *  c) there are args in sudoers and on command line and they match
+	     */
+	    if (user_stat->st_dev != sudoers_stat.st_dev ||
+		user_stat->st_ino != sudoers_stat.st_ino)
+		return(FALSE);
+	    if (!sudoers_args ||
+		(!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
+		(sudoers_args &&
+		 fnmatch(sudoers_args, user_args ? user_args : "", 0) == 0)) {
+		if (safe_cmnd)
+		    free(safe_cmnd);
+		safe_cmnd = estrdup(sudoers_cmnd);
+		return(TRUE);
+	    } else
+		return(FALSE);
+	}
+
+	/*
+	 * Grot through sudoers_cmnd's directory entries, looking for user_base.
+	 */
+	dirp = opendir(sudoers_cmnd);
+	if (dirp == NULL)
+	    return(FALSE);
+
+	if (strlcpy(buf, sudoers_cmnd, sizeof(buf)) >= sizeof(buf))
+	    return(FALSE);
+	while ((dent = readdir(dirp)) != NULL) {
+	    /* ignore paths > PATH_MAX (XXX - log) */
+	    buf[dlen] = '\0';
+	    if (strlcat(buf, dent->d_name, sizeof(buf)) >= sizeof(buf))
+		continue;
+
+	    /* only stat if basenames are the same */
+	    if (strcmp(user_base, dent->d_name) != 0 ||
+		stat(buf, &sudoers_stat) == -1)
+		continue;
+	    if (user_stat->st_dev == sudoers_stat.st_dev &&
+		user_stat->st_ino == sudoers_stat.st_ino) {
+		if (safe_cmnd)
+		    free(safe_cmnd);
+		safe_cmnd = estrdup(buf);
+		break;
+	    }
+	}
+
+	closedir(dirp);
+	return(dent != NULL);
+    }
+}
+
+/*
+ * Returns TRUE if "n" is one of our ip addresses or if
+ * "n" is a network that we are on, else returns FALSE.
+ */
+int
+addr_matches(n)
+    char *n;
+{
+    int i;
+    char *m;
+    struct in_addr addr, mask;
+
+    /* If there's an explicit netmask, use it. */
+    if ((m = strchr(n, '/'))) {
+	*m++ = '\0';
+	addr.s_addr = inet_addr(n);
+	if (strchr(m, '.'))
+	    mask.s_addr = inet_addr(m);
+	else {
+	    i = 32 - atoi(m);
+	    mask.s_addr = 0xffffffff;
+	    mask.s_addr >>= i;
+	    mask.s_addr <<= i;
+	    mask.s_addr = htonl(mask.s_addr);
+	}
+	*(m - 1) = '/';
+
+	for (i = 0; i < num_interfaces; i++)
+	    if ((interfaces[i].addr.s_addr & mask.s_addr) == addr.s_addr)
+		return(TRUE);
+    } else {
+	addr.s_addr = inet_addr(n);
+
+	for (i = 0; i < num_interfaces; i++)
+	    if (interfaces[i].addr.s_addr == addr.s_addr ||
+		(interfaces[i].addr.s_addr & interfaces[i].netmask.s_addr)
+		== addr.s_addr)
+		return(TRUE);
+    }
+
+    return(FALSE);
+}
+
+/*
+ * Returns 0 if the hostname matches the pattern and non-zero otherwise.
+ */
+int
+hostname_matches(shost, lhost, pattern)
+    char *shost;
+    char *lhost;
+    char *pattern;
+{
+    if (has_meta(pattern)) {
+	if (strchr(pattern, '.'))
+	    return(fnmatch(pattern, lhost, FNM_CASEFOLD));
+	else
+	    return(fnmatch(pattern, shost, FNM_CASEFOLD));
+    } else {
+	if (strchr(pattern, '.'))
+	    return(strcasecmp(lhost, pattern));
+	else
+	    return(strcasecmp(shost, pattern));
+    }
+}
+
+/*
+ *  Returns TRUE if the user/uid from sudoers matches the specified user/uid,
+ *  else returns FALSE.
+ */
+int
+userpw_matches(sudoers_user, user, pw)
+    char *sudoers_user;
+    char *user;
+    struct passwd *pw;
+{
+    if (pw != NULL && *sudoers_user == '#') {
+	uid_t uid = atoi(sudoers_user + 1);
+	if (uid == pw->pw_uid)
+	    return(1);
+    }
+    return(strcmp(sudoers_user, user) == 0);
+}
+
+/*
+ *  Returns TRUE if the given user belongs to the named group,
+ *  else returns FALSE.
+ *  XXX - reduce the number of passwd/group lookups
+ */
+int
+usergr_matches(group, user, pw)
+    char *group;
+    char *user;
+    struct passwd *pw;
+{
+    struct group *grp;
+    gid_t pw_gid;
+    char **cur;
+
+    /* make sure we have a valid usergroup, sudo style */
+    if (*group++ != '%')
+	return(FALSE);
+
+    /* look up user's primary gid in the passwd file */
+    if (pw == NULL && (pw = getpwnam(user)) == NULL)
+	return(FALSE);
+    pw_gid = pw->pw_gid;
+
+    if ((grp = getgrnam(group)) == NULL)
+	return(FALSE);
+
+    /* check against user's primary (passwd file) gid */
+    if (grp->gr_gid == pw_gid)
+	return(TRUE);
+
+    /* check to see if user is explicitly listed in the group */
+    for (cur = grp->gr_mem; *cur; cur++) {
+	if (strcmp(*cur, user) == 0)
+	    return(TRUE);
+    }
+
+    return(FALSE);
+}
+
+/*
+ * Returns TRUE if "host" and "user" belong to the netgroup "netgr",
+ * else return FALSE.  Either of "host", "shost" or "user" may be NULL
+ * in which case that argument is not checked...
+ */
+int
+netgr_matches(netgr, host, shost, user)
+    char *netgr;
+    char *host;
+    char *shost;
+    char *user;
+{
+#ifdef HAVE_GETDOMAINNAME
+    static char *domain = (char *) -1;
+#else
+    static char *domain = NULL;
+#endif /* HAVE_GETDOMAINNAME */
+
+    /* make sure we have a valid netgroup, sudo style */
+    if (*netgr++ != '+')
+	return(FALSE);
+
+#ifdef HAVE_GETDOMAINNAME
+    /* get the domain name (if any) */
+    if (domain == (char *) -1) {
+	domain = (char *) emalloc(MAXHOSTNAMELEN);
+	if (getdomainname(domain, MAXHOSTNAMELEN) == -1 || *domain == '\0') {
+	    free(domain);
+	    domain = NULL;
+	}
+    }
+#endif /* HAVE_GETDOMAINNAME */
+
+#ifdef HAVE_INNETGR
+    if (innetgr(netgr, host, user, domain))
+	return(TRUE);
+    else if (host != shost && innetgr(netgr, shost, user, domain))
+	return(TRUE);
+#endif /* HAVE_INNETGR */
+
+    return(FALSE);
+}
+
+/*
+ * Returns TRUE if "s" has shell meta characters in it,
+ * else returns FALSE.
+ */
+static int
+has_meta(s)
+    char *s;
+{
+    char *t;
+ 
+    for (t = s; *t; t++) {
+	if (*t == '\\' || *t == '?' || *t == '*' || *t == '[' || *t == ']')
+	    return(TRUE);
+    }
+    return(FALSE);
 }
