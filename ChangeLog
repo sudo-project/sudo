@@ -1,78 +1,101 @@
+2007-06-10 18:27  millert
+
+	* check.c, compat.h, fileops.c, gettime.c, sudo_edit.c, utimes.c,
+	  visudo.c (SUDO_1_6_9): Move declatation of struct timespec to its
+	  own include files for systems without it since it needs time_t
+	  defined.
+
+2007-06-10 18:18  millert
+
+	* utimes.c: Include config.h early so we have it for
+	  TIME_WITH_SYS_TIME
+
+2007-06-10 18:00  millert
+
+	* ChangeLog: Fix Changelog generation and update.
+
 2007-06-10 16:30  millert
 
-	* config.h.in, fileops.c, gettime.c, sudo.c: Add TIME_WITH_SYS_TIME
+	* config.h.in, fileops.c, gettime.c, sudo.c (SUDO_1_6_9): Add
+	  TIME_WITH_SYS_TIME
 
 2007-06-10 16:30  millert
 
-	* BUGS: Update version to 1.6.9
+	* BUGS (SUDO_1_6_9): Update version to 1.6.9
 
 2007-06-10 14:52  millert
 
-	* ldap.c, parse.c, sudo.c, sudo.h: Keep a copy of the supplemental
-	  group vector in struct sudo_user and use it for matching.
+	* ldap.c, parse.c, sudo.c, sudo.h (SUDO_1_6_9): Keep a copy of the
+	  supplemental group vector in struct sudo_user and use it for
+	  matching.
 
 2007-06-10 14:49  millert
 
-	* configure: regen
+	* configure (SUDO_1_6_9): regen
 
 2007-06-10 14:45  millert
 
-	* gettime.c: function to return the current time in a struct
-	  timespec
+	* gettime.c (SUDO_1_6_9): function to return the current time in a
+	  struct timespec
 
 2007-06-10 14:45  millert
 
-	* utime.c, utimes.c: Replace utime() emulation with utimes() and
-	  futimes() emulation.
+	* utime.c, utimes.c (SUDO_1_6_9): Replace utime() emulation with
+	  utimes() and futimes() emulation.
 
 2007-06-10 14:40  millert
 
-	* Makefile.binary, Makefile.binary.in: Replace Makefile.binary with
-	  Makefile.binary.in for config.status substitution
+	* Makefile.binary, Makefile.binary.in (SUDO_1_6_9): Replace
+	  Makefile.binary with Makefile.binary.in for config.status
+	  substitution
 
 2007-06-10 14:26  millert
 
-	* env.c: Add NOEXEC support for AIX 5.3 which supports LDR_PRELOAD
-	  and LDR_PRELOAD64.  The 64-bit version is not currently
-	  supported.
+	* env.c (SUDO_1_6_9): Add NOEXEC support for AIX 5.3 which supports
+	  LDR_PRELOAD and LDR_PRELOAD64.  The 64-bit version is not
+	  currently supported.
 
 2007-06-10 14:23  millert
 
-	* env.c: Actually add COLORTERM to initial_checkenv_table
+	* env.c (SUDO_1_6_9): Actually add COLORTERM to
+	  initial_checkenv_table
 
 2007-06-10 13:53  millert
 
-	* closefrom.c: Use /proc/self/fd instead of /proc/$$/fd.  Add fcntl
-	  F_CLOSEM support to closefrom().  Move old-style fd closing into
-	  closefrom_fallback() and call that if /proc/self/fd doesn't exist
-	  or the F_CLOSEM fcntl() fails.
+	* closefrom.c (SUDO_1_6_9): Use /proc/self/fd instead of
+	  /proc/$$/fd.	Add fcntl F_CLOSEM support to closefrom().  Move
+	  old-style fd closing into closefrom_fallback() and call that if
+	  /proc/self/fd doesn't exist or the F_CLOSEM fcntl() fails.
 
 2007-06-10 13:52  millert
 
-	* config.h.in, auth/sudo_auth.h: s/HAVE_AUTHENTICATE/HAVE_AIXAUTH/
+	* config.h.in, auth/sudo_auth.h (SUDO_1_6_9):
+	  s/HAVE_AUTHENTICATE/HAVE_AIXAUTH/
 
 2007-06-10 13:46  millert
 
-	* auth/securid5.c: Fix securid5 authentication, was not checking
-	  for ACM_OK.  Also add default cases for the two switch()es.
-	  Problem noted by ccon at worldbank
+	* auth/securid5.c (SUDO_1_6_9): Fix securid5 authentication, was
+	  not checking for ACM_OK.  Also add default cases for the two
+	  switch()es.  Problem noted by ccon at worldbank
 
 2007-06-10 13:43  millert
 
-	* alloc.c: Make easprintf() work correctly in K&R
+	* alloc.c (SUDO_1_6_9): Make easprintf() work correctly in K&R
 
 2007-06-10 13:37  millert
 
-	* README: Update version and note that license is ISC not BSD
+	* README (SUDO_1_6_9): Update version and note that license is ISC
+	  not BSD
 
 2007-06-10 13:37  millert
 
-	* INSTALL.configure: Update configure's INSTALL file from head
+	* INSTALL.configure (SUDO_1_6_9): Update configure's INSTALL file
+	  from head
 
 2007-06-10 13:28  millert
 
-	* auth/kerb5.c:  o If we cannot get a valid service key using the
-	  default keytab it
+	* auth/kerb5.c (SUDO_1_6_9):  o If we cannot get a valid service
+	  key using the default keytab it
 	     is a fatal error.
 	   o use krb5_verify_user() if available instead of doing it by
 	  hand
@@ -83,7 +106,7 @@
 
 2007-06-10 13:27  millert
 
-	* auth/pam.c: Linux PAM now defines __LINUX_PAM__, not
+	* auth/pam.c (SUDO_1_6_9): Linux PAM now defines __LINUX_PAM__, not
 	  __LIBPAM_VERSION.  If the user enters ^C at the password prompt,
 	  abort instead of trying to authenticate with an empty password
 	  (which causes an annoying delay).  Call pam_open_session() and
@@ -92,42 +115,43 @@
 2007-06-10 13:25  millert
 
 	* PORTING, TROUBLESHOOTING, config.h.in, set_perms.c, sudo.c,
-	  sudo.h, testsudoers.c: Kill use of POSIX saved uids; they aren't
-	  worth bothering with.
+	  sudo.h, testsudoers.c (SUDO_1_6_9): Kill use of POSIX saved uids;
+	  they aren't worth bothering with.
 
 2007-06-10 13:23  millert
 
-	* env.c: Allow COLORTERM to be inherited from the environment.
-	  Check TERM and COLORTERM for '%' and '/' characters.	Remove more
-	  potentially dangerous variables from the environment.  Many from
-	  Debian.
+	* env.c (SUDO_1_6_9): Allow COLORTERM to be inherited from the
+	  environment.	Check TERM and COLORTERM for '%' and '/'
+	  characters.  Remove more potentially dangerous variables from the
+	  environment.	Many from Debian.
 
 2007-06-10 13:21  millert
 
-	* check.c: Fix fd leak when lecture file option is enabled.  From
-	  Jerry Brown
+	* check.c (SUDO_1_6_9): Fix fd leak when lecture file option is
+	  enabled.  From Jerry Brown
 
 2007-06-10 13:19  millert
 
 	* aclocal.m4, acsite.m4, config.guess, config.sub, configure.in,
-	  ltmain.sh: Sync configure and libtool from head, using more
-	  recent autoconf.
+	  ltmain.sh (SUDO_1_6_9): Sync configure and libtool from head,
+	  using more recent autoconf.
 
 2007-06-10 13:17  millert
 
-	* README.LDAP: Sync with head
+	* README.LDAP (SUDO_1_6_9): Sync with head
 
 2007-06-10 13:16  millert
 
-	* INSTALL.binary, Makefile.in, version.h: Update version to 1.6.9
+	* INSTALL.binary, Makefile.in, version.h (SUDO_1_6_9): Update
+	  version to 1.6.9
 
 2007-06-10 13:14  millert
 
-	* INSTALL: Merge changes from head
+	* INSTALL (SUDO_1_6_9): Merge changes from head
 
 2007-06-10 13:05  millert
 
-	* HISTORY: No more support contracts.
+	* HISTORY (SUDO_1_6_9): No more support contracts.
 
 2007-06-10 12:57  millert
 
@@ -139,8 +163,8 @@
 	  lex.yy.c, mkdefaults, parse.c, parse.yacc, pathnames.h.in,
 	  sample.pam, sudo.c, sudo.h, sudo.man.in, sudo.pod, sudo_edit.c,
 	  sudo_noexec.c, sudoers.man.in, sudoers.pod, version.h, visudo.c,
-	  visudo.man.in, visudo.pod, auth/kerb5.c, auth/pam.c,
-	  emul/utime.h: Merge in sudo 1.6.8 patches 1-12
+	  visudo.man.in, visudo.pod, auth/kerb5.c, auth/pam.c, emul/utime.h
+	  (SUDO_1_6_9): Merge in sudo 1.6.8 patches 1-12
 
 2007-06-09 07:26  millert
 
@@ -3076,11 +3100,11 @@
 
 2004-02-12 20:54  aaron
 
-	* sudo.h: Merge with HEAD
+	* sudo.h (LDAP): Merge with HEAD
 
 2004-02-11 22:08  aaron
 
-	* sudo_noexec.c: Merge with HEAD
+	* sudo_noexec.c (LDAP): Merge with HEAD
 
 2004-02-08 15:53  millert
 
@@ -3089,27 +3113,27 @@
 
 2004-02-07 17:48  aaron
 
-	* ldap.c, sudoers2ldif: noexec hooks
+	* ldap.c, sudoers2ldif (LDAP): noexec hooks
 
 2004-02-07 17:05  aaron
 
-	* def_data.c, def_data.in: description fix
+	* def_data.c, def_data.in (LDAP): description fix
 
 2004-02-07 17:04  aaron
 
-	* ldap.c: Conformity
+	* ldap.c (LDAP): Conformity
 
 2004-02-07 16:44  aaron
 
-	* sudo.c: Conformity
+	* sudo.c (LDAP): Conformity
 
 2004-02-07 16:31  aaron
 
-	* def_data.c: Syntax Fix
+	* def_data.c (LDAP): Syntax Fix
 
 2004-02-07 16:21  aaron
 
-	* configure: regen (via autoconf from configure.in)
+	* configure (LDAP): regen (via autoconf from configure.in)
 
 2004-02-07 16:12  aaron
 
@@ -3122,8 +3146,8 @@
 	  set_perms.c, sigaction.c, sudo.c, sudo.h, sudo.man.in, sudo.pod,
 	  sudo.tab.h, sudo_edit.c, sudo_noexec.c, sudoers.man.in,
 	  sudoers.pod, testsudoers.c, tgetpass.c, visudo.c, visudo.man.in,
-	  visudo.pod, auth/fwtk.c, auth/pam.c, auth/sudo_auth.c: Big Merge
-	  with HEAD
+	  visudo.pod, auth/fwtk.c, auth/pam.c, auth/sudo_auth.c (LDAP): Big
+	  Merge with HEAD
 
 2004-02-06 18:08  millert
 
@@ -3630,7 +3654,7 @@
 
 2004-01-01 18:22  aaron
 
-	* configure: removed duplicate darwin entry
+	* configure (LDAP): removed duplicate darwin entry
 
 2004-01-01 16:47  aaron
 
@@ -3640,7 +3664,8 @@
 	  set_perms.c, sudo.c, sudo.h, sudoers.man.in, sudoers.pod,
 	  visudo.c, visudo.man.in, zero_bytes.c, auth/aix_auth.c,
 	  auth/bsdauth.c, auth/fwtk.c, auth/pam.c, auth/rfc1938.c,
-	  auth/securid5.c, auth/sia.c, auth/sudo_auth.c: Sync with HEAD
+	  auth/securid5.c, auth/sia.c, auth/sudo_auth.c (LDAP): Sync with
+	  HEAD
 
 2003-12-31 17:46  millert
 
@@ -3651,7 +3676,8 @@
 
 2003-12-31 16:53  aaron
 
-	* ldap.c, sudo.c: Incorporated Patch from Nationwide (Todd Anello)
+	* ldap.c, sudo.c (LDAP): Incorporated Patch from Nationwide (Todd
+	  Anello)
 
 2003-12-31 13:35  millert
 
@@ -3712,7 +3738,7 @@
 
 2003-12-23 10:58  aaron
 
-	* sudo.c: Sync with HEAD
+	* sudo.c (LDAP): Sync with HEAD
 
 2003-12-22 21:18  millert
 
@@ -3724,27 +3750,28 @@
 
 2003-12-19 21:30  aaron
 
-	* README.LDAP: typo
+	* README.LDAP (LDAP): typo
 
 2003-12-19 21:28  aaron
 
-	* README.LDAP: typos
+	* README.LDAP (LDAP): typos
 
 2003-12-18 19:40  aaron
 
-	* configure, visudo.pod: Merge with HEAD
+	* configure, visudo.pod (LDAP): Merge with HEAD
 
 2003-12-17 23:13  aaron
 
-	* ldap.c: Bugfix reported by Andreas.Bussjaeger@t-systems.com
+	* ldap.c (LDAP): Bugfix reported by
+	  Andreas.Bussjaeger@t-systems.com
 
 2003-12-17 22:47  aaron
 
-	* README.LDAP, ldap.c: LDAPv3
+	* README.LDAP, ldap.c (LDAP): LDAPv3
 
 2003-12-16 23:23  aaron
 
-	* sudoers2ldif: Added to buglist
+	* sudoers2ldif (LDAP): Added to buglist
 
 2003-12-16 13:51  millert
 
@@ -3752,20 +3779,20 @@
 
 2003-12-14 14:39  aaron
 
-	* README.LDAP, config.h.in, ldap.c: other LDAP Libraries from
-	  Andreas Bussjaeger
+	* README.LDAP, config.h.in, ldap.c (LDAP): other LDAP Libraries
+	  from Andreas Bussjaeger
 
 2003-12-12 12:22  millert
 
-	* Makefile.in, configure, configure.in, ldap.c: Don't compile
-	  ldap.c (even as a stub) unless --with-ldap is specified.
+	* Makefile.in, configure, configure.in, ldap.c (LDAP): Don't
+	  compile ldap.c (even as a stub) unless --with-ldap is specified.
 
 2003-12-12 12:12  millert
 
 	* CHANGES, Makefile.in, README.LDAP, config.h.in, configure,
 	  configure.in, def_data.c, def_data.h, def_data.in, ldap.c,
-	  sudo.c, sudo.h, sudoers2ldif: Merge in LDAP support from Aaron
-	  Spangler
+	  sudo.c, sudo.h, sudoers2ldif (LDAP): Merge in LDAP support from
+	  Aaron Spangler
 
 2003-12-09 22:09  millert
 
