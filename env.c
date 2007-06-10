@@ -112,24 +112,38 @@ static const char *initial_badenv_table[] = {
 #endif /* HAVE_KERB4 */
 #ifdef HAVE_KERB5
     "KRB5_CONFIG*",
+    "KRB5_KTNAME",
 #endif /* HAVE_KERB5 */
 #ifdef HAVE_SECURID
     "VAR_ACE",
     "USR_ACE",
     "DLC_ACE",
 #endif /* HAVE_SECURID */
-    "TERMINFO",
-    "TERMINFO_DIRS",
-    "TERMPATH",
+    "TERMINFO",			/* terminfo, exclusive path to terminfo files */
+    "TERMINFO_DIRS",		/* terminfo, path(s) to terminfo files */
+    "TERMPATH",			/* termcap, path(s) to termcap files */
     "TERMCAP",			/* XXX - only if it starts with '/' */
-    "ENV",
-    "BASH_ENV",
-    "PS4",
-    "SHELLOPTS",
-    "JAVA_TOOL_OPTIONS",
-    "PERLLIB",
-    "PERL5LIB",
-    "PERL5OPT",
+    "ENV",			/* ksh, file to source before script runs */
+    "BASH_ENV",			/* bash, file to source before script runs */
+    "PS4",			/* bash, prefix for lines in xtrace mode */
+    "GLOBIGNORE",		/* bash, globbing patterns to ignore */
+    "SHELLOPTS",		/* bash, extra command line options */
+    "JAVA_TOOL_OPTIONS",	/* java, extra command line options */
+    "PERLIO_DEBUG ",		/* perl, debugging output file */
+    "PERLLIB",			/* perl, search path for modules/includes */
+    "PERL5LIB",			/* perl 5, search path for modules/includes */
+    "PERL5OPT",			/* perl 5, extra command line options */
+    "PERL5DB",			/* perl 5, command used to load debugger */
+    "FPATH",			/* ksh, search path for functions */
+    "NULLCMD",			/* zsh, command for null file redirection */
+    "READNULLCMD",		/* zsh, command for null file redirection */
+    "ZDOTDIR",			/* zsh, search path for dot files */
+    "TMPPREFIX",		/* zsh, prefix for temporary files */
+    "PYTHONHOME",		/* python, module search path */
+    "PYTHONPATH",		/* python, search path */
+    "PYTHONINSPEC",		/* python, allow inspection */
+    "RUBYLIB",			/* ruby, library load path */
+    "RUBYOPT",			/* ruby, extra command line options */
     NULL
 };
 
@@ -140,6 +154,7 @@ static const char *initial_checkenv_table[] = {
     "LC_*",
     "LANG",
     "LANGUAGE",
+    "TERM",
     NULL
 };
 
@@ -377,13 +392,20 @@ rebuild_env(envp, sudo_mode, noexec)
 			if (strncmp(*ep, "HOME=", 5) == 0)
 			    SET(didvar, DID_HOME);
 			break;
+		    case 'L':
+			if (strncmp(*ep, "LOGNAME=", 8) == 0)
+			    SET(didvar, DID_LOGNAME);
+			break;
 		    case 'S':
 			if (strncmp(*ep, "SHELL=", 6) == 0)
 			    SET(didvar, DID_SHELL);
 			break;
-		    case 'L':
-			if (strncmp(*ep, "LOGNAME=", 8) == 0)
-			    SET(didvar, DID_LOGNAME);
+		    case 'P':
+			if (strncmp(*ep, "PATH=", 5) == 0)
+			    SET(didvar, DID_PATH);
+		    case 'T':
+			if (strncmp(*ep, "TERM=", 5) == 0)
+			    SET(didvar, DID_TERM);
 			break;
 		    case 'U':
 			if (strncmp(*ep, "USER=", 5) == 0)
