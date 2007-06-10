@@ -1,5 +1,5 @@
 #
-# Copyright (c) 1996, 1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 1996, 1998-2007 Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -130,7 +130,7 @@ TESTOBJS = interfaces.o testsudoers.o $(PARSEOBJS)
 
 LIBOBJS = @LIBOBJS@ @ALLOCA@
 
-VERSION = 1.6.8p12
+VERSION = 1.6.9
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES HISTORY INSTALL INSTALL.configure \
 	    LICENSE Makefile.in PORTING README README.LDAP RUNSON TODO \
@@ -179,6 +179,9 @@ visudo: $(VISUDOBJS) $(LIBOBJS)
 
 testsudoers: $(TESTOBJS) $(LIBOBJS)
 	$(CC) -o $@ $(TESTOBJS) $(LIBOBJS) $(LDFLAGS) $(LIBS) $(NET_LIBS)
+
+sudo_noexec.lo: $(srcdir)/sudo_noexec.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_noexec.c
 
 sudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
