@@ -139,7 +139,6 @@ login_cap_t *lc;
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
 sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
-void (*set_perms) __P((int));
 
 
 int
@@ -192,7 +191,7 @@ main(argc, argv, envp)
     (void) sigaction(SIGCHLD, &sa, &saved_sa_chld);
 
     /*
-     * Turn off core dumps, close open files and setup set_perms().
+     * Turn off core dumps and close open files.
      */
     initial_setup();
     setpwent();
@@ -277,22 +276,6 @@ main(argc, argv, envp)
     }
     if (safe_cmnd == NULL)
 	safe_cmnd = user_cmnd;
-
-    /*
-     * If we are using set_perms_posix() and the stay_setuid flag was not set,
-     * set the real, effective and saved uids to 0 and use set_perms_nosuid()
-     * instead of set_perms_posix().
-     */
-#if !defined(HAVE_SETRESUID) && !defined(HAVE_SETREUID) && \
-    !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
-    if (!def_stay_setuid && set_perms == set_perms_posix) {
-	if (setuid(0)) {
-	    perror("setuid(0)");
-	    exit(1);
-	}
-	set_perms = set_perms_nosuid;
-    }
-#endif
 
     /*
      * Look up the timestamp dir owner if one is specified.
@@ -921,7 +904,6 @@ check_sudoers()
 
 /*
  * Close all open files (except std*) and turn off core dumps.
- * Also sets the set_perms() pointer to the correct function.
  */
 static void
 initial_setup()
@@ -939,24 +921,6 @@ initial_setup()
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
 
     closefrom(STDERR_FILENO + 1);
-
-    /*
-     * Make set_perms point to the correct function.
-     * If we are using setresuid() or setreuid() we only need to set this
-     * once.  If we are using POSIX saved uids we will switch to
-     * set_perms_nosuid after sudoers has been parsed if the "stay_suid"
-     * option is not set.
-     */
-#if defined(HAVE_SETRESUID) || defined(HAVE_SETREUID)
-    set_perms = set_perms_suid;
-#else
-# if !defined(NO_SAVED_IDS) && defined(_SC_SAVED_IDS) && defined(_SC_VERSION)
-    if (sysconf(_SC_SAVED_IDS) == 1 && sysconf(_SC_VERSION) >= 199009)
-	set_perms = set_perms_posix;
-    else
-# endif
-	set_perms = set_perms_nosuid;
-#endif /* HAVE_SETRESUID || HAVE_SETREUID */
 }
 
 #ifdef HAVE_LOGIN_CAP_H

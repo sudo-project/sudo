@@ -179,6 +179,12 @@
 /* Define to 1 if you use Kerberos V. */
 #undef HAVE_KERB5
 
+/* Define to 1 if you have the `krb5_init_secure_context' function. */
+#undef HAVE_KRB5_INIT_SECURE_CONTEXT
+
+/* Define to 1 if you have the `krb5_verify_user' function. */
+#undef HAVE_KRB5_VERIFY_USER
+
 /* Define to 1 if your LDAP needs <lber.h>. (OpenLDAP does not) */
 #undef HAVE_LBER_H
 
@@ -433,9 +439,6 @@
 
 /* Define to 1 if root should not be allowed to use sudo. */
 #undef NO_ROOT_SUDO
-
-/* Define to avoid using POSIX saved ids. */
-#undef NO_SAVED_IDS
 
 /* The default password prompt. */
 #undef PASSPROMPT

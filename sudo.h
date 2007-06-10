@@ -213,9 +213,7 @@ int sudoers_lookup	__P((int));
 int sudo_ldap_check	__P((int));
 void sudo_ldap_list_matches __P((void));
 #endif
-void set_perms_nosuid	__P((int));
-void set_perms_posix	__P((int));
-void set_perms_suid	__P((int));
+void set_perms		__P((int));
 void remove_timestamp	__P((int));
 int check_secureware	__P((char *));
 void sia_attempt_auth	__P((void));
@@ -251,8 +249,6 @@ extern struct passwd *auth_pw;
 extern FILE *sudoers_fp;
 extern int tgetpass_flags;
 extern uid_t timestamp_uid;
-
-extern void (*set_perms) __P((int));
 #endif
 #ifndef errno
 extern int errno;
