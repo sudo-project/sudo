@@ -100,6 +100,7 @@ static const char *initial_badenv_table[] = {
     "SHLIB_PATH",
 #endif /* __hpux */
 #ifdef _AIX
+    "LDR_*",
     "LIBPATH",
 #endif /* _AIX */
 #ifdef __APPLE__
@@ -536,9 +537,13 @@ rebuild_env(envp, sudo_mode, noexec)
 # if defined(__osf__) || defined(__sgi)
 	insert_env(format_env("_RLD_LIST", def_noexec_file, ":DEFAULT", VNULL), 1);
 # else
+#  ifdef _AIX
+	insert_env(format_env("LDR_PRELOAD", def_noexec_file, VNULL), &env, 1);
+#  else
 	insert_env(format_env("LD_PRELOAD", def_noexec_file, VNULL), 1);
-# endif
-#endif
+#  endif /* _AIX */
+# endif /* __osf__ || __sgi */
+#endif /* __darwin__ || __APPLE__ */
     }
 
     /* Set PS1 if SUDO_PS1 is set. */
