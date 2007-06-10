@@ -232,13 +232,6 @@ const char *getprogname __P((void));
 #endif /* HAVE___PROGNAME */
 #endif /* !HAVE_GETPROGNAME */
 
-#ifndef HAVE_TIMESPEC
-struct timespec {
-    time_t	tv_sec;
-    long	tv_nsec;
-};
-#endif /* !HAVE_TIMESPEC */
-
 #ifndef timespecclear
 # define timespecclear(ts)	(ts)->tv_sec = (ts)->tv_nsec = 0
 #endif

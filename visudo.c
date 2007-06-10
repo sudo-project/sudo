@@ -64,10 +64,15 @@
 #endif /* HAVE_ERR_H */
 #include <ctype.h>
 #include <pwd.h>
-#include <time.h>
+#if TIME_WITH_SYS_TIME
+# include <time.h>
+#endif
 #include <signal.h>
 #include <errno.h>
 #include <fcntl.h>
+#ifndef HAVE_TIMESPEC
+# include <emul/timespec.h>
+#endif
 
 #include "sudo.h"
 #include "version.h"
