@@ -104,7 +104,7 @@ static const char rcsid[] = "$Sudo$";
 /*
  * Prototypes
  */
-static int init_vars			__P((int));
+static int init_vars			__P((int, char **));
 static int parse_args			__P((int, char **));
 static void check_sudoers		__P((void));
 static void initial_setup		__P((void));
@@ -115,7 +115,6 @@ static struct passwd *get_authpw	__P((void));
 extern int sudo_edit			__P((int, char **));
 extern void list_matches		__P((void));
 extern char **rebuild_env		__P((char **, int, int));
-extern char **zero_env			__P((char **));
 extern struct passwd *sudo_getpwnam	__P((const char *));
 extern struct passwd *sudo_getpwuid	__P((uid_t));
 extern struct passwd *sudo_pwdup	__P((const struct passwd *));
@@ -147,17 +146,15 @@ sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
 
 
 int
-main(argc, argv, envp)
+main(argc, argv)
     int argc;
     char **argv;
-    char **envp;
 {
     int validated;
     int fd;
     int cmnd_status;
     int sudo_mode;
     int pwflag;
-    char **new_environ;
     sigaction_t sa;
     extern int printmatches;
     extern char **environ;
@@ -177,9 +174,6 @@ main(argc, argv, envp)
     initprivs();
 # endif
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
-
-    /* Zero out the environment. */
-    environ = zero_env(envp);
 
     if (geteuid() != 0)
 	errx(1, "must be setuid root");
@@ -258,7 +252,7 @@ main(argc, argv, envp)
     if (user_cmnd == NULL && NewArgc == 0)
 	usage(1);
 
-    cmnd_status = init_vars(sudo_mode);
+    cmnd_status = init_vars(sudo_mode, environ);
 
 #ifdef HAVE_LDAP
     validated = sudo_ldap_check(pwflag);
@@ -355,9 +349,7 @@ main(argc, argv, envp)
 
     /* Build a new environment that avoids any nasty bits if we have a cmnd. */
     if (ISSET(sudo_mode, MODE_RUN))
-	new_environ = rebuild_env(envp, sudo_mode, def_noexec);
-    else
-	new_environ = envp;
+	environ = rebuild_env(environ, sudo_mode, def_noexec);
 
     if (ISSET(validated, VALIDATE_OK)) {
 	/* Finally tell the user if the command did not exist. */
@@ -396,9 +388,6 @@ main(argc, argv, envp)
 	/* Close the password and group files */
 	endpwent();
 	endgrent();
-
-	/* Install the real environment. */
-	environ = new_environ;
 
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	    char *p;
@@ -472,10 +461,11 @@ main(argc, argv, envp)
  * load the ``interfaces'' array.
  */
 static int
-init_vars(sudo_mode)
+init_vars(sudo_mode, envp)
     int sudo_mode;
+    char **envp;
 {
-    char *p, thost[MAXHOSTNAMELEN];
+    char *p, **ep, thost[MAXHOSTNAMELEN];
     int nohostname, rval;
 
     /* Sanity check command from user. */
@@ -522,6 +512,24 @@ init_vars(sudo_mode)
 	user_tty = estrdup(p);
     } else
 	user_tty = "unknown";
+
+    for (ep = envp; *ep; ep++) {
+	switch (**ep) {
+	    case 'P':
+		if (strncmp("PATH=", *ep, 5) == 0)
+		    user_path = *ep + 5;
+		break;
+	    case 'S':
+		if (strncmp("SHELL=", *ep, 6) == 0)
+		    user_shell = *ep + 6;
+		else if (!user_prompt && strncmp("SUDO_PROMPT=", *ep, 12) == 0)
+		    user_prompt = *ep + 12;
+		else if (strncmp("SUDO_USER=", *ep, 10) == 0)
+		    prev_user = *ep + 10;
+		break;
+
+	    }
+    }
 
     /*
      * Get a local copy of the user's struct passwd with the shadow password

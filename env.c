@@ -101,7 +101,6 @@ struct environment {
  * Prototypes
  */
 char **rebuild_env		__P((char **, int, int));
-char **zero_env			__P((char **));
 static void insert_env		__P((char *, struct environment *, int));
 static char *format_env		__P((char *, ...));
 
@@ -195,89 +194,6 @@ static const char *initial_keepenv_table[] = {
     "TZ",
     NULL
 };
-
-/*
- * Zero out environment and replace with a minimal set of KRB5CCNAME
- * USER, LOGNAME, HOME, TZ, PATH (XXX - should just set path to default)
- * May set user_path, user_shell, and/or user_prompt as side effects.
- */
-char **
-zero_env(envp)
-    char **envp;
-{
-    static char *newenv[9];
-    char **ep, **nep = newenv;
-    char **ne_last = &newenv[(sizeof(newenv) / sizeof(newenv[0])) - 1];
-    extern char *prev_user;
-
-    for (ep = envp; *ep; ep++) {
-	switch (**ep) {
-	    case 'H':
-		if (strncmp("HOME=", *ep, 5) == 0)
-		    break;
-		continue;
-	    case 'K':
-		if (strncmp("KRB5CCNAME=", *ep, 11) == 0)
-		    break;
-		continue;
-	    case 'L':
-		if (strncmp("LOGNAME=", *ep, 8) == 0)
-		    break;
-		continue;
-	    case 'P':
-		if (strncmp("PATH=", *ep, 5) == 0) {
-		    user_path = *ep + 5;
-		    /* XXX - set to sane default instead of user's? */
-		    break;
-		}
-		continue;
-	    case 'S':
-		if (strncmp("SHELL=", *ep, 6) == 0)
-		    user_shell = *ep + 6;
-		else if (!user_prompt && strncmp("SUDO_PROMPT=", *ep, 12) == 0)
-		    user_prompt = *ep + 12;
-		else if (strncmp("SUDO_USER=", *ep, 10) == 0)
-		    prev_user = *ep + 10;
-		continue;
-	    case 'T':
-		if (strncmp("TZ=", *ep, 3) == 0)
-		    break;
-		continue;
-	    case 'U':
-		if (strncmp("USER=", *ep, 5) == 0)
-		    break;
-		continue;
-	    default:
-		continue;
-	}
-
-	/* Deal with multiply defined variables (take first instance) */
-	for (nep = newenv; *nep; nep++) {
-	    if (**nep == **ep)
-		break;
-	}
-	if (*nep == NULL) {
-	    if (nep < ne_last)
-		*nep++ = *ep;
-	    else
-		errx(1, "internal error, attempt to write outside newenv");
-	}
-    }
-
-#ifdef HAVE_LDAP
-    /*
-     * Prevent OpenLDAP from reading any user dotfiles
-     * or files in the current directory.
-     *
-     */	     
-    if (nep < ne_last)
-	*nep++ = "LDAPNOINIT=1";
-    else
-	errx(1, "internal error, attempt to write outside newenv");
-#endif
-
-    return(&newenv[0]);
-}
 
 /*
  * Given a variable and value, allocate and format an environment string.
