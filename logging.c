@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996,1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996,1998-2007 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -537,9 +537,9 @@ send_mail(line)
 	get_timestr(), user_name, line);
     fclose(mail);
 
+    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
     /* If mailer is done, wait for it now.  If not, we'll get it later.  */
     reapchild(SIGCHLD);
-    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
 }
 
 /*
