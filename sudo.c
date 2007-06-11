@@ -111,7 +111,6 @@ static void usage_excl			__P((int))
 static struct passwd *get_authpw	__P((void));
 extern int sudo_edit			__P((int, char **));
 extern char **rebuild_env		__P((char **, int, int));
-extern char **clean_env			__P((char **));
 
 /*
  * Globals
