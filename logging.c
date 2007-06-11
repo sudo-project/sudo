@@ -340,7 +340,9 @@ void
 #ifdef __STDC__
 log_error(int flags, const char *fmt, ...)
 #else
-log_error(va_alist)
+log_error(flags, fmt, va_alist)
+    int flags;
+    const char *fmt;
     va_dcl
 #endif
 {
@@ -351,12 +353,7 @@ log_error(va_alist)
 #ifdef __STDC__
     va_start(ap, fmt);
 #else
-    int flags;
-    const char *fmt;
-
     va_start(ap);
-    flags = va_arg(ap, int);
-    fmt = va_arg(ap, const char *);
 #endif
 
     /* Become root if we are not already to avoid user control */
