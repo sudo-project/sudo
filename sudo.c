@@ -328,11 +328,6 @@ main(argc, argv, envp)
     if (ISSET(sudo_mode, MODE_IMPLIED_SHELL) && !def_shell_noargs)
 	usage(1);
 
-    /* May need to set $HOME to target user if we are running a command. */
-    if (ISSET(sudo_mode, MODE_RUN) && (def_always_set_home ||
-	(ISSET(sudo_mode, MODE_SHELL) && def_set_home)))
-	SET(sudo_mode, MODE_RESET_HOME);
-
     /* Bail if a tty is required and we don't have one.  */
     if (def_requiretty) {
 	if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1)
@@ -360,7 +355,7 @@ main(argc, argv, envp)
 
     /* Build a new environment that avoids any nasty bits if we have a cmnd. */
     if (ISSET(sudo_mode, MODE_RUN))
-	new_environ = rebuild_env(envp, sudo_mode, ISSET(validated, FLAG_NOEXEC));
+	new_environ = rebuild_env(envp, sudo_mode, def_noexec);
     else
 	new_environ = envp;
 
@@ -609,7 +604,7 @@ init_vars(sudo_mode)
 
 	/* copy the args from NewArgv */
 	for (dst = NewArgv + 1; (*dst = *src) != NULL; ++src, ++dst)
-	    ;
+	    continue;
     }
 
     /* Set login class if applicable. */

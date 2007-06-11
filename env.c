@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000-2004 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2000-2005 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,7 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -59,27 +59,50 @@ static const char rcsid[] = "$Sudo$";
  * Flags used in rebuild_env()
  */
 #undef DID_TERM
-#define DID_TERM	0x01
+#define DID_TERM	0x0001
 #undef DID_PATH
-#define DID_PATH	0x02
+#define DID_PATH	0x0002
 #undef DID_HOME
-#define DID_HOME	0x04
+#define DID_HOME	0x0004
 #undef DID_SHELL
-#define DID_SHELL	0x08
+#define DID_SHELL	0x0008
 #undef DID_LOGNAME
-#define DID_LOGNAME	0x10
+#define DID_LOGNAME	0x0010
 #undef DID_USER
-#define DID_USER    	0x20
+#define DID_USER    	0x0020
+#undef DID_MAX
+#define DID_MAX    	0x00ff
+
+#undef KEPT_TERM
+#define KEPT_TERM	0x0100
+#undef KEPT_PATH
+#define KEPT_PATH	0x0200
+#undef KEPT_HOME
+#define KEPT_HOME	0x0400
+#undef KEPT_SHELL
+#define KEPT_SHELL	0x0800
+#undef KEPT_LOGNAME
+#define KEPT_LOGNAME	0x1000
+#undef KEPT_USER
+#define KEPT_USER    	0x2000
+#undef KEPT_MAX
+#define KEPT_MAX    	0xff00
 
 #undef VNULL
 #define	VNULL	(VOID *)NULL
+
+struct environment {
+    char **envp;		/* pointer to the new environment */
+    size_t env_size;		/* size of new_environ in char **'s */
+    size_t env_len;		/* number of slots used, not counting NULL */
+};
 
 /*
  * Prototypes
  */
 char **rebuild_env		__P((char **, int, int));
 char **zero_env			__P((char **));
-static void insert_env		__P((char *, int));
+static void insert_env		__P((char *, struct environment *, int));
 static char *format_env		__P((char *, ...));
 
 /*
@@ -102,7 +125,7 @@ static const char *initial_badenv_table[] = {
 #ifdef _AIX
     "LDR_*",
     "LIBPATH",
-#endif /* _AIX */
+#endif
 #ifdef __APPLE__
     "DYLD_*",
 #endif
@@ -160,9 +183,18 @@ static const char *initial_checkenv_table[] = {
     NULL
 };
 
-static char **new_environ;	/* Modified copy of the environment */
-static size_t env_size;		/* size of new_environ in char **'s */
-static size_t env_len;		/* number of slots used, not counting NULL */
+/*
+ * Default table of variables to preserve in the environment.
+ */
+static const char *initial_keepenv_table[] = {
+    "KRB5CCNAME",
+    "DISPLAY",
+    "PATH",
+    "TERM",
+    "COLORTERM",
+    "TZ",
+    NULL
+};
 
 /*
  * Zero out environment and replace with a minimal set of KRB5CCNAME
@@ -298,36 +330,36 @@ format_env(var, va_alist)
 }
 
 /*
- * Insert str into new_environ, assumes str has an '=' in it.
- * NOTE: no other routines may modify new_environ, env_size, or env_len.
+ * Insert str into e->envp, assumes str has an '=' in it.
  */
 static void
-insert_env(str, dupcheck)
+insert_env(str, e, dupcheck)
     char *str;
+    struct environment *e;
     int dupcheck;
 {
     char **nep;
     size_t varlen;
 
     /* Make sure there is room for the new entry plus a NULL. */
-    if (env_len + 2 > env_size) {
-	env_size += 128;
-	new_environ = erealloc3(new_environ, env_size, sizeof(char *));
+    if (e->env_len + 2 > e->env_size) {
+	e->env_size += 128;
+	e->envp = erealloc3(e->envp, e->env_size, sizeof(char *));
     }
 
     if (dupcheck) {
 	    varlen = (strchr(str, '=') - str) + 1;
 
-	    for (nep = new_environ; *nep; nep++) {
+	    for (nep = e->envp; *nep; nep++) {
 		if (strncmp(str, *nep, varlen) == 0) {
 		    *nep = str;
 		    return;
 		}
 	    }
     } else
-	nep = &new_environ[env_len];
+	nep = e->envp + e->env_len;
 
-    env_len++;
+    e->env_len++;
     *nep++ = str;
     *nep = NULL;
 }
@@ -343,22 +375,24 @@ rebuild_env(envp, sudo_mode, noexec)
     int sudo_mode;
     int noexec;
 {
-    char **ep, *cp, *ps1;
-    int okvar, iswild, didvar;
-    size_t len;
     struct list_member *cur;
+    struct environment env;
+    size_t len;
+    char **ep, *cp, *ps1;
+    unsigned int okvar, iswild, didvar;
 
     /*
      * Either clean out the environment or reset to a safe default.
      */
     ps1 = NULL;
     didvar = 0;
+    memset(&env, 0, sizeof(env));
     if (def_env_reset) {
 	int keepit;
 
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = envp; *ep; ep++) {
-	    keepit = 0;
+	    keepit = FALSE;
 
 	    /* Skip variables with values beginning with () (bash functions) */
 	    if ((cp = strchr(*ep, '=')) != NULL) {
@@ -371,14 +405,12 @@ rebuild_env(envp, sudo_mode, noexec)
 		/* Deal with '*' wildcard */
 		if (cur->value[len - 1] == '*') {
 		    len--;
-		    iswild = 1;
+		    iswild = TRUE;
 		} else
-		    iswild = 0;
+		    iswild = FALSE;
 		if (strncmp(cur->value, *ep, len) == 0 &&
 		    (iswild || (*ep)[len] == '=')) {
-		    /* We always preserve TERM, no special treatment needed. */
-		    if (strncmp(*ep, "TERM=", 5) != 0)
-			keepit = 1;
+		    keepit = TRUE;
 		    break;
 		}
 	    }
@@ -398,13 +430,14 @@ rebuild_env(envp, sudo_mode, noexec)
 			if (strncmp(*ep, "LOGNAME=", 8) == 0)
 			    SET(didvar, DID_LOGNAME);
 			break;
+		    case 'P':
+			if (strncmp(*ep, "PATH=", 5) == 0)
+			    SET(didvar, DID_PATH);
+			break;
 		    case 'S':
 			if (strncmp(*ep, "SHELL=", 6) == 0)
 			    SET(didvar, DID_SHELL);
 			break;
-		    case 'P':
-			if (strncmp(*ep, "PATH=", 5) == 0)
-			    SET(didvar, DID_PATH);
 		    case 'T':
 			if (strncmp(*ep, "TERM=", 5) == 0)
 			    SET(didvar, DID_TERM);
@@ -414,18 +447,10 @@ rebuild_env(envp, sudo_mode, noexec)
 			    SET(didvar, DID_USER);
 			break;
 		}
-		insert_env(*ep, 0);
-	    } else {
-		/* Preserve TERM and PATH, ignore anything else. */
-		if (!ISSET(didvar, DID_TERM) && strncmp(*ep, "TERM=", 5) == 0) {
-		    insert_env(*ep, 0);
-		    SET(didvar, DID_TERM);
-		} else if (!ISSET(didvar, DID_PATH) && strncmp(*ep, "PATH=", 5) == 0) {
-		    insert_env(*ep, 0);
-		    SET(didvar, DID_PATH);
-		}
+		insert_env(*ep, &env, 0);
 	    }
 	}
+	didvar |= didvar << 8;		/* convert DID_* to KEPT_* */
 
 	/*
 	 * Add in defaults.  In -i mode these come from the runas user,
@@ -433,19 +458,24 @@ rebuild_env(envp, sudo_mode, noexec)
 	 * on sudoers options).
 	 */
 	if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-	    insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), 0);
-	    insert_env(format_env("SHELL", runas_pw->pw_shell, VNULL), 0);
-	    insert_env(format_env("LOGNAME", runas_pw->pw_name, VNULL), 0);
-	    insert_env(format_env("USER", runas_pw->pw_name, VNULL), 0);
+	    insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), &env,
+		ISSET(didvar, DID_HOME));
+	    insert_env(format_env("SHELL", runas_pw->pw_shell, VNULL), &env,
+		ISSET(didvar, DID_SHELL));
+	    insert_env(format_env("LOGNAME", runas_pw->pw_name, VNULL), &env,
+		ISSET(didvar, DID_LOGNAME));
+	    insert_env(format_env("USER", runas_pw->pw_name, VNULL), &env,
+		ISSET(didvar, DID_USER));
 	} else {
 	    if (!ISSET(didvar, DID_HOME))
-		insert_env(format_env("HOME", user_dir, VNULL), 0);
+		insert_env(format_env("HOME", user_dir, VNULL), &env, 0);
 	    if (!ISSET(didvar, DID_SHELL))
-		insert_env(format_env("SHELL", sudo_user.pw->pw_shell, VNULL), 0);
+		insert_env(format_env("SHELL", sudo_user.pw->pw_shell, VNULL),
+		    &env, 0);
 	    if (!ISSET(didvar, DID_LOGNAME))
-		insert_env(format_env("LOGNAME", user_name, VNULL), 0);
+		insert_env(format_env("LOGNAME", user_name, VNULL), &env, 0);
 	    if (!ISSET(didvar, DID_USER))
-		insert_env(format_env("USER", user_name, VNULL), 0);
+		insert_env(format_env("USER", user_name, VNULL), &env, 0);
 	}
     } else {
 	/*
@@ -453,7 +483,7 @@ rebuild_env(envp, sudo_mode, noexec)
 	 * env_check.
 	 */
 	for (ep = envp; *ep; ep++) {
-	    okvar = 1;
+	    okvar = TRUE;
 
 	    /* Skip variables with values beginning with () (bash functions) */
 	    if ((cp = strchr(*ep, '=')) != NULL) {
@@ -467,12 +497,12 @@ rebuild_env(envp, sudo_mode, noexec)
 		/* Deal with '*' wildcard */
 		if (cur->value[len - 1] == '*') {
 		    len--;
-		    iswild = 1;
+		    iswild = TRUE;
 		} else
-		    iswild = 0;
+		    iswild = FALSE;
 		if (strncmp(cur->value, *ep, len) == 0 &&
 		    (iswild || (*ep)[len] == '=')) {
-		    okvar = 0;
+		    okvar = FALSE;
 		}
 	    }
 
@@ -482,13 +512,13 @@ rebuild_env(envp, sudo_mode, noexec)
 		/* Deal with '*' wildcard */
 		if (cur->value[len - 1] == '*') {
 		    len--;
-		    iswild = 1;
+		    iswild = TRUE;
 		} else
-		    iswild = 0;
+		    iswild = FALSE;
 		if (strncmp(cur->value, *ep, len) == 0 &&
 		    (iswild || (*ep)[len] == '=') &&
 		    strpbrk(*ep, "/%")) {
-		    okvar = 0;
+		    okvar = FALSE;
 		}
 	    }
 
@@ -499,30 +529,40 @@ rebuild_env(envp, sudo_mode, noexec)
 		    SET(didvar, DID_PATH);
 		else if (strncmp(*ep, "TERM=", 5) == 0)
 		    SET(didvar, DID_TERM);
-		insert_env(*ep, 0);
+		insert_env(*ep, &env, 0);
 	    }
 	}
     }
-    /* Provide default values for $TERM and $PATH if they are not set. */
-    if (!ISSET(didvar, DID_TERM))
-	insert_env("TERM=unknown", 0);
-    if (!ISSET(didvar, DID_PATH))
-	insert_env(format_env("PATH", _PATH_DEFPATH, VNULL), 0);
 
 #ifdef SECURE_PATH
     /* Replace the PATH envariable with a secure one. */
-    insert_env(format_env("PATH", SECURE_PATH, VNULL), 1);
+    if (!user_is_exempt()) {
+	insert_env(format_env("PATH", SECURE_PATH, VNULL), &env, 1);
+	SET(didvar, DID_PATH);
+    }
 #endif
 
     /* Set $USER and $LOGNAME to target if "set_logname" is true. */
     if (def_set_logname && runas_pw->pw_name) {
-	insert_env(format_env("LOGNAME", runas_pw->pw_name, VNULL), 1);
-	insert_env(format_env("USER", runas_pw->pw_name, VNULL), 1);
+	if (!ISSET(didvar, KEPT_LOGNAME))
+	    insert_env(format_env("LOGNAME", runas_pw->pw_name, VNULL), &env, 1);
+	if (!ISSET(didvar, KEPT_USER))
+	    insert_env(format_env("USER", runas_pw->pw_name, VNULL), &env, 1);
     }
 
     /* Set $HOME for `sudo -H'.  Only valid at PERM_FULL_RUNAS. */
-    if (ISSET(sudo_mode, MODE_RESET_HOME) && runas_pw->pw_dir)
-	insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), 1);
+    if (runas_pw->pw_dir) {
+	if (ISSET(sudo_mode, MODE_RESET_HOME) ||
+	    (ISSET(sudo_mode, MODE_RUN) && (def_always_set_home ||
+	    (ISSET(sudo_mode, MODE_SHELL) && def_set_home))))
+	    insert_env(format_env("HOME", runas_pw->pw_dir, VNULL), &env, 1);
+    }
+
+    /* Provide default values for $TERM and $PATH if they are not set. */
+    if (!ISSET(didvar, DID_TERM))
+	insert_env("TERM=unknown", &env, 0);
+    if (!ISSET(didvar, DID_PATH))
+	insert_env(format_env("PATH", _PATH_DEFPATH, VNULL), &env, 0);
 
     /*
      * Preload a noexec file?  For a list of LD_PRELOAD-alikes, see
@@ -531,16 +571,18 @@ rebuild_env(envp, sudo_mode, noexec)
      */
     if (noexec && def_noexec_file != NULL) {
 #if defined(__darwin__) || defined(__APPLE__)
-	insert_env(format_env("DYLD_INSERT_LIBRARIES", def_noexec_file, VNULL), 1);
-	insert_env(format_env("DYLD_FORCE_FLAT_NAMESPACE", VNULL), 1);
+	insert_env(format_env("DYLD_INSERT_LIBRARIES", def_noexec_file, VNULL),
+	    &env, 1);
+	insert_env(format_env("DYLD_FORCE_FLAT_NAMESPACE", VNULL), &env, 1);
 #else
 # if defined(__osf__) || defined(__sgi)
-	insert_env(format_env("_RLD_LIST", def_noexec_file, ":DEFAULT", VNULL), 1);
+	insert_env(format_env("_RLD_LIST", def_noexec_file, ":DEFAULT", VNULL),
+	    &env, 1);
 # else
 #  ifdef _AIX
 	insert_env(format_env("LDR_PRELOAD", def_noexec_file, VNULL), &env, 1);
 #  else
-	insert_env(format_env("LD_PRELOAD", def_noexec_file, VNULL), 1);
+	insert_env(format_env("LD_PRELOAD", def_noexec_file, VNULL), &env, 1);
 #  endif /* _AIX */
 # endif /* __osf__ || __sgi */
 #endif /* __darwin__ || __APPLE__ */
@@ -548,22 +590,23 @@ rebuild_env(envp, sudo_mode, noexec)
 
     /* Set PS1 if SUDO_PS1 is set. */
     if (ps1)
-	insert_env(ps1, 1);
+	insert_env(ps1, &env, 1);
 
     /* Add the SUDO_COMMAND envariable (cmnd + args). */
     if (user_args)
-	insert_env(format_env("SUDO_COMMAND", user_cmnd, " ", user_args, VNULL), 1);
+	insert_env(format_env("SUDO_COMMAND", user_cmnd, " ", user_args, VNULL),
+	    &env, 1);
     else
-	insert_env(format_env("SUDO_COMMAND", user_cmnd, VNULL), 1);
+	insert_env(format_env("SUDO_COMMAND", user_cmnd, VNULL), &env, 1);
 
     /* Add the SUDO_USER, SUDO_UID, SUDO_GID environment variables. */
-    insert_env(format_env("SUDO_USER", user_name, VNULL), 1);
+    insert_env(format_env("SUDO_USER", user_name, VNULL), &env, 1);
     easprintf(&cp, "SUDO_UID=%lu", (unsigned long) user_uid);
-    insert_env(cp, 1);
+    insert_env(cp, &env, 1);
     easprintf(&cp, "SUDO_GID=%lu", (unsigned long) user_gid);
-    insert_env(cp, 1);
+    insert_env(cp, &env, 1);
 
-    return(new_environ);
+    return(env.envp);
 }
 
 void
@@ -586,5 +629,13 @@ init_envtables()
 	cur->value = estrdup(*p);
 	cur->next = def_env_check;
 	def_env_check = cur;
+    }
+
+    /* Fill in "env_keep" variable. */
+    for (p = initial_keepenv_table; *p; p++) {
+	cur = emalloc(sizeof(struct list_member));
+	cur->value = estrdup(*p);
+	cur->next = def_env_keep;
+	def_env_keep = cur;
     }
 }
