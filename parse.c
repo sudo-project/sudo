@@ -47,6 +47,9 @@
 #ifdef HAVE_FNMATCH
 # include <fnmatch.h>
 #endif /* HAVE_FNMATCH */
+#ifdef HAVE_EXTENDED_GLOB
+# include <glob.h>
+#endif /* HAVE_EXTENDED_GLOB */
 #ifdef HAVE_NETGROUP_H
 # include <netgroup.h>
 #endif /* HAVE_NETGROUP_H */
@@ -80,6 +83,9 @@
 #ifndef HAVE_FNMATCH
 # include "emul/fnmatch.h"
 #endif /* HAVE_FNMATCH */
+#ifndef HAVE_EXTENDED_GLOB
+# include "emul/glob.h"
+#endif /* HAVE_EXTENDED_GLOB */
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
@@ -236,7 +242,8 @@ command_matches(sudoers_cmnd, sudoers_args)
 {
     struct stat sudoers_stat;
     struct dirent *dent;
-    char buf[PATH_MAX];
+    char **ap, *base, buf[PATH_MAX];
+    glob_t gl;
     DIR *dirp;
 
     /* Check for pseudo-commands */
@@ -267,14 +274,41 @@ command_matches(sudoers_cmnd, sudoers_args)
      */
     if (has_meta(sudoers_cmnd)) {
 	/*
-	 * Return true if fnmatch(3) succeeds AND
+	 * Return true if we find a match in the glob(3) results AND
 	 *  a) there are no args in sudoers OR
 	 *  b) there are no args on command line and none required by sudoers OR
 	 *  c) there are args in sudoers and on command line and they match
 	 * else return false.
+	 *
+	 * Could optimize patterns ending in "/*" to "/user_base"
 	 */
-	if (fnmatch(sudoers_cmnd, user_cmnd, FNM_PATHNAME) != 0)
+#define GLOB_FLAGS	(GLOB_NOSORT | GLOB_MARK | GLOB_BRACE | GLOB_TILDE)
+	if (glob(sudoers_cmnd, GLOB_FLAGS, NULL, &gl) != 0) {
+	    globfree(&gl);
 	    return(FALSE);
+	}
+	/* For each glob match, compare basename, st_dev and st_ino. */
+	for (ap = gl.gl_pathv; *ap != NULL; ap++) {
+	    /* only stat if basenames are the same */
+	    if ((base = strrchr(*ap, '/')) != NULL)
+		base++;
+	    else
+		base = *ap;
+	    if (strcmp(user_base, base) != 0 ||
+		stat(*ap, &sudoers_stat) == -1)
+		continue;
+	    if (user_stat->st_dev == sudoers_stat.st_dev &&
+		user_stat->st_ino == sudoers_stat.st_ino) {
+		if (safe_cmnd)
+		    free(safe_cmnd);
+		safe_cmnd = estrdup(*ap);
+		break;
+	    }
+	}
+	globfree(&gl);
+	if (*ap == NULL)
+	    return(FALSE);
+
 	if (!sudoers_args ||
 	    (!user_args && sudoers_args && !strcmp("\"\"", sudoers_args)) ||
 	    (sudoers_args &&
@@ -292,8 +326,6 @@ command_matches(sudoers_cmnd, sudoers_args)
 	 * Check to make sure this is not a directory spec (doesn't end in '/')
 	 */
 	if (sudoers_cmnd[dlen - 1] != '/') {
-	    char *base;
-
 	    /* Only proceed if user_base and basename(sudoers_cmnd) match */
 	    if ((base = strrchr(sudoers_cmnd, '/')) == NULL)
 		base = sudoers_cmnd;
