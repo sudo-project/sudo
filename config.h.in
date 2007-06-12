@@ -47,6 +47,9 @@
 /* Define to 1 if you use AFS. */
 #undef HAVE_AFS
 
+/* Define to 1 if you use AIX general authentication. */
+#undef HAVE_AIXAUTH
+
 /* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
 
@@ -56,9 +59,6 @@
 
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
-
-/* Define to 1 if you use AIX general authentication. */
-#undef HAVE_AIXAUTH
 
 /* Define to 1 if you have the `bigcrypt' function. */
 #undef HAVE_BIGCRYPT
@@ -87,6 +87,12 @@
 
 /* Define to 1 if you have the <err.h> header file. */
 #undef HAVE_ERR_H
+
+/* Define to 1 if your glob.h defines the GLOB_BRACE and GLOB_TILDE flags. */
+#undef HAVE_EXTENDED_GLOB
+
+/* Define to 1 if your system has the F_CLOSEM fcntl. */
+#undef HAVE_FCNTL_CLOSEM
 
 /* Define to 1 if you have the `flock' function. */
 #undef HAVE_FLOCK
@@ -150,6 +156,9 @@
 /* Define to 1 if you have the `gettimeofday' function. */
 #undef HAVE_GETTIMEOFDAY
 
+/* Define to 1 if you have the `glob' function. */
+#undef HAVE_GLOB
+
 /* Define to 1 if your Kerberos is Heimdal. */
 #undef HAVE_HEIMDAL
 
@@ -209,6 +218,9 @@
 /* Define if your compiler supports the "long long" type. */
 #undef HAVE_LONG_LONG
 
+/* Define to 1 if you have the `lrand48' function. */
+#undef HAVE_LRAND48
+
 /* Define to 1 if you have the `lsearch' function. */
 #undef HAVE_LSEARCH
 
@@ -227,6 +239,9 @@
 /* Define to 1 if you have the `memset' function. */
 #undef HAVE_MEMSET
 
+/* Define to 1 if you have the `mkstemp' function. */
+#undef HAVE_MKSTEMP
+
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #undef HAVE_NDIR_H
 
@@ -244,6 +259,9 @@
 
 /* Define to 1 if you have the <paths.h> header file. */
 #undef HAVE_PATHS_H
+
+/* Define to 1 if you have the `random' function. */
+#undef HAVE_RANDOM
 
 /* Define if your struct sockadr has an sa_len field. */
 #undef HAVE_SA_LEN
@@ -365,8 +383,8 @@
 /* Define to 1 if you have struct timespec in sys/time.h */
 #undef HAVE_TIMESPEC
 
-/* Define to 1 if you have a timespecsub macro or function that takes
-   two arguments (not three) */
+/* Define to 1 if you have a timespecsub macro or function that takes two
+   arguments (not three) */
 #undef HAVE_TIMESPECSUB2
 
 /* Define to 1 if you have the `tzset' function. */
@@ -490,9 +508,9 @@
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
    automatically deduced at run-time.
-        STACK_DIRECTION > 0 => grows toward higher addresses
-        STACK_DIRECTION < 0 => grows toward lower addresses
-        STACK_DIRECTION = 0 => direction of growth unknown */
+	STACK_DIRECTION > 0 => grows toward higher addresses
+	STACK_DIRECTION < 0 => grows toward lower addresses
+	STACK_DIRECTION = 0 => direction of growth unknown */
 #undef STACK_DIRECTION
 
 /* Define to 1 if you have the ANSI C header files. */
@@ -529,21 +547,6 @@
 
 /* Define to avoid using the passwd/shadow file for authentication. */
 #undef WITHOUT_PASSWD
-
-/* Enable non-POSIX extensions on AIX. */
-#ifndef _ALL_SOURCE
-# undef _ALL_SOURCE
-#endif
-
-/* Enable non-POSIX extensions on ConvexOS. */
-#ifndef _CONVEX_SOURCE
-# undef _CONVEX_SOURCE
-#endif
-
-/* Enable GNU extensions on systems that have them. */
-#ifndef _GNU_SOURCE
-# define _GNU_SOURCE	1
-#endif
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
