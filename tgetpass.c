@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -97,7 +97,7 @@ __unused static const char rcsid[] = "$Sudo$";
 # define TERM			termios
 # define tflags			c_lflag
 # define term_getattr(f, t)	tcgetattr(f, t)
-# define term_setattr(f, t)	tcsetattr(f, TCSAFLUSH|TCSASOFT, t)
+# define term_setattr(f, t)	tcsetattr(f, TCSADRAIN|TCSASOFT, t)
 #else
 # ifdef HAVE_TERMIO_H
 # define TERM			termio
