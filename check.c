@@ -376,7 +376,7 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
     if (lstat(dirparent, &sb) == 0) {
 	if (!S_ISDIR(sb.st_mode))
 	    log_error(NO_EXIT, "%s exists but is not a directory (0%o)",
-		dirparent, sb.st_mode);
+		dirparent, (unsigned int) sb.st_mode);
 	else if (sb.st_uid != timestamp_uid)
 	    log_error(NO_EXIT, "%s owned by uid %lu, should be uid %lu",
 		dirparent, (unsigned long) sb.st_uid,
@@ -384,7 +384,7 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 	else if ((sb.st_mode & 0000022))
 	    log_error(NO_EXIT,
 		"%s writable by non-owner (0%o), should be mode 0700",
-		dirparent, sb.st_mode);
+		dirparent, (unsigned int) sb.st_mode);
 	else {
 	    if ((sb.st_mode & 0000777) != 0700)
 		(void) chmod(dirparent, 0700);
@@ -423,7 +423,7 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 		    status = TS_MISSING;
 	    } else
 		log_error(NO_EXIT, "%s exists but is not a directory (0%o)",
-		    timestampdir, sb.st_mode);
+		    timestampdir, (unsigned int) sb.st_mode);
 	} else if (sb.st_uid != timestamp_uid)
 	    log_error(NO_EXIT, "%s owned by uid %lu, should be uid %lu",
 		timestampdir, (unsigned long) sb.st_uid,
@@ -431,7 +431,7 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 	else if ((sb.st_mode & 0000022))
 	    log_error(NO_EXIT,
 		"%s writable by non-owner (0%o), should be mode 0700",
-		timestampdir, sb.st_mode);
+		timestampdir, (unsigned int) sb.st_mode);
 	else {
 	    if ((sb.st_mode & 0000777) != 0700)
 		(void) chmod(timestampdir, 0700);
@@ -463,7 +463,7 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 	    if (!S_ISREG(sb.st_mode)) {
 		status = TS_ERROR;
 		log_error(NO_EXIT, "%s exists but is not a regular file (0%o)",
-		    timestampfile, sb.st_mode);
+		    timestampfile, (unsigned int) sb.st_mode);
 	    } else {
 		/* If bad uid or file mode, complain and kill the bogus file. */
 		if (sb.st_uid != timestamp_uid) {
@@ -475,7 +475,7 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 		} else if ((sb.st_mode & 0000022)) {
 		    log_error(NO_EXIT,
 			"%s writable by non-owner (0%o), should be mode 0600",
-			timestampfile, sb.st_mode);
+			timestampfile, (unsigned int) sb.st_mode);
 		    (void) unlink(timestampfile);
 		} else {
 		    /* If not mode 0600, fix it. */
