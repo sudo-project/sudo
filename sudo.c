@@ -416,7 +416,7 @@ main(argc, argv)
 	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0)
 	    exit(0);
 	else
-	    EXECV(safe_cmnd, NewArgv);	/* run the command */
+	    execve(safe_cmnd, NewArgv, environ);
 #else
 	exit(0);
 #endif /* PROFILING */

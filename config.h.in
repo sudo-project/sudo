@@ -510,10 +510,6 @@
 /* The number of tries a user gets to enter their password. */
 #undef TRIES_FOR_PASSWORD
 
-/* Define to 1 if you wish to use execv() instead of execvp() when running
-   programs. */
-#undef USE_EXECV
-
 /* Define to 1 if you want to insult the user for entering an incorrect
    password. */
 #undef USE_INSULTS
@@ -610,12 +606,6 @@
 #else
 # define stat_sudoers	lstat
 #endif
-
-#ifdef USE_EXECV
-# define EXECV	execv
-#else
-# define EXECV	execvp
-#endif /* USE_EXECV */
 
 /* Macros to set/clear/test flags. */
 #undef SET
