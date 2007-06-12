@@ -1356,9 +1356,6 @@ at http://www.sudo.ws/sudo/bugs/
 
 =head1 SUPPORT
 
-Commercial support is available for B<sudo>, see
-http://www.sudo.ws/sudo/support.html for details.
-
 Limited free support is available via the sudo-users mailing list,
 see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
 search the archives.
