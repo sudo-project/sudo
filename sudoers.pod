@@ -1,5 +1,5 @@
 =cut
-Copyright (c) 1994-1996,1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
+Copyright (c) 1994-1996,1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -32,8 +32,8 @@ The I<sudoers> file is composed of two types of entries: aliases
 may run what).
 
 When multiple entries match for a user, they are applied in order.
-Where there are conflicting values, the last match is used (which
-is not necessarily the most specific match).
+Where there are multiple matches, the last match is used (which is
+not necessarily the most specific match).
 
 The I<sudoers> grammar will be described below in Extended Backus-Naur
 Form (EBNF).  Don't despair if you don't know what EBNF is; it is
@@ -137,7 +137,7 @@ also contain uids (prefixed with '#') and instead of C<User_Alias>es
 it can contain C<Runas_Alias>es.  Note that usernames and groups
 are matched as strings.  In other words, two users (groups) with
 the same uid (gid) are considered to be distinct.  If you wish to
-match all usernames with the same uid (e.g. root and toor), you
+match all usernames with the same uid (e.g.E<nbsp>root and toor), you
 can use a uid instead (#0 in the example given).
 
  Host_List ::= Host |
@@ -152,14 +152,16 @@ can use a uid instead (#0 in the example given).
 A C<Host_List> is made up of one or more hostnames, IP addresses,
 network numbers, netgroups (prefixed with '+') and other aliases.
 Again, the value of an item may be negated with the '!' operator.
-If you do not specify a netmask with a network number, the netmask
-of the host's ethernet interface(s) will be used when matching.
-The netmask may be specified either in dotted quad notation (e.g.
-255.255.255.0) or CIDR notation (number of bits, e.g. 24).  A hostname
-may include shell-style wildcards (see the L<Wildcards> section below),
+If you do not specify a netmask along with the network number,
+B<sudo> will query each of the local host's network interfaces and,
+if the network number corresponds to one of the hosts's network
+interfaces, the corresponding netmask will be used.  The netmask
+may be specified either in dotted quad notation (e.g.E<nbsp>255.255.255.0)
+or CIDR notation (number of bits, e.g.E<nbsp>24).  A hostname may
+include shell-style wildcards (see the L<Wildcards> section below),
 but unless the C<hostname> command on your machine returns the fully
-qualified hostname, you'll need to use the I<fqdn> option for wildcards
-to be useful.
+qualified hostname, you'll need to use the I<fqdn> option for
+wildcards to be useful.
 
  Cmnd_List ::= Cmnd |
 	       Cmnd ',' Cmnd_List
@@ -255,7 +257,7 @@ This flag is I<off> by default.
 
 =item mail_badpass
 
-Send mail to the I<mailto> user if the user running sudo does not
+Send mail to the I<mailto> user if the user running B<sudo> does not
 enter the correct password.  This flag is I<off> by default.
 
 =item mail_no_user
@@ -378,7 +380,7 @@ password.  This flag is I<@insults@> by default.
 If set, B<sudo> will only run when the user is logged in to a real
 tty.  This will disallow things like C<"rsh somehost sudo ls"> since
 L<rsh(1)> does not allocate a tty.  Because it is not possible to turn
-off echo when there is no tty present, some sites may with to set
+off echo when there is no tty present, some sites may wish to set
 this flag to prevent a user from entering a visible password.  This
 flag is I<off> by default.
 
@@ -419,6 +421,8 @@ to the name of the target user (usually root unless the B<-u> flag is given).
 However, since some programs (including the RCS revision control system)
 use C<LOGNAME> to determine the real identity of the user, it may be desirable
 to change this behavior.  This can be done by negating the set_logname option.
+Note that if the I<env_reset> option has been enabled, entries in
+the I<env_keep> list will override the value of I<set_logname>.
 
 =item stay_setuid
 
@@ -427,23 +431,22 @@ UIDs are set to the target user (root by default).  This option
 changes that behavior such that the real UID is left as the invoking
 user's UID.  In other words, this makes B<sudo> act as a setuid
 wrapper.  This can be useful on systems that disable some potentially
-dangerous functionality when a program is run setuid.  Note, however,
-that this means that sudo will run with the real uid of the invoking
-user which may allow that user to kill B<sudo> before it can log a
-failure, depending on how your OS defines the interaction between
-signals and setuid processes.
+dangerous functionality when a program is run setuid.  This option
+is only effective on systems with either the setreuid() or setresuid()
+function.
 
 =item env_reset
 
 If set, B<sudo> will reset the environment to only contain the
-following variables: C<HOME>, C<LOGNAME>, C<PATH>, C<SHELL>, C<TERM>,
-and C<USER> (in addition to the C<SUDO_*> variables).
-Of these, only C<TERM> is copied unaltered from the old environment.
-The other variables are set to default values (possibly modified
-by the value of the I<set_logname> option).  If B<sudo> was compiled
-with the C<SECURE_PATH> option, its value will be used for the C<PATH>
-environment variable.
-Other variables may be preserved with the I<env_keep> option.
+following variables: C<DISPLAY>, C<HOME>, C<LOGNAME>, C<PATH>,
+C<SHELL>, C<TERM>, C<TZ> and C<USER> (in addition to the C<SUDO_*>
+variables).  Of these, only C<DISPLAY>, C<PATH>, C<TZ> and C<TERM>
+are copied unaltered from the old environment.  The other variables
+are set to default values (possibly modified by the value of the
+I<set_logname> option).  If the I<secure_path> option is set, its
+value will be used for the C<PATH> environment variable.  Other
+variables may be preserved via the I<env_keep> option.
+This flag is I<off> by default.
 
 =item use_loginclass
 
@@ -453,7 +456,7 @@ the --with-logincap option.  This flag is I<off> by default.
 
 =item noexec
 
-If set, all commands run via sudo will behave as if the C<NOEXEC>
+If set, all commands run via B<sudo> will behave as if the C<NOEXEC>
 tag has been set, unless overridden by a C<EXEC> tag.  See the
 description of I<NOEXEC and EXEC> below as well as the L<PREVENTING SHELL
 ESCAPES> section at the end of this manual.  This flag is I<off> by default.
@@ -465,7 +468,7 @@ This is intended for an Enterprises that wish to prevent the usage of local
 sudoers files so that only LDAP is used.  This thwarts the efforts of
 rogue operators who would attempt to add roles to @sysconfdir@/sudoers.
 When this option is present, @sysconfdir@/sudoers does not even need to exist. 
-Since this options tells sudo how to behave when no specific LDAP entries
+Since this option tells B<sudo> how to behave when no specific LDAP entries
 have been matched, this sudoOption is only meaningful for the cn=defaults
 section.  This flag is I<off> by default.
 
@@ -639,7 +642,7 @@ The default value is I<@lecture@>.
 
 =item lecture_file
 
-Path to a file containing an alternate sudo lecture that will
+Path to a file containing an alternate B<sudo> lecture that will
 be used in place of the standard lecture if the named file exists.
 
 =item logfile
@@ -664,7 +667,7 @@ Flags to use when invoking mailer. Defaults to B<-t>.
 =item mailto
 
 Address to send warning and error mail to.  The address should
-be enclosed in double quotes (C<">) to protect against sudo
+be enclosed in double quotes (C<">) to protect against B<sudo>
 interpreting the C<@> sign.  Defaults to C<@mailto@>.
 
 =item exempt_group
@@ -830,11 +833,11 @@ but  F</bin/kill> and F</usr/bin/lprm> as B<root>.
 =head2 Tag_Spec
 
 A command may have zero or more tags associated with it.  There are
-four possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>, C<EXEC>.
+four possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC> and C<EXEC>.
 Once a tag is set on a C<Cmnd>, subsequent C<Cmnd>s in the
 C<Cmnd_Spec_List>, inherit the tag unless it is overridden by the
-opposite tag (ie: C<PASSWD> overrides C<NOPASSWD> and C<EXEC>
-overrides C<NOEXEC>).
+opposite tag (ie: C<PASSWD> overrides C<NOPASSWD> and C<NOEXEC>
+overrides C<EXEC>).
 
 =head3 NOPASSWD and PASSWD
 
@@ -855,7 +858,7 @@ run F</bin/kill> without a password the entry would be:
  ray	rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
 
 Note, however, that the C<PASSWD> tag has no effect on users who are
-in the group specified by the exempt_group option.
+in the group specified by the I<exempt_group> option.
 
 By default, if the C<NOPASSWD> tag is applied to any of the entries
 for a user on the current host, he or she will be able to run
@@ -866,8 +869,8 @@ This behavior may be overridden via the verifypw and listpw options.
 
 =head3 NOEXEC and EXEC
 
-If sudo has been compiled with I<noexec> support and the underlying
-operating system support it, the C<NOEXEC> tag can be used to prevent
+If B<sudo> has been compiled with I<noexec> support and the underlying
+operating system supports it, the C<NOEXEC> tag can be used to prevent
 a dynamically-linked executable from running further commands itself.
 
 In the following example, user B<aaron> may run F</usr/bin/more>
@@ -876,7 +879,7 @@ and F</usr/bin/vi> but shell escapes will be disabled.
  aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
 
 See the L<PREVENTING SHELL ESCAPES> section below for more details
-on how I<noexec> works and whether or not it will work on your system.
+on how C<NOEXEC> works and whether or not it will work on your system.
 
 =head2 Wildcards
 
@@ -919,28 +922,6 @@ wildcards.  This is to make a path like:
 
 match F</usr/bin/who> but not F</usr/bin/X11/xterm>.
 
-WARNING: a pathname with wildcards will B<not> match a user command
-that consists of a relative path.  In other words, given the
-following I<sudoers> entry:
-
-    billy  workstation = /usr/bin/*
-
-user billy will be able to run any command in /usr/bin as root, such
-as F</usr/bin/w>.  The following two command will be allowed (the first
-assumes that F</usr/bin> is in the user's path):
-
-    $ sudo w
-    $ sudo /usr/bin/w
-
-However, this will not:
-
-    $ cd /usr/bin
-    $ sudo ./w
-
-For this reason you should only B<grant> access to commands using
-wildcards and never B<restrict> access using them.  This limitation
-will be removed in a future version of B<sudo>.
-
 =head2 Exceptions to wildcard rules
 
 The following exceptions apply to the above rules:
@@ -957,11 +938,11 @@ with B<any> arguments.
 
 =head2 Other special characters and reserved words
 
-The pound sign ('#') is used to indicate a comment (unless it
-occurs in the context of a user name and is followed by one or
-more digits, in which case it is treated as a uid).  Both the
-comment character and any text after it, up to the end of the line,
-are ignored.
+The pound sign ('#') is used to indicate a comment (unless it is
+part of a #include directive or unless it occurs in the context of
+a user name and is followed by one or more digits, in which case
+it is treated as a uid).  Both the comment character and any text
+after it, up to the end of the line, are ignored.
 
 The reserved word B<ALL> is a built-in I<alias> that always causes
 a match to succeed.  It can be used wherever one might otherwise
@@ -985,7 +966,7 @@ Whitespace between elements in a list as well as special syntactic
 characters in a I<User Specification> ('=', ':', '(', ')') is optional.
 
 The following characters must be escaped with a backslash ('\') when
-used as part of a word (e.g. a username or hostname):
+used as part of a word (e.g.E<nbsp>a username or hostname):
 '@', '!', '=', ':', ',', '(', ')', '\'.
 
 =head1 FILES
@@ -1054,6 +1035,7 @@ will be kept around for several years.
  Defaults:FULLTIMERS	!lecture
  Defaults:millert	!authenticate
  Defaults@SERVERS	log_year, logfile=/var/log/sudo.log
+ Defaults!PAGERS	noexec
 
 The I<User specification> is the part that actually determines who may
 run what.
@@ -1188,15 +1170,30 @@ advisory at best (and reinforced by policy).
 Once B<sudo> executes a program, that program is free to do whatever
 it pleases, including run other programs.  This can be a security
 issue since it is not uncommon for a program to allow shell escapes,
-which lets a user bypass B<sudo>'s restrictions.  Common programs
-that permit shell escapes include shells (obviously), editors,
-paginators, mail and terminal programs.
+which lets a user bypass B<sudo>'s access control and logging.
+Common programs that permit shell escapes include shells (obviously),
+editors, paginators, mail and terminal programs.
+
+There are three basic approaches to this problem:
+
+=over 10
+
+=item restrict
+
+Avoid giving users access to commands that allow the user to run
+arbitrary commands.  Many editors have a restricted mode where shell
+escapes are disabled, though B<sudoedit> is a better solution to
+running editors via B<sudo>.  Due to the large number of programs that
+offer shell escapes, restricting users to the set of programs that
+do not if often unworkable.
+
+=item noexec
 
 Many systems that support shared libraries have the ability to
 override default library functions by pointing an environment
 variable (usually C<LD_PRELOAD>) to an alternate shared library.
 On such systems, B<sudo>'s I<noexec> functionality can be used to
-prevent a program run by sudo from executing any other programs.
+prevent a program run by B<sudo> from executing any other programs.
 Note, however, that this applies only to native dynamically-linked
 executables.  Statically-linked executables and foreign executables
 running under binary emulation are not affected.
@@ -1232,11 +1229,14 @@ executing other commands (such as a shell).  If you are unsure
 whether or not your system is capable of supporting I<noexec> you
 can always just try it out and see if it works.
 
-Note that disabling shell escapes is not a panacea.  Programs running
-as root are still capable of many potentially hazardous operations
-(such as changing or overwriting files) that could lead to unintended
-privilege escalation.  In the specific case of an editor, a safer
-approach is to give the user permission to run B<sudoedit>.
+=back
+
+Note that restricting shell escapes is not a panacea.  Programs
+running as root are still capable of many potentially hazardous
+operations (such as changing or overwriting files) that could lead
+to unintended privilege escalation.  In the specific case of an
+editor, a safer approach is to give the user permission to run
+B<sudoedit>.
 
 =head1 SEE ALSO
 

@@ -1,5 +1,5 @@
 =cut
-Copyright (c) 1994-1996,1998-2003 Todd C. Miller <Todd.Miller@courtesan.com>
+Copyright (c) 1994-1996,1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -27,14 +27,16 @@ sudo, sudoedit - execute a command as another user
 
 =head1 SYNOPSIS
 
-B<sudo> B<-K> | B<-L> | B<-V> | B<-h> | B<-k> | B<-l> | B<-v>
+B<sudo> B<-K> | B<-k> | B<-h> | B<-L> | B<-V> | B<-v>
 
-B<sudo> [B<-HPSb>] S<[B<-a> I<auth_type>]> S<[B<-c> I<class>|I<->]>
-S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
+B<sudo> B<-l> S<[B<-u> I<username>|I<#uid>]> [I<command>]
+
+B<sudo> [B<-bHPS>] S<[B<-a> I<auth_type>]>
+S<[B<-c> I<class>|I<->]> S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
 S<{B<-e> file [...] | B<-i> | B<-s> | I<command>}>
 
-B<sudoedit> [B<-S>] S<[B<-a> I<auth_type>]>
-S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
+B<sudoedit> S<[B<-a> I<auth_type>]>
+S<[B<-p> I<prompt>]> [B<-S>] S<[B<-u> I<username>|I<#uid>]>
 file [...]
 
 =head1 DESCRIPTION
@@ -89,45 +91,6 @@ or via the I<sudoers> file.
 B<sudo> accepts the following command line options:
 
 =over 4
-
-=item -H
-
-The B<-H> (I<HOME>) option sets the C<HOME> environment variable
-to the homedir of the target user (root by default) as specified
-in passwd(@mansectform@).  By default, B<sudo> does not modify C<HOME>
-(see I<set_home> and I<always_set_home> in L<sudoers(@mansectform@)>).
-
-=item -K
-
-The B<-K> (sure I<kill>) option is like B<-k> except that it removes
-the user's timestamp entirely.  Like B<-k>, this option does not
-require a password.
-
-=item -L
-
-The B<-L> (I<list> defaults) option will list out the parameters
-that may be set in a I<Defaults> line along with a short description
-for each.  This option is useful in conjunction with grep(1).
-
-=item -P
-
-The B<-P> (I<preserve group vector>) option causes B<sudo> to
-preserve the invoking user's group vector unaltered.  By default,
-B<sudo> will initialize the group vector to the list of groups the
-target user is in.  The real and effective group IDs, however, are
-still set to match the target user.
-
-=item -S
-
-The B<-S> (I<stdin>) option causes B<sudo> to read the password from
-the standard input instead of the terminal device.
-
-=item -V
-
-The B<-V> (I<version>) option causes B<sudo> to print the version
-number and exit.  If the invoking user is already root the B<-V>
-option will print out a list of the defaults B<sudo> was compiled
-with as well as the machine's local network addresses.
 
 =item -a
 
@@ -194,6 +157,13 @@ B<sudo> is unable to update a file with its edited version, the
 user will receive a warning and the edited copy will remain in a
 temporary file.
 
+=item -H
+
+The B<-H> (I<HOME>) option sets the C<HOME> environment variable
+to the homedir of the target user (root by default) as specified
+in passwd(@mansectform@).  By default, B<sudo> does not modify C<HOME>
+(see I<set_home> and I<always_set_home> in L<sudoers(@mansectform@)>).
+
 =item -h
 
 The B<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
@@ -203,7 +173,7 @@ The B<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
 The B<-i> (I<simulate initial login>) option runs the shell specified
 in the L<passwd(@mansectform@)> entry of the user that the command is
 being run as.  The command name argument given to the shell begins
-with a C<-> to tell the shell to run as a login shell.  B<sudo>
+with a `C<->' to tell the shell to run as a login shell.  B<sudo>
 attempts to change to that user's home directory before running the
 shell.  It also initializes the environment, leaving I<TERM>
 unchanged, setting I<HOME>, I<SHELL>, I<USER>, I<LOGNAME>, and
@@ -213,18 +183,38 @@ is parsed, a I<runas_default> setting in I<sudoers> will specify
 the user to run the shell as but will not affect which shell is
 actually run.
 
+=item -K
+
+The B<-K> (sure I<kill>) option is like B<-k> except that it removes
+the user's timestamp entirely.  Like B<-k>, this option does not
+require a password.
+
 =item -k
 
 The B<-k> (I<kill>) option to B<sudo> invalidates the user's timestamp
-by setting the time on it to the epoch.  The next time B<sudo> is
+by setting the time on it to the Epoch.  The next time B<sudo> is
 run a password will be required.  This option does not require a password
 and was added to allow a user to revoke B<sudo> permissions from a .logout
 file.
 
+=item -L
+
+The B<-L> (I<list> defaults) option will list out the parameters
+that may be set in a I<Defaults> line along with a short description
+for each.  This option is useful in conjunction with grep(1).
+
 =item -l
 
 The B<-l> (I<list>) option will list out the allowed (and
-forbidden) commands for the user on the current host.
+forbidden) commands for the invoking user on the current host.
+
+=item -P
+
+The B<-P> (I<preserve group vector>) option causes B<sudo> to
+preserve the invoking user's group vector unaltered.  By default,
+B<sudo> will initialize the group vector to the list of groups the
+target user is in.  The real and effective group IDs, however, are
+still set to match the target user.
 
 =item -p
 
@@ -259,6 +249,11 @@ two consecutive C<%> characters are collapsed into a single C<%> character
 
 =back
 
+=item -S
+
+The B<-S> (I<stdin>) option causes B<sudo> to read the password from
+the standard input instead of the terminal device.
+
 =item -s
 
 The B<-s> (I<shell>) option runs the shell specified by the I<SHELL>
@@ -272,6 +267,13 @@ as a user other than I<root>.  To specify a I<uid> instead of a
 I<username>, use I<#uid>.  Note that if the I<targetpw> Defaults
 option is set (see L<sudoers(@mansectform@)>) it is not possible
 to run commands with a uid not listed in the password database.
+
+=item -V
+
+The B<-V> (I<version>) option causes B<sudo> to print the version
+number and exit.  If the invoking user is already root the B<-V>
+option will print out a list of the defaults B<sudo> was compiled
+with as well as the machine's local network addresses.
 
 =item -v
 
@@ -340,20 +342,20 @@ behavior or link B<sudo> statically.
 
 B<sudo> will check the ownership of its timestamp directory
 (F<@timedir@> by default) and ignore the directory's contents if
-it is not owned by root and only writable by root.  On systems that
-allow non-root users to give away files via L<chown(2)>, if the timestamp
-directory is located in a directory writable by anyone (e.g.: F</tmp>),
-it is possible for a user to create the timestamp directory before
-B<sudo> is run.  However, because B<sudo> checks the ownership and
-mode of the directory and its contents, the only damage that can
-be done is to "hide" files by putting them in the timestamp dir.
-This is unlikely to happen since once the timestamp dir is owned
-by root and inaccessible by any other user the user placing files
-there would be unable to get them back out.  To get around this
-issue you can use a directory that is not world-writable for the
-timestamps (F</var/adm/sudo> for instance) or create F<@timedir@>
-with the appropriate owner (root) and permissions (0700) in the
-system startup files.
+it is not owned by root or if it is writable by a user other than
+root.  On systems that allow non-root users to give away files via
+L<chown(2)>, if the timestamp directory is located in a directory
+writable by anyone (e.g., F</tmp>), it is possible for a user to
+create the timestamp directory before B<sudo> is run.  However,
+because B<sudo> checks the ownership and mode of the directory and
+its contents, the only damage that can be done is to "hide" files
+by putting them in the timestamp dir.  This is unlikely to happen
+since once the timestamp dir is owned by root and inaccessible by
+any other user, the user placing files there would be unable to get
+them back out.  To get around this issue you can use a directory
+that is not world-writable for the timestamps (F</var/adm/sudo> for
+instance) or create F<@timedir@> with the appropriate owner (root)
+and permissions (0700) in the system startup files.
 
 B<sudo> will not honor timestamps set far in the future.
 Timestamps with a date greater than current_time + 2 * C<TIMEOUT>
@@ -361,14 +363,16 @@ will be ignored and sudo will log and complain.  This is done to
 keep a user from creating his/her own timestamp with a bogus
 date on systems that allow users to give away files.
 
-Please note that B<sudo> will only log the command it explicitly
-runs.  If a user runs a command such as C<sudo su> or C<sudo sh>,
-subsequent commands run from that shell will I<not> be logged, nor
-will B<sudo>'s access control affect them.  The same is true for
-commands that offer shell escapes (including most editors).  Because
-of this, care must be taken when giving users access to commands
-via B<sudo> to verify that the command does not inadvertently give
-the user an effective root shell.
+Please note that B<sudo> will normally only log the command it
+explicitly runs.  If a user runs a command such as C<sudo su> or
+C<sudo sh>, subsequent commands run from that shell will I<not> be
+logged, nor will B<sudo>'s access control affect them.  The same
+is true for commands that offer shell escapes (including most
+editors).  Because of this, care must be taken when giving users
+access to commands via B<sudo> to verify that the command does not
+inadvertently give the user an effective root shell.  For more
+information, please see the C<PREVENTING SHELL ESCAPES> section in
+L<sudoers(@mansectform@)>.
 
 =head1 ENVIRONMENT
 
@@ -445,7 +449,7 @@ L<passwd(@mansectform@)>, L<visudo(@mansectsu@)>
 Many people have worked on B<sudo> over the years; this
 version consists of code written primarily by:
 
-	Todd Miller
+	Todd C. Miller
 	Chris Jepeway
 
 See the HISTORY file in the B<sudo> distribution or visit
@@ -462,11 +466,11 @@ most systems it is possible to prevent shell escapes with B<sudo>'s
 I<noexec> functionality.  See the L<sudoers(@mansectform@)> manual
 for details.
 
-It is not meaningful to run the C<cd> command directly via sudo, e.g.
+It is not meaningful to run the C<cd> command directly via sudo, e.g.,
 
  $ sudo cd /usr/local/protected
 
-since when whe command exits the parent process (your shell) will
+since when the command exits the parent process (your shell) will
 still be the same.  Please see the EXAMPLES section for more information.
 
 If users have sudo C<ALL> there is nothing to prevent them from
