@@ -122,6 +122,9 @@
 /* Define to 1 if you have the `getdomainname' function. */
 #undef HAVE_GETDOMAINNAME
 
+/* Define to 1 if you have the `getgroups' function. */
+#undef HAVE_GETGROUPS
+
 /* Define to 1 if you have the `getifaddrs' function. */
 #undef HAVE_GETIFADDRS
 
@@ -505,7 +508,7 @@
 #undef TIMEOUT
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
-#undef TIME_WITH_SYS_TIME 
+#undef TIME_WITH_SYS_TIME
 
 /* The number of tries a user gets to enter their password. */
 #undef TRIES_FOR_PASSWORD
