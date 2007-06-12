@@ -237,6 +237,7 @@ int easprintf		__P((char **, const char *, ...))
 			    __printflike(2, 3);
 int evasprintf		__P((char **, const char *, va_list))
 			    __printflike(2, 0);
+void efree		__P((VOID *));
 void dump_defaults	__P((void));
 void dump_auth_methods	__P((void));
 void init_envtables	__P((void));
