@@ -58,7 +58,7 @@
 #define	RANGE_ERROR	(-1)
 
 #if defined(LIBC_SCCS) && !defined(lint)
-static char rcsid[] = "$OpenBSD: fnmatch.c,v 1.6 1998/03/19 00:29:59 millert Exp $";
+__unused static char rcsid[] = "$OpenBSD: fnmatch.c,v 1.6 1998/03/19 00:29:59 millert Exp $";
 #endif /* LIBC_SCCS and not lint */
 
 static int rangematch __P((const char *, char, int, char **));
