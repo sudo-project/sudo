@@ -1,32 +1,17 @@
 /*
- * Copyright (c) 1987, 1993
- *	The Regents of the University of California.  All rights reserved.
+ * Copyright (c) 2004-2005 Todd C. Miller <Todd.Miller@courtesan.com>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the University nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
  *
- * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- * @(#)strcasecmp.c	8.1 (Berkeley) 6/4/93
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
 #include <sys/types.h>
@@ -38,76 +23,73 @@ __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
- * This array is designed for mapping upper and lower case letter
- * together for a case independent comparison.  The mappings are
- * based upon ascii character sequences.
+ * Case insensitive string compare routines, same semantics as str[n]cmp()
+ * (assumes ASCII..).
+ * Derived from a public domain implementation included with the pdksh shell.
  */
-static const unsigned char charmap[] = {
-	'\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007',
-	'\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
-	'\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027',
-	'\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037',
-	'\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047',
-	'\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057',
-	'\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067',
-	'\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077',
-	'\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147',
-	'\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
-	'\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167',
-	'\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137',
-	'\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147',
-	'\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
-	'\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167',
-	'\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177',
-	'\200', '\201', '\202', '\203', '\204', '\205', '\206', '\207',
-	'\210', '\211', '\212', '\213', '\214', '\215', '\216', '\217',
-	'\220', '\221', '\222', '\223', '\224', '\225', '\226', '\227',
-	'\230', '\231', '\232', '\233', '\234', '\235', '\236', '\237',
-	'\240', '\241', '\242', '\243', '\244', '\245', '\246', '\247',
-	'\250', '\251', '\252', '\253', '\254', '\255', '\256', '\257',
-	'\260', '\261', '\262', '\263', '\264', '\265', '\266', '\267',
-	'\270', '\271', '\272', '\273', '\274', '\275', '\276', '\277',
-	'\300', '\301', '\302', '\303', '\304', '\305', '\306', '\307',
-	'\310', '\311', '\312', '\313', '\314', '\315', '\316', '\317',
-	'\320', '\321', '\322', '\323', '\324', '\325', '\326', '\327',
-	'\330', '\331', '\332', '\333', '\334', '\335', '\336', '\337',
-	'\340', '\341', '\342', '\343', '\344', '\345', '\346', '\347',
-	'\350', '\351', '\352', '\353', '\354', '\355', '\356', '\357',
-	'\360', '\361', '\362', '\363', '\364', '\365', '\366', '\367',
-	'\370', '\371', '\372', '\373', '\374', '\375', '\376', '\377',
+static const char ichars[256] = {
+	   0,  0x1,  0x2,  0x3,  0x4,  0x5,  0x6,  0x7,
+	 0x8,  0x9,  0xa,  0xb,  0xc,  0xd,  0xe,  0xf,
+	0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+	0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
+	0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27,
+	0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f,
+	0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
+	0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
+	0x40,  'a',  'b',  'c',  'd',  'e',  'f',  'g',
+	 'h',  'i',  'j',  'k',  'l',  'm',  'n',  'o',
+	 'p',  'q',  'r',  's',  't',  'u',  'v',  'w',
+	 'x',  'y',  'z', 0x5b, 0x5c, 0x5d, 0x5e, 0x5f,
+	0x60,  'a',  'b',  'c',  'd',  'e',  'f',  'g',
+	 'h',  'i',  'j',  'k',  'l',  'm',  'n',  'o',
+	 'p',  'q',  'r',  's',  't',  'u',  'v',  'w',
+	 'x',  'y',  'z', 0x7b, 0x7c, 0x7d, 0x7e, 0x7f,
+	0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87,
+	0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e, 0x8f,
+	0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97,
+	0x98, 0x99, 0x9a, 0x9b, 0x9c, 0x9d, 0x9e, 0x9f,
+	0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7,
+	0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf,
+	0xb0, 0xb1, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6, 0xb7,
+	0xb8, 0xb9, 0xba, 0xbb, 0xbc, 0xbd, 0xbe, 0xbf,
+	0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7,
+	0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf,
+	0xd0, 0xd1, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7,
+	0xd8, 0xd9, 0xda, 0xdb, 0xdc, 0xdd, 0xde, 0xdf,
+	0xe0, 0xe1, 0xe2, 0xe3, 0xe4, 0xe5, 0xe6, 0xe7,
+	0xe8, 0xe9, 0xea, 0xeb, 0xec, 0xed, 0xee, 0xef,
+	0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
+	0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff
 };
 
 int
 strcasecmp(s1, s2)
-	const char *s1, *s2;
+	const char *s1;
+	const char *s2;
 {
-	const unsigned char *cm = charmap,
-			    *us1 = (const unsigned char *)s1,
-			    *us2 = (const unsigned char *)s2;
+	const unsigned char *us1 = (const unsigned char *) s1;
+	const unsigned char *us2 = (const unsigned char *) s2;
 
-	while (cm[*us1] == cm[*us2++])
+	while (ichars[*us1] == ichars[*us2++]) {
 		if (*us1++ == '\0')
-			return (0);
-	return (cm[*us1] - cm[*--us2]);
+			return 0;
+	}
+	return ichars[*us1] - ichars[*--us2];
 }
 
 int
 strncasecmp(s1, s2, n)
-	const char *s1, *s2;
+	const char *s1;
+	const char *s2;
 	size_t n;
 {
+	const unsigned char *us1 = (const unsigned char *) s1;
+	const unsigned char *us2 = (const unsigned char *) s2;
 
-	if (n != 0) {
-		const unsigned char *cm = charmap,
-				    *us1 = (const unsigned char *)s1,
-				    *us2 = (const unsigned char *)s2;
-
-		do {
-			if (cm[*us1] != cm[*us2++])
-				return (cm[*us1] - cm[*--us2]);
-			if (*us1++ == '\0')
-				break;
-		} while (--n != 0);
+	while (n != 0 && ichars[*us1] == ichars[*us2++]) {
+		if (*us1++ == '\0')
+			return 0;
+		n--;
 	}
-	return (0);
+	return n ? ichars[*us1] - ichars[*--us2] : 0;
 }
