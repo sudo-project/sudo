@@ -51,11 +51,7 @@ mirror.
 Building the release
 ====================
 Please read the installation guide in the `INSTALL' file before
-trying to build sudo.  The `RUNSON' file contains a list of of
-platforms that this version of sudo is known to work on.  If you
-can add to this list, please send mail to sudo@sudo.ws.  If
-something goes wrong you may want to refer to the `TROUBLESHOOTING'
-file.
+trying to build sudo.
 
 Copyright
 =========
