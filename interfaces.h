@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,32 +16,33 @@
  * Sponsored in part by the Defense Advanced Research Projects
  * Agency (DARPA) and Air Force Research Laboratory, Air Force
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
+ *
+ * $Sudo$
  */
 
-#include <stdio.h>
-#include <string.h>
+#ifndef _SUDO_INTERFACES_H
+#define _SUDO_INTERFACES_H
 
-#include <config.h>
-#include <compat.h>
+/*
+ * IP address and netmask pairs for checking against local interfaces.
+ */
+struct interface {
+    struct in_addr addr;
+    struct in_addr netmask;
+};
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
+/*
+ * Prototypes for external functions.
+ */
+void load_interfaces	__P((void));
+void dump_interfaces	__P((void));
 
-const char *
-getprogname()
-{
-    static const char *progname;
-    extern int Argc;
-    extern char **Argv;
+/*
+ * Definitions for external variables.
+ */
+#ifndef _SUDO_MAIN
+extern struct interface *interfaces;
+extern int num_interfaces;
+#endif
 
-    if (progname == NULL) {
-	if (Argc < 0)
-	    progname = "sudo";
-	else if ((progname = strrchr(Argv[0], '/')) != NULL)
-	    progname++;
-	else
-	    progname = Argv[0];
-    }
-    return(progname);
-}
+#endif /* _SUDO_INTERFACES_H */

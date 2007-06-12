@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 1996, 1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ *
+ * This code is derived from software contributed by Aaron Spangler.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

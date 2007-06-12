@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2001 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 1990, 1993
  *	The Regents of the University of California.  All rights reserved.
  *
