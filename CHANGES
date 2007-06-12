@@ -1808,3 +1808,56 @@ Sudo 1.6.8p11 released.
      remove from the environment.
 
 Sudo 1.6.8p12 released.
+
+568) Fixed a file descriptor leak when the lecture file option is enabled.
+
+569) Added to the list of variables to remove from the environment.
+
+570) Fixed a Kerberos V security issue that could allow a
+     user to authenticate using a fake KDC.
+
+571) Pulled in updated configure and libtool from sudo 1.7.
+
+572) PAM is now the default on systems where it is supported.
+
+573) Removed POSIX saved uid use; the stay_setuid option now
+     requires the setreuid() or setresuid() functions to work.
+
+574) Regenerated configure with up to date autoconf and libtool.
+
+575) Fixed fd leak when lecture file option is enabled.
+
+576) Removed used of POSIX saved uids.  The stay_setuid
+     option now requires setreuid() or setresuid().
+
+577) PAM fixes.  If the user enters ^C at the password prompt,
+     abort instead of trying to authenticate with an empty password
+     (which causes an annoying delay).  Also Call pam_open_session()
+     and pam_close_session() to give pam_limits a chance to run.
+
+578) Security fix for Kerberos5.  If we cannot get a valid service
+     key using the default keytab it is a fatal error.  Now uses
+     krb5_verify_user() and krb5_init_secure_context() if they
+     are available.
+
+579) Fixed securid5 authentication.
+
+580) Added fcntl F_CLOSEM support to closefrom().
+
+581) Added NOEXEC support for AIX 5.3.
+
+582) Sudo now uses the supplemental group vector for matching.
+     This fixes problems with split group lines in /etc/group
+     as well as multiple group sources in nsswitch.conf.
+
+583) Added more environment variables to remove by default.
+
+584) Mail from sudo now includes an Auto-Submitted: auto-generated
+     header ala rfc 3834.
+
+585) Reworked the environment handling code.
+
+586) Remove the --with-execv option, it was not useful.
+
+587) Use TCSADRAIN instead of TCSAFLUSH in tgetpass() since
+     some OSes have issues with TCSAFLUSH.
