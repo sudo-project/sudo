@@ -1,0 +1,198 @@
+
+
+
+VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
+
+
+NNAAMMEE
+       visudo - edit the sudoers file
+
+SSYYNNOOPPSSIISS
+       vviissuuddoo [ --cc ] [ --ff _s_u_d_o_e_r_s ] [ --qq ] [ --ss ] [ --VV ]
+
+DDEESSCCRRIIPPTTIIOONN
+       vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous
+       to vipw(1m).  vviissuuddoo locks the _s_u_d_o_e_r_s file against multi­
+       ple simultaneous edits, provides basic sanity checks, and
+       checks for parse errors.  If the _s_u_d_o_e_r_s file is currently
+       being edited you will receive a message to try again
+       later.
+
+       There is a hard-coded list of editors that vviissuuddoo will use
+       set at compile-time that may be overridden via the _e_d_i_t_o_r
+       _s_u_d_o_e_r_s Default variable.  This list defaults to the path
+       to _v_i(1) on your system, as determined by the _c_o_n_f_i_g_u_r_e
+       script.  Normally, vviissuuddoo does not honor the VISUAL or
+       EDITOR environment variables unless they contain an editor
+       in the aforementioned editors list.  However, if vviissuuddoo is
+       configured with the _-_-_w_i_t_h_-_e_n_v_e_d_i_t_o_r flag or the _e_n_v___e_d_i_­
+       _t_o_r Default variable is set in _s_u_d_o_e_r_s, vviissuuddoo will use
+       any the editor defines by VISUAL or EDITOR.  Note that
+       this can be a security hole since it allows the user to
+       execute any program they wish simply by setting VISUAL or
+       EDITOR.
+
+       vviissuuddoo parses the _s_u_d_o_e_r_s file after the edit and will not
+       save the changes if there is a syntax error.  Upon finding
+       an error, vviissuuddoo will print a message stating the line
+       number(s) where the error occurred and the user will
+       receive the "What now?" prompt.  At this point the user
+       may enter "e" to re-edit the _s_u_d_o_e_r_s file, "x" to exit
+       without saving the changes, or "Q" to quit and save
+       changes.  The "Q" option should be used with extreme care
+       because if vviissuuddoo believes there to be a parse error, so
+       will ssuuddoo and no one will be able to ssuuddoo again until the
+       error is fixed.  If "e" is typed to edit the  _s_u_d_o_e_r_s file
+       after a parse error has been detected, the cursor will be
+       placed on the line where the error occurred (if the editor
+       supports this feature).
+
+OOPPTTIIOONNSS
+       vviissuuddoo accepts the following command line options:
+
+       -c  Enable cchheecckk--oonnllyy mode.  The existing _s_u_d_o_e_r_s file
+           will be checked for syntax and a message will be
+           printed to the standard output detailing the status of
+           _s_u_d_o_e_r_s.  If the syntax check completes successfully,
+           vviissuuddoo will exit with a value of 0.  If a syntax error
+           is encountered, vviissuuddoo will exit with a value of 1.
+
+       -f  Specify and alternate _s_u_d_o_e_r_s file location.  With
+
+
+
+1.6.9                     June 12, 2007                         1
+
+
+
+
+
+VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
+
+
+           this option vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s
+           file of your choice, instead of the default,
+           _/_e_t_c_/_s_u_d_o_e_r_s.  The lock file used is the specified
+           _s_u_d_o_e_r_s file with ".tmp" appended to it.
+
+       -q  Enable qquuiieett mode.  In this mode details about syntax
+           errors are not printed.  This option is only useful
+           when combined with the --cc flag.
+
+       -s  Enable ssttrriicctt checking of the _s_u_d_o_e_r_s file.  If an
+           alias is used before it is defined, vviissuuddoo will con­
+           sider this a parse error.  Note that it is not possi­
+           ble to differentiate between an alias and a hostname
+           or username that consists solely of uppercase letters,
+           digits, and the underscore ('_') character.
+
+       -V  The --VV (version) option causes vviissuuddoo to print its
+           version number and exit.
+
+EENNVVIIRROONNMMEENNTT
+       The following environment variables are used only if
+       vviissuuddoo was configured with the _-_-_w_i_t_h_-_e_n_v_-_e_d_i_t_o_r option:
+
+        VISUAL                 Invoked by visudo as the editor to use
+        EDITOR                 Used by visudo if VISUAL is not set
+
+FFIILLEESS
+        /etc/sudoers           List of who can run what
+        /etc/sudoers.tmp       Lock file for visudo
+
+DDIIAAGGNNOOSSTTIICCSS
+       sudoers file busy, try again later.
+           Someone else is currently editing the _s_u_d_o_e_r_s file.
+
+       /etc/sudoers.tmp: Permission denied
+           You didn't run vviissuuddoo as root.
+
+       Can't find you in the passwd database
+           Your userid does not appear in the system passwd file.
+
+       Warning: undeclared Alias referenced near ...
+           Either you are using a {User,Runas,Host,Cmnd}_Alias
+           before defining it or you have a user or hostname
+           listed that consists solely of uppercase letters, dig­
+           its, and the underscore ('_') character.  If the lat­
+           ter, you can ignore the warnings (ssuuddoo will not com­
+           plain).  In --ss (strict) mode these are errors, not
+           warnings.
+
+       Warning: runas_default set after old value is in use ...
+           You have a _r_u_n_a_s___d_e_f_a_u_l_t Defaults setting listed in
+           the _s_u_d_o_e_r_s file after its value has already been
+           used.  This means that entries prior to the
+           _r_u_n_a_s___d_e_f_a_u_l_t setting will match based on the default
+
+
+
+1.6.9                     June 12, 2007                         2
+
+
+
+
+
+VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
+
+
+           value of _r_u_n_a_s___d_e_f_a_u_l_t (root) whereas entries aafftteerr
+           the _r_u_n_a_s___d_e_f_a_u_l_t setting will match based on the new
+           value.  This is usually unintentional and in most
+           cases the <runas_default> setting should be placed
+           before any Runas_Alias or User specifications.  In --ss
+           (strict) mode this is an error, not a warning.
+
+SSEEEE AALLSSOO
+       _v_i(1), sudoers(4), sudo(1m), vipw(1m)
+
+AAUUTTHHOORR
+       Many people have worked on _s_u_d_o over the years; this ver­
+       sion of vviissuuddoo was written by:
+
+        Todd Miller
+
+       See the HISTORY file in the sudo distribution or visit
+       http://www.sudo.ws/sudo/history.html for more details.
+
+CCAAVVEEAATTSS
+       There is no easy way to prevent a user from gaining a root
+       shell if the editor used by vviissuuddoo allows shell escapes.
+
+BBUUGGSS
+       If you feel you have found a bug in vviissuuddoo, please submit
+       a bug report at http://www.sudo.ws/sudo/bugs/
+
+SSUUPPPPOORRTT
+       Commercial support is available for ssuuddoo, see
+       http://www.sudo.ws/sudo/support.html for details.
+
+       Limited free support is available via the sudo-users mail­
+       ing list, see http://www.sudo.ws/mail­
+       man/listinfo/sudo-users to subscribe or search the
+       archives.
+
+DDIISSCCLLAAIIMMEERR
+       VViissuuddoo is provided ``AS IS'' and any express or implied
+       warranties, including, but not limited to, the implied
+       warranties of merchantability and fitness for a particular
+       purpose are disclaimed.  See the LICENSE file distributed
+       with ssuuddoo or http://www.sudo.ws/sudo/license.html for com­
+       plete details.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.6.9                     June 12, 2007                         3
+
+
