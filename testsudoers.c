@@ -298,7 +298,7 @@ netgr_matches(netgr, host, shost, user)
 	domain = (char *) emalloc(MAXHOSTNAMELEN);
 
 	if (getdomainname(domain, MAXHOSTNAMELEN) != 0 || *domain == '\0') {
-	    free(domain);
+	    efree(domain);
 	    domain = NULL;
 	}
     }

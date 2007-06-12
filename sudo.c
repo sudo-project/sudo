@@ -342,7 +342,7 @@ main(argc, argv)
 	    struct passwd *pw;
 
 	    if ((pw = sudo_getpwnam(prev_user)) != NULL) {
-		    free(sudo_user.pw);
+		    efree(sudo_user.pw);
 		    sudo_user.pw = pw;
 	    }
     }
@@ -1000,8 +1000,8 @@ set_fqdn()
 	    "unable to lookup %s via gethostbyname()", user_host);
     } else {
 	if (user_shost != user_host)
-	    free(user_shost);
-	free(user_host);
+	    efree(user_shost);
+	efree(user_host);
 	user_host = estrdup(hp->h_name);
     }
     if ((p = strchr(user_host, '.'))) {
@@ -1024,7 +1024,7 @@ set_runaspw(user)
     if (runas_pw != NULL) {
 	if (user_runas != &def_runas_default)
 	    return(TRUE);		/* don't override -u option */
-	free(runas_pw);
+	efree(runas_pw);
     }
     if (*user == '#') {
 	runas_pw = sudo_getpwuid(atoi(user + 1));

@@ -108,9 +108,8 @@ check_user(override)
     }
     if (status != TS_ERROR)
 	update_timestamp(timestampdir, timestampfile);
-    free(timestampdir);
-    if (timestampfile)
-	free(timestampfile);
+    efree(timestampdir);
+    efree(timestampfile);
 }
 
 /*
@@ -560,7 +559,6 @@ remove_timestamp(remove)
 	}
     }
 
-    free(timestampdir);
-    if (timestampfile)
-	free(timestampfile);
+    efree(timestampdir);
+    efree(timestampfile);
 }

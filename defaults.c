@@ -375,10 +375,8 @@ init_defaults()
 	for (def = sudo_defs_table; def->name; def++)
 	    switch (def->type & T_MASK) {
 		case T_STR:
-		    if (def->sd_un.str) {
-			free(def->sd_un.str);
-			def->sd_un.str = NULL;
-		    }
+		    efree(def->sd_un.str);
+		    def->sd_un.str = NULL;
 		    break;
 		case T_LIST:
 		    list_op(NULL, 0, def, freeall);
@@ -585,8 +583,7 @@ store_str(val, def, op)
     int op;
 {
 
-    if (def->sd_un.str)
-	free(def->sd_un.str);
+    efree(def->sd_un.str);
     if (op == FALSE)
 	def->sd_un.str = NULL;
     else
@@ -735,8 +732,8 @@ list_op(val, len, def, op)
 	for (cur = def->sd_un.list; cur; ) {
 	    tmp = cur;
 	    cur = tmp->next;
-	    free(tmp->value);
-	    free(tmp);
+	    efree(tmp->value);
+	    efree(tmp);
 	}
 	def->sd_un.list = NULL;
 	return;
@@ -753,8 +750,8 @@ list_op(val, len, def, op)
 		prev->next = cur->next;
 	    else
 		def->sd_un.list = cur->next;
-	    free(cur->value);
-	    free(cur);
+	    efree(cur->value);
+	    efree(cur);
 	    break;
 	}
     }

@@ -433,8 +433,7 @@ fill_args(s, len, addspace)
 	    (char *) realloc(yylval.command.args, arg_size) :
 	    (char *) malloc(arg_size);
 	if (p == NULL) {
-	    if (yylval.command.args != NULL)
-		free(yylval.command.args);
+	    efree(yylval.command.args);
 	    yyerror("unable to allocate memory");
 	    return;
 	} else

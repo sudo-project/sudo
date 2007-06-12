@@ -127,7 +127,7 @@ find_path(infile, outfile, sbp, path)
 	path = n + 1;
 
     } while (n);
-    free(origpath);
+    efree(origpath);
 
     /*
      * Check current dir if dot was in the PATH

@@ -216,3 +216,14 @@ evasprintf(ret, format, args)
 	errx(1, "unable to allocate memory");
     return(len);
 }
+
+/*
+ * Wrapper for free(3) so we can depend on C89 semantics.
+ */
+void
+efree(ptr)
+    VOID *ptr;
+{
+    if (ptr != NULL)
+	free(ptr);
+}

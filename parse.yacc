@@ -321,7 +321,7 @@ defaults_entry	:	DEFVAR {
 				yyerror(NULL);
 				YYERROR;
 			    }
-			    free($1);
+			    efree($1);
 			}
 		|	'!' DEFVAR {
 			    if (defaults_matches == TRUE &&
@@ -329,7 +329,7 @@ defaults_entry	:	DEFVAR {
 				yyerror(NULL);
 				YYERROR;
 			    }
-			    free($2);
+			    efree($2);
 			}
 		|	DEFVAR '=' WORD {
 			    if (defaults_matches == TRUE &&
@@ -337,8 +337,8 @@ defaults_entry	:	DEFVAR {
 				yyerror(NULL);
 				YYERROR;
 			    }
-			    free($1);
-			    free($3);
+			    efree($1);
+			    efree($3);
 			}
 		|	DEFVAR '+' WORD {
 			    if (defaults_matches == TRUE &&
@@ -346,8 +346,8 @@ defaults_entry	:	DEFVAR {
 				yyerror(NULL);
 				YYERROR;
 			    }
-			    free($1);
-			    free($3);
+			    efree($1);
+			    efree($3);
 			}
 		|	DEFVAR '-' WORD {
 			    if (defaults_matches == TRUE &&
@@ -355,8 +355,8 @@ defaults_entry	:	DEFVAR {
 				yyerror(NULL);
 				YYERROR;
 			    }
-			    free($1);
-			    free($3);
+			    efree($1);
+			    efree($3);
 			}
 		;
 
@@ -393,21 +393,21 @@ host		:	ALL {
 				$$ = TRUE;
 			    else
 				$$ = NOMATCH;
-			    free($1);
+			    efree($1);
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, user_host, user_shost, NULL))
 				$$ = TRUE;
 			    else
 				$$ = NOMATCH;
-			    free($1);
+			    efree($1);
 			}
 		|	WORD {
 			    if (hostname_matches(user_shost, user_host, $1) == 0)
 				$$ = TRUE;
 			    else
 				$$ = NOMATCH;
-			    free($1);
+			    efree($1);
 			}
 		|	ALIAS {
 			    aliasinfo *aip = find_alias($1, HOST_ALIAS);
@@ -429,7 +429,7 @@ host		:	ALL {
 				}
 				$$ = NOMATCH;
 			    }
-			    free($1);
+			    efree($1);
 			}
 		;
 
@@ -549,7 +549,7 @@ runasuser	:	WORD {
 				$$ = TRUE;
 			    else
 				$$ = NOMATCH;
-			    free($1);
+			    efree($1);
 			    used_runas = TRUE;
 			}
 		|	USERGROUP {
@@ -564,7 +564,7 @@ runasuser	:	WORD {
 				$$ = TRUE;
 			    else
 				$$ = NOMATCH;
-			    free($1);
+			    efree($1);
 			    used_runas = TRUE;
 			}
 		|	NETGROUP {
@@ -579,7 +579,7 @@ runasuser	:	WORD {
 				$$ = TRUE;
 			    else
 				$$ = NOMATCH;
-			    free($1);
+			    efree($1);
 			    used_runas = TRUE;
 			}
 		|	ALIAS {
@@ -609,7 +609,7 @@ runasuser	:	WORD {
 				}
 				$$ = NOMATCH;
 			    }
-			    free($1);
+			    efree($1);
 			    used_runas = TRUE;
 			}
 		|	ALL {
@@ -704,7 +704,7 @@ cmnd		:	ALL {
 				}
 				$$ = NOMATCH;
 			    }
-			    free($1);
+			    efree($1);
 			}
 		|	 COMMAND {
 			    if (printmatches == TRUE) {
@@ -727,9 +727,8 @@ cmnd		:	ALL {
 			    else
 				$$ = NOMATCH;
 
-			    free($1.cmnd);
-			    if ($1.args)
-				free($1.args);
+			    efree($1.cmnd);
+			    efree($1.args);
 			}
 		;
 
@@ -771,7 +770,7 @@ cmndalias	:	ALIAS {
 				YYERROR;
 			    }
 			    pop;
-			    free($1);
+			    efree($1);
 
 			    if (printmatches == TRUE)
 				in_alias = FALSE;
@@ -800,7 +799,7 @@ runasalias	:	ALIAS {
 				yyerror(NULL);
 				YYERROR;
 			    }
-			    free($1);
+			    efree($1);
 
 			    if (printmatches == TRUE)
 				in_alias = FALSE;
@@ -818,7 +817,7 @@ useralias	:	ALIAS { push; }	'=' userlist {
 				YYERROR;
 			    }
 			    pop;
-			    free($1);
+			    efree($1);
 			}
 		;
 
@@ -839,21 +838,21 @@ user		:	WORD {
 				$$ = TRUE;
 			    else
 				$$ = NOMATCH;
-			    free($1);
+			    efree($1);
 			}
 		|	USERGROUP {
 			    if (usergr_matches($1, user_name, sudo_user.pw))
 				$$ = TRUE;
 			    else
 				$$ = NOMATCH;
-			    free($1);
+			    efree($1);
 			}
 		|	NETGROUP {
 			    if (netgr_matches($1, NULL, NULL, user_name))
 				$$ = TRUE;
 			    else
 				$$ = NOMATCH;
-			    free($1);
+			    efree($1);
 			}
 		|	ALIAS {
 			    aliasinfo *aip = find_alias($1, USER_ALIAS);
@@ -875,7 +874,7 @@ user		:	WORD {
 				}
 				$$ = NOMATCH;
 			    }
-			    free($1);
+			    efree($1);
 			}
 		|	ALL {
 			    $$ = TRUE;
@@ -1096,17 +1095,17 @@ list_matches()
 
     /* Be nice and free up space now that we are done. */
     for (count = 0; count < ga_list_len; count++) {
-	free(ga_list[count].alias);
-	free(ga_list[count].entries);
+	efree(ga_list[count].alias);
+	efree(ga_list[count].entries);
     }
-    free(ga_list);
+    efree(ga_list);
     ga_list = NULL;
 
     for (count = 0; count < cm_list_len; count++) {
-	free(cm_list[count].runas);
-	free(cm_list[count].cmnd);
+	efree(cm_list[count].runas);
+	efree(cm_list[count].cmnd);
     }
-    free(cm_list);
+    efree(cm_list);
     cm_list = NULL;
     cm_list_len = 0;
     cm_list_size = 0;
@@ -1168,8 +1167,8 @@ reset_aliases()
 
     if (aliases) {
 	for (n = 0; n < naliases; n++)
-	    free(aliases[n].name);
-	free(aliases);
+	    efree(aliases[n].name);
+	efree(aliases);
 	aliases = NULL;
     }
     naliases = nslots = 0;
@@ -1223,7 +1222,7 @@ init_parser()
 
     /* Free up old data structures if we run the parser more than once. */
     if (match) {
-	free(match);
+	efree(match);
 	match = NULL;
 	top = 0;
 	parse_error = FALSE;

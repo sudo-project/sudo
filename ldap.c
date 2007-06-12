@@ -310,7 +310,7 @@ int sudo_ldap_check_command(ld,entry)
     }
 
     /* cleanup */
-    free(allowed_cmnd);
+    efree(allowed_cmnd);
   }
 
   /* more cleanup */
@@ -369,7 +369,7 @@ sudo_ldap_parse_options(ld,entry)
       /* case var Boolean True */
       set_default(var,NULL,TRUE);
     }
-    free(var);
+    efree(var);
 
   }
 
@@ -519,7 +519,7 @@ sudo_ldap_read_config()
     /* The following macros make the code much more readable */
 
 #define MATCH_S(x,y) if (!strcasecmp(keyword,x)) \
-    { if (y) free(y); y=estrdup(value); }
+    { efree(y); y=estrdup(value); }
 #define MATCH_I(x,y) if (!strcasecmp(keyword,x)) { y=atoi(value); }
 #define MATCH_B(x,y) if (!strcasecmp(keyword,x)) { y=_atobool(value); }
 

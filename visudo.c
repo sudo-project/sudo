@@ -324,8 +324,7 @@ main(argc, argv)
      * find one that exists, is regular, and is executable.
      */
     if (Editor == NULL || *Editor == '\0') {
-	if (EditorPath != NULL)
-	    free(EditorPath);
+	efree(EditorPath);
 	EditorPath = estrdup(def_editor);
 	Editor = strtok(EditorPath, ":");
 	do {
