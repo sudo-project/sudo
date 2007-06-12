@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 1996, 1998, 1999, 2001
- *	Todd C. Miller <Todd.Miller@courtesan.com>.
+ * Copyright (c) 1999-2002 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,9 +21,16 @@
 #include <config.h>
 
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/param.h>
 #include <stdio.h>
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif /* STDC_HEADERS */
 #ifdef HAVE_STRING_H
 # include <string.h>
 #else
@@ -35,38 +41,31 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#include <errno.h>
+#include <pwd.h>
 
 #include "sudo.h"
+#include "sudo_auth.h"
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-/*
- * Verify that path is a normal file and executable by root.
- */
-char *
-sudo_goodpath(path, sbp)
-    const char *path;
-    struct stat *sbp;
+int
+aixauth_verify(pw, prompt, auth)
+    struct passwd *pw;
+    char *prompt;
+    sudo_auth *auth;
 {
-    struct stat sb;
+    char *pass;
+    char *message;
+    int reenter = 1;
+    int rval = AUTH_FAILURE;
 
-    /* Check for brain damage */
-    if (path == NULL || path[0] == '\0')
-	return(NULL);
-
-    if (stat(path, &sb))
-	return(NULL);
-
-    /* Make sure path describes an executable regular file. */
-    if (!S_ISREG(sb.st_mode) || !(sb.st_mode & 0000111)) {
-	errno = EACCES;
-	return(NULL);
+    pass = tgetpass(prompt, def_passwd_timeout * 60, tgetpass_flags);
+    if (pass) {
+	if (authenticate(pw->pw_name, (char *)pass, &reenter, &message) == 0)
+	    rval = AUTH_SUCCESS;
+	zero_bytes(pass, strlen(pass));
     }
-
-    if (sbp != NULL)
-	(void) memcpy(sbp, &sb, sizeof(struct stat));
-    return((char *)path);
+    return(rval);
 }

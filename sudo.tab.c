@@ -47,7 +47,7 @@ static char yyrcsid[]
  *       list_matches() can format things the way it wants.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -89,7 +89,7 @@ static char yyrcsid[]
 #endif /* HAVE_LSEARCH */
 
 #ifndef lint
-static const char rcsid[] = "$Sudo$";
+__unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*

@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 1996, 1998, 1999, 2001
- *	Todd C. Miller <Todd.Miller@courtesan.com>.
+ * Copyright (c) 1999, 2001 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,54 +18,28 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#include <config.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/param.h>
 #include <stdio.h>
-#ifdef HAVE_STRING_H
-# include <string.h>
-#else
-# ifdef HAVE_STRINGS_H
-#  include <strings.h>
-# endif
-#endif /* HAVE_STRING_H */
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
 #include <errno.h>
 
-#include "sudo.h"
+#include <config.h>
+#include <compat.h>
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
- * Verify that path is a normal file and executable by root.
+ * Map errno -> error string.
  */
 char *
-sudo_goodpath(path, sbp)
-    const char *path;
-    struct stat *sbp;
+strerror(n)
+    int n;
 {
-    struct stat sb;
+    extern int sys_nerr;
+    extern char *sys_errlist[];
 
-    /* Check for brain damage */
-    if (path == NULL || path[0] == '\0')
-	return(NULL);
-
-    if (stat(path, &sb))
-	return(NULL);
-
-    /* Make sure path describes an executable regular file. */
-    if (!S_ISREG(sb.st_mode) || !(sb.st_mode & 0000111)) {
-	errno = EACCES;
-	return(NULL);
-    }
-
-    if (sbp != NULL)
-	(void) memcpy(sbp, &sb, sizeof(struct stat));
-    return((char *)path);
+    if (n > 0 && n < sys_nerr)
+	return(sys_errlist[n]);
+    errno = EINVAL;
+    return("Unknown error");
 }

@@ -27,7 +27,7 @@
 # include <floss.h>
 #endif
 
-#include "config.h"
+#include <config.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -98,7 +98,7 @@
 #include "version.h"
 
 #ifndef lint
-static const char rcsid[] = "$Sudo$";
+__unused __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*

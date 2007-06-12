@@ -1,5 +1,7 @@
+/*	$OpenBSD: strlcpy.c,v 1.5 2001/05/13 15:40:16 deraadt Exp $	*/
+
 /*
- * Copyright (c) 2004 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,18 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <config.h>
-
 #include <sys/types.h>
-#include <sys/time.h>
-#include <stdio.h>
-#if TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
-#ifndef HAVE_TIMESPEC
-# include <emul/timespec.h>
-#endif
 
+#include <config.h>
 #include <compat.h>
 
 #ifndef lint
@@ -33,24 +26,35 @@ __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
- * Get the current time via gettimeofday() for systems with
- * timespecs in struct stat or, otherwise, using time().
- * XXX - configure check for gettimeofday() - XXX
+ * Copy src to string dst of size siz.  At most siz-1 characters
+ * will be copied.  Always NUL terminates (unless siz == 0).
+ * Returns strlen(src); if retval >= siz, truncation occurred.
  */
-int
-gettime(ts)
-    struct timespec *ts;
+size_t
+strlcpy(dst, src, siz)
+	char *dst;
+	const char *src;
+	size_t siz;
 {
-    int rval;
-#if defined(HAVE_GETTIMEOFDAY) && (defined(HAVE_ST_MTIM) || defined(HAVE_ST_MTIMESPEC))
-    struct timeval tv;
+	char *d = dst;
+	const char *s = src;
+	size_t n = siz;
 
-    rval = gettimeofday(&tv, NULL);
-    ts->tv_sec = tv.tv_sec;
-    ts->tv_nsec = tv.tv_usec * 1000;
-#else
-    rval = (int)time(&ts->tv_sec);
-    ts->tv_nsec = 0;
-#endif
-    return (rval);
+	/* Copy as many bytes as will fit */
+	if (n != 0 && --n != 0) {
+		do {
+			if ((*d++ = *s++) == 0)
+				break;
+		} while (--n != 0);
+	}
+
+	/* Not enough room in dst, add NUL and traverse rest of src */
+	if (n == 0) {
+		if (siz != 0)
+			*d = '\0';		/* NUL-terminate dst */
+		while (*s++)
+			;
+	}
+
+	return(s - src - 1);	/* count does not include NUL */
 }

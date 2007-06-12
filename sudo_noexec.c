@@ -14,17 +14,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <errno.h>
+#ifndef HAVE_TIMESPEC
+# include <time.h>
+#endif
 #ifdef __STDC__
 # include <stdarg.h>
 #else
 # include <varargs.h>
 #endif
 
+#include <compat.h>
+
 #ifndef lint
-static const char rcsid[] = "$Sudo$";
+__unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*

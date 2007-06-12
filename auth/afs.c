@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 1996, 1998, 1999, 2001
- *	Todd C. Miller <Todd.Miller@courtesan.com>.
+ * Copyright (c) 1999, 2001, 2002 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -21,10 +20,17 @@
 
 #include <config.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/param.h>
+#include <sys/types.h>
 #include <stdio.h>
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif /* STDC_HEADERS */
 #ifdef HAVE_STRING_H
 # include <string.h>
 #else
@@ -35,38 +41,51 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
-#include <errno.h>
+#include <pwd.h>
 
 #include "sudo.h"
+#include "sudo_auth.h"
+
+#undef VOID
+#include <afs/stds.h>
+#include <afs/kautils.h>
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-/*
- * Verify that path is a normal file and executable by root.
- */
-char *
-sudo_goodpath(path, sbp)
-    const char *path;
-    struct stat *sbp;
+int
+afs_verify(pw, pass, auth)
+    struct passwd *pw;
+    char *pass;
+    sudo_auth *auth;
 {
-    struct stat sb;
+    struct ktc_encryptionKey afs_key;
+    struct ktc_token afs_token;
 
-    /* Check for brain damage */
-    if (path == NULL || path[0] == '\0')
-	return(NULL);
+    /* Try to just check the password */
+    ka_StringToKey(pass, NULL, &afs_key);
+    if (ka_GetAdminToken(pw->pw_name,		/* name */
+			 NULL,			/* instance */
+			 NULL,			/* realm */
+			 &afs_key,		/* key (contains password) */
+			 0,			/* lifetime */
+			 &afs_token,		/* token */
+			 0) == 0)		/* new */
+	return(AUTH_SUCCESS);
 
-    if (stat(path, &sb))
-	return(NULL);
+    /* Fall back on old method XXX - needed? */
+    setpag();
+    if (ka_UserAuthenticateGeneral(KA_USERAUTH_VERSION+KA_USERAUTH_DOSETPAG,
+				   pw->pw_name,	/* name */
+				   NULL,	/* instance */
+				   NULL,	/* realm */
+				   pass,	/* password */
+				   0,		/* lifetime */
+				   NULL,	/* expiration ptr (unused) */
+				   0,		/* spare */
+				   NULL) == 0)	/* reason */
+	return(AUTH_SUCCESS);
 
-    /* Make sure path describes an executable regular file. */
-    if (!S_ISREG(sb.st_mode) || !(sb.st_mode & 0000111)) {
-	errno = EACCES;
-	return(NULL);
-    }
-
-    if (sbp != NULL)
-	(void) memcpy(sbp, &sb, sizeof(struct stat));
-    return((char *)path);
+    return(AUTH_FAILURE);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999, 2001 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,18 +14,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <config.h>
-
 #include <sys/types.h>
-#include <sys/time.h>
-#include <stdio.h>
-#if TIME_WITH_SYS_TIME
-# include <time.h>
-#endif
-#ifndef HAVE_TIMESPEC
-# include <emul/timespec.h>
-#endif
 
+#include <config.h>
 #include <compat.h>
 
 #ifndef lint
@@ -33,24 +24,17 @@ __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
- * Get the current time via gettimeofday() for systems with
- * timespecs in struct stat or, otherwise, using time().
- * XXX - configure check for gettimeofday() - XXX
+ * Like bzero(3) but with a volatile pointer.  The hope is that
+ * the compiler will not be able to optimize away this function.
  */
-int
-gettime(ts)
-    struct timespec *ts;
+void
+zero_bytes(v, n)
+    volatile VOID *v;
+    size_t n;
 {
-    int rval;
-#if defined(HAVE_GETTIMEOFDAY) && (defined(HAVE_ST_MTIM) || defined(HAVE_ST_MTIMESPEC))
-    struct timeval tv;
+    volatile char *p, *ep;
 
-    rval = gettimeofday(&tv, NULL);
-    ts->tv_sec = tv.tv_sec;
-    ts->tv_nsec = tv.tv_usec * 1000;
-#else
-    rval = (int)time(&ts->tv_sec);
-    ts->tv_nsec = 0;
-#endif
-    return (rval);
+    for (p = v, ep = p + n; p < ep; p++)
+	*p = 0;
+    return;
 }
