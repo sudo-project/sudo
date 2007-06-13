@@ -1863,11 +1863,26 @@ _ACEOF
 echo $ECHO_N "checking whether to try S/Key authentication... $ECHO_C" >&6
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		if test X"$AUTH_OBJS" = X""; then
-		    AUTH_OBJS="rfc1938.o"
-		else
-		    AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
-		fi
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix S/Key with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix S/Key with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix S/Key with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix S/Key with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test X"" != X""; then
+    AUTH_OBJS="rfc1938.o"
+    AUTH_EXCL="S/Key"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="rfc1938.o"
+else
+    AUTH_OBJS="$AUTH_OBJS rfc1938.o"
+fi
+
 		;;
 esac
 fi;
@@ -1892,11 +1907,26 @@ _ACEOF
 echo $ECHO_N "checking whether to try NRL OPIE authentication... $ECHO_C" >&6
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		if test X"$AUTH_OBJS" = X""; then
-		    AUTH_OBJS="rfc1938.o"
-		else
-		    AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
-		fi
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix NRL OPIE with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix NRL OPIE with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix NRL OPIE with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix NRL OPIE with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test X"" != X""; then
+    AUTH_OBJS="rfc1938.o"
+    AUTH_EXCL="NRL OPIE"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="rfc1938.o"
+else
+    AUTH_OBJS="$AUTH_OBJS rfc1938.o"
+fi
+
 		;;
 esac
 fi;
@@ -1958,13 +1988,26 @@ _ACEOF
 echo $ECHO_N "checking whether to use FWTK AuthSRV for authentication... $ECHO_C" >&6
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-		    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-		    { { echo "$as_me:$LINENO: error: \"cannot mix fwtk with other authentication methods (such as $_AUTH)\"" >&5
-echo "$as_me: error: \"cannot mix fwtk with other authentication methods (such as $_AUTH)\"" >&2;}
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix FWTK AuthSRV with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix FWTK AuthSRV with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
    { (exit 1); exit 1; }; }
-		fi
-		AUTH_OBJS="fwtk.o"
+elif test X"true" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix FWTK AuthSRV with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix FWTK AuthSRV with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test X"true" != X""; then
+    AUTH_OBJS="fwtk.o"
+    AUTH_EXCL="FWTK AuthSRV"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="fwtk.o"
+else
+    AUTH_OBJS="$AUTH_OBJS fwtk.o"
+fi
+
 		;;
 esac
 fi;
@@ -2036,11 +2079,26 @@ _ACEOF
 echo $ECHO_N "checking whether to try AFS (kerberos) authentication... $ECHO_C" >&6
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		if test X"$AUTH_OBJS" = X""; then
-		    AUTH_OBJS="afs.o"
-		else
-		    AUTH_OBJS="${AUTH_OBJS} afs.o"
-		fi
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix AFS with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix AFS with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix AFS with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix AFS with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test X"" != X""; then
+    AUTH_OBJS="afs.o"
+    AUTH_EXCL="AFS"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="afs.o"
+else
+    AUTH_OBJS="$AUTH_OBJS afs.o"
+fi
+
 		;;
     no)		;;
     *)		{ { echo "$as_me:$LINENO: error: \"--with-AFS does not take an argument.\"" >&5
@@ -2063,11 +2121,26 @@ _ACEOF
 echo $ECHO_N "checking whether to try DCE (kerberos) authentication... $ECHO_C" >&6
 		echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-		if test X"$AUTH_OBJS" = X""; then
-		    AUTH_OBJS="dce.o"
-		else
-		    AUTH_OBJS="${AUTH_OBJS} dce.o"
-		fi
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix DCE with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix DCE with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix DCE with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix DCE with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test X"" != X""; then
+    AUTH_OBJS="dce.o"
+    AUTH_EXCL="DCE"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="dce.o"
+else
+    AUTH_OBJS="$AUTH_OBJS dce.o"
+fi
+
 		;;
     no)		;;
     *)		{ { echo "$as_me:$LINENO: error: \"--with-DCE does not take an argument.\"" >&5
@@ -6978,7 +7051,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 6981 "configure"
+#line 7054 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7076,7 +7149,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 7079 "configure"
+#line 7152 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7225,7 +7298,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  $ECHO '#line 7228 "configure"' > conftest.$ac_ext
+  $ECHO '#line 7301 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7876,11 +7949,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7879: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7952: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7883: \$? = $ac_status" >&5
+   echo "$as_me:7956: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -8151,11 +8224,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8154: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8227: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8158: \$? = $ac_status" >&5
+   echo "$as_me:8231: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -8248,11 +8321,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8251: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8324: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8255: \$? = $ac_status" >&5
+   echo "$as_me:8328: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8302,11 +8375,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8305: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8378: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8309: \$? = $ac_status" >&5
+   echo "$as_me:8382: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10845,13 +10918,26 @@ fi
 done
 
 		    if test "$found" = "true"; then
-			if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-			    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-			    { { echo "$as_me:$LINENO: error: \"cannot mix SIA with other authentication methods (such as $_AUTH)\"" >&5
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix SIA with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix SIA with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"true" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix SIA with other authentication methods (such as $_AUTH)\"" >&5
 echo "$as_me: error: \"cannot mix SIA with other authentication methods (such as $_AUTH)\"" >&2;}
    { (exit 1); exit 1; }; }
-			fi
-			AUTH_OBJS="sia.o"
+fi
+if test X"true" != X""; then
+    AUTH_OBJS="sia.o"
+    AUTH_EXCL="SIA"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="sia.o"
+else
+    AUTH_OBJS="$AUTH_OBJS sia.o"
+fi
+
 			CHECKSHADOW=false
 		    fi
 		fi
@@ -13234,13 +13320,26 @@ if test $ac_cv_header_bsd_auth_h = yes; then
 #define HAVE_BSD_AUTH_H 1
 _ACEOF
 
-	if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-	    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-	    { { echo "$as_me:$LINENO: error: \"cannot mix BSD authentication with other authentication methods (such as $_AUTH)\"" >&5
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix BSD authentication with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix BSD authentication with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"true" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix BSD authentication with other authentication methods (such as $_AUTH)\"" >&5
 echo "$as_me: error: \"cannot mix BSD authentication with other authentication methods (such as $_AUTH)\"" >&2;}
    { (exit 1); exit 1; }; }
-	fi
-	AUTH_OBJS=bsdauth.o
+fi
+if test X"true" != X""; then
+    AUTH_OBJS="bsdauth.o"
+    AUTH_EXCL="BSD authentication"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="bsdauth.o"
+else
+    AUTH_OBJS="$AUTH_OBJS bsdauth.o"
+fi
+
 else
   -
 fi
@@ -19572,11 +19671,26 @@ fi
 
     LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} $K4LIBS"
-    if test X"$AUTH_OBJS" = X""; then
-	AUTH_OBJS="kerb4.o"
-    else
-	AUTH_OBJS="${AUTH_OBJS} kerb4.o"
-    fi
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix Kerberos 4 with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix Kerberos 4 with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix Kerberos 4 with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix Kerberos 4 with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test X"" != X""; then
+    AUTH_OBJS="kerb4.o"
+    AUTH_EXCL="Kerberos 4"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="kerb4.o"
+else
+    AUTH_OBJS="$AUTH_OBJS kerb4.o"
+fi
+
 fi
 
 if test "$with_kerb5" = "yes"; then
@@ -19621,11 +19735,26 @@ fi
 #define HAVE_KERB5 1
 _ACEOF
 
-	if test X"$AUTH_OBJS" = X""; then
-	    AUTH_OBJS="kerb5.o"
-	else
-	    AUTH_OBJS="${AUTH_OBJS} kerb5.o"
-	fi
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix Kerberos 5 with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix Kerberos 5 with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix Kerberos 5 with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix Kerberos 5 with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test X"" != X""; then
+    AUTH_OBJS="kerb5.o"
+    AUTH_EXCL="Kerberos 5"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="kerb5.o"
+else
+    AUTH_OBJS="$AUTH_OBJS kerb5.o"
+fi
+
 	CPPFLAGS="$CPPFLAGS `krb5-config --cflags`"
 	SUDO_LIBS="$SUDO_LIBS `krb5-config --libs`"
 				echo "$as_me:$LINENO: checking whether we are using Heimdal" >&5
@@ -19869,11 +19998,26 @@ echo "${ECHO_T}no" >&6
 
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-    if test X"$AUTH_OBJS" = X""; then
-	AUTH_OBJS="kerb5.o"
-    else
-	AUTH_OBJS="${AUTH_OBJS} kerb5.o"
-    fi
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix Kerberos 5 with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix Kerberos 5 with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix Kerberos 5 with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix Kerberos 5 with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test X"" != X""; then
+    AUTH_OBJS="kerb5.o"
+    AUTH_EXCL="Kerberos 5"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="kerb5.o"
+else
+    AUTH_OBJS="$AUTH_OBJS kerb5.o"
+fi
+
     _LIBS="$LIBS"
     LIBS="${LIBS} ${SUDO_LIBS}"
 
@@ -19996,13 +20140,26 @@ echo "$as_me: using AIX general authentication" >&6;}
 #define HAVE_AIXAUTH 1
 _ACEOF
 
-    if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-	_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-	{ { echo "$as_me:$LINENO: error: \"cannot mix AIX general authentication with other authentication methods (such as $_AUTH)\"" >&5
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix AIX general authentication with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix AIX general authentication with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"true" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix AIX general authentication with other authentication methods (such as $_AUTH)\"" >&5
 echo "$as_me: error: \"cannot mix AIX general authentication with other authentication methods (such as $_AUTH)\"" >&2;}
    { (exit 1); exit 1; }; }
-    fi
+fi
+if test X"true" != X""; then
     AUTH_OBJS="aix_auth.o"
+    AUTH_EXCL="AIX general authentication"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="aix_auth.o"
+else
+    AUTH_OBJS="$AUTH_OBJS aix_auth.o"
+fi
+
     SUDO_LIBS="${SUDO_LIBS} -ls"
 fi
 
@@ -20229,13 +20386,26 @@ done
 #define HAVE_PAM 1
 _ACEOF
 
-	if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-	    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-	    { { echo "$as_me:$LINENO: error: \"cannot mix PAM with other authentication methods (such as $_AUTH)\"" >&5
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix PAM with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix PAM with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"true" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix PAM with other authentication methods (such as $_AUTH)\"" >&5
 echo "$as_me: error: \"cannot mix PAM with other authentication methods (such as $_AUTH)\"" >&2;}
    { (exit 1); exit 1; }; }
-	fi
-	AUTH_OBJS="pam.o"
+fi
+if test X"true" != X""; then
+    AUTH_OBJS="pam.o"
+    AUTH_EXCL="PAM"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="pam.o"
+else
+    AUTH_OBJS="$AUTH_OBJS pam.o"
+fi
+
 	CHECKSHADOW=false
     fi
 fi
@@ -21060,7 +21230,26 @@ _ACEOF
 fi
 done
 
-    AUTH_OBJS="${AUTH_OBJS} secureware.o"
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix SecureWare with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix SecureWare with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix SecureWare with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix SecureWare with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test X"" != X""; then
+    AUTH_OBJS="secureware.o"
+    AUTH_EXCL="SecureWare"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="secureware.o"
+else
+    AUTH_OBJS="$AUTH_OBJS secureware.o"
+fi
+
 fi
 
 if test "$with_AFS" = "yes"; then
@@ -21565,12 +21754,6 @@ fi
 fi
 
 if test ${with_SecurID-'no'} != "no"; then
-    if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-	_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-	{ { echo "$as_me:$LINENO: error: \"cannot mix SecurID with other authentication methods (such as $_AUTH)\"" >&5
-echo "$as_me: error: \"cannot mix SecurID with other authentication methods (such as $_AUTH)\"" >&2;}
-   { (exit 1); exit 1; }; }
-    fi
     if test "$with_SecurID" != "yes"; then
 	:
     elif test -d /usr/ace/examples; then
@@ -21662,7 +21845,26 @@ echo "$as_me:$LINENO: result: $ac_cv_lib_aceclnt_SD_Init_______lpthread_______" 
 echo "${ECHO_T}$ac_cv_lib_aceclnt_SD_Init_______lpthread_______" >&6
 if test $ac_cv_lib_aceclnt_SD_Init_______lpthread_______ = yes; then
 
-	    AUTH_OBJS="securid5.o"
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix SecurID 5 with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix SecurID 5 with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"true" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix SecurID 5 with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix SecurID 5 with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test X"true" != X""; then
+    AUTH_OBJS="securid5.o"
+    AUTH_EXCL="SecurID 5"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="securid5.o"
+else
+    AUTH_OBJS="$AUTH_OBJS securid5.o"
+fi
+
 	    SUDO_LIBS="${SUDO_LIBS} -laceclnt -lpthread"
 
 
@@ -21679,7 +21881,26 @@ if test $ac_cv_lib_aceclnt_SD_Init_______lpthread_______ = yes; then
 
 else
 
-	    AUTH_OBJS="securid.o"
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix SecurID with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix SecurID with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"true" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix SecurID with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix SecurID with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test X"true" != X""; then
+    AUTH_OBJS="securid.o"
+    AUTH_EXCL="SecurID"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="securid.o"
+else
+    AUTH_OBJS="$AUTH_OBJS securid.o"
+fi
+
 	    SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"
 
 fi

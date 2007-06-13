@@ -267,11 +267,7 @@ AC_ARG_WITH(skey, [  --with-skey[=DIR]         enable S/Key support ],
     		AC_DEFINE(HAVE_SKEY)
 		AC_MSG_CHECKING(whether to try S/Key authentication)
 		AC_MSG_RESULT(yes)
-		if test X"$AUTH_OBJS" = X""; then
-		    AUTH_OBJS="rfc1938.o"
-		else
-		    AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
-		fi
+		SUDO_ADD_AUTH([S/Key], [rfc1938.o])
 		;;
 esac])
 
@@ -285,11 +281,7 @@ AC_ARG_WITH(opie, [  --with-opie[=DIR]         enable OPIE support ],
 		AC_DEFINE(HAVE_OPIE)
 		AC_MSG_CHECKING(whether to try NRL OPIE authentication)
 		AC_MSG_RESULT(yes)
-		if test X"$AUTH_OBJS" = X""; then
-		    AUTH_OBJS="rfc1938.o"
-		else
-		    AUTH_OBJS="${AUTH_OBJS} rfc1938.o"
-		fi
+		SUDO_ADD_AUTH([NRL OPIE], [rfc1938.o])
 		;;
 esac])
 
@@ -322,11 +314,7 @@ AC_ARG_WITH(fwtk, [  --with-fwtk[[=DIR]]       enable FWTK AuthSRV support],
     *)		AC_DEFINE(HAVE_FWTK)
 		AC_MSG_CHECKING(whether to use FWTK AuthSRV for authentication)
 		AC_MSG_RESULT(yes)
-		if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-		    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-		    AC_MSG_ERROR(["cannot mix fwtk with other authentication methods (such as $_AUTH)"])
-		fi
-		AUTH_OBJS="fwtk.o"
+		SUDO_ADD_AUTH([FWTK AuthSRV], [fwtk.o], [true])
 		;;
 esac])
 
@@ -365,11 +353,7 @@ AC_ARG_WITH(AFS, [  --with-AFS              enable AFS support],
     yes)	AC_DEFINE(HAVE_AFS)
 		AC_MSG_CHECKING(whether to try AFS (kerberos) authentication)
 		AC_MSG_RESULT(yes)
-		if test X"$AUTH_OBJS" = X""; then
-		    AUTH_OBJS="afs.o"
-		else
-		    AUTH_OBJS="${AUTH_OBJS} afs.o"
-		fi
+		SUDO_ADD_AUTH([AFS], [afs.o])
 		;;
     no)		;;
     *)		AC_MSG_ERROR(["--with-AFS does not take an argument."])
@@ -381,11 +365,7 @@ AC_ARG_WITH(DCE, [  --with-DCE              enable DCE support],
     yes)	AC_DEFINE(HAVE_DCE)
 		AC_MSG_CHECKING(whether to try DCE (kerberos) authentication)
 		AC_MSG_RESULT(yes)
-		if test X"$AUTH_OBJS" = X""; then
-		    AUTH_OBJS="dce.o"
-		else
-		    AUTH_OBJS="${AUTH_OBJS} dce.o"
-		fi
+		SUDO_ADD_AUTH([DCE], [dce.o])
 		;;
     no)		;;
     *)		AC_MSG_ERROR(["--with-DCE does not take an argument."])
@@ -1344,11 +1324,7 @@ case "$host" in
 		if test "$CHECKSIA" = "true"; then
 		    AC_CHECK_FUNCS(sia_ses_init, [found=true], [found=false])
 		    if test "$found" = "true"; then
-			if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-			    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-			    AC_MSG_ERROR(["cannot mix SIA with other authentication methods (such as $_AUTH)"])
-			fi
-			AUTH_OBJS="sia.o"
+			SUDO_ADD_AUTH([SIA], [sia.o], [true])
 			CHECKSHADOW=false
 		    fi
 		fi
@@ -1639,12 +1615,8 @@ if test ${with_logincap-'no'} != "no"; then
     AC_CHECK_HEADERS(login_cap.h)
 fi
 if test "$with_bsdauth" = "yes"; then
-    AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H) [
-	if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-	    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-	    AC_MSG_ERROR(["cannot mix BSD authentication with other authentication methods (such as $_AUTH)"])
-	fi
-	AUTH_OBJS=bsdauth.o], -)
+    AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H)
+	[SUDO_ADD_AUTH([BSD authentication], [bsdauth.o], [true])], -)
 fi
 dnl
 dnl typedef checks
@@ -1847,11 +1819,7 @@ if test -n "$with_kerb4"; then
     ], [$K4LIBS])
     LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} $K4LIBS"
-    if test X"$AUTH_OBJS" = X""; then
-	AUTH_OBJS="kerb4.o"
-    else
-	AUTH_OBJS="${AUTH_OBJS} kerb4.o"
-    fi
+    SUDO_ADD_AUTH([Kerberos 4], [kerb4.o])
 fi
 
 dnl
@@ -1862,11 +1830,7 @@ if test "$with_kerb5" = "yes"; then
     AC_CHECK_PROG(KRB5CONFIG, krb5-config, yes, "")
     if test -n "$KRB5CONFIG"; then
 	AC_DEFINE(HAVE_KERB5)
-	if test X"$AUTH_OBJS" = X""; then
-	    AUTH_OBJS="kerb5.o"
-	else
-	    AUTH_OBJS="${AUTH_OBJS} kerb5.o"
-	fi
+	SUDO_ADD_AUTH([Kerberos 5], [kerb5.o])
 	CPPFLAGS="$CPPFLAGS `krb5-config --cflags`"
 	SUDO_LIBS="$SUDO_LIBS `krb5-config --libs`"
 	dnl
@@ -1918,11 +1882,7 @@ if test -n "$with_kerb5" -a -z "$KRB5CONFIG"; then
 	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
 	
     ])
-    if test X"$AUTH_OBJS" = X""; then
-	AUTH_OBJS="kerb5.o"
-    else
-	AUTH_OBJS="${AUTH_OBJS} kerb5.o"
-    fi
+    SUDO_ADD_AUTH([Kerberos 5], [kerb5.o])
     _LIBS="$LIBS"
     LIBS="${LIBS} ${SUDO_LIBS}"
     AC_CHECK_FUNCS(krb5_verify_user krb5_init_secure_context)
@@ -1945,11 +1905,7 @@ dnl
 if test "$with_aixauth" = "yes"; then
     AC_MSG_NOTICE([using AIX general authentication])
     AC_DEFINE(HAVE_AIXAUTH)
-    if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-	_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-	AC_MSG_ERROR(["cannot mix AIX general authentication with other authentication methods (such as $_AUTH)"])
-    fi
-    AUTH_OBJS="aix_auth.o"
+    SUDO_ADD_AUTH([AIX general authentication], [aix_auth.o], [true])
     SUDO_LIBS="${SUDO_LIBS} -ls"
 fi
 
@@ -1971,11 +1927,7 @@ if test ${with_pam-'no'} != "no"; then
     AC_CHECK_HEADERS([security/pam_appl.h] [pam/pam_appl.h], [with_pam=yes; break])
     if test "$with_pam" = "yes"; then
 	AC_DEFINE(HAVE_PAM)
-	if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-	    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-	    AC_MSG_ERROR(["cannot mix PAM with other authentication methods (such as $_AUTH)"])
-	fi
-	AUTH_OBJS="pam.o"
+	SUDO_ADD_AUTH([PAM], [pam.o], [true])
 	CHECKSHADOW=false
     fi
 fi
@@ -2017,7 +1969,7 @@ if test "$CHECKSHADOW" = "true"; then
 fi
 if test -n "$SECUREWARE"; then
     AC_CHECK_FUNCS(bigcrypt set_auth_parameters initprivs)
-    AUTH_OBJS="${AUTH_OBJS} secureware.o"
+    SUDO_ADD_AUTH([SecureWare], [secureware.o])
 fi
 
 dnl
@@ -2143,10 +2095,6 @@ dnl
 dnl extra SecurID lib + includes
 dnl
 if test ${with_SecurID-'no'} != "no"; then
-    if test X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-	_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-	AC_MSG_ERROR(["cannot mix SecurID with other authentication methods (such as $_AUTH)"])
-    fi
     if test "$with_SecurID" != "yes"; then
 	:
     elif test -d /usr/ace/examples; then
@@ -2162,13 +2110,13 @@ if test ${with_SecurID-'no'} != "no"; then
     #
     AC_CHECK_LIB(aceclnt, SD_Init,
 	[
-	    AUTH_OBJS="securid5.o"
+	    SUDO_ADD_AUTH([SecurID 5], [securid5.o], true)
 	    SUDO_LIBS="${SUDO_LIBS} -laceclnt -lpthread"
 	]
 	[
 	    SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_SecurID}])
 	], [
-	    AUTH_OBJS="securid.o"
+	    SUDO_ADD_AUTH([SecurID], [securid.o], true)
 	    SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"
 	],
 	[
