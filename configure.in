@@ -2354,14 +2354,16 @@ AH_TOP([#ifndef _SUDO_CONFIG_H
 
 AH_BOTTOM([/*
  * Macros to pull sec and nsec parts of mtime from struct stat.
+ * We need to be able to convert between timeval and timespec
+ * so the last 3 digits of tv_nsec are not significant.
  */
 #ifdef HAVE_ST_MTIM
 # define mtim_getsec(_x)	((_x).st_mtim.tv_sec)
-# define mtim_getnsec(_x)	((_x).st_mtim.tv_nsec)
+# define mtim_getnsec(_x)	(((_x).st_mtim.tv_nsec / 1000) * 1000)
 #else
 # ifdef HAVE_ST_MTIMESPEC
 #  define mtim_getsec(_x)	((_x).st_mtimespec.tv_sec)
-#  define mtim_getnsec(_x)	((_x).st_mtimespec.tv_nsec)
+#  define mtim_getnsec(_x)	(((_x).st_mtimespec.tv_nsec / 1000) * 1000)
 # else
 #  define mtim_getsec(_x)	((_x).st_mtime)
 #  define mtim_getnsec(_x)	(0)
