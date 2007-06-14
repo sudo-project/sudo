@@ -1684,7 +1684,7 @@ if test "$ac_cv_func_fnmatch_works" = no; then
     AC_LIBOBJ(fnmatch)
 fi
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(strerror strcasecmp sigaction strlcpy strlcat)
+AC_REPLACE_FUNCS(memrchr strerror strcasecmp sigaction strlcpy strlcat)
 AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
     AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [],
 	[ #include <limits.h>
