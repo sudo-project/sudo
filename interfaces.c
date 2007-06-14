@@ -65,6 +65,7 @@ struct rtentry;
 # include "emul/err.h"
 #endif /* HAVE_ERR_H */
 #include <netdb.h>
+#include <errno.h>
 #ifdef _ISC
 # include <sys/stream.h>
 # include <sys/sioctl.h>
@@ -187,12 +188,12 @@ load_interfaces()
 	ifconf->ifc_len = len - sizeof(struct ifconf);
 	ifconf->ifc_buf = (caddr_t) (ifconf_buf + sizeof(struct ifconf));
 
-	/* Networking may not be installed in kernel... */
 #ifdef _ISC
 	STRSET(SIOCGIFCONF, (caddr_t) ifconf, len);
 	if (ioctl(sock, I_STR, (caddr_t) &strioctl) < 0) {
 #else
-	if (ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0) {
+	/* Note that some kernels return EINVAL if the buffer is too small */
+	if (ioctl(sock, SIOCGIFCONF, (caddr_t) ifconf) < 0 && errno != EINVAL) {
 #endif /* _ISC */
 	    efree(ifconf_buf);
 	    (void) close(sock);
