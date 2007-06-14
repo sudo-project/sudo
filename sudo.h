@@ -207,6 +207,12 @@ size_t strlcat		__P((char *, const char *, size_t));
 #ifndef HAVE_STRLCPY
 size_t strlcpy		__P((char *, const char *, size_t));
 #endif
+#ifndef HAVE_MEMRCHR
+VOID *memrchr		__P((const VOID *, int, size_t));
+#endif
+#ifndef HAVE_MKSTEMP
+int mkstemp		__P((char *));
+#endif
 char *sudo_goodpath	__P((const char *, struct stat *));
 char *tgetpass		__P((const char *, int, int));
 int find_path		__P((char *, char **, struct stat *, char *));

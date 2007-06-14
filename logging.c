@@ -128,46 +128,45 @@ do_syslog(pri, msg)
     int pri;
     char *msg;
 {
-    size_t count;
-    char *p;
-    char *tmp;
-    char save;
+    size_t len, maxlen;
+    char *p, *tmp, save;
+    const char *fmt;
+    const char fmt_first[] = "%8s : %s";
+    const char fmt_contd[] = "%8s : (command continued) %s";
 
     /*
      * Log the full line, breaking into multiple syslog(3) calls if necessary
      */
-    for (p = msg, count = 0; *p && count < strlen(msg) / MAXSYSLOGLEN + 1;
-	count++) {
-	if (strlen(p) > MAXSYSLOGLEN) {
+    fmt = fmt_first;
+    maxlen = MAXSYSLOGLEN - (sizeof(fmt_first) - 6 + strlen(user_name));
+    for (p = msg; *p != '\0'; ) {
+	len = strlen(p);
+	if (len > maxlen) {
 	    /*
 	     * Break up the line into what will fit on one syslog(3) line
-	     * Try to break on a word boundary if possible.
+	     * Try to avoid breaking words into several lines if possible.
 	     */
-	    for (tmp = p + MAXSYSLOGLEN; tmp > p && *tmp != ' '; tmp--)
-		;
-	    if (tmp <= p)
-		tmp = p + MAXSYSLOGLEN;
+	    tmp = memrchr(p, ' ', maxlen);
+	    if (tmp == NULL)
+		tmp = p + maxlen;
 
 	    /* NULL terminate line, but save the char to restore later */
 	    save = *tmp;
 	    *tmp = '\0';
 
-	    if (count == 0)
-		mysyslog(pri, "%8s : %s", user_name, p);
-	    else
-		mysyslog(pri, "%8s : (command continued) %s", user_name, p);
+	    mysyslog(pri, fmt, user_name, p);
 
 	    *tmp = save;			/* restore saved character */
 
-	    /* Eliminate leading whitespace */
-	    for (p = tmp; *p != ' ' && *p !='\0'; p++)
+	    /* Advance p and eliminate leading whitespace */
+	    for (p = tmp; *p == ' '; p++)
 		;
 	} else {
-	    if (count == 0)
-		mysyslog(pri, "%8s : %s", user_name, p);
-	    else
-		mysyslog(pri, "%8s : (command continued) %s", user_name, p);
+	    mysyslog(pri, fmt, user_name, p);
+	    p += len;
 	}
+	fmt = fmt_contd;
+	maxlen = MAXSYSLOGLEN - (sizeof(fmt_contd) - 6 + strlen(user_name));
     }
 }
 
