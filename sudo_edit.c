@@ -48,6 +48,7 @@
 #endif /* HAVE_ERR_H */
 #include <ctype.h>
 #include <pwd.h>
+#include <grp.h>
 #include <signal.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -147,9 +148,6 @@ int sudo_edit(argc, argv)
 	tf[i].omtim.tv_sec = mtim_getsec(sb);
 	tf[i].omtim.tv_nsec = mtim_getnsec(sb);
 	tf[i].osize = sb.st_size;
-#if 1
-	warnx("sec: %d, nsec: %d, size: %d", tf[i].omtim.tv_sec, tf[i].omtim.tv_nsec, (int)tf[i].osize);
-#endif
 	if ((cp = strrchr(tf[i].ofile, '/')) != NULL)
 	    cp++;
 	else
@@ -188,10 +186,6 @@ int sudo_edit(argc, argv)
 	    }
 	    /* XXX - else error? */
 	}
-#if 1
-	fstat(tfd, &sb);
-	warnx("sec: %d, nsec: %d, size: %d", sb.st_mtimespec.tv_sec, sb.st_mtimespec.tv_nsec, (int)sb.st_size);
-#endif
 #endif
 	close(tfd);
     }
