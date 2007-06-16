@@ -13,6 +13,16 @@ o Upgrading from a version prior to 1.7
     list in sudoers.  The old behavior can be restored by negating the
     "env_reset" option in sudoers.
 
+o Upgrading from a version prior to 1.6.9:
+
+    Prior to sudo 1.6.9, if env_reset was specified in sudoers the
+    TERM and PATH environment variables would always be preserved
+    even if env_keep was redefined.  That is no longer the case in
+    sudo 1.6.9 and higher.  Consequently, if env_reset is set and
+    env_keep is set with "=" and not simply appended to (i.e. using
+    "+=") PATH and TERM must be explicitly included in the list
+    of environment variables to keep.
+
 o Upgrading from a version prior to 1.6.8:
 
     Prior to sudo 1.6.8, if /var/run did not exist, sudo would put
