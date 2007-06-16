@@ -205,8 +205,6 @@ main(argc, argv)
      */
     if ((yyin = open_sudoers(sudoers_path, NULL)) == NULL)
 	error(1, "%s", sudoers_path);
-    if (!lock_file(fileno(yyin), SUDO_TLOCK))
-	errorx(1, "%s busy, try again later", sudoers_path);
     init_parser(sudoers_path, 0);
     yyparse();
     (void) update_defaults(SKIP_CMND);
@@ -700,6 +698,10 @@ check_syntax(sudoers_path, quiet)
     return(parse_error == TRUE);
 }
 
+/*
+ * Used to open (and lock) the initial sudoers file and to also open
+ * any subsequent files #included via a callback from the parser.
+ */
 FILE *
 open_sudoers(path, keepopen)
     const char *path;
