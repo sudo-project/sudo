@@ -440,7 +440,7 @@ sudo_ldap_build_pass1()
   ncat(&b,&sz,")");
 
   /* Append primary group */
-  grp=getgrgid(pw->pw_gid);
+  grp=getgrgid(user_gid);
   if (grp!=NULL){
     ncat(&b,&sz,"(sudoUser=%");
     ncat(&b,&sz,grp->gr_name);
