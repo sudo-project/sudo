@@ -112,3 +112,7 @@
 #ifndef _PATH_LDAP_CONF
 #define	_PATH_LDAP_CONF	"/etc/ldap.conf"
 #endif /* _PATH_LDAP_CONF */
+
+#ifndef _PATH_LDAP_SECRET
+#define _PATH_LDAP_SECRET	"/etc/ldap.secret"
+#endif /* _PATH_LDAP_SECRET */
