@@ -92,7 +92,7 @@ struct sudoersfile {
 /*
  * Function prototypes
  */
-static void usage		__P((void));
+static void usage		__P((void)) __attribute__((__noreturn__));
 static char whatnow		__P((void));
 static RETSIGTYPE Exit		__P((int));
 static void edit_sudoers	__P((struct sudoersfile *, char *, char *, int));
