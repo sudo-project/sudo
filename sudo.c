@@ -219,6 +219,7 @@ main(argc, argv)
 		(void) printf("Sudo version %s\n", version);
 		if (getuid() == 0) {
 		    putchar('\n');
+		    (void) printf("Sudoers path: %s\n", _PATH_SUDOERS);
 		    dump_auth_methods();
 		    dump_defaults();
 		    dump_interfaces();
@@ -1080,7 +1081,7 @@ static void
 usage_excl(exit_val)
     int exit_val;
 {
-    warnx("Only one of the -e, -h, -k, -K, -l, -s, -v or -V options may be used");
+    warnx("Only one of the -e, -h, i, -k, -K, -l, -s, -v or -V options may be used");
     usage(exit_val);
 }
 
