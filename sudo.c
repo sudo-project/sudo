@@ -900,7 +900,8 @@ check_sudoers()
 	log_error(0, "%s is zero length", _PATH_SUDOERS);
     else if ((statbuf.st_mode & 07777) != SUDOERS_MODE)
 	log_error(0, "%s is mode 0%o, should be 0%o", _PATH_SUDOERS,
-	    (statbuf.st_mode & 07777), SUDOERS_MODE);
+	    (unsigned int) (statbuf.st_mode & 07777),
+	    (unsigned int) SUDOERS_MODE);
     else if (statbuf.st_uid != SUDOERS_UID)
 	log_error(0, "%s is owned by uid %lu, should be %lu", _PATH_SUDOERS,
 	    (unsigned long) statbuf.st_uid, (unsigned long) SUDOERS_UID);
