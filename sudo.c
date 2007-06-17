@@ -353,7 +353,7 @@ main(argc, argv)
 
     /* Build a new environment that avoids any nasty bits if we have a cmnd. */
     if (ISSET(sudo_mode, MODE_RUN))
-	environ = rebuild_env(environ, sudo_mode, def_noexec);
+	environ = rebuild_env(environ, sudo_mode, ISSET(validated, FLAG_NOEXEC));
 
     if (ISSET(validated, VALIDATE_OK)) {
 	/* Finally tell the user if the command did not exist. */
@@ -933,6 +933,7 @@ check_sudoers()
 static void
 initial_setup()
 {
+    int miss[3], devnull = -1;
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
     struct rlimit rl;
 
@@ -945,6 +946,23 @@ initial_setup()
     (void) setrlimit(RLIMIT_CORE, &rl);
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
 
+    /*
+     * stdin, stdout and stderr must be open; set them to /dev/null
+     * if they are closed and close all other fds.
+     */
+    miss[STDIN_FILENO] = fcntl(STDIN_FILENO, F_GETFL, 0) == -1;
+    miss[STDOUT_FILENO] = fcntl(STDOUT_FILENO, F_GETFL, 0) == -1;
+    miss[STDERR_FILENO] = fcntl(STDERR_FILENO, F_GETFL, 0) == -1;
+    if (miss[STDIN_FILENO] || miss[STDOUT_FILENO] || miss[STDERR_FILENO]) {
+	if ((devnull = open(_PATH_DEVNULL, O_RDWR, 0644)) != -1) {
+	    if (miss[STDIN_FILENO])
+		(void) dup2(devnull, STDIN_FILENO);
+	    if (miss[STDOUT_FILENO])
+		(void) dup2(devnull, STDOUT_FILENO);
+	    if (miss[STDERR_FILENO])
+		(void) dup2(devnull, STDERR_FILENO);
+	}
+    }
     closefrom(STDERR_FILENO + 1);
 }
 
