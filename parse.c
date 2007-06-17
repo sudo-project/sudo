@@ -299,8 +299,7 @@ command_matches(sudoers_cmnd, sudoers_args)
 		continue;
 	    if (user_stat->st_dev == sudoers_stat.st_dev &&
 		user_stat->st_ino == sudoers_stat.st_ino) {
-		if (safe_cmnd)
-		    free(safe_cmnd);
+		efree(safe_cmnd);
 		safe_cmnd = estrdup(*ap);
 		break;
 	    }
