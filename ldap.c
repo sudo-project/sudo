@@ -983,10 +983,12 @@ sudo_ldap_check(pwflag)
          *
          */
 	ret = VALIDATE_OK;
-	if (pwflag != -1) {
+	if (pwflag == -1) {
+	    SET(ret, FLAG_NOPASS);		/* -k or -K */
+	} else {
 	    switch (sudo_defs_table[pwflag].sd_un.tuple) {
 	    case never:
-		def_authenticate = FALSE;
+		SET(ret, FLAG_NOPASS);
 		break;
 	    case always:
 		if (def_authenticate)
@@ -997,7 +999,13 @@ sudo_ldap_check(pwflag)
 	    }
 	}
     }
-    if (!ISSET(ret, VALIDATE_OK)) {
+    if (ISSET(ret, VALIDATE_OK)) {
+	/* we have a match, should we check the password? */
+	if (!def_authenticate)
+	    SET(ret, FLAG_NOPASS);
+	if (def_noexec)
+	    SET(ret, FLAG_NOEXEC);
+    } else {
 	/* we do not have a match */
 	ret = VALIDATE_NOT_OK;
 	if (pwflag)
