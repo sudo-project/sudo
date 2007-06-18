@@ -436,6 +436,7 @@ send_mail(line)
 	"HOME=/",
 	"PATH=/usr/bin:/bin",
 	"LOGNAME=root",
+	"USERNAME=root",
 	"USER=root",
 	NULL
     };
