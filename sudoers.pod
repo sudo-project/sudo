@@ -421,7 +421,7 @@ to the name of the target user (usually root unless the B<-u> flag is given).
 However, since some programs (including the RCS revision control system)
 use C<LOGNAME> to determine the real identity of the user, it may be desirable
 to change this behavior.  This can be done by negating the set_logname option.
-Note that if the I<env_reset> option has been enabled, entries in
+Note that if the I<env_reset> option has not been disabled, entries in
 the I<env_keep> list will override the value of I<set_logname>.
 
 =item stay_setuid
@@ -446,7 +446,7 @@ are set to default values (possibly modified by the value of the
 I<set_logname> option).  If the I<secure_path> option is set, its
 value will be used for the C<PATH> environment variable.  Other
 variables may be preserved via the I<env_keep> option.
-This flag is I<off> by default.
+This flag is I<on> by default.
 
 =item use_loginclass
 
