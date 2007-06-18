@@ -896,7 +896,7 @@ sudo_ldap_check(pwflag)
     LDAP *ld;
     LDAPMessage *entry = NULL, *result = NULL;	/* used for searches */
     char *filt;					/* used to parse attributes */
-    int rc, ret = VALIDATE_ERROR, do_netgr;	/* temp/final return values */
+    int rc, ret = FALSE, do_netgr;		/* temp/final return values */
     int ldap_user_matches = FALSE, ldap_host_matches = FALSE; /* flags */
 
     /* Open a connection to the LDAP server. */
