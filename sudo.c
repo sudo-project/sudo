@@ -163,7 +163,7 @@ main(argc, argv)
     extern char **environ;
 
 #ifdef HAVE_SETLOCALE
-    setlocale(LC_ALL, "C");
+    setlocale(LC_ALL, "");
 #endif
 
     Argv = argv;
