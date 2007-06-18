@@ -173,11 +173,12 @@ static const char *initial_badenv_table[] = {
  * Default table of variables to check for '%' and '/' characters.
  */
 static const char *initial_checkenv_table[] = {
-    "LC_*",
+    "COLORTERM",
     "LANG",
     "LANGUAGE",
+    "LC_*",
+    "LINGUAS",
     "TERM",
-    "COLORTERM",
     NULL
 };
 
@@ -185,10 +186,17 @@ static const char *initial_checkenv_table[] = {
  * Default table of variables to preserve in the environment.
  */
 static const char *initial_keepenv_table[] = {
-    "KRB5CCNAME",
+    "COLORS",
     "DISPLAY",
+    "HOSTNAME",
+    "KRB5CCNAME",
+    "LS_COLORS",
+    "MAIL",
     "PATH",
+    "PS1",
+    "PS2",
     "TZ",
+    "XAUTHORITY",
     NULL
 };
 
