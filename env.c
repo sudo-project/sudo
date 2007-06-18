@@ -181,14 +181,9 @@ static const char *initial_checkenv_table[] = {
  * Default table of variables to preserve in the environment.
  */
 static const char *initial_keepenv_table[] = {
-    "LC_*",
-    "LANG",
-    "LANGUAGE",
     "KRB5CCNAME",
     "DISPLAY",
     "PATH",
-    "TERM",
-    "COLORTERM",
     "TZ",
     NULL
 };
