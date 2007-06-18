@@ -181,6 +181,9 @@ static const char *initial_checkenv_table[] = {
  * Default table of variables to preserve in the environment.
  */
 static const char *initial_keepenv_table[] = {
+    "LC_*",
+    "LANG",
+    "LANGUAGE",
     "KRB5CCNAME",
     "DISPLAY",
     "PATH",
@@ -299,7 +302,7 @@ rebuild_env(envp, sudo_mode, noexec)
     didvar = 0;
     memset(&env, 0, sizeof(env));
     if (def_env_reset) {
-	int keepit;
+	int keepit = -1;
 
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = envp; *ep; ep++) {
@@ -311,7 +314,8 @@ rebuild_env(envp, sudo_mode, noexec)
 		    continue;
 	    }
 
-	    for (cur = def_env_keep; cur; cur = cur->next) {
+	    /* Check certain variables for '%' and '/' characters. */
+	    for (cur = def_env_check; cur; cur = cur->next) {
 		len = strlen(cur->value);
 		/* Deal with '*' wildcard */
 		if (cur->value[len - 1] == '*') {
@@ -321,8 +325,25 @@ rebuild_env(envp, sudo_mode, noexec)
 		    iswild = FALSE;
 		if (strncmp(cur->value, *ep, len) == 0 &&
 		    (iswild || (*ep)[len] == '=')) {
-		    keepit = TRUE;
+		    keepit = !strpbrk(*ep, "/%");
 		    break;
+		}
+	    }
+
+	    if (keepit == -1) {
+		for (cur = def_env_keep; cur; cur = cur->next) {
+		    len = strlen(cur->value);
+		    /* Deal with '*' wildcard */
+		    if (cur->value[len - 1] == '*') {
+			len--;
+			iswild = TRUE;
+		    } else
+			iswild = FALSE;
+		    if (strncmp(cur->value, *ep, len) == 0 &&
+			(iswild || (*ep)[len] == '=')) {
+			keepit = TRUE;
+			break;
+		    }
 		}
 	    }
 
