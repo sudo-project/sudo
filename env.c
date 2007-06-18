@@ -65,6 +65,8 @@ __unused static const char rcsid[] = "$Sudo$";
 #define DID_LOGNAME	0x0010
 #undef DID_USER
 #define DID_USER    	0x0020
+#undef DID_USERNAME
+#define DID_USERNAME   	0x0040
 #undef DID_MAX
 #define DID_MAX    	0x00ff
 
@@ -80,6 +82,8 @@ __unused static const char rcsid[] = "$Sudo$";
 #define KEPT_LOGNAME	0x1000
 #undef KEPT_USER
 #define KEPT_USER    	0x2000
+#undef KEPT_USERNAME
+#define KEPT_USERNAME	0x4000
 #undef KEPT_MAX
 #define KEPT_MAX    	0xff00
 
@@ -372,6 +376,8 @@ rebuild_env(envp, sudo_mode, noexec)
 		    case 'U':
 			if (strncmp(*ep, "USER=", 5) == 0)
 			    SET(didvar, DID_USER);
+			if (strncmp(*ep, "USERNAME=", 5) == 0)
+			    SET(didvar, DID_USERNAME);
 			break;
 		}
 		insert_env(*ep, &env, 0);
@@ -393,6 +399,8 @@ rebuild_env(envp, sudo_mode, noexec)
 		ISSET(didvar, DID_LOGNAME));
 	    insert_env(format_env("USER", runas_pw->pw_name, VNULL), &env,
 		ISSET(didvar, DID_USER));
+	    insert_env(format_env("USERNAME", runas_pw->pw_name, VNULL), &env,
+		ISSET(didvar, DID_USERNAME));
 	} else {
 	    if (!ISSET(didvar, DID_HOME))
 		insert_env(format_env("HOME", user_dir, VNULL), &env, 0);
@@ -403,6 +411,8 @@ rebuild_env(envp, sudo_mode, noexec)
 		insert_env(format_env("LOGNAME", user_name, VNULL), &env, 0);
 	    if (!ISSET(didvar, DID_USER))
 		insert_env(format_env("USER", user_name, VNULL), &env, 0);
+	    if (!ISSET(didvar, DID_USERNAME))
+		insert_env(format_env("USERNAME", user_name, VNULL), &env, 0);
 	}
     } else {
 	/*
@@ -466,12 +476,14 @@ rebuild_env(envp, sudo_mode, noexec)
 	SET(didvar, DID_PATH);
     }
 
-    /* Set $USER and $LOGNAME to target if "set_logname" is true. */
+    /* Set $USER, $LOGNAME and $USERNAME to target if "set_logname" is true. */
     if (def_set_logname && runas_pw->pw_name) {
 	if (!ISSET(didvar, KEPT_LOGNAME))
 	    insert_env(format_env("LOGNAME", runas_pw->pw_name, VNULL), &env, 1);
 	if (!ISSET(didvar, KEPT_USER))
 	    insert_env(format_env("USER", runas_pw->pw_name, VNULL), &env, 1);
+	if (!ISSET(didvar, KEPT_USERNAME))
+	    insert_env(format_env("USERNAME", runas_pw->pw_name, VNULL), &env, 1);
     }
 
     /* Set $HOME for `sudo -H'.  Only valid at PERM_FULL_RUNAS. */
