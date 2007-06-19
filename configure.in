@@ -1679,10 +1679,7 @@ AC_CHECK_FUNCS(waitpid wait3, [break])
 AC_CHECK_FUNCS(innetgr _innetgr, [AC_CHECK_FUNCS(getdomainname) [break]])
 AC_CHECK_FUNCS(lsearch, [], [AC_CHECK_LIB([compat], [lsearch], [AC_CHECK_HEADER([search.h], [AC_DEFINE(HAVE_LSEARCH)] [LIBS="${LIBS} -lcompat"], [AC_LIBOBJ(lsearch)], -)], [AC_LIBOBJ(lsearch)])])
 AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_FUNCS(futime) AC_LIBOBJ(utimes)])
-AC_FUNC_FNMATCH
-if test "$ac_cv_func_fnmatch_works" = no; then
-    AC_LIBOBJ(fnmatch)
-fi
+SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)])
 SUDO_FUNC_ISBLANK
 AC_REPLACE_FUNCS(memrchr strerror strcasecmp sigaction strlcpy strlcat)
 AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
