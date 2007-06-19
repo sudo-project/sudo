@@ -41,8 +41,8 @@ memrchr(s, c, n)
 	cp = (unsigned char *)s + n;
 	do {
 	    if (*(--cp) == (unsigned char)c)
-		return((void *)cp);
+		return((VOID *)cp);
 	} while (--n != 0);
     }
-    return(NULL);
+    return((VOID *)0);
 }
