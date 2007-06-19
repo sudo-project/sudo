@@ -237,6 +237,10 @@ Special features/options:
 	is supported.  If you don't have /usr/include/bsd_auth.h
 	then you cannot use this.
 
+  --with-project
+	Enable support for Solaris project resource limits.
+	This option is only available on Solaris 9 and above.
+
   --with-noexec[=PATH]
 	Enable support for the "noexec" functionality which prevents
 	a dynamically-linked program being run by sudo from executing
@@ -264,7 +268,7 @@ Special features/options:
 
   --disable-setreuid
 	Disable use of the setreuid() function for operating systems
-	where it is broken.  4.4BSD has setreuid() but it doesn't
+	where it is broken.  Mac OS X has setreuid() but it doesn't
 	really work.
 
   --disable-setresuid
