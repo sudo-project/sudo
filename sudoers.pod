@@ -596,7 +596,7 @@ option is set)
 
 =item C<%%>
 
-two consecutive C<%> characters are collaped into a single C<%> character
+two consecutive C<%> characters are collapsed into a single C<%> character
 
 =back
 
