@@ -21907,6 +21907,7 @@ if test -n "$with_fwtk"; then
 fi
 
 if test -n "$with_ldap"; then
+    _LDFLAGS="$LDFLAGS"
     if test "$with_ldap" != "yes"; then
 
     if test X"$with_rpath" = X"yes"; then
@@ -21918,7 +21919,6 @@ if test -n "$with_ldap"; then
 	blibpath_add="${blibpath_add}:${with_ldap}/lib"
     fi
 
-	_LDFLAGS="$LDFLAGS"
 
     if test X"$with_rpath" = X"yes"; then
 	LDFLAGS="${LDFLAGS} -L${with_ldap}/lib -R${with_ldap}/lib"
