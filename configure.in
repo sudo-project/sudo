@@ -2161,9 +2161,9 @@ dnl
 dnl extra lib and .o file for LDAP support
 dnl
 if test -n "$with_ldap"; then
+    _LDFLAGS="$LDFLAGS"
     if test "$with_ldap" != "yes"; then
 	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_ldap}/lib])
-	_LDFLAGS="$LDFLAGS"
 	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_ldap}/lib])
 	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
 	with_ldap=yes
