@@ -417,13 +417,15 @@ This flag is I<off> by default.
 
 =item set_logname
 
-Normally, B<sudo> will set the C<LOGNAME> and C<USER> environment variables
-to the name of the target user (usually root unless the B<-u> flag is given).
-However, since some programs (including the RCS revision control system)
-use C<LOGNAME> to determine the real identity of the user, it may be desirable
-to change this behavior.  This can be done by negating the set_logname option.
-Note that if the I<env_reset> option has not been disabled, entries in
-the I<env_keep> list will override the value of I<set_logname>.
+Normally, B<sudo> will set the C<LOGNAME>, C<USER> and C<USERNAME>
+environment variables to the name of the target user (usually root
+unless the B<-u> flag is given).  However, since some programs
+(including the RCS revision control system) use C<LOGNAME> to
+determine the real identity of the user, it may be desirable to
+change this behavior.  This can be done by negating the set_logname
+option.  Note that if the I<env_reset> option has not been disabled,
+entries in the I<env_keep> list will override the value of
+I<set_logname>.
 
 =item stay_setuid
 
@@ -439,14 +441,12 @@ function.
 =item env_reset
 
 If set, B<sudo> will reset the environment to only contain the
-following variables: C<DISPLAY>, C<HOME>, C<LOGNAME>, C<PATH>,
-C<SHELL>, C<TERM>, C<TZ> and C<USER> (in addition to the C<SUDO_*>
-variables).  Of these, only C<DISPLAY>, C<PATH>, C<TZ> and C<TERM>
-are copied unaltered from the old environment.  The other variables
-are set to default values (possibly modified by the value of the
-I<set_logname> option).  If the I<secure_path> option is set, its
-value will be used for the C<PATH> environment variable.  Other
-variables may be preserved via the I<env_keep> option.
+LOGNAME, SHELL, USER, USERNAME and the C<SUDO_*> variables.  Any
+variables in the caller's environment that match the C<env_keep>
+and C<env_check> lists are then added.  The default contents of the
+C<env_keep> and C<env_check> lists are displayed when B<sudo> is
+run by root with the I<-V> option.  If the I<secure_path> option
+is set, its -value will be used for the C<PATH> environment variable.
 This flag is I<on> by default.
 
 =item use_loginclass
@@ -623,7 +623,7 @@ Defaults to C<@badpri@>.
 
 A colon (':') separated list of editors allowed to be used with
 B<visudo>.  B<visudo> will choose the editor that matches the user's
-USER environment variable if possible, or the first editor in the
+EDITOR environment variable if possible, or the first editor in the
 list that exists and is executable.  The default is the path to vi
 on your system.
 
@@ -785,9 +785,12 @@ be used to guard against printf-style format vulnerabilities in
 poorly-written programs.  The argument may be a double-quoted,
 space-separated list or a single value without double-quotes.  The
 list can be replaced, added to, deleted from, or disabled by using
-the C<=>, C<+=>, C<-=>, and C<!> operators respectively.  The default
-list of environment variables to check is printed when B<sudo> is
-run by root with the I<-V> option.
+the C<=>, C<+=>, C<-=>, and C<!> operators respectively.  Regardless
+of whether the C<env_reset> option is enabled or disabled, variables
+specified by C<env_check> will be preserved in the environment if
+they pass the aforementioned check.  The default list of environment
+variables to check is displayed when B<sudo> is run by root with
+the I<-V> option.
 
 =item env_delete
 
@@ -796,7 +799,7 @@ The argument may be a double-quoted, space-separated list or a
 single value without double-quotes.  The list can be replaced, added
 to, deleted from, or disabled by using the C<=>, C<+=>, C<-=>, and
 C<!> operators respectively.  The default list of environment
-variables to remove is printed when B<sudo> is run by root with the
+variables to remove is displayed when B<sudo> is run by root with the
 I<-V> option.  Note that many operating systems will remove potentially
 dangerous variables from the environment of any setuid process (such
 as B<sudo>).
@@ -809,7 +812,8 @@ control over the environment B<sudo>-spawned processes will receive.
 The argument may be a double-quoted, space-separated list or a
 single value without double-quotes.  The list can be replaced, added
 to, deleted from, or disabled by using the C<=>, C<+=>, C<-=>, and
-C<!> operators respectively.  This list has no default members.
+C<!> operators respectively.  The default list of variables to keep
+is displayed when B<sudo> is run by root with the I<-V> option.
 
 =back
 
@@ -1090,13 +1094,13 @@ Here we override some of the compiled in default values.  We want
 B<sudo> to log via L<syslog(3)> using the I<auth> facility in all
 cases.  We don't want to subject the full time staff to the B<sudo>
 lecture, user B<millert> need not give a password, and we don't
-want to reset the C<LOGNAME> or C<USER> environment variables when
-running commands as root.  Additionally, on the machines in the
-I<SERVERS> C<Host_Alias>, we keep an additional local log file and
-make sure we log the year in each log line since the log entries
-will be kept around for several years.  Lastly, we disable shell
-escapes for the commands in the PAGERS C<Cmnd_Alias> (/usr/bin/more,
-/usr/bin/pg and /usr/bin/less).
+want to reset the C<LOGNAME>, C<USER> or C<USERNAME> environment
+variables when running commands as root.  Additionally, on the
+machines in the I<SERVERS> C<Host_Alias>, we keep an additional
+local log file and make sure we log the year in each log line since
+the log entries will be kept around for several years.  Lastly, we
+disable shell escapes for the commands in the PAGERS C<Cmnd_Alias>
+(/usr/bin/more, /usr/bin/pg and /usr/bin/less).
 
  # Override built-in defaults
  Defaults		syslog=auth
