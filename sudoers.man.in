@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "June 18, 2007" "1.6.9" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "June 19, 2007" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -679,7 +679,7 @@ option is set)
 .ie n .IP "\*(C`%%\*(C'" 8
 .el .IP "\f(CW\*(C`%%\*(C'\fR" 8
 .IX Item "%%"
-two consecutive \f(CW\*(C`%\*(C'\fR characters are collaped into a single \f(CW\*(C`%\*(C'\fR character
+two consecutive \f(CW\*(C`%\*(C'\fR characters are collapsed into a single \f(CW\*(C`%\*(C'\fR character
 .RE
 .RS 12
 .Sp

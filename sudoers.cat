@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.6.9                     June 18, 2007                         1
+1.6.9                     June 19, 2007                         1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                         2
+1.6.9                     June 19, 2007                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                         3
+1.6.9                     June 19, 2007                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                         4
+1.6.9                     June 19, 2007                         4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                         5
+1.6.9                     June 19, 2007                         5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                         6
+1.6.9                     June 19, 2007                         6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                         7
+1.6.9                     June 19, 2007                         7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                         8
+1.6.9                     June 19, 2007                         8
 
 
 
@@ -589,7 +589,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                         9
+1.6.9                     June 19, 2007                         9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                        10
+1.6.9                     June 19, 2007                        10
 
 
 
@@ -665,7 +665,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
                    %%      two consecutive % characters are col­
-                           laped into a single % character
+                           lapsed into a single % character
 
                    The default value is Password:.
 
@@ -721,7 +721,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                        11
+1.6.9                     June 19, 2007                        11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                        12
+1.6.9                     June 19, 2007                        12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                        13
+1.6.9                     June 19, 2007                        13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                        14
+1.6.9                     June 19, 2007                        14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                        15
+1.6.9                     June 19, 2007                        15
 
 
 
@@ -1051,7 +1051,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                        16
+1.6.9                     June 19, 2007                        16
 
 
 
@@ -1117,7 +1117,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.6.9                     June 18, 2007                        17
+1.6.9                     June 19, 2007                        17
 
 
 
@@ -1183,7 +1183,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                        18
+1.6.9                     June 19, 2007                        18
 
 
 
@@ -1249,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                        19
+1.6.9                     June 19, 2007                        19
 
 
 
@@ -1315,7 +1315,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9                     June 18, 2007                        20
+1.6.9                     June 19, 2007                        20
 
 
 
@@ -1381,7 +1381,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.6.9                     June 18, 2007                        21
+1.6.9                     June 19, 2007                        21
 
 
 
@@ -1447,7 +1447,7 @@ CCAAVVEEAATTSS
 
 
 
-1.6.9                     June 18, 2007                        22
+1.6.9                     June 19, 2007                        22
 
 
 
@@ -1513,6 +1513,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.6.9                     June 18, 2007                        23
+1.6.9                     June 19, 2007                        23
 
 
