@@ -197,6 +197,7 @@ static const char *initial_keepenv_table[] = {
     "PS2",
     "TZ",
     "XAUTHORITY",
+    "XAUTHORIZATION",
     NULL
 };
 
