@@ -1861,3 +1861,31 @@ Sudo 1.6.8p12 released.
 
 587) Use TCSADRAIN instead of TCSAFLUSH in tgetpass() since
      some OSes have issues with TCSAFLUSH.
+
+588) Use glob(3) instead of fnmatch(3) for matching pathnames
+     and stat() each result that matches the basename of the user's
+     command.  This makes "cd /usr/bin ; sudo ./blah" work when
+     sudoers allows /usr/bin/blah.
+
+589) Reworked the syslog long line splitting code based on changes
+     from Eygene Ryabinkin.
+
+590) Sudo can now with deal more than 32 network interfaces on
+     Solaris.
+
+591) Visudo will now honor command line arguments in the EDITOR or
+     VISUAL environment variables if env_editor is enabled.
+
+592) LDAP now honors rootbinddn, timelimit and bind_timelimit in
+     /etc/ldap.conf.
+
+593) For LDAP, do a sub tree search instead of a base search (one
+     level in the tree only) for sudo right objects.  This allows
+     system administrators to categorize the rights in a tree to
+     make them easier to manage.
+
+594) The env_reset option is now enabled by default.  Commands run
+     through sudo now receive a minimal environment with certain
+     variables passed through and/or checked.  The list of variables
+     allowed is configurable via the env_keep and env_check options
+     in sudoers.
