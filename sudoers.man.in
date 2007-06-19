@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "June 12, 2007" "1.6.9" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "June 18, 2007" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -553,13 +553,15 @@ in the passwd database as an argument to the \fB\-u\fR flag.
 This flag is \fIoff\fR by default.
 .IP "set_logname" 12
 .IX Item "set_logname"
-Normally, \fBsudo\fR will set the \f(CW\*(C`LOGNAME\*(C'\fR and \f(CW\*(C`USER\*(C'\fR environment variables
-to the name of the target user (usually root unless the \fB\-u\fR flag is given).
-However, since some programs (including the \s-1RCS\s0 revision control system)
-use \f(CW\*(C`LOGNAME\*(C'\fR to determine the real identity of the user, it may be desirable
-to change this behavior.  This can be done by negating the set_logname option.
-Note that if the \fIenv_reset\fR option has been enabled, entries in
-the \fIenv_keep\fR list will override the value of \fIset_logname\fR.
+Normally, \fBsudo\fR will set the \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR and \f(CW\*(C`USERNAME\*(C'\fR
+environment variables to the name of the target user (usually root
+unless the \fB\-u\fR flag is given).  However, since some programs
+(including the \s-1RCS\s0 revision control system) use \f(CW\*(C`LOGNAME\*(C'\fR to
+determine the real identity of the user, it may be desirable to
+change this behavior.  This can be done by negating the set_logname
+option.  Note that if the \fIenv_reset\fR option has not been disabled,
+entries in the \fIenv_keep\fR list will override the value of
+\&\fIset_logname\fR.
 .IP "stay_setuid" 12
 .IX Item "stay_setuid"
 Normally, when \fBsudo\fR executes a command the real and effective
@@ -573,15 +575,13 @@ function.
 .IP "env_reset" 12
 .IX Item "env_reset"
 If set, \fBsudo\fR will reset the environment to only contain the
-following variables: \f(CW\*(C`DISPLAY\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`PATH\*(C'\fR,
-\&\f(CW\*(C`SHELL\*(C'\fR, \f(CW\*(C`TERM\*(C'\fR, \f(CW\*(C`TZ\*(C'\fR and \f(CW\*(C`USER\*(C'\fR (in addition to the \f(CW\*(C`SUDO_*\*(C'\fR
-variables).  Of these, only \f(CW\*(C`DISPLAY\*(C'\fR, \f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`TZ\*(C'\fR and \f(CW\*(C`TERM\*(C'\fR
-are copied unaltered from the old environment.  The other variables
-are set to default values (possibly modified by the value of the
-\&\fIset_logname\fR option).  If the \fIsecure_path\fR option is set, its
-value will be used for the \f(CW\*(C`PATH\*(C'\fR environment variable.  Other
-variables may be preserved via the \fIenv_keep\fR option.
-This flag is \fIoff\fR by default.
+\&\s-1LOGNAME\s0, \s-1SHELL\s0, \s-1USER\s0, \s-1USERNAME\s0 and the \f(CW\*(C`SUDO_*\*(C'\fR variables.  Any
+variables in the caller's environment that match the \f(CW\*(C`env_keep\*(C'\fR
+and \f(CW\*(C`env_check\*(C'\fR lists are then added.  The default contents of the
+\&\f(CW\*(C`env_keep\*(C'\fR and \f(CW\*(C`env_check\*(C'\fR lists are displayed when \fBsudo\fR is
+run by root with the \fI\-V\fR option.  If \fBsudo\fR was compiled with
+the \f(CW\*(C`SECURE_PATH\*(C'\fR option, its value will be used for the \f(CW\*(C`PATH\*(C'\fR
+environment variable.  This flag is \fIon\fR by default.
 .IP "use_loginclass" 12
 .IX Item "use_loginclass"
 If set, \fBsudo\fR will apply the defaults specified for the target user's
@@ -703,7 +703,7 @@ Defaults to \f(CW\*(C`@badpri@\*(C'\fR.
 .IX Item "editor"
 A colon (':') separated list of editors allowed to be used with
 \&\fBvisudo\fR.  \fBvisudo\fR will choose the editor that matches the user's
-\&\s-1USER\s0 environment variable if possible, or the first editor in the
+\&\s-1EDITOR\s0 environment variable if possible, or the first editor in the
 list that exists and is executable.  The default is the path to vi
 on your system.
 .IP "noexec_file" 12
@@ -825,9 +825,12 @@ be used to guard against printf-style format vulnerabilities in
 poorly-written programs.  The argument may be a double\-quoted,
 space-separated list or a single value without double\-quotes.  The
 list can be replaced, added to, deleted from, or disabled by using
-the \f(CW\*(C`=\*(C'\fR, \f(CW\*(C`+=\*(C'\fR, \f(CW\*(C`\-=\*(C'\fR, and \f(CW\*(C`!\*(C'\fR operators respectively.  The default
-list of environment variables to check is printed when \fBsudo\fR is
-run by root with the \fI\-V\fR option.
+the \f(CW\*(C`=\*(C'\fR, \f(CW\*(C`+=\*(C'\fR, \f(CW\*(C`\-=\*(C'\fR, and \f(CW\*(C`!\*(C'\fR operators respectively.  Regardless
+of whether the \f(CW\*(C`env_reset\*(C'\fR option is enabled or disabled, variables
+specified by \f(CW\*(C`env_check\*(C'\fR will be preserved in the environment if
+they pass the aforementioned check.  The default list of environment
+variables to check is displayed when \fBsudo\fR is run by root with
+the \fI\-V\fR option.
 .IP "env_delete" 12
 .IX Item "env_delete"
 Environment variables to be removed from the user's environment.
@@ -835,7 +838,7 @@ The argument may be a double\-quoted, space-separated list or a
 single value without double\-quotes.  The list can be replaced, added
 to, deleted from, or disabled by using the \f(CW\*(C`=\*(C'\fR, \f(CW\*(C`+=\*(C'\fR, \f(CW\*(C`\-=\*(C'\fR, and
 \&\f(CW\*(C`!\*(C'\fR operators respectively.  The default list of environment
-variables to remove is printed when \fBsudo\fR is run by root with the
+variables to remove is displayed when \fBsudo\fR is run by root with the
 \&\fI\-V\fR option.  Note that many operating systems will remove potentially
 dangerous variables from the environment of any setuid process (such
 as \fBsudo\fR).
@@ -847,7 +850,8 @@ control over the environment \fBsudo\fR\-spawned processes will receive.
 The argument may be a double\-quoted, space-separated list or a
 single value without double\-quotes.  The list can be replaced, added
 to, deleted from, or disabled by using the \f(CW\*(C`=\*(C'\fR, \f(CW\*(C`+=\*(C'\fR, \f(CW\*(C`\-=\*(C'\fR, and
-\&\f(CW\*(C`!\*(C'\fR operators respectively.  This list has no default members.
+\&\f(CW\*(C`!\*(C'\fR operators respectively.  The default list of variables to keep
+is displayed when \fBsudo\fR is run by root with the \fI\-V\fR option.
 .PP
 When logging via \fIsyslog\fR\|(3), \fBsudo\fR accepts the following values
 for the syslog facility (the value of the \fBsyslog\fR Parameter):
@@ -1113,11 +1117,11 @@ Here we override some of the compiled in default values.  We want
 \&\fBsudo\fR to log via \fIsyslog\fR\|(3) using the \fIauth\fR facility in all
 cases.  We don't want to subject the full time staff to the \fBsudo\fR
 lecture, user \fBmillert\fR need not give a password, and we don't
-want to reset the \f(CW\*(C`LOGNAME\*(C'\fR or \f(CW\*(C`USER\*(C'\fR environment variables when
-running commands as root.  Additionally, on the machines in the
-\&\fI\s-1SERVERS\s0\fR \f(CW\*(C`Host_Alias\*(C'\fR, we keep an additional local log file and
-make sure we log the year in each log line since the log entries
-will be kept around for several years.
+want to reset the \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR or \f(CW\*(C`USERNAME\*(C'\fR environment
+variables when running commands as root.  Additionally, on the
+machines in the \fI\s-1SERVERS\s0\fR \f(CW\*(C`Host_Alias\*(C'\fR, we keep an additional
+local log file and make sure we log the year in each log line since
+the log entries will be kept around for several years.
 .PP
 .Vb 7
 \& # Override built-in defaults
