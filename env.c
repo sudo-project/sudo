@@ -315,11 +315,9 @@ rebuild_env(envp, sudo_mode, noexec)
     didvar = 0;
     memset(&env, 0, sizeof(env));
     if (def_env_reset) {
-	int keepit = -1;
-
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = envp; *ep; ep++) {
-	    keepit = FALSE;
+	    int keepit = -1;
 
 	    /* Skip variables with values beginning with () (bash functions) */
 	    if ((cp = strchr(*ep, '=')) != NULL) {
@@ -359,6 +357,8 @@ rebuild_env(envp, sudo_mode, noexec)
 		    }
 		}
 	    }
+	    if (keepit == -1)
+		keepit = FALSE;
 
 	    /* For SUDO_PS1 -> PS1 conversion. */
 	    if (strncmp(*ep, "SUDO_PS1=", 8) == 0)
