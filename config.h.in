@@ -263,6 +263,9 @@
 /* Define to 1 if you have the <paths.h> header file. */
 #undef HAVE_PATHS_H
 
+/* Define to 1 if you have the <project.h> header file. */
+#undef HAVE_PROJECT_H
+
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM
 

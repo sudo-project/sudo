@@ -386,6 +386,14 @@ AC_ARG_WITH(bsdauth, [  --with-bsdauth          enable BSD authentication suppor
 		;;
 esac])
 
+AC_ARG_WITH(project, [  --with-project          enable Solaris project support],
+[case $with_project in
+    yes|no)	;;
+    no)	;;
+    *)		AC_MSG_ERROR(["--with-project does not take an argument."])
+		;;
+esac])
+
 AC_MSG_CHECKING(whether to lecture users the first time they run sudo)
 AC_ARG_WITH(lecture, [  --without-lecture       don't print lecture for first-time sudoer],
 [case $with_lecture in
@@ -1617,6 +1625,10 @@ fi
 if test "$with_bsdauth" = "yes"; then
     AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H)
 	[SUDO_ADD_AUTH([BSD authentication], [bsdauth.o], [true])], -)
+fi
+if test ${with_project-'no'} != "no"; then
+    AC_CHECK_HEADER(project.h, AC_DEFINE(HAVE_PROJECT_H)
+	[SUDO_LIBS="${SUDO_LIBS} -lproject"], -)
 fi
 dnl
 dnl typedef checks
