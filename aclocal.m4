@@ -211,6 +211,20 @@ AC_DEFUN(SUDO_TYPE_INO_T,
 [SUDO_CHECK_TYPE(ino_t, unsigned int)])
 
 dnl
+dnl check for working fnmatch(3)
+dnl
+AC_DEFUN(SUDO_FUNC_FNMATCH,
+[AC_MSG_CHECKING([for working fnmatch with FNM_CASEFOLD])
+AC_CACHE_VAL(sudo_cv_func_fnmatch,
+[rm -f conftestdata; > conftestdata
+AC_TRY_RUN([#include <fnmatch.h>
+main() { exit(fnmatch("/*/bin/echo *", "/usr/bin/echo just a test", FNM_CASEFOLD)); }], [sudo_cv_func_fnmatch=yes], [sudo_cv_func_fnmatch=no],
+  [sudo_cv_func_fnmatch=no])
+rm -f core core.* *.core])
+AC_MSG_RESULT($sudo_cv_func_fnmatch)
+AS_IF([test $sudo_cv_func_fnmatch = yes], [$1], [$2])])
+
+dnl
 dnl check for isblank(3)
 dnl
 AC_DEFUN([SUDO_FUNC_ISBLANK],
