@@ -228,6 +228,10 @@ Special features/options:
 	unless the 'use_loginclass' option is defined in sudoers or the user
 	specifies a class on the command line.
 
+  --with-project
+	  Enable support for Solaris project resource limits.
+	  This option is only available on Solaris 9 and above.
+
   --with-bsdauth
 	Enable support for BSD authentication.  This is the default
 	for BSD/OS and OpenBSD systems that support it.
