@@ -60,6 +60,12 @@
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
 
+/* Define to 1 if you have the `authenticate' function. */
+#undef HAVE_AUTHENTICATE
+
+/* Define to 1 if you have the `auth_challenge' function. */
+#undef HAVE_AUTH_CHALLENGE
+
 /* Define to 1 if you have the `bigcrypt' function. */
 #undef HAVE_BIGCRYPT
 
@@ -275,6 +281,9 @@
 /* Define to 1 if you use SecurID for authentication. */
 #undef HAVE_SECURID
 
+/* Define to 1 if you have the <security/pam_appl.h> header file. */
+#undef HAVE_SECURITY_PAM_APPL_H
+
 /* Define to 1 if you have the `seteuid' function. */
 #undef HAVE_SETEUID
 
@@ -295,6 +304,9 @@
 
 /* Define to 1 if you use SIA authentication. */
 #undef HAVE_SIA
+
+/* Define to 1 if you have the `sia_ses_init' function. */
+#undef HAVE_SIA_SES_INIT
 
 /* Define to 1 if you have the `sigaction' function. */
 #undef HAVE_SIGACTION
@@ -444,6 +456,10 @@
 /* Define to 1 if you want a two line OTP (S/Key or OPIE) prompt. */
 #undef LONG_OTP_PROMPT
 
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
 /* The subject of the mail sent by sudo to the MAILTO user/address. */
 #undef MAILSUBJECT
 
@@ -554,6 +570,15 @@
 /* Define to avoid using the passwd/shadow file for authentication. */
 #undef WITHOUT_PASSWD
 
+/* Path to the ldap.conf file */
+#undef _PATH_LDAP_CONF
+
+/* Path to the ldap.secret file */
+#undef _PATH_LDAP_SECRET
+
+/* The fully qualified pathname of sudo_noexec.so */
+#undef _PATH_SUDO_NOEXEC
+
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
 
@@ -587,14 +612,16 @@
 
 /*
  * Macros to pull sec and nsec parts of mtime from struct stat.
+ * We need to be able to convert between timeval and timespec
+ * so the last 3 digits of tv_nsec are not significant.
  */
 #ifdef HAVE_ST_MTIM
 # define mtim_getsec(_x)	((_x).st_mtim.tv_sec)
-# define mtim_getnsec(_x)	((_x).st_mtim.tv_nsec)
+# define mtim_getnsec(_x)	(((_x).st_mtim.tv_nsec / 1000) * 1000)
 #else
 # ifdef HAVE_ST_MTIMESPEC
 #  define mtim_getsec(_x)	((_x).st_mtimespec.tv_sec)
-#  define mtim_getnsec(_x)	((_x).st_mtimespec.tv_nsec)
+#  define mtim_getnsec(_x)	(((_x).st_mtimespec.tv_nsec / 1000) * 1000)
 # else
 #  define mtim_getsec(_x)	((_x).st_mtime)
 #  define mtim_getnsec(_x)	(0)
