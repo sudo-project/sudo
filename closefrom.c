@@ -28,6 +28,7 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
+#include <fcntl.h>
 #ifdef HAVE_DIRENT_H
 # include <dirent.h>
 # define NAMLEN(dirent) strlen((dirent)->d_name)
