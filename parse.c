@@ -508,9 +508,11 @@ usergr_matches(group, user, pw)
 	if (grp->gr_gid == user_groups[n])
 	    return(TRUE);
     }
-    for (cur = grp->gr_mem; *cur; cur++) {
-	if (strcmp(*cur, user) == 0)
-	    return(TRUE);
+    if (grp->gr_mem != NULL) {
+	for (cur = grp->gr_mem; *cur; cur++) {
+	    if (strcmp(*cur, user) == 0)
+		return(TRUE);
+	}
     }
 
     return(FALSE);
