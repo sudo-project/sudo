@@ -50,6 +50,10 @@
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
+/*
+ * For a description of the AIX authentication API, see
+ * http://publib16.boulder.ibm.com/doc_link/en_US/a_doc_lib/libs/basetrf1/authenticate.htm
+ */
 int
 aixauth_verify(pw, prompt, auth)
     struct passwd *pw;
@@ -57,14 +61,16 @@ aixauth_verify(pw, prompt, auth)
     sudo_auth *auth;
 {
     char *pass;
-    char *message;
+    char *message = NULL;
     int reenter = 1;
     int rval = AUTH_FAILURE;
 
     pass = tgetpass(prompt, def_passwd_timeout * 60, tgetpass_flags);
     if (pass) {
-	if (authenticate(pw->pw_name, (char *)pass, &reenter, &message) == 0)
+	/* XXX - should probably print message on failure. */
+	if (authenticate(pw->pw_name, pass, &reenter, &message) == 0)
 	    rval = AUTH_SUCCESS;
+	free(message);
 	zero_bytes(pass, strlen(pass));
     }
     return(rval);
