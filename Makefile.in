@@ -130,17 +130,18 @@ TESTOBJS = interfaces.o testsudoers.o $(PARSEOBJS)
 
 LIBOBJS = @LIBOBJS@ @ALLOCA@
 
-VERSION = 1.6.9
+VERSION = 1.6.9b3
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES HISTORY INSTALL INSTALL.configure \
-	    LICENSE Makefile.in PORTING README README.LDAP TODO \
-	    TROUBLESHOOTING UPGRADE aclocal.m4 acsite.m4 aixcrypt.exp \
-	    config.guess config.h.in config.sub configure configure.in \
-	    def_data.in fnmatch.3 indent.pro install-sh ltmain.sh mkdefaults \
-	    mkinstalldirs pathnames.h.in sample.pam sample.syslog.conf \
-	    sample.sudoers sudo.cat sudo.man.in sudo.pod sudoers sudoers.cat \
-	    sudoers.man.in sudoers.pod sudoers2ldif visudo.cat visudo.man.in \
-	    visudo.pod auth/API
+            LICENSE Makefile.in PORTING README README.LDAP TODO \
+            TROUBLESHOOTING UPGRADE aclocal.m4 acsite.m4 aixcrypt.exp \
+            config.guess config.h.in config.sub configure configure.in \
+            def_data.in fnmatch.3 indent.pro install-sh ltmain.sh \
+            mkdefaults mkinstalldirs pathnames.h.in sample.pam \
+            sample.syslog.conf sample.sudoers schema.OpenLDAP \
+            schema.iPlanet sudo.cat sudo.man.in sudo.pod sudoers \
+            sudoers.cat sudoers.man.in sudoers.pod sudoers2ldif \
+            visudo.cat visudo.man.in visudo.pod auth/API
 
 BINFILES= BUGS CHANGES HISTORY LICENSE README TODO TROUBLESHOOTING \
 	  UPGRADE install-sh mkinstalldirs sample.syslog.conf sample.sudoers \
