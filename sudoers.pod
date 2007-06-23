@@ -475,7 +475,7 @@ This flag is I<off> by default.
 =item ignore_local_sudoers
 
 If set via LDAP, parsing of @sysconfdir@/sudoers will be skipped.
-This is intended for an Enterprises that wish to prevent the usage of local
+This is intended for Enterprises that wish to prevent the usage of local
 sudoers files so that only LDAP is used.  This thwarts the efforts of
 rogue operators who would attempt to add roles to @sysconfdir@/sudoers.
 When this option is present, @sysconfdir@/sudoers does not even need to exist. 
@@ -539,6 +539,14 @@ descriptors other than standard input, standard output and standard
 error (ie: file descriptors 0-2).  The I<closefrom> option can be used
 to specify a different file descriptor at which to start closing.
 The default is 3.
+
+=item setenv
+
+Allow the user to set additional environment variables from the
+command line.  Note that variables set this way are not subject to
+the restrictions imposed by I<env_check>, I<env_delete>, or
+I<env_reset>.  As such, only trusted users should be allowed to set
+variables in this manner.
 
 =back
 
@@ -838,7 +846,7 @@ B<notice>, and B<warning>.
  Runas_Spec ::= '(' Runas_List ')'
 
  Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-	       'MONITOR' | 'NOMONITOR')
+	       'SETENV:' | 'NOSETENV:' | 'MONITOR:' | 'NOMONITOR:')
 
 A B<user specification> determines which commands a user may run
 (and as what user) on specified hosts.  By default, commands are
@@ -872,12 +880,12 @@ but  F</bin/kill> and F</usr/bin/lprm> as B<root>.
 =head2 Tag_Spec
 
 A command may have zero or more tags associated with it.  There are
-four possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>, C<EXEC>,
-C<MONITOR> and C<NOMONITOR>.
+eight possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>, C<EXEC>,
+C<SETENV>, C<NOSETENV>, C<MONITOR> and C<NOMONITOR>.
 Once a tag is set on a C<Cmnd>, subsequent C<Cmnd>s in the
 C<Cmnd_Spec_List>, inherit the tag unless it is overridden by the
-opposite tag (ie: C<PASSWD> overrides C<NOPASSWD> and C<NOMONITOR>
-overrides C<MONITOR>).
+opposite tag (i.e.: C<PASSWD> overrides C<NOPASSWD> and C<NOEXEC>
+overrides C<EXEC>).
 
 =head3 NOPASSWD and PASSWD
 
@@ -920,6 +928,14 @@ and F</usr/bin/vi> but shell escapes will be disabled.
 
 See the L<PREVENTING SHELL ESCAPES> section below for more details
 on how C<NOEXEC> works and whether or not it will work on your system.
+
+=head3 SETENV and NOSETENV
+
+These tags override the value of the I<setenv> option on a per-command
+basis.  Note that environment variables set on the command line way
+are not subject to the restrictions imposed by I<env_check>,
+I<env_delete>, or I<env_reset>.  As such, only trusted users should
+be allowed to set variables in this manner.
 
 =head3 MONITOR and NOMONITOR
 

@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1993-1996,1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2005, 2007
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -51,6 +52,7 @@ struct sudo_user {
     char *class_name;
     int   ngroups;
     gid_t *groups;
+    struct list_member *env_vars;
     char  cwd[PATH_MAX];
 };
 
@@ -85,22 +87,23 @@ struct sudo_user {
 /*
  * Various modes sudo can be in (based on arguments) in hex
  */
-#define MODE_RUN		0x0001
-#define MODE_EDIT		0x0002
-#define MODE_VALIDATE		0x0004
-#define MODE_INVALIDATE		0x0008
-#define MODE_KILL		0x0010
-#define MODE_VERSION		0x0020
-#define MODE_HELP		0x0040
-#define MODE_LIST		0x0080
-#define MODE_CHECK		0x0100
-#define MODE_LISTDEFS		0x0200
-#define MODE_BACKGROUND		0x0400
-#define MODE_SHELL		0x0800
-#define MODE_LOGIN_SHELL	0x1000
-#define MODE_IMPLIED_SHELL	0x2000
-#define MODE_RESET_HOME		0x4000
-#define MODE_PRESERVE_GROUPS	0x8000
+#define MODE_RUN		0x00001
+#define MODE_EDIT		0x00002
+#define MODE_VALIDATE		0x00004
+#define MODE_INVALIDATE		0x00008
+#define MODE_KILL		0x00010
+#define MODE_VERSION		0x00020
+#define MODE_HELP		0x00040
+#define MODE_LIST		0x00080
+#define MODE_CHECK		0x00100
+#define MODE_LISTDEFS		0x00200
+#define MODE_BACKGROUND		0x00400
+#define MODE_SHELL		0x00800
+#define MODE_LOGIN_SHELL	0x01000
+#define MODE_IMPLIED_SHELL	0x02000
+#define MODE_RESET_HOME		0x04000
+#define MODE_PRESERVE_GROUPS	0x08000
+#define MODE_PRESERVE_ENV	0x10000
 
 /*
  * Used with set_perms()

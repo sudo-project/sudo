@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2000-2007 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -550,6 +550,10 @@ rebuild_env(envp, sudo_mode, noexec)
     insert_env(cp, &env, 1);
     easprintf(&cp, "SUDO_GID=%lu", (unsigned long) user_gid);
     insert_env(cp, &env, 1);
+
+    /* Add user-specified environment variables. */
+    for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next)
+	insert_env(cur->value, &env, 1);
 
     return(env.envp);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2005, 2007 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -193,6 +193,8 @@ sudoers_lookup(pwflag)
 		def_authenticate = !tags->nopasswd;
 	    if (tags->noexec != UNSPEC)
 		def_noexec = tags->noexec;
+	    if (tags->setenv != UNSPEC)
+		def_setenv = tags->setenv;
 	    if (tags->monitor != UNSPEC)
 		def_monitor = tags->monitor;
 	}
@@ -244,6 +246,7 @@ display_privs(v, pw)
 	    for (priv = us->privileges; priv != NULL; priv = priv->next) {
 		tags.monitor = def_monitor;
 		tags.noexec = def_noexec;
+		tags.setenv = def_setenv;
 		tags.nopasswd = !def_authenticate;
 		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
 		    if (cs != priv->cmndlist)
@@ -261,12 +264,16 @@ display_privs(v, pw)
 			print_priv(cs->tags.monitor ? "MONITOR: " : "NOMONITOR: ");
 			tags.monitor = cs->tags.monitor;
 		    }
+		    if (TAG_CHANGED(setenv)) {
+			print_priv(cs->tags.setenv ? "SETENV: " : "NOSETENV: ");
+			tags.setenv = cs->tags.setenv;
+		    }
 		    if (TAG_CHANGED(noexec)) {
-			print_priv(cs->tags.monitor ? "EXEC: " : "NOEXEC: ");
+			print_priv(cs->tags.noexec ? "NOEXEC: " : "EXEC: ");
 			tags.noexec = cs->tags.noexec;
 		    }
 		    if (TAG_CHANGED(nopasswd)) {
-			print_priv(cs->tags.monitor ? "PASSWD: " : "NOPASSWD: ");
+			print_priv(cs->tags.nopasswd ? "NOPASSWD: " : "PASSWD: ");
 			tags.nopasswd = cs->tags.nopasswd;
 		    }
 		    m = cs->cmnd;

@@ -122,6 +122,8 @@
 #define I_ENV_DELETE            60
 #define def_env_keep            (sudo_defs_table[61].sd_un.list)
 #define I_ENV_KEEP              61
+#define def_setenv              (sudo_defs_table[62].sd_un.flag)
+#define I_SETENV                62
 
 enum def_tupple {
 	never,

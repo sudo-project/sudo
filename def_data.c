@@ -272,6 +272,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Environment variables to preserve:",
 	NULL,
     }, {
+	"setenv", T_FLAG,
+	"Allow users to set arbitrary environment variables",
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

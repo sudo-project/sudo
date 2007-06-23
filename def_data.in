@@ -200,3 +200,6 @@ env_delete
 env_keep
 	T_LIST|T_BOOL
 	"Environment variables to preserve:"
+setenv
+	T_FLAG
+	"Allow users to set arbitrary environment variables"

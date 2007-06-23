@@ -342,6 +342,14 @@ main(argc, argv)
 	    (void) close(fd);
     }
 
+    /* Build a new environment based on the rules in sudoers. */
+    if (ISSET(sudo_mode, MODE_RUN)) {
+	/* User may have overrided environment resetting via the -E flag. */
+	if (ISSET(sudo_mode, MODE_PRESERVE_ENV) && def_setenv)
+	    def_env_reset = FALSE;
+	environ = rebuild_env(environ, sudo_mode, def_noexec);
+    }
+
     /* Fill in passwd struct based on user we are authenticating as.  */
     auth_pw = get_authpw();
 
@@ -360,10 +368,6 @@ main(argc, argv)
 	}
     }
 
-    /* Build a new environment based on the rules in sudoers. */
-    if (ISSET(sudo_mode, MODE_RUN))
-	environ = rebuild_env(environ, sudo_mode, def_noexec);
-
     if (ISSET(validated, VALIDATE_OK)) {
 	/* Finally tell the user if the command did not exist. */
 	if (cmnd_status == NOT_FOUND_DOT) {
@@ -372,6 +376,16 @@ main(argc, argv)
 	} else if (cmnd_status == NOT_FOUND) {
 	    warningx("%s: command not found", user_cmnd);
 	    exit(1);
+	}
+
+	/* If user specified env vars make sure sudoers allows it. */
+	if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
+	    if (ISSET(sudo_mode, MODE_PRESERVE_ENV))
+		log_error(NO_MAIL,
+		    "sorry, you are not allowed to preserve the environment");
+	    else if (sudo_user.env_vars != NULL)
+		log_error(NO_MAIL,
+		    "sorry, you are not allowed to set environment variables");
 	}
 
 	log_auth(validated, 1);
@@ -745,160 +759,175 @@ parse_args(argc, argv)
 	return(rval);
     }
 
-    while (NewArgc > 0 && NewArgv[0][0] == '-') {
-	if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0')
-	    warningx("please use single character options");
+    while (NewArgc > 0) {
+	if (NewArgv[0][0] == '-') {
+	    if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0')
+		warningx("please use single character options");
 
-	switch (NewArgv[0][1]) {
-	    case 'p':
-		/* Must have an associated prompt. */
-		if (NewArgv[1] == NULL)
+	    switch (NewArgv[0][1]) {
+		case 'p':
+		    /* Must have an associated prompt. */
+		    if (NewArgv[1] == NULL)
+			usage(1);
+
+		    user_prompt = NewArgv[1];
+
+		    NewArgc--;
+		    NewArgv++;
+		    break;
+		case 'u':
+		    /* Must have an associated runas user. */
+		    if (NewArgv[1] == NULL)
+			usage(1);
+
+		    user_runas = &NewArgv[1];
+
+		    NewArgc--;
+		    NewArgv++;
+		    break;
+    #ifdef HAVE_BSD_AUTH_H
+		case 'a':
+		    /* Must have an associated authentication style. */
+		    if (NewArgv[1] == NULL)
+			usage(1);
+
+		    login_style = NewArgv[1];
+
+		    NewArgc--;
+		    NewArgv++;
+		    break;
+    #endif
+    #ifdef HAVE_LOGIN_CAP_H
+		case 'c':
+		    /* Must have an associated login class. */
+		    if (NewArgv[1] == NULL)
+			usage(1);
+
+		    login_class = NewArgv[1];
+		    def_use_loginclass = TRUE;
+
+		    NewArgc--;
+		    NewArgv++;
+		    break;
+    #endif
+		case 'C':
+		    if (NewArgv[1] == NULL)
+			usage(1);
+		    if ((user_closefrom = atoi(NewArgv[1])) < 3) {
+			warningx("the argument to -C must be at least 3");
+			usage(1);
+		    }
+		    NewArgc--;
+		    NewArgv++;
+		    break;
+		case 'b':
+		    SET(rval, MODE_BACKGROUND);
+		    break;
+		case 'e':
+		    rval = MODE_EDIT;
+		    if (excl && excl != 'e')
+			usage_excl(1);
+		    excl = 'e';
+		    break;
+		case 'v':
+		    rval = MODE_VALIDATE;
+		    if (excl && excl != 'v')
+			usage_excl(1);
+		    excl = 'v';
+		    break;
+		case 'i':
+		    SET(rval, (MODE_LOGIN_SHELL | MODE_SHELL));
+		    def_env_reset = TRUE;
+		    if (excl && excl != 'i')
+			usage_excl(1);
+		    excl = 'i';
+		    break;
+		case 'k':
+		    rval = MODE_INVALIDATE;
+		    if (excl && excl != 'k')
+			usage_excl(1);
+		    excl = 'k';
+		    break;
+		case 'K':
+		    rval = MODE_KILL;
+		    if (excl && excl != 'K')
+			usage_excl(1);
+		    excl = 'K';
+		    break;
+		case 'L':
+		    rval = MODE_LISTDEFS;
+		    if (excl && excl != 'L')
+			usage_excl(1);
+		    excl = 'L';
+		    break;
+		case 'l':
+		    rval = MODE_LIST;
+		    if (excl && excl != 'l')
+			usage_excl(1);
+		    excl = 'l';
+		    break;
+		case 'V':
+		    rval = MODE_VERSION;
+		    if (excl && excl != 'V')
+			usage_excl(1);
+		    excl = 'V';
+		    break;
+		case 'h':
+		    rval = MODE_HELP;
+		    if (excl && excl != 'h')
+			usage_excl(1);
+		    excl = 'h';
+		    break;
+		case 's':
+		    SET(rval, MODE_SHELL);
+		    if (excl && excl != 's')
+			usage_excl(1);
+		    excl = 's';
+		    break;
+		case 'H':
+		    SET(rval, MODE_RESET_HOME);
+		    break;
+		case 'P':
+		    SET(rval, MODE_PRESERVE_GROUPS);
+		    break;
+		case 'S':
+		    SET(tgetpass_flags, TGP_STDIN);
+		    break;
+		case 'U':
+		    /* Must have an associated list user. */
+		    if (NewArgv[1] == NULL)
+			usage(1);
+		    if ((list_pw = sudo_getpwnam(NewArgv[1])) == NULL)
+			errorx(1, "unknown user %s", NewArgv[1]);
+		    NewArgc--;
+		    NewArgv++;
+		    break;
+		case 'E':
+		    SET(rval, MODE_PRESERVE_ENV);
+		    break;
+		case '-':
+		    NewArgc--;
+		    NewArgv++;
+		    if (rval == MODE_RUN)
+			SET(rval, (MODE_IMPLIED_SHELL | MODE_SHELL));
+		    return(rval);
+		case '\0':
+		    warningx("'-' requires an argument");
 		    usage(1);
-
-		user_prompt = NewArgv[1];
-
-		NewArgc--;
-		NewArgv++;
-		break;
-	    case 'u':
-		/* Must have an associated runas user. */
-		if (NewArgv[1] == NULL)
+		default:
+		    warningx("illegal option `%s'", NewArgv[0]);
 		    usage(1);
-
-		user_runas = &NewArgv[1];
-
-		NewArgc--;
-		NewArgv++;
-		break;
-#ifdef HAVE_BSD_AUTH_H
-	    case 'a':
-		/* Must have an associated authentication style. */
-		if (NewArgv[1] == NULL)
-		    usage(1);
-
-		login_style = NewArgv[1];
-
-		NewArgc--;
-		NewArgv++;
-		break;
-#endif
-#ifdef HAVE_LOGIN_CAP_H
-	    case 'c':
-		/* Must have an associated login class. */
-		if (NewArgv[1] == NULL)
-		    usage(1);
-
-		login_class = NewArgv[1];
-		def_use_loginclass = TRUE;
-
-		NewArgc--;
-		NewArgv++;
-		break;
-#endif
-	    case 'C':
-		if (NewArgv[1] == NULL)
-		    usage(1);
-		if ((user_closefrom = atoi(NewArgv[1])) < 3) {
-		    warningx("the argument to -C must be at least 3");
-		    usage(1);
-		}
-		NewArgc--;
-		NewArgv++;
-		break;
-	    case 'b':
-		SET(rval, MODE_BACKGROUND);
-		break;
-	    case 'e':
-		rval = MODE_EDIT;
-		if (excl && excl != 'e')
-		    usage_excl(1);
-		excl = 'e';
-		break;
-	    case 'v':
-		rval = MODE_VALIDATE;
-		if (excl && excl != 'v')
-		    usage_excl(1);
-		excl = 'v';
-		break;
-	    case 'i':
-		SET(rval, (MODE_LOGIN_SHELL | MODE_SHELL));
-		def_env_reset = TRUE;
-		if (excl && excl != 'i')
-		    usage_excl(1);
-		excl = 'i';
-		break;
-	    case 'k':
-		rval = MODE_INVALIDATE;
-		if (excl && excl != 'k')
-		    usage_excl(1);
-		excl = 'k';
-		break;
-	    case 'K':
-		rval = MODE_KILL;
-		if (excl && excl != 'K')
-		    usage_excl(1);
-		excl = 'K';
-		break;
-	    case 'L':
-		rval = MODE_LISTDEFS;
-		if (excl && excl != 'L')
-		    usage_excl(1);
-		excl = 'L';
-		break;
-	    case 'l':
-		rval = MODE_LIST;
-		if (excl && excl != 'l')
-		    usage_excl(1);
-		excl = 'l';
-		break;
-	    case 'V':
-		rval = MODE_VERSION;
-		if (excl && excl != 'V')
-		    usage_excl(1);
-		excl = 'V';
-		break;
-	    case 'h':
-		rval = MODE_HELP;
-		if (excl && excl != 'h')
-		    usage_excl(1);
-		excl = 'h';
-		break;
-	    case 's':
-		SET(rval, MODE_SHELL);
-		if (excl && excl != 's')
-		    usage_excl(1);
-		excl = 's';
-		break;
-	    case 'H':
-		SET(rval, MODE_RESET_HOME);
-		break;
-	    case 'P':
-		SET(rval, MODE_PRESERVE_GROUPS);
-		break;
-	    case 'S':
-		SET(tgetpass_flags, TGP_STDIN);
-		break;
-	    case 'U':
-		/* Must have an associated list user. */
-		if (NewArgv[1] == NULL)
-		    usage(1);
-		if ((list_pw = sudo_getpwnam(NewArgv[1])) == NULL)
-		    errorx(1, "unknown user %s", NewArgv[1]);
-		NewArgc--;
-		NewArgv++;
-		break;
-	    case '-':
-		NewArgc--;
-		NewArgv++;
-		if (rval == MODE_RUN)
-		    SET(rval, (MODE_IMPLIED_SHELL | MODE_SHELL));
-		return(rval);
-	    case '\0':
-		warningx("'-' requires an argument");
-		usage(1);
-	    default:
-		warningx("illegal option `%s'", NewArgv[0]);
-		usage(1);
+	    }
+	} else if (NewArgv[0][0] != '/' && strchr(NewArgv[0], '=') != NULL) {
+		/* Could be an environment variable. */
+		struct list_member *ev;
+		ev = emalloc(sizeof(*ev));
+		ev->value = NewArgv[0];
+		ev->next = sudo_user.env_vars;
+		sudo_user.env_vars = ev;
+	} else {
+	    /* Not an arg */
+	    break;
 	}
 	NewArgc--;
 	NewArgv++;
@@ -1267,7 +1296,7 @@ usage(exit_val)
     char **p;
     int linelen, linemax, ulen;
     static char *uvec[] = {
-	" [-bHPS]",
+	" [-bEHPS]",
 #ifdef HAVE_BSD_AUTH_H
 	" [-a auth_type]",
 #endif
@@ -1277,6 +1306,7 @@ usage(exit_val)
 #endif
 	" [-p prompt]",
 	" [-u username|#uid]",
+	" [VAR=value]",
 	" { -e file [...] | -i | -s | <command> }",
 	NULL
     };

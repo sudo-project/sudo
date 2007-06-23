@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1996,1998-2000,2004 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2000, 2004, 2007
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,6 +43,7 @@ struct sudo_command {
 struct cmndtag {
     char nopasswd;
     char noexec;
+    char setenv;
     char monitor;
     char extra;
 };

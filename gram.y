@@ -1,6 +1,7 @@
 %{
 /*
- * Copyright (c) 1996, 1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2005, 2007
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -128,6 +129,8 @@ yyerror(s)
 %token <tok> 	 EXEC			/* don't preload dummy execve() */
 %token <tok> 	 MONITOR		/* monitor children of cmnd */
 %token <tok> 	 NOMONITOR		/* disable monitoring of children */
+%token <tok>	 SETENV			/* user may set environment for cmnd */
+%token <tok>	 NOSETENV		/* user may not set environment */
 %token <tok>	 ALL			/* ALL keyword */
 %token <tok>	 COMMENT		/* comment and/or carriage return */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
@@ -243,13 +246,16 @@ privilege	:	hostlist '=' cmndspeclist {
 			    struct cmndspec *cs;
 			    p->hostlist = $1;
 			    p->cmndlist = $3;
-			    tags.nopasswd = tags.noexec = tags.monitor = UNSPEC;
+			    tags.nopasswd = tags.noexec = tags.monitor =
+				tags.setenv = UNSPEC;
 			    /* propagate tags */
 			    for (cs = $3; cs != NULL; cs = cs->next) {
 				if (cs->tags.nopasswd == UNSPEC)
 				    cs->tags.nopasswd = tags.nopasswd;
 				if (cs->tags.noexec == UNSPEC)
 				    cs->tags.noexec = tags.noexec;
+				if (cs->tags.setenv == UNSPEC)
+				    cs->tags.setenv = tags.setenv;
 				if (cs->tags.monitor == UNSPEC)
 				    cs->tags.monitor = tags.monitor;
 				memcpy(&tags, &cs->tags, sizeof(tags));
@@ -358,7 +364,8 @@ runasuser	:	ALIAS {
 		;
 
 cmndtag		:	/* empty */ {
-			    $$.nopasswd = $$.noexec = $$.monitor = UNSPEC;
+			    $$.nopasswd = $$.noexec = $$.monitor =
+				$$.setenv = UNSPEC;
 			}
 		|	cmndtag NOPASSWD {
 			    $$.nopasswd = TRUE;
@@ -371,6 +378,12 @@ cmndtag		:	/* empty */ {
 			}
 		|	cmndtag EXEC {
 			    $$.noexec = FALSE;
+			}
+		|	cmndtag SETENV {
+			    $$.setenv = TRUE;
+			}
+		|	cmndtag NOSETENV {
+			    $$.setenv = FALSE;
 			}
 		|	cmndtag MONITOR {
 			    $$.monitor = TRUE;

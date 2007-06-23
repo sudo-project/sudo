@@ -1,5 +1,6 @@
 =cut
-Copyright (c) 1994-1996,1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
+Copyright (c) 1994-1996, 1998-2005, 2007
+	Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -31,9 +32,9 @@ B<sudo> B<-K> | B<-k> | B<-h> | B<-L> | B<-V> | B<-v>
 
 B<sudo> B<-l> S<[B<-U> I<username>]> S<[B<-u> I<username>|I<#uid>]> [I<command>]
 
-B<sudo> [B<-bHPS>] S<[B<-a> I<auth_type>]> S<[B<-C> I<fd>]>
+B<sudo> [B<-bEHPS>] S<[B<-a> I<auth_type>]> S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]> S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
-S<{B<-e> file [...] | B<-i> | B<-s> | I<command>}>
+S<[B<VAR>=I<value>]> S<{B<-e> file [...] | B<-i> | B<-s> | I<command>}>
 
 B<sudoedit> S<[B<-a> I<auth_type>]>
 S<[B<-p> I<prompt>]> [B<-S>] S<[B<-u> I<username>|I<#uid>]>
@@ -130,6 +131,13 @@ argument specifies an existing user class, the command must be run
 as root, or the B<sudo> command must be run from a shell that is already
 root.  This option is only available on systems with BSD login classes
 where B<sudo> has been configured with the --with-logincap option.
+
+=item -E
+
+The B<-E> (I<preserve environment>) option will override the
+I<env_reset> option in L<sudoers(@mansectform@)>).  It is only
+available when either the matching command has the C<SETENV> tag
+or the I<setenv> option is set in L<sudoers(@mansectform@)>.
 
 =item -e
 
@@ -252,7 +260,7 @@ expanded to the local hostname without the domain name
 
 expanded to the local hostname including the domain name
 (on if the machine's hostname is fully qualified or the I<fqdn>
-sudoers option is set)
+I<sudoers> option is set)
 
 =item C<%%>
 
@@ -307,6 +315,13 @@ The B<--> flag indicates that B<sudo> should stop processing command
 line arguments.  It is most useful in conjunction with the B<-s> flag.
 
 =back
+
+Environment variables to be set for the command may also be passed
+on the command line in the form of B<VAR>=I<value>, e.g.
+B<LD_LIBRARY_PATH>=I</usr/local/pkg/lib>.  This is only permitted
+when the I<setenv> option is set in I<sudoers> or the command to
+be run has the C<SETENV> tag set.  See L<sudoers(@mansectform@)>
+for more information.
 
 =head1 RETURN VALUES
 
