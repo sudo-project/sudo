@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996,1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996,1998-2007 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -51,6 +51,7 @@ struct sudo_user {
     char *class_name;
     int ngroups;
     gid_t *groups;
+    struct list_member *env_vars;
 };
 
 /*
@@ -67,6 +68,7 @@ struct sudo_user {
 #define FLAG_NO_HOST		0x080
 #define FLAG_NO_CHECK		0x100
 #define FLAG_NOEXEC		0x200
+#define FLAG_SETENV		0x400
 
 /*
  * Pseudo-boolean values
@@ -88,23 +90,24 @@ struct sudo_user {
 #define NOT_FOUND_DOT		-1
 
 /*
- * Various modes sudo can be in (based on arguments) in octal
+ * Various modes sudo can be in (based on arguments) in hex
  */
-#define MODE_RUN                 000001
-#define MODE_VALIDATE            000002
-#define MODE_INVALIDATE          000004
-#define MODE_KILL                000010
-#define MODE_VERSION             000020
-#define MODE_HELP                000040
-#define MODE_LIST                000100
-#define MODE_LISTDEFS            000200
-#define MODE_BACKGROUND          000400
-#define MODE_SHELL               001000
-#define MODE_LOGIN_SHELL         002000
-#define MODE_IMPLIED_SHELL       004000
-#define MODE_RESET_HOME          010000
-#define MODE_PRESERVE_GROUPS     020000
-#define MODE_EDIT                040000
+#define MODE_RUN		0x0001
+#define MODE_EDIT		0x0002
+#define MODE_VALIDATE		0x0004
+#define MODE_INVALIDATE		0x0008
+#define MODE_KILL		0x0010
+#define MODE_VERSION		0x0020
+#define MODE_HELP		0x0040
+#define MODE_LIST		0x0080
+#define MODE_LISTDEFS		0x0100
+#define MODE_BACKGROUND		0x0200
+#define MODE_SHELL		0x0400
+#define MODE_LOGIN_SHELL	0x0800
+#define MODE_IMPLIED_SHELL	0x1000
+#define MODE_RESET_HOME		0x2000
+#define MODE_PRESERVE_GROUPS	0x4000
+#define MODE_PRESERVE_ENV	0x8000
 
 /*
  * Used with set_perms()
@@ -256,6 +259,7 @@ char *sudo_getepw	__P((const struct passwd *));
 int pam_prep_user	__P((struct passwd *));
 void zero_bytes		__P((volatile VOID *, size_t));
 int gettime		__P((struct timespec *));
+char **add_user_vars	__P((char **, struct list_member *));
 YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */

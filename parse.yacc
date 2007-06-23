@@ -1,6 +1,7 @@
 %{
 /*
- * Copyright (c) 1996, 1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2004, 2007
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -124,6 +125,7 @@ int top = 0, stacksize = 0;
 	match[top].runas  = UNSPEC; \
 	match[top].nopass = def_authenticate ? UNSPEC : TRUE; \
 	match[top].noexec = def_noexec ? TRUE : UNSPEC; \
+	match[top].setenv = def_setenv ? TRUE : UNSPEC; \
 	top++; \
     } while (0)
 
@@ -139,6 +141,7 @@ int top = 0, stacksize = 0;
 	match[top].runas  = match[top-1].runas; \
 	match[top].nopass = match[top-1].nopass; \
 	match[top].noexec = match[top-1].noexec; \
+	match[top].setenv = match[top-1].setenv; \
 	top++; \
     } while (0)
 
@@ -242,6 +245,8 @@ yyerror(s)
 %token <tok> 	 PASSWD			/* passwd req for command (default) */
 %token <tok> 	 NOEXEC			/* preload dummy execve() for cmnd */
 %token <tok> 	 EXEC			/* don't preload dummy execve() */
+%token <tok> 	 SETENV			/* user may set environment for cmnd */
+%token <tok> 	 NOSETENV		/* user may not set environment */
 %token <tok>	 ALL			/* ALL keyword */
 %token <tok>	 COMMENT		/* comment and/or carriage return */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
@@ -374,6 +379,7 @@ privilege	:	hostlist '=' cmndspeclist {
 			    runas_matches = UNSPEC;
 			    no_passwd = def_authenticate ? UNSPEC : TRUE;
 			    no_execve = def_noexec ? TRUE : UNSPEC;
+			    setenv_ok = def_setenv ? TRUE : UNSPEC;
 			}
 		;
 
@@ -625,7 +631,7 @@ runasuser	:	WORD {
 		;
 
 cmndtag		:	/* empty */ {
-			    /* Inherit {NOPASSWD,PASSWD,NOEXEC,EXEC} status. */
+			    /* Inherit {NO,}{PASSWD,EXEC,SETENV} status. */
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE) {
 				if (no_passwd == TRUE)
@@ -636,6 +642,10 @@ cmndtag		:	/* empty */ {
 				    cm_list[cm_list_len].noexecve = TRUE;
 				else
 				    cm_list[cm_list_len].noexecve = FALSE;
+				if (setenv_ok == TRUE)
+				    cm_list[cm_list_len].setenv = TRUE;
+				else
+				    cm_list[cm_list_len].setenv = FALSE;
 			    }
 			}
 		|	cmndtag NOPASSWD {
@@ -661,6 +671,18 @@ cmndtag		:	/* empty */ {
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE)
 				cm_list[cm_list_len].noexecve = FALSE;
+			}
+		|	cmndtag SETENV {
+			    setenv_ok = TRUE;
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				cm_list[cm_list_len].setenv = TRUE;
+			}
+		|	cmndtag NOSETENV {
+			    setenv_ok = FALSE;
+			    if (printmatches == TRUE && host_matches == TRUE &&
+				user_matches == TRUE)
+				cm_list[cm_list_len].setenv = FALSE;
 			}
 		;
 
@@ -1083,6 +1105,12 @@ list_matches()
 	else if (cm_list[count].nopasswd == FALSE && !def_authenticate)
 	    (void) fputs("PASSWD: ", stdout);
 
+	/* Is setenv enabled? */
+	if (cm_list[count].setenv == TRUE && !def_setenv)
+	    (void) fputs("SETENV: ", stdout);
+	else if (cm_list[count].setenv == FALSE && def_setenv)
+	    (void) fputs("NOSETENV: ", stdout);
+
 	/* Print the actual command or expanded Cmnd_Alias. */
 	key.alias = cm_list[count].cmnd;
 	key.type = CMND_ALIAS;
@@ -1210,6 +1238,7 @@ expand_match_list()
     cm_list[cm_list_len].runas = cm_list[cm_list_len].cmnd = NULL;
     cm_list[cm_list_len].nopasswd = FALSE;
     cm_list[cm_list_len].noexecve = FALSE;
+    cm_list[cm_list_len].setenv = FALSE;
 }
 
 /*

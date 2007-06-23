@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1996, 1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2005, 2007
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -206,7 +207,8 @@ sudoers_lookup(pwflag)
 		    set_perms(PERM_ROOT);
 		    return(VALIDATE_OK |
 			(no_passwd == TRUE ? FLAG_NOPASS : 0) |
-			(no_execve == TRUE ? FLAG_NOEXEC : 0));
+			(no_execve == TRUE ? FLAG_NOEXEC : 0) |
+			(setenv_ok == TRUE ? FLAG_SETENV : 0));
 		} else if ((runas_matches == TRUE && cmnd_matches == FALSE) ||
 		    (runas_matches == FALSE && cmnd_matches == TRUE)) {
 		    /*
@@ -215,7 +217,8 @@ sudoers_lookup(pwflag)
 		    set_perms(PERM_ROOT);
 		    return(VALIDATE_NOT_OK |
 			(no_passwd == TRUE ? FLAG_NOPASS : 0) |
-			(no_execve == TRUE ? FLAG_NOEXEC : 0));
+			(no_execve == TRUE ? FLAG_NOEXEC : 0) |
+			(setenv_ok == TRUE ? FLAG_SETENV : 0));
 		}
 	    }
 	    top--;

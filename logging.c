@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996,1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996,1998-2007 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -279,6 +279,7 @@ log_auth(status, inform_user)
     int status;
     int inform_user;
 {
+    char *evstr = NULL;
     char *message;
     char *logline;
     int pri;
@@ -300,9 +301,21 @@ log_auth(status, inform_user)
     else
 	message = "unknown error ; ";
 
-    easprintf(&logline, "%sTTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s%s%s",
-	message, user_tty, user_cwd, *user_runas, user_cmnd,
-	user_args ? " " : "", user_args ? user_args : "");
+    if (sudo_user.env_vars != NULL) {
+	size_t len = 7; /* " ; ENV=" */
+	struct list_member *cur;
+	for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next)
+	    len += strlen(cur->value) + 1;
+	evstr = emalloc(len);
+	strlcpy(evstr, " ; ENV=", len);
+	for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next) {
+	    strlcat(evstr, cur->value, len);
+	    strlcat(evstr, " ", len);		/* NOTE: last one will fail */
+	}
+    }
+    easprintf(&logline, "%sTTY=%s ; PWD=%s ; USER=%s%s ; COMMAND=%s%s%s",
+	message, user_tty, user_cwd, *user_runas, evstr ? evstr : "",
+	user_cmnd, user_args ? " " : "", user_args ? user_args : "");
 
     mail_auth(status, logline);		/* send mail based on status */
 
@@ -332,6 +345,7 @@ log_auth(status, inform_user)
     if (def_logfile)
 	do_logfile(logline);
 
+    efree(evstr);
     efree(logline);
 }
 
@@ -348,6 +362,7 @@ log_error(flags, fmt, va_alist)
     int serrno = errno;
     char *message;
     char *logline;
+    char *evstr = NULL;
     va_list ap;
 #ifdef __STDC__
     va_start(ap, fmt);
@@ -363,28 +378,43 @@ log_error(flags, fmt, va_alist)
     evasprintf(&message, fmt, ap);
     va_end(ap);
 
+    if (sudo_user.env_vars != NULL) {
+	size_t len = 7; /* " ; ENV=" */
+	struct list_member *cur;
+	for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next)
+	    len += strlen(cur->value) + 1;
+	evstr = emalloc(len);
+	strlcpy(evstr, " ; ENV=", len);
+	for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next) {
+	    strlcat(evstr, cur->value, len);
+	    strlcat(evstr, " ", len);		/* NOTE: last one will fail */
+	}
+    }
+
     if (ISSET(flags, MSG_ONLY))
 	logline = message;
     else if (ISSET(flags, USE_ERRNO)) {
 	if (user_args) {
 	    easprintf(&logline,
-		"%s: %s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s %s",
+		"%s: %s ; TTY=%s ; PWD=%s ; USER=%s%s ; COMMAND=%s %s",
 		message, strerror(serrno), user_tty, user_cwd, *user_runas,
-		user_cmnd, user_args);
+		evstr ? evstr : "", user_cmnd, user_args);
 	} else {
 	    easprintf(&logline,
-		"%s: %s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s", message,
-		strerror(serrno), user_tty, user_cwd, *user_runas, user_cmnd);
+		"%s: %s ; TTY=%s ; PWD=%s ; USER=%s%s ; COMMAND=%s", message,
+		strerror(serrno), user_tty, user_cwd, *user_runas,
+		evstr ? evstr : "", user_cmnd);
 	}
     } else {
 	if (user_args) {
 	    easprintf(&logline,
-		"%s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s %s", message,
-		user_tty, user_cwd, *user_runas, user_cmnd, user_args);
+		"%s ; TTY=%s ; PWD=%s ; USER=%s%s ; COMMAND=%s %s", message,
+		user_tty, user_cwd, *user_runas, evstr ? evstr : "",
+		user_cmnd, user_args);
 	} else {
 	    easprintf(&logline,
-		"%s ; TTY=%s ; PWD=%s ; USER=%s ; COMMAND=%s", message,
-		user_tty, user_cwd, *user_runas, user_cmnd);
+		"%s ; TTY=%s ; PWD=%s ; USER=%s%s ; COMMAND=%s", message,
+		user_tty, user_cwd, *user_runas, evstr ? evstr : "", user_cmnd);
 	}
     }
 

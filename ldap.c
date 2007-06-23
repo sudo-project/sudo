@@ -1005,6 +1005,8 @@ sudo_ldap_check(pwflag)
 	    SET(ret, FLAG_NOPASS);
 	if (def_noexec)
 	    SET(ret, FLAG_NOEXEC);
+	if (def_setenv)
+	    SET(ret, FLAG_SETENV);
     } else {
 	/* we do not have a match */
 	ret = VALIDATE_NOT_OK;
