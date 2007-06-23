@@ -1,4 +1,4 @@
-.\" Copyright (c) 1994-1996,1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 1994-1996,1998-2007 Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -149,16 +149,16 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "June 12, 2007" "1.6.9" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "June 23, 2007" "1.6.9b4" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 \&\fBsudo\fR \fB\-K\fR | \fB\-k\fR | \fB\-h\fR | \fB\-L\fR | \fB\-l\fR | \fB\-V\fR | \fB\-v\fR
 .PP
-\&\fBsudo\fR [\fB\-bHPS\fR] [\fB\-a\fR\ \fIauth_type\fR]
+\&\fBsudo\fR [\fB\-bEHPS\fR] [\fB\-a\fR\ \fIauth_type\fR]
 [\fB\-c\fR\ \fIclass\fR|\fI\-\fR] [\fB\-p\fR\ \fIprompt\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
-{\fB\-e\fR\ file\ [...]\ |\ \fB\-i\fR\ |\ \fB\-s\fR\ |\ \fIcommand\fR}
+[\fB\s-1VAR\s0\fR=\fIvalue\fR] {\fB\-e\fR\ file\ [...]\ |\ \fB\-i\fR\ |\ \fB\-s\fR\ |\ \fIcommand\fR}
 .PP
 \&\fBsudoedit\fR [\fB\-a\fR\ \fIauth_type\fR]
 [\fB\-p\fR\ \fIprompt\fR] [\fB\-S\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
@@ -238,6 +238,12 @@ argument specifies an existing user class, the command must be run
 as root, or the \fBsudo\fR command must be run from a shell that is already
 root.  This option is only available on systems with \s-1BSD\s0 login classes
 where \fBsudo\fR has been configured with the \-\-with\-logincap option.
+.IP "\-E" 4
+.IX Item "-E"
+The \fB\-E\fR (\fIpreserve environment\fR) option will override the
+\&\fIenv_reset\fR option in sudoers(@mansectform@)).  It is only
+available when either the matching command has the \f(CW\*(C`SETENV\*(C'\fR tag
+or the \fIsetenv\fR option is set in sudoers(@mansectform@).
 .IP "\-e" 4
 .IX Item "-e"
 The \fB\-e\fR (\fIedit\fR) option indicates that, instead of running
@@ -342,7 +348,7 @@ expanded to the local hostname without the domain name
 .IX Item "%H"
 expanded to the local hostname including the domain name
 (on if the machine's hostname is fully qualified or the \fIfqdn\fR
-sudoers option is set)
+\&\fIsudoers\fR option is set)
 .ie n .IP "\*(C`%%\*(C'" 8
 .el .IP "\f(CW\*(C`%%\*(C'\fR" 8
 .IX Item "%%"
@@ -382,6 +388,13 @@ a command.
 .IP "\-\-" 4
 The \fB\-\-\fR flag indicates that \fBsudo\fR should stop processing command
 line arguments.  It is most useful in conjunction with the \fB\-s\fR flag.
+.PP
+Environment variables to be set for the command may also be passed
+on the command line in the form of \fB\s-1VAR\s0\fR=\fIvalue\fR, e.g.
+\&\fB\s-1LD_LIBRARY_PATH\s0\fR=\fI/usr/local/pkg/lib\fR.  This is only permitted
+when the \fIsetenv\fR option is set in \fIsudoers\fR or the command to
+be run has the \f(CW\*(C`SETENV\*(C'\fR tag set.  See sudoers(@mansectform@)
+for more information.
 .SH "RETURN VALUES"
 .IX Header "RETURN VALUES"
 Upon successful execution of a program, the return value from \fBsudo\fR

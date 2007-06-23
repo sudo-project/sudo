@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "June 19, 2007" "1.6.9" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "June 23, 2007" "1.6.9b4" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -595,7 +595,7 @@ description of \fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR below as well as the \*(L"\s-
 .IP "ignore_local_sudoers" 12
 .IX Item "ignore_local_sudoers"
 If set via \s-1LDAP\s0, parsing of \f(CW@sysconfdir\fR@/sudoers will be skipped.
-This is intended for an Enterprises that wish to prevent the usage of local
+This is intended for Enterprises that wish to prevent the usage of local
 sudoers files so that only \s-1LDAP\s0 is used.  This thwarts the efforts of
 rogue operators who would attempt to add roles to \f(CW@sysconfdir\fR@/sudoers.
 When this option is present, \f(CW@sysconfdir\fR@/sudoers does not even need to exist. 
@@ -632,6 +632,13 @@ The default is \f(CW\*(C`@password_timeout@\*(C'\fR, set this to \f(CW0\fR for n
 .IX Item "umask"
 Umask to use when running the command.  Negate this option or set
 it to 0777 to preserve the user's umask.  The default is \f(CW\*(C`@sudo_umask@\*(C'\fR.
+.IP "setenv" 12
+.IX Item "setenv"
+Allow the user to set additional environment variables from the
+command line.  Note that variables set this way are not subject to
+the restrictions imposed by \fIenv_check\fR, \fIenv_delete\fR, or
+\&\fIenv_reset\fR.  As such, only trusted users should be allowed to set
+variables in this manner.
 .PP
 \&\fBStrings\fR:
 .IP "mailsub" 12
@@ -880,8 +887,9 @@ supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\fR, \fBerr\fR, \fBinfo
 \& Runas_Spec ::= '(' Runas_List ')'
 .Ve
 .PP
-.Vb 1
-\& Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:')
+.Vb 2
+\& Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
+\&               'SETENV:' | 'NOSETENV:')
 .Ve
 .PP
 A \fBuser specification\fR determines which commands a user may run
@@ -920,10 +928,11 @@ but  \fI/bin/kill\fR and \fI/usr/bin/lprm\fR as \fBroot\fR.
 .Sh "Tag_Spec"
 .IX Subsection "Tag_Spec"
 A command may have zero or more tags associated with it.  There are
-four possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR and \f(CW\*(C`EXEC\*(C'\fR.
+six possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR, \f(CW\*(C`EXEC\*(C'\fR,
+\&\f(CW\*(C`SETENV\*(C'\fR and \f(CW\*(C`NOSETENV\*(C'\fR.
 Once a tag is set on a \f(CW\*(C`Cmnd\*(C'\fR, subsequent \f(CW\*(C`Cmnd\*(C'\fRs in the
 \&\f(CW\*(C`Cmnd_Spec_List\*(C'\fR, inherit the tag unless it is overridden by the
-opposite tag (ie: \f(CW\*(C`PASSWD\*(C'\fR overrides \f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`NOEXEC\*(C'\fR
+opposite tag (i.e.: \f(CW\*(C`PASSWD\*(C'\fR overrides \f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`NOEXEC\*(C'\fR
 overrides \f(CW\*(C`EXEC\*(C'\fR).
 .PP
 \fI\s-1NOPASSWD\s0 and \s-1PASSWD\s0\fR
@@ -975,6 +984,15 @@ and \fI/usr/bin/vi\fR but shell escapes will be disabled.
 .PP
 See the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section below for more details
 on how \f(CW\*(C`NOEXEC\*(C'\fR works and whether or not it will work on your system.
+.PP
+\fI\s-1SETENV\s0 and \s-1NOSETENV\s0\fR
+.IX Subsection "SETENV and NOSETENV"
+.PP
+These tags override the value of the \fIsetenv\fR option on a per-command
+basis.  Note that environment variables set on the command line way
+are not subject to the restrictions imposed by \fIenv_check\fR,
+\&\fIenv_delete\fR, or \fIenv_reset\fR.  As such, only trusted users should
+be allowed to set variables in this manner.
 .Sh "Wildcards"
 .IX Subsection "Wildcards"
 \&\fBsudo\fR allows shell-style \fIwildcards\fR (aka meta or glob characters)
