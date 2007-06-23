@@ -259,7 +259,6 @@ char *sudo_getepw	__P((const struct passwd *));
 int pam_prep_user	__P((struct passwd *));
 void zero_bytes		__P((volatile VOID *, size_t));
 int gettime		__P((struct timespec *));
-char **add_user_vars	__P((char **, struct list_member *));
 YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */
