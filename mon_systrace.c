@@ -555,7 +555,7 @@ systrace_write(fd, pid, addr, buf, len)
     io.strio_offs = addr;
     io.strio_op = SYSTR_WRITE;
     if ((rval = ioctl(fd, STRIOCIO, &io)) != 0)
-	warning("systrace_read: STRIOCIO");
+	warning("systrace_write: STRIOCIO");
     return(rval ? -1 : (ssize_t)io.strio_len);
 }
 
@@ -773,9 +773,15 @@ decode_args(fd, pid, askp)
     struct str_msg_ask *askp;
 {
     ssize_t len;
-    char *off, *ap, *cp, *ep;
+    int i, argc, argc_max;
+    char *off, *ap, *cp, *ep, **argv;
     static char pbuf[PATH_MAX], abuf[ARG_MAX];
 
+    /*
+     * Fill in user_cmnd and user_base from the 1st arg to execve().
+     * Note that this is the path the kernel will execute, which
+     * may be different from argv[0].
+     */
     memset(pbuf, 0, sizeof(pbuf));
     if (read_string(fd, pid, (void *)askp->args[0], pbuf, sizeof(pbuf)) == -1)
 	return(-1);
@@ -785,29 +791,49 @@ decode_args(fd, pid, askp)
 	user_base = user_cmnd;
     user_args = NULL;
 
+    /* XXX - write exec path back to stack gap */
+
     /*
-     * Loop through argv, collapsing it into a single string and reading
-     * until we hit the terminating NULL.  We skip argv[0].
+     * Make a local copy of argv, looping until we hit the
+     * terminating NULL pointer.
      */
+    argc = 0;
+    argc_max = 16;
+    argv = emalloc2(argc_max, sizeof(char *));
     memset(abuf, 0, sizeof(abuf));
     off = (char *)askp->args[1];
     for (cp = abuf, ep = abuf + sizeof(abuf); cp < ep; off += sizeof(char *)) {
 	if (systrace_read(fd, pid, off, &ap, sizeof(ap)) == -1)
 	    return(-1);
-	if (ap == NULL) {
-	    if (cp != abuf) {
-		cp[-1] = '\0';	/* replace final space with a NUL */
-		user_args = abuf;
-	    }
-	    break;
+	if (ap == NULL)
+	    break;		/* end of args */
+	if (argc + 1 >= argc_max) {
+	    argc_max *= 2;
+	    argv = erealloc3(argv, argc_max, sizeof(char *));
 	}
-	if (off == (char *)askp->args[1])
-	    continue;			/* skip argv[0] */
 	if ((len = read_string(fd, pid, ap, cp, ep - cp)) == -1)
 	    return(-1);
+	argv[argc++] = cp;
 	cp += len;
-	*cp++ = ' ';		/* replace NUL with a space */
     }
+    ep = cp;
+    argv[argc] = NULL;
+
+    /* XXX - now write argv back into stack gap. */
+
+    /*
+     * Collapse argv into user_args, skipping argv[0].
+     * Since argv strings are contiguous (in abuf) we can
+     * just replace the previous char in each string with a
+     * space.
+     */
+    if (argc > 1) {
+	user_args = argv[1];
+	for (i = 2; i < argc; i++)
+	    argv[i][-1] = ' ';		/* replace NUL with a space */
+    }
+
+    efree(argv);
     return(0);
 }
 
@@ -860,7 +886,7 @@ check_execv(fd, pid, seqnr, askp, policyp, errorp)
 	return(0);
     }
 
-    /* Get processes's cwd. */
+    /* Get process cwd. */
     rval = ioctl(fd, STRIOCGETCWD, &pid);
     if (rval == -1 || getcwd(user_cwd, sizeof(user_cwd)) == NULL) {
 	if (rval == -1 && errno == EBUSY)
