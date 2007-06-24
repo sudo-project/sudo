@@ -1889,3 +1889,16 @@ Sudo 1.6.8p12 released.
      variables passed through and/or checked.  The list of variables
      allowed is configurable via the env_keep and env_check options
      in sudoers.
+
+595) Added support for Solaris 10 resource control limits using
+     the "project" interface.
+
+596) Moved LDAP schema data into separate files.
+
+597) Sudo no longer assumes that gr_mem in struct group is non-NULL.
+
+598) Added support for setting environment variables on the command
+     line if the command has the SETENV attribute set in sudoers.
+
+599) Added a -E flag to preserve the environment if the SETENV attribute
+     has been set.
