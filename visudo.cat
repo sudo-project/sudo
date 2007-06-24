@@ -25,11 +25,12 @@ DDEESSCCRRIIPPTTIIOONN
        script.  Normally, vviissuuddoo does not honor the VISUAL or
        EDITOR environment variables unless they contain an editor
        in the aforementioned editors list.  However, if vviissuuddoo is
-       configured with the _-_-_w_i_t_h_-_e_n_v_e_d_i_t_o_r flag or the _e_n_v_e_d_i_t_o_r
-       Default variable is set in _s_u_d_o_e_r_s, vviissuuddoo will use any
-       the editor defines by VISUAL or EDITOR.  Note that this
-       can be a security hole since it allows the user to execute
-       any program they wish simply by setting VISUAL or EDITOR.
+       configured with the _-_-_w_i_t_h_-_e_n_v_e_d_i_t_o_r flag or the _e_n_v___e_d_i_­
+       _t_o_r Default variable is set in _s_u_d_o_e_r_s, vviissuuddoo will use
+       any the editor defines by VISUAL or EDITOR.  Note that
+       this can be a security hole since it allows the user to
+       execute any program they wish simply by setting VISUAL or
+       EDITOR.
 
        vviissuuddoo parses the _s_u_d_o_e_r_s file after the edit and will not
        save the changes if there is a syntax error.  Upon finding
@@ -57,11 +58,10 @@ OOPPTTIIOONNSS
            is encountered, vviissuuddoo will exit with a value of 1.
 
        -f  Specify and alternate _s_u_d_o_e_r_s file location.  With
-           this option vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s
 
 
 
-1.6.9                    October 26, 2004                       1
+1.7                       June 23, 2007                         1
 
 
 
@@ -70,6 +70,7 @@ OOPPTTIIOONNSS
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
+           this option vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s
            file of your choice, instead of the default,
            _/_e_t_c_/_s_u_d_o_e_r_s.  The lock file used is the specified
            _s_u_d_o_e_r_s file with ".tmp" appended to it.
@@ -123,11 +124,10 @@ DDIIAAGGNNOOSSTTIICCSS
            The specified {User,Runas,Host,Cmnd}_Alias was defined
            but never used.  You may wish to comment out or remove
            the unused alias.  In --ss (strict) mode this is an
-           error, not a warning.
 
 
 
-1.6.9                    October 26, 2004                       2
+1.7                       June 23, 2007                         2
 
 
 
@@ -135,6 +135,8 @@ DDIIAAGGNNOOSSTTIICCSS
 
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
+
+           error, not a warning.
 
 SSEEEE AALLSSOO
        _v_i(1), sudoers(4), sudo(1m), vipw(1m)
@@ -157,9 +159,6 @@ BBUUGGSS
        a bug report at http://www.sudo.ws/sudo/bugs/
 
 SSUUPPPPOORRTT
-       Commercial support is available for ssuuddoo, see
-       http://www.sudo.ws/sudo/support.html for details.
-
        Limited free support is available via the sudo-users mail­
        ing list, see http://www.sudo.ws/mail­
        man/listinfo/sudo-users to subscribe or search the
@@ -193,6 +192,7 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.6.9                    October 26, 2004                       3
+
+1.7                       June 23, 2007                         3
 
 
