@@ -862,7 +862,7 @@ check_execv(fd, pid, seqnr, askp, policyp, errorp)
 
     /* Get processes's cwd. */
     rval = ioctl(fd, STRIOCGETCWD, &pid);
-    if (rval == -1 || getcwd(user_cwd, sizeof(user_cwd)) != 0) {
+    if (rval == -1 || getcwd(user_cwd, sizeof(user_cwd)) == NULL) {
 	if (rval == -1 && errno == EBUSY)
 	    return(-1);
 	warningx("cannot get working directory");
