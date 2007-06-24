@@ -496,7 +496,7 @@ read_string(fd, pid, addr, buf, bufsiz)
 	    addr += nread;
 	    bufsiz -= nread;
 	} else {
-	    if (errno != EINVAL || chunksiz == 4)
+	    if (errno != EINVAL || chunksiz == 1)
 		    return(-1);
 	    chunksiz >>= 1;	/* chunksiz too big, halve it */
 	}
