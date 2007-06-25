@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "June 12, 2007" "1.6.9" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "June 25, 2007" "1.6.9b5" "MAINTENANCE COMMANDS"
 .SH "NAME"
 visudo \- edit the sudoers file
 .SH "SYNOPSIS"
@@ -290,9 +290,6 @@ If you feel you have found a bug in \fBvisudo\fR, please submit a bug report
 at http://www.sudo.ws/sudo/bugs/
 .SH "SUPPORT"
 .IX Header "SUPPORT"
-Commercial support is available for \fBsudo\fR, see
-http://www.sudo.ws/sudo/support.html for details.
-.PP
 Limited free support is available via the sudo-users mailing list,
 see http://www.sudo.ws/mailman/listinfo/sudo\-users to subscribe or
 search the archives.
