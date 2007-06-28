@@ -103,6 +103,8 @@ sub expand{
     s/PASSWD:\s*// && push @options,"authenticate";
     s/NOEXEC:\s*// && push @options,"noexec";
     s/EXEC:\s*// && push @options,"!noexec";
+    s/SETENV:\s*// && push @options,"setenv";
+    s/NOSETENV:\s*// && push @options,"!setenv";
     s/\w+://; # silently remove other directives
     s/\s+$//; # right trim
   }
