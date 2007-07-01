@@ -754,11 +754,6 @@ parse_args(argc, argv)
     } else
 	rval = MODE_RUN;
 
-    if (NewArgc == 0 && rval == MODE_RUN) {	/* no options and no command */
-	SET(rval, (MODE_IMPLIED_SHELL | MODE_SHELL));
-	return(rval);
-    }
-
     while (NewArgc > 0) {
 	if (NewArgv[0][0] == '-') {
 	    if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0')
@@ -785,7 +780,7 @@ parse_args(argc, argv)
 		    NewArgc--;
 		    NewArgv++;
 		    break;
-    #ifdef HAVE_BSD_AUTH_H
+#ifdef HAVE_BSD_AUTH_H
 		case 'a':
 		    /* Must have an associated authentication style. */
 		    if (NewArgv[1] == NULL)
@@ -796,8 +791,8 @@ parse_args(argc, argv)
 		    NewArgc--;
 		    NewArgv++;
 		    break;
-    #endif
-    #ifdef HAVE_LOGIN_CAP_H
+#endif
+#ifdef HAVE_LOGIN_CAP_H
 		case 'c':
 		    /* Must have an associated login class. */
 		    if (NewArgv[1] == NULL)
@@ -809,7 +804,7 @@ parse_args(argc, argv)
 		    NewArgc--;
 		    NewArgv++;
 		    break;
-    #endif
+#endif
 		case 'C':
 		    if (NewArgv[1] == NULL)
 			usage(1);
@@ -908,9 +903,7 @@ parse_args(argc, argv)
 		case '-':
 		    NewArgc--;
 		    NewArgv++;
-		    if (rval == MODE_RUN)
-			SET(rval, (MODE_IMPLIED_SHELL | MODE_SHELL));
-		    return(rval);
+		    goto args_done;
 		case '\0':
 		    warningx("'-' requires an argument");
 		    usage(1);
@@ -932,6 +925,8 @@ parse_args(argc, argv)
 	NewArgc--;
 	NewArgv++;
     }
+args_done:
+
     if (NewArgc > 0 && rval == MODE_LIST)
 	rval = MODE_CHECK;
 
@@ -950,6 +945,8 @@ parse_args(argc, argv)
     if ((NewArgc == 0 && (rval & MODE_EDIT)) ||
 	(NewArgc > 0 && !(rval & (MODE_RUN | MODE_EDIT | MODE_CHECK))))
 	usage(1);
+    if (NewArgc == 0 && rval == MODE_RUN)
+	SET(rval, (MODE_IMPLIED_SHELL | MODE_SHELL));
 
     return(rval);
 }
