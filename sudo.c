@@ -1160,7 +1160,7 @@ set_project(pw)
 			    "resource pool for project \"%s\"", resultp->pj_name);
 		break;
 	    default:
-		if (error <= 0) {
+		if (errval <= 0) {
 		    log_error(errflags, "setproject failed for project \"%s\"",
 			resultp->pj_name);
 		} else {
