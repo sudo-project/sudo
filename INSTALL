@@ -200,7 +200,7 @@ Special features/options:
 	Linux, Solaris and HP-UX (version 11 and higher).
 
 	NOTE: on RedHat Linux and Fedora you *must* have an /etc/pam.d/sudo
-	file install.  You may either use the sample.pam file included with
+	file installed.  You may either use the sample.pam file included with
 	sudo or use /etc/pam.d/su as a reference.  The sample.pam file
 	included with sudo may or may not work with other Linux distributions.
 	On Solaris and HP-UX 11 systems you should check (and understand)
@@ -646,6 +646,12 @@ Digital UNIX:
     edit that.
 
 Linux:
+    PAM and LDAP headers are not installed by default on most Linux
+    systems.  You will need to install the "pav-dev" package if
+    /usr/include/security/pam_appl.h is not present on your system.
+    If you wish to build with LDAP support you will also need the
+    openldap-devel package.
+
     Versions of glibc 2.x previous to 2.0.7 have a broken lsearch().
     You will need to either upgrade to glibc-2.0.7 or use sudo's
     version of lsearch().  To use sudo's lsearch(), comment out
