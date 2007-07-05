@@ -563,11 +563,10 @@ netgr_matches(netgr, lhost, shost, user)
     char *shost;
     char *user;
 {
+    static char *domain;
 #ifdef HAVE_GETDOMAINNAME
-    static char *domain = (char *) -1;
-#else
-    static char *domain = NULL;
-#endif /* HAVE_GETDOMAINNAME */
+    static int initialized;
+#endif
 
     /* make sure we have a valid netgroup, sudo style */
     if (*netgr++ != '+')
@@ -575,12 +574,13 @@ netgr_matches(netgr, lhost, shost, user)
 
 #ifdef HAVE_GETDOMAINNAME
     /* get the domain name (if any) */
-    if (domain == (char *) -1) {
+    if (!initialized) {
 	domain = (char *) emalloc(MAXHOSTNAMELEN);
 	if (getdomainname(domain, MAXHOSTNAMELEN) == -1 || *domain == '\0') {
 	    efree(domain);
 	    domain = NULL;
 	}
+	initialized = 1;
     }
 #endif /* HAVE_GETDOMAINNAME */
 
