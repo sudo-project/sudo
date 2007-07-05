@@ -251,15 +251,17 @@ display_privs(v, pw)
 		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
 		    if (cs != priv->cmndlist)
 			print_priv(", ");
+		    print_priv("    (");
 		    if (cs->runaslist != NULL) {
-			print_priv("    (");
 			for (m = cs->runaslist; m != NULL; m = m->next) {
 			    if (m != cs->runaslist)
 				print_priv(", ");
 			    print_member(m->name, m->type, m->negated, RUNASALIAS);
 			}
-			print_priv(") ");
+		    } else {
+			print_priv(def_runas_default);
 		    }
+		    print_priv(") ");
 		    if (TAG_CHANGED(monitor)) {
 			print_priv(cs->tags.monitor ? "MONITOR: " : "NOMONITOR: ");
 			tags.monitor = cs->tags.monitor;
