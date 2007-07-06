@@ -98,7 +98,7 @@ int
 sudoers_lookup(pwflag)
     int pwflag;
 {
-    int rval, validated, matched;
+    int validated, matched, host_matched, runas_matched, cmnd_matched;
     enum def_tupple pwcheck = 0;
     struct cmndspec *cs;
     struct cmndtag *tags = NULL;
@@ -130,20 +130,20 @@ sudoers_lookup(pwflag)
 	CLR(validated, FLAG_NO_HOST);
 	matched = FALSE;
 	for (us = userspecs; us != NULL; us = us->next) {
-	    if (user_matches(sudo_user.pw, us->user) == TRUE) {
-		for (priv = us->privileges; priv != NULL; priv = priv->next) {
-		    if (host_matches(priv->hostlist) == TRUE) {
-			for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
-			    /* Only check the command when listing another user. */
-			    if (user_uid == 0 || list_pw == NULL ||
-				user_uid == list_pw->pw_uid ||
-				cmnd_matches(cs->cmnd) == TRUE)
-				    matched = TRUE;
-			    if ((pwcheck == any && nopass != TRUE) ||
-				(pwcheck == all && nopass == TRUE))
-				nopass = cs->tags.nopasswd;
-			}
-		    }
+	    if (user_matches(sudo_user.pw, us->user) != TRUE)
+		continue;
+	    for (priv = us->privileges; priv != NULL; priv = priv->next) {
+		if (host_matches(priv->hostlist) != TRUE)
+		    continue;
+		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
+		    /* Only check the command when listing another user. */
+		    if (user_uid == 0 || list_pw == NULL ||
+			user_uid == list_pw->pw_uid ||
+			cmnd_matches(cs->cmnd) == TRUE)
+			    matched = TRUE;
+		    if ((pwcheck == any && nopass != TRUE) ||
+			(pwcheck == all && nopass == TRUE))
+			nopass = cs->tags.nopasswd;
 		}
 	    }
 	}
@@ -164,23 +164,27 @@ sudoers_lookup(pwflag)
 
     matched = UNSPEC;
     for (us = userspecs; us != NULL; us = us->next) {
-	if (user_matches(sudo_user.pw, us->user) == TRUE) {
-	    CLR(validated, FLAG_NO_USER);
-	    for (priv = us->privileges; priv != NULL; priv = priv->next) {
-		if (host_matches(priv->hostlist) == TRUE) {
-		    CLR(validated, FLAG_NO_HOST);
-		    runas = NULL;
-		    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
-			if (cs->runaslist != NULL)
-			    runas = cs->runaslist;
-			if (runas_matches(runas) == TRUE) {
-			    rval = cmnd_matches(cs->cmnd);
-			    if (rval != UNSPEC) {
-				matched = rval;
-				tags = &cs->tags;
-			    }
-			}
-		    }
+	if (user_matches(sudo_user.pw, us->user) != TRUE)
+	    continue;
+	CLR(validated, FLAG_NO_USER);
+	for (priv = us->privileges; priv != NULL; priv = priv->next) {
+	    host_matched = host_matches(priv->hostlist);
+	    if (host_matched == UNSPEC)
+		continue;
+	    if (host_matched == TRUE)
+		CLR(validated, FLAG_NO_HOST);
+	    runas = NULL;
+	    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
+		if (cs->runaslist != NULL)
+		    runas = cs->runaslist;
+		runas_matched = runas_matches(runas);
+		if (runas_matched != UNSPEC) {
+		    cmnd_matched = cmnd_matches(cs->cmnd);
+		    if (cmnd_matched != UNSPEC)
+			matched = host_matched && runas_matched &&
+			    cmnd_matched;
+		    if (matched)
+			tags = &cs->tags;
 		}
 	    }
 	}
@@ -416,6 +420,7 @@ display_cmnd(v, pw)
     struct privilege *priv;
     struct userspec *us;
     int rval = 1;
+    int host_matched, runas_matched, cmnd_matched;
 
 #ifdef HAVE_LDAP
     if (v != NULL)
@@ -423,18 +428,24 @@ display_cmnd(v, pw)
 #endif
     if (rval != 0 && !def_ignore_local_sudoers) {
 	for (match = NULL, us = userspecs; us != NULL; us = us->next) {
-	    if (user_matches(pw, us->user) != TRUE ||
-	      host_matches(us->privileges->hostlist) != TRUE)
+	    if (user_matches(pw, us->user) != TRUE)
 		continue;
 
 	    for (priv = us->privileges; priv != NULL; priv = priv->next) {
+		host_matched = host_matches(priv->hostlist);
+		if (host_matched == UNSPEC)
+		    continue;
 		runas = NULL;
 		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
 		    if (cs->runaslist != NULL)
 			runas = cs->runaslist;
-		    if (runas_matches(runas) == TRUE &&
-		      cmnd_matches(cs->cmnd) != UNSPEC) 
-			match = cs->cmnd;
+		    runas_matched = runas_matches(runas);
+		    if (runas_matched != UNSPEC) {
+			cmnd_matched = cmnd_matches(cs->cmnd);
+			if (cmnd_matched != UNSPEC)
+			    match = host_matched && runas_matched ?
+				cs->cmnd : NULL;
+		    }
 		}
 	    }
 	}
