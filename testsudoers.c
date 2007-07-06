@@ -273,29 +273,28 @@ main(argc, argv)
     printf("\nEntries for user %s:\n", user_name);
     matched = UNSPEC;
     for (us = userspecs; us != NULL; us = us->next) {
-	if (user_matches(sudo_user.pw, us->user) == TRUE) {
-	    for (priv = us->privileges; priv != NULL; priv = priv->next) {
-		putchar('\n');
-		print_privilege(priv);
-		putchar('\n');
-		if (host_matches(priv->hostlist) == TRUE) {
-		    puts("\thost  matched");
-		    runas = NULL;
-		    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
-			if (cs->runaslist != NULL)
-			    runas = cs->runaslist;
-			if (runas_matches(runas) == TRUE) {
-			    puts("\trunas matched");
-			    rval = cmnd_matches(cs->cmnd);
-			    if (rval != UNSPEC)
-				matched = rval;
-			    printf("\tcmnd  %s\n", rval == ALLOW ? "allowed" :
-				rval == DENY ? "denied" : "unmatched");
-			}
+	if (user_matches(sudo_user.pw, us->user) != TRUE)
+	    continue;
+	for (priv = us->privileges; priv != NULL; priv = priv->next) {
+	    putchar('\n');
+	    print_privilege(priv);
+	    putchar('\n');
+	    if (host_matches(priv->hostlist) == TRUE) {
+		puts("\thost  matched");
+		runas = NULL;
+		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
+		    if (cs->runaslist != NULL)
+			runas = cs->runaslist;
+		    if (runas_matches(runas) == TRUE) {
+			puts("\trunas matched");
+			rval = cmnd_matches(cs->cmnd);
+			if (rval != UNSPEC)
+			    matched = rval;
+			printf("\tcmnd  %s\n", rval == ALLOW ? "allowed" :
+			    rval == DENY ? "denied" : "unmatched");
 		    }
-		} else
-		    puts("\thost  unmatched");
-	    }
+		}
+	    } else puts("\thost  unmatched");
 	}
     }
     printf("\nCommand %s\n", matched == TRUE ? "allowed" :
