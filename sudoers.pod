@@ -233,6 +233,243 @@ These operators are used to add to and delete from a list respectively.
 It is not an error to use the C<-=> operator to remove an element
 that does not exist in a list.
 
+See L</"SUDOERS OPTIONS"> for a list of supported Defaults parameters.
+
+=head2 User Specification
+
+ User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \
+	       (':' Host_List '=' Cmnd_Spec_List)*
+
+ Cmnd_Spec_List ::= Cmnd_Spec |
+		    Cmnd_Spec ',' Cmnd_Spec_List
+
+ Cmnd_Spec ::= Runas_Spec? Tag_Spec* Cmnd
+
+ Runas_Spec ::= '(' Runas_List ')'
+
+ Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
+	       'SETENV:' | 'NOSETENV:' | 'MONITOR:' | 'NOMONITOR:')
+
+A B<user specification> determines which commands a user may run
+(and as what user) on specified hosts.  By default, commands are
+run as B<root>, but this can be changed on a per-command basis.
+
+Let's break that down into its constituent parts:
+
+=head2 Runas_Spec
+
+A C<Runas_Spec> is simply a C<Runas_List> (as defined above)
+enclosed in a set of parentheses.  If you do not specify a
+C<Runas_Spec> in the user specification, a default C<Runas_Spec>
+of B<root> will be used.  A C<Runas_Spec> sets the default for
+commands that follow it.  What this means is that for the entry:
+
+ dgb	boulder = (operator) /bin/ls, /bin/kill, /usr/bin/lprm
+
+The user B<dgb> may run F</bin/ls>, F</bin/kill>, and
+F</usr/bin/lprm> -- but only as B<operator>.  E.g.,
+
+ $ sudo -u operator /bin/ls.
+
+It is also possible to override a C<Runas_Spec> later on in an
+entry.  If we modify the entry like so:
+
+ dgb	boulder = (operator) /bin/ls, (root) /bin/kill, /usr/bin/lprm
+
+Then user B<dgb> is now allowed to run F</bin/ls> as B<operator>,
+but  F</bin/kill> and F</usr/bin/lprm> as B<root>.
+
+=head2 Tag_Spec
+
+A command may have zero or more tags associated with it.  There are
+eight possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>, C<EXEC>,
+C<SETENV>, C<NOSETENV>, C<MONITOR> and C<NOMONITOR>.
+Once a tag is set on a C<Cmnd>, subsequent C<Cmnd>s in the
+C<Cmnd_Spec_List>, inherit the tag unless it is overridden by the
+opposite tag (i.e.: C<PASSWD> overrides C<NOPASSWD> and C<NOEXEC>
+overrides C<EXEC>).
+
+=head3 NOPASSWD and PASSWD
+
+By default, B<sudo> requires that a user authenticate him or herself
+before running a command.  This behavior can be modified via the
+C<NOPASSWD> tag.  Like a C<Runas_Spec>, the C<NOPASSWD> tag sets
+a default for the commands that follow it in the C<Cmnd_Spec_List>.
+Conversely, the C<PASSWD> tag can be used to reverse things.
+For example:
+
+ ray	rushmore = NOPASSWD: /bin/kill, /bin/ls, /usr/bin/lprm
+
+would allow the user B<ray> to run F</bin/kill>, F</bin/ls>, and
+F</usr/bin/lprm> as root on the machine rushmore as B<root> without
+authenticating himself.  If we only want B<ray> to be able to
+run F</bin/kill> without a password the entry would be:
+
+ ray	rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
+
+Note, however, that the C<PASSWD> tag has no effect on users who are
+in the group specified by the I<exempt_group> option.
+
+By default, if the C<NOPASSWD> tag is applied to any of the entries
+for a user on the current host, he or she will be able to run
+C<sudo -l> without a password.  Additionally, a user may only run
+C<sudo -v> without a password if the C<NOPASSWD> tag is present
+for all a user's entries that pertain to the current host.
+This behavior may be overridden via the verifypw and listpw options.
+
+=head3 NOEXEC and EXEC
+
+If B<sudo> has been compiled with I<noexec> support and the underlying
+operating system supports it, the C<NOEXEC> tag can be used to prevent
+a dynamically-linked executable from running further commands itself.
+
+In the following example, user B<aaron> may run F</usr/bin/more>
+and F</usr/bin/vi> but shell escapes will be disabled.
+
+ aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+
+See the L<PREVENTING SHELL ESCAPES> section below for more details
+on how C<NOEXEC> works and whether or not it will work on your system.
+
+=head3 SETENV and NOSETENV
+
+These tags override the value of the I<setenv> option on a per-command
+basis.  Note that environment variables set on the command line way
+are not subject to the restrictions imposed by I<env_check>,
+I<env_delete>, or I<env_reset>.  As such, only trusted users should
+be allowed to set variables in this manner.
+
+=head3 MONITOR and NOMONITOR
+
+If B<sudo> has been configured with the C<--with-systrace> option,
+the C<MONITOR> tag can be used to cause programs spawned by a command
+to be checked against I<sudoers> and logged just like they would
+be if run through B<sudo> directly.  This is useful in conjunction
+with commands that allow shell escapes such as editors, shells and
+paginators.
+
+In the following example, user B<chuck> may run any command on the
+machine research in monitor mode.
+
+ chuck	research = MONITOR: ALL
+
+See the L<PREVENTING SHELL ESCAPES> section below for more details
+on how C<MONITOR> works and whether or not it will work on your system.
+
+=head2 Wildcards
+
+B<sudo> allows shell-style I<wildcards> (aka meta or glob characters)
+to be used in pathnames as well as command line arguments in the
+I<sudoers> file.  Wildcard matching is done via the B<POSIX>
+L<fnmatch(3)> routine.  Note that these are I<not> regular expressions.
+
+=over 8
+
+=item C<*>
+
+Matches any set of zero or more characters.
+
+=item C<?>
+
+Matches any single character.
+
+=item C<[...]>
+
+Matches any character in the specified range.
+
+=item C<[!...]>
+
+Matches any character B<not> in the specified range.
+
+=item C<\x>
+
+For any character "x", evaluates to "x".  This is used to
+escape special characters such as: "*", "?", "[", and "}".
+
+=back
+
+Note that a forward slash ('/') will B<not> be matched by
+wildcards used in the pathname.  When matching the command
+line arguments, however, a slash B<does> get matched by
+wildcards.  This is to make a path like:
+
+    /usr/bin/*
+
+match F</usr/bin/who> but not F</usr/bin/X11/xterm>.
+
+=head2 Exceptions to wildcard rules
+
+The following exceptions apply to the above rules:
+
+=over 8
+
+=item C<"">
+
+If the empty string C<""> is the only command line argument in the
+I<sudoers> entry it means that command is not allowed to be run
+with B<any> arguments.
+
+=back
+
+=head2 Including other files from within sudoers
+
+It is possible to include other I<sudoers> files from within the
+I<sudoers> file currently being parsed using the C<#include>
+directive, similar to the one used by the C preprocessor.  This is
+useful, for example, for keeping a site-wide I<sudoers> file in
+addition to a per-machine local one.  For the sake of this example
+the site-wide I<sudoers> will be F</etc/sudoers> and the per-machine
+one will be F</etc/sudoers.local>.  To include F</etc/sudoers.local>
+from F</etc/sudoers> we would use the following line in F</etc/sudoers>:
+
+ #include /etc/sudoers.local
+
+When B<sudo> reaches this line it will suspend processing of the
+current file (F</etc/sudoers>) and switch to F</etc/sudoers.local>.
+Upon reaching the end of F</etc/sudoers.local>, the rest of
+F</etc/sudoers> will be processed.  Files that are included may
+themselves include other files.  A hard limit of 128 nested include
+files is enforced to prevent include file loops.
+
+=head2 Other special characters and reserved words
+
+The pound sign ('#') is used to indicate a comment (unless it is
+part of a #include directive or unless it occurs in the context of
+a user name and is followed by one or more digits, in which case
+it is treated as a uid).  Both the comment character and any text
+after it, up to the end of the line, are ignored.
+
+The reserved word B<ALL> is a built-in I<alias> that always causes
+a match to succeed.  It can be used wherever one might otherwise
+use a C<Cmnd_Alias>, C<User_Alias>, C<Runas_Alias>, or C<Host_Alias>.
+You should not try to define your own I<alias> called B<ALL> as the
+built-in alias will be used in preference to your own.  Please note
+that using B<ALL> can be dangerous since in a command context, it
+allows the user to run B<any> command on the system.
+
+An exclamation point ('!') can be used as a logical I<not> operator
+both in an I<alias> and in front of a C<Cmnd>.  This allows one to
+exclude certain values.  Note, however, that using a C<!> in
+conjunction with the built-in C<ALL> alias to allow a user to
+run "all but a few" commands rarely works as intended (see SECURITY
+NOTES below).
+
+Long lines can be continued with a backslash ('\') as the last
+character on the line.
+
+Whitespace between elements in a list as well as special syntactic
+characters in a I<User Specification> ('=', ':', '(', ')') is optional.
+
+The following characters must be escaped with a backslash ('\') when
+used as part of a word (e.g.E<nbsp>a username or hostname):
+'@', '!', '=', ':', ',', '(', ')', '\'.
+
+=head1 SUDOERS OPTIONS
+
+Sudo's behavior can be modified by C<Default_Entry> lines, as
+explained earlier.  A list of all supported Defaults parameters,
+grouped by type, are listed below.
+
 B<Flags>:
 
 =over 12
@@ -832,235 +1069,6 @@ B<local0>, B<local1>, B<local2>, B<local3>, B<local4>, B<local5>,
 B<local6>, and B<local7>.  The following syslog priorities are
 supported: B<alert>, B<crit>, B<debug>, B<emerg>, B<err>, B<info>,
 B<notice>, and B<warning>.
-
-=head2 User Specification
-
- User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \
-	       (':' Host_List '=' Cmnd_Spec_List)*
-
- Cmnd_Spec_List ::= Cmnd_Spec |
-		    Cmnd_Spec ',' Cmnd_Spec_List
-
- Cmnd_Spec ::= Runas_Spec? Tag_Spec* Cmnd
-
- Runas_Spec ::= '(' Runas_List ')'
-
- Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-	       'SETENV:' | 'NOSETENV:' | 'MONITOR:' | 'NOMONITOR:')
-
-A B<user specification> determines which commands a user may run
-(and as what user) on specified hosts.  By default, commands are
-run as B<root>, but this can be changed on a per-command basis.
-
-Let's break that down into its constituent parts:
-
-=head2 Runas_Spec
-
-A C<Runas_Spec> is simply a C<Runas_List> (as defined above)
-enclosed in a set of parentheses.  If you do not specify a
-C<Runas_Spec> in the user specification, a default C<Runas_Spec>
-of B<root> will be used.  A C<Runas_Spec> sets the default for
-commands that follow it.  What this means is that for the entry:
-
- dgb	boulder = (operator) /bin/ls, /bin/kill, /usr/bin/lprm
-
-The user B<dgb> may run F</bin/ls>, F</bin/kill>, and
-F</usr/bin/lprm> -- but only as B<operator>.  E.g.,
-
- $ sudo -u operator /bin/ls.
-
-It is also possible to override a C<Runas_Spec> later on in an
-entry.  If we modify the entry like so:
-
- dgb	boulder = (operator) /bin/ls, (root) /bin/kill, /usr/bin/lprm
-
-Then user B<dgb> is now allowed to run F</bin/ls> as B<operator>,
-but  F</bin/kill> and F</usr/bin/lprm> as B<root>.
-
-=head2 Tag_Spec
-
-A command may have zero or more tags associated with it.  There are
-eight possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>, C<EXEC>,
-C<SETENV>, C<NOSETENV>, C<MONITOR> and C<NOMONITOR>.
-Once a tag is set on a C<Cmnd>, subsequent C<Cmnd>s in the
-C<Cmnd_Spec_List>, inherit the tag unless it is overridden by the
-opposite tag (i.e.: C<PASSWD> overrides C<NOPASSWD> and C<NOEXEC>
-overrides C<EXEC>).
-
-=head3 NOPASSWD and PASSWD
-
-By default, B<sudo> requires that a user authenticate him or herself
-before running a command.  This behavior can be modified via the
-C<NOPASSWD> tag.  Like a C<Runas_Spec>, the C<NOPASSWD> tag sets
-a default for the commands that follow it in the C<Cmnd_Spec_List>.
-Conversely, the C<PASSWD> tag can be used to reverse things.
-For example:
-
- ray	rushmore = NOPASSWD: /bin/kill, /bin/ls, /usr/bin/lprm
-
-would allow the user B<ray> to run F</bin/kill>, F</bin/ls>, and
-F</usr/bin/lprm> as root on the machine rushmore as B<root> without
-authenticating himself.  If we only want B<ray> to be able to
-run F</bin/kill> without a password the entry would be:
-
- ray	rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
-
-Note, however, that the C<PASSWD> tag has no effect on users who are
-in the group specified by the I<exempt_group> option.
-
-By default, if the C<NOPASSWD> tag is applied to any of the entries
-for a user on the current host, he or she will be able to run
-C<sudo -l> without a password.  Additionally, a user may only run
-C<sudo -v> without a password if the C<NOPASSWD> tag is present
-for all a user's entries that pertain to the current host.
-This behavior may be overridden via the verifypw and listpw options.
-
-=head3 NOEXEC and EXEC
-
-If B<sudo> has been compiled with I<noexec> support and the underlying
-operating system supports it, the C<NOEXEC> tag can be used to prevent
-a dynamically-linked executable from running further commands itself.
-
-In the following example, user B<aaron> may run F</usr/bin/more>
-and F</usr/bin/vi> but shell escapes will be disabled.
-
- aaron	shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
-
-See the L<PREVENTING SHELL ESCAPES> section below for more details
-on how C<NOEXEC> works and whether or not it will work on your system.
-
-=head3 SETENV and NOSETENV
-
-These tags override the value of the I<setenv> option on a per-command
-basis.  Note that environment variables set on the command line way
-are not subject to the restrictions imposed by I<env_check>,
-I<env_delete>, or I<env_reset>.  As such, only trusted users should
-be allowed to set variables in this manner.
-
-=head3 MONITOR and NOMONITOR
-
-If B<sudo> has been configured with the C<--with-systrace> option,
-the C<MONITOR> tag can be used to cause programs spawned by a command
-to be checked against I<sudoers> and logged just like they would
-be if run through B<sudo> directly.  This is useful in conjunction
-with commands that allow shell escapes such as editors, shells and
-paginators.
-
-In the following example, user B<chuck> may run any command on the
-machine research in monitor mode.
-
- chuck	research = MONITOR: ALL
-
-See the L<PREVENTING SHELL ESCAPES> section below for more details
-on how C<MONITOR> works and whether or not it will work on your system.
-
-=head2 Wildcards
-
-B<sudo> allows shell-style I<wildcards> (aka meta or glob characters)
-to be used in pathnames as well as command line arguments in the
-I<sudoers> file.  Wildcard matching is done via the B<POSIX>
-L<fnmatch(3)> routine.  Note that these are I<not> regular expressions.
-
-=over 8
-
-=item C<*>
-
-Matches any set of zero or more characters.
-
-=item C<?>
-
-Matches any single character.
-
-=item C<[...]>
-
-Matches any character in the specified range.
-
-=item C<[!...]>
-
-Matches any character B<not> in the specified range.
-
-=item C<\x>
-
-For any character "x", evaluates to "x".  This is used to
-escape special characters such as: "*", "?", "[", and "}".
-
-=back
-
-Note that a forward slash ('/') will B<not> be matched by
-wildcards used in the pathname.  When matching the command
-line arguments, however, a slash B<does> get matched by
-wildcards.  This is to make a path like:
-
-    /usr/bin/*
-
-match F</usr/bin/who> but not F</usr/bin/X11/xterm>.
-
-=head2 Exceptions to wildcard rules
-
-The following exceptions apply to the above rules:
-
-=over 8
-
-=item C<"">
-
-If the empty string C<""> is the only command line argument in the
-I<sudoers> entry it means that command is not allowed to be run
-with B<any> arguments.
-
-=back
-
-=head2 Including other files from within sudoers
-
-It is possible to include other I<sudoers> files from within the
-I<sudoers> file currently being parsed using the C<#include>
-directive, similar to the one used by the C preprocessor.  This is
-useful, for example, for keeping a site-wide I<sudoers> file in
-addition to a per-machine local one.  For the sake of this example
-the site-wide I<sudoers> will be F</etc/sudoers> and the per-machine
-one will be F</etc/sudoers.local>.  To include F</etc/sudoers.local>
-from F</etc/sudoers> we would use the following line in F</etc/sudoers>:
-
- #include /etc/sudoers.local
-
-When B<sudo> reaches this line it will suspend processing of the
-current file (F</etc/sudoers>) and switch to F</etc/sudoers.local>.
-Upon reaching the end of F</etc/sudoers.local>, the rest of
-F</etc/sudoers> will be processed.  Files that are included may
-themselves include other files.  A hard limit of 128 nested include
-files is enforced to prevent include file loops.
-
-=head2 Other special characters and reserved words
-
-The pound sign ('#') is used to indicate a comment (unless it is
-part of a #include directive or unless it occurs in the context of
-a user name and is followed by one or more digits, in which case
-it is treated as a uid).  Both the comment character and any text
-after it, up to the end of the line, are ignored.
-
-The reserved word B<ALL> is a built-in I<alias> that always causes
-a match to succeed.  It can be used wherever one might otherwise
-use a C<Cmnd_Alias>, C<User_Alias>, C<Runas_Alias>, or C<Host_Alias>.
-You should not try to define your own I<alias> called B<ALL> as the
-built-in alias will be used in preference to your own.  Please note
-that using B<ALL> can be dangerous since in a command context, it
-allows the user to run B<any> command on the system.
-
-An exclamation point ('!') can be used as a logical I<not> operator
-both in an I<alias> and in front of a C<Cmnd>.  This allows one to
-exclude certain values.  Note, however, that using a C<!> in
-conjunction with the built-in C<ALL> alias to allow a user to
-run "all but a few" commands rarely works as intended (see SECURITY
-NOTES below).
-
-Long lines can be continued with a backslash ('\') as the last
-character on the line.
-
-Whitespace between elements in a list as well as special syntactic
-characters in a I<User Specification> ('=', ':', '(', ')') is optional.
-
-The following characters must be escaped with a backslash ('\') when
-used as part of a word (e.g.E<nbsp>a username or hostname):
-'@', '!', '=', ':', ',', '(', ')', '\'.
 
 =head1 FILES
 
