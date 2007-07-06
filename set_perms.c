@@ -86,6 +86,7 @@ set_perms(perm)
 	case PERM_ROOT:
 				if (setresuid(ROOT_UID, ROOT_UID, ROOT_UID))
 				    errx(1, "setresuid(ROOT_UID, ROOT_UID, ROOT_UID) failed, your operating system may have a broken setresuid() function\nTry running configure with --disable-setresuid");
+				(void) setresgid(-1, user_gid, -1);
 			      	break;
 
 	case PERM_USER:
@@ -102,6 +103,7 @@ set_perms(perm)
 			      	break;
 				
 	case PERM_RUNAS:
+				(void) setresgid(-1, runas_pw->pw_gid, -1);
 				if (setresuid(-1, runas_pw->pw_uid, -1))
 				    err(1, "unable to change to runas uid");
 			      	break;
@@ -161,6 +163,7 @@ set_perms(perm)
 				    errx(1, "setreuid(-1, ROOT_UID) failed, your operating system may have a broken setreuid() function\nTry running configure with --disable-setreuid");
 				if (setuid(ROOT_UID))
 				    err(1, "setuid(ROOT_UID)");
+				(void) setregid(-1, user_gid);
 			      	break;
 
 	case PERM_USER:
@@ -177,6 +180,7 @@ set_perms(perm)
 			      	break;
 				
 	case PERM_RUNAS:
+				(void) setregid(-1, runas_pw->pw_gid);
 				if (setreuid(-1, runas_pw->pw_uid))
 				    err(1, "unable to change to runas uid");
 			      	break;
@@ -239,7 +243,8 @@ set_perms(perm)
 
     switch (perm) {
 	case PERM_ROOT:
-				/* already set above */
+				/* uid set above */
+				(void) setegid(user_gid);
 			      	break;
 
 	case PERM_USER:
@@ -256,6 +261,7 @@ set_perms(perm)
 			      	break;
 				
 	case PERM_RUNAS:
+				(void) setegid(runas_pw->pw_gid);
 				if (seteuid(runas_pw->pw_uid))
 				    err(1, "unable to change to runas uid");
 			      	break;
