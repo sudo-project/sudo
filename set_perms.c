@@ -83,7 +83,6 @@ set_perms(perm)
     int perm;
 {
     switch (perm) {
-	case PERM_FULL_ROOT:
 	case PERM_ROOT:
 				if (setresuid(ROOT_UID, ROOT_UID, ROOT_UID))
 				    errx(1, "setresuid(ROOT_UID, ROOT_UID, ROOT_UID) failed, your operating system may have a broken setresuid() function\nTry running configure with --disable-setresuid");
@@ -157,7 +156,6 @@ set_perms(perm)
     int perm;
 {
     switch (perm) {
-	case PERM_FULL_ROOT:
 	case PERM_ROOT:
 				if (setreuid(-1, ROOT_UID))
 				    errx(1, "setreuid(-1, ROOT_UID) failed, your operating system may have a broken setreuid() function\nTry running configure with --disable-setreuid");
@@ -240,7 +238,6 @@ set_perms(perm)
 	err(1, "setuid(ROOT_UID)");
 
     switch (perm) {
-	case PERM_FULL_ROOT:
 	case PERM_ROOT:
 				/* already set above */
 			      	break;
@@ -309,7 +306,6 @@ set_perms(perm)
 {
 
     switch (perm) {
-	case PERM_FULL_ROOT:
 	case PERM_ROOT:
 				if (setuid(ROOT_UID))
 					err(1, "setuid(ROOT_UID)");
