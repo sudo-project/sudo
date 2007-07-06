@@ -83,8 +83,8 @@ static void  update_timestamp	__P((char *, char *));
  * verify who he/she is.
  */
 void
-check_user(override)
-    int override;
+check_user(validated)
+    int validated;
 {
     char *timestampdir = NULL;
     char *timestampfile = NULL;
@@ -97,7 +97,7 @@ check_user(override)
     build_timestamp(&timestampdir, &timestampfile);
     status = timestamp_status(timestampdir, timestampfile, user_name,
 	TS_MAKE_DIRS);
-    if (override || status != TS_CURRENT) {
+    if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
 	lecture(status);
 
 	/* Expand any escapes in the prompt. */
@@ -106,7 +106,8 @@ check_user(override)
 
 	verify_user(auth_pw, prompt);
     }
-    if (status != TS_ERROR)
+    /* Only update timestamp if user was validated. */
+    if (status != TS_ERROR && ISSET(validated, VALIDATE_OK))
 	update_timestamp(timestampdir, timestampfile);
     efree(timestampdir);
     efree(timestampfile);

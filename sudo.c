@@ -355,7 +355,7 @@ main(argc, argv)
 
     /* Require a password if sudoers says so.  */
     if (def_authenticate)
-	check_user(ISSET(validated, FLAG_CHECK_USER));
+	check_user(validated);
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
     /* XXX - causes confusion when root is not listed in sudoers */
