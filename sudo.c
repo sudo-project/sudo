@@ -286,8 +286,6 @@ main(argc, argv)
 	/* Validate the user but don't search for pseudo-commands. */
 	validated = sudoers_lookup(pwflag);
     }
-    if (safe_cmnd == NULL)
-	safe_cmnd = user_cmnd;
 
     /*
      * Look up the timestamp dir owner if one is specified.
@@ -352,7 +350,7 @@ main(argc, argv)
 
     /* Require a password if sudoers says so.  */
     if (!ISSET(validated, FLAG_NOPASS))
-	check_user(ISSET(validated, FLAG_CHECK_USER));
+	check_user(validated);
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
     if (user_uid == 0 && prev_user != NULL && strcmp(prev_user, "root") != 0) {
