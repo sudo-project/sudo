@@ -68,6 +68,10 @@ __unused static const char rcsid[] = "$Sudo$";
 #define TS_NOFILE		3
 #define TS_ERROR		4
 
+/* Flags for timestamp_status() */
+#define TS_MAKE_DIRS		1
+#define TS_REMOVE		2
+
 static void  build_timestamp	__P((char **, char **));
 static int   timestamp_status	__P((char *, char *, char *, int));
 static char *expand_prompt	__P((char *, char *, char *));
@@ -91,7 +95,8 @@ check_user(override)
 	return;
 
     build_timestamp(&timestampdir, &timestampfile);
-    status = timestamp_status(timestampdir, timestampfile, user_name, TRUE);
+    status = timestamp_status(timestampdir, timestampfile, user_name,
+	TS_MAKE_DIRS);
     if (override || status != TS_CURRENT) {
 	lecture(status);
 
@@ -347,11 +352,11 @@ build_timestamp(timestampdir, timestampfile)
  * Check the timestamp file and directory and return their status.
  */
 static int
-timestamp_status(timestampdir, timestampfile, user, make_dirs)
+timestamp_status(timestampdir, timestampfile, user, flags)
     char *timestampdir;
     char *timestampfile;
     char *user;
-    int make_dirs;
+    int flags;
 {
     struct stat sb;
     time_t now;
@@ -389,7 +394,7 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 	log_error(NO_EXIT|USE_ERRNO, "can't stat %s", dirparent);
     } else {
 	/* No dirparent, try to make one. */
-	if (make_dirs) {
+	if (ISSET(flags, TS_MAKE_DIRS)) {
 	    if (mkdir(dirparent, S_IRWXU))
 		log_error(NO_EXIT|USE_ERRNO, "can't mkdir %s",
 		    dirparent);
@@ -439,9 +444,9 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
 
     /*
      * If there is no user ticket dir, AND we are in tty ticket mode,
-     * AND the make_dirs flag is set, create the user ticket dir.
+     * AND the TS_MAKE_DIRS flag is set, create the user ticket dir.
      */
-    if (status == TS_MISSING && timestampfile && make_dirs) {
+    if (status == TS_MISSING && timestampfile && ISSET(flags, TS_MAKE_DIRS)) {
 	if (mkdir(timestampdir, S_IRWXU) == -1) {
 	    status = TS_ERROR;
 	    log_error(NO_EXIT|USE_ERRNO, "can't mkdir %s", timestampdir);
@@ -487,9 +492,9 @@ timestamp_status(timestampdir, timestampfile, user, make_dirs)
     }
 
     /*
-     * If the file/dir exists, check its mtime.
+     * If the file/dir exists and we are not removing it, check its mtime.
      */
-    if (status == TS_OLD) {
+    if (status == TS_OLD && !ISSET(flags, TS_REMOVE)) {
 	/* Negative timeouts only expire manually (sudo -k). */
 	if (def_timestamp_timeout < 0 && sb.st_mtime != 0)
 	    status = TS_CURRENT;
@@ -534,7 +539,8 @@ remove_timestamp(remove)
     int status;
 
     build_timestamp(&timestampdir, &timestampfile);
-    status = timestamp_status(timestampdir, timestampfile, user_name, FALSE);
+    status = timestamp_status(timestampdir, timestampfile, user_name,
+	TS_REMOVE);
     if (status == TS_OLD || status == TS_CURRENT) {
 	path = timestampfile ? timestampfile : timestampdir;
 	if (remove) {
