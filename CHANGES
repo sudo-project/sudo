@@ -1906,3 +1906,8 @@ Sudo 1.6.8p12 released.
 600) The sudoers2ldif script now parses Runas users.
 
 601) The -- flag now behaves as documented.
+
+602) sudo -k/-K no longer cares if the timestamp is in the futue.
+
+603) When searching for the command, sudo now uses the effective gid
+     of the runas user.
