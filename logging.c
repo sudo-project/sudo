@@ -527,7 +527,7 @@ send_mail(line)
 		 * (so user cannot kill it) or as the user (for the paranoid).
 		 */
 #ifndef NO_ROOT_MAILER
-		set_perms(PERM_FULL_ROOT);
+		set_perms(PERM_ROOT);
 		execve(mpath, argv, root_envp);
 #else
 		set_perms(PERM_FULL_USER);

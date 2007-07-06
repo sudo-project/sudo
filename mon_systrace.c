@@ -165,7 +165,7 @@ systrace_attach(pid)
     }
 
     /* become a daemon */
-    set_perms(PERM_FULL_ROOT);
+    set_perms(PERM_ROOT);
     if (setsid() == -1) {
 	warning("setsid");
 	kill(pid, SIGKILL);
