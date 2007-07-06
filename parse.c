@@ -114,7 +114,6 @@ sudoers_lookup(pwflag)
     int pwflag;
 {
     int error, nopass;
-    enum def_tupple pwcheck;
 
     /* We opened _PATH_SUDOERS in check_sudoers() so just rewind it. */
     rewind(sudoers_fp);
@@ -124,7 +123,7 @@ sudoers_lookup(pwflag)
     /* Allocate space for data structures in the parser. */
     init_parser();
 
-    /* If pwcheck *could* be "all" or "any", keep more state. */
+    /* Keep more state for pseudo-commands so that listpw and verifypw work */
     if (pwflag > 0)
 	keepall = TRUE;
 
@@ -142,15 +141,6 @@ sudoers_lookup(pwflag)
     }
 
     /*
-     * The pw options may have changed during sudoers parse so we
-     * wait until now to set this.
-     */
-    if (pwflag)
-	pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
-    else
-	pwcheck = 0;
-
-    /*
      * Assume the worst.  If the stack is empty the user was
      * not mentioned at all.
      */
@@ -158,7 +148,7 @@ sudoers_lookup(pwflag)
 	error = VALIDATE_NOT_OK;
     else
 	error = VALIDATE_NOT_OK | FLAG_NOPASS;
-    if (pwcheck) {
+    if (pwflag) {
 	SET(error, FLAG_NO_CHECK);
     } else {
 	SET(error, FLAG_NO_HOST);
@@ -174,6 +164,9 @@ sudoers_lookup(pwflag)
     nopass = -1;
     if (pwflag) {
 	int found;
+	enum def_tupple pwcheck;
+
+	pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
 	if (pwcheck == always && def_authenticate)
 	    nopass = FLAG_CHECK_USER;
