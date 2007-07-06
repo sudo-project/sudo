@@ -99,19 +99,11 @@ sudoers_lookup(pwflag)
     int pwflag;
 {
     int validated, matched, host_matched, runas_matched, cmnd_matched;
-    enum def_tupple pwcheck = 0;
     struct cmndspec *cs;
     struct cmndtag *tags = NULL;
     struct member *runas;
     struct privilege *priv;
     struct userspec *us;
-
-    /*
-     * We use pwflag to tell us when a password should be required
-     * for pseudo-commands.  XXX - pass in pwcheck, not pwflag
-     */
-    if (pwflag)
-	pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
     /* Assume the worst.  */
     validated = VALIDATE_NOT_OK | FLAG_NO_HOST | FLAG_NO_USER;
@@ -125,6 +117,9 @@ sudoers_lookup(pwflag)
      */
     if (pwflag) {
 	int nopass = UNSPEC;
+	enum def_tupple pwcheck;
+
+	pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
 	CLR(validated, FLAG_NO_USER);
 	CLR(validated, FLAG_NO_HOST);
@@ -151,11 +146,11 @@ sudoers_lookup(pwflag)
 	    /* User has an entry for this host. */
 	    CLR(validated, VALIDATE_NOT_OK);
 	    SET(validated, VALIDATE_OK);
-	    if (pwcheck == always && def_authenticate)
-		SET(validated, FLAG_CHECK_USER);
-	    else if (pwcheck == never || nopass == TRUE)
-		def_authenticate = FALSE;
 	}
+	if (pwcheck == always && def_authenticate)
+	    SET(validated, FLAG_CHECK_USER);
+	else if (pwcheck == never || nopass == TRUE)
+	    def_authenticate = FALSE;
 	return(validated);
     }
 
