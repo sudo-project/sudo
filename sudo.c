@@ -286,6 +286,8 @@ main(argc, argv)
 	/* Validate the user but don't search for pseudo-commands. */
 	validated = sudoers_lookup(pwflag);
     }
+    if (safe_cmnd == NULL)
+	safe_cmnd = estrdup(user_cmnd);
 
     /*
      * Look up the timestamp dir owner if one is specified.
