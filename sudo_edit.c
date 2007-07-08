@@ -60,13 +60,15 @@ __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 extern sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
+extern char **environ;
 
 /*
  * Wrapper to allow users to edit privileged files with their own uid.
  */
-int sudo_edit(argc, argv)
+int sudo_edit(argc, argv, envp)
     int argc;
     char **argv;
+    char **envp;
 {
     ssize_t nread, nwritten;
     pid_t kidpid, pid;
@@ -192,6 +194,7 @@ int sudo_edit(argc, argv)
      * based on def_env_editor or def_editor since the editor runs with
      * the uid of the invoking user, not the runas (privileged) user.
      */
+    environ = envp;
     if (((editor = getenv("VISUAL")) != NULL && *editor != '\0') ||
 	((editor = getenv("EDITOR")) != NULL && *editor != '\0')) {
 	editor = estrdup(editor);
