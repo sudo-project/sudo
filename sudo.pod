@@ -36,7 +36,7 @@ B<sudo> [B<-bEHPS>] S<[B<-a> I<auth_type>]> S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]> S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
 S<[B<VAR>=I<value>]> S<{B<-e> file [...] | B<-i> | B<-s> | I<command>}>
 
-B<sudoedit> S<[B<-a> I<auth_type>]>
+B<sudoedit> S<[B<-a> I<auth_type>]> S<[B<-c> I<class>|I<->]>
 S<[B<-p> I<prompt>]> [B<-S>] S<[B<-u> I<username>|I<#uid>]>
 file [...]
 
