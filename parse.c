@@ -98,7 +98,7 @@ int
 sudoers_lookup(pwflag)
     int pwflag;
 {
-    int validated, matched, host_matched, runas_matched, cmnd_matched;
+    int validated, match, host_match, runas_match, cmnd_match;
     struct cmndspec *cs;
     struct cmndtag *tags = NULL;
     struct member *runas;
@@ -123,26 +123,26 @@ sudoers_lookup(pwflag)
 	    SET(validated, FLAG_NO_CHECK);
 	CLR(validated, FLAG_NO_USER);
 	CLR(validated, FLAG_NO_HOST);
-	matched = FALSE;
+	match = DENY;
 	for (us = userspecs; us != NULL; us = us->next) {
-	    if (user_matches(sudo_user.pw, us->user) != TRUE)
+	    if (user_matches(sudo_user.pw, us->user) != ALLOW)
 		continue;
 	    for (priv = us->privileges; priv != NULL; priv = priv->next) {
-		if (host_matches(priv->hostlist) != TRUE)
+		if (host_matches(priv->hostlist) != ALLOW)
 		    continue;
 		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
 		    /* Only check the command when listing another user. */
 		    if (user_uid == 0 || list_pw == NULL ||
 			user_uid == list_pw->pw_uid ||
-			cmnd_matches(cs->cmnd) == TRUE)
-			    matched = TRUE;
+			cmnd_matches(cs->cmnd) == ALLOW)
+			    match = ALLOW;
 		    if ((pwcheck == any && nopass != TRUE) ||
 			(pwcheck == all && nopass == TRUE))
 			nopass = cs->tags.nopasswd;
 		}
 	    }
 	}
-	if (matched == TRUE || user_uid == 0) {
+	if (match == ALLOW || user_uid == 0) {
 	    /* User has an entry for this host. */
 	    CLR(validated, VALIDATE_NOT_OK);
 	    SET(validated, VALIDATE_OK);
@@ -157,34 +157,33 @@ sudoers_lookup(pwflag)
     /* Need to be runas user while stat'ing things. */
     set_perms(PERM_RUNAS);
 
-    matched = UNSPEC;
+    match = UNSPEC;
     for (us = userspecs; us != NULL; us = us->next) {
-	if (user_matches(sudo_user.pw, us->user) != TRUE)
+	if (user_matches(sudo_user.pw, us->user) != ALLOW)
 	    continue;
 	CLR(validated, FLAG_NO_USER);
 	for (priv = us->privileges; priv != NULL; priv = priv->next) {
-	    host_matched = host_matches(priv->hostlist);
-	    if (host_matched == UNSPEC)
+	    host_match = host_matches(priv->hostlist);
+	    if (host_match == UNSPEC)
 		continue;
-	    if (host_matched == TRUE)
+	    if (host_match == ALLOW)
 		CLR(validated, FLAG_NO_HOST);
 	    runas = NULL;
 	    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
 		if (cs->runaslist != NULL)
 		    runas = cs->runaslist;
-		runas_matched = runas_matches(runas);
-		if (runas_matched != UNSPEC) {
-		    cmnd_matched = cmnd_matches(cs->cmnd);
-		    if (cmnd_matched != UNSPEC)
-			matched = host_matched && runas_matched &&
-			    cmnd_matched;
-		    if (matched)
+		runas_match = runas_matches(runas);
+		if (runas_match != UNSPEC) {
+		    cmnd_match = cmnd_matches(cs->cmnd);
+		    if (cmnd_match != UNSPEC)
+			match = host_match && runas_match && cmnd_match;
+		    if (match == ALLOW)
 			tags = &cs->tags;
 		}
 	    }
 	}
     }
-    if (matched == TRUE) {
+    if (match == ALLOW) {
 	CLR(validated, VALIDATE_NOT_OK);
 	SET(validated, VALIDATE_OK);
 	if (tags != NULL) {
@@ -238,8 +237,8 @@ display_privs(v, pw)
 	    " may run the following commands on this host:\n");
 
 	for (us = userspecs; us != NULL; us = us->next) {
-	    if (user_matches(pw, us->user) != TRUE ||
-	      host_matches(us->privileges->hostlist) != TRUE)
+	    if (user_matches(pw, us->user) != ALLOW ||
+	      host_matches(us->privileges->hostlist) != ALLOW)
 		continue;
 
 	    for (priv = us->privileges; priv != NULL; priv = priv->next) {
@@ -304,11 +303,11 @@ display_defaults(pw)
     for (d = defaults, prefix = NULL; d != NULL; d = d->next) {
 	switch (d->type) {
 	    case DEFAULTS_HOST:
-		if (host_matches(d->binding) != TRUE)
+		if (host_matches(d->binding) != ALLOW)
 		    continue;
 		break;
 	    case DEFAULTS_USER:
-		if (user_matches(pw, d->binding) != TRUE)
+		if (user_matches(pw, d->binding) != ALLOW)
 		    continue;
 		break;
 	    case DEFAULTS_RUNAS:
@@ -415,7 +414,7 @@ display_cmnd(v, pw)
     struct privilege *priv;
     struct userspec *us;
     int rval = 1;
-    int host_matched, runas_matched, cmnd_matched;
+    int host_match, runas_match, cmnd_match;
 
 #ifdef HAVE_LDAP
     if (v != NULL)
@@ -423,22 +422,22 @@ display_cmnd(v, pw)
 #endif
     if (rval != 0 && !def_ignore_local_sudoers) {
 	for (match = NULL, us = userspecs; us != NULL; us = us->next) {
-	    if (user_matches(pw, us->user) != TRUE)
+	    if (user_matches(pw, us->user) != ALLOW)
 		continue;
 
 	    for (priv = us->privileges; priv != NULL; priv = priv->next) {
-		host_matched = host_matches(priv->hostlist);
-		if (host_matched == UNSPEC)
+		host_match = host_matches(priv->hostlist);
+		if (host_match == UNSPEC)
 		    continue;
 		runas = NULL;
 		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
 		    if (cs->runaslist != NULL)
 			runas = cs->runaslist;
-		    runas_matched = runas_matches(runas);
-		    if (runas_matched != UNSPEC) {
-			cmnd_matched = cmnd_matches(cs->cmnd);
-			if (cmnd_matched != UNSPEC)
-			    match = host_matched && runas_matched ?
+		    runas_match = runas_matches(runas);
+		    if (runas_match != UNSPEC) {
+			cmnd_match = cmnd_matches(cs->cmnd);
+			if (cmnd_match != UNSPEC)
+			    match = host_match && runas_match ?
 				cs->cmnd : NULL;
 		    }
 		}
