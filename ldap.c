@@ -80,7 +80,7 @@ __unused static const char rcsid[] = "$Sudo$";
 	(var) != NULL;							\
 	(var) = ldap_next_entry((ld), (var)))
 
-#define	DPRINTF(args, level)	if (ldap_conf.debug >= level) warnx args
+#define	DPRINTF(args, level)	if (ldap_conf.debug >= level) warningx args
 
 /* ldap configuration structure */
 struct ldap_config {
@@ -914,7 +914,7 @@ sudo_ldap_open()
     if (ldap_conf.host) {
 	DPRINTF(("ldap_init(%s,%d)", ldap_conf.host, ldap_conf.port), 2);
 	if ((ld = ldap_init(ldap_conf.host, ldap_conf.port)) == NULL) {
-	    warn("ldap_init()");
+	    warning("ldap_init()");
 	    return(NULL);
 	}
     }
