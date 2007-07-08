@@ -120,7 +120,7 @@ static void usage_excl			__P((int))
 					    __attribute__((__noreturn__));
 static void usage_excl			__P((int));
 static struct passwd *get_authpw	__P((void));
-extern int sudo_edit			__P((int, char **));
+extern int sudo_edit			__P((int, char **, char **));
 extern void list_matches		__P((void));
 extern char **rebuild_env		__P((char **, int, int));
 extern struct passwd *sudo_getpwnam	__P((const char *));
@@ -154,9 +154,10 @@ sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
 
 
 int
-main(argc, argv)
+main(argc, argv, envp)
     int argc;
     char **argv;
+    char **envp;
 {
     int validated;
     int fd;
@@ -339,13 +340,12 @@ main(argc, argv)
 	    (void) close(fd);
     }
 
-    /* Build a new environment that avoids any nasty bits if we have a cmnd. */
-    if (ISSET(sudo_mode, MODE_RUN)) {
-	/* User may have overrided environment resetting via the -E flag. */
-	if (ISSET(sudo_mode, MODE_PRESERVE_ENV) && ISSET(validated, FLAG_SETENV))
-	    def_env_reset = FALSE;
-	environ = rebuild_env(environ, sudo_mode, ISSET(validated, FLAG_NOEXEC));
-    }
+    /* User may have overriden environment resetting via the -E flag. */
+    if (ISSET(sudo_mode, MODE_PRESERVE_ENV) && ISSET(validated, FLAG_SETENV))
+	def_env_reset = FALSE;
+
+    /* Build a new environment that avoids any nasty bits. */
+    environ = rebuild_env(environ, sudo_mode, ISSET(validated, FLAG_NOEXEC));
 
     /* Fill in passwd struct based on user we are authenticating as.  */
     auth_pw = get_authpw();
@@ -427,7 +427,7 @@ main(argc, argv)
 	}
 
 	if (ISSET(sudo_mode, MODE_EDIT))
-	    exit(sudo_edit(NewArgc, NewArgv));
+	    exit(sudo_edit(NewArgc, NewArgv, envp));
 
 	/* Restore signal handlers before we exec. */
 	(void) sigaction(SIGINT, &saved_sa_int, NULL);
@@ -878,6 +878,15 @@ parse_args(argc, argv)
     }
 args_done:
 
+    if (ISSET(rval, MODE_EDIT) &&
+	(ISSET(rval, MODE_PRESERVE_ENV) || sudo_user.env_vars != NULL)) {
+	if (ISSET(rval, MODE_PRESERVE_ENV))
+	    warnx("the `-E' option is not valid in edit mode");
+	if (sudo_user.env_vars != NULL)
+	    warnx("you may not specify environment variables in edit mode");
+	usage(1);
+    }
+
     if (user_runas != NULL && !ISSET(rval, (MODE_EDIT|MODE_RUN))) {
 	if (excl != '\0')
 	    warnx("the `-u' and '-%c' options may not be used together", excl);
@@ -1220,9 +1229,13 @@ static void
 usage(exit_val)
     int exit_val;
 {
-    char **p;
-    int linelen, linemax, ulen;
-    static char *uvec[] = {
+    char **p, **uvec[4];
+    int i, linelen, linemax, ulen;
+    static char *uvec1[] = {
+	" -K | -L | -V | -h | -k | -l | -v",
+	NULL
+    };
+    static char *uvec2[] = {
 	" [-EHPSb]",
 #ifdef HAVE_BSD_AUTH_H
 	" [-a auth_type]",
@@ -1236,38 +1249,52 @@ usage(exit_val)
 	" { -e file [...] | -i | -s | <command> }",
 	NULL
     };
+    static char *uvec3[] = {
+	" [-S]",
+#ifdef HAVE_BSD_AUTH_H
+	" [-a auth_type]",
+#endif
+#ifdef HAVE_LOGIN_CAP_H
+	" [-c class|-]",
+#endif
+	" [-p prompt]",
+	" [-u username|#uid]",
+	" file [...]",
+	NULL
+    };
 
     /*
-     * For sudoedit, replace the last entry in the usage vector.
-     * For sudo, print the secondary usage.
+     * Use usage vectors appropriate to the progname.
      */
     if (strcmp(getprogname(), "sudoedit") == 0) {
-	/* Replace the last entry in the usage vector. */
-	for (p = uvec; p[1] != NULL; p++)
-	    continue;
-	*p = " file [...]";
+	uvec[0] = uvec3;
+	uvec[1] = NULL;
     } else {
-	fprintf(stderr, "usage: %s -K | -L | -V | -h | -k | -l | -v\n",
-	    getprogname());
+	uvec[0] = uvec1;
+	uvec[1] = uvec2;
+	uvec[2] = uvec3;
+	uvec[3] = NULL;
     }
 
     /*
-     * Print the main usage and wrap lines as needed.
+     * Print usage and wrap lines as needed.
      * Assumes an 80-character wide terminal, which is kind of bogus...
      */
     ulen = (int)strlen(getprogname()) + 7;
     linemax = 80;
-    linelen = linemax - ulen;
-    printf("usage: %s", getprogname());
-    for (p = uvec; *p != NULL; p++) {
-	if (linelen == linemax || (linelen -= strlen(*p)) >= 0) {
-	    fputs(*p, stdout);
-	} else {
-	    p--;
-	    linelen = linemax;
-	    printf("\n%*s", ulen, "");
+    for (i = 0; uvec[i] != NULL; i++) {
+	linelen = linemax - ulen;
+	printf("usage: %s", getprogname());
+	for (p = uvec[i]; *p != NULL; p++) {
+	    if (linelen == linemax || (linelen -= strlen(*p)) >= 0) {
+		fputs(*p, stdout);
+	    } else {
+		p--;
+		linelen = linemax;
+		printf("\n%*s", ulen, "");
+	    }
 	}
+	putchar('\n');
     }
-    putchar('\n');
     exit(exit_val);
 }
