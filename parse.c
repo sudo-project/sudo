@@ -107,8 +107,6 @@ sudoers_lookup(pwflag)
 
     /* Assume the worst.  */
     validated = VALIDATE_NOT_OK | FLAG_NO_HOST | FLAG_NO_USER;
-    if (pwflag && list_pw == NULL)
-	SET(validated, FLAG_NO_CHECK);
 
     /*
      * Only check the actual command if pwflag is not set.
@@ -121,6 +119,8 @@ sudoers_lookup(pwflag)
 
 	pwcheck = (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
+	if (list_pw == NULL)
+	    SET(validated, FLAG_NO_CHECK);
 	CLR(validated, FLAG_NO_USER);
 	CLR(validated, FLAG_NO_HOST);
 	matched = FALSE;
