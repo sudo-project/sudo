@@ -123,6 +123,8 @@ static struct passwd *get_authpw	__P((void));
 extern int sudo_edit			__P((int, char **, char **));
 extern void list_matches		__P((void));
 extern char **rebuild_env		__P((char **, int, int));
+extern void validate_env_vars		__P((struct list_member *));
+extern char **insert_env_vars		__P((char **, struct list_member *));
 extern struct passwd *sudo_getpwnam	__P((const char *));
 extern struct passwd *sudo_getpwuid	__P((uid_t));
 extern struct passwd *sudo_pwdup	__P((const struct passwd *));
@@ -379,9 +381,8 @@ main(argc, argv, envp)
 	    if (ISSET(sudo_mode, MODE_PRESERVE_ENV))
 		log_error(NO_MAIL,
 		    "sorry, you are not allowed to preserve the environment");
-	    else if (sudo_user.env_vars != NULL)
-		log_error(NO_MAIL,
-		    "sorry, you are not allowed to set environment variables");
+	    else
+		validate_env_vars(sudo_user.env_vars);
 	}
 
 	log_auth(validated, 1);
@@ -428,6 +429,9 @@ main(argc, argv, envp)
 
 	if (ISSET(sudo_mode, MODE_EDIT))
 	    exit(sudo_edit(NewArgc, NewArgv, envp));
+
+	/* Insert user-specified environment variables. */
+	environ = insert_env_vars(environ, sudo_user.env_vars);
 
 	/* Restore signal handlers before we exec. */
 	(void) sigaction(SIGINT, &saved_sa_int, NULL);
