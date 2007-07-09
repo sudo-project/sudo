@@ -592,7 +592,6 @@ rebuild_env(envp, sudo_mode, noexec)
 
     /* Add user-specified environment variables. */
     /* XXX - this is not safe, should be done after authentication. */
-    /* XXX - also honor secure_path */
     for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next)
 	insert_env(cur->value, &env, 1);
 
@@ -614,7 +613,10 @@ validate_env_vars(env_vars)
     int okvar;
 
     for (var = env_vars; var != NULL; var = var->next) {
-	if (def_env_reset) {
+	if (def_secure_path && !user_is_exempt() &&
+	    strncmp(var->value, "PATH=", 5) == 0) {
+	    okvar = FALSE;
+	} else if (def_env_reset) {
 	    okvar = matches_env_check(var->value);
 	    if (okvar == -1)
 		okvar = matches_env_keep(var->value);
