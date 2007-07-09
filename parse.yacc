@@ -697,6 +697,8 @@ cmnd		:	ALL {
 				}
 			    }
 
+			    efree(safe_cmnd);
+			    safe_cmnd = NULL;
 			    $$ = TRUE;
 			}
 		|	ALIAS {
