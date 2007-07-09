@@ -287,6 +287,95 @@ insert_env(str, e, dupcheck)
 }
 
 /*
+ * Check the env_delete blacklist.
+ * Returns TRUE if the variable was found, else false.
+ */
+static int
+matches_env_delete(var)
+    const char *var;
+{
+    struct list_member *cur;
+    size_t len;
+    int iswild, match = FALSE;
+
+    /* Skip anything listed in env_delete. */
+    for (cur = def_env_delete; cur; cur = cur->next) {
+	len = strlen(cur->value);
+	/* Deal with '*' wildcard */
+	if (cur->value[len - 1] == '*') {
+	    len--;
+	    iswild = TRUE;
+	} else
+	    iswild = FALSE;
+	if (strncmp(cur->value, var, len) == 0 &&
+	    (iswild || var[len] == '=')) {
+	    match = TRUE;
+	    break;
+	}
+    }
+    return(match);
+}
+
+/*
+ * Apply the env_check list.
+ * Returns TRUE if the variable is allowed, FALSE if denied
+ * or -1 if no match.
+ */
+static int
+matches_env_check(var)
+    const char *var;
+{
+    struct list_member *cur;
+    size_t len;
+    int iswild, keepit = -1;
+
+    for (cur = def_env_check; cur; cur = cur->next) {
+	len = strlen(cur->value);
+	/* Deal with '*' wildcard */
+	if (cur->value[len - 1] == '*') {
+	    len--;
+	    iswild = TRUE;
+	} else
+	    iswild = FALSE;
+	if (strncmp(cur->value, var, len) == 0 &&
+	    (iswild || var[len] == '=')) {
+	    keepit = !strpbrk(var, "/%");
+	    break;
+	}
+    }
+    return(keepit);
+}
+
+/*
+ * Check the env_keep list.
+ * Returns TRUE if the variable is allowed else FALSE.
+ */
+static int
+matches_env_keep(var)
+    const char *var;
+{
+    struct list_member *cur;
+    size_t len;
+    int iswild, keepit = FALSE;
+
+    for (cur = def_env_keep; cur; cur = cur->next) {
+	len = strlen(cur->value);
+	/* Deal with '*' wildcard */
+	if (cur->value[len - 1] == '*') {
+	    len--;
+	    iswild = TRUE;
+	} else
+	    iswild = FALSE;
+	if (strncmp(cur->value, var, len) == 0 &&
+	    (iswild || var[len] == '=')) {
+	    keepit = TRUE;
+	    break;
+	}
+    }
+    return(keepit);
+}
+
+/*
  * Build a new environment and ether clear potentially dangerous
  * variables from the old one or start with a clean slate.
  * Also adds sudo-specific variables (SUDO_*).
@@ -299,9 +388,8 @@ rebuild_env(envp, sudo_mode, noexec)
 {
     struct list_member *cur;
     struct environment env;
-    size_t len;
     char **ep, *cp, *ps1;
-    unsigned int okvar, iswild, didvar;
+    unsigned int didvar;
 
     /*
      * Either clean out the environment or reset to a safe default.
@@ -312,7 +400,7 @@ rebuild_env(envp, sudo_mode, noexec)
     if (def_env_reset) {
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = envp; *ep; ep++) {
-	    int keepit = -1;
+	    int keepit;
 
 	    /* Skip variables with values beginning with () (bash functions) */
 	    if ((cp = strchr(*ep, '=')) != NULL) {
@@ -320,40 +408,14 @@ rebuild_env(envp, sudo_mode, noexec)
 		    continue;
 	    }
 
-	    /* Check certain variables for '%' and '/' characters. */
-	    for (cur = def_env_check; cur; cur = cur->next) {
-		len = strlen(cur->value);
-		/* Deal with '*' wildcard */
-		if (cur->value[len - 1] == '*') {
-		    len--;
-		    iswild = TRUE;
-		} else
-		    iswild = FALSE;
-		if (strncmp(cur->value, *ep, len) == 0 &&
-		    (iswild || (*ep)[len] == '=')) {
-		    keepit = !strpbrk(*ep, "/%");
-		    break;
-		}
-	    }
-
-	    if (keepit == -1) {
-		for (cur = def_env_keep; cur; cur = cur->next) {
-		    len = strlen(cur->value);
-		    /* Deal with '*' wildcard */
-		    if (cur->value[len - 1] == '*') {
-			len--;
-			iswild = TRUE;
-		    } else
-			iswild = FALSE;
-		    if (strncmp(cur->value, *ep, len) == 0 &&
-			(iswild || (*ep)[len] == '=')) {
-			keepit = TRUE;
-			break;
-		    }
-		}
-	    }
+	    /*
+	     * First check certain variables for '%' and '/' characters.
+	     * If no match there, check the keep list.
+	     * If nothing matched, we remove it from the environment.
+	     */
+	    keepit = matches_env_check(*ep);
 	    if (keepit == -1)
-		keepit = FALSE;
+		keepit = matches_env_keep(*ep);
 
 	    /* For SUDO_PS1 -> PS1 conversion. */
 	    if (strncmp(*ep, "SUDO_PS1=", 8) == 0)
@@ -429,7 +491,7 @@ rebuild_env(envp, sudo_mode, noexec)
 	 * env_check.
 	 */
 	for (ep = envp; *ep; ep++) {
-	    okvar = TRUE;
+	    int okvar;
 
 	    /* Skip variables with values beginning with () (bash functions) */
 	    if ((cp = strchr(*ep, '=')) != NULL) {
@@ -437,36 +499,13 @@ rebuild_env(envp, sudo_mode, noexec)
 		    continue;
 	    }
 
-	    /* Skip anything listed in env_delete. */
-	    for (cur = def_env_delete; cur && okvar; cur = cur->next) {
-		len = strlen(cur->value);
-		/* Deal with '*' wildcard */
-		if (cur->value[len - 1] == '*') {
-		    len--;
-		    iswild = TRUE;
-		} else
-		    iswild = FALSE;
-		if (strncmp(cur->value, *ep, len) == 0 &&
-		    (iswild || (*ep)[len] == '=')) {
-		    okvar = FALSE;
-		}
-	    }
-
-	    /* Check certain variables for '%' and '/' characters. */
-	    for (cur = def_env_check; cur && okvar; cur = cur->next) {
-		len = strlen(cur->value);
-		/* Deal with '*' wildcard */
-		if (cur->value[len - 1] == '*') {
-		    len--;
-		    iswild = TRUE;
-		} else
-		    iswild = FALSE;
-		if (strncmp(cur->value, *ep, len) == 0 &&
-		    (iswild || (*ep)[len] == '=') &&
-		    strpbrk(*ep, "/%")) {
-		    okvar = FALSE;
-		}
-	    }
+	    /*
+	     * First check variables against the blacklist in env_delete.
+	     * If no match there check for '%' and '/' characters.
+	     */
+	    okvar = matches_env_delete(*ep) != TRUE;
+	    if (okvar)
+		okvar = matches_env_check(*ep) != FALSE;
 
 	    if (okvar) {
 		if (strncmp(*ep, "SUDO_PS1=", 9) == 0)
@@ -552,10 +591,64 @@ rebuild_env(envp, sudo_mode, noexec)
     insert_env(cp, &env, 1);
 
     /* Add user-specified environment variables. */
+    /* XXX - this is not safe, should be done after authentication. */
+    /* XXX - also honor secure_path */
     for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next)
 	insert_env(cur->value, &env, 1);
 
     return(env.envp);
+}
+
+/*
+ * Validate the list of environment variables passed in on the command
+ * line against env_delete, env_check, and env_keep.
+ * Calls log_error() if any specified variables are not allowed.
+ */
+void
+validate_env_vars(env_vars)
+    struct list_member *env_vars;
+{
+    struct list_member *var;
+    char *eq, *bad = NULL;
+    size_t len, blen = 0, bsize = 0;
+    int okvar;
+
+    for (var = env_vars; var != NULL; var = var->next) {
+	if (def_env_reset) {
+	    okvar = matches_env_check(var->value);
+	    if (okvar == -1)
+		okvar = matches_env_keep(var->value);
+	} else {
+	    okvar = matches_env_delete(var->value) == FALSE;
+	    if (okvar == FALSE)
+		okvar = matches_env_check(var->value) != FALSE;
+	}
+	if (okvar == FALSE) {
+	    /* Not allowed, add to error string, allocating as needed. */
+	    if ((eq = strchr(var->value, '=')) != NULL)
+		*eq = '\0';
+	    len = strlen(var->value) + 2;
+	    if (blen + len >= bsize) {
+		do {
+		    bsize += 1024;
+		} while (blen + len >= bsize);
+		bad = erealloc(bad, bsize);
+		bad[blen] = '\0';
+	    }
+	    strlcat(bad, var->value, bsize);
+	    strlcat(bad, ", ", bsize);
+	    blen += len;
+	    if (eq != NULL)
+		*eq = '=';
+	}
+    }
+    if (bad != NULL) {
+	bad[blen - 2] = '\0';		/* remove trailing ", " */
+	log_error(NO_MAIL,
+	    "sorry, you are not allowed to set the following environment variables: %s", bad);
+	/* NOTREACHED */
+	efree(bad);
+    }
 }
 
 void
@@ -564,7 +657,7 @@ init_envtables()
     struct list_member *cur;
     const char **p;
 
-    /* Fill in "env_delete" variable. */
+    /* Fill in the "env_delete" list. */
     for (p = initial_badenv_table; *p; p++) {
 	cur = emalloc(sizeof(struct list_member));
 	cur->value = estrdup(*p);
@@ -572,7 +665,7 @@ init_envtables()
 	def_env_delete = cur;
     }
 
-    /* Fill in "env_check" variable. */
+    /* Fill in the "env_check" list. */
     for (p = initial_checkenv_table; *p; p++) {
 	cur = emalloc(sizeof(struct list_member));
 	cur->value = estrdup(*p);
@@ -580,7 +673,7 @@ init_envtables()
 	def_env_check = cur;
     }
 
-    /* Fill in "env_keep" variable. */
+    /* Fill in the "env_keep" list. */
     for (p = initial_keepenv_table; *p; p++) {
 	cur = emalloc(sizeof(struct list_member));
 	cur->value = estrdup(*p);

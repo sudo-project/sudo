@@ -116,6 +116,7 @@ static void usage_excl			__P((int))
 static struct passwd *get_authpw	__P((void));
 extern int sudo_edit			__P((int, char **, char **));
 extern char **rebuild_env		__P((char **, int, int));
+void validate_env_vars			__P((struct list_member *));
 
 /*
  * Globals
@@ -383,9 +384,8 @@ main(argc, argv, envp)
 	    if (ISSET(sudo_mode, MODE_PRESERVE_ENV))
 		log_error(NO_MAIL,
 		    "sorry, you are not allowed to preserve the environment");
-	    else if (sudo_user.env_vars != NULL)
-		log_error(NO_MAIL,
-		    "sorry, you are not allowed to set environment variables");
+	    else
+		validate_env_vars(sudo_user.env_vars);
 	}
 
 	log_auth(validated, 1);
