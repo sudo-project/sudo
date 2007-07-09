@@ -117,6 +117,7 @@ static struct passwd *get_authpw	__P((void));
 extern int sudo_edit			__P((int, char **, char **));
 extern char **rebuild_env		__P((char **, int, int));
 void validate_env_vars			__P((struct list_member *));
+char **insert_env_vars			__P((char **, struct list_member *));
 
 /*
  * Globals
@@ -439,6 +440,9 @@ main(argc, argv, envp)
 
 	if (ISSET(sudo_mode, MODE_EDIT))
 	    exit(sudo_edit(NewArgc, NewArgv, envp));
+
+	/* Insert user-specified environment variables. */
+	environ = insert_env_vars(environ, sudo_user.env_vars);
 
 	/* Restore signal handlers before we exec. */
 	(void) sigaction(SIGINT, &saved_sa_int, NULL);

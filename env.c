@@ -104,6 +104,11 @@ static void insert_env		__P((char *, struct environment *, int));
 static char *format_env		__P((char *, ...));
 
 /*
+ * Copy of the sudo-managed environment.
+ */
+static struct environment env;
+
+/*
  * Default table of "bad" variables to remove from the environment.
  * XXX - how to omit TERMCAP if it starts with '/'?
  */
@@ -386,8 +391,6 @@ rebuild_env(envp, sudo_mode, noexec)
     int sudo_mode;
     int noexec;
 {
-    struct list_member *cur;
-    struct environment env;
     char **ep, *cp, *ps1;
     unsigned int didvar;
 
@@ -590,9 +593,40 @@ rebuild_env(envp, sudo_mode, noexec)
     easprintf(&cp, "SUDO_GID=%lu", (unsigned long) user_gid);
     insert_env(cp, &env, 1);
 
+    return(env.envp);
+}
+
+char **
+insert_env_vars(envp, env_vars)
+    char **envp;
+    struct list_member *env_vars;
+{
+    struct list_member *cur;
+
+    if (env_vars == NULL)
+	return (envp);
+
+    /*
+     * Make sure we still own the environment and steal it back if not.
+     */
+    if (env.envp != envp) {
+	size_t evlen;
+	char **ep;
+
+	for (ep = envp; *ep != NULL; ep++)
+	    continue;
+	evlen = ep - envp;
+	if (evlen + 1 > env.env_size) {
+	    efree(env.envp);
+	    env.env_size = evlen + 1 + 128;
+	    env.envp = emalloc2(env.env_size, sizeof(char *));
+	}
+	memcpy(env.envp, envp, evlen + 1);
+	env.env_len = evlen;
+    }
+
     /* Add user-specified environment variables. */
-    /* XXX - this is not safe, should be done after authentication. */
-    for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next)
+    for (cur = env_vars; cur != NULL; cur = cur->next)
 	insert_env(cur->value, &env, 1);
 
     return(env.envp);
