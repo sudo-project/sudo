@@ -321,36 +321,41 @@ unreachable.
 
 =head1 SECURITY NOTES
 
-B<sudo> tries to be safe when executing external commands.  Variables
-that control how dynamic loading and binding is done can be used
-to subvert the program that B<sudo> runs.  To combat this the
-C<LD_*>, C<_RLD_*>, C<SHLIB_PATH> (HP-UX only), and C<LIBPATH> (AIX
-only) environment variables are removed from the environment passed
-on to all commands executed.  B<sudo> will also remove the C<IFS>,
-C<CDPATH>, C<ENV>, C<BASH_ENV>, C<KRB_CONF>, C<KRBCONFDIR>, C<KRBTKFILE>,
-C<KRB5_CONFIG>, C<LOCALDOMAIN>, C<RES_OPTIONS>, C<HOSTALIASES>,
-C<NLSPATH>, C<PATH_LOCALE>, C<TERMINFO>, C<TERMINFO_DIRS> and
-C<TERMPATH> variables as they too can pose a threat.  If the
-C<TERMCAP> variable is set and is a pathname, it too is ignored.
-Additionally, if the C<LC_*> or C<LANGUAGE> variables contain the
-C</> or C<%> characters, they are ignored.  Environment variables
-with a value beginning with C<()> are also removed as they could
-be interpreted as B<bash> functions.  If B<sudo> has been
-compiled with SecurID support, the C<VAR_ACE>, C<USR_ACE> and
-C<DLC_ACE> variables are cleared as well.  The list of environment
-variables that B<sudo> clears is contained in the output of
-C<sudo -V> when run as root.
+B<sudo> tries to be safe when executing external commands.
+
+There are two distinct ways to deal with environment variables.
+By default, the I<env_reset> I<sudoers> option is enabled.
+This causes commands to be executed with a minimal environment
+containing C<TERM>, C<PATH>, C<HOME>, C<SHELL>, C<LOGNAME>, C<USER>
+and C<USERNAME> in addition to variables from the invoking process
+permitted by the I<env_check> and I<env_keep> I<sudoers> options.
+There is effectively a whitelist for environment variables.
+
+If, however, the I<env_reset> option is disabled in I<sudoers>, any
+variables not explicitly denied by the I<env_check> and I<env_delete>
+options are inherited from the invoking process.  In this case,
+I<env_check> and I<env_delete> behave like a blacklist.  Since it
+is not possible to blacklist all potentially dangerous environment
+variables, use of the default I<env_reset> behavior is encouraged.
+
+In all cases, environment variables with a value beginning with
+C<()> are removed as they could be interpreted as B<bash> functions.
+The list of environment variables that B<sudo> allows or denies is
+contained in the output of C<sudo -V> when run as root.
+
+Note that the dynamic linker on most operating systems will remove
+variables that can control dynamic linking from the environment of
+setuid executables, including B<sudo>.  Depending on the operating
+system this may include C<_RLD*>, C<DYLD_*>, C<LD_*>, C<LDR_*>,
+C<LIBPATH>, C<SHLIB_PATH>, and others.  These type of variables are
+removed from the environment before B<sudo> even begins execution
+and, as such, it is not possible for B<sudo> to preserve them.
 
 To prevent command spoofing, B<sudo> checks "." and "" (both denoting
 current directory) last when searching for a command in the user's
 PATH (if one or both are in the PATH).  Note, however, that the
 actual C<PATH> environment variable is I<not> modified and is passed
 unchanged to the program that B<sudo> executes.
-
-For security reasons, if your OS supports shared libraries and does
-not disable user-defined library search paths for setuid programs
-(most do), you should either use a linker option that disables this
-behavior or link B<sudo> statically.
 
 B<sudo> will check the ownership of its timestamp directory
 (F<@timedir@> by default) and ignore the directory's contents if
