@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "June 23, 2007" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "July  9, 2007" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
@@ -163,7 +163,7 @@ sudo, sudoedit \- execute a command as another user
 [\fB\-c\fR\ \fIclass\fR|\fI\-\fR] [\fB\-p\fR\ \fIprompt\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
 [\fB\s-1VAR\s0\fR=\fIvalue\fR] {\fB\-e\fR\ file\ [...]\ |\ \fB\-i\fR\ |\ \fB\-s\fR\ |\ \fIcommand\fR}
 .PP
-\&\fBsudoedit\fR [\fB\-a\fR\ \fIauth_type\fR]
+\&\fBsudoedit\fR [\fB\-a\fR\ \fIauth_type\fR] [\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
 [\fB\-p\fR\ \fIprompt\fR] [\fB\-S\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
 file [...]
 .SH "DESCRIPTION"
@@ -410,10 +410,12 @@ line arguments.  It is most useful in conjunction with the \fB\-s\fR flag.
 .PP
 Environment variables to be set for the command may also be passed
 on the command line in the form of \fB\s-1VAR\s0\fR=\fIvalue\fR, e.g.
-\&\fB\s-1LD_LIBRARY_PATH\s0\fR=\fI/usr/local/pkg/lib\fR.  This is only permitted
-when the \fIsetenv\fR option is set in \fIsudoers\fR or the command to
-be run has the \f(CW\*(C`SETENV\*(C'\fR tag set.  See sudoers(@mansectform@)
-for more information.
+\&\fB\s-1LD_LIBRARY_PATH\s0\fR=\fI/usr/local/pkg/lib\fR.  Variables passed on the
+command line are subject to the same restrictions as normal environment
+variables with one important exception.  If the \fIsetenv\fR option
+is set in \fIsudoers\fR or the command to be run has the \f(CW\*(C`SETENV\*(C'\fR tag
+set the user may set variables that would overwise be forbidden.
+See sudoers(@mansectform@) for more information.
 .SH "RETURN VALUES"
 .IX Header "RETURN VALUES"
 Upon successful execution of a program, the return value from \fBsudo\fR
@@ -432,36 +434,41 @@ of the directories in your \f(CW\*(C`PATH\*(C'\fR is on a machine that is curren
 unreachable.
 .SH "SECURITY NOTES"
 .IX Header "SECURITY NOTES"
-\&\fBsudo\fR tries to be safe when executing external commands.  Variables
-that control how dynamic loading and binding is done can be used
-to subvert the program that \fBsudo\fR runs.  To combat this the
-\&\f(CW\*(C`LD_*\*(C'\fR, \f(CW\*(C`_RLD_*\*(C'\fR, \f(CW\*(C`SHLIB_PATH\*(C'\fR (\s-1HP\-UX\s0 only), and \f(CW\*(C`LIBPATH\*(C'\fR (\s-1AIX\s0
-only) environment variables are removed from the environment passed
-on to all commands executed.  \fBsudo\fR will also remove the \f(CW\*(C`IFS\*(C'\fR,
-\&\f(CW\*(C`CDPATH\*(C'\fR, \f(CW\*(C`ENV\*(C'\fR, \f(CW\*(C`BASH_ENV\*(C'\fR, \f(CW\*(C`KRB_CONF\*(C'\fR, \f(CW\*(C`KRBCONFDIR\*(C'\fR, \f(CW\*(C`KRBTKFILE\*(C'\fR,
-\&\f(CW\*(C`KRB5_CONFIG\*(C'\fR, \f(CW\*(C`LOCALDOMAIN\*(C'\fR, \f(CW\*(C`RES_OPTIONS\*(C'\fR, \f(CW\*(C`HOSTALIASES\*(C'\fR,
-\&\f(CW\*(C`NLSPATH\*(C'\fR, \f(CW\*(C`PATH_LOCALE\*(C'\fR, \f(CW\*(C`TERMINFO\*(C'\fR, \f(CW\*(C`TERMINFO_DIRS\*(C'\fR and
-\&\f(CW\*(C`TERMPATH\*(C'\fR variables as they too can pose a threat.  If the
-\&\f(CW\*(C`TERMCAP\*(C'\fR variable is set and is a pathname, it too is ignored.
-Additionally, if the \f(CW\*(C`LC_*\*(C'\fR or \f(CW\*(C`LANGUAGE\*(C'\fR variables contain the
-\&\f(CW\*(C`/\*(C'\fR or \f(CW\*(C`%\*(C'\fR characters, they are ignored.  Environment variables
-with a value beginning with \f(CW\*(C`()\*(C'\fR are also removed as they could
-be interpreted as \fBbash\fR functions.  If \fBsudo\fR has been
-compiled with SecurID support, the \f(CW\*(C`VAR_ACE\*(C'\fR, \f(CW\*(C`USR_ACE\*(C'\fR and
-\&\f(CW\*(C`DLC_ACE\*(C'\fR variables are cleared as well.  The list of environment
-variables that \fBsudo\fR clears is contained in the output of
-\&\f(CW\*(C`sudo \-V\*(C'\fR when run as root.
+\&\fBsudo\fR tries to be safe when executing external commands.
+.PP
+There are two distinct ways to deal with environment variables.
+By default, the \fIenv_reset\fR \fIsudoers\fR option is enabled.
+This causes commands to be executed with a minimal environment
+containing \f(CW\*(C`TERM\*(C'\fR, \f(CW\*(C`PATH\*(C'\fR, \f(CW\*(C`HOME\*(C'\fR, \f(CW\*(C`SHELL\*(C'\fR, \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR
+and \f(CW\*(C`USERNAME\*(C'\fR in addition to variables from the invoking process
+permitted by the \fIenv_check\fR and \fIenv_keep\fR \fIsudoers\fR options.
+There is effectively a whitelist for environment variables.
+.PP
+If, however, the \fIenv_reset\fR option is disabled in \fIsudoers\fR, any
+variables not explicitly denied by the \fIenv_check\fR and \fIenv_delete\fR
+options are inherited from the invoking process.  In this case,
+\&\fIenv_check\fR and \fIenv_delete\fR behave like a blacklist.  Since it
+is not possible to blacklist all potentially dangerous environment
+variables, use of the default \fIenv_reset\fR behavior is encouraged.
+.PP
+In all cases, environment variables with a value beginning with
+\&\f(CW\*(C`()\*(C'\fR are removed as they could be interpreted as \fBbash\fR functions.
+The list of environment variables that \fBsudo\fR allows or denies is
+contained in the output of \f(CW\*(C`sudo \-V\*(C'\fR when run as root.
+.PP
+Note that the dynamic linker on most operating systems will remove
+variables that can control dynamic linking from the environment of
+setuid executables, including \fBsudo\fR.  Depending on the operating
+system this may include \f(CW\*(C`_RLD*\*(C'\fR, \f(CW\*(C`DYLD_*\*(C'\fR, \f(CW\*(C`LD_*\*(C'\fR, \f(CW\*(C`LDR_*\*(C'\fR,
+\&\f(CW\*(C`LIBPATH\*(C'\fR, \f(CW\*(C`SHLIB_PATH\*(C'\fR, and others.  These type of variables are
+removed from the environment before \fBsudo\fR even begins execution
+and, as such, it is not possible for \fBsudo\fR to preserve them.
 .PP
 To prevent command spoofing, \fBsudo\fR checks \*(L".\*(R" and "" (both denoting
 current directory) last when searching for a command in the user's
 \&\s-1PATH\s0 (if one or both are in the \s-1PATH\s0).  Note, however, that the
 actual \f(CW\*(C`PATH\*(C'\fR environment variable is \fInot\fR modified and is passed
 unchanged to the program that \fBsudo\fR executes.
-.PP
-For security reasons, if your \s-1OS\s0 supports shared libraries and does
-not disable user-defined library search paths for setuid programs
-(most do), you should either use a linker option that disables this
-behavior or link \fBsudo\fR statically.
 .PP
 \&\fBsudo\fR will check the ownership of its timestamp directory
 (\fI@timedir@\fR by default) and ignore the directory's contents if
@@ -556,7 +563,7 @@ sudoers(@mansectform@).
 .IX Header "FILES"
 .Vb 2
 \& @sysconfdir@/sudoers           List of who can run what
-\& @timedir@              Directory containing timestamps
+\& @timedir@          Directory containing timestamps
 .Ve
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
