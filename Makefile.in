@@ -368,6 +368,9 @@ sudoers.man:: sudoers.man.in
 
 sudoers.cat: sudoers.man
 
+@DEV@HISTORY: history.pod
+@DEV@	pod2text -l -i0 $> > $@
+
 install: install-dirs install-binaries @INSTALL_NOEXEC@ install-sudoers install-man
 
 install-dirs:
