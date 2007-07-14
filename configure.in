@@ -1250,8 +1250,8 @@ case "$host" in
 		LDFLAGS="$O_LDFLAGS"
 
 		# check for authenticate(3)
-		if test -z "$with_aixauth"; then
-		    AC_CHECK_FUNCS(authenticate, [with_aixauth=yes])
+		if test X"$with_aixauth" = X""; then
+		    AC_CHECK_FUNCS(authenticate, [with_aixauth=maybe])
 		fi
 		;;
     *-*-hiuxmpp*)
@@ -1463,7 +1463,7 @@ case "$host" in
 		fi
 		# Check for newer BSD auth API (just check for >= 3.0?)
 		if test -z "$with_bsdauth"; then
-		    AC_CHECK_FUNCS(auth_challenge, [with_bsdauth=yes])
+		    AC_CHECK_FUNCS(auth_challenge, [with_bsdauth=maybe])
 		fi
 		;;
     *-*-freebsd*)
@@ -1496,7 +1496,7 @@ case "$host" in
 		    [0-2].*)
 			;;
 		    *)
-			with_bsdauth=yes
+			with_bsdauth=maybe
 			;;
 		    esac
 		fi
@@ -1621,10 +1621,6 @@ if test "$OS" != "ultrix"; then
 fi
 if test ${with_logincap-'no'} != "no"; then
     AC_CHECK_HEADERS(login_cap.h)
-fi
-if test "$with_bsdauth" = "yes"; then
-    AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H)
-	[SUDO_ADD_AUTH([BSD authentication], [bsdauth.o], [true])], -)
 fi
 if test ${with_project-'no'} != "no"; then
     AC_CHECK_HEADER(project.h, AC_DEFINE(HAVE_PROJECT_H)
@@ -1909,16 +1905,6 @@ if test "$with_logincap" = "yes"; then
 fi
 
 dnl
-dnl AIX general authentication
-dnl
-if test "$with_aixauth" = "yes"; then
-    AC_MSG_NOTICE([using AIX general authentication])
-    AC_DEFINE(HAVE_AIXAUTH)
-    SUDO_ADD_AUTH([AIX general authentication], [aix_auth.o], [true])
-    SUDO_LIBS="${SUDO_LIBS} -ls"
-fi
-
-dnl
 dnl PAM support.  Systems that might support PAM set with_pam=maybe
 dnl and we do that actual tests here.
 dnl
@@ -2145,6 +2131,30 @@ if test -n "$with_fwtk"; then
 	with_fwtk=yes
     fi
     SUDO_LIBS="${SUDO_LIBS} -lauth -lfwall"
+fi
+
+dnl
+dnl AIX general authentication
+dnl If set to "maybe" only enable if no other exclusive method in use.
+dnl
+if test ${with_aixauth-'no'} != "no"; then
+    if test X"$with_aixauth" != X"maybe" -o X"$AUTH_EXCL" = X""; then
+	AC_MSG_NOTICE([using AIX general authentication])
+	AC_DEFINE(HAVE_AIXAUTH)
+	SUDO_ADD_AUTH([AIX general authentication], [aix_auth.o], [true])
+	SUDO_LIBS="${SUDO_LIBS} -ls"
+    fi
+fi
+
+dnl
+dnl BSD authentication
+dnl If set to "maybe" only enable if no other exclusive method in use.
+dnl
+if test ${with_bsdauth-'no'} != "no"; then
+    if test X"$with_bsdauth" != X"maybe" -o X"$AUTH_EXCL" = X""; then
+	AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H)
+	    [SUDO_ADD_AUTH([BSD authentication], [bsdauth.o], [true])], -)
+    fi
 fi
 
 dnl
