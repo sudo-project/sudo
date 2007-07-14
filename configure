@@ -10646,7 +10646,7 @@ rm -f conftest.err conftest.$ac_objext \
 		LDFLAGS="$O_LDFLAGS"
 
 		# check for authenticate(3)
-		if test -z "$with_aixauth"; then
+		if test X"$with_aixauth" = X""; then
 
 for ac_func in authenticate
 do
@@ -10745,7 +10745,7 @@ if test `eval echo '${'$as_ac_var'}'` = yes; then
   cat >>confdefs.h <<_ACEOF
 #define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
- with_aixauth=yes
+ with_aixauth=maybe
 fi
 done
 
@@ -11381,7 +11381,7 @@ if test `eval echo '${'$as_ac_var'}'` = yes; then
   cat >>confdefs.h <<_ACEOF
 #define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
- with_bsdauth=yes
+ with_bsdauth=maybe
 fi
 done
 
@@ -11417,7 +11417,7 @@ done
 		    0-2.*)
 			;;
 		    *)
-			with_bsdauth=yes
+			with_bsdauth=maybe
 			;;
 		    esac
 		fi
@@ -13046,175 +13046,6 @@ _ACEOF
 fi
 
 done
-
-fi
-if test "$with_bsdauth" = "yes"; then
-    if test "${ac_cv_header_bsd_auth_h+set}" = set; then
-  echo "$as_me:$LINENO: checking for bsd_auth.h" >&5
-echo $ECHO_N "checking for bsd_auth.h... $ECHO_C" >&6
-if test "${ac_cv_header_bsd_auth_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_bsd_auth_h" >&5
-echo "${ECHO_T}$ac_cv_header_bsd_auth_h" >&6
-else
-  # Is the header compilable?
-echo "$as_me:$LINENO: checking bsd_auth.h usability" >&5
-echo $ECHO_N "checking bsd_auth.h usability... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <bsd_auth.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_header_compiler=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6
-
-# Is the header present?
-echo "$as_me:$LINENO: checking bsd_auth.h presence" >&5
-echo $ECHO_N "checking bsd_auth.h presence... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <bsd_auth.h>
-_ACEOF
-if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
-  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null; then
-  if test -s conftest.err; then
-    ac_cpp_err=$ac_c_preproc_warn_flag
-    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
-  else
-    ac_cpp_err=
-  fi
-else
-  ac_cpp_err=yes
-fi
-if test -z "$ac_cpp_err"; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-rm -f conftest.err conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: bsd_auth.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: bsd_auth.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: bsd_auth.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: bsd_auth.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: bsd_auth.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: bsd_auth.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: bsd_auth.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: bsd_auth.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: bsd_auth.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: bsd_auth.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: bsd_auth.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: bsd_auth.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: bsd_auth.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: bsd_auth.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: bsd_auth.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: bsd_auth.h: in the future, the compiler will take precedence" >&2;}
-    (
-      cat <<\_ASBOX
-## ------------------------------- ##
-## Report this to the sudo lists.  ##
-## ------------------------------- ##
-_ASBOX
-    ) |
-      sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-echo "$as_me:$LINENO: checking for bsd_auth.h" >&5
-echo $ECHO_N "checking for bsd_auth.h... $ECHO_C" >&6
-if test "${ac_cv_header_bsd_auth_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_header_bsd_auth_h=$ac_header_preproc
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_bsd_auth_h" >&5
-echo "${ECHO_T}$ac_cv_header_bsd_auth_h" >&6
-
-fi
-if test $ac_cv_header_bsd_auth_h = yes; then
-  cat >>confdefs.h <<\_ACEOF
-#define HAVE_BSD_AUTH_H 1
-_ACEOF
-
-
-if test X"$AUTH_EXCL" != X""; then
-    { { echo "$as_me:$LINENO: error: \"cannot mix BSD authentication with an exclusive authentication method such as $AUTH_EXCL\"" >&5
-echo "$as_me: error: \"cannot mix BSD authentication with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
-   { (exit 1); exit 1; }; }
-elif test X"true" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-    { { echo "$as_me:$LINENO: error: \"cannot mix BSD authentication with other authentication methods (such as $_AUTH)\"" >&5
-echo "$as_me: error: \"cannot mix BSD authentication with other authentication methods (such as $_AUTH)\"" >&2;}
-   { (exit 1); exit 1; }; }
-fi
-if test X"true" != X""; then
-    AUTH_OBJS="bsdauth.o"
-    AUTH_EXCL="BSD authentication"
-elif test X"$AUTH_OBJS" = X""; then
-    AUTH_OBJS="bsdauth.o"
-else
-    AUTH_OBJS="$AUTH_OBJS bsdauth.o"
-fi
-
-else
-  -
-fi
-
 
 fi
 if test ${with_project-'no'} != "no"; then
@@ -20073,36 +19904,6 @@ if test "$with_logincap" = "yes"; then
     esac
 fi
 
-if test "$with_aixauth" = "yes"; then
-    { echo "$as_me:$LINENO: using AIX general authentication" >&5
-echo "$as_me: using AIX general authentication" >&6;}
-    cat >>confdefs.h <<\_ACEOF
-#define HAVE_AIXAUTH 1
-_ACEOF
-
-
-if test X"$AUTH_EXCL" != X""; then
-    { { echo "$as_me:$LINENO: error: \"cannot mix AIX general authentication with an exclusive authentication method such as $AUTH_EXCL\"" >&5
-echo "$as_me: error: \"cannot mix AIX general authentication with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
-   { (exit 1); exit 1; }; }
-elif test X"true" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
-    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
-    { { echo "$as_me:$LINENO: error: \"cannot mix AIX general authentication with other authentication methods (such as $_AUTH)\"" >&5
-echo "$as_me: error: \"cannot mix AIX general authentication with other authentication methods (such as $_AUTH)\"" >&2;}
-   { (exit 1); exit 1; }; }
-fi
-if test X"true" != X""; then
-    AUTH_OBJS="aix_auth.o"
-    AUTH_EXCL="AIX general authentication"
-elif test X"$AUTH_OBJS" = X""; then
-    AUTH_OBJS="aix_auth.o"
-else
-    AUTH_OBJS="$AUTH_OBJS aix_auth.o"
-fi
-
-    SUDO_LIBS="${SUDO_LIBS} -ls"
-fi
-
 if test ${with_pam-'no'} != "no"; then
                 echo "$as_me:$LINENO: checking for main in -ldl" >&5
 echo $ECHO_N "checking for main in -ldl... $ECHO_C" >&6
@@ -21864,6 +21665,210 @@ if test -n "$with_fwtk"; then
 	with_fwtk=yes
     fi
     SUDO_LIBS="${SUDO_LIBS} -lauth -lfwall"
+fi
+
+if test ${with_aixauth-'no'} != "no"; then
+    if test X"$with_aixauth" != X"maybe" -o X"$AUTH_EXCL" = X""; then
+	{ echo "$as_me:$LINENO: using AIX general authentication" >&5
+echo "$as_me: using AIX general authentication" >&6;}
+	cat >>confdefs.h <<\_ACEOF
+#define HAVE_AIXAUTH 1
+_ACEOF
+
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix AIX general authentication with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix AIX general authentication with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"true" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix AIX general authentication with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix AIX general authentication with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test X"true" != X""; then
+    AUTH_OBJS="aix_auth.o"
+    AUTH_EXCL="AIX general authentication"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="aix_auth.o"
+else
+    AUTH_OBJS="$AUTH_OBJS aix_auth.o"
+fi
+
+	SUDO_LIBS="${SUDO_LIBS} -ls"
+    fi
+fi
+
+if test ${with_bsdauth-'no'} != "no"; then
+    if test X"$with_bsdauth" != X"maybe" -o X"$AUTH_EXCL" = X""; then
+	if test "${ac_cv_header_bsd_auth_h+set}" = set; then
+  echo "$as_me:$LINENO: checking for bsd_auth.h" >&5
+echo $ECHO_N "checking for bsd_auth.h... $ECHO_C" >&6
+if test "${ac_cv_header_bsd_auth_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_bsd_auth_h" >&5
+echo "${ECHO_T}$ac_cv_header_bsd_auth_h" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking bsd_auth.h usability" >&5
+echo $ECHO_N "checking bsd_auth.h usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <bsd_auth.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_header_compiler=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking bsd_auth.h presence" >&5
+echo $ECHO_N "checking bsd_auth.h presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <bsd_auth.h>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: bsd_auth.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: bsd_auth.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: bsd_auth.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: bsd_auth.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: bsd_auth.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: bsd_auth.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: bsd_auth.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: bsd_auth.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: bsd_auth.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: bsd_auth.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: bsd_auth.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: bsd_auth.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: bsd_auth.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: bsd_auth.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: bsd_auth.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: bsd_auth.h: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## ------------------------------- ##
+## Report this to the sudo lists.  ##
+## ------------------------------- ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for bsd_auth.h" >&5
+echo $ECHO_N "checking for bsd_auth.h... $ECHO_C" >&6
+if test "${ac_cv_header_bsd_auth_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_bsd_auth_h=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_bsd_auth_h" >&5
+echo "${ECHO_T}$ac_cv_header_bsd_auth_h" >&6
+
+fi
+if test $ac_cv_header_bsd_auth_h = yes; then
+  cat >>confdefs.h <<\_ACEOF
+#define HAVE_BSD_AUTH_H 1
+_ACEOF
+
+
+if test X"$AUTH_EXCL" != X""; then
+    { { echo "$as_me:$LINENO: error: \"cannot mix BSD authentication with an exclusive authentication method such as $AUTH_EXCL\"" >&5
+echo "$as_me: error: \"cannot mix BSD authentication with an exclusive authentication method such as $AUTH_EXCL\"" >&2;}
+   { (exit 1); exit 1; }; }
+elif test X"true" != X"" -a X"$AUTH_OBJS" != X"" -a X"$AUTH_OBJS" != X"passwd.o"; then
+    _AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+    { { echo "$as_me:$LINENO: error: \"cannot mix BSD authentication with other authentication methods (such as $_AUTH)\"" >&5
+echo "$as_me: error: \"cannot mix BSD authentication with other authentication methods (such as $_AUTH)\"" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test X"true" != X""; then
+    AUTH_OBJS="bsdauth.o"
+    AUTH_EXCL="BSD authentication"
+elif test X"$AUTH_OBJS" = X""; then
+    AUTH_OBJS="bsdauth.o"
+else
+    AUTH_OBJS="$AUTH_OBJS bsdauth.o"
+fi
+
+else
+  -
+fi
+
+
+    fi
 fi
 
 if test -n "$with_ldap"; then
