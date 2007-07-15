@@ -114,6 +114,7 @@ struct ldap_config {
     char *tls_keyfile;
     char *sasl_authid;
     char *rootsasl_authid;
+    char *krb5_ccname;
 } ldap_conf;
 
 /*
@@ -570,6 +571,7 @@ sudo_ldap_read_config()
 	MATCH_S("sudoers_base", ldap_conf.base)
 	    else
 	MATCH_I("sudoers_debug", ldap_conf.debug)
+#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
 	    else
 	MATCH_B("use_sasl", ldap_conf.use_sasl)
 	    else
@@ -578,6 +580,9 @@ sudo_ldap_read_config()
 	MATCH_B("rootuse_sasl", ldap_conf.rootuse_sasl)
 	    else
 	MATCH_S("rootsasl_authid", ldap_conf.rootsasl_authid)
+	    else
+	MATCH_S("krb5_ccname", ldap_conf.krb5_ccname)
+#endif
 	    else {
 
 	    /*
@@ -655,6 +660,26 @@ sudo_ldap_read_config()
 	    fclose(f);
 	}
     }
+#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+    /*
+     * Make sure we can open the file specified by krb5_ccname.
+     */
+    if (ldap_conf.krb5_ccname != NULL) {
+	if (strncasecmp(ldap_conf.krb5_ccname, "FILE:", 5) == 0 ||
+	    strncasecmp(ldap_conf.krb5_ccname, "WRFILE:", 7) == 0) {
+	    value = ldap_conf.krb5_ccname +
+		(ldap_conf.krb5_ccname[4] == ':' ? 5 : 7);
+	    if ((f = fopen(value, "r")) != NULL) {
+		fclose(f);
+	    } else {
+		/* Can't open it, just ignore the entry. */
+		efree(ldap_conf.krb5_ccname);
+		ldap_conf.krb5_ccname = NULL;
+	    }
+	}
+    }
+#endif
+
     return(TRUE);
 }
 
@@ -873,7 +898,7 @@ sudo_ldap_sasl_interact(ld, flags, v_authid, v_interact)
 
     for (;interact->id != SASL_CB_LIST_END; interact++) {
 	if (interact->id != SASL_CB_USER)
-	    return (LDAP_PARAM_ERROR);
+	    return(LDAP_PARAM_ERROR);
 
 	if (authid != NULL)
 	    interact->result = authid;
@@ -883,7 +908,7 @@ sudo_ldap_sasl_interact(ld, flags, v_authid, v_interact)
 	    interact->result = "";
 	interact->len = strlen(interact->result);
     }
-    return (LDAP_SUCCESS);
+    return(LDAP_SUCCESS);
 }
 #endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
 
@@ -995,14 +1020,18 @@ sudo_ldap_open()
 #endif /* HAVE_LDAP_START_TLS_S */
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
-    /* XXX - should use krb5_ccname from ldap.conf too! */
     if (ldap_conf.rootuse_sasl == TRUE ||
 	(ldap_conf.rootuse_sasl != FALSE && ldap_conf.use_sasl == TRUE)) {
 	void *authid = ldap_conf.rootsasl_authid ?
 	    ldap_conf.rootsasl_authid : ldap_conf.sasl_authid;
 
+	if (ldap_conf.krb5_ccname != NULL)
+	    sudo_setenv("KRB5CCNAME", ldap_conf.krb5_ccname, TRUE);
 	rc = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
 	    NULL, NULL, LDAP_SASL_QUIET, sudo_ldap_sasl_interact, authid);
+	/* XXX - should unset  if no user_ccname */
+	if (user_ccname != NULL)
+	    sudo_setenv("KRB5CCNAME", user_ccname, TRUE);
 	if (rc != LDAP_SUCCESS) {
 	    fprintf(stderr, "ldap_sasl_interactive_bind_s(): %d : %s\n",
 		rc, ldap_err2string(rc));

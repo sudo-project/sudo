@@ -50,6 +50,7 @@ struct sudo_user {
     char *cmnd_base;
     char *cmnd_safe;
     char *class_name;
+    char *krb5_ccname;
     int   ngroups;
     gid_t *groups;
     struct list_member *env_vars;
@@ -138,6 +139,7 @@ struct sudo_user {
 #define user_prompt		(sudo_user.prompt)
 #define user_host		(sudo_user.host)
 #define user_shost		(sudo_user.shost)
+#define user_ccname		(sudo_user.krb5_ccname)
 #define safe_cmnd		(sudo_user.cmnd_safe)
 #define login_class		(sudo_user.class_name)
 #define runas_pw		(sudo_user._runas_pw)

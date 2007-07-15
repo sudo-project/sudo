@@ -565,6 +565,10 @@ init_vars(sudo_mode, envp)
 
     for (ep = envp; *ep; ep++) {
 	switch (**ep) {
+	    case 'K':
+		if (strncmp("KRB5CCNAME=", *ep, 11) == 0)
+		    user_ccname = *ep + 11;
+		break;
 	    case 'P':
 		if (strncmp("PATH=", *ep, 5) == 0)
 		    user_path = *ep + 5;
