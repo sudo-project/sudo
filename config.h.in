@@ -212,6 +212,12 @@
 /* Define to 1 if you have the <linux/systrace.h> header file. */
 #undef HAVE_LINUX_SYSTRACE_H
 
+/* Define to 1 if you have the `ldap_sasl_interactive_bind_s' function. */
+#undef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+
+/* Define to 1 if you have the <sasl/sasl.h> header file. */
+#undef HAVE_SASL_SASL_H
+
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF
 

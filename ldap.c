@@ -55,6 +55,13 @@
 # include <lber.h>
 #endif
 #include <ldap.h>
+#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+# ifdef HAVE_SASL_SASL_H
+#  include <sasl/sasl.h>
+# else
+#  include <sasl.h>
+# endif
+#endif
 
 #include "sudo.h"
 #include "parse.h"
@@ -90,6 +97,8 @@ struct ldap_config {
     int tls_checkpeer;
     int timelimit;
     int bind_timelimit;
+    int use_sasl;
+    int rootuse_sasl;
     char *host;
     char *uri;
     char *binddn;
@@ -103,6 +112,8 @@ struct ldap_config {
     char *tls_cipher_suite;
     char *tls_certfile;
     char *tls_keyfile;
+    char *sasl_authid;
+    char *rootsasl_authid;
 } ldap_conf;
 
 /*
@@ -476,6 +487,8 @@ sudo_ldap_read_config()
     ldap_conf.tls_checkpeer = -1;
     ldap_conf.timelimit = -1;
     ldap_conf.bind_timelimit = -1;
+    ldap_conf.use_sasl = -1;
+    ldap_conf.rootuse_sasl = -1;
 
     if ((f = fopen(_PATH_LDAP_CONF, "r")) == NULL)
 	return(FALSE);
@@ -557,6 +570,14 @@ sudo_ldap_read_config()
 	MATCH_S("sudoers_base", ldap_conf.base)
 	    else
 	MATCH_I("sudoers_debug", ldap_conf.debug)
+	    else
+	MATCH_B("use_sasl", ldap_conf.use_sasl)
+	    else
+	MATCH_S("sasl_authid", ldap_conf.sasl_authid)
+	    else
+	MATCH_B("rootuse_sasl", ldap_conf.rootuse_sasl)
+	    else
+	MATCH_S("rootsasl_authid", ldap_conf.rootsasl_authid)
 	    else {
 
 	    /*
@@ -601,6 +622,14 @@ sudo_ldap_read_config()
 #ifdef HAVE_LDAP_START_TLS_S
 	fprintf(stderr, "ssl          %s\n", ldap_conf.ssl ?
 	    ldap_conf.ssl : "(no)");
+#endif
+#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+	fprintf(stderr, "use_sasl     %d\n", ldap_conf.use_sasl);
+	fprintf(stderr, "sasl_authid  %s\n", ldap_conf.sasl_authid ?
+	    ldap_conf.sasl_authid : "(NONE)");
+	fprintf(stderr, "use_sasl     %d\n", ldap_conf.use_sasl);
+	fprintf(stderr, "rootsasl_authid %s\n", ldap_conf.rootsasl_authid ?
+	    ldap_conf.rootsasl_authid : "(NONE)");
 #endif
 	fprintf(stderr, "===================\n");
     }
@@ -831,6 +860,33 @@ sudo_ldap_display_cmnd(ldv, pw)
     } \
 } while(0)
 
+#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+static int
+sudo_ldap_sasl_interact(ld, flags, v_authid, v_interact)
+    LDAP *ld;
+    unsigned int flags;
+    void *v_authid;
+    void *v_interact;
+{
+    char *authid = (char *)v_authid;
+    sasl_interact_t *interact = (sasl_interact_t *)v_interact;
+
+    for (;interact->id != SASL_CB_LIST_END; interact++) {
+	if (interact->id != SASL_CB_USER)
+	    return (LDAP_PARAM_ERROR);
+
+	if (authid != NULL)
+	    interact->result = authid;
+	else if (interact->defresult != NULL)
+	    interact->result = interact->defresult;
+	else
+	    interact->result = "";
+	interact->len = strlen(interact->result);
+    }
+    return (LDAP_SUCCESS);
+}
+#endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
+
 /*
  * Open a connection to the LDAP server.
  */
@@ -938,13 +994,31 @@ sudo_ldap_open()
     }
 #endif /* HAVE_LDAP_START_TLS_S */
 
-    /* Actually connect */
-    if ((rc = ldap_simple_bind_s(ld, ldap_conf.binddn, ldap_conf.bindpw))) {
-	fprintf(stderr, "ldap_simple_bind_s()=%d : %s\n",
-	    rc, ldap_err2string(rc));
-	return(NULL);
+#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+    /* XXX - should use krb5_ccname from ldap.conf too! */
+    if (ldap_conf.rootuse_sasl != FALSE && ldap_conf.use_sasl == TRUE) {
+	void *authid = ldap_conf.rootsasl_authid ?
+	    ldap_conf.rootsasl_authid : ldap_conf.sasl_authid;
+
+	rc = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
+	    NULL, NULL, LDAP_SASL_QUIET, sudo_ldap_sasl_interact, authid);
+	if (rc != LDAP_SUCCESS) {
+	    fprintf(stderr, "ldap_sasl_interactive_bind_s(): %d : %s\n",
+		rc, ldap_err2string(rc));
+	    return(NULL);
+	}
+	DPRINTF(("ldap_sasl_interactive_bind_s() ok"), 1);
+    } else
+#endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
+    {
+	/* Actually connect */
+	if ((rc = ldap_simple_bind_s(ld, ldap_conf.binddn, ldap_conf.bindpw))) {
+	    fprintf(stderr, "ldap_simple_bind_s()=%d : %s\n",
+		rc, ldap_err2string(rc));
+	    return(NULL);
+	}
+	DPRINTF(("ldap_bind() ok"), 1);
     }
-    DPRINTF(("ldap_bind() ok"), 1);
 
     return((VOID *) ld);
 }
