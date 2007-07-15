@@ -914,7 +914,8 @@ sudo_ldap_open()
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     /* XXX - should use krb5_ccname from ldap.conf too! */
-    if (ldap_conf.rootuse_sasl != FALSE && ldap_conf.use_sasl == TRUE) {
+    if (ldap_conf.rootuse_sasl == TRUE ||
+	(ldap_conf.rootuse_sasl != FALSE && ldap_conf.use_sasl == TRUE)) {
 	void *authid = ldap_conf.rootsasl_authid ?
 	    ldap_conf.rootsasl_authid : ldap_conf.sasl_authid;
 
