@@ -254,6 +254,12 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
   #tls_cert /etc/certs/client_cert.pem
   #tls_key  /etc/certs/client_key.pem
   #
+  # If using SASL authentication for LDAP
+  # use_sasl yes
+  # sasl_authid <SASL password>
+  # rootuse_sasl yes
+  # rootsasl_authid <SASL password for root access>
+  #
 
 Debugging your LDAP configuration
 =================================
