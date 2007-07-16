@@ -260,6 +260,7 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
   # rootuse_sasl yes
   # rootsasl_auth_id <SASL username for root access>
   # sasl_secprops none
+  # krb5_ccname /etc/.ldapcache
   #
 
 Debugging your LDAP configuration
