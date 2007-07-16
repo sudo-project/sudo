@@ -265,6 +265,7 @@ FILE *open_sudoers	__P((const char *, int *));
 void display_privs	__P((VOID *, struct passwd *));
 int display_cmnd	__P((VOID *, struct passwd *));
 void sudo_setenv	__P((const char *, const char *, int));
+void sudo_unsetenv	__P((const char *));
 void sudo_setgrent	__P((void));
 void sudo_endgrent	__P((void));
 void sudo_setpwent	__P((void));

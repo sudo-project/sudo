@@ -101,7 +101,11 @@ struct environment {
  */
 char **rebuild_env		__P((char **, int, int));
 void sudo_setenv		__P((const char *, const char *, int));
+void sudo_unsetenv		__P((const char *));
 static void insert_env		__P((char *, int));
+static void sync_env		__P((char **));
+
+extern char **environ;		/* global environment */
 
 /*
  * Copy of the sudo-managed environment.
@@ -207,6 +211,29 @@ static const char *initial_keepenv_table[] = {
 };
 
 /*
+ * Syncronize our private copy of the environment with what is
+ * in envp.
+ */
+static void
+sync_env(envp)
+    char **envp;
+{
+    size_t evlen;
+    char **ep;
+
+    for (ep = envp; *ep != NULL; ep++)
+	continue;
+    evlen = ep - envp;
+    if (evlen + 1 > env.env_size) {
+	efree(env.envp);
+	env.env_size = evlen + 1 + 128;
+	env.envp = emalloc2(env.env_size, sizeof(char *));
+    }
+    memcpy(env.envp, envp, evlen + 1);
+    env.env_len = evlen;
+}
+
+/*
  * Similar to setenv(3) but operates on sudo's private copy of the environment
  * and it always overwrites.  The dupcheck param determines whether we need
  * to verify that the variable is not already set.
@@ -223,16 +250,45 @@ sudo_setenv(var, val, dupcheck)
     esize = strlen(var) + 1 + strlen(val) + 1;
     estring = emalloc(esize);
 
+    /* Make sure we are operating on the current environment. */
+    if (env.envp != environ)
+	sync_env(environ);
+
+    /* Build environment string and insert it. */
     if (strlcpy(estring, var, esize) >= esize ||
 	strlcat(estring, "=", esize) >= esize ||
 	strlcat(estring, val, esize) >= esize) {
 
 	errorx(1, "internal error, sudo_setenv() overflow");
     }
-
     insert_env(estring, dupcheck);
 }
 
+/*
+ * Similar to unsetenv(3) but operates on sudo's private copy of the
+ * environment.
+ */
+void
+sudo_unsetenv(var)
+    const char *var;
+{
+    char **nep;
+    size_t varlen;
+
+    /* Make sure we are operating on the current environment. */
+    if (env.envp != environ)
+	sync_env(environ);
+
+    varlen = strlen(var);
+    for (nep = env.envp; *nep; nep++) {
+	if (strncmp(var, *nep, varlen) == 0 && *nep[varlen] == '=') {
+	    /* Found it; move everything over by one and update len. */
+	    memmove(nep, nep + 1, env.env_len - (nep - env.envp));
+	    env.env_len--;
+	    return;
+	}
+    }
+}
 
 /*
  * Insert str into env.envp, assumes str has an '=' in it.
@@ -581,24 +637,9 @@ insert_env_vars(envp, env_vars)
     if (env_vars == NULL)
 	return(envp);
 
-    /*
-     * Make sure we still own the environment and steal it back if not.
-     */
-    if (env.envp != envp) {
-	size_t evlen;
-	char **ep;
-
-	for (ep = envp; *ep != NULL; ep++)
-	    continue;
-	evlen = ep - envp;
-	if (evlen + 1 > env.env_size) {
-	    efree(env.envp);
-	    env.env_size = evlen + 1 + 128;
-	    env.envp = emalloc2(env.env_size, sizeof(char *));
-	}
-	memcpy(env.envp, envp, evlen + 1);
-	env.env_len = evlen;
-    }
+    /* Make sure we are operating on the current environment. */
+    if (env.envp != envp)
+	sync_env(envp);
 
     /* Add user-specified environment variables. */
     for (cur = env_vars; cur != NULL; cur = cur->next)
