@@ -256,9 +256,10 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
   #
   # If using SASL authentication for LDAP
   # use_sasl yes
-  # sasl_auth_id <SASL password>
+  # sasl_auth_id <SASL username>
   # rootuse_sasl yes
-  # rootsasl_auth_id <SASL password for root access>
+  # rootsasl_auth_id <SASL username for root access>
+  # sasl_secprops none
   #
 
 Debugging your LDAP configuration

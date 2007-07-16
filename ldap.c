@@ -114,6 +114,7 @@ struct ldap_config {
     char *tls_keyfile;
     char *sasl_auth_id;
     char *rootsasl_auth_id;
+    char *sasl_secprops;
     char *krb5_ccname;
 } ldap_conf;
 
@@ -581,6 +582,8 @@ sudo_ldap_read_config()
 	    else
 	MATCH_S("rootsasl_auth_id", ldap_conf.rootsasl_auth_id)
 	    else
+	MATCH_S("sasl_secprops", ldap_conf.sasl_secprops)
+	    else
 	MATCH_S("krb5_ccname", ldap_conf.krb5_ccname)
 #endif
 	    else {
@@ -606,35 +609,39 @@ sudo_ldap_read_config()
 	fprintf(stderr, "===================\n");
 #ifdef HAVE_LDAP_INITIALIZE
 	if (ldap_conf.uri) {
-	    fprintf(stderr, "uri          %s\n", ldap_conf.uri);
+	    fprintf(stderr, "uri              %s\n", ldap_conf.uri);
 	} else
 #endif
 	{
-	    fprintf(stderr, "host         %s\n", ldap_conf.host ?
+	    fprintf(stderr, "host             %s\n", ldap_conf.host ?
 		ldap_conf.host : "(NONE)");
-	    fprintf(stderr, "port         %d\n", ldap_conf.port);
+	    fprintf(stderr, "port             %d\n", ldap_conf.port);
 	}
-	fprintf(stderr, "ldap_version %d\n", ldap_conf.version);
+	fprintf(stderr, "ldap_version     %d\n", ldap_conf.version);
 
-	fprintf(stderr, "sudoers_base %s\n", ldap_conf.base ?
+	fprintf(stderr, "sudoers_base     %s\n", ldap_conf.base ?
 	    ldap_conf.base : "(NONE) <---Sudo will ignore ldap)");
-	fprintf(stderr, "binddn       %s\n", ldap_conf.binddn ?
+	fprintf(stderr, "binddn           %s\n", ldap_conf.binddn ?
 	    ldap_conf.binddn : "(anonymous)");
-	fprintf(stderr, "bindpw       %s\n", ldap_conf.bindpw ?
+	fprintf(stderr, "bindpw           %s\n", ldap_conf.bindpw ?
 	    ldap_conf.bindpw : "(anonymous)");
-	fprintf(stderr, "bind_timelimit  %d\n", ldap_conf.bind_timelimit);
-	fprintf(stderr, "timelimit    %d\n", ldap_conf.timelimit);
+	fprintf(stderr, "bind_timelimit   %d\n", ldap_conf.bind_timelimit);
+	fprintf(stderr, "timelimit        %d\n", ldap_conf.timelimit);
 #ifdef HAVE_LDAP_START_TLS_S
-	fprintf(stderr, "ssl          %s\n", ldap_conf.ssl ?
+	fprintf(stderr, "ssl              %s\n", ldap_conf.ssl ?
 	    ldap_conf.ssl : "(no)");
 #endif
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
-	fprintf(stderr, "use_sasl     %d\n", ldap_conf.use_sasl);
-	fprintf(stderr, "sasl_auth_id  %s\n", ldap_conf.sasl_auth_id ?
+	fprintf(stderr, "use_sasl         %d\n", ldap_conf.use_sasl);
+	fprintf(stderr, "sasl_auth_id     %s\n", ldap_conf.sasl_auth_id ?
 	    ldap_conf.sasl_auth_id : "(NONE)");
-	fprintf(stderr, "use_sasl     %d\n", ldap_conf.use_sasl);
+	fprintf(stderr, "rootuse_sasl     %d\n", ldap_conf.rootuse_sasl);
 	fprintf(stderr, "rootsasl_auth_id %s\n", ldap_conf.rootsasl_auth_id ?
 	    ldap_conf.rootsasl_auth_id : "(NONE)");
+	fprintf(stderr, "sasl_secprops    %s\n", ldap_conf.sasl_secprops ?
+	    ldap_conf.sasl_secprops : "(NONE)");
+	fprintf(stderr, "krb5_ccname      %s\n", ldap_conf.krb5_ccname ?
+	    ldap_conf.krb5_ccname : "(NONE)");
 #endif
 	fprintf(stderr, "===================\n");
     }
@@ -887,16 +894,16 @@ sudo_ldap_display_cmnd(ldv, pw)
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
 static int
-sudo_ldap_sasl_interact(ld, flags, v_auth_id, v_interact)
+sudo_ldap_sasl_interact(ld, flags, _auth_id, _interact)
     LDAP *ld;
     unsigned int flags;
-    void *v_auth_id;
-    void *v_interact;
+    void *_auth_id;
+    void *_interact;
 {
-    char *auth_id = (char *)v_auth_id;
-    sasl_interact_t *interact = (sasl_interact_t *)v_interact;
+    char *auth_id = (char *)_auth_id;
+    sasl_interact_t *interact = (sasl_interact_t *)_interact;
 
-    for (;interact->id != SASL_CB_LIST_END; interact++) {
+    for (; interact->id != SASL_CB_LIST_END; interact++) {
 	if (interact->id != SASL_CB_USER)
 	    return(LDAP_PARAM_ERROR);
 
@@ -906,7 +913,11 @@ sudo_ldap_sasl_interact(ld, flags, v_auth_id, v_interact)
 	    interact->result = interact->defresult;
 	else
 	    interact->result = "";
+
 	interact->len = strlen(interact->result);
+#if SASL_VERSION_MAJOR < 2
+	interact->result = estrdup(interact->result);
+#endif /* SASL_VERSION_MAJOR < 2 */
     }
     return(LDAP_SUCCESS);
 }
@@ -960,6 +971,10 @@ sudo_ldap_open()
 #ifdef LDAP_OPT_X_CONNECT_TIMEOUT
     SET_OPTI(X_CONNECT_TIMEOUT, bind_timeout);
 #endif  
+
+#ifdef LDAP_OPT_X_SASL_SECPROPS
+    SET_OPTS(X_SASL_SECPROPS, sasl_secprops);
+#endif
 
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
     if (ldap_conf.bind_timelimit > 0) {
