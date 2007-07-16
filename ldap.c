@@ -61,6 +61,12 @@
 # else
 #  include <sasl.h>
 # endif
+# ifdef HAVE_GSSAPI_H
+#  include <gssapi.h>
+# elif defined(HAVE_GSSAPI_GSSAPI_KRB5_H)
+#  include <gssapi/gssapi.h>
+#  include <gssapi/gssapi_krb5.h>
+# endif
 #endif
 
 #include "sudo.h"
@@ -930,7 +936,11 @@ VOID *
 sudo_ldap_open()
 {
     LDAP *ld = NULL;
+    const char *old_ccname = user_ccname;
     int rc;
+#ifdef HAVE_GSS_KRB5_CCACHE_NAME
+    unsigned int status;
+#endif
 
     if (!sudo_ldap_read_config())
 	return(NULL);
@@ -1040,13 +1050,30 @@ sudo_ldap_open()
 	void *auth_id = ldap_conf.rootsasl_auth_id ?
 	    ldap_conf.rootsasl_auth_id : ldap_conf.sasl_auth_id;
 
-	if (ldap_conf.krb5_ccname != NULL)
+	if (ldap_conf.krb5_ccname != NULL) {
+#ifdef HAVE_GSS_KRB5_CCACHE_NAME
+	    if (gss_krb5_ccache_name(&status, ldap_conf.krb5_ccname, &old_ccname)
+		!= GSS_S_COMPLETE) {
+		old_ccname = NULL;
+		DPRINTF(("gss_krb5_ccache_name() failed: %d", status), 1);
+	    }
+#else
 	    sudo_setenv("KRB5CCNAME", ldap_conf.krb5_ccname, TRUE);
+#endif
+	}
 	rc = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
 	    NULL, NULL, LDAP_SASL_QUIET, sudo_ldap_sasl_interact, auth_id);
-	/* XXX - should unset  if no user_ccname */
-	if (user_ccname != NULL)
-	    sudo_setenv("KRB5CCNAME", user_ccname, TRUE);
+	if (ldap_conf.krb5_ccname != NULL) {
+#ifdef HAVE_GSS_KRB5_CCACHE_NAME
+	    if (gss_krb5_ccache_name(&status, old_ccname, NULL) != GSS_S_COMPLETE)
+		    DPRINTF(("gss_krb5_ccache_name() failed: %d", status), 1);
+#else
+	    if (old_ccname != NULL)
+		sudo_setenv("KRB5CCNAME", old_ccname, TRUE);
+	    else
+		sudo_unsetenv("KRB5CCNAME");
+#endif
+	}
 	if (rc != LDAP_SUCCESS) {
 	    fprintf(stderr, "ldap_sasl_interactive_bind_s(): %d : %s\n",
 		rc, ldap_err2string(rc));
