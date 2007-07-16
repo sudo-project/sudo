@@ -112,8 +112,8 @@ struct ldap_config {
     char *tls_cipher_suite;
     char *tls_certfile;
     char *tls_keyfile;
-    char *sasl_authid;
-    char *rootsasl_authid;
+    char *sasl_auth_id;
+    char *rootsasl_auth_id;
     char *krb5_ccname;
 } ldap_conf;
 
@@ -575,11 +575,11 @@ sudo_ldap_read_config()
 	    else
 	MATCH_B("use_sasl", ldap_conf.use_sasl)
 	    else
-	MATCH_S("sasl_authid", ldap_conf.sasl_authid)
+	MATCH_S("sasl_auth_id", ldap_conf.sasl_auth_id)
 	    else
 	MATCH_B("rootuse_sasl", ldap_conf.rootuse_sasl)
 	    else
-	MATCH_S("rootsasl_authid", ldap_conf.rootsasl_authid)
+	MATCH_S("rootsasl_auth_id", ldap_conf.rootsasl_auth_id)
 	    else
 	MATCH_S("krb5_ccname", ldap_conf.krb5_ccname)
 #endif
@@ -630,11 +630,11 @@ sudo_ldap_read_config()
 #endif
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
 	fprintf(stderr, "use_sasl     %d\n", ldap_conf.use_sasl);
-	fprintf(stderr, "sasl_authid  %s\n", ldap_conf.sasl_authid ?
-	    ldap_conf.sasl_authid : "(NONE)");
+	fprintf(stderr, "sasl_auth_id  %s\n", ldap_conf.sasl_auth_id ?
+	    ldap_conf.sasl_auth_id : "(NONE)");
 	fprintf(stderr, "use_sasl     %d\n", ldap_conf.use_sasl);
-	fprintf(stderr, "rootsasl_authid %s\n", ldap_conf.rootsasl_authid ?
-	    ldap_conf.rootsasl_authid : "(NONE)");
+	fprintf(stderr, "rootsasl_auth_id %s\n", ldap_conf.rootsasl_auth_id ?
+	    ldap_conf.rootsasl_auth_id : "(NONE)");
 #endif
 	fprintf(stderr, "===================\n");
     }
@@ -887,21 +887,21 @@ sudo_ldap_display_cmnd(ldv, pw)
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
 static int
-sudo_ldap_sasl_interact(ld, flags, v_authid, v_interact)
+sudo_ldap_sasl_interact(ld, flags, v_auth_id, v_interact)
     LDAP *ld;
     unsigned int flags;
-    void *v_authid;
+    void *v_auth_id;
     void *v_interact;
 {
-    char *authid = (char *)v_authid;
+    char *auth_id = (char *)v_auth_id;
     sasl_interact_t *interact = (sasl_interact_t *)v_interact;
 
     for (;interact->id != SASL_CB_LIST_END; interact++) {
 	if (interact->id != SASL_CB_USER)
 	    return(LDAP_PARAM_ERROR);
 
-	if (authid != NULL)
-	    interact->result = authid;
+	if (auth_id != NULL)
+	    interact->result = auth_id;
 	else if (interact->defresult != NULL)
 	    interact->result = interact->defresult;
 	else
@@ -1022,13 +1022,13 @@ sudo_ldap_open()
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     if (ldap_conf.rootuse_sasl == TRUE ||
 	(ldap_conf.rootuse_sasl != FALSE && ldap_conf.use_sasl == TRUE)) {
-	void *authid = ldap_conf.rootsasl_authid ?
-	    ldap_conf.rootsasl_authid : ldap_conf.sasl_authid;
+	void *auth_id = ldap_conf.rootsasl_auth_id ?
+	    ldap_conf.rootsasl_auth_id : ldap_conf.sasl_auth_id;
 
 	if (ldap_conf.krb5_ccname != NULL)
 	    sudo_setenv("KRB5CCNAME", ldap_conf.krb5_ccname, TRUE);
 	rc = ldap_sasl_interactive_bind_s(ld, ldap_conf.binddn, "GSSAPI",
-	    NULL, NULL, LDAP_SASL_QUIET, sudo_ldap_sasl_interact, authid);
+	    NULL, NULL, LDAP_SASL_QUIET, sudo_ldap_sasl_interact, auth_id);
 	/* XXX - should unset  if no user_ccname */
 	if (user_ccname != NULL)
 	    sudo_setenv("KRB5CCNAME", user_ccname, TRUE);
