@@ -1907,7 +1907,20 @@ Sudo 1.6.8p12 released.
 
 601) The -- flag now behaves as documented.
 
-602) sudo -k/-K no longer cares if the timestamp is in the futue.
+602) sudo -k/-K no longer cares if the timestamp is in the future.
 
 603) When searching for the command, sudo now uses the effective gid
      of the runas user.
+
+604) Sudo no longer updates the timestamp if not validated by sudoers.
+
+605) Now rebuild environment regardless of how sudo was invoked.
+
+606) More accurate usage() when called as sudoedit.
+
+607) Command line environment variables are now treated like
+     normal environment variables unless the SETENV tag is set.
+     
+608) Better explanation of environment handling in the sudo man page.
+
+Sudo 1.6.9 released.
