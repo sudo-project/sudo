@@ -789,9 +789,10 @@ get_editor(args)
 	} while ((Editor = strtok(NULL, ":")));
 
 	/* Bleah, none of the editors existed! */
-	if (Editor == NULL || *Editor == '\0')
+	if (Editor == NULL || *Editor == '\0') {
 	    warnx("no editor found (editor path = %s)", def_editor);
 	    Exit(-1);
+	}
     }
     *args = EditorArgs;
     return(Editor);
