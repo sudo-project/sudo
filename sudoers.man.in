@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "June 25, 2007" "1.6.9b5" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "July 16, 2007" "1.6.9" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -393,6 +393,219 @@ These operators are used to add to and delete from a list respectively.
 It is not an error to use the \f(CW\*(C`\-=\*(C'\fR operator to remove an element
 that does not exist in a list.
 .PP
+See \*(L"\s-1SUDOERS\s0 \s-1OPTIONS\s0\*(R" for a list of supported Defaults parameters.
+.Sh "User Specification"
+.IX Subsection "User Specification"
+.Vb 2
+\& User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \e
+\&               (':' Host_List '=' Cmnd_Spec_List)*
+.Ve
+.PP
+.Vb 2
+\& Cmnd_Spec_List ::= Cmnd_Spec |
+\&                    Cmnd_Spec ',' Cmnd_Spec_List
+.Ve
+.PP
+.Vb 1
+\& Cmnd_Spec ::= Runas_Spec? Tag_Spec* Cmnd
+.Ve
+.PP
+.Vb 1
+\& Runas_Spec ::= '(' Runas_List ')'
+.Ve
+.PP
+.Vb 2
+\& Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
+\&               'SETENV:' | 'NOSETENV:')
+.Ve
+.PP
+A \fBuser specification\fR determines which commands a user may run
+(and as what user) on specified hosts.  By default, commands are
+run as \fBroot\fR, but this can be changed on a per-command basis.
+.PP
+Let's break that down into its constituent parts:
+.Sh "Runas_Spec"
+.IX Subsection "Runas_Spec"
+A \f(CW\*(C`Runas_Spec\*(C'\fR is simply a \f(CW\*(C`Runas_List\*(C'\fR (as defined above)
+enclosed in a set of parentheses.  If you do not specify a
+\&\f(CW\*(C`Runas_Spec\*(C'\fR in the user specification, a default \f(CW\*(C`Runas_Spec\*(C'\fR
+of \fBroot\fR will be used.  A \f(CW\*(C`Runas_Spec\*(C'\fR sets the default for
+commands that follow it.  What this means is that for the entry:
+.PP
+.Vb 1
+\& dgb    boulder = (operator) /bin/ls, /bin/kill, /usr/bin/lprm
+.Ve
+.PP
+The user \fBdgb\fR may run \fI/bin/ls\fR, \fI/bin/kill\fR, and
+\&\fI/usr/bin/lprm\fR \*(-- but only as \fBoperator\fR.  E.g.,
+.PP
+.Vb 1
+\& $ sudo -u operator /bin/ls.
+.Ve
+.PP
+It is also possible to override a \f(CW\*(C`Runas_Spec\*(C'\fR later on in an
+entry.  If we modify the entry like so:
+.PP
+.Vb 1
+\& dgb    boulder = (operator) /bin/ls, (root) /bin/kill, /usr/bin/lprm
+.Ve
+.PP
+Then user \fBdgb\fR is now allowed to run \fI/bin/ls\fR as \fBoperator\fR,
+but  \fI/bin/kill\fR and \fI/usr/bin/lprm\fR as \fBroot\fR.
+.Sh "Tag_Spec"
+.IX Subsection "Tag_Spec"
+A command may have zero or more tags associated with it.  There are
+six possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR, \f(CW\*(C`EXEC\*(C'\fR,
+\&\f(CW\*(C`SETENV\*(C'\fR and \f(CW\*(C`NOSETENV\*(C'\fR.
+Once a tag is set on a \f(CW\*(C`Cmnd\*(C'\fR, subsequent \f(CW\*(C`Cmnd\*(C'\fRs in the
+\&\f(CW\*(C`Cmnd_Spec_List\*(C'\fR, inherit the tag unless it is overridden by the
+opposite tag (i.e.: \f(CW\*(C`PASSWD\*(C'\fR overrides \f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`NOEXEC\*(C'\fR
+overrides \f(CW\*(C`EXEC\*(C'\fR).
+.PP
+\fI\s-1NOPASSWD\s0 and \s-1PASSWD\s0\fR
+.IX Subsection "NOPASSWD and PASSWD"
+.PP
+By default, \fBsudo\fR requires that a user authenticate him or herself
+before running a command.  This behavior can be modified via the
+\&\f(CW\*(C`NOPASSWD\*(C'\fR tag.  Like a \f(CW\*(C`Runas_Spec\*(C'\fR, the \f(CW\*(C`NOPASSWD\*(C'\fR tag sets
+a default for the commands that follow it in the \f(CW\*(C`Cmnd_Spec_List\*(C'\fR.
+Conversely, the \f(CW\*(C`PASSWD\*(C'\fR tag can be used to reverse things.
+For example:
+.PP
+.Vb 1
+\& ray    rushmore = NOPASSWD: /bin/kill, /bin/ls, /usr/bin/lprm
+.Ve
+.PP
+would allow the user \fBray\fR to run \fI/bin/kill\fR, \fI/bin/ls\fR, and
+\&\fI/usr/bin/lprm\fR as root on the machine rushmore as \fBroot\fR without
+authenticating himself.  If we only want \fBray\fR to be able to
+run \fI/bin/kill\fR without a password the entry would be:
+.PP
+.Vb 1
+\& ray    rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
+.Ve
+.PP
+Note, however, that the \f(CW\*(C`PASSWD\*(C'\fR tag has no effect on users who are
+in the group specified by the \fIexempt_group\fR option.
+.PP
+By default, if the \f(CW\*(C`NOPASSWD\*(C'\fR tag is applied to any of the entries
+for a user on the current host, he or she will be able to run
+\&\f(CW\*(C`sudo \-l\*(C'\fR without a password.  Additionally, a user may only run
+\&\f(CW\*(C`sudo \-v\*(C'\fR without a password if the \f(CW\*(C`NOPASSWD\*(C'\fR tag is present
+for all a user's entries that pertain to the current host.
+This behavior may be overridden via the verifypw and listpw options.
+.PP
+\fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR
+.IX Subsection "NOEXEC and EXEC"
+.PP
+If \fBsudo\fR has been compiled with \fInoexec\fR support and the underlying
+operating system supports it, the \f(CW\*(C`NOEXEC\*(C'\fR tag can be used to prevent
+a dynamically-linked executable from running further commands itself.
+.PP
+In the following example, user \fBaaron\fR may run \fI/usr/bin/more\fR
+and \fI/usr/bin/vi\fR but shell escapes will be disabled.
+.PP
+.Vb 1
+\& aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
+.Ve
+.PP
+See the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section below for more details
+on how \f(CW\*(C`NOEXEC\*(C'\fR works and whether or not it will work on your system.
+.PP
+\fI\s-1SETENV\s0 and \s-1NOSETENV\s0\fR
+.IX Subsection "SETENV and NOSETENV"
+.PP
+These tags override the value of the \fIsetenv\fR option on a per-command
+basis.  Note that if \f(CW\*(C`SETENV\*(C'\fR has been set for a command, any
+environment variables set on the command line way are not subject
+to the restrictions imposed by \fIenv_check\fR, \fIenv_delete\fR, or
+\&\fIenv_keep\fR.  As such, only trusted users should be allowed to set
+variables in this manner.
+.Sh "Wildcards"
+.IX Subsection "Wildcards"
+\&\fBsudo\fR allows shell-style \fIwildcards\fR (aka meta or glob characters)
+to be used in pathnames as well as command line arguments in the
+\&\fIsudoers\fR file.  Wildcard matching is done via the \fB\s-1POSIX\s0\fR
+\&\fIfnmatch\fR\|(3) routine.  Note that these are \fInot\fR regular expressions.
+.ie n .IP "\*(C`*\*(C'" 8
+.el .IP "\f(CW\*(C`*\*(C'\fR" 8
+.IX Item "*"
+Matches any set of zero or more characters.
+.ie n .IP "\*(C`?\*(C'" 8
+.el .IP "\f(CW\*(C`?\*(C'\fR" 8
+.IX Item "?"
+Matches any single character.
+.ie n .IP "\*(C`[...]\*(C'" 8
+.el .IP "\f(CW\*(C`[...]\*(C'\fR" 8
+.IX Item "[...]"
+Matches any character in the specified range.
+.ie n .IP "\*(C`[!...]\*(C'" 8
+.el .IP "\f(CW\*(C`[!...]\*(C'\fR" 8
+.IX Item "[!...]"
+Matches any character \fBnot\fR in the specified range.
+.ie n .IP "\*(C`\ex\*(C'" 8
+.el .IP "\f(CW\*(C`\ex\*(C'\fR" 8
+.IX Item "x"
+For any character \*(L"x\*(R", evaluates to \*(L"x\*(R".  This is used to
+escape special characters such as: \*(L"*\*(R", \*(L"?\*(R", \*(L"[\*(R", and \*(L"}\*(R".
+.PP
+Note that a forward slash ('/') will \fBnot\fR be matched by
+wildcards used in the pathname.  When matching the command
+line arguments, however, a slash \fBdoes\fR get matched by
+wildcards.  This is to make a path like:
+.PP
+.Vb 1
+\&    /usr/bin/*
+.Ve
+.PP
+match \fI/usr/bin/who\fR but not \fI/usr/bin/X11/xterm\fR.
+.Sh "Exceptions to wildcard rules"
+.IX Subsection "Exceptions to wildcard rules"
+The following exceptions apply to the above rules:
+.ie n .IP """""" 8
+.el .IP "\f(CW``''\fR" 8
+.IX Item """"""
+If the empty string \f(CW""\fR is the only command line argument in the
+\&\fIsudoers\fR entry it means that command is not allowed to be run
+with \fBany\fR arguments.
+.Sh "Other special characters and reserved words"
+.IX Subsection "Other special characters and reserved words"
+The pound sign ('#') is used to indicate a comment (unless it is
+part of a #include directive or unless it occurs in the context of
+a user name and is followed by one or more digits, in which case
+it is treated as a uid).  Both the comment character and any text
+after it, up to the end of the line, are ignored.
+.PP
+The reserved word \fB\s-1ALL\s0\fR is a built-in \fIalias\fR that always causes
+a match to succeed.  It can be used wherever one might otherwise
+use a \f(CW\*(C`Cmnd_Alias\*(C'\fR, \f(CW\*(C`User_Alias\*(C'\fR, \f(CW\*(C`Runas_Alias\*(C'\fR, or \f(CW\*(C`Host_Alias\*(C'\fR.
+You should not try to define your own \fIalias\fR called \fB\s-1ALL\s0\fR as the
+built-in alias will be used in preference to your own.  Please note
+that using \fB\s-1ALL\s0\fR can be dangerous since in a command context, it
+allows the user to run \fBany\fR command on the system.
+.PP
+An exclamation point ('!') can be used as a logical \fInot\fR operator
+both in an \fIalias\fR and in front of a \f(CW\*(C`Cmnd\*(C'\fR.  This allows one to
+exclude certain values.  Note, however, that using a \f(CW\*(C`!\*(C'\fR in
+conjunction with the built-in \f(CW\*(C`ALL\*(C'\fR alias to allow a user to
+run \*(L"all but a few\*(R" commands rarely works as intended (see \s-1SECURITY\s0
+\&\s-1NOTES\s0 below).
+.PP
+Long lines can be continued with a backslash ('\e') as the last
+character on the line.
+.PP
+Whitespace between elements in a list as well as special syntactic
+characters in a \fIUser Specification\fR ('=', ':', '(', ')') is optional.
+.PP
+The following characters must be escaped with a backslash ('\e') when
+used as part of a word (e.g.\ a username or hostname):
+\&'@', '!', '=', ':', ',', '(', ')', '\e'.
+.SH "SUDOERS OPTIONS"
+.IX Header "SUDOERS OPTIONS"
+Sudo's behavior can be modified by \f(CW\*(C`Default_Entry\*(C'\fR lines, as
+explained earlier.  A list of all supported Defaults parameters,
+grouped by type, are listed below.
+.PP
 \&\fBFlags\fR:
 .IP "long_otp_prompt" 12
 .IX Item "long_otp_prompt"
@@ -634,11 +847,11 @@ Umask to use when running the command.  Negate this option or set
 it to 0777 to preserve the user's umask.  The default is \f(CW\*(C`@sudo_umask@\*(C'\fR.
 .IP "setenv" 12
 .IX Item "setenv"
-Allow the user to set additional environment variables from the
-command line.  Note that variables set this way are not subject to
-the restrictions imposed by \fIenv_check\fR, \fIenv_delete\fR, or
-\&\fIenv_reset\fR.  As such, only trusted users should be allowed to set
-variables in this manner.
+Allow the user to disable the \fIenv_reset\fR option from the command
+line.  Additionally, environment variables set via the command line
+are not subject to the restrictions imposed by \fIenv_check\fR,
+\&\fIenv_delete\fR, or \fIenv_keep\fR.  As such, only trusted users should
+be allowed to set variables in this manner.
 .PP
 \&\fBStrings\fR:
 .IP "mailsub" 12
@@ -867,211 +1080,6 @@ for the syslog facility (the value of the \fBsyslog\fR Parameter):
 \&\fBlocal6\fR, and \fBlocal7\fR.  The following syslog priorities are
 supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\fR, \fBerr\fR, \fBinfo\fR,
 \&\fBnotice\fR, and \fBwarning\fR.
-.Sh "User Specification"
-.IX Subsection "User Specification"
-.Vb 2
-\& User_Spec ::= User_List Host_List '=' Cmnd_Spec_List \e
-\&               (':' Host_List '=' Cmnd_Spec_List)*
-.Ve
-.PP
-.Vb 2
-\& Cmnd_Spec_List ::= Cmnd_Spec |
-\&                    Cmnd_Spec ',' Cmnd_Spec_List
-.Ve
-.PP
-.Vb 1
-\& Cmnd_Spec ::= Runas_Spec? Tag_Spec* Cmnd
-.Ve
-.PP
-.Vb 1
-\& Runas_Spec ::= '(' Runas_List ')'
-.Ve
-.PP
-.Vb 2
-\& Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-\&               'SETENV:' | 'NOSETENV:')
-.Ve
-.PP
-A \fBuser specification\fR determines which commands a user may run
-(and as what user) on specified hosts.  By default, commands are
-run as \fBroot\fR, but this can be changed on a per-command basis.
-.PP
-Let's break that down into its constituent parts:
-.Sh "Runas_Spec"
-.IX Subsection "Runas_Spec"
-A \f(CW\*(C`Runas_Spec\*(C'\fR is simply a \f(CW\*(C`Runas_List\*(C'\fR (as defined above)
-enclosed in a set of parentheses.  If you do not specify a
-\&\f(CW\*(C`Runas_Spec\*(C'\fR in the user specification, a default \f(CW\*(C`Runas_Spec\*(C'\fR
-of \fBroot\fR will be used.  A \f(CW\*(C`Runas_Spec\*(C'\fR sets the default for
-commands that follow it.  What this means is that for the entry:
-.PP
-.Vb 1
-\& dgb    boulder = (operator) /bin/ls, /bin/kill, /usr/bin/lprm
-.Ve
-.PP
-The user \fBdgb\fR may run \fI/bin/ls\fR, \fI/bin/kill\fR, and
-\&\fI/usr/bin/lprm\fR \*(-- but only as \fBoperator\fR.  E.g.,
-.PP
-.Vb 1
-\& $ sudo -u operator /bin/ls.
-.Ve
-.PP
-It is also possible to override a \f(CW\*(C`Runas_Spec\*(C'\fR later on in an
-entry.  If we modify the entry like so:
-.PP
-.Vb 1
-\& dgb    boulder = (operator) /bin/ls, (root) /bin/kill, /usr/bin/lprm
-.Ve
-.PP
-Then user \fBdgb\fR is now allowed to run \fI/bin/ls\fR as \fBoperator\fR,
-but  \fI/bin/kill\fR and \fI/usr/bin/lprm\fR as \fBroot\fR.
-.Sh "Tag_Spec"
-.IX Subsection "Tag_Spec"
-A command may have zero or more tags associated with it.  There are
-six possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR, \f(CW\*(C`EXEC\*(C'\fR,
-\&\f(CW\*(C`SETENV\*(C'\fR and \f(CW\*(C`NOSETENV\*(C'\fR.
-Once a tag is set on a \f(CW\*(C`Cmnd\*(C'\fR, subsequent \f(CW\*(C`Cmnd\*(C'\fRs in the
-\&\f(CW\*(C`Cmnd_Spec_List\*(C'\fR, inherit the tag unless it is overridden by the
-opposite tag (i.e.: \f(CW\*(C`PASSWD\*(C'\fR overrides \f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`NOEXEC\*(C'\fR
-overrides \f(CW\*(C`EXEC\*(C'\fR).
-.PP
-\fI\s-1NOPASSWD\s0 and \s-1PASSWD\s0\fR
-.IX Subsection "NOPASSWD and PASSWD"
-.PP
-By default, \fBsudo\fR requires that a user authenticate him or herself
-before running a command.  This behavior can be modified via the
-\&\f(CW\*(C`NOPASSWD\*(C'\fR tag.  Like a \f(CW\*(C`Runas_Spec\*(C'\fR, the \f(CW\*(C`NOPASSWD\*(C'\fR tag sets
-a default for the commands that follow it in the \f(CW\*(C`Cmnd_Spec_List\*(C'\fR.
-Conversely, the \f(CW\*(C`PASSWD\*(C'\fR tag can be used to reverse things.
-For example:
-.PP
-.Vb 1
-\& ray    rushmore = NOPASSWD: /bin/kill, /bin/ls, /usr/bin/lprm
-.Ve
-.PP
-would allow the user \fBray\fR to run \fI/bin/kill\fR, \fI/bin/ls\fR, and
-\&\fI/usr/bin/lprm\fR as root on the machine rushmore as \fBroot\fR without
-authenticating himself.  If we only want \fBray\fR to be able to
-run \fI/bin/kill\fR without a password the entry would be:
-.PP
-.Vb 1
-\& ray    rushmore = NOPASSWD: /bin/kill, PASSWD: /bin/ls, /usr/bin/lprm
-.Ve
-.PP
-Note, however, that the \f(CW\*(C`PASSWD\*(C'\fR tag has no effect on users who are
-in the group specified by the \fIexempt_group\fR option.
-.PP
-By default, if the \f(CW\*(C`NOPASSWD\*(C'\fR tag is applied to any of the entries
-for a user on the current host, he or she will be able to run
-\&\f(CW\*(C`sudo \-l\*(C'\fR without a password.  Additionally, a user may only run
-\&\f(CW\*(C`sudo \-v\*(C'\fR without a password if the \f(CW\*(C`NOPASSWD\*(C'\fR tag is present
-for all a user's entries that pertain to the current host.
-This behavior may be overridden via the verifypw and listpw options.
-.PP
-\fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR
-.IX Subsection "NOEXEC and EXEC"
-.PP
-If \fBsudo\fR has been compiled with \fInoexec\fR support and the underlying
-operating system supports it, the \f(CW\*(C`NOEXEC\*(C'\fR tag can be used to prevent
-a dynamically-linked executable from running further commands itself.
-.PP
-In the following example, user \fBaaron\fR may run \fI/usr/bin/more\fR
-and \fI/usr/bin/vi\fR but shell escapes will be disabled.
-.PP
-.Vb 1
-\& aaron  shanty = NOEXEC: /usr/bin/more, /usr/bin/vi
-.Ve
-.PP
-See the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section below for more details
-on how \f(CW\*(C`NOEXEC\*(C'\fR works and whether or not it will work on your system.
-.PP
-\fI\s-1SETENV\s0 and \s-1NOSETENV\s0\fR
-.IX Subsection "SETENV and NOSETENV"
-.PP
-These tags override the value of the \fIsetenv\fR option on a per-command
-basis.  Note that environment variables set on the command line way
-are not subject to the restrictions imposed by \fIenv_check\fR,
-\&\fIenv_delete\fR, or \fIenv_reset\fR.  As such, only trusted users should
-be allowed to set variables in this manner.
-.Sh "Wildcards"
-.IX Subsection "Wildcards"
-\&\fBsudo\fR allows shell-style \fIwildcards\fR (aka meta or glob characters)
-to be used in pathnames as well as command line arguments in the
-\&\fIsudoers\fR file.  Wildcard matching is done via the \fB\s-1POSIX\s0\fR
-\&\fIfnmatch\fR\|(3) routine.  Note that these are \fInot\fR regular expressions.
-.ie n .IP "\*(C`*\*(C'" 8
-.el .IP "\f(CW\*(C`*\*(C'\fR" 8
-.IX Item "*"
-Matches any set of zero or more characters.
-.ie n .IP "\*(C`?\*(C'" 8
-.el .IP "\f(CW\*(C`?\*(C'\fR" 8
-.IX Item "?"
-Matches any single character.
-.ie n .IP "\*(C`[...]\*(C'" 8
-.el .IP "\f(CW\*(C`[...]\*(C'\fR" 8
-.IX Item "[...]"
-Matches any character in the specified range.
-.ie n .IP "\*(C`[!...]\*(C'" 8
-.el .IP "\f(CW\*(C`[!...]\*(C'\fR" 8
-.IX Item "[!...]"
-Matches any character \fBnot\fR in the specified range.
-.ie n .IP "\*(C`\ex\*(C'" 8
-.el .IP "\f(CW\*(C`\ex\*(C'\fR" 8
-.IX Item "x"
-For any character \*(L"x\*(R", evaluates to \*(L"x\*(R".  This is used to
-escape special characters such as: \*(L"*\*(R", \*(L"?\*(R", \*(L"[\*(R", and \*(L"}\*(R".
-.PP
-Note that a forward slash ('/') will \fBnot\fR be matched by
-wildcards used in the pathname.  When matching the command
-line arguments, however, a slash \fBdoes\fR get matched by
-wildcards.  This is to make a path like:
-.PP
-.Vb 1
-\&    /usr/bin/*
-.Ve
-.PP
-match \fI/usr/bin/who\fR but not \fI/usr/bin/X11/xterm\fR.
-.Sh "Exceptions to wildcard rules"
-.IX Subsection "Exceptions to wildcard rules"
-The following exceptions apply to the above rules:
-.ie n .IP """""" 8
-.el .IP "\f(CW``''\fR" 8
-.IX Item """"""
-If the empty string \f(CW""\fR is the only command line argument in the
-\&\fIsudoers\fR entry it means that command is not allowed to be run
-with \fBany\fR arguments.
-.Sh "Other special characters and reserved words"
-.IX Subsection "Other special characters and reserved words"
-The pound sign ('#') is used to indicate a comment (unless it is
-part of a #include directive or unless it occurs in the context of
-a user name and is followed by one or more digits, in which case
-it is treated as a uid).  Both the comment character and any text
-after it, up to the end of the line, are ignored.
-.PP
-The reserved word \fB\s-1ALL\s0\fR is a built-in \fIalias\fR that always causes
-a match to succeed.  It can be used wherever one might otherwise
-use a \f(CW\*(C`Cmnd_Alias\*(C'\fR, \f(CW\*(C`User_Alias\*(C'\fR, \f(CW\*(C`Runas_Alias\*(C'\fR, or \f(CW\*(C`Host_Alias\*(C'\fR.
-You should not try to define your own \fIalias\fR called \fB\s-1ALL\s0\fR as the
-built-in alias will be used in preference to your own.  Please note
-that using \fB\s-1ALL\s0\fR can be dangerous since in a command context, it
-allows the user to run \fBany\fR command on the system.
-.PP
-An exclamation point ('!') can be used as a logical \fInot\fR operator
-both in an \fIalias\fR and in front of a \f(CW\*(C`Cmnd\*(C'\fR.  This allows one to
-exclude certain values.  Note, however, that using a \f(CW\*(C`!\*(C'\fR in
-conjunction with the built-in \f(CW\*(C`ALL\*(C'\fR alias to allow a user to
-run \*(L"all but a few\*(R" commands rarely works as intended (see \s-1SECURITY\s0
-\&\s-1NOTES\s0 below).
-.PP
-Long lines can be continued with a backslash ('\e') as the last
-character on the line.
-.PP
-Whitespace between elements in a list as well as special syntactic
-characters in a \fIUser Specification\fR ('=', ':', '(', ')') is optional.
-.PP
-The following characters must be escaped with a backslash ('\e') when
-used as part of a word (e.g.\ a username or hostname):
-\&'@', '!', '=', ':', ',', '(', ')', '\e'.
 .SH "FILES"
 .IX Header "FILES"
 .Vb 3

@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.6.9b5                   June 25, 2007                         1
+1.6.9                     July 16, 2007                         1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9b5                   June 25, 2007                         2
+1.6.9                     July 16, 2007                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9b5                   June 25, 2007                         3
+1.6.9                     July 16, 2007                         3
 
 
 
@@ -254,78 +254,12 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        respectively.  It is not an error to use the -= operator
        to remove an element that does not exist in a list.
 
-       FFllaaggss:
+       See "SUDOERS OPTIONS" for a list of supported Defaults
+       parameters.
 
 
 
-
-1.6.9b5                   June 25, 2007                         4
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
-       long_otp_prompt
-                   When validating with a One Time Password
-                   scheme (SS//KKeeyy or OOPPIIEE), a two-line prompt is
-                   used to make it easier to cut and paste the
-                   challenge to a local window.  It's not as
-                   pretty as the default but some people find it
-                   more convenient.  This flag is _o_f_f by default.
-
-       ignore_dot  If set, ssuuddoo will ignore '.' or '' (current
-                   dir) in the PATH environment variable; the
-                   PATH itself is not modified.  This flag is _o_n
-                   by default.  Currently, while it is possible
-                   to set _i_g_n_o_r_e___d_o_t in _s_u_d_o_e_r_s, its value is not
-                   used.  This option should be considered read-
-                   only (it will be fixed in a future version of
-                   ssuuddoo).
-
-       mail_always Send mail to the _m_a_i_l_t_o user every time a
-                   users runs ssuuddoo.  This flag is _o_f_f by default.
-
-       mail_badpass
-                   Send mail to the _m_a_i_l_t_o user if the user run­
-                   ning ssuuddoo does not enter the correct password.
-                   This flag is _o_f_f by default.
-
-       mail_no_user
-                   If set, mail will be sent to the _m_a_i_l_t_o user
-                   if the invoking user is not in the _s_u_d_o_e_r_s
-                   file.  This flag is _o_n by default.
-
-       mail_no_host
-                   If set, mail will be sent to the _m_a_i_l_t_o user
-                   if the invoking user exists in the _s_u_d_o_e_r_s
-                   file, but is not allowed to run commands on
-                   the current host.  This flag is _o_f_f by
-                   default.
-
-       mail_no_perms
-                   If set, mail will be sent to the _m_a_i_l_t_o user
-                   if the invoking user is allowed to use ssuuddoo
-                   but the command they are trying is not listed
-                   in their _s_u_d_o_e_r_s file entry or is explicitly
-                   denied.  This flag is _o_f_f by default.
-
-       tty_tickets If set, users must authenticate on a per-tty
-                   basis.  Normally, ssuuddoo uses a directory in the
-                   ticket dir with the same name as the user run­
-                   ning it.  With this flag enabled, ssuuddoo will
-                   use a file named for the tty the user is
-                   logged in on in that directory.  This flag is
-                   _o_f_f by default.
-
-       authenticate
-                   If set, users must authenticate themselves via
-
-
-
-1.6.9b5                   June 25, 2007                         5
+1.6.9                     July 16, 2007                         4
 
 
 
@@ -333,565 +267,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
-
-                   a password (or other means of authentication)
-                   before they may run commands.  This default
-                   may be overridden via the PASSWD and NOPASSWD
-                   tags.  This flag is _o_n by default.
-
-       root_sudo   If set, root is allowed to run ssuuddoo too.  Dis­
-                   abling this prevents users from "chaining"
-                   ssuuddoo commands to get a root shell by doing
-                   something like "sudo sudo /bin/sh".  Note,
-                   however, that turning off _r_o_o_t___s_u_d_o will also
-                   prevent root and from running ssuuddooeeddiitt.  Dis­
-                   abling _r_o_o_t___s_u_d_o provides no real additional
-                   security; it exists purely for historical rea­
-                   sons.  This flag is _o_n by default.
-
-       log_host    If set, the hostname will be logged in the
-                   (non-syslog) ssuuddoo log file.  This flag is _o_f_f
-                   by default.
-
-       log_year    If set, the four-digit year will be logged in
-                   the (non-syslog) ssuuddoo log file.  This flag is
-                   _o_f_f by default.
-
-       shell_noargs
-                   If set and ssuuddoo is invoked with no arguments
-                   it acts as if the --ss flag had been given.
-                   That is, it runs a shell as root (the shell is
-                   determined by the SHELL environment variable
-                   if it is set, falling back on the shell listed
-                   in the invoking user's /etc/passwd entry if
-                   not).  This flag is _o_f_f by default.
-
-       set_home    If set and ssuuddoo is invoked with the --ss flag
-                   the HOME environment variable will be set to
-                   the home directory of the target user (which
-                   is root unless the --uu option is used).  This
-                   effectively makes the --ss flag imply --HH.  This
-                   flag is _o_f_f by default.
-
-       always_set_home
-                   If set, ssuuddoo will set the HOME environment
-                   variable to the home directory of the target
-                   user (which is root unless the --uu option is
-                   used).  This effectively means that the --HH
-                   flag is always implied.  This flag is _o_f_f by
-                   default.
-
-       path_info   Normally, ssuuddoo will tell the user when a com­
-                   mand could not be found in their PATH environ­
-                   ment variable.  Some sites may wish to disable
-                   this as it could be used to gather information
-                   on the location of executables that the normal
-                   user does not have access to.  The disadvan­
-                   tage is that if the executable is simply not
-
-
-
-1.6.9b5                   June 25, 2007                         6
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
-                   in the user's PATH, ssuuddoo will tell the user
-                   that they are not allowed to run it, which can
-                   be confusing.  This flag is _o_f_f by default.
-
-       preserve_groups
-                   By default ssuuddoo will initialize the group vec­
-                   tor to the list of groups the target user is
-                   in.  When _p_r_e_s_e_r_v_e___g_r_o_u_p_s is set, the user's
-                   existing group vector is left unaltered.  The
-                   real and effective group IDs, however, are
-                   still set to match the target user.  This flag
-                   is _o_f_f by default.
-
-       fqdn        Set this flag if you want to put fully quali­
-                   fied hostnames in the _s_u_d_o_e_r_s file.  I.e.,
-                   instead of myhost you would use myhost.mydo­
-                   main.edu.  You may still use the short form if
-                   you wish (and even mix the two).  Beware that
-                   turning on _f_q_d_n requires ssuuddoo to make DNS
-                   lookups which may make ssuuddoo unusable if DNS
-                   stops working (for example if the machine is
-                   not plugged into the network).  Also note that
-                   you must use the host's official name as DNS
-                   knows it.  That is, you may not use a host
-                   alias (CNAME entry) due to performance issues
-                   and the fact that there is no way to get all
-                   aliases from DNS.  If your machine's hostname
-                   (as returned by the hostname command) is
-                   already fully qualified you shouldn't need to
-                   set _f_q_d_n.  This flag is _o_f_f by default.
-
-       insults     If set, ssuuddoo will insult users when they enter
-                   an incorrect password.  This flag is _o_n by
-                   default.
-
-       requiretty  If set, ssuuddoo will only run when the user is
-                   logged in to a real tty.  This will disallow
-                   things like "rsh somehost sudo ls" since
-                   _r_s_h(1) does not allocate a tty.  Because it is
-                   not possible to turn off echo when there is no
-                   tty present, some sites may wish to set this
-                   flag to prevent a user from entering a visible
-                   password.  This flag is _o_f_f by default.
-
-       env_editor  If set, vviissuuddoo will use the value of the EDI­
-                   TOR or VISUAL environment variables before
-                   falling back on the default editor list.  Note
-                   that this may create a security hole as it
-                   allows the user to run any arbitrary command
-                   as root without logging.  A safer alternative
-                   is to place a colon-separated list of editors
-                   in the editor variable.  vviissuuddoo will then only
-                   use the EDITOR or VISUAL if they match a value
-                   specified in editor.  This flag is on by
-
-
-
-1.6.9b5                   June 25, 2007                         7
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
-                   default.
-
-       rootpw      If set, ssuuddoo will prompt for the root password
-                   instead of the password of the invoking user.
-                   This flag is _o_f_f by default.
-
-       runaspw     If set, ssuuddoo will prompt for the password of
-                   the user defined by the _r_u_n_a_s___d_e_f_a_u_l_t option
-                   (defaults to root) instead of the password of
-                   the invoking user.  This flag is _o_f_f by
-                   default.
-
-       targetpw    If set, ssuuddoo will prompt for the password of
-                   the user specified by the --uu flag (defaults to
-                   root) instead of the password of the invoking
-                   user.  Note that this precludes the use of a
-                   uid not listed in the passwd database as an
-                   argument to the --uu flag.  This flag is _o_f_f by
-                   default.
-
-       set_logname Normally, ssuuddoo will set the LOGNAME, USER and
-                   USERNAME environment variables to the name of
-                   the target user (usually root unless the --uu
-                   flag is given).  However, since some programs
-                   (including the RCS revision control system)
-                   use LOGNAME to determine the real identity of
-                   the user, it may be desirable to change this
-                   behavior.  This can be done by negating the
-                   set_logname option.  Note that if the
-                   _e_n_v___r_e_s_e_t option has not been disabled,
-                   entries in the _e_n_v___k_e_e_p list will override the
-                   value of _s_e_t___l_o_g_n_a_m_e.
-
-       stay_setuid Normally, when ssuuddoo executes a command the
-                   real and effective UIDs are set to the target
-                   user (root by default).  This option changes
-                   that behavior such that the real UID is left
-                   as the invoking user's UID.  In other words,
-                   this makes ssuuddoo act as a setuid wrapper.  This
-                   can be useful on systems that disable some
-                   potentially dangerous functionality when a
-                   program is run setuid.  This option is only
-                   effective on systems with either the
-                   _s_e_t_r_e_u_i_d_(_) or _s_e_t_r_e_s_u_i_d_(_) function.
-
-       env_reset   If set, ssuuddoo will reset the environment to
-                   only contain the LOGNAME, SHELL, USER, USER­
-                   NAME and the SUDO_* variables.  Any variables
-                   in the caller's environment that match the
-                   env_keep and env_check lists are then added.
-                   The default contents of the env_keep and
-                   env_check lists are displayed when ssuuddoo is run
-                   by root with the _-_V option.  If ssuuddoo was com­
-                   piled with the SECURE_PATH option, its value
-
-
-
-1.6.9b5                   June 25, 2007                         8
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
-                   will be used for the PATH environment vari­
-                   able.  This flag is _o_n by default.
-
-       use_loginclass
-                   If set, ssuuddoo will apply the defaults specified
-                   for the target user's login class if one
-                   exists.  Only available if ssuuddoo is configured
-                   with the --with-logincap option.  This flag is
-                   _o_f_f by default.
-
-       noexec      If set, all commands run via ssuuddoo will behave
-                   as if the NOEXEC tag has been set, unless
-                   overridden by a EXEC tag.  See the description
-                   of _N_O_E_X_E_C _a_n_d _E_X_E_C below as well as the "PRE­
-                   VENTING SHELL ESCAPES" section at the end of
-                   this manual.  This flag is _o_f_f by default.
-
-       ignore_local_sudoers
-                   If set via LDAP, parsing of @sysconfdir@/sudo­
-                   ers will be skipped.  This is intended for
-                   Enterprises that wish to prevent the usage of
-                   local sudoers files so that only LDAP is used.
-                   This thwarts the efforts of rogue operators
-                   who would attempt to add roles to
-                   @sysconfdir@/sudoers.  When this option is
-                   present, @sysconfdir@/sudoers does not even
-                   need to exist.  Since this option tells ssuuddoo
-                   how to behave when no specific LDAP entries
-                   have been matched, this sudoOption is only
-                   meaningful for the cn=defaults section.  This
-                   flag is _o_f_f by default.
-
-       IInntteeggeerrss:
-
-       passwd_tries
-                   The number of tries a user gets to enter
-                   his/her password before ssuuddoo logs the failure
-                   and exits.  The default is 3.
-
-       IInntteeggeerrss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
-
-       loglinelen  Number of characters per line for the file
-                   log.  This value is used to decide when to
-                   wrap lines for nicer log files.  This has no
-                   effect on the syslog log file, only the file
-                   log.  The default is 80 (use 0 or negate the
-                   option to disable word wrap).
-
-       timestamp_timeout
-                   Number of minutes that can elapse before ssuuddoo
-                   will ask for a passwd again.  The default is
-                   5.  Set this to 0 to always prompt for a pass­
-                   word.  If set to a value less than 0 the
-                   user's timestamp will never expire.  This can
-
-
-
-1.6.9b5                   June 25, 2007                         9
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
-                   be used to allow users to create or delete
-                   their own timestamps via sudo -v and sudo -k
-                   respectively.
-
-       passwd_timeout
-                   Number of minutes before the ssuuddoo password
-                   prompt times out.  The default is 5, set this
-                   to 0 for no password timeout.
-
-       umask       Umask to use when running the command.  Negate
-                   this option or set it to 0777 to preserve the
-                   user's umask.  The default is 0022.
-
-       setenv      Allow the user to set additional environment
-                   variables from the command line.  Note that
-                   variables set this way are not subject to the
-                   restrictions imposed by _e_n_v___c_h_e_c_k, _e_n_v___d_e_l_e_t_e,
-                   or _e_n_v___r_e_s_e_t.  As such, only trusted users
-                   should be allowed to set variables in this
-                   manner.
-
-       SSttrriinnggss:
-
-       mailsub     Subject of the mail sent to the _m_a_i_l_t_o user.
-                   The escape %h will expand to the hostname of
-                   the machine.  Default is *** SECURITY informa­
-                   tion for %h ***.
-
-       badpass_message
-                   Message that is displayed if a user enters an
-                   incorrect password.  The default is Sorry, try
-                   again. unless insults are enabled.
-
-       timestampdir
-                   The directory in which ssuuddoo stores its times­
-                   tamp files.  The default is _/_v_a_r_/_r_u_n_/_s_u_d_o.
-
-       timestampowner
-                   The owner of the timestamp directory and the
-                   timestamps stored therein.  The default is
-                   root.
-
-       passprompt  The default prompt to use when asking for a
-                   password; can be overridden via the --pp option
-                   or the SUDO_PROMPT environment variable.  The
-                   following percent (`%') escapes are supported:
-
-                   %u      expanded to the invoking user's login
-                           name
-
-                   %U      expanded to the login name of the user
-                           the command will be run as (defaults
-                           to root)
-
-
-
-
-1.6.9b5                   June 25, 2007                        10
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
-                   %h      expanded to the local hostname without
-                           the domain name
-
-                   %H      expanded to the local hostname includ­
-                           ing the domain name (on if the
-                           machine's hostname is fully qualified
-                           or the _f_q_d_n option is set)
-
-                   %%      two consecutive % characters are col­
-                           lapsed into a single % character
-
-                   The default value is Password:.
-
-       runas_default
-                   The default user to run commands as if the --uu
-                   flag is not specified on the command line.
-                   This defaults to root.  Note that if
-                   _r_u_n_a_s___d_e_f_a_u_l_t is set it mmuusstt occur before any
-                   Runas_Alias specifications.
-
-       syslog_goodpri
-                   Syslog priority to use when user authenticates
-                   successfully.  Defaults to notice.
-
-       syslog_badpri
-                   Syslog priority to use when user authenticates
-                   unsuccessfully.  Defaults to alert.
-
-       editor      A colon (':') separated list of editors
-                   allowed to be used with vviissuuddoo.  vviissuuddoo will
-                   choose the editor that matches the user's EDI­
-                   TOR environment variable if possible, or the
-                   first editor in the list that exists and is
-                   executable.  The default is the path to vi on
-                   your system.
-
-       noexec_file Path to a shared library containing dummy ver­
-                   sions of the _e_x_e_c_v_(_), _e_x_e_c_v_e_(_) and _f_e_x_e_c_v_e_(_)
-                   library functions that just return an error.
-                   This is used to implement the _n_o_e_x_e_c function­
-                   ality on systems that support LD_PRELOAD or
-                   its equivalent.  Defaults to
-                   _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c_/_s_u_d_o___n_o_e_x_e_c.
-
-       SSttrriinnggss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
-
-       lecture     This option controls when a short lecture will
-                   be printed along with the password prompt.  It
-                   has the following possible values:
-
-                   never   Never lecture the user.
-
-                   once    Only lecture the user the first time
-                           they run ssuuddoo.
-
-
-
-1.6.9b5                   June 25, 2007                        11
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
-                   always  Always lecture the user.
-
-                   If no value is specified, a value of _o_n_c_e is
-                   implied.  Negating the option results in a
-                   value of _n_e_v_e_r being used.  The default value
-                   is _o_n_c_e.
-
-       lecture_file
-                   Path to a file containing an alternate ssuuddoo
-                   lecture that will be used in place of the
-                   standard lecture if the named file exists.
-
-       logfile     Path to the ssuuddoo log file (not the syslog log
-                   file).  Setting a path turns on logging to a
-                   file; negating this option turns it off.
-
-       syslog      Syslog facility if syslog is being used for
-                   logging (negate to disable syslog logging).
-                   Defaults to authpriv.
-
-       mailerpath  Path to mail program used to send warning
-                   mail.  Defaults to the path to sendmail found
-                   at configure time.
-
-       mailerflags Flags to use when invoking mailer. Defaults to
-                   --tt.
-
-       mailto      Address to send warning and error mail to.
-                   The address should be enclosed in double
-                   quotes (") to protect against ssuuddoo interpret­
-                   ing the @ sign.  Defaults to root.
-
-       exempt_group
-                   Users in this group are exempt from password
-                   and PATH requirements.  This is not set by
-                   default.
-
-       verifypw    This option controls when a password will be
-                   required when a user runs ssuuddoo with the --vv
-                   flag.  It has the following possible values:
-
-                   all     All the user's _s_u_d_o_e_r_s entries for the
-                           current host must have the NOPASSWD
-                           flag set to avoid entering a password.
-
-                   any     At least one of the user's _s_u_d_o_e_r_s
-                           entries for the current host must have
-                           the NOPASSWD flag set to avoid enter­
-                           ing a password.
-
-                   never   The user need never enter a password
-                           to use the --vv flag.
-
-                   always  The user must always enter a password
-
-
-
-1.6.9b5                   June 25, 2007                        12
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
-                           to use the --vv flag.
-
-                   If no value is specified, a value of _a_l_l is
-                   implied.  Negating the option results in a
-                   value of _n_e_v_e_r being used.  The default value
-                   is _a_l_l.
-
-       listpw      This option controls when a password will be
-                   required when a user runs ssuuddoo with the --ll
-                   flag.  It has the following possible values:
-
-                   all     All the user's _s_u_d_o_e_r_s entries for the
-                           current host must have the NOPASSWD
-                           flag set to avoid entering a password.
-
-                   any     At least one of the user's _s_u_d_o_e_r_s
-                           entries for the current host must have
-                           the NOPASSWD flag set to avoid enter­
-                           ing a password.
-
-                   never   The user need never enter a password
-                           to use the --ll flag.
-
-                   always  The user must always enter a password
-                           to use the --ll flag.
-
-                   If no value is specified, a value of _a_n_y is
-                   implied.  Negating the option results in a
-                   value of _n_e_v_e_r being used.  The default value
-                   is _a_n_y.
-
-       LLiissttss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
-
-       env_check   Environment variables to be removed from the
-                   user's environment if the variable's value
-                   contains % or / characters.  This can be used
-                   to guard against printf-style format vulnera­
-                   bilities in poorly-written programs.  The
-                   argument may be a double-quoted, space-sepa­
-                   rated list or a single value without dou­
-                   ble-quotes.  The list can be replaced, added
-                   to, deleted from, or disabled by using the =,
-                   +=, -=, and ! operators respectively.  Regard­
-                   less of whether the env_reset option is
-                   enabled or disabled, variables specified by
-                   env_check will be preserved in the environment
-                   if they pass the aforementioned check.  The
-                   default list of environment variables to check
-                   is displayed when ssuuddoo is run by root with the
-                   _-_V option.
-
-       env_delete  Environment variables to be removed from the
-                   user's environment.  The argument may be a
-                   double-quoted, space-separated list or a
-
-
-
-1.6.9b5                   June 25, 2007                        13
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
-                   single value without double-quotes.  The list
-                   can be replaced, added to, deleted from, or
-                   disabled by using the =, +=, -=, and ! opera­
-                   tors respectively.  The default list of envi­
-                   ronment variables to remove is displayed when
-                   ssuuddoo is run by root with the _-_V option.  Note
-                   that many operating systems will remove poten­
-                   tially dangerous variables from the environ­
-                   ment of any setuid process (such as ssuuddoo).
-
-       env_keep    Environment variables to be preserved in the
-                   user's environment when the _e_n_v___r_e_s_e_t option
-                   is in effect.  This allows fine-grained con­
-                   trol over the environment ssuuddoo-spawned pro­
-                   cesses will receive.  The argument may be a
-                   double-quoted, space-separated list or a sin­
-                   gle value without double-quotes.  The list can
-                   be replaced, added to, deleted from, or dis­
-                   abled by using the =, +=, -=, and ! operators
-                   respectively.  The default list of variables
-                   to keep is displayed when ssuuddoo is run by root
-                   with the _-_V option.
-
-       When logging via _s_y_s_l_o_g(3), ssuuddoo accepts the following
-       values for the syslog facility (the value of the ssyysslloogg
-       Parameter): aauutthhpprriivv (if your OS supports it), aauutthh, ddaaee­­
-       mmoonn, uusseerr, llooccaall00, llooccaall11, llooccaall22, llooccaall33, llooccaall44, llooccaall55,
-       llooccaall66, and llooccaall77.  The following syslog priorities are
-       supported: aalleerrtt, ccrriitt, ddeebbuugg, eemmeerrgg, eerrrr, iinnffoo, nnoottiiccee,
-       and wwaarrnniinngg.
 
        UUsseerr SSppeecciiffiiccaattiioonn
 
@@ -914,19 +289,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        per-command basis.
 
        Let's break that down into its constituent parts:
-
-
-
-
-
-1.6.9b5                   June 25, 2007                        14
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
        RRuunnaass__SSppeecc
 
@@ -961,6 +323,17 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        tag unless it is overridden by the opposite tag (i.e.:
        PASSWD overrides NOPASSWD and NOEXEC overrides EXEC).
 
+
+
+1.6.9                     July 16, 2007                         5
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        _N_O_P_A_S_S_W_D _a_n_d _P_A_S_S_W_D
 
        By default, ssuuddoo requires that a user authenticate him or
@@ -982,17 +355,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        Note, however, that the PASSWD tag has no effect on users
        who are in the group specified by the _e_x_e_m_p_t___g_r_o_u_p option.
-
-
-
-1.6.9b5                   June 25, 2007                        15
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
        By default, if the NOPASSWD tag is applied to any of the
        entries for a user on the current host, he or she will be
@@ -1021,11 +383,22 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        _S_E_T_E_N_V _a_n_d _N_O_S_E_T_E_N_V
 
        These tags override the value of the _s_e_t_e_n_v option on a
-       per-command basis.  Note that environment variables set on
-       the command line way are not subject to the restrictions
-       imposed by _e_n_v___c_h_e_c_k, _e_n_v___d_e_l_e_t_e, or _e_n_v___r_e_s_e_t.  As such,
-       only trusted users should be allowed to set variables in
-       this manner.
+       per-command basis.  Note that if SETENV has been set for a
+       command, any environment variables set on the command line
+       way are not subject to the restrictions imposed by
+       _e_n_v___c_h_e_c_k, _e_n_v___d_e_l_e_t_e, or _e_n_v___k_e_e_p.  As such, only trusted
+       users should be allowed to set variables in this manner.
+
+
+
+1.6.9                     July 16, 2007                         6
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
 
        WWiillddccaarrddss
 
@@ -1048,18 +421,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                "?", "[", and "}".
 
        Note that a forward slash ('/') will nnoott be matched by
-
-
-
-1.6.9b5                   June 25, 2007                        16
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
        wildcards used in the pathname.  When matching the command
        line arguments, however, a slash ddooeess get matched by wild­
        cards.  This is to make a path like:
@@ -1094,6 +455,17 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        dangerous since in a command context, it allows the user
        to run aannyy command on the system.
 
+
+
+1.6.9                     July 16, 2007                         7
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        An exclamation point ('!') can be used as a logical _n_o_t
        operator both in an _a_l_i_a_s and in front of a Cmnd.  This
        allows one to exclude certain values.  Note, however, that
@@ -1112,12 +484,640 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        ('\') when used as part of a word (e.g. a username or
        hostname): '@', '!', '=', ':', ',', '(', ')', '\'.
 
+SSUUDDOOEERRSS OOPPTTIIOONNSS
+       Sudo's behavior can be modified by Default_Entry lines, as
+       explained earlier.  A list of all supported Defaults
+       parameters, grouped by type, are listed below.
+
+       FFllaaggss:
+
+       long_otp_prompt
+                   When validating with a One Time Password
+                   scheme (SS//KKeeyy or OOPPIIEE), a two-line prompt is
+                   used to make it easier to cut and paste the
+                   challenge to a local window.  It's not as
+                   pretty as the default but some people find it
+                   more convenient.  This flag is _o_f_f by default.
+
+       ignore_dot  If set, ssuuddoo will ignore '.' or '' (current
+                   dir) in the PATH environment variable; the
+                   PATH itself is not modified.  This flag is _o_f_f
+                   by default.  Currently, while it is possible
+                   to set _i_g_n_o_r_e___d_o_t in _s_u_d_o_e_r_s, its value is not
+                   used.  This option should be considered read-
+                   only (it will be fixed in a future version of
+                   ssuuddoo).
+
+       mail_always Send mail to the _m_a_i_l_t_o user every time a
+                   users runs ssuuddoo.  This flag is _o_f_f by default.
+
+       mail_badpass
+                   Send mail to the _m_a_i_l_t_o user if the user run­
+                   ning ssuuddoo does not enter the correct password.
+                   This flag is _o_f_f by default.
+
+       mail_no_user
+                   If set, mail will be sent to the _m_a_i_l_t_o user
+                   if the invoking user is not in the _s_u_d_o_e_r_s
+                   file.  This flag is _o_n by default.
+
+
+
+1.6.9                     July 16, 2007                         8
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
+       mail_no_host
+                   If set, mail will be sent to the _m_a_i_l_t_o user
+                   if the invoking user exists in the _s_u_d_o_e_r_s
+                   file, but is not allowed to run commands on
+                   the current host.  This flag is _o_f_f by
+                   default.
+
+       mail_no_perms
+                   If set, mail will be sent to the _m_a_i_l_t_o user
+                   if the invoking user is allowed to use ssuuddoo
+                   but the command they are trying is not listed
+                   in their _s_u_d_o_e_r_s file entry or is explicitly
+                   denied.  This flag is _o_f_f by default.
+
+       tty_tickets If set, users must authenticate on a per-tty
+                   basis.  Normally, ssuuddoo uses a directory in the
+                   ticket dir with the same name as the user run­
+                   ning it.  With this flag enabled, ssuuddoo will
+                   use a file named for the tty the user is
+                   logged in on in that directory.  This flag is
+                   _o_f_f by default.
+
+       authenticate
+                   If set, users must authenticate themselves via
+                   a password (or other means of authentication)
+                   before they may run commands.  This default
+                   may be overridden via the PASSWD and NOPASSWD
+                   tags.  This flag is _o_n by default.
+
+       root_sudo   If set, root is allowed to run ssuuddoo too.  Dis­
+                   abling this prevents users from "chaining"
+                   ssuuddoo commands to get a root shell by doing
+                   something like "sudo sudo /bin/sh".  Note,
+                   however, that turning off _r_o_o_t___s_u_d_o will also
+                   prevent root and from running ssuuddooeeddiitt.  Dis­
+                   abling _r_o_o_t___s_u_d_o provides no real additional
+                   security; it exists purely for historical rea­
+                   sons.  This flag is _o_n by default.
+
+       log_host    If set, the hostname will be logged in the
+                   (non-syslog) ssuuddoo log file.  This flag is _o_f_f
+                   by default.
+
+       log_year    If set, the four-digit year will be logged in
+                   the (non-syslog) ssuuddoo log file.  This flag is
+                   _o_f_f by default.
+
+       shell_noargs
+                   If set and ssuuddoo is invoked with no arguments
+                   it acts as if the --ss flag had been given.
+                   That is, it runs a shell as root (the shell is
+                   determined by the SHELL environment variable
+                   if it is set, falling back on the shell listed
+                   in the invoking user's /etc/passwd entry if
+
+
+
+1.6.9                     July 16, 2007                         9
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
+                   not).  This flag is _o_f_f by default.
+
+       set_home    If set and ssuuddoo is invoked with the --ss flag
+                   the HOME environment variable will be set to
+                   the home directory of the target user (which
+                   is root unless the --uu option is used).  This
+                   effectively makes the --ss flag imply --HH.  This
+                   flag is _o_f_f by default.
+
+       always_set_home
+                   If set, ssuuddoo will set the HOME environment
+                   variable to the home directory of the target
+                   user (which is root unless the --uu option is
+                   used).  This effectively means that the --HH
+                   flag is always implied.  This flag is _o_f_f by
+                   default.
+
+       path_info   Normally, ssuuddoo will tell the user when a com­
+                   mand could not be found in their PATH environ­
+                   ment variable.  Some sites may wish to disable
+                   this as it could be used to gather information
+                   on the location of executables that the normal
+                   user does not have access to.  The disadvan­
+                   tage is that if the executable is simply not
+                   in the user's PATH, ssuuddoo will tell the user
+                   that they are not allowed to run it, which can
+                   be confusing.  This flag is _o_f_f by default.
+
+       preserve_groups
+                   By default ssuuddoo will initialize the group vec­
+                   tor to the list of groups the target user is
+                   in.  When _p_r_e_s_e_r_v_e___g_r_o_u_p_s is set, the user's
+                   existing group vector is left unaltered.  The
+                   real and effective group IDs, however, are
+                   still set to match the target user.  This flag
+                   is _o_f_f by default.
+
+       fqdn        Set this flag if you want to put fully quali­
+                   fied hostnames in the _s_u_d_o_e_r_s file.  I.e.,
+                   instead of myhost you would use myhost.mydo­
+                   main.edu.  You may still use the short form if
+                   you wish (and even mix the two).  Beware that
+                   turning on _f_q_d_n requires ssuuddoo to make DNS
+                   lookups which may make ssuuddoo unusable if DNS
+                   stops working (for example if the machine is
+                   not plugged into the network).  Also note that
+                   you must use the host's official name as DNS
+                   knows it.  That is, you may not use a host
+                   alias (CNAME entry) due to performance issues
+                   and the fact that there is no way to get all
+                   aliases from DNS.  If your machine's hostname
+                   (as returned by the hostname command) is
+                   already fully qualified you shouldn't need to
+                   set _f_q_d_n.  This flag is _o_f_f by default.
+
+
+
+1.6.9                     July 16, 2007                        10
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
+       insults     If set, ssuuddoo will insult users when they enter
+                   an incorrect password.  This flag is _o_f_f by
+                   default.
+
+       requiretty  If set, ssuuddoo will only run when the user is
+                   logged in to a real tty.  This will disallow
+                   things like "rsh somehost sudo ls" since
+                   _r_s_h(1) does not allocate a tty.  Because it is
+                   not possible to turn off echo when there is no
+                   tty present, some sites may wish to set this
+                   flag to prevent a user from entering a visible
+                   password.  This flag is _o_f_f by default.
+
+       env_editor  If set, vviissuuddoo will use the value of the EDI­
+                   TOR or VISUAL environment variables before
+                   falling back on the default editor list.  Note
+                   that this may create a security hole as it
+                   allows the user to run any arbitrary command
+                   as root without logging.  A safer alternative
+                   is to place a colon-separated list of editors
+                   in the editor variable.  vviissuuddoo will then only
+                   use the EDITOR or VISUAL if they match a value
+                   specified in editor.  This flag is off by
+                   default.
+
+       rootpw      If set, ssuuddoo will prompt for the root password
+                   instead of the password of the invoking user.
+                   This flag is _o_f_f by default.
+
+       runaspw     If set, ssuuddoo will prompt for the password of
+                   the user defined by the _r_u_n_a_s___d_e_f_a_u_l_t option
+                   (defaults to root) instead of the password of
+                   the invoking user.  This flag is _o_f_f by
+                   default.
+
+       targetpw    If set, ssuuddoo will prompt for the password of
+                   the user specified by the --uu flag (defaults to
+                   root) instead of the password of the invoking
+                   user.  Note that this precludes the use of a
+                   uid not listed in the passwd database as an
+                   argument to the --uu flag.  This flag is _o_f_f by
+                   default.
+
+       set_logname Normally, ssuuddoo will set the LOGNAME, USER and
+                   USERNAME environment variables to the name of
+                   the target user (usually root unless the --uu
+                   flag is given).  However, since some programs
+                   (including the RCS revision control system)
+                   use LOGNAME to determine the real identity of
+                   the user, it may be desirable to change this
+                   behavior.  This can be done by negating the
+                   set_logname option.  Note that if the
+                   _e_n_v___r_e_s_e_t option has not been disabled,
+                   entries in the _e_n_v___k_e_e_p list will override the
+
+
+
+1.6.9                     July 16, 2007                        11
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
+                   value of _s_e_t___l_o_g_n_a_m_e.
+
+       stay_setuid Normally, when ssuuddoo executes a command the
+                   real and effective UIDs are set to the target
+                   user (root by default).  This option changes
+                   that behavior such that the real UID is left
+                   as the invoking user's UID.  In other words,
+                   this makes ssuuddoo act as a setuid wrapper.  This
+                   can be useful on systems that disable some
+                   potentially dangerous functionality when a
+                   program is run setuid.  This option is only
+                   effective on systems with either the
+                   _s_e_t_r_e_u_i_d_(_) or _s_e_t_r_e_s_u_i_d_(_) function.
+
+       env_reset   If set, ssuuddoo will reset the environment to
+                   only contain the LOGNAME, SHELL, USER, USER­
+                   NAME and the SUDO_* variables.  Any variables
+                   in the caller's environment that match the
+                   env_keep and env_check lists are then added.
+                   The default contents of the env_keep and
+                   env_check lists are displayed when ssuuddoo is run
+                   by root with the _-_V option.  If ssuuddoo was com­
+                   piled with the SECURE_PATH option, its value
+                   will be used for the PATH environment vari­
+                   able.  This flag is _o_n by default.
+
+       use_loginclass
+                   If set, ssuuddoo will apply the defaults specified
+                   for the target user's login class if one
+                   exists.  Only available if ssuuddoo is configured
+                   with the --with-logincap option.  This flag is
+                   _o_f_f by default.
+
+       noexec      If set, all commands run via ssuuddoo will behave
+                   as if the NOEXEC tag has been set, unless
+                   overridden by a EXEC tag.  See the description
+                   of _N_O_E_X_E_C _a_n_d _E_X_E_C below as well as the "PRE­
+                   VENTING SHELL ESCAPES" section at the end of
+                   this manual.  This flag is _o_f_f by default.
+
+       ignore_local_sudoers
+                   If set via LDAP, parsing of @sysconfdir@/sudo­
+                   ers will be skipped.  This is intended for
+                   Enterprises that wish to prevent the usage of
+                   local sudoers files so that only LDAP is used.
+                   This thwarts the efforts of rogue operators
+                   who would attempt to add roles to
+                   @sysconfdir@/sudoers.  When this option is
+                   present, @sysconfdir@/sudoers does not even
+                   need to exist.  Since this option tells ssuuddoo
+                   how to behave when no specific LDAP entries
+                   have been matched, this sudoOption is only
+                   meaningful for the cn=defaults section.  This
+                   flag is _o_f_f by default.
+
+
+
+1.6.9                     July 16, 2007                        12
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
+       IInntteeggeerrss:
+
+       passwd_tries
+                   The number of tries a user gets to enter
+                   his/her password before ssuuddoo logs the failure
+                   and exits.  The default is 3.
+
+       IInntteeggeerrss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
+
+       loglinelen  Number of characters per line for the file
+                   log.  This value is used to decide when to
+                   wrap lines for nicer log files.  This has no
+                   effect on the syslog log file, only the file
+                   log.  The default is 80 (use 0 or negate the
+                   option to disable word wrap).
+
+       timestamp_timeout
+                   Number of minutes that can elapse before ssuuddoo
+                   will ask for a passwd again.  The default is
+                   5.  Set this to 0 to always prompt for a pass­
+                   word.  If set to a value less than 0 the
+                   user's timestamp will never expire.  This can
+                   be used to allow users to create or delete
+                   their own timestamps via sudo -v and sudo -k
+                   respectively.
+
+       passwd_timeout
+                   Number of minutes before the ssuuddoo password
+                   prompt times out.  The default is 5, set this
+                   to 0 for no password timeout.
+
+       umask       Umask to use when running the command.  Negate
+                   this option or set it to 0777 to preserve the
+                   user's umask.  The default is 0022.
+
+       setenv      Allow the user to disable the _e_n_v___r_e_s_e_t option
+                   from the command line.  Additionally, environ­
+                   ment variables set via the command line are
+                   not subject to the restrictions imposed by
+                   _e_n_v___c_h_e_c_k, _e_n_v___d_e_l_e_t_e, or _e_n_v___k_e_e_p.  As such,
+                   only trusted users should be allowed to set
+                   variables in this manner.
+
+       SSttrriinnggss:
+
+       mailsub     Subject of the mail sent to the _m_a_i_l_t_o user.
+                   The escape %h will expand to the hostname of
+                   the machine.  Default is *** SECURITY informa­
+                   tion for %h ***.
+
+       badpass_message
+                   Message that is displayed if a user enters an
+                   incorrect password.  The default is Sorry, try
+                   again. unless insults are enabled.
+
+
+
+1.6.9                     July 16, 2007                        13
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
+       timestampdir
+                   The directory in which ssuuddoo stores its times­
+                   tamp files.  The default is _/_v_a_r_/_r_u_n_/_s_u_d_o.
+
+       timestampowner
+                   The owner of the timestamp directory and the
+                   timestamps stored therein.  The default is
+                   root.
+
+       passprompt  The default prompt to use when asking for a
+                   password; can be overridden via the --pp option
+                   or the SUDO_PROMPT environment variable.  The
+                   following percent (`%') escapes are supported:
+
+                   %u      expanded to the invoking user's login
+                           name
+
+                   %U      expanded to the login name of the user
+                           the command will be run as (defaults
+                           to root)
+
+                   %h      expanded to the local hostname without
+                           the domain name
+
+                   %H      expanded to the local hostname includ­
+                           ing the domain name (on if the
+                           machine's hostname is fully qualified
+                           or the _f_q_d_n option is set)
+
+                   %%      two consecutive % characters are col­
+                           lapsed into a single % character
+
+                   The default value is Password:.
+
+       runas_default
+                   The default user to run commands as if the --uu
+                   flag is not specified on the command line.
+                   This defaults to root.  Note that if
+                   _r_u_n_a_s___d_e_f_a_u_l_t is set it mmuusstt occur before any
+                   Runas_Alias specifications.
+
+       syslog_goodpri
+                   Syslog priority to use when user authenticates
+                   successfully.  Defaults to notice.
+
+       syslog_badpri
+                   Syslog priority to use when user authenticates
+                   unsuccessfully.  Defaults to alert.
+
+       editor      A colon (':') separated list of editors
+                   allowed to be used with vviissuuddoo.  vviissuuddoo will
+                   choose the editor that matches the user's EDI­
+                   TOR environment variable if possible, or the
+                   first editor in the list that exists and is
+
+
+
+1.6.9                     July 16, 2007                        14
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
+                   executable.  The default is the path to vi on
+                   your system.
+
+       noexec_file Path to a shared library containing dummy ver­
+                   sions of the _e_x_e_c_v_(_), _e_x_e_c_v_e_(_) and _f_e_x_e_c_v_e_(_)
+                   library functions that just return an error.
+                   This is used to implement the _n_o_e_x_e_c function­
+                   ality on systems that support LD_PRELOAD or
+                   its equivalent.  Defaults to
+                   _/_u_s_r_/_l_o_c_a_l_/_l_i_b_e_x_e_c_/_s_u_d_o___n_o_e_x_e_c.
+
+       SSttrriinnggss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
+
+       lecture     This option controls when a short lecture will
+                   be printed along with the password prompt.  It
+                   has the following possible values:
+
+                   never   Never lecture the user.
+
+                   once    Only lecture the user the first time
+                           they run ssuuddoo.
+
+                   always  Always lecture the user.
+
+                   If no value is specified, a value of _o_n_c_e is
+                   implied.  Negating the option results in a
+                   value of _n_e_v_e_r being used.  The default value
+                   is _o_n_c_e.
+
+       lecture_file
+                   Path to a file containing an alternate ssuuddoo
+                   lecture that will be used in place of the
+                   standard lecture if the named file exists.
+
+       logfile     Path to the ssuuddoo log file (not the syslog log
+                   file).  Setting a path turns on logging to a
+                   file; negating this option turns it off.
+
+       syslog      Syslog facility if syslog is being used for
+                   logging (negate to disable syslog logging).
+                   Defaults to local2.
+
+       mailerpath  Path to mail program used to send warning
+                   mail.  Defaults to the path to sendmail found
+                   at configure time.
+
+       mailerflags Flags to use when invoking mailer. Defaults to
+                   --tt.
+
+       mailto      Address to send warning and error mail to.
+                   The address should be enclosed in double
+                   quotes (") to protect against ssuuddoo interpret­
+                   ing the @ sign.  Defaults to root.
+
+
+
+
+1.6.9                     July 16, 2007                        15
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
+       exempt_group
+                   Users in this group are exempt from password
+                   and PATH requirements.  This is not set by
+                   default.
+
+       verifypw    This option controls when a password will be
+                   required when a user runs ssuuddoo with the --vv
+                   flag.  It has the following possible values:
+
+                   all     All the user's _s_u_d_o_e_r_s entries for the
+                           current host must have the NOPASSWD
+                           flag set to avoid entering a password.
+
+                   any     At least one of the user's _s_u_d_o_e_r_s
+                           entries for the current host must have
+                           the NOPASSWD flag set to avoid enter­
+                           ing a password.
+
+                   never   The user need never enter a password
+                           to use the --vv flag.
+
+                   always  The user must always enter a password
+                           to use the --vv flag.
+
+                   If no value is specified, a value of _a_l_l is
+                   implied.  Negating the option results in a
+                   value of _n_e_v_e_r being used.  The default value
+                   is _a_l_l.
+
+       listpw      This option controls when a password will be
+                   required when a user runs ssuuddoo with the --ll
+                   flag.  It has the following possible values:
+
+                   all     All the user's _s_u_d_o_e_r_s entries for the
+                           current host must have the NOPASSWD
+                           flag set to avoid entering a password.
+
+                   any     At least one of the user's _s_u_d_o_e_r_s
+                           entries for the current host must have
+                           the NOPASSWD flag set to avoid enter­
+                           ing a password.
+
+                   never   The user need never enter a password
+                           to use the --ll flag.
+
+                   always  The user must always enter a password
+                           to use the --ll flag.
+
+                   If no value is specified, a value of _a_n_y is
+                   implied.  Negating the option results in a
+                   value of _n_e_v_e_r being used.  The default value
+                   is _a_n_y.
+
+       LLiissttss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
+
+
+
+1.6.9                     July 16, 2007                        16
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
+       env_check   Environment variables to be removed from the
+                   user's environment if the variable's value
+                   contains % or / characters.  This can be used
+                   to guard against printf-style format vulnera­
+                   bilities in poorly-written programs.  The
+                   argument may be a double-quoted, space-sepa­
+                   rated list or a single value without dou­
+                   ble-quotes.  The list can be replaced, added
+                   to, deleted from, or disabled by using the =,
+                   +=, -=, and ! operators respectively.  Regard­
+                   less of whether the env_reset option is
+                   enabled or disabled, variables specified by
+                   env_check will be preserved in the environment
+                   if they pass the aforementioned check.  The
+                   default list of environment variables to check
+                   is displayed when ssuuddoo is run by root with the
+                   _-_V option.
+
+       env_delete  Environment variables to be removed from the
+                   user's environment.  The argument may be a
+                   double-quoted, space-separated list or a sin­
+                   gle value without double-quotes.  The list can
+                   be replaced, added to, deleted from, or dis­
+                   abled by using the =, +=, -=, and ! operators
+                   respectively.  The default list of environment
+                   variables to remove is displayed when ssuuddoo is
+                   run by root with the _-_V option.  Note that
+                   many operating systems will remove potentially
+                   dangerous variables from the environment of
+                   any setuid process (such as ssuuddoo).
+
+       env_keep    Environment variables to be preserved in the
+                   user's environment when the _e_n_v___r_e_s_e_t option
+                   is in effect.  This allows fine-grained con­
+                   trol over the environment ssuuddoo-spawned pro­
+                   cesses will receive.  The argument may be a
+                   double-quoted, space-separated list or a sin­
+                   gle value without double-quotes.  The list can
+                   be replaced, added to, deleted from, or dis­
+                   abled by using the =, +=, -=, and ! operators
+                   respectively.  The default list of variables
+                   to keep is displayed when ssuuddoo is run by root
+                   with the _-_V option.
+
+       When logging via _s_y_s_l_o_g(3), ssuuddoo accepts the following
+       values for the syslog facility (the value of the ssyysslloogg
+       Parameter): aauutthhpprriivv (if your OS supports it), aauutthh, ddaaee­­
+       mmoonn, uusseerr, llooccaall00, llooccaall11, llooccaall22, llooccaall33, llooccaall44, llooccaall55,
+       llooccaall66, and llooccaall77.  The following syslog priorities are
+       supported: aalleerrtt, ccrriitt, ddeebbuugg, eemmeerrgg, eerrrr, iinnffoo, nnoottiiccee,
+       and wwaarrnniinngg.
+
 FFIILLEESS
 
 
 
 
-1.6.9b5                   June 25, 2007                        17
+1.6.9                     July 16, 2007                        17
 
 
 
@@ -1183,7 +1183,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.6.9b5                   June 25, 2007                        18
+1.6.9                     July 16, 2007                        18
 
 
 
@@ -1249,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9b5                   June 25, 2007                        19
+1.6.9                     July 16, 2007                        19
 
 
 
@@ -1315,7 +1315,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9b5                   June 25, 2007                        20
+1.6.9                     July 16, 2007                        20
 
 
 
@@ -1381,7 +1381,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.6.9b5                   June 25, 2007                        21
+1.6.9                     July 16, 2007                        21
 
 
 
@@ -1447,7 +1447,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.6.9b5                   June 25, 2007                        22
+1.6.9                     July 16, 2007                        22
 
 
 
@@ -1513,6 +1513,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.6.9b5                   June 25, 2007                        23
+1.6.9                     July 16, 2007                        23
 
 
