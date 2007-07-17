@@ -2195,8 +2195,7 @@ if test -n "$with_ldap"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_LBER_H)])
 
-    AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s ldap_sasl_interactive_bind_s)
-    AC_CHECK_HEADERS([sasl/sasl.h])
+    AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s)
 
     SUDO_LIBS="${SUDO_LIBS}${LDAP_LIBS}"
     LIBS="$_LIBS"
