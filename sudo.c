@@ -115,9 +115,9 @@ static void usage_excl			__P((int))
 					    __attribute__((__noreturn__));
 static struct passwd *get_authpw	__P((void));
 extern int sudo_edit			__P((int, char **, char **));
-extern char **rebuild_env		__P((char **, int, int));
+extern void rebuild_env			__P((int, int));
 void validate_env_vars			__P((struct list_member *));
-char **insert_env_vars			__P((char **, struct list_member *));
+void insert_env_vars			__P((struct list_member *));
 
 /*
  * Globals
@@ -160,7 +160,6 @@ main(argc, argv, envp)
     int pwflag;
     sigaction_t sa;
     VOID *ld = NULL;
-    extern char **environ;
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     extern char *malloc_options;
     malloc_options = "AFGJPR";
@@ -263,7 +262,7 @@ main(argc, argv, envp)
     if (user_cmnd == NULL && NewArgc == 0)
 	usage(1);
 
-    init_vars(sudo_mode, environ);	/* XXX - move this? */
+    init_vars(sudo_mode, envp);		/* XXX - move this? */
 
 #ifdef HAVE_LDAP
     if ((ld = sudo_ldap_open()) != NULL)
@@ -350,7 +349,7 @@ main(argc, argv, envp)
 	def_env_reset = FALSE;
 
     /* Build a new environment that avoids any nasty bits. */
-    environ = rebuild_env(environ, sudo_mode, def_noexec);
+    rebuild_env(sudo_mode, def_noexec);
 
     /* Fill in passwd struct based on user we are authenticating as.  */
     auth_pw = get_authpw();
@@ -442,7 +441,7 @@ main(argc, argv, envp)
 	    exit(sudo_edit(NewArgc, NewArgv, envp));
 
 	/* Insert user-specified environment variables. */
-	environ = insert_env_vars(environ, sudo_user.env_vars);
+	insert_env_vars(sudo_user.env_vars);
 
 	/* Restore signal handlers before we exec. */
 	(void) sigaction(SIGINT, &saved_sa_int, NULL);
@@ -460,7 +459,7 @@ main(argc, argv, envp)
 	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0)
 	    exit(0);
 	else
-	    execve(safe_cmnd, NewArgv, environ);
+	    execv(safe_cmnd, NewArgv);
 #else
 	exit(0);
 #endif /* PROFILING */
@@ -471,7 +470,7 @@ main(argc, argv, envp)
 	    NewArgv--;			/* at least one extra slot... */
 	    NewArgv[0] = "sh";
 	    NewArgv[1] = safe_cmnd;
-	    execve(_PATH_BSHELL, NewArgv, environ);
+	    execv(_PATH_BSHELL, NewArgv);
 	}
 	warning("unable to execute %s", safe_cmnd);
 	exit(127);

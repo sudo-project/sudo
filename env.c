@@ -99,12 +99,12 @@ struct environment {
 /*
  * Prototypes
  */
-char **rebuild_env		__P((char **, int, int));
+void rebuild_env		__P((int, int));
 void sudo_setenv		__P((const char *, const char *, int));
 void sudo_unsetenv		__P((const char *));
 static void _sudo_setenv	__P((const char *, const char *, int));
-static void insert_env		__P((char *, int));
-static void sync_env		__P((char **));
+static void insert_env		__P((char *, int, int));
+static void sync_env		__P((void));
 
 extern char **environ;		/* global environment */
 
@@ -213,25 +213,25 @@ static const char *initial_keepenv_table[] = {
 
 /*
  * Syncronize our private copy of the environment with what is
- * in envp.
+ * in environ.
  */
 static void
-sync_env(envp)
-    char **envp;
+sync_env()
 {
     size_t evlen;
     char **ep;
 
-    for (ep = envp; *ep != NULL; ep++)
+    for (ep = environ; *ep != NULL; ep++)
 	continue;
-    evlen = ep - envp;
+    evlen = ep - environ;
     if (evlen + 1 > env.env_size) {
 	efree(env.envp);
 	env.env_size = evlen + 1 + 128;
 	env.envp = emalloc2(env.env_size, sizeof(char *));
     }
-    memcpy(env.envp, envp, evlen + 1);
+    memcpy(env.envp, environ, evlen + 1);
     env.env_len = evlen;
+    environ = env.envp;
 }
 
 /*
@@ -239,7 +239,7 @@ sync_env(envp)
  * and it always overwrites.  The dupcheck param determines whether we need
  * to verify that the variable is not already set.
  */
-void
+static void
 _sudo_setenv(var, val, dupcheck)
     const char *var;
     const char *val;
@@ -258,7 +258,7 @@ _sudo_setenv(var, val, dupcheck)
 
 	errorx(1, "internal error, sudo_setenv() overflow");
     }
-    insert_env(estring, dupcheck);
+    insert_env(estring, dupcheck, FALSE);
 }
 
 /*
@@ -271,11 +271,24 @@ sudo_setenv(var, val, dupcheck)
     const char *val;
     int dupcheck;
 {
+    char *estring;
+    size_t esize;
+
     /* Make sure we are operating on the current environment. */
     if (env.envp != environ)
-	sync_env(environ);
+	sync_env();
 
-    _sudo_setenv(var, val, dupcheck);
+    esize = strlen(var) + 1 + strlen(val) + 1;
+    estring = emalloc(esize);
+
+    /* Build environment string and insert it. */
+    if (strlcpy(estring, var, esize) >= esize ||
+	strlcat(estring, "=", esize) >= esize ||
+	strlcat(estring, val, esize) >= esize) {
+
+	errorx(1, "internal error, sudo_setenv() overflow");
+    }
+    insert_env(estring, dupcheck, TRUE);
 }
 
 /*
@@ -291,7 +304,7 @@ sudo_unsetenv(var)
 
     /* Make sure we are operating on the current environment. */
     if (env.envp != environ)
-	sync_env(environ);
+	sync_env();
 
     varlen = strlen(var);
     for (nep = env.envp; *nep; nep++) {
@@ -308,9 +321,10 @@ sudo_unsetenv(var)
  * Insert str into env.envp, assumes str has an '=' in it.
  */
 static void
-insert_env(str, dupcheck)
+insert_env(str, dupcheck, dosync)
     char *str;
     int dupcheck;
+    int dosync;
 {
     char **nep;
     size_t varlen;
@@ -319,6 +333,8 @@ insert_env(str, dupcheck)
     if (env.env_len + 2 > env.env_size) {
 	env.env_size += 128;
 	env.envp = erealloc3(env.envp, env.env_size, sizeof(char *));
+	if (dosync)
+	    environ = env.envp;
     }
 
     if (dupcheck) {
@@ -432,9 +448,8 @@ matches_env_keep(var)
  * variables from the old one or start with a clean slate.
  * Also adds sudo-specific variables (SUDO_*).
  */
-char **
-rebuild_env(envp, sudo_mode, noexec)
-    char **envp;
+void
+rebuild_env(sudo_mode, noexec)
     int sudo_mode;
     int noexec;
 {
@@ -447,10 +462,12 @@ rebuild_env(envp, sudo_mode, noexec)
      */
     ps1 = NULL;
     didvar = 0;
-    memset(&env, 0, sizeof(env));
+    env.env_len = 0;
+    env.env_size = 128;
+    env.envp = emalloc2(env.env_size, sizeof(char *));
     if (def_env_reset) {
 	/* Pull in vars we want to keep from the old environment. */
-	for (ep = envp; *ep; ep++) {
+	for (ep = environ; *ep; ep++) {
 	    int keepit;
 
 	    /* Skip variables with values beginning with () (bash functions) */
@@ -502,7 +519,7 @@ rebuild_env(envp, sudo_mode, noexec)
 			    SET(didvar, DID_USERNAME);
 			break;
 		}
-		insert_env(*ep, FALSE);
+		insert_env(*ep, FALSE, FALSE);
 	    }
 	}
 	didvar |= didvar << 8;		/* convert DID_* to KEPT_* */
@@ -534,10 +551,10 @@ rebuild_env(envp, sudo_mode, noexec)
 	}
     } else {
 	/*
-	 * Copy envp entries as long as they don't match env_delete or
+	 * Copy environ entries as long as they don't match env_delete or
 	 * env_check.
 	 */
-	for (ep = envp; *ep; ep++) {
+	for (ep = environ; *ep; ep++) {
 	    int okvar;
 
 	    /* Skip variables with values beginning with () (bash functions) */
@@ -561,7 +578,7 @@ rebuild_env(envp, sudo_mode, noexec)
 		    SET(didvar, DID_PATH);
 		else if (strncmp(*ep, "TERM=", 5) == 0)
 		    SET(didvar, DID_TERM);
-		insert_env(*ep, FALSE);
+		insert_env(*ep, FALSE, FALSE);
 	    }
 	}
     }
@@ -591,7 +608,7 @@ rebuild_env(envp, sudo_mode, noexec)
 
     /* Provide default values for $TERM and $PATH if they are not set. */
     if (!ISSET(didvar, DID_TERM))
-	insert_env("TERM=unknown", FALSE);
+	insert_env("TERM=unknown", FALSE, FALSE);
     if (!ISSET(didvar, DID_PATH))
 	_sudo_setenv("PATH", _PATH_DEFPATH, FALSE);
 
@@ -621,7 +638,7 @@ rebuild_env(envp, sudo_mode, noexec)
 
     /* Set PS1 if SUDO_PS1 is set. */
     if (ps1 != NULL)
-	insert_env(ps1, TRUE);
+	insert_env(ps1, TRUE, FALSE);
 
     /* Add the SUDO_COMMAND envariable (cmnd + args). */
     if (user_args) {
@@ -638,28 +655,26 @@ rebuild_env(envp, sudo_mode, noexec)
     snprintf(idbuf, sizeof(idbuf), "%lu", (unsigned long) user_gid);
     _sudo_setenv("SUDO_GID", idbuf, TRUE);
 
-    return(env.envp);
+    /* Install new environment. */
+    environ = env.envp;
 }
 
-char **
-insert_env_vars(envp, env_vars)
-    char **envp;
+void
+insert_env_vars(env_vars)
     struct list_member *env_vars;
 {
     struct list_member *cur;
 
     if (env_vars == NULL)
-	return(envp);
+	return;
 
     /* Make sure we are operating on the current environment. */
-    if (env.envp != envp)
-	sync_env(envp);
+    if (env.envp != environ)
+	sync_env();
 
     /* Add user-specified environment variables. */
     for (cur = env_vars; cur != NULL; cur = cur->next)
-	insert_env(cur->value, TRUE);
-
-    return(env.envp);
+	insert_env(cur->value, TRUE, TRUE);
 }
 
 /*
