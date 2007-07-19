@@ -61,11 +61,15 @@
 # else
 #  include <sasl.h>
 # endif
-# ifdef HAVE_GSSAPI_H
-#  include <gssapi.h>
-# elif defined(HAVE_GSSAPI_GSSAPI_KRB5_H)
-#  include <gssapi/gssapi.h>
-#  include <gssapi/gssapi_krb5.h>
+# if HAVE_GSS_KRB5_CCACHE_NAME
+#  if defined(HAVE_GSSAPI_GSSAPI_KRB5_H)
+#   include <gssapi/gssapi.h>
+#   include <gssapi/gssapi_krb5.h>
+#  elif defined(HAVE_GSSAPI_GSSAPI_H)
+#   include <gssapi/gssapi.h>
+#  else
+#   include <gssapi.h>
+#  endif
 # endif
 #endif
 

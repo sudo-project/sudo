@@ -159,6 +159,12 @@
 /* Define to 1 if you have the `glob' function. */
 #undef HAVE_GLOB
 
+/* Define to 1 if you have the <gssapi/gssapi_krb5.h> header file. */
+#undef HAVE_GSSAPI_GSSAPI_KRB5_H
+
+/* Define to 1 if you have the `gss_krb5_ccache_name' function. */
+#undef HAVE_GSS_KRB5_CCACHE_NAME
+
 /* Define to 1 if your Kerberos is Heimdal. */
 #undef HAVE_HEIMDAL
 
@@ -206,17 +212,14 @@
 /* Define to 1 if you have the `ldap_initialize' function. */
 #undef HAVE_LDAP_INITIALIZE
 
+/* Define to 1 if you have the `ldap_sasl_interactive_bind_s' function. */
+#undef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+
 /* Define to 1 if you have the `ldap_start_tls_s' function. */
 #undef HAVE_LDAP_START_TLS_S
 
 /* Define to 1 if you have the <linux/systrace.h> header file. */
 #undef HAVE_LINUX_SYSTRACE_H
-
-/* Define to 1 if you have the `ldap_sasl_interactive_bind_s' function. */
-#undef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
-
-/* Define to 1 if you have the <sasl/sasl.h> header file. */
-#undef HAVE_SASL_SASL_H
 
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF
@@ -274,6 +277,9 @@
 
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM
+
+/* Define to 1 if you have the <sasl/sasl.h> header file. */
+#undef HAVE_SASL_SASL_H
 
 /* Define if your struct sockadr has an sa_len field. */
 #undef HAVE_SA_LEN
