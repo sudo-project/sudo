@@ -136,7 +136,7 @@ LIB_OBJS = @LIBOBJS@ @ALLOCA@
 
 VERSION = 1.7
 
-DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES HISTORY INSTALL INSTALL.configure \
+DISTFILES = $(SRCS) $(HDRS) BUGS Changelog HISTORY INSTALL INSTALL.configure \
             LICENSE Makefile.in PORTING README README.LDAP TODO \
             TROUBLESHOOTING UPGRADE aclocal.m4 acsite.m4 aixcrypt.exp \
             config.guess config.h.in config.sub configure configure.in \
@@ -147,7 +147,7 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES HISTORY INSTALL INSTALL.configure \
             sudoers.man.in sudoers.pod sudoers2ldif visudo.cat \
             visudo.man.in visudo.pod auth/API
 
-BINFILES= BUGS CHANGES HISTORY LICENSE README TODO TROUBLESHOOTING \
+BINFILES= BUGS Changelog HISTORY LICENSE README TODO TROUBLESHOOTING \
 	  UPGRADE install-sh mkinstalldirs sample.syslog.conf sample.sudoers \
 	  sudo sudo.cat sudo.man sudo.pod sudoers sudoers.cat sudoers.man \
 	  sudoers.pod visudo visudo.cat visudo.man visudo.pod
@@ -469,7 +469,7 @@ depot:
 	( \
 	  tdir=tmp.depot ; \
 	  mkdir $$tdir ; \
-	  for i in sudo visudo sudo.man visudo.man sudoers.man sudoers BUGS CHANGES HISTORY LICENSE README TODO TROUBLESHOOTING UPGRADE sample.syslog.conf sample.sudoers; do \
+	  for i in sudo visudo sudo.man visudo.man sudoers.man sudoers BUGS Changelog HISTORY LICENSE README TODO TROUBLESHOOTING UPGRADE sample.syslog.conf sample.sudoers; do \
 	    if [ -f $$i ]; then \
 	      cp $$i $$tdir ; \
 	    elif [ -f $(srcdir)/$$i ]; then \
