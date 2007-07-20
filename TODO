@@ -130,7 +130,7 @@ TODO list (most will be addressed in sudo 2.0)
 
 47) Refactor duplicated code in ldap.c into wrapper functions.
 
-48) Move setting of safe_cmnd out of match.c.
+48) Return command from command_matches() instead of setting safe_cmnd directly.
 
 49) Support timelimit, bind_timelimit, bind_policy in ldap.conf (see nss_ldap).
 
@@ -147,10 +147,32 @@ TODO list (most will be addressed in sudo 2.0)
 
 55) For systrace rewrite argv using stackgap to avoid races.
 
-56) Examine debian fqdn diffs
+56) Examine debian fqdn diffs.
 
 57) Add gettext() support
 
 58) Consider allowing chown/chrgp to fail in visudo in -f mode.
 
 59) Refactor common env code in logging.c
+
+61) Add :group to Runas user specs
+
+62) Convert the other capitalized files into .pod so we can get decent html
+    form them?  E.g. README, etc.  E.g.
+	pod2text -l -i0 history.pod > HISTORY
+	pod2html --noindex history.pod > history.html
+
+Exlcusive auth methods:
+    fwtk
+    sia (implied)
+    pam (implied)
+    SecurID
+    aix auth (implied)
+    bsd auth (implied)
+
+Need to make the implied ones not conflict with explicit ones
+This means not only other exclusive ones but also non-exclusive too
+
+63) For LDAP SASL use ldap_gss_bind() if available, else gss_krb5_ccache_name()
+    See nss_ldap.  Can only use this stuff if kerb5 is available.
+    That's separate from kerb5 auth though.
