@@ -1,3 +1,849 @@
+2007-07-20 09:29  millert
+
+	* Makefile.in: CHANGE -> Changelog
+
+2007-07-19 20:23  millert
+
+	* TODO: sync
+
+2007-07-19 19:53  millert
+
+	* config.h.in, configure.in, configure, ldap.c: Add configure hooks
+	  for gss_krb5_ccache_name() and the gssapi headers.
+
+2007-07-18 12:57  millert
+
+	* env.c, sudo.c: rebuild_env() and insert_env_vars() no longer
+	  return environment pointer, they set environ directly.
+
+	  No longer need to pass around an envp pointer since we just
+	  operate on environ now.
+
+	  Add dosync argument to insert_env() that indicates whether it
+	  should reset environ when realloc()ing env.envp.
+
+	  Use an initial size of 128 for the environment.
+
+2007-07-18 12:41  millert
+
+	* env.c: Split sudo_setenv() into an external version and a version
+	  only for use by rebuild_env().
+
+2007-07-18 07:13  millert
+
+	* ldap.c (SUDO_1_6_9): Use emul/err.h if no <err.h>
+
+2007-07-17 09:19  millert
+
+	* visudo.c (SUDO_1_6_9): add missing braces
+
+2007-07-16 22:55  millert
+
+	* sudo.cat, sudo.man.in, sudoers.cat, sudoers.man.in, visudo.cat,
+	  visudo.man.in (SUDO_1_6_9): regen
+
+2007-07-16 22:51  millert
+
+	* configure, ldap.c, config.h.in, configure.in, README.LDAP
+	  (SUDO_1_6_9): back out LDAP SASL support; it is not read for
+	  1.6.9
+
+2007-07-16 22:50  millert
+
+	* CHANGES (SUDO_1_6_9): checkpoint for 1.6.9
+
+2007-07-16 19:40  millert
+
+	* ldap.c: Add support for using gss_krb5_ccache_name() instead of
+	  setting KRB5CCNAME.  Also use sudo_unsetenv() in the
+	  non-gss_krb5_ccache_name() case if there was no KRB5CCNAME in the
+	  original environment.  TODO: configure setup for
+	  gss_krb5_ccache_name()
+
+2007-07-16 18:44  millert
+
+	* README.LDAP: add krb5_ccname
+
+2007-07-16 18:44  millert
+
+	* README.LDAP, ldap.c: Add support for sasl_secprops in ldap.conf
+
+2007-07-16 18:39  millert
+
+	* env.c, sudo.h: Add sudo_unsetenv() and refactor private env
+	  syncing code into sync_env().
+
+2007-07-16 07:28  millert
+
+	* README.LDAP, ldap.c (SUDO_1_6_9): The ldap.conf variable is
+	  sasl_auth_id, not sasl_authid.
+
+2007-07-16 07:27  millert
+
+	* README.LDAP, ldap.c: The ldap.conf variable is sasl_auth_id not
+	  sasl_authid.
+
+2007-07-15 15:44  millert
+
+	* ldap.c, sudo.c, sudo.h: Add support for krb5_ccname in ldap.conf.
+	  If specified, it will override the default value of KRB5CCNAME
+	  in the environment for the duration of the call to
+	  ldap_sasl_interactive_bind_s().
+
+2007-07-15 15:41  millert
+
+	* env.c, sudo.h: Remove format_env() Add sudo_setenv() to replace
+	  most format_env() + insert_env() combinations.  insert_env() no
+	  longer takes a struct environment *
+
+2007-07-15 12:47  millert
+
+	* ldap.c (SUDO_1_6_9), ldap.c: Fix use_sasl vs. rootuse_sasl logic.
+
+2007-07-15 09:23  millert
+
+	* README.LDAP, config.h.in, configure, configure.in, ldap.c
+	  (SUDO_1_6_9), README.LDAP, config.h.in, configure, configure.in,
+	  ldap.c: Add support for SASL auth when connecting to an LDAP
+	  server.  Adapted from a diff by Tom McLaughlin.
+
+2007-07-14 16:32  millert
+
+	* configure, configure.in (SUDO_1_6_9), configure, configure.in:
+	  Only enable AIX or BSD auth if no other exclusive auth method has
+	  been chosen.	Allows people to e.g., use PAM on AIX without
+	  adding --without-aixauth.  A better solution is needed to deal
+	  with default authentication since if a non-exclusive method is
+	  chosen we will still get an error.
+
+2007-07-11 11:23  millert
+
+	* HISTORY, Makefile.in, history.pod: Generate HISTORY from
+	  history.pod (which is also used for web pages)
+
+2007-07-09 19:40  millert
+
+	* sudo.man.in, sudoers.man.in: regen
+
+2007-07-09 19:25  millert
+
+	* sudo.pod (SUDO_1_6_9), sudo.pod: Better explanation of
+	  environment handling in the sudo man page.
+
+2007-07-09 17:53  millert
+
+	* parse.yacc (SUDO_1_6_9): Reset safe_cmnd if we hit an ALL
+	  command.  Works around a bug where the last matched command in
+	  sudoers was executed even for sudo ALL.
+
+2007-07-09 15:15  millert
+
+	* env.c, sudo.c, sudo.pod, sudoers.pod (SUDO_1_6_9): Allow user to
+	  set environment variables on the command line as long as they are
+	  allowed by env_keep and env_check.  Ie: apply the same
+	  restrictions as normal environment variables.  Also Defer Setting
+	  user-specified env vars until after authentication.
+
+2007-07-09 15:13  millert
+
+	* env.c, sudo.c: Defer setting user-specified env vars until after
+	  authentication.
+
+2007-07-09 13:25  millert
+
+	* env.c: honor def_default_path for PATH set on the command line
+
+2007-07-09 13:22  millert
+
+	* sudo.c, env.c, sudo.pod, sudoers.pod: Allow user to set
+	  environment variables on the command line as long as they are
+	  allowed by env_keep and env_check.  Ie: apply the same
+	  restrictions as normal environment variables.  TODO: deal with
+	  secure_path
+
+2007-07-08 14:44  millert
+
+	* sudo.c, sudo_edit.c (SUDO_1_6_9), sudo.c, sudo_edit.c: Call
+	  rebuild_env() in call cases.	Pass original envp to sudo_edit().
+	  Don't allow -E or env var setting in sudoedit mode.  More
+	  accurate usage() when called as sudoedit.
+
+2007-07-08 14:41  millert
+
+	* ldap.c: warn -> warning
+
+2007-07-08 14:11  millert
+
+	* sudo.pod (SUDO_1_6_9), sudo.pod: add -c option to sudoedit
+	  synopsis
+
+2007-07-08 10:27  millert
+
+	* TODO: udpate to reality
+
+2007-07-08 09:43  millert
+
+	* parse.c: Use ALLOW/DENY instead of TRUE/FALSE when dealing with
+	  the return value from {user,host,runas,cmnd}_matches().  Rename
+	  *matches variables -> *match.  Purely cosmetic.
+
+2007-07-08 09:30  millert
+
+	* parse.c: Move setting of FLAG_NO_CHECK into the if(pwflag) block.
+	  No change in behavior.
+
+2007-07-08 09:17  millert
+
+	* sudoers (SUDO_1_6_9), sudoers: add SETENV tag
+
+2007-07-07 13:55  millert
+
+	* sudo.c (SUDO_1_6_9): Undo editing gaff and restore 2 lines.
+
+2007-07-06 15:52  millert
+
+	* check.c, sudo.c (SUDO_1_6_9): Do not update timestamp if user not
+	  validated by sudoers.
+
+2007-07-06 15:51  millert
+
+	* parse.c: Make pwcheck local to the pwflag block.  Use pwcheck
+	  even if user didn't match since Defaults options may still apply.
+
+2007-07-06 15:34  millert
+
+	* parse.c (SUDO_1_6_9): Make pwcheck local to the pwflag block.
+
+2007-07-06 14:51  millert
+
+	* check.c, sudo.c: Do not update timestamp if user not validated by
+	  sudoers.
+
+2007-07-06 10:19  millert
+
+	* CHANGES (SUDO_1_6_9): checkpoint for rc2
+
+2007-07-06 10:14  millert
+
+	* logging.c, set_perms.c, sudo.h (SUDO_1_6_9): PERM_FULL_ROOT is
+	  now no different than PERM_ROOT so remove PERM_FULL_ROOT
+
+2007-07-06 10:14  millert
+
+	* set_perms.c (SUDO_1_6_9), set_perms.c: for PERM_RUNAS, set the
+	  egid to the runas user's gid and restore to the user's original
+	  in PERM_ROOT
+
+2007-07-06 10:04  millert
+
+	* logging.c, mon_systrace.c, set_perms.c, sudo.h: PERM_FULL_ROOT is
+	  now no different than PERM_ROOT so remove PERM_FULL_ROOT
+
+2007-07-06 09:49  millert
+
+	* check.c (SUDO_1_6_9), check.c: don't check timestamp mtime if we
+	  are just going to remove it
+
+2007-07-06 09:33  millert
+
+	* sudoers.pod (SUDO_1_6_9), sudoers.pod: Move sudoers defaults
+	  parameters into their own section.
+
+2007-07-05 20:21  millert
+
+	* testsudoers.c: Reduce a level of indent by a few placed continue
+	  statements.
+
+2007-07-05 20:20  millert
+
+	* parse.c: Make matching but negated commands/hosts/runas entries
+	  override a previous match as expected.  Also reduce some levels
+	  of indent by a few placed continue statements.
+
+2007-07-05 16:34  millert
+
+	* parse.c: Print default runas in "sudo -l" if sudoers don't
+	  specify one.
+
+2007-07-05 15:46  millert
+
+	* parse.c (SUDO_1_6_9), match.c: Less hacky way of testing whether
+	  the domain was set.
+
+2007-07-04 15:50  millert
+
+	* INSTALL (SUDO_1_6_9), INSTALL: Mention pam-devel and
+	  openldap-devel for Linux
+
+2007-07-04 12:58  millert
+
+	* sudo.pod (SUDO_1_6_9): minor cleanup
+
+2007-07-03 19:38  millert
+
+	* README.LDAP (SUDO_1_6_9), README.LDAP: or vs. are
+
+2007-07-03 19:37  millert
+
+	* CHANGES (SUDO_1_6_9): checkpoint for 1.6.9rc1
+
+2007-07-01 16:55  millert
+
+	* sudo.c (SUDO_1_6_9), sudo.c: fix typo in Solaris project support
+
+2007-07-01 09:40  millert
+
+	* HISTORY (SUDO_1_6_9), HISTORY: update
+
+2007-07-01 09:07  millert
+
+	* sudo.c (SUDO_1_6_9), sudo.c: Make -- on the command line match
+	  the manual page.  The implied shell case has been simplified as a
+	  result.
+
+2007-06-28 10:45  millert
+
+	* sudoers2ldif (SUDO_1_6_9): Honor SETENV/NOSETENV tag Add
+	  simplistic support for sudoRunas; note that if a sudoers entry
+	  contains     multiple Runas users, all will apply to the sudoRole
+
+2007-06-28 10:44  millert
+
+	* sudoers2ldif: add simplistic support for sudoRunas; note that if
+	  a sudoers entry contains multiple Runas users, all will apply to
+	  the sudoRole
+
+2007-06-28 10:42  millert
+
+	* sudoers2ldif: honor SETENV and NOSETENV tags
+
+2007-06-25 16:02  millert
+
+	* sudo.cat, sudo.man.in, sudoers.cat, sudoers.man.in, visudo.cat,
+	  visudo.man.in (SUDO_1_6_9): regen
+
+2007-06-25 16:01  millert
+
+	* sudo.pod, sudoers.pod, visudo.pod (SUDO_1_6_9): remove commercial
+	  support language
+
+2007-06-24 09:25  millert
+
+	* mon_systrace.c: Redo setting of user_args.  We now build up a
+	  private copy of argv first and then replace the NULs with spaces.
+
+2007-06-24 09:19  millert
+
+	* mon_systrace.c: getcwd() returns NULL on failure, not 0 on
+	  success
+
+2007-06-24 07:39  millert
+
+	* mon_systrace.c: allow chunksiz to reach 1 before erroring out
+
+2007-06-23 20:09  millert
+
+	* CHANGES (SUDO_1_6_9): checkpoint for 1.6.9b4
+
+2007-06-23 20:08  millert
+
+	* Makefile.in (SUDO_1_6_9): fix version
+
+2007-06-23 20:00  millert
+
+	* sudo.cat, sudo.man.in, sudoers.cat, sudoers.man.in, visudo.cat,
+	  visudo.man.in: regen
+
+2007-06-23 19:58  millert
+
+	* def_data.c, def_data.h, def_data.in, env.c, gram.c, gram.h,
+	  gram.y, logging.c, parse.c, parse.h, sudo.c, sudo.h, sudo.pod,
+	  sudoers.pod, toke.c, toke.l: Add support for setting environment
+	  variables on the command line.  This is only allowed if the
+	  setenv sudoers options is enabled or if the command is prefixed
+	  with the SETENV tag.
+
+2007-06-23 19:57  millert
+
+	* README.LDAP (SUDO_1_6_9), README.LDAP: replace Aaron's email
+	  address with the sudo-workers list
+
+2007-06-23 19:55  millert
+
+	* configure: regen
+
+2007-06-23 19:00  millert
+
+	* sudo.h (SUDO_1_6_9): g/c obsolete prototype
+
+2007-06-23 17:37  millert
+
+	* sudo.cat, sudo.man.in, sudoers.cat, sudoers.man.in (SUDO_1_6_9):
+	  regen
+
+2007-06-23 17:36  millert
+
+	* def_data.c, def_data.h, def_data.in, env.c, ldap.c, lex.yy.c,
+	  logging.c, parse.c, parse.h, parse.lex, parse.yacc, sudo.c,
+	  sudo.h, sudo.pod, sudo.tab.h, sudoers.pod (SUDO_1_6_9): Add
+	  support for setting environment variables on the command line.
+	  This is only allowed if the setenv sudoers options is enabled or
+	  if the command is prefixed with the SETENV tag.
+
+2007-06-21 20:35  millert
+
+	* Makefile.in, README.LDAP, schema.OpenLDAP, schema.iPlanet
+	  (SUDO_1_6_9), Makefile.in, README.LDAP, schema.OpenLDAP,
+	  schema.iPlanet: Break schema out into separate files.
+
+2007-06-21 18:30  millert
+
+	* configure (SUDO_1_6_9): regen
+
+2007-06-21 18:29  millert
+
+	* auth/aix_auth.c (SUDO_1_6_9): Free message is set by
+	  authenticate()
+
+2007-06-21 18:28  millert
+
+	* auth/aix_auth.c: free message if set by authenticate()
+
+2007-06-21 13:03  millert
+
+	* parse.c (SUDO_1_6_9), match.c: deal with NULL gr_mem
+
+2007-06-20 15:04  millert
+
+	* config.h.in (SUDO_1_6_9), config.h.in: regen
+
+2007-06-20 15:04  millert
+
+	* configure.in (SUDO_1_6_9), configure.in: add template for
+	  HAVE_PROJECT_H
+
+2007-06-20 07:06  millert
+
+	* closefrom.c (SUDO_1_6_9), closefrom.c: include fcntl.h
+
+2007-06-19 19:37  millert
+
+	* INSTALL (SUDO_1_6_9), INSTALL: mention --with-project
+
+2007-06-19 18:24  millert
+
+	* config.h.in, configure.in, sudo.c (SUDO_1_6_9), config.h.in,
+	  configure.in, sudo.c: Add Solaris 10 "project" support.  From
+	  Michael Brantley.
+
+2007-06-19 17:27  millert
+
+	* sudoers.pod (SUDO_1_6_9), sudoers.pod: fix typo
+
+2007-06-19 17:25  millert
+
+	* pathnames.h.in (SUDO_1_6_9): define _PATH_DEVNULL if not already
+	  defined
+
+2007-06-19 17:22  millert
+
+	* configure (SUDO_1_6_9), configure: regen
+
+2007-06-19 17:21  millert
+
+	* configure.in (SUDO_1_6_9), configure.in: Fix preservation of
+	  LDFLAGS in the LDAP case.
+
+2007-06-19 17:00  millert
+
+	* memrchr.c (SUDO_1_6_9), memrchr.c: Remove dependecy on NULL
+
+2007-06-19 15:37  millert
+
+	* configure (SUDO_1_6_9), configure: regen
+
+2007-06-19 15:37  millert
+
+	* aclocal.m4, configure.in (SUDO_1_6_9), aclocal.m4, configure.in:
+	  Can't use the regular autoconf fnmatch() check since we need
+	  FNM_CASEFOLD so go back to our custom one.
+
+2007-06-19 15:25  millert
+
+	* glob.c (SUDO_1_6_9): use standard passwd routines, not the
+	  sudo-specific ones.
+
+2007-06-19 12:52  millert
+
+	* env.c (SUDO_1_6_9), env.c: Fix preserving of variables in
+	  env_keep.
+
+2007-06-19 09:58  millert
+
+	* CHANGES (SUDO_1_6_9): checkpoint for 1.6.9b1
+
+2007-06-19 07:35  millert
+
+	* sudoers.cat, sudoers.man.in (SUDO_1_6_9): regen
+
+2007-06-19 07:10  millert
+
+	* env.c (SUDO_1_6_9), env.c: add XAUTHORIZATION
+
+2007-06-18 20:41  millert
+
+	* UPGRADE: expand upon env resetting and mention that it began in
+	  1.6.9 not 1.7.
+
+2007-06-18 20:40  millert
+
+	* UPGRADE (SUDO_1_6_9): env reseting is now in 1.6.9.
+
+2007-06-18 20:34  millert
+
+	* sudoers.cat, sudoers.man.in (SUDO_1_6_9): regen
+
+2007-06-18 20:33  millert
+
+	* sudoers.pod (SUDO_1_6_9), sudoers.pod: Update descriptions of
+	  env_keep and env_check to match current reality.
+
+2007-06-18 17:33  millert
+
+	* env.c (SUDO_1_6_9), env.c: Add LINGUAS to initial_checkenv_table.
+	  Add COLORS, HOSTNAME, LS_COLORS, MAIL, PS1, PS2, XAUTHORITY to
+	  intial_keepenv_table.
+
+2007-06-18 17:23  millert
+
+	* env.c, logging.c (SUDO_1_6_9), env.c, logging.c: Treat USERNAME
+	  environemnt variable like LOGNAME/USER
+
+2007-06-18 17:21  millert
+
+	* env.c (SUDO_1_6_9), env.c: Don't need to populate keepenv table
+	  with the contents of the checkenv table.
+
+2007-06-18 16:19  millert
+
+	* Makefile.in (SUDO_1_6_9): add emul/glob.h and emul/timespec.h to
+	  HDRS
+
+2007-06-18 15:54  millert
+
+	* sudo.c (SUDO_1_6_9): If execve() fails with ENOEXEC try running
+	  through /bin/sh like execvp() does.
+
+2007-06-18 11:51  millert
+
+	* defaults.c, sudoers.pod (SUDO_1_6_9): env_reset is now the
+	  default.
+
+2007-06-18 08:57  millert
+
+	* sudo.c (SUDO_1_6_9), sudo.c: Don't force sudo into the C locale.
+
+2007-06-18 08:56  millert
+
+	* env.c (SUDO_1_6_9), env.c: Make env_check apply when env_reset it
+	  true.  Environment variables are passed through unless they
+	  contain '/' or '%'.  There is no need to have a variable in both
+	  env_check and env_keep.
+
+2007-06-17 20:22  millert
+
+	* ldap.c (SUDO_1_6_9): Fix merge error.
+
+2007-06-17 19:38  millert
+
+	* sudo.c (SUDO_1_6_9): Add explicit cast from mode_t -> u_int in
+	  printf to silence warnings on Solaris
+
+2007-06-17 19:28  millert
+
+	* sudo.c (SUDO_1_6_9): Make sure stdin, stdout and stderr are open
+	  and dup them to /dev/null if not.
+
+2007-06-17 19:12  millert
+
+	* ldap.c (SUDO_1_6_9): Fix mismerge, re-introduce FLAG_NOPASS and
+	  FLAG_NOEXEC.
+
+2007-06-17 17:45  millert
+
+	* parse.c (SUDO_1_6_9): Missed free -> efree conversion
+
+2007-06-17 17:35  millert
+
+	* sudo.c, visudo.c (SUDO_1_6_9): Use __attribute__((__noreturn__))
+
+2007-06-17 14:58  millert
+
+	* sudo.c (SUDO_1_6_9): -i is also one of the mutually exclusive
+	  options to list it in the warning message.  Print sudoers path in
+	  -V mode for root.
+
+2007-06-17 09:15  millert
+
+	* lex.yy.c (SUDO_1_6_9): regen
+
+2007-06-17 09:13  millert
+
+	* pathnames.h.in (SUDO_1_6_9): add _PATH_LDAP_SECRET
+
+2007-06-17 09:02  millert
+
+	* ldap.c (SUDO_1_6_9): merge applicable changes from head
+
+2007-06-16 17:02  millert
+
+	* ldap.c (SUDO_1_6_9): Fix mismerge.
+
+2007-06-16 07:43  millert
+
+	* visudo.c (SUDO_1_6_9): Adapt changes from head.  Most notably,
+	  visudo can now deal with arguments in EDITOR/VISUAL if env_editor
+	  is enabled.
+
+2007-06-16 07:31  millert
+
+	* visudo.c: Remove an duplicate lock_file() call and add a comment.
+
+2007-06-15 21:16  millert
+
+	* UPGRADE: Add sudo 1.6.9 upgrade note.
+
+2007-06-15 21:15  millert
+
+	* UPGRADE (SUDO_1_6_9): Add note about TERM and PATH in env_keep.
+
+2007-06-15 10:03  millert
+
+	* sudo_edit.c (SUDO_1_6_9): Remove debugging, add missing grp.h
+	  include.
+
+2007-06-14 12:23  millert
+
+	* interfaces.c (SUDO_1_6_9), interfaces.c: Solaris will return
+	  EINVAL if the buffer used in SIOCGIFCONF is too small.  From
+	  Klaus Wagner.
+
+2007-06-14 12:07  millert
+
+	* Makefile.in, config.h.in, configure, configure.in, logging.c,
+	  memrchr.c, sudo.h (SUDO_1_6_9): Redo the long syslog line
+	  splitting based on a patch from Eygene Ryabinkin.  Include
+	  memrchr() for systems without it.
+
+2007-06-14 12:03  millert
+
+	* Makefile.in, config.h.in, configure, configure.in, memrchr.c,
+	  logging.c, sudo.h: Redo the long syslog line splitting based on a
+	  patch from Eygene Ryabinkin.	Include memrchr() for systems
+	  without it.
+
+2007-06-14 07:18  millert
+
+	* sudo_edit.c (SUDO_1_6_9): Sync with head.  Also close passwd file
+	  before trying to open the path specified by the user to avoid
+	  abuse of /dev/fd/N
+
+2007-06-14 07:09  millert
+
+	* configure.in (SUDO_1_6_9), configure.in: Since we need to be able
+	  to convert timespec to timeval for utimes() the last 3 digits in
+	  the tv_nsec are not significant.  This makes the sudoedit file
+	  date comparison work again.
+
+2007-06-13 13:41  millert
+
+	* configure, configure.in, aclocal.m4 (SUDO_1_6_9), aclocal.m4,
+	  configure, configure.in: Add SUDO_ADD_AUTH macro to deal with
+	  adding things to AUTH_OBJS.  This deals with exclusive
+	  authentication methods in a simple way.
+
+2007-06-12 13:08  millert
+
+	* LICENSE (SUDO_1_6_9), LICENSE: mkstemp.c is BSD code too.
+
+2007-06-12 13:06  millert
+
+	* Makefile.in, mkstemp.c (SUDO_1_6_9): Provide mkstemp() for those
+	  without it.
+
+2007-06-12 13:03  millert
+
+	* configure.in, configure, config.h.in (SUDO_1_6_9): Add back
+	  checks for err.h and lsearch() and regen.
+
+2007-06-12 12:38  millert
+
+	* LICENSE, Makefile.in, glob.c, parse.c, emul/glob.h (SUDO_1_6_9):
+	  Use glob(3) instead of fnmatch(3) for matching pathnames and stat
+	  each result that matches the basename of the user's command.
+	  This makes "cd /usr/bin ; sudo ./blah" work when sudoers allows
+	  /usr/bin/blah.
+
+2007-06-12 12:19  millert
+
+	* strcasecmp.c (SUDO_1_6_9): replace BSD licensed one with version
+	  derived from pdksh
+
+2007-06-12 12:16  millert
+
+	* check.c (SUDO_1_6_9): Cast mode_t to unsigned int when using
+	  printf %o to display it.
+
+2007-06-12 12:15  millert
+
+	* sudo.h (SUDO_1_6_9): Prototype efree()
+
+2007-06-12 12:11  millert
+
+	* sudo.cat, sudo.man.in, sudoers.cat, sudoers.man.in, visudo.cat,
+	  visudo.man.in (SUDO_1_6_9): regen
+
+2007-06-12 12:09  millert
+
+	* sudo.pod (SUDO_1_6_9): Remove SYNOPSYS line that is not relevant
+	  to sudo 1.6.9
+
+2007-06-12 12:06  millert
+
+	* sudo.pod, sudoers.pod, visudo.pod (SUDO_1_6_9): Sync docs w/ head
+
+2007-06-12 09:21  millert
+
+	* sudo.pod, sudoers.pod, visudo.pod: No commercial support for now.
+
+2007-06-11 22:46  millert
+
+	* CHANGES (SUDO_1_6_9): sync
+
+2007-06-11 21:43  millert
+
+	* alloc.c, check.c, defaults.c, find_path.c, interfaces.c, ldap.c,
+	  logging.c, parse.c, parse.lex, parse.yacc, sudo.c, testsudoers.c,
+	  visudo.c (SUDO_1_6_9): Add efree() for consistency with emalloc()
+	  et al.  Allows us to rely on C89 behavior (free(NULL) is valid)
+	  even on K&R.
+
+2007-06-11 21:28  millert
+
+	* check.c, compat.h, defaults.c, fileops.c, find_path.c,
+	  getprogname.c, getspwuid.c, gettime.c, goodpath.c, interfaces.c,
+	  interfaces.h, ldap.c, logging.c, sigaction.c, snprintf.c,
+	  strerror.c, strlcat.c, strlcpy.c, sudo.c, sudo.h, sudo_edit.c,
+	  testsudoers.c, version.h, visudo.c, zero_bytes.c, auth/afs.c,
+	  auth/aix_auth.c, auth/bsdauth.c, auth/dce.c, auth/fwtk.c,
+	  auth/kerb4.c, auth/kerb5.c, auth/passwd.c, auth/rfc1938.c,
+	  auth/secureware.c, auth/securid.c, auth/sia.c, auth/sudo_auth.c,
+	  auth/sudo_auth.h, emul/utime.h (SUDO_1_6_9): Update copyright
+	  year of files synced from head
+
+2007-06-11 21:26  millert
+
+	* tgetpass.c (SUDO_1_6_9): Use TCSADRAIN instead of TCSAFLUSH since
+	  some OSes have issues with TCSAFLUSH.
+
+2007-06-11 21:21  millert
+
+	* fnmatch.c (SUDO_1_6_9): add __unused to rcsid
+
+2007-06-11 21:19  millert
+
+	* config.h.in (SUDO_1_6_9): Add missing HAVE_GETGROUPS
+
+2007-06-11 21:14  millert
+
+	* README (SUDO_1_6_9): Typo
+
+2007-06-11 21:06  millert
+
+	* config.h.in, configure, configure.in, sudo.c (SUDO_1_6_9): Remove
+	  --with-execv option; there is really no point in having it.
+
+2007-06-11 21:01  millert
+
+	* Makefile.in, README, RUNSON (SUDO_1_6_9): Remove RUNSON, the
+	  obsolete info confuses people.  Sudo should build just fine on a
+	  POSIX-like system.
+
+2007-06-11 20:59  millert
+
+	* logging.h, sudo.h (SUDO_1_6_9): Use __printflike with gcc to warn
+	  about printf-like format mismatches
+
+2007-06-11 20:56  millert
+
+	* alloc.c, check.c, closefrom.c, defaults.c, env.c, err.c,
+	  fileops.c, find_path.c, fnmatch.c, getcwd.c, getprogname.c,
+	  getspwuid.c, gettime.c, goodpath.c, interfaces.c, ldap.c,
+	  lex.yy.c, logging.c, lsearch.c, parse.c, parse.lex, parse.yacc,
+	  set_perms.c, sigaction.c, snprintf.c, strcasecmp.c, strerror.c,
+	  strlcat.c, strlcpy.c, sudo.c, sudo_edit.c, sudo_noexec.c,
+	  testsudoers.c, tgetpass.c, utimes.c, visudo.c, zero_bytes.c,
+	  auth/afs.c, auth/aix_auth.c, auth/bsdauth.c, auth/dce.c,
+	  auth/fwtk.c, auth/kerb4.c, auth/kerb5.c, auth/pam.c,
+	  auth/passwd.c, auth/rfc1938.c, auth/secureware.c, auth/securid.c,
+	  auth/securid5.c, auth/sia.c, auth/sudo_auth.c (SUDO_1_6_9): Add
+	  __unused to rcsids
+
+2007-06-11 20:44  millert
+
+	* compat.h (SUDO_1_6_9): Add __attribute__, __unused, and
+	  __printflike.
+
+2007-06-11 19:18  millert
+
+	* env.c, sudo.c (SUDO_1_6_9): Instead of zeroing out the
+	  environment, just prune out entries based on the env_delete and
+	  env_check lists.  Base building up the new environment on the
+	  current environment and the variables we removed initially.
+
+	  Move setting of user_path, user_shell, user_prompt and prev_user
+	  into init_vars() since user_shell at least is needed there.
+
+2007-06-11 19:12  millert
+
+	* env.c, sudo.c (SUDO_1_6_9): Sync env.c and associated sudo.c
+	  changes with head.
+
+2007-06-11 18:27  millert
+
+	* sudo.c: cleanenv() is no more.
+
+2007-06-11 17:23  millert
+
+	* config.h.in, sudo.c (SUDO_1_6_9): Set locale to "C" if locales
+	  are supported, just to be safe.
+
+2007-06-11 17:12  millert
+
+	* logging.c (SUDO_1_6_9): Make varargs usage consistent with the
+	  rest of the code.
+
+2007-06-11 17:09  millert
+
+	* logging.c (SUDO_1_6_9): Restore signal mask before calling
+	  reapchild().	Fixes a possible race condition that could prevent
+	  sudo from properly waiting for the child.
+
+2007-06-11 17:07  millert
+
+	* logging.c (SUDO_1_6_9): Add "Auto-Submitted: auto-generated" line
+	  to sudo mail for rfc 3834.
+
+2007-06-11 07:27  millert
+
+	* emul/timespec.h (SUDO_1_6_9): Move declatation of struct timespec
+	  to its own include files for systems without it since it needs
+	  time_t defined.
+
+2007-06-10 18:37  millert
+
+	* ChangeLog: Display branch info in Changelog
+
 2007-06-10 18:27  millert
 
 	* check.c, compat.h, fileops.c, gettime.c, sudo_edit.c, utimes.c,
