@@ -545,8 +545,8 @@ to disable this as it could be used to gather information on the
 location of executables that the normal user does not have access
 to.  The disadvantage is that if the executable is simply not in
 the user's C<PATH>, B<sudo> will tell the user that they are not
-allowed to run it, which can be confusing.  This flag is I<off> by
-default.
+allowed to run it, which can be confusing.  This flag is I<@path_info@>
+by default.
 
 =item preserve_groups
 

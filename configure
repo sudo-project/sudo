@@ -458,7 +458,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS LIBTOOL CFLAGS PROGS CPPFLAGS LDFLAGS SUDO_LDFLAGS SUDO_OBJS SUDO_LIBS NET_LIBS AFS_LIBS OSDEFS AUTH_OBJS MANTYPE MAN_POSTINSTALL SUDOERS_MODE SUDOERS_UID SUDOERS_GID DEV mansectsu mansectform mansrcdir NOEXECDIR noexec_file INSTALL_NOEXEC timedir timeout password_timeout sudo_umask passprompt long_otp_prompt lecture logfac goodpri badpri loglen ignore_dot mail_no_user mail_no_host mail_no_perms mailto mailsub badpass_message fqdn runas_default env_editor passwd_tries tty_tickets insults root_sudo EGREPPROG CC ac_ct_CC EXEEXT OBJEXT CPP build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os SED EGREP FGREP GREP LD NM LN_S AR ac_ct_AR STRIP ac_ct_STRIP RANLIB ac_ct_RANLIB lt_ECHO UNAMEPROG TRPROG NROFFPROG YACC LIBOBJS ALLOCA KRB5CONFIG LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS LIBTOOL CFLAGS PROGS CPPFLAGS LDFLAGS SUDO_LDFLAGS SUDO_OBJS SUDO_LIBS NET_LIBS AFS_LIBS OSDEFS AUTH_OBJS MANTYPE MAN_POSTINSTALL SUDOERS_MODE SUDOERS_UID SUDOERS_GID DEV mansectsu mansectform mansrcdir NOEXECDIR noexec_file INSTALL_NOEXEC DONT_LEAK_PATH_INFO timedir timeout password_timeout sudo_umask passprompt long_otp_prompt lecture logfac goodpri badpri loglen ignore_dot mail_no_user mail_no_host mail_no_perms mailto mailsub badpass_message fqdn runas_default env_editor passwd_tries tty_tickets insults root_sudo path_info EGREPPROG CC ac_ct_CC EXEEXT OBJEXT CPP build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os SED EGREP FGREP GREP LD NM LN_S AR ac_ct_AR STRIP ac_ct_STRIP RANLIB ac_ct_RANLIB lt_ECHO UNAMEPROG TRPROG NROFFPROG YACC LIBOBJS ALLOCA KRB5CONFIG LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1590,6 +1590,25 @@ echo "$as_me: Configuring Sudo version 1.6.9" >&6;}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 timeout=5
 password_timeout=5
 sudo_umask=0022
@@ -1614,6 +1633,7 @@ passwd_tries=3
 tty_tickets=off
 insults=off
 root_sudo=on
+path_info=on
 INSTALL_NOEXEC=
 PROGS="sudo visudo"
 : ${MANTYPE='man'}
@@ -3521,6 +3541,7 @@ echo "${ECHO_T}yes" >&6
 #define DONT_LEAK_PATH_INFO 1
 _ACEOF
 
+		path_info=off
 		;;
     *)		echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
@@ -7066,7 +7087,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 7069 "configure"
+#line 7090 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7164,7 +7185,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 7167 "configure"
+#line 7188 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7313,7 +7334,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  $ECHO '#line 7316 "configure"' > conftest.$ac_ext
+  $ECHO '#line 7337 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7964,11 +7985,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7967: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7988: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7971: \$? = $ac_status" >&5
+   echo "$as_me:7992: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -8239,11 +8260,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8242: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8263: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8246: \$? = $ac_status" >&5
+   echo "$as_me:8267: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -8336,11 +8357,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8339: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8360: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8343: \$? = $ac_status" >&5
+   echo "$as_me:8364: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8390,11 +8411,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8393: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8414: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8397: \$? = $ac_status" >&5
+   echo "$as_me:8418: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -23268,6 +23289,7 @@ s,@mansrcdir@,$mansrcdir,;t t
 s,@NOEXECDIR@,$NOEXECDIR,;t t
 s,@noexec_file@,$noexec_file,;t t
 s,@INSTALL_NOEXEC@,$INSTALL_NOEXEC,;t t
+s,@DONT_LEAK_PATH_INFO@,$DONT_LEAK_PATH_INFO,;t t
 s,@timedir@,$timedir,;t t
 s,@timeout@,$timeout,;t t
 s,@password_timeout@,$password_timeout,;t t
@@ -23293,6 +23315,7 @@ s,@passwd_tries@,$passwd_tries,;t t
 s,@tty_tickets@,$tty_tickets,;t t
 s,@insults@,$insults,;t t
 s,@root_sudo@,$root_sudo,;t t
+s,@path_info@,$path_info,;t t
 s,@EGREPPROG@,$EGREPPROG,;t t
 s,@CC@,$CC,;t t
 s,@ac_ct_CC@,$ac_ct_CC,;t t
