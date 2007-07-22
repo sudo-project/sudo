@@ -30,16 +30,7 @@ What's new in Sudo 1.7?
 
  * Password and group data is now cached for fast lookup.
 
- * Sudo will use the supplemental group vector if it is present in addition
-   to doing string comparisons of the group members.  This is useful for
-   systems with nsswitch.conf where group entries can be in either /etc/group
-   or some other database (NIS, NIS+, LDAP, etc) and getgrnam() only returns
-   data from one source.
-
  * The file descriptor at which sudo starts closing all open files is now
    configurable via sudoers and, optionally, the command line.
-
- * Visudo can now handle VISUAL and EDITOR environment variables that contain
-   command line arguments.
 
  * Visudo will now warn about aliases that are defined but not used.
