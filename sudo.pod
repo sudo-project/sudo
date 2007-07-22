@@ -27,15 +27,15 @@ sudo, sudoedit - execute a command as another user
 
 =head1 SYNOPSIS
 
-B<sudo> B<-K> | B<-k> | B<-h> | B<-L> | B<-l> | B<-V> | B<-v>
+B<sudo> B<-h> | B<-K> | B<-k> | B<-L> | B<-l> | B<-V> | B<-v>
 
 B<sudo> [B<-bEHPS>] S<[B<-a> I<auth_type>]>
 S<[B<-c> I<class>|I<->]> S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
-S<[B<VAR>=I<value>]> S<{B<-e> file [...] | B<-i> | B<-s> | I<command>}>
+S<[B<VAR>=I<value>]> S<{B<-i> | B<-s> | I<command>}>
 
-B<sudoedit> S<[B<-a> I<auth_type>]> S<[B<-c> I<class>|I<->]>
-S<[B<-p> I<prompt>]> [B<-S>] S<[B<-u> I<username>|I<#uid>]>
-file [...]
+B<sudoedit> [B<-S>] S<[B<-a> I<auth_type>]> S<[B<-c> I<class>|I<->]>
+S<[B<-p> I<prompt>]> S<[B<-u> I<username>|I<#uid>]>
+file ...
 
 =head1 DESCRIPTION
 
@@ -227,24 +227,24 @@ escapes are supported:
 
 =over 8
 
-=item C<%u>
+=item C<%H>
 
-expanded to the invoking user's login name
+expanded to the local hostname including the domain name
+(on if the machine's hostname is fully qualified or the I<fqdn>
+I<sudoers> option is set)
+
+=item C<%h>
+
+expanded to the local hostname without the domain name
 
 =item C<%U>
 
 expanded to the login name of the user the command will
 be run as (defaults to root)
 
-=item C<%h>
+=item C<%u>
 
-expanded to the local hostname without the domain name
-
-=item C<%H>
-
-expanded to the local hostname including the domain name
-(on if the machine's hostname is fully qualified or the I<fqdn>
-I<sudoers> option is set)
+expanded to the invoking user's login name
 
 =item C<%%>
 
@@ -458,8 +458,8 @@ to make the C<cd> and file redirection work.
 
 =head1 SEE ALSO
 
-L<grep(1)>, L<su(1)>, L<stat(2)>, L<login_cap(3)>, L<sudoers(@mansectform@)>,
-L<passwd(@mansectform@)>, L<visudo(@mansectsu@)>
+L<grep(1)>, L<su(1)>, L<stat(2)>, L<login_cap(3)>, L<passwd(@mansectform@)>,
+L<sudoers(@mansectform@)>, L<visudo(@mansectsu@)>
 
 =head1 AUTHORS
 

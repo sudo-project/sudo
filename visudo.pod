@@ -27,7 +27,7 @@ visudo - edit the sudoers file
 
 =head1 SYNOPSIS
 
-B<visudo> [ B<-c> ] [ B<-f> I<sudoers> ] [ B<-q> ] [ B<-s> ] [ B<-V> ]
+B<visudo> [B<-c>] [B<-q>] [B<-s>] [B<-V>] [B<-f> I<sudoers>]
 
 =head1 DESCRIPTION
 

@@ -842,7 +842,7 @@ Exit(sig)
 static void
 usage()
 {
-    (void) fprintf(stderr, "usage: %s [-c] [-f sudoers] [-q] [-s] [-V]\n",
+    (void) fprintf(stderr, "usage: %s [-c] [-q] [-s] [-V] [-f sudoers]\n",
 	getprogname());
     exit(1);
 }
