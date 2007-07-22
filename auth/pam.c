@@ -94,7 +94,14 @@ pam_init(pw, promptp, auth)
 	log_error(USE_ERRNO|NO_EXIT|NO_MAIL, "unable to initialize PAM");
 	return(AUTH_FATAL);
     }
-    if (strcmp(user_tty, "unknown"))
+    /*
+     * Some versions of pam_lastlog have a bug that
+     * will cause a crash if PAM_TTY is not set so if
+     * there is no tty, set PAM_TTY to the empty string.
+     */
+    if (strcmp(user_tty, "unknown") == 0)
+	(void) pam_set_item(pamh, PAM_TTY, "");
+    else
 	(void) pam_set_item(pamh, PAM_TTY, user_tty);
 
     return(AUTH_SUCCESS);
@@ -252,7 +259,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		if (pass == NULL) {
 		    /* We got ^C instead of a password; abort quickly. */
 		    nil_pw = 1;
-		    return(PAM_CONV_ERR);
+		    goto err;
 		}
 		pr->resp = estrdup(pass);
 		if (*pr->resp == '\0')
@@ -271,20 +278,23 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		}
 		break;
 	    default:
-		/* Zero and free allocated memory and return an error. */
-		for (pr = *response, n = num_msg; n--; pr++) {
-		    if (pr->resp != NULL) {
-			zero_bytes(pr->resp, strlen(pr->resp));
-			free(pr->resp);
-			pr->resp = NULL;
-		    }
-		}
-		zero_bytes(*response, num_msg * sizeof(struct pam_response));
-		free(*response);
-		*response = NULL;
-		return(PAM_CONV_ERR);
+		goto err;
 	}
     }
 
     return(PAM_SUCCESS);
+
+err:
+    /* Zero and free allocated memory and return an error. */
+    for (pr = *response, n = num_msg; n--; pr++) {
+	if (pr->resp != NULL) {
+	    zero_bytes(pr->resp, strlen(pr->resp));
+	    free(pr->resp);
+	    pr->resp = NULL;
+	}
+    }
+    zero_bytes(*response, num_msg * sizeof(struct pam_response));
+    free(*response);
+    *response = NULL;
+    return(PAM_CONV_ERR);
 }
