@@ -94,7 +94,14 @@ pam_init(pw, promptp, auth)
 	log_error(USE_ERRNO|NO_EXIT|NO_MAIL, "unable to initialize PAM");
 	return(AUTH_FATAL);
     }
-    if (strcmp(user_tty, "unknown"))
+    /*
+     * Some versions of pam_lastlog have a bug that
+     * will cause a crash if PAM_TTY is not set so if
+     * there is no tty, set PAM_TTY to the empty string.
+     */
+    if (strcmp(user_tty, "unknown") == 0)
+	(void) pam_set_item(pamh, PAM_TTY, "");
+    else
 	(void) pam_set_item(pamh, PAM_TTY, user_tty);
 
     return(AUTH_SUCCESS);
