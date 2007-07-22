@@ -1309,11 +1309,11 @@ usage(exit_val)
     char **p, **uvec[5];
     int i, linelen, linemax, ulen;
     static char *uvec1[] = {
-	" -K | -L | -V | -h | -k | -v",
+	" -h | -K | -k | -L | -V | -v",
 	NULL
     };
     static char *uvec2[] = {
-	" [-U username] [-u username|#uid] -l [command]",
+	" -l [-U username] [-u username|#uid] [command]",
 	NULL
     };
     static char *uvec3[] = {
@@ -1328,10 +1328,11 @@ usage(exit_val)
 	" [-p prompt]",
 	" [-u username|#uid]",
 	" [VAR=value]",
-	" { -e file [...] | -i | -s | <command> }",
+	" {-i | -s | <command>}",
 	NULL
     };
     static char *uvec4[] = {
+	" -e",
 	" [-S]",
 #ifdef HAVE_BSD_AUTH_H
 	" [-a auth_type]",
@@ -1342,7 +1343,7 @@ usage(exit_val)
 #endif
 	" [-p prompt]",
 	" [-u username|#uid]",
-	" file [...]",
+	" file ...",
 	NULL
     };
 
@@ -1350,7 +1351,7 @@ usage(exit_val)
      * Use usage vectors appropriate to the progname.
      */
     if (strcmp(getprogname(), "sudoedit") == 0) {
-	uvec[0] = uvec4;
+	uvec[0] = uvec4 + 1;
 	uvec[1] = NULL;
     } else {
 	uvec[0] = uvec1;
