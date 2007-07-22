@@ -370,6 +370,9 @@ sudoers.cat: sudoers.man
 
 @DEV@HISTORY: history.pod
 @DEV@	pod2text -l -i0 $> > $@
+@DEV@
+@DEV@LICENSE: license.pod
+@DEV@	pod2text -l -i0 $> | sed '1,2d' > $@
 
 ChangeLog:
 	cvs2cl --follow-only trunk
