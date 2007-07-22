@@ -259,7 +259,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		if (pass == NULL) {
 		    /* We got ^C instead of a password; abort quickly. */
 		    nil_pw = 1;
-		    return(PAM_CONV_ERR);
+		    goto err;
 		}
 		pr->resp = estrdup(pass);
 		if (*pr->resp == '\0')
@@ -278,20 +278,23 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		}
 		break;
 	    default:
-		/* Zero and free allocated memory and return an error. */
-		for (pr = *response, n = num_msg; n--; pr++) {
-		    if (pr->resp != NULL) {
-			zero_bytes(pr->resp, strlen(pr->resp));
-			free(pr->resp);
-			pr->resp = NULL;
-		    }
-		}
-		zero_bytes(*response, num_msg * sizeof(struct pam_response));
-		free(*response);
-		*response = NULL;
-		return(PAM_CONV_ERR);
+		goto err;
 	}
     }
 
     return(PAM_SUCCESS);
+
+err:
+    /* Zero and free allocated memory and return an error. */
+    for (pr = *response, n = num_msg; n--; pr++) {
+	if (pr->resp != NULL) {
+	    zero_bytes(pr->resp, strlen(pr->resp));
+	    free(pr->resp);
+	    pr->resp = NULL;
+	}
+    }
+    zero_bytes(*response, num_msg * sizeof(struct pam_response));
+    free(*response);
+    *response = NULL;
+    return(PAM_CONV_ERR);
 }
