@@ -441,7 +441,8 @@ log_error(flags, fmt, va_alist)
 	do_logfile(logline);
 
     efree(message);
-    efree(logline);
+    if (logline != message)
+	efree(logline);
 
     if (!ISSET(flags, NO_EXIT))
 	exit(1);
