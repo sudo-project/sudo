@@ -1271,7 +1271,7 @@ B<sudoedit>.
 
 =head1 SEE ALSO
 
-L<rsh(1)>, L<su(1)>, L<fnmatch(3)>, L<sudo(@mansectsu@)>, L<visudo(@mansectsu@)>
+L<rsh(1)>, L<su(1)>, L<fnmatch(3)>, L<sudo(8)>, L<visudo(8)>
 
 =head1 CAVEATS
 

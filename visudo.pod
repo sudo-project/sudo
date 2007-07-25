@@ -32,7 +32,7 @@ B<visudo> [B<-c>] [B<-q>] [B<-s>] [B<-V>] [B<-f> I<sudoers>]
 =head1 DESCRIPTION
 
 B<visudo> edits the I<sudoers> file in a safe fashion, analogous to
-L<vipw(@mansectsu@)>.  B<visudo> locks the I<sudoers> file against multiple
+L<vipw(8)>.  B<visudo> locks the I<sudoers> file against multiple
 simultaneous edits, provides basic sanity checks, and checks
 for parse errors.  If the I<sudoers> file is currently being
 edited you will receive a message to try again later.
@@ -160,7 +160,7 @@ not a warning.
 
 =head1 SEE ALSO
 
-L<vi(1)>, L<sudoers(@mansectform@)>, L<sudo(@mansectsu@)>, L<vipw(@mansectsu@)>
+L<vi(1)>, L<sudoers(5)>, L<sudo(8)>, L<vipw(8)>
 
 =head1 AUTHOR
 
