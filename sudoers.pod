@@ -1205,7 +1205,7 @@ which lets a user bypass B<sudo>'s access control and logging.
 Common programs that permit shell escapes include shells (obviously),
 editors, paginators, mail and terminal programs.
 
-There are three basic approaches to this problem:
+There are two basic approaches to this problem:
 
 =over 10
 
