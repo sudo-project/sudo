@@ -434,13 +434,56 @@ B<Flags>:
 
 =over 12
 
-=item long_otp_prompt
+=item always_set_home
 
-When validating with a One Time Password scheme (B<S/Key> or B<OPIE>),
-a two-line prompt is used to make it easier to cut and paste the
-challenge to a local window.  It's not as pretty as the default but
-some people find it more convenient.  This flag is I<@long_otp_prompt@>
-by default.
+If set, B<sudo> will set the C<HOME> environment variable to the home
+directory of the target user (which is root unless the B<-u> option is used).
+This effectively means that the B<-H> flag is always implied.
+This flag is I<off> by default.
+
+=item authenticate
+
+If set, users must authenticate themselves via a password (or other
+means of authentication) before they may run commands.  This default
+may be overridden via the C<PASSWD> and C<NOPASSWD> tags.
+This flag is I<on> by default.
+
+=item env_editor
+
+If set, B<visudo> will use the value of the EDITOR or VISUAL
+environment variables before falling back on the default editor list.
+Note that this may create a security hole as it allows the user to
+run any arbitrary command as root without logging.  A safer alternative
+is to place a colon-separated list of editors in the C<editor>
+variable.  B<visudo> will then only use the EDITOR or VISUAL if
+they match a value specified in C<editor>.  This flag is I<@env_editor@> by
+default.
+
+=item env_reset
+
+If set, B<sudo> will reset the environment to only contain the
+LOGNAME, SHELL, USER, USERNAME and the C<SUDO_*> variables.  Any
+variables in the caller's environment that match the C<env_keep>
+and C<env_check> lists are then added.  The default contents of the
+C<env_keep> and C<env_check> lists are displayed when B<sudo> is
+run by root with the I<-V> option.  If B<sudo> was compiled with
+the C<SECURE_PATH> option, its value will be used for the C<PATH>
+environment variable.  This flag is I<on> by default.
+
+=item fqdn
+
+Set this flag if you want to put fully qualified hostnames in the
+I<sudoers> file.  I.e., instead of myhost you would use myhost.mydomain.edu.
+You may still use the short form if you wish (and even mix the two).
+Beware that turning on I<fqdn> requires B<sudo> to make DNS lookups
+which may make B<sudo> unusable if DNS stops working (for example
+if the machine is not plugged into the network).  Also note that
+you must use the host's official name as DNS knows it.  That is,
+you may not use a host alias (C<CNAME> entry) due to performance
+issues and the fact that there is no way to get all aliases from
+DNS.  If your machine's hostname (as returned by the C<hostname>
+command) is already fully qualified you shouldn't need to set
+I<fqdn>.  This flag is I<@fqdn@> by default.
 
 =item ignore_dot
 
@@ -451,6 +494,40 @@ to set I<ignore_dot> in I<sudoers>, its value is not used.  This option
 should be considered read-only (it will be fixed in a future version
 of B<sudo>).
 
+=item ignore_local_sudoers
+
+If set via LDAP, parsing of @sysconfdir@/sudoers will be skipped.
+This is intended for Enterprises that wish to prevent the usage of local
+sudoers files so that only LDAP is used.  This thwarts the efforts of
+rogue operators who would attempt to add roles to @sysconfdir@/sudoers.
+When this option is present, @sysconfdir@/sudoers does not even need to exist. 
+Since this option tells B<sudo> how to behave when no specific LDAP entries
+have been matched, this sudoOption is only meaningful for the cn=defaults
+section.  This flag is I<off> by default.
+
+=item insults
+
+If set, B<sudo> will insult users when they enter an incorrect
+password.  This flag is I<@insults@> by default.
+
+=item log_host
+
+If set, the hostname will be logged in the (non-syslog) B<sudo> log file.
+This flag is I<off> by default.
+
+=item log_year
+
+If set, the four-digit year will be logged in the (non-syslog) B<sudo> log file.
+This flag is I<off> by default.
+
+=item long_otp_prompt
+
+When validating with a One Time Password (OPT) scheme such as
+B<S/Key> or B<OPIE>, a two-line prompt is used to make it easier
+to cut and paste the challenge to a local window.  It's not as
+pretty as the default but some people find it more convenient.  This
+flag is I<@long_otp_prompt@> by default.
+
 =item mail_always
 
 Send mail to the I<mailto> user every time a users runs B<sudo>.
@@ -460,12 +537,6 @@ This flag is I<off> by default.
 
 Send mail to the I<mailto> user if the user running B<sudo> does not
 enter the correct password.  This flag is I<off> by default.
-
-=item mail_no_user
-
-If set, mail will be sent to the I<mailto> user if the invoking
-user is not in the I<sudoers> file.  This flag is I<@mail_no_user@>
-by default.
 
 =item mail_no_host
 
@@ -480,62 +551,18 @@ user is allowed to use B<sudo> but the command they are trying is not
 listed in their I<sudoers> file entry or is explicitly denied.
 This flag is I<@mail_no_perms@> by default.
 
-=item tty_tickets
+=item mail_no_user
 
-If set, users must authenticate on a per-tty basis.  Normally,
-B<sudo> uses a directory in the ticket dir with the same name as
-the user running it.  With this flag enabled, B<sudo> will use a
-file named for the tty the user is logged in on in that directory.
-This flag is I<@tty_tickets@> by default.
+If set, mail will be sent to the I<mailto> user if the invoking
+user is not in the I<sudoers> file.  This flag is I<@mail_no_user@>
+by default.
 
-=item authenticate
+=item noexec
 
-If set, users must authenticate themselves via a password (or other
-means of authentication) before they may run commands.  This default
-may be overridden via the C<PASSWD> and C<NOPASSWD> tags.
-This flag is I<on> by default.
-
-=item root_sudo
-
-If set, root is allowed to run B<sudo> too.  Disabling this prevents users
-from "chaining" B<sudo> commands to get a root shell by doing something
-like C<"sudo sudo /bin/sh">.  Note, however, that turning off I<root_sudo>
-will also prevent root and from running B<sudoedit>.
-Disabling I<root_sudo> provides no real additional security; it
-exists purely for historical reasons.
-This flag is I<@root_sudo@> by default.
-
-=item log_host
-
-If set, the hostname will be logged in the (non-syslog) B<sudo> log file.
-This flag is I<off> by default.
-
-=item log_year
-
-If set, the four-digit year will be logged in the (non-syslog) B<sudo> log file.
-This flag is I<off> by default.
-
-=item shell_noargs
-
-If set and B<sudo> is invoked with no arguments it acts as if the
-B<-s> flag had been given.  That is, it runs a shell as root (the
-shell is determined by the C<SHELL> environment variable if it is
-set, falling back on the shell listed in the invoking user's
-/etc/passwd entry if not).  This flag is I<off> by default.
-
-=item set_home
-
-If set and B<sudo> is invoked with the B<-s> flag the C<HOME>
-environment variable will be set to the home directory of the target
-user (which is root unless the B<-u> option is used).  This effectively
-makes the B<-s> flag imply B<-H>.  This flag is I<off> by default.
-
-=item always_set_home
-
-If set, B<sudo> will set the C<HOME> environment variable to the home
-directory of the target user (which is root unless the B<-u> option is used).
-This effectively means that the B<-H> flag is always implied.
-This flag is I<off> by default.
+If set, all commands run via B<sudo> will behave as if the C<NOEXEC>
+tag has been set, unless overridden by a C<EXEC> tag.  See the
+description of I<NOEXEC and EXEC> below as well as the L<PREVENTING SHELL
+ESCAPES> section at the end of this manual.  This flag is I<off> by default.
 
 =item path_info
 
@@ -556,26 +583,6 @@ user's existing group vector is left unaltered.  The real and
 effective group IDs, however, are still set to match the target
 user.  This flag is I<off> by default.
 
-=item fqdn
-
-Set this flag if you want to put fully qualified hostnames in the
-I<sudoers> file.  I.e., instead of myhost you would use myhost.mydomain.edu.
-You may still use the short form if you wish (and even mix the two).
-Beware that turning on I<fqdn> requires B<sudo> to make DNS lookups
-which may make B<sudo> unusable if DNS stops working (for example
-if the machine is not plugged into the network).  Also note that
-you must use the host's official name as DNS knows it.  That is,
-you may not use a host alias (C<CNAME> entry) due to performance
-issues and the fact that there is no way to get all aliases from
-DNS.  If your machine's hostname (as returned by the C<hostname>
-command) is already fully qualified you shouldn't need to set
-I<fqdn>.  This flag is I<@fqdn@> by default.
-
-=item insults
-
-If set, B<sudo> will insult users when they enter an incorrect
-password.  This flag is I<@insults@> by default.
-
 =item requiretty
 
 If set, B<sudo> will only run when the user is logged in to a real
@@ -585,16 +592,15 @@ off echo when there is no tty present, some sites may wish to set
 this flag to prevent a user from entering a visible password.  This
 flag is I<off> by default.
 
-=item env_editor
+=item root_sudo
 
-If set, B<visudo> will use the value of the EDITOR or VISUAL
-environment variables before falling back on the default editor list.
-Note that this may create a security hole as it allows the user to
-run any arbitrary command as root without logging.  A safer alternative
-is to place a colon-separated list of editors in the C<editor>
-variable.  B<visudo> will then only use the EDITOR or VISUAL if
-they match a value specified in C<editor>.  This flag is C<@env_editor@> by
-default.
+If set, root is allowed to run B<sudo> too.  Disabling this prevents users
+from "chaining" B<sudo> commands to get a root shell by doing something
+like C<"sudo sudo /bin/sh">.  Note, however, that turning off I<root_sudo>
+will also prevent root and from running B<sudoedit>.
+Disabling I<root_sudo> provides no real additional security; it
+exists purely for historical reasons.
+This flag is I<@root_sudo@> by default.
 
 =item rootpw
 
@@ -607,13 +613,12 @@ If set, B<sudo> will prompt for the password of the user defined by the
 I<runas_default> option (defaults to C<@runas_default@>) instead of the
 password of the invoking user.  This flag is I<off> by default.
 
-=item targetpw
+=item set_home
 
-If set, B<sudo> will prompt for the password of the user specified by
-the B<-u> flag (defaults to C<root>) instead of the password of the
-invoking user.  Note that this precludes the use of a uid not listed
-in the passwd database as an argument to the B<-u> flag.
-This flag is I<off> by default.
+If set and B<sudo> is invoked with the B<-s> flag the C<HOME>
+environment variable will be set to the home directory of the target
+user (which is root unless the B<-u> option is used).  This effectively
+makes the B<-s> flag imply B<-H>.  This flag is I<off> by default.
 
 =item set_logname
 
@@ -625,7 +630,24 @@ determine the real identity of the user, it may be desirable to
 change this behavior.  This can be done by negating the set_logname
 option.  Note that if the I<env_reset> option has not been disabled,
 entries in the I<env_keep> list will override the value of
-I<set_logname>.
+I<set_logname>.  This flag is I<off> by default.
+
+=item setenv
+
+Allow the user to disable the I<env_reset> option from the command
+line.  Additionally, environment variables set via the command line
+are not subject to the restrictions imposed by I<env_check>,
+I<env_delete>, or I<env_keep>.  As such, only trusted users should
+be allowed to set variables in this manner.  This flag is I<off>
+by default.
+
+=item shell_noargs
+
+If set and B<sudo> is invoked with no arguments it acts as if the
+B<-s> flag had been given.  That is, it runs a shell as root (the
+shell is determined by the C<SHELL> environment variable if it is
+set, falling back on the shell listed in the invoking user's
+/etc/passwd entry if not).  This flag is I<off> by default.
 
 =item stay_setuid
 
@@ -636,42 +658,29 @@ user's UID.  In other words, this makes B<sudo> act as a setuid
 wrapper.  This can be useful on systems that disable some potentially
 dangerous functionality when a program is run setuid.  This option
 is only effective on systems with either the setreuid() or setresuid()
-function.
+function.  This flag is I<off> by default.
 
-=item env_reset
+=item targetpw
 
-If set, B<sudo> will reset the environment to only contain the
-LOGNAME, SHELL, USER, USERNAME and the C<SUDO_*> variables.  Any
-variables in the caller's environment that match the C<env_keep>
-and C<env_check> lists are then added.  The default contents of the
-C<env_keep> and C<env_check> lists are displayed when B<sudo> is
-run by root with the I<-V> option.  If B<sudo> was compiled with
-the C<SECURE_PATH> option, its value will be used for the C<PATH>
-environment variable.  This flag is I<on> by default.
+If set, B<sudo> will prompt for the password of the user specified by
+the B<-u> flag (defaults to C<root>) instead of the password of the
+invoking user.  Note that this precludes the use of a uid not listed
+in the passwd database as an argument to the B<-u> flag.
+This flag is I<off> by default.
+
+=item tty_tickets
+
+If set, users must authenticate on a per-tty basis.  Normally,
+B<sudo> uses a directory in the ticket dir with the same name as
+the user running it.  With this flag enabled, B<sudo> will use a
+file named for the tty the user is logged in on in that directory.
+This flag is I<@tty_tickets@> by default.
 
 =item use_loginclass
 
 If set, B<sudo> will apply the defaults specified for the target user's
 login class if one exists.  Only available if B<sudo> is configured with
 the --with-logincap option.  This flag is I<off> by default.
-
-=item noexec
-
-If set, all commands run via B<sudo> will behave as if the C<NOEXEC>
-tag has been set, unless overridden by a C<EXEC> tag.  See the
-description of I<NOEXEC and EXEC> below as well as the L<PREVENTING SHELL
-ESCAPES> section at the end of this manual.  This flag is I<off> by default.
-
-=item ignore_local_sudoers
-
-If set via LDAP, parsing of @sysconfdir@/sudoers will be skipped.
-This is intended for Enterprises that wish to prevent the usage of local
-sudoers files so that only LDAP is used.  This thwarts the efforts of
-rogue operators who would attempt to add roles to @sysconfdir@/sudoers.
-When this option is present, @sysconfdir@/sudoers does not even need to exist. 
-Since this option tells B<sudo> how to behave when no specific LDAP entries
-have been matched, this sudoOption is only meaningful for the cn=defaults
-section.  This flag is I<off> by default.
 
 =back
 
@@ -697,6 +706,11 @@ to decide when to wrap lines for nicer log files.  This has no
 effect on the syslog log file, only the file log.  The default is
 C<@loglen@> (use 0 or negate the option to disable word wrap).
 
+=item passwd_timeout
+
+Number of minutes before the B<sudo> password prompt times out.
+The default is C<@password_timeout@>; set this to C<0> for no password timeout.
+
 =item timestamp_timeout
 
 Number of minutes that can elapse before B<sudo> will ask for a
@@ -706,23 +720,10 @@ If set to a value less than C<0> the user's timestamp will never
 expire.  This can be used to allow users to create or delete their
 own timestamps via C<sudo -v> and C<sudo -k> respectively.
 
-=item passwd_timeout
-
-Number of minutes before the B<sudo> password prompt times out.
-The default is C<@password_timeout@>, set this to C<0> for no password timeout.
-
 =item umask
 
 Umask to use when running the command.  Negate this option or set
 it to 0777 to preserve the user's umask.  The default is C<@sudo_umask@>.
-
-=item setenv
-
-Allow the user to disable the I<env_reset> option from the command
-line.  Additionally, environment variables set via the command line
-are not subject to the restrictions imposed by I<env_check>,
-I<env_delete>, or I<env_keep>.  As such, only trusted users should
-be allowed to set variables in this manner.
 
 =back
 
@@ -730,26 +731,31 @@ B<Strings>:
 
 =over 12
 
+=item badpass_message
+
+Message that is displayed if a user enters an incorrect password.
+The default is C<@badpass_message@> unless insults are enabled.
+
+=item editor
+
+A colon (':') separated list of editors allowed to be used with
+B<visudo>.  B<visudo> will choose the editor that matches the user's
+EDITOR environment variable if possible, or the first editor in the
+list that exists and is executable.  The default is the path to vi
+on your system.
+
 =item mailsub
 
 Subject of the mail sent to the I<mailto> user. The escape C<%h>
 will expand to the hostname of the machine.
 Default is C<@mailsub@>.
 
-=item badpass_message
+=item noexec_file
 
-Message that is displayed if a user enters an incorrect password.
-The default is C<@badpass_message@> unless insults are enabled.
-
-=item timestampdir
-
-The directory in which B<sudo> stores its timestamp files.
-The default is F<@timedir@>.
-
-=item timestampowner
-
-The owner of the timestamp directory and the timestamps stored therein.
-The default is C<root>.
+Path to a shared library containing dummy versions of the execv(),
+execve() and fexecve() library functions that just return an error.
+This is used to implement the I<noexec> functionality on systems that
+support C<LD_PRELOAD> or its equivalent.  Defaults to F<@noexec_file@>.
 
 =item passprompt
 
@@ -759,24 +765,24 @@ The following percent (`C<%>') escapes are supported:
 
 =over 8
 
-=item C<%u>
+=item C<%H>
 
-expanded to the invoking user's login name
+expanded to the local hostname including the domain name
+(on if the machine's hostname is fully qualified or the I<fqdn>
+option is set)
+
+=item C<%h>
+
+expanded to the local hostname without the domain name
 
 =item C<%U>
 
 expanded to the login name of the user the command will
 be run as (defaults to root)
 
-=item C<%h>
+=item C<%u>
 
-expanded to the local hostname without the domain name
-
-=item C<%H>
-
-expanded to the local hostname including the domain name
-(on if the machine's hostname is fully qualified or the I<fqdn>
-option is set)
+expanded to the invoking user's login name
 
 =item C<%%>
 
@@ -793,36 +799,36 @@ on the command line.  This defaults to C<@runas_default@>.
 Note that if I<runas_default> is set it B<must> occur before
 any C<Runas_Alias> specifications.
 
-=item syslog_goodpri
-
-Syslog priority to use when user authenticates successfully.
-Defaults to C<@goodpri@>.
-
 =item syslog_badpri
 
 Syslog priority to use when user authenticates unsuccessfully.
 Defaults to C<@badpri@>.
 
-=item editor
+=item syslog_goodpri
 
-A colon (':') separated list of editors allowed to be used with
-B<visudo>.  B<visudo> will choose the editor that matches the user's
-EDITOR environment variable if possible, or the first editor in the
-list that exists and is executable.  The default is the path to vi
-on your system.
+Syslog priority to use when user authenticates successfully.
+Defaults to C<@goodpri@>.
 
-=item noexec_file
+=item timestampdir
 
-Path to a shared library containing dummy versions of the execv(),
-execve() and fexecve() library functions that just return an error.
-This is used to implement the I<noexec> functionality on systems that
-support C<LD_PRELOAD> or its equivalent.  Defaults to F<@noexec_file@>.
+The directory in which B<sudo> stores its timestamp files.
+The default is F<@timedir@>.
+
+=item timestampowner
+
+The owner of the timestamp directory and the timestamps stored therein.
+The default is C<root>.
 
 =back
 
 B<Strings that can be used in a boolean context>:
 
 =over 12
+
+=item exempt_group
+
+Users in this group are exempt from password and PATH requirements.
+This is not set by default.
 
 =item lecture
 
@@ -831,6 +837,10 @@ the password prompt.  It has the following possible values:
 
 =over 8
 
+=item always
+
+Always lecture the user.
+
 =item never
 
 Never lecture the user.
@@ -838,10 +848,6 @@ Never lecture the user.
 =item once
 
 Only lecture the user the first time they run B<sudo>.
-
-=item always
-
-Always lecture the user.
 
 =back
 
@@ -853,67 +859,7 @@ The default value is I<@lecture@>.
 
 Path to a file containing an alternate B<sudo> lecture that will
 be used in place of the standard lecture if the named file exists.
-
-=item logfile
-
-Path to the B<sudo> log file (not the syslog log file).  Setting a path
-turns on logging to a file; negating this option turns it off.
-
-=item syslog
-
-Syslog facility if syslog is being used for logging (negate to
-disable syslog logging).  Defaults to C<@logfac@>.
-
-=item mailerpath
-
-Path to mail program used to send warning mail.
-Defaults to the path to sendmail found at configure time.
-
-=item mailerflags
-
-Flags to use when invoking mailer. Defaults to B<-t>.
-
-=item mailto
-
-Address to send warning and error mail to.  The address should
-be enclosed in double quotes (C<">) to protect against B<sudo>
-interpreting the C<@> sign.  Defaults to C<@mailto@>.
-
-=item exempt_group
-
-Users in this group are exempt from password and PATH requirements.
-This is not set by default.
-
-=item verifypw
-
-This option controls when a password will be required when a user runs
-B<sudo> with the B<-v> flag.  It has the following possible values:
-
-=over 8
-
-=item all
-
-All the user's I<sudoers> entries for the current host must have
-the C<NOPASSWD> flag set to avoid entering a password.
-
-=item any
-
-At least one of the user's I<sudoers> entries for the current host
-must have the C<NOPASSWD> flag set to avoid entering a password.
-
-=item never
-
-The user need never enter a password to use the B<-v> flag.
-
-=item always
-
-The user must always enter a password to use the B<-v> flag.
-
-=back
-
-If no value is specified, a value of I<all> is implied.
-Negating the option results in a value of I<never> being used.
-The default value is I<all>.
+By default, B<sudo> uses a built-in lecture.
 
 =item listpw
 
@@ -927,6 +873,10 @@ user runs B<sudo> with the B<-l> flag.  It has the following possible values:
 All the user's I<sudoers> entries for the current host must have
 the C<NOPASSWD> flag set to avoid entering a password.
 
+=item always
+
+The user must always enter a password to use the B<-l> flag.
+
 =item any
 
 At least one of the user's I<sudoers> entries for the current host
@@ -936,15 +886,68 @@ must have the C<NOPASSWD> flag set to avoid entering a password.
 
 The user need never enter a password to use the B<-l> flag.
 
-=item always
-
-The user must always enter a password to use the B<-l> flag.
-
 =back
 
 If no value is specified, a value of I<any> is implied.
 Negating the option results in a value of I<never> being used.
 The default value is I<any>.
+
+=item logfile
+
+Path to the B<sudo> log file (not the syslog log file).  Setting a path
+turns on logging to a file; negating this option turns it off.
+By default, B<sudo> logs via syslog.
+
+=item mailerflags
+
+Flags to use when invoking mailer. Defaults to B<-t>.
+
+=item mailerpath
+
+Path to mail program used to send warning mail.
+Defaults to the path to sendmail found at configure time.
+
+=item mailto
+
+Address to send warning and error mail to.  The address should
+be enclosed in double quotes (C<">) to protect against B<sudo>
+interpreting the C<@> sign.  Defaults to C<@mailto@>.
+
+=item syslog
+
+Syslog facility if syslog is being used for logging (negate to
+disable syslog logging).  Defaults to C<@logfac@>.
+
+=item verifypw
+
+This option controls when a password will be required when a user runs
+B<sudo> with the B<-v> flag.  It has the following possible values:
+
+=over 8
+
+=item all
+
+All the user's I<sudoers> entries for the current host must have
+the C<NOPASSWD> flag set to avoid entering a password.
+
+=item always
+
+The user must always enter a password to use the B<-v> flag.
+
+=item any
+
+At least one of the user's I<sudoers> entries for the current host
+must have the C<NOPASSWD> flag set to avoid entering a password.
+
+=item never
+
+The user need never enter a password to use the B<-v> flag.
+
+=back
+
+If no value is specified, a value of I<all> is implied.
+Negating the option results in a value of I<never> being used.
+The default value is I<all>.
 
 =back
 
