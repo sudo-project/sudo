@@ -467,7 +467,7 @@ used as part of a word (e.g.E<nbsp>a username or hostname):
 
 =head1 SUDOERS OPTIONS
 
-Sudo's behavior can be modified by C<Default_Entry> lines, as
+B<sudo>'s behavior can be modified by C<Default_Entry> lines, as
 explained earlier.  A list of all supported Defaults parameters,
 grouped by type, are listed below.
 
@@ -1198,7 +1198,7 @@ as any user listed in the I<OP> C<Runas_Alias> (B<root> and B<operator>).
  jim		+biglab = ALL
 
 The user B<jim> may run any command on machines in the I<biglab> netgroup.
-B<Sudo> knows that "biglab" is a netgroup due to the '+' prefix.
+B<sudo> knows that "biglab" is a netgroup due to the '+' prefix.
 
  +secretaries	ALL = PRINTING, /usr/bin/adduser, /usr/bin/rmuser
 
@@ -1311,9 +1311,9 @@ If the resulting output contains a line that begins with:
 then B<sudo> may be able to replace the exec family of functions
 in the standard library with its own that simply return an error.
 Unfortunately, there is no foolproof way to know whether or not
-I<noexec> will work at compile-time.  I<Noexec> should work on
+I<noexec> will work at compile-time.  I<noexec> should work on
 SunOS, Solaris, *BSD, Linux, IRIX, Tru64 UNIX, MacOS X, and HP-UX
-11.x.  It is known B<not> to work on AIX and UnixWare.  I<Noexec>
+11.x.  It is known B<not> to work on AIX and UnixWare.  I<noexec>
 is expected to work on most operating systems that support the
 C<LD_PRELOAD> environment variable.  Check your operating system's
 manual pages for the dynamic linker (usually ld.so, ld.so.1, dyld,
@@ -1394,7 +1394,7 @@ search the archives.
 
 =head1 DISCLAIMER
 
-B<Sudo> is provided ``AS IS'' and any express or implied warranties,
+B<sudo> is provided ``AS IS'' and any express or implied warranties,
 including, but not limited to, the implied warranties of merchantability
 and fitness for a particular purpose are disclaimed.  See the LICENSE
 file distributed with B<sudo> or http://www.sudo.ws/sudo/license.html
