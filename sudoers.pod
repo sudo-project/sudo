@@ -1005,9 +1005,9 @@ B<notice>, and B<warning>.
 
 =head1 FILES
 
- @sysconfdir@/sudoers		List of who can run what
- /etc/group		Local groups file
- /etc/netgroup		List of network groups
+F<@sysconfdir@/sudoers>		List of who can run what
+F</etc/group>		Local groups file
+F</etc/netgroup>		List of network groups
 
 =head1 EXAMPLES
 
