@@ -116,8 +116,8 @@ was configured with the I<--with-env-editor> option:
 
 =head1 FILES
 
- @sysconfdir@/sudoers		List of who can run what
- @sysconfdir@/sudoers.tmp	Lock file for visudo
+F<@sysconfdir@/sudoers>		List of who can run what
+F<@sysconfdir@/sudoers.tmp>	Lock file for visudo
 
 =head1 DIAGNOSTICS
 
