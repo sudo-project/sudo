@@ -1924,3 +1924,12 @@ Sudo 1.6.8p12 released.
 608) Better explanation of environment handling in the sudo man page.
 
 Sudo 1.6.9 released.
+
+609) Worked around a bug ins some PAM implementations that caused a crash
+     when no tty was present.
+
+610) Fixed a crash on some platforms in the error logging function.
+
+611) Documentation improvements.
+
+Sudo 1.6.9p1 released.

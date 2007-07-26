@@ -8,11 +8,11 @@ NNAAMMEE
        visudo - edit the sudoers file
 
 SSYYNNOOPPSSIISS
-       vviissuuddoo [ --cc ] [ --ff _s_u_d_o_e_r_s ] [ --qq ] [ --ss ] [ --VV ]
+       vviissuuddoo [--cc] [--qq] [--ss] [--VV] [--ff _s_u_d_o_e_r_s]
 
 DDEESSCCRRIIPPTTIIOONN
        vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous
-       to vipw(1m).  vviissuuddoo locks the _s_u_d_o_e_r_s file against multi­
+       to _v_i_p_w(1m).  vviissuuddoo locks the _s_u_d_o_e_r_s file against multi­
        ple simultaneous edits, provides basic sanity checks, and
        checks for parse errors.  If the _s_u_d_o_e_r_s file is currently
        being edited you will receive a message to try again
@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.9                     July 16, 2007                         1
+1.6.9p1                   July 26, 2007                         1
 
 
 
@@ -127,7 +127,7 @@ DDIIAAGGNNOOSSTTIICCSS
 
 
 
-1.6.9                     July 16, 2007                         2
+1.6.9p1                   July 26, 2007                         2
 
 
 
@@ -144,7 +144,7 @@ VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
            (strict) mode this is an error, not a warning.
 
 SSEEEE AALLSSOO
-       _v_i(1), sudoers(4), sudo(1m), vipw(1m)
+       _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(8)
 
 AAUUTTHHOORR
        Many people have worked on _s_u_d_o over the years; this ver­
@@ -170,7 +170,7 @@ SSUUPPPPOORRTT
        archives.
 
 DDIISSCCLLAAIIMMEERR
-       VViissuuddoo is provided ``AS IS'' and any express or implied
+       vviissuuddoo is provided ``AS IS'' and any express or implied
        warranties, including, but not limited to, the implied
        warranties of merchantability and fitness for a particular
        purpose are disclaimed.  See the LICENSE file distributed
@@ -193,6 +193,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.6.9                     July 16, 2007                         3
+1.6.9p1                   July 26, 2007                         3
 
 

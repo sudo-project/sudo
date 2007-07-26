@@ -149,16 +149,16 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "July 16, 2007" "1.6.9" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "July 26, 2007" "1.6.9p1" "MAINTENANCE COMMANDS"
 .SH "NAME"
 visudo \- edit the sudoers file
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBvisudo\fR [ \fB\-c\fR ] [ \fB\-f\fR \fIsudoers\fR ] [ \fB\-q\fR ] [ \fB\-s\fR ] [ \fB\-V\fR ]
+\&\fBvisudo\fR [\fB\-c\fR] [\fB\-q\fR] [\fB\-s\fR] [\fB\-V\fR] [\fB\-f\fR \fIsudoers\fR]
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 \&\fBvisudo\fR edits the \fIsudoers\fR file in a safe fashion, analogous to
-vipw(@mansectsu@).  \fBvisudo\fR locks the \fIsudoers\fR file against multiple
+\&\fIvipw\fR\|(@mansectsu@).  \fBvisudo\fR locks the \fIsudoers\fR file against multiple
 simultaneous edits, provides basic sanity checks, and checks
 for parse errors.  If the \fIsudoers\fR file is currently being
 edited you will receive a message to try again later.
@@ -268,7 +268,7 @@ or User specifications.  In \fB\-s\fR (strict) mode this is an error,
 not a warning.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIvi\fR\|(1), sudoers(@mansectform@), sudo(@mansectsu@), vipw(@mansectsu@)
+\&\fIvi\fR\|(1), \fIsudoers\fR\|(@mansectform@), \fIsudo\fR\|(@mansectsu@), \fIvipw\fR\|(8)
 .SH "AUTHOR"
 .IX Header "AUTHOR"
 Many people have worked on \fIsudo\fR over the years; this version of
@@ -295,7 +295,7 @@ see http://www.sudo.ws/mailman/listinfo/sudo\-users to subscribe or
 search the archives.
 .SH "DISCLAIMER"
 .IX Header "DISCLAIMER"
-\&\fBVisudo\fR is provided ``\s-1AS\s0 \s-1IS\s0'' and any express or implied warranties,
+\&\fBvisudo\fR is provided ``\s-1AS\s0 \s-1IS\s0'' and any express or implied warranties,
 including, but not limited to, the implied warranties of merchantability
 and fitness for a particular purpose are disclaimed.  See the \s-1LICENSE\s0
 file distributed with \fBsudo\fR or http://www.sudo.ws/sudo/license.html
