@@ -190,7 +190,7 @@ search the archives.
 
 =head1 DISCLAIMER
 
-B<Visudo> is provided ``AS IS'' and any express or implied warranties,
+B<visudo> is provided ``AS IS'' and any express or implied warranties,
 including, but not limited to, the implied warranties of merchantability
 and fitness for a particular purpose are disclaimed.  See the LICENSE
 file distributed with B<sudo> or http://www.sudo.ws/sudo/license.html
