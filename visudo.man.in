@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "July 26, 2007" "1.6.9p1" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "July 29, 2007" "1.6.9p2" "MAINTENANCE COMMANDS"
 .SH "NAME"
 visudo \- edit the sudoers file
 .SH "SYNOPSIS"
@@ -232,10 +232,8 @@ was configured with the \fI\-\-with\-env\-editor\fR option:
 .Ve
 .SH "FILES"
 .IX Header "FILES"
-.Vb 2
-\& @sysconfdir@/sudoers           List of who can run what
-\& @sysconfdir@/sudoers.tmp       Lock file for visudo
-.Ve
+\&\fI@sysconfdir@/sudoers\fR		List of who can run what
+\&\fI@sysconfdir@/sudoers.tmp\fR	Lock file for visudo
 .SH "DIAGNOSTICS"
 .IX Header "DIAGNOSTICS"
 .IP "sudoers file busy, try again later." 4

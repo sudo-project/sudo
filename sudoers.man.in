@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "July 26, 2007" "1.6.9p1" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "July 29, 2007" "1.6.9p2" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -1085,11 +1085,9 @@ supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\fR, \fBerr\fR, \fBinfo
 \&\fBnotice\fR, and \fBwarning\fR.
 .SH "FILES"
 .IX Header "FILES"
-.Vb 3
-\& @sysconfdir@/sudoers           List of who can run what
-\& /etc/group             Local groups file
-\& /etc/netgroup          List of network groups
-.Ve
+\&\fI@sysconfdir@/sudoers\fR		List of who can run what
+\&\fI/etc/group\fR		Local groups file
+\&\fI/etc/netgroup\fR		List of network groups
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Since the \fIsudoers\fR file is parsed in a single pass, order is

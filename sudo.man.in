@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "July 26, 2007" "1.6.9p1" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "July 29, 2007" "1.6.9p2" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
@@ -540,10 +540,8 @@ information, please see the \f(CW\*(C`PREVENTING SHELL ESCAPES\*(C'\fR section i
 .Ve
 .SH "FILES"
 .IX Header "FILES"
-.Vb 2
-\& @sysconfdir@/sudoers           List of who can run what
-\& @timedir@          Directory containing timestamps
-.Ve
+\&\fI@sysconfdir@/sudoers\fR		List of who can run what
+\&\fI@timedir@\fR		Directory containing timestamps
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Note: the following examples assume suitable \fIsudoers\fR\|(@mansectform@) entries.
