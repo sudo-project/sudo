@@ -229,7 +229,7 @@ sync_env()
 	env.env_size = evlen + 1 + 128;
 	env.envp = emalloc2(env.env_size, sizeof(char *));
     }
-    memcpy(env.envp, environ, evlen + 1);
+    memcpy(env.envp, environ, (evlen + 1) * sizeof(char *));
     env.env_len = evlen;
     environ = env.envp;
 }
@@ -309,9 +309,10 @@ sudo_unsetenv(var)
 
     varlen = strlen(var);
     for (nep = env.envp; *nep; nep++) {
-	if (strncmp(var, *nep, varlen) == 0 && *nep[varlen] == '=') {
+	if (strncmp(var, *nep, varlen) == 0 && (*nep)[varlen] == '=') {
 	    /* Found it; move everything over by one and update len. */
-	    memmove(nep, nep + 1, env.env_len - (nep - env.envp));
+	    memmove(nep, nep + 1,
+		(env.env_len - (nep - env.envp)) * sizeof(char *));
 	    env.env_len--;
 	    return;
 	}
@@ -464,9 +465,6 @@ rebuild_env(sudo_mode, noexec)
      */
     ps1 = NULL;
     didvar = 0;
-    env.env_len = 0;
-    env.env_size = 128;
-    env.envp = emalloc2(env.env_size, sizeof(char *));
     if (def_env_reset) {
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = environ; *ep; ep++) {
