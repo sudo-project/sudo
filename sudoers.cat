@@ -1135,9 +1135,9 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        and wwaarrnniinngg.
 
 FFIILLEESS
-       _/_e_t_c_/_s_u_d_o_e_r_s        List of who can run what
-       _/_e_t_c_/_g_r_o_u_p          Local groups file
-       _/_e_t_c_/_n_e_t_g_r_o_u_p       List of network groups
+       _/_e_t_c_/_s_u_d_o_e_r_s         List of who can run what
+       _/_e_t_c_/_g_r_o_u_p           Local groups file
+       _/_e_t_c_/_n_e_t_g_r_o_u_p        List of network groups
 
 EEXXAAMMPPLLEESS
        Since the _s_u_d_o_e_r_s file is parsed in a single pass, order

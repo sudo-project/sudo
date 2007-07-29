@@ -1085,9 +1085,20 @@ supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\fR, \fBerr\fR, \fBinfo
 \&\fBnotice\fR, and \fBwarning\fR.
 .SH "FILES"
 .IX Header "FILES"
-\&\fI@sysconfdir@/sudoers\fR		List of who can run what
-\&\fI/etc/group\fR		Local groups file
-\&\fI/etc/netgroup\fR		List of network groups
+.RE
+.ie n .IP "\fI@sysconfdir@/sudoers\fR\*(C`		\*(C' List of who can run what"
+.el .IP "\fI@sysconfdir@/sudoers\fR\f(CW\*(C`		\*(C'\fR List of who can run what"
+.IX Item "@sysconfdir@/sudoers		 List of who can run what"
+.RE
+.PD 0
+.ie n .IP "\fI/etc/group\fR\*(C`		\*(C' Local groups file"
+.el .IP "\fI/etc/group\fR\f(CW\*(C`		\*(C'\fR Local groups file"
+.IX Item "/etc/group		 Local groups file"
+.RE
+.ie n .IP "\fI/etc/netgroup\fR\*(C`		\*(C' List of network groups"
+.el .IP "\fI/etc/netgroup\fR\f(CW\*(C`		\*(C'\fR List of network groups"
+.IX Item "/etc/netgroup		 List of network groups"
+.PD
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Since the \fIsudoers\fR file is parsed in a single pass, order is

@@ -232,8 +232,14 @@ was configured with the \fI\-\-with\-env\-editor\fR option:
 .Ve
 .SH "FILES"
 .IX Header "FILES"
-\&\fI@sysconfdir@/sudoers\fR		List of who can run what
-\&\fI@sysconfdir@/sudoers.tmp\fR	Lock file for visudo
+.ie n .IP "\fI@sysconfdir@/sudoers\fR\*(C`    		\*(C'List of who can run what" 4
+.el .IP "\fI@sysconfdir@/sudoers\fR\f(CW\*(C`    		\*(C'\fRList of who can run what" 4
+.IX Item "@sysconfdir@/sudoers    		List of who can run what"
+.PD 0
+.ie n .IP "\fI@sysconfdir@/sudoers.tmp\fR\*(C`		\*(C'Lock file for visudo" 4
+.el .IP "\fI@sysconfdir@/sudoers.tmp\fR\f(CW\*(C`		\*(C'\fRLock file for visudo" 4
+.IX Item "@sysconfdir@/sudoers.tmp		Lock file for visudo"
+.PD
 .SH "DIAGNOSTICS"
 .IX Header "DIAGNOSTICS"
 .IP "sudoers file busy, try again later." 4
