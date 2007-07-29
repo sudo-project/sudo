@@ -122,7 +122,7 @@ was configured with the I<--with-env-editor> option:
 
 =item F<@sysconfdir@/sudoers.tmp>C<		>Lock file for visudo
 
-=back 4
+=back
 
 =head1 DIAGNOSTICS
 
