@@ -456,7 +456,7 @@ rebuild_env(sudo_mode, noexec)
     int sudo_mode;
     int noexec;
 {
-    char **ep, *cp, *ps1;
+    char **old_envp, **ep, *cp, *ps1;
     char idbuf[MAX_UID_T_LEN];
     unsigned int didvar;
 
@@ -465,6 +465,10 @@ rebuild_env(sudo_mode, noexec)
      */
     ps1 = NULL;
     didvar = 0;
+    env.env_len = 0;
+    env.env_size = 128;
+    old_envp = env.envp;
+    env.envp = emalloc2(env.env_size, sizeof(char *));
     if (def_env_reset) {
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = environ; *ep; ep++) {
@@ -657,6 +661,7 @@ rebuild_env(sudo_mode, noexec)
 
     /* Install new environment. */
     environ = env.envp;
+    efree(old_envp);
 }
 
 void
