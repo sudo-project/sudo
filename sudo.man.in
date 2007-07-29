@@ -540,14 +540,12 @@ information, please see the \f(CW\*(C`PREVENTING SHELL ESCAPES\*(C'\fR section i
 .Ve
 .SH "FILES"
 .IX Header "FILES"
-.RE
-.ie n .IP "\fI@sysconfdir@/sudoers\fR\*(C`		\*(C' List of who can run what"
-.el .IP "\fI@sysconfdir@/sudoers\fR\f(CW\*(C`		\*(C'\fR List of who can run what"
+.ie n .IP "\fI@sysconfdir@/sudoers\fR\*(C`		\*(C' List of who can run what" 4
+.el .IP "\fI@sysconfdir@/sudoers\fR\f(CW\*(C`		\*(C'\fR List of who can run what" 4
 .IX Item "@sysconfdir@/sudoers		 List of who can run what"
-.RE
 .PD 0
-.ie n .IP "\fI@timedir@\fR\*(C`		\*(C' Directory containing timestamps"
-.el .IP "\fI@timedir@\fR\f(CW\*(C`		\*(C'\fR Directory containing timestamps"
+.ie n .IP "\fI@timedir@\fR\*(C`		\*(C' Directory containing timestamps" 4
+.el .IP "\fI@timedir@\fR\f(CW\*(C`		\*(C'\fR Directory containing timestamps" 4
 .IX Item "@timedir@		 Directory containing timestamps"
 .PD
 .SH "EXAMPLES"
