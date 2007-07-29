@@ -629,7 +629,7 @@ insert_env_vars(envp, env_vars)
 	    env.env_size = evlen + 1 + 128;
 	    env.envp = emalloc2(env.env_size, sizeof(char *));
 	}
-	memcpy(env.envp, envp, evlen + 1);
+	memcpy(env.envp, envp, (evlen + 1) * sizeof(char *));
 	env.env_len = evlen;
     }
 
