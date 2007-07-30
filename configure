@@ -16175,7 +16175,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 int
 main ()
 {
-(void)isblank(1);
+return (isblank('a'));
   ;
   return 0;
 }
@@ -17167,7 +17167,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 int
 main ()
 {
-DIR d; (void)&d.dd_fd;
+DIR d; memset(&d, 0, sizeof(d)); return(d.dd_fd);
   ;
   return 0;
 }
