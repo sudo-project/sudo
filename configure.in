@@ -2228,6 +2228,7 @@ if test -n "$with_ldap"; then
 	AC_DEFINE(HAVE_GSS_KRB5_CCACHE_NAME)
 	[LDAP_LIBS="${LDAP_LIBS} -lgssapi"],
 	AC_CHECK_LIB(gssapi_krb5, gss_krb5_ccache_name,
+	    AC_DEFINE(HAVE_GSS_KRB5_CCACHE_NAME)
 	    [LDAP_LIBS="${LDAP_LIBS} -lgssapi_krb5"])
     )
 

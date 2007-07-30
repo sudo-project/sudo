@@ -22432,7 +22432,11 @@ fi
 echo "$as_me:$LINENO: result: $ac_cv_lib_gssapi_krb5_gss_krb5_ccache_name" >&5
 echo "${ECHO_T}$ac_cv_lib_gssapi_krb5_gss_krb5_ccache_name" >&6
 if test $ac_cv_lib_gssapi_krb5_gss_krb5_ccache_name = yes; then
-  LDAP_LIBS="${LDAP_LIBS} -lgssapi_krb5"
+  cat >>confdefs.h <<\_ACEOF
+#define HAVE_GSS_KRB5_CCACHE_NAME 1
+_ACEOF
+
+	    LDAP_LIBS="${LDAP_LIBS} -lgssapi_krb5"
 fi
 
 
