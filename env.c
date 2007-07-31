@@ -173,7 +173,7 @@ static const char *initial_badenv_table[] = {
     "TMPPREFIX",		/* zsh, prefix for temporary files */
     "PYTHONHOME",		/* python, module search path */
     "PYTHONPATH",		/* python, search path */
-    "PYTHONINSPEC",		/* python, allow inspection */
+    "PYTHONINSPECT",		/* python, allow inspection */
     "RUBYLIB",			/* ruby, library load path */
     "RUBYOPT",			/* ruby, extra command line options */
     NULL
