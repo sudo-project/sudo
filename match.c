@@ -514,7 +514,7 @@ usergr_matches(group, user, pw)
 {
     struct group *grp;
     char **cur;
-    int n;
+    int i;
 
     /* make sure we have a valid usergroup, sudo style */
     if (*group++ != '%')
@@ -536,8 +536,8 @@ usergr_matches(group, user, pw)
      * supplementary group vector, check it first.
      */
     if (strcmp(user, list_pw ? list_pw->pw_name : user_name) == 0) {
-	for (n = user_ngroups; n != 0; n--)
-	    if (grp->gr_gid == user_groups[n])
+	for (i = 0; i < user_ngroups; i++)
+	    if (grp->gr_gid == user_groups[i])
 		return(TRUE);
     }
     if (grp->gr_mem != NULL) {
