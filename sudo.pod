@@ -288,11 +288,13 @@ option.
 
 =item -u
 
-The B<-u> (I<user>) option causes B<sudo> to run the specified command
-as a user other than I<root>.  To specify a I<uid> instead of a
-I<username>, use I<#uid>.  Note that if the I<targetpw> Defaults
-option is set (see L<sudoers(5)>) it is not possible
-to run commands with a uid not listed in the password database.
+The B<-u> (I<user>) option causes B<sudo> to run the specified
+command as a user other than I<root>.  To specify a I<uid> instead
+of a I<username>, use I<#uid>.  When running commands as a I<uid>,
+many shells require that the '#' be escaped with a backslash ('\').
+Note that if the I<targetpw> Defaults option is set (see L<sudoers(5)>)
+it is not possible to run commands with a uid not listed in the
+password database.
 
 =item -V
 
