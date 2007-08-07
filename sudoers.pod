@@ -52,7 +52,7 @@ operators, which many readers will recognize from regular
 expressions.  Do not, however, confuse them with "wildcard"
 characters, which have different meanings.
 
-=over 8
+=over 4
 
 =item C<?>
 
@@ -473,7 +473,7 @@ grouped by type, are listed below.
 
 B<Flags>:
 
-=over 12
+=over 16
 
 =item always_set_home
 
@@ -740,7 +740,7 @@ the --with-logincap option.  This flag is I<off> by default.
 
 B<Integers>:
 
-=over 12
+=over 16
 
 =item closefrom
 
@@ -759,7 +759,7 @@ B<sudo> logs the failure and exits.  The default is C<@passwd_tries@>.
 
 B<Integers that can be used in a boolean context>:
 
-=over 12
+=over 16
 
 =item loglinelen
 
@@ -791,7 +791,7 @@ it to 0777 to preserve the user's umask.  The default is C<@sudo_umask@>.
 
 B<Strings>:
 
-=over 12
+=over 16
 
 =item badpass_message
 
@@ -825,7 +825,7 @@ The default prompt to use when asking for a password; can be overridden
 via the B<-p> option or the C<SUDO_PROMPT> environment variable.
 The following percent (`C<%>') escapes are supported:
 
-=over 8
+=over 4
 
 =item C<%H>
 
@@ -1024,7 +1024,7 @@ The default value is I<all>.
 
 B<Lists that can be used in a boolean context>:
 
-=over 12
+=over 16
 
 =item env_check
 
