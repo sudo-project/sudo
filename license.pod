@@ -1,5 +1,6 @@
 =head1 Sudo License
 
+=head3
 Sudo is distributed under the following ISC-style license:
 
    Copyright (c) 1994-1996,1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
@@ -20,6 +21,7 @@ Sudo is distributed under the following ISC-style license:
    Agency (DARPA) and Air Force Research Laboratory, Air Force
    Materiel Command, USAF, under agreement number F39502-99-1-0512.
 
+=head3
 Additionally, fnmatch.c, fnmatch.h, getcwd.c, glob.c, glob.h, mkstemp.c
 and snprintf.c bear the following UCB license:
 
