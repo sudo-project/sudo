@@ -111,8 +111,17 @@ and exit.
 The following environment variables are used only if B<visudo>
 was configured with the I<--with-env-editor> option:
 
- VISUAL			Invoked by visudo as the editor to use
- EDITOR			Used by visudo if VISUAL is not set
+=over 16
+
+=item C<VISUAL>
+
+Invoked by visudo as the editor to use
+
+=item C<EDITOR>
+
+Used by visudo if VISUAL is not set
+
+=back
 
 =head1 FILES
 
