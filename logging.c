@@ -131,8 +131,8 @@ do_syslog(pri, msg)
     size_t len, maxlen;
     char *p, *tmp, save;
     const char *fmt;
-    const char fmt_first[] = "%8s : %s";
-    const char fmt_contd[] = "%8s : (command continued) %s";
+    const char *fmt_first = "%8s : %s";
+    const char *fmt_contd = "%8s : (command continued) %s";
 
     /*
      * Log the full line, breaking into multiple syslog(3) calls if necessary
