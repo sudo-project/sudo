@@ -34,7 +34,7 @@ top_builddir = .
 CC = @CC@
 LEX = flex
 YACC = @YACC@
-NROFF = nroff
+NROFF = nroff -Tascii
 LIBTOOL = @LIBTOOL@
 
 # Our install program supports extra flags...
