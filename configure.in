@@ -1157,7 +1157,7 @@ dnl
 if test "$enable_shared" = "no"; then
     with_noexec=no
 else
-    eval _shrext="$shrext"
+    eval _shrext="$shrext_cmds"
 fi
 AC_MSG_CHECKING(path to sudo_noexec.so)
 AC_ARG_WITH(noexec, [  --with-noexec[=PATH]      fully qualified pathname of sudo_noexec.so],
