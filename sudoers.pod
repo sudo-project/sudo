@@ -1,5 +1,6 @@
 =cut
-Copyright (c) 1994-1996,1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+Copyright (c) 1994-1996, 1998-2005, 2007
+	Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
@@ -1137,7 +1138,7 @@ machines in the I<SERVERS> C<Host_Alias>, we keep an additional
 local log file and make sure we log the year in each log line since
 the log entries will be kept around for several years.  Lastly, we
 disable shell escapes for the commands in the PAGERS C<Cmnd_Alias>
-(/usr/bin/more, /usr/bin/pg and /usr/bin/less).
+(F</usr/bin/more>, F</usr/bin/pg> and F</usr/bin/less>).
 
  # Override built-in defaults
  Defaults		syslog=auth
@@ -1233,7 +1234,7 @@ in the I<SERVERS> C<Host_Alias> (master, mail, www and ns).
  jill		SERVERS = /usr/bin/, !SU, !SHELLS
 
 For any machine in the I<SERVERS> C<Host_Alias>, B<jill> may run
-any commands in the directory /usr/bin/ except for those commands
+any commands in the directory F</usr/bin/> except for those commands
 belonging to the I<SU> and I<SHELLS> C<Cmnd_Aliases>.
 
  steve		CSNETS = (operator) /usr/local/op_commands/

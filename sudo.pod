@@ -60,8 +60,8 @@ When invoked as B<sudoedit>, the B<-e> option (described below),
 is implied.
 
 B<sudo> determines who is an authorized user by consulting the file
-F<@sysconfdir@/sudoers>.  By giving B<sudo> the B<-v> flag a user
-can update the time stamp without running a I<command.> The password
+F<@sysconfdir@/sudoers>.  By giving B<sudo> the B<-v> flag, a user
+can update the time stamp without running a I<command>. The password
 prompt itself will also time out if the user's password is not
 entered within C<@password_timeout@> minutes (unless overridden via
 I<sudoers>).
@@ -97,11 +97,10 @@ B<sudo> accepts the following command line options:
 
 The B<-a> (I<authentication type>) option causes B<sudo> to use the
 specified authentication type when validating the user, as allowed
-by /etc/login.conf.  The system administrator may specify a list
+by F</etc/login.conf>.  The system administrator may specify a list
 of sudo-specific authentication methods by adding an "auth-sudo"
-entry in /etc/login.conf.  This option is only available on systems
-that support BSD authentication where B<sudo> has been configured
-with the --with-bsdauth option.
+entry in F</etc/login.conf>.  This option is only available on systems
+that support BSD authentication.
 
 =item -b
 
@@ -123,18 +122,17 @@ L<sudoers(5)>.
 
 The B<-c> (I<class>) option causes B<sudo> to run the specified command
 with resources limited by the specified login class.  The I<class>
-argument can be either a class name as defined in /etc/login.conf,
+argument can be either a class name as defined in F</etc/login.conf>,
 or a single '-' character.  Specifying a I<class> of C<-> indicates
 that the command should be run restricted by the default login
 capabilities for the user the command is run as.  If the I<class>
 argument specifies an existing user class, the command must be run
 as root, or the B<sudo> command must be run from a shell that is already
-root.  This option is only available on systems with BSD login classes
-where B<sudo> has been configured with the --with-logincap option.
+root.  This option is only available on systems with BSD login classes.
 
 =item -E
 
-The B<-E> (I<preserve environment>) option will override the
+The B<-E> (I<preserve> I<environment>) option will override the
 I<env_reset> option in L<sudoers(5)>).  It is only
 available when either the matching command has the C<SETENV> tag
 or the I<setenv> option is set in L<sudoers(5)>.
@@ -215,7 +213,7 @@ file.
 
 The B<-L> (I<list> defaults) option will list out the parameters
 that may be set in a I<Defaults> line along with a short description
-for each.  This option is useful in conjunction with grep(1).
+for each.  This option is useful in conjunction with L<grep(1)>.
 
 =item -l [I<command>]
 
@@ -229,7 +227,7 @@ exit with a return value of 1.
 
 =item -P
 
-The B<-P> (I<preserve group vector>) option causes B<sudo> to
+The B<-P> (I<preserve> I<group vector>) option causes B<sudo> to
 preserve the invoking user's group vector unaltered.  By default,
 B<sudo> will initialize the group vector to the list of groups the
 target user is in.  The real and effective group IDs, however, are
@@ -313,7 +311,7 @@ a command.
 
 =item --
 
-The C<--> flag indicates that B<sudo> should stop processing command
+The B<--> flag indicates that B<sudo> should stop processing command
 line arguments.  It is most useful in conjunction with the B<-s> flag.
 
 =back
@@ -433,7 +431,7 @@ In B<-s> or B<-H> mode (or if sudo was configured with the
 
 =item C<PATH>
 
-Set to a sane value if sudo was configured with the --with-secure-path option
+Set to a sane value if the I<secure_path> sudoers option is set.
 
 =item C<SHELL>
 
