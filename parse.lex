@@ -83,8 +83,11 @@ extern void yyerror		__P((char *));
 #endif
 %}
 
+HEXDIGIT		[0-9A-Fa-f]{1,4}
 OCTET			(1?[0-9]{1,2})|(2[0-4][0-9])|(25[0-5])
 DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
+IPV6ADDR		\:\:|({HEXDIGIT}\:){7}{HEXDIGIT}|({HEXDIGIT}\:){5}{HEXDIGIT}\:{DOTTEDQUAD}|({HEXDIGIT}\:){1,7}\:|({HEXDIGIT}\:){1,6}(\:{HEXDIGIT}){1}|({HEXDIGIT}\:){1,5}(\:{HEXDIGIT}){2}|({HEXDIGIT}\:){1,2}\:{DOTTEDQUAD}|({HEXDIGIT}\:){1,4}(\:{HEXDIGIT}){3}|({HEXDIGIT}\:){1,4}(\:{HEXDIGIT}){1}\:{DOTTEDQUAD}|({HEXDIGIT}\:){1,3}(\:{HEXDIGIT}){4}|({HEXDIGIT}\:){1,3}(\:{HEXDIGIT}){2}\:{DOTTEDQUAD}|({HEXDIGIT}\:){1,2}(\:{HEXDIGIT}){5}|({HEXDIGIT}\:){1,2}(\:{HEXDIGIT}){3}\:{DOTTEDQUAD}|({HEXDIGIT}\:){1}(\:{HEXDIGIT}){6}|({HEXDIGIT}\:){1}(\:{HEXDIGIT}){4}\:{DOTTEDQUAD}|\:(\:{HEXDIGIT}){1,7}|\:(\:{HEXDIGIT}){1,5}\:{DOTTEDQUAD}
+
 HOSTNAME		[[:alnum:]_-]+
 WORD			([^#>@!=:,\(\) \t\n\\]|\\[^\n])+
 ENVAR			([^#!=, \t\n\\]|\\[^\n])([^#=, \t\n\\]|\\[^\n])*
@@ -264,6 +267,18 @@ NOSETENV[[:blank:]]*:	{
 			    LEXTRACE("NTWKADDR ");
 			    return(NTWKADDR);
 			}
+
+{IPV6ADDR}(\/{IPV6ADDR})? {
+			    fill(yytext, yyleng);
+			    LEXTRACE("NTWKADDR ");
+			    return(NTWKADDR);
+			}
+
+{IPV6ADDR}\/([0-9]|[1-9][0-9]|1[01][0-9]|12[0-8]) {
+			    fill(yytext, yyleng);
+ 			    LEXTRACE("NTWKADDR ");
+ 			    return(NTWKADDR);
+ 			}
 
 <INITIAL>\(		{
 				BEGIN GOTRUNAS;

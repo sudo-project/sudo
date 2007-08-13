@@ -232,7 +232,7 @@ yyerror(s)
 %token <command> COMMAND		/* absolute pathname w/ optional args */
 %token <string>  ALIAS			/* an UPPERCASE alias name */
 %token <string>	 DEFVAR			/* a Defaults variable name */
-%token <string>  NTWKADDR		/* w.x.y.z */
+%token <string>  NTWKADDR		/* w.x.y.z or ipv6 address */
 %token <string>  NETGROUP		/* a netgroup (+NAME) */
 %token <string>  USERGROUP		/* a usergroup (%NAME) */
 %token <string>  WORD			/* a word */
