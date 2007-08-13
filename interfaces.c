@@ -98,8 +98,10 @@ void
 load_interfaces()
 {
     struct ifaddrs *ifa, *ifaddrs;
-    /* XXX - sockaddr_in6 sin6; */
     struct sockaddr_in *sin;
+#ifdef AF_INET6
+    struct sockaddr_in6 *sin6;
+#endif
     int i;
 
     if (getifaddrs(&ifaddrs))
@@ -113,8 +115,10 @@ load_interfaces()
 	    continue;
 
 	switch(ifa->ifa_addr->sa_family) {
-	    /* XXX - AF_INET6 */
 	    case AF_INET:
+#ifdef AF_INET6
+	    case AF_INET6:
+#endif
 		num_interfaces++;
 		break;
 	}
@@ -132,7 +136,6 @@ load_interfaces()
 		continue;
 
 	switch(ifa->ifa_addr->sa_family) {
-	    /* XXX - AF_INET6 */
 	    case AF_INET:
 		sin = (struct sockaddr_in *)ifa->ifa_addr;
 		memcpy(&interfaces[i].addr, &sin->sin_addr,
@@ -140,8 +143,21 @@ load_interfaces()
 		sin = (struct sockaddr_in *)ifa->ifa_netmask;
 		memcpy(&interfaces[i].netmask, &sin->sin_addr,
 		    sizeof(struct in_addr));
+		interfaces[i].family = AF_INET;
 		i++;
 		break;
+#ifdef AF_INET6
+	    case AF_INET6:
+		sin6 = (struct sockaddr_in6 *)ifa->ifa_addr;
+		memcpy(&interfaces[i].addr, &sin6->sin6_addr,
+		    sizeof(struct in6_addr));
+		sin6 = (struct sockaddr_in6 *)ifa->ifa_netmask;
+		memcpy(&interfaces[i].netmask, &sin6->sin6_addr,
+		    sizeof(struct in6_addr));
+		interfaces[i].family = AF_INET6;
+		i++;
+		break;
+#endif /* AF_INET6 */
 	}
     }
 #ifdef HAVE_FREEIFADDRS
@@ -271,6 +287,7 @@ load_interfaces()
 	}
 
 	/* Only now can we be sure it was a good/interesting interface. */
+	interfaces[num_interfaces].family = AF_INET;
 	num_interfaces++;
     }
 
@@ -303,9 +320,26 @@ void
 dump_interfaces()
 {
     int i;
+#ifdef AF_INET6
+    char addrbuf[INET6_ADDRSTRLEN], maskbuf[INET6_ADDRSTRLEN];
+#endif
 
     puts("Local IP address and netmask pairs:");
-    for (i = 0; i < num_interfaces; i++)
-	printf("\t%s / 0x%x\n", inet_ntoa(interfaces[i].addr),
-	    (unsigned int)ntohl(interfaces[i].netmask.s_addr));
+    for (i = 0; i < num_interfaces; i++) {
+	switch(interfaces[i].family) {
+	    case AF_INET:
+		printf("\t%s / ", inet_ntoa(interfaces[i].addr.ip4));
+		puts(inet_ntoa(interfaces[i].netmask.ip4));
+		break;
+#ifdef AF_INET6
+	    case AF_INET6:
+		inet_ntop(AF_INET6, &interfaces[i].addr.ip6,
+		    addrbuf, sizeof(addrbuf));
+		inet_ntop(AF_INET6, &interfaces[i].netmask.ip6,
+		    maskbuf, sizeof(maskbuf));
+		printf("\t%s / %s\n", addrbuf, maskbuf);
+		break;
+#endif /* AF_INET6 */
+	}
+    }
 }

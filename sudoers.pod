@@ -157,8 +157,9 @@ If you do not specify a netmask along with the network number,
 B<sudo> will query each of the local host's network interfaces and,
 if the network number corresponds to one of the hosts's network
 interfaces, the corresponding netmask will be used.  The netmask
-may be specified either in dotted quad notation (e.g.E<nbsp>255.255.255.0)
-or CIDR notation (number of bits, e.g.E<nbsp>24).  A hostname may
+may be specified either in standard IP address notation
+(e.g.E<nbsp>255.255.255.0 or ffff:ffff:ffff:ffff::),
+or CIDR notation (number of bits, e.g.E<nbsp>24 or 64).  A hostname may
 include shell-style wildcards (see the L<Wildcards> section below),
 but unless the C<hostname> command on your machine returns the fully
 qualified hostname, you'll need to use the I<fqdn> option for

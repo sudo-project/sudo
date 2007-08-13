@@ -27,8 +27,19 @@
  * IP address and netmask pairs for checking against local interfaces.
  */
 struct interface {
-    struct in_addr addr;
-    struct in_addr netmask;
+    int family;	/* AF_INET or AF_INET6 */
+    union {
+	struct in_addr ip4;
+#ifdef AF_INET6
+	struct in6_addr ip6;
+#endif
+    } addr;
+    union {
+	struct in_addr ip4;
+#ifdef AF_INET6
+	struct in6_addr ip6;
+#endif
+    } netmask;
 };
 
 /*
