@@ -616,7 +616,7 @@ init_vars(sudo_mode, envp)
 
 #ifdef HAVE_GETGROUPS
     if ((user_ngroups = getgroups(0, NULL)) > 0) {
-	user_groups = emalloc2(user_ngroups, sizeof(gid_t));
+	user_groups = emalloc2(user_ngroups, MAX(sizeof(gid_t), sizeof(int)));
 	if (getgroups(user_ngroups, user_groups) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
     } else

@@ -222,7 +222,8 @@ display_privs(v, pw)
     if (pw != sudo_user.pw) {
 	(void) initgroups(pw->pw_name, pw->pw_gid);
 	if ((user_ngroups = getgroups(0, NULL)) > 0) {
-	    user_groups = erealloc3(user_groups, user_ngroups, sizeof(gid_t));
+	    user_groups = erealloc3(user_groups, user_ngroups,
+		MAX(sizeof(gid_t), sizeof(int)));
 	    if (getgroups(user_ngroups, user_groups) < 0)
 		log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
 	} else
