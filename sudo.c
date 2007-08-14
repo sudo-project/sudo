@@ -978,7 +978,6 @@ open_sudoers(sudoers, keepopen)
 {
     struct stat statbuf;
     FILE *fp = NULL;
-    char c;
     int rootstat, i;
 
     /*
@@ -1030,8 +1029,9 @@ open_sudoers(sudoers, keepopen)
 	/* Solaris sometimes returns EAGAIN so try 10 times */
 	for (i = 0; i < 10 ; i++) {
 	    errno = 0;
-	    if ((fp = fopen(sudoers, "r")) == NULL ||
-		fread(&c, sizeof(c), 1, fp) != 1) {
+	    if ((fp = fopen(sudoers, "r")) == NULL || fgetc(fp) == EOF) {
+		if (fp != NULL)
+		    fclose(fp);
 		fp = NULL;
 		if (errno != EAGAIN && errno != EWOULDBLOCK)
 		    break;
