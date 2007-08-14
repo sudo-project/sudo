@@ -914,7 +914,6 @@ check_sudoers()
 {
     struct stat statbuf;
     int rootstat, i;
-    char c;
 
     /*
      * Fix the mode and group on sudoers file from old default.
@@ -966,7 +965,9 @@ check_sudoers()
 	for (i = 0; i < 10 ; i++) {
 	    errno = 0;
 	    if ((sudoers_fp = fopen(_PATH_SUDOERS, "r")) == NULL ||
-		fread(&c, sizeof(c), 1, sudoers_fp) != 1) {
+		fgetc(sudoers_fp) == EOF) {
+		if (sudoers_fp != NULL)
+		    fclose(sudoers_fp);
 		sudoers_fp = NULL;
 		if (errno != EAGAIN && errno != EWOULDBLOCK)
 		    break;
