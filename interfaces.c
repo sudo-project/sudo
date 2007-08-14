@@ -256,7 +256,7 @@ load_interfaces()
 		continue;
 
 	sin = (struct sockaddr_in *) &ifr->ifr_addr;
-	interfaces[num_interfaces].addr.s_addr = sin->sin_addr.s_addr;
+	interfaces[num_interfaces].addr.ip4.s_addr = sin->sin_addr.s_addr;
 
 	/* Stash the name of the interface we saved. */
 	previfname = ifr->ifr_name;
@@ -273,17 +273,17 @@ load_interfaces()
 #endif /* _ISC */
 	    sin = (struct sockaddr_in *) &ifr_tmp.ifr_addr;
 
-	    interfaces[num_interfaces].netmask.s_addr = sin->sin_addr.s_addr;
+	    interfaces[num_interfaces].netmask.ip4.s_addr = sin->sin_addr.s_addr;
 	} else {
 #else
 	{
 #endif /* SIOCGIFNETMASK */
-	    if (IN_CLASSC(interfaces[num_interfaces].addr.s_addr))
-		interfaces[num_interfaces].netmask.s_addr = htonl(IN_CLASSC_NET);
-	    else if (IN_CLASSB(interfaces[num_interfaces].addr.s_addr))
-		interfaces[num_interfaces].netmask.s_addr = htonl(IN_CLASSB_NET);
+	    if (IN_CLASSC(interfaces[num_interfaces].addr.ip4.s_addr))
+		interfaces[num_interfaces].netmask.ip4.s_addr = htonl(IN_CLASSC_NET);
+	    else if (IN_CLASSB(interfaces[num_interfaces].addr.ip4.s_addr))
+		interfaces[num_interfaces].netmask.ip4.s_addr = htonl(IN_CLASSB_NET);
 	    else
-		interfaces[num_interfaces].netmask.s_addr = htonl(IN_CLASSA_NET);
+		interfaces[num_interfaces].netmask.ip4.s_addr = htonl(IN_CLASSA_NET);
 	}
 
 	/* Only now can we be sure it was a good/interesting interface. */
