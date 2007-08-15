@@ -1,4 +1,5 @@
-.\" Copyright (c) 1994-1996,1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 1994-1996, 1998-2005, 2007
+.\" 	Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -149,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "August  1, 2007" "1.6.9p3" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "August 15, 2007" "1.6.9p4" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -179,18 +180,18 @@ grammar for the language.  \s-1EBNF\s0 also contains the following
 operators, which many readers will recognize from regular
 expressions.  Do not, however, confuse them with \*(L"wildcard\*(R"
 characters, which have different meanings.
-.ie n .IP "\*(C`?\*(C'" 8
-.el .IP "\f(CW\*(C`?\*(C'\fR" 8
+.ie n .IP "\*(C`?\*(C'" 4
+.el .IP "\f(CW\*(C`?\*(C'\fR" 4
 .IX Item "?"
 Means that the preceding symbol (or group of symbols) is optional.
 That is, it may appear once or not at all.
-.ie n .IP "\*(C`*\*(C'" 8
-.el .IP "\f(CW\*(C`*\*(C'\fR" 8
+.ie n .IP "\*(C`*\*(C'" 4
+.el .IP "\f(CW\*(C`*\*(C'\fR" 4
 .IX Item "*"
 Means that the preceding symbol (or group of symbols) may appear
 zero or more times.
-.ie n .IP "\*(C`+\*(C'" 8
-.el .IP "\f(CW\*(C`+\*(C'\fR" 8
+.ie n .IP "\*(C`+\*(C'" 4
+.el .IP "\f(CW\*(C`+\*(C'\fR" 4
 .IX Item "+"
 Means that the preceding symbol (or group of symbols) may appear
 one or more times.
@@ -307,8 +308,9 @@ If you do not specify a netmask along with the network number,
 \&\fBsudo\fR will query each of the local host's network interfaces and,
 if the network number corresponds to one of the hosts's network
 interfaces, the corresponding netmask will be used.  The netmask
-may be specified either in dotted quad notation (e.g.\ 255.255.255.0)
-or \s-1CIDR\s0 notation (number of bits, e.g.\ 24).  A hostname may
+may be specified either in standard \s-1IP\s0 address notation
+(e.g.\ 255.255.255.0 or ffff:ffff:ffff:ffff::),
+or \s-1CIDR\s0 notation (number of bits, e.g.\ 24 or 64).  A hostname may
 include shell-style wildcards (see the Wildcards section below),
 but unless the \f(CW\*(C`hostname\*(C'\fR command on your machine returns the fully
 qualified hostname, you'll need to use the \fIfqdn\fR option for
@@ -607,19 +609,19 @@ explained earlier.  A list of all supported Defaults parameters,
 grouped by type, are listed below.
 .PP
 \&\fBFlags\fR:
-.IP "always_set_home" 12
+.IP "always_set_home" 16
 .IX Item "always_set_home"
 If set, \fBsudo\fR will set the \f(CW\*(C`HOME\*(C'\fR environment variable to the home
 directory of the target user (which is root unless the \fB\-u\fR option is used).
 This effectively means that the \fB\-H\fR flag is always implied.
 This flag is \fIoff\fR by default.
-.IP "authenticate" 12
+.IP "authenticate" 16
 .IX Item "authenticate"
 If set, users must authenticate themselves via a password (or other
 means of authentication) before they may run commands.  This default
 may be overridden via the \f(CW\*(C`PASSWD\*(C'\fR and \f(CW\*(C`NOPASSWD\*(C'\fR tags.
 This flag is \fIon\fR by default.
-.IP "env_editor" 12
+.IP "env_editor" 16
 .IX Item "env_editor"
 If set, \fBvisudo\fR will use the value of the \s-1EDITOR\s0 or \s-1VISUAL\s0
 environment variables before falling back on the default editor list.
@@ -629,7 +631,7 @@ is to place a colon-separated list of editors in the \f(CW\*(C`editor\*(C'\fR
 variable.  \fBvisudo\fR will then only use the \s-1EDITOR\s0 or \s-1VISUAL\s0 if
 they match a value specified in \f(CW\*(C`editor\*(C'\fR.  This flag is \fI@env_editor@\fR by
 default.
-.IP "env_reset" 12
+.IP "env_reset" 16
 .IX Item "env_reset"
 If set, \fBsudo\fR will reset the environment to only contain the
 \&\s-1LOGNAME\s0, \s-1SHELL\s0, \s-1USER\s0, \s-1USERNAME\s0 and the \f(CW\*(C`SUDO_*\*(C'\fR variables.  Any
@@ -639,7 +641,7 @@ and \f(CW\*(C`env_check\*(C'\fR lists are then added.  The default contents of t
 run by root with the \fI\-V\fR option.  If \fBsudo\fR was compiled with
 the \f(CW\*(C`SECURE_PATH\*(C'\fR option, its value will be used for the \f(CW\*(C`PATH\*(C'\fR
 environment variable.  This flag is \fIon\fR by default.
-.IP "fqdn" 12
+.IP "fqdn" 16
 .IX Item "fqdn"
 Set this flag if you want to put fully qualified hostnames in the
 \&\fIsudoers\fR file.  I.e., instead of myhost you would use myhost.mydomain.edu.
@@ -653,7 +655,7 @@ issues and the fact that there is no way to get all aliases from
 \&\s-1DNS\s0.  If your machine's hostname (as returned by the \f(CW\*(C`hostname\*(C'\fR
 command) is already fully qualified you shouldn't need to set
 \&\fIfqdn\fR.  This flag is \fI@fqdn@\fR by default.
-.IP "ignore_dot" 12
+.IP "ignore_dot" 16
 .IX Item "ignore_dot"
 If set, \fBsudo\fR will ignore '.' or '' (current dir) in the \f(CW\*(C`PATH\*(C'\fR
 environment variable; the \f(CW\*(C`PATH\*(C'\fR itself is not modified.  This
@@ -661,7 +663,7 @@ flag is \fI@ignore_dot@\fR by default.  Currently, while it is possible
 to set \fIignore_dot\fR in \fIsudoers\fR, its value is not used.  This option
 should be considered read-only (it will be fixed in a future version
 of \fBsudo\fR).
-.IP "ignore_local_sudoers" 12
+.IP "ignore_local_sudoers" 16
 .IX Item "ignore_local_sudoers"
 If set via \s-1LDAP\s0, parsing of \f(CW@sysconfdir\fR@/sudoers will be skipped.
 This is intended for Enterprises that wish to prevent the usage of local
@@ -671,55 +673,55 @@ When this option is present, \f(CW@sysconfdir\fR@/sudoers does not even need to 
 Since this option tells \fBsudo\fR how to behave when no specific \s-1LDAP\s0 entries
 have been matched, this sudoOption is only meaningful for the cn=defaults
 section.  This flag is \fIoff\fR by default.
-.IP "insults" 12
+.IP "insults" 16
 .IX Item "insults"
 If set, \fBsudo\fR will insult users when they enter an incorrect
 password.  This flag is \fI@insults@\fR by default.
-.IP "log_host" 12
+.IP "log_host" 16
 .IX Item "log_host"
 If set, the hostname will be logged in the (non\-syslog) \fBsudo\fR log file.
 This flag is \fIoff\fR by default.
-.IP "log_year" 12
+.IP "log_year" 16
 .IX Item "log_year"
 If set, the four-digit year will be logged in the (non\-syslog) \fBsudo\fR log file.
 This flag is \fIoff\fR by default.
-.IP "long_otp_prompt" 12
+.IP "long_otp_prompt" 16
 .IX Item "long_otp_prompt"
 When validating with a One Time Password (\s-1OPT\s0) scheme such as
 \&\fBS/Key\fR or \fB\s-1OPIE\s0\fR, a two-line prompt is used to make it easier
 to cut and paste the challenge to a local window.  It's not as
 pretty as the default but some people find it more convenient.  This
 flag is \fI@long_otp_prompt@\fR by default.
-.IP "mail_always" 12
+.IP "mail_always" 16
 .IX Item "mail_always"
 Send mail to the \fImailto\fR user every time a users runs \fBsudo\fR.
 This flag is \fIoff\fR by default.
-.IP "mail_badpass" 12
+.IP "mail_badpass" 16
 .IX Item "mail_badpass"
 Send mail to the \fImailto\fR user if the user running \fBsudo\fR does not
 enter the correct password.  This flag is \fIoff\fR by default.
-.IP "mail_no_host" 12
+.IP "mail_no_host" 16
 .IX Item "mail_no_host"
 If set, mail will be sent to the \fImailto\fR user if the invoking
 user exists in the \fIsudoers\fR file, but is not allowed to run
 commands on the current host.  This flag is \fI@mail_no_host@\fR by default.
-.IP "mail_no_perms" 12
+.IP "mail_no_perms" 16
 .IX Item "mail_no_perms"
 If set, mail will be sent to the \fImailto\fR user if the invoking
 user is allowed to use \fBsudo\fR but the command they are trying is not
 listed in their \fIsudoers\fR file entry or is explicitly denied.
 This flag is \fI@mail_no_perms@\fR by default.
-.IP "mail_no_user" 12
+.IP "mail_no_user" 16
 .IX Item "mail_no_user"
 If set, mail will be sent to the \fImailto\fR user if the invoking
 user is not in the \fIsudoers\fR file.  This flag is \fI@mail_no_user@\fR
 by default.
-.IP "noexec" 12
+.IP "noexec" 16
 .IX Item "noexec"
 If set, all commands run via \fBsudo\fR will behave as if the \f(CW\*(C`NOEXEC\*(C'\fR
 tag has been set, unless overridden by a \f(CW\*(C`EXEC\*(C'\fR tag.  See the
 description of \fI\s-1NOEXEC\s0 and \s-1EXEC\s0\fR below as well as the \*(L"\s-1PREVENTING\s0 \s-1SHELL\s0 \s-1ESCAPES\s0\*(R" section at the end of this manual.  This flag is \fIoff\fR by default.
-.IP "path_info" 12
+.IP "path_info" 16
 .IX Item "path_info"
 Normally, \fBsudo\fR will tell the user when a command could not be
 found in their \f(CW\*(C`PATH\*(C'\fR environment variable.  Some sites may wish
@@ -729,14 +731,14 @@ to.  The disadvantage is that if the executable is simply not in
 the user's \f(CW\*(C`PATH\*(C'\fR, \fBsudo\fR will tell the user that they are not
 allowed to run it, which can be confusing.  This flag is \fI@path_info@\fR
 by default.
-.IP "preserve_groups" 12
+.IP "preserve_groups" 16
 .IX Item "preserve_groups"
 By default \fBsudo\fR will initialize the group vector to the list of
 groups the target user is in.  When \fIpreserve_groups\fR is set, the
 user's existing group vector is left unaltered.  The real and
 effective group IDs, however, are still set to match the target
 user.  This flag is \fIoff\fR by default.
-.IP "requiretty" 12
+.IP "requiretty" 16
 .IX Item "requiretty"
 If set, \fBsudo\fR will only run when the user is logged in to a real
 tty.  This will disallow things like \f(CW"rsh somehost sudo ls"\fR since
@@ -744,7 +746,7 @@ tty.  This will disallow things like \f(CW"rsh somehost sudo ls"\fR since
 off echo when there is no tty present, some sites may wish to set
 this flag to prevent a user from entering a visible password.  This
 flag is \fIoff\fR by default.
-.IP "root_sudo" 12
+.IP "root_sudo" 16
 .IX Item "root_sudo"
 If set, root is allowed to run \fBsudo\fR too.  Disabling this prevents users
 from \*(L"chaining\*(R" \fBsudo\fR commands to get a root shell by doing something
@@ -753,22 +755,22 @@ will also prevent root and from running \fBsudoedit\fR.
 Disabling \fIroot_sudo\fR provides no real additional security; it
 exists purely for historical reasons.
 This flag is \fI@root_sudo@\fR by default.
-.IP "rootpw" 12
+.IP "rootpw" 16
 .IX Item "rootpw"
 If set, \fBsudo\fR will prompt for the root password instead of the password
 of the invoking user.  This flag is \fIoff\fR by default.
-.IP "runaspw" 12
+.IP "runaspw" 16
 .IX Item "runaspw"
 If set, \fBsudo\fR will prompt for the password of the user defined by the
 \&\fIrunas_default\fR option (defaults to \f(CW\*(C`@runas_default@\*(C'\fR) instead of the
 password of the invoking user.  This flag is \fIoff\fR by default.
-.IP "set_home" 12
+.IP "set_home" 16
 .IX Item "set_home"
 If set and \fBsudo\fR is invoked with the \fB\-s\fR flag the \f(CW\*(C`HOME\*(C'\fR
 environment variable will be set to the home directory of the target
 user (which is root unless the \fB\-u\fR option is used).  This effectively
 makes the \fB\-s\fR flag imply \fB\-H\fR.  This flag is \fIoff\fR by default.
-.IP "set_logname" 12
+.IP "set_logname" 16
 .IX Item "set_logname"
 Normally, \fBsudo\fR will set the \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR and \f(CW\*(C`USERNAME\*(C'\fR
 environment variables to the name of the target user (usually root
@@ -779,7 +781,7 @@ change this behavior.  This can be done by negating the set_logname
 option.  Note that if the \fIenv_reset\fR option has not been disabled,
 entries in the \fIenv_keep\fR list will override the value of
 \&\fIset_logname\fR.  This flag is \fIoff\fR by default.
-.IP "setenv" 12
+.IP "setenv" 16
 .IX Item "setenv"
 Allow the user to disable the \fIenv_reset\fR option from the command
 line.  Additionally, environment variables set via the command line
@@ -787,14 +789,14 @@ are not subject to the restrictions imposed by \fIenv_check\fR,
 \&\fIenv_delete\fR, or \fIenv_keep\fR.  As such, only trusted users should
 be allowed to set variables in this manner.  This flag is \fIoff\fR
 by default.
-.IP "shell_noargs" 12
+.IP "shell_noargs" 16
 .IX Item "shell_noargs"
 If set and \fBsudo\fR is invoked with no arguments it acts as if the
 \&\fB\-s\fR flag had been given.  That is, it runs a shell as root (the
 shell is determined by the \f(CW\*(C`SHELL\*(C'\fR environment variable if it is
 set, falling back on the shell listed in the invoking user's
 /etc/passwd entry if not).  This flag is \fIoff\fR by default.
-.IP "stay_setuid" 12
+.IP "stay_setuid" 16
 .IX Item "stay_setuid"
 Normally, when \fBsudo\fR executes a command the real and effective
 UIDs are set to the target user (root by default).  This option
@@ -804,44 +806,44 @@ wrapper.  This can be useful on systems that disable some potentially
 dangerous functionality when a program is run setuid.  This option
 is only effective on systems with either the \fIsetreuid()\fR or \fIsetresuid()\fR
 function.  This flag is \fIoff\fR by default.
-.IP "targetpw" 12
+.IP "targetpw" 16
 .IX Item "targetpw"
 If set, \fBsudo\fR will prompt for the password of the user specified by
 the \fB\-u\fR flag (defaults to \f(CW\*(C`root\*(C'\fR) instead of the password of the
 invoking user.  Note that this precludes the use of a uid not listed
 in the passwd database as an argument to the \fB\-u\fR flag.
 This flag is \fIoff\fR by default.
-.IP "tty_tickets" 12
+.IP "tty_tickets" 16
 .IX Item "tty_tickets"
 If set, users must authenticate on a per-tty basis.  Normally,
 \&\fBsudo\fR uses a directory in the ticket dir with the same name as
 the user running it.  With this flag enabled, \fBsudo\fR will use a
 file named for the tty the user is logged in on in that directory.
 This flag is \fI@tty_tickets@\fR by default.
-.IP "use_loginclass" 12
+.IP "use_loginclass" 16
 .IX Item "use_loginclass"
 If set, \fBsudo\fR will apply the defaults specified for the target user's
 login class if one exists.  Only available if \fBsudo\fR is configured with
 the \-\-with\-logincap option.  This flag is \fIoff\fR by default.
 .PP
 \&\fBIntegers\fR:
-.IP "passwd_tries" 12
+.IP "passwd_tries" 16
 .IX Item "passwd_tries"
 The number of tries a user gets to enter his/her password before
 \&\fBsudo\fR logs the failure and exits.  The default is \f(CW\*(C`@passwd_tries@\*(C'\fR.
 .PP
 \&\fBIntegers that can be used in a boolean context\fR:
-.IP "loglinelen" 12
+.IP "loglinelen" 16
 .IX Item "loglinelen"
 Number of characters per line for the file log.  This value is used
 to decide when to wrap lines for nicer log files.  This has no
 effect on the syslog log file, only the file log.  The default is
 \&\f(CW\*(C`@loglen@\*(C'\fR (use 0 or negate the option to disable word wrap).
-.IP "passwd_timeout" 12
+.IP "passwd_timeout" 16
 .IX Item "passwd_timeout"
 Number of minutes before the \fBsudo\fR password prompt times out.
 The default is \f(CW\*(C`@password_timeout@\*(C'\fR; set this to \f(CW0\fR for no password timeout.
-.IP "timestamp_timeout" 12
+.IP "timestamp_timeout" 16
 .IX Item "timestamp_timeout"
 Number of minutes that can elapse before \fBsudo\fR will ask for a
 passwd again.  The default is \f(CW\*(C`@timeout@\*(C'\fR.  Set this to \f(CW0\fR to always
@@ -849,87 +851,87 @@ prompt for a password.
 If set to a value less than \f(CW0\fR the user's timestamp will never
 expire.  This can be used to allow users to create or delete their
 own timestamps via \f(CW\*(C`sudo \-v\*(C'\fR and \f(CW\*(C`sudo \-k\*(C'\fR respectively.
-.IP "umask" 12
+.IP "umask" 16
 .IX Item "umask"
 Umask to use when running the command.  Negate this option or set
 it to 0777 to preserve the user's umask.  The default is \f(CW\*(C`@sudo_umask@\*(C'\fR.
 .PP
 \&\fBStrings\fR:
-.IP "badpass_message" 12
+.IP "badpass_message" 16
 .IX Item "badpass_message"
 Message that is displayed if a user enters an incorrect password.
 The default is \f(CW\*(C`@badpass_message@\*(C'\fR unless insults are enabled.
-.IP "editor" 12
+.IP "editor" 16
 .IX Item "editor"
 A colon (':') separated list of editors allowed to be used with
 \&\fBvisudo\fR.  \fBvisudo\fR will choose the editor that matches the user's
 \&\s-1EDITOR\s0 environment variable if possible, or the first editor in the
 list that exists and is executable.  The default is the path to vi
 on your system.
-.IP "mailsub" 12
+.IP "mailsub" 16
 .IX Item "mailsub"
 Subject of the mail sent to the \fImailto\fR user. The escape \f(CW%h\fR
 will expand to the hostname of the machine.
 Default is \f(CW\*(C`@mailsub@\*(C'\fR.
-.IP "noexec_file" 12
+.IP "noexec_file" 16
 .IX Item "noexec_file"
 Path to a shared library containing dummy versions of the \fIexecv()\fR,
 \&\fIexecve()\fR and \fIfexecve()\fR library functions that just return an error.
 This is used to implement the \fInoexec\fR functionality on systems that
 support \f(CW\*(C`LD_PRELOAD\*(C'\fR or its equivalent.  Defaults to \fI@noexec_file@\fR.
-.IP "passprompt" 12
+.IP "passprompt" 16
 .IX Item "passprompt"
 The default prompt to use when asking for a password; can be overridden
 via the \fB\-p\fR option or the \f(CW\*(C`SUDO_PROMPT\*(C'\fR environment variable.
 The following percent (`\f(CW\*(C`%\*(C'\fR') escapes are supported:
-.RS 12
-.ie n .IP "%H" 8
-.el .IP "\f(CW%H\fR" 8
+.RS 16
+.ie n .IP "%H" 4
+.el .IP "\f(CW%H\fR" 4
 .IX Item "%H"
 expanded to the local hostname including the domain name
 (on if the machine's hostname is fully qualified or the \fIfqdn\fR
 option is set)
-.ie n .IP "%h" 8
-.el .IP "\f(CW%h\fR" 8
+.ie n .IP "%h" 4
+.el .IP "\f(CW%h\fR" 4
 .IX Item "%h"
 expanded to the local hostname without the domain name
-.ie n .IP "%U" 8
-.el .IP "\f(CW%U\fR" 8
+.ie n .IP "%U" 4
+.el .IP "\f(CW%U\fR" 4
 .IX Item "%U"
 expanded to the login name of the user the command will
 be run as (defaults to root)
-.ie n .IP "%u" 8
-.el .IP "\f(CW%u\fR" 8
+.ie n .IP "%u" 4
+.el .IP "\f(CW%u\fR" 4
 .IX Item "%u"
 expanded to the invoking user's login name
-.ie n .IP "\*(C`%%\*(C'" 8
-.el .IP "\f(CW\*(C`%%\*(C'\fR" 8
+.ie n .IP "\*(C`%%\*(C'" 4
+.el .IP "\f(CW\*(C`%%\*(C'\fR" 4
 .IX Item "%%"
 two consecutive \f(CW\*(C`%\*(C'\fR characters are collapsed into a single \f(CW\*(C`%\*(C'\fR character
 .RE
-.RS 12
+.RS 16
 .Sp
 The default value is \f(CW\*(C`@passprompt@\*(C'\fR.
 .RE
-.IP "runas_default" 12
+.IP "runas_default" 16
 .IX Item "runas_default"
 The default user to run commands as if the \fB\-u\fR flag is not specified
 on the command line.  This defaults to \f(CW\*(C`@runas_default@\*(C'\fR.
 Note that if \fIrunas_default\fR is set it \fBmust\fR occur before
 any \f(CW\*(C`Runas_Alias\*(C'\fR specifications.
-.IP "syslog_badpri" 12
+.IP "syslog_badpri" 16
 .IX Item "syslog_badpri"
 Syslog priority to use when user authenticates unsuccessfully.
 Defaults to \f(CW\*(C`@badpri@\*(C'\fR.
-.IP "syslog_goodpri" 12
+.IP "syslog_goodpri" 16
 .IX Item "syslog_goodpri"
 Syslog priority to use when user authenticates successfully.
 Defaults to \f(CW\*(C`@goodpri@\*(C'\fR.
-.IP "timestampdir" 12
+.IP "timestampdir" 16
 .IX Item "timestampdir"
 The directory in which \fBsudo\fR stores its timestamp files.
 The default is \fI@timedir@\fR.
-.IP "timestampowner" 12
+.IP "timestampowner" 16
 .IX Item "timestampowner"
 The owner of the timestamp directory and the timestamps stored therein.
 The default is \f(CW\*(C`root\*(C'\fR.
@@ -1040,7 +1042,7 @@ The default value is \fIall\fR.
 .RE
 .PP
 \&\fBLists that can be used in a boolean context\fR:
-.IP "env_check" 12
+.IP "env_check" 16
 .IX Item "env_check"
 Environment variables to be removed from the user's environment if
 the variable's value contains \f(CW\*(C`%\*(C'\fR or \f(CW\*(C`/\*(C'\fR characters.  This can
@@ -1054,7 +1056,7 @@ specified by \f(CW\*(C`env_check\*(C'\fR will be preserved in the environment if
 they pass the aforementioned check.  The default list of environment
 variables to check is displayed when \fBsudo\fR is run by root with
 the \fI\-V\fR option.
-.IP "env_delete" 12
+.IP "env_delete" 16
 .IX Item "env_delete"
 Environment variables to be removed from the user's environment.
 The argument may be a double\-quoted, space-separated list or a
@@ -1065,7 +1067,7 @@ variables to remove is displayed when \fBsudo\fR is run by root with the
 \&\fI\-V\fR option.  Note that many operating systems will remove potentially
 dangerous variables from the environment of any setuid process (such
 as \fBsudo\fR).
-.IP "env_keep" 12
+.IP "env_keep" 16
 .IX Item "env_keep"
 Environment variables to be preserved in the user's environment
 when the \fIenv_reset\fR option is in effect.  This allows fine-grained
@@ -1133,7 +1135,7 @@ these are a bit contrived.  First, we define our \fIaliases\fR:
 \& Host_Alias     CDROM = orion, perseus, hercules
 .Ve
 .PP
-.Vb 12
+.Vb 13
 \& # Cmnd alias specification
 \& Cmnd_Alias     DUMPS = /usr/bin/mt, /usr/sbin/dump, /usr/sbin/rdump,\e
 \&                        /usr/sbin/restore, /usr/sbin/rrestore
@@ -1146,6 +1148,7 @@ these are a bit contrived.  First, we define our \fIaliases\fR:
 \&                         /usr/local/bin/tcsh, /usr/bin/rsh, \e
 \&                         /usr/local/bin/zsh
 \& Cmnd_Alias     SU = /usr/bin/su
+\& Cmnd_Alias     PAGERS = /usr/bin/more, /usr/bin/pg, /usr/bin/less
 .Ve
 .PP
 Here we override some of the compiled in default values.  We want
@@ -1156,7 +1159,9 @@ want to reset the \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR or \f(CW\*(C
 variables when running commands as root.  Additionally, on the
 machines in the \fI\s-1SERVERS\s0\fR \f(CW\*(C`Host_Alias\*(C'\fR, we keep an additional
 local log file and make sure we log the year in each log line since
-the log entries will be kept around for several years.
+the log entries will be kept around for several years.  Lastly, we
+disable shell escapes for the commands in the \s-1PAGERS\s0 \f(CW\*(C`Cmnd_Alias\*(C'\fR
+(\fI/usr/bin/more\fR, \fI/usr/bin/pg\fR and \fI/usr/bin/less\fR).
 .PP
 .Vb 7
 \& # Override built-in defaults
@@ -1284,7 +1289,7 @@ in the \fI\s-1SERVERS\s0\fR \f(CW\*(C`Host_Alias\*(C'\fR (master, mail, www and 
 .Ve
 .PP
 For any machine in the \fI\s-1SERVERS\s0\fR \f(CW\*(C`Host_Alias\*(C'\fR, \fBjill\fR may run
-any commands in the directory /usr/bin/ except for those commands
+any commands in the directory \fI/usr/bin/\fR except for those commands
 belonging to the \fI\s-1SU\s0\fR and \fI\s-1SHELLS\s0\fR \f(CW\*(C`Cmnd_Aliases\*(C'\fR.
 .PP
 .Vb 1

@@ -1,4 +1,4 @@
-.\" Copyright (c) 1996,1998-2003 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 1996,1998-2005, 2007 Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "August  1, 2007" "1.6.9p3" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "August 15, 2007" "1.6.9p4" "MAINTENANCE COMMANDS"
 .SH "NAME"
 visudo \- edit the sudoers file
 .SH "SYNOPSIS"
@@ -225,11 +225,14 @@ and exit.
 .IX Header "ENVIRONMENT"
 The following environment variables are used only if \fBvisudo\fR
 was configured with the \fI\-\-with\-env\-editor\fR option:
-.PP
-.Vb 2
-\& VISUAL                 Invoked by visudo as the editor to use
-\& EDITOR                 Used by visudo if VISUAL is not set
-.Ve
+.ie n .IP "\*(C`VISUAL\*(C'" 16
+.el .IP "\f(CW\*(C`VISUAL\*(C'\fR" 16
+.IX Item "VISUAL"
+Invoked by visudo as the editor to use
+.ie n .IP "\*(C`EDITOR\*(C'" 16
+.el .IP "\f(CW\*(C`EDITOR\*(C'\fR" 16
+.IX Item "EDITOR"
+Used by visudo if \s-1VISUAL\s0 is not set
 .SH "FILES"
 .IX Header "FILES"
 .ie n .IP "\fI@sysconfdir@/sudoers\fR\*(C`    		\*(C'List of who can run what" 4
