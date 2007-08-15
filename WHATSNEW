@@ -5,14 +5,6 @@ What's new in Sudo 1.7?
    apply sudoers Defaults entries before searching for the command.
    It also adds support for per-command Defaults specifications.
 
- * New monitor functionality for systems with the systrace kernel facility
-   (OpenBSD and NetBSD in the default system, FreeBSD and Linux with kernel
-   patched).  When monitoring is enabled, sudo will fork a daemon that
-   monitors the command being run and intercepts the execve() system call,
-   allowing or denying execution of the new command based on a sudoers lookup.
-   The SUDO_* environment variables are also updated if this is supported by
-   the version of systrace(4) on the system.
-
  * Sudoers now supports a #include facility to allow the inclusion of other
    sudoers-format files.
 

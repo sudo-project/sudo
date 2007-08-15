@@ -279,9 +279,6 @@ struct passwd *sudo_getpwuid __P((uid_t));
 struct passwd *sudo_fakepwuid __P((uid_t));
 struct group *sudo_getgrnam __P((const char *));
 struct group *sudo_getgrgid __P((gid_t));
-#ifdef HAVE_SYSTRACE
-void systrace_attach	__P((pid_t));
-#endif
 YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */

@@ -127,8 +127,6 @@ yyerror(s)
 %token <tok> 	 PASSWD			/* passwd req for command (default) */
 %token <tok> 	 NOEXEC			/* preload dummy execve() for cmnd */
 %token <tok> 	 EXEC			/* don't preload dummy execve() */
-%token <tok> 	 MONITOR		/* monitor children of cmnd */
-%token <tok> 	 NOMONITOR		/* disable monitoring of children */
 %token <tok>	 SETENV			/* user may set environment for cmnd */
 %token <tok>	 NOSETENV		/* user may not set environment */
 %token <tok>	 ALL			/* ALL keyword */
@@ -246,8 +244,7 @@ privilege	:	hostlist '=' cmndspeclist {
 			    struct cmndspec *cs;
 			    p->hostlist = $1;
 			    p->cmndlist = $3;
-			    tags.nopasswd = tags.noexec = tags.monitor =
-				tags.setenv = UNSPEC;
+			    tags.nopasswd = tags.noexec = tags.setenv = UNSPEC;
 			    /* propagate tags */
 			    for (cs = $3; cs != NULL; cs = cs->next) {
 				if (cs->tags.nopasswd == UNSPEC)
@@ -256,8 +253,6 @@ privilege	:	hostlist '=' cmndspeclist {
 				    cs->tags.noexec = tags.noexec;
 				if (cs->tags.setenv == UNSPEC)
 				    cs->tags.setenv = tags.setenv;
-				if (cs->tags.monitor == UNSPEC)
-				    cs->tags.monitor = tags.monitor;
 				memcpy(&tags, &cs->tags, sizeof(tags));
 			    }
 			    p->last = NULL;
@@ -364,8 +359,7 @@ runasuser	:	ALIAS {
 		;
 
 cmndtag		:	/* empty */ {
-			    $$.nopasswd = $$.noexec = $$.monitor =
-				$$.setenv = UNSPEC;
+			    $$.nopasswd = $$.noexec = $$.setenv = UNSPEC;
 			}
 		|	cmndtag NOPASSWD {
 			    $$.nopasswd = TRUE;
@@ -384,12 +378,6 @@ cmndtag		:	/* empty */ {
 			}
 		|	cmndtag NOSETENV {
 			    $$.setenv = FALSE;
-			}
-		|	cmndtag MONITOR {
-			    $$.monitor = TRUE;
-			}
-		|	cmndtag NOMONITOR {
-			    $$.monitor = FALSE;
 			}
 		;
 

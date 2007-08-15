@@ -405,11 +405,6 @@ main(argc, argv, envp)
 	}
 #endif
 
-#ifdef HAVE_SYSTRACE 
-	if (def_monitor)
-	    systrace_attach(getpid());
-#endif
-
 	/* Override user's umask if configured to do so. */
 	if (def_umask != 0777)
 	    (void) umask(def_umask);

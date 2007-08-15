@@ -248,10 +248,6 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"If LDAP directory is up, do we ignore local sudoers file",
 	NULL,
     }, {
-	"monitor", T_FLAG,
-	"Monitor children of cmnd and apply sudoers restrictions to them",
-	NULL,
-    }, {
 	"closefrom", T_INT,
 	"File descriptors >= %d will be closed before executing a command",
 	NULL,

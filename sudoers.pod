@@ -250,7 +250,7 @@ See L</"SUDOERS OPTIONS"> for a list of supported Defaults parameters.
  Runas_Spec ::= '(' Runas_List ')'
 
  Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-	       'SETENV:' | 'NOSETENV:' | 'MONITOR:' | 'NOMONITOR:')
+	       'SETENV:' | 'NOSETENV:' )
 
 A B<user specification> determines which commands a user may run
 (and as what user) on specified hosts.  By default, commands are
@@ -285,7 +285,7 @@ but  F</bin/kill> and F</usr/bin/lprm> as B<root>.
 
 A command may have zero or more tags associated with it.  There are
 eight possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>, C<EXEC>,
-C<SETENV>, C<NOSETENV>, C<MONITOR> and C<NOMONITOR>.
+C<SETENV> and C<NOSETENV>.
 Once a tag is set on a C<Cmnd>, subsequent C<Cmnd>s in the
 C<Cmnd_Spec_List>, inherit the tag unless it is overridden by the
 opposite tag (i.e.: C<PASSWD> overrides C<NOPASSWD> and C<NOEXEC>
@@ -341,23 +341,6 @@ environment variables set on the command line way are not subject
 to the restrictions imposed by I<env_check>, I<env_delete>, or
 I<env_keep>.  As such, only trusted users should be allowed to set
 variables in this manner.
-
-=head3 MONITOR and NOMONITOR
-
-If B<sudo> has been configured with the C<--with-systrace> option,
-the C<MONITOR> tag can be used to cause programs spawned by a command
-to be checked against I<sudoers> and logged just like they would
-be if run through B<sudo> directly.  This is useful in conjunction
-with commands that allow shell escapes such as editors, shells and
-paginators.
-
-In the following example, user B<chuck> may run any command on the
-machine research in monitor mode.
-
- chuck	research = MONITOR: ALL
-
-See the L<PREVENTING SHELL ESCAPES> section below for more details
-on how C<MONITOR> works and whether or not it will work on your system.
 
 =head2 Wildcards
 
@@ -602,16 +585,6 @@ This flag is I<@mail_no_perms@> by default.
 If set, mail will be sent to the I<mailto> user if the invoking
 user is not in the I<sudoers> file.  This flag is I<@mail_no_user@>
 by default.
-
-=item monitor
-
-If set, all commands run via B<sudo> will behave as if the C<MONITOR>
-tag has been set, unless overridden by a C<NOMONITOR> tag.  See the
-description of I<MONITOR and NOMONITOR> below as well as the L<PREVENTING
-SHELL ESCAPES> section at the end of this manual.  Be aware that
-tracing is only supported on certain operating systems.  On systems
-where it is not supported this flag will have no effect.
-This flag is I<off> by default.
 
 =item noexec
 
@@ -1286,7 +1259,7 @@ which lets a user bypass B<sudo>'s access control and logging.
 Common programs that permit shell escapes include shells (obviously),
 editors, paginators, mail and terminal programs.
 
-There are three basic approaches to this problem:
+There are two basic approaches to this problem:
 
 =over 10
 
@@ -1340,31 +1313,6 @@ with I<noexec> enabled.  This will prevent those two commands from
 executing other commands (such as a shell).  If you are unsure
 whether or not your system is capable of supporting I<noexec> you
 can always just try it out and see if it works.
-
-=item monitor
-
-On operating systems that support the B<systrace> pseudo-device,
-the C<--with-systrace> configure option can be used to compile
-support for proccess monitoring in B<sudo>.  In monitor mode
-B<sudo> can transparently intercept a new command, allow or deny
-it based on I<sudoers>, and log the result.  This does require that
-B<sudo> become a daemon that persists until the command and all its
-descendents have exited.
-
-To enable monitor mode on a per-command basis, use the C<MONITOR>
-tag as documented in the User Specification section above.  Here
-is that example again:
-
- chuck	research = MONITOR: ALL
-
-This allows user B<chuck> to run any command on the machine research
-in monitor mode.  Any commands run via shell escapes will be logged
-by B<sudo>.
-
-At the time of this writing the B<systrace> pseudo-device comes
-standard with OpenBSD and NetBSD and is available as patches to
-FreeBSD, MacOS X and Linux.  See L<http://www.systrace.org/> for
-more information.
 
 =back
 

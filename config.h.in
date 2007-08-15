@@ -75,9 +75,6 @@
 /* Define to 1 if your `DIR' contains dd_fd. */
 #undef HAVE_DD_FD
 
-/* Define to 1 if you have the <dev/systrace.h> header file. */
-#undef HAVE_DEV_SYSTRACE_H
-
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
@@ -220,9 +217,6 @@
 
 /* Define to 1 if you have the `ldap_start_tls_s' function. */
 #undef HAVE_LDAP_START_TLS_S
-
-/* Define to 1 if you have the <linux/systrace.h> header file. */
-#undef HAVE_LINUX_SYSTRACE_H
 
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF
@@ -374,9 +368,6 @@
 /* Define to 1 if you have the `sysconf' function. */
 #undef HAVE_SYSCONF
 
-/* Define to 1 to build support for tracing subprocesses using systrace(4) */
-#undef HAVE_SYSTRACE
-
 /* Define to 1 if you have the <sys/bsdtypes.h> header file. */
 #undef HAVE_SYS_BSDTYPES_H
 
@@ -396,9 +387,6 @@
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
-
-/* Define to 1 if you have the <sys/systrace.h> header file. */
-#undef HAVE_SYS_SYSTRACE_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H

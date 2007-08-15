@@ -474,7 +474,7 @@ print_privilege(priv)
 	    print_member(m);
 	}
 	fputs(" = ", stdout);
-	tags.nopasswd = tags.noexec = tags.monitor = UNSPEC;
+	tags.nopasswd = tags.noexec = UNSPEC;
 	for (cs = p->cmndlist; cs != NULL; cs = cs->next) {
 	    if (cs != p->cmndlist)
 		fputs(", ", stdout);
@@ -491,8 +491,6 @@ print_privilege(priv)
 		printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
 	    if (cs->tags.noexec != UNSPEC && cs->tags.noexec != tags.noexec)
 		printf("%sEXEC: ", cs->tags.noexec ? "NO" : "");
-	    if (cs->tags.monitor != UNSPEC && cs->tags.monitor != tags.monitor)
-		printf("%sMONITOR: ", cs->tags.monitor ? "" : "NO");
 	    print_member(cs->cmnd);
 	    memcpy(&tags, &cs->tags, sizeof(tags));
 	}

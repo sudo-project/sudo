@@ -110,20 +110,18 @@
 #define I_NOEXEC_FILE           54
 #define def_ignore_local_sudoers (sudo_defs_table[55].sd_un.flag)
 #define I_IGNORE_LOCAL_SUDOERS  55
-#define def_monitor             (sudo_defs_table[56].sd_un.flag)
-#define I_MONITOR               56
-#define def_closefrom           (sudo_defs_table[57].sd_un.ival)
-#define I_CLOSEFROM             57
-#define def_closefrom_override  (sudo_defs_table[58].sd_un.flag)
-#define I_CLOSEFROM_OVERRIDE    58
-#define def_env_check           (sudo_defs_table[59].sd_un.list)
-#define I_ENV_CHECK             59
-#define def_env_delete          (sudo_defs_table[60].sd_un.list)
-#define I_ENV_DELETE            60
-#define def_env_keep            (sudo_defs_table[61].sd_un.list)
-#define I_ENV_KEEP              61
-#define def_setenv              (sudo_defs_table[62].sd_un.flag)
-#define I_SETENV                62
+#define def_closefrom           (sudo_defs_table[56].sd_un.ival)
+#define I_CLOSEFROM             56
+#define def_closefrom_override  (sudo_defs_table[57].sd_un.flag)
+#define I_CLOSEFROM_OVERRIDE    57
+#define def_env_check           (sudo_defs_table[58].sd_un.list)
+#define I_ENV_CHECK             58
+#define def_env_delete          (sudo_defs_table[59].sd_un.list)
+#define I_ENV_DELETE            59
+#define def_env_keep            (sudo_defs_table[60].sd_un.list)
+#define I_ENV_KEEP              60
+#define def_setenv              (sudo_defs_table[61].sd_un.flag)
+#define I_SETENV                61
 
 enum def_tupple {
 	never,

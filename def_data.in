@@ -182,9 +182,6 @@ noexec_file
 ignore_local_sudoers
 	T_FLAG
 	"If LDAP directory is up, do we ignore local sudoers file"
-monitor
-	T_FLAG
-	"Monitor children of cmnd and apply sudoers restrictions to them"
 closefrom
 	T_INT
 	"File descriptors >= %d will be closed before executing a command"

@@ -101,7 +101,7 @@ PROGS = @PROGS@
 SRCS = alloc.c alloca.c check.c closefrom.c def_data.c defaults.c env.c \
        error.c fileops.c find_path.c fnmatch.c getcwd.c getprogname.c \
        getspwuid.c gettime.c goodpath.c gram.c gram.y interfaces.c ldap.c \
-       logging.c match.c mkstemp.c memrchr.c mon_systrace.c parse.c pwutil.c  \
+       logging.c match.c mkstemp.c memrchr.c parse.c pwutil.c  \
        set_perms.c sigaction.c snprintf.c strcasecmp.c strerror.c strlcat.c \
        strlcpy.c sudo.c sudo_noexec.c sudo_edit.c testsudoers.c tgetpass.c \
        toke.c toke.l tsgetgrpw.c utimes.c visudo.c zero_bytes.c redblack.c \
@@ -263,8 +263,6 @@ mkstemp.o: $(srcdir)/mkstemp.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mkstemp.c
 mon_solaris.o: $(srcdir)/mon_solaris.c $(SUDODEP) $(srcdir)/mon_solaris.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mon_solaris.c
-mon_systrace.o: $(srcdir)/mon_systrace.c $(SUDODEP) $(srcdir)/mon_systrace.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mon_systrace.c
 parse.o: $(srcdir)/parse.c $(SUDODEP) $(srcdir)/parse.h $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/parse.c
 pwutil.o: $(srcdir)/pwutil.c $(SUDODEP)

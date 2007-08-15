@@ -392,13 +392,6 @@ AC_ARG_WITH(bsdauth, [  --with-bsdauth          enable BSD authentication suppor
 		;;
 esac])
 
-AC_ARG_WITH(systrace, [  --with-systrace[[=DIR]]   enable systrace(4) support],
-[case $with_systrace in
-    no)		with_systrace=""
-		;;
-    *)		;;
-esac])
-
 AC_ARG_WITH(project, [  --with-project          enable Solaris project support],
 [case $with_project in
     yes|no)	;;
@@ -1781,19 +1774,6 @@ AC_CHECK_FUNCS(getprogname, , [
     AC_MSG_RESULT($sudo_cv___progname)
 ])
 dnl
-dnl systrace(4) support
-dnl
-if test -n "$with_systrace"; then
-    AC_DEFINE(HAVE_SYSTRACE)
-    if test "$with_systrace" = "yes"; then
-	AC_CHECK_HEADERS(dev/systrace.h sys/systrace.h linux/systrace.h, [break], [], [#include <sys/param.h>])
-    else
-	CPPFLAGS="$CPPFLAGS -I${with_systrace}"
-    fi
-    SUDO_OBJS="${SUDO_OBJS} mon_systrace.o"
-    AC_CHECK_FUNCS(setproctitle)
-fi
-dnl
 dnl Kerberos IV
 dnl
 if test -n "$with_kerb4"; then
@@ -2393,7 +2373,6 @@ AH_TEMPLATE(HAVE_SKEY, [Define to 1 if you use S/Key.])
 AH_TEMPLATE(HAVE_SKEYACCESS, [Define to 1 if your S/Key library has skeyaccess().])
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member])
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member])
-AH_TEMPLATE(HAVE_SYSTRACE, [Define to 1 to build support for tracing subprocesses using systrace(4)])
 AH_TEMPLATE(HAVE_TERMIOS_H, [Define to 1 if you have the <termios.h> header file and the `tcgetattr' function.])
 AH_TEMPLATE(HAVE_TIMESPEC, [Define to 1 if you have struct timespec in sys/time.h])
 AH_TEMPLATE(HAVE_TIMESPECSUB2, [Define to 1 if you have a timespecsub macro or function that takes two arguments (not three)])

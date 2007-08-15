@@ -193,8 +193,6 @@ sudoers_lookup(pwflag)
 		def_noexec = tags->noexec;
 	    if (tags->setenv != UNSPEC)
 		def_setenv = tags->setenv;
-	    if (tags->monitor != UNSPEC)
-		def_monitor = tags->monitor;
 	}
     }
     set_perms(PERM_ROOT);
@@ -243,7 +241,6 @@ display_privs(v, pw)
 		continue;
 
 	    for (priv = us->privileges; priv != NULL; priv = priv->next) {
-		tags.monitor = def_monitor;
 		tags.noexec = def_noexec;
 		tags.setenv = def_setenv;
 		tags.nopasswd = !def_authenticate;
@@ -261,10 +258,6 @@ display_privs(v, pw)
 			print_priv(def_runas_default);
 		    }
 		    print_priv(") ");
-		    if (TAG_CHANGED(monitor)) {
-			print_priv(cs->tags.monitor ? "MONITOR: " : "NOMONITOR: ");
-			tags.monitor = cs->tags.monitor;
-		    }
 		    if (TAG_CHANGED(setenv)) {
 			print_priv(cs->tags.setenv ? "SETENV: " : "NOSETENV: ");
 			tags.setenv = cs->tags.setenv;

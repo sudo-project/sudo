@@ -44,7 +44,6 @@ struct cmndtag {
     char nopasswd;
     char noexec;
     char setenv;
-    char monitor;
     char extra;
 };
 

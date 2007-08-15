@@ -15,17 +15,15 @@
 #define PASSWD 271
 #define NOEXEC 272
 #define EXEC 273
-#define MONITOR 274
-#define NOMONITOR 275
-#define SETENV 276
-#define NOSETENV 277
-#define ALL 278
-#define COMMENT 279
-#define HOSTALIAS 280
-#define CMNDALIAS 281
-#define USERALIAS 282
-#define RUNASALIAS 283
-#define ERROR 284
+#define SETENV 274
+#define NOSETENV 275
+#define ALL 276
+#define COMMENT 277
+#define HOSTALIAS 278
+#define CMNDALIAS 279
+#define USERALIAS 280
+#define RUNASALIAS 281
+#define ERROR 282
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {

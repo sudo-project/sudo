@@ -286,16 +286,6 @@ NOSETENV[[:blank:]]*:	{
 			    	return(NOSETENV);
 			}
 
-NOMONITOR[[:blank:]]*:	{
-			    	LEXTRACE("NOMONITOR ");
-			    	return(NOMONITOR);
-			}
-
-MONITOR[[:blank:]]*:	{
-			    	LEXTRACE("MONITOR ");
-			    	return(MONITOR);
-			}
-
 \+{WORD}		{
 			    /* netgroup */
 			    if (!fill(yytext, yyleng))
