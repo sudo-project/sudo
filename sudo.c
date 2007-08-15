@@ -1135,17 +1135,33 @@ set_project(pw)
 void
 set_fqdn()
 {
+#ifdef HAVE_GETADDRINFO
+    struct addrinfo *res0, hint;
+#else
     struct hostent *hp;
+#endif
     char *p;
 
+#ifdef HAVE_GETADDRINFO
+    memset(&hint, 0, sizeof(hint));
+    hint.ai_family = PF_UNSPEC;
+    hint.ai_flags = AI_CANONNAME;
+    if (getaddrinfo(user_host, NULL, &hint, &res0) != 0) {
+#else
     if (!(hp = gethostbyname(user_host))) {
+#endif
 	log_error(MSG_ONLY|NO_EXIT,
-	    "unable to lookup %s via gethostbyname()", user_host);
+	    "unable to resolve host %s", user_host);
     } else {
 	if (user_shost != user_host)
 	    efree(user_shost);
 	efree(user_host);
+#ifdef HAVE_GETADDRINFO
+	user_host = estrdup(res0->ai_canonname);
+	freeaddrinfo(res0);
+#else
 	user_host = estrdup(hp->h_name);
+#endif
     }
     if ((p = strchr(user_host, '.'))) {
 	*p = '\0';
