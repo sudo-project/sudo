@@ -1,4 +1,4 @@
-.\" Copyright (c) 1996,1998-2004 Todd C. Miller <Todd.Miller@courtesan.com>
+.\" Copyright (c) 1996,1998-2005, 2007 Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -149,16 +149,16 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "June 23, 2007" "1.7" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "August 15, 2007" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 visudo \- edit the sudoers file
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBvisudo\fR [ \fB\-c\fR ] [ \fB\-f\fR \fIsudoers\fR ] [ \fB\-q\fR ] [ \fB\-s\fR ] [ \fB\-V\fR ]
+\&\fBvisudo\fR [\fB\-c\fR] [\fB\-q\fR] [\fB\-s\fR] [\fB\-V\fR] [\fB\-f\fR \fIsudoers\fR]
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 \&\fBvisudo\fR edits the \fIsudoers\fR file in a safe fashion, analogous to
-vipw(@mansectsu@).  \fBvisudo\fR locks the \fIsudoers\fR file against multiple
+\&\fIvipw\fR\|(@mansectsu@).  \fBvisudo\fR locks the \fIsudoers\fR file against multiple
 simultaneous edits, provides basic sanity checks, and checks
 for parse errors.  If the \fIsudoers\fR file is currently being
 edited you will receive a message to try again later.
@@ -225,17 +225,24 @@ and exit.
 .IX Header "ENVIRONMENT"
 The following environment variables are used only if \fBvisudo\fR
 was configured with the \fI\-\-with\-env\-editor\fR option:
-.PP
-.Vb 2
-\& VISUAL                 Invoked by visudo as the editor to use
-\& EDITOR                 Used by visudo if VISUAL is not set
-.Ve
+.ie n .IP "\*(C`VISUAL\*(C'" 16
+.el .IP "\f(CW\*(C`VISUAL\*(C'\fR" 16
+.IX Item "VISUAL"
+Invoked by visudo as the editor to use
+.ie n .IP "\*(C`EDITOR\*(C'" 16
+.el .IP "\f(CW\*(C`EDITOR\*(C'\fR" 16
+.IX Item "EDITOR"
+Used by visudo if \s-1VISUAL\s0 is not set
 .SH "FILES"
 .IX Header "FILES"
-.Vb 2
-\& @sysconfdir@/sudoers           List of who can run what
-\& @sysconfdir@/sudoers.tmp       Lock file for visudo
-.Ve
+.ie n .IP "\fI@sysconfdir@/sudoers\fR\*(C`    		\*(C'List of who can run what" 4
+.el .IP "\fI@sysconfdir@/sudoers\fR\f(CW\*(C`    		\*(C'\fRList of who can run what" 4
+.IX Item "@sysconfdir@/sudoers    		List of who can run what"
+.PD 0
+.ie n .IP "\fI@sysconfdir@/sudoers.tmp\fR\*(C`		\*(C'Lock file for visudo" 4
+.el .IP "\fI@sysconfdir@/sudoers.tmp\fR\f(CW\*(C`		\*(C'\fRLock file for visudo" 4
+.IX Item "@sysconfdir@/sudoers.tmp		Lock file for visudo"
+.PD
 .SH "DIAGNOSTICS"
 .IX Header "DIAGNOSTICS"
 .IP "sudoers file busy, try again later." 4
@@ -261,7 +268,7 @@ used.  You may wish to comment out or remove the unused alias.  In
 \&\fB\-s\fR (strict) mode this is an error, not a warning.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIvi\fR\|(1), sudoers(@mansectform@), sudo(@mansectsu@), vipw(@mansectsu@)
+\&\fIvi\fR\|(1), \fIsudoers\fR\|(@mansectform@), \fIsudo\fR\|(@mansectsu@), \fIvipw\fR\|(8)
 .SH "AUTHOR"
 .IX Header "AUTHOR"
 Many people have worked on \fIsudo\fR over the years; this version of
@@ -288,7 +295,7 @@ see http://www.sudo.ws/mailman/listinfo/sudo\-users to subscribe or
 search the archives.
 .SH "DISCLAIMER"
 .IX Header "DISCLAIMER"
-\&\fBVisudo\fR is provided ``\s-1AS\s0 \s-1IS\s0'' and any express or implied warranties,
+\&\fBvisudo\fR is provided ``\s-1AS\s0 \s-1IS\s0'' and any express or implied warranties,
 including, but not limited to, the implied warranties of merchantability
 and fitness for a particular purpose are disclaimed.  See the \s-1LICENSE\s0
 file distributed with \fBsudo\fR or http://www.sudo.ws/sudo/license.html

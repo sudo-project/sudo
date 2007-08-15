@@ -8,11 +8,11 @@ NNAAMMEE
        visudo - edit the sudoers file
 
 SSYYNNOOPPSSIISS
-       vviissuuddoo [ --cc ] [ --ff _s_u_d_o_e_r_s ] [ --qq ] [ --ss ] [ --VV ]
+       vviissuuddoo [--cc] [--qq] [--ss] [--VV] [--ff _s_u_d_o_e_r_s]
 
 DDEESSCCRRIIPPTTIIOONN
        vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous
-       to vipw(1m).  vviissuuddoo locks the _s_u_d_o_e_r_s file against multi­
+       to _v_i_p_w(1m).  vviissuuddoo locks the _s_u_d_o_e_r_s file against multi-
        ple simultaneous edits, provides basic sanity checks, and
        checks for parse errors.  If the _s_u_d_o_e_r_s file is currently
        being edited you will receive a message to try again
@@ -25,7 +25,7 @@ DDEESSCCRRIIPPTTIIOONN
        script.  Normally, vviissuuddoo does not honor the VISUAL or
        EDITOR environment variables unless they contain an editor
        in the aforementioned editors list.  However, if vviissuuddoo is
-       configured with the _-_-_w_i_t_h_-_e_n_v_e_d_i_t_o_r flag or the _e_n_v___e_d_i_­
+       configured with the _-_-_w_i_t_h_-_e_n_v_e_d_i_t_o_r flag or the _e_n_v___e_d_i_-
        _t_o_r Default variable is set in _s_u_d_o_e_r_s, vviissuuddoo will use
        any the editor defines by VISUAL or EDITOR.  Note that
        this can be a security hole since it allows the user to
@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.7                       June 23, 2007                         1
+1.7                      August 15, 2007                        1
 
 
 
@@ -80,8 +80,8 @@ VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
            when combined with the --cc flag.
 
        -s  Enable ssttrriicctt checking of the _s_u_d_o_e_r_s file.  If an
-           alias is used before it is defined, vviissuuddoo will con­
-           sider this a parse error.  Note that it is not possi­
+           alias is used before it is defined, vviissuuddoo will con-
+           sider this a parse error.  Note that it is not possi-
            ble to differentiate between an alias and a hostname
            or username that consists solely of uppercase letters,
            digits, and the underscore ('_') character.
@@ -93,12 +93,13 @@ EENNVVIIRROONNMMEENNTT
        The following environment variables are used only if
        vviissuuddoo was configured with the _-_-_w_i_t_h_-_e_n_v_-_e_d_i_t_o_r option:
 
-        VISUAL                 Invoked by visudo as the editor to use
-        EDITOR                 Used by visudo if VISUAL is not set
+       VISUAL          Invoked by visudo as the editor to use
+
+       EDITOR          Used by visudo if VISUAL is not set
 
 FFIILLEESS
-        /etc/sudoers           List of who can run what
-        /etc/sudoers.tmp       Lock file for visudo
+       _/_e_t_c_/_s_u_d_o_e_r_s             List of who can run what
+       _/_e_t_c_/_s_u_d_o_e_r_s_._t_m_p         Lock file for visudo
 
 DDIIAAGGNNOOSSTTIICCSS
        sudoers file busy, try again later.
@@ -114,7 +115,7 @@ DDIIAAGGNNOOSSTTIICCSS
        defined
            Either you are trying to use an undeclare
            {User,Runas,Host,Cmnd}_Alias or you have a user or
-           hostname listed that consists solely of uppercase let­
+           hostname listed that consists solely of uppercase let-
            ters, digits, and the underscore ('_') character.  In
            the latter case, you can ignore the warnings (ssuuddoo
            will not complain).  In --ss (strict) mode these are
@@ -123,11 +124,10 @@ DDIIAAGGNNOOSSTTIICCSS
        Warning: unused {User,Runas,Host,Cmnd}_Alias
            The specified {User,Runas,Host,Cmnd}_Alias was defined
            but never used.  You may wish to comment out or remove
-           the unused alias.  In --ss (strict) mode this is an
 
 
 
-1.7                       June 23, 2007                         2
+1.7                      August 15, 2007                        2
 
 
 
@@ -136,13 +136,14 @@ DDIIAAGGNNOOSSTTIICCSS
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
+           the unused alias.  In --ss (strict) mode this is an
            error, not a warning.
 
 SSEEEE AALLSSOO
-       _v_i(1), sudoers(4), sudo(1m), vipw(1m)
+       _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(8)
 
 AAUUTTHHOORR
-       Many people have worked on _s_u_d_o over the years; this ver­
+       Many people have worked on _s_u_d_o over the years; this ver-
        sion of vviissuuddoo was written by:
 
         Todd Miller
@@ -159,17 +160,17 @@ BBUUGGSS
        a bug report at http://www.sudo.ws/sudo/bugs/
 
 SSUUPPPPOORRTT
-       Limited free support is available via the sudo-users mail­
-       ing list, see http://www.sudo.ws/mail­
+       Limited free support is available via the sudo-users mail-
+       ing list, see http://www.sudo.ws/mail-
        man/listinfo/sudo-users to subscribe or search the
        archives.
 
 DDIISSCCLLAAIIMMEERR
-       VViissuuddoo is provided ``AS IS'' and any express or implied
+       vviissuuddoo is provided ``AS IS'' and any express or implied
        warranties, including, but not limited to, the implied
        warranties of merchantability and fitness for a particular
        purpose are disclaimed.  See the LICENSE file distributed
-       with ssuuddoo or http://www.sudo.ws/sudo/license.html for com­
+       with ssuuddoo or http://www.sudo.ws/sudo/license.html for com-
        plete details.
 
 
@@ -192,7 +193,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-1.7                       June 23, 2007                         3
+1.7                      August 15, 2007                        3
 
 
