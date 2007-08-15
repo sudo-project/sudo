@@ -244,10 +244,11 @@ display_privs(v, pw)
 		tags.noexec = def_noexec;
 		tags.setenv = def_setenv;
 		tags.nopasswd = !def_authenticate;
+		print_priv("    ");
 		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
 		    if (cs != priv->cmndlist)
 			print_priv(", ");
-		    print_priv("    (");
+		    print_priv("(");
 		    if (cs->runaslist != NULL) {
 			for (m = cs->runaslist; m != NULL; m = m->next) {
 			    if (m != cs->runaslist)
@@ -511,7 +512,8 @@ get_ttycols()
 /*
  * Simplistic print function with line wrap.
  * XXX - does not expand tabs, etc and only checks for newlines
- *       at the end of an arg.
+ *       at the end of an arg.  Should probably use cols-2 to leave
+ *	 room for a space and the continuation char.
  */
 static void
 #ifdef __STDC__
@@ -546,7 +548,7 @@ print_wrap(indent, lc, nargs, va_alist)
 
     if (len > left && cols > indent && len < cols - indent) {
 	if (lc)
-	    putchar(lc);
+	    putchar(lc);	/* XXX - there may not be space on the line for continuation char */
 	putchar('\n');
 	for (i = 0; i < indent; i++)
 	    putchar(' ');
