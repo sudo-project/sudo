@@ -67,7 +67,7 @@ error occurred (if the editor supports this feature).
 
 B<visudo> accepts the following command line options:
 
-=over 4
+=over 12
 
 =item -c
 
@@ -78,7 +78,7 @@ If the syntax check completes successfully, B<visudo> will
 exit with a value of 0.  If a syntax error is encountered,
 B<visudo> will exit with a value of 1.
 
-=item -f
+=item -f I<sudoers>
 
 Specify and alternate I<sudoers> file location.  With this option
 B<visudo> will edit (or check) the I<sudoers> file of your choice,
@@ -108,8 +108,8 @@ and exit.
 
 =head1 ENVIRONMENT
 
-The following environment variables are used only if B<visudo>
-was configured with the I<--with-env-editor> option:
+The following environment variables may be consulted depending on
+the value of the I<editor> and I<env_editor> I<sudoers> variables:
 
 =over 16
 
