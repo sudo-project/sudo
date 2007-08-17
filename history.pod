@@ -23,6 +23,11 @@ some time, Todd Miller made a public release of "CU sudo" (version
 "CU" was added to differentiate it from the "official" version from
 "The Root Group".
 
+In 1995, a new parser for the sudoers file was contributed by Chris
+Jepeway.  The new parser was a proper grammar (unlike the old one)
+and could work with both sudo and visudo (previously they had
+slightly different parsers).
+
 In 1996, Todd, who had been maintaining sudo for several years in
 his spare time, brought sudo development under the umbrella of his
 consulting firm, Courtesan Consulting.  Courtesan remains committed
@@ -35,10 +40,10 @@ been no formal release of sudo from "The Root Group" since 1991
 no longer contains any of the original "Root Group" code and is
 available under an ISC-style license.
 
-In 2004, Todd incorporated as GratiSoft, Inc. to provide commercial
-support and enhancements to the sudo community.
-
-In 2005, GratiSoft was put on hold.
+In 2005, Todd rewrote the sudoers parser to better support the
+features that had been added in the past ten years.  The new parser
+removes some limitations of the previous one, removes ordering
+constraints and adds support for including multiple sudoers files.
 
 sudo, in its current form, is maintained by:
 
