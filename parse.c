@@ -64,7 +64,6 @@ extern struct defaults *defaults;
 static void print_member	__P((char *, int, int, int));
 static void display_defaults	__P((struct passwd *));
 static void display_bound_defaults __P((int));
-static int  get_ttycols		__P((void));
 static void print_wrap		__P((int, int, int, ...));
 
 #define	print_def(a)		print_wrap(4, 0, 1, a);
@@ -491,7 +490,7 @@ print_member(name, type, negated, alias_type)
 # define ts_cols	ws_col
 #endif
 
-static int
+int
 get_ttycols()
 {
     char *p;

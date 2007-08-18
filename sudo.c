@@ -1318,13 +1318,21 @@ usage(exit_val)
     int exit_val;
 {
     char **p, **uvec[5];
-    int i, linelen, linemax, ulen;
+    int i, linelen, linemax, ulen, plen;
     static char *uvec1[] = {
-	" -h | -K | -k | -L | -V | -v",
+	" -h |",
+	" -K |",
+	" -k |",
+	" -L |",
+	" -V |",
+	" -v",
 	NULL
     };
     static char *uvec2[] = {
-	" -l [-U username] [-u username|#uid] [command]",
+	" -l",
+	" [-U username]",
+	" [-u username|#uid]",
+	" [command]",
 	NULL
     };
     static char *uvec3[] = {
@@ -1373,20 +1381,22 @@ usage(exit_val)
     }
 
     /*
-     * Print usage and wrap lines as needed.
-     * Assumes an 80-character wide terminal, which is kind of bogus...
+     * Print usage and wrap lines as needed, depending on the
+     * tty width.
      */
     ulen = (int)strlen(getprogname()) + 7;
-    linemax = 80;
+    linemax = get_ttycols();
     for (i = 0; uvec[i] != NULL; i++) {
-	linelen = linemax - ulen;
 	printf("usage: %s", getprogname());
+	linelen = linemax - ulen;
 	for (p = uvec[i]; *p != NULL; p++) {
-	    if (linelen == linemax || (linelen -= strlen(*p)) >= 0) {
+	    plen = (int)strlen(*p);
+	    if (linelen >= plen || linelen == linemax - ulen) {
 		fputs(*p, stdout);
+		linelen -= plen;
 	    } else {
 		p--;
-		linelen = linemax;
+		linelen = linemax - ulen;
 		printf("\n%*s", ulen, "");
 	    }
 	}

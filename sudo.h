@@ -264,6 +264,7 @@ int gettime		__P((struct timespec *));
 FILE *open_sudoers	__P((const char *, int *));
 void display_privs	__P((VOID *, struct passwd *));
 int display_cmnd	__P((VOID *, struct passwd *));
+int get_ttycols		__P((void));
 void sudo_setenv	__P((const char *, const char *, int));
 void sudo_unsetenv	__P((const char *));
 void sudo_setgrent	__P((void));
