@@ -93,6 +93,8 @@
 #endif
 
 #include "sudo.h"
+#include "sudo_usage.h"
+#include "lbuf.h"
 #include "interfaces.h"
 #include "version.h"
 
@@ -1312,71 +1314,27 @@ usage_excl(exit_val)
 
 /*
  * Give usage message and exit.
+ * The actual usage strings are in sudo_usage.h for configure substitution.
  */
 static void
 usage(exit_val)
     int exit_val;
 {
-    char **p, **uvec[5];
-    int i, linelen, linemax, ulen, plen;
-    static char *uvec1[] = {
-	" -h |",
-	" -K |",
-	" -k |",
-	" -L |",
-	" -V |",
-	" -v",
-	NULL
-    };
-    static char *uvec2[] = {
-	" -l",
-	" [-U username]",
-	" [-u username|#uid]",
-	" [command]",
-	NULL
-    };
-    static char *uvec3[] = {
-	" [-bEHPS]",
-#ifdef HAVE_BSD_AUTH_H
-	" [-a auth_type]",
-#endif
-	" [-C fd]",
-#ifdef HAVE_LOGIN_CAP_H
-	" [-c class|-]",
-#endif
-	" [-p prompt]",
-	" [-u username|#uid]",
-	" [VAR=value]",
-	" {-i | -s | <command>}",
-	NULL
-    };
-    static char *uvec4[] = {
-	" -e",
-	" [-S]",
-#ifdef HAVE_BSD_AUTH_H
-	" [-a auth_type]",
-#endif
-	" [-C fd]",
-#ifdef HAVE_LOGIN_CAP_H
-	" [-c class|-]",
-#endif
-	" [-p prompt]",
-	" [-u username|#uid]",
-	" file ...",
-	NULL
-    };
+    struct lbuf lbuf;
+    char *uvec[5];
+    int i, ulen;
 
     /*
      * Use usage vectors appropriate to the progname.
      */
     if (strcmp(getprogname(), "sudoedit") == 0) {
-	uvec[0] = uvec4 + 1;
+	uvec[0] = SUDO_USAGE4 + 3;
 	uvec[1] = NULL;
     } else {
-	uvec[0] = uvec1;
-	uvec[1] = uvec2;
-	uvec[2] = uvec3;
-	uvec[3] = uvec4;
+	uvec[0] = SUDO_USAGE1;
+	uvec[1] = SUDO_USAGE2;
+	uvec[2] = SUDO_USAGE3;
+	uvec[3] = SUDO_USAGE4;
 	uvec[4] = NULL;
     }
 
@@ -1384,23 +1342,12 @@ usage(exit_val)
      * Print usage and wrap lines as needed, depending on the
      * tty width.
      */
-    ulen = (int)strlen(getprogname()) + 7;
-    linemax = get_ttycols();
+    ulen = (int)strlen(getprogname()) + 8;
+    lbuf_init(&lbuf, NULL, ulen, 0);
     for (i = 0; uvec[i] != NULL; i++) {
-	printf("usage: %s", getprogname());
-	linelen = linemax - ulen;
-	for (p = uvec[i]; *p != NULL; p++) {
-	    plen = (int)strlen(*p);
-	    if (linelen >= plen || linelen == linemax - ulen) {
-		fputs(*p, stdout);
-		linelen -= plen;
-	    } else {
-		p--;
-		linelen = linemax - ulen;
-		printf("\n%*s", ulen, "");
-	    }
-	}
-	putchar('\n');
+	lbuf_append(&lbuf, "usage: ", getprogname(), uvec[i], NULL);
+	lbuf_print(&lbuf);
     }
+    lbuf_destroy(&lbuf);
     exit(exit_val);
 }

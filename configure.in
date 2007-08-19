@@ -40,6 +40,8 @@ AC_SUBST(NOEXECDIR)
 AC_SUBST(noexec_file)
 AC_SUBST(INSTALL_NOEXEC)
 AC_SUBST(DONT_LEAK_PATH_INFO)
+AC_SUBST(BSDAUTH_USAGE)
+AC_SUBST(LOGINCAP_USAGE)
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -1626,7 +1628,7 @@ if test "$OS" != "ultrix"; then
     fi
 fi
 if test ${with_logincap-'no'} != "no"; then
-    AC_CHECK_HEADERS(login_cap.h)
+    AC_CHECK_HEADERS(login_cap.h, [LOGINCAP_USAGE='[[-c class|-]] '])
 fi
 if test ${with_project-'no'} != "no"; then
     AC_CHECK_HEADER(project.h, AC_DEFINE(HAVE_PROJECT_H)
@@ -2159,7 +2161,8 @@ dnl
 if test ${with_bsdauth-'no'} != "no"; then
     if test X"$with_bsdauth" != X"maybe" -o X"$AUTH_EXCL" = X""; then
 	AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H)
-	    [SUDO_ADD_AUTH([BSD authentication], [bsdauth.o], [true])], -)
+	    [SUDO_ADD_AUTH([BSD authentication], [bsdauth.o], [true])]
+	    [BSDAUTH_USAGE='[[-a auth_type]] '], -)
     fi
 fi
 
@@ -2314,7 +2317,7 @@ fi
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-AC_CONFIG_FILES([Makefile sudo.man visudo.man sudoers.man])
+AC_CONFIG_FILES([Makefile sudo.man visudo.man sudoers.man sudo_usage.h])
 AC_OUTPUT
 
 dnl

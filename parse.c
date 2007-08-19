@@ -20,7 +20,6 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
-#include <sys/ioctl.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -46,6 +45,7 @@
 
 #include "sudo.h"
 #include "parse.h"
+#include "lbuf.h"
 #include <gram.h>
 
 #ifndef lint
@@ -61,19 +61,9 @@ extern struct defaults *defaults;
 /*
  * Local prototypes.
  */
-static void print_member	__P((char *, int, int, int));
+static void print_member	__P((struct lbuf *, char *, int, int, int));
 static void display_defaults	__P((struct passwd *));
 static void display_bound_defaults __P((int));
-static void print_wrap		__P((int, int, int, ...));
-
-#define	print_def(a)		print_wrap(4, 0, 1, a);
-#define	print_def2(a, b)	print_wrap(4, 0, 2, a, b);
-#define	print_def3(a, b, c)	print_wrap(4, 0, 3, a, b, c);
-#define	print_def4(a, b, c, d)	print_wrap(4, 0, 4, a, b, c, d);
-#define	print_priv(a)		print_wrap(8, '\\', 1, a);
-#define	print_priv2(a, b)	print_wrap(8, '\\', 2, a, b);
-#define	print_priv3(a, b, c)	print_wrap(8, '\\', 3, a, b, c);
-#define	print_priv4(a, b, c, d)	print_wrap(8, '\\', 4, a, b, c, d);
 
 /*
  * Parse the specified sudoers file.
@@ -208,6 +198,7 @@ display_privs(v, pw)
     VOID *v;
     struct passwd *pw;
 {
+    struct lbuf lbuf;
     struct cmndspec *cs;
     struct member *m;
     struct privilege *priv;
@@ -231,8 +222,9 @@ display_privs(v, pw)
     if (!def_ignore_local_sudoers) {
 	display_defaults(pw);
 
-	print_priv3("User ", pw->pw_name,
-	    " may run the following commands on this host:\n");
+	lbuf_init(&lbuf, NULL, 8, '\\');
+	printf("User %s may run the following commands on this host:\n",
+	    pw->pw_name);
 
 	for (us = userspecs; us != NULL; us = us->next) {
 	    if (user_matches(pw, us->user) != ALLOW ||
@@ -243,39 +235,45 @@ display_privs(v, pw)
 		tags.noexec = def_noexec;
 		tags.setenv = def_setenv;
 		tags.nopasswd = !def_authenticate;
-		print_priv("    ");
+		lbuf_append(&lbuf, "    ", NULL);
 		for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
 		    if (cs != priv->cmndlist)
-			print_priv(", ");
-		    print_priv("(");
+			lbuf_append(&lbuf, ", ", NULL);
+		    lbuf_append(&lbuf, "(", NULL);
 		    if (cs->runaslist != NULL) {
 			for (m = cs->runaslist; m != NULL; m = m->next) {
 			    if (m != cs->runaslist)
-				print_priv(", ");
-			    print_member(m->name, m->type, m->negated, RUNASALIAS);
+				lbuf_append(&lbuf, ", ", NULL);
+			    print_member(&lbuf, m->name, m->type, m->negated,
+				RUNASALIAS);
 			}
 		    } else {
-			print_priv(def_runas_default);
+			lbuf_append(&lbuf, def_runas_default, NULL);
 		    }
-		    print_priv(") ");
+		    lbuf_append(&lbuf, ") ", NULL);
 		    if (TAG_CHANGED(setenv)) {
-			print_priv(cs->tags.setenv ? "SETENV: " : "NOSETENV: ");
+			lbuf_append(&lbuf, cs->tags.setenv ? "SETENV: " :
+			    "NOSETENV: ", NULL);
 			tags.setenv = cs->tags.setenv;
 		    }
 		    if (TAG_CHANGED(noexec)) {
-			print_priv(cs->tags.noexec ? "NOEXEC: " : "EXEC: ");
+			lbuf_append(&lbuf, cs->tags.noexec ? "NOEXEC: " :
+			    "EXEC: ", NULL);
 			tags.noexec = cs->tags.noexec;
 		    }
 		    if (TAG_CHANGED(nopasswd)) {
-			print_priv(cs->tags.nopasswd ? "NOPASSWD: " : "PASSWD: ");
+			lbuf_append(&lbuf, cs->tags.nopasswd ? "NOPASSWD: " :
+			    "PASSWD: ", NULL);
 			tags.nopasswd = cs->tags.nopasswd;
 		    }
 		    m = cs->cmnd;
-		    print_member(m->name, m->type, m->negated, CMNDALIAS);
+		    print_member(&lbuf, m->name, m->type, m->negated,
+			CMNDALIAS);
 		}
-		print_priv("\n");
+		lbuf_print(&lbuf);
 	    }
 	}
+	lbuf_destroy(&lbuf);
     }
 #ifdef HAVE_LDAP
     if (v != NULL)
@@ -291,8 +289,11 @@ display_defaults(pw)
     struct passwd *pw;
 {
     struct defaults *d;
+    struct lbuf lbuf;
     char *prefix;
     int per_runas = 0, per_cmnd = 0;
+
+    lbuf_init(&lbuf, NULL, 4, 0);
 
     for (d = defaults, prefix = NULL; d != NULL; d = d->next) {
 	switch (d->type) {
@@ -312,20 +313,23 @@ display_defaults(pw)
 		continue;
 	}
 	if (prefix == NULL) {
-	    print_def4("Matching Defaults entries for ", pw->pw_name,
-		" on this host:\n", "    ");
-	} else {
-	    print_def(prefix);
+	    printf("Matching Defaults entries for %s on this host:\n",
+		pw->pw_name);
+	    prefix = "    ";
 	}
+	lbuf_append(&lbuf, prefix, NULL);
 	if (d->val != NULL) {
-	    print_def3(d->var, d->op == '+' ? "+=" : d->op == '-' ? "-=" : "=",
-		d->val);
+	    lbuf_append(&lbuf, d->var, d->op == '+' ? "+=" :
+		d->op == '-' ? "-=" : "=", d->val, NULL);
 	} else
-	    print_def2(d->op == FALSE ? "!" : "", d->var);
+	    lbuf_append(&lbuf, d->op == FALSE ? "!" : "", d->var, NULL);
 	prefix = ", ";
     }
-    if (prefix)
-	print_priv("\n\n");
+    if (prefix) {
+	lbuf_print(&lbuf);
+	putchar('\n');
+    }
+    lbuf_destroy(&lbuf);
 
     if (per_runas)
 	display_bound_defaults(DEFAULTS_RUNAS);
@@ -340,6 +344,7 @@ static void
 display_bound_defaults(dtype)
     int dtype;
 {
+    struct lbuf lbuf;
     struct defaults *d;
     struct member *m, *binding;
     char *dname, *dsep;
@@ -369,29 +374,32 @@ display_bound_defaults(dtype)
 	default:
 	    return;
     }
-    print_def3("Per-", dname, " Defaults entries:");
+    lbuf_init(&lbuf, NULL, 4, 0);
+    printf("Per-%s Defaults entries:\n", dname);
     for (d = defaults, binding = NULL; d != NULL; d = d->next) {
 	if (d->type != dtype)
 	    continue;
 
 	if (d->binding != binding) {
 	    binding = d->binding;
-	    print_def3("\n", "    Defaults", dsep);
+	    lbuf_append(&lbuf, "    Defaults", dsep, NULL);
 	    for (m = binding; m != NULL; m = m->next) {
 		if (m != binding)
-		    print_def(",");
-		print_member(m->name, m->type, m->negated, atype);
-		print_def(" ");
+		    lbuf_append(&lbuf, ",", NULL);
+		print_member(&lbuf, m->name, m->type, m->negated, atype);
+		lbuf_append(&lbuf, " ", NULL);
 	    }
 	} else
-	    print_def(", ");
+	    lbuf_append(&lbuf, ", ", NULL);
 	if (d->val != NULL) {
-	    print_def3(d->var, d->op == '+' ? "+=" : d->op == '-' ? "-=" : "=",
-		d->val);
+	    lbuf_append(&lbuf, d->var, d->op == '+' ? "+=" :
+		d->op == '-' ? "-=" : "=", d->val, NULL);
 	} else
-	    print_def2(d->op == FALSE ? "!" : "", d->var);
+	    lbuf_append(&lbuf, d->op == FALSE ? "!" : "", d->var, NULL);
     }
-    print_priv("\n\n");
+    lbuf_print(&lbuf);
+    lbuf_destroy(&lbuf);
+    putchar('\n');
 }
 
 /*
@@ -450,7 +458,8 @@ display_cmnd(v, pw)
  * Print the contents of a struct member to stdout
  */
 static void
-print_member(name, type, negated, alias_type)
+print_member(lbuf, name, type, negated, alias_type)
+    struct lbuf *lbuf;
     char *name;
     int type, negated, alias_type;
 {
@@ -460,115 +469,26 @@ print_member(name, type, negated, alias_type)
 
     switch (type) {
 	case ALL:
-	    print_priv(negated ? "!ALL" : "ALL");
+	    lbuf_append(lbuf, negated ? "!ALL" : "ALL", NULL);
 	    break;
 	case COMMAND:
 	    c = (struct sudo_command *) name;
-	    print_priv4(negated ? "!" : "", c->cmnd, c->args ? " " : "",
-		c->args ? c->args : "");
+	    lbuf_append(lbuf, negated ? "!" : "", c->cmnd, c->args ? " " : "",
+		c->args ? c->args : "", NULL);
 	    break;
 	case ALIAS:
 	    if ((a = find_alias(name, alias_type)) != NULL) {
 		for (m = a->first_member; m != NULL; m = m->next) {
 		    if (m != a->first_member)
-			print_priv(", ");
-		    print_member(m->name, m->type,
+			lbuf_append(lbuf, ", ", NULL);
+		    print_member(lbuf, m->name, m->type,
 			negated ? !m->negated : m->negated, alias_type);
 		}
 		break;
 	    }
 	    /* FALLTHROUGH */
 	default:
-	    print_priv2(negated ? "!" : "", name);
+	    lbuf_append(lbuf, negated ? "!" : "", name, NULL);
 	    break;
     }
-}
-
-#if !defined(TIOCGSIZE) && defined(TIOCGWINSZ)
-# define TIOCGSIZE	TIOCGWINSZ
-# define ttysize	winsize
-# define ts_cols	ws_col
-#endif
-
-int
-get_ttycols()
-{
-    char *p;
-    int cols;
-#ifdef TIOCGSIZE
-    struct ttysize win;
-
-    if (ioctl(STDERR_FILENO, TIOCGSIZE, &win) == 0 && win.ts_cols != 0)
-	return((int)win.ts_cols);
-#endif
-
-    /* Fall back on $COLUMNS. */
-    if ((p = getenv("COLUMNS")) == NULL || (cols = atoi(p)) <= 0)
-	cols = 80;
-    return(cols);
-}
-
-/*
- * Simplistic print function with line wrap.
- * XXX - does not expand tabs, etc and only checks for newlines
- *       at the end of an arg.  Should probably use cols-2 to leave
- *	 room for a space and the continuation char.
- */
-static void
-#ifdef __STDC__
-print_wrap(int indent, int lc, int nargs, ...)
-#else
-print_wrap(indent, lc, nargs, va_alist)
-	int indent;
-	int lc;
-	int nargs;
-	va_dcl
-#endif
-{
-    static int left, cols = -1;
-    int i, n, len;
-    va_list ap;
-    char *s = NULL;
-
-    if (cols == -1)
-	left = cols = get_ttycols();
-
-#ifdef __STDC__
-    va_start(ap, nargs);
-#else
-    va_start(ap);
-#endif
-    for (len = 0, i = 1; i <= nargs; i++) {
-	s = va_arg(ap, char *);
-	if ((n = strlen(s)) > 0)
-	    len += s[n - 1] == '\n' ? n - 1 : n;
-    }
-    va_end(ap);
-
-    if (len > left && cols > indent && len < cols - indent) {
-	if (lc)
-	    putchar(lc);	/* XXX - there may not be space on the line for continuation char */
-	putchar('\n');
-	for (i = 0; i < indent; i++)
-	    putchar(' ');
-	left = cols - indent;
-    }
-#ifdef __STDC__
-    va_start(ap, nargs);
-#else
-    va_start(ap);
-#endif
-    for (i = 1; i <= nargs; i++) {
-	s = va_arg(ap, char *);
-	if ((len = strlen(s)) > 0) {
-	    fwrite(s, len, 1, stdout);
-	    if (s[len - 1] == '\n')
-		left = cols;
-	    else if (len > left)
-		left = 0;
-	    else
-		left -= len;
-	}
-    }
-    va_end(ap);
 }

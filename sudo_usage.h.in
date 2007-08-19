@@ -1,0 +1,13 @@
+#ifndef _SUDO_USAGE_H
+#define _SUDO_USAGE_H
+
+/*
+ * Usage strings for sudo.  These are here because we
+ * need to be able to substitute values from configure.
+ */
+#define SUDO_USAGE1 " -h | -K | -k | -L | -V | -v"
+#define SUDO_USAGE2 " -l [-U username] [-u username|#uid] [command]"
+#define SUDO_USAGE3 " [-bEHPS] @BSDAUTH_USAGE@[-C fd] @LOGINCAP_USAGE@[-p prompt] [-u username|#uid] [VAR=value] {-i | -s | <command>}"
+#define SUDO_USAGE4 " -e [-S] @BSDAUTH_USAGE@[-C fd] @LOGINCAP_USAGE@[-p prompt] [-u username|#uid] file ..."
+
+#endif /* _SUDO_USAGE_H */
