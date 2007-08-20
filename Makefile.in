@@ -423,7 +423,7 @@ mostlyclean: clean
 distclean: clean
 	-rm -rf Makefile pathnames.h config.h config.status config.cache \
 		config.log libtool sudo_noexec.lo .libs $(GENERATED) \
-		sudo.man sudoers.man visudo.man Makefile.binary
+		sudo.man sudoers.man visudo.man sudo_usage.h Makefile.binary
 
 clobber: distclean
 
