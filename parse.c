@@ -319,8 +319,12 @@ display_defaults(pw)
 	}
 	lbuf_append(&lbuf, prefix, NULL);
 	if (d->val != NULL) {
-	    lbuf_append(&lbuf, d->var, d->op == '+' ? "+=" :
-		d->op == '-' ? "-=" : "=", d->val, NULL);
+	    lbuf_append(&lbuf, d->var, d->op == '+' ? " += " :
+		d->op == '-' ? " -= " : " = ", NULL);
+	    if (strpbrk(d->val, " \t") != NULL)
+		lbuf_append(&lbuf, "\"", d->val, "\"", NULL);
+	    else
+		lbuf_append(&lbuf, d->val, NULL);
 	} else
 	    lbuf_append(&lbuf, d->op == FALSE ? "!" : "", d->var, NULL);
 	prefix = ", ";
