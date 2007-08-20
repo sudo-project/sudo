@@ -65,11 +65,14 @@ static int sawspace = 0;
 static int arg_len = 0;
 static int arg_size = 0;
 
-static int fill			__P((char *, int));
+static int append		__P((char *, int));
+static int _fill		__P((char *, int, int));
 static int fill_cmnd		__P((char *, int));
 static int fill_args		__P((char *, int, int));
 static int switch_buffer	__P((char *));
 extern void yyerror		__P((const char *));
+
+#define fill(a, b)		_fill(a, b, 0)
 
 #define	push_include(_p)	(switch_buffer((_p)))
 #define	pop_include()		(switch_buffer(NULL))
@@ -92,7 +95,7 @@ IPV6ADDR		\:\:|({HEXDIGIT}\:){7}{HEXDIGIT}|({HEXDIGIT}\:){5}{HEXDIGIT}\:{DOTTEDQ
 HOSTNAME		[[:alnum:]_-]+
 WORD			([^#>!=:,\(\) \t\n\\]|\\[^\n])+
 PATH			\/(\\[\,:= \t#]|[^\,:=\\ \t\n#])+
-ENVAR			([^#!=, \t\n\\]|\\[^\n])([^#=, \t\n\\]|\\[^\n])*
+ENVAR			([^#!=, \t\n\\\"]|\\[^\n])([^#=, \t\n\\\"]|\\[^\n])*
 DEFVAR			[a-z_]+
 
 %option nounput
@@ -104,6 +107,7 @@ DEFVAR			[a-z_]+
 %x	GOTCMND
 %x	STARTDEFS
 %x	INDEFS
+%x	INSTR
 
 %%
 <GOTDEFS>[[:blank:]]+	BEGIN STARTDEFS;
@@ -138,11 +142,10 @@ DEFVAR			[a-z_]+
 			    return('-');
 			}			/* return '-' */
 
-    \"([^\"]|\\\")+\"	{
-			    LEXTRACE("WORD(1) ");
-			    if (!fill(yytext + 1, yyleng - 2))
-				yyterminate();
-			    return(WORD);
+    \"			{
+			    LEXTRACE("BEGINSTR ");
+			    yylval.string = NULL;
+			    BEGIN INSTR;
 			}
 
     {ENVAR}		{
@@ -150,6 +153,30 @@ DEFVAR			[a-z_]+
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    return(WORD);
+			}
+}
+
+<INSTR>{
+    \\\n[[:blank:]]*	{
+			    /* Line continuation char followed by newline. */
+			    ++sudolineno;
+			    LEXTRACE("\n");
+			}
+
+    \"			{
+			    LEXTRACE("ENDSTR ");
+			    BEGIN INDEFS;
+			    return(WORD);
+			}
+
+    ([^\"\n]|\\\")+	{
+			    LEXTRACE("STRBODY ");
+			    /* Push back line continuation char if present */
+			    if (yyleng > 2 && yytext[yyleng - 1] == '\\' &&
+				isspace((unsigned char)yytext[yyleng - 2]))
+				yyless(yyleng - 1);
+			    if (!append(yytext, yyleng))
+				yyterminate();
 			}
 }
 
@@ -459,27 +486,43 @@ sudoedit		{
 
 %%
 static int
-fill(s, len)
-    char *s;
-    int len;
+_fill(src, len, olen)
+    char *src;
+    int len, olen;
 {
     int i, j;
+    char *dst;
 
-    yylval.string = (char *) malloc(len + 1);
-    if (yylval.string == NULL) {
+    dst = olen ? realloc(yylval.string, olen + len + 1) : malloc(len + 1);
+    if (dst == NULL) {
 	yyerror("unable to allocate memory");
 	return(FALSE);
     }
+    yylval.string = dst;
 
     /* Copy the string and collapse any escaped characters. */
+    dst += olen;
     for (i = 0, j = 0; i < len; i++, j++) {
-	if (s[i] == '\\' && i != len - 1)
-	    yylval.string[j] = s[++i];
+	if (src[i] == '\\' && i != len - 1)
+	    dst[j] = src[++i];
 	else
-	    yylval.string[j] = s[i];
+	    dst[j] = src[i];
     }
-    yylval.string[j] = '\0';
+    dst[j] = '\0';
     return(TRUE);
+}
+
+static int
+append(src, len)
+    char *src;
+    int len;
+{
+    int olen = 0;
+
+    if (yylval.string != NULL)
+	olen = strlen(yylval.string);
+
+    return(_fill(src, len, olen));
 }
 
 static int
