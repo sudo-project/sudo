@@ -909,7 +909,7 @@ parse_args(argc, argv)
 		    NewArgv++;
 		    goto args_done;
 		case '\0':
-		    warningx("'-' requires an argument");
+		    warningx("`-' requires an argument");
 		    usage(1);
 		default:
 		    warningx("illegal option `%s'", NewArgv[0]);
@@ -945,13 +945,13 @@ args_done:
 
     if (user_runas != NULL && !ISSET(rval, (MODE_EDIT|MODE_RUN|MODE_CHECK))) {
 	if (excl != '\0')
-	    warningx("the `-u' and '-%c' options may not be used together",
+	    warningx("the `-u' and `-%c' options may not be used together",
 		excl);
 	usage(1);
     }
     if (list_pw != NULL && rval != MODE_LIST && rval != MODE_CHECK) {
 	if (excl != '\0')
-	    warningx("the `-U' and '-%c' options may not be used together",
+	    warningx("the `-U' and `-%c' options may not be used together",
 		excl);
 	usage(1);
     }
