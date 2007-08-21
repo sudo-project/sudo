@@ -8,9 +8,6 @@ What's new in Sudo 1.7?
  * Sudoers now supports a #include facility to allow the inclusion of other
    sudoers-format files.
 
- * Wildcard matches on commands now use glob() and stat() so that relative
-   paths now work correctly in conjunction with wildcards.
-
  * Sudo's -l (list) flag has been enhanced:
     o applicable Defaults options are now listed
     o a command argument can be specified for testing whether a user
@@ -20,7 +17,7 @@ What's new in Sudo 1.7?
 
  * The "secure_path" run-time Defaults option has been restored.
 
- * Password and group data is now cached for fast lookup.
+ * Password and group data is now cached for fast lookups.
 
  * The file descriptor at which sudo starts closing all open files is now
    configurable via sudoers and, optionally, the command line.
