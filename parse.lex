@@ -67,11 +67,14 @@ static int sawspace = 0;
 static int arg_len = 0;
 static int arg_size = 0;
 
-static void fill		__P((char *, int));
+static void _fill		__P((char *, int, int));
+static void append		__P((char *, int));
 static void fill_cmnd		__P((char *, int));
 static void fill_args		__P((char *, int, int));
 extern void reset_aliases	__P((void));
 extern void yyerror		__P((char *));
+
+#define fill(a, b)		_fill(a, b, 0)
 
 /* realloc() to size + COMMANDARGINC to make room for command args */
 #define COMMANDARGINC	64
@@ -90,7 +93,7 @@ IPV6ADDR		\:\:|({HEXDIGIT}\:){7}{HEXDIGIT}|({HEXDIGIT}\:){5}{HEXDIGIT}\:{DOTTEDQ
 
 HOSTNAME		[[:alnum:]_-]+
 WORD			([^#>@!=:,\(\) \t\n\\]|\\[^\n])+
-ENVAR			([^#!=, \t\n\\]|\\[^\n])([^#=, \t\n\\]|\\[^\n])*
+ENVAR			([^#!=, \t\n\\\"]|\\[^\n])([^#=, \t\n\\]|\\[^\n])*
 DEFVAR			[a-z_]+
 
 /* XXX - convert GOTRUNAS to exclusive state (GOTDEFS cannot be) */
@@ -99,6 +102,7 @@ DEFVAR			[a-z_]+
 %x	GOTCMND
 %x	STARTDEFS
 %x	INDEFS
+%x	INSTR
 
 %%
 <GOTDEFS>[[:blank:]]+	BEGIN STARTDEFS;
@@ -132,16 +136,39 @@ DEFVAR			[a-z_]+
 			    return('-');
 			}			/* return '-' */
 
-    \"([^\"]|\\\")+\"	{
-			    LEXTRACE("WORD(1) ");
-			    fill(yytext + 1, yyleng - 2);
-			    return(WORD);
+    \"			{
+			    LEXTRACE("BEGINSTR ");
+			    yylval.string = NULL;
+			    BEGIN INSTR;
 			}
 
     {ENVAR}		{
 			    LEXTRACE("WORD(2) ");
 			    fill(yytext, yyleng);
 			    return(WORD);
+			}
+}
+
+<INSTR>{
+    \\\n[[:blank:]]*	{
+			    /* Line continuation char followed by newline. */
+			    ++sudolineno;
+			    LEXTRACE("\n");
+			}
+
+    \"			{
+			    LEXTRACE("ENDSTR ");
+			    BEGIN INDEFS;
+			    return(WORD);
+			}
+
+    ([^\"\n]|\\\")+	{
+			    LEXTRACE("STRBODY ");
+			    /* Push back line continuation char if present */
+			    if (yyleng > 2 && yytext[yyleng - 1] == '\\' &&
+				isspace((unsigned char)yytext[yyleng - 2]))
+				yyless(yyleng - 1);
+			    append(yytext, yyleng);
 			}
 }
 
@@ -394,26 +421,42 @@ sudoedit		{
 
 %%
 static void
-fill(s, len)
-    char *s;
-    int len;
+_fill(src, len, olen)
+    char *src;
+    int len, olen;
 {
     int i, j;
+    char *dst;
 
-    yylval.string = (char *) malloc(len + 1);
-    if (yylval.string == NULL) {
+    dst = olen ? realloc(yylval.string, olen + len + 1) : malloc(len + 1);
+    if (dst == NULL) {
 	yyerror("unable to allocate memory");
 	return;
     }
+    yylval.string = dst;
 
     /* Copy the string and collapse any escaped characters. */
+    dst += olen;
     for (i = 0, j = 0; i < len; i++, j++) {
-	if (s[i] == '\\' && i != len - 1)
-	    yylval.string[j] = s[++i];
+	if (src[i] == '\\' && i != len - 1)
+	    dst[j] = src[++i];
 	else
-	    yylval.string[j] = s[i];
+	    dst[j] = src[i];
     }
-    yylval.string[j] = '\0';
+    dst[j] = '\0';
+}
+
+static void
+append(src, len)
+    char *src;
+    int len;
+{
+    int olen = 0;
+
+    if (yylval.string != NULL)
+	olen = strlen(yylval.string);
+
+    _fill(src, len, olen);
 }
 
 static void
