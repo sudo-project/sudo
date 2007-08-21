@@ -383,6 +383,13 @@ NOSETENV[[:blank:]]*:	{
 			    return(WORD);
 			}
 
+<GOTRUNAS>#[^0-9-].*\n	{
+			    BEGIN INITIAL;
+			    ++sudolineno;
+			    LEXTRACE("\n");
+			    return(COMMENT);
+			}
+
 <GOTRUNAS>\)		{
 			    BEGIN INITIAL;
 			}
