@@ -52,6 +52,9 @@
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
+/* Characters that must be quoted in sudoers */
+#define SUDOERS_QUOTED	"*?[]!:\\,=#\""
+
 /*
  * Parsed sudoers info.
  */
@@ -321,10 +324,12 @@ display_defaults(pw)
 	if (d->val != NULL) {
 	    lbuf_append(&lbuf, d->var, d->op == '+' ? " += " :
 		d->op == '-' ? " -= " : " = ", NULL);
-	    if (strpbrk(d->val, " \t") != NULL)
-		lbuf_append(&lbuf, "\"", d->val, "\"", NULL);
-	    else
-		lbuf_append(&lbuf, d->val, NULL);
+	    if (strpbrk(d->val, " \t") != NULL) {
+		lbuf_append(&lbuf, "\"", NULL);
+		lbuf_append_quoted(&lbuf, "\"", d->val, NULL);
+		lbuf_append(&lbuf, "\"", NULL);
+	    } else
+		lbuf_append_quoted(&lbuf, SUDOERS_QUOTED, d->val, NULL);
 	} else
 	    lbuf_append(&lbuf, d->op == FALSE ? "!" : "", d->var, NULL);
 	prefix = ", ";
@@ -477,8 +482,13 @@ print_member(lbuf, name, type, negated, alias_type)
 	    break;
 	case COMMAND:
 	    c = (struct sudo_command *) name;
-	    lbuf_append(lbuf, negated ? "!" : "", c->cmnd, c->args ? " " : "",
-		c->args ? c->args : "", NULL);
+	    if (negated)
+		lbuf_append(lbuf, negated, NULL);
+	    lbuf_append_quoted(lbuf, SUDOERS_QUOTED, c->cmnd, NULL);
+	    if (c->args) {
+		lbuf_append(lbuf, " ", NULL);
+		lbuf_append_quoted(lbuf, SUDOERS_QUOTED, c->args, NULL);
+	    }
 	    break;
 	case ALIAS:
 	    if ((a = find_alias(name, alias_type)) != NULL) {
