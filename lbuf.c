@@ -97,6 +97,68 @@ lbuf_destroy(lbuf)
  */
 void
 #ifdef __STDC__
+lbuf_append_quoted(struct lbuf *lbuf, const char *set, ...)
+#else
+lbuf_appen_quotedd(lbuf, va_alist)
+	struct lbuf *lbuf;
+	const char *set;
+	va_dcl
+#endif
+{
+    va_list ap;
+    int len = 0;
+    char *cp, *s;
+
+#ifdef __STDC__
+    va_start(ap, set);
+#else
+    va_start(ap);
+#endif
+    while ((s = va_arg(ap, char *)) != NULL) {
+	len += strlen(s);
+	for (cp = s; (cp = strpbrk(cp, set)) != NULL; cp++)
+	    len++;
+    }
+    va_end(ap);
+
+    /* Expand buffer as needed. */
+    if (lbuf->len + len >= lbuf->size) {
+	do {
+	    lbuf->size += 256;
+	} while (lbuf->len + len >= lbuf->size);
+	lbuf->buf = erealloc(lbuf->buf, lbuf->size);
+    }
+
+#ifdef __STDC__
+    va_start(ap, set);
+#else
+    va_start(ap);
+#endif
+    /* Append each string. */
+    while ((s = va_arg(ap, char *)) != NULL) {
+	while ((cp = strpbrk(s, set)) != NULL) {
+	    len = (int)(cp - s);
+	    memcpy(lbuf->buf + lbuf->len, s, len);
+	    lbuf->len += len;
+	    lbuf->buf[lbuf->len++] = '\\';
+	    lbuf->buf[lbuf->len++] = *cp;
+	    s = cp + 1;
+	}
+	if (*s != '\0') {
+	    len = strlen(s);
+	    memcpy(lbuf->buf + lbuf->len, s, len);
+	    lbuf->len += len;
+	}
+    }
+    lbuf->buf[lbuf->len] = '\0';
+    va_end(ap);
+}
+
+/*
+ * Append strings to the buffer, expanding it as needed.
+ */
+void
+#ifdef __STDC__
 lbuf_append(struct lbuf *lbuf, ...)
 #else
 lbuf_append(lbuf, va_alist)
