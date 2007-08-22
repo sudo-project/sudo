@@ -122,7 +122,6 @@ yyerror(s)
 %token <tok>	 DEFAULTS_USER		/* User-specific defaults entry */
 %token <tok>	 DEFAULTS_RUNAS		/* Runas-specific defaults entry */
 %token <tok>	 DEFAULTS_CMND		/* Command-specific defaults entry */
-%token <tok> 	 RUNAS			/* ( runas_list ) */
 %token <tok> 	 NOPASSWD		/* no passwd req for command */
 %token <tok> 	 PASSWD			/* passwd req for command (default) */
 %token <tok> 	 NOEXEC			/* preload dummy execve() for cmnd */
@@ -136,6 +135,7 @@ yyerror(s)
 %token <tok>	 USERALIAS		/* User_Alias keyword */
 %token <tok>	 RUNASALIAS		/* Runas_Alias keyword */
 %token <tok>	 ':' '=' ',' '!' '+' '-' /* union member tokens */
+%token <tok>	 '(' ')'		/* runas tokens */
 %token <tok>	 ERROR
 
 %type <cmndspec>  cmndspec
@@ -319,7 +319,7 @@ opcmnd		:	cmnd {
 runasspec	:	/* empty */ {
 			    $$ = NULL;
 			}
-		|	RUNAS runaslist {
+		|	'(' runaslist ')' {
 			    $$ = $2;
 			}
 		;

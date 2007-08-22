@@ -94,6 +94,7 @@ IPV6ADDR		\:\:|({HEXDIGIT}\:){7}{HEXDIGIT}|({HEXDIGIT}\:){5}{HEXDIGIT}\:{DOTTEDQ
 
 HOSTNAME		[[:alnum:]_-]+
 WORD			([^#>!=:,\(\) \t\n\\]|\\[^\n])+
+ID			#-?[0-9]+
 PATH			\/(\\[\,:= \t#]|[^\,:=\\ \t\n#])+
 ENVAR			([^#!=, \t\n\\\"]|\\[^\n])([^#=, \t\n\\\"]|\\[^\n])*
 DEFVAR			[a-z_]+
@@ -359,7 +360,7 @@ NOSETENV[[:blank:]]*:	{
 
 <INITIAL>\(		{
 				BEGIN GOTRUNAS;
-				LEXTRACE("RUNAS ");
+				LEXTRACE("( ");
 				return (RUNAS);
 			}
 
@@ -375,7 +376,7 @@ NOSETENV[[:blank:]]*:	{
 			    }
 			}
 
-<GOTRUNAS>(#[0-9-]+|{WORD}) {
+<GOTRUNAS>({ID}|{WORD}) {
 			    /* username/uid that user can run command as */
 			    if (!fill(yytext, yyleng))
 				yyterminate();
@@ -392,6 +393,7 @@ NOSETENV[[:blank:]]*:	{
 
 <GOTRUNAS>\)		{
 			    BEGIN INITIAL;
+			    LEXTRACE(") ");
 			}
 
 <GOTDEFS>({PATH}|sudoedit) {
