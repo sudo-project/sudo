@@ -10,20 +10,19 @@
 #define DEFAULTS_USER 266
 #define DEFAULTS_RUNAS 267
 #define DEFAULTS_CMND 268
-#define RUNAS 269
-#define NOPASSWD 270
-#define PASSWD 271
-#define NOEXEC 272
-#define EXEC 273
-#define SETENV 274
-#define NOSETENV 275
-#define ALL 276
-#define COMMENT 277
-#define HOSTALIAS 278
-#define CMNDALIAS 279
-#define USERALIAS 280
-#define RUNASALIAS 281
-#define ERROR 282
+#define NOPASSWD 269
+#define PASSWD 270
+#define NOEXEC 271
+#define EXEC 272
+#define SETENV 273
+#define NOSETENV 274
+#define ALL 275
+#define COMMENT 276
+#define HOSTALIAS 277
+#define CMNDALIAS 278
+#define USERALIAS 279
+#define RUNASALIAS 280
+#define ERROR 281
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
