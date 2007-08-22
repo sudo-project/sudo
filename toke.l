@@ -102,8 +102,6 @@ DEFVAR			[a-z_]+
 %option nounput
 %option noyywrap
 
-/* XXX - convert GOTRUNAS to exclusive state (GOTDEFS cannot be) */
-%s	GOTRUNAS
 %s	GOTDEFS
 %x	GOTCMND
 %x	STARTDEFS
@@ -213,6 +211,7 @@ DEFVAR			[a-z_]+
 }
 
 <INITIAL>^#include[[:blank:]]+\/.*\n {
+			    /* XXX - handle include lines in grammar */
 			    char *cp, *ep;
 			    ++sudolineno;
 			    /* pull out path from #include line */
@@ -277,7 +276,6 @@ DEFVAR			[a-z_]+
 				    return(USERALIAS);
 				case 'R':
 				    LEXTRACE("RUNASALIAS ");
-				    BEGIN GOTRUNAS;
 				    return(RUNASALIAS);
 			    }
 			}
@@ -358,12 +356,6 @@ NOSETENV[[:blank:]]*:	{
 			    return(NTWKADDR);
 			}
 
-<INITIAL>\(		{
-				BEGIN GOTRUNAS;
-				LEXTRACE("( ");
-				return (RUNAS);
-			}
-
 [[:upper:]][[:upper:][:digit:]_]* {
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
@@ -374,26 +366,6 @@ NOSETENV[[:blank:]]*:	{
 				LEXTRACE("ALIAS ");
 				return(ALIAS);
 			    }
-			}
-
-<GOTRUNAS>({ID}|{WORD}) {
-			    /* username/uid that user can run command as */
-			    if (!fill(yytext, yyleng))
-				yyterminate();
-			    LEXTRACE("WORD(3) ");
-			    return(WORD);
-			}
-
-<GOTRUNAS>#[^0-9-].*\n	{
-			    BEGIN INITIAL;
-			    ++sudolineno;
-			    LEXTRACE("\n");
-			    return(COMMENT);
-			}
-
-<GOTRUNAS>\)		{
-			    BEGIN INITIAL;
-			    LEXTRACE(") ");
 			}
 
 <GOTDEFS>({PATH}|sudoedit) {
@@ -426,12 +398,22 @@ sudoedit		{
 			    }
 			}			/* a pathname */
 
-<INITIAL,GOTDEFS>{WORD} {
+<INITIAL,GOTDEFS>({ID}|{WORD}) {
 			    /* a word */
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("WORD(4) ");
 			    return(WORD);
+			}
+
+\(			{
+			    LEXTRACE("( ");
+			    return ('(');
+			}
+
+\)			{
+			    LEXTRACE(") ");
+			    return(')');
 			}
 
 ,			{
@@ -471,7 +453,7 @@ sudoedit		{
 			    LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
 
-<INITIAL,STARTDEFS,INDEFS>#.*\n	{
+<INITIAL,STARTDEFS,INDEFS>#[^0-9-].*\n	{
 			    BEGIN INITIAL;
 			    ++sudolineno;
 			    LEXTRACE("\n");
