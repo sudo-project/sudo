@@ -149,7 +149,6 @@ struct defaults {
 	(h)->last->next = (e);				\
     else /* if ((h)->next == NULL) */			\
 	(h)->next = (e);				\
-    (h)->last = (e);					\
     (h)->last = (e)->last ? (e)->last : (e);		\
 } while (0)
 
