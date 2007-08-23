@@ -70,6 +70,7 @@ static int _fill		__P((char *, int, int));
 static int fill_cmnd		__P((char *, int));
 static int fill_args		__P((char *, int, int));
 static int switch_buffer	__P((char *));
+static char *parse_include	__P((char *));
 extern void yyerror		__P((const char *));
 
 #define fill(a, b)		_fill(a, b, 0)
@@ -211,22 +212,16 @@ DEFVAR			[a-z_]+
 }
 
 <INITIAL>^#include[[:blank:]]+\/.*\n {
-			    /* XXX - handle include lines in grammar */
-			    char *cp, *ep;
-			    ++sudolineno;
-			    /* pull out path from #include line */
-			    cp = yytext + 9;
-			    while (isblank((unsigned char) *cp))
-				cp++;
-			    ep = cp;
-			    while (*ep != '\0' && !isspace((unsigned char) *ep))
-				ep++;
-			    *ep = '\0';
-			    /* push current buffer and switch to include file */
-			    if (!push_include(cp))
+			    char *path;
+
+			    if ((path = parse_include(yytext)) == NULL)
 				yyterminate();
+
 			    LEXTRACE("INCLUDE\n");
-			    return(COMMENT);
+
+			    /* Push current buffer and switch to include file */
+			    if (!push_include(path))
+				yyterminate();
 			}
 
 <INITIAL>^[[:blank:]]*Defaults([:@>\!]{WORD})? {
@@ -599,10 +594,6 @@ switch_buffer(path)
 
     if (path != NULL) {
 	/* push current state */
-	if ((path = strdup(path)) == NULL) {
-	    yyerror("unable to allocate memory");
-	    return(FALSE);
-	}
 	if (depth >= stacksize) {
 	    if (depth > MAX_SUDOERS_DEPTH) {
 		yyerror("too many levels of includes");
@@ -642,4 +633,33 @@ switch_buffer(path)
 	keepopen = FALSE;
     }
     return(TRUE);
+}
+
+static char *
+parse_include(base)
+    char *base;
+{
+    char *cp, *ep, *path;
+    int len;
+
+    /* Pull out path from #include line. */
+    cp = base + sizeof("#include");
+    while (isblank((unsigned char) *cp))
+	cp++;
+    ep = cp;
+    while (*ep != '\0' && !isspace((unsigned char) *ep))
+	ep++;
+
+    /* Make a copy of path and return it. */
+    len = (int)(ep - cp);
+    if ((path = malloc(len + 1)) == NULL)
+	yyerror("unable to allocate memory");
+    memcpy(path, cp, len);
+    path[len] = '\0';
+
+    /* Push any excess characters (e.g. comment, newline) back to the lexer */
+    if (*ep != '\0')
+	yyless((int)(ep - base));
+
+    return(path);
 }
