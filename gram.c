@@ -610,7 +610,7 @@ add_userspec(members, privs)
     u = emalloc(sizeof(*u));
     u->user = members;
     u->privileges = privs;
-    u->last = NULL;
+    u->prev = u;
     u->next = NULL;
     if (userspecs == NULL)
 	userspecs = u;
@@ -1024,7 +1024,7 @@ case 26:
 				    cs->tags.setenv = tags.setenv;
 				memcpy(&tags, &cs->tags, sizeof(tags));
 			    }
-			    p->last = NULL;
+			    p->prev = p;
 			    p->next = NULL;
 			    yyval.privilege = p;
 			}
@@ -1087,7 +1087,7 @@ case 36:
 			    cs->runaslist = yyvsp[-2].member;
 			    cs->tags = yyvsp[-1].tag;
 			    cs->cmnd = yyvsp[0].member;
-			    cs->last = NULL;
+			    cs->prev = cs;
 			    cs->next = NULL;
 			    yyval.cmndspec = cs;
 			}
