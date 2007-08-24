@@ -6319,19 +6319,32 @@ m4_define([lt_join],
 ])
 
 
+# lt_car(LIST)
+# lt_cdr(LIST)
+# ------------
+# Manipulate m4 lists.
+# These macros are necessary as long as will still need to support
+# Autoconf-2.59 which quotes differently.
+m4_define([lt_car], [[$1]])
+m4_define([lt_cdr],
+[m4_if([$#], 0, [m4_fatal([$0: cannot be called without arguments])],
+       [$#], 1, [],
+       [m4_dquote(m4_shift($@))])])
+
+
 # lt_combine(SEP, PREFIX-LIST, INFIX, SUFFIX1, [SUFFIX2...])
 # ----------------------------------------------------------
 # Produce a SEP delimited list of all paired combinations of elements of
 # PREFIX-LIST with SUFFIX1 through SUFFIXn.  Each element of the list
 # has the form PREFIXmINFIXSUFFIXn.
 m4_define([lt_combine],
-[m4_if([$2], [[]], [],
-       [lt_join(m4_quote(m4_default([$1], [, ])),
-		_$0([$1], m4_car($2)[$3], m4_shiftn(3, $@)),
-		$0([$1], m4_cdr($2), m4_shiftn(2, $@)))])])
+[m4_if([$2], [], [],
+       [lt_join(m4_quote(m4_default([$1], [[, ]])),
+		_$0([$1], lt_car($2)[$3], m4_shiftn(3, $@)),
+		$0([$1], lt_cdr($2), m4_shiftn(2, $@)))])])
 m4_define([_lt_combine],
 [m4_if([$3], [], [],
-       [lt_join(m4_quote(m4_default([$1], [, ])),
+       [lt_join(m4_quote(m4_default([$1], [[, ]])),
 		[$2$3],
 		$0([$1], [$2], m4_shiftn(3, $@)))])[]dnl
 ])
