@@ -1,6 +1,12 @@
 Notes on upgrading from an older release
 ========================================
 
+o Upgrading from a version prior to 1.7.0:
+
+    Starting with sudo 1.7.0 comments in the sudoers file must not
+    have a digit or minus sign immediately after the comment character
+    ('#').  Otherwise, the comment may be interpreted as a user ID.
+
 o Upgrading from a version prior to 1.6.9:
 
     Starting with sudo 1.6.9, if an OS supports a modular authentication
