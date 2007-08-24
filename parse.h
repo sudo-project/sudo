@@ -146,13 +146,12 @@ struct defaults {
 /*
  * Append one queue (or single entry) to another using the
  * circular properties of the prev pointer to simplify the logic.
- * We use XOR to swap the two prev pointers to avoid a temp variable.
  */
 #define LIST_APPEND(h, e) do {				\
+    void *_tail = (e)->prev;				\
     (h)->prev->next = (e);				\
-    (long)(e)->prev ^= (long)(h)->prev;			\
-    (long)(h)->prev ^= (long)(e)->prev;			\
-    (long)(e)->prev ^= (long)(h)->prev;			\
+    (e)->prev = (h)->prev;				\
+    (h)->prev = _tail;					\
 } while (0)
 
 /*
