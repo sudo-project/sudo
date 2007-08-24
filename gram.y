@@ -255,7 +255,7 @@ privilege	:	hostlist '=' cmndspeclist {
 				    cs->tags.setenv = tags.setenv;
 				memcpy(&tags, &cs->tags, sizeof(tags));
 			    }
-			    p->last = NULL;
+			    p->prev = p;
 			    p->next = NULL;
 			    $$ = p;
 			}
@@ -300,7 +300,7 @@ cmndspec	:	runasspec cmndtag opcmnd {
 			    cs->runaslist = $1;
 			    cs->tags = $2;
 			    cs->cmnd = $3;
-			    cs->last = NULL;
+			    cs->prev = cs;
 			    cs->next = NULL;
 			    $$ = cs;
 			}
@@ -536,7 +536,7 @@ add_userspec(members, privs)
     u = emalloc(sizeof(*u));
     u->user = members;
     u->privileges = privs;
-    u->last = NULL;
+    u->prev = u;
     u->next = NULL;
     if (userspecs == NULL)
 	userspecs = u;

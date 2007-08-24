@@ -52,10 +52,12 @@ struct cmndtag {
  * modelled after the yacc grammar.
  *
  * Other than the alias struct, which is stored in a red-black tree,
- * the data structure used is basically a tail queue without a separate
- * head struct--the first entry acts as the head.  This makes it possible
- * to trivally append sub-lists.  Note, however, that the "last" field is
- * only valid in the first entry (the list head).
+ * the data structure used is basically a doubly-linked tail queue without
+ * a separate head struct--the first entry acts as the head where the prev
+ * pointer does double duty as the tail pointer.  This makes it possible
+ * to trivally append sub-lists.  In addition, the prev pointer is always
+ * valid (even if it points to itself).  Unlike a circle queue, the next
+ * pointer of the last entry is NULL and does not point back to the head.
  */
 
 /*
@@ -64,7 +66,7 @@ struct cmndtag {
 struct userspec {
     struct member *user;		/* list of users */
     struct privilege *privileges;	/* list of privileges */
-    struct userspec *last, *next;
+    struct userspec *prev, *next;
 };
 
 /*
@@ -73,7 +75,7 @@ struct userspec {
 struct privilege {
     struct member *hostlist;		/* list of hosts */
     struct cmndspec *cmndlist;		/* list of Cmnd_Specs */
-    struct privilege *last, *next;
+    struct privilege *prev, *next;
 };
 
 /*
@@ -83,7 +85,7 @@ struct cmndspec {
     struct member *runaslist;		/* list of runas users */
     struct member *cmnd;		/* command to allow/deny */
     struct cmndtag tags;		/* tag specificaion */
-    struct cmndspec *last, *next;
+    struct cmndspec *prev, *next;
 };
 
 /*
@@ -93,7 +95,7 @@ struct member {
     char *name;				/* member name */
     short type;				/* type (see gram.h) */
     short negated;			/* negated via '!'? */
-    struct member *last, *next;
+    struct member *prev, *next;
 };
 
 /*
@@ -115,7 +117,7 @@ struct defaults {
     struct member *binding;		/* user/host/runas binding */
     int type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
     int op;				/* TRUE, FALSE, '+', '-' */
-    struct defaults *last, *next;
+    struct defaults *prev, *next;
 };
 
 /*
@@ -126,7 +128,7 @@ struct defaults {
     (r)->var  = (v1);					\
     (r)->val  = (v2);					\
     (r)->op   = (o);					\
-    (r)->last = NULL;					\
+    (r)->prev = (r);					\
     (r)->next = NULL;					\
 } while (0)
 
@@ -137,19 +139,20 @@ struct defaults {
     (r)       = emalloc(sizeof(struct member));		\
     (r)->name = (n);					\
     (r)->type = (t);					\
-    (r)->last = NULL;					\
+    (r)->prev = (r);					\
     (r)->next = NULL;					\
 } while (0)
 
 /*
- * Append a list (or single entry) to a tail queue.
+ * Append one queue (or single entry) to another using the
+ * circular properties of the prev pointer to simplify the logic.
+ * We use XOR to swap the two prev pointers to avoid a temp variable.
  */
 #define LIST_APPEND(h, e) do {				\
-    if ((h)->last != NULL)				\
-	(h)->last->next = (e);				\
-    else /* if ((h)->next == NULL) */			\
-	(h)->next = (e);				\
-    (h)->last = (e)->last ? (e)->last : (e);		\
+    (h)->prev->next = (e);				\
+    (long)(e)->prev ^= (long)(h)->prev;			\
+    (long)(h)->prev ^= (long)(e)->prev;			\
+    (long)(e)->prev ^= (long)(h)->prev;			\
 } while (0)
 
 /*
