@@ -70,6 +70,7 @@ static int _fill		__P((char *, int, int));
 static int fill_cmnd		__P((char *, int));
 static int fill_args		__P((char *, int, int));
 static int switch_buffer	__P((char *));
+static int ipv6_valid		__P((const char *s));
 static char *parse_include	__P((char *));
 extern void yyerror		__P((const char *));
 
@@ -88,10 +89,10 @@ extern void yyerror		__P((const char *));
 #endif
 %}
 
-HEXDIGIT		[0-9A-Fa-f]{1,4}
+HEX16			[0-9A-Fa-f]{1,4}
 OCTET			(1?[0-9]{1,2})|(2[0-4][0-9])|(25[0-5])
-DOTTEDQUAD		{OCTET}(\.{OCTET}){3}
-IPV6ADDR		\:\:|({HEXDIGIT}\:){7}{HEXDIGIT}|({HEXDIGIT}\:){5}{HEXDIGIT}\:{DOTTEDQUAD}|({HEXDIGIT}\:){1,7}\:|({HEXDIGIT}\:){1,6}(\:{HEXDIGIT}){1}|({HEXDIGIT}\:){1,5}(\:{HEXDIGIT}){2}|({HEXDIGIT}\:){1,2}\:{DOTTEDQUAD}|({HEXDIGIT}\:){1,4}(\:{HEXDIGIT}){3}|({HEXDIGIT}\:){1,4}(\:{HEXDIGIT}){1}\:{DOTTEDQUAD}|({HEXDIGIT}\:){1,3}(\:{HEXDIGIT}){4}|({HEXDIGIT}\:){1,3}(\:{HEXDIGIT}){2}\:{DOTTEDQUAD}|({HEXDIGIT}\:){1,2}(\:{HEXDIGIT}){5}|({HEXDIGIT}\:){1,2}(\:{HEXDIGIT}){3}\:{DOTTEDQUAD}|({HEXDIGIT}\:){1}(\:{HEXDIGIT}){6}|({HEXDIGIT}\:){1}(\:{HEXDIGIT}){4}\:{DOTTEDQUAD}|\:(\:{HEXDIGIT}){1,7}|\:(\:{HEXDIGIT}){1,5}\:{DOTTEDQUAD}
+IPV4ADDR		{OCTET}(\.{OCTET}){3}
+IPV6ADDR		({HEX16}?:){2,7}{HEX16}?|({HEX16}?:){2,6}:{IPV4ADDR}
 
 HOSTNAME		[[:alnum:]_-]+
 WORD			([^#>!=:,\(\) \t\n\\]|\\[^\n])+
@@ -323,14 +324,14 @@ NOSETENV[[:blank:]]*:	{
 			    return(USERGROUP);
 			}
 
-{DOTTEDQUAD}(\/{DOTTEDQUAD})? {
+{IPV4ADDR}(\/{IPV4ADDR})? {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
 			    return(NTWKADDR);
 			}
 
-{DOTTEDQUAD}\/([12][0-9]*|3[0-2]*) {
+{IPV4ADDR}\/([12][0-9]*|3[0-2]*) {
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
@@ -338,6 +339,10 @@ NOSETENV[[:blank:]]*:	{
 			}
 
 {IPV6ADDR}(\/{IPV6ADDR})? {
+			    if (!ipv6_valid(yytext)) {
+				LEXTRACE("ERROR ");
+				return(ERROR);
+			    }
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
@@ -345,6 +350,10 @@ NOSETENV[[:blank:]]*:	{
 			}
 
 {IPV6ADDR}\/([0-9]|[1-9][0-9]|1[01][0-9]|12[0-8]) {
+			    if (!ipv6_valid(yytext)) {
+				LEXTRACE("ERROR ");
+				return(ERROR);
+			    }
 			    if (!fill(yytext, yyleng))
 				yyterminate();
 			    LEXTRACE("NTWKADDR ");
@@ -662,4 +671,27 @@ parse_include(base)
 	yyless((int)(ep - base));
 
     return(path);
+}
+
+/*
+ * Check to make sure an IPv6 address does not contain multiple instances
+ * of the string "::".  Assumes strlen(s) >= 1.
+ * Returns TRUE if address is valid else FALSE.
+ */
+static int
+ipv6_valid(s)
+    const char *s;
+{
+    int nmatch = 0;
+
+    for (; *s != '\0'; s++) {
+	if (s[0] == ':' && s[1] == ':') {
+	    if (++nmatch > 1)
+		break;
+	}
+	if (s[0] == '/')
+	    nmatch = 0;			/* reset if we hit netmask */
+    }
+
+    return (nmatch <= 1);
 }
