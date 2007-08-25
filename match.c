@@ -430,18 +430,17 @@ addr_matches_if(n)
     struct in6_addr addr6;
     int j;
 #endif
-    int family = AF_UNSPEC;
+    int family;
 
 #ifdef AF_INET6
     if (inet_pton(AF_INET6, n, &addr6) > 0) {
 	family = AF_INET6;
     } else
-#else
+#endif
     {
 	family = AF_INET;
 	addr.s_addr = inet_addr(n);
     }
-#endif
 
     for (i = 0; i < num_interfaces; i++) {
 	ifp = &interfaces[i];
@@ -484,18 +483,17 @@ addr_matches_if_netmask(n, m)
     struct in6_addr addr6, mask6;
     int j;
 #endif
-    int family = AF_UNSPEC;
+    int family;
 
 #ifdef AF_INET6
     if (inet_pton(AF_INET6, n, &addr6) > 0)
 	family = AF_INET6;
     else
-#else
+#endif
     {
 	family = AF_INET;
 	addr.s_addr = inet_addr(n);
     }
-#endif
 
     if (family == AF_INET) {
 	if (strchr(m, '.'))
