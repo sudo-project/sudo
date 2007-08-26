@@ -195,17 +195,17 @@ sudo_noexec.la: sudo_noexec.lo
 # Uncomment the following if you want "make distclean" to clean the parser
 @DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h
 
-# Uncomment the $(YACC) and mv lines if you intend to modify gram.y
+# Uncomment the lines before -@true if you intend to modify gram.y
 $(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
 @DEV@	$(YACC) -d $(srcdir)/gram.y
-@DEV@	if `cmp -s y.tab.c gram.c`; then mv -f y.tab.c gram.c; else rm -f y.tab.c; fi
-@DEV@	if `cmp -s y.tab.h gram.h`; then mv -f y.tab.h gram.h; else rm -f y.tab.h; fi
+@DEV@	mv -f y.tab.c gram.c
+@DEV@	mv -f y.tab.h gram.h
 	-@true
 
-# Uncomment the $(LEX) and mv lines if you intend to modify toke.l
+# Uncomment the lines before -@true if you intend to modify toke.l
 $(devdir)/toke.c: $(srcdir)/toke.l
 @DEV@	$(LEX) $(srcdir)/toke.l
-@DEV@	if `cmp -s lex.yy.c`; then mv -f lex.yy.c toke.c; else rm -f lex.yy.c; fi
+@DEV@	mv -f lex.yy.c toke.c
 	-@true
 
 # Uncomment the following if you intend to modify def_data.in
