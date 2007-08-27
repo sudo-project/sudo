@@ -208,10 +208,10 @@ If you need to specify arguments, define a C<Cmnd_Alias> and reference
 that instead.
 
  Default_Type ::= 'Defaults' |
-		  'Defaults' '@' Host |
-		  'Defaults' ':' User |
-		  'Defaults' '!' Cmnd |
-		  'Defaults' '>' RunasUser
+		  'Defaults' '@' Host_List |
+		  'Defaults' ':' User_List |
+		  'Defaults' '!' Cmnd_List |
+		  'Defaults' '>' Runas_List
 
  Default_Entry ::= Default_Type Parameter_List
 
