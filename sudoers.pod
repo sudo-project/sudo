@@ -205,9 +205,9 @@ may affect all users on any host, all users on a specific host, a
 specific user, or commands being run as a specific user.
 
  Default_Type ::= 'Defaults' |
-		  'Defaults' '@' Host |
-		  'Defaults' ':' User |
-		  'Defaults' '>' RunasUser
+		  'Defaults' '@' Host_List |
+		  'Defaults' ':' User_List |
+		  'Defaults' '>' Runas_List
 
  Default_Entry ::= Default_Type Parameter_List
 
