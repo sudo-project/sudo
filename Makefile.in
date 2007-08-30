@@ -196,10 +196,10 @@ sudo_noexec.la: sudo_noexec.lo
 @DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h
 
 # Uncomment the lines before -@true if you intend to modify gram.y
-$(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
+$(devdir)/gram.c: $(srcdir)/gram.y
 @DEV@	$(YACC) -d $(srcdir)/gram.y
 @DEV@	mv -f y.tab.c gram.c
-@DEV@	mv -f y.tab.h gram.h
+@DEV@	if `cmp y.tab.h gram.h`; then mv -f y.tab.h gram.h; else rm -f y.tab.h; fi
 	-@true
 
 # Uncomment the lines before -@true if you intend to modify toke.l
