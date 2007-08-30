@@ -94,9 +94,9 @@ __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /*
- * Prototypes
+ * Returns TRUE if string 's' contains meta characters.
  */
-static int has_meta	__P((char *));
+#define has_meta(s)	(strpbrk(s, "\\?*[]") != NULL)
 
 /*
  * Check for user described by pw in a list of members.
@@ -713,22 +713,5 @@ netgr_matches(netgr, lhost, shost, user)
 	return(TRUE);
 #endif /* HAVE_INNETGR */
 
-    return(FALSE);
-}
-
-/*
- * Returns TRUE if "s" has shell meta characters in it,
- * else returns FALSE.
- */
-static int
-has_meta(s)
-    char *s;
-{
-    char *t;
- 
-    for (t = s; *t; t++) {
-	if (*t == '\\' || *t == '?' || *t == '*' || *t == '[' || *t == ']')
-	    return(TRUE);
-    }
     return(FALSE);
 }
