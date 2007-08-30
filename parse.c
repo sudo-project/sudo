@@ -483,7 +483,7 @@ print_member(lbuf, name, type, negated, alias_type)
 	case COMMAND:
 	    c = (struct sudo_command *) name;
 	    if (negated)
-		lbuf_append(lbuf, negated, NULL);
+		lbuf_append(lbuf, "!", NULL);
 	    lbuf_append_quoted(lbuf, SUDOERS_QUOTED, c->cmnd, NULL);
 	    if (c->args) {
 		lbuf_append(lbuf, " ", NULL);
