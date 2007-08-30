@@ -103,15 +103,15 @@ static int has_meta	__P((char *));
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-user_matches(pw, list)
+userlist_matches(pw, list)
     struct passwd *pw;
-    struct member *list;
+    struct member_list *list;
 {
     struct member *m;
     struct alias *a;
     int rval, matched = UNSPEC;
 
-    for (m = list; m != NULL; m = m->next) {
+    for (m = list->first; m != NULL; m = m->next) {
 	switch (m->type) {
 	    case ALL:
 		matched = !m->negated;
@@ -126,7 +126,7 @@ user_matches(pw, list)
 		break;
 	    case ALIAS:
 		if ((a = find_alias(m->name, USERALIAS)) != NULL) {
-		    rval = user_matches(pw, a->first_member);
+		    rval = userlist_matches(pw, &a->members);
 		    if (rval != UNSPEC)
 			matched = m->negated ? !rval : rval;
 		    break;
@@ -147,8 +147,8 @@ user_matches(pw, list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-runas_matches(list)
-    struct member *list;
+runaslist_matches(list)
+    struct member_list *list;
 {
     struct member *m;
     struct alias *a;
@@ -157,7 +157,7 @@ runas_matches(list)
     if (list == NULL)
 	return(userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw));
 
-    for (m = list; m != NULL; m = m->next) {
+    for (m = list->first; m != NULL; m = m->next) {
 	switch (m->type) {
 	    case ALL:
 		matched = !m->negated;
@@ -172,7 +172,7 @@ runas_matches(list)
 		break;
 	    case ALIAS:
 		if ((a = find_alias(m->name, RUNASALIAS)) != NULL) {
-		    rval = runas_matches(a->first_member);
+		    rval = runaslist_matches(&a->members);
 		    if (rval != UNSPEC)
 			matched = m->negated ? !rval : rval;
 		    break;
@@ -192,14 +192,14 @@ runas_matches(list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-host_matches(list)
-    struct member *list;
+hostlist_matches(list)
+    struct member_list *list;
 {
     struct member *m;
     struct alias *a;
     int rval, matched = UNSPEC;
 
-    for (m = list; m != NULL; m = m->next) {
+    for (m = list->first; m != NULL; m = m->next) {
 	switch (m->type) {
 	    case ALL:
 		matched = !m->negated;
@@ -214,7 +214,7 @@ host_matches(list)
 		break;
 	    case ALIAS:
 		if ((a = find_alias(m->name, HOSTALIAS)) != NULL) {
-		    rval = host_matches(a->first_member);
+		    rval = hostlist_matches(&a->members);
 		    if (rval != UNSPEC)
 			matched = m->negated ? !rval : rval;
 		    break;
@@ -230,36 +230,52 @@ host_matches(list)
 }
 
 /*
+ * Check cmnd and args.
+ * Returns ALLOW, DENY or UNSPEC.
+ */
+int
+cmnd_matches(m)
+    struct member *m;
+{
+    struct alias *a;
+    struct sudo_command *c;
+    int rval, matched = UNSPEC;
+
+    switch (m->type) {
+	case ALL:
+	    matched = !m->negated;
+	    break;
+	case ALIAS:
+	    if ((a = find_alias(m->name, CMNDALIAS)) != NULL) {
+		rval = cmndlist_matches(&a->members);
+		if (rval != UNSPEC)
+		    matched = m->negated ? !rval : rval;
+	    }
+	    break;
+	case COMMAND:
+	    c = (struct sudo_command *)m->name;
+	    if (command_matches(c->cmnd, c->args))
+		matched = !m->negated;
+	    break;
+    }
+    return(matched);
+}
+
+/*
  * Check for cmnd and args in a list of members.
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-cmnd_matches(list)
-    struct member *list;
+cmndlist_matches(list)
+    struct member_list *list;
 {
-    struct sudo_command *c;
     struct member *m;
-    struct alias *a;
     int rval, matched = UNSPEC;
 
-    for (m = list; m != NULL; m = m->next) {
-	switch (m->type) {
-	    case ALL:
-		matched = !m->negated;
-		break;
-	    case ALIAS:
-		if ((a = find_alias(m->name, CMNDALIAS)) != NULL) {
-		    rval = cmnd_matches(a->first_member);
-		    if (rval != UNSPEC)
-			matched = m->negated ? !rval : rval;
-		}
-		break;
-	    case COMMAND:
-		c = (struct sudo_command *)m->name;
-		if (command_matches(c->cmnd, c->args))
-		    matched = !m->negated;
-		break;
-	}
+    for (m = list->first; m != NULL; m = m->next) {
+	rval = cmnd_matches(m);
+	if (rval != UNSPEC)
+	    matched = m->negated ? !rval : rval;
     }
     return(matched);
 }

@@ -114,7 +114,7 @@ alias_add(name, type, members)
     a = emalloc(sizeof(*a));
     a->name = name;
     a->type = type;
-    a->first_member = members;
+    LIST2HEAD(a->members, members);
     if (rbinsert(aliases, a)) {
 	efree(a);
 	snprintf(errbuf, sizeof(errbuf), "Alias `%s' already defined", name);
@@ -154,7 +154,7 @@ alias_free(v)
     struct member *m;
     VOID *next;
 
-    for (m = a->first_member; m != NULL; m = next) {
+    for (m = a->members.first; m != NULL; m = next) {
 	next = m->next;
 	efree(m->name);
 	efree(m);

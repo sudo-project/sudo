@@ -67,8 +67,8 @@ int verbose = FALSE;
 int errorlineno = -1;
 char *errorfile = NULL;
 
-struct defaults *defaults;
-struct userspec *userspecs;
+struct defaults_list defaults;
+struct userspec_list userspecs;
 
 /*
  * Local protoypes
@@ -242,8 +242,8 @@ privilege	:	hostlist '=' cmndspeclist {
 			    struct cmndtag tags;
 			    struct privilege *p = emalloc(sizeof(*p));
 			    struct cmndspec *cs;
-			    p->hostlist = $1;
-			    p->cmndlist = $3;
+			    LIST2HEAD(p->hostlist, $1);
+			    LIST2HEAD(p->cmndlist, $3);
 			    tags.nopasswd = tags.noexec = tags.setenv = UNSPEC;
 			    /* propagate tags */
 			    for (cs = $3; cs != NULL; cs = cs->next) {
@@ -297,7 +297,7 @@ cmndspeclist	:	cmndspec
 
 cmndspec	:	runasspec cmndtag opcmnd {
 			    struct cmndspec *cs = emalloc(sizeof(*cs));
-			    cs->runaslist = $1;
+			    LIST2HEAD(cs->runaslist, $1);
 			    cs->tags = $2;
 			    cs->cmnd = $3;
 			    cs->prev = cs;
@@ -514,12 +514,9 @@ add_defaults(type, binding, defs)
      */
     for (d = defs; d != NULL; d = d->next) {
 	d->type = type;
-	d->binding = binding;
+	LIST2HEAD(d->binding, binding);
     }
-    if (defaults == NULL)
-	defaults = defs;
-    else
-	LIST_APPEND(defaults, defs);
+    HEAD_APPEND(defaults, defs);
 }
 
 /*
@@ -534,14 +531,11 @@ add_userspec(members, privs)
     struct userspec *u;
 
     u = emalloc(sizeof(*u));
-    u->user = members;
-    u->privileges = privs;
+    LIST2HEAD(u->users, members);
+    LIST2HEAD(u->privileges, privs);
     u->prev = u;
     u->next = NULL;
-    if (userspecs == NULL)
-	userspecs = u;
-    else
-	LIST_APPEND(userspecs, u);
+    HEAD_APPEND(userspecs, u);
 }
 
 /*
@@ -558,55 +552,53 @@ init_parser(path, quiet)
     struct userspec *us;
     struct privilege *priv;
     struct cmndspec *cs;
-    VOID *next;
 
-    for (us = userspecs; us != NULL; us = next) {
-	for (m = us->user; m != NULL; m = next) {
-	    next = m->next;
+    while ((us = LH_LAST(userspecs)) != NULL) {
+	LH_POP(userspecs);
+	while ((m = LH_LAST(us->users)) != NULL) {
+	    LH_POP(us->users);
 	    efree(m->name);
 	    efree(m);
 	}
-	for (priv = us->privileges; priv != NULL; priv = next) {
-	    for (m = priv->hostlist; m != NULL; m = next) {
-		next = m->next;
+	while ((priv = LH_LAST(us->privileges)) != NULL) {
+	    LH_POP(us->privileges);
+	    while ((m = LH_LAST(priv->hostlist)) != NULL) {
+		LH_POP(priv->hostlist);
 		efree(m->name);
 		efree(m);
 	    }
-	    for (cs = priv->cmndlist; cs != NULL; cs = next) {
-		for (m = cs->runaslist; m != NULL; m = next) {
-		    next = m->next;
+	    while ((cs = LH_LAST(priv->cmndlist)) != NULL) {
+		LH_POP(priv->cmndlist);
+		while ((m = LH_LAST(cs->runaslist)) != NULL) {
+		    LH_POP(cs->runaslist);
 		    efree(m->name);
 		    efree(m);
 		}
 		efree(cs->cmnd->name);
 		efree(cs->cmnd);
-		next = cs->next;
 		efree(cs);
 	    }
-	    next = priv->next;
 	    efree(priv);
 	}
-	next = us->next;
-	efree(us);
     }
-    userspecs = NULL;
+    LH_INIT(userspecs);
 
     lastbinding = NULL;
-    for (d = defaults; d != NULL; d = next) {
-	if (d->binding != lastbinding) {
-	    for (m = d->binding; m != NULL; m = next) {
-		next = m->next;
+    while ((d = LH_LAST(defaults)) != NULL) {
+	LH_POP(defaults);
+	if (LH_FIRST(d->binding) != lastbinding) {
+	    lastbinding = LH_FIRST(d->binding);
+	    while ((m = LH_LAST(d->binding)) != NULL) {
+		LH_POP(d->binding);
 		efree(m->name);
 		efree(m);
 	    }
-	    lastbinding = d->binding;
 	}
-	next = d->next;
 	efree(d->var);
 	efree(d->val);
 	efree(d);
     }
-    defaults = NULL;
+    LH_INIT(defaults);
 
     init_aliases();
 

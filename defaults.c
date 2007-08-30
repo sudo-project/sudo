@@ -92,8 +92,6 @@ static struct strmap priorities[] = {
 	{ NULL,		-1 }
 };
 
-extern struct defaults *defaults;
-
 /*
  * Local prototypes.
  */
@@ -503,7 +501,7 @@ update_defaults(skip_cmnd)
 {
     struct defaults *def;
 
-    for (def = defaults; def != NULL; def = def->next) {
+    LH_FOREACH_FWD(defaults, def) {
 	if (skip_cmnd == (def->type == DEFAULTS_CMND))
 	    continue;
 	switch (def->type) {
@@ -511,22 +509,22 @@ update_defaults(skip_cmnd)
 		if (!set_default(def->var, def->val, def->op))
 		    return(FALSE);
 	    case DEFAULTS_USER:
-		if (user_matches(sudo_user.pw, def->binding) &&
+		if (userlist_matches(sudo_user.pw, &def->binding) &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 		break;
 	    case DEFAULTS_RUNAS:
-		if (runas_matches(def->binding) &&
+		if (runaslist_matches(&def->binding) &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 		break;
 	    case DEFAULTS_HOST:
-		if (host_matches(def->binding) &&
+		if (hostlist_matches(&def->binding) &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 		break;
 	    case DEFAULTS_CMND:
-		if (cmnd_matches(def->binding) &&
+		if (cmndlist_matches(&def->binding) &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 	}

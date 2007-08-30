@@ -128,9 +128,6 @@ extern int errorlineno, parse_error;
 extern char *optarg;
 extern int optind;
 
-extern struct defaults *defaults;
-extern struct userspec *userspecs;
-
 /*
  * Globals
  */
@@ -215,8 +212,8 @@ main(argc, argv)
     setup_signals();
 
     /* Edit the sudoers file(s) */
-    for (sp = sudoerslist.first; sp != NULL; sp = sp->next) {
-	if (sp != sudoerslist.first) {
+    LH_FOREACH_FWD(sudoerslist, sp) {
+	if (sp != LH_FIRST(sudoerslist)) {
 	    printf("press return to edit %s: ", sp->path);
 	    while ((ch = getchar()) != EOF && ch != '\n')
 		    continue;
@@ -228,7 +225,7 @@ main(argc, argv)
     reparse_sudoers(editor, args, strict, quiet);
 
     /* Install the sudoers temp files. */
-    for (sp = sudoerslist.first; sp != NULL; sp = sp->next) {
+    LH_FOREACH_FWD(sudoerslist, sp) {
 	if (!sp->modified)
 	    (void) unlink(sp->tpath);
 	else
@@ -403,8 +400,8 @@ reparse_sudoers(editor, args, strict, quiet)
      * Parse the edited sudoers files and do sanity checking
      */
     do {
-	sp = sudoerslist.first;
-	last = sudoerslist.last;
+	sp = LH_FIRST(sudoerslist);
+	last = LH_LAST(sudoerslist);
 	fp = fopen(sp->tpath, "r+");
 	if (fp == NULL)
 	    errorx(1, "can't re-open temporary file (%s), %s unchanged.",
@@ -440,7 +437,7 @@ reparse_sudoers(editor, args, strict, quiet)
 	}
 	if (parse_error) {
 	    /* Edit file with the parse error */
-	    for (sp = sudoerslist.first; sp != NULL; sp = sp->next) {
+	    LH_FOREACH_FWD(sudoerslist, sp) {
 		if (errorfile == NULL || strcmp(sp->path, errorfile) == 0) {
 		    edit_sudoers(sp, editor, args, errorlineno);
 		    break;
@@ -711,7 +708,7 @@ open_sudoers(path, keepopen)
     FILE *fp;
 
     /* Check for existing entry */
-    for (entry = sudoerslist.first; entry != NULL; entry = entry->next) {
+    LH_FOREACH_FWD(sudoerslist, entry) {
 	if (strcmp(path, entry->path) == 0)
 	    break;
     }
@@ -731,6 +728,7 @@ open_sudoers(path, keepopen)
 	    errorx(1, "%s busy, try again later", entry->path);
 	if ((fp = fdopen(entry->fd, "r")) == NULL)
 	    error(1, "%s", entry->path);
+	/* XXX - macro here? */
 	if (sudoerslist.last == NULL)
 	    sudoerslist.first = sudoerslist.last = entry;
 	else {
@@ -888,8 +886,8 @@ check_aliases(strict)
     int error = 0;
 
     /* Forward check. */
-    for (us = userspecs; us != NULL; us = us->next) {
-	for (m = us->user; m != NULL; m = m->next) {
+    LH_FOREACH_FWD(userspecs, us) {
+	LH_FOREACH_FWD(us->users, m) {
 	    if (m->type == USERALIAS) {
 		if (find_alias(m->name, m->type) == NULL) {
 		    fprintf(stderr,
@@ -899,8 +897,8 @@ check_aliases(strict)
 		}
 	    }
 	}
-	for (priv = us->privileges; priv != NULL; priv = priv->next) {
-	    for (m = priv->hostlist; m != NULL; m = m->next) {
+	LH_FOREACH_FWD(us->privileges, priv) {
+	    LH_FOREACH_FWD(priv->hostlist, m) {
 		if (m->type == HOSTALIAS) {
 		    if (find_alias(m->name, m->type) == NULL) {
 			fprintf(stderr,
@@ -910,8 +908,8 @@ check_aliases(strict)
 		    }
 		}
 	    }
-	    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
-		for (m = cs->runaslist; m != NULL; m = m->next) {
+	    LH_FOREACH_FWD(priv->cmndlist, cs) {
+		LH_FOREACH_FWD(cs->runaslist, m) {
 		    if (m->type == RUNASALIAS) {
 			if (find_alias(m->name, m->type) == NULL) {
 			    fprintf(stderr,
@@ -934,18 +932,18 @@ check_aliases(strict)
     }
 
     /* Reverse check (destructive) */
-    for (us = userspecs; us != NULL; us = us->next) {
-	for (m = us->user; m != NULL; m = m->next) {
+    LH_FOREACH_FWD(userspecs, us) {
+	LH_FOREACH_FWD(us->users, m) {
 	    if (m->type == USERALIAS)
 		(void) alias_remove(m->name, m->type);
 	}
-	for (priv = us->privileges; priv != NULL; priv = priv->next) {
-	    for (m = priv->hostlist; m != NULL; m = m->next) {
+	LH_FOREACH_FWD(us->privileges, priv) {
+	    LH_FOREACH_FWD(priv->hostlist, m) {
 		if (m->type == HOSTALIAS)
 		    (void) alias_remove(m->name, m->type);
 	    }
-	    for (cs = priv->cmndlist; cs != NULL; cs = cs->next) {
-		for (m = cs->runaslist; m != NULL; m = m->next) {
+	    LH_FOREACH_FWD(priv->cmndlist, cs) {
+		LH_FOREACH_FWD(cs->runaslist, m) {
 		    if (m->type == RUNASALIAS)
 			(void) alias_remove(m->name, m->type);
 		}
@@ -985,7 +983,7 @@ cleanup(gotsignal)
 {
     struct sudoersfile *sp;
 
-    for (sp = sudoerslist.first; sp != NULL; sp = sp->next) {
+    LH_FOREACH_FWD(sudoerslist, sp) {
 	if (sp->tpath != NULL)
 	    (void) unlink(sp->tpath);
     }
