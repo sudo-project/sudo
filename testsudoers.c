@@ -269,18 +269,18 @@ main(argc, argv)
     /* This loop must match the one in sudoers_lookup() */
     printf("\nEntries for user %s:\n", user_name);
     matched = UNSPEC;
-    LH_FOREACH_FWD(userspecs, us) {
+    LH_FOREACH_FWD(&userspecs, us) {
 	if (userlist_matches(sudo_user.pw, &us->users) != TRUE)
 	    continue;
-	LH_FOREACH_FWD(us->privileges, priv) {
+	LH_FOREACH_FWD(&us->privileges, priv) {
 	    putchar('\n');
 	    print_privilege(priv); /* XXX */
 	    putchar('\n');
 	    if (hostlist_matches(&priv->hostlist) == TRUE) {
 		puts("\thost  matched");
 		runas = NULL;
-		LH_FOREACH_FWD(priv->cmndlist, cs) {
-		    if (!LH_EMPTY(cs->runaslist))
+		LH_FOREACH_FWD(&priv->cmndlist, cs) {
+		    if (!LH_EMPTY(&cs->runaslist))
 			runas = &cs->runaslist;
 		    if (runaslist_matches(runas) == TRUE) {
 			puts("\trunas matched");
@@ -388,7 +388,7 @@ print_defaults()
     struct defaults *d;
     struct member *m;
 
-    LH_FOREACH_FWD(defaults, d) {
+    LH_FOREACH_FWD(&defaults, d) {
 	(void) fputs("Defaults", stdout);
 	switch (d->type) {
 	    case DEFAULTS_HOST:
@@ -404,8 +404,8 @@ print_defaults()
 		putchar('!');
 		break;
 	}
-	LH_FOREACH_FWD(d->binding, m) {
-	    if (m != LH_FIRST(d->binding))
+	LH_FOREACH_FWD(&d->binding, m) {
+	    if (m != LH_FIRST(&d->binding))
 		putchar(',');
 	    print_member(m);
 	}
@@ -439,8 +439,8 @@ print_alias(v1, v2)
 	    (void) printf("Runas_Alias\t%s = ", a->name);
 	    break;
     }
-    LH_FOREACH_FWD(a->members, m) {
-	if (m != LH_FIRST(a->members))
+    LH_FOREACH_FWD(&a->members, m) {
+	if (m != LH_FIRST(&a->members))
 	    fputs(", ", stdout);
 	if (m->type == COMMAND) {
 	    c = (struct sudo_command *) m->name;
@@ -465,20 +465,20 @@ print_privilege(priv)
     for (p = priv; p != NULL; p = p->next) {
 	if (p != priv)
 	    fputs(" : ", stdout);
-	LH_FOREACH_FWD(p->hostlist, m) {
-	    if (m != LH_FIRST(p->hostlist))
+	LH_FOREACH_FWD(&p->hostlist, m) {
+	    if (m != LH_FIRST(&p->hostlist))
 		fputs(", ", stdout);
 	    print_member(m);
 	}
 	fputs(" = ", stdout);
 	tags.nopasswd = tags.noexec = UNSPEC;
-	LH_FOREACH_FWD(p->cmndlist, cs) {
-	    if (cs != LH_FIRST(p->cmndlist))
+	LH_FOREACH_FWD(&p->cmndlist, cs) {
+	    if (cs != LH_FIRST(&p->cmndlist))
 		fputs(", ", stdout);
-	    if (!LH_EMPTY(cs->runaslist)) {
+	    if (!LH_EMPTY(&cs->runaslist)) {
 		fputs("(", stdout);
-		LH_FOREACH_FWD(cs->runaslist, m) {
-		    if (m != LH_FIRST(cs->runaslist))
+		LH_FOREACH_FWD(&cs->runaslist, m) {
+		    if (m != LH_FIRST(&cs->runaslist))
 			fputs(", ", stdout);
 		    print_member(m);
 		}
@@ -500,9 +500,9 @@ print_userspecs()
     struct member *m;
     struct userspec *us;
 
-    LH_FOREACH_FWD(userspecs, us) {
-	LH_FOREACH_FWD(us->users, m) {
-	    if (m != LH_FIRST(us->users))
+    LH_FOREACH_FWD(&userspecs, us) {
+	LH_FOREACH_FWD(&us->users, m) {
+	    if (m != LH_FIRST(&us->users))
 		fputs(", ", stdout);
 	    print_member(m);
 	}

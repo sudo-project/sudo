@@ -218,11 +218,11 @@ struct defaults {
 
 #undef LH_FOREACH_FWD
 #define LH_FOREACH_FWD(h, v)				\
-    for ((v) = (h).first; (v) != NULL; (v) = (v)->next)
+    for ((v) = (h)->first; (v) != NULL; (v) = (v)->next)
 
 #undef LH_FOREACH_REV
 #define LH_FOREACH_REV(h, v)				\
-    for ((v) = (h).last; (v) != NULL; (v) = (v)->prev)
+    for ((v) = (h)->last; (v) != NULL; (v) = (v)->prev)
 
 /*
  * Pop the last element off the end of h.
@@ -231,29 +231,29 @@ struct defaults {
 #undef LH_POP
 #define LH_POP(h) do {					\
     if (!LH_EMPTY(h)) {					\
-	if ((h).first == (h).last)			\
-	    (h).first = (h).last = NULL;		\
+	if ((h)->first == (h)->last)			\
+	    (h)->first = (h)->last = NULL;		\
 	else {						\
-	    (h).last = (h).last->prev;			\
-	    (h).last->next = NULL;			\
+	    (h)->last = (h)->last->prev;		\
+	    (h)->last->next = NULL;			\
 	}						\
     }							\
 } while (0)
 
 #undef LH_INIT
 #define LH_INIT(h) do {					\
-    (h).first = NULL;					\
-    (h).last = NULL;					\
+    (h)->first = NULL;					\
+    (h)->last = NULL;					\
 } while (0)
 
 #undef LH_EMPTY
-#define LH_EMPTY(h)	((h).first == NULL)
+#define LH_EMPTY(h)	((h)->first == NULL)
 
 #undef LH_FIRST
-#define LH_FIRST(h)	((h).first)
+#define LH_FIRST(h)	((h)->first)
 
 #undef LH_LAST
-#define LH_LAST(h)	((h).last)
+#define LH_LAST(h)	((h)->last)
 
 #undef LIST_NEXT
 #define LIST_NEXT(e)	((e)->next)

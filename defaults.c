@@ -501,7 +501,7 @@ update_defaults(skip_cmnd)
 {
     struct defaults *def;
 
-    LH_FOREACH_FWD(defaults, def) {
+    LH_FOREACH_FWD(&defaults, def) {
 	if (skip_cmnd == (def->type == DEFAULTS_CMND))
 	    continue;
 	switch (def->type) {
