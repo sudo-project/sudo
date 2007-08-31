@@ -627,24 +627,24 @@ init_parser(path, quiet)
     struct privilege *priv;
     struct cmndspec *cs;
 
-    while ((us = LH_LAST(userspecs)) != NULL) {
-	LH_POP(userspecs);
-	while ((m = LH_LAST(us->users)) != NULL) {
-	    LH_POP(us->users);
+    while ((us = LH_LAST(&userspecs)) != NULL) {
+	LH_POP(&userspecs);
+	while ((m = LH_LAST(&us->users)) != NULL) {
+	    LH_POP(&us->users);
 	    efree(m->name);
 	    efree(m);
 	}
-	while ((priv = LH_LAST(us->privileges)) != NULL) {
-	    LH_POP(us->privileges);
-	    while ((m = LH_LAST(priv->hostlist)) != NULL) {
-		LH_POP(priv->hostlist);
+	while ((priv = LH_LAST(&us->privileges)) != NULL) {
+	    LH_POP(&us->privileges);
+	    while ((m = LH_LAST(&priv->hostlist)) != NULL) {
+		LH_POP(&priv->hostlist);
 		efree(m->name);
 		efree(m);
 	    }
-	    while ((cs = LH_LAST(priv->cmndlist)) != NULL) {
-		LH_POP(priv->cmndlist);
-		while ((m = LH_LAST(cs->runaslist)) != NULL) {
-		    LH_POP(cs->runaslist);
+	    while ((cs = LH_LAST(&priv->cmndlist)) != NULL) {
+		LH_POP(&priv->cmndlist);
+		while ((m = LH_LAST(&cs->runaslist)) != NULL) {
+		    LH_POP(&cs->runaslist);
 		    efree(m->name);
 		    efree(m);
 		}
@@ -655,15 +655,15 @@ init_parser(path, quiet)
 	    efree(priv);
 	}
     }
-    LH_INIT(userspecs);
+    LH_INIT(&userspecs);
 
     lastbinding = NULL;
-    while ((d = LH_LAST(defaults)) != NULL) {
-	LH_POP(defaults);
-	if (LH_FIRST(d->binding) != lastbinding) {
-	    lastbinding = LH_FIRST(d->binding);
-	    while ((m = LH_LAST(d->binding)) != NULL) {
-		LH_POP(d->binding);
+    while ((d = LH_LAST(&defaults)) != NULL) {
+	LH_POP(&defaults);
+	if (LH_FIRST(&d->binding) != lastbinding) {
+	    lastbinding = LH_FIRST(&d->binding);
+	    while ((m = LH_LAST(&d->binding)) != NULL) {
+		LH_POP(&d->binding);
 		efree(m->name);
 		efree(m);
 	    }
@@ -672,7 +672,7 @@ init_parser(path, quiet)
 	efree(d->val);
 	efree(d);
     }
-    LH_INIT(defaults);
+    LH_INIT(&defaults);
 
     init_aliases();
 
@@ -1007,8 +1007,8 @@ case 26:
 			    /* propagate tags and runas lists */
 			    tags.nopasswd = tags.noexec = tags.setenv = UNSPEC;
 			    for (cs = yyvsp[0].cmndspec; cs != NULL; cs = cs->next) {
-				if (LH_EMPTY(cs->runaslist) &&
-				    !LH_EMPTY(cs->prev->runaslist)) {
+				if (LH_EMPTY(&cs->runaslist) &&
+				    !LH_EMPTY(&cs->prev->runaslist)) {
 				    memcpy(&cs->runaslist, &cs->prev->runaslist,
 					sizeof(cs->runaslist));
 				}
