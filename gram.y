@@ -242,11 +242,15 @@ privilege	:	hostlist '=' cmndspeclist {
 			    struct cmndtag tags;
 			    struct privilege *p = emalloc(sizeof(*p));
 			    struct cmndspec *cs;
-			    LIST2HEAD(p->hostlist, $1);
-			    LIST2HEAD(p->cmndlist, $3);
+
+			    /* propagate tags and runas lists */
 			    tags.nopasswd = tags.noexec = tags.setenv = UNSPEC;
-			    /* propagate tags */
 			    for (cs = $3; cs != NULL; cs = cs->next) {
+				if (LH_EMPTY(cs->runaslist) &&
+				    !LH_EMPTY(cs->prev->runaslist)) {
+				    memcpy(&cs->runaslist, &cs->prev->runaslist,
+					sizeof(cs->runaslist));
+				}
 				if (cs->tags.nopasswd == UNSPEC)
 				    cs->tags.nopasswd = tags.nopasswd;
 				if (cs->tags.noexec == UNSPEC)
@@ -255,6 +259,8 @@ privilege	:	hostlist '=' cmndspeclist {
 				    cs->tags.setenv = tags.setenv;
 				memcpy(&tags, &cs->tags, sizeof(tags));
 			    }
+			    LIST2HEAD(p->hostlist, $1);
+			    LIST2HEAD(p->cmndlist, $3);
 			    p->prev = p;
 			    p->next = NULL;
 			    $$ = p;
