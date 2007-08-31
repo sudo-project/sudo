@@ -149,31 +149,6 @@ struct defaults {
 };
 
 /*
- * Allocate space for a defaults entry and populate it.
- */
-#undef NEW_DEFAULT
-#define NEW_DEFAULT(r, v1, v2, o) do {			\
-    (r)       = emalloc(sizeof(struct defaults));	\
-    (r)->var  = (v1);					\
-    (r)->val  = (v2);					\
-    (r)->op   = (o);					\
-    (r)->prev = (r);					\
-    (r)->next = NULL;					\
-} while (0)
-
-/*
- * Allocate space for a member and populate it.
- */
-#undef NEW_MEMBER
-#define NEW_MEMBER(r, n, t) do {			\
-    (r)       = emalloc(sizeof(struct member));		\
-    (r)->name = (n);					\
-    (r)->type = (t);					\
-    (r)->prev = (r);					\
-    (r)->next = NULL;					\
-} while (0)
-
-/*
  * Append one queue (or single entry) to another using the
  * circular properties of the prev pointer to simplify the logic.
  */

@@ -75,6 +75,8 @@ struct userspec_list userspecs;
  */
 static void  add_defaults	__P((int, struct member *, struct defaults *));
 static void  add_userspec	__P((struct member *, struct privilege *));
+static struct defaults *new_default __P((char *, char *, int));
+static struct member *new_member __P((char *, int));
        void  yyerror		__P((const char *));
 
 void
@@ -215,19 +217,19 @@ defaults_list	:	defaults_entry
 		;
 
 defaults_entry	:	DEFVAR {
-			    NEW_DEFAULT($$, $1, NULL, TRUE);
+			    $$ = new_default($1, NULL, TRUE);
 			}
 		|	'!' DEFVAR {
-			    NEW_DEFAULT($$, $2, NULL, FALSE);
+			    $$ = new_default($2, NULL, FALSE);
 			}
 		|	DEFVAR '=' WORD {
-			    NEW_DEFAULT($$, $1, $3, TRUE);
+			    $$ = new_default($1, $3, TRUE);
 			}
 		|	DEFVAR '+' WORD {
-			    NEW_DEFAULT($$, $1, $3, '+');
+			    $$ = new_default($1, $3, '+');
 			}
 		|	DEFVAR '-' WORD {
-			    NEW_DEFAULT($$, $1, $3, '-');
+			    $$ = new_default($1, $3, '-');
 			}
 		;
 
@@ -278,19 +280,19 @@ ophost		:	host {
 		;
 
 host		:	ALIAS {
-			    NEW_MEMBER($$, $1, ALIAS);
+			    $$ = new_member($1, ALIAS);
 			}
 		|	ALL {
-			    NEW_MEMBER($$, NULL, ALL);
+			    $$ = new_member(NULL, ALL);
 			}
 		|	NETGROUP {
-			    NEW_MEMBER($$, $1, NETGROUP);
+			    $$ = new_member($1, NETGROUP);
 			}
 		|	NTWKADDR {
-			    NEW_MEMBER($$, $1, NTWKADDR);
+			    $$ = new_member($1, NTWKADDR);
 			}
 		|	WORD {
-			    NEW_MEMBER($$, $1, WORD);
+			    $$ = new_member($1, WORD);
 			}
 		;
 
@@ -348,19 +350,19 @@ oprunasuser	:	runasuser {
 		;
 
 runasuser	:	ALIAS {
-			    NEW_MEMBER($$, $1, ALIAS);
+			    $$ = new_member($1, ALIAS);
 			}
 		|	ALL {
-			    NEW_MEMBER($$, NULL, ALL);
+			    $$ = new_member(NULL, ALL);
 			}
 		|	NETGROUP {
-			    NEW_MEMBER($$, $1, NETGROUP);
+			    $$ = new_member($1, NETGROUP);
 			}
 		|	USERGROUP {
-			    NEW_MEMBER($$, $1, USERGROUP);
+			    $$ = new_member($1, USERGROUP);
 			}
 		|	WORD {
-			    NEW_MEMBER($$, $1, WORD);
+			    $$ = new_member($1, WORD);
 			}
 		;
 
@@ -388,16 +390,16 @@ cmndtag		:	/* empty */ {
 		;
 
 cmnd		:	ALL {
-			    NEW_MEMBER($$, NULL, ALL);
+			    $$ = new_member(NULL, ALL);
 			}
 		|	ALIAS {
-			    NEW_MEMBER($$, $1, ALIAS);
+			    $$ = new_member($1, ALIAS);
 			}
 		|	COMMAND {
 			    struct sudo_command *c = emalloc(sizeof(*c));
 			    c->cmnd = $1.cmnd;
 			    c->args = $1.args;
-			    NEW_MEMBER($$, (char *)c, COMMAND);
+			    $$ = new_member((char *)c, COMMAND);
 			}
 		;
 
@@ -485,23 +487,59 @@ opuser		:	user {
 		;
 
 user		:	ALIAS {
-			    NEW_MEMBER($$, $1, ALIAS);
+			    $$ = new_member($1, ALIAS);
 			}
 		|	ALL {
-			    NEW_MEMBER($$, NULL, ALL);
+			    $$ = new_member(NULL, ALL);
 			}
 		|	NETGROUP {
-			    NEW_MEMBER($$, $1, NETGROUP);
+			    $$ = new_member($1, NETGROUP);
 			}
 		|	USERGROUP {
-			    NEW_MEMBER($$, $1, USERGROUP);
+			    $$ = new_member($1, USERGROUP);
 			}
 		|	WORD {
-			    NEW_MEMBER($$, $1, WORD);
+			    $$ = new_member($1, WORD);
 			}
 		;
 
 %%
+static struct defaults *
+new_default(var, val, op)
+    char *var;
+    char *val;
+    int op;
+{
+    struct defaults *d;
+
+    d = emalloc(sizeof(struct defaults));
+    d->var = var;
+    d->val = val;
+    LH_INIT(&d->binding);
+    d->type = 0;
+    d->op = op;
+    d->prev = d;
+    d->next = NULL;
+
+    return(d);
+}
+
+static struct member *
+new_member(name, type)
+    char *name;
+    int type;
+{
+    struct member *m;
+
+    m = emalloc(sizeof(struct member));
+    m->name = name;
+    m->type = type;
+    m->prev = m;
+    m->next = NULL;
+
+    return(m);
+}
+
 /*
  * Add a list of defaults structures to the defaults list.
  * The binding, if non-NULL, specifies a list of hosts, users, or
