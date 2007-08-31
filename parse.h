@@ -20,6 +20,8 @@
 #ifndef _SUDO_PARSE_H
 #define _SUDO_PARSE_H
 
+#include "list.h"
+
 #undef ALLOW
 #define ALLOW	1
 #undef DENY
@@ -58,72 +60,56 @@ struct cmndtag {
  * to trivally append sub-lists.  In addition, the prev pointer is always
  * valid (even if it points to itself).  Unlike a circle queue, the next
  * pointer of the last entry is NULL and does not point back to the head.
+ *
+ * Note that each list struct must contain a "prev" and "next" pointer as
+ * the first two members of the struct (in that order).
  */
 
 /*
  * Tail queue list head structure.
  */
-struct defaults_list {
-    struct defaults *first;
-    struct defaults *last;
-};
-
-struct userspec_list {
-    struct userspec *first;
-    struct userspec *last;
-};
-
-struct member_list {
-    struct member *first;
-    struct member *last;
-};
-
-struct privilege_list {
-    struct privilege *first;
-    struct privilege *last;
-};
-
-struct cmndspec_list {
-    struct cmndspec *first;
-    struct cmndspec *last;
-};
+LH_DECLARE(defaults)
+LH_DECLARE(userspec)
+LH_DECLARE(member)
+LH_DECLARE(privilege)
+LH_DECLARE(cmndspec)
 
 /*
  * Structure describing a user specification and list thereof.
  */
 struct userspec {
+    struct userspec *prev, *next;
     struct member_list users;		/* list of users */
     struct privilege_list privileges;	/* list of privileges */
-    struct userspec *prev, *next;
 };
 
 /*
  * Structure describing a privilege specification.
  */
 struct privilege {
+    struct privilege *prev, *next;
     struct member_list hostlist;	/* list of hosts */
     struct cmndspec_list cmndlist;	/* list of Cmnd_Specs */
-    struct privilege *prev, *next;
 };
 
 /*
  * Structure describing a linked list of Cmnd_Specs.
  */
 struct cmndspec {
+    struct cmndspec *prev, *next;
     struct member_list runaslist;	/* list of runas users */
     struct member *cmnd;		/* command to allow/deny */
     struct cmndtag tags;		/* tag specificaion */
-    struct cmndspec *prev, *next;
 };
 
 /*
  * Generic structure to hold users, hosts, commands.
  */
 struct member {
+    struct member *prev, *next;
     char *name;				/* member name */
     short type;				/* type (see gram.h) */
     short negated;			/* negated via '!'? */
-    struct member *prev, *next;
 };
 
 /*
@@ -140,101 +126,13 @@ struct alias {
  * Structure describing a Defaults entry and a list thereof.
  */
 struct defaults {
+    struct defaults *prev, *next;
     char *var;				/* variable name */
     char *val;				/* variable value */
     struct member_list binding;		/* user/host/runas binding */
     int type;				/* DEFAULTS{,_USER,_RUNAS,_HOST} */
     int op;				/* TRUE, FALSE, '+', '-' */
-    struct defaults *prev, *next;
 };
-
-/*
- * Append one queue (or single entry) to another using the
- * circular properties of the prev pointer to simplify the logic.
- */
-#undef LIST_APPEND
-#define LIST_APPEND(h, e) do {				\
-    void *_tail = (e)->prev;				\
-    (h)->prev->next = (e);				\
-    (e)->prev = (h)->prev;				\
-    (h)->prev = _tail;					\
-} while (0)
-
-/*
- * Append the list of entries to the head node and convert
- * e from a semi-circle queue to normal doubly-linked list.
- */
-#undef HEAD_APPEND
-#define HEAD_APPEND(h, e) do {				\
-    void *_tail = (e)->prev;				\
-    if ((h).first == NULL)				\
-	(h).first = (e);				\
-    else						\
-	(h).last->next = (e);				\
-    (e)->prev = (h).last;				\
-    (h).last = _tail;					\
-} while (0)
-
-/*
- * Convert from a semi-circle queue to normal doubly-linked list
- * with a head node.
- */
-#undef LIST2HEAD
-#define LIST2HEAD(h, e) do {				\
-    if ((e) != NULL) {					\
-	(h).first = (e);				\
-	(h).last = (e)->prev;				\
-	(e)->prev = NULL;				\
-    } else {						\
-	(h).first = NULL;				\
-	(h).last = NULL;				\
-    }							\
-} while (0)
-
-#undef LH_FOREACH_FWD
-#define LH_FOREACH_FWD(h, v)				\
-    for ((v) = (h)->first; (v) != NULL; (v) = (v)->next)
-
-#undef LH_FOREACH_REV
-#define LH_FOREACH_REV(h, v)				\
-    for ((v) = (h)->last; (v) != NULL; (v) = (v)->prev)
-
-/*
- * Pop the last element off the end of h.
- * XXX - really should return the popped element.
- */
-#undef LH_POP
-#define LH_POP(h) do {					\
-    if (!LH_EMPTY(h)) {					\
-	if ((h)->first == (h)->last)			\
-	    (h)->first = (h)->last = NULL;		\
-	else {						\
-	    (h)->last = (h)->last->prev;		\
-	    (h)->last->next = NULL;			\
-	}						\
-    }							\
-} while (0)
-
-#undef LH_INIT
-#define LH_INIT(h) do {					\
-    (h)->first = NULL;					\
-    (h)->last = NULL;					\
-} while (0)
-
-#undef LH_EMPTY
-#define LH_EMPTY(h)	((h)->first == NULL)
-
-#undef LH_FIRST
-#define LH_FIRST(h)	((h)->first)
-
-#undef LH_LAST
-#define LH_LAST(h)	((h)->last)
-
-#undef LIST_NEXT
-#define LIST_NEXT(e)	((e)->next)
-
-#undef LIST_PREV
-#define LIST_PREV(e)	((e)->prev)
 
 /*
  * Parsed sudoers info.

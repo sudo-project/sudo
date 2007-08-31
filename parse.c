@@ -110,13 +110,13 @@ sudoers_lookup(pwflag)
 	CLR(validated, FLAG_NO_USER);
 	CLR(validated, FLAG_NO_HOST);
 	match = DENY;
-	LH_FOREACH_REV(&userspecs, us) {
+	lh_foreach_rev(&userspecs, us) {
 	    if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
 		continue;
-	    LH_FOREACH_REV(&us->privileges, priv) {
+	    lh_foreach_rev(&us->privileges, priv) {
 		if (hostlist_matches(&priv->hostlist) != ALLOW)
 		    continue;
-		LH_FOREACH_REV(&priv->cmndlist, cs) {
+		lh_foreach_rev(&priv->cmndlist, cs) {
 		    /* Only check the command when listing another user. */
 		    if (user_uid == 0 || list_pw == NULL ||
 			user_uid == list_pw->pw_uid ||
@@ -147,19 +147,19 @@ sudoers_lookup(pwflag)
     set_perms(PERM_RUNAS);
 
     match = UNSPEC;
-    LH_FOREACH_REV(&userspecs, us) {
+    lh_foreach_rev(&userspecs, us) {
 	if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
 	    continue;
 	CLR(validated, FLAG_NO_USER);
-	LH_FOREACH_REV(&us->privileges, priv) {
+	lh_foreach_rev(&us->privileges, priv) {
 	    host_match = hostlist_matches(&priv->hostlist);
 	    if (host_match == ALLOW)
 		CLR(validated, FLAG_NO_HOST);
 	    else
 		continue;
 	    runas = NULL;
-	    LH_FOREACH_REV(&priv->cmndlist, cs) {
-		if (!LH_EMPTY(&cs->runaslist))
+	    lh_foreach_rev(&priv->cmndlist, cs) {
+		if (!lh_empty(&cs->runaslist))
 		    runas = &cs->runaslist;
 		runas_match = runaslist_matches(runas);
 		if (runas_match == ALLOW) {
@@ -228,24 +228,24 @@ display_privs(v, pw)
 	printf("User %s may run the following commands on this host:\n",
 	    pw->pw_name);
 
-	LH_FOREACH_FWD(&userspecs, us) {
+	lh_foreach_fwd(&userspecs, us) {
 	    /* XXX - why only check the first privilege here? */
 	    if (userlist_matches(pw, &us->users) != ALLOW ||
 		hostlist_matches(&us->privileges.first->hostlist) != ALLOW)
 		continue;
 
-	    LH_FOREACH_FWD(&us->privileges, priv) {
+	    lh_foreach_fwd(&us->privileges, priv) {
 		tags.noexec = def_noexec;
 		tags.setenv = def_setenv;
 		tags.nopasswd = !def_authenticate;
 		lbuf_append(&lbuf, "    ", NULL);
-		LH_FOREACH_FWD(&priv->cmndlist, cs) {
-		    if (cs != LH_FIRST(&priv->cmndlist))
+		lh_foreach_fwd(&priv->cmndlist, cs) {
+		    if (cs != lh_first(&priv->cmndlist))
 			lbuf_append(&lbuf, ", ", NULL);
 		    lbuf_append(&lbuf, "(", NULL);
-		    if (!LH_EMPTY(&cs->runaslist)) {
-			LH_FOREACH_FWD(&cs->runaslist, m) {
-			    if (m != LH_FIRST(&cs->runaslist))
+		    if (!lh_empty(&cs->runaslist)) {
+			lh_foreach_fwd(&cs->runaslist, m) {
+			    if (m != lh_first(&cs->runaslist))
 				lbuf_append(&lbuf, ", ", NULL);
 			    print_member(&lbuf, m->name, m->type, m->negated,
 				RUNASALIAS);
@@ -298,7 +298,7 @@ display_defaults(pw)
 
     lbuf_init(&lbuf, NULL, 4, 0);
 
-    LH_FOREACH_FWD(&defaults, d) {
+    lh_foreach_fwd(&defaults, d) {
 	switch (d->type) {
 	    case DEFAULTS_HOST:
 		if (hostlist_matches(&d->binding) != ALLOW)
@@ -385,12 +385,12 @@ display_bound_defaults(dtype)
     }
     lbuf_init(&lbuf, NULL, 4, 0);
     printf("Per-%s Defaults entries:\n", dname);
-    LH_FOREACH_FWD(&defaults, d) {
+    lh_foreach_fwd(&defaults, d) {
 	if (d->type != dtype)
 	    continue;
 
-	if (binding != LH_FIRST(&d->binding)) {
-	    binding = LH_FIRST(&d->binding);
+	if (binding != lh_first(&d->binding)) {
+	    binding = lh_first(&d->binding);
 	    lbuf_append(&lbuf, "    Defaults", dsep, NULL);
 	    for (m = binding; m != NULL; m = m->next) {
 		if (m != binding)
@@ -434,17 +434,17 @@ display_cmnd(v, pw)
 #endif
     if (rval != 0 && !def_ignore_local_sudoers) {
 	match = NULL;
-	LH_FOREACH_REV(&userspecs, us) {
+	lh_foreach_rev(&userspecs, us) {
 	    if (userlist_matches(pw, &us->users) != ALLOW)
 		continue;
 
-	    LH_FOREACH_REV(&us->privileges, priv) {
+	    lh_foreach_rev(&us->privileges, priv) {
 		host_match = hostlist_matches(&priv->hostlist);
 		if (host_match != ALLOW)
 		    continue;
 		runas = NULL;
-		LH_FOREACH_REV(&priv->cmndlist, cs) {
-		    if (!LH_EMPTY(&cs->runaslist) != NULL)
+		lh_foreach_rev(&priv->cmndlist, cs) {
+		    if (!lh_empty(&cs->runaslist) != NULL)
 			runas = &cs->runaslist;
 		    runas_match = runaslist_matches(runas);
 		    if (runas_match == ALLOW) {
@@ -497,8 +497,8 @@ print_member(lbuf, name, type, negated, alias_type)
 	    break;
 	case ALIAS:
 	    if ((a = find_alias(name, alias_type)) != NULL) {
-		LH_FOREACH_FWD(&a->members, m) {
-		    if (m != LH_FIRST(&a->members))
+		lh_foreach_fwd(&a->members, m) {
+		    if (m != lh_first(&a->members))
 			lbuf_append(lbuf, ", ", NULL);
 		    print_member(lbuf, m->name, m->type,
 			negated ? !m->negated : m->negated, alias_type);

@@ -211,7 +211,7 @@ entry		:	COMMENT {
 
 defaults_list	:	defaults_entry
 		|	defaults_list ',' defaults_entry {
-			    LIST_APPEND($1, $3);
+			    list_append($1, $3);
 			    $$ = $1;
 			}
 		;
@@ -235,7 +235,7 @@ defaults_entry	:	DEFVAR {
 
 privileges	:	privilege
 		|	privileges ':' privilege {
-			    LIST_APPEND($1, $3);
+			    list_append($1, $3);
 			    $$ = $1;
 			}
 		;
@@ -248,8 +248,8 @@ privilege	:	hostlist '=' cmndspeclist {
 			    /* propagate tags and runas lists */
 			    tags.nopasswd = tags.noexec = tags.setenv = UNSPEC;
 			    for (cs = $3; cs != NULL; cs = cs->next) {
-				if (LH_EMPTY(&cs->runaslist) &&
-				    !LH_EMPTY(&cs->prev->runaslist)) {
+				if (lh_empty(&cs->runaslist) &&
+				    !lh_empty(&cs->prev->runaslist)) {
 				    memcpy(&cs->runaslist, &cs->prev->runaslist,
 					sizeof(cs->runaslist));
 				}
@@ -261,8 +261,8 @@ privilege	:	hostlist '=' cmndspeclist {
 				    cs->tags.setenv = tags.setenv;
 				memcpy(&tags, &cs->tags, sizeof(tags));
 			    }
-			    LIST2HEAD(p->hostlist, $1);
-			    LIST2HEAD(p->cmndlist, $3);
+			    list2head(&p->hostlist, $1);
+			    list2head(&p->cmndlist, $3);
 			    p->prev = p;
 			    p->next = NULL;
 			    $$ = p;
@@ -298,14 +298,14 @@ host		:	ALIAS {
 
 cmndspeclist	:	cmndspec
 		|	cmndspeclist ',' cmndspec {
-			    LIST_APPEND($1, $3);
+			    list_append($1, $3);
 			    $$ = $1;
 			}
 		;
 
 cmndspec	:	runasspec cmndtag opcmnd {
 			    struct cmndspec *cs = emalloc(sizeof(*cs));
-			    LIST2HEAD(cs->runaslist, $1);
+			    list2head(&cs->runaslist, $1);
 			    cs->tags = $2;
 			    cs->cmnd = $3;
 			    cs->prev = cs;
@@ -334,7 +334,7 @@ runasspec	:	/* empty */ {
 
 runaslist	:	oprunasuser
 		|	runaslist ',' oprunasuser {
-			    LIST_APPEND($1, $3);
+			    list_append($1, $3);
 			    $$ = $1;
 			}
 		;
@@ -418,7 +418,7 @@ hostalias	:	ALIAS '=' hostlist {
 
 hostlist	:	ophost
 		|	hostlist ',' ophost {
-			    LIST_APPEND($1, $3);
+			    list_append($1, $3);
 			    $$ = $1;
 			}
 		;
@@ -438,7 +438,7 @@ cmndalias	:	ALIAS '=' cmndlist {
 
 cmndlist	:	opcmnd
 		|	cmndlist ',' opcmnd {
-			    LIST_APPEND($1, $3);
+			    list_append($1, $3);
 			    $$ = $1;
 			}
 		;
@@ -471,7 +471,7 @@ useralias	:	ALIAS '=' userlist {
 
 userlist	:	opuser
 		|	userlist ',' opuser {
-			    LIST_APPEND($1, $3);
+			    list_append($1, $3);
 			    $$ = $1;
 			}
 		;
@@ -515,7 +515,7 @@ new_default(var, val, op)
     d = emalloc(sizeof(struct defaults));
     d->var = var;
     d->val = val;
-    LH_INIT(&d->binding);
+    lh_init(&d->binding);
     d->type = 0;
     d->op = op;
     d->prev = d;
@@ -558,9 +558,9 @@ add_defaults(type, binding, defs)
      */
     for (d = defs; d != NULL; d = d->next) {
 	d->type = type;
-	LIST2HEAD(d->binding, binding);
+	list2head(&d->binding, binding);
     }
-    HEAD_APPEND(defaults, defs);
+    lh_append(&defaults, defs);
 }
 
 /*
@@ -575,11 +575,11 @@ add_userspec(members, privs)
     struct userspec *u;
 
     u = emalloc(sizeof(*u));
-    LIST2HEAD(u->users, members);
-    LIST2HEAD(u->privileges, privs);
+    list2head(&u->users, members);
+    list2head(&u->privileges, privs);
     u->prev = u;
     u->next = NULL;
-    HEAD_APPEND(userspecs, u);
+    lh_append(&userspecs, u);
 }
 
 /*
@@ -597,24 +597,18 @@ init_parser(path, quiet)
     struct privilege *priv;
     struct cmndspec *cs;
 
-    while ((us = LH_LAST(&userspecs)) != NULL) {
-	LH_POP(&userspecs);
-	while ((m = LH_LAST(&us->users)) != NULL) {
-	    LH_POP(&us->users);
+    while ((us = lh_pop(&userspecs)) != NULL) {
+	while ((m = lh_pop(&us->users)) != NULL) {
 	    efree(m->name);
 	    efree(m);
 	}
-	while ((priv = LH_LAST(&us->privileges)) != NULL) {
-	    LH_POP(&us->privileges);
-	    while ((m = LH_LAST(&priv->hostlist)) != NULL) {
-		LH_POP(&priv->hostlist);
+	while ((priv = lh_pop(&us->privileges)) != NULL) {
+	    while ((m = lh_pop(&priv->hostlist)) != NULL) {
 		efree(m->name);
 		efree(m);
 	    }
-	    while ((cs = LH_LAST(&priv->cmndlist)) != NULL) {
-		LH_POP(&priv->cmndlist);
-		while ((m = LH_LAST(&cs->runaslist)) != NULL) {
-		    LH_POP(&cs->runaslist);
+	    while ((cs = lh_pop(&priv->cmndlist)) != NULL) {
+		while ((m = lh_pop(&cs->runaslist)) != NULL) {
 		    efree(m->name);
 		    efree(m);
 		}
@@ -625,15 +619,12 @@ init_parser(path, quiet)
 	    efree(priv);
 	}
     }
-    LH_INIT(&userspecs);
+    lh_init(&userspecs);
 
     lastbinding = NULL;
-    while ((d = LH_LAST(&defaults)) != NULL) {
-	LH_POP(&defaults);
-	if (LH_FIRST(&d->binding) != lastbinding) {
-	    lastbinding = LH_FIRST(&d->binding);
-	    while ((m = LH_LAST(&d->binding)) != NULL) {
-		LH_POP(&d->binding);
+    while ((d = lh_pop(&defaults)) != NULL) {
+	if (lh_pop(&d->binding) != lastbinding) {
+	    while ((m = lh_pop(&d->binding)) != NULL) {
 		efree(m->name);
 		efree(m);
 	    }
@@ -642,7 +633,7 @@ init_parser(path, quiet)
 	efree(d->val);
 	efree(d);
     }
-    LH_INIT(&defaults);
+    lh_init(&defaults);
 
     init_aliases();
 

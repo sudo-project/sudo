@@ -114,7 +114,7 @@ alias_add(name, type, members)
     a = emalloc(sizeof(*a));
     a->name = name;
     a->type = type;
-    LIST2HEAD(a->members, members);
+    list2head(&a->members, members);
     if (rbinsert(aliases, a)) {
 	efree(a);
 	snprintf(errbuf, sizeof(errbuf), "Alias `%s' already defined", name);
