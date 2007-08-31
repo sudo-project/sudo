@@ -110,15 +110,13 @@ sudoers_lookup(pwflag)
 	CLR(validated, FLAG_NO_USER);
 	CLR(validated, FLAG_NO_HOST);
 	match = DENY;
-	/* XXX - it should be faster to start from the bottom and
-		 work our way up and then just stop at the first match. */
-	LH_FOREACH_FWD(&userspecs, us) {
+	LH_FOREACH_REV(&userspecs, us) {
 	    if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
 		continue;
-	    LH_FOREACH_FWD(&us->privileges, priv) {
+	    LH_FOREACH_REV(&us->privileges, priv) {
 		if (hostlist_matches(&priv->hostlist) != ALLOW)
 		    continue;
-		LH_FOREACH_FWD(&priv->cmndlist, cs) {
+		LH_FOREACH_REV(&priv->cmndlist, cs) {
 		    /* Only check the command when listing another user. */
 		    if (user_uid == 0 || list_pw == NULL ||
 			user_uid == list_pw->pw_uid ||
@@ -127,9 +125,12 @@ sudoers_lookup(pwflag)
 		    if ((pwcheck == any && nopass != TRUE) ||
 			(pwcheck == all && nopass == TRUE))
 			nopass = cs->tags.nopasswd;
+		    if (match == ALLOW)
+			goto matched_pseudo;
 		}
 	    }
 	}
+	matched_pseudo:
 	if (match == ALLOW || user_uid == 0) {
 	    /* User has an entry for this host. */
 	    CLR(validated, VALIDATE_NOT_OK);
@@ -145,34 +146,34 @@ sudoers_lookup(pwflag)
     /* Need to be runas user while stat'ing things. */
     set_perms(PERM_RUNAS);
 
-    /* XXX - it should be faster to start from the bottom and
-	     work our way up and then just stop at the first match. */
     match = UNSPEC;
-    LH_FOREACH_FWD(&userspecs, us) {
+    LH_FOREACH_REV(&userspecs, us) {
 	if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
 	    continue;
 	CLR(validated, FLAG_NO_USER);
-	LH_FOREACH_FWD(&us->privileges, priv) {
+	LH_FOREACH_REV(&us->privileges, priv) {
 	    host_match = hostlist_matches(&priv->hostlist);
-	    if (host_match == UNSPEC)
-		continue;
 	    if (host_match == ALLOW)
 		CLR(validated, FLAG_NO_HOST);
+	    else
+		continue;
 	    runas = NULL;
-	    LH_FOREACH_FWD(&priv->cmndlist, cs) {
+	    LH_FOREACH_REV(&priv->cmndlist, cs) {
 		if (!LH_EMPTY(&cs->runaslist))
 		    runas = &cs->runaslist;
 		runas_match = runaslist_matches(runas);
-		if (runas_match != UNSPEC) {
+		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(cs->cmnd);
-		    if (cmnd_match != UNSPEC)
-			match = host_match && runas_match && cmnd_match;
-		    if (match == ALLOW)
+		    if (cmnd_match != UNSPEC) {
+			match = cmnd_match;
 			tags = &cs->tags;
+			goto matched2;
+		    }
 		}
 	    }
 	}
     }
+    matched2:
     if (match == ALLOW) {
 	CLR(validated, VALIDATE_NOT_OK);
 	SET(validated, VALIDATE_OK);
@@ -433,28 +434,31 @@ display_cmnd(v, pw)
 #endif
     if (rval != 0 && !def_ignore_local_sudoers) {
 	match = NULL;
-	LH_FOREACH_FWD(&userspecs, us) {
+	LH_FOREACH_REV(&userspecs, us) {
 	    if (userlist_matches(pw, &us->users) != ALLOW)
 		continue;
 
-	    LH_FOREACH_FWD(&us->privileges, priv) {
+	    LH_FOREACH_REV(&us->privileges, priv) {
 		host_match = hostlist_matches(&priv->hostlist);
-		if (host_match == UNSPEC)
+		if (host_match != ALLOW)
 		    continue;
 		runas = NULL;
-		LH_FOREACH_FWD(&priv->cmndlist, cs) {
+		LH_FOREACH_REV(&priv->cmndlist, cs) {
 		    if (!LH_EMPTY(&cs->runaslist) != NULL)
 			runas = &cs->runaslist;
 		    runas_match = runaslist_matches(runas);
-		    if (runas_match != UNSPEC) {
+		    if (runas_match == ALLOW) {
 			cmnd_match = cmnd_matches(cs->cmnd);
-			if (cmnd_match != UNSPEC)
+			if (cmnd_match != UNSPEC) {
 			    match = host_match && runas_match ?
 				cs->cmnd : NULL;
+			    goto matched;
+			}
 		    }
 		}
 	    }
 	}
+	matched:
 	if (match != NULL && !match->negated) {
 	    printf("%s%s%s\n", safe_cmnd, user_args ? " " : "",
 		user_args ? user_args : "");

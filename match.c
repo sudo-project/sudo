@@ -111,7 +111,7 @@ userlist_matches(pw, list)
     struct alias *a;
     int rval, matched = UNSPEC;
 
-    for (m = list->first; m != NULL; m = m->next) {
+    LH_FOREACH_REV(list, m) {
 	switch (m->type) {
 	    case ALL:
 		matched = !m->negated;
@@ -137,6 +137,8 @@ userlist_matches(pw, list)
 		    matched = !m->negated;
 		break;
 	}
+	if (matched != UNSPEC)
+	    break;
     }
     return(matched);
 }
@@ -157,7 +159,7 @@ runaslist_matches(list)
     if (list == NULL)
 	return(userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw));
 
-    for (m = list->first; m != NULL; m = m->next) {
+    LH_FOREACH_REV(list, m) {
 	switch (m->type) {
 	    case ALL:
 		matched = !m->negated;
@@ -183,6 +185,8 @@ runaslist_matches(list)
 		    matched = !m->negated;
 		break;
 	}
+	if (matched != UNSPEC)
+	    break;
     }
     return(matched);
 }
@@ -199,7 +203,7 @@ hostlist_matches(list)
     struct alias *a;
     int rval, matched = UNSPEC;
 
-    for (m = list->first; m != NULL; m = m->next) {
+    LH_FOREACH_REV(list, m) {
 	switch (m->type) {
 	    case ALL:
 		matched = !m->negated;
@@ -225,6 +229,8 @@ hostlist_matches(list)
 		    matched = !m->negated;
 		break;
 	}
+	if (matched != UNSPEC)
+	    break;
     }
     return(matched);
 }
@@ -272,10 +278,12 @@ cmndlist_matches(list)
     struct member *m;
     int rval, matched = UNSPEC;
 
-    for (m = list->first; m != NULL; m = m->next) {
+    LH_FOREACH_REV(list, m) {
 	rval = cmnd_matches(m);
-	if (rval != UNSPEC)
+	if (rval != UNSPEC) {
 	    matched = m->negated ? !rval : rval;
+	    break;
+	}
     }
     return(matched);
 }

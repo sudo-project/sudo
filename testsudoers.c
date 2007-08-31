@@ -269,20 +269,20 @@ main(argc, argv)
     /* This loop must match the one in sudoers_lookup() */
     printf("\nEntries for user %s:\n", user_name);
     matched = UNSPEC;
-    LH_FOREACH_FWD(&userspecs, us) {
-	if (userlist_matches(sudo_user.pw, &us->users) != TRUE)
+    LH_FOREACH_REV(&userspecs, us) {
+	if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
 	    continue;
-	LH_FOREACH_FWD(&us->privileges, priv) {
+	LH_FOREACH_REV(&us->privileges, priv) {
 	    putchar('\n');
 	    print_privilege(priv); /* XXX */
 	    putchar('\n');
-	    if (hostlist_matches(&priv->hostlist) == TRUE) {
+	    if (hostlist_matches(&priv->hostlist) == ALLOW) {
 		puts("\thost  matched");
 		runas = NULL;
-		LH_FOREACH_FWD(&priv->cmndlist, cs) {
+		LH_FOREACH_REV(&priv->cmndlist, cs) {
 		    if (!LH_EMPTY(&cs->runaslist))
 			runas = &cs->runaslist;
-		    if (runaslist_matches(runas) == TRUE) {
+		    if (runaslist_matches(runas) == ALLOW) {
 			puts("\trunas matched");
 			rval = cmnd_matches(cs->cmnd);
 			if (rval != UNSPEC)
@@ -291,11 +291,12 @@ main(argc, argv)
 			    rval == DENY ? "denied" : "unmatched");
 		    }
 		}
-	    } else puts("\thost  unmatched");
+	    } else
+		puts("\thost  unmatched");
 	}
     }
-    printf("\nCommand %s\n", matched == TRUE ? "allowed" :
-	matched == FALSE ? "denied" : "unmatched");
+    printf("\nCommand %s\n", matched == ALLOW ? "allowed" :
+	matched == DENY ? "denied" : "unmatched");
 
     exit(0);
 }
