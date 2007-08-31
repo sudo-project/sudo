@@ -77,9 +77,9 @@ struct n/**/_list {					\
 /*
  * Prototypes for list.c
  */
-VOID *lh_pop		__P((VOID *));
-void lh_append		__P((VOID *, VOID *));
-void list_append	__P((VOID *, VOID *));
-void list2head		__P((VOID *, VOID *));
+void *lh_pop		__P((void *));
+void lh_append		__P((void *, void *));
+void list_append	__P((void *, void *));
+void list2head		__P((void *, void *));
 
 #endif /* _SUDO_LIST_H */

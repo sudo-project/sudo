@@ -161,7 +161,7 @@ main(argc, argv, envp)
     int sudo_mode;
     int pwflag;
     sigaction_t sa;
-    VOID *ld = NULL;
+    void *ld = NULL;
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     extern char *malloc_options;
     malloc_options = "AFGJPR";

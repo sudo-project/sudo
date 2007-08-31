@@ -63,7 +63,7 @@ static void rbrepair		__P((struct rbtree *, struct rbnode *));
 static void rotate_left		__P((struct rbtree *, struct rbnode *));
 static void rotate_right	__P((struct rbtree *, struct rbnode *));
 static void _rbdestroy		__P((struct rbtree *, struct rbnode *,
-				    void (*)(VOID *)));
+				    void (*)(void *)));
 
 /*
  * Red-Black tree, see http://en.wikipedia.org/wiki/Red-black_tree
@@ -88,7 +88,7 @@ static void _rbdestroy		__P((struct rbtree *, struct rbnode *,
  */
 struct rbtree *
 rbcreate(compar)
-    int (*compar)__P((const VOID *, const VOID*));
+    int (*compar)__P((const void *, const void*));
 {
     struct rbtree *tree;
 
@@ -172,7 +172,7 @@ rotate_right(tree, node)
 struct rbnode *
 rbinsert(tree, data)
     struct rbtree *tree;
-    VOID *data;
+    void *data;
 {
     struct rbnode *node = rbfirst(tree);
     struct rbnode *parent = rbroot(tree);
@@ -266,7 +266,7 @@ rbinsert(tree, data)
 struct rbnode *
 rbfind(tree, key)
     struct rbtree *tree;
-    VOID *key;
+    void *key;
 {
     struct rbnode *node = rbfirst(tree);
     int res;
@@ -288,8 +288,8 @@ int
 rbapply_node(tree, node, func, cookie, order)
     struct rbtree *tree;
     struct rbnode *node;
-    int (*func)__P((VOID *, VOID *));
-    VOID *cookie;
+    int (*func)__P((void *, void *));
+    void *cookie;
     enum rbtraversal order;
 {
     int error;
@@ -342,7 +342,7 @@ static void
 _rbdestroy(tree, node, destroy)
     struct rbtree *tree;
     struct rbnode *node;
-    void (*destroy)__P((VOID *));
+    void (*destroy)__P((void *));
 {
     if (node != rbnil(tree)) {
 	_rbdestroy(tree, node->left, destroy);
@@ -360,7 +360,7 @@ _rbdestroy(tree, node, destroy)
 void
 rbdestroy(tree, destroy)
     struct rbtree *tree;
-    void (*destroy)__P((VOID *));
+    void (*destroy)__P((void *));
 {
     _rbdestroy(tree, rbfirst(tree), destroy);
     efree(tree);
@@ -369,13 +369,13 @@ rbdestroy(tree, destroy)
 /*
  * Delete victim from tree and return its data pointer.
  */
-VOID *
+void *
 rbdelete(tree, victim)
     struct rbtree *tree;
     struct rbnode *victim;
 {
     struct rbnode *pred, *succ;
-    VOID *data;
+    void *data;
 
     if (victim->left != rbnil(tree) && victim->right != rbnil(tree)) {
 	succ = rbsuccessor(tree, victim);

@@ -212,7 +212,7 @@ size_t strlcat		__P((char *, const char *, size_t));
 size_t strlcpy		__P((char *, const char *, size_t));
 #endif
 #ifndef HAVE_MEMRCHR
-VOID *memrchr		__P((const VOID *, int, size_t));
+void *memrchr		__P((const void *, int, size_t));
 #endif
 #ifndef HAVE_MKSTEMP
 int mkstemp		__P((char *));
@@ -225,12 +225,12 @@ void verify_user	__P((struct passwd *, char *));
 int sudoers_lookup	__P((int));
 int parse_sudoers	__P((const char *));
 #ifdef HAVE_LDAP
-int sudo_ldap_check	__P((VOID *, int));
-void sudo_ldap_display_privs __P((VOID *, struct passwd *));
-int sudo_ldap_display_cmnd __P((VOID *, struct passwd *));
-void sudo_ldap_update_defaults __P((VOID *));
-VOID *sudo_ldap_open	__P((void));
-void sudo_ldap_close	__P((VOID *));
+int sudo_ldap_check	__P((void *, int));
+void sudo_ldap_display_privs __P((void *, struct passwd *));
+int sudo_ldap_display_cmnd __P((void *, struct passwd *));
+void sudo_ldap_update_defaults __P((void *));
+void *sudo_ldap_open	__P((void));
+void sudo_ldap_close	__P((void *));
 #endif
 void set_perms		__P((int));
 void remove_timestamp	__P((int));
@@ -239,16 +239,16 @@ void sia_attempt_auth	__P((void));
 void pam_attempt_auth	__P((void));
 int yyparse		__P((void));
 void pass_warn		__P((FILE *));
-VOID *emalloc		__P((size_t));
-VOID *emalloc2		__P((size_t, size_t));
-VOID *erealloc		__P((VOID *, size_t));
-VOID *erealloc3		__P((VOID *, size_t, size_t));
+void *emalloc		__P((size_t));
+void *emalloc2		__P((size_t, size_t));
+void *erealloc		__P((void *, size_t));
+void *erealloc3		__P((void *, size_t, size_t));
 char *estrdup		__P((const char *));
 int easprintf		__P((char **, const char *, ...))
 			    __printflike(2, 3);
 int evasprintf		__P((char **, const char *, va_list))
 			    __printflike(2, 0);
-void efree		__P((VOID *));
+void efree		__P((void *));
 void dump_defaults	__P((void));
 void dump_auth_methods	__P((void));
 void init_envtables	__P((void));
@@ -259,11 +259,11 @@ void set_fqdn		__P((void));
 int set_runaspw		__P((char *));
 char *sudo_getepw	__P((const struct passwd *));
 int pam_prep_user	__P((struct passwd *));
-void zero_bytes		__P((volatile VOID *, size_t));
+void zero_bytes		__P((volatile void *, size_t));
 int gettime		__P((struct timespec *));
 FILE *open_sudoers	__P((const char *, int *));
-void display_privs	__P((VOID *, struct passwd *));
-int display_cmnd	__P((VOID *, struct passwd *));
+void display_privs	__P((void *, struct passwd *));
+int display_cmnd	__P((void *, struct passwd *));
 int get_ttycols		__P((void));
 void sudo_setenv	__P((const char *, const char *, int));
 void sudo_unsetenv	__P((const char *));

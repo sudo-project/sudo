@@ -46,7 +46,6 @@
 #include "sudo.h"
 #include "sudo_auth.h"
 
-#undef VOID
 #include <afs/stds.h>
 #include <afs/kautils.h>
 

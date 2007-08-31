@@ -88,7 +88,7 @@ __unused static const char rcsid[] = "$Sudo$";
 #define KEPT_MAX    	0xff00
 
 #undef VNULL
-#define	VNULL	(VOID *)NULL
+#define	VNULL	(void *)NULL
 
 struct environment {
     char **envp;		/* pointer to the new environment */

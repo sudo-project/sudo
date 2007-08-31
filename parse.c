@@ -197,7 +197,7 @@ sudoers_lookup(pwflag)
  */
 void
 display_privs(v, pw)
-    VOID *v;
+    void *v;
     struct passwd *pw;
 {
     struct lbuf lbuf;
@@ -417,7 +417,7 @@ display_bound_defaults(dtype)
  */
 int
 display_cmnd(v, pw)
-    VOID *v;
+    void *v;
     struct passwd *pw;
 {
     struct cmndspec *cs;

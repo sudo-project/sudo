@@ -68,7 +68,7 @@ kerb4_init(pw, promptp, auth)
 	return(AUTH_FAILURE);
 
     /* Stash a pointer to the realm (used in kerb4_verify) */
-    auth->data = (VOID *) realm;
+    auth->data = (void *) realm;
 
     return(AUTH_SUCCESS);
 }

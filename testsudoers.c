@@ -99,7 +99,7 @@ struct passwd *(*my_getpwuid) __P((uid_t)) = getpwuid;
 extern char *optarg;
 extern int optind;
 
-int  print_alias __P((VOID *, VOID *));
+int  print_alias __P((void *, void *));
 void dump_sudoers __P((void));
 void print_defaults __P((void));
 void print_privilege __P((struct privilege *));
@@ -420,7 +420,7 @@ print_defaults()
 
 int
 print_alias(v1, v2)
-    VOID *v1, *v2;
+    void *v1, *v2;
 {
     struct alias *a = (struct alias *)v1;
     struct member *m;

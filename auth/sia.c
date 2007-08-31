@@ -108,7 +108,7 @@ sia_setup(pw, promptp, auth)
 	return(AUTH_FATAL);
     }
 
-    auth->data = (VOID *) siah;
+    auth->data = (void *) siah;
     return(AUTH_SUCCESS);
 }
 

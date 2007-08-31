@@ -32,12 +32,12 @@ enum rbtraversal {
 
 struct rbnode {
     struct rbnode *left, *right, *parent;
-    VOID *data;
+    void *data;
     enum rbcolor color;
 };
 
 struct rbtree {
-    int (*compar) __P((const VOID *, const VOID *));
+    int (*compar) __P((const void *, const void *));
     struct rbnode root;
     struct rbnode nil;
 };
@@ -48,13 +48,13 @@ struct rbtree {
 #define rbroot(t)		(&(t)->root)
 #define rbnil(t)		(&(t)->nil)
 
-VOID *rbdelete			__P((struct rbtree *, struct rbnode *));
+void *rbdelete			__P((struct rbtree *, struct rbnode *));
 int rbapply_node		__P((struct rbtree *, struct rbnode *,
-				    int (*)(VOID *, VOID *), VOID *,
+				    int (*)(void *, void *), void *,
 				    enum rbtraversal));
-struct rbnode *rbfind		__P((struct rbtree *, VOID *));
-struct rbnode *rbinsert		__P((struct rbtree *, VOID *));
-struct rbtree *rbcreate		__P((int (*)(const VOID *, const VOID *)));
-void rbdestroy			__P((struct rbtree *, void (*)(VOID *)));
+struct rbnode *rbfind		__P((struct rbtree *, void *));
+struct rbnode *rbinsert		__P((struct rbtree *, void *));
+struct rbtree *rbcreate		__P((int (*)(const void *, const void *)));
+void rbdestroy			__P((struct rbtree *, void (*)(void *)));
 
 #endif /* _SUDO_REDBLACK_H */

@@ -56,8 +56,8 @@ struct rbtree *aliases;
 /*
  * Local protoypes
  */
-static int   alias_compare	__P((const VOID *, const VOID *));
-static void  alias_free		__P((VOID *));
+static int   alias_compare	__P((const void *, const void *));
+static void  alias_free		__P((void *));
 
 /*
  * Comparison function for the red-black tree.
@@ -65,7 +65,7 @@ static void  alias_free		__P((VOID *));
  */
 static int
 alias_compare(v1, v2)
-    const VOID *v1, *v2;
+    const void *v1, *v2;
 {
     const struct alias *a1 = (const struct alias *)v1;
     const struct alias *a2 = (const struct alias *)v2;
@@ -128,8 +128,8 @@ alias_add(name, type, members)
  */
 void
 alias_apply(func, cookie)
-    int (*func) __P((VOID *, VOID *));
-    VOID *cookie;
+    int (*func) __P((void *, void *));
+    void *cookie;
 {
     rbapply(aliases, func, cookie, inorder);
 }
@@ -148,11 +148,11 @@ no_aliases()
  */
 static void
 alias_free(v)
-    VOID *v;
+    void *v;
 {
     struct alias *a = (struct alias *)v;
     struct member *m;
-    VOID *next;
+    void *next;
 
     for (m = a->members.first; m != NULL; m = next) {
 	next = m->next;

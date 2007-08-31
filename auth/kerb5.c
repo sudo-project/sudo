@@ -89,7 +89,7 @@ kerb5_init(pw, promptp, auth)
     char		cache_name[64];
     char		*pname;
 
-    auth->data = (VOID *) &sudo_krb5_data; /* Stash all our data here */
+    auth->data = (void *) &sudo_krb5_data; /* Stash all our data here */
 
 #ifdef HAVE_KRB5_INIT_SECURE_CONTEXT
     error = krb5_init_secure_context(&(sudo_krb5_data.sudo_context));

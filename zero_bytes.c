@@ -29,7 +29,7 @@ __unused static const char rcsid[] = "$Sudo$";
  */
 void
 zero_bytes(v, n)
-    volatile VOID *v;
+    volatile void *v;
     size_t n;
 {
     volatile char *p, *ep;

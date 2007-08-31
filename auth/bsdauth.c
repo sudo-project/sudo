@@ -88,7 +88,7 @@ bsdauth_init(pw, promptp, auth)
 	return(AUTH_FATAL);
     }
 
-    auth->data = (VOID *) as;
+    auth->data = (void *) as;
     return(AUTH_SUCCESS);
 }
 

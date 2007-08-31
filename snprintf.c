@@ -129,9 +129,9 @@ static int xxxprintf	 __P((char **, size_t, int, const char *, va_list));
 #define BUF		68
 
 #ifndef HAVE_MEMCHR
-VOID *
+void *
 memchr(s, c, n)
-	const VOID *s;
+	const void *s;
 	unsigned char c;
 	size_t n;
 {
@@ -140,7 +140,7 @@ memchr(s, c, n)
 
 		do {
 			if (*p++ == c)
-				return ((VOID *)(p - 1));
+				return ((void *)(p - 1));
 		} while (--n != 0);
 	}
 	return (NULL);
@@ -537,7 +537,7 @@ reswitch:	switch (ch) {
 			 * defined manner.''
 			 *	-- ANSI X3J11
 			 */
-			ulval = (unsigned long)va_arg(ap, VOID *);
+			ulval = (unsigned long)va_arg(ap, void *);
 			base = 16;
 			xdigs = "0123456789abcdef";
 			flags = (flags & ~QUADINT) | HEXPREFIX;

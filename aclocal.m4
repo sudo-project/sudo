@@ -156,15 +156,6 @@ fi
 ])dnl
 
 dnl
-dnl check for fullly working void
-dnl
-AC_DEFUN(SUDO_FULL_VOID, [AC_MSG_CHECKING(for full void implementation)
-AC_TRY_COMPILE(, [void *foo;
-foo = (void *)0; (void *)"test";], AC_DEFINE(VOID, void, [Define to "void" if your compiler supports void pointers, else use "char"].)
-AC_MSG_RESULT(yes), AC_DEFINE(VOID, char)
-AC_MSG_RESULT(no))])
-
-dnl
 dnl SUDO_CHECK_TYPE(TYPE, DEFAULT)
 dnl XXX - should require the check for unistd.h...
 dnl

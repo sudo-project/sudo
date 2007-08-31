@@ -67,7 +67,7 @@ securid_init(pw, promptp, auth)
 {
     static struct SD_CLIENT sd_dat;		/* SecurID data block */
 
-    auth->data = (VOID *) &sd_dat;		/* For method-specific data */
+    auth->data = (void *) &sd_dat;		/* For method-specific data */
 
     if (creadcfg() == 0)
 	return(AUTH_SUCCESS);

@@ -29,9 +29,9 @@ __unused static const char rcsid[] = "$Sudo$";
  * Reverse memchr()
  * Find the last occurence of 'c' in the buffer 's' of size 'n'.
  */
-VOID *
+void *
 memrchr(s, c, n)
-    const VOID *s;
+    const void *s;
     int c;
     size_t n;
 {
@@ -41,8 +41,8 @@ memrchr(s, c, n)
 	cp = (unsigned char *)s + n;
 	do {
 	    if (*(--cp) == (unsigned char)c)
-		return((VOID *)cp);
+		return((void *)cp);
 	} while (--n != 0);
     }
-    return((VOID *)0);
+    return((void *)0);
 }

@@ -66,16 +66,16 @@ __unused static const char rcsid[] = "$Sudo$";
  * emalloc() calls the system malloc(3) and exits with an error if
  * malloc(3) fails.
  */
-VOID *
+void *
 emalloc(size)
     size_t size;
 {
-    VOID *ptr;
+    void *ptr;
 
     if (size == 0)
 	errorx(1, "internal error, tried to emalloc(0)");
 
-    if ((ptr = (VOID *) malloc(size)) == NULL)
+    if ((ptr = (void *) malloc(size)) == NULL)
 	errorx(1, "unable to allocate memory");
     return(ptr);
 }
@@ -84,12 +84,12 @@ emalloc(size)
  * emalloc2() allocates nmemb * size bytes and exits with an error
  * if overflow would occur or if the system malloc(3) fails.
  */
-VOID *
+void *
 emalloc2(nmemb, size)
     size_t nmemb;
     size_t size;
 {
-    VOID *ptr;
+    void *ptr;
 
     if (nmemb == 0 || size == 0)
 	errorx(1, "internal error, tried to emalloc2(0)");
@@ -97,7 +97,7 @@ emalloc2(nmemb, size)
 	errorx(1, "internal error, emalloc2() overflow");
 
     size *= nmemb;
-    if ((ptr = (VOID *) malloc(size)) == NULL)
+    if ((ptr = (void *) malloc(size)) == NULL)
 	errorx(1, "unable to allocate memory");
     return(ptr);
 }
@@ -107,16 +107,16 @@ emalloc2(nmemb, size)
  * realloc(3) fails.  You can call erealloc() with a NULL pointer even
  * if the system realloc(3) does not support this.
  */
-VOID *
+void *
 erealloc(ptr, size)
-    VOID *ptr;
+    void *ptr;
     size_t size;
 {
 
     if (size == 0)
 	errorx(1, "internal error, tried to erealloc(0)");
 
-    ptr = ptr ? (VOID *) realloc(ptr, size) : (VOID *) malloc(size);
+    ptr = ptr ? (void *) realloc(ptr, size) : (void *) malloc(size);
     if (ptr == NULL)
 	errorx(1, "unable to allocate memory");
     return(ptr);
@@ -128,9 +128,9 @@ erealloc(ptr, size)
  * You can call erealloc() with a NULL pointer even if the system realloc(3)
  * does not support this.
  */
-VOID *
+void *
 erealloc3(ptr, nmemb, size)
-    VOID *ptr;
+    void *ptr;
     size_t nmemb;
     size_t size;
 {
@@ -141,7 +141,7 @@ erealloc3(ptr, nmemb, size)
 	errorx(1, "internal error, erealloc3() overflow");
 
     size *= nmemb;
-    ptr = ptr ? (VOID *) realloc(ptr, size) : (VOID *) malloc(size);
+    ptr = ptr ? (void *) realloc(ptr, size) : (void *) malloc(size);
     if (ptr == NULL)
 	errorx(1, "unable to allocate memory");
     return(ptr);
@@ -217,7 +217,7 @@ evasprintf(ret, format, args)
  */
 void
 efree(ptr)
-    VOID *ptr;
+    void *ptr;
 {
     if (ptr != NULL)
 	free(ptr);

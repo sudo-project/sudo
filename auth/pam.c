@@ -67,7 +67,7 @@ __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 static int sudo_conv __P((int, PAM_CONST struct pam_message **,
-			  struct pam_response **, VOID *));
+			  struct pam_response **, void *));
 static char *def_prompt;
 
 #ifndef PAM_DATA_SILENT
@@ -87,7 +87,7 @@ pam_init(pw, promptp, auth)
 
     /* Initial PAM setup */
     if (auth != NULL)
-	auth->data = (VOID *) &pam_status;
+	auth->data = (void *) &pam_status;
     pam_conv.conv = sudo_conv;
     pam_status = pam_start("sudo", pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
@@ -231,7 +231,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
     int num_msg;
     PAM_CONST struct pam_message **msg;
     struct pam_response **response;
-    VOID *appdata_ptr;
+    void *appdata_ptr;
 {
     struct pam_response *pr;
     PAM_CONST struct pam_message *pm;

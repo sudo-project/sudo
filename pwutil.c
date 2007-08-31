@@ -81,18 +81,18 @@ extern struct passwd *(*my_getpwuid) __P((uid_t));
 static struct rbtree *pwcache_byuid, *pwcache_byname;
 static struct rbtree *grcache_bygid, *grcache_byname;
 
-static int  cmp_pwuid	__P((const VOID *, const VOID *));
-static int  cmp_pwnam	__P((const VOID *, const VOID *));
-static int  cmp_grgid	__P((const VOID *, const VOID *));
-static int  cmp_grnam	__P((const VOID *, const VOID *));
+static int  cmp_pwuid	__P((const void *, const void *));
+static int  cmp_pwnam	__P((const void *, const void *));
+static int  cmp_grgid	__P((const void *, const void *));
+static int  cmp_grnam	__P((const void *, const void *));
 
 /*
  * Compare by uid.
  */
 static int
 cmp_pwuid(v1, v2)
-    const VOID *v1;
-    const VOID *v2;
+    const void *v1;
+    const void *v2;
 {
     const struct passwd *pw1 = (const struct passwd *) v1;
     const struct passwd *pw2 = (const struct passwd *) v2;
@@ -104,8 +104,8 @@ cmp_pwuid(v1, v2)
  */
 static int
 cmp_pwnam(v1, v2)
-    const VOID *v1;
-    const VOID *v2;
+    const void *v1;
+    const void *v2;
 {
     const struct passwd *pw1 = (const struct passwd *) v1;
     const struct passwd *pw2 = (const struct passwd *) v2;
@@ -207,16 +207,16 @@ sudo_getpwuid(uid)
 	    zero_bytes(pw->pw_passwd, strlen(pw->pw_passwd));
 	pw->pw_passwd = cp;
 
-	if (rbinsert(pwcache_byname, (VOID *) pw) != NULL)
+	if (rbinsert(pwcache_byname, (void *) pw) != NULL)
 	    errorx(1, "unable to cache user name, already exists");
-	if (rbinsert(pwcache_byuid, (VOID *) pw) != NULL)
+	if (rbinsert(pwcache_byuid, (void *) pw) != NULL)
 	    errorx(1, "unable to cache uid, already exists");
 	return(pw);
     } else {
 	pw = emalloc(sizeof(*pw));
 	memset(pw, 0, sizeof(*pw));
 	pw->pw_uid = uid;
-	if (rbinsert(pwcache_byuid, (VOID *) pw) != NULL)
+	if (rbinsert(pwcache_byuid, (void *) pw) != NULL)
 	    errorx(1, "unable to cache uid, already exists");
 	return(NULL);
     }
@@ -250,9 +250,9 @@ sudo_getpwnam(name)
 	    zero_bytes(pw->pw_passwd, strlen(pw->pw_passwd));
 	pw->pw_passwd = cp;
 
-	if (rbinsert(pwcache_byname, (VOID *) pw) != NULL)
+	if (rbinsert(pwcache_byname, (void *) pw) != NULL)
 	    errorx(1, "unable to cache user name, already exists");
-	if (rbinsert(pwcache_byuid, (VOID *) pw) != NULL)
+	if (rbinsert(pwcache_byuid, (void *) pw) != NULL)
 	    errorx(1, "unable to cache uid, already exists");
 	return(pw);
     } else {
@@ -264,7 +264,7 @@ sudo_getpwnam(name)
 	memcpy(cp, name, len);
 	pw->pw_name = cp;
 	pw->pw_uid = (uid_t) -1;
-	if (rbinsert(pwcache_byname, (VOID *) pw) != NULL)
+	if (rbinsert(pwcache_byname, (void *) pw) != NULL)
 	    errorx(1, "unable to cache user name, already exists");
 	return(NULL);
     }
@@ -290,11 +290,11 @@ sudo_fakepwuid(uid)
     /* Store by uid and by name, overwriting cached version. */
     if ((node = rbinsert(pwcache_byuid, pw)) != NULL) {
 	efree(node->data);
-	node->data = (VOID *) pw;
+	node->data = (void *) pw;
     }
     if ((node = rbinsert(pwcache_byname, pw)) != NULL) {
 	efree(node->data);
-	node->data = (VOID *) pw;
+	node->data = (void *) pw;
     }
     return(pw);
 }
@@ -320,11 +320,11 @@ sudo_fakepwnam(user)
     /* Store by uid and by name, overwriting cached version. */
     if ((node = rbinsert(pwcache_byuid, pw)) != NULL) {
 	efree(node->data);
-	node->data = (VOID *) pw;
+	node->data = (void *) pw;
     }
     if ((node = rbinsert(pwcache_byname, pw)) != NULL) {
 	efree(node->data);
-	node->data = (VOID *) pw;
+	node->data = (void *) pw;
     }
     return(pw);
 }
@@ -341,7 +341,7 @@ sudo_setpwent()
 }
 
 #ifdef notyet
-static void pw_free	__P((VOID *));
+static void pw_free	__P((void *));
 
 void
 sudo_freepwcache()
@@ -358,7 +358,7 @@ sudo_freepwcache()
 
 static void
 pw_free(v)
-    VOID *v;
+    void *v;
 {
     struct passwd *pw = (struct passwd *) v;
 
@@ -382,8 +382,8 @@ sudo_endpwent()
  */
 static int
 cmp_grgid(v1, v2)
-    const VOID *v1;
-    const VOID *v2;
+    const void *v1;
+    const void *v2;
 {
     const struct group *grp1 = (const struct group *) v1;
     const struct group *grp2 = (const struct group *) v2;
@@ -395,8 +395,8 @@ cmp_grgid(v1, v2)
  */
 static int
 cmp_grnam(v1, v2)
-    const VOID *v1;
-    const VOID *v2;
+    const void *v1;
+    const void *v2;
 {
     const struct group *grp1 = (const struct group *) v1;
     const struct group *grp2 = (const struct group *) v2;
@@ -469,16 +469,16 @@ sudo_getgrgid(gid)
      */
     if ((gr = getgrgid(gid)) != NULL) {
 	gr = sudo_grdup(gr);
-	if (rbinsert(grcache_byname, (VOID *) gr) != NULL)
+	if (rbinsert(grcache_byname, (void *) gr) != NULL)
 	    errorx(1, "unable to cache group name, already exists");
-	if (rbinsert(grcache_bygid, (VOID *) gr) != NULL)
+	if (rbinsert(grcache_bygid, (void *) gr) != NULL)
 	    errorx(1, "unable to cache gid, already exists");
 	return(gr);
     } else {
 	gr = emalloc(sizeof(*gr));
 	memset(gr, 0, sizeof(*gr));
 	gr->gr_gid = gid;
-	if (rbinsert(grcache_bygid, (VOID *) gr) != NULL)
+	if (rbinsert(grcache_bygid, (void *) gr) != NULL)
 	    errorx(1, "unable to cache gid, already exists");
 	return(NULL);
     }
@@ -506,9 +506,9 @@ sudo_getgrnam(name)
      */
     if ((gr = getgrnam(name)) != NULL) {
 	gr = sudo_grdup(gr);
-	if (rbinsert(grcache_byname, (VOID *) gr) != NULL)
+	if (rbinsert(grcache_byname, (void *) gr) != NULL)
 	    errorx(1, "unable to cache group name, already exists");
-	if (rbinsert(grcache_bygid, (VOID *) gr) != NULL)
+	if (rbinsert(grcache_bygid, (void *) gr) != NULL)
 	    errorx(1, "unable to cache gid, already exists");
 	return(gr);
     } else {
@@ -520,7 +520,7 @@ sudo_getgrnam(name)
 	memcpy(cp, name, len);
 	gr->gr_name = cp;
 	gr->gr_gid = (gid_t) -1;
-	if (rbinsert(grcache_byname, (VOID *) gr) != NULL)
+	if (rbinsert(grcache_byname, (void *) gr) != NULL)
 	    errorx(1, "unable to cache group name, already exists");
 	return(NULL);
     }

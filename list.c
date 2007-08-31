@@ -50,15 +50,15 @@ struct list_head_proto {
  * Pop the last element off the end of vh.
  * Returns the popped element.
  */
-VOID *
+void *
 lh_pop(vh)
-    VOID *vh;
+    void *vh;
 {
     struct list_head_proto *h = (struct list_head_proto *)vh;
-    VOID *last = NULL;
+    void *last = NULL;
 
     if (!lh_empty(h)) {
-	last = (VOID *)h->last;
+	last = (void *)h->last;
 	if (h->first == h->last) {
 	    h->first = NULL;
 	    h->last = NULL;
@@ -76,8 +76,8 @@ lh_pop(vh)
  */
 void
 list2head(vh, vl)
-    VOID *vh;
-    VOID *vl;
+    void *vh;
+    void *vl;
 {
     struct list_head_proto *h = (struct list_head_proto *)vh;
     struct list_proto *l = (struct list_proto *)vl;
@@ -98,12 +98,12 @@ list2head(vh, vl)
  */
 void
 list_append(vl1, vl2)
-    VOID *vl1;
-    VOID *vl2;
+    void *vl1;
+    void *vl2;
 {
     struct list_proto *l1 = (struct list_proto *)vl1;
     struct list_proto *l2 = (struct list_proto *)vl2;
-    VOID *tail = l2->prev;
+    void *tail = l2->prev;
 
     l1->prev->next = l2;
     l2->prev = l1->prev;
@@ -116,12 +116,12 @@ list_append(vl1, vl2)
  */
 void
 lh_append(vh, vl)
-    VOID *vh;
-    VOID *vl;
+    void *vh;
+    void *vl;
 {
     struct list_head_proto *h = (struct list_head_proto *)vh;
     struct list_proto *l = (struct list_proto *)vl;
-    VOID *tail = l->prev;
+    void *tail = l->prev;
 
     if (h->first == NULL)
 	h->first = l;

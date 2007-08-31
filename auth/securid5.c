@@ -79,7 +79,7 @@ securid_init(pw, promptp, auth)
 {
     static SDI_HANDLE sd_dat;			/* SecurID handle */
 
-    auth->data = (VOID *) &sd_dat;		/* For method-specific data */
+    auth->data = (void *) &sd_dat;		/* For method-specific data */
 
     /* Start communications */
     if (AceInitialize() != SD_FALSE)

@@ -559,10 +559,6 @@
 /* Define to 1 if you want a different ticket file for each tty. */
 #undef USE_TTY_TICKETS
 
-/* Define to "void" if your compiler supports void pointers, else use "char".
-   */
-#undef VOID
-
 /* Define to avoid using the passwd/shadow file for authentication. */
 #undef WITHOUT_PASSWD
 

@@ -109,7 +109,7 @@ static int check_aliases	__P((int));
 static int check_syntax		__P((char *, int));
 static int edit_sudoers		__P((struct sudoersfile *, char *, char *, int));
 static int install_sudoers	__P((struct sudoersfile *));
-static int print_unused		__P((VOID *, VOID *));
+static int print_unused		__P((void *, void *));
 static int reparse_sudoers	__P((char *, char *, int, int));
 static int run_command		__P((char *, char **));
 static void setup_signals	__P((void));
@@ -961,8 +961,8 @@ check_aliases(strict)
 
 static int
 print_unused(v1, v2)
-    VOID *v1;
-    VOID *v2;
+    void *v1;
+    void *v2;
 {
     struct alias *a = (struct alias *)v1;
     char *prefix = (char *)v2;
