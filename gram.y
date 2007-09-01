@@ -241,26 +241,7 @@ privileges	:	privilege
 		;
 
 privilege	:	hostlist '=' cmndspeclist {
-			    struct cmndtag tags;
 			    struct privilege *p = emalloc(sizeof(*p));
-			    struct cmndspec *cs;
-
-			    /* propagate tags and runas lists */
-			    tags.nopasswd = tags.noexec = tags.setenv = UNSPEC;
-			    for (cs = $3; cs != NULL; cs = cs->next) {
-				if (lh_empty(&cs->runaslist) &&
-				    !lh_empty(&cs->prev->runaslist)) {
-				    memcpy(&cs->runaslist, &cs->prev->runaslist,
-					sizeof(cs->runaslist));
-				}
-				if (cs->tags.nopasswd == UNSPEC)
-				    cs->tags.nopasswd = tags.nopasswd;
-				if (cs->tags.noexec == UNSPEC)
-				    cs->tags.noexec = tags.noexec;
-				if (cs->tags.setenv == UNSPEC)
-				    cs->tags.setenv = tags.setenv;
-				memcpy(&tags, &cs->tags, sizeof(tags));
-			    }
 			    list2head(&p->hostlist, $1);
 			    list2head(&p->cmndlist, $3);
 			    p->prev = p;
@@ -299,6 +280,16 @@ host		:	ALIAS {
 cmndspeclist	:	cmndspec
 		|	cmndspeclist ',' cmndspec {
 			    list_append($1, $3);
+			    /* propagate tags and runas list */
+			    if ($3->tags.nopasswd == UNSPEC)
+				$3->tags.nopasswd = $3->prev->tags.nopasswd;
+			    if ($3->tags.noexec == UNSPEC)
+				$3->tags.noexec = $3->prev->tags.noexec;
+			    if ($3->tags.setenv == UNSPEC)
+				$3->tags.setenv = $3->prev->tags.setenv;
+			    if (lh_empty(&$3->runaslist) &&
+				!lh_empty(&$3->prev->runaslist))
+				$3->runaslist = $3->prev->runaslist;
 			    $$ = $1;
 			}
 		;
