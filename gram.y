@@ -592,7 +592,7 @@ init_parser(path, quiet)
     int quiet;
 {
     struct defaults *d;
-    struct member *m, *lastbinding;
+    struct member *m, *freed;
     struct userspec *us;
     struct privilege *priv;
     struct cmndspec *cs;
@@ -607,10 +607,14 @@ init_parser(path, quiet)
 		efree(m->name);
 		efree(m);
 	    }
+	    freed = NULL;
 	    while ((cs = lh_pop(&priv->cmndlist)) != NULL) {
-		while ((m = lh_pop(&cs->runaslist)) != NULL) {
-		    efree(m->name);
-		    efree(m);
+		if (lh_last(&cs->runaslist) != freed) {
+		    freed = lh_last(&cs->runaslist);
+		    while ((m = lh_pop(&cs->runaslist)) != NULL) {
+			efree(m->name);
+			efree(m);
+		    }
 		}
 		efree(cs->cmnd->name);
 		efree(cs->cmnd);
@@ -621,9 +625,10 @@ init_parser(path, quiet)
     }
     lh_init(&userspecs);
 
-    lastbinding = NULL;
+    freed = NULL;
     while ((d = lh_pop(&defaults)) != NULL) {
-	if (lh_pop(&d->binding) != lastbinding) {
+	if (lh_last(&d->binding) != freed) {
+	    freed = lh_last(&d->binding);
 	    while ((m = lh_pop(&d->binding)) != NULL) {
 		efree(m->name);
 		efree(m);
