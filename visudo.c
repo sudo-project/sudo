@@ -108,7 +108,7 @@ static char whatnow		__P((void));
 static int check_aliases	__P((int));
 static int check_syntax		__P((char *, int));
 static int edit_sudoers		__P((struct sudoersfile *, char *, char *, int));
-static int install_sudoers	__P((struct sudoersfile *));
+static int install_sudoers	__P((struct sudoersfile *, int));
 static int print_unused		__P((void *, void *));
 static int reparse_sudoers	__P((char *, char *, int, int));
 static int run_command		__P((char *, char **));
@@ -148,7 +148,7 @@ main(argc, argv)
 {
     struct sudoersfile *sp;
     char *args, *editor, *sudoers_path;
-    int ch, checkonly, quiet, strict;
+    int ch, checkonly, quiet, strict, oldperms;
 
     Argv = argv;
     if ((Argc = argc) < 1)
@@ -157,7 +157,7 @@ main(argc, argv)
     /*
      * Arg handling.
      */
-    checkonly = quiet = strict = 0;
+    checkonly = oldperms = quiet = strict = FALSE;
     sudoers_path = _PATH_SUDOERS;
     while ((ch = getopt(argc, argv, "Vcf:sq")) != -1) {
 	switch (ch) {
@@ -169,6 +169,7 @@ main(argc, argv)
 		break;
 	    case 'f':
 		sudoers_path = optarg;	/* sudoers file path */
+		oldperms = TRUE;
 		break;
 	    case 's':
 		strict++;		/* strict mode */
@@ -229,7 +230,7 @@ main(argc, argv)
 	if (!sp->modified)
 	    (void) unlink(sp->tpath);
 	else
-	    (void) install_sudoers(sp);
+	    (void) install_sudoers(sp, oldperms);
     }
 
     exit(0);
@@ -464,21 +465,37 @@ reparse_sudoers(editor, args, strict, quiet)
  * move it into place.  Returns TRUE on success, else FALSE.
  */
 static int
-install_sudoers(sp)
+install_sudoers(sp, oldperms)
     struct sudoersfile *sp;
+    int oldperms;
 {
+    struct stat sb;
+
     /*
      * Change mode and ownership of temp file so when
      * we move it to sp->path things are kosher.
      */
-    if (chown(sp->tpath, SUDOERS_UID, SUDOERS_GID) != 0) {
-	warning("unable to set (uid, gid) of %s to (%d, %d)",
-	    sp->tpath, SUDOERS_UID, SUDOERS_GID);
-	return(FALSE);
-    }
-    if (chmod(sp->tpath, SUDOERS_MODE) != 0) {
-	warning("unable to change mode of %s to 0%o", sp->tpath, SUDOERS_MODE);
-	return(FALSE);
+    if (oldperms) {
+	/* Use perms of the existing file.  */
+#ifdef HAVE_FSTAT
+	if (fstat(sp->fd, &sb) == -1)
+#else
+	if (stat(sp->path, &sb) == -1)
+#endif
+	    error(1, "can't stat %s", sp->path);
+	(void) chown(sp->tpath, sb.st_uid, sb.st_gid);
+	(void) chmod(sp->tpath, sb.st_mode & 0777);
+    } else {
+	if (chown(sp->tpath, SUDOERS_UID, SUDOERS_GID) != 0) {
+	    warning("unable to set (uid, gid) of %s to (%d, %d)",
+		sp->tpath, SUDOERS_UID, SUDOERS_GID);
+	    return(FALSE);
+	}
+	if (chmod(sp->tpath, SUDOERS_MODE) != 0) {
+	    warning("unable to change mode of %s to 0%o", sp->tpath,
+		SUDOERS_MODE);
+	    return(FALSE);
+	}
     }
 
     /*
