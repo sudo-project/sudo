@@ -571,7 +571,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 507 "gram.y"
+#line 498 "gram.y"
 static struct defaults *
 new_default(var, val, op)
     char *var;
@@ -660,7 +660,7 @@ init_parser(path, quiet)
     int quiet;
 {
     struct defaults *d;
-    struct member *m, *lastbinding;
+    struct member *m, *freed;
     struct userspec *us;
     struct privilege *priv;
     struct cmndspec *cs;
@@ -675,10 +675,14 @@ init_parser(path, quiet)
 		efree(m->name);
 		efree(m);
 	    }
+	    freed = NULL;
 	    while ((cs = lh_pop(&priv->cmndlist)) != NULL) {
-		while ((m = lh_pop(&cs->runaslist)) != NULL) {
-		    efree(m->name);
-		    efree(m);
+		if (lh_last(&cs->runaslist) != freed) {
+		    freed = lh_last(&cs->runaslist);
+		    while ((m = lh_pop(&cs->runaslist)) != NULL) {
+			efree(m->name);
+			efree(m);
+		    }
 		}
 		efree(cs->cmnd->name);
 		efree(cs->cmnd);
@@ -689,9 +693,10 @@ init_parser(path, quiet)
     }
     lh_init(&userspecs);
 
-    lastbinding = NULL;
+    freed = NULL;
     while ((d = lh_pop(&defaults)) != NULL) {
-	if (lh_pop(&d->binding) != lastbinding) {
+	if (lh_last(&d->binding) != freed) {
+	    freed = lh_last(&d->binding);
 	    while ((m = lh_pop(&d->binding)) != NULL) {
 		efree(m->name);
 		efree(m);
@@ -713,7 +718,7 @@ init_parser(path, quiet)
     sudolineno = 1;
     verbose = !quiet;
 }
-#line 665 "y.tab.c"
+#line 670 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1029,26 +1034,7 @@ break;
 case 26:
 #line 243 "gram.y"
 {
-			    struct cmndtag tags;
 			    struct privilege *p = emalloc(sizeof(*p));
-			    struct cmndspec *cs;
-
-			    /* propagate tags and runas lists */
-			    tags.nopasswd = tags.noexec = tags.setenv = UNSPEC;
-			    for (cs = yyvsp[0].cmndspec; cs != NULL; cs = cs->next) {
-				if (lh_empty(&cs->runaslist) &&
-				    !lh_empty(&cs->prev->runaslist)) {
-				    memcpy(&cs->runaslist, &cs->prev->runaslist,
-					sizeof(cs->runaslist));
-				}
-				if (cs->tags.nopasswd == UNSPEC)
-				    cs->tags.nopasswd = tags.nopasswd;
-				if (cs->tags.noexec == UNSPEC)
-				    cs->tags.noexec = tags.noexec;
-				if (cs->tags.setenv == UNSPEC)
-				    cs->tags.setenv = tags.setenv;
-				memcpy(&tags, &cs->tags, sizeof(tags));
-			    }
 			    list2head(&p->hostlist, yyvsp[-2].member);
 			    list2head(&p->cmndlist, yyvsp[0].cmndspec);
 			    p->prev = p;
@@ -1057,58 +1043,68 @@ case 26:
 			}
 break;
 case 27:
-#line 272 "gram.y"
+#line 253 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = FALSE;
 			}
 break;
 case 28:
-#line 276 "gram.y"
+#line 257 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = TRUE;
 			}
 break;
 case 29:
-#line 282 "gram.y"
+#line 263 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			}
 break;
 case 30:
-#line 285 "gram.y"
+#line 266 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			}
 break;
 case 31:
-#line 288 "gram.y"
+#line 269 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
 			}
 break;
 case 32:
-#line 291 "gram.y"
+#line 272 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NTWKADDR);
 			}
 break;
 case 33:
-#line 294 "gram.y"
+#line 275 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
 case 35:
-#line 300 "gram.y"
+#line 281 "gram.y"
 {
 			    list_append(yyvsp[-2].cmndspec, yyvsp[0].cmndspec);
+			    /* propagate tags and runas list */
+			    if (yyvsp[0].cmndspec->tags.nopasswd == UNSPEC)
+				yyvsp[0].cmndspec->tags.nopasswd = yyvsp[0].cmndspec->prev->tags.nopasswd;
+			    if (yyvsp[0].cmndspec->tags.noexec == UNSPEC)
+				yyvsp[0].cmndspec->tags.noexec = yyvsp[0].cmndspec->prev->tags.noexec;
+			    if (yyvsp[0].cmndspec->tags.setenv == UNSPEC)
+				yyvsp[0].cmndspec->tags.setenv = yyvsp[0].cmndspec->prev->tags.setenv;
+			    if (lh_empty(&yyvsp[0].cmndspec->runaslist) &&
+				!lh_empty(&yyvsp[0].cmndspec->prev->runaslist))
+				yyvsp[0].cmndspec->runaslist = yyvsp[0].cmndspec->prev->runaslist;
 			    yyval.cmndspec = yyvsp[-2].cmndspec;
 			}
 break;
 case 36:
-#line 306 "gram.y"
+#line 297 "gram.y"
 {
 			    struct cmndspec *cs = emalloc(sizeof(*cs));
 			    list2head(&cs->runaslist, yyvsp[-2].member);
@@ -1120,138 +1116,138 @@ case 36:
 			}
 break;
 case 37:
-#line 317 "gram.y"
+#line 308 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = FALSE;
 			}
 break;
 case 38:
-#line 321 "gram.y"
+#line 312 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = TRUE;
 			}
 break;
 case 39:
-#line 327 "gram.y"
+#line 318 "gram.y"
 {
 			    yyval.member = NULL;
 			}
 break;
 case 40:
-#line 330 "gram.y"
+#line 321 "gram.y"
 {
 			    yyval.member = yyvsp[-1].member;
 			}
 break;
 case 42:
-#line 336 "gram.y"
+#line 327 "gram.y"
 {
 			    list_append(yyvsp[-2].member, yyvsp[0].member);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 43:
-#line 342 "gram.y"
+#line 333 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = FALSE;
 			}
 break;
 case 44:
-#line 346 "gram.y"
+#line 337 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = TRUE;
 			}
 break;
 case 45:
-#line 352 "gram.y"
+#line 343 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			}
 break;
 case 46:
-#line 355 "gram.y"
+#line 346 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			}
 break;
 case 47:
-#line 358 "gram.y"
+#line 349 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
 			}
 break;
 case 48:
-#line 361 "gram.y"
+#line 352 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, USERGROUP);
 			}
 break;
 case 49:
-#line 364 "gram.y"
+#line 355 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
 case 50:
-#line 369 "gram.y"
+#line 360 "gram.y"
 {
 			    yyval.tag.nopasswd = yyval.tag.noexec = yyval.tag.setenv = UNSPEC;
 			}
 break;
 case 51:
-#line 372 "gram.y"
+#line 363 "gram.y"
 {
 			    yyval.tag.nopasswd = TRUE;
 			}
 break;
 case 52:
-#line 375 "gram.y"
+#line 366 "gram.y"
 {
 			    yyval.tag.nopasswd = FALSE;
 			}
 break;
 case 53:
-#line 378 "gram.y"
+#line 369 "gram.y"
 {
 			    yyval.tag.noexec = TRUE;
 			}
 break;
 case 54:
-#line 381 "gram.y"
+#line 372 "gram.y"
 {
 			    yyval.tag.noexec = FALSE;
 			}
 break;
 case 55:
-#line 384 "gram.y"
+#line 375 "gram.y"
 {
 			    yyval.tag.setenv = TRUE;
 			}
 break;
 case 56:
-#line 387 "gram.y"
+#line 378 "gram.y"
 {
 			    yyval.tag.setenv = FALSE;
 			}
 break;
 case 57:
-#line 392 "gram.y"
+#line 383 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			}
 break;
 case 58:
-#line 395 "gram.y"
+#line 386 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			}
 break;
 case 59:
-#line 398 "gram.y"
+#line 389 "gram.y"
 {
 			    struct sudo_command *c = emalloc(sizeof(*c));
 			    c->cmnd = yyvsp[0].command.cmnd;
@@ -1260,7 +1256,7 @@ case 59:
 			}
 break;
 case 62:
-#line 410 "gram.y"
+#line 401 "gram.y"
 {
 			    char *s;
 			    if ((s = alias_add(yyvsp[-2].string, HOSTALIAS, yyvsp[0].member)) != NULL) {
@@ -1270,14 +1266,14 @@ case 62:
 			}
 break;
 case 64:
-#line 420 "gram.y"
+#line 411 "gram.y"
 {
 			    list_append(yyvsp[-2].member, yyvsp[0].member);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 67:
-#line 430 "gram.y"
+#line 421 "gram.y"
 {
 			    char *s;
 			    if ((s = alias_add(yyvsp[-2].string, CMNDALIAS, yyvsp[0].member)) != NULL) {
@@ -1287,14 +1283,14 @@ case 67:
 			}
 break;
 case 69:
-#line 440 "gram.y"
+#line 431 "gram.y"
 {
 			    list_append(yyvsp[-2].member, yyvsp[0].member);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 72:
-#line 450 "gram.y"
+#line 441 "gram.y"
 {
 			    char *s;
 			    if ((s = alias_add(yyvsp[-2].string, RUNASALIAS, yyvsp[0].member)) != NULL) {
@@ -1304,7 +1300,7 @@ case 72:
 			}
 break;
 case 75:
-#line 463 "gram.y"
+#line 454 "gram.y"
 {
 			    char *s;
 			    if ((s = alias_add(yyvsp[-2].string, USERALIAS, yyvsp[0].member)) != NULL) {
@@ -1314,57 +1310,57 @@ case 75:
 			}
 break;
 case 77:
-#line 473 "gram.y"
+#line 464 "gram.y"
 {
 			    list_append(yyvsp[-2].member, yyvsp[0].member);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
 case 78:
-#line 479 "gram.y"
+#line 470 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = FALSE;
 			}
 break;
 case 79:
-#line 483 "gram.y"
+#line 474 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = TRUE;
 			}
 break;
 case 80:
-#line 489 "gram.y"
+#line 480 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			}
 break;
 case 81:
-#line 492 "gram.y"
+#line 483 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			}
 break;
 case 82:
-#line 495 "gram.y"
+#line 486 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
 			}
 break;
 case 83:
-#line 498 "gram.y"
+#line 489 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, USERGROUP);
 			}
 break;
 case 84:
-#line 501 "gram.y"
+#line 492 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
-#line 1316 "y.tab.c"
+#line 1312 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
