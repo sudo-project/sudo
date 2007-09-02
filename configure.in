@@ -112,8 +112,7 @@ PROGS="sudo visudo"
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
 DEV="#"
-AUTH_OBJS=passwd.o
-with_passwd=default
+AUTH_OBJS=
 
 dnl
 dnl Other vaiables
@@ -139,7 +138,7 @@ dnl
 
 AC_ARG_WITH(otp-only, [  --with-otp-only         deprecated],
 [case $with_otp_only in
-    yes)	AUTH_OBJS=`echo "$AUTH_OBJS"|sed -e 's/^passwd\.o *//'`
+    yes)	with_passwd="no"
 		AC_MSG_NOTICE([--with-otp-only option deprecated, treating as --without-passwd])
 		;;
 esac])
@@ -257,9 +256,8 @@ esac])
 
 AC_ARG_WITH(passwd, [  --without-passwd        don't use passwd/shadow file for authentication],
 [case $with_passwd in
-    yes)	;;
-    no)		AC_MSG_CHECKING(whether to use shadow/passwd file authentication)
-		AC_MSG_RESULT(no)
+    yes|no)	AC_MSG_CHECKING(whether to use shadow/passwd file authentication)
+		AC_MSG_RESULT($with_passwd)
 		;;
     *)		AC_MSG_ERROR(["Sorry, --with-passwd does not take an argument."])
 		;;
@@ -1213,6 +1211,7 @@ else
     OSMAJOR=0
 fi
 
+: ${with_passwd='default'}
 case "$host" in
     *-*-sunos4*)
 		# getcwd(3) opens a pipe to getpwd(1)!?!
@@ -1342,7 +1341,7 @@ case "$host" in
 		fi
 
 		# use SIA by default, if we have it
-		if test "$CHECKSIA" = "true"; then
+		if test "$CHECKSIA" = "true" -a "$with_passwd" != "yes"; then
 		    AC_CHECK_FUNCS(sia_ses_init, [found=true], [found=false])
 		    if test "$found" = "true"; then
 			SUDO_ADD_AUTH([SIA], [sia.o], [true])
@@ -1730,7 +1729,7 @@ fi
 dnl
 dnl if crypt(3) not in libc, look elsewhere
 dnl
-if test "$with_passwd" != "no"; then
+if test -z "$LIB_CRYPT" -a "$with_passwd" != "no"; then
     AC_CHECK_FUNC(crypt, , [AC_CHECK_LIB(crypt, crypt, [SUDO_LIBS="${SUDO_LIBS} -lcrypt"; LIBS="${LIBS} -lcrypt"], AC_CHECK_LIB(crypt_d, crypt, [SUDO_LIBS="${SUDO_LIBS} -lcrypt_d"; LIBS="${LIBS} -lcrypt_d"], AC_CHECK_LIB(ufc, crypt, [SUDO_LIBS="${SUDO_LIBS} -lufc"; LIBS="${LIBS} -lufc"])))])
 fi
 dnl
