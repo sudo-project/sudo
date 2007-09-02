@@ -61,6 +61,7 @@ exec_prefix = @exec_prefix@
 bindir = @bindir@
 sbindir = @sbindir@
 sysconfdir = @sysconfdir@
+datarootdir = @datarootdir@
 mandir = @mandir@
 noexecdir = @NOEXECDIR@
 
@@ -200,7 +201,7 @@ sudo_noexec.la: sudo_noexec.lo
 $(devdir)/gram.c: $(srcdir)/gram.y
 @DEV@	$(YACC) -d $(srcdir)/gram.y
 @DEV@	mv -f y.tab.c gram.c
-@DEV@	if cmp y.tab.h gram.h; then rm -f y.tab.h; else mv -f y.tab.h gram.h; fi
+@DEV@	if cmp -s y.tab.h gram.h; then rm -f y.tab.h; else mv -f y.tab.h gram.h; fi
 	-@true
 
 # Uncomment the lines before -@true if you intend to modify toke.l
