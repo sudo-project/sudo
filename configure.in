@@ -1134,12 +1134,11 @@ AC_PROG_CPP
 
 dnl
 dnl Libtool magic; enable shared libs and disable static libs
-dnl XXX - disable static, require shared
 dnl
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET([])
-LT_PREREQ([1.9f])
-LT_INIT([disable-static])
+AC_DISABLE_STATIC
+AC_PROG_LIBTOOL
 
 dnl
 dnl Defer with_noexec until after libtool magic runs
@@ -1961,10 +1960,10 @@ if test "$CHECKSHADOW" = "true" -a -n "$shadow_funcs"; then
     CHECKSHADOW=false
 fi
 if test "$CHECKSHADOW" = "true"; then
-    AC_CHECK_FUNCS(getspnam, [CHECKSHADOW="false"], [AC_CHECK_LIB(gen, getspnam, AC_DEFINE(HAVE_GETSPNAM) [SUDO_LIBS="${SUDO_LIBS} -lgen"; LIBS="${LIBS} -lgen"])])
+    AC_SEARCH_LIBS([getspnam], [gen], [AC_DEFINE(HAVE_GETSPNAM)] [CHECKSHADOW=false; test -n "$ac_lib" && SUDO_LIBS="${SUDO_LIBS} $ac_res"])
 fi
 if test "$CHECKSHADOW" = "true"; then
-    AC_CHECK_FUNC(getprpwnam, [AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1], AC_CHECK_LIB(sec, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsec"; LIBS="${LIBS} -lsec"], AC_CHECK_LIB(security, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lsecurity"; LIBS="${LIBS} -lsecurity"], AC_CHECK_LIB(prot, getprpwnam, AC_DEFINE(HAVE_GETPRPWNAM) [CHECKSHADOW="false"; SECUREWARE=1; SUDO_LIBS="${SUDO_LIBS} -lprot"; LIBS="${LIBS} -lprot"])))])
+    AC_SEARCH_LIBS([getprpwnam], [sec security prot], [AC_DEFINE(HAVE_GETPRPWNAM)] [CHECKSHADOW=false; SECUREWARE=1; test -n "$ac_lib" && SUDO_LIBS="${SUDO_LIBS} $ac_res"])
 fi
 if test -n "$SECUREWARE"; then
     AC_CHECK_FUNCS(bigcrypt set_auth_parameters initprivs)
