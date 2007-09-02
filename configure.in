@@ -2,7 +2,7 @@ dnl
 dnl Process this file with GNU autoconf to produce a configure script.
 dnl $Sudo$
 dnl
-dnl Copyright (c) 1994-1996,1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2007 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_INIT([sudo], [1.7])
 AC_CONFIG_HEADER(config.h pathnames.h)
@@ -1137,7 +1137,6 @@ AC_PROG_CPP
 
 dnl
 dnl Libtool magic; enable shared libs and disable static libs
-dnl XXX - disable static, require shared
 dnl
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET([])
