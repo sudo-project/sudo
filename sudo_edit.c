@@ -135,7 +135,7 @@ int sudo_edit(argc, argv, envp)
 	    }
 	}
 	set_perms(PERM_ROOT);
-	if (error || !S_ISREG(sb.st_mode)) {
+	if (error || (ofd != -1 && !S_ISREG(sb.st_mode))) {
 	    if (error)
 		warn("%s", *ap);
 	    else
