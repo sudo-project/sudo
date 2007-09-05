@@ -87,7 +87,6 @@ sudoers_lookup(pwflag)
     int validated, match, host_match, runas_match, cmnd_match;
     struct cmndspec *cs;
     struct cmndtag *tags = NULL;
-    struct member_list *runas;
     struct privilege *priv;
     struct userspec *us;
 
@@ -157,11 +156,8 @@ sudoers_lookup(pwflag)
 		CLR(validated, FLAG_NO_HOST);
 	    else
 		continue;
-	    runas = NULL;
 	    lh_foreach_rev(&priv->cmndlist, cs) {
-		if (!lh_empty(&cs->runaslist))
-		    runas = &cs->runaslist;
-		runas_match = runaslist_matches(runas);
+		runas_match = runaslist_matches(&cs->runaslist);
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(cs->cmnd);
 		    if (cmnd_match != UNSPEC) {
@@ -422,7 +418,6 @@ display_cmnd(v, pw)
 {
     struct cmndspec *cs;
     struct member *match;
-    struct member_list *runas;
     struct privilege *priv;
     struct userspec *us;
     int rval = 1;
@@ -442,11 +437,8 @@ display_cmnd(v, pw)
 		host_match = hostlist_matches(&priv->hostlist);
 		if (host_match != ALLOW)
 		    continue;
-		runas = NULL;
 		lh_foreach_rev(&priv->cmndlist, cs) {
-		    if (!lh_empty(&cs->runaslist) != NULL)
-			runas = &cs->runaslist;
-		    runas_match = runaslist_matches(runas);
+		    runas_match = runaslist_matches(&cs->runaslist);
 		    if (runas_match == ALLOW) {
 			cmnd_match = cmnd_matches(cs->cmnd);
 			if (cmnd_match != UNSPEC) {

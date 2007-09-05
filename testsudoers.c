@@ -125,7 +125,6 @@ main(argc, argv)
     char **argv;
 {
     struct cmndspec *cs;
-    struct member_list *runas;
     struct privilege *priv;
     struct userspec *us;
     char *p, *grfile, *pwfile, *uflag, hbuf[MAXHOSTNAMELEN];
@@ -278,11 +277,8 @@ main(argc, argv)
 	    putchar('\n');
 	    if (hostlist_matches(&priv->hostlist) == ALLOW) {
 		puts("\thost  matched");
-		runas = NULL;
 		lh_foreach_rev(&priv->cmndlist, cs) {
-		    if (!lh_empty(&cs->runaslist))
-			runas = &cs->runaslist;
-		    if (runaslist_matches(runas) == ALLOW) {
+		    if (runaslist_matches(&cs->runaslist) == ALLOW) {
 			puts("\trunas matched");
 			rval = cmnd_matches(cs->cmnd);
 			if (rval != UNSPEC)

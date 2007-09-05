@@ -156,7 +156,7 @@ runaslist_matches(list)
     struct alias *a;
     int rval, matched = UNSPEC;
 
-    if (list == NULL)
+    if (lh_empty(list))
 	return(userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw));
 
     lh_foreach_rev(list, m) {
