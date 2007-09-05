@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "August 15, 2007" "1.6.9p4" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "September  5, 2007" "1.6.9p5" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -362,9 +362,9 @@ specific user, or commands being run as a specific user.
 .PP
 .Vb 4
 \& Default_Type ::= 'Defaults' |
-\&                  'Defaults' '@' Host |
-\&                  'Defaults' ':' User |
-\&                  'Defaults' '>' RunasUser
+\&                  'Defaults' '@' Host_List |
+\&                  'Defaults' ':' User_List |
+\&                  'Defaults' '>' Runas_List
 .Ve
 .PP
 .Vb 1
