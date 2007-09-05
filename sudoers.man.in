@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "August 15, 2007" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "September  5, 2007" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -254,18 +254,19 @@ The definitions of what constitutes a valid \fIalias\fR member follow.
 \&               User ',' User_List
 .Ve
 .PP
-.Vb 4
+.Vb 5
 \& User ::= '!'* username |
+\&          '!'* '#'uid |
 \&          '!'* '%'group |
 \&          '!'* '+'netgroup |
 \&          '!'* User_Alias
 .Ve
 .PP
-A \f(CW\*(C`User_List\*(C'\fR is made up of one or more usernames, system groups
-(prefixed with '%'), netgroups (prefixed with '+') and other aliases.
-Each list item may be prefixed with one or more '!' operators.
-An odd number of '!' operators negate the value of the item; an even
-number just cancel each other out.
+A \f(CW\*(C`User_List\*(C'\fR is made up of one or more usernames, uids (prefixed
+with '#'), system groups (prefixed with '%'), netgroups (prefixed
+with '+') and \f(CW\*(C`User_Alias\*(C'\fRes.  Each list item may be prefixed with
+zero or more '!' operators.  An odd number of '!' operators negate
+the value of the item; an even number just cancel each other out.
 .PP
 .Vb 2
 \& Runas_List ::= Runas_User |
@@ -280,13 +281,12 @@ number just cancel each other out.
 \&                '!'* Runas_Alias
 .Ve
 .PP
-A \f(CW\*(C`Runas_List\*(C'\fR is similar to a \f(CW\*(C`User_List\*(C'\fR except that it can
-also contain uids (prefixed with '#') and instead of \f(CW\*(C`User_Alias\*(C'\fRes
-it can contain \f(CW\*(C`Runas_Alias\*(C'\fRes.  Note that usernames and groups
-are matched as strings.  In other words, two users (groups) with
-the same uid (gid) are considered to be distinct.  If you wish to
-match all usernames with the same uid (e.g.\ root and toor), you
-can use a uid instead (#0 in the example given).
+A \f(CW\*(C`Runas_List\*(C'\fR is similar to a \f(CW\*(C`User_List\*(C'\fR except that instead
+of \f(CW\*(C`User_Alias\*(C'\fRes it can contain \f(CW\*(C`Runas_Alias\*(C'\fRes.  Note that
+usernames and groups are matched as strings.  In other words, two
+users (groups) with the same uid (gid) are considered to be distinct.
+If you wish to match all usernames with the same uid (e.g.\ root
+and toor), you can use a uid instead (#0 in the example given).
 .PP
 .Vb 2
 \& Host_List ::= Host |
@@ -365,10 +365,10 @@ that instead.
 .PP
 .Vb 5
 \& Default_Type ::= 'Defaults' |
-\&                  'Defaults' '@' Host |
-\&                  'Defaults' ':' User |
-\&                  'Defaults' '!' Cmnd |
-\&                  'Defaults' '>' RunasUser
+\&                  'Defaults' '@' Host_List |
+\&                  'Defaults' ':' User_List |
+\&                  'Defaults' '!' Cmnd_List |
+\&                  'Defaults' '>' Runas_List
 .Ve
 .PP
 .Vb 1
