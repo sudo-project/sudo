@@ -63,6 +63,7 @@ sbindir = @sbindir@
 sysconfdir = @sysconfdir@
 mandir = @mandir@
 noexecdir = @NOEXECDIR@
+datarootdir = @datarootdir@
 
 # Directory in which to install sudo.
 sudodir = $(bindir)
@@ -133,7 +134,7 @@ LIBOBJS = @LIBOBJS@ @ALLOCA@
 VERSION = 1.6.9p5
 
 DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES HISTORY INSTALL INSTALL.configure \
-            LICENSE Makefile.in PORTING README README.LDAP TODO \
+            LICENSE Makefile.in PORTING README README.LDAP \
             TROUBLESHOOTING UPGRADE aclocal.m4 acsite.m4 aixcrypt.exp \
             config.guess config.h.in config.sub configure configure.in \
             def_data.in fnmatch.3 indent.pro install-sh ltmain.sh \
@@ -143,7 +144,7 @@ DISTFILES = $(SRCS) $(HDRS) BUGS CHANGES HISTORY INSTALL INSTALL.configure \
             sudoers.cat sudoers.man.in sudoers.pod sudoers2ldif \
             visudo.cat visudo.man.in visudo.pod auth/API
 
-BINFILES= BUGS CHANGES HISTORY LICENSE README TODO TROUBLESHOOTING \
+BINFILES= BUGS CHANGES HISTORY LICENSE README TROUBLESHOOTING \
 	  UPGRADE install-sh mkinstalldirs sample.syslog.conf sample.sudoers \
 	  sudo sudo.cat sudo.man sudo.pod sudoers sudoers.cat sudoers.man \
 	  sudoers.pod visudo visudo.cat visudo.man visudo.pod
