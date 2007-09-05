@@ -94,85 +94,71 @@ TODO list (most will be addressed in sudo 2.0)
 
 32) Add Makefile.in bits to autogenerate Solaris and Irix packages
 
-33) Add monitor support for Solaris using /proc/$$/ctl w/ PCSENTRY
-    (use PRSABORT flag to indicate failure).  Race-prone.
-
-34) Add a session mode where sudo allocates a pty and logs everything
+33) Add a session mode where sudo allocates a pty and logs everything
     that occurs ala script(1).
 
-35) Use pam_open_session() and pam_close_session() (requires a persistent
+34) Use pam_open_session() and pam_close_session() (requires a persistent
     sudo process to call pam_close_session()).  Maybe add xauth support for
     the non-pam case?
 
-36) Should "monitor" and MONITOR/NOMONITOR be disabled for non-systrace?
+35) Add substitution mechanism in sudoers to subst, e.g. editors for sudoedit
 
-37) Add substitution mechanism in sudoers to subst, e.g. editors for sudoedit
+36) Move prototypes to extern.h?
 
-38) Move prototypes to extern.h?
+37) Get rid of VALIDATE_NOT_OK and just set/clear VALIDATE_OK
 
-39) Get rid of VALIDATE_NOT_OK and just set/clear VALIDATE_OK
+38) visudo -c should also sanity check aliases
 
-40) visudo -c should also sanity check aliases
+39) Use AC_CHECK_DECLS for systems w/o proper prototypes?  Maybe errno too?
 
-41) Use AC_CHECK_DECLS for systems w/o proper prototypes?  Maybe errno too?
-
-42) Flesh out testsudoers and fix glob/opendir issues.  Use custom netgroup
+40) Flesh out testsudoers and fix glob/opendir issues.  Use custom netgroup
     code too?
 
-43) Think some more about giving admins a way to test commands for a user
+41) Think some more about giving admins a way to test commands for a user
     on a specific host with a different sudoers file.
 
-44) Add nsswitch.conf parsing to LDAP support.
+42) Add nsswitch.conf parsing to LDAP support.
 
-45) document environment stuff (new vs. old) in sudo.pod
+43) Refactor duplicated code in ldap.c into wrapper functions.
 
-46) Investigate systrace EBUSY issues w/ csh.  Kernel bug?
+44) Return command from command_matches() instead of setting safe_cmnd directly.
 
-47) Refactor duplicated code in ldap.c into wrapper functions.
+45) Roll visudo into sudo ala sudoedit.
 
-48) Return command from command_matches() instead of setting safe_cmnd directly.
-
-49) Support timelimit, bind_timelimit, bind_policy in ldap.conf (see nss_ldap).
-
-51) Roll visudo into sudo ala sudoedit.
-
-52) Add ticket file to ticket dir in non-tty tickets case so we
+46) Add ticket file to ticket dir in non-tty tickets case so we
     can mix tty and non-tty ticket schemes.
 
-53) Use ldap_get_values_len() instead of ldap_get_values_len() for
+47) Use ldap_get_values_len() instead of ldap_get_values() for
     OpenLDAP (what about others?)
 
-54) Add support for NOEXEC w/ 64-bit AIX executables.
+48) Add support for NOEXEC w/ 64-bit AIX executables.
     http://publib.boulder.ibm.com/infocenter/pseries/v5r3/index.jsp?topic=/com.ibm.xlf91a.doc/xlfug/comp64.htm
 
-55) For systrace rewrite argv using stackgap to avoid races.
+49) Examine debian fqdn diffs.
 
-56) Examine debian fqdn diffs.
+50) Add gettext() support
 
-57) Add gettext() support
+51) Refactor common env code in logging.c
 
-58) Consider allowing chown/chrgp to fail in visudo in -f mode.
+52) Add :group to Runas user specs
 
-59) Refactor common env code in logging.c
-
-61) Add :group to Runas user specs
-
-62) Convert the other capitalized files into .pod so we can get decent html
+53) Convert the other capitalized files into .pod so we can get decent html
     form them?  E.g. README, etc.  E.g.
 	pod2text -l -i0 history.pod > HISTORY
 	pod2html --noindex history.pod > history.html
 
-Exlcusive auth methods:
-    fwtk
-    sia (implied)
-    pam (implied)
-    SecurID
-    aix auth (implied)
-    bsd auth (implied)
+54) Use mkstemp() for visudo temp files?  Also re-examine locking.
 
-Need to make the implied ones not conflict with explicit ones
-This means not only other exclusive ones but also non-exclusive too
+55) Add SSL support for ldap, see http://docs.sun.com/source/816-5616-10/ssl.htm#12979 and enablefor "ssl on"
 
-63) For LDAP SASL use ldap_gss_bind() if available, else gss_krb5_ccache_name()
-    See nss_ldap.  Can only use this stuff if kerb5 is available.
-    That's separate from kerb5 auth though.
+56) verbose sudo -V output make it clear whether env_reset is active
+
+57) Run sudo thorugh valgrind
+
+58) Make -a and -c options in sudo.pod only visible when available.
+    Could use an nroff register combines with configure substitute magic.
+    Note that configure substitution runs on the .man.in file not the
+    .pod file.
+
+59) Consider making a distinction between ID and WORD in what token
+    gets passed in to the grammar.

@@ -1,3 +1,534 @@
+2007-09-05 18:39  millert
+
+	* auth/kerb5.c: Remove call to krb5_cc_register() as it is not
+	  needed for modern kerb5.
+
+2007-09-05 18:16  millert
+
+	* configure: regen
+
+2007-09-05 18:16  millert
+
+	* configure.in, aclocal.m4: New method for setting the default
+	  authentication type and avoiding conflicts in auth types.
+
+2007-09-05 14:45  millert
+
+	* match.c, parse.c, testsudoers.c: Each entry in a cmndlist now has
+	  an associated runaslist so no need to keep track of the most
+	  recent non-NULL one.
+
+2007-09-04 18:51  millert
+
+	* ldap.c: back out partial ldaps support mistakenly committed
+
+2007-09-04 10:57  millert
+
+	* ldap.c: Add support for unix groups and netgroups in sudoRunas
+
+2007-09-03 16:28  millert
+
+	* sudo_edit.c: Fix sudoedit of a non-existent file.  From Tilo
+	  Stritzky.
+
+2007-09-02 17:05  millert
+
+	* configure: regen
+
+2007-09-02 17:05  millert
+
+	* INSTALL: update --passprompt escape info
+
+2007-09-02 17:03  millert
+
+	* configure.in: remove now-bogus comment and update copyright date
+
+2007-09-02 16:35  millert
+
+	* configure.in: Fix up use of with_passwd
+
+2007-09-02 16:25  millert
+
+	* acsite.m4, config.guess, config.sub, configure.in, ltmain.sh:
+	  Update to autoconf-2.61 andf libtool-1.5.24
+
+2007-09-02 16:17  millert
+
+	* Makefile.in: "cmp -s" not just cmp Add @datarootdir@ to quiet
+	  autoconf-2.61
+
+2007-09-01 17:39  millert
+
+	* gram.c: regen
+
+2007-09-01 17:39  millert
+
+	* gram.y: move tags and runaslist propagation to be earlier
+
+2007-09-01 09:34  millert
+
+	* visudo.c: If -f flag given use the permissions of the original
+	  file as a template
+
+2007-09-01 08:45  millert
+
+	* gram.y: prevent a double free() when re-initing the parser
+
+2007-08-31 19:30  millert
+
+	* configure: regen
+
+2007-08-31 19:30  millert
+
+	* aclocal.m4, alias.c, alloc.c, config.h.in, configure.in, env.c,
+	  ldap.c, list.c, list.h, memrchr.c, parse.c, parse.h, pwutil.c,
+	  redblack.c, redblack.h, snprintf.c, sudo.c, sudo.h,
+	  testsudoers.c, visudo.c, zero_bytes.c, auth/API, auth/afs.c,
+	  auth/bsdauth.c, auth/kerb4.c, auth/kerb5.c, auth/pam.c,
+	  auth/securid.c, auth/securid5.c, auth/sia.c, auth/sudo_auth.h:
+	  Remove support for compilers that don't support void *
+
+2007-08-31 19:14  millert
+
+	* gram.c: regen
+
+2007-08-31 19:13  millert
+
+	* Makefile.in, alias.c, defaults.c, gram.y, list.c, list.h,
+	  match.c, parse.c, parse.h, testsudoers.c, visudo.c: Move list
+	  manipulation macros to list.h and create C versions of the more
+	  complex ones in list.c.  The names have been down-cased so they
+	  appear more like normal functions.
+
+2007-08-31 17:21  millert
+
+	* Makefile.in: Fix cmp command when regenerating parser.  Make
+	  gram.o the first dependency for all programs so gram.h will be
+	  generated before anything that needs it.
+
+2007-08-31 13:56  millert
+
+	* parse.h, gram.y: Convert NEW_DEFAULT anf NEW_MEMBER into static
+	  functions.
+
+2007-08-30 21:21  millert
+
+	* match.c, parse.c, testsudoers.c: Use LH_FOREACH_REV when checking
+	  permission and short-circuit on the first non-UNSPEC hit we get
+	  for the command.  This means that instead of cycling through the
+	  all the parsed sudoers entries we start at the end and work
+	  backwards and quit after the first positive or negative match.
+
+2007-08-30 21:13  millert
+
+	* gram.c: regen
+
+2007-08-30 21:12  millert
+
+	* defaults.c, gram.y, parse.c, parse.h, testsudoers.c, visudo.c:
+	  Change list head macros to take a pointer, not a struct.
+
+2007-08-30 20:46  millert
+
+	* gram.c: regen
+
+2007-08-30 20:46  millert
+
+	* gram.y: Propagate the runasspec from one command to the next in a
+	  cmndspec.
+
+2007-08-30 16:15  millert
+
+	* match.c: Replace has_meta() with a macro that calls strpbrk().
+
+2007-08-30 16:04  millert
+
+	* gram.c: regen
+
+2007-08-30 13:26  millert
+
+	* alias.c, defaults.c, gram.y, match.c, parse.c, parse.h,
+	  testsudoers.c, visudo.c: Use a list head struct when storing the
+	  semi-circular lists and convert to tail queues in the process.
+	  This will allow us to reverse foreach loops more easily and it
+	  makes it clearer which functions expect a list as opposed to a
+	  single member.
+
+	  Add macros for manipulating lists.  Some of these should become
+	  functions.
+
+	  When freeing up a list, just pop off the last item in the queue
+	  instead of going from head to tail.  This is simpler since we
+	  don't have to stash a pointer to the next member, we always just
+	  use the last one in the queue until the queue is empty.
+
+	  Rename match functions that take a list to have list in the name.
+	   Break cmnd_matches() into cmnd_matches() and cmndlist_matches.
+
+2007-08-30 13:12  millert
+
+	* parse.c: Fix pasto, append "!" not negated (which is an int) for
+	  sudo -l output.
+
+2007-08-30 12:45  millert
+
+	* Makefile.in: Remove the dependency of gram .h on gram.y, the .c
+	  dependency is enough.  Only move y.tab.h to gram.h if it is
+	  different; avoids needless rebuilding.
+
+2007-08-27 15:51  millert
+
+	* sudoers.pod: Defaults lines may be associated with lists of
+	  users, hosts, commands and runas users, not just single entries.
+
+2007-08-26 17:42  millert
+
+	* Makefile.in: Revert the "cmp" portion of the last diff, it
+	  doesn't make sense.
+
+2007-08-26 17:10  millert
+
+	* Makefile.in: Remove *.lo for clean: When generating the parser,
+	  only move the generated files into place if they differ from the
+	  existing ones.
+
+2007-08-24 22:47  millert
+
+	* toke.c, toke.l: Replace IPV6 regexp with a much simpler
+	  (readable) one and add an extra check when it matches to make
+	  sure we have a valid address.
+
+2007-08-24 22:36  millert
+
+	* match.c: Fix thinko introduced when merging IPV6 support.
+
+2007-08-24 14:23  millert
+
+	* HISTORY, LICENSE: regen
+
+2007-08-24 14:23  millert
+
+	* license.pod: add 2007
+
+2007-08-24 14:19  millert
+
+	* UPGRADE: mention #uid vs. comment pitfall
+
+2007-08-24 09:50  millert
+
+	* acsite.m4: Merge in a patch from the libtool cvs that fixes a
+	  problem with the latest autoconf.  From Stepan Kasal.
+
+2007-08-23 20:28  millert
+
+	* parse.h: Back out he XOR swap trick, it is slower than a temp
+	  variable on modern CPUs.
+
+2007-08-23 20:14  millert
+
+	* gram.c: regen
+
+2007-08-23 20:14  millert
+
+	* gram.y, parse.h: Convert the tail queue to a semi-circle queue
+	  and use the XOR swap trick to swap the prev pointers during
+	  append.
+
+2007-08-23 15:31  millert
+
+	* parse.h: remove useless statement
+
+2007-08-23 07:47  millert
+
+	* toke.c, toke.l: Refactor #include parsing into a separate
+	  function and return unparsed chars (such as newline or comment)
+	  back to the lexer.
+
+2007-08-22 18:56  millert
+
+	* WHATSNEW: mention better uid support
+
+2007-08-22 18:55  millert
+
+	* sudoers.pod: Users may now consist of a uid.
+
+2007-08-22 18:39  millert
+
+	* gram.c, gram.h, toke.c: regen
+
+2007-08-22 18:32  millert
+
+	* parse.c: Use lbuf_append_quoted() for sudo -l output to quote
+	  characters that would require quoting in sudoers.
+
+2007-08-22 18:31  millert
+
+	* lbuf.c, lbuf.h: Add lbuf_append_quoted() which takes a set of
+	  characters which should be quoted with a backslash when
+	  displayed.
+
+2007-08-22 18:28  millert
+
+	* toke.l: Require that the first character after a comment not be a
+	  digit or a dash.  This allows us to remove the GOTRUNAS state and
+	  treat uid/gids similar to other words.  It also means that we can
+	  now specify uids in User_Lists and a User_Spec may now contain a
+	  uid.
+
+2007-08-22 18:23  millert
+
+	* gram.y, toke.l: Replace RUNAS token with '(' and ')' tokens to
+	  make the runas portion of the grammar more natural.
+
+2007-08-22 06:35  millert
+
+	* Makefile.in, README, BUGS: The BUGS file is history
+
+2007-08-21 09:19  millert
+
+	* toke.c, toke.l: Allow comments after a RunasAlias as long as the
+	  character after the pound sign isn't a digit or a dash.
+
+2007-08-20 20:43  millert
+
+	* WHATSNEW: Glob support was back-ported to 1.6.9
+
+2007-08-20 19:59  millert
+
+	* Makefile.in: remove sudo_usage.h in distclean
+
+2007-08-20 19:24  millert
+
+	* parse.c: If a Defaults value contains a blank, double-quote the
+	  string.
+
+2007-08-20 19:19  millert
+
+	* toke.c, toke.l: Properly deal with Defaults double-quoted strings
+	  that span multiple lines using the line continuation char.
+	  Previously, the entire thing, including the continuation char,
+	  newline, and spaces was stored as-is.
+
+2007-08-20 10:46  millert
+
+	* sudo.c: Be consistent when using single quotes and backticks.
+
+2007-08-19 16:48  millert
+
+	* Makefile.in, configure, configure.in, lbuf.c, lbuf.h, parse.c,
+	  sudo.c, sudo_usage.h.in: Add new linebuf code to do appends of
+	  dynamically allocated strings and word-wrapped output.  Currently
+	  used for sudo's usage() and sudo -l output.  Sudo usage strings
+	  are now in sudo_usage.h which is generated at configure time.
+
+2007-08-18 08:22  millert
+
+	* sudo.h, parse.c, sudo.c: Fix line wrapping in usage() and use the
+	  actual tty width instead of assuming 80.
+
+2007-08-17 18:32  millert
+
+	* history.pod: some more info
+
+2007-08-17 17:28  millert
+
+	* history.pod: Mentioned Chris Jepeway's parser and also the new
+	  one that is in sudo 1.7.
+
+2007-08-16 09:38  millert
+
+	* sudo.pod, visudo.pod: For the options list, add flag args where
+	  appropriate and increase the indent level so there is room for
+	  them.
+
+2007-08-15 13:49  millert
+
+	* parse.c: Fix some spacing in "sudo -l" and add a comment about
+	  some bogosity in the line wrapping.
+
+2007-08-15 11:21  millert
+
+	* sudo.cat, sudo.man.in, sudoers.cat, sudoers.man.in,
+	  visudo.man.in, visudo.cat: regen
+
+2007-08-15 11:20  millert
+
+	* INSTALL, Makefile.in, WHATSNEW, config.h.in, configure.in,
+	  def_data.c, def_data.h, def_data.in, gram.c, gram.h, gram.y,
+	  parse.c, parse.h, pathnames.h.in, sudo.c, sudo.h, sudoers.pod,
+	  testsudoers.c, toke.c, toke.l: Remove monitor support until there
+	  is a versino of systrace that uses a lookaside buffer (or we have
+	  a better mechanism to use).
+
+2007-08-15 09:22  millert
+
+	* configure.in, configure, config.h.in, sudo.c: use getaddrinfo()
+	  instead of gethostbyname() if it is available
+
+2007-08-14 15:27  millert
+
+	* parse.c, sudo.c: Deal with OSes where sizeof(gid_t) <
+	  sizeof(int).
+
+2007-08-14 11:19  millert
+
+	* interfaces.c: repair non-getifaddrs() code after ipv6 integration
+
+2007-08-14 10:04  millert
+
+	* sudo.c: If we can open sudoers but fail to read the first byte,
+	  close the file stream before trying again.
+
+2007-08-13 12:34  millert
+
+	* gram.c, toke.c: regen
+
+2007-08-13 12:29  millert
+
+	* gram.y, interfaces.c, interfaces.h, match.c, sudoers.pod, toke.l:
+	  Add IPv6 support; adapted from patches by YOSHIFUJI Hideaki
+
+2007-08-13 12:23  millert
+
+	* sudo.pod, sudoers.pod, visudo.pod: Add some missing markup Update
+	  copyright
+
+2007-08-12 18:55  millert
+
+	* configure, configure.in: fix sudo_noexec extension which got
+	  broken in the libtool update
+
+2007-08-10 10:41  millert
+
+	* Makefile.in: explicitly specify -Tascii to nroff
+
+2007-08-08 16:07  millert
+
+	* logging.c: remove an ANSI-ism that crept in
+
+2007-08-06 20:37  millert
+
+	* sudo.pod: Adjust list indents Prevent -- from being turned into
+	  an em dash Use a list for the environment instead of a literal
+	  paragraph
+
+2007-08-06 20:36  millert
+
+	* visudo.pod: Use a list for the environment instead of an indented
+	  literal paragraph.
+
+2007-08-06 20:33  millert
+
+	* sudoers.pod: Adjust list indentation
+
+2007-08-06 20:31  millert
+
+	* license.pod: add =head3
+
+2007-08-06 10:24  millert
+
+	* sudo.pod: mention that when specifying a uid for the -u option
+	  the shell may require that the # be escaped
+
+2007-08-01 22:08  millert
+
+	* match.c: Fix off by one in group matching.
+
+2007-07-31 14:04  millert
+
+	* env.c: Fix typo: PYTHONINSPEC should be PYTHONINSPECT.  From
+	  David Krause.
+
+2007-07-30 10:45  millert
+
+	* configure, configure.in: Add missing define of
+	  HAVE_GSS_KRB5_CCACHE_NAME for the -lgssapi_krb5 case.
+
+2007-07-30 09:29  millert
+
+	* aclocal.m4, configure.in, configure: Fix link tests such that new
+	  gcc doesn't optimize away the test.
+
+2007-07-29 19:21  millert
+
+	* sudo.pod, sudoers.pod, visudo.pod: add missing over/back
+
+2007-07-29 19:09  millert
+
+	* sudo.pod, sudoers.pod, visudo.pod: Change FILES section to use
+	  =item
+
+2007-07-29 18:32  millert
+
+	* env.c: Add back allocation of the env struct in rebuild_env but
+	  save a copy of the old pointer and free it before returning.
+
+2007-07-29 16:09  millert
+
+	* env.c: Don't init the private environment in rebuild_env() since
+	  it may have already been done implicitly
+	  sudo_setenv/sudo_unsetenv.
+
+	  Multiply length by sizeof(char *) in memcpy/memmove when copying
+	  the environment so we copy the full thing.
+
+	  Add missing set of parens so we deref the right pointer in
+	  sudo_unsetenv when searching for a matching variable.
+
+2007-07-26 16:35  millert
+
+	* sudo.pod, sudoers.pod, visudo.pod: Use  file markup for paths in
+	  the FILES section
+
+2007-07-26 10:04  millert
+
+	* sudo.pod, sudoers.pod, visudo.pod: Don't capitalize sudo/visudo
+
+2007-07-26 07:28  millert
+
+	* sudoers.pod: Sort sudoers options; based on a diff from Igor
+	  Sobrado.
+
+2007-07-25 16:19  millert
+
+	* sudo.pod, sudoers.pod, visudo.pod: Use 8 and 5 instead of
+	  @mansectsu@ and @mansectform@ since the latter confuses pod2man.
+	  The Makefile rules for the .man.in file will add @mansectsu@ and
+	  @mansectform@ back in after pod2man is done anyway.
+
+2007-07-22 19:09  millert
+
+	* LICENSE, Makefile.in, license.pod: Move license info to pod
+	  format
+
+2007-07-22 18:43  millert
+
+	* configure, configure.in, sudoers.pod: Substitute value of
+	  path_info into sudoers man page.
+
+2007-07-22 16:40  millert
+
+	* WHATSNEW: remove features that were back-ported to 1.6.9
+
+2007-07-22 15:20  millert
+
+	* sudo.c, sudo.pod, visudo.c, visudo.pod: Sort SYNOPSIS and sync
+	  usage.  From Igor Sobrado.
+
+2007-07-22 15:19  millert
+
+	* env.c: Only need sudo_setenv/sudo_unsetenv if we are going to use
+	  ldap_sasl_interactive_bind_s() but don't have
+	  gss_krb5_ccache_name().
+
+2007-07-22 08:23  millert
+
+	* ChangeLog: rebuild without branch info
+
+2007-07-22 08:23  millert
+
+	* Makefile.in: Add ChangeLog target
+
 2007-07-22 08:14  millert
 
 	* auth/pam.c: Run cleanup code if the user hits ^C at the password
