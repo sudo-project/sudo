@@ -1756,13 +1756,6 @@ dnl If syslog(3) not in libc, check -lsocket, -lnsl and -linet
 dnl
 AC_CHECK_FUNC(syslog, , [AC_CHECK_LIB(socket, syslog, [NET_LIBS="${NET_LIBS} -lsocket"; LIBS="${LIBS} -lsocket"], AC_CHECK_LIB(nsl, syslog, [NET_LIBS="${NET_LIBS} -lnsl"; LIBS="${LIBS} -lnsl"], AC_CHECK_LIB(inet, syslog, [NET_LIBS="${NET_LIBS} -linet"; LIBS="${LIBS} -linet"])))])
 dnl
-dnl Bison and DCE use alloca(3), if not in libc, use the sudo one (from gcc)
-dnl (gcc includes its own alloca(3) but other compilers may not)
-dnl
-if test "$with_DCE" = "yes" -o "$ac_cv_prog_YACC" = "bison -y"; then
-    AC_FUNC_ALLOCA
-fi
-dnl
 dnl Check for getprogname() or __progname
 dnl
 AC_CHECK_FUNCS(getprogname, , [

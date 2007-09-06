@@ -99,7 +99,7 @@ SHELL = /bin/sh
 
 PROGS = @PROGS@
 
-SRCS = alloc.c alloca.c check.c closefrom.c def_data.c defaults.c env.c \
+SRCS = alias.c alloc.c check.c closefrom.c def_data.c defaults.c env.c \
        error.c fileops.c find_path.c fnmatch.c getcwd.c getprogname.c \
        getspwuid.c gettime.c goodpath.c gram.c gram.y interfaces.c lbuf.c \
        ldap.c list.c logging.c match.c mkstemp.c memrchr.c parse.c pwutil.c  \
@@ -219,8 +219,6 @@ alias.o: $(srcdir)/alias.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdi
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alias.c
 alloc.o: $(srcdir)/alloc.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alloc.c
-alloca.o: $(srcdir)/alloca.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alloca.c
 check.o: $(srcdir)/check.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/check.c
 closefrom.o: $(srcdir)/closefrom.c config.h
