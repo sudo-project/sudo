@@ -118,7 +118,6 @@ dnl
 dnl Other vaiables
 dnl
 CHECKSHADOW=true
-CHECKSIA=
 shadow_defs=
 shadow_funcs=
 shadow_libs=
