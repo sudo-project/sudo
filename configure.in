@@ -118,7 +118,7 @@ dnl
 dnl Other vaiables
 dnl
 CHECKSHADOW=true
-CHECKSIA=true
+CHECKSIA=
 shadow_defs=
 shadow_funcs=
 shadow_libs=
@@ -1311,11 +1311,13 @@ case "$host" in
 		# ignore envariables wrt dynamic lib path
 		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
 
+		: ${CHECKSIA='true'}
 		AC_MSG_CHECKING(whether to disable sia support on Digital UNIX)
 		AC_ARG_ENABLE(sia,
 		[  --disable-sia           Disable SIA on Digital UNIX],
 		[ case "$enableval" in
 		    yes)	AC_MSG_RESULT(no)
+				CHECKSIA=true
 				;;
 		    no)		AC_MSG_RESULT(yes)
 				CHECKSIA=false
