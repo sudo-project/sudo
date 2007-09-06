@@ -102,7 +102,7 @@ PROGS = @PROGS@
 SRCS = alloc.c alloca.c check.c closefrom.c def_data.c defaults.c env.c \
        error.c fileops.c find_path.c fnmatch.c getcwd.c getprogname.c \
        getspwuid.c gettime.c goodpath.c gram.c gram.y interfaces.c lbuf.c \
-       ldap.c logging.c match.c mkstemp.c memrchr.c parse.c pwutil.c  \
+       ldap.c list.c logging.c match.c mkstemp.c memrchr.c parse.c pwutil.c  \
        set_perms.c sigaction.c snprintf.c strcasecmp.c strerror.c strlcat.c \
        strlcpy.c sudo.c sudo_noexec.c sudo_edit.c testsudoers.c tgetpass.c \
        toke.c toke.l tsgetgrpw.c utimes.c visudo.c zero_bytes.c redblack.c \
