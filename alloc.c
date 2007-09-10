@@ -78,7 +78,7 @@ emalloc(size)
     if (size == 0)
 	errorx(1, "internal error, tried to emalloc(0)");
 
-    if ((ptr = (void *) malloc(size)) == NULL)
+    if ((ptr = malloc(size)) == NULL)
 	errorx(1, "unable to allocate memory");
     return(ptr);
 }
@@ -100,7 +100,7 @@ emalloc2(nmemb, size)
 	errorx(1, "internal error, emalloc2() overflow");
 
     size *= nmemb;
-    if ((ptr = (void *) malloc(size)) == NULL)
+    if ((ptr = malloc(size)) == NULL)
 	errorx(1, "unable to allocate memory");
     return(ptr);
 }
@@ -119,7 +119,7 @@ erealloc(ptr, size)
     if (size == 0)
 	errorx(1, "internal error, tried to erealloc(0)");
 
-    ptr = ptr ? (void *) realloc(ptr, size) : (void *) malloc(size);
+    ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
 	errorx(1, "unable to allocate memory");
     return(ptr);
@@ -144,7 +144,7 @@ erealloc3(ptr, nmemb, size)
 	errorx(1, "internal error, erealloc3() overflow");
 
     size *= nmemb;
-    ptr = ptr ? (void *) realloc(ptr, size) : (void *) malloc(size);
+    ptr = ptr ? realloc(ptr, size) : malloc(size);
     if (ptr == NULL)
 	errorx(1, "unable to allocate memory");
     return(ptr);
