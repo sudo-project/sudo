@@ -23,13 +23,13 @@
  * Convenience macro for declaring a list head.
  */
 #ifdef __STDC__
-#define LH_DECLARE(n)					\
+#define TQ_DECLARE(n)					\
 struct n##_list {					\
     struct n *first;					\
     struct n *last;					\
 };
 #else
-#define LH_DECLARE(n)					\
+#define TQ_DECLARE(n)					\
 struct n/**/_list {					\
     struct n *first;					\
     struct n *last;					\
@@ -39,19 +39,19 @@ struct n/**/_list {					\
 /*
  * Foreach loops: forward and reverse
  */
-#undef lh_foreach_fwd
-#define lh_foreach_fwd(h, v)				\
+#undef tq_foreach_fwd
+#define tq_foreach_fwd(h, v)				\
     for ((v) = (h)->first; (v) != NULL; (v) = (v)->next)
 
-#undef lh_foreach_rev
-#define lh_foreach_rev(h, v)				\
+#undef tq_foreach_rev
+#define tq_foreach_rev(h, v)				\
     for ((v) = (h)->last; (v) != NULL; (v) = (v)->prev)
 
 /*
  * Init a list head.
  */
-#undef lh_init
-#define lh_init(h) do {					\
+#undef tq_init
+#define tq_init(h) do {					\
     (h)->first = NULL;					\
     (h)->last = NULL;					\
 } while (0)
@@ -59,14 +59,14 @@ struct n/**/_list {					\
 /*
  * Simple macros to avoid exposing first/last and prev/next.
  */
-#undef lh_empty
-#define lh_empty(h)	((h)->first == NULL)
+#undef tq_empty
+#define tq_empty(h)	((h)->first == NULL)
 
-#undef lh_first
-#define lh_first(h)	((h)->first)
+#undef tq_first
+#define tq_first(h)	((h)->first)
 
-#undef lh_last
-#define lh_last(h)	((h)->last)
+#undef tq_last
+#define tq_last(h)	((h)->last)
 
 #undef list_next
 #define list_next(e)	((e)->next)
@@ -77,9 +77,9 @@ struct n/**/_list {					\
 /*
  * Prototypes for list.c
  */
-void *lh_pop		__P((void *));
-void lh_append		__P((void *, void *));
+void *tq_pop		__P((void *));
+void tq_append		__P((void *, void *));
 void list_append	__P((void *, void *));
-void list2head		__P((void *, void *));
+void list2tq		__P((void *, void *));
 
 #endif /* _SUDO_LIST_H */

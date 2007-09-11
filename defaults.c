@@ -501,7 +501,7 @@ update_defaults(skip_cmnd)
 {
     struct defaults *def;
 
-    lh_foreach_fwd(&defaults, def) {
+    tq_foreach_fwd(&defaults, def) {
 	if (skip_cmnd == (def->type == DEFAULTS_CMND))
 	    continue;
 	switch (def->type) {

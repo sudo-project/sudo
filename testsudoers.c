@@ -268,16 +268,16 @@ main(argc, argv)
     /* This loop must match the one in sudoers_lookup() */
     printf("\nEntries for user %s:\n", user_name);
     matched = UNSPEC;
-    lh_foreach_rev(&userspecs, us) {
+    tq_foreach_rev(&userspecs, us) {
 	if (userlist_matches(sudo_user.pw, &us->users) != ALLOW)
 	    continue;
-	lh_foreach_rev(&us->privileges, priv) {
+	tq_foreach_rev(&us->privileges, priv) {
 	    putchar('\n');
 	    print_privilege(priv); /* XXX */
 	    putchar('\n');
 	    if (hostlist_matches(&priv->hostlist) == ALLOW) {
 		puts("\thost  matched");
-		lh_foreach_rev(&priv->cmndlist, cs) {
+		tq_foreach_rev(&priv->cmndlist, cs) {
 		    if (runaslist_matches(&cs->runaslist) == ALLOW) {
 			puts("\trunas matched");
 			rval = cmnd_matches(cs->cmnd);
@@ -385,7 +385,7 @@ print_defaults()
     struct defaults *d;
     struct member *m;
 
-    lh_foreach_fwd(&defaults, d) {
+    tq_foreach_fwd(&defaults, d) {
 	(void) fputs("Defaults", stdout);
 	switch (d->type) {
 	    case DEFAULTS_HOST:
@@ -401,8 +401,8 @@ print_defaults()
 		putchar('!');
 		break;
 	}
-	lh_foreach_fwd(&d->binding, m) {
-	    if (m != lh_first(&d->binding))
+	tq_foreach_fwd(&d->binding, m) {
+	    if (m != tq_first(&d->binding))
 		putchar(',');
 	    print_member(m);
 	}
@@ -436,8 +436,8 @@ print_alias(v1, v2)
 	    (void) printf("Runas_Alias\t%s = ", a->name);
 	    break;
     }
-    lh_foreach_fwd(&a->members, m) {
-	if (m != lh_first(&a->members))
+    tq_foreach_fwd(&a->members, m) {
+	if (m != tq_first(&a->members))
 	    fputs(", ", stdout);
 	if (m->type == COMMAND) {
 	    c = (struct sudo_command *) m->name;
@@ -462,20 +462,20 @@ print_privilege(priv)
     for (p = priv; p != NULL; p = p->next) {
 	if (p != priv)
 	    fputs(" : ", stdout);
-	lh_foreach_fwd(&p->hostlist, m) {
-	    if (m != lh_first(&p->hostlist))
+	tq_foreach_fwd(&p->hostlist, m) {
+	    if (m != tq_first(&p->hostlist))
 		fputs(", ", stdout);
 	    print_member(m);
 	}
 	fputs(" = ", stdout);
 	tags.nopasswd = tags.noexec = UNSPEC;
-	lh_foreach_fwd(&p->cmndlist, cs) {
-	    if (cs != lh_first(&p->cmndlist))
+	tq_foreach_fwd(&p->cmndlist, cs) {
+	    if (cs != tq_first(&p->cmndlist))
 		fputs(", ", stdout);
-	    if (!lh_empty(&cs->runaslist)) {
+	    if (!tq_empty(&cs->runaslist)) {
 		fputs("(", stdout);
-		lh_foreach_fwd(&cs->runaslist, m) {
-		    if (m != lh_first(&cs->runaslist))
+		tq_foreach_fwd(&cs->runaslist, m) {
+		    if (m != tq_first(&cs->runaslist))
 			fputs(", ", stdout);
 		    print_member(m);
 		}
@@ -497,9 +497,9 @@ print_userspecs()
     struct member *m;
     struct userspec *us;
 
-    lh_foreach_fwd(&userspecs, us) {
-	lh_foreach_fwd(&us->users, m) {
-	    if (m != lh_first(&us->users))
+    tq_foreach_fwd(&userspecs, us) {
+	tq_foreach_fwd(&us->users, m) {
+	    if (m != tq_first(&us->users))
 		fputs(", ", stdout);
 	    print_member(m);
 	}

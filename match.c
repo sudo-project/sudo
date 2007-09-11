@@ -111,7 +111,7 @@ userlist_matches(pw, list)
     struct alias *a;
     int rval, matched = UNSPEC;
 
-    lh_foreach_rev(list, m) {
+    tq_foreach_rev(list, m) {
 	switch (m->type) {
 	    case ALL:
 		matched = !m->negated;
@@ -156,10 +156,10 @@ runaslist_matches(list)
     struct alias *a;
     int rval, matched = UNSPEC;
 
-    if (lh_empty(list))
+    if (tq_empty(list))
 	return(userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw));
 
-    lh_foreach_rev(list, m) {
+    tq_foreach_rev(list, m) {
 	switch (m->type) {
 	    case ALL:
 		matched = !m->negated;
@@ -203,7 +203,7 @@ hostlist_matches(list)
     struct alias *a;
     int rval, matched = UNSPEC;
 
-    lh_foreach_rev(list, m) {
+    tq_foreach_rev(list, m) {
 	switch (m->type) {
 	    case ALL:
 		matched = !m->negated;
@@ -278,7 +278,7 @@ cmndlist_matches(list)
     struct member *m;
     int rval, matched = UNSPEC;
 
-    lh_foreach_rev(list, m) {
+    tq_foreach_rev(list, m) {
 	rval = cmnd_matches(m);
 	if (rval != UNSPEC) {
 	    matched = m->negated ? !rval : rval;

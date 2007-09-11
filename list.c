@@ -51,13 +51,13 @@ struct list_head_proto {
  * Returns the popped element.
  */
 void *
-lh_pop(vh)
+tq_pop(vh)
     void *vh;
 {
     struct list_head_proto *h = (struct list_head_proto *)vh;
     void *last = NULL;
 
-    if (!lh_empty(h)) {
+    if (!tq_empty(h)) {
 	last = (void *)h->last;
 	if (h->first == h->last) {
 	    h->first = NULL;
@@ -75,7 +75,7 @@ lh_pop(vh)
  * with a head node.
  */
 void
-list2head(vh, vl)
+list2tq(vh, vl)
     void *vh;
     void *vl;
 {
@@ -115,7 +115,7 @@ list_append(vl1, vl2)
  * e from a semi-circle queue to normal doubly-linked list. 
  */
 void
-lh_append(vh, vl)
+tq_append(vh, vl)
     void *vh;
     void *vl;
 {

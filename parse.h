@@ -68,11 +68,11 @@ struct cmndtag {
 /*
  * Tail queue list head structure.
  */
-LH_DECLARE(defaults)
-LH_DECLARE(userspec)
-LH_DECLARE(member)
-LH_DECLARE(privilege)
-LH_DECLARE(cmndspec)
+TQ_DECLARE(defaults)
+TQ_DECLARE(userspec)
+TQ_DECLARE(member)
+TQ_DECLARE(privilege)
+TQ_DECLARE(cmndspec)
 
 /*
  * Structure describing a user specification and list thereof.
