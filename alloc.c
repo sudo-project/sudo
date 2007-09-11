@@ -46,6 +46,9 @@
 #else
 # include "emul/err.h"
 #endif /* HAVE_ERR_H */
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
 
 #include "sudo.h"
 
