@@ -583,7 +583,7 @@ new_default(var, val, op)
     d = emalloc(sizeof(struct defaults));
     d->var = var;
     d->val = val;
-    lh_init(&d->binding);
+    tq_init(&d->binding);
     d->type = 0;
     d->op = op;
     d->prev = d;
@@ -626,9 +626,9 @@ add_defaults(type, binding, defs)
      */
     for (d = defs; d != NULL; d = d->next) {
 	d->type = type;
-	list2head(&d->binding, binding);
+	list2tq(&d->binding, binding);
     }
-    lh_append(&defaults, defs);
+    tq_append(&defaults, defs);
 }
 
 /*
@@ -643,11 +643,11 @@ add_userspec(members, privs)
     struct userspec *u;
 
     u = emalloc(sizeof(*u));
-    list2head(&u->users, members);
-    list2head(&u->privileges, privs);
+    list2tq(&u->users, members);
+    list2tq(&u->privileges, privs);
     u->prev = u;
     u->next = NULL;
-    lh_append(&userspecs, u);
+    tq_append(&userspecs, u);
 }
 
 /*
@@ -665,21 +665,21 @@ init_parser(path, quiet)
     struct privilege *priv;
     struct cmndspec *cs;
 
-    while ((us = lh_pop(&userspecs)) != NULL) {
-	while ((m = lh_pop(&us->users)) != NULL) {
+    while ((us = tq_pop(&userspecs)) != NULL) {
+	while ((m = tq_pop(&us->users)) != NULL) {
 	    efree(m->name);
 	    efree(m);
 	}
-	while ((priv = lh_pop(&us->privileges)) != NULL) {
-	    while ((m = lh_pop(&priv->hostlist)) != NULL) {
+	while ((priv = tq_pop(&us->privileges)) != NULL) {
+	    while ((m = tq_pop(&priv->hostlist)) != NULL) {
 		efree(m->name);
 		efree(m);
 	    }
 	    freed = NULL;
-	    while ((cs = lh_pop(&priv->cmndlist)) != NULL) {
-		if (lh_last(&cs->runaslist) != freed) {
-		    freed = lh_last(&cs->runaslist);
-		    while ((m = lh_pop(&cs->runaslist)) != NULL) {
+	    while ((cs = tq_pop(&priv->cmndlist)) != NULL) {
+		if (tq_last(&cs->runaslist) != freed) {
+		    freed = tq_last(&cs->runaslist);
+		    while ((m = tq_pop(&cs->runaslist)) != NULL) {
 			efree(m->name);
 			efree(m);
 		    }
@@ -691,13 +691,13 @@ init_parser(path, quiet)
 	    efree(priv);
 	}
     }
-    lh_init(&userspecs);
+    tq_init(&userspecs);
 
     freed = NULL;
-    while ((d = lh_pop(&defaults)) != NULL) {
-	if (lh_last(&d->binding) != freed) {
-	    freed = lh_last(&d->binding);
-	    while ((m = lh_pop(&d->binding)) != NULL) {
+    while ((d = tq_pop(&defaults)) != NULL) {
+	if (tq_last(&d->binding) != freed) {
+	    freed = tq_last(&d->binding);
+	    while ((m = tq_pop(&d->binding)) != NULL) {
 		efree(m->name);
 		efree(m);
 	    }
@@ -706,7 +706,7 @@ init_parser(path, quiet)
 	efree(d->val);
 	efree(d);
     }
-    lh_init(&defaults);
+    tq_init(&defaults);
 
     init_aliases();
 
@@ -1035,8 +1035,8 @@ case 26:
 #line 243 "gram.y"
 {
 			    struct privilege *p = emalloc(sizeof(*p));
-			    list2head(&p->hostlist, yyvsp[-2].member);
-			    list2head(&p->cmndlist, yyvsp[0].cmndspec);
+			    list2tq(&p->hostlist, yyvsp[-2].member);
+			    list2tq(&p->cmndlist, yyvsp[0].cmndspec);
 			    p->prev = p;
 			    p->next = NULL;
 			    yyval.privilege = p;
@@ -1097,8 +1097,8 @@ case 35:
 				yyvsp[0].cmndspec->tags.noexec = yyvsp[0].cmndspec->prev->tags.noexec;
 			    if (yyvsp[0].cmndspec->tags.setenv == UNSPEC)
 				yyvsp[0].cmndspec->tags.setenv = yyvsp[0].cmndspec->prev->tags.setenv;
-			    if (lh_empty(&yyvsp[0].cmndspec->runaslist) &&
-				!lh_empty(&yyvsp[0].cmndspec->prev->runaslist))
+			    if (tq_empty(&yyvsp[0].cmndspec->runaslist) &&
+				!tq_empty(&yyvsp[0].cmndspec->prev->runaslist))
 				yyvsp[0].cmndspec->runaslist = yyvsp[0].cmndspec->prev->runaslist;
 			    yyval.cmndspec = yyvsp[-2].cmndspec;
 			}
@@ -1107,7 +1107,7 @@ case 36:
 #line 297 "gram.y"
 {
 			    struct cmndspec *cs = emalloc(sizeof(*cs));
-			    list2head(&cs->runaslist, yyvsp[-2].member);
+			    list2tq(&cs->runaslist, yyvsp[-2].member);
 			    cs->tags = yyvsp[-1].tag;
 			    cs->cmnd = yyvsp[0].member;
 			    cs->prev = cs;
