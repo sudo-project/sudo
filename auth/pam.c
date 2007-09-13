@@ -190,9 +190,11 @@ pam_prep_user(pw)
     /*
      * Set PAM_USER to the user we are changing *to* and
      * set PAM_RUSER to the user we are coming *from*.
+     * We set PAM_RHOST to avoid a bug in Solaris 7 and below.
      */
     (void) pam_set_item(pamh, PAM_USER, pw->pw_name);
     (void) pam_set_item(pamh, PAM_RUSER, user_name);
+    (void) pam_set_item(pamh, PAM_RHOST, user_host);
 
     /*
      * Set credentials (may include resource limits, device ownership, etc).
