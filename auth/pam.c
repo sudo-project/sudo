@@ -99,10 +99,10 @@ pam_init(pw, promptp, auth)
      * will cause a crash if PAM_TTY is not set so if
      * there is no tty, set PAM_TTY to the empty string.
      */
-    if (strcmp(user_tty, "unknown") == 0)
+    if (user_ttypath == NULL)
 	(void) pam_set_item(pamh, PAM_TTY, "");
     else
-	(void) pam_set_item(pamh, PAM_TTY, user_tty);
+	(void) pam_set_item(pamh, PAM_TTY, user_ttypath);
 
     return(AUTH_SUCCESS);
 }

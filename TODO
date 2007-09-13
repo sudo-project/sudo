@@ -160,5 +160,4 @@ TODO list (most will be addressed in sudo 2.0)
     Note that configure substitution runs on the .man.in file not the
     .pod file.
 
-59) Consider making a distinction between ID and WORD in what token
-    gets passed in to the grammar.
+59) Consolidate line wrap code.
