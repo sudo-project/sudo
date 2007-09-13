@@ -39,6 +39,7 @@ struct sudo_user {
     char *path;
     char *shell;
     char *tty;
+    char *ttypath;
     char  cwd[PATH_MAX];
     char *host;
     char *shost;
@@ -132,6 +133,7 @@ struct sudo_user {
 #define user_ngroups		(sudo_user.ngroups)
 #define user_groups		(sudo_user.groups)
 #define user_tty		(sudo_user.tty)
+#define user_ttypath		(sudo_user.ttypath)
 #define user_cwd		(sudo_user.cwd)
 #define user_runas		(sudo_user.runas)
 #define user_cmnd		(sudo_user.cmnd)

@@ -540,9 +540,9 @@ init_vars(sudo_mode, envp)
     }
 
     if ((p = ttyname(STDIN_FILENO)) || (p = ttyname(STDOUT_FILENO))) {
-	if (strncmp(p, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
-	    p += sizeof(_PATH_DEV) - 1;
-	user_tty = estrdup(p);
+	user_tty = user_ttypath = estrdup(p);
+	if (strncmp(user_tty, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
+	    user_tty += sizeof(_PATH_DEV) - 1;
     } else
 	user_tty = "unknown";
 
