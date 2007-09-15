@@ -464,7 +464,7 @@ display_cmnd(v, pw)
  * Print the contents of a struct member to stdout
  */
 static void
-print_member(lbuf, name, type, negated, alias_type)
+_print_member(lbuf, name, type, negated, alias_type)
     struct lbuf *lbuf;
     char *name;
     int type, negated, alias_type;
@@ -492,7 +492,7 @@ print_member(lbuf, name, type, negated, alias_type)
 		tq_foreach_fwd(&a->members, m) {
 		    if (m != tq_first(&a->members))
 			lbuf_append(lbuf, ", ", NULL);
-		    print_member(lbuf, m->name, m->type,
+		    _print_member(lbuf, m->name, m->type,
 			negated ? !m->negated : m->negated, alias_type);
 		}
 		break;
@@ -502,4 +502,14 @@ print_member(lbuf, name, type, negated, alias_type)
 	    lbuf_append(lbuf, negated ? "!" : "", name, NULL);
 	    break;
     }
+}
+
+static void
+print_member(lbuf, name, type, negated, alias_type)
+    struct lbuf *lbuf;
+    char *name;
+    int type, negated, alias_type;
+{
+    alias_seqno++;
+    _print_member(lbuf, name, type, negated, alias_type);
 }

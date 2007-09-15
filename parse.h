@@ -119,6 +119,7 @@ struct member {
 struct alias {
     char *name;				/* alias name */
     int type; 				/* {USER,HOST,RUNAS,CMND}ALIAS */
+    unsigned int seqno;			/* sequence number */
     struct member_list members;		/* list of alias members */
 };
 
@@ -139,6 +140,11 @@ struct defaults {
  */
 extern struct userspec_list userspecs;
 extern struct defaults_list defaults;
+
+/*
+ * Alias sequence number to avoid loops.
+ */
+extern unsigned int alias_seqno;
 
 /*
  * Prototypes

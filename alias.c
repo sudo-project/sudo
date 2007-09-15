@@ -52,6 +52,7 @@ __unused static const char rcsid[] = "$Sudo$";
  * Globals
  */
 struct rbtree *aliases;
+unsigned int alias_seqno;
 
 /*
  * Local protoypes
@@ -91,11 +92,22 @@ find_alias(name, type)
 {
     struct alias key;
     struct rbnode *node;
+    struct alias *a = NULL;
 
     key.name = name;
     key.type = type;
-    node = rbfind(aliases, &key);
-    return(node ? node->data : NULL);
+    if ((node = rbfind(aliases, &key)) != NULL) {
+	    /*
+	     * Compare the global sequence number with the one stored
+	     * in the alias.  If they match then we've seen this alias
+	     * before and found a loop.
+	     */
+	    a = node->data;
+	    if (a->seqno == alias_seqno)
+		return(NULL);
+	    a->seqno = alias_seqno;
+    }
+    return(a);
 }
 
 /*
@@ -114,6 +126,7 @@ alias_add(name, type, members)
     a = emalloc(sizeof(*a));
     a->name = name;
     a->type = type;
+    a->seqno = 0;
     list2tq(&a->members, members);
     if (rbinsert(aliases, a)) {
 	efree(a);
