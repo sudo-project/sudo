@@ -118,8 +118,8 @@ struct member {
  */
 struct alias {
     char *name;				/* alias name */
-    int type; 				/* {USER,HOST,RUNAS,CMND}ALIAS */
-    unsigned int seqno;			/* sequence number */
+    unsigned short type;		/* {USER,HOST,RUNAS,CMND}ALIAS */
+    unsigned short seqno;		/* sequence number */
     struct member_list members;		/* list of alias members */
 };
 
