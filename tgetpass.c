@@ -172,17 +172,20 @@ restart:
 	memset(&oterm, 0, sizeof(oterm));
     }
 
-    if (prompt)
-	(void) write(output, prompt, strlen(prompt));
+    /* No output if we are already backgrounded. */
+    if (signo != SIGTTOU && signo != SIGTTIN) {
+	if (prompt)
+	    (void) write(output, prompt, strlen(prompt));
 
-    if (timeout > 0)
-	alarm(timeout);
-    pass = getln(input, buf, sizeof(buf));
-    alarm(0);
-    save_errno = errno;
+	if (timeout > 0)
+	    alarm(timeout);
+	pass = getln(input, buf, sizeof(buf));
+	alarm(0);
+	save_errno = errno;
 
-    if (!ISSET(term.tflags, ECHO))
-	(void) write(output, "\n", 1);
+	if (!ISSET(term.tflags, ECHO))
+	    (void) write(output, "\n", 1);
+    }
 
     /* Restore old tty settings and signals. */
     if (memcmp(&term, &oterm, sizeof(term)) != 0)
