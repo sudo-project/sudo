@@ -135,6 +135,9 @@ tgetpass(prompt, timeout, flags)
 
     (void) fflush(stdout);
 restart:
+    signo = 0;
+    pass = NULL;
+    save_errno = 0;
     /* Open /dev/tty for reading/writing if possible else use stdin/stderr. */
     if (ISSET(flags, TGP_STDIN) ||
 	(input = output = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1) {
@@ -211,12 +214,12 @@ restart:
 	    case SIGTSTP:
 	    case SIGTTIN:
 	    case SIGTTOU:
-		signo = 0;
 		goto restart;
 	}
     }
 
-    errno = save_errno;
+    if (save_errno)
+	errno = save_errno;
     return(pass);
 }
 
