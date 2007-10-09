@@ -134,7 +134,7 @@ VISUDO_OBJS = $(COMMON_OBJS) visudo.o fileops.o gettime.o goodpath.o \
 
 TEST_OBJS = $(COMMON_OBJS) interfaces.o testsudoers.o tsgetgrpw.o tspwutil.o
 
-LIB_OBJS = @LIBOBJS@ @ALLOCA@
+LIB_OBJS = @LIBOBJS@
 
 VERSION = 1.7
 
