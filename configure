@@ -13928,10 +13928,8 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <sys/types.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
-# include <time.h>
-#else
-# include <sys/time.h>
 #endif
+#include <time.h>
 
 typedef struct timespec ac__type_new_;
 int

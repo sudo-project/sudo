@@ -1654,10 +1654,8 @@ AC_CHECK_TYPES([sigaction_t], [AC_DEFINE(HAVE_SIGACTION_T)], [], [#include <sys/
 AC_CHECK_TYPE([struct timespec], [AC_DEFINE(HAVE_TIMESPEC)], [], [#include <sys/types.h>
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
-# include <time.h>
-#else
-# include <sys/time.h>
-#endif])
+#endif
+#include <time.h>])
 SUDO_TYPE_SIZE_T
 SUDO_TYPE_SSIZE_T
 SUDO_TYPE_DEV_T
