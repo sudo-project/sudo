@@ -1632,7 +1632,12 @@ if test "$OS" != "ultrix"; then
     fi
 fi
 if test ${with_logincap-'no'} != "no"; then
-    AC_CHECK_HEADERS(login_cap.h)
+    AC_CHECK_HEADERS(login_cap.h, [
+	case "$OS" in
+	    freebsd|netbsd)	SUDO_LIBS="${SUDO_LIBS} -lutil"
+	    ;;
+	esac
+    ])
 fi
 if test ${with_project-'no'} != "no"; then
     AC_CHECK_HEADER(project.h, AC_DEFINE(HAVE_PROJECT_H)
@@ -2055,16 +2060,6 @@ if test ${with_kerb5-'no'} != "no" -a -z "$KRB5CONFIG"; then
     LIBS="${LIBS} ${SUDO_LIBS}"
     AC_CHECK_FUNCS(krb5_verify_user krb5_init_secure_context)
     LIBS="$_LIBS"
-fi
-
-dnl
-dnl Some systems put login_cap(3) in libutil
-dnl
-if test ${with_logincap-'no'} = "yes"; then
-    case "$OS" in
-	freebsd|netbsd)	SUDO_LIBS="${SUDO_LIBS} -lutil"
-	;;
-    esac
 fi
 
 dnl
