@@ -13534,6 +13534,11 @@ if test `eval echo '${'$as_ac_Header'}'` = yes; then
 #define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
  LOGINCAP_USAGE='[-c class|-] '
+	case "$OS" in
+	    freebsd|netbsd)	SUDO_LIBS="${SUDO_LIBS} -lutil"
+	    ;;
+	esac
+
 fi
 
 done
@@ -19754,13 +19759,6 @@ fi
 done
 
     LIBS="$_LIBS"
-fi
-
-if test ${with_logincap-'no'} = "yes"; then
-    case "$OS" in
-	freebsd|netbsd)	SUDO_LIBS="${SUDO_LIBS} -lutil"
-	;;
-    esac
 fi
 
 if test ${with_AFS-'no'} = "yes"; then
