@@ -1657,6 +1657,8 @@ AC_CHECK_TYPE([struct timespec], [AC_DEFINE(HAVE_TIMESPEC)], [], [#include <sys/
 # include <sys/time.h>
 #endif
 #include <time.h>])
+AC_CHECK_TYPES([struct in6_addr], [AC_DEFINE(HAVE_IN6_ADDR)], [], [#include <sys/types.h>
+#include <netinet/in.h>])
 SUDO_TYPE_SIZE_T
 SUDO_TYPE_SSIZE_T
 SUDO_TYPE_DEV_T
@@ -2404,6 +2406,7 @@ AH_TEMPLATE(HAVE_GETPWANAM, [Define to 1 if you have the `getpwanam' function. (
 AH_TEMPLATE(HAVE_GETSPNAM, [Define to 1 if you have the `getspnam' function (SVR4-style shadow passwords)])
 AH_TEMPLATE(HAVE_GETSPWUID, [Define to 1 if you have the `getspwuid' function. (HP-UX <= 9.X shadow passwords)])
 AH_TEMPLATE(HAVE_HEIMDAL, [Define to 1 if your Kerberos is Heimdal.])
+AH_TEMPLATE(HAVE_IN6_ADDR, [Define to 1 if <netinet/in.h> contains struct in6_addr.])
 AH_TEMPLATE(HAVE_ISCOMSEC, [Define to 1 if you have the `iscomsec' function. (HP-UX >= 10.x check for shadow enabled)])
 AH_TEMPLATE(HAVE_ISSECURE, [Define to 1 if you have the `issecure' function. (SunOS 4.x check for shadow enabled)])
 AH_TEMPLATE(HAVE_KERB4, [Define to 1 if you use Kerberos IV.])
