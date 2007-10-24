@@ -99,7 +99,7 @@ load_interfaces()
 {
     struct ifaddrs *ifa, *ifaddrs;
     struct sockaddr_in *sin;
-#ifdef AF_INET6
+#ifdef HAVE_IN6_ADDR
     struct sockaddr_in6 *sin6;
 #endif
     int i;
@@ -116,7 +116,7 @@ load_interfaces()
 
 	switch(ifa->ifa_addr->sa_family) {
 	    case AF_INET:
-#ifdef AF_INET6
+#ifdef HAVE_IN6_ADDR
 	    case AF_INET6:
 #endif
 		num_interfaces++;
@@ -146,7 +146,7 @@ load_interfaces()
 		interfaces[i].family = AF_INET;
 		i++;
 		break;
-#ifdef AF_INET6
+#ifdef HAVE_IN6_ADDR
 	    case AF_INET6:
 		sin6 = (struct sockaddr_in6 *)ifa->ifa_addr;
 		memcpy(&interfaces[i].addr, &sin6->sin6_addr,
@@ -157,7 +157,7 @@ load_interfaces()
 		interfaces[i].family = AF_INET6;
 		i++;
 		break;
-#endif /* AF_INET6 */
+#endif /* HAVE_IN6_ADDR */
 	}
     }
 #ifdef HAVE_FREEIFADDRS
@@ -320,7 +320,7 @@ void
 dump_interfaces()
 {
     int i;
-#ifdef AF_INET6
+#ifdef HAVE_IN6_ADDR
     char addrbuf[INET6_ADDRSTRLEN], maskbuf[INET6_ADDRSTRLEN];
 #endif
 
@@ -331,7 +331,7 @@ dump_interfaces()
 		printf("\t%s / ", inet_ntoa(interfaces[i].addr.ip4));
 		puts(inet_ntoa(interfaces[i].netmask.ip4));
 		break;
-#ifdef AF_INET6
+#ifdef HAVE_IN6_ADDR
 	    case AF_INET6:
 		inet_ntop(AF_INET6, &interfaces[i].addr.ip6,
 		    addrbuf, sizeof(addrbuf));
@@ -339,7 +339,7 @@ dump_interfaces()
 		    maskbuf, sizeof(maskbuf));
 		printf("\t%s / %s\n", addrbuf, maskbuf);
 		break;
-#endif /* AF_INET6 */
+#endif /* HAVE_IN6_ADDR */
 	}
     }
 }

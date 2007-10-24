@@ -30,13 +30,13 @@ struct interface {
     int family;	/* AF_INET or AF_INET6 */
     union {
 	struct in_addr ip4;
-#ifdef AF_INET6
+#ifdef HAVE_IN6_ADDR
 	struct in6_addr ip6;
 #endif
     } addr;
     union {
 	struct in_addr ip4;
-#ifdef AF_INET6
+#ifdef HAVE_IN6_ADDR
 	struct in6_addr ip6;
 #endif
     } netmask;
