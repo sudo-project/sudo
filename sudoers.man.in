@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "October 24, 2007" "1.6.9p7" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "November  2, 2007" "1.6.9p8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
