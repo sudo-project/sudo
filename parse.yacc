@@ -505,9 +505,8 @@ runasspec	:	/* empty */ {
 			     * then check against default runas user.
 			     */
 			    if (runas_matches == UNSPEC) {
-				runas_matches =
-				    userpw_matches(def_runas_default,
-					*user_runas, runas_pw);
+				runas_matches = userpw_matches(def_runas_default,
+				    *user_runas, runas_pw) ? TRUE : NOMATCH;
 			    }
 			}
 		|	RUNAS runaslist {
