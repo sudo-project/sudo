@@ -65,6 +65,7 @@ static void send_mail		__P((char *));
 static void mail_auth		__P((int, char *));
 static char *get_timestr	__P((void));
 static void mysyslog		__P((int, const char *, ...));
+static char *new_logline	__P((const char *, int));
 
 #define MAXSYSLOGTRIES	16	/* num of retries for broken syslogs */
 
@@ -275,7 +276,6 @@ log_auth(status, inform_user)
     int status;
     int inform_user;
 {
-    char *evstr = NULL;
     char *message;
     char *logline;
     int pri;
@@ -287,31 +287,17 @@ log_auth(status, inform_user)
 
     /* Set error message, if any. */
     if (ISSET(status, VALIDATE_OK))
-	message = "";
+	message = NULL;
     else if (ISSET(status, FLAG_NO_USER))
-	message = "user NOT in sudoers ; ";
+	message = "user NOT in sudoers";
     else if (ISSET(status, FLAG_NO_HOST))
-	message = "user NOT authorized on host ; ";
+	message = "user NOT authorized on host";
     else if (ISSET(status, VALIDATE_NOT_OK))
-	message = "command not allowed ; ";
+	message = "command not allowed";
     else
-	message = "unknown error ; ";
+	message = "unknown error";
 
-    if (sudo_user.env_vars != NULL) {
-	size_t len = 7; /* " ; ENV=" */
-	struct list_member *cur;
-	for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next)
-	    len += strlen(cur->value) + 1;
-	evstr = emalloc(len);
-	strlcpy(evstr, " ; ENV=", len);
-	for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next) {
-	    strlcat(evstr, cur->value, len);
-	    strlcat(evstr, " ", len);		/* NOTE: last one will fail */
-	}
-    }
-    easprintf(&logline, "%sTTY=%s ; PWD=%s ; USER=%s%s ; COMMAND=%s%s%s",
-	message, user_tty, user_cwd, *user_runas, evstr ? evstr : "",
-	user_cmnd, user_args ? " " : "", user_args ? user_args : "");
+    logline = new_logline(message, 0);
 
     mail_auth(status, logline);		/* send mail based on status */
 
@@ -342,7 +328,6 @@ log_auth(status, inform_user)
     if (def_logfile)
 	do_logfile(logline);
 
-    efree(evstr);
     efree(logline);
 }
 
@@ -359,7 +344,6 @@ log_error(flags, fmt, va_alist)
     int serrno = errno;
     char *message;
     char *logline;
-    char *evstr = NULL;
     va_list ap;
 #ifdef __STDC__
     va_start(ap, fmt);
@@ -375,45 +359,10 @@ log_error(flags, fmt, va_alist)
     evasprintf(&message, fmt, ap);
     va_end(ap);
 
-    if (sudo_user.env_vars != NULL) {
-	size_t len = 7; /* " ; ENV=" */
-	struct list_member *cur;
-	for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next)
-	    len += strlen(cur->value) + 1;
-	evstr = emalloc(len);
-	strlcpy(evstr, " ; ENV=", len);
-	for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next) {
-	    strlcat(evstr, cur->value, len);
-	    strlcat(evstr, " ", len);		/* NOTE: last one will fail */
-	}
-    }
-
     if (ISSET(flags, MSG_ONLY))
 	logline = message;
-    else if (ISSET(flags, USE_ERRNO)) {
-	if (user_args) {
-	    easprintf(&logline,
-		"%s: %s ; TTY=%s ; PWD=%s ; USER=%s%s ; COMMAND=%s %s",
-		message, strerror(serrno), user_tty, user_cwd, *user_runas,
-		evstr ? evstr : "", user_cmnd, user_args);
-	} else {
-	    easprintf(&logline,
-		"%s: %s ; TTY=%s ; PWD=%s ; USER=%s%s ; COMMAND=%s", message,
-		strerror(serrno), user_tty, user_cwd, *user_runas,
-		evstr ? evstr : "", user_cmnd);
-	}
-    } else {
-	if (user_args) {
-	    easprintf(&logline,
-		"%s ; TTY=%s ; PWD=%s ; USER=%s%s ; COMMAND=%s %s", message,
-		user_tty, user_cwd, *user_runas, evstr ? evstr : "",
-		user_cmnd, user_args);
-	} else {
-	    easprintf(&logline,
-		"%s ; TTY=%s ; PWD=%s ; USER=%s%s ; COMMAND=%s", message,
-		user_tty, user_cwd, *user_runas, evstr ? evstr : "", user_cmnd);
-	}
-    }
+    else
+	logline = new_logline(message, ISSET(flags, USE_ERRNO) ? serrno : 0);
 
     /*
      * Tell the user.
@@ -424,6 +373,7 @@ log_error(flags, fmt, va_alist)
 	else
 	    warningx("%s", message);
     }
+    efree(message);
 
     /*
      * Send a copy of the error via mail.
@@ -439,7 +389,6 @@ log_error(flags, fmt, va_alist)
     if (def_logfile)
 	do_logfile(logline);
 
-    efree(message);
     if (logline != message)
 	efree(logline);
 
@@ -651,4 +600,102 @@ get_timestr()
 	s[15] = '\0';			/* don't care about year */
 
     return(s);
+}
+
+#define	LL_TTY_STR	"TTY="
+#define	LL_CWD_STR	"PWD="		/* XXX - should be CWD= */
+#define	LL_USER_STR	"USER="
+#define	LL_GROUP_STR	"GROUP="
+#define	LL_ENV_STR	"ENV="
+#define	LL_CMND_STR	"COMMAND="
+
+/*
+ * Allocate and fill in a new logline.
+ */
+static char *
+new_logline(message, serrno)
+    const char *message;
+    int serrno;
+{
+    size_t len = 0;
+    char *evstr = NULL;
+    char *errstr = NULL;
+    char *line;
+
+    /*
+     * Compute line length
+     */
+    if (message != NULL)
+	len += strlen(message) + 3;
+    if (serrno) {
+	errstr = strerror(serrno);
+	len += strlen(errstr) + 2;
+    }
+    len += sizeof(LL_TTY_STR) + 2 + strlen(user_tty);
+    len += sizeof(LL_CWD_STR) + 2 + strlen(user_cwd);
+    len += sizeof(LL_USER_STR) + 2 + strlen(*user_runas);
+    if (sudo_user.env_vars != NULL) {
+	size_t evlen = 0;
+	struct list_member *cur;
+	for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next)
+	    evlen += strlen(cur->value) + 1;
+	evstr = emalloc(evlen);
+	evstr[0] = '\0';
+	for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next) {
+	    strlcat(evstr, cur->value, evlen);
+	    strlcat(evstr, " ", evlen);	/* NOTE: last one will fail */
+	}
+	len += sizeof(LL_ENV_STR) + 2 + evlen;
+    }
+    len += sizeof(LL_CMND_STR) - 1 + strlen(user_cmnd);
+    if (user_args != NULL)
+	len += strlen(user_args) + 1;
+
+    /*
+     * Allocate and build up the line.
+     */
+    line = emalloc(++len);
+    line[0] = '\0';
+
+    if (message != NULL) {
+	if (strlcat(line, message, len) >= len ||
+	    strlcat(line, errstr ? " : " : " ; ", len) >= len)
+	    goto toobig;
+    }
+    if (serrno) {
+	if (strlcat(line, errstr, len) >= len ||
+	    strlcat(line, " ; ", len) >= len)
+	    goto toobig;
+    }
+    if (strlcat(line, LL_TTY_STR, len) >= len ||
+	strlcat(line, user_tty, len) >= len ||
+	strlcat(line, " ; ", len) >= len)
+	goto toobig;
+    if (strlcat(line, LL_CWD_STR, len) >= len ||
+	strlcat(line, user_cwd, len) >= len ||
+	strlcat(line, " ; ", len) >= len)
+	goto toobig;
+    if (strlcat(line, LL_USER_STR, len) >= len ||
+	strlcat(line, *user_runas, len) >= len ||
+	strlcat(line, " ; ", len) >= len)
+	goto toobig;
+    if (evstr != NULL) {
+	if (strlcat(line, LL_ENV_STR, len) >= len ||
+	    strlcat(line, evstr, len) >= len ||
+	    strlcat(line, " ; ", len) >= len)
+	    goto toobig;
+	efree(evstr);
+    }
+    if (strlcat(line, LL_CMND_STR, len) >= len ||
+	strlcat(line, user_cmnd, len) >= len)
+	goto toobig;
+    if (user_args != NULL) {
+	if (strlcat(line, " ", len) >= len ||
+	    strlcat(line, user_args, len) >= len)
+	    goto toobig;
+    }
+
+    return (line);
+toobig:
+    errorx(1, "internal error: insufficient space for log line");
 }
