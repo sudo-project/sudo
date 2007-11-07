@@ -125,7 +125,7 @@
 #define	M_MASK		0xffff
 #define	M_ASCII		0x00ff
 
-typedef u_short Char;
+typedef unsigned short Char;
 
 #else
 
@@ -151,7 +151,7 @@ typedef char Char;
 
 
 static int	 compare __P((const void *, const void *));
-static int	 g_Ctoc __P((const Char *, char *, u_int));
+static int	 g_Ctoc __P((const Char *, char *, unsigned int));
 static int	 g_lstat __P((Char *, struct stat *, glob_t *));
 static DIR	*g_opendir __P((Char *, glob_t *));
 static Char	*g_strchr __P((Char *, int));
@@ -181,11 +181,11 @@ glob(pattern, flags, errfunc, pglob)
 	int flags, (*errfunc) __P((const char *, int));
 	glob_t *pglob;
 {
-	const u_char *patnext;
+	const unsigned char *patnext;
 	int c;
 	Char *bufnext, *bufend, patbuf[PATH_MAX];
 
-	patnext = (u_char *) pattern;
+	patnext = (unsigned char *) pattern;
 	if (!(flags & GLOB_APPEND)) {
 		pglob->gl_pathc = 0;
 		pglob->gl_pathv = NULL;
@@ -630,14 +630,14 @@ glob3(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last,
 
 	/* Search directory for matching names. */
 	while ((dp = readdir(dirp))) {
-		u_char *sc;
+		unsigned char *sc;
 		Char *dc;
 
 		/* Initial DOT must be matched literally. */
 		if (dp->d_name[0] == DOT && *pattern != DOT)
 			continue;
 		dc = pathend;
-		sc = (u_char *) dp->d_name;
+		sc = (unsigned char *) dp->d_name;
 		while (dc < pathend_last && (*dc++ = *sc++) != EOS)
 			continue;
 		if (dc >= pathend_last) {
@@ -681,7 +681,7 @@ globextend(path, pglob)
 {
 	char **pathv;
 	int i;
-	u_int newsize, len;
+	unsigned int newsize, len;
 	char *copy;
 	const Char *p;
 
@@ -848,7 +848,7 @@ static int
 g_Ctoc(str, buf, len)
 	const Char *str;
 	char *buf;
-	u_int len;
+	unsigned int len;
 {
 
 	while (len--) {
