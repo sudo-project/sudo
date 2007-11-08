@@ -53,7 +53,7 @@ __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 /* Characters that must be quoted in sudoers */
-#define SUDOERS_QUOTED	"*?[]!:\\,=#\""
+#define SUDOERS_QUOTED	":\\,=#\""
 
 /*
  * Local prototypes.
