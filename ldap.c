@@ -276,9 +276,10 @@ sudo_ldap_check_runas(ld, entry)
  * Walk through search results and return TRUE if we have a command match.
  */
 int
-sudo_ldap_check_command(ld, entry)
+sudo_ldap_check_command(ld, entry, setenv_ok)
     LDAP *ld;
     LDAPMessage *entry;
+    int *setenv_ok;
 {
     char *allowed_cmnd, *allowed_args, **v = NULL, **p = NULL;
     int foundbang, ret = FALSE;
@@ -292,6 +293,8 @@ sudo_ldap_check_command(ld, entry)
 	/* Match against ALL ? */
 	if (!strcasecmp(*p, "ALL")) {
 	    ret = TRUE;
+	    if (setenv_ok != NULL)
+		*setenv_ok = TRUE;
 	    DPRINTF(("ldap sudoCommand '%s' ... MATCH!", *p), 2);
 	    continue;
 	}
@@ -874,7 +877,7 @@ sudo_ldap_display_cmnd(ldv, pw)
 	    if ((!do_netgr ||
 		sudo_ldap_check_user_netgroup(ld, entry, pw->pw_name)) &&
 		sudo_ldap_check_host(ld, entry) &&
-		sudo_ldap_check_command(ld, entry) &&
+		sudo_ldap_check_command(ld, entry, NULL) &&
 		sudo_ldap_check_runas(ld, entry)) {
 
 		found = TRUE;
@@ -1149,6 +1152,7 @@ sudo_ldap_check(v, pwflag)
     LDAPMessage *entry = NULL, *result = NULL;	/* used for searches */
     char *filt;					/* used to parse attributes */
     int do_netgr, rc, ret;			/* temp/final return values */
+    int setenv_ok;
     int ldap_user_matches = FALSE, ldap_host_matches = FALSE; /* flags */
     struct passwd *pw = list_pw ? list_pw : sudo_user.pw;
 
@@ -1179,7 +1183,7 @@ sudo_ldap_check(v, pwflag)
 		    /* Only check the command when listing another user. */
 		    if (user_uid == 0 || list_pw == NULL ||
 			user_uid == list_pw->pw_uid ||
-			sudo_ldap_check_command(ld, entry)) {
+			sudo_ldap_check_command(ld, entry, NULL)) {
 			ret = 1;
 			break;	/* end foreach */
 		    }
@@ -1231,6 +1235,7 @@ sudo_ldap_check(v, pwflag)
      * user netgroups.  Then we take the netgroups returned and
      * try to match them against the username.
      */
+    setenv_ok = FALSE;
     for (ret = 0, do_netgr = 0; !ret && do_netgr < 2; do_netgr++) {
 	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
 	DPRINTF(("ldap search '%s'", filt), 1);
@@ -1254,13 +1259,15 @@ sudo_ldap_check(v, pwflag)
 		/* remember that host matched */
 		    (ldap_host_matches = TRUE) &&
 		/* verify command match */
-		    sudo_ldap_check_command(ld, entry) &&
+		    sudo_ldap_check_command(ld, entry, &setenv_ok) &&
 		/* verify runas match */
 		    sudo_ldap_check_runas(ld, entry)
 		    ) {
 		    /* We have a match! */
 		    DPRINTF(("Perfect Match!"), 1);
 		    /* pick up any options */
+		    if (setenv_ok)
+			def_setenv = TRUE;
 		    sudo_ldap_parse_options(ld, entry);
 		    /* make sure we don't reenter loop */
 		    ret = VALIDATE_OK;
