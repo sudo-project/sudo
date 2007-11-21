@@ -321,9 +321,9 @@ on the command line in the form of B<VAR>=I<value>, e.g.
 B<LD_LIBRARY_PATH>=I</usr/local/pkg/lib>.  Variables passed on the
 command line are subject to the same restrictions as normal environment
 variables with one important exception.  If the I<setenv> option
-is set in I<sudoers> or the command to be run has the C<SETENV> tag
-set the user may set variables that would overwise be forbidden.
-See L<sudoers(5)> for more information.
+is set in I<sudoers>, the command to be run has the C<SETENV> tag
+set or the command matched is C<ALL>, the user may set variables
+that would overwise be forbidden.  See L<sudoers(5)> for more information.
 
 =head1 RETURN VALUES
 
