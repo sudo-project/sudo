@@ -185,7 +185,7 @@ sudo_ldap_check_host(ld, entry)
 	/* match any or address or netgroup or hostname */
 	if (!strcmp(*p, "ALL") || addr_matches(*p) ||
 	    netgr_matches(*p, user_host, user_shost, NULL) ||
-	    !hostname_matches(user_shost, user_host, *p))
+	    hostname_matches(user_shost, user_host, *p))
 	    ret = TRUE;
 	DPRINTF(("ldap sudoHost '%s' ... %s", *p,
 	    ret ? "MATCH!" : "not"), 2);
