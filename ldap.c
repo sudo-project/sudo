@@ -163,7 +163,7 @@ sudo_ldap_check_host(ld, entry)
     /* walk through values */
     for (p = v; p && *p && !ret; p++) {
 	/* match any or address or netgroup or hostname */
-	if (!strcasecmp(*p, "ALL") || addr_matches(*p) ||
+	if (!strcmp(*p, "ALL") || addr_matches(*p) ||
 	    netgr_matches(*p, user_host, user_shost, NULL) ||
 	    !hostname_matches(user_shost, user_host, *p))
 	    ret = TRUE;
@@ -273,7 +273,7 @@ sudo_ldap_check_command(ld, entry, setenv_ok)
     /* get_first_entry */
     for (p = v; p && *p && ret >= 0; p++) {
 	/* Match against ALL ? */
-	if (!strcasecmp(*p, "ALL")) {
+	if (!strcmp(*p, "ALL")) {
 	    ret = TRUE;
 	    if (setenv_ok != NULL)
 		*setenv_ok = TRUE;
