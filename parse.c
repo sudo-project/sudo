@@ -186,7 +186,8 @@ sudoers_lookup(pwflag)
     return(validated);
 }
 
-#define	TAG_CHANGED(t)	(cs->tags.t != UNSPEC && cs->tags.t != tags.t)
+#define	TAG_CHANGED(t) \
+	(cs->tags.t != UNSPEC && cs->tags.t != IMPLIED && cs->tags.t != tags.t)
 
 /*
  * Print out privileges for the specified user.

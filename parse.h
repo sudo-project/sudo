@@ -22,13 +22,14 @@
 
 #include "list.h"
 
-#undef ALLOW
-#define ALLOW	1
-#undef DENY
-#define DENY	0
 #undef UNSPEC
 #define UNSPEC	-1
-/* XXX - use NOTFOUND instead? */
+#undef DENY
+#define DENY	 0
+#undef ALLOW
+#define ALLOW	 1
+#undef IMPLIED
+#define IMPLIED	 2
 
 /*
  * A command with args. XXX - merge into struct member.

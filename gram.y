@@ -285,7 +285,8 @@ cmndspeclist	:	cmndspec
 				$3->tags.nopasswd = $3->prev->tags.nopasswd;
 			    if ($3->tags.noexec == UNSPEC)
 				$3->tags.noexec = $3->prev->tags.noexec;
-			    if ($3->tags.setenv == UNSPEC)
+			    if ($3->tags.setenv == UNSPEC &&
+				$3->prev->tags.setenv != IMPLIED)
 				$3->tags.setenv = $3->prev->tags.setenv;
 			    if (tq_empty(&$3->runaslist) &&
 				!tq_empty(&$3->prev->runaslist))
@@ -301,6 +302,10 @@ cmndspec	:	runasspec cmndtag opcmnd {
 			    cs->cmnd = $3;
 			    cs->prev = cs;
 			    cs->next = NULL;
+			    /* sudo "ALL" implies the SETENV tag */
+			    if (cs->cmnd->type == ALL && !cs->cmnd->negated &&
+				cs->tags.setenv == UNSPEC)
+				cs->tags.setenv = IMPLIED;
 			    $$ = cs;
 			}
 		;
