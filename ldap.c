@@ -257,9 +257,10 @@ sudo_ldap_check_runas(ld, entry)
  * Walk through search results and return TRUE if we have a command match.
  */
 int
-sudo_ldap_check_command(ld, entry)
+sudo_ldap_check_command(ld, entry, setenv_ok)
     LDAP *ld;
     LDAPMessage *entry;
+    int *setenv_ok;
 {
     char *allowed_cmnd, *allowed_args, **v = NULL, **p = NULL;
     int foundbang, ret = FALSE;
@@ -274,6 +275,8 @@ sudo_ldap_check_command(ld, entry)
 	/* Match against ALL ? */
 	if (!strcasecmp(*p, "ALL")) {
 	    ret = TRUE;
+	    if (setenv_ok != NULL)
+		*setenv_ok = TRUE;
 	    DPRINTF(("ldap sudoCommand '%s' ... MATCH!", *p), 2);
 	    continue;
 	}
@@ -942,7 +945,7 @@ sudo_ldap_check(pwflag)
      * user netgroups.  Then we take the netgroups returned and
      * try to match them against the username.
      */
-
+    setenv_ok = FALSE;
     for (do_netgr = 0; !ret && do_netgr < 2; do_netgr++) {
 	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1();
 	DPRINTF(("ldap search '%s'", filt), 1);
@@ -968,13 +971,15 @@ sudo_ldap_check(pwflag)
 	    /* add matches for listing later */
 		sudo_ldap_add_match(ld, entry, pwflag) &&
 	    /* verify command match */
-		sudo_ldap_check_command(ld, entry) &&
+		sudo_ldap_check_command(ld, entry, &setenv_ok) &&
 	    /* verify runas match */
 		sudo_ldap_check_runas(ld, entry)
 		) {
 		/* We have a match! */
 		DPRINTF(("Perfect Matched!"), 1);
 		/* pick up any options */
+		if (setenv_ok)
+		    def_setenv = TRUE;
 		sudo_ldap_parse_options(ld, entry);
 		/* make sure we don't reenter loop */
 		ret = VALIDATE_OK;

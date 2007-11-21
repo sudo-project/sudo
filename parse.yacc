@@ -104,6 +104,9 @@ int used_runas = FALSE;
 	    (_var) = NOMATCH; \
 } while (0)
 
+#define	SETENV_RESET \
+	if (setenv_ok == IMPLIED) setenv_ok = def_setenv ? TRUE : UNSPEC
+
 /*
  * The matching stack, initial space allocated in init_parser().
  */
@@ -440,7 +443,7 @@ cmndspeclist	:	cmndspec
 		|	cmndspeclist ',' cmndspec
 		;
 
-cmndspec	:	runasspec cmndtag opcmnd {
+cmndspec	:	{ SETENV_RESET; } runasspec cmndtag opcmnd {
 			    /*
 			     * Push the entry onto the stack if it is worth
 			     * saving and reset cmnd_matches for next cmnd.
@@ -692,6 +695,9 @@ cmnd		:	ALL {
 				    expand_match_list();
 				}
 			    }
+			    /* sudo "ALL" implies the SETENV tag */
+			    if (setenv_ok == UNSPEC)
+				setenv_ok = IMPLIED;
 
 			    efree(safe_cmnd);
 			    safe_cmnd = NULL;

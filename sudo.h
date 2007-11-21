@@ -78,6 +78,8 @@ struct sudo_user {
 #define TRUE                     1
 #undef FALSE
 #define FALSE                    0
+#undef IMPLIED
+#define IMPLIED                  2
 #undef NOMATCH
 #define NOMATCH                 -1
 #undef UNSPEC
