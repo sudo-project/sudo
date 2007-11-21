@@ -111,6 +111,7 @@ static int parse_args			__P((int, char **));
 static void initial_setup		__P((void));
 static void set_loginclass		__P((struct passwd *));
 static void set_project			__P((struct passwd *));
+static void set_runasgr			__P((char *));
 static void usage			__P((int))
 					    __attribute__((__noreturn__));
 static void usage_excl			__P((int))
@@ -147,6 +148,8 @@ login_cap_t *lc;
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
 sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
+static char *runas_user;
+static char *runas_group;
 
 
 int
@@ -280,6 +283,19 @@ main(argc, argv, envp)
 	    log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
     }
 
+    /*
+     * Set runas passwd/group entries based on command line or sudoers.
+     * Note that if runas_group was specified without runas_user we
+     * defer setting runas_pw so the match routines know to ignore it.
+     * XXX - early enough?
+     */
+    if (runas_group != NULL) {
+	set_runasgr(runas_group);
+	if (runas_user != NULL)
+	    set_runaspw(runas_user);
+    } else
+	set_runaspw(runas_user ? runas_user : def_runas_default);
+
     /* This goes after sudoers is parsed since it may have timestamp options. */
     if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
 	remove_timestamp((sudo_mode == MODE_KILL));
@@ -313,6 +329,10 @@ main(argc, argv, envp)
 	validated = sudoers_lookup(pwflag);
     if (safe_cmnd == NULL)
 	safe_cmnd = estrdup(user_cmnd);
+
+    /* If only a group was specified, set runas_pw based on invoking user. */
+    if (runas_pw == NULL)
+	set_runaspw(user_name);
 
     /*
      * Look up the timestamp dir owner if one is specified.
@@ -603,8 +623,8 @@ init_vars(sudo_mode, envp)
 	 * be run during reboot after the YP/NIS/NIS+/LDAP/etc daemon has died.
 	 */
 	if (sudo_mode & (MODE_INVALIDATE|MODE_KILL))
-	    errorx(1, "uid %s does not exist in the passwd file!", pw_name);
-	log_error(0, "uid %s does not exist in the passwd file!", pw_name);
+	    errorx(1, "unknown uid: %s", pw_name);
+	log_error(0, "unknown uid: %s", pw_name);
     }
     if (user_shell == NULL || *user_shell == '\0')
 	user_shell = estrdup(sudo_user.pw->pw_shell);
@@ -625,10 +645,6 @@ init_vars(sudo_mode, envp)
 
     if (nohostname)
 	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
-
-    set_runaspw(*user_runas);		/* may call log_error() */
-    if (*user_runas[0] == '#' && runas_pw->pw_name[0] != '#')
-	*user_runas = estrdup(runas_pw->pw_name);
 
     /*
      * Get current working directory.  Try as user, fall back to root.
@@ -668,6 +684,7 @@ init_vars(sudo_mode, envp)
     }
 
     /* Set login class if applicable. */
+    /* XXX - should move to after sudoers_lookup */
     set_loginclass(sudo_user.pw);
 }
 
@@ -738,7 +755,7 @@ set_cmnd(sudo_mode)
 }
 
 /*
- * Command line argument parsing, can't use getopt(3).
+ * Command line argument parsing, can't use getopt(3) due to optional args.
  */
 static int
 parse_args(argc, argv)
@@ -779,7 +796,17 @@ parse_args(argc, argv)
 		    if (NewArgv[1] == NULL)
 			usage(1);
 
-		    user_runas = &NewArgv[1];
+		    runas_user = NewArgv[1];
+
+		    NewArgc--;
+		    NewArgv++;
+		    break;
+		case 'g':
+		    /* Must have an associated runas group. */
+		    if (NewArgv[1] == NULL)
+			usage(1);
+
+		    runas_group = NewArgv[1];
 
 		    NewArgc--;
 		    NewArgv++;
@@ -897,7 +924,7 @@ parse_args(argc, argv)
 		    if (NewArgv[1] == NULL)
 			usage(1);
 		    if ((list_pw = sudo_getpwnam(NewArgv[1])) == NULL)
-			errorx(1, "unknown user %s", NewArgv[1]);
+			errorx(1, "unknown user: %s", NewArgv[1]);
 		    NewArgc--;
 		    NewArgv++;
 		    break;
@@ -943,10 +970,11 @@ args_done:
 	usage(1);
     }
 
-    if (user_runas != NULL && !ISSET(rval, (MODE_EDIT|MODE_RUN|MODE_CHECK))) {
+    if ((runas_user != NULL || runas_group != NULL) &&
+	!ISSET(rval, (MODE_EDIT|MODE_RUN|MODE_CHECK))) {
 	if (excl != '\0')
-	    warningx("the `-u' and `-%c' options may not be used together",
-		excl);
+	    warningx("the `-%c' and `-%c' options may not be used together",
+		runas_user ? 'u' : 'g', excl);
 	usage(1);
     }
     if (list_pw != NULL && rval != MODE_LIST && rval != MODE_CHECK) {
@@ -1105,7 +1133,9 @@ set_loginclass(pw)
 	errflags = NO_MAIL|MSG_ONLY|NO_EXIT;
 
     if (login_class && strcmp(login_class, "-") != 0) {
-	if (strcmp(*user_runas, "root") != 0 && user_uid != 0)
+	/* XXX - def_runas user may change after sudoers parse */
+	if (user_uid != 0 &&
+	    strcmp(runas_user ? runas_user : def_runas_default, "root") != 0)
 	    errorx(1, "only root can use -c %s", login_class);
     } else {
 	login_class = pw->pw_class;
@@ -1246,18 +1276,31 @@ int
 set_runaspw(user)
     char *user;
 {
-    if (runas_pw != NULL) {
-	if (user_runas != &def_runas_default)
-	    return(TRUE);		/* don't override -u option */
-    }
     if (*user == '#') {
 	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
 	    runas_pw = sudo_fakepwnam(user);
     } else {
 	if ((runas_pw = sudo_getpwnam(user)) == NULL)
-	    log_error(NO_MAIL|MSG_ONLY, "no passwd entry for %s!", user);
+	    log_error(NO_MAIL|MSG_ONLY, "unknown user: %s", user);
     }
     return(TRUE);
+}
+
+/*
+ * Get group entry for the group we are going to run commands as.
+ * Updates runas_pw as a side effect.
+ */
+static void
+set_runasgr(group)
+    char *group;
+{
+    if (*group == '#') {
+	if ((runas_gr = sudo_getgrgid(atoi(group + 1))) == NULL)
+	    runas_gr = sudo_fakegrnam(group);
+    } else {
+	if ((runas_gr = sudo_getgrnam(group)) == NULL)
+	    log_error(NO_MAIL|MSG_ONLY, "unknown group: %s", group);
+    }
 }
 
 /*
@@ -1272,14 +1315,13 @@ get_authpw()
 
     if (def_rootpw) {
 	if ((pw = sudo_getpwuid(0)) == NULL)
-	    log_error(0, "uid 0 does not exist in the passwd file!");
+	    log_error(0, "unknown uid: 0");
     } else if (def_runaspw) {
 	if ((pw = sudo_getpwnam(def_runas_default)) == NULL)
-	    log_error(0, "user %s does not exist in the passwd file!",
-		def_runas_default);
+	    log_error(0, "unknown user: %s", def_runas_default);
     } else if (def_targetpw) {
 	if (runas_pw->pw_name == NULL)
-	    log_error(NO_MAIL|MSG_ONLY, "no passwd entry for %lu!",
+	    log_error(NO_MAIL|MSG_ONLY, "unknown uid: %lu",
 		(unsigned long) runas_pw->pw_uid);
 	pw = runas_pw;
     } else

@@ -314,10 +314,12 @@ log_auth(status, inform_user)
 		user_name, user_shost);
 	else
 	    (void) fprintf(stderr,
-		"Sorry, user %s is not allowed to execute '%s%s%s' as %s on %s.\n",
+		"Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n",
 		user_name, user_cmnd, user_args ? " " : "",
 		user_args ? user_args : "",
-		list_pw ? list_pw->pw_name : *user_runas, user_host);
+		list_pw ? list_pw->pw_name : runas_pw ?
+		runas_pw->pw_name : user_name, runas_gr ? ":" : "",
+		runas_gr ? runas_gr->gr_name : "", user_host);
     }
 
     /*
@@ -633,7 +635,10 @@ new_logline(message, serrno)
     }
     len += sizeof(LL_TTY_STR) + 2 + strlen(user_tty);
     len += sizeof(LL_CWD_STR) + 2 + strlen(user_cwd);
-    len += sizeof(LL_USER_STR) + 2 + strlen(*user_runas);
+    if (runas_pw != NULL)
+	len += sizeof(LL_USER_STR) + 2 + strlen(runas_pw->pw_name);
+    if (runas_gr != NULL)
+	len += sizeof(LL_GROUP_STR) + 2 + strlen(runas_gr->gr_name);
     if (sudo_user.env_vars != NULL) {
 	size_t evlen = 0;
 	struct list_member *cur;
@@ -675,10 +680,18 @@ new_logline(message, serrno)
 	strlcat(line, user_cwd, len) >= len ||
 	strlcat(line, " ; ", len) >= len)
 	goto toobig;
-    if (strlcat(line, LL_USER_STR, len) >= len ||
-	strlcat(line, *user_runas, len) >= len ||
-	strlcat(line, " ; ", len) >= len)
-	goto toobig;
+    if (runas_pw != NULL) {
+	if (strlcat(line, LL_USER_STR, len) >= len ||
+	    strlcat(line, runas_pw->pw_name, len) >= len ||
+	    strlcat(line, " ; ", len) >= len)
+	    goto toobig;
+    }
+    if (runas_gr != NULL) {
+	if (strlcat(line, LL_GROUP_STR, len) >= len ||
+	    strlcat(line, runas_gr->gr_name, len) >= len ||
+	    strlcat(line, " ; ", len) >= len)
+	    goto toobig;
+    }
     if (evstr != NULL) {
 	if (strlcat(line, LL_ENV_STR, len) >= len ||
 	    strlcat(line, evstr, len) >= len ||

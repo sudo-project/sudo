@@ -98,8 +98,10 @@ set_perms(perm)
 			      	break;
 				
 	case PERM_RUNAS:
-				(void) setresgid(-1, runas_pw->pw_gid, -1);
-				if (setresuid(-1, runas_pw->pw_uid, -1))
+				(void) setresgid(-1, runas_gr ?
+				    runas_gr->gr_gid : runas_pw->pw_gid, -1);
+				if (setresuid(-1,
+				    runas_pw ? runas_pw->pw_uid : user_uid, -1))
 				    error(1, "unable to change to runas uid");
 			      	break;
 
@@ -175,8 +177,10 @@ set_perms(perm)
 			      	break;
 				
 	case PERM_RUNAS:
-				(void) setregid(-1, runas_pw->pw_gid);
-				if (setreuid(-1, runas_pw->pw_uid))
+				(void) setregid(-1, runas_gr ?
+				    runas_gr->gr_gid : runas_pw->pw_gid);
+				if (setreuid(-1,
+				    runas_pw ? runas_pw->pw_uid : user_uid))
 				    error(1, "unable to change to runas uid");
 			      	break;
 
@@ -256,8 +260,9 @@ set_perms(perm)
 			      	break;
 				
 	case PERM_RUNAS:
-				(void) setegid(runas_pw->pw_gid);
-				if (seteuid(runas_pw->pw_uid))
+				(void) setegid(runas_gr ?
+				    runas_gr->gr_gid : runas_pw->pw_gid);
+				if (seteuid(runas_pw ? runas_pw->pw_uid : user_uid))
 				    error(1, "unable to change to runas uid");
 			      	break;
 
@@ -339,12 +344,14 @@ set_perms(perm)
 static void
 runas_setup()
 {
+    gid_t gid;
 #ifdef HAVE_LOGIN_CAP_H
     int flags;
     extern login_cap_t *lc;
 #endif
 
     if (runas_pw->pw_name != NULL) {
+	gid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
 #ifdef HAVE_PAM
 	pam_prep_user(runas_pw);
 #endif /* HAVE_PAM */
@@ -360,7 +367,7 @@ runas_setup()
 	    flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
 	    if (!def_preserve_groups)
 		SET(flags, LOGIN_SETGROUP);
-	    else if (setgid(runas_pw->pw_gid))
+	    else if (setgid(gid))
 		warning("cannot set gid to runas gid");
 	    if (setusercontext(lc, runas_pw, runas_pw->pw_uid, flags)) {
 		if (runas_pw->pw_uid != ROOT_UID)
@@ -371,14 +378,14 @@ runas_setup()
 	} else
 #endif /* HAVE_LOGIN_CAP_H */
 	{
-	    if (setgid(runas_pw->pw_gid))
+	    if (setgid(gid))
 		warning("cannot set gid to runas gid");
 #ifdef HAVE_INITGROUPS
 	    /*
 	     * Initialize group vector unless asked not to.
 	     */
 	    if (!def_preserve_groups &&
-		initgroups(*user_runas, runas_pw->pw_gid) < 0)
+		initgroups(runas_pw->pw_name, runas_pw->pw_gid) < 0)
 		warning("cannot set group vector");
 #endif /* HAVE_INITGROUPS */
 	}

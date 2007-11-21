@@ -329,6 +329,36 @@ sudo_fakepwnam(user)
     return(pw);
 }
 
+/*
+ * Take a gid in string form "#123" and return a faked up group struct.
+ */
+struct group *
+sudo_fakegrnam(group)
+    const char *group;
+{
+    struct group *gr;
+    struct rbnode *node;
+    size_t len;
+
+    len = strlen(group);
+    gr = emalloc(sizeof(struct group) + len + 1);
+    memset(gr, 0, sizeof(struct group));
+    gr->gr_gid = (gid_t) atoi(group + 1);
+    gr->gr_name = (char *)gr + sizeof(struct group);
+    strlcpy(gr->gr_name, group, len + 1);
+
+    /* Store by gid and by name, overwriting cached version. */
+    if ((node = rbinsert(grcache_bygid, gr)) != NULL) {
+	efree(node->data);
+	node->data = (void *) gr;
+    }
+    if ((node = rbinsert(grcache_byname, gr)) != NULL) {
+	efree(node->data);
+	node->data = (void *) gr;
+    }
+    return(gr);
+}
+
 void
 sudo_setpwent()
 {

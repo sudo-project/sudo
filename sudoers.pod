@@ -125,14 +125,14 @@ with '+') and C<User_Alias>es.  Each list item may be prefixed with
 zero or more '!' operators.  An odd number of '!' operators negate
 the value of the item; an even number just cancel each other out.
 
- Runas_List ::= Runas_User |
-		Runas_User ',' Runas_List
+ Runas_List ::= Runas_Member |
+		Runas_Member ',' Runas_List
 
- Runas_User ::= '!'* username |
-	        '!'* '#'uid |
-	        '!'* '%'group |
-	        '!'* +netgroup |
-	        '!'* Runas_Alias
+ Runas_Member ::= '!'* username |
+	          '!'* '#'uid |
+	          '!'* '%'group |
+	          '!'* +netgroup |
+	          '!'* Runas_Alias
 
 A C<Runas_List> is similar to a C<User_List> except that instead
 of C<User_Alias>es it can contain C<Runas_Alias>es.  Note that
@@ -247,7 +247,7 @@ See L</"SUDOERS OPTIONS"> for a list of supported Defaults parameters.
 
  Cmnd_Spec ::= Runas_Spec? Tag_Spec* Cmnd
 
- Runas_Spec ::= '(' Runas_List ')'
+ Runas_Spec ::= '(' Runas_List? (: Runas_List)? ')'
 
  Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
 	       'SETENV:' | 'NOSETENV:' )
@@ -260,11 +260,24 @@ Let's break that down into its constituent parts:
 
 =head2 Runas_Spec
 
-A C<Runas_Spec> is simply a C<Runas_List> (as defined above)
-enclosed in a set of parentheses.  If you do not specify a
-C<Runas_Spec> in the user specification, a default C<Runas_Spec>
-of B<root> will be used.  A C<Runas_Spec> sets the default for
-commands that follow it.  What this means is that for the entry:
+A C<Runas_Spec> determines the user and/or the group that a command
+may be run as.  A fully-specified C<Runas_Spec> consists of two
+C<Runas_List>s (as defined above) separated by a colon (':') and
+enclosed in a set of parentheses.  The first C<Runas_List> indicates
+which users the command may be run as via B<sudo>'s B<-u> flag.
+The second defines a list of groups that can be specified via
+B<sudo>'s B<-g> flag.  If both C<Runas_List>s are specified, the
+command may be run with any combination of users and groups listed
+in their respective C<Runas_List>s.  If only the first is specified,
+the command may be run as any user in the list but no B<-g> flag
+may be specified.  If the first C<Runas_List> is empty but the
+second is specified, the command may be run as the invoking user
+with the group set to any listed in the C<Runas_List>.  If no
+C<Runas_Spec> is specified the command may be run as B<root> and
+no group may be specified.
+
+A C<Runas_Spec> sets the default for the commands that follow it.
+What this means is that for the entry:
 
  dgb	boulder = (operator) /bin/ls, /bin/kill, /usr/bin/lprm
 
@@ -280,6 +293,19 @@ entry.  If we modify the entry like so:
 
 Then user B<dgb> is now allowed to run F</bin/ls> as B<operator>,
 but  F</bin/kill> and F</usr/bin/lprm> as B<root>.
+
+We can extend this to allow B<dgb> to run C</bin/ls> with either
+the user or group set to B<operator>:
+
+ dgb	boulder = (operator : operator) /bin/ls, (root) /bin/kill, \
+	/usr/bin/lprm
+
+In the following example, user B<tcm> may run commands that access
+a modem device file with the dialer group.  Note that in this example
+only the group will be set, the command still runs as user B<tcm>.
+
+ tcm	boulder = (:dialer) /usr/bin/tip, /usr/bin/cu, \
+	/usr/local/bin/minicom
 
 =head2 Tag_Spec
 

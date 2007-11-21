@@ -213,6 +213,11 @@ sudo_ldap_check_runas(ld, entry)
     if (!entry)
 	return(ret);
 
+    /* If no runas user, just check the group. */
+    /* XXX - implement runas group checking via sudoRunasGroup */
+    if (!runas_pw)
+	return(TRUE);
+
     /* get the values from the entry */
     v = ldap_get_values(ld, entry, "sudoRunAs");
 

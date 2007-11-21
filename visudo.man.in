@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "August 15, 2007" "1.7" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "October 20, 2007" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 visudo \- edit the sudoers file
 .SH "SYNOPSIS"
@@ -191,7 +191,7 @@ error occurred (if the editor supports this feature).
 .SH "OPTIONS"
 .IX Header "OPTIONS"
 \&\fBvisudo\fR accepts the following command line options:
-.IP "\-c" 4
+.IP "\-c" 12
 .IX Item "-c"
 Enable \fBcheck-only\fR mode.  The existing \fIsudoers\fR file will be
 checked for syntax and a message will be printed to the
@@ -199,32 +199,32 @@ standard output detailing the status of \fIsudoers\fR.
 If the syntax check completes successfully, \fBvisudo\fR will
 exit with a value of 0.  If a syntax error is encountered,
 \&\fBvisudo\fR will exit with a value of 1.
-.IP "\-f" 4
-.IX Item "-f"
+.IP "\-f \fIsudoers\fR" 12
+.IX Item "-f sudoers"
 Specify and alternate \fIsudoers\fR file location.  With this option
 \&\fBvisudo\fR will edit (or check) the \fIsudoers\fR file of your choice,
 instead of the default, \fI@sysconfdir@/sudoers\fR.  The lock file used
 is the specified \fIsudoers\fR file with \*(L".tmp\*(R" appended to it.
-.IP "\-q" 4
+.IP "\-q" 12
 .IX Item "-q"
 Enable \fBquiet\fR mode.  In this mode details about syntax errors
 are not printed.  This option is only useful when combined with
 the \fB\-c\fR flag.
-.IP "\-s" 4
+.IP "\-s" 12
 .IX Item "-s"
 Enable \fBstrict\fR checking of the \fIsudoers\fR file.  If an alias is
 used before it is defined, \fBvisudo\fR will consider this a parse
 error.  Note that it is not possible to differentiate between an
 alias and a hostname or username that consists solely of uppercase
 letters, digits, and the underscore ('_') character.
-.IP "\-V" 4
+.IP "\-V" 12
 .IX Item "-V"
 The \fB\-V\fR (version) option causes \fBvisudo\fR to print its version number
 and exit.
 .SH "ENVIRONMENT"
 .IX Header "ENVIRONMENT"
-The following environment variables are used only if \fBvisudo\fR
-was configured with the \fI\-\-with\-env\-editor\fR option:
+The following environment variables may be consulted depending on
+the value of the \fIeditor\fR and \fIenv_editor\fR \fIsudoers\fR variables:
 .ie n .IP "\*(C`VISUAL\*(C'" 16
 .el .IP "\f(CW\*(C`VISUAL\*(C'\fR" 16
 .IX Item "VISUAL"

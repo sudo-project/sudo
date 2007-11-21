@@ -10,14 +10,16 @@ NNAAMMEE
 SSYYNNOOPPSSIISS
        ssuuddoo --hh | --KK | --kk | --LL | --VV | --vv
 
-       ssuuddoo --ll [--UU _u_s_e_r_n_a_m_e] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
+       ssuuddoo --ll [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d] [--UU _u_s_e_r_n_a_m_e] [--uu _u_s_e_r_-
+       _n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
 
        ssuuddoo [--bbEEHHPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
-       [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e] {--ii | --ss | _c_o_m_-
-       _m_a_n_d}
+       [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d]
+       [VVAARR=_v_a_l_u_e] {--ii | --ss | _c_o_m_m_a_n_d}
 
        ssuuddooeeddiitt [--SS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
-       [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] file ...
+       [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] file
+       ...
 
 DDEESSCCRRIIPPTTIIOONN
        ssuuddoo allows a permitted user to execute a _c_o_m_m_a_n_d as the
@@ -55,13 +57,11 @@ DDEESSCCRRIIPPTTIIOONN
 
        If ssuuddoo is run by root and the SUDO_USER environment vari-
        able is set, ssuuddoo will use this value to determine who the
-       actual user is.  This can be used by a user to log com-
-       mands through sudo even when a root shell has been
-       invoked.  It also allows the --ee flag to remain useful even
+       actual user is.  This can be used by a user to log
 
 
 
-1.7                      August 15, 2007                        1
+1.7                     November 21, 2007                       1
 
 
 
@@ -70,6 +70,8 @@ DDEESSCCRRIIPPTTIIOONN
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       commands through sudo even when a root shell has been
+       invoked.  It also allows the --ee flag to remain useful even
        when being run via a sudo-run script or program.  Note
        however, that the sudoers lookup is still done for root,
        not the user specified by SUDO_USER.
@@ -82,52 +84,50 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 OOPPTTIIOONNSS
        ssuuddoo accepts the following command line options:
 
-       -a  The --aa (_a_u_t_h_e_n_t_i_c_a_t_i_o_n _t_y_p_e) option causes ssuuddoo to use
-           the specified authentication type when validating the
-           user, as allowed by _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  The system
-           administrator may specify a list of sudo-specific
-           authentication methods by adding an "auth-sudo" entry
-           in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  This option is only available on
-           systems that support BSD authentication.
+       -a _t_y_p_e     The --aa (_a_u_t_h_e_n_t_i_c_a_t_i_o_n _t_y_p_e) option causes
+                   ssuuddoo to use the specified authentication type
+                   when validating the user, as allowed by
+                   _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  The system administrator may
+                   specify a list of sudo-specific authentication
+                   methods by adding an "auth-sudo" entry in
+                   _/_e_t_c_/_l_o_g_i_n_._c_o_n_f.  This option is only avail-
+                   able on systems that support BSD authentica-
+                   tion.
 
-       -b  The --bb (_b_a_c_k_g_r_o_u_n_d) option tells ssuuddoo to run the given
-           command in the background.  Note that if you use the
-           --bb option you cannot use shell job control to manipu-
-           late the process.
+       -b          The --bb (_b_a_c_k_g_r_o_u_n_d) option tells ssuuddoo to run
+                   the given command in the background.  Note
+                   that if you use the --bb option you cannot use
+                   shell job control to manipulate the process.
 
-       -C fd
-           Normally, ssuuddoo will close all open file descriptors
-           other than standard input, standard output and stan-
-           dard error.  The --CC (_c_l_o_s_e _f_r_o_m) option allows the
-           user to specify a starting point above the standard
-           error (file descriptor three).  Values less than three
-           are not permitted.  This option is only available if
-           the administrator has enabled the _c_l_o_s_e_f_r_o_m___o_v_e_r_r_i_d_e
-           option in _s_u_d_o_e_r_s(4).
+       -C _f_d       Normally, ssuuddoo will close all open file
+                   descriptors other than standard input, stan-
+                   dard output and standard error.  The --CC (_c_l_o_s_e
+                   _f_r_o_m) option allows the user to specify a
+                   starting point above the standard error (file
+                   descriptor three).  Values less than three are
+                   not permitted.  This option is only available
+                   if the administrator has enabled the _c_l_o_s_e_-
+                   _f_r_o_m___o_v_e_r_r_i_d_e option in _s_u_d_o_e_r_s(4).
 
-       -c  The --cc (_c_l_a_s_s) option causes ssuuddoo to run the specified
-           command with resources limited by the specified login
-           class.  The _c_l_a_s_s argument can be either a class name
-           as defined in _/_e_t_c_/_l_o_g_i_n_._c_o_n_f, or a single '-' charac-
-           ter.  Specifying a _c_l_a_s_s of - indicates that the com-
-           mand should be run restricted by the default login
-           capabilities for the user the command is run as.  If
-           the _c_l_a_s_s argument specifies an existing user class,
-           the command must be run as root, or the ssuuddoo command
-           must be run from a shell that is already root.  This
-           option is only available on systems with BSD login
-           classes.
-
-       -E  The --EE (_p_r_e_s_e_r_v_e _e_n_v_i_r_o_n_m_e_n_t) option will override the
-           _e_n_v___r_e_s_e_t option in _s_u_d_o_e_r_s(4)).  It is only available
-           when either the matching command has the SETENV tag or
-           the _s_e_t_e_n_v option is set in _s_u_d_o_e_r_s(4).
-
-       -e  The --ee (_e_d_i_t) option indicates that, instead of
+       -c _c_l_a_s_s    The --cc (_c_l_a_s_s) option causes ssuuddoo to run the
+                   specified command with resources limited by
+                   the specified login class.  The _c_l_a_s_s argument
+                   can be either a class name as defined in
+                   _/_e_t_c_/_l_o_g_i_n_._c_o_n_f, or a single '-' character.
+                   Specifying a _c_l_a_s_s of - indicates that the
+                   command should be run restricted by the
+                   default login capabilities for the user the
+                   command is run as.  If the _c_l_a_s_s argument
+                   specifies an existing user class, the command
+                   must be run as root, or the ssuuddoo command must
+                   be run from a shell that is already root.
+                   This option is only available on systems with
+                   BSD login classes.
 
 
 
-1.7                      August 15, 2007                        2
+
+1.7                     November 21, 2007                       2
 
 
 
@@ -136,64 +136,64 @@ OOPPTTIIOONNSS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-           running a command, the user wishes to edit one or more
-           files.  In lieu of a command, the string "sudoedit" is
-           used when consulting the _s_u_d_o_e_r_s file.  If the user is
-           authorized by _s_u_d_o_e_r_s the following steps are taken:
+       -E          The --EE (_p_r_e_s_e_r_v_e _e_n_v_i_r_o_n_m_e_n_t) option will
+                   override the _e_n_v___r_e_s_e_t option in _s_u_d_o_e_r_s(4)).
+                   It is only available when either the matching
+                   command has the SETENV tag or the _s_e_t_e_n_v
+                   option is set in _s_u_d_o_e_r_s(4).
 
-           1.  Temporary copies are made of the files to be
-               edited with the owner set to the invoking user.
+       -e          The --ee (_e_d_i_t) option indicates that, instead
+                   of running a command, the user wishes to edit
+                   one or more files.  In lieu of a command, the
+                   string "sudoedit" is used when consulting the
+                   _s_u_d_o_e_r_s file.  If the user is authorized by
+                   _s_u_d_o_e_r_s the following steps are taken:
 
-           2.  The editor specified by the VISUAL or EDITOR envi-
-               ronment variables is run to edit the temporary
-               files.  If neither VISUAL nor EDITOR are set, the
-               program listed in the _e_d_i_t_o_r _s_u_d_o_e_r_s variable is
-               used.
+                   1.  Temporary copies are made of the files to
+                       be edited with the owner set to the invok-
+                       ing user.
 
-           3.  If they have been modified, the temporary files
-               are copied back to their original location and the
-               temporary versions are removed.
+                   2.  The editor specified by the VISUAL or EDI-
+                       TOR environment variables is run to edit
+                       the temporary files.  If neither VISUAL
+                       nor EDITOR are set, the program listed in
+                       the _e_d_i_t_o_r _s_u_d_o_e_r_s variable is used.
 
-           If the specified file does not exist, it will be cre-
-           ated.  Note that unlike most commands run by ssuuddoo, the
-           editor is run with the invoking user's environment
-           unmodified.  If, for some reason, ssuuddoo is unable to
-           update a file with its edited version, the user will
-           receive a warning and the edited copy will remain in a
-           temporary file.
+                   3.  If they have been modified, the temporary
+                       files are copied back to their original
+                       location and the temporary versions are
+                       removed.
 
-       -H  The --HH (_H_O_M_E) option sets the HOME environment vari-
-           able to the homedir of the target user (root by
-           default) as specified in _p_a_s_s_w_d(4).  By default, ssuuddoo
-           does not modify HOME (see _s_e_t___h_o_m_e and _a_l_w_a_y_s___s_e_t___h_o_m_e
-           in _s_u_d_o_e_r_s(4)).
+                   If the specified file does not exist, it will
+                   be created.  Note that unlike most commands
+                   run by ssuuddoo, the editor is run with the invok-
+                   ing user's environment unmodified.  If, for
+                   some reason, ssuuddoo is unable to update a file
+                   with its edited version, the user will receive
+                   a warning and the edited copy will remain in a
+                   temporary file.
 
-       -h  The --hh (_h_e_l_p) option causes ssuuddoo to print a usage mes-
-           sage and exit.
+       -g _g_r_o_u_p    Normally, ssuuddoo sets the primary group to the
+                   one specified by the passwd database for the
+                   user the command is being run as (by default,
+                   root).  The --gg (_g_r_o_u_p) option causes ssuuddoo to
+                   run the specified command with the primary
+                   group set to _g_r_o_u_p.  To specify a _g_i_d instead
+                   of a _g_r_o_u_p _n_a_m_e, use _#_g_i_d.  When running com-
+                   mands as a _g_i_d, many shells require that the
+                   '#' be escaped with a backslash ('\').  If no
+                   --uu option is specified, the command will be
+                   run as the invoking user (not root).  In
+                   either case, the primary group will be set to
+                   _g_r_o_u_p.
 
-       -i  The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
-           specified in the _p_a_s_s_w_d(4) entry of the user that the
-           command is being run as.  The command name argument
-           given to the shell begins with a `-' to tell the shell
-           to run as a login shell.  ssuuddoo attempts to change to
-           that user's home directory before running the shell.
-           It also initializes the environment, leaving _D_I_S_P_L_A_Y
-           and _T_E_R_M unchanged, setting _H_O_M_E, _S_H_E_L_L, _U_S_E_R, _L_O_G_-
-           _N_A_M_E, and _P_A_T_H, and unsetting all other environment
-           variables.
-
-       -K  The --KK (sure _k_i_l_l) option is like --kk except that it
-           removes the user's timestamp entirely.  Like --kk, this
-           option does not require a password.
-
-       -k  The --kk (_k_i_l_l) option to ssuuddoo invalidates the user's
-           timestamp by setting the time on it to the Epoch.  The
-           next time ssuuddoo is run a password will be required.
-           This option does not require a password and was added
-
+       -H          The --HH (_H_O_M_E) option sets the HOME environment
+                   variable to the homedir of the target user
+                   (root by default) as specified in _p_a_s_s_w_d(4).
 
 
-1.7                      August 15, 2007                        3
+
+1.7                     November 21, 2007                       3
 
 
 
@@ -202,64 +202,64 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-           to allow a user to revoke ssuuddoo permissions from a
-           .logout file.
+                   By default, ssuuddoo does not modify HOME (see
+                   _s_e_t___h_o_m_e and _a_l_w_a_y_s___s_e_t___h_o_m_e in _s_u_d_o_e_r_s(4)).
 
-       -L  The --LL (_l_i_s_t defaults) option will list out the param-
-           eters that may be set in a _D_e_f_a_u_l_t_s line along with a
-           short description for each.  This option is useful in
-           conjunction with _g_r_e_p(1).
+       -h          The --hh (_h_e_l_p) option causes ssuuddoo to print a
+                   usage message and exit.
+
+       -i          The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs
+                   the shell specified in the _p_a_s_s_w_d(4) entry of
+                   the user that the command is being run as.
+                   The command name argument given to the shell
+                   begins with a `-' to tell the shell to run as
+                   a login shell.  ssuuddoo attempts to change to
+                   that user's home directory before running the
+                   shell.  It also initializes the environment,
+                   leaving _D_I_S_P_L_A_Y and _T_E_R_M unchanged, setting
+                   _H_O_M_E, _S_H_E_L_L, _U_S_E_R, _L_O_G_N_A_M_E, and _P_A_T_H, and
+                   unsetting all other environment variables.
+
+       -K          The --KK (sure _k_i_l_l) option is like --kk except
+                   that it removes the user's timestamp entirely.
+                   Like --kk, this option does not require a pass-
+                   word.
+
+       -k          The --kk (_k_i_l_l) option to ssuuddoo invalidates the
+                   user's timestamp by setting the time on it to
+                   the Epoch.  The next time ssuuddoo is run a pass-
+                   word will be required.  This option does not
+                   require a password and was added to allow a
+                   user to revoke ssuuddoo permissions from a .logout
+                   file.
+
+       -L          The --LL (_l_i_s_t defaults) option will list out
+                   the parameters that may be set in a _D_e_f_a_u_l_t_s
+                   line along with a short description for each.
+                   This option is useful in conjunction with
+                   _g_r_e_p(1).
 
        -l [_c_o_m_m_a_n_d]
-           If no _c_o_m_m_a_n_d is specified, the --ll (_l_i_s_t) option will
-           list the allowed (and forbidden) commands for the
-           invoking user (or the user specified by the --UU option)
-           on the current host.  If a _c_o_m_m_a_n_d is specified and is
-           permitted by _s_u_d_o_e_r_s, the fully-qualified path to the
-           command is displayed along with any command line argu-
-           ments.  If _c_o_m_m_a_n_d is not allowed, ssuuddoo will exit with
-           a return value of 1.
+                   If no _c_o_m_m_a_n_d is specified, the --ll (_l_i_s_t)
+                   option will list the allowed (and forbidden)
+                   commands for the invoking user (or the user
+                   specified by the --UU option) on the current
+                   host.  If a _c_o_m_m_a_n_d is specified and is per-
+                   mitted by _s_u_d_o_e_r_s, the fully-qualified path to
+                   the command is displayed along with any com-
+                   mand line arguments.  If _c_o_m_m_a_n_d is not
+                   allowed, ssuuddoo will exit with a return value of
+                   1.
 
-       -P  The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssuuddoo to
-           preserve the invoking user's group vector unaltered.
-           By default, ssuuddoo will initialize the group vector to
-           the list of groups the target user is in.  The real
-           and effective group IDs, however, are still set to
-           match the target user.
-
-       -p  The --pp (_p_r_o_m_p_t) option allows you to override the
-           default password prompt and use a custom one.  The
-           following percent (`%') escapes are supported:
-
-           %H  expanded to the local hostname including the
-               domain name (on if the machine's hostname is fully
-               qualified or the _f_q_d_n _s_u_d_o_e_r_s option is set)
-
-           %h  expanded to the local hostname without the domain
-               name
-
-           %U  expanded to the login name of the user the command
-               will be run as (defaults to root)
-
-           %u  expanded to the invoking user's login name
-
-           %%  two consecutive % characters are collapsed into a
-               single % character
-
-       -S  The --SS (_s_t_d_i_n) option causes ssuuddoo to read the password
-           from the standard input instead of the terminal
-           device.
-
-       -s  The --ss (_s_h_e_l_l) option runs the shell specified by the
-           _S_H_E_L_L environment variable if it is set or the shell
-           as specified in _p_a_s_s_w_d(4).
-
-       -U  The --UU (_o_t_h_e_r _u_s_e_r) option is used in conjunction with
-           the --ll option to specify the user whose privileges
+       -P          The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes
+                   ssuuddoo to preserve the invoking user's group
+                   vector unaltered.  By default, ssuuddoo will ini-
+                   tialize the group vector to the list of groups
+                   the target user is in.  The real and effective
 
 
 
-1.7                      August 15, 2007                        4
+1.7                     November 21, 2007                       4
 
 
 
@@ -268,33 +268,82 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-           should be listed.  Only root or a user with ssuuddoo ALL
-           on the current host may use this option.
+                   group IDs, however, are still set to match the
+                   target user.
 
-       -u  The --uu (_u_s_e_r) option causes ssuuddoo to run the specified
-           command as a user other than _r_o_o_t.  To specify a _u_i_d
-           instead of a _u_s_e_r_n_a_m_e, use _#_u_i_d.  When running com-
-           mands as a _u_i_d, many shells require that the '#' be
-           escaped with a backslash ('\').  Note that if the _t_a_r_-
-           _g_e_t_p_w Defaults option is set (see _s_u_d_o_e_r_s(4)) it is
-           not possible to run commands with a uid not listed in
-           the password database.
+       -p _p_r_o_m_p_t   The --pp (_p_r_o_m_p_t) option allows you to override
+                   the default password prompt and use a custom
+                   one.  The following percent (`%') escapes are
+                   supported:
 
-       -V  The --VV (_v_e_r_s_i_o_n) option causes ssuuddoo to print the ver-
-           sion number and exit.  If the invoking user is already
-           root the --VV option will print out a list of the
-           defaults ssuuddoo was compiled with as well as the
-           machine's local network addresses.
+                   %H  expanded to the local hostname including
+                       the domain name (on if the machine's host-
+                       name is fully qualified or the _f_q_d_n _s_u_d_o_-
+                       _e_r_s option is set)
 
-       -v  If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update
-           the user's timestamp, prompting for the user's pass-
-           word if necessary.  This extends the ssuuddoo timeout for
-           another 5 minutes (or whatever the timeout is set to
-           in _s_u_d_o_e_r_s) but does not run a command.
+                   %h  expanded to the local hostname without the
+                       domain name
 
-       --  The ---- flag indicates that ssuuddoo should stop processing
-           command line arguments.  It is most useful in conjunc-
-           tion with the --ss flag.
+                   %U  expanded to the login name of the user the
+                       command will be run as (defaults to root)
+
+                   %u  expanded to the invoking user's login name
+
+                   %%  two consecutive % characters are collapsed
+                       into a single % character
+
+       -S          The --SS (_s_t_d_i_n) option causes ssuuddoo to read the
+                   password from the standard input instead of
+                   the terminal device.
+
+       -s          The --ss (_s_h_e_l_l) option runs the shell specified
+                   by the _S_H_E_L_L environment variable if it is set
+                   or the shell as specified in _p_a_s_s_w_d(4).
+
+       -U _u_s_e_r     The --UU (_o_t_h_e_r _u_s_e_r) option is used in conjunc-
+                   tion with the --ll option to specify the user
+                   whose privileges should be listed.  Only root
+                   or a user with ssuuddoo ALL on the current host
+                   may use this option.
+
+       -u _u_s_e_r     The --uu (_u_s_e_r) option causes ssuuddoo to run the
+                   specified command as a user other than _r_o_o_t.
+                   To specify a _u_i_d instead of a _u_s_e_r _n_a_m_e, use
+                   _#_u_i_d.  When running commands as a _u_i_d, many
+                   shells require that the '#' be escaped with a
+                   backslash ('\').  Note that if the _t_a_r_g_e_t_p_w
+                   Defaults option is set (see _s_u_d_o_e_r_s(4)) it is
+                   not possible to run commands with a uid not
+                   listed in the password database.
+
+       -V          The --VV (_v_e_r_s_i_o_n) option causes ssuuddoo to print
+                   the version number and exit.  If the invoking
+                   user is already root the --VV option will print
+                   out a list of the defaults ssuuddoo was compiled
+                   with as well as the machine's local network
+                   addresses.
+
+
+
+1.7                     November 21, 2007                       5
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
+       -v          If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will
+                   update the user's timestamp, prompting for the
+                   user's password if necessary.  This extends
+                   the ssuuddoo timeout for another 5 minutes (or
+                   whatever the timeout is set to in _s_u_d_o_e_r_s) but
+                   does not run a command.
+
+       --          The ---- flag indicates that ssuuddoo should stop
+                   processing command line arguments.  It is most
+                   useful in conjunction with the --ss flag.
 
        Environment variables to be set for the command may also
        be passed on the command line in the form of VVAARR=_v_a_l_u_e,
@@ -302,9 +351,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        passed on the command line are subject to the same
        restrictions as normal environment variables with one
        important exception.  If the _s_e_t_e_n_v option is set in _s_u_d_o_-
-       _e_r_s or the command to be run has the SETENV tag set the
-       user may set variables that would overwise be forbidden.
-       See _s_u_d_o_e_r_s(4) for more information.
+       _e_r_s, the command to be run has the SETENV tag set or the
+       command matched is ALL, the user may set variables that
+       would overwise be forbidden.  See _s_u_d_o_e_r_s(4) for more
+       information.
 
 RREETTUURRNN VVAALLUUEESS
        Upon successful execution of a program, the return value
@@ -322,18 +372,6 @@ RREETTUURRNN VVAALLUUEESS
        stances.  The most common reason for _s_t_a_t(2) to return
        "permission denied" is if you are running an automounter
        and one of the directories in your PATH is on a machine
-
-
-
-1.7                      August 15, 2007                        5
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        that is currently unreachable.
 
 SSEECCUURRIITTYY NNOOTTEESS
@@ -350,6 +388,18 @@ SSEECCUURRIITTYY NNOOTTEESS
 
        If, however, the _e_n_v___r_e_s_e_t option is disabled in _s_u_d_o_e_r_s,
        any variables not explicitly denied by the _e_n_v___c_h_e_c_k and
+
+
+
+1.7                     November 21, 2007                       6
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
        _e_n_v___d_e_l_e_t_e options are inherited from the invoking pro-
        cess.  In this case, _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e behave like
        a blacklist.  Since it is not possible to blacklist all
@@ -388,18 +438,6 @@ SSEECCUURRIITTYY NNOOTTEESS
        timestamp directory before ssuuddoo is run.  However, because
        ssuuddoo checks the ownership and mode of the directory and
        its contents, the only damage that can be done is to
-
-
-
-1.7                      August 15, 2007                        6
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        "hide" files by putting them in the timestamp dir.  This
        is unlikely to happen since once the timestamp dir is
        owned by root and inaccessible by any other user, the user
@@ -416,6 +454,17 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        This is done to keep a user from creating his/her own
        timestamp with a bogus date on systems that allow users to
        give away files.
+
+
+
+1.7                     November 21, 2007                       7
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
 
        Please note that ssuuddoo will normally only log the command
        it explicitly runs.  If a user runs a command such as sudo
@@ -455,17 +504,6 @@ EENNVVIIRROONNMMEENNTT
        SUDO_UID        Set to the uid of the user who invoked
                        sudo
 
-
-
-1.7                      August 15, 2007                        7
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        SUDO_GID        Set to the gid of the user who invoked
                        sudo
 
@@ -480,6 +518,19 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 FFIILLEESS
        _/_e_t_c_/_s_u_d_o_e_r_s        List of who can run what
        _/_v_a_r_/_r_u_n_/_s_u_d_o       Directory containing timestamps
+
+
+
+
+
+1.7                     November 21, 2007                       8
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
 
 EEXXAAMMPPLLEESS
        Note: the following examples assume suitable _s_u_d_o_e_r_s(4)
@@ -520,18 +571,6 @@ AAUUTTHHOORRSS
                Todd C. Miller
 
        See the HISTORY file in the ssuuddoo distribution or visit
-
-
-
-1.7                      August 15, 2007                        8
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        http://www.sudo.ws/sudo/history.html for a short history
        of ssuuddoo.
 
@@ -546,6 +585,18 @@ CCAAVVEEAATTSS
 
        It is not meaningful to run the cd command directly via
        sudo, e.g.,
+
+
+
+
+1.7                     November 21, 2007                       9
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
 
         $ sudo cd /usr/local/protected
 
@@ -589,6 +640,21 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7                      August 15, 2007                        9
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.7                     November 21, 2007                      10
 
 

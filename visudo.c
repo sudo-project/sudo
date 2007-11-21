@@ -412,7 +412,6 @@ reparse_sudoers(editor, args, strict, quiet)
 		sp->tpath, sp->path);
 
 	/* Clean slate for each parse */
-	user_runas = NULL;
 	init_defaults();
 	init_parser(sp->path, quiet);
 
@@ -929,7 +928,7 @@ check_aliases(strict)
 		}
 	    }
 	    tq_foreach_fwd(&priv->cmndlist, cs) {
-		tq_foreach_fwd(&cs->runaslist, m) {
+		tq_foreach_fwd(&cs->runasuserlist, m) {
 		    if (m->type == RUNASALIAS) {
 			if (find_alias(m->name, m->type) == NULL) {
 			    fprintf(stderr,
@@ -963,7 +962,7 @@ check_aliases(strict)
 		    (void) alias_remove(m->name, m->type);
 	    }
 	    tq_foreach_fwd(&priv->cmndlist, cs) {
-		tq_foreach_fwd(&cs->runaslist, m) {
+		tq_foreach_fwd(&cs->runasuserlist, m) {
 		    if (m->type == RUNASALIAS)
 			(void) alias_remove(m->name, m->type);
 		}

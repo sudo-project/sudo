@@ -29,6 +29,7 @@ typedef union {
     struct cmndspec *cmndspec;
     struct defaults *defaults;
     struct member *member;
+    struct runascontainer *runas;
     struct privilege *privilege;
     struct sudo_command command;
     struct cmndtag tag;

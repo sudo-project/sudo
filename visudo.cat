@@ -50,18 +50,18 @@ DDEESSCCRRIIPPTTIIOONN
 OOPPTTIIOONNSS
        vviissuuddoo accepts the following command line options:
 
-       -c  Enable cchheecckk--oonnllyy mode.  The existing _s_u_d_o_e_r_s file
-           will be checked for syntax and a message will be
-           printed to the standard output detailing the status of
-           _s_u_d_o_e_r_s.  If the syntax check completes successfully,
-           vviissuuddoo will exit with a value of 0.  If a syntax error
-           is encountered, vviissuuddoo will exit with a value of 1.
+       -c          Enable cchheecckk--oonnllyy mode.  The existing _s_u_d_o_e_r_s
+                   file will be checked for syntax and a message
+                   will be printed to the standard output detail-
+                   ing the status of _s_u_d_o_e_r_s.  If the syntax
+                   check completes successfully, vviissuuddoo will exit
+                   with a value of 0.  If a syntax error is
+                   encountered, vviissuuddoo will exit with a value of
+                   1.
 
-       -f  Specify and alternate _s_u_d_o_e_r_s file location.  With
 
 
-
-1.7                      August 15, 2007                        1
+1.7                      October 20, 2007                       1
 
 
 
@@ -70,28 +70,32 @@ OOPPTTIIOONNSS
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
-           this option vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s
-           file of your choice, instead of the default,
-           _/_e_t_c_/_s_u_d_o_e_r_s.  The lock file used is the specified
-           _s_u_d_o_e_r_s file with ".tmp" appended to it.
+       -f _s_u_d_o_e_r_s  Specify and alternate _s_u_d_o_e_r_s file location.
+                   With this option vviissuuddoo will edit (or check)
+                   the _s_u_d_o_e_r_s file of your choice, instead of
+                   the default, _/_e_t_c_/_s_u_d_o_e_r_s.  The lock file used
+                   is the specified _s_u_d_o_e_r_s file with ".tmp"
+                   appended to it.
 
-       -q  Enable qquuiieett mode.  In this mode details about syntax
-           errors are not printed.  This option is only useful
-           when combined with the --cc flag.
+       -q          Enable qquuiieett mode.  In this mode details about
+                   syntax errors are not printed.  This option is
+                   only useful when combined with the --cc flag.
 
-       -s  Enable ssttrriicctt checking of the _s_u_d_o_e_r_s file.  If an
-           alias is used before it is defined, vviissuuddoo will con-
-           sider this a parse error.  Note that it is not possi-
-           ble to differentiate between an alias and a hostname
-           or username that consists solely of uppercase letters,
-           digits, and the underscore ('_') character.
+       -s          Enable ssttrriicctt checking of the _s_u_d_o_e_r_s file.
+                   If an alias is used before it is defined,
+                   vviissuuddoo will consider this a parse error.  Note
+                   that it is not possible to differentiate
+                   between an alias and a hostname or username
+                   that consists solely of uppercase letters,
+                   digits, and the underscore ('_') character.
 
-       -V  The --VV (version) option causes vviissuuddoo to print its
-           version number and exit.
+       -V          The --VV (version) option causes vviissuuddoo to print
+                   its version number and exit.
 
 EENNVVIIRROONNMMEENNTT
-       The following environment variables are used only if
-       vviissuuddoo was configured with the _-_-_w_i_t_h_-_e_n_v_-_e_d_i_t_o_r option:
+       The following environment variables may be consulted
+       depending on the value of the _e_d_i_t_o_r and _e_n_v___e_d_i_t_o_r _s_u_d_o_-
+       _e_r_s variables:
 
        VISUAL          Invoked by visudo as the editor to use
 
@@ -121,13 +125,9 @@ DDIIAAGGNNOOSSTTIICCSS
            will not complain).  In --ss (strict) mode these are
            errors, not warnings.
 
-       Warning: unused {User,Runas,Host,Cmnd}_Alias
-           The specified {User,Runas,Host,Cmnd}_Alias was defined
-           but never used.  You may wish to comment out or remove
 
 
-
-1.7                      August 15, 2007                        2
+1.7                      October 20, 2007                       2
 
 
 
@@ -136,6 +136,9 @@ DDIIAAGGNNOOSSTTIICCSS
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
+       Warning: unused {User,Runas,Host,Cmnd}_Alias
+           The specified {User,Runas,Host,Cmnd}_Alias was defined
+           but never used.  You may wish to comment out or remove
            the unused alias.  In --ss (strict) mode this is an
            error, not a warning.
 
@@ -190,9 +193,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-1.7                      August 15, 2007                        3
+1.7                      October 20, 2007                       3
 
 

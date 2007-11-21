@@ -104,6 +104,7 @@ yyerror(s)
     struct cmndspec *cmndspec;
     struct defaults *defaults;
     struct member *member;
+    struct runascontainer *runas;
     struct privilege *privilege;
     struct sudo_command command;
     struct cmndtag tag;
@@ -150,13 +151,14 @@ yyerror(s)
 %type <member>	  host
 %type <member>	  hostlist
 %type <member>	  ophost
-%type <member>	  oprunasuser
 %type <member>	  opuser
-%type <member>	  runaslist
-%type <member>	  runasspec
-%type <member>	  runasuser
 %type <member>	  user
 %type <member>	  userlist
+%type <member>	  opgroup
+%type <member>	  group
+%type <member>	  grouplist
+%type <runas>	  runasspec
+%type <runas>	  runaslist
 %type <privilege> privilege
 %type <privilege> privileges
 %type <tag>	  cmndtag
@@ -198,7 +200,7 @@ entry		:	COMMENT {
 		|	DEFAULTS_USER userlist defaults_list {
 			    add_defaults(DEFAULTS_USER, $2, $3);
 			}
-		|	DEFAULTS_RUNAS runaslist defaults_list {
+		|	DEFAULTS_RUNAS userlist defaults_list {
 			    add_defaults(DEFAULTS_RUNAS, $2, $3);
 			}
 		|	DEFAULTS_HOST hostlist defaults_list {
@@ -288,16 +290,27 @@ cmndspeclist	:	cmndspec
 			    if ($3->tags.setenv == UNSPEC &&
 				$3->prev->tags.setenv != IMPLIED)
 				$3->tags.setenv = $3->prev->tags.setenv;
-			    if (tq_empty(&$3->runaslist) &&
-				!tq_empty(&$3->prev->runaslist))
-				$3->runaslist = $3->prev->runaslist;
+			    if ((tq_empty(&$3->runasuserlist) &&
+				 tq_empty(&$3->runasgrouplist)) &&
+				(!tq_empty(&$3->prev->runasuserlist) ||
+				 !tq_empty(&$3->prev->runasgrouplist))) {
+				$3->runasuserlist = $3->prev->runasuserlist;
+				$3->runasgrouplist = $3->prev->runasgrouplist;
+			    }
 			    $$ = $1;
 			}
 		;
 
 cmndspec	:	runasspec cmndtag opcmnd {
 			    struct cmndspec *cs = emalloc(sizeof(*cs));
-			    list2tq(&cs->runaslist, $1);
+			    if ($1 != NULL) {
+				list2tq(&cs->runasuserlist, $1->runasusers);
+				list2tq(&cs->runasgrouplist, $1->runasgroups);
+				efree($1);
+			    } else {
+				tq_init(&cs->runasuserlist);
+				tq_init(&cs->runasgrouplist);
+			    }
 			    cs->tags = $2;
 			    cs->cmnd = $3;
 			    cs->prev = cs;
@@ -328,37 +341,20 @@ runasspec	:	/* empty */ {
 			}
 		;
 
-runaslist	:	oprunasuser
-		|	runaslist ',' oprunasuser {
-			    list_append($1, $3);
-			    $$ = $1;
+runaslist	:	userlist {
+			    $$ = emalloc(sizeof(struct runascontainer));
+			    $$->runasusers = $1;
+			    $$->runasgroups = NULL;
 			}
-		;
-
-oprunasuser	:	runasuser {
-			    $$ = $1;
-			    $$->negated = FALSE;
+		|	userlist ':' grouplist {
+			    $$ = emalloc(sizeof(struct runascontainer));
+			    $$->runasusers = $1;
+			    $$->runasgroups = $3;
 			}
-		|	'!' runasuser {
-			    $$ = $2;
-			    $$->negated = TRUE;
-			}
-		;
-
-runasuser	:	ALIAS {
-			    $$ = new_member($1, ALIAS);
-			}
-		|	ALL {
-			    $$ = new_member(NULL, ALL);
-			}
-		|	NETGROUP {
-			    $$ = new_member($1, NETGROUP);
-			}
-		|	USERGROUP {
-			    $$ = new_member($1, USERGROUP);
-			}
-		|	WORD {
-			    $$ = new_member($1, WORD);
+		|	':' grouplist {
+			    $$ = emalloc(sizeof(struct runascontainer));
+			    $$->runasusers = NULL;
+			    $$->runasgroups = $2;
 			}
 		;
 
@@ -443,7 +439,7 @@ runasaliases	:	runasalias
 		|	runasaliases ':' runasalias
 		;
 
-runasalias	:	ALIAS '=' runaslist {
+runasalias	:	ALIAS '=' userlist {
 			    char *s;
 			    if ((s = alias_add($1, RUNASALIAS, $3)) != NULL) {
 				yyerror(s);
@@ -493,6 +489,34 @@ user		:	ALIAS {
 			}
 		|	USERGROUP {
 			    $$ = new_member($1, USERGROUP);
+			}
+		|	WORD {
+			    $$ = new_member($1, WORD);
+			}
+		;
+
+grouplist	:	opgroup
+		|	grouplist ',' opgroup {
+			    list_append($1, $3);
+			    $$ = $1;
+			}
+		;
+
+opgroup		:	group {
+			    $$ = $1;
+			    $$->negated = FALSE;
+			}
+		|	'!' group {
+			    $$ = $2;
+			    $$->negated = TRUE;
+			}
+		;
+
+group		:	ALIAS {
+			    $$ = new_member($1, ALIAS);
+			}
+		|	ALL {
+			    $$ = new_member(NULL, ALL);
 			}
 		|	WORD {
 			    $$ = new_member($1, WORD);
@@ -588,7 +612,7 @@ init_parser(path, quiet)
     int quiet;
 {
     struct defaults *d;
-    struct member *m, *freed;
+    struct member *m, *binding;
     struct userspec *us;
     struct privilege *priv;
     struct cmndspec *cs;
@@ -599,15 +623,23 @@ init_parser(path, quiet)
 	    efree(m);
 	}
 	while ((priv = tq_pop(&us->privileges)) != NULL) {
+	    struct member *runasuser = NULL, *runasgroup = NULL;
+
 	    while ((m = tq_pop(&priv->hostlist)) != NULL) {
 		efree(m->name);
 		efree(m);
 	    }
-	    freed = NULL;
 	    while ((cs = tq_pop(&priv->cmndlist)) != NULL) {
-		if (tq_last(&cs->runaslist) != freed) {
-		    freed = tq_last(&cs->runaslist);
-		    while ((m = tq_pop(&cs->runaslist)) != NULL) {
+		if (tq_last(&cs->runasuserlist) != runasuser) {
+		    runasuser = tq_last(&cs->runasuserlist);
+		    while ((m = tq_pop(&cs->runasuserlist)) != NULL) {
+			efree(m->name);
+			efree(m);
+		    }
+		}
+		if (tq_last(&cs->runasgrouplist) != runasgroup) {
+		    runasgroup = tq_last(&cs->runasgrouplist);
+		    while ((m = tq_pop(&cs->runasgrouplist)) != NULL) {
 			efree(m->name);
 			efree(m);
 		    }
@@ -621,10 +653,10 @@ init_parser(path, quiet)
     }
     tq_init(&userspecs);
 
-    freed = NULL;
+    binding = NULL;
     while ((d = tq_pop(&defaults)) != NULL) {
-	if (tq_last(&d->binding) != freed) {
-	    freed = tq_last(&d->binding);
+	if (tq_last(&d->binding) != binding) {
+	    binding = tq_last(&d->binding);
 	    while ((m = tq_pop(&d->binding)) != NULL) {
 		efree(m->name);
 		efree(m);

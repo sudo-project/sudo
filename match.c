@@ -93,6 +93,8 @@
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
+static struct member_list empty;
+
 /*
  * Returns TRUE if string 's' contains meta characters.
  */
@@ -154,58 +156,92 @@ userlist_matches(pw, list)
 
 /*
  * Check for user described by pw in a list of members.
- * If list is NULL compare against def_runas_default.
+ * If both lists are empty compare against def_runas_default.
  * Returns ALLOW, DENY or UNSPEC.
  */
 static int
-_runaslist_matches(list)
-    struct member_list *list;
+_runaslist_matches(user_list, group_list)
+    struct member_list *user_list;
+    struct member_list *group_list;
 {
     struct member *m;
     struct alias *a;
     int rval, matched = UNSPEC;
 
-    if (tq_empty(list))
+    /* Deny if user specified a group but there is no group in sudoers */
+    if (runas_gr != NULL && tq_empty(group_list))
+	return(DENY);
+
+    if (tq_empty(user_list) && tq_empty(group_list))
 	return(userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw));
 
-    tq_foreach_rev(list, m) {
-	switch (m->type) {
-	    case ALL:
-		matched = !m->negated;
-		break;
-	    case NETGROUP:
-		if (netgr_matches(m->name, NULL, NULL, runas_pw->pw_name))
+    if (runas_pw != NULL) {
+	tq_foreach_rev(user_list, m) {
+	    switch (m->type) {
+		case ALL:
 		    matched = !m->negated;
-		break;
-	    case USERGROUP:
-		if (usergr_matches(m->name, runas_pw->pw_name, runas_pw))
-		    matched = !m->negated;
-		break;
-	    case ALIAS:
-		if ((a = find_alias(m->name, RUNASALIAS)) != NULL) {
-		    rval = _runaslist_matches(&a->members);
-		    if (rval != UNSPEC)
-			matched = m->negated ? !rval : rval;
 		    break;
-		}
-		/* FALLTHROUGH */
-	    case WORD:
-		if (userpw_matches(m->name, runas_pw->pw_name, runas_pw))
-		    matched = !m->negated;
+		case NETGROUP:
+		    if (netgr_matches(m->name, NULL, NULL, runas_pw->pw_name))
+			matched = !m->negated;
+		    break;
+		case USERGROUP:
+		    if (usergr_matches(m->name, runas_pw->pw_name, runas_pw))
+			matched = !m->negated;
+		    break;
+		case ALIAS:
+		    if ((a = find_alias(m->name, RUNASALIAS)) != NULL) {
+			rval = _runaslist_matches(&a->members, &empty);
+			if (rval != UNSPEC)
+			    matched = m->negated ? !rval : rval;
+			break;
+		    }
+		    /* FALLTHROUGH */
+		case WORD:
+		    if (userpw_matches(m->name, runas_pw->pw_name, runas_pw))
+			matched = !m->negated;
+		    break;
+	    }
+	    if (matched != UNSPEC)
 		break;
 	}
-	if (matched != UNSPEC)
-	    break;
     }
+
+    if (runas_gr != NULL) {
+	tq_foreach_rev(group_list, m) {
+	    switch (m->type) {
+		case ALL:
+		    matched = !m->negated;
+		    break;
+		case ALIAS:
+		    if ((a = find_alias(m->name, RUNASALIAS)) != NULL) {
+			rval = _runaslist_matches(&a->members, &empty);
+			if (rval != UNSPEC)
+			    matched = m->negated ? !rval : rval;
+			break;
+		    }
+		    /* FALLTHROUGH */
+		case WORD:
+		    if (group_matches(m->name, runas_gr))
+			matched = !m->negated;
+		    break;
+	    }
+	    if (matched != UNSPEC)
+		break;
+	}
+    }
+
     return(matched);
 }
 
 int
-runaslist_matches(list)
-    struct member_list *list;
+runaslist_matches(user_list, group_list)
+    struct member_list *user_list;
+    struct member_list *group_list;
 {
     alias_seqno++;
-    return(_runaslist_matches(list));
+    return(_runaslist_matches(user_list ? user_list : &empty,
+	group_list ? group_list : &empty));
 }
 
 /*
@@ -660,9 +696,26 @@ userpw_matches(sudoers_user, user, pw)
     if (pw != NULL && *sudoers_user == '#') {
 	uid_t uid = (uid_t) atoi(sudoers_user + 1);
 	if (uid == pw->pw_uid)
-	    return(1);
+	    return(TRUE);
     }
     return(strcmp(sudoers_user, user) == 0);
+}
+
+/*
+ *  Returns TRUE if the group/gid from sudoers matches the specified group/gid,
+ *  else returns FALSE.
+ */
+int
+group_matches(sudoers_group, gr)
+    char *sudoers_group;
+    struct group *gr;
+{
+    if (*sudoers_group == '#') {
+	gid_t gid = (gid_t) atoi(sudoers_group + 1);
+	if (gid == gr->gr_gid)
+	    return(TRUE);
+    }
+    return(strcmp(gr->gr_name, sudoers_group) == 0);
 }
 
 /*

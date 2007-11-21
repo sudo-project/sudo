@@ -16,7 +16,7 @@ static char yyrcsid[]
 #define yyerrok (yyerrflag=0)
 #define YYRECOVERING() (yyerrflag!=0)
 #define YYPREFIX "yy"
-#line 2 "./gram.y"
+#line 2 "gram.y"
 /*
  * Copyright (c) 1996, 1998-2005, 2007
  *	Todd C. Miller <Todd.Miller@courtesan.com>
@@ -116,13 +116,14 @@ yyerror(s)
     }
     parse_error = TRUE;
 }
-#line 103 "./gram.y"
+#line 103 "gram.y"
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
     struct cmndspec *cmndspec;
     struct defaults *defaults;
     struct member *member;
+    struct runascontainer *runas;
     struct privilege *privilege;
     struct sudo_command command;
     struct cmndtag tag;
@@ -130,7 +131,7 @@ typedef union {
     int tok;
 } YYSTYPE;
 #endif /* YYSTYPE_DEFINED */
-#line 134 "y.tab.c"
+#line 135 "y.tab.c"
 #define COMMAND 257
 #define ALIAS 258
 #define DEFVAR 259
@@ -163,15 +164,15 @@ const short yylhs[] =
 short yylhs[] =
 #endif
 	{                                        -1,
-    0,    0,   21,   21,   22,   22,   22,   22,   22,   22,
-   22,   22,   22,   22,   22,   22,    4,    4,    3,    3,
-    3,    3,    3,   19,   19,   18,   10,   10,    8,    8,
-    8,    8,    8,    2,    2,    1,    6,    6,   14,   14,
-   13,   13,   11,   11,   15,   15,   15,   15,   15,   20,
-   20,   20,   20,   20,   20,   20,    5,    5,    5,   24,
-   24,   27,    9,    9,   25,   25,   28,    7,    7,   26,
-   26,   29,   23,   23,   30,   17,   17,   12,   12,   16,
-   16,   16,   16,   16,
+    0,    0,   22,   22,   23,   23,   23,   23,   23,   23,
+   23,   23,   23,   23,   23,   23,    4,    4,    3,    3,
+    3,    3,    3,   20,   20,   19,   10,   10,    8,    8,
+    8,    8,    8,    2,    2,    1,    6,    6,   17,   17,
+   18,   18,   18,   21,   21,   21,   21,   21,   21,   21,
+    5,    5,    5,   25,   25,   28,    9,    9,   26,   26,
+   29,    7,    7,   27,   27,   30,   24,   24,   31,   13,
+   13,   11,   11,   12,   12,   12,   12,   12,   16,   16,
+   14,   14,   15,   15,   15,
 };
 #if defined(__cplusplus) || defined(__STDC__)
 const short yylen[] =
@@ -183,11 +184,11 @@ short yylen[] =
     2,    2,    3,    3,    3,    3,    1,    3,    1,    2,
     3,    3,    3,    1,    3,    3,    1,    2,    1,    1,
     1,    1,    1,    1,    3,    3,    1,    2,    0,    3,
-    1,    3,    1,    2,    1,    1,    1,    1,    1,    0,
-    2,    2,    2,    2,    2,    2,    1,    1,    1,    1,
-    3,    3,    1,    3,    1,    3,    3,    1,    3,    1,
-    3,    3,    1,    3,    3,    1,    3,    1,    2,    1,
-    1,    1,    1,    1,
+    1,    3,    2,    0,    2,    2,    2,    2,    2,    2,
+    1,    1,    1,    1,    3,    3,    1,    3,    1,    3,
+    3,    1,    3,    1,    3,    3,    1,    3,    3,    1,
+    3,    1,    2,    1,    1,    1,    1,    1,    1,    3,
+    1,    2,    1,    1,    1,
 };
 #if defined(__cplusplus) || defined(__STDC__)
 const short yydefred[] =
@@ -195,19 +196,20 @@ const short yydefred[] =
 short yydefred[] =
 #endif
 	{                                      0,
-    0,   80,   82,   83,   84,    0,    0,    0,    0,    0,
-   81,    5,    0,    0,    0,    0,    0,    0,   76,   78,
+    0,   74,   76,   77,   78,    0,    0,    0,    0,    0,
+   75,    5,    0,    0,    0,    0,    0,    0,   70,   72,
     0,    0,    3,    6,    0,    0,   17,    0,   29,   32,
-   31,   33,   30,    0,   27,    0,   63,    0,   45,   47,
-   48,   49,   46,    0,   41,    0,   43,   59,   58,   57,
-    0,   37,   68,    0,    0,    0,   60,    0,    0,   65,
-    0,    0,   73,    0,    0,   70,   79,    0,    0,   24,
-    0,    4,    0,    0,    0,   20,    0,   28,    0,    0,
-    0,   44,    0,    0,   38,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,   77,    0,    0,   21,   22,
-   23,   18,   64,   42,   69,    0,   61,    0,   66,    0,
-   74,    0,   71,    0,   34,    0,   50,   25,    0,    0,
-    0,   40,   35,   51,   52,   53,   54,   55,   56,   36,
+   31,   33,   30,    0,   27,    0,   57,    0,    0,   53,
+   52,   51,    0,   37,   62,    0,    0,    0,   54,    0,
+    0,   59,    0,    0,   67,    0,    0,   64,   73,    0,
+    0,   24,    0,    4,    0,    0,    0,   20,    0,   28,
+    0,    0,    0,    0,   38,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,   71,    0,    0,   21,   22,
+   23,   18,   58,   63,    0,   55,    0,   60,    0,   68,
+    0,   65,    0,   34,    0,   44,   25,    0,    0,    0,
+    0,    0,   83,   85,   84,    0,   79,   81,    0,    0,
+   40,   35,   45,   46,   47,   48,   49,   50,   36,   82,
+    0,    0,   80,
 };
 #if defined(__cplusplus) || defined(__STDC__)
 const short yydgoto[] =
@@ -215,9 +217,10 @@ const short yydgoto[] =
 short yydgoto[] =
 #endif
 	{                                      18,
-  115,  116,   27,   28,   52,   53,   54,   35,   69,   37,
-   45,   19,   46,  117,   47,   20,   21,   70,   71,  121,
-   22,   23,   62,   56,   59,   65,   57,   60,   66,   63,
+  104,  105,   27,   28,   44,   45,   46,   35,   61,   37,
+   19,   20,   21,  117,  118,  119,  106,  110,   62,   63,
+  112,   22,   23,   54,   48,   51,   57,   49,   52,   58,
+   55,
 };
 #if defined(__cplusplus) || defined(__STDC__)
 const short yysindex[] =
@@ -225,94 +228,97 @@ const short yysindex[] =
 short yysindex[] =
 #endif
 	{                                    -33,
- -269,    0,    0,    0,    0,   -6,  217,  454,  461,  -17,
-    0,    0, -250, -247, -240, -238, -220,    0,    0,    0,
-  141,  -33,    0,    0,  -26, -231,    0,   -4,    0,    0,
-    0,    0,    0, -212,    0,  -23,    0,  -21,    0,    0,
-    0,    0,    0, -205,    0,  -11,    0,    0,    0,    0,
- -243,    0,    0,   -8,   -1,  -14,    0,    3,    4,    0,
-    5,    7,    0,    6,   10,    0,    0,  454,  -31,    0,
-   11,    0, -213, -209, -202,    0,   -6,    0,  217,   -4,
-   -4,    0,  461,   -4,    0,  -17,   -4,  217, -250,  -17,
- -247,  454, -240,  461, -238,    0,   31,  217,    0,    0,
-    0,    0,    0,    0,    0,   28,    0,   29,    0,   30,
-    0,   32,    0,  461,    0,   33,    0,    0,  -35,   31,
-  250,    0,    0,    0,    0,    0,    0,    0,    0,    0,};
+ -269,    0,    0,    0,    0,   -8,  454,  458,  458,  -17,
+    0,    0, -249, -247, -241, -231, -243,    0,    0,    0,
+  141,  -33,    0,    0,  -37, -216,    0,  -16,    0,    0,
+    0,    0,    0, -221,    0,  -23,    0,  -21,  -21,    0,
+    0,    0, -244,    0,    0,  -11,  -14,   -1,    0,   -6,
+    2,    0,    3,    4,    0,    5,    7,    0,    0,  458,
+  -15,    0,    9,    0, -219, -207, -202,    0,   -8,    0,
+  454,  -16,  -16,  -16,    0,  -17,  -16,  454, -249,  -17,
+ -247,  458, -241,  458, -231,    0,   23,  454,    0,    0,
+    0,    0,    0,    0,   24,    0,   25,    0,   27,    0,
+   27,    0,  217,    0,   28,    0,    0,   -3,   -9,   29,
+   23,  250,    0,    0,    0, -222,    0,    0,   30,   -3,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+   -3,   30,    0,};
 #if defined(__cplusplus) || defined(__STDC__)
 const short yyrindex[] =
 #else
 short yyrindex[] =
 #endif
-	{                                     75,
+	{                                     73,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,   79,    0,    0,    1,    0,    0,  156,    0,    0,
+    0,   75,    0,    0,    1,    0,    0,  156,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,  181,    0,    0,  206,    0,
-    0,  237,    0,    0,  274,    0,    0,    0,    0,    0,
-  300,    0,    0,    0,    0,    0,    0,    0,    0,  326,
-  352,    0,    0,  378,    0,    0,  430,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,  181,    0,    0,
+  206,    0,    0,  237,    0,    0,  274,    0,    0,    0,
+    0,    0,  300,    0,    0,    0,    0,    0,    0,    0,
+    0,  326,  352,  378,    0,    0,  430,    0,    0,    0,
     0,    0,    0,    0,    0,    0,  392,    0,    0,    0,
-    0,    0,    0,    0,    0,   26,    0,   52,    0,   78,
-    0,  104,    0,    0,    0,  130,    0,    0,    0,  392,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,};
+    0,    0,    0,    0,   26,    0,   52,    0,   78,    0,
+  104,    0,    0,    0,  130,    0,    0,    0,   39,    0,
+  392,    0,    0,    0,    0,    0,    0,    0,   40,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,   41,    0,};
 #if defined(__cplusplus) || defined(__STDC__)
 const short yygindex[] =
 #else
 short yygindex[] =
 #endif
 	{                                      0,
-  -40,    0,   12,   -7,   37,  -84,   -9,   48,   -2,   13,
-    8,   15,  -90,    0,   46,   76,   -5,   -3,    0,    0,
-    0,   72,    0,    0,    0,    0,    9,   14,    2,   16,
+  -28,    0,   17,   12,   44,  -74,    8,   55,   -2,   19,
+   31,   76,   -5,  -39,  -22,  -25,    0,    0,   11,    0,
+    0,    0,   74,    0,    0,    0,    0,   18,   20,   15,
+   22,
 };
-#define YYTABLESIZE 736
+#define YYTABLESIZE 733
 #if defined(__cplusplus) || defined(__STDC__)
 const short yytable[] =
 #else
 short yytable[] =
 #endif
 	{                                      17,
-   19,  105,   38,  112,   36,  122,   24,   55,   83,   26,
-   58,   26,   79,   48,   49,   51,   74,   61,   75,   64,
-   79,   26,   68,  119,   26,   62,   26,   76,   80,   97,
-   81,   50,   83,   19,   73,   86,  130,    2,   84,   77,
-    3,    4,    5,   89,   19,   29,   87,   30,   31,   99,
-   32,   67,   39,  100,   11,   40,   41,   42,   62,   88,
-  101,   91,   33,   90,   93,   92,   94,   95,   98,   43,
-  114,   79,   86,   68,    1,   83,  120,   75,    2,  123,
-  108,   78,   96,   62,   67,  106,  110,   85,  102,   82,
-  104,  103,   67,   72,  118,    0,  113,  107,    0,    0,
-    0,    0,    0,   72,  109,    0,    0,    0,  111,   67,
-   75,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+   19,   94,   38,   39,   36,   66,   24,   67,   47,   26,
+   50,   26,   40,   41,    2,   43,   53,    3,    4,    5,
+   71,   26,   60,   65,   26,   56,   56,   69,   71,  116,
+   42,   11,   76,   19,   60,  113,   29,  129,   30,   31,
+  114,   32,   68,   89,   19,   87,   78,   72,  120,   73,
+   74,   61,  115,   33,   80,   90,   79,   77,   56,   81,
+   91,   83,  103,   82,   85,   84,   88,   71,   76,  121,
+   60,  111,    1,  131,    2,   95,   99,   69,  101,   41,
+   43,   42,  122,   56,   61,   92,   75,   97,   70,   93,
+   86,  133,   59,  130,  132,   64,   96,  109,  107,  102,
+   98,    0,    0,   66,  100,    0,    0,    0,    0,   61,
+   69,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,   26,
-    0,    0,    0,    0,    0,   75,   72,    0,    0,    0,
+    0,    0,    0,    0,    0,   69,   66,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,   12,    0,    0,    0,    0,
-    0,   72,   26,    0,    0,    0,    0,    0,    0,    0,
+    0,   66,   26,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,   34,    0,    0,    0,    0,    0,    0,
-    9,    0,    0,    0,   68,    0,    0,   26,   12,    0,
+    9,    0,    0,    0,   60,    0,    0,   26,   12,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,   10,    0,    0,    0,    0,
     0,    0,    0,    9,    0,    0,    0,    0,    0,    0,
     0,    0,    1,    0,    2,    0,    0,    3,    4,    5,
-    6,    7,    8,    9,   10,   25,    8,   25,   10,   48,
-   49,   11,   12,   13,   14,   15,   16,   25,    0,   34,
-   25,    0,   25,    0,    0,    0,   19,   50,   19,    0,
+    6,    7,    8,    9,   10,   25,    8,   25,   10,   40,
+   41,   11,   12,   13,   14,   15,   16,   25,    0,   17,
+   25,    0,    0,    0,  113,    0,   19,   42,   19,  114,
     0,   19,   19,   19,   19,   19,   19,   19,   19,    8,
-    0,    0,    0,   11,    0,   19,   19,   19,   19,   19,
-   19,   62,   51,   62,    0,    0,   62,   62,   62,   62,
-   62,   62,   62,   62,    0,    0,    0,    0,    0,    7,
-   62,   62,   62,   62,   62,   62,   11,   67,    0,   67,
-    0,    0,   67,   67,   67,   67,   67,   67,   67,   67,
-    0,    0,    0,    0,    0,   15,   67,   67,   67,   67,
-   67,   67,    7,   75,    0,   75,    0,    0,   75,   75,
-   75,   75,   75,   75,   75,   75,    0,    0,    0,    0,
-    0,   13,   75,   75,   75,   75,   75,   75,   15,   72,
-    0,   72,    0,    0,   72,   72,   72,   72,   72,   72,
-   72,   72,    0,    0,    0,    0,    0,   14,   72,   72,
-   72,   72,   72,   72,   13,   26,    0,   26,    0,    0,
+    0,  115,    0,   11,  108,   19,   19,   19,   19,   19,
+   19,   56,   43,   56,    0,    0,   56,   56,   56,   56,
+   56,   56,   56,   56,    0,    0,    0,    0,    0,    7,
+   56,   56,   56,   56,   56,   56,   11,   61,    0,   61,
+    0,    0,   61,   61,   61,   61,   61,   61,   61,   61,
+    0,    0,    0,    0,    0,   15,   61,   61,   61,   61,
+   61,   61,    7,   69,    0,   69,    0,    0,   69,   69,
+   69,   69,   69,   69,   69,   69,    0,    0,    0,    0,
+    0,   13,   69,   69,   69,   69,   69,   69,   15,   66,
+    0,   66,    0,    0,   66,   66,   66,   66,   66,   66,
+   66,   66,    0,    0,    0,    0,    0,   14,   66,   66,
+   66,   66,   66,   66,   13,   26,    0,   26,    0,    0,
    26,   26,   26,   26,   26,   26,   26,   26,   29,    0,
    30,   31,    0,   32,   26,   26,   26,   26,   26,   26,
    14,   12,    0,   12,    0,   33,   12,   12,   12,   12,
@@ -321,12 +327,12 @@ short yytable[] =
     0,    9,    9,    9,    9,    9,    9,    9,    9,    0,
     0,    0,    0,    0,    0,    9,    9,    9,    9,    9,
     9,   10,   16,   10,    0,    0,   10,   10,   10,   10,
-   10,   10,   10,   10,   29,    0,   30,   31,    0,   32,
-   10,   10,   10,   10,   10,   10,   17,    0,    0,    0,
-    0,   33,    8,   44,    8,    0,    0,    8,    8,    8,
-    8,    8,    8,    8,    8,    0,   48,   49,    0,    0,
-    0,    8,    8,    8,    8,    8,    8,    0,  124,  125,
-  126,  127,  128,  129,   50,    0,    0,    0,    0,   11,
+   10,   10,   10,   10,    2,    0,    0,    3,    4,    5,
+   10,   10,   10,   10,   10,   10,   34,    0,    0,    0,
+   17,   11,    8,    0,    8,    0,    0,    8,    8,    8,
+    8,    8,    8,    8,    8,    0,   40,   41,    0,    0,
+    0,    8,    8,    8,    8,    8,    8,    0,  123,  124,
+  125,  126,  127,  128,   42,    0,    0,    0,    0,   11,
     0,   11,    0,    0,   11,   11,   11,   11,   11,   11,
    11,   11,    0,    0,    0,    0,    0,    0,   11,   11,
    11,   11,   11,   11,    0,    7,    0,    7,    0,    0,
@@ -345,9 +351,9 @@ short yytable[] =
     0,    0,    0,    0,    0,   16,    0,   16,    0,    0,
    16,   16,   16,   16,   16,   16,   16,   16,    0,    0,
     0,    0,    0,    0,   16,   16,   16,   16,   16,   16,
-    0,    2,    0,    0,    3,    4,    5,    0,   39,    0,
-    0,   40,   41,   42,    0,    0,    0,    0,   11,    0,
-    0,    0,    0,    0,    0,   43,
+    0,   29,    0,   30,   31,    2,   32,    0,    3,    4,
+    5,    0,    0,    0,    0,    0,    0,    0,   33,    0,
+    0,    0,   11,
 };
 #if defined(__cplusplus) || defined(__STDC__)
 const short yycheck[] =
@@ -355,17 +361,17 @@ const short yycheck[] =
 short yycheck[] =
 #endif
 	{                                      33,
-    0,   86,    8,   94,    7,   41,  276,  258,   44,   33,
-  258,   33,   44,  257,  258,   33,   43,  258,   45,  258,
-   44,   33,   44,  114,   33,    0,   33,  259,   36,   61,
-   38,  275,   44,   33,   61,   44,  121,  258,   46,   44,
-  261,  262,  263,   58,   44,  258,   54,  260,  261,  263,
-  263,    0,  258,  263,  275,  261,  262,  263,   33,   61,
-  263,   58,  275,   61,   58,   61,   61,   58,   58,  275,
-   40,   44,   44,   44,    0,   44,   44,    0,    0,  120,
-   90,   34,   68,   58,   33,   88,   92,   51,   77,   44,
-   83,   79,   17,   22,   98,   -1,   95,   89,   -1,   -1,
-   -1,   -1,   -1,    0,   91,   -1,   -1,   -1,   93,   58,
+    0,   76,    8,    9,    7,   43,  276,   45,  258,   33,
+  258,   33,  257,  258,  258,   33,  258,  261,  262,  263,
+   44,   33,   44,   61,   33,    0,  258,   44,   44,   33,
+  275,  275,   44,   33,   44,  258,  258,  112,  260,  261,
+  263,  263,  259,  263,   44,   61,   61,   36,   58,   38,
+   39,    0,  275,  275,   61,  263,   58,   46,   33,   58,
+  263,   58,   40,   61,   58,   61,   58,   44,   44,   41,
+   44,   44,    0,   44,    0,   78,   82,    0,   84,   41,
+   41,   41,  111,   58,   33,   69,   43,   80,   34,   71,
+   60,  131,   17,  116,  120,   22,   79,  103,   88,   85,
+   81,   -1,   -1,    0,   83,   -1,   -1,   -1,   -1,   58,
    33,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,    0,
    -1,   -1,   -1,   -1,   -1,   58,   33,   -1,   -1,   -1,
@@ -380,9 +386,9 @@ short yycheck[] =
    -1,   -1,  256,   -1,  258,   -1,   -1,  261,  262,  263,
   264,  265,  266,  267,  268,  259,    0,  259,   33,  257,
   258,  275,  276,  277,  278,  279,  280,  259,   -1,   33,
-  259,   -1,  259,   -1,   -1,   -1,  256,  275,  258,   -1,
+  259,   -1,   -1,   -1,  258,   -1,  256,  275,  258,  263,
    -1,  261,  262,  263,  264,  265,  266,  267,  268,   33,
-   -1,   -1,   -1,    0,   -1,  275,  276,  277,  278,  279,
+   -1,  275,   -1,    0,   58,  275,  276,  277,  278,  279,
   280,  256,   33,  258,   -1,   -1,  261,  262,  263,  264,
   265,  266,  267,  268,   -1,   -1,   -1,   -1,   -1,    0,
   275,  276,  277,  278,  279,  280,   33,  256,   -1,  258,
@@ -402,9 +408,9 @@ short yycheck[] =
    -1,  261,  262,  263,  264,  265,  266,  267,  268,   -1,
    -1,   -1,   -1,   -1,   -1,  275,  276,  277,  278,  279,
   280,  256,   33,  258,   -1,   -1,  261,  262,  263,  264,
-  265,  266,  267,  268,  258,   -1,  260,  261,   -1,  263,
+  265,  266,  267,  268,  258,   -1,   -1,  261,  262,  263,
   275,  276,  277,  278,  279,  280,   33,   -1,   -1,   -1,
-   -1,  275,  256,   33,  258,   -1,   -1,  261,  262,  263,
+   33,  275,  256,   -1,  258,   -1,   -1,  261,  262,  263,
   264,  265,  266,  267,  268,   -1,  257,  258,   -1,   -1,
    -1,  275,  276,  277,  278,  279,  280,   -1,  269,  270,
   271,  272,  273,  274,  275,   -1,   -1,   -1,   -1,  256,
@@ -426,9 +432,9 @@ short yycheck[] =
    -1,   -1,   -1,   -1,   -1,  256,   -1,  258,   -1,   -1,
   261,  262,  263,  264,  265,  266,  267,  268,   -1,   -1,
    -1,   -1,   -1,   -1,  275,  276,  277,  278,  279,  280,
-   -1,  258,   -1,   -1,  261,  262,  263,   -1,  258,   -1,
-   -1,  261,  262,  263,   -1,   -1,   -1,   -1,  275,   -1,
-   -1,   -1,   -1,   -1,   -1,  275,
+   -1,  258,   -1,  260,  261,  258,  263,   -1,  261,  262,
+  263,   -1,   -1,   -1,   -1,   -1,   -1,   -1,  275,   -1,
+   -1,   -1,  275,
 };
 #define YYFINAL 18
 #ifndef YYDEBUG
@@ -473,7 +479,7 @@ char *yyrule[] =
 "entry : RUNASALIAS runasaliases",
 "entry : DEFAULTS defaults_list",
 "entry : DEFAULTS_USER userlist defaults_list",
-"entry : DEFAULTS_RUNAS runaslist defaults_list",
+"entry : DEFAULTS_RUNAS userlist defaults_list",
 "entry : DEFAULTS_HOST hostlist defaults_list",
 "entry : DEFAULTS_CMND cmndlist defaults_list",
 "defaults_list : defaults_entry",
@@ -500,15 +506,9 @@ char *yyrule[] =
 "opcmnd : '!' cmnd",
 "runasspec :",
 "runasspec : '(' runaslist ')'",
-"runaslist : oprunasuser",
-"runaslist : runaslist ',' oprunasuser",
-"oprunasuser : runasuser",
-"oprunasuser : '!' runasuser",
-"runasuser : ALIAS",
-"runasuser : ALL",
-"runasuser : NETGROUP",
-"runasuser : USERGROUP",
-"runasuser : WORD",
+"runaslist : userlist",
+"runaslist : userlist ':' grouplist",
+"runaslist : ':' grouplist",
 "cmndtag :",
 "cmndtag : cmndtag NOPASSWD",
 "cmndtag : cmndtag PASSWD",
@@ -531,7 +531,7 @@ char *yyrule[] =
 "cmndlist : cmndlist ',' opcmnd",
 "runasaliases : runasalias",
 "runasaliases : runasaliases ':' runasalias",
-"runasalias : ALIAS '=' runaslist",
+"runasalias : ALIAS '=' userlist",
 "useraliases : useralias",
 "useraliases : useraliases ':' useralias",
 "useralias : ALIAS '=' userlist",
@@ -544,6 +544,13 @@ char *yyrule[] =
 "user : NETGROUP",
 "user : USERGROUP",
 "user : WORD",
+"grouplist : opgroup",
+"grouplist : grouplist ',' opgroup",
+"opgroup : group",
+"opgroup : '!' group",
+"group : ALIAS",
+"group : ALL",
+"group : WORD",
 };
 #endif
 #ifdef YYSTACKSIZE
@@ -571,7 +578,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 503 "./gram.y"
+#line 527 "gram.y"
 static struct defaults *
 new_default(var, val, op)
     char *var;
@@ -660,7 +667,7 @@ init_parser(path, quiet)
     int quiet;
 {
     struct defaults *d;
-    struct member *m, *freed;
+    struct member *m, *binding;
     struct userspec *us;
     struct privilege *priv;
     struct cmndspec *cs;
@@ -671,15 +678,23 @@ init_parser(path, quiet)
 	    efree(m);
 	}
 	while ((priv = tq_pop(&us->privileges)) != NULL) {
+	    struct member *runasuser = NULL, *runasgroup = NULL;
+
 	    while ((m = tq_pop(&priv->hostlist)) != NULL) {
 		efree(m->name);
 		efree(m);
 	    }
-	    freed = NULL;
 	    while ((cs = tq_pop(&priv->cmndlist)) != NULL) {
-		if (tq_last(&cs->runaslist) != freed) {
-		    freed = tq_last(&cs->runaslist);
-		    while ((m = tq_pop(&cs->runaslist)) != NULL) {
+		if (tq_last(&cs->runasuserlist) != runasuser) {
+		    runasuser = tq_last(&cs->runasuserlist);
+		    while ((m = tq_pop(&cs->runasuserlist)) != NULL) {
+			efree(m->name);
+			efree(m);
+		    }
+		}
+		if (tq_last(&cs->runasgrouplist) != runasgroup) {
+		    runasgroup = tq_last(&cs->runasgrouplist);
+		    while ((m = tq_pop(&cs->runasgrouplist)) != NULL) {
 			efree(m->name);
 			efree(m);
 		    }
@@ -693,10 +708,10 @@ init_parser(path, quiet)
     }
     tq_init(&userspecs);
 
-    freed = NULL;
+    binding = NULL;
     while ((d = tq_pop(&defaults)) != NULL) {
-	if (tq_last(&d->binding) != freed) {
-	    freed = tq_last(&d->binding);
+	if (tq_last(&d->binding) != binding) {
+	    binding = tq_last(&d->binding);
 	    while ((m = tq_pop(&d->binding)) != NULL) {
 		efree(m->name);
 		efree(m);
@@ -718,7 +733,7 @@ init_parser(path, quiet)
     sudolineno = 1;
     verbose = !quiet;
 }
-#line 670 "y.tab.c"
+#line 685 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -921,127 +936,127 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 166 "./gram.y"
+#line 168 "gram.y"
 { ; }
 break;
 case 5:
-#line 174 "./gram.y"
+#line 176 "gram.y"
 {
 			    ;
 			}
 break;
 case 6:
-#line 177 "./gram.y"
+#line 179 "gram.y"
 {
 			    yyerrok;
 			}
 break;
 case 7:
-#line 180 "./gram.y"
+#line 182 "gram.y"
 {
 			    add_userspec(yyvsp[-1].member, yyvsp[0].privilege);
 			}
 break;
 case 8:
-#line 183 "./gram.y"
+#line 185 "gram.y"
 {
 			    ;
 			}
 break;
 case 9:
-#line 186 "./gram.y"
+#line 188 "gram.y"
 {
 			    ;
 			}
 break;
 case 10:
-#line 189 "./gram.y"
+#line 191 "gram.y"
 {
 			    ;
 			}
 break;
 case 11:
-#line 192 "./gram.y"
+#line 194 "gram.y"
 {
 			    ;
 			}
 break;
 case 12:
-#line 195 "./gram.y"
+#line 197 "gram.y"
 {
 			    add_defaults(DEFAULTS, NULL, yyvsp[0].defaults);
 			}
 break;
 case 13:
-#line 198 "./gram.y"
+#line 200 "gram.y"
 {
 			    add_defaults(DEFAULTS_USER, yyvsp[-1].member, yyvsp[0].defaults);
 			}
 break;
 case 14:
-#line 201 "./gram.y"
+#line 203 "gram.y"
 {
 			    add_defaults(DEFAULTS_RUNAS, yyvsp[-1].member, yyvsp[0].defaults);
 			}
 break;
 case 15:
-#line 204 "./gram.y"
+#line 206 "gram.y"
 {
 			    add_defaults(DEFAULTS_HOST, yyvsp[-1].member, yyvsp[0].defaults);
 			}
 break;
 case 16:
-#line 207 "./gram.y"
+#line 209 "gram.y"
 {
 			    add_defaults(DEFAULTS_CMND, yyvsp[-1].member, yyvsp[0].defaults);
 			}
 break;
 case 18:
-#line 213 "./gram.y"
+#line 215 "gram.y"
 {
 			    list_append(yyvsp[-2].defaults, yyvsp[0].defaults);
 			    yyval.defaults = yyvsp[-2].defaults;
 			}
 break;
 case 19:
-#line 219 "./gram.y"
+#line 221 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[0].string, NULL, TRUE);
 			}
 break;
 case 20:
-#line 222 "./gram.y"
+#line 224 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[0].string, NULL, FALSE);
 			}
 break;
 case 21:
-#line 225 "./gram.y"
+#line 227 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, TRUE);
 			}
 break;
 case 22:
-#line 228 "./gram.y"
+#line 230 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, '+');
 			}
 break;
 case 23:
-#line 231 "./gram.y"
+#line 233 "gram.y"
 {
 			    yyval.defaults = new_default(yyvsp[-2].string, yyvsp[0].string, '-');
 			}
 break;
 case 25:
-#line 237 "./gram.y"
+#line 239 "gram.y"
 {
 			    list_append(yyvsp[-2].privilege, yyvsp[0].privilege);
 			    yyval.privilege = yyvsp[-2].privilege;
 			}
 break;
 case 26:
-#line 243 "./gram.y"
+#line 245 "gram.y"
 {
 			    struct privilege *p = emalloc(sizeof(*p));
 			    list2tq(&p->hostlist, yyvsp[-2].member);
@@ -1052,51 +1067,51 @@ case 26:
 			}
 break;
 case 27:
-#line 253 "./gram.y"
+#line 255 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = FALSE;
 			}
 break;
 case 28:
-#line 257 "./gram.y"
+#line 259 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = TRUE;
 			}
 break;
 case 29:
-#line 263 "./gram.y"
+#line 265 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			}
 break;
 case 30:
-#line 266 "./gram.y"
+#line 268 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			}
 break;
 case 31:
-#line 269 "./gram.y"
+#line 271 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
 			}
 break;
 case 32:
-#line 272 "./gram.y"
+#line 274 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NTWKADDR);
 			}
 break;
 case 33:
-#line 275 "./gram.y"
+#line 277 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
 case 35:
-#line 281 "./gram.y"
+#line 283 "gram.y"
 {
 			    list_append(yyvsp[-2].cmndspec, yyvsp[0].cmndspec);
 			    /* propagate tags and runas list */
@@ -1107,17 +1122,28 @@ case 35:
 			    if (yyvsp[0].cmndspec->tags.setenv == UNSPEC &&
 				yyvsp[0].cmndspec->prev->tags.setenv != IMPLIED)
 				yyvsp[0].cmndspec->tags.setenv = yyvsp[0].cmndspec->prev->tags.setenv;
-			    if (tq_empty(&yyvsp[0].cmndspec->runaslist) &&
-				!tq_empty(&yyvsp[0].cmndspec->prev->runaslist))
-				yyvsp[0].cmndspec->runaslist = yyvsp[0].cmndspec->prev->runaslist;
+			    if ((tq_empty(&yyvsp[0].cmndspec->runasuserlist) &&
+				 tq_empty(&yyvsp[0].cmndspec->runasgrouplist)) &&
+				(!tq_empty(&yyvsp[0].cmndspec->prev->runasuserlist) ||
+				 !tq_empty(&yyvsp[0].cmndspec->prev->runasgrouplist))) {
+				yyvsp[0].cmndspec->runasuserlist = yyvsp[0].cmndspec->prev->runasuserlist;
+				yyvsp[0].cmndspec->runasgrouplist = yyvsp[0].cmndspec->prev->runasgrouplist;
+			    }
 			    yyval.cmndspec = yyvsp[-2].cmndspec;
 			}
 break;
 case 36:
-#line 298 "./gram.y"
+#line 304 "gram.y"
 {
 			    struct cmndspec *cs = emalloc(sizeof(*cs));
-			    list2tq(&cs->runaslist, yyvsp[-2].member);
+			    if (yyvsp[-2].runas != NULL) {
+				list2tq(&cs->runasuserlist, yyvsp[-2].runas->runasusers);
+				list2tq(&cs->runasgrouplist, yyvsp[-2].runas->runasgroups);
+				efree(yyvsp[-2].runas);
+			    } else {
+				tq_init(&cs->runasuserlist);
+				tq_init(&cs->runasgrouplist);
+			    }
 			    cs->tags = yyvsp[-1].tag;
 			    cs->cmnd = yyvsp[0].member;
 			    cs->prev = cs;
@@ -1130,138 +1156,111 @@ case 36:
 			}
 break;
 case 37:
-#line 313 "./gram.y"
+#line 326 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = FALSE;
 			}
 break;
 case 38:
-#line 317 "./gram.y"
+#line 330 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = TRUE;
 			}
 break;
 case 39:
-#line 323 "./gram.y"
+#line 336 "gram.y"
 {
-			    yyval.member = NULL;
+			    yyval.runas = NULL;
 			}
 break;
 case 40:
-#line 326 "./gram.y"
+#line 339 "gram.y"
 {
-			    yyval.member = yyvsp[-1].member;
+			    yyval.runas = yyvsp[-1].runas;
+			}
+break;
+case 41:
+#line 344 "gram.y"
+{
+			    yyval.runas = emalloc(sizeof(struct runascontainer));
+			    yyval.runas->runasusers = yyvsp[0].member;
+			    yyval.runas->runasgroups = NULL;
 			}
 break;
 case 42:
-#line 332 "./gram.y"
+#line 349 "gram.y"
 {
-			    list_append(yyvsp[-2].member, yyvsp[0].member);
-			    yyval.member = yyvsp[-2].member;
+			    yyval.runas = emalloc(sizeof(struct runascontainer));
+			    yyval.runas->runasusers = yyvsp[-2].member;
+			    yyval.runas->runasgroups = yyvsp[0].member;
 			}
 break;
 case 43:
-#line 338 "./gram.y"
+#line 354 "gram.y"
 {
-			    yyval.member = yyvsp[0].member;
-			    yyval.member->negated = FALSE;
+			    yyval.runas = emalloc(sizeof(struct runascontainer));
+			    yyval.runas->runasusers = NULL;
+			    yyval.runas->runasgroups = yyvsp[0].member;
 			}
 break;
 case 44:
-#line 342 "./gram.y"
-{
-			    yyval.member = yyvsp[0].member;
-			    yyval.member->negated = TRUE;
-			}
-break;
-case 45:
-#line 348 "./gram.y"
-{
-			    yyval.member = new_member(yyvsp[0].string, ALIAS);
-			}
-break;
-case 46:
-#line 351 "./gram.y"
-{
-			    yyval.member = new_member(NULL, ALL);
-			}
-break;
-case 47:
-#line 354 "./gram.y"
-{
-			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
-			}
-break;
-case 48:
-#line 357 "./gram.y"
-{
-			    yyval.member = new_member(yyvsp[0].string, USERGROUP);
-			}
-break;
-case 49:
-#line 360 "./gram.y"
-{
-			    yyval.member = new_member(yyvsp[0].string, WORD);
-			}
-break;
-case 50:
-#line 365 "./gram.y"
+#line 361 "gram.y"
 {
 			    yyval.tag.nopasswd = yyval.tag.noexec = yyval.tag.setenv = UNSPEC;
 			}
 break;
-case 51:
-#line 368 "./gram.y"
+case 45:
+#line 364 "gram.y"
 {
 			    yyval.tag.nopasswd = TRUE;
 			}
 break;
-case 52:
-#line 371 "./gram.y"
+case 46:
+#line 367 "gram.y"
 {
 			    yyval.tag.nopasswd = FALSE;
 			}
 break;
-case 53:
-#line 374 "./gram.y"
+case 47:
+#line 370 "gram.y"
 {
 			    yyval.tag.noexec = TRUE;
 			}
 break;
-case 54:
-#line 377 "./gram.y"
+case 48:
+#line 373 "gram.y"
 {
 			    yyval.tag.noexec = FALSE;
 			}
 break;
-case 55:
-#line 380 "./gram.y"
+case 49:
+#line 376 "gram.y"
 {
 			    yyval.tag.setenv = TRUE;
 			}
 break;
-case 56:
-#line 383 "./gram.y"
+case 50:
+#line 379 "gram.y"
 {
 			    yyval.tag.setenv = FALSE;
 			}
 break;
-case 57:
-#line 388 "./gram.y"
+case 51:
+#line 384 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			}
 break;
-case 58:
-#line 391 "./gram.y"
+case 52:
+#line 387 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			}
 break;
-case 59:
-#line 394 "./gram.y"
+case 53:
+#line 390 "gram.y"
 {
 			    struct sudo_command *c = emalloc(sizeof(*c));
 			    c->cmnd = yyvsp[0].command.cmnd;
@@ -1269,8 +1268,8 @@ case 59:
 			    yyval.member = new_member((char *)c, COMMAND);
 			}
 break;
-case 62:
-#line 406 "./gram.y"
+case 56:
+#line 402 "gram.y"
 {
 			    char *s;
 			    if ((s = alias_add(yyvsp[-2].string, HOSTALIAS, yyvsp[0].member)) != NULL) {
@@ -1279,15 +1278,15 @@ case 62:
 			    }
 			}
 break;
-case 64:
-#line 416 "./gram.y"
+case 58:
+#line 412 "gram.y"
 {
 			    list_append(yyvsp[-2].member, yyvsp[0].member);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
-case 67:
-#line 426 "./gram.y"
+case 61:
+#line 422 "gram.y"
 {
 			    char *s;
 			    if ((s = alias_add(yyvsp[-2].string, CMNDALIAS, yyvsp[0].member)) != NULL) {
@@ -1296,15 +1295,15 @@ case 67:
 			    }
 			}
 break;
-case 69:
-#line 436 "./gram.y"
+case 63:
+#line 432 "gram.y"
 {
 			    list_append(yyvsp[-2].member, yyvsp[0].member);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
-case 72:
-#line 446 "./gram.y"
+case 66:
+#line 442 "gram.y"
 {
 			    char *s;
 			    if ((s = alias_add(yyvsp[-2].string, RUNASALIAS, yyvsp[0].member)) != NULL) {
@@ -1313,8 +1312,8 @@ case 72:
 			    }
 			}
 break;
-case 75:
-#line 459 "./gram.y"
+case 69:
+#line 455 "gram.y"
 {
 			    char *s;
 			    if ((s = alias_add(yyvsp[-2].string, USERALIAS, yyvsp[0].member)) != NULL) {
@@ -1323,58 +1322,97 @@ case 75:
 			    }
 			}
 break;
-case 77:
-#line 469 "./gram.y"
+case 71:
+#line 465 "gram.y"
 {
 			    list_append(yyvsp[-2].member, yyvsp[0].member);
 			    yyval.member = yyvsp[-2].member;
 			}
 break;
-case 78:
-#line 475 "./gram.y"
+case 72:
+#line 471 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = FALSE;
 			}
 break;
-case 79:
-#line 479 "./gram.y"
+case 73:
+#line 475 "gram.y"
 {
 			    yyval.member = yyvsp[0].member;
 			    yyval.member->negated = TRUE;
 			}
 break;
-case 80:
-#line 485 "./gram.y"
+case 74:
+#line 481 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, ALIAS);
 			}
 break;
-case 81:
-#line 488 "./gram.y"
+case 75:
+#line 484 "gram.y"
 {
 			    yyval.member = new_member(NULL, ALL);
 			}
 break;
-case 82:
-#line 491 "./gram.y"
+case 76:
+#line 487 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, NETGROUP);
 			}
 break;
-case 83:
-#line 494 "./gram.y"
+case 77:
+#line 490 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, USERGROUP);
 			}
 break;
-case 84:
-#line 497 "./gram.y"
+case 78:
+#line 493 "gram.y"
 {
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
-#line 1326 "y.tab.c"
+case 80:
+#line 499 "gram.y"
+{
+			    list_append(yyvsp[-2].member, yyvsp[0].member);
+			    yyval.member = yyvsp[-2].member;
+			}
+break;
+case 81:
+#line 505 "gram.y"
+{
+			    yyval.member = yyvsp[0].member;
+			    yyval.member->negated = FALSE;
+			}
+break;
+case 82:
+#line 509 "gram.y"
+{
+			    yyval.member = yyvsp[0].member;
+			    yyval.member->negated = TRUE;
+			}
+break;
+case 83:
+#line 515 "gram.y"
+{
+			    yyval.member = new_member(yyvsp[0].string, ALIAS);
+			}
+break;
+case 84:
+#line 518 "gram.y"
+{
+			    yyval.member = new_member(NULL, ALL);
+			}
+break;
+case 85:
+#line 521 "gram.y"
+{
+			    yyval.member = new_member(yyvsp[0].string, WORD);
+			}
+break;
+#line 1364 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

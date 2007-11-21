@@ -208,7 +208,7 @@ expand_prompt(old_prompt, user, host)
 		    break;
 		case 'U':
 		    p++;
-		    len += strlen(*user_runas) - 2;
+		    len += strlen(runas_pw->pw_name) - 2;
 		    subst = 1;
 		    break;
 		case '%':
@@ -251,7 +251,7 @@ expand_prompt(old_prompt, user, host)
 			continue;
 		    case 'U':
 			p++;
-			n = strlcpy(np,  *user_runas, np - endp);
+			n = strlcpy(np,  runas_pw->pw_name, np - endp);
 			if (n >= np - endp)
 			    goto oflow;
 			np += n;
@@ -335,14 +335,14 @@ build_timestamp(timestampdir, timestampfile)
 	    p = user_tty;
 	if (def_targetpw)
 	    len = easprintf(timestampfile, "%s/%s/%s:%s", dirparent, user_name,
-		p, *user_runas);
+		p, runas_pw->pw_name);
 	else
 	    len = easprintf(timestampfile, "%s/%s/%s", dirparent, user_name, p);
 	if (len >= PATH_MAX)
 	    log_error(0, "timestamp path too long: %s", *timestampfile);
     } else if (def_targetpw) {
 	len = easprintf(timestampfile, "%s/%s/%s", dirparent, user_name,
-	    *user_runas);
+	    runas_pw->pw_name);
 	if (len >= PATH_MAX)
 	    log_error(0, "timestamp path too long: %s", *timestampfile);
     } else

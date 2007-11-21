@@ -157,7 +157,8 @@ sudoers_lookup(pwflag)
 	    else
 		continue;
 	    tq_foreach_rev(&priv->cmndlist, cs) {
-		runas_match = runaslist_matches(&cs->runaslist);
+		runas_match = runaslist_matches(&cs->runasuserlist,
+		    &cs->runasgrouplist);
 		if (runas_match == ALLOW) {
 		    cmnd_match = cmnd_matches(cs->cmnd);
 		    if (cmnd_match != UNSPEC) {
@@ -240,15 +241,24 @@ display_privs(v, pw)
 		    if (cs != tq_first(&priv->cmndlist))
 			lbuf_append(&lbuf, ", ", NULL);
 		    lbuf_append(&lbuf, "(", NULL);
-		    if (!tq_empty(&cs->runaslist)) {
-			tq_foreach_fwd(&cs->runaslist, m) {
-			    if (m != tq_first(&cs->runaslist))
+		    if (!tq_empty(&cs->runasuserlist)) {
+			tq_foreach_fwd(&cs->runasuserlist, m) {
+			    if (m != tq_first(&cs->runasuserlist))
 				lbuf_append(&lbuf, ", ", NULL);
 			    print_member(&lbuf, m->name, m->type, m->negated,
 				RUNASALIAS);
 			}
 		    } else {
 			lbuf_append(&lbuf, def_runas_default, NULL);
+		    }
+		    if (!tq_empty(&cs->runasgrouplist)) {
+			lbuf_append(&lbuf, " : ", NULL);
+			tq_foreach_fwd(&cs->runasgrouplist, m) {
+			    if (m != tq_first(&cs->runasgrouplist))
+				lbuf_append(&lbuf, ", ", NULL);
+			    print_member(&lbuf, m->name, m->type, m->negated,
+				RUNASALIAS);
+			}
 		    }
 		    lbuf_append(&lbuf, ") ", NULL);
 		    if (TAG_CHANGED(setenv)) {
@@ -439,7 +449,8 @@ display_cmnd(v, pw)
 		if (host_match != ALLOW)
 		    continue;
 		tq_foreach_rev(&priv->cmndlist, cs) {
-		    runas_match = runaslist_matches(&cs->runaslist);
+		    runas_match = runaslist_matches(&cs->runasuserlist,
+			&cs->runasgrouplist);
 		    if (runas_match == ALLOW) {
 			cmnd_match = cmnd_matches(cs->cmnd);
 			if (cmnd_match != UNSPEC) {

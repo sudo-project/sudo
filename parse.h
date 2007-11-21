@@ -98,7 +98,8 @@ struct privilege {
  */
 struct cmndspec {
     struct cmndspec *prev, *next;
-    struct member_list runaslist;	/* list of runas users */
+    struct member_list runasuserlist;	/* list of runas users */
+    struct member_list runasgrouplist;	/* list of runas groups */
     struct member *cmnd;		/* command to allow/deny */
     struct cmndtag tags;		/* tag specificaion */
 };
@@ -111,6 +112,11 @@ struct member {
     char *name;				/* member name */
     short type;				/* type (see gram.h) */
     short negated;			/* negated via '!'? */
+};
+
+struct runascontainer {
+    struct member *runasusers;
+    struct member *runasgroups;
 };
 
 /*
@@ -160,10 +166,11 @@ int hostlist_matches	__P((struct member_list *));
 int hostname_matches	__P((char *, char *, char *));
 int netgr_matches	__P((char *, char *, char *, char *));
 int no_aliases		__P((void));
-int runaslist_matches	__P((struct member_list *));
+int runaslist_matches	__P((struct member_list *, struct member_list *));
 int userlist_matches	__P((struct passwd *, struct member_list *));
 int usergr_matches	__P((char *, char *, struct passwd *));
 int userpw_matches	__P((char *, char *, struct passwd *));
+int group_matches	__P((char *, struct group *));
 struct alias *find_alias __P((char *, int));
 void alias_apply	__P((int (*)(void *, void *), void *));
 void init_aliases	__P((void));

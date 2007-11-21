@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "September  5, 2007" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "November 21, 2007" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -269,16 +269,16 @@ zero or more '!' operators.  An odd number of '!' operators negate
 the value of the item; an even number just cancel each other out.
 .PP
 .Vb 2
-\& Runas_List ::= Runas_User |
-\&                Runas_User ',' Runas_List
+\& Runas_List ::= Runas_Member |
+\&                Runas_Member ',' Runas_List
 .Ve
 .PP
 .Vb 5
-\& Runas_User ::= '!'* username |
-\&                '!'* '#'uid |
-\&                '!'* '%'group |
-\&                '!'* +netgroup |
-\&                '!'* Runas_Alias
+\& Runas_Member ::= '!'* username |
+\&                  '!'* '#'uid |
+\&                  '!'* '%'group |
+\&                  '!'* +netgroup |
+\&                  '!'* Runas_Alias
 .Ve
 .PP
 A \f(CW\*(C`Runas_List\*(C'\fR is similar to a \f(CW\*(C`User_List\*(C'\fR except that instead
@@ -417,7 +417,7 @@ See \*(L"\s-1SUDOERS\s0 \s-1OPTIONS\s0\*(R" for a list of supported Defaults par
 .Ve
 .PP
 .Vb 1
-\& Runas_Spec ::= '(' Runas_List ')'
+\& Runas_Spec ::= '(' Runas_List? (: Runas_List)? ')'
 .Ve
 .PP
 .Vb 2
@@ -432,11 +432,24 @@ run as \fBroot\fR, but this can be changed on a per-command basis.
 Let's break that down into its constituent parts:
 .Sh "Runas_Spec"
 .IX Subsection "Runas_Spec"
-A \f(CW\*(C`Runas_Spec\*(C'\fR is simply a \f(CW\*(C`Runas_List\*(C'\fR (as defined above)
-enclosed in a set of parentheses.  If you do not specify a
-\&\f(CW\*(C`Runas_Spec\*(C'\fR in the user specification, a default \f(CW\*(C`Runas_Spec\*(C'\fR
-of \fBroot\fR will be used.  A \f(CW\*(C`Runas_Spec\*(C'\fR sets the default for
-commands that follow it.  What this means is that for the entry:
+A \f(CW\*(C`Runas_Spec\*(C'\fR determines the user and/or the group that a command
+may be run as.  A fully-specified \f(CW\*(C`Runas_Spec\*(C'\fR consists of two
+\&\f(CW\*(C`Runas_List\*(C'\fRs (as defined above) separated by a colon (':') and
+enclosed in a set of parentheses.  The first \f(CW\*(C`Runas_List\*(C'\fR indicates
+which users the command may be run as via \fBsudo\fR's \fB\-u\fR flag.
+The second defines a list of groups that can be specified via
+\&\fBsudo\fR's \fB\-g\fR flag.  If both \f(CW\*(C`Runas_List\*(C'\fRs are specified, the
+command may be run with any combination of users and groups listed
+in their respective \f(CW\*(C`Runas_List\*(C'\fRs.  If only the first is specified,
+the command may be run as any user in the list but no \fB\-g\fR flag
+may be specified.  If the first \f(CW\*(C`Runas_List\*(C'\fR is empty but the
+second is specified, the command may be run as the invoking user
+with the group set to any listed in the \f(CW\*(C`Runas_List\*(C'\fR.  If no
+\&\f(CW\*(C`Runas_Spec\*(C'\fR is specified the command may be run as \fBroot\fR and
+no group may be specified.
+.PP
+A \f(CW\*(C`Runas_Spec\*(C'\fR sets the default for the commands that follow it.
+What this means is that for the entry:
 .PP
 .Vb 1
 \& dgb    boulder = (operator) /bin/ls, /bin/kill, /usr/bin/lprm
@@ -458,6 +471,23 @@ entry.  If we modify the entry like so:
 .PP
 Then user \fBdgb\fR is now allowed to run \fI/bin/ls\fR as \fBoperator\fR,
 but  \fI/bin/kill\fR and \fI/usr/bin/lprm\fR as \fBroot\fR.
+.PP
+We can extend this to allow \fBdgb\fR to run \f(CW\*(C`/bin/ls\*(C'\fR with either
+the user or group set to \fBoperator\fR:
+.PP
+.Vb 2
+\& dgb    boulder = (operator : operator) /bin/ls, (root) /bin/kill, \e
+\&        /usr/bin/lprm
+.Ve
+.PP
+In the following example, user \fBtcm\fR may run commands that access
+a modem device file with the dialer group.  Note that in this example
+only the group will be set, the command still runs as user \fBtcm\fR.
+.PP
+.Vb 2
+\& tcm    boulder = (:dialer) /usr/bin/tip, /usr/bin/cu, \e
+\&        /usr/local/bin/minicom
+.Ve
 .Sh "Tag_Spec"
 .IX Subsection "Tag_Spec"
 A command may have zero or more tags associated with it.  There are
@@ -526,7 +556,9 @@ basis.  Note that if \f(CW\*(C`SETENV\*(C'\fR has been set for a command, any
 environment variables set on the command line way are not subject
 to the restrictions imposed by \fIenv_check\fR, \fIenv_delete\fR, or
 \&\fIenv_keep\fR.  As such, only trusted users should be allowed to set
-variables in this manner.
+variables in this manner.  If the command matched is \fB\s-1ALL\s0\fR, the
+\&\f(CW\*(C`SETENV\*(C'\fR tag is implied for that command; this default may
+be overridden by use of the \f(CW\*(C`UNSETENV\*(C'\fR tag.
 .Sh "Wildcards"
 .IX Subsection "Wildcards"
 \&\fBsudo\fR allows shell-style \fIwildcards\fR (aka meta or glob characters)

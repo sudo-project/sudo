@@ -479,14 +479,6 @@ init_defaults()
     /* Finally do the lists (currently just environment tables). */
     init_envtables();
 
-    /*
-     * The following depend on the above values.
-     * We use a pointer to the string so that if its
-     * value changes we get the change.
-     */
-    if (user_runas == NULL)
-	user_runas = &def_runas_default;
-
     firsttime = 0;
 }
 
@@ -514,7 +506,7 @@ update_defaults(skip_cmnd)
 		    return(FALSE);
 		break;
 	    case DEFAULTS_RUNAS:
-		if (runaslist_matches(&def->binding) &&
+		if (runaslist_matches(&def->binding, NULL) &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 		break;

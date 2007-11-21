@@ -912,7 +912,6 @@ check_execv(fd, pid, seqnr, askp, policyp, errorp)
     init_defaults();
     def_authenticate = FALSE;
     runas_pw = info->pw;
-    user_runas = &info->pw->pw_name;
     validated = VALIDATE_NOT_OK;
 #ifdef HAVE_LDAP
     if ((ld = sudo_ldap_open()) != NULL) {

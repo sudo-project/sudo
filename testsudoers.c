@@ -127,7 +127,7 @@ main(argc, argv)
     struct cmndspec *cs;
     struct privilege *priv;
     struct userspec *us;
-    char *p, *grfile, *pwfile, *uflag, hbuf[MAXHOSTNAMELEN];
+    char *p, *grfile, *pwfile, *runas_user, hbuf[MAXHOSTNAMELEN];
     int ch, dflag, rval, matched;
 #ifdef	YYDEBUG
     extern int yydebug;
@@ -138,7 +138,7 @@ main(argc, argv)
     Argc = argc;
 
     dflag = 0;
-    grfile = pwfile = uflag = NULL;
+    grfile = pwfile = runas_user = NULL;
     while ((ch = getopt(argc, argv, "dg:h:p:u:")) != -1) {
 	switch (ch) {
 	    case 'd':
@@ -154,8 +154,7 @@ main(argc, argv)
 		pwfile = optarg;
 		break;
 	    case 'u':
-		uflag = optarg;
-		user_runas = &uflag;
+		runas_user = optarg;
 		break;
 	    default:
 		usage();
@@ -235,12 +234,12 @@ main(argc, argv)
 
     /* Initialize default values. */
     init_defaults();
-    if (**user_runas == '#') {
-        if ((runas_pw = sudo_getpwuid(atoi(*user_runas + 1))) == NULL)
-            runas_pw = sudo_fakepwnam(*user_runas);
+    if (*runas_user == '#') {
+        if ((runas_pw = sudo_getpwuid(atoi(runas_user + 1))) == NULL)
+            runas_pw = sudo_fakepwnam(runas_user);
     } else {
-        if ((runas_pw = sudo_getpwnam(*user_runas)) == NULL)
-            errorx(1, "no passwd entry for %s!", *user_runas);
+        if ((runas_pw = sudo_getpwnam(runas_user)) == NULL)
+            errorx(1, "no passwd entry for %s!", runas_user);
     }
 
     /* Load ip addr/mask for each interface. */
@@ -278,7 +277,8 @@ main(argc, argv)
 	    if (hostlist_matches(&priv->hostlist) == ALLOW) {
 		puts("\thost  matched");
 		tq_foreach_rev(&priv->cmndlist, cs) {
-		    if (runaslist_matches(&cs->runaslist) == ALLOW) {
+		    if (runaslist_matches(&cs->runasuserlist,
+			&cs->runasgrouplist) == ALLOW) {
 			puts("\trunas matched");
 			rval = cmnd_matches(cs->cmnd);
 			if (rval != UNSPEC)
@@ -472,10 +472,11 @@ print_privilege(priv)
 	tq_foreach_fwd(&p->cmndlist, cs) {
 	    if (cs != tq_first(&p->cmndlist))
 		fputs(", ", stdout);
-	    if (!tq_empty(&cs->runaslist)) {
+	    /* XXX - runasgrouplist too */
+	    if (!tq_empty(&cs->runasuserlist)) {
 		fputs("(", stdout);
-		tq_foreach_fwd(&cs->runaslist, m) {
-		    if (m != tq_first(&cs->runaslist))
+		tq_foreach_fwd(&cs->runasuserlist, m) {
+		    if (m != tq_first(&cs->runasuserlist))
 			fputs(", ", stdout);
 		    print_member(m);
 		}

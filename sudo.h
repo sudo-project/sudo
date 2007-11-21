@@ -37,6 +37,7 @@
 struct sudo_user {
     struct passwd *pw;
     struct passwd *_runas_pw;
+    struct group *_runas_gr;
     struct stat *cmnd_stat;
     char *path;
     char *shell;
@@ -44,7 +45,6 @@ struct sudo_user {
     char *ttypath;
     char *host;
     char *shost;
-    char **runas;
     char *prompt;
     char *cmnd;
     char *cmnd_args;
@@ -132,7 +132,6 @@ struct sudo_user {
 #define user_tty		(sudo_user.tty)
 #define user_ttypath		(sudo_user.ttypath)
 #define user_cwd		(sudo_user.cwd)
-#define user_runas		(sudo_user.runas)
 #define user_cmnd		(sudo_user.cmnd)
 #define user_args		(sudo_user.cmnd_args)
 #define user_base		(sudo_user.cmnd_base)
@@ -145,6 +144,7 @@ struct sudo_user {
 #define safe_cmnd		(sudo_user.cmnd_safe)
 #define login_class		(sudo_user.class_name)
 #define runas_pw		(sudo_user._runas_pw)
+#define runas_gr		(sudo_user._runas_gr)
 
 /*
  * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
@@ -281,6 +281,7 @@ struct passwd *sudo_fakepwnam __P((const char *));
 struct passwd *sudo_getpwuid __P((uid_t));
 struct passwd *sudo_fakepwuid __P((uid_t));
 struct group *sudo_getgrnam __P((const char *));
+struct group *sudo_fakegrnam __P((const char *));
 struct group *sudo_getgrgid __P((gid_t));
 YY_DECL;
 
