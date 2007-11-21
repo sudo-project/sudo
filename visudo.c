@@ -186,9 +186,12 @@ main(argc, argv)
     if (argc)
 	usage();
 
+    sudo_setpwent();
+    sudo_setgrent();
+
     /* Mock up a fake sudo_user struct. */
     user_host = user_shost = user_cmnd = "";
-    if ((sudo_user.pw = getpwuid(getuid())) == NULL)
+    if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
 	errorx(1, "you don't exist in the passwd database");
 
     /* Setup defaults data structures. */
