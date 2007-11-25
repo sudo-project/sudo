@@ -353,9 +353,8 @@ log_error(flags, fmt, va_alist)
     va_start(ap);
 #endif
 
-    /* Become root if we are not already to avoid user control */
-    if (geteuid() != 0)
-	set_perms(PERM_ROOT);
+    /* Become root if we are not already to avoid user interference */
+    set_perms(PERM_ROOT);
 
     /* Expand printf-style format + args. */
     evasprintf(&message, fmt, ap);
