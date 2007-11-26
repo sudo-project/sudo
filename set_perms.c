@@ -70,7 +70,7 @@ __unused static const char rcsid[] = "$Sudo$";
  * Prototypes
  */
 static void runas_setup		__P((void));
-static void runas_setgroups	__P((const char *, gid_t));
+static void runas_setgroups	__P((void));
 static void restore_groups	__P((void));
 
 static int current_perm = -1;
@@ -112,7 +112,7 @@ set_perms(perm)
 			      	break;
 				
 	case PERM_RUNAS:
-				runas_setgroups(runas_pw->pw_name, runas_pw->pw_gid);
+				runas_setgroups();
 				(void) setresgid(-1, runas_pw->pw_gid, -1);
 				if (setresuid(-1, runas_pw->pw_uid, -1))
 				    err(1, "unable to change to runas uid");
@@ -197,7 +197,7 @@ set_perms(perm)
 			      	break;
 				
 	case PERM_RUNAS:
-				runas_setgroups(runas_pw->pw_name, runas_pw->pw_gid);
+				runas_setgroups();
 				(void) setregid(-1, runas_pw->pw_gid);
 				if (setreuid(-1, runas_pw->pw_uid))
 				    err(1, "unable to change to runas uid");
@@ -286,7 +286,7 @@ set_perms(perm)
 			      	break;
 				
 	case PERM_RUNAS:
-				runas_setgroups(runas_pw->pw_name, runas_pw->pw_gid);
+				runas_setgroups();
 				(void) setegid(runas_pw->pw_gid);
 				if (seteuid(runas_pw->pw_uid))
 				    err(1, "unable to change to runas uid");
@@ -377,12 +377,11 @@ set_perms(perm)
 
 #ifdef HAVE_INITGROUPS
 static void
-runas_setgroups(name, basegid)
-    const char *name;
-    gid_t basegid;
+runas_setgroups()
 {
     static int ngroups = -1;
     static gid_t *groups;
+    struct passwd *pw;
 
     if (def_preserve_groups)
 	return;
@@ -391,7 +390,8 @@ runas_setgroups(name, basegid)
      * Use stashed copy of runas groups if available, else initgroups and stash.
      */
     if (ngroups == -1) {
-	if (initgroups(name, basegid) < 0)
+	pw = runas_pw ? runas_pw : sudo_user.pw;
+	if (initgroups(pw->pw_name, pw->pw_gid) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't set runas group vector");
 	if ((ngroups = getgroups(0, NULL)) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't get runas ngroups");
@@ -414,9 +414,7 @@ restore_groups()
 #else
 
 static void
-runas_setgroups(name, basegid)
-    const char *name;
-    gid_t basegid;
+runas_setgroups()
 {
     /* STUB */
 }
@@ -465,6 +463,6 @@ runas_setup()
 	/*
 	 * Initialize group vector unless asked not to.
 	 */
-	runas_setgroups(runas_pw->pw_name, runas_pw->pw_gid);
+	runas_setgroups();
     }
 }
