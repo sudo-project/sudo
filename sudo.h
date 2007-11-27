@@ -51,7 +51,7 @@ struct sudo_user {
     char *cmnd_safe;
     char *class_name;
     int ngroups;
-    gid_t *groups;
+    GETGROUPS_T *groups;
     struct list_member *env_vars;
 };
 
