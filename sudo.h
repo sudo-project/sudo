@@ -53,7 +53,7 @@ struct sudo_user {
     char *class_name;
     char *krb5_ccname;
     int   ngroups;
-    gid_t *groups;
+    GETGROUPS_T *groups;
     struct list_member *env_vars;
     char  cwd[PATH_MAX];
 };

@@ -24,6 +24,7 @@ AC_SUBST(LIBS)
 AC_SUBST(SUDO_LIBS)
 AC_SUBST(NET_LIBS)
 AC_SUBST(AFS_LIBS)
+AC_SUBST(GETGROUPS_LIB)
 AC_SUBST(OSDEFS)
 AC_SUBST(AUTH_OBJS)
 AC_SUBST(MANTYPE)
@@ -1684,6 +1685,7 @@ esac
 dnl
 dnl Function checks
 dnl
+AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
 	       setlocale getaddrinfo)

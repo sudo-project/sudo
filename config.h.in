@@ -595,6 +595,10 @@
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef uid_t
 
+/* Define to the type of elements in the array set by `getgroups'.
+   Usually this is either `int' or `gid_t'. */
+#undef GETGROUPS_T
+
 /* Define to empty if the keyword `volatile' does not work. Warning: valid
    code using `volatile' can become incorrect without. Disable with care. */
 #undef volatile

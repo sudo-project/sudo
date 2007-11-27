@@ -380,7 +380,7 @@ static void
 runas_setgroups()
 {
     static int ngroups = -1;
-    static gid_t *groups;
+    static GETGROUPS_T *groups;
     struct passwd *pw;
 
     if (def_preserve_groups)
@@ -395,7 +395,7 @@ runas_setgroups()
 	    log_error(USE_ERRNO|MSG_ONLY, "can't set runas group vector");
 	if ((ngroups = getgroups(0, NULL)) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't get runas ngroups");
-	groups = emalloc2(ngroups, MAX(sizeof(gid_t), sizeof(int)));
+	groups = emalloc2(ngroups, sizeof(GETGROUPS_T));
 	if (getgroups(ngroups, groups) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't get runas group vector");
     } else {
