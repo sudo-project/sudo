@@ -27,7 +27,7 @@ __unused static const char rcsid[] = "$Sudo$";
 
 /*
  * Reverse memchr()
- * Find the last occurence of 'c' in the buffer 's' of size 'n'.
+ * Find the last occurrence of 'c' in the buffer 's' of size 'n'.
  */
 void *
 memrchr(s, c, n)
