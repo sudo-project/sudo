@@ -280,6 +280,10 @@ two consecutive C<%> characters are collapsed into a single C<%> character
 
 =back
 
+The prompt specified by the B<-p> option will override the system
+password prompt on systems that support PAM unless the
+I<passprompt_override> flag is disabled in I<sudoers>.
+
 =item -S
 
 The B<-S> (I<stdin>) option causes B<sudo> to read the password from
