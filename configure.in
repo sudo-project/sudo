@@ -1837,6 +1837,13 @@ if test ${with_pam-"no"} != "no"; then
 			    AC_MSG_WARN([Ignoring unknown argument to --enable-pam-session: $enableval])
 			    ;;
 	    esac], AC_MSG_RESULT(yes))
+	case $host in
+	    *-*-linux*|*-*-solaris*)
+		    AC_CHECK_FUNCS(dgettext, [], 
+			[AC_CHECK_LIB(intl, dgettext, [LIBS="${LIBS} -lintl"]
+			[AC_DEFINE(HAVE_DGETTEXT)])])
+		    ;;
+	esac
     fi
 fi
 
