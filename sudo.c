@@ -740,6 +740,7 @@ parse_args(argc, argv)
 			usage(1);
 
 		    user_prompt = NewArgv[1];
+		    def_passprompt_override = TRUE;
 
 		    NewArgc--;
 		    NewArgv++;

@@ -271,14 +271,14 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		prompt = def_prompt;
 		/* Only override PAM prompt if it matches /^Password: ?/ */
 #if defined(PAM_TEXT_DOMAIN) && defined(HAVE_DGETTEXT)
-		if (std_prompt ||
+		if (!def_passprompt_override && (std_prompt ||
 		    (strcmp(pm->msg, dgettext(PAM_TEXT_DOMAIN, "Password: ")) &&
-		    strcmp(pm->msg, dgettext(PAM_TEXT_DOMAIN, "Password:"))))
+		    strcmp(pm->msg, dgettext(PAM_TEXT_DOMAIN, "Password:")))))
 		    prompt = pm->msg;
 #else
-		if (std_prompt ||
+		if (!def_passprompt_override && (std_prompt ||
 		    strncmp(pm->msg, "Password:", 9) || (pm->msg[9] != '\0'
-		    && (pm->msg[9] != ' ' || pm->msg[10] != '\0')))
+		    && (pm->msg[9] != ' ' || pm->msg[10] != '\0'))))
 		    prompt = pm->msg;
 #endif
 		/* Read the password. */
