@@ -1388,9 +1388,6 @@ case "$host" in
 		shadow_funcs="getspnam"
 		shadow_libs_optional="-lshadow"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
-		AC_CHECK_FUNCS(dgettext, [],
-		    [AC_CHECK_LIB(intl, dgettext, [LIBS="${LIBS} -lintl"]
-		    [AC_DEFINE(HAVE_DGETTEXT)])])
 		;;
     *-convex-bsd*)
 		OSDEFS="${OSDEFS} -D_CONVEX_SOURCE"
@@ -1838,6 +1835,13 @@ if test ${with_pam-"no"} != "no"; then
 			    AC_MSG_WARN([Ignoring unknown argument to --enable-pam-session: $enableval])
 			    ;;
 	    esac], AC_MSG_RESULT(yes))
+	case $host in
+	    *-*-linux*|*-*-solaris*)
+		    AC_CHECK_FUNCS(dgettext, [],
+			[AC_CHECK_LIB(intl, dgettext, [LIBS="${LIBS} -lintl"]
+			[AC_DEFINE(HAVE_DGETTEXT)])])
+		    ;;
+	esac
     fi
 fi
 
