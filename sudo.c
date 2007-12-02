@@ -267,7 +267,7 @@ main(argc, argv, envp)
     if (user_cmnd == NULL && NewArgc == 0)
 	usage(1);
 
-    init_vars(sudo_mode, envp);		/* XXX - move this? */
+    init_vars(sudo_mode, envp);		/* XXX - move this later? */
 
 #ifdef HAVE_LDAP
     if ((ld = sudo_ldap_open()) != NULL)
@@ -283,11 +283,12 @@ main(argc, argv, envp)
 	    log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
     }
 
+    /* XXX - collect post-sudoers parse settings into a function */
+
     /*
      * Set runas passwd/group entries based on command line or sudoers.
      * Note that if runas_group was specified without runas_user we
      * defer setting runas_pw so the match routines know to ignore it.
-     * XXX - early enough?
      */
     if (runas_group != NULL) {
 	set_runasgr(runas_group);
@@ -295,6 +296,13 @@ main(argc, argv, envp)
 	    set_runaspw(runas_user);
     } else
 	set_runaspw(runas_user ? runas_user : def_runas_default);
+
+    /* Set login class if applicable. */
+    set_loginclass(sudo_user.pw);
+
+    /* Update initial shell now that runas is set. */
+    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
+	NewArgv[0] = runas_pw->pw_shell;
 
     /* This goes after sudoers is parsed since it may have timestamp options. */
     if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
@@ -671,8 +679,6 @@ init_vars(sudo_mode, envp)
 	NewArgv++;
 	if (ISSET(sudo_mode, MODE_EDIT))
 	    NewArgv[0] = "sudoedit";
-	else if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
-	    NewArgv[0] = estrdup(runas_pw->pw_shell);
 	else if (user_shell && *user_shell)
 	    NewArgv[0] = user_shell;
 	else
@@ -682,10 +688,6 @@ init_vars(sudo_mode, envp)
 	for (dst = NewArgv + 1; (*dst = *src) != NULL; ++src, ++dst)
 	    continue;
     }
-
-    /* Set login class if applicable. */
-    /* XXX - should move to after sudoers_lookup */
-    set_loginclass(sudo_user.pw);
 }
 
 /*
