@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "November  2, 2007" "1.6.9p8" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "December  3, 2007" "1.6.9p8" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -522,7 +522,9 @@ basis.  Note that if \f(CW\*(C`SETENV\*(C'\fR has been set for a command, any
 environment variables set on the command line way are not subject
 to the restrictions imposed by \fIenv_check\fR, \fIenv_delete\fR, or
 \&\fIenv_keep\fR.  As such, only trusted users should be allowed to set
-variables in this manner.
+variables in this manner.  If the command matched is \fB\s-1ALL\s0\fR, the
+\&\f(CW\*(C`SETENV\*(C'\fR tag is implied for that command; this default may
+be overridden by use of the \f(CW\*(C`UNSETENV\*(C'\fR tag.
 .Sh "Wildcards"
 .IX Subsection "Wildcards"
 \&\fBsudo\fR allows shell-style \fIwildcards\fR (aka meta or glob characters)
@@ -731,6 +733,12 @@ to.  The disadvantage is that if the executable is simply not in
 the user's \f(CW\*(C`PATH\*(C'\fR, \fBsudo\fR will tell the user that they are not
 allowed to run it, which can be confusing.  This flag is \fI@path_info@\fR
 by default.
+.IP "passprompt_override" 16
+.IX Item "passprompt_override"
+The password prompt specified by \fIpassprompt\fR will normally only
+be used if the passwod prompt provided by systems such as \s-1PAM\s0 matches
+the string \*(L"Password:\*(R".  If \fIpassprompt_override\fR is set, \fIpassprompt\fR
+will always be used.  This flag is \fIoff\fR by default.
 .IP "preserve_groups" 16
 .IX Item "preserve_groups"
 By default \fBsudo\fR will initialize the group vector to the list of

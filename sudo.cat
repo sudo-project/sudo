@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.6.9p8                 November  2, 2007                       1
+1.6.9p8                 December  3, 2007                       1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.9p8                 November  2, 2007                       2
+1.6.9p8                 December  3, 2007                       2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.6.9p8                 November  2, 2007                       3
+1.6.9p8                 December  3, 2007                       3
 
 
 
@@ -259,7 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.6.9p8                 November  2, 2007                       4
+1.6.9p8                 December  3, 2007                       4
 
 
 
@@ -281,9 +281,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        passed on the command line are subject to the same
        restrictions as normal environment variables with one
        important exception.  If the _s_e_t_e_n_v option is set in _s_u_d_o_­
-       _e_r_s or the command to be run has the SETENV tag set the
-       user may set variables that would overwise be forbidden.
-       See _s_u_d_o_e_r_s(4) for more information.
+       _e_r_s, the command to be run has the SETENV tag set or the
+       command matched is ALL, the user may set variables that
+       would overwise be forbidden.  See _s_u_d_o_e_r_s(4) for more
+       information.
 
 RREETTUURRNN VVAALLUUEESS
        Upon successful execution of a program, the return value
@@ -321,11 +322,10 @@ SSEECCUURRIITTYY NNOOTTEESS
        cess.  In this case, _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e behave like
        a blacklist.  Since it is not possible to blacklist all
        potentially dangerous environment variables, use of the
-       default _e_n_v___r_e_s_e_t behavior is encouraged.
 
 
 
-1.6.9p8                 November  2, 2007                       5
+1.6.9p8                 December  3, 2007                       5
 
 
 
@@ -333,6 +333,8 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       default _e_n_v___r_e_s_e_t behavior is encouraged.
 
        In all cases, environment variables with a value beginning
        with () are removed as they could be interpreted as bbaasshh
@@ -386,12 +388,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        Please note that ssuuddoo will normally only log the command
        it explicitly runs.  If a user runs a command such as sudo
        su or sudo sh, subsequent commands run from that shell
-       will _n_o_t be logged, nor will ssuuddoo's access control affect
-       them.  The same is true for commands that offer shell
 
 
 
-1.6.9p8                 November  2, 2007                       6
+1.6.9p8                 December  3, 2007                       6
 
 
 
@@ -400,6 +400,8 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       will _n_o_t be logged, nor will ssuuddoo's access control affect
+       them.  The same is true for commands that offer shell
        escapes (including most editors).  Because of this, care
        must be taken when giving users access to commands via
        ssuuddoo to verify that the command does not inadvertently
@@ -452,12 +454,10 @@ EEXXAAMMPPLLEESS
        Note: the following examples assume suitable _s_u_d_o_e_r_s(4)
        entries.
 
-       To get a file listing of an unreadable directory:
 
 
 
-
-1.6.9p8                 November  2, 2007                       7
+1.6.9p8                 December  3, 2007                       7
 
 
 
@@ -465,6 +465,8 @@ EEXXAAMMPPLLEESS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       To get a file listing of an unreadable directory:
 
         $ sudo ls /usr/local/protected
 
@@ -518,12 +520,10 @@ CCAAVVEEAATTSS
         $ sudo cd /usr/local/protected
 
        since when the command exits the parent process (your
-       shell) will still be the same.  Please see the EXAMPLES
-       section for more information.
 
 
 
-1.6.9p8                 November  2, 2007                       8
+1.6.9p8                 December  3, 2007                       8
 
 
 
@@ -531,6 +531,9 @@ CCAAVVEEAATTSS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       shell) will still be the same.  Please see the EXAMPLES
+       section for more information.
 
        If users have sudo ALL there is nothing to prevent them
        from creating their own program that gives them a root
@@ -586,9 +589,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-1.6.9p8                 November  2, 2007                       9
+1.6.9p8                 December  3, 2007                       9
 
 
