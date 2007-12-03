@@ -671,22 +671,35 @@ init_vars(sudo_mode, envp)
      * If we were given the '-e', '-i' or '-s' options we need to redo
      * NewArgv and NewArgc.
      */
-    if ((sudo_mode & (MODE_SHELL | MODE_EDIT))) {
-	char **dst, **src = NewArgv;
+    if (ISSET(sudo_mode, MODE_EDIT)) {
+	NewArgv--;
+	NewArgc++;
+	NewArgv[0] = "sudoedit";
+    } else if (ISSET(sudo_mode, MODE_SHELL)) {
+	char **av;
 
 	/* Allocate an extra slot for execve() failure (ENOEXEC). */
-	NewArgv = (char **) emalloc2((++NewArgc + 2), sizeof(char *));
-	NewArgv++;
-	if (ISSET(sudo_mode, MODE_EDIT))
-	    NewArgv[0] = "sudoedit";
-	else if (user_shell && *user_shell)
-	    NewArgv[0] = user_shell;
-	else
-	    errorx(1, "unable to determine shell");
+	av = (char **) emalloc2(5, sizeof(char *));
+	av++;
 
-	/* copy the args from NewArgv */
-	for (dst = NewArgv + 1; (*dst = *src) != NULL; ++src, ++dst)
-	    continue;
+	av[0] = user_shell;	/* may be updated later */
+	if (NewArgc > 0) {
+	    size_t size;
+	    char *cmnd, *src, *dst, *end;
+	    size = (size_t) (NewArgv[NewArgc - 1] - NewArgv[0]) +
+		    strlen(NewArgv[NewArgc - 1]) + 1;
+	    cmnd = emalloc(size);
+	    src = NewArgv[0];
+	    dst = cmnd;
+	    for (end = src + size - 1; src < end; src++, dst++)
+		*dst = *src == 0 ? ' ' : *src;
+	    *dst = '\0';
+	    av[1] = "-c";
+	    av[2] = cmnd;
+	    NewArgc = 2;
+	}
+	av[++NewArgc] = NULL;
+	NewArgv = av;
     }
 }
 
@@ -725,7 +738,7 @@ set_cmnd(sudo_mode)
 	    size_t size, n;
 
 	    /* If we didn't realloc NewArgv it is contiguous so just count. */
-	    if (!(sudo_mode & (MODE_SHELL | MODE_EDIT))) {
+	    if (!ISSET(sudo_mode, MODE_SHELL)) {
 		size = (size_t) (NewArgv[NewArgc-1] - NewArgv[1]) +
 			strlen(NewArgv[NewArgc-1]) + 1;
 	    } else {
@@ -779,8 +792,10 @@ parse_args(argc, argv)
 
     while (NewArgc > 0) {
 	if (NewArgv[0][0] == '-') {
-	    if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0')
+	    if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0') {
 		warningx("please use single character options");
+		usage(1);
+	    }
 
 	    switch (NewArgv[0][1]) {
 		case 'p':

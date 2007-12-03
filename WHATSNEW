@@ -29,3 +29,6 @@ What's new in Sudo 1.7?
    configurable via sudoers and, optionally, the command line.
 
  * Visudo will now warn about aliases that are defined but not used.
+
+ * The -i and -s command line flags now take an optional command
+   to be run via the shell.

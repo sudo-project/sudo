@@ -35,8 +35,8 @@ S<[B<-u> I<username>|I<#uid>]> [I<command>]
 
 B<sudo> [B<-bEHPS>] S<[B<-a> I<auth_type>]> S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]> S<[B<-g> I<groupname>|I<#gid>]> S<[B<-p> I<prompt>]>
-S<[B<-u> I<username>|I<#uid>]> S<[B<VAR>=I<value>]>
-S<{B<-i> | B<-s> | I<command>}>
+S<[B<-u> I<username>|I<#uid>]> S<[B<VAR>=I<value>]> [S<{B<-i> | B<-s>]
+[<I<command>}>]
 
 B<sudoedit> [B<-S>] S<[B<-a> I<auth_type>]> S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]> S<[B<-g> I<groupname>|I<#gid>]> S<[B<-p> I<prompt>]>
@@ -198,16 +198,18 @@ in passwd(5).  By default, B<sudo> does not modify C<HOME>
 
 The B<-h> (I<help>) option causes B<sudo> to print a usage message and exit.
 
-=item -i
+=item -i [command]
 
 The B<-i> (I<simulate initial login>) option runs the shell specified
-in the L<passwd(5)> entry of the user that the command is
-being run as.  The command name argument given to the shell begins
-with a `C<->' to tell the shell to run as a login shell.  B<sudo>
-attempts to change to that user's home directory before running the
-shell.  It also initializes the environment, leaving I<DISPLAY>
-and I<TERM> unchanged, setting I<HOME>, I<SHELL>, I<USER>, I<LOGNAME>, and
-I<PATH>, and unsetting all other environment variables.
+in the L<passwd(5)> entry of the target user as a login shell.  This
+means that login-specific resource files such as C<.profile> or
+C<.login> will be read by the shell.  If a command is specified,
+it is passed to the shell for execution.  Otherwise, an interactive
+shell is executed.  B<sudo> attempts to change to that user's home
+directory before running the shell.  It also initializes the
+environment, leaving I<DISPLAY> and I<TERM> unchanged, setting
+I<HOME>, I<SHELL>, I<USER>, I<LOGNAME>, and I<PATH>, and unsetting
+all other environment variables.
 
 =item -K
 
@@ -289,11 +291,12 @@ I<passprompt_override> flag is disabled in I<sudoers>.
 The B<-S> (I<stdin>) option causes B<sudo> to read the password from
 the standard input instead of the terminal device.
 
-=item -s
+=item -s [command]
 
 The B<-s> (I<shell>) option runs the shell specified by the I<SHELL>
-environment variable if it is set or the shell as specified
-in L<passwd(5)>.
+environment variable if it is set or the shell as specified in
+L<passwd(5)>.  If a command is specified, it is passed to the shell
+for execution.  Otherwise, an interactive shell is executed.
 
 =item -U I<user>
 
