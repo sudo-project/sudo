@@ -202,7 +202,7 @@ sudoers_lookup(pwflag)
 		    return(VALIDATE_OK |
 			(no_passwd == TRUE ? FLAG_NOPASS : 0) |
 			(no_execve == TRUE ? FLAG_NOEXEC : 0) |
-			(setenv_ok == TRUE ? FLAG_SETENV : 0));
+			(setenv_ok >= TRUE ? FLAG_SETENV : 0));
 		} else if ((runas_matches == TRUE && cmnd_matches == FALSE) ||
 		    (runas_matches == FALSE && cmnd_matches == TRUE)) {
 		    /*
@@ -212,7 +212,7 @@ sudoers_lookup(pwflag)
 		    return(VALIDATE_NOT_OK |
 			(no_passwd == TRUE ? FLAG_NOPASS : 0) |
 			(no_execve == TRUE ? FLAG_NOEXEC : 0) |
-			(setenv_ok == TRUE ? FLAG_SETENV : 0));
+			(setenv_ok >= TRUE ? FLAG_SETENV : 0));
 		}
 	    }
 	    top--;
