@@ -21,143 +21,142 @@ TODO list (most will be addressed in sudo 2.0)
 08) Make runas_user a struct "runas" with user and group components.
     (maybe uid and gid too???)
 
-09) Add -g group/gid option.
-
-10) Should be able to mix Cmnd_Alias's and command args.  Ie:
+09) Should be able to mix Cmnd_Alias's and command args.  Ie:
 	pete   ALL=PASSWD [A-z]*,!PASSWD root
     where PASSWD was defined to be /usr/bin/passwd.
     This requires the arg parsing to happen in the yacc grammer.
     At the very least, commands and args have to become separate
     tokens in the lexer.
 
-11) Add a per-tty restriction?  Ie: only can run foo from /dev/console.
+10) Add a per-tty restriction?  Ie: only can run foo from /dev/console.
 
-12) Add test for how to read ether interfaces in configure script
+11) Add test for how to read ether interfaces in configure script
 
-13) Use strtol() and strtoul(), not atoi()
+12) Use strtol() and strtoul(), not atoi()
 
-14) Implement date_format and log_format options.
+13) Implement date_format and log_format options.
 
-15) Add support for: Default:user@host
+14) Add support for: Default:user@host
 
-16) Some people want to be able to specify a special password in sudoers
+15) Some people want to be able to specify a special password in sudoers
     in addition or instead of the normal one.  The best argument for
     this so far is to be able to use separate passwords for the
     target users that are not the passwd file ones.
 
-17) Add support for trusted users.  E.g. allow user to run a certain
+16) Add support for trusted users.  E.g. allow user to run a certain
     command regardless of what dir it is in if it is owned by the
     trusted user.
 
-18) Add a flag similar to '-l' but that spits out sudo commands in
+17) Add a flag similar to '-l' but that spits out sudo commands in
     a format suitable for cut & paste into sudoers.
 
-19) Someone wants a recursive version of the dir specifier.  Ie:
+18) Someone wants a recursive version of the dir specifier.  Ie:
     SOME_MODIFIER:/usr/local/ to allow anything under /usr/local to be run.
 
-20) An option to set the shell to the target user would make sense.
+19) An option to set the shell to the target user would make sense.
     See other target user-related issues above.
 
-21) Add an option (-D) to dump the defaults after the sudoers file
+20) Add an option (-D) to dump the defaults after the sudoers file
     has been parsed.  Should only be available to root and should
     allow a -u user modifier.  Maybe dump all of sudoers?
 
-22) Allow /etc/sudoers to be a symlink but require the parent dir to
+21) Allow /etc/sudoers to be a symlink but require the parent dir to
     be root-owned and not writable by anything else.  Should really
     traverse the tree to the root doing this.
 
-23) Improve interfaces.c STREAMS code (see ntpd's ntp_io.c for hints)
+22) Improve interfaces.c STREAMS code (see ntpd's ntp_io.c for hints)
 
-24) Wildcard support for user and group names? (netgroup too?)
+23) Wildcard support for user and group names? (netgroup too?)
 
-25) If root_sudo is off, still allow sudo -u to non-root users?
+24) If root_sudo is off, still allow sudo -u to non-root users?
 
-26) Parse gids like %#0
+25) Parse gids like %#0
 
-27) For AIX, use setpenv() and setpcred() if they exist
+26) For AIX, use setpenv() and setpcred() if they exist
     http://publibn.boulder.ibm.com/doc_link/en_US/a_doc_lib/libs/basetrf2/setpenv.htm
     http://publib16.boulder.ibm.com/pseries/en_US/libs/basetrf2/setpcred.htm
 
-28) Add an insult_path variable that is intialized to "builtin" but that
+27) Add an insult_path variable that is intialized to "builtin" but that
     can point to other files containing an insult count as the first
     line and that have a constant record length (sparse files) for
     easy seeking.
 
-29) Some way of using a new pty for the program run via sudo would prevent
+28) Some way of using a new pty for the program run via sudo would prevent
     access to the caller's /dev/tty (but probably makes job control tricky).
 
-30) Maybe have a database of checksums that commands are verified against.
+29) Maybe have a database of checksums that commands are verified against.
     Basically replace the st_ino/st_dev check with a checksum lookup.
 
-31) Look into testing writability of a file via sudoedit *before* doing
+30) Look into testing writability of a file via sudoedit *before* doing
     the edit; e.g., try opening with O_APPEND.
 
-32) Add Makefile.in bits to autogenerate Solaris and Irix packages
+31) Add Makefile.in bits to autogenerate Solaris and Irix packages
 
-33) Add a session mode where sudo allocates a pty and logs everything
+32) Add a session mode where sudo allocates a pty and logs everything
     that occurs ala script(1).
 
-34) Use pam_open_session() and pam_close_session() (requires a persistent
+33) Use pam_open_session() and pam_close_session() (requires a persistent
     sudo process to call pam_close_session()).  Maybe add xauth support for
     the non-pam case?
 
-35) Add substitution mechanism in sudoers to subst, e.g. editors for sudoedit
+34) Add substitution mechanism in sudoers to subst, e.g. editors for sudoedit
 
-36) Move prototypes to extern.h?
+35) Move prototypes to extern.h?
 
-37) Get rid of VALIDATE_NOT_OK and just set/clear VALIDATE_OK
+36) Get rid of VALIDATE_NOT_OK and just set/clear VALIDATE_OK
 
-38) visudo -c should also sanity check aliases
+37) visudo -c should also sanity check aliases
 
-39) Use AC_CHECK_DECLS for systems w/o proper prototypes?  Maybe errno too?
+38) Use AC_CHECK_DECLS for systems w/o proper prototypes?  Maybe errno too?
 
-40) Flesh out testsudoers and fix glob/opendir issues.  Use custom netgroup
+39) Flesh out testsudoers and fix glob/opendir issues.  Use custom netgroup
     code too?
 
-41) Think some more about giving admins a way to test commands for a user
+40) Think some more about giving admins a way to test commands for a user
     on a specific host with a different sudoers file.
 
-42) Add nsswitch.conf parsing to LDAP support.
+41) Add nsswitch.conf parsing to LDAP support.
 
-43) Refactor duplicated code in ldap.c into wrapper functions.
+42) Refactor duplicated code in ldap.c into wrapper functions.
 
-44) Return command from command_matches() instead of setting safe_cmnd directly.
+43) Return command from command_matches() instead of setting safe_cmnd directly.
 
-45) Roll visudo into sudo ala sudoedit.
+44) Roll visudo into sudo ala sudoedit.
 
-46) Add ticket file to ticket dir in non-tty tickets case so we
+45) Add ticket file to ticket dir in non-tty tickets case so we
     can mix tty and non-tty ticket schemes.
 
-47) Use ldap_get_values_len() instead of ldap_get_values() for
+46) Use ldap_get_values_len() instead of ldap_get_values() for
     OpenLDAP (what about others?)
 
-48) Add support for NOEXEC w/ 64-bit AIX executables.
+47) Add support for NOEXEC w/ 64-bit AIX executables.
     http://publib.boulder.ibm.com/infocenter/pseries/v5r3/index.jsp?topic=/com.ibm.xlf91a.doc/xlfug/comp64.htm
 
-49) Examine debian fqdn diffs.
+48) Revisit debian fqdn diffs.
 
-50) Add gettext() support
+49) Add gettext() support.  Can borrow some translations from PAM.
 
-51) Refactor common env code in logging.c
-
-52) Add :group to Runas user specs
-
-53) Convert the other capitalized files into .pod so we can get decent html
+50) Convert the other capitalized files into .pod so we can get decent html
     form them?  E.g. README, etc.  E.g.
 	pod2text -l -i0 history.pod > HISTORY
 	pod2html --noindex history.pod > history.html
 
-54) Use mkstemp() for visudo temp files?  Also re-examine locking.
+51) Use mkstemp() for visudo temp files?  Also re-examine locking.
 
-55) Add SSL support for ldap, see http://docs.sun.com/source/816-5616-10/ssl.htm#12979 and enablefor "ssl on"
+52) Add SSL support for ldap, see http://docs.sun.com/source/816-5616-10/ssl.htm#12979 and enablefor "ssl on"
 
-56) verbose sudo -V output make it clear whether env_reset is active
+53) Run sudo thorugh valgrind
 
-57) Run sudo thorugh valgrind
-
-58) Make -a and -c options in sudo.pod only visible when available.
+54) Make -a and -c options in sudo.pod only visible when available.
     Could use an nroff register combines with configure substitute magic.
     Note that configure substitution runs on the .man.in file not the
     .pod file.
 
-59) Consolidate line wrap code.
+55) Consolidate line wrap code.
+
+56) How can we distinguish between a bare '\\' and one that is escaping
+    glob chars?  Right now we convert \\ -> \ in the lexer which
+    causes the confusion.
+
+57) For LDAP entries, should be able to parse the per-command options
+    since they may affect the outcome (e.g. default_runas).

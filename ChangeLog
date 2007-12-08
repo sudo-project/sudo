@@ -1,3 +1,272 @@
+2007-12-07 19:09  millert
+
+	* ldap.c, schema.OpenLDAP, schema.iPlanet, sudoers2ldif: add -g
+	  support for LDAP
+
+2007-12-03 11:36  millert
+
+	* WHATSNEW, sudo.c, sudo.pod, sudo_usage.h.in: The -i and -s flags
+	  can now take an optional command.
+
+2007-12-02 12:13  millert
+
+	* def_data.c, def_data.h, def_data.in, sudo.c, sudo.pod,
+	  sudoers.pod, auth/pam.c: Add passprompt_override flag to sudoers
+	  that will cause the prompt to be overridden in all cases.  This
+	  flag is also set when the user specifies the -p flag.
+
+2007-12-01 19:51  millert
+
+	* sudo.c: Move setting of login class until after sudoers has been
+	  parsed.  Set NewArgv[0] for -i after runas_pw has been set.
+
+2007-12-01 19:34  millert
+
+	* configure, configure.in: Move the dgettext check.
+
+2007-12-01 11:22  millert
+
+	* config.h.in, configure, configure.in, auth/pam.c: Add basic
+	  support for looking up the string "Password: " in the PAM
+	  localized text db.  This allows us to determine whether the PAM
+	  prompt is the default "Password: " one even if it has been
+	  localized.
+
+	  TODO: concatenate non-std PAM prompts and user-specified sudo
+	  prompts.
+
+2007-11-27 18:40  millert
+
+	* Makefile.in, config.h.in, configure.in, parse.c, set_perms.c,
+	  sudo.c, configure, sudo.h: Use AC_FUNC_GETGROUPS instead of a
+	  home-grown attempt that was insufficient.
+
+2007-11-27 12:13  millert
+
+	* configure, acsite.m4, interfaces.c, memrchr.c: Fix typos;
+	  Martynas Venckus
+
+2007-11-25 19:26  millert
+
+	* set_perms.c: Don't assume runas_pw is set; it may not be in the
+	  -g case.
+
+2007-11-25 08:07  millert
+
+	* logging.c, set_perms.c: Set aux group vector for PERM_RUNAS and
+	  restore group vector for PERM_ROOT if we previously changed it.
+	  Stash the runas group vector so we don't have to call initgroups
+	  more than once. Also add no-op check to check_perms.
+
+2007-11-21 15:11  millert
+
+	* WHATSNEW, check.c, def_data.in, defaults.c, gram.c, gram.h,
+	  gram.y, ldap.c, logging.c, match.c, mon_systrace.c, parse.c,
+	  parse.h, pwutil.c, set_perms.c, sudo.c, sudo.cat, sudo.h,
+	  sudo.man.in, sudo.pod, sudo_usage.h.in, sudoers.cat,
+	  sudoers.man.in, sudoers.pod, testsudoers.c, toke.c, visudo.c,
+	  visudo.cat, visudo.man.in: Add support for runas groups.  This
+	  allows the user to run a command with a different effective
+	  group.  If the -g option is specified without -u the command will
+	  be run as the current user (only the group will change).  the -g
+	  and -u options may be used together.	TODO: implement runas group
+	  for ldap	 improve runas group documentation	 add
+	  testsudoers support
+
+2007-11-21 15:02  millert
+
+	* configure, configure.in: fix setting of mandir
+
+2007-11-21 14:26  millert
+
+	* sudo.pod, sudoers.pod: document that ALL implies SETENV
+
+2007-11-21 13:50  millert
+
+	* ldap.c: s/setenv_ok/setenv_implied/g
+
+2007-11-21 13:44  millert
+
+	* ldap.c: hostname_matches() returns TRUE on match in sudo 1.7.
+
+2007-11-21 13:26  millert
+
+	* ldap.c: use strcmp, not strcasecmp when comparing ALL
+
+2007-11-21 11:41  millert
+
+	* ldap.c: Make sudo ALL imply setenv.  Note that unlike with
+	  file-based sudoers this does affect all the commands in the
+	  sudoRole.
+
+2007-11-21 11:05  millert
+
+	* gram.c, gram.y, parse.c, parse.h: sudo "ALL" now implies the
+	  SETENV tag but, unlike an explicit tag, it is not passed on to
+	  other commands in the list.
+
+2007-11-21 11:02  millert
+
+	* visudo.c: Add missing sudo_setpwent() and sudo_setgrent() calls.
+	  Also use sudo_getpwuid() instead of getpwuid().
+
+2007-11-15 11:16  millert
+
+	* sudoers: Expand on the dangers of not using visudo to edit
+	  sudoers.
+
+2007-11-08 07:24  millert
+
+	* parse.c: Don't quote *?[]! on output since the lexer does not
+	  strip off the backslash when reading those in.
+
+2007-11-07 13:16  millert
+
+	* glob.c: expand "u_foo" types to "unsigned foo" to avoid
+	  compatibility issues.
+
+2007-11-04 08:33  millert
+
+	* logging.c: Refactor log line generation in to new_logline().
+
+2007-10-25 09:23  millert
+
+	* TROUBLESHOOTING: fix typo
+
+2007-10-24 12:41  millert
+
+	* config.h.in, configure, configure.in, interfaces.c, interfaces.h,
+	  match.c: Add configure check for struct in6_addr instead of
+	  relying on AF_INET6 since some systems define AF_INET6 but do not
+	  include IPv6 support.
+
+2007-10-21 09:29  millert
+
+	* configure, configure.in: Fix block to add -lutil for FreeBSD and
+	  NetBSD when logincap is in use.
+
+2007-10-19 22:28  millert
+
+	* configure, configure.in: POSIX states that struct timespec be
+	  declared in time.h so check there regardless of the value of
+	  TIME_WITH_SYS_TIME.
+
+2007-10-17 11:37  millert
+
+	* tgetpass.c: Instead of defining a macro to call the appropriate
+	  method for turning on/off echo, just define tc[gs]etattr() and
+	  the related defines that use the correct terminal ioctls if
+	  needed.  Also go back to using TCSAFLUSH instead of TCSADRAIN on
+	  all but QNX.
+
+2007-10-08 20:18  millert
+
+	* Makefile.in: g/c @ALLOCA@
+
+2007-10-08 20:07  millert
+
+	* configure: regen
+
+2007-10-08 20:04  millert
+
+	* INSTALL, config.h.in, configure.in, auth/pam.c: Add
+	  --disable-pam-session configure option to disable calling
+	  pam_{open,close}_session.  May work around bugs in some PAM
+	  implementations.
+
+2007-10-08 12:00  millert
+
+	* tgetpass.c: quiet gcc warnings
+
+2007-10-08 08:41  millert
+
+	* tgetpass.c: Avoid printing the prompt if we are already
+	  backgrounded.  E.g. if the user runs "sudo foo &" from the shell.
+	  In this case, the call to tcsetattr() will cause SIGTTOU to be
+	  delivered.
+
+2007-09-15 16:07  millert
+
+	* def_data.c, def_data.h, def_data.in: Reorder things such that the
+	  definition of env_reset come right before the env variable lists.
+
+2007-09-15 07:50  millert
+
+	* parse.h: Shrink type and seqno in struct alias from int to
+	  u_short
+
+2007-09-15 07:24  millert
+
+	* alias.c, match.c, parse.c, parse.h: Add a sequence number in the
+	  aliases for loop detection.  If we find an alias with the seqno
+	  already set to the current (global) value we know we've visited
+	  it before so ignore it.
+
+2007-09-13 19:05  millert
+
+	* TODO, sudo.c, sudo.h, auth/pam.c: PAM wants the full tty path so
+	  add user_ttypath which holds the full path to the tty or is NULL
+	  if no tty was present.
+
+2007-09-13 18:42  millert
+
+	* auth/pam.c: Set PAM_RHOST to work around a bug in Solaris 7 and
+	  lower that results in a segv.
+
+2007-09-11 15:43  millert
+
+	* gram.c: regen
+
+2007-09-11 15:42  millert
+
+	* alias.c, defaults.c, gram.y, list.c, list.h, match.c, parse.c,
+	  parse.h, testsudoers.c, visudo.c: rename lh_ -> tq_
+
+2007-09-10 17:33  millert
+
+	* alloc.c: remove some useless casts
+
+2007-09-10 17:32  millert
+
+	* alloc.c: pull in inttypes.h for SIZE_MAX; we avoid stdint.h since
+	  inttypes.h predates the final C99 spec and the standard specifies
+	  that it shall include stdint.h anyway
+
+2007-09-06 12:39  millert
+
+	* Makefile.in, alloca.c, configure.in: Since we ship with a
+	  pre-generated parser there is no need to ship a bogus alloca
+	  implementation.
+
+2007-09-06 12:22  millert
+
+	* configure: regen
+
+2007-09-06 12:19  millert
+
+	* configure.in: remove initial setting of CHECKSIA, we require that
+	  it be unset if not used
+
+2007-09-06 11:55  millert
+
+	* Makefile.in: add list.c to SRCS
+
+2007-09-06 07:18  millert
+
+	* configure: regen
+
+2007-09-06 07:17  millert
+
+	* configure.in: only do SIA checks on Digital Unix
+
+2007-09-05 18:50  millert
+
+	* sudoers.cat, sudoers.man.in: regen
+
+2007-09-05 18:48  millert
+
+	* ChangeLog, TODO: sync
+
 2007-09-05 18:39  millert
 
 	* auth/kerb5.c: Remove call to krb5_cc_register() as it is not
@@ -2511,11 +2780,10 @@
 
 2004-10-26 18:10  millert
 
-	* gram.c, gram.h, gram.y, parse.c, parse.h, parse.yacc, sudo.tab.h:
-	  Rewritten parser that converts sudoers into a set of data
-	  structures.  This eliminates ordering issues and makes it
-	  possible to apply sudoers Defaults entries before searching for
-	  the command.
+	* gram.c, gram.h, gram.y, parse.c, parse.h, parse.yacc: Rewritten
+	  parser that converts sudoers into a set of data structures.  This
+	  eliminates ordering issues and makes it possible to apply sudoers
+	  Defaults entries before searching for the command.
 
 2004-10-26 18:09  millert
 
@@ -2668,9 +2936,8 @@
 
 	* Makefile.in, configure, configure.in, def_data.c, def_data.h,
 	  def_data.in, lex.yy.c, parse.c, parse.h, parse.lex, parse.yacc,
-	  sudo.c, sudo.h, sudo.tab.h, sudoers.pod: No longer call it
-	  tracing, it is now "monitoring" which should be more a obvious
-	  name to non-hackers.
+	  sudo.c, sudo.h, sudoers.pod: No longer call it tracing, it is now
+	  "monitoring" which should be more a obvious name to non-hackers.
 
 2004-10-01 15:06  millert
 
@@ -2943,7 +3210,7 @@
 
 2004-09-24 14:11  millert
 
-	* lex.yy.c, sudo.tab.h: regen
+	* lex.yy.c: regen
 
 2004-09-24 14:10  millert
 
@@ -4348,11 +4615,6 @@
 	* sudo_noexec.c: stub execve() that just returns EACCES; used for
 	  noexec functionality
 
-2004-01-06 01:42  millert
-
-	* sudo.tab.h: Regen w/ updated byacc from OpenBSD; fixes a gcc 3.2
-	  issue with generated code.
-
 2004-01-05 16:10  millert
 
 	* def_data.c, def_data.h, def_data.in: Move the environment
@@ -4390,13 +4652,12 @@
 2004-01-04 21:48  millert
 
 	* def_data.c, def_data.h, def_data.in, env.c, lex.yy.c, parse.c,
-	  parse.h, parse.lex, parse.yacc, sudo.c, sudo.h, sudo.tab.h: Add
-	  support for preloading a shared object containing a dummy
-	  execve() function that just sets error and returns -1.  This adds
-	  a "noexec_file" option to load the filename as well as a "noexec"
-	  flag to enable it unconditionally.  There is also a NOEXEC tag
-	  that can be attached to specific commands and an EXEC tag to
-	  disable it.
+	  parse.h, parse.lex, parse.yacc, sudo.c, sudo.h: Add support for
+	  preloading a shared object containing a dummy execve() function
+	  that just sets error and returns -1.	This adds a "noexec_file"
+	  option to load the filename as well as a "noexec" flag to enable
+	  it unconditionally.  There is also a NOEXEC tag that can be
+	  attached to specific commands and an EXEC tag to disable it.
 
 2004-01-04 21:40  millert
 
@@ -5105,7 +5366,7 @@
 
 2003-01-17 18:10  millert
 
-	* lex.yy.c, sudo.tab.h: regen
+	* lex.yy.c: regen
 
 2003-01-17 18:09  millert
 
@@ -6185,7 +6446,7 @@
 
 2001-12-12 15:11  millert
 
-	* lex.yy.c, sudo.tab.h: regen parser
+	* lex.yy.c: regen parser
 
 2001-12-12 14:56  millert
 
@@ -7151,13 +7412,13 @@
 
 2000-03-22 23:38  millert
 
-	* lex.yy.c, parse.c, parse.h, parse.lex, parse.yacc, sudo.tab.h,
-	  testsudoers.c, visudo.c: Fully qualified hosts w/ wildcards were
-	  not matching the FQHOST token type.  There's really no need for a
-	  separate token for fully-qualified vs.  unqualified anymore so
-	  FQHOST is now history and hostname_matches now decides which
-	  hostname (short or long) to check based on whether or not the
-	  pattern contains a '.'.
+	* lex.yy.c, parse.c, parse.h, parse.lex, parse.yacc, testsudoers.c,
+	  visudo.c: Fully qualified hosts w/ wildcards were not matching
+	  the FQHOST token type.  There's really no need for a separate
+	  token for fully-qualified vs.  unqualified anymore so FQHOST is
+	  now history and hostname_matches now decides which hostname
+	  (short or long) to check based on whether or not the pattern
+	  contains a '.'.
 
 2000-03-22 23:09  millert
 
@@ -7973,7 +8234,7 @@
 	* BUGS, INSTALL, Makefile.in, TODO, aclocal.m4, check.c,
 	  config.h.in, configure, configure.in, defaults.c, defaults.h,
 	  find_path.c, lex.yy.c, logging.c, parse.h, parse.lex, parse.yacc,
-	  sudo.c, sudo.h, sudo.tab.h, testsudoers.c, version.c, visudo.c,
+	  sudo.c, sudo.h, testsudoers.c, version.c, visudo.c,
 	  auth/aix_auth.c, auth/fwtk.c, auth/kerb5.c, auth/pam.c,
 	  auth/rfc1938.c, auth/sia.c, auth/sudo_auth.c: Add support for
 	  "Defaults" line in sudoers to make configuration variables
@@ -8225,19 +8486,15 @@
 
 1999-08-24 12:40  millert
 
-	* sudo.tab.h: these should be generated with byacc, not bison
-
-1999-08-24 12:40  millert
-
 	* lex.yy.c: regen
 
 1999-08-24 11:58  millert
 
-	* parse.h, parse.yacc, sudo.tab.h: In "sudo -l" mode, the type of
-	  the stored (expanded) alias was not stored with the contents.
-	  This could lead to incorrect output if the sudoers file had
-	  different alias types with the same name.  Normal parsing (ie:
-	  not in '-l' mode) is unaffected.
+	* parse.h, parse.yacc: In "sudo -l" mode, the type of the stored
+	  (expanded) alias was not stored with the contents.  This could
+	  lead to incorrect output if the sudoers file had different alias
+	  types with the same name.  Normal parsing (ie: not in '-l' mode)
+	  is unaffected.
 
 1999-08-23 12:47  millert
 
@@ -8382,12 +8639,12 @@
 1999-08-14 11:34  millert
 
 	* Makefile.in, INSTALL, README, config.h.in, configure,
-	  configure.in, getspwuid.c, lex.yy.c, parse.lex, parse.yacc,
-	  sudo.tab.h: o --with-otp deprecated, use --without-passwd instead
-	  o real dependencies in the Makefile o --with-devel option to
-	  enable yacc, lex, and -Wall o style -- "foo -> bar" becomes
-	  "foo->bar" o ALL goes back to being a token, not a string but
-	  don't leak memory o rename hsotspec -> host in parse.yacc
+	  configure.in, getspwuid.c, lex.yy.c, parse.lex, parse.yacc: o
+	  --with-otp deprecated, use --without-passwd instead o real
+	  dependencies in the Makefile o --with-devel option to enable
+	  yacc, lex, and -Wall o style -- "foo -> bar" becomes "foo->bar" o
+	  ALL goes back to being a token, not a string but don't leak
+	  memory o rename hsotspec -> host in parse.yacc
 
 1999-08-12 12:26  millert
 
@@ -8578,7 +8835,7 @@
 
 1999-08-04 11:31  millert
 
-	* lex.yy.c, sudo.tab.h: regen
+	* lex.yy.c: regen
 
 1999-08-04 10:54  millert
 
@@ -9169,10 +9426,9 @@
 
 1999-04-07 19:18  millert
 
-	* parse.yacc, sudo.tab.h, sudoers.cat, sudoers.html, sudoers.man,
-	  sudoers.pod: You can now specifiy a host list instead of just a
-	  host or alias.  Ie: user = host1,host2,ALIAS,!host3 my_command
-	  now works.
+	* parse.yacc, sudoers.cat, sudoers.html, sudoers.man, sudoers.pod:
+	  You can now specifiy a host list instead of just a host or alias.
+	  Ie: user = host1,host2,ALIAS,!host3 my_command now works.
 
 1999-04-07 02:59  millert
 
