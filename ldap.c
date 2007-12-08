@@ -197,29 +197,21 @@ sudo_ldap_check_host(ld, entry)
     return(ret);
 }
 
-/*
- * Walk through search results and return TRUE if we have a runas match,
- * else FALSE.
- * Since the runas directive in /etc/sudoers is optional, so is sudoRunAs.
- */
 int
-sudo_ldap_check_runas(ld, entry)
+sudo_ldap_check_runas_user(ld, entry)
     LDAP *ld;
     LDAPMessage *entry;
 {
     char **v = NULL, **p = NULL;
     int ret = FALSE;
 
-    if (!entry)
-	return(ret);
-
-    /* If no runas user, just check the group. */
-    /* XXX - implement runas group checking via sudoRunasGroup */
     if (!runas_pw)
-	return(TRUE);
+	return(UNSPEC);
 
     /* get the values from the entry */
-    v = ldap_get_values(ld, entry, "sudoRunAs");
+    v = ldap_get_values(ld, entry, "sudoRunAsUser");
+    if (v == NULL)
+	v = ldap_get_values(ld, entry, "sudoRunAs");	/* backwards compat */
 
     /*
      * BUG:
@@ -267,12 +259,61 @@ sudo_ldap_check_runas(ld, entry)
 		ret = TRUE;
 	    break;
 	}
-	DPRINTF(("ldap sudoRunAs '%s' ... %s", *p,
+	DPRINTF(("ldap sudoRunAsUser '%s' ... %s", *p,
 	    ret ? "MATCH!" : "not"), 2);
     }
 
     if (v)
 	ldap_value_free(v);	/* cleanup */
+
+    return(ret);
+}
+
+int
+sudo_ldap_check_runas_group(ld, entry)
+    LDAP *ld;
+    LDAPMessage *entry;
+{
+    char **v = NULL, **p = NULL;
+    int ret = FALSE;
+
+    /* runas_gr is only set if the user specified the -g flag */
+    if (!runas_gr)
+	return(UNSPEC);
+
+    /* get the values from the entry */
+    v = ldap_get_values(ld, entry, "sudoRunAsGroup");
+
+    /* walk through values returned, looking for a match */
+    for (p = v; p && *p && !ret; p++) {
+	if (strcmp(*p, "ALL") == 0 || group_matches(*p, runas_gr))
+	    ret = TRUE;
+	DPRINTF(("ldap sudoRunAsGroup '%s' ... %s", *p,
+	    ret ? "MATCH!" : "not"), 2);
+    }
+
+    if (v)
+	ldap_value_free(v);	/* cleanup */
+
+    return(ret);
+}
+
+/*
+ * Walk through search results and return TRUE if we have a runas match,
+ * else FALSE.  RunAs info is optional.
+ */
+int
+sudo_ldap_check_runas(ld, entry)
+    LDAP *ld;
+    LDAPMessage *entry;
+{
+    int ret;
+
+    if (!entry)
+	return(FALSE);
+
+    ret = sudo_ldap_check_runas_user(ld, entry) != FALSE &&
+	sudo_ldap_check_runas_group(ld, entry) != FALSE;
 
     return(ret);
 }
@@ -812,16 +853,31 @@ sudo_ldap_display_privs(ldv, pw)
 		    ldap_value_free(v);
 		}
 
-		/* get the RunAs Values from the entry */
-		v = ldap_get_values(ld, entry, "sudoRunAs");
+		/* get the RunAsUser Values from the entry */
+		v = ldap_get_values(ld, entry, "sudoRunAsUser");
+		if (v == NULL)
+		    v = ldap_get_values(ld, entry, "sudoRunAs");
 		if (v != NULL) {
-		    printf("  RunAs: (");
+		    fputs("  RunAsUsers: ", stdout);
 		    for (p = v; *p != NULL; p++) {
 			if (p != v)
 			    fputs(", ", stdout);
 			fputs(*p, stdout);
 		    }
-		    puts(")");
+		    putchar('\n');
+		    ldap_value_free(v);
+		}
+
+		/* get the RunAsGroup Values from the entry */
+		v = ldap_get_values(ld, entry, "sudoRunAsGroup");
+		if (v != NULL) {
+		    fputs("  RunAsGroups: ", stdout);
+		    for (p = v; *p != NULL; p++) {
+			if (p != v)
+			    fputs(", ", stdout);
+			fputs(*p, stdout);
+		    }
+		    putchar('\n');
 		    ldap_value_free(v);
 		}
 
