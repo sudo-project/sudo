@@ -31,4 +31,8 @@ What's new in Sudo 1.7?
  * Visudo will now warn about aliases that are defined but not used.
 
  * The -i and -s command line flags now take an optional command
-   to be run via the shell.
+   to be run via the shell.  Previously, the argument was passed
+   to the shell as a script to run.
+
+ * Improved LDAP support.  The krb5_ccname parameter in ldap.conf
+   is now used for Kerberos SASL authentication if present.
