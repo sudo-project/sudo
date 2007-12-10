@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "November 21, 2007" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "December 10, 2007" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
@@ -162,8 +162,7 @@ sudo, sudoedit \- execute a command as another user
 .PP
 \&\fBsudo\fR [\fB\-bEHPS\fR] [\fB\-a\fR\ \fIauth_type\fR] [\fB\-C\fR\ \fIfd\fR]
 [\fB\-c\fR\ \fIclass\fR|\fI\-\fR] [\fB\-g\fR\ \fIgroupname\fR|\fI#gid\fR] [\fB\-p\fR\ \fIprompt\fR]
-[\fB\-u\fR\ \fIusername\fR|\fI#uid\fR] [\fB\s-1VAR\s0\fR=\fIvalue\fR]
-{\fB\-i\fR\ |\ \fB\-s\fR\ |\ \fIcommand\fR}
+[\fB\-u\fR\ \fIusername\fR|\fI#uid\fR] [\fB\s-1VAR\s0\fR=\fIvalue\fR] [{\fB\-i\fR\ |\ \fB\-s\fR]\ [<\fIcommand\fR}]
 .PP
 \&\fBsudoedit\fR [\fB\-S\fR] [\fB\-a\fR\ \fIauth_type\fR] [\fB\-C\fR\ \fIfd\fR]
 [\fB\-c\fR\ \fIclass\fR|\fI\-\fR] [\fB\-g\fR\ \fIgroupname\fR|\fI#gid\fR] [\fB\-p\fR\ \fIprompt\fR]
@@ -305,16 +304,18 @@ in \fIpasswd\fR\|(@mansectform@).  By default, \fBsudo\fR does not modify \f(CW\
 .IP "\-h" 12
 .IX Item "-h"
 The \fB\-h\fR (\fIhelp\fR) option causes \fBsudo\fR to print a usage message and exit.
-.IP "\-i" 12
-.IX Item "-i"
+.IP "\-i [command]" 12
+.IX Item "-i [command]"
 The \fB\-i\fR (\fIsimulate initial login\fR) option runs the shell specified
-in the \fIpasswd\fR\|(@mansectform@) entry of the user that the command is
-being run as.  The command name argument given to the shell begins
-with a `\f(CW\*(C`\-\*(C'\fR' to tell the shell to run as a login shell.  \fBsudo\fR
-attempts to change to that user's home directory before running the
-shell.  It also initializes the environment, leaving \fI\s-1DISPLAY\s0\fR
-and \fI\s-1TERM\s0\fR unchanged, setting \fI\s-1HOME\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR, \fI\s-1LOGNAME\s0\fR, and
-\&\fI\s-1PATH\s0\fR, and unsetting all other environment variables.
+in the \fIpasswd\fR\|(@mansectform@) entry of the target user as a login shell.  This
+means that login-specific resource files such as \f(CW\*(C`.profile\*(C'\fR or
+\&\f(CW\*(C`.login\*(C'\fR will be read by the shell.  If a command is specified,
+it is passed to the shell for execution.  Otherwise, an interactive
+shell is executed.  \fBsudo\fR attempts to change to that user's home
+directory before running the shell.  It also initializes the
+environment, leaving \fI\s-1DISPLAY\s0\fR and \fI\s-1TERM\s0\fR unchanged, setting
+\&\fI\s-1HOME\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR, \fI\s-1LOGNAME\s0\fR, and \fI\s-1PATH\s0\fR, and unsetting
+all other environment variables.
 .IP "\-K" 12
 .IX Item "-K"
 The \fB\-K\fR (sure \fIkill\fR) option is like \fB\-k\fR except that it removes
@@ -379,16 +380,21 @@ expanded to the invoking user's login name
 two consecutive \f(CW\*(C`%\*(C'\fR characters are collapsed into a single \f(CW\*(C`%\*(C'\fR character
 .RE
 .RS 12
+.Sp
+The prompt specified by the \fB\-p\fR option will override the system
+password prompt on systems that support \s-1PAM\s0 unless the
+\&\fIpassprompt_override\fR flag is disabled in \fIsudoers\fR.
 .RE
 .IP "\-S" 12
 .IX Item "-S"
 The \fB\-S\fR (\fIstdin\fR) option causes \fBsudo\fR to read the password from
 the standard input instead of the terminal device.
-.IP "\-s" 12
-.IX Item "-s"
+.IP "\-s [command]" 12
+.IX Item "-s [command]"
 The \fB\-s\fR (\fIshell\fR) option runs the shell specified by the \fI\s-1SHELL\s0\fR
-environment variable if it is set or the shell as specified
-in \fIpasswd\fR\|(@mansectform@).
+environment variable if it is set or the shell as specified in
+\&\fIpasswd\fR\|(@mansectform@).  If a command is specified, it is passed to the shell
+for execution.  Otherwise, an interactive shell is executed.
 .IP "\-U \fIuser\fR" 12
 .IX Item "-U user"
 The \fB\-U\fR (\fIother user\fR) option is used in conjunction with the \fB\-l\fR

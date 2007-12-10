@@ -15,7 +15,7 @@ SSYYNNOOPPSSIISS
 
        ssuuddoo [--bbEEHHPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
        [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d]
-       [VVAARR=_v_a_l_u_e] {--ii | --ss | _c_o_m_m_a_n_d}
+       [VVAARR=_v_a_l_u_e] [{--ii | --ss] [<_c_o_m_m_a_n_d}]
 
        ssuuddooeeddiitt [--SS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
        [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] file
@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7                     November 21, 2007                       1
+1.7                     December 10, 2007                       1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.7                     November 21, 2007                       2
+1.7                     December 10, 2007                       2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7                     November 21, 2007                       3
+1.7                     December 10, 2007                       3
 
 
 
@@ -208,17 +208,21 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        -h          The --hh (_h_e_l_p) option causes ssuuddoo to print a
                    usage message and exit.
 
-       -i          The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs
+       -i [command]
+                   The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs
                    the shell specified in the _p_a_s_s_w_d(4) entry of
-                   the user that the command is being run as.
-                   The command name argument given to the shell
-                   begins with a `-' to tell the shell to run as
-                   a login shell.  ssuuddoo attempts to change to
-                   that user's home directory before running the
-                   shell.  It also initializes the environment,
-                   leaving _D_I_S_P_L_A_Y and _T_E_R_M unchanged, setting
-                   _H_O_M_E, _S_H_E_L_L, _U_S_E_R, _L_O_G_N_A_M_E, and _P_A_T_H, and
-                   unsetting all other environment variables.
+                   the target user as a login shell.  This means
+                   that login-specific resource files such as
+                   .profile or .login will be read by the shell.
+                   If a command is specified, it is passed to the
+                   shell for execution.  Otherwise, an interac-
+                   tive shell is executed.  ssuuddoo attempts to
+                   change to that user's home directory before
+                   running the shell.  It also initializes the
+                   environment, leaving _D_I_S_P_L_A_Y and _T_E_R_M
+                   unchanged, setting _H_O_M_E, _S_H_E_L_L, _U_S_E_R, _L_O_G_N_A_M_E,
+                   and _P_A_T_H, and unsetting all other environment
+                   variables.
 
        -K          The --KK (sure _k_i_l_l) option is like --kk except
                    that it removes the user's timestamp entirely.
@@ -252,14 +256,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    1.
 
        -P          The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes
-                   ssuuddoo to preserve the invoking user's group
-                   vector unaltered.  By default, ssuuddoo will ini-
-                   tialize the group vector to the list of groups
-                   the target user is in.  The real and effective
 
 
 
-1.7                     November 21, 2007                       4
+1.7                     December 10, 2007                       4
 
 
 
@@ -268,6 +268,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+                   ssuuddoo to preserve the invoking user's group
+                   vector unaltered.  By default, ssuuddoo will ini-
+                   tialize the group vector to the list of groups
+                   the target user is in.  The real and effective
                    group IDs, however, are still set to match the
                    target user.
 
@@ -292,13 +296,22 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    %%  two consecutive % characters are collapsed
                        into a single % character
 
+                   The prompt specified by the --pp option will
+                   override the system password prompt on systems
+                   that support PAM unless the _p_a_s_s_p_r_o_m_p_t___o_v_e_r_-
+                   _r_i_d_e flag is disabled in _s_u_d_o_e_r_s.
+
        -S          The --SS (_s_t_d_i_n) option causes ssuuddoo to read the
                    password from the standard input instead of
                    the terminal device.
 
-       -s          The --ss (_s_h_e_l_l) option runs the shell specified
+       -s [command]
+                   The --ss (_s_h_e_l_l) option runs the shell specified
                    by the _S_H_E_L_L environment variable if it is set
-                   or the shell as specified in _p_a_s_s_w_d(4).
+                   or the shell as specified in _p_a_s_s_w_d(4).  If a
+                   command is specified, it is passed to the
+                   shell for execution.  Otherwise, an interac-
+                   tive shell is executed.
 
        -U _u_s_e_r     The --UU (_o_t_h_e_r _u_s_e_r) option is used in conjunc-
                    tion with the --ll option to specify the user
@@ -309,6 +322,18 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        -u _u_s_e_r     The --uu (_u_s_e_r) option causes ssuuddoo to run the
                    specified command as a user other than _r_o_o_t.
                    To specify a _u_i_d instead of a _u_s_e_r _n_a_m_e, use
+
+
+
+1.7                     December 10, 2007                       5
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
                    _#_u_i_d.  When running commands as a _u_i_d, many
                    shells require that the '#' be escaped with a
                    backslash ('\').  Note that if the _t_a_r_g_e_t_p_w
@@ -322,17 +347,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    out a list of the defaults ssuuddoo was compiled
                    with as well as the machine's local network
                    addresses.
-
-
-
-1.7                     November 21, 2007                       5
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
        -v          If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will
                    update the user's timestamp, prompting for the
@@ -374,6 +388,18 @@ RREETTUURRNN VVAALLUUEESS
        and one of the directories in your PATH is on a machine
        that is currently unreachable.
 
+
+
+
+1.7                     December 10, 2007                       6
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
 SSEECCUURRIITTYY NNOOTTEESS
        ssuuddoo tries to be safe when executing external commands.
 
@@ -388,18 +414,6 @@ SSEECCUURRIITTYY NNOOTTEESS
 
        If, however, the _e_n_v___r_e_s_e_t option is disabled in _s_u_d_o_e_r_s,
        any variables not explicitly denied by the _e_n_v___c_h_e_c_k and
-
-
-
-1.7                     November 21, 2007                       6
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        _e_n_v___d_e_l_e_t_e options are inherited from the invoking pro-
        cess.  In this case, _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e behave like
        a blacklist.  Since it is not possible to blacklist all
@@ -440,6 +454,18 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        its contents, the only damage that can be done is to
        "hide" files by putting them in the timestamp dir.  This
        is unlikely to happen since once the timestamp dir is
+
+
+
+1.7                     December 10, 2007                       7
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
        owned by root and inaccessible by any other user, the user
        placing files there would be unable to get them back out.
        To get around this issue you can use a directory that is
@@ -454,17 +480,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        This is done to keep a user from creating his/her own
        timestamp with a bogus date on systems that allow users to
        give away files.
-
-
-
-1.7                     November 21, 2007                       7
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
        Please note that ssuuddoo will normally only log the command
        it explicitly runs.  If a user runs a command such as sudo
@@ -505,6 +520,18 @@ EENNVVIIRROONNMMEENNTT
                        sudo
 
        SUDO_GID        Set to the gid of the user who invoked
+
+
+
+1.7                     December 10, 2007                       8
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
                        sudo
 
        SUDO_PS1        If set, PS1 will be set to its value
@@ -518,19 +545,6 @@ EENNVVIIRROONNMMEENNTT
 FFIILLEESS
        _/_e_t_c_/_s_u_d_o_e_r_s        List of who can run what
        _/_v_a_r_/_r_u_n_/_s_u_d_o       Directory containing timestamps
-
-
-
-
-
-1.7                     November 21, 2007                       8
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
 EEXXAAMMPPLLEESS
        Note: the following examples assume suitable _s_u_d_o_e_r_s(4)
@@ -572,6 +586,18 @@ AAUUTTHHOORRSS
 
        See the HISTORY file in the ssuuddoo distribution or visit
        http://www.sudo.ws/sudo/history.html for a short history
+
+
+
+1.7                     December 10, 2007                       9
+
+
+
+
+
+SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+
        of ssuuddoo.
 
 CCAAVVEEAATTSS
@@ -585,18 +611,6 @@ CCAAVVEEAATTSS
 
        It is not meaningful to run the cd command directly via
        sudo, e.g.,
-
-
-
-
-1.7                     November 21, 2007                       9
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
 
         $ sudo cd /usr/local/protected
 
@@ -641,20 +655,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.7                     November 21, 2007                      10
+1.7                     December 10, 2007                      10
 
 
