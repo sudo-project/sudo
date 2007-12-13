@@ -77,7 +77,7 @@ __unused static const char rcsid[] = "$Sudo$";
 #endif
 
 #if defined(LDAP_X_OPT_CONNECT_TIMEOUT) && !defined(LDAP_OPT_X_CONNECT_TIMEOUT)
-#define LDAP_OPT_X_CONNECT_TIMEOUT	LDAP_OPT_X_CONNECT_TIMEOUT
+#define LDAP_OPT_X_CONNECT_TIMEOUT	LDAP_X_OPT_CONNECT_TIMEOUT
 #endif
 
 #define	DPRINTF(args, level)	if (ldap_conf.debug >= level) warnx args
