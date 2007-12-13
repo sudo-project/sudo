@@ -730,8 +730,10 @@ parse_args(argc, argv)
 
     while (NewArgc > 0) {
 	if (NewArgv[0][0] == '-') {
-	    if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0')
+	    if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0') {
 		warnx("please use single character options");
+		usage(1);
+	    }
 
 	    switch (NewArgv[0][1]) {
 		case 'p':
