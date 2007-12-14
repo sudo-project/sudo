@@ -792,7 +792,7 @@ sudo_ldap_set_options(ld)
 		DPRINTF(("ldap_set_option: %s -> %d", cur->conf_str, ival), 1);
 		rc = ldap_set_option(ld, cur->opt_val, &ival);
 		if (rc != LDAP_OPT_SUCCESS) {
-		    fprintf(stderr, "ldap_set_option: %s -> %d: %s\n",
+		    warnx("ldap_set_option: %s -> %d: %s",
 			cur->conf_str, ival, ldap_err2string(rc));
 		    return(-1);
 		}
@@ -804,7 +804,7 @@ sudo_ldap_set_options(ld)
 		DPRINTF(("ldap_set_option: %s -> %s", cur->conf_str, sval), 1);
 		rc = ldap_set_option(ld, cur->opt_val, sval);
 		if (rc != LDAP_OPT_SUCCESS) {
-		    fprintf(stderr, "ldap_set_option: %s -> %s: %s\n",
+		    warnx("ldap_set_option: %s -> %s: %s",
 			cur->conf_str, sval, ldap_err2string(rc));
 		    return(-1);
 		}
@@ -823,7 +823,7 @@ sudo_ldap_set_options(ld)
 	    (long)tv.tv_sec), 1);
 	rc = ldap_set_option(ld, LDAP_OPT_NETWORK_TIMEOUT, &tv);
 	if (rc != LDAP_OPT_SUCCESS) {
-	    fprintf(stderr, "ldap_set_option(NETWORK_TIMEOUT, %ld): %s\n",
+	    warnx("ldap_set_option(NETWORK_TIMEOUT, %ld): %s",
 		(long)tv.tv_sec, ldap_err2string(rc));
 	    return(-1);
 	}
@@ -852,8 +852,7 @@ sudo_ldap_open()
 
 	rc = ldap_initialize(&ld, ldap_conf.uri);
 	if (rc != LDAP_SUCCESS) {
-	    fprintf(stderr, "ldap_initialize()=%d : %s\n",
-		rc, ldap_err2string(rc));
+	    warnx("unable to initialize LDAP: %s", ldap_err2string(rc));
 	    return(NULL);
 	}
     } else
@@ -863,8 +862,7 @@ sudo_ldap_open()
 	DPRINTF(("ldap_init(%s,%d)", ldap_conf.host, ldap_conf.port), 2);
 
 	if ((ld = ldap_init(ldap_conf.host, ldap_conf.port)) == NULL) {
-	    fprintf(stderr, "ldap_init(): errno=%d : %s\n",
-		errno, strerror(errno));
+	    warn("unable to initialize LDAP");
 	    return(NULL);
 	}
     }
@@ -878,8 +876,7 @@ sudo_ldap_open()
     if (ldap_conf.ssl && !strcasecmp(ldap_conf.ssl, "start_tls")) {
 	rc = ldap_start_tls_s(ld, NULL, NULL);
 	if (rc != LDAP_SUCCESS) {
-	    fprintf(stderr, "ldap_start_tls_s(): %d: %s\n", rc,
-		ldap_err2string(rc));
+	    warnx("ldap_start_tls_s(): %s", ldap_err2string(rc));
 	    ldap_unbind(ld);
 	    return(NULL);
 	}
@@ -889,10 +886,7 @@ sudo_ldap_open()
 
     /* Actually connect */
     if ((rc = ldap_simple_bind_s(ld, ldap_conf.binddn, ldap_conf.bindpw))) {
-	fprintf(stderr, "ldap_simple_bind_s(%s, %s): %s\n",
-	    ldap_conf.binddn ? ldap_conf.binddn : "NULL",
-	    ldap_conf.bindpw ? ldap_conf.bindpw : "NULL",
-	    ldap_err2string(rc));
+	warnx("ldap_simple_bind_s: %s", ldap_err2string(rc));
 	return(NULL);
     }
     DPRINTF(("ldap_bind() ok"), 1);
