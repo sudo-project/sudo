@@ -150,7 +150,7 @@ char *login_style;
 sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
 static char *runas_user;
 static char *runas_group;
-
+void *ldap_conn;
 
 int
 main(argc, argv, envp)
@@ -159,12 +159,8 @@ main(argc, argv, envp)
     char **envp;
 {
     int validated = 0;
-    int fd;
-    int cmnd_status;
-    int sudo_mode;
-    int pwflag;
+    int fd, cmnd_status, sudo_mode, pwflag, rc = 0;
     sigaction_t sa;
-    void *ld = NULL;
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
     extern char *malloc_options;
     malloc_options = "AFGJPR";
@@ -270,8 +266,8 @@ main(argc, argv, envp)
     init_vars(sudo_mode, envp);		/* XXX - move this later? */
 
 #ifdef HAVE_LDAP
-    if ((ld = sudo_ldap_open()) != NULL)
-	sudo_ldap_update_defaults(ld);
+    if ((ldap_conn = sudo_ldap_open()) != NULL)
+	sudo_ldap_update_defaults(ldap_conn);
 
     if (!def_ignore_local_sudoers)
 #endif
@@ -307,6 +303,7 @@ main(argc, argv, envp)
     /* This goes after sudoers is parsed since it may have timestamp options. */
     if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
 	remove_timestamp((sudo_mode == MODE_KILL));
+	cleanup(0);
 	exit(0);
     }
 
@@ -329,8 +326,8 @@ main(argc, argv, envp)
     cmnd_status = set_cmnd(sudo_mode);
 
 #ifdef HAVE_LDAP
-    if (ld != NULL)
-	validated = sudo_ldap_check(ld, pwflag);
+    if (ldap_conn != NULL)
+	validated = sudo_ldap_check(ldap_conn, pwflag);
     /* Fallback to sudoers if we are allowed to and we aren't validated. */
     if (!def_ignore_local_sudoers && !ISSET(validated, VALIDATE_OK))
 #endif
@@ -401,13 +398,10 @@ main(argc, argv, envp)
 
     if (ISSET(validated, VALIDATE_OK)) {
 	/* Finally tell the user if the command did not exist. */
-	if (cmnd_status == NOT_FOUND_DOT) {
-	    warningx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
-	    exit(1);
-	} else if (cmnd_status == NOT_FOUND) {
-	    warningx("%s: command not found", user_cmnd);
-	    exit(1);
-	}
+	if (cmnd_status == NOT_FOUND_DOT)
+	    errorx(1, "ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
+	else if (cmnd_status == NOT_FOUND)
+	    errorx(1, "%s: command not found", user_cmnd);
 
 	/* If user specified env vars make sure sudoers allows it. */
 	if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
@@ -419,21 +413,22 @@ main(argc, argv, envp)
 	}
 
 	log_auth(validated, 1);
-	if (sudo_mode == MODE_VALIDATE)
-	    exit(0);
-	else if (sudo_mode == MODE_CHECK)
-	    exit(display_cmnd(ld, list_pw ? list_pw : sudo_user.pw));
-	else if (sudo_mode == MODE_LIST) {
-	    display_privs(ld, list_pw ? list_pw : sudo_user.pw);
-	    exit(0);
-	}
+	if (sudo_mode == MODE_CHECK)
+	    rc = display_cmnd(ldap_conn, list_pw ? list_pw : sudo_user.pw);
+	else if (sudo_mode == MODE_LIST)
+	    display_privs(ldap_conn, list_pw ? list_pw : sudo_user.pw);
 
 #ifdef HAVE_LDAP
-	if (ld != NULL) {
-	    sudo_ldap_close(ld);
-	    ld = NULL;
+	if (ldap_conn != NULL) {
+	    sudo_ldap_close(ldap_conn);
+	    ldap_conn = NULL;
 	}
 #endif
+
+	/* Deferred exit due to sudo_ldap_close() */
+	if (sudo_mode == MODE_VALIDATE || sudo_mode == MODE_CHECK ||
+	    sudo_mode == MODE_LIST)
+	    exit(rc);
 
 	/* Override user's umask if configured to do so. */
 	if (def_umask != 0777)
@@ -1349,7 +1344,7 @@ get_authpw()
 }
 
 /*
- * Stub for error()/errorx()
+ * Cleanup hook for error()/errorx()
  */
 void
 cleanup(gotsignal)
@@ -1359,6 +1354,12 @@ cleanup(gotsignal)
 	sudo_endpwent();
 	sudo_endgrent();
     }
+#ifdef HAVE_LDAP
+    if (ld != NULL) {
+	sudo_ldap_close(ld);
+	ld = NULL;
+    }
+#endif
 }
 
 /*

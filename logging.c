@@ -393,8 +393,13 @@ log_error(flags, fmt, va_alist)
     if (logline != message)
 	efree(logline);
 
-    if (!ISSET(flags, NO_EXIT))
+    if (!ISSET(flags, NO_EXIT)) {
+#ifdef HAVE_LDAP
+	if (ldap_conn != NULL)
+	    sudo_ldap_close(ldap_conn);
+#endif
 	exit(1);
+    }
 }
 
 #define MAX_MAILFLAGS	63
