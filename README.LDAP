@@ -193,13 +193,13 @@ this file is stored, recompile SUDO with the -DLDAP_CONFIG compile option.
 Make sure you sudoers_base matches exactly with the location you specified
 when you imported the sudoers.  Below is an example /etc/ldap.conf
 
-  # Either specify a uri or host & port
+  # Either specify a URI or host and port.
+  # If neither is specified sudo will default to localhost port 389.
   #host          ldapserver
   #port          389
   #
-  # URI will override host & port settings
-  # but only works with LDAP SDK's that support
-  # ldap_initialize() such as OpenLDAP
+  # URI will override host & port settings but only works with LDAP
+  # SDK's that support ldap_initialize() such as OpenLDAP.
   uri            ldap://ldapserver
   #uri            ldaps://secureldapserver
   #
@@ -217,8 +217,17 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
   # LDAP Protocol Version defaults to 3
   #ldap_version 3
   #
+  # Define if you want to use an encrypted LDAP connection.
+  # Typically, you must also set the port to 636 (ldaps).
+  #ssl on
+  #
+  # Path to SSL certificate database; SunONE or iPlanet LDAP only.
+  #sslpath /etc/ssl/cert7.db
+  #
   # Define if you want to use port 389 and switch to
-  # encryption before the bind credentials are sent
+  # encryption before the bind credentials are sent.
+  # Only supported by LDAP servers that support the start_tls
+  # extension such as OpenLDAP.
   #ssl start_tls
   #
   # Additional TLS options follow that allow tweaking
