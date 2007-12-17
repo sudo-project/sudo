@@ -1564,7 +1564,7 @@ Optional Packages:
   --with-goons-insults    include the insults from the "Goon Show"
   --with-ldap[=DIR]       enable LDAP support
   --with-ldap-conf-file   path to LDAP configuration file
-  --with-ldap-secret-file path to LDAP secret pasdword file
+  --with-ldap-secret-file path to LDAP secret password file
   --with-pc-insults       replace politically incorrect insults with less offensive ones
   --with-secure-path      override the user's path with a built-in one
   --without-interfaces    don't try to read the ip addr of ether interfaces
