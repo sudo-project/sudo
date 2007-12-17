@@ -394,10 +394,7 @@ log_error(flags, fmt, va_alist)
 	efree(logline);
 
     if (!ISSET(flags, NO_EXIT)) {
-#ifdef HAVE_LDAP
-	if (ldap_conn != NULL)
-	    sudo_ldap_close(ldap_conn);
-#endif
+	cleanup(0);
 	exit(1);
     }
 }

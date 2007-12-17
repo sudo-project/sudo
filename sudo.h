@@ -292,7 +292,6 @@ extern struct passwd *auth_pw, *list_pw;
 
 extern int tgetpass_flags;
 extern uid_t timestamp_uid;
-extern void *ldap_conn;
 #endif
 #ifndef errno
 extern int errno;

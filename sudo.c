@@ -150,7 +150,7 @@ char *login_style;
 sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
 static char *runas_user;
 static char *runas_group;
-void *ldap_conn;
+static void *ldap_conn;
 
 int
 main(argc, argv, envp)
