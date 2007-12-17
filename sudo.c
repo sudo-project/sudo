@@ -1355,9 +1355,9 @@ cleanup(gotsignal)
 	sudo_endgrent();
     }
 #ifdef HAVE_LDAP
-    if (ld != NULL) {
-	sudo_ldap_close(ld);
-	ld = NULL;
+    if (ldap_conn != NULL) {
+	sudo_ldap_close(ldap_conn);
+	ldap_conn = NULL;
     }
 #endif
 }
