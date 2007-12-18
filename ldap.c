@@ -185,7 +185,7 @@ struct ldap_config_table ldap_conf_table[] = {
 	&ldap_conf.tls_keyfile },
 #endif
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
-    { "bind_timelimit", CONF_INT, TRUE, 0 /* needs timeval, set manually */,
+    { "bind_timelimit", CONF_INT, TRUE, -1 /* needs timeval, set manually */,
 	&ldap_conf.bind_timelimit },
 #elif defined(LDAP_X_OPT_CONNECT_TIMEOUT)
     { "bind_timelimit", CONF_INT, TRUE, LDAP_X_OPT_CONNECT_TIMEOUT,
