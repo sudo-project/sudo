@@ -120,13 +120,15 @@ struct ldap_config {
 } ldap_conf;
 
 struct ldap_config_table ldap_conf_table[] = {
-    { "debug", CONF_INT, FALSE, LDAP_OPT_DEBUG_LEVEL, &ldap_conf.ldap_debug },
     { "sudoers_debug", CONF_INT, FALSE, -1, &ldap_conf.debug },
     { "host", CONF_STR, FALSE, -1, &ldap_conf.host },
     { "port", CONF_INT, FALSE, -1, &ldap_conf.port },
     { "ssl", CONF_STR, FALSE, -1, &ldap_conf.ssl },
     { "sslpath", CONF_STR, FALSE, -1, &ldap_conf.sslpath },
     { "uri", CONF_STR, FALSE, -1, &ldap_conf.uri },
+#ifdef LDAP_OPT_DEBUG_LEVEL
+    { "debug", CONF_INT, FALSE, LDAP_OPT_DEBUG_LEVEL, &ldap_conf.ldap_debug },
+#endif
 #ifdef LDAP_OPT_PROTOCOL_VERSION
     { "ldap_version", CONF_INT, TRUE, LDAP_OPT_PROTOCOL_VERSION,
 	&ldap_conf.version },
@@ -804,8 +806,10 @@ sudo_ldap_set_options(ld)
     int rc;
 
     /* Set ber options */
+#ifdef LBER_OPT_DEBUG_LEVEL
     if (ldap_conf.ldap_debug)
 	ber_set_option(NULL, LBER_OPT_DEBUG_LEVEL, &ldap_conf.ldap_debug);
+#endif
 
     /* Set simple LDAP options */
     for (cur = ldap_conf_table; cur->conf_str != NULL; cur++) {
@@ -932,11 +936,13 @@ sudo_ldap_open()
 	    warnx("ldapssl_install_routines(): %s", ldapssl_err2string(rc));
 	    return(NULL);
 	}
+# ifdef LDAP_OPT_SSL
 	rc = ldap_set_option(ld, LDAP_OPT_SSL, LDAP_OPT_ON);
 	if (rc != LDAP_SUCCESS) {
 	    warnx("unable to enable SSL: %s", ldapssl_err2string(rc));
 	    return(NULL);
 	}
+# endif
     }
 #endif
 #ifdef HAVE_LDAP_START_TLS_S
