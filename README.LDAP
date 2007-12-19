@@ -221,9 +221,6 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
   # Typically, you must also set the port to 636 (ldaps).
   #ssl on
   #
-  # Path to SSL certificate database; SunONE or iPlanet LDAP only.
-  #sslpath /etc/ssl/cert7.db
-  #
   # Define if you want to use port 389 and switch to
   # encryption before the bind credentials are sent.
   # Only supported by LDAP servers that support the start_tls
@@ -237,7 +234,7 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
   #tls_checkpeer no  # ignore server SSL certificate
   #
   # If you enable tls_checkpeer, specify either tls_cacertfile
-  # or tls_cacertdir.
+  # or tls_cacertdir.  Only supported when using OpenLDAP.
   #
   #tls_cacertfile /etc/certs/trusted_signers.pem
   #tls_cacertdir  /etc/certs
@@ -245,11 +242,13 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
   # For systems that don't have /dev/random
   # use this along with PRNGD or EGD.pl to seed the
   # random number pool to generate cryptographic session keys.
+  # Only supported when using OpenLDAP.
   #
   #tls_randfile /etc/egd-pool
   #
   # You may restrict which ciphers are used.  Consult your SSL
   # documentation for which options go here.
+  # Only supported when using OpenLDAP.
   #
   #tls_ciphers <cipher-list>
   #
@@ -260,8 +259,15 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
   #   * Do not password protect the key file.
   #   * Ensure the keyfile is only readable by root.
   #
+  # For OpenLDAP:
   #tls_cert /etc/certs/client_cert.pem
   #tls_key  /etc/certs/client_key.pem
+  #
+  # For SunONE or iPlanet LDAP, tls_cert may be specified alone if it
+  # contains the server's certificate and not the client's certificate.
+  # Also, sslpath may be used in place of tls_cert.
+  #tls_cert /var/ldap/cert7.db
+  #tls_key /var/ldap/key3.db
   #
   # If using SASL authentication for LDAP (OpenSSL)
   # use_sasl yes
