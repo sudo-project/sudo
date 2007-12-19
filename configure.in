@@ -2287,7 +2287,7 @@ if test ${with_ldap-'no'} != "no"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_LBER_H)])
 
-    AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s ldap_sasl_interactive_bind_s ldapssl_client_init)
+    AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s ldap_sasl_interactive_bind_s ldapssl_init)
     AC_CHECK_HEADERS([sasl/sasl.h])
 
     AC_CHECK_LIB(gssapi, gss_krb5_ccache_name,
