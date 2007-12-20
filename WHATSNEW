@@ -34,5 +34,6 @@ What's new in Sudo 1.7?
    to be run via the shell.  Previously, the argument was passed
    to the shell as a script to run.
 
- * Improved LDAP support.  The krb5_ccname parameter in ldap.conf
-   is now used for Kerberos SASL authentication if present.
+ * Improved LDAP support.  SASL authentication may now be used in
+   conjunction when connecting to an LDAP server.  The krb5_ccname
+   parameter in ldap.conf may be used to enable Kerberos.
