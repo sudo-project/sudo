@@ -42,6 +42,8 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <ctype.h>
+#include <limits.h>
 #include <pwd.h>
 
 #include "sudo.h"
@@ -49,6 +51,10 @@
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
+
+#ifndef LINE_MAX
+# define LINE_MAX 2048
+#endif
 
 /*
  * Flags used in rebuild_env()
@@ -735,6 +741,49 @@ validate_env_vars(env_vars)
 	/* NOTREACHED */
 	efree(bad);
     }
+}
+
+/*
+ * Read in /etc/environment ala AIX and Linux.
+ * Lines are in the form of NAME=VALUE
+ * Invalid lines, blank lines, or lines consisting solely of a comment
+ * character are skipped.
+ */
+void
+read_env_file(path)
+    const char *path;
+{
+    FILE *fp;
+    char *cp, buf[LINE_MAX];
+    size_t len;
+
+    if ((fp = fopen(path, "r")) == NULL)
+	return;
+
+    /* Make sure we are operating on the current environment. */
+    if (env.envp != environ)
+	sync_env();
+
+    while (fgets(buf, sizeof(buf), fp) != NULL) {
+	len = strlen(buf);
+
+	/* Trim leading and trailing whitespace/newline */
+	while (len > 0 && isspace(buf[len - 1]))
+	    buf[--len] = '\0';
+	for (cp = buf; isblank(*cp); cp++)
+	    continue;
+
+	/* Skip blank or comment lines */
+	if (*cp == '\0' || *cp == '#')
+	    continue;
+
+	/* Must be of the form name=value */
+	if (strchr(cp, '=') == NULL)
+	    continue;
+
+	insert_env(estrdup(cp), TRUE, TRUE);
+    }
+    fclose(fp);
 }
 
 void

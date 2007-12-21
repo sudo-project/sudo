@@ -254,6 +254,7 @@ void efree		__P((void *));
 void dump_defaults	__P((void));
 void dump_auth_methods	__P((void));
 void init_envtables	__P((void));
+void read_env_file	__P((const char *));
 int lock_file		__P((int, int));
 int touch		__P((int, char *, struct timespec *));
 int user_is_exempt	__P((void));

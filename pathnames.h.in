@@ -45,6 +45,10 @@
 #define _PATH_DEFPATH		"/usr/bin:/bin"
 #endif /* _PATH_DEFPATH */
 
+#ifndef _PATH_ENVIRONMENT
+#define _PATH_ENVIRONMENT	"/etc/environment"
+#endif /* _PATH_ENVIRONMENT */
+
 /*
  * NOTE: _PATH_SUDOERS is usually overriden by the Makefile.
  */

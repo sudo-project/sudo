@@ -455,6 +455,9 @@ main(argc, argv, envp)
 	    /* Change to target user's homedir. */
 	    if (chdir(runas_pw->pw_dir) == -1)
 		warning("unable to change directory to %s", runas_pw->pw_dir);
+
+	    /* Insert system-wide environment variables. */
+	    read_env_file(_PATH_ENVIRONMENT);
 	}
 
 	if (ISSET(sudo_mode, MODE_EDIT))
