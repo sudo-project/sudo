@@ -45,6 +45,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <ctype.h>
+#include <limits.h>
 #include <pwd.h>
 #include <grp.h>
 #include <netinet/in.h>
