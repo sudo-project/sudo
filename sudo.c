@@ -165,6 +165,7 @@ main(argc, argv, envp)
     extern char *malloc_options;
     malloc_options = "AFGJPR";
 #endif
+    const unsigned char *nss, *nss_base;
 
 #ifdef HAVE_SETLOCALE
     setlocale(LC_ALL, "");
@@ -265,18 +266,32 @@ main(argc, argv, envp)
 
     init_vars(sudo_mode, envp);		/* XXX - move this later? */
 
-#ifdef HAVE_LDAP
-    if ((ldap_conn = sudo_ldap_open()) != NULL)
-	sudo_ldap_update_defaults(ldap_conn);
+    /* Parse nsswitch.conf for sudoers order. */
+    nss_base = read_nss(_PATH_NSSWITCH_CONF);
+    if (*nss_base == SUDO_NSS_LAST)
+	log_error(0, "No valid sudoers sources in nsswitch.conf");
 
-    if (!def_ignore_local_sudoers)
+    /* Set global defaults */
+    /* XXX - error out early if no sources can be opened */
+    for (nss = nss_base; *nss != SUDO_NSS_LAST; nss++) {
+#ifdef HAVE_LDAP
+	/* LDAP defaults must come first due to def_ignore_local_sudoers */
+	if (ldap_conn == NULL && ISSET(*nss, SUDO_NSS_LDAP)) {
+	    if ((ldap_conn = sudo_ldap_open()) != NULL)
+		sudo_ldap_update_defaults(ldap_conn);
+	    /* XXX - was: break; */
+	} else
 #endif
-    {
-	/* Parse sudoers and set any defaults listed in it. */
-	if (parse_sudoers(_PATH_SUDOERS) || parse_error)
-	    log_error(0, "parse error in %s near line %d", errorfile, errorlineno);
-	if (!update_defaults(SKIP_CMND))
-	    log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
+	if (ISSET(*nss, SUDO_NSS_FILES)) {
+	    if (def_ignore_local_sudoers)
+		continue;
+	    /* Parse sudoers and upate defaults from it. */
+	    if (parse_sudoers(_PATH_SUDOERS) || parse_error)
+		log_error(0, "parse error in %s near line %d", errorfile,
+		    errorlineno);
+	    if (!update_defaults(SKIP_CMND))
+		log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
+	}
     }
 
     /* XXX - collect post-sudoers parse settings into a function */
@@ -325,13 +340,27 @@ main(argc, argv, envp)
 
     cmnd_status = set_cmnd(sudo_mode);
 
+    for (nss = nss_base; *nss != SUDO_NSS_LAST; nss++) {
+	if (ISSET(*nss, SUDO_NSS_FILES)) {
+	    if (def_ignore_local_sudoers)
+		continue;
+	    rc = sudoers_lookup(pwflag);
+	}
 #ifdef HAVE_LDAP
-    if (ldap_conn != NULL)
-	validated = sudo_ldap_check(ldap_conn, pwflag);
-    /* Fallback to sudoers if we are allowed to and we aren't validated. */
-    if (!def_ignore_local_sudoers && !ISSET(validated, VALIDATE_OK))
+	else if (ISSET(*nss, SUDO_NSS_LDAP))
+	    rc = sudo_ldap_check(ldap_conn, pwflag);
 #endif
-	validated = sudoers_lookup(pwflag);
+
+	/* XXX - rethink this logic */
+	if (validated == 0 || ISSET(rc, VALIDATE_OK))
+	    validated = rc;
+	else if (ISSET(rc, VALIDATE_NOT_OK) && ISSET(validated, VALIDATE_NOT_OK))
+	    validated |= rc;
+
+	/* Handle [NOTFOUND=return] */
+	if (!ISSET(rc, VALIDATE_OK) && ISSET(*nss, SUDO_NSS_RETURN))
+	    break;
+    }
     if (safe_cmnd == NULL)
 	safe_cmnd = estrdup(user_cmnd);
 

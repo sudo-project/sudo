@@ -30,6 +30,7 @@
 #include "error.h"
 #include "defaults.h"
 #include "logging.h"
+#include "sudo_nss.h"
 
 /*
  * Info pertaining to the invoking user.

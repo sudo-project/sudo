@@ -366,8 +366,16 @@ seem.  If you desperately want this to be changed, contact Aaron Spangler
 
 Configure your /etc/nsswitch.conf
 =================================
-At the time of this writing, sudo does not consult nsswitch.conf for the
-search order.  But if it did, it would look like this:
-This might be implemented in the future.  For now just skip this step.
+Starting with version 1.7, sudo consults nsswitch.conf for the search order.
+The following sources are recognized.
+    files	read sudoers from a file (usually /etc/sudoers)
+    ldap	read sudoers from LDAP
+    compat	behave as if no nsswitch.conf was present
 
-  sudoers: files ldap
+I addition, the entry "[NOTFOUND=return]" will short-circuit the
+search if the user was not found in the preceding source.
+
+If /etc/nsswitch.conf is not present or there is no sudoers line,
+the following default is assumed:
+
+  sudoers: ldap files

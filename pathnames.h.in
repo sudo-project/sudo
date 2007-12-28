@@ -115,3 +115,7 @@
 #ifndef _PATH_LDAP_SECRET
 #define	_PATH_LDAP_SECRET	"/etc/ldap.secret"
 #endif /* _PATH_LDAP_SECRET */
+
+#ifndef _PATH_NSSWITCH_CONF
+#define	_PATH_NSSWITCH_CONF	"/etc/nsswitch.conf"
+#endif /* _PATH_NSSWITCH_CONF */

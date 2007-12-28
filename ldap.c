@@ -1304,6 +1304,9 @@ sudo_ldap_check(v, pwflag)
     int ldap_user_matches = FALSE, ldap_host_matches = FALSE; /* flags */
     struct passwd *pw = list_pw ? list_pw : sudo_user.pw;
 
+    if (ld == NULL)
+	return(0);	/* XXX - if only LDAP and we return 0, it will misbehasve */
+
     if (pwflag) {
 	int doauth = UNSPEC;
 	enum def_tupple pwcheck = 
