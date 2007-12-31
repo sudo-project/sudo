@@ -27,6 +27,15 @@
 # include <sys/file.h>
 #endif /* HAVE_FLOCK */
 #include <stdio.h>
+#ifdef HAVE_STRING_H
+# include <string.h>
+#else
+# ifdef HAVE_STRINGS_H
+#  include <strings.h>
+# endif
+#endif /* HAVE_STRING_H */
+#include <ctype.h>
+#include <limits.h>
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
@@ -39,6 +48,10 @@
 #endif
 
 #include "sudo.h"
+
+#ifndef LINE_MAX
+# define LINE_MAX 2048
+#endif
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
@@ -139,3 +152,30 @@ lock_file(fd, lockit)
 #endif
 }
 #endif
+
+/*
+ * Read a line of input, remove comments and strip off leading
+ * and trailing spaces.  Returns static storage that is reused.
+ */
+char *
+sudo_parseln(fp)
+    FILE *fp;
+{
+    size_t len;
+    char *cp = NULL;
+    static char buf[LINE_MAX];
+
+    if (fgets(buf, sizeof(buf), fp) != NULL) {
+	/* Remove comments */
+	if ((cp = strchr(buf, '#')) != NULL)
+	    *cp = '\0';
+
+	/* Trim leading and trailing whitespace/newline */
+	len = strlen(buf);
+	while (len > 0 && isspace(buf[len - 1]))
+	    buf[--len] = '\0';
+	for (cp = buf; isblank(*cp); cp++)
+	    continue;
+    }
+    return(cp);
+}

@@ -278,6 +278,7 @@ FILE *open_sudoers	__P((const char *, int *));
 void display_privs	__P((struct sudo_nss_list *, struct passwd *));
 int display_cmnd	__P((struct sudo_nss_list *, struct passwd *));
 int get_ttycols		__P((void));
+char *sudo_parseln	__P((FILE *));
 void sudo_setenv	__P((const char *, const char *, int));
 void sudo_unsetenv	__P((const char *));
 void sudo_setgrent	__P((void));

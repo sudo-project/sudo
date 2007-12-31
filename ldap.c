@@ -45,7 +45,6 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <ctype.h>
-#include <limits.h>
 #include <pwd.h>
 #include <grp.h>
 #include <netinet/in.h>
@@ -79,10 +78,6 @@
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
-
-#ifndef LINE_MAX
-# define LINE_MAX 2048
-#endif
 
 #ifndef LDAP_OPT_SUCCESS
 # define LDAP_OPT_SUCCESS LDAP_SUCCESS
@@ -658,8 +653,8 @@ _atobool(s)
 int
 sudo_ldap_read_config()
 {
-    FILE *f;
-    char buf[LINE_MAX], *c, *keyword, *value;
+    FILE *fp;
+    char *cp, *keyword, *value;
     struct ldap_config_table *cur;
 
     /* defaults */
@@ -671,38 +666,24 @@ sudo_ldap_read_config()
     ldap_conf.use_sasl = -1;
     ldap_conf.rootuse_sasl = -1;
 
-    if ((f = fopen(_PATH_LDAP_CONF, "r")) == NULL)
+    if ((fp = fopen(_PATH_LDAP_CONF, "r")) == NULL)
 	return(FALSE);
 
-    while (fgets(buf, sizeof(buf), f)) {
-	/* ignore text after comment character */
-	if ((c = strchr(buf, '#')) != NULL)
-	    *c = '\0';
-
-	/* skip leading whitespace */
-	for (c = buf; isspace((unsigned char) *c); c++)
-	    /* nothing */;
-
-	if (*c == '\0' || *c == '\n')
+    while ((cp = sudo_parseln(fp)) != NULL) {
+	if (*cp == '\0')
 	    continue;		/* skip empty line */
 
-	/* properly terminate keyword string */
-	keyword = c;
-	while (*c && !isspace((unsigned char) *c))
-	    c++;
-	if (*c)
-	    *c++ = '\0';	/* terminate keyword */
+	/* split into keyword and value */
+	keyword = cp;
+	while (*cp && !isblank((unsigned char) *cp))
+	    cp++;
+	if (*cp)
+	    *cp++ = '\0';	/* terminate keyword */
 
 	/* skip whitespace before value */
-	while (isspace((unsigned char) *c))
-	    c++;
-	value = c;
-
-	/* trim whitespace after value */
-	while (*c)
-	    c++;		/* wind to end */
-	while (--c > value && isspace((unsigned char) *c))
-	    *c = '\0';
+	while (isblank((unsigned char) *cp))
+	    cp++;
+	value = cp;
 
 	/* Look up keyword in config table. */
 	for (cur = ldap_conf_table; cur->conf_str != NULL; cur++) {
@@ -723,7 +704,7 @@ sudo_ldap_read_config()
 	    }
 	}
     }
-    fclose(f);
+    fclose(fp);
 
     if (!ldap_conf.host)
 	ldap_conf.host = "localhost";
@@ -810,21 +791,16 @@ sudo_ldap_read_config()
 
     /* If rootbinddn set, read in /etc/ldap.secret if it exists. */
     if (ldap_conf.rootbinddn) {
-	if ((f = fopen(_PATH_LDAP_SECRET, "r")) != NULL) {
-	    if (fgets(buf, sizeof(buf), f) != NULL) {
-		/* removing trailing newlines */
-		for (c = buf; *c != '\0'; c++)
-		    continue;
-		while (--c > buf && *c == '\n')
-		    *c = '\0';
+	if ((fp = fopen(_PATH_LDAP_SECRET, "r")) != NULL) {
+	    if ((cp = sudo_parseln(fp)) != NULL) {
 		/* copy to bindpw and binddn */
 		efree(ldap_conf.bindpw);
-		ldap_conf.bindpw = estrdup(buf);
+		ldap_conf.bindpw = estrdup(cp);
 		efree(ldap_conf.binddn);
 		ldap_conf.binddn = ldap_conf.rootbinddn;
 		ldap_conf.rootbinddn = NULL;
 	    }
-	    fclose(f);
+	    fclose(fp);
 	}
     }
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
@@ -836,8 +812,8 @@ sudo_ldap_read_config()
 	    strncasecmp(ldap_conf.krb5_ccname, "WRFILE:", 7) == 0) {
 	    value = ldap_conf.krb5_ccname +
 		(ldap_conf.krb5_ccname[4] == ':' ? 5 : 7);
-	    if ((f = fopen(value, "r")) != NULL) {
-		fclose(f);
+	    if ((fp = fopen(value, "r")) != NULL) {
+		fclose(fp);
 	    } else {
 		/* Can't open it, just ignore the entry. */
 		efree(ldap_conf.krb5_ccname);

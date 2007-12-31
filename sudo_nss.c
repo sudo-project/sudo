@@ -34,18 +34,12 @@
 #  include <strings.h>
 # endif
 #endif /* HAVE_STRING_H */
-#include <ctype.h>
-#include <limits.h>
 
 #include "sudo.h"
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
-
-#ifndef LINE_MAX
-# define LINE_MAX 2048
-#endif
 
 extern struct sudo_nss sudo_nss_file;
 
@@ -62,9 +56,8 @@ struct sudo_nss_list *
 read_nss(path)
     const char *path;
 {
-    size_t len;
     FILE *fp;
-    char *cp, buf[LINE_MAX];
+    char *cp;
     int saw_files = FALSE;
     int saw_ldap = FALSE;
     int got_match = FALSE;
@@ -73,20 +66,9 @@ read_nss(path)
     if ((fp = fopen(path, "r")) == NULL)
 	goto nomatch;
 
-    while (fgets(buf, sizeof(buf), fp) != NULL) {
-	/* Remove comments */
-	if ((cp = strchr(buf, '#')) != NULL)
-	    *cp = '\0';
-
-	/* Trim leading and trailing whitespace/newline */
-	len = strlen(buf);
-	while (len > 0 && isspace(buf[len - 1]))
-	    buf[--len] = '\0';
-	for (cp = buf; isblank(*cp); cp++)
-	    continue;
-
+    while ((cp = sudo_parseln(fp)) != NULL) {
 	/* Skip blank or comment lines */
-	if (*cp == '\0' || *cp == '#')
+	if (*cp == '\0')
 	    continue;
 
 	/* Look for a line starting with "sudoers:" */
