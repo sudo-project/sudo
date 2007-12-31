@@ -874,7 +874,7 @@ sudo_ldap_display_privs(nss, pw)
     if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
 	v = ldap_get_values(ld, entry, "sudoOption");
 	if (v != NULL) {
-	    fputs("Global options:\n  ", stdout);
+	    fputs("Global LDAP options:\n  ", stdout);
 	    for (p = v; *p != NULL; p++) {
 		if (p != v)
 		    fputs("\n  ", stdout);
