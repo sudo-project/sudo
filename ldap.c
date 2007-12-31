@@ -1355,13 +1355,6 @@ sudo_ldap_lookup(nss, pwflag)
 			SET(ret, FLAG_CHECK_USER);
 			break;
 		    case all:
-			/*
-			 * If we are not ignoring local sudoers we
-			 * can't make a decision yet. (XXX)
-			 */
-			if (!def_ignore_local_sudoers && doauth == FALSE)
-			    def_authenticate = FALSE;
-			break;
 		    case any:
 			if (doauth == FALSE)
 			    def_authenticate = FALSE;
