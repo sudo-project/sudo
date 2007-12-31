@@ -311,17 +311,18 @@ display_privs(snl, pw)
 
 #if defined(HAVE_INITGROUPS) && defined(HAVE_GETGROUPS)
     /* XXX - refactor and call for display_cmnd too */
-    /* Set group vector so group matching works correctly. */
+    /* Reset group vector so group matching works correctly. */
     if (pw != sudo_user.pw) {
 	(void) initgroups(pw->pw_name, pw->pw_gid);
-	efree(user_groups);
 	if ((user_ngroups = getgroups(0, NULL)) > 0) {
 	    user_groups = erealloc3(user_groups, user_ngroups,
 		sizeof(GETGROUPS_T));
 	    if (getgroups(user_ngroups, user_groups) < 0)
 		log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
-	} else
+	} else {
 	    user_ngroups = 0;
+	    efree(user_groups);
+	}
     }
 #endif
 
