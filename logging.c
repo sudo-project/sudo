@@ -632,7 +632,7 @@ new_logline(message, serrno)
 	len += strlen(message) + 3;
     if (serrno) {
 	errstr = strerror(serrno);
-	len += strlen(errstr) + 2;
+	len += strlen(errstr) + 3;
     }
     len += sizeof(LL_TTY_STR) + 2 + strlen(user_tty);
     len += sizeof(LL_CWD_STR) + 2 + strlen(user_cwd);
