@@ -298,20 +298,12 @@ sudo_file_lookup(nss, pwflag)
 #define	TAG_CHANGED(t) \
 	(cs->tags.t != UNSPEC && cs->tags.t != IMPLIED && cs->tags.t != tags.t)
 
-/*
- * Print out privileges for the specified user.
- * XXX - move out of parse.c
- */
-void
-display_privs(snl, pw)
-    struct sudo_nss_list *snl;
+/* Reset user_groups based on passwd entry. */
+static void
+reset_groups(pw)
     struct passwd *pw;
 {
-    struct sudo_nss *nss;
-
 #if defined(HAVE_INITGROUPS) && defined(HAVE_GETGROUPS)
-    /* XXX - refactor and call for display_cmnd too */
-    /* Reset group vector so group matching works correctly. */
     if (pw != sudo_user.pw) {
 	(void) initgroups(pw->pw_name, pw->pw_gid);
 	if ((user_ngroups = getgroups(0, NULL)) > 0) {
@@ -325,9 +317,28 @@ display_privs(snl, pw)
 	}
     }
 #endif
+}
 
-    tq_foreach_fwd(snl, nss)
+/*
+ * Print out privileges for the specified user.
+ * XXX - move out of parse.c
+ */
+void
+display_privs(snl, pw)
+    struct sudo_nss_list *snl;
+    struct passwd *pw;
+{
+    struct sudo_nss *nss;
+
+    /* Reset group vector so group matching works correctly. */
+    reset_groups(pw);
+
+    /* Display privileges from all sources. */
+    tq_foreach_fwd(snl, nss) {
+	if (nss != tq_first(snl))
+	    putchar('\n');
 	nss->display_privs(nss, pw);
+    }
 }
 
 void
@@ -546,15 +557,15 @@ display_cmnd(snl, pw)
     struct passwd *pw;
 {
     struct sudo_nss *nss;
-    int rval = 1;
 
-    /* XXX - reset group vector? */
+    /* Reset group vector so group matching works correctly. */
+    reset_groups(pw);
 
     tq_foreach_fwd(snl, nss) {
 	if (nss->display_cmnd(nss, pw) == 0)
-	    rval = 0;
+	    return(0);
     }
-    return(rval);
+    return(1);
 }
 
 int
