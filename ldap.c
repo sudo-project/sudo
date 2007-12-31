@@ -860,8 +860,10 @@ sudo_ldap_display_privs(nss, pw)
 	    ldap_value_free(v);
 	}
     }
-    if (result)
+    if (result) {
 	ldap_msgfree(result);
+	result = NULL;
+    }
 
     /*
      * Okay - time to search for anything that matches this user
@@ -959,6 +961,7 @@ sudo_ldap_display_privs(nss, pw)
 	    }
 	}
 	ldap_msgfree(result);
+	result = NULL;
     }
 }
 
@@ -1009,8 +1012,7 @@ sudo_ldap_display_cmnd(nss, pw)
 		break;
 	    }
 	}
-	if (result)
-	    ldap_msgfree(result);
+	ldap_msgfree(result);
 	result = NULL;
     }
 
@@ -1343,6 +1345,7 @@ sudo_ldap_lookup(nss, pwflag)
 		}
 	    }
 	    ldap_msgfree(result);
+	    result = NULL;
 	}
 	if (ret || user_uid == 0) {
 	    ret = VALIDATE_OK;
@@ -1429,6 +1432,7 @@ sudo_ldap_lookup(nss, pwflag)
 		}
 	    }
 	    ldap_msgfree(result);
+	    result = NULL;
 	}
     }
 
@@ -1446,7 +1450,7 @@ done:
 	else if (!ldap_host_matches)
 	    SET(ret, FLAG_NO_HOST);
     }
-    DPRINTF(("sudo_ldap_check(%d)=0x%02x", pwflag, ret), 1);
+    DPRINTF(("sudo_ldap_lookup(%d)=0x%02x", pwflag, ret), 1);
 
     return(ret);
 }
