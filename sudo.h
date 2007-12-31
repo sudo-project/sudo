@@ -27,8 +27,9 @@
 #include <pathnames.h>
 #include <limits.h>
 #include "compat.h"
-#include "error.h"
 #include "defaults.h"
+#include "error.h"
+#include "list.h"
 #include "logging.h"
 #include "sudo_nss.h"
 
@@ -225,15 +226,21 @@ char *tgetpass		__P((const char *, int, int));
 int find_path		__P((char *, char **, struct stat *, char *));
 void check_user		__P((int));
 void verify_user	__P((struct passwd *, char *));
-int sudoers_lookup	__P((int));
-int parse_sudoers	__P((const char *));
 #ifdef HAVE_LDAP
-int sudo_ldap_check	__P((void *, int));
 void sudo_ldap_display_privs __P((void *, struct passwd *));
 int sudo_ldap_display_cmnd __P((void *, struct passwd *));
-void sudo_ldap_update_defaults __P((void *));
-void *sudo_ldap_open	__P((void));
-void sudo_ldap_close	__P((void *));
+int sudo_ldap_open	__P((struct sudo_nss *));
+int sudo_ldap_close	__P((struct sudo_nss *));
+int sudo_ldap_setdefs	__P((struct sudo_nss *));
+int sudo_ldap_lookup	__P((struct sudo_nss *, int));
+int sudo_ldap_parse	__P((struct sudo_nss *));
+#endif
+#if 1
+int sudo_file_open	__P((struct sudo_nss *));
+int sudo_file_close	__P((struct sudo_nss *));
+int sudo_file_setdefs	__P((struct sudo_nss *));
+int sudo_file_lookup	__P((struct sudo_nss *, int));
+int sudo_file_parse	__P((struct sudo_nss *));
 #endif
 void set_perms		__P((int));
 void remove_timestamp	__P((int));

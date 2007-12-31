@@ -30,7 +30,6 @@
 #endif /* STDC_HEADERS */
 
 #include "sudo.h"
-#include "list.h"
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";

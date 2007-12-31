@@ -157,8 +157,8 @@ BINFILES= ChangeLog HISTORY LICENSE README TODO TROUBLESHOOTING \
 BINSPECIAL= INSTALL.binary Makefile.binary.in libtool
 
 SUDODEP = $(srcdir)/sudo.h $(srcdir)/compat.h $(srcdir)/defaults.h \
-	  $(srcdir)/error.h $(srcdir)/logging.h $(devdir)/def_data.h \
-	  pathnames.h config.h
+	  $(srcdir)/error.h $(srcdir)/list.h $(srcdir)/logging.h \
+	  $(srcdir)/sudo_nss.h $(devdir)/def_data.h pathnames.h config.h
 
 AUTHDEP = $(SUDODEP) $(authdir)/sudo_auth.h
 

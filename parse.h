@@ -20,8 +20,6 @@
 #ifndef _SUDO_PARSE_H
 #define _SUDO_PARSE_H
 
-#include "list.h"
-
 #undef UNSPEC
 #define UNSPEC	-1
 #undef DENY

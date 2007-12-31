@@ -150,7 +150,7 @@ char *login_style;
 sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
 static char *runas_user;
 static char *runas_group;
-static void *ldap_conn;
+static struct sudo_nss_list *snl;
 
 int
 main(argc, argv, envp)
@@ -165,7 +165,7 @@ main(argc, argv, envp)
     extern char *malloc_options;
     malloc_options = "AFGJPR";
 #endif
-    const unsigned char *nss, *nss_base;
+    struct sudo_nss *nss;
 
 #ifdef HAVE_SETLOCALE
     setlocale(LC_ALL, "");
@@ -267,31 +267,14 @@ main(argc, argv, envp)
     init_vars(sudo_mode, envp);		/* XXX - move this later? */
 
     /* Parse nsswitch.conf for sudoers order. */
-    nss_base = read_nss(_PATH_NSSWITCH_CONF);
-    if (*nss_base == SUDO_NSS_LAST)
-	log_error(0, "No valid sudoers sources in nsswitch.conf");
+    snl = read_nss(_PATH_NSSWITCH_CONF);
 
     /* Set global defaults */
     /* XXX - error out early if no sources can be opened */
-    for (nss = nss_base; *nss != SUDO_NSS_LAST; nss++) {
-#ifdef HAVE_LDAP
-	/* LDAP defaults must come first due to def_ignore_local_sudoers */
-	if (ldap_conn == NULL && ISSET(*nss, SUDO_NSS_LDAP)) {
-	    if ((ldap_conn = sudo_ldap_open()) != NULL)
-		sudo_ldap_update_defaults(ldap_conn);
-	    /* XXX - was: break; */
-	} else
-#endif
-	if (ISSET(*nss, SUDO_NSS_FILES)) {
-	    if (def_ignore_local_sudoers)
-		continue;
-	    /* Parse sudoers and upate defaults from it. */
-	    if (parse_sudoers(_PATH_SUDOERS) || parse_error)
-		log_error(0, "parse error in %s near line %d", errorfile,
-		    errorlineno);
-	    if (!update_defaults(SKIP_CMND))
-		log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
-	}
+    tq_foreach_fwd(snl, nss) {
+	/* XXX - remove from tailq if open or parse fails? */
+	if (nss->open(nss) == 0 && nss->parse(nss) == 0)
+	    nss->setdefs(nss);
     }
 
     /* XXX - collect post-sudoers parse settings into a function */
@@ -340,16 +323,11 @@ main(argc, argv, envp)
 
     cmnd_status = set_cmnd(sudo_mode);
 
-    for (nss = nss_base; *nss != SUDO_NSS_LAST; nss++) {
-	if (ISSET(*nss, SUDO_NSS_FILES)) {
-	    if (def_ignore_local_sudoers)
-		continue;
-	    rc = sudoers_lookup(pwflag);
-	}
-#ifdef HAVE_LDAP
-	else if (ISSET(*nss, SUDO_NSS_LDAP))
-	    rc = sudo_ldap_check(ldap_conn, pwflag);
-#endif
+    tq_foreach_fwd(snl, nss) {
+	/* XXX - should lookup check handle instead? */
+	if (!nss->handle)
+	    continue;
+	rc = nss->lookup(nss, pwflag);
 
 	/* XXX - rethink this logic */
 	if (validated == 0 || ISSET(rc, VALIDATE_OK))
@@ -358,7 +336,7 @@ main(argc, argv, envp)
 	    validated |= rc;
 
 	/* Handle [NOTFOUND=return] */
-	if (!ISSET(rc, VALIDATE_OK) && ISSET(*nss, SUDO_NSS_RETURN))
+	if (!ISSET(rc, VALIDATE_OK) && nss->ret_notfound)
 	    break;
     }
     if (safe_cmnd == NULL)
@@ -443,16 +421,13 @@ main(argc, argv, envp)
 
 	log_auth(validated, 1);
 	if (sudo_mode == MODE_CHECK)
-	    rc = display_cmnd(ldap_conn, list_pw ? list_pw : sudo_user.pw);
+	    rc = display_cmnd(NULL, list_pw ? list_pw : sudo_user.pw);
 	else if (sudo_mode == MODE_LIST)
-	    display_privs(ldap_conn, list_pw ? list_pw : sudo_user.pw);
+	    display_privs(NULL, list_pw ? list_pw : sudo_user.pw);
 
-#ifdef HAVE_LDAP
-	if (ldap_conn != NULL) {
-	    sudo_ldap_close(ldap_conn);
-	    ldap_conn = NULL;
-	}
-#endif
+	/* Cleanup sudoers sources */
+	tq_foreach_fwd(snl, nss)
+	    nss->close(nss);
 
 	/* Deferred exit due to sudo_ldap_close() */
 	if (sudo_mode == MODE_VALIDATE || sudo_mode == MODE_CHECK ||
@@ -1382,16 +1357,14 @@ void
 cleanup(gotsignal)
     int gotsignal;
 {
+    struct sudo_nss *nss;
+
     if (!gotsignal) {
+	tq_foreach_fwd(snl, nss)
+	    nss->close(nss);
 	sudo_endpwent();
 	sudo_endgrent();
     }
-#ifdef HAVE_LDAP
-    if (ldap_conn != NULL) {
-	sudo_ldap_close(ldap_conn);
-	ldap_conn = NULL;
-    }
-#endif
 }
 
 /*

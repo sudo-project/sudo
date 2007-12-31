@@ -115,7 +115,7 @@ struct ldap_config_table {
 };
 
 /* ldap configuration structure */
-struct ldap_config {
+static struct ldap_config {
     int port;
     int version;
     int debug;
@@ -145,7 +145,7 @@ struct ldap_config {
     char *krb5_ccname;
 } ldap_conf;
 
-struct ldap_config_table ldap_conf_table[] = {
+static struct ldap_config_table ldap_conf_table[] = {
     { "sudoers_debug", CONF_INT, FALSE, -1, &ldap_conf.debug },
     { "host", CONF_STR, FALSE, -1, &ldap_conf.host },
     { "port", CONF_INT, FALSE, -1, &ldap_conf.port },
@@ -215,6 +215,17 @@ struct ldap_config_table ldap_conf_table[] = {
     { "krb5_ccname", CONF_STR, FALSE, -1, &ldap_conf.krb5_ccname },
 #endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
     { NULL }
+};
+
+/* XXX - add display_cmnd and display_privs */
+struct sudo_nss sudo_nss_ldap = {
+    &sudo_nss_ldap,
+    NULL,
+    sudo_ldap_open,
+    sudo_ldap_close,
+    sudo_ldap_parse,
+    sudo_ldap_setdefs,
+    sudo_ldap_lookup
 };
 
 /*
@@ -1146,9 +1157,11 @@ sudo_ldap_set_options(ld)
 
 /*
  * Open a connection to the LDAP server.
+ * Returns 0 on success and non-zero on failure.
  */
-void *
-sudo_ldap_open()
+int
+sudo_ldap_open(nss)
+    struct sudo_nss *nss;
 {
     LDAP *ld;
     const char *old_ccname = user_ccname;
@@ -1158,7 +1171,7 @@ sudo_ldap_open()
 #endif
 
     if (!sudo_ldap_read_config())
-	return(NULL);
+	return(-1);
 
 #ifdef HAVE_LDAPSSL_INIT
     if (ldap_conf.ssl_mode == SUDO_LDAP_SSL) {
@@ -1170,7 +1183,7 @@ sudo_ldap_open()
 	if (rc != LDAP_SUCCESS) {
 	    warningx("unable to initialize SSL cert and key db: %s",
 		ldapssl_err2string(rc));
-	    return(NULL);
+	    return(-1);
 	}
     }
 #endif /* HAVE_LDAPSSL_INIT */
@@ -1182,7 +1195,7 @@ sudo_ldap_open()
 	rc = ldap_initialize(&ld, ldap_conf.uri);
 	if (rc != LDAP_SUCCESS) {
 	    warningx("unable to initialize LDAP: %s", ldap_err2string(rc));
-	    return(NULL);
+	    return(-1);
 	}
     } else
 #endif /* HAVE_LDAP_INITIALIZE */
@@ -1198,20 +1211,20 @@ sudo_ldap_open()
 #endif
 	if (ld == NULL) {
 	    warning("unable to initialize LDAP");
-	    return(NULL);
+	    return(-1);
 	}
     }
 
     /* Set LDAP options */
     if (sudo_ldap_set_options(ld) < 0)
-	return(NULL);
+	return(-1);
 
     if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
 #ifdef HAVE_LDAP_START_TLS_S
 	rc = ldap_start_tls_s(ld, NULL, NULL);
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_start_tls_s(): %s", ldap_err2string(rc));
-	    return(NULL);
+	    return(-1);
 	}
 	DPRINTF(("ldap_start_tls_s() ok"), 1);
 #else
@@ -1251,7 +1264,7 @@ sudo_ldap_open()
 	}
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_sasl_interactive_bind_s(): %s", ldap_err2string(rc));
-	    return(NULL);
+	    return(-1);
 	}
 	DPRINTF(("ldap_sasl_interactive_bind_s() ok"), 1);
     } else
@@ -1260,21 +1273,25 @@ sudo_ldap_open()
 	/* Actually connect */
 	if ((rc = ldap_simple_bind_s(ld, ldap_conf.binddn, ldap_conf.bindpw))) {
 	    warningx("ldap_simple_bind_s(): %s", ldap_err2string(rc));
-	    return(NULL);
+	    return(-1);
 	}
 	DPRINTF(("ldap_simple_bind_s() ok"), 1);
     }
 
-    return((void *) ld);
+    nss->handle = ld;
+    return(0);
 }
 
-void
-sudo_ldap_update_defaults(v)
-    void *v;
+int
+sudo_ldap_setdefs(nss)
+    struct sudo_nss *nss;
 {
-    LDAP *ld = (LDAP *) v;
+    LDAP *ld = (LDAP *) nss->handle;
     LDAPMessage *entry = NULL, *result = NULL;	 /* used for searches */
     int rc;					 /* temp return value */
+
+    if (ld == NULL)
+	return(-1);
 
     rc = ldap_search_s(ld, ldap_conf.base, LDAP_SCOPE_SUBTREE,
 	"cn=defaults", NULL, 0, &result);
@@ -1286,17 +1303,19 @@ sudo_ldap_update_defaults(v)
 
     if (result)
 	ldap_msgfree(result);
+
+    return(0);
 }
 
 /*
  * like sudoers_lookup() - only LDAP style
  */
 int
-sudo_ldap_check(v, pwflag)
-    void *v;
+sudo_ldap_lookup(nss, pwflag)
+    struct sudo_nss *nss;
     int pwflag;
 {
-    LDAP *ld = (LDAP *) v;
+    LDAP *ld = (LDAP *) nss->handle;
     LDAPMessage *entry = NULL, *result = NULL;	/* used for searches */
     char *filt;					/* used to parse attributes */
     int do_netgr, rc, ret;			/* temp/final return values */
@@ -1452,10 +1471,22 @@ done:
 /*
  * shut down LDAP connection
  */
-void
-sudo_ldap_close(v)
-    void *v;
+int
+sudo_ldap_close(nss)
+    struct sudo_nss *nss;
 {
-    if (v != NULL)
-	ldap_unbind_s((LDAP *) v);
+    if (nss->handle != NULL)
+	ldap_unbind_s((LDAP *) nss->handle);
+    nss->handle = NULL;
+    return(0);
+}
+
+/*
+ * STUB
+ */
+int
+sudo_ldap_parse(nss)
+    struct sudo_nss *nss;
+{
+    return(0);
 }

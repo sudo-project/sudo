@@ -55,6 +55,24 @@ __unused static const char rcsid[] = "$Sudo$";
 /* Characters that must be quoted in sudoers */
 #define SUDOERS_QUOTED	":\\,=#\""
 
+/* sudoers nsswitch routines */
+struct sudo_nss sudo_nss_file = {
+    &sudo_nss_file,
+    NULL,
+    sudo_file_open,
+    sudo_file_close,
+    sudo_file_parse,
+    sudo_file_setdefs,
+    sudo_file_lookup
+};
+
+/*
+ * Parser externs.
+ */
+extern FILE *yyin;
+extern char *errorfile;
+extern int errorlineno, parse_error;
+
 /*
  * Local prototypes.
  */
@@ -62,18 +80,59 @@ static void print_member	__P((struct lbuf *, char *, int, int, int));
 static void display_defaults	__P((struct passwd *));
 static void display_bound_defaults __P((int));
 
+int
+sudo_file_open(nss)
+    struct sudo_nss *nss;
+{
+    /* XXX - open_sudoers() errors out if cannot open */
+    nss->handle = open_sudoers(_PATH_SUDOERS, NULL);
+    return(nss->handle ? 0 : -1);
+}
+
+int
+sudo_file_close(nss)
+    struct sudo_nss *nss;
+{
+    /* XXX - free up data structures */
+    if (nss->handle != NULL) {
+	fclose(nss->handle);
+	nss->handle = NULL;
+	yyin = NULL;
+    }
+    return(0);
+}
+
 /*
  * Parse the specified sudoers file.
  */
 int
-parse_sudoers(path)
-    const char *path;
+sudo_file_parse(nss)
+    struct sudo_nss *nss;
 {
-    extern FILE *yyin;
+    if (nss->handle == NULL)
+	return(-1);
 
-    yyin = open_sudoers(_PATH_SUDOERS, NULL);
     init_parser(_PATH_SUDOERS, 0);
-    return(yyparse());
+    yyin = nss->handle;
+    /* XXX - log_error() is terminal */
+    if (yyparse() != 0 || parse_error) {
+	log_error(0, "parse error in %s near line %d", errorfile, errorlineno);
+	return(-1);
+    }
+    return(0);
+}
+
+int
+sudo_file_setdefs(nss)
+    struct sudo_nss *nss;
+{
+    if (nss->handle == NULL)
+	return(-1);
+
+    /* XXX - move guts of update_defaults here */
+    if (!update_defaults(SKIP_CMND))
+	return(-1);
+    return(0);
 }
 
 /*
@@ -81,7 +140,8 @@ parse_sudoers(path)
  * allowed to run the specified command on this host as the target user.
  */
 int
-sudoers_lookup(pwflag)
+sudo_file_lookup(nss, pwflag)
+    struct sudo_nss *nss;
     int pwflag;
 {
     int validated, match, host_match, runas_match, cmnd_match;
@@ -285,6 +345,7 @@ display_privs(v, pw)
 	}
 	lbuf_destroy(&lbuf);
     }
+    /* XXX - nss */
 #ifdef HAVE_LDAP
     if (v != NULL)
 	sudo_ldap_display_privs(v, pw);
@@ -434,6 +495,7 @@ display_cmnd(v, pw)
     int rval = 1;
     int host_match, runas_match, cmnd_match;
 
+    /* XXX - nss */
 #ifdef HAVE_LDAP
     if (v != NULL)
 	rval = sudo_ldap_display_cmnd(v, pw);
