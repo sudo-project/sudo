@@ -297,6 +297,13 @@ main(argc, argv)
     exit(0);
 }
 
+int
+update_defaults(skip_cmnd)
+    int skip_cmnd;
+{
+    return(TRUE);
+}
+
 void
 sudo_setspent()
 {

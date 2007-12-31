@@ -573,6 +573,14 @@ user_is_exempt()
 }
 
 /* STUB */
+int
+update_defaults(skip_cmnd)
+    int skip_cmnd;
+{
+    return(TRUE);
+}
+
+/* STUB */
 void
 sudo_setspent()
 {
