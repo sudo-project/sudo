@@ -421,9 +421,9 @@ main(argc, argv, envp)
 
 	log_auth(validated, 1);
 	if (sudo_mode == MODE_CHECK)
-	    rc = display_cmnd(NULL, list_pw ? list_pw : sudo_user.pw);
+	    rc = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
 	else if (sudo_mode == MODE_LIST)
-	    display_privs(NULL, list_pw ? list_pw : sudo_user.pw);
+	    display_privs(snl, list_pw ? list_pw : sudo_user.pw);
 
 	/* Cleanup sudoers sources */
 	tq_foreach_fwd(snl, nss)

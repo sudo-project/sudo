@@ -217,7 +217,6 @@ static struct ldap_config_table ldap_conf_table[] = {
     { NULL }
 };
 
-/* XXX - add display_cmnd and display_privs */
 struct sudo_nss sudo_nss_ldap = {
     &sudo_nss_ldap,
     NULL,
@@ -225,7 +224,9 @@ struct sudo_nss sudo_nss_ldap = {
     sudo_ldap_close,
     sudo_ldap_parse,
     sudo_ldap_setdefs,
-    sudo_ldap_lookup
+    sudo_ldap_lookup,
+    sudo_ldap_display_privs,
+    sudo_ldap_display_cmnd
 };
 
 /*
@@ -849,18 +850,21 @@ sudo_ldap_read_config()
 }
 
 /*
- * Like sudo_ldap_check(), except we just print entries.
+ * Like sudo_ldap_lookup(), except we just print entries.
  */
 void
-sudo_ldap_display_privs(ldv, pw)
-    void *ldv;
+sudo_ldap_display_privs(nss, pw)
+    struct sudo_nss *nss;
     struct passwd *pw;
 {
-    LDAP *ld = (LDAP *) ldv;
+    LDAP *ld = (LDAP *) nss->handle;
     LDAPMessage *entry = NULL, *result = NULL;	/* used for searches */
     char *filt;					/* used to parse attributes */
     char *dn, **edn, **v, **p;
     int rc, do_netgr;
+
+    if (ld == NULL)
+	return;
 
     /*
      * First, get (and display) the global Options.
@@ -983,14 +987,17 @@ sudo_ldap_display_privs(ldv, pw)
 }
 
 int
-sudo_ldap_display_cmnd(ldv, pw)
-    void *ldv;
+sudo_ldap_display_cmnd(nss, pw)
+    struct sudo_nss *nss;
     struct passwd *pw;
 {
-    LDAP *ld = (LDAP *) ldv;
+    LDAP *ld = (LDAP *) nss->handle;
     LDAPMessage *entry = NULL, *result = NULL;	/* used for searches */
     char *filt;					/* used to parse attributes */
     int rc, found, do_netgr;			/* temp/final return values */
+
+    if (ld == NULL)
+	return(1);
 
     /*
      * Okay - time to search for anything that matches this user

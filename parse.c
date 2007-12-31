@@ -63,7 +63,9 @@ struct sudo_nss sudo_nss_file = {
     sudo_file_close,
     sudo_file_parse,
     sudo_file_setdefs,
-    sudo_file_lookup
+    sudo_file_lookup,
+    sudo_file_display_privs,
+    sudo_file_display_cmnd
 };
 
 /*
@@ -296,23 +298,21 @@ sudo_file_lookup(nss, pwflag)
 
 /*
  * Print out privileges for the specified user.
+ * XXX - move out of parse.c
  */
 void
-display_privs(v, pw)
-    void *v;
+display_privs(snl, pw)
+    struct sudo_nss_list *snl;
     struct passwd *pw;
 {
-    struct lbuf lbuf;
-    struct cmndspec *cs;
-    struct member *m;
-    struct privilege *priv;
-    struct userspec *us;
-    struct cmndtag tags;
+    struct sudo_nss *nss;
 
 #if defined(HAVE_INITGROUPS) && defined(HAVE_GETGROUPS)
+    /* XXX - refactor and call for display_cmnd too */
     /* Set group vector so group matching works correctly. */
     if (pw != sudo_user.pw) {
 	(void) initgroups(pw->pw_name, pw->pw_gid);
+	efree(user_groups);
 	if ((user_ngroups = getgroups(0, NULL)) > 0) {
 	    user_groups = erealloc3(user_groups, user_ngroups,
 		sizeof(GETGROUPS_T));
@@ -323,77 +323,86 @@ display_privs(v, pw)
     }
 #endif
 
-    if (!def_ignore_local_sudoers) {
-	display_defaults(pw);
+    tq_foreach_fwd(snl, nss)
+	nss->display_privs(nss, pw);
+}
 
-	lbuf_init(&lbuf, NULL, 8, '\\');
-	printf("User %s may run the following commands on this host:\n",
-	    pw->pw_name);
+void
+sudo_file_display_privs(nss, pw)
+    struct sudo_nss *nss;
+    struct passwd *pw;
+{
+    struct lbuf lbuf;
+    struct cmndspec *cs;
+    struct member *m;
+    struct privilege *priv;
+    struct userspec *us;
+    struct cmndtag tags;
 
-	tq_foreach_fwd(&userspecs, us) {
-	    /* XXX - why only check the first privilege here? */
-	    if (userlist_matches(pw, &us->users) != ALLOW ||
-		hostlist_matches(&us->privileges.first->hostlist) != ALLOW)
-		continue;
+    display_defaults(pw);
 
-	    tq_foreach_fwd(&us->privileges, priv) {
-		tags.noexec = def_noexec;
-		tags.setenv = def_setenv;
-		tags.nopasswd = !def_authenticate;
-		lbuf_append(&lbuf, "    ", NULL);
-		tq_foreach_fwd(&priv->cmndlist, cs) {
-		    if (cs != tq_first(&priv->cmndlist))
-			lbuf_append(&lbuf, ", ", NULL);
-		    lbuf_append(&lbuf, "(", NULL);
-		    if (!tq_empty(&cs->runasuserlist)) {
-			tq_foreach_fwd(&cs->runasuserlist, m) {
-			    if (m != tq_first(&cs->runasuserlist))
-				lbuf_append(&lbuf, ", ", NULL);
-			    print_member(&lbuf, m->name, m->type, m->negated,
-				RUNASALIAS);
-			}
-		    } else {
-			lbuf_append(&lbuf, def_runas_default, NULL);
+    lbuf_init(&lbuf, NULL, 8, '\\');
+    printf("User %s may run the following commands on this host:\n",
+	pw->pw_name);
+
+    tq_foreach_fwd(&userspecs, us) {
+	/* XXX - why only check the first privilege here? */
+	if (userlist_matches(pw, &us->users) != ALLOW ||
+	    hostlist_matches(&us->privileges.first->hostlist) != ALLOW)
+	    continue;
+
+	tq_foreach_fwd(&us->privileges, priv) {
+	    tags.noexec = def_noexec;
+	    tags.setenv = def_setenv;
+	    tags.nopasswd = !def_authenticate;
+	    lbuf_append(&lbuf, "    ", NULL);
+	    tq_foreach_fwd(&priv->cmndlist, cs) {
+		if (cs != tq_first(&priv->cmndlist))
+		    lbuf_append(&lbuf, ", ", NULL);
+		lbuf_append(&lbuf, "(", NULL);
+		if (!tq_empty(&cs->runasuserlist)) {
+		    tq_foreach_fwd(&cs->runasuserlist, m) {
+			if (m != tq_first(&cs->runasuserlist))
+			    lbuf_append(&lbuf, ", ", NULL);
+			print_member(&lbuf, m->name, m->type, m->negated,
+			    RUNASALIAS);
 		    }
-		    if (!tq_empty(&cs->runasgrouplist)) {
-			lbuf_append(&lbuf, " : ", NULL);
-			tq_foreach_fwd(&cs->runasgrouplist, m) {
-			    if (m != tq_first(&cs->runasgrouplist))
-				lbuf_append(&lbuf, ", ", NULL);
-			    print_member(&lbuf, m->name, m->type, m->negated,
-				RUNASALIAS);
-			}
-		    }
-		    lbuf_append(&lbuf, ") ", NULL);
-		    if (TAG_CHANGED(setenv)) {
-			lbuf_append(&lbuf, cs->tags.setenv ? "SETENV: " :
-			    "NOSETENV: ", NULL);
-			tags.setenv = cs->tags.setenv;
-		    }
-		    if (TAG_CHANGED(noexec)) {
-			lbuf_append(&lbuf, cs->tags.noexec ? "NOEXEC: " :
-			    "EXEC: ", NULL);
-			tags.noexec = cs->tags.noexec;
-		    }
-		    if (TAG_CHANGED(nopasswd)) {
-			lbuf_append(&lbuf, cs->tags.nopasswd ? "NOPASSWD: " :
-			    "PASSWD: ", NULL);
-			tags.nopasswd = cs->tags.nopasswd;
-		    }
-		    m = cs->cmnd;
-		    print_member(&lbuf, m->name, m->type, m->negated,
-			CMNDALIAS);
+		} else {
+		    lbuf_append(&lbuf, def_runas_default, NULL);
 		}
-		lbuf_print(&lbuf);
+		if (!tq_empty(&cs->runasgrouplist)) {
+		    lbuf_append(&lbuf, " : ", NULL);
+		    tq_foreach_fwd(&cs->runasgrouplist, m) {
+			if (m != tq_first(&cs->runasgrouplist))
+			    lbuf_append(&lbuf, ", ", NULL);
+			print_member(&lbuf, m->name, m->type, m->negated,
+			    RUNASALIAS);
+		    }
+		}
+		lbuf_append(&lbuf, ") ", NULL);
+		if (TAG_CHANGED(setenv)) {
+		    lbuf_append(&lbuf, cs->tags.setenv ? "SETENV: " :
+			"NOSETENV: ", NULL);
+		    tags.setenv = cs->tags.setenv;
+		}
+		if (TAG_CHANGED(noexec)) {
+		    lbuf_append(&lbuf, cs->tags.noexec ? "NOEXEC: " :
+			"EXEC: ", NULL);
+		    tags.noexec = cs->tags.noexec;
+		}
+		if (TAG_CHANGED(nopasswd)) {
+		    lbuf_append(&lbuf, cs->tags.nopasswd ? "NOPASSWD: " :
+			"PASSWD: ", NULL);
+		    tags.nopasswd = cs->tags.nopasswd;
+		}
+		m = cs->cmnd;
+		print_member(&lbuf, m->name, m->type, m->negated,
+		    CMNDALIAS);
 	    }
+	    lbuf_print(&lbuf);
 	}
-	lbuf_destroy(&lbuf);
     }
-    /* XXX - nss */
-#ifdef HAVE_LDAP
-    if (v != NULL)
-	sudo_ldap_display_privs(v, pw);
-#endif
+    lbuf_destroy(&lbuf);
 }
 
 /*
@@ -526,10 +535,28 @@ display_bound_defaults(dtype)
 /*
  * Check user_cmnd against sudoers and print the matching entry if the
  * command is allowed.
+ * XXX - move out of parse.c
  */
 int
-display_cmnd(v, pw)
-    void *v;
+display_cmnd(snl, pw)
+    struct sudo_nss_list *snl;
+    struct passwd *pw;
+{
+    struct sudo_nss *nss;
+    int rval = 1;
+
+    /* XXX - reset group vector? */
+
+    tq_foreach_fwd(snl, nss) {
+	if (nss->display_cmnd(nss, pw) == 0)
+	    rval = 0;
+    }
+    return(rval);
+}
+
+int
+sudo_file_display_cmnd(nss, pw)
+    struct sudo_nss *nss;
     struct passwd *pw;
 {
     struct cmndspec *cs;
@@ -539,41 +566,37 @@ display_cmnd(v, pw)
     int rval = 1;
     int host_match, runas_match, cmnd_match;
 
-    /* XXX - nss */
-#ifdef HAVE_LDAP
-    if (v != NULL)
-	rval = sudo_ldap_display_cmnd(v, pw);
-#endif
-    if (rval != 0 && !def_ignore_local_sudoers) {
-	match = NULL;
-	tq_foreach_rev(&userspecs, us) {
-	    if (userlist_matches(pw, &us->users) != ALLOW)
-		continue;
+    if (nss->handle == NULL)
+	return(rval);
 
-	    tq_foreach_rev(&us->privileges, priv) {
-		host_match = hostlist_matches(&priv->hostlist);
-		if (host_match != ALLOW)
-		    continue;
-		tq_foreach_rev(&priv->cmndlist, cs) {
-		    runas_match = runaslist_matches(&cs->runasuserlist,
-			&cs->runasgrouplist);
-		    if (runas_match == ALLOW) {
-			cmnd_match = cmnd_matches(cs->cmnd);
-			if (cmnd_match != UNSPEC) {
-			    match = host_match && runas_match ?
-				cs->cmnd : NULL;
-			    goto matched;
-			}
+    match = NULL;
+    tq_foreach_rev(&userspecs, us) {
+	if (userlist_matches(pw, &us->users) != ALLOW)
+	    continue;
+
+	tq_foreach_rev(&us->privileges, priv) {
+	    host_match = hostlist_matches(&priv->hostlist);
+	    if (host_match != ALLOW)
+		continue;
+	    tq_foreach_rev(&priv->cmndlist, cs) {
+		runas_match = runaslist_matches(&cs->runasuserlist,
+		    &cs->runasgrouplist);
+		if (runas_match == ALLOW) {
+		    cmnd_match = cmnd_matches(cs->cmnd);
+		    if (cmnd_match != UNSPEC) {
+			match = host_match && runas_match ?
+			    cs->cmnd : NULL;
+			goto matched;
 		    }
 		}
 	    }
 	}
-	matched:
-	if (match != NULL && !match->negated) {
-	    printf("%s%s%s\n", safe_cmnd, user_args ? " " : "",
-		user_args ? user_args : "");
-	    rval = 0;
-	}
+    }
+    matched:
+    if (match != NULL && !match->negated) {
+	printf("%s%s%s\n", safe_cmnd, user_args ? " " : "",
+	    user_args ? user_args : "");
+	rval = 0;
     }
     return(rval);
 }
