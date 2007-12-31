@@ -86,7 +86,6 @@ int
 sudo_file_open(nss)
     struct sudo_nss *nss;
 {
-    /* XXX - open_sudoers() errors out if cannot open */
     nss->handle = open_sudoers(_PATH_SUDOERS, NULL);
     return(nss->handle ? 0 : -1);
 }
@@ -116,9 +115,9 @@ sudo_file_parse(nss)
 
     init_parser(_PATH_SUDOERS, 0);
     yyin = nss->handle;
-    /* XXX - log_error() is terminal */
     if (yyparse() != 0 || parse_error) {
-	log_error(0, "parse error in %s near line %d", errorfile, errorlineno);
+	log_error(NO_EXIT, "parse error in %s near line %d",
+	    errorfile, errorlineno);
 	return(-1);
     }
     return(0);
@@ -198,6 +197,9 @@ sudo_file_lookup(nss, pwflag)
 
     /* Assume the worst.  */
     validated = VALIDATE_NOT_OK | FLAG_NO_HOST | FLAG_NO_USER;
+
+    if (nss->handle == NULL)
+	return(validated);
 
     /*
      * Only check the actual command if pwflag is not set.

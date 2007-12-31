@@ -158,7 +158,7 @@ main(argc, argv, envp)
     char **argv;
     char **envp;
 {
-    int validated = 0;
+    int sources = 0, validated = 0;
     int fd, cmnd_status, sudo_mode, pwflag, rc = 0;
     sigaction_t sa;
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -270,12 +270,14 @@ main(argc, argv, envp)
     snl = read_nss(_PATH_NSSWITCH_CONF);
 
     /* Set global defaults */
-    /* XXX - error out early if no sources can be opened */
     tq_foreach_fwd(snl, nss) {
-	/* XXX - remove from tailq if open or parse fails? */
-	if (nss->open(nss) == 0 && nss->parse(nss) == 0)
+	if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
+	    sources++;
 	    nss->setdefs(nss);
+	}
     }
+    if (sources == 0)
+	log_error(0, "no valid sudoers sources found, quitting");
 
     /* XXX - collect post-sudoers parse settings into a function */
 
@@ -324,9 +326,6 @@ main(argc, argv, envp)
     cmnd_status = set_cmnd(sudo_mode);
 
     tq_foreach_fwd(snl, nss) {
-	/* XXX - should lookup check handle instead? */
-	if (!nss->handle)
-	    continue;
 	rc = nss->lookup(nss, pwflag);
 
 	/* XXX - rethink this logic */
@@ -1014,7 +1013,7 @@ args_done:
 
 /*
  * Open sudoers and sanity check mode/owner/type.
- * Returns a handle to the sudoers file.
+ * Returns a handle to the sudoers file or NULL on error.
  */
 FILE *
 open_sudoers(sudoers, keepopen)
@@ -1037,7 +1036,7 @@ open_sudoers(sudoers, keepopen)
 	    warningx("fixed mode on %s", sudoers);
 	    SET(statbuf.st_mode, SUDOERS_MODE);
 	    if (statbuf.st_gid != SUDOERS_GID) {
-		if (!chown(sudoers, (uid_t) -1, SUDOERS_GID)) {
+		if (chown(sudoers, (uid_t) -1, SUDOERS_GID) == 0) {
 		    warningx("set group on %s", sudoers);
 		    statbuf.st_gid = SUDOERS_GID;
 		} else
@@ -1055,20 +1054,20 @@ open_sudoers(sudoers, keepopen)
     set_perms(PERM_SUDOERS);
 
     if (rootstat != 0 && stat_sudoers(sudoers, &statbuf) != 0)
-	log_error(USE_ERRNO, "can't stat %s", sudoers);
+	log_error(USE_ERRNO|NO_EXIT, "can't stat %s", sudoers);
     else if (!S_ISREG(statbuf.st_mode))
-	log_error(0, "%s is not a regular file", sudoers);
+	log_error(NO_EXIT, "%s is not a regular file", sudoers);
     else if (statbuf.st_size == 0)
-	log_error(0, "%s is zero length", sudoers);
+	log_error(NO_EXIT, "%s is zero length", sudoers);
     else if ((statbuf.st_mode & 07777) != SUDOERS_MODE)
-	log_error(0, "%s is mode 0%o, should be 0%o", sudoers,
+	log_error(NO_EXIT, "%s is mode 0%o, should be 0%o", sudoers,
 	    (unsigned int) (statbuf.st_mode & 07777),
 	    (unsigned int) SUDOERS_MODE);
     else if (statbuf.st_uid != SUDOERS_UID)
-	log_error(0, "%s is owned by uid %lu, should be %lu", sudoers,
+	log_error(NO_EXIT, "%s is owned by uid %lu, should be %lu", sudoers,
 	    (unsigned long) statbuf.st_uid, (unsigned long) SUDOERS_UID);
     else if (statbuf.st_gid != SUDOERS_GID)
-	log_error(0, "%s is owned by gid %lu, should be %lu", sudoers,
+	log_error(NO_EXIT, "%s is owned by gid %lu, should be %lu", sudoers,
 	    (unsigned long) statbuf.st_gid, (unsigned long) SUDOERS_GID);
     else {
 	/* Solaris sometimes returns EAGAIN so try 10 times */
