@@ -234,26 +234,29 @@ sudo_ldap_check_user_netgroup(ld, entry, user)
     LDAPMessage *entry;
     char *user;
 {
-    char **v = NULL, **p = NULL;
+    struct berval **bv, **p;
+    char *val;
     int ret = FALSE;
 
     if (!entry)
 	return(ret);
 
     /* get the values from the entry */
-    v = ldap_get_values(ld, entry, "sudoUser");
+    bv = ldap_get_values_len(ld, entry, "sudoUser");
+    if (bv == NULL)
+	return(ret);
 
     /* walk through values */
-    for (p = v; p && *p && !ret; p++) {
+    for (p = bv; *p != NULL && !ret; p++) {
+	val = (*p)->bv_val;
 	/* match any */
-	if (netgr_matches(*p, NULL, NULL, user))
+	if (netgr_matches(val, NULL, NULL, user))
 	    ret = TRUE;
-	DPRINTF(("ldap sudoUser netgroup '%s' ... %s", *p,
+	DPRINTF(("ldap sudoUser netgroup '%s' ... %s", val,
 	    ret ? "MATCH!" : "not"), 2);
     }
 
-    if (v)
-	ldap_value_free(v);	/* cleanup */
+    ldap_value_free_len(bv);	/* cleanup */
 
     return(ret);
 }
@@ -267,28 +270,31 @@ sudo_ldap_check_host(ld, entry)
     LDAP *ld;
     LDAPMessage *entry;
 {
-    char **v = NULL, **p = NULL;
+    struct berval **bv, **p;
+    char *val;
     int ret = FALSE;
 
     if (!entry)
 	return(ret);
 
     /* get the values from the entry */
-    v = ldap_get_values(ld, entry, "sudoHost");
+    bv = ldap_get_values_len(ld, entry, "sudoHost");
+    if (bv == NULL)
+	return(ret);
 
     /* walk through values */
-    for (p = v; p && *p && !ret; p++) {
+    for (p = bv; *p != NULL && !ret; p++) {
+	val = (*p)->bv_val;
 	/* match any or address or netgroup or hostname */
-	if (!strcmp(*p, "ALL") || addr_matches(*p) ||
-	    netgr_matches(*p, user_host, user_shost, NULL) ||
-	    hostname_matches(user_shost, user_host, *p))
+	if (!strcmp(val, "ALL") || addr_matches(val) ||
+	    netgr_matches(val, user_host, user_shost, NULL) ||
+	    hostname_matches(user_shost, user_host, val))
 	    ret = TRUE;
-	DPRINTF(("ldap sudoHost '%s' ... %s", *p,
+	DPRINTF(("ldap sudoHost '%s' ... %s", val,
 	    ret ? "MATCH!" : "not"), 2);
     }
 
-    if (v)
-	ldap_value_free(v);	/* cleanup */
+    ldap_value_free_len(bv);	/* cleanup */
 
     return(ret);
 }
@@ -298,16 +304,17 @@ sudo_ldap_check_runas_user(ld, entry)
     LDAP *ld;
     LDAPMessage *entry;
 {
-    char **v = NULL, **p = NULL;
+    struct berval **bv, **p;
+    char *val;
     int ret = FALSE;
 
     if (!runas_pw)
 	return(UNSPEC);
 
-    /* get the values from the entry */
-    v = ldap_get_values(ld, entry, "sudoRunAsUser");
-    if (v == NULL)
-	v = ldap_get_values(ld, entry, "sudoRunAs");	/* backwards compat */
+    /* get the runas user from the entry */
+    bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
+    if (bv == NULL)
+	bv = ldap_get_values_len(ld, entry, "sudoRunAs"); /* old style */
 
     /*
      * BUG:
@@ -330,37 +337,37 @@ sudo_ldap_check_runas_user(ld, entry)
      * If there are no runas entries, match runas_default against
      * what the user specified on the command line.
      */
-    if (!v)
-	ret = !strcasecmp(runas_pw->pw_name, def_runas_default);
+    if (bv == NULL)
+	return(!strcasecmp(runas_pw->pw_name, def_runas_default));
 
     /* walk through values returned, looking for a match */
-    for (p = v; p && *p && !ret; p++) {
-	switch (*p[0]) {
+    for (p = bv; *p != NULL && !ret; p++) {
+	val = (*p)->bv_val;
+	switch (val[0]) {
 	case '+':
-	    if (netgr_matches(*p, NULL, NULL, runas_pw->pw_name))
+	    if (netgr_matches(val, NULL, NULL, runas_pw->pw_name))
 		ret = TRUE;
 	    break;
 	case '%':
-	    if (usergr_matches(*p, runas_pw->pw_name, runas_pw))
+	    if (usergr_matches(val, runas_pw->pw_name, runas_pw))
 		ret = TRUE;
 	    break;
 	case 'A':
-	    if (strcmp(*p, "ALL") == 0) {
+	    if (strcmp(val, "ALL") == 0) {
 		ret = TRUE;
 		break;
 	    }
 	    /* FALLTHROUGH */
 	default:
-	    if (strcasecmp(*p, runas_pw->pw_name) == 0)
+	    if (strcasecmp(val, runas_pw->pw_name) == 0)
 		ret = TRUE;
 	    break;
 	}
-	DPRINTF(("ldap sudoRunAsUser '%s' ... %s", *p,
+	DPRINTF(("ldap sudoRunAsUser '%s' ... %s", val,
 	    ret ? "MATCH!" : "not"), 2);
     }
 
-    if (v)
-	ldap_value_free(v);	/* cleanup */
+    ldap_value_free_len(bv);	/* cleanup */
 
     return(ret);
 }
@@ -370,7 +377,8 @@ sudo_ldap_check_runas_group(ld, entry)
     LDAP *ld;
     LDAPMessage *entry;
 {
-    char **v = NULL, **p = NULL;
+    struct berval **bv, **p;
+    char *val;
     int ret = FALSE;
 
     /* runas_gr is only set if the user specified the -g flag */
@@ -378,18 +386,20 @@ sudo_ldap_check_runas_group(ld, entry)
 	return(UNSPEC);
 
     /* get the values from the entry */
-    v = ldap_get_values(ld, entry, "sudoRunAsGroup");
+    bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
+    if (bv == NULL)
+	return(ret);
 
     /* walk through values returned, looking for a match */
-    for (p = v; p && *p && !ret; p++) {
-	if (strcmp(*p, "ALL") == 0 || group_matches(*p, runas_gr))
+    for (p = bv; *p != NULL && !ret; p++) {
+	val = (*p)->bv_val;
+	if (strcmp(val, "ALL") == 0 || group_matches(val, runas_gr))
 	    ret = TRUE;
-	DPRINTF(("ldap sudoRunAsGroup '%s' ... %s", *p,
+	DPRINTF(("ldap sudoRunAsGroup '%s' ... %s", val,
 	    ret ? "MATCH!" : "not"), 2);
     }
 
-    if (v)
-	ldap_value_free(v);	/* cleanup */
+    ldap_value_free_len(bv);	/* cleanup */
 
     return(ret);
 }
@@ -423,31 +433,35 @@ sudo_ldap_check_command(ld, entry, setenv_implied)
     LDAPMessage *entry;
     int *setenv_implied;
 {
-    char *allowed_cmnd, *allowed_args, **v = NULL, **p = NULL;
+    struct berval **bv, **p;
+    char *allowed_cmnd, *allowed_args, *val;
     int foundbang, ret = FALSE;
 
     if (!entry)
 	return(ret);
 
-    v = ldap_get_values(ld, entry, "sudoCommand");
+    bv = ldap_get_values_len(ld, entry, "sudoCommand");
+    if (bv == NULL)
+	return(ret);
 
-    for (p = v; p && *p && ret >= 0; p++) {
+    for (p = bv; *p != NULL && ret >= 0; p++) {
+	val = (*p)->bv_val;
 	/* Match against ALL ? */
-	if (!strcmp(*p, "ALL")) {
+	if (!strcmp(val, "ALL")) {
 	    ret = TRUE;
 	    if (setenv_implied != NULL)
 		*setenv_implied = TRUE;
-	    DPRINTF(("ldap sudoCommand '%s' ... MATCH!", *p), 2);
+	    DPRINTF(("ldap sudoCommand '%s' ... MATCH!", val), 2);
 	    continue;
 	}
 
 	/* check for !command */
-	if (**p == '!') {
+	if (*val == '!') {
 	    foundbang = TRUE;
-	    allowed_cmnd = estrdup(1 + *p);	/* !command */
+	    allowed_cmnd = estrdup(1 + val);	/* !command */
 	} else {
 	    foundbang = FALSE;
-	    allowed_cmnd = estrdup(*p);		/* command */
+	    allowed_cmnd = estrdup(val);	/* command */
 	}
 
 	/* split optional args away from command */
@@ -463,14 +477,13 @@ sudo_ldap_check_command(ld, entry, setenv_implied)
 	     */
 	    ret = foundbang ? -1 : TRUE;
 	}
-	DPRINTF(("ldap sudoCommand '%s' ... %s", *p,
+	DPRINTF(("ldap sudoCommand '%s' ... %s", val,
 	    ret == TRUE ? "MATCH!" : "not"), 2);
 
 	efree(allowed_cmnd);	/* cleanup */
     }
 
-    if (v)
-	ldap_value_free(v);	/* more cleanup */
+    ldap_value_free_len(bv);	/* more cleanup */
 
     /* return TRUE if we found at least one ALLOW and no DENY */
     return(ret > 0);
@@ -486,16 +499,20 @@ sudo_ldap_check_bool(ld, entry, option)
     LDAPMessage *entry;
     char *option;
 {
-    char ch, *var, **v, **p;
+    struct berval **bv, **p;
+    char ch, *var;
     int ret = UNSPEC;
 
     if (entry == NULL)
 	return(UNSPEC);
 
+    bv = ldap_get_values_len(ld, entry, "sudoOption");
+    if (bv == NULL)
+	return(ret);
+
     /* walk through options */
-    v = ldap_get_values(ld, entry, "sudoOption");
-    for (p = v; p && *p; p++) {
-	var = *p;
+    for (p = bv; *p != NULL; p++) {
+	var = (*p)->bv_val;;
 	DPRINTF(("ldap sudoOption: '%s'", var), 2);
 
 	if ((ch = *var) == '!')
@@ -504,8 +521,7 @@ sudo_ldap_check_bool(ld, entry, option)
 	    ret = (ch != '!');
     }
 
-    if (v)
-	ldap_value_free(v);
+    ldap_value_free_len(bv);
 
     return(ret);
 }
@@ -519,18 +535,20 @@ sudo_ldap_parse_options(ld, entry)
     LDAP *ld;
     LDAPMessage *entry;
 {
-    char op, *var, *val, **v, **p;
+    struct berval **bv, **p;
+    char op, *var, *val;
 
     if (entry == NULL)
 	return;
 
-    v = ldap_get_values(ld, entry, "sudoOption");
+    bv = ldap_get_values_len(ld, entry, "sudoOption");
+    if (bv == NULL)
+	return;
 
     /* walk through options */
-    for (p = v; p && *p; p++) {
-
-	DPRINTF(("ldap sudoOption: '%s'", *p), 2);
-	var = estrdup(*p);
+    for (p = bv; *p != NULL; p++) {
+	var = estrdup((*p)->bv_val);
+	DPRINTF(("ldap sudoOption: '%s'", var), 2);
 
 	/* check for equals sign past first char */
 	val = strchr(var, '=');
@@ -555,8 +573,7 @@ sudo_ldap_parse_options(ld, entry)
 	efree(var);
     }
 
-    if (v)
-	ldap_value_free(v);
+    ldap_value_free_len(bv);
 }
 
 /*
@@ -837,10 +854,11 @@ sudo_ldap_display_privs(nss, pw)
     struct sudo_nss *nss;
     struct passwd *pw;
 {
+    struct berval **bv, **p;
     LDAP *ld = (LDAP *) nss->handle;
     LDAPMessage *entry = NULL, *result = NULL;	/* used for searches */
     char *filt;					/* used to parse attributes */
-    char *dn, **edn, **v, **p;
+    char *dn, **edn;
     int rc, do_netgr;
 
     if (ld == NULL)
@@ -852,16 +870,16 @@ sudo_ldap_display_privs(nss, pw)
     rc = ldap_search_s(ld, ldap_conf.base, LDAP_SCOPE_SUBTREE,
 	"cn=defaults", NULL, 0, &result);
     if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
-	v = ldap_get_values(ld, entry, "sudoOption");
-	if (v != NULL) {
+	bv = ldap_get_values_len(ld, entry, "sudoOption");
+	if (bv != NULL) {
 	    fputs("Global LDAP options:\n  ", stdout);
-	    for (p = v; *p != NULL; p++) {
-		if (p != v)
+	    for (p = bv; *p != NULL; p++) {
+		if (p != bv)
 		    fputs("\n  ", stdout);
-		fputs(*p, stdout);
+		fputs((*p)->bv_val, stdout);
 	    }
 	    putchar('\n');
-	    ldap_value_free(v);
+	    ldap_value_free_len(bv);
 	}
     }
     if (result) {
@@ -908,57 +926,57 @@ sudo_ldap_display_privs(nss, pw)
 		    ldap_value_free(edn);
 
 		/* get the Option Values from the entry */
-		v = ldap_get_values(ld, entry, "sudoOption");
-		if (v != NULL) {
+		bv = ldap_get_values_len(ld, entry, "sudoOption");
+		if (bv != NULL) {
 		    fputs("  Options:\n    ", stdout);
-		    for (p = v; *p != NULL; p++) {
-			if (p != v)
+		    for (p = bv; *p != NULL; p++) {
+			if (p != bv)
 			    fputs("\n    ", stdout);
-			fputs(*p, stdout);
+			fputs((*p)->bv_val, stdout);
 		    }
 		    putchar('\n');
-		    ldap_value_free(v);
+		    ldap_value_free_len(bv);
 		}
 
 		/* get the RunAsUser Values from the entry */
-		v = ldap_get_values(ld, entry, "sudoRunAsUser");
-		if (v == NULL)
-		    v = ldap_get_values(ld, entry, "sudoRunAs");
-		if (v != NULL) {
+		bv = ldap_get_values_len(ld, entry, "sudoRunAsUser");
+		if (bv == NULL)
+		    bv = ldap_get_values_len(ld, entry, "sudoRunAs");
+		if (bv != NULL) {
 		    fputs("  RunAsUsers: ", stdout);
-		    for (p = v; *p != NULL; p++) {
-			if (p != v)
+		    for (p = bv; *p != NULL; p++) {
+			if (p != bv)
 			    fputs(", ", stdout);
-			fputs(*p, stdout);
+			fputs((*p)->bv_val, stdout);
 		    }
 		    putchar('\n');
-		    ldap_value_free(v);
+		    ldap_value_free_len(bv);
 		}
 
 		/* get the RunAsGroup Values from the entry */
-		v = ldap_get_values(ld, entry, "sudoRunAsGroup");
-		if (v != NULL) {
+		bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
+		if (bv != NULL) {
 		    fputs("  RunAsGroups: ", stdout);
-		    for (p = v; *p != NULL; p++) {
-			if (p != v)
+		    for (p = bv; *p != NULL; p++) {
+			if (p != bv)
 			    fputs(", ", stdout);
-			fputs(*p, stdout);
+			fputs((*p)->bv_val, stdout);
 		    }
 		    putchar('\n');
-		    ldap_value_free(v);
+		    ldap_value_free_len(bv);
 		}
 
 		/* get the Command Values from the entry */
-		v = ldap_get_values(ld, entry, "sudoCommand");
-		if (v != NULL) {
+		bv = ldap_get_values_len(ld, entry, "sudoCommand");
+		if (bv != NULL) {
 		    fputs("  Commands:\n    ", stdout);
-		    for (p = v; *p != NULL; p++) {
-			if (p != v)
+		    for (p = bv; *p != NULL; p++) {
+			if (p != bv)
 			    fputs("\n    ", stdout);
-			fputs(*p, stdout);
+			fputs((*p)->bv_val, stdout);
 		    }
 		    putchar('\n');
-		    ldap_value_free(v);
+		    ldap_value_free_len(bv);
 		} else {
 		    puts("  Commands: NONE");
 		}
