@@ -1,3 +1,242 @@
+2008-01-01 17:07  millert
+
+	* TODO: sync
+
+2008-01-01 17:06  millert
+
+	* gettime.c, sudo.c: Remove some already fixed XXXs
+
+2008-01-01 17:03  millert
+
+	* ldap.c: Same return value as non-existent sudoers if LDAP was
+	  unable to connect.
+
+2008-01-01 16:52  millert
+
+	* sudo.pod: mention /etc/environment
+
+2008-01-01 16:42  millert
+
+	* UPGRADE, WHATSNEW, README.LDAP: Update to reflect recent
+	  developments.
+
+2008-01-01 16:42  millert
+
+	* sudo.c: Print nsswitch.conf, ldap.conf and ldap.secret paths in
+	  -V output.
+
+2008-01-01 16:25  millert
+
+	* ldap.c: When building up a query don't list groups in the aux
+	  group vector that are the same as the passwd file group.  On most
+	  systems the first gid in the group vector is the same as the
+	  passwd entry gid.
+
+2008-01-01 14:01  millert
+
+	* env.c, ldap.c: Define LDAPNOINIT before calling ldap_init(), etc.
+	  to disable user ldaprc and system defaults that could affect how
+	  LDAP works.
+
+2008-01-01 13:21  millert
+
+	* INSTALL, configure, configure.in, pathnames.h.in, sudo.c,
+	  sudo_nss.c, sudo_nss.h: Rename read_nss -> sudo_read_nss Add
+	  --with-nsswitch to allow users to specify nsswitch.conf path or
+	  disable it.  If --with-nsswitch=no but --with-ldap, order is
+	  LDAP, then sudoers.  Fix --with-ldap-conf-file and
+	  --with-ldap-secret-file
+
+2008-01-01 13:12  millert
+
+	* parse.c: Honor def_ignore_local_sudoers
+
+2007-12-31 16:44  millert
+
+	* ldap.c: no longer need to check def_ignore_local_sudoers here
+
+2007-12-31 16:36  millert
+
+	* parse.c: Refactor group vector resetting into a function and also
+	  call it from display_cmnd.  Stop after the first sucessful match
+	  in display_cmnd.  Print a newline between each display_privs
+	  method.
+
+2007-12-31 16:23  millert
+
+	* parse.c: fix double free introduced in rev 1.218
+
+2007-12-31 16:10  millert
+
+	* ldap.c: belt and suspenders; zero out result after freeing it
+
+2007-12-31 15:04  millert
+
+	* env.c, fileops.c, ldap.c, sudo.h, sudo_nss.c: Refactor line
+	  reading into a separate function, sudo_parseln(), which removes
+	  comments, leading/trailing whitespace and newlines.  May want to
+	  rethink the use of sudo_parseln() for /etc/ldap.secret
+
+2007-12-31 14:26  millert
+
+	* parse.c, sudo.c: Make the inability to read the sudoers file a
+	  non-fatal error if there are other sudoers sources available.
+	  sudoers_file_lookup now returns "not OK" if sudoers was not
+	  present
+
+2007-12-31 14:24  millert
+
+	* ldap.c: make it clear that the global options are from LDAP
+
+2007-12-31 14:13  millert
+
+	* logging.c: allocate proper amount of space for error string
+
+2007-12-31 10:24  millert
+
+	* sudo_nss.c, sudo_nss.h: actual sudo nss code
+
+2007-12-31 10:08  millert
+
+	* ldap.c, parse.c, sudo.c, sudo.h: nss-ify display_privs and
+	  display_cmnd.
+
+2007-12-31 07:54  millert
+
+	* defaults.c, parse.c, testsudoers.c, visudo.c: move
+	  update_defaults() to parse.c
+
+2007-12-31 07:39  millert
+
+	* Makefile.in, ldap.c, list.c, parse.c, parse.h, sudo.c, sudo.h:
+	  Use nsswitch to hide some sudoers vs. ldap implementation details
+	  and reduce the number of #ifdef LDAP TODO: fix display routines
+	  and error handling
+
+2007-12-28 11:20  millert
+
+	* Makefile.in, README.LDAP, ldap.c, pathnames.h.in, sudo.c, sudo.h:
+	  First cut at nsswitch.conf support.  Further reorganizaton and
+	  related changes are forthcoming.
+
+2007-12-21 16:53  millert
+
+	* env.c, pathnames.h.in, sudo.c, sudo.h: Add support for reading
+	  and /etc/environment file.  Still needs to be documented and
+	  should probably only applies to OSes that have it (AIX and Linux,
+	  maybe others).
+
+2007-12-21 16:20  millert
+
+	* ldap.c: include limits.h
+
+2007-12-20 10:02  millert
+
+	* WHATSNEW: reword LDAP SASL
+
+2007-12-19 16:40  millert
+
+	* TODO: sync
+
+2007-12-19 16:39  millert
+
+	* README.LDAP: Add an example sudoRole, clarify netscape vs.
+	  openldap a bit more
+
+2007-12-19 14:42  millert
+
+	* README.LDAP: Be clear on what is OpenLDAP vs. Netscape-derived
+
+2007-12-19 14:28  millert
+
+	* config.h.in, configure, configure.in, ldap.c: Use ldapssl_init()
+	  for ldaps support instead of trying to do it manually with
+	  ldap_init() + ldapssl_install_routines().  Use tls_cert and
+	  tls_key for cert7.db and key3.db respectively.  Don't print
+	  debugging info for options that are not set.	Add warning if
+	  start_tls specified when not supported.
+
+2007-12-19 14:25  millert
+
+	* ldap.c: fix compilation on solaris
+
+2007-12-19 14:23  millert
+
+	* Makefile.in: add missing .h and .c files for missing lib objs
+
+2007-12-18 09:54  millert
+
+	* ldap.c: fix LDAP_OPT_NETWORK_TIMEOUT setting
+
+2007-12-17 20:10  millert
+
+	* ldap.c: fix compilation on Solaris
+
+2007-12-17 10:14  millert
+
+	* configure, configure.in: fix typo
+
+2007-12-17 08:08  millert
+
+	* README.LDAP: try to clear up which variables are for OpenLDAP and
+	  which are for netscape-derived SDKs
+
+2007-12-17 07:31  millert
+
+	* config.h.in, configure, configure.in, ldap.c: Add support for
+	  "ssl on" in both netscape and openldap flavors.  Only the
+	  OpenLDAP flavor has been tested.
+
+2007-12-17 07:28  millert
+
+	* logging.c, sudo.c, sudo.h: Call cleanup() before exit in
+	  log_error() instead of calling sudo_ldap_close() directly.
+	  ldap_conn can now be static to sudo.c
+
+2007-12-16 20:02  millert
+
+	* sudo.c: ld -> ldap_conn
+
+2007-12-16 14:42  millert
+
+	* logging.c, sudo.c, sudo.h: Better ldap cleanup.
+
+2007-12-16 14:08  millert
+
+	* ldap.c: Distinguish between LDAP conf settings that are
+	  connection-specific (which take an ld pointer) and those that are
+	  default settings (which do not).
+
+2007-12-14 16:46  millert
+
+	* ldap.c: Improved warnings on error.
+
+2007-12-14 15:59  millert
+
+	* ldap.c: Make ldap config table driven and set the config *after*
+	  we open the connection.
+
+2007-12-13 16:41  millert
+
+	* ldap.c: fix LDAP_OPT_X_CONNECT_TIMEOUT compat define
+
+2007-12-13 09:13  millert
+
+	* configure, configure.in: some operating systems need to link with
+	  -lkrb5support when using krb5
+
+2007-12-10 17:12  millert
+
+	* WHATSNEW: minor update
+
+2007-12-10 10:56  millert
+
+	* sudo.cat, sudo.man.in, sudoers.cat, sudoers.man.in: regen
+
+2007-12-07 19:17  millert
+
+	* TODO, ChangeLog: sync
+
 2007-12-07 19:09  millert
 
 	* ldap.c, schema.OpenLDAP, schema.iPlanet, sudoers2ldif: add -g
@@ -2780,10 +3019,11 @@
 
 2004-10-26 18:10  millert
 
-	* gram.c, gram.h, gram.y, parse.c, parse.h, parse.yacc: Rewritten
-	  parser that converts sudoers into a set of data structures.  This
-	  eliminates ordering issues and makes it possible to apply sudoers
-	  Defaults entries before searching for the command.
+	* gram.c, gram.h, gram.y, parse.c, parse.h, parse.yacc, sudo.tab.h:
+	  Rewritten parser that converts sudoers into a set of data
+	  structures.  This eliminates ordering issues and makes it
+	  possible to apply sudoers Defaults entries before searching for
+	  the command.
 
 2004-10-26 18:09  millert
 
@@ -2936,8 +3176,9 @@
 
 	* Makefile.in, configure, configure.in, def_data.c, def_data.h,
 	  def_data.in, lex.yy.c, parse.c, parse.h, parse.lex, parse.yacc,
-	  sudo.c, sudo.h, sudoers.pod: No longer call it tracing, it is now
-	  "monitoring" which should be more a obvious name to non-hackers.
+	  sudo.c, sudo.h, sudo.tab.h, sudoers.pod: No longer call it
+	  tracing, it is now "monitoring" which should be more a obvious
+	  name to non-hackers.
 
 2004-10-01 15:06  millert
 
@@ -3210,7 +3451,7 @@
 
 2004-09-24 14:11  millert
 
-	* lex.yy.c: regen
+	* lex.yy.c, sudo.tab.h: regen
 
 2004-09-24 14:10  millert
 
@@ -4615,6 +4856,11 @@
 	* sudo_noexec.c: stub execve() that just returns EACCES; used for
 	  noexec functionality
 
+2004-01-06 01:42  millert
+
+	* sudo.tab.h: Regen w/ updated byacc from OpenBSD; fixes a gcc 3.2
+	  issue with generated code.
+
 2004-01-05 16:10  millert
 
 	* def_data.c, def_data.h, def_data.in: Move the environment
@@ -4652,12 +4898,13 @@
 2004-01-04 21:48  millert
 
 	* def_data.c, def_data.h, def_data.in, env.c, lex.yy.c, parse.c,
-	  parse.h, parse.lex, parse.yacc, sudo.c, sudo.h: Add support for
-	  preloading a shared object containing a dummy execve() function
-	  that just sets error and returns -1.	This adds a "noexec_file"
-	  option to load the filename as well as a "noexec" flag to enable
-	  it unconditionally.  There is also a NOEXEC tag that can be
-	  attached to specific commands and an EXEC tag to disable it.
+	  parse.h, parse.lex, parse.yacc, sudo.c, sudo.h, sudo.tab.h: Add
+	  support for preloading a shared object containing a dummy
+	  execve() function that just sets error and returns -1.  This adds
+	  a "noexec_file" option to load the filename as well as a "noexec"
+	  flag to enable it unconditionally.  There is also a NOEXEC tag
+	  that can be attached to specific commands and an EXEC tag to
+	  disable it.
 
 2004-01-04 21:40  millert
 
@@ -5366,7 +5613,7 @@
 
 2003-01-17 18:10  millert
 
-	* lex.yy.c: regen
+	* lex.yy.c, sudo.tab.h: regen
 
 2003-01-17 18:09  millert
 
@@ -6446,7 +6693,7 @@
 
 2001-12-12 15:11  millert
 
-	* lex.yy.c: regen parser
+	* lex.yy.c, sudo.tab.h: regen parser
 
 2001-12-12 14:56  millert
 
@@ -7412,13 +7659,13 @@
 
 2000-03-22 23:38  millert
 
-	* lex.yy.c, parse.c, parse.h, parse.lex, parse.yacc, testsudoers.c,
-	  visudo.c: Fully qualified hosts w/ wildcards were not matching
-	  the FQHOST token type.  There's really no need for a separate
-	  token for fully-qualified vs.  unqualified anymore so FQHOST is
-	  now history and hostname_matches now decides which hostname
-	  (short or long) to check based on whether or not the pattern
-	  contains a '.'.
+	* lex.yy.c, parse.c, parse.h, parse.lex, parse.yacc, sudo.tab.h,
+	  testsudoers.c, visudo.c: Fully qualified hosts w/ wildcards were
+	  not matching the FQHOST token type.  There's really no need for a
+	  separate token for fully-qualified vs.  unqualified anymore so
+	  FQHOST is now history and hostname_matches now decides which
+	  hostname (short or long) to check based on whether or not the
+	  pattern contains a '.'.
 
 2000-03-22 23:09  millert
 
@@ -8234,7 +8481,7 @@
 	* BUGS, INSTALL, Makefile.in, TODO, aclocal.m4, check.c,
 	  config.h.in, configure, configure.in, defaults.c, defaults.h,
 	  find_path.c, lex.yy.c, logging.c, parse.h, parse.lex, parse.yacc,
-	  sudo.c, sudo.h, testsudoers.c, version.c, visudo.c,
+	  sudo.c, sudo.h, sudo.tab.h, testsudoers.c, version.c, visudo.c,
 	  auth/aix_auth.c, auth/fwtk.c, auth/kerb5.c, auth/pam.c,
 	  auth/rfc1938.c, auth/sia.c, auth/sudo_auth.c: Add support for
 	  "Defaults" line in sudoers to make configuration variables
@@ -8486,15 +8733,19 @@
 
 1999-08-24 12:40  millert
 
+	* sudo.tab.h: these should be generated with byacc, not bison
+
+1999-08-24 12:40  millert
+
 	* lex.yy.c: regen
 
 1999-08-24 11:58  millert
 
-	* parse.h, parse.yacc: In "sudo -l" mode, the type of the stored
-	  (expanded) alias was not stored with the contents.  This could
-	  lead to incorrect output if the sudoers file had different alias
-	  types with the same name.  Normal parsing (ie: not in '-l' mode)
-	  is unaffected.
+	* parse.h, parse.yacc, sudo.tab.h: In "sudo -l" mode, the type of
+	  the stored (expanded) alias was not stored with the contents.
+	  This could lead to incorrect output if the sudoers file had
+	  different alias types with the same name.  Normal parsing (ie:
+	  not in '-l' mode) is unaffected.
 
 1999-08-23 12:47  millert
 
@@ -8639,12 +8890,12 @@
 1999-08-14 11:34  millert
 
 	* Makefile.in, INSTALL, README, config.h.in, configure,
-	  configure.in, getspwuid.c, lex.yy.c, parse.lex, parse.yacc: o
-	  --with-otp deprecated, use --without-passwd instead o real
-	  dependencies in the Makefile o --with-devel option to enable
-	  yacc, lex, and -Wall o style -- "foo -> bar" becomes "foo->bar" o
-	  ALL goes back to being a token, not a string but don't leak
-	  memory o rename hsotspec -> host in parse.yacc
+	  configure.in, getspwuid.c, lex.yy.c, parse.lex, parse.yacc,
+	  sudo.tab.h: o --with-otp deprecated, use --without-passwd instead
+	  o real dependencies in the Makefile o --with-devel option to
+	  enable yacc, lex, and -Wall o style -- "foo -> bar" becomes
+	  "foo->bar" o ALL goes back to being a token, not a string but
+	  don't leak memory o rename hsotspec -> host in parse.yacc
 
 1999-08-12 12:26  millert
 
@@ -8835,7 +9086,7 @@
 
 1999-08-04 11:31  millert
 
-	* lex.yy.c: regen
+	* lex.yy.c, sudo.tab.h: regen
 
 1999-08-04 10:54  millert
 
@@ -9426,9 +9677,10 @@
 
 1999-04-07 19:18  millert
 
-	* parse.yacc, sudoers.cat, sudoers.html, sudoers.man, sudoers.pod:
-	  You can now specifiy a host list instead of just a host or alias.
-	  Ie: user = host1,host2,ALIAS,!host3 my_command now works.
+	* parse.yacc, sudo.tab.h, sudoers.cat, sudoers.html, sudoers.man,
+	  sudoers.pod: You can now specifiy a host list instead of just a
+	  host or alias.  Ie: user = host1,host2,ALIAS,!host3 my_command
+	  now works.
 
 1999-04-07 02:59  millert
 
