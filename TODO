@@ -155,3 +155,8 @@ TODO list (most will be addressed in sudo 2.0)
     since they may affect the outcome (e.g. default_runas).
 
 55) Better LDAP documention.  Perhaps a sudo-ldap man page.
+
+56) Improve nss error handling.  Consider removing sources that
+    can't be opened.  Need to keep in mind ret_notfound.
+
+57) lookup method should only return VALIDATE_NOT_OK if matched !command.
