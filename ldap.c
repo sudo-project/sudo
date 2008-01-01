@@ -578,6 +578,8 @@ sudo_ldap_build_pass1(pw)
     if ((grp = sudo_getgrgid(pw->pw_gid)) != NULL)
 	sz += 12 + strlen(grp->gr_name);	/* primary group */
     for (i = 0; i < user_ngroups; i++) {
+	if (user_groups[i] == pw->pw_gid)
+	    continue;
 	if ((grp = sudo_getgrgid(user_groups[i])) != NULL)
 	    sz += 12 + strlen(grp->gr_name);	/* supplementary group */
     }
@@ -597,6 +599,8 @@ sudo_ldap_build_pass1(pw)
 
     /* Append supplementary groups */
     for (i = 0; i < user_ngroups; i++) {
+	if (user_groups[i] == pw->pw_gid)
+	    continue;
 	if ((grp = sudo_getgrgid(user_groups[i])) != NULL) {
 	    (void) strlcat(buf, "(sudoUser=%", sz);
 	    (void) strlcat(buf, grp->gr_name, sz);
