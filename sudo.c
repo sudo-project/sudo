@@ -1159,7 +1159,6 @@ set_loginclass(pw)
 	errflags = NO_MAIL|MSG_ONLY|NO_EXIT;
 
     if (login_class && strcmp(login_class, "-") != 0) {
-	/* XXX - def_runas user may change after sudoers parse */
 	if (user_uid != 0 &&
 	    strcmp(runas_user ? runas_user : def_runas_default, "root") != 0)
 	    errorx(1, "only root can use -c %s", login_class);

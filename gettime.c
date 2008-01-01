@@ -35,7 +35,6 @@ __unused static const char rcsid[] = "$Sudo$";
 /*
  * Get the current time via gettimeofday() for systems with
  * timespecs in struct stat or, otherwise, using time().
- * XXX - configure check for gettimeofday() - XXX
  */
 int
 gettime(ts)
