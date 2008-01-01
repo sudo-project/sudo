@@ -1322,7 +1322,7 @@ sudo_ldap_lookup(nss, pwflag)
     struct passwd *pw = list_pw ? list_pw : sudo_user.pw;
 
     if (ld == NULL)
-	return(0);	/* XXX - if only LDAP and we return 0, it will misbehasve */
+	return(VALIDATE_NOT_OK | FLAG_NO_HOST | FLAG_NO_USER);
 
     if (pwflag) {
 	int doauth = UNSPEC;
