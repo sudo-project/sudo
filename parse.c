@@ -86,6 +86,8 @@ int
 sudo_file_open(nss)
     struct sudo_nss *nss;
 {
+    if (def_ignore_local_sudoers)
+	return(-1);
     nss->handle = open_sudoers(_PATH_SUDOERS, NULL);
     return(nss->handle ? 0 : -1);
 }
