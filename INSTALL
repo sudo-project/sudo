@@ -189,6 +189,12 @@ Special features/options:
 	this file instead of /etc/ldap.secret to read the secret password
 	when rootbinddn is specified in the ldap config file.
 
+  --with-nsswitch[=filename]
+	Path to nsswitch.conf or "no" to disable nsswitch support.
+	If specified, sudo uses this file instead of /etc/nsswitch.conf.
+	If nsswitch is disabled but LDAP is enabled, sudo will check
+	LDAP first, then the sudoers file.
+
   --with-aixauth
 	Enable support for the AIX 4.x general authentication function.
 	This will use the authentication scheme specified for the user

@@ -33,4 +33,4 @@ struct sudo_nss {
 
 TQ_DECLARE(sudo_nss)
 
-struct sudo_nss_list *read_nss	__P((const char *));
+struct sudo_nss_list *sudo_read_nss	__P((void));

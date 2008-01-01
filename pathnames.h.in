@@ -109,13 +109,13 @@
 #endif /* _PATH_USRTMP */
 
 #ifndef _PATH_LDAP_CONF
-#define	_PATH_LDAP_CONF	"/etc/ldap.conf"
+#undef	_PATH_LDAP_CONF
 #endif /* _PATH_LDAP_CONF */
 
 #ifndef _PATH_LDAP_SECRET
-#define	_PATH_LDAP_SECRET	"/etc/ldap.secret"
+#undef	_PATH_LDAP_SECRET
 #endif /* _PATH_LDAP_SECRET */
 
 #ifndef _PATH_NSSWITCH_CONF
-#define	_PATH_NSSWITCH_CONF	"/etc/nsswitch.conf"
+#undef	_PATH_NSSWITCH_CONF
 #endif /* _PATH_NSSWITCH_CONF */

@@ -42,19 +42,17 @@ __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 extern struct sudo_nss sudo_nss_file;
-
 #ifdef HAVE_LDAP
-
 extern struct sudo_nss sudo_nss_ldap;
+#endif
 
+#if defined(HAVE_LDAP) && defined(_PATH_NSSWITCH_CONF)
 /*
  * Read in /etc/nsswitch.conf
  * Returns a tail queue of matches.
- * XXX - refactor config reading (ldap.conf, /etc/environment too)
  */
 struct sudo_nss_list *
-read_nss(path)
-    const char *path;
+sudo_read_nss()
 {
     FILE *fp;
     char *cp;
@@ -63,7 +61,7 @@ read_nss(path)
     int got_match = FALSE;
     static struct sudo_nss_list snl;
 
-    if ((fp = fopen(path, "r")) == NULL)
+    if ((fp = fopen(_PATH_NSSWITCH_CONF, "r")) == NULL)
 	goto nomatch;
 
     while ((cp = sudo_parseln(fp)) != NULL) {
@@ -95,28 +93,30 @@ read_nss(path)
     }
     fclose(fp);
 
-    /* Default to fails only if no matches */
-    if (tq_empty(&snl)) {
 nomatch:
-	snl.first = &sudo_nss_file;
-	snl.last = &sudo_nss_file;
-    }
+    /* Default to files only if no matches */
+    if (tq_empty(&snl))
+	tq_append(&snl, &sudo_nss_file);
 
     return(&snl);
 }
 
-#else /* HAVE_LDAP */
+#else /* HAVE_LDAP && _PATH_NSSWITCH_CONF */
 
 /*
- * Non-LDAP stub
+ * Non-nsswitch.conf version with hard-coded order.
  */
 struct sudo_nss_list *
-read_nss(path)
-    const char *path;
+sudo_read_nss()
 {
-    static struct sudo_nss_list snl = { &sudo_nss_file, &sudo_nss_file };
+    static struct sudo_nss_list snl;
 
-    return(snl);
+# ifdef HAVE_LDAP
+    tq_append(&snl, &sudo_nss_ldap);
+# endif
+    tq_append(&snl, &sudo_nss_file);
+
+    return(&snl);
 }
 
-#endif /* HAVE_LDAP */
+#endif /* HAVE_LDAP && _PATH_NSSWITCH_CONF */

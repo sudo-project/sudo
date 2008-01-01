@@ -267,9 +267,9 @@ main(argc, argv, envp)
     init_vars(sudo_mode, envp);		/* XXX - move this later? */
 
     /* Parse nsswitch.conf for sudoers order. */
-    snl = read_nss(_PATH_NSSWITCH_CONF);
+    snl = sudo_read_nss();
 
-    /* Set global defaults */
+    /* Open and parse sudoers, set global defaults */
     tq_foreach_fwd(snl, nss) {
 	if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
 	    sources++;
