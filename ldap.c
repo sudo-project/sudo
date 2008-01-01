@@ -1150,13 +1150,19 @@ sudo_ldap_open(nss)
 {
     LDAP *ld;
     const char *old_ccname = user_ccname;
-    int rc;
+    int rc, ldapnoinit = FALSE;
 #ifdef HAVE_GSS_KRB5_CCACHE_NAME
     unsigned int status;
 #endif
 
     if (!sudo_ldap_read_config())
 	return(-1);
+
+    /* Prevent reading of user ldaprc and system defaults. */
+    if (getenv("LDAPNOINIT") == NULL) {
+	ldapnoinit = TRUE;
+	sudo_setenv("LDAPNOINIT", "1", TRUE);
+    }
 
 #ifdef HAVE_LDAPSSL_INIT
     if (ldap_conf.ssl_mode == SUDO_LDAP_SSL) {
@@ -1199,6 +1205,9 @@ sudo_ldap_open(nss)
 	    return(-1);
 	}
     }
+
+    if (ldapnoinit)
+	sudo_unsetenv("LDAPNOINIT");
 
     /* Set LDAP options */
     if (sudo_ldap_set_options(ld) < 0)

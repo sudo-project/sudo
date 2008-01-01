@@ -261,7 +261,7 @@ _sudo_setenv(var, val, dupcheck)
     insert_env(estring, dupcheck, FALSE);
 }
 
-#if defined(HAVE_LDAP_SASL_INTERACTIVE_BIND_S) && !defined(HAVE_GSS_KRB5_CCACHE_NAME)
+#ifdef HAVE_LDAP
 /*
  * External version of sudo_setenv() that keeps things in sync with
  * the environ pointer.
@@ -318,7 +318,7 @@ sudo_unsetenv(var)
 	}
     }
 }
-#endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S && !HAVE_GSS_KRB5_CCACHE_NAME */
+#endif /* HAVE_LDAP */
 
 /*
  * Insert str into env.envp, assumes str has an '=' in it.
