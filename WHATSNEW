@@ -37,3 +37,15 @@ What's new in Sudo 1.7?
  * Improved LDAP support.  SASL authentication may now be used in
    conjunction when connecting to an LDAP server.  The krb5_ccname
    parameter in ldap.conf may be used to enable Kerberos.
+
+ * Support for /etc/nsswitch.conf.  LDAP users may now use nsswitch.conf
+   to specify the sudoers order.  E.g.:
+	sudoers: ldap files
+   to check LDAP, then /etc/sudoers.  The default is "files", even
+   when LDAP support is compiled in.  This differs from sudo 1.6
+   where LDAP was always consulted first.
+
+ * Support for /etc/environment.  If sudo is run with the -i flag,
+   the contents of /etc/environment are used to populate the new
+   environment that is passed to the command being run.
+

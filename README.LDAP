@@ -79,12 +79,14 @@ Design Features
     If you want to specify lots of commands, use directories or wildcards, or
     just paste them all into LDAP.  That's what it's for.
 
-  * The /etc/sudoers file can be disabled.  Paranoid security administrators
-    can now disallow parsing of any local /etc/sudoers file by an LDAP
-    sudoOption 'ignore_local_sudoers'.  This way all sudoers can be controlled
-    and audited in one place because local entries are not allowed.
-    In fact, if this option is included in the cn=defaults object of LDAP,
-    sudo won't even look for a /etc/sudoers file.
+  * nsswitch.conf support.  Sudo now reads /etc/nsswitch.conf and looks
+    for a line begining with "sudoers:" and uses this to determine the
+    search order for sudoers.  To consult LDAP first, falling back on
+    a local sudoers file, use:
+	sudoers: ldap files
+
+    The local sudoers file can be ignored completely by using:
+	sudoers: ldap
 
   * The sudo binary compiled with LDAP support should be totally backward
     compatible and be syntactically and source code equivalent to its non
