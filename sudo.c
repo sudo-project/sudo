@@ -229,6 +229,13 @@ main(argc, argv, envp)
 		if (getuid() == 0) {
 		    putchar('\n');
 		    (void) printf("Sudoers path: %s\n", _PATH_SUDOERS);
+#ifdef HAVE_LDAP
+# ifdef _PATH_NSSWITCH_CONF
+		    (void) printf("nsswitch path: %s\n", _PATH_NSSWITCH_CONF);
+# endif
+		    (void) printf("ldap.conf path: %s\n", _PATH_LDAP_CONF);
+		    (void) printf("ldap.secret path: %s\n", _PATH_LDAP_SECRET);
+#endif
 		    dump_auth_methods();
 		    dump_defaults();
 		    dump_interfaces();
