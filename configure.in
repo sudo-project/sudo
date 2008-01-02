@@ -2,7 +2,7 @@ dnl
 dnl Process this file with GNU autoconf to produce a configure script.
 dnl $Sudo$
 dnl
-dnl Copyright (c) 1994-1996,1998-2007 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2008 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
 AC_INIT([sudo], [1.7])
 AC_CONFIG_HEADER(config.h pathnames.h)
@@ -1741,7 +1741,9 @@ AC_CHECK_FUNCS(mkstemp, [], [SUDO_OBJS="${SUDO_OBJS} mkstemp.o"
 ])
 AC_CHECK_FUNCS(snprintf vsnprintf asprintf vasprintf, , [NEED_SNPRINTF=1])
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
-    AC_CHECK_MEMBER([struct stat.st_mtim], AC_DEFINE(HAVE_ST_MTIM), [AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
+    AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
+	[AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
+	[AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
     AC_MSG_CHECKING([for two-parameter timespecsub])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 #include <sys/time.h>]], [[struct timespec ts1, ts2;
@@ -2300,7 +2302,7 @@ if test ${with_ldap-'no'} != "no"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_LBER_H)])
 
-    AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s ldap_sasl_interactive_bind_s ldapssl_init)
+    AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s ldap_sasl_interactive_bind_s ldapssl_init ldap_unbind_ext_s ldap_str2dn)
     AC_CHECK_HEADERS([sasl/sasl.h])
 
     AC_CHECK_LIB(gssapi, gss_krb5_ccache_name,
@@ -2474,6 +2476,7 @@ AH_TEMPLATE(HAVE_SIA, [Define to 1 if you use SIA authentication.])
 AH_TEMPLATE(HAVE_SIGACTION_T, [Define to 1 if <signal.h> has the sigaction_t typedef.])
 AH_TEMPLATE(HAVE_SKEY, [Define to 1 if you use S/Key.])
 AH_TEMPLATE(HAVE_SKEYACCESS, [Define to 1 if your S/Key library has skeyaccess().])
+AH_TEMPLATE(HAVE_ST__TIM, [Define to 1 if your struct stat uses an st__tim union])
 AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member])
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member])
 AH_TEMPLATE(HAVE_TERMIOS_H, [Define to 1 if you have the <termios.h> header file and the `tcgetattr' function.])
@@ -2514,8 +2517,13 @@ AH_BOTTOM([/*
  * so the last 3 digits of tv_nsec are not significant.
  */
 #ifdef HAVE_ST_MTIM
-# define mtim_getsec(_x)	((_x).st_mtim.tv_sec)
-# define mtim_getnsec(_x)	(((_x).st_mtim.tv_nsec / 1000) * 1000)
+# ifdef HAVE_ST__TIM
+#  define mtim_getsec(_x)	((_x).st_mtim.st__tim.tv_sec)
+#  define mtim_getnsec(_x)	(((_x).st_mtim.tst__tim.v_nsec / 1000) * 1000)
+# else
+#  define mtim_getsec(_x)	((_x).st_mtim.tv_sec)
+#  define mtim_getnsec(_x)	(((_x).st_mtim.tv_nsec / 1000) * 1000)
+# endif
 #else
 # ifdef HAVE_ST_MTIMESPEC
 #  define mtim_getsec(_x)	((_x).st_mtimespec.tv_sec)

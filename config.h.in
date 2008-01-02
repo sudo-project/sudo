@@ -224,6 +224,12 @@
 /* Define to 1 if you have the `ldap_start_tls_s' function. */
 #undef HAVE_LDAP_START_TLS_S
 
+/* Define to 1 if you have the `ldap_str2dn' function. */
+#undef HAVE_LDAP_STR2DN
+
+/* Define to 1 if you have the `ldap_unbind_ext_s' function. */
+#undef HAVE_LDAP_UNBIND_EXT_S
+
 /* Define to 1 if you have the `ldapssl_init' function. */
 #undef HAVE_LDAPSSL_INIT
 
@@ -370,6 +376,9 @@
 
 /* Define to 1 if your struct stat has an st_mtim member */
 #undef HAVE_ST_MTIM
+
+/* Define to 1 if your struct stat uses an st__tim union */
+#undef HAVE_ST__TIM
 
 /* Define to 1 if your struct stat has an st_mtimespec member */
 #undef HAVE_ST_MTIMESPEC
@@ -615,8 +624,13 @@
  * so the last 3 digits of tv_nsec are not significant.
  */
 #ifdef HAVE_ST_MTIM
-# define mtim_getsec(_x)	((_x).st_mtim.tv_sec)
-# define mtim_getnsec(_x)	(((_x).st_mtim.tv_nsec / 1000) * 1000)
+# ifdef HAVE_ST__TIM
+#  define mtim_getsec(_x)	((_x).st_mtim.st__tim.tv_sec)
+#  define mtim_getnsec(_x)	(((_x).st_mtim.tst__tim.v_nsec / 1000) * 1000)
+# else
+#  define mtim_getsec(_x)	((_x).st_mtim.tv_sec)
+#  define mtim_getnsec(_x)	(((_x).st_mtim.tv_nsec / 1000) * 1000)
+# endif
 #else
 # ifdef HAVE_ST_MTIMESPEC
 #  define mtim_getsec(_x)	((_x).st_mtimespec.tv_sec)
