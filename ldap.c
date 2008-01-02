@@ -856,9 +856,8 @@ sudo_ldap_display_privs(nss, pw)
 {
     struct berval **bv, **p;
     LDAP *ld = (LDAP *) nss->handle;
-    LDAPMessage *entry = NULL, *result = NULL;	/* used for searches */
-    char *filt;					/* used to parse attributes */
-    char *dn, **edn;
+    LDAPMessage *entry = NULL, *result = NULL;
+    char *filt, *dn, *rdn;
     int rc, do_netgr;
 
     if (ld == NULL)
@@ -916,14 +915,20 @@ sudo_ldap_display_privs(nss, pw)
 		sudo_ldap_check_user_netgroup(ld, entry, pw->pw_passwd)) &&
 		sudo_ldap_check_host(ld, entry)) {
 
-		/* collect the dn, only show the rdn */
-		dn = ldap_get_dn(ld, entry);
-		edn = dn ? ldap_explode_dn(dn, 1) : NULL;
-		printf("\nLDAP Role: %s\n", (edn && *edn) ? *edn : "UNKNOWN");
+		/* collect the dn, only show the first rdn */
+		rdn = NULL;
+		if ((dn = ldap_get_dn(ld, entry)) != NULL) {
+		    LDAPDN tmpDN;
+		    if (ldap_str2dn(dn, &tmpDN, LDAP_DN_FORMAT_LDAP) == LDAP_SUCCESS) {
+			ldap_rdn2str(tmpDN[0], &rdn, LDAP_DN_FORMAT_UFN);
+			ldap_dnfree(tmpDN);
+		    }
+		}
+		printf("\nLDAP Role: %s\n", rdn ? rdn : "UNKNOWN");
 		if (dn)
 		    ldap_memfree(dn);
-		if (edn)
-		    ldap_value_free(edn);
+		if (rdn)
+		    ldap_memfree(rdn);
 
 		/* get the Option Values from the entry */
 		bv = ldap_get_values_len(ld, entry, "sudoOption");
