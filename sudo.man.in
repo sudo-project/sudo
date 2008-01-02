@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "December 10, 2007" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "January  1, 2008" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
@@ -314,8 +314,9 @@ it is passed to the shell for execution.  Otherwise, an interactive
 shell is executed.  \fBsudo\fR attempts to change to that user's home
 directory before running the shell.  It also initializes the
 environment, leaving \fI\s-1DISPLAY\s0\fR and \fI\s-1TERM\s0\fR unchanged, setting
-\&\fI\s-1HOME\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR, \fI\s-1LOGNAME\s0\fR, and \fI\s-1PATH\s0\fR, and unsetting
-all other environment variables.
+\&\fI\s-1HOME\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR, \fI\s-1LOGNAME\s0\fR, and \fI\s-1PATH\s0\fR, as well as
+the contents of \fI/etc/environment\fR.  All other environment variables
+are removed.
 .IP "\-K" 12
 .IX Item "-K"
 The \fB\-K\fR (sure \fIkill\fR) option is like \fB\-k\fR except that it removes
@@ -583,6 +584,9 @@ Default editor to use in \fB\-e\fR (sudoedit) mode
 .ie n .IP "\fI@timedir@\fR\*(C`		\*(C'Directory containing timestamps" 4
 .el .IP "\fI@timedir@\fR\f(CW\*(C`		\*(C'\fRDirectory containing timestamps" 4
 .IX Item "@timedir@		Directory containing timestamps"
+.ie n .IP "\fI/etc/environment\fR\*(C`	\*(C'\fRInitial environment for \fB\-i mode" 4
+.el .IP "\fI/etc/environment\fR\f(CW\*(C`	\*(C'\fRInitial environment for \fB\-i\fR mode" 4
+.IX Item "/etc/environment	Initial environment for -i mode"
 .PD
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"

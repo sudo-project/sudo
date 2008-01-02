@@ -1,7 +1,7 @@
 
 
 
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
 
 
 NNAAMMEE
@@ -61,13 +61,13 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7                     December 10, 2007                       1
+1.7                      January  1, 2008                       1
 
 
 
 
 
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
 
 
        commands through sudo even when a root shell has been
@@ -107,7 +107,7 @@ OOPPTTIIOONNSS
                    descriptor three).  Values less than three are
                    not permitted.  This option is only available
                    if the administrator has enabled the _c_l_o_s_e_-
-                   _f_r_o_m___o_v_e_r_r_i_d_e option in _s_u_d_o_e_r_s(4).
+                   _f_r_o_m___o_v_e_r_r_i_d_e option in _s_u_d_o_e_r_s(5).
 
        -c _c_l_a_s_s    The --cc (_c_l_a_s_s) option causes ssuuddoo to run the
                    specified command with resources limited by
@@ -127,20 +127,20 @@ OOPPTTIIOONNSS
 
 
 
-1.7                     December 10, 2007                       2
+1.7                      January  1, 2008                       2
 
 
 
 
 
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
 
 
        -E          The --EE (_p_r_e_s_e_r_v_e _e_n_v_i_r_o_n_m_e_n_t) option will
-                   override the _e_n_v___r_e_s_e_t option in _s_u_d_o_e_r_s(4)).
+                   override the _e_n_v___r_e_s_e_t option in _s_u_d_o_e_r_s(5)).
                    It is only available when either the matching
                    command has the SETENV tag or the _s_e_t_e_n_v
-                   option is set in _s_u_d_o_e_r_s(4).
+                   option is set in _s_u_d_o_e_r_s(5).
 
        -e          The --ee (_e_d_i_t) option indicates that, instead
                    of running a command, the user wishes to edit
@@ -189,28 +189,28 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
        -H          The --HH (_H_O_M_E) option sets the HOME environment
                    variable to the homedir of the target user
-                   (root by default) as specified in _p_a_s_s_w_d(4).
+                   (root by default) as specified in _p_a_s_s_w_d(5).
 
 
 
-1.7                     December 10, 2007                       3
+1.7                      January  1, 2008                       3
 
 
 
 
 
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
 
 
                    By default, ssuuddoo does not modify HOME (see
-                   _s_e_t___h_o_m_e and _a_l_w_a_y_s___s_e_t___h_o_m_e in _s_u_d_o_e_r_s(4)).
+                   _s_e_t___h_o_m_e and _a_l_w_a_y_s___s_e_t___h_o_m_e in _s_u_d_o_e_r_s(5)).
 
        -h          The --hh (_h_e_l_p) option causes ssuuddoo to print a
                    usage message and exit.
 
        -i [command]
                    The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs
-                   the shell specified in the _p_a_s_s_w_d(4) entry of
+                   the shell specified in the _p_a_s_s_w_d(5) entry of
                    the target user as a login shell.  This means
                    that login-specific resource files such as
                    .profile or .login will be read by the shell.
@@ -221,8 +221,9 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    running the shell.  It also initializes the
                    environment, leaving _D_I_S_P_L_A_Y and _T_E_R_M
                    unchanged, setting _H_O_M_E, _S_H_E_L_L, _U_S_E_R, _L_O_G_N_A_M_E,
-                   and _P_A_T_H, and unsetting all other environment
-                   variables.
+                   and _P_A_T_H, as well as the contents of
+                   _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t.  All other environment vari-
+                   ables are removed.
 
        -K          The --KK (sure _k_i_l_l) option is like --kk except
                    that it removes the user's timestamp entirely.
@@ -255,19 +256,19 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    allowed, ssuuddoo will exit with a return value of
                    1.
 
+
+
+
+1.7                      January  1, 2008                       4
+
+
+
+
+
+SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
+
+
        -P          The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes
-
-
-
-1.7                     December 10, 2007                       4
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
                    ssuuddoo to preserve the invoking user's group
                    vector unaltered.  By default, ssuuddoo will ini-
                    tialize the group vector to the list of groups
@@ -308,7 +309,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        -s [command]
                    The --ss (_s_h_e_l_l) option runs the shell specified
                    by the _S_H_E_L_L environment variable if it is set
-                   or the shell as specified in _p_a_s_s_w_d(4).  If a
+                   or the shell as specified in _p_a_s_s_w_d(5).  If a
                    command is specified, it is passed to the
                    shell for execution.  Otherwise, an interac-
                    tive shell is executed.
@@ -321,23 +322,23 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
        -u _u_s_e_r     The --uu (_u_s_e_r) option causes ssuuddoo to run the
                    specified command as a user other than _r_o_o_t.
+
+
+
+1.7                      January  1, 2008                       5
+
+
+
+
+
+SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
+
+
                    To specify a _u_i_d instead of a _u_s_e_r _n_a_m_e, use
-
-
-
-1.7                     December 10, 2007                       5
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
                    _#_u_i_d.  When running commands as a _u_i_d, many
                    shells require that the '#' be escaped with a
                    backslash ('\').  Note that if the _t_a_r_g_e_t_p_w
-                   Defaults option is set (see _s_u_d_o_e_r_s(4)) it is
+                   Defaults option is set (see _s_u_d_o_e_r_s(5)) it is
                    not possible to run commands with a uid not
                    listed in the password database.
 
@@ -367,7 +368,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        important exception.  If the _s_e_t_e_n_v option is set in _s_u_d_o_-
        _e_r_s, the command to be run has the SETENV tag set or the
        command matched is ALL, the user may set variables that
-       would overwise be forbidden.  See _s_u_d_o_e_r_s(4) for more
+       would overwise be forbidden.  See _s_u_d_o_e_r_s(5) for more
        information.
 
 RREETTUURRNN VVAALLUUEESS
@@ -390,14 +391,13 @@ RREETTUURRNN VVAALLUUEESS
 
 
 
-
-1.7                     December 10, 2007                       6
-
+1.7                      January  1, 2008                       6
 
 
 
 
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+
+SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
 
 
 SSEECCUURRIITTYY NNOOTTEESS
@@ -457,13 +457,13 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.7                     December 10, 2007                       7
+1.7                      January  1, 2008                       7
 
 
 
 
 
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
 
 
        owned by root and inaccessible by any other user, the user
@@ -491,7 +491,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        ssuuddoo to verify that the command does not inadvertently
        give the user an effective root shell.  For more informa-
        tion, please see the PREVENTING SHELL ESCAPES section in
-       _s_u_d_o_e_r_s(4).
+       _s_u_d_o_e_r_s(5).
 
 EENNVVIIRROONNMMEENNTT
        ssuuddoo utilizes the following environment variables:
@@ -523,13 +523,13 @@ EENNVVIIRROONNMMEENNTT
 
 
 
-1.7                     December 10, 2007                       8
+1.7                      January  1, 2008                       8
 
 
 
 
 
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
+SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
 
 
                        sudo
@@ -545,9 +545,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 FFIILLEESS
        _/_e_t_c_/_s_u_d_o_e_r_s        List of who can run what
        _/_v_a_r_/_r_u_n_/_s_u_d_o       Directory containing timestamps
+       _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t    Initial environment for --ii mmooddee
 
 EEXXAAMMPPLLEESS
-       Note: the following examples assume suitable _s_u_d_o_e_r_s(4)
+       Note: the following examples assume suitable _s_u_d_o_e_r_s(5)
        entries.
 
        To get a file listing of an unreadable directory:
@@ -575,8 +576,8 @@ EEXXAAMMPPLLEESS
         $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 
 SSEEEE AALLSSOO
-       _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), _p_a_s_s_w_d(4),
-       _s_u_d_o_e_r_s(4), _v_i_s_u_d_o(1m)
+       _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), _p_a_s_s_w_d(5),
+       _s_u_d_o_e_r_s(5), _v_i_s_u_d_o(8)
 
 AAUUTTHHOORRSS
        Many people have worked on ssuuddoo over the years; this ver-
@@ -585,19 +586,19 @@ AAUUTTHHOORRSS
                Todd C. Miller
 
        See the HISTORY file in the ssuuddoo distribution or visit
+
+
+
+1.7                      January  1, 2008                       9
+
+
+
+
+
+SUDO(8)                MAINTENANCE COMMANDS               SUDO(8)
+
+
        http://www.sudo.ws/sudo/history.html for a short history
-
-
-
-1.7                     December 10, 2007                       9
-
-
-
-
-
-SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
-
-
        of ssuuddoo.
 
 CCAAVVEEAATTSS
@@ -607,7 +608,7 @@ CCAAVVEEAATTSS
        user to run commands via shell escapes, thus avoiding
        ssuuddoo's checks.  However, on most systems it is possible to
        prevent shell escapes with ssuuddoo's _n_o_e_x_e_c functionality.
-       See the _s_u_d_o_e_r_s(4) manual for details.
+       See the _s_u_d_o_e_r_s(5) manual for details.
 
        It is not meaningful to run the cd command directly via
        sudo, e.g.,
@@ -654,7 +655,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-1.7                     December 10, 2007                      10
+1.7                      January  1, 2008                      10
 
 
