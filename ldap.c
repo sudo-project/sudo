@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2008 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -85,6 +85,15 @@ __unused static const char rcsid[] = "$Sudo$";
 
 #if defined(HAVE_LDAP_SASL_INTERACTIVE_BIND_S) && !defined(LDAP_SASL_QUIET)
 # define LDAP_SASL_QUIET	0
+#endif
+
+#ifndef HAVE_LDAP_UNBIND_EXT_S
+#define ldap_unbind_ext_s(a, b, c)	ldap_unbind_s(a)
+#endif
+
+#ifndef HAVE_LDAP_SEARCH_EXT_S
+#define ldap_search_ext_s(a, b, c, d, e, f, g, h, i, j, k)		\
+	ldap_search_s(a, b, c, d, e, f, k)
 #endif
 
 #define LDAP_FOREACH(var, ld, res)					\
@@ -847,6 +856,37 @@ sudo_ldap_read_config()
 }
 
 /*
+ * Extract the dn from an entry and return the first rdn from it.
+ */
+static char *
+sudo_ldap_get_first_rdn(ld, entry)
+    LDAP *ld;
+    LDAPMessage *entry;
+{
+#ifdef HAVE_LDAP_STR2DN
+    char *dn, *rdn = NULL;
+    LDAPDN tmpDN;
+
+    if ((dn = ldap_get_dn(ld, entry)) == NULL)
+	return(NULL);
+    if (ldap_str2dn(dn, &tmpDN, LDAP_DN_FORMAT_LDAP) == LDAP_SUCCESS) {
+	ldap_rdn2str(tmpDN[0], &rdn, LDAP_DN_FORMAT_UFN);
+	ldap_dnfree(tmpDN);
+    }
+    ldap_memfree(dn);
+    return(rdn);
+#else
+    char *dn, **edn;
+
+    if ((dn = ldap_get_dn(ld, entry)) == NULL)
+	return(NULL);
+    edn = ldap_explode_dn(dn, 1);
+    ldap_memfree(dn);
+    return(edn ? edn[0] : NULL);
+#endif
+}
+
+/*
  * Like sudo_ldap_lookup(), except we just print entries.
  */
 void
@@ -857,7 +897,7 @@ sudo_ldap_display_privs(nss, pw)
     struct berval **bv, **p;
     LDAP *ld = (LDAP *) nss->handle;
     LDAPMessage *entry = NULL, *result = NULL;
-    char *filt, *dn, *rdn;
+    char *filt, *rdn;
     int rc, do_netgr;
 
     if (ld == NULL)
@@ -915,18 +955,9 @@ sudo_ldap_display_privs(nss, pw)
 		sudo_ldap_check_user_netgroup(ld, entry, pw->pw_passwd)) &&
 		sudo_ldap_check_host(ld, entry)) {
 
-		/* collect the dn, only show the first rdn */
-		rdn = NULL;
-		if ((dn = ldap_get_dn(ld, entry)) != NULL) {
-		    LDAPDN tmpDN;
-		    if (ldap_str2dn(dn, &tmpDN, LDAP_DN_FORMAT_LDAP) == LDAP_SUCCESS) {
-			ldap_rdn2str(tmpDN[0], &rdn, LDAP_DN_FORMAT_UFN);
-			ldap_dnfree(tmpDN);
-		    }
-		}
+		/* extract the dn, only show the first rdn */
+		rdn = sudo_ldap_get_first_rdn(ld, entry);
 		printf("\nLDAP Role: %s\n", rdn ? rdn : "UNKNOWN");
-		if (dn)
-		    ldap_memfree(dn);
 		if (rdn)
 		    ldap_memfree(rdn);
 
@@ -1491,9 +1522,10 @@ int
 sudo_ldap_close(nss)
     struct sudo_nss *nss;
 {
-    if (nss->handle != NULL)
-	ldap_unbind_s((LDAP *) nss->handle);
-    nss->handle = NULL;
+    if (nss->handle != NULL) {
+	ldap_unbind_ext_s((LDAP *) nss->handle, NULL, NULL);
+	nss->handle = NULL;
+    }
     return(0);
 }
 
