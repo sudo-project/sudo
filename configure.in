@@ -2519,7 +2519,7 @@ AH_BOTTOM([/*
 #ifdef HAVE_ST_MTIM
 # ifdef HAVE_ST__TIM
 #  define mtim_getsec(_x)	((_x).st_mtim.st__tim.tv_sec)
-#  define mtim_getnsec(_x)	(((_x).st_mtim.tst__tim.v_nsec / 1000) * 1000)
+#  define mtim_getnsec(_x)	(((_x).st_mtim.st__tim.tv_nsec / 1000) * 1000)
 # else
 #  define mtim_getsec(_x)	((_x).st_mtim.tv_sec)
 #  define mtim_getnsec(_x)	(((_x).st_mtim.tv_nsec / 1000) * 1000)
