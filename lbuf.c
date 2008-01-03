@@ -37,6 +37,9 @@
 #  include <strings.h>
 # endif
 #endif /* HAVE_STRING_H */
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
 #include <ctype.h>
 
 #include "sudo.h"
