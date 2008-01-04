@@ -215,6 +215,9 @@
 /* Define to 1 if you use LDAP for sudoers. */
 #undef HAVE_LDAP
 
+/* Define to 1 if you have the `ldap_create' function. */
+#undef HAVE_LDAP_CREATE
+
 /* Define to 1 if you have the `ldap_initialize' function. */
 #undef HAVE_LDAP_INITIALIZE
 
