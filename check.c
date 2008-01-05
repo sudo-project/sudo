@@ -201,6 +201,16 @@ expand_prompt(old_prompt, user, host)
 		    len += strlen(user_host) - 2;
 		    subst = 1;
 		    break;
+		case 'p':
+		    p++;
+		    if (def_rootpw)
+			    len += 2;
+		    else if (def_targetpw || def_runaspw)
+			    len += strlen(*user_runas) - 2;
+		    else
+			    len += strlen(user_name) - 2;
+		    subst = 1;
+		    break;
 		case 'u':
 		    p++;
 		    len += strlen(user_name) - 2;
@@ -240,6 +250,18 @@ expand_prompt(old_prompt, user, host)
 			n = strlcpy(np, user_host, np - endp);
 			if (n >= np - endp)
 			    goto oflow;
+			np += n;
+			continue;
+		    case 'p':
+			p++;
+			if (def_rootpw)
+				n = strlcpy(np, "root", np - endp);
+			else if (def_targetpw || def_runaspw)
+				n = strlcpy(np, *user_runas, np - endp);
+			else
+				n = strlcpy(np, user_name, np - endp);
+			if (n >= np - endp)
+				goto oflow;
 			np += n;
 			continue;
 		    case 'u':
