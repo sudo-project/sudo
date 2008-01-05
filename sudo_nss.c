@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2007-2008 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +34,11 @@
 #  include <strings.h>
 # endif
 #endif /* HAVE_STRING_H */
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#include <pwd.h>
+#include <grp.h>
 
 #include "sudo.h"
 
@@ -120,3 +125,66 @@ sudo_read_nss()
 }
 
 #endif /* HAVE_LDAP && _PATH_NSSWITCH_CONF */
+
+/* Reset user_groups based on passwd entry. */
+static void
+reset_groups(pw)
+    struct passwd *pw;
+{
+#if defined(HAVE_INITGROUPS) && defined(HAVE_GETGROUPS)
+    if (pw != sudo_user.pw) {
+	(void) initgroups(pw->pw_name, pw->pw_gid);
+	if ((user_ngroups = getgroups(0, NULL)) > 0) {
+	    user_groups = erealloc3(user_groups, user_ngroups,
+		sizeof(GETGROUPS_T));
+	    if (getgroups(user_ngroups, user_groups) < 0)
+		log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
+	} else {
+	    user_ngroups = 0;
+	    efree(user_groups);
+	}
+    }
+#endif
+}
+
+/*
+ * Print out privileges for the specified user.
+ */
+void
+display_privs(snl, pw)
+    struct sudo_nss_list *snl;
+    struct passwd *pw;
+{
+    struct sudo_nss *nss;
+
+    /* Reset group vector so group matching works correctly. */
+    reset_groups(pw);
+
+    /* Display privileges from all sources. */
+    tq_foreach_fwd(snl, nss) {
+	if (nss != tq_first(snl))
+	    putchar('\n');
+	nss->display_privs(nss, pw);
+    }
+}
+
+/*
+ * Check user_cmnd against sudoers and print the matching entry if the
+ * command is allowed.
+ */
+int
+display_cmnd(snl, pw)
+    struct sudo_nss_list *snl;
+    struct passwd *pw;
+{
+    struct sudo_nss *nss;
+
+    /* Reset group vector so group matching works correctly. */
+    reset_groups(pw);
+
+    tq_foreach_fwd(snl, nss) {
+	if (nss->display_cmnd(nss, pw) == 0)
+	    return(0);
+    }
+    return(1);
+}
