@@ -21956,7 +21956,8 @@ rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
 
 
 
-for ac_func in ldap_initialize ldap_start_tls_s ldap_sasl_interactive_bind_s ldapssl_init ldap_search_ext_s ldap_unbind_ext_s ldap_str2dn ldap_create
+
+for ac_func in ldap_initialize ldap_start_tls_s ldap_sasl_interactive_bind_s ldapssl_init ldap_search_ext_s ldap_unbind_ext_s ldap_str2dn ldap_create ldap_sasl_bind_s
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 { echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -22684,8 +22685,6 @@ echo "$as_me: WARNING: Unable to locate gssapi.h, you will have to edit the Make
     SUDO_LIBS="${SUDO_LIBS}${LDAP_LIBS}"
     LIBS="$_LIBS"
     LDFLAGS="$_LDFLAGS"
-    # XXX - OpenLDAP has deprecated ldap_get_values()
-    CPPFLAGS="${CPPFLAGS} -DLDAP_DEPRECATED"
 fi
 
 if test -n "$blibpath"; then

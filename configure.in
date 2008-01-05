@@ -2302,7 +2302,7 @@ if test ${with_ldap-'no'} != "no"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_LBER_H)])
 
-    AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s ldap_sasl_interactive_bind_s ldapssl_init ldap_search_ext_s ldap_unbind_ext_s ldap_str2dn ldap_create)
+    AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s ldap_sasl_interactive_bind_s ldapssl_init ldap_search_ext_s ldap_unbind_ext_s ldap_str2dn ldap_create ldap_sasl_bind_s)
     AC_CHECK_HEADERS([sasl/sasl.h])
 
     AC_CHECK_LIB(gssapi, gss_krb5_ccache_name,
@@ -2333,8 +2333,6 @@ if test ${with_ldap-'no'} != "no"; then
     SUDO_LIBS="${SUDO_LIBS}${LDAP_LIBS}"
     LIBS="$_LIBS"
     LDFLAGS="$_LDFLAGS"
-    # XXX - OpenLDAP has deprecated ldap_get_values()
-    CPPFLAGS="${CPPFLAGS} -DLDAP_DEPRECATED"
 fi
 
 dnl
