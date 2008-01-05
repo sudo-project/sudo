@@ -726,7 +726,7 @@ init_parser(path, quiet)
     init_aliases();
 
     efree(sudoers);
-    sudoers = estrdup(path);
+    sudoers = path ? estrdup(path) : NULL;
 
     parse_error = FALSE;
     errorlineno = -1;

@@ -96,7 +96,8 @@ int
 sudo_file_close(nss)
     struct sudo_nss *nss;
 {
-    /* XXX - free up data structures */
+    /* Free parser data structures and close sudoers file. */
+    init_parser(NULL, 0);
     if (nss->handle != NULL) {
 	fclose(nss->handle);
 	nss->handle = NULL;
