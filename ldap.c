@@ -214,20 +214,26 @@ sudo_ldap_parse_uri(uri_list)
 	}
 
 	/* trim optional trailing slash */
-	if ((cp = strrchr(host, '/')) != NULL && cp[1] == '\0')
+	if ((cp = strrchr(host, '/')) != NULL && cp[1] == '\0') {
 	    *cp = '\0';
+	}
 
-	/* XXX - strlcat return values */
-	if (hostbuf[0] != '\0')
-	    strlcat(hostbuf, " ", sizeof(hostbuf));
+	if (hostbuf[0] != '\0') {
+	    if (strlcat(hostbuf, " ", sizeof(hostbuf)) >= sizeof(hostbuf))
+		goto toobig;
+	}
 
-	/* If no host specified, use localhost */
-	strlcat(hostbuf, *host ? host : "localhost", sizeof(hostbuf));
+	if (*host == '\0')
+	    host = "localhost";		/* no host specified, use localhost */
+
+	if (strlcat(hostbuf, host, sizeof(hostbuf)) >= sizeof(hostbuf))
+	    goto toobig;
 
 	/* If using SSL and no port specified, add port 636 */
 	if (nldaps) {
 	    if ((port = strrchr(host, ':')) == NULL || !isdigit(port[1]))
-		strlcat(hostbuf, ":636", sizeof(hostbuf));
+		if (strlcat(hostbuf, ":636", sizeof(hostbuf)) >= sizeof(hostbuf))
+		    goto toobig;
 	}
     }
     if (hostbuf[0] == '\0') {
@@ -254,6 +260,9 @@ sudo_ldap_parse_uri(uri_list)
 done:
     efree(buf);
     return(rc);
+
+toobig:
+    errx(1, "sudo_ldap_parse_uri: out of space building hostbuf");
 }
 #endif /* HAVE_LDAP_INITIALIZE */
 
