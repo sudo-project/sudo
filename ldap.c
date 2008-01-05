@@ -1369,61 +1369,17 @@ sudo_ldap_set_options(ld)
 }
 
 /*
- * Open a connection to the LDAP server.
- * Returns 0 on success and non-zero on failure.
+ * Connect to the LDAP server specified by ld
  */
-int
-sudo_ldap_open(nss)
-    struct sudo_nss *nss;
-{
+static int
+sudo_ldap_bind_s(ld)
     LDAP *ld;
+{
+    int rc;
     const char *old_ccname = user_ccname;
-    int rc, ldapnoinit = FALSE;
 #ifdef HAVE_GSS_KRB5_CCACHE_NAME
     unsigned int status;
 #endif
-
-    if (!sudo_ldap_read_config())
-	return(-1);
-
-    /* Prevent reading of user ldaprc and system defaults. */
-    if (getenv("LDAPNOINIT") == NULL) {
-	ldapnoinit = TRUE;
-	sudo_setenv("LDAPNOINIT", "1", TRUE);
-    }
-
-    /* Connect to LDAP server */
-#ifdef HAVE_LDAP_INITIALIZE
-    if (ldap_conf.uri != NULL) {
-	DPRINTF(("ldap_initialize(ld, %s)", ldap_conf.uri), 2);
-	rc = ldap_initialize(&ld, ldap_conf.uri);
-    } else
-#endif
-	rc = sudo_ldap_init(&ld, ldap_conf.host, ldap_conf.port);
-    if (rc != LDAP_SUCCESS) {
-	warningx("unable to initialize LDAP: %s", ldap_err2string(rc));
-	return(-1);
-    }
-
-    if (ldapnoinit)
-	sudo_unsetenv("LDAPNOINIT");
-
-    /* Set LDAP options */
-    if (sudo_ldap_set_options(ld) < 0)
-	return(-1);
-
-    if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
-#ifdef HAVE_LDAP_START_TLS_S
-	rc = ldap_start_tls_s(ld, NULL, NULL);
-	if (rc != LDAP_SUCCESS) {
-	    warningx("ldap_start_tls_s(): %s", ldap_err2string(rc));
-	    return(-1);
-	}
-	DPRINTF(("ldap_start_tls_s() ok"), 1);
-#else
-	warningx("start_tls specified but LDAP libs do not support ldap_start_tls_s()");
-#endif /* HAVE_LDAP_START_TLS_S */
-    }
 
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     if (ldap_conf.rootuse_sasl == TRUE ||
@@ -1469,7 +1425,6 @@ sudo_ldap_open(nss)
 	bv.bv_val = ldap_conf.bindpw ? ldap_conf.bindpw : "";
 	bv.bv_len = strlen(bv.bv_val);
 
-	/* Actually connect */
 	rc = ldap_sasl_bind_s(ld, ldap_conf.binddn, LDAP_SASL_SIMPLE, &bv,
 	    NULL, NULL, NULL);
 	if (rc != LDAP_SUCCESS) {
@@ -1480,7 +1435,6 @@ sudo_ldap_open(nss)
     }
 #else
     {
-	/* Actually connect */
 	rc = ldap_simple_bind_s(ld, ldap_conf.binddn, ldap_conf.bindpw);
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_simple_bind_s(): %s", ldap_err2string(rc));
@@ -1489,6 +1443,65 @@ sudo_ldap_open(nss)
 	DPRINTF(("ldap_simple_bind_s() ok"), 1);
     }
 #endif
+    return(0);
+}
+
+/*
+ * Open a connection to the LDAP server.
+ * Returns 0 on success and non-zero on failure.
+ */
+int
+sudo_ldap_open(nss)
+    struct sudo_nss *nss;
+{
+    LDAP *ld;
+    int rc, ldapnoinit = FALSE;
+
+    if (!sudo_ldap_read_config())
+	return(-1);
+
+    /* Prevent reading of user ldaprc and system defaults. */
+    if (getenv("LDAPNOINIT") == NULL) {
+	ldapnoinit = TRUE;
+	sudo_setenv("LDAPNOINIT", "1", TRUE);
+    }
+
+    /* Connect to LDAP server */
+#ifdef HAVE_LDAP_INITIALIZE
+    if (ldap_conf.uri != NULL) {
+	DPRINTF(("ldap_initialize(ld, %s)", ldap_conf.uri), 2);
+	rc = ldap_initialize(&ld, ldap_conf.uri);
+    } else
+#endif
+	rc = sudo_ldap_init(&ld, ldap_conf.host, ldap_conf.port);
+    if (rc != LDAP_SUCCESS) {
+	warningx("unable to initialize LDAP: %s", ldap_err2string(rc));
+	return(-1);
+    }
+
+    if (ldapnoinit)
+	sudo_unsetenv("LDAPNOINIT");
+
+    /* Set LDAP options */
+    if (sudo_ldap_set_options(ld) < 0)
+	return(-1);
+
+    if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
+#ifdef HAVE_LDAP_START_TLS_S
+	rc = ldap_start_tls_s(ld, NULL, NULL);
+	if (rc != LDAP_SUCCESS) {
+	    warningx("ldap_start_tls_s(): %s", ldap_err2string(rc));
+	    return(-1);
+	}
+	DPRINTF(("ldap_start_tls_s() ok"), 1);
+#else
+	warningx("start_tls specified but LDAP libs do not support ldap_start_tls_s()");
+#endif /* HAVE_LDAP_START_TLS_S */
+    }
+
+    /* Actually connect */
+    if (sudo_ldap_bind_s(ld) != 0)
+	return(-1);
 
     nss->handle = ld;
     return(0);
