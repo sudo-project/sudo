@@ -786,6 +786,11 @@ option is set)
 
 expanded to the local hostname without the domain name
 
+=item C<%p>
+
+expanded to the user whose password is being asked for (respects the 
+I<rootpw>, I<targetpw> and I<runaspw> flags in I<sudoers>)
+
 =item C<%U>
 
 expanded to the login name of the user the command will

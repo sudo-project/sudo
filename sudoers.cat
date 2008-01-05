@@ -936,6 +936,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        %h  expanded to the local hostname without
                            the domain name
 
+                       %p  expanded to the user whose password is
+                           being asked for (respects the _r_o_o_t_p_w,
+                           _t_a_r_g_e_t_p_w and _r_u_n_a_s_p_w flags in _s_u_d_o_e_r_s)
+
                        %U  expanded to the login name of the user
                            the command will be run as (defaults
                            to root)
@@ -979,10 +983,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    be printed along with the password prompt.  It
                    has the following possible values:
 
-                   always  Always lecture the user.
-
-                   never   Never lecture the user.
-
 
 
 1.6.9p11                 January  5, 2008                      15
@@ -993,6 +993,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+                   always  Always lecture the user.
+
+                   never   Never lecture the user.
 
                    once    Only lecture the user the first time
                            they run ssuuddoo.
@@ -1044,10 +1048,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    mail.  Defaults to the path to sendmail found
                    at configure time.
 
-       mailto      Address to send warning and error mail to.
-                   The address should be enclosed in double
-                   quotes (") to protect against ssuuddoo interpret­
-                   ing the @ sign.  Defaults to root.
 
 
 
@@ -1059,6 +1059,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+       mailto      Address to send warning and error mail to.
+                   The address should be enclosed in double
+                   quotes (") to protect against ssuuddoo interpret­
+                   ing the @ sign.  Defaults to root.
 
        syslog      Syslog facility if syslog is being used for
                    logging (negate to disable syslog logging).
@@ -1109,11 +1114,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        check is displayed when ssuuddoo is run by
                        root with the _-_V option.
 
-       env_delete      Environment variables to be removed from
-                       the user's environment.  The argument may
-                       be a double-quoted, space-separated list
-                       or a single value without double-quotes.
-                       The list can be replaced, added to,
 
 
 
@@ -1126,6 +1126,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       env_delete      Environment variables to be removed from
+                       the user's environment.  The argument may
+                       be a double-quoted, space-separated list
+                       or a single value without double-quotes.
+                       The list can be replaced, added to,
                        deleted from, or disabled by using the =,
                        +=, -=, and ! operators respectively.  The
                        default list of environment variables to
@@ -1174,11 +1179,6 @@ EEXXAAMMPPLLEESS
        Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of
        these are a bit contrived.  First, we define our _a_l_i_a_s_e_s:
 
-        # User alias specification
-        User_Alias     FULLTIMERS = millert, mikef, dowdy
-        User_Alias     PARTTIMERS = bostley, jwfox, crawl
-        User_Alias     WEBMASTERS = will, wendy, wim
-
 
 
 
@@ -1191,6 +1191,11 @@ EEXXAAMMPPLLEESS
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+        # User alias specification
+        User_Alias     FULLTIMERS = millert, mikef, dowdy
+        User_Alias     PARTTIMERS = bostley, jwfox, crawl
+        User_Alias     WEBMASTERS = will, wendy, wim
 
         # Runas alias specification
         Runas_Alias    OP = root, operator
@@ -1241,11 +1246,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
         Defaults@SERVERS       log_year, logfile=/var/log/sudo.log
         Defaults!PAGERS        noexec
 
-       The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually deter­
-       mines who may run what.
-
-        root           ALL = (ALL) ALL
-        %wheel         ALL = (ALL) ALL
 
 
 
@@ -1257,6 +1257,12 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+       The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually deter­
+       mines who may run what.
+
+        root           ALL = (ALL) ALL
+        %wheel         ALL = (ALL) ALL
 
        We let rroooott and any user in group wwhheeeell run any command on
        any host as any user.
@@ -1307,12 +1313,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
         bob            SPARC = (OP) ALL : SGI = (OP) ALL
 
-       The user bboobb may run anything on the _S_P_A_R_C and _S_G_I
-       machines as any user listed in the _O_P Runas_Alias (rroooott
-       and ooppeerraattoorr).
-
-        jim            +biglab = ALL
-
 
 
 1.6.9p11                 January  5, 2008                      20
@@ -1323,6 +1323,12 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+       The user bboobb may run anything on the _S_P_A_R_C and _S_G_I
+       machines as any user listed in the _O_P Runas_Alias (rroooott
+       and ooppeerraattoorr).
+
+        jim            +biglab = ALL
 
        The user jjiimm may run any command on machines in the _b_i_g_l_a_b
        netgroup.  ssuuddoo knows that "biglab" is a netgroup due to
@@ -1372,12 +1378,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        (will, wendy, and wim), may run any command as user www
        (which owns the web pages) or simply _s_u(1) to www.
 
-        ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
-                       /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
-
-       Any user may mount or unmount a CD-ROM on the machines in
-       the CDROM Host_Alias (orion, perseus, hercules) without
-       entering a password.  This is a bit tedious for users to
 
 
 
@@ -1390,6 +1390,12 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+        ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
+                       /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
+
+       Any user may mount or unmount a CD-ROM on the machines in
+       the CDROM Host_Alias (orion, perseus, hercules) without
+       entering a password.  This is a bit tedious for users to
        type, so it is a prime candidate for encapsulating in a
        shell script.
 
@@ -1438,12 +1444,6 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
                  that this applies only to native dynamically-
                  linked executables.  Statically-linked executa­
                  bles and foreign executables running under
-                 binary emulation are not affected.
-
-                 To tell whether or not ssuuddoo supports _n_o_e_x_e_c, you
-                 can run the following as root:
-
-                     sudo -V | grep "dummy exec"
 
 
 
@@ -1455,6 +1455,13 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+                 binary emulation are not affected.
+
+                 To tell whether or not ssuuddoo supports _n_o_e_x_e_c, you
+                 can run the following as root:
+
+                     sudo -V | grep "dummy exec"
 
                  If the resulting output contains a line that
                  begins with:
@@ -1502,14 +1509,7 @@ SSEEEE AALLSSOO
 
 CCAAVVEEAATTSS
        The _s_u_d_o_e_r_s file should aallwwaayyss be edited by the vviissuuddoo
-       command which locks the file and does grammatical check­
-       ing. It is imperative that _s_u_d_o_e_r_s be free of syntax
-       errors since ssuuddoo will not run with a syntactically incor­
-       rect _s_u_d_o_e_r_s file.
-
-       When using netgroups of machines (as opposed to users), if
-       you store fully qualified hostnames in the netgroup (as is
-       usually the case), you either need to have the machine's
+       command which locks the file and does grammatical
 
 
 
@@ -1522,6 +1522,13 @@ CCAAVVEEAATTSS
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       checking. It is imperative that _s_u_d_o_e_r_s be free of syntax
+       errors since ssuuddoo will not run with a syntactically incor­
+       rect _s_u_d_o_e_r_s file.
+
+       When using netgroups of machines (as opposed to users), if
+       you store fully qualified hostnames in the netgroup (as is
+       usually the case), you either need to have the machine's
        hostname be fully qualified as returned by the hostname
        command or use the _f_q_d_n option in _s_u_d_o_e_r_s.
 
@@ -1542,13 +1549,6 @@ DDIISSCCLLAAIIMMEERR
        purpose are disclaimed.  See the LICENSE file distributed
        with ssuuddoo or http://www.sudo.ws/sudo/license.html for com­
        plete details.
-
-
-
-
-
-
-
 
 
 

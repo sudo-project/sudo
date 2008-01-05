@@ -222,6 +222,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            %h  expanded to the local hostname without the domain
                name
 
+           %p  expanded to the user whose password is being asked
+               for (respects the _r_o_o_t_p_w, _t_a_r_g_e_t_p_w and _r_u_n_a_s_p_w
+               flags in _s_u_d_o_e_r_s)
+
            %U  expanded to the login name of the user the command
                will be run as (defaults to root)
 
@@ -253,10 +257,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
            defaults ssuuddoo was compiled with as well as the
            machine's local network addresses.
 
-       -v  If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update
-           the user's timestamp, prompting for the user's pass­
-           word if necessary.  This extends the ssuuddoo timeout for
-
 
 
 1.6.9p11                 January  5, 2008                       4
@@ -268,6 +268,9 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       -v  If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update
+           the user's timestamp, prompting for the user's pass­
+           word if necessary.  This extends the ssuuddoo timeout for
            another 5 minutes (or whatever the timeout is set to
            in _s_u_d_o_e_r_s) but does not run a command.
 
@@ -318,10 +321,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
        If, however, the _e_n_v___r_e_s_e_t option is disabled in _s_u_d_o_e_r_s,
        any variables not explicitly denied by the _e_n_v___c_h_e_c_k and
-       _e_n_v___d_e_l_e_t_e options are inherited from the invoking pro­
-       cess.  In this case, _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e behave like
-       a blacklist.  Since it is not possible to blacklist all
-       potentially dangerous environment variables, use of the
+       _e_n_v___d_e_l_e_t_e options are inherited from the invoking
 
 
 
@@ -334,7 +334,10 @@ SSEECCUURRIITTYY NNOOTTEESS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-       default _e_n_v___r_e_s_e_t behavior is encouraged.
+       process.  In this case, _e_n_v___c_h_e_c_k and _e_n_v___d_e_l_e_t_e behave
+       like a blacklist.  Since it is not possible to blacklist
+       all potentially dangerous environment variables, use of
+       the default _e_n_v___r_e_s_e_t behavior is encouraged.
 
        In all cases, environment variables with a value beginning
        with () are removed as they could be interpreted as bbaasshh
@@ -385,9 +388,6 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        timestamp with a bogus date on systems that allow users to
        give away files.
 
-       Please note that ssuuddoo will normally only log the command
-       it explicitly runs.  If a user runs a command such as sudo
-       su or sudo sh, subsequent commands run from that shell
 
 
 
@@ -400,6 +400,9 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       Please note that ssuuddoo will normally only log the command
+       it explicitly runs.  If a user runs a command such as sudo
+       su or sudo sh, subsequent commands run from that shell
        will _n_o_t be logged, nor will ssuuddoo's access control affect
        them.  The same is true for commands that offer shell
        escapes (including most editors).  Because of this, care
@@ -450,9 +453,6 @@ FFIILLEESS
        _/_e_t_c_/_s_u_d_o_e_r_s        List of who can run what
        _/_v_a_r_/_r_u_n_/_s_u_d_o       Directory containing timestamps
 
-EEXXAAMMPPLLEESS
-       Note: the following examples assume suitable _s_u_d_o_e_r_s(4)
-       entries.
 
 
 
@@ -465,6 +465,10 @@ EEXXAAMMPPLLEESS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+EEXXAAMMPPLLEESS
+       Note: the following examples assume suitable _s_u_d_o_e_r_s(4)
+       entries.
 
        To get a file listing of an unreadable directory:
 
@@ -517,10 +521,6 @@ CCAAVVEEAATTSS
        It is not meaningful to run the cd command directly via
        sudo, e.g.,
 
-        $ sudo cd /usr/local/protected
-
-       since when the command exits the parent process (your
-
 
 
 1.6.9p11                 January  5, 2008                       8
@@ -532,6 +532,9 @@ CCAAVVEEAATTSS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+        $ sudo cd /usr/local/protected
+
+       since when the command exits the parent process (your
        shell) will still be the same.  Please see the EXAMPLES
        section for more information.
 
@@ -562,9 +565,6 @@ DDIISSCCLLAAIIMMEERR
        purpose are disclaimed.  See the LICENSE file distributed
        with ssuuddoo or http://www.sudo.ws/sudo/license.html for com­
        plete details.
-
-
-
 
 
 

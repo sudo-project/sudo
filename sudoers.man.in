@@ -903,6 +903,11 @@ option is set)
 .el .IP "\f(CW%h\fR" 4
 .IX Item "%h"
 expanded to the local hostname without the domain name
+.ie n .IP "%p" 4
+.el .IP "\f(CW%p\fR" 4
+.IX Item "%p"
+expanded to the user whose password is being asked for (respects the 
+\&\fIrootpw\fR, \fItargetpw\fR and \fIrunaspw\fR flags in \fIsudoers\fR)
 .ie n .IP "%U" 4
 .el .IP "\f(CW%U\fR" 4
 .IX Item "%U"

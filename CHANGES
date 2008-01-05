@@ -2025,3 +2025,7 @@ Sudo 1.6.9p10 released.
 
 639) The URI specifier can now be used in ldap.conf even when
      the LDAP SDK doesn't support ldap_initialize().
+
+640) New %p prompt escape that expands to the user whose password
+     is being prompted, as specified by the rootpw, targetpw and
+     runaspw sudoers flags.  Based on a diff from Patrick Schoenfeld.
