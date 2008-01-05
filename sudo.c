@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996,1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996,1998-2008 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -336,17 +336,7 @@ main(argc, argv, envp)
     tq_foreach_fwd(snl, nss) {
 	validated = nss->lookup(nss, validated, pwflag);
 
-/*
-	VALIDATE_OK
-	VALIDATE_NOT_OK
-	FLAG_CHECK_USER
-	FLAG_NO_USER
-	FLAG_NO_HOST
-	FLAG_NO_CHECK
-*/
-
 	/* Handle [NOTFOUND=return] */
-	/* XXX - no longer a valid check due to inheriting validated */
 	if (!ISSET(validated, VALIDATE_OK) && nss->ret_notfound)
 	    break;
     }
