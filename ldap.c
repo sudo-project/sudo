@@ -233,6 +233,157 @@ struct sudo_nss sudo_nss_ldap = {
     sudo_ldap_display_cmnd
 };
 
+#ifdef HAVE_LDAP_CREATE
+/*
+ * Rebuild the hosts list and include a specific port for each host.
+ * ldap_create() does not take a default port parameter so we must
+ * append one if we want something other than LDAP_PORT.
+ */
+static void
+sudo_ldap_conf_add_ports()
+{
+
+    char *host, *port, defport[13];
+    char hostbuf[LINE_MAX];
+
+    hostbuf[0] = '\0';
+    (void)snprintf(defport, sizeof(defport), ":%d", ldap_conf.port);
+
+    /* XXX - strlcat return values */
+    for ((host = strtok(ldap_conf.host, " \t")); host; (host = strtok(NULL, " \t"))) {
+	if (hostbuf[0] != '\0')
+	    strlcat(hostbuf, " ", sizeof(hostbuf));
+
+	strlcat(hostbuf, host, sizeof(hostbuf));
+	/* Append port if there is not one already. */
+	if ((port = strrchr(host, ':')) == NULL || !isdigit(port[1]))
+	    strlcat(hostbuf, defport, sizeof(hostbuf));
+    }
+
+    free(ldap_conf.host);
+    ldap_conf.host = estrdup(hostbuf);
+}
+#endif
+
+#ifndef HAVE_LDAP_INITIALIZE
+/*
+ * For each uri, convert to host:port pairs.  For ldaps:// enable SSL
+ * Accepts: uris of the form ldap:/// or ldap://hostname:portnum/
+ * where the trailing slash is optional.
+ */
+static int
+sudo_ldap_parse_uri(uri_list)
+    const char *uri_list;
+{
+    char *buf, *uri, *host, *cp, *port;
+    char hostbuf[LINE_MAX];
+    int nldap = 0, nldaps = 0;
+    int rc = -1;
+
+    buf = estrdup(uri_list);
+    hostbuf[0] = '\0';
+    for ((uri = strtok(buf, " \t")); uri != NULL; (uri = strtok(NULL, " \t"))) {
+	if (strncasecmp(uri, "ldap://", 7) == 0) {
+	    nldap++;
+	    host = uri + 7;
+	} else if (strncasecmp(uri, "ldaps://", 8) == 0) {
+	    nldaps++;
+	    host = uri + 8;
+	} else {
+	    warningx("unsupported LDAP uri type: %s", uri);
+	    goto done;
+	}
+
+	/* trim optional trailing slash */
+	if ((cp = strrchr(host, '/')) != NULL && cp[1] == '\0')
+	    *cp = '\0';
+
+	/* XXX - strlcat return values */
+	if (hostbuf[0] != '\0')
+	    strlcat(hostbuf, " ", sizeof(hostbuf));
+
+	/* If no host specified, use localhost */
+	strlcat(hostbuf, *host ? host : "localhost", sizeof(hostbuf));
+
+	/* If using SSL and no port specified, add port 636 */
+	if (nldaps) {
+	    if ((port = strrchr(host, ':')) == NULL || !isdigit(port[1]))
+		strlcat(hostbuf, ":636", sizeof(hostbuf));
+	}
+    }
+    if (hostbuf[0] == '\0') {
+	warningx("invalid uri: %s", uri_list);
+	goto done;
+    }
+
+    if (nldaps != 0) {
+	if (nldap != 0) {
+	    warningx("cannot mix ldap and ldaps URIs");
+	    goto done;
+	}
+	if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
+	    warningx("cannot mix ldaps and starttls");
+	    goto done;
+	}
+	ldap_conf.ssl_mode = SUDO_LDAP_SSL;
+    }
+
+    free(ldap_conf.host);
+    ldap_conf.host = estrdup(hostbuf);
+    rc = 0;
+
+done:
+    efree(buf);
+    return(rc);
+}
+#endif /* HAVE_LDAP_INITIALIZE */
+
+static int
+sudo_ldap_init(ldp, host, port)
+    LDAP **ldp;
+    const char *host;
+    int port;
+{
+    LDAP *ld = NULL;
+    int rc = LDAP_CONNECT_ERROR;
+
+#ifdef HAVE_LDAPSSL_INIT
+    if (ldap_conf.ssl_mode == SUDO_LDAP_SSL) {
+	DPRINTF(("ldapssl_clientauth_init(%s, %s)",
+	    ldap_conf.tls_certfile ? ldap_conf.tls_certfile : "NULL",
+	    ldap_conf.tls_keyfile ? ldap_conf.tls_keyfile : "NULL"), 2);
+	rc = ldapssl_clientauth_init(ldap_conf.tls_certfile, NULL,
+	    ldap_conf.tls_keyfile != NULL, ldap_conf.tls_keyfile, NULL);
+	if (rc != LDAP_SUCCESS) {
+	    warningx("unable to initialize SSL cert and key db: %s",
+		ldapssl_err2string(rc));
+	    goto done;
+	}
+
+	DPRINTF(("ldapssl_init(%s, %d, 1)", host, port), 2);
+	if ((ld = ldapssl_init(host, port, 1)) != NULL)
+	    rc = LDAP_SUCCESS;
+    } else
+#endif
+    {
+#ifdef HAVE_LDAP_CREATE
+	DPRINTF(("ldap_create()"), 2);
+	if ((rc = ldap_create(&ld)) != LDAP_SUCCESS)
+	    goto done;
+	DPRINTF(("ldap_set_option(LDAP_OPT_HOST_NAME, %s)", host), 2);
+	rc = ldap_set_option(ld, LDAP_OPT_HOST_NAME, host);
+#else
+	DPRINTF(("ldap_init(%s, %d)", host, port), 2);
+	if ((ld = ldap_init(host, port)) != NULL)
+	    rc = LDAP_SUCCESS;
+#endif
+    }
+
+done:
+    *ldp = ld;
+    return(rc);
+}
+
 /*
  * Walk through search results and return TRUE if we have a matching
  * netgroup, else FALSE.
@@ -737,7 +888,7 @@ sudo_ldap_read_config()
     fclose(fp);
 
     if (!ldap_conf.host)
-	ldap_conf.host = "localhost";
+	ldap_conf.host = estrdup("localhost");
 
     if (ldap_conf.bind_timelimit > 0)
 	ldap_conf.bind_timelimit *= 1000;	/* convert to ms */
@@ -745,12 +896,9 @@ sudo_ldap_read_config()
     if (ldap_conf.debug > 1) {
 	fprintf(stderr, "LDAP Config Summary\n");
 	fprintf(stderr, "===================\n");
-#ifdef HAVE_LDAP_INITIALIZE
 	if (ldap_conf.uri) {
 	    fprintf(stderr, "uri              %s\n", ldap_conf.uri);
-	} else
-#endif
-	{
+	} else {
 	    fprintf(stderr, "host             %s\n", ldap_conf.host ?
 		ldap_conf.host : "(NONE)");
 	    fprintf(stderr, "port             %d\n", ldap_conf.port);
@@ -814,10 +962,32 @@ sudo_ldap_read_config()
 		ldap_conf.ssl_mode = SUDO_LDAP_SSL;
     }
 
-    /* Use port 389 for plaintext LDAP and port 636 for SSL LDAP */
-    if (ldap_conf.port < 0)
-	ldap_conf.port =
-	    ldap_conf.ssl_mode == SUDO_LDAP_SSL ? LDAPS_PORT : LDAP_PORT;
+#ifndef HAVE_LDAP_INITIALIZE
+    /* Convert uri list to host list if no ldap_initialize(). */
+    if (ldap_conf.uri) {
+	if (sudo_ldap_parse_uri(ldap_conf.uri) != 0)
+	    return(FALSE);
+	free(ldap_conf.uri);
+	ldap_conf.uri = NULL;
+	ldap_conf.port = LDAP_PORT;
+    }
+#endif
+
+    if (!ldap_conf.uri) {
+	/* Use port 389 for plaintext LDAP and port 636 for SSL LDAP */
+	if (ldap_conf.port < 0)
+	    ldap_conf.port =
+		ldap_conf.ssl_mode == SUDO_LDAP_SSL ? LDAPS_PORT : LDAP_PORT;
+
+#ifdef HAVE_LDAP_CREATE
+	/*
+	 * Cannot specify port directly to ldap_create(), each host must
+	 * include :port to override the default.
+	 */
+	if (ldap_conf.port != LDAP_PORT)
+	    sudo_ldap_conf_add_ports();
+#endif
+    }
 
     /* If rootbinddn set, read in /etc/ldap.secret if it exists. */
     if (ldap_conf.rootbinddn) {
@@ -1192,7 +1362,7 @@ sudo_ldap_set_options(ld)
 		ldap_err2string(rc));
 	    return(-1);
 	}
-
+	DPRINTF(("ldap_set_option(LDAP_OPT_X_TLS, LDAP_OPT_X_TLS_HARD)\n"), 1);
     }
 #endif
     return(0);
@@ -1222,46 +1392,17 @@ sudo_ldap_open(nss)
 	sudo_setenv("LDAPNOINIT", "1", TRUE);
     }
 
-#ifdef HAVE_LDAPSSL_INIT
-    if (ldap_conf.ssl_mode == SUDO_LDAP_SSL) {
-	DPRINTF(("ldapssl_clientauth_init(%s, %s)",
-	    ldap_conf.tls_certfile ? ldap_conf.tls_certfile : "NULL",
-	    ldap_conf.tls_keyfile ? ldap_conf.tls_keyfile : "NULL"), 2);
-	rc = ldapssl_clientauth_init(ldap_conf.tls_certfile, NULL,
-	    ldap_conf.tls_keyfile != NULL, ldap_conf.tls_keyfile, NULL);
-	if (rc != LDAP_SUCCESS) {
-	    warningx("unable to initialize SSL cert and key db: %s",
-		ldapssl_err2string(rc));
-	    return(-1);
-	}
-    }
-#endif /* HAVE_LDAPSSL_INIT */
-
     /* Connect to LDAP server */
 #ifdef HAVE_LDAP_INITIALIZE
-    if (ldap_conf.uri) {
+    if (ldap_conf.uri != NULL) {
 	DPRINTF(("ldap_initialize(ld, %s)", ldap_conf.uri), 2);
 	rc = ldap_initialize(&ld, ldap_conf.uri);
-	if (rc != LDAP_SUCCESS) {
-	    warningx("unable to initialize LDAP: %s", ldap_err2string(rc));
-	    return(-1);
-	}
     } else
-#endif /* HAVE_LDAP_INITIALIZE */
-    {
-#ifdef HAVE_LDAPSSL_INIT
-	DPRINTF(("ldapssl_init(%s, %d, %d)", ldap_conf.host, ldap_conf.port,
-	    ldap_conf.ssl_mode == SUDO_LDAP_SSL), 2);
-	ld = ldapssl_init(ldap_conf.host, ldap_conf.port,
-	    ldap_conf.ssl_mode == SUDO_LDAP_SSL);
-#else
-	DPRINTF(("ldap_init(%s, %d)", ldap_conf.host, ldap_conf.port), 2);
-	ld = ldap_init(ldap_conf.host, ldap_conf.port);
 #endif
-	if (ld == NULL) {
-	    warning("unable to initialize LDAP");
-	    return(-1);
-	}
+	rc = sudo_ldap_init(&ld, ldap_conf.host, ldap_conf.port);
+    if (rc != LDAP_SUCCESS) {
+	warningx("unable to initialize LDAP: %s", ldap_err2string(rc));
+	return(-1);
     }
 
     if (ldapnoinit)
@@ -1321,14 +1462,33 @@ sudo_ldap_open(nss)
 	DPRINTF(("ldap_sasl_interactive_bind_s() ok"), 1);
     } else
 #endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
+#ifdef HAVE_LDAP_SASL_BIND_S
+    {
+	struct berval bv;
+
+	bv.bv_val = ldap_conf.bindpw ? ldap_conf.bindpw : "";
+	bv.bv_len = strlen(bv.bv_val);
+
+	/* Actually connect */
+	rc = ldap_sasl_bind_s(ld, ldap_conf.binddn, LDAP_SASL_SIMPLE, &bv,
+	    NULL, NULL, NULL);
+	if (rc != LDAP_SUCCESS) {
+	    warningx("ldap_sasl_bind_s(): %s", ldap_err2string(rc));
+	    return(-1);
+	}
+	DPRINTF(("ldap_sasl_bind_s() ok"), 1);
+    }
+#else
     {
 	/* Actually connect */
-	if ((rc = ldap_simple_bind_s(ld, ldap_conf.binddn, ldap_conf.bindpw))) {
+	rc = ldap_simple_bind_s(ld, ldap_conf.binddn, ldap_conf.bindpw);
+	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_simple_bind_s(): %s", ldap_err2string(rc));
 	    return(-1);
 	}
 	DPRINTF(("ldap_simple_bind_s() ok"), 1);
     }
+#endif
 
     nss->handle = ld;
     return(0);
