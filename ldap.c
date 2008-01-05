@@ -510,6 +510,8 @@ sudo_ldap_build_pass1()
 
     /* Append supplementary groups */
     for (i = 0; i < user_ngroups; i++) {
+	if (user_groups[i] == pw->pw_gid)
+	    continue;
 	if ((grp = getgrgid(user_groups[i])) != NULL) {
 	    ncat(&b, &sz, "(sudoUser=%");
 	    ncat(&b, &sz, grp -> gr_name);
