@@ -148,14 +148,3 @@ TODO list (most will be addressed in sudo 2.0)
     since they may affect the outcome (e.g. default_runas).
 
 52) Better LDAP documention.  Perhaps a sudo-ldap man page.
-
-53) Improve nss error handling.  Consider removing sources that
-    can't be opened.  Need to keep in mind ret_notfound.
-
-54) lookup method should only return VALIDATE_NOT_OK if matched !command.
-
-55) Convert LDAP code from using deprecated interfaces and stop
-    defining LDAP_DEPRECATED in configure.  Deprecated functions:
-    ldap_search_s ldap_init ldap_simple_bind_s ldap_unbind_s
-
-56) Emulate ldap_initialize() on SDKs where it is not available?
