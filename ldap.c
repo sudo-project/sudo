@@ -244,24 +244,33 @@ sudo_ldap_conf_add_ports()
 {
 
     char *host, *port, defport[13];
-    char hostbuf[LINE_MAX];
+    char hostbuf[LINE_MAX * 2];
 
     hostbuf[0] = '\0';
-    (void)snprintf(defport, sizeof(defport), ":%d", ldap_conf.port);
+    if (snprintf(defport, sizeof(defport), ":%d", ldap_conf.port) >= sizeof(defport))
+	errorx(1, "sudo_ldap_conf_add_ports: port too large");
 
-    /* XXX - strlcat return values */
     for ((host = strtok(ldap_conf.host, " \t")); host; (host = strtok(NULL, " \t"))) {
-	if (hostbuf[0] != '\0')
-	    strlcat(hostbuf, " ", sizeof(hostbuf));
+	if (hostbuf[0] != '\0') {
+	    if (strlcat(hostbuf, " ", sizeof(hostbuf)) >= sizeof(hostbuf))
+		goto toobig;
+	}
 
-	strlcat(hostbuf, host, sizeof(hostbuf));
+	if (strlcat(hostbuf, host, sizeof(hostbuf)) >= sizeof(hostbuf))
+	    goto toobig;
 	/* Append port if there is not one already. */
-	if ((port = strrchr(host, ':')) == NULL || !isdigit(port[1]))
-	    strlcat(hostbuf, defport, sizeof(hostbuf));
+	if ((port = strrchr(host, ':')) == NULL || !isdigit(port[1])) {
+	    if (strlcat(hostbuf, defport, sizeof(hostbuf)) >= sizeof(hostbuf))
+		goto toobig;
+	}
     }
 
     free(ldap_conf.host);
     ldap_conf.host = estrdup(hostbuf);
+    return;
+
+toobig:
+    errorx(1, "sudo_ldap_conf_add_ports: out of space expanding hostbuf");
 }
 #endif
 
@@ -295,20 +304,26 @@ sudo_ldap_parse_uri(uri_list)
 	}
 
 	/* trim optional trailing slash */
-	if ((cp = strrchr(host, '/')) != NULL && cp[1] == '\0')
+	if ((cp = strrchr(host, '/')) != NULL && cp[1] == '\0') {
 	    *cp = '\0';
+	}
 
-	/* XXX - strlcat return values */
-	if (hostbuf[0] != '\0')
-	    strlcat(hostbuf, " ", sizeof(hostbuf));
+	if (hostbuf[0] != '\0') {
+	    if (strlcat(hostbuf, " ", sizeof(hostbuf)) >= sizeof(hostbuf))
+		goto toobig;
+	}
 
-	/* If no host specified, use localhost */
-	strlcat(hostbuf, *host ? host : "localhost", sizeof(hostbuf));
+	if (*host == '\0')
+	    host = "localhost";		/* no host specified, use localhost */
+
+	if (strlcat(hostbuf, host, sizeof(hostbuf)) >= sizeof(hostbuf))
+	    goto toobig;
 
 	/* If using SSL and no port specified, add port 636 */
 	if (nldaps) {
 	    if ((port = strrchr(host, ':')) == NULL || !isdigit(port[1]))
-		strlcat(hostbuf, ":636", sizeof(hostbuf));
+		if (strlcat(hostbuf, ":636", sizeof(hostbuf)) >= sizeof(hostbuf))
+		    goto toobig;
 	}
     }
     if (hostbuf[0] == '\0') {
@@ -335,6 +350,9 @@ sudo_ldap_parse_uri(uri_list)
 done:
     efree(buf);
     return(rc);
+
+toobig:
+    errorx(1, "sudo_ldap_parse_uri: out of space building hostbuf");
 }
 #endif /* HAVE_LDAP_INITIALIZE */
 
