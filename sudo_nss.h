@@ -24,7 +24,7 @@ struct sudo_nss {
     int (*close) __P((struct sudo_nss *nss));
     int (*parse) __P((struct sudo_nss *nss));
     int (*setdefs) __P((struct sudo_nss *nss));
-    int (*lookup) __P((struct sudo_nss *nss, int));
+    int (*lookup) __P((struct sudo_nss *nss, int, int));
     void (*display_privs) __P((struct sudo_nss *nss, struct passwd *));
     int (*display_cmnd) __P((struct sudo_nss *nss, struct passwd *));
     void *handle;

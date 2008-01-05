@@ -188,18 +188,16 @@ sudo_file_setdefs(nss)
  * allowed to run the specified command on this host as the target user.
  */
 int
-sudo_file_lookup(nss, pwflag)
+sudo_file_lookup(nss, validated, pwflag)
     struct sudo_nss *nss;
+    int validated;
     int pwflag;
 {
-    int validated, match, host_match, runas_match, cmnd_match;
+    int match, host_match, runas_match, cmnd_match;
     struct cmndspec *cs;
     struct cmndtag *tags = NULL;
     struct privilege *priv;
     struct userspec *us;
-
-    /* Assume the worst.  */
-    validated = VALIDATE_NOT_OK | FLAG_NO_HOST | FLAG_NO_USER;
 
     if (nss->handle == NULL)
 	return(validated);
@@ -243,9 +241,9 @@ sudo_file_lookup(nss, pwflag)
 	matched_pseudo:
 	if (match == ALLOW || user_uid == 0) {
 	    /* User has an entry for this host. */
-	    CLR(validated, VALIDATE_NOT_OK);
 	    SET(validated, VALIDATE_OK);
-	}
+	} else if (match == DENY)
+	    SET(validated, VALIDATE_NOT_OK);
 	if (pwcheck == always && def_authenticate)
 	    SET(validated, FLAG_CHECK_USER);
 	else if (pwcheck == never || nopass == TRUE)
@@ -283,8 +281,8 @@ sudo_file_lookup(nss, pwflag)
     }
     matched2:
     if (match == ALLOW) {
-	CLR(validated, VALIDATE_NOT_OK);
 	SET(validated, VALIDATE_OK);
+	CLR(validated, VALIDATE_NOT_OK);
 	if (tags != NULL) {
 	    if (tags->nopasswd != UNSPEC)
 		def_authenticate = !tags->nopasswd;
@@ -293,6 +291,9 @@ sudo_file_lookup(nss, pwflag)
 	    if (tags->setenv != UNSPEC)
 		def_setenv = tags->setenv;
 	}
+    } else if (match == DENY) {
+	SET(validated, VALIDATE_NOT_OK);
+	CLR(validated, VALIDATE_OK);
     }
     set_perms(PERM_ROOT);
     return(validated);

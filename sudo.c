@@ -158,7 +158,7 @@ main(argc, argv, envp)
     char **argv;
     char **envp;
 {
-    int sources = 0, validated = 0;
+    int sources = 0, validated;
     int fd, cmnd_status, sudo_mode, pwflag, rc = 0;
     sigaction_t sa;
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -332,17 +332,22 @@ main(argc, argv, envp)
 
     cmnd_status = set_cmnd(sudo_mode);
 
+    validated = FLAG_NO_USER | FLAG_NO_HOST;
     tq_foreach_fwd(snl, nss) {
-	rc = nss->lookup(nss, pwflag);
+	validated = nss->lookup(nss, validated, pwflag);
 
-	/* XXX - rethink this logic */
-	if (validated == 0 || ISSET(rc, VALIDATE_OK))
-	    validated = rc;
-	else if (ISSET(rc, VALIDATE_NOT_OK) && ISSET(validated, VALIDATE_NOT_OK))
-	    validated |= rc;
+/*
+	VALIDATE_OK
+	VALIDATE_NOT_OK
+	FLAG_CHECK_USER
+	FLAG_NO_USER
+	FLAG_NO_HOST
+	FLAG_NO_CHECK
+*/
 
 	/* Handle [NOTFOUND=return] */
-	if (!ISSET(rc, VALIDATE_OK) && nss->ret_notfound)
+	/* XXX - no longer a valid check due to inheriting validated */
+	if (!ISSET(validated, VALIDATE_OK) && nss->ret_notfound)
 	    break;
     }
     if (safe_cmnd == NULL)
@@ -504,13 +509,12 @@ main(argc, argv, envp)
 	    NewArgv[0] = "sh";
 	    NewArgv[1] = safe_cmnd;
 	    execv(_PATH_BSHELL, NewArgv);
-	}
-	warning("unable to execute %s", safe_cmnd);
+	} warning("unable to execute %s", safe_cmnd);
 	exit(127);
     } else if (ISSET(validated, FLAG_NO_USER) || (validated & FLAG_NO_HOST)) {
 	log_auth(validated, 1);
 	exit(1);
-    } else if (ISSET(validated, VALIDATE_NOT_OK)) {
+    } else {
 	if (def_path_info) {
 	    /*
 	     * We'd like to not leak path info at all here, but that can
@@ -529,10 +533,6 @@ main(argc, argv, envp)
 	    /* Just tell the user they are not allowed to run foo. */
 	    log_auth(validated, 1);
 	}
-	exit(1);
-    } else {
-	/* should never get here */
-	log_auth(validated, 1);
 	exit(1);
     }
     exit(0);	/* not reached */

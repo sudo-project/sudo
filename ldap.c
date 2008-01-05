@@ -585,7 +585,8 @@ sudo_ldap_check_runas(ld, entry)
 }
 
 /*
- * Walk through search results and return TRUE if we have a command match.
+ * Walk through search results and return TRUE if we have a command match,
+ * FALSE if disallowed and UNSPEC if not matched.
  */
 int
 sudo_ldap_check_command(ld, entry, setenv_implied)
@@ -595,7 +596,7 @@ sudo_ldap_check_command(ld, entry, setenv_implied)
 {
     struct berval **bv, **p;
     char *allowed_cmnd, *allowed_args, *val;
-    int foundbang, ret = FALSE;
+    int foundbang, ret = UNSPEC;
 
     if (!entry)
 	return(ret);
@@ -604,7 +605,7 @@ sudo_ldap_check_command(ld, entry, setenv_implied)
     if (bv == NULL)
 	return(ret);
 
-    for (p = bv; *p != NULL && ret >= 0; p++) {
+    for (p = bv; *p != NULL && ret != FALSE; p++) {
 	val = (*p)->bv_val;
 	/* Match against ALL ? */
 	if (!strcmp(val, "ALL")) {
@@ -635,7 +636,7 @@ sudo_ldap_check_command(ld, entry, setenv_implied)
 	     * If allowed (no bang) set ret but keep on checking.
 	     * If disallowed (bang), exit loop.
 	     */
-	    ret = foundbang ? -1 : TRUE;
+	    ret = foundbang ? FALSE : TRUE;
 	}
 	DPRINTF(("ldap sudoCommand '%s' ... %s", val,
 	    ret == TRUE ? "MATCH!" : "not"), 2);
@@ -645,8 +646,7 @@ sudo_ldap_check_command(ld, entry, setenv_implied)
 
     ldap_value_free_len(bv);	/* more cleanup */
 
-    /* return TRUE if we found at least one ALLOW and no DENY */
-    return(ret > 0);
+    return(ret);
 }
 
 /*
@@ -1523,27 +1523,28 @@ sudo_ldap_setdefs(nss)
  * like sudoers_lookup() - only LDAP style
  */
 int
-sudo_ldap_lookup(nss, pwflag)
+sudo_ldap_lookup(nss, ret, pwflag)
     struct sudo_nss *nss;
+    int ret;
     int pwflag;
 {
     LDAP *ld = (LDAP *) nss->handle;
-    LDAPMessage *entry = NULL, *result = NULL;	/* used for searches */
-    char *filt;					/* used to parse attributes */
-    int do_netgr, rc, ret;			/* temp/final return values */
+    LDAPMessage *entry = NULL, *result = NULL;
+    char *filt;
+    int do_netgr, rc, matched;
     int setenv_implied;
-    int ldap_user_matches = FALSE, ldap_host_matches = FALSE; /* flags */
+    int ldap_user_matches = FALSE, ldap_host_matches = FALSE;
     struct passwd *pw = list_pw ? list_pw : sudo_user.pw;
 
     if (ld == NULL)
-	return(VALIDATE_NOT_OK | FLAG_NO_HOST | FLAG_NO_USER);
+	return(ret);
 
     if (pwflag) {
 	int doauth = UNSPEC;
 	enum def_tupple pwcheck = 
 	    (pwflag == -1) ? never : sudo_defs_table[pwflag].sd_un.tuple;
 
-	for (ret = 0, do_netgr = 0; !ret && do_netgr < 2; do_netgr++) {
+	for (matched = 0, do_netgr = 0; !matched && do_netgr < 2; do_netgr++) {
 	    filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
 	    rc = ldap_search_ext_s(ld, ldap_conf.base, LDAP_SCOPE_SUBTREE, filt,
 		NULL, 0, NULL, NULL, NULL, -1, &result);
@@ -1566,7 +1567,7 @@ sudo_ldap_lookup(nss, pwflag)
 		    if (user_uid == 0 || list_pw == NULL ||
 			user_uid == list_pw->pw_uid ||
 			sudo_ldap_check_command(ld, entry, NULL)) {
-			ret = 1;
+			matched = 1;
 			break;	/* end foreach */
 		    }
 		}
@@ -1574,8 +1575,9 @@ sudo_ldap_lookup(nss, pwflag)
 	    ldap_msgfree(result);
 	    result = NULL;
 	}
-	if (ret || user_uid == 0) {
-	    ret = VALIDATE_OK;
+	if (matched || user_uid == 0) {
+	    SET(ret, VALIDATE_OK);
+	    CLR(ret, VALIDATE_NOT_OK);
 	    if (def_authenticate) {
 		switch (pwcheck) {
 		    case always:
@@ -1612,7 +1614,7 @@ sudo_ldap_lookup(nss, pwflag)
      * try to match them against the username.
      */
     setenv_implied = FALSE;
-    for (ret = 0, do_netgr = 0; !ret && do_netgr < 2; do_netgr++) {
+    for (matched = 0, do_netgr = 0; !matched && do_netgr < 2; do_netgr++) {
 	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
 	DPRINTF(("ldap search '%s'", filt), 1);
 	rc = ldap_search_ext_s(ld, ldap_conf.base, LDAP_SCOPE_SUBTREE, filt,
@@ -1634,19 +1636,26 @@ sudo_ldap_lookup(nss, pwflag)
 		    sudo_ldap_check_host(ld, entry) &&
 		/* remember that host matched */
 		    (ldap_host_matches = TRUE) &&
-		/* verify command match */
-		    sudo_ldap_check_command(ld, entry, &setenv_implied) &&
 		/* verify runas match */
-		    sudo_ldap_check_runas(ld, entry)
+		    sudo_ldap_check_runas(ld, entry) &&
+		/* verify command match */
+		    (rc = sudo_ldap_check_command(ld, entry, &setenv_implied)) != UNSPEC
 		    ) {
 		    /* We have a match! */
-		    DPRINTF(("Perfect Match!"), 1);
-		    /* pick up any options */
-		    if (setenv_implied)
-			def_setenv = TRUE;
-		    sudo_ldap_parse_options(ld, entry);
-		    /* make sure we don't reenter loop */
-		    ret = VALIDATE_OK;
+		    DPRINTF(("Command %sallowed", rc == TRUE ? "" : "NOT "), 1);
+		    matched = TRUE;
+		    if (rc == TRUE) {
+			/* pick up any options */
+			if (setenv_implied)
+			    def_setenv = TRUE;
+			sudo_ldap_parse_options(ld, entry);
+			/* make sure we don't reenter loop */
+			SET(ret, VALIDATE_OK);
+			CLR(ret, VALIDATE_NOT_OK);
+		    } else {
+			SET(ret, VALIDATE_NOT_OK);
+			CLR(ret, VALIDATE_OK);
+		    }
 		    /* break from inside for loop */
 		    break;
 		}
@@ -1662,14 +1671,13 @@ done:
 
     if (!ISSET(ret, VALIDATE_OK)) {
 	/* we do not have a match */
-	ret = VALIDATE_NOT_OK;
 	if (pwflag && list_pw == NULL)
 	    SET(ret, FLAG_NO_CHECK);
-	else if (!ldap_user_matches)
-	    SET(ret, FLAG_NO_USER);
-	else if (!ldap_host_matches)
-	    SET(ret, FLAG_NO_HOST);
     }
+    if (ldap_user_matches)
+	CLR(ret, FLAG_NO_USER);
+    if (ldap_host_matches)
+	CLR(ret, FLAG_NO_HOST);
     DPRINTF(("sudo_ldap_lookup(%d)=0x%02x", pwflag, ret), 1);
 
     return(ret);
