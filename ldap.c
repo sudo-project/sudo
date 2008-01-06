@@ -849,6 +849,28 @@ _atobool(s)
     return(-1);
 }
 
+static void
+sudo_ldap_read_secret(path)
+    const char *path;
+{
+    FILE *fp;
+    char buf[LINE_MAX], *cp;
+
+    if ((fp = fopen(_PATH_LDAP_SECRET, "r")) != NULL) {
+	if (fgets(buf, sizeof(buf), fp) != NULL) {
+	    if ((cp = strchr(buf, '\n')) != NULL)
+		*cp = '\0';
+	    /* copy to bindpw and binddn */
+	    efree(ldap_conf.bindpw);
+	    ldap_conf.bindpw = estrdup(cp);
+	    efree(ldap_conf.binddn);
+	    ldap_conf.binddn = ldap_conf.rootbinddn;
+	    ldap_conf.rootbinddn = NULL;
+	}
+	fclose(fp);
+    }
+}
+
 int
 sudo_ldap_read_config()
 {
@@ -1008,19 +1030,9 @@ sudo_ldap_read_config()
     }
 
     /* If rootbinddn set, read in /etc/ldap.secret if it exists. */
-    if (ldap_conf.rootbinddn) {
-	if ((fp = fopen(_PATH_LDAP_SECRET, "r")) != NULL) {
-	    if ((cp = sudo_parseln(fp)) != NULL) {
-		/* copy to bindpw and binddn */
-		efree(ldap_conf.bindpw);
-		ldap_conf.bindpw = estrdup(cp);
-		efree(ldap_conf.binddn);
-		ldap_conf.binddn = ldap_conf.rootbinddn;
-		ldap_conf.rootbinddn = NULL;
-	    }
-	    fclose(fp);
-	}
-    }
+    if (ldap_conf.rootbinddn)
+	sudo_ldap_read_secret(_PATH_LDAP_SECRET);
+
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
     /*
      * Make sure we can open the file specified by krb5_ccname.
