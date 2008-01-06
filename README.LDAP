@@ -226,6 +226,13 @@ when you imported the sudoers.  Below is an example /etc/ldap.conf
   #uri            ldaps://secureldapserver
   #uri            ldaps://secureldapserver ldap://ldapserver
   #
+  # The amount of time, in seconds, to wait while trying to connect to
+  # an LDAP server.
+  bind_timelimit 30
+  #
+  # The amount of time, in seconds, to wait while performing an LDAP query.
+  timelimit 30
+  #
   # must be set or sudo will ignore LDAP
   sudoers_base   ou=SUDOers,dc=example,dc=com
   #
