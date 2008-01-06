@@ -206,7 +206,7 @@ expand_prompt(old_prompt, user, host)
 		    if (def_rootpw)
 			    len += 2;
 		    else if (def_targetpw || def_runaspw)
-			    len += strlen(*user_runas) - 2;
+			    len += strlen(runas_pw->pw_name) - 2;
 		    else
 			    len += strlen(user_name) - 2;
 		    subst = 1;
@@ -257,7 +257,7 @@ expand_prompt(old_prompt, user, host)
 			if (def_rootpw)
 				n = strlcpy(np, "root", np - endp);
 			else if (def_targetpw || def_runaspw)
-				n = strlcpy(np, *user_runas, np - endp);
+				n = strlcpy(np, runas_pw->pw_name, np - endp);
 			else
 				n = strlcpy(np, user_name, np - endp);
 			if (n >= np - endp)
