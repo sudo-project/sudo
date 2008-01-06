@@ -358,9 +358,8 @@ Here is an example:
   sudoCommand: ALL
 
 Another difference is that negations on the Host, User or Runas are
-currently ignorred.  For example, these attributes do not work how they first
-seem.  If you desperately want this to be changed, contact Aaron Spangler
-(aaron@spangler.ods.org).
+currently ignorred.  For example, these attributes do not work how
+they first seem.
 
   # does not match all but joe
   # rather, does not match anyone
