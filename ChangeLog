@@ -1,6 +1,117 @@
-2008-01-01 17:07  millert
+2008-01-06 07:56  millert
+
+	* ldap.c: Move ldap.secret reading into a separate function.
+
+2008-01-05 19:09  millert
+
+	* check.c: user_runas -> runas_pw
+
+2008-01-05 18:59  millert
 
 	* TODO: sync
+
+2008-01-05 18:59  millert
+
+	* check.c, sudo.pod, sudoers.pod: Add and document the %p escape in
+	  the password prompt.	Based on a patch from Patrick Schoenfeld.
+
+2008-01-05 18:25  millert
+
+	* ldap.c: Check strlcpy() return values.
+
+2008-01-05 18:12  millert
+
+	* ldap.c: refactor ldap binding code into sudo_ldap_bind_s()
+
+2008-01-05 16:35  millert
+
+	* README.LDAP: Make it clear that host and uri can take multiple
+	  parameters.  URI is now supported for more than just openldap
+	  nsswitch.conf does't accept "compat"
+
+2008-01-05 16:27  millert
+
+	* sudo.c: comment cleanup and update (c) year
+
+2008-01-05 16:25  millert
+
+	* parse.c, sudo_nss.c: Move display_privs() and display_cmnd() from
+	  parse.c to sudo_nss.c.  This should make it possible to build an
+	  LDAP-only sudo binary.
+
+2008-01-05 13:27  millert
+
+	* ldap.c, parse.c, sudo.c, sudo.h, sudo_nss.h: Improve chaining of
+	  multiple sudoers sources by passing in the previous return value
+	  to the next in the chain
+
+2008-01-05 13:26  millert
+
+	* gram.y: Free up parser data structures in sudo_file_close().
+
+2008-01-05 08:13  millert
+
+	* gram.c, parse.c: Free up parser data structures in
+	  sudo_file_close().
+
+2008-01-05 07:59  millert
+
+	* ldap.c: Parse uri ourself if no ldap_initialize() is present Use
+	  ldap_create() instead of deprecated ldap_init() Use
+	  ldap_sasl_bind_s() instead of deprecated ldap_simple_bind_s()
+
+2008-01-05 07:56  millert
+
+	* config.h.in, configure, configure.in: Add check for
+	  ldap_sasl_bind_s() Remove -DLDAP_DEPRECATED from CFLAGS
+
+2008-01-04 09:56  millert
+
+	* configure.in, configure, config.h.in: add check for ldap_create
+
+2008-01-03 16:11  millert
+
+	* config.h.in, configure, configure.in, ldap.c: Add
+	  sudo_ldap_get_first_rdn() to return the first rdn of an entry's
+	  dn using the mechanism appropriate for the LDAP SDK in use.  Use
+	  ldap_unbind_ext_s() instead of deprecated ldap_unbind_s().
+	  Emulate ldap_unbind_ext_s() and ldap_search_ext_s() for SDK's
+	  without them.
+
+2008-01-03 16:02  millert
+
+	* lbuf.c: include unistd.h
+
+2008-01-03 11:05  millert
+
+	* config.h.in, configure.in: fix typo in mtim_getnsec
+
+2008-01-02 15:29  millert
+
+	* config.h.in, configure.in, configure: add check for st__tim in
+	  struct stat as used by SCO
+
+2008-01-02 11:05  millert
+
+	* ldap.c: use ldap_search_ext_s instead of deprecated ldap_search_s
+
+2008-01-02 10:09  millert
+
+	* Makefile.in, TODO, sudo.cat, sudo.man.in: add sudo_nss.h to HDRS
+
+2008-01-01 19:04  millert
+
+	* ldap.c: Replace deprecated ldap_explode_dn() with calls to
+	  ldap_str2dn() and ldap_rdn2str().
+
+2008-01-01 18:37  millert
+
+	* ldap.c: Use ldap_get_values_len()/ldap_value_free_len() instead
+	  of the deprecated ldap_get_values()/ldap_value_free().
+
+2008-01-01 17:07  millert
+
+	* TODO, ChangeLog: sync
 
 2008-01-01 17:06  millert
 
