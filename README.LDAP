@@ -389,4 +389,4 @@ search if the user was not found in the preceding source.
 If /etc/nsswitch.conf is not present or there is no sudoers line,
 the following default is assumed:
 
-  sudoers: ldap files
+  sudoers: files
