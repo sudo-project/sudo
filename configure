@@ -827,6 +827,7 @@ noexec_file
 INSTALL_NOEXEC
 DONT_LEAK_PATH_INFO
 BSDAUTH_USAGE
+LDAP
 LOGINCAP_USAGE
 timedir
 timeout
@@ -2079,6 +2080,7 @@ echo "$as_me: Configuring Sudo version 1.7" >&6;}
 
 
 
+
 timeout=5
 password_timeout=5
 sudo_umask=0022
@@ -2113,6 +2115,7 @@ PROGS="sudo visudo"
 : ${SUDOERS_UID='0'}
 : ${SUDOERS_GID='0'}
 DEV="#"
+LDAP="#"
 AUTH_OBJS=
 AUTH_REG=
 AUTH_EXCL=
@@ -6119,7 +6122,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6122 "configure"' > conftest.$ac_ext
+  echo '#line 6125 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7663,11 +7666,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7666: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7669: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7670: \$? = $ac_status" >&5
+   echo "$as_me:7673: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7953,11 +7956,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7956: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7959: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7960: \$? = $ac_status" >&5
+   echo "$as_me:7963: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8057,11 +8060,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8060: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8063: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8064: \$? = $ac_status" >&5
+   echo "$as_me:8067: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10402,7 +10405,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10405 "configure"
+#line 10408 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10502,7 +10505,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10505 "configure"
+#line 10508 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -21829,6 +21832,7 @@ if test ${with_ldap-'no'} != "no"; then
 
 	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
 	with_ldap=yes
+	LDAP=""
     fi
     SUDO_OBJS="${SUDO_OBJS} ldap.o"
 
@@ -21887,13 +21891,97 @@ rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
     done
         if test "$found" = "no"; then
-	LDAP_LIBS=" -lldap"
+	LIBS="${_LIBS} -lldap"
+	LDAP_LIBS="-lldap"
 	{ echo "$as_me:$LINENO: result: not found, using -lldap" >&5
 echo "${ECHO_T}not found, using -lldap" >&6; }
     else
 	{ echo "$as_me:$LINENO: result: $LDAP_LIBS" >&5
 echo "${ECHO_T}$LDAP_LIBS" >&6; }
     fi
+        { echo "$as_me:$LINENO: checking for library containing ber_set_option" >&5
+echo $ECHO_N "checking for library containing ber_set_option... $ECHO_C" >&6; }
+if test "${ac_cv_search_ber_set_option+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char ber_set_option ();
+int
+main ()
+{
+return ber_set_option ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' lber; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_search_ber_set_option=$ac_res
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext
+  if test "${ac_cv_search_ber_set_option+set}" = set; then
+  break
+fi
+done
+if test "${ac_cv_search_ber_set_option+set}" = set; then
+  :
+else
+  ac_cv_search_ber_set_option=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_search_ber_set_option" >&5
+echo "${ECHO_T}$ac_cv_search_ber_set_option" >&6; }
+ac_res=$ac_cv_search_ber_set_option
+if test "$ac_res" != no; then
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+  LDAP_LIBS="$LDAP_LIBS -llber"
+fi
+
         { echo "$as_me:$LINENO: checking whether lber.h is needed" >&5
 echo $ECHO_N "checking whether lber.h is needed... $ECHO_C" >&6; }
     cat >conftest.$ac_ext <<_ACEOF
@@ -23510,6 +23598,7 @@ noexec_file!$noexec_file$ac_delim
 INSTALL_NOEXEC!$INSTALL_NOEXEC$ac_delim
 DONT_LEAK_PATH_INFO!$DONT_LEAK_PATH_INFO$ac_delim
 BSDAUTH_USAGE!$BSDAUTH_USAGE$ac_delim
+LDAP!$LDAP$ac_delim
 LOGINCAP_USAGE!$LOGINCAP_USAGE$ac_delim
 timedir!$timedir$ac_delim
 timeout!$timeout$ac_delim
@@ -23541,7 +23630,6 @@ EGREPPROG!$EGREPPROG$ac_delim
 CC!$CC$ac_delim
 ac_ct_CC!$ac_ct_CC$ac_delim
 EXEEXT!$EXEEXT$ac_delim
-OBJEXT!$OBJEXT$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -23583,6 +23671,7 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+OBJEXT!$OBJEXT$ac_delim
 CPP!$CPP$ac_delim
 build!$build$ac_delim
 build_cpu!$build_cpu$ac_delim
@@ -23614,7 +23703,7 @@ KRB5CONFIG!$KRB5CONFIG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 29; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 30; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
