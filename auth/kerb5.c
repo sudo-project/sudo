@@ -65,7 +65,7 @@ __unused static const char rcsid[] = "$Sudo$";
 #endif
 
 #ifndef HAVE_KRB5_VERIFY_USER
-static int verify_krb_v5_tgt __P((krb5_context, krb5_ccache, char *));
+static int verify_krb_v5_tgt __P((krb5_context, krb5_creds *, char *));
 #endif
 static struct _sudo_krb5_data {
     krb5_context	sudo_context;
@@ -175,22 +175,31 @@ kerb5_verify(pw, pass, auth)
 {
     krb5_context	sudo_context;
     krb5_principal	princ;
-    krb5_ccache		ccache;
     krb5_creds		creds;
+    krb5_ccache		ccache;
     krb5_error_code	error;
-    krb5_get_init_creds_opt opts;
+    krb5_get_init_creds_opt *opts;
 
     sudo_context = ((sudo_krb5_datap) auth->data)->sudo_context;
     princ = ((sudo_krb5_datap) auth->data)->princ;
     ccache = ((sudo_krb5_datap) auth->data)->ccache;
 
-    /* Initialize options to defaults */
-    krb5_get_init_creds_opt_init(&opts);
+    /* Set default flags based on the local config file. */
+    error = krb5_get_init_creds_opt_alloc(sudo_context, &opts);
+    if (error) {
+	log_error(NO_EXIT|NO_MAIL,
+		  "%s: unable to allocate options: %s", auth->name,
+		  error_message(error));
+	return(AUTH_FAILURE);
+    }
+    krb5_get_init_creds_opt_set_default_flags(sudo_context, NULL,
+	krb5_principal_get_realm(sudo_context, princ), opts);
+
 
     /* Note that we always obtain a new TGT to verify the user */
     if ((error = krb5_get_init_creds_password(sudo_context, &creds, princ,
 					     pass, krb5_prompter_posix,
-					     NULL, 0, NULL, &opts))) {
+					     NULL, 0, NULL, opts))) {
 	if (error == KRB5KRB_AP_ERR_BAD_INTEGRITY) /* Bad password */
 	    return(AUTH_FAILURE);
 	/* Some other error */
@@ -200,16 +209,14 @@ kerb5_verify(pw, pass, auth)
 	return(AUTH_FAILURE);
     }
 
-    /* Stash the TGT so we can verify it. */
-    if ((error = krb5_cc_store_cred(sudo_context, ccache, &creds))) {
-	log_error(NO_EXIT|NO_MAIL,
-		  "%s: unable to store credentials: %s", auth->name,
-		  error_message(error));
-    } else {
-	error = verify_krb_v5_tgt(sudo_context, ccache, auth->name);
-    }
+    /* Verify the TGT to prevent spoof attacks. */
+    error = verify_krb_v5_tgt(sudo_context, &creds, auth->name);
 
+    /* Store cred in cred cache and free it. */
+    if (!error)
+	error = krb5_cc_store_cred(sudo_context, ccache, &creds);
     krb5_free_cred_contents(sudo_context, &creds);
+
     return (error ? AUTH_FAILURE : AUTH_SUCCESS);
 }
 #endif
@@ -240,81 +247,43 @@ kerb5_cleanup(pw, auth)
 
 #ifndef HAVE_KRB5_VERIFY_USER
 /*
- * This routine with some modification is from the MIT V5B6 appl/bsd/login.c
- *
  * Verify the Kerberos ticket-granting ticket just retrieved for the
  * user.  If the Kerberos server doesn't respond, assume the user is
  * trying to fake us out (since we DID just get a TGT from what is
- * supposedly our KDC). If the host/<host> service is unknown (i.e.,
- * the local keytab doesn't have it), return success but log the error.
- *
- * This needs to run as root (to read the host service ticket).
+ * supposedly our KDC).
  *
  * Returns 0 for successful authentication, non-zero for failure.
  */
 static int
-verify_krb_v5_tgt(sudo_context, ccache, auth_name)
+verify_krb_v5_tgt(sudo_context, cred, auth_name)
     krb5_context	sudo_context;
-    krb5_ccache		ccache;
+    krb5_creds		*cred;
     char		*auth_name; /* For error reporting */
 {
-    char		phost[BUFSIZ];
     krb5_error_code	error;
-    krb5_principal	princ;
-    krb5_data		packet;
-    krb5_keyblock	*keyblock = 0;
-    krb5_auth_context	auth_context = NULL;
-
-    packet.data = 0;
+    krb5_principal	server;
+    krb5_verify_init_creds_opt vopt;
 
     /*
      * Get the server principal for the local host.
      * (Use defaults of "host" and canonicalized local name.)
      */
     if ((error = krb5_sname_to_principal(sudo_context, NULL, NULL,
-					KRB5_NT_SRV_HST, &princ))) {
+					KRB5_NT_SRV_HST, &server))) {
 	log_error(NO_EXIT|NO_MAIL,
 		  "%s: unable to get host principal: %s", auth_name,
 		  error_message(error));
 	return(-1);
     }
 
-    /* Extract the name directly. Yow. */
-    strlcpy(phost, extract_name(sudo_context, princ), sizeof(phost));
+    /* Initialize verify opts and set secure mode */
+    krb5_verify_init_creds_opt_init(&vopt);
+    krb5_verify_init_creds_opt_set_ap_req_nofail(&vopt, 1);
 
-    /*
-     * Do we have host/<host> keys?
-     * (use default keytab, kvno IGNORE_VNO to get the first match,
-     * and enctype is currently ignored anyhow.)
-     */
-    if ((error = krb5_kt_read_service_key(sudo_context, NULL, princ, 0,
-					 0, &keyblock))) {
-	/* Keytab or service key does not exist. */
-	log_error(NO_EXIT,
-		  "%s: host service key not found: %s", auth_name,
-		  error_message(error));
-	goto cleanup;
-    }
-    if (keyblock)
-	krb5_free_keyblock(sudo_context, keyblock);
-
-    /* Talk to the kdc and construct the ticket. */
-    error = krb5_mk_req(sudo_context, &auth_context, 0, "host", phost,
-			NULL, ccache, &packet);
-    if (auth_context) {
-	krb5_auth_con_free(sudo_context, auth_context);
-	auth_context = NULL;	/* setup for rd_req */
-    }
-
-    /* Try to use the ticket. */
-    if (!error)
-	error = krb5_rd_req(sudo_context, &auth_context, &packet, princ,
-			    NULL, NULL, NULL);
-cleanup:
-    if (packet.data)
-	krb5_free_data_contents(sudo_context, &packet);
-    krb5_free_principal(sudo_context, princ);
-
+    /* verify the Kerberos ticket-granting ticket we just retrieved */
+    error = krb5_verify_init_creds(sudo_context, cred, server, NULL,
+				   NULL, &vopt);
+    krb5_free_principal(sudo_context, server);
     if (error)
 	log_error(NO_EXIT|NO_MAIL,
 		  "%s: Cannot verify TGT! Possible attack!: %s", auth_name,
