@@ -1050,7 +1050,12 @@ static int yygrowstack()
     else if ((newsize *= 2) > YYMAXDEPTH)
         newsize = YYMAXDEPTH;
     i = yyssp - yyss;
-    if (newsize && (size_t)-1 / newsize < sizeof *newss)
+#ifdef SIZE_MAX
+#define YY_SIZE_MAX SIZE_MAX
+#else
+#define YY_SIZE_MAX 0x7fffffff
+#endif
+    if (newsize && YY_SIZE_MAX / newsize < sizeof *newss)
         goto bail;
     newss = yyss ? (short *)realloc(yyss, newsize * sizeof *newss) :
       (short *)malloc(newsize * sizeof *newss); /* overflow check above */
@@ -1058,7 +1063,7 @@ static int yygrowstack()
         goto bail;
     yyss = newss;
     yyssp = newss + i;
-    if (newsize && (size_t)-1 / newsize < sizeof *newvs)
+    if (newsize && YY_SIZE_MAX / newsize < sizeof *newvs)
         goto bail;
     newvs = yyvs ? (YYSTYPE *)realloc(yyvs, newsize * sizeof *newvs) :
       (YYSTYPE *)malloc(newsize * sizeof *newvs); /* overflow check above */
