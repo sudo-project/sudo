@@ -136,6 +136,8 @@ struct ldap_config_table ldap_conf_table[] = {
 #ifdef LDAP_OPT_X_TLS_REQUIRE_CERT
     { "tls_checkpeer", CONF_BOOL, FALSE, LDAP_OPT_X_TLS_REQUIRE_CERT,
 	&ldap_conf.tls_checkpeer },
+#else
+    { "tls_checkpeer", CONF_BOOL, FALSE, -1, &ldap_conf.tls_checkpeer },
 #endif
 #ifdef LDAP_OPT_X_TLS_CACERTFILE
     { "tls_cacertfile", CONF_STR, FALSE, LDAP_OPT_X_TLS_CACERTFILE,
@@ -810,11 +812,18 @@ sudo_ldap_read_config()
      * Interpret SSL option
      */
     if (ldap_conf.ssl != NULL) {
-	    if (strcasecmp(ldap_conf.ssl, "start_tls") == 0)
-		ldap_conf.ssl_mode = SUDO_LDAP_STARTTLS;
-	    else if (_atobool(ldap_conf.ssl))
-		ldap_conf.ssl_mode = SUDO_LDAP_SSL;
+	if (strcasecmp(ldap_conf.ssl, "start_tls") == 0)
+	    ldap_conf.ssl_mode = SUDO_LDAP_STARTTLS;
+	else if (_atobool(ldap_conf.ssl))
+	    ldap_conf.ssl_mode = SUDO_LDAP_SSL;
     }
+
+#if defined(HAVE_LDAPSSL_SET_STRENGTH) && !defined(LDAP_OPT_X_TLS_REQUIRE_CERT)
+    if (ldap_conf.checkpeer != -1) {
+	ldapssl_set_strength(NULL,
+	    ldap_conf.checkpeer ? LDAPSSL_AUTH_CERT : LDAPSSL_AUTH_WEAK);
+    }
+#endif
 
 #ifndef HAVE_LDAP_INITIALIZE
     /* Convert uri list to host list if no ldap_initialize(). */

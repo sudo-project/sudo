@@ -227,6 +227,9 @@
 /* Define to 1 if you have the `ldapssl_init' function. */
 #undef HAVE_LDAPSSL_INIT
 
+/* Define to 1 if you have the `ldapssl_set_strength' function. */
+#undef HAVE_LDAPSSL_SET_STRENGTH
+
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF
 
