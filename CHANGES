@@ -2039,4 +2039,4 @@ Sudo 1.6.9p11 released.
 643) Revamped the Kerberos 5 ticket verification code.
 
 644) Added support for the checkpeer ldap.conf variable for
-     for netscape-based LDAP SDKs.
+     netscape-based LDAP SDKs.
