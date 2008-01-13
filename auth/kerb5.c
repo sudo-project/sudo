@@ -149,13 +149,6 @@ kerb5_init(pw, promptp, auth)
     }
     ccache = sudo_krb5_data.ccache;
 
-    if ((error = krb5_cc_initialize(sudo_context, ccache, princ))) {
-	log_error(NO_EXIT|NO_MAIL,
-		  "%s: unable to initialize ccache: %s", auth->name,
-		  error_message(error));
-	return(AUTH_FAILURE);
-    }
-
     return(AUTH_SUCCESS);
 }
 
@@ -187,10 +180,10 @@ kerb5_verify(pw, pass, auth)
 {
     krb5_context	sudo_context;
     krb5_principal	princ;
-    krb5_creds		creds;
+    krb5_creds		credbuf, *creds = NULL;
     krb5_ccache		ccache;
     krb5_error_code	error;
-    krb5_get_init_creds_opt *opts;
+    krb5_get_init_creds_opt *opts = NULL;
 
     sudo_context = ((sudo_krb5_datap) auth->data)->sudo_context;
     princ = ((sudo_krb5_datap) auth->data)->princ;
@@ -202,33 +195,44 @@ kerb5_verify(pw, pass, auth)
 	log_error(NO_EXIT|NO_MAIL,
 		  "%s: unable to allocate options: %s", auth->name,
 		  error_message(error));
-	return(AUTH_FAILURE);
+	goto done;
     }
     krb5_get_init_creds_opt_set_default_flags(sudo_context, NULL,
 	krb5_principal_get_realm(sudo_context, princ), opts);
 
-
     /* Note that we always obtain a new TGT to verify the user */
-    if ((error = krb5_get_init_creds_password(sudo_context, &creds, princ,
+    if ((error = krb5_get_init_creds_password(sudo_context, &credbuf, princ,
 					     pass, krb5_prompter_posix,
 					     NULL, 0, NULL, opts))) {
-	if (error == KRB5KRB_AP_ERR_BAD_INTEGRITY) /* Bad password */
-	    return(AUTH_FAILURE);
-	/* Some other error */
-	log_error(NO_EXIT|NO_MAIL,
-		  "%s: unable to get credentials: %s", auth->name,
-		  error_message(error));
-	return(AUTH_FAILURE);
+	/* Don't print error if just a bad password */
+	if (error != KRB5KRB_AP_ERR_BAD_INTEGRITY)
+	    log_error(NO_EXIT|NO_MAIL,
+		      "%s: unable to get credentials: %s", auth->name,
+		      error_message(error));
+	goto done;
     }
+    creds = &credbuf;
 
     /* Verify the TGT to prevent spoof attacks. */
-    error = verify_krb_v5_tgt(sudo_context, &creds, auth->name);
+    if ((error = verify_krb_v5_tgt(sudo_context, creds, auth->name)))
+	goto done;
 
-    /* Store cred in cred cache and free it. */
-    if (!error)
-	error = krb5_cc_store_cred(sudo_context, ccache, &creds);
-    krb5_free_cred_contents(sudo_context, &creds);
+    /* Store cred in cred cache. */
+    if ((error = krb5_cc_initialize(sudo_context, ccache, princ))) {
+	log_error(NO_EXIT|NO_MAIL,
+		  "%s: unable to initialize ccache: %s", auth->name,
+		  error_message(error));
+    } else if ((error = krb5_cc_store_cred(sudo_context, ccache, creds))) {
+	log_error(NO_EXIT|NO_MAIL,
+		  "%s: unable to store cred in ccache: %s", auth->name,
+		  error_message(error));
+    }
 
+done:
+    if (opts)
+	krb5_get_init_creds_opt_free(opts);
+    if (creds)
+	krb5_free_cred_contents(sudo_context, creds);
     return (error ? AUTH_FAILURE : AUTH_SUCCESS);
 }
 #endif
