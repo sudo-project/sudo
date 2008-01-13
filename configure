@@ -22561,9 +22561,16 @@ echo "${ECHO_T}$ac_cv_search_ber_set_option" >&6; }
 ac_res=$ac_cv_search_ber_set_option
 if test "$ac_res" != no; then
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-  LDAP_LIBS="$LDAP_LIBS -llber"
+  found=yes
+else
+  found=no
 fi
 
+    if test $found="yes"; then
+	case "$LIBS" in
+	    *-llber*)	LDAP_LIBS="$LDAP_LIBS -llber";;
+	esac
+    fi
         { echo "$as_me:$LINENO: checking whether lber.h is needed" >&5
 echo $ECHO_N "checking whether lber.h is needed... $ECHO_C" >&6; }
     cat >conftest.$ac_ext <<_ACEOF
