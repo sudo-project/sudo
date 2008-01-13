@@ -74,8 +74,6 @@ static struct _sudo_krb5_data {
 } sudo_krb5_data = { NULL, NULL, NULL };
 typedef struct _sudo_krb5_data *sudo_krb5_datap;
 
-extern const krb5_cc_ops krb5_mcc_ops;
-
 int
 kerb5_init(pw, promptp, auth)
     struct passwd *pw;
@@ -127,16 +125,6 @@ kerb5_init(pw, promptp, auth)
     /*}*/
     free(pname);
 #endif
-
-    /* For CNS compatibility */
-    if ((error = krb5_cc_register(sudo_context, &krb5_mcc_ops, FALSE))) {
-	if (error != KRB5_CC_TYPE_EXISTS) {
-	    log_error(NO_EXIT|NO_MAIL,
-		      "%s: unable to use Memory ccache: %s", auth->name,
-		      error_message(error));
-	    return(AUTH_FAILURE);
-	}
-    }
 
     (void) snprintf(cache_name, sizeof(cache_name), "MEMORY:sudocc_%ld",
 		    (long) getpid());
