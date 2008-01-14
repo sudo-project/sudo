@@ -1005,9 +1005,9 @@ sudo_ldap_read_config()
     }
 
 #if defined(HAVE_LDAPSSL_SET_STRENGTH) && !defined(LDAP_OPT_X_TLS_REQUIRE_CERT)
-    if (ldap_conf.checkpeer != -1) {
+    if (ldap_conf.tls_checkpeer != -1) {
 	ldapssl_set_strength(NULL,
-	    ldap_conf.checkpeer ? LDAPSSL_AUTH_CERT : LDAPSSL_AUTH_WEAK);
+	    ldap_conf.tls_checkpeer ? LDAPSSL_AUTH_CERT : LDAPSSL_AUTH_WEAK);
     }
 #endif
 
