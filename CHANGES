@@ -2040,3 +2040,5 @@ Sudo 1.6.9p11 released.
 
 644) Added support for the checkpeer ldap.conf variable for
      netscape-based LDAP SDKs.
+
+Sudo 1.6.9p12 released.
