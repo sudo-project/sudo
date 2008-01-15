@@ -105,6 +105,8 @@ void print_defaults __P((void));
 void print_privilege __P((struct privilege *));
 void print_userspecs __P((void));
 void usage __P((void)) __attribute__((__noreturn__));
+void set_runasgr __P((char *));
+void set_runaspw __P((char *));
 
 extern void ts_setgrfile __P((const char *));
 extern void ts_setgrent __P((void));
@@ -127,7 +129,7 @@ main(argc, argv)
     struct cmndspec *cs;
     struct privilege *priv;
     struct userspec *us;
-    char *p, *grfile, *pwfile, *runas_user, hbuf[MAXHOSTNAMELEN];
+    char *p, *grfile, *pwfile, *runas_group, *runas_user, hbuf[MAXHOSTNAMELEN];
     int ch, dflag, rval, matched;
 #ifdef	YYDEBUG
     extern int yydebug;
@@ -138,8 +140,8 @@ main(argc, argv)
     Argc = argc;
 
     dflag = 0;
-    grfile = pwfile = runas_user = NULL;
-    while ((ch = getopt(argc, argv, "dg:h:p:u:")) != -1) {
+    grfile = pwfile = runas_group = runas_user = NULL;
+    while ((ch = getopt(argc, argv, "dg:G:h:p:u:")) != -1) {
 	switch (ch) {
 	    case 'd':
 		dflag = 1;
@@ -147,8 +149,11 @@ main(argc, argv)
 	    case 'h':
 		user_host = optarg;
 		break;
-	    case 'g':
+	    case 'G':
 		grfile = optarg;
+		break;
+	    case 'g':
+		runas_group = optarg;
 		break;
 	    case 'p':
 		pwfile = optarg;
@@ -219,8 +224,9 @@ main(argc, argv)
 	char *to, **from;
 	size_t size, n;
 
-	size = (size_t) (NewArgv[NewArgc-1] - NewArgv[1]) +
-		strlen(NewArgv[NewArgc-1]) + 1;
+	for (size = 0, from = NewArgv + 1; *from; from++)
+	    size += strlen(*from) + 1;
+
 	user_args = (char *) emalloc(size);
 	for (to = user_args, from = NewArgv + 1; *from; from++) {
 	    n = strlcpy(to, *from, size - (to - user_args));
@@ -234,13 +240,6 @@ main(argc, argv)
 
     /* Initialize default values. */
     init_defaults();
-    if (*runas_user == '#') {
-        if ((runas_pw = sudo_getpwuid(atoi(runas_user + 1))) == NULL)
-            runas_pw = sudo_fakepwnam(runas_user);
-    } else {
-        if ((runas_pw = sudo_getpwnam(runas_user)) == NULL)
-            errorx(1, "no passwd entry for %s!", runas_user);
-    }
 
     /* Load ip addr/mask for each interface. */
     load_interfaces();
@@ -256,6 +255,18 @@ main(argc, argv)
     if (!update_defaults(SET_ALL))
 	(void) fputs(" (problem with defaults entries)", stdout);
     puts(".");
+
+    /*
+     * Set runas passwd/group entries based on command line or sudoers.
+     * Note that if runas_group was specified without runas_user we
+     * defer setting runas_pw so the match routines know to ignore it.
+     */
+    if (runas_group != NULL) {
+        set_runasgr(runas_group);
+        if (runas_user != NULL)
+            set_runaspw(runas_user);
+    } else
+        set_runaspw(runas_user ? runas_user : def_runas_default);
 
     if (dflag) {
 	(void) putchar('\n');
@@ -295,6 +306,32 @@ main(argc, argv)
 	matched == DENY ? "denied" : "unmatched");
 
     exit(0);
+}
+
+void
+set_runaspw(user)
+    char *user;
+{
+    if (*user == '#') {
+	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
+	    runas_pw = sudo_fakepwnam(user);
+    } else {
+	if ((runas_pw = sudo_getpwnam(user)) == NULL)
+	    errorx(1, "unknown user: %s", user);
+    }
+}
+
+void
+set_runasgr(group)
+    char *group;
+{
+    if (*group == '#') {
+	if ((runas_gr = sudo_getgrgid(atoi(group + 1))) == NULL)
+	    runas_gr = sudo_fakegrnam(group);
+    } else {
+	if ((runas_gr = sudo_getgrnam(group)) == NULL)
+	    errorx(1, "unknown group: %s", group);
+    }
 }
 
 int
@@ -525,6 +562,6 @@ dump_sudoers()
 void
 usage()
 {
-    (void) fprintf(stderr, "usage: %s [-d] [-g grfile] [-h host] [-p pwfile] [-u user] <user> <command> [args]\n", getprogname());
+    (void) fprintf(stderr, "usage: %s [-d] [-G grfile] [-g group] [-h host] [-p pwfile] [-u user] <user> <command> [args]\n", getprogname());
     exit(1);
 }
