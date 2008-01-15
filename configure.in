@@ -2280,12 +2280,11 @@ if test ${with_ldap-'no'} != "no"; then
     else
 	AC_MSG_RESULT([$LDAP_LIBS])
     fi
-    dnl check if we need to link with -llbre for ber_set_option
+    dnl check if we need to link with -llber for ber_set_option
+    OLIBS="$LIBS"
     AC_SEARCH_LIBS([ber_set_option], [lber], [found=yes], [found=no])
-    if test $found="yes"; then
-	case "$LIBS" in
-	    *-llber*)	LDAP_LIBS="$LDAP_LIBS -llber";;
-	esac
+    if test X"$found" = X"yes" -a X"$LIBS" != X"$OLIBS"; then
+	LDAP_LIBS="$LDAP_LIBS -llber"
     fi
     dnl check if ldap.h includes lber.h for us
     AC_MSG_CHECKING([whether lber.h is needed])

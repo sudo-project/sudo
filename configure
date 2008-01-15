@@ -22481,7 +22481,8 @@ echo "${ECHO_T}not found, using -lldap" >&6; }
 	{ echo "$as_me:$LINENO: result: $LDAP_LIBS" >&5
 echo "${ECHO_T}$LDAP_LIBS" >&6; }
     fi
-        { echo "$as_me:$LINENO: checking for library containing ber_set_option" >&5
+        OLIBS="$LIBS"
+    { echo "$as_me:$LINENO: checking for library containing ber_set_option" >&5
 echo $ECHO_N "checking for library containing ber_set_option... $ECHO_C" >&6; }
 if test "${ac_cv_search_ber_set_option+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -22566,10 +22567,8 @@ else
   found=no
 fi
 
-    if test $found="yes"; then
-	case "$LIBS" in
-	    *-llber*)	LDAP_LIBS="$LDAP_LIBS -llber";;
-	esac
+    if test X"$found" = X"yes" -a X"$LIBS" != X"$OLIBS"; then
+	LDAP_LIBS="$LDAP_LIBS -llber"
     fi
         { echo "$as_me:$LINENO: checking whether lber.h is needed" >&5
 echo $ECHO_N "checking whether lber.h is needed... $ECHO_C" >&6; }
