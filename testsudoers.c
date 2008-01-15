@@ -329,13 +329,6 @@ set_fqdn()
     return;
 }
 
-int
-set_runaspw(user)
-    char *user;
-{
-    return(TRUE);
-}
-
 FILE *
 open_sudoers(path, keepopen)
     const char *path;

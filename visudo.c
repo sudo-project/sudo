@@ -551,14 +551,6 @@ set_fqdn()
 }
 
 /* STUB */
-int
-set_runaspw(user)
-    char *user;
-{
-    return(TRUE);
-}
-
-/* STUB */
 void
 init_envtables()
 {
