@@ -112,6 +112,7 @@ static void initial_setup		__P((void));
 static void set_loginclass		__P((struct passwd *));
 static void set_project			__P((struct passwd *));
 static void set_runasgr			__P((char *));
+static void set_runaspw			__P((char *));
 static void usage			__P((int))
 					    __attribute__((__noreturn__));
 static void usage_excl			__P((int))
@@ -1287,7 +1288,7 @@ set_fqdn()
  * Get passwd entry for the user we are going to run commands as.
  * By default, this is "root".  Updates runas_pw as a side effect.
  */
-int
+static void
 set_runaspw(user)
     char *user;
 {
@@ -1298,7 +1299,6 @@ set_runaspw(user)
 	if ((runas_pw = sudo_getpwnam(user)) == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, "unknown user: %s", user);
     }
-    return(TRUE);
 }
 
 /*

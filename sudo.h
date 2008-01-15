@@ -269,7 +269,6 @@ int lock_file		__P((int, int));
 int touch		__P((int, char *, struct timespec *));
 int user_is_exempt	__P((void));
 void set_fqdn		__P((void));
-int set_runaspw		__P((char *));
 char *sudo_getepw	__P((const struct passwd *));
 int pam_prep_user	__P((struct passwd *));
 void zero_bytes		__P((volatile void *, size_t));
