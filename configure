@@ -22146,7 +22146,8 @@ fi
 done
 
 
-for ac_header in sasl/sasl.h
+
+for ac_header in sasl/sasl.h mps/ldap_ssl.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
