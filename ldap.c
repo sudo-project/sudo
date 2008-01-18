@@ -1164,7 +1164,7 @@ sudo_ldap_display_privs(nss, pw)
 	/* print each matching entry */
 	LDAP_FOREACH(entry, ld, result) {
 	    if ((!do_netgr ||
-		sudo_ldap_check_user_netgroup(ld, entry, pw->pw_passwd)) &&
+		sudo_ldap_check_user_netgroup(ld, entry, pw->pw_name)) &&
 		sudo_ldap_check_host(ld, entry)) {
 
 		/* extract the dn, only show the first rdn */
