@@ -458,12 +458,11 @@ sudo_grdup(gr)
 
     /*
      * Copy in group contents and make strings relative to space
-     * at the end of the buffer.
+     * at the end of the buffer.  Note that gr_mem must come
+     * immediately after struct group to guarantee proper alignment.
      */
     (void)memcpy(newgr, gr, sizeof(struct group));
     cp += sizeof(struct group);
-    FIELD_COPY(gr, newgr, gr_name, nsize);
-    FIELD_COPY(gr, newgr, gr_passwd, psize);
     if (gr->gr_mem) {
 	newgr->gr_mem = (char **)cp;
 	cp += sizeof(char *) * nmem;
@@ -475,6 +474,8 @@ sudo_grdup(gr)
 	}
 	newgr->gr_mem[nmem] = NULL;
     }
+    FIELD_COPY(gr, newgr, gr_passwd, psize);
+    FIELD_COPY(gr, newgr, gr_name, nsize);
 
     return(newgr);
 }
