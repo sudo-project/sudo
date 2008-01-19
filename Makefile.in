@@ -146,8 +146,9 @@ DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
             mkinstalldirs pathnames.h.in sample.pam sample.syslog.conf \
             sample.sudoers schema.OpenLDAP schema.iPlanet sudo.cat \
             sudo.man.in sudo.pod sudo.psf sudo_usage.h.in sudoers sudoers.cat \
-            sudoers.man.in sudoers.pod sudoers2ldif visudo.cat \
-            visudo.man.in visudo.pod auth/API
+            sudoers.man.in sudoers.pod sudoers.ldap.cat sudoers.ldap.man.in \
+	    sudoers.ldap.pod sudoers2ldif visudo.cat visudo.man.in visudo.pod \
+	    auth/API
 
 BINFILES= ChangeLog HISTORY LICENSE README TODO TROUBLESHOOTING \
 	  UPGRADE install-sh mkinstalldirs sample.syslog.conf sample.sudoers \
@@ -368,7 +369,16 @@ sudoers.man.in: $(srcdir)/sudoers.pod
 sudoers.man:: sudoers.man.in
 	CONFIG_FILES=$@ CONFIG_HEADERS= sh ./config.status
 
-sudoers.cat: sudoers.man
+sudoers.ldap.cat: sudoers.ldap.man
+
+sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.pod
+	@rm -f $(srcdir)/$@
+	( cd $(srcdir); mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e 1d -e '/^=pod/q' -e 's/^/.\\" /p' sudoers.ldap.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectform --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudoers.ldap.pod | sed -e "s/(5)/($$mansectform)/" -e "s/(8)/($$mansectsu)/" >> $@ )
+
+sudoers.ldap.man:: sudoers.ldap.man.in
+	CONFIG_FILES=$@ CONFIG_HEADERS= sh ./config.status
+
+sudoers.ldap.cat: sudoers.ldap.man
 
 @DEV@HISTORY: history.pod
 @DEV@	pod2text -l -i0 $> > $@
@@ -411,6 +421,7 @@ install-man:
 	ln $(DESTDIR)$(mandirsu)/sudo.$(mansectsu) $(DESTDIR)$(mandirsu)/sudoedit.$(mansectsu)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/visudo.$(mantype) $(DESTDIR)$(mandirsu)/visudo.$(mansectsu)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudoers.$(mantype) $(DESTDIR)$(mandirform)/sudoers.$(mansectform)
+	@LDAP@$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 @mansrcdir@/sudoers.ldap.$(mantype) $(DESTDIR)$(mandirform)/sudoers.ldap.$(mansectform)
 @MAN_POSTINSTALL@
 
 check:
@@ -425,7 +436,8 @@ mostlyclean: clean
 distclean: clean
 	-rm -rf Makefile pathnames.h config.h config.status config.cache \
 		config.log libtool sudo_noexec.lo .libs $(GENERATED) \
-		sudo.man sudoers.man visudo.man sudo_usage.h Makefile.binary
+		sudo.man sudoers.man sudoers.ldap.man visudo.man sudo_usage.h \
+		Makefile.binary
 
 clobber: distclean
 
