@@ -369,7 +369,7 @@ sudoers.man.in: $(srcdir)/sudoers.pod
 sudoers.man:: sudoers.man.in
 	CONFIG_FILES=$@ CONFIG_HEADERS= sh ./config.status
 
-sudoers.ldap.cat: sudoers.ldap.man
+sudoers.cat: sudoers.man
 
 sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.pod
 	@rm -f $(srcdir)/$@
