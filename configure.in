@@ -2425,7 +2425,7 @@ fi
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-AC_CONFIG_FILES([Makefile sudo.man visudo.man sudoers.man sudo_usage.h])
+AC_CONFIG_FILES([Makefile sudo.man visudo.man sudoers.man sudoers.ldap.man sudo_usage.h])
 AC_OUTPUT
 
 dnl
