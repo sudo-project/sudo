@@ -855,6 +855,9 @@ tty_tickets
 insults
 root_sudo
 path_info
+ldap_conf
+ldap_secret
+nsswitch_conf
 EGREPPROG
 CC
 ac_ct_CC
@@ -2025,6 +2028,9 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { echo "$as_me:$LINENO: Configuring Sudo version 1.7" >&5
 echo "$as_me: Configuring Sudo version 1.7" >&6;}
+
+
+
 
 
 
@@ -3556,6 +3562,9 @@ if test ${with_nsswitch-"yes"} != "no"; then
 #define _PATH_NSSWITCH_CONF "${with_nsswitch-/etc/nsswitch.conf}"
 EOF
 
+    nsswitch_conf=${with_nsswitch-'/etc/nsswitch.conf'}
+else
+    nsswitch_conf='/etc/nsswitch.conf'
 fi
 
 
@@ -3587,6 +3596,7 @@ cat >>confdefs.h <<_ACEOF
 #define _PATH_LDAP_CONF "${with_ldap_conf_file-'/etc/ldap.conf'}"
 _ACEOF
 
+ldap_conf=${with_ldap_conf_file-'/etc/ldap.conf'}
 
 
 # Check whether --with-ldap-secret-file was given.
@@ -3599,6 +3609,7 @@ cat >>confdefs.h <<_ACEOF
 #define _PATH_LDAP_SECRET "${with_ldap_secret_file-'/etc/ldap.secret'}"
 _ACEOF
 
+ldap_secret=${with_ldap_secret_file-'/etc/ldap.secret'}
 
 
 # Check whether --with-pc-insults was given.
@@ -6122,7 +6133,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6125 "configure"' > conftest.$ac_ext
+  echo '#line 6136 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7666,11 +7677,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7669: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7680: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7673: \$? = $ac_status" >&5
+   echo "$as_me:7684: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7956,11 +7967,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7959: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7970: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7963: \$? = $ac_status" >&5
+   echo "$as_me:7974: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8060,11 +8071,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8063: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8074: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8067: \$? = $ac_status" >&5
+   echo "$as_me:8078: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10405,7 +10416,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10408 "configure"
+#line 10419 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10505,7 +10516,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10508 "configure"
+#line 10519 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -23635,10 +23646,10 @@ tty_tickets!$tty_tickets$ac_delim
 insults!$insults$ac_delim
 root_sudo!$root_sudo$ac_delim
 path_info!$path_info$ac_delim
+ldap_conf!$ldap_conf$ac_delim
+ldap_secret!$ldap_secret$ac_delim
+nsswitch_conf!$nsswitch_conf$ac_delim
 EGREPPROG!$EGREPPROG$ac_delim
-CC!$CC$ac_delim
-ac_ct_CC!$ac_ct_CC$ac_delim
-EXEEXT!$EXEEXT$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -23680,6 +23691,9 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+CC!$CC$ac_delim
+ac_ct_CC!$ac_ct_CC$ac_delim
+EXEEXT!$EXEEXT$ac_delim
 OBJEXT!$OBJEXT$ac_delim
 CPP!$CPP$ac_delim
 build!$build$ac_delim
@@ -23712,7 +23726,7 @@ KRB5CONFIG!$KRB5CONFIG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 30; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 33; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
