@@ -241,72 +241,22 @@ Two versions of the schema, one for OpenLDAP servers (F<schema.OpenLDAP>)
 and another for Netscape-derived servers (F<schema.iPlanet>), may
 be found in the B<sudo> distribution.
 
-The schema for B<sudo> in OpenLDAP form is included below.
-
- attributetype ( 1.3.6.1.4.1.15953.9.1.1
-    NAME 'sudoUser'
-    DESC 'User(s) who may  run sudo'
-    EQUALITY caseExactIA5Match
-    SUBSTR caseExactIA5SubstringsMatch
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
- attributetype ( 1.3.6.1.4.1.15953.9.1.2
-    NAME 'sudoHost'
-    DESC 'Host(s) who may run sudo'
-    EQUALITY caseExactIA5Match
-    SUBSTR caseExactIA5SubstringsMatch
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
- attributetype ( 1.3.6.1.4.1.15953.9.1.3
-    NAME 'sudoCommand'
-    DESC 'Command(s) to be executed by sudo'
-    EQUALITY caseExactIA5Match
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
- attributetype ( 1.3.6.1.4.1.15953.9.1.4
-    NAME 'sudoRunAs'
-    DESC 'User(s) impersonated by sudo'
-    EQUALITY caseExactIA5Match
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
- attributetype ( 1.3.6.1.4.1.15953.9.1.5
-    NAME 'sudoOption'
-    DESC 'Options(s) followed by sudo'
-    EQUALITY caseExactIA5Match
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
- attributetype ( 1.3.6.1.4.1.15953.9.1.6
-    NAME 'sudoRunAsUser'
-    DESC 'User(s) impersonated by sudo'
-    EQUALITY caseExactIA5Match
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
- attributetype ( 1.3.6.1.4.1.15953.9.1.7
-    NAME 'sudoRunAsGroup'
-    DESC 'Group(s) impersonated by sudo'
-    EQUALITY caseExactIA5Match
-    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
- objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
-    DESC 'Sudoer Entries'
-    MUST ( cn )
-    MAY ( sudoUser $ sudoHost $ sudoCommand $ sudoRunAs $ sudoRunAsUser $
-	  sudoRunAsGroup $ sudoOption $ description )
-    )
+The schema for B<sudo> in OpenLDAP form is included in the L<EXAMPLES>
+section.
 
 =head2 Configuring ldap.conf
 
-Sudo reads the F</etc/ldap.conf> file for LDAP-specific configuration.
+Sudo reads the F<@ldap_conf@> file for LDAP-specific configuration.
 Typically, this file is shared amongst different LDAP-aware clients.
 As such, most of the settings are not B<sudo>-specific.  Note that
-B<sudo> parses F</etc/ldap.conf> itself and may support options
-that differ from those described in the L<ldap.conf(4)> manual.
+B<sudo> parses F<@ldap_conf@> itself and may support options
+that differ from those described in the L<ldap.conf(5)> manual.
 
 Also note that on systems using the OpenLDAP libraries, default
 values specified in F</etc/openldap/ldap.conf> or the user's
 F<.ldaprc> files are not used.
 
-Only those options explicitly listed in F</etc/ldap.conf> that are
+Only those options explicitly listed in F<@ldap_conf@> that are
 supported by B<sudo> are honored.  Configuration options are listed
 below in upper case but are parsed in a case-independent manner.
 
@@ -386,7 +336,7 @@ B<BINDDN> parameter.
 The B<ROOTBINDDN> parameter specifies the identity, in the form of
 a Distinguished Name (DN), to use when performing privileged LDAP
 operations, such as I<sudoers> queries.  The password corresponding
-to the identity should be stored in </etc/ldap.passwd>
+to the identity should be stored in F<@ldap_secret@>.
 If not specified, the B<BINDDN> identity is used (if any).
 
 =item LDAP_VERSION number
@@ -520,7 +470,7 @@ See the C<ldap.conf> entry in the L<EXAMPLES> section.
 
 =head2 Configuring nsswitch.conf
 
-Sudo consults the Name Service Switch file, F</etc/nsswitch.conf>,
+Sudo consults the Name Service Switch file, F<@nsswitch_conf@>,
 to specify the I<sudoers> search order.  Sudo looks for a line
 beginning with C<sudoers:> and uses this to determine the search
 order.  Note that B<sudo> does not stop searching after the first
@@ -543,33 +493,29 @@ The local I<sudoers> file can be ignored completely by using:
 
     sudoers: ldap
 
-If the F</etc/nsswitch.conf> file is not present or there is no
+If the F<@nsswitch_conf@> file is not present or there is no
 sudoers line, the following default is assumed:
 
     sudoers: files
 
-Note that F</etc/nsswitch.conf> is supported even when the underlying
+Note that F<@nsswitch_conf@> is supported even when the underlying
 operating system does not use an nsswitch.conf file.
 
 =head1 FILES
 
 =over 24
 
-=item F</etc/ldap.conf>
+=item F<@ldap_conf@>
 
 LDAP configuration file
 
-=item F</etc/nsswitch.conf>
+=item F<@nsswitch_conf@>
 
 determines sudoers source order
 
 =back
 
 =head1 EXAMPLES
-
-=head2 XXX nsswitch.conf example?
-
-=head2 XXX sudoers ldif example?
 
 =head2 Example ldap.conf
 
@@ -603,7 +549,7 @@ determines sudoers source order
   # optional proxy credentials
   #binddn        <who to search as>
   #bindpw        <password>
-  #rootbinddn    <who to search as, uses /etc/ldap.passwd for bindpw>
+  #rootbinddn    <who to search as, uses /etc/ldap.secret for bindpw>
   #
   # LDAP protocol version, defaults to 3
   #ldap_version 3
@@ -668,6 +614,67 @@ determines sudoers source order
   # rootsasl_auth_id <SASL username for root access>
   # sasl_secprops none
   # krb5_ccname /etc/.ldapcache
+
+=head2 Sudo schema for OpenLDAP 
+
+The following schema is in OpenLDAP format.  Simply copy it to the
+schema directory (e.g. F</etc/openldap/schema>), add the proper
+C<include> line in C<slapd.conf> and restart B<slapd>.
+
+ attributetype ( 1.3.6.1.4.1.15953.9.1.1
+    NAME 'sudoUser'
+    DESC 'User(s) who may  run sudo'
+    EQUALITY caseExactIA5Match
+    SUBSTR caseExactIA5SubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+ attributetype ( 1.3.6.1.4.1.15953.9.1.2
+    NAME 'sudoHost'
+    DESC 'Host(s) who may run sudo'
+    EQUALITY caseExactIA5Match
+    SUBSTR caseExactIA5SubstringsMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+ attributetype ( 1.3.6.1.4.1.15953.9.1.3
+    NAME 'sudoCommand'
+    DESC 'Command(s) to be executed by sudo'
+    EQUALITY caseExactIA5Match
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+ attributetype ( 1.3.6.1.4.1.15953.9.1.4
+    NAME 'sudoRunAs'
+    DESC 'User(s) impersonated by sudo'
+    EQUALITY caseExactIA5Match
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+ attributetype ( 1.3.6.1.4.1.15953.9.1.5
+    NAME 'sudoOption'
+    DESC 'Options(s) followed by sudo'
+    EQUALITY caseExactIA5Match
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+ attributetype ( 1.3.6.1.4.1.15953.9.1.6
+    NAME 'sudoRunAsUser'
+    DESC 'User(s) impersonated by sudo'
+    EQUALITY caseExactIA5Match
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+ attributetype ( 1.3.6.1.4.1.15953.9.1.7
+    NAME 'sudoRunAsGroup'
+    DESC 'Group(s) impersonated by sudo'
+    EQUALITY caseExactIA5Match
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+ objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
+    DESC 'Sudoer Entries'
+    MUST ( cn )
+    MAY ( sudoUser $ sudoHost $ sudoCommand $ sudoRunAs $ sudoRunAsUser $
+	  sudoRunAsGroup $ sudoOption $ description )
+    )
+
+=head2 XXX nsswitch.conf example?
+
+=head2 XXX more exhaustive sudoers ldif example?
 
 =head1 SEE ALSO
 

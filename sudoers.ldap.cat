@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7                      January 19, 2008                       1
+1.7                      January 20, 2008                       1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7                      January 19, 2008                       2
+1.7                      January 20, 2008                       2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7                      January 19, 2008                       3
+1.7                      January 20, 2008                       3
 
 
 
@@ -253,79 +253,13 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        (_s_c_h_e_m_a_._O_p_e_n_L_D_A_P) and another for Netscape-derived servers
        (_s_c_h_e_m_a_._i_P_l_a_n_e_t), may be found in the ssuuddoo distribution.
 
-       The schema for ssuuddoo in OpenLDAP form is included below.
+       The schema for ssuuddoo in OpenLDAP form is included in the
+       EXAMPLES section.
 
 
 
 
-
-1.7                      January 19, 2008                       4
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
-
-        attributetype ( 1.3.6.1.4.1.15953.9.1.1
-           NAME 'sudoUser'
-           DESC 'User(s) who may  run sudo'
-           EQUALITY caseExactIA5Match
-           SUBSTR caseExactIA5SubstringsMatch
-           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
-        attributetype ( 1.3.6.1.4.1.15953.9.1.2
-           NAME 'sudoHost'
-           DESC 'Host(s) who may run sudo'
-           EQUALITY caseExactIA5Match
-           SUBSTR caseExactIA5SubstringsMatch
-           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
-        attributetype ( 1.3.6.1.4.1.15953.9.1.3
-           NAME 'sudoCommand'
-           DESC 'Command(s) to be executed by sudo'
-           EQUALITY caseExactIA5Match
-           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
-        attributetype ( 1.3.6.1.4.1.15953.9.1.4
-           NAME 'sudoRunAs'
-           DESC 'User(s) impersonated by sudo'
-           EQUALITY caseExactIA5Match
-           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
-        attributetype ( 1.3.6.1.4.1.15953.9.1.5
-           NAME 'sudoOption'
-           DESC 'Options(s) followed by sudo'
-           EQUALITY caseExactIA5Match
-           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
-        attributetype ( 1.3.6.1.4.1.15953.9.1.6
-           NAME 'sudoRunAsUser'
-           DESC 'User(s) impersonated by sudo'
-           EQUALITY caseExactIA5Match
-           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
-        attributetype ( 1.3.6.1.4.1.15953.9.1.7
-           NAME 'sudoRunAsGroup'
-           DESC 'Group(s) impersonated by sudo'
-           EQUALITY caseExactIA5Match
-           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-
-        objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
-           DESC 'Sudoer Entries'
-           MUST ( cn )
-           MAY ( sudoUser $ sudoHost $ sudoCommand $ sudoRunAs $ sudoRunAsUser $
-                 sudoRunAsGroup $ sudoOption $ description )
-           )
-
-
-
-
-
-
-
-1.7                      January 19, 2008                       5
+1.7                      January 20, 2008                       4
 
 
 
@@ -391,7 +325,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7                      January 19, 2008                       6
+1.7                      January 20, 2008                       5
 
 
 
@@ -436,7 +370,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            the form of a Distinguished Name (DN), to use when
            performing privileged LDAP operations, such as _s_u_d_o_e_r_s
            queries.  The password corresponding to the identity
-           should be stored in </etc/ldap.passwd> If not speci-
+           should be stored in _/_e_t_c_/_l_d_a_p_._s_e_c_r_e_t.  If not speci-
            fied, the BBIINNDDDDNN identity is used (if any).
 
        LDAP_VERSION number
@@ -457,7 +391,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7                      January 19, 2008                       7
+1.7                      January 20, 2008                       6
 
 
 
@@ -523,7 +457,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7                      January 19, 2008                       8
+1.7                      January 20, 2008                       7
 
 
 
@@ -589,7 +523,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7                      January 19, 2008                       9
+1.7                      January 20, 2008                       8
 
 
 
@@ -622,12 +556,6 @@ FFIILLEESS
        _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f      determines sudoers source order
 
 EEXXAAMMPPLLEESS
-       XXXXXX nnsssswwiittcchh..ccoonnff eexxaammppllee??
-
-
-       XXXXXX ssuuddooeerrss llddiiff eexxaammppllee??
-
-
        EExxaammppllee llddaapp..ccoonnff
 
 
@@ -655,7 +583,13 @@ EEXXAAMMPPLLEESS
 
 
 
-1.7                      January 19, 2008                      10
+
+
+
+
+
+
+1.7                      January 20, 2008                       9
 
 
 
@@ -694,7 +628,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
          # optional proxy credentials
          #binddn        <who to search as>
          #bindpw        <password>
-         #rootbinddn    <who to search as, uses /etc/ldap.passwd for bindpw>
+         #rootbinddn    <who to search as, uses /etc/ldap.secret for bindpw>
          #
          # LDAP protocol version, defaults to 3
          #ldap_version 3
@@ -721,7 +655,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7                      January 19, 2008                      11
+1.7                      January 20, 2008                      10
 
 
 
@@ -772,6 +706,102 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
          # sasl_secprops none
          # krb5_ccname /etc/.ldapcache
 
+       SSuuddoo sscchheemmaa ffoorr OOppeennLLDDAAPP
+
+       The following schema is in OpenLDAP format.  Simply copy
+       it to the schema directory (e.g. _/_e_t_c_/_o_p_e_n_l_d_a_p_/_s_c_h_e_m_a),
+       add the proper include line in slapd.conf and restart
+       ssllaappdd.
+
+
+
+
+
+
+
+
+
+1.7                      January 20, 2008                      11
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
+        attributetype ( 1.3.6.1.4.1.15953.9.1.1
+           NAME 'sudoUser'
+           DESC 'User(s) who may  run sudo'
+           EQUALITY caseExactIA5Match
+           SUBSTR caseExactIA5SubstringsMatch
+           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+        attributetype ( 1.3.6.1.4.1.15953.9.1.2
+           NAME 'sudoHost'
+           DESC 'Host(s) who may run sudo'
+           EQUALITY caseExactIA5Match
+           SUBSTR caseExactIA5SubstringsMatch
+           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+        attributetype ( 1.3.6.1.4.1.15953.9.1.3
+           NAME 'sudoCommand'
+           DESC 'Command(s) to be executed by sudo'
+           EQUALITY caseExactIA5Match
+           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+        attributetype ( 1.3.6.1.4.1.15953.9.1.4
+           NAME 'sudoRunAs'
+           DESC 'User(s) impersonated by sudo'
+           EQUALITY caseExactIA5Match
+           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+        attributetype ( 1.3.6.1.4.1.15953.9.1.5
+           NAME 'sudoOption'
+           DESC 'Options(s) followed by sudo'
+           EQUALITY caseExactIA5Match
+           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+        attributetype ( 1.3.6.1.4.1.15953.9.1.6
+           NAME 'sudoRunAsUser'
+           DESC 'User(s) impersonated by sudo'
+           EQUALITY caseExactIA5Match
+           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+        attributetype ( 1.3.6.1.4.1.15953.9.1.7
+           NAME 'sudoRunAsGroup'
+           DESC 'Group(s) impersonated by sudo'
+           EQUALITY caseExactIA5Match
+           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+        objectclass ( 1.3.6.1.4.1.15953.9.2.1 NAME 'sudoRole' SUP top STRUCTURAL
+           DESC 'Sudoer Entries'
+           MUST ( cn )
+           MAY ( sudoUser $ sudoHost $ sudoCommand $ sudoRunAs $ sudoRunAsUser $
+                 sudoRunAsGroup $ sudoOption $ description )
+           )
+
+
+
+
+
+
+
+1.7                      January 20, 2008                      12
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
+       XXXXXX nnsssswwiittcchh..ccoonnff eexxaammppllee??
+
+
+       XXXXXX mmoorree eexxhhaauussttiivvee ssuuddooeerrss llddiiff eexxaammppllee??
+
+
 SSEEEE AALLSSOO
        _l_d_a_p_._c_o_n_f(4), _s_u_d_o_e_r_s(4)
 
@@ -783,20 +813,8 @@ BBUUGGSS
        bug report at http://www.sudo.ws/sudo/bugs/
 
 SSUUPPPPOORRTT
-       Limited free support is available via the sudo-users
-
-
-
-1.7                      January 19, 2008                      12
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
-
-       mailing list, see http://www.sudo.ws/mail-
+       Limited free support is available via the sudo-users mail-
+       ing list, see http://www.sudo.ws/mail-
        man/listinfo/sudo-users to subscribe or search the
        archives.
 
@@ -835,24 +853,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.7                      January 19, 2008                      13
+1.7                      January 20, 2008                      13
 
 
