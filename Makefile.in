@@ -178,7 +178,7 @@ all: $(PROGS)
 
 .man.cat:
 	@rm -f $(srcdir)/$@
-	$(NROFF) -man $< > $(srcdir)/$@
+	sed '1s/^/.if n .ll 78n/' $< | $(NROFF) -man > $(srcdir)/$@
 
 sudo: $(SUDO_OBJS) $(LIB_OBJS)
 	$(CC) -o $@ $(SUDO_OBJS) $(LIB_OBJS) $(SUDO_LDFLAGS) $(SUDO_LIBS)
