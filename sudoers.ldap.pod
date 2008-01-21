@@ -57,11 +57,11 @@ Placing the options directly in the entry is more natural.
 
 =item *
 
-B<visudo> is no longer needed.  B<visudo> provides locking and
-syntax checking of the F<@sysconfdir@/sudoers> file.  Since LDAP updates
-are atomic, locking is no longer necessary.  Because syntax is
-checked when the data is inserted into LDAP, there is no need
-for a specialized tool to check syntax.
+The B<visudo> program is no longer needed.  B<visudo> provides
+locking and syntax checking of the F<@sysconfdir@/sudoers> file.
+Since LDAP updates are atomic, locking is no longer necessary.
+Because syntax is checked when the data is inserted into LDAP, there
+is no need for a specialized tool to check syntax.
 
 =back
 
