@@ -54,7 +54,9 @@
 # include <lber.h>
 #endif
 #include <ldap.h>
-#ifdef HAVE_MPS_LDAP_SSL_H
+#if defined(HAVE_LDAP_SSL_H)
+# include <ldap_ssl.h>
+#elif defined(HAVE_MPS_LDAP_SSL_H)
 # include <mps/ldap_ssl.h>
 #endif
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
