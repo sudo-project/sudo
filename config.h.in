@@ -221,6 +221,9 @@
 /* Define to 1 if you have the `ldap_initialize' function. */
 #undef HAVE_LDAP_INITIALIZE
 
+/* Define to 1 if you have the <ldap_ssl.h> header file. */
+#undef HAVE_LDAP_SSL_H
+
 /* Define to 1 if you have the `ldap_start_tls_s' function. */
 #undef HAVE_LDAP_START_TLS_S
 
