@@ -146,7 +146,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "January 20, 2008" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "January 21, 2008" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers.ldap \- sudo LDAP configuration
 .SH "DESCRIPTION"
@@ -174,11 +174,11 @@ limited options associated with user/host/commands/aliases.  The
 syntax is complicated and can be difficult for users to understand.
 Placing the options directly in the entry is more natural.
 .IP "\(bu" 4
-\&\fBvisudo\fR is no longer needed.  \fBvisudo\fR provides locking and
-syntax checking of the \fI@sysconfdir@/sudoers\fR file.  Since \s-1LDAP\s0 updates
-are atomic, locking is no longer necessary.  Because syntax is
-checked when the data is inserted into \s-1LDAP\s0, there is no need
-for a specialized tool to check syntax.
+The \fBvisudo\fR program is no longer needed.  \fBvisudo\fR provides
+locking and syntax checking of the \fI@sysconfdir@/sudoers\fR file.
+Since \s-1LDAP\s0 updates are atomic, locking is no longer necessary.
+Because syntax is checked when the data is inserted into \s-1LDAP\s0, there
+is no need for a specialized tool to check syntax.
 .PP
 Another major difference between \s-1LDAP\s0 and file-based \fIsudoers\fR
 is that in \s-1LDAP\s0, \fBsudo\fR\-specific Aliases are not supported.
