@@ -146,5 +146,3 @@ TODO list (most will be addressed in sudo 2.0)
 
 51) For LDAP entries, should be able to parse the per-command options
     since they may affect the outcome (e.g. default_runas).
-
-52) Better LDAP documention.  Perhaps a sudo-ldap man page.
