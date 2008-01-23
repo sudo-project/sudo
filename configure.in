@@ -922,7 +922,7 @@ AC_ARG_WITH(nsswitch, [  --with-nsswitch[[=PATH]]  path to nsswitch.conf],
 esac])
 if test ${with_nsswitch-"yes"} != "no"; then
     SUDO_DEFINE_UNQUOTED(_PATH_NSSWITCH_CONF, "${with_nsswitch-/etc/nsswitch.conf}")
-    nsswitch_conf=${with_nsswitch-'/etc/nsswitch.conf'}
+    nsswitch_conf=${with_nsswitch-/etc/nsswitch.conf}
 else
     nsswitch_conf='/etc/nsswitch.conf'
 fi
@@ -937,11 +937,11 @@ AC_ARG_WITH(ldap, [  --with-ldap[[=DIR]]       enable LDAP support],
 esac])
 
 AC_ARG_WITH(ldap-conf-file, [  --with-ldap-conf-file   path to LDAP configuration file])
-AC_DEFINE_UNQUOTED(_PATH_LDAP_CONF, "${with_ldap_conf_file-'/etc/ldap.conf'}", [Path to the ldap.conf file])
+SUDO_DEFINE_UNQUOTED(_PATH_LDAP_CONF, "${with_ldap_conf_file-/etc/ldap.conf}", [Path to the ldap.conf file])
 ldap_conf=${with_ldap_conf_file-'/etc/ldap.conf'}
 
 AC_ARG_WITH(ldap-secret-file, [  --with-ldap-secret-file path to LDAP secret password file])
-AC_DEFINE_UNQUOTED(_PATH_LDAP_SECRET, "${with_ldap_secret_file-'/etc/ldap.secret'}", [Path to the ldap.secret file])
+SUDO_DEFINE_UNQUOTED(_PATH_LDAP_SECRET, "${with_ldap_secret_file-/etc/ldap.secret}", [Path to the ldap.secret file])
 ldap_secret=${with_ldap_secret_file-'/etc/ldap.secret'}
 
 AC_ARG_WITH(pc-insults, [  --with-pc-insults       replace politically incorrect insults with less offensive ones],

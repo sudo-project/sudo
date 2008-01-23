@@ -3562,7 +3562,7 @@ if test ${with_nsswitch-"yes"} != "no"; then
 #define _PATH_NSSWITCH_CONF "${with_nsswitch-/etc/nsswitch.conf}"
 EOF
 
-    nsswitch_conf=${with_nsswitch-'/etc/nsswitch.conf'}
+    nsswitch_conf=${with_nsswitch-/etc/nsswitch.conf}
 else
     nsswitch_conf='/etc/nsswitch.conf'
 fi
@@ -3591,10 +3591,9 @@ if test "${with_ldap_conf_file+set}" = set; then
   withval=$with_ldap_conf_file;
 fi
 
-
-cat >>confdefs.h <<_ACEOF
-#define _PATH_LDAP_CONF "${with_ldap_conf_file-'/etc/ldap.conf'}"
-_ACEOF
+cat >>confdefs.h <<EOF
+#define _PATH_LDAP_CONF "${with_ldap_conf_file-/etc/ldap.conf}"
+EOF
 
 ldap_conf=${with_ldap_conf_file-'/etc/ldap.conf'}
 
@@ -3604,10 +3603,9 @@ if test "${with_ldap_secret_file+set}" = set; then
   withval=$with_ldap_secret_file;
 fi
 
-
-cat >>confdefs.h <<_ACEOF
-#define _PATH_LDAP_SECRET "${with_ldap_secret_file-'/etc/ldap.secret'}"
-_ACEOF
+cat >>confdefs.h <<EOF
+#define _PATH_LDAP_SECRET "${with_ldap_secret_file-/etc/ldap.secret}"
+EOF
 
 ldap_secret=${with_ldap_secret_file-'/etc/ldap.secret'}
 
@@ -6133,7 +6131,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6136 "configure"' > conftest.$ac_ext
+  echo '#line 6134 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7677,11 +7675,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7680: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7678: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7684: \$? = $ac_status" >&5
+   echo "$as_me:7682: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7967,11 +7965,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7970: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7968: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7974: \$? = $ac_status" >&5
+   echo "$as_me:7972: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8071,11 +8069,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8074: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8072: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8078: \$? = $ac_status" >&5
+   echo "$as_me:8076: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10416,7 +10414,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10419 "configure"
+#line 10417 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10516,7 +10514,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10519 "configure"
+#line 10517 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
