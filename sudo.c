@@ -462,8 +462,10 @@ main(argc, argv, envp)
 	    if (chdir(runas_pw->pw_dir) == -1)
 		warning("unable to change directory to %s", runas_pw->pw_dir);
 
+#if defined(__linux__) || defined(_AIX)
 	    /* Insert system-wide environment variables. */
 	    read_env_file(_PATH_ENVIRONMENT);
+#endif
 	}
 
 	if (ISSET(sudo_mode, MODE_EDIT))

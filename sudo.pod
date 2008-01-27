@@ -209,8 +209,8 @@ shell is executed.  B<sudo> attempts to change to that user's home
 directory before running the shell.  It also initializes the
 environment, leaving I<DISPLAY> and I<TERM> unchanged, setting
 I<HOME>, I<SHELL>, I<USER>, I<LOGNAME>, and I<PATH>, as well as
-the contents of F</etc/environment>.  All other environment variables
-are removed.
+the contents of F</etc/environment> on Linux and AIX systems.
+All other environment variables are removed.
 
 =item -K
 
@@ -506,7 +506,7 @@ Default editor to use in B<-e> (sudoedit) mode
 
 =item F<@timedir@>C<		>Directory containing timestamps
 
-=item F</etc/environment>C<	>Initial environment for B<-i> mode
+=item F</etc/environment>C<	>Initial environment for B<-i> mode on Linux and AIX
 
 =back
 

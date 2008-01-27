@@ -737,6 +737,7 @@ validate_env_vars(env_vars)
     }
 }
 
+#if defined(__linux__) || defined(_AIX)
 /*
  * Read in /etc/environment ala AIX and Linux.
  * Lines are in the form of NAME=VALUE
@@ -770,6 +771,7 @@ read_env_file(path)
     }
     fclose(fp);
 }
+#endif /* __linux__ || _AIX */
 
 void
 init_envtables()
