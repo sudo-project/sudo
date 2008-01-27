@@ -992,9 +992,25 @@ static void
 initial_setup()
 {
     int miss[3], devnull = -1;
-#if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
+#if defined(__linux__) || (defined(RLIMIT_CORE) && !defined(SUDO_DEVEL))
     struct rlimit rl;
+#endif
 
+#if defined(__linux__)
+    /*
+     * Unlimit the number of processes since Linux's setuid() will
+     * apply resource limits when changing uid and return EAGAIN if
+     * nproc would be violated by the uid switch.
+     */
+    rl.rlim_cur = rl.rlim_max = RLIM_INFINITY;
+    if (setrlimit(RLIMIT_NPROC, &rl)) {
+	if (getrlimit(RLIMIT_NPROC, &rl) == 0) {
+	    rl.rlim_cur = rl.rlim_max;
+	    (void)setrlimit(RLIMIT_NPROC, &rl);
+	}
+    }
+#endif /* __linux__ */
+#if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
     /*
      * Turn off core dumps.
      */
