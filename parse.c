@@ -64,8 +64,10 @@ struct sudo_nss sudo_nss_file = {
     sudo_file_parse,
     sudo_file_setdefs,
     sudo_file_lookup,
-    sudo_file_display_privs,
-    sudo_file_display_cmnd
+    sudo_file_display_cmnd,
+    sudo_file_display_defaults,
+    sudo_file_display_bound_defaults,
+    sudo_file_display_privs
 };
 
 /*
@@ -79,8 +81,7 @@ extern int errorlineno, parse_error;
  * Local prototypes.
  */
 static void print_member	__P((struct lbuf *, char *, int, int, int));
-static void display_defaults	__P((struct passwd *));
-static void display_bound_defaults __P((int));
+static int display_bound_defaults __P((int, struct lbuf *));
 
 int
 sudo_file_open(nss)
@@ -302,23 +303,21 @@ sudo_file_lookup(nss, validated, pwflag)
 #define	TAG_CHANGED(t) \
 	(cs->tags.t != UNSPEC && cs->tags.t != IMPLIED && cs->tags.t != tags.t)
 
-void
-sudo_file_display_privs(nss, pw)
+int
+sudo_file_display_privs(nss, pw, lbuf)
     struct sudo_nss *nss;
     struct passwd *pw;
+    struct lbuf *lbuf;
 {
-    struct lbuf lbuf;
     struct cmndspec *cs;
     struct member *m;
     struct privilege *priv;
     struct userspec *us;
     struct cmndtag tags;
+    int nfound = 0;
 
-    display_defaults(pw);
-
-    lbuf_init(&lbuf, NULL, 8, '\\');
-    printf("User %s may run the following commands on this host:\n",
-	pw->pw_name);
+    if (nss->handle == NULL)
+	return(-1);
 
     tq_foreach_fwd(&userspecs, us) {
 	/* XXX - why only check the first privilege here? */
@@ -330,69 +329,77 @@ sudo_file_display_privs(nss, pw)
 	    tags.noexec = def_noexec;
 	    tags.setenv = def_setenv;
 	    tags.nopasswd = !def_authenticate;
-	    lbuf_append(&lbuf, "    ", NULL);
+	    lbuf_append(lbuf, "    ", NULL);
 	    tq_foreach_fwd(&priv->cmndlist, cs) {
 		if (cs != tq_first(&priv->cmndlist))
-		    lbuf_append(&lbuf, ", ", NULL);
-		lbuf_append(&lbuf, "(", NULL);
+		    lbuf_append(lbuf, ", ", NULL);
+		lbuf_append(lbuf, "(", NULL);
 		if (!tq_empty(&cs->runasuserlist)) {
 		    tq_foreach_fwd(&cs->runasuserlist, m) {
 			if (m != tq_first(&cs->runasuserlist))
-			    lbuf_append(&lbuf, ", ", NULL);
-			print_member(&lbuf, m->name, m->type, m->negated,
+			    lbuf_append(lbuf, ", ", NULL);
+			print_member(lbuf, m->name, m->type, m->negated,
 			    RUNASALIAS);
 		    }
 		} else {
-		    lbuf_append(&lbuf, def_runas_default, NULL);
+		    lbuf_append(lbuf, def_runas_default, NULL);
 		}
 		if (!tq_empty(&cs->runasgrouplist)) {
-		    lbuf_append(&lbuf, " : ", NULL);
+		    lbuf_append(lbuf, " : ", NULL);
 		    tq_foreach_fwd(&cs->runasgrouplist, m) {
 			if (m != tq_first(&cs->runasgrouplist))
-			    lbuf_append(&lbuf, ", ", NULL);
-			print_member(&lbuf, m->name, m->type, m->negated,
+			    lbuf_append(lbuf, ", ", NULL);
+			print_member(lbuf, m->name, m->type, m->negated,
 			    RUNASALIAS);
 		    }
 		}
-		lbuf_append(&lbuf, ") ", NULL);
+		lbuf_append(lbuf, ") ", NULL);
 		if (TAG_CHANGED(setenv)) {
-		    lbuf_append(&lbuf, cs->tags.setenv ? "SETENV: " :
+		    lbuf_append(lbuf, cs->tags.setenv ? "SETENV: " :
 			"NOSETENV: ", NULL);
 		    tags.setenv = cs->tags.setenv;
 		}
 		if (TAG_CHANGED(noexec)) {
-		    lbuf_append(&lbuf, cs->tags.noexec ? "NOEXEC: " :
+		    lbuf_append(lbuf, cs->tags.noexec ? "NOEXEC: " :
 			"EXEC: ", NULL);
 		    tags.noexec = cs->tags.noexec;
 		}
 		if (TAG_CHANGED(nopasswd)) {
-		    lbuf_append(&lbuf, cs->tags.nopasswd ? "NOPASSWD: " :
+		    lbuf_append(lbuf, cs->tags.nopasswd ? "NOPASSWD: " :
 			"PASSWD: ", NULL);
 		    tags.nopasswd = cs->tags.nopasswd;
 		}
 		m = cs->cmnd;
-		print_member(&lbuf, m->name, m->type, m->negated,
+		print_member(lbuf, m->name, m->type, m->negated,
 		    CMNDALIAS);
+		nfound++;
 	    }
-	    lbuf_print(&lbuf);
+	    lbuf_print(lbuf);		/* forces a newline */
 	}
     }
-    lbuf_destroy(&lbuf);
+    return(nfound);
 }
 
 /*
  * Display matching Defaults entries for the given user on this host.
  */
-static void
-display_defaults(pw)
+int
+sudo_file_display_defaults(nss, pw, lbuf)
+    struct sudo_nss *nss;
     struct passwd *pw;
+    struct lbuf *lbuf;
 {
     struct defaults *d;
-    struct lbuf lbuf;
     char *prefix = NULL;
-    int per_runas = 0, per_cmnd = 0;
+    int nfound = 0;
 
-    lbuf_init(&lbuf, NULL, 4, 0);
+    if (nss->handle == NULL)
+	return(-1);
+
+    if (lbuf->len == 0)
+	prefix = "    ";
+    else
+	prefix = ", ";
 
     tq_foreach_fwd(&defaults, d) {
 	switch (d->type) {
@@ -405,55 +412,58 @@ display_defaults(pw)
 		    continue;
 		break;
 	    case DEFAULTS_RUNAS:
-		per_runas = 1;
-		continue;
 	    case DEFAULTS_CMND:
-		per_cmnd = 1;
 		continue;
 	}
-	if (prefix == NULL) {
-	    printf("Matching Defaults entries for %s on this host:\n",
-		pw->pw_name);
-	    prefix = "    ";
-	}
-	lbuf_append(&lbuf, prefix, NULL);
+	lbuf_append(lbuf, prefix, NULL);
 	if (d->val != NULL) {
-	    lbuf_append(&lbuf, d->var, d->op == '+' ? " += " :
-		d->op == '-' ? " -= " : " = ", NULL);
+	    lbuf_append(lbuf, d->var, d->op == '+' ? "+=" :
+		d->op == '-' ? "-=" : "=", NULL);
 	    if (strpbrk(d->val, " \t") != NULL) {
-		lbuf_append(&lbuf, "\"", NULL);
-		lbuf_append_quoted(&lbuf, "\"", d->val, NULL);
-		lbuf_append(&lbuf, "\"", NULL);
+		lbuf_append(lbuf, "\"", NULL);
+		lbuf_append_quoted(lbuf, "\"", d->val, NULL);
+		lbuf_append(lbuf, "\"", NULL);
 	    } else
-		lbuf_append_quoted(&lbuf, SUDOERS_QUOTED, d->val, NULL);
+		lbuf_append_quoted(lbuf, SUDOERS_QUOTED, d->val, NULL);
 	} else
-	    lbuf_append(&lbuf, d->op == FALSE ? "!" : "", d->var, NULL);
+	    lbuf_append(lbuf, d->op == FALSE ? "!" : "", d->var, NULL);
 	prefix = ", ";
+	nfound++;
     }
-    if (prefix) {
-	lbuf_print(&lbuf);
-	putchar('\n');
-    }
-    lbuf_destroy(&lbuf);
 
-    if (per_runas)
-	display_bound_defaults(DEFAULTS_RUNAS);
-    if (per_cmnd)
-	display_bound_defaults(DEFAULTS_CMND);
+    return(nfound);
+}
+
+/*
+ * Display Defaults entries that are per-runas or per-command
+ */
+int
+sudo_file_display_bound_defaults(nss, pw, lbuf)
+    struct sudo_nss *nss;
+    struct passwd *pw;
+    struct lbuf *lbuf;
+{
+    int nfound = 0;
+
+    /* XXX - should only print ones that match what the user can do. */
+    nfound += display_bound_defaults(DEFAULTS_RUNAS, lbuf);
+    nfound += display_bound_defaults(DEFAULTS_CMND, lbuf);
+
+    return(nfound);
 }
 
 /*
  * Display Defaults entries of the given type.
  */
-static void
-display_bound_defaults(dtype)
+static int
+display_bound_defaults(dtype, lbuf)
     int dtype;
+    struct lbuf *lbuf;
 {
-    struct lbuf lbuf;
     struct defaults *d;
     struct member *m, *binding = NULL;
     char *dname, *dsep;
-    int atype;
+    int atype, nfound = 0;
 
     switch (dtype) {
 	case DEFAULTS_HOST:
@@ -477,34 +487,33 @@ display_bound_defaults(dtype)
 	    dsep = "!";
 	    break;
 	default:
-	    return;
+	    return(-1);
     }
-    lbuf_init(&lbuf, NULL, 4, 0);
-    printf("Per-%s Defaults entries:\n", dname);
+    /* printf("Per-%s Defaults entries:\n", dname); */
     tq_foreach_fwd(&defaults, d) {
 	if (d->type != dtype)
 	    continue;
 
+	nfound++;
 	if (binding != tq_first(&d->binding)) {
 	    binding = tq_first(&d->binding);
-	    lbuf_append(&lbuf, "    Defaults", dsep, NULL);
+	    lbuf_append(lbuf, "    Defaults", dsep, NULL);
 	    for (m = binding; m != NULL; m = m->next) {
 		if (m != binding)
-		    lbuf_append(&lbuf, ",", NULL);
-		print_member(&lbuf, m->name, m->type, m->negated, atype);
-		lbuf_append(&lbuf, " ", NULL);
+		    lbuf_append(lbuf, ",", NULL);
+		print_member(lbuf, m->name, m->type, m->negated, atype);
+		lbuf_append(lbuf, " ", NULL);
 	    }
 	} else
-	    lbuf_append(&lbuf, ", ", NULL);
+	    lbuf_append(lbuf, ", ", NULL);
 	if (d->val != NULL) {
-	    lbuf_append(&lbuf, d->var, d->op == '+' ? "+=" :
+	    lbuf_append(lbuf, d->var, d->op == '+' ? "+=" :
 		d->op == '-' ? "-=" : "=", d->val, NULL);
 	} else
-	    lbuf_append(&lbuf, d->op == FALSE ? "!" : "", d->var, NULL);
+	    lbuf_append(lbuf, d->op == FALSE ? "!" : "", d->var, NULL);
     }
-    lbuf_print(&lbuf);
-    lbuf_destroy(&lbuf);
-    putchar('\n');
+
+    return(nfound);
 }
 
 int

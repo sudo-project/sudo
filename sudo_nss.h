@@ -16,7 +16,9 @@
  * $Sudo$
  */
 
+struct lbuf;
 struct passwd;
+
 struct sudo_nss {
     struct sudo_nss *prev;
     struct sudo_nss *next;
@@ -25,8 +27,10 @@ struct sudo_nss {
     int (*parse) __P((struct sudo_nss *nss));
     int (*setdefs) __P((struct sudo_nss *nss));
     int (*lookup) __P((struct sudo_nss *nss, int, int));
-    void (*display_privs) __P((struct sudo_nss *nss, struct passwd *));
     int (*display_cmnd) __P((struct sudo_nss *nss, struct passwd *));
+    int (*display_defaults) __P((struct sudo_nss *nss, struct passwd *, struct lbuf *));
+    int (*display_bound_defaults) __P((struct sudo_nss *nss, struct passwd *, struct lbuf *));
+    int (*display_privs) __P((struct sudo_nss *nss, struct passwd *, struct lbuf *));
     void *handle;
     int ret_notfound;
 };

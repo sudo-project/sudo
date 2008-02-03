@@ -169,6 +169,7 @@ struct sudo_user {
 #define TGP_ECHO	0x01		/* leave echo on when reading passwd */
 #define TGP_STDIN	0x02		/* read from stdin, not /dev/tty */
 
+struct lbuf;
 struct passwd;
 struct timespec;
 struct timeval;
@@ -232,8 +233,10 @@ int sudo_ldap_close	__P((struct sudo_nss *));
 int sudo_ldap_setdefs	__P((struct sudo_nss *));
 int sudo_ldap_lookup	__P((struct sudo_nss *, int, int));
 int sudo_ldap_parse	__P((struct sudo_nss *));
-void sudo_ldap_display_privs __P((struct sudo_nss *, struct passwd *));
 int sudo_ldap_display_cmnd __P((struct sudo_nss *, struct passwd *));
+int sudo_ldap_display_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
+int sudo_ldap_display_bound_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
+int sudo_ldap_display_privs __P((struct sudo_nss *, struct passwd *, struct lbuf *));
 #endif
 #if 1
 int sudo_file_open	__P((struct sudo_nss *));
@@ -241,8 +244,10 @@ int sudo_file_close	__P((struct sudo_nss *));
 int sudo_file_setdefs	__P((struct sudo_nss *));
 int sudo_file_lookup	__P((struct sudo_nss *, int, int));
 int sudo_file_parse	__P((struct sudo_nss *));
-void sudo_file_display_privs __P((struct sudo_nss *, struct passwd *));
 int sudo_file_display_cmnd __P((struct sudo_nss *, struct passwd *));
+int sudo_file_display_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
+int sudo_file_display_bound_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
+int sudo_file_display_privs __P((struct sudo_nss *, struct passwd *, struct lbuf *));
 #endif
 void set_perms		__P((int));
 void remove_timestamp	__P((int));

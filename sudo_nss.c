@@ -41,6 +41,7 @@
 #include <grp.h>
 
 #include "sudo.h"
+#include "lbuf.h"
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
@@ -156,16 +157,44 @@ display_privs(snl, pw)
     struct passwd *pw;
 {
     struct sudo_nss *nss;
+    struct lbuf lbuf;
+    int count;
 
     /* Reset group vector so group matching works correctly. */
     reset_groups(pw);
 
-    /* Display privileges from all sources. */
-    tq_foreach_fwd(snl, nss) {
-	if (nss != tq_first(snl))
-	    putchar('\n');
-	nss->display_privs(nss, pw);
+    lbuf_init(&lbuf, NULL, 4, 0);
+
+    /* Display defaults from all sources. */
+    count = 0;
+    tq_foreach_fwd(snl, nss)
+	count += nss->display_defaults(nss, pw, &lbuf);
+    if (count) {
+	/* XXX - defer printing until we find a command the user can run? */
+	printf("Matching Defaults entries for %s on this host:\n", pw->pw_name);
+	lbuf_print(&lbuf);
+	putchar('\n');
     }
+
+    /* Display Runas and Cmnd-specific defaults from all sources. */
+    count = 0;
+    tq_foreach_fwd(snl, nss)
+	count += nss->display_bound_defaults(nss, pw, &lbuf);
+    if (count) {
+	printf("Runas and Command-specific defaults for %s:\n", pw->pw_name);
+	lbuf_print(&lbuf);
+	putchar('\n');
+    }
+
+    printf("User %s may run the following commands on this host:\n",
+	pw->pw_name);
+    /* Display privileges from all sources. */
+    count = 0;
+    tq_foreach_fwd(snl, nss)
+	count += nss->display_privs(nss, pw, &lbuf);
+    if (count)
+	lbuf_print(&lbuf);
+    lbuf_destroy(&lbuf);
 }
 
 /*
