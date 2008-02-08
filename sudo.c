@@ -135,6 +135,7 @@ struct passwd *auth_pw, *list_pw;
 struct interface *interfaces;
 int num_interfaces;
 int tgetpass_flags;
+int long_list;
 uid_t timestamp_uid;
 extern int errorlineno;
 extern int parse_error;
@@ -793,7 +794,8 @@ parse_args(argc, argv)
 
     while (NewArgc > 0) {
 	if (NewArgv[0][0] == '-') {
-	    if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0') {
+	    if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0' &&
+		NewArgv[0][2] != 'l') {
 		warningx("please use single character options");
 		usage(1);
 	    }
@@ -910,6 +912,8 @@ parse_args(argc, argv)
 		    if (excl && excl != 'l')
 			usage_excl(1);
 		    excl = 'l';
+		    if (NewArgv[0][2] == 'l')
+			long_list = 1;
 		    break;
 		case 'V':
 		    rval = MODE_VERSION;

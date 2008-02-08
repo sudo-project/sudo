@@ -73,6 +73,10 @@ get_ttycols()
     return(cols);
 }
 
+/*
+ * TODO: add support for embedded newlines in lbufs
+ */
+
 void
 lbuf_init(lbuf, buf, indent, continuation)
     struct lbuf *lbuf;

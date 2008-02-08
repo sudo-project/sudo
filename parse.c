@@ -301,7 +301,137 @@ sudo_file_lookup(nss, validated, pwflag)
 }
 
 #define	TAG_CHANGED(t) \
-	(cs->tags.t != UNSPEC && cs->tags.t != IMPLIED && cs->tags.t != tags.t)
+	(cs->tags.t != UNSPEC && cs->tags.t != IMPLIED && cs->tags.t != tags->t)
+
+static void
+sudo_file_append_cmnd(cs, tags, lbuf)
+    struct cmndspec *cs;
+    struct cmndtag *tags;
+    struct lbuf *lbuf;
+{
+    struct member *m;
+
+    if (TAG_CHANGED(setenv)) {
+	lbuf_append(lbuf, cs->tags.setenv ? "SETENV: " :
+	    "NOSETENV: ", NULL);
+	tags->setenv = cs->tags.setenv;
+    }
+    if (TAG_CHANGED(noexec)) {
+	lbuf_append(lbuf, cs->tags.noexec ? "NOEXEC: " :
+	    "EXEC: ", NULL);
+	tags->noexec = cs->tags.noexec;
+    }
+    if (TAG_CHANGED(nopasswd)) {
+	lbuf_append(lbuf, cs->tags.nopasswd ? "NOPASSWD: " :
+	    "PASSWD: ", NULL);
+	tags->nopasswd = cs->tags.nopasswd;
+    }
+    m = cs->cmnd;
+    print_member(lbuf, m->name, m->type, m->negated,
+	CMNDALIAS);
+}
+
+static int
+sudo_file_display_priv_short(pw, us, lbuf)
+    struct passwd *pw;
+    struct userspec *us;
+    struct lbuf *lbuf;
+{
+    struct cmndspec *cs;
+    struct member *m;
+    struct privilege *priv;
+    struct cmndtag tags;
+    int nfound = 0;
+
+    tq_foreach_fwd(&us->privileges, priv) {
+	tags.noexec = def_noexec;
+	tags.setenv = def_setenv;
+	tags.nopasswd = !def_authenticate;
+	lbuf_append(lbuf, "    ", NULL);
+	tq_foreach_fwd(&priv->cmndlist, cs) {
+	    if (cs != tq_first(&priv->cmndlist))
+		lbuf_append(lbuf, ", ", NULL);
+	    lbuf_append(lbuf, "(", NULL);
+	    if (!tq_empty(&cs->runasuserlist)) {
+		tq_foreach_fwd(&cs->runasuserlist, m) {
+		    if (m != tq_first(&cs->runasuserlist))
+			lbuf_append(lbuf, ", ", NULL);
+		    print_member(lbuf, m->name, m->type, m->negated,
+			RUNASALIAS);
+		}
+	    } else {
+		lbuf_append(lbuf, def_runas_default, NULL);
+	    }
+	    if (!tq_empty(&cs->runasgrouplist)) {
+		lbuf_append(lbuf, " : ", NULL);
+		tq_foreach_fwd(&cs->runasgrouplist, m) {
+		    if (m != tq_first(&cs->runasgrouplist))
+			lbuf_append(lbuf, ", ", NULL);
+		    print_member(lbuf, m->name, m->type, m->negated,
+			RUNASALIAS);
+		}
+	    }
+	    lbuf_append(lbuf, ") ", NULL);
+	    sudo_file_append_cmnd(cs, &tags, lbuf);
+	    nfound++;
+	}
+	lbuf_print(lbuf);		/* forces a newline */
+    }
+    return(nfound);
+}
+
+static int
+sudo_file_display_priv_long(pw, us, lbuf)
+    struct passwd *pw;
+    struct userspec *us;
+    struct lbuf *lbuf;
+{
+    struct cmndspec *cs;
+    struct member *m;
+    struct privilege *priv;
+    struct cmndtag tags;
+    int nfound = 0;
+
+    tq_foreach_fwd(&us->privileges, priv) {
+	tags.noexec = def_noexec;
+	tags.setenv = def_setenv;
+	tags.nopasswd = !def_authenticate;
+	lbuf_print(lbuf);	/* force a newline */
+	lbuf_append(lbuf, "Sudoers entry:", NULL);
+	lbuf_print(lbuf);
+	tq_foreach_fwd(&priv->cmndlist, cs) {
+	    lbuf_append(lbuf, "    RunAsUsers: ", NULL);
+	    if (!tq_empty(&cs->runasuserlist)) {
+		tq_foreach_fwd(&cs->runasuserlist, m) {
+		    if (m != tq_first(&cs->runasuserlist))
+			lbuf_append(lbuf, ", ", NULL);
+		    print_member(lbuf, m->name, m->type, m->negated,
+			RUNASALIAS);
+		}
+	    } else {
+		lbuf_append(lbuf, def_runas_default, NULL);
+	    }
+	    lbuf_print(lbuf);
+	    if (!tq_empty(&cs->runasgrouplist)) {
+		lbuf_append(lbuf, "    RunAsGroups: ", NULL);
+		tq_foreach_fwd(&cs->runasgrouplist, m) {
+		    if (m != tq_first(&cs->runasgrouplist))
+			lbuf_append(lbuf, ", ", NULL);
+		    print_member(lbuf, m->name, m->type, m->negated,
+			RUNASALIAS);
+		}
+		lbuf_print(lbuf);
+	    }
+	    lbuf_append(lbuf, "    Commands: ", NULL);
+	    lbuf_print(lbuf);
+	    lbuf_append(lbuf, "\t", NULL);
+	    sudo_file_append_cmnd(cs, &tags, lbuf);
+	    lbuf_print(lbuf);
+	    nfound++;
+	}
+    }
+    return(nfound);
+}
 
 int
 sudo_file_display_privs(nss, pw, lbuf)
@@ -309,11 +439,7 @@ sudo_file_display_privs(nss, pw, lbuf)
     struct passwd *pw;
     struct lbuf *lbuf;
 {
-    struct cmndspec *cs;
-    struct member *m;
-    struct privilege *priv;
     struct userspec *us;
-    struct cmndtag tags;
     int nfound = 0;
 
     if (nss->handle == NULL)
@@ -325,57 +451,10 @@ sudo_file_display_privs(nss, pw, lbuf)
 	    hostlist_matches(&us->privileges.first->hostlist) != ALLOW)
 	    continue;
 
-	tq_foreach_fwd(&us->privileges, priv) {
-	    tags.noexec = def_noexec;
-	    tags.setenv = def_setenv;
-	    tags.nopasswd = !def_authenticate;
-	    lbuf_append(lbuf, "    ", NULL);
-	    tq_foreach_fwd(&priv->cmndlist, cs) {
-		if (cs != tq_first(&priv->cmndlist))
-		    lbuf_append(lbuf, ", ", NULL);
-		lbuf_append(lbuf, "(", NULL);
-		if (!tq_empty(&cs->runasuserlist)) {
-		    tq_foreach_fwd(&cs->runasuserlist, m) {
-			if (m != tq_first(&cs->runasuserlist))
-			    lbuf_append(lbuf, ", ", NULL);
-			print_member(lbuf, m->name, m->type, m->negated,
-			    RUNASALIAS);
-		    }
-		} else {
-		    lbuf_append(lbuf, def_runas_default, NULL);
-		}
-		if (!tq_empty(&cs->runasgrouplist)) {
-		    lbuf_append(lbuf, " : ", NULL);
-		    tq_foreach_fwd(&cs->runasgrouplist, m) {
-			if (m != tq_first(&cs->runasgrouplist))
-			    lbuf_append(lbuf, ", ", NULL);
-			print_member(lbuf, m->name, m->type, m->negated,
-			    RUNASALIAS);
-		    }
-		}
-		lbuf_append(lbuf, ") ", NULL);
-		if (TAG_CHANGED(setenv)) {
-		    lbuf_append(lbuf, cs->tags.setenv ? "SETENV: " :
-			"NOSETENV: ", NULL);
-		    tags.setenv = cs->tags.setenv;
-		}
-		if (TAG_CHANGED(noexec)) {
-		    lbuf_append(lbuf, cs->tags.noexec ? "NOEXEC: " :
-			"EXEC: ", NULL);
-		    tags.noexec = cs->tags.noexec;
-		}
-		if (TAG_CHANGED(nopasswd)) {
-		    lbuf_append(lbuf, cs->tags.nopasswd ? "NOPASSWD: " :
-			"PASSWD: ", NULL);
-		    tags.nopasswd = cs->tags.nopasswd;
-		}
-		m = cs->cmnd;
-		print_member(lbuf, m->name, m->type, m->negated,
-		    CMNDALIAS);
-		nfound++;
-	    }
-	    lbuf_print(lbuf);		/* forces a newline */
-	}
+	if (long_list)
+	    nfound += sudo_file_display_priv_long(pw, us, lbuf);
+	else
+	    nfound += sudo_file_display_priv_short(pw, us, lbuf);
     }
     return(nfound);
 }

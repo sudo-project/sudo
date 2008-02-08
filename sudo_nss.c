@@ -150,6 +150,7 @@ reset_groups(pw)
 
 /*
  * Print out privileges for the specified user.
+ * We only get here if the user is allowed to run something on this host.
  */
 void
 display_privs(snl, pw)
@@ -170,7 +171,6 @@ display_privs(snl, pw)
     tq_foreach_fwd(snl, nss)
 	count += nss->display_defaults(nss, pw, &lbuf);
     if (count) {
-	/* XXX - defer printing until we find a command the user can run? */
 	printf("Matching Defaults entries for %s on this host:\n", pw->pw_name);
 	lbuf_print(&lbuf);
 	putchar('\n');
@@ -186,14 +186,13 @@ display_privs(snl, pw)
 	putchar('\n');
     }
 
+    /* Display privileges from all sources. */
     printf("User %s may run the following commands on this host:\n",
 	pw->pw_name);
-    /* Display privileges from all sources. */
-    count = 0;
     tq_foreach_fwd(snl, nss)
-	count += nss->display_privs(nss, pw, &lbuf);
-    if (count)
-	lbuf_print(&lbuf);
+	(void) nss->display_privs(nss, pw, &lbuf);
+    if (lbuf.len != 0)
+	lbuf_print(&lbuf);		/* print remainder, if any */
     lbuf_destroy(&lbuf);
 }
 
