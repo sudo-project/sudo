@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "January 21, 2008" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "February  9, 2008" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
@@ -162,7 +162,8 @@ sudo, sudoedit \- execute a command as another user
 .PP
 \&\fBsudo\fR [\fB\-bEHPS\fR] [\fB\-a\fR\ \fIauth_type\fR] [\fB\-C\fR\ \fIfd\fR]
 [\fB\-c\fR\ \fIclass\fR|\fI\-\fR] [\fB\-g\fR\ \fIgroupname\fR|\fI#gid\fR] [\fB\-p\fR\ \fIprompt\fR]
-[\fB\-u\fR\ \fIusername\fR|\fI#uid\fR] [\fB\s-1VAR\s0\fR=\fIvalue\fR] [{\fB\-i\fR\ |\ \fB\-s\fR]\ [<\fIcommand\fR}]
+[\fB\-r\fR\ \fIrole\fR] [\fB\-t\fR\ \fItype\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
+[\fB\s-1VAR\s0\fR=\fIvalue\fR] [{\fB\-i\fR\ |\ \fB\-s\fR]\ [<\fIcommand\fR}]
 .PP
 \&\fBsudoedit\fR [\fB\-S\fR] [\fB\-a\fR\ \fIauth_type\fR] [\fB\-C\fR\ \fIfd\fR]
 [\fB\-c\fR\ \fIclass\fR|\fI\-\fR] [\fB\-g\fR\ \fIgroupname\fR|\fI#gid\fR] [\fB\-p\fR\ \fIprompt\fR]
@@ -315,8 +316,8 @@ shell is executed.  \fBsudo\fR attempts to change to that user's home
 directory before running the shell.  It also initializes the
 environment, leaving \fI\s-1DISPLAY\s0\fR and \fI\s-1TERM\s0\fR unchanged, setting
 \&\fI\s-1HOME\s0\fR, \fI\s-1SHELL\s0\fR, \fI\s-1USER\s0\fR, \fI\s-1LOGNAME\s0\fR, and \fI\s-1PATH\s0\fR, as well as
-the contents of \fI/etc/environment\fR.  All other environment variables
-are removed.
+the contents of \fI/etc/environment\fR on Linux and \s-1AIX\s0 systems.
+All other environment variables are removed.
 .IP "\-K" 12
 .IX Item "-K"
 The \fB\-K\fR (sure \fIkill\fR) option is like \fB\-k\fR except that it removes
@@ -391,6 +392,10 @@ The prompt specified by the \fB\-p\fR option will override the system
 password prompt on systems that support \s-1PAM\s0 unless the
 \&\fIpassprompt_override\fR flag is disabled in \fIsudoers\fR.
 .RE
+.IP "\-r \fIrole\fR" 12
+.IX Item "-r role"
+The \fB\-r\fR (\fIrole\fR) option causes the new (SELinux) security context to 
+have the role specified by \fIrole\fR.
 .IP "\-S" 12
 .IX Item "-S"
 The \fB\-S\fR (\fIstdin\fR) option causes \fBsudo\fR to read the password from
@@ -401,6 +406,11 @@ The \fB\-s\fR (\fIshell\fR) option runs the shell specified by the \fI\s-1SHELL\
 environment variable if it is set or the shell as specified in
 \&\fIpasswd\fR\|(@mansectform@).  If a command is specified, it is passed to the shell
 for execution.  Otherwise, an interactive shell is executed.
+.IP "\-t \fItype\fR" 12
+.IX Item "-t type"
+The \fB\-t\fR (\fItype\fR) option causes the new (SELinux) security context to 
+have the type specified by \fItype\fR.  If no type is specified, the default
+type is derived from the specified role.
 .IP "\-U \fIuser\fR" 12
 .IX Item "-U user"
 The \fB\-U\fR (\fIother user\fR) option is used in conjunction with the \fB\-l\fR
@@ -589,9 +599,9 @@ Default editor to use in \fB\-e\fR (sudoedit) mode
 .ie n .IP "\fI@timedir@\fR\*(C`		\*(C'Directory containing timestamps" 4
 .el .IP "\fI@timedir@\fR\f(CW\*(C`		\*(C'\fRDirectory containing timestamps" 4
 .IX Item "@timedir@		Directory containing timestamps"
-.ie n .IP "\fI/etc/environment\fR\*(C`	\*(C'\fRInitial environment for \fB\-i mode" 4
-.el .IP "\fI/etc/environment\fR\f(CW\*(C`	\*(C'\fRInitial environment for \fB\-i\fR mode" 4
-.IX Item "/etc/environment	Initial environment for -i mode"
+.ie n .IP "\fI/etc/environment\fR\*(C`	\*(C'\fRInitial environment for \fB\-i mode on Linux and \s-1AIX\s0" 4
+.el .IP "\fI/etc/environment\fR\f(CW\*(C`	\*(C'\fRInitial environment for \fB\-i\fR mode on Linux and \s-1AIX\s0" 4
+.IX Item "/etc/environment	Initial environment for -i mode on Linux and AIX"
 .PD
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"

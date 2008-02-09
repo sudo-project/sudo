@@ -519,6 +519,12 @@ print_privilege(priv)
 		}
 		fputs(") ", stdout);
 	    }
+#ifdef HAVE_SELINUX
+	    if (cs->role)
+		printf("ROLE=%s ", cs->role);
+	    if (cs->type)
+		printf("TYPE=%s ", cs->type);
+#endif /* HAVE_SELINUX */
 	    if (cs->tags.nopasswd != UNSPEC && cs->tags.nopasswd != tags.nopasswd)
 		printf("%sPASSWD: ", cs->tags.nopasswd ? "NO" : "");
 	    if (cs->tags.noexec != UNSPEC && cs->tags.noexec != tags.noexec)

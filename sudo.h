@@ -57,6 +57,10 @@ struct sudo_user {
     int   ngroups;
     GETGROUPS_T *groups;
     struct list_member *env_vars;
+#ifdef HAVE_SELINUX
+    char *role;
+    char *type;
+#endif
     char  cwd[PATH_MAX];
 };
 
@@ -147,6 +151,8 @@ struct sudo_user {
 #define login_class		(sudo_user.class_name)
 #define runas_pw		(sudo_user._runas_pw)
 #define runas_gr		(sudo_user._runas_gr)
+#define user_role		(sudo_user.role)
+#define user_type		(sudo_user.type)
 
 /*
  * We used to use the system definition of PASS_MAX or _PASSWD_LEN,
@@ -299,6 +305,9 @@ struct passwd *sudo_fakepwuid __P((uid_t));
 struct group *sudo_getgrnam __P((const char *));
 struct group *sudo_fakegrnam __P((const char *));
 struct group *sudo_getgrgid __P((gid_t));
+#ifdef HAVE_SELINUX
+void selinux_exec __P((char *, char *, char **, int));
+#endif
 YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */

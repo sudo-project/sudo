@@ -146,7 +146,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "January 21, 2008" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "February  9, 2008" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers.ldap \- sudo LDAP configuration
 .SH "DESCRIPTION"
@@ -540,11 +540,12 @@ with the remote server.
 See the \f(CW\*(C`ldap.conf\*(C'\fR entry in the \s-1EXAMPLES\s0 section.
 .Sh "Configuring nsswitch.conf"
 .IX Subsection "Configuring nsswitch.conf"
-Sudo consults the Name Service Switch file, \fI@nsswitch_conf@\fR,
-to specify the \fIsudoers\fR search order.  Sudo looks for a line
-beginning with \f(CW\*(C`sudoers:\*(C'\fR and uses this to determine the search
-order.  Note that \fBsudo\fR does not stop searching after the first
-match and later matches take precedence over earlier ones.
+Unless it is disabled at build time, \fBsudo\fR consults the Name
+Service Switch file, \fI@nsswitch_conf@\fR, to specify the \fIsudoers\fR
+search order.  Sudo looks for a line beginning with \f(CW\*(C`sudoers:\*(C'\fR and
+uses this to determine the search order.  Note that \fBsudo\fR does
+not stop searching after the first match and later matches take
+precedence over earlier ones.
 .PP
 The following sources are recognized:
 .PP

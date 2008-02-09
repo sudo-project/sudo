@@ -35,8 +35,8 @@ S<[B<-u> I<username>|I<#uid>]> [I<command>]
 
 B<sudo> [B<-bEHPS>] S<[B<-a> I<auth_type>]> S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]> S<[B<-g> I<groupname>|I<#gid>]> S<[B<-p> I<prompt>]>
-S<[B<-u> I<username>|I<#uid>]> S<[B<VAR>=I<value>]> [S<{B<-i> | B<-s>]
-[<I<command>}>]
+S<[B<-r> I<role>]> S<[B<-t> I<type>]> S<[B<-u> I<username>|I<#uid>]>
+S<[B<VAR>=I<value>]> [S<{B<-i> | B<-s>] [<I<command>}>]
 
 B<sudoedit> [B<-S>] S<[B<-a> I<auth_type>]> S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]> S<[B<-g> I<groupname>|I<#gid>]> S<[B<-p> I<prompt>]>
@@ -292,6 +292,11 @@ The prompt specified by the B<-p> option will override the system
 password prompt on systems that support PAM unless the
 I<passprompt_override> flag is disabled in I<sudoers>.
 
+=item -r I<role>
+
+The B<-r> (I<role>) option causes the new (SELinux) security context to 
+have the role specified by I<role>.
+
 =item -S
 
 The B<-S> (I<stdin>) option causes B<sudo> to read the password from
@@ -303,6 +308,12 @@ The B<-s> (I<shell>) option runs the shell specified by the I<SHELL>
 environment variable if it is set or the shell as specified in
 L<passwd(5)>.  If a command is specified, it is passed to the shell
 for execution.  Otherwise, an interactive shell is executed.
+
+=item -t I<type>
+
+The B<-t> (I<type>) option causes the new (SELinux) security context to 
+have the type specified by I<type>.  If no type is specified, the default
+type is derived from the specified role.
 
 =item -U I<user>
 
