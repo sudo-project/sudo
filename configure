@@ -818,6 +818,7 @@ SUDOERS_MODE
 SUDOERS_UID
 SUDOERS_GID
 DEV
+SELINUX
 devdir
 mansectsu
 mansectform
@@ -827,6 +828,7 @@ noexec_file
 INSTALL_NOEXEC
 DONT_LEAK_PATH_INFO
 BSDAUTH_USAGE
+SELINUX_USAGE
 LDAP
 LOGINCAP_USAGE
 timedir
@@ -1574,6 +1576,7 @@ Optional Packages:
   --with-secure-path      override the user's path with a built-in one
   --without-interfaces    don't try to read the ip addr of ether interfaces
   --with-stow             properly handle GNU stow packaging
+  --with-selinux          enable SELinux support
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-pic              try to use only PIC/non-PIC objects [default=use
                           both]
@@ -2087,6 +2090,8 @@ echo "$as_me: Configuring Sudo version 1.7" >&6;}
 
 
 
+
+
 timeout=5
 password_timeout=5
 sudo_umask=0022
@@ -2122,6 +2127,7 @@ PROGS="sudo visudo"
 : ${SUDOERS_GID='0'}
 DEV="#"
 LDAP="#"
+SELINUX="#"
 AUTH_OBJS=
 AUTH_REG=
 AUTH_EXCL=
@@ -3965,6 +3971,29 @@ echo "$as_me: WARNING: Ignoring unknown argument to --enable-path-info: $enablev
 else
   { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
+fi
+
+
+
+# Check whether --with-selinux was given.
+if test "${with_selinux+set}" = set; then
+  withval=$with_selinux; case $with_selinux in
+    yes)	SELINUX_USAGE="[-r role] [-t type] "
+    		cat >>confdefs.h <<\_ACEOF
+#define HAVE_SELINUX 1
+_ACEOF
+
+		SUDO_LIBS="${SUDO_LIBS} -lselinux"
+		SUDO_OBJS="${SUDO_OBJS} selinux.o"
+		PROGS="${PROGS} sesh"
+		SELINUX=""
+		;;
+    no)		;;
+    *)		{ { echo "$as_me:$LINENO: error: \"--with-selinux does not take an argument.\"" >&5
+echo "$as_me: error: \"--with-selinux does not take an argument.\"" >&2;}
+   { (exit 1); exit 1; }; }
+		;;
+esac
 fi
 
 
@@ -6131,7 +6160,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6134 "configure"' > conftest.$ac_ext
+  echo '#line 6163 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7675,11 +7704,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7678: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7707: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7682: \$? = $ac_status" >&5
+   echo "$as_me:7711: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7965,11 +7994,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7968: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7997: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7972: \$? = $ac_status" >&5
+   echo "$as_me:8001: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8069,11 +8098,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8072: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8101: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8076: \$? = $ac_status" >&5
+   echo "$as_me:8105: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10414,7 +10443,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10417 "configure"
+#line 10446 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10514,7 +10543,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10517 "configure"
+#line 10546 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -22965,10 +22994,7 @@ fi
 
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
 
-if test "$with_noexec" != "no"; then
-    PROGS="${PROGS} sudo_noexec.la"
-    INSTALL_NOEXEC="install-noexec"
-
+if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
     oexec_prefix="$exec_prefix"
     if test "$exec_prefix" = '$(prefix)'; then
 	if test "$prefix" = "NONE"; then
@@ -22977,12 +23003,25 @@ if test "$with_noexec" != "no"; then
 	    exec_prefix="$prefix"
 	fi
     fi
-    eval noexec_file="$with_noexec"
+    if test X"$with_noexec" != X"no"; then
+	PROGS="${PROGS} sudo_noexec.la"
+	INSTALL_NOEXEC="install-noexec"
+
+	eval noexec_file="$with_noexec"
 
 cat >>confdefs.h <<_ACEOF
 #define _PATH_SUDO_NOEXEC "$noexec_file"
 _ACEOF
 
+    fi
+    if test X"$with_selinux" != X"no"; then
+	eval sesh_file="$libexecdir/sesh"
+
+cat >>confdefs.h <<_ACEOF
+#define _PATH_SUDO_SESH "$sesh_file"
+_ACEOF
+
+    fi
     exec_prefix="$oexec_prefix"
 fi
 
@@ -23665,6 +23704,7 @@ SUDOERS_MODE!$SUDOERS_MODE$ac_delim
 SUDOERS_UID!$SUDOERS_UID$ac_delim
 SUDOERS_GID!$SUDOERS_GID$ac_delim
 DEV!$DEV$ac_delim
+SELINUX!$SELINUX$ac_delim
 devdir!$devdir$ac_delim
 mansectsu!$mansectsu$ac_delim
 mansectform!$mansectform$ac_delim
@@ -23674,6 +23714,7 @@ noexec_file!$noexec_file$ac_delim
 INSTALL_NOEXEC!$INSTALL_NOEXEC$ac_delim
 DONT_LEAK_PATH_INFO!$DONT_LEAK_PATH_INFO$ac_delim
 BSDAUTH_USAGE!$BSDAUTH_USAGE$ac_delim
+SELINUX_USAGE!$SELINUX_USAGE$ac_delim
 LDAP!$LDAP$ac_delim
 LOGINCAP_USAGE!$LOGINCAP_USAGE$ac_delim
 timedir!$timedir$ac_delim
@@ -23704,8 +23745,6 @@ root_sudo!$root_sudo$ac_delim
 path_info!$path_info$ac_delim
 ldap_conf!$ldap_conf$ac_delim
 ldap_secret!$ldap_secret$ac_delim
-nsswitch_conf!$nsswitch_conf$ac_delim
-EGREPPROG!$EGREPPROG$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -23747,6 +23786,8 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+nsswitch_conf!$nsswitch_conf$ac_delim
+EGREPPROG!$EGREPPROG$ac_delim
 CC!$CC$ac_delim
 ac_ct_CC!$ac_ct_CC$ac_delim
 EXEEXT!$EXEEXT$ac_delim
@@ -23782,7 +23823,7 @@ KRB5CONFIG!$KRB5CONFIG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 33; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 35; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
@@ -24248,6 +24289,8 @@ echo "$as_me: You will need to customize sample.pam and install it as /etc/pam.d
 	    ;;
     esac
 fi
+
+
 
 
 
