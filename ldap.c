@@ -1844,6 +1844,13 @@ sudo_ldap_lookup(nss, ret, pwflag)
 			if (setenv_implied)
 			    def_setenv = TRUE;
 			sudo_ldap_parse_options(ld, entry);
+#ifdef HAVE_SELINUX
+			/* Set role and type if not specified on command line. */
+			if (user_role == NULL)
+			    user_role = def_role;
+			if (user_type == NULL)
+			    user_type = def_type;
+#endif /* HAVE_SELINUX */
 			/* make sure we don't reenter loop */
 			SET(ret, VALIDATE_OK);
 			CLR(ret, VALIDATE_NOT_OK);

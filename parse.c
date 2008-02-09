@@ -274,6 +274,13 @@ sudo_file_lookup(nss, validated, pwflag)
 		    if (cmnd_match != UNSPEC) {
 			match = cmnd_match;
 			tags = &cs->tags;
+#ifdef HAVE_SELINUX
+			/* Set role and type if not specified on command line. */
+			if (user_role == NULL)
+			    user_role = cs->role ? estrdup(cs->role) : def_role;
+			if (user_type == NULL)
+			    user_type = cs->type ? estrdup(cs->type) : def_type;
+#endif /* HAVE_SELINUX */
 			goto matched2;
 		    }
 		}
@@ -311,6 +318,12 @@ sudo_file_append_cmnd(cs, tags, lbuf)
 {
     struct member *m;
 
+#ifdef HAVE_SELINUX
+    if (cs->role)
+	lbuf_append(lbuf, "ROLE=", cs->role, " ", NULL);
+    if (cs->type)
+	lbuf_append(lbuf, "TYPE=", cs->type, " ", NULL);
+#endif /* HAVE_SELINUX */
     if (TAG_CHANGED(setenv)) {
 	lbuf_append(lbuf, cs->tags.setenv ? "SETENV: " :
 	    "NOSETENV: ", NULL);

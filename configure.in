@@ -33,6 +33,7 @@ AC_SUBST(SUDOERS_MODE)
 AC_SUBST(SUDOERS_UID)
 AC_SUBST(SUDOERS_GID)
 AC_SUBST(DEV)
+AC_SUBST(SELINUX)
 AC_SUBST(devdir)
 AC_SUBST(mansectsu)
 AC_SUBST(mansectform)
@@ -42,6 +43,7 @@ AC_SUBST(noexec_file)
 AC_SUBST(INSTALL_NOEXEC)
 AC_SUBST(DONT_LEAK_PATH_INFO)
 AC_SUBST(BSDAUTH_USAGE)
+AC_SUBST(SELINUX_USAGE)
 AC_SUBST(LDAP)
 AC_SUBST(LOGINCAP_USAGE)
 dnl
@@ -118,6 +120,7 @@ PROGS="sudo visudo"
 : ${SUDOERS_GID='0'}
 DEV="#"
 LDAP="#"
+SELINUX="#"
 AUTH_OBJS=
 AUTH_REG=
 AUTH_EXCL=
@@ -1145,6 +1148,20 @@ AC_ARG_ENABLE(path_info,
 		;;
   esac
 ], AC_MSG_RESULT(no))
+
+AC_ARG_WITH(selinux, [  --with-selinux          enable SELinux support],
+[case $with_selinux in
+    yes)	SELINUX_USAGE="[[-r role]] [[-t type]] "
+    		AC_DEFINE(HAVE_SELINUX)
+		SUDO_LIBS="${SUDO_LIBS} -lselinux"
+		SUDO_OBJS="${SUDO_OBJS} selinux.o"
+		PROGS="${PROGS} sesh"
+		SELINUX=""
+		;;
+    no)		;;
+    *)		AC_MSG_ERROR(["--with-selinux does not take an argument."])
+		;;
+esac])
 
 dnl
 dnl If we don't have egrep we can't do anything...
@@ -2414,10 +2431,7 @@ dnl
 dnl Defer setting _PATH_SUDO_NOEXEC until after exec_prefix is set
 dnl XXX - this is gross!
 dnl
-if test "$with_noexec" != "no"; then
-    PROGS="${PROGS} sudo_noexec.la"
-    INSTALL_NOEXEC="install-noexec"
-
+if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
     oexec_prefix="$exec_prefix"
     if test "$exec_prefix" = '$(prefix)'; then
 	if test "$prefix" = "NONE"; then
@@ -2426,8 +2440,17 @@ if test "$with_noexec" != "no"; then
 	    exec_prefix="$prefix"
 	fi
     fi
-    eval noexec_file="$with_noexec"
-    AC_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
+    if test X"$with_noexec" != X"no"; then
+	PROGS="${PROGS} sudo_noexec.la"
+	INSTALL_NOEXEC="install-noexec"
+
+	eval noexec_file="$with_noexec"
+	AC_DEFINE_UNQUOTED(_PATH_SUDO_NOEXEC, "$noexec_file", [The fully qualified pathname of sudo_noexec.so])
+    fi
+    if test X"$with_selinux" != X"no"; then
+	eval sesh_file="$libexecdir/sesh"
+	AC_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file", [The fully qualified pathname of sesh])
+    fi
     exec_prefix="$oexec_prefix"
 fi
 
@@ -2489,6 +2512,7 @@ AH_TEMPLATE(HAVE_OPIE, [Define to 1 if you use NRL OPIE.])
 AH_TEMPLATE(HAVE_PAM, [Define to 1 if you use PAM authentication.])
 AH_TEMPLATE(HAVE_PROJECT_H, [Define to 1 if you have the <project.h> header file.])
 AH_TEMPLATE(HAVE_SECURID, [Define to 1 if you use SecurID for authentication.])
+AH_TEMPLATE(HAVE_SELINUX, [Define to 1 to enable SELinux RBAC support.])
 AH_TEMPLATE(HAVE_SIA, [Define to 1 if you use SIA authentication.])
 AH_TEMPLATE(HAVE_SIGACTION_T, [Define to 1 if <signal.h> has the sigaction_t typedef.])
 AH_TEMPLATE(HAVE_SKEY, [Define to 1 if you use S/Key.])

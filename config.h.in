@@ -317,6 +317,9 @@
 /* Define to 1 if you use SecurID for authentication. */
 #undef HAVE_SECURID
 
+/* Define to 1 to enable SELinux RBAC support. */
+#undef HAVE_SELINUX
+
 /* Define to 1 if you have the `seteuid' function. */
 #undef HAVE_SETEUID
 

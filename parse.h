@@ -49,6 +49,15 @@ struct cmndtag {
 };
 
 /*
+ * SELinux-specific container struct.
+ * Currently just contains a role and type.
+ */
+struct selinux_info {
+    char *role;
+    char *type;
+};
+
+/*
  * The parses sudoers file is stored as a collection of linked lists,
  * modelled after the yacc grammar.
  *
@@ -100,6 +109,9 @@ struct cmndspec {
     struct member_list runasgrouplist;	/* list of runas groups */
     struct member *cmnd;		/* command to allow/deny */
     struct cmndtag tags;		/* tag specificaion */
+#ifdef HAVE_SELINUX
+    char *role, *type;			/* SELinux role and type */
+#endif
 };
 
 /*

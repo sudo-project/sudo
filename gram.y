@@ -122,6 +122,7 @@ yyerror(s)
     struct privilege *privilege;
     struct sudo_command command;
     struct cmndtag tag;
+    struct selinux_info seinfo;
     char *string;
     int tok;
 }
@@ -154,6 +155,8 @@ yyerror(s)
 %token <tok>	 ':' '=' ',' '!' '+' '-' /* union member tokens */
 %token <tok>	 '(' ')'		/* runas tokens */
 %token <tok>	 ERROR
+%token <tok>	 TYPE			/* SELinux type */
+%token <tok>	 ROLE			/* SELinux role */
 
 %type <cmndspec>  cmndspec
 %type <cmndspec>  cmndspeclist
@@ -176,6 +179,9 @@ yyerror(s)
 %type <privilege> privilege
 %type <privilege> privileges
 %type <tag>	  cmndtag
+%type <seinfo>	  selinux
+%type <string>	  rolespec
+%type <string>	  typespec
 
 %%
 
@@ -296,6 +302,13 @@ host		:	ALIAS {
 cmndspeclist	:	cmndspec
 		|	cmndspeclist ',' cmndspec {
 			    list_append($1, $3);
+#ifdef HAVE_SELINUX
+			    /* propagate role and type */
+			    if ($3->role == NULL)
+				$3->role = $3->prev->role;
+			    if ($3->type == NULL)
+				$3->type = $3->prev->type;
+#endif /* HAVE_SELINUX */
 			    /* propagate tags and runas list */
 			    if ($3->tags.nopasswd == UNSPEC)
 				$3->tags.nopasswd = $3->prev->tags.nopasswd;
@@ -315,7 +328,7 @@ cmndspeclist	:	cmndspec
 			}
 		;
 
-cmndspec	:	runasspec cmndtag opcmnd {
+cmndspec	:	runasspec selinux cmndtag opcmnd {
 			    struct cmndspec *cs = emalloc(sizeof(*cs));
 			    if ($1 != NULL) {
 				list2tq(&cs->runasuserlist, $1->runasusers);
@@ -325,8 +338,12 @@ cmndspec	:	runasspec cmndtag opcmnd {
 				tq_init(&cs->runasuserlist);
 				tq_init(&cs->runasgrouplist);
 			    }
-			    cs->tags = $2;
-			    cs->cmnd = $3;
+#ifdef HAVE_SELINUX
+			    cs->role = $2.role;
+			    cs->type = $2.type;
+#endif
+			    cs->tags = $3;
+			    cs->cmnd = $4;
 			    cs->prev = cs;
 			    cs->next = NULL;
 			    /* sudo "ALL" implies the SETENV tag */
@@ -344,6 +361,38 @@ opcmnd		:	cmnd {
 		|	'!' cmnd {
 			    $$ = $2;
 			    $$->negated = TRUE;
+			}
+		;
+
+rolespec	:	ROLE '=' WORD {
+			    $$ = $3;
+			}
+		;
+
+typespec	:	TYPE '=' WORD {
+			    $$ = $3;
+			}
+		;
+
+selinux		:	/* empty */ {
+			    $$.role = NULL;
+			    $$.type = NULL;
+			}
+		|	rolespec {
+			    $$.role = $1;
+			    $$.type = NULL;
+			}
+		|	typespec {
+			    $$.type = $1;
+			    $$.role = NULL;
+			}
+		|	rolespec typespec {
+			    $$.role = $1;
+			    $$.type = $2;
+			}
+		|	typespec rolespec {
+			    $$.type = $1;
+			    $$.role = $2;
 			}
 		;
 
@@ -638,12 +687,26 @@ init_parser(path, quiet)
 	}
 	while ((priv = tq_pop(&us->privileges)) != NULL) {
 	    struct member *runasuser = NULL, *runasgroup = NULL;
+#ifdef HAVE_SELINUX
+	    char *role = NULL, *type = NULL;
+#endif /* HAVE_SELINUX */
 
 	    while ((m = tq_pop(&priv->hostlist)) != NULL) {
 		efree(m->name);
 		efree(m);
 	    }
 	    while ((cs = tq_pop(&priv->cmndlist)) != NULL) {
+#ifdef HAVE_SELINUX
+		/* Only free the first instance of a role/type. */
+		if (cs->role != role) {
+		    role = cs->role;
+		    efree(cs->role);
+		}
+		if (cs->type != type) {
+		    type = cs->type;
+		    efree(cs->type);
+		}
+#endif /* HAVE_SELINUX */
 		if (tq_last(&cs->runasuserlist) != runasuser) {
 		    runasuser = tq_last(&cs->runasuserlist);
 		    while ((m = tq_pop(&cs->runasuserlist)) != NULL) {

@@ -23,6 +23,8 @@
 #define USERALIAS 279
 #define RUNASALIAS 280
 #define ERROR 281
+#define TYPE 282
+#define ROLE 283
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
@@ -33,6 +35,7 @@ typedef union {
     struct privilege *privilege;
     struct sudo_command command;
     struct cmndtag tag;
+    struct selinux_info seinfo;
     char *string;
     int tok;
 } YYSTYPE;

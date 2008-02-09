@@ -61,6 +61,7 @@ exec_prefix = @exec_prefix@
 bindir = @bindir@
 sbindir = @sbindir@
 sysconfdir = @sysconfdir@
+libexecdir = @libexecdir@
 datarootdir = @datarootdir@
 mandir = @mandir@
 noexecdir = @NOEXECDIR@
@@ -106,7 +107,7 @@ SRCS = alias.c alloc.c check.c closefrom.c def_data.c defaults.c env.c \
        pwutil.c  set_perms.c sigaction.c snprintf.c strcasecmp.c strerror.c \
        strlcat.c strlcpy.c sudo.c sudo_noexec.c sudo_edit.c sudo_nss.c \
        testsudoers.c tgetpass.c toke.c toke.l tsgetgrpw.c utimes.c visudo.c \
-       zero_bytes.c redblack.c $(AUTH_SRCS)
+       zero_bytes.c redblack.c selinux.c sesh.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -286,6 +287,8 @@ strlcat.o: $(srcdir)/strlcat.c $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strlcat.c
 strlcpy.o: $(srcdir)/strlcpy.c $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strlcpy.c
+selinux.o: $(srcdir)/selinux.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/selinux.c
 sudo.o: $(srcdir)/sudo.c $(SUDODEP) sudo_usage.h $(srcdir)/interfaces.h $(srcdir)/version.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
@@ -401,8 +404,9 @@ install-binaries: $(PROGS)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 -s sudo $(DESTDIR)$(sudodir)/sudo
 	rm -f $(DESTDIR)$(sudodir)/sudoedit
 	ln $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
-
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s visudo $(DESTDIR)$(visudodir)/visudo
+@SELINUX@	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sesh $(DESTDIR)$(libexecdir)/sesh
+
 
 install-noexec: sudo_noexec.la
 	$(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la $(DESTDIR)$(noexecdir)
