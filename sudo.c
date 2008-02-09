@@ -96,6 +96,9 @@
 # include <project.h>
 # include <sys/task.h>
 #endif
+#ifdef HAVE_SELINUX
+# include <selinux/selinux.h>
+#endif
 
 #include "sudo.h"
 #include "interfaces.h"
@@ -442,8 +445,14 @@ main(argc, argv, envp)
 #ifndef PROFILING
 	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0)
 	    exit(0);
-	else
+	else {
+#ifdef HAVE_SELINUX
+	    if (is_selinux_enabled() > 0 && user_role != NULL)
+		selinux_exec(user_role, user_type, NewArgv, environ,
+		    ISSET(sudo_mode, MODE_LOGIN_SHELL));
+#endif
 	    execve(safe_cmnd, NewArgv, environ);
+	}
 #else
 	exit(0);
 #endif /* PROFILING */
@@ -858,6 +867,28 @@ parse_args(argc, argv)
 		case 'E':
 		    SET(rval, MODE_PRESERVE_ENV);
 		    break;
+#ifdef HAVE_SELINUX
+		case 'r':
+		    /* Must have an associated SELinux role. */
+		    if (NewArgv[1] == NULL)
+			usage(1);
+
+		    user_role = NewArgv[1];
+
+		    NewArgc--;
+		    NewArgv++;
+		    break;
+		case 't':
+		    /* Must have an associated SELinux type. */
+		    if (NewArgv[1] == NULL)
+			usage(1);
+
+		    user_type = NewArgv[1];
+
+		    NewArgc--;
+		    NewArgv++;
+		    break;
+#endif
 		case '-':
 		    NewArgc--;
 		    NewArgv++;
@@ -1289,7 +1320,13 @@ usage(exit_val)
 #ifdef HAVE_LOGIN_CAP_H
 	" [-c class|-]",
 #endif
+#ifdef HAVE_SELINUX
+	" [-r role]",
+#endif
 	" [-p prompt]",
+#ifdef HAVE_SELINUX
+	" [-t type]",
+#endif
 	" [-u username|#uid]",
 	" [VAR=value]",
 	" {-i | -s | <command>}",

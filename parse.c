@@ -198,6 +198,21 @@ sudoers_lookup(pwflag)
 		    /*
 		     * User was granted access to cmnd on host as user.
 		     */
+#ifdef HAVE_SELINUX
+		    /* Set role and type if not specified on command line. */
+		    if (user_role == NULL) {
+			if (match[top-1].role != NULL)
+			    user_role = match[top-1].role;
+			else
+			    user_role = def_role;
+		    }
+		    if (user_type == NULL) {
+			if (match[top-1].type != NULL)
+			    user_type = match[top-1].type;
+			else
+			    user_type = def_type;
+		    }
+#endif
 		    set_perms(PERM_ROOT);
 		    return(VALIDATE_OK |
 			(no_passwd == TRUE ? FLAG_NOPASS : 0) |

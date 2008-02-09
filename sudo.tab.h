@@ -23,6 +23,8 @@
 #define USERALIAS 279
 #define RUNASALIAS 280
 #define ERROR 281
+#define TYPE 282
+#define ROLE 283
 #ifndef YYSTYPE_DEFINED
 #define YYSTYPE_DEFINED
 typedef union {
@@ -30,6 +32,7 @@ typedef union {
     int BOOLEAN;
     struct sudo_command command;
     int tok;
+    struct selinux_info seinfo;
 } YYSTYPE;
 #endif /* YYSTYPE_DEFINED */
 extern YYSTYPE yylval;

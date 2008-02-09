@@ -2045,3 +2045,13 @@ Sudo 1.6.9p11 released.
      to the screen if there was a read timeout.
 
 Sudo 1.6.9p12 released.
+
+646) Sudo will now set the nproc resource limit to unlimited on Linux
+     systems to work around Linux's setuid() resource limit semantics.
+     On PAM systems the resource limits will be reset by pam_limits.so
+     before the command is executed.
+
+647) SELinux support that can be used to implement role based access
+     control (RBAC).  A role and (optional) type may be specified
+     in sudoers or on the command line.  These are then used in the
+     security context that the command is run as.

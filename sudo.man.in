@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "January 14, 2008" "1.6.9p12" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "February  7, 2008" "1.6.9p12" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
@@ -158,7 +158,7 @@ sudo, sudoedit \- execute a command as another user
 \&\fBsudo\fR \fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-L\fR | \fB\-l\fR | \fB\-V\fR | \fB\-v\fR
 .PP
 \&\fBsudo\fR [\fB\-bEHPS\fR] [\fB\-a\fR\ \fIauth_type\fR]
-[\fB\-c\fR\ \fIclass\fR|\fI\-\fR] [\fB\-p\fR\ \fIprompt\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
+[\fB\-c\fR\ \fIclass\fR|\fI\-\fR] [\fB\-p\fR\ \fIprompt\fR] [\fB\-r\fR\ \fIrole\fR] [\fB\-t\fR\ \fItype\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
 [\fB\s-1VAR\s0\fR=\fIvalue\fR] {\fB\-i\fR\ |\ \fB\-s\fR\ |\ \fIcommand\fR}
 .PP
 \&\fBsudoedit\fR [\fB\-S\fR] [\fB\-a\fR\ \fIauth_type\fR] [\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
@@ -360,6 +360,10 @@ two consecutive \f(CW\*(C`%\*(C'\fR characters are collapsed into a single \f(CW
 .RE
 .RS 4
 .RE
+.IP "\-r" 4
+.IX Item "-r"
+The \fB\-r\fR (\fIrole\fR) option causes the new (SELinux) security context to 
+have the role specified by \fIrole\fR.
 .IP "\-S" 4
 .IX Item "-S"
 The \fB\-S\fR (\fIstdin\fR) option causes \fBsudo\fR to read the password from
@@ -369,6 +373,11 @@ the standard input instead of the terminal device.
 The \fB\-s\fR (\fIshell\fR) option runs the shell specified by the \fI\s-1SHELL\s0\fR
 environment variable if it is set or the shell as specified
 in \fIpasswd\fR\|(@mansectform@).
+.IP "\-t" 4
+.IX Item "-t"
+The \fB\-t\fR (\fItype\fR) option causes the new (SELinux) security context to 
+have the type specified by \fItype\fR.  If no type is specified, the default
+type is derived from the specified role.
 .IP "\-u" 4
 .IX Item "-u"
 The \fB\-u\fR (\fIuser\fR) option causes \fBsudo\fR to run the specified

@@ -326,11 +326,21 @@ NOSETENV[[:blank:]]*:	{
 			    if (strcmp(yytext, "ALL") == 0) {
 				LEXTRACE("ALL ");
 				return(ALL);
-			    } else {
-				fill(yytext, yyleng);
-				LEXTRACE("ALIAS ");
-				return(ALIAS);
 			    }
+#ifdef HAVE_SELINUX
+			    /* XXX - restrict type/role to initial state */
+			    if (strcmp(yytext, "TYPE") == 0) {
+				LEXTRACE("TYPE ");
+				return(TYPE);
+			    }
+			    if (strcmp(yytext, "ROLE") == 0) {
+				LEXTRACE("ROLE ");
+				return(ROLE);
+			    }
+#endif /* HAVE_SELINUX */
+			    fill(yytext, yyleng);
+			    LEXTRACE("ALIAS ");
+			    return(ALIAS);
 			}
 
 <GOTRUNAS>(#[0-9-]+|{WORD}) {

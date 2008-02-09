@@ -63,6 +63,7 @@ sbindir = @sbindir@
 sysconfdir = @sysconfdir@
 mandir = @mandir@
 noexecdir = @NOEXECDIR@
+libexecdir = @libexecdir@
 datarootdir = @datarootdir@
 
 # Directory in which to install sudo.
@@ -105,7 +106,7 @@ SRCS = alloc.c alloca.c check.c closefrom.c def_data.c defaults.c env.c err.c \
        logging.c memrchr.c mkstemp.c parse.c parse.lex parse.yacc set_perms.c \
        sigaction.c snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c \
        sudo.c sudo_noexec.c sudo.tab.c sudo_edit.c testsudoers.c tgetpass.c \
-       utimes.c visudo.c zero_bytes.c $(AUTH_SRCS)
+       utimes.c visudo.c zero_bytes.c selinux.c sesh.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -233,6 +234,7 @@ glob.o: glob.c config.h compat.h emul/glob.h
 lsearch.o: lsearch.c config.h compat.h emul/search.h
 memrchr.o: memrchr.c config.h compat.h
 mkstemp.o: mkstemp.c config.h compat.h
+selinux.o: selinux.c $(SUDODEP)
 snprintf.o: snprintf.c config.h compat.h
 strcasecmp.o: strcasecmp.c config.h
 strlcat.o: strlcat.c config.h
@@ -313,8 +315,8 @@ install-binaries: $(PROGS)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 -s sudo $(DESTDIR)$(sudodir)/sudo
 	rm -f $(DESTDIR)$(sudodir)/sudoedit
 	ln $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
-
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s visudo $(DESTDIR)$(visudodir)/visudo
+@SELINUX@	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sesh $(DESTDIR)$(libexecdir)/sesh
 
 install-noexec: sudo_noexec.la
 	$(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la $(DESTDIR)$(noexecdir)

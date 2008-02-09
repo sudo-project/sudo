@@ -101,6 +101,10 @@
 #undef _PATH_BSHELL
 #endif /* _PATH_BSHELL */
 
+#ifndef _PATH_SUDO_SESH
+#undef	_PATH_SUDO_SESH
+#endif /* _PATH_SUDO_SESH */
+
 #ifndef _PATH_TMP
 #define	_PATH_TMP	"/tmp/"
 #endif /* _PATH_TMP */

@@ -542,6 +542,10 @@ main(argc, argv)
 	    (void) printf("no_passwd  : %d\n", no_passwd);
 	    (void) printf("runas_match: %d\n", runas_matches);
 	    (void) printf("runas      : %s\n", *user_runas);
+	    if (match[top-1].role)
+		(void) printf("role       : %s\n", match[top-1].role);
+	    if (match[top-1].type)
+		(void) printf("type       : %s\n", match[top-1].type);
 	    top--;
 	}
     }
