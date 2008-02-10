@@ -1060,9 +1060,11 @@ sudo_ldap_read_config()
 	    value = ldap_conf.krb5_ccname +
 		(ldap_conf.krb5_ccname[4] == ':' ? 5 : 7);
 	    if ((fp = fopen(value, "r")) != NULL) {
+		DPRINTF(("using krb5 credential cache: %s", value), 1);
 		fclose(fp);
 	    } else {
 		/* Can't open it, just ignore the entry. */
+		DPRINTF(("unable to open krb5 credential cache: %s", value), 1);
 		efree(ldap_conf.krb5_ccname);
 		ldap_conf.krb5_ccname = NULL;
 	    }
