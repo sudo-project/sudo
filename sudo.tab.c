@@ -963,6 +963,8 @@ list_matches()
     for (count = 0; count < cm_list_len; count++) {
 	efree(cm_list[count].runas);
 	efree(cm_list[count].cmnd);
+	efree(cm_list[count].role);
+	efree(cm_list[count].type);
     }
     efree(cm_list);
     cm_list = NULL;
@@ -1099,7 +1101,7 @@ init_parser()
     if (printmatches == TRUE)
 	expand_match_list();
 }
-#line 1051 "sudo.tab.c"
+#line 1053 "sudo.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1641,14 +1643,14 @@ case 46:
 				cm_list[cm_list_len].role_len =
 				    cm_list[cm_list_len-1].role_len;
 				cm_list[cm_list_len].role_size =
-				    cm_list[cm_list_len-1].role_size;
+				    cm_list[cm_list_len-1].role_len + 1;
 				/* Inherit type. */
 				cm_list[cm_list_len].type =
 				    estrdup(cm_list[cm_list_len-1].type);
 				cm_list[cm_list_len].type_len =
 				    cm_list[cm_list_len-1].type_len;
 				cm_list[cm_list_len].type_size =
-				    cm_list[cm_list_len-1].type_size;
+				    cm_list[cm_list_len-1].type_len + 1;
 			    }
 #endif /* HAVE_SELINUX */
 			    yyval.seinfo.role = NULL;
@@ -1667,7 +1669,7 @@ case 47:
 				cm_list[cm_list_len].type_len =
 				    cm_list[cm_list_len-1].type_len;
 				cm_list[cm_list_len].type_size =
-				    cm_list[cm_list_len-1].type_size;
+				    cm_list[cm_list_len-1].type_len + 1;
 			    }
 #endif /* HAVE_SELINUX */
 			    yyval.seinfo.role = yyvsp[0].string;
@@ -1686,7 +1688,7 @@ case 48:
 				cm_list[cm_list_len].role_len =
 				    cm_list[cm_list_len-1].role_len;
 				cm_list[cm_list_len].role_size =
-				    cm_list[cm_list_len-1].role_size;
+				    cm_list[cm_list_len-1].role_len + 1;
 			    }
 #endif /* HAVE_SELINUX */
 			    yyval.seinfo.type = yyvsp[0].string;
@@ -1721,7 +1723,7 @@ case 51:
 				    cm_list[cm_list_len].runas_len =
 					cm_list[cm_list_len-1].runas_len;
 				    cm_list[cm_list_len].runas_size =
-					cm_list[cm_list_len-1].runas_size;
+					cm_list[cm_list_len-1].runas_len + 1;
 				}
 			    }
 			    /*
@@ -2194,7 +2196,7 @@ case 101:
 			    yyval.BOOLEAN = TRUE;
 			}
 break;
-#line 2146 "sudo.tab.c"
+#line 2148 "sudo.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
