@@ -62,7 +62,7 @@ __unused static const char rcsid[] = "$Sudo$";
 static void do_syslog		__P((int, char *));
 static void do_logfile		__P((char *));
 static void send_mail		__P((char *));
-static void mail_auth		__P((int, char *));
+static int should_mail		__P((int));
 static char *get_timestr	__P((void));
 static void mysyslog		__P((int, const char *, ...));
 static char *new_logline	__P((const char *, int));
@@ -268,41 +268,31 @@ do_logfile(msg)
 }
 
 /*
- * Two main functions, log_error() to log errors and log_auth() to
- * log allow/deny messages.
+ * Log and mail the denial message, optionally informing the user.
  */
 void
-log_auth(status, inform_user)
+log_denial(status, inform_user)
     int status;
     int inform_user;
 {
     char *message;
     char *logline;
-    int pri;
 
-    if (ISSET(status, VALIDATE_OK))
-	pri = def_syslog_goodpri;
-    else
-	pri = def_syslog_badpri;
-
-    /* Set error message, if any. */
-    if (ISSET(status, VALIDATE_OK))
-	message = NULL;
-    else if (ISSET(status, FLAG_NO_USER))
+    /* Set error message. */
+    if (ISSET(status, FLAG_NO_USER))
 	message = "user NOT in sudoers";
     else if (ISSET(status, FLAG_NO_HOST))
 	message = "user NOT authorized on host";
-    else if (ISSET(status, VALIDATE_NOT_OK))
-	message = "command not allowed";
     else
-	message = "unknown error";
+	message = "command not allowed";
 
     logline = new_logline(message, 0);
 
-    mail_auth(status, logline);		/* send mail based on status */
+    if (should_mail(status))
+	send_mail(logline);	/* send mail based on status */
 
     /* Inform the user if they failed to authenticate.  */
-    if (inform_user && ISSET(status, VALIDATE_NOT_OK)) {
+    if (inform_user) {
 	if (ISSET(status, FLAG_NO_USER))
 	    (void) fprintf(stderr, "%s is not in the sudoers file.  %s",
 		user_name, "This incident will be reported.\n");
@@ -326,7 +316,32 @@ log_auth(status, inform_user)
      * Log via syslog and/or a file.
      */
     if (def_syslog)
-	do_syslog(pri, logline);
+	do_syslog(def_syslog_badpri, logline);
+    if (def_logfile)
+	do_logfile(logline);
+
+    efree(logline);
+}
+
+/*
+ * Log and potentially mail the allowed command.
+ */
+void
+log_allowed(status)
+    int status;
+{
+    char *logline;
+
+    logline = new_logline(NULL, 0);
+
+    if (should_mail(status))
+	send_mail(logline);	/* send mail based on status */
+
+    /*
+     * Log via syslog and/or a file.
+     */
+    if (def_syslog)
+	do_syslog(def_syslog_goodpri, logline);
     if (def_logfile)
 	do_logfile(logline);
 
@@ -523,31 +538,17 @@ send_mail(line)
 }
 
 /*
- * Send mail based on the value of "status" and compile-time options.
+ * Determine whether we should send mail based on "status" and defaults options.
  */
-static void
-mail_auth(status, line)
+static int
+should_mail(status)
     int status;
-    char *line;
 {
-    int mail_mask;
 
-    /* If any of these bits are set in status, we send mail. */
-    if (def_mail_always)
-	mail_mask =
-	    VALIDATE_ERROR|VALIDATE_OK|FLAG_NO_USER|FLAG_NO_HOST|VALIDATE_NOT_OK;
-    else {
-	mail_mask = VALIDATE_ERROR;
-	if (def_mail_no_user)
-	    SET(mail_mask, FLAG_NO_USER);
-	if (def_mail_no_host)
-	    SET(mail_mask, FLAG_NO_HOST);
-	if (def_mail_no_perms)
-	    SET(mail_mask, VALIDATE_NOT_OK);
-    }
-
-    if ((status & mail_mask) != 0)
-	send_mail(line);
+    return(def_mail_always || ISSET(status, VALIDATE_ERROR) ||
+	(def_mail_no_user && ISSET(status, FLAG_NO_USER)) ||
+	(def_mail_no_host && ISSET(status, FLAG_NO_HOST)) ||
+	(def_mail_no_perms && !ISSET(status, VALIDATE_OK)));
 }
 
 /*

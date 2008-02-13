@@ -48,7 +48,8 @@
 # define MAXSYSLOGLEN		960
 #endif
 
-void log_auth			__P((int, int));
+void log_allowed		__P((int));
+void log_denial			__P((int, int));
 void log_error			__P((int flags, const char *fmt, ...))
 				    __printflike(2, 3);
 RETSIGTYPE reapchild		__P((int));

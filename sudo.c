@@ -425,7 +425,7 @@ main(argc, argv, envp)
 		validate_env_vars(sudo_user.env_vars);
 	}
 
-	log_auth(validated, 1);
+	log_allowed(validated);
 	if (sudo_mode == MODE_CHECK)
 	    rc = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
 	else if (sudo_mode == MODE_LIST)
@@ -514,8 +514,8 @@ main(argc, argv, envp)
 	    execv(_PATH_BSHELL, NewArgv);
 	} warning("unable to execute %s", safe_cmnd);
 	exit(127);
-    } else if (ISSET(validated, FLAG_NO_USER) || (validated & FLAG_NO_HOST)) {
-	log_auth(validated, 1);
+    } else if (ISSET(validated, FLAG_NO_USER) || ISSET(validated, FLAG_NO_HOST)) {
+	log_denial(validated, 1);
 	exit(1);
     } else {
 	if (def_path_info) {
@@ -526,7 +526,7 @@ main(argc, argv, envp)
 	     * is just "no foo in path" since the user can trivially set
 	     * their path to just contain a single dir.
 	     */
-	    log_auth(validated,
+	    log_denial(validated,
 		!(cmnd_status == NOT_FOUND_DOT || cmnd_status == NOT_FOUND));
 	    if (cmnd_status == NOT_FOUND)
 		warningx("%s: command not found", user_cmnd);
@@ -534,7 +534,7 @@ main(argc, argv, envp)
 		warningx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
 	} else {
 	    /* Just tell the user they are not allowed to run foo. */
-	    log_auth(validated, 1);
+	    log_denial(validated, 1);
 	}
 	exit(1);
     }
