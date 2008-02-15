@@ -1431,7 +1431,7 @@ case "$host" in
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 		;;
-    *-*-linux*)
+    *-*-linux*|*-*-k*bsd*-gnu)
 		OSDEFS="${OSDEFS} -D_GNU_SOURCE"
 		# Some Linux versions need to link with -lshadow
 		shadow_funcs="getspnam"
