@@ -34,6 +34,7 @@ AC_SUBST(SUDOERS_UID)
 AC_SUBST(SUDOERS_GID)
 AC_SUBST(DEV)
 AC_SUBST(SELINUX)
+AC_SUBST(SEMAN)
 AC_SUBST(devdir)
 AC_SUBST(mansectsu)
 AC_SUBST(mansectform)
@@ -121,6 +122,7 @@ PROGS="sudo visudo"
 DEV="#"
 LDAP="#"
 SELINUX="#"
+SEMAN='.\" '
 AUTH_OBJS=
 AUTH_REG=
 AUTH_EXCL=
@@ -1157,6 +1159,7 @@ AC_ARG_WITH(selinux, [  --with-selinux          enable SELinux support],
 		SUDO_OBJS="${SUDO_OBJS} selinux.o"
 		PROGS="${PROGS} sesh"
 		SELINUX=""
+		SEMAN=""
 		;;
     no)		;;
     *)		AC_MSG_ERROR(["--with-selinux does not take an argument."])
