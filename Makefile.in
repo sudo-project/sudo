@@ -349,7 +349,7 @@ sia.o: $(authdir)/sia.c $(AUTHDEP)
 
 sudo.man.in: $(srcdir)/sudo.pod
 	@rm -f $(srcdir)/$@
-	( cd $(srcdir); mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e 1d -e '/^=pod/q' -e 's/^/.\\" /p' sudo.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudo.pod | sed -e "s/(5)/($$mansectform)/" -e "s/(8)/($$mansectsu)/" >> $@ )
+	( cd $(srcdir); mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e 1d -e '/^=pod/q' -e 's/^/.\\" /p' sudo.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudo.pod | sed -e "s/(5)/($$mansectform)/" -e "s/(8)/($$mansectsu)/" | perl -p sudo.man.pl >> $@ )
 
 sudo.man: sudo.man.in
 	CONFIG_FILES=$@ CONFIG_HEADERS= sh ./config.status
