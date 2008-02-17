@@ -10,7 +10,8 @@ NNAAMMEE
 SSYYNNOOPPSSIISS
        ssuuddoo --hh | --KK | --kk | --LL | --VV | --vv
 
-       ssuuddoo --ll [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d] [--UU _u_s_e_r_n_a_m_e] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
+       ssuuddoo --ll[[ll]] [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d] [--UU _u_s_e_r_n_a_m_e] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] [_c_o_m_-
+       _m_a_n_d]
 
        ssuuddoo [--bbEEHHPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-] [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d]
        [--pp _p_r_o_m_p_t] [--rr _r_o_l_e] [--tt _t_y_p_e] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e]
@@ -57,11 +58,10 @@ DDEESSCCRRIIPPTTIIOONN
        SUDO_USER.
 
        ssuuddoo can log both successful and unsuccessful attempts (as well as
-       errors) to _s_y_s_l_o_g(3), a log file, or both.  By default ssuuddoo will log
 
 
 
-1.7                     February  9, 2008                       1
+1.7                     February 15, 2008                       1
 
 
 
@@ -70,6 +70,7 @@ DDEESSCCRRIIPPTTIIOONN
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       errors) to _s_y_s_l_o_g(3), a log file, or both.  By default ssuuddoo will log
        via _s_y_s_l_o_g(3) but this is changeable at configure time or via the _s_u_d_o_-
        _e_r_s file.
 
@@ -122,12 +123,11 @@ OOPPTTIIOONNSS
                    1.  Temporary copies are made of the files to be edited
                        with the owner set to the invoking user.
 
-                   2.  The editor specified by the VISUAL or EDITOR environ-
-                       ment variables is run to edit the temporary files.  If
+                   2.  The editor specified by the VISUAL or EDITOR
 
 
 
-1.7                     February  9, 2008                       2
+1.7                     February 15, 2008                       2
 
 
 
@@ -136,8 +136,9 @@ OOPPTTIIOONNSS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-                       neither VISUAL nor EDITOR are set, the program listed
-                       in the _e_d_i_t_o_r _s_u_d_o_e_r_s variable is used.
+                       environment variables is run to edit the temporary
+                       files.  If neither VISUAL nor EDITOR are set, the pro-
+                       gram listed in the _e_d_i_t_o_r _s_u_d_o_e_r_s variable is used.
 
                    3.  If they have been modified, the temporary files are
                        copied back to their original location and the tempo-
@@ -189,11 +190,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
        -k          The --kk (_k_i_l_l) option to ssuuddoo invalidates the user's times-
                    tamp by setting the time on it to the Epoch.  The next time
-                   ssuuddoo is run a password will be required.  This option does
 
 
 
-1.7                     February  9, 2008                       3
+1.7                     February 15, 2008                       3
 
 
 
@@ -202,6 +202,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+                   ssuuddoo is run a password will be required.  This option does
                    not require a password and was added to allow a user to
                    revoke ssuuddoo permissions from a .logout file.
 
@@ -210,14 +211,17 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    description for each.  This option is useful in conjunction
                    with _g_r_e_p(1).
 
-       -l [_c_o_m_m_a_n_d]
+       -l[l] [_c_o_m_m_a_n_d]
                    If no _c_o_m_m_a_n_d is specified, the --ll (_l_i_s_t) option will list
                    the allowed (and forbidden) commands for the invoking user
                    (or the user specified by the --UU option) on the current
                    host.  If a _c_o_m_m_a_n_d is specified and is permitted by _s_u_d_o_-
                    _e_r_s, the fully-qualified path to the command is displayed
-                   along with any command line arguments.  If _c_o_m_m_a_n_d is not
-                   allowed, ssuuddoo will exit with a return value of 1.
+                   along with any command line arguments.  If _c_o_m_m_a_n_d is spec-
+                   ified but not allowed, ssuuddoo will exit with a return value
+                   of 1.  If the --ll flag is specified with an ll argument (i.e.
+                   --llll), or if --ll is specified multiple times, a longer list
+                   format is used.
 
        -P          The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssuuddoo to pre-
                    serve the invoking user's group vector unaltered.  By
@@ -251,15 +255,11 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    system password prompt on systems that support PAM unless
                    the _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e flag is disabled in _s_u_d_o_e_r_s.
 
-       -r _r_o_l_e     The --rr (_r_o_l_e) option causes the new (SELinux) security con-
-                   text to have the role specified by _r_o_l_e.
-
-       -S          The --SS (_s_t_d_i_n) option causes ssuuddoo to read the password from
-                   the standard input instead of the terminal device.
+       -r _r_o_l_e     The --rr (_r_o_l_e) option causes the new (SELinux) security
 
 
 
-1.7                     February  9, 2008                       4
+1.7                     February 15, 2008                       4
 
 
 
@@ -267,6 +267,11 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+                   context to have the role specified by _r_o_l_e.
+
+       -S          The --SS (_s_t_d_i_n) option causes ssuuddoo to read the password from
+                   the standard input instead of the terminal device.
 
        -s [command]
                    The --ss (_s_h_e_l_l) option runs the shell specified by the _S_H_E_L_L
@@ -318,14 +323,9 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        matched is ALL, the user may set variables that would overwise be for-
        bidden.  See _s_u_d_o_e_r_s(4) for more information.
 
-RREETTUURRNN VVAALLUUEESS
-       Upon successful execution of a program, the return value from ssuuddoo will
-       simply be the return value of the program that was executed.
 
 
-
-
-1.7                     February  9, 2008                       5
+1.7                     February 15, 2008                       5
 
 
 
@@ -333,6 +333,10 @@ RREETTUURRNN VVAALLUUEESS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+RREETTUURRNN VVAALLUUEESS
+       Upon successful execution of a program, the return value from ssuuddoo will
+       simply be the return value of the program that was executed.
 
        Otherwise, ssuuddoo quits with an exit value of 1 if there is a configura-
        tion/permission problem or if ssuuddoo cannot execute the given command.
@@ -384,14 +388,10 @@ SSEECCUURRIITTYY NNOOTTEESS
        ssuuddoo will check the ownership of its timestamp directory (_/_v_a_r_/_r_u_n_/_s_u_d_o
        by default) and ignore the directory's contents if it is not owned by
        root or if it is writable by a user other than root.  On systems that
-       allow non-root users to give away files via _c_h_o_w_n(2), if the timestamp
-       directory is located in a directory writable by anyone (e.g., _/_t_m_p), it
-       is possible for a user to create the timestamp directory before ssuuddoo is
-       run.  However, because ssuuddoo checks the ownership and mode of the
 
 
 
-1.7                     February  9, 2008                       6
+1.7                     February 15, 2008                       6
 
 
 
@@ -400,14 +400,18 @@ SSEECCUURRIITTYY NNOOTTEESS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-       directory and its contents, the only damage that can be done is to
-       "hide" files by putting them in the timestamp dir.  This is unlikely to
-       happen since once the timestamp dir is owned by root and inaccessible
-       by any other user, the user placing files there would be unable to get
-       them back out.  To get around this issue you can use a directory that
-       is not world-writable for the timestamps (_/_v_a_r_/_a_d_m_/_s_u_d_o for instance)
-       or create _/_v_a_r_/_r_u_n_/_s_u_d_o with the appropriate owner (root) and permis-
-       sions (0700) in the system startup files.
+       allow non-root users to give away files via _c_h_o_w_n(2), if the timestamp
+       directory is located in a directory writable by anyone (e.g., _/_t_m_p), it
+       is possible for a user to create the timestamp directory before ssuuddoo is
+       run.  However, because ssuuddoo checks the ownership and mode of the direc-
+       tory and its contents, the only damage that can be done is to "hide"
+       files by putting them in the timestamp dir.  This is unlikely to happen
+       since once the timestamp dir is owned by root and inaccessible by any
+       other user, the user placing files there would be unable to get them
+       back out.  To get around this issue you can use a directory that is not
+       world-writable for the timestamps (_/_v_a_r_/_a_d_m_/_s_u_d_o for instance) or cre-
+       ate _/_v_a_r_/_r_u_n_/_s_u_d_o with the appropriate owner (root) and permissions
+       (0700) in the system startup files.
 
        ssuuddoo will not honor timestamps set far in the future.  Timestamps with
        a date greater than current_time + 2 * TIMEOUT will be ignored and sudo
@@ -450,14 +454,10 @@ EENNVVIIRROONNMMEENNTT
 
        SUDO_GID        Set to the gid of the user who invoked sudo
 
-       SUDO_PS1        If set, PS1 will be set to its value
-
-       USER            Set to the target user (root unless the --uu option is
-                       specified)
 
 
 
-1.7                     February  9, 2008                       7
+1.7                     February 15, 2008                       7
 
 
 
@@ -465,6 +465,11 @@ EENNVVIIRROONNMMEENNTT
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       SUDO_PS1        If set, PS1 will be set to its value
+
+       USER            Set to the target user (root unless the --uu option is
+                       specified)
 
        VISUAL          Default editor to use in --ee (sudoedit) mode
 
@@ -515,15 +520,10 @@ AAUUTTHHOORRSS
 CCAAVVEEAATTSS
        There is no easy way to prevent a user from gaining a root shell if
        that user is allowed to run arbitrary commands via ssuuddoo.  Also, many
-       programs (such as editors) allow the user to run commands via shell
-       escapes, thus avoiding ssuuddoo's checks.  However, on most systems it is
-       possible to prevent shell escapes with ssuuddoo's _n_o_e_x_e_c functionality.
-       See the _s_u_d_o_e_r_s(4) manual for details.
 
 
 
-
-1.7                     February  9, 2008                       8
+1.7                     February 15, 2008                       8
 
 
 
@@ -531,6 +531,11 @@ CCAAVVEEAATTSS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       programs (such as editors) allow the user to run commands via shell
+       escapes, thus avoiding ssuuddoo's checks.  However, on most systems it is
+       possible to prevent shell escapes with ssuuddoo's _n_o_e_x_e_c functionality.
+       See the _s_u_d_o_e_r_s(4) manual for details.
 
        It is not meaningful to run the cd command directly via sudo, e.g.,
 
@@ -584,11 +589,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-1.7                     February  9, 2008                       9
+1.7                     February 15, 2008                       9
 
 

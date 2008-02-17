@@ -920,9 +920,9 @@ parse_args(argc, argv)
 		    rval = MODE_LIST;
 		    if (excl && excl != 'l')
 			usage_excl(1);
-		    excl = 'l';
-		    if (NewArgv[0][2] == 'l')
+		    if (NewArgv[0][2] == 'l' || excl == 'l')
 			long_list = 1;
+		    excl = 'l';
 		    break;
 		case 'V':
 		    rval = MODE_VERSION;

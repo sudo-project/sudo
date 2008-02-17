@@ -150,19 +150,20 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "February  9, 2008" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "February 15, 2008" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 \&\fBsudo\fR \fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-L\fR | \fB\-V\fR | \fB\-v\fR
 .PP
-\&\fBsudo\fR \fB\-l\fR [\fB\-g\fR\ \fIgroupname\fR|\fI#gid\fR] [\fB\-U\fR\ \fIusername\fR]
+\&\fBsudo\fR \fB\-l[l]\fR [\fB\-g\fR\ \fIgroupname\fR|\fI#gid\fR] [\fB\-U\fR\ \fIusername\fR]
 [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR] [\fIcommand\fR]
 .PP
 \&\fBsudo\fR [\fB\-bEHPS\fR] [\fB\-a\fR\ \fIauth_type\fR] [\fB\-C\fR\ \fIfd\fR]
 [\fB\-c\fR\ \fIclass\fR|\fI\-\fR] [\fB\-g\fR\ \fIgroupname\fR|\fI#gid\fR] [\fB\-p\fR\ \fIprompt\fR]
-[\fB\-r\fR\ \fIrole\fR] [\fB\-t\fR\ \fItype\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
+[\fB\-r\fR\ \fIrole\fR] [\fB\-t\fR\ \fItype\fR]
+[\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
 [\fB\s-1VAR\s0\fR=\fIvalue\fR] [{\fB\-i\fR\ |\ \fB\-s\fR]\ [<\fIcommand\fR}]
 .PP
 \&\fBsudoedit\fR [\fB\-S\fR] [\fB\-a\fR\ \fIauth_type\fR] [\fB\-C\fR\ \fIfd\fR]
@@ -335,15 +336,17 @@ file.
 The \fB\-L\fR (\fIlist\fR defaults) option will list out the parameters
 that may be set in a \fIDefaults\fR line along with a short description
 for each.  This option is useful in conjunction with \fIgrep\fR\|(1).
-.IP "\-l [\fIcommand\fR]" 12
-.IX Item "-l [command]"
+.IP "\-l[l] [\fIcommand\fR]" 12
+.IX Item "-l[l] [command]"
 If no \fIcommand\fR is specified, the \fB\-l\fR (\fIlist\fR) option will list
 the allowed (and forbidden) commands for the invoking user (or the
 user specified by the \fB\-U\fR option) on the current host.  If a
 \&\fIcommand\fR is specified and is permitted by \fIsudoers\fR, the
 fully-qualified path to the command is displayed along with any
-command line arguments.  If \fIcommand\fR is not allowed, \fBsudo\fR will
-exit with a return value of 1.
+command line arguments.  If \fIcommand\fR is specified but not allowed,
+\&\fBsudo\fR will exit with a return value of 1.  If the \fB\-l\fR flag is
+specified with an \fBl\fR argument (i.e. \fB\-ll\fR), or if \fB\-l\fR
+is specified multiple times, a longer list format is used.
 .IP "\-P" 12
 .IX Item "-P"
 The \fB\-P\fR (\fIpreserve\fR \fIgroup vector\fR) option causes \fBsudo\fR to
