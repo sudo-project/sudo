@@ -1,16 +1,23 @@
 #!/usr/bin/perl -p
 
 BEGIN {
-    $prepend = 0;
+    %tags = ( 'a', '@BAMAN@', 'c', '@LCMAN@', 'r', '@SEMAN@', 't', '@SEMAN@');
+    $t = undef;
 }
-if (/-r.*role.*-t.*type/) {
-    # comment out SELinux-specific line in SYNOPSIS
-    s/^/\@SEMAN\@/;
-} elsif (/^\.IP(.*-[rt])?/) {
-    $prepend = defined($1);
+if (/^\.IP(.*-([acrt]))?/) {
+    $t = $1 ? $tags{$2} : undef;
+} elsif (/-a.*auth_type/) {
+    $_ = $tags{'a'} . $_;
+} elsif (/-c.*class.*\|/) {
+    $_ = $tags{'c'} . $_;
+} elsif (/-r.*role.*-t.*type/) {
+    $_ = $tags{'r'} . $_;
 }
 
-# comment out SELinux-specific lines in DESCRIPTION
-if ($prepend) {
-    s/^/\@SEMAN\@/;
+# Fix up broken pod2man formatting of F<@foo@/bar>
+s/\\fI\\f(\(C)?I\@([^\@]*)\\fI\@/\\fI\@$2\@/g;
+
+# comment out Compile-time-specific lines in DESCRIPTION
+if ($t) {
+    $_ = $t . $_;
 }
