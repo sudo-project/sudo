@@ -1,7 +1,7 @@
 
 
 
-VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
+VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
 
 
 NNAAMMEE
@@ -11,7 +11,7 @@ SSYYNNOOPPSSIISS
        vviissuuddoo [--cc] [--qq] [--ss] [--VV] [--ff _s_u_d_o_e_r_s]
 
 DDEESSCCRRIIPPTTIIOONN
-       vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous to _v_i_p_w(1m).
+       vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous to _v_i_p_w(8).
        vviissuuddoo locks the _s_u_d_o_e_r_s file against multiple simultaneous edits, pro-
        vides basic sanity checks, and checks for parse errors.  If the _s_u_d_o_e_r_s
        file is currently being edited you will receive a message to try again
@@ -61,13 +61,13 @@ OOPPTTIIOONNSS
 
 
 
-1.7                      January 21, 2008                       1
+1.7                     February 18, 2008                       1
 
 
 
 
 
-VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
+VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
 
 
                    combined with the --cc flag.
@@ -91,8 +91,9 @@ EENNVVIIRROONNMMEENNTT
        EDITOR          Used by visudo if VISUAL is not set
 
 FFIILLEESS
-       _/_e_t_c_/_s_u_d_o_e_r_s             List of who can run what
-       _/_e_t_c_/_s_u_d_o_e_r_s_._t_m_p         Lock file for visudo
+       _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
+
+       _/_e_t_c_/_s_u_d_o_e_r_s_._t_m_p        Lock file for visudo
 
 DDIIAAGGNNOOSSTTIICCSS
        sudoers file busy, try again later.
@@ -118,7 +119,7 @@ DDIIAAGGNNOOSSTTIICCSS
            --ss (strict) mode this is an error, not a warning.
 
 SSEEEE AALLSSOO
-       _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(8)
+       _v_i(1), _s_u_d_o_e_r_s(5), _s_u_d_o(8), _v_i_p_w(8)
 
 AAUUTTHHOORR
        Many people have worked on _s_u_d_o over the years; this version of vviissuuddoo
@@ -126,14 +127,13 @@ AAUUTTHHOORR
 
 
 
-
-1.7                      January 21, 2008                       2
-
+1.7                     February 18, 2008                       2
 
 
 
 
-VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
+
+VISUDO(8)              MAINTENANCE COMMANDS             VISUDO(8)
 
 
         Todd Miller
@@ -193,6 +193,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7                      January 21, 2008                       3
+1.7                     February 18, 2008                       3
 
 
