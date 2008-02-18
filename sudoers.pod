@@ -552,14 +552,14 @@ flag is I<@ignore_dot@> by default.
 
 =item ignore_local_sudoers
 
-If set via LDAP, parsing of @sysconfdir@/sudoers will be skipped.
+If set via LDAP, parsing of F<@sysconfdir@/sudoers> will be skipped.
 This is intended for Enterprises that wish to prevent the usage of local
 sudoers files so that only LDAP is used.  This thwarts the efforts of
-rogue operators who would attempt to add roles to @sysconfdir@/sudoers.
-When this option is present, @sysconfdir@/sudoers does not even need to exist. 
-Since this option tells B<sudo> how to behave when no specific LDAP entries
-have been matched, this sudoOption is only meaningful for the cn=defaults
-section.  This flag is I<off> by default.
+rogue operators who would attempt to add roles to F<@sysconfdir@/sudoers>.
+When this option is present, F<@sysconfdir@/sudoers> does not even need to
+exist. Since this option tells B<sudo> how to behave when no specific LDAP
+entries have been matched, this sudoOption is only meaningful for the
+C<cn=defaults> section.  This flag is I<off> by default.
 
 =item insults
 
