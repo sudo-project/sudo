@@ -32,14 +32,20 @@ B<sudo> B<-h> | B<-K> | B<-k> | B<-L> | B<-V> | B<-v>
 B<sudo> B<-l[l]> S<[B<-g> I<groupname>|I<#gid>]> S<[B<-U> I<username>]>
 S<[B<-u> I<username>|I<#uid>]> [I<command>]
 
-B<sudo> [B<-bEHPS>] S<[B<-a> I<auth_type>]> S<[B<-C> I<fd>]>
-S<[B<-c> I<class>|I<->]> S<[B<-g> I<groupname>|I<#gid>]> S<[B<-p> I<prompt>]>
+B<sudo> [B<-bEHPS>]
+S<[B<-a> I<auth_type>]>
+S<[B<-C> I<fd>]>
+S<[B<-c> I<class>|I<->]>
+S<[B<-g> I<groupname>|I<#gid>]> S<[B<-p> I<prompt>]>
 S<[B<-r> I<role>]> S<[B<-t> I<type>]>
 S<[B<-u> I<username>|I<#uid>]>
 S<[B<VAR>=I<value>]> [S<{B<-i> | B<-s>] [<I<command>}>]
 
-B<sudoedit> [B<-S>] S<[B<-a> I<auth_type>]> S<[B<-C> I<fd>]>
-S<[B<-c> I<class>|I<->]> S<[B<-g> I<groupname>|I<#gid>]> S<[B<-p> I<prompt>]>
+B<sudoedit> [B<-S>]
+S<[B<-a> I<auth_type>]>
+S<[B<-C> I<fd>]>
+S<[B<-c> I<class>|I<->]>
+S<[B<-g> I<groupname>|I<#gid>]> S<[B<-p> I<prompt>]>
 S<[B<-u> I<username>|I<#uid>]> file ...
 
 =head1 DESCRIPTION
