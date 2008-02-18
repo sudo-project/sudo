@@ -1,4 +1,3 @@
-=cut
 Copyright (c) 2003-2008
 	Todd C. Miller <Todd.Miller@courtesan.com>
 
