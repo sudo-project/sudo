@@ -2055,3 +2055,7 @@ Sudo 1.6.9p12 released.
      control (RBAC).  A role and (optional) type may be specified
      in sudoers or on the command line.  These are then used in the
      security context that the command is run as.
+
+648) Fixed a Kerberos 5 compilation problem with MIT Kerberos.
+
+Sudo 1.6.9p13 released.
