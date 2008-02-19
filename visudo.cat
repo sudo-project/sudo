@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.9p12                 January 14, 2008                       1
+1.6.9p13                February 19, 2008                       1
 
 
 
@@ -98,8 +98,9 @@ EENNVVIIRROONNMMEENNTT
        EDITOR          Used by visudo if VISUAL is not set
 
 FFIILLEESS
-       _/_e_t_c_/_s_u_d_o_e_r_s             List of who can run what
-       _/_e_t_c_/_s_u_d_o_e_r_s_._t_m_p         Lock file for visudo
+       _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
+
+       _/_e_t_c_/_s_u_d_o_e_r_s_._t_m_p        Lock file for visudo
 
 DDIIAAGGNNOOSSTTIICCSS
        sudoers file busy, try again later.
@@ -123,11 +124,10 @@ DDIIAAGGNNOOSSTTIICCSS
        Warning: runas_default set after old value is in use ...
            You have a _r_u_n_a_s___d_e_f_a_u_l_t Defaults setting listed in
            the _s_u_d_o_e_r_s file after its value has already been
-           used.  This means that entries prior to the
 
 
 
-1.6.9p12                 January 14, 2008                       2
+1.6.9p13                February 19, 2008                       2
 
 
 
@@ -136,6 +136,7 @@ DDIIAAGGNNOOSSTTIICCSS
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
+           used.  This means that entries prior to the
            _r_u_n_a_s___d_e_f_a_u_l_t setting will match based on the default
            value of _r_u_n_a_s___d_e_f_a_u_l_t (root) whereas entries aafftteerr
            the _r_u_n_a_s___d_e_f_a_u_l_t setting will match based on the new
@@ -192,7 +193,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-1.6.9p12                 January 14, 2008                       3
+1.6.9p13                February 19, 2008                       3
 
 

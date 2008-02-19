@@ -603,8 +603,9 @@ to make the \f(CW\*(C`cd\*(C'\fR and file redirection work.
 .Ve
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIgrep\fR\|(1), \fIsu\fR\|(1), \fIstat\fR\|(2), \fIlogin_cap\fR\|(3), \fIpasswd\fR\|(@mansectform@),
-\&\fIsudoers\fR\|(@mansectform@), \fIvisudo\fR\|(@mansectsu@)
+\&\fIgrep\fR\|(1), \fIsu\fR\|(1), \fIstat\fR\|(2),
+@LCMAN@\&\fIlogin_cap\fR\|(3),
+\&\fIpasswd\fR\|(@mansectform@), \fIsudoers\fR\|(5), \fIvisudo\fR\|(@mansectsu@)
 .SH "AUTHORS"
 .IX Header "AUTHORS"
 Many people have worked on \fBsudo\fR over the years; this
