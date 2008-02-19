@@ -515,8 +515,9 @@ to make the C<cd> and file redirection work.
 
 =head1 SEE ALSO
 
-L<grep(1)>, L<su(1)>, L<stat(2)>, L<login_cap(3)>, L<passwd(5)>,
-L<sudoers(5)>, L<visudo(8)>
+L<grep(1)>, L<su(1)>, L<stat(2)>,
+L<login_cap(3)>,
+L<passwd(5)>, L<sudoers(5)>, L<visudo(8)>
 
 =head1 AUTHORS
 

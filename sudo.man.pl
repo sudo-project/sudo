@@ -8,7 +8,7 @@ if (/^\.IP(.*-([acrt]))?/) {
     $t = $1 ? $tags{$2} : undef;
 } elsif (/-a.*auth_type/) {
     $_ = $tags{'a'} . $_;
-} elsif (/-c.*class.*\|/) {
+} elsif (/(-c.*class.*\||login_cap)/) {
     $_ = $tags{'c'} . $_;
 } elsif (/-r.*role.*-t.*type/) {
     $_ = $tags{'r'} . $_;
