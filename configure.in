@@ -34,6 +34,9 @@ AC_SUBST(SUDOERS_UID)
 AC_SUBST(SUDOERS_GID)
 AC_SUBST(DEV)
 AC_SUBST(SELINUX)
+AC_SUBST(BAMAN)
+AC_SUBST(LCMAN)
+AC_SUBST(SEMAN)
 AC_SUBST(mansectsu)
 AC_SUBST(mansectform)
 AC_SUBST(mansrcdir)
@@ -111,6 +114,9 @@ PROGS="sudo visudo"
 : ${SUDOERS_GID='0'}
 DEV="#"
 SELINUX="#"
+BAMAN='.\" '
+LCMAN='.\" '
+SEMAN='.\" '
 AUTH_OBJS=
 AUTH_REG=
 AUTH_EXCL=
@@ -1123,6 +1129,7 @@ AC_ARG_WITH(selinux, [  --with-selinux          enable SELinux support],
 		SUDO_OBJS="${SUDO_OBJS} selinux.o"
 		PROGS="${PROGS} sesh"
 		SELINUX=""
+		SEMAN=""
 		;;
     no)		;;
     *)		AC_MSG_ERROR(["--with-selinux does not take an argument."])
@@ -1648,7 +1655,7 @@ if test "$OS" != "ultrix"; then
     fi
 fi
 if test ${with_logincap-'no'} != "no"; then
-    AC_CHECK_HEADERS(login_cap.h, [
+    AC_CHECK_HEADERS(login_cap.h, [LCMAN=""
 	case "$OS" in
 	    freebsd|netbsd)	SUDO_LIBS="${SUDO_LIBS} -lutil"
 	    ;;
@@ -1883,7 +1890,7 @@ dnl
 if test ${with_bsdauth-'no'} != "no"; then
     AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H)
 	[AUTH_OBJS="$AUTH_OBJS bsdauth.o"]
-	[AUTH_EXCL=BSD_AUTH],
+	[AUTH_EXCL=BSD_AUTH; BAMAN=""],
 	[AC_MSG_ERROR([BSD authentication was specified but bsd_auth.h could not be found])])
 fi
 

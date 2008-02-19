@@ -150,18 +150,24 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "February  7, 2008" "1.6.9p12" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "February 19, 2008" "1.6.9p13" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 \&\fBsudo\fR \fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-L\fR | \fB\-l\fR | \fB\-V\fR | \fB\-v\fR
 .PP
-\&\fBsudo\fR [\fB\-bEHPS\fR] [\fB\-a\fR\ \fIauth_type\fR]
-[\fB\-c\fR\ \fIclass\fR|\fI\-\fR] [\fB\-p\fR\ \fIprompt\fR] [\fB\-r\fR\ \fIrole\fR] [\fB\-t\fR\ \fItype\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
+\&\fBsudo\fR [\fB\-bEHPS\fR]
+@BAMAN@[\fB\-a\fR\ \fIauth_type\fR]
+@LCMAN@[\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
+[\fB\-p\fR\ \fIprompt\fR]
+@SEMAN@[\fB\-r\fR\ \fIrole\fR] [\fB\-t\fR\ \fItype\fR]
+[\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
 [\fB\s-1VAR\s0\fR=\fIvalue\fR] {\fB\-i\fR\ |\ \fB\-s\fR\ |\ \fIcommand\fR}
 .PP
-\&\fBsudoedit\fR [\fB\-S\fR] [\fB\-a\fR\ \fIauth_type\fR] [\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
+\&\fBsudoedit\fR [\fB\-S\fR]
+@BAMAN@[\fB\-a\fR\ \fIauth_type\fR]
+@LCMAN@[\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
 [\fB\-p\fR\ \fIprompt\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
 file ...
 .SH "DESCRIPTION"
@@ -213,30 +219,30 @@ or via the \fIsudoers\fR file.
 .SH "OPTIONS"
 .IX Header "OPTIONS"
 \&\fBsudo\fR accepts the following command line options:
-.IP "\-a" 4
-.IX Item "-a"
-The \fB\-a\fR (\fIauthentication type\fR) option causes \fBsudo\fR to use the
-specified authentication type when validating the user, as allowed
-by \fI/etc/login.conf\fR.  The system administrator may specify a list
-of sudo-specific authentication methods by adding an \*(L"auth\-sudo\*(R"
-entry in \fI/etc/login.conf\fR.  This option is only available on systems
-that support \s-1BSD\s0 authentication.
+@BAMAN@.IP "\-a" 4
+@BAMAN@.IX Item "-a"
+@BAMAN@The \fB\-a\fR (\fIauthentication type\fR) option causes \fBsudo\fR to use the
+@BAMAN@specified authentication type when validating the user, as allowed
+@BAMAN@by \fI/etc/login.conf\fR.  The system administrator may specify a list
+@BAMAN@of sudo-specific authentication methods by adding an \*(L"auth\-sudo\*(R"
+@BAMAN@entry in \fI/etc/login.conf\fR.  This option is only available on systems
+@BAMAN@that support \s-1BSD\s0 authentication.
 .IP "\-b" 4
 .IX Item "-b"
 The \fB\-b\fR (\fIbackground\fR) option tells \fBsudo\fR to run the given
 command in the background.  Note that if you use the \fB\-b\fR
 option you cannot use shell job control to manipulate the process.
-.IP "\-c" 4
-.IX Item "-c"
-The \fB\-c\fR (\fIclass\fR) option causes \fBsudo\fR to run the specified command
-with resources limited by the specified login class.  The \fIclass\fR
-argument can be either a class name as defined in \f(CW\*(C`/etc/login.conf\*(C'\fR,
-or a single '\-' character.  Specifying a \fIclass\fR of \f(CW\*(C`\-\*(C'\fR indicates
-that the command should be run restricted by the default login
-capabilities for the user the command is run as.  If the \fIclass\fR
-argument specifies an existing user class, the command must be run
-as root, or the \fBsudo\fR command must be run from a shell that is already
-root.  This option is only available on systems with \s-1BSD\s0 login classes.
+@LCMAN@.IP "\-c" 4
+@LCMAN@.IX Item "-c"
+@LCMAN@The \fB\-c\fR (\fIclass\fR) option causes \fBsudo\fR to run the specified command
+@LCMAN@with resources limited by the specified login class.  The \fIclass\fR
+@LCMAN@argument can be either a class name as defined in \f(CW\*(C`/etc/login.conf\*(C'\fR,
+@LCMAN@or a single '\-' character.  Specifying a \fIclass\fR of \f(CW\*(C`\-\*(C'\fR indicates
+@LCMAN@that the command should be run restricted by the default login
+@LCMAN@capabilities for the user the command is run as.  If the \fIclass\fR
+@LCMAN@argument specifies an existing user class, the command must be run
+@LCMAN@as root, or the \fBsudo\fR command must be run from a shell that is already
+@LCMAN@root.  This option is only available on systems with \s-1BSD\s0 login classes.
 .IP "\-E" 4
 .IX Item "-E"
 The \fB\-E\fR (\fIpreserve\fR \fIenvironment\fR) option will override the
@@ -360,10 +366,10 @@ two consecutive \f(CW\*(C`%\*(C'\fR characters are collapsed into a single \f(CW
 .RE
 .RS 4
 .RE
-.IP "\-r" 4
-.IX Item "-r"
-The \fB\-r\fR (\fIrole\fR) option causes the new (SELinux) security context to 
-have the role specified by \fIrole\fR.
+@SEMAN@.IP "\-r" 4
+@SEMAN@.IX Item "-r"
+@SEMAN@The \fB\-r\fR (\fIrole\fR) option causes the new (SELinux) security context to 
+@SEMAN@have the role specified by \fIrole\fR.
 .IP "\-S" 4
 .IX Item "-S"
 The \fB\-S\fR (\fIstdin\fR) option causes \fBsudo\fR to read the password from
@@ -373,11 +379,11 @@ the standard input instead of the terminal device.
 The \fB\-s\fR (\fIshell\fR) option runs the shell specified by the \fI\s-1SHELL\s0\fR
 environment variable if it is set or the shell as specified
 in \fIpasswd\fR\|(@mansectform@).
-.IP "\-t" 4
-.IX Item "-t"
-The \fB\-t\fR (\fItype\fR) option causes the new (SELinux) security context to 
-have the type specified by \fItype\fR.  If no type is specified, the default
-type is derived from the specified role.
+@SEMAN@.IP "\-t" 4
+@SEMAN@.IX Item "-t"
+@SEMAN@The \fB\-t\fR (\fItype\fR) option causes the new (SELinux) security context to 
+@SEMAN@have the type specified by \fItype\fR.  If no type is specified, the default
+@SEMAN@type is derived from the specified role.
 .IP "\-u" 4
 .IX Item "-u"
 The \fB\-u\fR (\fIuser\fR) option causes \fBsudo\fR to run the specified
@@ -553,14 +559,12 @@ Set to the target user (root unless the \fB\-u\fR option is specified)
 Default editor to use in \fB\-e\fR (sudoedit) mode
 .SH "FILES"
 .IX Header "FILES"
-.ie n .IP "\fI@sysconfdir@/sudoers\fR\*(C`		\*(C'List of who can run what" 4
-.el .IP "\fI@sysconfdir@/sudoers\fR\f(CW\*(C`		\*(C'\fRList of who can run what" 4
-.IX Item "@sysconfdir@/sudoers		List of who can run what"
-.PD 0
-.ie n .IP "\fI@timedir@\fR\*(C`		\*(C'Directory containing timestamps" 4
-.el .IP "\fI@timedir@\fR\f(CW\*(C`		\*(C'\fRDirectory containing timestamps" 4
-.IX Item "@timedir@		Directory containing timestamps"
-.PD
+.IP "\fI@sysconfdir@/sudoers\fR" 24
+.IX Item "@sysconfdir@/sudoers"
+List of who can run what
+.IP "\fI@timedir@\fR" 24
+.IX Item "@timedir@"
+Directory containing timestamps
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Note: the following examples assume suitable \fIsudoers\fR\|(@mansectform@) entries.

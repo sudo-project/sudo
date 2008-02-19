@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "February  7, 2008" "1.6.9p12" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "February 19, 2008" "1.6.9p13" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -667,14 +667,14 @@ should be considered read-only (it will be fixed in a future version
 of \fBsudo\fR).
 .IP "ignore_local_sudoers" 16
 .IX Item "ignore_local_sudoers"
-If set via \s-1LDAP\s0, parsing of \f(CW@sysconfdir\fR@/sudoers will be skipped.
+If set via \s-1LDAP\s0, parsing of \fI@sysconfdir@/sudoers\fR will be skipped.
 This is intended for Enterprises that wish to prevent the usage of local
 sudoers files so that only \s-1LDAP\s0 is used.  This thwarts the efforts of
-rogue operators who would attempt to add roles to \f(CW@sysconfdir\fR@/sudoers.
-When this option is present, \f(CW@sysconfdir\fR@/sudoers does not even need to exist. 
-Since this option tells \fBsudo\fR how to behave when no specific \s-1LDAP\s0 entries
-have been matched, this sudoOption is only meaningful for the cn=defaults
-section.  This flag is \fIoff\fR by default.
+rogue operators who would attempt to add roles to \fI@sysconfdir@/sudoers\fR.
+When this option is present, \fI@sysconfdir@/sudoers\fR does not even need to
+exist. Since this option tells \fBsudo\fR how to behave when no specific \s-1LDAP\s0
+entries have been matched, this sudoOption is only meaningful for the
+\&\f(CW\*(C`cn=defaults\*(C'\fR section.  This flag is \fIoff\fR by default.
 .IP "insults" 16
 .IX Item "insults"
 If set, \fBsudo\fR will insult users when they enter an incorrect
@@ -828,11 +828,11 @@ If set, users must authenticate on a per-tty basis.  Normally,
 the user running it.  With this flag enabled, \fBsudo\fR will use a
 file named for the tty the user is logged in on in that directory.
 This flag is \fI@tty_tickets@\fR by default.
-.IP "use_loginclass" 16
-.IX Item "use_loginclass"
-If set, \fBsudo\fR will apply the defaults specified for the target user's
-login class if one exists.  Only available if \fBsudo\fR is configured with
-the \-\-with\-logincap option.  This flag is \fIoff\fR by default.
+@LCMAN@.IP "use_loginclass" 16
+@LCMAN@.IX Item "use_loginclass"
+@LCMAN@If set, \fBsudo\fR will apply the defaults specified for the target user's
+@LCMAN@login class if one exists.  Only available if \fBsudo\fR is configured with
+@LCMAN@the \-\-with\-logincap option.  This flag is \fIoff\fR by default.
 .PP
 \&\fBIntegers\fR:
 .IP "passwd_tries" 16
@@ -926,12 +926,12 @@ two consecutive \f(CW\*(C`%\*(C'\fR characters are collapsed into a single \f(CW
 .Sp
 The default value is \f(CW\*(C`@passprompt@\*(C'\fR.
 .RE
-.IP "role" 16
-.IX Item "role"
-The default SELinux role to use when constructing a new security
-context to run the command.  The default role may be overridden on
-a per-command basis in \fIsudoers\fR or via command line options.
-This option is only available whe \fBsudo\fR is built with SELinux support.
+@SEMAN@.IP "role" 16
+@SEMAN@.IX Item "role"
+@SEMAN@The default SELinux role to use when constructing a new security
+@SEMAN@context to run the command.  The default role may be overridden on
+@SEMAN@a per-command basis in \fIsudoers\fR or via command line options.
+@SEMAN@This option is only available whe \fBsudo\fR is built with SELinux support.
 .IP "runas_default" 16
 .IX Item "runas_default"
 The default user to run commands as if the \fB\-u\fR flag is not specified
@@ -954,12 +954,12 @@ The default is \fI@timedir@\fR.
 .IX Item "timestampowner"
 The owner of the timestamp directory and the timestamps stored therein.
 The default is \f(CW\*(C`root\*(C'\fR.
-.IP "type" 16
-.IX Item "type"
-The default SELinux type to use when constructing a new security
-context to run the command.  The default type may be overridden on
-a per-command basis in \fIsudoers\fR or via command line options.
-This option is only available whe \fBsudo\fR is built with SELinux support.
+@SEMAN@.IP "type" 16
+@SEMAN@.IX Item "type"
+@SEMAN@The default SELinux type to use when constructing a new security
+@SEMAN@context to run the command.  The default type may be overridden on
+@SEMAN@a per-command basis in \fIsudoers\fR or via command line options.
+@SEMAN@This option is only available whe \fBsudo\fR is built with SELinux support.
 .PP
 \&\fBStrings that can be used in a boolean context\fR:
 .IP "exempt_group" 12
@@ -1112,17 +1112,15 @@ supported: \fBalert\fR, \fBcrit\fR, \fBdebug\fR, \fBemerg\fR, \fBerr\fR, \fBinfo
 \&\fBnotice\fR, and \fBwarning\fR.
 .SH "FILES"
 .IX Header "FILES"
-.ie n .IP "\fI@sysconfdir@/sudoers\fR\*(C`		\*(C' List of who can run what" 4
-.el .IP "\fI@sysconfdir@/sudoers\fR\f(CW\*(C`		\*(C'\fR List of who can run what" 4
-.IX Item "@sysconfdir@/sudoers		 List of who can run what"
-.PD 0
-.ie n .IP "\fI/etc/group\fR\*(C`		\*(C' Local groups file" 4
-.el .IP "\fI/etc/group\fR\f(CW\*(C`		\*(C'\fR Local groups file" 4
-.IX Item "/etc/group		 Local groups file"
-.ie n .IP "\fI/etc/netgroup\fR\*(C`		\*(C' List of network groups" 4
-.el .IP "\fI/etc/netgroup\fR\f(CW\*(C`		\*(C'\fR List of network groups" 4
-.IX Item "/etc/netgroup		 List of network groups"
-.PD
+.IP "\fI@sysconfdir@/sudoers\fR" 24
+.IX Item "@sysconfdir@/sudoers"
+List of who can run what
+.IP "\fI/etc/group\fR" 24
+.IX Item "/etc/group"
+Local groups file
+.IP "\fI/etc/netgroup\fR" 24
+.IX Item "/etc/netgroup"
+List of network groups
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Since the \fIsudoers\fR file is parsed in a single pass, order is
