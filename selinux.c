@@ -74,7 +74,7 @@ restore_tty_label(int fd, const char *ttyn, security_context_t tty_context,
     if (!new_tty_context)
 	    goto skip_relabel;
 
-    /* Verify that the tty still has the context set by newrole. */
+    /* Verify that the tty still has the context set by sudo. */
     if ((rc = fgetfilecon(fd, &chk_tty_context)) < 0) {
 	    warning("unable to fgetfilecon %s", ttyn);
 	    goto skip_relabel;
