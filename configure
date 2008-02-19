@@ -2131,7 +2131,11 @@ shadow_funcs=
 shadow_libs=
 shadow_libs_optional=
 
-test "$mandir" = '${prefix}/man' && mandir='$(prefix)/man'
+if test X"$prefix" = X"NONE"; then
+    test "$mandir" = '${datarootdir}/man' && mandir='$(prefix)/man'
+else
+    test "$mandir" = '${datarootdir}/man' && mandir='$(datarootdir)/man'
+fi
 test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
 test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
 test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
@@ -6121,7 +6125,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6124 "configure"' > conftest.$ac_ext
+  echo '#line 6128 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7665,11 +7669,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7668: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7672: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7672: \$? = $ac_status" >&5
+   echo "$as_me:7676: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7955,11 +7959,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7958: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7962: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7962: \$? = $ac_status" >&5
+   echo "$as_me:7966: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8059,11 +8063,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8062: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8066: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8066: \$? = $ac_status" >&5
+   echo "$as_me:8070: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10404,7 +10408,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10407 "configure"
+#line 10411 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10504,7 +10508,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10507 "configure"
+#line 10511 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

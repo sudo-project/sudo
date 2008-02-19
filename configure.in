@@ -135,7 +135,11 @@ shadow_libs_optional=
 dnl
 dnl Override default configure dirs...
 dnl
-test "$mandir" = '${prefix}/man' && mandir='$(prefix)/man'
+if test X"$prefix" = X"NONE"; then
+    test "$mandir" = '${datarootdir}/man' && mandir='$(prefix)/man'
+else
+    test "$mandir" = '${datarootdir}/man' && mandir='$(datarootdir)/man'
+fi
 test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
 test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
 test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
