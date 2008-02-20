@@ -147,8 +147,6 @@ relabel_tty(const char *ttyn, security_context_t new_context,
 	    if (enforcing)
 		goto error;
 	}
-	freecon(new_tty_con);
-	new_tty_con = NULL;
     }
 
     *tty_context = tty_con;
