@@ -104,20 +104,15 @@ skip_relabel:
  */
 static int
 relabel_tty(const char *ttyn, security_context_t new_context,
-    security_context_t * tty_context, security_context_t * new_tty_context)
+    security_context_t * tty_context, security_context_t * new_tty_context,
+    int enforcing)
 {
     int fd;
-    int enforcing = security_getenforce();
     security_context_t tty_con = NULL;
     security_context_t new_tty_con = NULL;
 
     if (!ttyn)
 	return(0);
-
-    if (enforcing < 0) {
-	warnx("unable to determine enforcing mode.");
-	return(-1);
-    }
 
     /* Re-open TTY descriptor */
     fd = open(ttyn, O_RDWR | O_NONBLOCK);
@@ -239,7 +234,7 @@ selinux_exec(char *role, char *type, char **argv, char **envp, int login_shell)
     security_context_t tty_context = NULL;
     security_context_t new_tty_context = NULL;
     pid_t childPid;
-    int ttyfd;
+    int enforcing, ttyfd;
 
     /* Must have a tty. */
     if (user_ttypath == NULL || *user_ttypath == '\0')
@@ -248,6 +243,11 @@ selinux_exec(char *role, char *type, char **argv, char **envp, int login_shell)
     /* Store the caller's SID in old_context. */
     if (getprevcon(&old_context))
 	err(EXIT_FAILURE, "failed to get old_context");
+
+    enforcing = security_getenforce();
+    if (enforcing < 0)
+	err(EXIT_FAILURE, "unable to determine enforcing mode.");
+
     
 #ifdef DEBUG
     warnx("your old context was %s", old_context);
@@ -257,7 +257,7 @@ selinux_exec(char *role, char *type, char **argv, char **envp, int login_shell)
 	exit(EXIT_FAILURE);
     
     ttyfd = relabel_tty(user_ttypath, new_context, &tty_context,
-	&new_tty_context);
+	&new_tty_context, enforcing);
     if (ttyfd < 0)
 	err(EXIT_FAILURE, "unable to setup tty context for %s", new_context);
 
@@ -314,7 +314,14 @@ selinux_exec(char *role, char *type, char **argv, char **envp, int login_shell)
 
     if (setexeccon(new_context)) {
 	warn("unable to set exec context to %s", new_context);
-	goto error;
+	if (enforcing)
+	    goto error;
+    }
+
+    if (setkeycreatecon(new_context)) {
+	warn("unable to set key creation context to %s", new_context);
+	if (enforcing)
+	    goto error;
     }
 
 #ifdef WITH_AUDIT
