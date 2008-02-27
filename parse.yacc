@@ -1383,6 +1383,7 @@ expand_match_list()
     }
 
     cm_list[cm_list_len].runas = cm_list[cm_list_len].cmnd = NULL;
+    cm_list[cm_list_len].type = cm_list[cm_list_len].role = NULL;
     cm_list[cm_list_len].nopasswd = FALSE;
     cm_list[cm_list_len].noexecve = FALSE;
     cm_list[cm_list_len].setenv = FALSE;

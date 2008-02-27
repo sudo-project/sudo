@@ -1069,6 +1069,7 @@ expand_match_list()
     }
 
     cm_list[cm_list_len].runas = cm_list[cm_list_len].cmnd = NULL;
+    cm_list[cm_list_len].type = cm_list[cm_list_len].role = NULL;
     cm_list[cm_list_len].nopasswd = FALSE;
     cm_list[cm_list_len].noexecve = FALSE;
     cm_list[cm_list_len].setenv = FALSE;
@@ -1101,7 +1102,7 @@ init_parser()
     if (printmatches == TRUE)
 	expand_match_list();
 }
-#line 1053 "sudo.tab.c"
+#line 1054 "sudo.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -2196,7 +2197,7 @@ case 101:
 			    yyval.BOOLEAN = TRUE;
 			}
 break;
-#line 2148 "sudo.tab.c"
+#line 2149 "sudo.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
