@@ -1494,8 +1494,10 @@ Optional Features:
   --enable-log-host       Log the hostname in the log file
   --enable-noargs-shell   If sudo is given no arguments run a shell
   --enable-shell-sets-home
-                          set $HOME to target user in shell mode
+                          Set $HOME to target user in shell mode
   --disable-path-info     Print 'command not allowed' not 'command not found'
+  --enable-gss-krb5-ccache-name
+                          Use GSS-API to set the Kerberos V cred cache name
   --enable-static[=PKGS]  build static libraries [default=no]
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -4007,6 +4009,14 @@ esac
 fi
 
 
+# Check whether --enable-gss_krb5_ccache_name was given.
+if test "${enable_gss_krb5_ccache_name+set}" = set; then
+  enableval=$enable_gss_krb5_ccache_name; check_gss_krb5_ccache_name=$enableval
+else
+  check_gss_krb5_ccache_name=no
+fi
+
+
 # Extract the first word of "egrep", so it can be a program name with args.
 set dummy egrep; ac_word=$2
 { echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -6170,7 +6180,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6173 "configure"' > conftest.$ac_ext
+  echo '#line 6183 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7714,11 +7724,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7717: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7727: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7721: \$? = $ac_status" >&5
+   echo "$as_me:7731: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8004,11 +8014,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8007: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8017: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8011: \$? = $ac_status" >&5
+   echo "$as_me:8021: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8108,11 +8118,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8111: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8121: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8115: \$? = $ac_status" >&5
+   echo "$as_me:8125: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10453,7 +10463,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10456 "configure"
+#line 10466 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10553,7 +10563,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10556 "configure"
+#line 10566 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -22393,7 +22403,8 @@ fi
 done
 
 
-    { echo "$as_me:$LINENO: checking for gss_krb5_ccache_name in -lgssapi" >&5
+    if test X"$check_gss_krb5_ccache_name" = X"yes"; then
+	{ echo "$as_me:$LINENO: checking for gss_krb5_ccache_name in -lgssapi" >&5
 echo $ECHO_N "checking for gss_krb5_ccache_name in -lgssapi... $ECHO_C" >&6; }
 if test "${ac_cv_lib_gssapi_gss_krb5_ccache_name+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -22459,7 +22470,7 @@ if test $ac_cv_lib_gssapi_gss_krb5_ccache_name = yes; then
 #define HAVE_GSS_KRB5_CCACHE_NAME 1
 _ACEOF
 
-	LDAP_LIBS="${LDAP_LIBS} -lgssapi"
+	    LDAP_LIBS="${LDAP_LIBS} -lgssapi"
 else
   { echo "$as_me:$LINENO: checking for gss_krb5_ccache_name in -lgssapi_krb5" >&5
 echo $ECHO_N "checking for gss_krb5_ccache_name in -lgssapi_krb5... $ECHO_C" >&6; }
@@ -22527,19 +22538,19 @@ if test $ac_cv_lib_gssapi_krb5_gss_krb5_ccache_name = yes; then
 #define HAVE_GSS_KRB5_CCACHE_NAME 1
 _ACEOF
 
-	    LDAP_LIBS="${LDAP_LIBS} -lgssapi_krb5"
+		LDAP_LIBS="${LDAP_LIBS} -lgssapi_krb5"
 fi
 
 
 fi
 
 
-    # gssapi headers may be separate or part of Kerberos V
-    found=no
-    O_CPPFLAGS="$CPPFLAGS"
-    for dir in "" "kerberosV" "krb5" "kerberos5" "kerberosv5"; do
-	test X"$dir" != X"" && CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
-	cat >conftest.$ac_ext <<_ACEOF
+	# gssapi headers may be separate or part of Kerberos V
+	found=no
+	O_CPPFLAGS="$CPPFLAGS"
+	for dir in "" "kerberosV" "krb5" "kerberos5" "kerberosv5"; do
+	    test X"$dir" != X"" && CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
+	    cat >conftest.$ac_ext <<_ACEOF
 #include <gssapi/gssapi.h>
 _ACEOF
 if { (ac_try="$ac_cpp conftest.$ac_ext"
@@ -22594,8 +22605,8 @@ rm -f conftest.err conftest.$ac_ext
 fi
 
 rm -f conftest.err conftest.$ac_ext
-    done
-    if test X"$found" != X"no"; then
+	done
+	if test X"$found" != X"no"; then
 
 for ac_header in $found
 do
@@ -22736,7 +22747,7 @@ fi
 
 done
 
-	if test X"$found" = X"gssapi/gssapi.h"; then
+	    if test X"$found" = X"gssapi/gssapi.h"; then
 
 for ac_header in gssapi/gssapi_krb5.h
 do
@@ -22877,11 +22888,12 @@ fi
 
 done
 
-	fi
-    else
-	CPPFLAGS="$O_CPPFLAGS"
-	{ echo "$as_me:$LINENO: WARNING: Unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS" >&5
+	    fi
+	else
+	    CPPFLAGS="$O_CPPFLAGS"
+	    { echo "$as_me:$LINENO: WARNING: Unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS" >&5
 echo "$as_me: WARNING: Unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS" >&2;}
+	fi
     fi
 
     SUDO_LIBS="${SUDO_LIBS}${LDAP_LIBS}"

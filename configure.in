@@ -1126,7 +1126,7 @@ AC_ARG_ENABLE(noargs-shell,
 AC_MSG_CHECKING(whether to set \$HOME to target user in shell mode)
 AC_ARG_ENABLE(shell-sets-home,
 [  --enable-shell-sets-home
-                          set $HOME to target user in shell mode],
+                          Set $HOME to target user in shell mode],
 [ case "$enableval" in
     yes)	AC_MSG_RESULT(yes)
 		AC_DEFINE(SHELL_SETS_HOME)
@@ -1169,6 +1169,12 @@ AC_ARG_WITH(selinux, [  --with-selinux          enable SELinux support],
     *)		AC_MSG_ERROR(["--with-selinux does not take an argument."])
 		;;
 esac])
+
+dnl
+dnl gss_krb5_ccache_name() may not work on Heimdal so we don't use it by default
+dnl
+AC_ARG_ENABLE(gss_krb5_ccache_name, [  --enable-gss-krb5-ccache-name
+                          Use GSS-API to set the Kerberos V cred cache name], [check_gss_krb5_ccache_name=$enableval], [check_gss_krb5_ccache_name=no])
 
 dnl
 dnl If we don't have egrep we can't do anything...
@@ -2348,29 +2354,31 @@ if test ${with_ldap-'no'} != "no"; then
     AC_CHECK_HEADERS([sasl/sasl.h])
     AC_CHECK_HEADERS([ldap_ssl.h] [mps/ldap_ssl.h], [break], [], [#include <ldap.h>])
 
-    AC_CHECK_LIB(gssapi, gss_krb5_ccache_name,
-	AC_DEFINE(HAVE_GSS_KRB5_CCACHE_NAME)
-	[LDAP_LIBS="${LDAP_LIBS} -lgssapi"],
-	AC_CHECK_LIB(gssapi_krb5, gss_krb5_ccache_name,
+    if test X"$check_gss_krb5_ccache_name" = X"yes"; then
+	AC_CHECK_LIB(gssapi, gss_krb5_ccache_name,
 	    AC_DEFINE(HAVE_GSS_KRB5_CCACHE_NAME)
-	    [LDAP_LIBS="${LDAP_LIBS} -lgssapi_krb5"])
-    )
+	    [LDAP_LIBS="${LDAP_LIBS} -lgssapi"],
+	    AC_CHECK_LIB(gssapi_krb5, gss_krb5_ccache_name,
+		AC_DEFINE(HAVE_GSS_KRB5_CCACHE_NAME)
+		[LDAP_LIBS="${LDAP_LIBS} -lgssapi_krb5"])
+	)
 
-    # gssapi headers may be separate or part of Kerberos V
-    found=no
-    O_CPPFLAGS="$CPPFLAGS"
-    for dir in "" "kerberosV" "krb5" "kerberos5" "kerberosv5"; do
-	test X"$dir" != X"" && CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
-	AC_PREPROC_IFELSE([#include <gssapi/gssapi.h>], [found="gssapi/gssapi.h"; break], [AC_PREPROC_IFELSE([#include <gssapi.h>], [found="gssapi.h"; break])])
-    done
-    if test X"$found" != X"no"; then
-	AC_CHECK_HEADERS([$found])
-	if test X"$found" = X"gssapi/gssapi.h"; then
-	    AC_CHECK_HEADERS([gssapi/gssapi_krb5.h])
+	# gssapi headers may be separate or part of Kerberos V
+	found=no
+	O_CPPFLAGS="$CPPFLAGS"
+	for dir in "" "kerberosV" "krb5" "kerberos5" "kerberosv5"; do
+	    test X"$dir" != X"" && CPPFLAGS="$O_CPPFLAGS -I/usr/include/${dir}"
+	    AC_PREPROC_IFELSE([#include <gssapi/gssapi.h>], [found="gssapi/gssapi.h"; break], [AC_PREPROC_IFELSE([#include <gssapi.h>], [found="gssapi.h"; break])])
+	done
+	if test X"$found" != X"no"; then
+	    AC_CHECK_HEADERS([$found])
+	    if test X"$found" = X"gssapi/gssapi.h"; then
+		AC_CHECK_HEADERS([gssapi/gssapi_krb5.h])
+	    fi
+	else
+	    CPPFLAGS="$O_CPPFLAGS"
+	    AC_MSG_WARN([Unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS])
 	fi
-    else
-	CPPFLAGS="$O_CPPFLAGS"
-	AC_MSG_WARN([Unable to locate gssapi.h, you will have to edit the Makefile and add -I/path/to/gssapi/includes to CPPFLAGS])
     fi
 
     SUDO_LIBS="${SUDO_LIBS}${LDAP_LIBS}"

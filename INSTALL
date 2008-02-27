@@ -539,6 +539,13 @@ The following options are also configurable at runtime:
 	"chaining" sudo commands to get a root shell by doing something
 	like "sudo sudo /bin/sh".
 
+  --enable-gss-krb5-ccache-name
+        Use the gss_krb5_ccache_name() function to set the Kerberos
+        V credential cache file name.  By default, sudo will use
+        the KRB5CCNAME environment variable to set this.  While
+        gss_krb5_ccache_name() provides a better API to do this it
+        is not supported by all Kerberos V and SASL combinations.
+
   --enable-log-host
 	Log the hostname in the log file.
 
