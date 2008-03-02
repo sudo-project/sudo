@@ -204,7 +204,7 @@ env_keep
 	"Environment variables to preserve:"
 role
 	T_STR
-	"SELinux role to use in the new security context"
+	"SELinux role to use in the new security context: %s"
 type
 	T_STR
-	"SELinux type to use in the new security context"
+	"SELinux type to use in the new security context: %s"
