@@ -29,10 +29,10 @@ sudo, sudoedit - execute a command as another user
 
 B<sudo> B<-h> | B<-K> | B<-k> | B<-L> | B<-V> | B<-v>
 
-B<sudo> B<-l[l]> S<[B<-g> I<groupname>|I<#gid>]> S<[B<-U> I<username>]>
+B<sudo> B<-l[l]> [B<-AS>] S<[B<-g> I<groupname>|I<#gid>]> S<[B<-U> I<username>]>
 S<[B<-u> I<username>|I<#uid>]> [I<command>]
 
-B<sudo> [B<-bEHPS>]
+B<sudo> [B<-AbEHPS>]
 S<[B<-a> I<auth_type>]>
 S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]>
@@ -41,7 +41,7 @@ S<[B<-r> I<role>]> S<[B<-t> I<type>]>
 S<[B<-u> I<username>|I<#uid>]>
 S<[B<VAR>=I<value>]> [S<{B<-i> | B<-s>] [<I<command>}>]
 
-B<sudoedit> [B<-S>]
+B<sudoedit> [B<-AS>]
 S<[B<-a> I<auth_type>]>
 S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]>
@@ -100,6 +100,16 @@ or via the I<sudoers> file.
 B<sudo> accepts the following command line options:
 
 =over 12
+
+=item -A
+
+Normally, if B<sudo> requires a password, it will read it from the
+current terminal.  If the B<-A> (I<askpass>) option is specified,
+a helper program is executed to read the user's password and output
+the password to the standard output.  If the C<SUDO_ASKPASS>
+environment variable is set, it specifies the path to the helper
+program.  Otherwise, the value specified by the I<askpass> option
+in L<sudoers(5)> is used.
 
 =item -a I<type>
 
@@ -482,6 +492,11 @@ Set to a sane value if the I<secure_path> sudoers option is set.
 =item C<SHELL>
 
 Used to determine shell to run with C<-s> option
+
+=item C<SUDO_ASKPASS>
+
+Specifies the path to a helper program used to read the password
+if no terminal is available or if the C<-A> option is specified.
 
 =item C<SUDO_PROMPT>
 
