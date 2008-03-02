@@ -128,6 +128,8 @@
 #define I_ROLE                  63
 #define def_type                (sudo_defs_table[64].sd_un.str)
 #define I_TYPE                  64
+#define def_askpass             (sudo_defs_table[65].sd_un.str)
+#define I_ASKPASS               65
 
 enum def_tupple {
 	never,

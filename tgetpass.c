@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1996, 1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1996, 1998-2005, 2007-2008
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -122,6 +123,7 @@ static volatile sig_atomic_t signo;
 
 static void handler __P((int));
 static char *getln __P((int, char *, size_t));
+static char *sudo_askpass(const char *);
 
 /*
  * Like getpass(3) but with timeout and echo flags.
@@ -140,6 +142,11 @@ tgetpass(prompt, timeout, flags)
     int input, output, save_errno;
 
     (void) fflush(stdout);
+
+    /* If using a helper program to get the password, run it instead. */
+    if (ISSET(flags, TGP_ASKPASS) && user_askpass)
+	return(sudo_askpass(prompt));
+
 restart:
     signo = 0;
     pass = NULL;
@@ -229,6 +236,49 @@ restart:
 
     if (save_errno)
 	errno = save_errno;
+    return(pass);
+}
+
+/*
+ * Fork a child and exec sudo-askpass to get the password from the user.
+ */
+static char *
+sudo_askpass(prompt)
+    const char *prompt;
+{
+    static char buf[SUDO_PASS_MAX + 1], *pass;
+    sigaction_t sa, saved_sa_pipe;
+    int pfd[2];
+    pid_t pid;
+
+    if (pipe(pfd) == -1)
+	error(1, "unable to create pipe");
+
+    if ((pid = fork()) == -1)
+	error(1, "unable to fork");
+
+    if (pid == 0) {
+	/* child, point stdout to output side of the pipe and exec askpass */
+	(void) dup2(pfd[1], STDOUT_FILENO);
+	set_perms(PERM_FULL_USER);
+	closefrom(STDERR_FILENO + 1);
+	execl(user_askpass, user_askpass, prompt, (char *)NULL);
+	warning("unable to run %s", user_askpass);
+	_exit(255);
+    }
+
+    /* Ignore SIGPIPE in case child exits prematurely */
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = SIG_IGN;
+    (void) sigaction(SIGPIPE, &sa, &saved_sa_pipe);
+
+    /* Get response from child (askpass) and restore SIGPIPE handler */
+    (void) close(pfd[1]);
+    pass = getln(pfd[0], buf, sizeof(buf));
+    (void) close(pfd[0]);
+    (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
+
     return(pass);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2005, 2007
+ * Copyright (c) 1993-1996, 1998-2005, 2007-2008
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -54,6 +54,8 @@ struct sudo_user {
     char *cmnd_safe;
     char *class_name;
     char *krb5_ccname;
+    char *display;
+    char *askpass;
     int   ngroups;
     GETGROUPS_T *groups;
     struct list_member *env_vars;
@@ -147,6 +149,8 @@ struct sudo_user {
 #define user_host		(sudo_user.host)
 #define user_shost		(sudo_user.shost)
 #define user_ccname		(sudo_user.krb5_ccname)
+#define user_display		(sudo_user.display)
+#define user_askpass		(sudo_user.askpass)
 #define safe_cmnd		(sudo_user.cmnd_safe)
 #define login_class		(sudo_user.class_name)
 #define runas_pw		(sudo_user._runas_pw)
@@ -174,6 +178,7 @@ struct sudo_user {
  */
 #define TGP_ECHO	0x01		/* leave echo on when reading passwd */
 #define TGP_STDIN	0x02		/* read from stdin, not /dev/tty */
+#define TGP_ASKPASS	0x03		/* read from askpass helper program */
 
 struct lbuf;
 struct passwd;

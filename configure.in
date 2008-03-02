@@ -1010,6 +1010,17 @@ AC_ARG_WITH(stow, [  --with-stow             properly handle GNU stow packaging]
 		;;
 esac], AC_MSG_RESULT(no))
 
+AC_MSG_CHECKING(path to sudo-askpass)
+AC_ARG_WITH(askpass, [  --with-askpass=PATH     Fully qualified pathname of sudo-askpass],
+[case $with_askpass in
+    yes)	with_askpass="$libexecdir/sudo-askpass"
+		;;
+    no)		;;
+    *)		;;
+esac], [with_askpass="$libexecdir/sudo-askpass"])
+AC_MSG_RESULT($with_askpass)
+SUDO_DEFINE_UNQUOTED(_PATH_SUDO_ASKPASS, "$with_askpass")
+
 dnl
 dnl Options for --enable
 dnl

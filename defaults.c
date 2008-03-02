@@ -423,6 +423,9 @@ init_defaults()
 #ifdef ENV_EDITOR
     def_env_editor = TRUE;
 #endif
+#ifdef _PATH_SUDO_ASKPASS
+    def_askpass = _PATH_SUDO_ASKPASS;
+#endif
     def_env_reset = TRUE;
     def_set_logname = TRUE;
     def_closefrom = STDERR_FILENO + 1;

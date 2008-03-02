@@ -283,6 +283,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"SELinux type to use in the new security context: %s",
 	NULL,
     }, {
+	"askpass", T_STR|T_PATH,
+	"Path to the askpass helper program: %s",
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

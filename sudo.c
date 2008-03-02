@@ -384,6 +384,15 @@ main(argc, argv, envp)
 	    (void) close(fd);
     }
 
+    /* Use askpass value from sudoers unless specified by the user. */
+    if (def_askpass && !user_askpass)
+	user_askpass = def_askpass;
+
+    /* If no tty is present but DISPLAY is set, use askpass if we have it. */
+    if (user_askpass && !ISSET(tgetpass_flags, TGP_STDIN) &&
+	user_ttypath == NULL && user_display != NULL && *user_display != '\0')
+	SET(tgetpass_flags, TGP_ASKPASS);
+
     /* User may have overriden environment resetting via the -E flag. */
     if (ISSET(sudo_mode, MODE_PRESERVE_ENV) && def_setenv)
 	def_env_reset = FALSE;
@@ -599,7 +608,12 @@ init_vars(sudo_mode, envp)
 	user_tty = "unknown";
 
     for (ep = envp; *ep; ep++) {
+	/* XXX - don't fill in if empty string */
 	switch (**ep) {
+	    case 'D':
+		if (strncmp("DISPLAY=", *ep, 8) == 0)
+		    user_display = *ep + 8;
+		break;
 	    case 'K':
 		if (strncmp("KRB5CCNAME=", *ep, 11) == 0)
 		    user_ccname = *ep + 11;
@@ -615,8 +629,9 @@ init_vars(sudo_mode, envp)
 		    user_prompt = *ep + 12;
 		else if (strncmp("SUDO_USER=", *ep, 10) == 0)
 		    prev_user = *ep + 10;
+		else if (strncmp("SUDO_ASKPASS=", *ep, 13) == 0)
+		    user_askpass = *ep + 13;
 		break;
-
 	    }
     }
 
@@ -810,6 +825,9 @@ parse_args(argc, argv)
 	    }
 
 	    switch (NewArgv[0][1]) {
+		case 'A':
+		    SET(tgetpass_flags, TGP_ASKPASS);
+		    break;
 		case 'p':
 		    /* Must have an associated prompt. */
 		    if (NewArgv[1] == NULL)

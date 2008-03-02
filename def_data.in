@@ -208,3 +208,6 @@ role
 type
 	T_STR
 	"SELinux type to use in the new security context: %s"
+askpass
+	T_STR|T_PATH
+	"Path to the askpass helper program: %s"

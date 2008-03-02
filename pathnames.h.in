@@ -84,6 +84,10 @@
 #undef _PATH_SUDO_NOEXEC
 #endif /* _PATH_SUDO_NOEXEC */
 
+#ifndef _PATH_SUDO_ASKPASS
+#undef _PATH_SUDO_ASKPASS
+#endif /* _PATH_SUDO_ASKPASS */
+
 #ifndef _PATH_VI
 #undef _PATH_VI
 #endif /* _PATH_VI */

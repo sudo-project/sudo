@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 1993-1996,1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996,1998-2005, 2007-2008
+ *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -98,7 +99,8 @@ check_user(validated)
     status = timestamp_status(timestampdir, timestampfile, user_name,
 	TS_MAKE_DIRS);
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
-	lecture(status);
+	if (!ISSET(tgetpass_flags, TGP_ASKPASS))
+	    lecture(status);
 
 	/* Expand any escapes in the prompt. */
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
