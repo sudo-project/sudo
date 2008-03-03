@@ -528,6 +528,13 @@ The following options are also configurable at runtime:
 	option.  visudo will then only use the VISUAL or EDITOR variables
 	if they match a value specified via --with-editor.
 
+  --with-askpass=PATH
+        Set PATH as the "askpass" program to use when no tty is
+        available.  Typically, this is a graphical password prompter,
+        similar to the one used by ssh.  The program must take a
+        prompt as an argument and print the received password to
+        the standard output.
+
   --disable-authentication
 	By default, sudo requires the user to authenticate via a
 	password or similar means.  This options causes sudo to
