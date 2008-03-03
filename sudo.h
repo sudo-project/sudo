@@ -178,7 +178,7 @@ struct sudo_user {
  */
 #define TGP_ECHO	0x01		/* leave echo on when reading passwd */
 #define TGP_STDIN	0x02		/* read from stdin, not /dev/tty */
-#define TGP_ASKPASS	0x03		/* read from askpass helper program */
+#define TGP_ASKPASS	0x04		/* read from askpass helper program */
 
 struct lbuf;
 struct passwd;
