@@ -1,7 +1,7 @@
 
 
 
-SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 NNAAMMEE
@@ -67,7 +67,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
        manner as a global Defaults line in _/_e_t_c_/_s_u_d_o_e_r_s.  In the following
@@ -133,7 +133,7 @@ SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
 
 
 
-SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
            dn: cn=%wheel,ou=SUDOers,dc=example,dc=com
@@ -199,7 +199,7 @@ SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
 
 
 
-SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
            # LDAP equivalent of puddles
@@ -251,7 +251,7 @@ SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
        Typically, this file is shared amongst different LDAP-aware clients.
        As such, most of the settings are not ssuuddoo-specific.  Note that ssuuddoo
        parses _/_e_t_c_/_l_d_a_p_._c_o_n_f itself and may support options that differ from
-       those described in the _l_d_a_p_._c_o_n_f(5) manual.
+       those described in the _l_d_a_p_._c_o_n_f(4) manual.
 
        Also note that on systems using the OpenLDAP libraries, default values
        specified in _/_e_t_c_/_o_p_e_n_l_d_a_p_/_l_d_a_p_._c_o_n_f or the user's _._l_d_a_p_r_c files are
@@ -265,7 +265,7 @@ SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
 
 
 
-SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
        Only those options explicitly listed in _/_e_t_c_/_l_d_a_p_._c_o_n_f that are sup-
@@ -331,7 +331,7 @@ SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
 
 
 
-SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
        BBIINNDDDDNN DN
@@ -397,7 +397,7 @@ SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
 
 
 
-SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
            OpenLDAP libraries.
@@ -463,7 +463,7 @@ SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
 
 
 
-SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
        SSAASSLL__SSEECCPPRROOPPSS none/properties
@@ -529,7 +529,7 @@ EEXXAAMMPPLLEESS
 
 
 
-SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
          # Either specify one or more URIs or one or more host:port pairs.
@@ -595,7 +595,7 @@ SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
 
 
 
-SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
          #tls_cacertfile /etc/certs/trusted_signers.pem
@@ -661,7 +661,7 @@ SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
 
 
 
-SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
         attributetype ( 1.3.6.1.4.1.15953.9.1.2
@@ -715,7 +715,7 @@ SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
 
 
 SSEEEE AALLSSOO
-       _l_d_a_p_._c_o_n_f(5), _s_u_d_o_e_r_s(5)
+       _l_d_a_p_._c_o_n_f(4), _s_u_d_o_e_r_s(5)
 
 
 
@@ -727,7 +727,7 @@ SSEEEE AALLSSOO
 
 
 
-SUDOERS.LDAP(5)        MAINTENANCE COMMANDS       SUDOERS.LDAP(5)
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 CCAAVVEEAATTSS

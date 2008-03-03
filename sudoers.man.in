@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "February 18, 2008" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "March  2, 2008" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -1026,6 +1026,16 @@ The default is \f(CW\*(C`root\*(C'\fR.
 @SEMAN@This option is only available whe \fBsudo\fR is built with SELinux support.
 .PP
 \&\fBStrings that can be used in a boolean context\fR:
+.IP "askpass" 12
+.IX Item "askpass"
+The \fIaskpass\fR option specifies the fully-qualilfy path to a helper
+program used to read the user's password when no terminal is
+available.  This may be the case when \fBsudo\fR is executed from a
+graphical (as opposed to text\-based) application.  The program
+specified by \fIaskpass\fR should display the argument passed to it
+as the prompt and write the user's password to the standard output.
+The value of \fIaskpass\fR may be overridden by the \f(CW\*(C`SUDO_ASKPASS\*(C'\fR
+environment variable.
 .IP "exempt_group" 12
 .IX Item "exempt_group"
 Users in this group are exempt from password and \s-1PATH\s0 requirements.

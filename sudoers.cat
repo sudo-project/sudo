@@ -1,7 +1,7 @@
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 NNAAMMEE
@@ -61,13 +61,13 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7                     February 18, 2008                       1
+1.7                       March  2, 2008                        1
 
 
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
         Host_Alias ::= NAME '=' Host_List
@@ -127,13 +127,13 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
 
-1.7                     February 18, 2008                       2
+1.7                       March  2, 2008                        2
 
 
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
         Host ::= '!'* hostname |
@@ -193,13 +193,13 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
 
-1.7                     February 18, 2008                       3
+1.7                       March  2, 2008                        3
 
 
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
        users on any host, all users on a specific host, a specific user, a
@@ -259,13 +259,13 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
 
-1.7                     February 18, 2008                       4
+1.7                       March  2, 2008                        4
 
 
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
        Let's break that down into its constituent parts:
@@ -325,13 +325,13 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
 
-1.7                     February 18, 2008                       5
+1.7                       March  2, 2008                        5
 
 
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
        Cmnd_Spec_List, inherit the tag unless it is overridden by the opposite
@@ -391,13 +391,13 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
 
-1.7                     February 18, 2008                       6
+1.7                       March  2, 2008                        6
 
 
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
        WWiillddccaarrddss
@@ -457,13 +457,13 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
 
-1.7                     February 18, 2008                       7
+1.7                       March  2, 2008                        7
 
 
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
        OOtthheerr ssppeecciiaall cchhaarraacctteerrss aanndd rreesseerrvveedd wwoorrddss
@@ -523,13 +523,13 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.7                     February 18, 2008                       8
+1.7                       March  2, 2008                        8
 
 
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
        env_editor      If set, vviissuuddoo will use the value of the EDITOR or
@@ -589,13 +589,13 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
 
-1.7                     February 18, 2008                       9
+1.7                       March  2, 2008                        9
 
 
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
        log_host        If set, the hostname will be logged in the (non-syslog)
@@ -655,13 +655,13 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
 
-1.7                     February 18, 2008                      10
+1.7                       March  2, 2008                       10
 
 
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
                        normally only be used if the passwod prompt provided by
@@ -721,13 +721,13 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
 
-1.7                     February 18, 2008                      11
+1.7                       March  2, 2008                       11
 
 
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
        setenv          Allow the user to disable the _e_n_v___r_e_s_e_t option from the
@@ -787,13 +787,13 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
 
-1.7                     February 18, 2008                      12
+1.7                       March  2, 2008                       12
 
 
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
                        password before ssuuddoo logs the failure and exits.  The
@@ -853,13 +853,13 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
 
 
-1.7                     February 18, 2008                      13
+1.7                       March  2, 2008                       13
 
 
 
 
 
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
                        environment variable.  The following percent (`%')
@@ -905,6 +905,29 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
        SSttrriinnggss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
 
+       askpass     The _a_s_k_p_a_s_s option specifies the fully-qualilfy path to a
+                   helper program used to read the user's password when no
+                   terminal is available.  This may be the case when ssuuddoo is
+                   executed from a graphical (as opposed to text-based) appli-
+                   cation.  The program specified by _a_s_k_p_a_s_s should display
+                   the argument passed to it as the prompt and write the
+                   user's password to the standard output.  The value of
+                   _a_s_k_p_a_s_s may be overridden by the SUDO_ASKPASS environment
+                   variable.
+
+
+
+
+
+1.7                       March  2, 2008                       14
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        exempt_group
                    Users in this group are exempt from password and PATH
                    requirements.  This is not set by default.
@@ -916,17 +939,6 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
                    always  Always lecture the user.
 
                    never   Never lecture the user.
-
-
-
-1.7                     February 18, 2008                      14
-
-
-
-
-
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
-
 
                    once    Only lecture the user the first time they run ssuuddoo.
 
@@ -970,6 +982,18 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
        mailerpath  Path to mail program used to send warning mail.  Defaults
                    to the path to sendmail found at configure time.
 
+
+
+
+1.7                       March  2, 2008                       15
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        mailto      Address to send warning and error mail to.  The address
                    should be enclosed in double quotes (") to protect against
                    ssuuddoo interpreting the @ sign.  Defaults to root.
@@ -981,18 +1005,6 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
                    path."  Users in the group specified by the _e_x_e_m_p_t___g_r_o_u_p
                    option are not affected by _s_e_c_u_r_e___p_a_t_h.  This is not set by
                    default.
-
-
-
-
-1.7                     February 18, 2008                      15
-
-
-
-
-
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
-
 
        syslog      Syslog facility if syslog is being used for logging (negate
                    to disable syslog logging).  Defaults to local2.
@@ -1036,6 +1048,18 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
                        environment variables to check is displayed when ssuuddoo
                        is run by root with the _-_V option.
 
+
+
+
+1.7                       March  2, 2008                       16
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        env_delete      Environment variables to be removed from the user's
                        environment.  The argument may be a double-quoted,
                        space-separated list or a single value without dou-
@@ -1047,18 +1071,6 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
                        systems will remove potentially dangerous variables
                        from the environment of any setuid process (such as
                        ssuuddoo).
-
-
-
-
-1.7                     February 18, 2008                      16
-
-
-
-
-
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
-
 
        env_keep        Environment variables to be preserved in the user's
                        environment when the _e_n_v___r_e_s_e_t option is in effect.
@@ -1098,6 +1110,22 @@ EEXXAAMMPPLLEESS
         Runas_Alias    OP = root, operator
         Runas_Alias    DB = oracle, sybase
 
+
+
+
+
+
+
+
+1.7                       March  2, 2008                       17
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
         # Host alias specification
         Host_Alias     SPARC = bigtime, eclipse, moet, anchor :\
                        SGI = grolsch, dandelion, black :\
@@ -1107,24 +1135,6 @@ EEXXAAMMPPLLEESS
         Host_Alias     CSNETS = 128.138.243.0, 128.138.204.0/24, 128.138.242.0
         Host_Alias     SERVERS = master, mail, www, ns
         Host_Alias     CDROM = orion, perseus, hercules
-
-
-
-
-
-
-
-
-
-
-1.7                     February 18, 2008                      17
-
-
-
-
-
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
-
 
         # Cmnd alias specification
         Cmnd_Alias     DUMPS = /usr/bin/mt, /usr/sbin/dump, /usr/sbin/rdump,\
@@ -1170,6 +1180,18 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
         FULLTIMERS     ALL = NOPASSWD: ALL
 
+
+
+
+1.7                       March  2, 2008                       18
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        Full time sysadmins (mmiilllleerrtt, mmiikkeeff, and ddoowwddyy) may run any command on
        any host without authenticating themselves.
 
@@ -1180,17 +1202,6 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
        lacks the NOPASSWD tag).
 
         jack           CSNETS = ALL
-
-
-
-1.7                     February 18, 2008                      18
-
-
-
-
-
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
-
 
        The user jjaacckk may run any command on the machines in the _C_S_N_E_T_S alias
        (the networks 128.138.243.0, 128.138.204.0, and 128.138.242.0).  Of
@@ -1235,6 +1246,18 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
        Users in the sseeccrreettaarriieess netgroup need to help manage the printers as
        well as add and remove users, so they are allowed to run those commands
+
+
+
+1.7                       March  2, 2008                       19
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        on all machines.
 
         fred           ALL = (DB) NOPASSWD: ALL
@@ -1246,17 +1269,6 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
 
        On the _A_L_P_H_A machines, user jjoohhnn may su to anyone except root but he is
        not allowed to give _s_u(1) any flags.
-
-
-
-1.7                     February 18, 2008                      19
-
-
-
-
-
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
-
 
         jen            ALL, !SERVERS = ALL
 
@@ -1301,6 +1313,17 @@ SSEECCUURRIITTYY NNOOTTEESS
 
            bill        ALL = ALL, !SU, !SHELLS
 
+
+
+1.7                       March  2, 2008                       20
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        Doesn't really prevent bbiillll from running the commands listed in _S_U or
        _S_H_E_L_L_S since he can simply copy those commands to a different name, or
        use a shell escape from an editor or other program.  Therefore, these
@@ -1312,18 +1335,6 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
        pleases, including run other programs.  This can be a security issue
        since it is not uncommon for a program to allow shell escapes, which
        lets a user bypass ssuuddoo's access control and logging.  Common programs
-
-
-
-1.7                     February 18, 2008                      20
-
-
-
-
-
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
-
-
        that permit shell escapes include shells (obviously), editors, pagina-
        tors, mail and terminal programs.
 
@@ -1367,6 +1378,18 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
                  (usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader) to see
                  if LD_PRELOAD is supported.
 
+
+
+
+1.7                       March  2, 2008                       21
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                  To enable _n_o_e_x_e_c for a command, use the NOEXEC tag as docu-
                  mented in the User Specification section above.  Here is that
                  example again:
@@ -1379,17 +1402,6 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
                  unsure whether or not your system is capable of supporting
                  _n_o_e_x_e_c you can always just try it out and see if it works.
 
-
-
-1.7                     February 18, 2008                      21
-
-
-
-
-
-SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
-
-
        Note that restricting shell escapes is not a panacea.  Programs running
        as root are still capable of many potentially hazardous operations
        (such as changing or overwriting files) that could lead to unintended
@@ -1397,7 +1409,7 @@ SUDOERS(5)             MAINTENANCE COMMANDS            SUDOERS(5)
        approach is to give the user permission to run ssuuddooeeddiitt.
 
 SSEEEE AALLSSOO
-       _r_s_h(1), _s_u(1), _f_n_m_a_t_c_h(3), _s_u_d_o(8), _v_i_s_u_d_o(8)
+       _r_s_h(1), _s_u(1), _f_n_m_a_t_c_h(3), _s_u_d_o(1m), _v_i_s_u_d_o(8)
 
 CCAAVVEEAATTSS
        The _s_u_d_o_e_r_s file should aallwwaayyss be edited by the vviissuuddoo command which
@@ -1435,18 +1447,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-1.7                     February 18, 2008                      22
+1.7                       March  2, 2008                       22
 
 
