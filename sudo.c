@@ -388,10 +388,17 @@ main(argc, argv, envp)
     if (def_askpass && !user_askpass)
 	user_askpass = def_askpass;
 
-    /* If no tty is present but DISPLAY is set, use askpass if we have it. */
-    if (user_askpass && !ISSET(tgetpass_flags, TGP_STDIN) &&
-	user_ttypath == NULL && user_display != NULL && *user_display != '\0')
-	SET(tgetpass_flags, TGP_ASKPASS);
+    /* If user specified -A, make sure there is an askpass helper defined. */
+    if (ISSET(tgetpass_flags, TGP_ASKPASS)) {
+	if (user_askpass == NULL)
+	    log_error(NO_MAIL,
+		"no askpass program specified, try setting SUDO_ASKPASS");
+    } else {
+	/* If no tty but DISPLAY is set, use askpass if we have it. */
+	if (user_askpass && !ISSET(tgetpass_flags, TGP_STDIN) &&
+	    !user_ttypath && user_display && *user_display != '\0')
+	    SET(tgetpass_flags, TGP_ASKPASS);
+    }
 
     /* User may have overriden environment resetting via the -E flag. */
     if (ISSET(sudo_mode, MODE_PRESERVE_ENV) && def_setenv)
@@ -1053,6 +1060,10 @@ args_done:
 	if (excl != '\0')
 	    warningx("the `-U' and `-%c' options may not be used together",
 		excl);
+	usage(1);
+    }
+    if (ISSET(tgetpass_flags, TGP_STDIN) && ISSET(tgetpass_flags, TGP_ASKPASS)) {
+	warningx("the `-A' and `-S' options may not be used together");
 	usage(1);
     }
     if ((NewArgc == 0 && (rval & MODE_EDIT)) ||
