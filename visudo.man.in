@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "February 19, 2008" "1.6.9p13" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "February 19, 2008" "1.6.9p14" "MAINTENANCE COMMANDS"
 .SH "NAME"
 visudo \- edit the sudoers file
 .SH "SYNOPSIS"

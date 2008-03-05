@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "February 19, 2008" "1.6.9p13" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "February 19, 2008" "1.6.9p14" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
