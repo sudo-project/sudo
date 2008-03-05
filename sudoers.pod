@@ -1008,6 +1008,13 @@ Flags to use when invoking mailer. Defaults to B<-t>.
 Path to mail program used to send warning mail.
 Defaults to the path to sendmail found at configure time.
 
+=item mailfrom
+
+Address to use for the "from" address when sending warning and error
+mail.  The address should be enclosed in double quotes (C<">) to
+protect against B<sudo> interpreting the C<@> sign.  Defaults to
+the name of the user running B<sudo>.
+
 =item mailto
 
 Address to send warning and error mail to.  The address should

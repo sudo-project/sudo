@@ -187,6 +187,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Address to send mail to: %s",
 	NULL,
     }, {
+	"mailfrom", T_STR|T_BOOL,
+	"Address to send mail from: %s",
+	NULL,
+    }, {
 	"mailsub", T_STR,
 	"Subject line for mail messages: %s",
 	NULL,

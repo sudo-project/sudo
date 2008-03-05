@@ -150,7 +150,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "March  2, 2008" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "March  5, 2008" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers \- list of which users may execute what
 .SH "DESCRIPTION"
@@ -1104,6 +1104,12 @@ Flags to use when invoking mailer. Defaults to \fB\-t\fR.
 .IX Item "mailerpath"
 Path to mail program used to send warning mail.
 Defaults to the path to sendmail found at configure time.
+.IP "mailfrom" 12
+.IX Item "mailfrom"
+Address to use for the \*(L"from\*(R" address when sending warning and error
+mail.  The address should be enclosed in double quotes (\f(CW\*(C`"\*(C'\fR) to
+protect against \fBsudo\fR interpreting the \f(CW\*(C`@\*(C'\fR sign.  Defaults to
+the name of the user running \fBsudo\fR.
 .IP "mailto" 12
 .IX Item "mailto"
 Address to send warning and error mail to.  The address should

@@ -134,6 +134,9 @@ mailerflags
 mailto
 	T_STR|T_BOOL
 	"Address to send mail to: %s"
+mailfrom
+	T_STR|T_BOOL
+	"Address to send mail from: %s"
 mailsub
 	T_STR
 	"Subject line for mail messages: %s"
