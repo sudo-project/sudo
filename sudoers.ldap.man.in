@@ -146,7 +146,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "February 18, 2008" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "March  5, 2008" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers.ldap \- sudo LDAP configuration
 .SH "DESCRIPTION"
@@ -760,10 +760,9 @@ schema directory (e.g. \fI/etc/openldap/schema\fR), add the proper
 \&          sudoRunAsGroup $ sudoOption $ description )
 \&    )
 .Ve
-.Sh "\s-1XXX\s0 nsswitch.conf example?"
-.IX Subsection "XXX nsswitch.conf example?"
-.Sh "\s-1XXX\s0 more exhaustive sudoers ldif example?"
-.IX Subsection "XXX more exhaustive sudoers ldif example?"
+.PP
+Add nsswitch.conf example?
+Add more exhaustive sudoers ldif example?
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIldap.conf\fR\|(@mansectform@), \fIsudoers\fR\|(5)

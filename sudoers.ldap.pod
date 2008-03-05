@@ -657,9 +657,10 @@ C<include> line in C<slapd.conf> and restart B<slapd>.
 	  sudoRunAsGroup $ sudoOption $ description )
     )
 
-=head2 XXX nsswitch.conf example?
+=for comment
 
-=head2 XXX more exhaustive sudoers ldif example?
+Add nsswitch.conf example?
+Add more exhaustive sudoers ldif example?
 
 =head1 SEE ALSO
 
