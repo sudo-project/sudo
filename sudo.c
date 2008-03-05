@@ -273,25 +273,21 @@ main(argc, argv, envp)
     validated = sudo_ldap_check(pwflag);
 
     /* Skip reading /etc/sudoers if LDAP told us to */
-    if (def_ignore_local_sudoers); /* skips */
-    else if (ISSET(validated, VALIDATE_OK) && !printmatches); /* skips */
-    else if (ISSET(validated, VALIDATE_OK) && printmatches)
-    {
+    if (!def_ignore_local_sudoers) {
 	check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
 
-	/* User is found in LDAP and we want a list of all sudo commands the
-	 * user can do, so consult sudoers but throw away result.
-	 */
-	sudoers_lookup(pwflag);
+	/* If user was found in LDAP, check sudoers for Defaults and -l mode */
+	if (ISSET(validated, VALIDATE_OK))
+	    (void) sudoers_lookup(pwflag);
+	else
+	    validated =  sudoers_lookup(pwflag);
     }
-    else
+#else
+    check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
+
+    /* Validate the user but don't search for pseudo-commands. */
+    validated = sudoers_lookup(pwflag);
 #endif
-    {
-	check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
-
-	/* Validate the user but don't search for pseudo-commands. */
-	validated = sudoers_lookup(pwflag);
-    }
     if (safe_cmnd == NULL)
 	safe_cmnd = estrdup(user_cmnd);
 
