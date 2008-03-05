@@ -2059,3 +2059,17 @@ Sudo 1.6.9p12 released.
 648) Fixed a Kerberos 5 compilation problem with MIT Kerberos.
 
 Sudo 1.6.9p13 released.
+
+649) Fixed an invalid assumption in the PAM conversation function
+     introduced in version 1.6.9p9.  The conversation function may
+     be called for non-password reading purposes as well.
+
+650) Fixed freeing an uninitialized pointer in -l mode, introduced in
+     version 1.6.9p13.
+
+651) Check /etc/sudoers after LDAP even if the user was found in LDAP.
+     This allows Defaults options in /etc/sudoers to take effect.
+
+652) Add missing checks for enforcing mode in SELinux RBAC mode.
+
+Sudo 1.6.9p14 released.
