@@ -274,13 +274,14 @@ main(argc, argv, envp)
 
     /* Skip reading /etc/sudoers if LDAP told us to */
     if (!def_ignore_local_sudoers) {
+	int v;
+
 	check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
 
-	/* If user was found in LDAP, check sudoers for Defaults and -l mode */
-	if (ISSET(validated, VALIDATE_OK))
-	    (void) sudoers_lookup(pwflag);
-	else
-	    validated =  sudoers_lookup(pwflag);
+	/* Local sudoers file overrides LDAP if we have a match. */
+	v = sudoers_lookup(pwflag);
+	if (ISSET(v, VALIDATE_OK))
+	    validated = v;
     }
 #else
     check_sudoers();	/* check mode/owner on _PATH_SUDOERS */
