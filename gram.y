@@ -629,19 +629,26 @@ new_member(name, type)
  * runas users the entries apply to (specified by the type).
  */
 static void
-add_defaults(type, binding, defs)
+add_defaults(type, bmem, defs)
     int type;
-    struct member *binding;
+    struct member *bmem;
     struct defaults *defs;
 {
     struct defaults *d;
+    struct member_list binding;
+
+    /*
+     * We can only call list2tq once on bmem as it will zero
+     * out the prev pointer when it consumes bmem.
+     */
+    list2tq(&binding, bmem);
 
     /*
      * Set type and binding (who it applies to) for new entries.
      */
     for (d = defs; d != NULL; d = d->next) {
 	d->type = type;
-	list2tq(&d->binding, binding);
+	d->binding = binding;
     }
     tq_append(&defaults, defs);
 }
