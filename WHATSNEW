@@ -45,7 +45,12 @@ What's new in Sudo 1.7?
    when LDAP support is compiled in.  This differs from sudo 1.6
    where LDAP was always consulted first.
 
- * Support for /etc/environment.  If sudo is run with the -i flag,
-   the contents of /etc/environment are used to populate the new
-   environment that is passed to the command being run.
+ * Support for /etc/environment on AIX and Linux.  If sudo is run
+   with the -i flag, the contents of /etc/environment are used to
+   populate the new environment that is passed to the command being
+   run.
 
+ * If no terminal is available or if the new -A flag is specified,
+   sudo will use a helper program to read the password if one is
+   configured.  Typically, this is a graphical password prompter
+   such as ssh-askpass.
