@@ -82,6 +82,12 @@ list2tq(vh, vl)
     struct list_proto *l = (struct list_proto *)vl;
 
     if (l != NULL) {
+#ifdef DEBUG
+	if (l->prev == NULL) {
+	    warningx("list2tq called with non-semicircular list");
+	    abort();
+	}
+#endif
 	h->first = l;
 	h->last = l->prev;	/* l->prev points to the last member of l */
 	l->prev = NULL;		/* zero last ptr now that we have a head */
