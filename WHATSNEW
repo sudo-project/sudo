@@ -54,3 +54,7 @@ What's new in Sudo 1.7?
    sudo will use a helper program to read the password if one is
    configured.  Typically, this is a graphical password prompter
    such as ssh-askpass.
+
+ * A new Defaults option, "mailfrom" that sets the value of the
+   "From:" field in the warning/error mail.  If unspecified, the
+   login name of the invoking user is used.
