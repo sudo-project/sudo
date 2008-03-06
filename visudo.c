@@ -909,8 +909,7 @@ check_aliases(strict)
 	tq_foreach_fwd(&us->users, m) {
 	    if (m->type == USERALIAS) {
 		if (find_alias(m->name, m->type) == NULL) {
-		    fprintf(stderr,
-			"%s: User_Alias `%s' referenced but not defined\n",
+		    warningx("%s: User_Alias `%s' referenced but not defined",
 			strict ? "Error" : "Warning", m->name);
 		    error++;
 		}
@@ -920,8 +919,7 @@ check_aliases(strict)
 	    tq_foreach_fwd(&priv->hostlist, m) {
 		if (m->type == HOSTALIAS) {
 		    if (find_alias(m->name, m->type) == NULL) {
-			fprintf(stderr,
-			    "%s: Host_Alias `%s' referenced but not defined\n",
+			warningx("%s: Host_Alias `%s' referenced but not defined",
 			    strict ? "Error" : "Warning", m->name);
 			error++;
 		    }
@@ -931,8 +929,7 @@ check_aliases(strict)
 		tq_foreach_fwd(&cs->runasuserlist, m) {
 		    if (m->type == RUNASALIAS) {
 			if (find_alias(m->name, m->type) == NULL) {
-			    fprintf(stderr,
-				"%s: Runas_Alias `%s' referenced but not defined\n",
+			    warningx("%s: Runas_Alias `%s' referenced but not defined",
 				strict ? "Error" : "Warning", m->name);
 			    error++;
 			}
@@ -940,8 +937,7 @@ check_aliases(strict)
 		}
 		if ((m = cs->cmnd)->type == CMNDALIAS) {
 		    if (find_alias(m->name, m->type) == NULL) {
-			fprintf(stderr,
-			    "%s: Cmnd_Alias `%s' referenced but not defined\n",
+			warningx("%s: Cmnd_Alias `%s' referenced but not defined",
 			    strict ? "Error" : "Warning", m->name);
 			error++;
 		    }
@@ -986,7 +982,7 @@ print_unused(v1, v2)
     struct alias *a = (struct alias *)v1;
     char *prefix = (char *)v2;
 
-    fprintf(stderr, "%s: unused %s_Alias %s\n", prefix,
+    warningx("%s: unused %s_Alias %s", prefix,
 	a->type == HOSTALIAS ? "Host" : a->type == CMNDALIAS ? "Cmnd" :
 	a->type == USERALIAS ? "User" : a->type == RUNASALIAS ? "Runas" :
 	"Unknown", a->name);
