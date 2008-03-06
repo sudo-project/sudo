@@ -1,3 +1,35 @@
+2008-03-06 14:43  millert
+
+	* acsite.m4, configure, ltmain.sh: update to libtool-1.5.26
+
+2008-03-06 14:32  millert
+
+	* config.guess, config.sub: update from libtool-1.5.26 distribution
+
+2008-03-06 13:18  millert
+
+	* aix.c, sudo.h: attempt to fix compilation errors on AIX
+
+2008-03-06 13:08  millert
+
+	* Makefile.in: fix typo in last commit
+
+2008-03-06 13:07  millert
+
+	* Makefile.in: Add WHATSNEW file to the distribution
+
+2008-03-06 12:43  millert
+
+	* visudo.c: use warningx instead of fprintf(stderr, ...)
+
+2008-03-06 12:31  millert
+
+	* list.c: add DEBUG to list2tq
+
+2008-03-06 12:28  millert
+
+	* ChangeLog, TODO: sync
+
 2008-03-06 12:21  millert
 
 	* WHATSNEW: mention mailfrom
