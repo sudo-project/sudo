@@ -40,8 +40,8 @@ __unused static const char rcsid[] = "$Sudo$";
 
 struct aix_limit {
     int resource;
-    const char *soft;
-    const char *hard;
+    char *soft;
+    char *hard;
 };
 
 static struct aix_limit aix_limits[] = {
@@ -56,7 +56,7 @@ static struct aix_limit aix_limits[] = {
 
 void
 aix_setlimits(user)
-    const char *user;
+    char *user;
 {
     struct rlimit rlim;
     int i, n;
@@ -65,7 +65,7 @@ aix_setlimits(user)
      * For each resource limit, get the soft/hard values for the user
      * and set those values via setrlimit().  Must be run as euid 0.
      */
-    for (n = 0; n < sizeof(aix_limits) / sizeof(aix_limits[0])) {
+    for (n = 0; n < sizeof(aix_limits) / sizeof(aix_limits[0]); n++) {
 	if (getuserattr(user, aix_limits[n].soft, &i, SEC_INT) != 0)
 	    continue;
 	rlim.rlim_cur = i;

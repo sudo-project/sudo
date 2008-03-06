@@ -314,7 +314,7 @@ struct group *sudo_getgrgid __P((gid_t));
 void selinux_exec __P((char *, char *, char **, int));
 #endif
 #ifdef HAVE_GETUSERATTR
-void aix_setlimits __P((const char *));
+void aix_setlimits __P((char *));
 #endif
 YY_DECL;
 
