@@ -131,18 +131,41 @@ TODO list (most will be addressed in sudo 2.0)
 
 46) Use mkstemp() for visudo temp files?  Also re-examine locking.
 
-47) Run sudo thorugh valgrind
+47) Run sudo through valgrind --tool=memcheck on Linux.  Need to
+    add #ifdefs to free stuff on exit, e.g.  #ifdef PURIFY
 
-48) Make -a and -c options in sudo.pod only visible when available.
-    Could use an nroff register combines with configure substitute magic.
-    Note that configure substitution runs on the .man.in file not the
-    .pod file.
+48) Consolidate line wrap code.
 
-49) Consolidate line wrap code.
-
-50) How can we distinguish between a bare '\\' and one that is escaping
+49) How can we distinguish between a bare '\\' and one that is escaping
     glob chars?  Right now we convert \\ -> \ in the lexer which
     causes the confusion.
 
-51) For LDAP entries, should be able to parse the per-command options
+50) For LDAP entries, should be able to parse the per-command options
     since they may affect the outcome (e.g. default_runas).
+
+51) Set usrinfo for AIX, see openssh.
+
+52) Consider adding -d (debug) flag for both LDAP and files sudoers lookups.
+    Is it safe to allow normal users to use it?
+
+53) Why does testsudoers give wrong line number for parse error?
+
+54) Add non-interactive flag that, if set, just fails if a password is req'd
+
+55) Should send mail if sudoers does not parse
+
+56) Add arg markup to indicate that an arg is a path and treat it specially
+    regarding cwd.
+
+57) Should -k/-K clear *all* timestamps in tty_ticket mode?
+    http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=306919
+
+58) Dan says Pam activity should probably be happening after
+    setkeycreatecon and setexeccon (which may use the keyring or
+    run external commands).  However, this means sendmail
+    will be executed w/ the new context if user is denied.
+
+59) Allow the -k flag to be used in conjunction with other flags
+    so you can force a password check w/ a command.
+
+60) Decide between option and flag in sudo and visudo man pages

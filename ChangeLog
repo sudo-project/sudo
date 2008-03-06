@@ -1,3 +1,427 @@
+2008-03-06 12:21  millert
+
+	* WHATSNEW: mention mailfrom
+
+2008-03-06 12:19  millert
+
+	* Makefile.in, config.h.in, configure, configure.in, set_perms.c,
+	  sudo.h, aix.c: Add aix_setlimits() to set resource limits on AIX
+	  using a combination of getuserattr() and setrlimit().  Currently
+	  untested.
+
+2008-03-05 16:52  millert
+
+	* def_data.c, def_data.h, def_data.in, logging.c, sudoers.cat,
+	  sudoers.pod, sudoers.man.in: Add mailfrom Defaults option that
+	  sets the value of the From: field in the warning/error mail.	If
+	  unset the login name of the invoking user is used.
+
+2008-03-05 16:18  millert
+
+	* defaults.c: store a copy of _PATH_SUDO_ASKPASS in def_askpass
+	  that is freeable
+
+2008-03-05 15:19  millert
+
+	* gram.c, gram.y: When adding a default, only call list2tq() once
+	  to do the list to tq conversion.  It is not legal to call list2tq
+	  multiple times on the same list since list2tq consumes and
+	  modifies the list argument.
+
+2008-03-05 09:38  millert
+
+	* sudoers.ldap.cat, sudoers.ldap.man.in, sudoers.ldap.pod: comment
+	  out XXXs for now
+
+2008-03-05 09:36  millert
+
+	* WHATSNEW: mention askpass
+
+2008-03-04 17:20  millert
+
+	* sudo.c: Error out if both -A and -S are specified Error out if -A
+	  is specified but no askpass is configured
+
+2008-03-04 17:16  millert
+
+	* configure, configure.in: we are not going to ship a sudo-specific
+	  askpass
+
+2008-03-03 14:30  millert
+
+	* sudo.h: fix definition of TGP_ASKPASS
+
+2008-03-03 13:54  millert
+
+	* def_data.c, def_data.in: make askpass boolean-capable
+
+2008-03-03 13:53  millert
+
+	* INSTALL: document --with-askpass
+
+2008-03-02 19:27  millert
+
+	* sudo.cat, sudo.man.in, sudoers.cat, sudoers.man.in,
+	  sudoers.ldap.cat, visudo.cat: regen
+
+2008-03-02 17:31  millert
+
+	* sudo.pod, sudo_usage.h.in, sudoers.pod: document -A and askpass
+
+2008-03-02 09:31  millert
+
+	* check.c, configure, configure.in, def_data.c, def_data.h,
+	  def_data.in, defaults.c, pathnames.h.in, sudo.c, sudo.h,
+	  sudo_usage.h.in, tgetpass.c, auth/sudo_auth.c: Add support for
+	  running a helper program to read the password when no tty is
+	  present (or when specified with the -A flag).  TODO: docs.
+
+2008-03-02 08:38  millert
+
+	* def_data.c, def_data.in: add missing printf format to SELinux
+	  role and type strings
+
+2008-02-27 09:26  millert
+
+	* INSTALL, configure, configure.in: Disable use of
+	  gss_krb5_ccache_name() by default and add
+	  --enable-gss-krb5-ccache-name configure option to enable it.	It
+	  seems that gss_krb5_ccache_name() doesn't work properly with some
+	  combinations of Heimdal and OpenLDAP.
+
+2008-02-22 15:33  millert
+
+	* selinux.c: Ignore setexeccon() failing in permissive mode.  Also
+	  add a call to setkeycreatecon() (though this is probably
+	  insufficient).  From Dan Walsh.
+
+2008-02-22 15:19  millert
+
+	* auth/pam.c: Only set std_prompt for the PAM_PROMPT_* cases.  The
+	  conversation function may be called for non-password reading
+	  purposes so we must be careful not to use def_prompt in cases
+	  where it may not be set.
+
+2008-02-20 12:00  millert
+
+	* selinux.c: Don't free the new tty context, we need to keep it
+	  around when we restore the tty context after the command
+	  completes
+
+2008-02-19 16:04  millert
+
+	* selinux.c: s/newrole/sudo/
+
+2008-02-19 13:21  millert
+
+	* sudo.man.pl, sudo.pod: Only put login_cap(3) in SEE ALSO section
+	  if we have login.conf support
+
+2008-02-18 11:05  millert
+
+	* sudo.cat, sudo.man.in, sudoers.cat, sudoers.ldap.cat,
+	  sudoers.ldap.man.in, sudoers.man.in, visudo.cat, visudo.man.in:
+	  regen
+
+2008-02-18 10:53  millert
+
+	* Makefile.in, configure, configure.in, sudo.man.pl, sudo.pod,
+	  sudoers.man.pl, sudoers.pod: Substitute in comment characters for
+	  lines partaining to login.conf, BSD auth and SELinux and only
+	  enable them if pertinent.
+
+2008-02-18 10:42  millert
+
+	* Makefile.in, sudo.pod, sudoers.ldap.pod, sudoers.pod, visudo.pod:
+	  Remove the =cut on the first line (above the copyright notice) to
+	  quiet pod2man.  Also remove the hackery in the FILES section and
+	  just deal with the fact that there will a newline between each
+	  pathname.
+
+2008-02-17 08:19  millert
+
+	* Makefile.in: run sudo.man.pl when generating sudo.man.in
+
+2008-02-17 08:11  millert
+
+	* configure, configure.in, sudo.man.pl: comment out SELinux manual
+	  bits unless --with-selinux was specified
+
+2008-02-17 08:04  millert
+
+	* sudoers.pod: document role and type defaults for SELinux
+
+2008-02-16 20:26  millert
+
+	* sudo.c, sudo.cat, sudo.man.in, sudo.pod, sudo_usage.h.in:
+	  Document "sudo -ll" and make "sudo -l -l" be equivalent.
+
+2008-02-15 15:23  millert
+
+	* configure.in, configure: Treat k*bsd*-gnu like Linux, not BSD.
+	  Fixes compilation problems on Debian GNU/kFreeBSD.
+
+2008-02-13 17:17  millert
+
+	* auth/kerb5.c: Avoid Heimdal'isms introduced in the rev 1.32
+	  rewrite of verify_krb_v5_tgt()
+
+2008-02-13 07:28  millert
+
+	* logging.c, logging.h, sudo.c: Remove dependence on
+	  VALIDATE_NOT_OK in logging functions.  Split log_auth() into
+	  log_allowed() and log_denial() Replace mail_auth() with
+	  should_mail() and a call to send_mail()
+
+2008-02-10 18:06  millert
+
+	* ldap.c: Add debugging so we can tell if the krb5 ccache is
+	  accessible
+
+2008-02-10 17:34  millert
+
+	* INSTALL: mention --with-selinux
+
+2008-02-09 09:48  millert
+
+	* configure: regen
+
+2008-02-09 09:43  millert
+
+	* selinux.c: add Sudo tag
+
+2008-02-09 09:30  millert
+
+	* Makefile.in, config.h.in, configure.in, def_data.c, def_data.h,
+	  def_data.in, gram.c, gram.h, gram.y, ldap.c, parse.c, parse.h,
+	  pathnames.h.in, selinux.c, sesh.c, sudo.c, sudo.cat, sudo.h,
+	  sudo.man.in, sudo.pod, sudo_usage.h.in, sudoers.ldap.cat,
+	  sudoers.ldap.man.in, sudoers.ldap.pod, testsudoers.c, toke.c,
+	  toke.l: Add support for SELinux RBAC.  Sudoers entries may
+	  specify a role and type.  There are also role and type defaults
+	  that may be used.  To make sure a transition occurs, when using
+	  RBAC commands are executed via the new sesh binary.  Based on
+	  initial changes from Dan Walsh.
+
+2008-02-08 08:18  millert
+
+	* lbuf.c, ldap.c, parse.c, sudo.c, sudo.h, sudo_nss.c: Add long
+	  list (sudo -ll) support for printing verbose LDAP and sudoers
+	  file entries.  Still need to update manual.
+
+2008-02-03 10:43  millert
+
+	* ldap.c, parse.c, sudo.h, sudo_nss.c, sudo_nss.h: Unify the -l
+	  output for file and ldap based sudoers and use lbufs for both.
+	  The ldap output does not currently include options that cannot be
+	  represented as tags.	This will be remedied in a long list output
+	  mode to come.
+
+2008-01-27 16:37  millert
+
+	* set_perms.c: Use a specific error message for errno == EAGAIN
+	  when setuid() et al fails.  On Linux systems setuid() will fail
+	  with errno set to EAGAIN if changing to the new uid would result
+	  in a resource limit violation.
+
+2008-01-27 16:34  millert
+
+	* sudo.c: Unlimit nproc on Linux systems where calling the setuid()
+	  family of syscalls causes the nroc resource limit to be checked.
+	  The limits will be reset by pam_limits.so when PAM is used.  In
+	  the non-PAM case the nproc limit will remain unlimited but there
+	  doesn't seem to be a way around that other than having sudo parse
+	  /etc/security/limits.conf directly.
+
+2008-01-27 16:31  millert
+
+	* env.c, sudo.c, sudo.pod: Only read /etc/environment on Linux and
+	  AIX
+
+2008-01-23 06:33  millert
+
+	* configure, configure.in: Use SUDO_DEFINE_UNQUOTED instead of
+	  AC_DEFINE_UNQUOTED to prevent ldap.conf and ldap.secret paths
+	  from going into config.h.  Avoid single quotes in variable
+	  expansion when using SUDO_DEFINE_UNQUOTED since in some versions
+	  of bash they will end up literally in the resulting define.
+
+2008-01-21 13:22  millert
+
+	* README.LDAP: mention --with-nsswitch=no
+
+2008-01-21 11:43  millert
+
+	* configure, configure.in: ldap_ssl.h depends on ldap.h being
+	  included first
+
+2008-01-21 11:07  millert
+
+	* configure, configure.in, ldap.c, config.h.in: Include ldap_ssl.h
+	  if we can find it.  Needed for the ldapssl_set_strength defines
+	  on HP-UX at least.
+
+2008-01-21 10:02  millert
+
+	* TODO, sudoers.ldap.pod: sync
+
+2008-01-21 10:01  millert
+
+	* sudo.cat, sudo.man.in, sudoers.cat, sudoers.ldap.cat,
+	  sudoers.ldap.man.in, sudoers.man.in, visudo.cat, visudo.man.in:
+	  regen
+
+2008-01-21 10:00  millert
+
+	* Makefile.in: Use 78n line length when formatting cat pages.
+
+2008-01-21 09:50  millert
+
+	* README.LDAP: Remove redundant info that is now in
+	  sudoers.ldap.pod
+
+2008-01-20 16:18  millert
+
+	* sudoers.ldap.cat, sudoers.ldap.man.in, sudoers.ldap.pod:
+	  Reorganize the first section a bit.  Substitute the proper path
+	  for /etc/sudoers.
+
+2008-01-20 10:17  millert
+
+	* sudoers.ldap.cat, sudoers.ldap.man.in, sudoers.ldap.pod:
+	  Substitute values for ldap.conf, ldap.secret and nsswitch.conf
+	  Move schema into EXAMPLES
+
+2008-01-20 10:15  millert
+
+	* configure.in, configure: Substitute values for ldap.conf,
+	  ldap.secret and nsswitch.conf into sudoers.ldap.man.
+
+2008-01-19 20:35  millert
+
+	* configure, configure.in: substitute for sudoers.ldap.man
+
+2008-01-19 20:34  millert
+
+	* Makefile.in: Fix cut & pasto introduced when adding sudoers.ldap
+	  man page.
+
+2008-01-19 20:25  millert
+
+	* sudoers.ldap.pod, sudoers.ldap.cat, sudoers.ldap.man.in: Fill in
+	  some of the missing pieces.  Still needs some reorganization and
+	  editing.
+
+2008-01-19 15:06  millert
+
+	* Makefile.in, sudoers.ldap.cat, sudoers.ldap.man.in,
+	  sudoers.ldap.pod: Beginnings of a sudoers.ldap man page.
+	  Currently, much of the information is adapted from README.LDAP.
+
+2008-01-18 17:32  millert
+
+	* pwutil.c: When copying gr_mem we must guarantee that the storage
+	  space for gr_mem is properly aligned.  The simplest way to do
+	  this is to simply store gr_mem directly after struct group.  This
+	  is not a problem for gr_passwd or gr_name as they are simple
+	  strings.
+
+2008-01-18 16:47  millert
+
+	* ldap.c: Fix a typo/thinko in one of the calls to
+	  sudo_ldap_check_user_netgroup().  From Marco van Wieringen.
+
+2008-01-17 15:44  millert
+
+	* config.h.in, configure, configure.in, ldap.c: include
+	  <mps/ldap_ssl.h> in ldap.c if available
+
+2008-01-16 18:20  millert
+
+	* gram.c, gram.y: Make sure we define SIZE_MAX for yacc's
+	  skeleton.c
+
+2008-01-16 13:03  millert
+
+	* tgetpass.c: Use TCSAFLUSH when restoring terminal settings (and
+	  echo) to guarantee that any pending output is discarded
+
+2008-01-15 17:18  millert
+
+	* sudoers: no longer need to specify SETENV when user has sudo ALL
+
+2008-01-15 09:40  millert
+
+	* testsudoers.c: sync user_args size calculation with sudo.c Add -g
+	  group option, renaming old -g to -G Add set_runasgr() and
+	  set_runaspw() and use them
+
+2008-01-15 09:23  millert
+
+	* sudo.h, sudo.c: Make set_runaspw static void
+
+2008-01-15 09:17  millert
+
+	* testsudoers.c, visudo.c: g/c set_runaspw stub
+
+2008-01-15 07:28  millert
+
+	* configure, configure.in: Don't add -llber twice.
+
+2008-01-14 06:40  millert
+
+	* ldap.c: fix typo
+
+2008-01-13 15:39  millert
+
+	* gram.c: regen
+
+2008-01-13 14:57  millert
+
+	* configure, configure.in: Fix check that determines whether -llber
+	  is required.
+
+2008-01-13 14:22  millert
+
+	* config.h.in, configure, configure.in, README.LDAP, ldap.c: For
+	  netscape-based LDAP, use ldapssl_set_strength() to implement the
+	  checkpeer ldap.conf option.
+
+2008-01-13 09:49  millert
+
+	* auth/kerb5.c: Delay krb5_cc_initialize() until we actually need
+	  to use the cred cache, which is what krb5_verify_user() does.
+	  Better cleanup on failure.
+
+2008-01-12 12:40  millert
+
+	* auth/kerb5.c: Rewrite verify_krb_v5_tgt() based on what heimdal's
+	  krb5_verify_user() does.
+
+2008-01-09 14:58  millert
+
+	* gram.c: The U suffix on constants is an ANSI feature
+
+2008-01-09 12:08  millert
+
+	* configure.in, configure: Add check for ber_set_option() in -llber
+
+2008-01-06 19:02  millert
+
+	* README.LDAP: default if no nsswitch.conf is files only
+
+2008-01-06 17:28  millert
+
+	* README.LDAP: don't tell people to mail aaron about LDAP stuff
+
+2008-01-06 12:32  millert
+
+	* README.LDAP: timelimit and bind_timelimit
+
+2008-01-06 08:54  millert
+
+	* ChangeLog: sync
+
 2008-01-06 07:56  millert
 
 	* ldap.c: Move ldap.secret reading into a separate function.
