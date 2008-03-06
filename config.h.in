@@ -159,6 +159,9 @@
 /* Define to 1 if you have the `gettimeofday' function. */
 #undef HAVE_GETTIMEOFDAY
 
+/* Define to 1 if you have the `getuserattr' function. */
+#undef HAVE_GETUSERATTR
+
 /* Define to 1 if you have the `glob' function. */
 #undef HAVE_GLOB
 

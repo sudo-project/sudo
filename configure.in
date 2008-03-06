@@ -1331,6 +1331,10 @@ case "$host" in
 		if test X"$with_aixauth" = X""; then
 		    AC_CHECK_FUNCS(authenticate, [AUTH_EXCL_DEF="AIX_AUTH"])
 		fi
+
+		# AIX-specific functions
+		AC_CHECK_FUNCS(getuserattr)
+		SUDO_OBJS="$SUDO_OBJS aix.o"
 		;;
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}

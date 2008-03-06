@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994-1996,1998-2006 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1994-1996,1998-2008 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -520,6 +520,9 @@ runas_setup()
 
     if (runas_pw->pw_name != NULL) {
 	gid = runas_gr ? runas_gr->gr_gid : runas_pw->pw_gid;
+#ifdef HAVE_GETUSERATTR
+	aix_setlimits(runas_pw->pw_name);
+#endif
 #ifdef HAVE_PAM
 	pam_prep_user(runas_pw);
 #endif /* HAVE_PAM */

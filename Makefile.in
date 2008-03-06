@@ -1,5 +1,6 @@
 #
-# Copyright (c) 1996, 1998-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 1996, 1998-2005, 2007-2008
+#	Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -100,7 +101,7 @@ SHELL = /bin/sh
 
 PROGS = @PROGS@
 
-SRCS = alias.c alloc.c check.c closefrom.c def_data.c defaults.c env.c \
+SRCS = aix.c alias.c alloc.c check.c closefrom.c def_data.c defaults.c env.c \
        error.c fileops.c find_path.c fnmatch.c getcwd.c getprogname.c \
        getspwuid.c gettime.c glob.c goodpath.c gram.c gram.y interfaces.c \
        lbuf.c ldap.c list.c logging.c match.c mkstemp.c memrchr.c parse.c \
@@ -217,6 +218,8 @@ $(devdir)/toke.c: $(srcdir)/toke.l
 @DEV@	perl $(srcdir)/mkdefaults -o def_data $(srcdir)/def_data.in
 
 # Dependencies (not counting auth functions)
+aix.o: $(srcdir)/aix.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/aix.c
 alias.o: $(srcdir)/alias.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(srcdir)/redblack.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alias.c
 alloc.o: $(srcdir)/alloc.c $(SUDODEP)

@@ -313,6 +313,9 @@ struct group *sudo_getgrgid __P((gid_t));
 #ifdef HAVE_SELINUX
 void selinux_exec __P((char *, char *, char **, int));
 #endif
+#ifdef HAVE_GETUSERATTR
+void aix_setlimits __P((const char *));
+#endif
 YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */
