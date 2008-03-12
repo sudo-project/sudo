@@ -157,6 +157,10 @@ static char *runas_user;
 static char *runas_group;
 static struct sudo_nss_list *snl;
 
+/* For getopt(3) */
+extern char *optarg;
+extern int optind;
+
 int
 main(argc, argv, envp)
     int argc;
@@ -803,7 +807,9 @@ set_cmnd(sudo_mode)
 }
 
 /*
- * Command line argument parsing, can't use getopt(3) due to optional args.
+ * Command line argument parsing.
+ * Sets NewArgc and NewArgv which corresponds to the argc/argv we'll use
+ * for the command to be run (if we are running one).
  */
 static int
 parse_args(argc, argv)
@@ -812,9 +818,7 @@ parse_args(argc, argv)
 {
     int rval = MODE_RUN;		/* what mode is sudo to be run in? */
     int excl = 0;			/* exclusive arg, no others allowed */
-
-    NewArgv = argv + 1;
-    NewArgc = argc - 1;
+    int ch;
 
     /* First, check to see if we were invoked as "sudoedit". */
     if (strcmp(getprogname(), "sudoedit") == 0) {
@@ -823,83 +827,51 @@ parse_args(argc, argv)
     } else
 	rval = MODE_RUN;
 
-    while (NewArgc > 0) {
-	if (NewArgv[0][0] == '-') {
-	    if (NewArgv[0][1] != '\0' && NewArgv[0][2] != '\0' &&
-		NewArgv[0][2] != 'l') {
-		warningx("please use single character options");
-		usage(1);
-	    }
+    /* Returns true if the last option string was "--" */
+#define got_end_of_args	(optind > 1 && argv[optind - 1][0] == '-' && \
+	    argv[optind - 1][1] == '-' && argv[optind - 1][2] == '\0')
 
-	    switch (NewArgv[0][1]) {
+    /* Returns true if next option is an environment variable */
+#define is_envar (optind < argc && argv[optind][0] != '/' && \
+	    strchr(argv[optind], '=') != NULL)
+
+    for (;;) {
+	/*
+	 * We disable arg permutation for GNU getopt().
+	 * Some trickiness is required to allow environment variables
+	 * to be interspersed with command line options.
+	 */
+	if ((ch = getopt(argc, argv, "+Aa:bC:c:Eeg:HhiKkLlPp:r:Sst:Uu:Vv")) != -1) {
+	    switch (ch) {
 		case 'A':
 		    SET(tgetpass_flags, TGP_ASKPASS);
 		    break;
 		case 'p':
-		    /* Must have an associated prompt. */
-		    if (NewArgv[1] == NULL)
-			usage(1);
-
-		    user_prompt = NewArgv[1];
+		    user_prompt = optarg;
 		    def_passprompt_override = TRUE;
-
-		    NewArgc--;
-		    NewArgv++;
 		    break;
 		case 'u':
-		    /* Must have an associated runas user. */
-		    if (NewArgv[1] == NULL)
-			usage(1);
-
-		    runas_user = NewArgv[1];
-
-		    NewArgc--;
-		    NewArgv++;
+		    runas_user = optarg;
 		    break;
 		case 'g':
-		    /* Must have an associated runas group. */
-		    if (NewArgv[1] == NULL)
-			usage(1);
-
-		    runas_group = NewArgv[1];
-
-		    NewArgc--;
-		    NewArgv++;
+		    runas_group = optarg;
 		    break;
 #ifdef HAVE_BSD_AUTH_H
 		case 'a':
-		    /* Must have an associated authentication style. */
-		    if (NewArgv[1] == NULL)
-			usage(1);
-
-		    login_style = NewArgv[1];
-
-		    NewArgc--;
-		    NewArgv++;
+		    login_style = optarg;
 		    break;
 #endif
 #ifdef HAVE_LOGIN_CAP_H
 		case 'c':
-		    /* Must have an associated login class. */
-		    if (NewArgv[1] == NULL)
-			usage(1);
-
-		    login_class = NewArgv[1];
+		    login_class = optarg;
 		    def_use_loginclass = TRUE;
-
-		    NewArgc--;
-		    NewArgv++;
 		    break;
 #endif
 		case 'C':
-		    if (NewArgv[1] == NULL)
-			usage(1);
-		    if ((user_closefrom = atoi(NewArgv[1])) < 3) {
+		    if ((user_closefrom = atoi(optarg)) < 3) {
 			warningx("the argument to -C must be at least 3");
 			usage(1);
 		    }
-		    NewArgc--;
-		    NewArgv++;
 		    break;
 		case 'b':
 		    SET(rval, MODE_BACKGROUND);
@@ -943,10 +915,10 @@ parse_args(argc, argv)
 		    break;
 		case 'l':
 		    rval = MODE_LIST;
-		    if (excl && excl != 'l')
-			usage_excl(1);
-		    if (NewArgv[0][2] == 'l' || excl == 'l')
+		    if (excl == 'l')
 			long_list = 1;
+		    else if (excl)
+			usage_excl(1);
 		    excl = 'l';
 		    break;
 		case 'V':
@@ -977,65 +949,42 @@ parse_args(argc, argv)
 		    SET(tgetpass_flags, TGP_STDIN);
 		    break;
 		case 'U':
-		    /* Must have an associated list user. */
-		    if (NewArgv[1] == NULL)
-			usage(1);
-		    if ((list_pw = sudo_getpwnam(NewArgv[1])) == NULL)
-			errorx(1, "unknown user: %s", NewArgv[1]);
-		    NewArgc--;
-		    NewArgv++;
+		    if ((list_pw = sudo_getpwnam(optarg)) == NULL)
+			errorx(1, "unknown user: %s", optarg);
 		    break;
 		case 'E':
 		    SET(rval, MODE_PRESERVE_ENV);
 		    break;
 #ifdef HAVE_SELINUX
 		case 'r':
-		    /* Must have an associated SELinux role. */
-		    if (NewArgv[1] == NULL)
-			usage(1);
-
-		    user_role = NewArgv[1];
-
-		    NewArgc--;
-		    NewArgv++;
+		    user_role = optarg;
 		    break;
 		case 't':
-		    /* Must have an associated SELinux type. */
-		    if (NewArgv[1] == NULL)
-			usage(1);
-
-		    user_type = NewArgv[1];
-
-		    NewArgc--;
-		    NewArgv++;
+		    user_type = optarg;
 		    break;
 #endif
-		case '-':
-		    NewArgc--;
-		    NewArgv++;
-		    goto args_done;
-		case '\0':
-		    warningx("`-' requires an argument");
-		    usage(1);
 		default:
-		    warningx("illegal option `%s'", NewArgv[0]);
 		    usage(1);
 	    }
-	} else if (NewArgv[0][0] != '/' && strchr(NewArgv[0], '=') != NULL) {
-		/* Could be an environment variable. */
-		struct list_member *ev;
-		ev = emalloc(sizeof(*ev));
-		ev->value = NewArgv[0];
-		ev->next = sudo_user.env_vars;
-		sudo_user.env_vars = ev;
+	} else if (!got_end_of_args && is_envar) {
+	    struct list_member *ev;
+
+	    /* Store environment variable. */
+	    ev = emalloc(sizeof(*ev));
+	    ev->value = argv[optind];
+	    ev->next = sudo_user.env_vars;
+	    sudo_user.env_vars = ev;
+
+	    /* Crank optind and resume getopt. */
+	    optind++;
 	} else {
-	    /* Not an arg */
+	    /* Not an option or an environment variable -- we're done. */
 	    break;
 	}
-	NewArgc--;
-	NewArgv++;
     }
-args_done:
+
+    NewArgc = argc - optind;
+    NewArgv = argv + optind;
 
     if (NewArgc > 0 && rval == MODE_LIST)
 	rval = MODE_CHECK;
