@@ -198,6 +198,7 @@ static const char *initial_checkenv_table[] = {
 static const char *initial_keepenv_table[] = {
     "COLORS",
     "DISPLAY",
+    "HOME",
     "HOSTNAME",
     "KRB5CCNAME",
     "LS_COLORS",
