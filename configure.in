@@ -1285,6 +1285,12 @@ case "$host" in
 		if test X"$with_aixauth" = X""; then
 		    AC_CHECK_FUNCS(authenticate, [AUTH_EXCL_DEF="AIX_AUTH"])
 		fi
+ 
+		# AIX shared libs use the .a suffix unless run-time linking
+		# is being used (determined by libtool).
+		if test X"$with_noexec" != X"no" && X"$aix_use_runtimelinking" != X"yes"; then
+		    with_noexec=`echo $with_noexec | sed 's/\.so$/.a/'`
+		fi
 		;;
     *-*-hiuxmpp*)
 		: ${mansectsu='1m'}
