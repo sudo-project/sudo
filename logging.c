@@ -445,6 +445,7 @@ send_mail(line)
 
     (void) sigemptyset(&set);
     (void) sigaddset(&set, SIGCHLD);
+    (void) sigaddset(&set, SIGPIPE);
     (void) sigprocmask(SIG_BLOCK, &set, &oset);
 
     if (pipe(pfd) == -1)
