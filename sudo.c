@@ -1386,8 +1386,10 @@ cleanup(gotsignal)
     struct sudo_nss *nss;
 
     if (!gotsignal) {
-	tq_foreach_fwd(snl, nss)
-	    nss->close(nss);
+	if (snl != NULL) {
+	    tq_foreach_fwd(snl, nss)
+		nss->close(nss);
+	}
 	sudo_endpwent();
 	sudo_endgrent();
     }
