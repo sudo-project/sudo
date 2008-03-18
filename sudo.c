@@ -116,6 +116,7 @@ static void set_loginclass		__P((struct passwd *));
 static void set_project			__P((struct passwd *));
 static void set_runasgr			__P((char *));
 static void set_runaspw			__P((char *));
+static void show_version		__P((void));
 static void usage			__P((int))
 					    __attribute__((__noreturn__));
 static void usage_excl			__P((int))
@@ -234,22 +235,7 @@ main(argc, argv, envp)
     else
 	switch (sudo_mode) {
 	    case MODE_VERSION:
-		(void) printf("Sudo version %s\n", version);
-		if (getuid() == 0) {
-		    putchar('\n');
-		    (void) printf("Sudoers path: %s\n", _PATH_SUDOERS);
-#ifdef HAVE_LDAP
-# ifdef _PATH_NSSWITCH_CONF
-		    (void) printf("nsswitch path: %s\n", _PATH_NSSWITCH_CONF);
-# endif
-		    (void) printf("ldap.conf path: %s\n", _PATH_LDAP_CONF);
-		    (void) printf("ldap.secret path: %s\n", _PATH_LDAP_SECRET);
-#endif
-		    dump_auth_methods();
-		    dump_defaults();
-		    dump_interfaces();
-		}
-		exit(0);
+		show_version();
 		break;
 	    case MODE_HELP:
 		usage(0);
@@ -1393,6 +1379,27 @@ cleanup(gotsignal)
 	sudo_endpwent();
 	sudo_endgrent();
     }
+}
+
+static void
+show_version()
+{
+    (void) printf("Sudo version %s\n", version);
+    if (getuid() == 0) {
+	putchar('\n');
+	(void) printf("Sudoers path: %s\n", _PATH_SUDOERS);
+#ifdef HAVE_LDAP
+# ifdef _PATH_NSSWITCH_CONF
+	(void) printf("nsswitch path: %s\n", _PATH_NSSWITCH_CONF);
+# endif
+	(void) printf("ldap.conf path: %s\n", _PATH_LDAP_CONF);
+	(void) printf("ldap.secret path: %s\n", _PATH_LDAP_SECRET);
+#endif
+	dump_auth_methods();
+	dump_defaults();
+	dump_interfaces();
+    }
+    exit(0);
 }
 
 /*
