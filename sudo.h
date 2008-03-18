@@ -114,6 +114,7 @@ struct sudo_user {
 #define MODE_RESET_HOME		0x04000
 #define MODE_PRESERVE_GROUPS	0x08000
 #define MODE_PRESERVE_ENV	0x10000
+#define MODE_NONINTERACTIVE	0x20000
 
 /*
  * Used with set_perms()
@@ -236,7 +237,7 @@ int mkstemp		__P((char *));
 char *sudo_goodpath	__P((const char *, struct stat *));
 char *tgetpass		__P((const char *, int, int));
 int find_path		__P((char *, char **, struct stat *, char *));
-void check_user		__P((int));
+void check_user		__P((int, int));
 void verify_user	__P((struct passwd *, char *));
 #ifdef HAVE_LDAP
 int sudo_ldap_open	__P((struct sudo_nss *));

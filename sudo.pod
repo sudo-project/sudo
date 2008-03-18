@@ -27,12 +27,12 @@ sudo, sudoedit - execute a command as another user
 
 =head1 SYNOPSIS
 
-B<sudo> B<-h> | B<-K> | B<-k> | B<-L> | B<-V> | B<-v>
+B<sudo> [B<-n>] B<-h> | B<-K> | B<-k> | B<-L> | B<-V> | B<-v>
 
-B<sudo> B<-l[l]> [B<-AS>] S<[B<-g> I<groupname>|I<#gid>]> S<[B<-U> I<username>]>
+B<sudo> B<-l[l]> [B<-AnS>] S<[B<-g> I<groupname>|I<#gid>]> S<[B<-U> I<username>]>
 S<[B<-u> I<username>|I<#uid>]> [I<command>]
 
-B<sudo> [B<-AbEHPS>]
+B<sudo> [B<-AbEHnPS>]
 S<[B<-a> I<auth_type>]>
 S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]>
@@ -41,7 +41,7 @@ S<[B<-r> I<role>]> S<[B<-t> I<type>]>
 S<[B<-u> I<username>|I<#uid>]>
 S<[B<VAR>=I<value>]> [S<{B<-i> | B<-s>] [<I<command>}>]
 
-B<sudoedit> [B<-AS>]
+B<sudoedit> [B<-AnS>]
 S<[B<-a> I<auth_type>]>
 S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]>
@@ -259,6 +259,12 @@ command line arguments.  If I<command> is specified but not allowed,
 B<sudo> will exit with a return value of 1.  If the B<-l> flag is
 specified with an B<l> argument (i.e. B<-ll>), or if B<-l>
 is specified multiple times, a longer list format is used.
+
+=item -n
+
+The B<-n> (I<non-interactive>) option prevents B<sudo> from prompting
+the user for a password.  If a password is required for the command
+to run, B<sudo> will display an error messages and exit.
 
 =item -P
 

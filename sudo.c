@@ -402,7 +402,7 @@ main(argc, argv, envp)
 
     /* Require a password if sudoers says so.  */
     if (def_authenticate)
-	check_user(validated);
+	check_user(validated, !ISSET(sudo_mode, MODE_NONINTERACTIVE));
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
     /* XXX - causes confusion when root is not listed in sudoers */
@@ -827,7 +827,7 @@ parse_args(argc, argv)
 	 * Some trickiness is required to allow environment variables
 	 * to be interspersed with command line options.
 	 */
-	if ((ch = getopt(argc, argv, "+Aa:bC:c:Eeg:HhiKkLlPp:r:Sst:Uu:Vv")) != -1) {
+	if ((ch = getopt(argc, argv, "+Aa:bC:c:Eeg:HhiKkLlnPp:r:Sst:Uu:Vv")) != -1) {
 	    switch (ch) {
 		case 'A':
 		    SET(tgetpass_flags, TGP_ASKPASS);
@@ -906,6 +906,9 @@ parse_args(argc, argv)
 		    else if (excl)
 			usage_excl(1);
 		    excl = 'l';
+		    break;
+		case 'n':
+		    SET(rval, MODE_NONINTERACTIVE);
 		    break;
 		case 'V':
 		    rval = MODE_VERSION;

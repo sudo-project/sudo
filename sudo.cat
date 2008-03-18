@@ -8,15 +8,15 @@ NNAAMMEE
        sudo, sudoedit - execute a command as another user
 
 SSYYNNOOPPSSIISS
-       ssuuddoo --hh | --KK | --kk | --LL | --VV | --vv
+       ssuuddoo [--nn] --hh | --KK | --kk | --LL | --VV | --vv
 
-       ssuuddoo --ll[[ll]] [--AASS] [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d] [--UU _u_s_e_r_n_a_m_e] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d]
+       ssuuddoo --ll[[ll]] [--AAnnSS] [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d] [--UU _u_s_e_r_n_a_m_e] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d]
        [_c_o_m_m_a_n_d]
 
-       ssuuddoo [--AAbbEEHHPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-] [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d]
+       ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-] [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d]
        [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e] [{--ii | --ss] [<_c_o_m_m_a_n_d}]
 
-       ssuuddooeeddiitt [--AASS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-] [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d]
+       ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-] [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d]
        [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] file ...
 
 DDEESSCCRRIIPPTTIIOONN
@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7                       March  2, 2008                        1
+1.7                       March 18, 2008                        1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.7                       March  2, 2008                        2
+1.7                       March 18, 2008                        2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7                       March  2, 2008                        3
+1.7                       March 18, 2008                        3
 
 
 
@@ -229,6 +229,11 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    --llll), or if --ll is specified multiple times, a longer list
                    format is used.
 
+       -n          The --nn (_n_o_n_-_i_n_t_e_r_a_c_t_i_v_e) option prevents ssuuddoo from prompt-
+                   ing the user for a password.  If a password is required for
+                   the command to run, ssuuddoo will display an error messages and
+                   exit.
+
        -P          The --PP (_p_r_e_s_e_r_v_e _g_r_o_u_p _v_e_c_t_o_r) option causes ssuuddoo to pre-
                    serve the invoking user's group vector unaltered.  By
                    default, ssuuddoo will initialize the group vector to the list
@@ -252,14 +257,9 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    %U  expanded to the login name of the user the command will
                        be run as (defaults to root)
 
-                   %u  expanded to the invoking user's login name
-
-                   %%  two consecutive % characters are collapsed into a sin-
-                       gle % character
 
 
-
-1.7                       March  2, 2008                        4
+1.7                       March 18, 2008                        4
 
 
 
@@ -267,6 +267,11 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+                   %u  expanded to the invoking user's login name
+
+                   %%  two consecutive % characters are collapsed into a sin-
+                       gle % character
 
                    The prompt specified by the --pp option will override the
                    system password prompt on systems that support PAM unless
@@ -317,15 +322,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
        line are subject to the same restrictions as normal environment vari-
        ables with one important exception.  If the _s_e_t_e_n_v option is set in
        _s_u_d_o_e_r_s, the command to be run has the SETENV tag set or the command
-       matched is ALL, the user may set variables that would overwise be for-
-       bidden.  See _s_u_d_o_e_r_s(4) for more information.
-
-RREETTUURRNN VVAALLUUEESS
-       Upon successful execution of a program, the return value from ssuuddoo will
 
 
 
-1.7                       March  2, 2008                        5
+1.7                       March 18, 2008                        5
 
 
 
@@ -334,6 +334,11 @@ RREETTUURRNN VVAALLUUEESS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       matched is ALL, the user may set variables that would overwise be for-
+       bidden.  See _s_u_d_o_e_r_s(4) for more information.
+
+RREETTUURRNN VVAALLUUEESS
+       Upon successful execution of a program, the return value from ssuuddoo will
        simply be the return value of the program that was executed.
 
        Otherwise, ssuuddoo quits with an exit value of 1 if there is a configura-
@@ -383,15 +388,10 @@ SSEECCUURRIITTYY NNOOTTEESS
        environment variable is _n_o_t modified and is passed unchanged to the
        program that ssuuddoo executes.
 
-       ssuuddoo will check the ownership of its timestamp directory (_/_v_a_r_/_r_u_n_/_s_u_d_o
-       by default) and ignore the directory's contents if it is not owned by
-       root or if it is writable by a user other than root.  On systems that
-       allow non-root users to give away files via _c_h_o_w_n(2), if the timestamp
-       directory is located in a directory writable by anyone (e.g., _/_t_m_p), it
 
 
 
-1.7                       March  2, 2008                        6
+1.7                       March 18, 2008                        6
 
 
 
@@ -400,6 +400,11 @@ SSEECCUURRIITTYY NNOOTTEESS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       ssuuddoo will check the ownership of its timestamp directory (_/_v_a_r_/_r_u_n_/_s_u_d_o
+       by default) and ignore the directory's contents if it is not owned by
+       root or if it is writable by a user other than root.  On systems that
+       allow non-root users to give away files via _c_h_o_w_n(2), if the timestamp
+       directory is located in a directory writable by anyone (e.g., _/_t_m_p), it
        is possible for a user to create the timestamp directory before ssuuddoo is
        run.  However, because ssuuddoo checks the ownership and mode of the direc-
        tory and its contents, the only damage that can be done is to "hide"
@@ -450,14 +455,9 @@ EENNVVIIRROONNMMEENNTT
 
        SUDO_COMMAND    Set to the command run by sudo
 
-       SUDO_USER       Set to the login of the user who invoked sudo
-
-       SUDO_UID        Set to the uid of the user who invoked sudo
 
 
-
-
-1.7                       March  2, 2008                        7
+1.7                       March 18, 2008                        7
 
 
 
@@ -465,6 +465,10 @@ EENNVVIIRROONNMMEENNTT
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       SUDO_USER       Set to the login of the user who invoked sudo
+
+       SUDO_UID        Set to the uid of the user who invoked sudo
 
        SUDO_GID        Set to the gid of the user who invoked sudo
 
@@ -517,13 +521,9 @@ AAUUTTHHOORRSS
        Many people have worked on ssuuddoo over the years; this version consists
        of code written primarily by:
 
-               Todd C. Miller
-
-       See the HISTORY file in the ssuuddoo distribution or visit
 
 
-
-1.7                       March  2, 2008                        8
+1.7                       March 18, 2008                        8
 
 
 
@@ -532,6 +532,9 @@ AAUUTTHHOORRSS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+               Todd C. Miller
+
+       See the HISTORY file in the ssuuddoo distribution or visit
        http://www.sudo.ws/sudo/history.html for a short history of ssuuddoo.
 
 CCAAVVEEAATTSS
@@ -586,9 +589,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-1.7                       March  2, 2008                        9
+1.7                       March 18, 2008                        9
 
 

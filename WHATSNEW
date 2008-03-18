@@ -58,3 +58,7 @@ What's new in Sudo 1.7?
  * A new Defaults option, "mailfrom" that sets the value of the
    "From:" field in the warning/error mail.  If unspecified, the
    login name of the invoking user is used.
+
+ * A new flag, -n, may be used to indicate that sudo should not
+   prompt the user for a password and, instead, exit with an error
+   if authentication is required.

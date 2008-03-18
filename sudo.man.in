@@ -150,17 +150,17 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "March  2, 2008" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "March 18, 2008" "1.7" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBsudo\fR \fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-L\fR | \fB\-V\fR | \fB\-v\fR
+\&\fBsudo\fR [\fB\-n\fR] \fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-L\fR | \fB\-V\fR | \fB\-v\fR
 .PP
-\&\fBsudo\fR \fB\-l[l]\fR [\fB\-AS\fR] [\fB\-g\fR\ \fIgroupname\fR|\fI#gid\fR] [\fB\-U\fR\ \fIusername\fR]
+\&\fBsudo\fR \fB\-l[l]\fR [\fB\-AnS\fR] [\fB\-g\fR\ \fIgroupname\fR|\fI#gid\fR] [\fB\-U\fR\ \fIusername\fR]
 [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR] [\fIcommand\fR]
 .PP
-\&\fBsudo\fR [\fB\-AbEHPS\fR]
+\&\fBsudo\fR [\fB\-AbEHnPS\fR]
 @BAMAN@[\fB\-a\fR\ \fIauth_type\fR]
 [\fB\-C\fR\ \fIfd\fR]
 @LCMAN@[\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
@@ -169,7 +169,7 @@ sudo, sudoedit \- execute a command as another user
 [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
 [\fB\s-1VAR\s0\fR=\fIvalue\fR] [{\fB\-i\fR\ |\ \fB\-s\fR]\ [<\fIcommand\fR}]
 .PP
-\&\fBsudoedit\fR [\fB\-AS\fR]
+\&\fBsudoedit\fR [\fB\-AnS\fR]
 @BAMAN@[\fB\-a\fR\ \fIauth_type\fR]
 [\fB\-C\fR\ \fIfd\fR]
 @LCMAN@[\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
@@ -362,6 +362,11 @@ command line arguments.  If \fIcommand\fR is specified but not allowed,
 \&\fBsudo\fR will exit with a return value of 1.  If the \fB\-l\fR flag is
 specified with an \fBl\fR argument (i.e. \fB\-ll\fR), or if \fB\-l\fR
 is specified multiple times, a longer list format is used.
+.IP "\-n" 12
+.IX Item "-n"
+The \fB\-n\fR (\fInon-interactive\fR) option prevents \fBsudo\fR from prompting
+the user for a password.  If a password is required for the command
+to run, \fBsudo\fR will display an error messages and exit.
 .IP "\-P" 12
 .IX Item "-P"
 The \fB\-P\fR (\fIpreserve\fR \fIgroup vector\fR) option causes \fBsudo\fR to

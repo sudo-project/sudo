@@ -84,8 +84,9 @@ static void  update_timestamp	__P((char *, char *));
  * verify who he/she is.
  */
 void
-check_user(validated)
+check_user(validated, interactive)
     int validated;
+    int interactive;
 {
     char *timestampdir = NULL;
     char *timestampfile = NULL;
@@ -99,6 +100,10 @@ check_user(validated)
     status = timestamp_status(timestampdir, timestampfile, user_name,
 	TS_MAKE_DIRS);
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
+	/* Bail out if we are non-interactive and a password is required */
+	if (!interactive)
+	    errorx(1, "sorry, a password is required to run %s", getprogname());
+
 	if (!ISSET(tgetpass_flags, TGP_ASKPASS))
 	    lecture(status);
 
