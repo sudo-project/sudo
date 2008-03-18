@@ -520,7 +520,7 @@ main(argc, argv, envp)
 	    execv(_PATH_BSHELL, NewArgv);
 	} warning("unable to execute %s", safe_cmnd);
 	exit(127);
-    } else if (ISSET(validated, FLAG_NO_USER) || ISSET(validated, FLAG_NO_HOST)) {
+    } else if (ISSET(validated, FLAG_NO_USER | FLAG_NO_HOST)) {
 	log_denial(validated, 1);
 	exit(1);
     } else {
@@ -802,16 +802,13 @@ parse_args(argc, argv)
     int argc;
     char **argv;
 {
-    int rval = MODE_RUN;		/* what mode is sudo to be run in? */
-    int excl = 0;			/* exclusive arg, no others allowed */
+    int mode = 0;		/* what mode is sudo to be run in? */
+    int flags = 0;		/* mode flags */
     int ch;
 
     /* First, check to see if we were invoked as "sudoedit". */
-    if (strcmp(getprogname(), "sudoedit") == 0) {
-	rval = MODE_EDIT;
-	excl = 'e';
-    } else
-	rval = MODE_RUN;
+    if (strcmp(getprogname(), "sudoedit") == 0)
+	mode = MODE_EDIT;
 
     /* Returns true if the last option string was "--" */
 #define got_end_of_args	(optind > 1 && argv[optind - 1][0] == '-' && \
@@ -827,122 +824,87 @@ parse_args(argc, argv)
 	 * Some trickiness is required to allow environment variables
 	 * to be interspersed with command line options.
 	 */
-	if ((ch = getopt(argc, argv, "+Aa:bC:c:Eeg:HhiKkLlnPp:r:Sst:Uu:Vv")) != -1) {
+	if ((ch = getopt(argc, argv, "+Aa:bC:c:Eeg:HhiKkLlnPp:r:Sst:U:u:Vv")) != -1) {
 	    switch (ch) {
 		case 'A':
 		    SET(tgetpass_flags, TGP_ASKPASS);
-		    break;
-		case 'p':
-		    user_prompt = optarg;
-		    def_passprompt_override = TRUE;
-		    break;
-		case 'u':
-		    runas_user = optarg;
-		    break;
-		case 'g':
-		    runas_group = optarg;
 		    break;
 #ifdef HAVE_BSD_AUTH_H
 		case 'a':
 		    login_style = optarg;
 		    break;
 #endif
-#ifdef HAVE_LOGIN_CAP_H
-		case 'c':
-		    login_class = optarg;
-		    def_use_loginclass = TRUE;
+		case 'b':
+		    SET(flags, MODE_BACKGROUND);
 		    break;
-#endif
 		case 'C':
 		    if ((user_closefrom = atoi(optarg)) < 3) {
 			warningx("the argument to -C must be at least 3");
 			usage(1);
 		    }
 		    break;
-		case 'b':
-		    SET(rval, MODE_BACKGROUND);
+#ifdef HAVE_LOGIN_CAP_H
+		case 'c':
+		    login_class = optarg;
+		    def_use_loginclass = TRUE;
+		    break;
+#endif
+		case 'E':
+		    SET(flags, MODE_PRESERVE_ENV);
 		    break;
 		case 'e':
-		    rval = MODE_EDIT;
-		    if (excl && excl != 'e')
+		    if (mode && mode != MODE_EDIT)
 			usage_excl(1);
-		    excl = 'e';
+		    mode = MODE_EDIT;
 		    break;
-		case 'v':
-		    rval = MODE_VALIDATE;
-		    if (excl && excl != 'v')
-			usage_excl(1);
-		    excl = 'v';
-		    break;
-		case 'i':
-		    SET(rval, (MODE_LOGIN_SHELL | MODE_SHELL));
-		    def_env_reset = TRUE;
-		    if (excl && excl != 'i')
-			usage_excl(1);
-		    excl = 'i';
-		    break;
-		case 'k':
-		    rval = MODE_INVALIDATE;
-		    if (excl && excl != 'k')
-			usage_excl(1);
-		    excl = 'k';
-		    break;
-		case 'K':
-		    rval = MODE_KILL;
-		    if (excl && excl != 'K')
-			usage_excl(1);
-		    excl = 'K';
-		    break;
-		case 'L':
-		    rval = MODE_LISTDEFS;
-		    if (excl && excl != 'L')
-			usage_excl(1);
-		    excl = 'L';
-		    break;
-		case 'l':
-		    rval = MODE_LIST;
-		    if (excl == 'l')
-			long_list = 1;
-		    else if (excl)
-			usage_excl(1);
-		    excl = 'l';
-		    break;
-		case 'n':
-		    SET(rval, MODE_NONINTERACTIVE);
-		    break;
-		case 'V':
-		    rval = MODE_VERSION;
-		    if (excl && excl != 'V')
-			usage_excl(1);
-		    excl = 'V';
-		    break;
-		case 'h':
-		    rval = MODE_HELP;
-		    if (excl && excl != 'h')
-			usage_excl(1);
-		    excl = 'h';
-		    break;
-		case 's':
-		    SET(rval, MODE_SHELL);
-		    if (excl && excl != 's')
-			usage_excl(1);
-		    excl = 's';
+		case 'g':
+		    runas_group = optarg;
 		    break;
 		case 'H':
-		    SET(rval, MODE_RESET_HOME);
+		    SET(flags, MODE_RESET_HOME);
+		    break;
+		case 'h':
+		    if (mode && mode != MODE_HELP)
+			usage_excl(1);
+		    mode = MODE_HELP;
+		    break;
+		case 'i':
+		    SET(flags, MODE_LOGIN_SHELL);
+		    def_env_reset = TRUE;
+		    break;
+		case 'k':
+		    if (mode && mode != MODE_INVALIDATE)
+			usage_excl(1);
+		    mode = MODE_INVALIDATE;
+		    break;
+		case 'K':
+		    if (mode && mode != MODE_KILL)
+			usage_excl(1);
+		    mode = MODE_KILL;
+		    break;
+		case 'L':
+		    if (mode && mode != MODE_LISTDEFS)
+			usage_excl(1);
+		    mode = MODE_LISTDEFS;
+		    break;
+		case 'l':
+		    if (mode) {
+			if (mode == MODE_LIST)
+			    long_list = 1;
+			else
+			    usage_excl(1);
+		    }
+		    mode = MODE_LIST;
+		    break;
+		case 'n':
+		    SET(flags, MODE_NONINTERACTIVE);
 		    break;
 		case 'P':
-		    SET(rval, MODE_PRESERVE_GROUPS);
+		    SET(flags, MODE_PRESERVE_GROUPS);
 		    break;
-		case 'S':
-		    SET(tgetpass_flags, TGP_STDIN);
-		    break;
-		case 'U':
-		    if ((list_pw = sudo_getpwnam(optarg)) == NULL)
-			errorx(1, "unknown user: %s", optarg);
-		    break;
-		case 'E':
-		    SET(rval, MODE_PRESERVE_ENV);
+		case 'p':
+		    user_prompt = optarg;
+		    def_passprompt_override = TRUE;
 		    break;
 #ifdef HAVE_SELINUX
 		case 'r':
@@ -952,6 +914,29 @@ parse_args(argc, argv)
 		    user_type = optarg;
 		    break;
 #endif
+		case 'S':
+		    SET(tgetpass_flags, TGP_STDIN);
+		    break;
+		case 's':
+		    SET(flags, MODE_SHELL);
+		    break;
+		case 'U':
+		    if ((list_pw = sudo_getpwnam(optarg)) == NULL)
+			errorx(1, "unknown user: %s", optarg);
+		    break;
+		case 'u':
+		    runas_user = optarg;
+		    break;
+		case 'v':
+		    if (mode && mode != MODE_VALIDATE)
+			usage_excl(1);
+		    mode = MODE_VALIDATE;
+		    break;
+		case 'V':
+		    if (mode && mode != MODE_VERSION)
+			usage_excl(1);
+		    mode = MODE_VERSION;
+		    break;
 		default:
 		    usage(1);
 	    }
@@ -975,42 +960,46 @@ parse_args(argc, argv)
     NewArgc = argc - optind;
     NewArgv = argv + optind;
 
-    if (NewArgc > 0 && rval == MODE_LIST)
-	rval = MODE_CHECK;
+    if (!mode)
+	mode = MODE_RUN;
 
-    if (ISSET(rval, MODE_EDIT) &&
-       (ISSET(rval, MODE_PRESERVE_ENV) || sudo_user.env_vars != NULL)) {
-	if (ISSET(rval, MODE_PRESERVE_ENV))
+    if (NewArgc > 0 && mode == MODE_LIST)
+	mode = MODE_CHECK;
+
+    if (ISSET(flags, MODE_LOGIN_SHELL)) {
+	if (ISSET(flags, MODE_SHELL)) {
+	    warningx("you may not specify both the `-i' and `-s' options");
+	    usage(1);
+	}
+	SET(flags, MODE_SHELL);
+    }
+    if (mode == MODE_EDIT &&
+       (ISSET(flags, MODE_PRESERVE_ENV) || sudo_user.env_vars != NULL)) {
+	if (ISSET(mode, MODE_PRESERVE_ENV))
 	    warningx("the `-E' option is not valid in edit mode");
 	if (sudo_user.env_vars != NULL)
 	    warningx("you may not specify environment variables in edit mode");
 	usage(1);
     }
-
     if ((runas_user != NULL || runas_group != NULL) &&
-	!ISSET(rval, (MODE_EDIT|MODE_RUN|MODE_CHECK))) {
-	if (excl != '\0')
-	    warningx("the `-%c' and `-%c' options may not be used together",
-		runas_user ? 'u' : 'g', excl);
+	!ISSET(mode, MODE_EDIT | MODE_RUN | MODE_CHECK)) {
 	usage(1);
     }
-    if (list_pw != NULL && rval != MODE_LIST && rval != MODE_CHECK) {
-	if (excl != '\0')
-	    warningx("the `-U' and `-%c' options may not be used together",
-		excl);
+    if (list_pw != NULL && mode != MODE_LIST && mode != MODE_CHECK) {
+	warningx("the `-U' option may only be used with the `-l' option");
 	usage(1);
     }
     if (ISSET(tgetpass_flags, TGP_STDIN) && ISSET(tgetpass_flags, TGP_ASKPASS)) {
 	warningx("the `-A' and `-S' options may not be used together");
 	usage(1);
     }
-    if ((NewArgc == 0 && (rval & MODE_EDIT)) ||
-	(NewArgc > 0 && !(rval & (MODE_RUN | MODE_EDIT | MODE_CHECK))))
+    if ((NewArgc == 0 && mode == MODE_EDIT) ||
+	(NewArgc > 0 && !ISSET(mode, MODE_RUN | MODE_EDIT | MODE_CHECK)))
 	usage(1);
-    if (NewArgc == 0 && rval == MODE_RUN)
-	SET(rval, (MODE_IMPLIED_SHELL | MODE_SHELL));
+    if (NewArgc == 0 && mode == MODE_RUN)
+	SET(flags, (MODE_IMPLIED_SHELL | MODE_SHELL));
 
-    return(rval);
+    return(mode | flags);
 }
 
 /*
