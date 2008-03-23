@@ -2073,3 +2073,14 @@ Sudo 1.6.9p13 released.
 652) Add missing checks for enforcing mode in SELinux RBAC mode.
 
 Sudo 1.6.9p14 released.
+
+653) Fixed installation of sudo_noexec.so on AIX.
+
+654) Updated libtool to version 1.5.26.
+
+655) Fixed printing of default SELinux role and type in -V mode.
+
+656) The HOME environment variable is once again preserved by default,
+     as per the documentation.
+
+Sudo 1.6.9p15 released.
