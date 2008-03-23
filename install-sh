@@ -182,7 +182,7 @@ fi
 
 ##  Get the destination and a temp file in the destination diretory.
 if [ -d "$2" ] ; then
-    DEST="$2/$1"
+    DEST="$2/`basename $1`"
     TEMP="$2/$$.tmp"
 else
     DEST="$2"
