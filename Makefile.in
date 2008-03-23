@@ -62,6 +62,7 @@ bindir = @bindir@
 sbindir = @sbindir@
 sysconfdir = @sysconfdir@
 mandir = @mandir@
+noexecfile = @NOEXECFILE@
 noexecdir = @NOEXECDIR@
 libexecdir = @libexecdir@
 datarootdir = @datarootdir@
@@ -319,10 +320,7 @@ install-binaries: $(PROGS)
 @SELINUX@	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sesh $(DESTDIR)$(libexecdir)/sesh
 
 install-noexec: sudo_noexec.la
-	$(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la $(DESTDIR)$(noexecdir)
-
-bininst-noexec: sudo_noexec.la
-	$(LIBTOOL) --mode=install $(INSTALL) sudo_noexec.la $(DESTDIR)$(noexecdir)
+	test -f .libs/$(noexecfile) && $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0755 .libs/$(noexecfile) $(DESTDIR)$(noexecdir)
 
 install-sudoers:
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \

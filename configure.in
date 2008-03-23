@@ -40,6 +40,7 @@ AC_SUBST(SEMAN)
 AC_SUBST(mansectsu)
 AC_SUBST(mansectform)
 AC_SUBST(mansrcdir)
+AC_SUBST(NOEXECFILE)
 AC_SUBST(NOEXECDIR)
 AC_SUBST(noexec_file)
 AC_SUBST(INSTALL_NOEXEC)
@@ -1186,6 +1187,7 @@ AC_ARG_WITH(noexec, [  --with-noexec[=PATH]      fully qualified pathname of sud
     *)		;;
 esac], [with_noexec="$libexecdir/sudo_noexec$_shrext"])
 AC_MSG_RESULT($with_noexec)
+NOEXECFILE="sudo_noexec$_shrext"
 NOEXECDIR="`echo $with_noexec|sed 's:^\(.*\)/[[^/]]*:\1:'`"
 
 dnl
@@ -1284,12 +1286,6 @@ case "$host" in
 		# Use authenticate(3) as the default authentication method
 		if test X"$with_aixauth" = X""; then
 		    AC_CHECK_FUNCS(authenticate, [AUTH_EXCL_DEF="AIX_AUTH"])
-		fi
- 
-		# AIX shared libs use the .a suffix unless run-time linking
-		# is being used (determined by libtool).
-		if test X"$with_noexec" != X"no" && X"$aix_use_runtimelinking" != X"yes"; then
-		    with_noexec=`echo $with_noexec | sed 's/\.so$/.a/'`
 		fi
 		;;
     *-*-hiuxmpp*)
