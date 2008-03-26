@@ -66,12 +66,35 @@ aix_setlimits(user)
      * and set those values via setrlimit().  Must be run as euid 0.
      */
     for (n = 0; n < sizeof(aix_limits) / sizeof(aix_limits[0]); n++) {
-	if (getuserattr(user, aix_limits[n].soft, &i, SEC_INT) != 0)
-	    continue;
-	rlim.rlim_cur = i;
-	if (getuserattr(user, aix_limits[n].hard, &i, SEC_INT) != 0)
-	    continue;
-	rlim.rlim_max = i;
+	/*
+	 * We have two strategies, depending on whether or not the
+	 * hard limit has been defined.
+	 */
+	if (getuserattr(user, aix_limits[n].hard, &i, SEC_INT) == 0) {
+	    rlim.rlim_max = i == -1 ? RLIM_INFINITY : i;
+	    if (getuserattr(user, aix_limits[n].soft, &i, SEC_INT) == 0)
+		rlim.rlim_cur = i == -1 ? RLIM_INFINITY : i;
+	    else
+		rlim.rlim_cur = rlim.rlim_max;	/* soft not specd, use hard */
+	} else {
+	    /* No hard limit set, try soft limit. */
+	    if (getuserattr(user, aix_limits[n].soft, &i, SEC_INT) == 0)
+		rlim.rlim_cur = i == -1 ? RLIM_INFINITY : i;
+
+	    /* Set hard limit per AIX /etc/security/limits documentation. */
+	    switch (aix_limits[n].resource) {
+		case RLIMIT_CPU:
+		case RLIMIT_FSIZE:
+		    rlim.rlim_max = rlim.rlim_cur;
+		    break;
+		case RLIMIT_STACK:
+		    rlim.rlim_max = 0x400000;
+		    break;
+		default:
+		    rlim.rlim_max = RLIM_INFINITY;
+		    break;
+	    }
+	}
 	(void)setrlimit(aix_limits[n].resource, &rlim);
     }
 }
