@@ -150,22 +150,21 @@ TODO list (most will be addressed in sudo 2.0)
 
 53) Why does testsudoers give wrong line number for parse error?
 
-54) Add non-interactive flag that, if set, just fails if a password is req'd
+54) Should send mail if sudoers does not parse
 
-55) Should send mail if sudoers does not parse
-
-56) Add arg markup to indicate that an arg is a path and treat it specially
+55) Add arg markup to indicate that an arg is a path and treat it specially
     regarding cwd.
 
-57) Should -k/-K clear *all* timestamps in tty_ticket mode?
+56) Should -k/-K clear *all* timestamps in tty_ticket mode?
     http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=306919
+    Perhaps change the meaning of -k vs. -K in 1.7.
 
-58) Dan says Pam activity should probably be happening after
+57) Dan says Pam activity should probably be happening after
     setkeycreatecon and setexeccon (which may use the keyring or
     run external commands).  However, this means sendmail
     will be executed w/ the new context if user is denied.
 
-59) Allow the -k flag to be used in conjunction with other flags
+58) Allow the -k flag to be used in conjunction with other flags
     so you can force a password check w/ a command.
 
-60) Decide between option and flag in sudo and visudo man pages
+59) Decide between option and flag in sudo and visudo man pages
