@@ -1,3 +1,74 @@
+2008-03-27 19:04  millert
+
+	* TODO: sync
+
+2008-03-27 19:01  millert
+
+	* sudo.h: Split MODE_* defines into primary and flags.
+
+2008-03-26 13:11  millert
+
+	* aix.c: It turns out the logic for getting AIX limits is more
+	  convoluted than I realized and differs depending on whether the
+	  soft and/or hard limits are defined.
+
+2008-03-23 10:18  millert
+
+	* Makefile.in, configure, configure.in: Back out AIX-specific
+	  change to set the sudo_noexec path to the .a file, we do really
+	  want to use the .so file.  Since libtool doesn't do that
+	  correctly, just install the .so file ourselves in the Makefile.
+
+2008-03-23 10:12  millert
+
+	* install-sh: If the file given to install is a path, only use the
+	  basename of the file when building the destination path.
+
+2008-03-18 16:08  millert
+
+	* sudo.c: parse_args() cleanup: Sort command line options in the
+	  getopt() switch The -U option requires a parameter Normalize a
+	  few ISSET calls Split mode into mode and flags and retire the
+	  now-obsolete excl variable
+
+2008-03-18 16:04  millert
+
+	* WHATSNEW, check.c, sudo.c, sudo.cat, sudo.h, sudo.man.in,
+	  sudo.pod, sudo_usage.h.in: Add -n (non-interactive) flag.
+
+2008-03-18 15:59  millert
+
+	* sudo.c: Move version printing, etc. into a separate function.
+
+2008-03-18 15:57  millert
+
+	* sudo.c: Don't try to cleanup nsswitch if it has not been
+	  initialized.
+
+2008-03-17 11:09  millert
+
+	* logging.c: Block SIGPIPE in send_mail() so sudo is not killed by
+	  a problem executing the mailer.
+
+2008-03-14 08:11  millert
+
+	* configure.in, configure: AIX shared libs end in .a, not .so.
+
+2008-03-13 07:34  millert
+
+	* env.c: Preserve HOME by default too. Matches documentation and
+	  previous behavior.
+
+2008-03-12 19:42  millert
+
+	* sudo.c: Use getopt() to parse the command line.  We need to be
+	  able to intersperse env variables and options yet still honor
+	  "--"" which complicates things slightly.
+
+2008-03-06 14:46  millert
+
+	* ChangeLog: sync
+
 2008-03-06 14:43  millert
 
 	* acsite.m4, configure, ltmain.sh: update to libtool-1.5.26
