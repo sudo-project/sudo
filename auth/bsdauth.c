@@ -146,7 +146,7 @@ bsdauth_verify(pw, prompt, auth)
 	nil_pw = 1;
 
     if (pass) {
-	authok = auth_userresponse(as, (char *)pass, 1);
+	authok = auth_userresponse(as, pass, 1);
 	zero_bytes(pass, strlen(pass));
     }
 
