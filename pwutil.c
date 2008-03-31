@@ -370,7 +370,7 @@ sudo_setpwent()
 	pwcache_byname = rbcreate(cmp_pwnam);
 }
 
-#ifdef notyet
+#ifdef PURIFY
 static void pw_free	__P((void *));
 
 void
@@ -398,13 +398,16 @@ pw_free(v)
     }
     efree(pw);
 }
-#endif
+#endif /* PURIFY */
 
 void
 sudo_endpwent()
 {
     endpwent();
     sudo_endspent();
+#ifdef PURIFY
+    sudo_freepwcache();
+#endif
 }
 
 /*
@@ -567,23 +570,26 @@ sudo_setgrent()
 	grcache_byname = rbcreate(cmp_grnam);
 }
 
-#if 0
+#ifdef PURIFY
 void
 sudo_freegrcache()
 {
-    if (free_cache && grcache_bygid != NULL) {
+    if (grcache_bygid != NULL) {
 	rbdestroy(grcache_bygid, free);
 	grcache_bygid = NULL;
     }
-    if (free_cache && grcache_byname != NULL) {
+    if (grcache_byname != NULL) {
 	rbdestroy(grcache_byname, NULL);
 	grcache_byname = NULL;
     }
 }
-#endif
+#endif /* PURIFY */
 
 void
 sudo_endgrent()
 {
     endgrent();
+#ifdef PURIFY
+    sudo_freegrcache();
+#endif
 }
