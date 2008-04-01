@@ -401,10 +401,10 @@ password-protected.  The key type depends on the LDAP libraries
 used.
 
 OpenLDAP:
-    C<tls_cert /etc/ssl/client_key.pem>
+    C<tls_key /etc/ssl/client_key.pem>
 
 Netscape-derived:
-    C<tls_cert /var/ldap/key3.db>
+    C<tls_key /var/ldap/key3.db>
 
 =item B<TLS_RANDFILE> file name
 
