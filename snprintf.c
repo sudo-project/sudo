@@ -91,18 +91,18 @@ static int xxxprintf	 __P((char **, size_t, int, const char *, va_list));
 # define LONG_MAX	(ULONG_MAX / 2)
 #endif
 #ifdef HAVE_LONG_LONG
-# ifndef UQUAD_MAX
-#  ifdef ULONG_LONG_MAX
-#   define UQUAD_MAX	ULONG_LONG_MAX
+# ifndef ULLONG_MAX
+#  ifdef UQUAD_MAX
+#   define ULLONG_MAX	UQUAD_MAX
 #  else
-#   define UQUAD_MAX	((unsigned long long)-1)
+#   define ULLONG_MAX	((unsigned long long)-1)
 #  endif
 # endif
-# ifndef QUAD_MAX
-#  ifdef LONG_LONG_MAX
-#   define QUAD_MAX	LONG_LONG_MAX
+# ifndef LLONG_MAX
+#  ifdef QUAD_MAX
+#   define LLONG_MAX	QUAD_MAX
 #  else
-#   define QUAD_MAX	(UQUAD_MAX / 2)
+#   define LLONG_MAX	(ULLONG_MAX / 2)
 #  endif
 # endif
 #endif /* HAVE_LONG_LONG */
@@ -237,7 +237,7 @@ __uqtoa(val, endp, base, octzero, xdigs)
 			*--cp = to_char(val % 10);
 			return (cp);
 		}
-		if (val > QUAD_MAX) {
+		if (val > LLONG_MAX) {
 			*--cp = to_char(val % 10);
 			sval = val / 10;
 		} else
