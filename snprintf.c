@@ -52,6 +52,9 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
 #ifdef HAVE_STRING_H
 # if defined(HAVE_MEMORY_H) && !defined(STDC_HEADERS)
 #  include <memory.h>
