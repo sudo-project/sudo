@@ -54,6 +54,17 @@ static struct aix_limit aix_limits[] = {
     { RLIMIT_NOFILE, S_UNOFILE, S_UNOFILE_HARD }
 };
 
+static int
+aix_getlimit(user, lim, valp)
+    char *user;
+    char *lim;
+    int *valp;
+{
+    if (getuserattr(user, lim, valp, SEC_INT) != 0)
+	return getuserattr("default", lim, valp, SEC_INT);
+    return(0);
+}
+
 void
 aix_setlimits(user)
     char *user;
@@ -70,15 +81,15 @@ aix_setlimits(user)
 	 * We have two strategies, depending on whether or not the
 	 * hard limit has been defined.
 	 */
-	if (getuserattr(user, aix_limits[n].hard, &i, SEC_INT) == 0) {
+	if (aix_getlimit(user, aix_limits[n].hard, &i) == 0) {
 	    rlim.rlim_max = i == -1 ? RLIM_INFINITY : i;
-	    if (getuserattr(user, aix_limits[n].soft, &i, SEC_INT) == 0)
+	    if (aix_getlimit(user, aix_limits[n].soft, &i) == 0)
 		rlim.rlim_cur = i == -1 ? RLIM_INFINITY : i;
 	    else
 		rlim.rlim_cur = rlim.rlim_max;	/* soft not specd, use hard */
 	} else {
 	    /* No hard limit set, try soft limit. */
-	    if (getuserattr(user, aix_limits[n].soft, &i, SEC_INT) == 0)
+	    if (aix_getlimit(user, aix_limits[n].soft, &i) == 0)
 		rlim.rlim_cur = i == -1 ? RLIM_INFINITY : i;
 
 	    /* Set hard limit per AIX /etc/security/limits documentation. */
