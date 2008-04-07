@@ -996,7 +996,7 @@ parse_args(argc, argv)
     if ((NewArgc == 0 && mode == MODE_EDIT) ||
 	(NewArgc > 0 && !ISSET(mode, MODE_RUN | MODE_EDIT | MODE_CHECK)))
 	usage(1);
-    if (NewArgc == 0 && mode == MODE_RUN)
+    if (NewArgc == 0 && mode == MODE_RUN && !ISSET(flags, MODE_SHELL))
 	SET(flags, (MODE_IMPLIED_SHELL | MODE_SHELL));
 
     return(mode | flags);
