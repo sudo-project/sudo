@@ -1466,9 +1466,6 @@ case "$host" in
 		shadow_funcs="getspnam"
 		shadow_libs_optional="-lshadow"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
-		AC_CHECK_FUNCS(dgettext, [],
-		    [AC_CHECK_LIB(intl, dgettext, [LIBS="${LIBS} -lintl"]
-		    [AC_DEFINE(HAVE_DGETTEXT)])])
 		;;
     *-convex-bsd*)
 		OSDEFS="${OSDEFS} -D_CONVEX_SOURCE"
