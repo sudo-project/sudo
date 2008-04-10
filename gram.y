@@ -686,6 +686,7 @@ init_parser(path, quiet)
     struct userspec *us;
     struct privilege *priv;
     struct cmndspec *cs;
+    struct sudo_command *c;
 
     while ((us = tq_pop(&userspecs)) != NULL) {
 	while ((m = tq_pop(&us->users)) != NULL) {
@@ -728,6 +729,11 @@ init_parser(path, quiet)
 			efree(m);
 		    }
 		}
+		if (cs->cmnd->type == COMMAND) {
+			c = (struct sudo_command *) cs->cmnd->name;
+			efree(c->cmnd);
+			efree(c->args);
+		}
 		efree(cs->cmnd->name);
 		efree(cs->cmnd);
 		efree(cs);
@@ -742,6 +748,11 @@ init_parser(path, quiet)
 	if (tq_last(&d->binding) != binding) {
 	    binding = tq_last(&d->binding);
 	    while ((m = tq_pop(&d->binding)) != NULL) {
+		if (m->type == COMMAND) {
+			c = (struct sudo_command *) m->name;
+			efree(c->cmnd);
+			efree(c->args);
+		}
 		efree(m->name);
 		efree(m);
 	    }

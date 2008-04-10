@@ -717,6 +717,7 @@ init_parser(path, quiet)
     struct userspec *us;
     struct privilege *priv;
     struct cmndspec *cs;
+    struct sudo_command *c;
 
     while ((us = tq_pop(&userspecs)) != NULL) {
 	while ((m = tq_pop(&us->users)) != NULL) {
@@ -759,6 +760,11 @@ init_parser(path, quiet)
 			efree(m);
 		    }
 		}
+		if (cs->cmnd->type == COMMAND) {
+			c = (struct sudo_command *) cs->cmnd->name;
+			efree(c->cmnd);
+			efree(c->args);
+		}
 		efree(cs->cmnd->name);
 		efree(cs->cmnd);
 		efree(cs);
@@ -773,6 +779,11 @@ init_parser(path, quiet)
 	if (tq_last(&d->binding) != binding) {
 	    binding = tq_last(&d->binding);
 	    while ((m = tq_pop(&d->binding)) != NULL) {
+		if (m->type == COMMAND) {
+			c = (struct sudo_command *) m->name;
+			efree(c->cmnd);
+			efree(c->args);
+		}
 		efree(m->name);
 		efree(m);
 	    }
@@ -793,7 +804,7 @@ init_parser(path, quiet)
     sudolineno = 1;
     verbose = !quiet;
 }
-#line 745 "y.tab.c"
+#line 756 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1530,7 +1541,7 @@ case 92:
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
-#line 1482 "y.tab.c"
+#line 1493 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

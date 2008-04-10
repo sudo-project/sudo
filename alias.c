@@ -43,6 +43,7 @@
 #include "sudo.h"
 #include "parse.h"
 #include "redblack.h"
+#include <gram.h>
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
@@ -129,7 +130,7 @@ alias_add(name, type, members)
     a->seqno = 0;
     list2tq(&a->members, members);
     if (rbinsert(aliases, a)) {
-	efree(a);
+	alias_free(a);
 	snprintf(errbuf, sizeof(errbuf), "Alias `%s' already defined", name);
 	return(errbuf);
     }
@@ -165,10 +166,17 @@ alias_free(v)
 {
     struct alias *a = (struct alias *)v;
     struct member *m;
+    struct sudo_command *c;
     void *next;
 
+    efree(a->name);
     for (m = a->members.first; m != NULL; m = next) {
 	next = m->next;
+	if (m->type == COMMAND) {
+		c = (struct sudo_command *) m->name;
+		efree(c->cmnd);
+		efree(c->args);
+	}
 	efree(m->name);
 	efree(m);
     }

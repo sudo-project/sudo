@@ -258,8 +258,6 @@ DEFVAR			[a-z_]+
 			    int n;
 			    for (n = 0; isblank((unsigned char)yytext[n]); n++)
 				continue;
-			    if (!fill(yytext + n, yyleng - n))
-				yyterminate();
 			    switch (yytext[n]) {
 				case 'H':
 				    LEXTRACE("HOSTALIAS ");
