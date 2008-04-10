@@ -740,6 +740,7 @@ init_parser(path, quiet)
 	    }
 	    efree(priv);
 	}
+	efree(us);
     }
     tq_init(&userspecs);
 

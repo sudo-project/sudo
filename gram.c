@@ -771,6 +771,7 @@ init_parser(path, quiet)
 	    }
 	    efree(priv);
 	}
+	efree(us);
     }
     tq_init(&userspecs);
 
@@ -804,7 +805,7 @@ init_parser(path, quiet)
     sudolineno = 1;
     verbose = !quiet;
 }
-#line 756 "y.tab.c"
+#line 757 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1541,7 +1542,7 @@ case 92:
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
-#line 1493 "y.tab.c"
+#line 1494 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
