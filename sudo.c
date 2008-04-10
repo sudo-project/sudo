@@ -280,7 +280,7 @@ main(argc, argv, envp)
 
 	/* Local sudoers file overrides LDAP if we have a match. */
 	v = sudoers_lookup(pwflag);
-	if (ISSET(v, VALIDATE_OK))
+	if (validated == VALIDATE_ERROR || ISSET(v, VALIDATE_OK))
 	    validated = v;
     }
 #else
