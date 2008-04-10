@@ -23194,7 +23194,7 @@ echo "$as_me: WARNING: Unable to locate gssapi.h, you will have to edit the Make
 	fi
     fi
 
-    SUDO_LIBS="${SUDO_LIBS}${LDAP_LIBS}"
+    SUDO_LIBS="${SUDO_LIBS} ${LDAP_LIBS}"
     LIBS="$_LIBS"
     LDFLAGS="$_LDFLAGS"
 fi
