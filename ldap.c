@@ -82,6 +82,10 @@ __unused static const char rcsid[] = "$Sudo$";
 # define LDAP_OPT_SUCCESS LDAP_SUCCESS
 #endif
 
+#ifndef LDAPS_PORT
+# define LDAPS_PORT 636
+#endif
+
 #define	DPRINTF(args, level)	if (ldap_conf.debug >= level) warnx args
 
 #define CONF_BOOL	0
