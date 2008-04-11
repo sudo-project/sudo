@@ -89,6 +89,10 @@ __unused static const char rcsid[] = "$Sudo$";
 # define LDAP_OPT_SUCCESS LDAP_SUCCESS
 #endif
 
+#ifndef LDAPS_PORT
+# define LDAPS_PORT 636
+#endif
+
 #if defined(HAVE_LDAP_SASL_INTERACTIVE_BIND_S) && !defined(LDAP_SASL_QUIET)
 # define LDAP_SASL_QUIET	0
 #endif
