@@ -876,7 +876,7 @@ sudo_ldap_read_secret(path)
 		*cp = '\0';
 	    /* copy to bindpw and binddn */
 	    efree(ldap_conf.bindpw);
-	    ldap_conf.bindpw = estrdup(cp);
+	    ldap_conf.bindpw = estrdup(buf);
 	    efree(ldap_conf.binddn);
 	    ldap_conf.binddn = ldap_conf.rootbinddn;
 	    ldap_conf.rootbinddn = NULL;
