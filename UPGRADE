@@ -14,7 +14,7 @@ o Upgrading from a version prior to 1.7.0:
     This can be changed with an nsswitch.conf line, e.g.:
         sudoers:        ldap files
     Would case LDAP to be searched first, then the sudoers file.
-    To restore the pre-1.7 behavior, run configure with the
+    To restore the pre-1.7.0 behavior, run configure with the
     --with-nsswitch=no flag.
 
     Sudo now ignores user .ldaprc files as well as system LDAP defaults.
