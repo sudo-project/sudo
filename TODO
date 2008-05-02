@@ -131,8 +131,12 @@ TODO list (most will be addressed in sudo 2.0)
 
 46) Use mkstemp() for visudo temp files?  Also re-examine locking.
 
-47) Run sudo through valgrind --tool=memcheck on Linux.  Need to
-    add #ifdefs to free stuff on exit, e.g.  #ifdef PURIFY
+47) Run sudo through valgrind.
+    sudo valgrind --tool=memcheck --leak-check=full --leak-resolution=high \
+    --num-callers=40 ./sudo aksdjha foo
+    Says there are a couple minor leaks in the parser.  Maybe make
+    testsudoers pass cleanly.  Can use rh5 vm for this.  Note that
+    the process must not exec if we want to get the info.
 
 48) Consolidate line wrap code.
 
@@ -168,3 +172,13 @@ TODO list (most will be addressed in sudo 2.0)
     so you can force a password check w/ a command.
 
 59) Decide between option and flag in sudo and visudo man pages
+
+60) Add report program (or mode) to print out all permissions on a
+    per-user basis.  Would also be nice to have a diff facility given
+    two sudoers files.
+
+61) Fix test for dgettext() in libc.  Solaris appears to need to link
+    with -lintl but configure doesn't add it to LIBS.  Try w/
+    Sun Pro C Compiler on ecbuild-20
+
+62) Include gram.h in parse.h

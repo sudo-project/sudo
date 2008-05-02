@@ -146,7 +146,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "March  5, 2008" "1.7" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "May  2, 2008" "1.7.0" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers.ldap \- sudo LDAP configuration
 .SH "DESCRIPTION"
@@ -498,10 +498,10 @@ password\-protected.  The key type depends on the \s-1LDAP\s0 libraries
 used.
 .Sp
 OpenLDAP:
-    \f(CW\*(C`tls_cert /etc/ssl/client_key.pem\*(C'\fR
+    \f(CW\*(C`tls_key /etc/ssl/client_key.pem\*(C'\fR
 .Sp
 Netscape\-derived:
-    \f(CW\*(C`tls_cert /var/ldap/key3.db\*(C'\fR
+    \f(CW\*(C`tls_key /var/ldap/key3.db\*(C'\fR
 .IP "\fB\s-1TLS_RANDFILE\s0\fR file name" 4
 .IX Item "TLS_RANDFILE file name"
 The \fB\s-1TLS_RANDFILE\s0\fR parameter specifies the path to an entropy

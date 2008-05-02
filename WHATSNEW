@@ -1,4 +1,4 @@
-What's new in Sudo 1.7?
+What's new in Sudo 1.7.0?
 
  * Rewritten parser that converts sudoers into a set of data structures.
    This eliminates a number of ordering issues and makes it possible to
