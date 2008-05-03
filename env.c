@@ -346,7 +346,8 @@ insert_env(str, dupcheck, dosync)
 
 	    for (nep = env.envp; *nep; nep++) {
 		if (strncmp(str, *nep, varlen) == 0) {
-		    *nep = str;
+		    if (dupcheck != -1)
+			*nep = str;
 		    return;
 		}
 	    }
@@ -738,7 +739,6 @@ validate_env_vars(env_vars)
     }
 }
 
-#if defined(__linux__) || defined(_AIX)
 /*
  * Read in /etc/environment ala AIX and Linux.
  * Lines are in the form of NAME=VALUE
@@ -746,8 +746,9 @@ validate_env_vars(env_vars)
  * character are skipped.
  */
 void
-read_env_file(path)
+read_env_file(path, replace)
     const char *path;
+    int replace;
 {
     FILE *fp;
     char *cp;
@@ -768,11 +769,10 @@ read_env_file(path)
 	if (strchr(cp, '=') == NULL)
 	    continue;
 
-	insert_env(estrdup(cp), TRUE, TRUE);
+	insert_env(estrdup(cp), replace ? TRUE : -1, TRUE);
     }
     fclose(fp);
 }
-#endif /* __linux__ || _AIX */
 
 void
 init_envtables()

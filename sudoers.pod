@@ -926,6 +926,14 @@ as the prompt and write the user's password to the standard output.
 The value of I<askpass> may be overridden by the C<SUDO_ASKPASS>
 environment variable.
 
+=item env_file
+
+The I<env_file> options specifies the fully-qualilfy path to a file
+containing variables to be set in the environment of the program
+being run.  Entries in this file should be of the form C<VARIABLE=value>.
+Variables in this file are subject to other B<sudo> environment
+settings such as I<env_keep> and I<env_check>.
+
 =item exempt_group
 
 Users in this group are exempt from password and PATH requirements.

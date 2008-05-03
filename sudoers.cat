@@ -915,7 +915,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    _a_s_k_p_a_s_s may be overridden by the SUDO_ASKPASS environment
                    variable.
 
-
+       env_file    The _e_n_v___f_i_l_e options specifies the fully-qualilfy path to a
 
 
 
@@ -927,6 +927,12 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+                   file containing variables to be set in the environment of
+                   the program being run.  Entries in this file should be of
+                   the form VARIABLE=value.  Variables in this file are sub-
+                   ject to other ssuuddoo environment settings such as _e_n_v___k_e_e_p
+                   and _e_n_v___c_h_e_c_k.
 
        exempt_group
                    Users in this group are exempt from password and PATH
@@ -977,12 +983,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    ting a path turns on logging to a file; negating this
                    option turns it off.  By default, ssuuddoo logs via syslog.
 
-       mailerflags Flags to use when invoking mailer. Defaults to --tt.
-
-       mailerpath  Path to mail program used to send warning mail.  Defaults
-                   to the path to sendmail found at configure time.
-
-
 
 
 1.7.0                      May  2, 2008                        15
@@ -993,6 +993,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+       mailerflags Flags to use when invoking mailer. Defaults to --tt.
+
+       mailerpath  Path to mail program used to send warning mail.  Defaults
+                   to the path to sendmail found at configure time.
 
        mailfrom    Address to use for the "from" address when sending warning
                    and error mail.  The address should be enclosed in double
@@ -1042,12 +1047,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        environment if the variable's value contains % or /
                        characters.  This can be used to guard against printf-
                        style format vulnerabilities in poorly-written pro-
-                       grams.  The argument may be a double-quoted, space-sep-
-                       arated list or a single value without double-quotes.
-                       The list can be replaced, added to, deleted from, or
-                       disabled by using the =, +=, -=, and ! operators
-                       respectively.  Regardless of whether the env_reset
-                       option is enabled or disabled, variables specified by
+                       grams.  The argument may be a double-quoted, space-
 
 
 
@@ -1060,6 +1060,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+                       separated list or a single value without double-quotes.
+                       The list can be replaced, added to, deleted from, or
+                       disabled by using the =, +=, -=, and ! operators
+                       respectively.  Regardless of whether the env_reset
+                       option is enabled or disabled, variables specified by
                        env_check will be preserved in the environment if they
                        pass the aforementioned check.  The default list of
                        environment variables to check is displayed when ssuuddoo
@@ -1106,14 +1111,9 @@ EEXXAAMMPPLLEESS
        Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of these are a bit
        contrived.  First, we define our _a_l_i_a_s_e_s:
 
-        # User alias specification
-        User_Alias     FULLTIMERS = millert, mikef, dowdy
-        User_Alias     PARTTIMERS = bostley, jwfox, crawl
-        User_Alias     WEBMASTERS = will, wendy, wim
 
-        # Runas alias specification
-        Runas_Alias    OP = root, operator
-        Runas_Alias    DB = oracle, sybase
+
+
 
 
 
@@ -1125,6 +1125,15 @@ EEXXAAMMPPLLEESS
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+        # User alias specification
+        User_Alias     FULLTIMERS = millert, mikef, dowdy
+        User_Alias     PARTTIMERS = bostley, jwfox, crawl
+        User_Alias     WEBMASTERS = will, wendy, wim
+
+        # Runas alias specification
+        Runas_Alias    OP = root, operator
+        Runas_Alias    DB = oracle, sybase
 
         # Host alias specification
         Host_Alias     SPARC = bigtime, eclipse, moet, anchor :\
@@ -1172,15 +1181,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually determines who may run
        what.
 
-        root           ALL = (ALL) ALL
-        %wheel         ALL = (ALL) ALL
-
-       We let rroooott and any user in group wwhheeeell run any command on any host as
-       any user.
-
-        FULLTIMERS     ALL = NOPASSWD: ALL
-
-
 
 
 1.7.0                      May  2, 2008                        18
@@ -1191,6 +1191,14 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+        root           ALL = (ALL) ALL
+        %wheel         ALL = (ALL) ALL
+
+       We let rroooott and any user in group wwhheeeell run any command on any host as
+       any user.
+
+        FULLTIMERS     ALL = NOPASSWD: ALL
 
        Full time sysadmins (mmiilllleerrtt, mmiikkeeff, and ddoowwddyy) may run any command on
        any host without authenticating themselves.
@@ -1239,14 +1247,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
         jim            +biglab = ALL
 
-       The user jjiimm may run any command on machines in the _b_i_g_l_a_b netgroup.
-       ssuuddoo knows that "biglab" is a netgroup due to the '+' prefix.
-
-        +secretaries   ALL = PRINTING, /usr/bin/adduser, /usr/bin/rmuser
-
-       Users in the sseeccrreettaarriieess netgroup need to help manage the printers as
-       well as add and remove users, so they are allowed to run those commands
-
 
 
 1.7.0                      May  2, 2008                        19
@@ -1258,6 +1258,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       The user jjiimm may run any command on machines in the _b_i_g_l_a_b netgroup.
+       ssuuddoo knows that "biglab" is a netgroup due to the '+' prefix.
+
+        +secretaries   ALL = PRINTING, /usr/bin/adduser, /usr/bin/rmuser
+
+       Users in the sseeccrreettaarriieess netgroup need to help manage the printers as
+       well as add and remove users, so they are allowed to run those commands
        on all machines.
 
         fred           ALL = (DB) NOPASSWD: ALL
@@ -1305,13 +1312,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        This is a bit tedious for users to type, so it is a prime candidate for
        encapsulating in a shell script.
 
-SSEECCUURRIITTYY NNOOTTEESS
-       It is generally not effective to "subtract" commands from ALL using the
-       '!' operator.  A user can trivially circumvent this by copying the
-       desired command to a different name and then executing that.  For exam-
-       ple:
-
-           bill        ALL = ALL, !SU, !SHELLS
 
 
 
@@ -1323,6 +1323,14 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+SSEECCUURRIITTYY NNOOTTEESS
+       It is generally not effective to "subtract" commands from ALL using the
+       '!' operator.  A user can trivially circumvent this by copying the
+       desired command to a different name and then executing that.  For exam-
+       ple:
+
+           bill        ALL = ALL, !SU, !SHELLS
 
        Doesn't really prevent bbiillll from running the commands listed in _S_U or
        _S_H_E_L_L_S since he can simply copy those commands to a different name, or
@@ -1370,14 +1378,6 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
                  in the standard library with its own that simply return an
                  error.  Unfortunately, there is no foolproof way to know
                  whether or not _n_o_e_x_e_c will work at compile-time.  _n_o_e_x_e_c
-                 should work on SunOS, Solaris, *BSD, Linux, IRIX, Tru64 UNIX,
-                 MacOS X, and HP-UX 11.x.  It is known nnoott to work on AIX and
-                 UnixWare.  _n_o_e_x_e_c is expected to work on most operating sys-
-                 tems that support the LD_PRELOAD environment variable.  Check
-                 your operating system's manual pages for the dynamic linker
-                 (usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader) to see
-                 if LD_PRELOAD is supported.
-
 
 
 
@@ -1389,6 +1389,14 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+                 should work on SunOS, Solaris, *BSD, Linux, IRIX, Tru64 UNIX,
+                 MacOS X, and HP-UX 11.x.  It is known nnoott to work on AIX and
+                 UnixWare.  _n_o_e_x_e_c is expected to work on most operating sys-
+                 tems that support the LD_PRELOAD environment variable.  Check
+                 your operating system's manual pages for the dynamic linker
+                 (usually ld.so, ld.so.1, dyld, dld.sl, rld, or loader) to see
+                 if LD_PRELOAD is supported.
 
                  To enable _n_o_e_x_e_c for a command, use the NOEXEC tag as docu-
                  mented in the User Specification section above.  Here is that
@@ -1436,6 +1444,18 @@ DDIISSCCLLAAIIMMEERR
        including, but not limited to, the implied warranties of merchantabil-
        ity and fitness for a particular purpose are disclaimed.  See the
        LICENSE file distributed with ssuuddoo or
+
+
+
+1.7.0                      May  2, 2008                        22
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        http://www.sudo.ws/sudo/license.html for complete details.
 
 
@@ -1447,6 +1467,52 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.0                      May  2, 2008                        22
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.7.0                      May  2, 2008                        23
 
 

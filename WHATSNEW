@@ -59,6 +59,9 @@ What's new in Sudo 1.7.0?
    "From:" field in the warning/error mail.  If unspecified, the
    login name of the invoking user is used.
 
+ * A new Defaults option, "env_file" that refers to a file containing
+   environment variables to be set in the command being run.
+
  * A new flag, -n, may be used to indicate that sudo should not
    prompt the user for a password and, instead, exit with an error
    if authentication is required.

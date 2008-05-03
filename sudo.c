@@ -474,12 +474,16 @@ main(argc, argv, envp)
 
 #if defined(__linux__) || defined(_AIX)
 	    /* Insert system-wide environment variables. */
-	    read_env_file(_PATH_ENVIRONMENT);
+	    read_env_file(_PATH_ENVIRONMENT, TRUE);
 #endif
 	}
 
 	if (ISSET(sudo_mode, MODE_EDIT))
 	    exit(sudo_edit(NewArgc, NewArgv, envp));
+
+	/* Insert system-wide environment variables. */
+	if (def_env_file)
+	    read_env_file(def_env_file, FALSE);
 
 	/* Insert user-specified environment variables. */
 	insert_env_vars(sudo_user.env_vars);

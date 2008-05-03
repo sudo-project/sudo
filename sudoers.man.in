@@ -1036,6 +1036,13 @@ specified by \fIaskpass\fR should display the argument passed to it
 as the prompt and write the user's password to the standard output.
 The value of \fIaskpass\fR may be overridden by the \f(CW\*(C`SUDO_ASKPASS\*(C'\fR
 environment variable.
+.IP "env_file" 12
+.IX Item "env_file"
+The \fIenv_file\fR options specifies the fully-qualilfy path to a file
+containing variables to be set in the environment of the program
+being run.  Entries in this file should be of the form \f(CW\*(C`VARIABLE=value\*(C'\fR.
+Variables in this file are subject to other \fBsudo\fR environment
+settings such as \fIenv_keep\fR and \fIenv_check\fR.
 .IP "exempt_group" 12
 .IX Item "exempt_group"
 Users in this group are exempt from password and \s-1PATH\s0 requirements.

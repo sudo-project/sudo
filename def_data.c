@@ -291,6 +291,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Path to the askpass helper program: %s",
 	NULL,
     }, {
+	"env_file", T_STR|T_PATH|T_BOOL,
+	"Path to the sudo-specific environment file: %s",
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

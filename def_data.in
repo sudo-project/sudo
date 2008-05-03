@@ -214,3 +214,6 @@ type
 askpass
 	T_STR|T_PATH|T_BOOL
 	"Path to the askpass helper program: %s"
+env_file
+	T_STR|T_PATH|T_BOOL
+	"Path to the sudo-specific environment file: %s"

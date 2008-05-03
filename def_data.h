@@ -132,6 +132,8 @@
 #define I_TYPE                  65
 #define def_askpass             (sudo_defs_table[66].sd_un.str)
 #define I_ASKPASS               66
+#define def_env_file            (sudo_defs_table[67].sd_un.str)
+#define I_ENV_FILE              67
 
 enum def_tupple {
 	never,
