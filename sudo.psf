@@ -74,7 +74,6 @@ product
                 file -m 444 -g bin -o root HISTORY /usr/local/doc/sudo/HISTORY
                 file -m 444 -g bin -o root LICENSE /usr/local/doc/sudo/LICENSE
                 file -m 444 -g bin -o root README /usr/local/doc/sudo/README
-                file -m 444 -g bin -o root TODO /usr/local/doc/sudo/TODO
                 file -m 444 -g bin -o root TROUBLESHOOTING /usr/local/doc/sudo/TROUBLESHOOTING
                 file -m 444 -g bin -o root UPGRADE /usr/local/doc/sudo/UPGRADE
                 file -m 444 -g bin -o root sample.syslog.conf /usr/local/doc/sudo/sample.syslog.conf

@@ -142,7 +142,7 @@ LIB_OBJS = @LIBOBJS@
 VERSION = 1.7.0
 
 DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
-            LICENSE Makefile.in PORTING README README.LDAP TODO \
+            LICENSE Makefile.in PORTING README README.LDAP \
             TROUBLESHOOTING UPGRADE WHATSNEW aclocal.m4 acsite.m4 aixcrypt.exp \
             config.guess config.h.in config.sub configure configure.in \
             def_data.in indent.pro install-sh ltmain.sh mkdefaults \
@@ -153,7 +153,7 @@ DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
 	    sudoers.ldap.pod sudoers2ldif visudo.cat visudo.man.in visudo.pod \
 	    auth/API
 
-BINFILES= ChangeLog HISTORY LICENSE README TODO TROUBLESHOOTING \
+BINFILES= ChangeLog HISTORY LICENSE README TROUBLESHOOTING \
 	  UPGRADE install-sh mkinstalldirs sample.syslog.conf sample.sudoers \
 	  sudo sudo.cat sudo.man sudo.pod sudoers sudoers.cat sudoers.man \
 	  sudoers.pod visudo visudo.cat visudo.man visudo.pod
@@ -493,7 +493,7 @@ depot:
 	( \
 	  tdir=tmp.depot ; \
 	  mkdir $$tdir ; \
-	  for i in sudo visudo sudo.man visudo.man sudoers.man sudoers ChangeLog HISTORY LICENSE README TODO TROUBLESHOOTING UPGRADE sample.syslog.conf sample.sudoers; do \
+	  for i in sudo visudo sudo.man visudo.man sudoers.man sudoers ChangeLog HISTORY LICENSE README TROUBLESHOOTING UPGRADE sample.syslog.conf sample.sudoers; do \
 	    if [ -f $$i ]; then \
 	      cp $$i $$tdir ; \
 	    elif [ -f $(srcdir)/$$i ]; then \
