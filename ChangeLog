@@ -1,3 +1,81 @@
+2008-05-02 20:53  millert
+
+	* WHATSNEW, def_data.c, def_data.h, def_data.in, env.c, sudo.c,
+	  sudo.h, sudoers.cat, sudoers.man.in, sudoers.pod: Add env_file
+	  Defaults option that is similar to /etc/environment on some
+	  systems.
+
+2008-05-02 16:38  millert
+
+	* Makefile.in, README, TODO, WHATSNEW, sudo.cat, sudo.man.in,
+	  sudoers.cat, sudoers.ldap.cat, sudoers.ldap.man.in,
+	  sudoers.man.in, version.h, visudo.cat, visudo.man.in: change
+	  version to 1.7.0
+
+2008-05-02 16:37  millert
+
+	* UPGRADE: initial valgrind pass done
+
+2008-04-23 08:30  millert
+
+	* ldap.c: Fix typo/think in sudo_ldap_read_secret() when storing
+	  the secret.
+
+2008-04-11 10:03  millert
+
+	* ldap.c: define LDAPS_PORT if the system headers do not
+
+2008-04-10 14:54  millert
+
+	* gram.c, gram.y: Fix another memory leak in init_parser().
+
+2008-04-10 12:51  millert
+
+	* configure, configure.in: There was a missing space before the
+	  ldap libs in SUDO_LIBS for some configurations.
+
+2008-04-10 11:28  millert
+
+	* alias.c, gram.c, gram.y, toke.c, toke.l: Clean up some memory
+	  leaks pointed out by valgrind.
+
+2008-04-07 14:39  millert
+
+	* sudo.c: fix "sudo -s" broken by mode/flags breakout
+
+2008-04-07 14:26  millert
+
+	* configure, configure.in: remove duplicate check for dgettext
+
+2008-04-05 15:54  millert
+
+	* aix.c: Fall back to default stanza if no user-specific limit is
+	  found.
+
+2008-04-02 15:56  millert
+
+	* snprintf.c: include stdint.h if present
+
+2008-04-02 15:28  millert
+
+	* snprintf.c: Use LLONG_MAX, not the old QUAD_MAX
+
+2008-04-01 19:18  millert
+
+	* sudoers.ldap.pod: fix cut and pasto
+
+2008-03-31 11:24  millert
+
+	* pwutil.c: Add #ifdef PURITY
+
+2008-03-30 17:36  millert
+
+	* auth/bsdauth.c: remove useless cast
+
+2008-03-27 19:07  millert
+
+	* ChangeLog: sync
+
 2008-03-27 19:04  millert
 
 	* TODO: sync
