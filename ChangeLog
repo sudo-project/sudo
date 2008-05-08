@@ -1,3 +1,17 @@
+2008-05-08 12:49  millert
+
+	* parse.c: Initialize tags to UNSPEC instead of def_* in "sudo -l"
+	  mode.  This fixes a problem where the tag value printed was
+	  influenced by defaults set in the first pass through the parser.
+
+2008-05-03 21:29  millert
+
+	* Makefile.in, sudo.psf: No point in packaging the TODO file
+
+2008-05-03 21:24  millert
+
+	* ChangeLog: sync
+
 2008-05-02 20:53  millert
 
 	* WHATSNEW, def_data.c, def_data.h, def_data.in, env.c, sudo.c,
