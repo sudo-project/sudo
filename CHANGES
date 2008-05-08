@@ -2084,3 +2084,13 @@ Sudo 1.6.9p14 released.
      as per the documentation.
 
 Sudo 1.6.9p15 released.
+
+657) There was a missing space before the ldap libraries in the Makefile
+     for some configurations.
+
+658) LDAPS_PORT may not be defined on older Solaris LDAP SDKs.
+
+659) If the LDAP server could not be contacted and the user was not present
+     in sudoers, a syntax error in sudoers was incorrectly reported.
+
+Sudo 1.6.9p16 released.
