@@ -248,6 +248,7 @@ sudo_file_lookup(nss, validated, pwflag)
 	if (pwcheck == always && def_authenticate)
 	    SET(validated, FLAG_CHECK_USER);
 	else if (pwcheck == never || nopass == TRUE)
+	    /* XXX - breaks NOPASSWD output in -l mode */
 	    def_authenticate = FALSE;
 	return(validated);
     }
@@ -357,9 +358,9 @@ sudo_file_display_priv_short(pw, us, lbuf)
     int nfound = 0;
 
     tq_foreach_fwd(&us->privileges, priv) {
-	tags.noexec = def_noexec;
-	tags.setenv = def_setenv;
-	tags.nopasswd = !def_authenticate;
+	tags.noexec = UNSPEC;
+	tags.setenv = UNSPEC;
+	tags.nopasswd = UNSPEC;
 	lbuf_append(lbuf, "    ", NULL);
 	tq_foreach_fwd(&priv->cmndlist, cs) {
 	    if (cs != tq_first(&priv->cmndlist))
@@ -406,9 +407,9 @@ sudo_file_display_priv_long(pw, us, lbuf)
     int nfound = 0;
 
     tq_foreach_fwd(&us->privileges, priv) {
-	tags.noexec = def_noexec;
-	tags.setenv = def_setenv;
-	tags.nopasswd = !def_authenticate;
+	tags.noexec = UNSPEC;
+	tags.setenv = UNSPEC;
+	tags.nopasswd = UNSPEC;
 	lbuf_print(lbuf);	/* force a newline */
 	lbuf_append(lbuf, "Sudoers entry:", NULL);
 	lbuf_print(lbuf);
