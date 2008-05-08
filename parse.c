@@ -248,7 +248,6 @@ sudo_file_lookup(nss, validated, pwflag)
 	if (pwcheck == always && def_authenticate)
 	    SET(validated, FLAG_CHECK_USER);
 	else if (pwcheck == never || nopass == TRUE)
-	    /* XXX - breaks NOPASSWD output in -l mode */
 	    def_authenticate = FALSE;
 	return(validated);
     }
