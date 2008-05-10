@@ -146,7 +146,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "May  2, 2008" "1.7.0" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "May 10, 2008" "1.7.0" "MAINTENANCE COMMANDS"
 .SH "NAME"
 sudoers.ldap \- sudo LDAP configuration
 .SH "DESCRIPTION"
@@ -349,8 +349,9 @@ In order to use \fBsudo\fR's \s-1LDAP\s0 support, the \fBsudo\fR schema must be
 installed on your \s-1LDAP\s0 server.  In addition, be sure to index the
 \&'sudoUser' attribute.
 .PP
-Two versions of the schema, one for OpenLDAP servers (\fIschema.OpenLDAP\fR)
-and another for Netscape-derived servers (\fIschema.iPlanet\fR), may
+Three versions of the schema: one for OpenLDAP servers (\fIschema.OpenLDAP\fR),
+one for Netscape-derived servers (\fIschema.iPlanet\fR), and one for
+Microsoft Active Directory (\fIschema.ActiveDirectory\fR) may
 be found in the \fBsudo\fR distribution.
 .PP
 The schema for \fBsudo\fR in OpenLDAP form is included in the \s-1EXAMPLES\s0

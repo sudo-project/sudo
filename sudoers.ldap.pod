@@ -231,8 +231,9 @@ In order to use B<sudo>'s LDAP support, the B<sudo> schema must be
 installed on your LDAP server.  In addition, be sure to index the
 'sudoUser' attribute.
 
-Two versions of the schema, one for OpenLDAP servers (F<schema.OpenLDAP>)
-and another for Netscape-derived servers (F<schema.iPlanet>), may
+Three versions of the schema: one for OpenLDAP servers (F<schema.OpenLDAP>),
+one for Netscape-derived servers (F<schema.iPlanet>), and one for
+Microsoft Active Directory (F<schema.ActiveDirectory>) may
 be found in the B<sudo> distribution.
 
 The schema for B<sudo> in OpenLDAP form is included in the L<EXAMPLES>

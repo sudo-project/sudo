@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.0                      May  2, 2008                         1
+1.7.0                      May 10, 2008                         1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.0                      May  2, 2008                         2
+1.7.0                      May 10, 2008                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.0                      May  2, 2008                         3
+1.7.0                      May 10, 2008                         3
 
 
 
@@ -238,9 +238,10 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        on your LDAP server.  In addition, be sure to index the 'sudoUser'
        attribute.
 
-       Two versions of the schema, one for OpenLDAP servers (_s_c_h_e_m_a_._O_p_e_n_L_D_A_P)
-       and another for Netscape-derived servers (_s_c_h_e_m_a_._i_P_l_a_n_e_t), may be found
-       in the ssuuddoo distribution.
+       Three versions of the schema: one for OpenLDAP servers (_s_c_h_e_m_a_._O_p_e_n_L_-
+       _D_A_P), one for Netscape-derived servers (_s_c_h_e_m_a_._i_P_l_a_n_e_t), and one for
+       Microsoft Active Directory (_s_c_h_e_m_a_._A_c_t_i_v_e_D_i_r_e_c_t_o_r_y) may be found in the
+       ssuuddoo distribution.
 
        The schema for ssuuddoo in OpenLDAP form is included in the EXAMPLES sec-
        tion.
@@ -255,11 +256,10 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
        Also note that on systems using the OpenLDAP libraries, default values
        specified in _/_e_t_c_/_o_p_e_n_l_d_a_p_/_l_d_a_p_._c_o_n_f or the user's _._l_d_a_p_r_c files are
-       not used.
 
 
 
-1.7.0                      May  2, 2008                         4
+1.7.0                      May 10, 2008                         4
 
 
 
@@ -267,6 +267,8 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
+
+       not used.
 
        Only those options explicitly listed in _/_e_t_c_/_l_d_a_p_._c_o_n_f that are sup-
        ported by ssuuddoo are honored.  Configuration options are listed below in
@@ -323,9 +325,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-
-
-1.7.0                      May  2, 2008                         5
+1.7.0                      May 10, 2008                         5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.0                      May  2, 2008                         6
+1.7.0                      May 10, 2008                         6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.0                      May  2, 2008                         7
+1.7.0                      May 10, 2008                         7
 
 
 
@@ -523,7 +523,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.7.0                      May  2, 2008                         8
+1.7.0                      May 10, 2008                         8
 
 
 
@@ -589,7 +589,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.0                      May  2, 2008                         9
+1.7.0                      May 10, 2008                         9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.0                      May  2, 2008                        10
+1.7.0                      May 10, 2008                        10
 
 
 
@@ -721,7 +721,7 @@ CCAAVVEEAATTSS
 
 
 
-1.7.0                      May  2, 2008                        11
+1.7.0                      May 10, 2008                        11
 
 
 
@@ -787,6 +787,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.0                      May  2, 2008                        12
+1.7.0                      May 10, 2008                        12
 
 

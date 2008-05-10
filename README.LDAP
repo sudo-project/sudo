@@ -87,6 +87,11 @@ replacing example.com with your domain:
 
     serviceSearchDescriptor: sudoers: ou=sudoers,dc=example,dc=com
 
+If using an Active Directory server, copy schema.ActiveDirectory
+to your Windows domain controller and run the following command:
+
+    ldifde -i -f schema.ActiveDirectory -c dc=X dc=example,dc=com
+
 Importing /etc/sudoers into LDAP
 ================================
 Importing sudoers is a two-step process.

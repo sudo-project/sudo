@@ -142,13 +142,13 @@ LIB_OBJS = @LIBOBJS@
 VERSION = 1.7.0
 
 DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
-            LICENSE Makefile.in PORTING README README.LDAP \
-            TROUBLESHOOTING UPGRADE WHATSNEW aclocal.m4 acsite.m4 aixcrypt.exp \
-            config.guess config.h.in config.sub configure configure.in \
-            def_data.in indent.pro install-sh ltmain.sh mkdefaults \
-            mkinstalldirs pathnames.h.in sample.pam sample.syslog.conf \
-            sample.sudoers schema.OpenLDAP schema.iPlanet sudo.cat \
-            sudo.man.in sudo.pod sudo.psf sudo_usage.h.in sudoers sudoers.cat \
+            LICENSE Makefile.in PORTING README README.LDAP TROUBLESHOOTING \
+	    UPGRADE WHATSNEW aclocal.m4 acsite.m4 aixcrypt.exp config.guess \
+	    config.h.in config.sub configure configure.in def_data.in \
+	    indent.pro install-sh ltmain.sh mkdefaults mkinstalldirs \
+	    pathnames.h.in sample.pam sample.syslog.conf sample.sudoers \
+	    schema.ActiveDirectory schema.OpenLDAP schema.iPlanet sudo.cat \
+	    sudo.man.in sudo.pod sudo.psf sudo_usage.h.in sudoers sudoers.cat \
             sudoers.man.in sudoers.pod sudoers.ldap.cat sudoers.ldap.man.in \
 	    sudoers.ldap.pod sudoers2ldif visudo.cat visudo.man.in visudo.pod \
 	    auth/API
