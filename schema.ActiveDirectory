@@ -4,7 +4,7 @@
 # To extend your Active Directory schema, run the following command
 # on your Windows DC:
 #
-#  ldifde -i -f sudoers-ad-schema.ldf -c dc=X dc=YOURDOMAIN,DC=COM
+#  ldifde -i -f schema.ActiveDirectory -c dc=X dc=YOURDOMAIN,DC=COM
 #
 
 dn: CN=sudoUser,CN=Schema,CN=Configuration,DC=X
