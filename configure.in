@@ -1907,8 +1907,13 @@ if test ${with_pam-"no"} != "no"; then
 	    esac], AC_MSG_RESULT(yes))
 	case $host in
 	    *-*-linux*|*-*-solaris*)
-		    AC_CHECK_FUNCS(dgettext, [], 
-			[AC_CHECK_LIB(intl, dgettext, [LIBS="${LIBS} -lintl"]
+		    # dgettext() may be defined to dgettext_libintl in the
+		    # header file, so first check that it links w/ additional
+		    # libs, then try with -lintl
+		    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+		    [[#include <libintl.h>]], [(void)dgettext((char *)0, (char *)0);])],
+		    [AC_DEFINE(HAVE_DGETTEXT)],
+		    [AC_CHECK_LIB(intl, dgettext, [LIBS="${LIBS} -lintl"]
 			[AC_DEFINE(HAVE_DGETTEXT)])])
 		    ;;
 	esac
