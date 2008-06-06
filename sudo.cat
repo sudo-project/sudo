@@ -14,7 +14,7 @@ SSYYNNOOPPSSIISS
        [_c_o_m_m_a_n_d]
 
        ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-] [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d]
-       [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e] [{--ii | --ss] [<_c_o_m_m_a_n_d}]
+       [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e] [--ii | --ss] [_c_o_m_m_a_n_d]
 
        ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-] [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d]
        [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] file ...
@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.0                      May  2, 2008                         1
+1.7.0                     June  6, 2008                         1
 
 
 
@@ -127,7 +127,7 @@ OOPPTTIIOONNSS
 
 
 
-1.7.0                      May  2, 2008                         2
+1.7.0                     June  6, 2008                         2
 
 
 
@@ -193,7 +193,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.0                      May  2, 2008                         3
+1.7.0                     June  6, 2008                         3
 
 
 
@@ -259,7 +259,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.0                      May  2, 2008                         4
+1.7.0                     June  6, 2008                         4
 
 
 
@@ -325,7 +325,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
 
-1.7.0                      May  2, 2008                         5
+1.7.0                     June  6, 2008                         5
 
 
 
@@ -391,7 +391,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 
 
-1.7.0                      May  2, 2008                         6
+1.7.0                     June  6, 2008                         6
 
 
 
@@ -457,7 +457,7 @@ EENNVVIIRROONNMMEENNTT
 
 
 
-1.7.0                      May  2, 2008                         7
+1.7.0                     June  6, 2008                         7
 
 
 
@@ -523,7 +523,7 @@ AAUUTTHHOORRSS
 
 
 
-1.7.0                      May  2, 2008                         8
+1.7.0                     June  6, 2008                         8
 
 
 
@@ -589,6 +589,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.0                      May  2, 2008                         9
+1.7.0                     June  6, 2008                         9
 
 
