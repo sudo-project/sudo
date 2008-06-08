@@ -19490,8 +19490,9 @@ echo "${ECHO_T}yes" >&6; }
 			;;
 		no)		{ echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
-			    cat >>confdefs.h <<\_ACEOF
-#define NO_PAM_SESSION 1
+
+cat >>confdefs.h <<\_ACEOF
+#define NO_PAM_SESSION
 _ACEOF
 
 			    ;;
