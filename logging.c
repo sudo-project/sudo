@@ -427,7 +427,7 @@ send_mail(line)
     char *p;
     int pfd[2];
     pid_t pid;
-    sigset_t set, oset;
+    sigaction_t sa, saved_sa_pipe;
 #ifndef NO_ROOT_MAILER
     static char *root_envp[] = {
 	"HOME=/",
@@ -443,10 +443,11 @@ send_mail(line)
     if (!def_mailerpath || !def_mailto)
 	return;
 
-    (void) sigemptyset(&set);
-    (void) sigaddset(&set, SIGCHLD);
-    (void) sigaddset(&set, SIGPIPE);
-    (void) sigprocmask(SIG_BLOCK, &set, &oset);
+    /* Ignore SIGPIPE in case mailer exits prematurely (or is missing). */
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = SIG_IGN;
+    (void) sigaction(SIGPIPE, &sa, &saved_sa_pipe);
 
     if (pipe(pfd) == -1)
 	error(1, "cannot open pipe");
@@ -509,7 +510,7 @@ send_mail(line)
     (void) close(pfd[0]);
     mail = fdopen(pfd[1], "w");
 
-    /* Pipes are all setup, send message via sendmail. */
+    /* Pipes are all setup, send message. */
     (void) fprintf(mail, "To: %s\nFrom: %s\nAuto-Submitted: %s\nSubject: ",
 	def_mailto, def_mailfrom ? def_mailfrom : user_name, "auto-generated");
     for (p = def_mailsub; *p; p++) {
@@ -533,9 +534,7 @@ send_mail(line)
 	get_timestr(), user_name, line);
     fclose(mail);
 
-    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
-    /* If mailer is done, wait for it now.  If not, we'll get it later.  */
-    reapchild(SIGCHLD);
+    (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
 }
 
 /*
