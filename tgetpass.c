@@ -90,14 +90,6 @@ __unused static const char rcsid[] = "$Sudo$";
 #endif
 
 /*
- * QNX 6 (at least) has issues with TCSAFLUSH.
- */
-#ifdef __QNX__
-#undef TCSAFLUSH
-#define	TCSAFLUSH	TCSADRAIN
-#endif
-
-/*
  * Compat macros for non-termios systems.
  */
 #ifndef HAVE_TERMIOS_H
