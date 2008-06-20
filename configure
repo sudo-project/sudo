@@ -18063,7 +18063,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 int
 main ()
 {
-DIR d; (void)dirfd(&d);
+DIR *d; (void)dirfd(d);
   ;
   return 0;
 }
