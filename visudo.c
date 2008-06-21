@@ -651,19 +651,13 @@ run_command(path, argv)
     char **argv;
 {
     int status;
-    pid_t pid;
-    sigset_t set, oset;
-
-    (void) sigemptyset(&set);
-    (void) sigaddset(&set, SIGCHLD);
-    (void) sigprocmask(SIG_BLOCK, &set, &oset);
+    pid_t pid, rv;
 
     switch (pid = fork()) {
 	case -1:
 	    error(1, "unable to run %s", path);
 	    break;	/* NOTREACHED */
 	case 0:
-	    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
 	    sudo_endpwent();
 	    sudo_endgrent();
 	    closefrom(STDERR_FILENO + 1);
@@ -673,15 +667,15 @@ run_command(path, argv)
 	    break;	/* NOTREACHED */
     }
 
+    do {
 #ifdef sudo_waitpid
-    pid = sudo_waitpid(pid, &status, 0);
+	rv = sudo_waitpid(pid, &status, 0);
 #else
-    pid = wait(&status);
+	rv = wait(&status);
 #endif
+    } while (rv == -1 && errno == EINTR);
 
-    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
-
-    if (pid == -1 || !WIFEXITED(status))
+    if (rv == -1 || !WIFEXITED(status))
 	return(-1);
     return(WEXITSTATUS(status));
 }

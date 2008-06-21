@@ -153,7 +153,7 @@ login_cap_t *lc;
 #ifdef HAVE_BSD_AUTH_H
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
-sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
+sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
 static char *runas_user;
 static char *runas_group;
 static struct sudo_nss_list *snl;
@@ -208,8 +208,6 @@ main(argc, argv, envp)
     (void) sigaction(SIGINT, &sa, &saved_sa_int);
     (void) sigaction(SIGQUIT, &sa, &saved_sa_quit);
     (void) sigaction(SIGTSTP, &sa, &saved_sa_tstp);
-    sa.sa_handler = reapchild;
-    (void) sigaction(SIGCHLD, &sa, &saved_sa_chld);
 
     /*
      * Turn off core dumps and make sure fds 0-2 are open.
@@ -492,7 +490,6 @@ main(argc, argv, envp)
 	(void) sigaction(SIGINT, &saved_sa_int, NULL);
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	(void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
-	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
 
 	/* Close the password and group files and free up memory. */
 	sudo_endpwent();

@@ -425,8 +425,8 @@ send_mail(line)
 {
     FILE *mail;
     char *p;
-    int pfd[2];
-    pid_t pid;
+    int pfd[2], status;
+    pid_t pid, rv;
     sigaction_t sa, saved_sa_pipe;
 #ifndef NO_ROOT_MAILER
     static char *root_envp[] = {
@@ -443,19 +443,58 @@ send_mail(line)
     if (!def_mailerpath || !def_mailto)
 	return;
 
+    /* Fork a child so we can be asyncronous. */
+    switch (pid = fork()) {
+	case -1:
+	    /* Error. */
+	    error(1, "cannot fork");
+	    break;
+	case 0:
+	    /* Child continues below. */
+	    break;
+	default:
+	    /* Parent waits and returns. */
+	    do {
+#ifdef sudo_waitpid
+		rv = sudo_waitpid(pid, &status, 0);
+#else
+		rv = wait(&status);
+#endif
+	    } while (rv == -1 && errno == EINTR);
+	    return;
+    }
+
+    /* Fork again and orphan the grandchild so parent can continue. */
+    switch (pid = fork()) {
+	case -1:
+	    /* Error. */
+	    warning("cannot fork");
+	    _exit(1);
+	    break;
+	case 0:
+	    /* Grandchild continues below. */
+	    break;
+	default:
+	    /* Orphan grandchild. */
+	    _exit(0);
+    }
+
     /* Ignore SIGPIPE in case mailer exits prematurely (or is missing). */
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     sa.sa_handler = SIG_IGN;
     (void) sigaction(SIGPIPE, &sa, &saved_sa_pipe);
 
-    if (pipe(pfd) == -1)
-	error(1, "cannot open pipe");
+    if (pipe(pfd) == -1) {
+	warning("cannot open pipe");
+	_exit(1);
+    }
 
     switch (pid = fork()) {
 	case -1:
 	    /* Error. */
-	    error(1, "cannot fork");
+	    warning("cannot fork");
+	    _exit(1);
 	    break;
 	case 0:
 	    {
@@ -463,7 +502,7 @@ send_mail(line)
 		char *mpath, *mflags;
 		int i;
 
-		/* Child, set stdin to output side of the pipe */
+		/* Great-grandchild, set stdin to output side of the pipe */
 		if (pfd[0] != STDIN_FILENO) {
 		    (void) dup2(pfd[0], STDIN_FILENO);
 		    (void) close(pfd[0]);
@@ -533,7 +572,13 @@ send_mail(line)
     (void) fprintf(mail, "\n\n%s : %s : %s : %s\n\n", user_host,
 	get_timestr(), user_name, line);
     fclose(mail);
-
+    do {
+#ifdef sudo_waitpid
+        rv = sudo_waitpid(pid, &status, 0);
+#else
+        rv = wait(&status);
+#endif
+    } while (rv == -1 && errno == EINTR);
     (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
 }
 
@@ -549,26 +594,6 @@ should_mail(status)
 	(def_mail_no_user && ISSET(status, FLAG_NO_USER)) ||
 	(def_mail_no_host && ISSET(status, FLAG_NO_HOST)) ||
 	(def_mail_no_perms && !ISSET(status, VALIDATE_OK)));
-}
-
-/*
- * SIGCHLD sig handler--wait for children as they die.
- */
-RETSIGTYPE
-reapchild(sig)
-    int sig;
-{
-    int status, serrno = errno;
-#ifdef sudo_waitpid
-    pid_t pid;
-
-    do {
-	pid = sudo_waitpid(-1, &status, WNOHANG);
-    } while (pid != 0 && (pid != -1 || errno == EINTR));
-#else
-    (void) wait(&status);
-#endif
-    errno = serrno;
 }
 
 /*

@@ -59,7 +59,7 @@
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-extern sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp, saved_sa_chld;
+extern sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
 extern char **environ;
 
 /*
@@ -226,11 +226,10 @@ int sudo_edit(argc, argv, envp)
 	nargv[ac++] = tf[i++].tfile;
     nargv[ac] = NULL;
 
-    /* We wait for our own children and can be suspended. */
+    /* Allow the editor to be suspended. */
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_DFL;
-    (void) sigaction(SIGCHLD, &sa, NULL);
     (void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
 
     /*
@@ -246,7 +245,6 @@ int sudo_edit(argc, argv, envp)
 	/* child */
 	(void) sigaction(SIGINT, &saved_sa_int, NULL);
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
-	(void) sigaction(SIGCHLD, &saved_sa_chld, NULL);
 	set_perms(PERM_FULL_USER);
 	closefrom(def_closefrom + 1);
 	execvp(nargv[0], nargv);
