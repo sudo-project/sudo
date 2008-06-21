@@ -918,7 +918,10 @@ args_done:
 	    warnx("you may not specify environment variables in edit mode");
 	usage(1);
     }
-
+    if (ISSET(rval, MODE_PRESERVE_ENV) && ISSET(rval, MODE_LOGIN_SHELL)) {
+	warnx("you may not specify both the `-i' and `-E' options");
+	usage(1);
+    }
     if (user_runas != NULL && !ISSET(rval, (MODE_EDIT|MODE_RUN))) {
 	if (excl != '\0')
 	    warnx("the `-u' and '-%c' options may not be used together", excl);
