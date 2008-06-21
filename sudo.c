@@ -972,6 +972,10 @@ parse_args(argc, argv)
 	    warningx("you may not specify both the `-i' and `-s' options");
 	    usage(1);
 	}
+	if (ISSET(flags, MODE_PRESERVE_ENV)) {
+	    warningx("you may not specify both the `-i' and `-E' options");
+	    usage(1);
+	}
 	SET(flags, MODE_SHELL);
     }
     if (mode == MODE_EDIT &&

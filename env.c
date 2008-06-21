@@ -471,7 +471,7 @@ rebuild_env(sudo_mode, noexec)
     env.env_size = 128;
     old_envp = env.envp;
     env.envp = emalloc2(env.env_size, sizeof(char *));
-    if (def_env_reset) {
+    if (def_env_reset || ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = environ; *ep; ep++) {
 	    int keepit;
@@ -595,6 +595,7 @@ rebuild_env(sudo_mode, noexec)
     }
 
     /* Set $USER, $LOGNAME and $USERNAME to target if "set_logname" is true. */
+    /* XXX - not needed for MODE_LOGIN_SHELL */
     if (def_set_logname && runas_pw->pw_name) {
 	if (!ISSET(didvar, KEPT_LOGNAME))
 	    _sudo_setenv("LOGNAME", runas_pw->pw_name, TRUE);
@@ -605,6 +606,7 @@ rebuild_env(sudo_mode, noexec)
     }
 
     /* Set $HOME for `sudo -H'.  Only valid at PERM_FULL_RUNAS. */
+    /* XXX - not needed for MODE_LOGIN_SHELL */
     if (runas_pw->pw_dir) {
 	if (ISSET(sudo_mode, MODE_RESET_HOME) ||
 	    (ISSET(sudo_mode, MODE_RUN) && (def_always_set_home ||
