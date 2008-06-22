@@ -1709,7 +1709,7 @@ dnl
 AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
-	       setlocale getaddrinfo)
+	       setlocale getaddrinfo setsid)
 if test -z "$SKIP_SETRESUID"; then
     AC_CHECK_FUNCS(setresuid, [SKIP_SETREUID=yes])
 fi
