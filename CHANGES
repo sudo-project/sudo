@@ -2094,3 +2094,16 @@ Sudo 1.6.9p15 released.
      in sudoers, a syntax error in sudoers was incorrectly reported.
 
 Sudo 1.6.9p16 released.
+
+660) The -i flag should imply resetting the environment, as it did in
+     sudo version prior to 1.6.9.  Also, the -i and -E flags are
+     mutually exclusive.
+
+661) Fixed the configure test for dirfd() under Linux.
+
+662) Fixed test for whether -lintl is required to link.
+
+663) Changed how sudo handles the child process when sending mail.
+     This fixes a problem on Linux with the mail_always option.
+
+Sudo 1.6.9p17 released.
