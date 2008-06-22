@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -52,6 +53,7 @@
 #include <signal.h>
 #include <time.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include "sudo.h"
 
@@ -425,9 +427,9 @@ send_mail(line)
 {
     FILE *mail;
     char *p;
-    int pfd[2], status;
+    int fd, pfd[2], status;
     pid_t pid, rv;
-    sigaction_t sa, saved_sa_pipe;
+    sigaction_t sa;
 #ifndef NO_ROOT_MAILER
     static char *root_envp[] = {
 	"HOME=/",
@@ -443,20 +445,32 @@ send_mail(line)
     if (!def_mailerpath || !def_mailto)
 	return;
 
-    /* Fork a child so we can be asyncronous. */
+    /* Fork and return, child will daemonize. */
     switch (pid = fork()) {
 	case -1:
 	    /* Error. */
 	    error(1, "cannot fork");
 	    break;
 	case 0:
-	    /* Child continues below. */
+	    /* Child. */
+	    switch (pid = fork()) {
+		case -1:
+		    /* Error. */
+		    mysyslog(LOG_ERR, "cannot fork: %m");
+		    _exit(1);
+		case 0:
+		    /* Grandchild continues below. */
+		    break;
+		default:
+		    /* Parent will wait for us. */
+		    _exit(0);
+	    }
 	    break;
 	default:
-	    /* Parent waits and returns. */
+	    /* Parent. */
 	    do {
-#ifdef sudo_waitpid
-		rv = sudo_waitpid(pid, &status, 0);
+#ifdef HAVE_WAITPID
+		rv = waitpid(pid, &status, 0);
 #else
 		rv = wait(&status);
 #endif
@@ -464,36 +478,46 @@ send_mail(line)
 	    return;
     }
 
-    /* Fork again and orphan the grandchild so parent can continue. */
-    switch (pid = fork()) {
-	case -1:
-	    /* Error. */
-	    warning("cannot fork");
-	    _exit(1);
-	    break;
-	case 0:
-	    /* Grandchild continues below. */
-	    break;
-	default:
-	    /* Orphan grandchild. */
-	    _exit(0);
+    /* Daemonize - disassociate from session/tty. */
+#ifdef HAVE_SETSID
+    if (setsid() == -1)
+      warning("setsid");
+#else
+    setpgrp(0, 0);
+# ifdef TIOCNOTTY
+    if ((fd = open(_PATH_TTY, O_RDWR, 0644)) != -1) {
+	ioctl(fd, TIOCNOTTY, NULL);
+	close(fd);
     }
+# endif
+#endif
+    chdir("/");
+    if ((fd = open(_PATH_DEVNULL, O_RDWR, 0644)) != -1) {
+	(void) dup2(fd, STDIN_FILENO);
+	(void) dup2(fd, STDOUT_FILENO);
+	(void) dup2(fd, STDERR_FILENO);
+    }
+
+    /* Close password, group and other fds so we don't leak. */
+    sudo_endpwent();
+    sudo_endgrent();
+    closefrom(STDERR_FILENO + 1);
 
     /* Ignore SIGPIPE in case mailer exits prematurely (or is missing). */
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     sa.sa_handler = SIG_IGN;
-    (void) sigaction(SIGPIPE, &sa, &saved_sa_pipe);
+    (void) sigaction(SIGPIPE, &sa, NULL);
 
     if (pipe(pfd) == -1) {
-	warning("cannot open pipe");
+	mysyslog(LOG_ERR, "cannot open pipe: %m");
 	_exit(1);
     }
 
     switch (pid = fork()) {
 	case -1:
 	    /* Error. */
-	    warning("cannot fork");
+	    mysyslog(LOG_ERR, "cannot fork: %m");
 	    _exit(1);
 	    break;
 	case 0:
@@ -502,7 +526,7 @@ send_mail(line)
 		char *mpath, *mflags;
 		int i;
 
-		/* Great-grandchild, set stdin to output side of the pipe */
+		/* Child, set stdin to output side of the pipe */
 		if (pfd[0] != STDIN_FILENO) {
 		    (void) dup2(pfd[0], STDIN_FILENO);
 		    (void) close(pfd[0]);
@@ -525,11 +549,6 @@ send_mail(line)
 		}
 		argv[i] = NULL;
 
-		/* Close password, group and other fds so we don't leak. */
-		sudo_endpwent();
-		sudo_endgrent();
-		closefrom(STDERR_FILENO + 1);
-
 		/*
 		 * Depending on the config, either run the mailer as root
 		 * (so user cannot kill it) or as the user (for the paranoid).
@@ -541,6 +560,7 @@ send_mail(line)
 		set_perms(PERM_FULL_USER);
 		execv(mpath, argv);
 #endif /* NO_ROOT_MAILER */
+		mysyslog(LOG_ERR, "cannot execute %s: %m", mpath);
 		_exit(127);
 	    }
 	    break;
@@ -573,13 +593,13 @@ send_mail(line)
 	get_timestr(), user_name, line);
     fclose(mail);
     do {
-#ifdef sudo_waitpid
-        rv = sudo_waitpid(pid, &status, 0);
+#ifdef HAVE_WAITPID
+        rv = waitpid(pid, &status, 0);
 #else
         rv = wait(&status);
 #endif
     } while (rv == -1 && errno == EINTR);
-    (void) sigaction(SIGPIPE, &saved_sa_pipe, NULL);
+    _exit(0);
 }
 
 /*
