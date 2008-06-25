@@ -166,8 +166,7 @@ DEFVAR			[a-z_]+
     ([^\"\n]|\\\")+	{
 			    LEXTRACE("STRBODY ");
 			    /* Push back line continuation char if present */
-			    if (yyleng > 2 && yytext[yyleng - 1] == '\\' &&
-				isspace((unsigned char)yytext[yyleng - 2]))
+			    if (yytext[yyleng - 1] == '\\')
 				yyless(yyleng - 1);
 			    append(yytext, yyleng);
 			}
