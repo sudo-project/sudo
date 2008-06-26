@@ -2106,4 +2106,7 @@ Sudo 1.6.9p16 released.
 663) Changed how sudo handles the child process when sending mail.
      This fixes a problem on Linux with the mail_always option.
 
+664) Fixed a problem with line continuation characters inside of
+     quoted strings.
+
 Sudo 1.6.9p17 released.
