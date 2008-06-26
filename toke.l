@@ -158,7 +158,7 @@ DEFVAR			[a-z_]+
 }
 
 <INSTR>{
-    \\\n[[:blank:]]*	{
+    \\[[:blank:]]*\n[[:blank:]]*	{
 			    /* Line continuation char followed by newline. */
 			    ++sudolineno;
 			    LEXTRACE("\n");
@@ -170,11 +170,14 @@ DEFVAR			[a-z_]+
 			    return(WORD);
 			}
 
-    ([^\"\n]|\\\")+	{
+    \\			{
+			    LEXTRACE("BACKSLASH ");
+			    if (!append(yytext, yyleng))
+				yyterminate();
+			}
+
+    ([^\"\n\\]|\\\")+	{
 			    LEXTRACE("STRBODY ");
-			    /* Push back line continuation char if present */
-			    if (yytext[yyleng - 1] == '\\')
-				yyless(yyleng - 1);
 			    if (!append(yytext, yyleng))
 				yyterminate();
 			}
