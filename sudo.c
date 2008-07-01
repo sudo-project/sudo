@@ -613,8 +613,10 @@ init_vars(sudo_mode, envp)
 	log_error(USE_ERRNO|MSG_ONLY, "can't get hostname");
 
     set_runaspw(*user_runas);		/* may call log_error() */
-    if (*user_runas[0] == '#' && runas_pw->pw_name && runas_pw->pw_name[0])
-	*user_runas = estrdup(runas_pw->pw_name);
+    if (*user_runas[0] == '#') {
+	if (runas_pw->pw_name != *user_runas && runas_pw->pw_name[0])
+	    *user_runas = estrdup(runas_pw->pw_name);
+    }
 
     /*
      * Get current working directory.  Try as user, fall back to root.
@@ -639,13 +641,14 @@ init_vars(sudo_mode, envp)
 	/* Allocate an extra slot for execve() failure (ENOEXEC). */
 	NewArgv = (char **) emalloc2((++NewArgc + 2), sizeof(char *));
 	NewArgv++;
+	NewArgv[0] = NULL;
 	if (ISSET(sudo_mode, MODE_EDIT))
 	    NewArgv[0] = "sudoedit";
 	else if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
 	    NewArgv[0] = runas_pw->pw_shell;
 	else if (user_shell && *user_shell)
 	    NewArgv[0] = user_shell;
-	else
+	if (NewArgv[0] == NULL)
 	    errx(1, "unable to determine shell");
 
 	/* copy the args from NewArgv */
@@ -1238,6 +1241,7 @@ set_runaspw(user)
 	    runas_pw = emalloc(sizeof(struct passwd));
 	    (void) memset((VOID *)runas_pw, 0, sizeof(struct passwd));
 	    runas_pw->pw_uid = atoi(user + 1);
+	    runas_pw->pw_name = user;
 	}
     } else {
 	runas_pw = sudo_getpwnam(user);
