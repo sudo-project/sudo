@@ -641,14 +641,13 @@ init_vars(sudo_mode, envp)
 	/* Allocate an extra slot for execve() failure (ENOEXEC). */
 	NewArgv = (char **) emalloc2((++NewArgc + 2), sizeof(char *));
 	NewArgv++;
-	NewArgv[0] = NULL;
 	if (ISSET(sudo_mode, MODE_EDIT))
 	    NewArgv[0] = "sudoedit";
 	else if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
 	    NewArgv[0] = runas_pw->pw_shell;
 	else if (user_shell && *user_shell)
 	    NewArgv[0] = user_shell;
-	if (NewArgv[0] == NULL)
+	else
 	    errx(1, "unable to determine shell");
 
 	/* copy the args from NewArgv */
@@ -1242,6 +1241,10 @@ set_runaspw(user)
 	    (void) memset((VOID *)runas_pw, 0, sizeof(struct passwd));
 	    runas_pw->pw_uid = atoi(user + 1);
 	    runas_pw->pw_name = user;
+	    runas_pw->pw_passwd = "*";
+	    runas_pw->pw_gecos = user;
+	    runas_pw->pw_dir = "/";
+	    runas_pw->pw_shell = estrdup(_PATH_BSHELL);
 	}
     } else {
 	runas_pw = sudo_getpwnam(user);
