@@ -271,51 +271,34 @@ sudo_getpwnam(name)
 }
 
 /*
- * Take a uid and return a faked up passwd struct.
- */
-struct passwd *
-sudo_fakepwuid(uid)
-    uid_t uid;
-{
-    struct passwd *pw;
-    struct rbnode *node;
-
-    pw = emalloc(sizeof(struct passwd) + MAX_UID_T_LEN + 1);
-    memset(pw, 0, sizeof(struct passwd));
-    pw->pw_uid = uid;
-    pw->pw_name = (char *)pw + sizeof(struct passwd);
-    (void) snprintf(pw->pw_name, MAX_UID_T_LEN + 1, "#%lu",
-	(unsigned long) uid);
-
-    /* Store by uid and by name, overwriting cached version. */
-    if ((node = rbinsert(pwcache_byuid, pw)) != NULL) {
-	efree(node->data);
-	node->data = (void *) pw;
-    }
-    if ((node = rbinsert(pwcache_byname, pw)) != NULL) {
-	efree(node->data);
-	node->data = (void *) pw;
-    }
-    return(pw);
-}
-
-/*
  * Take a uid in string form "#123" and return a faked up passwd struct.
  */
 struct passwd *
-sudo_fakepwnam(user)
+sudo_fakepwnam(user, gid)
     const char *user;
+    gid_t gid;
 {
     struct passwd *pw;
     struct rbnode *node;
     size_t len;
 
     len = strlen(user);
-    pw = emalloc(sizeof(struct passwd) + len + 1);
+    pw = emalloc(sizeof(struct passwd) + len + 1 /* pw_name */ +
+	sizeof("*") /* pw_passwd */ + sizeof("") /* pw_gecos */ +
+	sizeof("/") /* pw_dir */ + sizeof(_PATH_BSHELL));
     memset(pw, 0, sizeof(struct passwd));
     pw->pw_uid = (uid_t) atoi(user + 1);
+    pw->pw_gid = gid;
     pw->pw_name = (char *)pw + sizeof(struct passwd);
-    strlcpy(pw->pw_name, user, len + 1);
+    memcpy(pw->pw_name, user, len + 1);
+    pw->pw_passwd = pw->pw_name + len + 1;
+    memcpy(pw->pw_passwd, "*", 2);
+    pw->pw_gecos = pw->pw_passwd + 2;
+    pw->pw_gecos[0] = '\0';
+    pw->pw_dir = pw->pw_gecos + 1;
+    memcpy(pw->pw_dir, "/", 2);
+    pw->pw_shell = pw->pw_dir + 2;
+    memcpy(pw->pw_shell, _PATH_BSHELL, sizeof(_PATH_BSHELL));
 
     /* Store by uid and by name, overwriting cached version. */
     if ((node = rbinsert(pwcache_byuid, pw)) != NULL) {

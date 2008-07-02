@@ -297,11 +297,8 @@ main(argc, argv, envp)
     set_loginclass(sudo_user.pw);
 
     /* Update initial shell now that runas is set. */
-    if (ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
-	if (runas_pw->pw_shell == NULL)
-	    errorx(1, "no login shell for user %s!", runas_pw->pw_name);
+    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
 	NewArgv[0] = runas_pw->pw_shell;
-    }
 
     /* This goes after sudoers is parsed since it may have timestamp options. */
     if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE) {
@@ -1311,7 +1308,7 @@ set_runaspw(user)
 {
     if (*user == '#') {
 	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
-	    runas_pw = sudo_fakepwnam(user);
+	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
     } else {
 	if ((runas_pw = sudo_getpwnam(user)) == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, "unknown user: %s", user);

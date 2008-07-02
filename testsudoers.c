@@ -314,7 +314,7 @@ set_runaspw(user)
 {
     if (*user == '#') {
 	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
-	    runas_pw = sudo_fakepwnam(user);
+	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
     } else {
 	if ((runas_pw = sudo_getpwnam(user)) == NULL)
 	    errorx(1, "unknown user: %s", user);
