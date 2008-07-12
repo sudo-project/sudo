@@ -4,9 +4,8 @@ static char yyrcsid[]
 #if __GNUC__ >= 2
   __attribute__ ((unused))
 #endif /* __GNUC__ >= 2 */
-  = "$OpenBSD: skeleton.c,v 1.28 2007/09/03 21:14:58 deraadt Exp $";
+  = "$OpenBSD: skeleton.c,v 1.29 2008/07/08 15:06:50 otto Exp $";
 #endif
-#include <stdlib.h>
 #define YYBYACC 1
 #define YYMAJOR 1
 #define YYMINOR 9
@@ -146,7 +145,7 @@ typedef union {
     int tok;
 } YYSTYPE;
 #endif /* YYSTYPE_DEFINED */
-#line 150 "y.tab.c"
+#line 151 "y.tab.c"
 #define COMMAND 257
 #define ALIAS 258
 #define DEFVAR 259
@@ -805,7 +804,7 @@ init_parser(path, quiet)
     sudolineno = 1;
     verbose = !quiet;
 }
-#line 757 "y.tab.c"
+#line 758 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1004,7 +1003,10 @@ yyreduce:
                 YYPREFIX, yystate, yyn, yyrule[yyn]);
 #endif
     yym = yylen[yyn];
-    yyval = yyvsp[1-yym];
+    if (yym)
+        yyval = yyvsp[1-yym];
+    else
+        memset(&yyval, 0, sizeof yyval);
     switch (yyn)
     {
 case 1:
@@ -1542,7 +1544,7 @@ case 92:
 			    yyval.member = new_member(yyvsp[0].string, WORD);
 			}
 break;
-#line 1494 "y.tab.c"
+#line 1498 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
