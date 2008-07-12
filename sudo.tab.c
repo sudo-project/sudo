@@ -4,9 +4,8 @@ static char yyrcsid[]
 #if __GNUC__ >= 2
   __attribute__ ((unused))
 #endif /* __GNUC__ >= 2 */
-  = "$OpenBSD: skeleton.c,v 1.28 2007/09/03 21:14:58 deraadt Exp $";
+  = "$OpenBSD: skeleton.c,v 1.29 2008/07/08 15:06:50 otto Exp $";
 #endif
-#include <stdlib.h>
 #define YYBYACC 1
 #define YYMAJOR 1
 #define YYMINOR 9
@@ -275,7 +274,7 @@ typedef union {
     struct selinux_info seinfo;
 } YYSTYPE;
 #endif /* YYSTYPE_DEFINED */
-#line 279 "sudo.tab.c"
+#line 280 "sudo.tab.c"
 #define COMMAND 257
 #define ALIAS 258
 #define DEFVAR 259
@@ -1102,7 +1101,7 @@ init_parser()
     if (printmatches == TRUE)
 	expand_match_list();
 }
-#line 1054 "sudo.tab.c"
+#line 1055 "sudo.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 #if defined(__cplusplus) || defined(__STDC__)
 static int yygrowstack(void)
@@ -1301,7 +1300,10 @@ yyreduce:
                 YYPREFIX, yystate, yyn, yyrule[yyn]);
 #endif
     yym = yylen[yyn];
-    yyval = yyvsp[1-yym];
+    if (yym)
+        yyval = yyvsp[1-yym];
+    else
+        memset(&yyval, 0, sizeof yyval);
     switch (yyn)
     {
 case 3:
@@ -2197,7 +2199,7 @@ case 101:
 			    yyval.BOOLEAN = TRUE;
 			}
 break;
-#line 2149 "sudo.tab.c"
+#line 2153 "sudo.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
