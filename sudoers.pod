@@ -328,7 +328,7 @@ For example:
  ray	rushmore = NOPASSWD: /bin/kill, /bin/ls, /usr/bin/lprm
 
 would allow the user B<ray> to run F</bin/kill>, F</bin/ls>, and
-F</usr/bin/lprm> as root on the machine rushmore as B<root> without
+F</usr/bin/lprm> as B<root> on the machine rushmore without
 authenticating himself.  If we only want B<ray> to be able to
 run F</bin/kill> without a password the entry would be:
 
