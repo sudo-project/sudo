@@ -253,7 +253,6 @@ int sudo_ldap_display_defaults __P((struct sudo_nss *, struct passwd *, struct l
 int sudo_ldap_display_bound_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
 int sudo_ldap_display_privs __P((struct sudo_nss *, struct passwd *, struct lbuf *));
 #endif
-#if 1
 int sudo_file_open	__P((struct sudo_nss *));
 int sudo_file_close	__P((struct sudo_nss *));
 int sudo_file_setdefs	__P((struct sudo_nss *));
@@ -263,7 +262,6 @@ int sudo_file_display_cmnd __P((struct sudo_nss *, struct passwd *));
 int sudo_file_display_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
 int sudo_file_display_bound_defaults __P((struct sudo_nss *, struct passwd *, struct lbuf *));
 int sudo_file_display_privs __P((struct sudo_nss *, struct passwd *, struct lbuf *));
-#endif
 void set_perms		__P((int));
 void remove_timestamp	__P((int));
 int check_secureware	__P((char *));
