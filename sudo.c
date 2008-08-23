@@ -178,7 +178,7 @@ main(argc, argv, envp)
     struct sudo_nss *nss;
 
 #ifdef HAVE_SETLOCALE
-    setlocale(LC_ALL, "");
+    setlocale(LC_ALL, "C");
 #endif
 
     Argv = argv;
