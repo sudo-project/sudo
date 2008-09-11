@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 1998-2005, 2007
+ * Copyright (c) 1996, 1998-2005, 2007-2008
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -254,9 +254,10 @@ command_matches(sudoers_cmnd, sudoers_args)
 {
     struct stat sudoers_stat;
     struct dirent *dent;
-    char **ap, *base, buf[PATH_MAX];
+    char *cp, *base, buf[PATH_MAX];
     glob_t gl;
     DIR *dirp;
+    int i;
 
     /* Check for pseudo-commands */
     if (strchr(user_cmnd, '/') == NULL) {
@@ -300,24 +301,25 @@ command_matches(sudoers_cmnd, sudoers_args)
 	    return(FALSE);
 	}
 	/* For each glob match, compare basename, st_dev and st_ino. */
-	for (ap = gl.gl_pathv; *ap != NULL; ap++) {
+	i = 0;
+	while ((cp = gl.gl_pathv[i++])) {
 	    /* only stat if basenames are the same */
-	    if ((base = strrchr(*ap, '/')) != NULL)
+	    if ((base = strrchr(cp, '/')) != NULL)
 		base++;
 	    else
-		base = *ap;
+		base = cp;
 	    if (strcmp(user_base, base) != 0 ||
-		stat(*ap, &sudoers_stat) == -1)
+		stat(cp, &sudoers_stat) == -1)
 		continue;
 	    if (user_stat->st_dev == sudoers_stat.st_dev &&
 		user_stat->st_ino == sudoers_stat.st_ino) {
 		efree(safe_cmnd);
-		safe_cmnd = estrdup(*ap);
+		safe_cmnd = estrdup(cp);
 		break;
 	    }
 	}
 	globfree(&gl);
-	if (*ap == NULL)
+	if (cp == NULL)
 	    return(FALSE);
 
 	if (!sudoers_args ||
