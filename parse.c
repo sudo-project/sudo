@@ -254,10 +254,9 @@ command_matches(sudoers_cmnd, sudoers_args)
 {
     struct stat sudoers_stat;
     struct dirent *dent;
-    char *cp, *base, buf[PATH_MAX];
+    char **ap, *base, buf[PATH_MAX], *cp;
     glob_t gl;
     DIR *dirp;
-    int i;
 
     /* Check for pseudo-commands */
     if (strchr(user_cmnd, '/') == NULL) {
@@ -301,8 +300,7 @@ command_matches(sudoers_cmnd, sudoers_args)
 	    return(FALSE);
 	}
 	/* For each glob match, compare basename, st_dev and st_ino. */
-	i = 0;
-	while ((cp = gl.gl_pathv[i++])) {
+	for (ap = gl.gl_pathv; (cp = *ap) != NULL; ap++) {
 	    /* only stat if basenames are the same */
 	    if ((base = strrchr(cp, '/')) != NULL)
 		base++;
