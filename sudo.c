@@ -178,7 +178,7 @@ main(argc, argv, envp)
     struct sudo_nss *nss;
 
 #ifdef HAVE_SETLOCALE
-    setlocale(LC_ALL, "C");
+    setlocale(LC_ALL, "");
 #endif
 
     Argv = argv;
@@ -325,6 +325,10 @@ main(argc, argv, envp)
 
     cmnd_status = set_cmnd(sudo_mode);
 
+#ifdef HAVE_SETLOCALE
+    setlocale(LC_ALL, "C");
+#endif
+
     validated = FLAG_NO_USER | FLAG_NO_HOST;
     tq_foreach_fwd(snl, nss) {
 	validated = nss->lookup(nss, validated, pwflag);
@@ -335,6 +339,10 @@ main(argc, argv, envp)
     }
     if (safe_cmnd == NULL)
 	safe_cmnd = estrdup(user_cmnd);
+
+#ifdef HAVE_SETLOCALE
+    setlocale(LC_ALL, "");
+#endif
 
     /* If only a group was specified, set runas_pw based on invoking user. */
     if (runas_pw == NULL)
