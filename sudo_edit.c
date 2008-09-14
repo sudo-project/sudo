@@ -62,10 +62,13 @@ __unused static const char rcsid[] = "$Sudo$";
 extern sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
 extern char **environ;
 
+static char *find_editor();
+
 /*
  * Wrapper to allow users to edit privileged files with their own uid.
  */
-int sudo_edit(argc, argv, envp)
+int
+sudo_edit(argc, argv, envp)
     int argc;
     char **argv;
     char **envp;
@@ -189,20 +192,8 @@ int sudo_edit(argc, argv, envp)
     if (argc == 1)
 	return(1);			/* no files readable, you lose */
 
-    /*
-     * Determine which editor to use.  We don't bother restricting this
-     * based on def_env_editor or def_editor since the editor runs with
-     * the uid of the invoking user, not the runas (privileged) user.
-     */
     environ = envp;
-    if (((editor = getenv("VISUAL")) != NULL && *editor != '\0') ||
-	((editor = getenv("EDITOR")) != NULL && *editor != '\0')) {
-	editor = estrdup(editor);
-    } else {
-	editor = estrdup(def_editor);
-	if ((cp = strchr(editor, ':')) != NULL)
-	    *cp = '\0';			/* def_editor could be a path */
-    }
+    editor = find_editor();
 
     /*
      * Allocate space for the new argument vector and fill it in.
@@ -357,4 +348,40 @@ cleanup:
 	    unlink(tf[i].tfile);
     }
     return(1);
+}
+
+/*
+ * Determine which editor to use.  We don't bother restricting this
+ * based on def_env_editor or def_editor since the editor runs with
+ * the uid of the invoking user, not the runas (privileged) user.
+ */
+static char *
+find_editor()
+{
+    char *cp, *editor = NULL, **ev, *ev0[3];
+
+    ev0[0] = "VISUAL";
+    ev0[1] = "EDITOR";
+    ev0[2] = NULL;
+    for (ev = ev0; *ev != NULL; ev++) {
+	if ((editor = getenv(*ev)) != NULL && *editor != '\0') {
+	    if ((cp = strrchr(editor, '/')) != NULL)
+		cp++;
+	    else
+		cp = editor;
+	    /* Ignore "sudoedit" and "sudo" to avoid an endless loop. */
+	    if (strncmp(cp, "sudo", 4) != 0 ||
+		(cp[4] != ' ' && cp[4] != '\0' && strcmp(cp + 4, "edit") != 0)) {
+		editor = estrdup(editor);
+		break;
+	    }
+	}
+	editor = NULL;
+    }
+    if (editor == NULL) {
+	editor = estrdup(def_editor);
+	if ((cp = strchr(editor, ':')) != NULL)
+	    *cp = '\0';			/* def_editor could be a path */
+    }
+    return(editor);
 }
