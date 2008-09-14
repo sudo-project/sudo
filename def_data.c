@@ -295,6 +295,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Path to the sudo-specific environment file: %s",
 	NULL,
     }, {
+	"sudoers_locale", T_STR,
+	"Locale to use while parsing sudoers: %s",
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

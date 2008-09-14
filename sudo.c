@@ -326,7 +326,11 @@ main(argc, argv, envp)
     cmnd_status = set_cmnd(sudo_mode);
 
 #ifdef HAVE_SETLOCALE
-    setlocale(LC_ALL, "C");
+    if (!setlocale(LC_ALL, def_sudoers_locale)) {
+	warningx("unable to set locale to \"%s\", using \"C\"",
+	    def_sudoers_locale);
+	setlocale(LC_ALL, "C");
+    }
 #endif
 
     validated = FLAG_NO_USER | FLAG_NO_HOST;
