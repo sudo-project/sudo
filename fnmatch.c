@@ -49,6 +49,7 @@
 
 #include <compat.h>
 #include "emul/fnmatch.h"
+#include "emul/charclass.h"
 
 #undef	EOS
 #define	EOS	'\0'
@@ -61,7 +62,8 @@
 __unused static const char rcsid[] = "$OpenBSD: fnmatch.c,v 1.6 1998/03/19 00:29:59 millert Exp $";
 #endif /* LIBC_SCCS and not lint */
 
-static int rangematch __P((const char *, char, int, char **));
+static int rangematch __P((const char *, int, int, char **));
+static int classmatch __P((const char *, int, int, const char **));
 
 int
 fnmatch(pattern, string, flags)
@@ -167,16 +169,16 @@ fnmatch(pattern, string, flags)
 
 static int
 #ifdef __STDC__
-rangematch(const char *pattern, char test, int flags, char **newp)
+rangematch(const char *pattern, int test, int flags, char **newp)
 #else
 rangematch(pattern, test, flags, newp)
 	const char *pattern;
-	char test;
+	int test;
 	int flags;
 	char **newp;
 #endif
 {
-	int negate, ok;
+	int negate, ok, rv;
 	char c, c2;
 
 	/*
@@ -190,7 +192,7 @@ rangematch(pattern, test, flags, newp)
 		++pattern;
 
 	if (ISSET(flags, FNM_CASEFOLD))
-		test = tolower((unsigned char)test);
+		test = tolower(test);
 
 	/*
 	 * A right bracket shall lose its special meaning and represent
@@ -200,6 +202,17 @@ rangematch(pattern, test, flags, newp)
 	ok = 0;
 	c = *pattern++;
 	do {
+		if (c == '[' && *pattern == ':') {
+			do {
+				rv = classmatch(pattern + 1, test,
+				    (flags & FNM_CASEFOLD), &pattern);
+				if (rv == RANGE_MATCH)
+					ok = 1;
+				c = *pattern++;
+			} while (rv != RANGE_ERROR && c == '[' && *pattern == ':');
+			if (c == ']')
+			break;
+		}
 		if (c == '\\' && !ISSET(flags, FNM_NOESCAPE))
 			c = *pattern++;
 		if (c == EOS)
@@ -225,4 +238,44 @@ rangematch(pattern, test, flags, newp)
 
 	*newp = (char *)pattern;
 	return (ok == negate ? RANGE_NOMATCH : RANGE_MATCH);
+}
+
+static int
+#ifdef __STDC__
+classmatch(const char *pattern, int test, int foldcase, const char **ep)
+#else
+classmatch(pattern, test, foldcase, ep)
+	const char *pattern;
+	int test;
+	int foldcase;
+	const char **ep;
+#endif
+{
+	struct cclass *cc;
+	const char *colon;
+	size_t len;
+	int rval = RANGE_NOMATCH;
+
+	if ((colon = strchr(pattern, ':')) == NULL || colon[1] != ']') {
+		*ep = pattern - 2;
+		return(RANGE_ERROR);
+	}
+	*ep = colon + 2;
+	len = (size_t)(colon - pattern);
+
+	if (foldcase && strncmp(pattern, "upper:]", 7) == 0)
+		pattern = "lower:]";
+	for (cc = cclasses; cc->name != NULL; cc++) {
+		if (!strncmp(pattern, cc->name, len) && cc->name[len] == '\0') {
+			if (cc->isctype(test))
+				rval = RANGE_MATCH;
+			break;
+		}
+	}
+	if (cc->name == NULL) {
+		/* invalid character class, return EOS */
+		*ep = colon + strlen(colon);
+		rval = RANGE_ERROR;
+	}
+	return(rval);
 }
