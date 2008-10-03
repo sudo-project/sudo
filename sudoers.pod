@@ -401,6 +401,15 @@ escape special characters such as: "*", "?", "[", and "}".
 
 =back
 
+POSIX character classes may also be used if your system's
+L<fnmatch(3)> function supports them.  However, because the
+C<':'> character has special meaning in I<sudoers>, it must
+be escaped.  For example:
+
+    /bin/ls [[\:alpha\:]]*
+
+Would match any filename beginning with a letter.
+
 Note that a forward slash ('/') will B<not> be matched by
 wildcards used in the pathname.  When matching the command
 line arguments, however, a slash B<does> get matched by
