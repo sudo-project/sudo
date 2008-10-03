@@ -1726,7 +1726,8 @@ dnl typedef checks
 dnl
 AC_TYPE_MODE_T
 AC_TYPE_UID_T
-AC_CHECK_TYPES([sig_atomic_t], , [AC_DEFINE(sig_atomic_t, int)], [#include <sys/types.h>
+AC_CHECK_TYPE([__signed char], [], [AC_CHECK_TYPE([signed char], [AC_DEFINE(__signed, signed)], [AC_DEFINE(__signed, [])])])
+AC_CHECK_TYPE([sig_atomic_t], [], [AC_DEFINE(sig_atomic_t, int)], [#include <sys/types.h>
 #include <signal.h>])
 AC_CHECK_TYPES([sigaction_t], [AC_DEFINE(HAVE_SIGACTION_T)], [], [#include <sys/types.h>
 #include <signal.h>])
@@ -2578,6 +2579,7 @@ AH_TEMPLATE(USE_STOW, [Define to 1 if you use GNU stow packaging.])
 AH_TEMPLATE(USE_TTY_TICKETS, [Define to 1 if you want a different ticket file for each tty.])
 AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])
 AH_TEMPLATE(sig_atomic_t, [Define to `int' if <signal.h> does not define.])
+AH_TEMPLATE(__signed, [Define to `signed' or nothing if compiler does not support a signed type qualifier.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

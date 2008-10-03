@@ -3,6 +3,10 @@
 #ifndef _SUDO_CONFIG_H
 #define _SUDO_CONFIG_H
 
+/* Define to `signed' or nothing if compiler does not support a signed
+   type qualifier. */
+#undef __signed
+
 /* Define to 1 if the `syslog' function returns a non-zero int to denote
    failure. */
 #undef BROKEN_SYSLOG
@@ -352,9 +356,6 @@
 
 /* Define to 1 if <signal.h> has the sigaction_t typedef. */
 #undef HAVE_SIGACTION_T
-
-/* Define to 1 if the system has the type `sig_atomic_t'. */
-#undef HAVE_SIG_ATOMIC_T
 
 /* Define to 1 if you use S/Key. */
 #undef HAVE_SKEY

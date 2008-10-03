@@ -14335,6 +14335,129 @@ _ACEOF
 
 fi
 
+{ echo "$as_me:$LINENO: checking for __signed char" >&5
+echo $ECHO_N "checking for __signed char... $ECHO_C" >&6; }
+if test "${ac_cv_type___signed_char+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+typedef __signed char ac__type_new_;
+int
+main ()
+{
+if ((ac__type_new_ *) 0)
+  return 0;
+if (sizeof (ac__type_new_))
+  return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_type___signed_char=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_type___signed_char=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_type___signed_char" >&5
+echo "${ECHO_T}$ac_cv_type___signed_char" >&6; }
+if test $ac_cv_type___signed_char = yes; then
+  :
+else
+  { echo "$as_me:$LINENO: checking for signed char" >&5
+echo $ECHO_N "checking for signed char... $ECHO_C" >&6; }
+if test "${ac_cv_type_signed_char+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+typedef signed char ac__type_new_;
+int
+main ()
+{
+if ((ac__type_new_ *) 0)
+  return 0;
+if (sizeof (ac__type_new_))
+  return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_type_signed_char=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_type_signed_char=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_type_signed_char" >&5
+echo "${ECHO_T}$ac_cv_type_signed_char" >&6; }
+if test $ac_cv_type_signed_char = yes; then
+  cat >>confdefs.h <<\_ACEOF
+#define __signed signed
+_ACEOF
+
+else
+  cat >>confdefs.h <<\_ACEOF
+#define __signed
+_ACEOF
+
+fi
+
+fi
+
 { echo "$as_me:$LINENO: checking for sig_atomic_t" >&5
 echo $ECHO_N "checking for sig_atomic_t... $ECHO_C" >&6; }
 if test "${ac_cv_type_sig_atomic_t+set}" = set; then
@@ -14391,12 +14514,7 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_type_sig_atomic_t" >&5
 echo "${ECHO_T}$ac_cv_type_sig_atomic_t" >&6; }
 if test $ac_cv_type_sig_atomic_t = yes; then
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_SIG_ATOMIC_T 1
-_ACEOF
-
-
+  :
 else
   cat >>confdefs.h <<\_ACEOF
 #define sig_atomic_t int
@@ -24571,6 +24689,8 @@ echo "$as_me: You will need to customize sample.pam and install it as /etc/pam.d
 	    ;;
     esac
 fi
+
+
 
 
 
