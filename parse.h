@@ -42,10 +42,10 @@ struct sudo_command {
  * Possible valus: TRUE, FALSE, UNSPEC.
  */
 struct cmndtag {
-    char nopasswd;
-    char noexec;
-    char setenv;
-    char extra;
+    __signed char nopasswd;
+    __signed char noexec;
+    __signed char setenv;
+    __signed char extra;
 };
 
 /*
