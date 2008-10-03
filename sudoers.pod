@@ -1250,7 +1250,7 @@ directory F</usr/oper/bin/>.
 
 The user B<joe> may only L<su(1)> to operator.
 
- pete		HPPA = /usr/bin/passwd [A-z]*, !/usr/bin/passwd root
+ pete		HPPA = /usr/bin/passwd [A-Za-z]*, !/usr/bin/passwd root
 
 The user B<pete> is allowed to change anyone's password except for
 root on the I<HPPA> machines.  Note that this assumes L<passwd(1)>
