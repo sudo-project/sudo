@@ -38,20 +38,25 @@ __unused static const char rcsid[] = "$Sudo$";
 
 #ifdef HAVE_GETUSERATTR
 
+#ifndef RLIM_SAVED_MAX
+# define RLIM_SAVED_MAX 0x400000
+#endif
+
 struct aix_limit {
     int resource;
     char *soft;
     char *hard;
+    int factor;
 };
 
 static struct aix_limit aix_limits[] = {
-    { RLIMIT_FSIZE, S_UFSIZE, S_UFSIZE_HARD },
-    { RLIMIT_CPU, S_UCPU, S_UCPU_HARD },
-    { RLIMIT_DATA, S_UDATA, S_UDATA_HARD },
-    { RLIMIT_STACK, S_USTACK, S_USTACK_HARD },
-    { RLIMIT_RSS, S_URSS, S_URSS_HARD },
-    { RLIMIT_CORE, S_UCORE, S_UCORE_HARD },
-    { RLIMIT_NOFILE, S_UNOFILE, S_UNOFILE_HARD }
+    { RLIMIT_FSIZE, S_UFSIZE, S_UFSIZE_HARD, 512 },
+    { RLIMIT_CPU, S_UCPU, S_UCPU_HARD, 1 },
+    { RLIMIT_DATA, S_UDATA, S_UDATA_HARD, 512 },
+    { RLIMIT_STACK, S_USTACK, S_USTACK_HARD, 512 },
+    { RLIMIT_RSS, S_URSS, S_URSS_HARD, 512 },
+    { RLIMIT_CORE, S_UCORE, S_UCORE_HARD, 512 },
+    { RLIMIT_NOFILE, S_UNOFILE, S_UNOFILE_HARD, 1 }
 };
 
 static int
@@ -82,15 +87,15 @@ aix_setlimits(user)
 	 * hard limit has been defined.
 	 */
 	if (aix_getlimit(user, aix_limits[n].hard, &i) == 0) {
-	    rlim.rlim_max = i == -1 ? RLIM_INFINITY : i;
+	    rlim.rlim_max = i == -1 ? RLIM_INFINITY : i * aix_limits[n].factor;
 	    if (aix_getlimit(user, aix_limits[n].soft, &i) == 0)
-		rlim.rlim_cur = i == -1 ? RLIM_INFINITY : i;
+		rlim.rlim_cur = i == -1 ? RLIM_INFINITY : i * aix_limits[n].factor;
 	    else
 		rlim.rlim_cur = rlim.rlim_max;	/* soft not specd, use hard */
 	} else {
 	    /* No hard limit set, try soft limit. */
 	    if (aix_getlimit(user, aix_limits[n].soft, &i) == 0)
-		rlim.rlim_cur = i == -1 ? RLIM_INFINITY : i;
+		rlim.rlim_cur = i == -1 ? RLIM_INFINITY : i * aix_limits[n].factor;
 
 	    /* Set hard limit per AIX /etc/security/limits documentation. */
 	    switch (aix_limits[n].resource) {
@@ -99,7 +104,7 @@ aix_setlimits(user)
 		    rlim.rlim_max = rlim.rlim_cur;
 		    break;
 		case RLIMIT_STACK:
-		    rlim.rlim_max = 0x400000;
+		    rlim.rlim_max = RLIM_SAVED_MAX;
 		    break;
 		default:
 		    rlim.rlim_max = RLIM_INFINITY;
