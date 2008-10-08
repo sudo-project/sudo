@@ -901,6 +901,12 @@ Defaults to C<@badpri@>.
 Syslog priority to use when user authenticates successfully.
 Defaults to C<@goodpri@>.
 
+=item sudoers_locale
+
+Locale to use when parsing the sudoers file.  Note that changing
+the locale may affect how sudoers is interpreted.
+Defaults to C<"C">.
+
 =item timestampdir
 
 The directory in which B<sudo> stores its timestamp files.
