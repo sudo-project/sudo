@@ -3111,21 +3111,33 @@ append(src, len)
     return(_fill(src, len, olen));
 }
 
+#define SPECIAL(c) \
+    ((c) == ',' || (c) == ':' || (c) == '=' || (c) == ' ' || (c) == '\t' || (c) == '#')
+
 static int
-fill_cmnd(s, len)
-    char *s;
+fill_cmnd(src, len)
+    char *src;
     int len;
 {
+    char *dst;
+    int i;
+
     arg_len = arg_size = 0;
 
-    yylval.command.cmnd = (char *) malloc(++len);
+    dst = yylval.command.cmnd = (char *) malloc(++len);
     if (yylval.command.cmnd == NULL) {
 	yyerror("unable to allocate memory");
 	return(FALSE);
     }
 
-    /* copy the string and NULL-terminate it (escapes handled by fnmatch) */
-    (void) strlcpy(yylval.command.cmnd, s, len);
+    /* Copy the string and collapse any escaped sudo-specific characters. */
+    for (i = 0; i < len; i++) {
+	if (src[i] == '\\' && i != len - 1 && SPECIAL(src[i + 1]))
+	    *dst++ = src[++i];
+	else
+	    *dst++ = src[i];
+    }
+    *dst = '\0';
 
     yylval.command.args = NULL;
     return(TRUE);
