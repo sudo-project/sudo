@@ -505,33 +505,33 @@ Used to determine shell to run with C<-s> option
 Specifies the path to a helper program used to read the password
 if no terminal is available or if the C<-A> option is specified.
 
-=item C<SUDO_PROMPT>
-
-Used as the default password prompt
-
 =item C<SUDO_COMMAND>
 
 Set to the command run by sudo
 
-=item C<SUDO_USER>
-
-Set to the login of the user who invoked sudo
-
-=item C<SUDO_UID>
-
-Set to the uid of the user who invoked sudo
-
-=item C<SUDO_GID>
-
-Set to the gid of the user who invoked sudo
-
-=item C<SUDO_PS1>
-
-If set, C<PS1> will be set to its value
-
 =item C<SUDO_EDITOR>
 
 Default editor to use in B<-e> (sudoedit) mode
+
+=item C<SUDO_GID>
+
+Set to the group ID of the user who invoked sudo
+
+=item C<SUDO_PROMPT>
+
+Used as the default password prompt
+
+=item C<SUDO_PS1>
+
+If set, C<PS1> will be set to its value for the program being run
+
+=item C<SUDO_UID>
+
+Set to the user ID of the user who invoked sudo
+
+=item C<SUDO_USER>
+
+Set to the login of the user who invoked sudo
 
 =item C<USER>
 
