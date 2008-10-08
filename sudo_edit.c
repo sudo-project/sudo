@@ -358,11 +358,12 @@ cleanup:
 static char *
 find_editor()
 {
-    char *cp, *editor = NULL, **ev, *ev0[3];
+    char *cp, *editor = NULL, **ev, *ev0[4];
 
-    ev0[0] = "VISUAL";
-    ev0[1] = "EDITOR";
-    ev0[2] = NULL;
+    ev0[0] = "SUDO_EDITOR";
+    ev0[1] = "VISUAL";
+    ev0[2] = "EDITOR";
+    ev0[3] = NULL;
     for (ev = ev0; *ev != NULL; ev++) {
 	if ((editor = getenv(*ev)) != NULL && *editor != '\0') {
 	    if ((cp = strrchr(editor, '/')) != NULL)

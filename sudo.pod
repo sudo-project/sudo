@@ -172,10 +172,10 @@ set to the invoking user.
 
 =item 2.
 
-The editor specified by the C<VISUAL> or C<EDITOR> environment
-variables is run to edit the temporary files.  If neither C<VISUAL>
-nor C<EDITOR> are set, the program listed in the I<editor> I<sudoers>
-variable is used.
+The editor specified by the C<SUDO_EDITOR>, C<VISUAL> or C<EDITOR>
+environment variables is run to edit the temporary files.  If none
+of C<SUDO_EDITOR>, C<VISUAL> or C<EDITOR> are set, the first program
+listed in the I<editor> I<sudoers> variable is used.
 
 =item 3.
 
@@ -484,7 +484,8 @@ B<sudo> utilizes the following environment variables:
 
 =item C<EDITOR>
 
-Default editor to use in B<-e> (sudoedit) mode if C<VISUAL> is not set
+Default editor to use in B<-e> (sudoedit) mode if neither C<SUDO_EDITOR>
+nor C<VISUAL> is set
 
 =item C<HOME>
 
@@ -528,13 +529,18 @@ Set to the gid of the user who invoked sudo
 
 If set, C<PS1> will be set to its value
 
+=item C<SUDO_EDITOR>
+
+Default editor to use in B<-e> (sudoedit) mode
+
 =item C<USER>
 
 Set to the target user (root unless the B<-u> option is specified)
 
 =item C<VISUAL>
 
-Default editor to use in B<-e> (sudoedit) mode
+Default editor to use in B<-e> (sudoedit) mode if C<SUDO_EDITOR>
+is not set
 
 =back
 
