@@ -210,6 +210,12 @@
 /* Define to 1 if you use Kerberos V. */
 #undef HAVE_KERB5
 
+/* Define to 1 if you have the `krb5_get_init_creds_opt_alloc' function. */
+#undef HAVE_KRB5_GET_INIT_CREDS_OPT_ALLOC
+
+/* Define to 1 if your `krb5_get_init_creds_opt_alloc' function takes two arguments. */
+#undef HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_TWO_ARGS
+
 /* Define to 1 if you have the `krb5_init_secure_context' function. */
 #undef HAVE_KRB5_INIT_SECURE_CONTEXT
 
