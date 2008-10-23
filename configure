@@ -21560,7 +21560,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     LIBS="${LIBS} ${SUDO_LIBS}"
 
 
-for ac_func in krb5_verify_user krb5_init_secure_context
+
+for ac_func in krb5_verify_user krb5_init_secure_context krb5_get_init_creds_opt_alloc
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 { echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -21653,6 +21654,69 @@ _ACEOF
 fi
 done
 
+    { echo "$as_me:$LINENO: checking whether krb5_get_init_creds_opt_free takes a two argument2" >&5
+echo $ECHO_N "checking whether krb5_get_init_creds_opt_free takes a two argument2... $ECHO_C" >&6; }
+if test "${sudo_cv_krb5_get_init_creds_opt_free_two_args+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+	    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <krb5.h>
+int
+main ()
+{
+
+		    krb5_context context = NULL;
+		    krb5_get_init_creds_opt *opts = NULL;
+		    krb5_get_init_creds_opt_free(context, opts);
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  sudo_cv_krb5_get_init_creds_opt_free_two_args=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	sudo_cv_krb5_get_init_creds_opt_free_two_args=no
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+
+fi
+{ echo "$as_me:$LINENO: result: $sudo_cv_krb5_get_init_creds_opt_free_two_args" >&5
+echo "${ECHO_T}$sudo_cv_krb5_get_init_creds_opt_free_two_args" >&6; }
+    if test X"$sudo_cv_krb5_get_init_creds_opt_free_two_args" = X"yes"; then
+  	cat >>confdefs.h <<\_ACEOF
+#define HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_TWO_ARGS 1
+_ACEOF
+
+    fi
     LIBS="$_LIBS"
 fi
 
@@ -24529,6 +24593,14 @@ echo "$as_me: You will need to customize sample.pam and install it as /etc/pam.d
 	    ;;
     esac
 fi
+
+
+
+
+
+
+
+
 
 
 

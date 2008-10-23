@@ -74,6 +74,24 @@ static struct _sudo_krb5_data {
 } sudo_krb5_data = { NULL, NULL, NULL };
 typedef struct _sudo_krb5_data *sudo_krb5_datap;
 
+#ifndef HAVE_KRB5_GET_INIT_CREDS_OPT_ALLOC
+static krb5_error_code
+krb5_get_init_creds_opt_alloc(context, opts)
+    krb5_context		context;
+    krb5_get_init_creds_opt   **opts;
+{
+    *opts = emalloc(sizeof(krb5_get_init_creds_opt));
+    return 0;
+}
+
+static void
+krb5_get_init_creds_opt_free(opts)
+    krb5_get_init_creds_opt *opts;
+{
+    free(opts);
+}
+#endif
+
 int
 kerb5_init(pw, promptp, auth)
     struct passwd *pw;
@@ -220,10 +238,10 @@ kerb5_verify(pw, pass, auth)
 
 done:
     if (opts) {
-#ifdef HAVE_HEIMDAL
-	krb5_get_init_creds_opt_free(opts);
-#else
+#ifdef HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_TWO_ARGS
 	krb5_get_init_creds_opt_free(sudo_context, opts);
+#else
+	krb5_get_init_creds_opt_free(opts);
 #endif
     }
     if (creds)
