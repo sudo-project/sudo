@@ -1065,8 +1065,6 @@ open_sudoers(sudoers, keepopen)
 	log_error(USE_ERRNO|NO_EXIT, "can't stat %s", sudoers);
     else if (!S_ISREG(statbuf.st_mode))
 	log_error(NO_EXIT, "%s is not a regular file", sudoers);
-    else if (statbuf.st_size == 0)
-	log_error(NO_EXIT, "%s is zero length", sudoers);
     else if ((statbuf.st_mode & 07777) != SUDOERS_MODE)
 	log_error(NO_EXIT, "%s is mode 0%o, should be 0%o", sudoers,
 	    (unsigned int) (statbuf.st_mode & 07777),
