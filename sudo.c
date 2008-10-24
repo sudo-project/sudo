@@ -174,7 +174,7 @@ main(argc, argv, envp)
     extern char **environ;
 
 #ifdef HAVE_SETLOCALE
-    setlocale(LC_ALL, "C");
+    setlocale(LC_ALL, "");
 #endif
 
     Argv = argv;
@@ -267,6 +267,9 @@ main(argc, argv, envp)
 
     cmnd_status = init_vars(sudo_mode, environ);
 
+#ifdef HAVE_SETLOCALE
+    setlocale(LC_ALL, "C");
+#endif
 #ifdef HAVE_LDAP
     validated = sudo_ldap_check(pwflag);
 
@@ -289,6 +292,9 @@ main(argc, argv, envp)
 #endif
     if (safe_cmnd == NULL)
 	safe_cmnd = estrdup(user_cmnd);
+#ifdef HAVE_SETLOCALE
+    setlocale(LC_ALL, "");
+#endif
 
     /*
      * Look up the timestamp dir owner if one is specified.
