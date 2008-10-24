@@ -16,26 +16,27 @@ DDEESSCCRRIIPPTTIIOONN
 
        +o   ssuuddoo no longer needs to read _s_u_d_o_e_r_s in its entirety.  When LDAP is
            used, there are only two or three LDAP queries per invocation.
-           This makes it especially fast and particularly usable in LDAP envi-
-           ronments.
+           This makes it especially fast and particularly usable in LDAP
+           environments.
 
-       +o   ssuuddoo no longer exits if there is a typo in _s_u_d_o_e_r_s.  It is not pos-
-           sible to load LDAP data into the server that does not conform to
+       +o   ssuuddoo no longer exits if there is a typo in _s_u_d_o_e_r_s.  It is not
+           possible to load LDAP data into the server that does not conform to
            the sudoers schema, so proper syntax is guaranteed.  It is still
            possible to have typos in a user or host name, but this will not
            prevent ssuuddoo from running.
 
        +o   It is possible to specify per-entry options that override the
-           global default options.  _/_e_t_c_/_s_u_d_o_e_r_s only supports default options
-           and limited options associated with user/host/commands/aliases.
-           The syntax is complicated and can be difficult for users to under-
-           stand.  Placing the options directly in the entry is more natural.
+           global default options.  _@_s_y_s_c_o_n_f_d_i_r_@_/_s_u_d_o_e_r_s only supports default
+           options and limited options associated with
+           user/host/commands/aliases.  The syntax is complicated and can be
+           difficult for users to understand.  Placing the options directly in
+           the entry is more natural.
 
        +o   The vviissuuddoo program is no longer needed.  vviissuuddoo provides locking
-           and syntax checking of the _/_e_t_c_/_s_u_d_o_e_r_s file.  Since LDAP updates
-           are atomic, locking is no longer necessary.  Because syntax is
-           checked when the data is inserted into LDAP, there is no need for a
-           specialized tool to check syntax.
+           and syntax checking of the _@_s_y_s_c_o_n_f_d_i_r_@_/_s_u_d_o_e_r_s file.  Since LDAP
+           updates are atomic, locking is no longer necessary.  Because syntax
+           is checked when the data is inserted into LDAP, there is no need
+           for a specialized tool to check syntax.
 
        Another major difference between LDAP and file-based _s_u_d_o_e_r_s is that in
        LDAP, ssuuddoo-specific Aliases are not supported.
@@ -48,20 +49,19 @@ DDEESSCCRRIIPPTTIIOONN
 
        Cmnd_Aliases are not really required either since it is possible to
        have multiple users listed in a sudoRole.  Instead of defining a
-       Cmnd_Alias that is referenced by multiple users, one can create a sudo-
-       Role that contains the commands and assign multiple users to it.
+       Cmnd_Alias that is referenced by multiple users, one can create a
+       sudoRole that contains the commands and assign multiple users to it.
 
        SSUUDDOOeerrss LLDDAAPP ccoonnttaaiinneerr
 
-       The _s_u_d_o_e_r_s configuration is contained in the ou=SUDOers LDAP con-
-       tainer.
+       The _s_u_d_o_e_r_s configuration is contained in the ou=SUDOers LDAP
+       container.
 
        Sudo first looks for the cn=default entry in the SUDOers container.  If
-       found, the multi-valued sudoOption attribute is parsed in the same
 
 
 
-1.7.0                      May 10, 2008                         1
+1.7.0                    October 24, 2008                       1
 
 
 
@@ -70,9 +70,10 @@ DDEESSCCRRIIPPTTIIOONN
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
-       manner as a global Defaults line in _/_e_t_c_/_s_u_d_o_e_r_s.  In the following
-       example, the SSH_AUTH_SOCK variable will be preserved in the environ-
-       ment for all users.
+       found, the multi-valued sudoOption attribute is parsed in the same
+       manner as a global Defaults line in _@_s_y_s_c_o_n_f_d_i_r_@_/_s_u_d_o_e_r_s.  In the
+       following example, the SSH_AUTH_SOCK variable will be preserved in the
+       environment for all users.
 
            dn: cn=defaults,ou=SUDOers,dc=example,dc=com
            objectClass: top
@@ -114,8 +115,8 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            as.  The special value ALL will match any group.
 
        Each component listed above should contain a single value, but there
-       may be multiple instances of each component type.  A sudoRole must con-
-       tain at least one sudoUser, sudoHost and sudoCommand.
+       may be multiple instances of each component type.  A sudoRole must
+       contain at least one sudoUser, sudoHost and sudoCommand.
 
        The following example allows users in group wheel to run any command on
        any host via ssuuddoo:
@@ -126,8 +127,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-
-1.7.0                      May 10, 2008                         2
+1.7.0                    October 24, 2008                       2
 
 
 
@@ -182,26 +182,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            sudoCommand: ALL
            sudoCommand: !/bin/sh
 
-
-
-
-
-
-
-
-
-
-
-
-1.7.0                      May 10, 2008                         3
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
-
            # LDAP equivalent of puddles
            # Notice that even though ALL comes last, it still behaves like
            # role1 since the LDAP code assumes the more paranoid configuration
@@ -210,6 +190,18 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            objectClass: top
            cn: role2
            sudoUser: puddles
+
+
+
+1.7.0                    October 24, 2008                       3
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
            sudoHost: ALL
            sudoCommand: !/bin/sh
            sudoCommand: ALL
@@ -238,28 +230,36 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        on your LDAP server.  In addition, be sure to index the 'sudoUser'
        attribute.
 
-       Three versions of the schema: one for OpenLDAP servers (_s_c_h_e_m_a_._O_p_e_n_L_-
-       _D_A_P), one for Netscape-derived servers (_s_c_h_e_m_a_._i_P_l_a_n_e_t), and one for
-       Microsoft Active Directory (_s_c_h_e_m_a_._A_c_t_i_v_e_D_i_r_e_c_t_o_r_y) may be found in the
-       ssuuddoo distribution.
+       Three versions of the schema: one for OpenLDAP servers
+       (_s_c_h_e_m_a_._O_p_e_n_L_D_A_P), one for Netscape-derived servers (_s_c_h_e_m_a_._i_P_l_a_n_e_t),
+       and one for Microsoft Active Directory (_s_c_h_e_m_a_._A_c_t_i_v_e_D_i_r_e_c_t_o_r_y) may be
+       found in the ssuuddoo distribution.
 
-       The schema for ssuuddoo in OpenLDAP form is included in the EXAMPLES sec-
-       tion.
+       The schema for ssuuddoo in OpenLDAP form is included in the EXAMPLES
+       section.
 
        CCoonnffiigguurriinngg llddaapp..ccoonnff
 
-       Sudo reads the _/_e_t_c_/_l_d_a_p_._c_o_n_f file for LDAP-specific configuration.
+       Sudo reads the _@_l_d_a_p___c_o_n_f_@ file for LDAP-specific configuration.
        Typically, this file is shared amongst different LDAP-aware clients.
        As such, most of the settings are not ssuuddoo-specific.  Note that ssuuddoo
-       parses _/_e_t_c_/_l_d_a_p_._c_o_n_f itself and may support options that differ from
+       parses _@_l_d_a_p___c_o_n_f_@ itself and may support options that differ from
        those described in the _l_d_a_p_._c_o_n_f(4) manual.
 
        Also note that on systems using the OpenLDAP libraries, default values
        specified in _/_e_t_c_/_o_p_e_n_l_d_a_p_/_l_d_a_p_._c_o_n_f or the user's _._l_d_a_p_r_c files are
+       not used.
+
+       Only those options explicitly listed in _@_l_d_a_p___c_o_n_f_@ that are supported
+       by ssuuddoo are honored.  Configuration options are listed below in upper
+       case but are parsed in a case-independent manner.
+
+       UURRII ldap[s]://[hostname[:port]] ...
+           Specifies a whitespace-delimited list of one or more URIs
 
 
 
-1.7.0                      May 10, 2008                         4
+1.7.0                    October 24, 2008                       4
 
 
 
@@ -268,18 +268,10 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
-       not used.
-
-       Only those options explicitly listed in _/_e_t_c_/_l_d_a_p_._c_o_n_f that are sup-
-       ported by ssuuddoo are honored.  Configuration options are listed below in
-       upper case but are parsed in a case-independent manner.
-
-       UURRII ldap[s]://[hostname[:port]] ...
-           Specifies a whitespace-delimited list of one or more URIs describ-
-           ing the LDAP server(s) to connect to.  The _p_r_o_t_o_c_o_l may be either
-           llddaapp or llddaappss, the latter being for servers that support TLS (SSL)
-           encryption.  If no _p_o_r_t is specified, the default is port 389 for
-           ldap:// or port 636 for ldaps://.  If no _h_o_s_t_n_a_m_e is specified,
+           describing the LDAP server(s) to connect to.  The _p_r_o_t_o_c_o_l may be
+           either llddaapp or llddaappss, the latter being for servers that support TLS
+           (SSL) encryption.  If no _p_o_r_t is specified, the default is port 389
+           for ldap:// or port 636 for ldaps://.  If no _h_o_s_t_n_a_m_e is specified,
            ssuuddoo will connect to llooccaallhhoosstt.  Only systems using the OpenSSL
            libraries support the mixing of ldap:// and ldaps:// URIs.  The
            Netscape-derived libraries used on most commercial versions of Unix
@@ -301,10 +293,10 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            is included for backwards compatibility.
 
        BBIINNDD__TTIIMMEELLIIMMIITT seconds
-           The BBIINNDD__TTIIMMEELLIIMMIITT parameter specifies the amount of time, in sec-
-           onds, to wait while trying to connect to an LDAP server.  If multi-
-           ple UURRIIs or HHOOSSTTs are specified, this is the amount of time to wait
-           before trying the next one in the list.
+           The BBIINNDD__TTIIMMEELLIIMMIITT parameter specifies the amount of time, in
+           seconds, to wait while trying to connect to an LDAP server.  If
+           multiple UURRIIs or HHOOSSTTs are specified, this is the amount of time to
+           wait before trying the next one in the list.
 
        TTIIMMEELLIIMMIITT seconds
            The TTIIMMEELLIIMMIITT parameter specifies the amount of time, in seconds,
@@ -316,16 +308,24 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            example.com.
 
        SSUUDDOOEERRSS__DDEEBBUUGG debug_level
-           This sets the debug level for ssuuddoo LDAP queries.  Debugging infor-
-           mation is printed to the standard error.  A value of 1 results in a
-           moderate amount of debugging information.  A value of 2 shows the
-           results of the matches themselves.  This parameter should not be
-           set in a production environment as the extra information is likely
-           to confuse users.
+           This sets the debug level for ssuuddoo LDAP queries.  Debugging
+           information is printed to the standard error.  A value of 1 results
+           in a moderate amount of debugging information.  A value of 2 shows
+           the results of the matches themselves.  This parameter should not
+           be set in a production environment as the extra information is
+           likely to confuse users.
+
+       BBIINNDDDDNN DN
+           The BBIINNDDDDNN parameter specifies the identity, in the form of a
+           Distinguished Name (DN), to use when performing LDAP operations.
+           If not specified, LDAP operations are performed with an anonymous
+           identity.  By default, most LDAP servers will allow anonymous
+           access.
 
 
 
-1.7.0                      May 10, 2008                         5
+
+1.7.0                    October 24, 2008                       5
 
 
 
@@ -333,13 +333,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
-
-       BBIINNDDDDNN DN
-           The BBIINNDDDDNN parameter specifies the identity, in the form of a Dis-
-           tinguished Name (DN), to use when performing LDAP operations.  If
-           not specified, LDAP operations are performed with an anonymous
-           identity.  By default, most LDAP servers will allow anonymous
-           access.
 
        BBIINNDDPPWW secret
            The BBIINNDDPPWW parameter specifies the password to use when performing
@@ -350,48 +343,55 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            The RROOOOTTBBIINNDDDDNN parameter specifies the identity, in the form of a
            Distinguished Name (DN), to use when performing privileged LDAP
            operations, such as _s_u_d_o_e_r_s queries.  The password corresponding to
-           the identity should be stored in _/_e_t_c_/_l_d_a_p_._s_e_c_r_e_t.  If not speci-
-           fied, the BBIINNDDDDNN identity is used (if any).
+           the identity should be stored in _@_l_d_a_p___s_e_c_r_e_t_@.  If not specified,
+           the BBIINNDDDDNN identity is used (if any).
 
        LLDDAAPP__VVEERRSSIIOONN number
            The version of the LDAP protocol to use when connecting to the
            server.  The default value is protocol version 3.
 
        SSSSLL on/true/yes/off/false/no
-           If the SSSSLL parameter is set to on, true or yes, TLS (SSL) encryp-
-           tion is always used when communicating with the LDAP server.  Typi-
-           cally, this involves connecting to the server on port 636 (ldaps).
+           If the SSSSLL parameter is set to on, true or yes, TLS (SSL)
+           encryption is always used when communicating with the LDAP server.
+           Typically, this involves connecting to the server on port 636
+           (ldaps).
 
        SSSSLL start_tls
-           If the SSSSLL parameter is set to start_tls, the LDAP server connec-
-           tion is initiated normally and TLS encryption is begun before the
-           bind credentials are sent.  This has the advantage of not requiring
-           a dedicated port for encrypted communications.  This parameter is
-           only supported by LDAP servers that honor the start_tls extension,
-           such as the OpenLDAP server.
+           If the SSSSLL parameter is set to start_tls, the LDAP server
+           connection is initiated normally and TLS encryption is begun before
+           the bind credentials are sent.  This has the advantage of not
+           requiring a dedicated port for encrypted communications.  This
+           parameter is only supported by LDAP servers that honor the
+           start_tls extension, such as the OpenLDAP server.
 
        TTLLSS__CCHHEECCKKPPEEEERR on/true/yes/off/false/no
-           If enabled, TTLLSS__CCHHEECCKKPPEEEERR will cause the LDAP server's TLS certifi-
-           cated to be verified.  If the server's TLS certificate cannot be
-           verified (usually because it is signed by an unknown certificate
-           authority), ssuuddoo will be unable to connect to it.  If TTLLSS__CCHHEECCKKPPEEEERR
-           is disabled, no check is made.
+           If enabled, TTLLSS__CCHHEECCKKPPEEEERR will cause the LDAP server's TLS
+           certificated to be verified.  If the server's TLS certificate
+           cannot be verified (usually because it is signed by an unknown
+           certificate authority), ssuuddoo will be unable to connect to it.  If
+           TTLLSS__CCHHEECCKKPPEEEERR is disabled, no check is made.
 
        TTLLSS__CCAACCEERRTTFFIILLEE file name
-           The path to a certificate authority bundle which contains the cer-
-           tificates for all the Certificate Authorities the client knows to
-           be valid, e.g. _/_e_t_c_/_s_s_l_/_c_a_-_b_u_n_d_l_e_._p_e_m.  This option is only sup-
-           ported by the OpenLDAP libraries.
+           The path to a certificate authority bundle which contains the
+           certificates for all the Certificate Authorities the client knows
+           to be valid, e.g. _/_e_t_c_/_s_s_l_/_c_a_-_b_u_n_d_l_e_._p_e_m.  This option is only
+           supported by the OpenLDAP libraries.
 
        TTLLSS__CCAACCEERRTTDDIIRR directory
            Similar to TTLLSS__CCAACCEERRTTFFIILLEE but instead of a file, it is a directory
            containing individual Certificate Authority certificates, e.g.
            _/_e_t_c_/_s_s_l_/_c_e_r_t_s.  The directory specified by TTLLSS__CCAACCEERRTTDDIIRR is
            checked after TTLLSS__CCAACCEERRTTFFIILLEE.  This option is only supported by the
+           OpenLDAP libraries.
+
+       TTLLSS__CCEERRTT file name
+           The path to a file containing the client certificate which can be
+           used to authenticate the client to the LDAP server.  The
+           certificate type depends on the LDAP libraries used.
 
 
 
-1.7.0                      May 10, 2008                         6
+1.7.0                    October 24, 2008                       6
 
 
 
@@ -399,13 +399,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
-
-           OpenLDAP libraries.
-
-       TTLLSS__CCEERRTT file name
-           The path to a file containing the client certificate which can be
-           used to authenticate the client to the LDAP server.  The certifi-
-           cate type depends on the LDAP libraries used.
 
            OpenLDAP:
                tls_cert /etc/ssl/client_cert.pem
@@ -454,10 +447,17 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        RROOOOTTSSAASSLL__AAUUTTHH__IIDD identity
            The SASL user name to use when RROOOOTTUUSSEE__SSAASSLL is enabled.
 
+       SSAASSLL__SSEECCPPRROOPPSS none/properties
+           SASL security properties or _n_o_n_e for no properties.  See the SASL
+           programmer's manual for details.
+
+       KKRRBB55__CCCCNNAAMMEE file name
+           The path to the Kerberos 5 credential cache to use when
+           authenticating with the remote server.
 
 
 
-1.7.0                      May 10, 2008                         7
+1.7.0                    October 24, 2008                       7
 
 
 
@@ -466,23 +466,16 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
-       SSAASSLL__SSEECCPPRROOPPSS none/properties
-           SASL security properties or _n_o_n_e for no properties.  See the SASL
-           programmer's manual for details.
-
-       KKRRBB55__CCCCNNAAMMEE file name
-           The path to the Kerberos 5 credential cache to use when authenti-
-           cating with the remote server.
-
        See the ldap.conf entry in the EXAMPLES section.
 
        CCoonnffiigguurriinngg nnsssswwiittcchh..ccoonnff
 
        Unless it is disabled at build time, ssuuddoo consults the Name Service
-       Switch file, _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f, to specify the _s_u_d_o_e_r_s search order.
-       Sudo looks for a line beginning with sudoers: and uses this to deter-
-       mine the search order.  Note that ssuuddoo does not stop searching after
-       the first match and later matches take precedence over earlier ones.
+       Switch file, _@_n_s_s_w_i_t_c_h___c_o_n_f_@, to specify the _s_u_d_o_e_r_s search order.
+       Sudo looks for a line beginning with sudoers: and uses this to
+       determine the search order.  Note that ssuuddoo does not stop searching
+       after the first match and later matches take precedence over earlier
+       ones.
 
        The following sources are recognized:
 
@@ -501,36 +494,21 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
            sudoers: ldap
 
-       If the _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f file is not present or there is no sudoers
-       line, the following default is assumed:
+       If the _@_n_s_s_w_i_t_c_h___c_o_n_f_@ file is not present or there is no sudoers line,
+       the following default is assumed:
 
            sudoers: files
 
-       Note that _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f is supported even when the underlying
+       Note that _@_n_s_s_w_i_t_c_h___c_o_n_f_@ is supported even when the underlying
        operating system does not use an nsswitch.conf file.
 
 FFIILLEESS
-       _/_e_t_c_/_l_d_a_p_._c_o_n_f          LDAP configuration file
+       _@_l_d_a_p___c_o_n_f_@             LDAP configuration file
 
-       _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f      determines sudoers source order
+       _@_n_s_s_w_i_t_c_h___c_o_n_f_@         determines sudoers source order
 
 EEXXAAMMPPLLEESS
        EExxaammppllee llddaapp..ccoonnff
-
-
-
-
-
-
-
-1.7.0                      May 10, 2008                         8
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
 
          # Either specify one or more URIs or one or more host:port pairs.
          # If neither is specified sudo will default to localhost, port 389.
@@ -542,6 +520,18 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
          #port          389
          #
          # URI will override the host and port settings.
+
+
+
+1.7.0                    October 24, 2008                       8
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
          uri            ldap://ldapserver
          #uri            ldaps://secureldapserver
          #uri            ldaps://secureldapserver ldap://ldapserver
@@ -586,18 +576,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
          # If you enable tls_checkpeer, specify either tls_cacertfile
          # or tls_cacertdir.  Only supported when using OpenLDAP.
          #
-
-
-
-1.7.0                      May 10, 2008                         9
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
-
          #tls_cacertfile /etc/certs/trusted_signers.pem
          #tls_cacertdir  /etc/certs
          #
@@ -608,6 +586,18 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
          #
          #tls_randfile /etc/egd-pool
          #
+
+
+
+1.7.0                    October 24, 2008                       9
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
          # You may restrict which ciphers are used.  Consult your SSL
          # documentation for which options go here.
          # Only supported when using OpenLDAP.
@@ -653,17 +643,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            SUBSTR caseExactIA5SubstringsMatch
            SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 
-
-
-1.7.0                      May 10, 2008                        10
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
-
         attributetype ( 1.3.6.1.4.1.15953.9.1.2
            NAME 'sudoHost'
            DESC 'Host(s) who may run sudo'
@@ -673,6 +652,18 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
         attributetype ( 1.3.6.1.4.1.15953.9.1.3
            NAME 'sudoCommand'
+
+
+
+1.7.0                    October 24, 2008                      10
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
            DESC 'Command(s) to be executed by sudo'
            EQUALITY caseExactIA5Match
            SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
@@ -714,21 +705,10 @@ SSEEEE AALLSSOO
        _l_d_a_p_._c_o_n_f(4), _s_u_d_o_e_r_s(5)
 
 CCAAVVEEAATTSS
-       The way that _s_u_d_o_e_r_s is parsed differs between Note that there are dif-
-       ferences in the way that LDAP-based _s_u_d_o_e_r_s is parsed compared to file-
-       based _s_u_d_o_e_r_s.  See the "Differences between LDAP and non-LDAP sudoers"
-       section for more information.
-
-
-
-1.7.0                      May 10, 2008                        11
-
-
-
-
-
-SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
-
+       The way that _s_u_d_o_e_r_s is parsed differs between Note that there are
+       differences in the way that LDAP-based _s_u_d_o_e_r_s is parsed compared to
+       file-based _s_u_d_o_e_r_s.  See the "Differences between LDAP and non-LDAP
+       sudoers" section for more information.
 
 BBUUGGSS
        If you feel you have found a bug in ssuuddoo, please submit a bug report at
@@ -739,11 +719,22 @@ SSUUPPPPOORRTT
        http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search
        the archives.
 
+
+
+1.7.0                    October 24, 2008                      11
+
+
+
+
+
+SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
+
+
 DDIISSCCLLAAIIMMEERR
        ssuuddoo is provided ``AS IS'' and any express or implied warranties,
-       including, but not limited to, the implied warranties of merchantabil-
-       ity and fitness for a particular purpose are disclaimed.  See the
-       LICENSE file distributed with ssuuddoo or
+       including, but not limited to, the implied warranties of
+       merchantability and fitness for a particular purpose are disclaimed.
+       See the LICENSE file distributed with ssuuddoo or
        http://www.sudo.ws/sudo/license.html for complete details.
 
 
@@ -787,6 +778,15 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.0                      May 10, 2008                        12
+
+
+
+
+
+
+
+
+
+1.7.0                    October 24, 2008                      12
 
 
