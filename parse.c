@@ -146,22 +146,22 @@ update_defaults(skip_cmnd)
 		if (!set_default(def->var, def->val, def->op))
 		    return(FALSE);
 	    case DEFAULTS_USER:
-		if (userlist_matches(sudo_user.pw, &def->binding) &&
+		if (userlist_matches(sudo_user.pw, &def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 		break;
 	    case DEFAULTS_RUNAS:
-		if (runaslist_matches(&def->binding, NULL) &&
+		if (runaslist_matches(&def->binding, NULL) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 		break;
 	    case DEFAULTS_HOST:
-		if (hostlist_matches(&def->binding) &&
+		if (hostlist_matches(&def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 		break;
 	    case DEFAULTS_CMND:
-		if (cmndlist_matches(&def->binding) &&
+		if (cmndlist_matches(&def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 	}
