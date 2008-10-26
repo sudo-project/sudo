@@ -12,11 +12,11 @@ SSYYNNOOPPSSIISS
 
 DDEESSCCRRIIPPTTIIOONN
        vviissuuddoo edits the _s_u_d_o_e_r_s file in a safe fashion, analogous
-       to _v_i_p_w(1m).  vviissuuddoo locks the _s_u_d_o_e_r_s file against multi­
-       ple simultaneous edits, provides basic sanity checks, and
-       checks for parse errors.  If the _s_u_d_o_e_r_s file is currently
-       being edited you will receive a message to try again
-       later.
+       to _v_i_p_w(1m).  vviissuuddoo locks the _s_u_d_o_e_r_s file against
+       multiple simultaneous edits, provides basic sanity checks,
+       and checks for parse errors.  If the _s_u_d_o_e_r_s file is
+       currently being edited you will receive a message to try
+       again later.
 
        There is a hard-coded list of editors that vviissuuddoo will use
        set at compile-time that may be overridden via the _e_d_i_t_o_r
@@ -25,9 +25,9 @@ DDEESSCCRRIIPPTTIIOONN
        script.  Normally, vviissuuddoo does not honor the VISUAL or
        EDITOR environment variables unless they contain an editor
        in the aforementioned editors list.  However, if vviissuuddoo is
-       configured with the _-_-_w_i_t_h_-_e_n_v_e_d_i_t_o_r flag or the _e_n_v___e_d_i_­
-       _t_o_r Default variable is set in _s_u_d_o_e_r_s, vviissuuddoo will use
-       any the editor defines by VISUAL or EDITOR.  Note that
+       configured with the _-_-_w_i_t_h_-_e_n_v_e_d_i_t_o_r flag or the
+       _e_n_v___e_d_i_t_o_r Default variable is set in _s_u_d_o_e_r_s, vviissuuddoo will
+       use any the editor defines by VISUAL or EDITOR.  Note that
        this can be a security hole since it allows the user to
        execute any program they wish simply by setting VISUAL or
        EDITOR.
@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.9p17                   Jun 21, 2008                         1
+1.6.9p17                 October 26, 2008                       1
 
 
 
@@ -72,19 +72,19 @@ VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
            this option vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s
            file of your choice, instead of the default,
-           _/_e_t_c_/_s_u_d_o_e_r_s.  The lock file used is the specified
-           _s_u_d_o_e_r_s file with ".tmp" appended to it.
+           _@_s_y_s_c_o_n_f_d_i_r_@_/_s_u_d_o_e_r_s.  The lock file used is the
+           specified _s_u_d_o_e_r_s file with ".tmp" appended to it.
 
        -q  Enable qquuiieett mode.  In this mode details about syntax
            errors are not printed.  This option is only useful
            when combined with the --cc flag.
 
        -s  Enable ssttrriicctt checking of the _s_u_d_o_e_r_s file.  If an
-           alias is used before it is defined, vviissuuddoo will con­
-           sider this a parse error.  Note that it is not possi­
-           ble to differentiate between an alias and a hostname
-           or username that consists solely of uppercase letters,
-           digits, and the underscore ('_') character.
+           alias is used before it is defined, vviissuuddoo will
+           consider this a parse error.  Note that it is not
+           possible to differentiate between an alias and a
+           hostname or username that consists solely of uppercase
+           letters, digits, and the underscore ('_') character.
 
        -V  The --VV (version) option causes vviissuuddoo to print its
            version number and exit.
@@ -98,9 +98,10 @@ EENNVVIIRROONNMMEENNTT
        EDITOR          Used by visudo if VISUAL is not set
 
 FFIILLEESS
-       _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
+       _@_s_y_s_c_o_n_f_d_i_r_@_/_s_u_d_o_e_r_s    List of who can run what
 
-       _/_e_t_c_/_s_u_d_o_e_r_s_._t_m_p        Lock file for visudo
+       _@_s_y_s_c_o_n_f_d_i_r_@_/_s_u_d_o_e_r_s_._t_m_p
+                               Lock file for visudo
 
 DDIIAAGGNNOOSSTTIICCSS
        sudoers file busy, try again later.
@@ -115,19 +116,18 @@ DDIIAAGGNNOOSSTTIICCSS
        Warning: undeclared Alias referenced near ...
            Either you are using a {User,Runas,Host,Cmnd}_Alias
            before defining it or you have a user or hostname
-           listed that consists solely of uppercase letters, dig­
-           its, and the underscore ('_') character.  If the lat­
-           ter, you can ignore the warnings (ssuuddoo will not com­
-           plain).  In --ss (strict) mode these are errors, not
+           listed that consists solely of uppercase letters,
+           digits, and the underscore ('_') character.  If the
+           latter, you can ignore the warnings (ssuuddoo will not
+           complain).  In --ss (strict) mode these are errors, not
            warnings.
 
        Warning: runas_default set after old value is in use ...
            You have a _r_u_n_a_s___d_e_f_a_u_l_t Defaults setting listed in
-           the _s_u_d_o_e_r_s file after its value has already been
 
 
 
-1.6.9p17                   Jun 21, 2008                         2
+1.6.9p17                 October 26, 2008                       2
 
 
 
@@ -136,6 +136,7 @@ DDIIAAGGNNOOSSTTIICCSS
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
+           the _s_u_d_o_e_r_s file after its value has already been
            used.  This means that entries prior to the
            _r_u_n_a_s___d_e_f_a_u_l_t setting will match based on the default
            value of _r_u_n_a_s___d_e_f_a_u_l_t (root) whereas entries aafftteerr
@@ -149,8 +150,8 @@ SSEEEE AALLSSOO
        _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(8)
 
 AAUUTTHHOORR
-       Many people have worked on _s_u_d_o over the years; this ver­
-       sion of vviissuuddoo was written by:
+       Many people have worked on _s_u_d_o over the years; this
+       version of vviissuuddoo was written by:
 
         Todd Miller
 
@@ -166,18 +167,18 @@ BBUUGGSS
        a bug report at http://www.sudo.ws/sudo/bugs/
 
 SSUUPPPPOORRTT
-       Limited free support is available via the sudo-users mail­
-       ing list, see http://www.sudo.ws/mail­
-       man/listinfo/sudo-users to subscribe or search the
-       archives.
+       Limited free support is available via the sudo-users
+       mailing list, see
+       http://www.sudo.ws/mailman/listinfo/sudo-users to
+       subscribe or search the archives.
 
 DDIISSCCLLAAIIMMEERR
        vviissuuddoo is provided ``AS IS'' and any express or implied
        warranties, including, but not limited to, the implied
        warranties of merchantability and fitness for a particular
        purpose are disclaimed.  See the LICENSE file distributed
-       with ssuuddoo or http://www.sudo.ws/sudo/license.html for com­
-       plete details.
+       with ssuuddoo or http://www.sudo.ws/sudo/license.html for
+       complete details.
 
 
 
@@ -192,7 +193,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-1.6.9p17                   Jun 21, 2008                         3
+1.6.9p17                 October 26, 2008                       3
 
 
