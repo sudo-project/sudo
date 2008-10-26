@@ -1030,7 +1030,7 @@ open_sudoers(sudoers, keepopen)
 {
     struct stat statbuf;
     FILE *fp = NULL;
-    int rootstat, i;
+    int rootstat;
 
     /*
      * Fix the mode and group on sudoers file from old default.
@@ -1075,25 +1075,18 @@ open_sudoers(sudoers, keepopen)
     else if (statbuf.st_gid != SUDOERS_GID)
 	log_error(NO_EXIT, "%s is owned by gid %lu, should be %lu", sudoers,
 	    (unsigned long) statbuf.st_gid, (unsigned long) SUDOERS_GID);
-    else {
-	/* Solaris sometimes returns EAGAIN so try 10 times */
-	for (i = 0; i < 10 ; i++) {
-	    errno = 0;
-	    if ((fp = fopen(sudoers, "r")) == NULL || fgetc(fp) == EOF) {
-		if (fp != NULL)
-		    fclose(fp);
-		fp = NULL;
-		if (errno != EAGAIN && errno != EWOULDBLOCK)
-		    break;
-	    } else
-		break;
-	    sleep(1);
-	}
-	if (fp == NULL)
-	    log_error(USE_ERRNO, "can't open %s", sudoers);
+    else if ((fp = fopen(sudoers, "r")) == NULL)
+	log_error(USE_ERRNO, "can't open %s", sudoers);
+    else if (statbuf.st_size != 0) {
+	/*
+	 * Make sure we can actually read sudoers so we can present the
+	 * user with a reasonable error message.
+	 */
+	if (fgetc(fp) == EOF)
+	    log_error(USE_ERRNO, "can't read %s", sudoers);
 	rewind(fp);
-	(void) fcntl(fileno(fp), F_SETFD, 1);
     }
+    (void) fcntl(fileno(fp), F_SETFD, 1);
 
     set_perms(PERM_ROOT);		/* change back to root */
     return(fp);
