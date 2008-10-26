@@ -401,8 +401,12 @@ main(argc, argv, envp)
 	}
 
 	/* Override user's umask if configured to do so. */
-	if (def_umask != 0777)
-	    (void) umask(def_umask);
+	if (def_umask != 0777) {
+	    mode_t mask = umask(def_umask);
+	    mask |= def_umask;
+	    if (mask != def_umask)  
+		umask(mask);
+	}
 
 	/* Restore coredumpsize resource limit. */
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
