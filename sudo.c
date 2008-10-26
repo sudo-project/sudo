@@ -456,9 +456,16 @@ main(argc, argv, envp)
 	    sudo_mode == MODE_LIST)
 	    exit(rc);
 
-	/* Override user's umask if configured to do so. */
-	if (def_umask != 0777)
-	    (void) umask(def_umask);
+	/*
+	 * Override user's umask if configured to do so.
+	 * If user's umask is more restrictive, OR in those bits too.
+	 */
+	if (def_umask != 0777) {
+	    mode_t mask = umask(def_umask);
+	    mask |= def_umask;
+	    if (mask != def_umask)
+		umask(mask);
+	}
 
 	/* Restore coredumpsize resource limit. */
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
