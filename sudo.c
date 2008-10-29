@@ -511,7 +511,7 @@ init_vars(sudo_mode, envp)
     int sudo_mode;
     char **envp;
 {
-    char *p, **ep, thost[MAXHOSTNAMELEN];
+    char *p, **ep, thost[MAXHOSTNAMELEN + 1];
     int nohostname, rval;
 
     /* Sanity check command from user. */
@@ -537,6 +537,7 @@ init_vars(sudo_mode, envp)
     if (nohostname)
 	user_host = user_shost = "localhost";
     else {
+	thost[sizeof(thost) - 1] = '\0';
 	user_host = estrdup(thost);
 	if (def_fqdn) {
 	    /* Defer call to set_fqdn() until log_error() is safe. */

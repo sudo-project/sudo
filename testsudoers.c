@@ -404,9 +404,9 @@ netgr_matches(netgr, host, shost, user)
 #ifdef HAVE_GETDOMAINNAME
     /* Get the domain name (if any). */
     if (domain == (char *) -1) {
-	domain = (char *) emalloc(MAXHOSTNAMELEN);
+	domain = (char *) emalloc(MAXHOSTNAMELEN + 1);
 
-	if (getdomainname(domain, MAXHOSTNAMELEN) != 0 || *domain == '\0') {
+	if (getdomainname(domain, MAXHOSTNAMELEN + 1) != 0 || *domain == '\0') {
 	    efree(domain);
 	    domain = NULL;
 	}
