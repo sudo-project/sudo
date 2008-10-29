@@ -129,7 +129,8 @@ main(argc, argv)
     struct cmndspec *cs;
     struct privilege *priv;
     struct userspec *us;
-    char *p, *grfile, *pwfile, *runas_group, *runas_user, hbuf[MAXHOSTNAMELEN];
+    char *p, *grfile, *pwfile, *runas_group, *runas_user;
+    char hbuf[MAXHOSTNAMELEN + 1];
     int ch, dflag, rval, matched;
 #ifdef	YYDEBUG
     extern int yydebug;
@@ -209,6 +210,7 @@ main(argc, argv)
     if (user_host == NULL) {
 	if (gethostname(hbuf, sizeof(hbuf)) != 0)
 	    error(1, "gethostname");
+	hbuf[sizeof(hbuf) - 1] = '\0';
 	user_host = hbuf;
     }
     if ((p = strchr(user_host, '.'))) {
