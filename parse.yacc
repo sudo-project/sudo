@@ -569,20 +569,24 @@ selinux		:	/* empty */ {
 #ifdef HAVE_SELINUX
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE && runas_matches == TRUE) {
-				/* Inherit role. */
-				cm_list[cm_list_len].role =
-				    estrdup(cm_list[cm_list_len-1].role);
-				cm_list[cm_list_len].role_len =
-				    cm_list[cm_list_len-1].role_len;
-				cm_list[cm_list_len].role_size =
-				    cm_list[cm_list_len-1].role_len + 1;
-				/* Inherit type. */
-				cm_list[cm_list_len].type =
-				    estrdup(cm_list[cm_list_len-1].type);
-				cm_list[cm_list_len].type_len =
-				    cm_list[cm_list_len-1].type_len;
-				cm_list[cm_list_len].type_size =
-				    cm_list[cm_list_len-1].type_len + 1;
+				if (match[top-1].role != NULL) {
+				    /* Inherit role. */
+				    cm_list[cm_list_len].role =
+					estrdup(cm_list[cm_list_len-1].role);
+				    cm_list[cm_list_len].role_len =
+					cm_list[cm_list_len-1].role_len;
+				    cm_list[cm_list_len].role_size =
+					cm_list[cm_list_len-1].role_len + 1;
+				}
+				if (match[top-1].type != NULL) {
+				    /* Inherit type. */
+				    cm_list[cm_list_len].type =
+					estrdup(cm_list[cm_list_len-1].type);
+				    cm_list[cm_list_len].type_len =
+					cm_list[cm_list_len-1].type_len;
+				    cm_list[cm_list_len].type_size =
+					cm_list[cm_list_len-1].type_len + 1;
+				}
 			    }
 #endif /* HAVE_SELINUX */
 			    $$.role = NULL;
@@ -592,13 +596,15 @@ selinux		:	/* empty */ {
 #ifdef HAVE_SELINUX
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE && runas_matches == TRUE) {
-				/* Inherit type. */
-				cm_list[cm_list_len].type =
-				    estrdup(cm_list[cm_list_len-1].type);
-				cm_list[cm_list_len].type_len =
-				    cm_list[cm_list_len-1].type_len;
-				cm_list[cm_list_len].type_size =
-				    cm_list[cm_list_len-1].type_len + 1;
+				if (match[top-1].type != NULL) {
+				    /* Inherit type. */
+				    cm_list[cm_list_len].type =
+					estrdup(cm_list[cm_list_len-1].type);
+				    cm_list[cm_list_len].type_len =
+					cm_list[cm_list_len-1].type_len;
+				    cm_list[cm_list_len].type_size =
+					cm_list[cm_list_len-1].type_len + 1;
+				}
 			    }
 #endif /* HAVE_SELINUX */
 			    $$.role = $1;
@@ -608,13 +614,15 @@ selinux		:	/* empty */ {
 #ifdef HAVE_SELINUX
 			    if (printmatches == TRUE && host_matches == TRUE &&
 				user_matches == TRUE && runas_matches == TRUE) {
-				/* Inherit role. */
-				cm_list[cm_list_len].role =
-				    estrdup(cm_list[cm_list_len-1].role);
-				cm_list[cm_list_len].role_len =
-				    cm_list[cm_list_len-1].role_len;
-				cm_list[cm_list_len].role_size =
-				    cm_list[cm_list_len-1].role_len + 1;
+				if (match[top-1].role != NULL) {
+				    /* Inherit role. */
+				    cm_list[cm_list_len].role =
+					estrdup(cm_list[cm_list_len-1].role);
+				    cm_list[cm_list_len].role_len =
+					cm_list[cm_list_len-1].role_len;
+				    cm_list[cm_list_len].role_size =
+					cm_list[cm_list_len-1].role_len + 1;
+				}
 			    }
 #endif /* HAVE_SELINUX */
 			    $$.type = $1;
