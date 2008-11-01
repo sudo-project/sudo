@@ -293,6 +293,9 @@ main(argc, argv, envp)
     } else
 	set_runaspw(runas_user ? runas_user : def_runas_default);
 
+    if (!update_defaults(SETDEF_RUNAS))
+	log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
+
     /* Set login class if applicable. */
     set_loginclass(sudo_user.pw);
 
@@ -807,7 +810,7 @@ set_cmnd(sudo_mode)
     else
 	user_base = user_cmnd;
 
-    if (!update_defaults(ONLY_CMND))
+    if (!update_defaults(SETDEF_CMND))
 	log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
 
     return(rval);

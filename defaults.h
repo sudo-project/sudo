@@ -93,9 +93,12 @@ struct sudo_defs_types {
 /*
  * Argument to update_defaults()
  */
-#define	SKIP_CMND	1
-#define	ONLY_CMND	0
-#define	SET_ALL		-1
+#define SETDEF_GENERIC	0x01
+#define	SETDEF_HOST	0x02
+#define	SETDEF_USER	0x04
+#define	SETDEF_RUNAS	0x08
+#define	SETDEF_CMND	0x10
+#define SETDEF_ALL	(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER|SETDEF_RUNAS|SETDEF_CMND)
 
 /*
  * Prototypes

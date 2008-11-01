@@ -254,7 +254,7 @@ main(argc, argv)
     else
 	(void) fputs("Parses OK", stdout);
 
-    if (!update_defaults(SET_ALL))
+    if (!update_defaults(SETDEF_ALL))
 	(void) fputs(" (problem with defaults entries)", stdout);
     puts(".");
 
@@ -336,9 +336,10 @@ set_runasgr(group)
     }
 }
 
+/* XXX - sanity check defaults settings */
 int
-update_defaults(skip_cmnd)
-    int skip_cmnd;
+update_defaults(what)
+    int what;
 {
     return(TRUE);
 }

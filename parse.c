@@ -133,37 +133,42 @@ sudo_file_parse(nss)
  * Returns TRUE on success and FALSE on failure.
  */
 int
-update_defaults(skip_cmnd)
-    int skip_cmnd;
+update_defaults(what)
+    int what;
 {
     struct defaults *def;
 
     tq_foreach_fwd(&defaults, def) {
-	if (skip_cmnd == (def->type == DEFAULTS_CMND))
-	    continue;
 	switch (def->type) {
 	    case DEFAULTS:
-		if (!set_default(def->var, def->val, def->op))
+		if (ISSET(what, SETDEF_GENERIC) &&
+		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
+		break;
 	    case DEFAULTS_USER:
-		if (userlist_matches(sudo_user.pw, &def->binding) == ALLOW &&
+		if (ISSET(what, SETDEF_USER) &&
+		    userlist_matches(sudo_user.pw, &def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 		break;
 	    case DEFAULTS_RUNAS:
-		if (runaslist_matches(&def->binding, NULL) == ALLOW &&
+		if (ISSET(what, SETDEF_RUNAS) &&
+		    runaslist_matches(&def->binding, NULL) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 		break;
 	    case DEFAULTS_HOST:
-		if (hostlist_matches(&def->binding) == ALLOW &&
+		if (ISSET(what, SETDEF_HOST) &&
+		    hostlist_matches(&def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
 		break;
 	    case DEFAULTS_CMND:
-		if (cmndlist_matches(&def->binding) == ALLOW &&
+		if (ISSET(what, SETDEF_CMND) &&
+		    cmndlist_matches(&def->binding) == ALLOW &&
 		    !set_default(def->var, def->val, def->op))
 		    return(FALSE);
+		break;
 	}
     }
     return(TRUE);
@@ -179,7 +184,7 @@ sudo_file_setdefs(nss)
     if (nss->handle == NULL)
 	return(-1);
 
-    if (!update_defaults(SKIP_CMND))
+    if (!update_defaults(SETDEF_GENERIC|SETDEF_HOST|SETDEF_USER))
 	return(-1);
     return(0);
 }

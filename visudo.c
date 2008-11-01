@@ -208,7 +208,7 @@ main(argc, argv)
 	error(1, "%s", sudoers_path);
     init_parser(sudoers_path, 0);
     yyparse();
-    (void) update_defaults(SKIP_CMND);
+    (void) update_defaults(SETDEF_ALL & ~SETDEF_CMND);
 
     editor = get_editor(&args);
 
@@ -565,9 +565,10 @@ user_is_exempt()
 }
 
 /* STUB */
+/* XXX - parse defaults to get editor and env_editor values */
 int
-update_defaults(skip_cmnd)
-    int skip_cmnd;
+update_defaults(what)
+    int what;
 {
     return(TRUE);
 }
