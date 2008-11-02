@@ -119,6 +119,8 @@ TODO list (most will be addressed in sudo 2.0)
 
 42) Add support for NOEXEC w/ 64-bit AIX executables.
     http://publib.boulder.ibm.com/infocenter/pseries/v5r3/index.jsp?topic=/com.ibm.xlf91a.doc/xlfug/comp64.htm
+    Note that it is possible to create shared libs w/ both 32bit and 64bit
+    objects.
 
 43) Revisit debian fqdn diffs.
 
@@ -169,7 +171,8 @@ TODO list (most will be addressed in sudo 2.0)
     will be executed w/ the new context if user is denied.
 
 58) Allow the -k flag to be used in conjunction with other flags
-    so you can force a password check w/ a command.
+    so you can force a password check w/ a command.  This turns out
+    to be rather difficult.
 
 59) Decide between option and flag in sudo and visudo man pages
 
@@ -177,8 +180,15 @@ TODO list (most will be addressed in sudo 2.0)
     per-user basis.  Would also be nice to have a diff facility given
     two sudoers files.
 
-61) Fix test for dgettext() in libc.  Solaris appears to need to link
-    with -lintl but configure doesn't add it to LIBS.  Try w/
-    Sun Pro C Compiler on ecbuild-20
+61) Add flag to ignore timestamp and always prompt for passwd.
 
-62) Include gram.h in parse.h
+62) Add rpm spec file that works on suse and redhat
+
+63) Store configure args in sudo binary for -V
+    Make -V operate in verbose mode with -VV instead of as root?
+
+64) Change tgetpass default to require a tty (and have option to enable old behavior)
+
+65) Verify consumers of *list_matches do not treat UNSPEC as true
+
+66) Add estrndup()?
