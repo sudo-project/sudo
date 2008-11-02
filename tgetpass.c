@@ -170,8 +170,8 @@ restart:
 #endif
 	(void) tcsetattr(input, TCSAFLUSH|TCSASOFT, &term);
     } else {
-	memset(&term, 0, sizeof(term));
-	memset(&oterm, 0, sizeof(oterm));
+	zero_bytes(&term, sizeof(term));
+	zero_bytes(&oterm, sizeof(oterm));
     }
 
     /* No output if we are already backgrounded. */

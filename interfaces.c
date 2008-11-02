@@ -249,7 +249,7 @@ load_interfaces()
 		continue;
 
 #ifdef SIOCGIFFLAGS
-	memset(&ifr_tmp, 0, sizeof(ifr_tmp));
+	zero_bytes(&ifr_tmp, sizeof(ifr_tmp));
 	strncpy(ifr_tmp.ifr_name, ifr->ifr_name, sizeof(ifr_tmp.ifr_name) - 1);
 	if (ioctl(sock, SIOCGIFFLAGS, (caddr_t) &ifr_tmp) < 0)
 #endif
@@ -267,7 +267,7 @@ load_interfaces()
 	previfname = ifr->ifr_name;
 
 	/* Get the netmask. */
-	(void) memset(&ifr_tmp, 0, sizeof(ifr_tmp));
+	zero_bytes(&ifr_tmp, sizeof(ifr_tmp));
 	strncpy(ifr_tmp.ifr_name, ifr->ifr_name, sizeof(ifr_tmp.ifr_name) - 1);
 #ifdef SIOCGIFNETMASK
 #ifdef _ISC

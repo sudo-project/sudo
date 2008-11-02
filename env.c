@@ -405,7 +405,7 @@ rebuild_env(envp, sudo_mode, noexec)
      */
     ps1 = NULL;
     didvar = 0;
-    memset(&env, 0, sizeof(env));
+    zero_bytes(&env, sizeof(env));
     if (def_env_reset || ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = envp; *ep; ep++) {

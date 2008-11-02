@@ -1204,7 +1204,7 @@ set_fqdn()
     char *p;
 
 #ifdef HAVE_GETADDRINFO
-    memset(&hint, 0, sizeof(hint));
+    zero_bytes(&hint, sizeof(hint));
     hint.ai_family = PF_UNSPEC;
     hint.ai_flags = AI_CANONNAME;
     if (getaddrinfo(user_host, NULL, &hint, &res0) != 0) {
@@ -1250,7 +1250,7 @@ set_runaspw(user)
 	runas_pw = sudo_getpwuid(atoi(user + 1));
 	if (runas_pw == NULL) {
 	    runas_pw = emalloc(sizeof(struct passwd));
-	    (void) memset((VOID *)runas_pw, 0, sizeof(struct passwd));
+	    zero_bytes(runas_pw, sizeof(struct passwd));
 	    runas_pw->pw_uid = atoi(user + 1);
 	    runas_pw->pw_name = user;
 	    runas_pw->pw_passwd = "*";
