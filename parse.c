@@ -305,8 +305,6 @@ command_matches(sudoers_cmnd, sudoers_args)
 	 *  b) there are no args on command line and none required by sudoers OR
 	 *  c) there are args in sudoers and on command line and they match
 	 * else return false.
-	 *
-	 * Could optimize patterns ending in "/*" to "/user_base"
 	 */
 #define GLOB_FLAGS	(GLOB_NOSORT | GLOB_MARK | GLOB_BRACE | GLOB_TILDE)
 	if (glob(sudoers_cmnd, GLOB_FLAGS, NULL, &gl) != 0) {
