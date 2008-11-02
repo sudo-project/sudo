@@ -128,54 +128,6 @@ sudo_file_parse(nss)
 }
 
 /*
- * Update the defaults based on what was set by sudoers.
- * If skip_cmnd is 1, skip DEFAULTS_CMND, if it is 0, skip all others.
- * Returns TRUE on success and FALSE on failure.
- * XXX - move to defaults.c or match.c
- */
-int
-update_defaults(what)
-    int what;
-{
-    struct defaults *def;
-
-    tq_foreach_fwd(&defaults, def) {
-	switch (def->type) {
-	    case DEFAULTS:
-		if (ISSET(what, SETDEF_GENERIC) &&
-		    !set_default(def->var, def->val, def->op))
-		    return(FALSE);
-		break;
-	    case DEFAULTS_USER:
-		if (ISSET(what, SETDEF_USER) &&
-		    userlist_matches(sudo_user.pw, &def->binding) == ALLOW &&
-		    !set_default(def->var, def->val, def->op))
-		    return(FALSE);
-		break;
-	    case DEFAULTS_RUNAS:
-		if (ISSET(what, SETDEF_RUNAS) &&
-		    runaslist_matches(&def->binding, NULL) == ALLOW &&
-		    !set_default(def->var, def->val, def->op))
-		    return(FALSE);
-		break;
-	    case DEFAULTS_HOST:
-		if (ISSET(what, SETDEF_HOST) &&
-		    hostlist_matches(&def->binding) == ALLOW &&
-		    !set_default(def->var, def->val, def->op))
-		    return(FALSE);
-		break;
-	    case DEFAULTS_CMND:
-		if (ISSET(what, SETDEF_CMND) &&
-		    cmndlist_matches(&def->binding) == ALLOW &&
-		    !set_default(def->var, def->val, def->op))
-		    return(FALSE);
-		break;
-	}
-    }
-    return(TRUE);
-}
-
-/*
  * Wrapper around update_defaults() for nsswitch code.
  */
 int

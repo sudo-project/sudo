@@ -336,14 +336,6 @@ set_runasgr(group)
     }
 }
 
-/* XXX - sanity check defaults settings */
-int
-update_defaults(what)
-    int what;
-{
-    return(TRUE);
-}
-
 void
 sudo_setspent()
 {
