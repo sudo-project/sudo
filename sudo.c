@@ -202,6 +202,7 @@ main(argc, argv, envp)
      *  us at some point and avoid the logging.
      *  Install handler to wait for children when they exit.
      */
+    zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_IGN;

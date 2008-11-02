@@ -154,6 +154,7 @@ restart:
      * Catch signals that would otherwise cause the user to end
      * up with echo turned off in the shell.
      */
+    zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT;	/* don't restart system calls */
     sa.sa_handler = handler;
@@ -260,6 +261,7 @@ sudo_askpass(prompt)
     }
 
     /* Ignore SIGPIPE in case child exits prematurely */
+    zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     sa.sa_handler = SIG_IGN;

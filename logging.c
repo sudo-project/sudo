@@ -504,6 +504,7 @@ send_mail(line)
     closefrom(STDERR_FILENO + 1);
 
     /* Ignore SIGPIPE in case mailer exits prematurely (or is missing). */
+    zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     sa.sa_handler = SIG_IGN;

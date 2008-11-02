@@ -115,6 +115,7 @@ systrace_attach(pid)
     sigfillset(&set);
     if (sigprocmask(SIG_BLOCK, &set, &oset) != 0)
 	error(1, "sigprocmask");
+    zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     sa.sa_handler = catchsig;
@@ -152,6 +153,7 @@ systrace_attach(pid)
 
     /* set signal state for tracer */
     dodetach = 0;
+    zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     sa.sa_handler = catchsig;

@@ -131,6 +131,7 @@ sudo_file_parse(nss)
  * Update the defaults based on what was set by sudoers.
  * If skip_cmnd is 1, skip DEFAULTS_CMND, if it is 0, skip all others.
  * Returns TRUE on success and FALSE on failure.
+ * XXX - move to defaults.c or match.c
  */
 int
 update_defaults(what)
