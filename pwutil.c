@@ -214,7 +214,7 @@ sudo_getpwuid(uid)
 	return(pw);
     } else {
 	pw = emalloc(sizeof(*pw));
-	memset(pw, 0, sizeof(*pw));
+	zero_bytes(pw, sizeof(*pw));
 	pw->pw_uid = uid;
 	if (rbinsert(pwcache_byuid, (void *) pw) != NULL)
 	    errorx(1, "unable to cache uid, already exists");
@@ -258,7 +258,7 @@ sudo_getpwnam(name)
     } else {
 	len = strlen(name) + 1;
 	cp = emalloc(sizeof(*pw) + len);
-	memset(cp, 0, sizeof(*pw));
+	zero_bytes(cp, sizeof(*pw));
 	pw = (struct passwd *) cp;
 	cp += sizeof(*pw);
 	memcpy(cp, name, len);
@@ -286,7 +286,7 @@ sudo_fakepwnam(user, gid)
     pw = emalloc(sizeof(struct passwd) + len + 1 /* pw_name */ +
 	sizeof("*") /* pw_passwd */ + sizeof("") /* pw_gecos */ +
 	sizeof("/") /* pw_dir */ + sizeof(_PATH_BSHELL));
-    memset(pw, 0, sizeof(struct passwd));
+    zero_bytes(pw, sizeof(struct passwd));
     pw->pw_uid = (uid_t) atoi(user + 1);
     pw->pw_gid = gid;
     pw->pw_name = (char *)pw + sizeof(struct passwd);
@@ -325,7 +325,7 @@ sudo_fakegrnam(group)
 
     len = strlen(group);
     gr = emalloc(sizeof(struct group) + len + 1);
-    memset(gr, 0, sizeof(struct group));
+    zero_bytes(gr, sizeof(struct group));
     gr->gr_gid = (gid_t) atoi(group + 1);
     gr->gr_name = (char *)gr + sizeof(struct group);
     strlcpy(gr->gr_name, group, len + 1);
@@ -493,7 +493,7 @@ sudo_getgrgid(gid)
 	return(gr);
     } else {
 	gr = emalloc(sizeof(*gr));
-	memset(gr, 0, sizeof(*gr));
+	zero_bytes(gr, sizeof(*gr));
 	gr->gr_gid = gid;
 	if (rbinsert(grcache_bygid, (void *) gr) != NULL)
 	    errorx(1, "unable to cache gid, already exists");
@@ -531,7 +531,7 @@ sudo_getgrnam(name)
     } else {
 	len = strlen(name) + 1;
 	cp = emalloc(sizeof(*gr) + len);
-	memset(cp, 0, sizeof(*gr));
+	zero_bytes(cp, sizeof(*gr));
 	gr = (struct group *) cp;
 	cp += sizeof(*gr);
 	memcpy(cp, name, len);

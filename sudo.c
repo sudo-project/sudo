@@ -1284,7 +1284,7 @@ set_fqdn()
     char *p;
 
 #ifdef HAVE_GETADDRINFO
-    memset(&hint, 0, sizeof(hint));
+    zero_bytes(&hint, sizeof(hint));
     hint.ai_family = PF_UNSPEC;
     hint.ai_flags = AI_CANONNAME;
     if (getaddrinfo(user_host, NULL, &hint, &res0) != 0) {

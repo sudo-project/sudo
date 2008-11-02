@@ -367,7 +367,7 @@ init_defaults()
 		    list_op(NULL, 0, def, freeall);
 		    break;
 	    }
-	    memset(&def->sd_un, 0, sizeof(def->sd_un));
+	    zero_bytes(&def->sd_un, sizeof(def->sd_un));
 	}
     }
 

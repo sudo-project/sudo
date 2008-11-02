@@ -118,7 +118,7 @@ ts_getpwent()
     if ((colon = fgets(pwbuf, sizeof(pwbuf), pwf)) == NULL)
 	return(NULL);
 
-    memset(&pw, 0, sizeof(pw));
+    zero_bytes(&pw, sizeof(pw));
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	return(NULL);
     *colon++ = '\0';
@@ -233,7 +233,7 @@ ts_getgrent()
     if ((colon = fgets(grbuf, sizeof(grbuf), grf)) == NULL)
 	return(NULL);
 
-    memset(&gr, 0, sizeof(gr));
+    zero_bytes(&gr, sizeof(gr));
     if ((colon = strchr(cp = colon, ':')) == NULL)
 	return(NULL);
     *colon++ = '\0';

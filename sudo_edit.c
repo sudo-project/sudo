@@ -115,13 +115,13 @@ sudo_edit(argc, argv, envp)
      * and copy the contents of the original to it.
      */
     tf = emalloc2(argc - 1, sizeof(*tf));
-    memset(tf, 0, (argc - 1) * sizeof(*tf));
+    zero_bytes(tf, (argc - 1) * sizeof(*tf));
     for (i = 0, ap = argv + 1; i < argc - 1 && *ap != NULL; i++, ap++) {
 	error = -1;
 	set_perms(PERM_RUNAS);
 	if ((ofd = open(*ap, O_RDONLY, 0644)) != -1 || errno == ENOENT) {
 	    if (ofd == -1) {
-		memset(&sb, 0, sizeof(sb));		/* new file */
+		zero_bytes(&sb, sizeof(sb));		/* new file */
 		error = 0;
 	    } else {
 #ifdef HAVE_FSTAT
