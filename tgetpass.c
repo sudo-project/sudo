@@ -147,6 +147,7 @@ restart:
      * Catch signals that would otherwise cause the user to end
      * up with echo turned off in the shell.
      */
+    zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_INTERRUPT;	/* don't restart system calls */
     sa.sa_handler = handler;

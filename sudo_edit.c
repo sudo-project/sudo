@@ -232,6 +232,7 @@ int sudo_edit(argc, argv, envp)
     nargv[ac] = NULL;
 
     /* Allow the editor to be suspended. */
+    zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_DFL;

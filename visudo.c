@@ -575,6 +575,7 @@ setup_signals()
 	/*
 	 * Setup signal handlers to cleanup nicely.
 	 */
+	zero_bytes(&sa, sizeof(sa));
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = Exit;
