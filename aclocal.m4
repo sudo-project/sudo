@@ -225,6 +225,8 @@ AC_DEFUN([SUDO_FUNC_ISBLANK],
 ] [
   if test "$sudo_cv_func_isblank" = "yes"; then
     AC_DEFINE(HAVE_ISBLANK, 1, [Define if you have isblank(3).])
+  else
+    AC_LIBOBJ(isblank)
   fi
 ])
 

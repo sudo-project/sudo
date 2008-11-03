@@ -152,9 +152,10 @@
 #endif
 
 /*
- * Simple isblank() macro for systems without it.
+ * Simple isblank() macro and function for systems without it.
  */
 #ifndef HAVE_ISBLANK
+int isblank __P((int));
 # define isblank(_x)	((_x) == ' ' || (_x) == '\t')
 #endif
 

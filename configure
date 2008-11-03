@@ -17250,6 +17250,13 @@ cat >>confdefs.h <<\_ACEOF
 #define HAVE_ISBLANK 1
 _ACEOF
 
+  else
+    case " $LIBOBJS " in
+  *" isblank.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS isblank.$ac_objext"
+ ;;
+esac
+
   fi
 
 

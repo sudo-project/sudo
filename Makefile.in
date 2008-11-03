@@ -105,11 +105,11 @@ PROGS = @PROGS@
 SRCS = aix.c alias.c alloc.c check.c closefrom.c def_data.c defaults.c env.c \
        error.c fileops.c find_path.c fnmatch.c getcwd.c getprogname.c \
        getspwuid.c gettime.c glob.c goodpath.c gram.c gram.y interfaces.c \
-       lbuf.c ldap.c list.c logging.c match.c mkstemp.c memrchr.c parse.c \
-       pwutil.c  set_perms.c sigaction.c snprintf.c strcasecmp.c strerror.c \
-       strlcat.c strlcpy.c sudo.c sudo_noexec.c sudo_edit.c sudo_nss.c \
-       testsudoers.c tgetpass.c toke.c toke.l tsgetgrpw.c utimes.c visudo.c \
-       zero_bytes.c redblack.c selinux.c sesh.c $(AUTH_SRCS)
+       isblank.c lbuf.c ldap.c list.c logging.c match.c mkstemp.c memrchr.c \
+       parse.c pwutil.c  set_perms.c sigaction.c snprintf.c strcasecmp.c \
+       strerror.c strlcat.c strlcpy.c sudo.c sudo_noexec.c sudo_edit.c \
+       sudo_nss.c testsudoers.c tgetpass.c toke.c toke.l tsgetgrpw.c utimes.c \
+       visudo.c zero_bytes.c redblack.c selinux.c sesh.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -258,6 +258,8 @@ gram.o: $(devdir)/gram.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(devdir)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(devdir)/gram.c
 interfaces.o: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/interfaces.c
+isblank.o: $(srcdir)/isblank.c $(srcdir)/compat.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/isblank.c
 lbuf.o: $(srcdir)/lbuf.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/lbuf.c
 ldap.o: $(srcdir)/ldap.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h
