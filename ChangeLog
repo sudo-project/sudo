@@ -1,3 +1,318 @@
+2008-11-04 15:46  millert
+
+	* sudoers.cat, sudoers.man.in: regen
+
+2008-11-04 15:45  millert
+
+	* sudoers.pod: mention defauts parse order
+
+2008-11-03 13:19  millert
+
+	* Makefile.in, aclocal.m4, compat.h, configure: Add isblank()
+	  function for systems without it.  Needed for POSIX character
+	  class matching in fnmatch.c and glob.c.
+
+2008-11-03 12:54  millert
+
+	* Makefile.in: add emul/charclass.h to HDRS
+
+2008-11-02 14:08  millert
+
+	* TODO: checkpoint
+
+2008-11-02 14:06  millert
+
+	* parse.c, defaults.c, testsudoers.c, visudo.c: Move
+	  update_defaults into defaults.c and call it properly from visudo
+	  and testsudoers.
+
+2008-11-02 09:51  millert
+
+	* defaults.c, interfaces.c, pwutil.c, sudo.c, sudo_edit.c,
+	  tgetpass.c, tsgetgrpw.c: use zero_bytes() instead of memset() for
+	  consistency
+
+2008-11-02 09:45  millert
+
+	* logging.c, mon_systrace.c, parse.c, sudo.c, sudo_edit.c,
+	  tgetpass.c, visudo.c: Zero out sigaction_t before use in case it
+	  has non-standard entries.
+
+2008-11-02 09:35  millert
+
+	* match.c: quiet gcc
+
+2008-11-02 09:28  millert
+
+	* match.c: Short circuit glob() checks if basename(pattern) !=
+	  basename(command).  Refactor code that checks for a command in a
+	  directory and use it in the glob case if the resolved pattern
+	  ends in a '/'.
+
+2008-11-01 09:20  millert
+
+	* defaults.h, parse.c, sudo.c, testsudoers.c, visudo.c: Defer
+	  setting runas defaults until after runaspw/gr is setup.
+
+2008-10-29 13:26  millert
+
+	* match.c, sudo.c, testsudoers.c: Use MAXHOSTNAMELEN+1 when
+	  allocating host/domain name since some systems do not include
+	  space for the NUL in the size.  Also manually NUL-terminate
+	  buffer from gethostname() since POSIX is wishy-washy on this.
+
+2008-10-26 17:13  millert
+
+	* sudo.c, sudoers.pod: When setting the umask, use the union of the
+	  user's umask and the default value set in sudoers so that we
+	  never lower the user's umask when running a command.
+
+2008-10-26 16:43  millert
+
+	* sudo.c: Don't try to read from a zero-length sudoers file.
+	  Remove the bogus Solaris work-around for EAGAIN.  Since we now
+	  use fgetc() it should not be a problem.
+
+2008-10-25 09:22  millert
+
+	* parse.c: In update_defaults() check the return value of
+	  user*_matches against ALLOW so we don't inadvertantly match on
+	  UNSPEC.
+
+2008-10-24 09:52  millert
+
+	* sudo.cat, sudo.man.in, sudoers.cat, sudoers.ldap.cat,
+	  sudoers.ldap.man.in, sudoers.man.in, visudo.cat, visudo.man.in:
+	  regen man pages; no more hyphenation
+
+2008-10-24 09:49  millert
+
+	* sudo.c: Don't error out on a zero-length sudoers file.  With the
+	  advent of #include the user could create a situation where sudo
+	  is unusable.
+
+2008-10-23 12:06  millert
+
+	* config.h.in, configure, configure.in, auth/kerb5.c: Newer heimdal
+	  has 2-argument krb5_get_init_creds_opt_free() like MIT krb5.
+	  Really old heimdal has no krb5_get_init_creds_opt_alloc() at all.
+	  Add configure tests to handle all the cases.
+
+2008-10-08 17:28  millert
+
+	* sudo.pod: resort ENVIRONMENT
+
+2008-10-08 17:09  millert
+
+	* sudoers.pod: document sudoers_locale
+
+2008-10-08 16:56  millert
+
+	* sudo.pod, sudo_edit.c: add SUDO_EDITOR variable that sudoedit
+	  uses in preference to VISUAL or EDITOR
+
+2008-10-08 14:27  millert
+
+	* toke.c, toke.l: In fill_cmnd(), collapse any escaped
+	  sudo-specific characters.  Allows character classes to be used in
+	  pathnames.
+
+2008-10-03 16:02  millert
+
+	* lbuf.c: fix typo in non-C89 function declaration
+
+2008-10-03 15:56  millert
+
+	* sudoers.pod: Mention POSIX characters classes now that out
+	  fnmatch() and glob() support them.
+
+2008-10-03 15:55  millert
+
+	* sample.sudoers, sudoers.pod: Replace [A-z] (which won't match in
+	  UTF8) with [A-Za-z] which is locale agnostic.
+
+2008-10-03 10:02  millert
+
+	* parse.h: use __signed char if we are going to assign a negative
+	  value since on Power, char is unsigned by default
+
+2008-10-03 09:59  millert
+
+	* configure, configure.in, config.h.in: Add tests for __signed char
+	  and signed char.
+
+2008-10-03 09:19  millert
+
+	* aix.c: Fix AIX limit setting.  getuserattr() returns values in
+	  disk blocks rather than bytes.  The default hard stack size in
+	  newer AIX is RLIM_SAVED_MAX.	From Dale King.
+
+2008-09-26 17:13  millert
+
+	* fnmatch.c, glob.c, emul/charclass.h: Add character class support
+	  to included glob(3) and fnmatch(3).
+
+2008-09-16 08:28  millert
+
+	* emul/fnmatch.h: Remove UCB advertising clause and some
+	  compatibility defines.
+
+2008-09-14 16:07  millert
+
+	* sudo_edit.c: Check EDITOR/VISUAL to make sure sudoedit is not
+	  re-invoking itself or sudo.  This allows one to set EDITOR to
+	  sudoedit without getting into an infinite loop of sudoedit
+	  running itself until the path gets too big.
+
+2008-09-13 20:45  millert
+
+	* def_data.c, def_data.h, def_data.in, defaults.c, sudo.c: Add
+	  sudoers_locale Defaults option to override the default sudoers
+	  locale of "C".
+
+2008-09-13 14:09  millert
+
+	* sudo.c: Set locale to system default except for during sudoers
+	  parse.
+
+2008-09-12 09:34  millert
+
+	* match.c: Redo change in 1.34 to use pointer arithmetic.
+
+2008-09-11 07:06  millert
+
+	* match.c: Fix a dereference (read) of a freed pointer.  Reported
+	  by Patrick Williams.
+
+2008-08-23 19:09  millert
+
+	* sudo.c: Set locale to "C" to avoid interpretation issues with
+	  character ranges in sudoers.	May want to make the locale a
+	  sudoers option in the future.
+
+2008-08-20 07:45  millert
+
+	* config.h.in: we no longer use setproctitle
+
+2008-08-20 07:41  millert
+
+	* sudo.h: remove #if 1
+
+2008-08-20 07:40  millert
+
+	* LICENSE, mkstemp.c: Use my replacement mkstemp() from the mktemp
+	  package.
+
+2008-07-12 08:53  millert
+
+	* gram.c: regen with yacc skeleton bug fixed
+
+2008-07-12 08:48  millert
+
+	* sudoers.pod: Remove duplicate "as root".  From Martin Toft.
+
+2008-07-02 06:27  millert
+
+	* pwutil.c, sudo.c, testsudoers.c, sudo.h: Flesh out the fake
+	  passwd entry used for running commands as a uid not listed in the
+	  passwd database.  Fixes an issue with some PAM modules.
+
+2008-07-01 07:57  millert
+
+	* sudo.c: Error out in -i mode if the user has no shell.  This can
+	  happen when running commands as a uid with no password entry.
+
+2008-06-26 07:49  millert
+
+	* toke.c, toke.l: Better fix for line continuation inside double
+	  quotes.  Now accepts whitespace between the backslash and the
+	  newline like the main lexer.
+
+2008-06-25 14:31  millert
+
+	* toke.c, toke.l: Fix line continuation in strings.  It was only
+	  being honored if preceded by whitespace.
+
+2008-06-22 16:19  millert
+
+	* config.h.in, configure, configure.in, logging.c: Replace the
+	  double fork with a fork + daemonize.
+
+2008-06-21 14:59  millert
+
+	* env.c, sudo.c: The -i flag should imply env_reset.  This got
+	  broken in sudo 1.6.9.
+
+2008-06-20 20:34  millert
+
+	* logging.c, sudo.c, sudo_edit.c, visudo.c: Change how the mailer
+	  is waited for.  Instead of having a SIGCHLD handler, use the
+	  double fork trick to orphan the child that opens the pipe to
+	  sendmail.  Fixes a problem running su on some Linux distros.
+
+2008-06-20 17:16  millert
+
+	* configure, configure.in: Fix configure test for dirfd() on Linux
+	  where DIR is opaque.
+
+2008-06-17 17:42  millert
+
+	* tgetpass.c: Get rid of the QNX TCSAFLUSH -> TCSADRAIN hack.  If
+	  QNX still has this problem we'll need to revisit this again.
+
+2008-06-10 21:13  millert
+
+	* logging.c: Ignore SIGPIPE instead of blocking it when piping to
+	  the mailer.  If we only block the signal it may be delivered
+	  later when we unblock.  Also, there is no need to block SIGCHLD
+	  since we no longer do the double fork.  The normal SIGCHLD
+	  handler is sufficient.
+
+2008-06-08 17:37  millert
+
+	* configure, configure.in: Add description for NO_PAM_SESSION, from
+	  a redhat patch.
+
+2008-06-06 09:36  millert
+
+	* sudo.cat, sudo.man.in, sudo.pod: Fix typos in -i usage
+
+2008-05-18 13:54  millert
+
+	* configure, configure.in: Redo the test for dgettext() in a way
+	  that hopefully will work around the libintl_dgettext() undefined
+	  problem.
+
+2008-05-11 09:21  millert
+
+	* schema.ActiveDirectory: change filename in comment
+
+2008-05-10 09:18  millert
+
+	* Makefile.in, README.LDAP, sudoers.ldap.cat, sudoers.ldap.man.in,
+	  sudoers.ldap.pod: Reference schema.ActiveDirectory
+
+2008-05-09 14:49  millert
+
+	* schema.OpenLDAP, schema.iPlanet: Mark sudoRunAs as deprecated.
+
+2008-05-09 14:48  millert
+
+	* schema.ActiveDirectory: add sudoRunAsUser and sudoRunAsGroup
+
+2008-05-09 14:01  millert
+
+	* schema.ActiveDirectory: Active Directory schema by Chantal
+	  Paradis and Eric Paquet
+
+2008-05-08 17:54  millert
+
+	* parse.c: remove an XXX that was fixed
+
+2008-05-08 12:53  millert
+
+	* ChangeLog: sync
+
 2008-05-08 12:49  millert
 
 	* parse.c: Initialize tags to UNSPEC instead of def_* in "sudo -l"
