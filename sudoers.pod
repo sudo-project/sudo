@@ -234,6 +234,10 @@ These operators are used to add to and delete from a list respectively.
 It is not an error to use the C<-=> operator to remove an element
 that does not exist in a list.
 
+Defaults entries are parsed in the following order: generic, host
+and user Defaults first, then runas Defaults and finally command
+defaults.
+
 See L</"SUDOERS OPTIONS"> for a list of supported Defaults parameters.
 
 =head2 User Specification
