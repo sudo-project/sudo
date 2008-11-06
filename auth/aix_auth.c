@@ -77,3 +77,14 @@ aixauth_verify(pw, prompt, auth)
     }
     return(rval);
 }
+
+int
+aixauth_cleanup(pw, auth)
+    struct passwd *pw;
+    sudo_auth *auth;
+{
+    /* Unset AUTHSTATE as it may not be correct for the runas user. */
+    unsetenv("AUTHSTATE");
+ 
+    return(AUTH_SUCCESS);
+}

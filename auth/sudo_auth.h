@@ -99,7 +99,7 @@ int securid_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
 #elif defined(HAVE_AIXAUTH)
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(0, "aixauth", \
-	    NULL, NULL, aixauth_verify, NULL)
+	    NULL, NULL, aixauth_verify, aixauth_cleanup)
 #elif defined(HAVE_FWTK)
 #  define AUTH_STANDALONE \
 	AUTH_ENTRY(0, "fwtk", \
