@@ -133,6 +133,7 @@ static const char *initial_badenv_table[] = {
 #ifdef _AIX
     "LDR_*",
     "LIBPATH",
+    "AUTHSTATE",
 #endif
 #ifdef __APPLE__
     "DYLD_*",
