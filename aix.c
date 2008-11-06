@@ -39,7 +39,7 @@ __unused static const char rcsid[] = "$Sudo$";
 #ifdef HAVE_GETUSERATTR
 
 #ifndef RLIM_SAVED_MAX
-# define RLIM_SAVED_MAX 0x400000
+# define RLIM_SAVED_MAX 0x7fffffff
 #endif
 
 struct aix_limit {
