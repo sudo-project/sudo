@@ -70,10 +70,19 @@ aixauth_verify(pw, prompt, auth)
 	/* XXX - should probably print message on failure. */
 	if (authenticate(pw->pw_name, pass, &reenter, &message) == 0)
 	    rval = AUTH_SUCCESS;
-	/* Unset AUTHSTATE as it may not be correct for the runas user. */
-	sudo_unsetenv("AUTHSTATE");
 	free(message);
 	zero_bytes(pass, strlen(pass));
     }
     return(rval);
+}
+
+int
+aixauth_cleanup(pw, auth)
+    struct passwd *pw;
+    sudo_auth *auth;
+{
+    /* Unset AUTHSTATE as it may not be correct for the runas user. */
+    sudo_unsetenv("AUTHSTATE");
+
+    return(AUTH_SUCCESS);
 }
