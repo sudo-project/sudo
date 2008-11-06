@@ -133,6 +133,7 @@ static const char *initial_badenv_table[] = {
 #ifdef _AIX
     "LDR_*",
     "LIBPATH",
+    "AUTHSTATE",
 #endif
 #ifdef __APPLE__
     "DYLD_*",
@@ -292,7 +293,9 @@ sudo_setenv(var, val, dupcheck)
     }
     insert_env(estring, dupcheck, TRUE);
 }
+#endif /* HAVE_LDAP */
 
+#if defined(HAVE_LDAP) || defined(HAVE_AIXAUTH)
 /*
  * Similar to unsetenv(3) but operates on sudo's private copy of the
  * environment.
@@ -319,7 +322,7 @@ sudo_unsetenv(var)
 	}
     }
 }
-#endif /* HAVE_LDAP */
+#endif /* HAVE_LDAP || HAVE_AIXAUTH */
 
 /*
  * Insert str into env.envp, assumes str has an '=' in it.
