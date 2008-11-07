@@ -22,7 +22,8 @@
 /* Auth function return values.  */
 #define AUTH_SUCCESS	0
 #define AUTH_FAILURE	1
-#define AUTH_FATAL	2
+#define AUTH_INTR	2
+#define AUTH_FATAL	3
 
 typedef struct sudo_auth {
     short flags;		/* various flags, see below */

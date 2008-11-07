@@ -95,7 +95,6 @@ fwtk_verify(pw, prompt, auth)
     char buf[SUDO_PASS_MAX + 12];	/* General prupose buffer */
     char resp[128];			/* Response from the server */
     int error;
-    extern int nil_pw;
 
     /* Send username to authentication server. */
     (void) snprintf(buf, sizeof(buf), "authorize %s 'sudo'", pw->pw_name);
@@ -127,10 +126,8 @@ restart:
 	return(AUTH_FATAL);
     }
     if (!pass) {			/* ^C or error */
-	nil_pw = 1;
-	return(AUTH_FAILURE);
-    } else if (*pass == '\0')		/* empty password */
-	nil_pw = 1;
+	return(AUTH_INTR);
+    }
 
     /* Send the user's response to the server */
     (void) snprintf(buf, sizeof(buf), "response '%s'", pass);

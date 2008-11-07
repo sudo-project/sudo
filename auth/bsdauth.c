@@ -104,7 +104,6 @@ bsdauth_verify(pw, prompt, auth)
     int authok = 0;
     sigaction_t sa, osa;
     auth_session_t *as = (auth_session_t *) auth->data;
-    extern int nil_pw;
 
     /* save old signal handler */
     sigemptyset(&sa.sa_mask);
@@ -142,9 +141,6 @@ bsdauth_verify(pw, prompt, auth)
 	}
     }
 
-    if (!pass || *pass == '\0')		/* ^C or empty password */
-	nil_pw = 1;
-
     if (pass) {
 	authok = auth_userresponse(as, pass, 1);
 	zero_bytes(pass, strlen(pass));
@@ -155,6 +151,9 @@ bsdauth_verify(pw, prompt, auth)
 
     if (authok)
 	return(AUTH_SUCCESS);
+
+    if (!pass)
+	return(AUTH_INTR);
 
     if ((s = auth_getvalue(as, "errormsg")) != NULL)
 	log_error(NO_EXIT|NO_MAIL, "%s", s);

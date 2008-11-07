@@ -88,8 +88,6 @@ sudo_auth auth_switch[] = {
     AUTH_ENTRY(0, NULL, NULL, NULL, NULL, NULL)
 };
 
-int nil_pw;		/* I hate resorting to globals like this... */
-
 void
 verify_user(pw, prompt)
     struct passwd *pw;
@@ -156,14 +154,11 @@ verify_user(pw, prompt)
 	}
 
 	/* Get the password unless the auth function will do it for us */
-	nil_pw = 0;
 #ifdef AUTH_STANDALONE
 	p = prompt;
 #else
 	p = (char *) tgetpass(prompt, def_passwd_timeout * 60,
 	    tgetpass_flags);
-	if (!p || *p == '\0')
-	    nil_pw = 1;
 #endif /* AUTH_STANDALONE */
 
 	/* Call authentication functions. */
@@ -186,15 +181,6 @@ verify_user(pw, prompt)
 	if (p)
 	    zero_bytes(p, strlen(p));
 #endif
-
-	/* Exit loop on nil password, but give it a chance to match first. */
-	if (nil_pw) {
-	    if (counter == def_passwd_tries)
-		exit(1);
-	    else
-		break;
-	}
-
 	if (!ISSET(tgetpass_flags, TGP_ASKPASS))
 	    pass_warn(stderr);
     }
@@ -219,14 +205,18 @@ cleanup:
 	case AUTH_SUCCESS:
 	    (void) sigaction(SIGTSTP, &osa, NULL);
 	    return;
+	case AUTH_INTR:
 	case AUTH_FAILURE:
-	    if (def_mail_badpass || def_mail_always)
-		flags = 0;
-	    else
-		flags = NO_MAIL;
-	    log_error(flags, "%d incorrect password attempt%s",
-		def_passwd_tries - counter,
-		(def_passwd_tries - counter == 1) ? "" : "s");
+	    if (counter != def_passwd_tries) {
+		if (def_mail_badpass || def_mail_always)
+		    flags = 0;
+		else
+		    flags = NO_MAIL;
+		log_error(flags, "%d incorrect password attempt%s",
+		    def_passwd_tries - counter,
+		    (def_passwd_tries - counter == 1) ? "" : "s");
+	    }
+	    /* FALLTHROUGH */
 	case AUTH_FATAL:
 	    exit(1);
     }
