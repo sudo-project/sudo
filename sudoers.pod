@@ -662,11 +662,9 @@ user.  This flag is I<off> by default.
 =item requiretty
 
 If set, B<sudo> will only run when the user is logged in to a real
-tty.  This will disallow things like C<"rsh somehost sudo ls"> since
-L<rsh(1)> does not allocate a tty.  Because it is not possible to turn
-off echo when there is no tty present, some sites may wish to set
-this flag to prevent a user from entering a visible password.  This
-flag is I<off> by default.
+tty.  When this flag is set, B<sudo> can only be run from a login
+session and not via other means such as L<cron(8)> or cgi-bin scripts.
+This flag is I<off> by default.
 
 =item root_sudo
 
@@ -757,6 +755,15 @@ This flag is I<@tty_tickets@> by default.
 If set, B<sudo> will apply the defaults specified for the target user's
 login class if one exists.  Only available if B<sudo> is configured with
 the --with-logincap option.  This flag is I<off> by default.
+
+=item visiblepw
+
+By default, B<sudo> will refuse to run if the user must enter a
+password but it is not possible to disable echo on the terminal.
+If the I<visiblepw> flag is set, B<sudo> will prompt for a password
+even when it would be visible on the screen.  This makes it possible
+to run things like C<"rsh somehost sudo ls"> since L<rsh(1)> does
+not allocate a tty.  This flag is I<off> by default.
 
 =back
 

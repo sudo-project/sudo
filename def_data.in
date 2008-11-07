@@ -220,3 +220,6 @@ env_file
 sudoers_locale
 	T_STR
 	"Locale to use while parsing sudoers: %s"
+visiblepw
+	T_FLAG
+	"Allow sudo to prompt for a password even if it would be visisble"

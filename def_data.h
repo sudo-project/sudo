@@ -136,6 +136,8 @@
 #define I_ENV_FILE              67
 #define def_sudoers_locale      (sudo_defs_table[68].sd_un.str)
 #define I_SUDOERS_LOCALE        68
+#define def_visiblepw           (sudo_defs_table[69].sd_un.flag)
+#define I_VISIBLEPW             69
 
 enum def_tupple {
 	never,

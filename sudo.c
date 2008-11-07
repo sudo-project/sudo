@@ -399,9 +399,14 @@ main(argc, argv, envp)
 		"no askpass program specified, try setting SUDO_ASKPASS");
     } else {
 	/* If no tty but DISPLAY is set, use askpass if we have it. */
-	if (user_askpass && !ISSET(tgetpass_flags, TGP_STDIN) &&
-	    !user_ttypath && user_display && *user_display != '\0')
-	    SET(tgetpass_flags, TGP_ASKPASS);
+	if (!user_ttypath && !ISSET(tgetpass_flags, TGP_STDIN)) {
+	    if (user_askpass && user_display && *user_display != '\0') {
+		SET(tgetpass_flags, TGP_ASKPASS);
+	    } else if (!def_visiblepw) {
+		log_error(NO_MAIL,
+		    "no tty present and no askpass program specified");
+	    }
+	}
     }
 
     /* User may have overriden environment resetting via the -E flag. */

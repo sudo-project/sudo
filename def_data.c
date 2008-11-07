@@ -299,6 +299,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Locale to use while parsing sudoers: %s",
 	NULL,
     }, {
+	"visiblepw", T_FLAG,
+	"Allow sudo to prompt for a password even if it would be visisble",
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };
