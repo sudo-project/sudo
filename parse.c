@@ -190,7 +190,7 @@ sudo_file_lookup(nss, validated, pwflag)
 			cmnd_matches(cs->cmnd) == ALLOW)
 			    match = ALLOW;
 		    if ((pwcheck == any && nopass != TRUE) ||
-			(pwcheck == all && nopass == TRUE))
+			(pwcheck == all && nopass != FALSE))
 			nopass = cs->tags.nopasswd;
 		    if (match == ALLOW)
 			goto matched_pseudo;
