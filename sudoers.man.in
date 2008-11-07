@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "November  4, 2008" "1.7.0" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "November  6, 2008" "1.7.0" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -795,11 +795,9 @@ user.  This flag is \fIoff\fR by default.
 .IP "requiretty" 16
 .IX Item "requiretty"
 If set, \fBsudo\fR will only run when the user is logged in to a real
-tty.  This will disallow things like \f(CW"rsh somehost sudo ls"\fR since
-\&\fIrsh\fR\|(1) does not allocate a tty.  Because it is not possible to turn
-off echo when there is no tty present, some sites may wish to set
-this flag to prevent a user from entering a visible password.  This
-flag is \fIoff\fR by default.
+tty.  When this flag is set, \fBsudo\fR can only be run from a login
+session and not via other means such as \fIcron\fR\|(@mansectsu@) or cgi-bin scripts.
+This flag is \fIoff\fR by default.
 .IP "root_sudo" 16
 .IX Item "root_sudo"
 If set, root is allowed to run \fBsudo\fR too.  Disabling this prevents users
@@ -879,6 +877,14 @@ This flag is \fI@tty_tickets@\fR by default.
 @LCMAN@If set, \fBsudo\fR will apply the defaults specified for the target user's
 @LCMAN@login class if one exists.  Only available if \fBsudo\fR is configured with
 @LCMAN@the \-\-with\-logincap option.  This flag is \fIoff\fR by default.
+.IP "visiblepw" 16
+.IX Item "visiblepw"
+By default, \fBsudo\fR will refuse to run if the user must enter a
+password but it is not possible to disable echo on the terminal.
+If the \fIvisiblepw\fR flag is set, \fBsudo\fR will prompt for a password
+even when it would be visible on the screen.  This makes it possible
+to run things like \f(CW"rsh somehost sudo ls"\fR since \fIrsh\fR\|(1) does
+not allocate a tty.  This flag is \fIoff\fR by default.
 .PP
 \&\fBIntegers\fR:
 .IP "closefrom" 16
