@@ -127,7 +127,8 @@ SUDOBJS = check.o env.o getspwuid.o gettime.o goodpath.o fileops.o find_path.o \
 	  interfaces.o logging.o parse.o set_perms.o sudo.o sudo_edit.o \
 	  tgetpass.o zero_bytes.o @SUDO_OBJS@ $(AUTH_OBJS) $(PARSEOBJS)
 
-VISUDOBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o $(PARSEOBJS)
+VISUDOBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o zero_bytes.o \
+	    $(PARSEOBJS)
 
 TESTOBJS = interfaces.o testsudoers.o $(PARSEOBJS)
 
