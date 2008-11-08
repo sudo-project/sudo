@@ -282,20 +282,24 @@ getln(fd, buf, bufsiz)
     char *buf;
     size_t bufsiz;
 {
-    char c, *cp;
-    ssize_t nr;
+    ssize_t nr = -1;
+    char *cp = buf;
+    char c = '\0';
 
     if (bufsiz == 0) {
 	errno = EINVAL;
 	return(NULL);			/* sanity */
     }
 
-    cp = buf;
-    nr = -1;
-    while (--bufsiz && (nr = read(fd, &c, 1)) == 1 && c != '\n' && c != '\r')
+    while (--bufsiz) {
+	nr = read(fd, &c, 1);
+	if (nr != 1 || c == '\n' || c == '\r')
+	    break;
 	*cp++ = c;
+    }
     *cp = '\0';
-    return(nr == -1 ? NULL : buf);
+
+    return(nr == 1 ? buf : NULL);
 }
 
 static void
