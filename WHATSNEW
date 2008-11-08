@@ -65,3 +65,12 @@ What's new in Sudo 1.7.0?
  * A new flag, -n, may be used to indicate that sudo should not
    prompt the user for a password and, instead, exit with an error
    if authentication is required.
+
+ * If sudo needs to prompt for a password and it is unable to disable
+   echo (and no askpass program is defined), it will refuse to run
+   unless the "visiblepw" Defaults option has been specified.
+
+ * Prior to version 1.7.0, hitting enter/return at the Password: prompt
+   would exit sudo.  In sudo 1.7.0 and beyond, this is treated as
+   an empty password.  To exit sudo, the user must press ^C or ^D
+   at the prompt.
