@@ -3124,7 +3124,7 @@ fill_cmnd(src, len)
 
     arg_len = arg_size = 0;
 
-    dst = yylval.command.cmnd = (char *) malloc(++len);
+    dst = yylval.command.cmnd = (char *) malloc(len + 1);
     if (yylval.command.cmnd == NULL) {
 	yyerror("unable to allocate memory");
 	return(FALSE);
