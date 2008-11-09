@@ -1,6 +1,5 @@
-/*	$OpenBSD: glob.c,v 1.23 2004/05/18 02:05:52 jfb Exp $	*/
-
 /*
+ * Copyright (c) 2008 Todd C. Miller <Todd.Miller@courtesan.com>
  * Copyright (c) 1989, 1993
  *	The Regents of the University of California.  All rights reserved.
  *
