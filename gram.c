@@ -6,6 +6,8 @@ static char yyrcsid[]
 #endif /* __GNUC__ >= 2 */
   = "$OpenBSD: skeleton.c,v 1.29 2008/07/08 15:06:50 otto Exp $";
 #endif
+#include <stdlib.h>
+#include <string.h>
 #define YYBYACC 1
 #define YYMAJOR 1
 #define YYMINOR 9
@@ -17,7 +19,7 @@ static char yyrcsid[]
 #define YYPREFIX "yy"
 #line 2 "gram.y"
 /*
- * Copyright (c) 1996, 1998-2005, 2007
+ * Copyright (c) 1996, 1998-2005, 2007-2008
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
