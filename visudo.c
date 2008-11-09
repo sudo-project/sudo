@@ -107,7 +107,7 @@ static char *get_args		__P((char *));
 static char *get_editor		__P((char **));
 static char whatnow		__P((void));
 static int check_aliases	__P((int));
-static int check_syntax		__P((char *, int));
+static int check_syntax		__P((char *, int, int));
 static int edit_sudoers		__P((struct sudoersfile *, char *, char *, int));
 static int install_sudoers	__P((struct sudoersfile *, int));
 static int print_unused		__P((void *, void *));
@@ -199,7 +199,7 @@ main(argc, argv)
     init_defaults();
 
     if (checkonly)
-	exit(check_syntax(sudoers_path, quiet));
+	exit(check_syntax(sudoers_path, quiet, strict));
 
     /*
      * Parse the existing sudoers file(s) in quiet mode to highlight any
@@ -675,10 +675,13 @@ run_command(path, argv)
 }
 
 static int
-check_syntax(sudoers_path, quiet)
+check_syntax(sudoers_path, quiet, strict)
     char *sudoers_path;
     int quiet;
+    int strict;
 {
+    struct stat sb;
+    int error;
 
     if ((yyin = fopen(sudoers_path, "r")) == NULL) {
 	if (!quiet)
@@ -691,15 +694,38 @@ check_syntax(sudoers_path, quiet)
 	    warningx("failed to parse %s file, unknown error", sudoers_path);
 	parse_error = TRUE;
     }
-    if (!quiet){
+    error = parse_error;
+    if (!quiet) {
 	if (parse_error)
 	    (void) printf("parse error in %s near line %d\n", sudoers_path,
 		errorlineno);
 	else
-	    (void) printf("%s file parsed OK\n", sudoers_path);
+	    (void) printf("%s: parsed OK\n", sudoers_path);
+    }
+    /* Check mode and owner in strict mode. */
+#ifdef HAVE_FSTAT
+    if (strict && fstat(fileno(yyin), &sb) == 0)
+#else
+    if (strict && stat(sudoers_path, &sb) == 0)
+#endif
+    {
+	if (sb.st_uid != SUDOERS_UID || sb.st_gid != SUDOERS_GID) {
+	    error = TRUE;
+	    if (!quiet) {
+		fprintf(stderr, "%s: wrong owner (uid, gid) should be (%d, %d)\n",
+		    sudoers_path, SUDOERS_UID, SUDOERS_GID);
+		}
+	}
+	if ((sb.st_mode & 07777) != SUDOERS_MODE) {
+	    error = TRUE;
+	    if (!quiet) {
+		fprintf(stderr, "%s: bad permissions, should be mode 0%o\n",
+		    sudoers_path, SUDOERS_MODE);
+	    }
+	}
     }
 
-    return(parse_error == TRUE);
+    return(error);
 }
 
 /*
