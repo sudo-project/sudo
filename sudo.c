@@ -409,7 +409,7 @@ main(argc, argv, envp)
 	}
     }
 
-    /* User may have overriden environment resetting via the -E flag. */
+    /* User may have overridden environment resetting via the -E flag. */
     if (ISSET(sudo_mode, MODE_PRESERVE_ENV) && def_setenv)
 	def_env_reset = FALSE;
 

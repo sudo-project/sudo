@@ -50,7 +50,7 @@
 #endif /* _PATH_ENVIRONMENT */
 
 /*
- * NOTE: _PATH_SUDOERS is usually overriden by the Makefile.
+ * NOTE: _PATH_SUDOERS is usually overridden by the Makefile.
  */
 #ifndef _PATH_SUDOERS
 #define _PATH_SUDOERS		"/etc/sudoers"
