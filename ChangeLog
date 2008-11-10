@@ -1,3 +1,102 @@
+2008-11-10 08:07  millert
+
+	* pathnames.h.in, sudo.c: s/overriden/overridden/; from Tobias
+	  Stoeckmann
+
+2008-11-09 15:18  millert
+
+	* visudo.c, WHATSNEW: check sudoers owner and mode in strict mode
+
+2008-11-09 09:15  millert
+
+	* gram.c, toke.c: regen
+
+2008-11-09 09:13  millert
+
+	* alias.c, alloc.c, closefrom.c, compat.h, defaults.c, defaults.h,
+	  env.c, fileops.c, gettime.c, gram.y, ins_csops.h, insults.h,
+	  interfaces.c, interfaces.h, lbuf.c, license.pod, list.c,
+	  logging.c, logging.h, parse.c, parse.h, pwutil.c, redblack.c,
+	  redblack.h, snprintf.c, sudo.c, sudo.pod, sudo_edit.c,
+	  sudo_nss.h, testsudoers.c, toke.l, tsgetgrpw.c, utimes.c,
+	  version.h, visudo.c, zero_bytes.c, LICENSE, sudoers.pod,
+	  visudo.pod, auth/afs.c, auth/aix_auth.c, auth/bsdauth.c,
+	  auth/fwtk.c, auth/kerb4.c, auth/kerb5.c, auth/pam.c,
+	  auth/securid.c, auth/securid5.c, auth/sia.c, auth/sudo_auth.h,
+	  sudo.man.in, sudoers.man.in, visudo.man.in: Update copyright
+	  years.
+
+2008-11-09 08:48  millert
+
+	* fnmatch.c, glob.c, emul/charclass.h: add my copyright
+
+2008-11-08 10:40  millert
+
+	* toke.c, toke.l: The loop in fill_cmnd() was going one byte too
+	  far past the end, resulting in a NUL being written immediately
+	  after the buffer end.
+
+2008-11-08 10:31  millert
+
+	* UPGRADE, WHATSNEW: add sections on tgetpass changes
+
+2008-11-08 10:30  millert
+
+	* tgetpass.c: Treat EOF w/o newline as an error.
+
+2008-11-07 17:42  millert
+
+	* parse.c: Fix "sudo -v" when NOPASSWD is set.
+
+2008-11-07 12:45  millert
+
+	* auth/: bsdauth.c, fwtk.c, pam.c, sudo_auth.c, sudo_auth.h: No
+	  longer treat an empty password at the prompt as special.  To quit
+	  out of sudo you now need to hit ^C at the password prompt.
+
+2008-11-06 21:07  millert
+
+	* sudoers.cat, sudoers.man.in: regen
+
+2008-11-06 21:06  millert
+
+	* def_data.c, def_data.h, def_data.in, sudo.c, sudoers.pod: Sudo
+	  will now refuse to run if no tty is present unless the new
+	  visiblepw sudoers flag is set.
+
+2008-11-05 19:42  millert
+
+	* aix.c: just use RLIM_INFINITY for RLIM_SAVED_MAX if
+	  RLIM_SAVED_MAX not defined
+
+2008-11-05 19:40  millert
+
+	* aix.c: fix fallback value for RLIM_SAVED_MAX
+
+2008-11-05 19:14  millert
+
+	* auth/: aix_auth.c, sudo_auth.h: Move clearing of AUTHSTATE into
+	  aixauth_cleanup.
+
+2008-11-05 19:08  millert
+
+	* env.c, auth/aix_auth.c: Unset AUTHSTATE after calling
+	  authenticate() as it may not be correct for the user we are
+	  running the command as.
+
+2008-11-05 19:05  millert
+
+	* isblank.c: Add isblank() function for systems without it.  Needed
+	  for POSIX character class matching in fnmatch.c and glob.c.
+
+2008-11-05 11:02  millert
+
+	* TROUBLESHOOTING: expound on sudo and cd
+
+2008-11-04 15:52  millert
+
+	* ChangeLog: regen
+
 2008-11-04 15:46  millert
 
 	* sudoers.cat, sudoers.man.in: regen
@@ -9160,7 +9259,7 @@
 	  compile time).  o Fix "fqdn" sudoers option.	We now set
 	  host/shost via set_fqdn which   gets called when the "fqdn"
 	  option is set in sudoers.  o Move the openlog() to
-	  store_syslogfac() so this gets overriden   correctly from the
+	  store_syslogfac() so this gets overridden   correctly from the
 	  sudoers file.
 
 1999-12-02 15:21  millert
