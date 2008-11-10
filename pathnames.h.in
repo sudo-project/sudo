@@ -46,14 +46,14 @@
 #endif /* _PATH_DEFPATH */
 
 /*
- * NOTE: _PATH_SUDOERS is usually overriden by the Makefile.
+ * NOTE: _PATH_SUDOERS is usually overridden by the Makefile.
  */
 #ifndef _PATH_SUDOERS
 #define _PATH_SUDOERS		"/etc/sudoers"
 #endif /* _PATH_SUDOERS */
 
 /*
- * NOTE:  _PATH_SUDOERS_TMP is usually overriden by the Makefile.
+ * NOTE:  _PATH_SUDOERS_TMP is usually overridden by the Makefile.
  *        _PATH_SUDOERS_TMP *MUST* be on the same partition
  *        as _PATH_SUDOERS!
  */
