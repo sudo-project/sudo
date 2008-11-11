@@ -388,27 +388,6 @@ main(argc, argv, envp)
 	    (void) close(fd);
     }
 
-    /* Use askpass value from sudoers unless specified by the user. */
-    if (def_askpass && !user_askpass)
-	user_askpass = def_askpass;
-
-    /* If user specified -A, make sure there is an askpass helper defined. */
-    if (ISSET(tgetpass_flags, TGP_ASKPASS)) {
-	if (user_askpass == NULL)
-	    log_error(NO_MAIL,
-		"no askpass program specified, try setting SUDO_ASKPASS");
-    } else {
-	/* If no tty but DISPLAY is set, use askpass if we have it. */
-	if (!user_ttypath && !ISSET(tgetpass_flags, TGP_STDIN)) {
-	    if (user_askpass && user_display && *user_display != '\0') {
-		SET(tgetpass_flags, TGP_ASKPASS);
-	    } else if (!def_visiblepw) {
-		log_error(NO_MAIL,
-		    "no tty present and no askpass program specified");
-	    }
-	}
-    }
-
     /* User may have overridden environment resetting via the -E flag. */
     if (ISSET(sudo_mode, MODE_PRESERVE_ENV) && def_setenv)
 	def_env_reset = FALSE;
@@ -420,8 +399,29 @@ main(argc, argv, envp)
     auth_pw = get_authpw();
 
     /* Require a password if sudoers says so.  */
-    if (def_authenticate)
+    if (def_authenticate) {
+	/* Use askpass value from sudoers unless user specified their own. */
+	if (def_askpass && !user_askpass)
+	    user_askpass = def_askpass;
+
+	/* If user specified -A, make sure we have an askpass helper. */
+	if (ISSET(tgetpass_flags, TGP_ASKPASS)) {
+	    if (user_askpass == NULL)
+		log_error(NO_MAIL,
+		    "no askpass program specified, try setting SUDO_ASKPASS");
+	} else {
+	    /* If no tty but DISPLAY is set, use askpass if we have it. */
+	    if (!user_ttypath && !ISSET(tgetpass_flags, TGP_STDIN)) {
+		if (user_askpass && user_display && *user_display != '\0') {
+		    SET(tgetpass_flags, TGP_ASKPASS);
+		} else if (!def_visiblepw) {
+		    log_error(NO_MAIL,
+			"no tty present and no askpass program specified");
+		}
+	    }
+	}
 	check_user(validated, !ISSET(sudo_mode, MODE_NONINTERACTIVE));
+    }
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
     /* XXX - causes confusion when root is not listed in sudoers */
