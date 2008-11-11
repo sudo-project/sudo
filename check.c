@@ -104,6 +104,23 @@ check_user(validated, interactive)
 	if (!interactive)
 	    errorx(1, "sorry, a password is required to run %s", getprogname());
 
+	/* If user specified -A, make sure we have an askpass helper. */
+	if (ISSET(tgetpass_flags, TGP_ASKPASS)) {
+	    if (user_askpass == NULL)
+		log_error(NO_MAIL,
+		    "no askpass program specified, try setting SUDO_ASKPASS");
+	} else {
+	    /* If no tty but DISPLAY is set, use askpass if we have it. */
+	    if (!user_ttypath && !ISSET(tgetpass_flags, TGP_STDIN)) {
+		if (user_askpass && user_display && *user_display != '\0') {
+		    SET(tgetpass_flags, TGP_ASKPASS);
+		} else if (!def_visiblepw) {
+		    log_error(NO_MAIL,
+			"no tty present and no askpass program specified");
+		}
+	    }
+	}
+
 	if (!ISSET(tgetpass_flags, TGP_ASKPASS))
 	    lecture(status);
 
