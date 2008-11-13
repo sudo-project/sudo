@@ -2110,3 +2110,28 @@ Sudo 1.6.9p16 released.
      quoted strings.
 
 Sudo 1.6.9p17 released.
+
+665) Fixed a crash when the -i flag was used with a uid not in the password
+     database.
+
+666) Regenerated parser to pull in a yacc skeleton fix.
+
+667) Sudo now operates in the C locale again when doing a match against
+     sudoers.
+
+668) Fixed a potential crash when a glob matches a large number of files.
+
+669) Fixed compilation problem with certain versions of Heimdal krb5 related
+     to krb5_get_init_creds_opt_free().
+
+670) When setting the umask, use the union of the user's umask and the
+     default value set in sudoers so that we never lower the user's
+     umask when running a command.
+
+671) Sudo now supports 64-character host names.
+
+672) Fixed a problem with the SELinux support for "sudo -l".
+
+673) Reduced the number of stat() calls when resolving wildcard commands.
+
+Sudo 1.6.9p18 released.
