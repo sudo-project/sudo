@@ -702,6 +702,11 @@ HP-UX:
     noexec to work.  Binary packages of gcc are available from
     http://hpux.connect.org.uk/ and http://hpux.cs.utah.edu/.
 
+    To prevent PAM from overriding the value of umask on HP-UX 11,
+    you will need to add a line like the following to /etc/pam.conf:
+
+    sudo	session	required	libpam_hpsec.so.1 bypass_umask
+
 SunOS 4.x:
     The /bin/sh shipped with SunOS blows up while running configure.
     You can work around this by installalling bash or zsh.  If you
