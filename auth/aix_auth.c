@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2007-2008 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -70,8 +70,6 @@ aixauth_verify(pw, prompt, auth)
 	/* XXX - should probably print message on failure. */
 	if (authenticate(pw->pw_name, pass, &reenter, &message) == 0)
 	    rval = AUTH_SUCCESS;
-	/* Unset AUTHSTATE as it may not be correct for the runas user. */
-	unsetenv("AUTHSTATE");
 	free(message);
 	zero_bytes(pass, strlen(pass));
     }
