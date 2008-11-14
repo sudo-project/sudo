@@ -2132,13 +2132,11 @@ Sudo 1.6.9p17 released.
 
 672) Fixed a problem with the SELinux support for "sudo -l".
 
-673) Reduced the number of stat() calls when resolving wildcard commands.
+673) When doing a wildcard match against a filename, sudo will now only
+     check the filesystem if the basename of the path matches, or if
+     the basename itself contains wildcards.
 
 674) Sudo will now unset the AUTHSTATE environment variable on AIX after
      authenticating.
-
-675) When doing a wildcard match against a filename, sudo will now only
-     check the filesystem if the basename of the path matches, or if
-     the basename itself contains wildcards.
 
 Sudo 1.6.9p18 released.
