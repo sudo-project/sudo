@@ -1,5 +1,5 @@
 .\" Copyright (c) 1996,1998-2005, 2007-2008
-.\"	Todd C. Miller <Todd.Miller@courtesan.com>
+.\" 	Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "October 24, 2008" "1.7.0" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "November 15, 2008" "1.7.0" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -178,7 +178,7 @@ your system, as determined by the \fIconfigure\fR script.  Normally,
 \&\fBvisudo\fR does not honor the \f(CW\*(C`VISUAL\*(C'\fR or \f(CW\*(C`EDITOR\*(C'\fR environment
 variables unless they contain an editor in the aforementioned editors
 list.  However, if \fBvisudo\fR is configured with the \fI\-\-with\-enveditor\fR
-flag or the \fIenv_editor\fR \f(CW\*(C`Default\*(C'\fR variable is set in \fIsudoers\fR,
+option or the \fIenv_editor\fR \f(CW\*(C`Default\*(C'\fR variable is set in \fIsudoers\fR,
 \&\fBvisudo\fR will use any the editor defines by \f(CW\*(C`VISUAL\*(C'\fR or \f(CW\*(C`EDITOR\*(C'\fR.
 Note that this can be a security hole since it allows the user to
 execute any program they wish simply by setting \f(CW\*(C`VISUAL\*(C'\fR or \f(CW\*(C`EDITOR\*(C'\fR.
@@ -217,7 +217,7 @@ is the specified \fIsudoers\fR file with \*(L".tmp\*(R" appended to it.
 .IX Item "-q"
 Enable \fBquiet\fR mode.  In this mode details about syntax errors
 are not printed.  This option is only useful when combined with
-the \fB\-c\fR flag.
+the \fB\-c\fR option.
 .IP "\-s" 12
 .IX Item "-s"
 Enable \fBstrict\fR checking of the \fIsudoers\fR file.  If an alias is

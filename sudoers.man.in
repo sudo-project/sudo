@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "November  6, 2008" "1.7.0" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "November 15, 2008" "1.7.0" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -337,7 +337,7 @@ in the \f(CW\*(C`Cmnd\*(C'\fR must match exactly those given by the user on the 
 (or match the wildcards if there are any).  Note that the following
 characters must be escaped with a '\e' if they are used in command
 arguments: ',', ':', '=', '\e'.  The special command \f(CW"sudoedit"\fR
-is used to permit a user to run \fBsudo\fR with the \fB\-e\fR flag (or
+is used to permit a user to run \fBsudo\fR with the \fB\-e\fR option (or
 as \fBsudoedit\fR).  It may take command line arguments just as
 a normal command does.
 .Sh "Defaults"
@@ -413,12 +413,12 @@ A \f(CW\*(C`Runas_Spec\*(C'\fR determines the user and/or the group that a comma
 may be run as.  A fully-specified \f(CW\*(C`Runas_Spec\*(C'\fR consists of two
 \&\f(CW\*(C`Runas_List\*(C'\fRs (as defined above) separated by a colon (':') and
 enclosed in a set of parentheses.  The first \f(CW\*(C`Runas_List\*(C'\fR indicates
-which users the command may be run as via \fBsudo\fR's \fB\-u\fR flag.
+which users the command may be run as via \fBsudo\fR's \fB\-u\fR option.
 The second defines a list of groups that can be specified via
-\&\fBsudo\fR's \fB\-g\fR flag.  If both \f(CW\*(C`Runas_List\*(C'\fRs are specified, the
+\&\fBsudo\fR's \fB\-g\fR option.  If both \f(CW\*(C`Runas_List\*(C'\fRs are specified, the
 command may be run with any combination of users and groups listed
 in their respective \f(CW\*(C`Runas_List\*(C'\fRs.  If only the first is specified,
-the command may be run as any user in the list but no \fB\-g\fR flag
+the command may be run as any user in the list but no \fB\-g\fR option
 may be specified.  If the first \f(CW\*(C`Runas_List\*(C'\fR is empty but the
 second is specified, the command may be run as the invoking user
 with the group set to any listed in the \f(CW\*(C`Runas_List\*(C'\fR.  If no
@@ -658,7 +658,7 @@ grouped by type, are listed below.
 .IX Item "always_set_home"
 If set, \fBsudo\fR will set the \f(CW\*(C`HOME\*(C'\fR environment variable to the home
 directory of the target user (which is root unless the \fB\-u\fR option is used).
-This effectively means that the \fB\-H\fR flag is always implied.
+This effectively means that the \fB\-H\fR option is always implied.
 This flag is \fIoff\fR by default.
 .IP "authenticate" 16
 .IX Item "authenticate"
@@ -818,15 +818,15 @@ If set, \fBsudo\fR will prompt for the password of the user defined by the
 password of the invoking user.  This flag is \fIoff\fR by default.
 .IP "set_home" 16
 .IX Item "set_home"
-If set and \fBsudo\fR is invoked with the \fB\-s\fR flag the \f(CW\*(C`HOME\*(C'\fR
+If set and \fBsudo\fR is invoked with the \fB\-s\fR option the \f(CW\*(C`HOME\*(C'\fR
 environment variable will be set to the home directory of the target
 user (which is root unless the \fB\-u\fR option is used).  This effectively
-makes the \fB\-s\fR flag imply \fB\-H\fR.  This flag is \fIoff\fR by default.
+makes the \fB\-s\fR option imply \fB\-H\fR.  This flag is \fIoff\fR by default.
 .IP "set_logname" 16
 .IX Item "set_logname"
 Normally, \fBsudo\fR will set the \f(CW\*(C`LOGNAME\*(C'\fR, \f(CW\*(C`USER\*(C'\fR and \f(CW\*(C`USERNAME\*(C'\fR
 environment variables to the name of the target user (usually root
-unless the \fB\-u\fR flag is given).  However, since some programs
+unless the \fB\-u\fR option is given).  However, since some programs
 (including the \s-1RCS\s0 revision control system) use \f(CW\*(C`LOGNAME\*(C'\fR to
 determine the real identity of the user, it may be desirable to
 change this behavior.  This can be done by negating the set_logname
@@ -844,7 +844,7 @@ by default.
 .IP "shell_noargs" 16
 .IX Item "shell_noargs"
 If set and \fBsudo\fR is invoked with no arguments it acts as if the
-\&\fB\-s\fR flag had been given.  That is, it runs a shell as root (the
+\&\fB\-s\fR option had been given.  That is, it runs a shell as root (the
 shell is determined by the \f(CW\*(C`SHELL\*(C'\fR environment variable if it is
 set, falling back on the shell listed in the invoking user's
 /etc/passwd entry if not).  This flag is \fIoff\fR by default.
@@ -861,9 +861,9 @@ function.  This flag is \fIoff\fR by default.
 .IP "targetpw" 16
 .IX Item "targetpw"
 If set, \fBsudo\fR will prompt for the password of the user specified by
-the \fB\-u\fR flag (defaults to \f(CW\*(C`root\*(C'\fR) instead of the password of the
+the \fB\-u\fR option (defaults to \f(CW\*(C`root\*(C'\fR) instead of the password of the
 invoking user.  Note that this precludes the use of a uid not listed
-in the passwd database as an argument to the \fB\-u\fR flag.
+in the passwd database as an argument to the \fB\-u\fR option.
 This flag is \fIoff\fR by default.
 .IP "tty_tickets" 16
 .IX Item "tty_tickets"
@@ -998,7 +998,7 @@ The default value is \f(CW\*(C`@passprompt@\*(C'\fR.
 @SEMAN@This option is only available whe \fBsudo\fR is built with SELinux support.
 .IP "runas_default" 16
 .IX Item "runas_default"
-The default user to run commands as if the \fB\-u\fR flag is not specified
+The default user to run commands as if the \fB\-u\fR option is not specified
 on the command line.  This defaults to \f(CW\*(C`@runas_default@\*(C'\fR.
 Note that if \fIrunas_default\fR is set it \fBmust\fR occur before
 any \f(CW\*(C`Runas_Alias\*(C'\fR specifications.
@@ -1081,7 +1081,7 @@ By default, \fBsudo\fR uses a built-in lecture.
 .IP "listpw" 12
 .IX Item "listpw"
 This option controls when a password will be required when a
-user runs \fBsudo\fR with the \fB\-l\fR flag.  It has the following possible values:
+user runs \fBsudo\fR with the \fB\-l\fR option.  It has the following possible values:
 .RS 12
 .IP "all" 8
 .IX Item "all"
@@ -1089,14 +1089,14 @@ All the user's \fIsudoers\fR entries for the current host must have
 the \f(CW\*(C`NOPASSWD\*(C'\fR flag set to avoid entering a password.
 .IP "always" 8
 .IX Item "always"
-The user must always enter a password to use the \fB\-l\fR flag.
+The user must always enter a password to use the \fB\-l\fR option.
 .IP "any" 8
 .IX Item "any"
 At least one of the user's \fIsudoers\fR entries for the current host
 must have the \f(CW\*(C`NOPASSWD\*(C'\fR flag set to avoid entering a password.
 .IP "never" 8
 .IX Item "never"
-The user need never enter a password to use the \fB\-l\fR flag.
+The user need never enter a password to use the \fB\-l\fR option.
 .RE
 .RS 12
 .Sp
@@ -1142,7 +1142,7 @@ disable syslog logging).  Defaults to \f(CW\*(C`@logfac@\*(C'\fR.
 .IP "verifypw" 12
 .IX Item "verifypw"
 This option controls when a password will be required when a user runs
-\&\fBsudo\fR with the \fB\-v\fR flag.  It has the following possible values:
+\&\fBsudo\fR with the \fB\-v\fR option.  It has the following possible values:
 .RS 12
 .IP "all" 8
 .IX Item "all"
@@ -1150,14 +1150,14 @@ All the user's \fIsudoers\fR entries for the current host must have
 the \f(CW\*(C`NOPASSWD\*(C'\fR flag set to avoid entering a password.
 .IP "always" 8
 .IX Item "always"
-The user must always enter a password to use the \fB\-v\fR flag.
+The user must always enter a password to use the \fB\-v\fR option.
 .IP "any" 8
 .IX Item "any"
 At least one of the user's \fIsudoers\fR entries for the current host
 must have the \f(CW\*(C`NOPASSWD\*(C'\fR flag set to avoid entering a password.
 .IP "never" 8
 .IX Item "never"
-The user need never enter a password to use the \fB\-v\fR flag.
+The user need never enter a password to use the \fB\-v\fR option.
 .RE
 .RS 12
 .Sp
@@ -1386,7 +1386,7 @@ The user \fBfred\fR can run commands as any user in the \fI\s-1DB\s0\fR \f(CW\*(
 .Ve
 .PP
 On the \fI\s-1ALPHA\s0\fR machines, user \fBjohn\fR may su to anyone except root
-but he is not allowed to give \fIsu\fR\|(1) any flags.
+but he is not allowed to specify any options to the \fIsu\fR\|(1) command.
 .PP
 .Vb 1
 \& jen            ALL, !SERVERS = ALL
