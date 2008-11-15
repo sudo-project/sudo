@@ -44,7 +44,7 @@ your system, as determined by the I<configure> script.  Normally,
 B<visudo> does not honor the C<VISUAL> or C<EDITOR> environment
 variables unless they contain an editor in the aforementioned editors
 list.  However, if B<visudo> is configured with the I<--with-enveditor>
-flag or the I<env_editor> C<Default> variable is set in I<sudoers>,
+option or the I<env_editor> C<Default> variable is set in I<sudoers>,
 B<visudo> will use any the editor defines by C<VISUAL> or C<EDITOR>.
 Note that this can be a security hole since it allows the user to
 execute any program they wish simply by setting C<VISUAL> or C<EDITOR>.
@@ -89,7 +89,7 @@ is the specified I<sudoers> file with ".tmp" appended to it.
 
 Enable B<quiet> mode.  In this mode details about syntax errors
 are not printed.  This option is only useful when combined with
-the B<-c> flag.
+the B<-c> option.
 
 =item -s
 
