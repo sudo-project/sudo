@@ -193,14 +193,14 @@ alias_remove(name, type)
     int type;
 {
     struct rbnode *node;
-    struct alias key;
+    struct alias key, *a;
 
     key.name = name;
     key.type = type;
     if ((node = rbfind(aliases, &key)) == NULL)
 	return(FALSE);
-    rbdelete(aliases, node);
-    alias_free(node->data);
+    a = rbdelete(aliases, node);
+    alias_free(a);
     return(TRUE);
 }
 
