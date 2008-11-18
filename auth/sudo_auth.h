@@ -58,6 +58,7 @@ int sia_setup __P((struct passwd *pw, char **prompt, sudo_auth *auth));
 int sia_verify __P((struct passwd *pw, char *prompt, sudo_auth *auth));
 int sia_cleanup __P((struct passwd *pw, sudo_auth *auth));
 int aixauth_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
+int aixauth_cleanup __P((struct passwd *pw, sudo_auth *auth));
 int bsdauth_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
 int bsdauth_verify __P((struct passwd *pw, char *prompt, sudo_auth *auth));
 int bsdauth_cleanup __P((struct passwd *pw, sudo_auth *auth));
