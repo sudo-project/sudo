@@ -100,6 +100,13 @@ struct passwd *(*my_getpwuid) __P((uid_t)) = getpwuid;
 extern char *optarg;
 extern int optind;
 
+#if defined(SUDO_DEVEL) && defined(__OpenBSD__)
+extern char *malloc_options;
+#endif
+#ifdef YYDEBUG
+extern int yydebug;
+#endif
+
 int  print_alias __P((void *, void *));
 void dump_sudoers __P((void));
 void print_defaults __P((void));
@@ -133,8 +140,11 @@ main(argc, argv)
     char *p, *grfile, *pwfile, *runas_group, *runas_user;
     char hbuf[MAXHOSTNAMELEN + 1];
     int ch, dflag, rval, matched;
-#ifdef	YYDEBUG
-    extern int yydebug;
+
+#if defined(SUDO_DEVEL) && defined(__OpenBSD__)
+    malloc_options = "AFGJPR";
+#endif
+#ifdef YYDEBUG
     yydebug = 1;
 #endif
 
