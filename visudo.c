@@ -150,6 +150,10 @@ main(argc, argv)
     struct sudoersfile *sp;
     char *args, *editor, *sudoers_path;
     int ch, checkonly, quiet, strict, oldperms;
+#if defined(SUDO_DEVEL) && defined(__OpenBSD__)
+    extern char *malloc_options;
+    malloc_options = "AFGJPR";
+#endif
 
     Argv = argv;
     if ((Argc = argc) < 1)
