@@ -419,7 +419,6 @@ rbrepair(tree, node)
     struct rbtree *tree;
     struct rbnode *node;
 {
-    struct rbnode *first = rbfirst(tree);
     struct rbnode *sibling;
 
     while (node->color == black) {
