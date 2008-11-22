@@ -287,7 +287,11 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		if (pass == NULL) {
 		    /* We got ^C instead of a password; abort quickly. */
 		    nil_pw = 1;
+#if defined(__darwin__) || defined(__APPLE__)
+		    pass = "";
+#else
 		    goto err;
+#endif
 		}
 		pr->resp = estrdup(pass);
 		if (*pr->resp == '\0')
