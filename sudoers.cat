@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.0                   November 15, 2008                       1
+1.7.0                   November 24, 2008                       1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                       2
+1.7.0                   November 24, 2008                       2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                       3
+1.7.0                   November 24, 2008                       3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                       4
+1.7.0                   November 24, 2008                       4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                       5
+1.7.0                   November 24, 2008                       5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                       6
+1.7.0                   November 24, 2008                       6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                       7
+1.7.0                   November 24, 2008                       7
 
 
 
@@ -523,7 +523,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.7.0                   November 15, 2008                       8
+1.7.0                   November 24, 2008                       8
 
 
 
@@ -589,7 +589,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                       9
+1.7.0                   November 24, 2008                       9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                      10
+1.7.0                   November 24, 2008                      10
 
 
 
@@ -721,7 +721,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                      11
+1.7.0                   November 24, 2008                      11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                      12
+1.7.0                   November 24, 2008                      12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                      13
+1.7.0                   November 24, 2008                      13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                      14
+1.7.0                   November 24, 2008                      14
 
 
 
@@ -951,7 +951,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        SSttrriinnggss tthhaatt ccaann bbee uusseedd iinn aa bboooolleeaann ccoonntteexxtt:
 
-       askpass     The _a_s_k_p_a_s_s option specifies the fully-qualilfy path to a
+       askpass     The _a_s_k_p_a_s_s option specifies the fully qualified path to a
                    helper program used to read the user's password when no
                    terminal is available.  This may be the case when ssuuddoo is
                    executed from a graphical (as opposed to text-based)
@@ -961,8 +961,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    _a_s_k_p_a_s_s may be overridden by the SUDO_ASKPASS environment
                    variable.
 
-       env_file    The _e_n_v___f_i_l_e options specifies the fully-qualilfy path to a
-                   file containing variables to be set in the environment of
+       env_file    The _e_n_v___f_i_l_e options specifies the fully qualified path to
+                   a file containing variables to be set in the environment of
                    the program being run.  Entries in this file should be of
                    the form VARIABLE=value.  Variables in this file are
                    subject to other ssuuddoo environment settings such as _e_n_v___k_e_e_p
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                      15
+1.7.0                   November 24, 2008                      15
 
 
 
@@ -1051,7 +1051,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                      16
+1.7.0                   November 24, 2008                      16
 
 
 
@@ -1117,7 +1117,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                      17
+1.7.0                   November 24, 2008                      17
 
 
 
@@ -1183,7 +1183,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.7.0                   November 15, 2008                      18
+1.7.0                   November 24, 2008                      18
 
 
 
@@ -1249,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                      19
+1.7.0                   November 24, 2008                      19
 
 
 
@@ -1315,7 +1315,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                      20
+1.7.0                   November 24, 2008                      20
 
 
 
@@ -1381,7 +1381,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.7.0                   November 15, 2008                      21
+1.7.0                   November 24, 2008                      21
 
 
 
@@ -1447,7 +1447,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 15, 2008                      22
+1.7.0                   November 24, 2008                      22
 
 
 
@@ -1513,6 +1513,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.0                   November 15, 2008                      23
+1.7.0                   November 24, 2008                      23
 
 

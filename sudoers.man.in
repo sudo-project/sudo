@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "November 15, 2008" "1.7.0" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "November 24, 2008" "1.7.0" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1033,7 +1033,7 @@ The default is \f(CW\*(C`root\*(C'\fR.
 \&\fBStrings that can be used in a boolean context\fR:
 .IP "askpass" 12
 .IX Item "askpass"
-The \fIaskpass\fR option specifies the fully-qualilfy path to a helper
+The \fIaskpass\fR option specifies the fully qualified path to a helper
 program used to read the user's password when no terminal is
 available.  This may be the case when \fBsudo\fR is executed from a
 graphical (as opposed to text-based) application.  The program
@@ -1043,7 +1043,7 @@ The value of \fIaskpass\fR may be overridden by the \f(CW\*(C`SUDO_ASKPASS\*(C'\
 environment variable.
 .IP "env_file" 12
 .IX Item "env_file"
-The \fIenv_file\fR options specifies the fully-qualilfy path to a file
+The \fIenv_file\fR options specifies the fully qualified path to a file
 containing variables to be set in the environment of the program
 being run.  Entries in this file should be of the form \f(CW\*(C`VARIABLE=value\*(C'\fR.
 Variables in this file are subject to other \fBsudo\fR environment
