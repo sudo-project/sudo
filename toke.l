@@ -467,7 +467,7 @@ sudoedit		{
 			    LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
 
-<INITIAL,STARTDEFS,INDEFS>#[^0-9-].*\n	{
+<INITIAL,STARTDEFS,INDEFS>#([^\n0-9-].*)?\n	{
 			    BEGIN INITIAL;
 			    ++sudolineno;
 			    LEXTRACE("\n");
