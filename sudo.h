@@ -240,6 +240,7 @@ int mkstemp		__P((char *));
 char *sudo_goodpath	__P((const char *, struct stat *));
 char *tgetpass		__P((const char *, int, int));
 int find_path		__P((char *, char **, struct stat *, char *));
+int tty_present		__P((void));
 void check_user		__P((int, int));
 void verify_user	__P((struct passwd *, char *));
 #ifdef HAVE_LDAP

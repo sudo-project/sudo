@@ -109,9 +109,9 @@ check_user(validated, interactive)
 	    if (user_askpass == NULL)
 		log_error(NO_MAIL,
 		    "no askpass program specified, try setting SUDO_ASKPASS");
-	} else {
+	} else if (!ISSET(tgetpass_flags, TGP_STDIN)) {
 	    /* If no tty but DISPLAY is set, use askpass if we have it. */
-	    if (!user_ttypath && !ISSET(tgetpass_flags, TGP_STDIN)) {
+	    if (!user_ttypath && !tty_present()) {
 		if (user_askpass && user_display && *user_display != '\0') {
 		    SET(tgetpass_flags, TGP_ASKPASS);
 		} else if (!def_visiblepw) {

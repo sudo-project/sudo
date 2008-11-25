@@ -309,3 +309,13 @@ handler(s)
     if (s != SIGALRM)
 	signo = s;
 }
+
+int
+tty_present()
+{
+    int fd;
+
+    if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) != -1)
+	close(fd);
+    return(fd != -1);
+}
