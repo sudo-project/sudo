@@ -63,132 +63,131 @@ TODO list (most will be addressed in sudo 2.0)
 
 21) Improve interfaces.c STREAMS code (see ntpd's ntp_io.c for hints)
 
-22) Wildcard support for user and group names? (netgroup too?)
+22) If root_sudo is off, still allow sudo -u to non-root users?
 
-23) If root_sudo is off, still allow sudo -u to non-root users?
-
-24) For AIX, use setpenv() and setpcred() if they exist
+23) For AIX, use setpenv() and setpcred() if they exist
     http://publibn.boulder.ibm.com/doc_link/en_US/a_doc_lib/libs/basetrf2/setpenv.htm
     http://publib16.boulder.ibm.com/pseries/en_US/libs/basetrf2/setpcred.htm
 
-25) Add an insult_path variable that is intialized to "builtin" but that
+24) Add an insult_path variable that is intialized to "builtin" but that
     can point to other files containing an insult count as the first
     line and that have a constant record length (sparse files) for
     easy seeking.
 
-26) Some way of using a new pty for the program run via sudo would prevent
+25) Some way of using a new pty for the program run via sudo would prevent
     access to the caller's /dev/tty (but probably makes job control tricky).
 
-27) Maybe have a database of checksums that commands are verified against.
+26) Maybe have a database of checksums that commands are verified against.
     Basically replace the st_ino/st_dev check with a checksum lookup.
 
-28) Look into testing writability of a file via sudoedit *before* doing
+27) Look into testing writability of a file via sudoedit *before* doing
     the edit; e.g., try opening with O_APPEND.
 
-29) Add Makefile.in bits to autogenerate Solaris and Irix packages
+28) Add Makefile.in bits to autogenerate Solaris and Irix packages
 
-30) Add a session mode where sudo allocates a pty and logs everything
+29) Add a session mode where sudo allocates a pty and logs everything
     that occurs ala script(1).
 
-31) Use pam_open_session() and pam_close_session() (requires a persistent
+30) Use pam_open_session() and pam_close_session() (requires a persistent
     sudo process to call pam_close_session()).  Maybe add xauth support for
     the non-pam case?
 
-32) Add substitution mechanism in sudoers to subst, e.g. editors for sudoedit
+31) Add substitution mechanism in sudoers to subst, e.g. editors for sudoedit
 
-33) Move prototypes to extern.h?
+32) Move prototypes to extern.h?
 
-34) visudo -c should also sanity check aliases
+33) visudo -c should also sanity check aliases
 
-35) Use AC_CHECK_DECLS for systems w/o proper prototypes?  Maybe errno too?
+34) Use AC_CHECK_DECLS for systems w/o proper prototypes?  Maybe errno too?
 
-36) Flesh out testsudoers and fix glob/opendir issues.  Use custom netgroup
+35) Flesh out testsudoers and fix glob/opendir issues.  Use custom netgroup
     code too?
 
-37) Think some more about giving admins a way to test commands for a user
+36) Think some more about giving admins a way to test commands for a user
     on a specific host with a different sudoers file.
 
-38) Refactor duplicated code in ldap.c into wrapper functions.
+37) Refactor duplicated code in ldap.c into wrapper functions.
 
-39) Return command from command_matches() instead of setting safe_cmnd directly.
+38) Return command from command_matches() instead of setting safe_cmnd directly.
 
-40) Roll visudo into sudo ala sudoedit.
+39) Roll visudo into sudo ala sudoedit?
 
-41) Add ticket file to ticket dir in non-tty tickets case so we
+40) Add ticket file to ticket dir in non-tty tickets case so we
     can mix tty and non-tty ticket schemes.
 
-42) Add support for NOEXEC w/ 64-bit AIX executables.
+41) Add support for NOEXEC w/ 64-bit AIX executables.
     http://publib.boulder.ibm.com/infocenter/pseries/v5r3/index.jsp?topic=/com.ibm.xlf91a.doc/xlfug/comp64.htm
     Note that it is possible to create shared libs w/ both 32bit and 64bit
     objects.
 
-43) Revisit debian fqdn diffs.
+42) Revisit debian fqdn diffs.
 
-44) Add gettext() support.  Can borrow some translations from PAM.
+43) Add gettext() support.  Can borrow some translations from PAM.
 
-45) Convert the other capitalized files into .pod so we can get decent html
+44) Convert the other capitalized files into .pod so we can get decent html
     form them?  E.g. README, etc.  E.g.
 	pod2text -l -i0 history.pod > HISTORY
 	pod2html --noindex history.pod > history.html
 
-46) Use mkstemp() for visudo temp files?  Also re-examine locking.
+45) Use mkstemp() for visudo temp files?  Also re-examine locking.
 
-47) Run sudo through valgrind.
-    sudo valgrind --tool=memcheck --leak-check=full --leak-resolution=high \
-    --num-callers=40 ./sudo aksdjha foo
-    Says there are a couple minor leaks in the parser.  Maybe make
-    testsudoers pass cleanly.  Can use rh5 vm for this.  Note that
-    the process must not exec if we want to get the info.
+46) Consolidate line wrap code.
 
-48) Consolidate line wrap code.
-
-49) How can we distinguish between a bare '\\' and one that is escaping
+47) How can we distinguish between a bare '\\' and one that is escaping
     glob chars?  Right now we convert \\ -> \ in the lexer which
     causes the confusion.
 
-50) For LDAP entries, should be able to parse the per-command options
+48) For LDAP entries, should be able to parse the per-command options
     since they may affect the outcome (e.g. default_runas).
 
-51) Set usrinfo for AIX, see openssh.
+49) Set usrinfo for AIX, see openssh.
 
-52) Consider adding -d (debug) flag for both LDAP and files sudoers lookups.
+50) Consider adding -d (debug) flag for both LDAP and files sudoers lookups.
     Is it safe to allow normal users to use it?
 
-53) Why does testsudoers give wrong line number for parse error?
+51) Why does testsudoers give wrong line number for parse error?
 
-54) Should send mail if sudoers does not parse
+52) Should send mail if sudoers does not parse
 
-55) Add arg markup to indicate that an arg is a path and treat it specially
+53) Add arg markup to indicate that an arg is a path and treat it specially
     regarding cwd.
 
-56) Should -k/-K clear *all* timestamps in tty_ticket mode?
+54) Should -k/-K clear *all* timestamps in tty_ticket mode?
     http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=306919
     Perhaps change the meaning of -k vs. -K in 1.7.
 
-57) Dan says Pam activity should probably be happening after
+55) Dan says Pam activity should probably be happening after
     setkeycreatecon and setexeccon (which may use the keyring or
     run external commands).  However, this means sendmail
     will be executed w/ the new context if user is denied.
 
-58) Allow the -k flag to be used in conjunction with other flags
+56) Allow the -k flag to be used in conjunction with other flags
     so you can force a password check w/ a command.  This turns out
     to be rather difficult.
 
-59) Decide between option and flag in sudo and visudo man pages
-
-60) Add report program (or mode) to print out all permissions on a
+57) Add report program (or mode) to print out all permissions on a
     per-user basis.  Would also be nice to have a diff facility given
     two sudoers files.
 
-61) Add flag to ignore timestamp and always prompt for passwd.
+58) Add flag to ignore timestamp and always prompt for passwd.
 
-62) Add rpm spec file that works on suse and redhat
+59) Add rpm spec file that works on suse and redhat
 
-63) Store configure args in sudo binary for -V
+60) Store configure args in sudo binary for -V
     Make -V operate in verbose mode with -VV instead of as root?
 
-64) Change tgetpass default to require a tty (and have option to enable old behavior)
+61) Verify consumers of *list_matches do not treat UNSPEC as true
 
-65) Verify consumers of *list_matches do not treat UNSPEC as true
+62) Add FOO=BAR env settings to sudoers.  Also m/regexp/ where '/' can be
+    any char.
 
-66) Add estrndup()?
+63) ^C from prompt in PAM doesn't work correctly (on MacOS at least)
+    Maybe need better return value from conversaion function like
+    PAM_SYSTEM_ERROR?
+
+64) Consider a more fine-grained setenv option.  Perhaps have setenv
+    and setenv_all where the latter lets you override the blacklist?
+    Maybe just make it clear that setenv allows the user to run
+    anything.
+
+65) Merge in BSD audit support from apple
