@@ -20014,6 +20014,10 @@ done
     if test "$found" = "true"; then
 	AUTH_EXCL=SIA
 	AUTH_OBJS="$AUTH_OBJS sia.o"
+	cat >>confdefs.h <<\_ACEOF
+#define HAVE_SIA 1
+_ACEOF
+
     fi
 fi
 
