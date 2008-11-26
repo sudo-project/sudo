@@ -1,3 +1,20 @@
+2008-11-25 12:01  millert
+
+	* check.c, sudo.h, tgetpass.c: Even if neither stdin nor stdout are
+	  ttys we may still have /dev/tty available to us.
+
+2008-11-24 10:09  millert
+
+	* sudoers.cat, sudoers.man.in: regen
+
+2008-11-24 10:08  millert
+
+	* sudoers.pod: fix typos; Markus Lude
+
+2008-11-24 07:08  millert
+
+	* ChangeLog: sync
+
 2008-11-23 19:42  millert
 
 	* toke.c: regen
