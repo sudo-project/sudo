@@ -1913,6 +1913,7 @@ if test ${CHECKSIA-'false'} = "true"; then
     if test "$found" = "true"; then
 	AUTH_EXCL=SIA
 	AUTH_OBJS="$AUTH_OBJS sia.o"
+	AC_DEFINE(HAVE_SIA)
     fi
 fi
 
