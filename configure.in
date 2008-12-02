@@ -1955,7 +1955,6 @@ if test ${CHECKSIA-'false'} = "true"; then
     if test "$found" = "true"; then
 	AUTH_EXCL=SIA
 	AUTH_OBJS="$AUTH_OBJS sia.o"
-	AC_DEFINE(HAVE_SIA)
     fi
 fi
 
@@ -2568,7 +2567,6 @@ AH_TEMPLATE(HAVE_PAM, [Define to 1 if you use PAM authentication.])
 AH_TEMPLATE(HAVE_PROJECT_H, [Define to 1 if you have the <project.h> header file.])
 AH_TEMPLATE(HAVE_SECURID, [Define to 1 if you use SecurID for authentication.])
 AH_TEMPLATE(HAVE_SELINUX, [Define to 1 to enable SELinux RBAC support.])
-AH_TEMPLATE(HAVE_SIA, [Define to 1 if you use SIA authentication.])
 AH_TEMPLATE(HAVE_SIGACTION_T, [Define to 1 if <signal.h> has the sigaction_t typedef.])
 AH_TEMPLATE(HAVE_SKEY, [Define to 1 if you use S/Key.])
 AH_TEMPLATE(HAVE_SKEYACCESS, [Define to 1 if your S/Key library has skeyaccess().])
