@@ -20495,10 +20495,6 @@ done
     if test "$found" = "true"; then
 	AUTH_EXCL=SIA
 	AUTH_OBJS="$AUTH_OBJS sia.o"
-	cat >>confdefs.h <<\_ACEOF
-#define HAVE_SIA 1
-_ACEOF
-
     fi
 fi
 
@@ -24597,8 +24593,6 @@ echo "$as_me: You will need to customize sample.pam and install it as /etc/pam.d
 	    ;;
     esac
 fi
-
-
 
 
 
