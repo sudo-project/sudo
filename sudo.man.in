@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "October 26, 2008" "1.6.9p17" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "December  3, 2008" "1.6.9p19" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -197,17 +197,17 @@ When invoked as \fBsudoedit\fR, the \fB\-e\fR option (described below),
 is implied.
 .PP
 \&\fBsudo\fR determines who is an authorized user by consulting the file
-\&\fI@sysconfdir@/sudoers\fR.  By giving \fBsudo\fR the \fB\-v\fR flag, a user
-can update the time stamp without running a \fIcommand\fR. The password
-prompt itself will also time out if the user's password is not
-entered within \f(CW\*(C`@password_timeout@\*(C'\fR minutes (unless overridden via
-\&\fIsudoers\fR).
+\&\fI@sysconfdir@/sudoers\fR.  By running \fBsudo\fR with the \fB\-v\fR option,
+a user can update the time stamp without running a \fIcommand\fR. The
+password prompt itself will also time out if the user's password
+is not entered within \f(CW\*(C`@password_timeout@\*(C'\fR minutes (unless overridden
+via \fIsudoers\fR).
 .PP
 If a user who is not listed in the \fIsudoers\fR file tries to run a
 command via \fBsudo\fR, mail is sent to the proper authorities, as
 defined at configure time or in the \fIsudoers\fR file (defaults to
 \&\f(CW\*(C`@mailto@\*(C'\fR).  Note that the mail will not be sent if an unauthorized
-user tries to run sudo with the \fB\-l\fR or \fB\-v\fR flags.  This allows
+user tries to run sudo with the \fB\-l\fR or \fB\-v\fR option.  This allows
 users to determine for themselves whether or not they are allowed
 to use \fBsudo\fR.
 .PP
@@ -215,7 +215,7 @@ If \fBsudo\fR is run by root and the \f(CW\*(C`SUDO_USER\*(C'\fR environment var
 is set, \fBsudo\fR will use this value to determine who the actual
 user is.  This can be used by a user to log commands through sudo
 even when a root shell has been invoked.  It also allows the \fB\-e\fR
-flag to remain useful even when being run via a sudo-run script or
+option to remain useful even when being run via a sudo-run script or
 program.  Note however, that the sudoers lookup is still done for
 root, not the user specified by \f(CW\*(C`SUDO_USER\*(C'\fR.
 .PP
@@ -414,8 +414,8 @@ This extends the \fBsudo\fR timeout for another \f(CW\*(C`@timeout@\*(C'\fR minu
 (or whatever the timeout is set to in \fIsudoers\fR) but does not run
 a command.
 .IP "\-\-" 4
-The \fB\-\-\fR flag indicates that \fBsudo\fR should stop processing command
-line arguments.  It is most useful in conjunction with the \fB\-s\fR flag.
+The \fB\-\-\fR option indicates that \fBsudo\fR should stop processing command
+line arguments.  It is most useful in conjunction with the \fB\-s\fR option.
 .PP
 Environment variables to be set for the command may also be passed
 on the command line in the form of \fB\s-1VAR\s0\fR=\fIvalue\fR, e.g.
@@ -427,8 +427,8 @@ set or the command matched is \f(CW\*(C`ALL\*(C'\fR, the user may set variables
 that would overwise be forbidden.  See \fIsudoers\fR\|(@mansectform@) for more information.
 .SH "RETURN VALUES"
 .IX Header "RETURN VALUES"
-Upon successful execution of a program, the return value from \fBsudo\fR
-will simply be the return value of the program that was executed.
+Upon successful execution of a program, the exit status from \fBsudo\fR
+will simply be the exit status of the program that was executed.
 .PP
 Otherwise, \fBsudo\fR quits with an exit value of 1 if there is a
 configuration/permission problem or if \fBsudo\fR cannot execute the

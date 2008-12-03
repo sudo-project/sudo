@@ -25,7 +25,7 @@ DDEESSCCRRIIPPTTIIOONN
        script.  Normally, vviissuuddoo does not honor the VISUAL or
        EDITOR environment variables unless they contain an editor
        in the aforementioned editors list.  However, if vviissuuddoo is
-       configured with the _-_-_w_i_t_h_-_e_n_v_e_d_i_t_o_r flag or the
+       configured with the _-_-_w_i_t_h_-_e_n_v_e_d_i_t_o_r option or the
        _e_n_v___e_d_i_t_o_r Default variable is set in _s_u_d_o_e_r_s, vviissuuddoo will
        use any the editor defines by VISUAL or EDITOR.  Note that
        this can be a security hole since it allows the user to
@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.9p17                 October 26, 2008                       1
+1.6.9p19                December  3, 2008                       1
 
 
 
@@ -77,7 +77,7 @@ VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
        -q  Enable qquuiieett mode.  In this mode details about syntax
            errors are not printed.  This option is only useful
-           when combined with the --cc flag.
+           when combined with the --cc option.
 
        -s  Enable ssttrriicctt checking of the _s_u_d_o_e_r_s file.  If an
            alias is used before it is defined, vviissuuddoo will
@@ -127,7 +127,7 @@ DDIIAAGGNNOOSSTTIICCSS
 
 
 
-1.6.9p17                 October 26, 2008                       2
+1.6.9p19                December  3, 2008                       2
 
 
 
@@ -193,6 +193,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.6.9p17                 October 26, 2008                       3
+1.6.9p19                December  3, 2008                       3
 
 
