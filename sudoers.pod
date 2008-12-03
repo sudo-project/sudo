@@ -342,7 +342,7 @@ be overridden by use of the C<UNSETENV> tag.
 =head2 Wildcards
 
 B<sudo> allows shell-style I<wildcards> (aka meta or glob characters)
-to be used in pathnames as well as command line arguments in the
+to be used in hostnames, pathnames and command line arguments in the
 I<sudoers> file.  Wildcard matching is done via the B<POSIX>
 L<fnmatch(3)> routine.  Note that these are I<not> regular expressions.
 
