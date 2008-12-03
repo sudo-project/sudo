@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.0                   November 24, 2008                       1
+1.7.0                   December  3, 2008                       1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                       2
+1.7.0                   December  3, 2008                       2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                       3
+1.7.0                   December  3, 2008                       3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                       4
+1.7.0                   December  3, 2008                       4
 
 
 
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                       5
+1.7.0                   December  3, 2008                       5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                       6
+1.7.0                   December  3, 2008                       6
 
 
 
@@ -411,7 +411,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        WWiillddccaarrddss
 
        ssuuddoo allows shell-style _w_i_l_d_c_a_r_d_s (aka meta or glob characters) to be
-       used in pathnames as well as command line arguments in the _s_u_d_o_e_r_s
+       used in hostnames, pathnames and command line arguments in the _s_u_d_o_e_r_s
        file.  Wildcard matching is done via the PPOOSSIIXX _f_n_m_a_t_c_h(3) routine.
        Note that these are _n_o_t regular expressions.
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                       7
+1.7.0                   December  3, 2008                       7
 
 
 
@@ -523,7 +523,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.7.0                   November 24, 2008                       8
+1.7.0                   December  3, 2008                       8
 
 
 
@@ -589,7 +589,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                       9
+1.7.0                   December  3, 2008                       9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                      10
+1.7.0                   December  3, 2008                      10
 
 
 
@@ -721,7 +721,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                      11
+1.7.0                   December  3, 2008                      11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                      12
+1.7.0                   December  3, 2008                      12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                      13
+1.7.0                   December  3, 2008                      13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                      14
+1.7.0                   December  3, 2008                      14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                      15
+1.7.0                   December  3, 2008                      15
 
 
 
@@ -1051,7 +1051,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                      16
+1.7.0                   December  3, 2008                      16
 
 
 
@@ -1117,7 +1117,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                      17
+1.7.0                   December  3, 2008                      17
 
 
 
@@ -1183,7 +1183,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.7.0                   November 24, 2008                      18
+1.7.0                   December  3, 2008                      18
 
 
 
@@ -1249,7 +1249,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                      19
+1.7.0                   December  3, 2008                      19
 
 
 
@@ -1315,7 +1315,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                      20
+1.7.0                   December  3, 2008                      20
 
 
 
@@ -1381,7 +1381,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.7.0                   November 24, 2008                      21
+1.7.0                   December  3, 2008                      21
 
 
 
@@ -1447,7 +1447,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.0                   November 24, 2008                      22
+1.7.0                   December  3, 2008                      22
 
 
 
@@ -1513,6 +1513,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.0                   November 24, 2008                      23
+1.7.0                   December  3, 2008                      23
 
 
