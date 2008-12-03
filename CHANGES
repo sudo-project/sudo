@@ -2140,3 +2140,12 @@ Sudo 1.6.9p17 released.
      authenticating.
 
 Sudo 1.6.9p18 released.
+
+675) Fixed configuration of SIA authentication on Digital UNIX.
+
+676) Standardize on "option" instead of "flag" when referring to command
+     line options in the documentation.
+
+677) Fixed behavior when ^C it entered at the password prompt on MacOS.
+
+Sudo 1.6.9p19 released.
