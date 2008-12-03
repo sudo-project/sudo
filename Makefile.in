@@ -435,8 +435,7 @@ check:
 	@echo nothing to check
 
 clean:
-	-rm -f *.o *.lo $(PROGS) testsudoers core sudo.core visudo.core \
-	       testsudoers.core
+	-rm -f *.o *.lo stamp-* $(PROGS) testsudoers core *.core core.*
 
 mostlyclean: clean
 
