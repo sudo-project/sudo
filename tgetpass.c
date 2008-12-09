@@ -115,7 +115,7 @@ static volatile sig_atomic_t signo;
 
 static void handler __P((int));
 static char *getln __P((int, char *, size_t));
-static char *sudo_askpass(const char *);
+static char *sudo_askpass __P((const char *));
 
 /*
  * Like getpass(3) but with timeout and echo flags.

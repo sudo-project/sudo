@@ -418,7 +418,10 @@ globtilde(pattern, patbuf, patbuf_len, pglob)
 }
 
 static int
-g_strncmp(const Char *s1, const char *s2, size_t n)
+g_strncmp(s1, s2, n)
+	const Char *s1;
+	const char *s2;
+	size_t n;
 {
 	int rv = 0;
 
@@ -433,7 +436,9 @@ g_strncmp(const Char *s1, const char *s2, size_t n)
 }
 
 static int
-g_charclass(const Char **patternp, Char **bufnextp)
+g_charclass(patternp, bufnextp)
+	const Char **patternp;
+	Char **bufnextp;
 {
 	const Char *pattern = *patternp + 1;
 	Char *bufnext = *bufnextp;

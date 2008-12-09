@@ -106,7 +106,7 @@ void
 #ifdef __STDC__
 lbuf_append_quoted(struct lbuf *lbuf, const char *set, ...)
 #else
-lbuf_append_quoted(lbuf, va_alist)
+lbuf_append_quoted(lbuf, set, va_alist)
 	struct lbuf *lbuf;
 	const char *set;
 	va_dcl
