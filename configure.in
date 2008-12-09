@@ -1350,6 +1350,10 @@ case "$host" in
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
 
+		# HP-UX bundled compiler can't generate shared objects
+		if test "x$ac_cv_prog_cc_c89" = "xno"; then
+		    with_noexec=no
+		fi
 		case "$host" in
 			*-*-hpux[1-8].*)
 			    AC_DEFINE(BROKEN_SYSLOG)
