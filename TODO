@@ -181,13 +181,10 @@ TODO list (most will be addressed in sudo 2.0)
 62) Add FOO=BAR env settings to sudoers.  Also m/regexp/ where '/' can be
     any char.
 
-63) ^C from prompt in PAM doesn't work correctly (on MacOS at least)
-    Maybe need better return value from conversaion function like
-    PAM_SYSTEM_ERROR?
-
 64) Consider a more fine-grained setenv option.  Perhaps have setenv
     and setenv_all where the latter lets you override the blacklist?
     Maybe just make it clear that setenv allows the user to run
     anything.
 
-65) Merge in BSD audit support from apple
+65) Merge in BSM audit support from apple as well as linux audit from redhat
+    Should be able to abstract them into single set of logging functions
