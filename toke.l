@@ -467,12 +467,12 @@ sudoedit		{
 			    LEXTRACE("\n\t");
 			}			/* throw away EOL after \ */
 
-<INITIAL,STARTDEFS,INDEFS>#([^\n0-9-].*)?\n	{
+<INITIAL,STARTDEFS,INDEFS>#(-[^\n0-9].*|[^\n0-9-].*)?\n	{
 			    BEGIN INITIAL;
 			    ++sudolineno;
 			    LEXTRACE("\n");
 			    return(COMMENT);
-			}			/* return comments */
+			}			/* comment, not uid/gid */
 
 <*>.			{
 			    LEXTRACE("ERROR ");
