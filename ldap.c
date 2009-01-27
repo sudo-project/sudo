@@ -1128,7 +1128,7 @@ sudo_ldap_display_defaults(nss, pw, lbuf)
 	return(-1);
 
     rc = ldap_search_ext_s(ld, ldap_conf.base, LDAP_SCOPE_SUBTREE,
-	"cn=defaults", NULL, 0, NULL, NULL, NULL, -1, &result);
+	"cn=defaults", NULL, 0, NULL, NULL, NULL, 0, &result);
     if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
 	bv = ldap_get_values_len(ld, entry, "sudoOption");
 	if (bv != NULL) {
@@ -1358,7 +1358,7 @@ sudo_ldap_display_privs(nss, pw, lbuf)
 	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
 	DPRINTF(("ldap search '%s'", filt), 1);
 	rc = ldap_search_ext_s(ld, ldap_conf.base, LDAP_SCOPE_SUBTREE, filt,
-	    NULL, 0, NULL, NULL, NULL, -1, &result);
+	    NULL, 0, NULL, NULL, NULL, 0, &result);
 	efree(filt);
 	if (rc != LDAP_SUCCESS)
 	    continue;	/* no entries for this pass */
@@ -1412,7 +1412,7 @@ sudo_ldap_display_cmnd(nss, pw)
 	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
 	DPRINTF(("ldap search '%s'", filt), 1);
 	rc = ldap_search_ext_s(ld, ldap_conf.base, LDAP_SCOPE_SUBTREE, filt,
-	    NULL, 0, NULL, NULL, NULL, -1, &result);
+	    NULL, 0, NULL, NULL, NULL, 0, &result);
 	efree(filt);
 	if (rc != LDAP_SUCCESS)
 	    continue;	/* no entries for this pass */
@@ -1707,7 +1707,7 @@ sudo_ldap_setdefs(nss)
 	return(-1);
 
     rc = ldap_search_ext_s(ld, ldap_conf.base, LDAP_SCOPE_SUBTREE,
-	"cn=defaults", NULL, 0, NULL, NULL, NULL, -1, &result);
+	"cn=defaults", NULL, 0, NULL, NULL, NULL, 0, &result);
     if (rc == 0 && (entry = ldap_first_entry(ld, result))) {
 	DPRINTF(("found:%s", ldap_get_dn(ld, entry)), 1);
 	sudo_ldap_parse_options(ld, entry);
@@ -1748,7 +1748,7 @@ sudo_ldap_lookup(nss, ret, pwflag)
 	for (matched = 0, do_netgr = 0; !matched && do_netgr < 2; do_netgr++) {
 	    filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
 	    rc = ldap_search_ext_s(ld, ldap_conf.base, LDAP_SCOPE_SUBTREE, filt,
-		NULL, 0, NULL, NULL, NULL, -1, &result);
+		NULL, 0, NULL, NULL, NULL, 0, &result);
 	    efree(filt);
 	    if (rc != LDAP_SUCCESS)
 		continue;
@@ -1819,7 +1819,7 @@ sudo_ldap_lookup(nss, ret, pwflag)
 	filt = do_netgr ? estrdup("sudoUser=+*") : sudo_ldap_build_pass1(pw);
 	DPRINTF(("ldap search '%s'", filt), 1);
 	rc = ldap_search_ext_s(ld, ldap_conf.base, LDAP_SCOPE_SUBTREE, filt,
-	    NULL, 0, NULL, NULL, NULL, -1, &result);
+	    NULL, 0, NULL, NULL, NULL, 0, &result);
 	if (rc != LDAP_SUCCESS)
 	    DPRINTF(("nothing found for '%s'", filt), 1);
 	efree(filt);
