@@ -651,9 +651,11 @@ usergr_matches(group, user, pw)
     /*
      * If the user has a supplementary group vector, check it first.
      */
-    for (i = 0; i < user_ngroups; i++) {
-	if (grp->gr_gid == user_groups[i])
-	    return(TRUE);
+    if (strcmp(user, user_name) == 0) {
+	for (i = 0; i < user_ngroups; i++) {
+	    if (grp->gr_gid == user_groups[i])
+		return(TRUE);
+	}
     }
     if (grp->gr_mem != NULL) {
 	for (cur = grp->gr_mem; *cur; cur++) {
