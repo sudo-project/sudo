@@ -2149,3 +2149,10 @@ Sudo 1.6.9p18 released.
 677) Fixed behavior when ^C it entered at the password prompt on MacOS.
 
 Sudo 1.6.9p19 released.
+
+678) Only use the cached supplementory group vector when matching groups
+     for the invoking user.
+
+679) Fixed a compilation problem on AIX.
+
+Sudo 1.6.9p20 released.
