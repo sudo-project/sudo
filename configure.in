@@ -1286,6 +1286,7 @@ case "$host" in
 		# Use authenticate(3) as the default authentication method
 		if test X"$with_aixauth" = X""; then
 		    AC_CHECK_FUNCS(authenticate, [AUTH_EXCL_DEF="AIX_AUTH"])
+		    AC_CHECK_FUNCS(unsetenv)
 		fi
 		;;
     *-*-hiuxmpp*)

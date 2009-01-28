@@ -81,8 +81,10 @@ aixauth_cleanup(pw, auth)
     struct passwd *pw;
     sudo_auth *auth;
 {
+#ifdef HAVE_UNSETENV
     /* Unset AUTHSTATE as it may not be correct for the runas user. */
     unsetenv("AUTHSTATE");
- 
+#endif
+
     return(AUTH_SUCCESS);
 }
