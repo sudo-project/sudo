@@ -303,6 +303,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Allow sudo to prompt for a password even if it would be visisble",
 	NULL,
     }, {
+	"pwstars", T_FLAG,
+	"Print a stars at the password prompt when there is user input",
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

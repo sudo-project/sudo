@@ -223,3 +223,6 @@ sudoers_locale
 visiblepw
 	T_FLAG
 	"Allow sudo to prompt for a password even if it would be visisble"
+pwstars
+	T_FLAG
+	"Print a stars at the password prompt when there is user input"

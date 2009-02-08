@@ -138,6 +138,8 @@
 #define I_SUDOERS_LOCALE        68
 #define def_visiblepw           (sudo_defs_table[69].sd_un.flag)
 #define I_VISIBLEPW             69
+#define def_pwstars             (sudo_defs_table[70].sd_un.flag)
+#define I_PWSTARS               70
 
 enum def_tupple {
 	never,
