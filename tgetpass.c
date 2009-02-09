@@ -214,11 +214,11 @@ sudo_askpass(prompt)
 extern int term_erase, term_kill;
 
 static char *
-getln(fd, buf, bufsiz, stars)
+getln(fd, buf, bufsiz, feedback)
     int fd;
     char *buf;
     size_t bufsiz;
-    int stars;
+    int feedback;
 {
     size_t left = bufsiz;
     ssize_t nr = -1;
@@ -234,7 +234,7 @@ getln(fd, buf, bufsiz, stars)
 	nr = read(fd, &c, 1);
 	if (nr != 1 || c == '\n' || c == '\r')
 	    break;
-	if (stars) {
+	if (feedback) {
 	    if (c == term_kill) {
 		while (cp > buf) {
 		    (void) write(fd, "\b \b", 3);
@@ -255,6 +255,13 @@ getln(fd, buf, bufsiz, stars)
 	*cp++ = c;
     }
     *cp = '\0';
+    if (feedback) {
+	/* erase stars */
+	while (cp > buf) {
+	    (void) write(fd, "\b \b", 3);
+	    --cp;
+	}
+    }
 
     return(nr == 1 ? buf : NULL);
 }
