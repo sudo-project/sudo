@@ -2156,3 +2156,8 @@ Sudo 1.6.9p19 released.
 679) Fixed a compilation problem on AIX.
 
 Sudo 1.6.9p20 released.
+
+680) Added fast_glob option to make sudo to use fnmatch() instead
+     of glob() for pathname globbing.
+
+Sudo 1.6.9p21 released.

@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "January  27, 2008" "1.6.9p20" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "February 10, 2009" "1.6.9p21" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l

@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "January  27, 2008" "1.6.9p20" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "February 10, 2009" "1.6.9p21" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -501,9 +501,10 @@ be overridden by use of the \f(CW\*(C`UNSETENV\*(C'\fR tag.
 .Sh "Wildcards"
 .IX Subsection "Wildcards"
 \&\fBsudo\fR allows shell-style \fIwildcards\fR (aka meta or glob characters)
-to be used in pathnames as well as command line arguments in the
-\&\fIsudoers\fR file.  Wildcard matching is done via the \fB\s-1POSIX\s0\fR
-\&\fIfnmatch\fR\|(3) routine.  Note that these are \fInot\fR regular expressions.
+to be used in hostnames, pathnames and command line arguments in
+the \fIsudoers\fR file.  Wildcard matching is done via the \fB\s-1POSIX\s0\fR
+\&\fIglob\fR\|(3) and \fIfnmatch\fR\|(3) routines.  Note that these are \fInot\fR
+regular expressions.
 .ie n .IP "\*(C`*\*(C'" 8
 .el .IP "\f(CW\*(C`*\*(C'\fR" 8
 .IX Item "*"
@@ -778,6 +779,17 @@ If set and \fBsudo\fR is invoked with no arguments it acts as if the
 shell is determined by the \f(CW\*(C`SHELL\*(C'\fR environment variable if it is
 set, falling back on the shell listed in the invoking user's
 /etc/passwd entry if not).  This flag is \fIoff\fR by default.
+.IP "fast_glob" 16
+.IX Item "fast_glob"
+Normally, \fBsudo\fR uses the \fIglob\fR\|(3) function to do shell-style
+globbing when matching pathnames.  However, since it accesses the
+file system, \fIglob\fR\|(3) can take a long time to complete for some
+patterns, especially when the pattern references a network file
+system that is mounted on demand (automounted).  The \fIfast_glob\fR
+option causes \fBsudo\fR to use the \fIfnmatch\fR\|(3) function, which does
+not access the file system to do its matching.  The disadvantage
+of \fIfast_glob\fR is that it is unable to match relative pathnames
+such as \fI./ls\fR or \fI../bin/ls\fR.  This flag is \fIoff\fR by default.
 .IP "stay_setuid" 16
 .IX Item "stay_setuid"
 Normally, when \fBsudo\fR executes a command the real and effective
@@ -1410,7 +1422,7 @@ editor, a safer approach is to give the user permission to run
 \&\fBsudoedit\fR.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(8)
+\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIglob\fR\|(3), \fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(8)
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 The \fIsudoers\fR file should \fBalways\fR be edited by the \fBvisudo\fR

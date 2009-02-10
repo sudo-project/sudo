@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.6.9p20                January  27, 2008                       1
+1.6.9p21                February 10, 2009                       1
 
 
 
@@ -72,8 +72,8 @@ VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
            this option vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s
            file of your choice, instead of the default,
-           _@_s_y_s_c_o_n_f_d_i_r_@_/_s_u_d_o_e_r_s.  The lock file used is the
-           specified _s_u_d_o_e_r_s file with ".tmp" appended to it.
+           _/_e_t_c_/_s_u_d_o_e_r_s.  The lock file used is the specified
+           _s_u_d_o_e_r_s file with ".tmp" appended to it.
 
        -q  Enable qquuiieett mode.  In this mode details about syntax
            errors are not printed.  This option is only useful
@@ -98,10 +98,9 @@ EENNVVIIRROONNMMEENNTT
        EDITOR          Used by visudo if VISUAL is not set
 
 FFIILLEESS
-       _@_s_y_s_c_o_n_f_d_i_r_@_/_s_u_d_o_e_r_s    List of who can run what
+       _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
 
-       _@_s_y_s_c_o_n_f_d_i_r_@_/_s_u_d_o_e_r_s_._t_m_p
-                               Lock file for visudo
+       _/_e_t_c_/_s_u_d_o_e_r_s_._t_m_p        Lock file for visudo
 
 DDIIAAGGNNOOSSTTIICCSS
        sudoers file busy, try again later.
@@ -124,10 +123,11 @@ DDIIAAGGNNOOSSTTIICCSS
 
        Warning: runas_default set after old value is in use ...
            You have a _r_u_n_a_s___d_e_f_a_u_l_t Defaults setting listed in
+           the _s_u_d_o_e_r_s file after its value has already been
 
 
 
-1.6.9p20                January  27, 2008                       2
+1.6.9p21                February 10, 2009                       2
 
 
 
@@ -136,7 +136,6 @@ DDIIAAGGNNOOSSTTIICCSS
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
-           the _s_u_d_o_e_r_s file after its value has already been
            used.  This means that entries prior to the
            _r_u_n_a_s___d_e_f_a_u_l_t setting will match based on the default
            value of _r_u_n_a_s___d_e_f_a_u_l_t (root) whereas entries aafftteerr
@@ -193,6 +192,7 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.6.9p20                January  27, 2008                       3
+
+1.6.9p21                February 10, 2009                       3
 
 
