@@ -252,8 +252,8 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Reset the environment to a default set of variables",
 	NULL,
     }, {
-	"simple_glob", T_FLAG,
-	"Use simpler globbing that is less accurate but does not access the filesystem",
+	"fast_glob", T_FLAG,
+	"Use faster globbing that is less accurate but does not access the filesystem",
 	NULL,
     }, {
 	"env_check", T_LIST|T_BOOL,

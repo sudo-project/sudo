@@ -112,8 +112,8 @@
 #define I_SETENV                55
 #define def_env_reset           (sudo_defs_table[56].sd_un.flag)
 #define I_ENV_RESET             56
-#define def_simple_glob         (sudo_defs_table[57].sd_un.flag)
-#define I_SIMPLE_GLOB           57
+#define def_fast_glob           (sudo_defs_table[57].sd_un.flag)
+#define I_FAST_GLOB             57
 #define def_env_check           (sudo_defs_table[58].sd_un.list)
 #define I_ENV_CHECK             58
 #define def_env_delete          (sudo_defs_table[59].sd_un.list)
