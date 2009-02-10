@@ -342,9 +342,10 @@ be overridden by use of the C<UNSETENV> tag.
 =head2 Wildcards
 
 B<sudo> allows shell-style I<wildcards> (aka meta or glob characters)
-to be used in hostnames, pathnames and command line arguments in the
-I<sudoers> file.  Wildcard matching is done via the B<POSIX>
-L<fnmatch(3)> routine.  Note that these are I<not> regular expressions.
+to be used in hostnames, pathnames and command line arguments in
+the I<sudoers> file.  Wildcard matching is done via the B<POSIX>
+L<glob(3)> and L<fnmatch(3)> routines.  Note that these are I<not>
+regular expressions.
 
 =over 8
 
@@ -1323,7 +1324,7 @@ B<sudoedit>.
 
 =head1 SEE ALSO
 
-L<rsh(1)>, L<su(1)>, L<fnmatch(3)>, L<sudo(8)>, L<visudo(8)>
+L<rsh(1)>, L<su(1)>, L<fnmatch(3)>, L<glob(3)>, L<sudo(8)>, L<visudo(8)>
 
 =head1 CAVEATS
 
