@@ -140,6 +140,8 @@
 #define I_VISIBLEPW             69
 #define def_pwstars             (sudo_defs_table[70].sd_un.flag)
 #define I_PWSTARS               70
+#define def_simple_glob         (sudo_defs_table[71].sd_un.flag)
+#define I_SIMPLE_GLOB           71
 
 enum def_tupple {
 	never,
