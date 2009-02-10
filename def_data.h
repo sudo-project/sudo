@@ -112,16 +112,18 @@
 #define I_SETENV                55
 #define def_env_reset           (sudo_defs_table[56].sd_un.flag)
 #define I_ENV_RESET             56
-#define def_env_check           (sudo_defs_table[57].sd_un.list)
-#define I_ENV_CHECK             57
-#define def_env_delete          (sudo_defs_table[58].sd_un.list)
-#define I_ENV_DELETE            58
-#define def_env_keep            (sudo_defs_table[59].sd_un.list)
-#define I_ENV_KEEP              59
-#define def_role                (sudo_defs_table[60].sd_un.str)
-#define I_ROLE                  60
-#define def_type                (sudo_defs_table[61].sd_un.str)
-#define I_TYPE                  61
+#define def_simple_glob         (sudo_defs_table[57].sd_un.flag)
+#define I_SIMPLE_GLOB           57
+#define def_env_check           (sudo_defs_table[58].sd_un.list)
+#define I_ENV_CHECK             58
+#define def_env_delete          (sudo_defs_table[59].sd_un.list)
+#define I_ENV_DELETE            59
+#define def_env_keep            (sudo_defs_table[60].sd_un.list)
+#define I_ENV_KEEP              60
+#define def_role                (sudo_defs_table[61].sd_un.str)
+#define I_ROLE                  61
+#define def_type                (sudo_defs_table[62].sd_un.str)
+#define I_TYPE                  62
 
 enum def_tupple {
 	never,
