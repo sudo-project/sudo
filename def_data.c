@@ -307,8 +307,8 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Print a stars at the password prompt when there is user input",
 	NULL,
     }, {
-	"simple_glob", T_FLAG,
-	"Use simpler globbing that is less accurate but does not access the filesystem",
+	"fast_glob", T_FLAG,
+	"Use faster globbing that is less accurate but does not access the filesystem",
 	NULL,
     }, {
 	NULL, 0, NULL

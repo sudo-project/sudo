@@ -226,6 +226,6 @@ visiblepw
 pwstars
 	T_FLAG
 	"Print a stars at the password prompt when there is user input"
-simple_glob
+fast_glob
 	T_FLAG
-	"Use simpler globbing that is less accurate but does not access the filesystem"
+	"Use faster globbing that is less accurate but does not access the filesystem"

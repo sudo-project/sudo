@@ -400,7 +400,7 @@ command_matches(sudoers_cmnd, sudoers_args)
 	 * If sudoers_cmnd has meta characters in it, we need to
 	 * use glob(3) and/or fnmatch(3) to do the matching.
 	 */
-	if (def_simple_glob)
+	if (def_fast_glob)
 	    return(command_matches_fnmatch(sudoers_cmnd, sudoers_args));
 	return(command_matches_glob(sudoers_cmnd, sudoers_args));
     }
