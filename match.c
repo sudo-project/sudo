@@ -515,7 +515,7 @@ command_matches_normal(sudoers_cmnd, sudoers_args)
     char *sudoers_args;
 {
     struct stat sudoers_stat;
-    char *base, *cp;
+    char *base;
     size_t dlen;
 
     /* If it ends in '/' it is a directory spec. */
