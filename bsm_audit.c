@@ -52,7 +52,7 @@ audit_sudo_selected(int sf)
 }
 
 void
-audit_success(char **exec_args)
+audit_success(const char **exec_args)
 {
 	auditinfo_addr_t ainfo_addr;
 	auditinfo_t ainfo;
@@ -112,7 +112,7 @@ audit_success(char **exec_args)
 }
 
 void
-audit_failure(char **exec_args, char const *const fmt, ...)
+audit_failure(const char **exec_args, char const *const fmt, ...)
 {
 	auditinfo_addr_t ainfo_addr;
 	auditinfo_t ainfo;
