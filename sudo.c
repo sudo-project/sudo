@@ -101,6 +101,10 @@
 #include "interfaces.h"
 #include "version.h"
 
+#ifdef HAVE_BSM_AUDIT
+# include "bsm_audit.h"
+#endif
+
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
@@ -382,9 +386,12 @@ main(argc, argv, envp)
 
     /* Bail if a tty is required and we don't have one.  */
     if (def_requiretty) {
-	if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1)
+	if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1) {
+#ifdef HAVE_BSM_AUDIT
+	    audit_failure(NewArgv, "no tty");
+#endif
 	    log_error(NO_MAIL, "sorry, you must have a tty to run sudo");
-	else
+	} else
 	    (void) close(fd);
     }
 
@@ -419,10 +426,17 @@ main(argc, argv, envp)
 
     if (ISSET(validated, VALIDATE_OK)) {
 	/* Finally tell the user if the command did not exist. */
-	if (cmnd_status == NOT_FOUND_DOT)
+	if (cmnd_status == NOT_FOUND_DOT) {
+#ifdef HAVE_BSM_AUDIT
+	    audit_failure(NewArgv, "command in current directory");
+#endif
 	    errorx(1, "ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
-	else if (cmnd_status == NOT_FOUND)
+	} else if (cmnd_status == NOT_FOUND) {
+#ifdef HAVE_BSM_AUDIT
+	    audit_failure(NewArgv, "%s: command not found", user_cmnd);
+#endif
 	    errorx(1, "%s: command not found", user_cmnd);
+	}
 
 	/* If user specified env vars make sure sudoers allows it. */
 	if (ISSET(sudo_mode, MODE_RUN) && !def_setenv) {
@@ -509,13 +523,20 @@ main(argc, argv, envp)
 	closefrom(def_closefrom + 1);
 
 #ifndef PROFILING
-	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0)
+	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0) {
+#ifdef HAVE_BSM_AUDIT
+		syslog(LOG_AUTH|LOG_ERR, "fork");
+	    audit_success(NewArgv);
+#endif
 	    exit(0);
-	else {
+	} else {
 #ifdef HAVE_SELINUX
 	    if (is_selinux_enabled() > 0 && user_role != NULL)
 		selinux_exec(user_role, user_type, NewArgv,
 		    ISSET(sudo_mode, MODE_LOGIN_SHELL));
+#endif
+#ifdef HAVE_BSM_AUDIT
+	    audit_success(NewArgv);
 #endif
 	    execv(safe_cmnd, NewArgv);
 	}
@@ -533,6 +554,9 @@ main(argc, argv, envp)
 	} warning("unable to execute %s", safe_cmnd);
 	exit(127);
     } else if (ISSET(validated, FLAG_NO_USER | FLAG_NO_HOST)) {
+#ifdef HAVE_BSM_AUDIT
+	audit_failure(NewArgv, "No user or host");
+#endif
 	log_denial(validated, 1);
 	exit(1);
     } else {
@@ -554,6 +578,9 @@ main(argc, argv, envp)
 	    /* Just tell the user they are not allowed to run foo. */
 	    log_denial(validated, 1);
 	}
+#ifdef HAVE_BSM_AUDIT
+	audit_failure(NewArgv, "validation failure");
+#endif
 	exit(1);
     }
     exit(0);	/* not reached */
@@ -1315,8 +1342,12 @@ set_runaspw(user)
 	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
 	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
     } else {
-	if ((runas_pw = sudo_getpwnam(user)) == NULL)
+	if ((runas_pw = sudo_getpwnam(user)) == NULL) {
+#ifdef HAVE_BSM_AUDIT
+	    audit_failure(NewArgv, "unknown user: %s", user);
+#endif
 	    log_error(NO_MAIL|MSG_ONLY, "unknown user: %s", user);
+	}
     }
 }
 

@@ -13,6 +13,7 @@ AC_MSG_NOTICE([Configuring Sudo version 1.7])
 dnl
 dnl Variables that get substituted in the Makefile and man pages
 dnl
+AC_SUBST(HAVE_BSM_AUDIT)
 AC_SUBST(LIBTOOL)
 AC_SUBST(CFLAGS)
 AC_SUBST(PROGS)
@@ -198,6 +199,20 @@ AC_ARG_WITH(blibpath, [  --with-blibpath[=PATH]    pass -blibpath flag to ld for
 [case $with_blibpath in
     yes|no)	;;
     *)		AC_MSG_NOTICE([will pass -blibpath:${with_blibpath} to the loader.])
+		;;
+esac])
+
+dnl
+dnl Handle BSM auditing support.
+dnl
+AC_ARG_WITH(bsm-audit, [  --with-bsm-audit        enable BSM audit support],
+[case $with_bsm_audit in
+    yes)	AC_DEFINE(HAVE_BSM_AUDIT)
+		SUDO_LIBS="${SUDO_LIBS} -lbsm"
+		SUDO_OBJS="${SUDO_OBJS} bsm_audit.o"
+		;;
+    no)		;;
+    *)		AC_MSG_ERROR(["--with-bsm-audit does not take an argument."])
 		;;
 esac])
 
@@ -2539,6 +2554,7 @@ AH_TEMPLATE(HAL_INSULTS, [Define to 1 if you want 2001-like insults.])
 AH_TEMPLATE(HAVE_AFS, [Define to 1 if you use AFS.])
 AH_TEMPLATE(HAVE_AIXAUTH, [Define to 1 if you use AIX general authentication.])
 AH_TEMPLATE(HAVE_BSD_AUTH_H, [Define to 1 if you use BSD authentication.])
+AH_TEMPLATE(HAVE_BSM_AUDIT, [Define to 1 to enable BSM auditing.])
 AH_TEMPLATE(HAVE_DCE, [Define to 1 if you use OSF DCE.])
 AH_TEMPLATE(HAVE_DD_FD, [Define to 1 if your `DIR' contains dd_fd.])
 AH_TEMPLATE(HAVE_DIRFD, [Define to 1 if you have the `dirfd' function or macro.])
