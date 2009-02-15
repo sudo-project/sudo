@@ -138,8 +138,8 @@
 #define I_SUDOERS_LOCALE        68
 #define def_visiblepw           (sudo_defs_table[69].sd_un.flag)
 #define I_VISIBLEPW             69
-#define def_pwstars             (sudo_defs_table[70].sd_un.flag)
-#define I_PWSTARS               70
+#define def_pwfeedback          (sudo_defs_table[70].sd_un.flag)
+#define I_PWFEEDBACK            70
 #define def_fast_glob           (sudo_defs_table[71].sd_un.flag)
 #define I_FAST_GLOB             71
 

@@ -119,7 +119,7 @@ restart:
     (void) sigaction(SIGTTIN, &sa, &savettin);
     (void) sigaction(SIGTTOU, &sa, &savettou);
 
-    if (def_pwstars)
+    if (def_pwfeedback)
 	neednl = term_raw(input);
     else
 	neednl = term_noecho(input);
@@ -131,7 +131,7 @@ restart:
 
 	if (timeout > 0)
 	    alarm(timeout);
-	pass = getln(input, buf, sizeof(buf), def_pwstars);
+	pass = getln(input, buf, sizeof(buf), def_pwfeedback);
 	alarm(0);
 	save_errno = errno;
 

@@ -660,15 +660,15 @@ user's existing group vector is left unaltered.  The real and
 effective group IDs, however, are still set to match the target
 user.  This flag is I<off> by default.
 
-=item pwstars
+=item pwfeedback
 
 By default, B<sudo> reads the password like most other Unix programs,
 by turning off echo until the user hits the return (or enter) key.
 Some users become confused by this as it appears to them that B<sudo>
-has hung at this point.  When I<pwstars> is set, B<sudo> will print
-a star for each character of the password the user enters.  Note
-that this does have a security impact, as an onlooker will be able
-to determine the length of the password being entered.
+has hung at this point.  When I<pwfeedback> is set, B<sudo> will
+provide visual feedback when the user presses a key.  Note that
+this does have a security impact as an onlooker may be able to
+determine the length of the password being entered.
 This flag is I<off> by default.
 
 =item requiretty
