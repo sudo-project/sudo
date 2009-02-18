@@ -814,7 +814,7 @@ match(name, pat, patend)
 				return(0);
 			if ((negate_range = ((*pat & M_MASK) == M_NOT)) != EOS)
 				++pat;
-			while (((c = *pat++) & M_MASK) != M_END)
+			while (((c = *pat++) & M_MASK) != M_END) {
 				if ((c & M_MASK) == M_CLASS) {
 					int idx = *pat & M_MASK;
 					if (idx < NCCLASSES &&
@@ -828,6 +828,7 @@ match(name, pat, patend)
 					pat += 2;
 				} else if (c == k)
 					ok = 1;
+			}
 			if (ok == negate_range)
 				return(0);
 			break;
