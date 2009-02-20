@@ -829,6 +829,9 @@ set_cmnd(sudo_mode)
     if (!update_defaults(SETDEF_CMND))
 	log_error(NO_STDERR|NO_EXIT, "problem with defaults entries");
 
+    if (!runas_user)
+	set_runaspw(def_runas_default);	/* may have been updated above */
+
     return(rval);
 }
 
