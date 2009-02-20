@@ -29,6 +29,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include "logging.h"
+
 static int
 audit_sudo_selected(int sf)
 {
