@@ -781,6 +781,15 @@ the user running it.  With this flag enabled, B<sudo> will use a
 file named for the tty the user is logged in on in that directory.
 This flag is I<@tty_tickets@> by default.
 
+=item umask_override
+
+If set, B<sudo> will set the umask as specified by I<sudoers> without
+modification.  This makes it possible to specify a more permissive
+umask in I<sudoers> than the user's own umask and matches historical
+behavior.  If I<umask_override> is not set, B<sudo> will set the
+umask to be the union of the user's umask and what is specified in
+I<sudoers>.  This flag is I<off> by default.
+
 =item use_loginclass
 
 If set, B<sudo> will apply the defaults specified for the target user's

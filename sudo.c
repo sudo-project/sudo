@@ -453,14 +453,19 @@ main(argc, argv, envp)
 	    exit(rc);
 
 	/*
-	 * Override user's umask if configured to do so.
-	 * If user's umask is more restrictive, OR in those bits too.
+	 * Set umask based on sudoers.
+	 * If user's umask is more restrictive, OR in those bits too
+	 * unless umask_override is set.
 	 */
 	if (def_umask != 0777) {
-	    mode_t mask = umask(def_umask);
-	    mask |= def_umask;
-	    if (mask != def_umask)
-		umask(mask);
+	    if (def_umask_override) {
+		umask(def_umask);
+	    } else {
+		mode_t mask = umask(def_umask);
+		mask |= def_umask;
+		if (mask != def_umask)
+		    umask(mask);
+	    }
 	}
 
 	/* Restore coredumpsize resource limit. */
@@ -537,7 +542,8 @@ main(argc, argv, envp)
 	    NewArgv[0] = "sh";
 	    NewArgv[1] = safe_cmnd;
 	    execv(_PATH_BSHELL, NewArgv);
-	} warning("unable to execute %s", safe_cmnd);
+	}
+	warning("unable to execute %s", safe_cmnd);
 	exit(127);
     } else if (ISSET(validated, FLAG_NO_USER | FLAG_NO_HOST)) {
 	audit_failure(NewArgv, "No user or host");

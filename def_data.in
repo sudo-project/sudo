@@ -229,3 +229,6 @@ pwfeedback
 fast_glob
 	T_FLAG
 	"Use faster globbing that is less accurate but does not access the filesystem"
+umask_override
+	T_FLAG
+	"The umask specified in sudoers will override the user's, even if it is more permissive"
