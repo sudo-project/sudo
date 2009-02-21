@@ -19,7 +19,6 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <stdio.h>
-#include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
 # include <stddef.h>
