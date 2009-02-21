@@ -3258,22 +3258,43 @@ parse_include(base)
     char *base;
 {
     char *cp, *ep, *path;
-    int len;
+    int len = 0, subst = 0;
+    size_t shost_len = 0;
 
     /* Pull out path from #include line. */
     cp = base + sizeof("#include");
     while (isblank((unsigned char) *cp))
 	cp++;
     ep = cp;
-    while (*ep != '\0' && !isspace((unsigned char) *ep))
+    while (*ep != '\0' && !isspace((unsigned char) *ep)) {
+	if (ep[0] == '%' && ep[1] == 'h') {
+	    shost_len = strlen(user_shost);
+	    len += shost_len - 2;
+	    subst = 1;
+	}
 	ep++;
+    }
 
     /* Make a copy of path and return it. */
-    len = (int)(ep - cp);
+    len += (int)(ep - cp);
     if ((path = malloc(len + 1)) == NULL)
 	yyerror("unable to allocate memory");
-    memcpy(path, cp, len);
-    path[len] = '\0';
+    if (subst) {
+	/* substitute for %h */
+	char *pp = path;
+	while (cp < ep) {
+	    if (cp[0] == '%' && cp[1] == 'h') {
+		memcpy(pp, user_shost, shost_len);
+		pp += shost_len;
+		cp += 2;
+	    }
+	    *pp++ = *cp++;
+	}
+	*pp = '\0';
+    } else {
+	memcpy(path, cp, len);
+	path[len] = '\0';
+    }
 
     /* Push any excess characters (e.g. comment, newline) back to the lexer */
     if (*ep != '\0')
