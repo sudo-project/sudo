@@ -105,6 +105,7 @@ struct sudoersfile {
 static RETSIGTYPE quit		__P((int));
 static char *get_args		__P((char *));
 static char *get_editor		__P((char **));
+static void get_hostname	__P((void));
 static char whatnow		__P((void));
 static int check_aliases	__P((int));
 static int check_syntax		__P((char *, int, int));
@@ -195,9 +196,10 @@ main(argc, argv)
     sudo_setgrent();
 
     /* Mock up a fake sudo_user struct. */
-    user_host = user_shost = user_cmnd = "";
+    user_cmnd = "";
     if ((sudo_user.pw = sudo_getpwuid(getuid())) == NULL)
 	errorx(1, "you don't exist in the passwd database");
+    get_hostname();
 
     /* Setup defaults data structures. */
     init_defaults();
@@ -906,6 +908,30 @@ get_args(cmnd)
 	    args++;
     }
     return(*args ? args : NULL);
+}
+
+/*
+ * Look up the hostname and set user_host and user_shost.
+ */
+static void
+get_hostname()
+{
+    char *p, thost[MAXHOSTNAMELEN + 1];
+
+    if (gethostname(thost, sizeof(thost)) != 0) {
+	user_host = user_shost = "localhost";
+	return;
+    }
+    thost[sizeof(thost) - 1] = '\0';
+    user_host = estrdup(thost);
+
+    if ((p = strchr(user_host, '.'))) {
+	*p = '\0';
+	user_shost = estrdup(user_host);
+	*p = '.';
+    } else {
+	user_shost = user_host;
+    }
 }
 
 /*

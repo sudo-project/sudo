@@ -447,7 +447,7 @@ useful, for example, for keeping a site-wide I<sudoers> file in
 addition to a per-machine local one.  For the sake of this example
 the site-wide I<sudoers> will be F</etc/sudoers> and the per-machine
 one will be F</etc/sudoers.local>.  To include F</etc/sudoers.local>
-from F</etc/sudoers> we would use the following line in F</etc/sudoers>:
+from within F</etc/sudoers> we would use the following line in F</etc/sudoers>:
 
  #include /etc/sudoers.local
 
@@ -457,6 +457,13 @@ Upon reaching the end of F</etc/sudoers.local>, the rest of
 F</etc/sudoers> will be processed.  Files that are included may
 themselves include other files.  A hard limit of 128 nested include
 files is enforced to prevent include file loops.
+
+The filename may include the C<%h> escape, signifying the short form
+of the hostname.  I.e., if the machine's hostname is "xerxes", then
+
+ #include /etc/sudoers.%h
+
+will cause B<sudo> to include the file F</etc/sudoers.xerxes>.
 
 =head2 Other special characters and reserved words
 
