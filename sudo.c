@@ -401,12 +401,22 @@ main(argc, argv, envp)
 	    exit(0);
 	}
 
-	/* Override user's umask if configured to do so. */
+	/*
+	 * Override user's umask if configured to do so.
+	 * If user's umask is more restrictive, OR in those bits too.
+	 * Set umask based on sudoers.
+	 * If user's umask is more restrictive, OR in those bits too
+	 * unless umask_override is set.
+	 */
 	if (def_umask != 0777) {
-	    mode_t mask = umask(def_umask);
-	    mask |= def_umask;
-	    if (mask != def_umask)  
-		umask(mask);
+	    if (def_umask_override) {
+		umask(def_umask);
+	    } else {
+		mode_t mask = umask(def_umask);
+		mask |= def_umask;
+		if (mask != def_umask)
+		    umask(mask);
+	    }
 	}
 
 	/* Restore coredumpsize resource limit. */

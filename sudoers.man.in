@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "February 10, 2009" "1.6.9p21" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "February 21, 2009" "1.6.9p21" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -814,6 +814,14 @@ If set, users must authenticate on a per-tty basis.  Normally,
 the user running it.  With this flag enabled, \fBsudo\fR will use a
 file named for the tty the user is logged in on in that directory.
 This flag is \fI@tty_tickets@\fR by default.
+.IP "umask_override" 16
+.IX Item "umask_override"
+If set, \fBsudo\fR will set the umask as specified by \fIsudoers\fR without
+modification.  This makes it possible to specify a more permissive
+umask in \fIsudoers\fR than the user's own umask and matches historical
+behavior.  If \fIumask_override\fR is not set, \fBsudo\fR will set the
+umask to be the union of the user's umask and what is specified in
+\&\fIsudoers\fR.  This flag is \fIoff\fR by default.
 @LCMAN@.IP "use_loginclass" 16
 @LCMAN@.IX Item "use_loginclass"
 @LCMAN@If set, \fBsudo\fR will apply the defaults specified for the target user's

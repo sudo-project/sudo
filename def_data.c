@@ -256,6 +256,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Use faster globbing that is less accurate but does not access the filesystem",
 	NULL,
     }, {
+	"umask_override", T_FLAG,
+	"The umask specified in sudoers will override the user's, even if it is more permissive",
+	NULL,
+    }, {
 	"env_check", T_LIST|T_BOOL,
 	"Environment variables to check for sanity:",
 	NULL,

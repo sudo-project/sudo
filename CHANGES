@@ -2160,4 +2160,6 @@ Sudo 1.6.9p20 released.
 680) Added fast_glob option to make sudo to use fnmatch() instead
      of glob() for pathname globbing.
 
+681) Added umask_override option to restore historical umask behavior.
+
 Sudo 1.6.9p21 released.
