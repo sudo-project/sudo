@@ -17,7 +17,7 @@
 #ifndef _SUDO_BSM_AUDIT_H
 #define	_SUDO_BSM_AUDIT_H
 
-void	audit_success(const char **);
-void	audit_failure(const char **, char const * const, ...);
+void	bsm_audit_success(char **);
+void	bsm_audit_failure(char **, char const * const, va_list);
 
 #endif /* _SUDO_BSM_AUDIT_H */

@@ -29,7 +29,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include "logging.h"
+void log_error(int flags, const char *fmt, ...) __attribute__((__noreturn__));
 
 static int
 audit_sudo_selected(int sf)
@@ -54,7 +54,7 @@ audit_sudo_selected(int sf)
 }
 
 void
-audit_success(const char **exec_args)
+bsm_audit_success(char **exec_args)
 {
 	auditinfo_addr_t ainfo_addr;
 	auditinfo_t ainfo;
@@ -114,7 +114,7 @@ audit_success(const char **exec_args)
 }
 
 void
-audit_failure(const char **exec_args, char const *const fmt, ...)
+bsm_audit_failure(char **exec_args, char const *const fmt, va_list ap)
 {
 	auditinfo_addr_t ainfo_addr;
 	auditinfo_t ainfo;
@@ -122,7 +122,6 @@ audit_failure(const char **exec_args, char const *const fmt, ...)
 	token_t *tok;
 	long au_cond;
 	au_id_t auid;
-	va_list ap;
 	pid_t pid;
 	int aufd;
 
@@ -160,9 +159,7 @@ audit_failure(const char **exec_args, char const *const fmt, ...)
 	if (tok == NULL)
 		log_error(0, "au_to_exec_args: failed");
 	au_write(aufd, tok);
-	va_start(ap, fmt);
 	(void) vsnprintf(text, sizeof(text), fmt, ap);
-	va_end(ap);
 	tok = au_to_text(text);
 	if (tok == NULL)
 		log_error(0, "au_to_text: failed");

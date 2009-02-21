@@ -49,6 +49,8 @@
 # define MAXSYSLOGLEN		960
 #endif
 
+void audit_success		__P((char **));
+void audit_failure		__P((char **, char const * const, ...));
 void log_allowed		__P((int));
 void log_denial			__P((int, int));
 void log_error			__P((int flags, const char *fmt, ...))
