@@ -1166,7 +1166,6 @@ dnl
 dnl Libtool magic; enable shared libs and disable static libs
 dnl
 AC_CANONICAL_HOST
-AC_CANONICAL_TARGET([])
 AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
