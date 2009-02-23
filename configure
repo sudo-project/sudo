@@ -879,10 +879,6 @@ host
 host_cpu
 host_vendor
 host_os
-target
-target_cpu
-target_vendor
-target_os
 SED
 GREP
 EGREP
@@ -1475,7 +1471,6 @@ _ACEOF
 System types:
   --build=BUILD     configure for building on BUILD [guessed]
   --host=HOST       cross-compile to build programs to run on HOST [BUILD]
-  --target=TARGET   configure for building compilers for TARGET [HOST]
 _ACEOF
 fi
 
@@ -5464,49 +5459,6 @@ IFS=$ac_save_IFS
 case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
-{ echo "$as_me:$LINENO: checking target system type" >&5
-echo $ECHO_N "checking target system type... $ECHO_C" >&6; }
-if test "${ac_cv_target+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test "x$target_alias" = x; then
-  ac_cv_target=$ac_cv_host
-else
-  ac_cv_target=`$SHELL "$ac_aux_dir/config.sub" $target_alias` ||
-    { { echo "$as_me:$LINENO: error: $SHELL $ac_aux_dir/config.sub $target_alias failed" >&5
-echo "$as_me: error: $SHELL $ac_aux_dir/config.sub $target_alias failed" >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_target" >&5
-echo "${ECHO_T}$ac_cv_target" >&6; }
-case $ac_cv_target in
-*-*-*) ;;
-*) { { echo "$as_me:$LINENO: error: invalid value of canonical target" >&5
-echo "$as_me: error: invalid value of canonical target" >&2;}
-   { (exit 1); exit 1; }; };;
-esac
-target=$ac_cv_target
-ac_save_IFS=$IFS; IFS='-'
-set x $ac_cv_target
-shift
-target_cpu=$1
-target_vendor=$2
-shift; shift
-# Remember, the first character of IFS is used to create $*,
-# except with old shells:
-target_os=$*
-IFS=$ac_save_IFS
-case $target_os in *\ *) target_os=`echo "$target_os" | sed 's/ /-/g'`;; esac
-
-
-# The aliases save the names the user supplied, while $host etc.
-# will get canonicalized.
-test -n "$target_alias" &&
-  test "$program_prefix$program_suffix$program_transform_name" = \
-    NONENONEs,x,x, &&
-  program_prefix=${target_alias}-
 # Check whether --enable-static was given.
 if test "${enable_static+set}" = set; then
   enableval=$enable_static; p=${PACKAGE-default}
@@ -6232,7 +6184,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6235 "configure"' > conftest.$ac_ext
+  echo '#line 6187 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8091,11 +8043,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8094: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8046: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8098: \$? = $ac_status" >&5
+   echo "$as_me:8050: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8381,11 +8333,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8384: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8336: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8388: \$? = $ac_status" >&5
+   echo "$as_me:8340: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8485,11 +8437,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8488: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8440: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8492: \$? = $ac_status" >&5
+   echo "$as_me:8444: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10845,7 +10797,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10848 "configure"
+#line 10800 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10945,7 +10897,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10948 "configure"
+#line 10900 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -24297,10 +24249,6 @@ host!$host$ac_delim
 host_cpu!$host_cpu$ac_delim
 host_vendor!$host_vendor$ac_delim
 host_os!$host_os$ac_delim
-target!$target$ac_delim
-target_cpu!$target_cpu$ac_delim
-target_vendor!$target_vendor$ac_delim
-target_os!$target_os$ac_delim
 SED!$SED$ac_delim
 GREP!$GREP$ac_delim
 EGREP!$EGREP$ac_delim
@@ -24321,7 +24269,7 @@ KRB5CONFIG!$KRB5CONFIG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 42; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 38; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
