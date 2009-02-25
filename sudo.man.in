@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "February 10, 2009" "1.6.9p21" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "February 25, 2009" "1.6.9p21" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -164,7 +164,7 @@ sudo, sudoedit \- execute a command as another user
 .IX Header "SYNOPSIS"
 \&\fBsudo\fR \fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-L\fR | \fB\-l\fR | \fB\-V\fR | \fB\-v\fR
 .PP
-\&\fBsudo\fR [\fB\-bEHPS\fR]
+\&\fBsudo\fR [\fB\-bEHkPS\fR]
 @BAMAN@[\fB\-a\fR\ \fIauth_type\fR]
 @LCMAN@[\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
 [\fB\-p\fR\ \fIprompt\fR]
@@ -172,10 +172,12 @@ sudo, sudoedit \- execute a command as another user
 [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
 [\fB\s-1VAR\s0\fR=\fIvalue\fR] {\fB\-i\fR\ |\ \fB\-s\fR\ |\ \fIcommand\fR}
 .PP
-\&\fBsudoedit\fR [\fB\-S\fR]
+\&\fBsudoedit\fR [\fB\-kS\fR]
 @BAMAN@[\fB\-a\fR\ \fIauth_type\fR]
 @LCMAN@[\fB\-c\fR\ \fIclass\fR|\fI\-\fR]
-[\fB\-p\fR\ \fIprompt\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
+[\fB\-p\fR\ \fIprompt\fR]
+@SEMAN@[\fB\-r\fR\ \fIrole\fR] [\fB\-t\fR\ \fItype\fR]
+[\fB\-u\fR\ \fIusername\fR|\fI#uid\fR]
 file ...
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
@@ -311,15 +313,22 @@ actually run.
 .IP "\-K" 4
 .IX Item "-K"
 The \fB\-K\fR (sure \fIkill\fR) option is like \fB\-k\fR except that it removes
-the user's timestamp entirely.  Like \fB\-k\fR, this option does not
-require a password.
+the user's timestamp entirely and may not be used in conjunction
+with a command or other option.  This option does not require a
+password.
 .IP "\-k" 4
 .IX Item "-k"
-The \fB\-k\fR (\fIkill\fR) option to \fBsudo\fR invalidates the user's timestamp
-by setting the time on it to the Epoch.  The next time \fBsudo\fR is
-run a password will be required.  This option does not require a password
-and was added to allow a user to revoke \fBsudo\fR permissions from a .logout
-file.
+When used by itself, the \fB\-k\fR (\fIkill\fR) option to \fBsudo\fR invalidates
+the user's timestamp by setting the time on it to the Epoch.  The
+next time \fBsudo\fR is run a password will be required.  This option
+does not require a password and was added to allow a user to revoke
+\&\fBsudo\fR permissions from a .logout file.
+.Sp
+When used in conjunction with a command or an option that may require
+a password, the \fB\-k\fR option will cause \fBsudo\fR to ignore the user's
+timestamp file.  As a result, \fBsudo\fR will prompt for a password
+(if one is required by \fIsudoers\fR) and will not update the user's
+timestamp file.
 .IP "\-L" 4
 .IX Item "-L"
 The \fB\-L\fR (\fIlist\fR defaults) option will list out the parameters
