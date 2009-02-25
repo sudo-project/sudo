@@ -838,7 +838,7 @@ parse_args(argc, argv)
 {
     int mode = 0;		/* what mode is sudo to be run in? */
     int flags = 0;		/* mode flags */
-    int allowed_flags, ch;
+    int valid_flags, ch;
 
     /* First, check to see if we were invoked as "sudoedit". */
     if (strcmp(getprogname(), "sudoedit") == 0)
@@ -853,9 +853,9 @@ parse_args(argc, argv)
 	    strchr(argv[optind], '=') != NULL)
 
     /* Flags allowed when running a command */
-    allowed_flags = MODE_BACKGROUND|MODE_PRESERVE_ENV|MODE_RESET_HOME|
-		    MODE_LOGIN_SHELL|MODE_INVALIDATE|MODE_NONINTERACTIVE|
-		    MODE_PRESERVE_GROUPS|MODE_SHELL;
+    valid_flags = MODE_BACKGROUND|MODE_PRESERVE_ENV|MODE_RESET_HOME|
+		  MODE_LOGIN_SHELL|MODE_INVALIDATE|MODE_NONINTERACTIVE|
+		  MODE_PRESERVE_GROUPS|MODE_SHELL;
     for (;;) {
 	/*
 	 * We disable arg permutation for GNU getopt().
@@ -894,7 +894,7 @@ parse_args(argc, argv)
 		    if (mode && mode != MODE_EDIT)
 			usage_excl(1);
 		    mode = MODE_EDIT;
-		    allowed_flags = MODE_INVALIDATE|MODE_NONINTERACTIVE;
+		    valid_flags = MODE_INVALIDATE|MODE_NONINTERACTIVE;
 		    break;
 		case 'g':
 		    runas_group = optarg;
@@ -906,7 +906,7 @@ parse_args(argc, argv)
 		    if (mode && mode != MODE_HELP)
 			usage_excl(1);
 		    mode = MODE_HELP;
-		    allowed_flags = 0;
+		    valid_flags = 0;
 		    break;
 		case 'i':
 		    SET(flags, MODE_LOGIN_SHELL);
@@ -919,13 +919,13 @@ parse_args(argc, argv)
 		    if (mode && mode != MODE_KILL)
 			usage_excl(1);
 		    mode = MODE_KILL;
-		    allowed_flags = 0;
+		    valid_flags = 0;
 		    break;
 		case 'L':
 		    if (mode && mode != MODE_LISTDEFS)
 			usage_excl(1);
 		    mode = MODE_LISTDEFS;
-		    allowed_flags = MODE_INVALIDATE|MODE_NONINTERACTIVE;
+		    valid_flags = MODE_INVALIDATE|MODE_NONINTERACTIVE;
 		    break;
 		case 'l':
 		    if (mode) {
@@ -935,7 +935,7 @@ parse_args(argc, argv)
 			    usage_excl(1);
 		    }
 		    mode = MODE_LIST;
-		    allowed_flags = MODE_INVALIDATE|MODE_NONINTERACTIVE;
+		    valid_flags = MODE_INVALIDATE|MODE_NONINTERACTIVE;
 		    break;
 		case 'n':
 		    SET(flags, MODE_NONINTERACTIVE);
@@ -972,13 +972,13 @@ parse_args(argc, argv)
 		    if (mode && mode != MODE_VALIDATE)
 			usage_excl(1);
 		    mode = MODE_VALIDATE;
-		    allowed_flags = MODE_INVALIDATE|MODE_NONINTERACTIVE;
+		    valid_flags = MODE_INVALIDATE|MODE_NONINTERACTIVE;
 		    break;
 		case 'V':
 		    if (mode && mode != MODE_VERSION)
 			usage_excl(1);
 		    mode = MODE_VERSION;
-		    allowed_flags = 0;
+		    valid_flags = 0;
 		    break;
 		default:
 		    usage(1);
@@ -1007,8 +1007,8 @@ parse_args(argc, argv)
 	/* Defer -k mode setting until we know whether it is a flag or not */
 	if (ISSET(flags, MODE_INVALIDATE) && NewArgc == 0) {
 	    mode = MODE_INVALIDATE;	/* -k by itself */
-	    flags &= ~MODE_INVALIDATE;
-	    allowed_flags = 0;
+	    CLR(flags, MODE_INVALIDATE);
+	    valid_flags = 0;
 	} else {
 	    mode = MODE_RUN;		/* running a command */
 	}
@@ -1028,7 +1028,7 @@ parse_args(argc, argv)
 	}
 	SET(flags, MODE_SHELL);
     }
-    if ((flags & allowed_flags) != flags)
+    if ((flags & valid_flags) != flags)
 	usage(1);
     if (mode == MODE_EDIT &&
        (ISSET(flags, MODE_PRESERVE_ENV) || sudo_user.env_vars != NULL)) {
