@@ -111,11 +111,11 @@ B<sudo> accepts the following command line options:
 
 Normally, if B<sudo> requires a password, it will read it from the
 current terminal.  If the B<-A> (I<askpass>) option is specified,
-a helper program is executed to read the user's password and output
-the password to the standard output.  If the C<SUDO_ASKPASS>
-environment variable is set, it specifies the path to the helper
-program.  Otherwise, the value specified by the I<askpass> option
-in L<sudoers(5)> is used.
+a (possibly graphical) helper program is executed to read the
+user's password and output the password to the standard output.  If
+the C<SUDO_ASKPASS> environment variable is set, it specifies the
+path to the helper program.  Otherwise, the value specified by the
+I<askpass> option in L<sudoers(5)> is used.
 
 =item -a I<type>
 
