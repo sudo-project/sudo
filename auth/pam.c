@@ -77,7 +77,7 @@ __unused static const char rcsid[] = "$Sudo$";
 
 static int sudo_conv __P((int, PAM_CONST struct pam_message **,
 			  struct pam_response **, VOID *));
-static char *def_prompt;
+static char *def_prompt = "Password:";
 
 #ifndef PAM_DATA_SILENT
 #define PAM_DATA_SILENT	0
