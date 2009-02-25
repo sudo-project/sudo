@@ -244,8 +244,8 @@ main(argc, argv, envp)
 		user_cmnd = "validate";
 		pwflag = I_VERIFYPW;
 		break;
-	    case MODE_INVALIDATE:
 	    case MODE_KILL:
+	    case MODE_INVALIDATE:
 		user_cmnd = "kill";
 		pwflag = -1;
 		break;
@@ -684,7 +684,7 @@ init_vars(sudo_mode, envp)
 	 * users to place "sudo -k" in a .logout file which can cause sudo to
 	 * be run during reboot after the YP/NIS/NIS+/LDAP/etc daemon has died.
 	 */
-	if (sudo_mode & (MODE_INVALIDATE|MODE_KILL))
+	if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE)
 	    errorx(1, "unknown uid: %s", pw_name);
 	log_error(0, "unknown uid: %s", pw_name);
     }
@@ -1007,6 +1007,7 @@ parse_args(argc, argv)
 	/* Defer -k mode setting until we know whether it is a flag or not */
 	if (ISSET(flags, MODE_INVALIDATE) && NewArgc == 0) {
 	    mode = MODE_INVALIDATE;	/* -k by itself */
+	    flags &= ~MODE_INVALIDATE;
 	    allowed_flags = 0;
 	} else {
 	    mode = MODE_RUN;		/* running a command */
