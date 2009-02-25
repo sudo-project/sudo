@@ -903,8 +903,10 @@ parse_args(argc, argv)
 		    SET(flags, MODE_RESET_HOME);
 		    break;
 		case 'h':
-		    if (mode && mode != MODE_HELP)
-			usage_excl(1);
+		    if (mode && mode != MODE_HELP) {
+			if (strcmp(getprogname(), "sudoedit") != 0)
+			    usage_excl(1);
+		    }
 		    mode = MODE_HELP;
 		    valid_flags = 0;
 		    break;
