@@ -106,7 +106,7 @@ term_restore(fd)
     int fd;
 {
     if (changed) {
-	if (tcsetattr(fd, TCSAFLUSH|TCSASOFT, &term) != 0)
+	if (tcsetattr(fd, TCSAFLUSH|TCSASOFT, &oterm) != 0)
 	    return(0);
 	changed = 0;
     }
