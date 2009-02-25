@@ -88,20 +88,26 @@ static void  update_timestamp	__P((char *, char *));
  * verify who he/she is.
  */
 void
-check_user(validated)
+check_user(validated, mode)
     int validated;
+    int mode;
 {
     char *timestampdir = NULL;
     char *timestampfile = NULL;
     char *prompt;
     int status;
 
-    if (user_uid == 0 || user_uid == runas_pw->pw_uid || user_is_exempt())
-	return;
+    if (mode & MODE_INVALIDATE) {
+	/* do not check or update timestamp */
+	status = TS_ERROR;
+    } else {
+	if (user_uid == 0 || user_uid == runas_pw->pw_uid || user_is_exempt())
+	    return;
 
-    build_timestamp(&timestampdir, &timestampfile);
-    status = timestamp_status(timestampdir, timestampfile, user_name,
-	TS_MAKE_DIRS);
+	build_timestamp(&timestampdir, &timestampfile);
+	status = timestamp_status(timestampdir, timestampfile, user_name,
+	    TS_MAKE_DIRS);
+    }
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
 	lecture(status);
 
@@ -120,7 +126,6 @@ check_user(validated)
 
 /*
  * Standard sudo lecture.
- * TODO: allow the user to specify a file name instead.
  */
 static void
 lecture(status)

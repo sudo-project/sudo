@@ -226,7 +226,7 @@ main(argc, argv, envp)
 	user_cmnd = "shell";
     else if (ISSET(sudo_mode, MODE_EDIT))
 	user_cmnd = "sudoedit";
-    else
+    else {
 	switch (sudo_mode) {
 	    case MODE_VERSION:
 		(void) printf("Sudo version %s\n", version);
@@ -243,6 +243,7 @@ main(argc, argv, envp)
 		usage(0);
 		break;
 	    case MODE_VALIDATE:
+	    case MODE_VALIDATE|MODE_INVALIDATE:
 		user_cmnd = "validate";
 		pwflag = I_VERIFYPW;
 		break;
@@ -256,11 +257,13 @@ main(argc, argv, envp)
 		exit(0);
 		break;
 	    case MODE_LIST:
+	    case MODE_LIST|MODE_INVALIDATE:
 		user_cmnd = "list";
 		pwflag = I_LISTPW;
 		printmatches = 1;
 		break;
 	}
+    }
 
     /* Must have a command to run... */
     if (user_cmnd == NULL && NewArgc == 0)
@@ -359,7 +362,7 @@ main(argc, argv, envp)
 
     /* Require a password if sudoers says so.  */
     if (!ISSET(validated, FLAG_NOPASS))
-	check_user(validated);
+	check_user(validated, sudo_mode);
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
     if (user_uid == 0 && prev_user != NULL && strcmp(prev_user, "root") != 0) {
@@ -391,9 +394,9 @@ main(argc, argv, envp)
 	}
 
 	log_auth(validated, 1);
-	if (sudo_mode == MODE_VALIDATE)
+	if (ISSET(sudo_mode, MODE_VALIDATE))
 	    exit(0);
-	else if (sudo_mode == MODE_LIST) {
+	else if (ISSET(sudo_mode, MODE_LIST)) {
 	    list_matches();
 #ifdef HAVE_LDAP
 	    sudo_ldap_list_matches();
@@ -610,7 +613,7 @@ init_vars(sudo_mode, envp)
 	 * users to place "sudo -k" in a .logout file which can cause sudo to
 	 * be run during reboot after the YP/NIS/NIS+/LDAP/etc daemon has died.
 	 */
-	if (sudo_mode & (MODE_INVALIDATE|MODE_KILL))
+	if (sudo_mode == MODE_INVALIDATE || sudo_mode == MODE_KILL)
 	    errx(1, "uid %s does not exist in the passwd file!", pw_name);
 	log_error(0, "uid %s does not exist in the passwd file!", pw_name);
     }
@@ -752,8 +755,7 @@ parse_args(argc, argv)
     if (strcmp(getprogname(), "sudoedit") == 0) {
 	rval = MODE_EDIT;
 	excl = 'e';
-    } else
-	rval = MODE_RUN;
+    }
 
     while (NewArgc > 0) {
 	if (NewArgv[0][0] == '-') {
@@ -814,28 +816,42 @@ parse_args(argc, argv)
 		    break;
 		case 'e':
 		    rval = MODE_EDIT;
-		    if (excl && excl != 'e')
+		    if (excl == 'k')
+			SET(rval, MODE_INVALIDATE);
+		    else if (excl && excl != 'e')
 			usage_excl(1);
 		    excl = 'e';
 		    break;
 		case 'v':
 		    rval = MODE_VALIDATE;
-		    if (excl && excl != 'v')
+		    if (excl == 'k')
+			SET(rval, MODE_INVALIDATE);
+		    else if (excl && excl != 'v')
 			usage_excl(1);
 		    excl = 'v';
 		    break;
 		case 'i':
 		    SET(rval, (MODE_LOGIN_SHELL | MODE_SHELL));
 		    def_env_reset = TRUE;
-		    if (excl && excl != 'i')
+		    if (excl == 'k')
+			SET(rval, MODE_INVALIDATE);
+		    else if (excl && excl != 'i')
 			usage_excl(1);
 		    excl = 'i';
 		    break;
 		case 'k':
-		    rval = MODE_INVALIDATE;
-		    if (excl && excl != 'k')
-			usage_excl(1);
-		    excl = 'k';
+		    switch (excl) {
+			case 0:
+			    excl = 'k';
+			    break;
+			case 'k': case 'v': case 'e':
+			case 'i': case 's': case 'l':
+			    break;
+			default:
+			    usage_excl(1);
+		    }
+		    CLR(rval, MODE_RUN);
+		    SET(rval, MODE_INVALIDATE);
 		    break;
 		case 'K':
 		    rval = MODE_KILL;
@@ -851,7 +867,9 @@ parse_args(argc, argv)
 		    break;
 		case 'l':
 		    rval = MODE_LIST;
-		    if (excl && excl != 'l')
+		    if (excl == 'k')
+			SET(rval, MODE_INVALIDATE);
+		    else if (excl && excl != 'l')
 			usage_excl(1);
 		    excl = 'l';
 		    break;
@@ -869,7 +887,9 @@ parse_args(argc, argv)
 		    break;
 		case 's':
 		    SET(rval, MODE_SHELL);
-		    if (excl && excl != 's')
+		    if (excl == 'k')
+			SET(rval, MODE_INVALIDATE);
+		    else if (excl && excl != 's')
 			usage_excl(1);
 		    excl = 's';
 		    break;
@@ -1339,7 +1359,7 @@ usage(exit_val)
 	NULL
     };
     static char *uvec2[] = {
-	" [-bEHPS]",
+	" [-bEHkPS]",
 #ifdef HAVE_BSD_AUTH_H
 	" [-a auth_type]",
 #endif
@@ -1360,14 +1380,20 @@ usage(exit_val)
     };
     static char *uvec3[] = {
 	" -e",
-	" [-S]",
+	" [-kS]",
 #ifdef HAVE_BSD_AUTH_H
 	" [-a auth_type]",
 #endif
 #ifdef HAVE_LOGIN_CAP_H
 	" [-c class|-]",
 #endif
+#ifdef HAVE_SELINUX
+	" [-r role]",
+#endif
 	" [-p prompt]",
+#ifdef HAVE_SELINUX
+	" [-t type]",
+#endif
 	" [-u username|#uid]",
 	" file ...",
 	NULL
