@@ -251,6 +251,11 @@ setenv(var, val, overwrite)
     char *estring;
     size_t esize;
 
+    if (strchr(var, '=') != NULL) {
+	errno = EINVAL;
+	return(-1);
+    }
+
     esize = strlen(var) + 1 + strlen(val) + 1;
     estring = emalloc(esize);
 
@@ -278,6 +283,11 @@ unsetenv(var)
 {
     char **ep;
     size_t len;
+
+    if (strchr(var, '=') != NULL) {
+	errno = EINVAL;
+	return(-1);
+    }
 
     /* Make sure we are operating on the current environment. */
     if (env.envp != environ) {
