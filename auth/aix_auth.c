@@ -82,7 +82,7 @@ aixauth_cleanup(pw, auth)
     sudo_auth *auth;
 {
     /* Unset AUTHSTATE as it may not be correct for the runas user. */
-    sudo_unsetenv("AUTHSTATE");
+    unsetenv("AUTHSTATE");
 
     return(AUTH_SUCCESS);
 }

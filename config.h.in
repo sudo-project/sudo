@@ -333,6 +333,9 @@
 /* Define to 1 to enable SELinux RBAC support. */
 #undef HAVE_SELINUX
 
+/* Define to 1 if you have the `setenv' function. */
+#undef HAVE_SETENV
+
 /* Define to 1 if you have the `seteuid' function. */
 #undef HAVE_SETEUID
 
@@ -460,6 +463,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to 1 if you have the `unsetenv' function. */
+#undef HAVE_UNSETENV
+
 /* Define to 1 if you have the `utimes' function. */
 #undef HAVE_UTIMES
 
@@ -550,6 +556,9 @@
 /* The syslog priority sudo will use for successful attempts. */
 #undef PRI_SUCCESS
 
+/* Define to 1 if the `putenv' has a const argument.  */
+#undef PUTENV_CONST
+
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
 
@@ -600,6 +609,9 @@
 
 /* The number of tries a user gets to enter their password. */
 #undef TRIES_FOR_PASSWORD
+
+/* Define to 1 if the `unsetenv' function returns void instead of `int'. */
+#undef UNSETENV_VOID
 
 /* Define to 1 if you want to insult the user for entering an incorrect
    password. */
