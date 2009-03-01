@@ -1675,16 +1675,27 @@ sudo_ldap_open(nss)
 	return(-1);
 
     if (ldap_conf.ssl_mode == SUDO_LDAP_STARTTLS) {
-#ifdef HAVE_LDAP_START_TLS_S
+#if defined(HAVE_LDAP_START_TLS_S)
 	rc = ldap_start_tls_s(ld, NULL, NULL);
 	if (rc != LDAP_SUCCESS) {
 	    warningx("ldap_start_tls_s(): %s", ldap_err2string(rc));
 	    return(-1);
 	}
 	DPRINTF(("ldap_start_tls_s() ok"), 1);
+#elif defined(HAVE_LDAP_SSL_CLIENT_INIT) && defined(HAVE_LDAP_START_TLS_S_NP)
+	if (ldap_ssl_client_init(NULL, NULL, 0, &rc) != LDAP_SUCCESS) {
+	    warningx("ldap_ssl_client_init(): %s", ldapssl_err2string(rc));
+	    return(-1);
+	}
+	rc = ldap_start_tls_s_np(ld, NULL);
+	if (rc != LDAP_SUCCESS) {
+	    warningx("ldap_start_tls_s_np(): %s", ldap_err2string(rc));
+	    return(-1);
+	}
+	DPRINTF(("ldap_start_tls_s_np() ok"), 1);
 #else
-	warningx("start_tls specified but LDAP libs do not support ldap_start_tls_s()");
-#endif /* HAVE_LDAP_START_TLS_S */
+	warningx("start_tls specified but LDAP libs do not support ldap_start_tls_s() or ldap_start_tls_s_np()");
+#endif /* !HAVE_LDAP_START_TLS_S && !HAVE_LDAP_START_TLS_S_NP */
     }
 
     /* Actually connect */

@@ -243,11 +243,17 @@
 /* Define to 1 if you have the `ldap_search_ext_s' function. */
 #undef HAVE_LDAP_SEARCH_EXT_S
 
+/* Define to 1 if you have the `ldap_ssl_client_init' function. */
+#undef HAVE_LDAP_SSL_CLIENT_INIT
+
 /* Define to 1 if you have the <ldap_ssl.h> header file. */
 #undef HAVE_LDAP_SSL_H
 
 /* Define to 1 if you have the `ldap_start_tls_s' function. */
 #undef HAVE_LDAP_START_TLS_S
+
+/* Define to 1 if you have the `ldap_start_tls_s_np' function. */
+#undef HAVE_LDAP_START_TLS_S_NP
 
 /* Define to 1 if you have the `ldap_str2dn' function. */
 #undef HAVE_LDAP_STR2DN
