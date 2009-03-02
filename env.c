@@ -286,7 +286,7 @@ unsetenv(var)
 
     if (strchr(var, '=') != NULL) {
 	errno = EINVAL;
-#ifndef UNSETENV_VOID
+#ifdef UNSETENV_VOID
 	return;
 #else
 	return(-1);
