@@ -257,9 +257,8 @@ dnl
 AC_DEFUN([SUDO_FUNC_PUTENV_CONST],
 [AC_CACHE_CHECK([whether putenv has a const argument],
 sudo_cv_func_putenv_const,
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT], [
-int putenv(const char *string) {return 0;}
-])],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT
+int putenv(const char *string) {return 0;}], [])],
     [sudo_cv_func_putenv_const=yes],
     [sudo_cv_func_putenv_const=no])
   ])
