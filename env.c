@@ -286,7 +286,11 @@ unsetenv(var)
 
     if (strchr(var, '=') != NULL) {
 	errno = EINVAL;
+#ifndef UNSETENV_VOID
+	return;
+#else
 	return(-1);
+#endif
     }
 
     /* Make sure we are operating on the current environment. */
