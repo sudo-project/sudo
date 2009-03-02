@@ -1684,7 +1684,7 @@ sudo_ldap_open(nss)
 	DPRINTF(("ldap_start_tls_s() ok"), 1);
 #elif defined(HAVE_LDAP_SSL_CLIENT_INIT) && defined(HAVE_LDAP_START_TLS_S_NP)
 	if (ldap_ssl_client_init(NULL, NULL, 0, &rc) != LDAP_SUCCESS) {
-	    warningx("ldap_ssl_client_init(): %s", ldapssl_err2string(rc));
+	    warningx("ldap_ssl_client_init(): %s", ldap_err2string(rc));
 	    return(-1);
 	}
 	rc = ldap_start_tls_s_np(ld, NULL);
