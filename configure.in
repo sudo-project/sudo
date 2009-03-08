@@ -1181,6 +1181,21 @@ AC_ARG_ENABLE(path_info,
   esac
 ], AC_MSG_RESULT(no))
 
+AC_MSG_CHECKING(whether to enable environment debugging)
+AC_ARG_ENABLE(env_debug,
+[  --enable-env-debug      Whether to enable environment debugging.],
+[ case "$enableval" in
+    yes)	AC_MSG_RESULT(yes)
+		AC_DEFINE(ENV_DEBUG)
+		;;
+    no)		AC_MSG_RESULT(no)
+		;;
+    *)		AC_MSG_RESULT(no)
+    		AC_MSG_WARN([Ignoring unknown argument to --enable-env-debug: $enableval])
+		;;
+  esac
+], AC_MSG_RESULT(no))
+
 AC_ARG_WITH(selinux, [  --with-selinux          enable SELinux support],
 [case $with_selinux in
     yes)	SELINUX_USAGE="[[-r role]] [[-t type]] "

@@ -32,6 +32,9 @@
 /* A colon-separated list of pathnames to be used as the editor for visudo. */
 #undef EDITOR
 
+/* Define to enable environment debugging. */
+#undef ENV_DEBUG
+
 /* Define to 1 if you want visudo to honor the EDITOR and VISUAL env
    variables. */
 #undef ENV_EDITOR

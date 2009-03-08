@@ -279,11 +279,19 @@ setenv(var, val, overwrite)
 	    efree(env.envp);
 	    env.env_size = len + 2 + 128;
 	    env.envp = emalloc2(env.env_size, sizeof(char *));
+#ifdef ENV_DEBUG
+	    memset(env.envp, 0, env.env_size * sizeof(char *));
+#endif
 	}
 	memcpy(env.envp, environ, len * sizeof(char *));
 	env.envp[len] = NULL;
 	env.env_len = len;
 	environ = env.envp;
+#ifdef ENV_DEBUG
+    } else {
+	if (env.envp[env.env_len] != NULL)
+	    errorx(1, "setenv: corrupted envp, len mismatch");
+#endif
     }
     sudo_putenv(estring, TRUE, overwrite);
     return(0);
@@ -323,11 +331,19 @@ unsetenv(var)
 	    efree(env.envp);
 	    env.env_size = len + 1 + 128;
 	    env.envp = emalloc2(env.env_size, sizeof(char *));
+#ifdef ENV_DEBUG
+	    memset(env.envp, 0, env.env_size * sizeof(char *));
+#endif
 	}
 	memcpy(env.envp, environ, len * sizeof(char *));
 	env.envp[len] = NULL;
 	env.env_len = len;
 	environ = env.envp;
+#ifdef ENV_DEBUG
+    } else {
+	if (env.envp[env.env_len] != NULL)
+	    errorx(1, "unsetenv: corrupted envp, len mismatch");
+#endif
     }
 
     len = strlen(var);
@@ -372,11 +388,19 @@ putenv(char *string)
 	    efree(env.envp);
 	    env.env_size = len + 2 + 128;
 	    env.envp = emalloc2(env.env_size, sizeof(char *));
+#ifdef ENV_DEBUG
+	    memset(env.envp, 0, env.env_size * sizeof(char *));
+#endif
 	}
 	memcpy(env.envp, environ, len * sizeof(char *));
 	env.envp[len] = NULL;
 	env.env_len = len;
 	environ = env.envp;
+#ifdef ENV_DEBUG
+    } else {
+	if (env.envp[env.env_len] != NULL)
+	    errorx(1, "putenv: corrupted envp, len mismatch");
+#endif
     }
     sudo_putenv((char *)string, TRUE, TRUE);
     return(0);
@@ -401,8 +425,17 @@ sudo_putenv(str, dupcheck, overwrite)
     if (env.env_len + 2 > env.env_size) {
 	env.env_size += 128;
 	env.envp = erealloc3(env.envp, env.env_size, sizeof(char *));
+#ifdef ENV_DEBUG
+	memset(env.envp + env.env_len, 0,
+	    (env.env_size - env.env_len) * sizeof(char *));
+#endif
 	environ = env.envp;
     }
+
+#ifdef ENV_DEBUG
+    if (env.envp[env.env_len] != NULL)
+	errorx(1, "sudo_putenv: corrupted envp, len mismatch");
+#endif
 
     if (dupcheck) {
 	    len = (strchr(str, '=') - str) + 1;
@@ -533,6 +566,9 @@ rebuild_env(sudo_mode, noexec)
     env.env_size = 128;
     old_envp = env.envp;
     env.envp = emalloc2(env.env_size, sizeof(char *));
+#ifdef ENV_DEBUG
+    memset(env.envp, 0, env.env_size * sizeof(char *));
+#endif
     if (def_env_reset || ISSET(sudo_mode, MODE_LOGIN_SHELL)) {
 	/* Pull in vars we want to keep from the old environment. */
 	for (ep = environ; *ep; ep++) {
