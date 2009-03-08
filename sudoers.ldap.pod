@@ -457,7 +457,7 @@ See the C<ldap.conf> entry in the L<EXAMPLES> section.
 
 Unless it is disabled at build time, B<sudo> consults the Name
 Service Switch file, F<@nsswitch_conf@>, to specify the I<sudoers>
-search order.  Sudo looks for a line beginning with C<sudoers:> and
+search order.  Sudo looks for a line beginning with C<sudoers>: and
 uses this to determine the search order.  Note that B<sudo> does
 not stop searching after the first match and later matches take
 precedence over earlier ones.

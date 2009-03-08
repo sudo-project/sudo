@@ -238,7 +238,7 @@ Defaults entries are parsed in the following order: generic, host
 and user Defaults first, then runas Defaults and finally command
 defaults.
 
-See L</"SUDOERS OPTIONS"> for a list of supported Defaults parameters.
+See L<"SUDOERS OPTIONS"> for a list of supported Defaults parameters.
 
 =head2 User Specification
 
@@ -449,7 +449,11 @@ the site-wide I<sudoers> will be F</etc/sudoers> and the per-machine
 one will be F</etc/sudoers.local>.  To include F</etc/sudoers.local>
 from within F</etc/sudoers> we would use the following line in F</etc/sudoers>:
 
- #include /etc/sudoers.local
+=over 4
+
+C<#include /etc/sudoers.local>
+
+=back
 
 When B<sudo> reaches this line it will suspend processing of the
 current file (F</etc/sudoers>) and switch to F</etc/sudoers.local>.
