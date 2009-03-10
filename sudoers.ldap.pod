@@ -487,6 +487,36 @@ sudoers line, the following default is assumed:
 Note that F<@nsswitch_conf@> is supported even when the underlying
 operating system does not use an nsswitch.conf file.
 
+=head2 Configuring netsvc.conf
+
+On AIX systems, the F<@netsvc_conf@> file is consulted instead of
+F<@nsswitch_conf@>.  B<sudo> simply treats I<netsvc.conf> as a
+variant of I<nsswitch.conf>; information in the previous section
+unrelated to the file format itself still applies.
+
+To consult LDAP first followed by the local sudoers file (if it
+exists), use:
+
+    sudoers = ldap, files
+
+The local I<sudoers> file can be ignored completely by using:
+
+    sudoers = ldap
+
+To treat LDAP as authoratative and only use the local sudoers file
+if the user is not present in LDAP, use:
+
+    sudoers = ldap = auth, files
+
+Note that in the above example, the C<auth> qualfier only affects
+user lookups; both LDAP and I<sudoers> will be queried for C<Defaults>
+entries.
+
+If the F<@netsvc_conf@> file is not present or there is no
+sudoers line, the following default is assumed:
+
+    sudoers = files
+
 =head1 FILES
 
 =over 24
@@ -498,6 +528,10 @@ LDAP configuration file
 =item F<@nsswitch_conf@>
 
 determines sudoers source order
+
+=item F<@netsvc_conf@>
+
+determines sudoers source order on AIX
 
 =back
 
@@ -657,11 +691,6 @@ C<include> line in C<slapd.conf> and restart B<slapd>.
     MAY ( sudoUser $ sudoHost $ sudoCommand $ sudoRunAs $ sudoRunAsUser $
 	  sudoRunAsGroup $ sudoOption $ description )
     )
-
-=for comment
-
-Add nsswitch.conf example?
-Add more exhaustive sudoers ldif example?
 
 =head1 SEE ALSO
 
