@@ -73,6 +73,9 @@
 /* Define to 1 if you use BSD authentication. */
 #undef HAVE_BSD_AUTH_H
 
+/* Define to 1 to enable BSM auditing. */
+#undef HAVE_BSM_AUDIT
+
 /* Define to 1 if you have the `closefrom' function. */
 #undef HAVE_CLOSEFROM
 
