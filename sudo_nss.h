@@ -32,7 +32,8 @@ struct sudo_nss {
     int (*display_bound_defaults) __P((struct sudo_nss *nss, struct passwd *, struct lbuf *));
     int (*display_privs) __P((struct sudo_nss *nss, struct passwd *, struct lbuf *));
     void *handle;
-    int ret_notfound;
+    short ret_if_found;
+    short ret_if_notfound;
 };
 
 TQ_DECLARE(sudo_nss)

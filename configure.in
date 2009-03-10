@@ -83,6 +83,7 @@ AC_SUBST(path_info)
 AC_SUBST(ldap_conf)
 AC_SUBST(ldap_secret)
 AC_SUBST(nsswitch_conf)
+AC_SUBST(netsvc_conf)
 dnl
 dnl Initial values for above
 dnl
@@ -945,12 +946,6 @@ AC_ARG_WITH(nsswitch, [  --with-nsswitch[[=PATH]]  path to nsswitch.conf],
 		;;
     *)		;;
 esac])
-if test ${with_nsswitch-"yes"} != "no"; then
-    SUDO_DEFINE_UNQUOTED(_PATH_NSSWITCH_CONF, "${with_nsswitch-/etc/nsswitch.conf}")
-    nsswitch_conf=${with_nsswitch-/etc/nsswitch.conf}
-else
-    nsswitch_conf='/etc/nsswitch.conf'
-fi
 
 AC_ARG_WITH(ldap, [  --with-ldap[[=DIR]]       enable LDAP support],
 [case $with_ldap in
@@ -1361,6 +1356,18 @@ case "$host" in
 		# Use authenticate(3) as the default authentication method
 		if test X"$with_aixauth" = X""; then
 		    AC_CHECK_FUNCS(authenticate, [AUTH_EXCL_DEF="AIX_AUTH"])
+		fi
+
+		# AIX analog of nsswitch.conf, enabled by default
+		AC_ARG_WITH(netsvc, [  --with-netsvc[[=PATH]]  path to netsvc.conf],
+		[case $with_netsvc in
+		    no)		;;
+		    yes)	with_netsvc="/etc/netsvc.conf"
+				;;
+		    *)		;;
+		esac])
+		if test -z "$with_nsswitch" -a -z "$with_netsvc"; then
+		    with_netsvc="/etc/netsvc.conf"
 		fi
 
 		# AIX-specific functions
@@ -1887,6 +1894,19 @@ AC_CHECK_FUNCS(getprogname, , [
     fi
     AC_MSG_RESULT($sudo_cv___progname)
 ])
+
+dnl
+dnl nsswitch.conf and its equivalents
+dnl
+netsvc_conf='/etc/netsvc.conf'
+nsswitch_conf='/etc/nsswitch.conf'
+if test ${with_netsvc-"no"} != "no"; then
+    SUDO_DEFINE_UNQUOTED(_PATH_NETSVC_CONF, "${with_netsvc-/etc/netsvc.conf}")
+    netsvc_conf=${with_netsvc-/etc/netsvc.conf}
+elif test ${with_nsswitch-"yes"} != "no"; then
+    SUDO_DEFINE_UNQUOTED(_PATH_NSSWITCH_CONF, "${with_nsswitch-/etc/nsswitch.conf}")
+    nsswitch_conf=${with_nsswitch-/etc/nsswitch.conf}
+fi
 
 dnl
 dnl Mutually exclusive auth checks come first, followed by

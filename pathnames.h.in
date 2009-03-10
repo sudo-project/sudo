@@ -127,3 +127,7 @@
 #ifndef _PATH_NSSWITCH_CONF
 #undef	_PATH_NSSWITCH_CONF
 #endif /* _PATH_NSSWITCH_CONF */
+
+#ifndef _PATH_NETSVC_CONF
+#undef	_PATH_NETSVC_CONF
+#endif /* _PATH_NETSVC_CONF */

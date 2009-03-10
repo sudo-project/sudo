@@ -345,9 +345,15 @@ main(argc, argv, envp)
     tq_foreach_fwd(snl, nss) {
 	validated = nss->lookup(nss, validated, pwflag);
 
-	/* Handle [NOTFOUND=return] */
-	if (!ISSET(validated, VALIDATE_OK) && nss->ret_notfound)
-	    break;
+	if (ISSET(validated, VALIDATE_OK)) {
+	    /* Handle "= auth" in netsvc.conf */
+	    if (nss->ret_if_found)
+		break;
+	} else {
+	    /* Handle [NOTFOUND=return] */
+	    if (nss->ret_if_notfound)
+		break;
+	}
     }
     if (safe_cmnd == NULL)
 	safe_cmnd = estrdup(user_cmnd);
