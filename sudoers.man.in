@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "December  3, 2008" "1.7.0" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "March 11, 2009" "1.7.1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -539,9 +539,10 @@ be overridden by use of the \f(CW\*(C`UNSETENV\*(C'\fR tag.
 .Sh "Wildcards"
 .IX Subsection "Wildcards"
 \&\fBsudo\fR allows shell-style \fIwildcards\fR (aka meta or glob characters)
-to be used in hostnames, pathnames and command line arguments in the
-\&\fIsudoers\fR file.  Wildcard matching is done via the \fB\s-1POSIX\s0\fR
-\&\fIfnmatch\fR\|(3) routine.  Note that these are \fInot\fR regular expressions.
+to be used in hostnames, pathnames and command line arguments in
+the \fIsudoers\fR file.  Wildcard matching is done via the \fB\s-1POSIX\s0\fR
+\&\fIglob\fR\|(3) and \fIfnmatch\fR\|(3) routines.  Note that these are \fInot\fR
+regular expressions.
 .ie n .IP "\*(C`*\*(C'" 8
 .el .IP "\f(CW\*(C`*\*(C'\fR" 8
 .IX Item "*"
@@ -564,10 +565,10 @@ Matches any character \fBnot\fR in the specified range.
 For any character \*(L"x\*(R", evaluates to \*(L"x\*(R".  This is used to
 escape special characters such as: \*(L"*\*(R", \*(L"?\*(R", \*(L"[\*(R", and \*(L"}\*(R".
 .PP
-\&\s-1POSIX\s0 character classes may also be used if your system's
-\&\fIfnmatch\fR\|(3) function supports them.  However, because the
-\&\f(CW\*(Aq:\*(Aq\fR character has special meaning in \fIsudoers\fR, it must
-be escaped.  For example:
+\&\s-1POSIX\s0 character classes may also be used if your system's \fIglob\fR\|(3)
+and \fIfnmatch\fR\|(3) functions support them.  However, because the
+\&\f(CW\*(Aq:\*(Aq\fR character has special meaning in \fIsudoers\fR, it must be
+escaped.  For example:
 .PP
 .Vb 1
 \&    /bin/ls [[\e:alpha\e:]]*
@@ -603,11 +604,11 @@ useful, for example, for keeping a site-wide \fIsudoers\fR file in
 addition to a per-machine local one.  For the sake of this example
 the site-wide \fIsudoers\fR will be \fI/etc/sudoers\fR and the per-machine
 one will be \fI/etc/sudoers.local\fR.  To include \fI/etc/sudoers.local\fR
-from \fI/etc/sudoers\fR we would use the following line in \fI/etc/sudoers\fR:
-.PP
-.Vb 1
-\& #include /etc/sudoers.local
-.Ve
+from within \fI/etc/sudoers\fR we would use the following line in \fI/etc/sudoers\fR:
+.Sp
+.RS 4
+\&\f(CW\*(C`#include /etc/sudoers.local\*(C'\fR
+.RE
 .PP
 When \fBsudo\fR reaches this line it will suspend processing of the
 current file (\fI/etc/sudoers\fR) and switch to \fI/etc/sudoers.local\fR.
@@ -615,6 +616,15 @@ Upon reaching the end of \fI/etc/sudoers.local\fR, the rest of
 \&\fI/etc/sudoers\fR will be processed.  Files that are included may
 themselves include other files.  A hard limit of 128 nested include
 files is enforced to prevent include file loops.
+.PP
+The filename may include the \f(CW%h\fR escape, signifying the short form
+of the hostname.  I.e., if the machine's hostname is \*(L"xerxes\*(R", then
+.PP
+.Vb 1
+\& #include /etc/sudoers.%h
+.Ve
+.PP
+will cause \fBsudo\fR to include the file \fI/etc/sudoers.xerxes\fR.
 .Sh "Other special characters and reserved words"
 .IX Subsection "Other special characters and reserved words"
 The pound sign ('#') is used to indicate a comment (unless it is
@@ -787,11 +797,21 @@ the string \*(L"Password:\*(R".  If \fIpassprompt_override\fR is set, \fIpasspro
 will always be used.  This flag is \fIoff\fR by default.
 .IP "preserve_groups" 16
 .IX Item "preserve_groups"
-By default \fBsudo\fR will initialize the group vector to the list of
+By default, \fBsudo\fR will initialize the group vector to the list of
 groups the target user is in.  When \fIpreserve_groups\fR is set, the
 user's existing group vector is left unaltered.  The real and
 effective group IDs, however, are still set to match the target
 user.  This flag is \fIoff\fR by default.
+.IP "pwfeedback" 16
+.IX Item "pwfeedback"
+By default, \fBsudo\fR reads the password like most other Unix programs,
+by turning off echo until the user hits the return (or enter) key.
+Some users become confused by this as it appears to them that \fBsudo\fR
+has hung at this point.  When \fIpwfeedback\fR is set, \fBsudo\fR will
+provide visual feedback when the user presses a key.  Note that
+this does have a security impact as an onlooker may be able to
+determine the length of the password being entered.
+This flag is \fIoff\fR by default.
 .IP "requiretty" 16
 .IX Item "requiretty"
 If set, \fBsudo\fR will only run when the user is logged in to a real
@@ -848,6 +868,17 @@ If set and \fBsudo\fR is invoked with no arguments it acts as if the
 shell is determined by the \f(CW\*(C`SHELL\*(C'\fR environment variable if it is
 set, falling back on the shell listed in the invoking user's
 /etc/passwd entry if not).  This flag is \fIoff\fR by default.
+.IP "fast_glob" 16
+.IX Item "fast_glob"
+Normally, \fBsudo\fR uses the \fIglob\fR\|(3) function to do shell-style
+globbing when matching pathnames.  However, since it accesses the
+file system, \fIglob\fR\|(3) can take a long time to complete for some
+patterns, especially when the pattern references a network file
+system that is mounted on demand (automounted).  The \fIfast_glob\fR
+option causes \fBsudo\fR to use the \fIfnmatch\fR\|(3) function, which does
+not access the file system to do its matching.  The disadvantage
+of \fIfast_glob\fR is that it is unable to match relative pathnames
+such as \fI./ls\fR or \fI../bin/ls\fR.  This flag is \fIoff\fR by default.
 .IP "stay_setuid" 16
 .IX Item "stay_setuid"
 Normally, when \fBsudo\fR executes a command the real and effective
@@ -872,6 +903,14 @@ If set, users must authenticate on a per-tty basis.  Normally,
 the user running it.  With this flag enabled, \fBsudo\fR will use a
 file named for the tty the user is logged in on in that directory.
 This flag is \fI@tty_tickets@\fR by default.
+.IP "umask_override" 16
+.IX Item "umask_override"
+If set, \fBsudo\fR will set the umask as specified by \fIsudoers\fR without
+modification.  This makes it possible to specify a more permissive
+umask in \fIsudoers\fR than the user's own umask and matches historical
+behavior.  If \fIumask_override\fR is not set, \fBsudo\fR will set the
+umask to be the union of the user's umask and what is specified in
+\&\fIsudoers\fR.  This flag is \fIoff\fR by default.
 @LCMAN@.IP "use_loginclass" 16
 @LCMAN@.IX Item "use_loginclass"
 @LCMAN@If set, \fBsudo\fR will apply the defaults specified for the target user's
@@ -1524,7 +1563,7 @@ editor, a safer approach is to give the user permission to run
 \&\fBsudoedit\fR.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(8)
+\&\fIrsh\fR\|(1), \fIsu\fR\|(1), \fIfnmatch\fR\|(3), \fIglob\fR\|(3), \fIsudo\fR\|(@mansectsu@), \fIvisudo\fR\|(8)
 .SH "CAVEATS"
 .IX Header "CAVEATS"
 The \fIsudoers\fR file should \fBalways\fR be edited by the \fBvisudo\fR

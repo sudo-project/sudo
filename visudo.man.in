@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "VISUDO @mansectsu@"
-.TH VISUDO @mansectsu@ "November 15, 2008" "1.7.0" "MAINTENANCE COMMANDS"
+.TH VISUDO @mansectsu@ "March 11, 2009" "1.7.1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -211,7 +211,7 @@ exit with a value of 0.  If a syntax error is encountered,
 .IX Item "-f sudoers"
 Specify and alternate \fIsudoers\fR file location.  With this option
 \&\fBvisudo\fR will edit (or check) the \fIsudoers\fR file of your choice,
-instead of the default, \fI\f(CI@sysconfdir\fI@/sudoers\fR.  The lock file used
+instead of the default, \fI@sysconfdir@/sudoers\fR.  The lock file used
 is the specified \fIsudoers\fR file with \*(L".tmp\*(R" appended to it.
 .IP "\-q" 12
 .IX Item "-q"
@@ -243,12 +243,12 @@ Invoked by visudo as the editor to use
 Used by visudo if \s-1VISUAL\s0 is not set
 .SH "FILES"
 .IX Header "FILES"
-.ie n .IP "\fI\fI@sysconfdir\fI@/sudoers\fR" 24
-.el .IP "\fI\f(CI@sysconfdir\fI@/sudoers\fR" 24
+.ie n .IP "\fI@sysconfdir@/sudoers\fR" 24
+.el .IP "\fI@sysconfdir@/sudoers\fR" 24
 .IX Item "@sysconfdir@/sudoers"
 List of who can run what
-.ie n .IP "\fI\fI@sysconfdir\fI@/sudoers.tmp\fR" 24
-.el .IP "\fI\f(CI@sysconfdir\fI@/sudoers.tmp\fR" 24
+.ie n .IP "\fI@sysconfdir@/sudoers.tmp\fR" 24
+.el .IP "\fI@sysconfdir@/sudoers.tmp\fR" 24
 .IX Item "@sysconfdir@/sudoers.tmp"
 Lock file for visudo
 .SH "DIAGNOSTICS"

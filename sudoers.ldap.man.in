@@ -149,7 +149,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS.LDAP @mansectform@"
-.TH SUDOERS.LDAP @mansectform@ "October 24, 2008" "1.7.0" "MAINTENANCE COMMANDS"
+.TH SUDOERS.LDAP @mansectform@ "March 11, 2009" "1.7.1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -176,13 +176,13 @@ It is still possible to have typos in a user or host name, but
 this will not prevent \fBsudo\fR from running.
 .IP "\(bu" 4
 It is possible to specify per-entry options that override the global
-default options.  \fI\f(CI@sysconfdir\fI@/sudoers\fR only supports default options and
+default options.  \fI@sysconfdir@/sudoers\fR only supports default options and
 limited options associated with user/host/commands/aliases.  The
 syntax is complicated and can be difficult for users to understand.
 Placing the options directly in the entry is more natural.
 .IP "\(bu" 4
 The \fBvisudo\fR program is no longer needed.  \fBvisudo\fR provides
-locking and syntax checking of the \fI\f(CI@sysconfdir\fI@/sudoers\fR file.
+locking and syntax checking of the \fI@sysconfdir@/sudoers\fR file.
 Since \s-1LDAP\s0 updates are atomic, locking is no longer necessary.
 Because syntax is checked when the data is inserted into \s-1LDAP\s0, there
 is no need for a specialized tool to check syntax.
@@ -208,7 +208,7 @@ container.
 .PP
 Sudo first looks for the \f(CW\*(C`cn=default\*(C'\fR entry in the SUDOers container.
 If found, the multi-valued \f(CW\*(C`sudoOption\*(C'\fR attribute is parsed in the
-same manner as a global \f(CW\*(C`Defaults\*(C'\fR line in \fI\f(CI@sysconfdir\fI@/sudoers\fR.  In
+same manner as a global \f(CW\*(C`Defaults\*(C'\fR line in \fI@sysconfdir@/sudoers\fR.  In
 the following example, the \f(CW\*(C`SSH_AUTH_SOCK\*(C'\fR variable will be preserved
 in the environment for all users.
 .PP
@@ -357,17 +357,17 @@ The schema for \fBsudo\fR in OpenLDAP form is included in the \s-1EXAMPLES\s0
 section.
 .Sh "Configuring ldap.conf"
 .IX Subsection "Configuring ldap.conf"
-Sudo reads the \fI\f(CI@ldap_conf\fI@\fR file for LDAP-specific configuration.
+Sudo reads the \fI@ldap_conf@\fR file for LDAP-specific configuration.
 Typically, this file is shared amongst different LDAP-aware clients.
 As such, most of the settings are not \fBsudo\fR\-specific.  Note that
-\&\fBsudo\fR parses \fI\f(CI@ldap_conf\fI@\fR itself and may support options
+\&\fBsudo\fR parses \fI@ldap_conf@\fR itself and may support options
 that differ from those described in the \fIldap.conf\fR\|(@mansectform@) manual.
 .PP
 Also note that on systems using the OpenLDAP libraries, default
 values specified in \fI/etc/openldap/ldap.conf\fR or the user's
 \&\fI.ldaprc\fR files are not used.
 .PP
-Only those options explicitly listed in \fI\f(CI@ldap_conf\fI@\fR that are
+Only those options explicitly listed in \fI@ldap_conf@\fR that are
 supported by \fBsudo\fR are honored.  Configuration options are listed
 below in upper case but are parsed in a case-independent manner.
 .IP "\fB\s-1URI\s0\fR ldap[s]://[hostname[:port]] ..." 4
@@ -435,7 +435,7 @@ The \fB\s-1BINDPW\s0\fR parameter specifies the password to use when performing
 The \fB\s-1ROOTBINDDN\s0\fR parameter specifies the identity, in the form of
 a Distinguished Name (\s-1DN\s0), to use when performing privileged \s-1LDAP\s0
 operations, such as \fIsudoers\fR queries.  The password corresponding
-to the identity should be stored in \fI\f(CI@ldap_secret\fI@\fR.
+to the identity should be stored in \fI@ldap_secret@\fR.
 If not specified, the \fB\s-1BINDDN\s0\fR identity is used (if any).
 .IP "\fB\s-1LDAP_VERSION\s0\fR number" 4
 .IX Item "LDAP_VERSION number"
@@ -541,8 +541,8 @@ See the \f(CW\*(C`ldap.conf\*(C'\fR entry in the \s-1EXAMPLES\s0 section.
 .Sh "Configuring nsswitch.conf"
 .IX Subsection "Configuring nsswitch.conf"
 Unless it is disabled at build time, \fBsudo\fR consults the Name
-Service Switch file, \fI\f(CI@nsswitch_conf\fI@\fR, to specify the \fIsudoers\fR
-search order.  Sudo looks for a line beginning with \f(CW\*(C`sudoers:\*(C'\fR and
+Service Switch file, \fI@nsswitch_conf@\fR, to specify the \fIsudoers\fR
+search order.  Sudo looks for a line beginning with \f(CW\*(C`sudoers\*(C'\fR: and
 uses this to determine the search order.  Note that \fBsudo\fR does
 not stop searching after the first match and later matches take
 precedence over earlier ones.
@@ -570,25 +570,66 @@ The local \fIsudoers\fR file can be ignored completely by using:
 \&    sudoers: ldap
 .Ve
 .PP
-If the \fI\f(CI@nsswitch_conf\fI@\fR file is not present or there is no
+If the \fI@nsswitch_conf@\fR file is not present or there is no
 sudoers line, the following default is assumed:
 .PP
 .Vb 1
 \&    sudoers: files
 .Ve
 .PP
-Note that \fI\f(CI@nsswitch_conf\fI@\fR is supported even when the underlying
+Note that \fI@nsswitch_conf@\fR is supported even when the underlying
 operating system does not use an nsswitch.conf file.
+.Sh "Configuring netsvc.conf"
+.IX Subsection "Configuring netsvc.conf"
+On \s-1AIX\s0 systems, the \fI@netsvc_conf@\fR file is consulted instead of
+\&\fI@nsswitch_conf@\fR.  \fBsudo\fR simply treats \fInetsvc.conf\fR as a
+variant of \fInsswitch.conf\fR; information in the previous section
+unrelated to the file format itself still applies.
+.PP
+To consult \s-1LDAP\s0 first followed by the local sudoers file (if it
+exists), use:
+.PP
+.Vb 1
+\&    sudoers = ldap, files
+.Ve
+.PP
+The local \fIsudoers\fR file can be ignored completely by using:
+.PP
+.Vb 1
+\&    sudoers = ldap
+.Ve
+.PP
+To treat \s-1LDAP\s0 as authoratative and only use the local sudoers file
+if the user is not present in \s-1LDAP\s0, use:
+.PP
+.Vb 1
+\&    sudoers = ldap = auth, files
+.Ve
+.PP
+Note that in the above example, the \f(CW\*(C`auth\*(C'\fR qualfier only affects
+user lookups; both \s-1LDAP\s0 and \fIsudoers\fR will be queried for \f(CW\*(C`Defaults\*(C'\fR
+entries.
+.PP
+If the \fI@netsvc_conf@\fR file is not present or there is no
+sudoers line, the following default is assumed:
+.PP
+.Vb 1
+\&    sudoers = files
+.Ve
 .SH "FILES"
 .IX Header "FILES"
-.ie n .IP "\fI\fI@ldap_conf\fI@\fR" 24
-.el .IP "\fI\f(CI@ldap_conf\fI@\fR" 24
+.ie n .IP "\fI@ldap_conf@\fR" 24
+.el .IP "\fI@ldap_conf@\fR" 24
 .IX Item "@ldap_conf@"
 \&\s-1LDAP\s0 configuration file
-.ie n .IP "\fI\fI@nsswitch_conf\fI@\fR" 24
-.el .IP "\fI\f(CI@nsswitch_conf\fI@\fR" 24
+.ie n .IP "\fI@nsswitch_conf@\fR" 24
+.el .IP "\fI@nsswitch_conf@\fR" 24
 .IX Item "@nsswitch_conf@"
 determines sudoers source order
+.ie n .IP "\fI@netsvc_conf@\fR" 24
+.el .IP "\fI@netsvc_conf@\fR" 24
+.IX Item "@netsvc_conf@"
+determines sudoers source order on \s-1AIX\s0
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 .Sh "Example ldap.conf"
@@ -748,9 +789,6 @@ schema directory (e.g. \fI/etc/openldap/schema\fR), add the proper
 \&          sudoRunAsGroup $ sudoOption $ description )
 \&    )
 .Ve
-.PP
-Add nsswitch.conf example?
-Add more exhaustive sudoers ldif example?
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIldap.conf\fR\|(@mansectform@), \fIsudoers\fR\|(5)

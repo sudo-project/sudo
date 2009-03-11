@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "November 15, 2008" "1.7.0" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "March 11, 2009" "1.7.1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -162,10 +162,16 @@
 sudo, sudoedit \- execute a command as another user
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBsudo\fR [\fB\-n\fR] \fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-L\fR | \fB\-V\fR | \fB\-v\fR
+\&\fBsudo\fR \fB\-h\fR | \fB\-K\fR | \fB\-k\fR | \fB\-L\fR | \fB\-V\fR
 .PP
-\&\fBsudo\fR \fB\-l[l]\fR [\fB\-AnS\fR] [\fB\-g\fR\ \fIgroupname\fR|\fI#gid\fR] [\fB\-U\fR\ \fIusername\fR]
-[\fB\-u\fR\ \fIusername\fR|\fI#uid\fR] [\fIcommand\fR]
+\&\fBsudo\fR \fB\-v\fR [\fB\-AknS\fR]
+@BAMAN@[\fB\-a\fR\ \fIauth_type\fR]
+[\fB\-p\fR\ \fIprompt\fR]
+.PP
+\&\fBsudo\fR \fB\-l[l]\fR [\fB\-AknS\fR]
+@BAMAN@[\fB\-a\fR\ \fIauth_type\fR]
+[\fB\-g\fR\ \fIgroupname\fR|\fI#gid\fR] [\fB\-p\fR\ \fIprompt\fR]
+[\fB\-U\fR\ \fIusername\fR] [\fB\-u\fR\ \fIusername\fR|\fI#uid\fR] [\fIcommand\fR]
 .PP
 \&\fBsudo\fR [\fB\-AbEHnPS\fR]
 @BAMAN@[\fB\-a\fR\ \fIauth_type\fR]
@@ -235,11 +241,11 @@ or via the \fIsudoers\fR file.
 .IX Item "-A"
 Normally, if \fBsudo\fR requires a password, it will read it from the
 current terminal.  If the \fB\-A\fR (\fIaskpass\fR) option is specified,
-a helper program is executed to read the user's password and output
-the password to the standard output.  If the \f(CW\*(C`SUDO_ASKPASS\*(C'\fR
-environment variable is set, it specifies the path to the helper
-program.  Otherwise, the value specified by the \fIaskpass\fR option
-in \fIsudoers\fR\|(@mansectform@) is used.
+a (possibly graphical) helper program is executed to read the
+user's password and output the password to the standard output.  If
+the \f(CW\*(C`SUDO_ASKPASS\*(C'\fR environment variable is set, it specifies the
+path to the helper program.  Otherwise, the value specified by the
+\&\fIaskpass\fR option in \fIsudoers\fR\|(@mansectform@) is used.
 @BAMAN@.IP "\-a \fItype\fR" 12
 @BAMAN@.IX Item "-a type"
 @BAMAN@The \fB\-a\fR (\fIauthentication type\fR) option causes \fBsudo\fR to use the
@@ -344,15 +350,22 @@ All other environment variables are removed.
 .IP "\-K" 12
 .IX Item "-K"
 The \fB\-K\fR (sure \fIkill\fR) option is like \fB\-k\fR except that it removes
-the user's timestamp entirely.  Like \fB\-k\fR, this option does not
-require a password.
+the user's timestamp entirely and may not be used in conjunction
+with a command or other option.  This option does not require a
+password.
 .IP "\-k" 12
 .IX Item "-k"
-The \fB\-k\fR (\fIkill\fR) option to \fBsudo\fR invalidates the user's timestamp
-by setting the time on it to the Epoch.  The next time \fBsudo\fR is
-run a password will be required.  This option does not require a password
-and was added to allow a user to revoke \fBsudo\fR permissions from a .logout
-file.
+When used by itself, the \fB\-k\fR (\fIkill\fR) option to \fBsudo\fR invalidates
+the user's timestamp by setting the time on it to the Epoch.  The
+next time \fBsudo\fR is run a password will be required.  This option
+does not require a password and was added to allow a user to revoke
+\&\fBsudo\fR permissions from a .logout file.
+.Sp
+When used in conjunction with a command or an option that may require
+a password, the \fB\-k\fR option will cause \fBsudo\fR to ignore the user's
+timestamp file.  As a result, \fBsudo\fR will prompt for a password
+(if one is required by \fIsudoers\fR) and will not update the user's
+timestamp file.
 .IP "\-L" 12
 .IX Item "-L"
 The \fB\-L\fR (\fIlist\fR defaults) option will list out the parameters

@@ -53,15 +53,15 @@ OOPPTTIIOONNSS
 
        -f _s_u_d_o_e_r_s  Specify and alternate _s_u_d_o_e_r_s file location.  With this
                    option vviissuuddoo will edit (or check) the _s_u_d_o_e_r_s file of your
-                   choice, instead of the default, _@_s_y_s_c_o_n_f_d_i_r_@_/_s_u_d_o_e_r_s.  The
-                   lock file used is the specified _s_u_d_o_e_r_s file with ".tmp"
+                   choice, instead of the default, _/_e_t_c_/_s_u_d_o_e_r_s.  The lock
+                   file used is the specified _s_u_d_o_e_r_s file with ".tmp"
                    appended to it.
 
        -q          Enable qquuiieett mode.  In this mode details about syntax
 
 
 
-1.7.0                   November 15, 2008                       1
+1.7.1                     March 11, 2009                        1
 
 
 
@@ -92,10 +92,9 @@ EENNVVIIRROONNMMEENNTT
        EDITOR          Used by visudo if VISUAL is not set
 
 FFIILLEESS
-       _@_s_y_s_c_o_n_f_d_i_r_@_/_s_u_d_o_e_r_s    List of who can run what
+       _/_e_t_c_/_s_u_d_o_e_r_s            List of who can run what
 
-       _@_s_y_s_c_o_n_f_d_i_r_@_/_s_u_d_o_e_r_s_._t_m_p
-                               Lock file for visudo
+       _/_e_t_c_/_s_u_d_o_e_r_s_._t_m_p        Lock file for visudo
 
 DDIIAAGGNNOOSSTTIICCSS
        sudoers file busy, try again later.
@@ -123,11 +122,12 @@ DDIIAAGGNNOOSSTTIICCSS
 SSEEEE AALLSSOO
        _v_i(1), _s_u_d_o_e_r_s(4), _s_u_d_o(1m), _v_i_p_w(8)
 
+AAUUTTHHOORR
+       Many people have worked on _s_u_d_o over the years; this version of vviissuuddoo
 
 
 
-
-1.7.0                   November 15, 2008                       2
+1.7.1                     March 11, 2009                        2
 
 
 
@@ -136,8 +136,6 @@ SSEEEE AALLSSOO
 VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
 
 
-AAUUTTHHOORR
-       Many people have worked on _s_u_d_o over the years; this version of vviissuuddoo
        was written by:
 
         Todd Miller
@@ -193,6 +191,8 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.0                   November 15, 2008                       3
+
+
+1.7.1                     March 11, 2009                        3
 
 
