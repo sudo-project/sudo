@@ -59,7 +59,7 @@ audit_failure(char **exec_args, char const *const fmt, ...)
 audit_failure(exec_args, fmt, va_alist)
     const char **exec_args;
     char const *const fmt;
-    va_dcl;
+    va_dcl
 #endif
 {
     va_list ap;

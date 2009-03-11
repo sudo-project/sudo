@@ -369,7 +369,8 @@ int
 #ifdef PUTENV_CONST
 putenv(const char *string)
 #else
-putenv(char *string)
+putenv(string)
+    char *string;
 #endif
 {
     if (strchr(string, '=') == NULL) {
