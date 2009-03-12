@@ -172,7 +172,7 @@ sudo_parseln(fp)
 
 	/* Trim leading and trailing whitespace/newline */
 	len = strlen(buf);
-	while (len > 0 && isspace(buf[len - 1]))
+	while (len > 0 && isspace((unsigned char)buf[len - 1]))
 	    buf[--len] = '\0';
 	for (cp = buf; isblank(*cp); cp++)
 	    continue;
