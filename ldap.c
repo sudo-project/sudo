@@ -163,6 +163,7 @@ static struct ldap_config_table ldap_conf_table[] = {
     { "sudoers_debug", CONF_INT, FALSE, -1, &ldap_conf.debug },
     { "host", CONF_STR, FALSE, -1, &ldap_conf.host },
     { "port", CONF_INT, FALSE, -1, &ldap_conf.port },
+    { "ldap_hostport", CONF_STR, FALSE, -1, &ldap_conf.host },
     { "ssl", CONF_STR, FALSE, -1, &ldap_conf.ssl },
     { "sslpath", CONF_STR, FALSE, -1, &ldap_conf.tls_certfile },
     { "uri", CONF_STR, FALSE, -1, &ldap_conf.uri },
