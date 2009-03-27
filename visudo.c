@@ -934,6 +934,25 @@ get_hostname()
     }
 }
 
+static void
+alias_remove_recursive(name, type)
+    char *name;
+    int type;
+{
+    struct member *m;
+    struct alias *a;
+
+    alias_seqno++;
+    if ((a = find_alias(name, type)) != NULL) {
+	tq_foreach_fwd(&a->members, m) {
+	    if (m->type == ALIAS) {
+		alias_remove_recursive(m->name, type);
+	    }
+	}
+    }
+    (void) alias_remove(name, type);
+}
+
 /*
  * Iterate through the sudoers datastructures looking for undefined
  * aliases or unused aliases.
@@ -998,21 +1017,22 @@ check_aliases(strict)
     /* Reverse check (destructive) */
     tq_foreach_fwd(&userspecs, us) {
 	tq_foreach_fwd(&us->users, m) {
-	    if (m->type == ALIAS)
-		(void) alias_remove(m->name, USERALIAS);
+	    if (m->type == ALIAS) {
+		(void) alias_remove_recursive(m->name, USERALIAS);
+	    }
 	}
 	tq_foreach_fwd(&us->privileges, priv) {
 	    tq_foreach_fwd(&priv->hostlist, m) {
 		if (m->type == ALIAS)
-		    (void) alias_remove(m->name, HOSTALIAS);
+		    (void) alias_remove_recursive(m->name, HOSTALIAS);
 	    }
 	    tq_foreach_fwd(&priv->cmndlist, cs) {
 		tq_foreach_fwd(&cs->runasuserlist, m) {
 		    if (m->type == ALIAS)
-			(void) alias_remove(m->name, RUNASALIAS);
+			(void) alias_remove_recursive(m->name, RUNASALIAS);
 		}
 		if ((m = cs->cmnd)->type == ALIAS)
-		    (void) alias_remove(m->name, CMNDALIAS);
+		    (void) alias_remove_recursive(m->name, CMNDALIAS);
 	    }
 	}
     }
@@ -1036,7 +1056,7 @@ check_aliases(strict)
 	tq_foreach_fwd(&d->binding, binding) {
 	    for (m = binding; m != NULL; m = m->next) {
 		if (m->type == ALIAS)
-		    (void) alias_remove(m->name, atype);
+		    (void) alias_remove_recursive(m->name, atype);
 	    }
 	}
     }
