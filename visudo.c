@@ -107,13 +107,14 @@ static char *get_args		__P((char *));
 static char *get_editor		__P((char **));
 static void get_hostname	__P((void));
 static char whatnow		__P((void));
-static int check_aliases	__P((int));
+static int check_aliases	__P((int, int));
 static int check_syntax		__P((char *, int, int));
 static int edit_sudoers		__P((struct sudoersfile *, char *, char *, int));
 static int install_sudoers	__P((struct sudoersfile *, int));
 static int print_unused		__P((void *, void *));
 static int reparse_sudoers	__P((char *, char *, int, int));
 static int run_command		__P((char *, char **));
+static void print_undefined	__P((char *name, int, int, int));
 static void setup_signals	__P((void));
 static void usage		__P((void)) __attribute__((__noreturn__));
 
@@ -430,7 +431,7 @@ reparse_sudoers(editor, args, strict, quiet)
 	    parse_error = TRUE;
 	}
 	fclose(yyin);
-	if (check_aliases(strict) != 0)
+	if (check_aliases(strict, quiet) != 0)
 	    parse_error = TRUE;
 
 	/*
@@ -700,6 +701,10 @@ check_syntax(sudoers_path, quiet, strict)
 	    warningx("failed to parse %s file, unknown error", sudoers_path);
 	parse_error = TRUE;
     }
+    if (!parse_error) {
+	if (check_aliases(strict, quiet) != 0)
+	    parse_error = TRUE;
+    }
     error = parse_error;
     if (!quiet) {
 	if (parse_error)
@@ -958,8 +963,9 @@ alias_remove_recursive(name, type)
  * aliases or unused aliases.
  */
 static int
-check_aliases(strict)
+check_aliases(strict, quiet)
     int strict;
+    int quiet;
 {
     struct cmndspec *cs;
     struct member *m, *binding;
@@ -974,8 +980,7 @@ check_aliases(strict)
 	    if (m->type == ALIAS) {
 		alias_seqno++;
 		if (alias_find(m->name, USERALIAS) == NULL) {
-		    warningx("%s: User_Alias `%s' referenced but not defined",
-			strict ? "Error" : "Warning", m->name);
+		    print_undefined(m->name, USERALIAS, strict, quiet);
 		    error++;
 		}
 	    }
@@ -985,8 +990,7 @@ check_aliases(strict)
 		if (m->type == ALIAS) {
 		    alias_seqno++;
 		    if (alias_find(m->name, HOSTALIAS) == NULL) {
-			warningx("%s: Host_Alias `%s' referenced but not defined",
-			    strict ? "Error" : "Warning", m->name);
+			print_undefined(m->name, HOSTALIAS, strict, quiet);
 			error++;
 		    }
 		}
@@ -996,8 +1000,7 @@ check_aliases(strict)
 		    if (m->type == ALIAS) {
 			alias_seqno++;
 			if (alias_find(m->name, RUNASALIAS) == NULL) {
-			    warningx("%s: Runas_Alias `%s' referenced but not defined",
-				strict ? "Error" : "Warning", m->name);
+			    print_undefined(m->name, RUNASALIAS, strict, quiet);
 			    error++;
 			}
 		    }
@@ -1005,8 +1008,7 @@ check_aliases(strict)
 		if ((m = cs->cmnd)->type == ALIAS) {
 		    alias_seqno++;
 		    if (alias_find(m->name, CMNDALIAS) == NULL) {
-			warningx("%s: Cmnd_Alias `%s' referenced but not defined",
-			    strict ? "Error" : "Warning", m->name);
+			print_undefined(m->name, CMNDALIAS, strict, quiet);
 			error++;
 		    }
 		}
@@ -1064,8 +1066,26 @@ check_aliases(strict)
     /* If all aliases were referenced we will have an empty tree. */
     if (no_aliases())
 	return(0);
-    alias_apply(print_unused, strict ? "Error" : "Warning");
+    if (!quiet) {
+	alias_apply(print_unused, strict ? "Error" : "Warning");
+    }
     return (strict ? 1 : 0);
+}
+
+static void
+print_undefined(name, type, strict, quiet)
+    char *name;
+    int type;
+    int strict;
+    int quiet;
+{
+    if (!quiet) {
+	warningx("%s: %s_Alias `%s' referenced but not defined",
+	    strict ? "Error" : "Warning",
+	    type == HOSTALIAS ? "Host" : type == CMNDALIAS ? "Cmnd" :
+	    type == USERALIAS ? "User" : type == RUNASALIAS ? "Runas" :
+	    "Unknown", name);
+    }
 }
 
 static int
