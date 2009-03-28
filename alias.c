@@ -88,7 +88,7 @@ alias_compare(v1, v2)
  * Returns a pointer to the alias structure or NULL if not found.
  */
 struct alias *
-find_alias(name, type)
+alias_find(name, type)
     char *name;
     int type;
 {

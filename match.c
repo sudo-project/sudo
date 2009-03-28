@@ -133,7 +133,7 @@ _userlist_matches(pw, list)
 		    matched = !m->negated;
 		break;
 	    case ALIAS:
-		if ((a = find_alias(m->name, USERALIAS)) != NULL) {
+		if ((a = alias_find(m->name, USERALIAS)) != NULL) {
 		    rval = _userlist_matches(pw, &a->members);
 		    if (rval != UNSPEC)
 			matched = m->negated ? !rval : rval;
@@ -196,7 +196,7 @@ _runaslist_matches(user_list, group_list)
 			matched = !m->negated;
 		    break;
 		case ALIAS:
-		    if ((a = find_alias(m->name, RUNASALIAS)) != NULL) {
+		    if ((a = alias_find(m->name, RUNASALIAS)) != NULL) {
 			rval = _runaslist_matches(&a->members, &empty);
 			if (rval != UNSPEC)
 			    matched = m->negated ? !rval : rval;
@@ -220,7 +220,7 @@ _runaslist_matches(user_list, group_list)
 		    matched = !m->negated;
 		    break;
 		case ALIAS:
-		    if ((a = find_alias(m->name, RUNASALIAS)) != NULL) {
+		    if ((a = alias_find(m->name, RUNASALIAS)) != NULL) {
 			rval = _runaslist_matches(&a->members, &empty);
 			if (rval != UNSPEC)
 			    matched = m->negated ? !rval : rval;
@@ -276,7 +276,7 @@ _hostlist_matches(list)
 		    matched = !m->negated;
 		break;
 	    case ALIAS:
-		if ((a = find_alias(m->name, HOSTALIAS)) != NULL) {
+		if ((a = alias_find(m->name, HOSTALIAS)) != NULL) {
 		    rval = _hostlist_matches(&a->members);
 		    if (rval != UNSPEC)
 			matched = m->negated ? !rval : rval;
@@ -349,7 +349,7 @@ cmnd_matches(m)
 	    break;
 	case ALIAS:
 	    alias_seqno++;
-	    if ((a = find_alias(m->name, CMNDALIAS)) != NULL) {
+	    if ((a = alias_find(m->name, CMNDALIAS)) != NULL) {
 		rval = _cmndlist_matches(&a->members);
 		if (rval != UNSPEC)
 		    matched = m->negated ? !rval : rval;

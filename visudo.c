@@ -943,7 +943,7 @@ alias_remove_recursive(name, type)
     struct alias *a;
 
     alias_seqno++;
-    if ((a = find_alias(name, type)) != NULL) {
+    if ((a = alias_find(name, type)) != NULL) {
 	tq_foreach_fwd(&a->members, m) {
 	    if (m->type == ALIAS) {
 		alias_remove_recursive(m->name, type);
@@ -973,7 +973,7 @@ check_aliases(strict)
 	tq_foreach_fwd(&us->users, m) {
 	    if (m->type == ALIAS) {
 		alias_seqno++;
-		if (find_alias(m->name, USERALIAS) == NULL) {
+		if (alias_find(m->name, USERALIAS) == NULL) {
 		    warningx("%s: User_Alias `%s' referenced but not defined",
 			strict ? "Error" : "Warning", m->name);
 		    error++;
@@ -984,7 +984,7 @@ check_aliases(strict)
 	    tq_foreach_fwd(&priv->hostlist, m) {
 		if (m->type == ALIAS) {
 		    alias_seqno++;
-		    if (find_alias(m->name, HOSTALIAS) == NULL) {
+		    if (alias_find(m->name, HOSTALIAS) == NULL) {
 			warningx("%s: Host_Alias `%s' referenced but not defined",
 			    strict ? "Error" : "Warning", m->name);
 			error++;
@@ -995,7 +995,7 @@ check_aliases(strict)
 		tq_foreach_fwd(&cs->runasuserlist, m) {
 		    if (m->type == ALIAS) {
 			alias_seqno++;
-			if (find_alias(m->name, RUNASALIAS) == NULL) {
+			if (alias_find(m->name, RUNASALIAS) == NULL) {
 			    warningx("%s: Runas_Alias `%s' referenced but not defined",
 				strict ? "Error" : "Warning", m->name);
 			    error++;
@@ -1004,7 +1004,7 @@ check_aliases(strict)
 		}
 		if ((m = cs->cmnd)->type == ALIAS) {
 		    alias_seqno++;
-		    if (find_alias(m->name, CMNDALIAS) == NULL) {
+		    if (alias_find(m->name, CMNDALIAS) == NULL) {
 			warningx("%s: Cmnd_Alias `%s' referenced but not defined",
 			    strict ? "Error" : "Warning", m->name);
 			error++;

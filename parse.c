@@ -639,7 +639,7 @@ _print_member(lbuf, name, type, negated, alias_type)
 	    }
 	    break;
 	case ALIAS:
-	    if ((a = find_alias(name, alias_type)) != NULL) {
+	    if ((a = alias_find(name, alias_type)) != NULL) {
 		tq_foreach_fwd(&a->members, m) {
 		    if (m != tq_first(&a->members))
 			lbuf_append(lbuf, ", ", NULL);
