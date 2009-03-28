@@ -168,7 +168,6 @@ extern unsigned int alias_seqno;
  */
 char *alias_add		__P((char *, int, struct member *));
 int addr_matches	__P((char *));
-int alias_remove	__P((char *, int));
 int cmnd_matches	__P((struct member *));
 int cmndlist_matches	__P((struct member_list *));
 int command_matches	__P((char *, char *));
@@ -182,6 +181,8 @@ int usergr_matches	__P((char *, char *, struct passwd *));
 int userpw_matches	__P((char *, char *, struct passwd *));
 int group_matches	__P((char *, struct group *));
 struct alias *alias_find __P((char *, int));
+struct alias *alias_remove __P((char *, int));
+void alias_free		__P((void *));
 void alias_apply	__P((int (*)(void *, void *), void *));
 void init_aliases	__P((void));
 void init_parser	__P((char *, int));

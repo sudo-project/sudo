@@ -942,7 +942,6 @@ alias_remove_recursive(name, type)
     struct member *m;
     struct alias *a;
 
-    alias_seqno++;
     if ((a = alias_find(name, type)) != NULL) {
 	tq_foreach_fwd(&a->members, m) {
 	    if (m->type == ALIAS) {
@@ -950,6 +949,7 @@ alias_remove_recursive(name, type)
 	    }
 	}
     }
+    alias_seqno++;
     (void) alias_remove(name, type);
 }
 

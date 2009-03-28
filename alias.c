@@ -60,7 +60,6 @@ unsigned int alias_seqno;
  * Local protoypes
  */
 static int   alias_compare	__P((const void *, const void *));
-static void  alias_free		__P((void *));
 
 /*
  * Comparison function for the red-black tree.
@@ -161,7 +160,7 @@ no_aliases()
 /*
  * Free memory used by an alias struct and its members.
  */
-static void
+void
 alias_free(v)
     void *v;
 {
@@ -185,9 +184,9 @@ alias_free(v)
 }
 
 /*
- * Find the named alias, delete it from the tree and recover its resources.
+ * Find the named alias, remove it from the tree and return it.
  */
-int
+struct alias *
 alias_remove(name, type)
     char *name;
     int type;
@@ -198,10 +197,9 @@ alias_remove(name, type)
     key.name = name;
     key.type = type;
     if ((node = rbfind(aliases, &key)) == NULL)
-	return(FALSE);
+	return(NULL);
     a = rbdelete(aliases, node);
-    alias_free(a);
-    return(TRUE);
+    return(a);
 }
 
 void
