@@ -83,6 +83,7 @@
 #include "sudo.h"
 #include "interfaces.h"
 #include "parse.h"
+#include "redblack.h"
 #include <gram.h>
 #include "version.h"
 
@@ -124,6 +125,7 @@ extern void yyrestart		__P((FILE *));
 /*
  * External globals exported by the parser
  */
+extern struct rbtree *aliases;
 extern FILE *yyin;
 extern char *sudoers, *errorfile;
 extern int errorlineno, parse_error;
@@ -143,6 +145,7 @@ struct passwd *list_pw;
 static struct sudoerslist {
     struct sudoersfile *first, *last;
 } sudoerslist;
+static struct rbtree *alias_freelist;
 
 int
 main(argc, argv)
@@ -955,7 +958,9 @@ alias_remove_recursive(name, type)
 	}
     }
     alias_seqno++;
-    (void) alias_remove(name, type);
+    a = alias_remove(name, type);
+    if (a)
+	rbinsert(alias_freelist, a);
 }
 
 /*
@@ -973,6 +978,8 @@ check_aliases(strict, quiet)
     struct userspec *us;
     struct defaults *d;
     int atype, error = 0;
+
+    alias_freelist = rbcreate(alias_compare);
 
     /* Forward check. */
     tq_foreach_fwd(&userspecs, us) {
@@ -1062,6 +1069,7 @@ check_aliases(strict, quiet)
 	    }
 	}
     }
+    rbdestroy(alias_freelist, alias_free);
 
     /* If all aliases were referenced we will have an empty tree. */
     if (no_aliases())

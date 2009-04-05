@@ -57,15 +57,10 @@ struct rbtree *aliases;
 unsigned int alias_seqno;
 
 /*
- * Local protoypes
- */
-static int   alias_compare	__P((const void *, const void *));
-
-/*
  * Comparison function for the red-black tree.
  * Aliases are sorted by name with the type used as a tie-breaker.
  */
-static int
+int
 alias_compare(v1, v2)
     const void *v1, *v2;
 {
