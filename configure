@@ -3606,7 +3606,7 @@ fi
 # Check whether --with-ldap was given.
 if test "${with_ldap+set}" = set; then
   withval=$with_ldap; case $with_ldap in
-    no)		with_ldap="";;
+    no)		;;
     *)		cat >>confdefs.h <<\_ACEOF
 #define HAVE_LDAP 1
 _ACEOF

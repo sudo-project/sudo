@@ -949,7 +949,7 @@ esac])
 
 AC_ARG_WITH(ldap, [  --with-ldap[[=DIR]]       enable LDAP support],
 [case $with_ldap in
-    no)		with_ldap="";;
+    no)		;;
     *)		AC_DEFINE(HAVE_LDAP)
 		AC_MSG_CHECKING(whether to use sudoers from LDAP)
 		AC_MSG_RESULT(yes)
