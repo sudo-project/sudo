@@ -22,6 +22,9 @@ What's new in Sudo 1.7.1?
 
  * New support for /etc/netsvc.conf on AIX.
 
+ * The unused alias checks in visudo now handle the case of an alias
+   referring to another alias.
+
 What's new in Sudo 1.7.0?
 
  * Rewritten parser that converts sudoers into a set of data structures.
