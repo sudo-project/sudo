@@ -782,8 +782,6 @@ open_sudoers(path, keepopen)
 	    sudoerslist.last->next = entry;
 	    sudoerslist.last = entry;
 	}
-	if (keepopen != NULL)
-	    *keepopen = TRUE;
     } else {
 	/* Already exists, open .tmp version if there is one. */
 	if (entry->tpath != NULL) {
@@ -792,8 +790,11 @@ open_sudoers(path, keepopen)
 	} else {
 	    if ((fp = fdopen(entry->fd, "r")) == NULL)
 		error(1, "%s", entry->path);
+	    rewind(fp);
 	}
     }
+    if (keepopen != NULL)
+	*keepopen = TRUE;
     return(fp);
 }
 
