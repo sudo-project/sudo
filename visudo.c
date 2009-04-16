@@ -711,7 +711,7 @@ check_syntax(sudoers_path, quiet, strict)
     error = parse_error;
     if (!quiet) {
 	if (parse_error)
-	    (void) printf("parse error in %s near line %d\n", sudoers_path,
+	    (void) printf("parse error in %s near line %d\n", errorfile,
 		errorlineno);
 	else
 	    (void) printf("%s: parsed OK\n", sudoers_path);
