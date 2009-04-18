@@ -1072,8 +1072,9 @@ parse_args(argc, argv)
  * Returns a handle to the sudoers file or NULL on error.
  */
 FILE *
-open_sudoers(sudoers, keepopen)
+open_sudoers(sudoers, doedit, keepopen)
     const char *sudoers;
+    int doedit;
     int *keepopen;
 {
     struct stat statbuf;

@@ -441,13 +441,15 @@ with B<any> arguments.
 =head2 Including other files from within sudoers
 
 It is possible to include other I<sudoers> files from within the
-I<sudoers> file currently being parsed using the C<#include>
-directive, similar to the one used by the C preprocessor.  This is
-useful, for example, for keeping a site-wide I<sudoers> file in
-addition to a per-machine local one.  For the sake of this example
-the site-wide I<sudoers> will be F</etc/sudoers> and the per-machine
-one will be F</etc/sudoers.local>.  To include F</etc/sudoers.local>
-from within F</etc/sudoers> we would use the following line in F</etc/sudoers>:
+I<sudoers> file currently being parsed using the C<#include> and
+C<#includedir> directives.
+
+This can be used, for example, to keep a site-wide I<sudoers> file
+in addition to a local, per-machine file.  For the sake of this
+example the site-wide I<sudoers> will be F</etc/sudoers> and the
+per-machine one will be F</etc/sudoers.local>.  To include
+F</etc/sudoers.local> from within F</etc/sudoers> we would use the
+following line in F</etc/sudoers>:
 
 =over 4
 
@@ -468,6 +470,26 @@ of the hostname.  I.e., if the machine's hostname is "xerxes", then
  #include /etc/sudoers.%h
 
 will cause B<sudo> to include the file F</etc/sudoers.xerxes>.
+
+The C<#includedir> directive can be used to create a F<sudo.d>
+directory that the system package manager can drop I<sudoers> rules
+into as part of package installation.  For example, given:
+
+  #includedir /etc/sudoers.d
+
+B<sudo> will read each file in F</etc/sudoers.d>, skipping files
+that end in ".tmp" to avoid causing problems with B<visudo>.  Files
+are parsed in sorted lexical order.  That is, F</etc/sudoers.d/01_first>
+will be parsed before F</etc/sudoers.d/10_second>.  Be aware that
+because the sorting is lexical, not numeric, F</etc/sudoers.d/1_whoops>
+would be loaded B<after> F</etc/sudoers.d/10_second>.  Using a
+consistent number of leading zeroes in the file names can be used
+to avoid such problems.
+
+Note that unlike files included via C<#include>, B<visudo> will not
+edit the files in a C<#includedir> directory unless one of them
+contains a syntax error.  It is still possible to run B<visudo>
+with the C<-f> flag to edit the files directly.
 
 =head2 Other special characters and reserved words
 

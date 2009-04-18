@@ -89,7 +89,7 @@ sudo_file_open(nss)
 {
     if (def_ignore_local_sudoers)
 	return(-1);
-    nss->handle = open_sudoers(_PATH_SUDOERS, NULL);
+    nss->handle = open_sudoers(_PATH_SUDOERS, FALSE, NULL);
     return(nss->handle ? 0 : -1);
 }
 

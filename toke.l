@@ -27,6 +27,7 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #ifdef STDC_HEADERS
 # include <stdlib.h>
@@ -50,6 +51,7 @@
 # include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <ctype.h>
+#include <dirent.h>
 #include "sudo.h"
 #include "parse.h"
 #include <gram.h>
@@ -69,15 +71,16 @@ static int append		__P((char *, int));
 static int _fill		__P((char *, int, int));
 static int fill_cmnd		__P((char *, int));
 static int fill_args		__P((char *, int, int));
-static int switch_buffer	__P((char *));
+static int _push_include	__P((char *, int));
+static int pop_include		__P((void));
 static int ipv6_valid		__P((const char *s));
 static char *parse_include	__P((char *));
 extern void yyerror		__P((const char *));
 
 #define fill(a, b)		_fill(a, b, 0)
 
-#define	push_include(_p)	(switch_buffer((_p)))
-#define	pop_include()		(switch_buffer(NULL))
+#define	push_include(_p)	(_push_include((_p), FALSE))
+#define	push_includedir(_p)	(_push_include((_p), TRUE))
 
 /* realloc() to size + COMMANDARGINC to make room for command args */
 #define COMMANDARGINC	64
@@ -224,6 +227,19 @@ DEFVAR			[a-z_]+
 
 			    /* Push current buffer and switch to include file */
 			    if (!push_include(path))
+				yyterminate();
+			}
+
+<INITIAL>^#includedir[[:blank:]]+\/.*\n {
+			    char *path;
+
+			    if ((path = parse_include(yytext)) == NULL)
+				yyterminate();
+
+			    LEXTRACE("INCLUDEDIR\n");
+
+			    /* Push current buffer and switch to include file */
+			    if (!push_includedir(path))
 				yyterminate();
 			}
 
@@ -605,63 +621,228 @@ fill_args(s, len, addspace)
     return(TRUE);
 }
 
-struct sudoers_state {
+struct path_list {
+    char *path;
+    struct path_list *next;
+};
+
+struct include_stack {
     YY_BUFFER_STATE bs;
     char *path;
+    struct path_list *more; /* more files in case of includedir */
     int lineno;
+    int keepopen;
 };
+
+static int
+pl_compare(v1, v2)
+    const void *v1;
+    const void *v2;
+{
+    const struct path_list * const *p1 = v1;
+    const struct path_list * const *p2 = v2;
+
+    return(strcmp((*p1)->path, (*p2)->path));
+}
+
+static char *
+switch_dir(stack, dirpath)
+    struct include_stack *stack;
+    char *dirpath;
+{
+    DIR *dir;
+    int i, count = 0;
+    char *path = NULL;
+    struct dirent *dent;
+    struct stat sb;
+    struct path_list *pl, *first = NULL;
+    struct path_list **sorted = NULL;
+
+    if (!(dir = opendir(dirpath))) {
+	yyerror(dirpath);
+	return(FALSE);
+    }
+    while ((dent = readdir(dir))) {
+	/* Ignore visudo .tmp files. */
+	if (dent->d_namlen > 4 &&
+	    strcmp(dent->d_name + dent->d_namlen - 4, ".tmp") == 0) {
+	    continue;
+	}
+	if (asprintf(&path, "%s/%s", dirpath, dent->d_name) == -1) {
+	    closedir(dir);
+	    goto bad;
+	}
+	if (stat(path, &sb) != 0 || !S_ISREG(sb.st_mode)) {
+	    efree(path);
+	    continue;
+	}
+	pl = malloc(sizeof(*pl));
+	if (pl == NULL)
+	    goto bad;
+	pl->path = path;
+	pl->next = first;
+	first = pl;
+	count++;
+    }
+    closedir(dir);
+
+    if (count == 0)
+	goto done;
+
+    /* Sort the list as an array. */
+    sorted = malloc(sizeof(*sorted) * count);
+    if (sorted == NULL)
+	goto bad;
+    pl = first;
+    for (i = 0; i < count; i++) {
+	sorted[i] = pl;
+	pl = pl->next;
+    }
+    qsort(sorted, count, sizeof(*sorted), pl_compare);
+
+    /* Apply sorting to the list. */
+    first = sorted[0];
+    sorted[count - 1]->next = NULL;
+    for (i = 1; i < count; i++)
+	sorted[i - 1]->next = sorted[i];
+    efree(sorted);
+
+    /* Pull out the first element for parsing, leave the rest for later. */
+    if (count) {
+	path = first->path;
+	pl = first->next;
+	efree(first);
+	stack->more = pl;
+    } else {
+	path = NULL;
+    }
+done:
+    efree(dirpath);
+    return(path);
+bad:
+    while (first != NULL) {
+	pl = first;
+	first = pl->next;
+	free(pl->path);
+	free(pl);
+    }
+    efree(sorted);
+    efree(dirpath);
+    efree(path);
+    return(NULL);
+}
 
 #define MAX_SUDOERS_DEPTH	128
 #define SUDOERS_STACK_INCREMENT	16
 
-static int
-switch_buffer(path)
-    char *path;
+static size_t istacksize, idepth;
+static struct include_stack *istack;
+static int keepopen;
+
+void
+init_lexer()
 {
-    static size_t stacksize, depth;
-    static struct sudoers_state *state;
-    static int keepopen;
+    struct path_list *pl;
+
+    while (idepth) {
+	idepth--;
+	while ((pl = istack[idepth].more) != NULL) {
+	    istack[idepth].more = pl->next;
+	    efree(pl->path);
+	    efree(pl);
+	}
+	efree(istack[idepth].path);
+	if (!istack[idepth].keepopen)
+	    fclose(istack[idepth].bs->yy_input_file);
+	yy_delete_buffer(istack[idepth].bs);
+    }
+    efree(istack);
+    istack = NULL;
+    istacksize = idepth = 0;
+    keepopen = FALSE;
+}
+
+static int
+_push_include(path, isdir)
+    char *path;
+    int isdir;
+{
     FILE *fp;
 
-    if (path != NULL) {
-	/* push current state */
-	if (depth >= stacksize) {
-	    if (depth > MAX_SUDOERS_DEPTH) {
-		yyerror("too many levels of includes");
-		return(FALSE);
-	    }
-	    stacksize += SUDOERS_STACK_INCREMENT;
-	    state = (struct sudoers_state *) realloc(state,
-		sizeof(state) * stacksize);
-	    if (state == NULL) {
-		yyerror("unable to allocate memory");
-		return(FALSE);
-	    }
+    /* push current state onto stack */
+    if (idepth >= istacksize) {
+	if (idepth > MAX_SUDOERS_DEPTH) {
+	    yyerror("too many levels of includes");
+	    return(FALSE);
 	}
-	if ((fp = open_sudoers(path, &keepopen)) == NULL) {
+	istacksize += SUDOERS_STACK_INCREMENT;
+	istack = (struct include_stack *) realloc(istack,
+	    sizeof(istack) * istacksize);
+	if (istack == NULL) {
+	    yyerror("unable to allocate memory");
+	    return(FALSE);
+	}
+    }
+    if (isdir) {
+	if (!(path = switch_dir(&istack[idepth], path))) {
 	    yyerror(path);
 	    return(FALSE);
 	}
-	state[depth].bs = YY_CURRENT_BUFFER;
-	state[depth].path = sudoers;
-	state[depth].lineno = sudolineno;
-	depth++;
-	sudolineno = 1;
-	sudoers = path;
-	yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
+	if ((fp = open_sudoers(path, FALSE, &keepopen)) == NULL) {
+	    yyerror(path);
+	    return(FALSE); /* XXX - just to go next one? */
+	}
     } else {
-	/* pop */
-	if (depth == 0)
+	if ((fp = open_sudoers(path, TRUE, &keepopen)) == NULL) {
+	    yyerror(path);
 	    return(FALSE);
-	depth--;
-	if (!keepopen)
-	    fclose(YY_CURRENT_BUFFER->yy_input_file);
-	yy_delete_buffer(YY_CURRENT_BUFFER);
-	yy_switch_to_buffer(state[depth].bs);
+	}
+	istack[idepth].more = NULL;
+    }
+    /* Push the old (current) file and open the new one. */
+    istack[idepth].path = sudoers; /* push old path */
+    istack[idepth].bs = YY_CURRENT_BUFFER;
+    istack[idepth].lineno = sudolineno;
+    istack[idepth].keepopen = keepopen;
+    idepth++;
+    sudolineno = 1;
+    sudoers = path;
+    yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
+
+    return(TRUE);
+}
+
+static int
+pop_include()
+{
+    struct path_list *pl;
+    FILE *fp;
+
+    if (idepth == 0)
+	return(FALSE);
+
+    if (!keepopen)
+	fclose(YY_CURRENT_BUFFER->yy_input_file);
+    yy_delete_buffer(YY_CURRENT_BUFFER);
+    keepopen = FALSE;
+    if ((pl = istack[idepth - 1].more) != NULL) {
+	/* Move to next file in the dir. */
+	istack[idepth - 1].more = pl->next;
+	if ((fp = open_sudoers(pl->path, FALSE, &keepopen)) == NULL) {
+	    yyerror(pl->path);
+	    return(FALSE); /* XXX - just to go next one? */
+	}
 	efree(sudoers);
-	sudoers = state[depth].path;
-	sudolineno = state[depth].lineno;
-	keepopen = FALSE;
+	sudoers = pl->path;
+	sudolineno = 1;
+	yy_switch_to_buffer(yy_create_buffer(fp, YY_BUF_SIZE));
+	efree(pl);
+    } else {
+	idepth--;
+	yy_switch_to_buffer(istack[idepth].bs);
+	efree(sudoers);
+	sudoers = istack[idepth].path;
+	sudolineno = istack[idepth].lineno;
     }
     return(TRUE);
 }
@@ -676,6 +857,8 @@ parse_include(base)
 
     /* Pull out path from #include line. */
     cp = base + sizeof("#include");
+    if (*cp == 'i')
+	cp += 3; /* includedir */
     while (isblank((unsigned char) *cp))
 	cp++;
     ep = cp;

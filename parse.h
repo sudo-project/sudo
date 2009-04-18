@@ -185,6 +185,7 @@ struct alias *alias_remove __P((char *, int));
 void alias_free		__P((void *));
 void alias_apply	__P((int (*)(void *, void *), void *));
 void init_aliases	__P((void));
+void init_lexer		__P((void));
 void init_parser	__P((char *, int));
 int alias_compare	__P((const void *, const void *));
 

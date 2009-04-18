@@ -373,8 +373,9 @@ set_fqdn()
 }
 
 FILE *
-open_sudoers(path, keepopen)
+open_sudoers(path, isdir, keepopen)
     const char *path;
+    int isdir;
     int *keepopen;
 {
     return(fopen(path, "r"));

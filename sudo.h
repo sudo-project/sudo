@@ -298,7 +298,7 @@ char *sudo_getepw	__P((const struct passwd *));
 int pam_prep_user	__P((struct passwd *));
 void zero_bytes		__P((volatile void *, size_t));
 int gettime		__P((struct timespec *));
-FILE *open_sudoers	__P((const char *, int *));
+FILE *open_sudoers	__P((const char *, int, int *));
 void display_privs	__P((struct sudo_nss_list *, struct passwd *));
 int display_cmnd	__P((struct sudo_nss_list *, struct passwd *));
 int get_ttycols		__P((void));

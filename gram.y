@@ -766,11 +766,14 @@ init_parser(path, quiet)
 
     init_aliases();
 
+    init_lexer();
+
     efree(sudoers);
     sudoers = path ? estrdup(path) : NULL;
 
     parse_error = FALSE;
     errorlineno = -1;
+    errorfile = NULL;
     sudolineno = 1;
     verbose = !quiet;
 }

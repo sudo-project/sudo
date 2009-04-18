@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "March 11, 2009" "1.7.1" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "April 18, 2009" "1.7.1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -598,13 +598,15 @@ with \fBany\fR arguments.
 .Sh "Including other files from within sudoers"
 .IX Subsection "Including other files from within sudoers"
 It is possible to include other \fIsudoers\fR files from within the
-\&\fIsudoers\fR file currently being parsed using the \f(CW\*(C`#include\*(C'\fR
-directive, similar to the one used by the C preprocessor.  This is
-useful, for example, for keeping a site-wide \fIsudoers\fR file in
-addition to a per-machine local one.  For the sake of this example
-the site-wide \fIsudoers\fR will be \fI/etc/sudoers\fR and the per-machine
-one will be \fI/etc/sudoers.local\fR.  To include \fI/etc/sudoers.local\fR
-from within \fI/etc/sudoers\fR we would use the following line in \fI/etc/sudoers\fR:
+\&\fIsudoers\fR file currently being parsed using the \f(CW\*(C`#include\*(C'\fR and
+\&\f(CW\*(C`#includedir\*(C'\fR directives.
+.PP
+This can be used, for example, to keep a site-wide \fIsudoers\fR file
+in addition to a local, per-machine file.  For the sake of this
+example the site-wide \fIsudoers\fR will be \fI/etc/sudoers\fR and the
+per-machine one will be \fI/etc/sudoers.local\fR.  To include
+\&\fI/etc/sudoers.local\fR from within \fI/etc/sudoers\fR we would use the
+following line in \fI/etc/sudoers\fR:
 .Sp
 .RS 4
 \&\f(CW\*(C`#include /etc/sudoers.local\*(C'\fR
@@ -625,6 +627,28 @@ of the hostname.  I.e., if the machine's hostname is \*(L"xerxes\*(R", then
 .Ve
 .PP
 will cause \fBsudo\fR to include the file \fI/etc/sudoers.xerxes\fR.
+.PP
+The \f(CW\*(C`#includedir\*(C'\fR directive can be used to create a \fIsudo.d\fR
+directory that the system package manager can drop \fIsudoers\fR rules
+into as part of package installation.  For example, given:
+.PP
+.Vb 1
+\&  #includedir /etc/sudoers.d
+.Ve
+.PP
+\&\fBsudo\fR will read each file in \fI/etc/sudoers.d\fR, skipping files
+that end in \*(L".tmp\*(R" to avoid causing problems with \fBvisudo\fR.  Files
+are parsed in sorted lexical order.  That is, \fI/etc/sudoers.d/01_first\fR
+will be parsed before \fI/etc/sudoers.d/10_second\fR.  Be aware that
+because the sorting is lexical, not numeric, \fI/etc/sudoers.d/1_whoops\fR
+would be loaded \fBafter\fR \fI/etc/sudoers.d/10_second\fR.  Using a
+consistent number of leading zeroes in the file names can be used
+to avoid such problems.
+.PP
+Note that unlike files included via \f(CW\*(C`#include\*(C'\fR, \fBvisudo\fR will not
+edit the files in a \f(CW\*(C`#includedir\*(C'\fR directory unless one of them
+contains a syntax error.  It is still possible to run \fBvisudo\fR
+with the \f(CW\*(C`\-f\*(C'\fR flag to edit the files directly.
 .Sh "Other special characters and reserved words"
 .IX Subsection "Other special characters and reserved words"
 The pound sign ('#') is used to indicate a comment (unless it is
