@@ -496,10 +496,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
          #includedir /etc/sudoers.d
 
-       ssuuddoo will read each file in _/_e_t_c_/_s_u_d_o_e_r_s_._d, skipping files that end in
-       ".tmp" to avoid causing problems with vviissuuddoo.  Files are parsed in
-       sorted lexical order.  That is, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_0_1___f_i_r_s_t will be parsed
-       before _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Be aware that because the sorting is
+       ssuuddoo will read each file in _/_e_t_c_/_s_u_d_o_e_r_s_._d, skipping files that contain
+       a . character to avoid causing problems with package manager, vviissuuddoo or
+       editor temporary files.  Files are parsed in sorted lexical order.
+       That is, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_0_1___f_i_r_s_t will be parsed before
+       _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Be aware that because the sorting is
        lexical, not numeric, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1___w_h_o_o_p_s would be loaded aafftteerr
        _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Using a consistent number of leading zeroes
        in the file names can be used to avoid such problems.
@@ -519,7 +520,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        The reserved word AALLLL is a built-in _a_l_i_a_s that always causes a match to
        succeed.  It can be used wherever one might otherwise use a Cmnd_Alias,
-       User_Alias, Runas_Alias, or Host_Alias.  You should not try to define
 
 
 
@@ -532,6 +532,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       User_Alias, Runas_Alias, or Host_Alias.  You should not try to define
        your own _a_l_i_a_s called AALLLL as the built-in alias will be used in
        preference to your own.  Please note that using AALLLL can be dangerous
        since in a command context, it allows the user to run aannyy command on
@@ -585,7 +586,6 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        arbitrary command as root without logging.  A safer
                        alternative is to place a colon-separated list of
                        editors in the editor variable.  vviissuuddoo will then only
-                       use the EDITOR or VISUAL if they match a value
 
 
 
@@ -598,6 +598,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+                       use the EDITOR or VISUAL if they match a value
                        specified in editor.  This flag is _o_f_f by default.
 
        env_reset       If set, ssuuddoo will reset the environment to only contain
@@ -651,7 +652,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        log_year        If set, the four-digit year will be logged in the (non-
                        syslog) ssuuddoo log file.  This flag is _o_f_f by default.
-
 
 
 

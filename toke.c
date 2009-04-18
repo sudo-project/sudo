@@ -3258,11 +3258,9 @@ switch_dir(stack, dirpath)
 	return(FALSE);
     }
     while ((dent = readdir(dir))) {
-	/* Ignore visudo .tmp files. */
-	if (dent->d_namlen > 4 &&
-	    strcmp(dent->d_name + dent->d_namlen - 4, ".tmp") == 0) {
+	/* Ignore files that have a '.' in them. */
+	if (strchr(dent->d_name, '.') != NULL)
 	    continue;
-	}
 	if (asprintf(&path, "%s/%s", dirpath, dent->d_name) == -1) {
 	    closedir(dir);
 	    goto bad;

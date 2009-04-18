@@ -637,10 +637,11 @@ into as part of package installation.  For example, given:
 .Ve
 .PP
 \&\fBsudo\fR will read each file in \fI/etc/sudoers.d\fR, skipping files
-that end in \*(L".tmp\*(R" to avoid causing problems with \fBvisudo\fR.  Files
-are parsed in sorted lexical order.  That is, \fI/etc/sudoers.d/01_first\fR
-will be parsed before \fI/etc/sudoers.d/10_second\fR.  Be aware that
-because the sorting is lexical, not numeric, \fI/etc/sudoers.d/1_whoops\fR
+that contain a \f(CW\*(C`.\*(C'\fR character to avoid causing problems with package
+manager, \fBvisudo\fR or editor temporary files.  Files are parsed in
+sorted lexical order.  That is, \fI/etc/sudoers.d/01_first\fR will be
+parsed before \fI/etc/sudoers.d/10_second\fR.  Be aware that because
+the sorting is lexical, not numeric, \fI/etc/sudoers.d/1_whoops\fR
 would be loaded \fBafter\fR \fI/etc/sudoers.d/10_second\fR.  Using a
 consistent number of leading zeroes in the file names can be used
 to avoid such problems.
