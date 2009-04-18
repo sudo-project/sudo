@@ -141,7 +141,7 @@ TEST_OBJS = $(COMMON_OBJS) interfaces.o testsudoers.o tsgetgrpw.o tspwutil.o
 
 LIB_OBJS = @LIBOBJS@
 
-VERSION = 1.7.1
+VERSION = 1.7.2
 
 DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
             LICENSE Makefile.in PORTING README README.LDAP TROUBLESHOOTING \
