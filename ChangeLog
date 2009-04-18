@@ -1,3 +1,11 @@
+2009-04-18 10:27  millert
+
+	* WHATSNEW: Forgot umask_override
+
+2009-04-18 09:25  millert
+
+	* ChangeLog, TODO: sync
+
 2009-04-16 08:22  millert
 
 	* visudo.c: Rewind stream if we fdopen sudoers since it may not be
