@@ -139,9 +139,13 @@ load_interfaces()
 	switch(ifa->ifa_addr->sa_family) {
 	    case AF_INET:
 		sin = (struct sockaddr_in *)ifa->ifa_addr;
+		if (sin == NULL)
+		    continue;
 		memcpy(&interfaces[i].addr, &sin->sin_addr,
 		    sizeof(struct in_addr));
 		sin = (struct sockaddr_in *)ifa->ifa_netmask;
+		if (sin == NULL)
+		    continue;
 		memcpy(&interfaces[i].netmask, &sin->sin_addr,
 		    sizeof(struct in_addr));
 		interfaces[i].family = AF_INET;
@@ -150,9 +154,13 @@ load_interfaces()
 #ifdef HAVE_IN6_ADDR
 	    case AF_INET6:
 		sin6 = (struct sockaddr_in6 *)ifa->ifa_addr;
+		if (sin6 == NULL)
+		    continue;
 		memcpy(&interfaces[i].addr, &sin6->sin6_addr,
 		    sizeof(struct in6_addr));
 		sin6 = (struct sockaddr_in6 *)ifa->ifa_netmask;
+		if (sin6 == NULL)
+		    continue;
 		memcpy(&interfaces[i].netmask, &sin6->sin6_addr,
 		    sizeof(struct in6_addr));
 		interfaces[i].family = AF_INET6;
