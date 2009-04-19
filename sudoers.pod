@@ -477,15 +477,16 @@ into as part of package installation.  For example, given:
 
   #includedir /etc/sudoers.d
 
-B<sudo> will read each file in F</etc/sudoers.d>, skipping files
-that contain a C<.> character to avoid causing problems with package
-manager, B<visudo> or editor temporary files.  Files are parsed in
-sorted lexical order.  That is, F</etc/sudoers.d/01_first> will be
-parsed before F</etc/sudoers.d/10_second>.  Be aware that because
-the sorting is lexical, not numeric, F</etc/sudoers.d/1_whoops>
-would be loaded B<after> F</etc/sudoers.d/10_second>.  Using a
-consistent number of leading zeroes in the file names can be used
-to avoid such problems.
+B<sudo> will read each file in F</etc/sudoers.d>, skipping file
+names that end in C<~> or contain a C<.> character to avoid causing
+problems with package manager or editor temporary/backup files.
+Files are parsed in sorted lexical order.  That is,
+F</etc/sudoers.d/01_first> will be parsed before
+F</etc/sudoers.d/10_second>.  Be aware that because the sorting is
+lexical, not numeric, F</etc/sudoers.d/1_whoops> would be loaded
+B<after> F</etc/sudoers.d/10_second>.  Using a consistent number
+of leading zeroes in the file names can be used to avoid such
+problems.
 
 Note that unlike files included via C<#include>, B<visudo> will not
 edit the files in a C<#includedir> directory unless one of them
