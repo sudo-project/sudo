@@ -3258,9 +3258,11 @@ switch_dir(stack, dirpath)
 	return(FALSE);
     }
     while ((dent = readdir(dir))) {
-	/* Ignore files that have a '.' in them. */
-	if (strchr(dent->d_name, '.') != NULL)
+	/* Ignore files that end in '~' or have a '.' in them. */
+	if (dent->d_namlen == 0 || dent->d_name[dent->d_namlen - 1] == '~'
+	    || strchr(dent->d_name, '.') != NULL) {
 	    continue;
+	}
 	if (asprintf(&path, "%s/%s", dirpath, dent->d_name) == -1) {
 	    closedir(dir);
 	    goto bad;
