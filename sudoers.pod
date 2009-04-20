@@ -467,7 +467,7 @@ files is enforced to prevent include file loops.
 The filename may include the C<%h> escape, signifying the short form
 of the hostname.  I.e., if the machine's hostname is "xerxes", then
 
- #include /etc/sudoers.%h
+C<#include /etc/sudoers.%h>
 
 will cause B<sudo> to include the file F</etc/sudoers.xerxes>.
 
@@ -475,7 +475,7 @@ The C<#includedir> directive can be used to create a F<sudo.d>
 directory that the system package manager can drop I<sudoers> rules
 into as part of package installation.  For example, given:
 
-  #includedir /etc/sudoers.d
+C<#includedir /etc/sudoers.d>
 
 B<sudo> will read each file in F</etc/sudoers.d>, skipping file
 names that end in C<~> or contain a C<.> character to avoid causing
