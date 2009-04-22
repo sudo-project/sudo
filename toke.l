@@ -50,8 +50,23 @@
 #if defined(HAVE_MALLOC_H) && !defined(STDC_HEADERS)
 # include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
+#ifdef HAVE_DIRENT_H
+# include <dirent.h>
+# define NAMLEN(dirent) strlen((dirent)->d_name)
+#else
+# define dirent direct
+# define NAMLEN(dirent) (dirent)->d_namlen
+# ifdef HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# ifdef HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# ifdef HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
 #include <ctype.h>
-#include <dirent.h>
 #include "sudo.h"
 #include "parse.h"
 #include <gram.h>
@@ -664,7 +679,7 @@ switch_dir(stack, dirpath)
     }
     while ((dent = readdir(dir))) {
 	/* Ignore files that end in '~' or have a '.' in them. */
-	if (dent->d_namlen == 0 || dent->d_name[dent->d_namlen - 1] == '~'
+	if (dent->d_name[0] == '\0' || dent->d_name[NAMLEN(dent) - 1] == '~'
 	    || strchr(dent->d_name, '.') != NULL) {
 	    continue;
 	}
