@@ -250,23 +250,27 @@ setenv(var, val, overwrite)
     int overwrite;
 {
     char *estring;
+    const char *varend;
     size_t esize;
+    int len;
 
-    if (strchr(var, '=') != NULL) {
-	errno = EINVAL;
-	return(-1);
-    }
+    /*
+     * POSIX says a var name with '=' is an error but BSD
+     * just ignores the '=' and anything after it.
+     */
+    for (varend = var; *varend && *varend != '='; varend++)
+	;
 
-    esize = strlen(var) + 1 + strlen(val) + 1;
+    if (val == NULL)
+	val = "";		/* glibc treats a NULL val as "" */
+
+    esize = (size_t)(varend - var) + 1 + strlen(val) + 1;
     estring = emalloc(esize);
 
-    /* Build environment string and insert it. */
-    if (strlcpy(estring, var, esize) >= esize ||
-	strlcat(estring, "=", esize) >= esize ||
-	strlcat(estring, val, esize) >= esize) {
-
+    len = snprintf(estring, esize, "%.*s=%s", (int)(varend - var), var, val);
+    if (len < 0 && len >= esize)
 	errorx(1, "internal error, setenv() overflow");
-    }
+
     /* Sync env.envp with environ as needed. */
     if (env.envp != environ) {
 	char **ep;
