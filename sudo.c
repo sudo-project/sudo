@@ -131,6 +131,7 @@ extern char **insert_env_vars		__P((char **, struct list_member *));
 extern struct passwd *sudo_getpwnam	__P((const char *));
 extern struct passwd *sudo_getpwuid	__P((uid_t));
 extern struct passwd *sudo_pwdup	__P((const struct passwd *));
+extern void runas_resetgroups		__P((void));
 
 /*
  * Globals
@@ -1293,6 +1294,7 @@ set_runaspw(user)
 	if (runas_pw == NULL)
 	    log_error(NO_MAIL|MSG_ONLY, "no passwd entry for %s!", user);
     }
+    runas_resetgroups();
     return(TRUE);
 }
 

@@ -376,11 +376,12 @@ set_perms(perm)
 #endif /* HAVE_SETRESUID */
 
 #ifdef HAVE_INITGROUPS
+static int runas_ngroups = -1;
+static GETGROUPS_T *runas_groups;
+
 static void
 runas_setgroups()
 {
-    static int ngroups = -1;
-    static GETGROUPS_T *groups;
     struct passwd *pw;
 
     if (def_preserve_groups)
@@ -389,19 +390,26 @@ runas_setgroups()
     /*
      * Use stashed copy of runas groups if available, else initgroups and stash.
      */
-    if (ngroups == -1) {
+    if (runas_ngroups == -1) {
 	pw = runas_pw ? runas_pw : sudo_user.pw;
 	if (initgroups(pw->pw_name, pw->pw_gid) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't set runas group vector");
-	if ((ngroups = getgroups(0, NULL)) < 0)
+	if ((runas_ngroups = getgroups(0, NULL)) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't get runas ngroups");
-	groups = emalloc2(ngroups, sizeof(GETGROUPS_T));
-	if (getgroups(ngroups, groups) < 0)
+	runas_groups = emalloc2(runas_ngroups, sizeof(GETGROUPS_T));
+	if (getgroups(runas_ngroups, runas_groups) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't get runas group vector");
     } else {
-	if (setgroups(ngroups, groups) < 0)
+	if (setgroups(runas_ngroups, runas_groups) < 0)
 	    log_error(USE_ERRNO|MSG_ONLY, "can't set runas group vector");
     }
+}
+
+void
+runas_resetgroups()
+{
+    runas_ngroups = -1;
+    efree(runas_groups);
 }
 
 static void
