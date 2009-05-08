@@ -207,18 +207,16 @@ sudo_getpwuid(uid)
 	if (pw->pw_passwd != NULL)
 	    zero_bytes(pw->pw_passwd, strlen(pw->pw_passwd));
 	pw->pw_passwd = cp;
-
-	if (rbinsert(pwcache_byname, (void *) pw) != NULL)
-	    errorx(1, "unable to cache user name, already exists");
 	if (rbinsert(pwcache_byuid, (void *) pw) != NULL)
-	    errorx(1, "unable to cache uid, already exists");
+	    errorx(1, "unable to cache uid %lu (%s), already exists",
+		uid, pw->pw_name);
 	return(pw);
     } else {
 	pw = emalloc(sizeof(*pw));
 	zero_bytes(pw, sizeof(*pw));
 	pw->pw_uid = uid;
 	if (rbinsert(pwcache_byuid, (void *) pw) != NULL)
-	    errorx(1, "unable to cache uid, already exists");
+	    errorx(1, "unable to cache uid %lu, already exists", uid);
 	return(NULL);
     }
 }
@@ -250,11 +248,8 @@ sudo_getpwnam(name)
 	if (pw->pw_passwd != NULL)
 	    zero_bytes(pw->pw_passwd, strlen(pw->pw_passwd));
 	pw->pw_passwd = cp;
-
 	if (rbinsert(pwcache_byname, (void *) pw) != NULL)
-	    errorx(1, "unable to cache user name, already exists");
-	if (rbinsert(pwcache_byuid, (void *) pw) != NULL)
-	    errorx(1, "unable to cache uid, already exists");
+	    errorx(1, "unable to cache user %s, already exists", name);
 	return(pw);
     } else {
 	len = strlen(name) + 1;
@@ -266,7 +261,7 @@ sudo_getpwnam(name)
 	pw->pw_name = cp;
 	pw->pw_uid = (uid_t) -1;
 	if (rbinsert(pwcache_byname, (void *) pw) != NULL)
-	    errorx(1, "unable to cache user name, already exists");
+	    errorx(1, "unable to cache user %s, already exists", name);
 	return(NULL);
     }
 }
@@ -487,17 +482,16 @@ sudo_getgrgid(gid)
      */
     if ((gr = getgrgid(gid)) != NULL) {
 	gr = sudo_grdup(gr);
-	if (rbinsert(grcache_byname, (void *) gr) != NULL)
-	    errorx(1, "unable to cache group name, already exists");
 	if (rbinsert(grcache_bygid, (void *) gr) != NULL)
-	    errorx(1, "unable to cache gid, already exists");
+	    errorx(1, "unable to cache gid %lu (%s), already exists",
+		gid, gr->gr_name);
 	return(gr);
     } else {
 	gr = emalloc(sizeof(*gr));
 	zero_bytes(gr, sizeof(*gr));
 	gr->gr_gid = gid;
 	if (rbinsert(grcache_bygid, (void *) gr) != NULL)
-	    errorx(1, "unable to cache gid, already exists");
+	    errorx(1, "unable to cache gid %lu, already exists, gid");
 	return(NULL);
     }
 }
@@ -525,9 +519,7 @@ sudo_getgrnam(name)
     if ((gr = getgrnam(name)) != NULL) {
 	gr = sudo_grdup(gr);
 	if (rbinsert(grcache_byname, (void *) gr) != NULL)
-	    errorx(1, "unable to cache group name, already exists");
-	if (rbinsert(grcache_bygid, (void *) gr) != NULL)
-	    errorx(1, "unable to cache gid, already exists");
+	    errorx(1, "unable to cache group %s, already exists", name);
 	return(gr);
     } else {
 	len = strlen(name) + 1;
@@ -539,7 +531,7 @@ sudo_getgrnam(name)
 	gr->gr_name = cp;
 	gr->gr_gid = (gid_t) -1;
 	if (rbinsert(grcache_byname, (void *) gr) != NULL)
-	    errorx(1, "unable to cache group name, already exists");
+	    errorx(1, "unable to cache group %s, already exists", name);
 	return(NULL);
     }
 }
