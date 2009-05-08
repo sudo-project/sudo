@@ -144,7 +144,7 @@ lock_file(fd, lockit)
     lock.l_pid = getpid();
     lock.l_type = (lockit == SUDO_UNLOCK) ? F_UNLCK : F_WRLCK;
     lock.l_whence = SEEK_SET;
-    func = (lockit == SUDO_TLOCK) ? F_SETLK : F_SETLKW;
+    func = (lockit == SUDO_LOCK) ? F_SETLKW : F_SETLK;
 
     return(fcntl(fd, func, &lock) == 0);
 #else
