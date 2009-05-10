@@ -482,6 +482,9 @@ main(argc, argv, envp)
 	(void) setrlimit(RLIMIT_CORE, &corelimit);
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
 
+	/* Must audit before uid change. */
+	audit_success(NewArgv);
+
 	/* Become specified user or root if executing a command. */
 	if (ISSET(sudo_mode, MODE_RUN))
 	    set_perms(PERM_FULL_RUNAS);
@@ -529,7 +532,6 @@ main(argc, argv, envp)
 #ifndef PROFILING
 	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0) {
 	    syslog(LOG_AUTH|LOG_ERR, "fork");
-	    audit_success(NewArgv);
 	    exit(0);
 	} else {
 #ifdef HAVE_SELINUX
@@ -537,7 +539,6 @@ main(argc, argv, envp)
 		selinux_exec(user_role, user_type, NewArgv,
 		    ISSET(sudo_mode, MODE_LOGIN_SHELL));
 #endif
-	    audit_success(NewArgv);
 	    execv(safe_cmnd, NewArgv);
 	}
 #else
