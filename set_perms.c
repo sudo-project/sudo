@@ -77,14 +77,18 @@ static int current_perm = -1;
  * We only flip the effective gid since it only changes for PERM_SUDOERS.
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
-void
+int
 set_perms(perm)
     int perm;
 {
     const char *errstr;
+    int noexit;
+
+    noexit = ISSET(perm, PERM_NOEXIT);
+    CLR(perm, PERM_MASK);
 
     if (perm == current_perm)
-	return;
+	return(1);
 
     switch (perm) {
 	case PERM_ROOT:
@@ -169,10 +173,13 @@ set_perms(perm)
     }
 
     current_perm = perm;
-    return;
+    return(1);
 bad:
-    errorx(1, "%s: %s", errstr,
+    warningx("%s: %s", errstr,
 	errno == EAGAIN ? "too many processes" : strerror(errno));
+    if (noexit)
+	return(0);
+    exit(1);
 }
 
 #else
@@ -184,14 +191,18 @@ bad:
  * we are headed for an exec().
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
-void
+int
 set_perms(perm)
     int perm;
 {
     const char *errstr;
+    int noexit;
+
+    noexit = ISSET(perm, PERM_NOEXIT);
+    CLR(perm, PERM_MASK);
 
     if (perm == current_perm)
-	return;
+	return(1);
 
     switch (perm) {
 	case PERM_ROOT:
@@ -279,10 +290,13 @@ set_perms(perm)
     }
 
     current_perm = perm;
-    return;
+    return(1);
 bad:
-    errorx(1, "%s: %s", errstr,
+    warningx("%s: %s", errstr,
 	errno == EAGAIN ? "too many processes" : strerror(errno));
+    if (noexit)
+	return(0);
+    exit(1);
 }
 
 # else /* !HAVE_SETRESUID && !HAVE_SETREUID */
@@ -292,14 +306,18 @@ bad:
  * Set real and effective uids and gids based on perm.
  * NOTE: does not support the "stay_setuid" option.
  */
-void
+int
 set_perms(perm)
     int perm;
 {
     const char *errstr;
+    int noexit;
+
+    noexit = ISSET(perm, PERM_NOEXIT);
+    CLR(perm, PERM_MASK);
 
     if (perm == current_perm)
-	return;
+	return(1);
 
     /*
      * Since we only have setuid() and seteuid() and semantics
@@ -391,10 +409,13 @@ set_perms(perm)
     }
 
     current_perm = perm;
-    return;
+    return(1);
 bad:
-    errorx(1, "%s: %s", errstr,
+    warningx("%s: %s", errstr,
 	errno == EAGAIN ? "too many processes" : strerror(errno));
+    if (noexit)
+	return(0);
+    exit(1);
 }
 
 # else /* !HAVE_SETRESUID && !HAVE_SETREUID && !HAVE_SETEUID */
@@ -404,14 +425,18 @@ bad:
  * NOTE: does not support the "stay_setuid" or timestampowner options.
  *       Also, SUDOERS_UID and SUDOERS_GID are not used.
  */
-void
+int
 set_perms(perm)
     int perm;
 {
     const char *errstr;
+    int noexit;
+
+    noexit = ISSET(perm, PERM_NOEXIT);
+    CLR(perm, PERM_MASK);
 
     if (perm == current_perm)
-	return;
+	return(1);
 
     switch (perm) {
 	case PERM_ROOT:
@@ -448,10 +473,13 @@ set_perms(perm)
     }
 
     current_perm = perm;
-    return;
+    return(1);
 bad:
-    errorx(1, "%s: %s", errstr,
+    warningx("%s: %s", errstr,
 	errno == EAGAIN ? "too many processes" : strerror(errno));
+    if (noexit)
+	return(0);
+    exit(1);
 }
 #  endif /* HAVE_SETEUID */
 # endif /* HAVE_SETREUID */

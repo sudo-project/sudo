@@ -371,7 +371,7 @@ log_error(flags, fmt, va_alist)
 #endif
 
     /* Become root if we are not already to avoid user interference */
-    set_perms(PERM_ROOT);
+    set_perms(PERM_ROOT|PERM_NOEXIT);
 
     /* Expand printf-style format + args. */
     evasprintf(&message, fmt, ap);
@@ -555,10 +555,10 @@ send_mail(line)
 		 * (so user cannot kill it) or as the user (for the paranoid).
 		 */
 #ifndef NO_ROOT_MAILER
-		set_perms(PERM_ROOT);
+		set_perms(PERM_ROOT|PERM_NOEXIT);
 		execve(mpath, argv, root_envp);
 #else
-		set_perms(PERM_FULL_USER);
+		set_perms(PERM_FULL_USER|PERM_NOEXIT);
 		execv(mpath, argv);
 #endif /* NO_ROOT_MAILER */
 		mysyslog(LOG_ERR, "cannot execute %s: %m", mpath);

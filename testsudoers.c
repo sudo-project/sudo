@@ -387,11 +387,11 @@ init_envtables()
     return;
 }
 
-void
+int
 set_perms(perm)
     int perm;
 {
-    return;
+    return(1);
 }
 
 void
