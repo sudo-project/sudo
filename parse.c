@@ -328,8 +328,10 @@ sudo_file_display_priv_short(pw, us, lbuf)
 		    print_member(lbuf, m->name, m->type, m->negated,
 			RUNASALIAS);
 		}
-	    } else {
+	    } else if (tq_empty(&cs->runasgrouplist)) {
 		lbuf_append(lbuf, def_runas_default, NULL);
+	    } else {
+		lbuf_append(lbuf, pw->pw_name, NULL);
 	    }
 	    if (!tq_empty(&cs->runasgrouplist)) {
 		lbuf_append(lbuf, " : ", NULL);
@@ -377,8 +379,10 @@ sudo_file_display_priv_long(pw, us, lbuf)
 		    print_member(lbuf, m->name, m->type, m->negated,
 			RUNASALIAS);
 		}
-	    } else {
+	    } else if (tq_empty(&cs->runasgrouplist)) {
 		lbuf_append(lbuf, def_runas_default, NULL);
+	    } else {
+		lbuf_append(lbuf, pw->pw_name, NULL);
 	    }
 	    lbuf_print(lbuf);
 	    if (!tq_empty(&cs->runasgrouplist)) {
