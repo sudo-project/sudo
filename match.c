@@ -174,9 +174,13 @@ _runaslist_matches(user_list, group_list)
     struct alias *a;
     int rval, matched = UNSPEC;
 
-    /* Deny if user specified a group but there is no group in sudoers */
-    if (runas_gr != NULL && tq_empty(group_list))
-	return(DENY);
+    if (runas_gr != NULL) {
+	if (tq_empty(group_list))
+	    return(DENY); /* group was specified but none in sudoers */
+	if (runas_pw != NULL && strcmp(runas_pw->pw_name, user_name) &&
+	    tq_empty(user_list))
+	    return(DENY); /* user was specified but none in sudoers */
+    }
 
     if (tq_empty(user_list) && tq_empty(group_list))
 	return(userpw_matches(def_runas_default, runas_pw->pw_name, runas_pw));
