@@ -98,6 +98,9 @@
 /* Define to 1 if you have the `dispcrypt' function. */
 #undef HAVE_DISPCRYPT
 
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
 /* Define to 1 if your glob.h defines the GLOB_BRACE and GLOB_TILDE flags. */
 #undef HAVE_EXTENDED_GLOB
 
@@ -511,6 +514,9 @@
 /* The message given when a bad password is entered. */
 #undef INCORRECT_PASSWORD
 
+/* The name of libvas.so */
+#undef LIBVAS_SO
+
 /* The syslog facility sudo will use. */
 #undef LOGFAC
 
@@ -634,6 +640,9 @@
 
 /* Define to 1 if you want a different ticket file for each tty. */
 #undef USE_TTY_TICKETS
+
+/* Define to 1 if using a non-unix group lookup implementation. */
+#undef USING_NONUNIX_GROUPS
 
 /* Define to avoid using the passwd/shadow file for authentication. */
 #undef WITHOUT_PASSWD

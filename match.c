@@ -89,6 +89,9 @@
 #ifndef HAVE_EXTENDED_GLOB
 # include "emul/glob.h"
 #endif /* HAVE_EXTENDED_GLOB */
+#ifdef USING_NONUNIX_GROUPS
+# include "nonunix.h"
+#endif /* USING_NONUNIX_GROUPS */
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
@@ -824,6 +827,11 @@ usergr_matches(group, user, pw)
     /* make sure we have a valid usergroup, sudo style */
     if (*group++ != '%')
 	return(FALSE);
+
+#ifdef USING_NONUNIX_GROUPS
+    if (*group == ':')
+	return(sudo_nonunix_groupcheck(++group, user, pw));   
+#endif /* USING_NONUNIX_GROUPS */
 
     /* look up user's primary gid in the passwd file */
     if (pw == NULL && (pw = sudo_getpwnam(user)) == NULL)

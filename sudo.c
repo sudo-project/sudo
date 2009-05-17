@@ -101,6 +101,10 @@
 #include "interfaces.h"
 #include "version.h"
 
+#ifdef USING_NONUNIX_GROUPS
+# include "nonunix.h"
+#endif
+
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
@@ -271,6 +275,10 @@ main(argc, argv, envp)
 
     init_vars(sudo_mode, envp);		/* XXX - move this later? */
 
+#ifdef USING_NONUNIX_GROUPS
+    sudo_nonunix_groupcheck_init();	/* initialise nonunix groups impl */
+#endif /* USING_NONUNIX_GROUPS */
+
     /* Parse nsswitch.conf for sudoers order. */
     snl = sudo_read_nss();
 
@@ -355,6 +363,12 @@ main(argc, argv, envp)
 		break;
 	}
     }
+
+#ifdef USING_NONUNIX_GROUPCHECK
+    /* Finished with the groupcheck code */
+    sudo_nonunix_groupcheck_cleanup();
+#endif
+
     if (safe_cmnd == NULL)
 	safe_cmnd = estrdup(user_cmnd);
 
