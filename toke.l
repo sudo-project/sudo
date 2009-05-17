@@ -347,7 +347,7 @@ NOSETENV[[:blank:]]*:	{
 			    return(NETGROUP);
 			}
 
-\%{WORD}		{
+\%:?{WORD}		{
 			    /* UN*X group */
 			    if (!fill(yytext, yyleng))
 				yyterminate();
