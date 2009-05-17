@@ -443,11 +443,28 @@ sudoedit		{
 			    }
 			}			/* a pathname */
 
+<INITIAL,GOTDEFS>\"[^"\n]+\" {
+			    /* a quoted user/group name */
+			    if (!fill(yytext + 1, yyleng - 2))
+				yyterminate();
+			    switch (yytext[1]) {
+			    case '%':
+				LEXTRACE("USERGROUP ");
+				return(USERGROUP);
+			    case '+':
+				LEXTRACE("NETGROUP ");
+				return(NETGROUP);
+			    default:
+				LEXTRACE("WORD(4) ");
+				return(WORD);
+			    }
+			}
+
 <INITIAL,GOTDEFS>({ID}|{WORD}) {
 			    /* a word */
 			    if (!fill(yytext, yyleng))
 				yyterminate();
-			    LEXTRACE("WORD(4) ");
+			    LEXTRACE("WORD(5) ");
 			    return(WORD);
 			}
 
