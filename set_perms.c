@@ -558,13 +558,9 @@ runas_setup()
 #ifdef HAVE_LOGIN_CAP_H
 	if (def_use_loginclass) {
 	    /*
-             * We only use setusercontext() set the nice value and rlimits.
+             * We only use setusercontext() to set the nice value and rlimits.
 	     */
 	    flags = LOGIN_SETRESOURCES|LOGIN_SETPRIORITY;
-	    if (!def_preserve_groups)
-		SET(flags, LOGIN_SETGROUP);
-	    else if (setgid(gid))
-		warning("cannot set gid to runas gid");
 	    if (setusercontext(lc, runas_pw, runas_pw->pw_uid, flags)) {
 		if (runas_pw->pw_uid != ROOT_UID)
 		    error(1, "unable to set user context");
@@ -573,11 +569,11 @@ runas_setup()
 	    }
 	}
 #endif /* HAVE_LOGIN_CAP_H */
-	if (setgid(gid))
-	    warning("cannot set gid to runas gid");
 	/*
 	 * Initialize group vector
 	 */
 	runas_setgroups();
+	if (setegid(gid) || setgid(gid))
+	    warning("cannot set gid to runas gid");
     }
 }
