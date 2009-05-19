@@ -85,7 +85,6 @@
 #include "parse.h"
 #include "redblack.h"
 #include <gram.h>
-#include "version.h"
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
@@ -173,7 +172,7 @@ main(argc, argv)
     while ((ch = getopt(argc, argv, "Vcf:sq")) != -1) {
 	switch (ch) {
 	    case 'V':
-		(void) printf("%s version %s\n", getprogname(), version);
+		(void) printf("%s version %s\n", getprogname(), PACKAGE_VERSION);
 		exit(0);
 	    case 'c':
 		checkonly++;		/* check mode */

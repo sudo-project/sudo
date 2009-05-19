@@ -120,7 +120,7 @@ AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 HDRS = bsm_audit.h compat.h def_data.h defaults.h error.h ins_2001.h \
        ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.h lbuf.h \
        list.h logging.h nonunix.h redblack.h parse.h sudo.h sudo_nss.h gram.h \
-       version.h auth/sudo_auth.h emul/charclass.h emul/fnmatch.h emul/glob.h \
+       auth/sudo_auth.h emul/charclass.h emul/fnmatch.h emul/glob.h \
        emul/timespec.h emul/utime.h
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
@@ -141,7 +141,7 @@ TEST_OBJS = $(COMMON_OBJS) interfaces.o testsudoers.o tsgetgrpw.o tspwutil.o
 
 LIB_OBJS = @LIBOBJS@
 
-VERSION = 1.7.2
+VERSION = @PACKAGE_VERSION@
 
 DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
             LICENSE Makefile.in PORTING README README.LDAP TROUBLESHOOTING \
@@ -301,7 +301,7 @@ strlcpy.o: $(srcdir)/strlcpy.c $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strlcpy.c
 selinux.o: $(srcdir)/selinux.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/selinux.c
-sudo.o: $(srcdir)/sudo.c $(SUDODEP) sudo_usage.h $(srcdir)/interfaces.h $(srcdir)/version.h
+sudo.o: $(srcdir)/sudo.c $(SUDODEP) sudo_usage.h $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_edit.c
@@ -323,7 +323,7 @@ utimes.o: $(srcdir)/utimes.c $(srcdir)/compat.h $(srcdir)/emul/utime.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/utimes.c
 vasgroups.o: $(srcdir)/vasgroups.c $(srcdir)/nonunix.h $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/vasgroups.c
-visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(srcdir)/version.h $(devdir)/gram.h
+visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/visudo.c
 zero_bytes.o: $(srcdir)/zero_bytes.c $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/zero_bytes.c

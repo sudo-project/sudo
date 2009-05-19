@@ -2,14 +2,14 @@ dnl
 dnl Process this file with GNU autoconf to produce a configure script.
 dnl $Sudo$
 dnl
-dnl Copyright (c) 1994-1996,1998-2008 Todd C. Miller <Todd.Miller@courtesan.com>
+dnl Copyright (c) 1994-1996,1998-2009 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT([sudo], [1.7])
+AC_INIT([sudo], [1.7.2], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER(config.h pathnames.h)
 dnl
 dnl This won't work before AC_INIT
 dnl
-AC_MSG_NOTICE([Configuring Sudo version 1.7])
+AC_MSG_NOTICE([Configuring Sudo version $PACKAGE_VERSION])
 dnl
 dnl Variables that get substituted in the Makefile and man pages
 dnl

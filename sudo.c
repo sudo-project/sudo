@@ -99,7 +99,6 @@
 #include "sudo.h"
 #include "lbuf.h"
 #include "interfaces.h"
-#include "version.h"
 
 #ifdef USING_NONUNIX_GROUPS
 # include "nonunix.h"
@@ -1452,7 +1451,7 @@ cleanup(gotsignal)
 static void
 show_version()
 {
-    (void) printf("Sudo version %s\n", version);
+    (void) printf("Sudo version %s\n", PACKAGE_VERSION);
     if (getuid() == 0) {
 	putchar('\n');
 	(void) printf("Sudoers path: %s\n", _PATH_SUDOERS);
