@@ -41,6 +41,13 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <ctype.h>
+#ifdef HAVE_TERMIOS_H
+# include <termios.h>
+#else
+# ifdef HAVE_TERMIO_H
+#  include <termio.h>
+# endif
+#endif
 
 #include "sudo.h"
 #include "lbuf.h"
