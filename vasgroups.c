@@ -43,6 +43,7 @@
 #include "compat.h"
 #include "logging.h"
 #include "nonunix.h"
+#include "parse.h"
 #include "sudo.h"
 
 
@@ -153,7 +154,9 @@ sudo_nonunix_groupcheck( const char* group, const char* user, const struct passw
 
 FINISHED: /* cleanups */
     if (vaserr != VAS_ERR_SUCCESS) {
-	log_error(NO_MAIL|MSG_ONLY, "Error while checking group membership "
+	int error_flags = NO_MAIL | MSG_ONLY | (uses_inversion ? 0 : NO_EXIT);
+
+	log_error(error_flags, "Error while checking group membership "
 		"for user \"%s\", group \"%s\", error: %s%s.", user, group,
 		v_err_get_string(sudo_vas_ctx, 1),
 		/* A helpful hint if there seems to be a non-FQDN as the domain */

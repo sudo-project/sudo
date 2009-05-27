@@ -363,7 +363,7 @@ main(argc, argv, envp)
 	}
     }
 
-#ifdef USING_NONUNIX_GROUPCHECK
+#ifdef USING_NONUNIX_GROUPS
     /* Finished with the groupcheck code */
     sudo_nonunix_groupcheck_cleanup();
 #endif

@@ -812,7 +812,6 @@ group_matches(sudoers_group, gr)
 /*
  *  Returns TRUE if the given user belongs to the named group,
  *  else returns FALSE.
- *  XXX - reduce the number of group lookups
  */
 int
 usergr_matches(group, user, pw)
@@ -820,7 +819,7 @@ usergr_matches(group, user, pw)
     char *user;
     struct passwd *pw;
 {
-    struct group *grp;
+    struct group *grp = NULL;
     char **cur;
     int i;
 
@@ -835,12 +834,11 @@ usergr_matches(group, user, pw)
 
     /* look up user's primary gid in the passwd file */
     if (pw == NULL && (pw = sudo_getpwnam(user)) == NULL)
-	return(FALSE);
-
-    if ((grp = sudo_getgrnam(group)) == NULL)
-	return(FALSE);
+	goto try_supplementary;
 
     /* check against user's primary (passwd file) gid */
+    if ((grp = sudo_getgrnam(group)) == NULL)
+	goto try_supplementary;
     if (grp->gr_gid == pw->pw_gid)
 	return(TRUE);
 
@@ -853,11 +851,20 @@ usergr_matches(group, user, pw)
 	    if (grp->gr_gid == user_groups[i])
 		return(TRUE);
     }
-    if (grp->gr_mem != NULL) {
+
+try_supplementary:
+    if (grp != NULL && grp->gr_mem != NULL) {
 	for (cur = grp->gr_mem; *cur; cur++)
 	    if (strcmp(*cur, user) == 0)
 		return(TRUE);
     }
+
+#ifdef USING_NONUNIX_GROUPS
+    /* not a Unix group, could be an AD group */
+    if (sudo_nonunix_groupcheck_available() &&
+	sudo_nonunix_groupcheck(group, user, pw))
+    	return(TRUE);
+#endif /* USING_NONUNIX_GROUPS */
 
     return(FALSE);
 }

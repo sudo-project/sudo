@@ -51,6 +51,7 @@ AC_SUBST(BSDAUTH_USAGE)
 AC_SUBST(SELINUX_USAGE)
 AC_SUBST(LDAP)
 AC_SUBST(LOGINCAP_USAGE)
+AC_SUBST(NONUNIX_GROUPS_IMPL)
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -1032,6 +1033,29 @@ AC_ARG_WITH(askpass, [  --with-askpass=PATH     Fully qualified pathname of askp
 esac], AC_MSG_RESULT(no))
 
 dnl
+dnl If enabled, set LIBVAS_SO, LIBVAS_RPATH and USING_NONUNIX_GROUPS
+dnl
+AC_ARG_WITH(libvas, [  --with-libvas=NAME      Name of the libvas shared library [default=libvas.so]],
+[case $with_libvas in
+    yes)	with_libvas=libvas.so
+		;;
+    no)		;;
+    *)		AC_DEFINE_UNQUOTED([LIBVAS_SO], ["$with_with_libvas"], [The name of libvas.so])
+		;;
+esac
+if test X"$with_libvas" != X"no"; then
+    AC_DEFINE_UNQUOTED([LIBVAS_SO], ["$with_libvas"], [The name of libvas.so])
+    AC_DEFINE(USING_NONUNIX_GROUPS)
+    NONUNIX_GROUPS_IMPL="vasgroups.o"
+    AC_ARG_WITH([libvas-rpath],
+       [AS_HELP_STRING([--with-libvas-rpath=PATH],
+		       [Path to look for libvas in [default=/opt/quest/lib]])],
+       [LIBVAS_RPATH=$withval],
+       [LIBVAS_RPATH=/opt/quest/lib])
+fi
+])
+
+dnl
 dnl Options for --enable
 dnl
 
@@ -1238,6 +1262,7 @@ dnl Libtool magic; enable shared libs and disable static libs
 dnl
 AC_CANONICAL_HOST
 AC_DISABLE_STATIC
+AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
 
 dnl
@@ -1390,6 +1415,19 @@ case "$host" in
 		if test "x$ac_cv_prog_cc_c89" = "xno"; then
 		    with_noexec=no
 		fi
+
+		# Use the +DAportable flag if it is supported
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS +DAportable"
+		AC_CACHE_CHECK([whether $CC understands +DAportable],
+		    [sudo_cv_var_daportable],
+		    [AC_TRY_LINK([], [], [sudo_cv_var_daportable=yes],
+				 [sudo_cv_var_daportable=no])]
+		)
+		if test X"$sudo_cv_var_daportable" != X"yes"; then
+		    CFLAGS="$_CFLAGS"
+		fi
+
 		case "$host" in
 			*-*-hpux[1-8].*)
 			    AC_DEFINE(BROKEN_SYSLOG)
@@ -1725,6 +1763,7 @@ dnl
 dnl Program checks
 dnl
 AC_PROG_YACC
+AC_PATH_PROG([FLEX], [flex], [flex])
 SUDO_PROG_MV
 SUDO_PROG_BSHELL
 if test -z "$with_sendmail"; then
@@ -2440,7 +2479,7 @@ if test ${with_ldap-'no'} != "no"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_LBER_H)])
 
-    AC_CHECK_HEADERS([sasl/sasl.h] [sasl.h], [AC_CHECK_FUNCS(ldap_sasl_interactive_bind_s), [break]])
+    AC_CHECK_HEADERS([sasl/sasl.h] [sasl.h], [AC_CHECK_FUNCS(ldap_sasl_interactive_bind_s)], [break])
     AC_CHECK_HEADERS([ldap_ssl.h] [mps/ldap_ssl.h], [break], [], [#include <ldap.h>])
     AC_CHECK_FUNCS(ldap_initialize ldap_start_tls_s ldapssl_init ldapssl_set_strength ldap_search_ext_s ldap_unbind_ext_s ldap_str2dn ldap_create ldap_sasl_bind_s ldap_ssl_client_init ldap_start_tls_s_np)
 
@@ -2474,6 +2513,18 @@ if test ${with_ldap-'no'} != "no"; then
     SUDO_LIBS="${SUDO_LIBS} ${LDAP_LIBS}"
     LIBS="$_LIBS"
     LDFLAGS="$_LDFLAGS"
+fi
+
+dnl
+dnl Add LIBVAS_RPATH to LDFLAGS
+dnl GNU ld accepts -R/path/ as an alias for -rpath /path/
+dnl
+if test X"$LIBVAS_RPATH" != X""; then
+    if test -n "$blibpath"; then
+	blibpath_add="${blibpath_add}:$LIBVAS_RPATH"
+    else
+	LDFLAGS="$LDFLAGS -R$LIBVAS_RPATH"
+    fi
 fi
 
 dnl
@@ -2655,6 +2706,7 @@ AH_TEMPLATE(USE_TTY_TICKETS, [Define to 1 if you want a different ticket file fo
 AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for authentication.])
 AH_TEMPLATE(sig_atomic_t, [Define to `int' if <signal.h> does not define.])
 AH_TEMPLATE(__signed, [Define to `signed' or nothing if compiler does not support a signed type qualifier.])
+AH_TEMPLATE(USING_NONUNIX_GROUPS, [Define to 1 if using a non-Unix group lookup implementation.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

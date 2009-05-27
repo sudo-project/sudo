@@ -838,6 +838,7 @@ BSDAUTH_USAGE
 SELINUX_USAGE
 LDAP
 LOGINCAP_USAGE
+NONUNIX_GROUPS_IMPL
 timedir
 timeout
 password_timeout
@@ -897,6 +898,7 @@ TRPROG
 NROFFPROG
 YACC
 YFLAGS
+FLEX
 LIBOBJS
 KRB5CONFIG
 LTLIBOBJS'
@@ -1586,6 +1588,9 @@ Optional Packages:
   --without-interfaces    don't try to read the ip addr of ether interfaces
   --with-stow             properly handle GNU stow packaging
   --with-askpass=PATH     Fully qualified pathname of askpass helper
+  --with-libvas=NAME      Name of the libvas shared library default=libvas.so
+  --with-libvas-rpath=PATH
+                          Path to look for libvas in [default=/opt/quest/lib]
   --with-selinux          enable SELinux support
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-pic              try to use only PIC/non-PIC objects [default=use
@@ -2043,6 +2048,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { echo "$as_me:$LINENO: Configuring Sudo version $PACKAGE_VERSION" >&5
 echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -3786,6 +3792,44 @@ fi
 
 
 
+# Check whether --with-libvas was given.
+if test "${with_libvas+set}" = set; then
+  withval=$with_libvas; case $with_libvas in
+    yes)	with_libvas=libvas.so
+		;;
+    no)		;;
+    *)
+cat >>confdefs.h <<_ACEOF
+#define LIBVAS_SO "$with_with_libvas"
+_ACEOF
+
+		;;
+esac
+if test X"$with_libvas" != X"no"; then
+
+cat >>confdefs.h <<_ACEOF
+#define LIBVAS_SO "$with_libvas"
+_ACEOF
+
+    cat >>confdefs.h <<\_ACEOF
+#define USING_NONUNIX_GROUPS 1
+_ACEOF
+
+    NONUNIX_GROUPS_IMPL="vasgroups.o"
+
+# Check whether --with-libvas-rpath was given.
+if test "${with_libvas_rpath+set}" = set; then
+  withval=$with_libvas_rpath; LIBVAS_RPATH=$withval
+else
+  LIBVAS_RPATH=/opt/quest/lib
+fi
+
+fi
+
+fi
+
+
+
 { echo "$as_me:$LINENO: checking whether to do user authentication by default" >&5
 echo $ECHO_N "checking whether to do user authentication by default... $ECHO_C" >&6; }
 # Check whether --enable-authentication was given.
@@ -5510,6 +5554,8 @@ fi
 
 
 
+
+
 # Check whether --enable-shared was given.
 if test "${enable_shared+set}" = set; then
   enableval=$enable_shared; p=${PACKAGE-default}
@@ -6210,7 +6256,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6213 "configure"' > conftest.$ac_ext
+  echo '#line 6259 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7977,7 +8023,7 @@ echo "${ECHO_T}$lt_cv_ld_exported_symbols_list" >&6; }
   esac
 
 
-enable_dlopen=no
+enable_dlopen=yes
 enable_win32_dll=no
 
 # Check whether --enable-libtool-lock was given.
@@ -8074,11 +8120,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8077: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8123: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8081: \$? = $ac_status" >&5
+   echo "$as_me:8127: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8364,11 +8410,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8367: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8413: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8371: \$? = $ac_status" >&5
+   echo "$as_me:8417: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8468,11 +8514,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8471: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8517: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8475: \$? = $ac_status" >&5
+   echo "$as_me:8521: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10828,7 +10874,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10831 "configure"
+#line 10877 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10928,7 +10974,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10931 "configure"
+#line 10977 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12084,6 +12130,66 @@ done
 		if test "x$ac_cv_prog_cc_c89" = "xno"; then
 		    with_noexec=no
 		fi
+
+		# Use the +DAportable flag if it is supported
+		_CFLAGS="$CFLAGS"
+		CFLAGS="$CFLAGS +DAportable"
+		{ echo "$as_me:$LINENO: checking whether $CC understands +DAportable" >&5
+echo $ECHO_N "checking whether $CC understands +DAportable... $ECHO_C" >&6; }
+if test "${sudo_cv_var_daportable+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  sudo_cv_var_daportable=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	sudo_cv_var_daportable=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+
+fi
+{ echo "$as_me:$LINENO: result: $sudo_cv_var_daportable" >&5
+echo "${ECHO_T}$sudo_cv_var_daportable" >&6; }
+		if test X"$sudo_cv_var_daportable" != X"yes"; then
+		    CFLAGS="$_CFLAGS"
+		fi
+
 		case "$host" in
 			*-*-hpux1-8.*)
 			    cat >>confdefs.h <<\_ACEOF
@@ -12954,6 +13060,47 @@ fi
   test -n "$YACC" && break
 done
 test -n "$YACC" || YACC="yacc"
+
+# Extract the first word of "flex", so it can be a program name with args.
+set dummy flex; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_path_FLEX+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $FLEX in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_FLEX="$FLEX" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_FLEX="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_FLEX" && ac_cv_path_FLEX="flex"
+  ;;
+esac
+fi
+FLEX=$ac_cv_path_FLEX
+if test -n "$FLEX"; then
+  { echo "$as_me:$LINENO: result: $FLEX" >&5
+echo "${ECHO_T}$FLEX" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
 
 { echo "$as_me:$LINENO: checking for mv" >&5
 echo $ECHO_N "checking for mv... $ECHO_C" >&6; }
@@ -23078,7 +23225,9 @@ _ACEOF
 
 fi
 done
-, break
+
+else
+  break
 fi
 
 done
@@ -23753,6 +23902,14 @@ echo "$as_me: WARNING: Unable to locate gssapi.h, you will have to edit the Make
     SUDO_LIBS="${SUDO_LIBS} ${LDAP_LIBS}"
     LIBS="$_LIBS"
     LDFLAGS="$_LDFLAGS"
+fi
+
+if test X"$LIBVAS_RPATH" != X""; then
+    if test -n "$blibpath"; then
+	blibpath_add="${blibpath_add}:$LIBVAS_RPATH"
+    else
+	LDFLAGS="$LDFLAGS -R$LIBVAS_RPATH"
+    fi
 fi
 
 if test -n "$blibpath"; then
@@ -24598,6 +24755,7 @@ BSDAUTH_USAGE!$BSDAUTH_USAGE$ac_delim
 SELINUX_USAGE!$SELINUX_USAGE$ac_delim
 LDAP!$LDAP$ac_delim
 LOGINCAP_USAGE!$LOGINCAP_USAGE$ac_delim
+NONUNIX_GROUPS_IMPL!$NONUNIX_GROUPS_IMPL$ac_delim
 timedir!$timedir$ac_delim
 timeout!$timeout$ac_delim
 password_timeout!$password_timeout$ac_delim
@@ -24620,7 +24778,6 @@ fqdn!$fqdn$ac_delim
 runas_default!$runas_default$ac_delim
 env_editor!$env_editor$ac_delim
 passwd_tries!$passwd_tries$ac_delim
-tty_tickets!$tty_tickets$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -24662,6 +24819,7 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+tty_tickets!$tty_tickets$ac_delim
 insults!$insults$ac_delim
 root_sudo!$root_sudo$ac_delim
 path_info!$path_info$ac_delim
@@ -24698,12 +24856,13 @@ TRPROG!$TRPROG$ac_delim
 NROFFPROG!$NROFFPROG$ac_delim
 YACC!$YACC$ac_delim
 YFLAGS!$YFLAGS$ac_delim
+FLEX!$FLEX$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 KRB5CONFIG!$KRB5CONFIG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 39; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 41; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
@@ -25170,6 +25329,8 @@ echo "$as_me: You will need to customize sample.pam and install it as /etc/pam.d
 	    ;;
     esac
 fi
+
+
 
 
 
