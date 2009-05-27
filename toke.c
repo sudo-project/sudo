@@ -1345,7 +1345,7 @@ char *yytext;
 #define INITIAL 0
 #line 2 "toke.l"
 /*
- * Copyright (c) 1996, 1998-2005, 2007-2008
+ * Copyright (c) 1996, 1998-2005, 2007-2009
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -3159,12 +3159,57 @@ int main()
 #endif
 #line 540 "toke.l"
 
+static unsigned char
+hexchar(s)
+    const char *s;
+{
+    int i;
+    int result = 0;
+
+    s += 2; /* skip \\x */
+    for (i = 0; i < 2; i++) {
+	switch (*s) {
+	case 'A':
+	case 'a':
+	    result += 10;
+	    break;
+	case 'B':
+	case 'b':
+	    result += 11;
+	    break;
+	case 'C':
+	case 'c':
+	    result += 12;
+	    break;
+	case 'D':
+	case 'd':
+	    result += 13;
+	    break;
+	case 'E':
+	case 'e':
+	    result += 14;
+	    break;
+	case 'F':
+	case 'f':
+	    result += 15;
+	    break;
+	default:
+	    result += *s - '0';
+	    break;
+	}
+	if (i == 0) {
+	    result *= 16;
+	    s++;
+	}
+    }
+    return((unsigned char)result);
+}
+
 static int
 _fill(src, len, olen)
     char *src;
     int len, olen;
 {
-    int i, j;
     char *dst;
 
     dst = olen ? realloc(yylval.string, olen + len + 1) : malloc(len + 1);
@@ -3176,13 +3221,24 @@ _fill(src, len, olen)
 
     /* Copy the string and collapse any escaped characters. */
     dst += olen;
-    for (i = 0, j = 0; i < len; i++, j++) {
-	if (src[i] == '\\' && i != len - 1)
-	    dst[j] = src[++i];
-	else
-	    dst[j] = src[i];
+    while (len--) {
+	if (*src == '\\' && len) {
+	    if (src[1] == 'x' && len >= 3 && 
+		isxdigit((unsigned char) src[2]) &&
+		isxdigit((unsigned char) src[3])) {
+		*dst++ = hexchar(src);
+		src += 4;
+		len -= 3;
+	    } else {
+		src++;
+		len--;
+		*dst++ = *src++;
+	    }
+	} else {
+	    *dst++ = *src++;
+	}
     }
-    dst[j] = '\0';
+    *dst = '\0';
     return(TRUE);
 }
 
