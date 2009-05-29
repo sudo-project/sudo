@@ -33,7 +33,7 @@ top_builddir = .
 
 # Compiler & tools to use
 CC = @CC@
-LEX = flex
+FLEX = @FLEX@
 YACC = @YACC@
 NROFF = nroff -Tascii
 LIBTOOL = @LIBTOOL@
@@ -127,7 +127,7 @@ AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
 # Note: gram.o must come first here
 COMMON_OBJS = gram.o alias.o alloc.o defaults.o error.o list.o match.o \
-	      toke.o redblack.o zero_bytes.o
+	      toke.o redblack.o zero_bytes.o @NONUNIX_GROUPS_IMPL@
 
 SUDO_OBJS = $(COMMON_OBJS) $(AUTH_OBJS) @SUDO_OBJS@ audit.o check.o env.o \
 	    getspwuid.o gettime.o goodpath.o fileops.o find_path.o \
@@ -212,7 +212,7 @@ $(devdir)/gram.c: $(srcdir)/gram.y
 
 # Uncomment the lines before -@true if you intend to modify toke.l
 $(devdir)/toke.c: $(srcdir)/toke.l
-@DEV@	$(LEX) $(srcdir)/toke.l
+@DEV@	$(FLEX) $(srcdir)/toke.l
 @DEV@	mv -f lex.yy.c toke.c
 	-@true
 
