@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.1                     April 18, 2009                        1
+1.7.2                     June 11, 2009                         1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                        2
+1.7.2                     June 11, 2009                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                        3
+1.7.2                     June 11, 2009                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                        4
+1.7.2                     June 11, 2009                         4
 
 
 
@@ -276,7 +276,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        what user) on specified hosts.  By default, commands are run as rroooott,
        but this can be changed on a per-command basis.
 
-       Let's break that down into its constituent parts:
+       The basic structure of a user specification is `who = where (as_whom)
+       what'.  Let's break that down into its constituent parts:
 
        RRuunnaass__SSppeecc
 
@@ -324,8 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-
-1.7.1                     April 18, 2009                        5
+1.7.2                     June 11, 2009                         5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                        6
+1.7.2                     June 11, 2009                         6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                        7
+1.7.2                     June 11, 2009                         7
 
 
 
@@ -486,7 +486,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        The filename may include the %h escape, signifying the short form of
        the hostname.  I.e., if the machine's hostname is "xerxes", then
 
-        #include /etc/sudoers.%h
+       #include /etc/sudoers.%h
 
        will cause ssuuddoo to include the file _/_e_t_c_/_s_u_d_o_e_r_s_._x_e_r_x_e_s.
 
@@ -494,13 +494,13 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        the system package manager can drop _s_u_d_o_e_r_s rules into as part of
        package installation.  For example, given:
 
-         #includedir /etc/sudoers.d
+       #includedir /etc/sudoers.d
 
-       ssuuddoo will read each file in _/_e_t_c_/_s_u_d_o_e_r_s_._d, skipping files that contain
-       a . character to avoid causing problems with package manager, vviissuuddoo or
-       editor temporary files.  Files are parsed in sorted lexical order.
-       That is, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_0_1___f_i_r_s_t will be parsed before
-       _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Be aware that because the sorting is
+       ssuuddoo will read each file in _/_e_t_c_/_s_u_d_o_e_r_s_._d, skipping file names that
+       end in ~ or contain a . character to avoid causing problems with
+       package manager or editor temporary/backup files.  Files are parsed in
+       sorted lexical order.  That is, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_0_1___f_i_r_s_t will be parsed
+       before _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Be aware that because the sorting is
        lexical, not numeric, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1___w_h_o_o_p_s would be loaded aafftteerr
        _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Using a consistent number of leading zeroes
        in the file names can be used to avoid such problems.
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                        8
+1.7.2                     June 11, 2009                         8
 
 
 
@@ -589,7 +589,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.7.1                     April 18, 2009                        9
+1.7.2                     June 11, 2009                         9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                       10
+1.7.2                     June 11, 2009                        10
 
 
 
@@ -721,7 +721,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                       11
+1.7.2                     June 11, 2009                        11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                       12
+1.7.2                     June 11, 2009                        12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                       13
+1.7.2                     June 11, 2009                        13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                       14
+1.7.2                     June 11, 2009                        14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                       15
+1.7.2                     June 11, 2009                        15
 
 
 
@@ -1051,7 +1051,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                       16
+1.7.2                     June 11, 2009                        16
 
 
 
@@ -1117,7 +1117,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                       17
+1.7.2                     June 11, 2009                        17
 
 
 
@@ -1183,7 +1183,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                       18
+1.7.2                     June 11, 2009                        18
 
 
 
@@ -1249,7 +1249,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.7.1                     April 18, 2009                       19
+1.7.2                     June 11, 2009                        19
 
 
 
@@ -1315,7 +1315,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                       20
+1.7.2                     June 11, 2009                        20
 
 
 
@@ -1381,7 +1381,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                       21
+1.7.2                     June 11, 2009                        21
 
 
 
@@ -1447,7 +1447,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.7.1                     April 18, 2009                       22
+1.7.2                     June 11, 2009                        22
 
 
 
@@ -1513,7 +1513,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.1                     April 18, 2009                       23
+1.7.2                     June 11, 2009                        23
 
 
 
@@ -1579,6 +1579,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.1                     April 18, 2009                       24
+1.7.2                     June 11, 2009                        24
 
 

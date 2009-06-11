@@ -1,4 +1,4 @@
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2008
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2009
 .\" 	Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "April 18, 2009" "1.7.1" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "June 11, 2009" "1.7.2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -406,7 +406,8 @@ A \fBuser specification\fR determines which commands a user may run
 (and as what user) on specified hosts.  By default, commands are
 run as \fBroot\fR, but this can be changed on a per-command basis.
 .PP
-Let's break that down into its constituent parts:
+The basic structure of a user specification is `who = where (as_whom)
+what'.  Let's break that down into its constituent parts:
 .Sh "Runas_Spec"
 .IX Subsection "Runas_Spec"
 A \f(CW\*(C`Runas_Spec\*(C'\fR determines the user and/or the group that a command
@@ -622,9 +623,7 @@ files is enforced to prevent include file loops.
 The filename may include the \f(CW%h\fR escape, signifying the short form
 of the hostname.  I.e., if the machine's hostname is \*(L"xerxes\*(R", then
 .PP
-.Vb 1
-\& #include /etc/sudoers.%h
-.Ve
+\&\f(CW\*(C`#include /etc/sudoers.%h\*(C'\fR
 .PP
 will cause \fBsudo\fR to include the file \fI/etc/sudoers.xerxes\fR.
 .PP
@@ -632,19 +631,18 @@ The \f(CW\*(C`#includedir\*(C'\fR directive can be used to create a \fIsudo.d\fR
 directory that the system package manager can drop \fIsudoers\fR rules
 into as part of package installation.  For example, given:
 .PP
-.Vb 1
-\&  #includedir /etc/sudoers.d
-.Ve
+\&\f(CW\*(C`#includedir /etc/sudoers.d\*(C'\fR
 .PP
-\&\fBsudo\fR will read each file in \fI/etc/sudoers.d\fR, skipping files
-that contain a \f(CW\*(C`.\*(C'\fR character to avoid causing problems with package
-manager, \fBvisudo\fR or editor temporary files.  Files are parsed in
-sorted lexical order.  That is, \fI/etc/sudoers.d/01_first\fR will be
-parsed before \fI/etc/sudoers.d/10_second\fR.  Be aware that because
-the sorting is lexical, not numeric, \fI/etc/sudoers.d/1_whoops\fR
-would be loaded \fBafter\fR \fI/etc/sudoers.d/10_second\fR.  Using a
-consistent number of leading zeroes in the file names can be used
-to avoid such problems.
+\&\fBsudo\fR will read each file in \fI/etc/sudoers.d\fR, skipping file
+names that end in \f(CW\*(C`~\*(C'\fR or contain a \f(CW\*(C`.\*(C'\fR character to avoid causing
+problems with package manager or editor temporary/backup files.
+Files are parsed in sorted lexical order.  That is,
+\&\fI/etc/sudoers.d/01_first\fR will be parsed before
+\&\fI/etc/sudoers.d/10_second\fR.  Be aware that because the sorting is
+lexical, not numeric, \fI/etc/sudoers.d/1_whoops\fR would be loaded
+\&\fBafter\fR \fI/etc/sudoers.d/10_second\fR.  Using a consistent number
+of leading zeroes in the file names can be used to avoid such
+problems.
 .PP
 Note that unlike files included via \f(CW\*(C`#include\*(C'\fR, \fBvisudo\fR will not
 edit the files in a \f(CW\*(C`#includedir\*(C'\fR directory unless one of them
