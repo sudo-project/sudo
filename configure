@@ -1530,10 +1530,10 @@ Optional Packages:
   --with-skey=DIR         enable S/Key support
   --with-opie=DIR         enable OPIE support
   --with-long-otp-prompt  use a two line OTP (skey/opie) prompt
-  --with-SecurID[=DIR]    enable SecurID support
-  --with-fwtk[=DIR]       enable FWTK AuthSRV support
-  --with-kerb4[=DIR]      enable Kerberos IV support
-  --with-kerb5[=DIR]      enable Kerberos V support
+  --with-SecurID=DIR      enable SecurID support
+  --with-fwtk=DIR         enable FWTK AuthSRV support
+  --with-kerb4=DIR        enable Kerberos IV support
+  --with-kerb5=DIR        enable Kerberos V support
   --with-aixauth          enable AIX general authentication support
   --with-pam              enable PAM support
   --with-AFS              enable AFS support
@@ -1549,7 +1549,8 @@ Optional Packages:
   --with-logpath          path to the sudo log file
   --with-loglen           maximum length of a log file line (default is 80)
   --with-ignore-dot       ignore '.' in the PATH
-  --without-mail-if-no-user do not send mail if user not in sudoers
+  --without-mail-if-no-user
+                          do not send mail if user not in sudoers
   --with-mail-if-no-host  send mail if user in sudoers but not for this host
   --with-mail-if-noperms  send mail if user not allowed to run command
   --with-mailto           who should get sudo mail (default is "root")
@@ -1558,20 +1559,23 @@ Optional Packages:
   --with-badpass-message  message the user sees when the password is wrong
   --with-fqdn             expect fully qualified hosts in sudoers
   --with-timedir          path to the sudo timestamp dir
-  --with-sendmail=path    set path to sendmail
+  --with-sendmail         set path to sendmail
   --without-sendmail      do not send mail at all
   --with-sudoers-mode     mode of sudoers file (defaults to 0440)
   --with-sudoers-uid      uid that owns sudoers file (defaults to 0)
   --with-sudoers-gid      gid that owns sudoers file (defaults to 0)
-  --with-umask            umask with which the prog should run (default is 022)
+  --with-umask            umask with which the prog should run (default is
+                          022)
   --without-umask         Preserves the umask of the user invoking sudo.
   --with-runas-default    User to run commands as (default is "root")
   --with-exempt=group     no passwd needed for users in this group
   --with-editor=path      Default editor for visudo (defaults to vi)
   --with-env-editor       Use the environment variable EDITOR for visudo
   --with-passwd-tries     number of tries to enter password (default is 3)
-  --with-timeout          minutes before sudo asks for passwd again (def is 5 minutes)
-  --with-password-timeout passwd prompt timeout in minutes (default is 5 minutes)
+  --with-timeout          minutes before sudo asks for passwd again (def is 5
+                          minutes)
+  --with-password-timeout passwd prompt timeout in minutes (default is 5
+                          minutes)
   --with-tty-tickets      use a different ticket file for each tty
   --with-insults          insult the user for entering an incorrect password
   --with-all-insults      include all the sudo insult sets
@@ -1579,16 +1583,18 @@ Optional Packages:
   --with-csops-insults    include CSOps insults
   --with-hal-insults      include 2001-like insults
   --with-goons-insults    include the insults from the "Goon Show"
-  --with-nsswitch[=PATH]  path to nsswitch.conf
-  --with-ldap[=DIR]       enable LDAP support
+  --with-nsswitch=PATH    path to nsswitch.conf
+  --with-ldap=DIR         enable LDAP support
   --with-ldap-conf-file   path to LDAP configuration file
   --with-ldap-secret-file path to LDAP secret password file
-  --with-pc-insults       replace politically incorrect insults with less offensive ones
+  --with-pc-insults       replace politically incorrect insults with less
+                          offensive ones
   --with-secure-path      override the user's path with a built-in one
   --without-interfaces    don't try to read the ip addr of ether interfaces
   --with-stow             properly handle GNU stow packaging
   --with-askpass=PATH     Fully qualified pathname of askpass helper
-  --with-libvas=NAME      Name of the libvas shared library default=libvas.so
+  --with-libvas=NAME      Name of the libvas shared library
+                          (default=libvas.so)
   --with-libvas-rpath=PATH
                           Path to look for libvas in [default=/opt/quest/lib]
   --with-selinux          enable SELinux support
@@ -1596,7 +1602,7 @@ Optional Packages:
   --with-pic              try to use only PIC/non-PIC objects [default=use
                           both]
   --with-noexec=PATH      fully qualified pathname of sudo_noexec.so
-  --with-netsvc[=PATH]  path to netsvc.conf
+  --with-netsvc=PATH      path to netsvc.conf
 
 Some influential environment variables:
   CC          C compiler command
@@ -6256,7 +6262,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6259 "configure"' > conftest.$ac_ext
+  echo '#line 6265 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8120,11 +8126,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8123: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8129: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8127: \$? = $ac_status" >&5
+   echo "$as_me:8133: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8410,11 +8416,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8413: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8419: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8417: \$? = $ac_status" >&5
+   echo "$as_me:8423: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8514,11 +8520,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8517: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8523: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8521: \$? = $ac_status" >&5
+   echo "$as_me:8527: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10874,7 +10880,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10877 "configure"
+#line 10883 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10974,7 +10980,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10977 "configure"
+#line 10983 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
