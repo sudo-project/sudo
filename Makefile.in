@@ -182,8 +182,8 @@ all: $(PROGS)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 
 .man.cat:
-	@rm -f $(srcdir)/$@
-	sed '1s/^/.if n .ll 78n/' $< | $(NROFF) -man > $(srcdir)/$@
+	@rm -f $@
+	sed '1s/^/.if n .ll 78n/' $< | $(NROFF) -man > $@
 
 sudo: $(SUDO_OBJS) $(LIB_OBJS)
 	$(CC) -o $@ $(SUDO_OBJS) $(LIB_OBJS) $(SUDO_LDFLAGS) $(SUDO_LIBS)
