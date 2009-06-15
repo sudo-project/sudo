@@ -253,6 +253,9 @@ setenv(var, val, overwrite)
     const char *cp;
     size_t esize;
 
+    if (!var || *var == '\0')
+	return(EINVAL);
+
     /*
      * POSIX says a var name with '=' is an error but BSD
      * just ignores the '=' and anything after it.
