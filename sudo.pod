@@ -583,14 +583,22 @@ To get a file listing of an unreadable directory:
 
  $ sudo ls /usr/local/protected
 
-To list the home directory of user yazza on a machine where the
-file system holding ~yazza is not exported as root:
+To list the home directory of user yaz on a machine where the
+file system holding ~yaz is not exported as root:
 
- $ sudo -u yazza ls ~yazza
+ $ sudo -u yaz ls ~yaz
 
 To edit the F<index.html> file as user www:
 
  $ sudo -u www vi ~www/htdocs/index.html
+
+To view system logs only accessible to root and users in the adm group:
+
+ $ sudo -g adm view /var/log/syslog
+
+To run an editor as jim with a different primary group:
+
+ $ sudo -u jim -g audio vi ~jim/sound.txt
 
 To shutdown a machine:
 

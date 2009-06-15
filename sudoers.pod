@@ -116,6 +116,7 @@ The definitions of what constitutes a valid I<alias> member follow.
 	  '!'* '#'uid |
 	  '!'* '%'group |
 	  '!'* '+'netgroup |
+	  '!'* '%:'nonunix_group |
 	  '!'* User_Alias
 
 A C<User_List> is made up of one or more usernames, uids (prefixed
@@ -123,6 +124,33 @@ with '#'), system groups (prefixed with '%'), netgroups (prefixed
 with '+') and C<User_Alias>es.  Each list item may be prefixed with
 zero or more '!' operators.  An odd number of '!' operators negate
 the value of the item; an even number just cancel each other out.
+
+A C<username>, C<group>, C<netgroup> and C<nonunix_groups> may
+be enclosed in double quotes to avoid the need for escaping special
+characters.  Alternately, special characters may be specified in
+escaped hex mode, e.g. \x20 for space.
+
+The C<nonunix_group> syntax depends on the underlying implementation.
+For instance, the QAS AD backend supports the following formats:
+
+=over 4
+
+=item *
+
+Group in the same domain: "Group Name"
+
+=item *
+
+Group in any domain: "Group Name@FULLY.QUALIFIED.DOMAIN"
+
+=item *
+
+Group SID: "S-1-2-34-5678901234-5678901234-5678901234-567"
+
+=back
+
+Note that quotes around group names are optional.  Unquoted strings must
+use a backslash (\) to escape spaces and the '@' symbol.
 
  Runas_List ::= Runas_Member |
 		Runas_Member ',' Runas_List
@@ -1259,6 +1287,7 @@ these are a bit contrived.  First, we define our I<aliases>:
  # Runas alias specification
  Runas_Alias	OP = root, operator
  Runas_Alias	DB = oracle, sybase
+ Runas_Alias	ADMINGRP = adm, oper
 
  # Host alias specification
  Host_Alias	SPARC = bigtime, eclipse, moet, anchor :\
@@ -1351,6 +1380,12 @@ directory F</usr/oper/bin/>.
 The user B<joe> may only L<su(1)> to operator.
 
  pete		HPPA = /usr/bin/passwd [A-Za-z]*, !/usr/bin/passwd root
+
+ %opers		ALL = (: ADMINGRP) /usr/sbin/
+
+Users in the B<opers> group may run commands in F</usr/sbin/> as themselves
+with any group in the I<ADMINGRP> C<Runas_Alias> (the B<adm> and B<oper>
+groups).
 
 The user B<pete> is allowed to change anyone's password except for
 root on the I<HPPA> machines.  Note that this assumes L<passwd(1)>
