@@ -1056,11 +1056,13 @@ environment variable.
 
 =item env_file
 
-The I<env_file> options specifies the fully qualified path to a file
-containing variables to be set in the environment of the program
-being run.  Entries in this file should be of the form C<VARIABLE=value>.
-Variables in this file are subject to other B<sudo> environment
-settings such as I<env_keep> and I<env_check>.
+The I<env_file> options specifies the fully qualified path to a
+file containing variables to be set in the environment of the program
+being run.  Entries in this file should either be of the form
+C<VARIABLE=value> or C<export VARIABLE=value>.  The value may
+optionally be surrounded by single or double quotes.  Variables in
+this file are subject to other B<sudo> environment settings such
+as I<env_keep> and I<env_check>.
 
 =item exempt_group
 
