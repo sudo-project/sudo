@@ -1225,15 +1225,16 @@ the I<-V> option.
 
 =item env_delete
 
-Environment variables to be removed from the user's environment.
-The argument may be a double-quoted, space-separated list or a
-single value without double-quotes.  The list can be replaced, added
-to, deleted from, or disabled by using the C<=>, C<+=>, C<-=>, and
-C<!> operators respectively.  The default list of environment
-variables to remove is displayed when B<sudo> is run by root with the
-I<-V> option.  Note that many operating systems will remove potentially
-dangerous variables from the environment of any setuid process (such
-as B<sudo>).
+Environment variables to be removed from the user's environment
+when the I<env_reset> option is not in effect.  The argument may
+be a double-quoted, space-separated list or a single value without
+double-quotes.  The list can be replaced, added to, deleted from,
+or disabled by using the C<=>, C<+=>, C<-=>, and C<!> operators
+respectively.  The default list of environment variables to remove
+is displayed when B<sudo> is run by root with the I<-V> option.
+Note that many operating systems will remove potentially dangerous
+variables from the environment of any setuid process (such as
+B<sudo>).
 
 =item env_keep
 
