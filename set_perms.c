@@ -577,7 +577,11 @@ runas_setup()
 	 * Initialize group vector
 	 */
 	runas_setgroups();
-	if (setegid(gid) || setgid(gid))
+#ifdef HAVE_SETEUID
+	if (setegid(gid))
+	    warning("cannot set egid to runas gid");
+#endif
+	if (setgid(gid))
 	    warning("cannot set gid to runas gid");
     }
 }
