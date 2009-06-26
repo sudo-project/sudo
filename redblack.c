@@ -421,7 +421,7 @@ rbrepair(tree, node)
 {
     struct rbnode *sibling;
 
-    while (node->color == black) {
+    while (node->color == black && node != rbroot(tree)) {
 	if (node == node->parent->left) {
 	    sibling = node->parent->right;
 	    if (sibling->color == red) {
