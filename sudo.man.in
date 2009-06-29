@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "June 11, 2009" "1.7.2" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "June 15, 2009" "1.7.2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -667,17 +667,29 @@ To get a file listing of an unreadable directory:
 \& $ sudo ls /usr/local/protected
 .Ve
 .PP
-To list the home directory of user yazza on a machine where the
-file system holding ~yazza is not exported as root:
+To list the home directory of user yaz on a machine where the
+file system holding ~yaz is not exported as root:
 .PP
 .Vb 1
-\& $ sudo \-u yazza ls ~yazza
+\& $ sudo \-u yaz ls ~yaz
 .Ve
 .PP
 To edit the \fIindex.html\fR file as user www:
 .PP
 .Vb 1
 \& $ sudo \-u www vi ~www/htdocs/index.html
+.Ve
+.PP
+To view system logs only accessible to root and users in the adm group:
+.PP
+.Vb 1
+\& $ sudo \-g adm view /var/log/syslog
+.Ve
+.PP
+To run an editor as jim with a different primary group:
+.PP
+.Vb 1
+\& $ sudo \-u jim \-g audio vi ~jim/sound.txt
 .Ve
 .PP
 To shutdown a machine:

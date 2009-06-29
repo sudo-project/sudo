@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "June 11, 2009" "1.7.2" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "June 23, 2009" "1.7.2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -254,6 +254,7 @@ The definitions of what constitutes a valid \fIalias\fR member follow.
 \&          \*(Aq!\*(Aq* \*(Aq#\*(Aquid |
 \&          \*(Aq!\*(Aq* \*(Aq%\*(Aqgroup |
 \&          \*(Aq!\*(Aq* \*(Aq+\*(Aqnetgroup |
+\&          \*(Aq!\*(Aq* \*(Aq%:\*(Aqnonunix_group |
 \&          \*(Aq!\*(Aq* User_Alias
 .Ve
 .PP
@@ -262,6 +263,23 @@ with '#'), system groups (prefixed with '%'), netgroups (prefixed
 with '+') and \f(CW\*(C`User_Alias\*(C'\fRes.  Each list item may be prefixed with
 zero or more '!' operators.  An odd number of '!' operators negate
 the value of the item; an even number just cancel each other out.
+.PP
+A \f(CW\*(C`username\*(C'\fR, \f(CW\*(C`group\*(C'\fR, \f(CW\*(C`netgroup\*(C'\fR and \f(CW\*(C`nonunix_groups\*(C'\fR may
+be enclosed in double quotes to avoid the need for escaping special
+characters.  Alternately, special characters may be specified in
+escaped hex mode, e.g. \ex20 for space.
+.PP
+The \f(CW\*(C`nonunix_group\*(C'\fR syntax depends on the underlying implementation.
+For instance, the \s-1QAS\s0 \s-1AD\s0 backend supports the following formats:
+.IP "\(bu" 4
+Group in the same domain: \*(L"Group Name\*(R"
+.IP "\(bu" 4
+Group in any domain: \*(L"Group Name@FULLY.QUALIFIED.DOMAIN\*(R"
+.IP "\(bu" 4
+Group \s-1SID:\s0 \*(L"S\-1\-2\-34\-5678901234\-5678901234\-5678901234\-567\*(R"
+.PP
+Note that quotes around group names are optional.  Unquoted strings must
+use a backslash (\e) to escape spaces and the '@' symbol.
 .PP
 .Vb 2
 \& Runas_List ::= Runas_Member |
@@ -1105,11 +1123,13 @@ The value of \fIaskpass\fR may be overridden by the \f(CW\*(C`SUDO_ASKPASS\*(C'\
 environment variable.
 .IP "env_file" 12
 .IX Item "env_file"
-The \fIenv_file\fR options specifies the fully qualified path to a file
-containing variables to be set in the environment of the program
-being run.  Entries in this file should be of the form \f(CW\*(C`VARIABLE=value\*(C'\fR.
-Variables in this file are subject to other \fBsudo\fR environment
-settings such as \fIenv_keep\fR and \fIenv_check\fR.
+The \fIenv_file\fR options specifies the fully qualified path to a
+file containing variables to be set in the environment of the program
+being run.  Entries in this file should either be of the form
+\&\f(CW\*(C`VARIABLE=value\*(C'\fR or \f(CW\*(C`export VARIABLE=value\*(C'\fR.  The value may
+optionally be surrounded by single or double quotes.  Variables in
+this file are subject to other \fBsudo\fR environment settings such
+as \fIenv_keep\fR and \fIenv_check\fR.
 .IP "exempt_group" 12
 .IX Item "exempt_group"
 Users in this group are exempt from password and \s-1PATH\s0 requirements.
@@ -1245,15 +1265,16 @@ variables to check is displayed when \fBsudo\fR is run by root with
 the \fI\-V\fR option.
 .IP "env_delete" 16
 .IX Item "env_delete"
-Environment variables to be removed from the user's environment.
-The argument may be a double-quoted, space-separated list or a
-single value without double-quotes.  The list can be replaced, added
-to, deleted from, or disabled by using the \f(CW\*(C`=\*(C'\fR, \f(CW\*(C`+=\*(C'\fR, \f(CW\*(C`\-=\*(C'\fR, and
-\&\f(CW\*(C`!\*(C'\fR operators respectively.  The default list of environment
-variables to remove is displayed when \fBsudo\fR is run by root with the
-\&\fI\-V\fR option.  Note that many operating systems will remove potentially
-dangerous variables from the environment of any setuid process (such
-as \fBsudo\fR).
+Environment variables to be removed from the user's environment
+when the \fIenv_reset\fR option is not in effect.  The argument may
+be a double-quoted, space-separated list or a single value without
+double-quotes.  The list can be replaced, added to, deleted from,
+or disabled by using the \f(CW\*(C`=\*(C'\fR, \f(CW\*(C`+=\*(C'\fR, \f(CW\*(C`\-=\*(C'\fR, and \f(CW\*(C`!\*(C'\fR operators
+respectively.  The default list of environment variables to remove
+is displayed when \fBsudo\fR is run by root with the \fI\-V\fR option.
+Note that many operating systems will remove potentially dangerous
+variables from the environment of any setuid process (such as
+\&\fBsudo\fR).
 .IP "env_keep" 16
 .IX Item "env_keep"
 Environment variables to be preserved in the user's environment
@@ -1298,6 +1319,7 @@ these are a bit contrived.  First, we define our \fIaliases\fR:
 \& # Runas alias specification
 \& Runas_Alias    OP = root, operator
 \& Runas_Alias    DB = oracle, sybase
+\& Runas_Alias    ADMINGRP = adm, oper
 \&
 \& # Host alias specification
 \& Host_Alias     SPARC = bigtime, eclipse, moet, anchor :\e
@@ -1408,7 +1430,13 @@ The user \fBjoe\fR may only \fIsu\fR\|(1) to operator.
 .PP
 .Vb 1
 \& pete           HPPA = /usr/bin/passwd [A\-Za\-z]*, !/usr/bin/passwd root
+\&
+\& %opers         ALL = (: ADMINGRP) /usr/sbin/
 .Ve
+.PP
+Users in the \fBopers\fR group may run commands in \fI/usr/sbin/\fR as themselves
+with any group in the \fI\s-1ADMINGRP\s0\fR \f(CW\*(C`Runas_Alias\*(C'\fR (the \fBadm\fR and \fBoper\fR
+groups).
 .PP
 The user \fBpete\fR is allowed to change anyone's password except for
 root on the \fI\s-1HPPA\s0\fR machines.  Note that this assumes \fIpasswd\fR\|(1)
