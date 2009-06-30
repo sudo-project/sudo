@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.2                     June 23, 2009                         1
+1.7.2                     June 30, 2009                         1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                         2
+1.7.2                     June 30, 2009                         2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                         3
+1.7.2                     June 30, 2009                         3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                         4
+1.7.2                     June 30, 2009                         4
 
 
 
@@ -282,7 +282,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
         Cmnd_Spec ::= Runas_Spec? Tag_Spec* Cmnd
 
-        Runas_Spec ::= '(' Runas_List? (: Runas_List)? ')'
+        Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
         Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
                       'SETENV:' | 'NOSETENV:' )
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                         5
+1.7.2                     June 30, 2009                         5
 
 
 
@@ -391,7 +391,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                         6
+1.7.2                     June 30, 2009                         6
 
 
 
@@ -457,7 +457,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                         7
+1.7.2                     June 30, 2009                         7
 
 
 
@@ -523,7 +523,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                         8
+1.7.2                     June 30, 2009                         8
 
 
 
@@ -589,7 +589,7 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
 
 
 
-1.7.2                     June 23, 2009                         9
+1.7.2                     June 30, 2009                         9
 
 
 
@@ -655,7 +655,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                        10
+1.7.2                     June 30, 2009                        10
 
 
 
@@ -721,7 +721,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                        11
+1.7.2                     June 30, 2009                        11
 
 
 
@@ -787,7 +787,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                        12
+1.7.2                     June 30, 2009                        12
 
 
 
@@ -853,7 +853,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                        13
+1.7.2                     June 30, 2009                        13
 
 
 
@@ -919,7 +919,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                        14
+1.7.2                     June 30, 2009                        14
 
 
 
@@ -985,7 +985,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                        15
+1.7.2                     June 30, 2009                        15
 
 
 
@@ -1051,7 +1051,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                        16
+1.7.2                     June 30, 2009                        16
 
 
 
@@ -1117,7 +1117,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                        17
+1.7.2                     June 30, 2009                        17
 
 
 
@@ -1183,7 +1183,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                        18
+1.7.2                     June 30, 2009                        18
 
 
 
@@ -1249,7 +1249,7 @@ EEXXAAMMPPLLEESS
 
 
 
-1.7.2                     June 23, 2009                        19
+1.7.2                     June 30, 2009                        19
 
 
 
@@ -1315,7 +1315,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                        20
+1.7.2                     June 30, 2009                        20
 
 
 
@@ -1381,7 +1381,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                        21
+1.7.2                     June 30, 2009                        21
 
 
 
@@ -1447,7 +1447,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 23, 2009                        22
+1.7.2                     June 30, 2009                        22
 
 
 
@@ -1513,7 +1513,7 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
 
 
-1.7.2                     June 23, 2009                        23
+1.7.2                     June 30, 2009                        23
 
 
 
@@ -1579,7 +1579,7 @@ SSUUPPPPOORRTT
 
 
 
-1.7.2                     June 23, 2009                        24
+1.7.2                     June 30, 2009                        24
 
 
 
@@ -1645,6 +1645,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.2                     June 23, 2009                        25
+1.7.2                     June 30, 2009                        25
 
 

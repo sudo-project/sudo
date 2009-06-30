@@ -278,7 +278,7 @@ See L<"SUDOERS OPTIONS"> for a list of supported Defaults parameters.
 
  Cmnd_Spec ::= Runas_Spec? Tag_Spec* Cmnd
 
- Runas_Spec ::= '(' Runas_List? (: Runas_List)? ')'
+ Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
  Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
 	       'SETENV:' | 'NOSETENV:' )

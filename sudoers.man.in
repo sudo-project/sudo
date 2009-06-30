@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "June 23, 2009" "1.7.2" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "June 30, 2009" "1.7.2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -414,7 +414,7 @@ See \*(L"\s-1SUDOERS\s0 \s-1OPTIONS\s0\*(R" for a list of supported Defaults par
 \&
 \& Cmnd_Spec ::= Runas_Spec? Tag_Spec* Cmnd
 \&
-\& Runas_Spec ::= \*(Aq(\*(Aq Runas_List? (: Runas_List)? \*(Aq)\*(Aq
+\& Runas_Spec ::= \*(Aq(\*(Aq Runas_List? (\*(Aq:\*(Aq Runas_List)? \*(Aq)\*(Aq
 \&
 \& Tag_Spec ::= (\*(AqNOPASSWD:\*(Aq | \*(AqPASSWD:\*(Aq | \*(AqNOEXEC:\*(Aq | \*(AqEXEC:\*(Aq |
 \&               \*(AqSETENV:\*(Aq | \*(AqNOSETENV:\*(Aq )
