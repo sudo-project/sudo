@@ -971,6 +971,7 @@ parse_include(base)
 		memcpy(pp, user_shost, shost_len);
 		pp += shost_len;
 		cp += 2;
+		continue;
 	    }
 	    *pp++ = *cp++;
 	}
