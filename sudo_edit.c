@@ -233,7 +233,7 @@ sudo_edit(argc, argv, envp)
 	(void) sigaction(SIGINT, &saved_sa_int, NULL);
 	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	set_perms(PERM_FULL_USER);
-	closefrom(def_closefrom + 1);
+	closefrom(def_closefrom);
 	execvp(nargv[0], nargv);
 	warning("unable to execute %s", nargv[0]);
 	_exit(127);
