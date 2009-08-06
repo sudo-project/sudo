@@ -45,7 +45,7 @@ struct cmndtag {
     __signed char nopasswd;
     __signed char noexec;
     __signed char setenv;
-    __signed char extra;
+    __signed char script;
 };
 
 /*

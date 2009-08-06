@@ -144,6 +144,8 @@
 #define I_FAST_GLOB             71
 #define def_umask_override      (sudo_defs_table[72].sd_un.flag)
 #define I_UMASK_OVERRIDE        72
+#define def_script              (sudo_defs_table[73].sd_un.flag)
+#define I_SCRIPT                73
 
 enum def_tupple {
 	never,

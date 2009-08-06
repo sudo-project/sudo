@@ -4,7 +4,7 @@ dnl $Sudo$
 dnl
 dnl Copyright (c) 1994-1996,1998-2009 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT([sudo], [1.7.2], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.7.3], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER(config.h pathnames.h)
 dnl
 dnl This won't work before AC_INIT
@@ -1837,6 +1837,10 @@ AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
 	       setlocale getaddrinfo setsid setenv)
+AC_CHECK_FUNCS(openpty, [], [AC_CHECK_LIB(util, openpty, [
+    SUDO_LIBS="${SUDO_LIBS} -lutil"
+    AC_DEFINE(HAVE_OPENPTY)
+])])
 AC_CHECK_FUNCS(unsetenv, SUDO_FUNC_UNSETENV_VOID)
 SUDO_FUNC_PUTENV_CONST
 if test -z "$SKIP_SETRESUID"; then
@@ -2543,6 +2547,7 @@ dnl Check for log file and timestamp locations
 dnl
 SUDO_LOGFILE
 SUDO_TIMEDIR
+SUDO_SESSDIR
 
 dnl
 dnl Use passwd (and secureware) auth modules?

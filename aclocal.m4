@@ -134,7 +134,8 @@ fi
 ])dnl
 
 dnl
-dnl Where the log file goes, use /var/log if it exists, else /{var,usr}/adm
+dnl Where the timestamp files go, use /var/run/sudo if /var/run exists,
+dnl else /{var,usr}/adm/sudo
 dnl
 AC_DEFUN(SUDO_TIMEDIR, [AC_MSG_CHECKING(for timestamp file location)
 if test -n "$with_timedir"; then
@@ -153,6 +154,30 @@ else
     AC_MSG_RESULT(/usr/adm/sudo)
     SUDO_DEFINE(_PATH_SUDO_TIMEDIR, "/usr/adm/sudo")
     timedir="/usr/adm/sudo"
+fi
+])dnl
+
+dnl
+dnl Where the session files go, use /var/log/sudo-session if /var/log exists,
+dnl else /{var,usr}/adm/sudo-session
+dnl
+AC_DEFUN(SUDO_SESSDIR, [AC_MSG_CHECKING(for session file location)
+if test -n "$with_sessdir"; then
+    AC_MSG_RESULT($with_sessdir)
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESSDIR, "$with_sessdir")
+    sessdir="$with_sessdir"
+elif test -d "/var/log"; then
+    AC_MSG_RESULT(/var/log/sudo-session)
+    SUDO_DEFINE(_PATH_SUDO_SESSDIR, "/var/log/sudo-session")
+    sessdir="/var/log/sudo-session"
+elif test -d "/var/adm"; then
+    AC_MSG_RESULT(/var/adm/sudo-session)
+    SUDO_DEFINE(_PATH_SUDO_SESSDIR, "/var/adm/sudo-session")
+    sessdir="/var/adm/sudo-session"
+else
+    AC_MSG_RESULT(/usr/adm/sudo-session)
+    SUDO_DEFINE(_PATH_SUDO_SESSDIR, "/usr/adm/sudo-session")
+    sessdir="/usr/adm/sudo-session"
 fi
 ])dnl
 

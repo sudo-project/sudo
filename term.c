@@ -132,8 +132,31 @@ term_noecho(fd)
 }
 
 #if defined(HAVE_TERMIOS_H) || defined(HAVE_TERMIO_H)
+
 int
 term_raw(fd)
+    int fd;
+{
+    struct termios term;
+
+    if (!changed && tcgetattr(fd, &oterm) != 0)
+	return(0);
+    (void) memcpy(&term, &oterm, sizeof(term));
+    /* Set terminal to raw mode */
+    term.c_iflag &= ~(BRKINT|ICRNL|IGNCR|INLCR|IXON|PARMRK);
+    term.c_oflag &= ~OPOST;
+    term.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
+    term.c_cc[VMIN] = 1;
+    term.c_cc[VTIME] = 0;
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &term) == 0) {
+	changed = 1;
+    	return(1);
+    }
+    return(0);
+}
+
+int
+term_cbreak(fd)
     int fd;
 {
     if (!changed && tcgetattr(fd, &oterm) != 0)
@@ -156,10 +179,41 @@ term_raw(fd)
     return(0);
 }
 
+int
+term_copy(src, dst)
+    int src;
+    int dst;
+{
+    struct termios tt;
+
+    if (tcgetattr(src, &tt) != 0)
+	return(0);
+    if (tcsetattr(dst, TCSAFLUSH, &tt) != 0)
+	return(0);
+    return(1);
+}
+
 #else /* SGTTY */
 
 int
 term_raw(fd)
+    int fd;
+{
+    if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
+	return(0);
+    (void) memcpy(&term, &oterm, sizeof(term));
+    /* Set terminal to raw mode */
+    CLR(term.c_lflag, ECHO);
+    SET(term.sg_flags, RAW);
+    if (ioctl(fd, TIOCSETP, &term) == 0) {
+	changed = 1;
+	return(1);
+    }
+    return(0);
+}
+
+int
+term_cbreak(fd)
     int fd;
 {
     if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
@@ -175,6 +229,29 @@ term_raw(fd)
 	return(1);
     }
     return(0);
+}
+
+int
+term_copy(src, dst)
+    int src;
+    int dst;
+{
+    struct sgttyb b;
+    struct tchars tc;
+    struct ltchars lc;
+    int l, lb;
+
+    if (ioctl(src, TIOCGETP, &b) != 0 || ioctl(src, TIOCGETC, &tc) != 0 ||
+	ioctl(src, TIOCGETD, &l) != 0 || ioctl(src, TIOCGLTC, &lc) != 0 ||
+	ioctl(src, TIOCLGET, &lb)) {
+	return(0);
+    }
+    if (ioctl(dst, TIOCSETP, &b) != 0 || ioctl(dst, TIOCSETC, &tc) != 0 ||
+	ioctl(dst, TIOCSLTC, &lc) != 0 || ioctl(dst, TIOCLSET, &lb) != 0 ||
+	ioctl(dst, TIOCSETD, &l) != 0) {
+	return(0);
+    }
+    return(1);
 }
 
 #endif

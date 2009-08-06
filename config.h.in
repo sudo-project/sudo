@@ -318,6 +318,9 @@
 /* Define to 1 if you have the <netgroup.h> header file. */
 #undef HAVE_NETGROUP_H
 
+/* Define to 1 if you have the `openpty' function. */
+#undef HAVE_OPENPTY
+
 /* Define to 1 if you use NRL OPIE. */
 #undef HAVE_OPIE
 

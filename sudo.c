@@ -165,6 +165,10 @@ static struct sudo_nss_list *snl;
 extern char *optarg;
 extern int optind;
 
+/* XXX - script.c */
+extern int script_fds[5];
+extern void term_restore __P((int));
+
 int
 main(argc, argv, envp)
     int argc;
@@ -498,6 +502,10 @@ main(argc, argv, envp)
 	/* Must audit before uid change. */
 	audit_success(NewArgv);
 
+	/* Open tty as needed */
+	if (def_script)
+	    script_setup();
+
 	/* Become specified user or root if executing a command. */
 	if (ISSET(sudo_mode, MODE_RUN))
 	    set_perms(PERM_FULL_RUNAS);
@@ -540,7 +548,16 @@ main(argc, argv, envp)
 	sudo_endpwent();
 	sudo_endgrent();
 
-	closefrom(def_closefrom);
+	/* Move pty master/slave to low numbered fd and close the rest. */
+	fd = def_closefrom;
+	if (def_script) {
+	    int i;
+	    for (i = 0; i < 5; i++) {
+		dup2(script_fds[i], fd);
+		script_fds[i] = fd++;
+	    }
+	}
+	closefrom(fd);
 
 #ifndef PROFILING
 	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0) {
@@ -548,11 +565,15 @@ main(argc, argv, envp)
 	    exit(0);
 	} else {
 #ifdef HAVE_SELINUX
+	    /* XXX - script support */
 	    if (is_selinux_enabled() > 0 && user_role != NULL)
 		selinux_exec(user_role, user_type, NewArgv,
 		    ISSET(sudo_mode, MODE_LOGIN_SHELL));
 #endif
-	    execv(safe_cmnd, NewArgv);
+	    if (def_script)
+		script_execv(safe_cmnd, NewArgv);
+	    else
+		execv(safe_cmnd, NewArgv);
 	}
 #else
 	exit(0);
@@ -1446,6 +1467,8 @@ cleanup(gotsignal)
 	sudo_endpwent();
 	sudo_endgrent();
     }
+    if (def_script)
+	term_restore(STDIN_FILENO);
 }
 
 static void

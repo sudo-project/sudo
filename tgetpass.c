@@ -68,7 +68,7 @@ static char *sudo_askpass __P((const char *));
 
 extern int term_restore __P((int));
 extern int term_noecho __P((int));
-extern int term_raw __P((int));
+extern int term_cbreak __P((int));
 
 /*
  * Like getpass(3) but with timeout and echo flags.
@@ -120,7 +120,7 @@ restart:
     (void) sigaction(SIGTTOU, &sa, &savettou);
 
     if (def_pwfeedback)
-	neednl = term_raw(input);
+	neednl = term_cbreak(input);
     else
 	neednl = term_noecho(input);
 

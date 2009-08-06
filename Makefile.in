@@ -106,7 +106,7 @@ SRCS = aix.c alias.c alloc.c audit.c bsm_audit.c check.c closefrom.c \
        def_data.c defaults.c env.c error.c fileops.c find_path.c fnmatch.c \
        getcwd.c getprogname.c getspwuid.c gettime.c glob.c goodpath.c gram.c \
        gram.y interfaces.c isblank.c lbuf.c ldap.c list.c logging.c match.c \
-       mkstemp.c memrchr.c parse.c pwutil.c  set_perms.c sigaction.c \
+       mkstemp.c memrchr.c parse.c pwutil.c script.c  set_perms.c sigaction.c \
        snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c sudo.c \
        sudo_noexec.c sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c \
        toke.c toke.l tsgetgrpw.c utimes.c vasgroups.c visudo.c zero_bytes.c \
@@ -131,8 +131,8 @@ COMMON_OBJS = gram.o alias.o alloc.o defaults.o error.o list.o match.o \
 
 SUDO_OBJS = $(COMMON_OBJS) $(AUTH_OBJS) @SUDO_OBJS@ audit.o check.o env.o \
 	    getspwuid.o gettime.o goodpath.o fileops.o find_path.o \
-	    interfaces.o lbuf.o logging.o parse.o pwutil.o set_perms.o \
-	    sudo.o sudo_edit.o sudo_nss.o term.o tgetpass.o
+	    interfaces.o lbuf.o logging.o parse.o pwutil.o script.o \
+	    set_perms.o sudo.o sudo_edit.o sudo_nss.o term.o tgetpass.o
 
 VISUDO_OBJS = $(COMMON_OBJS) visudo.o fileops.o gettime.o goodpath.o \
 	      find_path.o pwutil.o
@@ -285,6 +285,8 @@ pwutil.o: $(srcdir)/pwutil.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/pwutil.c
 redblack.o: $(srcdir)/redblack.c $(SUDODEP) $(srcdir)/redblack.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/redblack.c
+script.o: $(srcdir)/script.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/script.c
 set_perms.o: $(srcdir)/set_perms.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/set_perms.c
 sigaction.o: $(srcdir)/sigaction.c $(srcdir)/compat.h
