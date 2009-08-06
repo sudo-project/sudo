@@ -1837,10 +1837,14 @@ AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
 	       setlocale getaddrinfo setsid setenv)
-AC_CHECK_FUNCS(openpty, [], [AC_CHECK_LIB(util, openpty, [
-    SUDO_LIBS="${SUDO_LIBS} -lutil"
-    AC_DEFINE(HAVE_OPENPTY)
-])])
+AC_CHECK_FUNCS(openpty, [], [
+    AC_CHECK_LIB(util, openpty, [
+	SUDO_LIBS="${SUDO_LIBS} -lutil"
+	AC_DEFINE(HAVE_OPENPTY)
+    ], [
+	AC_CHECK_FUNCS(revoke vhangup, [break])
+    ])
+])
 AC_CHECK_FUNCS(unsetenv, SUDO_FUNC_UNSETENV_VOID)
 SUDO_FUNC_PUTENV_CONST
 if test -z "$SKIP_SETRESUID"; then

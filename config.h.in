@@ -339,6 +339,9 @@
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM
 
+/* Define to 1 if you have the `revoke' function. */
+#undef HAVE_REVOKE
+
 /* Define to 1 if you have the <sasl/sasl.h> header file. */
 #undef HAVE_SASL_SASL_H
 
@@ -492,6 +495,9 @@
 
 /* Define to 1 if you have the `vasprintf' function. */
 #undef HAVE_VASPRINTF
+
+/* Define to 1 if you have the `vhangup' function. */
+#undef HAVE_VHANGUP
 
 /* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
