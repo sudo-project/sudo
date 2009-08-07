@@ -56,8 +56,11 @@
 #include <pwd.h>
 #include <signal.h>
 
-#ifdef HAVE_OPENPTY
+#ifdef HAVE_UTIL_H
 # include <util.h>
+#endif
+#ifdef HAVE_PTY_H
+# include <pty.h>
 #endif
 
 #include "sudo.h"

@@ -1837,8 +1837,9 @@ AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
 	       setlocale getaddrinfo setsid setenv)
-AC_CHECK_FUNCS(openpty, [], [
+AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(util.h pty.h, [break])], [
     AC_CHECK_LIB(util, openpty, [
+	AC_CHECK_HEADERS(util.h pty.h, [break])
 	SUDO_LIBS="${SUDO_LIBS} -lutil"
 	AC_DEFINE(HAVE_OPENPTY)
     ], [
