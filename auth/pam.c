@@ -105,6 +105,14 @@ pam_init(pw, promptp, auth)
 	log_error(USE_ERRNO|NO_EXIT|NO_MAIL, "unable to initialize PAM");
 	return(AUTH_FATAL);
     }
+
+    /*
+     * Set PAM_RUSER to the invoking user (the "from" user).
+     * We set PAM_RHOST to avoid a bug in Solaris 7 and below.
+     */
+    (void) pam_set_item(pamh, PAM_RUSER, user_name);
+    (void) pam_set_item(pamh, PAM_RHOST, user_host);
+
     /*
      * Some versions of pam_lastlog have a bug that
      * will cause a crash if PAM_TTY is not set so if
@@ -203,13 +211,10 @@ pam_prep_user(pw)
 	pam_init(pw, NULL, NULL);
 
     /*
-     * Set PAM_USER to the user we are changing *to* and
-     * set PAM_RUSER to the user we are coming *from*.
-     * We set PAM_RHOST to avoid a bug in Solaris 7 and below.
+     * Update PAM_USER to reference the user we are running the command
+     * as, as opposed to the user we authenticated as.
      */
     (void) pam_set_item(pamh, PAM_USER, pw->pw_name);
-    (void) pam_set_item(pamh, PAM_RUSER, user_name);
-    (void) pam_set_item(pamh, PAM_RHOST, user_host);
 
     /*
      * Set credentials (may include resource limits, device ownership, etc).
