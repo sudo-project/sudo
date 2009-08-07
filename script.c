@@ -84,7 +84,7 @@ static int get_pty __P((int *master, int *slave));
 
 /*
  * TODO: run monitor as root?
- *       get_pty for sysv pty and old BSD
+ *       get_pty for unix98 pty
  *       if stdin not tty, just use sane defaults
  *	 fix sigchild
  */
@@ -375,6 +375,10 @@ script_execv(path, argv)
         pid = wait(&n);
 #endif
     } while (pid != -1 || errno == EINTR);
+#ifdef HAVE_VHANGUP
+    signal(SIGHUP, SIG_IGN);
+    vhangup();
+#endif
     if (WIFEXITED(n))
 	exit(WEXITSTATUS(n));
     if (WIFSIGNALED(n))
@@ -391,11 +395,17 @@ script_child(path, argv)
      * Create new session, make slave controlling terminal and
      * point std{in,out,err} to it.
      */
+#ifdef HAVE_SETSID
     setsid();
+#else
+    setpgrp(0, 0);
+#endif
+#ifdef TIOCSCTTY
     if (ioctl(script_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0) {
 	warning("unable to set controlling tty");
 	return;
     }
+#endif
     dup2(script_fds[SFD_SLAVE], STDIN_FILENO);
     dup2(script_fds[SFD_SLAVE], STDOUT_FILENO);
     dup2(script_fds[SFD_SLAVE], STDERR_FILENO);
@@ -480,21 +490,22 @@ static int get_pty(master, slave)
     if ((gr = sudo_getgrnam("tty")) != NULL)
 	ttygid = gr->gr_gid;
 
-    /* XXX - more? */
     for (bank = "pqrs"; *bank != '\0'; bank++) {
-	line[sizeof("/dev/pty") - 1] = *bank;
+	line[sizeof("/dev/ptyX") - 2] = *bank;
 	for (cp = "0123456789abcdef"; *cp != '\0'; cp++) {
-	    line[sizeof("/dev/ptyX") - 1] = *cp;
+	    line[sizeof("/dev/ptyXX") - 2] = *cp;
 	    *master = open(line, O_RDWR, 0);
 	    if (*master == -1) {
 		if (errno == ENOENT)
 		    return(0); /* out of ptys */
 		continue; /* already in use */
 	    }
-	    line[sizeof("/dev/") - 1] = 't';
+	    line[sizeof("/dev/p") - 2] = 't';
 	    (void)chown(line, runas_pw->pw_uid, ttygid);
 	    (void)chmod(line, S_IRUSR|S_IWUSR|S_IWGRP);
-	    (void)revoke(line); /* XXX - configure check, maybe vhangup */
+#ifdef HAVE_REVOKE
+	    (void)revoke(line);
+#endif
 	    *slave = open(line, O_RDWR, 0);
 	    if (*slave != -1)
 		    return(1); /* success */
