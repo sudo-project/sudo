@@ -63,6 +63,9 @@ __unused static const char rcsid[] = "$Sudo$";
 #ifndef IEXTEN
 # define IEXTEN		0
 #endif
+#ifndef IUCLC
+# define IUCLC		0
+#endif
 
 #ifndef _POSIX_VDISABLE
 # ifdef VDISABLE
@@ -143,7 +146,7 @@ term_raw(fd)
 	return(0);
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to raw mode */
-    term.c_iflag &= ~(BRKINT|ICRNL|IGNCR|INLCR|IXON|PARMRK);
+    term.c_iflag &= ~(ICRNL|IGNCR|INLCR|IUCLC|IXON);
     term.c_oflag &= ~OPOST;
     term.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
     term.c_cc[VMIN] = 1;
