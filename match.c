@@ -580,8 +580,10 @@ command_matches_dir(sudoers_dir, dlen)
     if (dirp == NULL)
 	return(FALSE);
 
-    if (strlcpy(buf, sudoers_dir, sizeof(buf)) >= sizeof(buf))
+    if (strlcpy(buf, sudoers_dir, sizeof(buf)) >= sizeof(buf)) {
+	closedir(dirp);
 	return(FALSE);
+    }
     while ((dent = readdir(dirp)) != NULL) {
 	/* ignore paths > PATH_MAX (XXX - log) */
 	buf[dlen] = '\0';
