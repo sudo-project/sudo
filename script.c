@@ -80,6 +80,7 @@ int script_fds[5];
 static sig_atomic_t alive = 1;
 
 static pid_t child;
+static int child_status;
 
 static void script_child __P((const char *path, char *const argv[]));
 static void sync_winsize __P((int src, int dst));
@@ -89,7 +90,6 @@ static int get_pty __P((int *master, int *slave));
 
 /*
  * TODO: run monitor as root?
- *       if stdin not tty, just use sane defaults
  */
 
 struct script_buf {
@@ -113,14 +113,16 @@ script_setup()
     unsigned int len;
     char pathbuf[PATH_MAX];
 
-    /* XXX - bail early if stdin is not a tty */
+    if (!isatty(STDIN_FILENO))
+	log_error(USE_ERRNO, "Standard input is not a tty");
 
     if (!get_pty(&script_fds[SFD_MASTER], &script_fds[SFD_SLAVE]))
 	log_error(USE_ERRNO, "Can't get pty");
 
     /* Copy terminal attrs from stdin -> pty slave. */
-    if (!term_copy(STDIN_FILENO, script_fds[SFD_SLAVE]))
+    if (!term_copy(STDIN_FILENO, script_fds[SFD_SLAVE])) {
 	log_error(USE_ERRNO, "Can't copy terminal attributes");
+    }
     sync_winsize(STDIN_FILENO, script_fds[SFD_SLAVE]);
 
     if (!term_raw(STDIN_FILENO))
@@ -337,7 +339,6 @@ script_execv(path, argv)
 	n &= ~O_NONBLOCK;
 	(void) fcntl(STDIN_FILENO, F_SETFL, n);
     }
-    /* XXX - no check for short writes */
     if (output.len > output.off) {
 	write(STDOUT_FILENO, output.buf + output.off, output.len - output.off);
 	fwrite(output.buf + output.off, 1, output.len - output.off, ofile);
@@ -355,10 +356,10 @@ script_execv(path, argv)
     signal(SIGHUP, SIG_IGN);
     vhangup();
 #endif
-    if (WIFEXITED(n))
-	exit(WEXITSTATUS(n));
-    if (WIFSIGNALED(n))
-	exit(128 | WSTOPSIG(n));
+    if (WIFEXITED(child_status))
+	exit(WEXITSTATUS(child_status));
+    if (WIFSIGNALED(child_status))
+	exit(128 | WSTOPSIG(child_status));
     exit(1);
 }
 
@@ -420,12 +421,11 @@ static void
 sigchild(signo)
     int signo;
 {
-    int status;
     pid_t pid;
 
 #ifdef sudo_waitpid
     do {
-	pid = sudo_waitpid(child, &status, WNOHANG);
+	pid = sudo_waitpid(child, &child_status, WNOHANG);
 	if (pid == child) {
 	    alive = 0;
 	    break;
@@ -433,7 +433,7 @@ sigchild(signo)
     } while (pid > 0 || (pid == -1 && errno == EINTR));
 #else
     do {
-	pid = wait();
+	pid = wait(&child_status);
     } while (pid == -1 && errno == EINTR);
     alive = 0;
 #endif
