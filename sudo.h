@@ -326,6 +326,11 @@ void aix_setlimits __P((char *));
 #endif
 int script_execv __P((const char *, char * const *));
 void script_setup __P((void));
+int term_cbreak __P((int));
+int term_copy __P((int, int));
+int term_noecho __P((int));
+int term_raw __P((int));
+int term_restore __P((int));
 YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */

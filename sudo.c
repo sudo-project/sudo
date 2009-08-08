@@ -147,6 +147,7 @@ uid_t timestamp_uid;
 extern int errorlineno;
 extern int parse_error;
 extern char *errorfile;
+extern int script_fds[5];
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
@@ -164,10 +165,6 @@ static struct sudo_nss_list *snl;
 /* For getopt(3) */
 extern char *optarg;
 extern int optind;
-
-/* XXX - script.c */
-extern int script_fds[5];
-extern void term_restore __P((int));
 
 int
 main(argc, argv, envp)

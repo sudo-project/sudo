@@ -66,10 +66,6 @@ static void handler __P((int));
 static char *getln __P((int, char *, size_t, int));
 static char *sudo_askpass __P((const char *));
 
-extern int term_restore __P((int));
-extern int term_noecho __P((int));
-extern int term_cbreak __P((int));
-
 /*
  * Like getpass(3) but with timeout and echo flags.
  */
