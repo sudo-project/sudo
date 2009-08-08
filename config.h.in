@@ -333,6 +333,12 @@
 /* Define to 1 if you have the <paths.h> header file. */
 #undef HAVE_PATHS_H
 
+/* Define to 1 if you have the `posix_openpt' function. */
+#undef HAVE_POSIX_OPENPT
+
+/* Define to 1 if you have the `grantpt' function. */
+#undef HAVE_GRANTPT
+
 /* Define to 1 if you have the <project.h> header file. */
 #undef HAVE_PROJECT_H
 
