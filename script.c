@@ -79,6 +79,8 @@ int script_fds[5];
 
 static sig_atomic_t alive = 1;
 
+static pid_t child;
+
 static void script_child __P((const char *path, char *const argv[]));
 static void sync_winsize __P((int src, int dst));
 static void sigchild __P((int signo));
@@ -88,8 +90,13 @@ static int get_pty __P((int *master, int *slave));
 /*
  * TODO: run monitor as root?
  *       if stdin not tty, just use sane defaults
- *	 fix sigchild
  */
+
+struct script_buf {
+    int len; /* buffer length (how much read in) */
+    int off; /* write position (how much already consumed) */
+    char buf[16 * 1024];
+};
 
 static int
 fdcompar(v1, v2)
@@ -118,26 +125,6 @@ script_setup()
 
     if (!term_raw(STDIN_FILENO))
 	log_error(USE_ERRNO, "Can't set terminal to raw mode");
-
-#if 0
-    if (openpty(&script_fds[SFD_MASTER], &script_fds[SFD_SLAVE], ttypath, oterm, &win) == -1)
-	log_error(USE_ERRNO, "Can't get pty");
-
-    /* Get current terminal attrs, set stdin to raw, no echo, then open pty. */
-    if (tcgetattr(STDIN_FILENO, &oterm_buf) != 0)
-	log_error(USE_ERRNO, "Can't get terminal attributes");
-    oterm = &oterm_buf;
-    memcpy(&term, oterm, sizeof(term));
-    cfmakeraw(&term);
-    term.c_lflag &= ~ECHO;
-    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &term) != 0)
-	log_error(USE_ERRNO, "Can't set terminal attributes");
-    if (ioctl(STDIN_FILENO, TIOCGWINSZ, &win) != 0)
-	log_error(USE_ERRNO, "Can't get window size");
-    if (openpty(&script_fds[SFD_MASTER], &script_fds[SFD_SLAVE], ttypath, oterm, &win) == -1)
-	log_error(USE_ERRNO, "Can't open pty");
-    (void) chown(ttypath, runas_pw->pw_uid, -1);
-#endif
 
     /*
      * Log files live in a per-user subdir of _PATH_SUDO_SESSDIR.
@@ -185,18 +172,11 @@ script_setup()
     qsort(script_fds, 5, sizeof(int), fdcompar);
 }
 
-struct script_buf {
-    int len; /* buffer length (how much read in) */
-    int off; /* write position (how much already consumed) */
-    char buf[16 * 1024];
-};
-
 int
 script_execv(path, argv)
     const char *path;
     char *const argv[];
 {
-    pid_t child, pid;
     int n, nready;
     fd_set *fdsr, *fdsw;
     struct script_buf input, output;
@@ -371,13 +351,6 @@ script_execv(path, argv)
     }
     term_restore(STDIN_FILENO);
 
-    do {
-#ifdef sudo_waitpid
-        pid = sudo_waitpid(child, &n, 0);
-#else
-        pid = wait(&n);
-#endif
-    } while (pid != -1 || errno == EINTR);
 #ifdef HAVE_VHANGUP
     signal(SIGHUP, SIG_IGN);
     vhangup();
@@ -447,8 +420,23 @@ static void
 sigchild(signo)
     int signo;
 {
-    /* XXX - might not be right pid, must wait for it to find out */
+    int status;
+    pid_t pid;
+
+#ifdef sudo_waitpid
+    do {
+	pid = sudo_waitpid(child, &status, WNOHANG);
+	if (pid == child) {
+	    alive = 0;
+	    break;
+	}
+    } while (pid > 0 || (pid == -1 && errno == EINTR));
+#else
+    do {
+	pid = wait();
+    } while (pid == -1 && errno == EINTR);
     alive = 0;
+#endif
 }
 
 static void
