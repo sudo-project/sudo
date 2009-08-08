@@ -87,12 +87,12 @@ static int get_pty __P((int *master, int *slave));
 
 /*
  * TODO: run monitor as root?
- *       get_pty for unix98 pty
  *       if stdin not tty, just use sane defaults
  *	 fix sigchild
  */
 
-static int fdcompar(v1, v2)
+static int
+fdcompar(v1, v2)
     const void *v1;
     const void *v2;
 {
@@ -462,7 +462,8 @@ sigwinch(signo)
 }
 
 #ifdef HAVE_OPENPTY
-static int get_pty(master, slave)
+static int
+get_pty(master, slave)
     int *master;
     int *slave;
 {
@@ -480,9 +481,59 @@ static int get_pty(master, slave)
 }
 
 #else
+# ifdef HAVE_GRANTPT
+
+#  ifndef HAVE_POSIX_OPENPT
+static int
+posix_openpt(oflag)
+    int oflag;
+{
+    int fd;
+
+#   ifdef _AIX
+    fd = open("/dev/ptc", oflag);
+#   else
+    fd = open("/dev/ptmx", oflag);
+#   endif
+    return(fd);
+}
+#  endif HAVE_POSIX_OPENPT
+
+static int
+get_pty(master, slave)
+    int *master;
+    int *slave;
+{
+    char *line;
+
+    *master = posix_openpt(O_RDWR);
+    if (*master == -1)
+	return(0);
+
+    if (unlockpt(*master) != 0) {
+	close(*master);
+	return(0);
+    }
+    (void) grantpt(*master);
+    line = ptsname(*master);
+    if (line == NULL) {
+	close(*master);
+	return(0);
+    }
+    *slave = open(line, O_RDWR, 0);
+    if (*slave == -1) {
+	close(*master);
+	return(0);
+    }
+    (void) chown(line, runas_pw->pw_uid, -1);
+    return(1);
+}
+
+# else /* !HAVE_GRANTPT */
 
 static char line[] = "/dev/ptyXX";
-static int get_pty(master, slave)
+static int
+get_pty(master, slave)
     int *master;
     int *slave;
 {
@@ -504,18 +555,19 @@ static int get_pty(master, slave)
 		continue; /* already in use */
 	    }
 	    line[sizeof("/dev/p") - 2] = 't';
-	    (void)chown(line, runas_pw->pw_uid, ttygid);
-	    (void)chmod(line, S_IRUSR|S_IWUSR|S_IWGRP);
-#ifdef HAVE_REVOKE
-	    (void)revoke(line);
-#endif
+	    (void) chown(line, runas_pw->pw_uid, ttygid);
+	    (void) chmod(line, S_IRUSR|S_IWUSR|S_IWGRP);
+#  ifdef HAVE_REVOKE
+	    (void) revoke(line);
+#  endif
 	    *slave = open(line, O_RDWR, 0);
 	    if (*slave != -1)
 		    return(1); /* success */
-	    (void)close(*master);
+	    (void) close(*master);
 	}
     }
     return(0);
 }
 
-#endif
+# endif /* HAVE_GRANTPT */
+#endif /* HAVE_OPENPTY */
