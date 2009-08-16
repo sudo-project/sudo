@@ -61,6 +61,7 @@
 #include <pathnames.h>
 
 #include "compat.h"
+#include "error.h"
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
@@ -179,7 +180,7 @@ main(argc, argv)
 #ifndef HAVE_NANOSLEEP
 static int
 nanosleep(ts, rts)
-    struct timespec *ts;
+    const struct timespec *ts;
     struct timespec *rts;
 {
     struct timeval timeout, endtime, now;
