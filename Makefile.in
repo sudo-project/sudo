@@ -310,7 +310,7 @@ selinux.o: $(srcdir)/selinux.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/selinux.c
 sudo.o: $(srcdir)/sudo.c $(SUDODEP) sudo_usage.h $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
-sudoreplay.o: $(srcdir)/replay.c $(srcdir)/compat.h $(srcdir)/error.h config.h
+sudoreplay.o: $(srcdir)/sudoreplay.c $(srcdir)/compat.h $(srcdir)/error.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudoreplay.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_edit.c
