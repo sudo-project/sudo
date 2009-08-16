@@ -119,7 +119,7 @@ dnl
 dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
 dnl
-PROGS="sudo visudo"
+PROGS="sudo visudo sudoreplay"
 : ${MANTYPE='man'}
 : ${mansrcdir='.'}
 : ${SUDOERS_MODE='0440'}
@@ -1836,7 +1836,7 @@ dnl
 AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
-	       setlocale getaddrinfo setsid setenv vhangup)
+	       setlocale getaddrinfo setsid setenv vhangup nanosleep)
 AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(util.h pty.h, [break])], [
     AC_CHECK_LIB(util, openpty, [
 	AC_CHECK_HEADERS(util.h pty.h, [break])

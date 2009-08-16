@@ -312,6 +312,9 @@
 /* Define to 1 if you have the <mps/ldap_ssl.h> header file. */
 #undef HAVE_MPS_LDAP_SSL_H
 
+/* Define to 1 if you have the `nanosleep' function. */
+#undef HAVE_NANOSLEEP
+
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #undef HAVE_NDIR_H
 

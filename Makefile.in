@@ -110,7 +110,7 @@ SRCS = aix.c alias.c alloc.c audit.c bsm_audit.c check.c closefrom.c \
        snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c sudo.c \
        sudo_noexec.c sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c \
        toke.c toke.l tsgetgrpw.c utimes.c vasgroups.c visudo.c zero_bytes.c \
-       redblack.c selinux.c sesh.c $(AUTH_SRCS)
+       redblack.c selinux.c sesh.c sudoreplay.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -136,6 +136,8 @@ SUDO_OBJS = $(COMMON_OBJS) $(AUTH_OBJS) @SUDO_OBJS@ audit.o check.o env.o \
 
 VISUDO_OBJS = $(COMMON_OBJS) visudo.o fileops.o gettime.o goodpath.o \
 	      find_path.o pwutil.o
+
+REPLAY_OBJS = sudoreplay.o error.o
 
 TEST_OBJS = $(COMMON_OBJS) interfaces.o testsudoers.o tsgetgrpw.o tspwutil.o
 
@@ -190,6 +192,9 @@ sudo: $(SUDO_OBJS) $(LIB_OBJS)
 
 visudo: $(VISUDO_OBJS) $(LIB_OBJS)
 	$(CC) -o $@ $(VISUDO_OBJS) $(LIB_OBJS) $(LDFLAGS) $(LIBS) $(NET_LIBS)
+
+sudoreplay: $(REPLAY_OBJS) $(LIB_OBJS)
+	$(CC) -o $@ $(REPLAY_OBJS) $(LIB_OBJS) $(LDFLAGS) $(LIBS)
 
 testsudoers: $(TEST_OBJS) $(LIB_OBJS)
 	$(CC) -o $@ $(TEST_OBJS) $(LIB_OBJS) $(LDFLAGS) $(LIBS) $(NET_LIBS)
@@ -305,6 +310,8 @@ selinux.o: $(srcdir)/selinux.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/selinux.c
 sudo.o: $(srcdir)/sudo.c $(SUDODEP) sudo_usage.h $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
+sudoreplay.o: $(srcdir)/replay.c $(srcdir)/compat.h $(srcdir)/error.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudoreplay.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_edit.c
 sudo_noexec.o: $(srcdir)/sudo_noexec.c $(srcdir)/compat.h config.h
