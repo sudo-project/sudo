@@ -57,6 +57,22 @@
 #include <errno.h>
 #include <limits.h>
 #include <fcntl.h>
+#ifdef HAVE_DIRENT_H
+# include <dirent.h>
+# define NAMLEN(dirent) strlen((dirent)->d_name)
+#else
+# define dirent direct
+# define NAMLEN(dirent) (dirent)->d_namlen
+# ifdef HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# ifdef HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# ifdef HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
 
 #include <pathnames.h>
 
@@ -73,13 +89,15 @@ extern int optind;
 
 int Argc;
 char **Argv;
+const char *session_dir = _PATH_SUDO_SESSDIR;
 
 void usage __P((void));
 void delay __P((double));
+int list_sessions __P((int, char **));
 
 /*
- * TODO: add ability to scan for session files
- *       scan by command, user, provide summary
+ * TODO: expand ability to scan for session files:
+ *       scan by command (regex?), user, tty, provide summary
  */
 
 int
@@ -88,23 +106,36 @@ main(argc, argv)
     char **argv;
 {
     int ch, plen;
+    int listonly = 0;
     char path[PATH_MAX];
     char buf[BUFSIZ];
-    const char *session_dir = _PATH_SUDO_SESSDIR;
-    const char *user, *id;
+    const char *user, *id, *tty = NULL;
     char *cp, *ep;
     FILE *tfile, *sfile, *lfile;
     double seconds;
     unsigned long nbytes;
     size_t len, nread;
+    double speed = 1.0;
 
     Argc = argc;
     Argv = argv;
 
-    while ((ch = getopt(argc, argv, "d:")) != -1) {
+    while ((ch = getopt(argc, argv, "d:ls:t:")) != -1) {
 	switch(ch) {
 	case 'd':
 	    session_dir = optarg;
+	    break;
+	case 'l':
+	    listonly = 1;
+	    break;
+	case 's':
+	    errno = 0;
+	    speed = strtod(optarg, &ep);
+	    if (*ep != '\0' || errno != 0)
+		error(1, "invalid speed factor: %s", optarg);
+	    break;
+	case 't':
+	    tty = optarg;
 	    break;
 	default:
 	    usage();
@@ -114,6 +145,10 @@ main(argc, argv)
     }
     argc -= optind;
     argv += optind;
+
+    if (listonly) {
+	exit(list_sessions(argc, argv));
+    }
 
     if (argc != 2 && argc != 3)
 	usage();
@@ -153,9 +188,9 @@ main(argc, argv)
     while (fgets(buf, sizeof(buf), tfile) != NULL) {
 	errno = 0;
 	seconds = strtod(buf, &ep);
-	if (errno != 0)
+	if (errno != 0 || !isspace((unsigned char) *ep))
 	    error(1, "invalid timing file line: %s", buf);
-	for (cp = ep + 1; isspace((unsigned char)*cp); cp++)
+	for (cp = ep + 1; isspace((unsigned char) *cp); cp++)
 	    continue;
 	errno = 0;
 	nbytes = strtoul(cp, &ep, 10);
@@ -163,12 +198,13 @@ main(argc, argv)
 	    error(1, "invalid timing file byte count: %s", cp);
 
 	fflush(stdout);
-	delay(seconds);
+	delay(seconds / speed);
 	while (nbytes != 0) {
 	    if (nbytes > sizeof(buf))
 		len = sizeof(buf);
 	    else
 		len = nbytes;
+	    /* XXX - read/write all of len */
 	    nread = fread(buf, 1, len, sfile);
 	    fwrite(buf, nread, 1, stdout);
 	    nbytes -= nread;
@@ -227,10 +263,60 @@ delay(secs)
 	error(1, "nanosleep: tv_sec %ld, tv_nsec %ld", ts.tv_sec, ts.tv_nsec);
 }
 
+int
+list_sessions(argc, argv)
+    int argc;
+    char **argv;
+{
+    FILE *fp;
+    DIR *sess_d, *user_d;
+    struct dirent *dp;
+    char path[PATH_MAX];
+    char buf[BUFSIZ];
+    int len, plen;
+
+    sess_d = opendir(session_dir);
+    if (sess_d == NULL)
+	error(1, "unable to open %s", session_dir);
+
+    /* XXX - ignores optional user and tty for now */
+
+    while ((dp = readdir(sess_d)) != NULL) {
+	if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0)
+	    continue;
+	plen = snprintf(path, sizeof(path), "%s/%s/", session_dir, dp->d_name);
+	if (plen <= 0 || plen >= sizeof(path)) {
+	    /* XXX - warn */
+	    continue;
+	}
+	path[--plen] = '\0'; /* chop off the '/' for now */
+	user_d = opendir(path);
+	if (user_d == NULL && errno != ENOTDIR) {
+	    warning("cannot opendir %s", path);
+	    continue;
+	}
+	while ((dp = readdir(user_d)) != NULL) {
+	    /* base session (log) file name is 10 characters */
+	    len = NAMLEN(dp);
+	    if (len != 10)
+		continue;
+	    /* open log file, print id and command */
+	    path[plen] = '/'; /* restore dir separator */
+	    strlcpy(path + plen + 1, dp->d_name, sizeof(path) - plen - 1); /* XXX - check */
+	    fp = fopen(path, "r");
+	    fgets(buf, sizeof(buf), fp); /* XXX - ignore first line */
+	    fgets(buf, sizeof(buf), fp);
+	    printf("%s: %s", dp->d_name, buf);
+	}
+    }
+    closedir(sess_d);
+    return(0);
+}
+
 void
 usage()
 {
-    fprintf(stderr, "usage: %s [-d directory] username ID [divisor]\n",
+    fprintf(stderr, "usage: %s [-d directory] username ID [speed_factor]\n",
 	getprogname());
     exit(1);
 }
