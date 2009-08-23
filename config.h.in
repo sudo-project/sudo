@@ -351,6 +351,9 @@
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM
 
+/* Define to 1 if you have the `regcomp' function. */
+#undef HAVE_REGCOMP
+
 /* Define to 1 if you have the `revoke' function. */
 #undef HAVE_REVOKE
 
