@@ -160,6 +160,10 @@ next_seq(pathbuf)
     buf[6] = '\n';
     len += sizeof("/00/00/00") - 1;
 
+    /* For logging purposes */
+    memcpy(sudo_user.sessid, buf, 6);
+    sudo_user.sessid[6] = '\0';
+
     /* Rewind and overwrite old seq file. */
     if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7)
 	log_error(USE_ERRNO, "Can't write to %s", pathbuf);

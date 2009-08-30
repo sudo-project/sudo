@@ -461,6 +461,10 @@ main(argc, argv, envp)
 		validate_env_vars(sudo_user.env_vars);
 	}
 
+	/* Open tty and session ID as needed */
+	if (def_script)
+	    script_setup();
+
 	log_allowed(validated);
 	if (ISSET(sudo_mode, MODE_CHECK))
 	    rc = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
@@ -498,10 +502,6 @@ main(argc, argv, envp)
 
 	/* Must audit before uid change. */
 	audit_success(NewArgv);
-
-	/* Open tty as needed */
-	if (def_script)
-	    script_setup();
 
 	/* Become specified user or root if executing a command. */
 	if (ISSET(sudo_mode, MODE_RUN))

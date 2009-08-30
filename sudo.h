@@ -64,6 +64,7 @@ struct sudo_user {
     char *type;
 #endif
     char  cwd[PATH_MAX];
+    char  sessid[7];
 };
 
 /*

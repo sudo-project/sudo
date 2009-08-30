@@ -658,6 +658,7 @@ get_timestr()
 #define	LL_GROUP_STR	"GROUP="
 #define	LL_ENV_STR	"ENV="
 #define	LL_CMND_STR	"COMMAND="
+#define	LL_ID_STR	"ID="
 
 /*
  * Allocate and fill in a new logline.
@@ -687,6 +688,8 @@ new_logline(message, serrno)
 	len += sizeof(LL_USER_STR) + 2 + strlen(runas_pw->pw_name);
     if (runas_gr != NULL)
 	len += sizeof(LL_GROUP_STR) + 2 + strlen(runas_gr->gr_name);
+    if (sudo_user.sessid[0] != '\0')
+	len += sizeof(LL_ID_STR) + 2 + strlen(sudo_user.sessid);
     if (sudo_user.env_vars != NULL) {
 	size_t evlen = 0;
 	struct list_member *cur;
@@ -737,6 +740,12 @@ new_logline(message, serrno)
     if (runas_gr != NULL) {
 	if (strlcat(line, LL_GROUP_STR, len) >= len ||
 	    strlcat(line, runas_gr->gr_name, len) >= len ||
+	    strlcat(line, " ; ", len) >= len)
+	    goto toobig;
+    }
+    if (sudo_user.sessid[0] != '\0') {
+	if (strlcat(line, LL_ID_STR, len) >= len ||
+	    strlcat(line, sudo_user.sessid, len) >= len ||
 	    strlcat(line, " ; ", len) >= len)
 	    goto toobig;
     }
