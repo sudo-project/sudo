@@ -136,7 +136,7 @@ main(argc, argv)
     Argv = argv;
 
     /* XXX - timestamp option? (begin,end) */
-    while ((ch = getopt(argc, argv, "d:lm:p:s:t:u:w:")) != -1) {
+    while ((ch = getopt(argc, argv, "d:lm:p:s:t:u:V")) != -1) {
 	switch(ch) {
 	case 'd':
 	    session_dir = optarg;
@@ -165,6 +165,9 @@ main(argc, argv)
 	case 'u':
 	    user = optarg;
 	    break;
+	case 'V':
+	    (void) printf("%s version %s\n", getprogname(), PACKAGE_VERSION);
+	    exit(0);
 	default:
 	    usage();
 	    /* NOTREACHED */
