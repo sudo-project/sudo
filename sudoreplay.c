@@ -96,7 +96,7 @@ const char *session_dir = _PATH_SUDO_SESSDIR;
 
 void usage __P((void));
 void delay __P((double));
-int list_sessions __P((int, char **, const char *, const char *));
+int list_sessions __P((int, char **, const char *, const char *, const char *));
 
 #ifdef HAVE_REGCOMP
 # define REGEX_T	regex_t
@@ -104,16 +104,13 @@ int list_sessions __P((int, char **, const char *, const char *));
 # define REGEX_T	char
 #endif
 
+#define VALID_ID(s) (isalnum((s)[0]) && isalnum((s)[1]) && isalnum((s)[2]) && \
+    isalnum((s)[3]) && isalnum((s)[4]) && isalnum((s)[5]) && (s)[6] == '\0')
 
 /*
- * Things to think about:
- *  use a unique, inrementing id but break things up into lots of
- *  sub dirs like squid?  Means keeping a seq file to track the next id.
- *  Just use a random uuid with multiple dirs?
- *    550e8400-e29b-41d4-a716-446655440000
- *  Being able to select by user without opening all files is handy.
- *  Selecting by time could also be useful so an id that consists of a
- *  timestamp + random bits  + username might be good.
+ * TODO:
+ *  add max_wait option
+ *  add find-like search language?
  */
 
 int
@@ -125,25 +122,32 @@ main(argc, argv)
     int listonly = 0;
     char path[PATH_MAX];
     char buf[BUFSIZ];
-    const char *user, *id, *pattern = NULL, *tty = NULL;
+    const char *user = NULL, *id, *pattern = NULL, *tty = NULL;
     char *cp, *ep;
     FILE *tfile, *sfile, *lfile;
     double seconds;
     unsigned long nbytes;
     size_t len, nread;
     double speed = 1.0;
+    double max_wait = 0;
 
     Argc = argc;
     Argv = argv;
 
     /* XXX - timestamp option? (begin,end) */
-    while ((ch = getopt(argc, argv, "d:lp:s:t:")) != -1) {
+    while ((ch = getopt(argc, argv, "d:lm:p:s:t:u:")) != -1) {
 	switch(ch) {
 	case 'd':
 	    session_dir = optarg;
 	    break;
 	case 'l':
 	    listonly = 1;
+	    break;
+	case 'm':
+	    errno = 0;
+	    max_wait = strtod(optarg, &ep);
+	    if (*ep != '\0' || errno != 0)
+		error(1, "invalid max wait: %s", optarg);
 	    break;
 	case 'p':
 	    pattern = optarg;
@@ -157,6 +161,9 @@ main(argc, argv)
 	case 't':
 	    tty = optarg;
 	    break;
+	case 'u':
+	    user = optarg;
+	    break;
 	default:
 	    usage();
 	    /* NOTREACHED */
@@ -167,18 +174,22 @@ main(argc, argv)
     argv += optind;
 
     if (listonly) {
-	exit(list_sessions(argc, argv, pattern, tty));
+	exit(list_sessions(argc, argv, pattern, user, tty));
     }
 
-    if (argc != 2 && argc != 3)
+    if (argc != 1)
 	usage();
 
-    user = argv[0];
-    id = argv[1];
+    /* 6 digit ID in base 36, e.g. 01G712AB */
+    id = argv[0];
+    if (!VALID_ID(id))
+	errorx(1, "invalid ID %s", id);
 
-    plen = snprintf(path, sizeof(path), "%s/%s/%s.tim", session_dir, user, id);
+    plen = snprintf(path, sizeof(path), "%s/%.2s/%.2s/%.2s.tim",
+	session_dir, id, &id[2], &id[4]);
     if (plen <= 0 || plen >= sizeof(path))
-	errorx(1, "%s/%s/%s: %s", session_dir, user, id, strerror(ENAMETOOLONG));
+	errorx(1, "%s/%.2s/%.2s/%.2s/%.2s.tim: %s", session_dir,
+	    id, &id[2], &id[4], strerror(ENAMETOOLONG));
 
     /* timing file */
     tfile = fopen(path, "r");
@@ -283,71 +294,99 @@ delay(secs)
 	error(1, "nanosleep: tv_sec %ld, tv_nsec %ld", ts.tv_sec, ts.tv_nsec);
 }
 
-int
-list_user_sessions(user, re, tty)
-    const char *user;
+struct log_info {
+    char *user;
+    char *runas_user;
+    char *runas_group;
+    char *tty;
+    char *cmd;
+    time_t tstamp;
+};
+
+static int
+list_session_dir(pathbuf, re, user, tty)
+    char *pathbuf;
     REGEX_T *re;
+    const char *user;
     const char *tty;
 {
     FILE *fp;
-    DIR *user_d;
+    DIR *d;
     struct dirent *dp;
-    char path[PATH_MAX], buf[BUFSIZ], cmd[BUFSIZ];
-    char *cmd_tty;
-    time_t tstamp;
+    char buf[BUFSIZ], cmdbuf[BUFSIZ], idstr[7], *cp;
+    struct log_info li;
     int len, plen;
 
-    plen = snprintf(path, sizeof(path), "%s/%s/", session_dir, user);
-    if (plen <= 0 || plen >= sizeof(path)) {
-	warning("%s/%s/: %s", session_dir, user, strerror(ENAMETOOLONG));
+    plen = strlen(pathbuf);
+    d = opendir(pathbuf);
+    if (d == NULL && errno != ENOTDIR) {
+	warning("cannot opendir %s", pathbuf);
 	return(-1);
     }
-    path[--plen] = '\0'; /* chop off the '/' for now */
-    user_d = opendir(path);
-    if (user_d == NULL && errno != ENOTDIR) {
-	warning("cannot opendir %s", path);
-	return(-1);
-    }
-    while ((dp = readdir(user_d)) != NULL) {
-	/* base session (log) file name is 10 characters */
-	len = NAMLEN(dp);
-	if (len != 10)
+    while ((dp = readdir(d)) != NULL) {
+	if (NAMLEN(dp) != 2 || !isalnum(dp->d_name[0]) ||
+	    !isalnum(dp->d_name[1]))
 	    continue;
+
 	/* open log file, print id and command */
-	path[plen] = '/'; /* restore dir separator */
-	strlcpy(path + plen + 1, dp->d_name, sizeof(path) - plen - 1); /* XXX - check */
-	fp = fopen(path, "r");
+	pathbuf[plen + 0] = '/';
+	pathbuf[plen + 1] = dp->d_name[0];
+	pathbuf[plen + 2] = dp->d_name[1];
+	pathbuf[plen + 3] = '\0';
+	fp = fopen(pathbuf, "r");
 	if (fp == NULL) {
-	    warning("unable to open %s", path);
+	    warning("unable to open %s", pathbuf);
 	    continue;
 	}
 	/*
-	 * ID file has two lines:
-	 * timestamp tty
-	 * command
+	 * ID file has two lines, a log info line followed by a command line.
 	 */
 	/* XXX - BUFSIZ might not be enough, implement getline? */
-	if (!fgets(buf, sizeof(buf), fp) || !fgets(cmd, sizeof(cmd), fp)) {
+	if (!fgets(buf, sizeof(buf), fp) || !fgets(cmdbuf, sizeof(cmdbuf), fp)) {
 	    fclose(fp);
 	    continue;
 	}
 	fclose(fp);
+
+	/* crack the log line: timestamp:user:runas_user:runas_group:tty */
 	buf[strcspn(buf, "\n")] = '\0';
-	cmd[strcspn(cmd, "\n")] = '\0';
-	tstamp = atoi(buf);
-	cmd_tty = strchr(buf, ' ');
-	if (tstamp == 0 || cmd_tty == NULL)
+	if ((li.tstamp = atoi(buf)) == 0)
 	    continue;
-	cmd_tty++;
+
+	if ((cp = strchr(buf, ':')) == NULL)
+	    continue;
+	*cp++ = '\0';
+	li.user = cp;
+
+	if ((cp = strchr(cp, ':')) == NULL)
+	    continue;
+	*cp++ = '\0';
+	li.runas_user = cp;
+
+	if ((cp = strchr(cp, ':')) == NULL)
+	    continue;
+	*cp++ = '\0';
+	li.runas_group = cp;
+
+	if ((cp = strchr(cp, ':')) == NULL)
+	    continue;
+	*cp++ = '\0';
+	li.tty = cp;
+
+	cmdbuf[strcspn(cmdbuf, "\n")] = '\0';
+	li.cmd = cmdbuf;
 
 	/*
-	 * Select based on tty and/or regex if applicable.
+	 * Select based on user/tty/regex if applicable.
+	 * XXX - select on time or runas bits too?
 	 */
-	if (tty && strcmp(tty, cmd_tty) == 0)
+	if (user && strcmp(user, li.user) != 0)
+	    continue;
+	if (tty && strcmp(tty, li.tty) != 0)
 	    continue;
 	if (re) {
 #ifdef HAVE_REGCOMP
-	    int rc = regexec(re, cmd, 0, NULL, 0);
+	    int rc = regexec(re, li.cmd, 0, NULL, 0);
 	    if (rc) {
 		if (rc == REG_NOMATCH)
 		    continue;
@@ -355,30 +394,42 @@ list_user_sessions(user, re, tty)
 		errorx(1, "%s", buf);
 	    }
 #else
-	    if (strstr(cmd, re) == NULL)
+	    if (strstr(li.cmd, re) == NULL)
 		continue;
 #endif /* HAVE_REGCOMP */
 	}
 
-	printf("%s: %s\n", dp->d_name, cmd);
+	/* Convert from /var/log/sudo-sessions/00/00/01 to 000001 */
+	idstr[0] = pathbuf[plen - 5];
+	idstr[1] = pathbuf[plen - 4];
+	idstr[2] = pathbuf[plen - 2];
+	idstr[3] = pathbuf[plen - 1];
+	idstr[4] = pathbuf[plen + 1];
+	idstr[5] = pathbuf[plen + 2];
+	idstr[6] = '\0';
+	/* XXX - better format (timestamp?) */
+	printf("%s: %s %d (%s:%s) %s\n", idstr, li.user, li.tstamp,
+	    li.runas_user, li.runas_group, li.cmd);
     }
     return(0);
 }
 
 int
-list_sessions(argc, argv, pattern, tty)
+list_sessions(argc, argv, pattern, user, tty)
     int argc;
     char **argv;
     const char *pattern;
+    const char *user;
     const char *tty;
 {
-    DIR *sess_d;
-    struct dirent *dp;
+    DIR *d1, *d2;
+    struct dirent *dp1, *dp2;
     REGEX_T rebuf, *re = NULL;
-    const char *user = NULL;
+    size_t sdlen;
+    char pathbuf[PATH_MAX];
 
-    sess_d = opendir(session_dir);
-    if (sess_d == NULL)
+    d1 = opendir(session_dir);
+    if (d1 == NULL)
 	error(1, "unable to open %s", session_dir);
 
 #ifdef HAVE_REGCOMP
@@ -392,18 +443,40 @@ list_sessions(argc, argv, pattern, tty)
     re = (char *) pattern;
 #endif /* HAVE_REGCOMP */
 
-    /* optional user */
-    if (argc == 1) {
-	user = argv[0];
-	return(list_user_sessions(user, re, tty));
-    }
+    sdlen = strlcpy(pathbuf, session_dir, sizeof(pathbuf));
 
-    while ((dp = readdir(sess_d)) != NULL) {
-	if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0)
+    /*
+     * Three levels of directory, e.g. 00/00/00 .. ZZ/ZZ/ZZ
+     * We do a depth-first traversal.
+     */
+    /* XXX - traverse the tree 00/00/01 .. 00/00/A6 .. 01/03/5G .. */
+    while ((dp1 = readdir(d1)) != NULL) {
+	if (NAMLEN(dp1) != 2 || !isalnum(dp1->d_name[0]) ||
+	    !isalnum(dp1->d_name[1]))
 	    continue;
-	list_user_sessions(dp->d_name, re, tty);
+
+	pathbuf[sdlen + 0] = '/';
+	pathbuf[sdlen + 1] = dp1->d_name[0];
+	pathbuf[sdlen + 2] = dp1->d_name[1];
+	pathbuf[sdlen + 3] = '\0';
+	d2 = opendir(pathbuf);
+	if (d2 == NULL)
+	    continue;
+
+	while ((dp2 = readdir(d2)) != NULL) {
+	    if (NAMLEN(dp2) != 2 || !isalnum(dp2->d_name[0]) ||
+		!isalnum(dp2->d_name[1]))
+		continue;
+
+	    pathbuf[sdlen + 3] = '/';
+	    pathbuf[sdlen + 4] = dp2->d_name[0];
+	    pathbuf[sdlen + 5] = dp2->d_name[1];
+	    pathbuf[sdlen + 6] = '\0';
+	    list_session_dir(pathbuf, re, user, tty);
+	}
+	closedir(d2);
     }
-    closedir(sess_d);
+    closedir(d1);
     return(0);
 }
 
@@ -411,10 +484,10 @@ void
 usage()
 {
     fprintf(stderr,
-	"usage: %s [-d directory] [-s speed_factor]  username ID\n",
+	"usage: %s [-d directory] [-m max_wait] [-s speed_factor] ID\n",
 	getprogname());
     fprintf(stderr,
-	"usage: %s [-d directory] [-l] [-p pattern] [-t tty] [username]\n",
+	"usage: %s [-d directory] [-p pattern] [-t tty] [-u username] -l\n",
 	getprogname());
     exit(1);
 }

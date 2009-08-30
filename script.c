@@ -106,12 +106,90 @@ fdcompar(v1, v2)
     return(*(int *)v1 - *(int *)v2);
 }
 
+static int
+next_seq(pathbuf)
+    char *pathbuf;
+{
+    struct stat sb;
+    char buf[32], *cp, *ep;
+    int fd, i, ch;
+    unsigned long id = 0;
+    size_t len;
+    ssize_t nread;
+
+    /*
+     * Open sequence file
+     */
+    len = strlen(pathbuf);
+    if (len + sizeof("/00/00/00") > PATH_MAX) {
+	errno = ENAMETOOLONG;
+	log_error(USE_ERRNO, "%s/seq", pathbuf);
+    }
+    strlcat(pathbuf, "/seq", PATH_MAX);
+    fd = open(pathbuf, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
+    if (fd == -1)
+	log_error(USE_ERRNO, "cannot open %s", pathbuf);
+    lock_file(fd, SUDO_LOCK);
+
+    /* Read seq number (base 36). */
+    nread = read(fd, buf, sizeof(buf));
+    if (nread != 0) {
+	if (nread == -1)
+	    log_error(USE_ERRNO, "cannot read %s", pathbuf);
+	id = strtoul(buf, &ep, 36);
+	if (buf == ep || id >= 2176782336U)
+	    log_error(0, "invalid sequence number %s", pathbuf);
+    }
+    id++;
+
+    /*
+     * Convert id to a string (buf) and also append to pathbuf.
+     * Note that that least significant digits go at the end of the string.
+     */
+    len += sizeof("/00/00/00") - 1;
+    for (i = 5; i >= 0; i--) {
+	ch = id % 36;
+	id /= 36;
+	buf[i] = ch < 10 ? ch + '0' : ch - 10 + 'A';
+
+	/* Append to pathbuf, separating every two digits with a /. */
+	if (i & 1)
+	    pathbuf[len--] = '/';
+	pathbuf[len--] = buf[i];
+    }
+    buf[6] = '\n';
+    len += sizeof("/00/00/00") - 1;
+
+    /* Rewind and overwrite old seq file. */
+    if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7)
+	log_error(USE_ERRNO, "Can't write to %s", pathbuf);
+    close(fd);
+
+    /*
+     * Path is of the form /var/log/sudo-session/00/00/00 
+     * Create the intermediate subdirs as needed.
+     */
+    for (i = 6; i > 0; i -= 3) {
+	pathbuf[len - i] = '\0';
+	if (stat(pathbuf, &sb) != 0) {
+	    if (mkdir(pathbuf, S_IRWXU) != 0)
+		log_error(USE_ERRNO, "Can't mkdir %s", pathbuf);
+	} else if (!S_ISDIR(sb.st_mode)) {
+	    log_error(0, "%s: %s", pathbuf, strerror(ENOTDIR));
+	}
+	pathbuf[len - i] = '/';
+    }
+    pathbuf[len] = '\0';
+
+    return(len);
+}
+
 void
 script_setup()
 {
     struct stat sb;
-    unsigned int len;
     char pathbuf[PATH_MAX];
+    int len;
 
     if (!isatty(STDIN_FILENO))
 	log_error(USE_ERRNO, "Standard input is not a tty");
@@ -129,8 +207,7 @@ script_setup()
 	log_error(USE_ERRNO, "Can't set terminal to raw mode");
 
     /*
-     * Log files live in a per-user subdir of _PATH_SUDO_SESSDIR.
-     * Create these if they don't already exist.
+     * Create _PATH_SUDO_SESSDIR if it doesn't already exist.
      */
     if (stat(_PATH_SUDO_SESSDIR, &sb) != 0) {
 	if (mkdir(_PATH_SUDO_SESSDIR, S_IRWXU) != 0)
@@ -139,24 +216,22 @@ script_setup()
 	log_error(0, "%s exists but is not a directory (0%o)",
 	    _PATH_SUDO_SESSDIR, (unsigned int) sb.st_mode);
     }
-    snprintf(pathbuf, sizeof(pathbuf), "%s/%s", _PATH_SUDO_SESSDIR, user_name);
-    if (stat(pathbuf, &sb) != 0) {
-	if (mkdir(pathbuf, S_IRWXU) != 0)
-	    log_error(USE_ERRNO, "Can't mkdir %s", pathbuf);
-    } else if (!S_ISDIR(sb.st_mode)) {
-	log_error(0, "%s exists but is not a directory (0%o)",
-	    pathbuf, (unsigned int) sb.st_mode);
-    }
 
     /*
-     * We create 3 files: one for the command + args and timestamp,
-     * one for the raw session data, and another for the timing info.
+     * Get the next ID from the sequence file and append it to pathbuf.
+     * The log files are split into two-digit subdirs, so ID 000001
+     * becomes /var/log/sudo-session/00/00/01.
      */
-    strlcat(pathbuf, "/XXXXXXXXXX", sizeof(pathbuf));
-    script_fds[SFD_LOG] = mkstemp(pathbuf);
+    strlcpy(pathbuf, _PATH_SUDO_SESSDIR, sizeof(pathbuf));
+    len = next_seq(pathbuf);
+
+    /*
+     * We create 3 files: a log file, one for the raw session data,
+     * and one for the timing info.
+     */
+    script_fds[SFD_LOG] = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
     if (script_fds[SFD_LOG] == -1)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
-    len = strlen(pathbuf);
 
     strlcat(pathbuf, ".scr", sizeof(pathbuf));
     script_fds[SFD_OUTPUT] = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY,
@@ -215,7 +290,8 @@ script_execv(path, argv)
     gettimeofday(&prevtime, NULL);
 
     /* XXX - log more stuff to idfile (like normal log line?) */
-    fprintf(idfile, "%ld %s\n", prevtime.tv_sec, user_tty);
+    fprintf(idfile, "%ld:%s:%s:%s:%s\n", prevtime.tv_sec, user_name,
+	runas_pw->pw_name, runas_gr ? runas_gr->gr_name : "", user_tty);
     fprintf(idfile, "%s%s%s\n", user_cmnd, user_args ? " " : "",
 	user_args ? user_args : "");
 
