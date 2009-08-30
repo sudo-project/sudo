@@ -109,8 +109,8 @@ int list_sessions __P((int, char **, const char *, const char *, const char *));
 
 /*
  * TODO:
- *  add max_wait option
  *  add find-like search language?
+ *  timestamp option? (begin,end)
  */
 
 int
@@ -130,12 +130,13 @@ main(argc, argv)
     size_t len, nread;
     double speed = 1.0;
     double max_wait = 0;
+    double to_wait;
 
     Argc = argc;
     Argv = argv;
 
     /* XXX - timestamp option? (begin,end) */
-    while ((ch = getopt(argc, argv, "d:lm:p:s:t:u:")) != -1) {
+    while ((ch = getopt(argc, argv, "d:lm:p:s:t:u:w:")) != -1) {
 	switch(ch) {
 	case 'd':
 	    session_dir = optarg;
@@ -228,8 +229,13 @@ main(argc, argv)
 	if (errno == ERANGE && nbytes == ULONG_MAX)
 	    error(1, "invalid timing file byte count: %s", cp);
 
+	/* Adjust delay using speed factor and clamp to max_wait */
+	to_wait = seconds / speed;
+	if (to_wait > max_wait)
+	    to_wait = max_wait;
+	delay(to_wait);
+
 	fflush(stdout);
-	delay(seconds / speed);
 	while (nbytes != 0) {
 	    if (nbytes > sizeof(buf))
 		len = sizeof(buf);
@@ -378,7 +384,7 @@ list_session_dir(pathbuf, re, user, tty)
 
 	/*
 	 * Select based on user/tty/regex if applicable.
-	 * XXX - select on time or runas bits too?
+	 * XXX - select on time and/or runas bits too?
 	 */
 	if (user && strcmp(user, li.user) != 0)
 	    continue;
@@ -449,7 +455,6 @@ list_sessions(argc, argv, pattern, user, tty)
      * Three levels of directory, e.g. 00/00/00 .. ZZ/ZZ/ZZ
      * We do a depth-first traversal.
      */
-    /* XXX - traverse the tree 00/00/01 .. 00/00/A6 .. 01/03/5G .. */
     while ((dp1 = readdir(d1)) != NULL) {
 	if (NAMLEN(dp1) != 2 || !isalnum(dp1->d_name[0]) ||
 	    !isalnum(dp1->d_name[1]))
