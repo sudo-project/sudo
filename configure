@@ -2149,7 +2149,7 @@ root_sudo=on
 path_info=on
 INSTALL_NOEXEC=
 devdir='$(srcdir)'
-PROGS="sudo visudo"
+PROGS="sudo visudo sudoreplay"
 : ${MANTYPE='man'}
 : ${mansrcdir='.'}
 : ${SUDOERS_MODE='0440'}
@@ -15826,9 +15826,11 @@ LIBS=$ac_save_LIBS
 
 
 
+
+
 for ac_func in strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
-	       setlocale getaddrinfo setsid setenv vhangup
+	       regcomp setlocale getaddrinfo setsid setenv vhangup nanosleep
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 { echo "$as_me:$LINENO: checking for $ac_func" >&5
@@ -24849,7 +24851,7 @@ _ACEOF
     exec_prefix="$oexec_prefix"
 fi
 
-ac_config_files="$ac_config_files Makefile sudo.man visudo.man sudoers.man sudoers.ldap.man sudo_usage.h"
+ac_config_files="$ac_config_files Makefile sudo.man visudo.man sudoers.man sudoers.ldap.man sudoreplay.man sudo_usage.h"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -25410,6 +25412,7 @@ do
     "visudo.man") CONFIG_FILES="$CONFIG_FILES visudo.man" ;;
     "sudoers.man") CONFIG_FILES="$CONFIG_FILES sudoers.man" ;;
     "sudoers.ldap.man") CONFIG_FILES="$CONFIG_FILES sudoers.ldap.man" ;;
+    "sudoreplay.man") CONFIG_FILES="$CONFIG_FILES sudoreplay.man" ;;
     "sudo_usage.h") CONFIG_FILES="$CONFIG_FILES sudo_usage.h" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5

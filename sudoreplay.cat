@@ -1,0 +1,132 @@
+
+
+
+SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
+
+
+NNAAMMEE
+       sudoreplay - replay sudo session logs
+
+SSYYNNOOPPSSIISS
+       ssuuddoorreeppllaayy [--dd _d_i_r_e_c_t_o_r_y] [--mm _m_a_x___w_a_i_t] [--ss _s_p_e_e_d___f_a_c_t_o_r] ID
+
+       ssuuddoorreeppllaayy [--dd _d_i_r_e_c_t_o_r_y] [--pp _p_a_t_t_e_r_n] [--tt _t_t_y] [--uu _u_s_e_r] -l
+
+DDEESSCCRRIIPPTTIIOONN
+       ssuuddoorreeppllaayy plays back or lists the session logs created by ssuuddoo.  When
+       replaying, ssuuddoorreeppllaayy can play the session back in real-time, or the
+       playback speed may be adjusted (faster or slower) based on the command
+       line options.  The _I_D should be a six character sequence of digits and
+       upper case letters, e.g.  0100A5, which is logged by ssuuddoo when a
+       command is run with session logging enabled.
+
+       In list mode, ssuuddoorreeppllaayy can be used to find the ID of a session based
+       on the user, tty or command run.
+
+OOPPTTIIOONNSS
+       ssuuddoorreeppllaayy accepts the following command line options:
+
+       -d _d_i_r_e_c_t_o_r_y
+                   Use _d_i_r_e_c_t_o_r_y to for the session logs instead of the
+                   default, _/_v_a_r_/_l_o_g_/_s_u_d_o_-_s_e_s_s_i_o_n_s.
+
+       -l          Enable "list mode".  In this mode, ssuuddoorreeppllaayy will list
+                   available session IDs.  The -p, <-t> and <-u> options can
+                   be used to restrict the IDs that are displayed.
+
+       -m _m_a_x___w_a_i_t Specify an upper bound on how long to wait between key
+                   presses or output data.  By default, ssuuddoo__rreeppllaayy will
+                   accurately reproduce the delays between key presses or
+                   program output.  However, this can be tedious when the
+                   session includes long pauses.  When the _-_m option is
+                   specified, ssuuddoorreeppllaayy will limit these pauses to at most
+                   _m_a_x___w_a_i_t seconds.  The value may be specified as a floating
+                   point number, .e.g. _2_._5.
+
+       -p _p_a_t_t_e_r_n  Restrict list output to sessions where the command matches
+                   _p_a_t_t_e_r_n.  On systems with POSIX regular expression support,
+                   the pattern may be an extended regular expression.  On
+                   systems without POSIX regular expression support, a simple
+                   substring match is performed instead.
+
+       -s _s_p_e_e_d___f_a_c_t_o_r
+                   This option causes ssuuddoorreeppllaayy to adjust the number of
+                   seconds it will wait between key presses or program output.
+                   This can be used to slow down or speed up the display.  For
+                   example, a _s_p_e_e_d___f_a_c_t_o_r of _2 would make the output twice as
+                   fast whereas a _s_p_e_e_d___f_a_c_t_o_r of <.5> would make the output
+                   twice as slow.
+
+       -t _t_t_y      Restrict list output to sessions where the command was run
+
+
+
+1.7.2                    August 30, 2009                        1
+
+
+
+
+
+SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
+
+
+                   on the specified terming device.  The _t_t_y should be
+                   specified without the _/_d_e_v_/ prefix, e.g. _t_t_y_0_1 instead of
+                   _/_d_e_v_/_t_t_y_0_1.
+
+       -u _u_s_e_r     Restrict list output to sessions where the command was run
+                   by _u_s_e_r.
+
+       -V          The --VV (version) option causes ssuuddoorreeppllaayy to print its
+                   version number and exit.
+
+FFIILLEESS
+       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_s_e_s_s_i_o_n   The default session directory.
+
+       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_s_e_s_s_i_o_n_/_0_0_/_0_0_/_0_1
+                               Example session log info.
+
+       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_s_e_s_s_i_o_n_/_0_0_/_0_0_/_0_1_._s_c_r
+                               Example session transcript file.
+
+       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_s_e_s_s_i_o_n_/_0_0_/_0_0_/_0_1_._t_i_m
+                               Example session timing file.
+
+SSEEEE AALLSSOO
+       _s_u_d_o(1m), _s_c_r_i_p_t(1)
+
+AAUUTTHHOORR
+       Todd C. Miller
+
+BBUUGGSS
+       If you feel you have found a bug in ssuuddoorreeppllaayy, please submit a bug
+       report at http://www.sudo.ws/sudo/bugs/
+
+SSUUPPPPOORRTT
+       Limited free support is available via the sudo-users mailing list, see
+       http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search
+       the archives.
+
+DDIISSCCLLAAIIMMEERR
+       ssuuddoorreeppllaayy is provided ``AS IS'' and any express or implied warranties,
+       including, but not limited to, the implied warranties of
+       merchantability and fitness for a particular purpose are disclaimed.
+       See the LICENSE file distributed with ssuuddoo or
+       http://www.sudo.ws/sudo/license.html for complete details.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.7.2                    August 30, 2009                        2
+
+

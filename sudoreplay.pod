@@ -1,0 +1,148 @@
+Copyright (c) 2009 Todd C. Miller <Todd.Miller@courtesan.com>
+
+Permission to use, copy, modify, and distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+$Sudo$
+=pod
+
+=head1 NAME
+
+sudoreplay - replay sudo session logs
+
+=head1 SYNOPSIS
+
+B<sudoreplay> [B<-d> I<directory>] [B<-m> I<max_wait>] [B<-s> I<speed_factor>] ID
+
+B<sudoreplay> [B<-d> I<directory>] [B<-p> I<pattern>] [B<-t> I<tty>] [B<-u> I<user>] -l
+
+=head1 DESCRIPTION
+
+B<sudoreplay> plays back or lists the session logs created by
+B<sudo>.  When replaying, B<sudoreplay> can play the session back
+in real-time, or the playback speed may be adjusted (faster or
+slower) based on the command line options.  The I<ID> should be
+a six character sequence of digits and upper case letters, e.g.
+0100A5, which is logged by B<sudo> when a command is run with
+session logging enabled.
+
+In list mode, B<sudoreplay> can be used to find the ID of a session
+based on the user, tty or command run.
+
+=head1 OPTIONS
+
+B<sudoreplay> accepts the following command line options:
+
+=over 12
+
+=item -d I<directory>
+
+Use I<directory> to for the session logs instead of the default,
+F</var/log/sudo-sessions>.
+
+=item -l
+
+Enable "list mode".  In this mode, B<sudoreplay> will list available
+session IDs.  The C<-p>, <-t> and <-u> options can be used to
+restrict the IDs that are displayed.
+
+=item -m I<max_wait>
+
+Specify an upper bound on how long to wait between key presses or
+output data.  By default, B<sudo_replay> will accurately reproduce
+the delays between key presses or program output.  However, this
+can be tedious when the session includes long pauses.  When the
+I<-m> option is specified, B<sudoreplay> will limit these pauses
+to at most I<max_wait> seconds.  The value may be specified as a
+floating point number, .e.g. I<2.5>.
+
+=item -p I<pattern>
+
+Restrict list output to sessions where the command matches I<pattern>.
+On systems with POSIX regular expression support, the pattern may
+be an extended regular expression.  On systems without POSIX regular
+expression support, a simple substring match is performed instead.
+
+=item -s I<speed_factor>
+
+This option causes B<sudoreplay> to adjust the number of seconds
+it will wait between key presses or program output.  This can be
+used to slow down or speed up the display.  For example, a
+I<speed_factor> of I<2> would make the output twice as fast whereas
+a I<speed_factor> of <.5> would make the output twice as slow.
+
+=item -t I<tty>
+
+Restrict list output to sessions where the command was run on the
+specified terming device.  The I<tty> should be specified without the
+F</dev/> prefix, e.g. F<tty01> instead of F</dev/tty01>.
+
+=item -u I<user>
+
+Restrict list output to sessions where the command was run by I<user>.
+
+=item -V
+
+The B<-V> (version) option causes B<sudoreplay> to print its version number
+and exit.
+
+=back
+
+=head1 FILES
+
+=over 24
+
+=item F</var/log/sudo-session>
+
+The default session directory.
+
+=item F</var/log/sudo-session/00/00/01>
+
+Example session log info.
+
+=item F</var/log/sudo-session/00/00/01.scr>
+
+Example session transcript file.
+
+=item F</var/log/sudo-session/00/00/01.tim>
+
+Example session timing file.
+
+=back
+
+=head1 SEE ALSO
+
+L<sudo(8)>, L<script(1)>
+
+=head1 AUTHOR
+
+Todd C. Miller
+
+=head1 BUGS
+
+If you feel you have found a bug in B<sudoreplay>, please submit a bug report
+at http://www.sudo.ws/sudo/bugs/
+
+=head1 SUPPORT
+
+Limited free support is available via the sudo-users mailing list,
+see http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or
+search the archives.
+
+=head1 DISCLAIMER
+
+B<sudoreplay> is provided ``AS IS'' and any express or implied warranties,
+including, but not limited to, the implied warranties of merchantability
+and fitness for a particular purpose are disclaimed.  See the LICENSE
+file distributed with B<sudo> or http://www.sudo.ws/sudo/license.html
+for complete details.
