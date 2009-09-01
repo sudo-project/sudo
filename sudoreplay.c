@@ -324,7 +324,7 @@ list_session_dir(pathbuf, re, user, tty)
     struct dirent *dp;
     char buf[BUFSIZ], cmdbuf[BUFSIZ], idstr[7], *cp;
     struct log_info li;
-    int len, plen;
+    int plen;
 
     plen = strlen(pathbuf);
     d = opendir(pathbuf);
