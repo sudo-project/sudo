@@ -461,8 +461,8 @@ main(argc, argv, envp)
 	}
 
 	/* Get next session ID so we can log it. */
-	if (def_script)
-	    script_nextid(); /* XXX - only if we will run a command */
+	if (def_script && ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)))
+	    script_nextid();
 
 	log_allowed(validated);
 	if (ISSET(sudo_mode, MODE_CHECK))
