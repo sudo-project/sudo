@@ -325,6 +325,7 @@ void selinux_exec __P((char *, char *, char **, int));
 #ifdef HAVE_GETUSERATTR
 void aix_setlimits __P((char *));
 #endif
+int script_duplow __P((int));
 int script_execv __P((const char *, char * const *));
 void script_nextid __P((void));
 void script_setup __P((void));

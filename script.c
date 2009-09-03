@@ -103,7 +103,10 @@ fdcompar(v1, v2)
     const void *v1;
     const void *v2;
 {
-    return(*(int *)v1 - *(int *)v2);
+    int i = *(int *)v1;
+    int j = *(int *)v2;
+
+    return(script_fds[i] - script_fds[j]);
 }
 
 void
@@ -254,9 +257,28 @@ script_setup()
     script_fds[SFD_TIMING] = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
     if (script_fds[SFD_TIMING] == -1)
 	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+}
+
+int
+script_duplow(fd)
+    int fd;
+{
+    int i, j, indices[5];
 
     /* sort fds so we can dup them safely */
-    qsort(script_fds, 5, sizeof(int), fdcompar);
+    for (i = 0; i < 5; i++)
+	indices[i] = i;
+    qsort(indices, 5, sizeof(int), fdcompar);
+
+    /* Move pty master/slave and session fds to low numbered fds. */
+    if (def_script) {
+	for (i = 0; i < 5; i++) {
+	    j = indices[i];
+	    dup2(script_fds[j], fd);
+	    script_fds[j] = fd++;
+	}
+    }
+    return(fd);
 }
 
 int

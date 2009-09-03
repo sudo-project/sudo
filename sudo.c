@@ -147,7 +147,6 @@ uid_t timestamp_uid;
 extern int errorlineno;
 extern int parse_error;
 extern char *errorfile;
-extern int script_fds[5];
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
@@ -463,7 +462,7 @@ main(argc, argv, envp)
 
 	/* Get next session ID so we can log it. */
 	if (def_script)
-	    script_nextid();
+	    script_nextid(); /* XXX - only if we will run a command */
 
 	log_allowed(validated);
 	if (ISSET(sudo_mode, MODE_CHECK))
@@ -550,14 +549,7 @@ main(argc, argv, envp)
 	sudo_endgrent();
 
 	/* Move pty master/slave to low numbered fd and close the rest. */
-	fd = def_closefrom;
-	if (def_script) {
-	    int i;
-	    for (i = 0; i < 5; i++) {
-		dup2(script_fds[i], fd);
-		script_fds[i] = fd++;
-	    }
-	}
+	fd = def_script ? script_duplow(def_closefrom) : def_closefrom;
 	closefrom(fd);
 
 #ifndef PROFILING
