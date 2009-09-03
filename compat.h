@@ -276,4 +276,28 @@ const char *getprogname __P((void));
     } while (0)
 #endif
 
+#ifndef timeradd
+# define timeradd(tv1, tv2, total)					       \
+    do {								       \
+	(total)->tv_sec = (tv1)->tv_sec + (tv2)->tv_sec;		       \
+	(total)->tv_usec = (tv1)->tv_usec + (tv2)->tv_usec;		       \
+	if ((total)->tv_usec >= 1000000) {				       \
+	    (total)->tv_sec++;						       \
+	    (total)->tv_usec -= 1000000;				       \
+	}								       \
+    } while (0)
+#endif
+
+#ifndef timersub
+# define timersub(minuend, subrahend, difference)			       \
+    do {								       \
+	(difference)->tv_sec = (minuend)->tv_sec - (subrahend)->tv_sec;	       \
+	(difference)->tv_usec = (minuend)->tv_usec - (subrahend)->tv_usec;     \
+	if ((difference)->tv_usec < 0) {				       \
+	    (difference)->tv_sec--;					       \
+	    (difference)->tv_usec += 1000000;				       \
+	}								       \
+    } while (0)
+#endif
+
 #endif /* _SUDO_COMPAT_H */
