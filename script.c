@@ -268,13 +268,22 @@ script_duplow(fd)
     /* sort fds so we can dup them safely */
     for (i = 0; i < 5; i++)
 	indices[i] = i;
+    /* XXX - qsort is overkill for this */
     qsort(indices, 5, sizeof(int), fdcompar);
 
     /* Move pty master/slave and session fds to low numbered fds. */
     if (def_script) {
 	for (i = 0; i < 5; i++) {
 	    j = indices[i];
-	    dup2(script_fds[j], fd);
+	    if (script_fds[j] != fd) {
+#ifdef HAVE_DUP2
+		dup2(script_fds[j], fd);
+#else
+		close(fd);
+		dup(script_fds[j]);
+		close(script_fds[j]);
+#endif
+	    }
 	    script_fds[j] = fd++;
 	}
     }
