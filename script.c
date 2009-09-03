@@ -171,6 +171,9 @@ build_idpath(pathbuf)
     struct stat sb;
     int i, len;
 
+    if (sudo_user.sessid[0] == '\0')
+	log_error(0, "tried to build a session id path without a session id");
+
     /*
      * Path is of the form /var/log/sudo-session/00/00/01.
      */
