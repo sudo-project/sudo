@@ -16,8 +16,8 @@
 #define EXEC 272
 #define SETENV 273
 #define NOSETENV 274
-#define SCRIPT 275
-#define NOSCRIPT 276
+#define TRANSCRIPT 275
+#define NOTRANSCRIPT 276
 #define ALL 277
 #define COMMENT 278
 #define HOSTALIAS 279

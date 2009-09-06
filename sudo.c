@@ -461,7 +461,7 @@ main(argc, argv, envp)
 	}
 
 	/* Get next session ID so we can log it. */
-	if (def_script && ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)))
+	if (def_transcript && ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)))
 	    script_nextid();
 
 	log_allowed(validated);
@@ -503,7 +503,7 @@ main(argc, argv, envp)
 	audit_success(NewArgv);
 
 	/* Open tty as needed */
-	if (def_script)
+	if (def_transcript)
 	    script_setup();
 
 	/* Become specified user or root if executing a command. */
@@ -549,7 +549,7 @@ main(argc, argv, envp)
 	sudo_endgrent();
 
 	/* Move pty master/slave to low numbered fd and close the rest. */
-	fd = def_script ? script_duplow(def_closefrom) : def_closefrom;
+	fd = def_transcript ? script_duplow(def_closefrom) : def_closefrom;
 	closefrom(fd);
 
 #ifndef PROFILING
@@ -563,7 +563,7 @@ main(argc, argv, envp)
 		selinux_exec(user_role, user_type, NewArgv,
 		    ISSET(sudo_mode, MODE_LOGIN_SHELL));
 #endif
-	    if (def_script)
+	    if (def_transcript)
 		script_execv(safe_cmnd, NewArgv);
 	    else
 		execv(safe_cmnd, NewArgv);
@@ -1460,7 +1460,7 @@ cleanup(gotsignal)
 	sudo_endpwent();
 	sudo_endgrent();
     }
-    if (def_script)
+    if (def_transcript)
 	term_restore(STDIN_FILENO);
 }
 

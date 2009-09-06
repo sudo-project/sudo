@@ -232,6 +232,6 @@ fast_glob
 umask_override
 	T_FLAG
 	"The umask specified in sudoers will override the user's, even if it is more permissive"
-script
+transcript
 	T_FLAG
 	"Log a transcript of the command being run"

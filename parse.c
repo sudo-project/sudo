@@ -254,8 +254,8 @@ sudo_file_lookup(nss, validated, pwflag)
 		def_noexec = tags->noexec;
 	    if (tags->setenv != UNSPEC)
 		def_setenv = tags->setenv;
-	    if (tags->script != UNSPEC)
-		def_script = tags->script;
+	    if (tags->transcript != UNSPEC)
+		def_transcript = tags->transcript;
 	}
     } else if (match == DENY) {
 	SET(validated, VALIDATE_NOT_OK);
@@ -297,10 +297,10 @@ sudo_file_append_cmnd(cs, tags, lbuf)
 	    "PASSWD: ", NULL);
 	tags->nopasswd = cs->tags.nopasswd;
     }
-    if (TAG_CHANGED(script)) {
-	lbuf_append(lbuf, cs->tags.script ? "SCRIPT: " :
+    if (TAG_CHANGED(transcript)) {
+	lbuf_append(lbuf, cs->tags.transcript ? "SCRIPT: " :
 	    "NOSCRIPT: ", NULL);
-	tags->script = cs->tags.script;
+	tags->transcript = cs->tags.transcript;
     }
     m = cs->cmnd;
     print_member(lbuf, m->name, m->type, m->negated,
@@ -323,7 +323,7 @@ sudo_file_display_priv_short(pw, us, lbuf)
 	tags.noexec = UNSPEC;
 	tags.setenv = UNSPEC;
 	tags.nopasswd = UNSPEC;
-	tags.script = UNSPEC;
+	tags.transcript = UNSPEC;
 	lbuf_append(lbuf, "    ", NULL);
 	tq_foreach_fwd(&priv->cmndlist, cs) {
 	    if (cs != tq_first(&priv->cmndlist))
@@ -375,7 +375,7 @@ sudo_file_display_priv_long(pw, us, lbuf)
 	tags.noexec = UNSPEC;
 	tags.setenv = UNSPEC;
 	tags.nopasswd = UNSPEC;
-	tags.script = UNSPEC;
+	tags.transcript = UNSPEC;
 	lbuf_print(lbuf);	/* force a newline */
 	lbuf_append(lbuf, "Sudoers entry:", NULL);
 	lbuf_print(lbuf);

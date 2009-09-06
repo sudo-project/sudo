@@ -166,8 +166,8 @@ typedef union {
 #define EXEC 272
 #define SETENV 273
 #define NOSETENV 274
-#define SCRIPT 275
-#define NOSCRIPT 276
+#define TRANSCRIPT 275
+#define NOTRANSCRIPT 276
 #define ALL 277
 #define COMMENT 278
 #define HOSTALIAS 279
@@ -498,7 +498,7 @@ char *yyname[] =
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 "COMMAND","ALIAS","DEFVAR","NTWKADDR","NETGROUP","USERGROUP","WORD","DEFAULTS",
 "DEFAULTS_HOST","DEFAULTS_USER","DEFAULTS_RUNAS","DEFAULTS_CMND","NOPASSWD",
-"PASSWD","NOEXEC","EXEC","SETENV","NOSETENV","SCRIPT","NOSCRIPT","ALL",
+"PASSWD","NOEXEC","EXEC","SETENV","NOSETENV","TRANSCRIPT","NOTRANSCRIPT","ALL",
 "COMMENT","HOSTALIAS","CMNDALIAS","USERALIAS","RUNASALIAS","ERROR","TYPE",
 "ROLE",
 };
@@ -565,8 +565,8 @@ char *yyrule[] =
 "cmndtag : cmndtag EXEC",
 "cmndtag : cmndtag SETENV",
 "cmndtag : cmndtag NOSETENV",
-"cmndtag : cmndtag SCRIPT",
-"cmndtag : cmndtag NOSCRIPT",
+"cmndtag : cmndtag TRANSCRIPT",
+"cmndtag : cmndtag NOTRANSCRIPT",
 "cmnd : ALL",
 "cmnd : ALIAS",
 "cmnd : COMMAND",
@@ -1219,8 +1219,8 @@ case 35:
 			    if (yyvsp[0].cmndspec->tags.setenv == UNSPEC &&
 				yyvsp[0].cmndspec->prev->tags.setenv != IMPLIED)
 				yyvsp[0].cmndspec->tags.setenv = yyvsp[0].cmndspec->prev->tags.setenv;
-			    if (yyvsp[0].cmndspec->tags.script == UNSPEC)
-				yyvsp[0].cmndspec->tags.script = yyvsp[0].cmndspec->prev->tags.script;
+			    if (yyvsp[0].cmndspec->tags.transcript == UNSPEC)
+				yyvsp[0].cmndspec->tags.transcript = yyvsp[0].cmndspec->prev->tags.transcript;
 			    if ((tq_empty(&yyvsp[0].cmndspec->runasuserlist) &&
 				 tq_empty(&yyvsp[0].cmndspec->runasgrouplist)) &&
 				(!tq_empty(&yyvsp[0].cmndspec->prev->runasuserlist) ||
@@ -1358,7 +1358,7 @@ break;
 case 51:
 #line 428 "gram.y"
 {
-			    yyval.tag.nopasswd = yyval.tag.noexec = yyval.tag.setenv = yyval.tag.script = UNSPEC;
+			    yyval.tag.nopasswd = yyval.tag.noexec = yyval.tag.setenv = yyval.tag.transcript = UNSPEC;
 			}
 break;
 case 52:
@@ -1400,13 +1400,13 @@ break;
 case 58:
 #line 449 "gram.y"
 {
-			    yyval.tag.script = TRUE;
+			    yyval.tag.transcript = TRUE;
 			}
 break;
 case 59:
 #line 452 "gram.y"
 {
-			    yyval.tag.script = FALSE;
+			    yyval.tag.transcript = FALSE;
 			}
 break;
 case 60:

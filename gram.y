@@ -146,8 +146,8 @@ yyerror(s)
 %token <tok> 	 EXEC			/* don't preload dummy execve() */
 %token <tok>	 SETENV			/* user may set environment for cmnd */
 %token <tok>	 NOSETENV		/* user may not set environment */
-%token <tok>	 SCRIPT			/* log a transcript of the cmnd */
-%token <tok>	 NOSCRIPT		/* don't log a transcript of the cmnd */
+%token <tok>	 TRANSCRIPT		/* log a transcript of the cmnd */
+%token <tok>	 NOTRANSCRIPT		/* don't log a transcript of the cmnd */
 %token <tok>	 ALL			/* ALL keyword */
 %token <tok>	 COMMENT		/* comment and/or carriage return */
 %token <tok>	 HOSTALIAS		/* Host_Alias keyword */
@@ -319,8 +319,8 @@ cmndspeclist	:	cmndspec
 			    if ($3->tags.setenv == UNSPEC &&
 				$3->prev->tags.setenv != IMPLIED)
 				$3->tags.setenv = $3->prev->tags.setenv;
-			    if ($3->tags.script == UNSPEC)
-				$3->tags.script = $3->prev->tags.script;
+			    if ($3->tags.transcript == UNSPEC)
+				$3->tags.transcript = $3->prev->tags.transcript;
 			    if ((tq_empty(&$3->runasuserlist) &&
 				 tq_empty(&$3->runasgrouplist)) &&
 				(!tq_empty(&$3->prev->runasuserlist) ||
@@ -426,7 +426,7 @@ runaslist	:	userlist {
 		;
 
 cmndtag		:	/* empty */ {
-			    $$.nopasswd = $$.noexec = $$.setenv = $$.script = UNSPEC;
+			    $$.nopasswd = $$.noexec = $$.setenv = $$.transcript = UNSPEC;
 			}
 		|	cmndtag NOPASSWD {
 			    $$.nopasswd = TRUE;
@@ -446,11 +446,11 @@ cmndtag		:	/* empty */ {
 		|	cmndtag NOSETENV {
 			    $$.setenv = FALSE;
 			}
-		|	cmndtag SCRIPT {
-			    $$.script = TRUE;
+		|	cmndtag TRANSCRIPT {
+			    $$.transcript = TRUE;
 			}
-		|	cmndtag NOSCRIPT {
-			    $$.script = FALSE;
+		|	cmndtag NOTRANSCRIPT {
+			    $$.transcript = FALSE;
 			}
 		;
 

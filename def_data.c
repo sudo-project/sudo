@@ -315,7 +315,7 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"The umask specified in sudoers will override the user's, even if it is more permissive",
 	NULL,
     }, {
-	"script", T_FLAG,
+	"transcript", T_FLAG,
 	"Log a transcript of the command being run",
 	NULL,
     }, {
