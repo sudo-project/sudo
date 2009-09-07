@@ -281,7 +281,7 @@ See L<"SUDOERS OPTIONS"> for a list of supported Defaults parameters.
  Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
  Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-	       'SETENV:' | 'NOSETENV:' )
+	       'SETENV:' | 'NOSETENV:' | 'TRANSCRIPT:' | 'NOTRANSCRIPT:')
 
 A B<user specification> determines which commands a user may run
 (and as what user) on specified hosts.  By default, commands are
@@ -342,8 +342,8 @@ only the group will be set, the command still runs as user B<tcm>.
 =head2 Tag_Spec
 
 A command may have zero or more tags associated with it.  There are
-eight possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>, C<EXEC>,
-C<SETENV> and C<NOSETENV>.
+eight possible tag values, C<NOPASSWD>, C<PASSWD>, C<NOEXEC>,
+C<EXEC>, C<SETENV>, C<NOSETENV>, C<TRANSCRIPT> and C<NOTRANSCRIPT>.
 Once a tag is set on a C<Cmnd>, subsequent C<Cmnd>s in the
 C<Cmnd_Spec_List>, inherit the tag unless it is overridden by the
 opposite tag (i.e.: C<PASSWD> overrides C<NOPASSWD> and C<NOEXEC>
@@ -401,6 +401,12 @@ I<env_keep>.  As such, only trusted users should be allowed to set
 variables in this manner.  If the command matched is B<ALL>, the
 C<SETENV> tag is implied for that command; this default may
 be overridden by use of the C<UNSETENV> tag.
+
+=head3 TRANSCRIPT and NOTRANSCRIPT
+
+These tags override the value of the I<transcript> option on a
+per-command basis.  For more information, see the description of
+I<transcript> in the L<"SUDOERS OPTIONS"> section below.
 
 =head2 Wildcards
 
@@ -829,6 +835,25 @@ the B<-u> option (defaults to C<root>) instead of the password of the
 invoking user.  Note that this precludes the use of a uid not listed
 in the passwd database as an argument to the B<-u> option.
 This flag is I<off> by default.
+
+=item transcript
+
+If set, B<sudo> will log a transcript of the command being run,
+similar to the script(1) command.  In this mode B<sudo> will allocate
+a new I<pseudo tty> and log all input and output for the command (except
+when echo is turned off as when a password is entered).  Transcripts
+are logged to the F</var/log/sudo-session> directory with a unique
+transcript ID that is included in the normal B<sudo> log line,
+prefixed with I<TSID=>.
+
+Transcripts may be viewed with the L<sudoreplay(8)> utility, which
+can also be used to list or search the available transcripts.
+
+A side effect of this mode is that it will not be possible to suspend
+the command being run (because it is running in a different tty
+with its own job control).  If a shell is being run, commands
+executed by that shell will have normal job control but the shell
+itself may not be suspended.
 
 =item tty_tickets
 
@@ -1274,6 +1299,10 @@ Local groups file
 =item F</etc/netgroup>
 
 List of network groups
+
+=item F</var/log/sudo-session>
+
+Transcript logs
 
 =back
 
