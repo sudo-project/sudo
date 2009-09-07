@@ -470,10 +470,6 @@ script_execv(path, argv)
     }
     term_restore(STDIN_FILENO);
 
-#ifdef HAVE_VHANGUP
-    signal(SIGHUP, SIG_IGN);
-    vhangup();
-#endif
     if (WIFEXITED(child_status))
 	exit(WEXITSTATUS(child_status));
     if (WIFSIGNALED(child_status))
