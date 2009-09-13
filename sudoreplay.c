@@ -359,29 +359,47 @@ parse_expr(headp, argv)
     for (av = argv; *av; av++) {
 	switch (*av[0]) {
 	case 'a': /* and (ignore) */
+	    if (strncmp(*av, "and", strlen(*av)) != 0)
+		goto bad;
 	    continue;
 	case 'o': /* or */
+	    if (strncmp(*av, "or", strlen(*av)) != 0)
+		goto bad;
 	    or = 1;
 	    continue;
 	case '!': /* negate */
+	    if (*av[1] != '\0')
+		goto bad;
 	    not = 1;
 	    continue;
 	case 'c': /* command */
+	    if (strncmp(*av, "command", strlen(*av)) != 0)
+		goto bad;
 	    type = ST_PATTERN;
 	    break;
 	case 'g': /* runas group */
+	    if (strncmp(*av, "group", strlen(*av)) != 0)
+		goto bad;
 	    type = ST_RUNASGROUP;
 	    break;
 	case 'r': /* runas user */
+	    if (strncmp(*av, "runas", strlen(*av)) != 0)
+		goto bad;
 	    type = ST_RUNASUSER;
 	    break;
 	case 't': /* tty */
+	    if (strncmp(*av, "tty", strlen(*av)) != 0)
+		goto bad;
 	    type = ST_TTY;
 	    break;
 	case 'u': /* user */
+	    if (strncmp(*av, "user", strlen(*av)) != 0)
+		goto bad;
 	    type = ST_USER;
 	    break;
 	case '(': /* start sub-expression */
+	    if (*av[1] != '\0')
+		goto bad;
 	    if (stack_top + 1 == STACK_NODE_SIZE) {
 		errorx(1, "too many parenthesized expressions, max %d",
 		    STACK_NODE_SIZE);
@@ -390,12 +408,15 @@ parse_expr(headp, argv)
 	    type = ST_EXPR;
 	    break;
 	case ')': /* end sub-expression */
+	    if (*av[1] != '\0')
+		goto bad;
 	    /* pop */
 	    if (--stack_top < 0)
 		errorx(1, "unmatched ')' in expression");
 	    if (node_stack[stack_top])
 		sn->next = node_stack[stack_top]->next;
 	    return(av - argv + 1);
+	bad:
 	default:
 	    errorx(1, "unknown search term \"%s\"", *av);
 	    /* NOTREACHED */
