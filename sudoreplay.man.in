@@ -171,7 +171,7 @@ a six character sequence of digits and upper case letters, e.g.
 session logging enabled.
 .PP
 In list mode, \fBsudoreplay\fR can be used to find the \s-1ID\s0 of a session
-based on the user, tty or command run.
+based on a number of criteria such as the user, tty or command run.
 .SH "OPTIONS"
 .IX Header "OPTIONS"
 \&\fBsudoreplay\fR accepts the following command line options:
@@ -186,31 +186,34 @@ session IDs.  If a \fIsearch expression\fR is specified, it will be
 used to restrict the IDs that are displayed.  An expression is
 composed of the following predicates:
 .RS 12
-.IP "user \fIusername\fR" 8
-.IX Item "user username"
-Evaluates to true if the \s-1ID\s0 matches a command run by \fIusername\fR.
 .IP "command \fIcommand pattern\fR" 8
 .IX Item "command command pattern"
 Evaluates to true if the command run matches \fIcommand pattern\fR.
 On systems with \s-1POSIX\s0 regular expression support, the pattern may
 be an extended regular expression.  On systems without \s-1POSIX\s0 regular
 expression support, a simple substring match is performed instead.
+.IP "group \fIrunas_group\fR" 8
+.IX Item "group runas_group"
+Evaluates to true if the command was run with the specified
+\&\fIrunas_group\fR.  Note that unless a \fIrunas_group\fR was explicitly
+specified when \fBsudo\fR was run this field will be empty in the log.
+.IP "runas \fIrunas_user\fR" 8
+.IX Item "runas runas_user"
+Evaluates to true if the command was run as the specified \fIrunas_user\fR.
+Note that \fBsudo\fR runs commands as user \fIroot\fR by default.
 .IP "tty \fItty\fR" 8
 .IX Item "tty tty"
 Evaluates to true if the command was run on the specified terminal
 device.  The \fItty\fR should be specified without the \fI/dev/\fR prefix,
 e.g.  \fItty01\fR instead of \fI/dev/tty01\fR.
-.IP "runas \fIrunas_user\fR" 8
-.IX Item "runas runas_user"
-Evaluates to true if the command was run as the specified \fIrunas_user\fR.
-Note that \fBsudo\fR runs commands as user \fIroot\fR by default.
-.IP "runas \fIrunas_group\fR" 8
-.IX Item "runas runas_group"
-Evaluates to true if the command was run with the specified
-\&\fIrunas_group\fR.  Note that unless a \fIrunas_group\fR was explicitly
-specified when \fBsudo\fR was run this field will be empty in the log.
+.IP "user \fIusername\fR" 8
+.IX Item "user username"
+Evaluates to true if the \s-1ID\s0 matches a command run by \fIusername\fR.
 .RE
 .RS 12
+.Sp
+Predicates may be abbreviated to the shortest unique string (currently
+all predicates may be shortened to a single character).
 .Sp
 Predicates may be combined using \fIand\fR, \fIor\fR and \fI!\fR operators
 as well as \f(CW\*(Aq(\*(Aq\fR and \f(CW\*(Aq)\*(Aq\fR for grouping (note that parentheses
@@ -252,6 +255,31 @@ Example session transcript file.
 .IP "\fI/var/log/sudo\-session/00/00/01.tim\fR" 24
 .IX Item "/var/log/sudo-session/00/00/01.tim"
 Example session timing file.
+.SH "EXAMPLES"
+.IX Header "EXAMPLES"
+List sessions run by user \fImillert\fR:
+.PP
+.Vb 1
+\& sudoreplay \-l user millert
+.Ve
+.PP
+List sessions run by user \fIbob\fR with a command containing the string vi:
+.PP
+.Vb 1
+\& sudoreplay \-l user bob command vi
+.Ve
+.PP
+List sessions run by user \fIjeff\fR that match a regular expression:
+.PP
+.Vb 1
+\& sudoreplay \-l user jeff command \*(Aq/bin/[a\-z]*sh\*(Aq
+.Ve
+.PP
+List sessions run by jeff or bob on the console:
+.PP
+.Vb 1
+\& sudoreplay \-l ( user jeff or user bob ) tty console
+.Ve
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIsudo\fR\|(@mansectsu@), \fIscript\fR\|(1)

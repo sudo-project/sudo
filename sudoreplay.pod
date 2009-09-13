@@ -37,7 +37,7 @@ a six character sequence of digits and upper case letters, e.g.
 session logging enabled.
 
 In list mode, B<sudoreplay> can be used to find the ID of a session
-based on the user, tty or command run.
+based on a number of criteria such as the user, tty or command run.
 
 =head1 OPTIONS
 
@@ -59,10 +59,6 @@ composed of the following predicates:
 
 =over 8
 
-=item user I<username>
-
-Evaluates to true if the ID matches a command run by I<username>.
-
 =item command I<command pattern>
 
 Evaluates to true if the command run matches I<command pattern>.
@@ -70,24 +66,31 @@ On systems with POSIX regular expression support, the pattern may
 be an extended regular expression.  On systems without POSIX regular
 expression support, a simple substring match is performed instead.
 
-=item tty I<tty>
+=item group I<runas_group>
 
-Evaluates to true if the command was run on the specified terminal
-device.  The I<tty> should be specified without the F</dev/> prefix,
-e.g.  F<tty01> instead of F</dev/tty01>.
+Evaluates to true if the command was run with the specified
+I<runas_group>.  Note that unless a I<runas_group> was explicitly
+specified when B<sudo> was run this field will be empty in the log.
 
 =item runas I<runas_user>
 
 Evaluates to true if the command was run as the specified I<runas_user>.
 Note that B<sudo> runs commands as user I<root> by default.
 
-=item runas I<runas_group>
+=item tty I<tty>
 
-Evaluates to true if the command was run with the specified
-I<runas_group>.  Note that unless a I<runas_group> was explicitly
-specified when B<sudo> was run this field will be empty in the log.
+Evaluates to true if the command was run on the specified terminal
+device.  The I<tty> should be specified without the F</dev/> prefix,
+e.g.  F<tty01> instead of F</dev/tty01>.
+
+=item user I<username>
+
+Evaluates to true if the ID matches a command run by I<username>.
 
 =back
+
+Predicates may be abbreviated to the shortest unique string (currently
+all predicates may be shortened to a single character).
 
 Predicates may be combined using I<and>, I<or> and I<!> operators
 as well as C<'('> and C<')'> for grouping (note that parentheses
@@ -141,6 +144,24 @@ Example session transcript file.
 Example session timing file.
 
 =back
+
+=head1 EXAMPLES
+
+List sessions run by user I<millert>:
+
+ sudoreplay -l user millert
+
+List sessions run by user I<bob> with a command containing the string vi:
+
+ sudoreplay -l user bob command vi
+
+List sessions run by user I<jeff> that match a regular expression:
+
+ sudoreplay -l user jeff command '/bin/[a-z]*sh'
+
+List sessions run by jeff or bob on the console:
+
+ sudoreplay -l ( user jeff or user bob ) tty console
 
 =head1 SEE ALSO
 
