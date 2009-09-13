@@ -94,9 +94,58 @@ int Argc;
 char **Argv;
 const char *session_dir = _PATH_SUDO_SESSDIR;
 
-void usage __P((void));
-void delay __P((double));
-int list_sessions __P((int, char **, const char *, const char *, const char *));
+/*
+ * Info present in the transcript log file
+ */
+struct log_info {
+    char *user;
+    char *runas_user;
+    char *runas_group;
+    char *tty;
+    char *cmd;
+    time_t tstamp;
+};
+
+/*
+ * Handle expressions like:
+ * ( user millert or user root ) and tty console and command /bin/sh
+ * XXX - also time-based
+ */
+struct search_node {
+    struct search_node *next;
+#define ST_EXPR		1
+#define ST_TTY		2
+#define ST_USER		3
+#define ST_PATTERN	4
+#define ST_RUNASUSER	5
+#define ST_RUNASGROUP	6
+    char type;
+    char negated;
+    char or;
+    char pad;
+    union {
+#ifdef HAVE_REGCOMP
+	regex_t cmdre;
+#endif
+	char *tty;
+	char *user;
+	char *pattern;
+	char *runas_group;
+	char *runas_user;
+	struct search_node *expr;
+	void *ptr;
+    } u;
+} *search_expr;
+
+#define STACK_NODE_SIZE	32
+static struct search_node *node_stack[32];
+static int stack_top;
+
+extern void *emalloc __P((size_t));
+static int list_sessions __P((int, char **, const char *, const char *, const char *));
+static int parse_expr __P((struct search_node **, char **));
+static void delay __P((double));
+static void usage __P((void));
 
 #ifdef HAVE_REGCOMP
 # define REGEX_T	regex_t
@@ -136,7 +185,7 @@ main(argc, argv)
     Argv = argv;
 
     /* XXX - timestamp option? (begin,end) */
-    while ((ch = getopt(argc, argv, "d:lm:p:s:t:u:V")) != -1) {
+    while ((ch = getopt(argc, argv, "d:lm:s:V")) != -1) {
 	switch(ch) {
 	case 'd':
 	    session_dir = optarg;
@@ -150,20 +199,11 @@ main(argc, argv)
 	    if (*ep != '\0' || errno != 0)
 		error(1, "invalid max wait: %s", optarg);
 	    break;
-	case 'p':
-	    pattern = optarg;
-	    break;
 	case 's':
 	    errno = 0;
 	    speed = strtod(optarg, &ep);
 	    if (*ep != '\0' || errno != 0)
 		error(1, "invalid speed factor: %s", optarg);
-	    break;
-	case 't':
-	    tty = optarg;
-	    break;
-	case 'u':
-	    user = optarg;
 	    break;
 	case 'V':
 	    (void) printf("%s version %s\n", getprogname(), PACKAGE_VERSION);
@@ -177,9 +217,8 @@ main(argc, argv)
     argc -= optind;
     argv += optind;
 
-    if (listonly) {
+    if (listonly)
 	exit(list_sessions(argc, argv, pattern, user, tty));
-    }
 
     if (argc != 1)
 	usage();
@@ -279,7 +318,7 @@ nanosleep(ts, rts)
 }
 #endif
 
-void
+static void
 delay(secs)
     double secs;
 {
@@ -303,14 +342,149 @@ delay(secs)
 	error(1, "nanosleep: tv_sec %ld, tv_nsec %ld", ts.tv_sec, ts.tv_nsec);
 }
 
-struct log_info {
-    char *user;
-    char *runas_user;
-    char *runas_group;
-    char *tty;
-    char *cmd;
-    time_t tstamp;
-};
+/*
+ * Build expression list from search args
+ * XXX - add additional search terms
+ */
+static int
+parse_expr(headp, argv)
+    struct search_node **headp;
+    char **argv;
+{
+    struct search_node *sn, *newsn;
+    char or = 0, not = 0, type;
+    char **av;
+
+    sn = *headp;
+    for (av = argv; *av; av++) {
+	switch (*av[0]) {
+	case 'a': /* and (ignore) */
+	    continue;
+	case 'o': /* or */
+	    or = 1;
+	    continue;
+	case '!': /* negate */
+	    not = 1;
+	    continue;
+	case 'c': /* command */
+	    type = ST_PATTERN;
+	    break;
+	case 'g': /* runas group */
+	    type = ST_RUNASGROUP;
+	    break;
+	case 'r': /* runas user */
+	    type = ST_RUNASUSER;
+	    break;
+	case 't': /* tty */
+	    type = ST_TTY;
+	    break;
+	case 'u': /* user */
+	    type = ST_USER;
+	    break;
+	case '(': /* start sub-expression */
+	    if (stack_top + 1 == STACK_NODE_SIZE) {
+		errorx(1, "too many parenthesized expressions, max %d",
+		    STACK_NODE_SIZE);
+	    }
+	    node_stack[stack_top++] = sn;
+	    type = ST_EXPR;
+	    break;
+	case ')': /* end sub-expression */
+	    /* pop */
+	    if (--stack_top < 0)
+		errorx(1, "unmatched ')' in expression");
+	    if (node_stack[stack_top])
+		sn->next = node_stack[stack_top]->next;
+	    return(av - argv + 1);
+	default:
+	    errorx(1, "unknown search term \"%s\"", *av);
+	    /* NOTREACHED */
+	}
+
+	/* Allocate new search node */
+	newsn = emalloc(sizeof(*newsn));
+	newsn->next = NULL;
+	newsn->type = type;
+	newsn->or = or;
+	newsn->negated = not;
+	if (type == ST_EXPR) {
+	    av += parse_expr(&newsn->u.expr, av + 1);
+	} else {
+	    if (*(++av) == NULL)
+		errorx(1, "%s requires an argument", av[-1]);
+#ifdef HAVE_REGCOMP
+	    if (type == ST_PATTERN) {
+		if (regcomp(&newsn->u.cmdre, *av, REG_EXTENDED|REG_NOSUB) != 0)
+		    errorx(1, "invalid regex: %s", *av);
+	    } else
+#endif
+	    newsn->u.ptr = *av;
+	}
+	not = or = 0; /* reset state */
+	if (sn)
+	    sn->next = newsn;
+	else
+	    *headp = newsn;
+	sn = newsn;
+    }
+    if (stack_top)
+	errorx(1, "unmatched '(' in expression");
+    if (or)
+	errorx(1, "illegal trailing \"or\"");
+    if (not)
+	errorx(1, "illegal trailing \"!\"");
+
+    return(av - argv);
+}
+
+static int
+match_expr(head, log)
+    struct search_node *head;
+    struct log_info *log;
+{
+    struct search_node *sn;
+    int matched = 1, rc;
+
+    for (sn = head; sn; sn = sn->next) {
+	/* If we have no match, skip up to the next OR entry. */
+	if (!matched && !sn->or)
+	    continue;
+
+	switch (sn->type) {
+	case ST_EXPR:
+	    matched = match_expr(sn->u.expr, log);
+	    break;
+	case ST_TTY:
+	    matched = strcmp(sn->u.tty, log->tty) == 0;
+	    break;
+	case ST_RUNASGROUP:
+	    matched = strcmp(sn->u.runas_group, log->runas_group) == 0;
+	    break;
+	case ST_RUNASUSER:
+	    matched = strcmp(sn->u.runas_user, log->runas_user) == 0;
+	    break;
+	case ST_USER:
+	    matched = strcmp(sn->u.user, log->user) == 0;
+	    break;
+	case ST_PATTERN:
+#ifdef HAVE_REGCOMP
+	    rc = regexec(&sn->u.cmdre, log->cmd, 0, NULL, 0);
+	    if (rc && rc != REG_NOMATCH) {
+		char buf[BUFSIZ];
+		regerror(rc, &sn->u.cmdre, buf, sizeof(buf));
+		errorx(1, "%s", buf);
+	    }
+	    matched = rc == REG_NOMATCH ? 0 : 1;
+#else
+	    matched = strstr(log.cmd, sn->u.pattern) != NULL;
+#endif
+	    break;
+	}
+	if (sn->negated)
+	    matched = !matched;
+    }
+    return(matched);
+}
 
 static int
 list_session_dir(pathbuf, re, user, tty)
@@ -385,28 +559,9 @@ list_session_dir(pathbuf, re, user, tty)
 	cmdbuf[strcspn(cmdbuf, "\n")] = '\0';
 	li.cmd = cmdbuf;
 
-	/*
-	 * Select based on user/tty/regex if applicable.
-	 * XXX - select on time and/or runas bits too?
-	 */
-	if (user && strcmp(user, li.user) != 0)
+	/* Match on search expression if there is one. */
+	if (search_expr && !match_expr(search_expr, &li))
 	    continue;
-	if (tty && strcmp(tty, li.tty) != 0)
-	    continue;
-	if (re) {
-#ifdef HAVE_REGCOMP
-	    int rc = regexec(re, li.cmd, 0, NULL, 0);
-	    if (rc) {
-		if (rc == REG_NOMATCH)
-		    continue;
-		regerror(rc, re, buf, sizeof(buf));
-		errorx(1, "%s", buf);
-	    }
-#else
-	    if (strstr(li.cmd, re) == NULL)
-		continue;
-#endif /* HAVE_REGCOMP */
-	}
 
 	/* Convert from /var/log/sudo-sessions/00/00/01 to 000001 */
 	idstr[0] = pathbuf[plen - 5];
@@ -417,13 +572,13 @@ list_session_dir(pathbuf, re, user, tty)
 	idstr[5] = pathbuf[plen + 2];
 	idstr[6] = '\0';
 	/* XXX - better format (timestamp?) */
-	printf("%s: %s %d (%s:%s) %s\n", idstr, li.user, li.tstamp,
+	printf("%s: %s %ld (%s:%s) %s\n", idstr, li.user, (long)li.tstamp,
 	    li.runas_user, li.runas_group, li.cmd);
     }
     return(0);
 }
 
-int
+static int
 list_sessions(argc, argv, pattern, user, tty)
     int argc;
     char **argv;
@@ -436,6 +591,9 @@ list_sessions(argc, argv, pattern, user, tty)
     REGEX_T rebuf, *re = NULL;
     size_t sdlen;
     char pathbuf[PATH_MAX];
+
+    /* Parse search expression if present */
+    parse_expr(&search_expr, argv);
 
     d1 = opendir(session_dir);
     if (d1 == NULL)
@@ -488,14 +646,14 @@ list_sessions(argc, argv, pattern, user, tty)
     return(0);
 }
 
-void
+static void
 usage()
 {
     fprintf(stderr,
 	"usage: %s [-d directory] [-m max_wait] [-s speed_factor] ID\n",
 	getprogname());
     fprintf(stderr,
-	"usage: %s [-d directory] [-p pattern] [-t tty] [-u username] -l\n",
+	"usage: %s [-d directory] -l [search expression]\n",
 	getprogname());
     exit(1);
 }

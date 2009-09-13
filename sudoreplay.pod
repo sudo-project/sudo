@@ -24,7 +24,7 @@ sudoreplay - replay sudo session logs
 
 B<sudoreplay> [B<-d> I<directory>] [B<-m> I<max_wait>] [B<-s> I<speed_factor>] ID
 
-B<sudoreplay> [B<-d> I<directory>] [B<-p> I<pattern>] [B<-t> I<tty>] [B<-u> I<user>] -l
+B<sudoreplay> [B<-d> I<directory>] -l [search expression]
 
 =head1 DESCRIPTION
 
@@ -53,8 +53,47 @@ F</var/log/sudo-sessions>.
 =item -l
 
 Enable "list mode".  In this mode, B<sudoreplay> will list available
-session IDs.  The C<-p>, <-t> and <-u> options can be used to
-restrict the IDs that are displayed.
+session IDs.  If a I<search expression> is specified, it will be
+used to restrict the IDs that are displayed.  An expression is
+composed of the following predicates:
+
+=over 8
+
+=item user I<username>
+
+Evaluates to true if the ID matches a command run by I<username>.
+
+=item command I<command pattern>
+
+Evaluates to true if the command run matches I<command pattern>.
+On systems with POSIX regular expression support, the pattern may
+be an extended regular expression.  On systems without POSIX regular
+expression support, a simple substring match is performed instead.
+
+=item tty I<tty>
+
+Evaluates to true if the command was run on the specified terminal
+device.  The I<tty> should be specified without the F</dev/> prefix,
+e.g.  F<tty01> instead of F</dev/tty01>.
+
+=item runas I<runas_user>
+
+Evaluates to true if the command was run as the specified I<runas_user>.
+Note that B<sudo> runs commands as user I<root> by default.
+
+=item runas I<runas_group>
+
+Evaluates to true if the command was run with the specified
+I<runas_group>.  Note that unless a I<runas_group> was explicitly
+specified when B<sudo> was run this field will be empty in the log.
+
+=back
+
+Predicates may be combined using I<and>, I<or> and I<!> operators
+as well as C<'('> and C<')'> for grouping (note that parentheses
+must generally be escaped from the shell).  The I<and> operator is
+optional, adjacent predicates have an implied I<and> unless separated
+by an I<or>.
 
 =item -m I<max_wait>
 
@@ -66,13 +105,6 @@ I<-m> option is specified, B<sudoreplay> will limit these pauses
 to at most I<max_wait> seconds.  The value may be specified as a
 floating point number, .e.g. I<2.5>.
 
-=item -p I<pattern>
-
-Restrict list output to sessions where the command matches I<pattern>.
-On systems with POSIX regular expression support, the pattern may
-be an extended regular expression.  On systems without POSIX regular
-expression support, a simple substring match is performed instead.
-
 =item -s I<speed_factor>
 
 This option causes B<sudoreplay> to adjust the number of seconds
@@ -80,16 +112,6 @@ it will wait between key presses or program output.  This can be
 used to slow down or speed up the display.  For example, a
 I<speed_factor> of I<2> would make the output twice as fast whereas
 a I<speed_factor> of <.5> would make the output twice as slow.
-
-=item -t I<tty>
-
-Restrict list output to sessions where the command was run on the
-specified terming device.  The I<tty> should be specified without the
-F</dev/> prefix, e.g. F<tty01> instead of F</dev/tty01>.
-
-=item -u I<user>
-
-Restrict list output to sessions where the command was run by I<user>.
 
 =item -V
 

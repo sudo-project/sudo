@@ -10,7 +10,7 @@ NNAAMMEE
 SSYYNNOOPPSSIISS
        ssuuddoorreeppllaayy [--dd _d_i_r_e_c_t_o_r_y] [--mm _m_a_x___w_a_i_t] [--ss _s_p_e_e_d___f_a_c_t_o_r] ID
 
-       ssuuddoorreeppllaayy [--dd _d_i_r_e_c_t_o_r_y] [--pp _p_a_t_t_e_r_n] [--tt _t_t_y] [--uu _u_s_e_r] -l
+       ssuuddoorreeppllaayy [--dd _d_i_r_e_c_t_o_r_y] -l [search expression]
 
 DDEESSCCRRIIPPTTIIOONN
        ssuuddoorreeppllaayy plays back or lists the session logs created by ssuuddoo.  When
@@ -31,8 +31,56 @@ OOPPTTIIOONNSS
                    default, _/_v_a_r_/_l_o_g_/_s_u_d_o_-_s_e_s_s_i_o_n_s.
 
        -l          Enable "list mode".  In this mode, ssuuddoorreeppllaayy will list
-                   available session IDs.  The -p, <-t> and <-u> options can
-                   be used to restrict the IDs that are displayed.
+                   available session IDs.  If a _s_e_a_r_c_h _e_x_p_r_e_s_s_i_o_n is
+                   specified, it will be used to restrict the IDs that are
+                   displayed.  An expression is composed of the following
+                   predicates:
+
+                   user _u_s_e_r_n_a_m_e
+                           Evaluates to true if the ID matches a command run
+                           by _u_s_e_r_n_a_m_e.
+
+                   command _c_o_m_m_a_n_d _p_a_t_t_e_r_n
+                           Evaluates to true if the command run matches
+                           _c_o_m_m_a_n_d _p_a_t_t_e_r_n.  On systems with POSIX regular
+                           expression support, the pattern may be an extended
+                           regular expression.  On systems without POSIX
+                           regular expression support, a simple substring
+                           match is performed instead.
+
+                   tty _t_t_y Evaluates to true if the command was run on the
+                           specified terminal device.  The _t_t_y should be
+                           specified without the _/_d_e_v_/ prefix, e.g.  _t_t_y_0_1
+                           instead of _/_d_e_v_/_t_t_y_0_1.
+
+                   runas _r_u_n_a_s___u_s_e_r
+                           Evaluates to true if the command was run as the
+                           specified _r_u_n_a_s___u_s_e_r.  Note that ssuuddoo runs commands
+                           as user _r_o_o_t by default.
+
+
+
+
+1.7.2                   September 13, 2009                      1
+
+
+
+
+
+SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
+
+
+                   runas _r_u_n_a_s___g_r_o_u_p
+                           Evaluates to true if the command was run with the
+                           specified _r_u_n_a_s___g_r_o_u_p.  Note that unless a
+                           _r_u_n_a_s___g_r_o_u_p was explicitly specified when ssuuddoo was
+                           run this field will be empty in the log.
+
+                   Predicates may be combined using _a_n_d, _o_r and _! operators as
+                   well as '(' and ')' for grouping (note that parentheses
+                   must generally be escaped from the shell).  The _a_n_d
+                   operator is optional, adjacent predicates have an implied
+                   _a_n_d unless separated by an _o_r.
 
        -m _m_a_x___w_a_i_t Specify an upper bound on how long to wait between key
                    presses or output data.  By default, ssuuddoo__rreeppllaayy will
@@ -43,12 +91,6 @@ OOPPTTIIOONNSS
                    _m_a_x___w_a_i_t seconds.  The value may be specified as a floating
                    point number, .e.g. _2_._5.
 
-       -p _p_a_t_t_e_r_n  Restrict list output to sessions where the command matches
-                   _p_a_t_t_e_r_n.  On systems with POSIX regular expression support,
-                   the pattern may be an extended regular expression.  On
-                   systems without POSIX regular expression support, a simple
-                   substring match is performed instead.
-
        -s _s_p_e_e_d___f_a_c_t_o_r
                    This option causes ssuuddoorreeppllaayy to adjust the number of
                    seconds it will wait between key presses or program output.
@@ -56,26 +98,6 @@ OOPPTTIIOONNSS
                    example, a _s_p_e_e_d___f_a_c_t_o_r of _2 would make the output twice as
                    fast whereas a _s_p_e_e_d___f_a_c_t_o_r of <.5> would make the output
                    twice as slow.
-
-       -t _t_t_y      Restrict list output to sessions where the command was run
-
-
-
-1.7.2                    August 30, 2009                        1
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
-
-                   on the specified terming device.  The _t_t_y should be
-                   specified without the _/_d_e_v_/ prefix, e.g. _t_t_y_0_1 instead of
-                   _/_d_e_v_/_t_t_y_0_1.
-
-       -u _u_s_e_r     Restrict list output to sessions where the command was run
-                   by _u_s_e_r.
 
        -V          The --VV (version) option causes ssuuddoorreeppllaayy to print its
                    version number and exit.
@@ -102,6 +124,18 @@ BBUUGGSS
        If you feel you have found a bug in ssuuddoorreeppllaayy, please submit a bug
        report at http://www.sudo.ws/sudo/bugs/
 
+
+
+
+1.7.2                   September 13, 2009                      2
+
+
+
+
+
+SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
+
+
 SSUUPPPPOORRTT
        Limited free support is available via the sudo-users mailing list, see
        http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search
@@ -127,6 +161,38 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.2                    August 30, 2009                        2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.7.2                   September 13, 2009                      3
 
 

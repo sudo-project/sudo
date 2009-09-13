@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOREPLAY @mansectsu@"
-.TH SUDOREPLAY @mansectsu@ "August 30, 2009" "1.7.2" "MAINTENANCE COMMANDS"
+.TH SUDOREPLAY @mansectsu@ "September 13, 2009" "1.7.2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -159,7 +159,7 @@ sudoreplay \- replay sudo session logs
 .IX Header "SYNOPSIS"
 \&\fBsudoreplay\fR [\fB\-d\fR \fIdirectory\fR] [\fB\-m\fR \fImax_wait\fR] [\fB\-s\fR \fIspeed_factor\fR] \s-1ID\s0
 .PP
-\&\fBsudoreplay\fR [\fB\-d\fR \fIdirectory\fR] [\fB\-p\fR \fIpattern\fR] [\fB\-t\fR \fItty\fR] [\fB\-u\fR \fIuser\fR] \-l
+\&\fBsudoreplay\fR [\fB\-d\fR \fIdirectory\fR] \-l [search expression]
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 \&\fBsudoreplay\fR plays back or lists the session logs created by
@@ -182,8 +182,42 @@ Use \fIdirectory\fR to for the session logs instead of the default,
 .IP "\-l" 12
 .IX Item "-l"
 Enable \*(L"list mode\*(R".  In this mode, \fBsudoreplay\fR will list available
-session IDs.  The \f(CW\*(C`\-p\*(C'\fR, <\-t> and <\-u> options can be used to
-restrict the IDs that are displayed.
+session IDs.  If a \fIsearch expression\fR is specified, it will be
+used to restrict the IDs that are displayed.  An expression is
+composed of the following predicates:
+.RS 12
+.IP "user \fIusername\fR" 8
+.IX Item "user username"
+Evaluates to true if the \s-1ID\s0 matches a command run by \fIusername\fR.
+.IP "command \fIcommand pattern\fR" 8
+.IX Item "command command pattern"
+Evaluates to true if the command run matches \fIcommand pattern\fR.
+On systems with \s-1POSIX\s0 regular expression support, the pattern may
+be an extended regular expression.  On systems without \s-1POSIX\s0 regular
+expression support, a simple substring match is performed instead.
+.IP "tty \fItty\fR" 8
+.IX Item "tty tty"
+Evaluates to true if the command was run on the specified terminal
+device.  The \fItty\fR should be specified without the \fI/dev/\fR prefix,
+e.g.  \fItty01\fR instead of \fI/dev/tty01\fR.
+.IP "runas \fIrunas_user\fR" 8
+.IX Item "runas runas_user"
+Evaluates to true if the command was run as the specified \fIrunas_user\fR.
+Note that \fBsudo\fR runs commands as user \fIroot\fR by default.
+.IP "runas \fIrunas_group\fR" 8
+.IX Item "runas runas_group"
+Evaluates to true if the command was run with the specified
+\&\fIrunas_group\fR.  Note that unless a \fIrunas_group\fR was explicitly
+specified when \fBsudo\fR was run this field will be empty in the log.
+.RE
+.RS 12
+.Sp
+Predicates may be combined using \fIand\fR, \fIor\fR and \fI!\fR operators
+as well as \f(CW\*(Aq(\*(Aq\fR and \f(CW\*(Aq)\*(Aq\fR for grouping (note that parentheses
+must generally be escaped from the shell).  The \fIand\fR operator is
+optional, adjacent predicates have an implied \fIand\fR unless separated
+by an \fIor\fR.
+.RE
 .IP "\-m \fImax_wait\fR" 12
 .IX Item "-m max_wait"
 Specify an upper bound on how long to wait between key presses or
@@ -193,12 +227,6 @@ can be tedious when the session includes long pauses.  When the
 \&\fI\-m\fR option is specified, \fBsudoreplay\fR will limit these pauses
 to at most \fImax_wait\fR seconds.  The value may be specified as a
 floating point number, .e.g. \fI2.5\fR.
-.IP "\-p \fIpattern\fR" 12
-.IX Item "-p pattern"
-Restrict list output to sessions where the command matches \fIpattern\fR.
-On systems with \s-1POSIX\s0 regular expression support, the pattern may
-be an extended regular expression.  On systems without \s-1POSIX\s0 regular
-expression support, a simple substring match is performed instead.
 .IP "\-s \fIspeed_factor\fR" 12
 .IX Item "-s speed_factor"
 This option causes \fBsudoreplay\fR to adjust the number of seconds
@@ -206,14 +234,6 @@ it will wait between key presses or program output.  This can be
 used to slow down or speed up the display.  For example, a
 \&\fIspeed_factor\fR of \fI2\fR would make the output twice as fast whereas
 a \fIspeed_factor\fR of <.5> would make the output twice as slow.
-.IP "\-t \fItty\fR" 12
-.IX Item "-t tty"
-Restrict list output to sessions where the command was run on the
-specified terming device.  The \fItty\fR should be specified without the
-\&\fI/dev/\fR prefix, e.g. \fItty01\fR instead of \fI/dev/tty01\fR.
-.IP "\-u \fIuser\fR" 12
-.IX Item "-u user"
-Restrict list output to sessions where the command was run by \fIuser\fR.
 .IP "\-V" 12
 .IX Item "-V"
 The \fB\-V\fR (version) option causes \fBsudoreplay\fR to print its version number

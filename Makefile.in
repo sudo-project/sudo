@@ -137,7 +137,7 @@ SUDO_OBJS = $(COMMON_OBJS) $(AUTH_OBJS) @SUDO_OBJS@ audit.o check.o env.o \
 VISUDO_OBJS = $(COMMON_OBJS) visudo.o fileops.o gettime.o goodpath.o \
 	      find_path.o pwutil.o
 
-REPLAY_OBJS = sudoreplay.o error.o
+REPLAY_OBJS = sudoreplay.o error.o alloc.o
 
 TEST_OBJS = $(COMMON_OBJS) interfaces.o testsudoers.o tsgetgrpw.o tspwutil.o
 
@@ -154,8 +154,8 @@ DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
 	    schema.ActiveDirectory schema.OpenLDAP schema.iPlanet sudo.cat \
 	    sudo.man.in sudo.pod sudo.psf sudo_usage.h.in sudoers sudoers.cat \
             sudoers.man.in sudoers.pod sudoers.ldap.cat sudoers.ldap.man.in \
-	    sudoers.ldap.pod sudoers2ldif sudoreplay.cat sudoreplay.man.in \
-	    sudoreplay.pod visudo.cat visudo.man.in visudo.pod auth/API
+		sudoers.ldap.pod sudoers2ldif sudoreplay.cat sudoreplay.man.in \
+		sudoreplay.pod visudo.cat visudo.man.in visudo.pod auth/API
 
 BINFILES= ChangeLog HISTORY LICENSE README TROUBLESHOOTING \
 	  UPGRADE install-sh mkinstalldirs sample.syslog.conf sample.sudoers \
