@@ -99,6 +99,7 @@ static time_t	yyRelSeconds;
 
 static int	yyerror __P((char *s));
 static int	yylex __P((void));
+static int	yyparse __P((void));
 
 %}
 

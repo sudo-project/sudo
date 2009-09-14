@@ -224,6 +224,7 @@ $(devdir)/toke.c: $(srcdir)/toke.l
 
 # Uncomment the lines before -@true if you intend to modify getdate.y
 $(devdir)/getdate.c: $(srcdir)/getdate.y
+@DEV@	echo "expect 10 shift/reduce conflicts"
 @DEV@	$(YACC) $(srcdir)/getdate.y
 @DEV@	mv -f y.tab.c getdate.c
 	-@true
