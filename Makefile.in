@@ -110,7 +110,7 @@ SRCS = aix.c alias.c alloc.c audit.c bsm_audit.c check.c closefrom.c \
        snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c sudo.c \
        sudo_noexec.c sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c \
        toke.c toke.l tsgetgrpw.c utimes.c vasgroups.c visudo.c zero_bytes.c \
-       redblack.c selinux.c sesh.c sudoreplay.c $(AUTH_SRCS)
+       redblack.c selinux.c sesh.c sudoreplay.c getdate.c getdate.y $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -137,7 +137,7 @@ SUDO_OBJS = $(COMMON_OBJS) $(AUTH_OBJS) @SUDO_OBJS@ audit.o check.o env.o \
 VISUDO_OBJS = $(COMMON_OBJS) visudo.o fileops.o gettime.o goodpath.o \
 	      find_path.o pwutil.o
 
-REPLAY_OBJS = sudoreplay.o error.o alloc.o
+REPLAY_OBJS = sudoreplay.o error.o alloc.o getdate.o
 
 TEST_OBJS = $(COMMON_OBJS) interfaces.o testsudoers.o tsgetgrpw.o tspwutil.o
 
@@ -207,7 +207,7 @@ sudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
 # Uncomment the following if you want "make distclean" to clean the parser
-@DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h
+@DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate
 
 # Uncomment the lines before -@true if you intend to modify gram.y
 $(devdir)/gram.c: $(srcdir)/gram.y
@@ -220,6 +220,12 @@ $(devdir)/gram.c: $(srcdir)/gram.y
 $(devdir)/toke.c: $(srcdir)/toke.l
 @DEV@	$(FLEX) $(srcdir)/toke.l
 @DEV@	mv -f lex.yy.c toke.c
+	-@true
+
+# Uncomment the lines before -@true if you intend to modify getdate.y
+$(devdir)/getdate.c: $(srcdir)/getdate.y
+@DEV@	$(YACC) $(srcdir)/getdate.y
+@DEV@	mv -f y.tab.c getdate.c
 	-@true
 
 # Uncomment the following if you intend to modify def_data.in
@@ -255,6 +261,8 @@ fnmatch.o: $(srcdir)/fnmatch.c $(srcdir)/emul/fnmatch.h $(srcdir)/compat.h confi
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fnmatch.c
 getcwd.o: $(srcdir)/getcwd.c $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getcwd.c
+getdate.o: $(srcdir)/getdate.c config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getdate.c
 getprogname.o: $(srcdir)/getprogname.c config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getprogname.c
 getspwuid.o: $(srcdir)/getspwuid.c $(SUDODEP)
