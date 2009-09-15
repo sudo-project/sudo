@@ -119,6 +119,8 @@ struct search_node {
 #define ST_PATTERN	4
 #define ST_RUNASUSER	5
 #define ST_RUNASGROUP	6
+#define ST_FROMDATE	7
+#define ST_TODATE	8
     char type;
     char negated;
     char or;
@@ -127,6 +129,7 @@ struct search_node {
 #ifdef HAVE_REGCOMP
 	regex_t cmdre;
 #endif
+	time_t tstamp;
 	char *tty;
 	char *user;
 	char *pattern;
@@ -142,6 +145,8 @@ static struct search_node *node_stack[32];
 static int stack_top;
 
 extern void *emalloc __P((size_t));
+extern time_t get_date __P((char *));
+
 static int list_sessions __P((int, char **, const char *, const char *, const char *));
 static int parse_expr __P((struct search_node **, char **));
 static void delay __P((double));
@@ -377,6 +382,11 @@ parse_expr(headp, argv)
 		goto bad;
 	    type = ST_PATTERN;
 	    break;
+	case 'f': /* from date */
+	    if (strncmp(*av, "from", strlen(*av)) != 0)
+		goto bad;
+	    type = ST_FROMDATE;
+	    break;
 	case 'g': /* runas group */
 	    if (strncmp(*av, "group", strlen(*av)) != 0)
 		goto bad;
@@ -387,10 +397,15 @@ parse_expr(headp, argv)
 		goto bad;
 	    type = ST_RUNASUSER;
 	    break;
-	case 't': /* tty */
-	    if (strncmp(*av, "tty", strlen(*av)) != 0)
+	case 't': /* tty or to date */
+	    if (*av[1] == '\0')
+		errorx(1, "ambiguous expression \"%s\"", *av);
+	    if (strncmp(*av, "to", strlen(*av)) == 0)
+		type = ST_TODATE;
+	    else if (strncmp(*av, "tty", strlen(*av)) == 0)
+		type = ST_TTY;
+	    else
 		goto bad;
-	    type = ST_TTY;
 	    break;
 	case 'u': /* user */
 	    if (strncmp(*av, "user", strlen(*av)) != 0)
@@ -439,7 +454,13 @@ parse_expr(headp, argv)
 		    errorx(1, "invalid regex: %s", *av);
 	    } else
 #endif
-	    newsn->u.ptr = *av;
+	    if (type == ST_TODATE || type == ST_FROMDATE) {
+		newsn->u.tstamp = get_date(*av);
+		if (newsn->u.tstamp == -1)
+		    errorx(1, "could not parse date \"%s\"", *av);
+	    } else {
+		newsn->u.ptr = *av;
+	    }
 	}
 	not = or = 0; /* reset state */
 	if (sn)
@@ -499,6 +520,12 @@ match_expr(head, log)
 #else
 	    matched = strstr(log.cmd, sn->u.pattern) != NULL;
 #endif
+	    break;
+	case ST_FROMDATE:
+	    matched = log->tstamp >= sn->u.tstamp;
+	    break;
+	case ST_TODATE:
+	    matched = log->tstamp <= sn->u.tstamp;
 	    break;
 	}
 	if (sn->negated)
