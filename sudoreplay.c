@@ -148,6 +148,7 @@ static int stack_top;
 
 extern void *emalloc __P((size_t));
 extern void *erealloc __P((void *, size_t));
+extern void efree __P((void *));
 extern time_t get_date __P((char *));
 
 static int list_sessions __P((int, char **, const char *, const char *, const char *));
@@ -548,11 +549,11 @@ sudo_getln(char **bufp, FILE *fp)
 {
     char *buf;
     size_t bufsize = BUFSIZ;
-    ssize_t len, off = 0;
+    ssize_t len = 0;
 
     buf = emalloc(BUFSIZ);
     for (;;) {
-	if (fgets(buf + off, bufsize - off, fp) == NULL) {
+	if (fgets(buf + len, bufsize - len, fp) == NULL) {
 	    efree(buf);
 	    buf = NULL;
 	    len = -1;
@@ -580,7 +581,6 @@ list_session_dir(pathbuf, re, user, tty)
     struct dirent *dp;
     char *buf, *cmd, *cwd, idstr[7], *cp;
     struct log_info li;
-    ssize_t len;
     int plen;
 
     plen = strlen(pathbuf);
