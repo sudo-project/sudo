@@ -390,7 +390,7 @@ parse_expr(headp, argv)
 		goto bad;
 	    break;
 	case 'f': /* from date */
-	    if (strncmp(*av, "from", strlen(*av)) != 0)
+	    if (strncmp(*av, "fromdate", strlen(*av)) != 0)
 		goto bad;
 	    type = ST_FROMDATE;
 	    break;
@@ -407,7 +407,7 @@ parse_expr(headp, argv)
 	case 't': /* tty or to date */
 	    if (*av[1] == '\0')
 		errorx(1, "ambiguous expression \"%s\"", *av);
-	    if (strncmp(*av, "to", strlen(*av)) == 0)
+	    if (strncmp(*av, "todate", strlen(*av)) == 0)
 		type = ST_TODATE;
 	    else if (strncmp(*av, "tty", strlen(*av)) == 0)
 		type = ST_TTY;
