@@ -330,9 +330,10 @@ script_execv(path, argv)
 
     gettimeofday(&prevtime, NULL);
 
-    /* XXX - log more stuff to idfile (like normal log line?) */
+    /* XXX - log more stuff? environment too? */
     fprintf(idfile, "%ld:%s:%s:%s:%s\n", prevtime.tv_sec, user_name,
 	runas_pw->pw_name, runas_gr ? runas_gr->gr_name : "", user_tty);
+    fprintf(idfile, "%s\n", user_cwd);
     fprintf(idfile, "%s%s%s\n", user_cmnd, user_args ? " " : "",
 	user_args ? user_args : "");
     fclose(idfile);

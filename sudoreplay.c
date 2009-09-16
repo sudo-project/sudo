@@ -98,6 +98,7 @@ const char *session_dir = _PATH_SUDO_SESSDIR;
  * Info present in the transcript log file
  */
 struct log_info {
+    char *cwd;
     char *user;
     char *runas_user;
     char *runas_group;
@@ -109,7 +110,6 @@ struct log_info {
 /*
  * Handle expressions like:
  * ( user millert or user root ) and tty console and command /bin/sh
- * XXX - also time-based
  */
 struct search_node {
     struct search_node *next;
@@ -121,6 +121,7 @@ struct search_node {
 #define ST_RUNASGROUP	6
 #define ST_FROMDATE	7
 #define ST_TODATE	8
+#define ST_CWD		9
     char type;
     char negated;
     char or;
@@ -130,6 +131,7 @@ struct search_node {
 	regex_t cmdre;
 #endif
 	time_t tstamp;
+	char *cwd;
 	char *tty;
 	char *user;
 	char *pattern;
@@ -145,6 +147,7 @@ static struct search_node *node_stack[32];
 static int stack_top;
 
 extern void *emalloc __P((size_t));
+extern void *erealloc __P((void *, size_t));
 extern time_t get_date __P((char *));
 
 static int list_sessions __P((int, char **, const char *, const char *, const char *));
@@ -189,7 +192,6 @@ main(argc, argv)
     Argc = argc;
     Argv = argv;
 
-    /* XXX - timestamp option? (begin,end) */
     while ((ch = getopt(argc, argv, "d:lm:s:V")) != -1) {
 	switch(ch) {
 	case 'd':
@@ -349,7 +351,6 @@ delay(secs)
 
 /*
  * Build expression list from search args
- * XXX - add additional search terms
  */
 static int
 parse_expr(headp, argv)
@@ -378,9 +379,14 @@ parse_expr(headp, argv)
 	    not = 1;
 	    continue;
 	case 'c': /* command */
-	    if (strncmp(*av, "command", strlen(*av)) != 0)
+	    if (*av[1] == '\0')
+		errorx(1, "ambiguous expression \"%s\"", *av);
+	    if (strncmp(*av, "cwd", strlen(*av)) == 0)
+		type = ST_CWD;
+	    else if (strncmp(*av, "command", strlen(*av)) == 0)
+		type = ST_PATTERN;
+	    else
 		goto bad;
-	    type = ST_PATTERN;
 	    break;
 	case 'f': /* from date */
 	    if (strncmp(*av, "from", strlen(*av)) != 0)
@@ -496,6 +502,9 @@ match_expr(head, log)
 	case ST_EXPR:
 	    matched = match_expr(sn->u.expr, log);
 	    break;
+	case ST_CWD:
+	    matched = strcmp(sn->u.cwd, log->cwd) == 0;
+	    break;
 	case ST_TTY:
 	    matched = strcmp(sn->u.tty, log->tty) == 0;
 	    break;
@@ -534,6 +543,31 @@ match_expr(head, log)
     return(matched);
 }
 
+static ssize_t
+sudo_getln(char **bufp, FILE *fp)
+{
+    char *buf;
+    size_t bufsize = BUFSIZ;
+    ssize_t len, off = 0;
+
+    buf = emalloc(BUFSIZ);
+    for (;;) {
+	if (fgets(buf + off, bufsize - off, fp) == NULL) {
+	    efree(buf);
+	    buf = NULL;
+	    len = -1;
+	    break;
+	}
+	len = strlen(buf);
+	if (!len || buf[len - 1] == '\n' || feof(fp))
+	    break;
+	bufsize *= 2;
+	buf = erealloc(buf, bufsize);
+    }
+    *bufp = buf;
+    return(len);
+}
+
 static int
 list_session_dir(pathbuf, re, user, tty)
     char *pathbuf;
@@ -544,8 +578,9 @@ list_session_dir(pathbuf, re, user, tty)
     FILE *fp;
     DIR *d;
     struct dirent *dp;
-    char buf[BUFSIZ], cmdbuf[BUFSIZ], idstr[7], *cp;
+    char *buf, *cmd, *cwd, idstr[7], *cp;
     struct log_info li;
+    ssize_t len;
     int plen;
 
     plen = strlen(pathbuf);
@@ -570,14 +605,21 @@ list_session_dir(pathbuf, re, user, tty)
 	    continue;
 	}
 	/*
-	 * ID file has two lines, a log info line followed by a command line.
+	 * ID file has three lines:
+	 *  1) a log info line
+	 *  2) cwd
+	 *  3) command with args
 	 */
-	/* XXX - BUFSIZ might not be enough, implement getline? */
-	if (!fgets(buf, sizeof(buf), fp) || !fgets(cmdbuf, sizeof(cmdbuf), fp)) {
-	    fclose(fp);
+	sudo_getln(&buf, fp);
+	sudo_getln(&cwd, fp);
+	sudo_getln(&cmd, fp);
+	fclose(fp);
+	if (buf == NULL || cwd == NULL || cmd == NULL) {
+	    efree(buf);
+	    efree(cwd);
+	    efree(cmd);
 	    continue;
 	}
-	fclose(fp);
 
 	/* crack the log line: timestamp:user:runas_user:runas_group:tty */
 	buf[strcspn(buf, "\n")] = '\0';
@@ -604,8 +646,11 @@ list_session_dir(pathbuf, re, user, tty)
 	*cp++ = '\0';
 	li.tty = cp;
 
-	cmdbuf[strcspn(cmdbuf, "\n")] = '\0';
-	li.cmd = cmdbuf;
+	cwd[strcspn(cwd, "\n")] = '\0';
+	li.cwd = cwd;
+
+	cmd[strcspn(cmd, "\n")] = '\0';
+	li.cmd = cmd;
 
 	/* Match on search expression if there is one. */
 	if (search_expr && !match_expr(search_expr, &li))
@@ -620,6 +665,9 @@ list_session_dir(pathbuf, re, user, tty)
 	idstr[5] = pathbuf[plen + 2];
 	idstr[6] = '\0';
 	/* XXX - better format (timestamp?) */
+	/*
+	Sep 14 17:10:28 core sudo:  millert : TTY=ttyp9 ; PWD=/home/anoncvs/www/htdocs/torrentflux/downloads/millert ; USER=root ; COMMAND=/bin/rm mad.men.s03e04.720p.hdtv.x264-ctu.mkv
+	*/
 	printf("%s: %s %ld (%s:%s) %s\n", idstr, li.user, (long)li.tstamp,
 	    li.runas_user, li.runas_group, li.cmd);
     }
