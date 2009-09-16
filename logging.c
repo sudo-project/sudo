@@ -65,7 +65,6 @@ static void do_syslog		__P((int, char *));
 static void do_logfile		__P((char *));
 static void send_mail		__P((char *));
 static int should_mail		__P((int));
-static char *get_timestr	__P((void));
 static void mysyslog		__P((int, const char *, ...));
 static char *new_logline	__P((const char *, int));
 
@@ -201,17 +200,17 @@ do_logfile(msg)
 	if (def_loglinelen == 0) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
 	    if (def_log_host)
-		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n", get_timestr(),
-		    user_name, user_shost, msg);
+		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n",
+		    get_timestr(def_log_year), user_name, user_shost, msg);
 	    else
-		(void) fprintf(fp, "%s : %s : %s\n", get_timestr(),
+		(void) fprintf(fp, "%s : %s : %s\n", get_timestr(def_log_year),
 		    user_name, msg);
 	} else {
 	    if (def_log_host)
-		easprintf(&full_line, "%s : %s : HOST=%s : %s", get_timestr(),
-		    user_name, user_shost, msg);
+		easprintf(&full_line, "%s : %s : HOST=%s : %s",
+		    get_timestr(def_log_year), user_name, user_shost, msg);
 	    else
-		easprintf(&full_line, "%s : %s : %s", get_timestr(),
+		easprintf(&full_line, "%s : %s : %s", get_timestr(def_log_year),
 		    user_name, msg);
 
 	    /*
@@ -591,7 +590,7 @@ send_mail(line)
 	    (void) fputc(*p, mail);
     }
     (void) fprintf(mail, "\n\n%s : %s : %s : %s\n\n", user_host,
-	get_timestr(), user_name, line);
+	get_timestr(def_log_year), user_name, line);
     fclose(mail);
     do {
 #ifdef HAVE_WAITPID
@@ -615,41 +614,6 @@ should_mail(status)
 	(def_mail_no_user && ISSET(status, FLAG_NO_USER)) ||
 	(def_mail_no_host && ISSET(status, FLAG_NO_HOST)) ||
 	(def_mail_no_perms && !ISSET(status, VALIDATE_OK)));
-}
-
-/*
- * Return an ascii string with the current date + time
- * Uses strftime() if available, else falls back to ctime().
- */
-static char *
-get_timestr()
-{
-    char *s;
-    time_t now = time((time_t) 0);
-#ifdef HAVE_STRFTIME
-    static char buf[128];
-    struct tm *timeptr;
-
-    timeptr = localtime(&now);
-    if (def_log_year)
-	s = "%h %e %T %Y";
-    else
-	s = "%h %e %T";
-
-    /* strftime() does not guarantee to NUL-terminate so we must check. */
-    buf[sizeof(buf) - 1] = '\0';
-    if (strftime(buf, sizeof(buf), s, timeptr) && buf[sizeof(buf) - 1] == '\0')
-	return(buf);
-
-#endif /* HAVE_STRFTIME */
-
-    s = ctime(&now) + 4;		/* skip day of the week */
-    if (def_log_year)
-	s[20] = '\0';			/* avoid the newline */
-    else
-	s[15] = '\0';			/* don't care about year */
-
-    return(s);
 }
 
 #define	LL_TTY_STR	"TTY="

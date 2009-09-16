@@ -334,6 +334,7 @@ int term_copy __P((int, int));
 int term_noecho __P((int));
 int term_raw __P((int));
 int term_restore __P((int));
+char *get_timestr __P((int));
 YY_DECL;
 
 /* Only provide extern declarations outside of sudo.c. */
