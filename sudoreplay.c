@@ -154,6 +154,7 @@ extern char *get_timestr __P((time_t, int));
 
 static int list_sessions __P((int, char **, const char *, const char *, const char *));
 static int parse_expr __P((struct search_node **, char **));
+static ssize_t sudo_getln __P((char **, size_t *, FILE *));
 static void delay __P((double));
 static void usage __P((void));
 
@@ -260,10 +261,12 @@ main(argc, argv)
     if (lfile == NULL)
 	error(1, "unable to open %s", path);
 
-    if (!fgets(buf, sizeof(buf), lfile) || !fgets(buf, sizeof(buf), lfile))
-	errorx(1, "incomplete log file: %s", path);
+    sudo_getln(&cp, &len, lfile); /* log */
+    sudo_getln(&cp, &len, lfile); /* cwd */
+    sudo_getln(&cp, &len, lfile); /* command */
+    printf("Replaying sudo session: %s", cp);
+    free(cp);
     fclose(lfile);
-    printf("Replaying sudo session: %s", buf);
 
     /*
      * Timing file consists of line of the format: "%f %d\n"
@@ -546,17 +549,29 @@ match_expr(head, log)
 }
 
 static ssize_t
-sudo_getln(char **bufp, FILE *fp)
+sudo_getln(bufp, bufsizep, fp)
+    char **bufp;
+    size_t *bufsizep;
+    FILE *fp;
 {
     char *buf;
-    size_t bufsize = BUFSIZ;
+    size_t bufsize;
     ssize_t len = 0;
 
-    buf = emalloc(BUFSIZ);
+    if (*bufp == NULL) {
+	buf = emalloc(BUFSIZ);
+	bufsize = BUFSIZ;
+    } else {
+	buf = *bufp;
+	bufsize = *bufsizep;
+	if (!bufsize) {
+	    buf = erealloc(buf, BUFSIZ);
+	    bufsize = BUFSIZ;
+	}
+    }
+
     for (;;) {
 	if (fgets(buf + len, bufsize - len, fp) == NULL) {
-	    efree(buf);
-	    buf = NULL;
 	    len = -1;
 	    break;
 	}
@@ -567,6 +582,8 @@ sudo_getln(char **bufp, FILE *fp)
 	buf = erealloc(buf, bufsize);
     }
     *bufp = buf;
+    if (bufsizep)
+	*bufsizep = bufsize;
     return(len);
 }
 
@@ -580,7 +597,7 @@ list_session_dir(pathbuf, re, user, tty)
     FILE *fp;
     DIR *d;
     struct dirent *dp;
-    char *buf, *cmd, *cwd, idstr[7], *cp;
+    char *buf = NULL, *cmd = NULL, *cwd = NULL, idstr[7], *cp;
     struct log_info li;
     int plen;
 
@@ -611,9 +628,9 @@ list_session_dir(pathbuf, re, user, tty)
 	 *  2) cwd
 	 *  3) command with args
 	 */
-	sudo_getln(&buf, fp);
-	sudo_getln(&cwd, fp);
-	sudo_getln(&cmd, fp);
+	sudo_getln(&buf, NULL, fp);
+	sudo_getln(&cwd, NULL, fp);
+	sudo_getln(&cmd, NULL, fp);
 	fclose(fp);
 	if (buf == NULL || cwd == NULL || cmd == NULL) {
 	    efree(buf);
