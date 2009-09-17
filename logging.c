@@ -197,21 +197,24 @@ do_logfile(msg)
 	send_mail(full_line);
 	efree(full_line);
     } else {
+	time_t now;
+
+	now = time(NULL);
 	if (def_loglinelen == 0) {
 	    /* Don't pretty-print long log file lines (hard to grep) */
 	    if (def_log_host)
 		(void) fprintf(fp, "%s : %s : HOST=%s : %s\n",
-		    get_timestr(def_log_year), user_name, user_shost, msg);
+		    get_timestr(now, def_log_year), user_name, user_shost, msg);
 	    else
-		(void) fprintf(fp, "%s : %s : %s\n", get_timestr(def_log_year),
-		    user_name, msg);
+		(void) fprintf(fp, "%s : %s : %s\n",
+		    get_timestr(now, def_log_year), user_name, msg);
 	} else {
 	    if (def_log_host)
 		easprintf(&full_line, "%s : %s : HOST=%s : %s",
-		    get_timestr(def_log_year), user_name, user_shost, msg);
+		    get_timestr(now, def_log_year), user_name, user_shost, msg);
 	    else
-		easprintf(&full_line, "%s : %s : %s", get_timestr(def_log_year),
-		    user_name, msg);
+		easprintf(&full_line, "%s : %s : %s",
+		    get_timestr(now, def_log_year), user_name, msg);
 
 	    /*
 	     * Print out full_line with word wrap
@@ -590,7 +593,7 @@ send_mail(line)
 	    (void) fputc(*p, mail);
     }
     (void) fprintf(mail, "\n\n%s : %s : %s : %s\n\n", user_host,
-	get_timestr(def_log_year), user_name, line);
+	get_timestr(time(NULL), def_log_year), user_name, line);
     fclose(mail);
     do {
 #ifdef HAVE_WAITPID

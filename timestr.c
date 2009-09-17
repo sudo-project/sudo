@@ -34,23 +34,23 @@
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-char *get_timestr	__P((int));
+char *get_timestr	__P((time_t, int));
 
 /*
  * Return an ascii string with the current date + time
  * Uses strftime() if available, else falls back to ctime().
  */
 char *
-get_timestr(log_year)
+get_timestr(tstamp, log_year)
+    time_t tstamp;
     int log_year;
 {
     char *s;
-    time_t now = time((time_t) 0);
 #ifdef HAVE_STRFTIME
     static char buf[128];
     struct tm *timeptr;
 
-    timeptr = localtime(&now);
+    timeptr = localtime(&tstamp);
     if (log_year)
 	s = "%h %e %T %Y";
     else
@@ -63,7 +63,7 @@ get_timestr(log_year)
 
 #endif /* HAVE_STRFTIME */
 
-    s = ctime(&now) + 4;		/* skip day of the week */
+    s = ctime(&tstamp) + 4;		/* skip day of the week */
     if (log_year)
 	s[20] = '\0';			/* avoid the newline */
     else
