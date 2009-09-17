@@ -459,8 +459,14 @@ script_execv(path, argv)
 	(void) fcntl(STDIN_FILENO, F_SETFL, n);
     }
     if (output.len > output.off) {
-	write(STDOUT_FILENO, output.buf + output.off, output.len - output.off);
-	fwrite(output.buf + output.off, 1, output.len - output.off, ofile);
+	n = output.len - output.off;
+	write(STDOUT_FILENO, output.buf + output.off, n);
+	fwrite(output.buf + output.off, 1, n, ofile);
+	timersub(&now, &prevtime, &tv);
+	fprintf(tfile, "%f %d\n",
+	    tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
+	prevtime.tv_sec = now.tv_sec;
+	prevtime.tv_usec = now.tv_usec;
     }
     for (;;) {
 	n = read(script_fds[SFD_MASTER], output.buf, sizeof(output.buf));
@@ -468,6 +474,11 @@ script_execv(path, argv)
 	    break;
 	write(STDOUT_FILENO, output.buf, n);
 	fwrite(output.buf, 1, n, ofile);
+	timersub(&now, &prevtime, &tv);
+	fprintf(tfile, "%f %d\n",
+	    tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
+	prevtime.tv_sec = now.tv_sec;
+	prevtime.tv_usec = now.tv_usec;
     }
     term_restore(STDIN_FILENO);
 
