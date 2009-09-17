@@ -112,12 +112,24 @@ fdcompar(v1, v2)
 void
 script_nextid()
 {
+    struct stat sb;
     char buf[32], *ep;
     int fd, i, ch;
     unsigned long id = 0;
     int len;
     ssize_t nread;
     char pathbuf[PATH_MAX];
+
+    /*
+     * Create _PATH_SUDO_SESSDIR if it doesn't already exist.
+     */
+    if (stat(_PATH_SUDO_SESSDIR, &sb) != 0) {
+	if (mkdir(_PATH_SUDO_SESSDIR, S_IRWXU) != 0)
+	    log_error(USE_ERRNO, "Can't mkdir %s", _PATH_SUDO_SESSDIR);
+    } else if (!S_ISDIR(sb.st_mode)) {
+	log_error(0, "%s exists but is not a directory (0%o)",
+	    _PATH_SUDO_SESSDIR, (unsigned int) sb.st_mode);
+    }
 
     /*
      * Open sequence file
@@ -205,7 +217,6 @@ build_idpath(pathbuf)
 void
 script_setup()
 {
-    struct stat sb;
     char pathbuf[PATH_MAX];
     int len;
 
@@ -223,17 +234,6 @@ script_setup()
 
     if (!term_raw(STDIN_FILENO))
 	log_error(USE_ERRNO, "Can't set terminal to raw mode");
-
-    /*
-     * Create _PATH_SUDO_SESSDIR if it doesn't already exist.
-     */
-    if (stat(_PATH_SUDO_SESSDIR, &sb) != 0) {
-	if (mkdir(_PATH_SUDO_SESSDIR, S_IRWXU) != 0)
-	    log_error(USE_ERRNO, "Can't mkdir %s", _PATH_SUDO_SESSDIR);
-    } else if (!S_ISDIR(sb.st_mode)) {
-	log_error(0, "%s exists but is not a directory (0%o)",
-	    _PATH_SUDO_SESSDIR, (unsigned int) sb.st_mode);
-    }
 
     /*
      * Build a path containing the session id split into two-digit subdirs,
