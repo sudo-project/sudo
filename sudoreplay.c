@@ -150,6 +150,7 @@ extern void *emalloc __P((size_t));
 extern void *erealloc __P((void *, size_t));
 extern void efree __P((void *));
 extern time_t get_date __P((char *));
+extern char *get_timestr __P((time_t, int));
 
 static int list_sessions __P((int, char **, const char *, const char *, const char *));
 static int parse_expr __P((struct search_node **, char **));
@@ -664,12 +665,11 @@ list_session_dir(pathbuf, re, user, tty)
 	idstr[4] = pathbuf[plen + 1];
 	idstr[5] = pathbuf[plen + 2];
 	idstr[6] = '\0';
-	/* XXX - better format (timestamp?) */
-	/*
-	Sep 14 17:10:28 core sudo:  millert : TTY=ttyp9 ; PWD=/home/anoncvs/www/htdocs/torrentflux/downloads/millert ; USER=root ; COMMAND=/bin/rm mad.men.s03e04.720p.hdtv.x264-ctu.mkv
-	*/
-	printf("%s: %s %ld (%s:%s) %s\n", idstr, li.user, (long)li.tstamp,
-	    li.runas_user, li.runas_group, li.cmd);
+	printf("%s : %s : TTY=%s ; CWD=%s ; USER=%s ; ",
+	    get_timestr(li.tstamp, 0), li.user, li.tty, li.cwd, li.runas_user);
+	if (*li.runas_group)
+	    printf("GROUP=%s ; ", li.runas_group);
+	printf("TSID=%s ; COMMAND=%s\n", idstr, li.cmd);
     }
     return(0);
 }
