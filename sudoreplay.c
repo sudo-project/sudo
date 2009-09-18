@@ -154,6 +154,12 @@ extern char *get_timestr __P((time_t, int));
 #ifndef HAVE_GETLINE
 extern ssize_t getline __P((char **, size_t *, FILE *));
 #endif
+#ifndef HAVE_STRLCPY
+extern size_t strlcpy __P((char *, const char *, size_t));
+#endif
+#ifndef HAVE_SNPRINTF
+int snprintf __P((char *, size_t, const char *, ...)) __printflike(3, 4);
+#endif
 
 static int list_sessions __P((int, char **, const char *, const char *, const char *));
 static int parse_expr __P((struct search_node **, char **));
