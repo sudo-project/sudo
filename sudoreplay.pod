@@ -66,6 +66,17 @@ On systems with POSIX regular expression support, the pattern may
 be an extended regular expression.  On systems without POSIX regular
 expression support, a simple substring match is performed instead.
 
+=item cwd I<directory>
+
+Evaluates to true if the command was run with the specified current
+working directory.
+
+=item fromdate I<date>
+
+Evaluates to true if the command was run on or after I<date>.
+See L<"Date and time format"> for a description of supported
+date and time formats.
+
 =item group I<runas_group>
 
 Evaluates to true if the command was run with the specified
@@ -76,6 +87,12 @@ specified when B<sudo> was run this field will be empty in the log.
 
 Evaluates to true if the command was run as the specified I<runas_user>.
 Note that B<sudo> runs commands as user I<root> by default.
+
+=item todate I<date>
+
+Evaluates to true if the command was run on or prior to I<date>.
+See L<"Date and time format"> for a description of supported
+date and time formats.
 
 =item tty I<tty>
 
@@ -120,6 +137,66 @@ a I<speed_factor> of <.5> would make the output twice as slow.
 
 The B<-V> (version) option causes B<sudoreplay> to print its version number
 and exit.
+
+=back
+
+=head2 "Date and time format"
+
+The time and date may be specified multiple ways:
+
+=over 8
+
+=item HH:MM:SS am MM/DD/CCYY timezone
+
+Note that the date portion uses US format, regardless of locale.
+
+=item HH:MM:SS am Month, Day Year timezone
+
+The month and day names may be abbreviated.  Note that Month and
+Day of the week names must currently be specified in English.
+
+=item now
+
+The current time and date.
+
+=item tomorrow
+
+The current time but tomorrow's date.
+
+=item yesterday
+
+The current time but yesterday's date.
+
+=item next Friday
+
+The first second of the day, next Friday.
+
+=item this week
+
+The current time but the first day of the coming week.
+
+=back
+
+Either time or date may be omitted, the am/pm and timezone are
+optional.  If no date is specified, the current day is assumed; if
+no time is specified, the first second of the specified date is
+used.  The less significant parts of both time and date may also
+be omitted, in which case zero is assumed.  For example, the following
+are all valid:
+
+=over 8
+
+=item 10:01 am 9/17/2909
+
+=item 10:01 am
+
+=item 10
+
+=item 9/17/2009
+
+=item 10:01 am Sep 17, 2009
+
+=item Sep 17, 2009
 
 =back
 
