@@ -617,7 +617,7 @@ posix_openpt(oflag)
 #   endif
     return(fd);
 }
-#  endif HAVE_POSIX_OPENPT
+#  endif /* HAVE_POSIX_OPENPT */
 
 static int
 get_pty(master, slave)
