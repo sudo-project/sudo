@@ -151,10 +151,12 @@ extern void *erealloc __P((void *, size_t));
 extern void efree __P((void *));
 extern time_t get_date __P((char *));
 extern char *get_timestr __P((time_t, int));
+#ifndef HAVE_GETLINE
+extern ssize_t getline __P((char **, size_t *, FILE *));
+#endif
 
 static int list_sessions __P((int, char **, const char *, const char *, const char *));
 static int parse_expr __P((struct search_node **, char **));
-static ssize_t sudo_getln __P((char **, size_t *, FILE *));
 static void delay __P((double));
 static void usage __P((void));
 
@@ -167,23 +169,14 @@ static void usage __P((void));
 #define VALID_ID(s) (isalnum((s)[0]) && isalnum((s)[1]) && isalnum((s)[2]) && \
     isalnum((s)[3]) && isalnum((s)[4]) && isalnum((s)[5]) && (s)[6] == '\0')
 
-/*
- * TODO:
- *  add find-like search language?
- *  timestamp option? (begin,end)
- */
-
 int
 main(argc, argv)
     int argc;
     char **argv;
 {
-    int ch, plen;
-    int listonly = 0;
-    char path[PATH_MAX];
-    char buf[BUFSIZ];
-    const char *user = NULL, *id, *pattern = NULL, *tty = NULL;
-    char *cp, *ep;
+    int ch, plen, listonly = 0;
+    const char *id, *user = NULL, *pattern = NULL, *tty = NULL;
+    char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     FILE *tfile, *sfile, *lfile;
     double seconds;
     unsigned long nbytes;
@@ -261,9 +254,10 @@ main(argc, argv)
     if (lfile == NULL)
 	error(1, "unable to open %s", path);
 
-    sudo_getln(&cp, &len, lfile); /* log */
-    sudo_getln(&cp, &len, lfile); /* cwd */
-    sudo_getln(&cp, &len, lfile); /* command */
+    cp = NULL;
+    getline(&cp, &len, lfile); /* log */
+    getline(&cp, &len, lfile); /* cwd */
+    getline(&cp, &len, lfile); /* command */
     printf("Replaying sudo session: %s", cp);
     free(cp);
     fclose(lfile);
@@ -363,8 +357,7 @@ parse_expr(headp, argv)
     char **argv;
 {
     struct search_node *sn, *newsn;
-    char or = 0, not = 0, type;
-    char **av;
+    char or = 0, not = 0, type, **av;
 
     sn = *headp;
     for (av = argv; *av; av++) {
@@ -499,7 +492,7 @@ match_expr(head, log)
     int matched = 1, rc;
 
     for (sn = head; sn; sn = sn->next) {
-	/* If we have no match, skip up to the next OR entry. */
+	/* If we have no match, skip ahead to the next OR entry. */
 	if (!matched && !sn->or)
 	    continue;
 
@@ -548,45 +541,6 @@ match_expr(head, log)
     return(matched);
 }
 
-static ssize_t
-sudo_getln(bufp, bufsizep, fp)
-    char **bufp;
-    size_t *bufsizep;
-    FILE *fp;
-{
-    char *buf;
-    size_t bufsize;
-    ssize_t len = 0;
-
-    if (*bufp == NULL) {
-	buf = emalloc(BUFSIZ);
-	bufsize = BUFSIZ;
-    } else {
-	buf = *bufp;
-	bufsize = *bufsizep;
-	if (!bufsize) {
-	    buf = erealloc(buf, BUFSIZ);
-	    bufsize = BUFSIZ;
-	}
-    }
-
-    for (;;) {
-	if (fgets(buf + len, bufsize - len, fp) == NULL) {
-	    len = -1;
-	    break;
-	}
-	len = strlen(buf);
-	if (!len || buf[len - 1] == '\n' || feof(fp))
-	    break;
-	bufsize *= 2;
-	buf = erealloc(buf, bufsize);
-    }
-    *bufp = buf;
-    if (bufsizep)
-	*bufsizep = bufsize;
-    return(len);
-}
-
 static int
 list_session_dir(pathbuf, re, user, tty)
     char *pathbuf;
@@ -599,7 +553,7 @@ list_session_dir(pathbuf, re, user, tty)
     struct dirent *dp;
     char *buf = NULL, *cmd = NULL, *cwd = NULL, idstr[7], *cp;
     struct log_info li;
-    int plen;
+    size_t bufsize = 0, cwdsize = 0, cmdsize = 0, plen;
 
     plen = strlen(pathbuf);
     d = opendir(pathbuf);
@@ -622,22 +576,20 @@ list_session_dir(pathbuf, re, user, tty)
 	    warning("unable to open %s", pathbuf);
 	    continue;
 	}
+
 	/*
 	 * ID file has three lines:
 	 *  1) a log info line
 	 *  2) cwd
 	 *  3) command with args
 	 */
-	sudo_getln(&buf, NULL, fp);
-	sudo_getln(&cwd, NULL, fp);
-	sudo_getln(&cmd, NULL, fp);
-	fclose(fp);
-	if (buf == NULL || cwd == NULL || cmd == NULL) {
-	    efree(buf);
-	    efree(cwd);
-	    efree(cmd);
+	if (getline(&buf, &bufsize, fp) == -1 ||
+	    getline(&cwd, &cwdsize, fp) == -1 ||
+	    getline(&cmd, &cmdsize, fp)) {
+	    fclose(fp);
 	    continue;
 	}
+	fclose(fp);
 
 	/* crack the log line: timestamp:user:runas_user:runas_group:tty */
 	buf[strcspn(buf, "\n")] = '\0';

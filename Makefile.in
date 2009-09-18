@@ -110,8 +110,8 @@ SRCS = aix.c alias.c alloc.c audit.c bsm_audit.c check.c closefrom.c \
        snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c sudo.c \
        sudo_noexec.c sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c \
        toke.c toke.l tsgetgrpw.c utimes.c vasgroups.c visudo.c zero_bytes.c \
-       redblack.c selinux.c sesh.c sudoreplay.c getdate.c getdate.y timestr.c \
-       $(AUTH_SRCS)
+       redblack.c selinux.c sesh.c sudoreplay.c getdate.c getdate.y getline.c \
+       timestr.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -139,7 +139,7 @@ SUDO_OBJS = $(COMMON_OBJS) $(AUTH_OBJS) @SUDO_OBJS@ audit.o check.o env.o \
 VISUDO_OBJS = $(COMMON_OBJS) visudo.o fileops.o gettime.o goodpath.o \
 	      find_path.o pwutil.o
 
-REPLAY_OBJS = sudoreplay.o error.o alloc.o getdate.o timestr.o
+REPLAY_OBJS = alloc.o error.o getdate.o getline.o sudoreplay.o timestr.o
 
 TEST_OBJS = $(COMMON_OBJS) interfaces.o testsudoers.o tsgetgrpw.o tspwutil.o
 
@@ -266,6 +266,8 @@ getcwd.o: $(srcdir)/getcwd.c $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getcwd.c
 getdate.o: $(srcdir)/getdate.c config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getdate.c
+getline.o: $(srcdir)/getline.c config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getline.c
 getprogname.o: $(srcdir)/getprogname.c config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getprogname.c
 getspwuid.o: $(srcdir)/getspwuid.c $(SUDODEP)

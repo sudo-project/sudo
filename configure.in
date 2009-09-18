@@ -1834,7 +1834,7 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS(dup2 strchr strrchr memchr memcpy memset sysconf tzset \
+AC_CHECK_FUNCS(dup2 strchr strrchr memchr memcpy memset sysconf tzset getline \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
 	       regcomp setlocale getaddrinfo setsid setenv vhangup nanosleep)
 AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(util.h pty.h, [break])], [
