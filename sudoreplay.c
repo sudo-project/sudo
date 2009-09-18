@@ -585,7 +585,7 @@ list_session_dir(pathbuf, re, user, tty)
 	 */
 	if (getline(&buf, &bufsize, fp) == -1 ||
 	    getline(&cwd, &cwdsize, fp) == -1 ||
-	    getline(&cmd, &cmdsize, fp)) {
+	    getline(&cmd, &cmdsize, fp) == -1) {
 	    fclose(fp);
 	    continue;
 	}
