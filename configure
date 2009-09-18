@@ -15833,7 +15833,7 @@ LIBS=$ac_save_LIBS
 
 for ac_func in dup2 strchr strrchr memchr memcpy memset sysconf tzset getline \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
-	       regcomp setlocale getaddrinfo setsid setenv vhangup nanosleep
+	       regcomp setlocale getaddrinfo setsid setenv vhangup nanosleep \
 	       fgetln
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
