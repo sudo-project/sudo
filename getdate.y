@@ -40,6 +40,8 @@
 #endif
 #include <ctype.h>
 
+#include "compat.h"
+
 
 #define EPOCH		1970
 #define HOUR(x)		((time_t)(x) * 60)
