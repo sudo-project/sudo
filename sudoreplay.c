@@ -635,7 +635,7 @@ list_session_dir(pathbuf, re, user, tty)
 	idstr[5] = pathbuf[plen + 2];
 	idstr[6] = '\0';
 	printf("%s : %s : TTY=%s ; CWD=%s ; USER=%s ; ",
-	    get_timestr(li.tstamp, 0), li.user, li.tty, li.cwd, li.runas_user);
+	    get_timestr(li.tstamp, 1), li.user, li.tty, li.cwd, li.runas_user);
 	if (*li.runas_group)
 	    printf("GROUP=%s ; ", li.runas_group);
 	printf("TSID=%s ; COMMAND=%s\n", idstr, li.cmd);
