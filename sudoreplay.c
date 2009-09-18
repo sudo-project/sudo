@@ -285,7 +285,7 @@ main(argc, argv)
 
 	/* Adjust delay using speed factor and clamp to max_wait */
 	to_wait = seconds / speed;
-	if (to_wait > max_wait)
+	if (max_wait && to_wait > max_wait)
 	    to_wait = max_wait;
 	delay(to_wait);
 
