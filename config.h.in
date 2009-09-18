@@ -110,6 +110,9 @@
 /* Define to 1 if your system has the F_CLOSEM fcntl. */
 #undef HAVE_FCNTL_CLOSEM
 
+/* Define to 1 if you have the `fgetln' function. */
+#undef HAVE_FGETLN
+
 /* Define to 1 if you have the `flock' function. */
 #undef HAVE_FLOCK
 

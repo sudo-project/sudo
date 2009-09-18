@@ -42,6 +42,31 @@
 
 extern void *erealloc __P((void *, size_t));
 
+#ifdef HAVE_FGETLN
+ssize_t
+getline(bufp, bufsizep, fp)
+    char **bufp;
+    size_t *bufsizep;
+    FILE *fp;
+{
+    char *buf;
+    size_t bufsize;
+    size_t len;
+
+    buf = fgetln(fp, &len);
+    if (buf) {
+	bufsize = *bufp ? *bufsizep : 0;
+	if (bufsize < len + 1) {
+	    bufsize = len + 1;
+	    *bufp = erealloc(*bufp, bufsize);
+	    *bufsizep = bufsize;
+	}
+	memcpy(*bufp, buf, len);
+	(*bufp)[len] = '\0';
+    }
+    return(buf ? len : -1);
+}
+#else
 ssize_t
 getline(bufp, bufsizep, fp)
     char **bufp;
@@ -74,3 +99,4 @@ getline(bufp, bufsizep, fp)
     *bufsizep = bufsize;
     return(len);
 }
+#endif
