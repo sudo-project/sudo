@@ -314,12 +314,12 @@ nanosleep(ts, rts)
     int rval;
 
     timeout.tv_sec = ts->tv_sec;
-    timeout.tv_usec = ts->tv_nsecs / 1000;
+    timeout.tv_usec = ts->tv_nsec / 1000;
     if (rts != NULL) {
 	gettimeofday(&endtime, NULL);
 	timeradd(&endtime, &timeout, &endtime);
     }
-    rval = select(NULL, NULL, NULL, &timeout);
+    rval = select(0, NULL, NULL, NULL, &timeout);
     if (rts != NULL && rval == -1 && errno == EINTR) {
 	gettimeofday(&now, NULL);
 	timersub(&endtime, &now, &timeout);
