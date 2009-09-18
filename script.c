@@ -290,6 +290,26 @@ script_duplow(fd)
     return(fd);
 }
 
+/* Update output and timing files. */
+static void
+log_output(output, n, then, now, ofile, tfile)
+    struct script_buf *output;
+    int n;
+    struct timeval *then;
+    struct timeval *now;
+    FILE *ofile;
+    FILE *tfile;
+{
+    struct timeval tv;
+
+    fwrite(output->buf + output->off, 1, n, ofile);
+    timersub(now, then, &tv);
+    fprintf(tfile, "%f %d\n",
+	tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
+    then->tv_sec = now->tv_sec;
+    then->tv_usec = now->tv_usec;
+}
+
 int
 script_execv(path, argv)
     const char *path;
@@ -298,7 +318,7 @@ script_execv(path, argv)
     int n, nready;
     fd_set *fdsr, *fdsw;
     struct script_buf input, output;
-    struct timeval now, prevtime, tv;
+    struct timeval now, then;
     sigaction_t sa;
     FILE *idfile, *ofile, *tfile;
 
@@ -328,10 +348,10 @@ script_execv(path, argv)
     sa.sa_flags = SA_RESTART;
     sigaction(SIGWINCH, &sa, NULL);
 
-    gettimeofday(&prevtime, NULL);
+    gettimeofday(&then, NULL);
 
     /* XXX - log more stuff? environment too? */
-    fprintf(idfile, "%ld:%s:%s:%s:%s\n", prevtime.tv_sec, user_name,
+    fprintf(idfile, "%ld:%s:%s:%s:%s\n", then.tv_sec, user_name,
 	runas_pw->pw_name, runas_gr ? runas_gr->gr_name : "", user_tty);
     fprintf(idfile, "%s\n", user_cwd);
     fprintf(idfile, "%s%s%s\n", user_cmnd, user_args ? " " : "",
@@ -430,12 +450,7 @@ script_execv(path, argv)
 		output.len += n;
 
 		/* Update output and timing files. */
-		fwrite(output.buf + output.off, 1, n, ofile);
-		timersub(&now, &prevtime, &tv);
-		fprintf(tfile, "%f %d\n",
-		    tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
-		prevtime.tv_sec = now.tv_sec;
-		prevtime.tv_usec = now.tv_usec;
+		log_output(&output, n, &then, &now, ofile, tfile);
 	    }
 	}
 	if (FD_ISSET(STDOUT_FILENO, fdsw)) {
@@ -461,24 +476,15 @@ script_execv(path, argv)
     if (output.len > output.off) {
 	n = output.len - output.off;
 	write(STDOUT_FILENO, output.buf + output.off, n);
-	fwrite(output.buf + output.off, 1, n, ofile);
-	timersub(&now, &prevtime, &tv);
-	fprintf(tfile, "%f %d\n",
-	    tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
-	prevtime.tv_sec = now.tv_sec;
-	prevtime.tv_usec = now.tv_usec;
+	log_output(&output, n, &then, &now, ofile, tfile);
     }
     for (;;) {
+	output.off = 0;
 	n = read(script_fds[SFD_MASTER], output.buf, sizeof(output.buf));
 	if (n <= 0)
 	    break;
 	write(STDOUT_FILENO, output.buf, n);
-	fwrite(output.buf, 1, n, ofile);
-	timersub(&now, &prevtime, &tv);
-	fprintf(tfile, "%f %d\n",
-	    tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
-	prevtime.tv_sec = now.tv_sec;
-	prevtime.tv_usec = now.tv_usec;
+	log_output(&output, n, &then, &now, ofile, tfile);
     }
     term_restore(STDIN_FILENO);
 
