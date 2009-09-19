@@ -56,26 +56,6 @@
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-#ifdef MYPW
-extern void (*my_setgrent) __P((void));
-extern void (*my_endgrent) __P((void));
-extern struct group *(*my_getgrnam) __P((const char *));
-extern struct group *(*my_getgrgid) __P((gid_t));
-#define setgrent()	my_setgrent()
-#define endgrent()	my_endgrent()
-#define getgrnam(n)	my_getgrnam(n)
-#define getgrgid(g)	my_getgrgid(g)
-
-extern void (*my_setpwent) __P((void));
-extern void (*my_endpwent) __P((void));
-extern struct passwd *(*my_getpwnam) __P((const char *));
-extern struct passwd *(*my_getpwuid) __P((uid_t));
-#define setpwent()	my_setpwent()
-#define endpwent()	my_endpwent()
-#define getpwnam(n)	my_getpwnam(n)
-#define getpwuid(u)	my_getpwuid(u)
-#endif
-
 /*
  * The passwd and group caches.
  */
