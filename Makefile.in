@@ -130,19 +130,18 @@ AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
 # Note: gram.o must come first here
 COMMON_OBJS = gram.o alias.o alloc.o defaults.o error.o list.o match.o \
-	      toke.o redblack.o zero_bytes.o @NONUNIX_GROUPS_IMPL@
+	      pwutil.o timestr.o toke.o redblack.o zero_bytes.o @NONUNIX_GROUPS_IMPL@
 
 SUDO_OBJS = $(AUTH_OBJS) @SUDO_OBJS@ audit.o check.o env.o \
 	    getspwuid.o gettime.o goodpath.o fileops.o find_path.o \
-	    interfaces.o lbuf.o logging.o parse.o pwutil.o script.o \
-	    set_perms.o sudo.o sudo_edit.o sudo_nss.o term.o tgetpass.o \
-	    timestr.o
+	    interfaces.o lbuf.o logging.o parse.o script.o \
+	    set_perms.o sudo.o sudo_edit.o sudo_nss.o term.o tgetpass.o
 
-VISUDO_OBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o pwutil.o
+VISUDO_OBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o
 
-REPLAY_OBJS = getdate.o sudoreplay.o timestr.o
+REPLAY_OBJS = getdate.o sudoreplay.o
 
-TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o tspwutil.o
+TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o
 
 LIB_OBJS = @LIBOBJS@
 
@@ -359,11 +358,6 @@ visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/visudo.c
 zero_bytes.o: $(srcdir)/zero_bytes.c $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/zero_bytes.c
-
-# Private copy of pwutil.o with MYPW defined for testsudoers
-tspwutil.o: $(srcdir)/pwutil.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) -DMYPW -o tspwutil.o $(srcdir)/pwutil.c
-
 sudo_auth.o: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/sudo_auth.c
 afs.o: $(authdir)/afs.c $(AUTHDEP)
