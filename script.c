@@ -480,9 +480,9 @@ script_execv(path, argv)
 	do {
 	    n = write(STDOUT_FILENO, output.buf + output.off,
 		output.len - output.off);
-	    if (n == -1)
+	    if (n <= 0)
 		break;
-	    output.len += n;
+	    output.off += n;
 	} while (output.len > output.off);
     }
     term_restore(STDIN_FILENO);
