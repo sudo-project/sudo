@@ -156,8 +156,8 @@ DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
 	    schema.ActiveDirectory schema.OpenLDAP schema.iPlanet sudo.cat \
 	    sudo.man.in sudo.pod sudo.psf sudo_usage.h.in sudoers sudoers.cat \
             sudoers.man.in sudoers.pod sudoers.ldap.cat sudoers.ldap.man.in \
-		sudoers.ldap.pod sudoers2ldif sudoreplay.cat sudoreplay.man.in \
-		sudoreplay.pod visudo.cat visudo.man.in visudo.pod auth/API
+	    sudoers.ldap.pod sudoers2ldif sudoreplay.cat sudoreplay.man.in \
+	    sudoreplay.pod visudo.cat visudo.man.in visudo.pod auth/API
 
 BINFILES= ChangeLog HISTORY LICENSE README TROUBLESHOOTING \
 	  UPGRADE install-sh mkinstalldirs sample.syslog.conf sample.sudoers \
@@ -200,7 +200,7 @@ sudo: libsudo.a $(SUDO_OBJS)
 visudo: libsudo.a $(VISUDO_OBJS)
 	$(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) -lsudo $(LIBS) $(NET_LIBS)
 
-sudoreplay: $(REPLAY_OBJS)
+sudoreplay: libsudo.a $(REPLAY_OBJS)
 	$(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) -lsudo $(LIBS)
 
 testsudoers: $(TEST_OBJS)
