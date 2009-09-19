@@ -386,7 +386,7 @@ script_execv(path, argv)
 	sizeof(fd_mask));
     zero_bytes(&input, sizeof(input));
     zero_bytes(&output, sizeof(output));
-    while (alive) {
+    for (;;) {
 	if (input.off == input.len)
 	    input.off = input.len = 0;
 	if (output.off == output.len)
@@ -394,14 +394,16 @@ script_execv(path, argv)
 
 	zero_bytes(fdsw, howmany(script_fds[SFD_MASTER] + 1, NFDBITS) * sizeof(fd_mask));
 	zero_bytes(fdsr, howmany(script_fds[SFD_MASTER] + 1, NFDBITS) * sizeof(fd_mask));
-	if (input.len != sizeof(input.buf))
-	    FD_SET(STDIN_FILENO, fdsr);
 	if (output.len != sizeof(output.buf))
 	    FD_SET(script_fds[SFD_MASTER], fdsr);
 	if (output.len > output.off)
 	    FD_SET(STDOUT_FILENO, fdsw);
-	if (input.len > input.off)
-	    FD_SET(script_fds[SFD_MASTER], fdsw);
+	if (alive) {
+	    if (input.len != sizeof(input.buf))
+		FD_SET(STDIN_FILENO, fdsr);
+	    if (input.len > input.off)
+		FD_SET(script_fds[SFD_MASTER], fdsw);
+	}
 
 	nready = select(script_fds[SFD_MASTER] + 1, fdsr, fdsw, NULL, NULL);
 	if (nready == -1) {
@@ -468,23 +470,20 @@ script_execv(path, argv)
     }
 
     /* Flush any remaining output. */
-    n = fcntl(STDIN_FILENO, F_GETFL, 0);
+    n = fcntl(STDOUT_FILENO, F_GETFL, 0);
     if (n != -1) {
 	n &= ~O_NONBLOCK;
-	(void) fcntl(STDIN_FILENO, F_SETFL, n);
+	(void) fcntl(STDOUT_FILENO, F_SETFL, n);
     }
     if (output.len > output.off) {
-	n = output.len - output.off;
-	write(STDOUT_FILENO, output.buf + output.off, n);
-	log_output(&output, n, &then, &now, ofile, tfile);
-    }
-    for (;;) {
-	output.off = 0;
-	n = read(script_fds[SFD_MASTER], output.buf, sizeof(output.buf));
-	if (n <= 0)
-	    break;
-	write(STDOUT_FILENO, output.buf, n);
-	log_output(&output, n, &then, &now, ofile, tfile);
+	log_output(&output, output.len - output.off, &then, &now, ofile, tfile);
+	do {
+	    n = write(STDOUT_FILENO, output.buf + output.off,
+		output.len - output.off);
+	    if (n == -1)
+		break;
+	    output.len += n;
+	} while (output.len > output.off);
     }
     term_restore(STDIN_FILENO);
 
