@@ -1834,10 +1834,14 @@ dnl
 dnl Function checks
 dnl
 AC_FUNC_GETGROUPS
-AC_CHECK_FUNCS(dup2 strchr strrchr memchr memcpy memset sysconf tzset getline \
+AC_CHECK_FUNCS(dup2 strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
-	       regcomp setlocale getaddrinfo setsid setenv vhangup nanosleep \
-	       fgetln)
+	       regcomp setlocale getaddrinfo setsid setenv vhangup nanosleep)
+AC_CHECK_FUNCS(getline, [], [
+    AC_LIBOBJ(getline)
+    AC_CHECK_FUNCS(fgetln)
+])
+
 AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(util.h pty.h, [break])], [
     AC_CHECK_LIB(util, openpty, [
 	AC_CHECK_HEADERS(util.h pty.h, [break])
