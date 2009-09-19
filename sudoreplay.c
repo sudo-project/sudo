@@ -160,6 +160,9 @@ extern size_t strlcpy __P((char *, const char *, size_t));
 #ifndef HAVE_SNPRINTF
 int snprintf __P((char *, size_t, const char *, ...)) __printflike(3, 4);
 #endif
+#ifndef HAVE_NANOSLEEP
+int nanosleep __P((const struct timespec *, struct timespec *));
+#endif
 
 static int list_sessions __P((int, char **, const char *, const char *, const char *));
 static int parse_expr __P((struct search_node **, char **));
@@ -309,32 +312,6 @@ main(argc, argv)
     }
     exit(0);
 }
-
-#ifndef HAVE_NANOSLEEP
-static int
-nanosleep(ts, rts)
-    const struct timespec *ts;
-    struct timespec *rts;
-{
-    struct timeval timeout, endtime, now;
-    int rval;
-
-    timeout.tv_sec = ts->tv_sec;
-    timeout.tv_usec = ts->tv_nsec / 1000;
-    if (rts != NULL) {
-	gettimeofday(&endtime, NULL);
-	timeradd(&endtime, &timeout, &endtime);
-    }
-    rval = select(0, NULL, NULL, NULL, &timeout);
-    if (rts != NULL && rval == -1 && errno == EINTR) {
-	gettimeofday(&now, NULL);
-	timersub(&endtime, &now, &timeout);
-	rts->tv_sec = timeout.tv_sec;
-	rts->tv_nsec = timeout.tv_usec * 1000;
-    }
-    return(rval);
-}
-#endif
 
 static void
 delay(secs)

@@ -108,12 +108,12 @@ SRCS = aix.c alias.c alloc.c audit.c bsm_audit.c check.c closefrom.c \
        def_data.c defaults.c env.c error.c fileops.c find_path.c fnmatch.c \
        getcwd.c getprogname.c getspwuid.c gettime.c glob.c goodpath.c gram.c \
        gram.y interfaces.c isblank.c lbuf.c ldap.c list.c logging.c match.c \
-       mkstemp.c memrchr.c parse.c pwutil.c script.c  set_perms.c sigaction.c \
-       snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c sudo.c \
-       sudo_noexec.c sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c \
-       toke.c toke.l tsgetgrpw.c utimes.c vasgroups.c visudo.c zero_bytes.c \
-       redblack.c selinux.c sesh.c sudoreplay.c getdate.c getdate.y getline.c \
-       timestr.c $(AUTH_SRCS)
+       mkstemp.c memrchr.c nanosleep.c parse.c pwutil.c script.c  set_perms.c \
+       sigaction.c snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c \
+       sudo.c sudo_noexec.c sudo_edit.c sudo_nss.c term.c testsudoers.c \
+       tgetpass.c toke.c toke.l tsgetgrpw.c utimes.c vasgroups.c visudo.c \
+       zero_bytes.c redblack.c selinux.c sesh.c sudoreplay.c getdate.c \
+       getdate.y getline.c timestr.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -269,7 +269,7 @@ fnmatch.o: $(srcdir)/fnmatch.c $(srcdir)/emul/fnmatch.h $(srcdir)/compat.h confi
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fnmatch.c
 getcwd.o: $(srcdir)/getcwd.c $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getcwd.c
-getdate.o: $(srcdir)/getdate.c config.h
+getdate.o: $(srcdir)/getdate.c $(srcdir)/compat.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getdate.c
 getline.o: $(srcdir)/getline.c config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getline.c
@@ -303,6 +303,8 @@ memrchr.o: $(srcdir)/memrchr.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/memrchr.c
 mkstemp.o: $(srcdir)/mkstemp.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mkstemp.c
+nanosleep.o: $(srcdir)/nanosleep.c $(srcdir)/compat.h config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/nanosleep.c
 parse.o: $(srcdir)/parse.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(devdir)/gram.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/parse.c
 pwutil.o: $(srcdir)/pwutil.c $(SUDODEP)

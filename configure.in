@@ -1836,7 +1836,7 @@ dnl
 AC_FUNC_GETGROUPS
 AC_CHECK_FUNCS(dup2 strchr strrchr memchr memcpy memset sysconf tzset \
 	       strftime setrlimit initgroups getgroups fstat gettimeofday \
-	       regcomp setlocale getaddrinfo setsid setenv vhangup nanosleep)
+	       regcomp setlocale getaddrinfo setsid setenv vhangup)
 AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
     AC_CHECK_FUNCS(fgetln)
@@ -1883,6 +1883,10 @@ AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_F
 SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)])
 SUDO_FUNC_ISBLANK
 AC_REPLACE_FUNCS(memrchr strerror strcasecmp sigaction strlcpy strlcat)
+AC_CHECK_FUNCS(nanosleep, [], [
+    # On Solaris, nanosleep is in librt
+    AC_CHECK_LIB(rt, nanosleep, [LIBS="${LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])
+])
 AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
     AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [],
 	[ #include <limits.h>
