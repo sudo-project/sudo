@@ -148,7 +148,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOREPLAY @mansectsu@"
-.TH SUDOREPLAY @mansectsu@ "September 13, 2009" "1.7.2" "MAINTENANCE COMMANDS"
+.TH SUDOREPLAY @mansectsu@ "September 19, 2009" "1.7.2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -192,6 +192,15 @@ Evaluates to true if the command run matches \fIcommand pattern\fR.
 On systems with \s-1POSIX\s0 regular expression support, the pattern may
 be an extended regular expression.  On systems without \s-1POSIX\s0 regular
 expression support, a simple substring match is performed instead.
+.IP "cwd \fIdirectory\fR" 8
+.IX Item "cwd directory"
+Evaluates to true if the command was run with the specified current
+working directory.
+.IP "fromdate \fIdate\fR" 8
+.IX Item "fromdate date"
+Evaluates to true if the command was run on or after \fIdate\fR.
+See \*(L"Date and time format\*(R" for a description of supported
+date and time formats.
 .IP "group \fIrunas_group\fR" 8
 .IX Item "group runas_group"
 Evaluates to true if the command was run with the specified
@@ -201,6 +210,11 @@ specified when \fBsudo\fR was run this field will be empty in the log.
 .IX Item "runas runas_user"
 Evaluates to true if the command was run as the specified \fIrunas_user\fR.
 Note that \fBsudo\fR runs commands as user \fIroot\fR by default.
+.IP "todate \fIdate\fR" 8
+.IX Item "todate date"
+Evaluates to true if the command was run on or prior to \fIdate\fR.
+See \*(L"Date and time format\*(R" for a description of supported
+date and time formats.
 .IP "tty \fItty\fR" 8
 .IX Item "tty tty"
 Evaluates to true if the command was run on the specified terminal
@@ -241,6 +255,68 @@ a \fIspeed_factor\fR of <.5> would make the output twice as slow.
 .IX Item "-V"
 The \fB\-V\fR (version) option causes \fBsudoreplay\fR to print its version number
 and exit.
+.Sh "Date and time format"
+.IX Subsection "Date and time format"
+The time and date may be specified multiple ways, common formats include:
+.IP "\s-1HH:MM:SS\s0 am \s-1MM/DD/CCYY\s0 timezone" 8
+.IX Item "HH:MM:SS am MM/DD/CCYY timezone"
+24 hour time may be used in place of am/pm.
+.IP "\s-1HH:MM:SS\s0 am Month, Day Year timezone" 8
+.IX Item "HH:MM:SS am Month, Day Year timezone"
+24 hour time may be used in place of am/pm, and month and day names
+may be abbreviated.  Note that month and day of the week names must
+be specified in English.
+.IP "CCYY-MM-DD \s-1HH:MM:SS\s0" 8
+.IX Item "CCYY-MM-DD HH:MM:SS"
+\&\s-1ISO\s0 time format
+.IP "\s-1DD\s0 Month \s-1CCYY\s0 \s-1HH:MM:SS\s0" 8
+.IX Item "DD Month CCYY HH:MM:SS"
+The month name may be abbreviated.
+.PP
+Either time or date may be omitted, the am/pm and timezone are
+optional.  If no date is specified, the current day is assumed; if
+no time is specified, the first second of the specified date is
+used.  The less significant parts of both time and date may also
+be omitted, in which case zero is assumed.  For example, the following
+are all valid:
+.PP
+The following are all valid time and date specifications:
+.IP "now" 8
+.IX Item "now"
+The current time and date.
+.IP "tomorrow" 8
+.IX Item "tomorrow"
+Exactly one day from now.
+.IP "yesterday" 8
+.IX Item "yesterday"
+24 hours ago.
+.IP "2 hours ago" 8
+.IX Item "2 hours ago"
+2 hours ago.
+.IP "next Friday" 8
+.IX Item "next Friday"
+The first second of the next Friday.
+.IP "this week" 8
+.IX Item "this week"
+The current time but the first day of the coming week.
+.IP "a fortnight ago" 8
+.IX Item "a fortnight ago"
+The current time but 14 days ago.
+.IP "10:01 am 9/17/2009" 8
+.IX Item "10:01 am 9/17/2009"
+10:01 am, September 17, 2009.
+.IP "10:01 am" 8
+.IX Item "10:01 am"
+10:01 am on the current day.
+.IP "10" 8
+.IX Item "10"
+10:00 am on the current day.
+.IP "9/17/2009" 8
+.IX Item "9/17/2009"
+00:00 am, September 17, 2009.
+.IP "10:01 am Sep 17, 2009" 8
+.IX Item "10:01 am Sep 17, 2009"
+10:01 am, September 17, 2009.
 .SH "FILES"
 .IX Header "FILES"
 .IP "\fI/var/log/sudo\-session\fR" 24

@@ -44,24 +44,24 @@ OOPPTTIIOONNSS
                            regular expression support, a simple substring
                            match is performed instead.
 
+                   cwd _d_i_r_e_c_t_o_r_y
+                           Evaluates to true if the command was run with the
+                           specified current working directory.
+
+                   fromdate _d_a_t_e
+                           Evaluates to true if the command was run on or
+                           after _d_a_t_e.  See "Date and time format" for a
+                           description of supported date and time formats.
+
                    group _r_u_n_a_s___g_r_o_u_p
                            Evaluates to true if the command was run with the
                            specified _r_u_n_a_s___g_r_o_u_p.  Note that unless a
                            _r_u_n_a_s___g_r_o_u_p was explicitly specified when ssuuddoo was
                            run this field will be empty in the log.
 
-                   runas _r_u_n_a_s___u_s_e_r
-                           Evaluates to true if the command was run as the
-                           specified _r_u_n_a_s___u_s_e_r.  Note that ssuuddoo runs commands
-                           as user _r_o_o_t by default.
-
-                   tty _t_t_y Evaluates to true if the command was run on the
-                           specified terminal device.  The _t_t_y should be
-                           specified without the _/_d_e_v_/ prefix, e.g.  _t_t_y_0_1
 
 
-
-1.7.2                   September 13, 2009                      1
+1.7.2                   September 19, 2009                      1
 
 
 
@@ -70,6 +70,19 @@ OOPPTTIIOONNSS
 SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
 
+                   runas _r_u_n_a_s___u_s_e_r
+                           Evaluates to true if the command was run as the
+                           specified _r_u_n_a_s___u_s_e_r.  Note that ssuuddoo runs commands
+                           as user _r_o_o_t by default.
+
+                   todate _d_a_t_e
+                           Evaluates to true if the command was run on or
+                           prior to _d_a_t_e.  See "Date and time format" for a
+                           description of supported date and time formats.
+
+                   tty _t_t_y Evaluates to true if the command was run on the
+                           specified terminal device.  The _t_t_y should be
+                           specified without the _/_d_e_v_/ prefix, e.g.  _t_t_y_0_1
                            instead of _/_d_e_v_/_t_t_y_0_1.
 
                    user _u_s_e_r_n_a_m_e
@@ -106,6 +119,92 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
        -V          The --VV (version) option causes ssuuddoorreeppllaayy to print its
                    version number and exit.
 
+       DDaattee aanndd ttiimmee ffoorrmmaatt
+
+       The time and date may be specified multiple ways, common formats
+       include:
+
+
+
+
+1.7.2                   September 19, 2009                      2
+
+
+
+
+
+SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
+
+
+       HH:MM:SS am MM/DD/CCYY timezone
+               24 hour time may be used in place of am/pm.
+
+       HH:MM:SS am Month, Day Year timezone
+               24 hour time may be used in place of am/pm, and month and day
+               names may be abbreviated.  Note that month and day of the week
+               names must be specified in English.
+
+       CCYY-MM-DD HH:MM:SS
+               ISO time format
+
+       DD Month CCYY HH:MM:SS
+               The month name may be abbreviated.
+
+       Either time or date may be omitted, the am/pm and timezone are
+       optional.  If no date is specified, the current day is assumed; if no
+       time is specified, the first second of the specified date is used.  The
+       less significant parts of both time and date may also be omitted, in
+       which case zero is assumed.  For example, the following are all valid:
+
+       The following are all valid time and date specifications:
+
+       now     The current time and date.
+
+       tomorrow
+               Exactly one day from now.
+
+       yesterday
+               24 hours ago.
+
+       2 hours ago
+               2 hours ago.
+
+       next Friday
+               The first second of the next Friday.
+
+       this week
+               The current time but the first day of the coming week.
+
+       a fortnight ago
+               The current time but 14 days ago.
+
+       10:01 am 9/17/2009
+               10:01 am, September 17, 2009.
+
+       10:01 am
+               10:01 am on the current day.
+
+       10      10:00 am on the current day.
+
+       9/17/2009
+               00:00 am, September 17, 2009.
+
+
+
+
+
+1.7.2                   September 19, 2009                      3
+
+
+
+
+
+SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
+
+
+       10:01 am Sep 17, 2009
+               10:01 am, September 17, 2009.
+
 FFIILLEESS
        _/_v_a_r_/_l_o_g_/_s_u_d_o_-_s_e_s_s_i_o_n   The default session directory.
 
@@ -124,17 +223,6 @@ EEXXAAMMPPLLEESS
         sudoreplay -l user millert
 
        List sessions run by user _b_o_b with a command containing the string vi:
-
-
-
-1.7.2                   September 13, 2009                      2
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
 
         sudoreplay -l user bob command vi
 
@@ -171,28 +259,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.7.2                   September 13, 2009                      3
+1.7.2                   September 19, 2009                      4
 
 

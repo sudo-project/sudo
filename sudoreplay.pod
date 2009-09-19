@@ -140,40 +140,29 @@ and exit.
 
 =back
 
-=head2 "Date and time format"
+=head2 Date and time format
 
-The time and date may be specified multiple ways:
+The time and date may be specified multiple ways, common formats include:
 
 =over 8
 
 =item HH:MM:SS am MM/DD/CCYY timezone
 
-Note that the date portion uses US format, regardless of locale.
+24 hour time may be used in place of am/pm.
 
 =item HH:MM:SS am Month, Day Year timezone
 
-The month and day names may be abbreviated.  Note that Month and
-Day of the week names must currently be specified in English.
+24 hour time may be used in place of am/pm, and month and day names
+may be abbreviated.  Note that month and day of the week names must
+be specified in English.
 
-=item now
+=item CCYY-MM-DD HH:MM:SS
 
-The current time and date.
+ISO time format
 
-=item tomorrow
+=item DD Month CCYY HH:MM:SS
 
-The current time but tomorrow's date.
-
-=item yesterday
-
-The current time but yesterday's date.
-
-=item next Friday
-
-The first second of the day, next Friday.
-
-=item this week
-
-The current time but the first day of the coming week.
+The month name may be abbreviated.
 
 =back
 
@@ -184,19 +173,57 @@ used.  The less significant parts of both time and date may also
 be omitted, in which case zero is assumed.  For example, the following
 are all valid:
 
+The following are all valid time and date specifications:
+
 =over 8
 
-=item 10:01 am 9/17/2909
+=item now
+
+The current time and date.
+
+=item tomorrow
+
+Exactly one day from now.
+
+=item yesterday
+
+24 hours ago.
+
+=item 2 hours ago
+
+2 hours ago.
+
+=item next Friday
+
+The first second of the next Friday.
+
+=item this week
+
+The current time but the first day of the coming week.
+
+=item a fortnight ago
+
+The current time but 14 days ago.
+
+=item 10:01 am 9/17/2009
+
+10:01 am, September 17, 2009.
 
 =item 10:01 am
 
+10:01 am on the current day.
+
 =item 10
+
+10:00 am on the current day.
 
 =item 9/17/2009
 
+00:00 am, September 17, 2009.
+
 =item 10:01 am Sep 17, 2009
 
-=item Sep 17, 2009
+10:01 am, September 17, 2009.
 
 =back
 
