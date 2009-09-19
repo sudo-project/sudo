@@ -187,6 +187,7 @@ main(argc, argv)
     double seconds;
     unsigned long nbytes;
     size_t len, nread;
+    ssize_t nwritten;
     double speed = 1.0;
     double max_wait = 0;
     double to_wait;
@@ -271,6 +272,7 @@ main(argc, argv)
     /*
      * Timing file consists of line of the format: "%f %d\n"
      */
+    fflush(stdout);
     while (fgets(buf, sizeof(buf), tfile) != NULL) {
 	errno = 0;
 	seconds = strtod(buf, &ep);
@@ -289,16 +291,20 @@ main(argc, argv)
 	    to_wait = max_wait;
 	delay(to_wait);
 
-	fflush(stdout);
 	while (nbytes != 0) {
 	    if (nbytes > sizeof(buf))
 		len = sizeof(buf);
 	    else
 		len = nbytes;
-	    /* XXX - read/write all of len */
 	    nread = fread(buf, 1, len, sfile);
-	    fwrite(buf, nread, 1, stdout);
 	    nbytes -= nread;
+	    do {
+		/* no stdio, must be unbuffered */
+		nwritten = write(STDOUT_FILENO, buf, nread);
+		if (nwritten == -1)
+		    error(1, "writing to standard output");
+		nread -= nwritten;
+	    } while (nread);
 	}
     }
     exit(0);
