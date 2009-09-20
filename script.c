@@ -386,7 +386,7 @@ script_execv(path, argv)
 	sizeof(fd_mask));
     zero_bytes(&input, sizeof(input));
     zero_bytes(&output, sizeof(output));
-    for (;;) {
+    while (alive) {
 	if (input.off == input.len)
 	    input.off = input.len = 0;
 	if (output.off == output.len)
@@ -394,16 +394,14 @@ script_execv(path, argv)
 
 	zero_bytes(fdsw, howmany(script_fds[SFD_MASTER] + 1, NFDBITS) * sizeof(fd_mask));
 	zero_bytes(fdsr, howmany(script_fds[SFD_MASTER] + 1, NFDBITS) * sizeof(fd_mask));
+	if (input.len != sizeof(input.buf))
+	    FD_SET(STDIN_FILENO, fdsr);
 	if (output.len != sizeof(output.buf))
 	    FD_SET(script_fds[SFD_MASTER], fdsr);
 	if (output.len > output.off)
 	    FD_SET(STDOUT_FILENO, fdsw);
-	if (alive) {
-	    if (input.len != sizeof(input.buf))
-		FD_SET(STDIN_FILENO, fdsr);
-	    if (input.len > input.off)
-		FD_SET(script_fds[SFD_MASTER], fdsw);
-	}
+	if (input.len > input.off)
+	    FD_SET(script_fds[SFD_MASTER], fdsw);
 
 	nready = select(script_fds[SFD_MASTER] + 1, fdsr, fdsw, NULL, NULL);
 	if (nready == -1) {
@@ -469,14 +467,28 @@ script_execv(path, argv)
 	}
     }
 
-    /* Flush any remaining output. */
+    /* Flush any remaining output to stdout (already updated output file). */
     n = fcntl(STDOUT_FILENO, F_GETFL, 0);
     if (n != -1) {
 	n &= ~O_NONBLOCK;
 	(void) fcntl(STDOUT_FILENO, F_SETFL, n);
     }
-    if (output.len > output.off) {
-	log_output(&output, output.len - output.off, &then, &now, ofile, tfile);
+    do {
+	n = write(STDOUT_FILENO, output.buf + output.off,
+	    output.len - output.off);
+	if (n <= 0)
+	    break;
+	output.off += n;
+    } while (output.len > output.off);
+
+    /* Make sure there is no output remaining on the master pty. */
+    for (;;) {
+	n = read(script_fds[SFD_MASTER], output.buf, sizeof(output.buf));
+	if (n <= 0)
+	    break;
+	output.off = 0;
+	output.len = n;
+	log_output(&output, output.len, &then, &now, ofile, tfile);
 	do {
 	    n = write(STDOUT_FILENO, output.buf + output.off,
 		output.len - output.off);
@@ -485,6 +497,7 @@ script_execv(path, argv)
 	    output.off += n;
 	} while (output.len > output.off);
     }
+
     term_restore(STDIN_FILENO);
 
     if (WIFEXITED(child_status))
