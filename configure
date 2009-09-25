@@ -869,6 +869,7 @@ ldap_conf
 ldap_secret
 nsswitch_conf
 netsvc_conf
+secure_path
 EGREPPROG
 CC
 ac_ct_CC
@@ -2122,6 +2123,7 @@ echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
+
 timeout=5
 password_timeout=5
 sudo_umask=0022
@@ -2147,6 +2149,7 @@ tty_tickets=off
 insults=off
 root_sudo=on
 path_info=on
+secure_path="not set"
 INSTALL_NOEXEC=
 devdir='$(srcdir)'
 PROGS="sudo visudo sudoreplay"
@@ -3695,12 +3698,14 @@ echo $ECHO_N "checking whether to override the user's path... $ECHO_C" >&6; }
 # Check whether --with-secure-path was given.
 if test "${with_secure_path+set}" = set; then
   withval=$with_secure_path; case $with_secure_path in
-    yes)	cat >>confdefs.h <<_ACEOF
-#define SECURE_PATH "/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc"
+    yes)	with_secure_path="/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc"
+		cat >>confdefs.h <<_ACEOF
+#define SECURE_PATH "$with_secure_path"
 _ACEOF
 
-		{ echo "$as_me:$LINENO: result: :/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc" >&5
-echo "${ECHO_T}:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc" >&6; }
+		{ echo "$as_me:$LINENO: result: $with_secure_path" >&5
+echo "${ECHO_T}$with_secure_path" >&6; }
+		secure_path="set to $with_secure_path"
 		;;
     no)		{ echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
@@ -3711,6 +3716,7 @@ _ACEOF
 
 		{ echo "$as_me:$LINENO: result: $with_secure_path" >&5
 echo "${ECHO_T}$with_secure_path" >&6; }
+		secure_path="set to F<$with_secure_path>"
 		;;
 esac
 else
@@ -6262,7 +6268,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6265 "configure"' > conftest.$ac_ext
+  echo '#line 6271 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8126,11 +8132,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8129: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8135: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8133: \$? = $ac_status" >&5
+   echo "$as_me:8139: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8416,11 +8422,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8419: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8425: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8423: \$? = $ac_status" >&5
+   echo "$as_me:8429: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8520,11 +8526,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8523: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8529: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8527: \$? = $ac_status" >&5
+   echo "$as_me:8533: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10880,7 +10886,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10883 "configure"
+#line 10889 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10980,7 +10986,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10983 "configure"
+#line 10989 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -25989,6 +25995,7 @@ ldap_conf!$ldap_conf$ac_delim
 ldap_secret!$ldap_secret$ac_delim
 nsswitch_conf!$nsswitch_conf$ac_delim
 netsvc_conf!$netsvc_conf$ac_delim
+secure_path!$secure_path$ac_delim
 EGREPPROG!$EGREPPROG$ac_delim
 CC!$CC$ac_delim
 ac_ct_CC!$ac_ct_CC$ac_delim
@@ -26024,7 +26031,7 @@ KRB5CONFIG!$KRB5CONFIG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 41; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 42; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

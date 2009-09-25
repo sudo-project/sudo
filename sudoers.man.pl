@@ -16,6 +16,8 @@ if (/^\./) {
 
 # Fix up broken pod2man formatting of F<@foo@/bar>
 s/\\fI\\f(\(C)?I\@([^\@]*)\\fI\@/\\fI\@$2\@/g;
+s/\\f\(\CW\@([^\@]*)\\fR\@/\@$1\@/g;
+#\f(CW@secure_path\fR@
 
 # Comment out Compile-time-specific lines in DESCRIPTION
 if ($t) {

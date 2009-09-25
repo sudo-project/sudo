@@ -85,6 +85,7 @@ AC_SUBST(ldap_conf)
 AC_SUBST(ldap_secret)
 AC_SUBST(nsswitch_conf)
 AC_SUBST(netsvc_conf)
+AC_SUBST(secure_path)
 dnl
 dnl Initial values for above
 dnl
@@ -113,6 +114,7 @@ tty_tickets=off
 insults=off
 root_sudo=on
 path_info=on
+secure_path="not set"
 INSTALL_NOEXEC=
 devdir='$(srcdir)'
 dnl
@@ -988,13 +990,16 @@ fi
 AC_MSG_CHECKING(whether to override the user's path)
 AC_ARG_WITH(secure-path, [AS_HELP_STRING([--with-secure-path], [override the user's path with a built-in one])],
 [case $with_secure_path in
-    yes)	AC_DEFINE_UNQUOTED(SECURE_PATH, "/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc")
-		AC_MSG_RESULT([:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc])
+    yes)	with_secure_path="/bin:/usr/ucb:/usr/bin:/usr/sbin:/sbin:/usr/etc:/etc"
+		AC_DEFINE_UNQUOTED(SECURE_PATH, "$with_secure_path")
+		AC_MSG_RESULT([$with_secure_path])
+		secure_path="set to $with_secure_path"
 		;;
     no)		AC_MSG_RESULT(no)
 		;;
     *)		AC_DEFINE_UNQUOTED(SECURE_PATH, "$with_secure_path")
 		AC_MSG_RESULT([$with_secure_path])
+		secure_path="set to F<$with_secure_path>"
 		;;
 esac], AC_MSG_RESULT(no))
 
