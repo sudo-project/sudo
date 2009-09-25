@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "June 30, 2009" "1.7.2" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "September 24, 2009" "1.7.2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -417,7 +417,7 @@ See \*(L"\s-1SUDOERS\s0 \s-1OPTIONS\s0\*(R" for a list of supported Defaults par
 \& Runas_Spec ::= \*(Aq(\*(Aq Runas_List? (\*(Aq:\*(Aq Runas_List)? \*(Aq)\*(Aq
 \&
 \& Tag_Spec ::= (\*(AqNOPASSWD:\*(Aq | \*(AqPASSWD:\*(Aq | \*(AqNOEXEC:\*(Aq | \*(AqEXEC:\*(Aq |
-\&               \*(AqSETENV:\*(Aq | \*(AqNOSETENV:\*(Aq )
+\&               \*(AqSETENV:\*(Aq | \*(AqNOSETENV:\*(Aq | \*(AqTRANSCRIPT:\*(Aq | \*(AqNOTRANSCRIPT:\*(Aq)
 .Ve
 .PP
 A \fBuser specification\fR determines which commands a user may run
@@ -487,8 +487,8 @@ only the group will be set, the command still runs as user \fBtcm\fR.
 .Sh "Tag_Spec"
 .IX Subsection "Tag_Spec"
 A command may have zero or more tags associated with it.  There are
-eight possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR, \f(CW\*(C`EXEC\*(C'\fR,
-\&\f(CW\*(C`SETENV\*(C'\fR and \f(CW\*(C`NOSETENV\*(C'\fR.
+eight possible tag values, \f(CW\*(C`NOPASSWD\*(C'\fR, \f(CW\*(C`PASSWD\*(C'\fR, \f(CW\*(C`NOEXEC\*(C'\fR,
+\&\f(CW\*(C`EXEC\*(C'\fR, \f(CW\*(C`SETENV\*(C'\fR, \f(CW\*(C`NOSETENV\*(C'\fR, \f(CW\*(C`TRANSCRIPT\*(C'\fR and \f(CW\*(C`NOTRANSCRIPT\*(C'\fR.
 Once a tag is set on a \f(CW\*(C`Cmnd\*(C'\fR, subsequent \f(CW\*(C`Cmnd\*(C'\fRs in the
 \&\f(CW\*(C`Cmnd_Spec_List\*(C'\fR, inherit the tag unless it is overridden by the
 opposite tag (i.e.: \f(CW\*(C`PASSWD\*(C'\fR overrides \f(CW\*(C`NOPASSWD\*(C'\fR and \f(CW\*(C`NOEXEC\*(C'\fR
@@ -555,6 +555,13 @@ to the restrictions imposed by \fIenv_check\fR, \fIenv_delete\fR, or
 variables in this manner.  If the command matched is \fB\s-1ALL\s0\fR, the
 \&\f(CW\*(C`SETENV\*(C'\fR tag is implied for that command; this default may
 be overridden by use of the \f(CW\*(C`UNSETENV\*(C'\fR tag.
+.PP
+\fI\s-1TRANSCRIPT\s0 and \s-1NOTRANSCRIPT\s0\fR
+.IX Subsection "TRANSCRIPT and NOTRANSCRIPT"
+.PP
+These tags override the value of the \fItranscript\fR option on a
+per-command basis.  For more information, see the description of
+\&\fItranscript\fR in the \*(L"\s-1SUDOERS\s0 \s-1OPTIONS\s0\*(R" section below.
 .Sh "Wildcards"
 .IX Subsection "Wildcards"
 \&\fBsudo\fR allows shell-style \fIwildcards\fR (aka meta or glob characters)
@@ -742,6 +749,17 @@ and \f(CW\*(C`env_check\*(C'\fR lists are then added.  The default contents of t
 run by root with the \fI\-V\fR option.  If the \fIsecure_path\fR option
 is set, its value will be used for the \f(CW\*(C`PATH\*(C'\fR environment variable.
 This flag is \fIon\fR by default.
+.IP "fast_glob" 16
+.IX Item "fast_glob"
+Normally, \fBsudo\fR uses the \fIglob\fR\|(3) function to do shell-style
+globbing when matching pathnames.  However, since it accesses the
+file system, \fIglob\fR\|(3) can take a long time to complete for some
+patterns, especially when the pattern references a network file
+system that is mounted on demand (automounted).  The \fIfast_glob\fR
+option causes \fBsudo\fR to use the \fIfnmatch\fR\|(3) function, which does
+not access the file system to do its matching.  The disadvantage
+of \fIfast_glob\fR is that it is unable to match relative pathnames
+such as \fI./ls\fR or \fI../bin/ls\fR.  This flag is \fIoff\fR by default.
 .IP "fqdn" 16
 .IX Item "fqdn"
 Set this flag if you want to put fully qualified hostnames in the
@@ -909,17 +927,6 @@ If set and \fBsudo\fR is invoked with no arguments it acts as if the
 shell is determined by the \f(CW\*(C`SHELL\*(C'\fR environment variable if it is
 set, falling back on the shell listed in the invoking user's
 /etc/passwd entry if not).  This flag is \fIoff\fR by default.
-.IP "fast_glob" 16
-.IX Item "fast_glob"
-Normally, \fBsudo\fR uses the \fIglob\fR\|(3) function to do shell-style
-globbing when matching pathnames.  However, since it accesses the
-file system, \fIglob\fR\|(3) can take a long time to complete for some
-patterns, especially when the pattern references a network file
-system that is mounted on demand (automounted).  The \fIfast_glob\fR
-option causes \fBsudo\fR to use the \fIfnmatch\fR\|(3) function, which does
-not access the file system to do its matching.  The disadvantage
-of \fIfast_glob\fR is that it is unable to match relative pathnames
-such as \fI./ls\fR or \fI../bin/ls\fR.  This flag is \fIoff\fR by default.
 .IP "stay_setuid" 16
 .IX Item "stay_setuid"
 Normally, when \fBsudo\fR executes a command the real and effective
@@ -937,6 +944,24 @@ the \fB\-u\fR option (defaults to \f(CW\*(C`root\*(C'\fR) instead of the passwor
 invoking user.  Note that this precludes the use of a uid not listed
 in the passwd database as an argument to the \fB\-u\fR option.
 This flag is \fIoff\fR by default.
+.IP "transcript" 16
+.IX Item "transcript"
+If set, \fBsudo\fR will log a transcript of the command being run,
+similar to the \fIscript\fR\|(1) command.  In this mode \fBsudo\fR will allocate
+a new \fIpseudo tty\fR and log all input and output for the command (except
+when echo is turned off as when a password is entered).  Transcripts
+are logged to the \fI/var/log/sudo\-session\fR directory with a unique
+transcript \s-1ID\s0 that is included in the normal \fBsudo\fR log line,
+prefixed with \fITSID=\fR.
+.Sp
+Transcripts may be viewed with the \fIsudoreplay\fR\|(@mansectsu@) utility, which
+can also be used to list or search the available transcripts.
+.Sp
+A side effect of this mode is that it will not be possible to suspend
+the command being run (because it is running in a different tty
+with its own job control).  If a shell is being run, commands
+executed by that shell will have normal job control but the shell
+itself may not be suspended.
 .IP "tty_tickets" 16
 .IX Item "tty_tickets"
 If set, users must authenticate on a per-tty basis.  Normally,
@@ -1216,7 +1241,7 @@ people running \fBsudo\fR to have a sane \f(CW\*(C`PATH\*(C'\fR environment vari
 want to use this.  Another use is if you want to have the \*(L"root path\*(R"
 be separate from the \*(L"user path.\*(R"  Users in the group specified by the
 \&\fIexempt_group\fR option are not affected by \fIsecure_path\fR.
-This is not set by default.
+This option is @secure_path@ by default.
 .IP "syslog" 12
 .IX Item "syslog"
 Syslog facility if syslog is being used for logging (negate to
@@ -1305,6 +1330,9 @@ Local groups file
 .IP "\fI/etc/netgroup\fR" 24
 .IX Item "/etc/netgroup"
 List of network groups
+.IP "\fI/var/log/sudo\-session\fR" 24
+.IX Item "/var/log/sudo-session"
+Transcript logs
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
 Below are example \fIsudoers\fR entries.  Admittedly, some of

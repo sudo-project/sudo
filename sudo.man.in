@@ -153,7 +153,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO @mansectsu@"
-.TH SUDO @mansectsu@ "June 15, 2009" "1.7.2" "MAINTENANCE COMMANDS"
+.TH SUDO @mansectsu@ "September 24, 2009" "1.7.2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -442,7 +442,8 @@ password prompt on systems that support \s-1PAM\s0 unless the
 .IP "\-S" 12
 .IX Item "-S"
 The \fB\-S\fR (\fIstdin\fR) option causes \fBsudo\fR to read the password from
-the standard input instead of the terminal device.
+the standard input instead of the terminal device.  The password must
+be followed by a newline character.
 .IP "\-s [command]" 12
 .IX Item "-s [command]"
 The \fB\-s\fR (\fIshell\fR) option runs the shell specified by the \fI\s-1SHELL\s0\fR

@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.2                     June 30, 2009                         1
+1.7.2                   September 24, 2009                      1
 
 
 
@@ -127,7 +127,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 30, 2009                         2
+1.7.2                   September 24, 2009                      2
 
 
 
@@ -193,7 +193,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 30, 2009                         3
+1.7.2                   September 24, 2009                      3
 
 
 
@@ -259,7 +259,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 30, 2009                         4
+1.7.2                   September 24, 2009                      4
 
 
 
@@ -285,7 +285,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
         Runas_Spec ::= '(' Runas_List? (':' Runas_List)? ')'
 
         Tag_Spec ::= ('NOPASSWD:' | 'PASSWD:' | 'NOEXEC:' | 'EXEC:' |
-                      'SETENV:' | 'NOSETENV:' )
+                      'SETENV:' | 'NOSETENV:' | 'TRANSCRIPT:' | 'NOTRANSCRIPT:')
 
        A uusseerr ssppeecciiffiiccaattiioonn determines which commands a user may run (and as
        what user) on specified hosts.  By default, commands are run as rroooott,
@@ -325,7 +325,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
 
-1.7.2                     June 30, 2009                         5
+1.7.2                   September 24, 2009                      5
 
 
 
@@ -355,10 +355,11 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        TTaagg__SSppeecc
 
        A command may have zero or more tags associated with it.  There are
-       eight possible tag values, NOPASSWD, PASSWD, NOEXEC, EXEC, SETENV and
-       NOSETENV.  Once a tag is set on a Cmnd, subsequent Cmnds in the
-       Cmnd_Spec_List, inherit the tag unless it is overridden by the opposite
-       tag (i.e.: PASSWD overrides NOPASSWD and NOEXEC overrides EXEC).
+       eight possible tag values, NOPASSWD, PASSWD, NOEXEC, EXEC, SETENV,
+       NOSETENV, TRANSCRIPT and NOTRANSCRIPT.  Once a tag is set on a Cmnd,
+       subsequent Cmnds in the Cmnd_Spec_List, inherit the tag unless it is
+       overridden by the opposite tag (i.e.: PASSWD overrides NOPASSWD and
+       NOEXEC overrides EXEC).
 
        _N_O_P_A_S_S_W_D _a_n_d _P_A_S_S_W_D
 
@@ -387,11 +388,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        pertain to the current host.  This behavior may be overridden via the
        verifypw and listpw options.
 
-       _N_O_E_X_E_C _a_n_d _E_X_E_C
 
 
 
-1.7.2                     June 30, 2009                         6
+1.7.2                   September 24, 2009                      6
 
 
 
@@ -399,6 +399,8 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+       _N_O_E_X_E_C _a_n_d _E_X_E_C
 
        If ssuuddoo has been compiled with _n_o_e_x_e_c support and the underlying
        operating system supports it, the NOEXEC tag can be used to prevent a
@@ -421,6 +423,12 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        only trusted users should be allowed to set variables in this manner.
        If the command matched is AALLLL, the SETENV tag is implied for that
        command; this default may be overridden by use of the UNSETENV tag.
+
+       _T_R_A_N_S_C_R_I_P_T _a_n_d _N_O_T_R_A_N_S_C_R_I_P_T
+
+       These tags override the value of the _t_r_a_n_s_c_r_i_p_t option on a per-command
+       basis.  For more information, see the description of _t_r_a_n_s_c_r_i_p_t in the
+       "SUDOERS OPTIONS" section below.
 
        WWiillddccaarrddss
 
@@ -446,18 +454,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
            /bin/ls [[\:alpha\:]]*
 
-       Would match any filename beginning with a letter.
-
-       Note that a forward slash ('/') will nnoott be matched by wildcards used
-       in the pathname.  When matching the command line arguments, however, a
-       slash ddooeess get matched by wildcards.  This is to make a path like:
-
-           /usr/bin/*
 
 
 
-
-1.7.2                     June 30, 2009                         7
+1.7.2                   September 24, 2009                      7
 
 
 
@@ -465,6 +465,14 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
+
+       Would match any filename beginning with a letter.
+
+       Note that a forward slash ('/') will nnoott be matched by wildcards used
+       in the pathname.  When matching the command line arguments, however, a
+       slash ddooeess get matched by wildcards.  This is to make a path like:
+
+           /usr/bin/*
 
        match _/_u_s_r_/_b_i_n_/_w_h_o but not _/_u_s_r_/_b_i_n_/_X_1_1_/_x_t_e_r_m.
 
@@ -512,18 +520,10 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        ssuuddoo will read each file in _/_e_t_c_/_s_u_d_o_e_r_s_._d, skipping file names that
        end in ~ or contain a . character to avoid causing problems with
-       package manager or editor temporary/backup files.  Files are parsed in
-       sorted lexical order.  That is, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_0_1___f_i_r_s_t will be parsed
-       before _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Be aware that because the sorting is
-       lexical, not numeric, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1___w_h_o_o_p_s would be loaded aafftteerr
-       _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Using a consistent number of leading zeroes
-       in the file names can be used to avoid such problems.
-
-       Note that unlike files included via #include, vviissuuddoo will not edit the
 
 
 
-1.7.2                     June 30, 2009                         8
+1.7.2                   September 24, 2009                      8
 
 
 
@@ -532,6 +532,14 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
 
+       package manager or editor temporary/backup files.  Files are parsed in
+       sorted lexical order.  That is, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_0_1___f_i_r_s_t will be parsed
+       before _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Be aware that because the sorting is
+       lexical, not numeric, _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1___w_h_o_o_p_s would be loaded aafftteerr
+       _/_e_t_c_/_s_u_d_o_e_r_s_._d_/_1_0___s_e_c_o_n_d.  Using a consistent number of leading zeroes
+       in the file names can be used to avoid such problems.
+
+       Note that unlike files included via #include, vviissuuddoo will not edit the
        files in a #includedir directory unless one of them contains a syntax
        error.  It is still possible to run vviissuuddoo with the -f flag to edit the
        files directly.
@@ -578,6 +586,18 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
        always_set_home If set, ssuuddoo will set the HOME environment variable to
                        the home directory of the target user (which is root
                        unless the --uu option is used).  This effectively means
+
+
+
+1.7.2                   September 24, 2009                      9
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                        that the --HH option is always implied.  This flag is _o_f_f
                        by default.
 
@@ -586,17 +606,6 @@ SSUUDDOOEERRSS OOPPTTIIOONNSS
                        may run commands.  This default may be overridden via
                        the PASSWD and NOPASSWD tags.  This flag is _o_n by
                        default.
-
-
-
-1.7.2                     June 30, 2009                         9
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
        closefrom_override
                        If set, the user may use ssuuddoo's --CC option which
@@ -624,6 +633,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        its value will be used for the PATH environment
                        variable.  This flag is _o_n by default.
 
+       fast_glob       Normally, ssuuddoo uses the _g_l_o_b(3) function to do shell-
+                       style globbing when matching pathnames.  However, since
+                       it accesses the file system, _g_l_o_b(3) can take a long
+                       time to complete for some patterns, especially when the
+                       pattern references a network file system that is
+                       mounted on demand (automounted).  The _f_a_s_t___g_l_o_b option
+                       causes ssuuddoo to use the _f_n_m_a_t_c_h(3) function, which does
+                       not access the file system to do its matching.  The
+                       disadvantage of _f_a_s_t___g_l_o_b is that it is unable to match
+                       relative pathnames such as _._/_l_s or _._._/_b_i_n_/_l_s.  This
+                       flag is _o_f_f by default.
+
        fqdn            Set this flag if you want to put fully qualified
                        hostnames in the _s_u_d_o_e_r_s file.  I.e., instead of myhost
                        you would use myhost.mydomain.edu.  You may still use
@@ -631,6 +652,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        Beware that turning on _f_q_d_n requires ssuuddoo to make DNS
                        lookups which may make ssuuddoo unusable if DNS stops
                        working (for example if the machine is not plugged into
+
+
+
+1.7.2                   September 24, 2009                     10
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                        the network).  Also note that you must use the host's
                        official name as DNS knows it.  That is, you may not
                        use a host alias (CNAME entry) due to performance
@@ -652,18 +685,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        operators who would attempt to add roles to
                        _/_e_t_c_/_s_u_d_o_e_r_s.  When this option is present,
                        _/_e_t_c_/_s_u_d_o_e_r_s does not even need to exist. Since this
-
-
-
-1.7.2                     June 30, 2009                        10
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
                        option tells ssuuddoo how to behave when no specific LDAP
                        entries have been matched, this sudoOption is only
                        meaningful for the cn=defaults section.  This flag is
@@ -697,6 +718,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        allowed to run commands on the current host.  This flag
                        is _o_f_f by default.
 
+
+
+
+1.7.2                   September 24, 2009                     11
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        mail_no_perms   If set, mail will be sent to the _m_a_i_l_t_o user if the
                        invoking user is allowed to use ssuuddoo but the command
                        they are trying is not listed in their _s_u_d_o_e_r_s file
@@ -718,18 +751,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        sites may wish to disable this as it could be used to
                        gather information on the location of executables that
                        the normal user does not have access to.  The
-
-
-
-1.7.2                     June 30, 2009                        11
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
                        disadvantage is that if the executable is simply not in
                        the user's PATH, ssuuddoo will tell the user that they are
                        not allowed to run it, which can be confusing.  This
@@ -763,6 +784,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        to a real tty.  When this flag is set, ssuuddoo can only be
                        run from a login session and not via other means such
                        as _c_r_o_n(1m) or cgi-bin scripts.  This flag is _o_f_f by
+
+
+
+1.7.2                   September 24, 2009                     12
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                        default.
 
        root_sudo       If set, root is allowed to run ssuuddoo too.  Disabling
@@ -784,18 +817,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        flag is _o_f_f by default.
 
        set_home        If set and ssuuddoo is invoked with the --ss option the HOME
-
-
-
-1.7.2                     June 30, 2009                        12
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
                        environment variable will be set to the home directory
                        of the target user (which is root unless the --uu option
                        is used).  This effectively makes the --ss option imply
@@ -827,20 +848,20 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        shell listed in the invoking user's /etc/passwd entry
                        if not).  This flag is _o_f_f by default.
 
-       fast_glob       Normally, ssuuddoo uses the _g_l_o_b(3) function to do shell-
-                       style globbing when matching pathnames.  However, since
-                       it accesses the file system, _g_l_o_b(3) can take a long
-                       time to complete for some patterns, especially when the
-                       pattern references a network file system that is
-                       mounted on demand (automounted).  The _f_a_s_t___g_l_o_b option
-                       causes ssuuddoo to use the _f_n_m_a_t_c_h(3) function, which does
-                       not access the file system to do its matching.  The
-                       disadvantage of _f_a_s_t___g_l_o_b is that it is unable to match
-                       relative pathnames such as _._/_l_s or _._._/_b_i_n_/_l_s.  This
-                       flag is _o_f_f by default.
-
        stay_setuid     Normally, when ssuuddoo executes a command the real and
                        effective UIDs are set to the target user (root by
+
+
+
+1.7.2                   September 24, 2009                     13
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                        default).  This option changes that behavior such that
                        the real UID is left as the invoking user's UID.  In
                        other words, this makes ssuuddoo act as a setuid wrapper.
@@ -850,24 +871,32 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        with either the _s_e_t_r_e_u_i_d_(_) or _s_e_t_r_e_s_u_i_d_(_) function.
                        This flag is _o_f_f by default.
 
-
-
-
-1.7.2                     June 30, 2009                        13
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
        targetpw        If set, ssuuddoo will prompt for the password of the user
                        specified by the --uu option (defaults to root) instead
                        of the password of the invoking user.  Note that this
                        precludes the use of a uid not listed in the passwd
                        database as an argument to the --uu option.  This flag is
                        _o_f_f by default.
+
+       transcript      If set, ssuuddoo will log a transcript of the command being
+                       run, similar to the _s_c_r_i_p_t(1) command.  In this mode
+                       ssuuddoo will allocate a new _p_s_e_u_d_o _t_t_y and log all input
+                       and output for the command (except when echo is turned
+                       off as when a password is entered).  Transcripts are
+                       logged to the _/_v_a_r_/_l_o_g_/_s_u_d_o_-_s_e_s_s_i_o_n directory with a
+                       unique transcript ID that is included in the normal
+                       ssuuddoo log line, prefixed with _T_S_I_D_=.
+
+                       Transcripts may be viewed with the _s_u_d_o_r_e_p_l_a_y(1m)
+                       utility, which can also be used to list or search the
+                       available transcripts.
+
+                       A side effect of this mode is that it will not be
+                       possible to suspend the command being run (because it
+                       is running in a different tty with its own job
+                       control).  If a shell is being run, commands executed
+                       by that shell will have normal job control but the
+                       shell itself may not be suspended.
 
        tty_tickets     If set, users must authenticate on a per-tty basis.
                        Normally, ssuuddoo uses a directory in the ticket dir with
@@ -887,6 +916,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        use_loginclass  If set, ssuuddoo will apply the defaults specified for the
                        target user's login class if one exists.  Only
                        available if ssuuddoo is configured with the
+
+
+
+1.7.2                   September 24, 2009                     14
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                        --with-logincap option.  This flag is _o_f_f by default.
 
        visiblepw       By default, ssuuddoo will refuse to run if the user must
@@ -916,18 +957,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        value is used to decide when to wrap lines for nicer
                        log files.  This has no effect on the syslog log file,
                        only the file log.  The default is 80 (use 0 or negate
-
-
-
-1.7.2                     June 30, 2009                        14
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
                        the option to disable word wrap).
 
        passwd_timeout  Number of minutes before the ssuuddoo password prompt times
@@ -953,6 +982,17 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        in _s_u_d_o_e_r_s.
 
        SSttrriinnggss:
+
+
+
+1.7.2                   September 24, 2009                     15
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
 
        badpass_message Message that is displayed if a user enters an incorrect
                        password.  The default is Sorry, try again. unless
@@ -982,18 +1022,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        escapes are supported:
 
                        %H  expanded to the local hostname including the domain
-
-
-
-1.7.2                     June 30, 2009                        15
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
                            name (on if the machine's hostname is fully
                            qualified or the _f_q_d_n option is set)
 
@@ -1020,6 +1048,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        before any Runas_Alias specifications.
 
        syslog_badpri   Syslog priority to use when user authenticates
+
+
+
+1.7.2                   September 24, 2009                     16
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                        unsuccessfully.  Defaults to alert.
 
        syslog_goodpri  Syslog priority to use when user authenticates
@@ -1048,18 +1088,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    variable.
 
        env_file    The _e_n_v___f_i_l_e options specifies the fully qualified path to
-
-
-
-1.7.2                     June 30, 2009                        16
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
                    a file containing variables to be set in the environment of
                    the program being run.  Entries in this file should either
                    be of the form VARIABLE=value or export VARIABLE=value.
@@ -1084,6 +1112,19 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    If no value is specified, a value of _o_n_c_e is implied.
                    Negating the option results in a value of _n_e_v_e_r being used.
                    The default value is _o_n_c_e.
+
+
+
+
+
+1.7.2                   September 24, 2009                     17
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
 
        lecture_file
                    Path to a file containing an alternate ssuuddoo lecture that
@@ -1114,18 +1155,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
        logfile     Path to the ssuuddoo log file (not the syslog log file).
                    Setting a path turns on logging to a file; negating this
-
-
-
-1.7.2                     June 30, 2009                        17
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
                    option turns it off.  By default, ssuuddoo logs via syslog.
 
        mailerflags Flags to use when invoking mailer. Defaults to --tt.
@@ -1148,9 +1177,21 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                    is if you want to have the "root path" be separate from the
                    "user path."  Users in the group specified by the
                    _e_x_e_m_p_t___g_r_o_u_p option are not affected by _s_e_c_u_r_e___p_a_t_h.  This
-                   is not set by default.
+                   option is @secure_path@ by default.
 
        syslog      Syslog facility if syslog is being used for logging (negate
+
+
+
+1.7.2                   September 24, 2009                     18
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                    to disable syslog logging).  Defaults to local2.
 
        verifypw    This option controls when a password will be required when
@@ -1180,18 +1221,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        env_check       Environment variables to be removed from the user's
                        environment if the variable's value contains % or /
                        characters.  This can be used to guard against printf-
-
-
-
-1.7.2                     June 30, 2009                        18
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
                        style format vulnerabilities in poorly-written
                        programs.  The argument may be a double-quoted, space-
                        separated list or a single value without double-quotes.
@@ -1217,6 +1246,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
                        any setuid process (such as ssuuddoo).
 
        env_keep        Environment variables to be preserved in the user's
+
+
+
+1.7.2                   September 24, 2009                     19
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                        environment when the _e_n_v___r_e_s_e_t option is in effect.
                        This allows fine-grained control over the environment
                        ssuuddoo-spawned processes will receive.  The argument may
@@ -1241,22 +1282,11 @@ FFIILLEESS
 
        _/_e_t_c_/_n_e_t_g_r_o_u_p           List of network groups
 
+       _/_v_a_r_/_l_o_g_/_s_u_d_o_-_s_e_s_s_i_o_n   Transcript logs
+
 EEXXAAMMPPLLEESS
        Below are example _s_u_d_o_e_r_s entries.  Admittedly, some of these are a bit
        contrived.  First, we define our _a_l_i_a_s_e_s:
-
-
-
-
-
-1.7.2                     June 30, 2009                        19
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
 
         # User alias specification
         User_Alias     FULLTIMERS = millert, mikef, dowdy
@@ -1282,6 +1312,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
         Cmnd_Alias     DUMPS = /usr/bin/mt, /usr/sbin/dump, /usr/sbin/rdump,\
                                /usr/sbin/restore, /usr/sbin/rrestore
         Cmnd_Alias     KILL = /usr/bin/kill
+
+
+
+1.7.2                   September 24, 2009                     20
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
         Cmnd_Alias     PRINTING = /usr/sbin/lpc, /usr/bin/lprm
         Cmnd_Alias     SHUTDOWN = /usr/sbin/shutdown
         Cmnd_Alias     HALT = /usr/sbin/halt
@@ -1312,18 +1354,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
         Defaults!PAGERS        noexec
 
        The _U_s_e_r _s_p_e_c_i_f_i_c_a_t_i_o_n is the part that actually determines who may run
-
-
-
-1.7.2                     June 30, 2009                        20
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
        what.
 
         root           ALL = (ALL) ALL
@@ -1348,6 +1378,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        The user jjaacckk may run any command on the machines in the _C_S_N_E_T_S alias
        (the networks 128.138.243.0, 128.138.204.0, and 128.138.242.0).  Of
        those networks, only 128.138.204.0 has an explicit netmask (in CIDR
+
+
+
+1.7.2                   September 24, 2009                     21
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        notation) indicating it is a class C network.  For the other networks
        in _C_S_N_E_T_S, the local machine's netmask will be used during matching.
 
@@ -1379,17 +1421,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        the _H_P_P_A machines.  Note that this assumes _p_a_s_s_w_d(1) does not take
        multiple usernames on the command line.
 
-
-
-1.7.2                     June 30, 2009                        21
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
         bob            SPARC = (OP) ALL : SGI = (OP) ALL
 
        The user bboobb may run anything on the _S_P_A_R_C and _S_G_I machines as any user
@@ -1412,6 +1443,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        (oorraaccllee or ssyybbaassee) without giving a password.
 
         john           ALPHA = /usr/bin/su [!-]*, !/usr/bin/su *root*
+
+
+
+
+1.7.2                   September 24, 2009                     22
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
 
        On the _A_L_P_H_A machines, user jjoohhnn may su to anyone except root but he is
        not allowed to specify any options to the _s_u(1) command.
@@ -1443,19 +1486,6 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        and wim), may run any command as user www (which owns the web pages) or
        simply _s_u(1) to www.
 
-
-
-
-
-1.7.2                     June 30, 2009                        22
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
         ALL            CDROM = NOPASSWD: /sbin/umount /CDROM,\
                        /sbin/mount -o nosuid\,nodev /dev/cd0a /CDROM
 
@@ -1480,6 +1510,18 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
        Once ssuuddoo executes a program, that program is free to do whatever it
+
+
+
+1.7.2                   September 24, 2009                     23
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
        pleases, including run other programs.  This can be a security issue
        since it is not uncommon for a program to allow shell escapes, which
        lets a user bypass ssuuddoo's access control and logging.  Common programs
@@ -1510,18 +1552,6 @@ PPRREEVVEENNTTIINNGG SSHHEELLLL EESSCCAAPPEESS
 
                      sudo -V | grep "dummy exec"
 
-
-
-
-1.7.2                     June 30, 2009                        23
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
                  If the resulting output contains a line that begins with:
 
                      File containing dummy exec functions:
@@ -1546,6 +1576,18 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
 
                  This allows user aaaarroonn to run _/_u_s_r_/_b_i_n_/_m_o_r_e and _/_u_s_r_/_b_i_n_/_v_i
                  with _n_o_e_x_e_c enabled.  This will prevent those two commands
+
+
+
+1.7.2                   September 24, 2009                     24
+
+
+
+
+
+SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
+
+
                  from executing other commands (such as a shell).  If you are
                  unsure whether or not your system is capable of supporting
                  _n_o_e_x_e_c you can always just try it out and see if it works.
@@ -1576,18 +1618,6 @@ BBUUGGSS
 
 SSUUPPPPOORRTT
        Limited free support is available via the sudo-users mailing list, see
-
-
-
-1.7.2                     June 30, 2009                        24
-
-
-
-
-
-SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
-
-
        http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search
        the archives.
 
@@ -1615,36 +1645,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.7.2                     June 30, 2009                        25
+1.7.2                   September 24, 2009                     25
 
 
