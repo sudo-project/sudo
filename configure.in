@@ -142,6 +142,7 @@ AUTH_DEF=passwd
 dnl
 dnl Other vaiables
 dnl
+TRANSCRIPT=yes
 CHECKSHADOW=true
 shadow_defs=
 shadow_funcs=
@@ -1217,6 +1218,18 @@ AC_ARG_ENABLE(env_debug,
 		;;
   esac
 ], AC_MSG_RESULT(no))
+
+AC_ARG_ENABLE(transcript,
+[AS_HELP_STRING([--enable-transcript[[=DIR]]], [Enable Sudo's transcript support, storing them in DIR])],
+[ case "$enableval" in
+    yes)	TRANSCRIPT=yes
+		;;
+    no)		TRANSCRIPT=no
+		;;
+    *)		TRANSCRIPT="$enableval"
+		;;
+  esac
+])
 
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
@@ -2570,7 +2583,7 @@ dnl Check for log file and timestamp locations
 dnl
 SUDO_LOGFILE
 SUDO_TIMEDIR
-SUDO_SESSDIR
+SUDO_TRANSCRIPT
 
 dnl
 dnl Use passwd (and secureware) auth modules?

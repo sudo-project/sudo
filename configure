@@ -1502,6 +1502,8 @@ Optional Features:
                           Set $HOME to target user in shell mode
   --disable-path-info     Print 'command not allowed' not 'command not found'
   --enable-env-debug      Whether to enable environment debugging.
+  --enable-transcript=DIR Enable Sudo's transcript support, storing them in
+                          DIR
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-static[=PKGS]  build static libraries [default=no]
@@ -2170,6 +2172,7 @@ AUTH_EXCL=
 AUTH_EXCL_DEF=
 AUTH_DEF=passwd
 
+TRANSCRIPT=yes
 CHECKSHADOW=true
 shadow_defs=
 shadow_funcs=
@@ -4111,6 +4114,20 @@ echo "$as_me: WARNING: Ignoring unknown argument to --enable-env-debug: $enablev
 else
   { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
+fi
+
+
+# Check whether --enable-transcript was given.
+if test "${enable_transcript+set}" = set; then
+  enableval=$enable_transcript;  case "$enableval" in
+    yes)	TRANSCRIPT=yes
+		;;
+    no)		TRANSCRIPT=no
+		;;
+    *)		TRANSCRIPT="$enableval"
+		;;
+  esac
+
 fi
 
 
@@ -6268,7 +6285,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6271 "configure"' > conftest.$ac_ext
+  echo '#line 6288 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8132,11 +8149,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8135: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8152: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8139: \$? = $ac_status" >&5
+   echo "$as_me:8156: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8422,11 +8439,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8425: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8442: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8429: \$? = $ac_status" >&5
+   echo "$as_me:8446: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8526,11 +8543,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8529: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8546: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8533: \$? = $ac_status" >&5
+   echo "$as_me:8550: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10886,7 +10903,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10889 "configure"
+#line 10906 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10986,7 +11003,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10989 "configure"
+#line 11006 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -25122,41 +25139,23 @@ EOF
     timedir="/usr/adm/sudo"
 fi
 
-{ echo "$as_me:$LINENO: checking for session file location" >&5
-echo $ECHO_N "checking for session file location... $ECHO_C" >&6; }
-if test -n "$with_sessdir"; then
-    { echo "$as_me:$LINENO: result: $with_sessdir" >&5
-echo "${ECHO_T}$with_sessdir" >&6; }
+{ echo "$as_me:$LINENO: checking for transcript dir location" >&5
+echo $ECHO_N "checking for transcript dir location... $ECHO_C" >&6; }
+    if test "$TRANSCRIPT" != "yes"; then
+	:
+    elif test -d "/var/log"; then
+	TRANSCRIPT="/var/log/sudo-transcript"
+    elif test -d "/var/adm"; then
+	TRANSCRIPT="/var/adm/sudo-transcript"
+    else
+	TRANSCRIPT="/usr/adm/sudo-transcript"
+    fi
+    { echo "$as_me:$LINENO: result: $TRANSCRIPT" >&5
+echo "${ECHO_T}$TRANSCRIPT" >&6; }
     cat >>confdefs.h <<EOF
-#define _PATH_SUDO_SESSDIR "$with_sessdir"
+#define _PATH_SUDO_TRANSCRIPT "$TRANSCRIPT"
 EOF
 
-    sessdir="$with_sessdir"
-elif test -d "/var/log"; then
-    { echo "$as_me:$LINENO: result: /var/log/sudo-session" >&5
-echo "${ECHO_T}/var/log/sudo-session" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_SESSDIR "/var/log/sudo-session"
-EOF
-
-    sessdir="/var/log/sudo-session"
-elif test -d "/var/adm"; then
-    { echo "$as_me:$LINENO: result: /var/adm/sudo-session" >&5
-echo "${ECHO_T}/var/adm/sudo-session" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_SESSDIR "/var/adm/sudo-session"
-EOF
-
-    sessdir="/var/adm/sudo-session"
-else
-    { echo "$as_me:$LINENO: result: /usr/adm/sudo-session" >&5
-echo "${ECHO_T}/usr/adm/sudo-session" >&6; }
-    cat >>confdefs.h <<\EOF
-#define _PATH_SUDO_SESSDIR "/usr/adm/sudo-session"
-EOF
-
-    sessdir="/usr/adm/sudo-session"
-fi
 
 
 case "$with_passwd" in

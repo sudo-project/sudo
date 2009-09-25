@@ -158,28 +158,24 @@ fi
 ])dnl
 
 dnl
-dnl Where the session files go, use /var/log/sudo-session if /var/log exists,
-dnl else /{var,usr}/adm/sudo-session
+dnl Where the transcript files go, use /var/log/sudo-transcript if
+dnl /var/log exists, else /{var,usr}/adm/sudo-transcript
 dnl
-AC_DEFUN(SUDO_SESSDIR, [AC_MSG_CHECKING(for session file location)
-if test -n "$with_sessdir"; then
-    AC_MSG_RESULT($with_sessdir)
-    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_SESSDIR, "$with_sessdir")
-    sessdir="$with_sessdir"
-elif test -d "/var/log"; then
-    AC_MSG_RESULT(/var/log/sudo-session)
-    SUDO_DEFINE(_PATH_SUDO_SESSDIR, "/var/log/sudo-session")
-    sessdir="/var/log/sudo-session"
-elif test -d "/var/adm"; then
-    AC_MSG_RESULT(/var/adm/sudo-session)
-    SUDO_DEFINE(_PATH_SUDO_SESSDIR, "/var/adm/sudo-session")
-    sessdir="/var/adm/sudo-session"
-else
-    AC_MSG_RESULT(/usr/adm/sudo-session)
-    SUDO_DEFINE(_PATH_SUDO_SESSDIR, "/usr/adm/sudo-session")
-    sessdir="/usr/adm/sudo-session"
+if test "$TRANSCRIPT" != "no"; then
+    AC_DEFUN(SUDO_TRANSCRIPT, [AC_MSG_CHECKING(for transcript dir location)
+    if test "$TRANSCRIPT" != "yes"; then
+	:
+    elif test -d "/var/log"; then
+	TRANSCRIPT="/var/log/sudo-transcript"
+    elif test -d "/var/adm"; then
+	TRANSCRIPT="/var/adm/sudo-transcript"
+    else
+	TRANSCRIPT="/usr/adm/sudo-transcript"
+    fi
+    AC_MSG_RESULT($TRANSCRIPT)
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TRANSCRIPT, "$TRANSCRIPT")
+    ])dnl
 fi
-])dnl
 
 dnl
 dnl SUDO_CHECK_TYPE(TYPE, DEFAULT)

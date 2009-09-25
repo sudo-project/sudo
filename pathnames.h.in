@@ -72,9 +72,9 @@
  * Where to put the session files.  Defaults to /var/log/sudo-session,
  * /var/adm/sudo-session or /usr/adm/sudo-session depending on what exists.
  */
-#ifndef _PATH_SUDO_SESSDIR
-#undef _PATH_SUDO_SESSDIR
-#endif /* _PATH_SUDO_SESSDIR */
+#ifndef _PATH_SUDO_TRANSCRIPT
+#undef _PATH_SUDO_TRANSCRIPT
+#endif /* _PATH_SUDO_TRANSCRIPT */
 
 /*
  * Where to put the sudo log file when logging to a file.  Defaults to
