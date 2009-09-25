@@ -337,7 +337,8 @@ have the role specified by I<role>.
 =item -S
 
 The B<-S> (I<stdin>) option causes B<sudo> to read the password from
-the standard input instead of the terminal device.
+the standard input instead of the terminal device.  The password must
+be followed by a newline character.
 
 =item -s [command]
 
