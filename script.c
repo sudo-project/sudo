@@ -121,20 +121,20 @@ script_nextid()
     char pathbuf[PATH_MAX];
 
     /*
-     * Create _PATH_SUDO_SESSDIR if it doesn't already exist.
+     * Create _PATH_SUDO_TRANSCRIPT if it doesn't already exist.
      */
-    if (stat(_PATH_SUDO_SESSDIR, &sb) != 0) {
-	if (mkdir(_PATH_SUDO_SESSDIR, S_IRWXU) != 0)
-	    log_error(USE_ERRNO, "Can't mkdir %s", _PATH_SUDO_SESSDIR);
+    if (stat(_PATH_SUDO_TRANSCRIPT, &sb) != 0) {
+	if (mkdir(_PATH_SUDO_TRANSCRIPT, S_IRWXU) != 0)
+	    log_error(USE_ERRNO, "Can't mkdir %s", _PATH_SUDO_TRANSCRIPT);
     } else if (!S_ISDIR(sb.st_mode)) {
 	log_error(0, "%s exists but is not a directory (0%o)",
-	    _PATH_SUDO_SESSDIR, (unsigned int) sb.st_mode);
+	    _PATH_SUDO_TRANSCRIPT, (unsigned int) sb.st_mode);
     }
 
     /*
      * Open sequence file
      */
-    len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", _PATH_SUDO_SESSDIR);
+    len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", _PATH_SUDO_TRANSCRIPT);
     if (len <= 0 || len >= sizeof(pathbuf)) {
 	errno = ENAMETOOLONG;
 	log_error(USE_ERRNO, "%s/seq", pathbuf);
@@ -189,12 +189,12 @@ build_idpath(pathbuf)
     /*
      * Path is of the form /var/log/sudo-session/00/00/01.
      */
-    len = snprintf(pathbuf, PATH_MAX, "%s/%c%c/%c%c/%c%c", _PATH_SUDO_SESSDIR,
+    len = snprintf(pathbuf, PATH_MAX, "%s/%c%c/%c%c/%c%c", _PATH_SUDO_TRANSCRIPT,
 	sudo_user.sessid[0], sudo_user.sessid[1], sudo_user.sessid[2],
 	sudo_user.sessid[3], sudo_user.sessid[4], sudo_user.sessid[5]);
     if (len <= 0 && len >= PATH_MAX) {
 	errno = ENAMETOOLONG;
-	log_error(USE_ERRNO, "%s/%s", _PATH_SUDO_SESSDIR, sudo_user.sessid);
+	log_error(USE_ERRNO, "%s/%s", _PATH_SUDO_TRANSCRIPT, sudo_user.sessid);
     }
 
     /*

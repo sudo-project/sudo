@@ -92,7 +92,7 @@ extern int optind;
 
 int Argc;
 char **Argv;
-const char *session_dir = _PATH_SUDO_SESSDIR;
+const char *session_dir = _PATH_SUDO_TRANSCRIPT;
 
 /*
  * Info present in the transcript log file
