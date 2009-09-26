@@ -161,21 +161,22 @@ dnl
 dnl Where the transcript files go, use /var/log/sudo-transcript if
 dnl /var/log exists, else /{var,usr}/adm/sudo-transcript
 dnl
-if test "$TRANSCRIPT" != "no"; then
-    AC_DEFUN(SUDO_TRANSCRIPT, [AC_MSG_CHECKING(for transcript dir location)
-    if test "$TRANSCRIPT" != "yes"; then
-	:
-    elif test -d "/var/log"; then
-	TRANSCRIPT="/var/log/sudo-transcript"
-    elif test -d "/var/adm"; then
-	TRANSCRIPT="/var/adm/sudo-transcript"
-    else
-	TRANSCRIPT="/usr/adm/sudo-transcript"
+AC_DEFUN(SUDO_TRANSCRIPT, [
+    if test "${enable_transcript-no}" != "no"; then
+	AC_MSG_CHECKING(for transcript dir location)
+	if test "$enable_transcript" != "yes"; then
+	    :
+	elif test -d "/var/log"; then
+	    enable_transcript="/var/log/sudo-transcript"
+	elif test -d "/var/adm"; then
+	    enable_transcript="/var/adm/sudo-transcript"
+	else
+	    enable_transcript="/usr/adm/sudo-transcript"
+	fi
+	SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TRANSCRIPT, "$enable_transcript")
+	AC_MSG_RESULT($enable_transcript)
     fi
-    AC_MSG_RESULT($TRANSCRIPT)
-    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_TRANSCRIPT, "$TRANSCRIPT")
-    ])dnl
-fi
+])dnl
 
 dnl
 dnl SUDO_CHECK_TYPE(TYPE, DEFAULT)

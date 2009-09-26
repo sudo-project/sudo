@@ -460,9 +460,11 @@ main(argc, argv, envp)
 		validate_env_vars(sudo_user.env_vars);
 	}
 
+#ifdef _PATH_SUDO_TRANSCRIPT
 	/* Get next session ID so we can log it. */
 	if (def_transcript && ISSET(sudo_mode, (MODE_RUN | MODE_EDIT)))
 	    script_nextid();
+#endif
 
 	log_allowed(validated);
 	if (ISSET(sudo_mode, MODE_CHECK))
@@ -502,9 +504,11 @@ main(argc, argv, envp)
 	/* Must audit before uid change. */
 	audit_success(NewArgv);
 
+#ifdef _PATH_SUDO_TRANSCRIPT
 	/* Open tty as needed */
 	if (def_transcript)
 	    script_setup();
+#endif
 
 	/* Become specified user or root if executing a command. */
 	if (ISSET(sudo_mode, MODE_RUN))
@@ -549,8 +553,12 @@ main(argc, argv, envp)
 	sudo_endgrent();
 
 	/* Move pty master/slave to low numbered fd and close the rest. */
+#ifdef _PATH_SUDO_TRANSCRIPT
 	fd = def_transcript ? script_duplow(def_closefrom) : def_closefrom;
 	closefrom(fd);
+#else
+	closefrom(def_closefrom);
+#endif
 
 #ifndef PROFILING
 	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0) {
@@ -563,9 +571,11 @@ main(argc, argv, envp)
 		selinux_exec(user_role, user_type, NewArgv,
 		    ISSET(sudo_mode, MODE_LOGIN_SHELL));
 #endif
+#ifdef _PATH_SUDO_TRANSCRIPT
 	    if (def_transcript)
 		script_execv(safe_cmnd, NewArgv);
 	    else
+#endif
 		execv(safe_cmnd, NewArgv);
 	}
 #else
@@ -1460,8 +1470,10 @@ cleanup(gotsignal)
 	sudo_endpwent();
 	sudo_endgrent();
     }
+#ifdef _PATH_SUDO_TRANSCRIPT
     if (def_transcript)
 	term_restore(STDIN_FILENO);
+#endif
 }
 
 static void

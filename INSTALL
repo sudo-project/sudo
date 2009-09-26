@@ -591,6 +591,16 @@ The following options are also configurable at runtime:
 	if the executable is simply not in the user's path, sudo will tell
 	the user that they are not allowed to run it, which can be confusing.
 
+  --disable-transcript
+        Disable sudo's transcript support.  This can be used to allow sudo
+	to be compiled on systems without pseudo-tty support.
+
+  --enable-transcript[=DIR]
+	By default, sudo stores transcript files in either
+	/var/log/sudo-transcript, /var/adm/sudo-transcript, or
+	/usr/log/sudo-transcript.  If DIR is specified, transcripts
+	will be stored in the indicated directory instead.
+
 Shadow password and C2 support
 ==============================
 
