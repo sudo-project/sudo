@@ -25321,26 +25321,29 @@ EOF
     timedir="/usr/adm/sudo"
 fi
 
-{ echo "$as_me:$LINENO: checking for transcript dir location" >&5
+
+    if test "${enable_transcript-yes}" != "no"; then
+	{ echo "$as_me:$LINENO: checking for transcript dir location" >&5
 echo $ECHO_N "checking for transcript dir location... $ECHO_C" >&6; }
-    if test "$TRANSCRIPT" != "yes"; then
-	:
-    elif test -d "/var/log"; then
-	TRANSCRIPT="/var/log/sudo-transcript"
-    elif test -d "/var/adm"; then
-	TRANSCRIPT="/var/adm/sudo-transcript"
-    else
-	TRANSCRIPT="/usr/adm/sudo-transcript"
-    fi
-    { echo "$as_me:$LINENO: result: $TRANSCRIPT" >&5
-echo "${ECHO_T}$TRANSCRIPT" >&6; }
-    cat >>confdefs.h <<EOF
-#define _PATH_SUDO_TRANSCRIPT "$TRANSCRIPT"
+	if test "${enable_transcript-yes}" != "yes"; then
+	    :
+	elif test -d "/var/log"; then
+	    enable_transcript="/var/log/sudo-transcript"
+	elif test -d "/var/adm"; then
+	    enable_transcript="/var/adm/sudo-transcript"
+	else
+	    enable_transcript="/usr/adm/sudo-transcript"
+	fi
+	cat >>confdefs.h <<EOF
+#define _PATH_SUDO_TRANSCRIPT "$enable_transcript"
 EOF
 
+	{ echo "$as_me:$LINENO: result: $enable_transcript" >&5
+echo "${ECHO_T}$enable_transcript" >&6; }
+    fi
 
 
-if test "${enable_transcript-no}" != "no"; then
+if test "${enable_transcript-yes}" != "no"; then
     SUDO_OBJS="${SUDO_OBJS} script.o"
     PROGS="$PROGS sudoreplay"
     REPLAY=""

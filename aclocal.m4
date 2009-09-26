@@ -162,9 +162,9 @@ dnl Where the transcript files go, use /var/log/sudo-transcript if
 dnl /var/log exists, else /{var,usr}/adm/sudo-transcript
 dnl
 AC_DEFUN(SUDO_TRANSCRIPT, [
-    if test "${enable_transcript-no}" != "no"; then
+    if test "${enable_transcript-yes}" != "no"; then
 	AC_MSG_CHECKING(for transcript dir location)
-	if test "$enable_transcript" != "yes"; then
+	if test "${enable_transcript-yes}" != "yes"; then
 	    :
 	elif test -d "/var/log"; then
 	    enable_transcript="/var/log/sudo-transcript"
