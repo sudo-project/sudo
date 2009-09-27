@@ -69,6 +69,10 @@
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
+#ifndef O_NOCTTY
+#define O_NOCTTY 0
+#endif
+
 #define SFD_MASTER 0
 #define SFD_SLAVE 1
 #define SFD_LOG 2
@@ -342,7 +346,7 @@ script_execv(path, argv)
 	selinux_prefork(user_role, user_type, script_fds[SFD_SLAVE]);
 	/* Re-open slave fd after it has been relabeled */
 	close(script_fds[SFD_SLAVE]);
-	script_fds[SFD_SLAVE] = open(slavename, O_RDWR, 0);
+	script_fds[SFD_SLAVE] = open(slavename, O_RDWR|O_NOCTTY, 0);
 	if (script_fds[SFD_SLAVE] == -1)
 	    log_error(USE_ERRNO, "cannot open %s", slavename);
     }
@@ -533,6 +537,14 @@ script_child(path, argv, rbac_enabled)
     char *argv[];
     int rbac_enabled;
 {
+#ifdef TIOCNOTTY
+    int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY);
+    if (fd >= 0) {
+	/* Disconnect from old controlling tty. */
+	(void) ioctl(fd, TIOCNOTTY, NULL);
+	close(fd);
+    }
+#endif
     /*
      * Create new session, make slave controlling terminal and
      * point std{in,out,err} to it.
@@ -677,7 +689,7 @@ get_pty(master, slave)
 	return(0);
     }
     strlcpy(slavename, line, sizeof(slavename));
-    *slave = open(slavename, O_RDWR, 0);
+    *slave = open(slavename, O_RDWR|O_NOCTTY, 0);
     if (*slave == -1) {
 	close(*master);
 	return(0);
@@ -716,7 +728,7 @@ get_pty(master, slave)
 #  ifdef HAVE_REVOKE
 	    (void) revoke(slavename);
 #  endif
-	    *slave = open(slavename, O_RDWR, 0);
+	    *slave = open(slavename, O_RDWR|O_NOCTTY, 0);
 	    if (*slave != -1)
 		    return(1); /* success */
 	    (void) close(*master);
