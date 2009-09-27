@@ -320,13 +320,15 @@ struct group *sudo_getgrnam __P((const char *));
 struct group *sudo_fakegrnam __P((const char *));
 struct group *sudo_getgrgid __P((gid_t));
 #ifdef HAVE_SELINUX
-void selinux_exec __P((char *, char *, char **, int));
+void selinux_exec __P((char *, char *, char **));
+void selinux_execv __P((char *, char **));
+void selinux_prefork __P((char *, char *, int));
 #endif
 #ifdef HAVE_GETUSERATTR
 void aix_setlimits __P((char *));
 #endif
 int script_duplow __P((int));
-int script_execv __P((const char *, char * const *));
+int script_execv __P((char *, char **));
 void script_nextid __P((void));
 void script_setup __P((void));
 int term_cbreak __P((int));

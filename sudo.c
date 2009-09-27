@@ -560,27 +560,24 @@ main(argc, argv, envp)
 	closefrom(def_closefrom);
 #endif
 
-#ifndef PROFILING
-	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0) {
-	    syslog(LOG_AUTH|LOG_ERR, "fork");
-	    exit(0);
-	} else {
-#ifdef HAVE_SELINUX
-	    /* XXX - script support */
-	    if (is_selinux_enabled() > 0 && user_role != NULL)
-		selinux_exec(user_role, user_type, NewArgv,
-		    ISSET(sudo_mode, MODE_LOGIN_SHELL));
-#endif
-#ifdef _PATH_SUDO_TRANSCRIPT
-	    if (def_transcript)
-		script_execv(safe_cmnd, NewArgv);
-	    else
-#endif
-		execv(safe_cmnd, NewArgv);
-	}
-#else
+#ifdef PROFILING
 	exit(0);
-#endif /* PROFILING */
+#endif
+	if (ISSET(sudo_mode, MODE_BACKGROUND) && fork() > 0) {
+	    syslog(LOG_AUTH|LOG_ERR, "fork"); /* XXX */
+	    exit(0);
+	}
+#ifdef _PATH_SUDO_TRANSCRIPT
+	if (def_transcript)
+	    script_execv(safe_cmnd, NewArgv);
+	else
+#endif
+#ifdef HAVE_SELINUX
+	if (is_selinux_enabled() > 0 && user_role != NULL)
+	    selinux_exec(user_role, user_type, NewArgv);
+	else
+#endif
+	execv(safe_cmnd, NewArgv);
 	/*
 	 * If we got here then execve() failed...
 	 */

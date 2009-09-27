@@ -82,7 +82,13 @@ static sig_atomic_t alive = 1;
 static pid_t child;
 static int child_status;
 
-static void script_child __P((const char *path, char *const argv[]));
+#if defined(HAVE_OPENPTY) || defined(HAVE_GRANTPT)
+static char slavename[PATH_MAX];
+#else
+static char slavename[] = "/dev/ptyXX";
+#endif
+
+static void script_child __P((char *path, char *argv[], int));
 static void sync_winsize __P((int src, int dst));
 static void sigchild __P((int signo));
 static void sigwinch __P((int signo));
@@ -312,8 +318,8 @@ log_output(output, n, then, now, ofile, tfile)
 
 int
 script_execv(path, argv)
-    const char *path;
-    char *const argv[];
+    char *path;
+    char *argv[];
 {
     int n, nready;
     fd_set *fdsr, *fdsw;
@@ -321,6 +327,7 @@ script_execv(path, argv)
     struct timeval now, then;
     sigaction_t sa;
     FILE *idfile, *ofile, *tfile;
+    int rbac_enabled = 0;
 
     if ((idfile = fdopen(script_fds[SFD_LOG], "w")) == NULL)
 	log_error(USE_ERRNO, "fdopen");
@@ -329,13 +336,26 @@ script_execv(path, argv)
     if ((tfile = fdopen(script_fds[SFD_TIMING], "w")) == NULL)
 	log_error(USE_ERRNO, "fdopen");
 
+#ifdef HAVE_SELINUX
+    rbac_enabled = is_selinux_enabled() > 0 && user_role != NULL;
+    if (rbac_enabled) {
+	selinux_prefork(user_role, user_type, script_fds[SFD_SLAVE]);
+	/* Re-open slave fd after it has been relabeled */
+	close(script_fds[SFD_SLAVE]);
+	script_fds[SFD_SLAVE] = open(slavename, O_RDWR, 0);
+	if (script_fds[SFD_SLAVE] == -1)
+	    log_error(USE_ERRNO, "cannot open %s", slavename);
+    }
+#endif
+
     child = fork();
     if (child == -1)
 	log_error(USE_ERRNO, "Can't fork");
     if (child == 0) {
 	/* fork child, setup tty and exec command */
-	script_child(path, argv);
-	return(-1); /* execv failure */
+	script_child(path, argv, rbac_enabled);
+	warning("unable to execute %s", path);
+	_exit(127);
     }
 
     /* Setup signal handlers for child exit and window size changes. */
@@ -508,9 +528,10 @@ script_execv(path, argv)
 }
 
 static void
-script_child(path, argv)
-    const char *path;
-    char *const argv[];
+script_child(path, argv, rbac_enabled)
+    char *path;
+    char *argv[];
+    int rbac_enabled;
 {
     /*
      * Create new session, make slave controlling terminal and
@@ -539,6 +560,11 @@ script_child(path, argv)
     close(script_fds[SFD_LOG]);
     close(script_fds[SFD_OUTPUT]);
     close(script_fds[SFD_TIMING]);
+#ifdef HAVE_SELINUX
+    if (rbac_enabled)
+      selinux_execv(path, argv);
+    else
+#endif
     execv(path, argv);
 }
 
@@ -599,22 +625,20 @@ get_pty(master, slave)
     int *master;
     int *slave;
 {
-    char line[PATH_MAX];
     struct group *gr;
     gid_t ttygid = -1;
 
     if ((gr = sudo_getgrnam("tty")) != NULL)
 	ttygid = gr->gr_gid;
 
-    if (openpty(master, slave, line, NULL, NULL) != 0)
+    if (openpty(master, slave, slavename, NULL, NULL) != 0)
 	return(0);
-    (void) chown(line, runas_pw->pw_uid, ttygid);
+    (void) chown(slavename, runas_pw->pw_uid, ttygid);
     return(1);
 }
 
 #else
 # ifdef HAVE_GRANTPT
-
 #  ifndef HAVE_POSIX_OPENPT
 static int
 posix_openpt(oflag)
@@ -652,18 +676,18 @@ get_pty(master, slave)
 	close(*master);
 	return(0);
     }
-    *slave = open(line, O_RDWR, 0);
+    strlcpy(slavename, line, sizeof(slavename));
+    *slave = open(slavename, O_RDWR, 0);
     if (*slave == -1) {
 	close(*master);
 	return(0);
     }
-    (void) chown(line, runas_pw->pw_uid, -1);
+    (void) chown(slavename, runas_pw->pw_uid, -1);
     return(1);
 }
 
 # else /* !HAVE_GRANTPT */
 
-static char line[] = "/dev/ptyXX";
 static int
 get_pty(master, slave)
     int *master;
@@ -677,22 +701,22 @@ get_pty(master, slave)
 	ttygid = gr->gr_gid;
 
     for (bank = "pqrs"; *bank != '\0'; bank++) {
-	line[sizeof("/dev/ptyX") - 2] = *bank;
+	slavename[sizeof("/dev/ptyX") - 2] = *bank;
 	for (cp = "0123456789abcdef"; *cp != '\0'; cp++) {
-	    line[sizeof("/dev/ptyXX") - 2] = *cp;
-	    *master = open(line, O_RDWR, 0);
+	    slavename[sizeof("/dev/ptyXX") - 2] = *cp;
+	    *master = open(slavename, O_RDWR, 0);
 	    if (*master == -1) {
 		if (errno == ENOENT)
 		    return(0); /* out of ptys */
 		continue; /* already in use */
 	    }
-	    line[sizeof("/dev/p") - 2] = 't';
-	    (void) chown(line, runas_pw->pw_uid, ttygid);
-	    (void) chmod(line, S_IRUSR|S_IWUSR|S_IWGRP);
+	    slavename[sizeof("/dev/p") - 2] = 't';
+	    (void) chown(slavename, runas_pw->pw_uid, ttygid);
+	    (void) chmod(slavename, S_IRUSR|S_IWUSR|S_IWGRP);
 #  ifdef HAVE_REVOKE
-	    (void) revoke(line);
+	    (void) revoke(slavename);
 #  endif
-	    *slave = open(line, O_RDWR, 0);
+	    *slave = open(slavename, O_RDWR, 0);
 	    if (*slave != -1)
 		    return(1); /* success */
 	    (void) close(*master);

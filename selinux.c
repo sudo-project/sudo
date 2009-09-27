@@ -52,6 +52,12 @@
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
+static security_context_t old_context;
+static security_context_t new_context;
+static security_context_t tty_context;
+static security_context_t new_tty_context;
+static int enforcing;
+
 /*
  * This function attempts to revert the relabeling done to the tty.
  * fd		   - referencing the opened ttyn
@@ -95,49 +101,36 @@ skip_relabel:
 
 /*
  * This function attempts to relabel the tty. If this function fails, then
- * the fd is closed, the contexts are free'd and -1 is returned. On success,
- * a valid fd is returned and tty_context and new_tty_context are set.
+ * the contexts are free'd and -1 is returned. On success, 0 is returned
+ * and tty_context and new_tty_context are set.
  *
  * This function will not fail if it can not relabel the tty when selinux is
  * in permissive mode.
  */
 static int
-relabel_tty(const char *ttyn, security_context_t new_context,
-    security_context_t * tty_context, security_context_t * new_tty_context,
+relabel_tty(int ttyfd, security_context_t new_context,
+    security_context_t *tty_context, security_context_t *new_tty_context,
     int enforcing)
 {
-    int fd;
     security_context_t tty_con = NULL;
     security_context_t new_tty_con = NULL;
 
-    if (!ttyn)
-	return(0);
-
-    /* Re-open TTY descriptor */
-    fd = open(ttyn, O_RDWR | O_NONBLOCK);
-    if (fd == -1) {
-	warning("unable to open %s", ttyn);
-	return(-1);
-    }
-    (void)fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) & ~O_NONBLOCK);
-
-    if (fgetfilecon(fd, &tty_con) < 0) {
-	warning("unable to get current context for %s, not relabeling tty",
-	    ttyn);
+    if (fgetfilecon(ttyfd, &tty_con) < 0) {
+	warning("unable to get current tty context, not relabeling tty");
 	if (enforcing)
 	    goto error;
     }
 
     if (tty_con && (security_compute_relabel(new_context, tty_con,
 	SECCLASS_CHR_FILE, &new_tty_con) < 0)) {
-	warning("unable to get new context for %s, not relabeling tty", ttyn);
+	warning("unable to get new tty context, not relabeling tty");
 	if (enforcing)
 	    goto error;
     }
 
     if (new_tty_con != NULL) {
-	if (fsetfilecon(fd, new_tty_con) < 0) {
-	    warning("unable to set new context for %s", ttyn);
+	if (fsetfilecon(ttyfd, new_tty_con) < 0) {
+	    warning("unable to set new tty context");
 	    if (enforcing)
 		goto error;
 	}
@@ -145,11 +138,10 @@ relabel_tty(const char *ttyn, security_context_t new_context,
 
     *tty_context = tty_con;
     *new_tty_context = new_tty_con;
-    return(fd);
+    return(0);
 
 error:
     freecon(tty_con);
-    close(fd);
     return(-1);
 }
 
@@ -220,25 +212,11 @@ error:
 }
 
 /* 
- * If the program is being run with a different security context we
- * need to go through an intermediary process for the transition to
- * be allowed by the policy.  We use the "sesh" shell for this, which
- * will simply execute the command pass to it on the command line.
+ * Set the tty context in preparation for fork/exec.
  */
 void
-selinux_exec(char *role, char *type, char **argv, int login_shell)
+selinux_prefork(char *role, char *type, int ttyfd)
 {
-    security_context_t old_context = NULL;
-    security_context_t new_context = NULL;
-    security_context_t tty_context = NULL;
-    security_context_t new_tty_context = NULL;
-    pid_t childPid;
-    int enforcing, ttyfd;
-
-    /* Must have a tty. */
-    if (user_ttypath == NULL || *user_ttypath == '\0')
-	error(EXIT_FAILURE, "unable to determine tty");
-
     /* Store the caller's SID in old_context. */
     if (getprevcon(&old_context))
 	error(EXIT_FAILURE, "failed to get old_context");
@@ -247,15 +225,14 @@ selinux_exec(char *role, char *type, char **argv, int login_shell)
     if (enforcing < 0)
 	error(EXIT_FAILURE, "unable to determine enforcing mode.");
 
-    
 #ifdef DEBUG
     warningx("your old context was %s", old_context);
 #endif
     new_context = get_exec_context(old_context, role, type);
     if (!new_context)
-	exit(EXIT_FAILURE);
+	error(EXIT_FAILURE, "unable to get exec context");
     
-    ttyfd = relabel_tty(user_ttypath, new_context, &tty_context,
+    ttyfd = relabel_tty(ttyfd, new_context, &tty_context,
 	&new_tty_context, enforcing);
     if (ttyfd < 0)
 	error(EXIT_FAILURE, "unable to setup tty context for %s", new_context);
@@ -264,6 +241,64 @@ selinux_exec(char *role, char *type, char **argv, int login_shell)
     warningx("your old tty context is %s", tty_context);
     warningx("your new tty context is %s", new_tty_context);
 #endif
+}
+
+void
+selinux_execv(char *path, char **argv)
+{
+    if (setexeccon(new_context)) {
+	warning("unable to set exec context to %s", new_context);
+	if (enforcing)
+	    return;
+    }
+
+    if (setkeycreatecon(new_context)) {
+	warning("unable to set key creation context to %s", new_context);
+	if (enforcing)
+	    return;
+    }
+
+#ifdef WITH_AUDIT
+    if (send_audit_message(1, old_context, new_context, user_ttypath)) 
+	return;
+#endif
+
+    /* We use the "spare" slot in argv to store sesh. */
+    --argv;
+    argv[0] = *argv[1] == '-' ? "-sesh" : "sesh";
+    argv[1] = path;
+
+    execv(_PATH_SUDO_SESH, argv);
+    warning("%s", path);
+}
+
+/* 
+ * If the program is being run with a different security context we
+ * need to go through an intermediary process for the transition to
+ * be allowed by the policy.  We use the "sesh" shell for this, which
+ * will simply execute the command pass to it on the command line.
+ */
+void
+selinux_exec(char *role, char *type, char **argv)
+{
+    pid_t childPid;
+    int enforcing, ttyfd;
+
+    /* Must have a tty. */
+    if (user_ttypath == NULL || *user_ttypath == '\0')
+	error(EXIT_FAILURE, "unable to determine tty");
+
+    /* Re-open TTY descriptor */
+    ttyfd = open(user_ttypath, O_RDWR | O_NONBLOCK);
+    if (ttyfd == -1)
+	error(EXIT_FAILURE, "unable to open %s", user_ttypath);
+    (void)fcntl(ttyfd, F_SETFL, fcntl(ttyfd, F_GETFL, 0) & ~O_NONBLOCK);
+
+    /*
+     * Get the old and new security and tty contexts, sets the new
+     * tty context on ttyfd.
+     */
+    selinux_prefork(role, type, ttyfd);
 
     childPid = fork();
     if (childPid < 0) {
@@ -311,30 +346,7 @@ selinux_exec(char *role, char *type, char **argv, int login_shell)
     if (ttyfd != STDERR_FILENO)
 	goto error;
 
-    if (setexeccon(new_context)) {
-	warning("unable to set exec context to %s", new_context);
-	if (enforcing)
-	    goto error;
-    }
-
-    if (setkeycreatecon(new_context)) {
-	warning("unable to set key creation context to %s", new_context);
-	if (enforcing)
-	    goto error;
-    }
-
-#ifdef WITH_AUDIT
-    if (send_audit_message(1, old_context, new_context, user_ttypath)) 
-	goto error;
-#endif
-
-    /* We use the "spare" slot in argv to store sesh. */
-    --argv;
-    argv[0] = login_shell ? "-sesh" : "sesh";
-    argv[1] = safe_cmnd;
-
-    execv(_PATH_SUDO_SESH, argv);
-    warning("%s", safe_cmnd);
+    selinux_execv(safe_cmnd, argv);
 
 error:
     _exit(EXIT_FAILURE);
