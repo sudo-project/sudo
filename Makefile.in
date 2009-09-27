@@ -131,12 +131,12 @@ AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 # Note: gram.o must come first here
 COMMON_OBJS = alias.o alloc.o defaults.o error.o getline.o gram.o \
 	      list.o match.o pwutil.o timestr.o toke.o redblack.o \
-	      zero_bytes.o @NONUNIX_GROUPS_IMPL@
+	      term.o zero_bytes.o @NONUNIX_GROUPS_IMPL@
 
 SUDO_OBJS = $(AUTH_OBJS) @SUDO_OBJS@ audit.o check.o \
 	    env.o getspwuid.o gettime.o goodpath.o fileops.o find_path.o \
 	    interfaces.o lbuf.o logging.o parse.o set_perms.o sudo.o \
-	    sudo_edit.o sudo_nss.o term.o tgetpass.o
+	    sudo_edit.o sudo_nss.o tgetpass.o
 
 VISUDO_OBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o
 

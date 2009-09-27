@@ -191,8 +191,6 @@ term_copy(src, dst)
 
     if (tcgetattr(src, &tt) != 0)
 	return(0);
-    /* Do not convert line endings from NL to NLCR. */
-    CRL(tt.c_oflag, ONLCR);
     if (tcsetattr(dst, TCSAFLUSH, &tt) != 0)
 	return(0);
     return(1);
@@ -251,8 +249,6 @@ term_copy(src, dst)
 	ioctl(src, TIOCLGET, &lb)) {
 	return(0);
     }
-    /* Do not convert line endings from NL to NLCR. */
-    CLR(b.sg_flags, CRMOD);
     if (ioctl(dst, TIOCSETP, &b) != 0 || ioctl(dst, TIOCSETC, &tc) != 0 ||
 	ioctl(dst, TIOCSLTC, &lc) != 0 || ioctl(dst, TIOCLSET, &lb) != 0 ||
 	ioctl(dst, TIOCSETD, &l) != 0) {

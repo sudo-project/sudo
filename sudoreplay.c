@@ -272,10 +272,14 @@ main(argc, argv)
     free(cp);
     fclose(lfile);
 
+    /* Set stdout to raw mode if it is a tty */
+    /* XXX - reset terminal on signal */
+    fflush(stdout);
+    term_raw(STDOUT_FILENO);
+
     /*
      * Timing file consists of line of the format: "%f %d\n"
      */
-    fflush(stdout);
     while (fgets(buf, sizeof(buf), tfile) != NULL) {
 	errno = 0;
 	seconds = strtod(buf, &ep);
@@ -310,6 +314,7 @@ main(argc, argv)
 	    } while (nread);
 	}
     }
+    term_restore(STDOUT_FILENO);
     exit(0);
 }
 
