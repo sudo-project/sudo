@@ -497,13 +497,13 @@ script_execv(path, argv)
 	n &= ~O_NONBLOCK;
 	(void) fcntl(STDOUT_FILENO, F_SETFL, n);
     }
-    do {
+    while (output.len > output.off) {
 	n = write(STDOUT_FILENO, output.buf + output.off,
 	    output.len - output.off);
 	if (n <= 0)
 	    break;
 	output.off += n;
-    } while (output.len > output.off);
+    }
 
     /* Make sure there is no output remaining on the master pty. */
     for (;;) {
