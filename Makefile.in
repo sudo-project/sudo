@@ -456,12 +456,12 @@ install-binaries: install-dirs $(PROGS)
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 -s sudo $(DESTDIR)$(sudodir)/sudo
 	rm -f $(DESTDIR)$(sudodir)/sudoedit
 	ln $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
-	test -r sudoreplay && $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sudoreplay $(DESTDIR)$(sudodir)/sudoreplay
+	if [ -f sudoreplay ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sudoreplay $(DESTDIR)$(sudodir)/sudoreplay; fi
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s visudo $(DESTDIR)$(visudodir)/visudo
-	test -r sesh && $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sesh $(DESTDIR)$(libexecdir)/sesh
+	if [ -f sesh ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sesh $(DESTDIR)$(libexecdir)/sesh; fi
 
 install-noexec: install-dirs sudo_noexec.la
-	test -f .libs/$(noexecfile) && $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0755 .libs/$(noexecfile) $(DESTDIR)$(noexecdir)
+	if [ -f .libs/$(noexecfile) ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0755 .libs/$(noexecfile) $(DESTDIR)$(noexecdir); fi
 
 install-sudoers: install-dirs
 	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
