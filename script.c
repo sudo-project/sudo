@@ -231,7 +231,7 @@ script_setup()
     int len;
 
     if (!isatty(STDIN_FILENO))
-	log_error(USE_ERRNO, "Standard input is not a tty");
+	log_error(0, "Standard input is not a tty");
 
     if (!get_pty(&script_fds[SFD_MASTER], &script_fds[SFD_SLAVE]))
 	log_error(USE_ERRNO, "Can't get pty");
