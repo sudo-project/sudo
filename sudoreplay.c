@@ -158,11 +158,14 @@ extern ssize_t getline __P((char **, size_t *, FILE *));
 extern size_t strlcpy __P((char *, const char *, size_t));
 #endif
 #ifndef HAVE_SNPRINTF
-int snprintf __P((char *, size_t, const char *, ...)) __printflike(3, 4);
+extern int snprintf __P((char *, size_t, const char *, ...)) __printflike(3, 4);
 #endif
 #ifndef HAVE_NANOSLEEP
-int nanosleep __P((const struct timespec *, struct timespec *));
+extern int nanosleep __P((const struct timespec *, struct timespec *));
 #endif
+extern int term_raw __P((int, int));
+extern int term_restore __P((int));
+void cleanup __P((int));
 
 static int list_sessions __P((int, char **, const char *, const char *, const char *));
 static int parse_expr __P((struct search_node **, char **));
@@ -187,6 +190,7 @@ main(argc, argv)
     const char *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     FILE *tfile, *sfile, *lfile;
+    sigaction_t sa;
     double seconds;
     unsigned long nbytes;
     size_t len, nread;
@@ -273,9 +277,20 @@ main(argc, argv)
     fclose(lfile);
 
     /* Set stdout to raw mode if it is a tty */
-    /* XXX - reset terminal on signal */
     fflush(stdout);
-    term_raw(STDOUT_FILENO);
+    zero_bytes(&sa, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESETHAND;
+    sa.sa_handler = cleanup;
+    (void) sigaction(SIGINT, &sa, NULL);
+    (void) sigaction(SIGKILL, &sa, NULL);
+    (void) sigaction(SIGTERM, &sa, NULL);
+    (void) sigaction(SIGHUP, &sa, NULL);
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = SIG_IGN;
+    (void) sigaction(SIGTSTP, &sa, NULL);
+    (void) sigaction(SIGQUIT, &sa, NULL);
+    term_cbreak(STDOUT_FILENO);
 
     /*
      * Timing file consists of line of the format: "%f %d\n"
@@ -721,8 +736,10 @@ usage()
  * Cleanup hook for error()/errorx()
   */
 void
-cleanup(gotsignal)
-  int gotsignal;
+cleanup(signo)
+    int signo;
 {
-    /* nothing yet */
+    term_restore(STDOUT_FILENO);
+    if (signo)
+	kill(getpid(), signo);
 }
