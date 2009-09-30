@@ -137,8 +137,9 @@ term_noecho(fd)
 #if defined(HAVE_TERMIOS_H) || defined(HAVE_TERMIO_H)
 
 int
-term_raw(fd)
+term_raw(fd, onlcr)
     int fd;
+    int onlcr;
 {
     struct termios term;
 
@@ -147,11 +148,15 @@ term_raw(fd)
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to raw mode */
     term.c_iflag &= ~(ICRNL|IGNCR|INLCR|IUCLC|IXON);
-    term.c_oflag &= ~OPOST;
+    /* Retain NL to NLCR conversion if onlcr flag set. */
+    if (onlcr && ISSET(term.c_oflag, ONLCR|OPOST))
+	term.c_oflag = ONLCR|OPOST;
+    else
+	term.c_oflag &= ~OPOST;
     term.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
     term.c_cc[VMIN] = 1;
     term.c_cc[VTIME] = 0;
-    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &term) == 0) {
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH|TCSASOFT, &term) == 0) {
 	changed = 1;
     	return(1);
     }
@@ -183,15 +188,19 @@ term_cbreak(fd)
 }
 
 int
-term_copy(src, dst)
+term_copy(src, dst, onlcr)
     int src;
     int dst;
+    int onlcr;
 {
     struct termios tt;
 
     if (tcgetattr(src, &tt) != 0)
 	return(0);
-    if (tcsetattr(dst, TCSAFLUSH, &tt) != 0)
+    /* Do not convert line endings from NL to NLCR. */
+    if (!onlcr)
+	CLR(tt.c_oflag, ONLCR);
+    if (tcsetattr(dst, TCSAFLUSH|TCSASOFT, &tt) != 0)
 	return(0);
     return(1);
 }
@@ -199,8 +208,9 @@ term_copy(src, dst)
 #else /* SGTTY */
 
 int
-term_raw(fd)
+term_raw(fd, onlcr)
     int fd;
+    int onlcr;
 {
     if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
 	return(0);
@@ -208,6 +218,9 @@ term_raw(fd)
     /* Set terminal to raw mode */
     CLR(term.c_lflag, ECHO);
     SET(term.sg_flags, RAW);
+    /* Retain NL to NLCR conversion if onlcr flag set. */
+    if (onlcr)
+	SET(term.sg_flags, CRMOD);
     if (ioctl(fd, TIOCSETP, &term) == 0) {
 	changed = 1;
 	return(1);
@@ -235,9 +248,10 @@ term_cbreak(fd)
 }
 
 int
-term_copy(src, dst)
+term_copy(src, dst, onlcr)
     int src;
     int dst;
+    int onlcr;
 {
     struct sgttyb b;
     struct tchars tc;
@@ -249,6 +263,9 @@ term_copy(src, dst)
 	ioctl(src, TIOCLGET, &lb)) {
 	return(0);
     }
+    /* Do not convert line endings from NL to NLCR. */
+    if (!onlcr)
+	CLR(b.sg_flags, CRMOD);
     if (ioctl(dst, TIOCSETP, &b) != 0 || ioctl(dst, TIOCSETC, &tc) != 0 ||
 	ioctl(dst, TIOCSLTC, &lc) != 0 || ioctl(dst, TIOCLSET, &lb) != 0 ||
 	ioctl(dst, TIOCSETD, &l) != 0) {

@@ -237,12 +237,12 @@ script_setup()
 	log_error(USE_ERRNO, "Can't get pty");
 
     /* Copy terminal attrs from stdin -> pty slave. */
-    if (!term_copy(STDIN_FILENO, script_fds[SFD_SLAVE])) {
+    if (!term_copy(STDIN_FILENO, script_fds[SFD_SLAVE], 0)) {
 	log_error(USE_ERRNO, "Can't copy terminal attributes");
     }
     sync_winsize(STDIN_FILENO, script_fds[SFD_SLAVE]);
 
-    if (!term_raw(STDIN_FILENO))
+    if (!term_raw(STDIN_FILENO, 1))
 	log_error(USE_ERRNO, "Can't set terminal to raw mode");
 
     /*
