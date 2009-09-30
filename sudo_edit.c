@@ -171,21 +171,23 @@ sudo_edit(argc, argv, envp)
 	    }
 	    close(ofd);
 	}
-#ifdef HAVE_FSTAT
 	/*
-	 * If we are unable to set the mtime on the temp file to the value
-	 * of the original file just make the stashed mtime match the temp
-	 * file's mtime.  It is better than nothing and we only use the info
+	 * We always update the stashed mtime because the time
+	 * resolution of the filesystem the temporary file is on may
+	 * not match that of the filesystem where the file to be edited
+	 * resides.  It is OK if touch() fails since we only use the info
 	 * to determine whether or not a file has been modified.
 	 */
-	if (touch(tfd, NULL, &tf[i].omtim) == -1) {
-	    if (fstat(tfd, &sb) == 0) {
-		tf[i].omtim.tv_sec = mtim_getsec(sb);
-		tf[i].omtim.tv_nsec = mtim_getnsec(sb);
-	    }
-	    /* XXX - else error? */
-	}
+	(void) touch(tfd, NULL, &tf[i].omtim);
+#ifdef HAVE_FSTAT
+	error = fstat(tfd, &sb);
+#else
+	error = stat(tf[i].tfile, &sb);
 #endif
+	if (!error) {
+	    tf[i].omtim.tv_sec = mtim_getsec(sb);
+	    tf[i].omtim.tv_nsec = mtim_getnsec(sb);
+	}
 	close(tfd);
     }
     if (argc == 1)
