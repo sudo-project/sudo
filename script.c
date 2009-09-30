@@ -302,8 +302,8 @@ script_duplow(fd)
 
 /* Update output and timing files. */
 static void
-log_output(output, n, then, now, ofile, tfile)
-    struct script_buf *output;
+log_output(buf, n, then, now, ofile, tfile)
+    char *buf;
     int n;
     struct timeval *then;
     struct timeval *now;
@@ -312,7 +312,7 @@ log_output(output, n, then, now, ofile, tfile)
 {
     struct timeval tv;
 
-    fwrite(output->buf + output->off, 1, n, ofile);
+    fwrite(buf, 1, n, ofile);
     timersub(now, then, &tv);
     fprintf(tfile, "%f %d\n",
 	tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
@@ -471,10 +471,11 @@ script_execv(path, argv)
 	    } else {
 		if (n == 0)
 		    break; /* got EOF */
-		output.len += n;
 
 		/* Update output and timing files. */
-		log_output(&output, n, &then, &now, ofile, tfile);
+		log_output(output.buf + output.len, n, &then, &now, ofile, tfile);
+
+		output.len += n;
 	    }
 	}
 	if (FD_ISSET(STDOUT_FILENO, fdsw)) {
@@ -510,9 +511,9 @@ script_execv(path, argv)
 	n = read(script_fds[SFD_MASTER], output.buf, sizeof(output.buf));
 	if (n <= 0)
 	    break;
+	log_output(output.buf, n, &then, &now, ofile, tfile);
 	output.off = 0;
 	output.len = n;
-	log_output(&output, output.len, &then, &now, ofile, tfile);
 	do {
 	    n = write(STDOUT_FILENO, output.buf + output.off,
 		output.len - output.off);
