@@ -76,6 +76,7 @@
 #ifdef HAVE_REGCOMP
 # include <regex.h>
 #endif
+#include <signal.h>
 
 #include <pathnames.h>
 
@@ -163,8 +164,9 @@ extern int snprintf __P((char *, size_t, const char *, ...)) __printflike(3, 4);
 #ifndef HAVE_NANOSLEEP
 extern int nanosleep __P((const struct timespec *, struct timespec *));
 #endif
-extern int term_raw __P((int, int));
+extern int term_cbreak __P((int));
 extern int term_restore __P((int));
+extern void zero_bytes __P((volatile void *, size_t));
 void cleanup __P((int));
 
 static int list_sessions __P((int, char **, const char *, const char *, const char *));
@@ -276,7 +278,7 @@ main(argc, argv)
     free(cp);
     fclose(lfile);
 
-    /* Set stdout to raw mode if it is a tty */
+    /* Set stdout to cbreak mode if it is a tty */
     fflush(stdout);
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
