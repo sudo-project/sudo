@@ -39,6 +39,25 @@ session logging enabled.
 In list mode, B<sudoreplay> can be used to find the ID of a session
 based on a number of criteria such as the user, tty or command run.
 
+In replay mode, if the standard output has not been redirected,
+B<sudoreplay> will act on the following keys:
+
+=over 8
+
+=item ' ' (space)
+
+Pause output; press any key to resume.
+
+=item '<'
+
+Reduce the playback speed by one half.
+
+=item '>'
+
+Double the playback speed.
+
+=back
+
 =head1 OPTIONS
 
 B<sudoreplay> accepts the following command line options:

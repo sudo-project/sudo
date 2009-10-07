@@ -23,6 +23,16 @@ DDEESSCCRRIIPPTTIIOONN
        In list mode, ssuuddoorreeppllaayy can be used to find the ID of a session based
        on a number of criteria such as the user, tty or command run.
 
+       In replay mode, if the standard output has not been redirected,
+       ssuuddoorreeppllaayy will act on the following keys:
+
+       ' ' (space)
+               Pause output; press any key to resume.
+
+       '<'     Reduce the playback speed by one half.
+
+       '>'     Double the playback speed.
+
 OOPPTTIIOONNSS
        ssuuddoorreeppllaayy accepts the following command line options:
 
@@ -48,6 +58,18 @@ OOPPTTIIOONNSS
                            Evaluates to true if the command was run with the
                            specified current working directory.
 
+
+
+
+1.7.2                    October  6, 2009                       1
+
+
+
+
+
+SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
+
+
                    fromdate _d_a_t_e
                            Evaluates to true if the command was run on or
                            after _d_a_t_e.  See "Date and time format" for a
@@ -58,17 +80,6 @@ OOPPTTIIOONNSS
                            specified _r_u_n_a_s___g_r_o_u_p.  Note that unless a
                            _r_u_n_a_s___g_r_o_u_p was explicitly specified when ssuuddoo was
                            run this field will be empty in the log.
-
-
-
-1.7.2                   September 19, 2009                      1
-
-
-
-
-
-SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
-
 
                    runas _r_u_n_a_s___u_s_e_r
                            Evaluates to true if the command was run as the
@@ -113,21 +124,10 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
                    seconds it will wait between key presses or program output.
                    This can be used to slow down or speed up the display.  For
                    example, a _s_p_e_e_d___f_a_c_t_o_r of _2 would make the output twice as
-                   fast whereas a _s_p_e_e_d___f_a_c_t_o_r of <.5> would make the output
-                   twice as slow.
-
-       -V          The --VV (version) option causes ssuuddoorreeppllaayy to print its
-                   version number and exit.
-
-       DDaattee aanndd ttiimmee ffoorrmmaatt
-
-       The time and date may be specified multiple ways, common formats
-       include:
 
 
 
-
-1.7.2                   September 19, 2009                      2
+1.7.2                    October  6, 2009                       2
 
 
 
@@ -135,6 +135,16 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
 SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
+
+                   fast whereas a _s_p_e_e_d___f_a_c_t_o_r of <.5> would make the output
+                   twice as slow.
+
+       -V          The --VV (version) option causes ssuuddoorreeppllaayy to print its
+                   version number and exit.
+
+   DDaattee aanndd ttiimmee ffoorrmmaatt
+       The time and date may be specified multiple ways, common formats
+       include:
 
        HH:MM:SS am MM/DD/CCYY timezone
                24 hour time may be used in place of am/pm.
@@ -181,19 +191,9 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
        10:01 am 9/17/2009
                10:01 am, September 17, 2009.
 
-       10:01 am
-               10:01 am on the current day.
-
-       10      10:00 am on the current day.
-
-       9/17/2009
-               00:00 am, September 17, 2009.
 
 
-
-
-
-1.7.2                   September 19, 2009                      3
+1.7.2                    October  6, 2009                       3
 
 
 
@@ -201,6 +201,14 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
 SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
+
+       10:01 am
+               10:01 am on the current day.
+
+       10      10:00 am on the current day.
+
+       9/17/2009
+               00:00 am, September 17, 2009.
 
        10:01 am Sep 17, 2009
                10:01 am, September 17, 2009.
@@ -249,6 +257,17 @@ SSUUPPPPOORRTT
        http://www.sudo.ws/mailman/listinfo/sudo-users to subscribe or search
        the archives.
 
+
+
+1.7.2                    October  6, 2009                       4
+
+
+
+
+
+SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
+
+
 DDIISSCCLLAAIIMMEERR
        ssuuddoorreeppllaayy is provided ``AS IS'' and any express or implied warranties,
        including, but not limited to, the implied warranties of
@@ -259,6 +278,53 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.2                   September 19, 2009                      4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.7.2                    October  6, 2009                       5
 
 

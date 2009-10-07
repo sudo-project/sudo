@@ -148,6 +148,7 @@ static struct search_node *node_stack[32];
 static int stack_top;
 
 extern void *emalloc __P((size_t));
+extern void *emalloc2 __P((size_t, size_t));
 extern void *erealloc __P((void *, size_t));
 extern void efree __P((void *));
 extern time_t get_date __P((char *));
@@ -171,6 +172,7 @@ void cleanup __P((int));
 
 static int list_sessions __P((int, char **, const char *, const char *, const char *));
 static int parse_expr __P((struct search_node **, char **));
+static void check_input __P((int, double *));
 static void delay __P((double));
 static void usage __P((void));
 
@@ -188,15 +190,15 @@ main(argc, argv)
     int argc;
     char **argv;
 {
-    int ch, plen, listonly = 0;
+    int ch, plen, ttyfd, interactive = 0, listonly = 0;
     const char *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     FILE *tfile, *sfile, *lfile;
     sigaction_t sa;
-    double seconds;
     unsigned long nbytes;
     size_t len, nread;
     ssize_t nwritten;
+    double seconds;
     double speed = 1.0;
     double max_wait = 0;
     double to_wait;
@@ -292,7 +294,12 @@ main(argc, argv)
     sa.sa_handler = SIG_IGN;
     (void) sigaction(SIGTSTP, &sa, NULL);
     (void) sigaction(SIGQUIT, &sa, NULL);
-    term_cbreak(STDOUT_FILENO);
+
+    ttyfd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
+    if (ttyfd != -1) {
+	term_cbreak(ttyfd);
+	interactive = isatty(STDOUT_FILENO);
+    }
 
     /*
      * Timing file consists of line of the format: "%f %d\n"
@@ -308,6 +315,9 @@ main(argc, argv)
 	nbytes = strtoul(cp, &ep, 10);
 	if (errno == ERANGE && nbytes == ULONG_MAX)
 	    error(1, "invalid timing file byte count: %s", cp);
+
+	if (interactive)
+	    check_input(ttyfd, &speed);
 
 	/* Adjust delay using speed factor and clamp to max_wait */
 	to_wait = seconds / speed;
@@ -720,6 +730,58 @@ list_sessions(argc, argv, pattern, user, tty)
     }
     closedir(d1);
     return(0);
+}
+
+/*
+ * Check input for ' ', '<', '>'
+ * pause, slow, fast
+ */
+static void
+check_input(ttyfd, speed)
+    int ttyfd;
+    double *speed;
+{
+    fd_set *fdsr;
+    int flags, nready;
+    struct timeval tv;
+    char ch;
+    ssize_t n;
+
+    fdsr = (fd_set *)emalloc2(howmany(ttyfd + 1, NFDBITS), sizeof(fd_mask));
+    FD_SET(ttyfd, fdsr);
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+
+    nready = select(ttyfd + 1, fdsr, NULL, NULL, &tv);
+    if (nready == 1) {
+	flags = fcntl(ttyfd, F_GETFL, 0);
+	if (flags != -1)
+	    (void) fcntl(ttyfd, F_SETFL, flags | O_NONBLOCK);
+	do {
+	    n = read(ttyfd, &ch, 1);
+	    if (n == 1) {
+		switch (ch) {
+		case ' ':
+		    /* wait for another character */
+		    if (flags != -1)
+			(void) fcntl(ttyfd, F_SETFL, flags);
+		    n = read(ttyfd, &ch, 1);
+		    if (flags != -1)
+			(void) fcntl(ttyfd, F_SETFL, flags | O_NONBLOCK);
+		    break;
+		case '<':
+		    *speed /= 2;
+		    break;
+		case '>':
+		    *speed *= 2;
+		    break;
+		}
+	    }
+	} while (n == 1);
+	if (flags != -1)
+	    (void) fcntl(ttyfd, F_SETFL, flags);
+    }
+    free(fdsr);
 }
 
 static void
