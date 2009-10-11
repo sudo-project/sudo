@@ -794,9 +794,8 @@ sigrelay(signo)
     }
     /* Relay signal back to parent for its tty. */
     kill(parent, signo);
-    /* Suspend self, parent will continue us when it is time. */
-    /* XXX - want to be able to handle SIGSTOP too */
-    kill(getpid(), SIGSTOP);
+    /* Suspend self and command, parent will continue us when it is time. */
+    killpg(getpid(), SIGSTOP);
 
     errno = serrno;
 }
