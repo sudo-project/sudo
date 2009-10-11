@@ -680,8 +680,12 @@ script_child(path, argv)
 
     if (WIFEXITED(grandchild_status))
 	exit(WEXITSTATUS(grandchild_status));
-    if (WIFSIGNALED(grandchild_status))
+    if (WIFSIGNALED(grandchild_status)) {
+	switch (WTERMSIG(grandchild_status)) {
+
+	}
 	exit(WTERMSIG(grandchild_status) | 128);
+    }
     exit(1);
 }
 
@@ -792,7 +796,7 @@ sigchild(signo)
 #ifdef sudo_waitpid
     do {
 	pid = sudo_waitpid(grandchild, &grandchild_status, WNOHANG);
-	if (pid == grandchild)
+	if (pid == grandchild) {
 	    alive = 0;
 	    break;
 	}
