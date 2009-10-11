@@ -47,6 +47,7 @@
 #  include <sys/ioctl.h>
 # endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
+#include <errno.h>
 
 #include "sudo.h"
 
@@ -108,8 +109,13 @@ int
 term_restore(fd)
     int fd;
 {
+    int rval;
+
     if (changed) {
-	if (tcsetattr(fd, TCSAFLUSH|TCSASOFT, &oterm) != 0)
+	do {
+	    rval = tcsetattr(fd, TCSAFLUSH|TCSASOFT, &oterm);
+	} while (rval == -1 && errno == EINTR);
+	if (rval)
 	    return(0);
 	changed = 0;
     }
@@ -120,18 +126,27 @@ int
 term_noecho(fd)
     int fd;
 {
-    if (!changed && tcgetattr(fd, &oterm) != 0)
-	return(0);
+    int rval;
+
+    if (!changed) {
+	do {
+	    rval = tcgetattr(fd, &oterm);
+	} while (rval == -1 && errno == EINTR);
+	if (rval)
+	    return(0);
+    }
     (void) memcpy(&term, &oterm, sizeof(term));
     CLR(term.c_lflag, ECHO|ECHONL);
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr(fd, TCSAFLUSH|TCSASOFT, &term) == 0) {
-	changed = 1;
-	return(1);
-    }
-    return(0);
+    do {
+	rval = tcsetattr(fd, TCSAFLUSH|TCSASOFT, &term);
+    } while (rval == -1 && errno == EINTR);
+    if (rval)
+	return(0);
+    changed = 1;
+    return(1);
 }
 
 #if defined(HAVE_TERMIOS_H) || defined(HAVE_TERMIO_H)
@@ -142,9 +157,15 @@ term_raw(fd, onlcr)
     int onlcr;
 {
     struct termios term;
+    int rval;
 
-    if (!changed && tcgetattr(fd, &oterm) != 0)
-	return(0);
+    if (!changed) {
+	do {
+	    rval = tcgetattr(fd, &oterm);
+	} while (rval == -1 && errno == EINTR);
+	if (rval)
+	    return(0);
+    }
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to raw mode */
     term.c_iflag &= ~(ICRNL|IGNCR|INLCR|IUCLC|IXON);
@@ -156,19 +177,28 @@ term_raw(fd, onlcr)
     term.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
     term.c_cc[VMIN] = 1;
     term.c_cc[VTIME] = 0;
-    if (tcsetattr(STDIN_FILENO, TCSAFLUSH|TCSASOFT, &term) == 0) {
-	changed = 1;
-    	return(1);
-    }
-    return(0);
+    do {
+	rval = tcsetattr(fd, TCSAFLUSH|TCSASOFT, &term);
+    } while (rval == -1 && errno == EINTR);
+    if (rval)
+	return(0);
+    changed = 1;
+    return(1);
 }
 
 int
 term_cbreak(fd)
     int fd;
 {
-    if (!changed && tcgetattr(fd, &oterm) != 0)
-	return(0);
+    int rval;
+
+    if (!changed) {
+	do {
+	    rval = tcgetattr(fd, &oterm);
+	} while (rval == -1 && errno == EINTR);
+	if (rval)
+	    return(0);
+    }
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to half-cooked mode */
     term.c_cc[VMIN] = 1;
@@ -178,13 +208,15 @@ term_cbreak(fd)
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr(fd, TCSAFLUSH|TCSASOFT, &term) == 0) {
-	term_erase = term.c_cc[VERASE];
-	term_kill = term.c_cc[VKILL];
-	changed = 1;
-	return(1);
-    }
-    return(0);
+    do {
+	rval = tcsetattr(fd, TCSAFLUSH|TCSASOFT, &term);
+    } while (rval == -1 && errno == EINTR);
+    if (rval)
+	return(0);
+    term_erase = term.c_cc[VERASE];
+    term_kill = term.c_cc[VKILL];
+    changed = 1;
+    return(1);
 }
 
 int
@@ -194,13 +226,20 @@ term_copy(src, dst, onlcr)
     int onlcr;
 {
     struct termios tt;
+    int rval;
 
-    if (tcgetattr(src, &tt) != 0)
+    do {
+	rval = tcgetattr(src, &tt);
+    } while (rval == -1 && errno == EINTR);
+    if (rval)
 	return(0);
     /* Do not convert line endings from NL to NLCR. */
     if (!onlcr)
 	CLR(tt.c_oflag, ONLCR);
-    if (tcsetattr(dst, TCSAFLUSH|TCSASOFT, &tt) != 0)
+    do {
+	rval = tcsetattr(dst, TCSAFLUSH|TCSASOFT, &tt);
+    } while (rval == -1 && errno == EINTR);
+    if (rval)
 	return(0);
     return(1);
 }
@@ -212,8 +251,15 @@ term_raw(fd, onlcr)
     int fd;
     int onlcr;
 {
-    if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
-	return(0);
+    int rval;
+
+    if (!changed) {
+	do {
+	    rval = ioctl(fd, TIOCGETP, &oterm);
+	} while (rval == -1 && errno == EINTR);
+	if (rval)
+	    return(0);
+    }
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to raw mode */
     CLR(term.c_lflag, ECHO);
@@ -221,30 +267,41 @@ term_raw(fd, onlcr)
     /* Retain NL to NLCR conversion if onlcr flag set. */
     if (onlcr)
 	SET(term.sg_flags, CRMOD);
-    if (ioctl(fd, TIOCSETP, &term) == 0) {
-	changed = 1;
-	return(1);
-    }
-    return(0);
+    do {
+	rval = ioctl(fd, TIOCSETP, &term);
+    } while (rval == -1 && errno == EINTR);
+    if (rval)
+	return(0);
+    changed = 1;
+    return(1);
 }
 
 int
 term_cbreak(fd)
     int fd;
 {
-    if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
-	return(0);
+    int rval;
+
+    if (!changed) {
+	do {
+	    rval = ioctl(fd, TIOCGETP, &oterm);
+	} while (rval == -1 && errno == EINTR);
+	if (rval)
+	    return(0);
+    }
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to half-cooked mode */
     CLR(term.c_lflag, ECHO);
     SET(term.sg_flags, CBREAK);
-    if (ioctl(fd, TIOCSETP, &term) == 0) {
-	term_erase = term.sg_erase;
-	term_kill = term.sg_kill;
-	changed = 1;
-	return(1);
-    }
-    return(0);
+    do {
+	rval = ioctl(fd, TIOCSETP, &term);
+    } while (rval == -1 && errno == EINTR);
+    if (rval)
+	return(0);
+    term_erase = term.sg_erase;
+    term_kill = term.sg_kill;
+    changed = 1;
+    return(1);
 }
 
 int
@@ -258,6 +315,7 @@ term_copy(src, dst, onlcr)
     struct ltchars lc;
     int l, lb;
 
+    /* XXX - handle EINTR */
     if (ioctl(src, TIOCGETP, &b) != 0 || ioctl(src, TIOCGETC, &tc) != 0 ||
 	ioctl(src, TIOCGETD, &l) != 0 || ioctl(src, TIOCGLTC, &lc) != 0 ||
 	ioctl(src, TIOCLGET, &lb)) {
