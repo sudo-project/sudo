@@ -647,14 +647,11 @@ script_child(path, argv)
     }
 
     /* Flush any remaining output to stdout (already updated output file). */
-#if 0
-    /* XXX - this can cause us to hang trying to exit */
     n = fcntl(STDOUT_FILENO, F_GETFL, 0);
     if (n != -1) {
 	n &= ~O_NONBLOCK;
 	(void) fcntl(STDOUT_FILENO, F_SETFL, n);
     }
-#endif
     while (output.len > output.off) {
 	n = write(STDOUT_FILENO, output.buf + output.off,
 	    output.len - output.off);
