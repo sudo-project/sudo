@@ -78,9 +78,10 @@ __unused static const char rcsid[] = "$Sudo$";
 int script_fds[5];
 
 static sig_atomic_t alive = 1;
+static sig_atomic_t signo;
 
-static pid_t child;
-static int child_status;
+static pid_t parent, grandchild;
+static int grandchild_status;
 
 #if defined(HAVE_OPENPTY) || defined(HAVE_GRANTPT)
 static char slavename[PATH_MAX];
@@ -88,14 +89,19 @@ static char slavename[PATH_MAX];
 static char slavename[] = "/dev/ptyXX";
 #endif
 
-static void script_child __P((char *path, char *argv[], int));
+static void script_child __P((char *path, char *argv[]));
+static void script_grandchild __P((char *path, char *argv[], int));
 static void sync_winsize __P((int src, int dst));
+static void handler __P((int signo));
 static void sigchild __P((int signo));
 static void sigwinch __P((int signo));
+static void sigrelay __P((int signo));
 static int get_pty __P((int *master, int *slave));
 
 /*
  * TODO: run monitor as root?
+ *       make bg work (does not generate SIGTTOU)
+ *       handle SIGTTIN/SIGTTOU better (race?)
  */
 
 struct script_buf {
@@ -316,8 +322,124 @@ log_output(buf, n, then, now, ofile, tfile)
     then->tv_usec = now->tv_usec;
 }
 
+/*
+ * This is a little bit tricky due to how POSIX job control works and
+ * we fact that we have two different controlling terminals to deal with.
+ * There are three processes:
+ *  1) parent, which waits for its child and handles signals send by the child
+ *     allow the child to be suspended in the parent session with the
+ *     parent controlling tty.  Acts as the "glue" between the two controlling
+ *     ttys from a job-control standpoint.
+ *  2) child, creates a new session with the pty slave as the controlling tty.
+ *     Does all the work passing data to and from the pty and signals parent
+ *     when it receives job control-related signals on behalf of grandchild.
+ *  3) grandchild, runs the actual command, belongs to child's session and pgrp.
+ */
 int
 script_execv(path, argv)
+    char *path;
+    char *argv[];
+{
+    sigaction_t sa, saveint, savehup, saveterm;
+    sigaction_t savequit, savetstp, savettin, savettou;
+    int status;
+    pid_t child, pid;
+
+    parent = getpid(); /* so child can pass signals back to us */
+
+    /* Handle window change events in the parent for simplicity. */
+    zero_bytes(&sa, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = sigwinch;
+    (void) sigaction(SIGWINCH, &sa, NULL);
+
+    /*
+     * Catch signals that would otherwise cause the user to end up
+     * with the tty in raw mode.  Do this early to avoid a race.
+     * NOTE: must not modify sa after this point (it is used later).
+     */
+    sa.sa_flags = SA_INTERRUPT; /* don't restart system calls */
+    sa.sa_handler = handler;
+    (void) sigaction(SIGINT, &sa, &saveint);
+    (void) sigaction(SIGHUP, &sa, &savehup);
+    (void) sigaction(SIGQUIT, &sa, &savequit);
+    (void) sigaction(SIGTERM, &sa, &saveterm);
+    (void) sigaction(SIGTSTP, &sa, &savetstp);
+    (void) sigaction(SIGTTIN, &sa, &savettin);
+    (void) sigaction(SIGTTOU, &sa, &savettou);
+
+    /*
+     * We have to fork or we cannot create a new session with a new
+     * controlling tty.  The parent acts as glue betweem the two sessions.
+     */
+    child = fork();
+    switch (child) {
+    case -1:
+	log_error(USE_ERRNO, "fork");
+    case 0:
+	(void) sigaction(SIGINT, &saveint, NULL);
+	(void) sigaction(SIGHUP, &savehup, NULL);
+	(void) sigaction(SIGQUIT, &savequit, NULL);
+	(void) sigaction(SIGTERM, &saveterm, NULL);
+	(void) sigaction(SIGTSTP, &savetstp, NULL);
+	(void) sigaction(SIGTTIN, &savettin, NULL);
+	(void) sigaction(SIGTTOU, &savettou, NULL);
+	script_child(path, argv);
+	/* NOTREACHED */
+	break;
+    }
+
+    /* Wait for signal from child or for child to exit. */
+    for (;;) {
+	pid = waitpid(child, &status, 0);
+	if (pid == -1 && errno == EINTR) {
+	    /* Restore old tty settings and signal handler. */
+	    term_restore(STDIN_FILENO);
+	    switch (signo) {
+	    case SIGINT:
+		(void) sigaction(SIGINT, &saveint, NULL);
+		break;
+	    case SIGHUP:
+		(void) sigaction(SIGHUP, &savehup, NULL);
+		break;
+	    case SIGQUIT:
+		(void) sigaction(SIGQUIT, &savequit, NULL);
+		break;
+	    case SIGTERM:
+		(void) sigaction(SIGTERM, &saveterm, NULL);
+		break;
+	    case SIGTSTP:
+		(void) sigaction(SIGTSTP, &savetstp, NULL);
+		break;
+	    case SIGTTIN:
+		(void) sigaction(SIGTTIN, &savettin, NULL);
+		break;
+	    case SIGTTOU:
+		(void) sigaction(SIGTTOU, &savettou, NULL);
+		break;
+	    }
+	    kill(parent, signo);
+	    /* Reinstall signal handler, reset raw mode and continue child */
+	    (void) sigaction(signo, &sa, NULL);
+	    term_raw(STDIN_FILENO, 1);
+	    killpg(child, SIGCONT);
+	} else {
+	    if (pid == child) {
+		if (WIFEXITED(status))
+		    exit(WEXITSTATUS(status));
+		if (WIFSIGNALED(status))
+		    exit(128 | WTERMSIG(status));
+	    }
+	    break;
+	}
+    }
+
+    exit(0);
+}
+
+void
+script_child(path, argv)
     char *path;
     char *argv[];
 {
@@ -328,6 +450,36 @@ script_execv(path, argv)
     sigaction_t sa;
     FILE *idfile, *ofile, *tfile;
     int rbac_enabled = 0;
+
+    /*
+     * Start a new session with the parent as the session leader.
+     * This allows us to be notified when the child has been suspended.
+     */
+#ifdef TIOCNOTTY
+    n = open(_PATH_TTY, O_RDWR|O_NOCTTY);
+    if (n >= 0) {
+	/* Disconnect from old controlling tty. */
+	if (ioctl(n, TIOCNOTTY, NULL) == -1)
+	    warning("cannot disconnect controlling tty");
+	close(n);
+    }
+#endif
+    /*
+     * Create new session, with the slave as controlling terminal and
+     * point std{in,out,err} to it.
+     */
+    warningx("before: pid %d, pgrp %d, sid %d", getpid(), getpgrp(), getsid(0)); /* XXX */
+#ifdef HAVE_SETSID
+    if (setsid() == -1)
+	log_error(USE_ERRNO, "setsid");
+#else
+    setpgrp(0, 0);
+#endif
+#ifdef TIOCSCTTY
+    if (ioctl(script_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
+	log_error(USE_ERRNO, "unable to set controlling tty");
+#endif
+    warningx("after: pid %d, pgrp %d, sid %d", getpid(), getpgrp(), getsid(0)); /* XXX */
 
     if ((idfile = fdopen(script_fds[SFD_LOG], "w")) == NULL)
 	log_error(USE_ERRNO, "fdopen");
@@ -348,25 +500,28 @@ script_execv(path, argv)
     }
 #endif
 
-    child = fork();
-    if (child == -1)
+    /* Setup signal handlers for child exit, and tty-related signals. */
+    zero_bytes(&sa, sizeof(sa));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sa.sa_handler = sigchild;
+    sigaction(SIGCHLD, &sa, NULL);
+    sa.sa_handler = sigrelay;
+    sigaction(SIGTSTP, &sa, NULL);
+    sigaction(SIGTTIN, &sa, NULL);
+    sigaction(SIGTTOU, &sa, NULL);
+    sigaction(SIGQUIT, &sa, NULL);
+
+    /* Start grandchild and begin reading from pty master. */
+    grandchild = fork();
+    if (grandchild == -1)
 	log_error(USE_ERRNO, "Can't fork");
-    if (child == 0) {
-	/* fork child, setup tty and exec command */
-	script_child(path, argv, rbac_enabled);
+    if (grandchild == 0) {
+	/* setup tty and exec command */
+	script_grandchild(path, argv, rbac_enabled);
 	warning("unable to execute %s", path);
 	_exit(127);
     }
-
-    /* Setup signal handlers for child exit and window size changes. */
-    zero_bytes(&sa, sizeof(sa));
-    sigemptyset(&sa.sa_mask);
-    sa.sa_handler = sigchild;
-    sa.sa_flags = SA_RESTART|SA_NOCLDSTOP;
-    sigaction(SIGCHLD, &sa, NULL);
-    sa.sa_handler = sigwinch;
-    sa.sa_flags = SA_RESTART;
-    sigaction(SIGWINCH, &sa, NULL);
 
     gettimeofday(&then, NULL);
 
@@ -521,42 +676,21 @@ script_execv(path, argv)
 
     term_restore(STDIN_FILENO);
 
-    if (WIFEXITED(child_status))
-	exit(WEXITSTATUS(child_status));
-    if (WIFSIGNALED(child_status))
-	exit(128 | WSTOPSIG(child_status));
+    if (WIFEXITED(grandchild_status))
+	exit(WEXITSTATUS(grandchild_status));
+    if (WIFSIGNALED(grandchild_status))
+	exit(128 | WTERMSIG(grandchild_status));
     exit(1);
 }
 
 static void
-script_child(path, argv, rbac_enabled)
+script_grandchild(path, argv, rbac_enabled)
     char *path;
     char *argv[];
     int rbac_enabled;
 {
-#ifdef TIOCNOTTY
-    int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY);
-    if (fd >= 0) {
-	/* Disconnect from old controlling tty. */
-	(void) ioctl(fd, TIOCNOTTY, NULL);
-	close(fd);
-    }
-#endif
-    /*
-     * Create new session, make slave controlling terminal and
-     * point std{in,out,err} to it.
-     */
-#ifdef HAVE_SETSID
-    setsid();
-#else
-    setpgrp(0, 0);
-#endif
-#ifdef TIOCSCTTY
-    if (ioctl(script_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0) {
-	warning("unable to set controlling tty");
-	return;
-    }
-#endif
+    warningx("grandchild: pid %d, pgrp %d, sid %d, tcpgrp %d", getpid(), getpgrp(), getsid(0), tcgetpgrp(script_fds[SFD_SLAVE])); /* XXX */
+
     dup2(script_fds[SFD_SLAVE], STDIN_FILENO);
     dup2(script_fds[SFD_SLAVE], STDOUT_FILENO);
     dup2(script_fds[SFD_SLAVE], STDERR_FILENO);
@@ -596,26 +730,75 @@ sync_winsize(src, dst)
 #endif
 }
 
+/*
+ * Generic signal handler for parent, interrupts waitpid() and sets a flag.
+ */
+static void
+handler(s)
+    int s;
+{
+    signo = s;
+}
+
+/*
+ * Signal handler for grandchild and its descendents.
+ */
 static void
 sigchild(signo)
     int signo;
 {
     pid_t pid;
+    int serrno = errno;
 
 #ifdef sudo_waitpid
     do {
-	pid = sudo_waitpid(child, &child_status, WNOHANG);
-	if (pid == child) {
+	pid = sudo_waitpid(grandchild, &grandchild_status, WNOHANG);
+	if (pid == grandchild) {
 	    alive = 0;
 	    break;
 	}
     } while (pid > 0 || (pid == -1 && errno == EINTR));
 #else
     do {
-	pid = wait(&child_status);
+	pid = wait(&grandchild_status);
     } while (pid == -1 && errno == EINTR);
     alive = 0;
 #endif
+
+    errno = serrno;
+}
+
+static void
+sigrelay(signo)
+    int signo;
+{
+    int serrno = errno;
+
+    /* XXX */
+    switch (signo) {
+    case SIGTSTP:
+	write(STDERR_FILENO, "SIGTSTP caught\n", 15);
+	break;
+    case SIGTTIN:
+	write(STDERR_FILENO, "SIGTTIN caught\n", 15);
+	break;
+    case SIGTTOU:
+	write(STDERR_FILENO, "SIGTTOU caught\n", 15);
+	break;
+    case SIGQUIT:
+	write(STDERR_FILENO, "SIGQUIT caught\n", 15);
+	break;
+    default:
+	write(STDERR_FILENO, "SIG???? caught\n", 15);
+	break;
+    }
+    /* Relay signal back to parent for its tty. */
+    kill(parent, signo);
+    /* Suspend self, parent will continue us when it is time. */
+    /* XXX - want to be able to handle SIGSTOP too */
+    kill(getpid(), SIGSTOP);
+
+    errno = serrno;
 }
 
 static void
