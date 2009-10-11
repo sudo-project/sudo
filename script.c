@@ -428,7 +428,7 @@ script_execv(path, argv)
 	    break;
 	default:
 	    /* should not happen */
-	    continue;
+	    break;
 	}
 	kill(parent, signo); /* re-send signal with handler disabled */
 	/* Reinstall signal handler, reset raw mode and continue child */
@@ -647,11 +647,14 @@ script_child(path, argv)
     }
 
     /* Flush any remaining output to stdout (already updated output file). */
+#if 0
+    /* XXX - this can cause us to hang trying to exit */
     n = fcntl(STDOUT_FILENO, F_GETFL, 0);
     if (n != -1) {
 	n &= ~O_NONBLOCK;
 	(void) fcntl(STDOUT_FILENO, F_SETFL, n);
     }
+#endif
     while (output.len > output.off) {
 	n = write(STDOUT_FILENO, output.buf + output.off,
 	    output.len - output.off);
