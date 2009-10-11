@@ -75,9 +75,16 @@ __unused static const char rcsid[] = "$Sudo$";
 #define SFD_OUTPUT 3
 #define SFD_TIMING 4
 
-int script_fds[5];
+struct script_buf {
+    int len; /* buffer length (how much read in) */
+    int off; /* write position (how much already consumed) */
+    char buf[16 * 1024];
+};
+
+static int script_fds[5];
 
 static sig_atomic_t alive = 1;
+static sig_atomic_t suspended = 0;
 static sig_atomic_t signo;
 
 static pid_t parent, grandchild;
@@ -92,21 +99,18 @@ static char slavename[] = "/dev/ptyXX";
 static void script_child __P((char *path, char *argv[]));
 static void script_grandchild __P((char *path, char *argv[], int));
 static void sync_winsize __P((int src, int dst));
-static void handler __P((int signo));
-static void sigchild __P((int signo));
-static void sigwinch __P((int signo));
-static void sigrelay __P((int signo));
+static void handler __P((int s));
+static void sigchild __P((int s));
+static void sigwinch __P((int s));
+static void sigtstp __P((int s));
+static void sigrepost __P((int s));
 static int get_pty __P((int *master, int *slave));
+static void flush_output __P((struct script_buf *output, struct timeval *then,
+    struct timeval *now, FILE *ofile, FILE *tfile));
 
 /*
  * TODO: run monitor as root?
  */
-
-struct script_buf {
-    int len; /* buffer length (how much read in) */
-    int off; /* write position (how much already consumed) */
-    char buf[16 * 1024];
-};
 
 static int
 fdcompar(v1, v2)
@@ -435,7 +439,7 @@ script_execv(path, argv)
 	(void) sigaction(signo, &sa, NULL);
 	if (!term_raw(STDIN_FILENO, 1) && errno == EINTR)
 	    goto check_sig;
-	killpg(child, SIGCONT);
+	kill(child, SIGCONT);
     }
 
     term_restore(STDIN_FILENO);
@@ -507,13 +511,22 @@ script_child(path, argv)
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
-    sa.sa_handler = sigchild;
-    sigaction(SIGCHLD, &sa, NULL);
-    sa.sa_handler = sigrelay;
+
+    /* These tty-related signals get relayed back to the parent. */
+    sa.sa_handler = sigtstp;
     sigaction(SIGTSTP, &sa, NULL);
     sigaction(SIGTTIN, &sa, NULL);
     sigaction(SIGTTOU, &sa, NULL);
+
+    /* These signals just get posted to the grandchilds pgrp. */
+    sa.sa_handler = sigrepost;
     sigaction(SIGQUIT, &sa, NULL);
+    sigaction(SIGINT, &sa, NULL);
+
+    /* Do not want child stop notifications. */
+    sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+    sa.sa_handler = sigchild;
+    sigaction(SIGCHLD, &sa, NULL);
 
     /* Start grandchild and begin reading from pty master. */
     grandchild = fork();
@@ -521,6 +534,7 @@ script_child(path, argv)
 	log_error(USE_ERRNO, "Can't fork");
     if (grandchild == 0) {
 	/* setup tty and exec command */
+	setpgid(grandchild, grandchild);
 	script_grandchild(path, argv, rbac_enabled);
 	warning("unable to execute %s", path);
 	_exit(127);
@@ -581,6 +595,16 @@ script_child(path, argv)
 	if (input.len > input.off)
 	    FD_SET(script_fds[SFD_MASTER], fdsw);
 
+	if (suspended) {
+	    /* Flush any remaining output to master tty. */
+	    flush_output(&output, &then, &now, ofile, tfile);
+
+	    /* Relay signal back to parent for its tty and suspend ourself. */
+	    kill(parent, signo);
+	    kill(getpid(), SIGSTOP);
+	    suspended = 0;
+	    killpg(grandchild, SIGCONT);
+	}
 	nready = select(script_fds[SFD_MASTER] + 1, fdsr, fdsw, NULL, NULL);
 	if (nready == -1) {
 	    if (errno == EINTR)
@@ -652,30 +676,7 @@ script_child(path, argv)
 	n &= ~O_NONBLOCK;
 	(void) fcntl(STDOUT_FILENO, F_SETFL, n);
     }
-    while (output.len > output.off) {
-	n = write(STDOUT_FILENO, output.buf + output.off,
-	    output.len - output.off);
-	if (n <= 0)
-	    break;
-	output.off += n;
-    }
-
-    /* Make sure there is no output remaining on the master pty. */
-    for (;;) {
-	n = read(script_fds[SFD_MASTER], output.buf, sizeof(output.buf));
-	if (n <= 0)
-	    break;
-	log_output(output.buf, n, &then, &now, ofile, tfile);
-	output.off = 0;
-	output.len = n;
-	do {
-	    n = write(STDOUT_FILENO, output.buf + output.off,
-		output.len - output.off);
-	    if (n <= 0)
-		break;
-	    output.off += n;
-	} while (output.len > output.off);
-    }
+    flush_output(&output, &then, &now, ofile, tfile);
 
     if (WIFEXITED(grandchild_status))
 	exit(WEXITSTATUS(grandchild_status));
@@ -685,11 +686,50 @@ script_child(path, argv)
 }
 
 static void
+flush_output(output, then, now, ofile, tfile)
+    struct script_buf *output;
+    struct timeval *then;
+    struct timeval *now;
+    FILE *ofile;
+    FILE *tfile;
+{
+    int n;
+
+    while (output->len > output->off) {
+	n = write(STDOUT_FILENO, output->buf + output->off,
+	    output->len - output->off);
+	if (n <= 0)
+	    break;
+	output->off += n;
+    }
+
+    /* Make sure there is no output remaining on the master pty. */
+    for (;;) {
+	n = read(script_fds[SFD_MASTER], output->buf, sizeof(output->buf));
+	if (n <= 0)
+	    break;
+	log_output(output->buf, n, &then, &now, ofile, tfile);
+	output->off = 0;
+	output->len = n;
+	do {
+	    n = write(STDOUT_FILENO, output->buf + output->off,
+		output->len - output->off);
+	    if (n <= 0)
+		break;
+	    output->off += n;
+	} while (output->len > output->off);
+    }
+}
+
+static void
 script_grandchild(path, argv, rbac_enabled)
     char *path;
     char *argv[];
     int rbac_enabled;
 {
+    /* Also set process group here to avoid a race condition. */
+    setpgid(0, getpid());
+
     dup2(script_fds[SFD_SLAVE], STDIN_FILENO);
     dup2(script_fds[SFD_SLAVE], STDOUT_FILENO);
     dup2(script_fds[SFD_SLAVE], STDERR_FILENO);
@@ -752,7 +792,7 @@ sigchild(signo)
 #ifdef sudo_waitpid
     do {
 	pid = sudo_waitpid(grandchild, &grandchild_status, WNOHANG);
-	if (pid == grandchild) {
+	if (pid == grandchild)
 	    alive = 0;
 	    break;
 	}
@@ -768,23 +808,36 @@ sigchild(signo)
 }
 
 static void
-sigrelay(signo)
-    int signo;
+sigrepost(s)
+    int s;
 {
     int serrno = errno;
 
-    /* Relay signal back to parent for its tty. */
-    kill(parent, signo);
-
-    /* Suspend self and command, parent will continue us when it is time. */
-    killpg(getpid(), SIGSTOP);
+    /* Re-post signal to child via its process group. */
+    killpg(grandchild, s);
 
     errno = serrno;
 }
 
 static void
-sigwinch(signo)
-    int signo;
+sigtstp(s)
+    int s;
+{
+    int serrno = errno;
+
+    /* Event loop needs to know which signal to relay to parent. */
+    signo = s;
+
+    /* Suspend the command we are running and set state. */
+    killpg(grandchild, SIGSTOP);
+    suspended = 1;
+
+    errno = serrno;
+}
+
+static void
+sigwinch(s)
+    int s;
 {
     int serrno = errno;
 
