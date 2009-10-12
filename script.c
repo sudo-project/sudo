@@ -461,7 +461,8 @@ script_child(path, argv)
     int rbac_enabled = 0;
 
     /*
-     * Start a new session with the parent as the session leader.
+     * Start a new session with the parent as the session leader
+     * and the slave pty as the controlling terminal.
      * This allows us to be notified when the child has been suspended.
      */
 #ifdef TIOCNOTTY
@@ -473,10 +474,6 @@ script_child(path, argv)
 	close(n);
     }
 #endif
-    /*
-     * Create new session, with the slave as controlling terminal and
-     * point std{in,out,err} to it.
-     */
 #ifdef HAVE_SETSID
     if (setsid() == -1)
 	log_error(USE_ERRNO, "setsid");
@@ -534,11 +531,12 @@ script_child(path, argv)
 	log_error(USE_ERRNO, "Can't fork");
     if (grandchild == 0) {
 	/* setup tty and exec command */
-	setpgid(grandchild, grandchild);
 	script_grandchild(path, argv, rbac_enabled);
 	warning("unable to execute %s", path);
 	_exit(127);
     }
+    /* Also set grandchild process group here to avoid a race condition. */
+    setpgid(grandchild, grandchild);
 
     gettimeofday(&then, NULL);
 
