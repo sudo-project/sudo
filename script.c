@@ -663,12 +663,17 @@ script_child(path, argv)
     if (WIFEXITED(grandchild_status))
 	exit(WEXITSTATUS(grandchild_status));
     if (WIFSIGNALED(grandchild_status)) {
-	switch (WTERMSIG(grandchild_status)) {
-
-	}
+#ifdef HAVE_STRSIGNAL
+	char *reason = strsignal(WTERMSIG(grandchild_status));
+	write(STDOUT_FILENO, reason, strlen(reason));
+	if (WCOREDUMP(grandchild_status))
+	    write(STDOUT_FILENO, " (core dumped)", 14);
+	write(STDOUT_FILENO, "\n", 1);
+#endif
 	exit(WTERMSIG(grandchild_status) | 128);
     }
-    exit(1);
+    /* NOTREACHED */
+    exit(255);
 }
 
 static void
@@ -774,8 +779,8 @@ handler(s)
  * Signal handler for grandchild and its descendents.
  */
 static void
-sigchild(signo)
-    int signo;
+sigchild(s)
+    int s;
 {
     pid_t pid;
     int serrno = errno;
