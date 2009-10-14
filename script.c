@@ -102,8 +102,6 @@ static void sync_winsize __P((int src, int dst));
 static void handler __P((int s));
 static void sigchild __P((int s));
 static void sigwinch __P((int s));
-static void sigtstp __P((int s));
-static void sigrepost __P((int s));
 static int get_pty __P((int *master, int *slave));
 static void flush_output __P((struct script_buf *output, struct timeval *then,
     struct timeval *now, FILE *ofile, FILE *tfile));
@@ -504,24 +502,10 @@ script_child(path, argv)
     }
 #endif
 
-    /* Setup signal handlers for child exit, and tty-related signals. */
+    /* Setup signal handler for child stop/exit */
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
-
-    /* These tty-related signals get relayed back to the parent. */
-    sa.sa_handler = sigtstp;
-    sigaction(SIGTSTP, &sa, NULL);
-    sigaction(SIGTTIN, &sa, NULL);
-    sigaction(SIGTTOU, &sa, NULL);
-
-    /* These signals just get posted to the grandchilds pgrp. */
-    sa.sa_handler = sigrepost;
-    sigaction(SIGQUIT, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
-
-    /* Do not want child stop notifications. */
-    sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
     sa.sa_handler = sigchild;
     sigaction(SIGCHLD, &sa, NULL);
 
@@ -729,12 +713,16 @@ script_grandchild(path, argv, rbac_enabled)
     char *argv[];
     int rbac_enabled;
 {
-    /* Also set process group here to avoid a race condition. */
-    setpgid(0, getpid());
+    pid_t self = getpid();
+
+    /* Also set our process group here to avoid a race condition. */
+    setpgid(0, self);
 
     dup2(script_fds[SFD_SLAVE], STDIN_FILENO);
     dup2(script_fds[SFD_SLAVE], STDOUT_FILENO);
     dup2(script_fds[SFD_SLAVE], STDERR_FILENO);
+    if (tcsetpgrp(STDIN_FILENO, self) != 0)
+	warning("tcsetpgrp");
 
     /*
      * Close old fds and exec command.
@@ -744,6 +732,7 @@ script_grandchild(path, argv, rbac_enabled)
     close(script_fds[SFD_LOG]);
     close(script_fds[SFD_OUTPUT]);
     close(script_fds[SFD_TIMING]);
+
 #ifdef HAVE_SELINUX
     if (rbac_enabled)
       selinux_execv(path, argv);
@@ -794,17 +783,22 @@ sigchild(signo)
 #ifdef sudo_waitpid
     do {
 	pid = sudo_waitpid(grandchild, &grandchild_status, WNOHANG);
-	if (pid == grandchild) {
-	    alive = 0;
+	if (pid == grandchild)
 	    break;
-	}
     } while (pid > 0 || (pid == -1 && errno == EINTR));
 #else
     do {
 	pid = wait(&grandchild_status);
     } while (pid == -1 && errno == EINTR);
-    alive = 0;
 #endif
+    if (pid == grandchild) {
+	if (WIFSTOPPED(grandchild_status)) {
+	    suspended = 1;
+	    signo = WSTOPSIG(grandchild_status);
+	} else {
+	    alive = 0;
+	}
+    }
 
     errno = serrno;
 }
@@ -826,6 +820,8 @@ sigtstp(s)
     int s;
 {
     int serrno = errno;
+
+    write(STDERR_FILENO, "sigtstp\n", 8);
 
     /* Event loop needs to know which signal to relay to parent. */
     signo = s;
