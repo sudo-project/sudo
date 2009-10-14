@@ -1966,6 +1966,21 @@ AC_CHECK_FUNCS(getprogname, , [
 ])
 
 dnl
+dnl Check for strsignal() or sys_siglist
+dnl
+AC_CHECK_FUNCS(strsignal, [], [
+    AC_MSG_CHECKING([for sys_siglist])
+    AC_CACHE_VAL(sudo_cv_sys_siglist, [
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[extern char *sys_siglist; char *hup = sys_siglist[1];]])], [sudo_cv_sys_siglist=yes], [sudo_cv_sys_siglist=no])])
+    if test "$sudo_cv_sys_siglist" = "yes"; then
+	AC_LIBOBJ(strsignal)
+	AC_DEFINE(HAVE_SYS_SIGLIST)
+	AC_DEFINE(HAVE_STRSIGNAL)
+    fi
+    AC_MSG_RESULT($sudo_cv_sys_siglist)
+])
+
+dnl
 dnl nsswitch.conf and its equivalents
 dnl
 netsvc_conf='/etc/netsvc.conf'

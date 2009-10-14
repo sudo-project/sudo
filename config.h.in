@@ -453,6 +453,9 @@
 /* Define to 1 if you have the `strrchr' function. */
 #undef HAVE_STRRCHR
 
+/* Define to 1 if you have the `strsignal' function. */
+#undef HAVE_STRSIGNAL
+
 /* Define to 1 if your struct stat has an st_mtim member */
 #undef HAVE_ST_MTIM
 
@@ -478,6 +481,9 @@
 
 /* Define to 1 if you have the <sys/select.h> header file. */
 #undef HAVE_SYS_SELECT_H
+
+/* Define to 1 if you have the 'sys_siglist' symbol in libc. */
+#undef HAVE_SYS_SIGLIST
 
 /* Define to 1 if you have the <sys/sockio.h> header file. */
 #undef HAVE_SYS_SOCKIO_H

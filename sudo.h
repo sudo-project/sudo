@@ -246,6 +246,9 @@ int setenv		__P((const char *, const char *, int));
 #ifndef HAVE_UNSETENV
 int unsetenv		__P((const char *));
 #endif
+#ifdef HAVE_SYS_SIGLIST
+char *strsignal		__P((int));
+#endif
 char *sudo_goodpath	__P((const char *, struct stat *));
 char *tgetpass		__P((const char *, int, int));
 int find_path		__P((char *, char **, struct stat *, char *));
