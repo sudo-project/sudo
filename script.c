@@ -582,7 +582,7 @@ script_child(path, argv)
 	    flush_output(&output, &then, &now, ofile, tfile);
 
 	    /* Relay signal back to parent for its tty and suspend ourself. */
-	    kill(parent, signo);
+	    kill(parent, suspended);
 	    kill(getpid(), SIGSTOP);
 	    suspended = 0;
 	    killpg(grandchild, SIGCONT);
@@ -782,7 +782,7 @@ sigchild(signo)
 
 #ifdef sudo_waitpid
     do {
-	pid = sudo_waitpid(grandchild, &grandchild_status, WNOHANG);
+	pid = sudo_waitpid(grandchild, &grandchild_status, WNOHANG | WUNTRACED);
 	if (pid == grandchild)
 	    break;
     } while (pid > 0 || (pid == -1 && errno == EINTR));
@@ -792,12 +792,10 @@ sigchild(signo)
     } while (pid == -1 && errno == EINTR);
 #endif
     if (pid == grandchild) {
-	if (WIFSTOPPED(grandchild_status)) {
-	    suspended = 1;
-	    signo = WSTOPSIG(grandchild_status);
-	} else {
+	if (WIFSTOPPED(grandchild_status))
+	    suspended = WSTOPSIG(grandchild_status);
+	else
 	    alive = 0;
-	}
     }
 
     errno = serrno;
