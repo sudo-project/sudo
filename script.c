@@ -804,36 +804,6 @@ sigchild(signo)
 }
 
 static void
-sigrepost(s)
-    int s;
-{
-    int serrno = errno;
-
-    /* Re-post signal to child via its process group. */
-    killpg(grandchild, s);
-
-    errno = serrno;
-}
-
-static void
-sigtstp(s)
-    int s;
-{
-    int serrno = errno;
-
-    write(STDERR_FILENO, "sigtstp\n", 8);
-
-    /* Event loop needs to know which signal to relay to parent. */
-    signo = s;
-
-    /* Suspend the command we are running and set state. */
-    killpg(grandchild, SIGSTOP);
-    suspended = 1;
-
-    errno = serrno;
-}
-
-static void
 sigwinch(s)
     int s;
 {
