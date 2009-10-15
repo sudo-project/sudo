@@ -463,7 +463,11 @@ script_child(path, argv)
      * and the slave pty as the controlling terminal.
      * This allows us to be notified when the child has been suspended.
      */
-#ifdef TIOCNOTTY
+#ifdef HAVE_SETSID
+    if (setsid() == -1)
+	log_error(USE_ERRNO, "setsid");
+#else
+# ifdef TIOCNOTTY
     n = open(_PATH_TTY, O_RDWR|O_NOCTTY);
     if (n >= 0) {
 	/* Disconnect from old controlling tty. */
@@ -471,16 +475,16 @@ script_child(path, argv)
 	    warning("cannot disconnect controlling tty");
 	close(n);
     }
-#endif
-#ifdef HAVE_SETSID
-    if (setsid() == -1)
-	log_error(USE_ERRNO, "setsid");
-#else
+# endif
     setpgrp(0, 0);
 #endif
 #ifdef TIOCSCTTY
     if (ioctl(script_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
 	log_error(USE_ERRNO, "unable to set controlling tty");
+#else
+    /* Set controlling tty by reopening slave. */
+    if ((n = open(slavename, O_RDWR)) >= 0)
+	close(n);
 #endif
 
     if ((idfile = fdopen(script_fds[SFD_LOG], "w")) == NULL)
