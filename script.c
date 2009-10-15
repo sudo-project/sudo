@@ -523,8 +523,10 @@ script_child(path, argv)
 	warning("unable to execute %s", path);
 	_exit(127);
     }
-    /* Also set grandchild process group here to avoid a race condition. */
+    /* Set grandchild process group and grant it the controlling tty. */
     setpgid(grandchild, grandchild);
+    if (tcsetpgrp(script_fds[SFD_SLAVE], grandchild) != 0)
+	warning("tcsetpgrp");
 
     gettimeofday(&then, NULL);
 
@@ -724,14 +726,9 @@ script_grandchild(path, argv, rbac_enabled)
 {
     pid_t self = getpid();
 
-    /* Also set our process group here to avoid a race condition. */
-    setpgid(0, self);
-
     dup2(script_fds[SFD_SLAVE], STDIN_FILENO);
     dup2(script_fds[SFD_SLAVE], STDOUT_FILENO);
     dup2(script_fds[SFD_SLAVE], STDERR_FILENO);
-    if (tcsetpgrp(STDIN_FILENO, self) != 0)
-	warning("tcsetpgrp");
 
     /*
      * Close old fds and exec command.
@@ -741,6 +738,10 @@ script_grandchild(path, argv, rbac_enabled)
     close(script_fds[SFD_LOG]);
     close(script_fds[SFD_OUTPUT]);
     close(script_fds[SFD_TIMING]);
+
+    /* Spin until parent grants us the controlling pty */
+    while (tcgetpgrp(STDIN_FILENO) != self)
+	continue;
 
 #ifdef HAVE_SELINUX
     if (rbac_enabled)
