@@ -864,15 +864,15 @@ get_pty(master, slave)
 {
     char *line;
 
-    *master = posix_openpt(O_RDWR);
+    *master = posix_openpt(O_RDWR|O_NOCTTY);
     if (*master == -1)
 	return(0);
 
+    (void) grantpt(*master);
     if (unlockpt(*master) != 0) {
 	close(*master);
 	return(0);
     }
-    (void) grantpt(*master);
     line = ptsname(*master);
     if (line == NULL) {
 	close(*master);
@@ -906,7 +906,7 @@ get_pty(master, slave)
 	slavename[sizeof("/dev/ptyX") - 2] = *bank;
 	for (cp = "0123456789abcdef"; *cp != '\0'; cp++) {
 	    slavename[sizeof("/dev/ptyXX") - 2] = *cp;
-	    *master = open(slavename, O_RDWR, 0);
+	    *master = open(slavename, O_RDWR|O_NOCTTY, 0);
 	    if (*master == -1) {
 		if (errno == ENOENT)
 		    return(0); /* out of ptys */
