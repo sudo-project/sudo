@@ -2597,9 +2597,15 @@ dnl
 dnl If transcript is enabled, build sudoreplay and add pty.o script.o for sudo
 dnl
 if test "${enable_transcript-yes}" != "no"; then
-    SUDO_OBJS="${SUDO_OBJS} pty.o script.o"
-    PROGS="$PROGS sudoreplay"
-    REPLAY=""
+    # currently require POSIX job control for transcript support
+    AC_CHECK_FUNCS(tcsetpgrp, [
+	SUDO_OBJS="${SUDO_OBJS} pty.o script.o"
+	PROGS="$PROGS sudoreplay"
+	REPLAY=""
+    ], [
+	AC_MSG_WARN([Disabling transcript support due to lack of tcsetpgrp function])
+	enable_transcript=no
+    ])
 fi
 
 dnl

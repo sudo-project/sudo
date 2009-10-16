@@ -500,6 +500,9 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
+/* Define to 1 if you have the `tcsetpgrp' function. */
+#undef HAVE_TCSETPGRP
+
 /* Define to 1 if you have the <termios.h> header file and the `tcgetattr'
    function. */
 #undef HAVE_TERMIOS_H
