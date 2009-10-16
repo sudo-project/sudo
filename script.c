@@ -22,6 +22,9 @@
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
+#ifdef HAVE_SYS_STROPTS_H
+#include <sys/stropts.h>
+#endif /* HAVE_SYS_STROPTS_H */
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
@@ -884,6 +887,10 @@ get_pty(master, slave)
 	close(*master);
 	return(0);
     }
+#ifdef I_PUSH
+    ioctl(*slave, I_PUSH, "ptem");	/* pseudo tty emulation module */
+    ioctl(*slave, I_PUSH, "ldterm");	/* line discipline module */
+#endif
     (void) chown(slavename, runas_pw->pw_uid, -1);
     return(1);
 }

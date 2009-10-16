@@ -1787,7 +1787,7 @@ dnl
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_TIME
-AC_CHECK_HEADERS(malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h)
+AC_CHECK_HEADERS(malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h)
 dnl ultrix termio/termios are broken
 if test "$OS" != "ultrix"; then
     AC_SYS_POSIX_TERMIOS

@@ -13989,7 +13989,8 @@ fi
 
 
 
-for ac_header in malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h
+
+for ac_header in malloc.h paths.h utime.h netgroup.h sys/sockio.h sys/bsdtypes.h sys/select.h sys/stropts.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
