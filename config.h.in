@@ -225,6 +225,9 @@
 /* Define to 1 if you use Kerberos IV. */
 #undef HAVE_KERB4
 
+/* Define to 1 if you have the `killpg' function. */
+#undef HAVE_KILLPG
+
 /* Define to 1 if you use Kerberos V. */
 #undef HAVE_KERB5
 

@@ -245,6 +245,10 @@ typedef struct sigaction sigaction_t;
 # define HAVE_FUTIMES
 #endif
 
+#if !defined(HAVE_KILLPG) && !defined(killpg)
+# define killpg(s)	kill(-(s))
+#endif
+
 /*
  * If we lack getprogname(), emulate with __progname if possible.
  * Otherwise, add a prototype for use with our own getprogname.c.
