@@ -25613,7 +25613,7 @@ echo "${ECHO_T}$enable_transcript" >&6; }
 
 
 if test "${enable_transcript-yes}" != "no"; then
-    SUDO_OBJS="${SUDO_OBJS} script.o"
+    SUDO_OBJS="${SUDO_OBJS} pty.o script.o"
     PROGS="$PROGS sudoreplay"
     REPLAY=""
 fi

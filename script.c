@@ -22,9 +22,6 @@
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
-#ifdef HAVE_SYS_STROPTS_H
-#include <sys/stropts.h>
-#endif /* HAVE_SYS_STROPTS_H */
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
@@ -59,13 +56,6 @@
 #include <pwd.h>
 #include <signal.h>
 
-#ifdef HAVE_UTIL_H
-# include <util.h>
-#endif
-#ifdef HAVE_PTY_H
-# include <pty.h>
-#endif
-
 #include "sudo.h"
 
 #ifndef lint
@@ -93,11 +83,7 @@ static sig_atomic_t signo;
 static pid_t parent, grandchild;
 static int grandchild_status;
 
-#if defined(HAVE_OPENPTY) || defined(HAVE_GRANTPT)
 static char slavename[PATH_MAX];
-#else
-static char slavename[] = "/dev/ptyXX";
-#endif
 
 static void script_child __P((char *path, char *argv[]));
 static void script_grandchild __P((char *path, char *argv[], int));
@@ -105,9 +91,10 @@ static void sync_winsize __P((int src, int dst));
 static void handler __P((int s));
 static void sigchild __P((int s));
 static void sigwinch __P((int s));
-static int get_pty __P((int *master, int *slave));
 static void flush_output __P((struct script_buf *output, struct timeval *then,
     struct timeval *now, FILE *ofile, FILE *tfile));
+
+extern int get_pty __P((int *master, int *slave, char *name, size_t namesz));
 
 /*
  * TODO: run monitor as root?
@@ -238,7 +225,8 @@ script_setup()
     if (!isatty(STDIN_FILENO))
 	log_error(0, "Standard input is not a tty");
 
-    if (!get_pty(&script_fds[SFD_MASTER], &script_fds[SFD_SLAVE]))
+    if (!get_pty(&script_fds[SFD_MASTER], &script_fds[SFD_SLAVE],
+	slavename, sizeof(slavename)))
 	log_error(USE_ERRNO, "Can't get pty");
 
     /* Copy terminal attrs from stdin -> pty slave. */
@@ -823,116 +811,3 @@ sigwinch(s)
     sync_winsize(STDIN_FILENO, script_fds[SFD_SLAVE]);
     errno = serrno;
 }
-
-#ifdef HAVE_OPENPTY
-static int
-get_pty(master, slave)
-    int *master;
-    int *slave;
-{
-    struct group *gr;
-    gid_t ttygid = -1;
-
-    if ((gr = sudo_getgrnam("tty")) != NULL)
-	ttygid = gr->gr_gid;
-
-    if (openpty(master, slave, slavename, NULL, NULL) != 0)
-	return(0);
-    (void) chown(slavename, runas_pw->pw_uid, ttygid);
-    return(1);
-}
-
-#else
-# ifdef HAVE_GRANTPT
-#  ifndef HAVE_POSIX_OPENPT
-static int
-posix_openpt(oflag)
-    int oflag;
-{
-    int fd;
-
-#   ifdef _AIX
-    fd = open("/dev/ptc", oflag);
-#   else
-    fd = open("/dev/ptmx", oflag);
-#   endif
-    return(fd);
-}
-#  endif /* HAVE_POSIX_OPENPT */
-
-static int
-get_pty(master, slave)
-    int *master;
-    int *slave;
-{
-    char *line;
-
-    *master = posix_openpt(O_RDWR|O_NOCTTY);
-    if (*master == -1)
-	return(0);
-
-    (void) grantpt(*master);
-    if (unlockpt(*master) != 0) {
-	close(*master);
-	return(0);
-    }
-    line = ptsname(*master);
-    if (line == NULL) {
-	close(*master);
-	return(0);
-    }
-    strlcpy(slavename, line, sizeof(slavename));
-    *slave = open(slavename, O_RDWR|O_NOCTTY, 0);
-    if (*slave == -1) {
-	close(*master);
-	return(0);
-    }
-#ifdef I_PUSH
-    ioctl(*slave, I_PUSH, "ptem");	/* pseudo tty emulation module */
-    ioctl(*slave, I_PUSH, "ldterm");	/* line discipline module */
-#endif
-    (void) chown(slavename, runas_pw->pw_uid, -1);
-    return(1);
-}
-
-# else /* !HAVE_GRANTPT */
-
-static int
-get_pty(master, slave)
-    int *master;
-    int *slave;
-{
-    char *bank, *cp;
-    struct group *gr;
-    gid_t ttygid = -1;
-
-    if ((gr = sudo_getgrnam("tty")) != NULL)
-	ttygid = gr->gr_gid;
-
-    for (bank = "pqrs"; *bank != '\0'; bank++) {
-	slavename[sizeof("/dev/ptyX") - 2] = *bank;
-	for (cp = "0123456789abcdef"; *cp != '\0'; cp++) {
-	    slavename[sizeof("/dev/ptyXX") - 2] = *cp;
-	    *master = open(slavename, O_RDWR|O_NOCTTY, 0);
-	    if (*master == -1) {
-		if (errno == ENOENT)
-		    return(0); /* out of ptys */
-		continue; /* already in use */
-	    }
-	    slavename[sizeof("/dev/p") - 2] = 't';
-	    (void) chown(slavename, runas_pw->pw_uid, ttygid);
-	    (void) chmod(slavename, S_IRUSR|S_IWUSR|S_IWGRP);
-#  ifdef HAVE_REVOKE
-	    (void) revoke(slavename);
-#  endif
-	    *slave = open(slavename, O_RDWR|O_NOCTTY, 0);
-	    if (*slave != -1)
-		    return(1); /* success */
-	    (void) close(*master);
-	}
-    }
-    return(0);
-}
-
-# endif /* HAVE_GRANTPT */
-#endif /* HAVE_OPENPTY */

@@ -2594,10 +2594,10 @@ SUDO_TIMEDIR
 SUDO_TRANSCRIPT
 
 dnl
-dnl If transcript is enabled, build sudoreplay and add script.o for sudo
+dnl If transcript is enabled, build sudoreplay and add pty.o script.o for sudo
 dnl
 if test "${enable_transcript-yes}" != "no"; then
-    SUDO_OBJS="${SUDO_OBJS} script.o"
+    SUDO_OBJS="${SUDO_OBJS} pty.o script.o"
     PROGS="$PROGS sudoreplay"
     REPLAY=""
 fi
