@@ -108,10 +108,10 @@ SRCS = aix.c alias.c alloc.c audit.c bsm_audit.c check.c closefrom.c \
        def_data.c defaults.c env.c error.c fileops.c find_path.c fnmatch.c \
        getcwd.c getprogname.c getspwuid.c gettime.c glob.c goodpath.c gram.c \
        gram.y interfaces.c isblank.c lbuf.c ldap.c list.c logging.c match.c \
-       mkstemp.c memrchr.c nanosleep.c parse.c pwutil.c script.c  set_perms.c \
-       sigaction.c snprintf.c strcasecmp.c strerror.c strlcat.c strlcpy.c \
-       strsignal.c sudo.c sudo_noexec.c sudo_edit.c sudo_nss.c term.c \
-       testsudoers.c tgetpass.c toke.c toke.l tsgetgrpw.c utimes.c \
+       mkstemp.c memrchr.c nanosleep.c parse.c pwutil.c pty.c script.c \
+       set_perms.c sigaction.c snprintf.c strcasecmp.c strerror.c strlcat.c \
+       strlcpy.c strsignal.c sudo.c sudo_noexec.c sudo_edit.c sudo_nss.c \
+       term.c testsudoers.c tgetpass.c toke.c toke.l tsgetgrpw.c utimes.c \
        vasgroups.c visudo.c zero_bytes.c redblack.c selinux.c sesh.c \
        sudoreplay.c getdate.c getdate.y getline.c timestr.c $(AUTH_SRCS)
 
@@ -122,9 +122,9 @@ AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 
 HDRS = bsm_audit.h compat.h def_data.h defaults.h error.h ins_2001.h \
        ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.h lbuf.h \
-       list.h logging.h nonunix.h redblack.h parse.h sudo.h sudo_nss.h gram.h \
-       auth/sudo_auth.h emul/charclass.h emul/fnmatch.h emul/glob.h \
-       emul/timespec.h emul/utime.h
+       list.h logging.h missing.h nonunix.h redblack.h parse.h sudo.h \
+       sudo_nss.h gram.h auth/sudo_auth.h emul/charclass.h emul/fnmatch.h \
+       emul/glob.h emul/timespec.h emul/utime.h
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
@@ -170,7 +170,8 @@ BINSPECIAL= INSTALL.binary Makefile.binary.in libtool
 
 SUDODEP = $(srcdir)/sudo.h $(srcdir)/compat.h $(srcdir)/defaults.h \
 	  $(srcdir)/error.h $(srcdir)/list.h $(srcdir)/logging.h \
-	  $(srcdir)/sudo_nss.h $(devdir)/def_data.h pathnames.h config.h
+	  $(srcdir)/missing.h $(srcdir)/sudo_nss.h $(devdir)/def_data.h \
+	  pathnames.h config.h
 
 AUTHDEP = $(SUDODEP) $(authdir)/sudo_auth.h
 
@@ -309,6 +310,8 @@ parse.o: $(srcdir)/parse.c $(SUDODEP) $(srcdir)/parse.h $(srcdir)/list.h $(devdi
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/parse.c
 pwutil.o: $(srcdir)/pwutil.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/pwutil.c
+pty.o: $(srcdir)/pty.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/pty.c
 redblack.o: $(srcdir)/redblack.c $(SUDODEP) $(srcdir)/redblack.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/redblack.c
 script.o: $(srcdir)/script.c $(SUDODEP)
@@ -333,7 +336,7 @@ selinux.o: $(srcdir)/selinux.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/selinux.c
 sudo.o: $(srcdir)/sudo.c $(SUDODEP) sudo_usage.h $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
-sudoreplay.o: $(srcdir)/sudoreplay.c $(srcdir)/compat.h $(srcdir)/error.h config.h
+sudoreplay.o: $(srcdir)/sudoreplay.c $(srcdir)/compat.h $(srcdir)/error.h $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudoreplay.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_edit.c

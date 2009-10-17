@@ -31,6 +31,7 @@
 #include "error.h"
 #include "list.h"
 #include "logging.h"
+#include "missing.h"
 #include "sudo_nss.h"
 
 /*
@@ -197,58 +198,6 @@ struct timeval;
  */
 #define YY_DECL int yylex __P((void))
 
-#ifndef HAVE_CLOSEFROM
-void closefrom		__P((int));
-#endif
-#ifndef HAVE_GETCWD
-char *getcwd		__P((char *, size_t size));
-#endif
-#ifndef HAVE_UTIMES
-int utimes		__P((const char *, const struct timeval *));
-#endif
-#ifdef HAVE_FUTIME
-int futimes		__P((int, const struct timeval *));
-#endif
-#ifndef HAVE_SNPRINTF
-int snprintf		__P((char *, size_t, const char *, ...))
-			    __printflike(3, 4);
-#endif
-#ifndef HAVE_VSNPRINTF
-int vsnprintf		__P((char *, size_t, const char *, va_list))
-			    __printflike(3, 0);
-#endif
-#ifndef HAVE_ASPRINTF
-int asprintf		__P((char **, const char *, ...))
-			    __printflike(2, 3);
-#endif
-#ifndef HAVE_VASPRINTF
-int vasprintf		__P((char **, const char *, va_list))
-			    __printflike(2, 0);
-#endif
-#ifndef HAVE_STRCASECMP
-int strcasecmp		__P((const char *, const char *));
-#endif
-#ifndef HAVE_STRLCAT
-size_t strlcat		__P((char *, const char *, size_t));
-#endif
-#ifndef HAVE_STRLCPY
-size_t strlcpy		__P((char *, const char *, size_t));
-#endif
-#ifndef HAVE_MEMRCHR
-void *memrchr		__P((const void *, int, size_t));
-#endif
-#ifndef HAVE_MKSTEMP
-int mkstemp		__P((char *));
-#endif
-#ifndef HAVE_SETENV
-int setenv		__P((const char *, const char *, int));
-#endif
-#ifndef HAVE_UNSETENV
-int unsetenv		__P((const char *));
-#endif
-#ifdef HAVE_SYS_SIGLIST
-char *strsignal		__P((int));
-#endif
 char *sudo_goodpath	__P((const char *, struct stat *));
 char *tgetpass		__P((const char *, int, int));
 int find_path		__P((char *, char **, struct stat *, char *));

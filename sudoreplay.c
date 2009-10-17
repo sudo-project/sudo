@@ -82,6 +82,7 @@
 
 #include "compat.h"
 #include "error.h"
+#include "missing.h"
 
 #ifndef lint
 __unused static const char rcsid[] = "$Sudo$";
@@ -153,18 +154,6 @@ extern void *erealloc __P((void *, size_t));
 extern void efree __P((void *));
 extern time_t get_date __P((char *));
 extern char *get_timestr __P((time_t, int));
-#ifndef HAVE_GETLINE
-extern ssize_t getline __P((char **, size_t *, FILE *));
-#endif
-#ifndef HAVE_STRLCPY
-extern size_t strlcpy __P((char *, const char *, size_t));
-#endif
-#ifndef HAVE_SNPRINTF
-extern int snprintf __P((char *, size_t, const char *, ...)) __printflike(3, 4);
-#endif
-#ifndef HAVE_NANOSLEEP
-extern int nanosleep __P((const struct timespec *, struct timespec *));
-#endif
 extern int term_cbreak __P((int));
 extern int term_restore __P((int));
 extern void zero_bytes __P((volatile void *, size_t));
