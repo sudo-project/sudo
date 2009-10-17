@@ -60,7 +60,7 @@
 __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
-#ifdef HAVE_OPENPTY
+#if defined(HAVE_OPENPTY)
 int
 get_pty(master, slave, name, namesz)
     int *master;
@@ -80,23 +80,45 @@ get_pty(master, slave, name, namesz)
     return(1);
 }
 
-#else
-# ifdef HAVE_GRANTPT
-#  ifndef HAVE_POSIX_OPENPT
+#elif defined(HAVE__GETPTY)
+int
+get_pty(master, slave, name, namesz)
+    int *master;
+    int *slave;
+    char *name;
+    size_t namesz;
+{
+    char *line;
+
+    /* IRIX-style dynamic ptys (may fork) */
+    line = _getpty(master, O_RDWR, IRUSR|S_IWUSR|S_IWGRP, 0);
+    if (line == NULL)
+	return (0);
+    *slave = open(line, O_RDWR|O_NOCTTY, 0);
+    if (*slave == -1) {
+	close(*master);
+	return(0);
+    }
+    (void) chown(line, runas_pw->pw_uid, -1);
+    strlcpy(name, line, namesz);
+    return(1);
+}
+#elif defined(HAVE_GRANTPT)
+# ifndef HAVE_POSIX_OPENPT
 static int
 posix_openpt(oflag)
     int oflag;
 {
     int fd;
 
-#   ifdef _AIX
+#  ifdef _AIX
     fd = open("/dev/ptc", oflag);
-#   else
+#  else
     fd = open("/dev/ptmx", oflag);
-#   endif
+#  endif
     return(fd);
 }
-#  endif /* HAVE_POSIX_OPENPT */
+# endif /* HAVE_POSIX_OPENPT */
 
 int
 get_pty(master, slave, name, namesz)
@@ -111,7 +133,7 @@ get_pty(master, slave, name, namesz)
     if (*master == -1)
 	return(0);
 
-    (void) grantpt(*master);
+    (void) grantpt(*master); /* may fork */
     if (unlockpt(*master) != 0) {
 	close(*master);
 	return(0);
@@ -126,16 +148,16 @@ get_pty(master, slave, name, namesz)
 	close(*master);
 	return(0);
     }
-#ifdef I_PUSH
+# ifdef I_PUSH
     ioctl(*slave, I_PUSH, "ptem");	/* pseudo tty emulation module */
     ioctl(*slave, I_PUSH, "ldterm");	/* line discipline module */
-#endif
+# endif
     (void) chown(line, runas_pw->pw_uid, -1);
     strlcpy(name, line, namesz);
     return(1);
 }
 
-# else /* !HAVE_GRANTPT */
+#else /* Old-style BSD ptys */
 
 static char line[] = "/dev/ptyXX";
 
@@ -166,9 +188,9 @@ get_pty(master, slave, name, namesz)
 	    line[sizeof("/dev/p") - 2] = 't';
 	    (void) chown(line, runas_pw->pw_uid, ttygid);
 	    (void) chmod(line, S_IRUSR|S_IWUSR|S_IWGRP);
-#  ifdef HAVE_REVOKE
+# ifdef HAVE_REVOKE
 	    (void) revoke(line);
-#  endif
+# endif
 	    *slave = open(line, O_RDWR|O_NOCTTY, 0);
 	    if (*slave != -1) {
 		    strlcpy(name, line, namesz);
@@ -179,6 +201,4 @@ get_pty(master, slave, name, namesz)
     }
     return(0);
 }
-
-# endif /* HAVE_GRANTPT */
 #endif /* HAVE_OPENPTY */
