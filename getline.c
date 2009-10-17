@@ -37,12 +37,11 @@
 #include <limits.h>
 
 #include "compat.h"
+#include "alloc.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048
 #endif
-
-extern void *erealloc __P((void *, size_t));
 
 #ifdef HAVE_FGETLN
 ssize_t

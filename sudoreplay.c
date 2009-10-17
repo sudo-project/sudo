@@ -81,6 +81,7 @@
 #include <pathnames.h>
 
 #include "compat.h"
+#include "alloc.h"
 #include "error.h"
 #include "missing.h"
 
@@ -148,10 +149,6 @@ struct search_node {
 static struct search_node *node_stack[32];
 static int stack_top;
 
-extern void *emalloc __P((size_t));
-extern void *emalloc2 __P((size_t, size_t));
-extern void *erealloc __P((void *, size_t));
-extern void efree __P((void *));
 extern time_t get_date __P((char *));
 extern char *get_timestr __P((time_t, int));
 extern int term_cbreak __P((int));

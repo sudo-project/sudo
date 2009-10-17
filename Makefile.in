@@ -120,7 +120,7 @@ AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/secureware.c auth/securid.c auth/securid5.c auth/sia.c \
 	    auth/sudo_auth.c
 
-HDRS = bsm_audit.h compat.h def_data.h defaults.h error.h ins_2001.h \
+HDRS = alloc.h bsm_audit.h compat.h def_data.h defaults.h error.h ins_2001.h \
        ins_classic.h ins_csops.h ins_goons.h insults.h interfaces.h lbuf.h \
        list.h logging.h missing.h nonunix.h redblack.h parse.h sudo.h \
        sudo_nss.h gram.h auth/sudo_auth.h emul/charclass.h emul/fnmatch.h \
@@ -168,10 +168,10 @@ BINFILES= ChangeLog HISTORY LICENSE README TROUBLESHOOTING \
 
 BINSPECIAL= INSTALL.binary Makefile.binary.in libtool
 
-SUDODEP = $(srcdir)/sudo.h $(srcdir)/compat.h $(srcdir)/defaults.h \
-	  $(srcdir)/error.h $(srcdir)/list.h $(srcdir)/logging.h \
-	  $(srcdir)/missing.h $(srcdir)/sudo_nss.h $(devdir)/def_data.h \
-	  pathnames.h config.h
+SUDODEP = $(srcdir)/sudo.h $(srcdir)/alloc.h $(srcdir)/compat.h \
+	  $(srcdir)/defaults.h $(srcdir)/error.h $(srcdir)/list.h \
+	  $(srcdir)/logging.h $(srcdir)/missing.h $(srcdir)/sudo_nss.h \
+	  $(devdir)/def_data.h pathnames.h config.h
 
 AUTHDEP = $(SUDODEP) $(authdir)/sudo_auth.h
 
@@ -336,7 +336,7 @@ selinux.o: $(srcdir)/selinux.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/selinux.c
 sudo.o: $(srcdir)/sudo.c $(SUDODEP) sudo_usage.h $(srcdir)/interfaces.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
-sudoreplay.o: $(srcdir)/sudoreplay.c $(srcdir)/compat.h $(srcdir)/error.h $(srcdir)/missing.h config.h
+sudoreplay.o: $(srcdir)/sudoreplay.c $(srcdir)/alloc.h $(srcdir)/compat.h $(srcdir)/error.h $(srcdir)/missing.h config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudoreplay.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_edit.c

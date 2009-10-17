@@ -27,6 +27,7 @@
 #include <pathnames.h>
 #include <limits.h>
 #include "compat.h"
+#include "alloc.h"
 #include "defaults.h"
 #include "error.h"
 #include "list.h"
@@ -231,16 +232,6 @@ void sia_attempt_auth	__P((void));
 void pam_attempt_auth	__P((void));
 int yyparse		__P((void));
 void pass_warn		__P((FILE *));
-void *emalloc		__P((size_t));
-void *emalloc2		__P((size_t, size_t));
-void *erealloc		__P((void *, size_t));
-void *erealloc3		__P((void *, size_t, size_t));
-char *estrdup		__P((const char *));
-int easprintf		__P((char **, const char *, ...))
-			    __printflike(2, 3);
-int evasprintf		__P((char **, const char *, va_list))
-			    __printflike(2, 0);
-void efree		__P((void *));
 void dump_defaults	__P((void));
 void dump_auth_methods	__P((void));
 void init_envtables	__P((void));
