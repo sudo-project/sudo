@@ -67,6 +67,7 @@ __unused static const char rcsid[] = "$Sudo$";
 #define SFD_LOG 2
 #define SFD_OUTPUT 3
 #define SFD_TIMING 4
+#define SFD_USERTTY 5
 
 struct script_buf {
     int len; /* buffer length (how much read in) */
@@ -74,7 +75,7 @@ struct script_buf {
     char buf[16 * 1024];
 };
 
-static int script_fds[5];
+static int script_fds[6];
 
 static sig_atomic_t alive = 1;
 static sig_atomic_t suspended = 0;
@@ -222,19 +223,21 @@ script_setup()
     char pathbuf[PATH_MAX];
     int len;
 
-    if (!isatty(STDIN_FILENO))
-	log_error(0, "Standard input is not a tty");
+    /* XXX - can't use _PATH_TTY here since it won't be valid in new session */
+    if (!user_ttypath ||
+	(script_fds[SFD_USERTTY] = open(user_ttypath, O_RDWR|O_NOCTTY, 0) == -1))
+	log_error(0, "tty required for transcript support"); /* XXX */
 
     if (!get_pty(&script_fds[SFD_MASTER], &script_fds[SFD_SLAVE],
 	slavename, sizeof(slavename)))
 	log_error(USE_ERRNO, "Can't get pty");
 
-    /* Copy terminal attrs from stdin -> pty slave. */
-    if (!term_copy(STDIN_FILENO, script_fds[SFD_SLAVE], 0))
+    /* Copy terminal attrs from user tty -> pty slave. */
+    if (!term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], 0))
 	log_error(USE_ERRNO, "Can't copy terminal attributes");
-    sync_winsize(STDIN_FILENO, script_fds[SFD_SLAVE]);
+    sync_winsize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
 
-    if (!term_raw(STDIN_FILENO, 1))
+    if (!term_raw(script_fds[SFD_USERTTY], 1))
 	log_error(USE_ERRNO, "Can't set terminal to raw mode");
 
     /*
@@ -268,15 +271,15 @@ int
 script_duplow(fd)
     int fd;
 {
-    int i, j, indices[5];
+    int i, j, indices[6];
 
     /* sort fds so we can dup them safely */
-    for (i = 0; i < 5; i++)
+    for (i = 0; i < 6; i++)
 	indices[i] = i;
-    qsort(indices, 5, sizeof(int), fdcompar);
+    qsort(indices, 6, sizeof(int), fdcompar);
 
     /* Move pty master/slave and session fds to low numbered fds. */
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < 6; i++) {
 	j = indices[i];
 	if (script_fds[j] != fd) {
 #ifdef HAVE_DUP2
@@ -395,7 +398,7 @@ script_execv(path, argv)
 	}
 
 	/* Restore old tty settings and signal handler. */
-	term_restore(STDIN_FILENO);
+	term_restore(script_fds[SFD_USERTTY]);
       check_sig:
 	switch (signo) {
 	case SIGINT:
@@ -426,12 +429,12 @@ script_execv(path, argv)
 	kill(parent, signo); /* re-send signal with handler disabled */
 	/* Reinstall signal handler, reset raw mode and continue child */
 	(void) sigaction(signo, &sa, NULL);
-	if (!term_raw(STDIN_FILENO, 1) && errno == EINTR)
+	if (!term_raw(script_fds[SFD_USERTTY], 1) && errno == EINTR)
 	    goto check_sig;
 	kill(child, SIGCONT);
     }
 
-    term_restore(STDIN_FILENO);
+    term_restore(script_fds[SFD_USERTTY]);
 
     exit(exitcode);
 }
@@ -534,10 +537,10 @@ script_child(path, argv)
 	n |= O_NONBLOCK;
 	(void) fcntl(script_fds[SFD_MASTER], F_SETFL, n);
     }
-    n = fcntl(STDIN_FILENO, F_GETFL, 0);
+    n = fcntl(script_fds[SFD_USERTTY], F_GETFL, 0);
     if (n != -1) {
 	n |= O_NONBLOCK;
-	(void) fcntl(STDIN_FILENO, F_SETFL, n);
+	(void) fcntl(script_fds[SFD_USERTTY], F_SETFL, n);
     }
     n = fcntl(STDOUT_FILENO, F_GETFL, 0);
     if (n != -1) {
@@ -546,10 +549,9 @@ script_child(path, argv)
     }
 
     /*
-     * In the event loop we pass input from stdin to master
-     * and pass output from master to stdout and ofile.
-     * Note that we've set things up such that master is above
-     * stdin and stdout (see sudo.c).
+     * In the event loop we pass input from user tty to master
+     * and pass output from master to stdout and ofile.  Note that
+     * we've set things up such that master is > 3 (see sudo.c).
      */
     fdsr = (fd_set *)emalloc2(howmany(script_fds[SFD_MASTER] + 1, NFDBITS),
 	sizeof(fd_mask));
@@ -566,7 +568,7 @@ script_child(path, argv)
 	zero_bytes(fdsw, howmany(script_fds[SFD_MASTER] + 1, NFDBITS) * sizeof(fd_mask));
 	zero_bytes(fdsr, howmany(script_fds[SFD_MASTER] + 1, NFDBITS) * sizeof(fd_mask));
 	if (input.len != sizeof(input.buf))
-	    FD_SET(STDIN_FILENO, fdsr);
+	    FD_SET(script_fds[SFD_USERTTY], fdsr);
 	if (output.len != sizeof(output.buf))
 	    FD_SET(script_fds[SFD_MASTER], fdsr);
 	if (output.len > output.off)
@@ -590,8 +592,8 @@ script_child(path, argv)
 		continue;
 	    log_error(USE_ERRNO, "select failed");
 	}
-	if (FD_ISSET(STDIN_FILENO, fdsr)) {
-	    n = read(STDIN_FILENO, input.buf + input.len,
+	if (FD_ISSET(script_fds[SFD_USERTTY], fdsr)) {
+	    n = read(script_fds[SFD_USERTTY], input.buf + input.len,
 		sizeof(input.buf) - input.len);
 	    if (n == -1) {
 		if (errno == EINTR)
@@ -717,7 +719,11 @@ script_grandchild(path, argv, rbac_enabled)
 {
     pid_t self = getpid();
 
-    dup2(script_fds[SFD_SLAVE], STDIN_FILENO);
+    /*
+     * We have guaranteed that the slave fd > 3
+     */
+    if (isatty(STDIN_FILENO))
+	dup2(script_fds[SFD_SLAVE], STDIN_FILENO);
     dup2(script_fds[SFD_SLAVE], STDOUT_FILENO);
     dup2(script_fds[SFD_SLAVE], STDERR_FILENO);
 
@@ -729,9 +735,10 @@ script_grandchild(path, argv, rbac_enabled)
     close(script_fds[SFD_LOG]);
     close(script_fds[SFD_OUTPUT]);
     close(script_fds[SFD_TIMING]);
+    close(script_fds[SFD_USERTTY]);
 
     /* Spin until parent grants us the controlling pty */
-    while (tcgetpgrp(STDIN_FILENO) != self)
+    while (tcgetpgrp(STDOUT_FILENO) != self)
 	continue;
 
 #ifdef HAVE_SELINUX
@@ -808,6 +815,6 @@ sigwinch(s)
 {
     int serrno = errno;
 
-    sync_winsize(STDIN_FILENO, script_fds[SFD_SLAVE]);
+    sync_winsize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
     errno = serrno;
 }
