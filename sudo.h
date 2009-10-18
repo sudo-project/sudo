@@ -191,8 +191,6 @@ struct sudo_user {
 
 struct lbuf;
 struct passwd;
-struct timespec;
-struct timeval;
 
 /*
  * Function prototypes

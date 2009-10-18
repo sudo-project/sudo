@@ -21,6 +21,9 @@
 
 /* Functions "missing" from libc. */
 
+struct timeval;
+struct timespec;
+
 #ifndef HAVE_CLOSEFROM
 void closefrom		__P((int));
 #endif
