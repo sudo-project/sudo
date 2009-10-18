@@ -669,7 +669,8 @@ init_vars(sudo_mode, envp)
 	}
     }
 
-    if ((p = ttyname(STDIN_FILENO)) || (p = ttyname(STDOUT_FILENO))) {
+    if ((p = ttyname(STDIN_FILENO)) || (p = ttyname(STDOUT_FILENO)) ||
+	(p = ttyname(STDERR_FILENO))) {
 	user_tty = user_ttypath = estrdup(p);
 	if (strncmp(user_tty, _PATH_DEV, sizeof(_PATH_DEV) - 1) == 0)
 	    user_tty += sizeof(_PATH_DEV) - 1;
