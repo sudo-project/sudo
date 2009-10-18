@@ -323,10 +323,11 @@ log_output(buf, n, then, now, ofile, tfile)
  *     allow the child to be suspended in the parent session with the
  *     parent controlling tty.  Acts as the "glue" between the two controlling
  *     ttys from a job-control standpoint.
- *  2) child, creates a new session with the pty slave as the controlling tty.
- *     Does all the work passing data to and from the pty and signals parent
- *     when it receives job control-related signals on behalf of grandchild.
- *  3) grandchild, runs the actual command, belongs to child's session and pgrp.
+ *  2) child, creates a new session.  Does all the I/O passing data to and
+ *     from the pty and signals parent when it receives job control-related
+ *     signals on behalf of the grandchild.
+ *  3) grandchild, runs the actual command with the pty slave as its
+ *     controlling tty, belongs to child's session but has its own pgrp.
  */
 int
 script_execv(path, argv)
