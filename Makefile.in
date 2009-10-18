@@ -128,7 +128,6 @@ HDRS = alloc.h bsm_audit.h compat.h def_data.h defaults.h error.h ins_2001.h \
 
 AUTH_OBJS = sudo_auth.o @AUTH_OBJS@
 
-# Note: gram.o must come first here
 COMMON_OBJS = alias.o alloc.o defaults.o error.o getline.o gram.o \
 	      list.o match.o pwutil.o timestr.o toke.o redblack.o \
 	      term.o zero_bytes.o @NONUNIX_GROUPS_IMPL@
@@ -218,7 +217,7 @@ sudo_noexec.la: sudo_noexec.lo
 @DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate
 
 # Uncomment the lines before -@true if you intend to modify gram.y
-$(devdir)/gram.c: $(srcdir)/gram.y
+$(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
 @DEV@	$(YACC) -d $(srcdir)/gram.y
 @DEV@	mv -f y.tab.c gram.c
 @DEV@	if cmp -s y.tab.h gram.h; then rm -f y.tab.h; else mv -f y.tab.h gram.h; fi
