@@ -583,8 +583,10 @@ script_child(path, argv, rbac_enabled)
      * This allows us to be notified when the child has been suspended.
      */
 #ifdef HAVE_SETSID
-    if (setsid() == -1)
-	log_error(USE_ERRNO, "setsid");
+    if (setsid() == -1) {
+	warning("setsid");
+	_exit(1);
+    }
 #else
 # ifdef TIOCNOTTY
     n = open(_PATH_TTY, O_RDWR|O_NOCTTY);
@@ -608,8 +610,10 @@ script_child(path, argv, rbac_enabled)
 
     /* Start command and wait for it to stop or exit */
     child = fork();
-    if (child == -1)
-	log_error(USE_ERRNO, "Can't fork");
+    if (child == -1) {
+	warning("Can't fork");
+	_exit(1);
+    }
     if (child == 0) {
 	/* setup tty and exec command */
 	script_run(path, argv, rbac_enabled);
