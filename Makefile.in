@@ -196,13 +196,13 @@ libsudo.a: $(LIB_OBJS) $(COMMON_OBJS)
 	$(RANLIB) $@
 
 sudo: libsudo.a $(SUDO_OBJS)
-	$(CC) -o $@ $(SUDO_OBJS) $(SUDO_LDFLAGS) -lsudo $(SUDO_LIBS)
+	$(CC) -o $@ $(SUDO_OBJS) $(SUDO_LDFLAGS) -lsudo $(SUDO_LIBS) @ZLIB@
 
 visudo: libsudo.a $(VISUDO_OBJS)
 	$(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) -lsudo $(LIBS) $(NET_LIBS)
 
 sudoreplay: libsudo.a $(REPLAY_OBJS)
-	$(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) -lsudo $(LIBS)
+	$(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) -lsudo $(LIBS) @ZLIB@
 
 testsudoers: $(TEST_OBJS)
 	$(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) -lsudo $(LIBS) $(NET_LIBS)
