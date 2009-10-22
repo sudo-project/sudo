@@ -21,6 +21,15 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/wait.h>
+#ifdef HAVE_TERMIOS_H
+# include <termios.h>
+#else
+# ifdef HAVE_TERMIO_H
+#  include <termio.h>
+# else
+#  include <sgtty.h>
+# endif /* HAVE_TERMIO_H */
+#endif /* HAVE_TERMIOS_H */
 #include <sys/ioctl.h>
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -566,8 +575,10 @@ script_child(path, argv, rbac_enabled)
 {
     sigaction_t sa;
     pid_t pid;
-    int status;
-    int exitcode = 1;
+    int status, exitcode = 1;
+#ifndef TIOCSCTTY
+    int n;
+#endif
 
     /* Reset signal handlers. */
     zero_bytes(&sa, sizeof(sa));
