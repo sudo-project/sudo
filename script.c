@@ -55,6 +55,9 @@
 #include <grp.h>
 #include <pwd.h>
 #include <signal.h>
+#ifdef HAVE_SELINUX
+# include <selinux/selinux.h>
+#endif
 
 #include "sudo.h"
 
