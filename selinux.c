@@ -282,7 +282,7 @@ void
 selinux_exec(char *role, char *type, char **argv)
 {
     pid_t childPid;
-    int enforcing, ttyfd;
+    int ttyfd;
 
     /* Must have a tty. */
     if (user_ttypath == NULL || *user_ttypath == '\0')
