@@ -646,7 +646,7 @@ script_child(path, argv, rbac_enabled)
 	    /* Stop parent, self and then resume child when we come back */
 	    kill(parent, WSTOPSIG(status));
 	    kill(getpid(), SIGSTOP);
-	    kill(child, SIGCONT);
+	    killpg(child, SIGCONT);
 	} else {
 	    /* Child died, set exit code accordingly. */
 	    if (WIFEXITED(status))
