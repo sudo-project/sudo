@@ -52,6 +52,7 @@ AC_SUBST(LDAP)
 AC_SUBST(REPLAY)
 AC_SUBST(LOGINCAP_USAGE)
 AC_SUBST(NONUNIX_GROUPS_IMPL)
+AC_SUBST(ZLIB)
 dnl
 dnl Variables that get substituted in docs (not overridden by environment)
 dnl
@@ -133,6 +134,7 @@ REPLAY="#"
 BAMAN='.\" '
 LCMAN='.\" '
 SEMAN='.\" '
+ZLIB=
 AUTH_OBJS=
 AUTH_REG=
 AUTH_EXCL=
@@ -2604,6 +2606,27 @@ if test "${enable_transcript-yes}" != "no"; then
 	SUDO_OBJS="${SUDO_OBJS} pty.o script.o"
 	PROGS="$PROGS sudoreplay"
 	REPLAY=""
+
+	AC_ARG_ENABLE(zlib,
+	[AS_HELP_STRING([--enable-zlib[[=PATH]]], [Whether to enable or disable zlib])],
+	[ case "$enableval" in
+	    yes)    AC_DEFINE(HAVE_ZLIB)
+		    ZLIB="-lz"
+		    ;;
+	    no)	    ;;
+	    *)	    AC_DEFINE(HAVE_ZLIB)
+		    CPPFLAGS="${CPPFLAGS} -I${enableval}/include"
+		    SUDO_APPEND_LIBPATH(ZLIB, [$enableval/lib])
+		    ZLIB="${ZLIB} -lz"
+		    ;;
+	  esac
+	])
+	if test X"$enable_zlib" = X""; then
+	    AC_CHECK_LIB(z, gzdopen, [
+		AC_DEFINE(HAVE_ZLIB)
+		ZLIB="-lz"
+	    ])
+	fi
     ], [
 	AC_MSG_WARN([Disabling transcript support due to lack of tcsetpgrp function])
 	enable_transcript=no
@@ -2772,6 +2795,7 @@ AH_TEMPLATE(WITHOUT_PASSWD, [Define to avoid using the passwd/shadow file for au
 AH_TEMPLATE(sig_atomic_t, [Define to `int' if <signal.h> does not define.])
 AH_TEMPLATE(__signed, [Define to `signed' or nothing if compiler does not support a signed type qualifier.])
 AH_TEMPLATE(USING_NONUNIX_GROUPS, [Define to 1 if using a non-Unix group lookup implementation.])
+AH_TEMPLATE(HAVE_ZLIB, [Define to 1 if you the `zlib' library.])
 
 dnl
 dnl Bits to copy verbatim into config.h.in

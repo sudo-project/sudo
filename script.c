@@ -67,6 +67,9 @@
 #ifdef HAVE_SELINUX
 # include <selinux/selinux.h>
 #endif
+#ifdef HAVE_ZLIB
+# include <zlib.h>
+#endif
 
 #include "sudo.h"
 
@@ -104,7 +107,7 @@ static void sigchild __P((int s));
 static void sigtstp __P((int s));
 static void sigwinch __P((int s));
 static void flush_output __P((struct script_buf *output, struct timeval *then,
-    struct timeval *now, FILE *ofile, FILE *tfile));
+    struct timeval *now, void *ofile, void *tfile));
 
 extern int get_pty __P((int *master, int *slave, char *name, size_t namesz));
 
@@ -315,15 +318,29 @@ log_output(buf, n, then, now, ofile, tfile)
     int n;
     struct timeval *then;
     struct timeval *now;
+#ifdef HAVE_ZLIB
+    gzFile ofile;
+    gzFile tfile;
+#else
     FILE *ofile;
     FILE *tfile;
+#endif
 {
     struct timeval tv;
 
+#ifdef HAVE_ZLIB
+    gzwrite(ofile, buf, n);
+#else
     fwrite(buf, 1, n, ofile);
+#endif
     timersub(now, then, &tv);
+#ifdef HAVE_ZLIB
+    gzprintf(tfile, "%f %d\n",
+	tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
+#else
     fprintf(tfile, "%f %d\n",
 	tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
+#endif
     then->tv_sec = now->tv_sec;
     then->tv_usec = now->tv_usec;
 }
@@ -352,7 +369,12 @@ script_execv(path, argv)
     struct timeval now, then;
     int n, nready, exitcode = 1;
     fd_set *fdsr, *fdsw;
+    FILE *idfile;
+#ifdef HAVE_ZLIB
+    gzFile ofile, tfile;
+#else
     FILE *idfile, *ofile, *tfile;
+#endif
     int rbac_enabled = 0;
 
 #ifdef HAVE_SELINUX
@@ -402,10 +424,17 @@ script_execv(path, argv)
 
     if ((idfile = fdopen(script_fds[SFD_LOG], "w")) == NULL)
 	log_error(USE_ERRNO, "fdopen");
+#ifdef HAVE_ZLIB
+    if ((ofile = gzdopen(script_fds[SFD_OUTPUT], "w")) == NULL)
+	log_error(USE_ERRNO, "gzdopen");
+    if ((tfile = gzdopen(script_fds[SFD_TIMING], "w")) == NULL)
+	log_error(USE_ERRNO, "gzdopen");
+#else
     if ((ofile = fdopen(script_fds[SFD_OUTPUT], "w")) == NULL)
 	log_error(USE_ERRNO, "fdopen");
     if ((tfile = fdopen(script_fds[SFD_TIMING], "w")) == NULL)
 	log_error(USE_ERRNO, "fdopen");
+#endif
 
     gettimeofday(&then, NULL);
 
@@ -452,8 +481,19 @@ script_execv(path, argv)
 
 	zero_bytes(fdsw, howmany(script_fds[SFD_MASTER] + 1, NFDBITS) * sizeof(fd_mask));
 	zero_bytes(fdsr, howmany(script_fds[SFD_MASTER] + 1, NFDBITS) * sizeof(fd_mask));
-	if (input.len != sizeof(input.buf))
-	    FD_SET(script_fds[SFD_USERTTY], fdsr);
+	if (input.len != sizeof(input.buf)) {
+	    /* Only check for input if master pty is writable. */
+	    struct timeval tv;
+	    tv.tv_sec = 0;
+	    tv.tv_usec = 0;
+	    FD_SET(script_fds[SFD_MASTER], fdsw);
+	    do {
+		n = select(script_fds[SFD_MASTER] + 1, NULL, fdsw, NULL, &tv);
+	    } while (n == -1 && errno == EINTR);
+	    if (n == 1)
+		FD_SET(script_fds[SFD_USERTTY], fdsr);
+	    FD_CLR(script_fds[SFD_MASTER], fdsw);
+	}
 	if (output.len != sizeof(output.buf))
 	    FD_SET(script_fds[SFD_MASTER], fdsr);
 	if (output.len > output.off)
@@ -555,6 +595,14 @@ script_execv(path, argv)
 	(void) fcntl(STDOUT_FILENO, F_SETFL, n);
     }
     flush_output(&output, &then, &now, ofile, tfile);
+
+#ifdef HAVE_ZLIB
+    gzclose(ofile);
+    gzclose(tfile);
+#else
+    fclose(ofile);
+    fclose(tfile);
+#endif
 
     do {
 	n = term_restore(script_fds[SFD_USERTTY]);
@@ -687,8 +735,8 @@ flush_output(output, then, now, ofile, tfile)
     struct script_buf *output;
     struct timeval *then;
     struct timeval *now;
-    FILE *ofile;
-    FILE *tfile;
+    void *ofile;
+    void *tfile;
 {
     int n;
 

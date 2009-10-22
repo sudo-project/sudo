@@ -76,6 +76,9 @@
 #ifdef HAVE_REGCOMP
 # include <regex.h>
 #endif
+#ifdef HAVE_ZLIB
+# include <zlib.h>
+#endif
 #include <signal.h>
 
 #include <pathnames.h>
@@ -179,7 +182,12 @@ main(argc, argv)
     int ch, plen, ttyfd, interactive = 0, listonly = 0;
     const char *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
-    FILE *tfile, *sfile, *lfile;
+    FILE *lfile;
+#ifdef HAVE_ZLIB
+    gzFile tfile, sfile;
+#else
+    FILE *tfile, *sfile;
+#endif
     sigaction_t sa;
     unsigned long nbytes;
     size_t len, nread;
@@ -242,13 +250,21 @@ main(argc, argv)
 	    id, &id[2], &id[4], strerror(ENAMETOOLONG));
 
     /* timing file */
+#ifdef HAVE_ZLIB
+    tfile = gzopen(path, "r");
+#else
     tfile = fopen(path, "r");
+#endif
     if (tfile == NULL)
 	error(1, "unable to open %s", path);
 
     /* script file */
     memcpy(&path[plen - 3], "scr", 3);
+#ifdef HAVE_ZLIB
+    sfile = gzopen(path, "r");
+#else
     sfile = fopen(path, "r");
+#endif
     if (sfile == NULL)
 	error(1, "unable to open %s", path);
 
@@ -290,7 +306,11 @@ main(argc, argv)
     /*
      * Timing file consists of line of the format: "%f %d\n"
      */
+#ifdef HAVE_ZLIB
+    while (gzgets(tfile, buf, sizeof(buf)) != NULL) {
+#else
     while (fgets(buf, sizeof(buf), tfile) != NULL) {
+#endif
 	errno = 0;
 	seconds = strtod(buf, &ep);
 	if (errno != 0 || !isspace((unsigned char) *ep))
@@ -316,7 +336,11 @@ main(argc, argv)
 		len = sizeof(buf);
 	    else
 		len = nbytes;
+#ifdef HAVE_ZLIB
+	    nread = gzread(sfile, buf, len);
+#else
 	    nread = fread(buf, 1, len, sfile);
+#endif
 	    nbytes -= nread;
 	    do {
 		/* no stdio, must be unbuffered */
