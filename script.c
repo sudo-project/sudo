@@ -481,19 +481,8 @@ script_execv(path, argv)
 
 	zero_bytes(fdsw, howmany(script_fds[SFD_MASTER] + 1, NFDBITS) * sizeof(fd_mask));
 	zero_bytes(fdsr, howmany(script_fds[SFD_MASTER] + 1, NFDBITS) * sizeof(fd_mask));
-	if (input.len != sizeof(input.buf)) {
-	    /* Only check for input if master pty is writable. */
-	    struct timeval tv;
-	    tv.tv_sec = 0;
-	    tv.tv_usec = 0;
-	    FD_SET(script_fds[SFD_MASTER], fdsw);
-	    do {
-		n = select(script_fds[SFD_MASTER] + 1, NULL, fdsw, NULL, &tv);
-	    } while (n == -1 && errno == EINTR);
-	    if (n == 1)
-		FD_SET(script_fds[SFD_USERTTY], fdsr);
-	    FD_CLR(script_fds[SFD_MASTER], fdsw);
-	}
+	if (input.len != sizeof(input.buf))
+	    FD_SET(script_fds[SFD_USERTTY], fdsr);
 	if (output.len != sizeof(output.buf))
 	    FD_SET(script_fds[SFD_MASTER], fdsr);
 	if (output.len > output.off)
