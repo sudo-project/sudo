@@ -100,10 +100,11 @@ static int child_status;
 
 static char slavename[PATH_MAX];
 
-static void script_child __P((char *path, char *argv[], int));
+static void script_child __P((char *path, char *argv[], int, int));
 static void script_run __P((char *path, char *argv[], int));
 static void sync_winsize __P((int src, int dst));
 static void sigchild __P((int s));
+static void sigfgbg __P((int s));
 static void sigtstp __P((int s));
 static void sigwinch __P((int s));
 static void flush_output __P((struct script_buf *output, struct timeval *then,
@@ -367,7 +368,7 @@ script_execv(path, argv)
     sigaction_t sa, osa;
     struct script_buf input, output;
     struct timeval now, then;
-    int n, nready, exitcode = 1;
+    int foreground, n, nready, exitcode = 1;
     fd_set *fdsr, *fdsw;
     FILE *idfile;
 #ifdef HAVE_ZLIB
@@ -404,20 +405,23 @@ script_execv(path, argv)
     sigaction(SIGTTIN, &sa, NULL);
     sigaction(SIGTTOU, &sa, NULL);
 
+    /* Are we the foreground process? */
+    parent = getpid(); /* so child can pass signals back to us */
+    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
+
     /* XXX - should also catch terminal signals and kill child */
 
     /*
      * Child will run the command in the pty, parent will pass data
      * to and from pty.
      */
-    parent = getpid(); /* so child can pass signals back to us */
     child = fork();
     switch (child) {
     case -1:
 	log_error(USE_ERRNO, "fork");
 	break;
     case 0:
-	script_child(path, argv, rbac_enabled);
+	script_child(path, argv, foreground, rbac_enabled);
 	/* NOTREACHED */
 	break;
     }
@@ -490,7 +494,20 @@ script_execv(path, argv)
 	if (input.len > input.off)
 	    FD_SET(script_fds[SFD_MASTER], fdsw);
 
-	if (suspended) {
+	switch (suspended) {
+	case SIGTTOU:
+	case SIGTTIN:
+	    /*
+	     * If we are the foreground process, just resume the child.
+	     * Otherwise, re-send the signal with the handler disabled.
+	     */
+	    if (tcgetpgrp(script_fds[SFD_USERTTY]) == parent) {
+		suspended = 0;
+		kill(child, SIGUSR1);
+		break;
+	    }
+	    /* FALLTHROUGH */
+	case SIGTSTP:
 	    /* Flush any remaining output to master tty. */
 	    flush_output(&output, &then, &now, ofile, tfile);
 
@@ -504,13 +521,29 @@ script_execv(path, argv)
 	    sigaction(suspended, &sa, &osa);
 	    kill(parent, suspended);
 
-	    /* Set tty to raw mode, restore signal handler and resume child. */
-	    do {
-		n = term_raw(script_fds[SFD_USERTTY], 1);
-	    } while (!n && errno == EINTR);
+	    /*
+	     * If we were suspended due to tty I/O and sudo is still in
+	     * the background, re-suspend.
+	     */
+	    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
+	    if (!foreground && (suspended == SIGTTOU || suspended == SIGTTIN))
+		kill(parent, suspended);
+
 	    sigaction(suspended, &osa, NULL);
 	    suspended = 0;
-	    kill(child, SIGCONT);
+	    if (foreground) {
+		/* Set tty to raw mode and tell child it is in foregound. */
+		do {
+		    n = term_raw(script_fds[SFD_USERTTY], 1);
+		} while (!n && errno == EINTR);
+		kill(child, SIGUSR1);
+	    } else {
+		/* Tell child it is in the background. */
+		kill(child, SIGUSR2);
+	    }
+	    break;
+	default:
+	    break;
 	}
 	nready = select(script_fds[SFD_MASTER] + 1, fdsr, fdsw, NULL, NULL);
 	if (nready == -1) {
@@ -605,14 +638,15 @@ script_execv(path, argv)
 }
 
 void
-script_child(path, argv, rbac_enabled)
+script_child(path, argv, foreground, rbac_enabled)
     char *path;
     char *argv[];
+    int foreground;
     int rbac_enabled;
 {
     sigaction_t sa;
-    pid_t pid;
-    int status, exitcode = 1;
+    pid_t pid, self = getpid();
+    int signo, status, exitcode = 1;
 #ifndef TIOCSCTTY
     int n;
 #endif
@@ -627,6 +661,11 @@ script_child(path, argv, rbac_enabled)
     sigaction(SIGTSTP, &sa, NULL);
     sigaction(SIGTTIN, &sa, NULL);
     sigaction(SIGTTOU, &sa, NULL);
+
+    /* Parent sends child SIGUSR1 to put command in the foreground. */
+    sa.sa_handler = sigfgbg;
+    sigaction(SIGUSR1, &sa, NULL);
+    sigaction(SIGUSR2, &sa, NULL);
 
     /*
      * Start a new session with the parent as the session leader
@@ -671,10 +710,19 @@ script_child(path, argv, rbac_enabled)
 	warning("unable to execute %s", path);
 	_exit(127);
     }
-    /* Set child process group and grant it the controlling tty. */
+
+    /*
+     * Put child in its own process group and make it the foreground
+     * process of the session if sudo itself is run in the foreground.
+     */
     setpgid(child, child);
-    if (tcsetpgrp(script_fds[SFD_SLAVE], child) != 0)
-	warning("tcsetpgrp");
+    if (foreground) {
+	do {
+	    status = tcsetpgrp(script_fds[SFD_SLAVE], child);
+	} while (status == -1 && errno == EINTR);
+	if (status == -1)
+	    warning("tcsetpgrp");
+    }
 
     /* Wait for signal from child or for child to exit. */
     for (;;) {
@@ -682,37 +730,55 @@ script_child(path, argv, rbac_enabled)
 	if (pid != child) {
 	    if (pid == -1 && errno == EINTR)
 		continue;
-	    /* no child?  just exit */
+	    /* either no child or a fatal error, just exit */
 	    break;
 	}
 
-	/*
-	 * If child stopped, signal parent and stop self.
-	 * On resume, restart child and continue waiting.
-	 */
-	if (WIFSTOPPED(status)) {
-	    /* Stop parent, self and then resume child when we come back */
-	    kill(parent, WSTOPSIG(status));
-	    kill(getpid(), SIGSTOP);
-	    killpg(child, SIGCONT);
-	} else {
-	    /* Child died, set exit code accordingly. */
-	    if (WIFEXITED(status))
-		exitcode = WEXITSTATUS(status);
-	    else if (WIFSIGNALED(status)) {
-#ifdef HAVE_STRSIGNAL
-		int signo = WTERMSIG(status);
-		if (signo != SIGINT && signo != SIGPIPE) {
-		    char *reason = strsignal(signo);
-		    write(script_fds[SFD_MASTER], reason, strlen(reason));
-		    if (WCOREDUMP(status))
-			write(script_fds[SFD_MASTER], " (core dumped)", 14);
-		    write(script_fds[SFD_MASTER], "\n", 1);
-		}
-#endif
-		exitcode = WTERMSIG(status) | 128;
-	    }
+	/* If child exited or was killed we are done. */
+	if (!WIFSTOPPED(status))
 	    break;
+
+	/*
+	 * Child was stopped by signal, signal parent and stop self.
+	 */
+	suspended = 0;
+	signo = WSTOPSIG(status);
+	do {
+	    /* Take back controlling tty while child is suspended. */
+	    status = tcsetpgrp(script_fds[SFD_SLAVE], self);
+	} while (status == -1 && errno == EINTR);
+	kill(parent, signo);
+
+	/*
+	 * Wait for parent to resume us, then continue child.
+	 */
+	do {
+	    sigsuspend(&sa.sa_mask); 
+	} while (suspended == 0);
+	if (suspended == SIGUSR1) {
+	    /* Command is in the foreground, grant it controlling tty. */
+	    do {
+		status = tcsetpgrp(script_fds[SFD_SLAVE], child);
+	    } while (status == -1 && errno == EINTR);
+	}
+	killpg(child, SIGCONT);
+    }
+
+    if (pid == child) {
+	if (WIFEXITED(status)) {
+	    exitcode = WEXITSTATUS(status);
+	} else if (WIFSIGNALED(status)) {
+#ifdef HAVE_STRSIGNAL
+	    signo = WTERMSIG(status);
+	    if (signo != SIGINT && signo != SIGPIPE) {
+		char *reason = strsignal(signo);
+		write(script_fds[SFD_MASTER], reason, strlen(reason));
+		if (WCOREDUMP(status))
+		    write(script_fds[SFD_MASTER], " (core dumped)", 14);
+		write(script_fds[SFD_MASTER], "\n", 1);
+	    }
+#endif
+	    exitcode = WTERMSIG(status) | 128;
 	}
     }
 
@@ -763,6 +829,9 @@ script_run(path, argv, rbac_enabled)
 {
     pid_t self = getpid();
 
+    /* Set child process group here too to avoid a race. */
+    setpgid(0, self);
+
     /*
      * We have guaranteed that the slave fd > 3
      */
@@ -780,10 +849,6 @@ script_run(path, argv, rbac_enabled)
     close(script_fds[SFD_OUTPUT]);
     close(script_fds[SFD_TIMING]);
     close(script_fds[SFD_USERTTY]);
-
-    /* Spin until parent grants us the controlling pty */
-    while (tcgetpgrp(STDOUT_FILENO) != self)
-	continue;
 
 #ifdef HAVE_SELINUX
     if (rbac_enabled)
@@ -810,6 +875,16 @@ sync_winsize(src, dst)
 #endif
     }
 #endif
+}
+
+/*
+ * Signal handler for SIGUSR[12] in child
+ */
+static void
+sigfgbg(s)
+    int s;
+{
+    suspended = s;
 }
 
 /*
