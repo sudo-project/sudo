@@ -373,7 +373,7 @@ script_execv(path, argv)
 #ifdef HAVE_ZLIB
     gzFile ofile, tfile;
 #else
-    FILE *idfile, *ofile, *tfile;
+    FILE *ofile, *tfile;
 #endif
     int rbac_enabled = 0;
 
