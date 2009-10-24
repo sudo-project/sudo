@@ -822,17 +822,9 @@ sigchild(s)
     pid_t pid;
     int serrno = errno;
 
-#ifdef sudo_waitpid
     do {
-	pid = sudo_waitpid(child, &child_status, WNOHANG | WUNTRACED);
-	if (pid == child)
-	    break;
-    } while (pid > 0 || (pid == -1 && errno == EINTR));
-#else
-    do {
-	pid = wait(&child_status);
+	pid = waitpid(child, &child_status, WNOHANG | WUNTRACED);
     } while (pid == -1 && errno == EINTR);
-#endif
     if (pid == child) {
 	if (WIFSTOPPED(child_status))
 	    suspended = WSTOPSIG(child_status);
