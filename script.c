@@ -236,7 +236,7 @@ void
 script_setup()
 {
     char pathbuf[PATH_MAX];
-    int len, ok;
+    int len;
 
     script_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
     if (script_fds[SFD_USERTTY] == -1)
@@ -250,12 +250,6 @@ script_setup()
     if (!term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], 0))
 	log_error(USE_ERRNO, "Can't copy terminal attributes");
     sync_winsize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
-
-    do {
-	ok = term_raw(script_fds[SFD_USERTTY], 1);
-    } while (!ok && errno == EINTR);
-    if (!ok)
-	log_error(USE_ERRNO, "Can't set terminal to raw mode");
 
     /*
      * Build a path containing the session id split into two-digit subdirs,
@@ -409,6 +403,15 @@ script_execv(path, argv)
     parent = getpid(); /* so child can pass signals back to us */
     foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
 
+    /* Only set tty to raw mode if we are the foreground process. */
+    if (foreground) {
+	do {
+	    n = term_raw(script_fds[SFD_USERTTY], 1);
+	} while (!n && errno == EINTR);
+	if (!n)
+	    log_error(USE_ERRNO, "Can't set terminal to raw mode");
+    }
+
     /* XXX - should also catch terminal signals and kill child */
 
     /*
@@ -501,8 +504,13 @@ script_execv(path, argv)
 	     * If we are the foreground process, just resume the child.
 	     * Otherwise, re-send the signal with the handler disabled.
 	     */
-	    if (tcgetpgrp(script_fds[SFD_USERTTY]) == parent) {
+	    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
+	    if (foreground) {
 		suspended = 0;
+		/* Set tty to raw mode and tell child it is in foregound. */
+		do {
+		    n = term_raw(script_fds[SFD_USERTTY], 1);
+		} while (!n && errno == EINTR);
 		kill(child, SIGUSR1);
 		break;
 	    }
@@ -519,6 +527,7 @@ script_execv(path, argv)
 	    /* Suspend self and continue child when we resume. */
 	    sa.sa_handler = SIG_DFL;
 	    sigaction(suspended, &sa, &osa);
+	suspend:
 	    kill(parent, suspended);
 
 	    /*
@@ -527,7 +536,7 @@ script_execv(path, argv)
 	     */
 	    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
 	    if (!foreground && (suspended == SIGTTOU || suspended == SIGTTIN))
-		kill(parent, suspended);
+		goto suspend;
 
 	    sigaction(suspended, &osa, NULL);
 	    suspended = 0;
