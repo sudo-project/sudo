@@ -96,6 +96,8 @@ static sig_atomic_t alive = 1;
 static sig_atomic_t suspended = 0;
 static sig_atomic_t foreground = 0;
 
+static sigset_t ttyblock;
+
 static pid_t parent, child;
 static int child_status;
 
@@ -104,9 +106,11 @@ static char slavename[PATH_MAX];
 static void script_child __P((char *path, char *argv[], int, int));
 static void script_run __P((char *path, char *argv[], int));
 static void sync_winsize __P((int src, int dst));
+static void handler __P((int s));
 static void sigchild __P((int s));
 static void sigcont __P((int s));
 static void sigfgbg __P((int s));
+static void sigrelay __P((int s));
 static void sigtstp __P((int s));
 static void sigwinch __P((int s));
 static void flush_output __P((struct script_buf *output, struct timeval *then,
@@ -324,6 +328,9 @@ log_output(buf, n, then, now, ofile, tfile)
 #endif
 {
     struct timeval tv;
+    sigset_t omask;
+
+    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
 
 #ifdef HAVE_ZLIB
     gzwrite(ofile, buf, n);
@@ -340,6 +347,8 @@ log_output(buf, n, then, now, ofile, tfile)
 #endif
     then->tv_sec = now->tv_sec;
     then->tv_usec = now->tv_usec;
+
+    sigprocmask(SIG_SETMASK, &omask, NULL);
 }
 
 /*
@@ -390,7 +399,15 @@ script_execv(path, argv)
     parent = getpid(); /* so child can pass signals back to us */
     foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
 
-    /* Setup signal handlers window size changes and child exit */
+    /* So we can block tty-generated signals */
+    sigemptyset(&ttyblock);
+    sigaddset(&ttyblock, SIGINT);
+    sigaddset(&ttyblock, SIGQUIT);
+    sigaddset(&ttyblock, SIGTSTP);
+    sigaddset(&ttyblock, SIGTTIN);
+    sigaddset(&ttyblock, SIGTTOU);
+
+    /* Setup signal handlers window size changes and child stop/exit */
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
@@ -403,7 +420,15 @@ script_execv(path, argv)
     sa.sa_handler = sigcont;
     sigaction(SIGCONT, &sa, NULL);
 
-    /* Handler for tty stop signals */
+    /* Relay SIG{HUP,TERM} from parent to child. */
+    sa.sa_handler = sigrelay;
+    sigaction(SIGHUP, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGQUIT, &sa, NULL);
+
+    /* Handler for tty-based signals */
+    sa.sa_flags = 0; /* do not restart syscalls for these three */
     sa.sa_handler = sigtstp;
     sigaction(SIGTSTP, &sa, NULL);
     sigaction(SIGTTIN, &sa, NULL);
@@ -687,6 +712,14 @@ script_child(path, argv, foreground, rbac_enabled)
     sigaction(SIGTTOU, &sa, NULL);
     sigaction(SIGWINCH, &sa, NULL);
 
+    /*
+     * Parent may sent signals that we need to pass on.
+     */
+    sa.sa_flags = 0; /* do not restart syscalls for these signals. */
+    sa.sa_handler = handler;
+    sigaction(SIGHUP, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+
     /* Parent sends child SIGUSR1 to put command in the foreground. */
     sa.sa_handler = sigfgbg;
     sigaction(SIGUSR1, &sa, NULL);
@@ -749,8 +782,11 @@ script_child(path, argv, foreground, rbac_enabled)
 	    warning("tcsetpgrp");
     }
 
-    /* Wait for signal from child or for child to exit. */
+    /* Wait for signal to arrive or for child to exit. */
     for (;;) {
+	if (suspended == SIGHUP || suspended == SIGTERM)
+	    killpg(child, suspended);
+
 	pid = waitpid(child, &status, WUNTRACED);
 	if (pid != child) {
 	    if (pid == -1 && errno == EINTR)
@@ -937,6 +973,30 @@ sigchild(s)
 	else
 	    alive = 0;
     }
+
+    errno = serrno;
+}
+
+/*
+ * Generic handler for signals passed from parent -> child
+ */
+static void
+handler(s)
+    int s;
+{
+    suspended = s;
+}
+
+/*
+ * Handler for SIG{HUP,TERM} in parent, relays to child.
+ */
+static void
+sigrelay(s)
+    int s;
+{
+    int serrno = errno;
+
+    kill(child, s);
 
     errno = serrno;
 }
