@@ -94,6 +94,7 @@ static int script_fds[6];
 
 static sig_atomic_t alive = 1;
 static sig_atomic_t suspended = 0;
+static sig_atomic_t foreground = 0;
 
 static pid_t parent, child;
 static int child_status;
@@ -104,6 +105,7 @@ static void script_child __P((char *path, char *argv[], int, int));
 static void script_run __P((char *path, char *argv[], int));
 static void sync_winsize __P((int src, int dst));
 static void sigchild __P((int s));
+static void sigcont __P((int s));
 static void sigfgbg __P((int s));
 static void sigtstp __P((int s));
 static void sigwinch __P((int s));
@@ -362,7 +364,7 @@ script_execv(path, argv)
     sigaction_t sa, osa;
     struct script_buf input, output;
     struct timeval now, then;
-    int foreground, n, nready, exitcode = 1;
+    int n, nready, exitcode = 1;
     fd_set *fdsr, *fdsw;
     FILE *idfile;
 #ifdef HAVE_ZLIB
@@ -384,6 +386,10 @@ script_execv(path, argv)
     }
 #endif
 
+    /* Are we the foreground process? */
+    parent = getpid(); /* so child can pass signals back to us */
+    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
+
     /* Setup signal handlers window size changes and child exit */
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
@@ -393,15 +399,15 @@ script_execv(path, argv)
     sa.sa_handler = sigchild;
     sigaction(SIGCHLD, &sa, NULL);
 
+    /* To update foreground/background state. */
+    sa.sa_handler = sigcont;
+    sigaction(SIGCONT, &sa, NULL);
+
     /* Handler for tty stop signals */
     sa.sa_handler = sigtstp;
     sigaction(SIGTSTP, &sa, NULL);
     sigaction(SIGTTIN, &sa, NULL);
     sigaction(SIGTTOU, &sa, NULL);
-
-    /* Are we the foreground process? */
-    parent = getpid(); /* so child can pass signals back to us */
-    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
 
     /* Only set tty to raw mode if we are the foreground process. */
     if (foreground) {
@@ -504,7 +510,6 @@ script_execv(path, argv)
 	     * If we are the foreground process, just resume the child.
 	     * Otherwise, re-send the signal with the handler disabled.
 	     */
-	    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
 	    if (foreground) {
 		suspended = 0;
 		/* Set tty to raw mode and tell child it is in foregound. */
@@ -534,7 +539,6 @@ script_execv(path, argv)
 	     * If we were suspended due to tty I/O and sudo is still in
 	     * the background, re-suspend.
 	     */
-	    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
 	    if (!foreground && (suspended == SIGTTOU || suspended == SIGTTIN))
 		goto suspend;
 
@@ -884,6 +888,21 @@ sync_winsize(src, dst)
 #endif
     }
 #endif
+}
+
+/*
+ * Handler for SIGCONT in parent
+ */
+void
+sigcont(s)
+     int s;
+{
+    int serrno = errno;
+
+    /* Did we get continued in the foreground or background? */
+    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
+
+    errno = serrno;
 }
 
 /*
