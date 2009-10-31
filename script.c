@@ -93,7 +93,7 @@ struct script_buf {
 static int script_fds[6];
 
 static sig_atomic_t alive = 1;
-static sig_atomic_t suspended = 0;
+static sig_atomic_t recvsig = 0;
 static sig_atomic_t foreground = 0;
 
 static sigset_t ttyblock;
@@ -109,7 +109,6 @@ static void sync_winsize __P((int src, int dst));
 static void handler __P((int s));
 static void sigchild __P((int s));
 static void sigcont __P((int s));
-static void sigfgbg __P((int s));
 static void sigrelay __P((int s));
 static void sigtstp __P((int s));
 static void sigwinch __P((int s));
@@ -532,7 +531,7 @@ script_execv(path, argv)
 	if (input.len > input.off)
 	    FD_SET(script_fds[SFD_MASTER], fdsw);
 
-	switch (suspended) {
+	switch (recvsig) {
 	case SIGTTOU:
 	case SIGTTIN:
 	    /*
@@ -540,7 +539,7 @@ script_execv(path, argv)
 	     * Otherwise, re-send the signal with the handler disabled.
 	     */
 	    if (foreground) {
-		suspended = 0;
+		recvsig = 0;
 		/* Set tty to raw mode and tell child it is in foregound. */
 		do {
 		    n = term_raw(script_fds[SFD_USERTTY], 1);
@@ -560,19 +559,19 @@ script_execv(path, argv)
 
 	    /* Suspend self and continue child when we resume. */
 	    sa.sa_handler = SIG_DFL;
-	    sigaction(suspended, &sa, &osa);
+	    sigaction(recvsig, &sa, &osa);
 	suspend:
-	    kill(parent, suspended);
+	    kill(parent, recvsig);
 
 	    /*
 	     * If we were suspended due to tty I/O and sudo is still in
 	     * the background, re-suspend.
 	     */
-	    if (!foreground && (suspended == SIGTTOU || suspended == SIGTTIN))
+	    if (!foreground && (recvsig == SIGTTOU || recvsig == SIGTTIN))
 		goto suspend;
 
-	    sigaction(suspended, &osa, NULL);
-	    suspended = 0;
+	    sigaction(recvsig, &osa, NULL);
+	    recvsig = 0;
 	    if (foreground) {
 		/* Set tty to raw mode and tell child it is in foregound. */
 		do {
@@ -713,15 +712,13 @@ script_child(path, argv, foreground, rbac_enabled)
     sigaction(SIGWINCH, &sa, NULL);
 
     /*
-     * Parent may sent signals that we need to pass on.
+     * Handle signals from parent and pass to child.
+     * We convert SIGUSR[12] to SIGCONT after special handling.
      */
     sa.sa_flags = 0; /* do not restart syscalls for these signals. */
     sa.sa_handler = handler;
     sigaction(SIGHUP, &sa, NULL);
     sigaction(SIGTERM, &sa, NULL);
-
-    /* Parent sends child SIGUSR1 to put command in the foreground. */
-    sa.sa_handler = sigfgbg;
     sigaction(SIGUSR1, &sa, NULL);
     sigaction(SIGUSR2, &sa, NULL);
 
@@ -782,10 +779,25 @@ script_child(path, argv, foreground, rbac_enabled)
 	    warning("tcsetpgrp");
     }
 
-    /* Wait for signal to arrive or for child to exit. */
+    /* Wait for signal to arrive or for child to stop/exit. */
     for (;;) {
-	if (suspended == SIGHUP || suspended == SIGTERM)
-	    killpg(child, suspended);
+	switch (recvsig) {
+	case SIGHUP:
+	case SIGTERM:
+	    /* signal child; we'll get its status when we continue. */
+	    killpg(child, recvsig);
+	    break;
+	case SIGUSR1:
+	    /* foreground process, grant it controlling tty. */
+	    do {
+		status = tcsetpgrp(script_fds[SFD_SLAVE], child);
+	    } while (status == -1 && errno == EINTR);
+	    /* FALLTHROUGH */
+	case SIGUSR2:
+	    killpg(child, SIGCONT);
+	    break;
+	}
+	recvsig = 0;
 
 	pid = waitpid(child, &status, WUNTRACED);
 	if (pid != child) {
@@ -802,29 +814,15 @@ script_child(path, argv, foreground, rbac_enabled)
 	/*
 	 * Child was stopped by signal, signal parent and stop self.
 	 */
-	suspended = 0;
 	signo = WSTOPSIG(status);
 	do {
 	    /* Take back controlling tty while child is suspended. */
 	    status = tcsetpgrp(script_fds[SFD_SLAVE], self);
 	} while (status == -1 && errno == EINTR);
 	kill(parent, signo);
-
-	/*
-	 * Wait for parent to resume us, then continue child.
-	 */
-	do {
-	    sigsuspend(&sa.sa_mask); 
-	} while (suspended == 0);
-	if (suspended == SIGUSR1) {
-	    /* Command is in the foreground, grant it controlling tty. */
-	    do {
-		status = tcsetpgrp(script_fds[SFD_SLAVE], child);
-	    } while (status == -1 && errno == EINTR);
-	}
-	killpg(child, SIGCONT);
     }
 
+    /* Command is no longer running. */
     if (pid == child) {
 	if (WIFEXITED(status)) {
 	    exitcode = WEXITSTATUS(status);
@@ -945,16 +943,6 @@ sigcont(s)
 }
 
 /*
- * Signal handler for SIGUSR[12] in child
- */
-static void
-sigfgbg(s)
-    int s;
-{
-    suspended = s;
-}
-
-/*
  * Signal handler for child
  */
 static void
@@ -969,7 +957,7 @@ sigchild(s)
     } while (pid == -1 && errno == EINTR);
     if (pid == child) {
 	if (WIFSTOPPED(child_status))
-	    suspended = WSTOPSIG(child_status);
+	    recvsig = WSTOPSIG(child_status);
 	else
 	    alive = 0;
     }
@@ -984,7 +972,7 @@ static void
 handler(s)
     int s;
 {
-    suspended = s;
+    recvsig = s;
 }
 
 /*
@@ -1008,7 +996,7 @@ static void
 sigtstp(s)
     int s;
 {
-    suspended = s;
+    recvsig = s;
 }
 
 static void
