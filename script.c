@@ -435,6 +435,10 @@ script_execv(path, argv)
 	break;
     }
 
+    /* Do not need slave handle in parent */
+    close(script_fds[SFD_SLAVE]);
+    script_fds[SFD_SLAVE] = -1;
+
     if ((idfile = fdopen(script_fds[SFD_LOG], "w")) == NULL)
 	log_error(USE_ERRNO, "fdopen");
 #ifdef HAVE_ZLIB
@@ -664,16 +668,24 @@ script_child(path, argv, foreground, rbac_enabled)
     int n;
 #endif
 
+    /* Close unused fds. */
+    close(script_fds[SFD_MASTER]);
+    close(script_fds[SFD_LOG]);
+    close(script_fds[SFD_OUTPUT]);
+    close(script_fds[SFD_TIMING]);
+    close(script_fds[SFD_USERTTY]);
+
     /* Reset signal handlers. */
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_DFL;
-    sigaction(SIGWINCH, &sa, NULL);
     sigaction(SIGCHLD, &sa, NULL);
+    sigaction(SIGCONT, &sa, NULL);
     sigaction(SIGTSTP, &sa, NULL);
     sigaction(SIGTTIN, &sa, NULL);
     sigaction(SIGTTOU, &sa, NULL);
+    sigaction(SIGWINCH, &sa, NULL);
 
     /* Parent sends child SIGUSR1 to put command in the foreground. */
     sa.sa_handler = sigfgbg;
@@ -852,16 +864,7 @@ script_run(path, argv, rbac_enabled)
 	dup2(script_fds[SFD_SLAVE], STDIN_FILENO);
     dup2(script_fds[SFD_SLAVE], STDOUT_FILENO);
     dup2(script_fds[SFD_SLAVE], STDERR_FILENO);
-
-    /*
-     * Close old fds and exec command.
-     */
-    close(script_fds[SFD_MASTER]);
     close(script_fds[SFD_SLAVE]);
-    close(script_fds[SFD_LOG]);
-    close(script_fds[SFD_OUTPUT]);
-    close(script_fds[SFD_TIMING]);
-    close(script_fds[SFD_USERTTY]);
 
 #ifdef HAVE_SELINUX
     if (rbac_enabled)
