@@ -110,7 +110,6 @@ static void handler __P((int s));
 static void sigchild __P((int s));
 static void sigcont __P((int s));
 static void sigrelay __P((int s));
-static void sigtstp __P((int s));
 static void sigwinch __P((int s));
 static void flush_output __P((struct script_buf *output, struct timeval *then,
     struct timeval *now, void *ofile, void *tfile));
@@ -428,7 +427,7 @@ script_execv(path, argv)
 
     /* Handler for tty-based signals */
     sa.sa_flags = 0; /* do not restart syscalls for these three */
-    sa.sa_handler = sigtstp;
+    sa.sa_handler = handler;
     sigaction(SIGTSTP, &sa, NULL);
     sigaction(SIGTTIN, &sa, NULL);
     sigaction(SIGTTOU, &sa, NULL);
@@ -441,8 +440,6 @@ script_execv(path, argv)
 	if (!n)
 	    log_error(USE_ERRNO, "Can't set terminal to raw mode");
     }
-
-    /* XXX - should also catch terminal signals and kill child */
 
     /*
      * Child will run the command in the pty, parent will pass data
@@ -633,7 +630,6 @@ script_execv(path, argv)
 
 		/* Update output and timing files. */
 		log_output(output.buf + output.len, n, &then, &now, ofile, tfile);
-
 		output.len += n;
 	    }
 	}
@@ -706,10 +702,13 @@ script_child(path, argv, foreground, rbac_enabled)
     sa.sa_handler = SIG_DFL;
     sigaction(SIGCHLD, &sa, NULL);
     sigaction(SIGCONT, &sa, NULL);
-    sigaction(SIGTSTP, &sa, NULL);
+    sigaction(SIGWINCH, &sa, NULL);
+
+    /* Ignore SIGTT{IN,OU} if we get any. */
+    /* XXX - how can we since the pgrp is orphaned? */
+    sa.sa_handler = SIG_IGN;
     sigaction(SIGTTIN, &sa, NULL);
     sigaction(SIGTTOU, &sa, NULL);
-    sigaction(SIGWINCH, &sa, NULL);
 
     /*
      * Handle signals from parent and pass to child.
@@ -760,6 +759,10 @@ script_child(path, argv, foreground, rbac_enabled)
 	_exit(1);
     }
     if (child == 0) {
+	sa.sa_flags = SA_RESTART;
+	sa.sa_handler = SIG_DFL;
+	sigaction(SIGTTIN, &sa, NULL);
+	sigaction(SIGTTOU, &sa, NULL);
 	/* setup tty and exec command */
 	script_run(path, argv, rbac_enabled);
 	warning("unable to execute %s", path);
@@ -781,23 +784,26 @@ script_child(path, argv, foreground, rbac_enabled)
 
     /* Wait for signal to arrive or for child to stop/exit. */
     for (;;) {
-	switch (recvsig) {
-	case SIGHUP:
-	case SIGTERM:
-	    /* signal child; we'll get its status when we continue. */
-	    killpg(child, recvsig);
-	    break;
-	case SIGUSR1:
-	    /* foreground process, grant it controlling tty. */
-	    do {
-		status = tcsetpgrp(script_fds[SFD_SLAVE], child);
-	    } while (status == -1 && errno == EINTR);
-	    /* FALLTHROUGH */
-	case SIGUSR2:
-	    killpg(child, SIGCONT);
-	    break;
+	while ((signo = recvsig)) {
+	    recvsig = 0;
+	    switch (signo) {
+	    case SIGHUP:
+	    case SIGTERM:
+		/* signal child; we'll get its status when we continue. */
+		killpg(child, signo);
+		break;
+	    case SIGUSR1:
+		/* foreground process, grant it controlling tty. */
+		do {
+		    status = tcsetpgrp(script_fds[SFD_SLAVE], child);
+		} while (status == -1 && errno == EINTR);
+		/* FALLTHROUGH */
+	    case SIGUSR2:
+		status = tcgetpgrp(script_fds[SFD_SLAVE]);
+		killpg(child, SIGCONT);
+		break;
+	    }
 	}
-	recvsig = 0;
 
 	pid = waitpid(child, &status, WUNTRACED);
 	if (pid != child) {
@@ -812,11 +818,11 @@ script_child(path, argv, foreground, rbac_enabled)
 	    break;
 
 	/*
-	 * Child was stopped by signal, signal parent and stop self.
+	 * Child was stopped by signal, signal parent and wait for SIGUSR[12].
 	 */
 	signo = WSTOPSIG(status);
+	/* Take back controlling tty while child is suspended. */
 	do {
-	    /* Take back controlling tty while child is suspended. */
 	    status = tcsetpgrp(script_fds[SFD_SLAVE], self);
 	} while (status == -1 && errno == EINTR);
 	kill(parent, signo);
@@ -902,7 +908,7 @@ script_run(path, argv, rbac_enabled)
 
 #ifdef HAVE_SELINUX
     if (rbac_enabled)
-      selinux_execv(path, argv);
+	selinux_execv(path, argv);
     else
 #endif
     execv(path, argv);
@@ -930,9 +936,9 @@ sync_winsize(src, dst)
 /*
  * Handler for SIGCONT in parent
  */
-void
+static void
 sigcont(s)
-     int s;
+    int s;
 {
     int serrno = errno;
 
@@ -987,16 +993,6 @@ sigrelay(s)
     kill(child, s);
 
     errno = serrno;
-}
-
-/*
- * Signal handler for SIG{TSTP,TTOU,TTIN}
- */
-static void
-sigtstp(s)
-    int s;
-{
-    recvsig = s;
 }
 
 static void
