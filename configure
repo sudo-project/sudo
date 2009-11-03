@@ -23217,7 +23217,7 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_lib_krb5support_main" >&5
 echo "${ECHO_T}$ac_cv_lib_krb5support_main" >&6; }
 if test $ac_cv_lib_krb5support_main = yes; then
-  SUDO_LIBS="${SUDO_LIBS} -lkrb5support,"
+  SUDO_LIBS="${SUDO_LIBS} -lkrb5support"
 fi
 
 
