@@ -81,6 +81,7 @@ krb5_get_init_creds_opt_alloc(context, opts)
     krb5_get_init_creds_opt   **opts;
 {
     *opts = emalloc(sizeof(krb5_get_init_creds_opt));
+    krb5_get_init_creds_opt_init(*opts);
     return 0;
 }
 
