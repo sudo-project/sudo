@@ -86,6 +86,8 @@ __unused static const char rcsid[] = "$Sudo$";
 #  define tcsetattr(f, a, t)	ioctl(f, a, t)
 #  undef TCSAFLUSH
 #  define TCSAFLUSH		TCSETAF
+#  undef TCSADRAIN
+#  define TCSADRAIN		TCSETAW
 # else /* SGTTY */
 #  undef termios
 #  define termios		sgttyb
@@ -94,6 +96,8 @@ __unused static const char rcsid[] = "$Sudo$";
 #  define tcsetattr(f, a, t)	ioctl(f, a, t)
 #  undef TCSAFLUSH
 #  define TCSAFLUSH		TIOCSETP
+#  undef TCSADRAIN
+#  define TCSADRAIN		TIOCSETN
 # endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
@@ -105,11 +109,14 @@ int term_erase;
 int term_kill;
 
 int
-term_restore(fd)
+term_restore(fd, flush)
     int fd;
+    int flush;
 {
     if (changed) {
-	if (tcsetattr(fd, TCSAFLUSH|TCSASOFT, &oterm) != 0)
+	int flags = TCSASOFT;
+	flags |= flush ? TCSAFLUSH : TCSADRAIN;
+	if (tcsetattr(fd, flags, &oterm) != 0)
 	    return(0);
 	changed = 0;
     }
@@ -127,7 +134,7 @@ term_noecho(fd)
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr(fd, TCSAFLUSH|TCSASOFT, &term) == 0) {
+    if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
 	return(1);
     }
@@ -137,9 +144,10 @@ term_noecho(fd)
 #if defined(HAVE_TERMIOS_H) || defined(HAVE_TERMIO_H)
 
 int
-term_raw(fd, onlcr)
+term_raw(fd, onlcr, isig)
     int fd;
     int onlcr;
+    int isig;
 {
     struct termios term;
 
@@ -154,9 +162,11 @@ term_raw(fd, onlcr)
     else
 	term.c_oflag &= ~OPOST;
     term.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
+    if (isig)
+	term.c_lflag |= ISIG;
     term.c_cc[VMIN] = 1;
     term.c_cc[VTIME] = 0;
-    if (tcsetattr(fd, TCSAFLUSH|TCSASOFT, &term) == 0) {
+    if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
     	return(1);
     }
@@ -178,7 +188,7 @@ term_cbreak(fd)
 #ifdef VSTATUS
     term.c_cc[VSTATUS] = _POSIX_VDISABLE;
 #endif
-    if (tcsetattr(fd, TCSAFLUSH|TCSASOFT, &term) == 0) {
+    if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	term_erase = term.c_cc[VERASE];
 	term_kill = term.c_cc[VKILL];
 	changed = 1;
@@ -200,7 +210,8 @@ term_copy(src, dst, onlcr)
     /* Do not convert line endings from NL to NLCR. */
     if (!onlcr)
 	CLR(tt.c_oflag, ONLCR);
-    if (tcsetattr(dst, TCSAFLUSH|TCSASOFT, &tt) != 0)
+    /* XXX - add TCSANOW compat define */
+    if (tcsetattr(dst, TCSANOW|TCSASOFT, &tt) != 0)
 	return(0);
     return(1);
 }

@@ -1470,7 +1470,7 @@ cleanup(gotsignal)
     }
 #ifdef _PATH_SUDO_TRANSCRIPT
     if (def_transcript)
-	term_restore(STDIN_FILENO);
+	term_restore(STDIN_FILENO, 0);
 #endif
 }
 

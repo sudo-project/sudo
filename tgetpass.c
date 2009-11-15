@@ -136,7 +136,7 @@ restart:
     }
 
     /* Restore old tty settings and signals. */
-    term_restore(input);
+    term_restore(input, 1);
     (void) sigaction(SIGALRM, &savealrm, NULL);
     (void) sigaction(SIGINT, &saveint, NULL);
     (void) sigaction(SIGHUP, &savehup, NULL);

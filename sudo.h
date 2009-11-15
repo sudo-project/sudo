@@ -275,8 +275,8 @@ void script_setup __P((void));
 int term_cbreak __P((int));
 int term_copy __P((int, int, int));
 int term_noecho __P((int));
-int term_raw __P((int, int));
-int term_restore __P((int));
+int term_raw __P((int, int, int));
+int term_restore __P((int, int));
 char *get_timestr __P((time_t, int));
 YY_DECL;
 

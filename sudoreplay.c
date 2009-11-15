@@ -155,7 +155,7 @@ static int stack_top;
 extern time_t get_date __P((char *));
 extern char *get_timestr __P((time_t, int));
 extern int term_cbreak __P((int));
-extern int term_restore __P((int));
+extern int term_restore __P((int, int));
 extern void zero_bytes __P((volatile void *, size_t));
 void cleanup __P((int));
 
@@ -351,7 +351,7 @@ main(argc, argv)
 	    } while (nread);
 	}
     }
-    term_restore(STDOUT_FILENO);
+    term_restore(STDOUT_FILENO, 0);
     exit(0);
 }
 
@@ -813,7 +813,7 @@ void
 cleanup(signo)
     int signo;
 {
-    term_restore(STDOUT_FILENO);
+    term_restore(STDOUT_FILENO, 0);
     if (signo)
 	kill(getpid(), signo);
 }
