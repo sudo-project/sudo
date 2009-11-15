@@ -539,13 +539,13 @@ script_execv(path, argv)
 	    sync_winsize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
 	}
 
-	/* Start out in cbreak mode. */
+	/* Start out in raw mode is stdout is a tty. */
+	ttymode = isatty(STDOUT_FILENO) ? TERM_RAW : TERM_CBREAK;
 	do {
-	    n = term_raw(script_fds[SFD_USERTTY], 1, 1);
+	    n = term_raw(script_fds[SFD_USERTTY], 1, ttymode == TERM_CBREAK);
 	} while (!n && errno == EINTR);
 	if (!n)
 	    log_error(USE_ERRNO, "Can't set terminal to raw mode");
-	ttymode = TERM_CBREAK;
     }
 
     /*
@@ -856,6 +856,9 @@ script_child(path, argv, backchannel, rbac_enabled)
 	close(n);
 #endif
 
+    if (foreground && !isatty(STDOUT_FILENO))
+	foreground = 0;
+
     /* Start command and wait for it to stop or exit */
     child = fork();
     if (child == -1) {
@@ -883,10 +886,15 @@ script_child(path, argv, backchannel, rbac_enabled)
     }
 
     /*
-     * Put child in its own process group.  We always start the command
-     * in the background until it needs to be the foreground process.
+     * Put child in its own process group.  If we are starting the command
+     * in the foreground, assign its pgrp to the tty.
      */
     setpgid(child, child);
+    if (foreground) {
+	do {
+	    status = tcsetpgrp(script_fds[SFD_SLAVE], child);
+	} while (status == -1 && errno == EINTR);
+    }
 
     /* Wait for signal on backchannel or for SIGCHLD */
     for (;;) {
@@ -1021,6 +1029,12 @@ script_run(path, argv, rbac_enabled)
     dup2(script_fds[SFD_SLAVE], STDOUT_FILENO);
     dup2(script_fds[SFD_SLAVE], STDERR_FILENO);
     close(script_fds[SFD_SLAVE]);
+
+    /* Wait for parent to grant us the tty if we are foreground. */
+    if (foreground) {
+	while (tcgetpgrp(STDOUT_FILENO) != self)
+	    ; /* spin */
+    }
 
 #ifdef HAVE_SELINUX
     if (rbac_enabled)
