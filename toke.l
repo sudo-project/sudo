@@ -253,8 +253,11 @@ DEFVAR			[a-z_]+
 
 			    LEXTRACE("INCLUDEDIR\n");
 
-			    /* Push current buffer and switch to include file */
-			    if (!push_includedir(path))
+			    /*
+			     * Push current buffer and switch to include file.
+			     * We simply ignore empty directories.
+			     */
+			    if (!push_includedir(path) && parse_error)
 				yyterminate();
 			}
 
@@ -748,7 +751,7 @@ switch_dir(stack, dirpath)
 
     if (!(dir = opendir(dirpath))) {
 	yyerror(dirpath);
-	return(FALSE);
+	return(NULL);
     }
     while ((dent = readdir(dir))) {
 	/* Ignore files that end in '~' or have a '.' in them. */
@@ -873,12 +876,12 @@ _push_include(path, isdir)
     }
     if (isdir) {
 	if (!(path = switch_dir(&istack[idepth], path))) {
-	    yyerror(path);
+	    /* switch_dir() called yyerror() for us */
 	    return(FALSE);
 	}
 	if ((fp = open_sudoers(path, FALSE, &keepopen)) == NULL) {
 	    yyerror(path);
-	    return(FALSE); /* XXX - just to go next one? */
+	    return(FALSE); /* XXX - just to go next one */
 	}
     } else {
 	if ((fp = open_sudoers(path, TRUE, &keepopen)) == NULL) {
@@ -918,7 +921,7 @@ pop_include()
 	istack[idepth - 1].more = pl->next;
 	if ((fp = open_sudoers(pl->path, FALSE, &keepopen)) == NULL) {
 	    yyerror(pl->path);
-	    return(FALSE); /* XXX - just to go next one? */
+	    return(FALSE); /* XXX - just to go next one */
 	}
 	efree(sudoers);
 	sudoers = pl->path;
