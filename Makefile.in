@@ -157,7 +157,8 @@ DISTFILES = $(SRCS) $(HDRS) ChangeLog HISTORY INSTALL INSTALL.configure \
 	    sudo.man.in sudo.pod sudo.psf sudo_usage.h.in sudoers sudoers.cat \
             sudoers.man.in sudoers.pod sudoers.ldap.cat sudoers.ldap.man.in \
 	    sudoers.ldap.pod sudoers2ldif sudoreplay.cat sudoreplay.man.in \
-	    sudoreplay.pod visudo.cat visudo.man.in visudo.pod auth/API
+	    sudoreplay.pod visudo.cat visudo.man.in visudo.pod auth/API \
+	    sudo.man.pl sudoers.man.pl 
 
 BINFILES= ChangeLog HISTORY LICENSE README TROUBLESHOOTING \
 	  UPGRADE install-sh mkinstalldirs sample.syslog.conf sample.sudoers \
