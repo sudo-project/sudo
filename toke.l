@@ -76,6 +76,7 @@ __unused static const char rcsid[] = "$Sudo$";
 #endif /* lint */
 
 extern YYSTYPE yylval;
+extern int parse_error;
 int sudolineno = 1;
 char *sudoers;
 static int sawspace = 0;
