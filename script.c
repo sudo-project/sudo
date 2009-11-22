@@ -100,13 +100,13 @@ static int script_fds[6];
 static sig_atomic_t alive = 1;
 static sig_atomic_t recvsig = 0;
 static sig_atomic_t ttymode = TERM_COOKED;
-static sig_atomic_t foreground = 0;
 static sig_atomic_t tty_initialized = 0;
 
 static sigset_t ttyblock;
 
 static pid_t parent, child;
 static int child_status;
+static int foreground;
 
 static char slavename[PATH_MAX];
 
@@ -118,7 +118,6 @@ static void handler __P((int s));
 static void script_child __P((char *path, char *argv[], int, int));
 static void script_run __P((char *path, char *argv[], int));
 static void sigchild __P((int s));
-static void sigcont __P((int s));
 static void sigwinch __P((int s));
 static void sync_winsize __P((int src, int dst));
 
@@ -352,6 +351,18 @@ log_output(buf, n, then, now, ofile, tfile)
     sigprocmask(SIG_SETMASK, &omask, NULL);
 }
 
+static void
+check_foreground()
+{
+    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
+    if (foreground && !tty_initialized) {
+	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], 0)) {
+	    tty_initialized = 1;
+	    sync_winsize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
+	}
+    }
+}
+
 /*
  * Suspend sudo if the underlying command is suspended.
  * Returns SIGUSR1 if the child should be resume in foreground else SIGUSR2.
@@ -375,6 +386,8 @@ suspend_parent(signo, output, then, now, ofile, tfile)
 	 * If we are the foreground process, just resume the child.
 	 * Otherwise, re-send the signal with the handler disabled.
 	 */
+	if (!foreground)
+	    check_foreground();
 	if (foreground) {
 	    if (ttymode != TERM_RAW) {
 		do {
@@ -405,6 +418,9 @@ suspend_parent(signo, output, then, now, ofile, tfile)
 	warningx("kill parent %d", signo);
 #endif
 	kill(parent, signo);
+
+	/* Check foreground/background status on resume. */
+	check_foreground();
 
 	/*
 	 * Only modify term if we are foreground process and either
@@ -507,10 +523,6 @@ script_execv(path, argv)
     /* Ignore SIGPIPE from other end of socketpair. */
     sa.sa_handler = SIG_IGN;
     sigaction(SIGPIPE, &sa, NULL);
-
-    /* To update foreground/background state. */
-    sa.sa_handler = sigcont;
-    sigaction(SIGCONT, &sa, NULL);
 
     /* Signals to relay from parent to child. */
     sa.sa_flags = 0; /* do not restart syscalls for these */
@@ -615,7 +627,7 @@ script_execv(path, argv)
     zero_bytes(&input, sizeof(input));
     zero_bytes(&output, sizeof(output));
     while (alive) {
-       /* XXX */
+       /* XXX - racey */
 	if (!relaysig && recvsig != SIGCHLD) {
 	    relaysig = recvsig;
 	    recvsig = 0;
@@ -966,7 +978,7 @@ script_child(path, argv, backchannel, rbac_enabled)
 	    killpg(child, SIGCONT);
 	    break;
 	default:
-	    /* XXX - warn? */
+	    warningx("unexpected signal from child: %d", signo);
 	    break;
 	}
     }
@@ -1061,28 +1073,6 @@ sync_winsize(src, dst)
 #endif
     }
 #endif
-}
-
-/*
- * Handler for SIGCONT in parent
- */
-static void
-sigcont(s)
-    int s;
-{
-    int serrno = errno;
-
-    /* Did we get continued in the foreground or background? */
-    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
-
-    if (foreground && !tty_initialized) {
-	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], 0)) {
-	    tty_initialized = 1;
-	    sync_winsize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
-	}
-    }
-
-    errno = serrno;
 }
 
 /*
