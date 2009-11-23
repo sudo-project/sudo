@@ -318,14 +318,12 @@ _cmndlist_matches(list)
     struct member_list *list;
 {
     struct member *m;
-    int rval, matched = UNSPEC;
+    int matched = UNSPEC;
 
     tq_foreach_rev(list, m) {
-	rval = cmnd_matches(m);
-	if (rval != UNSPEC) {
-	    matched = m->negated ? !rval : rval;
+	matched = cmnd_matches(m);
+	if (matched != UNSPEC)
 	    break;
-	}
     }
     return(matched);
 }
