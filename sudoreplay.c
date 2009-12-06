@@ -392,7 +392,7 @@ parse_expr(headp, argv)
 
     sn = *headp;
     for (av = argv; *av; av++) {
-	switch (*av[0]) {
+	switch (av[0][0]) {
 	case 'a': /* and (ignore) */
 	    if (strncmp(*av, "and", strlen(*av)) != 0)
 		goto bad;
@@ -403,12 +403,12 @@ parse_expr(headp, argv)
 	    or = 1;
 	    continue;
 	case '!': /* negate */
-	    if (*av[1] != '\0')
+	    if (av[0][1] != '\0')
 		goto bad;
 	    not = 1;
 	    continue;
 	case 'c': /* command */
-	    if (*av[1] == '\0')
+	    if (av[0][1] == '\0')
 		errorx(1, "ambiguous expression \"%s\"", *av);
 	    if (strncmp(*av, "cwd", strlen(*av)) == 0)
 		type = ST_CWD;
@@ -433,7 +433,7 @@ parse_expr(headp, argv)
 	    type = ST_RUNASUSER;
 	    break;
 	case 't': /* tty or to date */
-	    if (*av[1] == '\0')
+	    if (av[0][1] == '\0')
 		errorx(1, "ambiguous expression \"%s\"", *av);
 	    if (strncmp(*av, "todate", strlen(*av)) == 0)
 		type = ST_TODATE;
@@ -448,7 +448,7 @@ parse_expr(headp, argv)
 	    type = ST_USER;
 	    break;
 	case '(': /* start sub-expression */
-	    if (*av[1] != '\0')
+	    if (av[0][1] != '\0')
 		goto bad;
 	    if (stack_top + 1 == STACK_NODE_SIZE) {
 		errorx(1, "too many parenthesized expressions, max %d",
@@ -458,7 +458,7 @@ parse_expr(headp, argv)
 	    type = ST_EXPR;
 	    break;
 	case ')': /* end sub-expression */
-	    if (*av[1] != '\0')
+	    if (av[0][1] != '\0')
 		goto bad;
 	    /* pop */
 	    if (--stack_top < 0)
