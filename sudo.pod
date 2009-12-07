@@ -257,9 +257,9 @@ timestamp file.
 
 =item -L
 
-The B<-L> (I<list> defaults) option will list out the parameters
-that may be set in a I<Defaults> line along with a short description
-for each.  This option is useful in conjunction with L<grep(1)>.
+The B<-L> (I<list> defaults) option will list the parameters that
+may be set in a I<Defaults> line along with a short description for
+each.  This option will be removed from a future version of B<sudo>.
 
 =item -l[l] [I<command>]
 
