@@ -104,6 +104,7 @@ static int store_syslogfac __P((char *, struct sudo_defs_types *, int));
 static int store_syslogpri __P((char *, struct sudo_defs_types *, int));
 static int store_tuple __P((char *, struct sudo_defs_types *, int));
 static int store_uint __P((char *, struct sudo_defs_types *, int));
+static int store_float __P((char *, struct sudo_defs_types *, int));
 static void list_op __P((char *, size_t, struct sudo_defs_types *, enum list_ops));
 static const char *logfac2str __P((int));
 static const char *logpri2str __P((int));
@@ -151,6 +152,10 @@ dump_defaults()
 		case T_UINT:
 		case T_INT:
 		    (void) printf(cur->desc, cur->sd_un.ival);
+		    putchar('\n');
+		    break;
+		case T_FLOAT:
+		    (void) printf(cur->desc, cur->sd_un.fval);
 		    putchar('\n');
 		    break;
 		case T_MODE:
@@ -290,6 +295,19 @@ set_default(var, val, op)
 		}
 	    }
 	    if (!store_uint(val, cur, op)) {
+		warningx("value `%s' is invalid for option `%s'", val, var);
+		return(FALSE);
+	    }
+	    break;
+	case T_FLOAT:
+	    if (!val) {
+		/* Check for bogus boolean usage or lack of a value. */
+		if (!ISSET(cur->type, T_BOOL) || op != FALSE) {
+		    warningx("no value specified for `%s'", var);
+		    return(FALSE);
+		}
+	    }
+	    if (!store_float(val, cur, op)) {
 		warningx("value `%s' is invalid for option `%s'", val, var);
 		return(FALSE);
 	    }
@@ -549,7 +567,7 @@ store_int(val, def, op)
 	if (*endp != '\0')
 	    return(FALSE);
 	/* XXX - should check against INT_MAX */
-	def->sd_un.ival = (unsigned int)l;
+	def->sd_un.ival = (int)l;
     }
     if (def->callback)
 	return(def->callback(val));
@@ -573,6 +591,29 @@ store_uint(val, def, op)
 	    return(FALSE);
 	/* XXX - should check against INT_MAX */
 	def->sd_un.ival = (unsigned int)l;
+    }
+    if (def->callback)
+	return(def->callback(val));
+    return(TRUE);
+}
+
+static int
+store_float(val, def, op)
+    char *val;
+    struct sudo_defs_types *def;
+    int op;
+{
+    char *endp;
+    double d;
+
+    if (op == FALSE) {
+	def->sd_un.fval = 0.0;
+    } else {
+	d = strtod(val, &endp);
+	if (*endp != '\0')
+	    return(FALSE);
+	/* XXX - should check against HUGE_VAL */
+	def->sd_un.fval = d;
     }
     if (def->callback)
 	return(def->callback(val));

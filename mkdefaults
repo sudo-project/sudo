@@ -133,7 +133,8 @@ sub print_record {
 	elsif (/^T_LOGFAC/) { $v = "ival"; }
 	elsif (/^T_LOGPRI/) { $v = "ival"; }
 	elsif (/^T_TUPLE/)  { $v = "tuple"; }
-	else { die "$0: unknown defaults type: $type\n"; }
+	elsif (/^T_FLOAT/)  { $v = "fval"; }
+	else { die "$0: unknown defaults type: $_\n"; }
     }
     printf HEADER "#define %-23s (sudo_defs_table[$recnum].sd_un.${v})\n",
 	"def_$rec->[0]";

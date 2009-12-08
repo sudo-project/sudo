@@ -155,12 +155,12 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Length at which to wrap log file lines (0 for no wrap): %d",
 	NULL,
     }, {
-	"timestamp_timeout", T_INT|T_BOOL,
-	"Authentication timestamp timeout: %d minutes",
+	"timestamp_timeout", T_FLOAT|T_BOOL,
+	"Authentication timestamp timeout: %.1f minutes",
 	NULL,
     }, {
-	"passwd_timeout", T_UINT|T_BOOL,
-	"Password prompt timeout: %d minutes",
+	"passwd_timeout", T_FLOAT|T_BOOL,
+	"Password prompt timeout: %.1f minutes",
 	NULL,
     }, {
 	"passwd_tries", T_UINT,

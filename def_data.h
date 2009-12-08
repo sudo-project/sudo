@@ -64,9 +64,9 @@
 #define I_PRESERVE_GROUPS       31
 #define def_loglinelen          (sudo_defs_table[32].sd_un.ival)
 #define I_LOGLINELEN            32
-#define def_timestamp_timeout   (sudo_defs_table[33].sd_un.ival)
+#define def_timestamp_timeout   (sudo_defs_table[33].sd_un.fval)
 #define I_TIMESTAMP_TIMEOUT     33
-#define def_passwd_timeout      (sudo_defs_table[34].sd_un.ival)
+#define def_passwd_timeout      (sudo_defs_table[34].sd_un.fval)
 #define I_PASSWD_TIMEOUT        34
 #define def_passwd_tries        (sudo_defs_table[35].sd_un.ival)
 #define I_PASSWD_TRIES          35

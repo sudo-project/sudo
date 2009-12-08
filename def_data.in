@@ -111,11 +111,11 @@ loglinelen
 	T_UINT|T_BOOL
 	"Length at which to wrap log file lines (0 for no wrap): %d"
 timestamp_timeout
-	T_INT|T_BOOL
-	"Authentication timestamp timeout: %d minutes"
+	T_FLOAT|T_BOOL
+	"Authentication timestamp timeout: %.1f minutes"
 passwd_timeout
-	T_UINT|T_BOOL
-	"Password prompt timeout: %d minutes"
+	T_FLOAT|T_BOOL
+	"Password prompt timeout: %.1f minutes"
 passwd_tries
 	T_UINT
 	"Number of tries to enter a password: %d"

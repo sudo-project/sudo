@@ -1,3 +1,13 @@
+What's new in Sudo 1.7.3?
+
+ * Support for logging a transcript of the command being run.
+   For more information, see the documentation for the "transcript"
+   Defaults option in the sudoers manual and the sudoreplay manual.
+
+ * The passwd_timeout and timestamp_timeout options may now be
+   specified as floating point numbers for more granular timeout
+   values.
+
 What's new in Sudo 1.7.2?
 
  * A new #includedir directive is available in sudoers.  This can be

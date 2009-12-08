@@ -54,6 +54,7 @@ struct sudo_defs_types {
     union {
 	int flag;
 	int ival;
+	double fval;
 	enum def_tupple tuple;
 	char *str;
 	mode_t mode;
@@ -63,7 +64,7 @@ struct sudo_defs_types {
 
 /*
  * Four types of defaults: strings, integers, and flags.
- * Also, T_INT or T_STR may be ANDed with T_BOOL to indicate that
+ * Also, T_INT, T_FLOAT or T_STR may be ANDed with T_BOOL to indicate that
  * a value is not required.  Flags are boolean by nature...
  */
 #undef T_INT
@@ -84,6 +85,8 @@ struct sudo_defs_types {
 #define T_LOGPRI	0x008
 #undef T_TUPLE
 #define T_TUPLE		0x009
+#undef T_FLOAT
+#define T_FLOAT		0x010
 #undef T_MASK
 #define T_MASK		0x0FF
 #undef T_BOOL
