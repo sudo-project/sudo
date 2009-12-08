@@ -922,13 +922,16 @@ C<@loglen@> (use 0 or negate the option to disable word wrap).
 =item passwd_timeout
 
 Number of minutes before the B<sudo> password prompt times out.
-The default is C<@password_timeout@>; set this to C<0> for no password timeout.
+The timeout may include a fractional component if minute granularity
+is insufficient, for example C<2.5>.  The default is C<@password_timeout@>;
+set this to C<0> for no password timeout.
 
 =item timestamp_timeout
 
 Number of minutes that can elapse before B<sudo> will ask for a
-passwd again.  The default is C<@timeout@>.  Set this to C<0> to always
-prompt for a password.
+passwd again.  The timeout may include a fractional component if
+minute granularity is insufficient, for example C<2.5>.  The default
+is C<@timeout@>.  Set this to C<0> to always prompt for a password.
 If set to a value less than C<0> the user's timestamp will never
 expire.  This can be used to allow users to create or delete their
 own timestamps via C<sudo -v> and C<sudo -k> respectively.
