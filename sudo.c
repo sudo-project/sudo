@@ -967,7 +967,7 @@ args_done:
 	warnx("you may not specify both the `-i' and `-E' options");
 	usage(1);
     }
-    if (user_runas != NULL && !ISSET(rval, (MODE_EDIT|MODE_RUN))) {
+    if (user_runas != NULL && !ISSET(rval, (MODE_EDIT|MODE_RUN|MODE_VALIDATE))) {
 	if (excl != '\0')
 	    warnx("the `-u' and '-%c' options may not be used together", excl);
 	usage(1);
