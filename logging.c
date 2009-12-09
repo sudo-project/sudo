@@ -122,7 +122,7 @@ mysyslog(pri, fmt, va_alist)
 }
 
 #define FMT_FIRST "%8s : %s"
-#define FMT_CONTD "%8s : (command continued) %s";
+#define FMT_CONTD "%8s : (command continued) %s"
 
 /*
  * Log a message to syslog, pre-pending the username and splitting the
