@@ -1083,7 +1083,7 @@ parse_args(argc, argv)
 	usage(1);
     }
     if ((runas_user != NULL || runas_group != NULL) &&
-	!ISSET(mode, MODE_EDIT | MODE_RUN | MODE_CHECK)) {
+	!ISSET(mode, MODE_EDIT | MODE_RUN | MODE_CHECK | MODE_VALIDATE)) {
 	usage(1);
     }
     if (list_pw != NULL && mode != MODE_LIST && mode != MODE_CHECK) {

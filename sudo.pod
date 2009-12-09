@@ -31,7 +31,8 @@ B<sudo> B<-h> | B<-K> | B<-k> | B<-L> | B<-V>
 
 B<sudo> B<-v> [B<-AknS>]
 S<[B<-a> I<auth_type>]>
-S<[B<-p> I<prompt>]>
+S<[B<-g> I<groupname>|I<#gid>]> S<[B<-p> I<prompt>]>
+S<[B<-u> I<username>|I<#uid>]>
 
 B<sudo> B<-l[l]> [B<-AknS>]
 S<[B<-a> I<auth_type>]>
