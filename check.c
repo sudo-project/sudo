@@ -410,7 +410,7 @@ timestamp_status(timestampdir, timestampfile, user, flags)
     int flags;
 {
     struct stat sb;
-    time_t now;
+    time_t boottime, now;
     char *dirparent = def_timestampdir;
     int status = TS_ERROR;		/* assume the worst */
 
@@ -552,6 +552,7 @@ timestamp_status(timestampdir, timestampfile, user, flags)
 	else {
 	    /* XXX - should use timespec here */
 	    now = time(NULL);
+	    boottime = get_boottime();
 	    if (def_timestamp_timeout &&
 		now - sb.st_mtime < 60 * def_timestamp_timeout) {
 		/*
@@ -567,8 +568,11 @@ timestamp_status(timestampdir, timestampfile, user, flags)
 		    else
 			(void) rmdir(timestampdir);
 		    status = TS_MISSING;
-		} else
+		} else if (sb.st_mtime < boottime) {
+		    status = TS_OLD;
+		} else {
 		    status = TS_CURRENT;
+		}
 	    }
 	}
     }

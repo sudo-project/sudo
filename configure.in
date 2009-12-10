@@ -4,7 +4,7 @@ dnl $Sudo$
 dnl
 dnl Copyright (c) 1994-1996,1998-2009 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT([sudo], [1.7.3], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.7.3b1], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER(config.h pathnames.h)
 dnl
 dnl This won't work before AC_INIT
@@ -1853,6 +1853,8 @@ AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
     AC_CHECK_FUNCS(fgetln)
 ])
+
+AC_CHECK_FUNCS(sysctl getutid getutxid, [break])
 
 AC_CHECK_FUNCS(openpty, [AC_CHECK_HEADERS(util.h pty.h, [break])], [
     AC_CHECK_LIB(util, openpty, [

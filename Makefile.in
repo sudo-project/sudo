@@ -104,16 +104,17 @@ SHELL = /bin/sh
 
 PROGS = @PROGS@
 
-SRCS = aix.c alias.c alloc.c audit.c bsm_audit.c check.c closefrom.c \
-       def_data.c defaults.c env.c error.c fileops.c find_path.c fnmatch.c \
-       getcwd.c getprogname.c getspwuid.c gettime.c glob.c goodpath.c gram.c \
-       gram.y interfaces.c isblank.c lbuf.c ldap.c list.c logging.c match.c \
-       mkstemp.c memrchr.c nanosleep.c parse.c pwutil.c pty.c script.c \
-       set_perms.c sigaction.c snprintf.c strcasecmp.c strerror.c strlcat.c \
-       strlcpy.c strsignal.c sudo.c sudo_noexec.c sudo_edit.c sudo_nss.c \
-       term.c testsudoers.c tgetpass.c toke.c toke.l tsgetgrpw.c utimes.c \
-       vasgroups.c visudo.c zero_bytes.c redblack.c selinux.c sesh.c \
-       sudoreplay.c getdate.c getdate.y getline.c timestr.c $(AUTH_SRCS)
+SRCS = aix.c alias.c alloc.c audit.c boottime.c bsm_audit.c check.c \
+       closefrom.c def_data.c defaults.c env.c error.c fileops.c find_path.c \
+       fnmatch.c getcwd.c getprogname.c getspwuid.c gettime.c glob.c \
+       goodpath.c gram.c gram.y interfaces.c isblank.c lbuf.c ldap.c list.c \
+       logging.c match.c mkstemp.c memrchr.c nanosleep.c parse.c pwutil.c \
+       pty.c script.c set_perms.c sigaction.c snprintf.c strcasecmp.c \
+       strerror.c strlcat.c strlcpy.c strsignal.c sudo.c sudo_noexec.c \
+       sudo_edit.c sudo_nss.c term.c testsudoers.c tgetpass.c toke.c toke.l \
+       tsgetgrpw.c utimes.c vasgroups.c visudo.c zero_bytes.c redblack.c \
+       selinux.c sesh.c sudoreplay.c getdate.c getdate.y getline.c \
+       timestr.c $(AUTH_SRCS)
 
 AUTH_SRCS = auth/afs.c auth/aix_auth.c auth/bsdauth.c auth/dce.c auth/fwtk.c \
 	    auth/kerb4.c auth/kerb5.c auth/pam.c auth/passwd.c auth/rfc1938.c \
@@ -132,7 +133,7 @@ COMMON_OBJS = alias.o alloc.o defaults.o error.o getline.o gram.o \
 	      list.o match.o pwutil.o timestr.o toke.o redblack.o \
 	      term.o zero_bytes.o @NONUNIX_GROUPS_IMPL@
 
-SUDO_OBJS = $(AUTH_OBJS) @SUDO_OBJS@ audit.o check.o \
+SUDO_OBJS = $(AUTH_OBJS) @SUDO_OBJS@ audit.o boottime.o check.o \
 	    env.o getspwuid.o gettime.o goodpath.o fileops.o find_path.o \
 	    interfaces.o lbuf.o logging.o parse.o set_perms.o sudo.o \
 	    sudo_edit.o sudo_nss.o tgetpass.o
@@ -250,6 +251,8 @@ alloc.o: $(srcdir)/alloc.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alloc.c
 audit.o: $(srcdir)/audit.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/audit.c
+boottime.o: $(srcdir)/boottime.c config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/boottime.c
 bsm_audit.o: $(srcdir)/bsm_audit.c $(SUDODEP) bsm_audit.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/bsm_audit.c
 check.o: $(srcdir)/check.c $(SUDODEP)

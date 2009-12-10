@@ -184,6 +184,12 @@
 /* Define to 1 if you have the `getuserattr' function. */
 #undef HAVE_GETUSERATTR
 
+/* Define to 1 if you have the `getutid' function. */
+#undef HAVE_GETUTID
+
+/* Define to 1 if you have the `getutxid' function. */
+#undef HAVE_GETUTXID
+
 /* Define to 1 if you have the `glob' function. */
 #undef HAVE_GLOB
 
@@ -470,6 +476,9 @@
 
 /* Define to 1 if you have the `sysconf' function. */
 #undef HAVE_SYSCONF
+
+/* Define to 1 if you have the `sysctl' function. */
+#undef HAVE_SYSCTL
 
 /* Define to 1 if you have the <sys/bsdtypes.h> header file. */
 #undef HAVE_SYS_BSDTYPES_H
