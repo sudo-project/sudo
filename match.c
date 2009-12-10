@@ -834,11 +834,11 @@ usergr_matches(group, user, pw)
 
     /* look up user's primary gid in the passwd file */
     if (pw == NULL && (pw = sudo_getpwnam(user)) == NULL)
-	goto try_supplementary;
+	goto check_membership;
 
     /* check against user's primary (passwd file) gid */
     if ((grp = sudo_getgrnam(group)) == NULL)
-	goto try_supplementary;
+	goto check_membership;
     if (grp->gr_gid == pw->pw_gid)
 	return(TRUE);
 
@@ -852,7 +852,7 @@ usergr_matches(group, user, pw)
 		return(TRUE);
     }
 
-try_supplementary:
+check_membership:
     if (grp != NULL && grp->gr_mem != NULL) {
 	for (cur = grp->gr_mem; *cur; cur++)
 	    if (strcmp(*cur, user) == 0)
