@@ -819,15 +819,6 @@ usergr_matches(group, user, pw)
     char *user;
     struct passwd *pw;
 {
-#ifdef HAVE_MBR_CHECK_MEMBERSHIP
-    uuid_t gu, uu;
-    int ismember;
-#else
-    char **gr_mem;
-    int i;
-#endif
-    struct group *grp = NULL;
-
     /* make sure we have a valid usergroup, sudo style */
     if (*group++ != '%')
 	return(FALSE);
@@ -839,43 +830,10 @@ usergr_matches(group, user, pw)
 
     /* look up user's primary gid in the passwd file */
     if (pw == NULL && (pw = sudo_getpwnam(user)) == NULL)
-	goto check_membership;
+	return(FALSE);
 
-    /* check against user's primary (passwd file) gid */
-    if ((grp = sudo_getgrnam(group)) == NULL)
-	goto check_membership;
-    if (grp->gr_gid == pw->pw_gid)
+    if (user_in_group(pw, group))
 	return(TRUE);
-
-    /*
-     * If we are matching the invoking or list user and that user has a
-     * supplementary group vector, check it first.
-     */
-    if (strcmp(user, list_pw ? list_pw->pw_name : user_name) == 0) {
-#ifdef HAVE_MBR_CHECK_MEMBERSHIP
-	if (mbr_gid_to_uuid(grp->gr_gid, gu) == 0 &&
-	    mbr_check_membership(user_uuid, gu, &ismember) == 0 && ismember)
-	    return(TRUE);
-#else
-	for (i = 0; i < user_ngroups; i++)
-	    if (grp->gr_gid == user_groups[i])
-		return(TRUE);
-#endif
-    }
-
-check_membership:
-#ifdef HAVE_MBR_CHECK_MEMBERSHIP
-    if (mbr_uid_to_uuid(pw->pw_uid, uu) == 0 &&
-	mbr_gid_to_uuid(grp->gr_gid, gu) == 0 &&
-	mbr_check_membership(uu, gu, &ismember) == 0 && ismember)
-        return(TRUE);
-#else
-    if (grp != NULL && grp->gr_mem != NULL) {
-	for (gr_mem = grp->gr_mem; *gr_mem; gr_mem++)
-	    if (strcmp(*gr_mem, user) == 0)
-		return(TRUE);
-    }
-#endif
 
 #ifdef USING_NONUNIX_GROUPS
     /* not a Unix group, could be an AD group */
