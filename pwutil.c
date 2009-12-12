@@ -594,9 +594,10 @@ user_in_group(pw, group)
 #else
 	if (grp != NULL && grp->gr_mem != NULL) {
 	    for (gr_mem = grp->gr_mem; *gr_mem; gr_mem++)
-		if (strcmp(*gr_mem, user) == 0)
+		if (strcmp(*gr_mem, pw->pw_name) == 0)
 		    return(TRUE);
 	}
 #endif
     }
+    return(FALSE);
 }
