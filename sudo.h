@@ -35,6 +35,10 @@
 #include "missing.h"
 #include "sudo_nss.h"
 
+#ifdef HAVE_MBR_CHECK_MEMBERSHIP
+# include <membership.h>
+#endif
+
 /*
  * Info pertaining to the invoking user.
  */
@@ -67,6 +71,9 @@ struct sudo_user {
 #endif
     char  cwd[PATH_MAX];
     char  sessid[7];
+#ifdef HAVE_MBR_CHECK_MEMBERSHIP
+    uuid_t uuid;
+#endif
 };
 
 /*
@@ -141,6 +148,7 @@ struct sudo_user {
 #define user_name		(sudo_user.pw->pw_name)
 #define user_passwd		(sudo_user.pw->pw_passwd)
 #define user_uid		(sudo_user.pw->pw_uid)
+#define user_uuid		(sudo_user.uuid)
 #define user_gid		(sudo_user.pw->pw_gid)
 #define user_dir		(sudo_user.pw->pw_dir)
 #define user_shell		(sudo_user.shell)

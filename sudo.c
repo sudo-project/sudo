@@ -94,6 +94,9 @@
 #ifdef HAVE_SELINUX
 # include <selinux/selinux.h>
 #endif
+#ifdef HAVE_MBR_CHECK_MEMBERSHIP
+# include <membership.h>
+#endif
 
 #include <sudo_usage.h>
 #include "sudo.h"
@@ -436,8 +439,12 @@ main(argc, argv, envp)
 	if (user_uid == 0 && strcmp(prev_user, "root") != 0) {
 	    struct passwd *pw;
 
-	    if ((pw = sudo_getpwnam(prev_user)) != NULL)
+	    if ((pw = sudo_getpwnam(prev_user)) != NULL) {
 		    sudo_user.pw = pw;
+#ifdef HAVE_MBR_CHECK_MEMBERSHIP
+		    mbr_uid_to_uuid(user_uid, user_uuid);
+#endif
+	    }
 	}
     }
 
@@ -730,6 +737,9 @@ init_vars(sudo_mode, envp)
 	    errorx(1, "unknown uid: %s", pw_name);
 	log_error(0, "unknown uid: %s", pw_name);
     }
+#ifdef HAVE_MBR_CHECK_MEMBERSHIP
+    mbr_uid_to_uuid(user_uid, user_uuid);
+#endif
     if (user_shell == NULL || *user_shell == '\0')
 	user_shell = estrdup(sudo_user.pw->pw_shell);
 

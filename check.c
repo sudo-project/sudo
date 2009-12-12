@@ -336,8 +336,13 @@ oflow:
 int
 user_is_exempt()
 {
-    struct group *grp;
+#ifdef HAVE_MBR_CHECK_MEMBERSHIP
+    uuid_t gu;
+    int ismember;
+#else
     char **gr_mem;
+#endif
+    struct group *grp;
 
     if (!def_exempt_group)
 	return(FALSE);
@@ -348,10 +353,17 @@ user_is_exempt()
     if (user_gid == grp->gr_gid)
 	return(TRUE);
 
+#ifdef HAVE_MBR_CHECK_MEMBERSHIP
+    if (mbr_gid_to_uuid(grp->gr_gid, gu) == 0 &&
+	mbr_check_membership(user_uuid, gu, &ismember) == 0 && ismember)
+        return(TRUE);
+#else
+    /* XXX - should check stashed group vector */
     for (gr_mem = grp->gr_mem; *gr_mem; gr_mem++) {
 	if (strcmp(user_name, *gr_mem) == 0)
 	    return(TRUE);
     }
+#endif
 
     return(FALSE);
 }
