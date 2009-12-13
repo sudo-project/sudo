@@ -521,7 +521,7 @@ runas_setgroups()
 static void
 restore_groups()
 {
-    if (setgroups(user_ngroups, user_groups) < 0)
+    if (user_groups >= 0 && setgroups(user_ngroups, user_groups) < 0)
 	log_error(USE_ERRNO|MSG_ONLY, "can't reset user group vector");
 }
 

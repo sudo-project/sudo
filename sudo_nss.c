@@ -217,14 +217,12 @@ reset_groups(pw)
 #if defined(HAVE_INITGROUPS) && defined(HAVE_GETGROUPS)
     if (pw != sudo_user.pw) {
 	(void) initgroups(pw->pw_name, pw->pw_gid);
+	efree(user_groups);
+	user_groups = NULL;
 	if ((user_ngroups = getgroups(0, NULL)) > 0) {
-	    user_groups = erealloc3(user_groups, user_ngroups,
-		sizeof(GETGROUPS_T));
+	    user_groups = emalloc2(user_ngroups, sizeof(GETGROUPS_T));
 	    if (getgroups(user_ngroups, user_groups) < 0)
 		log_error(USE_ERRNO|MSG_ONLY, "can't get group vector");
-	} else {
-	    user_ngroups = 0;
-	    efree(user_groups);
 	}
     }
 #endif
