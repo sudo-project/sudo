@@ -4,7 +4,7 @@ dnl $Sudo$
 dnl
 dnl Copyright (c) 1994-1996,1998-2009 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT([sudo], [1.7.3b1], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.7.3b2], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER(config.h pathnames.h)
 dnl
 dnl This won't work before AC_INIT
