@@ -319,6 +319,10 @@ struct sudo_defs_types sudo_defs_table[] = {
 	"Log a transcript of the command being run",
 	NULL,
     }, {
+	"compress_transcript", T_FLAG,
+	"Compress session transcripts with zlib",
+	NULL,
+    }, {
 	NULL, 0, NULL
     }
 };

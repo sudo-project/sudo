@@ -235,3 +235,6 @@ umask_override
 transcript
 	T_FLAG
 	"Log a transcript of the command being run"
+compress_transcript
+	T_FLAG
+	"Compress session transcripts with zlib"

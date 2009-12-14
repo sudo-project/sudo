@@ -146,6 +146,8 @@
 #define I_UMASK_OVERRIDE        72
 #define def_transcript          (sudo_defs_table[73].sd_un.flag)
 #define I_TRANSCRIPT            73
+#define def_compress_transcript (sudo_defs_table[74].sd_un.flag)
+#define I_COMPRESS_TRANSCRIPT   74
 
 enum def_tupple {
 	never,

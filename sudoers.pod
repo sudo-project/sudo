@@ -591,6 +591,12 @@ If set, the user may use B<sudo>'s B<-C> option which
 overrides the default starting point at which B<sudo> begins
 closing open file descriptors.  This flag is I<off> by default.
 
+=item compress_transcript
+
+If set, and the I<transcript> flag is also set, B<sudo> will compress
+the transcript logs using B<zlib>.  This flag is I<on> by default
+when B<sudo> is compiled with B<zlib> support.
+
 =item env_editor
 
 If set, B<visudo> will use the value of the EDITOR or VISUAL

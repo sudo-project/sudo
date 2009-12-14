@@ -473,6 +473,9 @@ init_defaults()
     def_timestamp_timeout = TIMEOUT;
     def_passwd_timeout = PASSWORD_TIMEOUT;
     def_passwd_tries = TRIES_FOR_PASSWORD;
+#ifdef HAVE_ZLIB
+    def_compress_transcript = TRUE;
+#endif
 
     /* Now do the strings */
     def_mailto = estrdup(MAILTO);

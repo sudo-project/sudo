@@ -89,6 +89,13 @@ __unused static const char rcsid[] = "$Sudo$";
 #define TERM_CBREAK	1
 #define TERM_RAW	2
 
+union script_fd {
+    FILE *f;
+#ifdef HAVE_ZLIB
+    gzFile g;
+#endif
+};
+
 struct script_buf {
     int len; /* buffer length (how much read in) */
     int off; /* write position (how much already consumed) */
@@ -111,9 +118,10 @@ static int foreground;
 static char slavename[PATH_MAX];
 
 static int suspend_parent __P((int signo, struct script_buf *output,
-    struct timeval *then, struct timeval *now, void *ofile, void *tfile));
+    struct timeval *then, struct timeval *now, union script_fd ofile,
+    union script_fd tfile));
 static void flush_output __P((struct script_buf *output, struct timeval *then,
-    struct timeval *now, void *ofile, void *tfile));
+    struct timeval *now, union script_fd ofile, union script_fd tfile));
 static void handler __P((int s));
 static void script_child __P((char *path, char *argv[], int, int));
 static void script_run __P((char *path, char *argv[], int));
@@ -319,13 +327,8 @@ log_output(buf, n, then, now, ofile, tfile)
     int n;
     struct timeval *then;
     struct timeval *now;
-#ifdef HAVE_ZLIB
-    gzFile ofile;
-    gzFile tfile;
-#else
-    FILE *ofile;
-    FILE *tfile;
-#endif
+    union script_fd ofile;
+    union script_fd tfile;
 {
     struct timeval tv;
     sigset_t omask;
@@ -333,18 +336,20 @@ log_output(buf, n, then, now, ofile, tfile)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
 
 #ifdef HAVE_ZLIB
-    gzwrite(ofile, buf, n);
-#else
-    fwrite(buf, 1, n, ofile);
+    if (def_compress_transcript)
+	gzwrite(ofile.g, buf, n);
+    else
 #endif
+	fwrite(buf, 1, n, ofile.f);
     timersub(now, then, &tv);
 #ifdef HAVE_ZLIB
-    gzprintf(tfile, "%f %d\n",
-	tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
-#else
-    fprintf(tfile, "%f %d\n",
-	tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
+    if (def_compress_transcript)
+	gzprintf(tfile.g, "%f %d\n",
+	    tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
+    else
 #endif
+	fprintf(tfile.f, "%f %d\n",
+	    tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
     then->tv_sec = now->tv_sec;
     then->tv_usec = now->tv_usec;
 
@@ -373,8 +378,8 @@ suspend_parent(signo, output, then, now, ofile, tfile)
     struct script_buf *output;
     struct timeval *then;
     struct timeval *now;
-    void *ofile;
-    void *tfile;
+    union script_fd ofile;
+    union script_fd tfile;
 {
     sigaction_t sa, osa;
     int n, oldmode = ttymode, rval = 0;
@@ -478,11 +483,7 @@ script_execv(path, argv)
     int relaysig, sv[2];
     fd_set *fdsr, *fdsw;
     FILE *idfile;
-#ifdef HAVE_ZLIB
-    gzFile ofile, tfile;
-#else
-    FILE *ofile, *tfile;
-#endif
+    union script_fd ofile, tfile;
     int rbac_enabled = 0;
 
 #ifdef HAVE_SELINUX
@@ -580,16 +581,19 @@ script_execv(path, argv)
     if ((idfile = fdopen(script_fds[SFD_LOG], "w")) == NULL)
 	log_error(USE_ERRNO, "fdopen");
 #ifdef HAVE_ZLIB
-    if ((ofile = gzdopen(script_fds[SFD_OUTPUT], "w")) == NULL)
-	log_error(USE_ERRNO, "gzdopen");
-    if ((tfile = gzdopen(script_fds[SFD_TIMING], "w")) == NULL)
-	log_error(USE_ERRNO, "gzdopen");
-#else
-    if ((ofile = fdopen(script_fds[SFD_OUTPUT], "w")) == NULL)
-	log_error(USE_ERRNO, "fdopen");
-    if ((tfile = fdopen(script_fds[SFD_TIMING], "w")) == NULL)
-	log_error(USE_ERRNO, "fdopen");
+    if (def_compress_transcript) {
+	if ((ofile.g = gzdopen(script_fds[SFD_OUTPUT], "w")) == NULL)
+	    log_error(USE_ERRNO, "gzdopen");
+	if ((tfile.g = gzdopen(script_fds[SFD_TIMING], "w")) == NULL)
+	    log_error(USE_ERRNO, "gzdopen");
+    } else
 #endif
+    {
+	if ((ofile.f = fdopen(script_fds[SFD_OUTPUT], "w")) == NULL)
+	    log_error(USE_ERRNO, "fdopen");
+	if ((tfile.f = fdopen(script_fds[SFD_TIMING], "w")) == NULL)
+	    log_error(USE_ERRNO, "fdopen");
+    }
 
     gettimeofday(&then, NULL);
 
@@ -768,12 +772,15 @@ script_execv(path, argv)
     flush_output(&output, &then, &now, ofile, tfile);
 
 #ifdef HAVE_ZLIB
-    gzclose(ofile);
-    gzclose(tfile);
-#else
-    fclose(ofile);
-    fclose(tfile);
+    if (def_compress_transcript) {
+	gzclose(ofile.g);
+	gzclose(tfile.g);
+    } else
 #endif
+    {
+	fclose(ofile.f);
+	fclose(tfile.f);
+    }
 
 #ifdef HAVE_STRSIGNAL
     if (WIFSIGNALED(child_status)) {
@@ -991,8 +998,8 @@ flush_output(output, then, now, ofile, tfile)
     struct script_buf *output;
     struct timeval *then;
     struct timeval *now;
-    void *ofile;
-    void *tfile;
+    union script_fd ofile;
+    union script_fd tfile;
 {
     int n;
 
