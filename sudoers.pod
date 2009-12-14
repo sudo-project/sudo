@@ -836,11 +836,12 @@ function.  This flag is I<off> by default.
 
 =item targetpw
 
-If set, B<sudo> will prompt for the password of the user specified by
-the B<-u> option (defaults to C<root>) instead of the password of the
-invoking user.  Note that this precludes the use of a uid not listed
-in the passwd database as an argument to the B<-u> option.
-This flag is I<off> by default.
+If set, B<sudo> will prompt for the password of the user specified
+by the B<-u> option (defaults to C<root>) instead of the password
+of the invoking user.  In addition, the timestamp file name will
+include the target user's name.  Note that this flag precludes the
+use of a uid not listed in the passwd database as an argument to
+the B<-u> option.  This flag is I<off> by default.
 
 =item transcript
 
