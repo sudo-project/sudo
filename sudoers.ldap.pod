@@ -637,9 +637,9 @@ determines sudoers source order on AIX
   #
   # If using SASL authentication for LDAP (OpenSSL)
   # use_sasl yes
-  # sasl_auth_id <SASL username>
+  # sasl_auth_id <SASL user name>
   # rootuse_sasl yes
-  # rootsasl_auth_id <SASL username for root access>
+  # rootsasl_auth_id <SASL user name for root access>
   # sasl_secprops none
   # krb5_ccname /etc/.ldapcache
 

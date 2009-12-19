@@ -52,16 +52,16 @@ DDEESSCCRRIIPPTTIIOONN
        Cmnd_Alias that is referenced by multiple users, one can create a
        sudoRole that contains the commands and assign multiple users to it.
 
-       SSUUDDOOeerrss LLDDAAPP ccoonnttaaiinneerr
-
+   SSUUDDOOeerrss LLDDAAPP ccoonnttaaiinneerr
        The _s_u_d_o_e_r_s configuration is contained in the ou=SUDOers LDAP
        container.
 
        Sudo first looks for the cn=default entry in the SUDOers container.  If
+       found, the multi-valued sudoOption attribute is parsed in the same
 
 
 
-1.7.2                     June 11, 2009                         1
+1.7.3b2                 December 19, 2009                       1
 
 
 
@@ -70,7 +70,6 @@ DDEESSCCRRIIPPTTIIOONN
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
-       found, the multi-valued sudoOption attribute is parsed in the same
        manner as a global Defaults line in _/_e_t_c_/_s_u_d_o_e_r_s.  In the following
        example, the SSH_AUTH_SOCK variable will be preserved in the
        environment for all users.
@@ -127,7 +126,8 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
 
-1.7.2                     June 11, 2009                         2
+
+1.7.3b2                 December 19, 2009                       2
 
 
 
@@ -144,8 +144,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            sudoHost: ALL
            sudoCommand: ALL
 
-       AAnnaattoommyy ooff LLDDAAPP ssuuddooeerrss llooookkuupp
-
+   AAnnaattoommyy ooff LLDDAAPP ssuuddooeerrss llooookkuupp
        When looking up a sudoer using LDAP there are only two or three LDAP
        queries per invocation.  The first query is to parse the global
        options.  The second is to match against the user's name and the groups
@@ -154,8 +153,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        third query returns all entries containing user netgroups and checks to
        see if the user belongs to any of them.
 
-       DDiiffffeerreenncceess bbeettwweeeenn LLDDAAPP aanndd nnoonn--LLDDAAPP ssuuddooeerrss
-
+   DDiiffffeerreenncceess bbeettwweeeenn LLDDAAPP aanndd nnoonn--LLDDAAPP ssuuddooeerrss
        There are some subtle differences in the way sudoers is handled once in
        LDAP.  Probably the biggest is that according to the RFC, LDAP ordering
        is arbitrary and you cannot expect that Attributes and Entries are
@@ -190,10 +188,12 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            objectClass: top
            cn: role2
            sudoUser: puddles
+           sudoHost: ALL
+           sudoCommand: !/bin/sh
 
 
 
-1.7.2                     June 11, 2009                         3
+1.7.3b2                 December 19, 2009                       3
 
 
 
@@ -202,8 +202,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
-           sudoHost: ALL
-           sudoCommand: !/bin/sh
            sudoCommand: ALL
 
        Another difference is that negations on the Host, User or Runas are
@@ -224,8 +222,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            sudoHost: ALL
            sudoHost: !web01
 
-       SSuuddooeerrss SScchheemmaa
-
+   SSuuddooeerrss SScchheemmaa
        In order to use ssuuddoo's LDAP support, the ssuuddoo schema must be installed
        on your LDAP server.  In addition, be sure to index the 'sudoUser'
        attribute.
@@ -238,8 +235,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        The schema for ssuuddoo in OpenLDAP form is included in the EXAMPLES
        section.
 
-       CCoonnffiigguurriinngg llddaapp..ccoonnff
-
+   CCoonnffiigguurriinngg llddaapp..ccoonnff
        Sudo reads the _/_e_t_c_/_l_d_a_p_._c_o_n_f file for LDAP-specific configuration.
        Typically, this file is shared amongst different LDAP-aware clients.
        As such, most of the settings are not ssuuddoo-specific.  Note that ssuuddoo
@@ -256,10 +252,14 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
        UURRII ldap[s]://[hostname[:port]] ...
            Specifies a whitespace-delimited list of one or more URIs
+           describing the LDAP server(s) to connect to.  The _p_r_o_t_o_c_o_l may be
+           either llddaapp or llddaappss, the latter being for servers that support TLS
+           (SSL) encryption.  If no _p_o_r_t is specified, the default is port 389
+           for ldap:// or port 636 for ldaps://.  If no _h_o_s_t_n_a_m_e is specified,
 
 
 
-1.7.2                     June 11, 2009                         4
+1.7.3b2                 December 19, 2009                       4
 
 
 
@@ -268,10 +268,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
-           describing the LDAP server(s) to connect to.  The _p_r_o_t_o_c_o_l may be
-           either llddaapp or llddaappss, the latter being for servers that support TLS
-           (SSL) encryption.  If no _p_o_r_t is specified, the default is port 389
-           for ldap:// or port 636 for ldaps://.  If no _h_o_s_t_n_a_m_e is specified,
            ssuuddoo will connect to llooccaallhhoosstt.  Only systems using the OpenSSL
            libraries support the mixing of ldap:// and ldaps:// URIs.  The
            Netscape-derived libraries used on most commercial versions of Unix
@@ -322,10 +318,14 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            identity.  By default, most LDAP servers will allow anonymous
            access.
 
+       BBIINNDDPPWW secret
+           The BBIINNDDPPWW parameter specifies the password to use when performing
+           LDAP operations.  This is typically used in conjunction with the
+           BBIINNDDDDNN parameter.
 
 
 
-1.7.2                     June 11, 2009                         5
+1.7.3b2                 December 19, 2009                       5
 
 
 
@@ -333,11 +333,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
-
-       BBIINNDDPPWW secret
-           The BBIINNDDPPWW parameter specifies the password to use when performing
-           LDAP operations.  This is typically used in conjunction with the
-           BBIINNDDDDNN parameter.
 
        RROOOOTTBBIINNDDDDNN DN
            The RROOOOTTBBIINNDDDDNN parameter specifies the identity, in the form of a
@@ -389,9 +384,14 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            used to authenticate the client to the LDAP server.  The
            certificate type depends on the LDAP libraries used.
 
+           OpenLDAP:
+               tls_cert /etc/ssl/client_cert.pem
+
+           Netscape-derived:
 
 
-1.7.2                     June 11, 2009                         6
+
+1.7.3b2                 December 19, 2009                       6
 
 
 
@@ -400,10 +400,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
-           OpenLDAP:
-               tls_cert /etc/ssl/client_cert.pem
-
-           Netscape-derived:
                tls_cert /var/ldap/cert7.db
 
            When using Netscape-derived libraries, this file may also contain
@@ -455,9 +451,13 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            The path to the Kerberos 5 credential cache to use when
            authenticating with the remote server.
 
+       See the ldap.conf entry in the EXAMPLES section.
 
 
-1.7.2                     June 11, 2009                         7
+
+
+
+1.7.3b2                 December 19, 2009                       7
 
 
 
@@ -466,10 +466,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
-       See the ldap.conf entry in the EXAMPLES section.
-
-       CCoonnffiigguurriinngg nnsssswwiittcchh..ccoonnff
-
+   CCoonnffiigguurriinngg nnsssswwiittcchh..ccoonnff
        Unless it is disabled at build time, ssuuddoo consults the Name Service
        Switch file, _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f, to specify the _s_u_d_o_e_r_s search order.
        Sudo looks for a line beginning with sudoers: and uses this to
@@ -502,8 +499,7 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        Note that _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f is supported even when the underlying
        operating system does not use an nsswitch.conf file.
 
-       CCoonnffiigguurriinngg nneettssvvcc..ccoonnff
-
+   CCoonnffiigguurriinngg nneettssvvcc..ccoonnff
        On AIX systems, the _/_e_t_c_/_n_e_t_s_v_c_._c_o_n_f file is consulted instead of
        _/_e_t_c_/_n_s_s_w_i_t_c_h_._c_o_n_f.  ssuuddoo simply treats _n_e_t_s_v_c_._c_o_n_f as a variant of
        _n_s_s_w_i_t_c_h_._c_o_n_f; information in the previous section unrelated to the
@@ -521,9 +517,13 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
        To treat LDAP as authoratative and only use the local sudoers file if
        the user is not present in LDAP, use:
 
+           sudoers = ldap = auth, files
+
+       Note that in the above example, the auth qualfier only affects user
 
 
-1.7.2                     June 11, 2009                         8
+
+1.7.3b2                 December 19, 2009                       8
 
 
 
@@ -532,9 +532,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
-           sudoers = ldap = auth, files
-
-       Note that in the above example, the auth qualfier only affects user
        lookups; both LDAP and _s_u_d_o_e_r_s will be queried for Defaults entries.
 
        If the _/_e_t_c_/_n_e_t_s_v_c_._c_o_n_f file is not present or there is no sudoers
@@ -550,8 +547,7 @@ FFIILLEESS
        _/_e_t_c_/_n_e_t_s_v_c_._c_o_n_f        determines sudoers source order on AIX
 
 EEXXAAMMPPLLEESS
-       EExxaammppllee llddaapp..ccoonnff
-
+   EExxaammppllee llddaapp..ccoonnff
          # Either specify one or more URIs or one or more host:port pairs.
          # If neither is specified sudo will default to localhost, port 389.
          #
@@ -586,10 +582,14 @@ EEXXAAMMPPLLEESS
          #
          # LDAP protocol version, defaults to 3
          #ldap_version 3
+         #
+         # Define if you want to use an encrypted LDAP connection.
+         # Typically, you must also set the port to 636 (ldaps).
+         #ssl on
 
 
 
-1.7.2                     June 11, 2009                         9
+1.7.3b2                 December 19, 2009                       9
 
 
 
@@ -598,10 +598,6 @@ EEXXAAMMPPLLEESS
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
-         #
-         # Define if you want to use an encrypted LDAP connection.
-         # Typically, you must also set the port to 636 (ldaps).
-         #ssl on
          #
          # Define if you want to use port 389 and switch to
          # encryption before the bind credentials are sent.
@@ -652,10 +648,14 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
          # SDK will prevent specific file names from working.  For this reason
          # it is suggested that tls_cert and tls_key be set to a directory,
          # not a file name.
+         #
+         # The certificate database specified by tls_cert may contain CA certs
+         # and/or the client's cert.  If the client's cert is included, tls_key
+         # should be specified as well.
 
 
 
-1.7.2                     June 11, 2009                        10
+1.7.3b2                 December 19, 2009                      10
 
 
 
@@ -664,24 +664,19 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
-         #
-         # The certificate database specified by tls_cert may contain CA certs
-         # and/or the client's cert.  If the client's cert is included, tls_key
-         # should be specified as well.
          # For backward compatibility, "sslpath" may be used in place of tls_cert.
          #tls_cert /var/ldap
          #tls_key /var/ldap
          #
          # If using SASL authentication for LDAP (OpenSSL)
          # use_sasl yes
-         # sasl_auth_id <SASL username>
+         # sasl_auth_id <SASL user name>
          # rootuse_sasl yes
-         # rootsasl_auth_id <SASL username for root access>
+         # rootsasl_auth_id <SASL user name for root access>
          # sasl_secprops none
          # krb5_ccname /etc/.ldapcache
 
-       SSuuddoo sscchheemmaa ffoorr OOppeennLLDDAAPP
-
+   SSuuddoo sscchheemmaa ffoorr OOppeennLLDDAAPP
        The following schema is in OpenLDAP format.  Simply copy it to the
        schema directory (e.g. _/_e_t_c_/_o_p_e_n_l_d_a_p_/_s_c_h_e_m_a), add the proper include
        line in slapd.conf and restart ssllaappdd.
@@ -718,10 +713,15 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
            EQUALITY caseExactIA5Match
            SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 
+        attributetype ( 1.3.6.1.4.1.15953.9.1.6
+           NAME 'sudoRunAsUser'
+           DESC 'User(s) impersonated by sudo'
+           EQUALITY caseExactIA5Match
+           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 
 
 
-1.7.2                     June 11, 2009                        11
+1.7.3b2                 December 19, 2009                      11
 
 
 
@@ -730,11 +730,6 @@ SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 SUDOERS.LDAP(4)        MAINTENANCE COMMANDS       SUDOERS.LDAP(4)
 
 
-        attributetype ( 1.3.6.1.4.1.15953.9.1.6
-           NAME 'sudoRunAsUser'
-           DESC 'User(s) impersonated by sudo'
-           EQUALITY caseExactIA5Match
-           SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 
         attributetype ( 1.3.6.1.4.1.15953.9.1.7
            NAME 'sudoRunAsGroup'
@@ -787,6 +782,11 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.2                     June 11, 2009                        12
+
+
+
+
+
+1.7.3b2                 December 19, 2009                      12
 
 

@@ -96,7 +96,7 @@ the B<-c> option.
 Enable B<strict> checking of the I<sudoers> file.  If an alias is
 used before it is defined, B<visudo> will consider this a parse
 error.  Note that it is not possible to differentiate between an
-alias and a hostname or username that consists solely of uppercase
+alias and a host name or user name that consists solely of uppercase
 letters, digits, and the underscore ('_') character.
 
 =item -V
@@ -156,7 +156,7 @@ Your userid does not appear in the system passwd file.
 =item Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined
 
 Either you are trying to use an undeclare {User,Runas,Host,Cmnd}_Alias
-or you have a user or hostname listed that consists solely of
+or you have a user or host name listed that consists solely of
 uppercase letters, digits, and the underscore ('_') character.  In
 the latter case, you can ignore the warnings (B<sudo> will not
 complain).  In B<-s> (strict) mode these are errors, not warnings.

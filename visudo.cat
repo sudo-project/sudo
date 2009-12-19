@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.7.2                     June 11, 2009                         1
+1.7.3b2                 December 19, 2009                       1
 
 
 
@@ -76,7 +76,7 @@ VISUDO(1m)             MAINTENANCE COMMANDS            VISUDO(1m)
        -s          Enable ssttrriicctt checking of the _s_u_d_o_e_r_s file.  If an alias is
                    used before it is defined, vviissuuddoo will consider this a
                    parse error.  Note that it is not possible to differentiate
-                   between an alias and a hostname or username that consists
+                   between an alias and a host name or user name that consists
                    solely of uppercase letters, digits, and the underscore
                    ('_') character.
 
@@ -108,7 +108,7 @@ DDIIAAGGNNOOSSTTIICCSS
 
        Warning: {User,Runas,Host,Cmnd}_Alias referenced but not defined
            Either you are trying to use an undeclare
-           {User,Runas,Host,Cmnd}_Alias or you have a user or hostname listed
+           {User,Runas,Host,Cmnd}_Alias or you have a user or host name listed
            that consists solely of uppercase letters, digits, and the
            underscore ('_') character.  In the latter case, you can ignore the
            warnings (ssuuddoo will not complain).  In --ss (strict) mode these are
@@ -127,7 +127,7 @@ AAUUTTHHOORR
 
 
 
-1.7.2                     June 11, 2009                         2
+1.7.3b2                 December 19, 2009                       2
 
 
 
@@ -193,6 +193,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.2                     June 11, 2009                         3
+1.7.3b2                 December 19, 2009                       3
 
 

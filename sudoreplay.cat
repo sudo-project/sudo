@@ -61,7 +61,7 @@ OOPPTTIIOONNSS
 
 
 
-1.7.2                    October  6, 2009                       1
+1.7.3b2                 December 19, 2009                       1
 
 
 
@@ -96,9 +96,9 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
                            specified without the _/_d_e_v_/ prefix, e.g.  _t_t_y_0_1
                            instead of _/_d_e_v_/_t_t_y_0_1.
 
-                   user _u_s_e_r_n_a_m_e
+                   user _u_s_e_r _n_a_m_e
                            Evaluates to true if the ID matches a command run
-                           by _u_s_e_r_n_a_m_e.
+                           by _u_s_e_r _n_a_m_e.
 
                    Predicates may be abbreviated to the shortest unique string
                    (currently all predicates may be shortened to a single
@@ -127,7 +127,7 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
 
 
-1.7.2                    October  6, 2009                       2
+1.7.3b2                 December 19, 2009                       2
 
 
 
@@ -193,7 +193,7 @@ SUDOREPLAY(1m)         MAINTENANCE COMMANDS        SUDOREPLAY(1m)
 
 
 
-1.7.2                    October  6, 2009                       3
+1.7.3b2                 December 19, 2009                       3
 
 
 
@@ -259,7 +259,7 @@ SSUUPPPPOORRTT
 
 
 
-1.7.2                    October  6, 2009                       4
+1.7.3b2                 December 19, 2009                       4
 
 
 
@@ -325,6 +325,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.2                    October  6, 2009                       5
+1.7.3b2                 December 19, 2009                       5
 
 

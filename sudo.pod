@@ -31,29 +31,29 @@ B<sudo> B<-h> | B<-K> | B<-k> | B<-L> | B<-V>
 
 B<sudo> B<-v> [B<-AknS>]
 S<[B<-a> I<auth_type>]>
-S<[B<-g> I<groupname>|I<#gid>]> S<[B<-p> I<prompt>]>
+S<[B<-g> I<group name>|I<#gid>]> S<[B<-p> I<prompt>]>
 S<[B<-u> I<username>|I<#uid>]>
 
 B<sudo> B<-l[l]> [B<-AknS>]
 S<[B<-a> I<auth_type>]>
-S<[B<-g> I<groupname>|I<#gid>]> S<[B<-p> I<prompt>]>
-S<[B<-U> I<username>]> S<[B<-u> I<username>|I<#uid>]> [I<command>]
+S<[B<-g> I<group name>|I<#gid>]> S<[B<-p> I<prompt>]>
+S<[B<-U> I<user name>]> S<[B<-u> I<user name>|I<#uid>]> [I<command>]
 
 B<sudo> [B<-AbEHnPS>]
 S<[B<-a> I<auth_type>]>
 S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]>
-S<[B<-g> I<groupname>|I<#gid>]> S<[B<-p> I<prompt>]>
+S<[B<-g> I<group name>|I<#gid>]> S<[B<-p> I<prompt>]>
 S<[B<-r> I<role>]> S<[B<-t> I<type>]>
-S<[B<-u> I<username>|I<#uid>]>
+S<[B<-u> I<user name>|I<#uid>]>
 S<[B<VAR>=I<value>]> S<[B<-i> | B<-s>]> [I<command>]
 
 B<sudoedit> [B<-AnS>]
 S<[B<-a> I<auth_type>]>
 S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]>
-S<[B<-g> I<groupname>|I<#gid>]> S<[B<-p> I<prompt>]>
-S<[B<-u> I<username>|I<#uid>]> file ...
+S<[B<-g> I<group name>|I<#gid>]> S<[B<-p> I<prompt>]>
+S<[B<-u> I<user name>|I<#uid>]> file ...
 
 =head1 DESCRIPTION
 
@@ -298,13 +298,13 @@ escapes are supported:
 
 =item C<%H>
 
-expanded to the local hostname including the domain name
-(on if the machine's hostname is fully qualified or the I<fqdn>
+expanded to the local host name including the domain name
+(on if the machine's host name is fully qualified or the I<fqdn>
 I<sudoers> option is set)
 
 =item C<%h>
 
-expanded to the local hostname without the domain name
+expanded to the local host name without the domain name
 
 =item C<%p>
 

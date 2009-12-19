@@ -140,7 +140,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOREPLAY @mansectsu@"
-.TH SUDOREPLAY @mansectsu@ "October  6, 2009" "1.7.2" "MAINTENANCE COMMANDS"
+.TH SUDOREPLAY @mansectsu@ "December 19, 2009" "1.7.3b2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -222,9 +222,9 @@ date and time formats.
 Evaluates to true if the command was run on the specified terminal
 device.  The \fItty\fR should be specified without the \fI/dev/\fR prefix,
 e.g.  \fItty01\fR instead of \fI/dev/tty01\fR.
-.IP "user \fIusername\fR" 8
-.IX Item "user username"
-Evaluates to true if the \s-1ID\s0 matches a command run by \fIusername\fR.
+.IP "user \fIuser name\fR" 8
+.IX Item "user user name"
+Evaluates to true if the \s-1ID\s0 matches a command run by \fIuser name\fR.
 .RE
 .RS 12
 .Sp

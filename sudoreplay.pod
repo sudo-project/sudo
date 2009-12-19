@@ -119,9 +119,9 @@ Evaluates to true if the command was run on the specified terminal
 device.  The I<tty> should be specified without the F</dev/> prefix,
 e.g.  F<tty01> instead of F</dev/tty01>.
 
-=item user I<username>
+=item user I<user name>
 
-Evaluates to true if the ID matches a command run by I<username>.
+Evaluates to true if the ID matches a command run by I<user name>.
 
 =back
 

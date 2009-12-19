@@ -10,16 +10,18 @@ NNAAMMEE
 SSYYNNOOPPSSIISS
        ssuuddoo --hh | --KK | --kk | --LL | --VV
 
-       ssuuddoo --vv [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--pp _p_r_o_m_p_t]
+       ssuuddoo --vv [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t]
+       [--uu _u_s_e_r_n_a_m_e|_#_u_i_d]
 
-       ssuuddoo --ll[[ll]] [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t]
-       [--UU _u_s_e_r_n_a_m_e] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
+       ssuuddoo --ll[[ll]] [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t]
+       [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
 
-       ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-] [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d]
-       [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e] [--ii | --ss] [_c_o_m_m_a_n_d]
+       ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
+       [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e]
+       [--ii | --ss] [_c_o_m_m_a_n_d]
 
-       ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-] [--gg _g_r_o_u_p_n_a_m_e|_#_g_i_d]
-       [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d] file ...
+       ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
+       [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] file ...
 
 DDEESSCCRRIIPPTTIIOONN
        ssuuddoo allows a permitted user to execute a _c_o_m_m_a_n_d as the superuser or
@@ -56,12 +58,10 @@ DDEESSCCRRIIPPTTIIOONN
        has been invoked.  It also allows the --ee option to remain useful even
        when being run via a sudo-run script or program.  Note however, that
        the sudoers lookup is still done for root, not the user specified by
-       SUDO_USER.
 
 
 
-
-1.7.2                   September 24, 2009                      1
+1.7.3b2                 December 19, 2009                       1
 
 
 
@@ -69,6 +69,8 @@ DDEESSCCRRIIPPTTIIOONN
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       SUDO_USER.
 
        ssuuddoo can log both successful and unsuccessful attempts (as well as
        errors) to _s_y_s_l_o_g(3), a log file, or both.  By default ssuuddoo will log
@@ -122,12 +124,10 @@ OOPPTTIIOONNSS
 
        -E          The --EE (_p_r_e_s_e_r_v_e _e_n_v_i_r_o_n_m_e_n_t) option will override the
                    _e_n_v___r_e_s_e_t option in _s_u_d_o_e_r_s(4)).  It is only available when
-                   either the matching command has the SETENV tag or the
-                   _s_e_t_e_n_v option is set in _s_u_d_o_e_r_s(4).
 
 
 
-1.7.2                   September 24, 2009                      2
+1.7.3b2                 December 19, 2009                       2
 
 
 
@@ -135,6 +135,9 @@ OOPPTTIIOONNSS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+                   either the matching command has the SETENV tag or the
+                   _s_e_t_e_n_v option is set in _s_u_d_o_e_r_s(4).
 
        -e          The --ee (_e_d_i_t) option indicates that, instead of running a
                    command, the user wishes to edit one or more files.  In
@@ -187,13 +190,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    login shell.  This means that login-specific resource files
                    such as .profile or .login will be read by the shell.  If a
                    command is specified, it is passed to the shell for
-                   execution.  Otherwise, an interactive shell is executed.
-                   ssuuddoo attempts to change to that user's home directory
-                   before running the shell.  It also initializes the
 
 
 
-1.7.2                   September 24, 2009                      3
+1.7.3b2                 December 19, 2009                       3
 
 
 
@@ -202,6 +202,9 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+                   execution.  Otherwise, an interactive shell is executed.
+                   ssuuddoo attempts to change to that user's home directory
+                   before running the shell.  It also initializes the
                    environment, leaving _D_I_S_P_L_A_Y and _T_E_R_M unchanged, setting
                    _H_O_M_E, _S_H_E_L_L, _U_S_E_R, _L_O_G_N_A_M_E, and _P_A_T_H, as well as the
                    contents of _/_e_t_c_/_e_n_v_i_r_o_n_m_e_n_t on Linux and AIX systems.  All
@@ -225,10 +228,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    prompt for a password (if one is required by _s_u_d_o_e_r_s) and
                    will not update the user's timestamp file.
 
-       -L          The --LL (_l_i_s_t defaults) option will list out the parameters
-                   that may be set in a _D_e_f_a_u_l_t_s line along with a short
-                   description for each.  This option is useful in conjunction
-                   with _g_r_e_p(1).
+       -L          The --LL (_l_i_s_t defaults) option will list the parameters that
+                   may be set in a _D_e_f_a_u_l_t_s line along with a short
+                   description for each.  This option will be removed from a
+                   future version of ssuuddoo.
 
        -l[l] [_c_o_m_m_a_n_d]
                    If no _c_o_m_m_a_n_d is specified, the --ll (_l_i_s_t) option will list
@@ -253,13 +256,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    of groups the target user is in.  The real and effective
                    group IDs, however, are still set to match the target user.
 
-       -p _p_r_o_m_p_t   The --pp (_p_r_o_m_p_t) option allows you to override the default
-                   password prompt and use a custom one.  The following
-                   percent (`%') escapes are supported:
 
 
 
-1.7.2                   September 24, 2009                      4
+1.7.3b2                 December 19, 2009                       4
 
 
 
@@ -268,11 +268,15 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
-                   %H  expanded to the local hostname including the domain
-                       name (on if the machine's hostname is fully qualified
+       -p _p_r_o_m_p_t   The --pp (_p_r_o_m_p_t) option allows you to override the default
+                   password prompt and use a custom one.  The following
+                   percent (`%') escapes are supported:
+
+                   %H  expanded to the local host name including the domain
+                       name (on if the machine's host name is fully qualified
                        or the _f_q_d_n _s_u_d_o_e_r_s option is set)
 
-                   %h  expanded to the local hostname without the domain name
+                   %h  expanded to the local host name without the domain name
 
                    %p  expanded to the user whose password is being asked for
                        (respects the _r_o_o_t_p_w, _t_a_r_g_e_t_p_w and _r_u_n_a_s_p_w flags in
@@ -318,14 +322,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    number and exit.  If the invoking user is already root the
                    --VV option will print out a list of the defaults ssuuddoo was
                    compiled with as well as the machine's local network
-                   addresses.
-
-       -v          If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update the
-                   user's timestamp, prompting for the user's password if
 
 
 
-1.7.2                   September 24, 2009                      5
+1.7.3b2                 December 19, 2009                       5
 
 
 
@@ -334,6 +334,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+                   addresses.
+
+       -v          If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update the
+                   user's timestamp, prompting for the user's password if
                    necessary.  This extends the ssuuddoo timeout for another 5
                    minutes (or whatever the timeout is set to in _s_u_d_o_e_r_s) but
                    does not run a command.
@@ -384,14 +388,10 @@ SSEECCUURRIITTYY NNOOTTEESS
        default _e_n_v___r_e_s_e_t behavior is encouraged.
 
        In all cases, environment variables with a value beginning with () are
-       removed as they could be interpreted as bbaasshh functions.  The list of
-       environment variables that ssuuddoo allows or denies is contained in the
-       output of sudo -V when run as root.
 
 
 
-
-1.7.2                   September 24, 2009                      6
+1.7.3b2                 December 19, 2009                       6
 
 
 
@@ -399,6 +399,10 @@ SSEECCUURRIITTYY NNOOTTEESS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+       removed as they could be interpreted as bbaasshh functions.  The list of
+       environment variables that ssuuddoo allows or denies is contained in the
+       output of sudo -V when run as root.
 
        Note that the dynamic linker on most operating systems will remove
        variables that can control dynamic linking from the environment of
@@ -450,14 +454,10 @@ EENNVVIIRROONNMMEENNTT
        ssuuddoo utilizes the following environment variables:
 
        EDITOR          Default editor to use in --ee (sudoedit) mode if neither
-                       SUDO_EDITOR nor VISUAL is set
-
-       HOME            In --ss or --HH mode (or if sudo was configured with the
-                       --enable-shell-sets-home option), set to homedir of the
 
 
 
-1.7.2                   September 24, 2009                      7
+1.7.3b2                 December 19, 2009                       7
 
 
 
@@ -466,6 +466,10 @@ EENNVVIIRROONNMMEENNTT
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+                       SUDO_EDITOR nor VISUAL is set
+
+       HOME            In --ss or --HH mode (or if sudo was configured with the
+                       --enable-shell-sets-home option), set to homedir of the
                        target user
 
        PATH            Set to a sane value if the _s_e_c_u_r_e___p_a_t_h sudoers option
@@ -516,14 +520,10 @@ EEXXAAMMPPLLEESS
        To list the home directory of user yaz on a machine where the file
        system holding ~yaz is not exported as root:
 
-        $ sudo -u yaz ls ~yaz
-
-       To edit the _i_n_d_e_x_._h_t_m_l file as user www:
 
 
 
-
-1.7.2                   September 24, 2009                      8
+1.7.3b2                 December 19, 2009                       8
 
 
 
@@ -531,6 +531,10 @@ EEXXAAMMPPLLEESS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+        $ sudo -u yaz ls ~yaz
+
+       To edit the _i_n_d_e_x_._h_t_m_l file as user www:
 
         $ sudo -u www vi ~www/htdocs/index.html
 
@@ -582,14 +586,10 @@ CCAAVVEEAATTSS
 
        If users have sudo ALL there is nothing to prevent them from creating
        their own program that gives them a root shell regardless of any '!'
-       elements in the user specification.
-
-       Running shell scripts via ssuuddoo can expose the same kernel bugs that
-       make setuid shell scripts unsafe on some operating systems (if your OS
 
 
 
-1.7.2                   September 24, 2009                      9
+1.7.3b2                 December 19, 2009                       9
 
 
 
@@ -598,6 +598,10 @@ CCAAVVEEAATTSS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       elements in the user specification.
+
+       Running shell scripts via ssuuddoo can expose the same kernel bugs that
+       make setuid shell scripts unsafe on some operating systems (if your OS
        has a /dev/fd/ directory, setuid shell scripts are generally safe).
 
 BBUUGGSS
@@ -651,10 +655,6 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-
-
-
-
-1.7.2                   September 24, 2009                     10
+1.7.3b2                 December 19, 2009                      10
 
 
