@@ -93,17 +93,18 @@ check_user(validated, mode)
     char *prompt;
     int status;
 
-    if (mode & MODE_INVALIDATE) {
-	/* do not check or update timestamp */
-	status = TS_ERROR;
+    /* Always prompt for a password when -k was specified with the command. */
+    if (ISSET(mode, MODE_INVALIDATE)) {
+	SET(validated, FLAG_CHECK_USER);
     } else {
 	if (user_uid == 0 || user_uid == runas_pw->pw_uid || user_is_exempt())
 	    return;
-
-	build_timestamp(&timestampdir, &timestampfile);
-	status = timestamp_status(timestampdir, timestampfile, user_name,
-	TS_MAKE_DIRS);
     }
+
+    build_timestamp(&timestampdir, &timestampfile);
+    status = timestamp_status(timestampdir, timestampfile, user_name,
+	TS_MAKE_DIRS);
+
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
 	/* Bail out if we are non-interactive and a password is required */
 	if (ISSET(mode, MODE_NONINTERACTIVE))
@@ -136,7 +137,7 @@ check_user(validated, mode)
 	verify_user(auth_pw, prompt);
     }
     /* Only update timestamp if user was validated. */
-    if (status != TS_ERROR && ISSET(validated, VALIDATE_OK))
+    if (ISSET(validated, VALIDATE_OK) && !ISSET(mode, MODE_INVALIDATE) && status != TS_ERROR)
 	update_timestamp(timestampdir, timestampfile);
     efree(timestampdir);
     efree(timestampfile);
@@ -495,6 +496,8 @@ timestamp_status(timestampdir, timestampfile, user, flags)
     if (timestampfile && status != TS_ERROR) {
 	if (status != TS_MISSING)
 	    status = TS_NOFILE;			/* dir there, file missing */
+	if (!user_ttypath)
+	    goto done;				/* no tty, always prompt */
 	if (lstat(timestampfile, &sb) == 0) {
 	    if (!S_ISREG(sb.st_mode)) {
 		status = TS_ERROR;
@@ -562,6 +565,7 @@ timestamp_status(timestampdir, timestampfile, user, flags)
 	}
     }
 
+done:
     if (timestamp_uid != 0)
 	set_perms(PERM_ROOT);
     return(status);
