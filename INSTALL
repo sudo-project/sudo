@@ -180,22 +180,22 @@ Special features/options:
 	containing the LDAP include and lib directories.  Please see
 	README.LDAP for more information.
 
-  --with-ldap-conf-file=filename
+  --with-ldap-conf-file=PATH
 	Path to LDAP configuration file.  If specified, sudo reads
 	this file instead of /etc/ldap.conf to locate the LDAP server.
 
-  --with-ldap-secret-file=filename
+  --with-ldap-secret-file=PATH
 	Path to LDAP secret password file.  If specified, sudo uses
 	this file instead of /etc/ldap.secret to read the secret password
 	when rootbinddn is specified in the ldap config file.
 
-  --with-nsswitch[=filename]
+  --with-nsswitch[=PATH]
 	Path to nsswitch.conf or "no" to disable nsswitch support.
 	If specified, sudo uses this file instead of /etc/nsswitch.conf.
 	If nsswitch is disabled but LDAP is enabled, sudo will check
 	LDAP first, then the sudoers file.
 
-  --with-netsvc[=filename]
+  --with-netsvc[=PATH]
         Path to netsvc.conf or "no" to disable netsvc.conf support.
         If specified, sudo uses this file instead of /etc/netsvc.conf
         on AIX systems.
@@ -258,7 +258,7 @@ Special features/options:
 	another program (think shell escapes).  Please see the
 	"PREVENTING SHELL ESCAPES" section in the sudoers man page
 	for details.  If specified, PATH should be a fully qualified
-	pathname, e.g. /usr/local/libexec/sudo_noexec.so.  If PATH
+	path name, e.g. /usr/local/libexec/sudo_noexec.so.  If PATH
 	is "no", noexec support will not be compiled in.  The default
 	is to compile noexec support if libtool supports building
 	shared objects on your OS.
@@ -529,7 +529,7 @@ The following options are also configurable at runtime:
 
   --with-editor=PATH
 	Specify the default editor path for use by visudo.  This may be a
-	single pathname or a colon-separated list of editors.  In the latter
+	single path name or a colon-separated list of editors.  In the latter
 	case, visudo will choose the editor that matches the user's VISUAL
 	or EDITOR environment variables or the first editor in the list that
 	exists.  The default is the path to vi on your system.

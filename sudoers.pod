@@ -195,9 +195,9 @@ wildcards to be useful.
  Cmnd_List ::= Cmnd |
 	       Cmnd ',' Cmnd_List
 
- commandname ::= filename |
-	         filename args |
-	         filename '""'
+ commandname ::= file name |
+	         file name args |
+	         file name '""'
 
  Cmnd ::= '!'* commandname |
 	  '!'* directory |
@@ -205,9 +205,9 @@ wildcards to be useful.
 	  '!'* Cmnd_Alias
 
 A C<Cmnd_List> is a list of one or more commandnames, directories, and other
-aliases.  A commandname is a fully qualified filename which may include
+aliases.  A commandname is a fully qualified file name which may include
 shell-style wildcards (see the L<Wildcards> section below).  A simple
-filename allows the user to run the command with any arguments he/she
+file name allows the user to run the command with any arguments he/she
 wishes.  However, you may also specify command line arguments (including
 wildcards).  Alternately, you can specify C<""> to indicate that the command
 may only be run B<without> command line arguments.  A directory is a
@@ -448,7 +448,7 @@ escaped.  For example:
 
     /bin/ls [[\:alpha\:]]*
 
-Would match any filename beginning with a letter.
+Would match any file name beginning with a letter.
 
 Note that a forward slash ('/') will B<not> be matched by
 wildcards used in the pathname.  When matching the command
@@ -499,7 +499,7 @@ F</etc/sudoers> will be processed.  Files that are included may
 themselves include other files.  A hard limit of 128 nested include
 files is enforced to prevent include file loops.
 
-The filename may include the C<%h> escape, signifying the short form
+The file name may include the C<%h> escape, signifying the short form
 of the hostname.  I.e., if the machine's hostname is "xerxes", then
 
 C<#include /etc/sudoers.%h>

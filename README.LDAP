@@ -151,8 +151,8 @@ Configure your /etc/ldap.conf and /etc/nsswitch.conf
 ====================================================
 The /etc/ldap.conf file is meant to be shared between sudo, pam_ldap, nss_ldap
 and other ldap applications and modules.  IBM Secureway unfortunately uses
-the same filename but has a different syntax.  If you need to rename where
-this file is stored, re-run configure with the --with-ldap-conf-file=filename
+the same file name but has a different syntax.  If you need to change where
+this file is stored, re-run configure with the --with-ldap-conf-file=PATH
 option.
 
 See the "Configuring ldap.conf" section in the sudoers.ldap manual
