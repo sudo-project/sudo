@@ -103,6 +103,7 @@ struct script_buf {
 };
 
 static int script_fds[6];
+static int ttyout;
 
 static sig_atomic_t alive = 1;
 static sig_atomic_t recvsig = 0;
@@ -361,7 +362,7 @@ check_foreground()
 {
     foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
     if (foreground && !tty_initialized) {
-	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], 0)) {
+	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], ttyout)) {
 	    tty_initialized = 1;
 	    sync_winsize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
 	}
@@ -396,7 +397,7 @@ suspend_parent(signo, output, then, now, ofile, tfile)
 	if (foreground) {
 	    if (ttymode != TERM_RAW) {
 		do {
-		    n = term_raw(script_fds[SFD_USERTTY], 1, 0);
+		    n = term_raw(script_fds[SFD_USERTTY], !ttyout, 0);
 		} while (!n && errno == EINTR);
 		ttymode = TERM_RAW;
 	    }
@@ -440,7 +441,7 @@ suspend_parent(signo, output, then, now, ofile, tfile)
 	    if (foreground) {
 		/* Set raw/cbreak mode. */
 		do {
-		    n = term_raw(script_fds[SFD_USERTTY], 1,
+		    n = term_raw(script_fds[SFD_USERTTY], !ttyout,
 			ttymode == TERM_CBREAK);
 		} while (!n && errno == EINTR);
 	    } else {
@@ -538,6 +539,9 @@ script_execv(path, argv)
     sigaction(SIGTTOU, &sa, NULL);
 #endif
 
+    /* If stdout is not a tty we handle post-processing differently. */
+    ttyout = isatty(STDOUT_FILENO);
+
     /*
      * We communicate with the child over a bi-directional pipe.
      * Parent sends signal info to child and child sends back wait status.
@@ -547,15 +551,16 @@ script_execv(path, argv)
 
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
-	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], 0)) {
+	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], ttyout)) {
 	    tty_initialized = 1;
 	    sync_winsize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
 	}
 
 	/* Start out in raw mode is stdout is a tty. */
-	ttymode = isatty(STDOUT_FILENO) ? TERM_RAW : TERM_CBREAK;
+	ttymode = ttyout ? TERM_RAW : TERM_CBREAK;
 	do {
-	    n = term_raw(script_fds[SFD_USERTTY], 1, ttymode == TERM_CBREAK);
+	    n = term_raw(script_fds[SFD_USERTTY], !ttyout,
+		ttymode == TERM_CBREAK);
 	} while (!n && errno == EINTR);
 	if (!n)
 	    log_error(USE_ERRNO, "Can't set terminal to raw mode");
@@ -875,7 +880,7 @@ script_child(path, argv, backchannel, rbac_enabled)
 	close(n);
 #endif
 
-    if (foreground && !isatty(STDOUT_FILENO))
+    if (foreground && !ttyout)
 	foreground = 0;
 
     /* Start command and wait for it to stop or exit */

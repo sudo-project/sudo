@@ -144,9 +144,9 @@ term_noecho(fd)
 #if defined(HAVE_TERMIOS_H) || defined(HAVE_TERMIO_H)
 
 int
-term_raw(fd, onlcr, isig)
+term_raw(fd, opost, isig)
     int fd;
-    int onlcr;
+    int opost;
     int isig;
 {
     struct termios term;
@@ -156,10 +156,8 @@ term_raw(fd, onlcr, isig)
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to raw mode */
     term.c_iflag &= ~(ICRNL|IGNCR|INLCR|IUCLC|IXON);
-    /* Retain NL to NLCR conversion if onlcr flag set. */
-    if (onlcr && ISSET(term.c_oflag, ONLCR|OPOST))
-	term.c_oflag = ONLCR|OPOST;
-    else
+    /* Only retain output post-processing opost flag set. */
+    if (!opost)
 	term.c_oflag &= ~OPOST;
     term.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
     if (isig)
@@ -198,18 +196,18 @@ term_cbreak(fd)
 }
 
 int
-term_copy(src, dst, onlcr)
+term_copy(src, dst, opost)
     int src;
     int dst;
-    int onlcr;
+    int opost;
 {
     struct termios tt;
 
     if (tcgetattr(src, &tt) != 0)
 	return(0);
-    /* Do not convert line endings from NL to NLCR. */
-    if (!onlcr)
-	CLR(tt.c_oflag, ONLCR);
+    /* Do not do post-processing unless opost set. */
+    if (!opost)
+	CLR(tt.c_oflag, OPOST);
     /* XXX - add TCSANOW compat define */
     if (tcsetattr(dst, TCSANOW|TCSASOFT, &tt) != 0)
 	return(0);
