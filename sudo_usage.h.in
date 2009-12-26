@@ -26,9 +26,9 @@
  * need to be able to substitute values from configure.
  */
 #define SUDO_USAGE1 " -h | -K | -k | -L | -V"
-#define SUDO_USAGE2 " -v [-AknS] @BSDAUTH_USAGE@[-g groupname|#gid] [-p prompt] [-u username|#uid]"
-#define SUDO_USAGE3 " -l[l] [-AknS] @BSDAUTH_USAGE@[-g groupname|#gid] [-p prompt] [-U username] [-u username|#uid] [-g groupname|#gid] [command]"
-#define SUDO_USAGE4 " [-AbEHknPS] @BSDAUTH_USAGE@@SELINUX_USAGE@[-C fd] @LOGINCAP_USAGE@[-g groupname|#gid] [-p prompt] [-u username|#uid] [-g groupname|#gid] [VAR=value] [-i|-s] [<command>]"
-#define SUDO_USAGE5 " -e [-AknS] @BSDAUTH_USAGE@@SELINUX_USAGE@[-C fd] @LOGINCAP_USAGE@[-g groupname|#gid] [-p prompt] [-u username|#uid] file ..."
+#define SUDO_USAGE2 " -v [-AknS] @BSDAUTH_USAGE@[-g groupname|#gid] [-p prompt] [-u user name|#uid]"
+#define SUDO_USAGE3 " -l[l] [-AknS] @BSDAUTH_USAGE@[-g groupname|#gid] [-p prompt] [-U user name] [-u user name|#uid] [-g groupname|#gid] [command]"
+#define SUDO_USAGE4 " [-AbEHknPS] @BSDAUTH_USAGE@@SELINUX_USAGE@[-C fd] @LOGINCAP_USAGE@[-g groupname|#gid] [-p prompt] [-u user name|#uid] [-g groupname|#gid] [VAR=value] [-i|-s] [<command>]"
+#define SUDO_USAGE5 " -e [-AknS] @BSDAUTH_USAGE@@SELINUX_USAGE@[-C fd] @LOGINCAP_USAGE@[-g groupname|#gid] [-p prompt] [-u user name|#uid] file ..."
 
 #endif /* _SUDO_USAGE_H */
