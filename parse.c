@@ -560,6 +560,8 @@ display_bound_defaults(dtype, lbuf)
 	nfound++;
 	if (binding != tq_first(&d->binding)) {
 	    binding = tq_first(&d->binding);
+	    if (nfound != 1)
+		lbuf_append(lbuf, "\n", NULL);
 	    lbuf_append(lbuf, "    Defaults", dsep, NULL);
 	    for (m = binding; m != NULL; m = m->next) {
 		if (m != binding)

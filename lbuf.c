@@ -245,10 +245,14 @@ lbuf_print(lbuf)
     cp = lbuf->buf;
     have = cols;
     while (cp != NULL && *cp != '\0') {
-	char *ep = NULL;
+	char *ep;
 	int need = lbuf->len - (int)(cp - lbuf->buf);
 
-	if (need > have) {
+	ep = memrchr(cp, '\n', need > have ? have : need);
+	if (ep) {
+	    need = ep - cp;
+	    ep++;			/* skip over newline */
+	} else if (need > have) {
 	    have -= contlen;		/* subtract for continuation char */
 	    if ((ep = memrchr(cp, ' ', have)) == NULL)
 		ep = memchr(cp + have, ' ', need - have);
