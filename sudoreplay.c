@@ -154,7 +154,7 @@ static int stack_top;
 
 extern time_t get_date __P((char *));
 extern char *get_timestr __P((time_t, int));
-extern int term_cbreak __P((int));
+extern int term_raw __P((int, int, int));
 extern int term_restore __P((int, int));
 extern void zero_bytes __P((volatile void *, size_t));
 void cleanup __P((int));
@@ -179,7 +179,7 @@ main(argc, argv)
     int argc;
     char **argv;
 {
-    int ch, plen, ttyfd, interactive = 0, listonly = 0;
+    int ch, plen, nready, interactive = 0, listonly = 0;
     const char *id, *user = NULL, *pattern = NULL, *tty = NULL;
     char path[PATH_MAX], buf[LINE_MAX], *cp, *ep;
     FILE *lfile;
@@ -188,6 +188,7 @@ main(argc, argv)
 #else
     FILE *tfile, *sfile;
 #endif
+    fd_set *fdsr;
     sigaction_t sa;
     unsigned long nbytes;
     size_t len, nread;
@@ -282,7 +283,6 @@ main(argc, argv)
     free(cp);
     fclose(lfile);
 
-    /* Set stdout to cbreak mode if it is a tty */
     fflush(stdout);
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
@@ -297,11 +297,17 @@ main(argc, argv)
     (void) sigaction(SIGTSTP, &sa, NULL);
     (void) sigaction(SIGQUIT, &sa, NULL);
 
-    ttyfd = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
-    if (ttyfd != -1) {
-	term_cbreak(ttyfd);
-	interactive = isatty(STDOUT_FILENO);
+    /* Set stdin to raw mode if it is a tty */
+    interactive = isatty(STDIN_FILENO);
+    if (interactive) {
+	ch = fcntl(STDIN_FILENO, F_GETFL, 0);
+	if (ch != -1)
+	    (void) fcntl(STDIN_FILENO, F_SETFL, ch | O_NONBLOCK);
+	if (!term_raw(STDIN_FILENO, 0, 1))
+	    error(1, "cannot set tty to raw mode");
     }
+    fdsr = (fd_set *)emalloc2(howmany(STDOUT_FILENO + 1, NFDBITS),
+	sizeof(fd_mask));
 
     /*
      * Timing file consists of line of the format: "%f %d\n"
@@ -323,7 +329,7 @@ main(argc, argv)
 	    error(1, "invalid timing file byte count: %s", cp);
 
 	if (interactive)
-	    check_input(ttyfd, &speed);
+	    check_input(STDIN_FILENO, &speed);
 
 	/* Adjust delay using speed factor and clamp to max_wait */
 	to_wait = seconds / speed;
@@ -345,8 +351,19 @@ main(argc, argv)
 	    do {
 		/* no stdio, must be unbuffered */
 		nwritten = write(STDOUT_FILENO, buf, nread);
-		if (nwritten == -1)
+		if (nwritten == -1) {
+		    if (errno == EINTR)
+			continue;
+		    if (errno == EAGAIN) {
+			FD_SET(STDOUT_FILENO, fdsr);
+			do {
+			    nready = select(STDOUT_FILENO + 1, fdsr, NULL, NULL, NULL);
+			} while (nready == -1 && errno == EINTR);
+			if (nready == 1)
+			    continue;
+		    }
 		    error(1, "writing to standard output");
+		}
 		nread -= nwritten;
 	    } while (nread);
 	}
@@ -752,44 +769,39 @@ check_input(ttyfd, speed)
     double *speed;
 {
     fd_set *fdsr;
-    int flags, nready;
+    int nready, paused = 0;
     struct timeval tv;
     char ch;
     ssize_t n;
 
     fdsr = (fd_set *)emalloc2(howmany(ttyfd + 1, NFDBITS), sizeof(fd_mask));
-    FD_SET(ttyfd, fdsr);
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
 
-    nready = select(ttyfd + 1, fdsr, NULL, NULL, &tv);
-    if (nready == 1) {
-	flags = fcntl(ttyfd, F_GETFL, 0);
-	if (flags != -1)
-	    (void) fcntl(ttyfd, F_SETFL, flags | O_NONBLOCK);
-	do {
-	    n = read(ttyfd, &ch, 1);
-	    if (n == 1) {
-		switch (ch) {
-		case ' ':
-		    /* wait for another character */
-		    if (flags != -1)
-			(void) fcntl(ttyfd, F_SETFL, flags);
-		    n = read(ttyfd, &ch, 1);
-		    if (flags != -1)
-			(void) fcntl(ttyfd, F_SETFL, flags | O_NONBLOCK);
-		    break;
-		case '<':
-		    *speed /= 2;
-		    break;
-		case '>':
-		    *speed *= 2;
-		    break;
-		}
+    for (;;) {
+	FD_SET(ttyfd, fdsr);
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
+
+	nready = select(ttyfd + 1, fdsr, NULL, NULL, paused ? NULL : &tv);
+	if (nready != 1)
+	    break;
+	n = read(ttyfd, &ch, 1);
+	if (n == 1) {
+	    if (paused) {
+		paused = 0;
+		continue;
 	    }
-	} while (n == 1);
-	if (flags != -1)
-	    (void) fcntl(ttyfd, F_SETFL, flags);
+	    switch (ch) {
+	    case ' ':
+		paused = 1;
+		break;
+	    case '<':
+		*speed /= 2;
+		break;
+	    case '>':
+		*speed *= 2;
+		break;
+	    }
+	}
     }
     free(fdsr);
 }
