@@ -155,15 +155,15 @@ term_raw(fd, opost, isig)
 	return(0);
     (void) memcpy(&term, &oterm, sizeof(term));
     /* Set terminal to raw mode */
-    term.c_iflag &= ~(ICRNL|IGNCR|INLCR|IUCLC|IXON);
-    /* Only retain output post-processing opost flag set. */
-    if (!opost)
-	term.c_oflag &= ~OPOST;
-    term.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
-    if (isig)
-	term.c_lflag |= ISIG;
     term.c_cc[VMIN] = 1;
     term.c_cc[VTIME] = 0;
+    CLR(term.c_lflag, ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+    if (isig)
+	SET(term.c_lflag, ISIG);
+    CLR(term.c_iflag, ICRNL | IGNCR | INLCR | IUCLC | IXON);
+    /* Only retain output post-processing opost flag set. */
+    if (!opost)
+	CLR(term.c_oflag, OPOST);
     if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
     	return(1);
