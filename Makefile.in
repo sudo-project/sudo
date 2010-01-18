@@ -447,8 +447,10 @@ sudoers.cat: sudoers.man
 @DEV@LICENSE: license.pod
 @DEV@	pod2text -l -i0 $> | sed '1,2d' > $@
 
+# The 1.7 branch started Jan 18, 2010
 ChangeLog:
-	hg log --style=changelog -b default > ChangeLog
+	hg log --style=changelog -b 1.7 > $@
+	hg log --style=changelog -b default --date '<2010-01-18 00:00:00' >> $@
 
 install: install-dirs install-binaries @INSTALL_NOEXEC@ install-sudoers install-man
 
