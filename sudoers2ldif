@@ -5,8 +5,6 @@ use strict;
 # Converts a sudoers file to LDIF format in prepration for loading into
 # the LDAP server.
 #
-# $Sudo$
-#
 
 # BUGS:
 #   Does not yet handle multiple lines with : in them

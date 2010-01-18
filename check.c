@@ -58,10 +58,6 @@
 
 #include "sudo.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /* Status codes for timestamp_status() */
 #define TS_CURRENT		0
 #define TS_OLD			1

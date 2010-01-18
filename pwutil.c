@@ -52,10 +52,6 @@
 #include "sudo.h"
 #include "redblack.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /*
  * The passwd and group caches.
  */

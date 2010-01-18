@@ -44,10 +44,6 @@
 #include "sudo.h"
 #include "mon_systrace.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /*
  * Open the systrace device and return the fd or -1 on failure.
  */

@@ -49,10 +49,6 @@
 #include "sudo.h"
 #include "sudo_auth.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 static int sudo_collect	__P((int, int, uchar_t *, int, prompt_t *));
 
 static char *def_prompt;

@@ -70,11 +70,6 @@
 # include "emul/fnmatch.h"
 #endif /* HAVE_FNMATCH */
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
-
 /*
  * Globals
  */

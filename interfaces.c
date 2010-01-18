@@ -84,10 +84,6 @@ struct rtentry;
 #include "sudo.h"
 #include "interfaces.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /* Minix apparently lacks IFF_LOOPBACK */
 #ifndef IFF_LOOPBACK
 # define IFF_LOOPBACK	0

@@ -72,10 +72,6 @@
 # define PAM_CONST
 #endif
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 static int sudo_conv __P((int, PAM_CONST struct pam_message **,
 			  struct pam_response **, void *));
 static char *def_prompt = "Password:";

@@ -31,10 +31,6 @@
 
 #include "compat.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 int
 nanosleep(ts, rts)
     const struct timespec *ts;

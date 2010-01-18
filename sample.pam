@@ -6,8 +6,6 @@
 #   There are two basic ways to configure PAM, either via pam_stack
 #   or by explicitly specifying the various methods to use.
 #
-# $Sudo$
-#
 # Here we use pam_stack
 auth       required	pam_stack.so service=system-auth
 account    required	pam_stack.so service=system-auth

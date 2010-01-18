@@ -93,10 +93,6 @@
 # include "nonunix.h"
 #endif /* USING_NONUNIX_GROUPS */
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 static struct member_list empty;
 
 static int command_matches_dir __P((char *, size_t));

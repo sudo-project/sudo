@@ -23,10 +23,6 @@
 
 #include <compat.h>
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 int
 sigaction(signo, sa, osa)
     int signo;

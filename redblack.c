@@ -57,10 +57,6 @@
 #include "sudo.h"
 #include "redblack.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 static void rbrepair		__P((struct rbtree *, struct rbnode *));
 static void rotate_left		__P((struct rbtree *, struct rbnode *));
 static void rotate_right	__P((struct rbtree *, struct rbnode *));

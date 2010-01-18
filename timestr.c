@@ -30,10 +30,6 @@
 
 #include "compat.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 char *get_timestr	__P((time_t, int));
 
 /*

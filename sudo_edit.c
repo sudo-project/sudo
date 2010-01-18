@@ -55,10 +55,6 @@
 
 #include "sudo.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 extern sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
 extern char **environ;
 

@@ -70,10 +70,6 @@
 
 #include "sudo.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /*
  * Exported for auth/secureware.c
  */

@@ -32,10 +32,6 @@
 
 #include <compat.h>
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 #ifdef HAVE_GETUSERATTR
 
 #ifndef RLIM_SAVED_MAX

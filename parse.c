@@ -48,10 +48,6 @@
 #include "lbuf.h"
 #include <gram.h>
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /* Characters that must be quoted in sudoers */
 #define SUDOERS_QUOTED	":\\,=#\""
 

@@ -56,10 +56,6 @@
 
 #include "sudo.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 static volatile sig_atomic_t signo;
 
 static void handler __P((int));

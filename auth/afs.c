@@ -50,10 +50,6 @@
 #include <afs/stds.h>
 #include <afs/kautils.h>
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 int
 afs_verify(pw, pass, auth)
     struct passwd *pw;

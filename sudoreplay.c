@@ -88,10 +88,6 @@
 #include "error.h"
 #include "missing.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /* For getopt(3) */
 extern char *optarg;
 extern int optind;

@@ -46,10 +46,6 @@
 #include "sudo.h"
 #include "sudo_auth.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 #define DESLEN			13
 #define HAS_AGEINFO(p, l)	(l == 18 && p[DESLEN] == ',')
 

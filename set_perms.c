@@ -51,10 +51,6 @@
 
 #include "sudo.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 #ifdef __TANDEM
 # define ROOT_UID	65535
 #else

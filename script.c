@@ -74,10 +74,6 @@
 
 #include "sudo.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 #define SFD_MASTER	0
 #define SFD_SLAVE	1
 #define SFD_LOG		2

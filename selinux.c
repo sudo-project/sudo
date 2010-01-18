@@ -48,10 +48,6 @@
 #include "sudo.h"
 #include "pathnames.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 static security_context_t old_context;
 static security_context_t new_context;
 static security_context_t tty_context;

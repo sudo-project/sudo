@@ -29,10 +29,6 @@
 
 #include "compat.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 int
 main (int argc, char **argv)
 {

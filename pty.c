@@ -56,10 +56,6 @@
 
 #include "sudo.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 #if defined(HAVE_OPENPTY)
 int
 get_pty(master, slave, name, namesz)
