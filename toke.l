@@ -865,7 +865,7 @@ _push_include(path, isdir)
 	}
 	istacksize += SUDOERS_STACK_INCREMENT;
 	istack = (struct include_stack *) realloc(istack,
-	    sizeof(istack) * istacksize);
+	    sizeof(*istack) * istacksize);
 	if (istack == NULL) {
 	    yyerror("unable to allocate memory");
 	    return(FALSE);
