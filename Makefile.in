@@ -448,7 +448,7 @@ sudoers.cat: sudoers.man
 @DEV@	pod2text -l -i0 $> | sed '1,2d' > $@
 
 ChangeLog:
-	hg log --style=changelog -b default > ChangeLog
+	hg log --style=changelog -b default > $@
 
 install: install-dirs install-binaries @INSTALL_NOEXEC@ install-sudoers install-man
 
@@ -505,13 +505,13 @@ realclean: distclean
 
 cleandir: realclean
 
-dist:
+dist: ChangeLog
 	pax -w -x ustar -s '/^/sudo-$(VERSION)\//' -f ../sudo-$(VERSION).tar \
 		$(DISTFILES)
 	gzip -9f ../sudo-$(VERSION).tar
 	ls -l ../sudo-$(VERSION).tar.gz
 
-bindist:
+bindist: ChangeLog
 	( \
 	  ARCH=`uname -m|sed 's:/:_:g'`+`uname -sr|sed 's/ /_/g'` ; \
 	  mkdir tmp.$$ARCH ; \
