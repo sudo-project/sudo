@@ -840,7 +840,7 @@ init_lexer()
 	    efree(pl);
 	}
 	efree(istack[idepth].path);
-	if (!istack[idepth].keepopen)
+	if (idepth && !istack[idepth].keepopen)
 	    fclose(istack[idepth].bs->yy_input_file);
 	yy_delete_buffer(istack[idepth].bs);
     }
