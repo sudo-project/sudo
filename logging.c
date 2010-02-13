@@ -390,7 +390,8 @@ log_error(flags, fmt, va_alist)
 	else
 	    warningx("%s", message);
     }
-    efree(message);
+    if (logline != message)
+        efree(message);
 
     /*
      * Send a copy of the error via mail.
@@ -406,8 +407,7 @@ log_error(flags, fmt, va_alist)
     if (def_logfile)
 	do_logfile(logline);
 
-    if (logline != message)
-	efree(logline);
+    efree(logline);
 
     if (!ISSET(flags, NO_EXIT)) {
 	cleanup(0);
