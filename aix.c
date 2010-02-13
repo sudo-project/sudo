@@ -34,8 +34,15 @@
 
 #ifdef HAVE_GETUSERATTR
 
+#ifndef HAVE_SETRLIMIT64
+# define setrlimit64(a, b) setrlimit(a, b)
+# define rlimit64 rlimit
+# define rlim64_t rlim_t
+# define RLIM64_INFINITY RLIM_INFINITY
+#endif /* HAVE_SETRLIMIT64 */
+
 #ifndef RLIM_SAVED_MAX
-# define RLIM_SAVED_MAX	RLIM_INFINITY
+# define RLIM_SAVED_MAX	RLIM64_INFINITY
 #endif
 
 struct aix_limit {
@@ -59,10 +66,15 @@ static int
 aix_getlimit(user, lim, valp)
     char *user;
     char *lim;
-    int *valp;
+    rlim64_t *valp;
 {
-    if (getuserattr(user, lim, valp, SEC_INT) != 0)
-	return getuserattr("default", lim, valp, SEC_INT);
+    int val;
+
+    if (getuserattr(user, lim, &val, SEC_INT) != 0 &&
+	getuserattr("default", lim, &val, SEC_INT) != 0) {
+	return(-1);
+    }
+    *valp = val;
     return(0);
 }
 
@@ -70,28 +82,29 @@ void
 aix_setlimits(user)
     char *user;
 {
-    struct rlimit rlim;
-    int i, n;
+    struct rlimit64 rlim;
+    rlim64_t val;
+    int n;
 
     /*
      * For each resource limit, get the soft/hard values for the user
-     * and set those values via setrlimit().  Must be run as euid 0.
+     * and set those values via setrlimit64().  Must be run as euid 0.
      */
     for (n = 0; n < sizeof(aix_limits) / sizeof(aix_limits[0]); n++) {
 	/*
 	 * We have two strategies, depending on whether or not the
 	 * hard limit has been defined.
 	 */
-	if (aix_getlimit(user, aix_limits[n].hard, &i) == 0) {
-	    rlim.rlim_max = i == -1 ? RLIM_INFINITY : i * aix_limits[n].factor;
-	    if (aix_getlimit(user, aix_limits[n].soft, &i) == 0)
-		rlim.rlim_cur = i == -1 ? RLIM_INFINITY : i * aix_limits[n].factor;
+	if (aix_getlimit(user, aix_limits[n].hard, &val) == 0) {
+	    rlim.rlim_max = val == -1 ? RLIM64_INFINITY : val * aix_limits[n].factor;
+	    if (aix_getlimit(user, aix_limits[n].soft, &val) == 0)
+		rlim.rlim_cur = val == -1 ? RLIM64_INFINITY : val * aix_limits[n].factor;
 	    else
 		rlim.rlim_cur = rlim.rlim_max;	/* soft not specd, use hard */
 	} else {
 	    /* No hard limit set, try soft limit. */
-	    if (aix_getlimit(user, aix_limits[n].soft, &i) == 0)
-		rlim.rlim_cur = i == -1 ? RLIM_INFINITY : i * aix_limits[n].factor;
+	    if (aix_getlimit(user, aix_limits[n].soft, &val) == 0)
+		rlim.rlim_cur = val == -1 ? RLIM64_INFINITY : val * aix_limits[n].factor;
 
 	    /* Set hard limit per AIX /etc/security/limits documentation. */
 	    switch (aix_limits[n].resource) {
@@ -103,11 +116,11 @@ aix_setlimits(user)
 		    rlim.rlim_max = RLIM_SAVED_MAX;
 		    break;
 		default:
-		    rlim.rlim_max = RLIM_INFINITY;
+		    rlim.rlim_max = RLIM64_INFINITY;
 		    break;
 	    }
 	}
-	(void)setrlimit(aix_limits[n].resource, &rlim);
+	(void)setrlimit64(aix_limits[n].resource, &rlim);
     }
 }
 
