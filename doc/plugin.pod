@@ -1,0 +1,757 @@
+=pod
+
+=head1 Sudo Plugin API
+
+Starting with version 1.8, B<sudo> supports a plugin API
+for policy and session logging.  By default, the I<sudoers> policy
+plugin and an associated I/O logging plugin are used.  Via the plugin
+API, B<sudo> can be configured to use alternate policy and/or I/O
+logging plugins provided by third parties.  The plugins to be used
+are specified via the F</etc/sudo.conf> file.
+
+The API is versioned with a major and minor number.  The minor
+version number is incremented when additions are made.  The major
+number is incremented when incompatible changes are made.  A plugin
+should be check the version passed to it and make sure that the
+major version matches.
+
+The plugin API is defined by the C<sudo_plugin.h> header file.
+
+=head2 The sudo.conf File
+
+The F</etc/sudo.conf> file contains plugin configuration directives.
+Currently, the only supported keyword is the C<Plugin> directive,
+which causes a plugin plugin to be loaded.
+
+A C<Plugin> line consists of the C<Plugin> keyword, followed by the
+I<symbol_name> and the I<path> to the shared object containing the
+plugin.  The I<symbol_name> is the name of the C<struct policy_plugin>
+or C<struct io_plugin> in the plugin shared object.  The I<path>
+may be fully qualified or relative.  If not fully qualified it is
+relative to the $prefix/libexec directory where the prefix is
+specified at build time (/usr/local by default).
+
+The same shared object may contain multiple plugins, each with a
+different symbol name.  The shared object file must be owned by uid
+0 and only writable by its owner.  Because of ambiguities that arise
+from composite policies, only a single policy plugin may be specified.
+This limitation does not apply to I/O plugins.
+
+ #
+ # Default /etc/sudo.conf file
+ #
+ # Format:
+ #   Plugin plugin_name plugin_path
+ #
+ # The plugin_path relative to prefix/libexec unless fully qualified
+ # The plugin_name corresponds to a global symbol in the plugin
+ #   that contains the plugin interface.
+ #
+ Plugin policy_plugin sudoers.so
+ Plugin io_plugin sudoers.so
+
+=head2 Policy Plugin API
+
+A policy plugin must declare and populate a C<policy_plugin> struct
+in the global scope.  This structure contains pointers to the functions
+that implement the B<sudo> policy checks.  The name of the symbol should
+be specified in F</etc/sudo.conf> along with a path to the plugin
+so that B<sudo> can load it.
+
+ struct policy_plugin {
+ #define SUDO_POLICY_PLUGIN	1
+     unsigned int type; /* always SUDO_POLICY_PLUGIN */
+     unsigned int version; /* always SUDO_API_VERSION */
+     int (*open)(unsigned int version, sudo_conv_t conversation,
+                 char * const settings[], char * const user_info[],
+                 char * const user_env[]);
+     void (*close)(int exit_status, int error);
+     int (*show_version)(int verbose);
+     int (*check_policy)(int agrc, char * const argv[],
+                         char *env_add[], char **command_info[],
+                         char **argv_out[], char **user_env_out[]);
+     int (*list)(int argc, char * const argv[], int verbose,
+                 const char *list_user);
+     int (*validate)(void);
+     void (*invalidate)(int remove);
+ };
+
+The policy_plugin struct has the following fields:
+
+=over 4
+
+=item type
+
+The C<type> field should always be set to SUDO_POLICY_PLUGIN
+
+=item version
+
+The C<version> field should be set to SUDO_API_VERSION.
+
+This allows B<sudo> to determine the API version the plugin was
+built against.
+
+=item open
+
+ int (*open)(unsigned int version, sudo_conv_t conversation,
+             char * const settings[], char * const user_info[],
+             char * const user_env[]);
+
+Returns 1 on success, 0 on failure and -1 on error.
+On error, the plugin may optionally call the conversation function with
+C<SUDO_CONF_ERROR_MSG> to present additional error information to the
+user.
+
+The function arguments are as follows:
+
+=over 4
+
+=item version
+
+The version passed in by B<sudo> allows the plugin to determine the
+major and minor version number of the plugin API supported by
+B<sudo>.
+
+=item conversation
+
+A pointer to the conversation function that can be used by the
+plugin to interact with the user (see below).
+
+=item settings
+
+A vector of user-supplied B<sudo> settings in the form of "name=value"
+strings.  The vector is terminated by a C<NULL> pointer.  These
+settings correspond to flags the user specified when running B<sudo>.
+As such, they will only be present when the corresponding flag has
+been specified on the command line.
+
+When parsing I<settings>, the plugin should split on the B<first>
+equal sign ('=') since the I<name> field will never include one
+itself but the I<value> might.
+
+=over 4
+
+=item runas_user=string
+
+The user name or uid to to run the command as, if specified via the
+C<-u> flag.
+
+=item runas_group=string
+
+The group name or gid to to run the command as, if specified via
+the C<-g> flag.
+
+=item prompt=string
+
+The prompt to use when requesting a password, if specified via
+the C<-p> flag.
+
+=item set_home=bool
+
+Set to true if the user specified the C<-H> flag.  If true, set the
+C<HOME> environment variable to the target user's home directory.
+
+=item preserve_environment=bool
+
+Set to true if the user specified the C<-E> flag, indicating that
+the user wishes to preserve the environment.
+
+=item login_shell=bool
+
+Set to true if the user specified the C<-i> flag, indicating that
+the user wishes to run a login shell.
+
+=item preserve_groups=bool
+
+Set to true if the user specified the C<-P> flag, indicating that
+the user wishes to preserve the group vector instead of setting it
+based on the runas user.
+
+=item ignore_ticket=bool
+
+Set to true if the user specified the C<-k> flag along with a
+command, indicating that the user wishes to ignore any cached
+authentication credentials.
+
+=item login_class=string
+
+BSD login class to use when setting resource limits and nice value,
+if specified by the C<-c> flag.
+
+=item selinux_role=string
+
+SELinux role to use when executing the command, if specified by
+the C<-r> flag.
+
+=item selinux_type=string
+
+SELinux type to use when executing the command, if specified by
+the C<-t> flag.
+
+=item bsdauth_type=string
+
+Authentication type, if specified by the C<-a> flag, to use on
+systems where BSD authentication is supported.
+
+=back
+
+Additional settings may be added in the future so the plugin should
+silently ignore settings that it does not recognize.
+
+=item user_info
+
+A vector of information about the user running the command in the form of
+"name=value" strings.  The vector is terminated by a C<NULL> pointer.
+
+When parsing I<user_info>, the plugin should split on the B<first>
+equal sign ('=') since the I<name> field will never include one
+itself but the I<value> might.
+
+=over 4
+
+=item user=string
+
+The name of the user invoking B<sudo>.
+
+=item uid=uid_t
+
+The real user ID of the user invoking B<sudo>.
+
+=item gid=gid_t
+
+The real group ID of the user invoking B<sudo>.
+
+=item groups=list
+
+The user's supplementary group list formatted as a string of
+comma-separated group IDs.
+
+=item cwd=string
+
+The user's current working directory.
+
+=item tty=string
+
+The path to the user's terminal device.  If the user has no terminal
+device associated with the session, the value will be empty, as in
+C<tty=>.
+
+=item host=string
+
+The local machine's hostname as returned by the C<gethostname()>
+system call.
+
+=back
+
+=item user_env
+
+The user's environment in the form of a C<NULL>-terminated vector of
+"name=value" strings.
+
+When parsing I<user_env>, the plugin should split on the B<first>
+equal sign ('=') since the I<name> field will never include one
+itself but the I<value> might.
+
+=back
+
+=item close
+
+ void (*close)(int exit_status, int error);
+
+The C<close> function is called when the command being run by B<sudo>
+finishes.
+
+The function arguments are as follows:
+
+=over 4
+
+=item exit_status
+
+The command's exit status, as returned by the wait(2) system call.
+The value of C<exit_status> is undefined if C<error> is non-zero.
+
+=item error
+
+If the command could not be executed, this is set to the value of
+C<errno> set by the execve(2) system call.  The plugin is responsible
+for displaying error information via the conversation function.  If
+the command was successfully executed, the value of C<error> is 0.
+
+=back
+
+=item show_version
+
+ int (*show_version)(int verbose);
+
+The C<show_version> function is called by B<sudo> when the user specifies
+the C<-V> option.  The plugin may display its version information
+to the user via the conversation function using C<SUDO_CONV_INFO_MSG>.
+If the user requests detailed version information, the verbose flag
+will be set.
+
+=item check_policy
+
+ int (*check_policy)(int argc, char * const argv[]
+                     char *env_add[], char **command_info[],
+                     char **argv_out[], char **user_env_out[]);
+
+The I<check_policy> function is called by B<sudo> to determine
+whether the user is allowed to run the specified commands.
+Returns 1 if the command is allowed, 0 if not and -1 on error.
+On error, the plugin may optionally call the conversation function with
+C<SUDO_CONF_ERROR_MSG> to present additional error information to the
+user.
+
+The function arguments are as follows:
+
+=over 4
+
+=item argc
+
+The number of elements in I<argv>, not counting the final C<NULL>
+pointer.
+
+=item argv
+
+The argument vector describing the command the user wishes to run,
+in the same form as what would be passed to the execve() system
+call.  The vector is terminated by a C<NULL> pointer.
+
+=item env_add
+
+Additional environment variables specified by the user on the command
+line in the form of a C<NULL>-terminated vector of "name=value"
+strings.  The plugin may reject the command if one or more variables
+are not allowed to be set, or it may silently ignore such variables.
+
+When parsing I<env_add>, the plugin should split on the B<first>
+equal sign ('=') since the I<name> field will never include one
+itself but the I<value> might.
+
+=item command_info
+
+Information about the command being run in the form of "name=value"
+strings.  These values are used by B<sudo> to set the execution
+environment when running a command.  The plugin is responsible for
+creating and populating the vector, which must be terminated with
+a C<NULL> pointer.  The following values are recognized by B<sudo>:
+
+=over 4
+
+=item command=string
+
+Fully qualified path to the command to be executed.
+
+=item runas_uid=uid
+
+User ID to run the command as.
+
+=item runas_euid=uid
+
+Effective user ID to run the command as.
+If not specified, the value of I<runas_uid> is used.
+
+=item runas_gid=gid
+
+Group ID to run the command as.
+
+=item runas_egid=gid
+
+Effective group ID to run the command as.
+If not specified, the value of I<runas_gid> is used.
+
+=item runas_groups=list
+
+The supplementary group vector to use for the command in the form
+of a comma-separated list of group IDs.  If I<preserve_groups>
+is set, this option is ignored.
+
+=item login_class=login_class
+
+BSD login class to use when setting resource limits and nice value
+(optional).  This option is only set on systems that support login
+classes.
+
+=item preserve_groups=bool
+
+If set, B<sudo> will preserve the user's group vector instead of
+initializing the group vector based on C<runas_user>.
+
+=item cwd=string
+
+The current working directory to change to when executing the command.
+
+=item noexec=bool
+
+If set, prevent the command from executing other programs.
+
+=item chroot=string
+
+The root directory to use when running the command.
+
+=item nice=int
+
+Nice value (priority) to use when executing the command.  The nice
+value, if specified, overrides the priority associated with the
+I<login_class> on BSD systems.
+
+=item umask=octal
+
+The file creation mask to use when executing the command.
+
+=item selinux_role=string
+
+SELinux role to use when executing the command.
+
+=item selinux_type=string
+
+SELinux type to use when executing the command.
+
+=item timeout=int
+
+Command timeout.  If non-zero then when the timeout expires the
+command will be killed.
+
+=back
+
+Unsupported values will be ignored.
+
+=item argv_out
+
+The C<NULL>-terminated argument vector to pass to the execve()
+system call when executing the command.  The plugin is responsible
+for allocating and populating the vector.
+
+=item user_env_out
+
+The C<NULL>-terminated environment vector to use when executing the
+command.  The plugin is responsible for allocating and populating
+the vector.
+
+=back
+
+=item list
+
+ int (*list)(int verbose, const char *list_user,
+             int argc, char * const argv[]);
+
+List available privileges for the invoking user.  Returns 1 on
+success, 0 on failure and -1 on error.
+On error, the plugin may optionally call the conversation function with
+C<SUDO_CONF_ERROR_MSG> to present additional error information to the
+user.
+
+Privileges should be output via the conversation function using
+C<SUDO_CONV_INFO_MSG>.
+
+=over 4
+
+=item verbose
+
+Flag indicating whether to list in verbose mode or not.
+
+=item list_user
+
+The name of a different user to list privileges for if the policy
+allows it.  If C<NULL>, the plugin should list the privileges of
+the invoking user.
+
+=item argc
+
+The number of elements in I<argv>, not counting the final C<NULL>
+pointer.
+
+=item argv
+
+If non-C<NULL>, an argument vector describing a command the user
+wishes to check against the policy in the same form as what would
+be passed to the execve() system call.  If the command is permitted
+by the policy, the fully-qualified path to the command should be
+displayed along with any command line arguments.
+
+=back
+
+=item validate
+
+ int (*validate)(void);
+
+The C<validate> function is called when B<sudo> is run with the
+C<-v> flag.  For policy plugins such as I<sudoers> that cache
+authentication credentials, this function will validate and cache
+the credentials.
+
+The C<validate> function should be C<NULL> if the plugin does not
+support credential caching.
+
+Returns 1 on success, 0 on failure and -1 on error.
+On error, the plugin may optionally call the conversation function with
+C<SUDO_CONF_ERROR_MSG> to present additional error information to the
+user.
+
+=item invalidate
+
+ void (*invalidate)(int remove);
+
+The C<invalidate> function is called when B<sudo> is called with
+the C<-k> or C<-K> flag.  For policy plugins such as I<sudoers> that
+cache authentication credentials, this function will invalidate the
+credentials.  If the I<remove> flag is set, the plugin may remove
+the credentials instead of simply invalidating them.
+
+The C<invalidate> function should be C<NULL> if the plugin does not
+support credential caching.
+
+=back
+
+=head3 Conversation API
+
+If the plugin needs to interact with the user or display informational
+or error messages, it may do so via the conversation function.  A
+plugin should not attempt to read directly from the standard input
+or the user's tty.
+
+ struct sudo_conv_message {
+ #define SUDO_CONV_PROMPT_ECHO_OFF	1
+ #define SUDO_CONV_PROMPT_ECHO_ON	2
+ #define SUDO_CONV_ERROR_MSG		3
+ #define SUDO_CONV_INFO_MSG		4
+     int msg_type;
+     int timeout;
+     const char *msg;
+ };
+
+ struct sudo_conv_reply {
+     char *reply;
+ };
+
+ typedef int (*sudo_conv_t)(int num_msgs,
+	      const struct sudo_conv_message msgs[],
+              struct sudo_conv_reply replies[]);
+
+A conversation function is passed in to the plugin's C<open> function
+when the plugin is initialized.  The plugin passes in a C<struct
+sudo_conv_message> and C<struct sudo_conv_reply> for each message
+in the conversation.  The plugin is responsible for freeing the
+actual reply buffer in C<struct sudo_conv_reply>.
+
+See the sample plugin for an example of the conversation function usage.
+
+=head2 I/O Plugin API
+
+ struct io_plugin {
+ #define SUDO_IO_PLUGIN		2
+     unsigned int type; /* always SUDO_IO_PLUGIN */
+     unsigned int version; /* always SUDO_API_VERSION */
+     int (*open)(unsigned int version, sudo_conv_t conversation
+                 char * const settings[], char * const user_info[],
+                 char * const user_env[]);
+     void (*close)(int exit_status, int error); /* wait status or error */
+     int (*show_version)(int verbose);
+     int (*log_input)(const char *buf, unsigned int len);
+     int (*log_output)(const char *buf, unsigned int len);
+ };
+
+When an I/O plugin is loaded, B<sudo> runs the command in a pseudo-tty.
+This makes it possible to log the input and output from the user's
+session.  If the log_input function is defined, it will receive the
+raw user input (note that this will include input even when echo
+is disabled, such as passwords).  The log_output function receives
+output from the pseudo-tty that is suitable for replaying the user's
+session at a later time.  Either log_input or log_output may be
+NULL.  If the open function returns C<0>, no I/O will be sent to
+the plugin.
+
+The io_plugin struct has the following fields:
+
+=over 4
+
+=item type
+
+The C<type> field should always be set to SUDO_IO_PLUGIN
+
+=item version
+
+The C<version> field should be set to SUDO_API_VERSION.
+
+This allows B<sudo> to determine the API version the plugin was
+built against.
+
+=item open
+
+ int (*open)(unsigned int version, sudo_conv_t conversation
+             char * const settings[], char * const user_info[],
+             char * const user_env[]);
+
+Returns 1 on success, 0 if the command should not be logged and -1 on error.
+On error, the plugin may optionally call the conversation function with
+C<SUDO_CONF_ERROR_MSG> to present additional error information to the
+user.
+
+The function arguments are as follows:
+
+=over 4
+
+=item version
+
+The version passed in by B<sudo> allows the plugin to determine the
+major and minor version number of the plugin API supported by
+B<sudo>.
+
+=item conversation
+
+A pointer to the conversation function that may be used by the
+I<show_version> function to display version information (see
+show_version below).  The conversation function may also be used
+to display additional error message to the user.
+
+=item settings
+
+A vector of user-supplied B<sudo> settings in the form of "name=value"
+strings.  The vector is terminated by a C<NULL> pointer.  These
+settings correspond to flags the user specified when running B<sudo>.
+As such, they will only be present when the corresponding flag has
+been specified on the command line.
+
+When parsing I<settings>, the plugin should split on the B<first>
+equal sign ('=') since the I<name> field will never include one
+itself but the I<value> might.
+
+See the L<Policy Plugin API> section for a list of all possible settings.
+
+=item user_info
+
+A vector of information about the user running the command in the form of
+"name=value" strings.  The vector is terminated by a C<NULL> pointer.
+
+When parsing I<user_info>, the plugin should split on the B<first>
+equal sign ('=') since the I<name> field will never include one
+itself but the I<value> might.
+
+See the L<Policy Plugin API> section for a list of all possible strings.
+
+=item user_env
+
+The user's environment in the form of a C<NULL>-terminated vector of
+"name=value" strings.
+
+When parsing I<user_env>, the plugin should split on the B<first>
+equal sign ('=') since the I<name> field will never include one
+itself but the I<value> might.
+
+=back
+
+=item close
+
+ void (*close)(int exit_status, int error);
+
+The C<close> function is called when the command being run by B<sudo>
+finishes.
+
+The function arguments are as follows:
+
+=over 4
+
+=item exit_status
+
+The command's exit status, as returned by the wait(2) system call.
+The value of C<exit_status> is undefined if C<error> is non-zero.
+
+=item error
+
+If the command could not be executed, this is set to the value of
+C<errno> set by the execve(2) system call.  If the command was
+successfully executed, the value of C<error> is 0.
+
+=back
+
+=item show_version
+
+ int (*show_version)(int verbose);
+
+The C<show_version> function is called by B<sudo> when the user specifies
+the C<-V> option.  The plugin may display its version information
+to the user via the conversation function using C<SUDO_CONV_INFO_MSG>.
+If the user requests detailed version information, the verbose flag
+will be set.
+
+=item log_input
+
+ int (*log_input)(const char *buf, unsigned int len);
+
+The I<log_input> function is called whenever data can be read from
+the user but before it is passed to the running command.  This
+allows the plugin to reject data if it chooses to (for instance
+if the input contains banned content).  Returns C<1> if the data
+should be passed to the command, C<0> if the data is rejected
+(which will terminate the command) or C<-1> if an error occurred.
+
+The function arguments are as follows:
+
+=over 4
+
+=item buf
+
+The buffer containing user input.
+
+=item len
+
+The length of I<buf> in bytes.
+
+=back
+
+=item log_output
+
+ int (*log_output)(const char *buf, unsigned int len);
+
+The I<log_output> function is called whenever data can be read from
+the command but before it is written to the user's terminal.  This
+allows the plugin to reject data if it chooses to (for instance
+if the input contains banned content).  Returns C<1> if the data
+should be passed to the user, C<0> if the data is rejected
+(which will terminate the command) or C<-1> if an error occurred.
+
+The function arguments are as follows:
+
+=over 4
+
+=item buf
+
+The buffer containing command output.
+
+=item len
+
+The length of I<buf> in bytes.
+
+=back
+
+=back
+
+=head2 Unhandled command line options
+
+The C<-L> command line option has been deprecated as its output is
+covered by the I<sudoers> manual page.
+
+=head2 Sudo implementation details
+
+Version macros:
+
+ #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
+ #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
+ #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
+     *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
+ } while(0)
+ #define SUDO_VERSION_SET_MINOR(vp, n) do { \
+     *(vp) = (*(vp) & 0xffff0000) | (n); \
+ } while(0)
+
+ #define SUDO_API_VERSION_MAJOR 1
+ #define SUDO_API_VERSION_MINOR 0
+ #define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | SUDO_API_VERSION_MINOR)
+
+Sudo will cast the plugin symbol to the following when determining
+the plugin type.
+
+ union sudo_plugin {
+     struct policy_plugin policy;
+     struct io_plugin io;
+ };
