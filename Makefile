@@ -15,12 +15,23 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# XXX - add sudoers, doc, compat?
+# XXX - add sudoers, doc, compat
 SUBDIRS = src plugins/sample
 
-all install:
+all clean install:
 	@if [ ! -s config.status ]; then \
 		echo "Please run configure first"; \
 		exit 1; \
 	fi
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
+
+distclean:
+	-rm -rf pathnames.h config.h config.status config.cache \
+		config.log libtool stamp-h* autom4te.cache
+	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
+
+cleandir: distclean
+
+clobber: distclean
+
+realclean: distclean
