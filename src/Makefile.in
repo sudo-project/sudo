@@ -184,13 +184,13 @@ zero_bytes.o: $(srcdir)/zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
 install: install-dirs install-binaries @INSTALL_NOEXEC@
 
 install-dirs:
-	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(sudodir) \
+	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(bindir) \
 	    $(DESTDIR)$(noexecdir)
 
 install-binaries: install-dirs $(PROGS)
-	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 -s sudo $(DESTDIR)$(sudodir)/sudo
-	rm -f $(DESTDIR)$(sudodir)/sudoedit
-	ln $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 -s sudo $(DESTDIR)$(bindir)/sudo
+	rm -f $(DESTDIR)$(bindir)/sudoedit
+	ln $(DESTDIR)$(bindir)/sudo $(DESTDIR)$(bindir)/sudoedit
 	if [ -f sesh ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sesh $(DESTDIR)$(libexecdir)/sesh; fi
 
 install-noexec: install-dirs sudo_noexec.la
