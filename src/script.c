@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -33,7 +33,7 @@
 #endif /* HAVE_TERMIOS_H */
 #include <sys/ioctl.h>
 #ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
+# include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
 #include <stdio.h>
 #ifdef STDC_HEADERS
@@ -68,29 +68,18 @@
 #ifdef HAVE_SELINUX
 # include <selinux/selinux.h>
 #endif
-#ifdef HAVE_ZLIB
-# include <zlib.h>
-#endif
 
-#include "sudo.h"
+#include "sudo.h" /* XXX? */
+#include "sudo_plugin.h"
+#include "sudo_plugin_int.h"
 
 #define SFD_MASTER	0
 #define SFD_SLAVE	1
-#define SFD_LOG		2
-#define SFD_OUTPUT	3
-#define SFD_TIMING	4
-#define SFD_USERTTY	5
+#define SFD_USERTTY	2
 
 #define TERM_COOKED	0
 #define TERM_CBREAK	1
 #define TERM_RAW	2
-
-union script_fd {
-    FILE *f;
-#ifdef HAVE_ZLIB
-    gzFile g;
-#endif
-};
 
 struct script_buf {
     int len; /* buffer length (how much read in) */
@@ -98,9 +87,10 @@ struct script_buf {
     char buf[16 * 1024];
 };
 
-static int script_fds[6];
+static int script_fds[3];
 static int ttyout;
 
+/* XXX - use an array of signals instead of just a single variable */
 static sig_atomic_t alive = 1;
 static sig_atomic_t recvsig = 0;
 static sig_atomic_t ttymode = TERM_COOKED;
@@ -114,247 +104,68 @@ static int foreground;
 
 static char slavename[PATH_MAX];
 
-static int suspend_parent __P((int signo, struct script_buf *output,
-    struct timeval *then, struct timeval *now, union script_fd ofile,
-    union script_fd tfile));
-static void flush_output __P((struct script_buf *output, struct timeval *then,
-    struct timeval *now, union script_fd ofile, union script_fd tfile));
-static void handler __P((int s));
-static void script_child __P((char *path, char *argv[], int, int));
-static void script_run __P((char *path, char *argv[], int));
-static void sigchild __P((int s));
-static void sigwinch __P((int s));
-static void sync_winsize __P((int src, int dst));
+static int suspend_parent(int signo, struct script_buf *output);
+static void flush_output(struct script_buf *output);
+static void handler(int s);
+static int script_child(const char *path, char *argv[], char *envp[], int, int);
+static void script_run(const char *path, char *argv[], char *envp[], int);
+static void sigchild(int s);
+static void sigwinch(int s);
+static void sync_winsize(int src, int dst);
 
-extern int get_pty __P((int *master, int *slave, char *name, size_t namesz));
-
-/*
- * TODO: run monitor as root?
- */
-
-static int
-fdcompar(v1, v2)
-    const void *v1;
-    const void *v2;
-{
-    int i = *(int *)v1;
-    int j = *(int *)v2;
-
-    return(script_fds[i] - script_fds[j]);
-}
+/* sudo.c */
+extern struct plugin_container_list io_plugins;
 
 void
-script_nextid()
+script_setup(uid_t uid)
 {
-    struct stat sb;
-    char buf[32], *ep;
-    int fd, i, ch;
-    unsigned long id = 0;
-    int len;
-    ssize_t nread;
-    char pathbuf[PATH_MAX];
-
-    /*
-     * Create _PATH_SUDO_TRANSCRIPT if it doesn't already exist.
-     */
-    if (stat(_PATH_SUDO_TRANSCRIPT, &sb) != 0) {
-	if (mkdir(_PATH_SUDO_TRANSCRIPT, S_IRWXU) != 0)
-	    log_error(USE_ERRNO, "Can't mkdir %s", _PATH_SUDO_TRANSCRIPT);
-    } else if (!S_ISDIR(sb.st_mode)) {
-	log_error(0, "%s exists but is not a directory (0%o)",
-	    _PATH_SUDO_TRANSCRIPT, (unsigned int) sb.st_mode);
-    }
-
-    /*
-     * Open sequence file
-     */
-    len = snprintf(pathbuf, sizeof(pathbuf), "%s/seq", _PATH_SUDO_TRANSCRIPT);
-    if (len <= 0 || len >= sizeof(pathbuf)) {
-	errno = ENAMETOOLONG;
-	log_error(USE_ERRNO, "%s/seq", pathbuf);
-    }
-    fd = open(pathbuf, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
-    if (fd == -1)
-	log_error(USE_ERRNO, "cannot open %s", pathbuf);
-    lock_file(fd, SUDO_LOCK);
-
-    /* Read seq number (base 36). */
-    nread = read(fd, buf, sizeof(buf));
-    if (nread != 0) {
-	if (nread == -1)
-	    log_error(USE_ERRNO, "cannot read %s", pathbuf);
-	id = strtoul(buf, &ep, 36);
-	if (buf == ep || id >= 2176782336U)
-	    log_error(0, "invalid sequence number %s", pathbuf);
-    }
-    id++;
-
-    /*
-     * Convert id to a string and stash in sudo_user.sessid.
-     * Note that that least significant digits go at the end of the string.
-     */
-    for (i = 5; i >= 0; i--) {
-	ch = id % 36;
-	id /= 36;
-	buf[i] = ch < 10 ? ch + '0' : ch - 10 + 'A';
-    }
-    buf[6] = '\n';
-
-    /* Stash id logging purposes */
-    memcpy(sudo_user.sessid, buf, 6);
-    sudo_user.sessid[6] = '\0';
-
-    /* Rewind and overwrite old seq file. */
-    if (lseek(fd, 0, SEEK_SET) == (off_t)-1 || write(fd, buf, 7) != 7)
-	log_error(USE_ERRNO, "Can't write to %s", pathbuf);
-    close(fd);
-}
-
-static int
-build_idpath(pathbuf)
-    char *pathbuf;
-{
-    struct stat sb;
-    int i, len;
-
-    if (sudo_user.sessid[0] == '\0')
-	log_error(0, "tried to build a session id path without a session id");
-
-    /*
-     * Path is of the form /var/log/sudo-session/00/00/01.
-     */
-    len = snprintf(pathbuf, PATH_MAX, "%s/%c%c/%c%c/%c%c", _PATH_SUDO_TRANSCRIPT,
-	sudo_user.sessid[0], sudo_user.sessid[1], sudo_user.sessid[2],
-	sudo_user.sessid[3], sudo_user.sessid[4], sudo_user.sessid[5]);
-    if (len <= 0 && len >= PATH_MAX) {
-	errno = ENAMETOOLONG;
-	log_error(USE_ERRNO, "%s/%s", _PATH_SUDO_TRANSCRIPT, sudo_user.sessid);
-    }
-
-    /*
-     * Create the intermediate subdirs as needed.
-     */
-    for (i = 6; i > 0; i -= 3) {
-	pathbuf[len - i] = '\0';
-	if (stat(pathbuf, &sb) != 0) {
-	    if (mkdir(pathbuf, S_IRWXU) != 0)
-		log_error(USE_ERRNO, "Can't mkdir %s", pathbuf);
-	} else if (!S_ISDIR(sb.st_mode)) {
-	    log_error(0, "%s: %s", pathbuf, strerror(ENOTDIR));
-	}
-	pathbuf[len - i] = '/';
-    }
-
-    return(len);
-}
-
-void
-script_setup()
-{
-    char pathbuf[PATH_MAX];
-    int len;
-
     script_fds[SFD_USERTTY] = open(_PATH_TTY, O_RDWR|O_NOCTTY, 0);
     if (script_fds[SFD_USERTTY] == -1)
-	log_error(0, "tty required for transcript support"); /* XXX */
+	errorx(1, "tty required for transcript support");
 
     if (!get_pty(&script_fds[SFD_MASTER], &script_fds[SFD_SLAVE],
-	slavename, sizeof(slavename)))
-	log_error(USE_ERRNO, "Can't get pty");
-
-    /*
-     * Build a path containing the session id split into two-digit subdirs,
-     * so ID 000001 becomes /var/log/sudo-session/00/00/01.
-     */
-    len = build_idpath(pathbuf);
-
-    /*
-     * We create 3 files: a log file, one for the raw session data,
-     * and one for the timing info.
-     */
-    script_fds[SFD_LOG] = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
-    if (script_fds[SFD_LOG] == -1)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
-
-    strlcat(pathbuf, ".scr", sizeof(pathbuf));
-    script_fds[SFD_OUTPUT] = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY,
-	S_IRUSR|S_IWUSR);
-    if (script_fds[SFD_OUTPUT] == -1)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
-
-    pathbuf[len] = '\0';
-    strlcat(pathbuf, ".tim", sizeof(pathbuf));
-    script_fds[SFD_TIMING] = open(pathbuf, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
-    if (script_fds[SFD_TIMING] == -1)
-	log_error(USE_ERRNO, "Can't create %s", pathbuf);
+	slavename, sizeof(slavename), uid))
+	error(1, "Can't get pty");
 }
 
-int
-script_duplow(fd)
-    int fd;
-{
-    int i, j, indices[6];
-
-    /* sort fds so we can dup them safely */
-    for (i = 0; i < 6; i++)
-	indices[i] = i;
-    qsort(indices, 6, sizeof(int), fdcompar);
-
-    /* Move pty master/slave and session fds to low numbered fds. */
-    for (i = 0; i < 6; i++) {
-	j = indices[i];
-	if (script_fds[j] != fd) {
-#ifdef HAVE_DUP2
-	    dup2(script_fds[j], fd);
-#else
-	    close(fd);
-	    dup(script_fds[j]);
-	    close(script_fds[j]);
-#endif
-	}
-	script_fds[j] = fd++;
-    }
-    return(fd);
-}
-
-/* Update output and timing files. */
+/* Call I/O plugin input method. */
 static void
-log_output(buf, n, then, now, ofile, tfile)
-    char *buf;
-    int n;
-    struct timeval *then;
-    struct timeval *now;
-    union script_fd ofile;
-    union script_fd tfile;
+log_input(char *buf, unsigned int n)
 {
-    struct timeval tv;
+    struct plugin_container *plugin;
     sigset_t omask;
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
 
-#ifdef HAVE_ZLIB
-    if (def_compress_transcript)
-	gzwrite(ofile.g, buf, n);
-    else
-#endif
-	fwrite(buf, 1, n, ofile.f);
-    timersub(now, then, &tv);
-#ifdef HAVE_ZLIB
-    if (def_compress_transcript)
-	gzprintf(tfile.g, "%f %d\n",
-	    tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
-    else
-#endif
-	fprintf(tfile.f, "%f %d\n",
-	    tv.tv_sec + ((double)tv.tv_usec / 1000000), n);
-    then->tv_sec = now->tv_sec;
-    then->tv_usec = now->tv_usec;
+    tq_foreach_fwd(&io_plugins, plugin) {
+	/* XXX - die if return != TRUE */
+	if (plugin->u.io->log_input)
+	    plugin->u.io->log_input(buf, n);
+    }
+
+    sigprocmask(SIG_SETMASK, &omask, NULL);
+}
+
+/* Call I/O plugin output method. */
+static void
+log_output(char *buf, unsigned int n)
+{
+    struct plugin_container *plugin;
+    sigset_t omask;
+
+    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
+
+    tq_foreach_fwd(&io_plugins, plugin) {
+	/* XXX - die if return != TRUE */
+	if (plugin->u.io->log_output)
+	    plugin->u.io->log_output(buf, n);
+    }
 
     sigprocmask(SIG_SETMASK, &omask, NULL);
 }
 
 static void
-check_foreground()
+check_foreground(void)
 {
     foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
     if (foreground && !tty_initialized) {
@@ -370,13 +181,7 @@ check_foreground()
  * Returns SIGUSR1 if the child should be resume in foreground else SIGUSR2.
  */
 static int
-suspend_parent(signo, output, then, now, ofile, tfile)
-    int signo;
-    struct script_buf *output;
-    struct timeval *then;
-    struct timeval *now;
-    union script_fd ofile;
-    union script_fd tfile;
+suspend_parent(int signo, struct script_buf *output)
 {
     sigaction_t sa, osa;
     int n, oldmode = ttymode, rval = 0;
@@ -404,7 +209,7 @@ suspend_parent(signo, output, then, now, ofile, tfile)
 	/* FALLTHROUGH */
     case SIGTSTP:
 	/* Flush any remaining output to master tty. */
-	flush_output(output, then, now, ofile, tfile);
+	flush_output(output);
 
 	/* Restore original tty mode before suspending. */
 	if (oldmode != TERM_COOKED) {
@@ -469,19 +274,18 @@ suspend_parent(signo, output, then, now, ofile, tfile)
  *     controlling tty, belongs to child's session but has its own pgrp.
  */
 int
-script_execv(path, argv)
-    char *path;
-    char *argv[];
+script_execve(struct command_details *details, char *argv[], char *envp[],
+    struct command_status *cstat)
 {
     sigaction_t sa;
     struct script_buf input, output;
-    struct timeval now, then;
-    int n, nready, exitcode = 1;
+    int n, nready;
     int relaysig, sv[2];
     fd_set *fdsr, *fdsw;
-    FILE *idfile;
-    union script_fd ofile, tfile;
     int rbac_enabled = 0;
+    int maxfd;
+
+    cstat->type = 0; /* XXX */
 
 #ifdef HAVE_SELINUX
     rbac_enabled = is_selinux_enabled() > 0 && user_role != NULL;
@@ -491,7 +295,7 @@ script_execv(path, argv)
 	close(script_fds[SFD_SLAVE]);
 	script_fds[SFD_SLAVE] = open(slavename, O_RDWR|O_NOCTTY, 0);
 	if (script_fds[SFD_SLAVE] == -1)
-	    log_error(USE_ERRNO, "cannot open %s", slavename);
+	    error(1, "cannot open %s", slavename);
     }
 #endif
 
@@ -542,8 +346,8 @@ script_execv(path, argv)
      * We communicate with the child over a bi-directional pipe.
      * Parent sends signal info to child and child sends back wait status.
      */
-    if (socketpair(PF_UNIX, SOCK_STREAM, 0, sv) != 0)
-	log_error(USE_ERRNO, "cannot create sockets");
+    if (socketpair(PF_UNIX, SOCK_DGRAM, 0, sv) != 0)
+	error(1, "cannot create sockets");
 
     if (foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
@@ -559,7 +363,7 @@ script_execv(path, argv)
 		ttymode == TERM_CBREAK);
 	} while (!n && errno == EINTR);
 	if (!n)
-	    log_error(USE_ERRNO, "Can't set terminal to raw mode");
+	    error(1, "Can't set terminal to raw mode");
     }
 
     /*
@@ -569,42 +373,21 @@ script_execv(path, argv)
     child = fork();
     switch (child) {
     case -1:
-	log_error(USE_ERRNO, "fork");
+	error(1, "fork");
 	break;
     case 0:
+	/* child */
 	close(sv[0]);
-	script_child(path, argv, sv[1], rbac_enabled);
-	/* NOTREACHED */
-	break;
+	if (exec_setup(details) == 0) {
+	    /* headed for execve() */
+	    script_child(details->command, argv, envp, sv[1], rbac_enabled);
+	}
+	cstat->type = CMD_ERRNO;
+	cstat->val = errno;
+	send(sv[1], cstat, sizeof(*cstat), 0);
+	_exit(1);
     }
     close(sv[1]);
-
-    if ((idfile = fdopen(script_fds[SFD_LOG], "w")) == NULL)
-	log_error(USE_ERRNO, "fdopen");
-#ifdef HAVE_ZLIB
-    if (def_compress_transcript) {
-	if ((ofile.g = gzdopen(script_fds[SFD_OUTPUT], "w")) == NULL)
-	    log_error(USE_ERRNO, "gzdopen");
-	if ((tfile.g = gzdopen(script_fds[SFD_TIMING], "w")) == NULL)
-	    log_error(USE_ERRNO, "gzdopen");
-    } else
-#endif
-    {
-	if ((ofile.f = fdopen(script_fds[SFD_OUTPUT], "w")) == NULL)
-	    log_error(USE_ERRNO, "fdopen");
-	if ((tfile.f = fdopen(script_fds[SFD_TIMING], "w")) == NULL)
-	    log_error(USE_ERRNO, "fdopen");
-    }
-
-    gettimeofday(&then, NULL);
-
-    /* XXX - log more stuff?  window size? environment? */
-    fprintf(idfile, "%ld:%s:%s:%s:%s\n", then.tv_sec, user_name,
-	runas_pw->pw_name, runas_gr ? runas_gr->gr_name : "", user_tty);
-    fprintf(idfile, "%s\n", user_cwd);
-    fprintf(idfile, "%s%s%s\n", user_cmnd, user_args ? " " : "",
-	user_args ? user_args : "");
-    fclose(idfile);
 
     n = fcntl(script_fds[SFD_MASTER], F_GETFL, 0);
     if (n != -1) {
@@ -622,13 +405,19 @@ script_execv(path, argv)
 	(void) fcntl(STDOUT_FILENO, F_SETFL, n);
     }
 
+    /* Max fd we will be selecting on. */
+    maxfd = sv[0];
+    if (maxfd < script_fds[SFD_MASTER])
+	maxfd = script_fds[SFD_MASTER];
+    if (maxfd < script_fds[SFD_USERTTY])
+	maxfd = script_fds[SFD_USERTTY];
+
     /*
      * In the event loop we pass input from user tty to master
-     * and pass output from master to stdout and ofile.  Note that
-     * we've set things up such that master is > 3 (see sudo.c).
+     * and pass output from master to stdout and IO plugin.
      */
-    fdsr = (fd_set *)emalloc2(howmany(sv[0] + 1, NFDBITS), sizeof(fd_mask));
-    fdsw = (fd_set *)emalloc2(howmany(sv[0] + 1, NFDBITS), sizeof(fd_mask));
+    fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    fdsw = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
     zero_bytes(&input, sizeof(input));
     zero_bytes(&output, sizeof(output));
     while (alive) {
@@ -643,8 +432,8 @@ script_execv(path, argv)
 	if (output.off == output.len)
 	    output.off = output.len = 0;
 
-	zero_bytes(fdsw, howmany(sv[0] + 1, NFDBITS) * sizeof(fd_mask));
-	zero_bytes(fdsr, howmany(sv[0] + 1, NFDBITS) * sizeof(fd_mask));
+	zero_bytes(fdsw, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
+	zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 
 	if (ttymode == TERM_RAW && input.len != sizeof(input.buf))
 	    FD_SET(script_fds[SFD_USERTTY], fdsr);
@@ -658,51 +447,50 @@ script_execv(path, argv)
 	if (relaysig)
 	    FD_SET(sv[0], fdsw);
 
-	nready = select(sv[0] + 1, fdsr, fdsw, NULL, NULL);
+	nready = select(maxfd + 1, fdsr, fdsw, NULL, NULL);
 	if (nready == -1) {
 	    if (errno == EINTR)
 		continue;
-	    log_error(USE_ERRNO, "select failed");
+	    error(1, "select failed");
 	}
 	if (FD_ISSET(sv[0], fdsr)) {
 	    /* read child status */
-	    n = read(sv[0], &child_status, sizeof(child_status));
+	    n = recv(sv[0], cstat, sizeof(*cstat), 0);
 	    if (n == -1) {
 		if (errno == EINTR)
 		    continue;
 		if (errno != EAGAIN)
 		    break;
-	    } else if (n != sizeof(child_status)) {
+	    } else if (n != sizeof(*cstat)) {
 		break; /* EOF? */
 	    }
-	    if (WIFSTOPPED(child_status)) {
-		/* Suspend parent and tell child how to resume on return. */
+	    if (cstat->type == CMD_WSTATUS) {
+		if (WIFSTOPPED(cstat->val)) {
+		    /* Suspend parent and tell child how to resume on return. */
 #ifdef SCRIPT_DEBUG
-		warningx("child stopped, suspending parent");
+		    warningx("child stopped, suspending parent");
 #endif
-		relaysig = suspend_parent(WSTOPSIG(child_status),
-		    &output, &then, &now, ofile, tfile);
-		/* XXX - write relaysig immediately? */
-		continue;
-	    } else {
-		/* Child exited or was killed, either way we are done. */
-		if (WIFEXITED(child_status))
-		    exitcode = WEXITSTATUS(child_status);
-		else if (WIFSIGNALED(child_status))
-		    exitcode = WTERMSIG(child_status) | 128;
+		    relaysig = suspend_parent(WSTOPSIG(cstat->val), &output);
+		    /* XXX - write relaysig immediately? */
+		    continue;
+		} else {
+		    /* Child exited or was killed, either way we are done. */
+		    break;
+		}
+	    } else if (cstat->type == CMD_ERRNO) {
+		/* Child was unable to execute command. */
 		break;
 	    }
 	}
 	if (FD_ISSET(sv[0], fdsw)) {
 	    /* XXX - we rely on child to be suspended before we suspend us */
-	    n = write(sv[0], &relaysig, sizeof(relaysig));
+	    cstat->type = CMD_SIGNO;
+	    cstat->val = relaysig;
 	    relaysig = 0;
-	    if (n == -1) {
-		if (errno == EINTR)
-		    continue;
-		if (errno != EAGAIN)
-		    break;
-	    } else if (n != sizeof(relaysig)) {
+	    do {
+		n = send(sv[0], cstat, sizeof(*cstat), 0);
+	    } while (n == -1 && errno == EINTR);
+	    if (n != sizeof(relaysig)) {
 		break; /* should not happen */
 	    }
 	}
@@ -717,6 +505,7 @@ script_execv(path, argv)
 	    } else {
 		if (n == 0)
 		    break; /* got EOF */
+		log_input(input.buf + input.len, n);
 		input.len += n;
 	    }
 	}
@@ -733,7 +522,6 @@ script_execv(path, argv)
 	    }
 	}
 	if (FD_ISSET(script_fds[SFD_MASTER], fdsr)) {
-	    gettimeofday(&now, NULL);
 	    n = read(script_fds[SFD_MASTER], output.buf + output.len,
 		sizeof(output.buf) - output.len);
 	    if (n == -1) {
@@ -744,9 +532,7 @@ script_execv(path, argv)
 	    } else {
 		if (n == 0)
 		    break; /* got EOF */
-
-		/* Update output and timing files. */
-		log_output(output.buf + output.len, n, &then, &now, ofile, tfile);
+		log_output(output.buf + output.len, n);
 		output.len += n;
 	    }
 	}
@@ -770,26 +556,15 @@ script_execv(path, argv)
 	n &= ~O_NONBLOCK;
 	(void) fcntl(STDOUT_FILENO, F_SETFL, n);
     }
-    flush_output(&output, &then, &now, ofile, tfile);
-
-#ifdef HAVE_ZLIB
-    if (def_compress_transcript) {
-	gzclose(ofile.g);
-	gzclose(tfile.g);
-    } else
-#endif
-    {
-	fclose(ofile.f);
-	fclose(tfile.f);
-    }
+    flush_output(&output);
 
 #ifdef HAVE_STRSIGNAL
-    if (WIFSIGNALED(child_status)) {
-	int signo = WTERMSIG(child_status);
+    if (cstat->type == CMD_WSTATUS && WIFSIGNALED(cstat->val)) {
+	int signo = WTERMSIG(cstat->val);
 	if (signo && signo != SIGINT && signo != SIGPIPE) {
 	    char *reason = strsignal(signo);
 	    write(STDOUT_FILENO, reason, strlen(reason));
-	    if (WCOREDUMP(child_status))
+	    if (WCOREDUMP(cstat->val))
 		write(STDOUT_FILENO, " (core dumped)", 14);
 	    write(STDOUT_FILENO, "\n", 1);
 	}
@@ -800,30 +575,22 @@ script_execv(path, argv)
 	n = term_restore(script_fds[SFD_USERTTY], 0);
     } while (!n && errno == EINTR);
 
-    exit(exitcode);
+    return cstat->type == CMD_ERRNO ? -1 : 0;
 }
 
-void
-script_child(path, argv, backchannel, rbac_enabled)
-    char *path;
-    char *argv[];
-    int backchannel;
-    int rbac_enabled;
+int
+script_child(const char *path, char *argv[], char *envp[], int backchannel, int rbac)
 {
+    struct command_status cstat;
+    fd_set *fdsr;
     sigaction_t sa;
     pid_t pid, self = getpid();
-    int nread, signo, status;
-#ifndef TIOCSCTTY
-    int n;
-#endif
+    int n, signo, status;
 
     recvsig = 0;
 
     /* Close unused fds. */
     close(script_fds[SFD_MASTER]);
-    close(script_fds[SFD_LOG]);
-    close(script_fds[SFD_OUTPUT]);
-    close(script_fds[SFD_TIMING]);
     close(script_fds[SFD_USERTTY]);
 
     /* Reset signal handlers. */
@@ -840,8 +607,7 @@ script_child(path, argv, backchannel, rbac_enabled)
     sigaction(SIGTTIN, &sa, NULL);
     sigaction(SIGTTOU, &sa, NULL);
 
-    /* We want SIGCHLD to interrupt us. */
-    sa.sa_flags = 0; /* do not restart syscalls for these signals. */
+    /* SIGCHLD will interrupt select. */
     sa.sa_handler = handler;
     sigaction(SIGCHLD, &sa, NULL);
 
@@ -853,7 +619,7 @@ script_child(path, argv, backchannel, rbac_enabled)
 #ifdef HAVE_SETSID
     if (setsid() == -1) {
 	warning("setsid");
-	_exit(1);
+	goto bad;
     }
 #else
 # ifdef TIOCNOTTY
@@ -869,7 +635,7 @@ script_child(path, argv, backchannel, rbac_enabled)
 #endif
 #ifdef TIOCSCTTY
     if (ioctl(script_fds[SFD_SLAVE], TIOCSCTTY, NULL) != 0)
-	log_error(USE_ERRNO, "unable to set controlling tty");
+	error(1, "unable to set controlling tty");
 #else
     /* Set controlling tty by reopening slave. */
     if ((n = open(slavename, O_RDWR)) >= 0)
@@ -880,10 +646,11 @@ script_child(path, argv, backchannel, rbac_enabled)
 	foreground = 0;
 
     /* Start command and wait for it to stop or exit */
+    /* XXX - use details->timeout */
     child = fork();
     if (child == -1) {
 	warning("Can't fork");
-	_exit(1);
+	goto bad;
     }
     if (child == 0) {
 	/* Reset signal handlers. */
@@ -900,9 +667,9 @@ script_child(path, argv, backchannel, rbac_enabled)
 	sigaction(SIGUSR2, &sa, NULL);
 
 	/* setup tty and exec command */
-	script_run(path, argv, rbac_enabled);
-	warning("unable to execute %s", path);
-	_exit(127);
+	script_run(path, argv, envp, rbac);
+	warning("unable to execute %s", path); /* XXX - leave this to plugin? */
+	goto bad;
     }
 
     /*
@@ -917,6 +684,9 @@ script_child(path, argv, backchannel, rbac_enabled)
     }
 
     /* Wait for signal on backchannel or for SIGCHLD */
+    fdsr = (fd_set *)emalloc2(howmany(backchannel + 1, NFDBITS), sizeof(fd_mask));
+    zero_bytes(fdsr, howmany(backchannel + 1, NFDBITS) * sizeof(fd_mask));
+    FD_SET(backchannel, fdsr);
     for (;;) {
 	/* Read child status, assumes recvsig can only be SIGCHLD */
 	while (recvsig) {
@@ -934,26 +704,43 @@ script_child(path, argv, backchannel, rbac_enabled)
 		else
 		    warningx("command exited?");
 #endif
-		if (write(backchannel, &status, sizeof(status)) != sizeof(status))
+		cstat.type = CMD_WSTATUS;
+		cstat.val = status;
+		do {
+		    n = send(backchannel, &cstat, sizeof(cstat), 0);
+		} while (n == -1 && errno == EINTR);
+		if (n != sizeof(cstat))
 		    break; /* XXX - error, kill child and exit */
 #ifdef SCRIPT_DEBUG
 		warningx("sent signo to parent");
 #endif
 		if (!WIFSTOPPED(status)) {
+		    /* XXX */
 		    _exit(1); /* child dead */
 		}
 	    }
 	}
-	nread = read(backchannel, &signo, sizeof(signo));
-	if (nread == -1) {
-	    if (errno != EINTR)
-		break; /* XXX - error, kill child and exit */
-	    continue;
+	n = select(backchannel + 1, fdsr, NULL, NULL, NULL);
+	if (n == -1) {
+	    if (errno == EINTR)
+		continue;
+	    error(1, "select failed");
 	}
-	if (nread != sizeof(signo)) {
-	    /* EOF? */
+
+	/* read child status */
+	n = recv(backchannel, &cstat, sizeof(cstat), 0);
+	if (n == -1) {
+	    if (errno == EINTR)
+		continue;
+	} else if (n != sizeof(cstat)) {
+	    warningx("error reading command status");
 	    break;
 	}
+	if (cstat.type != CMD_SIGNO) {
+	    warningx("unexpected reply type on backchannel: %d", cstat.type);
+	    continue;
+	}
+	signo = cstat.val;
 
 	/* Handle signal from parent. */
 #ifdef SCRIPT_DEBUG
@@ -961,7 +748,7 @@ script_child(path, argv, backchannel, rbac_enabled)
 #endif
 	switch (signo) {
 	case SIGKILL:
-	    _exit(1);
+	    _exit(1); /* XXX */
 	    /* NOTREACHED */
 	case SIGHUP:
 	case SIGTERM:
@@ -991,16 +778,14 @@ script_child(path, argv, backchannel, rbac_enabled)
 	}
     }
 
-    _exit(1);
+    _exit(1); /* XXX */
+
+bad:
+    return errno;
 }
 
 static void
-flush_output(output, then, now, ofile, tfile)
-    struct script_buf *output;
-    struct timeval *then;
-    struct timeval *now;
-    union script_fd ofile;
-    union script_fd tfile;
+flush_output(struct script_buf *output)
 {
     int n;
 
@@ -1017,7 +802,8 @@ flush_output(output, then, now, ofile, tfile)
 	n = read(script_fds[SFD_MASTER], output->buf, sizeof(output->buf));
 	if (n <= 0)
 	    break;
-	log_output(output->buf, n, &then, &now, ofile, tfile);
+	/* XXX */
+	log_output(output->buf, n);
 	output->off = 0;
 	output->len = n;
 	do {
@@ -1031,10 +817,7 @@ flush_output(output, then, now, ofile, tfile)
 }
 
 static void
-script_run(path, argv, rbac_enabled)
-    char *path;
-    char *argv[];
-    int rbac_enabled;
+script_run(const char *path, char *argv[], char *envp[], int rbac_enabled)
 {
     pid_t self = getpid();
 
@@ -1058,16 +841,14 @@ script_run(path, argv, rbac_enabled)
 
 #ifdef HAVE_SELINUX
     if (rbac_enabled)
-	selinux_execv(path, argv);
+	selinux_execve(path, argv, envp);
     else
 #endif
-    execv(path, argv);
+    execve(path, argv, envp);
 }
 
 static void
-sync_winsize(src, dst)
-    int src;
-    int dst;
+sync_winsize(int src, int dst)
 {
 #ifdef TIOCGWINSZ
     struct winsize win;
@@ -1087,8 +868,7 @@ sync_winsize(src, dst)
  * Handler for SIGCHLD in parent
  */
 static void
-sigchild(s)
-    int s;
+sigchild(int s)
 {
     pid_t pid;
     int serrno = errno;
@@ -1110,8 +890,7 @@ sigchild(s)
  * Generic handler for signals passed from parent -> child
  */
 static void
-handler(s)
-    int s;
+handler(int s)
 {
     recvsig = s;
 }
@@ -1120,8 +899,7 @@ handler(s)
  * Handler for SIGWINCH in parent
  */
 static void
-sigwinch(s)
-    int s;
+sigwinch(int s)
 {
     int serrno = errno;
 

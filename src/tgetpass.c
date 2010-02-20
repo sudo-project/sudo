@@ -56,6 +56,9 @@
 
 #include "sudo.h"
 
+/* XXX */
+char *user_askpass = NULL;
+
 static volatile sig_atomic_t signo;
 
 static void handler __P((int));
@@ -111,7 +114,7 @@ restart:
     (void) sigaction(SIGTTIN, &sa, &savettin);
     (void) sigaction(SIGTTOU, &sa, &savettou);
 
-    if (def_pwfeedback)
+    if (ISSET(flags, TGP_FEEDBACK))
 	neednl = term_cbreak(input);
     else
 	neednl = term_noecho(input);
@@ -123,7 +126,7 @@ restart:
 
 	if (timeout > 0)
 	    alarm(timeout);
-	pass = getln(input, buf, sizeof(buf), def_pwfeedback);
+	pass = getln(input, buf, sizeof(buf), ISSET(flags, TGP_FEEDBACK));
 	alarm(0);
 	save_errno = errno;
 
@@ -184,7 +187,8 @@ sudo_askpass(prompt)
     if (pid == 0) {
 	/* child, point stdout to output side of the pipe and exec askpass */
 	(void) dup2(pfd[1], STDOUT_FILENO);
-	set_perms(PERM_FULL_USER);
+	//XXX - set real and effective uid to user
+	//set_perms(PERM_FULL_USER);
 	closefrom(STDERR_FILENO + 1);
 	execl(user_askpass, user_askpass, prompt, (char *)NULL);
 	warning("unable to run %s", user_askpass);

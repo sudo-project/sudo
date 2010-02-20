@@ -1,0 +1,208 @@
+#
+# Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @configure_input@
+#
+
+#### Start of system configuration section. ####
+
+srcdir = @srcdir@
+devdir = @devdir@
+top_builddir = @top_builddir@
+top_srcdir = @top_srcdir@
+incdir = $(top_srcdir)/include
+
+# Compiler & tools to use
+CC = @CC@
+NROFF = nroff -Tascii
+
+# Our install program supports extra flags...
+INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
+
+# Libraries
+LIBS = @LIBS@ @SUDO_LIBS@ @GETGROUPS_LIB@ @NET_LIBS@ 
+
+# C preprocessor flags
+CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) -I. @CPPFLAGS@
+
+# Usually -O and/or -g
+CFLAGS = @CFLAGS@
+
+# Flags to pass to the link stage
+LDFLAGS = @LDFLAGS@
+
+# Where to install things...
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+sbindir = @sbindir@
+sysconfdir = @sysconfdir@
+libexecdir = @libexecdir@
+datarootdir = @datarootdir@
+noexecfile = @NOEXECFILE@
+noexecdir = @NOEXECDIR@
+
+# User and group ids the installed files should be "owned" by
+install_uid = 0
+install_gid = 0
+
+# Pass in paths and OS dependent defines
+DEFS = @OSDEFS@
+
+#### End of system configuration section. ####
+
+SHELL = /bin/sh
+
+PROGS = sudo
+
+# XXX - add back missing ones:
+#	sudo_edit.c selinux.c
+OBJS =	sudo.o parse_args.o lbuf.o alloc.o error.o zero_bytes.o \
+	load_plugins.o conversation.o list.o fmt_string.o tgetpass.o \
+	fileops.o term.o atobool.o script.o pty.o
+
+LIB_OBJS = @LIBOBJS@
+
+VERSION = @PACKAGE_VERSION@
+
+# XXX - update
+SUDODEP = $(srcdir)/sudo.h $(incdir)/alloc.h \
+	  $(incdir)/compat.h $(incdir)/error.h \
+	  $(incdir)/list.h $(incdir)/missing.h \
+	  $(top_builddir)/pathnames.h $(top_builddir)/config.h
+
+all: $(PROGS)
+
+.SUFFIXES: .o .c .h .l .y .man .cat .lo
+
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+
+.c.lo:
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+
+sudo: $(OBJS)
+	$(CC) -o $@ $(OBJS) $(LDFLAGS) $(LIBS)
+
+sudo_noexec.lo: $(srcdir)/sudo_noexec.c
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_noexec.c
+
+sudo_noexec.la: sudo_noexec.lo
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
+
+# Dependencies (not counting auth functions)
+aix.o: $(srcdir)/aix.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/aix.c
+alloc.o: $(srcdir)/alloc.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alloc.c
+audit.o: $(srcdir)/audit.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/audit.c
+bsm_audit.o: $(srcdir)/bsm_audit.c $(SUDODEP) bsm_audit.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/bsm_audit.c
+closefrom.o: $(srcdir)/closefrom.c $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/closefrom.c
+error.o: $(srcdir)/error.c $(incdir)/compat.h $(incdir)/error.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/error.c
+fileops.o: $(srcdir)/fileops.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fileops.c
+getcwd.o: $(srcdir)/getcwd.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getcwd.c
+getline.o: $(srcdir)/getline.c $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getline.c
+getprogname.o: $(srcdir)/getprogname.c $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getprogname.c
+isblank.o: $(srcdir)/isblank.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/isblank.c
+lbuf.o: $(srcdir)/lbuf.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/lbuf.c
+list.o: $(srcdir)/list.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/list.c
+memrchr.o: $(srcdir)/memrchr.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/memrchr.c
+mkstemp.o: $(srcdir)/mkstemp.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mkstemp.c
+nanosleep.o: $(srcdir)/nanosleep.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/nanosleep.c
+pty.o: $(srcdir)/pty.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/pty.c
+script.o: $(srcdir)/script.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/script.c
+sigaction.o: $(srcdir)/sigaction.c $(incdir)/compat.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sigaction.c
+snprintf.o: $(srcdir)/snprintf.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/snprintf.c
+strcasecmp.o: $(srcdir)/strcasecmp.c $(incdir)/compat.h  $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strcasecmp.c
+strerror.o: $(srcdir)/strerror.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strerror.c
+strlcat.o: $(srcdir)/strlcat.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strlcat.c
+strlcpy.o: $(srcdir)/strlcpy.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strlcpy.c
+strsignal.o: $(srcdir)/strsignal.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/strsignal.c
+selinux.o: $(srcdir)/selinux.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/selinux.c
+sudo.o: $(srcdir)/sudo.c $(SUDODEP) sudo_usage.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
+sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_edit.c
+sudo_noexec.o: $(srcdir)/sudo_noexec.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_noexec.c
+term.o: $(srcdir)/term.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/term.c
+tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tgetpass.c
+utimes.o: $(srcdir)/utimes.c $(incdir)/compat.h $(srcdir)/emul/utime.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/utimes.c
+zero_bytes.o: $(srcdir)/zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/zero_bytes.c
+
+install: install-dirs install-binaries @INSTALL_NOEXEC@
+
+install-dirs:
+	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(sudodir) \
+	    $(DESTDIR)$(noexecdir)
+
+install-binaries: install-dirs $(PROGS)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 -s sudo $(DESTDIR)$(sudodir)/sudo
+	rm -f $(DESTDIR)$(sudodir)/sudoedit
+	ln $(DESTDIR)$(sudodir)/sudo $(DESTDIR)$(sudodir)/sudoedit
+	if [ -f sesh ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sesh $(DESTDIR)$(libexecdir)/sesh; fi
+
+install-noexec: install-dirs sudo_noexec.la
+	if [ -f .libs/$(noexecfile) ]; then $(INSTALL) -O $(install_uid) -G $(install_gid) -M 0755 .libs/$(noexecfile) $(DESTDIR)$(noexecdir); fi
+
+check:
+	@echo nothing to check
+
+clean:
+	-rm -f *.a *.o *.lo stamp-* $(PROGS) core *.core core.*
+
+mostlyclean: clean
+
+# XXX - remove some
+distclean: clean
+	-rm -rf Makefile pathnames.h config.h config.status config.cache \
+		config.log libtool sudo_noexec.lo .libs $(GENERATED) \
+		sudo_usage.h
+
+clobber: distclean
+
+realclean: distclean
+	rm -f TAGS tags
+
+cleandir: realclean

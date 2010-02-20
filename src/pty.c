@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -58,31 +58,23 @@
 
 #if defined(HAVE_OPENPTY)
 int
-get_pty(master, slave, name, namesz)
-    int *master;
-    int *slave;
-    char *name;
-    size_t namesz;
+get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
 {
     struct group *gr;
     gid_t ttygid = -1;
 
-    if ((gr = sudo_getgrnam("tty")) != NULL)
+    if ((gr = getgrnam("tty")) != NULL)
 	ttygid = gr->gr_gid;
 
     if (openpty(master, slave, name, NULL, NULL) != 0)
 	return(0);
-    (void) chown(name, runas_pw->pw_uid, ttygid);
+    (void) chown(name, uid, ttygid);
     return(1);
 }
 
 #elif defined(HAVE__GETPTY)
 int
-get_pty(master, slave, name, namesz)
-    int *master;
-    int *slave;
-    char *name;
-    size_t namesz;
+get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
 {
     char *line;
 
@@ -95,7 +87,7 @@ get_pty(master, slave, name, namesz)
 	close(*master);
 	return(0);
     }
-    (void) chown(line, runas_pw->pw_uid, -1);
+    (void) chown(line, uid, -1);
     strlcpy(name, line, namesz);
     return(1);
 }
@@ -117,11 +109,7 @@ posix_openpt(oflag)
 # endif /* HAVE_POSIX_OPENPT */
 
 int
-get_pty(master, slave, name, namesz)
-    int *master;
-    int *slave;
-    char *name;
-    size_t namesz;
+get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
 {
     char *line;
 
@@ -148,7 +136,7 @@ get_pty(master, slave, name, namesz)
     ioctl(*slave, I_PUSH, "ptem");	/* pseudo tty emulation module */
     ioctl(*slave, I_PUSH, "ldterm");	/* line discipline module */
 # endif
-    (void) chown(line, runas_pw->pw_uid, -1);
+    (void) chown(line, uid, -1);
     strlcpy(name, line, namesz);
     return(1);
 }
@@ -158,17 +146,13 @@ get_pty(master, slave, name, namesz)
 static char line[] = "/dev/ptyXX";
 
 int
-get_pty(master, slave, name, namesz)
-    int *master;
-    int *slave;
-    char *name;
-    size_t namesz;
+get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
 {
     char *bank, *cp;
     struct group *gr;
     gid_t ttygid = -1;
 
-    if ((gr = sudo_getgrnam("tty")) != NULL)
+    if ((gr = getgrnam("tty")) != NULL)
 	ttygid = gr->gr_gid;
 
     for (bank = "pqrs"; *bank != '\0'; bank++) {
@@ -182,7 +166,7 @@ get_pty(master, slave, name, namesz)
 		continue; /* already in use */
 	    }
 	    line[sizeof("/dev/p") - 2] = 't';
-	    (void) chown(line, runas_pw->pw_uid, ttygid);
+	    (void) chown(line, uid, ttygid);
 	    (void) chmod(line, S_IRUSR|S_IWUSR|S_IWGRP);
 # ifdef HAVE_REVOKE
 	    (void) revoke(line);

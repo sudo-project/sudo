@@ -3,7 +3,7 @@ dnl Process this file with GNU autoconf to produce a configure script.
 dnl
 dnl Copyright (c) 1994-1996,1998-2009 Todd C. Miller <Todd.Miller@courtesan.com>
 dnl
-AC_INIT([sudo], [1.7.3b2], [http://www.sudo.ws/bugs/], [sudo])
+AC_INIT([sudo], [1.8.0a1], [http://www.sudo.ws/bugs/], [sudo])
 AC_CONFIG_HEADER(config.h pathnames.h)
 dnl
 dnl This won't work before AC_INIT
@@ -42,6 +42,7 @@ AC_SUBST(mansectform)
 AC_SUBST(mansrcdir)
 AC_SUBST(NOEXECFILE)
 AC_SUBST(NOEXECDIR)
+AC_SUBST(PLUGINDIR)
 AC_SUBST(noexec_file)
 AC_SUBST(INSTALL_NOEXEC)
 AC_SUBST(DONT_LEAK_PATH_INFO)
@@ -160,6 +161,11 @@ fi
 test "$bindir" = '${exec_prefix}/bin' && bindir='$(exec_prefix)/bin'
 test "$sbindir" = '${exec_prefix}/sbin' && sbindir='$(exec_prefix)/sbin'
 test "$sysconfdir" = '${prefix}/etc' -a X"$with_stow" != X"yes" && sysconfdir='/etc'
+
+dnl
+dnl libc replacement functions live in compat
+dnl
+AC_CONFIG_LIBOBJ_DIR(compat)
 
 dnl
 dnl Deprecated --with options (these all warn or generate an error)
@@ -1060,6 +1066,16 @@ if test X"$with_libvas" != X"no"; then
        [LIBVAS_RPATH=/opt/quest/lib])
 fi
 ])
+
+PLUGINDIR="$libexecdir"
+AC_ARG_WITH(plugin_dir, [AS_HELP_STRING([--with-plugin_dir], [set directory to load plugins from])],
+[case $with_plugin_dir in
+    yes)	;;
+    no)		;;
+    *)		PLUGINDIR="$with_plugin_dir"
+		;;
+esac])
+SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR")
 
 dnl
 dnl Options for --enable
@@ -2701,7 +2717,8 @@ fi
 dnl
 dnl Substitute into the Makefile and man pages
 dnl
-AC_CONFIG_FILES([Makefile sudo.man visudo.man sudoers.man sudoers.ldap.man sudoreplay.man sudo_usage.h])
+dnl AC_CONFIG_FILES([doc/sudo.man doc/visudo.man doc/sudoers.man doc/sudoers.ldap.man doc/sudoreplay.man src/Makefile src/sudo_usage.h])
+AC_CONFIG_FILES([src/sudo_usage.h src/Makefile plugins/sample/Makefile])
 AC_OUTPUT
 
 dnl

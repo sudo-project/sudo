@@ -44,7 +44,7 @@
 # include <time.h>
 #endif
 #ifndef HAVE_TIMESPEC
-# include <compat/timespec.h>
+# include <emul/timespec.h>
 #endif
 
 #include "sudo.h"
