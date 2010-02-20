@@ -26,7 +26,7 @@
 #ifdef HAVE_UTIME_H
 # include <utime.h>
 #else
-# include <emul/utime.h>
+# include <compat/utime.h>
 #endif
 
 #include <compat.h>

@@ -84,10 +84,10 @@
 #include <gram.h>
 
 #ifndef HAVE_FNMATCH
-# include "emul/fnmatch.h"
+# include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
 #ifndef HAVE_EXTENDED_GLOB
-# include "emul/glob.h"
+# include "compat/glob.h"
 #endif /* HAVE_EXTENDED_GLOB */
 #ifdef USING_NONUNIX_GROUPS
 # include "nonunix.h"

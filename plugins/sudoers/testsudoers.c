@@ -67,7 +67,7 @@
 #include <gram.h>
 
 #ifndef HAVE_FNMATCH
-# include "emul/fnmatch.h"
+# include "compat/fnmatch.h"
 #endif /* HAVE_FNMATCH */
 
 /*
