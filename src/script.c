@@ -280,7 +280,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     sigaction_t sa;
     struct script_buf input, output;
     int n, nready;
-    int relaysig, sv[2];
+    int relaysig = 0, sv[2];
     fd_set *fdsr, *fdsw;
     int rbac_enabled = 0;
     int maxfd;
@@ -712,7 +712,7 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 		if (n != sizeof(cstat))
 		    break; /* XXX - error, kill child and exit */
 #ifdef SCRIPT_DEBUG
-		warningx("sent signo to parent");
+		warningx("sent wait status to parent");
 #endif
 		if (!WIFSTOPPED(status)) {
 		    /* XXX */
