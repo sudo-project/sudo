@@ -50,6 +50,7 @@
 #endif
 
 #include "sudo.h"
+#include "missing.h"
 #include "lbuf.h"
 
 #if !defined(TIOCGSIZE) && defined(TIOCGWINSZ)
