@@ -209,26 +209,11 @@ extern struct plugin_container_list io_plugins;
 extern int errno;
 #endif
 
-#ifdef ntoyet
 /*
  * Sudo logging/debugging, printf-style.
- * XXX - not hooked up yet
  * The debug level may be set on the command line via the -D flag.
  * A higher debug level yields more verbose debugging.
  */
-#define SUDO_LOG_DEBUG1  1
-#define SUDO_LOG_DEBUG2  2
-#define SUDO_LOG_DEBUG3  3
-#define SUDO_LOG_DEBUG4  4
-#define SUDO_LOG_DEBUG5  5
-#define SUDO_LOG_DEBUG6  6
-#define SUDO_LOG_DEBUG7  7
-#define SUDO_LOG_DEBUG8  8
-#define SUDO_LOG_DEBUG9  9
-#define SUDO_LOG_INFO   10
-#define SUDO_LOG_WARN   11
-#define SUDO_LOG_ERROR  12
-void sudo_log(int level, const char *format, ...) __printflike(2, 3);
-#endif
+void sudo_debug(int level, const char *format, ...) __printflike(2, 3);
 
 #endif /* _SUDO_SUDO_H */

@@ -84,6 +84,7 @@
  */
 struct plugin_container policy_plugin;
 struct plugin_container_list io_plugins;
+int debug_level;
 
 /*
  * Local functions
@@ -179,8 +180,7 @@ main(int argc, char *argv[], char *envp[])
 	    user_info, envp);
     }
 
-    /* XXX - should not need to check for MODE_INVALIDATE ORed in */
-    warningx("sudo_mode %d", sudo_mode); /* XXX */
+    sudo_debug(9, "sudo_mode %d", sudo_mode);
     switch (sudo_mode & MODE_MASK) {
 	case MODE_VERSION:
 	    policy_plugin.u.policy->show_version(!user_details.uid);
@@ -224,7 +224,7 @@ main(int argc, char *argv[], char *envp[])
 	case MODE_RUN:
 	    ok = policy_plugin.u.policy->check_policy(nargc, nargv, env_add,
 		&command_info, &argv_out, &user_env_out);
-	    warningx("policy plugin returns %d", ok); /* XXX */
+	    sudo_debug(8, "policy plugin returns %d", ok);
 	    if (ok != TRUE)
 		exit(ok); /* plugin printed error message */
 	    command_info_to_details(command_info, &command_details);
@@ -747,7 +747,7 @@ run_command(struct command_details *details, char *argv[], char *envp[])
 
     /* If there are I/O plugins, allocate a pty and exec */
     if (!tq_empty(&io_plugins)) {
-	warningx("script mode"); /* XXX */
+	sudo_debug(8, "script mode");
 	script_setup(details->euid);
 	script_execve(details, argv, envp, &cstat);
     } else {
@@ -789,7 +789,7 @@ run_command(struct command_details *details, char *argv[], char *envp[])
 	    _exit(1);
 	}
 	close(sv[1]);
-	warningx("waiting for child"); /* XXX */
+	sudo_debug(9, "waiting for child");
 
 	/* wait for child to complete or for data on sv[0] */
 	fdsr = (fd_set *)emalloc2(howmany(sv[0] + 1, NFDBITS), sizeof(fd_mask));
@@ -855,39 +855,21 @@ run_command(struct command_details *details, char *argv[], char *envp[])
     exit(exitcode);
 }
 
-#if 0 /* XXX - convert warning/error to something log this */
 /*
  * Simple debugging/logging.
- * XXX - use askpass if configured?
  */
 void
-sudo_log(int level, const char *fmt, ...)
+sudo_debug(int level, const char *fmt, ...)
 {
     va_list ap;
 
-    switch (level) {
-    case SUDO_LOG_INFO:
-	va_start(ap, fmt);
-	vfprintf(stdout, fmt, ap);
-	va_end(ap);
-	break;
-    case SUDO_LOG_DEBUG1:
-    case SUDO_LOG_DEBUG2:
-    case SUDO_LOG_DEBUG3:
-    case SUDO_LOG_DEBUG4:
-    case SUDO_LOG_DEBUG5:
-    case SUDO_LOG_DEBUG6:
-    case SUDO_LOG_DEBUG7:
-    case SUDO_LOG_DEBUG8:
-    case SUDO_LOG_DEBUG9:
-	if (level > debug_level)
-	    return;
-	/* FALLTHROUGH */
-    case SUDO_LOG_WARN:
-    case SUDO_LOG_ERROR:
-	va_start(ap, fmt);
-	vfprintf(stderr, fmt, ap);
-	va_end(ap);
-    }
+    if (level > debug_level)
+	return;
+
+    fputs(getprogname(), stderr);
+    fputs(": ", stderr);
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+    putc('\n', stderr);
 }
-#endif

@@ -189,6 +189,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 #endif
 		case 'D':
 		    sudo_settings.D.value = optarg;
+		    debug_level = atoi(optarg);
 		    break;
 		case 'E':
 		    sudo_settings.c.value = "true";
