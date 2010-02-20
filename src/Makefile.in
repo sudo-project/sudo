@@ -78,11 +78,10 @@ LIB_OBJS = @LIBOBJS@
 
 VERSION = @PACKAGE_VERSION@
 
-# XXX - update
-SUDODEP = $(srcdir)/sudo.h $(incdir)/alloc.h \
-	  $(incdir)/compat.h $(incdir)/error.h \
-	  $(incdir)/list.h $(incdir)/missing.h \
-	  $(top_builddir)/pathnames.h $(top_builddir)/config.h
+SUDODEP = $(srcdir)/sudo.h $(incdir)/sudo_plugin.h $(incdir)/alloc.h \
+	  $(incdir)/compat.h $(incdir)/error.h $(incdir)/list.h \
+	  $(incdir)/missing.h $(top_builddir)/pathnames.h \
+	  $(top_builddir)/config.h
 
 all: $(PROGS)
 
@@ -103,21 +102,28 @@ sudo_noexec.lo: $(srcdir)/sudo_noexec.c
 sudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
-# Dependencies (not counting auth functions)
-aix.o: $(srcdir)/aix.c
+# Dependencies
+# XXX - SUDODEP is overkill for some of these
+aix.o: $(srcdir)/aix.c $(top_builddir)/config.h $(incdir)/compat.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/aix.c
 alloc.o: $(srcdir)/alloc.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alloc.c
+atobool.o: $(srcdir)/atobool.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/atobool.c
 audit.o: $(srcdir)/audit.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/audit.c
 bsm_audit.o: $(srcdir)/bsm_audit.c $(SUDODEP) bsm_audit.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/bsm_audit.c
 closefrom.o: $(srcdir)/closefrom.c $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/closefrom.c
+conversation.o: $(srcdir)/conversation.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/conversation.c
 error.o: $(srcdir)/error.c $(incdir)/compat.h $(incdir)/error.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/error.c
 fileops.o: $(srcdir)/fileops.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fileops.c
+fmt_string.o: $(srcdir)/fmt_string.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fmt_string.c
 getcwd.o: $(srcdir)/getcwd.c $(incdir)/compat.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getcwd.c
 getline.o: $(srcdir)/getline.c $(top_builddir)/config.h
@@ -130,12 +136,16 @@ lbuf.o: $(srcdir)/lbuf.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/lbuf.c
 list.o: $(srcdir)/list.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/list.c
+load_plugins.o: $(srcdir)/load_plugins.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/load_plugins.c
 memrchr.o: $(srcdir)/memrchr.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/memrchr.c
 mkstemp.o: $(srcdir)/mkstemp.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/mkstemp.c
 nanosleep.o: $(srcdir)/nanosleep.c $(incdir)/compat.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/nanosleep.c
+parse_args.o: $(srcdir)/parse_args.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/parse_args.c
 pty.o: $(srcdir)/pty.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/pty.c
 script.o: $(srcdir)/script.c $(SUDODEP)
