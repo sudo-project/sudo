@@ -1067,15 +1067,13 @@ if test X"$with_libvas" != X"no"; then
 fi
 ])
 
-PLUGINDIR="$libexecdir"
+with_plugindir="$libexecdir"
 AC_ARG_WITH(plugin_dir, [AS_HELP_STRING([--with-plugin_dir], [set directory to load plugins from])],
 [case $with_plugin_dir in
-    yes)	;;
-    no)		;;
-    *)		PLUGINDIR="$with_plugin_dir"
+    no)		AC_MSG_ERROR(["illegal argument: --without-plugin_dir."])
 		;;
+    *)		;;
 esac])
-SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR")
 
 dnl
 dnl Options for --enable
@@ -2711,6 +2709,8 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
 	eval sesh_file="$libexecdir/sesh"
 	AC_DEFINE_UNQUOTED(_PATH_SUDO_SESH, "$sesh_file", [The fully qualified pathname of sesh])
     fi
+    eval PLUGINDIR="$with_plugindir"
+    SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR")
     exec_prefix="$oexec_prefix"
 fi
 
