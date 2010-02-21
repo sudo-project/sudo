@@ -63,8 +63,9 @@ SHELL = /bin/sh
 
 OBJS =	sample_plugin.lo
 
-# XXX - need to support linking in compat bits
-LIB_OBJS = @LIBOBJS@
+LIBOBJDIR = $(top_srcdir)/@ac_config_libobj_dir@/
+
+LTLIBOBJS = @LTLIBOBJS@
 
 VERSION = @PACKAGE_VERSION@
 
@@ -81,8 +82,42 @@ all: sample_plugin.la
 sample_plugin.lo: $(srcdir)/sample_plugin.c
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sample_plugin.c
 
-sample_plugin.la: sample_plugin.lo
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sample_plugin.lo -module -avoid-version -rpath $(plugindir)
+sample_plugin.la: sample_plugin.lo $(LTLIBOBJS)
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sample_plugin.lo $(LTLIBOBJS) -module -avoid-version -rpath $(plugindir)
+
+# Compat dependencies
+$(LIBOBJDIR)closefrom.lo: $(top_srcdir)/compat/closefrom.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/closefrom.c
+$(LIBOBJDIR)getcwd.lo: $(top_srcdir)/compat/getcwd.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/getcwd.c
+$(LIBOBJDIR)getline.lo: $(top_srcdir)/compat/getline.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/getline.c
+$(LIBOBJDIR)getprogname.lo: $(top_srcdir)/compat/getprogname.c  $(incdir)/compat.h$(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/getprogname.c
+$(LIBOBJDIR)isblank.lo: $(top_srcdir)/compat/isblank.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/isblank.c
+$(LIBOBJDIR)memrchr.lo: $(top_srcdir)/compat/memrchr.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/memrchr.c
+$(LIBOBJDIR)mkstemp.lo: $(top_srcdir)/compat/mkstemp.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/mkstemp.c
+$(LIBOBJDIR)nanosleep.lo: $(top_srcdir)/compat/nanosleep.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/nanosleep.c
+$(LIBOBJDIR)sigaction.lo: $(top_srcdir)/compat/sigaction.c $(incdir)/compat.h $(incdir)/compat.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/sigaction.c
+$(LIBOBJDIR)snprintf.lo: $(top_srcdir)/compat/snprintf.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/snprintf.c
+$(LIBOBJDIR)strcasecmp.lo: $(top_srcdir)/compat/strcasecmp.c $(incdir)/compat.h  $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/strcasecmp.c
+$(LIBOBJDIR)strerror.lo: $(top_srcdir)/compat/strerror.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/strerror.c
+$(LIBOBJDIR)strlcat.lo: $(top_srcdir)/compat/strlcat.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/strlcat.c
+$(LIBOBJDIR)strlcpy.lo: $(top_srcdir)/compat/strlcpy.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/strlcpy.c
+$(LIBOBJDIR)strsignal.lo: $(top_srcdir)/compat/strsignal.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/strsignal.c
+$(LIBOBJDIR)utimes.lo: $(top_srcdir)/compat/utimes.c $(incdir)/compat.h $(top_srcdir)/compat/compat/utime.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/compat/utimes.c
 
 install: install-dirs install-plugin
 

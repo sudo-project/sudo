@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "config.h"
+#include <config.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -29,7 +29,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
-#include "sudo.h"
+#include <compat.h>
 
 static unsigned int get_random __P((void));
 static void seed_random __P((void));

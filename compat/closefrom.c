@@ -47,7 +47,7 @@
 # endif
 #endif
 
-#include "sudo.h"
+#include <compat.h>
 
 #ifndef HAVE_FCNTL_CLOSEM
 # ifndef HAVE_DIRFD
