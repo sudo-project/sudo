@@ -723,8 +723,7 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	if (n == -1) {
 	    if (errno == EINTR)
 		continue;
-	} else if (n != sizeof(cstat)) {
-	    warningx("error reading command status");
+	    warning("error reading command status");
 	    break;
 	}
 	if (cstat.type != CMD_SIGNO) {
