@@ -91,7 +91,6 @@ static int script_fds[3];
 static int ttyout;
 
 /* XXX - use an array of signals instead of just a single variable */
-static sig_atomic_t alive = 1;
 static sig_atomic_t recvsig = 0;
 static sig_atomic_t ttymode = TERM_COOKED;
 static sig_atomic_t tty_initialized = 0;
@@ -221,9 +220,7 @@ suspend_parent(int signo, struct script_buf *output)
 	/* Suspend self and continue child when we resume. */
 	sa.sa_handler = SIG_DFL;
 	sigaction(signo, &sa, &osa);
-#ifdef SCRIPT_DEBUG
-	warningx("kill parent %d", signo);
-#endif
+	sudo_debug(8, "kill parent %d", signo);
 	kill(parent, signo);
 
 	/* Check foreground/background status on resume. */
@@ -233,10 +230,8 @@ suspend_parent(int signo, struct script_buf *output)
 	 * Only modify term if we are foreground process and either
 	 * the old tty mode was not cooked or child got SIGTT{IN,OU}
 	 */
-#ifdef SCRIPT_DEBUG
-	warningx("parent is in %sground, ttymode %d -> %d",
+	sudo_debug(8, "parent is in %sground, ttymode %d -> %d",
 	    foreground ? "fore" : "back", oldmode, ttymode);
-#endif
 
 	if (ttymode != TERM_COOKED) {
 	    if (foreground) {
@@ -420,7 +415,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     fdsw = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
     zero_bytes(&input, sizeof(input));
     zero_bytes(&output, sizeof(output));
-    while (alive) {
+    for (;;) {
        /* XXX - racey */
 	if (!relaysig && recvsig != SIGCHLD) {
 	    relaysig = recvsig;
@@ -459,17 +454,16 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    if (n == -1) {
 		if (errno == EINTR)
 		    continue;
-		if (errno != EAGAIN)
-		    break;
-	    } else if (n != sizeof(*cstat)) {
-		break; /* EOF? */
+		if (errno != EAGAIN) {
+		    /* Did the other end of the pipe go away? */
+		    cstat->type = CMD_ERRNO;
+		    cstat->val = errno;
+		}
 	    }
 	    if (cstat->type == CMD_WSTATUS) {
 		if (WIFSTOPPED(cstat->val)) {
 		    /* Suspend parent and tell child how to resume on return. */
-#ifdef SCRIPT_DEBUG
-		    warningx("child stopped, suspending parent");
-#endif
+		    sudo_debug(8, "child stopped, suspending parent");
 		    relaysig = suspend_parent(WSTOPSIG(cstat->val), &output);
 		    /* XXX - write relaysig immediately? */
 		    continue;
@@ -478,19 +472,20 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		    break;
 		}
 	    } else if (cstat->type == CMD_ERRNO) {
-		/* Child was unable to execute command. */
+		/* Child was unable to execute command or broken pipe. */
 		break;
 	    }
 	}
 	if (FD_ISSET(sv[0], fdsw)) {
 	    /* XXX - we rely on child to be suspended before we suspend us */
+	    sudo_debug(9, "sending signal %d to child over backchannel", relaysig);
 	    cstat->type = CMD_SIGNO;
 	    cstat->val = relaysig;
 	    relaysig = 0;
 	    do {
 		n = send(sv[0], cstat, sizeof(*cstat), 0);
 	    } while (n == -1 && errno == EINTR);
-	    if (n != sizeof(relaysig)) {
+	    if (n != sizeof(cstat)) {
 		break; /* should not happen */
 	    }
 	}
@@ -550,7 +545,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	}
     }
 
-    /* Flush any remaining output to stdout (already updated output file). */
+    /* Flush any remaining output to stdout (already sent to I/O modules). */
     n = fcntl(STDOUT_FILENO, F_GETFL, 0);
     if (n != -1) {
 	n &= ~O_NONBLOCK;
@@ -696,14 +691,12 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 		pid = waitpid(child, &status, WUNTRACED|WNOHANG);
 	    } while (pid == -1 && errno == EINTR);
 	    if (pid == child) {
-#ifdef SCRIPT_DEBUG
 		if (WIFSTOPPED(status))
-		    warningx("command stopped, signal %d", WSTOPSIG(status));
+		    sudo_debug(8, "command stopped, signal %d", WSTOPSIG(status));
 		else if (WIFSIGNALED(status))
-		    warningx("command killed, signal %d", WTERMSIG(status));
+		    sudo_debug(8, "command killed, signal %d", WTERMSIG(status));
 		else
-		    warningx("command exited?");
-#endif
+		    sudo_debug(8, "command exited: %d", WEXITSTATUS(status));
 		cstat.type = CMD_WSTATUS;
 		cstat.val = status;
 		do {
@@ -711,9 +704,7 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 		} while (n == -1 && errno == EINTR);
 		if (n != sizeof(cstat))
 		    break; /* XXX - error, kill child and exit */
-#ifdef SCRIPT_DEBUG
-		warningx("sent wait status to parent");
-#endif
+		sudo_debug(8, "sent wait status to parent");
 		if (!WIFSTOPPED(status)) {
 		    /* XXX */
 		    _exit(1); /* child dead */
@@ -743,9 +734,7 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	signo = cstat.val;
 
 	/* Handle signal from parent. */
-#ifdef SCRIPT_DEBUG
-	warningx("signal %d from parent", signo);
-#endif
+	sudo_debug(8, "signal %d from parent", signo);
 	switch (signo) {
 	case SIGKILL:
 	    _exit(1); /* XXX */
@@ -866,6 +855,8 @@ sync_winsize(int src, int dst)
 
 /*
  * Handler for SIGCHLD in parent
+ * Note that this will detect when the child monitoring the command exits,
+ * not the command itself.
  */
 static void
 sigchild(int s)
@@ -879,8 +870,6 @@ sigchild(int s)
     if (pid == child) {
 	if (WIFSTOPPED(child_status))
 	    recvsig = WSTOPSIG(child_status);
-	else
-	    alive = 0;
     }
 
     errno = serrno;
