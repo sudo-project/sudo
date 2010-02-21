@@ -842,6 +842,7 @@ REPLAY
 LOGINCAP_USAGE
 NONUNIX_GROUPS_IMPL
 ZLIB
+ac_config_libobj_dir
 timedir
 timeout
 password_timeout
@@ -2062,6 +2063,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { echo "$as_me:$LINENO: Configuring Sudo version $PACKAGE_VERSION" >&5
 echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -6491,7 +6493,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6494 "configure"' > conftest.$ac_ext
+  echo '#line 6496 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8355,11 +8357,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8358: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8360: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8362: \$? = $ac_status" >&5
+   echo "$as_me:8364: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8645,11 +8647,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8648: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8650: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8652: \$? = $ac_status" >&5
+   echo "$as_me:8654: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8749,11 +8751,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8752: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8754: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8756: \$? = $ac_status" >&5
+   echo "$as_me:8758: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11109,7 +11111,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11112 "configure"
+#line 11114 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11209,7 +11211,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11212 "configure"
+#line 11214 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -26905,6 +26907,7 @@ REPLAY!$REPLAY$ac_delim
 LOGINCAP_USAGE!$LOGINCAP_USAGE$ac_delim
 NONUNIX_GROUPS_IMPL!$NONUNIX_GROUPS_IMPL$ac_delim
 ZLIB!$ZLIB$ac_delim
+ac_config_libobj_dir!$ac_config_libobj_dir$ac_delim
 timedir!$timedir$ac_delim
 timeout!$timeout$ac_delim
 password_timeout!$password_timeout$ac_delim
@@ -26924,7 +26927,6 @@ mailto!$mailto$ac_delim
 mailsub!$mailsub$ac_delim
 badpass_message!$badpass_message$ac_delim
 fqdn!$fqdn$ac_delim
-runas_default!$runas_default$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -26966,6 +26968,7 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+runas_default!$runas_default$ac_delim
 env_editor!$env_editor$ac_delim
 passwd_tries!$passwd_tries$ac_delim
 tty_tickets!$tty_tickets$ac_delim
@@ -27012,7 +27015,7 @@ KRB5CONFIG!$KRB5CONFIG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 44; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 45; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

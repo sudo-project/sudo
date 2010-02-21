@@ -140,7 +140,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf *.man
+	-rm -rf Makefile config.log *.man
 
 clobber: distclean
 

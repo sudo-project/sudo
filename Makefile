@@ -15,18 +15,26 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# XXX - add plugins/sudoers, compat
+# XXX - add plugins/sudoers
 SUBDIRS = src plugins/sample doc
 
-all clean install:
+all install: config.status
+	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
+
+config.status:
 	@if [ ! -s config.status ]; then \
 		echo "Please run configure first"; \
 		exit 1; \
 	fi
+
+clean: config.status
+	-rm -f compat/*.o
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
 
-distclean:
-	-rm -rf pathnames.h config.h config.status config.cache \
+mostlyclean: clean
+
+distclean: config.status
+	-rm -rf compat/*.o pathnames.h config.h config.status config.cache \
 		config.log libtool stamp-h* autom4te.cache
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
 
