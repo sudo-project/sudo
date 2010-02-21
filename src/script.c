@@ -206,6 +206,7 @@ suspend_parent(int signo, struct script_buf *output)
 	}
 	ttymode = TERM_RAW;
 	/* FALLTHROUGH */
+    case SIGSTOP:
     case SIGTSTP:
 	/* Flush any remaining output to master tty. */
 	flush_output(output);
