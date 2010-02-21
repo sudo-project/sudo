@@ -796,7 +796,9 @@ run_command(struct command_details *details, char *argv[], char *envp[])
 	zero_bytes(fdsr, howmany(sv[0] + 1, NFDBITS) * sizeof(fd_mask));
 	FD_SET(sv[0], fdsr);
 	for (;;) {
+	    /* XXX - we may get SIGCILD before the wait status from the child */
 	    if (sigchld) {
+		/* Note: this is the child, not the command we are waiting on */
 		sigchld = 0;
 		do {
 		    pid = waitpid(child, &cstat.val, WNOHANG);
@@ -818,11 +820,12 @@ run_command(struct command_details *details, char *argv[], char *envp[])
 		/* read child status */
 		nread = recv(sv[0], &cstat, sizeof(cstat), 0);
 		if (nread == -1) {
+		    /* XXX - could be interrupted by SIGCHLD */
 		    if (errno == EINTR)
 			continue;
-		} else if (nread != sizeof(cstat)) {
-		    warningx("error reading command status");
+		    /* XXX - init cstat for failure case */
 		}
+		sudo_debug(9, "cmdtype %d, val %d", cstat.type, cstat.val);
 		break; /* XXX */
 	    }
 	}
@@ -862,14 +865,15 @@ void
 sudo_debug(int level, const char *fmt, ...)
 {
     va_list ap;
+    char *fmt2;
 
     if (level > debug_level)
 	return;
 
-    fputs(getprogname(), stderr);
-    fputs(": ", stderr);
+    /* Backet fmt with program name and a newline to make it a single write */
+    easprintf(&fmt2, "%s: %s\n", getprogname(), fmt);
     va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
+    vfprintf(stderr, fmt2, ap);
     va_end(ap);
-    putc('\n', stderr);
+    efree(fmt2);
 }
