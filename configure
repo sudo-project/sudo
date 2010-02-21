@@ -26207,7 +26207,7 @@ EOF
     exec_prefix="$oexec_prefix"
 fi
 
-ac_config_files="$ac_config_files src/sudo_usage.h src/Makefile plugins/sample/Makefile"
+ac_config_files="$ac_config_files doc/Makefile.in src/sudo_usage.h src/Makefile plugins/sample/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -26763,6 +26763,7 @@ do
   case $ac_config_target in
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "pathnames.h") CONFIG_HEADERS="$CONFIG_HEADERS pathnames.h" ;;
+    "doc/Makefile.in") CONFIG_FILES="$CONFIG_FILES doc/Makefile.in" ;;
     "src/sudo_usage.h") CONFIG_FILES="$CONFIG_FILES src/sudo_usage.h" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "plugins/sample/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/sample/Makefile" ;;

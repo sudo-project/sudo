@@ -15,8 +15,8 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# XXX - add sudoers, doc, compat
-SUBDIRS = src plugins/sample
+# XXX - add plugins/sudoers, compat
+SUBDIRS = src plugins/sample doc
 
 all clean install:
 	@if [ ! -s config.status ]; then \
