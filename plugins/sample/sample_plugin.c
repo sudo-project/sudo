@@ -39,6 +39,10 @@
 #  include <strings.h>
 # endif
 #endif /* HAVE_STRING_H */
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+#include <fcntl.h>
 #include <stdarg.h>
 
 #include <sudo_plugin.h>
@@ -55,6 +59,7 @@ static struct plugin_state {
     char * const *user_info;
 } plugin_state;
 static sudo_conv_t sudo_conv;
+static FILE *input, *output;
 
 #undef TRUE
 #define TRUE 1
@@ -247,14 +252,32 @@ io_open(unsigned int version, sudo_conv_t conversation,
     char * const settings[], char * const user_info[],
     char * const user_env[])
 {
-    /* TODO: something here */
+    int fd;
+    char path[PATH_MAX];
+
+    /* Open input and output files. */
+    snprintf(path, sizeof(path), "/var/tmp/sample-%u.output",
+	(unsigned int)getpid());
+    fd = open(path, O_WRONLY|O_CREAT|O_EXCL, 0644);
+    if (fd == -1)
+	return FALSE;
+    output = fdopen(fd, "w");
+
+    snprintf(path, sizeof(path), "/var/tmp/sample-%u.input",
+	(unsigned int)getpid());
+    fd = open(path, O_WRONLY|O_CREAT|O_EXCL, 0644);
+    if (fd == -1)
+	return FALSE;
+    input = fdopen(fd, "w");
+
     return TRUE;
 }
 
 static void
 io_close(int exit_status, int error)
 {
-    /* TODO: something here */
+    fclose(input);
+    fclose(output);
 }
 
 static int
@@ -267,14 +290,14 @@ io_version(int verbose)
 static int
 io_log_input(const char *buf, unsigned int len)
 {
-    /* log nothing for now */
+    fwrite(buf, len, 1, input);
     return TRUE;
 }
 
 static int
 io_log_output(const char *buf, unsigned int len)
 {
-    /* log nothing for now */
+    fwrite(buf, len, 1, output);
     return TRUE;
 }
 
