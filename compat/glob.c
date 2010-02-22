@@ -174,9 +174,6 @@ static int	 match __P((Char *, Char *, Char *));
 static void	 qprintf __P((const char *, Char *));
 #endif
 
-extern struct passwd *sudo_getpwnam __P((const char *));
-extern struct passwd *sudo_getpwuid __P((uid_t));
-
 int
 glob(pattern, flags, errfunc, pglob)
 	const char *pattern;
@@ -390,7 +387,7 @@ globtilde(pattern, patbuf, patbuf_len, pglob)
 		 * first and then trying the password file
 		 */
 		if ((h = getenv("HOME")) == NULL) {
-			if ((pwd = sudo_getpwuid(getuid())) == NULL)
+			if ((pwd = getpwuid(getuid())) == NULL)
 				return pattern;
 			else
 				h = pwd->pw_dir;
@@ -399,7 +396,7 @@ globtilde(pattern, patbuf, patbuf_len, pglob)
 		/*
 		 * Expand a ~user
 		 */
-		if ((pwd = sudo_getpwnam((char*) patbuf)) == NULL)
+		if ((pwd = getpwnam((char*) patbuf)) == NULL)
 			return pattern;
 		else
 			h = pwd->pw_dir;
