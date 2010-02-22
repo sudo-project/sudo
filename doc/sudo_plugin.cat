@@ -1,0 +1,792 @@
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+SSuuddoo PPlluuggiinn AAPPII
+       Starting with version 1.8, ssuuddoo supports a plugin API for policy and
+       session logging.  By default, the _s_u_d_o_e_r_s policy plugin and an
+       associated I/O logging plugin are used.  Via the plugin API, ssuuddoo can
+       be configured to use alternate policy and/or I/O logging plugins
+       provided by third parties.  The plugins to be used are specified via
+       the _/_e_t_c_/_s_u_d_o_._c_o_n_f file.
+
+       The API is versioned with a major and minor number.  The minor version
+       number is incremented when additions are made.  The major number is
+       incremented when incompatible changes are made.  A plugin should be
+       check the version passed to it and make sure that the major version
+       matches.
+
+       The plugin API is defined by the sudo_plugin.h header file.
+
+   TThhee ssuuddoo..ccoonnff FFiillee
+       The _/_e_t_c_/_s_u_d_o_._c_o_n_f file contains plugin configuration directives.
+       Currently, the only supported keyword is the Plugin directive, which
+       causes a plugin plugin to be loaded.
+
+       A Plugin line consists of the Plugin keyword, followed by the
+       _s_y_m_b_o_l___n_a_m_e and the _p_a_t_h to the shared object containing the plugin.
+       The _s_y_m_b_o_l___n_a_m_e is the name of the struct policy_plugin or struct
+       io_plugin in the plugin shared object.  The _p_a_t_h may be fully qualified
+       or relative.  If not fully qualified it is relative to the
+       $prefix/libexec directory where the prefix is specified at build time
+       (/usr/local by default).
+
+       The same shared object may contain multiple plugins, each with a
+       different symbol name.  The shared object file must be owned by uid 0
+       and only writable by its owner.  Because of ambiguities that arise from
+       composite policies, only a single policy plugin may be specified.  This
+       limitation does not apply to I/O plugins.
+
+        #
+        # Default /etc/sudo.conf file
+        #
+        # Format:
+        #   Plugin plugin_name plugin_path
+        #
+        # The plugin_path relative to prefix/libexec unless fully qualified
+        # The plugin_name corresponds to a global symbol in the plugin
+        #   that contains the plugin interface.
+        #
+        Plugin policy_plugin sudoers.so
+        Plugin io_plugin sudoers.so
+
+   PPoolliiccyy PPlluuggiinn AAPPII
+       A policy plugin must declare and populate a policy_plugin struct in the
+       global scope.  This structure contains pointers to the functions that
+       implement the ssuuddoo policy checks.  The name of the symbol should be
+       specified in _/_e_t_c_/_s_u_d_o_._c_o_n_f along with a path to the plugin so that
+       ssuuddoo can load it.
+
+
+
+1.8.0a1                 February 21, 2010                       1
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+        struct policy_plugin {
+        #define SUDO_POLICY_PLUGIN     1
+            unsigned int type; /* always SUDO_POLICY_PLUGIN */
+            unsigned int version; /* always SUDO_API_VERSION */
+            int (*open)(unsigned int version, sudo_conv_t conversation,
+                        char * const settings[], char * const user_info[],
+                        char * const user_env[]);
+            void (*close)(int exit_status, int error);
+            int (*show_version)(int verbose);
+            int (*check_policy)(int agrc, char * const argv[],
+                                char *env_add[], char **command_info[],
+                                char **argv_out[], char **user_env_out[]);
+            int (*list)(int argc, char * const argv[], int verbose,
+                        const char *list_user);
+            int (*validate)(void);
+            void (*invalidate)(int remove);
+        };
+
+       The policy_plugin struct has the following fields:
+
+       type
+           The type field should always be set to SUDO_POLICY_PLUGIN
+
+       version
+           The version field should be set to SUDO_API_VERSION.
+
+           This allows ssuuddoo to determine the API version the plugin was built
+           against.
+
+       open
+            int (*open)(unsigned int version, sudo_conv_t conversation,
+                        char * const settings[], char * const user_info[],
+                        char * const user_env[]);
+
+           Returns 1 on success, 0 on failure and -1 on error.  On error, the
+           plugin may optionally call the conversation function with
+           SUDO_CONF_ERROR_MSG to present additional error information to the
+           user.
+
+           The function arguments are as follows:
+
+           version
+               The version passed in by ssuuddoo allows the plugin to determine
+               the major and minor version number of the plugin API supported
+               by ssuuddoo.
+
+           conversation
+               A pointer to the conversation function that can be used by the
+               plugin to interact with the user (see below).
+
+           settings
+               A vector of user-supplied ssuuddoo settings in the form of
+               "name=value" strings.  The vector is terminated by a NULL
+               pointer.  These settings correspond to flags the user specified
+
+
+
+1.8.0a1                 February 21, 2010                       2
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+               when running ssuuddoo.  As such, they will only be present when the
+               corresponding flag has been specified on the command line.
+
+               When parsing _s_e_t_t_i_n_g_s, the plugin should split on the ffiirrsstt
+               equal sign ('=') since the _n_a_m_e field will never include one
+               itself but the _v_a_l_u_e might.
+
+               runas_user=string
+                   The user name or uid to to run the command as, if specified
+                   via the -u flag.
+
+               runas_group=string
+                   The group name or gid to to run the command as, if
+                   specified via the -g flag.
+
+               prompt=string
+                   The prompt to use when requesting a password, if specified
+                   via the -p flag.
+
+               set_home=bool
+                   Set to true if the user specified the -H flag.  If true,
+                   set the HOME environment variable to the target user's home
+                   directory.
+
+               preserve_environment=bool
+                   Set to true if the user specified the -E flag, indicating
+                   that the user wishes to preserve the environment.
+
+               login_shell=bool
+                   Set to true if the user specified the -i flag, indicating
+                   that the user wishes to run a login shell.
+
+               preserve_groups=bool
+                   Set to true if the user specified the -P flag, indicating
+                   that the user wishes to preserve the group vector instead
+                   of setting it based on the runas user.
+
+               ignore_ticket=bool
+                   Set to true if the user specified the -k flag along with a
+                   command, indicating that the user wishes to ignore any
+                   cached authentication credentials.
+
+               login_class=string
+                   BSD login class to use when setting resource limits and
+                   nice value, if specified by the -c flag.
+
+               selinux_role=string
+                   SELinux role to use when executing the command, if
+                   specified by the -r flag.
+
+               selinux_type=string
+                   SELinux type to use when executing the command, if
+                   specified by the -t flag.
+
+
+
+
+1.8.0a1                 February 21, 2010                       3
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+               bsdauth_type=string
+                   Authentication type, if specified by the -a flag, to use on
+                   systems where BSD authentication is supported.
+
+               Additional settings may be added in the future so the plugin
+               should silently ignore settings that it does not recognize.
+
+           user_info
+               A vector of information about the user running the command in
+               the form of "name=value" strings.  The vector is terminated by
+               a NULL pointer.
+
+               When parsing _u_s_e_r___i_n_f_o, the plugin should split on the ffiirrsstt
+               equal sign ('=') since the _n_a_m_e field will never include one
+               itself but the _v_a_l_u_e might.
+
+               user=string
+                   The name of the user invoking ssuuddoo.
+
+               uid=uid_t
+                   The real user ID of the user invoking ssuuddoo.
+
+               gid=gid_t
+                   The real group ID of the user invoking ssuuddoo.
+
+               groups=list
+                   The user's supplementary group list formatted as a string
+                   of comma-separated group IDs.
+
+               cwd=string
+                   The user's current working directory.
+
+               tty=string
+                   The path to the user's terminal device.  If the user has no
+                   terminal device associated with the session, the value will
+                   be empty, as in tty=.
+
+               host=string
+                   The local machine's hostname as returned by the
+                   gethostname() system call.
+
+           user_env
+               The user's environment in the form of a NULL-terminated vector
+               of "name=value" strings.
+
+               When parsing _u_s_e_r___e_n_v, the plugin should split on the ffiirrsstt
+               equal sign ('=') since the _n_a_m_e field will never include one
+               itself but the _v_a_l_u_e might.
+
+       close
+            void (*close)(int exit_status, int error);
+
+           The close function is called when the command being run by ssuuddoo
+           finishes.
+
+
+
+1.8.0a1                 February 21, 2010                       4
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+           The function arguments are as follows:
+
+           exit_status
+               The command's exit status, as returned by the _w_a_i_t(2) system
+               call.  The value of exit_status is undefined if error is non-
+               zero.
+
+           error
+               If the command could not be executed, this is set to the value
+               of errno set by the _e_x_e_c_v_e(2) system call.  The plugin is
+               responsible for displaying error information via the
+               conversation function.  If the command was successfully
+               executed, the value of error is 0.
+
+       show_version
+            int (*show_version)(int verbose);
+
+           The show_version function is called by ssuuddoo when the user specifies
+           the -V option.  The plugin may display its version information to
+           the user via the conversation function using SUDO_CONV_INFO_MSG.
+           If the user requests detailed version information, the verbose flag
+           will be set.
+
+       check_policy
+            int (*check_policy)(int argc, char * const argv[]
+                                char *env_add[], char **command_info[],
+                                char **argv_out[], char **user_env_out[]);
+
+           The _c_h_e_c_k___p_o_l_i_c_y function is called by ssuuddoo to determine whether
+           the user is allowed to run the specified commands.  Returns 1 if
+           the command is allowed, 0 if not and -1 on error.  On error, the
+           plugin may optionally call the conversation function with
+           SUDO_CONF_ERROR_MSG to present additional error information to the
+           user.
+
+           The function arguments are as follows:
+
+           argc
+               The number of elements in _a_r_g_v, not counting the final NULL
+               pointer.
+
+           argv
+               The argument vector describing the command the user wishes to
+               run, in the same form as what would be passed to the _e_x_e_c_v_e_(_)
+               system call.  The vector is terminated by a NULL pointer.
+
+           env_add
+               Additional environment variables specified by the user on the
+               command line in the form of a NULL-terminated vector of
+               "name=value" strings.  The plugin may reject the command if one
+               or more variables are not allowed to be set, or it may silently
+               ignore such variables.
+
+               When parsing _e_n_v___a_d_d, the plugin should split on the ffiirrsstt
+
+
+
+1.8.0a1                 February 21, 2010                       5
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+               equal sign ('=') since the _n_a_m_e field will never include one
+               itself but the _v_a_l_u_e might.
+
+           command_info
+               Information about the command being run in the form of
+               "name=value" strings.  These values are used by ssuuddoo to set the
+               execution environment when running a command.  The plugin is
+               responsible for creating and populating the vector, which must
+               be terminated with a NULL pointer.  The following values are
+               recognized by ssuuddoo:
+
+               command=string
+                   Fully qualified path to the command to be executed.
+
+               runas_uid=uid
+                   User ID to run the command as.
+
+               runas_euid=uid
+                   Effective user ID to run the command as.  If not specified,
+                   the value of _r_u_n_a_s___u_i_d is used.
+
+               runas_gid=gid
+                   Group ID to run the command as.
+
+               runas_egid=gid
+                   Effective group ID to run the command as.  If not
+                   specified, the value of _r_u_n_a_s___g_i_d is used.
+
+               runas_groups=list
+                   The supplementary group vector to use for the command in
+                   the form of a comma-separated list of group IDs.  If
+                   _p_r_e_s_e_r_v_e___g_r_o_u_p_s is set, this option is ignored.
+
+               login_class=login_class
+                   BSD login class to use when setting resource limits and
+                   nice value (optional).  This option is only set on systems
+                   that support login classes.
+
+               preserve_groups=bool
+                   If set, ssuuddoo will preserve the user's group vector instead
+                   of initializing the group vector based on runas_user.
+
+               cwd=string
+                   The current working directory to change to when executing
+                   the command.
+
+               noexec=bool
+                   If set, prevent the command from executing other programs.
+
+               chroot=string
+                   The root directory to use when running the command.
+
+               nice=int
+                   Nice value (priority) to use when executing the command.
+
+
+
+1.8.0a1                 February 21, 2010                       6
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+                   The nice value, if specified, overrides the priority
+                   associated with the _l_o_g_i_n___c_l_a_s_s on BSD systems.
+
+               umask=octal
+                   The file creation mask to use when executing the command.
+
+               selinux_role=string
+                   SELinux role to use when executing the command.
+
+               selinux_type=string
+                   SELinux type to use when executing the command.
+
+               timeout=int
+                   Command timeout.  If non-zero then when the timeout expires
+                   the command will be killed.
+
+               Unsupported values will be ignored.
+
+           argv_out
+               The NULL-terminated argument vector to pass to the _e_x_e_c_v_e_(_)
+               system call when executing the command.  The plugin is
+               responsible for allocating and populating the vector.
+
+           user_env_out
+               The NULL-terminated environment vector to use when executing
+               the command.  The plugin is responsible for allocating and
+               populating the vector.
+
+       list
+            int (*list)(int verbose, const char *list_user,
+                        int argc, char * const argv[]);
+
+           List available privileges for the invoking user.  Returns 1 on
+           success, 0 on failure and -1 on error.  On error, the plugin may
+           optionally call the conversation function with SUDO_CONF_ERROR_MSG
+           to present additional error information to the user.
+
+           Privileges should be output via the conversation function using
+           SUDO_CONV_INFO_MSG.
+
+           verbose
+               Flag indicating whether to list in verbose mode or not.
+
+           list_user
+               The name of a different user to list privileges for if the
+               policy allows it.  If NULL, the plugin should list the
+               privileges of the invoking user.
+
+           argc
+               The number of elements in _a_r_g_v, not counting the final NULL
+               pointer.
+
+           argv
+               If non-NULL, an argument vector describing a command the user
+
+
+
+1.8.0a1                 February 21, 2010                       7
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+               wishes to check against the policy in the same form as what
+               would be passed to the _e_x_e_c_v_e_(_) system call.  If the command is
+               permitted by the policy, the fully-qualified path to the
+               command should be displayed along with any command line
+               arguments.
+
+       validate
+            int (*validate)(void);
+
+           The validate function is called when ssuuddoo is run with the -v flag.
+           For policy plugins such as _s_u_d_o_e_r_s that cache authentication
+           credentials, this function will validate and cache the credentials.
+
+           The validate function should be NULL if the plugin does not support
+           credential caching.
+
+           Returns 1 on success, 0 on failure and -1 on error.  On error, the
+           plugin may optionally call the conversation function with
+           SUDO_CONF_ERROR_MSG to present additional error information to the
+           user.
+
+       invalidate
+            void (*invalidate)(int remove);
+
+           The invalidate function is called when ssuuddoo is called with the -k
+           or -K flag.  For policy plugins such as _s_u_d_o_e_r_s that cache
+           authentication credentials, this function will invalidate the
+           credentials.  If the _r_e_m_o_v_e flag is set, the plugin may remove the
+           credentials instead of simply invalidating them.
+
+           The invalidate function should be NULL if the plugin does not
+           support credential caching.
+
+       _C_o_n_v_e_r_s_a_t_i_o_n _A_P_I
+
+       If the plugin needs to interact with the user or display informational
+       or error messages, it may do so via the conversation function.  A
+       plugin should not attempt to read directly from the standard input or
+       the user's tty.
+
+        struct sudo_conv_message {
+        #define SUDO_CONV_PROMPT_ECHO_OFF      1
+        #define SUDO_CONV_PROMPT_ECHO_ON       2
+        #define SUDO_CONV_ERROR_MSG            3
+        #define SUDO_CONV_INFO_MSG             4
+            int msg_type;
+            int timeout;
+            const char *msg;
+        };
+
+        struct sudo_conv_reply {
+            char *reply;
+        };
+
+
+
+
+1.8.0a1                 February 21, 2010                       8
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+        typedef int (*sudo_conv_t)(int num_msgs,
+                     const struct sudo_conv_message msgs[],
+                     struct sudo_conv_reply replies[]);
+
+       A conversation function is passed in to the plugin's open function when
+       the plugin is initialized.  The plugin passes in a struct
+       sudo_conv_message and struct sudo_conv_reply for each message in the
+       conversation.  The plugin is responsible for freeing the actual reply
+       buffer in struct sudo_conv_reply.
+
+       See the sample plugin for an example of the conversation function
+       usage.
+
+   II//OO PPlluuggiinn AAPPII
+        struct io_plugin {
+        #define SUDO_IO_PLUGIN         2
+            unsigned int type; /* always SUDO_IO_PLUGIN */
+            unsigned int version; /* always SUDO_API_VERSION */
+            int (*open)(unsigned int version, sudo_conv_t conversation
+                        char * const settings[], char * const user_info[],
+                        char * const user_env[]);
+            void (*close)(int exit_status, int error); /* wait status or error */
+            int (*show_version)(int verbose);
+            int (*log_input)(const char *buf, unsigned int len);
+            int (*log_output)(const char *buf, unsigned int len);
+        };
+
+       When an I/O plugin is loaded, ssuuddoo runs the command in a pseudo-tty.
+       This makes it possible to log the input and output from the user's
+       session.  If the log_input function is defined, it will receive the raw
+       user input (note that this will include input even when echo is
+       disabled, such as passwords).  The log_output function receives output
+       from the pseudo-tty that is suitable for replaying the user's session
+       at a later time.  Either log_input or log_output may be NULL.  If the
+       open function returns 0, no I/O will be sent to the plugin.
+
+       The io_plugin struct has the following fields:
+
+       type
+           The type field should always be set to SUDO_IO_PLUGIN
+
+       version
+           The version field should be set to SUDO_API_VERSION.
+
+           This allows ssuuddoo to determine the API version the plugin was built
+           against.
+
+       open
+            int (*open)(unsigned int version, sudo_conv_t conversation
+                        char * const settings[], char * const user_info[],
+                        char * const user_env[]);
+
+           Returns 1 on success, 0 if the command should not be logged and -1
+           on error.  On error, the plugin may optionally call the
+
+
+
+1.8.0a1                 February 21, 2010                       9
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+           conversation function with SUDO_CONF_ERROR_MSG to present
+           additional error information to the user.
+
+           The function arguments are as follows:
+
+           version
+               The version passed in by ssuuddoo allows the plugin to determine
+               the major and minor version number of the plugin API supported
+               by ssuuddoo.
+
+           conversation
+               A pointer to the conversation function that may be used by the
+               _s_h_o_w___v_e_r_s_i_o_n function to display version information (see
+               show_version below).  The conversation function may also be
+               used to display additional error message to the user.
+
+           settings
+               A vector of user-supplied ssuuddoo settings in the form of
+               "name=value" strings.  The vector is terminated by a NULL
+               pointer.  These settings correspond to flags the user specified
+               when running ssuuddoo.  As such, they will only be present when the
+               corresponding flag has been specified on the command line.
+
+               When parsing _s_e_t_t_i_n_g_s, the plugin should split on the ffiirrsstt
+               equal sign ('=') since the _n_a_m_e field will never include one
+               itself but the _v_a_l_u_e might.
+
+               See the "Policy Plugin API" section for a list of all possible
+               settings.
+
+           user_info
+               A vector of information about the user running the command in
+               the form of "name=value" strings.  The vector is terminated by
+               a NULL pointer.
+
+               When parsing _u_s_e_r___i_n_f_o, the plugin should split on the ffiirrsstt
+               equal sign ('=') since the _n_a_m_e field will never include one
+               itself but the _v_a_l_u_e might.
+
+               See the "Policy Plugin API" section for a list of all possible
+               strings.
+
+           user_env
+               The user's environment in the form of a NULL-terminated vector
+               of "name=value" strings.
+
+               When parsing _u_s_e_r___e_n_v, the plugin should split on the ffiirrsstt
+               equal sign ('=') since the _n_a_m_e field will never include one
+               itself but the _v_a_l_u_e might.
+
+       close
+            void (*close)(int exit_status, int error);
+
+           The close function is called when the command being run by ssuuddoo
+
+
+
+1.8.0a1                 February 21, 2010                      10
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+           finishes.
+
+           The function arguments are as follows:
+
+           exit_status
+               The command's exit status, as returned by the _w_a_i_t(2) system
+               call.  The value of exit_status is undefined if error is non-
+               zero.
+
+           error
+               If the command could not be executed, this is set to the value
+               of errno set by the _e_x_e_c_v_e(2) system call.  If the command was
+               successfully executed, the value of error is 0.
+
+       show_version
+            int (*show_version)(int verbose);
+
+           The show_version function is called by ssuuddoo when the user specifies
+           the -V option.  The plugin may display its version information to
+           the user via the conversation function using SUDO_CONV_INFO_MSG.
+           If the user requests detailed version information, the verbose flag
+           will be set.
+
+       log_input
+            int (*log_input)(const char *buf, unsigned int len);
+
+           The _l_o_g___i_n_p_u_t function is called whenever data can be read from the
+           user but before it is passed to the running command.  This allows
+           the plugin to reject data if it chooses to (for instance if the
+           input contains banned content).  Returns 1 if the data should be
+           passed to the command, 0 if the data is rejected (which will
+           terminate the command) or -1 if an error occurred.
+
+           The function arguments are as follows:
+
+           buf The buffer containing user input.
+
+           len The length of _b_u_f in bytes.
+
+       log_output
+            int (*log_output)(const char *buf, unsigned int len);
+
+           The _l_o_g___o_u_t_p_u_t function is called whenever data can be read from
+           the command but before it is written to the user's terminal.  This
+           allows the plugin to reject data if it chooses to (for instance if
+           the input contains banned content).  Returns 1 if the data should
+           be passed to the user, 0 if the data is rejected (which will
+           terminate the command) or -1 if an error occurred.
+
+           The function arguments are as follows:
+
+           buf The buffer containing command output.
+
+           len The length of _b_u_f in bytes.
+
+
+
+1.8.0a1                 February 21, 2010                      11
+
+
+
+
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+
+
+   UUnnhhaannddlleedd ccoommmmaanndd lliinnee ooppttiioonnss
+       The -L command line option has been deprecated as its output is covered
+       by the _s_u_d_o_e_r_s manual page.
+
+   SSuuddoo iimmpplleemmeennttaattiioonn ddeettaaiillss
+       Version macros:
+
+        #define SUDO_API_VERSION_GET_MAJOR(v) ((v) >> 16)
+        #define SUDO_API_VERSION_GET_MINOR(v) ((v) & 0xffff)
+        #define SUDO_API_VERSION_SET_MAJOR(vp, n) do { \
+            *(vp) = (*(vp) & 0x0000ffff) | ((n) << 16); \
+        } while(0)
+        #define SUDO_VERSION_SET_MINOR(vp, n) do { \
+            *(vp) = (*(vp) & 0xffff0000) | (n); \
+        } while(0)
+
+        #define SUDO_API_VERSION_MAJOR 1
+        #define SUDO_API_VERSION_MINOR 0
+        #define SUDO_API_VERSION ((SUDO_API_VERSION_MAJOR << 16) | SUDO_API_VERSION_MINOR)
+
+       Sudo will cast the plugin symbol to the following when determining the
+       plugin type.
+
+        union sudo_plugin {
+            struct policy_plugin policy;
+            struct io_plugin io;
+        };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1.8.0a1                 February 21, 2010                      12
+
+
