@@ -43,6 +43,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #include <fcntl.h>
+#include <limits.h>
 #include <stdarg.h>
 
 #include <sudo_plugin.h>
