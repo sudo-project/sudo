@@ -2162,4 +2162,15 @@ Sudo 1.6.9p20 released.
 
 681) Added umask_override option to restore historical umask behavior.
 
+682) The -k flag may now be used in conjuntion with a command, in which
+     case the user's timestamp file will be ignored (and not updated).
+
+683) The default runas user (usually root) was always used when setting
+     the auxiliary group vector, even when the runas_default option was
+     specified in sudoers.
+
+684) The -u flag may once again be used in conjunction with the -v flag.
+
+685) Users with permission to run sudoedit could run arbitrary commands.
+
 Sudo 1.6.9p21 released.
