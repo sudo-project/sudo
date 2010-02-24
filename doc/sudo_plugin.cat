@@ -1,7 +1,7 @@
 
 
 
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
 SSuuddoo PPlluuggiinn AAPPII
@@ -61,13 +61,13 @@ SSuuddoo PPlluuggiinn AAPPII
 
 
 
-1.8.0a1                 February 21, 2010                       1
+1.8.0a1                 February 24, 2010                       1
 
 
 
 
 
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
         struct policy_plugin {
@@ -127,13 +127,13 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                 February 21, 2010                       2
+1.8.0a1                 February 24, 2010                       2
 
 
 
 
 
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
+SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
                when running ssuuddoo.  As such, they will only be present when the
@@ -142,6 +142,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                When parsing _s_e_t_t_i_n_g_s, the plugin should split on the ffiirrsstt
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
+
+               debug_level=number
+                   A numeric debug level, from 1-9, if specified via the -D
+                   flag.
 
                runas_user=string
                    The user name or uid to to run the command as, if specified
@@ -186,21 +190,21 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    SELinux role to use when executing the command, if
                    specified by the -r flag.
 
+
+
+
+1.8.0a1                 February 24, 2010                       3
+
+
+
+
+
+SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+
+
                selinux_type=string
                    SELinux type to use when executing the command, if
                    specified by the -t flag.
-
-
-
-
-1.8.0a1                 February 21, 2010                       3
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
                bsdauth_type=string
                    Authentication type, if specified by the -a flag, to use on
@@ -251,22 +255,24 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
 
+
+
+
+
+1.8.0a1                 February 24, 2010                       4
+
+
+
+
+
+SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+
+
        close
             void (*close)(int exit_status, int error);
 
            The close function is called when the command being run by ssuuddoo
            finishes.
-
-
-
-1.8.0a1                 February 21, 2010                       4
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
            The function arguments are as follows:
 
@@ -316,24 +322,24 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
            env_add
                Additional environment variables specified by the user on the
+
+
+
+1.8.0a1                 February 24, 2010                       5
+
+
+
+
+
+SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+
+
                command line in the form of a NULL-terminated vector of
                "name=value" strings.  The plugin may reject the command if one
                or more variables are not allowed to be set, or it may silently
                ignore such variables.
 
                When parsing _e_n_v___a_d_d, the plugin should split on the ffiirrsstt
-
-
-
-1.8.0a1                 February 21, 2010                       5
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
                equal sign ('=') since the _n_a_m_e field will never include one
                itself but the _v_a_l_u_e might.
 
@@ -383,23 +389,22 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                noexec=bool
                    If set, prevent the command from executing other programs.
 
+
+
+1.8.0a1                 February 24, 2010                       6
+
+
+
+
+
+SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+
+
                chroot=string
                    The root directory to use when running the command.
 
                nice=int
                    Nice value (priority) to use when executing the command.
-
-
-
-1.8.0a1                 February 21, 2010                       6
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
                    The nice value, if specified, overrides the priority
                    associated with the _l_o_g_i_n___c_l_a_s_s on BSD systems.
 
@@ -448,24 +453,25 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                policy allows it.  If NULL, the plugin should list the
                privileges of the invoking user.
 
+
+
+
+
+1.8.0a1                 February 24, 2010                       7
+
+
+
+
+
+SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+
+
            argc
                The number of elements in _a_r_g_v, not counting the final NULL
                pointer.
 
            argv
                If non-NULL, an argument vector describing a command the user
-
-
-
-1.8.0a1                 February 21, 2010                       7
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
                wishes to check against the policy in the same form as what
                would be passed to the _e_x_e_c_v_e_(_) system call.  If the command is
                permitted by the policy, the fully-qualified path to the
@@ -506,6 +512,26 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        plugin should not attempt to read directly from the standard input or
        the user's tty.
 
+
+
+
+
+
+
+
+
+
+
+
+1.8.0a1                 February 24, 2010                       8
+
+
+
+
+
+SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+
+
         struct sudo_conv_message {
         #define SUDO_CONV_PROMPT_ECHO_OFF      1
         #define SUDO_CONV_PROMPT_ECHO_ON       2
@@ -519,18 +545,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
         struct sudo_conv_reply {
             char *reply;
         };
-
-
-
-
-1.8.0a1                 February 21, 2010                       8
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
         typedef int (*sudo_conv_t)(int num_msgs,
                      const struct sudo_conv_message msgs[],
@@ -573,6 +587,17 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        type
            The type field should always be set to SUDO_IO_PLUGIN
 
+
+
+1.8.0a1                 February 24, 2010                       9
+
+
+
+
+
+SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+
+
        version
            The version field should be set to SUDO_API_VERSION.
 
@@ -586,18 +611,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
            Returns 1 on success, 0 if the command should not be logged and -1
            on error.  On error, the plugin may optionally call the
-
-
-
-1.8.0a1                 February 21, 2010                       9
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
            conversation function with SUDO_CONF_ERROR_MSG to present
            additional error information to the user.
 
@@ -640,6 +653,17 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                See the "Policy Plugin API" section for a list of all possible
                strings.
 
+
+
+1.8.0a1                 February 24, 2010                      10
+
+
+
+
+
+SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+
+
            user_env
                The user's environment in the form of a NULL-terminated vector
                of "name=value" strings.
@@ -652,18 +676,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
             void (*close)(int exit_status, int error);
 
            The close function is called when the command being run by ssuuddoo
-
-
-
-1.8.0a1                 February 21, 2010                      10
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
-
            finishes.
 
            The function arguments are as follows:
@@ -706,6 +718,18 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
        log_output
             int (*log_output)(const char *buf, unsigned int len);
 
+
+
+
+1.8.0a1                 February 24, 2010                      11
+
+
+
+
+
+SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+
+
            The _l_o_g___o_u_t_p_u_t function is called whenever data can be read from
            the command but before it is written to the user's terminal.  This
            allows the plugin to reject data if it chooses to (for instance if
@@ -718,17 +742,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            buf The buffer containing command output.
 
            len The length of _b_u_f in bytes.
-
-
-
-1.8.0a1                 February 21, 2010                      11
-
-
-
-
-
-SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
-
 
    UUnnhhaannddlleedd ccoommmmaanndd lliinnee ooppttiioonnss
        The -L command line option has been deprecated as its output is covered
@@ -774,19 +787,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-1.8.0a1                 February 21, 2010                      12
+1.8.0a1                 February 24, 2010                      12
 
 

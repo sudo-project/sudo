@@ -131,6 +131,10 @@ itself but the I<value> might.
 
 =over 4
 
+=item debug_level=number
+
+A numeric debug level, from 1-9, if specified via the C<-D> flag.
+
 =item runas_user=string
 
 The user name or uid to to run the command as, if specified via the
