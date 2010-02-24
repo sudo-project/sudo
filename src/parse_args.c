@@ -188,8 +188,11 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 #endif
 		case 'D':
+		    if ((debug_level = atoi(optarg)) < 1 || debug_level > 9) {
+			warningx("the argument to -D must be between 1 and 9 inclusive");
+			usage(1);
+		    }
 		    sudo_settings.D.value = optarg;
-		    debug_level = atoi(optarg);
 		    break;
 		case 'E':
 		    sudo_settings.c.value = "true";

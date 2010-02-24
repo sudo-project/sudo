@@ -1,4 +1,4 @@
-Copyright (c) 1994-1996, 1998-2005, 2007-2009
+Copyright (c) 1994-1996, 1998-2005, 2007-2010
 	Todd C. Miller <Todd.Miller@courtesan.com>
 
 Permission to use, copy, modify, and distribute this software for any
@@ -26,21 +26,24 @@ sudo, sudoedit - execute a command as another user
 
 =head1 SYNOPSIS
 
-B<sudo> B<-h> | B<-K> | B<-k> | B<-L> | B<-V>
+B<sudo> S<[B<-D> I<level>]> B<-h> | B<-K> | B<-k> | B<-L> | B<-V>
 
 B<sudo> B<-v> [B<-AknS>]
 S<[B<-a> I<auth_type>]>
+S<[B<-D> I<level>]>
 S<[B<-g> I<group name>|I<#gid>]> S<[B<-p> I<prompt>]>
 S<[B<-u> I<username>|I<#uid>]>
 
 B<sudo> B<-l[l]> [B<-AknS>]
 S<[B<-a> I<auth_type>]>
+S<[B<-D> I<level>]>
 S<[B<-g> I<group name>|I<#gid>]> S<[B<-p> I<prompt>]>
 S<[B<-U> I<user name>]> S<[B<-u> I<user name>|I<#uid>]> [I<command>]
 
 B<sudo> [B<-AbEHnPS>]
 S<[B<-a> I<auth_type>]>
 S<[B<-C> I<fd>]>
+S<[B<-D> I<level>]>
 S<[B<-c> I<class>|I<->]>
 S<[B<-g> I<group name>|I<#gid>]> S<[B<-p> I<prompt>]>
 S<[B<-r> I<role>]> S<[B<-t> I<type>]>
@@ -51,6 +54,7 @@ B<sudoedit> [B<-AnS>]
 S<[B<-a> I<auth_type>]>
 S<[B<-C> I<fd>]>
 S<[B<-c> I<class>|I<->]>
+S<[B<-D> I<level>]>
 S<[B<-g> I<group name>|I<#gid>]> S<[B<-p> I<prompt>]>
 S<[B<-u> I<user name>|I<#uid>]> file ...
 
@@ -153,6 +157,11 @@ capabilities for the user the command is run as.  If the I<class>
 argument specifies an existing user class, the command must be run
 as root, or the B<sudo> command must be run from a shell that is already
 root.  This option is only available on systems with BSD login classes.
+
+=item -D I<level>
+
+Enable debugging of B<sudo> plugins and B<sudo> itself.  The I<level>
+may be a value from 1 through 9.
 
 =item -E
 

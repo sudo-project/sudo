@@ -8,19 +8,19 @@ NNAAMMEE
        sudo, sudoedit - execute a command as another user
 
 SSYYNNOOPPSSIISS
-       ssuuddoo --hh | --KK | --kk | --LL | --VV
+       ssuuddoo [--DD _l_e_v_e_l] --hh | --KK | --kk | --LL | --VV
 
-       ssuuddoo --vv [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t]
-       [--uu _u_s_e_r_n_a_m_e|_#_u_i_d]
+       ssuuddoo --vv [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--DD _l_e_v_e_l] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d]
+       [--pp _p_r_o_m_p_t] [--uu _u_s_e_r_n_a_m_e|_#_u_i_d]
 
-       ssuuddoo --ll[[ll]] [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t]
-       [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
+       ssuuddoo --ll[[ll]] [--AAkknnSS] [--aa _a_u_t_h___t_y_p_e] [--DD _l_e_v_e_l] [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d]
+       [--pp _p_r_o_m_p_t] [--UU _u_s_e_r _n_a_m_e] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [_c_o_m_m_a_n_d]
 
-       ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
+       ssuuddoo [--AAbbEEHHnnPPSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--DD _l_e_v_e_l] [--cc _c_l_a_s_s|_-]
        [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] [VVAARR=_v_a_l_u_e]
        [--ii | --ss] [_c_o_m_m_a_n_d]
 
-       ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-]
+       ssuuddooeeddiitt [--AAnnSS] [--aa _a_u_t_h___t_y_p_e] [--CC _f_d] [--cc _c_l_a_s_s|_-] [--DD _l_e_v_e_l]
        [--gg _g_r_o_u_p _n_a_m_e|_#_g_i_d] [--pp _p_r_o_m_p_t] [--uu _u_s_e_r _n_a_m_e|_#_u_i_d] file ...
 
 DDEESSCCRRIIPPTTIIOONN
@@ -61,7 +61,7 @@ DDEESSCCRRIIPPTTIIOONN
 
 
 
-1.7.3b2                 December 19, 2009                       1
+1.8.0a1                 February 24, 2010                       1
 
 
 
@@ -122,12 +122,12 @@ OOPPTTIIOONNSS
                    is already root.  This option is only available on systems
                    with BSD login classes.
 
-       -E          The --EE (_p_r_e_s_e_r_v_e _e_n_v_i_r_o_n_m_e_n_t) option will override the
-                   _e_n_v___r_e_s_e_t option in _s_u_d_o_e_r_s(4)).  It is only available when
+       -D _l_e_v_e_l    Enable debugging of ssuuddoo plugins and ssuuddoo itself.  The
+                   _l_e_v_e_l may be a value from 1 through 9.
 
 
 
-1.7.3b2                 December 19, 2009                       2
+1.8.0a1                 February 24, 2010                       2
 
 
 
@@ -136,6 +136,8 @@ OOPPTTIIOONNSS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       -E          The --EE (_p_r_e_s_e_r_v_e _e_n_v_i_r_o_n_m_e_n_t) option will override the
+                   _e_n_v___r_e_s_e_t option in _s_u_d_o_e_r_s(4)).  It is only available when
                    either the matching command has the SETENV tag or the
                    _s_e_t_e_n_v option is set in _s_u_d_o_e_r_s(4).
 
@@ -188,12 +190,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    The --ii (_s_i_m_u_l_a_t_e _i_n_i_t_i_a_l _l_o_g_i_n) option runs the shell
                    specified in the _p_a_s_s_w_d(4) entry of the target user as a
                    login shell.  This means that login-specific resource files
-                   such as .profile or .login will be read by the shell.  If a
-                   command is specified, it is passed to the shell for
 
 
 
-1.7.3b2                 December 19, 2009                       3
+1.8.0a1                 February 24, 2010                       3
 
 
 
@@ -202,6 +202,8 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+                   such as .profile or .login will be read by the shell.  If a
+                   command is specified, it is passed to the shell for
                    execution.  Otherwise, an interactive shell is executed.
                    ssuuddoo attempts to change to that user's home directory
                    before running the shell.  It also initializes the
@@ -254,12 +256,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
                    preserve the invoking user's group vector unaltered.  By
                    default, ssuuddoo will initialize the group vector to the list
                    of groups the target user is in.  The real and effective
-                   group IDs, however, are still set to match the target user.
 
 
 
-
-1.7.3b2                 December 19, 2009                       4
+1.8.0a1                 February 24, 2010                       4
 
 
 
@@ -267,6 +267,8 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
+
+                   group IDs, however, are still set to match the target user.
 
        -p _p_r_o_m_p_t   The --pp (_p_r_o_m_p_t) option allows you to override the default
                    password prompt and use a custom one.  The following
@@ -320,12 +322,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
        -V          The --VV (_v_e_r_s_i_o_n) option causes ssuuddoo to print the version
                    number and exit.  If the invoking user is already root the
-                   --VV option will print out a list of the defaults ssuuddoo was
-                   compiled with as well as the machine's local network
 
 
 
-1.7.3b2                 December 19, 2009                       5
+1.8.0a1                 February 24, 2010                       5
 
 
 
@@ -334,6 +334,8 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+                   --VV option will print out a list of the defaults ssuuddoo was
+                   compiled with as well as the machine's local network
                    addresses.
 
        -v          If given the --vv (_v_a_l_i_d_a_t_e) option, ssuuddoo will update the
@@ -387,11 +389,9 @@ SSEECCUURRIITTYY NNOOTTEESS
        blacklist all potentially dangerous environment variables, use of the
        default _e_n_v___r_e_s_e_t behavior is encouraged.
 
-       In all cases, environment variables with a value beginning with () are
 
 
-
-1.7.3b2                 December 19, 2009                       6
+1.8.0a1                 February 24, 2010                       6
 
 
 
@@ -400,6 +400,7 @@ SSEECCUURRIITTYY NNOOTTEESS
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       In all cases, environment variables with a value beginning with () are
        removed as they could be interpreted as bbaasshh functions.  The list of
        environment variables that ssuuddoo allows or denies is contained in the
        output of sudo -V when run as root.
@@ -453,11 +454,10 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 EENNVVIIRROONNMMEENNTT
        ssuuddoo utilizes the following environment variables:
 
-       EDITOR          Default editor to use in --ee (sudoedit) mode if neither
 
 
 
-1.7.3b2                 December 19, 2009                       7
+1.8.0a1                 February 24, 2010                       7
 
 
 
@@ -466,6 +466,7 @@ EENNVVIIRROONNMMEENNTT
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
 
+       EDITOR          Default editor to use in --ee (sudoedit) mode if neither
                        SUDO_EDITOR nor VISUAL is set
 
        HOME            In --ss or --HH mode (or if sudo was configured with the
@@ -522,8 +523,7 @@ EEXXAAMMPPLLEESS
 
 
 
-
-1.7.3b2                 December 19, 2009                       8
+1.8.0a1                 February 24, 2010                       8
 
 
 
@@ -557,8 +557,7 @@ SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
         $ sudo sh -c "cd /home ; du -s * | sort -rn > USAGE"
 
 SSEEEE AALLSSOO
-       _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), _p_a_s_s_w_d(4), _s_u_d_o_e_r_s(5),
-       _v_i_s_u_d_o(1m)
+       _g_r_e_p(1), _s_u(1), _s_t_a_t(2), _l_o_g_i_n___c_a_p(3), _p_a_s_s_w_d(4), _s_u_d_o_e_r_s(4), _v_i_s_u_d_o(1m)
 
 AAUUTTHHOORRSS
        Many people have worked on ssuuddoo over the years; this version consists
@@ -586,10 +585,11 @@ CCAAVVEEAATTSS
 
        If users have sudo ALL there is nothing to prevent them from creating
        their own program that gives them a root shell regardless of any '!'
+       elements in the user specification.
 
 
 
-1.7.3b2                 December 19, 2009                       9
+1.8.0a1                 February 24, 2010                       9
 
 
 
@@ -597,8 +597,6 @@ CCAAVVEEAATTSS
 
 SUDO(1m)               MAINTENANCE COMMANDS              SUDO(1m)
 
-
-       elements in the user specification.
 
        Running shell scripts via ssuuddoo can expose the same kernel bugs that
        make setuid shell scripts unsafe on some operating systems (if your OS
@@ -655,6 +653,8 @@ DDIISSCCLLAAIIMMEERR
 
 
 
-1.7.3b2                 December 19, 2009                      10
+
+
+1.8.0a1                 February 24, 2010                      10
 
 

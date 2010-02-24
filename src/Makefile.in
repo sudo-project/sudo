@@ -131,7 +131,7 @@ list.o: $(srcdir)/list.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/list.c
 load_plugins.o: $(srcdir)/load_plugins.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/load_plugins.c
-parse_args.o: $(srcdir)/parse_args.c $(SUDODEP)
+parse_args.o: $(srcdir)/parse_args.c sudo_usage.h $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/parse_args.c
 pty.o: $(srcdir)/pty.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/pty.c
@@ -139,7 +139,7 @@ script.o: $(srcdir)/script.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/script.c
 selinux.o: $(srcdir)/selinux.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/selinux.c
-sudo.o: $(srcdir)/sudo.c $(SUDODEP) sudo_usage.h
+sudo.o: $(srcdir)/sudo.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_edit.c
