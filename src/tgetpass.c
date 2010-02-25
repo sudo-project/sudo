@@ -56,35 +56,42 @@
 
 #include "sudo.h"
 
-/* XXX */
-char *user_askpass = NULL;
-
 static volatile sig_atomic_t signo;
 
-static void handler __P((int));
-static char *getln __P((int, char *, size_t, int));
-static char *sudo_askpass __P((const char *));
+static void handler(int);
+static char *getln(int, char *, size_t, int);
+static char *sudo_askpass(const char *, const char *);
+
+extern struct user_details user_details; /* XXX */
 
 /*
  * Like getpass(3) but with timeout and echo flags.
  */
 char *
-tgetpass(prompt, timeout, flags)
-    const char *prompt;
-    int timeout;
-    int flags;
+tgetpass(const char *prompt, int timeout, int flags)
 {
     sigaction_t sa, savealrm, saveint, savehup, savequit, saveterm;
     sigaction_t savetstp, savettin, savettou;
     char *pass;
+    static char *askpass;
     static char buf[SUDO_PASS_MAX + 1];
     int input, output, save_errno, neednl;;
 
     (void) fflush(stdout);
 
     /* If using a helper program to get the password, run it instead. */
-    if (ISSET(flags, TGP_ASKPASS) && user_askpass)
-	return(sudo_askpass(prompt));
+    /* XXX - askpass may be set by policy */
+    if (ISSET(flags, TGP_ASKPASS)) {
+	if (!askpass) {
+	    askpass = getenv("SUDO_ASKPASS");
+#ifdef _PATH_SUDO_ASKPASS
+	    if (!askpass)
+		askpass = _PATH_SUDO_ASKPASS;
+#endif
+	}
+	if (askpass && *askpass)
+	    return(sudo_askpass(askpass, prompt));
+    }
 
 restart:
     signo = 0;
@@ -170,8 +177,7 @@ restart:
  * Fork a child and exec sudo-askpass to get the password from the user.
  */
 static char *
-sudo_askpass(prompt)
-    const char *prompt;
+sudo_askpass(const char *askpass, const char *prompt)
 {
     static char buf[SUDO_PASS_MAX + 1], *pass;
     sigaction_t sa, saved_sa_pipe;
@@ -187,11 +193,18 @@ sudo_askpass(prompt)
     if (pid == 0) {
 	/* child, point stdout to output side of the pipe and exec askpass */
 	(void) dup2(pfd[1], STDOUT_FILENO);
-	//XXX - set real and effective uid to user
-	//set_perms(PERM_FULL_USER);
+	(void) setuid(ROOT_UID);
+	if (setgid(user_details.gid)) {
+	    warning("unable to set gid to %u", (unsigned int)user_details.gid);
+	    _exit(255);
+	}
+	if (setuid(user_details.uid)) {
+	    warning("unable to set uid to %u", (unsigned int)user_details.uid);
+	    _exit(255);
+	}
 	closefrom(STDERR_FILENO + 1);
-	execl(user_askpass, user_askpass, prompt, (char *)NULL);
-	warning("unable to run %s", user_askpass);
+	execl(askpass, askpass, prompt, (char *)NULL);
+	warning("unable to run %s", askpass);
 	_exit(255);
     }
 
@@ -214,11 +227,7 @@ sudo_askpass(prompt)
 extern int term_erase, term_kill;
 
 static char *
-getln(fd, buf, bufsiz, feedback)
-    int fd;
-    char *buf;
-    size_t bufsiz;
-    int feedback;
+getln(int fd, char *buf, size_t bufsiz, int feedback)
 {
     size_t left = bufsiz;
     ssize_t nr = -1;
@@ -267,15 +276,14 @@ getln(fd, buf, bufsiz, feedback)
 }
 
 static void
-handler(s)
-    int s;
+handler(int s)
 {
     if (s != SIGALRM)
 	signo = s;
 }
 
 int
-tty_present()
+tty_present(void)
 {
     int fd;
 

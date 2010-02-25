@@ -103,6 +103,9 @@ extern const char *list_user, *runas_user, *runas_group;
 int Argc;
 char **Argv;
 
+/* Needed by tgetpass when executing askpass helper */
+struct user_details user_details;
+
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
@@ -116,7 +119,6 @@ main(int argc, char *argv[], char *envp[])
     char **nargv, **settings, **env_add;
     char **user_info, **command_info, **argv_out, **user_env_out;
     struct plugin_container *plugin;
-    struct user_details user_details;
     struct command_details command_details;
     int ok;
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
