@@ -87,7 +87,7 @@ struct script_buf {
     char buf[16 * 1024];
 };
 
-static int script_fds[3];
+static int script_fds[3] = { -1, -1, -1 };
 static int ttyout;
 
 /* XXX - use an array of signals instead of just a single variable */
@@ -279,40 +279,38 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     int relaysig = 0, sv[2];
     fd_set *fdsr, *fdsw;
     int rbac_enabled = 0;
-    int maxfd;
+    int log_io, maxfd;
 
     cstat->type = 0; /* XXX */
+
+    log_io = !tq_empty(&io_plugins);
 
 #ifdef HAVE_SELINUX
     rbac_enabled = is_selinux_enabled() > 0 && user_role != NULL;
     if (rbac_enabled) {
 	selinux_prefork(user_role, user_type, script_fds[SFD_SLAVE]);
-	/* Re-open slave fd after it has been relabeled */
-	close(script_fds[SFD_SLAVE]);
-	script_fds[SFD_SLAVE] = open(slavename, O_RDWR|O_NOCTTY, 0);
-	if (script_fds[SFD_SLAVE] == -1)
+	if (log_io) {
+	    /* Re-open slave fd after it has been relabeled */
+	    close(script_fds[SFD_SLAVE]);
+	    script_fds[SFD_SLAVE] = open(slavename, O_RDWR|O_NOCTTY, 0);
+	    if (script_fds[SFD_SLAVE] == -1)
 	    error(1, "cannot open %s", slavename);
+	}
     }
 #endif
 
-    /* Are we the foreground process? */
     parent = getpid(); /* so child can pass signals back to us */
-    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
 
-    /* So we can block tty-generated signals */
-    sigemptyset(&ttyblock);
-    sigaddset(&ttyblock, SIGINT);
-    sigaddset(&ttyblock, SIGQUIT);
-    sigaddset(&ttyblock, SIGTSTP);
-    sigaddset(&ttyblock, SIGTTIN);
-    sigaddset(&ttyblock, SIGTTOU);
+    /*
+     * We communicate with the child over a bi-directional pipe.
+     * Parent sends signal info to child and child sends back wait status.
+     */
+    if (socketpair(PF_UNIX, SOCK_DGRAM, 0, sv) != 0)
+	error(1, "cannot create sockets");
 
-    /* Setup signal handlers window size changes and child stop/exit */
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
-    sa.sa_handler = sigwinch;
-    sigaction(SIGWINCH, &sa, NULL);
 
     /* XXX - now get command status via sv (still need to detect child death) */
     sa.sa_handler = sigchild;
@@ -322,6 +320,25 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     sa.sa_handler = SIG_IGN;
     sigaction(SIGPIPE, &sa, NULL);
 
+    if (log_io) {
+	sa.sa_handler = sigwinch;
+	sigaction(SIGWINCH, &sa, NULL);
+
+	/* So we can block tty-generated signals */
+	sigemptyset(&ttyblock);
+	sigaddset(&ttyblock, SIGINT);
+	sigaddset(&ttyblock, SIGQUIT);
+	sigaddset(&ttyblock, SIGTSTP);
+	sigaddset(&ttyblock, SIGTTIN);
+	sigaddset(&ttyblock, SIGTTOU);
+
+	/* Are we the foreground process? */
+	foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
+
+	/* If stdout is not a tty we handle post-processing differently. */
+	ttyout = isatty(STDOUT_FILENO);
+    }
+
     /* Signals to relay from parent to child. */
     sa.sa_flags = 0; /* do not restart syscalls for these */
     sa.sa_handler = handler;
@@ -330,22 +347,12 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     sigaction(SIGINT, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
     sigaction(SIGTSTP, &sa, NULL);
-#if 0 /* XXX - keep? */
+#if 0 /* XXX - keep these? */
     sigaction(SIGTTIN, &sa, NULL);
     sigaction(SIGTTOU, &sa, NULL);
 #endif
 
-    /* If stdout is not a tty we handle post-processing differently. */
-    ttyout = isatty(STDOUT_FILENO);
-
-    /*
-     * We communicate with the child over a bi-directional pipe.
-     * Parent sends signal info to child and child sends back wait status.
-     */
-    if (socketpair(PF_UNIX, SOCK_DGRAM, 0, sv) != 0)
-	error(1, "cannot create sockets");
-
-    if (foreground) {
+    if (log_io && foreground) {
 	/* Copy terminal attrs from user tty -> pty slave. */
 	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], ttyout)) {
 	    tty_initialized = 1;
@@ -376,7 +383,17 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	close(sv[0]);
 	if (exec_setup(details) == 0) {
 	    /* headed for execve() */
-	    script_child(details->command, argv, envp, sv[1], rbac_enabled);
+	    if (log_io)
+		script_child(details->command, argv, envp, sv[1], rbac_enabled);
+	    else {
+#ifdef HAVE_SELINUX
+		if (rbac_enabled)
+		    selinux_execve(details->command, argv, envp);
+		else
+#endif
+		    execve(details->command, argv, envp);
+	    }
+	    /* XXX - fallback to sh */
 	}
 	cstat->type = CMD_ERRNO;
 	cstat->val = errno;
@@ -385,28 +402,31 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     }
     close(sv[1]);
 
-    n = fcntl(script_fds[SFD_MASTER], F_GETFL, 0);
-    if (n != -1) {
-	n |= O_NONBLOCK;
-	(void) fcntl(script_fds[SFD_MASTER], F_SETFL, n);
-    }
-    n = fcntl(script_fds[SFD_USERTTY], F_GETFL, 0);
-    if (n != -1) {
-	n |= O_NONBLOCK;
-	(void) fcntl(script_fds[SFD_USERTTY], F_SETFL, n);
-    }
-    n = fcntl(STDOUT_FILENO, F_GETFL, 0);
-    if (n != -1) {
-	n |= O_NONBLOCK;
-	(void) fcntl(STDOUT_FILENO, F_SETFL, n);
-    }
-
     /* Max fd we will be selecting on. */
     maxfd = sv[0];
-    if (maxfd < script_fds[SFD_MASTER])
-	maxfd = script_fds[SFD_MASTER];
-    if (maxfd < script_fds[SFD_USERTTY])
-	maxfd = script_fds[SFD_USERTTY];
+
+    if (log_io) {
+	if (maxfd < script_fds[SFD_MASTER])
+	    maxfd = script_fds[SFD_MASTER];
+	if (maxfd < script_fds[SFD_USERTTY])
+	    maxfd = script_fds[SFD_USERTTY];
+
+	n = fcntl(script_fds[SFD_MASTER], F_GETFL, 0);
+	if (n != -1) {
+	    n |= O_NONBLOCK;
+	    (void) fcntl(script_fds[SFD_MASTER], F_SETFL, n);
+	}
+	n = fcntl(script_fds[SFD_USERTTY], F_GETFL, 0);
+	if (n != -1) {
+	    n |= O_NONBLOCK;
+	    (void) fcntl(script_fds[SFD_USERTTY], F_SETFL, n);
+	}
+	n = fcntl(STDOUT_FILENO, F_GETFL, 0);
+	if (n != -1) {
+	    n |= O_NONBLOCK;
+	    (void) fcntl(STDOUT_FILENO, F_SETFL, n);
+	}
+    }
 
     /*
      * In the event loop we pass input from user tty to master
@@ -423,22 +443,31 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    recvsig = 0;
 	}
 
-	if (input.off == input.len)
-	    input.off = input.len = 0;
-	if (output.off == output.len)
-	    output.off = output.len = 0;
+	/* If not logging I/O and child has exited we are done. */
+	if (!log_io && recvsig == SIGCHLD) {
+	    cstat->type = CMD_WSTATUS;
+	    cstat->val = child_status;
+	    break;
+	}
 
 	zero_bytes(fdsw, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 	zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
 
-	if (ttymode == TERM_RAW && input.len != sizeof(input.buf))
-	    FD_SET(script_fds[SFD_USERTTY], fdsr);
-	if (output.len != sizeof(output.buf))
-	    FD_SET(script_fds[SFD_MASTER], fdsr);
-	if (output.len > output.off)
-	    FD_SET(STDOUT_FILENO, fdsw);
-	if (input.len > input.off)
-	    FD_SET(script_fds[SFD_MASTER], fdsw);
+	if (log_io) {
+	    if (input.off == input.len)
+		input.off = input.len = 0;
+	    if (output.off == output.len)
+		output.off = output.len = 0;
+
+	    if (ttymode == TERM_RAW && input.len != sizeof(input.buf))
+		FD_SET(script_fds[SFD_USERTTY], fdsr);
+	    if (output.len != sizeof(output.buf))
+		FD_SET(script_fds[SFD_MASTER], fdsr);
+	    if (output.len > output.off)
+		FD_SET(STDOUT_FILENO, fdsw);
+	    if (input.len > input.off)
+		FD_SET(script_fds[SFD_MASTER], fdsw);
+	}
 	FD_SET(sv[0], fdsr);
 	if (relaysig)
 	    FD_SET(sv[0], fdsw);
@@ -490,6 +519,9 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		break; /* should not happen */
 	    }
 	}
+	if (!log_io)
+	    continue;
+
 	if (FD_ISSET(script_fds[SFD_USERTTY], fdsr)) {
 	    n = read(script_fds[SFD_USERTTY], input.buf + input.len,
 		sizeof(input.buf) - input.len);
@@ -546,30 +578,31 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	}
     }
 
-    /* Flush any remaining output to stdout (already sent to I/O modules). */
-    n = fcntl(STDOUT_FILENO, F_GETFL, 0);
-    if (n != -1) {
-	n &= ~O_NONBLOCK;
-	(void) fcntl(STDOUT_FILENO, F_SETFL, n);
-    }
-    flush_output(&output);
+    if (log_io) {
+	/* Flush any remaining output to stdout (plugin already got it) */
+	n = fcntl(STDOUT_FILENO, F_GETFL, 0);
+	if (n != -1) {
+	    n &= ~O_NONBLOCK;
+	    (void) fcntl(STDOUT_FILENO, F_SETFL, n);
+	}
+	flush_output(&output);
 
 #ifdef HAVE_STRSIGNAL
-    if (cstat->type == CMD_WSTATUS && WIFSIGNALED(cstat->val)) {
-	int signo = WTERMSIG(cstat->val);
-	if (signo && signo != SIGINT && signo != SIGPIPE) {
-	    char *reason = strsignal(signo);
-	    write(STDOUT_FILENO, reason, strlen(reason));
-	    if (WCOREDUMP(cstat->val))
-		write(STDOUT_FILENO, " (core dumped)", 14);
-	    write(STDOUT_FILENO, "\n", 1);
+	if (cstat->type == CMD_WSTATUS && WIFSIGNALED(cstat->val)) {
+	    int signo = WTERMSIG(cstat->val);
+	    if (signo && signo != SIGINT && signo != SIGPIPE) {
+		char *reason = strsignal(signo);
+		write(STDOUT_FILENO, reason, strlen(reason));
+		if (WCOREDUMP(cstat->val))
+		    write(STDOUT_FILENO, " (core dumped)", 14);
+		write(STDOUT_FILENO, "\n", 1);
+	    }
 	}
-    }
 #endif
-
-    do {
-	n = term_restore(script_fds[SFD_USERTTY], 0);
-    } while (!n && errno == EINTR);
+	do {
+	    n = term_restore(script_fds[SFD_USERTTY], 0);
+	} while (!n && errno == EINTR);
+    }
 
     return cstat->type == CMD_ERRNO ? -1 : 0;
 }
@@ -862,10 +895,15 @@ static void
 sigchild(int s)
 {
     pid_t pid;
+    int flags = WNOHANG;
     int serrno = errno;
 
+    if (!tq_empty(&io_plugins))
+    	flags |= WUNTRACED;
+    else
+	recvsig = SIGCHLD;
     do {
-	pid = waitpid(child, &child_status, WNOHANG | WUNTRACED);
+	pid = waitpid(child, &child_status, flags);
     } while (pid == -1 && errno == EINTR);
     if (pid == child) {
 	if (WIFSTOPPED(child_status))

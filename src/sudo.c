@@ -746,94 +746,14 @@ run_command(struct command_details *details, char *argv[], char *envp[])
     /*
      * XXX - missing closefrom(), may not be possible in new scheme
      *       also no background support
-     *       or selinux...
      */
 
     /* If there are I/O plugins, allocate a pty and exec */
     if (!tq_empty(&io_plugins)) {
 	sudo_debug(8, "script mode");
 	script_setup(details->euid);
-	script_execve(details, argv, envp, &cstat);
-    } else {
-	pid_t child, pid;
-	int nready, sv[2];
-	ssize_t nread;
-	sigaction_t sa;
-	fd_set *fdsr;
-
-	zero_bytes(&sa, sizeof(sa));
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART;
-
-	/* Want select() to be interrupted when child dies. */
-	sa.sa_handler = sigchild;
-	sigaction(SIGCHLD, &sa, NULL);
-     
-	/* Ignore SIGPIPE from other end of socketpair. */
-	sa.sa_handler = SIG_IGN;
-	sigaction(SIGPIPE, &sa, NULL);
-
-	if (socketpair(PF_UNIX, SOCK_DGRAM, 0, sv) != 0)
-		error(1, "cannot create sockets");
-
-	child = fork();
-	if (child == -1)
-	    error(1, "unable to fork");
-
-	if (child == 0) {
-	    /* child */
-	    close(sv[0]);
-	    if (exec_setup(details) == 0) {
-		/* XXX - fallback via /bin/sh */
-		execve(details->command, argv, envp);
-	    }
-	    cstat.type = CMD_ERRNO;
-	    cstat.val = errno;
-	    write(sv[1], &cstat, sizeof(cstat));
-	    _exit(1);
-	}
-	close(sv[1]);
-	sudo_debug(9, "waiting for child");
-
-	/* wait for child to complete or for data on sv[0] */
-	fdsr = (fd_set *)emalloc2(howmany(sv[0] + 1, NFDBITS), sizeof(fd_mask));
-	zero_bytes(fdsr, howmany(sv[0] + 1, NFDBITS) * sizeof(fd_mask));
-	FD_SET(sv[0], fdsr);
-	for (;;) {
-	    /* XXX - we may get SIGCILD before the wait status from the child */
-	    if (sigchld) {
-		/* Note: this is the child, not the command we are waiting on */
-		sigchld = 0;
-		do {
-		    pid = waitpid(child, &cstat.val, WNOHANG);
-		    if (pid == child)
-			cstat.type = CMD_WSTATUS;
-		} while (pid == -1 && errno == EINTR);
-		if (cstat.type == CMD_WSTATUS) {
-		    /* command terminated, we're done */
-		    break;
-		}
-	    }
-	    nready = select(sv[0] + 1, fdsr, NULL, NULL, NULL);
-	    if (nready == -1) {
-		if (errno == EINTR)
-		    continue;
-		error(1, "select failed");
-	    }
-	    if (FD_ISSET(sv[0], fdsr)) {
-		/* read child status */
-		nread = recv(sv[0], &cstat, sizeof(cstat), 0);
-		if (nread == -1) {
-		    /* XXX - could be interrupted by SIGCHLD */
-		    if (errno == EINTR)
-			continue;
-		    /* XXX - init cstat for failure case */
-		}
-		sudo_debug(9, "cmdtype %d, val %d", cstat.type, cstat.val);
-		break; /* XXX */
-	    }
-	}
     }
+    script_execve(details, argv, envp, &cstat);
 
     switch (cstat.type) {
     case CMD_ERRNO:
