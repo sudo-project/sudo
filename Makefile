@@ -21,6 +21,9 @@ SUBDIRS = src plugins/sample doc
 all install: config.status
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
 
+ChangeLog:
+	hg log --style=changelog -b default > $@
+
 config.status:
 	@if [ ! -s config.status ]; then \
 		echo "Please run configure first"; \
@@ -35,7 +38,7 @@ mostlyclean: clean
 
 distclean: config.status
 	-rm -rf compat/*.o pathnames.h config.h config.status config.cache \
-		config.log libtool stamp-h* autom4te.cache
+		config.log libtool stamp-h* autom4te.cache ChangeLog
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
 
 cleandir: distclean
