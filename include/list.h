@@ -20,19 +20,11 @@
 /*
  * Convenience macro for declaring a list head.
  */
-#ifdef __STDC__
 #define TQ_DECLARE(n)					\
 struct n##_list {					\
     struct n *first;					\
     struct n *last;					\
 };
-#else
-#define TQ_DECLARE(n)					\
-struct n/**/_list {					\
-    struct n *first;					\
-    struct n *last;					\
-};
-#endif
 
 /*
  * Foreach loops: forward and reverse
@@ -75,9 +67,9 @@ struct n/**/_list {					\
 /*
  * Prototypes for list.c
  */
-void *tq_pop		__P((void *));
-void tq_append		__P((void *, void *));
-void list_append	__P((void *, void *));
-void list2tq		__P((void *, void *));
+void *tq_pop		(void *);
+void tq_append		(void *, void *);
+void list_append	(void *, void *);
+void list2tq		(void *, void *);
 
 #endif /* _SUDO_LIST_H */

@@ -30,10 +30,10 @@ struct lbuf {
     int size;
 };
 
-void lbuf_init		__P((struct lbuf *, char *, int, int));
-void lbuf_destroy	__P((struct lbuf *));
-void lbuf_append	__P((struct lbuf *, ...));
-void lbuf_append_quoted	__P((struct lbuf *, const char *, ...));
-void lbuf_print		__P((struct lbuf *));
+void lbuf_init		(struct lbuf *, char *, int, int);
+void lbuf_destroy	(struct lbuf *);
+void lbuf_append	(struct lbuf *, ...);
+void lbuf_append_quoted	(struct lbuf *, const char *, ...);
+void lbuf_print		(struct lbuf *);
 
 #endif /* _SUDO_LBUF_H */

@@ -26,15 +26,6 @@
  * Macros that may be missing on some Operating Systems
  */
 
-/* Deal with ANSI stuff reasonably.  */
-#ifndef  __P
-# if defined (__cplusplus) || defined (__STDC__)
-#  define __P(args)		args
-# else
-#  define __P(args)		()
-# endif
-#endif /* __P */
-
 /* Define away __attribute__ for non-gcc or old gcc */
 #if !defined(__GNUC__) || __GNUC__ < 2 || __GNUC__ == 2 && __GNUC_MINOR__ < 5
 # define __attribute__(x)
@@ -154,7 +145,7 @@
  * Simple isblank() macro and function for systems without it.
  */
 #ifndef HAVE_ISBLANK
-int isblank __P((int));
+int isblank(int);
 # define isblank(_x)	((_x) == ' ' || (_x) == '\t')
 #endif
 
@@ -202,13 +193,13 @@ int isblank __P((int));
 # define sa_flags	sv_flags
 typedef struct sigvec sigaction_t;
 typedef int sigset_t;
-int sigaction __P((int sig, const sigaction_t *act, sigaction_t *oact));
-int sigemptyset __P((sigset_t *));
-int sigfillset __P((sigset_t *));
-int sigaddset __P((sigset_t *, int));
-int sigdelset __P((sigset_t *, int));
-int sigismember __P((sigset_t *, int));
-int sigprocmask __P((int, const sigset_t *, sigset_t *));
+int sigaction(int sig, const sigaction_t *act, sigaction_t *oact);
+int sigemptyset(sigset_t *);
+int sigfillset(sigset_t *);
+int sigaddset(sigset_t *, int);
+int sigdelset(sigset_t *, int);
+int sigismember(sigset_t *, int);
+int sigprocmask(int, const sigset_t *, sigset_t *);
 #endif
 
 /*
@@ -256,7 +247,7 @@ typedef struct sigaction sigaction_t;
 extern const char *__progname;
 #  define getprogname()          (__progname)
 # else
-const char *getprogname __P((void));
+const char *getprogname(void);
 #endif /* HAVE___PROGNAME */
 #endif /* !HAVE_GETPROGNAME */
 

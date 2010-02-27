@@ -17,8 +17,8 @@
 #ifndef _SUDO_ALLOC_H
 #define _SUDO_ALLOC_H
 
-#ifdef __STDC__
-# include <stdarg.h>
+#include <stdarg.h>
+
 int	 easprintf(char **, const char *, ...) __printflike(2, 3);
 int	 evasprintf(char **, const char *, va_list) __printflike(2, 0);
 void	 efree(void *);
@@ -27,16 +27,5 @@ void	*emalloc2(size_t, size_t);
 void	*erealloc(void *, size_t);
 void	*erealloc3(void *, size_t, size_t);
 char	*estrdup(const char *);
-#else
-# include <varargs.h>
-int	 easprintf();
-int	 evasprintf();
-void	 efree();
-void	*emalloc();
-void	*emalloc2();
-void	*erealloc();
-void	*erealloc3();
-char	*estrdup();
-#endif /* __STDC__ */
 
 #endif /* _SUDO_ALLOC_H */

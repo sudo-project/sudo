@@ -17,18 +17,11 @@
 #ifndef _SUDO_ERROR_H_
 #define	_SUDO_ERROR_H_
 
-#ifdef __STDC__
-# include <stdarg.h>
+#include <stdarg.h>
+
 void	error(int, const char *, ...) __attribute__((__noreturn__));
 void	errorx(int, const char *, ...) __attribute__((__noreturn__));
 void	warning(const char *, ...);
 void	warningx(const char *, ...);
-#else
-# include <varargs.h>
-void	error() __attribute__((__noreturn__));
-void	errorx() __attribute__((__noreturn__));
-void	warning();
-void	warningx();
-#endif /* __STDC__ */
 
 #endif /* _SUDO_ERROR_H_ */
