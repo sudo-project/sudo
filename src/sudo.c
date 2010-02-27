@@ -118,7 +118,7 @@ main(int argc, char *argv[], char *envp[])
     int nargc, sudo_mode;
     char **nargv, **settings, **env_add;
     char **user_info, **command_info, **argv_out, **user_env_out;
-    struct plugin_container *plugin;
+    struct plugin_container *plugin, *next;
     struct command_details command_details;
     int ok;
 #if defined(SUDO_DEVEL) && defined(__OpenBSD__)
@@ -135,14 +135,6 @@ main(int argc, char *argv[], char *envp[])
 
     if (geteuid() != 0)
 	errorx(1, "must be setuid root");
-
-    /* XXX - Must be done before shadow file lookups... */
-#if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
-    (void) set_auth_parameters(Argc, Argv);
-# ifdef HAVE_INITPRIVS
-    initprivs();
-# endif
-#endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
     /*
      * Signal setup:
@@ -172,13 +164,21 @@ main(int argc, char *argv[], char *envp[])
     memset(&user_details, 0, sizeof(user_details));
     user_info = get_user_info(&user_details);
 
-    /* Open each plugin (XXX - check for errors). */
-    policy_plugin.u.policy->open(SUDO_API_VERSION, sudo_conversation,
+    /* Open each plugin. */
+    ok = policy_plugin.u.policy->open(SUDO_API_VERSION, sudo_conversation,
 	settings, user_info, envp);
-    tq_foreach_fwd(&io_plugins, plugin) {
-	/* XXX - remove from list if open returns 0 */
-	plugin->u.io->open(SUDO_API_VERSION, sudo_conversation, settings,
+    if (ok != TRUE)
+	errorx(1, "unable to initialize policy plugin");
+    for (plugin = io_plugins.first; plugin != NULL; plugin = next) {
+	next = plugin->next;
+	ok = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation, settings,
 	    user_info, envp);
+	if (ok == -1)
+	    errorx(1, "error initializing I/O plugin %s", plugin->name);
+	if (!ok) {
+	    /* Disable I/O plugin by removing it from the list. */
+	    tq_remove(&io_plugins, plugin);
+	}
     }
 
     sudo_debug(9, "sudo_mode %d", sudo_mode);
@@ -374,33 +374,28 @@ command_info_to_details(char * const info[], struct command_details *details)
 
     memset(details, 0, sizeof(*details));
 
+#define SET_STRING(s, n) \
+    if (strncmp(s, info[i], sizeof(s) - 1) == 0 && info[i][sizeof(s) - 1]) { \
+	details->n = info[i] + sizeof(s) - 1; \
+	break; \
+    }
+
     for (i = 0; info[i] != NULL; i++) {
-	/* XXX - should ignore empty entries */
 	switch (info[i][0]) {
 	    case 'c':
-		if (strncmp("chroot=", info[i], sizeof("chroot=") - 1) == 0) {
-		    details->chroot = info[i] + sizeof("chroot=") - 1;
-		    break;
-		}
-		if (strncmp("command=", info[i], sizeof("command=") - 1) == 0) {
-		    details->command = info[i] + sizeof("command=") - 1;
-		    break;
-		}
-		if (strncmp("cwd=", info[i], sizeof("cwd=") - 1) == 0) {
-		    details->cwd = info[i] + sizeof("cwd=") - 1;
-		    break;
-		}
+		SET_STRING("chroot=", chroot)
+		SET_STRING("command=", command)
+		SET_STRING("cwd=", cwd)
 		break;
 	    case 'l':
-		if (strncmp("login_class=", info[i], sizeof("login_class=") - 1) == 0) {
-		    details->login_class = info[i] + sizeof("login_class=") - 1;
-		    break;
-		}
+		SET_STRING("login_class=", login_class)
 		break;
 	    case 'n':
 		/* XXX - bounds check  -NZERO to NZERO (inclusive). */
 		if (strncmp("nice=", info[i], sizeof("nice=") - 1) == 0) {
 		    cp = info[i] + sizeof("nice=") - 1;
+		    if (*cp == '\0')
+			break;
 		    errno = 0;
 		    lval = strtol(cp, &ep, 0);
 		    if (*cp != '\0' && *ep == '\0' &&
@@ -413,14 +408,14 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    break;
 		}
 		if (strncmp("noexec=", info[i], sizeof("noexec=") - 1) == 0) {
-		    if (atobool(info[i] + sizeof("noexec=") - 1))
+		    if (atobool(info[i] + sizeof("noexec=") - 1) == TRUE)
 			SET(details->flags, CD_NOEXEC);
 		    break;
 		}
 		break;
 	    case 'p':
 		if (strncmp("preserve_groups=", info[i], sizeof("preserve_groups=") - 1) == 0) {
-		    if (atobool(info[i] + sizeof("preserve_groups=") - 1))
+		    if (atobool(info[i] + sizeof("preserve_groups=") - 1) == TRUE)
 			SET(details->flags, CD_PRESERVE_GROUPS);
 		    break;
 		}
@@ -428,6 +423,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 'r':
 		if (strncmp("runas_egid=", info[i], sizeof("runas_egid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_egid=") - 1;
+		    if (*cp == '\0')
+			break;
 		    errno = 0;
 		    ulval = strtoul(cp, &ep, 0);
 		    if (*cp != '\0' && *ep == '\0' &&
@@ -439,6 +436,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_euid=", info[i], sizeof("runas_euid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_euid=") - 1;
+		    if (*cp == '\0')
+			break;
 		    errno = 0;
 		    ulval = strtoul(cp, &ep, 0);
 		    if (*cp != '\0' && *ep == '\0' &&
@@ -450,6 +449,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_gid=", info[i], sizeof("runas_gid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_gid=") - 1;
+		    if (*cp == '\0')
+			break;
 		    errno = 0;
 		    ulval = strtoul(cp, &ep, 0);
 		    if (*cp != '\0' && *ep == '\0' &&
@@ -464,6 +465,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 
 		    /* count groups, alloc and fill in */
 		    cp = info[i] + sizeof("runas_groups=") - 1;
+		    if (*cp == '\0')
+			break;
 		    for (;;) {
 			details->ngroups++;
 			if ((cp = strchr(cp, ',')) == NULL)
@@ -485,6 +488,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		if (strncmp("runas_uid=", info[i], sizeof("runas_uid=") - 1) == 0) {
 		    cp = info[i] + sizeof("runas_uid=") - 1;
+		    if (*cp == '\0')
+			break;
 		    errno = 0;
 		    ulval = strtoul(cp, &ep, 0);
 		    if (*cp != '\0' && *ep == '\0' &&
@@ -496,18 +501,14 @@ command_info_to_details(char * const info[], struct command_details *details)
 		}
 		break;
 	    case 's':
-		if (strncmp("selinux_role=", info[i], sizeof("selinux_role=") - 1) == 0) {
-		    details->selinux_role = info[i] + sizeof("selinux_role=") - 1;
-		    break;
-		}
-		if (strncmp("selinux_type=", info[i], sizeof("selinux_type=") - 1) == 0) {
-		    details->selinux_type = info[i] + sizeof("selinux_type=") - 1;
-		    break;
-		}
+		SET_STRING("selinux_role=", selinux_role)
+		SET_STRING("selinux_type=", selinux_type)
 		break;
 	    case 't':
 		if (strncmp("timeout=", info[i], sizeof("timeout=") - 1) == 0) {
 		    cp = info[i] + sizeof("timeout=") - 1;
+		    if (*cp == '\0')
+			break;
 		    errno = 0;
 		    lval = strtol(cp, &ep, 0);
 		    if (*cp != '\0' && *ep == '\0' &&
@@ -523,6 +524,8 @@ command_info_to_details(char * const info[], struct command_details *details)
 	    case 'u':
 		if (strncmp("umask=", info[i], sizeof("umask=") - 1) == 0) {
 		    cp = info[i] + sizeof("umask=") - 1;
+		    if (*cp == '\0')
+			break;
 		    errno = 0;
 		    ulval = strtoul(cp, &ep, 8);
 		    if (*cp != '\0' && *ep == '\0' &&
