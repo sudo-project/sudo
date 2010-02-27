@@ -171,22 +171,11 @@ estrdup(src)
  * returns -1 (out of memory).
  */
 int
-#ifdef __STDC__
 easprintf(char **ret, const char *fmt, ...)
-#else
-easprintf(ret, fmt, va_alist)
-    char **ret;
-    const char *fmt;
-    va_dcl
-#endif
 {
     int len;
     va_list ap;
-#ifdef __STDC__
     va_start(ap, fmt);
-#else
-    va_start(ap);
-#endif
     len = vasprintf(ret, fmt, ap);
     va_end(ap);
 

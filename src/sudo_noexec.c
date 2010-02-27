@@ -20,11 +20,7 @@
 #ifndef HAVE_TIMESPEC
 # include <time.h>
 #endif
-#ifdef __STDC__
-# include <stdarg.h>
-#else
-# include <varargs.h>
-#endif
+#include <stdarg.h>
 
 #include <compat.h>
 
@@ -46,8 +42,6 @@ extern int errno;
     return(-1);					\
 }
 
-#ifdef __STDC__
-
 #define DUMMY2(fn, t1, t2)			\
 int						\
 fn(t1 a1, t2 a2)				\
@@ -62,28 +56,6 @@ DUMMY_BODY
 int						\
 fn(t1 a1, t2 a2, ...)				\
 DUMMY_BODY
-
-#else /* !__STDC__ */
-
-#define DUMMY2(fn, t1, t2)			\
-int						\
-fn(a1, a2)					\
-t1 a1; t2 a2;					\
-DUMMY_BODY
-
-#define DUMMY3(fn, t1, t2, t3)			\
-int						\
-fn(a1, a2, a3)					\
-t1 a1; t2 a2; t3 a3;				\
-DUMMY_BODY
-
-#define DUMMY_VA(fn, t1, t2)			\
-int						\
-fn(a1, a2, va_alist)				\
-t1 a1; t2 a2; va_dcl				\
-DUMMY_BODY
-
-#endif /* !__STDC__ */
 
 DUMMY_VA(execl, const char *, const char *)
 DUMMY_VA(_execl, const char *, const char *)

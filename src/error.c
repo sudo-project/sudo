@@ -23,25 +23,14 @@
 #include <compat.h>
 #include "error.h"
 
-static void _warning	__P((int, const char *, va_list));
-       void cleanup	__P((int));
+static void _warning(int, const char *, va_list);
+       void cleanup(int);
 
 void
-#ifdef __STDC__
 error(int eval, const char *fmt, ...)
-#else
-error(eval, fmt, va_alist)
-	int eval;
-	const char *fmt;
-	va_dcl
-#endif
 {
 	va_list ap;
-#ifdef __STDC__
 	va_start(ap, fmt);
-#else
-	va_start(ap);
-#endif
 	_warning(1, fmt, ap);
 	va_end(ap);
 	cleanup(0);
@@ -49,21 +38,10 @@ error(eval, fmt, va_alist)
 }
 
 void
-#ifdef __STDC__
 errorx(int eval, const char *fmt, ...)
-#else
-errorx(eval, fmt, va_alist)
-	int eval;
-	const char *fmt;
-	va_dcl
-#endif
 {
 	va_list ap;
-#ifdef __STDC__
 	va_start(ap, fmt);
-#else
-	va_start(ap);
-#endif
 	_warning(0, fmt, ap);
 	va_end(ap);
 	cleanup(0);
@@ -71,39 +49,19 @@ errorx(eval, fmt, va_alist)
 }
 
 void
-#ifdef __STDC__
 warning(const char *fmt, ...)
-#else
-warning(fmt, va_alist)
-	const char *fmt;
-	va_dcl
-#endif
 {
 	va_list ap;
-#ifdef __STDC__
 	va_start(ap, fmt);
-#else
-	va_start(ap);
-#endif
 	_warning(1, fmt, ap);
 	va_end(ap);
 }
 
 void
-#ifdef __STDC__
 warningx(const char *fmt, ...)
-#else
-warningx(fmt, va_alist)
-	const char *fmt;
-	va_dcl
-#endif
 {
 	va_list ap;
-#ifdef __STDC__
 	va_start(ap, fmt);
-#else
-	va_start(ap);
-#endif
 	_warning(0, fmt, ap);
 	va_end(ap);
 }

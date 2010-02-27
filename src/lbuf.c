@@ -107,24 +107,13 @@ lbuf_destroy(lbuf)
  * Append strings to the buffer, expanding it as needed.
  */
 void
-#ifdef __STDC__
 lbuf_append_quoted(struct lbuf *lbuf, const char *set, ...)
-#else
-lbuf_append_quoted(lbuf, set, va_alist)
-	struct lbuf *lbuf;
-	const char *set;
-	va_dcl
-#endif
 {
     va_list ap;
     int len = 0;
     char *cp, *s;
 
-#ifdef __STDC__
     va_start(ap, set);
-#else
-    va_start(ap);
-#endif
     while ((s = va_arg(ap, char *)) != NULL) {
 	len += strlen(s);
 	for (cp = s; (cp = strpbrk(cp, set)) != NULL; cp++)
@@ -140,11 +129,7 @@ lbuf_append_quoted(lbuf, set, va_alist)
 	lbuf->buf = erealloc(lbuf->buf, lbuf->size);
     }
 
-#ifdef __STDC__
     va_start(ap, set);
-#else
-    va_start(ap);
-#endif
     /* Append each string. */
     while ((s = va_arg(ap, char *)) != NULL) {
 	while ((cp = strpbrk(s, set)) != NULL) {
@@ -169,23 +154,13 @@ lbuf_append_quoted(lbuf, set, va_alist)
  * Append strings to the buffer, expanding it as needed.
  */
 void
-#ifdef __STDC__
 lbuf_append(struct lbuf *lbuf, ...)
-#else
-lbuf_append(lbuf, va_alist)
-	struct lbuf *lbuf;
-	va_dcl
-#endif
 {
     va_list ap;
     int len = 0;
     char *s;
 
-#ifdef __STDC__
     va_start(ap, lbuf);
-#else
-    va_start(ap);
-#endif
     while ((s = va_arg(ap, char *)) != NULL)
 	len += strlen(s);
     va_end(ap);
@@ -198,11 +173,7 @@ lbuf_append(lbuf, va_alist)
 	lbuf->buf = erealloc(lbuf->buf, lbuf->size);
     }
 
-#ifdef __STDC__
     va_start(ap, lbuf);
-#else
-    va_start(ap);
-#endif
     /* Append each string. */
     while ((s = va_arg(ap, char *)) != NULL) {
 	len = strlen(s);

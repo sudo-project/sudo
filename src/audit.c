@@ -26,11 +26,7 @@
 #  include <stdlib.h>
 # endif
 #endif /* STDC_HEADERS */
-#ifdef __STDC__
-# include <stdarg.h>
-#else
-# include <varargs.h>
-#endif
+#include <stdarg.h>
 
 #include "compat.h"
 #include "logging.h"
@@ -40,12 +36,7 @@
 #endif
 
 void
-#ifdef __STDC__
 audit_success(char **exec_args)
-#else
-audit_success(exec_args)
-    const char **exec_args;
-#endif
 {
 #ifdef HAVE_BSM_AUDIT
     bsm_audit_success(exec_args);
@@ -53,22 +44,11 @@ audit_success(exec_args)
 }
 
 void
-#ifdef __STDC__
 audit_failure(char **exec_args, char const *const fmt, ...)
-#else
-audit_failure(exec_args, fmt, va_alist)
-    const char **exec_args;
-    char const *const fmt;
-    va_dcl
-#endif
 {
     va_list ap;
 
-#ifdef __STDC__
     va_start(ap, fmt);
-#else
-    va_start(ap);
-#endif
 #ifdef HAVE_BSM_AUDIT
     bsm_audit_failure(exec_args, fmt, ap);
 #endif
