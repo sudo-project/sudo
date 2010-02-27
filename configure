@@ -5652,6 +5652,12 @@ else
 fi
 
 
+if test "x$ac_cv_prog_cc_c89" = "xno"; then
+    { { echo "$as_me:$LINENO: error: Sudo version $PACKAGE_VERSION requires an ANSI C compiler to build." >&5
+echo "$as_me: error: Sudo version $PACKAGE_VERSION requires an ANSI C compiler to build." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
 ac_aux_dir=
 for ac_dir in "$srcdir" "$srcdir/.." "$srcdir/../.."; do
   if test -f "$ac_dir/install-sh"; then
@@ -6493,7 +6499,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6496 "configure"' > conftest.$ac_ext
+  echo '#line 6502 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8357,11 +8363,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8360: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8366: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8364: \$? = $ac_status" >&5
+   echo "$as_me:8370: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8647,11 +8653,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8650: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8656: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8654: \$? = $ac_status" >&5
+   echo "$as_me:8660: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8751,11 +8757,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8754: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8760: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8758: \$? = $ac_status" >&5
+   echo "$as_me:8764: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11111,7 +11117,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11114 "configure"
+#line 11120 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11211,7 +11217,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11214 "configure"
+#line 11220 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12362,11 +12368,6 @@ done
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-
-		# HP-UX bundled compiler can't generate shared objects
-		if test "x$ac_cv_prog_cc_c89" = "xno"; then
-		    with_noexec=no
-		fi
 
 		# Use the +DAportable flag if it is supported
 		_CFLAGS="$CFLAGS"

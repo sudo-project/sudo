@@ -1282,6 +1282,10 @@ AC_PROG_CPP
 AC_CHECK_TOOL(AR, ar, false)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
 
+if test "x$ac_cv_prog_cc_c89" = "xno"; then
+    AC_MSG_ERROR([Sudo version $PACKAGE_VERSION requires an ANSI C compiler to build.])
+fi
+
 dnl
 dnl Libtool magic; enable shared libs and disable static libs
 dnl
@@ -1435,11 +1439,6 @@ case "$host" in
 		fi
 		: ${mansectsu='1m'}
 		: ${mansectform='4'}
-
-		# HP-UX bundled compiler can't generate shared objects
-		if test "x$ac_cv_prog_cc_c89" = "xno"; then
-		    with_noexec=no
-		fi
 
 		# Use the +DAportable flag if it is supported
 		_CFLAGS="$CFLAGS"
