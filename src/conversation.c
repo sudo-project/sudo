@@ -70,8 +70,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 		SET(flags, TGP_ECHO);
 	    case SUDO_CONV_PROMPT_ECHO_OFF:
 		/* Read the password unless interrupted. */
-		/* XXX - look up passwd timeout and pass in XXX */
-		pass = tgetpass(msg->msg, 0, flags);
+		pass = tgetpass(msg->msg, msg->timeout, flags);
 		if (pass == NULL)
 		    goto err;
 		repl->reply = estrdup(pass);
