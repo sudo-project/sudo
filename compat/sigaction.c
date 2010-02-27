@@ -24,10 +24,7 @@
 #include <compat.h>
 
 int
-sigaction(signo, sa, osa)
-    int signo;
-    const sigaction_t *sa;
-    sigaction_t *osa;
+sigaction(int signo, const sigaction_t *sa, sigaction_t *osa)
 {
     sigaction_t nsa;
     int error;
@@ -47,8 +44,7 @@ sigaction(signo, sa, osa)
 }
 
 int
-sigemptyset(set)
-    sigset_t *set;
+sigemptyset(sigset_t *set)
 {
 
     *set = 0;
@@ -56,8 +52,7 @@ sigemptyset(set)
 }
 
 int
-sigfillset(set)
-    sigset_t *set;
+sigfillset(sigset_t *set)
 {
 
     *set = ~0;;
@@ -65,9 +60,7 @@ sigfillset(set)
 }
 
 int
-sigaddset(set, signo)
-    sigset_t *set;
-    int signo;
+sigaddset(sigset_t *set, int signo)
 {
 
     if (signo <= 0 || signo >= NSIG) {
@@ -80,9 +73,7 @@ sigaddset(set, signo)
 }
 
 int
-sigdelset(set, signo)
-    sigset_t *set;
-    int signo;
+sigdelset(sigset_t *set, int signo)
 {
 
     if (signo <= 0 || signo >= NSIG) {
@@ -95,19 +86,14 @@ sigdelset(set, signo)
 }
 
 int
-sigismember(set, signo)
-    sigset_t *set;
-    int signo;
+sigismember(sigset_t *set, int signo)
 {
 
     return(ISSET(*set, sigmask(signo)));
 }
 
 int
-sigprocmask(how, set, oset)
-    int how;
-    const sigset_t *set;
-    sigset_t *oset;
+sigprocmask(int how, const sigset_t *set, sigset_t *oset)
 {
     int mask;
 

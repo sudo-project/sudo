@@ -19,7 +19,7 @@
  */
 static struct cclass {
 	const char *name;
-	int (*isctype) __P((int));
+	int (*isctype)(int);
 } cclasses[] = {
 	{ "alnum",	isalnum },
 	{ "alpha",	isalpha },

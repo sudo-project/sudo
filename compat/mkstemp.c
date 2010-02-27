@@ -31,12 +31,11 @@
 
 #include <compat.h>
 
-static unsigned int get_random __P((void));
-static void seed_random __P((void));
+static unsigned int get_random(void);
+static void seed_random(void);
 
 int
-mkstemp(path)
-	char *path;
+mkstemp(char *path)
 {
 	char *start, *cp;
 	int fd, r;
@@ -84,7 +83,7 @@ mkstemp(path)
 #endif
 
 static void
-seed_random()
+seed_random(void)
 {
 	SEED_T seed;
 	struct timespec ts;
@@ -99,7 +98,7 @@ seed_random()
 }
 
 static unsigned int
-get_random()
+get_random(void)
 {
 	static int initialized;
 

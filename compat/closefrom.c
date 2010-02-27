@@ -60,8 +60,7 @@
  * This is the expensive (ballback) method.
  */
 void
-closefrom_fallback(lowfd)
-    int lowfd;
+closefrom_fallback(int lowfd)
 {
     long fd, maxfd;
 
@@ -88,8 +87,7 @@ closefrom_fallback(lowfd)
  */
 #ifdef HAVE_FCNTL_CLOSEM
 void
-closefrom(lowfd)
-    int lowfd;
+closefrom(int lowfd)
 {
     if (fcntl(lowfd, F_CLOSEM, 0) == -1)
 	closefrom_fallback(lowfd);
@@ -97,8 +95,7 @@ closefrom(lowfd)
 #else
 # ifdef HAVE_DIRFD
 void
-closefrom(lowfd)
-    int lowfd;
+closefrom(int lowfd)
 {
     struct dirent *dent;
     DIR *dirp;

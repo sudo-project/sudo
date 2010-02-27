@@ -26,10 +26,7 @@
  * Find the last occurrence of 'c' in the buffer 's' of size 'n'.
  */
 void *
-memrchr(s, c, n)
-    const void *s;
-    int c;
-    size_t n;
+memrchr(const void *s, int c, size_t n)
 {
     const unsigned char *cp;
 

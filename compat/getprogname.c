@@ -25,7 +25,7 @@
 #include <compat.h>
 
 const char *
-getprogname()
+getprogname(void)
 {
     static const char *progname;
     extern int Argc;

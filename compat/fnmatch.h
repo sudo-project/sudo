@@ -41,6 +41,6 @@
 #define	FNM_LEADING_DIR	0x08	/* Ignore /<tail> after Imatch. */
 #define	FNM_CASEFOLD	0x10	/* Case insensitive search. */
 
-int	 fnmatch __P((const char *, const char *, int));
+int	 fnmatch(const char *, const char *, int);
 
 #endif /* !_FNMATCH_H_ */

@@ -28,8 +28,7 @@
  * Map errno -> error string.
  */
 char *
-strerror(n)
-    int n;
+strerror(int n)
 {
     extern int sys_nerr;
     extern char *sys_errlist[];

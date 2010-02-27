@@ -22,10 +22,6 @@ struct	utimbuf {
 	time_t	modtime;	/* mod time */
 };
 
-#ifdef __STDC__
 int utime(const char *, const struct utimbuf *);
-#else
-int utime();
-#endif
 
 #endif	/* _UTIME_H */

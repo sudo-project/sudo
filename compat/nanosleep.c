@@ -32,9 +32,7 @@
 #include "compat.h"
 
 int
-nanosleep(ts, rts)
-    const struct timespec *ts;
-    struct timespec *rts;
+nanosleep(const struct timespec *ts, struct timespec *rts)
 {
     struct timeval timeout, endtime, now;
     int rval;

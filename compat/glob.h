@@ -45,11 +45,7 @@ typedef struct {
 	int gl_flags;		/* Copy of flags parameter to glob. */
 	char **gl_pathv;	/* List of paths matching pattern. */
 				/* Copy of errfunc parameter to glob. */
-#ifdef __STDC__
 	int (*gl_errfunc)(const char *, int);
-#else
-	int (*gl_errfunc)();
-#endif
 } glob_t;
 
 /* Flags */
@@ -73,12 +69,7 @@ typedef struct {
 #define	GLOB_NOSYS	(-4)	/* Function not supported. */
 #define GLOB_ABEND	GLOB_ABORTED
 
-#ifdef __STDC__
 int	glob(const char *, int, int (*)(const char *, int), glob_t *);
 void	globfree(glob_t *);
-#else
-int	glob();
-void	globfree();
-#endif
 
 #endif /* !_GLOB_H_ */

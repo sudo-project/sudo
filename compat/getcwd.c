@@ -79,9 +79,7 @@
 	    (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
 
 char *
-getcwd(pt, size)
-	char *pt;
-	size_t size;
+getcwd(char *pt, size_t size)
 {
 	struct dirent *dp;
 	DIR *dir = NULL;

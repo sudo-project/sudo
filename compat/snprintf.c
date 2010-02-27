@@ -69,16 +69,11 @@
 # include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 #include <limits.h>
-
-#ifdef __STDC__
-# include <stdarg.h>
-#else
-# include <varargs.h>
-#endif
+#include <stdarg.h>
 
 #include <compat.h>
 
-static int xxxprintf	 __P((char **, size_t, int, const char *, va_list));
+static int xxxprintf(char **, size_t, int, const char *, va_list);
 
 /*
  * Some systems may not have these defined in <limits.h>
@@ -129,10 +124,7 @@ static int xxxprintf	 __P((char **, size_t, int, const char *, va_list));
 
 #ifndef HAVE_MEMCHR
 void *
-memchr(s, c, n)
-	const void *s;
-	unsigned char c;
-	size_t n;
+memchr(const void *s, unsigned char c, size_t n)
 {
 	if (n != 0) {
 		const unsigned char *p = s;
@@ -153,11 +145,7 @@ memchr(s, c, n)
  * use the given digits.
  */
 static char *
-__ultoa(val, endp, base, octzero, xdigs)
-	unsigned long val;
-	char *endp;
-	int base, octzero;
-	char *xdigs;
+__ultoa(unsigned long val, char *endp, int base, int octzero, char *xdigs)
 {
 	char *cp = endp;
 	long sval;
@@ -217,11 +205,7 @@ __ultoa(val, endp, base, octzero, xdigs)
 #  define __uqtoa(v, e, b, o, x) __ultoa((unsigned long)(v), (e), (b), (o), (x))
 # else
 static char *
-__uqtoa(val, endp, base, octzero, xdigs)
-	unsigned long long val;
-	char *endp;
-	int base, octzero;
-	char *xdigs;
+__uqtoa(unsigned long long val, char *endp, int base, int octzero, char *xdigs)
 {
 	char *cp = endp;
 	long long sval;
@@ -275,12 +259,7 @@ __uqtoa(val, endp, base, octzero, xdigs)
  * Actual printf innards.
  */
 static int
-xxxprintf(strp, strsize, alloc, fmt0, ap)
-	char **strp;
-	size_t strsize;
-	int alloc;
-	const char *fmt0;
-	va_list ap;
+xxxprintf(char **strp, size_t strsize, int alloc, const char *fmt0, va_list ap)
 {
 	char *fmt;		/* format string */
 	int ch;			/* character from fmt */
@@ -699,11 +678,7 @@ done:
 
 #ifndef HAVE_VSNPRINTF
 int
-vsnprintf(str, n, fmt, ap)
-	char *str;
-	size_t n;
-	const char *fmt;
-	va_list ap;
+vsnprintf(char *str, size_t n, const char *fmt, va_list ap)
 {
 
 	return (xxxprintf(&str, n, 0, fmt, ap));
@@ -712,24 +687,12 @@ vsnprintf(str, n, fmt, ap)
 
 #ifndef HAVE_SNPRINTF
 int
-#ifdef __STDC__
 snprintf(char *str, size_t n, char const *fmt, ...)
-#else
-snprintf(str, n, fmt, va_alist)
-	char *str;
-	size_t n;
-	char const *fmt;
-	va_dcl
-#endif
 {
 	int ret;
 	va_list ap;
 
-#ifdef __STDC__
 	va_start(ap, fmt);
-#else
-	va_start(ap);
-#endif
 	ret = xxxprintf(&str, n, 0, fmt, ap);
 	va_end(ap);
 	return (ret);
@@ -738,10 +701,7 @@ snprintf(str, n, fmt, va_alist)
 
 #ifndef HAVE_VASPRINTF
 int
-vasprintf(str, fmt, ap)
-	char **str;
-	const char *fmt;
-	va_list ap;
+vasprintf(char **str, const char *fmt, va_list ap)
 {
 
 	return (xxxprintf(str, 0, 1, fmt, ap));
@@ -750,23 +710,12 @@ vasprintf(str, fmt, ap)
 
 #ifndef HAVE_ASPRINTF
 int
-#ifdef __STDC__
 asprintf(char **str, char const *fmt, ...)
-#else
-asprintf(str, fmt, va_alist)
-	char **str;
-	char const *fmt;
-	va_dcl
-#endif
 {
 	int ret;
 	va_list ap;
 
-#ifdef __STDC__
 	va_start(ap, fmt);
-#else
-	va_start(ap);
-#endif
 	ret = xxxprintf(str, 0, 1, fmt, ap);
 	va_end(ap);
 	return (ret);

@@ -36,9 +36,7 @@
  * Emulate utimes() via utime()
  */
 int
-utimes(file, times)
-    const char *file;
-    const struct timeval *times;
+utimes(const char *file, const struct timeval *times)
 {
     if (times != NULL) {
 	struct utimbuf utb;
@@ -56,9 +54,7 @@ utimes(file, times)
  * Emulate futimes() via futime()
  */
 int
-futimes(fd, times)
-    int fd;
-    const struct timeval *times;
+futimes(int fd, const struct timeval *times)
 {
     if (times != NULL) {
 	struct utimbuf utb;

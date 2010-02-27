@@ -45,10 +45,7 @@
 
 #ifdef HAVE_FGETLN
 ssize_t
-getline(bufp, bufsizep, fp)
-    char **bufp;
-    size_t *bufsizep;
-    FILE *fp;
+getline(char **bufp, size_t *bufsizep, FILE *fp)
 {
     char *buf;
     size_t bufsize;
@@ -69,10 +66,7 @@ getline(bufp, bufsizep, fp)
 }
 #else
 ssize_t
-getline(bufp, bufsizep, fp)
-    char **bufp;
-    size_t *bufsizep;
-    FILE *fp;
+getline(char **bufp, size_t *bufsizep, FILE *fp)
 {
     char *buf;
     size_t bufsize;

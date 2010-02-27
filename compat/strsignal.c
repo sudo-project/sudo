@@ -24,8 +24,7 @@
  * Get signal description string
  */
 char *
-strsignal(signo)
-    int signo;
+strsignal(int signo)
 {
     extern const char *const sys_siglist[];
 

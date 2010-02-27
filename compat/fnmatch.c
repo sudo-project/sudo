@@ -63,13 +63,11 @@
 __unused static const char rcsid[] = "$OpenBSD: fnmatch.c,v 1.6 1998/03/19 00:29:59 millert Exp $";
 #endif /* LIBC_SCCS and not lint */
 
-static int rangematch __P((const char *, int, int, char **));
-static int classmatch __P((const char *, int, int, const char **));
+static int rangematch(const char *, int, int, char **);
+static int classmatch(const char *, int, int, const char **);
 
 int
-fnmatch(pattern, string, flags)
-	const char *pattern, *string;
-	int flags;
+fnmatch(const char *pattern, const char *string, int flags)
 {
 	const char *stringstart;
 	char *newp;
@@ -169,15 +167,7 @@ fnmatch(pattern, string, flags)
 }
 
 static int
-#ifdef __STDC__
 rangematch(const char *pattern, int test, int flags, char **newp)
-#else
-rangematch(pattern, test, flags, newp)
-	const char *pattern;
-	int test;
-	int flags;
-	char **newp;
-#endif
 {
 	int negate, ok, rv;
 	char c, c2;
@@ -242,15 +232,7 @@ rangematch(pattern, test, flags, newp)
 }
 
 static int
-#ifdef __STDC__
 classmatch(const char *pattern, int test, int foldcase, const char **ep)
-#else
-classmatch(pattern, test, foldcase, ep)
-	const char *pattern;
-	int test;
-	int foldcase;
-	const char **ep;
-#endif
 {
 	struct cclass *cc;
 	const char *colon;

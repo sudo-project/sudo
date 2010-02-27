@@ -59,9 +59,7 @@ static const char ichars[256] = {
 };
 
 int
-strcasecmp(s1, s2)
-	const char *s1;
-	const char *s2;
+strcasecmp(const char *s1, const char *s2)
 {
 	const unsigned char *us1 = (const unsigned char *) s1;
 	const unsigned char *us2 = (const unsigned char *) s2;
@@ -74,10 +72,7 @@ strcasecmp(s1, s2)
 }
 
 int
-strncasecmp(s1, s2, n)
-	const char *s1;
-	const char *s2;
-	size_t n;
+strncasecmp(const char *s1, const char *s2, size_t n)
 {
 	const unsigned char *us1 = (const unsigned char *) s1;
 	const unsigned char *us2 = (const unsigned char *) s2;

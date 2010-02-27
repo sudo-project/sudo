@@ -19,8 +19,7 @@
 
 #undef isblank
 int
-isblank(ch)
-    int ch;
+isblank(int ch)
 {
     return(ch == ' ' || ch == '\t');
 }
