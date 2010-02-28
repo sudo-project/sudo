@@ -156,12 +156,36 @@ estrdup(src)
     const char *src;
 {
     char *dst = NULL;
-    size_t size;
+    size_t len;
 
     if (src != NULL) {
-	size = strlen(src) + 1;
-	dst = (char *) emalloc(size);
-	(void) memcpy(dst, src, size);
+	len = strlen(src);
+	dst = (char *) emalloc(len + 1);
+	(void) memcpy(dst, src, len);
+	dst[len] = '\0';
+    }
+    return(dst);
+}
+
+/*
+ * estrdup() is like strndup(3) except that it exits with an error if
+ * malloc(3) fails.  NOTE: unlike strdup(3), estrdup(NULL) is legal.
+ */
+char *
+estrndup(src, maxlen)
+    const char *src;
+    size_t maxlen;
+{
+    char *dst = NULL;
+    size_t len;
+
+    if (src != NULL) {
+	len = strlen(src);
+	if (len > maxlen)
+	    len = maxlen;
+	dst = (char *) emalloc(len + 1);
+	(void) memcpy(dst, src, len);
+	dst[len] = '\0';
     }
     return(dst);
 }
