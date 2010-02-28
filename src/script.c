@@ -256,6 +256,29 @@ suspend_parent(int signo, struct script_buf *output)
 }
 
 /*
+ * Like execve(2) but falls back to running through /bin/sh
+ * like execvp(3) if we get ENOEXEC.
+ */
+static int
+my_execve(const char *path, char *const argv[], char *const envp[])
+{
+    execve(path, argv, envp);
+    if (errno == ENOEXEC) {
+	int argc;
+	char **nargv;
+
+	for (argc = 0; argv[argc] != NULL; argc++)
+	    continue;
+	nargv = emalloc2(argc + 2, sizeof(char *));
+	nargv[0] = "sh";
+	nargv[1] = (char *)path;
+	memcpy(nargv + 2, argv + 1, argc * sizeof(char *));
+	execve(_PATH_BSHELL, nargv, envp);
+    }
+    return -1;
+}
+
+/*
  * This is a little bit tricky due to how POSIX job control works and
  * we fact that we have two different controlling terminals to deal with.
  * There are three processes:
@@ -391,9 +414,8 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		    selinux_execve(details->command, argv, envp);
 		else
 #endif
-		    execve(details->command, argv, envp);
+		    my_execve(details->command, argv, envp);
 	    }
-	    /* XXX - fallback to sh */
 	}
 	cstat->type = CMD_ERRNO;
 	cstat->val = errno;
@@ -866,7 +888,7 @@ script_run(const char *path, char *argv[], char *envp[], int rbac_enabled)
 	selinux_execve(path, argv, envp);
     else
 #endif
-    execve(path, argv, envp);
+    my_execve(path, argv, envp);
 }
 
 static void
