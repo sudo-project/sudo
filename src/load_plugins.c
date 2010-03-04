@@ -121,7 +121,7 @@ sudo_load_plugins(const char *conf_file,
 
     tq_foreach_fwd(plugin_list, info) {
 	if (info->path[0] == '/') {
-	    if (strlcpy(path, info->path, sizeof(path) >= sizeof(path)))
+	    if (strlcpy(path, info->path, sizeof(path)) >= sizeof(path))
 		errorx(1, "%s: %s", info->path, strerror(ENAMETOOLONG));
 	} else {
 	    if (snprintf(path, sizeof(path), "%s/%s", _PATH_SUDO_PLUGIN_DIR,
