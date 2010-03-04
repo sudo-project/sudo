@@ -838,7 +838,6 @@ DONT_LEAK_PATH_INFO
 BSDAUTH_USAGE
 SELINUX_USAGE
 LDAP
-REPLAY
 LOGINCAP_USAGE
 NONUNIX_GROUPS_IMPL
 ZLIB
@@ -874,11 +873,11 @@ ldap_secret
 nsswitch_conf
 netsvc_conf
 secure_path
-EGREPPROG
 CC
 ac_ct_CC
 EXEEXT
 OBJEXT
+EGREPPROG
 CPP
 AR
 RANLIB
@@ -1506,8 +1505,7 @@ Optional Features:
                           Set $HOME to target user in shell mode
   --disable-path-info     Print 'command not allowed' not 'command not found'
   --enable-env-debug      Whether to enable environment debugging.
-  --enable-transcript=DIR Enable Sudo's transcript support, storing them in
-                          DIR
+  --enable-zlib=PATH      Whether to enable or disable zlib
   --enable-gss-krb5-ccache-name
                           Use GSS-API to set the Kerberos V cred cache name
   --enable-static[=PKGS]  build static libraries [default=no]
@@ -1517,7 +1515,6 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-sia           Disable SIA on Digital UNIX
   --disable-pam-session   Disable PAM session support
-  --enable-zlib=PATH      Whether to enable or disable zlib
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1567,6 +1564,7 @@ Optional Packages:
   --with-badpass-message  message the user sees when the password is wrong
   --with-fqdn             expect fully qualified hosts in sudoers
   --with-timedir          path to the sudo timestamp dir
+  --with-transcript=DIR   directory to store sudo transcript files in
   --with-sendmail         set path to sendmail
   --without-sendmail      do not send mail at all
   --with-sudoers-mode     mode of sudoers file (defaults to 0440)
@@ -2134,7 +2132,6 @@ echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
 
 
 
-
 timeout=5
 password_timeout=5
 sudo_umask=0022
@@ -2171,7 +2168,6 @@ PROGS="sudo visudo"
 : ${SUDOERS_GID='0'}
 DEV="#"
 LDAP="#"
-REPLAY="#"
 BAMAN='.\" '
 LCMAN='.\" '
 SEMAN='.\" '
@@ -3161,6 +3157,19 @@ fi
 
 
 
+# Check whether --with-transcript was given.
+if test "${with_transcript+set}" = set; then
+  withval=$with_transcript; case $with_transcript in
+    yes)    ;;
+    no)     { { echo "$as_me:$LINENO: error: \"--without-transcript not supported.\"" >&5
+echo "$as_me: error: \"--without-transcript not supported.\"" >&2;}
+   { (exit 1); exit 1; }; }
+	    ;;
+esac
+fi
+
+
+
 # Check whether --with-sendmail was given.
 if test "${with_sendmail+set}" = set; then
   withval=$with_sendmail; case $with_sendmail in
@@ -4142,91 +4151,39 @@ echo "${ECHO_T}no" >&6; }
 fi
 
 
-# Check whether --enable-transcript was given.
-if test "${enable_transcript+set}" = set; then
-  enableval=$enable_transcript;
-fi
-
-
-
-# Check whether --with-selinux was given.
-if test "${with_selinux+set}" = set; then
-  withval=$with_selinux; case $with_selinux in
-    yes)	SELINUX_USAGE="[-r role] [-t type] "
-    		cat >>confdefs.h <<\_ACEOF
-#define HAVE_SELINUX 1
+# Check whether --enable-zlib was given.
+if test "${enable_zlib+set}" = set; then
+  enableval=$enable_zlib;  case "$enableval" in
+    yes)    cat >>confdefs.h <<\_ACEOF
+#define HAVE_ZLIB 1
 _ACEOF
 
-		SUDO_LIBS="${SUDO_LIBS} -lselinux"
-		SUDO_OBJS="${SUDO_OBJS} selinux.o"
-		PROGS="${PROGS} sesh"
-		SEMAN=""
-		;;
-    no)		;;
-    *)		{ { echo "$as_me:$LINENO: error: \"--with-selinux does not take an argument.\"" >&5
-echo "$as_me: error: \"--with-selinux does not take an argument.\"" >&2;}
-   { (exit 1); exit 1; }; }
-		;;
-esac
-fi
+	    ZLIB="-lz"
+	    ;;
+    no)	    ;;
+    *)	    cat >>confdefs.h <<\_ACEOF
+#define HAVE_ZLIB 1
+_ACEOF
 
+	    CPPFLAGS="${CPPFLAGS} -I${enableval}/include"
 
-# Check whether --enable-gss_krb5_ccache_name was given.
-if test "${enable_gss_krb5_ccache_name+set}" = set; then
-  enableval=$enable_gss_krb5_ccache_name; check_gss_krb5_ccache_name=$enableval
-else
-  check_gss_krb5_ccache_name=no
-fi
+    if test X"$with_rpath" = X"yes"; then
+	ZLIB="${ZLIB} -L$enableval/lib -R$enableval/lib"
+    else
+	ZLIB="${ZLIB} -L$enableval/lib"
+    fi
+    if test X"$blibpath" != X"" -a "ZLIB" = "SUDO_LDFLAGS"; then
+	blibpath_add="${blibpath_add}:$enableval/lib"
+    fi
 
-
-# Extract the first word of "egrep", so it can be a program name with args.
-set dummy egrep; ac_word=$2
-{ echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
-if test "${ac_cv_prog_EGREPPROG+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$EGREPPROG"; then
-  ac_cv_prog_EGREPPROG="$EGREPPROG" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_EGREPPROG="egrep"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-IFS=$as_save_IFS
+	    ZLIB="${ZLIB} -lz"
+	    ;;
+  esac
 
 fi
-fi
-EGREPPROG=$ac_cv_prog_EGREPPROG
-if test -n "$EGREPPROG"; then
-  { echo "$as_me:$LINENO: result: $EGREPPROG" >&5
-echo "${ECHO_T}$EGREPPROG" >&6; }
-else
-  { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-fi
 
-
-if test -z "$EGREPPROG"; then
-    { { echo "$as_me:$LINENO: error: Sorry, configure requires egrep to run." >&5
-echo "$as_me: error: Sorry, configure requires egrep to run." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-if test "$with_devel" != "yes"; then
-    ac_cv_prog_cc_g=no
-fi
-
-ac_ext=c
+if test X"$enable_zlib" = X""; then
+    ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -5145,6 +5102,157 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+
+{ echo "$as_me:$LINENO: checking for gzdopen in -lz" >&5
+echo $ECHO_N "checking for gzdopen in -lz... $ECHO_C" >&6; }
+if test "${ac_cv_lib_z_gzdopen+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lz  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char gzdopen ();
+int
+main ()
+{
+return gzdopen ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_lib_z_gzdopen=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_z_gzdopen=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_z_gzdopen" >&5
+echo "${ECHO_T}$ac_cv_lib_z_gzdopen" >&6; }
+if test $ac_cv_lib_z_gzdopen = yes; then
+
+	cat >>confdefs.h <<\_ACEOF
+#define HAVE_ZLIB 1
+_ACEOF
+
+	ZLIB="-lz"
+
+fi
+
+fi
+
+
+# Check whether --with-selinux was given.
+if test "${with_selinux+set}" = set; then
+  withval=$with_selinux; case $with_selinux in
+    yes)	SELINUX_USAGE="[-r role] [-t type] "
+    		cat >>confdefs.h <<\_ACEOF
+#define HAVE_SELINUX 1
+_ACEOF
+
+		SUDO_LIBS="${SUDO_LIBS} -lselinux"
+		SUDO_OBJS="${SUDO_OBJS} selinux.o"
+		PROGS="${PROGS} sesh"
+		SEMAN=""
+		;;
+    no)		;;
+    *)		{ { echo "$as_me:$LINENO: error: \"--with-selinux does not take an argument.\"" >&5
+echo "$as_me: error: \"--with-selinux does not take an argument.\"" >&2;}
+   { (exit 1); exit 1; }; }
+		;;
+esac
+fi
+
+
+# Check whether --enable-gss_krb5_ccache_name was given.
+if test "${enable_gss_krb5_ccache_name+set}" = set; then
+  enableval=$enable_gss_krb5_ccache_name; check_gss_krb5_ccache_name=$enableval
+else
+  check_gss_krb5_ccache_name=no
+fi
+
+
+# Extract the first word of "egrep", so it can be a program name with args.
+set dummy egrep; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_prog_EGREPPROG+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$EGREPPROG"; then
+  ac_cv_prog_EGREPPROG="$EGREPPROG" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_EGREPPROG="egrep"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+EGREPPROG=$ac_cv_prog_EGREPPROG
+if test -n "$EGREPPROG"; then
+  { echo "$as_me:$LINENO: result: $EGREPPROG" >&5
+echo "${ECHO_T}$EGREPPROG" >&6; }
+else
+  { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+
+if test -z "$EGREPPROG"; then
+    { { echo "$as_me:$LINENO: error: Sorry, configure requires egrep to run." >&5
+echo "$as_me: error: Sorry, configure requires egrep to run." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+if test "$with_devel" != "yes"; then
+    ac_cv_prog_cc_g=no
+fi
 
 { echo "$as_me:$LINENO: checking for library containing strerror" >&5
 echo $ECHO_N "checking for library containing strerror... $ECHO_C" >&6; }
@@ -6499,7 +6607,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6502 "configure"' > conftest.$ac_ext
+  echo '#line 6610 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8363,11 +8471,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8366: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8474: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8370: \$? = $ac_status" >&5
+   echo "$as_me:8478: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8653,11 +8761,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8656: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8764: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8660: \$? = $ac_status" >&5
+   echo "$as_me:8768: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8757,11 +8865,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8760: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8868: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8764: \$? = $ac_status" >&5
+   echo "$as_me:8872: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11117,7 +11225,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11120 "configure"
+#line 11228 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11217,7 +11325,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11220 "configure"
+#line 11328 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -25905,239 +26013,24 @@ EOF
 fi
 
 
-    if test "${enable_transcript-yes}" != "no"; then
-	{ echo "$as_me:$LINENO: checking for transcript dir location" >&5
+    { echo "$as_me:$LINENO: checking for transcript dir location" >&5
 echo $ECHO_N "checking for transcript dir location... $ECHO_C" >&6; }
-	if test "${enable_transcript-yes}" != "yes"; then
-	    :
-	elif test -d "/var/log"; then
-	    enable_transcript="/var/log/sudo-transcript"
-	elif test -d "/var/adm"; then
-	    enable_transcript="/var/adm/sudo-transcript"
-	else
-	    enable_transcript="/usr/adm/sudo-transcript"
-	fi
-	cat >>confdefs.h <<EOF
-#define _PATH_SUDO_TRANSCRIPT "$enable_transcript"
+    if test "${with_transcript-yes}" != "yes"; then
+	:
+    elif test -d "/var/log"; then
+	with_transcript="/var/log/sudo-transcript"
+    elif test -d "/var/adm"; then
+	with_transcript="/var/adm/sudo-transcript"
+    else
+	with_transcript="/usr/adm/sudo-transcript"
+    fi
+    cat >>confdefs.h <<EOF
+#define _PATH_SUDO_TRANSCRIPT "$with_transcript"
 EOF
 
-	{ echo "$as_me:$LINENO: result: $enable_transcript" >&5
-echo "${ECHO_T}$enable_transcript" >&6; }
-    fi
+    { echo "$as_me:$LINENO: result: $with_transcript" >&5
+echo "${ECHO_T}$with_transcript" >&6; }
 
-
-if test "${enable_transcript-yes}" != "no"; then
-    # currently require POSIX job control for transcript support
-
-for ac_func in tcsetpgrp
-do
-as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
-{ echo "$as_me:$LINENO: checking for $ac_func" >&5
-echo $ECHO_N "checking for $ac_func... $ECHO_C" >&6; }
-if { as_var=$as_ac_var; eval "test \"\${$as_var+set}\" = set"; }; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-/* Define $ac_func to an innocuous variant, in case <limits.h> declares $ac_func.
-   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
-#define $ac_func innocuous_$ac_func
-
-/* System header to define __stub macros and hopefully few prototypes,
-    which can conflict with char $ac_func (); below.
-    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
-    <limits.h> exists even on freestanding compilers.  */
-
-#ifdef __STDC__
-# include <limits.h>
-#else
-# include <assert.h>
-#endif
-
-#undef $ac_func
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char $ac_func ();
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined __stub_$ac_func || defined __stub___$ac_func
-choke me
-#endif
-
-int
-main ()
-{
-return $ac_func ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  eval "$as_ac_var=yes"
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	eval "$as_ac_var=no"
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-fi
-ac_res=`eval echo '${'$as_ac_var'}'`
-	       { echo "$as_me:$LINENO: result: $ac_res" >&5
-echo "${ECHO_T}$ac_res" >&6; }
-if test `eval echo '${'$as_ac_var'}'` = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-	SUDO_OBJS="${SUDO_OBJS} pty.o script.o"
-	PROGS="$PROGS sudoreplay"
-	REPLAY=""
-
-	# Check whether --enable-zlib was given.
-if test "${enable_zlib+set}" = set; then
-  enableval=$enable_zlib;  case "$enableval" in
-	    yes)    cat >>confdefs.h <<\_ACEOF
-#define HAVE_ZLIB 1
-_ACEOF
-
-		    ZLIB="-lz"
-		    ;;
-	    no)	    ;;
-	    *)	    cat >>confdefs.h <<\_ACEOF
-#define HAVE_ZLIB 1
-_ACEOF
-
-		    CPPFLAGS="${CPPFLAGS} -I${enableval}/include"
-
-    if test X"$with_rpath" = X"yes"; then
-	ZLIB="${ZLIB} -L$enableval/lib -R$enableval/lib"
-    else
-	ZLIB="${ZLIB} -L$enableval/lib"
-    fi
-    if test X"$blibpath" != X"" -a "ZLIB" = "SUDO_LDFLAGS"; then
-	blibpath_add="${blibpath_add}:$enableval/lib"
-    fi
-
-		    ZLIB="${ZLIB} -lz"
-		    ;;
-	  esac
-
-fi
-
-	if test X"$enable_zlib" = X""; then
-	    { echo "$as_me:$LINENO: checking for gzdopen in -lz" >&5
-echo $ECHO_N "checking for gzdopen in -lz... $ECHO_C" >&6; }
-if test "${ac_cv_lib_z_gzdopen+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lz  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char gzdopen ();
-int
-main ()
-{
-return gzdopen ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext &&
-       $as_test_x conftest$ac_exeext; then
-  ac_cv_lib_z_gzdopen=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_z_gzdopen=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_lib_z_gzdopen" >&5
-echo "${ECHO_T}$ac_cv_lib_z_gzdopen" >&6; }
-if test $ac_cv_lib_z_gzdopen = yes; then
-
-		cat >>confdefs.h <<\_ACEOF
-#define HAVE_ZLIB 1
-_ACEOF
-
-		ZLIB="-lz"
-
-fi
-
-	fi
-
-else
-
-	{ echo "$as_me:$LINENO: WARNING: Disabling transcript support due to lack of tcsetpgrp function" >&5
-echo "$as_me: WARNING: Disabling transcript support due to lack of tcsetpgrp function" >&2;}
-	enable_transcript=no
-
-fi
-done
-
-fi
 
 case "$with_passwd" in
 yes|maybe)
@@ -26210,7 +26103,7 @@ EOF
     exec_prefix="$oexec_prefix"
 fi
 
-ac_config_files="$ac_config_files doc/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile"
+ac_config_files="$ac_config_files doc/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sudoers/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -26770,6 +26663,7 @@ do
     "src/sudo_usage.h") CONFIG_FILES="$CONFIG_FILES src/sudo_usage.h" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "plugins/sample/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/sample/Makefile" ;;
+    "plugins/sudoers/Makefile") CONFIG_FILES="$CONFIG_FILES plugins/sudoers/Makefile" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -26904,7 +26798,6 @@ DONT_LEAK_PATH_INFO!$DONT_LEAK_PATH_INFO$ac_delim
 BSDAUTH_USAGE!$BSDAUTH_USAGE$ac_delim
 SELINUX_USAGE!$SELINUX_USAGE$ac_delim
 LDAP!$LDAP$ac_delim
-REPLAY!$REPLAY$ac_delim
 LOGINCAP_USAGE!$LOGINCAP_USAGE$ac_delim
 NONUNIX_GROUPS_IMPL!$NONUNIX_GROUPS_IMPL$ac_delim
 ZLIB!$ZLIB$ac_delim
@@ -26928,6 +26821,7 @@ mailto!$mailto$ac_delim
 mailsub!$mailsub$ac_delim
 badpass_message!$badpass_message$ac_delim
 fqdn!$fqdn$ac_delim
+runas_default!$runas_default$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -26969,7 +26863,6 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
-runas_default!$runas_default$ac_delim
 env_editor!$env_editor$ac_delim
 passwd_tries!$passwd_tries$ac_delim
 tty_tickets!$tty_tickets$ac_delim
@@ -26981,11 +26874,11 @@ ldap_secret!$ldap_secret$ac_delim
 nsswitch_conf!$nsswitch_conf$ac_delim
 netsvc_conf!$netsvc_conf$ac_delim
 secure_path!$secure_path$ac_delim
-EGREPPROG!$EGREPPROG$ac_delim
 CC!$CC$ac_delim
 ac_ct_CC!$ac_ct_CC$ac_delim
 EXEEXT!$EXEEXT$ac_delim
 OBJEXT!$OBJEXT$ac_delim
+EGREPPROG!$EGREPPROG$ac_delim
 CPP!$CPP$ac_delim
 AR!$AR$ac_delim
 RANLIB!$RANLIB$ac_delim
@@ -27016,7 +26909,7 @@ KRB5CONFIG!$KRB5CONFIG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 45; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 44; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

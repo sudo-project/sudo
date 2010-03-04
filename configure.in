@@ -49,7 +49,6 @@ AC_SUBST(DONT_LEAK_PATH_INFO)
 AC_SUBST(BSDAUTH_USAGE)
 AC_SUBST(SELINUX_USAGE)
 AC_SUBST(LDAP)
-AC_SUBST(REPLAY)
 AC_SUBST(LOGINCAP_USAGE)
 AC_SUBST(NONUNIX_GROUPS_IMPL)
 AC_SUBST(ZLIB)
@@ -131,7 +130,6 @@ PROGS="sudo visudo"
 : ${SUDOERS_GID='0'}
 DEV="#"
 LDAP="#"
-REPLAY="#"
 BAMAN='.\" '
 LCMAN='.\" '
 SEMAN='.\" '
@@ -702,6 +700,14 @@ AC_ARG_WITH(timedir, [AS_HELP_STRING([--with-timedir], [path to the sudo timesta
 		;;
 esac])
 
+AC_ARG_WITH(transcript, [AS_HELP_STRING([--with-transcript=DIR], [directory
+to store sudo transcript files in])],
+[case $with_transcript in
+    yes)    ;;
+    no)     AC_MSG_ERROR(["--without-transcript not supported."])
+	    ;;
+esac])
+
 AC_ARG_WITH(sendmail, [AS_HELP_STRING([--with-sendmail], [set path to sendmail])
 AS_HELP_STRING([--without-sendmail], [do not send mail at all])],
 [case $with_sendmail in
@@ -1234,9 +1240,26 @@ AC_ARG_ENABLE(env_debug,
   esac
 ], AC_MSG_RESULT(no))
 
-dnl we check enable_transcript later
-AC_ARG_ENABLE(transcript,
-[AS_HELP_STRING([--enable-transcript[[=DIR]]], [Enable Sudo's transcript support, storing them in DIR])])
+AC_ARG_ENABLE(zlib,
+[AS_HELP_STRING([--enable-zlib[[=PATH]]], [Whether to enable or disable zlib])],
+[ case "$enableval" in
+    yes)    AC_DEFINE(HAVE_ZLIB)
+	    ZLIB="-lz"
+	    ;;
+    no)	    ;;
+    *)	    AC_DEFINE(HAVE_ZLIB)
+	    CPPFLAGS="${CPPFLAGS} -I${enableval}/include"
+	    SUDO_APPEND_LIBPATH(ZLIB, [$enableval/lib])
+	    ZLIB="${ZLIB} -lz"
+	    ;;
+  esac
+])
+if test X"$enable_zlib" = X""; then
+    AC_CHECK_LIB(z, gzdopen, [
+	AC_DEFINE(HAVE_ZLIB)
+	ZLIB="-lz"
+    ])
+fi
 
 AC_ARG_WITH(selinux, [AS_HELP_STRING([--with-selinux], [enable SELinux support])],
 [case $with_selinux in
@@ -2612,42 +2635,6 @@ SUDO_TIMEDIR
 SUDO_TRANSCRIPT
 
 dnl
-dnl If transcript is enabled, build sudoreplay and add pty.o script.o for sudo
-dnl
-if test "${enable_transcript-yes}" != "no"; then
-    # currently require POSIX job control for transcript support
-    AC_CHECK_FUNCS(tcsetpgrp, [
-	SUDO_OBJS="${SUDO_OBJS} pty.o script.o"
-	PROGS="$PROGS sudoreplay"
-	REPLAY=""
-
-	AC_ARG_ENABLE(zlib,
-	[AS_HELP_STRING([--enable-zlib[[=PATH]]], [Whether to enable or disable zlib])],
-	[ case "$enableval" in
-	    yes)    AC_DEFINE(HAVE_ZLIB)
-		    ZLIB="-lz"
-		    ;;
-	    no)	    ;;
-	    *)	    AC_DEFINE(HAVE_ZLIB)
-		    CPPFLAGS="${CPPFLAGS} -I${enableval}/include"
-		    SUDO_APPEND_LIBPATH(ZLIB, [$enableval/lib])
-		    ZLIB="${ZLIB} -lz"
-		    ;;
-	  esac
-	])
-	if test X"$enable_zlib" = X""; then
-	    AC_CHECK_LIB(z, gzdopen, [
-		AC_DEFINE(HAVE_ZLIB)
-		ZLIB="-lz"
-	    ])
-	fi
-    ], [
-	AC_MSG_WARN([Disabling transcript support due to lack of tcsetpgrp function])
-	enable_transcript=no
-    ])
-fi
-
-dnl
 dnl Use passwd (and secureware) auth modules?
 dnl
 case "$with_passwd" in
@@ -2718,7 +2705,7 @@ dnl
 dnl Substitute into the Makefile and man pages
 dnl
 dnl AC_CONFIG_FILES([doc/sudo.man doc/visudo.man doc/sudoers.man doc/sudoers.ldap.man doc/sudoreplay.man src/Makefile src/sudo_usage.h])
-AC_CONFIG_FILES([doc/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile])
+AC_CONFIG_FILES([doc/Makefile src/sudo_usage.h src/Makefile plugins/sample/Makefile plugins/sudoers/Makefile])
 AC_OUTPUT
 
 dnl
