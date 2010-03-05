@@ -47,7 +47,7 @@
 # include <emul/timespec.h>
 #endif
 
-#include "sudo.h"
+#include "sudo.h" /* XXX - for SUDO_LOCK and friends */
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048
@@ -57,10 +57,7 @@
  * Update the access and modify times on an fd or file.
  */
 int
-touch(fd, path, tsp)
-    int fd;
-    char *path;
-    struct timespec *tsp;
+touch(int fd, char *path, struct timespec *tsp)
 {
     struct timeval times[2];
 
@@ -85,9 +82,7 @@ touch(fd, path, tsp)
  */
 #ifdef HAVE_LOCKF
 int
-lock_file(fd, lockit)
-    int fd;
-    int lockit;
+lock_file(int fd, int lockit)
 {
     int op = 0;
 
@@ -106,9 +101,7 @@ lock_file(fd, lockit)
 }
 #elif HAVE_FLOCK
 int
-lock_file(fd, lockit)
-    int fd;
-    int lockit;
+lock_file(int fd, int lockit)
 {
     int op = 0;
 
@@ -127,9 +120,7 @@ lock_file(fd, lockit)
 }
 #else
 int
-lock_file(fd, lockit)
-    int fd;
-    int lockit;
+lock_file(int fd, int lockit)
 {
 #ifdef F_SETLK
     int func;
@@ -154,8 +145,7 @@ lock_file(fd, lockit)
  * and trailing spaces.  Returns static storage that is reused.
  */
 char *
-sudo_parseln(fp)
-    FILE *fp;
+sudo_parseln(FILE *fp)
 {
     size_t len;
     char *cp = NULL;

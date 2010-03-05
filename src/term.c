@@ -105,9 +105,7 @@ int term_erase;
 int term_kill;
 
 int
-term_restore(fd, flush)
-    int fd;
-    int flush;
+term_restore(int fd, int flush)
 {
     if (changed) {
 	int flags = TCSASOFT;
@@ -120,8 +118,7 @@ term_restore(fd, flush)
 }
 
 int
-term_noecho(fd)
-    int fd;
+term_noecho(int fd)
 {
     if (!changed && tcgetattr(fd, &oterm) != 0)
 	return(0);
@@ -140,10 +137,7 @@ term_noecho(fd)
 #if defined(HAVE_TERMIOS_H) || defined(HAVE_TERMIO_H)
 
 int
-term_raw(fd, opost, isig)
-    int fd;
-    int opost;
-    int isig;
+term_raw(int fd, int opost, int isig)
 {
     struct termios term;
 
@@ -168,8 +162,7 @@ term_raw(fd, opost, isig)
 }
 
 int
-term_cbreak(fd)
-    int fd;
+term_cbreak(int fd)
 {
     if (!changed && tcgetattr(fd, &oterm) != 0)
 	return(0);
@@ -192,10 +185,7 @@ term_cbreak(fd)
 }
 
 int
-term_copy(src, dst, opost)
-    int src;
-    int dst;
-    int opost;
+term_copy(int src, int dst, int opost)
 {
     struct termios tt;
 
@@ -213,9 +203,7 @@ term_copy(src, dst, opost)
 #else /* SGTTY */
 
 int
-term_raw(fd, onlcr)
-    int fd;
-    int onlcr;
+term_raw(int fd, int onlcr)
 {
     if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
 	return(0);
@@ -234,8 +222,7 @@ term_raw(fd, onlcr)
 }
 
 int
-term_cbreak(fd)
-    int fd;
+term_cbreak(int fd)
 {
     if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
 	return(0);
@@ -253,10 +240,7 @@ term_cbreak(fd)
 }
 
 int
-term_copy(src, dst, onlcr)
-    int src;
-    int dst;
-    int onlcr;
+term_copy(int src, int dst, int onlcr)
 {
     struct sgttyb b;
     struct tchars tc;

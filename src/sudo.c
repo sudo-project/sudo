@@ -583,8 +583,7 @@ disable_coredumps(void)
  * Cleanup hook for error()/errorx()
  */
 void
-cleanup(gotsignal)
-    int gotsignal;
+cleanup(int gotsignal)
 {
 #if 0 /* XXX */
     struct sudo_nss *nss;

@@ -67,10 +67,7 @@ warningx(const char *fmt, ...)
 }
 
 static void
-_warning(use_errno, fmt, ap)
-	int use_errno;
-	const char *fmt;
-	va_list ap;
+_warning(int use_errno, const char *fmt, va_list ap)
 {
 	int serrno = errno;
 

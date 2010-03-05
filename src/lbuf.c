@@ -49,7 +49,9 @@
 # endif
 #endif
 
-#include "sudo.h"
+#include "compat.h"
+#include "alloc.h"
+#include "error.h"
 #include "missing.h"
 #include "lbuf.h"
 
@@ -60,7 +62,7 @@
 #endif
 
 int
-get_ttycols()
+get_ttycols(void)
 {
     char *p;
     int cols;
@@ -82,11 +84,7 @@ get_ttycols()
  */
 
 void
-lbuf_init(lbuf, buf, indent, continuation)
-    struct lbuf *lbuf;
-    char *buf;
-    int indent;
-    int continuation;
+lbuf_init(struct lbuf *lbuf, char *buf, int indent, int continuation)
 {
     lbuf->continuation = continuation;
     lbuf->indent = indent;
@@ -96,8 +94,7 @@ lbuf_init(lbuf, buf, indent, continuation)
 }
 
 void
-lbuf_destroy(lbuf)
-    struct lbuf *lbuf;
+lbuf_destroy(struct lbuf *lbuf)
 {
     efree(lbuf->buf);
     lbuf->buf = NULL;
@@ -189,8 +186,7 @@ lbuf_append(struct lbuf *lbuf, ...)
  * The lbuf is reset on return.
  */
 void
-lbuf_print(lbuf)
-    struct lbuf *lbuf;
+lbuf_print(struct lbuf *lbuf)
 {
     char *cp;
     int i, have, contlen;

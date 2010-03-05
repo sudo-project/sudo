@@ -28,7 +28,6 @@ compat = $(top_srcdir)/compat
 
 # Compiler & tools to use
 CC = @CC@
-NROFF = nroff -Tascii
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c

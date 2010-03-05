@@ -64,10 +64,7 @@ static char *find_editor();
  * Wrapper to allow users to edit privileged files with their own uid.
  */
 int
-sudo_edit(argc, argv, envp)
-    int argc;
-    char **argv;
-    char **envp;
+sudo_edit(int argc, char **argv, char **envp)
 {
     ssize_t nread, nwritten;
     pid_t kidpid, pid;
@@ -350,7 +347,7 @@ cleanup:
  * the uid of the invoking user, not the runas (privileged) user.
  */
 static char *
-find_editor()
+find_editor(void)
 {
     char *cp, *editor = NULL, **ev, *ev0[4];
 

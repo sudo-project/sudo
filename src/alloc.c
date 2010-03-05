@@ -46,7 +46,9 @@
 # include <inttypes.h>
 #endif
 
-#include "sudo.h"
+#include "compat.h"
+#include "alloc.h"
+#include "error.h"
 
 /*
  * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t
@@ -67,8 +69,7 @@
  * malloc(3) fails.
  */
 void *
-emalloc(size)
-    size_t size;
+emalloc(size_t size)
 {
     void *ptr;
 
@@ -85,9 +86,7 @@ emalloc(size)
  * if overflow would occur or if the system malloc(3) fails.
  */
 void *
-emalloc2(nmemb, size)
-    size_t nmemb;
-    size_t size;
+emalloc2(size_t nmemb, size_t size)
 {
     void *ptr;
 
@@ -108,9 +107,7 @@ emalloc2(nmemb, size)
  * if the system realloc(3) does not support this.
  */
 void *
-erealloc(ptr, size)
-    void *ptr;
-    size_t size;
+erealloc(void *ptr, size_t size)
 {
 
     if (size == 0)
@@ -129,10 +126,7 @@ erealloc(ptr, size)
  * does not support this.
  */
 void *
-erealloc3(ptr, nmemb, size)
-    void *ptr;
-    size_t nmemb;
-    size_t size;
+erealloc3(void *ptr, size_t nmemb, size_t size)
 {
 
     if (nmemb == 0 || size == 0)
@@ -152,8 +146,7 @@ erealloc3(ptr, nmemb, size)
  * malloc(3) fails.  NOTE: unlike strdup(3), estrdup(NULL) is legal.
  */
 char *
-estrdup(src)
-    const char *src;
+estrdup(const char *src)
 {
     char *dst = NULL;
     size_t len;
@@ -172,9 +165,7 @@ estrdup(src)
  * malloc(3) fails.  NOTE: unlike strdup(3), estrdup(NULL) is legal.
  */
 char *
-estrndup(src, maxlen)
-    const char *src;
-    size_t maxlen;
+estrndup(const char *src, size_t maxlen)
 {
     char *dst = NULL;
     size_t len;
@@ -213,10 +204,7 @@ easprintf(char **ret, const char *fmt, ...)
  * returns -1 (out of memory).
  */
 int
-evasprintf(ret, format, args)
-    char **ret;
-    const char *format;
-    va_list args;
+evasprintf(char **ret, const char *format, va_list args)
 {
     int len;
 
@@ -229,8 +217,7 @@ evasprintf(ret, format, args)
  * Wrapper for free(3) so we can depend on C89 semantics.
  */
 void
-efree(ptr)
-    void *ptr;
+efree(void *ptr)
 {
     if (ptr != NULL)
 	free(ptr);

@@ -94,8 +94,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
 #elif defined(HAVE_GRANTPT)
 # ifndef HAVE_POSIX_OPENPT
 static int
-posix_openpt(oflag)
-    int oflag;
+posix_openpt(int oflag)
 {
     int fd;
 

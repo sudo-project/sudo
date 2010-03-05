@@ -29,7 +29,11 @@
 # endif
 #endif /* STDC_HEADERS */
 
-#include "sudo.h"
+#include "compat.h"
+#include "list.h"
+#ifdef DEBUG
+# include "error.h"
+#endif
 
 struct list_proto {
     struct list_proto *prev;
@@ -46,8 +50,7 @@ struct list_head_proto {
  * Returns the popped element.
  */
 void *
-tq_pop(vh)
-    void *vh;
+tq_pop(void *vh)
 {
     struct list_head_proto *h = (struct list_head_proto *)vh;
     void *last = NULL;
@@ -70,9 +73,7 @@ tq_pop(vh)
  * with a head node.
  */
 void
-list2tq(vh, vl)
-    void *vh;
-    void *vl;
+list2tq(void *vh, void *vl)
 {
     struct list_head_proto *h = (struct list_head_proto *)vh;
     struct list_proto *l = (struct list_proto *)vl;
@@ -98,9 +99,7 @@ list2tq(vh, vl)
  * circular properties of the prev pointer to simplify the logic.
  */
 void
-list_append(vl1, vl2)
-    void *vl1;
-    void *vl2;
+list_append(void *vl1, void *vl2)
 {
     struct list_proto *l1 = (struct list_proto *)vl1;
     struct list_proto *l2 = (struct list_proto *)vl2;
@@ -116,9 +115,7 @@ list_append(vl1, vl2)
  * e from a semi-circle queue to normal doubly-linked list. 
  */
 void
-tq_append(vh, vl)
-    void *vh;
-    void *vl;
+tq_append(void *vh, void *vl)
 {
     struct list_head_proto *h = (struct list_head_proto *)vh;
     struct list_proto *l = (struct list_proto *)vl;
@@ -136,9 +133,7 @@ tq_append(vh, vl)
  * Remove element from the tail_queue
  */
 void
-tq_remove(vh, vl)
-    void *vh;
-    void *vl;
+tq_remove(void *vh, void *vl)
 {
     struct list_head_proto *h = (struct list_head_proto *)vh;
     struct list_proto *l = (struct list_proto *)vl;

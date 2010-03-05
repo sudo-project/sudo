@@ -63,10 +63,7 @@ static struct aix_limit aix_limits[] = {
 };
 
 static int
-aix_getlimit(user, lim, valp)
-    char *user;
-    char *lim;
-    rlim64_t *valp;
+aix_getlimit(char *user, char *lim, rlim64_t *valp)
 {
     int val;
 
@@ -79,8 +76,7 @@ aix_getlimit(user, lim, valp)
 }
 
 void
-aix_setlimits(user)
-    char *user;
+aix_setlimits(char *user)
 {
     struct rlimit64 rlim;
     rlim64_t val;

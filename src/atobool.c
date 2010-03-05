@@ -39,14 +39,15 @@
 # endif
 #endif /* HAVE_STRING_H */
 
-#include "sudo.h"
+#include "compat.h"
+#include "missing.h"
 
 int
 atobool(const char *str)
 {
     if (strcasecmp(str, "true") == 0 || strcmp(str, "1") == 0)
-	return TRUE;
+	return 1;
     if (strcasecmp(str, "false") == 0 || strcmp(str, "0") == 0)
-	return FALSE;
+	return 0;
     return -1;
 }

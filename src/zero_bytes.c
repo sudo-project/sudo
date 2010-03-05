@@ -24,9 +24,7 @@
  * the compiler will not be able to optimize away this function.
  */
 void
-zero_bytes(v, n)
-    volatile void *v;
-    size_t n;
+zero_bytes(volatile void *v, size_t n)
 {
     volatile char *p, *ep;
 
