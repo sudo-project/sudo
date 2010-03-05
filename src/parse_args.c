@@ -72,52 +72,37 @@ static void usage_excl(int) __attribute__((__noreturn__));
 /*
  * Mapping of command line flags to name/value settings.
  */
-struct name_value_pair {
+static struct sudo_settings {
     const char *name;
     const char *value;
-};
-static struct sudo_settings {
-    struct name_value_pair a;
-    struct name_value_pair c;
-    struct name_value_pair D;
-    struct name_value_pair E;
-    struct name_value_pair g;
-    struct name_value_pair H;
-    struct name_value_pair i;
-    struct name_value_pair k;
-    struct name_value_pair p;
-    struct name_value_pair r;
-    struct name_value_pair t;
-    struct name_value_pair u;
-} sudo_settings = {
+} sudo_settings[] = {
+#define ARG_BSDAUTH_TYPE 0
     { "bsdauth_type" },
+#define ARG_LOGIN_CLASS 1
     { "login_class" },
+#define ARG_DEBUG_LEVEL 2
     { "debug_level" },
+#define ARG_PRESERVE_ENVIRONMENT 3
     { "preserve_environment" },
+#define ARG_RUNAS_GROUP 4
     { "runas_group" },
+#define ARG_SET_HOME 5
     { "set_home" },
+#define ARG_LOGIN_SHELL 6
     { "login_shell" },
+#define ARG_IGNORE_TICKET 7
     { "ignore_ticket" },
+#define ARG_PROMPT 8
     { "prompt" },
+#define ARG_SELINUX_ROLE 9
     { "selinux_role" },
+#define ARG_SELINUX_TYPE 10
     { "selinux_type" },
-    { "runas_user" }
+#define ARG_RUNAS_USER 11
+    { "runas_user" },
+#define NUM_SETTINGS 12
+    { NULL }
 };
-static struct name_value_pair *setting_pairs[] = {
-    &sudo_settings.a,
-    &sudo_settings.c,
-    &sudo_settings.D,
-    &sudo_settings.E,
-    &sudo_settings.g,
-    &sudo_settings.H,
-    &sudo_settings.i,
-    &sudo_settings.k,
-    &sudo_settings.p,
-    &sudo_settings.r,
-    &sudo_settings.t,
-    &sudo_settings.u
-};
-#define settings_size (sizeof(setting_pairs) / sizeof(setting_pairs[0]))
 
 /*
  * Command line argument parsing.
@@ -170,7 +155,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 #ifdef HAVE_BSD_AUTH_H
 		case 'a':
-		    sudo_settings.a.value = optarg;
+		    sudo_settings[ARG_BSDAUTH_TYPE].value = optarg;
 		    break;
 #endif
 		case 'b':
@@ -184,7 +169,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 #ifdef HAVE_LOGIN_CAP_H
 		case 'c':
-		    sudo_settings.c.value = optarg;
+		    sudo_settings[ARG_LOGIN_CLASS].value = optarg;
 		    break;
 #endif
 		case 'D':
@@ -192,10 +177,10 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 			warningx("the argument to -D must be between 1 and 9 inclusive");
 			usage(1);
 		    }
-		    sudo_settings.D.value = optarg;
+		    sudo_settings[ARG_DEBUG_LEVEL].value = optarg;
 		    break;
 		case 'E':
-		    sudo_settings.c.value = "true";
+		    sudo_settings[ARG_PRESERVE_ENVIRONMENT].value = "true";
 		    break;
 		case 'e':
 		    if (mode && mode != MODE_EDIT)
@@ -205,10 +190,10 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 		case 'g':
 		    runas_group = optarg;
-		    sudo_settings.g.value = optarg;
+		    sudo_settings[ARG_RUNAS_GROUP].value = optarg;
 		    break;
 		case 'H':
-		    sudo_settings.H.value = optarg;
+		    sudo_settings[ARG_SET_HOME].value = "true";
 		    break;
 		case 'h':
 		    if (mode && mode != MODE_HELP) {
@@ -219,15 +204,15 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    valid_flags = 0;
 		    break;
 		case 'i':
-		    sudo_settings.i.value = "true";
+		    sudo_settings[ARG_LOGIN_SHELL].value = "true";
 		    SET(flags, MODE_LOGIN_SHELL);
 		    break;
 		case 'k':
-		    sudo_settings.k.value = "true";
+		    sudo_settings[ARG_IGNORE_TICKET].value = "true";
 		    SET(flags, MODE_INVALIDATE);
 		    break;
 		case 'K':
-		    sudo_settings.k.value = "true";
+		    sudo_settings[ARG_IGNORE_TICKET].value = "true";
 		    if (mode && mode != MODE_KILL)
 			usage_excl(1);
 		    mode = MODE_KILL;
@@ -250,14 +235,14 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    SET(flags, MODE_PRESERVE_GROUPS);
 		    break;
 		case 'p':
-		    sudo_settings.i.value = optarg;
+		    sudo_settings[ARG_PROMPT].value = optarg;
 		    break;
 #ifdef HAVE_SELINUX
 		case 'r':
-		    sudo_settings.r.value = optarg;
+		    sudo_settings[ARG_SELINUX_ROLE].value = optarg;
 		    break;
 		case 't':
-		    sudo_settings.t.value = optarg;
+		    sudo_settings[ARG_SELINUX_TYPE].value = optarg;
 		    break;
 #endif
 		case 'S':
@@ -274,7 +259,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 		case 'u':
 		    runas_user = optarg;
-		    sudo_settings.u.value = optarg;
+		    sudo_settings[ARG_RUNAS_USER].value = optarg;
 		    break;
 		case 'v':
 		    if (mode && mode != MODE_VALIDATE)
@@ -314,7 +299,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	if (ISSET(flags, MODE_INVALIDATE) && *nargc == 0) {
 	    mode = MODE_INVALIDATE;	/* -k by itself */
 	    CLR(flags, MODE_INVALIDATE);
-	    sudo_settings.k.value = NULL;
+	    sudo_settings[ARG_IGNORE_TICKET].value = NULL;
 	    valid_flags = 0;
 	} else {
 	    mode = MODE_RUN;		/* running a command */
@@ -369,13 +354,13 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     /*
      * Format setting_pairs into settings array.
      */
-    settings = emalloc2(settings_size + 1, sizeof (char *));
-    for (i = 0, j = 0; i < settings_size; i++) {
-	if (setting_pairs[i]->value) {
-	    sudo_debug(9, "settings: %s=%s", setting_pairs[i]->name,
-		setting_pairs[i]->value);
-	    settings[j++] = fmt_string(setting_pairs[i]->name,
-		setting_pairs[i]->value);
+    settings = emalloc2(NUM_SETTINGS + 1, sizeof (char *));
+    for (i = 0, j = 0; i < NUM_SETTINGS; i++) {
+	if (sudo_settings[i].value) {
+	    sudo_debug(9, "settings: %s=%s", sudo_settings[i].name,
+		sudo_settings[i].value);
+	    settings[j++] = fmt_string(sudo_settings[i].name,
+		sudo_settings[i].value);
 	}
     }
     settings[j] = NULL;
