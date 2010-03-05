@@ -88,7 +88,6 @@ static struct sudo_settings {
     struct name_value_pair p;
     struct name_value_pair r;
     struct name_value_pair t;
-    struct name_value_pair U;
     struct name_value_pair u;
 } sudo_settings = {
     { "bsdauth_type" },
@@ -112,12 +111,13 @@ static struct name_value_pair *setting_pairs[] = {
     &sudo_settings.g,
     &sudo_settings.H,
     &sudo_settings.i,
+    &sudo_settings.k,
     &sudo_settings.p,
     &sudo_settings.r,
     &sudo_settings.t,
     &sudo_settings.u
 };
-#define settings_size (sizeof(setting_pairs) / sizeof(struct name_value_pair))
+#define settings_size (sizeof(setting_pairs) / sizeof(setting_pairs[0]))
 
 /*
  * Command line argument parsing.
@@ -372,6 +372,8 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     settings = emalloc2(settings_size + 1, sizeof (char *));
     for (i = 0, j = 0; i < settings_size; i++) {
 	if (setting_pairs[i]->value) {
+	    sudo_debug(9, "settings: %s=%s", setting_pairs[i]->name,
+		setting_pairs[i]->value);
 	    settings[j++] = fmt_string(setting_pairs[i]->name,
 		setting_pairs[i]->value);
 	}
