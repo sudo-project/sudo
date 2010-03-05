@@ -83,8 +83,8 @@ all: sample_plugin.la
 sample_plugin.lo: $(srcdir)/sample_plugin.c
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sample_plugin.c
 
-sample_plugin.la: sample_plugin.lo $(LTLIBOBJS)
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sample_plugin.lo $(LTLIBOBJS) -module -avoid-version -rpath $(plugindir)
+sample_plugin.la: $(OBJS) $(LTLIBOBJS)
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) $(LTLIBOBJS) -module -avoid-version -rpath $(plugindir)
 
 # Compat dependencies
 $(LIBOBJDIR)closefrom.lo: $(compat)/closefrom.c $(incdir)/compat.h $(top_builddir)/config.h
@@ -145,7 +145,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile sample_plugin.lo .libs
+	-rm -rf Makefile .libs
 
 clobber: distclean
 
