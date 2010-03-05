@@ -140,7 +140,7 @@ policy_open(unsigned int version, sudo_conv_t conversation,
     }
 
     /* Only allow commands to be run as root. */
-    for (ui = user_info; *ui != NULL; ui++) {
+    for (ui = settings; *ui != NULL; ui++) {
 	if (strncmp(*ui, "runas_user=", sizeof("runas_user=") - 1) == 0) {
 	    runas_user = *ui + sizeof("runas_user=") - 1;
 	}
