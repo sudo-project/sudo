@@ -189,6 +189,10 @@ policy_check(int argc, char * const argv[],
     msg.msg = "Password: ";
     memset(&repl, 0, sizeof(repl));
     sudo_conv(1, &msg, &repl);
+    if (repl.reply == NULL) {
+	sudo_log(SUDO_CONV_ERROR_MSG, "missing password");
+	return FALSE;
+    }
     if (strcmp(repl.reply, "test") != 0) {
 	sudo_log(SUDO_CONV_ERROR_MSG, "incorrect password");
 	return FALSE;
