@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2009-2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,7 +37,6 @@
 #include <limits.h>
 
 #include "compat.h"
-#include "alloc.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048
@@ -47,7 +46,7 @@
 ssize_t
 getline(char **bufp, size_t *bufsizep, FILE *fp)
 {
-    char *buf;
+    char *buf, *cp;
     size_t bufsize;
     size_t len;
 
@@ -56,19 +55,22 @@ getline(char **bufp, size_t *bufsizep, FILE *fp)
 	bufsize = *bufp ? *bufsizep : 0;
 	if (bufsize < len + 1) {
 	    bufsize = len + 1;
-	    *bufp = erealloc(*bufp, bufsize);
+	    cp = *bufp ? realloc(*bufp, bufsize) : malloc(bufsize);
+	    if (cp == NULL)
+		return -1;
+	    *bufp = cp;
 	    *bufsizep = bufsize;
 	}
 	memcpy(*bufp, buf, len);
 	(*bufp)[len] = '\0';
     }
-    return(buf ? len : -1);
+    return buf ? len : -1;
 }
 #else
 ssize_t
 getline(char **bufp, size_t *bufsizep, FILE *fp)
 {
-    char *buf;
+    char *buf, *cp;
     size_t bufsize;
     ssize_t len = 0;
 
@@ -76,7 +78,10 @@ getline(char **bufp, size_t *bufsizep, FILE *fp)
     bufsize = *bufsizep;
     if (buf == NULL || bufsize == 0) {
 	bufsize = LINE_MAX;
-	buf = erealloc(buf, LINE_MAX);
+	cp = buf ? realloc(buf, bufsize) : malloc(bufsize);
+	if (cp == NULL)
+	    return -1;
+	buf = cp;
     }
 
     for (;;) {
@@ -88,10 +93,13 @@ getline(char **bufp, size_t *bufsizep, FILE *fp)
 	if (!len || buf[len - 1] == '\n' || feof(fp))
 	    break;
 	bufsize *= 2;
-	buf = erealloc(buf, bufsize);
+	cp = realloc(buf, bufsize);
+	if (cp == NULL)
+	    return -1;
+	buf = cp;
     }
     *bufp = buf;
     *bufsizep = bufsize;
-    return(len);
+    return len;
 }
 #endif
