@@ -69,8 +69,8 @@ struct n##_list {					\
  */
 void *tq_pop(void *);
 void tq_append(void *, void *);
+void tq_remove(void *, void *);
 void list_append(void *, void *);
-void list_remove(void *, void *);
 void list2tq(void *, void *);
 
 #endif /* _SUDO_LIST_H */
