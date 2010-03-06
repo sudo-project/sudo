@@ -111,6 +111,7 @@ static void script_run(const char *path, char *argv[], char *envp[], int);
 static void sigchild(int s);
 static void sigwinch(int s);
 static void sync_winsize(int src, int dst);
+static void deliver_signal(pid_t pid, int signo);
 
 /* sudo.c */
 extern struct plugin_container_list io_plugins;
@@ -339,6 +340,10 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     sa.sa_handler = sigchild;
     sigaction(SIGCHLD, &sa, NULL);
 
+    /* Catch SIGALRM for command timeout */
+    sa.sa_handler = handler;
+    sigaction(SIGALRM, &sa, NULL);
+
     /* Ignore SIGPIPE from other end of socketpair. */
     sa.sa_handler = SIG_IGN;
     sigaction(SIGPIPE, &sa, NULL);
@@ -392,6 +397,10 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    error(1, "Can't set terminal to raw mode");
     }
 
+    /* Set command timeout if specified. */
+    if (ISSET(details->flags, CD_SET_TIMEOUT))
+	    alarm(details->timeout);
+
     /*
      * Child will run the command in the pty, parent will pass data
      * to and from pty.
@@ -404,6 +413,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     case 0:
 	/* child */
 	close(sv[0]);
+	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	if (exec_setup(details) == 0) {
 	    /* headed for execve() */
 	    if (log_io)
@@ -459,7 +469,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     zero_bytes(&input, sizeof(input));
     zero_bytes(&output, sizeof(output));
     for (;;) {
-       /* XXX - racey */
+	/* XXX - racey */
 	if (!relaysig && recvsig != SIGCHLD) {
 	    relaysig = recvsig;
 	    recvsig = 0;
@@ -491,8 +501,14 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		FD_SET(script_fds[SFD_MASTER], fdsw);
 	}
 	FD_SET(sv[0], fdsr);
-	if (relaysig)
-	    FD_SET(sv[0], fdsw);
+	if (relaysig) {
+	    if (log_io) {
+		FD_SET(sv[0], fdsw);
+	    } else {
+		/* nothing listening on sv[0], send directly */
+		deliver_signal(child, relaysig);
+	    }
+	}
 
 	nready = select(maxfd + 1, fdsr, fdsw, NULL, NULL);
 	if (nready == -1) {
@@ -506,7 +522,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    if (n == -1) {
 		if (errno == EINTR)
 		    continue;
-		if (errno != EAGAIN) {
+		if (log_io && errno != EAGAIN) {
 		    /* Did the other end of the pipe go away? */
 		    cstat->type = CMD_ERRNO;
 		    cstat->val = errno;
@@ -629,14 +645,61 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     return cstat->type == CMD_ERRNO ? -1 : 0;
 }
 
+static void
+deliver_signal(pid_t pid, int signo)
+{
+    int status;
+
+    /* Handle signal from parent. */
+    sudo_debug(8, "signal %d from parent", signo);
+    switch (signo) {
+    case SIGKILL:
+	_exit(1); /* XXX */
+	/* NOTREACHED */
+    case SIGHUP:
+    case SIGTERM:
+    case SIGINT:
+    case SIGQUIT:
+    case SIGTSTP:
+	/* relay signal to child */
+	killpg(pid, signo);
+	break;
+    case SIGALRM:
+	/* command time out, kill child with increasing urgency */
+	killpg(pid, SIGHUP);
+	sleep(1);
+	killpg(pid, SIGTERM);
+	sleep(1);
+	killpg(pid, SIGKILL);
+	break;
+    case SIGUSR1:
+	/* foreground process, grant it controlling tty. */
+	do {
+	    status = tcsetpgrp(script_fds[SFD_SLAVE], pid);
+	} while (status == -1 && errno == EINTR);
+	killpg(pid, SIGCONT);
+	break;
+    case SIGUSR2:
+	/* background process, I take controlling tty. */
+	do {
+	    status = tcsetpgrp(script_fds[SFD_SLAVE], getpid());
+	} while (status == -1 && errno == EINTR);
+	killpg(pid, SIGCONT);
+	break;
+    default:
+	warningx("unexpected signal from child: %d", signo);
+	break;
+    }
+}
+
 int
 script_child(const char *path, char *argv[], char *envp[], int backchannel, int rbac)
 {
     struct command_status cstat;
     fd_set *fdsr;
     sigaction_t sa;
-    pid_t pid, self = getpid();
-    int n, signo, status;
+    pid_t pid;
+    int n, status;
 
     recvsig = 0;
 
@@ -649,8 +712,8 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_DFL;
-    sigaction(SIGCONT, &sa, NULL);
     sigaction(SIGWINCH, &sa, NULL);
+    sigaction(SIGALRM, &sa, NULL);
 
     /* Ignore any SIGTT{IN,OU} or SIGPIPE we get. */
     sa.sa_handler = SIG_IGN;
@@ -774,7 +837,7 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	    error(1, "select failed");
 	}
 
-	/* read child status */
+	/* read command from backchannel, should be a signal */
 	n = recv(backchannel, &cstat, sizeof(cstat), 0);
 	if (n == -1) {
 	    if (errno == EINTR)
@@ -786,40 +849,7 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	    warningx("unexpected reply type on backchannel: %d", cstat.type);
 	    continue;
 	}
-	signo = cstat.val;
-
-	/* Handle signal from parent. */
-	sudo_debug(8, "signal %d from parent", signo);
-	switch (signo) {
-	case SIGKILL:
-	    _exit(1); /* XXX */
-	    /* NOTREACHED */
-	case SIGHUP:
-	case SIGTERM:
-	case SIGINT:
-	case SIGQUIT:
-	case SIGTSTP:
-	    /* relay signal to child */
-	    killpg(child, signo);
-	    break;
-	case SIGUSR1:
-	    /* foreground process, grant it controlling tty. */
-	    do {
-		status = tcsetpgrp(script_fds[SFD_SLAVE], child);
-	    } while (status == -1 && errno == EINTR);
-	    killpg(child, SIGCONT);
-	    break;
-	case SIGUSR2:
-	    /* background process, I take controlling tty. */
-	    do {
-		status = tcsetpgrp(script_fds[SFD_SLAVE], self);
-	    } while (status == -1 && errno == EINTR);
-	    killpg(child, SIGCONT);
-	    break;
-	default:
-	    warningx("unexpected signal from child: %d", signo);
-	    break;
-	}
+	deliver_signal(child, cstat.val);
     }
 
     _exit(1); /* XXX */

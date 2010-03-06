@@ -689,8 +689,6 @@ exec_setup(struct command_details *details)
     }
     if (ISSET(details->flags, CD_SET_UMASK))
 	(void) umask(details->umask);
-    if (ISSET(details->flags, CD_SET_TIMEOUT))
-	alarm(details->timeout);
     if (details->chroot) {
 	if (chroot(details->chroot) != 0 || chdir("/") != 0) {
 	    warning("unable to change root to %s", details->chroot);
