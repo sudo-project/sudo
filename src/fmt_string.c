@@ -51,13 +51,15 @@ fmt_string(const char *var, const char *val)
     size_t val_len = strlen(val);
     char *cp, *str;
 
-    cp = str = emalloc(var_len + 1 + val_len + 1);
-    memcpy(cp, var, var_len);
-    cp += var_len;
-    *cp++ = '=';
-    memcpy(cp, val, val_len);
-    cp += val_len;
-    *cp = '\0';
+    cp = str = malloc(var_len + 1 + val_len + 1);
+	if (str != NULL) {
+	memcpy(cp, var, var_len);
+	cp += var_len;
+	*cp++ = '=';
+	memcpy(cp, val, val_len);
+	cp += val_len;
+	*cp = '\0';
+    }
 
     return(str);
 }

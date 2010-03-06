@@ -328,6 +328,8 @@ get_user_info(struct user_details *ud)
 	errorx(1, "unknown uid %lu: who are you?", (unsigned long)ud->uid);
 
     user_info[i] = fmt_string("user", pw->pw_name);
+    if (user_info[i] == NULL)
+	errorx(1, "unable to allocate memory");
     ud->username = user_info[i] + sizeof("user=") - 1;
 
     easprintf(&user_info[++i], "uid=%lu", (unsigned long)ud->uid);
@@ -340,12 +342,16 @@ get_user_info(struct user_details *ud)
 
     if (getcwd(cwd, sizeof(cwd)) != NULL) {
 	user_info[++i] = fmt_string("cwd", cwd);
+	if (user_info[i] == NULL)
+	    errorx(1, "unable to allocate memory");
 	ud->cwd = user_info[i] + sizeof("cwd=") - 1;
     }
 
     if ((cp = ttyname(STDIN_FILENO)) || (cp = ttyname(STDOUT_FILENO)) ||
 	(cp = ttyname(STDERR_FILENO))) {
 	user_info[++i] = fmt_string("tty", cp);
+	if (user_info[i] == NULL)
+	    errorx(1, "unable to allocate memory");
 	ud->tty = user_info[i] + sizeof("tty=") - 1;
     }
 
@@ -354,6 +360,8 @@ get_user_info(struct user_details *ud)
     else
 	strlcpy(host, "localhost", sizeof(host));
     user_info[++i] = fmt_string("host", host);
+    if (user_info[i] == NULL)
+	errorx(1, "unable to allocate memory");
     ud->host = user_info[i] + sizeof("host=") - 1;
 
     user_info[++i] = NULL;

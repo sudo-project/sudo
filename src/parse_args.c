@@ -359,8 +359,11 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	if (sudo_settings[i].value) {
 	    sudo_debug(9, "settings: %s=%s", sudo_settings[i].name,
 		sudo_settings[i].value);
-	    settings[j++] = fmt_string(sudo_settings[i].name,
+	    settings[j] = fmt_string(sudo_settings[i].name,
 		sudo_settings[i].value);
+	    if (settings[j] == NULL)
+		errorx(1, "unable to allocate memory");
+	    j++;
 	}
     }
     settings[j] = NULL;
