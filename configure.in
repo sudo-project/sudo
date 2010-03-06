@@ -2075,7 +2075,7 @@ if test ${with_pam-"no"} != "no"; then
     AC_CHECK_HEADERS([security/pam_appl.h] [pam/pam_appl.h], [with_pam=yes; break])
     if test "$with_pam" = "yes"; then
 	AC_DEFINE(HAVE_PAM)
-	AUTH_OBJS="$AUTH_OBJS pam.o";
+	AUTH_OBJS="$AUTH_OBJS pam.lo";
 	AUTH_EXCL=PAM
 	AC_MSG_CHECKING(whether to use PAM session support)
 	AC_ARG_ENABLE(pam_session,
@@ -2113,7 +2113,7 @@ if test ${with_aixauth-'no'} != "no"; then
     if test X"$with_aixauth" != X"maybe" -o X"$AUTH_EXCL" = X""; then
 	AC_MSG_NOTICE([using AIX general authentication])
 	AC_DEFINE(HAVE_AIXAUTH)
-	AUTH_OBJS="$AUTH_OBJS aix_auth.o";
+	AUTH_OBJS="$AUTH_OBJS aix_auth.lo";
 	SUDO_LIBS="${SUDO_LIBS} -ls"
 	AUTH_EXCL=AIX_AUTH
     fi
@@ -2125,7 +2125,7 @@ dnl If set to "maybe" only enable if no other exclusive method in use.
 dnl
 if test ${with_bsdauth-'no'} != "no"; then
     AC_CHECK_HEADER(bsd_auth.h, AC_DEFINE(HAVE_BSD_AUTH_H)
-	[AUTH_OBJS="$AUTH_OBJS bsdauth.o"]
+	[AUTH_OBJS="$AUTH_OBJS bsdauth.lo"]
 	[BSDAUTH_USAGE='[[-a auth_type]] ']
 	[AUTH_EXCL=BSD_AUTH; BAMAN=""],
 	[AC_MSG_ERROR([BSD authentication was specified but bsd_auth.h could not be found])])
@@ -2138,7 +2138,7 @@ if test ${CHECKSIA-'false'} = "true"; then
     AC_CHECK_FUNCS(sia_ses_init, [found=true], [found=false])
     if test "$found" = "true"; then
 	AUTH_EXCL=SIA
-	AUTH_OBJS="$AUTH_OBJS sia.o"
+	AUTH_OBJS="$AUTH_OBJS sia.lo"
     fi
 fi
 
@@ -2152,7 +2152,7 @@ if test ${with_fwtk-'no'} != "no"; then
 	with_fwtk=yes
     fi
     SUDO_LIBS="${SUDO_LIBS} -lauth -lfwall"
-    AUTH_OBJS="$AUTH_OBJS fwtk.o"
+    AUTH_OBJS="$AUTH_OBJS fwtk.lo"
 fi
 
 dnl
@@ -2174,13 +2174,13 @@ if test ${with_SecurID-'no'} != "no"; then
     #
     AC_CHECK_LIB(aceclnt, SD_Init,
 	[
-	    AUTH_OBJS="$AUTH_OBJS securid5.o";
+	    AUTH_OBJS="$AUTH_OBJS securid5.lo";
 	    SUDO_LIBS="${SUDO_LIBS} -laceclnt -lpthread"
 	]
 	[
 	    SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_SecurID}])
 	], [
-	    AUTH_OBJS="$AUTH_OBJS securid.o";
+	    AUTH_OBJS="$AUTH_OBJS securid.lo";
 	    SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"
 	],
 	[
@@ -2263,7 +2263,7 @@ if test ${with_kerb4-'no'} != "no"; then
     ], [$K4LIBS])
     LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} $K4LIBS"
-    AUTH_OBJS="$AUTH_OBJS kerb4.o"
+    AUTH_OBJS="$AUTH_OBJS kerb4.lo"
 fi
 
 dnl
@@ -2274,7 +2274,7 @@ if test ${with_kerb5-'no'} != "no"; then
     AC_CHECK_PROG(KRB5CONFIG, krb5-config, yes, "")
     if test -n "$KRB5CONFIG"; then
 	AC_DEFINE(HAVE_KERB5)
-	AUTH_OBJS="$AUTH_OBJS kerb5.o"
+	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
 	CPPFLAGS="$CPPFLAGS `krb5-config --cflags`"
 	SUDO_LIBS="$SUDO_LIBS `krb5-config --libs`"
 	dnl
@@ -2327,7 +2327,7 @@ if test ${with_kerb5-'no'} != "no" -a -z "$KRB5CONFIG"; then
 	    SUDO_LIBS="${SUDO_LIBS} -lkrb5 -lk5crypto -lcom_err"
 	    AC_CHECK_LIB(krb5support, main, [SUDO_LIBS="${SUDO_LIBS} -lkrb5support"])
     ])
-    AUTH_OBJS="$AUTH_OBJS kerb5.o"
+    AUTH_OBJS="$AUTH_OBJS kerb5.lo"
     _LIBS="$LIBS"
     LIBS="${LIBS} ${SUDO_LIBS}"
     AC_CHECK_FUNCS(krb5_verify_user krb5_init_secure_context)
@@ -2392,7 +2392,7 @@ if test ${with_AFS-'no'} = "yes"; then
 	AC_MSG_WARN([Unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options.])
     fi
 
-    AUTH_OBJS="$AUTH_OBJS afs.o"
+    AUTH_OBJS="$AUTH_OBJS afs.lo"
 fi
 
 dnl
@@ -2402,7 +2402,7 @@ dnl
 if test ${with_DCE-'no'} = "yes"; then
     DCE_OBJS="${DCE_OBJS} dce_pwent.o"
     SUDO_LIBS="${SUDO_LIBS} -ldce"
-    AUTH_OBJS="$AUTH_OBJS dce.o"
+    AUTH_OBJS="$AUTH_OBJS dce.lo"
 fi
 
 dnl
@@ -2436,7 +2436,7 @@ if test ${with_skey-'no'} = "yes"; then
     AC_CHECK_LIB(skey, skeyaccess, AC_DEFINE(HAVE_SKEYACCESS))
     LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} -lskey"
-    AUTH_OBJS="$AUTH_OBJS rfc1938.o"
+    AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
 fi
 
 dnl
@@ -2469,7 +2469,7 @@ if test ${with_opie-'no'} = "yes"; then
     AC_CHECK_LIB(opie, main, [found=yes], [AC_MSG_WARN([Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDO_LDFLAGS])])
     LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} -lopie"
-    AUTH_OBJS="$AUTH_OBJS rfc1938.o"
+    AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
 fi
 
 dnl
@@ -2517,7 +2517,7 @@ if test ${with_passwd-'no'} != "no"; then
     fi
     if test -n "$SECUREWARE"; then
 	AC_CHECK_FUNCS(bigcrypt set_auth_parameters initprivs)
-	AUTH_OBJS="$AUTH_OBJS secureware.o"
+	AUTH_OBJS="$AUTH_OBJS secureware.lo"
     fi
 fi
 
@@ -2639,7 +2639,7 @@ dnl Use passwd (and secureware) auth modules?
 dnl
 case "$with_passwd" in
 yes|maybe)
-    AUTH_OBJS="$AUTH_OBJS passwd.o"
+    AUTH_OBJS="$AUTH_OBJS passwd.lo"
     ;;
 *)
     AC_DEFINE(WITHOUT_PASSWD)
@@ -2649,7 +2649,7 @@ yes|maybe)
     ;;
 esac
 AUTH_OBJS=${AUTH_OBJS# }
-_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+_AUTH=`echo "$AUTH_OBJS" | sed 's/\.lo//g'`
 AC_MSG_NOTICE([using the following authentication methods: $_AUTH])
 
 dnl

@@ -21974,7 +21974,7 @@ done
 #define HAVE_PAM 1
 _ACEOF
 
-	AUTH_OBJS="$AUTH_OBJS pam.o";
+	AUTH_OBJS="$AUTH_OBJS pam.lo";
 	AUTH_EXCL=PAM
 	{ echo "$as_me:$LINENO: checking whether to use PAM session support" >&5
 echo $ECHO_N "checking whether to use PAM session support... $ECHO_C" >&6; }
@@ -22135,7 +22135,7 @@ echo "$as_me: using AIX general authentication" >&6;}
 #define HAVE_AIXAUTH 1
 _ACEOF
 
-	AUTH_OBJS="$AUTH_OBJS aix_auth.o";
+	AUTH_OBJS="$AUTH_OBJS aix_auth.lo";
 	SUDO_LIBS="${SUDO_LIBS} -ls"
 	AUTH_EXCL=AIX_AUTH
     fi
@@ -22277,7 +22277,7 @@ if test $ac_cv_header_bsd_auth_h = yes; then
 #define HAVE_BSD_AUTH_H 1
 _ACEOF
 
-	AUTH_OBJS="$AUTH_OBJS bsdauth.o"
+	AUTH_OBJS="$AUTH_OBJS bsdauth.lo"
 	BSDAUTH_USAGE='[-a auth_type] '
 	AUTH_EXCL=BSD_AUTH; BAMAN=""
 else
@@ -22388,7 +22388,7 @@ done
 
     if test "$found" = "true"; then
 	AUTH_EXCL=SIA
-	AUTH_OBJS="$AUTH_OBJS sia.o"
+	AUTH_OBJS="$AUTH_OBJS sia.lo"
     fi
 fi
 
@@ -22408,7 +22408,7 @@ if test ${with_fwtk-'no'} != "no"; then
 	with_fwtk=yes
     fi
     SUDO_LIBS="${SUDO_LIBS} -lauth -lfwall"
-    AUTH_OBJS="$AUTH_OBJS fwtk.o"
+    AUTH_OBJS="$AUTH_OBJS fwtk.lo"
 fi
 
 if test ${with_SecurID-'no'} != "no"; then
@@ -22500,7 +22500,7 @@ fi
 echo "${ECHO_T}$ac_cv_lib_aceclnt_SD_Init_______lpthread_______" >&6; }
 if test $ac_cv_lib_aceclnt_SD_Init_______lpthread_______ = yes; then
 
-	    AUTH_OBJS="$AUTH_OBJS securid5.o";
+	    AUTH_OBJS="$AUTH_OBJS securid5.lo";
 	    SUDO_LIBS="${SUDO_LIBS} -laceclnt -lpthread"
 
 
@@ -22517,7 +22517,7 @@ if test $ac_cv_lib_aceclnt_SD_Init_______lpthread_______ = yes; then
 
 else
 
-	    AUTH_OBJS="$AUTH_OBJS securid.o";
+	    AUTH_OBJS="$AUTH_OBJS securid.lo";
 	    SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"
 
 fi
@@ -23117,7 +23117,7 @@ fi
 
     LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} $K4LIBS"
-    AUTH_OBJS="$AUTH_OBJS kerb4.o"
+    AUTH_OBJS="$AUTH_OBJS kerb4.lo"
 fi
 
 if test ${with_kerb5-'no'} != "no"; then
@@ -23164,7 +23164,7 @@ fi
 #define HAVE_KERB5 1
 _ACEOF
 
-	AUTH_OBJS="$AUTH_OBJS kerb5.o"
+	AUTH_OBJS="$AUTH_OBJS kerb5.lo"
 	CPPFLAGS="$CPPFLAGS `krb5-config --cflags`"
 	SUDO_LIBS="$SUDO_LIBS `krb5-config --libs`"
 				{ echo "$as_me:$LINENO: checking whether we are using Heimdal" >&5
@@ -23455,7 +23455,7 @@ fi
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-    AUTH_OBJS="$AUTH_OBJS kerb5.o"
+    AUTH_OBJS="$AUTH_OBJS kerb5.lo"
     _LIBS="$LIBS"
     LIBS="${LIBS} ${SUDO_LIBS}"
 
@@ -23762,13 +23762,13 @@ echo "$as_me: WARNING: Unable to locate AFS libraries, you will have to edit the
 echo "$as_me: WARNING: Unable to locate AFS include dir, you may have to edit the Makefile and add -I/path/to/afs/includes to CPPFLAGS or rerun configure with the --with-incpath options." >&2;}
     fi
 
-    AUTH_OBJS="$AUTH_OBJS afs.o"
+    AUTH_OBJS="$AUTH_OBJS afs.lo"
 fi
 
 if test ${with_DCE-'no'} = "yes"; then
     DCE_OBJS="${DCE_OBJS} dce_pwent.o"
     SUDO_LIBS="${SUDO_LIBS} -ldce"
-    AUTH_OBJS="$AUTH_OBJS dce.o"
+    AUTH_OBJS="$AUTH_OBJS dce.lo"
 fi
 
 if test ${with_skey-'no'} = "yes"; then
@@ -24018,7 +24018,7 @@ fi
 
     LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} -lskey"
-    AUTH_OBJS="$AUTH_OBJS rfc1938.o"
+    AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
 fi
 
 if test ${with_opie-'no'} = "yes"; then
@@ -24200,7 +24200,7 @@ fi
 
     LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} -lopie"
-    AUTH_OBJS="$AUTH_OBJS rfc1938.o"
+    AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
 fi
 
 if test ${with_passwd-'no'} != "no"; then
@@ -24773,7 +24773,7 @@ _ACEOF
 fi
 done
 
-	AUTH_OBJS="$AUTH_OBJS secureware.o"
+	AUTH_OBJS="$AUTH_OBJS secureware.lo"
     fi
 fi
 
@@ -26034,7 +26034,7 @@ echo "${ECHO_T}$with_transcript" >&6; }
 
 case "$with_passwd" in
 yes|maybe)
-    AUTH_OBJS="$AUTH_OBJS passwd.o"
+    AUTH_OBJS="$AUTH_OBJS passwd.lo"
     ;;
 *)
     cat >>confdefs.h <<\_ACEOF
@@ -26049,7 +26049,7 @@ echo "$as_me: error: no authentication methods defined." >&2;}
     ;;
 esac
 AUTH_OBJS=${AUTH_OBJS# }
-_AUTH=`echo "$AUTH_OBJS" | sed 's/\.o//g'`
+_AUTH=`echo "$AUTH_OBJS" | sed 's/\.lo//g'`
 { echo "$as_me:$LINENO: using the following authentication methods: $_AUTH" >&5
 echo "$as_me: using the following authentication methods: $_AUTH" >&6;}
 
