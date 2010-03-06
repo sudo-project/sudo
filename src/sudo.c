@@ -729,14 +729,6 @@ done:
     return errno;
 }
 
-static sig_atomic_t sigchld;
-
-static void
-sigchild(int s)
-{
-    sigchld = 1;
-}
-
 /*
  * Run the command and wait for it to complete.
  */
