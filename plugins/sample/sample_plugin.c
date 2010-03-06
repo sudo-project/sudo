@@ -44,6 +44,8 @@
 #endif /* HAVE_UNISTD_H */
 #include <fcntl.h>
 #include <limits.h>
+#include <grp.h>
+#include <pwd.h>
 #include <stdarg.h>
 
 #include <sudo_plugin.h>
@@ -55,13 +57,11 @@
  * caching the validate and invalidate functions are NULL.
  */
 
-static struct plugin_state {
-    char **envp;
-    char * const *settings;
-    char * const *user_info;
-} plugin_state;
-static sudo_conv_t sudo_conv;
-static FILE *input, *output;
+#ifdef __TANDEM
+# define ROOT_UID       65535
+#else
+# define ROOT_UID       0
+#endif
 
 #undef TRUE
 #define TRUE 1
@@ -69,6 +69,16 @@ static FILE *input, *output;
 #define FALSE 0
 #undef ERROR
 #define ERROR -1
+
+static struct plugin_state {
+    char **envp;
+    char * const *settings;
+    char * const *user_info;
+} plugin_state;
+static sudo_conv_t sudo_conv;
+static FILE *input, *output;
+static uid_t runas_uid = ROOT_UID;
+static gid_t runas_gid = -1;
 
 /*
  * Allocate storage for a name=value string and return it.
@@ -81,14 +91,14 @@ fmt_string(const char *var, const char *val)
     char *cp, *str;
 
     cp = str = malloc(var_len + 1 + val_len + 1);
-    if (!str)
-	return NULL;
-    memcpy(cp, var, var_len);
-    cp += var_len;
-    *cp++ = '=';
-    memcpy(cp, val, val_len);
-    cp += val_len;
-    *cp = '\0';
+    if (str != NULL) {
+	memcpy(cp, var, var_len);
+	cp += var_len;
+	*cp++ = '=';
+	memcpy(cp, val, val_len);
+	cp += val_len;
+	*cp = '\0';
+    }
 
     return(str);
 }
@@ -128,7 +138,10 @@ policy_open(unsigned int version, sudo_conv_t conversation,
     char * const user_env[])
 {
     char * const *ui;
+    struct passwd *pw;
     const char *runas_user = NULL;
+    struct group *gr;
+    const char *runas_group = NULL;
 
     sudo_conv = conversation;
 
@@ -144,10 +157,23 @@ policy_open(unsigned int version, sudo_conv_t conversation,
 	if (strncmp(*ui, "runas_user=", sizeof("runas_user=") - 1) == 0) {
 	    runas_user = *ui + sizeof("runas_user=") - 1;
 	}
+	if (strncmp(*ui, "runas_group=", sizeof("runas_group=") - 1) == 0) {
+	    runas_group = *ui + sizeof("runas_group=") - 1;
+	}
     }
-    if (runas_user && strcmp(runas_user, "root") != 0) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "commands may only be run as root.");
-	return 0;
+    if (runas_user != NULL) {
+	if ((pw = getpwnam(runas_user)) == NULL) {
+	    sudo_log(SUDO_CONV_ERROR_MSG, "unknown user %s", runas_user);
+	    return 0;
+	}
+	runas_uid = pw->pw_uid;
+    }
+    if (runas_group != NULL) {
+	if ((gr = getgrnam(runas_group)) == NULL) {
+	    sudo_log(SUDO_CONV_ERROR_MSG, "unknown group %s", runas_group);
+	    return 0;
+	}
+	runas_gid = gr->gr_gid;
     }
 
     /* Plugin state. */
@@ -208,9 +234,23 @@ policy_check(int argc, char * const argv[],
 	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory");
 	return ERROR;
     }
-    command_info[i++] = fmt_string("command", argv[0]);
-    command_info[i++] = "runas_uid=0";
-    command_info[i++] = "runas_euid=0";
+    if ((command_info[i++] = fmt_string("command", argv[0])) == NULL ||
+	asprintf(&command_info[i++], "runas_euid=%ld", (long)runas_uid) == -1 ||
+	asprintf(&command_info[i++], "runas_uid=%ld", (long)runas_uid) == -1) {
+	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory");
+	return ERROR;
+    }
+    if (runas_gid != -1) {
+	if (asprintf(&command_info[i++], "runas_gid=%ld", (long)runas_gid) == -1 ||
+	    asprintf(&command_info[i++], "runas_egid=%ld", (long)runas_gid) == -1) {
+	    sudo_log(SUDO_CONV_ERROR_MSG, "out of memory");
+	    return ERROR;
+	}
+    }
+#ifdef USE_TIMEOUT
+    command_info[i++] = "timeout=30";
+#endif
+
     *command_info_out = command_info;
 
     return TRUE;
