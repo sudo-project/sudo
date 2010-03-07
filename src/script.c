@@ -97,7 +97,7 @@ static sig_atomic_t tty_initialized = 0;
 
 static sigset_t ttyblock;
 
-static pid_t parent, child;
+static pid_t ppgrp, child;
 static int child_status;
 static int foreground;
 
@@ -167,7 +167,7 @@ log_output(char *buf, unsigned int n)
 static void
 check_foreground(void)
 {
-    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
+    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == ppgrp;
     if (foreground && !tty_initialized) {
 	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], ttyout)) {
 	    tty_initialized = 1;
@@ -223,7 +223,7 @@ suspend_parent(int signo, struct script_buf *output)
 	sa.sa_handler = SIG_DFL;
 	sigaction(signo, &sa, &osa);
 	sudo_debug(8, "kill parent %d", signo);
-	kill(parent, signo);
+	killpg(ppgrp, signo);
 
 	/* Check foreground/background status on resume. */
 	check_foreground();
@@ -323,7 +323,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     }
 #endif
 
-    parent = getpid(); /* so child can pass signals back to us */
+    ppgrp = getpgrp(); /* parent's pgrp, so child can signal us */
 
     /*
      * We communicate with the child over a bi-directional pipe.
@@ -361,7 +361,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	sigaddset(&ttyblock, SIGTTOU);
 
 	/* Are we the foreground process? */
-	foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
+	foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == ppgrp;
 
 	/* If stdout is not a tty we handle post-processing differently. */
 	ttyout = isatty(STDOUT_FILENO);
