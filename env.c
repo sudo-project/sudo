@@ -250,8 +250,10 @@ setenv(var, val, overwrite)
     const char *cp;
     size_t esize;
 
-    if (!var || *var == '\0')
-	return(EINVAL);
+    if (!var || *var == '\0') {
+	errno = EINVAL;
+	return(-1);
+    }
 
     /*
      * POSIX says a var name with '=' is an error but BSD
