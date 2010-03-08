@@ -108,7 +108,7 @@ static sig_atomic_t tty_initialized = 0;
 
 static sigset_t ttyblock;
 
-static pid_t parent, child;
+static pid_t ppgrp, child;
 static int child_status;
 static int foreground;
 
@@ -356,7 +356,7 @@ log_output(buf, n, then, now, ofile, tfile)
 static void
 check_foreground()
 {
-    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
+    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == ppgrp;
     if (foreground && !tty_initialized) {
 	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], ttyout)) {
 	    tty_initialized = 1;
@@ -419,7 +419,7 @@ suspend_parent(signo, output, then, now, ofile, tfile)
 #ifdef SCRIPT_DEBUG
 	warningx("kill parent %d", signo);
 #endif
-	kill(parent, signo);
+	killpg(ppgrp, signo);
 
 	/* Check foreground/background status on resume. */
 	check_foreground();
@@ -496,8 +496,8 @@ script_execv(path, argv)
 #endif
 
     /* Are we the foreground process? */
-    parent = getpid(); /* so child can pass signals back to us */
-    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == parent;
+    ppgrp = getpgrp(); /* so child can pass signals back to us */
+    foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == ppgrp;
 
     /* So we can block tty-generated signals */
     sigemptyset(&ttyblock);
