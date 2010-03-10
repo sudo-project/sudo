@@ -109,8 +109,8 @@ fmt_string(const char *var, const char *val)
 static void
 sudo_log(int type, const char *fmt, ...)
 {
-    struct sudo_conv_message msg;
-    struct sudo_conv_reply repl;
+    struct sudo_conv_message msg[2];
+    struct sudo_conv_reply repl[2];
     va_list ap;
     char *str;
     int rc;
@@ -123,10 +123,12 @@ sudo_log(int type, const char *fmt, ...)
 
     /* Call conversation function */
     memset(&msg, 0, sizeof(msg));
-    msg.msg_type = type;
-    msg.msg = str;
+    msg[0].msg_type = type;
+    msg[0].msg = str;
+    msg[1].msg_type = type;
+    msg[1].msg = "\n";
     memset(&repl, 0, sizeof(repl));
-    sudo_conv(1, &msg, &repl);
+    sudo_conv(2, msg, repl);
 }
 
 /*
