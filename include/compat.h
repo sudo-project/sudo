@@ -293,4 +293,8 @@ const char *getprogname(void);
     } while (0)
 #endif
 
+#ifndef WCOREDUMP
+# define WCOREDUMP(x)	((x) & 0x80)
+#endif
+
 #endif /* _SUDO_COMPAT_H */
