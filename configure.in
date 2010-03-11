@@ -18,7 +18,8 @@ AC_SUBST(CFLAGS)
 AC_SUBST(PROGS)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LDFLAGS)
-AC_SUBST(SUDO_LDFLAGS)
+AC_SUBST(SUDOERS_LDFLAGS)
+AC_SUBST(SUDOERS_OBJS)
 AC_SUBST(SUDO_OBJS)
 AC_SUBST(LIBS)
 AC_SUBST(SUDO_LIBS)
@@ -1412,7 +1413,7 @@ case "$host" in
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
 		OSDEFS="${OSDEFS} -D_XOPEN_EXTENDED_SOURCE -D_ALL_SOURCE"
-		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
+		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 		if test X"$with_blibpath" != X"no"; then
 		    AC_MSG_CHECKING([if linker accepts -Wl,-blibpath])
 		    O_LDFLAGS="$LDFLAGS"
@@ -1481,9 +1482,9 @@ case "$host" in
 
 			    # Not sure if setuid binaries are safe in < 9.x
 			    if test -n "$GCC"; then
-				SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
+				SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -static"
 			    else
-				SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
+				SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-a,archive"
 			    fi
 			;;
 			*-*-hpux9.*)
@@ -1512,7 +1513,7 @@ case "$host" in
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
-		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
+		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-no_library_replacement"
 
 		: ${CHECKSIA='true'}
 		AC_MSG_CHECKING(whether to disable sia support on Digital UNIX)
@@ -1946,8 +1947,9 @@ AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
 	[ #include <limits.h>
 	  #include <fcntl.h> ])
 ])
-AC_CHECK_FUNCS(mkstemp, [], [SUDO_OBJS="${SUDO_OBJS} mkstemp.o"
+AC_CHECK_FUNCS(mkstemp, [], [
     AC_CHECK_FUNCS(random lrand48, [break])
+    AC_LIBOBJ(mkstemp)
 ])
 AC_CHECK_FUNCS(snprintf vsnprintf asprintf vasprintf, , [NEED_SNPRINTF=1])
 if test X"$ac_cv_type_struct_timespec" != X"no"; then
@@ -2147,7 +2149,7 @@ dnl extra FWTK libs + includes
 dnl
 if test ${with_fwtk-'no'} != "no"; then
     if test "$with_fwtk" != "yes"; then
-	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_fwtk}])
+	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_fwtk}])
 	CPPFLAGS="${CPPFLAGS} -I${with_fwtk}"
 	with_fwtk=yes
     fi
@@ -2178,7 +2180,7 @@ if test ${with_SecurID-'no'} != "no"; then
 	    SUDO_LIBS="${SUDO_LIBS} -laceclnt -lpthread"
 	]
 	[
-	    SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_SecurID}])
+	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_SecurID}])
 	], [
 	    AUTH_OBJS="$AUTH_OBJS securid.lo";
 	    SUDO_LIBS="${SUDO_LIBS} ${with_SecurID}/sdiclient.a"
@@ -2226,7 +2228,7 @@ if test ${with_kerb4-'no'} != "no"; then
 	test X"$found" = X"no" && CPPFLAGS="$O_CPPFLAGS"
     else
 	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_kerb4}/lib])
-	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_kerb4}/lib])
+	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_kerb4}/lib])
 	CPPFLAGS="$CPPFLAGS -I${with_kerb4}/include"
 	AC_CHECK_HEADER([krb.h], [found=yes], [found=no])
     fi
@@ -2258,7 +2260,7 @@ if test ${with_kerb4-'no'} != "no"; then
     AC_CHECK_LIB(krb, main, [K4LIBS="-lkrb $K4LIBS"], [
 	AC_CHECK_LIB(krb4, main, [K4LIBS="-lkrb4 $K4LIBS"],
 	    [K4LIBS="-lkrb $K4LIBS"]
-	    [AC_MSG_WARN([Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS and possibly add Kerberos libs to SUDO_LIBS])]
+	    [AC_MSG_WARN([Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDOERS_LDFLAGS and possibly add Kerberos libs to SUDO_LIBS])]
 	, [$K4LIBS])
     ], [$K4LIBS])
     LDFLAGS="$O_LDFLAGS"
@@ -2308,7 +2310,7 @@ if test ${with_kerb5-'no'} != "no" -a -z "$KRB5CONFIG"; then
 	fi
     else
 	dnl XXX - try to include krb5.h here too
-	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_kerb5}/lib])
+	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_kerb5}/lib])
 	CPPFLAGS="$CPPFLAGS -I${with_kerb5}/include"
     fi
 
@@ -2357,12 +2359,12 @@ if test ${with_AFS-'no'} = "yes"; then
     AFSLIBDIRS="/usr/lib/afs /usr/afsws/lib /usr/afsws/lib/afs"
     for i in $AFSLIBDIRS; do
 	if test -d ${i}; then
-	    SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [$i])
+	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [$i])
 	    FOUND_AFSLIBDIR=true
 	fi
     done
     if test -z "$FOUND_AFSLIBDIR"; then
-	AC_MSG_WARN([Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDO_LDFLAGS or rerun configure with the --with-libpath options.])
+	AC_MSG_WARN([Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDOERS_LDFLAGS or rerun configure with the --with-libpath options.])
     fi
 
     # Order is important here.  Note that we build AFS_LIBS from right to left
@@ -2413,7 +2415,7 @@ if test ${with_skey-'no'} = "yes"; then
     if test "$with_skey" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_skey}/include"
 	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_skey}/lib])
-	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_skey}/lib])
+	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_skey}/lib])
 	AC_PREPROC_IFELSE([#include <skey.h>], [found=yes], [found=no])
     else
 	found=no
@@ -2426,13 +2428,13 @@ if test ${with_skey-'no'} = "yes"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
 	    SUDO_APPEND_LIBPATH(LDFLAGS, [${dir}/lib])
-	    SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${dir}/lib])
+	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${dir}/lib])
 	fi
     fi
     if test "$found" = "no"; then
 	AC_MSG_WARN([Unable to locate skey.h, you will have to edit the Makefile and add -I/path/to/skey/includes to CPPFLAGS])
     fi
-    AC_CHECK_LIB(skey, main, [found=yes], [AC_MSG_WARN([Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS])])
+    AC_CHECK_LIB(skey, main, [found=yes], [AC_MSG_WARN([Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDOERS_LDFLAGS])])
     AC_CHECK_LIB(skey, skeyaccess, AC_DEFINE(HAVE_SKEYACCESS))
     LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} -lskey"
@@ -2447,7 +2449,7 @@ if test ${with_opie-'no'} = "yes"; then
     if test "$with_opie" != "yes"; then
 	CPPFLAGS="${CPPFLAGS} -I${with_opie}/include"
 	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_opie}/lib])
-	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_opie}/lib])
+	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_opie}/lib])
 	AC_PREPROC_IFELSE([#include <opie.h>], [found=yes], [found=no])
     else
 	found=no
@@ -2460,13 +2462,13 @@ if test ${with_opie-'no'} = "yes"; then
 	    CPPFLAGS="$O_CPPFLAGS"
 	else
 	    SUDO_APPEND_LIBPATH(LDFLAGS, [${dir}/lib])
-	    SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${dir}/lib])
+	    SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${dir}/lib])
 	fi
     fi
     if test "$found" = "no"; then
 	AC_MSG_WARN([Unable to locate opie.h, you will have to edit the Makefile and add -I/path/to/opie/includes to CPPFLAGS])
     fi
-    AC_CHECK_LIB(opie, main, [found=yes], [AC_MSG_WARN([Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDO_LDFLAGS])])
+    AC_CHECK_LIB(opie, main, [found=yes], [AC_MSG_WARN([Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDOERS_LDFLAGS])])
     LDFLAGS="$O_LDFLAGS"
     SUDO_LIBS="${SUDO_LIBS} -lopie"
     AUTH_OBJS="$AUTH_OBJS rfc1938.lo"
@@ -2527,13 +2529,13 @@ dnl
 if test ${with_ldap-'no'} != "no"; then
     _LDFLAGS="$LDFLAGS"
     if test "$with_ldap" != "yes"; then
-	SUDO_APPEND_LIBPATH(SUDO_LDFLAGS, [${with_ldap}/lib])
+	SUDO_APPEND_LIBPATH(SUDOERS_LDFLAGS, [${with_ldap}/lib])
 	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_ldap}/lib])
 	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
 	with_ldap=yes
 	LDAP=""
     fi
-    SUDO_OBJS="${SUDO_OBJS} ldap.o"
+    SUDOERS_OBJS="${SUDOERS_OBJS} ldap.o"
 
     AC_MSG_CHECKING([for LDAP libraries])
     LDAP_LIBS=""
@@ -2616,14 +2618,14 @@ if test X"$LIBVAS_RPATH" != X""; then
 fi
 
 dnl
-dnl Add $blibpath to SUDO_LDFLAGS if specified by the user or if we
-dnl added -L dirpaths to SUDO_LDFLAGS.
+dnl Add $blibpath to SUDOERS_LDFLAGS if specified by the user or if we
+dnl added -L dirpaths to SUDOERS_LDFLAGS.
 dnl
 if test -n "$blibpath"; then
     if test -n "$blibpath_add"; then
-    	SUDO_LDFLAGS="$SUDO_LDFLAGS -Wl,-blibpath:${blibpath}${blibpath_add}"
+    	SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS -Wl,-blibpath:${blibpath}${blibpath_add}"
     elif test -n "$with_blibpath" -a "$with_blibpath" != "yes"; then
-    	SUDO_LDFLAGS="$SUDO_LDFLAGS -Wl,-blibpath:${blibpath}"
+    	SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS -Wl,-blibpath:${blibpath}"
     fi
 fi
 

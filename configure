@@ -808,7 +808,8 @@ CFLAGS
 PROGS
 CPPFLAGS
 LDFLAGS
-SUDO_LDFLAGS
+SUDOERS_LDFLAGS
+SUDOERS_OBJS
 SUDO_OBJS
 SUDO_LIBS
 NET_LIBS
@@ -2061,6 +2062,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { echo "$as_me:$LINENO: Configuring Sudo version $PACKAGE_VERSION" >&5
 echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -6607,7 +6609,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6610 "configure"' > conftest.$ac_ext
+  echo '#line 6612 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8471,11 +8473,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8474: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8476: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8478: \$? = $ac_status" >&5
+   echo "$as_me:8480: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8761,11 +8763,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8764: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8766: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8768: \$? = $ac_status" >&5
+   echo "$as_me:8770: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8865,11 +8867,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8868: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8870: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8872: \$? = $ac_status" >&5
+   echo "$as_me:8874: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11225,7 +11227,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11228 "configure"
+#line 11230 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11325,7 +11327,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11328 "configure"
+#line 11330 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12191,7 +12193,7 @@ case "$host" in
     *-*-aix*)
 		# To get all prototypes (so we pass -Wall)
 		OSDEFS="${OSDEFS} -D_XOPEN_EXTENDED_SOURCE -D_ALL_SOURCE"
-		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
+		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-bI:\$(srcdir)/aixcrypt.exp"
 		if test X"$with_blibpath" != X"no"; then
 		    { echo "$as_me:$LINENO: checking if linker accepts -Wl,-blibpath" >&5
 echo $ECHO_N "checking if linker accepts -Wl,-blibpath... $ECHO_C" >&6; }
@@ -12545,9 +12547,9 @@ _ACEOF
 
 			    # Not sure if setuid binaries are safe in < 9.x
 			    if test -n "$GCC"; then
-				SUDO_LDFLAGS="${SUDO_LDFLAGS} -static"
+				SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -static"
 			    else
-				SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-a,archive"
+				SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-a,archive"
 			    fi
 			;;
 			*-*-hpux9.*)
@@ -12579,7 +12581,7 @@ _ACEOF
 		;;
     *-dec-osf*)
 		# ignore envariables wrt dynamic lib path
-		SUDO_LDFLAGS="${SUDO_LDFLAGS} -Wl,-no_library_replacement"
+		SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -Wl,-no_library_replacement"
 
 		: ${CHECKSIA='true'}
 		{ echo "$as_me:$LINENO: checking whether to disable sia support on Digital UNIX" >&5
@@ -19803,7 +19805,7 @@ if test `eval echo '${'$as_ac_var'}'` = yes; then
 _ACEOF
 
 else
-  SUDO_OBJS="${SUDO_OBJS} mkstemp.o"
+
 
 
 for ac_func in random lrand48
@@ -19898,6 +19900,12 @@ _ACEOF
  break
 fi
 done
+
+    case " $LIBOBJS " in
+  *" mkstemp.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS mkstemp.$ac_objext"
+ ;;
+esac
 
 
 fi
@@ -22396,11 +22404,11 @@ if test ${with_fwtk-'no'} != "no"; then
     if test "$with_fwtk" != "yes"; then
 
     if test X"$with_rpath" = X"yes"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_fwtk} -R${with_fwtk}"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk} -R${with_fwtk}"
     else
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_fwtk}"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_fwtk}"
     fi
-    if test X"$blibpath" != X"" -a "SUDO_LDFLAGS" = "SUDO_LDFLAGS"; then
+    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
 	blibpath_add="${blibpath_add}:${with_fwtk}"
     fi
 
@@ -22506,11 +22514,11 @@ if test $ac_cv_lib_aceclnt_SD_Init_______lpthread_______ = yes; then
 
 
     if test X"$with_rpath" = X"yes"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_SecurID} -R${with_SecurID}"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_SecurID} -R${with_SecurID}"
     else
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_SecurID}"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_SecurID}"
     fi
-    if test X"$blibpath" != X"" -a "SUDO_LDFLAGS" = "SUDO_LDFLAGS"; then
+    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
 	blibpath_add="${blibpath_add}:${with_SecurID}"
     fi
 
@@ -22588,11 +22596,11 @@ rm -f conftest.err conftest.$ac_ext
 
 
     if test X"$with_rpath" = X"yes"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_kerb4}/lib -R${with_kerb4}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb4}/lib -R${with_kerb4}/lib"
     else
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_kerb4}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb4}/lib"
     fi
-    if test X"$blibpath" != X"" -a "SUDO_LDFLAGS" = "SUDO_LDFLAGS"; then
+    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
 	blibpath_add="${blibpath_add}:${with_kerb4}/lib"
     fi
 
@@ -23107,8 +23115,8 @@ if test `eval echo '${'$as_ac_Lib'}'` = yes; then
   K4LIBS="-lkrb4 $K4LIBS"
 else
   K4LIBS="-lkrb $K4LIBS"
-	    { echo "$as_me:$LINENO: WARNING: Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS and possibly add Kerberos libs to SUDO_LIBS" >&5
-echo "$as_me: WARNING: Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDO_LDFLAGS and possibly add Kerberos libs to SUDO_LIBS" >&2;}
+	    { echo "$as_me:$LINENO: WARNING: Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDOERS_LDFLAGS and possibly add Kerberos libs to SUDO_LIBS" >&5
+echo "$as_me: WARNING: Unable to locate Kerberos IV libraries, you will have to edit the Makefile and add -L/path/to/krb/libs to SUDOERS_LDFLAGS and possibly add Kerberos libs to SUDO_LIBS" >&2;}
 
 fi
 
@@ -23270,11 +23278,11 @@ echo "$as_me: WARNING: Unable to locate Kerberos V include files, you will have 
     else
 
     if test X"$with_rpath" = X"yes"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_kerb5}/lib -R${with_kerb5}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib -R${with_kerb5}/lib"
     else
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_kerb5}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_kerb5}/lib"
     fi
-    if test X"$blibpath" != X"" -a "SUDO_LDFLAGS" = "SUDO_LDFLAGS"; then
+    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
 	blibpath_add="${blibpath_add}:${with_kerb5}/lib"
     fi
 
@@ -23718,11 +23726,11 @@ if test ${with_AFS-'no'} = "yes"; then
 	if test -d ${i}; then
 
     if test X"$with_rpath" = X"yes"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L$i -R$i"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i -R$i"
     else
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L$i"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L$i"
     fi
-    if test X"$blibpath" != X"" -a "SUDO_LDFLAGS" = "SUDO_LDFLAGS"; then
+    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
 	blibpath_add="${blibpath_add}:$i"
     fi
 
@@ -23730,8 +23738,8 @@ if test ${with_AFS-'no'} = "yes"; then
 	fi
     done
     if test -z "$FOUND_AFSLIBDIR"; then
-	{ echo "$as_me:$LINENO: WARNING: Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDO_LDFLAGS or rerun configure with the --with-libpath options." >&5
-echo "$as_me: WARNING: Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDO_LDFLAGS or rerun configure with the --with-libpath options." >&2;}
+	{ echo "$as_me:$LINENO: WARNING: Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDOERS_LDFLAGS or rerun configure with the --with-libpath options." >&5
+echo "$as_me: WARNING: Unable to locate AFS libraries, you will have to edit the Makefile and add -L/path/to/afs/libs to SUDOERS_LDFLAGS or rerun configure with the --with-libpath options." >&2;}
     fi
 
     # Order is important here.  Note that we build AFS_LIBS from right to left
@@ -23787,11 +23795,11 @@ if test ${with_skey-'no'} = "yes"; then
 
 
     if test X"$with_rpath" = X"yes"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_skey}/lib -R${with_skey}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib -R${with_skey}/lib"
     else
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_skey}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_skey}/lib"
     fi
-    if test X"$blibpath" != X"" -a "SUDO_LDFLAGS" = "SUDO_LDFLAGS"; then
+    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
 	blibpath_add="${blibpath_add}:${with_skey}/lib"
     fi
 
@@ -23872,11 +23880,11 @@ rm -f conftest.err conftest.$ac_ext
 
 
     if test X"$with_rpath" = X"yes"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${dir}/lib -R${dir}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -R${dir}/lib"
     else
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${dir}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
     fi
-    if test X"$blibpath" != X"" -a "SUDO_LDFLAGS" = "SUDO_LDFLAGS"; then
+    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
 	blibpath_add="${blibpath_add}:${dir}/lib"
     fi
 
@@ -23944,8 +23952,8 @@ echo "${ECHO_T}$ac_cv_lib_skey_main" >&6; }
 if test $ac_cv_lib_skey_main = yes; then
   found=yes
 else
-  { echo "$as_me:$LINENO: WARNING: Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS" >&5
-echo "$as_me: WARNING: Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDO_LDFLAGS" >&2;}
+  { echo "$as_me:$LINENO: WARNING: Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDOERS_LDFLAGS" >&5
+echo "$as_me: WARNING: Unable to locate libskey.a, you will have to edit the Makefile and add -L/path/to/skey/lib to SUDOERS_LDFLAGS" >&2;}
 fi
 
     { echo "$as_me:$LINENO: checking for skeyaccess in -lskey" >&5
@@ -24037,11 +24045,11 @@ if test ${with_opie-'no'} = "yes"; then
 
 
     if test X"$with_rpath" = X"yes"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_opie}/lib -R${with_opie}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib -R${with_opie}/lib"
     else
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_opie}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_opie}/lib"
     fi
-    if test X"$blibpath" != X"" -a "SUDO_LDFLAGS" = "SUDO_LDFLAGS"; then
+    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
 	blibpath_add="${blibpath_add}:${with_opie}/lib"
     fi
 
@@ -24122,11 +24130,11 @@ rm -f conftest.err conftest.$ac_ext
 
 
     if test X"$with_rpath" = X"yes"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${dir}/lib -R${dir}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib -R${dir}/lib"
     else
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${dir}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${dir}/lib"
     fi
-    if test X"$blibpath" != X"" -a "SUDO_LDFLAGS" = "SUDO_LDFLAGS"; then
+    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
 	blibpath_add="${blibpath_add}:${dir}/lib"
     fi
 
@@ -24194,8 +24202,8 @@ echo "${ECHO_T}$ac_cv_lib_opie_main" >&6; }
 if test $ac_cv_lib_opie_main = yes; then
   found=yes
 else
-  { echo "$as_me:$LINENO: WARNING: Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDO_LDFLAGS" >&5
-echo "$as_me: WARNING: Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDO_LDFLAGS" >&2;}
+  { echo "$as_me:$LINENO: WARNING: Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDOERS_LDFLAGS" >&5
+echo "$as_me: WARNING: Unable to locate libopie.a, you will have to edit the Makefile and add -L/path/to/opie/lib to SUDOERS_LDFLAGS" >&2;}
 fi
 
     LDFLAGS="$O_LDFLAGS"
@@ -24782,11 +24790,11 @@ if test ${with_ldap-'no'} != "no"; then
     if test "$with_ldap" != "yes"; then
 
     if test X"$with_rpath" = X"yes"; then
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_ldap}/lib -R${with_ldap}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib -R${with_ldap}/lib"
     else
-	SUDO_LDFLAGS="${SUDO_LDFLAGS} -L${with_ldap}/lib"
+	SUDOERS_LDFLAGS="${SUDOERS_LDFLAGS} -L${with_ldap}/lib"
     fi
-    if test X"$blibpath" != X"" -a "SUDO_LDFLAGS" = "SUDO_LDFLAGS"; then
+    if test X"$blibpath" != X"" -a "SUDOERS_LDFLAGS" = "SUDO_LDFLAGS"; then
 	blibpath_add="${blibpath_add}:${with_ldap}/lib"
     fi
 
@@ -24804,7 +24812,7 @@ if test ${with_ldap-'no'} != "no"; then
 	with_ldap=yes
 	LDAP=""
     fi
-    SUDO_OBJS="${SUDO_OBJS} ldap.o"
+    SUDOERS_OBJS="${SUDOERS_OBJS} ldap.o"
 
     { echo "$as_me:$LINENO: checking for LDAP libraries" >&5
 echo $ECHO_N "checking for LDAP libraries... $ECHO_C" >&6; }
@@ -25935,9 +25943,9 @@ fi
 
 if test -n "$blibpath"; then
     if test -n "$blibpath_add"; then
-    	SUDO_LDFLAGS="$SUDO_LDFLAGS -Wl,-blibpath:${blibpath}${blibpath_add}"
+    	SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS -Wl,-blibpath:${blibpath}${blibpath_add}"
     elif test -n "$with_blibpath" -a "$with_blibpath" != "yes"; then
-    	SUDO_LDFLAGS="$SUDO_LDFLAGS -Wl,-blibpath:${blibpath}"
+    	SUDOERS_LDFLAGS="$SUDOERS_LDFLAGS -Wl,-blibpath:${blibpath}"
     fi
 fi
 
@@ -26768,7 +26776,8 @@ CFLAGS!$CFLAGS$ac_delim
 PROGS!$PROGS$ac_delim
 CPPFLAGS!$CPPFLAGS$ac_delim
 LDFLAGS!$LDFLAGS$ac_delim
-SUDO_LDFLAGS!$SUDO_LDFLAGS$ac_delim
+SUDOERS_LDFLAGS!$SUDOERS_LDFLAGS$ac_delim
+SUDOERS_OBJS!$SUDOERS_OBJS$ac_delim
 SUDO_OBJS!$SUDO_OBJS$ac_delim
 SUDO_LIBS!$SUDO_LIBS$ac_delim
 NET_LIBS!$NET_LIBS$ac_delim
@@ -26821,7 +26830,6 @@ mailto!$mailto$ac_delim
 mailsub!$mailsub$ac_delim
 badpass_message!$badpass_message$ac_delim
 fqdn!$fqdn$ac_delim
-runas_default!$runas_default$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -26863,6 +26871,7 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+runas_default!$runas_default$ac_delim
 env_editor!$env_editor$ac_delim
 passwd_tries!$passwd_tries$ac_delim
 tty_tickets!$tty_tickets$ac_delim
@@ -26909,7 +26918,7 @@ KRB5CONFIG!$KRB5CONFIG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 44; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 45; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
