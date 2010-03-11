@@ -527,7 +527,9 @@ support credential caching.
 If the plugin needs to interact with the user or display informational
 or error messages, it may do so via the conversation function.  A
 plugin should not attempt to read directly from the standard input
-or the user's tty.
+or the user's tty (neither of which are guaranteed to exist).  The
+caller must include a trailing newline in C<msg> if they want one
+to be printed.
 
  struct sudo_conv_message {
  #define SUDO_CONV_PROMPT_ECHO_OFF	1

@@ -1,7 +1,7 @@
 
 
 
-SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 SSuuddoo PPlluuggiinn AAPPII
@@ -61,13 +61,13 @@ SSuuddoo PPlluuggiinn AAPPII
 
 
 
-1.8.0a1                 February 24, 2010                       1
+1.8.0a1                   March 11, 2010                        1
 
 
 
 
 
-SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
         struct policy_plugin {
@@ -127,13 +127,13 @@ SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
 
-1.8.0a1                 February 24, 2010                       2
+1.8.0a1                   March 11, 2010                        2
 
 
 
 
 
-SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
                when running ssuuddoo.  As such, they will only be present when the
@@ -193,13 +193,13 @@ SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
 
-1.8.0a1                 February 24, 2010                       3
+1.8.0a1                   March 11, 2010                        3
 
 
 
 
 
-SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
                selinux_type=string
@@ -259,13 +259,13 @@ SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
 
-1.8.0a1                 February 24, 2010                       4
+1.8.0a1                   March 11, 2010                        4
 
 
 
 
 
-SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
        close
@@ -325,13 +325,13 @@ SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
 
-1.8.0a1                 February 24, 2010                       5
+1.8.0a1                   March 11, 2010                        5
 
 
 
 
 
-SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
                command line in the form of a NULL-terminated vector of
@@ -391,13 +391,13 @@ SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
 
-1.8.0a1                 February 24, 2010                       6
+1.8.0a1                   March 11, 2010                        6
 
 
 
 
 
-SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
                chroot=string
@@ -457,13 +457,13 @@ SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
 
-1.8.0a1                 February 24, 2010                       7
+1.8.0a1                   March 11, 2010                        7
 
 
 
 
 
-SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
            argc
@@ -510,7 +510,8 @@ SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
        If the plugin needs to interact with the user or display informational
        or error messages, it may do so via the conversation function.  A
        plugin should not attempt to read directly from the standard input or
-       the user's tty.
+       the user's tty (neither of which are guaranteed to exist).  The caller
+       must include a trailing newline in msg if they want one to be printed.
 
 
 
@@ -522,14 +523,13 @@ SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
 
-
-1.8.0a1                 February 24, 2010                       8
-
+1.8.0a1                   March 11, 2010                        8
 
 
 
 
-SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
         struct sudo_conv_message {
@@ -589,13 +589,13 @@ SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
 
-1.8.0a1                 February 24, 2010                       9
+1.8.0a1                   March 11, 2010                        9
 
 
 
 
 
-SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
        version
@@ -655,13 +655,13 @@ SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
 
-1.8.0a1                 February 24, 2010                      10
+1.8.0a1                   March 11, 2010                       10
 
 
 
 
 
-SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
            user_env
@@ -721,13 +721,13 @@ SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
 
-1.8.0a1                 February 24, 2010                      11
+1.8.0a1                   March 11, 2010                       11
 
 
 
 
 
-SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
+SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
            The _l_o_g___o_u_t_p_u_t function is called whenever data can be read from
@@ -787,6 +787,6 @@ SUDO_PLUGIN(8)         MAINTENANCE COMMANDS        SUDO_PLUGIN(8)
 
 
 
-1.8.0a1                 February 24, 2010                      12
+1.8.0a1                   March 11, 2010                       12
 
 
