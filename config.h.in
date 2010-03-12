@@ -85,6 +85,15 @@
 /* Define to 1 if your `DIR' contains dd_fd. */
 #undef HAVE_DD_FD
 
+/* Define to 1 if you have the 'sys_siglist' declaration. */
+#undef HAVE_DECL_SYS_SIGLIST
+
+/* Define to 1 if you have the '_sys_siglist' declaration. */
+#undef HAVE_DECL__SYS_SIGLIST
+
+/* Define to 1 if you have the '__sys_siglist' declaration. */
+#undef HAVE_DECL___SYS_SIGLIST
+
 /* Define to 1 if you have the `dgettext' function. */
 #undef HAVE_DGETTEXT
 
@@ -499,9 +508,6 @@
 
 /* Define to 1 if you have the <sys/select.h> header file. */
 #undef HAVE_SYS_SELECT_H
-
-/* Define to 1 if you have the 'sys_siglist' symbol in libc. */
-#undef HAVE_SYS_SIGLIST
 
 /* Define to 1 if you have the <sys/sockio.h> header file. */
 #undef HAVE_SYS_SOCKIO_H

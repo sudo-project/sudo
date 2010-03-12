@@ -20,15 +20,33 @@
 #include <config.h>
 #include <compat.h>
 
+#if defined(HAVE_DECL_SYS_SIGLIST)
+# define my_sys_siglist	sys_siglist
+#elif defined(HAVE_DECL__SYS_SIGLIST)
+# define my_sys_siglist	_sys_siglist
+#elif defined(HAVE_DECL___SYS_SIGLIST)
+# define my_sys_siglist	__sys_siglist
+#else
+# error one of HAVE_DECL_SYS_SIGLIST, HAVE_DECL__SYS_SIGLIST, HAVE_DECL___SYS_SIGLIST must be defined
+#endif
+
+#if !defined(NSIG)
+# if defined(_NSIG)
+#  define NSIG _NSIG
+# elif defined(__NSIG)
+#  define NSIG __NSIG
+# else
+#  error one of NSIG, _NSIG, or __NSIG must be defined
+# endif
+#endif
+
 /*
  * Get signal description string
  */
 char *
 strsignal(int signo)
 {
-    extern const char *const sys_siglist[];
-
     if (signo > 0 && signo < NSIG)
-	return((char *)sys_siglist[signo]);
+	return((char *)my_sys_siglist[signo]);
     return("Unknown signal");
 }
