@@ -16174,9 +16174,8 @@ LIBS=$ac_save_LIBS
 
 
 
-
 for ac_func in dup2 strchr strrchr memchr memcpy memset sysconf tzset \
-	       strftime setrlimit initgroups getgroups fstat gettimeofday \
+	       strftime setrlimit initgroups fstat gettimeofday \
 	       regcomp setlocale getaddrinfo setsid setenv vhangup \
 	       mbr_check_membership setrlimit64
 do
