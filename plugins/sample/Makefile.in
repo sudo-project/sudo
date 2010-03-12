@@ -113,6 +113,10 @@ $(LIBOBJDIR)snprintf.lo: $(compat)/snprintf.c $(incdir)/compat.h $(top_builddir)
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/snprintf.c
 $(LIBOBJDIR)strcasecmp.lo: $(compat)/strcasecmp.c $(incdir)/compat.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strcasecmp.c
+$(LIBOBJDIR)strdup.lo: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strdup.c
+$(LIBOBJDIR)strndup.lo: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strndup.c
 $(LIBOBJDIR)strerror.lo: $(compat)/strerror.c $(incdir)/compat.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strerror.c
 $(LIBOBJDIR)strlcat.lo: $(compat)/strlcat.c $(incdir)/compat.h $(top_builddir)/config.h

@@ -1934,7 +1934,7 @@ AC_CHECK_FUNCS(utimes, [AC_CHECK_FUNCS(futimes futimesat, [break])], [AC_CHECK_F
 AC_CHECK_FUNCS(killpg, [], [AC_LIBOBJ(killpg)])
 SUDO_FUNC_FNMATCH([AC_DEFINE(HAVE_FNMATCH)], [AC_LIBOBJ(fnmatch)])
 SUDO_FUNC_ISBLANK
-AC_REPLACE_FUNCS(memrchr strerror strcasecmp sigaction strlcpy strlcat)
+AC_REPLACE_FUNCS(memrchr strerror strcasecmp sigaction strlcpy strlcat strdup strndup)
 AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt
     AC_CHECK_LIB(rt, nanosleep, [LIBS="${LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])

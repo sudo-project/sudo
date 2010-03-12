@@ -179,6 +179,10 @@ $(LIBOBJDIR)snprintf.o: $(compat)/snprintf.c $(incdir)/compat.h $(top_builddir)/
 	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/snprintf.c
 $(LIBOBJDIR)strcasecmp.o: $(compat)/strcasecmp.c $(incdir)/compat.h $(top_builddir)/config.h
 	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strcasecmp.c
+$(LIBOBJDIR)strdup.o: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strdup.c
+$(LIBOBJDIR)strndup.o: $(compat)/strndup.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strndup.c
 $(LIBOBJDIR)strerror.o: $(compat)/strerror.c $(incdir)/compat.h $(top_builddir)/config.h
 	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strerror.c
 $(LIBOBJDIR)strlcat.o: $(compat)/strlcat.c $(incdir)/compat.h $(top_builddir)/config.h
