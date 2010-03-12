@@ -20,11 +20,11 @@
 #include <config.h>
 #include <compat.h>
 
-#if defined(HAVE_DECL_SYS_SIGLIST)
+#if defined(HAVE_DECL_SYS_SIGLIST) && HAVE_DECL_SYS_SIGLIST == 1
 # define my_sys_siglist	sys_siglist
-#elif defined(HAVE_DECL__SYS_SIGLIST)
+#elif defined(HAVE_DECL__SYS_SIGLIST) && HAVE_DECL__SYS_SIGLIST == 1
 # define my_sys_siglist	_sys_siglist
-#elif defined(HAVE_DECL___SYS_SIGLIST)
+#elif defined(HAVE_DECL___SYS_SIGLIST) && HAVE_DECL___SYS_SIGLIST == 1
 # define my_sys_siglist	__sys_siglist
 #else
 # error one of HAVE_DECL_SYS_SIGLIST, HAVE_DECL__SYS_SIGLIST, HAVE_DECL___SYS_SIGLIST must be defined
