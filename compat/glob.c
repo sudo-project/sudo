@@ -247,7 +247,7 @@ globexp1(const Char *pattern, glob_t *pglob)
  * If it fails then it tries to glob the rest of the pattern and returns.
  */
 static int
-globexp2(const Char *ptr, *pattern, glob_t *pglob, int *rv)
+globexp2(const Char *ptr, const Char *pattern, glob_t *pglob, int *rv)
 {
 	int     i;
 	Char   *lm, *ls;
