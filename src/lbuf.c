@@ -44,9 +44,7 @@
 #ifdef HAVE_TERMIOS_H
 # include <termios.h>
 #else
-# ifdef HAVE_TERMIO_H
-#  include <termio.h>
-# endif
+# include <termio.h>
 #endif
 
 #include "compat.h"

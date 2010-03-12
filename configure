@@ -14271,8 +14271,7 @@ fi
 
 done
 
-if test "$OS" != "ultrix"; then
-    { echo "$as_me:$LINENO: checking POSIX termios" >&5
+{ echo "$as_me:$LINENO: checking POSIX termios" >&5
 echo $ECHO_N "checking POSIX termios... $ECHO_C" >&6; }
 if test "${ac_cv_sys_posix_termios+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -14328,12 +14327,12 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_sys_posix_termios" >&5
 echo "${ECHO_T}$ac_cv_sys_posix_termios" >&6; }
 
-    if test "$ac_cv_sys_posix_termios" = "yes"; then
-	cat >>confdefs.h <<\_ACEOF
+if test "$ac_cv_sys_posix_termios" = "yes"; then
+    cat >>confdefs.h <<\_ACEOF
 #define HAVE_TERMIOS_H 1
 _ACEOF
 
-    else
+else
 
 for ac_header in termio.h
 do
@@ -14475,11 +14474,14 @@ if test `eval echo '${'$as_ac_Header'}'` = yes; then
 #define `echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
 
+else
+  { { echo "$as_me:$LINENO: error: Must have either termios.h or termio.h to build sudo" >&5
+echo "$as_me: error: Must have either termios.h or termio.h to build sudo" >&2;}
+   { (exit 1); exit 1; }; }
 fi
 
 done
 
-    fi
 fi
 if test ${with_logincap-'no'} != "no"; then
 

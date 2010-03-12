@@ -40,12 +40,7 @@
 #ifdef HAVE_TERMIOS_H
 # include <termios.h>
 #else
-# ifdef HAVE_TERMIO_H
-#  include <termio.h>
-# else
-#  include <sgtty.h>
-#  include <sys/ioctl.h>
-# endif /* HAVE_TERMIO_H */
+# include <termio.h>
 #endif /* HAVE_TERMIOS_H */
 
 #include "sudo.h"
@@ -72,29 +67,17 @@
 #endif
 
 /*
- * Compat macros for non-termios systems.
+ * Emulate POSIX termios using termio
  */
 #ifndef HAVE_TERMIOS_H
-# ifdef HAVE_TERMIO_H
-#  undef termios
-#  define termios		termio
-#  define tcgetattr(f, t)	ioctl(f, TCGETA, t)
-#  define tcsetattr(f, a, t)	ioctl(f, a, t)
-#  undef TCSAFLUSH
-#  define TCSAFLUSH		TCSETAF
-#  undef TCSADRAIN
-#  define TCSADRAIN		TCSETAW
-# else /* SGTTY */
-#  undef termios
-#  define termios		sgttyb
-#  define c_lflag		sg_flags
-#  define tcgetattr(f, t)	ioctl(f, TIOCGETP, t)
-#  define tcsetattr(f, a, t)	ioctl(f, a, t)
-#  undef TCSAFLUSH
-#  define TCSAFLUSH		TIOCSETP
-#  undef TCSADRAIN
-#  define TCSADRAIN		TIOCSETN
-# endif /* HAVE_TERMIO_H */
+# undef termios
+# define termios		termio
+# define tcgetattr(f, t)	ioctl(f, TCGETA, t)
+# define tcsetattr(f, a, t)	ioctl(f, a, t)
+# undef TCSAFLUSH
+# define TCSAFLUSH		TCSETAF
+# undef TCSADRAIN
+# define TCSADRAIN		TCSETAW
 #endif /* HAVE_TERMIOS_H */
 
 typedef struct termios sudo_term_t;
@@ -133,8 +116,6 @@ term_noecho(int fd)
     }
     return(0);
 }
-
-#if defined(HAVE_TERMIOS_H) || defined(HAVE_TERMIO_H)
 
 int
 term_raw(int fd, int opost, int isig)
@@ -199,68 +180,3 @@ term_copy(int src, int dst, int opost)
 	return(0);
     return(1);
 }
-
-#else /* SGTTY */
-
-int
-term_raw(int fd, int onlcr)
-{
-    if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
-	return(0);
-    (void) memcpy(&term, &oterm, sizeof(term));
-    /* Set terminal to raw mode */
-    CLR(term.c_lflag, ECHO);
-    SET(term.sg_flags, RAW);
-    /* Retain NL to NLCR conversion if onlcr flag set. */
-    if (onlcr)
-	SET(term.sg_flags, CRMOD);
-    if (ioctl(fd, TIOCSETP, &term) == 0) {
-	changed = 1;
-	return(1);
-    }
-    return(0);
-}
-
-int
-term_cbreak(int fd)
-{
-    if (!changed && ioctl(fd, TIOCGETP, &oterm) != 0)
-	return(0);
-    (void) memcpy(&term, &oterm, sizeof(term));
-    /* Set terminal to half-cooked mode */
-    CLR(term.c_lflag, ECHO);
-    SET(term.sg_flags, CBREAK);
-    if (ioctl(fd, TIOCSETP, &term) == 0) {
-	term_erase = term.sg_erase;
-	term_kill = term.sg_kill;
-	changed = 1;
-	return(1);
-    }
-    return(0);
-}
-
-int
-term_copy(int src, int dst, int onlcr)
-{
-    struct sgttyb b;
-    struct tchars tc;
-    struct ltchars lc;
-    int l, lb;
-
-    if (ioctl(src, TIOCGETP, &b) != 0 || ioctl(src, TIOCGETC, &tc) != 0 ||
-	ioctl(src, TIOCGETD, &l) != 0 || ioctl(src, TIOCGLTC, &lc) != 0 ||
-	ioctl(src, TIOCLGET, &lb)) {
-	return(0);
-    }
-    /* Do not convert line endings from NL to NLCR. */
-    if (!onlcr)
-	CLR(b.sg_flags, CRMOD);
-    if (ioctl(dst, TIOCSETP, &b) != 0 || ioctl(dst, TIOCSETC, &tc) != 0 ||
-	ioctl(dst, TIOCSLTC, &lc) != 0 || ioctl(dst, TIOCLSET, &lb) != 0 ||
-	ioctl(dst, TIOCSETD, &l) != 0) {
-	return(0);
-    }
-    return(1);
-}
-
-#endif

@@ -25,11 +25,7 @@
 #ifdef HAVE_TERMIOS_H
 # include <termios.h>
 #else
-# ifdef HAVE_TERMIO_H
-#  include <termio.h>
-# else
-#  include <sgtty.h>
-# endif /* HAVE_TERMIO_H */
+# include <termio.h>
 #endif /* HAVE_TERMIOS_H */
 #include <sys/ioctl.h>
 #ifdef HAVE_SYS_SELECT_H
