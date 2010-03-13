@@ -73,8 +73,14 @@ int setenv(const char *, const char *, int);
 #ifndef HAVE_UNSETENV
 int unsetenv(const char *);
 #endif
-#ifdef HAVE_SYS_SIGLIST
+#if defined(HAVE_DECL_SYS_SIGLIST) || defined(HAVE_DECL__SYS_SIGLIST) || defined(HAVE_DECL___SYS_SIGLIST)
 char *strsignal(int);
+#endif
+#ifndef HAVE_STRDUP
+char *strdup(const char *);
+#endif
+#ifndef HAVE_STRNDUP
+char *strndup(const char *, size_t);
 #endif
 
 #endif /* _SUDO_MISSING_H */
