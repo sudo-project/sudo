@@ -1,0 +1,116 @@
+#
+# Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# @configure_input@
+#
+
+#### Start of system configuration section. ####
+
+srcdir = @srcdir@
+devdir = @devdir@
+top_builddir = @top_builddir@
+top_srcdir = @top_srcdir@
+incdir = $(top_srcdir)/include
+compat = $(top_srcdir)/compat
+
+# Compiler & tools to use
+CC = @CC@
+LIBTOOL = @LIBTOOL@
+AR=@AR@
+SED=@SED@
+RANLIB=@RANLIB@
+
+# C preprocessor flags
+CPPFLAGS = -I. -I$(top_srcdir) -I$(incdir) @CPPFLAGS@
+
+# Usually -O and/or -g
+CFLAGS = @CFLAGS@
+
+# Pass in paths and uid/gid + OS dependent defined
+DEFS = @OSDEFS@
+
+#### End of system configuration section. ####
+
+SHELL = /bin/sh
+
+LIBOBJDIR = $(top_srcdir)/@ac_config_libobj_dir@/
+
+LIBOBJS = @LIBOBJS@
+
+LTLIBOBJS = @LTLIBOBJS@
+
+all: libmissing.a libmissing_pic.a
+
+.SUFFIXES: .o .c .h .lo
+
+.c.o:
+	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+
+.c.lo:
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+
+libmissing.a: $(LIBOBJS)
+	$(AR) rv $@ $(LIBOBJS)
+	$(RANLIB) $@
+
+libmissing_pic.a: $(LTLIBOBJS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTLIBOBJS)
+
+# Dependencies
+$(LIBOBJDIR)$(LIBOBJDIR)closefrom.lo $(LIBOBJDIR)closefrom.o: $(compat)/closefrom.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)fnmatch.lo $(LIBOBJDIR)fnmatch.o: $(compat)/fnmatch.c $(compat)/fnmatch.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)getcwd.lo $(LIBOBJDIR)getcwd.o: $(compat)/getcwd.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)getline.lo $(LIBOBJDIR)getline.o: $(compat)/getline.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)getprogname.lo $(LIBOBJDIR)getprogname.o: $(compat)/getprogname.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)glob.lo $(LIBOBJDIR)glob.o: $(compat)/glob.c $(compat)/glob.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)isblank.lo $(LIBOBJDIR)isblank.o: $(compat)/isblank.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)memrchr.lo $(LIBOBJDIR)memrchr.o: $(compat)/memrchr.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)mkstemp.lo $(LIBOBJDIR)mkstemp.o: $(compat)/mkstemp.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)nanosleep.lo $(LIBOBJDIR)nanosleep.o: $(compat)/nanosleep.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)sigaction.lo $(LIBOBJDIR)sigaction.o: $(compat)/sigaction.c $(incdir)/compat.h $(incdir)/compat.h
+$(LIBOBJDIR)$(LIBOBJDIR)snprintf.lo $(LIBOBJDIR)snprintf.o: $(compat)/snprintf.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strcasecmp.lo $(LIBOBJDIR)strcasecmp.o: $(compat)/strcasecmp.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strdup.lo $(LIBOBJDIR)strdup.o: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strndup.lo $(LIBOBJDIR)strndup.o: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strerror.lo $(LIBOBJDIR)strerror.o: $(compat)/strerror.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strlcat.lo $(LIBOBJDIR)strlcat.o: $(compat)/strlcat.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strlcpy.lo $(LIBOBJDIR)strlcpy.o: $(compat)/strlcpy.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strsignal.lo $(LIBOBJDIR)strsignal.o: $(compat)/strsignal.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)utimes.lo $(LIBOBJDIR)utimes.o: $(compat)/utimes.c $(incdir)/compat.h $(compat)/utime.h $(top_builddir)/config.h
+
+install:
+
+install-binaries:
+
+install-man:
+
+check:
+	@echo nothing to check
+
+clean:
+	-rm -f *.a *.o *.lo *.la stamp-* core *.core core.*
+
+mostlyclean: clean
+
+distclean: clean
+	-rm -rf Makefile .libs
+
+clobber: distclean
+
+realclean: distclean
+	rm -f TAGS tags
+
+cleandir: realclean
