@@ -50,7 +50,7 @@
 #endif /* __hpux */
 #include <prot.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 
 int

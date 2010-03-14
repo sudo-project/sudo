@@ -36,7 +36,7 @@
 #endif /* HAVE_UNISTD_H */
 #include <errno.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 
 /*
  * Verify that path is a normal file and executable by root.

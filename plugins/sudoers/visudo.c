@@ -80,7 +80,7 @@
 # include <compat/timespec.h>
 #endif
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "interfaces.h"
 #include "parse.h"
 #include "redblack.h"

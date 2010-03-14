@@ -41,7 +41,7 @@
 #include <grp.h>
 #include <ctype.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "lbuf.h"
 
 extern struct sudo_nss sudo_nss_file;

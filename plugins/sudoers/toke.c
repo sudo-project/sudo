@@ -1412,7 +1412,7 @@ char *yytext;
 # endif
 #endif
 #include <ctype.h>
-#include "sudo.h"
+#include "sudoers.h"
 #include "parse.h"
 #include <gram.h>
 

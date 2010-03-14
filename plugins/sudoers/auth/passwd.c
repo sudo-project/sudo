@@ -43,7 +43,7 @@
 #endif /* HAVE_UNISTD_H */
 #include <pwd.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 
 #define DESLEN			13

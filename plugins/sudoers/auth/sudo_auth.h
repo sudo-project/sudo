@@ -45,6 +45,12 @@ typedef struct sudo_auth {
 #define IS_CONFIGURED(x)	((x)->flags & FLAG_CONFIGURED)
 #define IS_ONEANDONLY(x)	((x)->flags & FLAG_ONEANDONLY)
 
+/* Like tgetpass() but uses conversation function */
+char *auth_getpass(const char *prompt, int timeout, int type);
+
+/* Pointer to conversation function to use with auth_getpass(). */
+extern sudo_conv_t sudo_conv;
+
 /* Prototypes for standalone methods */
 int fwtk_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
 int fwtk_verify __P((struct passwd *pw, char *prompt, sudo_auth *auth));

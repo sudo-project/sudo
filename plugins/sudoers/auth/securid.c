@@ -50,7 +50,7 @@
 #include <sdconf.h>
 #include <sdacmvls.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 
 union config_record configure;

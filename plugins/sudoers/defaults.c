@@ -45,7 +45,7 @@
 #include <pwd.h>
 #include <ctype.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "parse.h"
 #include <gram.h>
 

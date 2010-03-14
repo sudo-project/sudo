@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999-2005, 2008-2009 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1999-2005, 2008-2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -48,9 +48,11 @@
 #include <time.h>
 #include <signal.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 #include "insults.h"
+
+sudo_conv_t sudo_conv;
 
 sudo_auth auth_switch[] = {
 #ifdef AUTH_STANDALONE
@@ -84,15 +86,12 @@ sudo_auth auth_switch[] = {
     AUTH_ENTRY(0, NULL, NULL, NULL, NULL, NULL)
 };
 
-void
-verify_user(pw, prompt)
-    struct passwd *pw;
-    char *prompt;
+int
+verify_user(struct passwd *pw, char *prompt)
 {
     int counter = def_passwd_tries + 1;
     int success = AUTH_FAILURE;
-    int status;
-    int flags;
+    int flags, status, rval;
     char *p;
     sudo_auth *auth;
     sigaction_t sa, osa;
@@ -115,6 +114,7 @@ verify_user(pw, prompt)
 	    "There are no authentication methods compiled into sudo!",
 	    "If you want to turn off authentication, use the",
 	    "--disable-authentication configure option.");
+	return -1;
     }
 
     /* Set FLAG_ONEANDONLY if there is only one auth method. */
@@ -134,7 +134,7 @@ verify_user(pw, prompt)
 #ifdef HAVE_BSM_AUDIT
 		audit_failure(NewArgv, "authentication failure");
 #endif
-		exit(1);		/* assume error msg already printed */
+		return -1;		/* assume error msg already printed */
 	    }
 
 	    if (NEEDS_USER(auth))
@@ -156,7 +156,7 @@ verify_user(pw, prompt)
 #ifdef HAVE_BSM_AUDIT
 		    audit_failure(NewArgv, "authentication failure");
 #endif
-		    exit(1);		/* assume error msg already printed */
+		    return -1;		/* assume error msg already printed */
 		}
 
 		if (NEEDS_USER(auth))
@@ -168,8 +168,7 @@ verify_user(pw, prompt)
 #ifdef AUTH_STANDALONE
 	p = prompt;
 #else
-	p = (char *) tgetpass(prompt, def_passwd_timeout * 60,
-	    tgetpass_flags);
+	p = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
 #endif /* AUTH_STANDALONE */
 
 	/* Call authentication functions. */
@@ -189,11 +188,12 @@ verify_user(pw, prompt)
 		goto cleanup;
 	}
 #ifndef AUTH_STANDALONE
-	if (p)
-	    zero_bytes(p, strlen(p));
+	if (repl.reply)
+	    zero_bytes(p, strlen(repl.reply));
 #endif
-	if (!ISSET(tgetpass_flags, TGP_ASKPASS))
-	    pass_warn(stderr);
+	/* XXX - need way to know if askpass was used */
+	//if (!ISSET(tgetpass_flags, TGP_ASKPASS))
+	    pass_warn();
     }
 
 cleanup:
@@ -208,7 +208,7 @@ cleanup:
 #ifdef HAVE_BSM_AUDIT
 		audit_failure(NewArgv, "authentication failure");
 #endif
-		exit(1);		/* assume error msg already printed */
+		return -1;		/* assume error msg already printed */
 	    }
 
 	    if (NEEDS_USER(auth))
@@ -219,7 +219,8 @@ cleanup:
     switch (success) {
 	case AUTH_SUCCESS:
 	    (void) sigaction(SIGTSTP, &osa, NULL);
-	    return;
+	    rval = TRUE;
+	    break;
 	case AUTH_INTR:
 	case AUTH_FAILURE:
 	    if (counter != def_passwd_tries) {
@@ -227,43 +228,73 @@ cleanup:
 		    flags = 0;
 		else
 		    flags = NO_MAIL;
-#ifdef HAVE_BSM_AUDIT
-		audit_failure(NewArgv, "authentication failure");
-#endif
 		log_error(flags, "%d incorrect password attempt%s",
 		    def_passwd_tries - counter,
 		    (def_passwd_tries - counter == 1) ? "" : "s");
 	    }
-	    /* FALLTHROUGH */
-	case AUTH_FATAL:
 #ifdef HAVE_BSM_AUDIT
 	    audit_failure(NewArgv, "authentication failure");
 #endif
-	    exit(1);
+	    rval = FALSE;
+	    break;
+	case AUTH_FATAL:
+	default:
+#ifdef HAVE_BSM_AUDIT
+	    audit_failure(NewArgv, "authentication failure");
+#endif
+	    rval = -1;
+	    break;
     }
-    /* NOTREACHED */
+
+    return rval;
 }
 
 void
-pass_warn(fp)
-    FILE *fp;
+pass_warn(void)
 {
+    struct sudo_conv_message msg;
+    struct sudo_conv_reply repl;
 
+    /* Call conversation function */
+    memset(&msg, 0, sizeof(msg));
+    msg.msg_type = SUDO_CONV_ERROR_MSG;
 #ifdef INSULT
     if (def_insults)
-	(void) fprintf(fp, "%s\n", INSULT);
+	msg.msg = INSULT;
     else
 #endif
-	(void) fprintf(fp, "%s\n", def_badpass_message);
+	msg.msg = def_badpass_message;
+    memset(&repl, 0, sizeof(repl));
+    sudo_conv(1, &msg, &repl);
 }
 
+char *
+auth_getpass(const char *prompt, int timeout, int type)
+{
+    struct sudo_conv_message msg;
+    struct sudo_conv_reply repl;
+
+    /* Call conversation function */
+    memset(&msg, 0, sizeof(msg));
+    msg.msg_type = SUDO_CONV_PROMPT_ECHO_OFF;
+    msg.timeout = def_passwd_timeout * 60;
+    msg.msg = prompt;
+    memset(&repl, 0, sizeof(repl));
+    sudo_conv(1, &msg, &repl);
+    /* XXX - check for ENOTTY? */
+    return repl.reply;
+}
+
+#ifdef notyet
 void
-dump_auth_methods()
+dump_auth_methods(void)
 {
     sudo_auth *auth;
 
+    /* XXX - conversation function */
     (void) fputs("Authentication methods:", stdout);
     for (auth = auth_switch; auth->name; auth++)
         (void) printf(" '%s'", auth->name);
     (void) putchar('\n');
 }
+#endif

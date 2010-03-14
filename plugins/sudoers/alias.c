@@ -41,7 +41,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "parse.h"
 #include "redblack.h"
 #include <gram.h>

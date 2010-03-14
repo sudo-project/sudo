@@ -56,7 +56,7 @@
 # include <compat/timespec.h>
 #endif
 
-#include "sudo.h"
+#include "sudoers.h"
 
 /* Status codes for timestamp_status() */
 #define TS_CURRENT		0
@@ -69,7 +69,7 @@
 #define TS_MAKE_DIRS		1
 #define TS_REMOVE		2
 
-static void  build_timestamp	__P((char **, char **));
+static int   build_timestamp	__P((char **, char **));
 static int   timestamp_status	__P((char *, char *, char *, int));
 static char *expand_prompt	__P((char *, char *, char *));
 static void  lecture		__P((int));
@@ -78,8 +78,9 @@ static void  update_timestamp	__P((char *, char *));
 /*
  * This function only returns if the user can successfully
  * verify who he/she is.
+ * XXX - check return values
  */
-void
+int
 check_user(validated, mode)
     int validated;
     int mode;
@@ -87,25 +88,30 @@ check_user(validated, mode)
     char *timestampdir = NULL;
     char *timestampfile = NULL;
     char *prompt;
-    int status;
+    int status, rval = TRUE;
 
     /* Always prompt for a password when -k was specified with the command. */
     if (ISSET(mode, MODE_INVALIDATE)) {
 	SET(validated, FLAG_CHECK_USER);
     } else {
 	if (user_uid == 0 || user_uid == runas_pw->pw_uid || user_is_exempt())
-	    return;
+	    return TRUE;
     }
 
-    build_timestamp(&timestampdir, &timestampfile);
+    if (build_timestamp(&timestampdir, &timestampfile) == -1)
+	return -1;
+
     status = timestamp_status(timestampdir, timestampfile, user_name,
 	TS_MAKE_DIRS);
 
     if (status != TS_CURRENT || ISSET(validated, FLAG_CHECK_USER)) {
 	/* Bail out if we are non-interactive and a password is required */
-	if (ISSET(mode, MODE_NONINTERACTIVE))
-	    errorx(1, "sorry, a password is required to run %s", getprogname());
+	if (ISSET(mode, MODE_NONINTERACTIVE)) {
+	    warningx("sorry, a password is required to run %s", getprogname());
+	    return -1;
+	}
 
+#if 0 /* XXX - checks need to be done in main driver */
 	/* If user specified -A, make sure we have an askpass helper. */
 	if (ISSET(tgetpass_flags, TGP_ASKPASS)) {
 	    if (user_askpass == NULL)
@@ -124,19 +130,22 @@ check_user(validated, mode)
 	}
 
 	if (!ISSET(tgetpass_flags, TGP_ASKPASS))
+#endif
 	    lecture(status);
 
 	/* Expand any escapes in the prompt. */
 	prompt = expand_prompt(user_prompt ? user_prompt : def_passprompt,
 	    user_name, user_shost);
 
-	verify_user(auth_pw, prompt);
+	rval = verify_user(auth_pw, prompt);
     }
     /* Only update timestamp if user was validated. */
     if (ISSET(validated, VALIDATE_OK) && !ISSET(mode, MODE_INVALIDATE) && status != TS_ERROR)
 	update_timestamp(timestampdir, timestampfile);
     efree(timestampdir);
     efree(timestampfile);
+
+    return rval;
 }
 
 /*
@@ -258,7 +267,7 @@ expand_prompt(old_prompt, user, host)
     }
 
     if (subst) {
-	new_prompt = (char *) emalloc(++len);
+	new_prompt = emalloc(++len);
 	endp = new_prompt + len;
 	for (p = old_prompt, np = new_prompt; *p; p++) {
 	    if (p[0] =='%') {
@@ -341,7 +350,7 @@ user_is_exempt()
 /*
  * Fills in timestampdir as well as timestampfile if using tty tickets.
  */
-static void
+static int
 build_timestamp(timestampdir, timestampfile)
     char **timestampdir;
     char **timestampfile;
@@ -351,8 +360,10 @@ build_timestamp(timestampdir, timestampfile)
 
     dirparent = def_timestampdir;
     len = easprintf(timestampdir, "%s/%s", dirparent, user_name);
-    if (len >= PATH_MAX)
+    if (len >= PATH_MAX) {
 	log_error(0, "timestamp path too long: %s", *timestampdir);
+	return -1;
+    }
 
     /*
      * Timestamp file may be a file in the directory or NUL to use
@@ -370,15 +381,21 @@ build_timestamp(timestampdir, timestampfile)
 		p, runas_pw->pw_name);
 	else
 	    len = easprintf(timestampfile, "%s/%s/%s", dirparent, user_name, p);
-	if (len >= PATH_MAX)
+	if (len >= PATH_MAX) {
 	    log_error(0, "timestamp path too long: %s", *timestampfile);
+	    return -1;
+	}
     } else if (def_targetpw) {
 	len = easprintf(timestampfile, "%s/%s/%s", dirparent, user_name,
 	    runas_pw->pw_name);
-	if (len >= PATH_MAX)
+	if (len >= PATH_MAX) {
 	    log_error(0, "timestamp path too long: %s", *timestampfile);
+	    return -1;
+	}
     } else
 	*timestampfile = NULL;
+
+    return len;
 }
 
 /*
@@ -578,7 +595,9 @@ remove_timestamp(remove)
     char *timestampdir, *timestampfile, *path;
     int status;
 
-    build_timestamp(&timestampdir, &timestampfile);
+    if (build_timestamp(&timestampdir, &timestampfile) == -1)
+	return;
+
     status = timestamp_status(timestampdir, timestampfile, user_name,
 	TS_REMOVE);
     if (status == TS_OLD || status == TS_CURRENT) {

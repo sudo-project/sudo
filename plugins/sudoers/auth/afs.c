@@ -44,7 +44,7 @@
 #endif /* HAVE_UNISTD_H */
 #include <pwd.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 
 #include <afs/stds.h>

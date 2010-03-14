@@ -78,7 +78,7 @@
 # endif
 #endif
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "interfaces.h"
 #include "parse.h"
 #include <gram.h>

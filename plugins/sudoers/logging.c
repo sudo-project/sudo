@@ -55,11 +55,11 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 
 static void do_syslog		__P((int, char *));
 static void do_logfile		__P((char *));
-static void send_mail		__P((char *));
+static void send_mail		__P((const char *fmt, ...));
 static int should_mail		__P((int));
 static void mysyslog		__P((int, const char *, ...));
 static char *new_logline	__P((const char *, int));
@@ -184,15 +184,9 @@ do_logfile(msg)
     fp = fopen(def_logfile, "a");
     (void) umask(oldmask);
     if (fp == NULL) {
-	easprintf(&full_line, "Can't open log file: %s: %s",
-	    def_logfile, strerror(errno));
-	send_mail(full_line);
-	efree(full_line);
+	send_mail("Can't open log file: %s: %s", def_logfile, strerror(errno));
     } else if (!lock_file(fileno(fp), SUDO_LOCK)) {
-	easprintf(&full_line, "Can't lock log file: %s: %s",
-	    def_logfile, strerror(errno));
-	send_mail(full_line);
-	efree(full_line);
+	send_mail("Can't lock log file: %s: %s", def_logfile, strerror(errno));
     } else {
 	time_t now;
 
@@ -369,12 +363,13 @@ log_error(flags, fmt, va_alist)
     va_start(ap);
 #endif
 
-    /* Become root if we are not already to avoid user interference */
-    set_perms(PERM_ROOT|PERM_NOEXIT);
-
     /* Expand printf-style format + args. */
     evasprintf(&message, fmt, ap);
     va_end(ap);
+
+    /* Become root if we are not already to avoid user interference */
+    /* XXX - could longjmp back with wrong uid */
+    set_perms(PERM_ROOT|PERM_NOEXIT);
 
     if (ISSET(flags, MSG_ONLY))
 	logline = message;
@@ -409,10 +404,14 @@ log_error(flags, fmt, va_alist)
 
     efree(logline);
 
+#if 0 /* XXX - longjmp instead */
     if (!ISSET(flags, NO_EXIT)) {
 	cleanup(0);
 	exit(1);
     }
+#endif
+
+    set_perms(PERM_USER);
 }
 
 #define MAX_MAILFLAGS	63
@@ -421,14 +420,14 @@ log_error(flags, fmt, va_alist)
  * Send a message to MAILTO user
  */
 static void
-send_mail(line)
-    char *line;
+send_mail(const char *fmt, ...)
 {
     FILE *mail;
     char *p;
     int fd, pfd[2], status;
     pid_t pid, rv;
     sigaction_t sa;
+    va_list ap;
 #ifndef NO_ROOT_MAILER
     static char *root_envp[] = {
 	"HOME=/",
@@ -589,8 +588,14 @@ send_mail(line)
 	} else
 	    (void) fputc(*p, mail);
     }
-    (void) fprintf(mail, "\n\n%s : %s : %s : %s\n\n", user_host,
-	get_timestr(time(NULL), def_log_year), user_name, line);
+
+    (void) fprintf(mail, "\n\n%s : %s : %s : ", user_host,
+	get_timestr(time(NULL), def_log_year), user_name);
+    va_start(ap, fmt);
+    (void) vfprintf(mail, fmt, ap);
+    va_end(ap);
+    fputs("\n\n", mail);
+
     fclose(mail);
     do {
 #ifdef HAVE_WAITPID
@@ -667,9 +672,11 @@ new_logline(message, serrno)
 	}
 	len += sizeof(LL_ENV_STR) + 2 + evlen;
     }
-    len += sizeof(LL_CMND_STR) - 1 + strlen(user_cmnd);
-    if (user_args != NULL)
-	len += strlen(user_args) + 1;
+    if (user_cmnd != NULL) {
+	len += sizeof(LL_CMND_STR) - 1 + strlen(user_cmnd);
+	if (user_args != NULL)
+	    len += strlen(user_args) + 1;
+    }
 
     /*
      * Allocate and build up the line.
@@ -720,16 +727,18 @@ new_logline(message, serrno)
 	    goto toobig;
 	efree(evstr);
     }
-    if (strlcat(line, LL_CMND_STR, len) >= len ||
-	strlcat(line, user_cmnd, len) >= len)
-	goto toobig;
-    if (user_args != NULL) {
-	if (strlcat(line, " ", len) >= len ||
-	    strlcat(line, user_args, len) >= len)
+    if (user_cmnd != NULL) {
+	if (strlcat(line, LL_CMND_STR, len) >= len ||
+	    strlcat(line, user_cmnd, len) >= len)
 	    goto toobig;
+	if (user_args != NULL) {
+	    if (strlcat(line, " ", len) >= len ||
+		strlcat(line, user_args, len) >= len)
+		goto toobig;
+	}
     }
 
-    return (line);
+    return line;
 toobig:
     errorx(1, "internal error: insufficient space for log line");
 }

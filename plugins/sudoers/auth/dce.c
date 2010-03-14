@@ -61,7 +61,7 @@
 #include <dce/sec_login.h>
 #include <dce/dce_error.h> /* required to call dce_error_inq_text routine */
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 
 static int check_dce_status __P((error_status_t, char *));

@@ -48,7 +48,7 @@
 #include <login_cap.h>
 #include <bsd_auth.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 
 extern char *login_style;		/* from sudo.c */
@@ -114,9 +114,9 @@ bsdauth_verify(pw, prompt, auth)
      * S/Key.
      */
     if ((s = auth_challenge(as)) == NULL) {
-	pass = tgetpass(prompt, def_passwd_timeout * 60, tgetpass_flags);
+	pass = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
     } else {
-	pass = tgetpass(s, def_passwd_timeout * 60, tgetpass_flags);
+	pass = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
 	if (pass && *pass == '\0') {
 	    if ((prompt = strrchr(s, '\n')))
 		prompt++;
@@ -131,8 +131,8 @@ bsdauth_verify(pw, prompt, auth)
 	    while (isspace(prompt[len]) || prompt[len] == ':')
 		prompt[len--] = '\0';
 	    easprintf(&s, "%s [echo on]: ", prompt);
-	    pass = tgetpass(s, def_passwd_timeout * 60,
-		tgetpass_flags | TGP_ECHO);
+	    pass = auth_getpass(prompt, def_passwd_timeout * 60,
+		SUDO_CONV_PROMPT_ECHO_ON);
 	    free(s);
 	}
     }

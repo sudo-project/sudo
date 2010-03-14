@@ -43,7 +43,7 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "parse.h"
 #include "lbuf.h"
 #include <gram.h>

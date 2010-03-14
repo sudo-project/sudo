@@ -77,7 +77,7 @@
 # endif
 #endif
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "parse.h"
 #include "lbuf.h"
 

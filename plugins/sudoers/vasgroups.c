@@ -44,7 +44,7 @@
 #include "logging.h"
 #include "nonunix.h"
 #include "parse.h"
-#include "sudo.h"
+#include "sudoers.h"
 
 
 /* Pseudo-boolean types */

@@ -43,7 +43,7 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
-#include "sudo.h"
+#include "sudoers.h"
 
 /*
  * This function finds the full pathname for a command and

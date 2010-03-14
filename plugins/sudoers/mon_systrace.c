@@ -41,7 +41,7 @@
 # endif
 #endif
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "mon_systrace.h"
 
 /*

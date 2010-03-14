@@ -50,7 +50,7 @@
 #endif /* YYBISON && HAVE_ALLOCA_H && !__GNUC__ */
 #include <limits.h>
 
-#include "sudo.h"
+#include "sudoers.h" /* XXX */
 #include "parse.h"
 
 /*
@@ -99,6 +99,7 @@ yyerror(s)
 	errorfile = estrdup(sudoers);
     }
     if (verbose && s != NULL) {
+	/* XXX - conversation function when called via plugin */
 #ifndef TRACELEXER
 	(void) fprintf(stderr, ">>> %s: %s near line %d <<<\n", sudoers, s,
 	    sudolineno ? sudolineno - 1 : 0);

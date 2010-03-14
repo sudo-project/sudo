@@ -43,7 +43,7 @@
 #endif /* HAVE_UNISTD_H */
 #include <pwd.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 
 /*
@@ -61,7 +61,7 @@ aixauth_verify(pw, prompt, auth)
     int reenter = 1;
     int rval = AUTH_FAILURE;
 
-    pass = tgetpass(prompt, def_passwd_timeout * 60, tgetpass_flags);
+    pass = auth_getpass(prompt, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
     if (pass) {
 	/* XXX - should probably print message on failure. */
 	if (authenticate(pw->pw_name, pass, &reenter, &message) == 0)

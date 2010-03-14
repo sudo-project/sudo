@@ -52,7 +52,7 @@
 #include <acexport.h>
 #include <sdacmvls.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 
 /*
@@ -160,8 +160,8 @@ securid_verify(pw, pass, auth)
     SDI_HANDLE *sd = (SDI_HANDLE *) auth->data;
     int rval;
 
-    pass = (char *) tgetpass("Enter your PASSCODE: ",
-	def_passwd_timeout * 60, tgetpass_flags);
+    pass = auth_getpass("Enter your PASSCODE: ",
+	def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
 
     /* Have ACE verify password */
     switch (SD_Check(*sd, pass, pw->pw_name)) {
@@ -192,11 +192,11 @@ securid_verify(pw, pass, auth)
                 /* Sometimes (when current token close to expire?)
                    ACE challenges for the next token displayed
                    (entered without the PIN) */
-        	pass = (char *) tgetpass("\
+        	pass = auth_getpass("\
 !!! ATTENTION !!!\n\
 Wait for the token code to change, \n\
 then enter the new token code.\n", \
-		def_passwd_timeout * 60, tgetpass_flags);
+		def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
 
 		if (SD_Next(*sd, pass) == ACM_OK) {
 			rval = AUTH_SUCCESS;

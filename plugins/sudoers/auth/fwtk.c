@@ -46,7 +46,7 @@
 #include <auth.h>
 #include <firewall.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 
 int
@@ -103,16 +103,17 @@ restart:
     /* Get the password/response from the user. */
     if (strncmp(resp, "challenge ", 10) == 0) {
 	(void) snprintf(buf, sizeof(buf), "%s\nResponse: ", &resp[10]);
-	pass = tgetpass(buf, def_passwd_timeout * 60, tgetpass_flags);
+	pass = auth_getpass(buf, def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_OFF);
 	if (pass && *pass == '\0') {
-	    pass = tgetpass("Response [echo on]: ",
-		def_passwd_timeout * 60, tgetpass_flags | TGP_ECHO);
+	    pass = auth_getpass("Response [echo on]: ",
+		def_passwd_timeout * 60, SUDO_CONV_PROMPT_ECHO_ON);
 	}
     } else if (strncmp(resp, "chalnecho ", 10) == 0) {
-	pass = tgetpass(&resp[10], def_passwd_timeout * 60, tgetpass_flags);
+	pass = auth_getpass(&resp[10], def_passwd_timeout * 60,
+	    SUDO_CONV_PROMPT_ECHO_OFF);
     } else if (strncmp(resp, "password", 8) == 0) {
-	pass = tgetpass(prompt, def_passwd_timeout * 60,
-	    tgetpass_flags);
+	pass = auth_getpass(prompt, def_passwd_timeout * 60,
+	    SUDO_CONV_PROMPT_ECHO_OFF);
     } else if (strncmp(resp, "display ", 8) == 0) {
 	fprintf(stderr, "%s\n", &resp[8]);
 	strlcpy(buf, "response dummy", sizeof(buf));

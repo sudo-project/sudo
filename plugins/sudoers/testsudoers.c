@@ -61,7 +61,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "interfaces.h"
 #include "parse.h"
 #include <gram.h>

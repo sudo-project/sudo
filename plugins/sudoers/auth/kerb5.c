@@ -50,7 +50,7 @@
 #include <com_err.h>
 #endif
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 
 #ifdef HAVE_HEIMDAL

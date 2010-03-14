@@ -47,7 +47,7 @@
 #include <errno.h>
 #include <pwd.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 
 /*
  * Flags used in rebuild_env()
@@ -210,6 +210,31 @@ static const char *initial_keepenv_table[] = {
 };
 
 /*
+ * Initialize env based on envp.
+ */
+int
+env_init(char * const envp[])
+{
+    char * const *ep;
+    size_t len;
+    int rval = -1;
+
+    for (ep = envp; *ep != NULL; ep++)
+	continue;
+    len = (size_t)(ep - envp);
+
+    env.env_size = len + 1 + 128;
+    env.envp = emalloc2(env.env_size, sizeof(char *));
+#ifdef ENV_DEBUG
+    memset(env.envp, 0, env.env_size * sizeof(char *));
+#endif
+    memcpy(env.envp, envp, len * sizeof(char *));
+    env.envp[len] = '\0';
+    rval = 0;
+    return rval;
+}
+
+/*
  * Similar to setenv(3) but operates on sudo's private copy of the environment
  * (not environ) and it always overwrites.  The dupcheck param determines
  * whether we need to verify that the variable is not already set.
@@ -250,8 +275,10 @@ setenv(var, val, overwrite)
     const char *cp;
     size_t esize;
 
-    if (!var || *var == '\0')
-	return(EINVAL);
+    if (!var || *var == '\0') {
+	errno = EINVAL;
+	return -1;
+    }
 
     /*
      * POSIX says a var name with '=' is an error but BSD
@@ -302,7 +329,7 @@ setenv(var, val, overwrite)
 #endif
     }
     sudo_putenv(estring, TRUE, overwrite);
-    return(0);
+    return 0;
 }
 
 /*
@@ -325,7 +352,7 @@ unsetenv(var)
 #ifdef UNSETENV_VOID
 	return;
 #else
-	return(-1);
+	return -1;
 #endif
     }
 
@@ -365,7 +392,7 @@ unsetenv(var)
 	}
     }
 #ifndef UNSETENV_VOID
-    return(0);
+    return 0;
 #endif
 }
 
@@ -383,7 +410,7 @@ putenv(string)
 {
     if (strchr(string, '=') == NULL) {
 	errno = EINVAL;
-	return(-1);
+	return -1;
     }
     /* Sync env.envp with environ as needed. */
     if (env.envp != environ) {
@@ -412,7 +439,7 @@ putenv(string)
 #endif
     }
     sudo_putenv((char *)string, TRUE, TRUE);
-    return(0);
+    return 0;
 }
 
 /*
@@ -490,7 +517,7 @@ matches_env_delete(var)
 	    break;
 	}
     }
-    return(match);
+    return match;
 }
 
 /*
@@ -520,7 +547,7 @@ matches_env_check(var)
 	    break;
 	}
     }
-    return(keepit);
+    return keepit;
 }
 
 /*
@@ -549,7 +576,7 @@ matches_env_keep(var)
 	    break;
 	}
     }
-    return(keepit);
+    return keepit;
 }
 
 /*
@@ -760,8 +787,9 @@ rebuild_env(sudo_mode, noexec)
 	easprintf(&cp, "%s %s", user_cmnd, user_args);
 	sudo_setenv("SUDO_COMMAND", cp, TRUE);
 	efree(cp);
-    } else
+    } else {
 	sudo_setenv("SUDO_COMMAND", user_cmnd, TRUE);
+    }
 
     /* Add the SUDO_USER, SUDO_UID, SUDO_GID environment variables. */
     sudo_setenv("SUDO_USER", user_name, TRUE);

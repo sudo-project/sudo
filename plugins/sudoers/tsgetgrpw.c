@@ -47,7 +47,7 @@
 #include <pwd.h>
 #include <grp.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048

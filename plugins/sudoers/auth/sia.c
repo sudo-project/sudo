@@ -46,7 +46,7 @@
 #include <pwd.h>
 #include <siad.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 
 static int sudo_collect	__P((int, int, uchar_t *, int, prompt_t *));

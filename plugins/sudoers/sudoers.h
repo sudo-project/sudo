@@ -19,19 +19,20 @@
  * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
-#ifndef _SUDO_SUDO_H
-#define _SUDO_SUDO_H
+#ifndef _SUDO_SUDOERS_H
+#define _SUDO_SUDOERS_H
 
 #include <pathnames.h>
 #include <limits.h>
 #include "compat.h"
-#include "alloc.h"
 #include "defaults.h"
-#include "error.h"
+#include "error.h" /* XXX */
+#include "alloc.h" /* XXX */
 #include "list.h"
 #include "logging.h"
 #include "missing.h"
 #include "sudo_nss.h"
+#include "sudo_plugin.h"
 
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
 # include <membership.h>
@@ -45,6 +46,7 @@ struct sudo_user {
     struct passwd *_runas_pw;
     struct group *_runas_gr;
     struct stat *cmnd_stat;
+    char *name;
     char *path;
     char *shell;
     char *tty;
@@ -61,13 +63,15 @@ struct sudo_user {
     char *display;
     char *askpass;
     int   ngroups;
+    uid_t uid;
+    uid_t gid;
     GETGROUPS_T *groups;
     struct list_member *env_vars;
 #ifdef HAVE_SELINUX
     char *role;
     char *type;
 #endif
-    char  cwd[PATH_MAX];
+    char *cwd;
     char  sessid[7];
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
     uuid_t uuid;
@@ -98,9 +102,9 @@ struct sudo_user {
 /*
  * find_path()/load_cmnd() return values
  */
-#define FOUND                    1
-#define NOT_FOUND                0
-#define NOT_FOUND_DOT		-1
+#define FOUND                   0
+#define NOT_FOUND               1
+#define NOT_FOUND_DOT		2
 
 /*
  * Various modes sudo can be in (based on arguments) in hex
@@ -143,11 +147,11 @@ struct sudo_user {
 /*
  * Shortcuts for sudo_user contents.
  */
-#define user_name		(sudo_user.pw->pw_name)
+#define user_name		(sudo_user.name)
+#define user_uid		(sudo_user.uid)
+#define user_gid		(sudo_user.gid)
 #define user_passwd		(sudo_user.pw->pw_passwd)
-#define user_uid		(sudo_user.pw->pw_uid)
 #define user_uuid		(sudo_user.uuid)
-#define user_gid		(sudo_user.pw->pw_gid)
 #define user_dir		(sudo_user.pw->pw_dir)
 #define user_shell		(sudo_user.shell)
 #define user_ngroups		(sudo_user.ngroups)
@@ -188,12 +192,14 @@ struct sudo_user {
 #define SUDO_TLOCK	2		/* test & lock a file (non-blocking) */
 #define SUDO_UNLOCK	4		/* unlock a file */
 
+#if 0 /* XXX */
 /*
  * Flags for tgetpass()
  */
 #define TGP_ECHO	0x01		/* leave echo on when reading passwd */
 #define TGP_STDIN	0x02		/* read from stdin, not /dev/tty */
 #define TGP_ASKPASS	0x04		/* read from askpass helper program */
+#endif
 
 struct lbuf;
 struct passwd;
@@ -204,11 +210,10 @@ struct passwd;
 #define YY_DECL int yylex __P((void))
 
 char *sudo_goodpath	__P((const char *, struct stat *));
-char *tgetpass		__P((const char *, int, int));
 int find_path		__P((char *, char **, struct stat *, char *));
 int tty_present		__P((void));
-void check_user		__P((int, int));
-void verify_user	__P((struct passwd *, char *));
+int check_user		__P((int, int));
+int verify_user		__P((struct passwd *, char *));
 #ifdef HAVE_LDAP
 int sudo_ldap_open	__P((struct sudo_nss *));
 int sudo_ldap_close	__P((struct sudo_nss *));
@@ -235,7 +240,7 @@ int check_secureware	__P((char *));
 void sia_attempt_auth	__P((void));
 void pam_attempt_auth	__P((void));
 int yyparse		__P((void));
-void pass_warn		__P((FILE *));
+void pass_warn		__P((void));
 void dump_defaults	__P((void));
 void dump_auth_methods	__P((void));
 void init_envtables	__P((void));
@@ -288,12 +293,15 @@ time_t get_boottime __P((void));
 int user_in_group __P((struct passwd *, const char *));
 YY_DECL;
 
+/* atobool.c */
+int atobool(const char *str);
+
 /* Only provide extern declarations outside of sudo.c. */
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
 extern struct passwd *auth_pw, *list_pw;
 
-extern int tgetpass_flags;
+extern int tgetpass_flags; /* XXX */
 extern int long_list;
 extern uid_t timestamp_uid;
 #endif
@@ -301,4 +309,4 @@ extern uid_t timestamp_uid;
 extern int errno;
 #endif
 
-#endif /* _SUDO_SUDO_H */
+#endif /* _SUDO_SUDOERS_H */

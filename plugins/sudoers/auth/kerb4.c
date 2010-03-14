@@ -44,7 +44,7 @@
 #include <pwd.h>
 #include <krb.h>
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 
 int

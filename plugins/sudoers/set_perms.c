@@ -49,7 +49,7 @@
 # include <login_cap.h>
 #endif
 
-#include "sudo.h"
+#include "sudoers.h"
 
 #ifdef __TANDEM
 # define ROOT_UID	65535

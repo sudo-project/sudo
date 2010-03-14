@@ -62,7 +62,7 @@
 # endif
 #endif
 
-#include "sudo.h"
+#include "sudoers.h"
 #include "sudo_auth.h"
 
 /* Only OpenPAM and Linux PAM use const qualifiers. */
@@ -257,17 +257,17 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
     PAM_CONST struct pam_message *pm;
     const char *prompt;
     char *pass;
-    int n, flags, std_prompt;
+    int n, type, std_prompt;
 
     if ((*response = malloc(num_msg * sizeof(struct pam_response))) == NULL)
 	return(PAM_SYSTEM_ERR);
     zero_bytes(*response, num_msg * sizeof(struct pam_response));
 
     for (pr = *response, pm = *msg, n = num_msg; n--; pr++, pm++) {
-	flags = tgetpass_flags;
+	type = SUDO_CONV_PROMPT_ECHO_OFF;
 	switch (pm->msg_style) {
 	    case PAM_PROMPT_ECHO_ON:
-		SET(flags, TGP_ECHO);
+		type = SUDO_CONV_PROMPT_ECHO_ON;
 	    case PAM_PROMPT_ECHO_OFF:
 		prompt = def_prompt;
 
@@ -289,7 +289,7 @@ sudo_conv(num_msg, msg, response, appdata_ptr)
 		    prompt = pm->msg;
 #endif
 		/* Read the password unless interrupted. */
-		pass = tgetpass(prompt, def_passwd_timeout * 60, flags);
+		pass = auth_getpass(prompt, def_passwd_timeout * 60, type);
 		if (pass == NULL) {
 		    /* We got ^C instead of a password; abort quickly. */
 		    if (errno == EINTR)
