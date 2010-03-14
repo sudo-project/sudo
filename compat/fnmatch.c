@@ -49,8 +49,8 @@
 #endif /* HAVE_STRING_H */
 
 #include <compat.h>
-#include "compat/fnmatch.h"
-#include "compat/charclass.h"
+#include "fnmatch.h"
+#include "charclass.h"
 
 #undef	EOS
 #define	EOS	'\0'

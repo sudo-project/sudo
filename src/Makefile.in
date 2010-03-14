@@ -77,7 +77,7 @@ OBJS =	sudo.o parse_args.o lbuf.o alloc.o error.o zero_bytes.o \
 
 LIBOBJDIR = $(top_srcdir)/@ac_config_libobj_dir@/
 
-LIBOBJS = @LIBOBJS@
+LIBOBJS = $(top_srcdir)/@ac_config_libobj_dir@/libmissing.a
 
 VERSION = @PACKAGE_VERSION@
 
@@ -151,48 +151,6 @@ tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tgetpass.c
 zero_bytes.o: $(srcdir)/zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/zero_bytes.c
-
-# Compat dependencies
-$(LIBOBJDIR)closefrom.o: $(compat)/closefrom.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/closefrom.c
-$(LIBOBJDIR)fnmatch.o: $(compat)/fnmatch.c $(compat)/fnmatch.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/fnmatch.c
-$(LIBOBJDIR)getcwd.o: $(compat)/getcwd.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/getcwd.c
-$(LIBOBJDIR)getline.o: $(compat)/getline.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/getline.c
-$(LIBOBJDIR)getprogname.o: $(compat)/getprogname.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/getprogname.c
-$(LIBOBJDIR)glob.o: $(compat)/glob.c $(compat)/glob.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/glob.c
-$(LIBOBJDIR)isblank.o: $(compat)/isblank.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/isblank.c
-$(LIBOBJDIR)memrchr.o: $(compat)/memrchr.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/memrchr.c
-$(LIBOBJDIR)mkstemp.o: $(compat)/mkstemp.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/mkstemp.c
-$(LIBOBJDIR)nanosleep.o: $(compat)/nanosleep.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/nanosleep.c
-$(LIBOBJDIR)sigaction.o: $(compat)/sigaction.c $(incdir)/compat.h $(incdir)/compat.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/sigaction.c
-$(LIBOBJDIR)snprintf.o: $(compat)/snprintf.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/snprintf.c
-$(LIBOBJDIR)strcasecmp.o: $(compat)/strcasecmp.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strcasecmp.c
-$(LIBOBJDIR)strdup.o: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strdup.c
-$(LIBOBJDIR)strndup.o: $(compat)/strndup.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strndup.c
-$(LIBOBJDIR)strerror.o: $(compat)/strerror.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strerror.c
-$(LIBOBJDIR)strlcat.o: $(compat)/strlcat.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strlcat.c
-$(LIBOBJDIR)strlcpy.o: $(compat)/strlcpy.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strlcpy.c
-$(LIBOBJDIR)strsignal.o: $(compat)/strsignal.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/strsignal.c
-$(LIBOBJDIR)utimes.o: $(compat)/utimes.c $(incdir)/compat.h $(compat)/utime.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(compat)/utimes.c
 
 install: install-dirs install-binaries @INSTALL_NOEXEC@
 

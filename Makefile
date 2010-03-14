@@ -16,7 +16,7 @@
 #
 
 # XXX - add plugins/sudoers
-SUBDIRS = src plugins/sample doc
+SUBDIRS = compat src plugins/sample doc
 
 all install: config.status
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done

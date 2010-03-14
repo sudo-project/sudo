@@ -97,8 +97,8 @@
 #include <pwd.h>
 
 #include <compat.h>
-#include "compat/glob.h"
-#include "compat/charclass.h"
+#include "glob.h"
+#include "charclass.h"
 
 #define	DOLLAR		'$'
 #define	DOT		'.'
