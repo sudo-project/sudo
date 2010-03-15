@@ -1232,7 +1232,7 @@ deserialize_info(char * const settings[], char * const user_info[])
 	    continue;
 	}
 	if (MATCHES(*cur, "ignore_ticket=")) {
-	    /* XXX */
+	    SET(flags, MODE_IGNORE_TICKET);
 	    continue;
 	}
 	if (MATCHES(*cur, "login_class=")) {

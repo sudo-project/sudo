@@ -130,6 +130,7 @@ struct sudo_user {
 #define MODE_PRESERVE_GROUPS	0x00200000
 #define MODE_PRESERVE_ENV	0x00400000
 #define MODE_NONINTERACTIVE	0x00800000
+#define MODE_IGNORE_TICKET	0x01000000
 
 /*
  * Used with set_perms()

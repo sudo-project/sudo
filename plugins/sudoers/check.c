@@ -91,7 +91,7 @@ check_user(validated, mode)
     int status, rval = TRUE;
 
     /* Always prompt for a password when -k was specified with the command. */
-    if (ISSET(mode, MODE_INVALIDATE)) {
+    if (ISSET(mode, MODE_IGNORE_TICKET)) {
 	SET(validated, FLAG_CHECK_USER);
     } else {
 	if (user_uid == 0 || user_uid == runas_pw->pw_uid || user_is_exempt())
@@ -140,7 +140,7 @@ check_user(validated, mode)
 	rval = verify_user(auth_pw, prompt);
     }
     /* Only update timestamp if user was validated. */
-    if (ISSET(validated, VALIDATE_OK) && !ISSET(mode, MODE_INVALIDATE) && status != TS_ERROR)
+    if (ISSET(validated, VALIDATE_OK) && !ISSET(mode, MODE_IGNORE_TICKET) && status != TS_ERROR)
 	update_timestamp(timestampdir, timestampfile);
     efree(timestampdir);
     efree(timestampfile);
