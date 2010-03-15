@@ -111,7 +111,7 @@ all: sudoers.la
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 
 sudoers.la: $(SUDOERS_OBJS) $(COMMON_OBJS) $(LTLIBOBJS)
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ $(SUDOERS_OBJS) $(COMMON_OBJS) $(LTLIBOBJS) -module -avoid-version -rpath $(plugindir)
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ $(SUDOERS_OBJS) $(COMMON_OBJS) -L$(LIBOBJDIR) -lmissing_pic -module -avoid-version -rpath $(plugindir)
 
 # Sudoers dependencies
 sudoers.lo: $(srcdir)/sudoers.c $(SUDODEP) $(srcdir)/interfaces.h

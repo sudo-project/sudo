@@ -84,7 +84,7 @@ sample_plugin.lo: $(srcdir)/sample_plugin.c
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sample_plugin.c
 
 sample_plugin.la: $(OBJS) $(LTLIBOBJS)
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) $(LTLIBOBJS) -module -avoid-version -rpath $(plugindir)
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) -L$(LIBOBJDIR) -lmissing_pic -module -avoid-version -rpath $(plugindir)
 
 install: install-dirs install-plugin
 
