@@ -72,7 +72,7 @@
 # define PAM_CONST
 #endif
 
-static int sudo_conv __P((int, PAM_CONST struct pam_message **,
+static int converse __P((int, PAM_CONST struct pam_message **,
 			  struct pam_response **, void *));
 static char *def_prompt = "Password:";
 static int gotintr;
@@ -95,7 +95,7 @@ pam_init(pw, promptp, auth)
     /* Initial PAM setup */
     if (auth != NULL)
 	auth->data = (void *) &pam_status;
-    pam_conv.conv = sudo_conv;
+    pam_conv.conv = converse;
     pam_status = pam_start("sudo", pw->pw_name, &pam_conv, &pamh);
     if (pam_status != PAM_SUCCESS) {
 	log_error(USE_ERRNO|NO_EXIT|NO_MAIL, "unable to initialize PAM");
@@ -131,7 +131,7 @@ pam_verify(pw, prompt, auth)
     const char *s;
     int *pam_status = (int *) auth->data;
 
-    def_prompt = prompt;	/* for sudo_conv */
+    def_prompt = prompt;	/* for converse */
 
     /* PAM_SILENT prevents the authentication service from generating output. */
     *pam_status = pam_authenticate(pamh, PAM_SILENT);
@@ -247,7 +247,7 @@ pam_prep_user(pw)
  * XXX - does not handle PAM_BINARY_PROMPT
  */
 static int
-sudo_conv(num_msg, msg, response, appdata_ptr)
+converse(num_msg, msg, response, appdata_ptr)
     int num_msg;
     PAM_CONST struct pam_message **msg;
     struct pam_response **response;
