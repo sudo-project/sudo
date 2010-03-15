@@ -54,6 +54,7 @@
 #include <time.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <setjmp.h>
 
 #include "sudoers.h"
 
@@ -63,6 +64,8 @@ static void send_mail		__P((const char *fmt, ...));
 static int should_mail		__P((int));
 static void mysyslog		__P((int, const char *, ...));
 static char *new_logline	__P((const char *, int));
+
+extern sigjmp_buf error_jmp;
 
 #define MAXSYSLOGTRIES	16	/* num of retries for broken syslogs */
 
@@ -368,7 +371,6 @@ log_error(flags, fmt, va_alist)
     va_end(ap);
 
     /* Become root if we are not already to avoid user interference */
-    /* XXX - could longjmp back with wrong uid */
     set_perms(PERM_ROOT|PERM_NOEXIT);
 
     if (ISSET(flags, MSG_ONLY))
@@ -404,14 +406,12 @@ log_error(flags, fmt, va_alist)
 
     efree(logline);
 
-#if 0 /* XXX - longjmp instead */
+    set_perms(PERM_USER);
+
     if (!ISSET(flags, NO_EXIT)) {
 	cleanup(0);
-	exit(1);
+	siglongjmp(error_jmp, 1);
     }
-#endif
-
-    set_perms(PERM_USER);
 }
 
 #define MAX_MAILFLAGS	63
