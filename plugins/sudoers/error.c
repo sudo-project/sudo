@@ -76,10 +76,10 @@ warningx(const char *fmt, ...)
 static void
 _warning(int use_errno, const char *fmt, va_list ap)
 {
-    struct sudo_conv_message msg[5];
-    struct sudo_conv_reply repl[5];
+    struct sudo_conv_message msg[6];
+    struct sudo_conv_reply repl[6];
     char *str;
-    int nmsgs = 3;
+    int nmsgs = 4;
 
     evasprintf(&str, fmt, ap);
 
@@ -88,16 +88,18 @@ _warning(int use_errno, const char *fmt, va_list ap)
     msg[0].msg_type = SUDO_CONV_ERROR_MSG;
     msg[0].msg = getprogname();
     msg[1].msg_type = SUDO_CONV_ERROR_MSG;
-    msg[1].msg = ":";
+    msg[1].msg = ": ";
     msg[2].msg_type = SUDO_CONV_ERROR_MSG;
     msg[2].msg = str;
     if (use_errno) {
 	msg[3].msg_type = SUDO_CONV_ERROR_MSG;
-	msg[3].msg = ":";
+	msg[3].msg = ": ";
 	msg[4].msg_type = SUDO_CONV_ERROR_MSG;
 	msg[4].msg = strerror(errno);
-	nmsgs = 5;
+	nmsgs = 6;
     }
+    msg[nmsgs - 1].msg_type = SUDO_CONV_ERROR_MSG;
+    msg[nmsgs - 1].msg = "\n";
     memset(&repl, 0, sizeof(repl));
     sudo_conv(nmsgs, msg, repl);
 }
