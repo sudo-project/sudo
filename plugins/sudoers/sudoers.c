@@ -179,8 +179,6 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     sigaction_t sa;
     struct sudo_nss *nss;
 
-    /* XXX - must not call log_error yet */
-
     /* Must be done before we do any password lookups */
 #if defined(HAVE_GETPRPWNAM) && defined(HAVE_SET_AUTH_PARAMETERS)
     (void) set_auth_parameters(Argc, Argv);
@@ -196,7 +194,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 	return -1;
     }
 
-/* XXX - duplicated in sudo.c */
+/* XXX - signal setup duplicated in sudo.c */
     /*
      * Signal setup:
      *	Ignore keyboard-generated signals so the user cannot interrupt
@@ -462,7 +460,6 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     auth_pw = get_authpw();
 
     /* Require a password if sudoers says so.  */
-    /* XXX - conversation function */
     if (def_authenticate) {
 	rval = check_user(validated, sudo_mode);
 	if (rval != TRUE)
@@ -1133,7 +1130,7 @@ sudoers_policy_version(int verbose)
     sudo_conv(1, &msg, &repl);
 
 #ifdef notyet
-    if (getuid() == 0) {
+    if (verbose) {
 	putchar('\n');
 	(void) printf("Sudoers path: %s\n", _PATH_SUDOERS);
 #ifdef HAVE_LDAP
@@ -1241,7 +1238,26 @@ deserialize_info(char * const settings[], char * const user_info[])
 	    continue;
 	}
 	if (MATCHES(*cur, "groups=")) {
-	    /* XXX, set user_groups and user_ngroups */
+	    /* Count number of groups */
+	    const char *val = *cur + sizeof("groups=") - 1;
+	    const char *cp;
+	    for (cp = val; *cp != '\0'; cp++) {
+		if (*cp == ',')
+		    user_ngroups++;
+	    }
+	    if (user_ngroups) {
+		user_groups = emalloc2(user_ngroups, sizeof(gid_t));
+		user_ngroups = 0;
+		cp = val;
+		for (;;) {
+		    /* XXX - strtol would be better here */
+		    user_groups[user_ngroups++] = atoi(cp);
+		    cp = strchr(cp, ',');
+		    if (cp == NULL)
+			break;
+		    cp++; /* skip over comma */
+		}
+	    }
 	    continue;
 	}
 	if (MATCHES(*cur, "cwd=")) {
