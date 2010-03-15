@@ -99,12 +99,11 @@ yyerror(s)
 	errorfile = estrdup(sudoers);
     }
     if (verbose && s != NULL) {
-	/* XXX - conversation function when called via plugin */
 #ifndef TRACELEXER
-	(void) fprintf(stderr, ">>> %s: %s near line %d <<<\n", sudoers, s,
+	warningx(">>> %s: %s near line %d <<<", sudoers, s,
 	    sudolineno ? sudolineno - 1 : 0);
 #else
-	(void) fprintf(stderr, "<*> ");
+	fputs("<*> ", stderr);
 #endif
     }
     parse_error = TRUE;
