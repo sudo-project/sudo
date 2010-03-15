@@ -327,15 +327,17 @@ sudoers_policy_close(int exit_status, int error)
 }
 
 static int
-sudoers_policy_check(int argc, char * const argv[], char *env_add[],
-     char **command_infop[], char **argv_out[], char **user_env_out[])
+sudoers_policy_main(int argc, char * const argv[], char *env_add[],
+    char **command_infop[], char **argv_out[], char **user_env_out[])
 {
     static char *command_info[32]; /* XXX */
     struct sudo_nss *nss;
     char **old_environ = environ;
-    int cmnd_status, fd, validated, pwflag = 0;
+    int cmnd_status = -1, fd, validated, pwflag = 0;
     int info_len = 0;
     int rval = FALSE;
+
+    /* refactor so list can use it too */
 
     /* Is root even allowed to run sudo? */
     if (user_uid == 0 && !def_root_sudo) {
@@ -344,7 +346,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     }    
 
     if (sigsetjmp(error_jmp, 1)) {
-	/* called via error(), errorx() or log_error() */
+	/* error recovery via error(), errorx() or log_error() */
 	return -1;
     }
 
@@ -356,9 +358,6 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 
     /* Set environ to contents of user_env. */
     env_init(user_env);
-
-    /* XXX*/
-    SET(sudo_mode, MODE_RUN);
 
 #ifdef USING_NONUNIX_GROUPS
     sudo_nonunix_groupcheck_init();     /* initialise nonunix groups impl */
@@ -507,11 +506,18 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     }
 
     log_allowed(validated);
+    if (ISSET(sudo_mode, MODE_CHECK))
+	rval = display_cmnd(snl, list_pw ? list_pw : sudo_user.pw);
+    else if (ISSET(sudo_mode, MODE_LIST))
+	display_privs(snl, list_pw ? list_pw : sudo_user.pw); /* XXX - return val */
 
     /* Cleanup sudoers sources */
     tq_foreach_fwd(snl, nss) {
 	nss->close(nss);
     }
+
+    if (ISSET(sudo_mode, (MODE_VALIDATE|MODE_CHECK|MODE_LIST)))
+	goto done;
 
     /*
      * Set umask based on sudoers.
@@ -566,7 +572,6 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     sudo_endpwent();
     sudo_endgrent();
 
-    /* XXX - handle ENOMEM */
     command_info[info_len++] = fmt_string("command", safe_cmnd);
     if (def_stay_setuid) {
 	easprintf(&command_info[info_len++], "runas_uid=%u", user_uid);
@@ -581,7 +586,6 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
     /* Must audit before uid change. */
     //audit_success(NewArgv); /* XXX */
 
-    /* XXX - set argv_out and env_out */
     *command_infop = command_info;
 
     *argv_out = NewArgv;
@@ -593,6 +597,36 @@ done:
     environ = old_environ;
 
     return rval;
+}
+
+static int
+sudoers_policy_check(int argc, char * const argv[], char *env_add[],
+    char **command_infop[], char **argv_out[], char **user_env_out[])
+{
+    SET(sudo_mode, MODE_RUN);
+
+    return sudoers_policy_main(argc, argv, env_add, command_infop,
+	argv_out, user_env_out);
+}
+
+static int
+sudoers_policy_list(int argc, char * const argv[], int verbose,
+    const char *list_user)
+{
+    user_cmnd = "list";
+    if (argc)
+	SET(sudo_mode, MODE_CHECK);
+    else
+	SET(sudo_mode, MODE_LIST);
+    if (verbose)
+	long_list = 1;
+    if (list_user) {
+	list_pw = sudo_getpwnam(list_user);
+	warningx("unknown user: %s", optarg);
+	return -1;
+    }
+
+    return sudoers_policy_main(argc, argv, NULL, NULL, NULL, NULL);
 }
 
 /*
@@ -1289,8 +1323,8 @@ struct policy_plugin sudoers_policy = {
     sudoers_policy_close,
     sudoers_policy_version,
     sudoers_policy_check,
-#ifdef notyet
     sudoers_policy_list,
+#ifdef notyet
     sudoers_policy_validate,
     sudoers_policy_invalidate
 #endif
