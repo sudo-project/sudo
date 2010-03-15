@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1993-1996, 1998-2009 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1993-1996, 1998-2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1265,55 +1265,6 @@ deserialize_info(char * const settings[], char * const user_info[])
 #undef MATCHES
     return flags;
 }
-
-#if 0 /* move to error.c */
-void
-warning(const char *fmt, ...)
-{
-    struct sudo_conv_message msg;
-    struct sudo_conv_reply repl;
-    va_list ap;
-    char *str, *tmp;
-
-    va_start(ap, fmt);
-    evasprintf(&tmp, fmt, ap);
-    va_end(ap);
-    easprintf(&str, "%s: %s: %s\n", getprogname(), tmp, strerror(errno));
-    efree(tmp);
-
-    /* Call conversation function */
-    memset(&msg, 0, sizeof(msg));
-    msg.msg_type = SUDO_CONV_ERROR_MSG;
-    msg.msg = str;
-    memset(&repl, 0, sizeof(repl));
-    sudo_conv(1, &msg, &repl);
-}
-
-void
-warningx(const char *fmt, ...)
-{
-    struct sudo_conv_message msg;
-    struct sudo_conv_reply repl;
-    va_list ap;
-    char *str, *tmp;
-    int rc;
-
-    va_start(ap, fmt);
-    rc = wvasprintf(&tmp, fmt, ap);
-    va_end(ap);
-    if (rc == -1)
-        return;
-    easprintf(&str, "%s: %s\n", getprogname(), tmp);
-    efree(tmp);
-
-    /* Call conversation function */
-    memset(&msg, 0, sizeof(msg));
-    msg.msg_type = SUDO_CONV_ERROR_MSG;
-    msg.msg = str;
-    memset(&repl, 0, sizeof(repl));
-    sudo_conv(1, &msg, &repl);
-}
-#endif
 
 struct policy_plugin sudoers_policy = {
     SUDO_POLICY_PLUGIN,

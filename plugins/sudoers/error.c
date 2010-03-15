@@ -22,7 +22,8 @@
 
 #include <config.h>
 #include <compat.h>
-#include "error.h"
+#include <error.h>
+#include <sudo_plugin.h>
 
 static void _warning(int, const char *, va_list);
        void cleanup(int);
@@ -37,10 +38,7 @@ error(int eval, const char *fmt, ...)
 	_warning(1, fmt, ap);
 	va_end(ap);
 	cleanup(0);
-	if (error_jmp)
-	    siglongjmp(error_jmp, 1);
-	else
-	    exit(eval);
+	siglongjmp(error_jmp, 1);
 }
 
 void
@@ -51,10 +49,7 @@ errorx(int eval, const char *fmt, ...)
 	_warning(0, fmt, ap);
 	va_end(ap);
 	cleanup(0);
-	if (error_jmp)
-	    siglongjmp(error_jmp, 1);
-	else
-	    exit(eval);
+	siglongjmp(error_jmp, 1);
 }
 
 void
@@ -78,16 +73,28 @@ warningx(const char *fmt, ...)
 static void
 _warning(int use_errno, const char *fmt, va_list ap)
 {
-	int serrno = errno;
+    struct sudo_conv_message msg[5];
+    struct sudo_conv_reply repl[5];
+    char *str;
+    int nmsgs = 3;
 
-	fputs(getprogname(), stderr);
-	if (fmt != NULL) {
-		fputs(": ", stderr);
-		vfprintf(stderr, fmt, ap);
-	}
-	if (use_errno) {
-	    fputs(": ", stderr);
-	    fputs(strerror(serrno), stderr);
-	}
-	putc('\n', stderr);
+    evasprintf(&str, fmt, ap);
+
+    /* Call conversation function */
+    memset(&msg, 0, sizeof(msg));
+    msg[0].msg_type = SUDO_CONV_ERROR_MSG;
+    msg[0].msg = getprogname();
+    msg[1].msg_type = SUDO_CONV_ERROR_MSG;
+    msg[1].msg = ":";
+    msg[2].msg_type = SUDO_CONV_ERROR_MSG;
+    msg[2].msg = str;
+    if (use_errno) {
+	msg[3].msg_type = SUDO_CONV_ERROR_MSG;
+	msg[3].msg = ":";
+	msg[4].msg_type = SUDO_CONV_ERROR_MSG;
+	msg[4].msg = strerror(errno);
+	nmsgs = 5;
+    }
+    memset(&repl, 0, sizeof(repl));
+    sudo_conv(nmsgs, msg, repl);
 }
