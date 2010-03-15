@@ -15,8 +15,7 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# XXX - add plugins/sudoers
-SUBDIRS = compat src plugins/sample doc
+SUBDIRS = compat src plugins/sample plugins/sudoers doc
 
 all install: config.status
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
