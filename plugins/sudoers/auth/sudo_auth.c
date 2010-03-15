@@ -252,20 +252,22 @@ cleanup:
 void
 pass_warn(void)
 {
-    struct sudo_conv_message msg;
-    struct sudo_conv_reply repl;
+    struct sudo_conv_message msg[2];
+    struct sudo_conv_reply repl[2];
 
     /* Call conversation function */
-    memset(&msg, 0, sizeof(msg));
-    msg.msg_type = SUDO_CONV_ERROR_MSG;
+    memset(msg, 0, sizeof(msg));
+    msg[0].msg_type = SUDO_CONV_ERROR_MSG;
 #ifdef INSULT
     if (def_insults)
-	msg.msg = INSULT;
+	msg[0].msg = INSULT;
     else
 #endif
-	msg.msg = def_badpass_message;
+	msg[0].msg = def_badpass_message;
+    msg[1].msg_type = SUDO_CONV_ERROR_MSG;
+    msg[1].msg = "\n";
     memset(&repl, 0, sizeof(repl));
-    sudo_conv(1, &msg, &repl);
+    sudo_conv(2, msg, repl);
 }
 
 char *
