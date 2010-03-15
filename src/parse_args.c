@@ -139,7 +139,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 
     /* Flags allowed when running a command */
     valid_flags = MODE_BACKGROUND|MODE_PRESERVE_ENV|MODE_RESET_HOME|
-		  MODE_LOGIN_SHELL|MODE_INVALIDATE|MODE_NONINTERACTIVE|
+		  MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|
 		  MODE_PRESERVE_GROUPS|MODE_SHELL;
     /* XXX - should fill in settings at the end to avoid dupes */
     for (;;) {
@@ -186,7 +186,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    if (mode && mode != MODE_EDIT)
 			usage_excl(1);
 		    mode = MODE_EDIT;
-		    valid_flags = MODE_INVALIDATE|MODE_NONINTERACTIVE;
+		    valid_flags = MODE_NONINTERACTIVE;
 		    break;
 		case 'g':
 		    runas_group = optarg;
@@ -209,7 +209,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 		case 'k':
 		    sudo_settings[ARG_IGNORE_TICKET].value = "true";
-		    SET(flags, MODE_INVALIDATE);
 		    break;
 		case 'K':
 		    sudo_settings[ARG_IGNORE_TICKET].value = "true";
@@ -226,7 +225,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 			    usage_excl(1);
 		    }
 		    mode = MODE_LIST;
-		    valid_flags = MODE_INVALIDATE|MODE_NONINTERACTIVE|MODE_LONG_LIST;
+		    valid_flags = MODE_NONINTERACTIVE|MODE_LONG_LIST;
 		    break;
 		case 'n':
 		    SET(flags, MODE_NONINTERACTIVE);
@@ -265,7 +264,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    if (mode && mode != MODE_VALIDATE)
 			usage_excl(1);
 		    mode = MODE_VALIDATE;
-		    valid_flags = MODE_INVALIDATE|MODE_NONINTERACTIVE;
+		    valid_flags = MODE_NONINTERACTIVE;
 		    break;
 		case 'V':
 		    if (mode && mode != MODE_VERSION)
@@ -296,14 +295,15 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 
     if (!mode) {
 	/* Defer -k mode setting until we know whether it is a flag or not */
-	if (ISSET(flags, MODE_INVALIDATE) && *nargc == 0) {
-	    mode = MODE_INVALIDATE;	/* -k by itself */
-	    CLR(flags, MODE_INVALIDATE);
-	    sudo_settings[ARG_IGNORE_TICKET].value = NULL;
-	    valid_flags = 0;
-	} else {
-	    mode = MODE_RUN;		/* running a command */
+	if (sudo_settings[ARG_IGNORE_TICKET].value != NULL) {
+	    if (*nargc == 0) {
+		mode = MODE_INVALIDATE;	/* -k by itself */
+		sudo_settings[ARG_IGNORE_TICKET].value = NULL;
+		valid_flags = 0;
+	    }
 	}
+	if (!mode)
+	    mode = MODE_RUN;		/* running a command */
     }
 
     if (*nargc > 0 && mode == MODE_LIST)
