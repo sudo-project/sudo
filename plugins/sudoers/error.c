@@ -22,6 +22,7 @@
 
 #include <config.h>
 #include <compat.h>
+#include <alloc.h>
 #include <error.h>
 #include <sudo_plugin.h>
 
@@ -29,6 +30,8 @@ static void _warning(int, const char *, va_list);
        void cleanup(int);
 
 sigjmp_buf error_jmp;
+
+extern sudo_conv_t sudo_conv;
 
 void
 error(int eval, const char *fmt, ...)
