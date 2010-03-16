@@ -610,6 +610,23 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 }
 
 static int
+sudoers_policy_validate(void)
+{
+    user_cmnd = "validate";
+    SET(sudo_mode, MODE_VALIDATE);
+
+    return sudoers_policy_main(0, NULL, NULL, NULL, NULL, NULL);
+}
+
+static void
+sudoers_policy_invalidate(int remove)
+{
+    user_cmnd = "kill";
+    remove_timestamp(remove);
+    cleanup(0);
+}
+
+static int
 sudoers_policy_list(int argc, char * const argv[], int verbose,
     const char *list_user)
 {
@@ -1324,10 +1341,8 @@ struct policy_plugin sudoers_policy = {
     sudoers_policy_version,
     sudoers_policy_check,
     sudoers_policy_list,
-#ifdef notyet
     sudoers_policy_validate,
     sudoers_policy_invalidate
-#endif
 };
 
 #ifdef notyet

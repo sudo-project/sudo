@@ -201,7 +201,7 @@ main(int argc, char *argv[], char *envp[])
 	    exit(ok != TRUE);
 	case MODE_KILL:
 	case MODE_INVALIDATE:
-	    if (policy_plugin.u.policy->validate == NULL) {
+	    if (policy_plugin.u.policy->invalidate == NULL) {
 		warningx("policy plugin %s does not support the -k/-K flags",
 		    policy_plugin.name);
 		exit(1);
