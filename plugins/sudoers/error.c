@@ -41,7 +41,7 @@ error(int eval, const char *fmt, ...)
 	_warning(1, fmt, ap);
 	va_end(ap);
 	cleanup(0);
-	siglongjmp(error_jmp, 1);
+	siglongjmp(error_jmp, eval);
 }
 
 void
@@ -52,7 +52,7 @@ errorx(int eval, const char *fmt, ...)
 	_warning(0, fmt, ap);
 	va_end(ap);
 	cleanup(0);
-	siglongjmp(error_jmp, 1);
+	siglongjmp(error_jmp, eval);
 }
 
 void
