@@ -140,7 +140,8 @@ check_user(validated, mode)
 	rval = verify_user(auth_pw, prompt);
     }
     /* Only update timestamp if user was validated. */
-    if (ISSET(validated, VALIDATE_OK) && !ISSET(mode, MODE_IGNORE_TICKET) && status != TS_ERROR)
+    if (rval == TRUE && ISSET(validated, VALIDATE_OK) &&
+	!ISSET(mode, MODE_IGNORE_TICKET) && status != TS_ERROR)
 	update_timestamp(timestampdir, timestampfile);
     efree(timestampdir);
     efree(timestampfile);
