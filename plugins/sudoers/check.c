@@ -75,6 +75,8 @@ static char *expand_prompt	__P((char *, char *, char *));
 static void  lecture		__P((int));
 static void  update_timestamp	__P((char *, char *));
 
+extern sudo_conv_t sudo_conv;
+
 /*
  * This function only returns if the user can successfully
  * verify who he/she is.
@@ -149,6 +151,13 @@ check_user(validated, mode)
     return rval;
 }
 
+static const char lecture_text[] = "\n"
+"We trust you have received the usual lecture from the local System\n"
+"Administrator. It usually boils down to these three things:\n\n"
+"    #1) Respect the privacy of others.\n"
+"    #2) Think before you type.\n"
+"    #3) With great power comes great responsibility.\n\n";
+
 /*
  * Standard sudo lecture.
  */
@@ -159,24 +168,28 @@ lecture(status)
     FILE *fp;
     char buf[BUFSIZ];
     ssize_t nread;
+    struct sudo_conv_message msg;
+    struct sudo_conv_reply repl;
 
     if (def_lecture == never ||
 	(def_lecture == once && status != TS_MISSING && status != TS_ERROR))
 	return;
 
+    memset(&msg, 0, sizeof(msg));
+    memset(&repl, 0, sizeof(repl));
+
     if (def_lecture_file && (fp = fopen(def_lecture_file, "r")) != NULL) {
-	while ((nread = fread(buf, sizeof(char), sizeof(buf), fp)) != 0)
-	    fwrite(buf, nread, 1, stderr);
+	while ((nread = fread(buf, sizeof(char), sizeof(buf) - 1, fp)) != 0) {
+	    buf[sizeof(buf) - 1] = '\0';
+	    msg.msg_type = SUDO_CONV_ERROR_MSG;
+	    msg.msg = buf;
+	    sudo_conv(1, &msg, &repl);
+	}
 	fclose(fp);
     } else {
-	(void) fputs("\n\
-We trust you have received the usual lecture from the local System\n\
-Administrator. It usually boils down to these three things:\n\
-\n\
-    #1) Respect the privacy of others.\n\
-    #2) Think before you type.\n\
-    #3) With great power comes great responsibility.\n\n",
-    stderr);
+	msg.msg_type = SUDO_CONV_ERROR_MSG;
+	msg.msg = lecture_text;
+	sudo_conv(1, &msg, &repl);
     }
 }
 
