@@ -221,51 +221,6 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     /* Parse settings and user_info */
     sudo_mode = deserialize_info(settings, user_info);
 
-#if 0 /* XXX */
-    pwflag = 0;
-    if (ISSET(sudo_mode, MODE_SHELL))
-	user_cmnd = "shell";
-    else if (ISSET(sudo_mode, MODE_EDIT))
-	user_cmnd = "sudoedit";
-    else {
-	switch (sudo_mode) {
-	    case MODE_VERSION:
-		show_version();
-		break;
-	    case MODE_HELP:
-		usage(0);
-		break;
-	    case MODE_VALIDATE:
-	    case MODE_VALIDATE|MODE_INVALIDATE:
-		user_cmnd = "validate";
-		pwflag = I_VERIFYPW;
-		break;
-	    case MODE_KILL:
-	    case MODE_INVALIDATE:
-		user_cmnd = "kill";
-		pwflag = -1;
-		break;
-	    case MODE_LISTDEFS:
-		list_options();
-		exit(0);
-		break;
-	    case MODE_LIST:
-	    case MODE_LIST|MODE_INVALIDATE:
-		user_cmnd = "list";
-		pwflag = I_LISTPW;
-		break;
-	    case MODE_CHECK:
-	    case MODE_CHECK|MODE_INVALIDATE:
-		pwflag = I_LISTPW;
-		break;
-	}
-    }
-
-    /* Must have a command to run... */
-    if (user_cmnd == NULL && NewArgc == 0)
-	usage(1);
-#endif
-
     init_vars(envp);		/* XXX - move this later? */
 
 #ifdef USING_NONUNIX_GROUPS
@@ -622,8 +577,10 @@ static void
 sudoers_policy_invalidate(int remove)
 {
     user_cmnd = "kill";
-    remove_timestamp(remove);
-    cleanup(0);
+    if (sigsetjmp(error_jmp, 1) == 0) {
+	remove_timestamp(remove);
+	cleanup(0);
+    }
 }
 
 static int
@@ -705,27 +662,23 @@ init_vars(char * const envp[])
      * can read the shadow passwd file if necessary.
      */
     if ((sudo_user.pw = sudo_getpwnam(user_name)) == NULL) {
-	/* Need to make a fake struct passwd for logging to work. */
-	/* XXX - really needed now? */
 	struct passwd pw;
-	char pw_name[MAX_UID_T_LEN + 1];
 
+	/* Create a fake struct passwd for log_error(). */
+	memset(&pw, 0, sizeof(pw));
 	pw.pw_uid = getuid();
-	(void) snprintf(pw_name, sizeof(pw_name), "%lu",
-	    (unsigned long) pw.pw_uid);
-	pw.pw_name = pw_name;
+	pw.pw_name = user_name;
 	sudo_user.pw = &pw;
 
-#if 0
 	/*
-	 * If we are in -k/-K mode, just spew to stderr.  It is not unusual for
-	 * users to place "sudo -k" in a .logout file which can cause sudo to
-	 * be run during reboot after the YP/NIS/NIS+/LDAP/etc daemon has died.
+	 * It is not unusual for users to place "sudo -k" in a .logout
+	 * file which can cause sudo to be run during reboot after the
+	 * YP/NIS/NIS+/LDAP/etc daemon has died.
 	 */
 	if (sudo_mode == MODE_KILL || sudo_mode == MODE_INVALIDATE)
-	    errorx(1, "unknown uid: %s", pw_name);
-	log_error(0, "unknown uid: %s", pw_name);
-#endif
+	    errorx(1, "unknown user: %s", user_name);
+	log_error(0, "unknown user: %s", user_name);
+	/* NOTREACHED */
     }
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
     mbr_uid_to_uuid(user_uid, user_uuid);
