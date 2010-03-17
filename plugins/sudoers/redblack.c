@@ -57,11 +57,10 @@
 #include "sudoers.h"
 #include "redblack.h"
 
-static void rbrepair		__P((struct rbtree *, struct rbnode *));
-static void rotate_left		__P((struct rbtree *, struct rbnode *));
-static void rotate_right	__P((struct rbtree *, struct rbnode *));
-static void _rbdestroy		__P((struct rbtree *, struct rbnode *,
-				    void (*)(void *)));
+static void rbrepair(struct rbtree *, struct rbnode *);
+static void rotate_left(struct rbtree *, struct rbnode *);
+static void rotate_right(struct rbtree *, struct rbnode *);
+static void _rbdestroy(struct rbtree *, struct rbnode *, void (*)(void *));
 
 /*
  * Red-Black tree, see http://en.wikipedia.org/wiki/Red-black_tree
@@ -87,7 +86,7 @@ static void _rbdestroy		__P((struct rbtree *, struct rbnode *,
  */
 struct rbtree *
 rbcreate(compar)
-    int (*compar)__P((const void *, const void*));
+    int (*compar)(const void *, const void*);
 {
     struct rbtree *tree;
 
@@ -287,7 +286,7 @@ int
 rbapply_node(tree, node, func, cookie, order)
     struct rbtree *tree;
     struct rbnode *node;
-    int (*func)__P((void *, void *));
+    int (*func)(void *, void *);
     void *cookie;
     enum rbtraversal order;
 {
@@ -341,7 +340,7 @@ static void
 _rbdestroy(tree, node, destroy)
     struct rbtree *tree;
     struct rbnode *node;
-    void (*destroy)__P((void *));
+    void (*destroy)(void *);
 {
     if (node != rbnil(tree)) {
 	_rbdestroy(tree, node->left, destroy);
@@ -359,7 +358,7 @@ _rbdestroy(tree, node, destroy)
 void
 rbdestroy(tree, destroy)
     struct rbtree *tree;
-    void (*destroy)__P((void *));
+    void (*destroy)(void *);
 {
     _rbdestroy(tree, rbfirst(tree), destroy);
     efree(tree);

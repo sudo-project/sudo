@@ -98,9 +98,8 @@ struct environment {
 /*
  * Prototypes
  */
-void rebuild_env		__P((int, int));
-static void sudo_setenv		__P((const char *, const char *, int));
-static void sudo_putenv		__P((char *, int, int));
+static void sudo_setenv(const char *, const char *, int);
+static void sudo_putenv(char *, int, int);
 
 extern char **environ;		/* global environment */
 

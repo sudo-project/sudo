@@ -47,12 +47,11 @@
 # define MAXSYSLOGLEN		960
 #endif
 
-void audit_success		__P((char **));
-void audit_failure		__P((char **, char const * const, ...));
-void log_allowed		__P((int));
-void log_denial			__P((int, int));
-void log_error			__P((int flags, const char *fmt, ...))
-				    __printflike(2, 3);
-RETSIGTYPE reapchild		__P((int));
+void audit_success(char **);
+void audit_failure(char **, char const * const, ...);
+void log_allowed(int);
+void log_denial(int, int);
+void log_error(int flags, const char *fmt, ...) __printflike(2, 3);
+RETSIGTYPE reapchild(int);
 
 #endif /* _LOGGING_H */

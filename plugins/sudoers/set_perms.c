@@ -60,9 +60,9 @@
 /*
  * Prototypes
  */
-static void runas_setup		__P((void));
-static void runas_setgroups	__P((void));
-static void restore_groups	__P((void));
+static void runas_setup(void);
+static void runas_setgroups(void);
+static void restore_groups(void);
 
 static int current_perm = -1;
 

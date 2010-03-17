@@ -28,10 +28,10 @@ typedef struct sudo_auth {
     short status;		/* status from verify routine */
     char *name;			/* name of the method as a string */
     void *data;			/* method-specific data pointer */
-    int (*init) __P((struct passwd *pw, char **prompt, struct sudo_auth *auth));
-    int (*setup) __P((struct passwd *pw, char **prompt, struct sudo_auth *auth));
-    int (*verify) __P((struct passwd *pw, char *p, struct sudo_auth *auth));
-    int (*cleanup) __P((struct passwd *pw, struct sudo_auth *auth));
+    int (*init)(struct passwd *pw, char **prompt, struct sudo_auth *auth);
+    int (*setup)(struct passwd *pw, char **prompt, struct sudo_auth *auth);
+    int (*verify)(struct passwd *pw, char *p, struct sudo_auth *auth);
+    int (*cleanup)(struct passwd *pw, struct sudo_auth *auth);
 } sudo_auth;
 
 /* Values for sudo_auth.flags.  */
@@ -52,38 +52,38 @@ char *auth_getpass(const char *prompt, int timeout, int type);
 extern sudo_conv_t sudo_conv;
 
 /* Prototypes for standalone methods */
-int fwtk_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
-int fwtk_verify __P((struct passwd *pw, char *prompt, sudo_auth *auth));
-int fwtk_cleanup __P((struct passwd *pw, sudo_auth *auth));
-int pam_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
-int pam_verify __P((struct passwd *pw, char *prompt, sudo_auth *auth));
-int pam_cleanup __P((struct passwd *pw, sudo_auth *auth));
-int sia_setup __P((struct passwd *pw, char **prompt, sudo_auth *auth));
-int sia_verify __P((struct passwd *pw, char *prompt, sudo_auth *auth));
-int sia_cleanup __P((struct passwd *pw, sudo_auth *auth));
-int aixauth_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
-int aixauth_cleanup __P((struct passwd *pw, sudo_auth *auth));
-int bsdauth_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
-int bsdauth_verify __P((struct passwd *pw, char *prompt, sudo_auth *auth));
-int bsdauth_cleanup __P((struct passwd *pw, sudo_auth *auth));
+int fwtk_init(struct passwd *pw, char **prompt, sudo_auth *auth);
+int fwtk_verify(struct passwd *pw, char *prompt, sudo_auth *auth);
+int fwtk_cleanup(struct passwd *pw, sudo_auth *auth);
+int pam_init(struct passwd *pw, char **prompt, sudo_auth *auth);
+int pam_verify(struct passwd *pw, char *prompt, sudo_auth *auth);
+int pam_cleanup(struct passwd *pw, sudo_auth *auth);
+int sia_setup(struct passwd *pw, char **prompt, sudo_auth *auth);
+int sia_verify(struct passwd *pw, char *prompt, sudo_auth *auth);
+int sia_cleanup(struct passwd *pw, sudo_auth *auth);
+int aixauth_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int aixauth_cleanup(struct passwd *pw, sudo_auth *auth);
+int bsdauth_init(struct passwd *pw, char **prompt, sudo_auth *auth);
+int bsdauth_verify(struct passwd *pw, char *prompt, sudo_auth *auth);
+int bsdauth_cleanup(struct passwd *pw, sudo_auth *auth);
 
 /* Prototypes for normal methods */
-int passwd_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
-int passwd_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
-int secureware_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
-int secureware_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
-int rfc1938_setup __P((struct passwd *pw, char **prompt, sudo_auth *auth));
-int rfc1938_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
-int afs_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
-int dce_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
-int kerb4_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
-int kerb4_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
-int kerb5_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
-int kerb5_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
-int kerb5_cleanup __P((struct passwd *pw, sudo_auth *auth));
-int securid_init __P((struct passwd *pw, char **prompt, sudo_auth *auth));
-int securid_setup __P((struct passwd *pw, char **prompt, sudo_auth *auth));
-int securid_verify __P((struct passwd *pw, char *pass, sudo_auth *auth));
+int passwd_init(struct passwd *pw, char **prompt, sudo_auth *auth);
+int passwd_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int secureware_init(struct passwd *pw, char **prompt, sudo_auth *auth);
+int secureware_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int rfc1938_setup(struct passwd *pw, char **prompt, sudo_auth *auth);
+int rfc1938_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int afs_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int dce_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int kerb4_init(struct passwd *pw, char **prompt, sudo_auth *auth);
+int kerb4_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int kerb5_init(struct passwd *pw, char **prompt, sudo_auth *auth);
+int kerb5_verify(struct passwd *pw, char *pass, sudo_auth *auth);
+int kerb5_cleanup(struct passwd *pw, sudo_auth *auth);
+int securid_init(struct passwd *pw, char **prompt, sudo_auth *auth);
+int securid_setup(struct passwd *pw, char **prompt, sudo_auth *auth);
+int securid_verify(struct passwd *pw, char *pass, sudo_auth *auth);
 
 /* Fields: need_root, name, init, setup, verify, cleanup */
 #define AUTH_ENTRY(r, n, i, s, v, c) \

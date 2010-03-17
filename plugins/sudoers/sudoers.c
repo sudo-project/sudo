@@ -112,21 +112,21 @@
 /*
  * Prototypes
  */
-static void init_vars			__P((char * const *));
-static int set_cmnd			__P((int));
-static void set_loginclass		__P((struct passwd *));
-static void set_project			__P((struct passwd *));
-static void set_runasgr			__P((char *));
-static void set_runaspw			__P((char *));
+static void init_vars(char * const *);
+static int set_cmnd(int);
+static void set_loginclass(struct passwd *);
+static void set_project(struct passwd *);
+static void set_runasgr(char *);
+static void set_runaspw(char *);
 static int sudoers_policy_version(int verbose);
-static struct passwd *get_authpw	__P((void));
+static struct passwd *get_authpw(void);
 static int deserialize_info(char * const settings[], char * const user_info[]);
 
-extern int sudo_edit			__P((int, char **, char **));
-extern int rebuild_env			__P((int, int));
-extern int env_init			__P((char * const envp[]));
-void validate_env_vars			__P((struct list_member *));
-void insert_env_vars			__P((struct list_member *));
+extern int sudo_edit(int, char **, char **);
+extern int rebuild_env(int, int);
+extern int env_init(char * const envp[]);
+void validate_env_vars(struct list_member *);
+void insert_env_vars(struct list_member *);
 
 /* XXX */
 char *fmt_string(const char *, const char *);

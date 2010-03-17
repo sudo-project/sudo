@@ -76,8 +76,8 @@ extern int errorlineno, parse_error;
 /*
  * Local prototypes.
  */
-static void print_member	__P((struct lbuf *, char *, int, int, int));
-static int display_bound_defaults __P((int, struct lbuf *));
+static void print_member(struct lbuf *, char *, int, int, int);
+static int display_bound_defaults(int, struct lbuf *);
 
 int
 sudo_file_open(nss)

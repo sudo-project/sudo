@@ -95,10 +95,10 @@
 
 static struct member_list empty;
 
-static int command_matches_dir __P((char *, size_t));
-static int command_matches_glob __P((char *, char *));
-static int command_matches_fnmatch __P((char *, char *));
-static int command_matches_normal __P((char *, char *));
+static int command_matches_dir(char *, size_t);
+static int command_matches_glob(char *, char *);
+static int command_matches_fnmatch(char *, char *);
+static int command_matches_normal(char *, char *);
 
 /*
  * Returns TRUE if string 's' contains meta characters.

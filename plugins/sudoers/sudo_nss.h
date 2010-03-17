@@ -20,15 +20,15 @@ struct passwd;
 struct sudo_nss {
     struct sudo_nss *prev;
     struct sudo_nss *next;
-    int (*open) __P((struct sudo_nss *nss));
-    int (*close) __P((struct sudo_nss *nss));
-    int (*parse) __P((struct sudo_nss *nss));
-    int (*setdefs) __P((struct sudo_nss *nss));
-    int (*lookup) __P((struct sudo_nss *nss, int, int));
-    int (*display_cmnd) __P((struct sudo_nss *nss, struct passwd *));
-    int (*display_defaults) __P((struct sudo_nss *nss, struct passwd *, struct lbuf *));
-    int (*display_bound_defaults) __P((struct sudo_nss *nss, struct passwd *, struct lbuf *));
-    int (*display_privs) __P((struct sudo_nss *nss, struct passwd *, struct lbuf *));
+    int (*open)(struct sudo_nss *nss);
+    int (*close)(struct sudo_nss *nss);
+    int (*parse)(struct sudo_nss *nss);
+    int (*setdefs)(struct sudo_nss *nss);
+    int (*lookup)(struct sudo_nss *nss, int, int);
+    int (*display_cmnd)(struct sudo_nss *nss, struct passwd *);
+    int (*display_defaults)(struct sudo_nss *nss, struct passwd *, struct lbuf *);
+    int (*display_bound_defaults)(struct sudo_nss *nss, struct passwd *, struct lbuf *);
+    int (*display_privs)(struct sudo_nss *nss, struct passwd *, struct lbuf *);
     void *handle;
     short ret_if_found;
     short ret_if_notfound;
@@ -36,4 +36,4 @@ struct sudo_nss {
 
 TQ_DECLARE(sudo_nss)
 
-struct sudo_nss_list *sudo_read_nss	__P((void));
+struct sudo_nss_list *sudo_read_nss(void);

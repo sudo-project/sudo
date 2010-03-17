@@ -48,7 +48,7 @@ struct sudo_defs_types {
     int type;
     char *desc;
     struct def_values *values;
-    int (*callback) __P((char *));
+    int (*callback)(char *);
     union {
 	int flag;
 	int ival;
@@ -105,11 +105,11 @@ struct sudo_defs_types {
 /*
  * Prototypes
  */
-void dump_default	__P((void));
-int set_default		__P((char *, char *, int));
-void init_defaults	__P((void));
-int update_defaults	__P((int));
-void list_options	__P((void));
+void dump_default(void);
+void init_defaults(void);
+void list_options(void);
+int  set_default(char *, char *, int);
+int  update_defaults(int);
 
 extern struct sudo_defs_types sudo_defs_table[];
 

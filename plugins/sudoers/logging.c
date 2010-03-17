@@ -58,12 +58,12 @@
 
 #include "sudoers.h"
 
-static void do_syslog		__P((int, char *));
-static void do_logfile		__P((char *));
-static void send_mail		__P((const char *fmt, ...));
-static int should_mail		__P((int));
-static void mysyslog		__P((int, const char *, ...));
-static char *new_logline	__P((const char *, int));
+static void do_syslog(int, char *);
+static void do_logfile(char *);
+static void send_mail(const char *fmt, ...);
+static int should_mail(int);
+static void mysyslog(int, const char *, ...);
+static char *new_logline(const char *, int);
 
 extern sigjmp_buf error_jmp;
 

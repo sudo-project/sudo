@@ -67,7 +67,7 @@
 # endif
 #endif
 #include <ctype.h>
-#include "sudo.h"
+#include "sudoers.h"
 #include "parse.h"
 #include <gram.h>
 
@@ -79,15 +79,15 @@ static int sawspace = 0;
 static int arg_len = 0;
 static int arg_size = 0;
 
-static int append		__P((char *, int));
-static int _fill		__P((char *, int, int));
-static int fill_cmnd		__P((char *, int));
-static int fill_args		__P((char *, int, int));
-static int _push_include	__P((char *, int));
-static int pop_include		__P((void));
-static int ipv6_valid		__P((const char *s));
-static char *parse_include	__P((char *));
-extern void yyerror		__P((const char *));
+static int append(char *, int);
+static int _fill(char *, int, int);
+static int fill_cmnd(char *, int);
+static int fill_args(char *, int, int);
+static int _push_include(char *, int);
+static int pop_include(void);
+static int ipv6_valid(const char *s);
+static char *parse_include(char *);
+extern void yyerror(const char *);
 
 #define fill(a, b)		_fill(a, b, 0)
 

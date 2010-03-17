@@ -148,18 +148,18 @@ struct search_node {
 static struct search_node *node_stack[32];
 static int stack_top;
 
-extern time_t get_date __P((char *));
-extern char *get_timestr __P((time_t, int));
-extern int term_raw __P((int, int, int));
-extern int term_restore __P((int, int));
-extern void zero_bytes __P((volatile void *, size_t));
-void cleanup __P((int));
+extern time_t get_date(char *);
+extern char *get_timestr(time_t, int);
+extern int term_raw(int, int, int);
+extern int term_restore(int, int);
+extern void zero_bytes(volatile void *, size_t);
+void cleanup(int);
 
-static int list_sessions __P((int, char **, const char *, const char *, const char *));
-static int parse_expr __P((struct search_node **, char **));
-static void check_input __P((int, double *));
-static void delay __P((double));
-static void usage __P((void));
+static int list_sessions(int, char **, const char *, const char *, const char *);
+static int parse_expr(struct search_node **, char **);
+static void check_input(int, double *);
+static void delay(double);
+static void usage(void);
 
 #ifdef HAVE_REGCOMP
 # define REGEX_T	regex_t

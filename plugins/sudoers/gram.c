@@ -94,11 +94,11 @@ struct userspec_list userspecs;
 /*
  * Local protoypes
  */
-static void  add_defaults	__P((int, struct member *, struct defaults *));
-static void  add_userspec	__P((struct member *, struct privilege *));
-static struct defaults *new_default __P((char *, char *, int));
-static struct member *new_member __P((char *, int));
-       void  yyerror		__P((const char *));
+static void  add_defaults(int, struct member *, struct defaults *);
+static void  add_userspec(struct member *, struct privilege *);
+static struct defaults *new_default(char *, char *, int);
+static struct member *new_member(char *, int);
+       void  yyerror(const char *);
 
 void
 yyerror(s)

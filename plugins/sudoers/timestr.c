@@ -30,7 +30,7 @@
 
 #include "compat.h"
 
-char *get_timestr	__P((time_t, int));
+char *get_timestr(time_t, int);
 
 /*
  * Return an ascii string with the current date + time

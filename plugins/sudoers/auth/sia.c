@@ -49,7 +49,7 @@
 #include "sudoers.h"
 #include "sudo_auth.h"
 
-static int sudo_collect	__P((int, int, uchar_t *, int, prompt_t *));
+static int sudo_collect(int, int, uchar_t *, int, prompt_t *);
 
 static char *def_prompt;
 

@@ -92,27 +92,27 @@ extern char *malloc_options;
 extern int yydebug;
 #endif
 
-int  print_alias __P((void *, void *));
-void dump_sudoers __P((void));
-void print_defaults __P((void));
-void print_privilege __P((struct privilege *));
-void print_userspecs __P((void));
-void usage __P((void)) __attribute__((__noreturn__));
-void set_runasgr __P((char *));
-void set_runaspw __P((char *));
+int  print_alias(void *, void *);
+void dump_sudoers(void);
+void print_defaults(void);
+void print_privilege(struct privilege *);
+void print_userspecs(void);
+void usage(void) __attribute__((__noreturn__));
+void set_runasgr(char *);
+void set_runaspw(char *);
 
-extern void setgrfile __P((const char *));
-extern void setgrent __P((void));
-extern void endgrent __P((void));
-extern struct group *getgrent __P((void));
-extern struct group *getgrnam __P((const char *));
-extern struct group *getgrgid __P((gid_t));
-extern void setpwfile __P((const char *));
-extern void setpwent __P((void));
-extern void endpwent __P((void));
-extern struct passwd *getpwent __P((void));
-extern struct passwd *getpwnam __P((const char *));
-extern struct passwd *getpwuid __P((uid_t));
+extern void setgrfile(const char *);
+extern void setgrent(void);
+extern void endgrent(void);
+extern struct group *getgrent(void);
+extern struct group *getgrnam(const char *);
+extern struct group *getgrgid(gid_t);
+extern void setpwfile(const char *);
+extern void setpwent(void);
+extern void endpwent(void);
+extern struct passwd *getpwent(void);
+extern struct passwd *getpwnam(const char *);
+extern struct passwd *getpwuid(uid_t);
 
 int
 main(argc, argv)

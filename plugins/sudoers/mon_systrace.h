@@ -20,29 +20,27 @@ struct childinfo;
 struct listhead;
 struct syscallhandler;
 
-static int check_execv		__P((int, pid_t, u_int16_t,
-				    struct str_msg_ask *, int *, int *));
-static int check_execve		__P((int, pid_t, u_int16_t,
-				    struct str_msg_ask *, int *, int *));
-static void log_exec		__P((int));
-static int decode_args		__P((int, pid_t, struct str_msg_ask *));
-static int set_policy		__P((int, struct childinfo *));
-static int switch_emulation	__P((int, struct str_message *));
-static int systrace_open	__P((void));
-static ssize_t systrace_read	__P((int, pid_t, void *, void *, size_t));
+static int check_execv(int, pid_t, u_int16_t, struct str_msg_ask *, int *, int *);
+static int check_execve(int, pid_t, u_int16_t, struct str_msg_ask *, int *, int *);
+static void log_exec(int);
+static int decode_args(int, pid_t, struct str_msg_ask *);
+static int set_policy(int, struct childinfo *);
+static int switch_emulation(int, struct str_message *);
+static int systrace_open(void);
+static ssize_t systrace_read(int, pid_t, void *, void *, size_t);
 #ifdef STRIOCINJECT
-static ssize_t systrace_write	__P((int, pid_t, void *, void *, size_t));
-static int update_env		__P((int, pid_t, u_int16_t, struct str_msg_ask *));
+static ssize_t systrace_write(int, pid_t, void *, void *, size_t);
+static int update_env(int, pid_t, u_int16_t, struct str_msg_ask *);
 #endif
-static struct syscallhandler *find_handler __P((pid_t, int));
-static ssize_t read_string	__P((int, pid_t, void *, char *, size_t));
-static struct childinfo *find_child __P((pid_t));
-static void catchsig		__P((int));
-static void detachall		__P((int));
-static void killall		__P((int));
-static void new_child		__P((pid_t, pid_t));
-static void rm_child		__P((pid_t));
-static void update_child	__P((pid_t, uid_t));
+static struct syscallhandler *find_handler(pid_t, int);
+static ssize_t read_string(int, pid_t, void *, char *, size_t);
+static struct childinfo *find_child(pid_t);
+static void catchsig(int);
+static void detachall(int);
+static void killall(int);
+static void new_child(pid_t, pid_t);
+static void rm_child(pid_t);
+static void update_child(pid_t, uid_t);
 
 
 static struct listhead children;	/* list of children being traced */
@@ -61,10 +59,8 @@ struct childinfo {
 };
 
 struct syscallhandler {
-    int (*checker)
-	__P((int, pid_t, u_int16_t, struct str_msg_ask *, int *, int *));
-    void (*logger)
-	__P((int));
+    int (*checker)(int, pid_t, u_int16_t, struct str_msg_ask *, int *, int *);
+    void (*logger)(int);
 };
 
 /*

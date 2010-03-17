@@ -99,24 +99,24 @@ struct sudoersfile {
 /*
  * Function prototypes
  */
-static RETSIGTYPE quit		__P((int));
-static char *get_args		__P((char *));
-static char *get_editor		__P((char **));
-static void get_hostname	__P((void));
-static char whatnow		__P((void));
-static int check_aliases	__P((int, int));
-static int check_syntax		__P((char *, int, int));
-static int edit_sudoers		__P((struct sudoersfile *, char *, char *, int));
-static int install_sudoers	__P((struct sudoersfile *, int));
-static int print_unused		__P((void *, void *));
-static int reparse_sudoers	__P((char *, char *, int, int));
-static int run_command		__P((char *, char **));
-static void print_undefined	__P((char *name, int, int, int));
-static void setup_signals	__P((void));
-static void usage		__P((void)) __attribute__((__noreturn__));
+static RETSIGTYPE quit(int);
+static char *get_args(char *);
+static char *get_editor(char **);
+static void get_hostname(void);
+static char whatnow(void);
+static int check_aliases(int, int);
+static int check_syntax(char *, int, int);
+static int edit_sudoers(struct sudoersfile *, char *, char *, int);
+static int install_sudoers(struct sudoersfile *, int);
+static int print_unused(void *, void *);
+static int reparse_sudoers(char *, char *, int, int);
+static int run_command(char *, char **);
+static void print_undefined(char *name, int, int, int);
+static void setup_signals(void);
+static void usage(void) __attribute__((__noreturn__));
 
-extern void yyerror		__P((const char *));
-extern void yyrestart		__P((FILE *));
+extern void yyerror(const char *);
+extern void yyrestart(FILE *);
 
 /*
  * External globals exported by the parser

@@ -58,10 +58,10 @@
 static struct rbtree *pwcache_byuid, *pwcache_byname;
 static struct rbtree *grcache_bygid, *grcache_byname;
 
-static int  cmp_pwuid	__P((const void *, const void *));
-static int  cmp_pwnam	__P((const void *, const void *));
-static int  cmp_grgid	__P((const void *, const void *));
-static int  cmp_grnam	__P((const void *, const void *));
+static int  cmp_pwuid(const void *, const void *);
+static int  cmp_pwnam(const void *, const void *);
+static int  cmp_grgid(const void *, const void *);
+static int  cmp_grnam(const void *, const void *);
 
 /*
  * Compare by uid.
@@ -315,7 +315,7 @@ sudo_fakegrnam(group)
 }
 
 void
-sudo_setpwent()
+sudo_setpwent(void)
 {
     setpwent();
     sudo_setspent();
@@ -326,10 +326,10 @@ sudo_setpwent()
 }
 
 #ifdef PURIFY
-static void pw_free	__P((void *));
+static void pw_free(void *);
 
 void
-sudo_freepwcache()
+sudo_freepwcache(void)
 {
     if (pwcache_byuid != NULL) {
 	rbdestroy(pwcache_byuid, pw_free);
@@ -356,7 +356,7 @@ pw_free(v)
 #endif /* PURIFY */
 
 void
-sudo_endpwent()
+sudo_endpwent(void)
 {
     endpwent();
     sudo_endspent();
@@ -513,7 +513,7 @@ sudo_getgrnam(name)
 }
 
 void
-sudo_setgrent()
+sudo_setgrent(void)
 {
     setgrent();
     if (grcache_bygid == NULL)
@@ -524,7 +524,7 @@ sudo_setgrent()
 
 #ifdef PURIFY
 void
-sudo_freegrcache()
+sudo_freegrcache(void)
 {
     if (grcache_bygid != NULL) {
 	rbdestroy(grcache_bygid, free);
@@ -538,7 +538,7 @@ sudo_freegrcache()
 #endif /* PURIFY */
 
 void
-sudo_endgrent()
+sudo_endgrent(void)
 {
     endgrent();
 #ifdef PURIFY

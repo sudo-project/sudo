@@ -64,19 +64,19 @@ static FILE *grf;
 static const char *grfile = "/etc/group";
 static int gr_stayopen;
 
-void setgrfile __P((const char *));
-void setgrent __P((void));
-void endgrent __P((void));
-struct group *getgrent __P((void));
-struct group *getgrnam __P((const char *));
-struct group *getgrgid __P((gid_t));
+void setgrfile(const char *);
+void setgrent(void);
+void endgrent(void);
+struct group *getgrent(void);
+struct group *getgrnam(const char *);
+struct group *getgrgid(gid_t);
 
-void setpwfile __P((const char *));
-void setpwent __P((void));
-void endpwent __P((void));
-struct passwd *getpwent __P((void));
-struct passwd *getpwnam __P((const char *));
-struct passwd *getpwuid __P((uid_t));
+void setpwfile(const char *);
+void setpwent(void);
+void endpwent(void);
+struct passwd *getpwent(void);
+struct passwd *getpwnam(const char *);
+struct passwd *getpwuid(uid_t);
 
 void
 setpwfile(file)

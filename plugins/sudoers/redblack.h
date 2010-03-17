@@ -35,7 +35,7 @@ struct rbnode {
 };
 
 struct rbtree {
-    int (*compar) __P((const void *, const void *));
+    int (*compar)(const void *, const void *);
     struct rbnode root;
     struct rbnode nil;
 };
@@ -46,13 +46,12 @@ struct rbtree {
 #define rbroot(t)		(&(t)->root)
 #define rbnil(t)		(&(t)->nil)
 
-void *rbdelete			__P((struct rbtree *, struct rbnode *));
-int rbapply_node		__P((struct rbtree *, struct rbnode *,
-				    int (*)(void *, void *), void *,
-				    enum rbtraversal));
-struct rbnode *rbfind		__P((struct rbtree *, void *));
-struct rbnode *rbinsert		__P((struct rbtree *, void *));
-struct rbtree *rbcreate		__P((int (*)(const void *, const void *)));
-void rbdestroy			__P((struct rbtree *, void (*)(void *)));
+void *rbdelete(struct rbtree *, struct rbnode *);
+int rbapply_node(struct rbtree *, struct rbnode *,
+	int (*)(void *, void *), void *, enum rbtraversal);
+struct rbnode *rbfind(struct rbtree *, void *);
+struct rbnode *rbinsert(struct rbtree *, void *);
+struct rbtree *rbcreate(int (*)(const void *, const void *));
+void rbdestroy(struct rbtree *, void (*)(void *));
 
 #endif /* _SUDO_REDBLACK_H */

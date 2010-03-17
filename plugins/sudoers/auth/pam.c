@@ -72,8 +72,8 @@
 # define PAM_CONST
 #endif
 
-static int converse __P((int, PAM_CONST struct pam_message **,
-			  struct pam_response **, void *));
+static int converse(int, PAM_CONST struct pam_message **,
+		    struct pam_response **, void *);
 static char *def_prompt = "Password:";
 static int gotintr;
 

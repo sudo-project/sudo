@@ -99,9 +99,9 @@ static MERIDIAN	yyMeridian;
 static time_t	yyRelMonth;
 static time_t	yyRelSeconds;
 
-static int	yyerror __P((char *s));
-static int	yylex __P((void));
-static int	yyparse __P((void));
+static int	yyerror(char *s);
+static int	yylex(void);
+static int	yyparse(void);
 
 %}
 

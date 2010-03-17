@@ -64,7 +64,7 @@
 #include "sudoers.h"
 #include "sudo_auth.h"
 
-static int check_dce_status __P((error_status_t, char *));
+static int check_dce_status(error_status_t, char *);
 
 int
 dce_verify(pw, plain_pw, auth)

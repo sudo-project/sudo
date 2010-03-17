@@ -69,11 +69,11 @@
 #define TS_MAKE_DIRS		1
 #define TS_REMOVE		2
 
-static int   build_timestamp	__P((char **, char **));
-static int   timestamp_status	__P((char *, char *, char *, int));
-static char *expand_prompt	__P((char *, char *, char *));
-static void  lecture		__P((int));
-static void  update_timestamp	__P((char *, char *));
+static int   build_timestamp(char **, char **);
+static int   timestamp_status(char *, char *, char *, int);
+static char *expand_prompt(char *, char *, char *);
+static void  lecture(int);
+static void  update_timestamp(char *, char *);
 
 extern sudo_conv_t sudo_conv;
 

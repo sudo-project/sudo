@@ -61,7 +61,7 @@
 #endif
 
 #ifndef HAVE_KRB5_VERIFY_USER
-static int verify_krb_v5_tgt __P((krb5_context, krb5_creds *, char *));
+static int verify_krb_v5_tgt(krb5_context, krb5_creds *, char *);
 #endif
 static struct _sudo_krb5_data {
     krb5_context	sudo_context;

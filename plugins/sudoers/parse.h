@@ -164,27 +164,27 @@ extern unsigned int alias_seqno;
 /*
  * Prototypes
  */
-char *alias_add		__P((char *, int, struct member *));
-int addr_matches	__P((char *));
-int cmnd_matches	__P((struct member *));
-int cmndlist_matches	__P((struct member_list *));
-int command_matches	__P((char *, char *));
-int hostlist_matches	__P((struct member_list *));
-int hostname_matches	__P((char *, char *, char *));
-int netgr_matches	__P((char *, char *, char *, char *));
-int no_aliases		__P((void));
-int runaslist_matches	__P((struct member_list *, struct member_list *));
-int userlist_matches	__P((struct passwd *, struct member_list *));
-int usergr_matches	__P((char *, char *, struct passwd *));
-int userpw_matches	__P((char *, char *, struct passwd *));
-int group_matches	__P((char *, struct group *));
-struct alias *alias_find __P((char *, int));
-struct alias *alias_remove __P((char *, int));
-void alias_free		__P((void *));
-void alias_apply	__P((int (*)(void *, void *), void *));
-void init_aliases	__P((void));
-void init_lexer		__P((void));
-void init_parser	__P((char *, int));
-int alias_compare	__P((const void *, const void *));
+char *alias_add(char *, int, struct member *);
+int addr_matches(char *);
+int cmnd_matches(struct member *);
+int cmndlist_matches(struct member_list *);
+int command_matches(char *, char *);
+int hostlist_matches(struct member_list *);
+int hostname_matches(char *, char *, char *);
+int netgr_matches(char *, char *, char *, char *);
+int no_aliases(void);
+int runaslist_matches(struct member_list *, struct member_list *);
+int userlist_matches(struct passwd *, struct member_list *);
+int usergr_matches(char *, char *, struct passwd *);
+int userpw_matches(char *, char *, struct passwd *);
+int group_matches(char *, struct group *);
+struct alias *alias_find(char *, int);
+struct alias *alias_remove(char *, int);
+void alias_free(void *);
+void alias_apply(int (*)(void *, void *), void *);
+void init_aliases(void);
+void init_lexer(void);
+void init_parser(char *, int);
+int alias_compare(const void *, const void *);
 
 #endif /* _SUDO_PARSE_H */

@@ -92,18 +92,18 @@ static struct strmap priorities[] = {
 /*
  * Local prototypes.
  */
-static int store_int __P((char *, struct sudo_defs_types *, int));
-static int store_list __P((char *, struct sudo_defs_types *, int));
-static int store_mode __P((char *, struct sudo_defs_types *, int));
-static int store_str __P((char *, struct sudo_defs_types *, int));
-static int store_syslogfac __P((char *, struct sudo_defs_types *, int));
-static int store_syslogpri __P((char *, struct sudo_defs_types *, int));
-static int store_tuple __P((char *, struct sudo_defs_types *, int));
-static int store_uint __P((char *, struct sudo_defs_types *, int));
-static int store_float __P((char *, struct sudo_defs_types *, int));
-static void list_op __P((char *, size_t, struct sudo_defs_types *, enum list_ops));
-static const char *logfac2str __P((int));
-static const char *logpri2str __P((int));
+static int store_int(char *, struct sudo_defs_types *, int);
+static int store_list(char *, struct sudo_defs_types *, int);
+static int store_mode(char *, struct sudo_defs_types *, int);
+static int store_str(char *, struct sudo_defs_types *, int);
+static int store_syslogfac(char *, struct sudo_defs_types *, int);
+static int store_syslogpri(char *, struct sudo_defs_types *, int);
+static int store_tuple(char *, struct sudo_defs_types *, int);
+static int store_uint(char *, struct sudo_defs_types *, int);
+static int store_float(char *, struct sudo_defs_types *, int);
+static void list_op(char *, size_t, struct sudo_defs_types *, enum list_ops);
+static const char *logfac2str(int);
+static const char *logpri2str(int);
 
 /*
  * Table describing compile-time and run-time options.
