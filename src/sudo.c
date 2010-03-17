@@ -364,6 +364,10 @@ get_user_info(struct user_details *ud)
 	errorx(1, "unable to allocate memory");
     ud->host = user_info[i] + sizeof("host=") - 1;
 
+    get_ttysize(&ud->ts_lines, &ud->ts_cols);
+    easprintf(&user_info[++i], "lines=%d", ud->ts_lines);
+    easprintf(&user_info[++i], "cols=%d", ud->ts_cols);
+
     user_info[++i] = NULL;
 
     return user_info;

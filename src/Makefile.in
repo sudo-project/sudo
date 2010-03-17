@@ -73,7 +73,7 @@ PROGS = sudo
 #	sudo_edit.o
 OBJS =	sudo.o parse_args.o lbuf.o alloc.o error.o zero_bytes.o \
 	load_plugins.o conversation.o list.o fmt_string.o tgetpass.o \
-	fileops.o term.o atobool.o script.o pty.o @SUDO_OBJS@ $(LIBOBJS)
+	fileops.o term.o ttysize.o atobool.o script.o pty.o @SUDO_OBJS@ $(LIBOBJS)
 
 LIBOBJDIR = $(top_srcdir)/@ac_config_libobj_dir@/
 
@@ -149,6 +149,8 @@ term.o: $(srcdir)/term.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/term.c
 tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tgetpass.c
+ttysize.o: $(srcdir)/ttysize.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ttysize.c
 zero_bytes.o: $(srcdir)/zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/zero_bytes.c
 

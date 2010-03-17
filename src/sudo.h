@@ -119,6 +119,8 @@ struct user_details {
     const char *host;
     GETGROUPS_T *groups;
     int ngroups;
+    int ts_cols;
+    int ts_lines;
 };
 
 #define CD_SET_UID		0x0001
@@ -199,6 +201,9 @@ int parse_args(int argc, char **argv, int *nargc, char ***nargv,
 
 /* pty.c */
 int get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid);
+
+/* ttysize.c */
+void get_ttysize(int *linep, int *colp);
 
 /* sudo.c */
 int exec_setup(struct command_details *details);
