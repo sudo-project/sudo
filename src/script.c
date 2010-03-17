@@ -77,6 +77,13 @@
 #define TERM_CBREAK	1
 #define TERM_RAW	2
 
+#if !defined(TIOCGSIZE) && defined(TIOCGWINSZ)
+# define TIOCGSIZE	TIOCGWINSZ
+# define TIOCSSIZE	TIOCSWINSZ
+# define ttysize	winsize
+# define ts_cols	ws_col
+#endif
+
 struct script_buf {
     int len; /* buffer length (how much read in) */
     int off; /* write position (how much already consumed) */
@@ -106,7 +113,7 @@ static int script_child(const char *path, char *argv[], char *envp[], int, int);
 static void script_run(const char *path, char *argv[], char *envp[], int);
 static void sigchild(int s);
 static void sigwinch(int s);
-static void sync_winsize(int src, int dst);
+static void sync_ttysize(int src, int dst);
 static void deliver_signal(pid_t pid, int signo);
 
 /* sudo.c */
@@ -167,7 +174,7 @@ check_foreground(void)
     if (foreground && !tty_initialized) {
 	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], ttyout)) {
 	    tty_initialized = 1;
-	    sync_winsize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
+	    sync_ttysize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
 	}
     }
 }
@@ -380,7 +387,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	/* Copy terminal attrs from user tty -> pty slave. */
 	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], ttyout)) {
 	    tty_initialized = 1;
-	    sync_winsize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
+	    sync_ttysize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
 	}
 
 	/* Start out in raw mode is stdout is a tty. */
@@ -918,14 +925,14 @@ script_run(const char *path, char *argv[], char *envp[], int rbac_enabled)
 }
 
 static void
-sync_winsize(int src, int dst)
+sync_ttysize(int src, int dst)
 {
-#ifdef TIOCGWINSZ
-    struct winsize win;
+#ifdef TIOCGSIZE
+    struct ttysize tsize;
     pid_t pgrp;
 
-    if (ioctl(src, TIOCGWINSZ, &win) == 0) {
-	    ioctl(dst, TIOCSWINSZ, &win);
+    if (ioctl(src, TIOCGSIZE, &tsize) == 0) {
+	    ioctl(dst, TIOCSSIZE, &tsize);
 #ifdef TIOCGPGRP
 	    if (ioctl(dst, TIOCGPGRP, &pgrp) == 0)
 		    killpg(pgrp, SIGWINCH);
@@ -978,6 +985,6 @@ sigwinch(int s)
 {
     int serrno = errno;
 
-    sync_winsize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
+    sync_ttysize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
     errno = serrno;
 }
