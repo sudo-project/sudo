@@ -260,6 +260,16 @@ C<tty=>.
 The local machine's hostname as returned by the C<gethostname()>
 system call.
 
+=item lines=int
+
+The number of lines the user's terminal supports.  If there is
+no terminal device available, a default value of 24 is used.
+
+=item cols=int
+
+The number of columns the user's terminal supports.  If there is
+no terminal device available, a default value of 80 is used.
+
 =back
 
 =item user_env

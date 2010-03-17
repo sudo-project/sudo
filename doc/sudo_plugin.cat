@@ -61,7 +61,7 @@ SSuuddoo PPlluuggiinn AAPPII
 
 
 
-1.8.0a1                   March 11, 2010                        1
+1.8.0a1                   March 17, 2010                        1
 
 
 
@@ -127,7 +127,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                   March 11, 2010                        2
+1.8.0a1                   March 17, 2010                        2
 
 
 
@@ -193,7 +193,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                   March 11, 2010                        3
+1.8.0a1                   March 17, 2010                        3
 
 
 
@@ -247,19 +247,19 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    The local machine's hostname as returned by the
                    gethostname() system call.
 
-           user_env
-               The user's environment in the form of a NULL-terminated vector
-               of "name=value" strings.
+               lines=int
+                   The number of lines the user's terminal supports.  If there
+                   is no terminal device available, a default value of 24 is
+                   used.
 
-               When parsing _u_s_e_r___e_n_v, the plugin should split on the ffiirrsstt
-               equal sign ('=') since the _n_a_m_e field will never include one
-               itself but the _v_a_l_u_e might.
+               cols=int
+                   The number of columns the user's terminal supports.  If
+                   there is no terminal device available, a default value of
+                   80 is used.
 
 
 
-
-
-1.8.0a1                   March 11, 2010                        4
+1.8.0a1                   March 17, 2010                        4
 
 
 
@@ -267,6 +267,14 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+           user_env
+               The user's environment in the form of a NULL-terminated vector
+               of "name=value" strings.
+
+               When parsing _u_s_e_r___e_n_v, the plugin should split on the ffiirrsstt
+               equal sign ('=') since the _n_a_m_e field will never include one
+               itself but the _v_a_l_u_e might.
 
        close
             void (*close)(int exit_status, int error);
@@ -315,17 +323,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                The number of elements in _a_r_g_v, not counting the final NULL
                pointer.
 
-           argv
-               The argument vector describing the command the user wishes to
-               run, in the same form as what would be passed to the _e_x_e_c_v_e_(_)
-               system call.  The vector is terminated by a NULL pointer.
-
-           env_add
-               Additional environment variables specified by the user on the
 
 
-
-1.8.0a1                   March 11, 2010                        5
+1.8.0a1                   March 17, 2010                        5
 
 
 
@@ -334,6 +334,13 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
+           argv
+               The argument vector describing the command the user wishes to
+               run, in the same form as what would be passed to the _e_x_e_c_v_e_(_)
+               system call.  The vector is terminated by a NULL pointer.
+
+           env_add
+               Additional environment variables specified by the user on the
                command line in the form of a NULL-terminated vector of
                "name=value" strings.  The plugin may reject the command if one
                or more variables are not allowed to be set, or it may silently
@@ -382,16 +389,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    If set, ssuuddoo will preserve the user's group vector instead
                    of initializing the group vector based on runas_user.
 
-               cwd=string
-                   The current working directory to change to when executing
-                   the command.
-
-               noexec=bool
-                   If set, prevent the command from executing other programs.
 
 
-
-1.8.0a1                   March 11, 2010                        6
+1.8.0a1                   March 17, 2010                        6
 
 
 
@@ -399,6 +399,13 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+               cwd=string
+                   The current working directory to change to when executing
+                   the command.
+
+               noexec=bool
+                   If set, prevent the command from executing other programs.
 
                chroot=string
                    The root directory to use when running the command.
@@ -448,16 +455,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
            verbose
                Flag indicating whether to list in verbose mode or not.
 
-           list_user
-               The name of a different user to list privileges for if the
-               policy allows it.  If NULL, the plugin should list the
-               privileges of the invoking user.
 
 
-
-
-
-1.8.0a1                   March 11, 2010                        7
+1.8.0a1                   March 17, 2010                        7
 
 
 
@@ -465,6 +465,11 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+           list_user
+               The name of a different user to list privileges for if the
+               policy allows it.  If NULL, the plugin should list the
+               privileges of the invoking user.
 
            argc
                The number of elements in _a_r_g_v, not counting the final NULL
@@ -518,12 +523,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-
-
-
-
-
-1.8.0a1                   March 11, 2010                        8
+1.8.0a1                   March 17, 2010                        8
 
 
 
@@ -589,7 +589,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                   March 11, 2010                        9
+1.8.0a1                   March 17, 2010                        9
 
 
 
@@ -655,7 +655,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                   March 11, 2010                       10
+1.8.0a1                   March 17, 2010                       10
 
 
 
@@ -721,7 +721,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                   March 11, 2010                       11
+1.8.0a1                   March 17, 2010                       11
 
 
 
@@ -787,6 +787,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                   March 11, 2010                       12
+1.8.0a1                   March 17, 2010                       12
 
 

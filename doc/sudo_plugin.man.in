@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "March 11, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "March 17, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -361,6 +361,14 @@ device associated with the session, the value will be empty, as in
 .IX Item "host=string"
 The local machine's hostname as returned by the \f(CW\*(C`gethostname()\*(C'\fR
 system call.
+.IP "lines=int" 4
+.IX Item "lines=int"
+The number of lines the user's terminal supports.  If there is
+no terminal device available, a default value of 24 is used.
+.IP "cols=int" 4
+.IX Item "cols=int"
+The number of columns the user's terminal supports.  If there is
+no terminal device available, a default value of 80 is used.
 .RE
 .RS 4
 .RE
