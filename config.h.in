@@ -25,6 +25,9 @@
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 
+/* The name of the sudoers plugin, including extension. */
+#undef SUDOERS_PLUGIN
+
 /* Define to 1 if you want sudo to display "command not allowed" instead of
    "command not found" when a command cannot be found. */
 #undef DONT_LEAK_PATH_INFO

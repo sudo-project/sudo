@@ -26289,6 +26289,10 @@ _ACEOF
 #define _PATH_SUDO_PLUGIN_DIR "$PLUGINDIR"
 EOF
 
+    cat >>confdefs.h <<EOF
+#define SUDOERS_PLUGIN "sudoers$_shrext"
+EOF
+
     exec_prefix="$oexec_prefix"
 fi
 
@@ -27567,6 +27571,8 @@ echo "$as_me: You will need to customize sample.pam and install it as /etc/pam.d
 	    ;;
     esac
 fi
+
+
 
 
 
