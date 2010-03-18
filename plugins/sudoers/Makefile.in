@@ -29,13 +29,13 @@ compat = $(top_srcdir)/compat
 
 # Compiler & tools to use
 CC = @CC@
-LIBTOOL = @LIBTOOL@
+LIBTOOL = @LIBTOOL@ --tag=disable-static
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
-LIBS =
+LIBS = $(LIBOBJDIR)/libreplace.la
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) @CPPFLAGS@
@@ -86,8 +86,6 @@ SUDOERS_OBJS = $(AUTH_OBJS) alloc.lo boottime.lo check.lo fmt_string.lo \
 
 LIBOBJDIR = $(top_srcdir)/@ac_config_libobj_dir@/
 
-LTLIBOBJS = $(top_srcdir)/@ac_config_libobj_dir@/libmissing_pic.a
-
 VERSION = @PACKAGE_VERSION@
 
 SUDODEP = $(srcdir)/sudoers.h $(incdir)/compat.h \
@@ -110,8 +108,8 @@ all: sudoers.la
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 
-sudoers.la: $(SUDOERS_OBJS) $(COMMON_OBJS) $(LTLIBOBJS)
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ $(SUDOERS_OBJS) $(COMMON_OBJS) -L$(LIBOBJDIR) -lmissing_pic -module -avoid-version -rpath $(plugindir)
+sudoers.la: $(SUDOERS_OBJS) $(COMMON_OBJS)
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ $(SUDOERS_OBJS) $(COMMON_OBJS) $(LIBS) -module -avoid-version -rpath $(plugindir)
 
 # Sudoers dependencies
 sudoers.lo: $(srcdir)/sudoers.c $(SUDODEP) $(srcdir)/interfaces.h

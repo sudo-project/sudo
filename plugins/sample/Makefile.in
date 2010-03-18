@@ -28,13 +28,13 @@ compat = $(top_srcdir)/compat
 
 # Compiler & tools to use
 CC = @CC@
-LIBTOOL = @LIBTOOL@
+LIBTOOL = @LIBTOOL@ --tag=disable-static
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
-LIBS =
+LIBS = $(LIBOBJDIR)/libreplace.la
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) @CPPFLAGS@
@@ -66,8 +66,6 @@ OBJS =	sample_plugin.lo
 
 LIBOBJDIR = $(top_srcdir)/@ac_config_libobj_dir@/
 
-LTLIBOBJS = $(top_srcdir)/@ac_config_libobj_dir@/libmissing_pic.a
-
 VERSION = @PACKAGE_VERSION@
 
 all: sample_plugin.la
@@ -83,8 +81,8 @@ all: sample_plugin.la
 sample_plugin.lo: $(srcdir)/sample_plugin.c
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sample_plugin.c
 
-sample_plugin.la: $(OBJS) $(LTLIBOBJS)
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) -L$(LIBOBJDIR) -lmissing_pic -module -avoid-version -rpath $(plugindir)
+sample_plugin.la: $(OBJS)
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS) -module -avoid-version -rpath $(plugindir)
 
 install: install-dirs install-plugin
 

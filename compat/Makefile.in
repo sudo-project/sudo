@@ -48,48 +48,39 @@ SHELL = /bin/sh
 
 LIBOBJDIR = $(top_srcdir)/@ac_config_libobj_dir@/
 
-LIBOBJS = @LIBOBJS@
-
 LTLIBOBJS = @LTLIBOBJS@
 
-all: libmissing.a libmissing_pic.a
+all: libreplace.la
 
 .SUFFIXES: .o .c .h .lo
-
-.c.o:
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 
-libmissing.a: $(LIBOBJS)
-	$(AR) rv $@ $(LIBOBJS)
-	$(RANLIB) $@
-
-libmissing_pic.a: $(LTLIBOBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTLIBOBJS)
+libreplace.la: $(LTLIBOBJS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTLIBOBJS) -no-install
 
 # Dependencies
-$(LIBOBJDIR)$(LIBOBJDIR)closefrom.lo $(LIBOBJDIR)closefrom.o: $(compat)/closefrom.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)fnmatch.lo $(LIBOBJDIR)fnmatch.o: $(compat)/fnmatch.c $(compat)/fnmatch.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)getcwd.lo $(LIBOBJDIR)getcwd.o: $(compat)/getcwd.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)getline.lo $(LIBOBJDIR)getline.o: $(compat)/getline.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)getprogname.lo $(LIBOBJDIR)getprogname.o: $(compat)/getprogname.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)glob.lo $(LIBOBJDIR)glob.o: $(compat)/glob.c $(compat)/glob.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)isblank.lo $(LIBOBJDIR)isblank.o: $(compat)/isblank.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)memrchr.lo $(LIBOBJDIR)memrchr.o: $(compat)/memrchr.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)mkstemp.lo $(LIBOBJDIR)mkstemp.o: $(compat)/mkstemp.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)nanosleep.lo $(LIBOBJDIR)nanosleep.o: $(compat)/nanosleep.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)sigaction.lo $(LIBOBJDIR)sigaction.o: $(compat)/sigaction.c $(incdir)/compat.h $(incdir)/compat.h
-$(LIBOBJDIR)$(LIBOBJDIR)snprintf.lo $(LIBOBJDIR)snprintf.o: $(compat)/snprintf.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strcasecmp.lo $(LIBOBJDIR)strcasecmp.o: $(compat)/strcasecmp.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strdup.lo $(LIBOBJDIR)strdup.o: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strndup.lo $(LIBOBJDIR)strndup.o: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strerror.lo $(LIBOBJDIR)strerror.o: $(compat)/strerror.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strlcat.lo $(LIBOBJDIR)strlcat.o: $(compat)/strlcat.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strlcpy.lo $(LIBOBJDIR)strlcpy.o: $(compat)/strlcpy.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strsignal.lo $(LIBOBJDIR)strsignal.o: $(compat)/strsignal.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)utimes.lo $(LIBOBJDIR)utimes.o: $(compat)/utimes.c $(incdir)/compat.h $(compat)/utime.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)closefrom.lo: $(compat)/closefrom.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)fnmatch.lo: $(compat)/fnmatch.c $(compat)/fnmatch.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)getcwd.lo: $(compat)/getcwd.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)getline.lo: $(compat)/getline.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)getprogname.lo: $(compat)/getprogname.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)glob.lo: $(compat)/glob.c $(compat)/glob.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)isblank.lo: $(compat)/isblank.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)memrchr.lo: $(compat)/memrchr.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)mkstemp.lo: $(compat)/mkstemp.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)nanosleep.lo: $(compat)/nanosleep.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)sigaction.lo: $(compat)/sigaction.c $(incdir)/compat.h $(incdir)/compat.h
+$(LIBOBJDIR)$(LIBOBJDIR)snprintf.lo: $(compat)/snprintf.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strcasecmp.lo: $(compat)/strcasecmp.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strdup.lo: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strndup.lo: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strerror.lo: $(compat)/strerror.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strlcat.lo: $(compat)/strlcat.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strlcpy.lo: $(compat)/strlcpy.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)strsignal.lo: $(compat)/strsignal.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)$(LIBOBJDIR)utimes.lo: $(compat)/utimes.c $(incdir)/compat.h $(compat)/utime.h $(top_builddir)/config.h
 
 install:
 
