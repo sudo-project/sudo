@@ -17,6 +17,8 @@
 #ifndef _SUDO_MISSING_H
 #define _SUDO_MISSING_H
 
+#include <stdarg.h>
+
 /* Functions "missing" from libc. */
 
 struct timeval;
