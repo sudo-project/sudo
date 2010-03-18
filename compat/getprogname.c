@@ -27,6 +27,9 @@
 const char *
 getprogname(void)
 {
+#ifdef PIC
+    return("sudo");
+#else
     static const char *progname;
     extern int Argc;
     extern char **Argv;
@@ -40,4 +43,5 @@ getprogname(void)
 	    progname = Argv[0];
     }
     return(progname);
+#endif
 }
