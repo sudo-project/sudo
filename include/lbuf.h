@@ -28,9 +28,10 @@ struct lbuf {
     int indent;
     int len;
     int size;
+    int cols;
 };
 
-void lbuf_init		(struct lbuf *, char *, int, int);
+void lbuf_init		(struct lbuf *, char *, int, int, int);
 void lbuf_destroy	(struct lbuf *);
 void lbuf_append	(struct lbuf *, ...);
 void lbuf_append_quoted	(struct lbuf *, const char *, ...);

@@ -65,6 +65,8 @@ struct sudo_user {
     int   ngroups;
     uid_t uid;
     uid_t gid;
+    int   lines;
+    int   cols;
     GETGROUPS_T *groups;
     struct list_member *env_vars;
 #ifdef HAVE_SELINUX

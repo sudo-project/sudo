@@ -20,8 +20,6 @@
 
 #include <config.h>
 
-/* XXX - prune this */
-
 #include <sys/types.h>
 #include <sys/param.h>
 
@@ -52,11 +50,13 @@
 
 #include <sudo_usage.h>
 #include "sudo.h"
-#include "lbuf.h" /* XXX */
+#include "lbuf.h"
 
 /* For getopt(3) */
 extern char *optarg;
 extern int optind;
+
+extern struct user_details user_details;
 
 /* XXX - better home for these and extern in header file */
 int tgetpass_flags;
@@ -376,7 +376,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 /*
  * Give usage message and exit.
  * The actual usage strings are in sudo_usage.h for configure substitution.
- * XXX - avoid lbuf usage
  */
 static void
 usage(int exit_val)
@@ -405,7 +404,7 @@ usage(int exit_val)
      * tty width.
      */
     ulen = (int)strlen(getprogname()) + 8;
-    lbuf_init(&lbuf, NULL, ulen, 0);
+    lbuf_init(&lbuf, NULL, ulen, 0, user_details.ts_cols);
     for (i = 0; uvec[i] != NULL; i++) {
 	lbuf_append(&lbuf, "usage: ", getprogname(), uvec[i], NULL);
 	lbuf_print(&lbuf);

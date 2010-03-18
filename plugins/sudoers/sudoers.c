@@ -1280,6 +1280,14 @@ deserialize_info(char * const settings[], char * const user_info[])
 		user_shost = estrndup(user_host, (size_t)(p - user_host));
 	    continue;
 	}
+	if (MATCHES(*cur, "lines=")) {
+	    sudo_user.lines = atoi(*cur + sizeof("lines=") - 1);
+	    continue;
+	}
+	if (MATCHES(*cur, "cols=")) {
+	    sudo_user.cols = atoi(*cur + sizeof("cols=") - 1);
+	    continue;
+	}
     }
 
 #undef MATCHES

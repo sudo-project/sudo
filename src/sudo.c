@@ -154,15 +154,15 @@ main(int argc, char *argv[], char *envp[])
     disable_coredumps();
     fix_fds();
 
+    /* Fill in user_info with user name, uid, cwd, etc. */
+    memset(&user_details, 0, sizeof(user_details));
+    user_info = get_user_info(&user_details);
+
     /* Parse command line arguments. */
     sudo_mode = parse_args(Argc, Argv, &nargc, &nargv, &settings, &env_add);
 
     /* Read sudo.conf and load plugins. */
     sudo_load_plugins(_PATH_SUDO_CONF, &policy_plugin, &io_plugins);
-
-    /* Fill in user_info with user name, uid, cwd, etc. */
-    memset(&user_details, 0, sizeof(user_details));
-    user_info = get_user_info(&user_details);
 
     /* Open each plugin. */
     ok = policy_plugin.u.policy->open(SUDO_API_VERSION, sudo_conversation,

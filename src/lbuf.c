@@ -53,39 +53,16 @@
 #include "missing.h"
 #include "lbuf.h"
 
-#if !defined(TIOCGSIZE) && defined(TIOCGWINSZ)
-# define TIOCGSIZE	TIOCGWINSZ
-# define ttysize	winsize
-# define ts_cols	ws_col
-#endif
-
-int
-get_ttycols(void)
-{
-    char *p;
-    int cols;
-#ifdef TIOCGSIZE
-    struct ttysize win;
-
-    if (ioctl(STDERR_FILENO, TIOCGSIZE, &win) == 0 && win.ts_cols != 0)
-	return((int)win.ts_cols);
-#endif
-
-    /* Fall back on $COLUMNS. */
-    if ((p = getenv("COLUMNS")) == NULL || (cols = atoi(p)) <= 0)
-	cols = 80;
-    return(cols);
-}
-
 /*
  * TODO: add support for embedded newlines in lbufs
  */
 
 void
-lbuf_init(struct lbuf *lbuf, char *buf, int indent, int continuation)
+lbuf_init(struct lbuf *lbuf, char *buf, int indent, int continuation, int cols)
 {
     lbuf->continuation = continuation;
     lbuf->indent = indent;
+    lbuf->cols = cols;
     lbuf->len = 0;
     lbuf->size = 0;
     lbuf->buf = NULL;
@@ -188,14 +165,11 @@ lbuf_print(struct lbuf *lbuf)
 {
     char *cp;
     int i, have, contlen;
-    static int cols = -1;
 
-    if (cols == -1)
-	cols = get_ttycols();
     contlen = lbuf->continuation ? 2 : 0;
 
     /* For very small widths just give up... */
-    if (cols <= lbuf->indent + contlen + 20) {
+    if (lbuf->cols <= lbuf->indent + contlen + 20) {
 	puts(lbuf->buf);
 	goto done;
     }
@@ -205,7 +179,7 @@ lbuf_print(struct lbuf *lbuf)
      * boundary.
      */
     cp = lbuf->buf;
-    have = cols;
+    have = lbuf->cols;
     while (cp != NULL && *cp != '\0') {
 	char *ep;
 	int need = lbuf->len - (int)(cp - lbuf->buf);
@@ -234,7 +208,7 @@ lbuf_print(struct lbuf *lbuf)
 	 * the whitespace, and print a line continuaton char if needed.
 	 */
 	if (cp != NULL) {
-	    have = cols - lbuf->indent;
+	    have = lbuf->cols - lbuf->indent;
 	    do {
 		cp++;
 	    } while (isspace((unsigned char)*cp));

@@ -240,7 +240,7 @@ display_privs(snl, pw)
     /* Reset group vector so group matching works correctly. */
     reset_groups(pw);
 
-    lbuf_init(&lbuf, NULL, 4, 0);
+    lbuf_init(&lbuf, NULL, 4, 0, sudo_user.cols);
 
     /* Display defaults from all sources. */
     count = 0;
