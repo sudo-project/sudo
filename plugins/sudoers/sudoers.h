@@ -307,6 +307,7 @@ extern struct passwd *auth_pw, *list_pw;
 extern int tgetpass_flags; /* XXX */
 extern int long_list;
 extern uid_t timestamp_uid;
+extern sudo_conv_t sudo_conv;
 #endif
 #ifndef errno
 extern int errno;

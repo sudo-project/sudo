@@ -52,8 +52,6 @@
 #include "sudo_auth.h"
 #include "insults.h"
 
-sudo_conv_t sudo_conv;
-
 sudo_auth auth_switch[] = {
 #ifdef AUTH_STANDALONE
     AUTH_STANDALONE

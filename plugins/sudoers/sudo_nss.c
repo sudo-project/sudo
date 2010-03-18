@@ -224,10 +224,27 @@ reset_groups(pw)
 #endif
 }
 
+static int
+output(const char *buf)
+{
+    struct sudo_conv_message msg;
+    struct sudo_conv_reply repl;
+
+    /* Call conversation function */
+    memset(&msg, 0, sizeof(msg));
+    msg.msg_type = SUDO_CONV_INFO_MSG;
+    msg.msg = buf;
+    memset(&repl, 0, sizeof(repl));
+    if (sudo_conv(1, &msg, &repl) == -1)
+	return 0;
+    return (int)strlen(buf);
+}
+
 /*
  * Print out privileges for the specified user.
  * We only get here if the user is allowed to run something on this host.
  */
+/* XXX - conversation function or newlines in lbuf */
 void
 display_privs(snl, pw)
     struct sudo_nss_list *snl;
@@ -240,7 +257,7 @@ display_privs(snl, pw)
     /* Reset group vector so group matching works correctly. */
     reset_groups(pw);
 
-    lbuf_init(&lbuf, NULL, 4, 0, sudo_user.cols);
+    lbuf_init(&lbuf, output, 4, NULL, sudo_user.cols);
 
     /* Display defaults from all sources. */
     count = 0;

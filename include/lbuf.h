@@ -23,18 +23,19 @@
  * Line buffer struct.
  */
 struct lbuf {
+    int (*output)(const char *);
     char *buf;
-    int continuation;
+    const char *continuation;
     int indent;
     int len;
     int size;
     int cols;
 };
 
-void lbuf_init		(struct lbuf *, char *, int, int, int);
-void lbuf_destroy	(struct lbuf *);
-void lbuf_append	(struct lbuf *, ...);
-void lbuf_append_quoted	(struct lbuf *, const char *, ...);
-void lbuf_print		(struct lbuf *);
+void lbuf_init(struct lbuf *, int (*)(const char *), int, const char *, int);
+void lbuf_destroy(struct lbuf *);
+void lbuf_append(struct lbuf *, ...);
+void lbuf_append_quoted(struct lbuf *, const char *, ...);
+void lbuf_print(struct lbuf *);
 
 #endif /* _SUDO_LBUF_H */

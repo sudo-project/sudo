@@ -152,6 +152,8 @@ login_cap_t *lc;
 char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
 sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
+sudo_conv_t sudo_conv;
+
 static char *runas_user;
 static char *runas_group;
 static struct sudo_nss_list *snl;

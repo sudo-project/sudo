@@ -373,6 +373,12 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     return(mode | flags);
 }
 
+static int
+usage_out(const char *buf)
+{
+    return fputs(buf, stderr);
+}
+
 /*
  * Give usage message and exit.
  * The actual usage strings are in sudo_usage.h for configure substitution.
@@ -404,7 +410,7 @@ usage(int exit_val)
      * tty width.
      */
     ulen = (int)strlen(getprogname()) + 8;
-    lbuf_init(&lbuf, NULL, ulen, 0, user_details.ts_cols);
+    lbuf_init(&lbuf, usage_out, ulen, NULL, user_details.ts_cols);
     for (i = 0; uvec[i] != NULL; i++) {
 	lbuf_append(&lbuf, "usage: ", getprogname(), uvec[i], NULL);
 	lbuf_print(&lbuf);

@@ -75,8 +75,6 @@ static char *expand_prompt(char *, char *, char *);
 static void  lecture(int);
 static void  update_timestamp(char *, char *);
 
-extern sudo_conv_t sudo_conv;
-
 /*
  * This function only returns if the user can successfully
  * verify who he/she is.

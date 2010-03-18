@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2009 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2007-2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -58,8 +58,10 @@
  */
 
 void
-lbuf_init(struct lbuf *lbuf, char *buf, int indent, int continuation, int cols)
+lbuf_init(struct lbuf *lbuf, int (*output)(const char *),
+    int indent, const char *continuation, int cols)
 {
+    lbuf->output = output;
     lbuf->continuation = continuation;
     lbuf->indent = indent;
     lbuf->cols = cols;
@@ -163,10 +165,10 @@ lbuf_append(struct lbuf *lbuf, ...)
 void
 lbuf_print(struct lbuf *lbuf)
 {
-    char *cp;
+    char *cp, save;
     int i, have, contlen;
 
-    contlen = lbuf->continuation ? 2 : 0;
+    contlen = lbuf->continuation ? strlen(lbuf->continuation) : 0;
 
     /* For very small widths just give up... */
     if (lbuf->cols <= lbuf->indent + contlen + 20) {
@@ -198,9 +200,13 @@ lbuf_print(struct lbuf *lbuf)
 	if (cp != lbuf->buf) {
 	    /* indent continued lines */
 	    for (i = 0; i < lbuf->indent; i++)
-		putchar(' ');
+		lbuf->output(" ");
 	}
-	fwrite(cp, need, 1, stdout);
+	/* NUL-terminate cp for the output function and restore afterwards */
+	save = cp[need];
+	cp[need] = '\0';
+	lbuf->output(cp);
+	cp[need] = save;
 	cp = ep;
 
 	/*
@@ -212,12 +218,10 @@ lbuf_print(struct lbuf *lbuf)
 	    do {
 		cp++;
 	    } while (isspace((unsigned char)*cp));
-	    if (lbuf->continuation) {
-		putchar(' ');
-		putchar(lbuf->continuation);
-	    }
+	    if (contlen)
+		lbuf->output(lbuf->continuation);
 	}
-	putchar('\n');
+	lbuf->output("\n");
     }
 
 done:
