@@ -61,7 +61,7 @@ sudo_read_conf(const char *conf_file)
 	/* Default values */
 	info = emalloc(sizeof(*info));
 	info->symbol_name = "sudoers_policy";
-	info->path = SUDOERS_PLUGIN;
+	info->path = "sudoers.so";
 	info->prev = info;
 	info->next = NULL;
 	tq_append(&pil, info);
