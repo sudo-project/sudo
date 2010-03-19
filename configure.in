@@ -23,6 +23,7 @@ AC_SUBST(SUDOERS_OBJS)
 AC_SUBST(SUDO_OBJS)
 AC_SUBST(LIBS)
 AC_SUBST(SUDO_LIBS)
+AC_SUBST(SUDOERS_LIBS)
 AC_SUBST(NET_LIBS)
 AC_SUBST(AFS_LIBS)
 AC_SUBST(GETGROUPS_LIB)
@@ -2529,7 +2530,7 @@ if test ${with_ldap-'no'} != "no"; then
 	with_ldap=yes
 	LDAP=""
     fi
-    SUDOERS_OBJS="${SUDOERS_OBJS} ldap.o"
+    SUDOERS_OBJS="${SUDOERS_OBJS} ldap.lo"
 
     AC_MSG_CHECKING([for LDAP libraries])
     LDAP_LIBS=""
@@ -2594,7 +2595,7 @@ if test ${with_ldap-'no'} != "no"; then
 	fi
     fi
 
-    SUDO_LIBS="${SUDO_LIBS} ${LDAP_LIBS}"
+    SUDOERS_LIBS="${SUDOERS_LIBS} ${LDAP_LIBS}"
     LIBS="$_LIBS"
     LDFLAGS="$_LDFLAGS"
 fi

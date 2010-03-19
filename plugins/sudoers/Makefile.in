@@ -36,6 +36,7 @@ INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
 LIBS = $(LIBOBJDIR)/libreplace.la
+SUDOERS_LIBS = @SUDOERS_LIBS@ $(LIBS)
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) @CPPFLAGS@
@@ -45,6 +46,7 @@ CFLAGS = @CFLAGS@
 
 # Flags to pass to the link stage
 LDFLAGS =
+SUDOERS_LDFLAGS = @SUDOERS_LDFLAGS@
 
 # Where to install things...
 prefix = @prefix@
@@ -109,7 +111,7 @@ all: sudoers.la
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 
 sudoers.la: $(SUDOERS_OBJS) $(COMMON_OBJS)
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ $(SUDOERS_OBJS) $(COMMON_OBJS) $(LIBS) -module -avoid-version -rpath $(plugindir)
+	$(LIBTOOL) --mode=link $(CC) $(SUDOERS_LDFLAGS) -o $@ $(SUDOERS_OBJS) $(COMMON_OBJS) $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
 
 # Sudoers dependencies
 sudoers.lo: $(srcdir)/sudoers.c $(SUDODEP) $(srcdir)/interfaces.h
