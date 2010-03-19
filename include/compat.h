@@ -248,6 +248,7 @@ extern const char *__progname;
 #  define getprogname()          (__progname)
 # else
 const char *getprogname(void);
+void setprogname(const char *);
 #endif /* HAVE___PROGNAME */
 #endif /* !HAVE_GETPROGNAME */
 

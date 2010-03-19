@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2005 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -12,10 +12,6 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- *
- * Sponsored in part by the Defense Advanced Research Projects
- * Agency (DARPA) and Air Force Research Laboratory, Air Force
- * Materiel Command, USAF, under agreement number F39502-99-1-0512.
  */
 
 #include <stdio.h>
@@ -24,24 +20,24 @@
 #include <config.h>
 #include <compat.h>
 
+static char *progname = "sudo";
+
+void
+setprogname(const char *name)
+{
+    const char *base;
+
+    if ((base = strrchr(name, '/')) != NULL) {
+	base++;
+    } else {
+	base = name;
+    }
+    if (strcmp(progname, base) != 0)
+	progname = base;
+}
+
 const char *
 getprogname(void)
 {
-#ifdef PIC
-    return("sudo");
-#else
-    static const char *progname;
-    extern int Argc;
-    extern char **Argv;
-
-    if (progname == NULL) {
-	if (Argc < 0)
-	    progname = "sudo";
-	else if ((progname = strrchr(Argv[0], '/')) != NULL)
-	    progname++;
-	else
-	    progname = Argv[0];
-    }
-    return(progname);
-#endif
+    return progname;
 }

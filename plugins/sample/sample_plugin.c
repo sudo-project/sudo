@@ -163,6 +163,11 @@ policy_open(unsigned int version, sudo_conv_t conversation,
 	if (strncmp(*ui, "runas_group=", sizeof("runas_group=") - 1) == 0) {
 	    runas_group = *ui + sizeof("runas_group=") - 1;
 	}
+#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
+	if (strncmp(*ui, "progname=", sizeof("progname=") - 1) == 0) {
+	    setprogname(*ui + sizeof("progname=") - 1);
+	}
+#endif
     }
     if (runas_user != NULL) {
 	if ((pw = getpwnam(runas_user)) == NULL) {

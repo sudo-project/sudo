@@ -99,10 +99,6 @@ static int run_command(struct command_details *details, char *argv[],
 /* XXX - header file */
 extern const char *list_user, *runas_user, *runas_group;
 
-/* Used by getprogname() unless crt0 supports getting program name. */
-int Argc;
-char **Argv;
-
 /* Needed by tgetpass when executing askpass helper */
 struct user_details user_details;
 
@@ -126,11 +122,13 @@ main(int argc, char *argv[], char *envp[])
     malloc_options = "AFGJPR";
 #endif
 
-    Argc = argc;
-    Argv = argv;
-
 #ifdef HAVE_SETLOCALE
     setlocale(LC_ALL, "");
+#endif
+
+#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
+    if (argc > 0)
+	setprogname(argv[0]);
 #endif
 
     if (geteuid() != 0)
@@ -159,7 +157,7 @@ main(int argc, char *argv[], char *envp[])
     user_info = get_user_info(&user_details);
 
     /* Parse command line arguments. */
-    sudo_mode = parse_args(Argc, Argv, &nargc, &nargv, &settings, &env_add);
+    sudo_mode = parse_args(argc, argv, &nargc, &nargv, &settings, &env_add);
 
     /* Read sudo.conf and load plugins. */
     sudo_load_plugins(_PATH_SUDO_CONF, &policy_plugin, &io_plugins);

@@ -100,7 +100,9 @@ static struct sudo_settings {
     { "selinux_type" },
 #define ARG_RUNAS_USER 11
     { "runas_user" },
-#define NUM_SETTINGS 12
+#define ARG_PROGNAME 12
+    { "progname" },
+#define NUM_SETTINGS 13
     { NULL }
 };
 
@@ -124,6 +126,9 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 
     env_add = emalloc2(env_size, sizeof(char *));
     env_add[0] = NULL;
+
+    /* Pass progname to plugin so it can call setprogname() */
+    sudo_settings[ARG_PROGNAME].value = getprogname();
 
     /* First, check to see if we were invoked as "sudoedit". */
     if (strcmp(getprogname(), "sudoedit") == 0)

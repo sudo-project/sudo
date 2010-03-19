@@ -162,8 +162,6 @@ static int NewArgc;
 static char **NewArgv;
 
 /* XXX */
-extern int Argc;
-extern char **Argv;
 extern char **environ;
 
 /* error.c */
@@ -1228,6 +1226,12 @@ deserialize_info(char * const settings[], char * const user_info[])
 	    continue;
 	}
 #endif /* HAVE_BSD_AUTH_H */
+#if !defined(HAVE_GETPROGNAME) && !defined(HAVE___PROGNAME)
+	if (MATCHES(*cur, "progname=")) {
+	    setprogname(*cur + sizeof("progname=") - 1);
+	    continue;
+	}
+#endif
     }
 
     for (cur = user_info; *cur != NULL; cur++) {
