@@ -53,10 +53,6 @@
 #include "missing.h"
 #include "lbuf.h"
 
-/*
- * TODO: add support for embedded newlines in lbufs
- */
-
 void
 lbuf_init(struct lbuf *lbuf, int (*output)(const char *),
     int indent, const char *continuation, int cols)
@@ -158,47 +154,34 @@ lbuf_append(struct lbuf *lbuf, ...)
     va_end(ap);
 }
 
-/*
- * Print the buffer with word wrap based on the tty width.
- * The lbuf is reset on return.
- */
-void
-lbuf_print(struct lbuf *lbuf)
+static void
+lbuf_println(struct lbuf *lbuf, char *line, int len)
 {
     char *cp, save;
     int i, have, contlen;
 
     contlen = lbuf->continuation ? strlen(lbuf->continuation) : 0;
 
-    /* For very small widths just give up... */
-    if (lbuf->cols <= lbuf->indent + contlen + 20) {
-	puts(lbuf->buf);
-	goto done;
-    }
-
     /*
      * Print the buffer, splitting the line as needed on a word
      * boundary.
      */
-    cp = lbuf->buf;
+    cp = line;
     have = lbuf->cols;
     while (cp != NULL && *cp != '\0') {
-	char *ep;
-	int need = lbuf->len - (int)(cp - lbuf->buf);
+	char *ep = NULL;
+	int need = len - (int)(cp - line);
 
-	ep = memrchr(cp, '\n', need > have ? have : need);
-	if (ep) {
-	    need = ep - cp;
-	    ep++;			/* skip over newline */
-	} else if (need > have) {
+	if (need > have) {
 	    have -= contlen;		/* subtract for continuation char */
 	    if ((ep = memrchr(cp, ' ', have)) == NULL)
 		ep = memchr(cp + have, ' ', need - have);
 	    if (ep != NULL)
 		need = (int)(ep - cp);
 	}
-	if (cp != lbuf->buf) {
+	if (cp != line) {
 	    /* indent continued lines */
+	    /* XXX - build up string instead? */
 	    for (i = 0; i < lbuf->indent; i++)
 		lbuf->output(" ");
 	}
@@ -215,13 +198,46 @@ lbuf_print(struct lbuf *lbuf)
 	 */
 	if (cp != NULL) {
 	    have = lbuf->cols - lbuf->indent;
-	    do {
+	    ep = line + len;
+	    while (cp < ep && isblank((unsigned char)*cp)) {
 		cp++;
-	    } while (isspace((unsigned char)*cp));
+	    }
 	    if (contlen)
 		lbuf->output(lbuf->continuation);
 	}
 	lbuf->output("\n");
+    }
+}
+
+/*
+ * Print the buffer with word wrap based on the tty width.
+ * The lbuf is reset on return.
+ */
+void
+lbuf_print(struct lbuf *lbuf)
+{
+    char *cp, *ep;
+    int len, contlen;
+
+    contlen = lbuf->continuation ? strlen(lbuf->continuation) : 0;
+
+    /* For very small widths just give up... */
+    if (lbuf->cols <= lbuf->indent + contlen + 20) {
+	puts(lbuf->buf);
+	goto done;
+    }
+
+    /* Print each line in the buffer */
+    for (cp = lbuf->buf; cp != NULL && *cp != '\0'; ) {
+	if (*cp == '\n') {
+	    putchar('\n');
+	    cp++;
+	} else {
+	    ep = memchr(cp, '\n', lbuf->len - (cp - lbuf->buf));
+	    len = ep ? (int)(ep - cp) : lbuf->len;
+	    lbuf_println(lbuf, cp, len);
+	    cp = ep ? ep + 1 : NULL;
+	}
     }
 
 done:
