@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2009 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2003-2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * This code is derived from software contributed by Aaron Spangler.
  *
@@ -1150,10 +1150,7 @@ sudo_ldap_display_defaults(nss, pw, lbuf)
     if (rc == LDAP_SUCCESS && (entry = ldap_first_entry(ld, result))) {
 	bv = ldap_get_values_len(ld, entry, "sudoOption");
 	if (bv != NULL) {
-	    if (lbuf->len == 0)
-		prefix = "    ";
-	    else
-		prefix = ", ";
+	    prefix = "    ";
 	    for (p = bv; *p != NULL; p++) {
 		lbuf_append(lbuf, prefix, (*p)->bv_val, NULL);
 		prefix = ", ";
@@ -1257,8 +1254,8 @@ sudo_ldap_display_entry_short(ld, entry, lbuf)
 	}
 	ldap_value_free_len(bv);
     }
+    lbuf_append(lbuf, "\n", NULL);
 
-    lbuf_print(lbuf);		/* forces a newline */
     return(count);
 }
 
@@ -1277,9 +1274,7 @@ sudo_ldap_display_entry_long(ld, entry, lbuf)
 
     /* extract the dn, only show the first rdn */
     rdn = sudo_ldap_get_first_rdn(ld, entry);
-    lbuf_print(lbuf);	/* force a newline */
-    lbuf_append(lbuf, "LDAP Role: ", rdn ? rdn : "UNKNOWN", NULL);
-    lbuf_print(lbuf);
+    lbuf_append(lbuf, "\nLDAP Role: ", rdn ? rdn : "UNKNOWN", "\n", NULL);
     if (rdn)
 	ldap_memfree(rdn);
 
@@ -1297,7 +1292,7 @@ sudo_ldap_display_entry_long(ld, entry, lbuf)
 	ldap_value_free_len(bv);
     } else
 	lbuf_append(lbuf, def_runas_default, NULL);
-    lbuf_print(lbuf);
+    lbuf_append(lbuf, "\n", NULL);
 
     /* get the RunAsGroup Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoRunAsGroup");
@@ -1309,7 +1304,7 @@ sudo_ldap_display_entry_long(ld, entry, lbuf)
 	    lbuf_append(lbuf, (*p)->bv_val, NULL);
 	}
 	ldap_value_free_len(bv);
-	lbuf_print(lbuf);
+	lbuf_append(lbuf, "\n", NULL);
     }
 
     /* get the Option Values from the entry */
@@ -1322,17 +1317,15 @@ sudo_ldap_display_entry_long(ld, entry, lbuf)
 	    lbuf_append(lbuf, (*p)->bv_val, NULL);
 	}
 	ldap_value_free_len(bv);
-	lbuf_print(lbuf);
+	lbuf_append(lbuf, "\n", NULL);
     }
 
     /* get the Command Values from the entry */
     bv = ldap_get_values_len(ld, entry, "sudoCommand");
     if (bv != NULL) {
-	lbuf_append(lbuf, "    Commands:", NULL);
-	lbuf_print(lbuf);
+	lbuf_append(lbuf, "    Commands:\n", NULL);
 	for (p = bv; *p != NULL; p++) {
-	    lbuf_append(lbuf, "\t", (*p)->bv_val, NULL);
-	    lbuf_print(lbuf);
+	    lbuf_append(lbuf, "\t", (*p)->bv_val, "\n", NULL);
 	    count++;
 	}
 	ldap_value_free_len(bv);

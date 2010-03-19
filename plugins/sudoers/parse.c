@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2005, 2007-2009 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2004-2005, 2007-2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -352,7 +352,7 @@ sudo_file_display_priv_short(pw, us, lbuf)
 	    sudo_file_append_cmnd(cs, &tags, lbuf);
 	    nfound++;
 	}
-	lbuf_print(lbuf);		/* forces a newline */
+	lbuf_append(lbuf, "\n", NULL);
     }
     return(nfound);
 }
@@ -376,9 +376,7 @@ sudo_file_display_priv_long(pw, us, lbuf)
 	tags.setenv = UNSPEC;
 	tags.nopasswd = UNSPEC;
 	tags.transcript = UNSPEC;
-	lbuf_print(lbuf);	/* force a newline */
-	lbuf_append(lbuf, "Sudoers entry:", NULL);
-	lbuf_print(lbuf);
+	lbuf_append(lbuf, "\nSudoers entry:\n", NULL);
 	tq_foreach_fwd(&priv->cmndlist, cs) {
 	    lbuf_append(lbuf, "    RunAsUsers: ", NULL);
 	    if (!tq_empty(&cs->runasuserlist)) {
@@ -393,7 +391,7 @@ sudo_file_display_priv_long(pw, us, lbuf)
 	    } else {
 		lbuf_append(lbuf, pw->pw_name, NULL);
 	    }
-	    lbuf_print(lbuf);
+	    lbuf_append(lbuf, "\n", NULL);
 	    if (!tq_empty(&cs->runasgrouplist)) {
 		lbuf_append(lbuf, "    RunAsGroups: ", NULL);
 		tq_foreach_fwd(&cs->runasgrouplist, m) {
@@ -402,13 +400,11 @@ sudo_file_display_priv_long(pw, us, lbuf)
 		    print_member(lbuf, m->name, m->type, m->negated,
 			RUNASALIAS);
 		}
-		lbuf_print(lbuf);
+		lbuf_append(lbuf, "\n", NULL);
 	    }
-	    lbuf_append(lbuf, "    Commands: ", NULL);
-	    lbuf_print(lbuf);
-	    lbuf_append(lbuf, "\t", NULL);
+	    lbuf_append(lbuf, "    Commands:\n\t", NULL);
 	    sudo_file_append_cmnd(cs, &tags, lbuf);
-	    lbuf_print(lbuf);
+	    lbuf_append(lbuf, "\n", NULL);
 	    nfound++;
 	}
     }
@@ -455,11 +451,7 @@ sudo_file_display_defaults(nss, pw, lbuf)
     if (nss->handle == NULL)
 	return(-1);
 
-    if (lbuf->len == 0)
-	prefix = "    ";
-    else
-	prefix = ", ";
-
+    prefix = "    ";
     tq_foreach_fwd(&defaults, d) {
 	switch (d->type) {
 	    case DEFAULTS_HOST:
