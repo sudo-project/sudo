@@ -272,7 +272,7 @@ display_privs(snl, pw)
 
     /* Display Runas and Cmnd-specific defaults from all sources. */
     lbuf.len = 0;
-    lbuf_append(&lbuf, "Runas and Command-specific defaults for", pw->pw_name,
+    lbuf_append(&lbuf, "Runas and Command-specific defaults for ", pw->pw_name,
 	":\n", NULL);
     count = 0;
     tq_foreach_fwd(snl, nss) {
