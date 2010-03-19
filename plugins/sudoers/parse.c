@@ -445,13 +445,17 @@ sudo_file_display_defaults(nss, pw, lbuf)
     struct lbuf *lbuf;
 {
     struct defaults *d;
-    char *prefix = NULL;
+    char *prefix;
     int nfound = 0;
 
     if (nss->handle == NULL)
 	return(-1);
 
-    prefix = "    ";
+    if (lbuf->len == 0 || isspace((unsigned char)lbuf->buf[lbuf->len - 1]))
+	prefix = "    ";
+    else
+	prefix = ", ";
+
     tq_foreach_fwd(&defaults, d) {
 	switch (d->type) {
 	    case DEFAULTS_HOST:
