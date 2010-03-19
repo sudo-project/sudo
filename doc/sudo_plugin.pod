@@ -212,6 +212,10 @@ the C<-t> flag.
 Authentication type, if specified by the C<-a> flag, to use on
 systems where BSD authentication is supported.
 
+=item progname=string
+
+The command name that sudo was run as, typically "sudo" or "sudoedit".
+
 =back
 
 Additional settings may be added in the future so the plugin should
