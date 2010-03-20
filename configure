@@ -11989,6 +11989,12 @@ if test "$enable_shared" = "no"; then
     with_noexec=no
 else
     eval _shrext="$shrext_cmds"
+    # Darwin uses .dylib for libraries but .so for modules
+    if test X"$_shrext" = X".dylib"; then
+	_shrext2=".so"
+    else
+	_shrext2="$_shrext"
+    fi
 fi
 { echo "$as_me:$LINENO: checking path to sudo_noexec.so" >&5
 echo $ECHO_N "checking path to sudo_noexec.so... $ECHO_C" >&6; }
@@ -26290,6 +26296,10 @@ _ACEOF
 #define _PATH_SUDO_PLUGIN_DIR "$PLUGINDIR"
 EOF
 
+    cat >>confdefs.h <<EOF
+#define SUDOERS_PLUGIN "sudoers$_shrext2"
+EOF
+
     exec_prefix="$oexec_prefix"
 fi
 
@@ -27569,6 +27579,8 @@ echo "$as_me: You will need to customize sample.pam and install it as /etc/pam.d
 	    ;;
     esac
 fi
+
+
 
 
 

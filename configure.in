@@ -1325,6 +1325,12 @@ if test "$enable_shared" = "no"; then
     with_noexec=no
 else
     eval _shrext="$shrext_cmds"
+    # Darwin uses .dylib for libraries but .so for modules
+    if test X"$_shrext" = X".dylib"; then
+	_shrext2=".so"
+    else
+	_shrext2="$_shrext"
+    fi
 fi
 AC_MSG_CHECKING(path to sudo_noexec.so)
 AC_ARG_WITH(noexec, [AS_HELP_STRING([--with-noexec[=PATH]], [fully qualified pathname of sudo_noexec.so])],
@@ -2695,6 +2701,7 @@ if test X"$with_noexec" != X"no" -o X"$with_selinux" != X"no"; then
     fi
     eval PLUGINDIR="$with_plugindir"
     SUDO_DEFINE_UNQUOTED(_PATH_SUDO_PLUGIN_DIR, "$PLUGINDIR")
+    SUDO_DEFINE_UNQUOTED(SUDOERS_PLUGIN, "sudoers$_shrext2")
     exec_prefix="$oexec_prefix"
 fi
 
@@ -2722,6 +2729,7 @@ dnl
 AH_TEMPLATE(BROKEN_SYSLOG, [Define to 1 if the `syslog' function returns a non-zero int to denote failure.])
 AH_TEMPLATE(CLASSIC_INSULTS, [Define to 1 if you want the insults from the "classic" version sudo.])
 AH_TEMPLATE(CSOPS_INSULTS, [Define to 1 if you want insults culled from the twisted minds of CSOps.])
+AH_TEMPLATE(SUDOERS_PLUGIN, [The name of the sudoers plugin, including extension.])
 AH_TEMPLATE(DONT_LEAK_PATH_INFO, [Define to 1 if you want sudo to display "command not allowed" instead of "command not found" when a command cannot be found.])
 AH_TEMPLATE(ENV_EDITOR, [Define to 1 if you want visudo to honor the EDITOR and VISUAL env variables.])
 AH_TEMPLATE(FQDN, [Define to 1 if you want to require fully qualified hosts in sudoers.])
