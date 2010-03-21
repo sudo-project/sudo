@@ -1,5 +1,6 @@
 #
-# Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
+# Copyright (c) 1996, 1998-2005, 2007-2010
+#       Todd C. Miller <Todd.Miller@courtesan.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -13,6 +14,10 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Sponsored in part by the Defense Advanced Research Projects
+# Agency (DARPA) and Air Force Research Laboratory, Air Force
+# Materiel Command, USAF, under agreement number F39502-99-1-0512.
 #
 # @configure_input@
 #
@@ -29,14 +34,17 @@ compat = $(top_srcdir)/compat
 
 # Compiler & tools to use
 CC = @CC@
-LIBTOOL = @LIBTOOL@ --tag=disable-static
+LIBTOOL = @LIBTOOL@
+FLEX = @FLEX@
+YACC = @YACC@
 
 # Our install program supports extra flags...
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
-LIBS = $(LIBOBJDIR)/libreplace.la
-SUDOERS_LIBS = @SUDOERS_LIBS@ $(LIBS)
+LIBS = $(top_srcdir)/@ac_config_libobj_dir@/libreplace.la
+NET_LIBS = @NET_LIBS@
+SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS)
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) @CPPFLAGS@
@@ -56,10 +64,22 @@ sbindir = @sbindir@
 sysconfdir = @sysconfdir@
 libexecdir = @libexecdir@
 datarootdir = @datarootdir@
+
+# Directory in which to install the sudoers plugin
 plugindir = @PLUGINDIR@
 
 # Directory in which to install the sudoers file
 sudoersdir = $(sysconfdir)
+
+# Directory in which to install sudoreplay.
+replaydir = $(bindir)
+
+# Directory in which to install visudo
+visudodir = $(sbindir)
+
+# User and group ids the installed files should be "owned" by
+install_uid = 0
+install_gid = 0
 
 # User, group, and mode the sudoers file should be "owned" by (configure)
 sudoers_uid = @SUDOERS_UID@
@@ -73,20 +93,23 @@ DEFS = @OSDEFS@ -D_PATH_SUDOERS=\"$(sudoersdir)/sudoers\" -DSUDOERS_UID=$(sudoer
 
 SHELL = /bin/sh
 
-# XXX - configure will substitute in .o files not .lo files
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
-COMMON_OBJS = alias.lo atobool.lo defaults.lo gram.lo \
-	      list.lo match.lo pwutil.lo timestr.lo toke.lo redblack.lo \
-	      zero_bytes.lo @NONUNIX_GROUPS_IMPL@
+LIBSUDOERS_OBJS = alias.lo alloc.lo atobool.lo defaults.lo gram.lo list.lo \
+		  match.lo pwutil.lo timestr.lo toke.lo redblack.lo \
+		  zero_bytes.lo @NONUNIX_GROUPS_IMPL@
 
-# XXX - add @SUDOERS_OBJS@ in configure.in
-SUDOERS_OBJS = $(AUTH_OBJS) alloc.lo boottime.lo check.lo fmt_string.lo \
-	       error.lo env.lo getspwuid.lo gettime.lo goodpath.lo fileops.lo \
-	       find_path.lo interfaces.lo lbuf.lo logging.lo parse.lo \
-	       set_perms.lo sudoers.lo sudo_nss.lo @SUDOERS_OBJS@
+SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo fmt_string.lo \
+	       plugin_error.lo env.lo getspwuid.lo gettime.lo goodpath.lo \
+	       fileops.lo find_path.lo interfaces.lo lbuf.lo logging.lo \
+	       parse.lo set_perms.lo sudoers.lo sudo_nss.lo @SUDOERS_OBJS@
 
-LIBOBJDIR = $(top_srcdir)/@ac_config_libobj_dir@/
+# XXX - need top level error.o; perhaps make #ifdef PIC?
+VISUDO_OBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o error.o
+
+REPLAY_OBJS = getdate.o sudoreplay.o term.o error.o
+
+TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o
 
 VERSION = @PACKAGE_VERSION@
 
@@ -100,9 +123,10 @@ AUTHDEP = $(SUDODEP) $(authdir)/sudo_auth.h
 INSDEP = $(srcdir)/ins_2001.h $(srcdir)/ins_classic.h $(srcdir)/ins_csops.h \
 	 $(srcdir)/ins_goons.h $(srcdir)/insults.h
 
-all: sudoers.la
+# XXX @PROGS@ ?
+all: sudoers.la visudo sudoreplay testsudoers
 
-.SUFFIXES: .o .c .h .lo
+.SUFFIXES: .o .c .h .l .y .lo
 
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
@@ -110,9 +134,49 @@ all: sudoers.la
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
 
-sudoers.la: $(SUDOERS_OBJS) $(COMMON_OBJS)
-	$(LIBTOOL) --mode=link $(CC) $(SUDOERS_LDFLAGS) -o $@ $(SUDOERS_OBJS) $(COMMON_OBJS) $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
+libsudoers.la: $(LIBSUDOERS_OBJS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(LIBSUDOERS_OBJS) -no-install
 
+sudoers.la: $(SUDOERS_OBJS) libsudoers.la
+	$(LIBTOOL) --mode=link $(CC) $(SUDOERS_LDFLAGS) -o $@ $(SUDOERS_OBJS) libsudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
+
+visudo: libsudoers.la $(VISUDO_OBJS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
+
+sudoreplay: libsudoers.la $(REPLAY_OBJS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) @ZLIB@
+
+testsudoers: $(TEST_OBJS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
+
+# Uncomment the following if you want "make distclean" to clean the parser
+@DEV@GENERATED = gram.h gram.c toke.c def_data.c def_data.h getdate
+
+# Uncomment the lines before -@true if you intend to modify gram.y
+$(devdir)/gram.c $(devdir)/gram.h: $(srcdir)/gram.y
+@DEV@	$(YACC) -d $(srcdir)/gram.y
+@DEV@	mv -f y.tab.c gram.c
+@DEV@	if cmp -s y.tab.h gram.h; then rm -f y.tab.h; else mv -f y.tab.h gram.h; fi
+	-@true
+
+# Uncomment the lines before -@true if you intend to modify toke.l
+$(devdir)/toke.c: $(srcdir)/toke.l
+@DEV@	$(FLEX) $(srcdir)/toke.l
+@DEV@	mv -f lex.yy.c toke.c
+	-@true
+
+# Uncomment the lines before -@true if you intend to modify getdate.y
+$(devdir)/getdate.c: $(srcdir)/getdate.y
+@DEV@	echo "expect 10 shift/reduce conflicts"
+@DEV@	$(YACC) $(srcdir)/getdate.y
+@DEV@	mv -f y.tab.c getdate.c
+	-@true
+
+# Uncomment the following if you intend to modify def_data.in
+@DEV@$(devdir)/def_data.h $(devdir)/def_data.c: $(srcdir)/def_data.in
+@DEV@	perl $(srcdir)/mkdefaults -o def_data $(srcdir)/def_data.in
+
+# XXX - should only need to specify the dependency bits
 # Sudoers dependencies
 sudoers.lo: $(srcdir)/sudoers.c $(SUDODEP) $(srcdir)/interfaces.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudoers.c
@@ -164,8 +228,8 @@ tsgetgrpw.lo: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tsgetgrpw.c
 vasgroups.lo: $(srcdir)/vasgroups.c $(srcdir)/nonunix.h $(SUDODEP)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/vasgroups.c
-error.lo: $(srcdir)/error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/error.c
+plugin_error.lo: $(srcdir)/plugin_error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/plugin_error.c
 
 # Upper level sudo dependencies
 alloc.lo: $(top_srcdir)/src/alloc.c $(SUDODEP)
@@ -182,6 +246,9 @@ lbuf.lo: $(top_srcdir)/src/lbuf.c $(SUDODEP)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/src/lbuf.c
 zero_bytes.lo: $(top_srcdir)/src/zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/src/zero_bytes.c
+# XXX - for sudoreplay
+term.o: $(top_srcdir)/src/term.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/src/term.c
 
 # Auth dependencies
 sudo_auth.lo: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
@@ -215,17 +282,29 @@ securid5.lo: $(authdir)/securid5.c $(AUTHDEP)
 sia.lo: $(authdir)/sia.c $(AUTHDEP)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/sia.c
 
-install: install-dirs install-plugin
+error.o: $(top_srcdir)/src/error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/src/error.c
+
+install: install-dirs install-plugin install-binaries install-sudoers
 
 install-dirs:
-	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(plugindir)
+	$(SHELL) $(top_srcdir)/mkinstalldirs $(DESTDIR)$(plugindir) \
+	    $(DESTDIR)$(visudodir) $(DESTDIR)$(replaydir) \
+	    $(DESTDIR)$(sudoersdir)
 
-install-binaries:
+install-binaries: visudo sudoreplay install-dirs
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s sudoreplay $(DESTDIR)$(replaydir)/sudoreplay
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s visudo $(DESTDIR)$(visudodir)/visudo
+
+install-plugin: sudoers.la install-dirs
+	$(LIBTOOL) --tag=disable-static --mode=install $(INSTALL) sudoers.la $(DESTDIR)$(plugindir)
 
 install-man:
 
-install-plugin: install-dirs sudoers.la
-	$(LIBTOOL) --mode=install $(INSTALL) sudoers.la $(plugindir)
+install-sudoers: install-dirs
+	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
+	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
+		$(srcdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers
 
 check:
 	@echo nothing to check
