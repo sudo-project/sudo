@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 2010 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -43,7 +43,7 @@
 # include <termio.h>
 #endif /* HAVE_TERMIOS_H */
 
-#include "sudo.h"
+#include "compat.h"
 
 #ifndef TCSASOFT
 # define TCSASOFT	0
@@ -80,9 +80,7 @@
 # define TCSADRAIN		TCSETAW
 #endif /* HAVE_TERMIOS_H */
 
-typedef struct termios sudo_term_t;
-
-static sudo_term_t term, oterm;
+static struct termios term, oterm;
 static int changed;
 int term_erase;
 int term_kill;
