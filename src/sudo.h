@@ -117,6 +117,7 @@ struct user_details {
     const char *cwd;
     const char *tty;
     const char *host;
+    const char *shell;
     GETGROUPS_T *groups;
     int ngroups;
     int ts_cols;
@@ -209,6 +210,9 @@ void get_ttysize(int *linep, int *colp);
 int exec_setup(struct command_details *details);
 extern int debug_level;
 extern struct plugin_container_list io_plugins;
+
+/* parse_args.c */
+void usage(int) __attribute__((__noreturn__));
 
 #ifndef errno
 extern int errno;

@@ -180,6 +180,16 @@ the user wishes to preserve the environment.
 Set to true if the user specified the C<-i> flag, indicating that
 the user wishes to run a login shell.
 
+=item implied_shell=bool
+
+If the user does not specify a program on the command line, B<sudo>
+will pass the plugin the path to the user's shell and set
+I<implied_shell> to true.  This allows B<sudo> with no arguments
+to be used similarly to L<su(1)>.  If the plugin does not to support
+this usage, it may return a value of -2 from the C<check_policy>
+function, which will cause B<sudo> to print a usage message and
+exit.
+
 =item preserve_groups=bool
 
 Set to true if the user specified the C<-P> flag, indicating that

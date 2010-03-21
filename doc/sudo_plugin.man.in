@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "March 19, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "March 21, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -295,6 +295,15 @@ the user wishes to preserve the environment.
 .IX Item "login_shell=bool"
 Set to true if the user specified the \f(CW\*(C`\-i\*(C'\fR flag, indicating that
 the user wishes to run a login shell.
+.IP "implied_shell=bool" 4
+.IX Item "implied_shell=bool"
+If the user does not specify a program on the command line, \fBsudo\fR
+will pass the plugin the path to the user's shell and set
+\&\fIimplied_shell\fR to true.  This allows \fBsudo\fR with no arguments
+to be used similarly to \fIsu\fR\|(1).  If the plugin does not to support
+this usage, it may return a value of \-2 from the \f(CW\*(C`check_policy\*(C'\fR
+function, which will cause \fBsudo\fR to print a usage message and
+exit.
 .IP "preserve_groups=bool" 4
 .IX Item "preserve_groups=bool"
 Set to true if the user specified the \f(CW\*(C`\-P\*(C'\fR flag, indicating that

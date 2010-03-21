@@ -262,12 +262,6 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     /* Set login class if applicable. */
     set_loginclass(sudo_user.pw);
 
-#if 0 /* XXX - later */
-    /* Update initial shell now that runas is set. */
-    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
-	NewArgv[0] = runas_pw->pw_shell;
-#endif
-
     /* XXX */
     user_env = envp; /* stash for later */
 
@@ -305,11 +299,17 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 	return -1;
     }
 
-    /* Local copy of argv */
+    /*
+     * Make a local copy of argc/argv, with special handling
+     * for the '-e', '-i' or '-s' options.
+     * XXX - handle sudoedit
+     */
     NewArgv = emalloc2(argc + 1, sizeof(char *));
     memcpy(NewArgv, argv, argc * sizeof(char *));
     NewArgv[argc] = NULL;
     NewArgc = argc;
+    if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
+	NewArgv[0] = runas_pw->pw_shell;
 
     /* Set environ to contents of user_env. */
     env_init(user_env);
@@ -387,9 +387,9 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
     if (ISSET(sudo_mode, MODE_PRESERVE_GROUPS))
 	def_preserve_groups = TRUE;
 
-    /* If no command line args and "set_home" is not set, error out. */
+    /* If no command line args and "shell_noargs" is not set, error out. */
     if (ISSET(sudo_mode, MODE_IMPLIED_SHELL) && !def_shell_noargs) {
-	/* XXX - error message */
+	rval = -2; /* usage error */
 	goto done;
     }
 
@@ -447,7 +447,7 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 	goto done;
     } else if (cmnd_status == NOT_FOUND) {
 	//audit_failure(NewArgv, "%s: command not found", user_cmnd);
-	warningx("command not found", user_cmnd);
+	warningx("%s: command not found", user_cmnd);
 	goto done;
     }
 
@@ -622,12 +622,6 @@ init_vars(char * const envp[])
     (void) tzset();		/* set the timezone if applicable */
 #endif /* HAVE_TZSET */
 
-#if 0
-    /* Default value for cmnd and cwd, overridden later. */
-    if (user_cmnd == NULL)
-	user_cmnd = NewArgv[0];
-#endif
-
     for (ep = envp; *ep; ep++) {
 	/* XXX - don't fill in if empty string */
 	switch (**ep) {
@@ -644,9 +638,7 @@ init_vars(char * const envp[])
 		    user_path = *ep + 5;
 		break;
 	    case 'S':
-		if (strncmp("SHELL=", *ep, 6) == 0)
-		    user_shell = *ep + 6;
-		else if (!user_prompt && strncmp("SUDO_PROMPT=", *ep, 12) == 0)
+		if (!user_prompt && strncmp("SUDO_PROMPT=", *ep, 12) == 0)
 		    user_prompt = *ep + 12;
 		else if (strncmp("SUDO_USER=", *ep, 10) == 0)
 		    prev_user = *ep + 10;
@@ -683,8 +675,6 @@ init_vars(char * const envp[])
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
     mbr_uid_to_uuid(user_uid, user_uuid);
 #endif
-    if (user_shell == NULL || *user_shell == '\0')
-	user_shell = estrdup(sudo_user.pw->pw_shell);
 
     /* It is now safe to use log_error() and set_perms() */
 
@@ -692,43 +682,6 @@ init_vars(char * const envp[])
 	/* may call log_error() */
 	set_fqdn();
     }
-
-#if 0 /* XXX need to adapt this in sudo.c */
-    /*
-     * If we were given the '-e', '-i' or '-s' options we need to redo
-     * NewArgv and NewArgc.
-     */
-    if (ISSET(sudo_mode, MODE_EDIT)) {
-	NewArgv--;
-	NewArgc++;
-	NewArgv[0] = "sudoedit";
-    } else if (ISSET(sudo_mode, MODE_SHELL)) {
-	char **av;
-
-	/* Allocate an extra slot for execve() failure (ENOEXEC). */
-	av = (char **) emalloc2(5, sizeof(char *));
-	av++;
-
-	av[0] = user_shell;	/* may be updated later */
-	if (NewArgc > 0) {
-	    size_t size;
-	    char *cmnd, *src, *dst, *end;
-	    size = (size_t) (NewArgv[NewArgc - 1] - NewArgv[0]) +
-		    strlen(NewArgv[NewArgc - 1]) + 1;
-	    cmnd = emalloc(size);
-	    src = NewArgv[0];
-	    dst = cmnd;
-	    for (end = src + size - 1; src < end; src++, dst++)
-		*dst = *src == 0 ? ' ' : *src;
-	    *dst = '\0';
-	    av[1] = "-c";
-	    av[2] = cmnd;
-	    NewArgc = 2;
-	}
-	av[++NewArgc] = NULL;
-	NewArgv = av;
-    }
-#endif
 }
 
 /*
@@ -748,6 +701,10 @@ set_cmnd(sudo_mode)
     rval = FOUND;
     user_stat = emalloc(sizeof(struct stat));
 
+    /* Default value for cmnd, overridden below. */
+    if (user_cmnd == NULL)
+	user_cmnd = NewArgv[0];
+
     if (sudo_mode & (MODE_RUN | MODE_EDIT | MODE_CHECK)) {
 	if (ISSET(sudo_mode, MODE_RUN | MODE_CHECK)) {
 	    set_perms(PERM_RUNAS);
@@ -766,16 +723,9 @@ set_cmnd(sudo_mode)
 	    char *to, **from;
 	    size_t size, n;
 
-	    /* If we didn't realloc NewArgv it is contiguous so just count. */
-	    if (!ISSET(sudo_mode, MODE_SHELL)) {
-		size = (size_t) (NewArgv[NewArgc-1] - NewArgv[1]) +
-			strlen(NewArgv[NewArgc-1]) + 1;
-	    } else {
-		for (size = 0, from = NewArgv + 1; *from; from++)
-		    size += strlen(*from) + 1;
-	    }
-
 	    /* Alloc and build up user_args. */
+	    for (size = 0, from = NewArgv + 1; *from; from++)
+		size += strlen(*from) + 1;
 	    user_args = emalloc(size);
 	    for (to = user_args, from = NewArgv + 1; *from; from++) {
 		n = strlcpy(to, *from, size - (to - user_args));
@@ -1195,6 +1145,11 @@ deserialize_info(char * const settings[], char * const user_info[])
 		SET(flags, MODE_LOGIN_SHELL);
 		def_env_reset = TRUE;
 	    }
+	    continue;
+	}
+	if (MATCHES(*cur, "implied_shell=")) {
+	    if (atobool(*cur + sizeof("implied_shell=") - 1) == TRUE)
+		SET(flags, MODE_IMPLIED_SHELL);
 	    continue;
 	}
 	if (MATCHES(*cur, "preserve_groups=")) {

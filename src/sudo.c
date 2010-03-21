@@ -224,8 +224,11 @@ main(int argc, char *argv[], char *envp[])
 	    ok = policy_plugin.u.policy->check_policy(nargc, nargv, env_add,
 		&command_info, &argv_out, &user_env_out);
 	    sudo_debug(8, "policy plugin returns %d", ok);
-	    if (ok != TRUE)
-		exit(ok); /* plugin printed error message */
+	    if (ok != TRUE) {
+		if (ok == -2)
+		    usage(1);
+		exit(1); /* plugin printed error message */
+	    }
 	    command_info_to_details(command_info, &command_details);
 	    /* Restore coredumpsize resource limit before running. */
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
@@ -329,6 +332,12 @@ get_user_info(struct user_details *ud)
     if (user_info[i] == NULL)
 	errorx(1, "unable to allocate memory");
     ud->username = user_info[i] + sizeof("user=") - 1;
+
+    /* Stash user's shell for use with the -s flag; don't pass to plugin. */
+    if ((ud->shell = getenv("SHELL")) == NULL || ud->shell[0] == '\0') {
+	ud->shell = pw->pw_shell[0] ? pw->pw_shell : _PATH_BSHELL;
+    }
+    ud->shell = estrdup(ud->shell);
 
     easprintf(&user_info[++i], "uid=%lu", (unsigned long)ud->uid);
     easprintf(&user_info[++i], "euid=%lu", (unsigned long)ud->euid);

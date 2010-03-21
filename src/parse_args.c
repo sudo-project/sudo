@@ -66,7 +66,6 @@ const char *list_user, *runas_user, *runas_group;
 /*
  * Local functions.
  */
-static void usage(int) __attribute__((__noreturn__));
 static void usage_excl(int) __attribute__((__noreturn__));
 
 /*
@@ -102,7 +101,9 @@ static struct sudo_settings {
     { "runas_user" },
 #define ARG_PROGNAME 12
     { "progname" },
-#define NUM_SETTINGS 13
+#define ARG_IMPLIED_SHELL 13
+    { "implied_shell" },
+#define NUM_SETTINGS 14
     { NULL }
 };
 
@@ -295,13 +296,13 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	}
     }
 
-    *nargc = argc - optind;
-    *nargv = argv + optind;
+    argc -= optind;
+    argv += optind;
 
     if (!mode) {
 	/* Defer -k mode setting until we know whether it is a flag or not */
 	if (sudo_settings[ARG_IGNORE_TICKET].value != NULL) {
-	    if (*nargc == 0) {
+	    if (argc == 0) {
 		mode = MODE_INVALIDATE;	/* -k by itself */
 		sudo_settings[ARG_IGNORE_TICKET].value = NULL;
 		valid_flags = 0;
@@ -311,7 +312,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    mode = MODE_RUN;		/* running a command */
     }
 
-    if (*nargc > 0 && mode == MODE_LIST)
+    if (argc > 0 && mode == MODE_LIST)
 	mode = MODE_CHECK;
 
     if (ISSET(flags, MODE_LOGIN_SHELL)) {
@@ -347,14 +348,54 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	warningx("the `-A' and `-S' options may not be used together");
 	usage(1);
     }
-    if ((*nargc == 0 && mode == MODE_EDIT) ||
-	(*nargc > 0 && !ISSET(mode, MODE_RUN | MODE_EDIT | MODE_CHECK)))
+    if ((argc == 0 && mode == MODE_EDIT) ||
+	(argc > 0 && !ISSET(mode, MODE_RUN | MODE_EDIT | MODE_CHECK)))
 	usage(1);
-    if (*nargc == 0 && mode == MODE_RUN && !ISSET(flags, MODE_SHELL))
+    if (argc == 0 && mode == MODE_RUN && !ISSET(flags, MODE_SHELL)) {
 	SET(flags, (MODE_IMPLIED_SHELL | MODE_SHELL));
+	sudo_settings[ARG_IMPLIED_SHELL].value = "true";
+    }
 
     if (mode == MODE_HELP)
 	usage(0);
+
+    /*
+     * For shell mode we need to rewrite argv
+     */
+    if (ISSET(mode, MODE_RUN) && ISSET(flags, MODE_SHELL)) {
+	char **av;
+	int ac;
+
+	if (argc == 0) {
+	    /* just the shell */
+	    ac = argc + 1;
+	    av = emalloc2(ac + 1, sizeof(char *));
+	    memcpy(av + 1, argv, argc * sizeof(char *));
+	} else {
+	    /* shell -c "command" */
+	    size_t size;
+	    char *src, *dst, *end;
+
+	    /* length of the command + NUL terminator */
+	    size = (size_t)(argv[argc - 1] - argv[0]) +
+		strlen(argv[argc - 1]) + 1;
+
+	    ac = 3;
+	    av = emalloc2(ac + 1, sizeof(char *));
+	    av[1] = "-c";
+	    av[2] = dst = emalloc(size);
+
+	    src = argv[0];
+	    for (end = src + size - 1; src < end; src++, dst++)
+		*dst = *src == 0 ? ' ' : *src;
+	    *dst = '\0';
+	}
+	av[0] = (char *)user_details.shell; /* plugin may override shell */
+	av[ac] = NULL;
+
+	argv = av;
+	argc = ac;
+    }
 
     /*
      * Format setting_pairs into settings array.
@@ -375,6 +416,8 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 
     *settingsp = settings;
     *env_addp = env_add;
+    *nargc = argc;
+    *nargv = argv;
     return(mode | flags);
 }
 
@@ -388,7 +431,7 @@ usage_out(const char *buf)
  * Give usage message and exit.
  * The actual usage strings are in sudo_usage.h for configure substitution.
  */
-static void
+void
 usage(int exit_val)
 {
     struct lbuf lbuf;

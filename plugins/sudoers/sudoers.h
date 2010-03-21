@@ -48,7 +48,6 @@ struct sudo_user {
     struct stat *cmnd_stat;
     char *name;
     char *path;
-    char *shell;
     char *tty;
     char *ttypath;
     char *host;
@@ -156,7 +155,6 @@ struct sudo_user {
 #define user_passwd		(sudo_user.pw->pw_passwd)
 #define user_uuid		(sudo_user.uuid)
 #define user_dir		(sudo_user.pw->pw_dir)
-#define user_shell		(sudo_user.shell)
 #define user_ngroups		(sudo_user.ngroups)
 #define user_groups		(sudo_user.groups)
 #define user_tty		(sudo_user.tty)
