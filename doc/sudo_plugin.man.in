@@ -439,11 +439,13 @@ will be set.
 .Ve
 .Sp
 The \fIcheck_policy\fR function is called by \fBsudo\fR to determine
-whether the user is allowed to run the specified commands.
-Returns 1 if the command is allowed, 0 if not and \-1 on error.
-On error, the plugin may optionally call the conversation function with
-\&\f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error information to the
-user.
+whether the user is allowed to run the specified commands.  Returns
+1 if the command is allowed, 0 if not allowed, \-1 for a general
+error, or \-2 for a usage error.  In the latter case, \fBsudo\fR will
+print a usage message before it exits.  If an error occurs, the
+plugin may optionally call the conversation function with
+\&\f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error information to
+the user.
 .Sp
 The function arguments are as follows:
 .RS 4

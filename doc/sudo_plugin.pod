@@ -339,11 +339,13 @@ will be set.
                      char **argv_out[], char **user_env_out[]);
 
 The I<check_policy> function is called by B<sudo> to determine
-whether the user is allowed to run the specified commands.
-Returns 1 if the command is allowed, 0 if not and -1 on error.
-On error, the plugin may optionally call the conversation function with
-C<SUDO_CONF_ERROR_MSG> to present additional error information to the
-user.
+whether the user is allowed to run the specified commands.  Returns
+1 if the command is allowed, 0 if not allowed, -1 for a general
+error, or -2 for a usage error.  In the latter case, B<sudo> will
+print a usage message before it exits.  If an error occurs, the
+plugin may optionally call the conversation function with
+C<SUDO_CONF_ERROR_MSG> to present additional error information to
+the user.
 
 The function arguments are as follows:
 

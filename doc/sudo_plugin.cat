@@ -340,10 +340,11 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
            The _c_h_e_c_k___p_o_l_i_c_y function is called by ssuuddoo to determine whether
            the user is allowed to run the specified commands.  Returns 1 if
-           the command is allowed, 0 if not and -1 on error.  On error, the
-           plugin may optionally call the conversation function with
-           SUDO_CONF_ERROR_MSG to present additional error information to the
-           user.
+           the command is allowed, 0 if not allowed, -1 for a general error,
+           or -2 for a usage error.  In the latter case, ssuuddoo will print a
+           usage message before it exits.  If an error occurs, the plugin may
+           optionally call the conversation function with SUDO_CONF_ERROR_MSG
+           to present additional error information to the user.
 
            The function arguments are as follows:
 
@@ -387,7 +388,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
                runas_gid=gid
                    Group ID to run the command as.
-
 
 
 

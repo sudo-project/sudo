@@ -188,6 +188,24 @@ TODO list (most will be addressed in sudo 2.0)
 
 65) See http://iase.disa.mil/stigs/whitepaper/sudowhitepaper-042304.doc
 
-66) Add a session mode where sudo allocates a pty and logs everything
-    that occurs ala script(1).  Logs should be replayable via
-    scriptreplay.pl.  See linux script's -t option for timing info.
+66) Add manifest file that gets used to build the dist
+
+67) Rename script_execve -> sudo_execve and make sudoedit use it
+
+69) better handling of two sudo processes constantly signaling each other
+
+70) Merge 549f8f7c2463
+
+71) selinux stuff in non-script case
+
+73) ANSIfy sudoers
+
+74) in configure distinguish between CPPFLAGS and SUDOERS_CPPFLAGS
+
+76) Handle -i and -s flags and implied shell
+    Do the argv munging in sudo and set a flag if implied shell.
+    Plugin can then decide what to do.  Make a return val of -2 mean
+    usage error.  Document this.
+
+77) Move io plugin open to be after the policy plugin has said ok?
+    That way it has the right path/argv.  Document this.
