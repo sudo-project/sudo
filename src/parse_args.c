@@ -103,7 +103,9 @@ static struct sudo_settings {
     { "progname" },
 #define ARG_IMPLIED_SHELL 13
     { "implied_shell" },
-#define NUM_SETTINGS 14
+#define ARG_PRESERVE_GROUPS 14
+    { "preserve_groups" },
+#define NUM_SETTINGS 15
     { NULL }
 };
 
@@ -145,8 +147,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 
     /* Flags allowed when running a command */
     valid_flags = MODE_BACKGROUND|MODE_PRESERVE_ENV|MODE_RESET_HOME|
-		  MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|
-		  MODE_PRESERVE_GROUPS|MODE_SHELL;
+		  MODE_LOGIN_SHELL|MODE_NONINTERACTIVE|MODE_SHELL;
     /* XXX - should fill in settings at the end to avoid dupes */
     for (;;) {
 	/*
@@ -237,7 +238,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    SET(flags, MODE_NONINTERACTIVE);
 		    break;
 		case 'P':
-		    SET(flags, MODE_PRESERVE_GROUPS);
+		    sudo_settings[ARG_PRESERVE_GROUPS].value = "true";
 		    break;
 		case 'p':
 		    sudo_settings[ARG_PROMPT].value = optarg;
