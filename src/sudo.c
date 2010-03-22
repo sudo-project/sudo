@@ -283,7 +283,7 @@ get_user_groups(struct user_details *ud)
 #ifdef HAVE_GETGROUPS
     size_t glsize;
     char *cp;
-    int i;
+    int i, len;
 
     if ((ud->ngroups = getgroups(0, NULL)) <= 0)
 	return NULL;
@@ -296,8 +296,10 @@ get_user_groups(struct user_details *ud)
     memcpy(gid_list, "groups=", sizeof("groups=") - 1);
     cp = gid_list + sizeof("groups=") - 1;
     for (i = 0; i < ud->ngroups; i++) {
-	snprintf(cp, glsize - (cp - gid_list), "%lu%s",
-	    (unsigned long)ud->groups[i], i ? "," : "");
+	/* XXX - check rval */
+	len = snprintf(cp, glsize - (cp - gid_list), "%s%lu",
+	    i ? "," : "", (unsigned long)ud->groups[i]);
+	cp += len;
     }
 #endif
     return gid_list;
