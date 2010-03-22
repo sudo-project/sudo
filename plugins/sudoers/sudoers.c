@@ -537,6 +537,35 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 	easprintf(&command_info[info_len++], "runas_uid=%u", runas_pw->pw_uid);
 	easprintf(&command_info[info_len++], "runas_gid=%u", runas_pw->pw_gid);
     }
+    if (def_preserve_groups) {
+	command_info[info_len++], "preserve_groups=true";
+    } else {
+	/* XXX - what about when runas user has no passwd entry? */
+#ifdef HAVE_GETGRSET
+	char *gid_list = getgrset(runas_pw->pw_name);
+	easprintf(&command_info[info_len++], "groups=%s", gid_list);
+	efree(gid_list);
+#else
+	gid_t groups[NGROUPS_MAX * 2]; /* should use sysconf */
+	int i, len, ngroups = NGROUPS_MAX * 2;
+	size_t glsize;
+	char *cp, *gid_list;
+
+	/* XXX - rval */
+	getgrouplist(runas_pw->pw_name, runas_pw->pw_gid, groups, &ngroups);
+	glsize = sizeof("groups=") - 1 + (user_ngroups * (MAX_UID_T_LEN + 1));
+	gid_list = emalloc(glsize);
+	memcpy(gid_list, "groups=", sizeof("groups=") - 1);
+	cp = gid_list + sizeof("groups=") - 1;
+	for (i = 0; i < ngroups; i++) {
+	    /* XXX - check rval */
+	    len = snprintf(cp, glsize - (cp - gid_list), "%s%lu",
+		 i ? "," : "", (unsigned long)groups[i]);
+	    cp += len;
+	}
+	command_info[info_len++] = gid_list;
+#endif
+    }
 
     /* Must audit before uid change. */
     //audit_success(NewArgv); /* XXX */
