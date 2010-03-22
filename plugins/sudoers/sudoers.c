@@ -538,7 +538,7 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 	easprintf(&command_info[info_len++], "runas_gid=%u", runas_pw->pw_gid);
     }
     if (def_preserve_groups) {
-	command_info[info_len++], "preserve_groups=true";
+	command_info[info_len++] = "preserve_groups=true";
     } else {
 	/* XXX - what about when runas user has no passwd entry? */
 #ifdef HAVE_GETGRSET
