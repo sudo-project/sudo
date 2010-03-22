@@ -1153,11 +1153,13 @@ deserialize_info(char * const settings[], char * const user_info[])
 	    continue;
 	}
 	if (MATCHES(*cur, "preserve_groups=")) {
-	    SET(flags, MODE_PRESERVE_GROUPS);
+	    if (atobool(*cur + sizeof("preserve_groups=") - 1) == TRUE)
+		SET(flags, MODE_PRESERVE_GROUPS);
 	    continue;
 	}
 	if (MATCHES(*cur, "ignore_ticket=")) {
-	    SET(flags, MODE_IGNORE_TICKET);
+	    if (atobool(*cur + sizeof("ignore_ticket=") - 1) == TRUE)
+		SET(flags, MODE_IGNORE_TICKET);
 	    continue;
 	}
 	if (MATCHES(*cur, "login_class=")) {
