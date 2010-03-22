@@ -24671,9 +24671,9 @@ if test ${with_ldap-'no'} != "no"; then
 
 	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
 	with_ldap=yes
-	LDAP=""
     fi
     SUDO_OBJS="${SUDO_OBJS} ldap.o"
+    LDAP=""
 
     { echo "$as_me:$LINENO: checking for LDAP libraries" >&5
 echo $ECHO_N "checking for LDAP libraries... $ECHO_C" >&6; }

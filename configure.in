@@ -2494,9 +2494,9 @@ if test ${with_ldap-'no'} != "no"; then
 	SUDO_APPEND_LIBPATH(LDFLAGS, [${with_ldap}/lib])
 	CPPFLAGS="${CPPFLAGS} -I${with_ldap}/include"
 	with_ldap=yes
-	LDAP=""
     fi
     SUDO_OBJS="${SUDO_OBJS} ldap.o"
+    LDAP=""
 
     AC_MSG_CHECKING([for LDAP libraries])
     LDAP_LIBS=""
