@@ -1894,6 +1894,7 @@ AC_CHECK_FUNCS(getline, [], [
     AC_LIBOBJ(getline)
     AC_CHECK_FUNCS(fgetln)
 ])
+AC_CHECK_FUNCS(getgrset, [], [AC_REPLACE_FUNCS(getgrouplist)])
 
 AC_CHECK_FUNCS(sysctl getutid getutxid, [break])
 

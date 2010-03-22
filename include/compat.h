@@ -298,4 +298,12 @@ void setprogname(const char *);
 # define WCOREDUMP(x)	((x) & 0x80)
 #endif
 
+#ifndef NGROUPS_MAX
+# ifdef NGROUPS
+#  define NGROUPS_MAX NGROUPS
+# else
+#  define NGROUPS_MAX 16
+# endif
+#endif
+
 #endif /* _SUDO_COMPAT_H */

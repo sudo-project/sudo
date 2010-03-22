@@ -165,6 +165,12 @@
 /* Define to 1 if you have the `getgroups' function. */
 #undef HAVE_GETGROUPS
 
+/* Define to 1 if you have the `getgrset' function. */
+#undef HAVE_GETGRSET
+
+/* Define to 1 if you have the `getgrouplist' function. */
+#undef HAVE_GETGROUPLIST
+
 /* Define to 1 if you have the `getifaddrs' function. */
 #undef HAVE_GETIFADDRS
 

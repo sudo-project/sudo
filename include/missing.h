@@ -84,5 +84,8 @@ char *strdup(const char *);
 #ifndef HAVE_STRNDUP
 char *strndup(const char *, size_t);
 #endif
+#ifndef HAVE_GETGROUPLIST
+int getgrouplist(const char *name, gid_t basegid, gid_t *groups, int *ngroups);
+#endif
 
 #endif /* _SUDO_MISSING_H */
