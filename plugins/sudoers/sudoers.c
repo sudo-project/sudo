@@ -543,7 +543,7 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 	/* XXX - what about when runas user has no passwd entry? */
 #ifdef HAVE_GETGRSET
 	char *gid_list = getgrset(runas_pw->pw_name);
-	easprintf(&command_info[info_len++], "groups=%s", gid_list);
+	easprintf(&command_info[info_len++], "runas_groups=%s", gid_list);
 	efree(gid_list);
 #else
 	gid_t groups[NGROUPS_MAX * 2]; /* should use sysconf */
@@ -553,10 +553,10 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 
 	/* XXX - rval */
 	getgrouplist(runas_pw->pw_name, runas_pw->pw_gid, groups, &ngroups);
-	glsize = sizeof("groups=") - 1 + (user_ngroups * (MAX_UID_T_LEN + 1));
+	glsize = sizeof("runas_groups=") - 1 + (user_ngroups * (MAX_UID_T_LEN + 1));
 	gid_list = emalloc(glsize);
-	memcpy(gid_list, "groups=", sizeof("groups=") - 1);
-	cp = gid_list + sizeof("groups=") - 1;
+	memcpy(gid_list, "runas_groups=", sizeof("runas_groups=") - 1);
+	cp = gid_list + sizeof("runas_groups=") - 1;
 	for (i = 0; i < ngroups; i++) {
 	    /* XXX - check rval */
 	    len = snprintf(cp, glsize - (cp - gid_list), "%s%lu",
