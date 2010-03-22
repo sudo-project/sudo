@@ -26,6 +26,7 @@ AC_SUBST(SUDO_LIBS)
 AC_SUBST(SUDOERS_LIBS)
 AC_SUBST(NET_LIBS)
 AC_SUBST(AFS_LIBS)
+AC_SUBST(REPLAY_LIBS)
 AC_SUBST(GETGROUPS_LIB)
 AC_SUBST(OSDEFS)
 AC_SUBST(AUTH_OBJS)
@@ -1944,7 +1945,7 @@ SUDO_FUNC_ISBLANK
 AC_REPLACE_FUNCS(memrchr strerror strcasecmp sigaction strlcpy strlcat strdup strndup)
 AC_CHECK_FUNCS(nanosleep, [], [
     # On Solaris, nanosleep is in librt
-    AC_CHECK_LIB(rt, nanosleep, [LIBS="${LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])
+    AC_CHECK_LIB(rt, nanosleep, [REPLAY_LIBS="${REPLAY_LIBS} -lrt"], [AC_LIBOBJ(nanosleep)])
 ])
 AC_CHECK_FUNCS(closefrom, [], [AC_LIBOBJ(closefrom)
     AC_CHECK_DECL(F_CLOSEM, AC_DEFINE(HAVE_FCNTL_CLOSEM), [],

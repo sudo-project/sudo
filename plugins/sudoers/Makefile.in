@@ -45,6 +45,7 @@ INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 LIBS = $(top_srcdir)/@ac_config_libobj_dir@/libreplace.la
 NET_LIBS = @NET_LIBS@
 SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS)
+REPLAY_LIBS = @REPLAY_LIBS@
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) @CPPFLAGS@
@@ -144,7 +145,7 @@ visudo: libsudoers.la $(VISUDO_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
 
 sudoreplay: libsudoers.la $(REPLAY_OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) @ZLIB@
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) $(REPLAY_LIBS) libsudoers.la $(LIBS) @ZLIB@
 
 testsudoers: $(TEST_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)

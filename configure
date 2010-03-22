@@ -815,6 +815,7 @@ SUDO_LIBS
 SUDOERS_LIBS
 NET_LIBS
 AFS_LIBS
+REPLAY_LIBS
 GETGROUPS_LIB
 OSDEFS
 AUTH_OBJS
@@ -2063,6 +2064,7 @@ ac_config_headers="$ac_config_headers config.h pathnames.h"
 
 { echo "$as_me:$LINENO: Configuring Sudo version $PACKAGE_VERSION" >&5
 echo "$as_me: Configuring Sudo version $PACKAGE_VERSION" >&6;}
+
 
 
 
@@ -6610,7 +6612,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6613 "configure"' > conftest.$ac_ext
+  echo '#line 6615 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8474,11 +8476,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8477: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8479: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8481: \$? = $ac_status" >&5
+   echo "$as_me:8483: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8764,11 +8766,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8767: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8769: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8771: \$? = $ac_status" >&5
+   echo "$as_me:8773: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8868,11 +8870,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8871: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8873: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8875: \$? = $ac_status" >&5
+   echo "$as_me:8877: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11228,7 +11230,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11231 "configure"
+#line 11233 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11328,7 +11330,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11331 "configure"
+#line 11333 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -19743,7 +19745,7 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_lib_rt_nanosleep" >&5
 echo "${ECHO_T}$ac_cv_lib_rt_nanosleep" >&6; }
 if test $ac_cv_lib_rt_nanosleep = yes; then
-  LIBS="${LIBS} -lrt"
+  REPLAY_LIBS="${REPLAY_LIBS} -lrt"
 else
   case " $LIBOBJS " in
   *" nanosleep.$ac_objext "* ) ;;
@@ -27173,6 +27175,7 @@ SUDO_LIBS!$SUDO_LIBS$ac_delim
 SUDOERS_LIBS!$SUDOERS_LIBS$ac_delim
 NET_LIBS!$NET_LIBS$ac_delim
 AFS_LIBS!$AFS_LIBS$ac_delim
+REPLAY_LIBS!$REPLAY_LIBS$ac_delim
 GETGROUPS_LIB!$GETGROUPS_LIB$ac_delim
 OSDEFS!$OSDEFS$ac_delim
 AUTH_OBJS!$AUTH_OBJS$ac_delim
@@ -27219,7 +27222,6 @@ mail_no_host!$mail_no_host$ac_delim
 mail_no_perms!$mail_no_perms$ac_delim
 mailto!$mailto$ac_delim
 mailsub!$mailsub$ac_delim
-badpass_message!$badpass_message$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -27261,6 +27263,7 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+badpass_message!$badpass_message$ac_delim
 fqdn!$fqdn$ac_delim
 runas_default!$runas_default$ac_delim
 env_editor!$env_editor$ac_delim
@@ -27309,7 +27312,7 @@ KRB5CONFIG!$KRB5CONFIG$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 46; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 47; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
