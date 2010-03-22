@@ -402,6 +402,7 @@ command_info_to_details(char * const info[], struct command_details *details)
     }
 
     for (i = 0; info[i] != NULL; i++) {
+	sudo_debug(9, "command info: %s", info[i]);
 	switch (info[i][0]) {
 	    case 'c':
 		SET_STRING("chroot=", chroot)
@@ -499,10 +500,12 @@ command_info_to_details(char * const info[], struct command_details *details)
 		    for (j = 0; j < details->ngroups;) {
 			errno = 0;
 			ulval = strtoul(cp, &ep, 0);
-			if (*cp != '\0' && (*ep == ',' || *ep == '\0') &&
-			    (errno != ERANGE || ulval != ULONG_MAX)) {
-			    details->groups[j++] = (gid_t)ulval;
+			if (*cp == '\0' || (*ep != ',' && *ep != '\0') ||
+			    (ulval == ULONG_MAX && errno == ERANGE)) {
+			    break;
 			}
+			details->groups[j++] = (gid_t)ulval;
+			cp = ep + 1;
 		    }
 		    details->ngroups = j;
 		    break;
@@ -678,7 +681,6 @@ exec_setup(struct command_details *details)
     }
 
     if (!ISSET(details->flags, CD_PRESERVE_GROUPS)) {
-	/* XXX - may need to initgroups anyway--plugin may not have list */
 #ifdef HAVE_GETGROUPS
 	if (details->ngroups >= 0) {
 	    if (setgroups(details->ngroups, details->groups) < 0) {
