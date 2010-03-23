@@ -1237,12 +1237,14 @@ deserialize_info(char * const settings[], char * const user_info[])
 	    /* Count number of groups */
 	    const char *val = *cur + sizeof("groups=") - 1;
 	    const char *cp;
-	    for (cp = val; *cp != '\0'; cp++) {
-		if (*cp == ',')
-		    user_ngroups++;
-	    }
-	    if (user_ngroups) {
-		user_groups = emalloc2(user_ngroups, sizeof(gid_t));
+	    if (val[0] != '\0') {
+		user_ngroups = 1;
+		for (cp = val; *cp != '\0'; cp++) {
+		    if (*cp == ',')
+			user_ngroups++;
+		}
+
+		user_groups = emalloc2(user_ngroups, sizeof(GETGROUPS_T));
 		user_ngroups = 0;
 		cp = val;
 		for (;;) {
