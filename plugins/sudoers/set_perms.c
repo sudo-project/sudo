@@ -125,6 +125,7 @@ set_perms(perm)
 				}
 			      	break;
 
+#if 0
 	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == ROOT_UID */
 				runas_setup();
@@ -135,6 +136,7 @@ set_perms(perm)
 				    goto bad;
 				}
 				break;
+#endif
 
 	case PERM_SUDOERS:
 				/* assume euid == ROOT_UID, ruid == user */
@@ -243,6 +245,7 @@ set_perms(perm)
 				}
 			      	break;
 
+#if 0
 	case PERM_FULL_RUNAS:
 				/* headed for exec(), assume euid == ROOT_UID */
 				runas_setup();
@@ -252,6 +255,7 @@ set_perms(perm)
 				    goto bad;
 				}
 				break;
+#endif
 
 	case PERM_SUDOERS:
 				/* assume euid == ROOT_UID, ruid == user */
@@ -364,6 +368,7 @@ set_perms(perm)
 				}
 			      	break;
 
+#if 0
 	case PERM_FULL_RUNAS:
 				/* headed for exec() */
 				runas_setup();
@@ -372,6 +377,7 @@ set_perms(perm)
 				    goto bad;
 				}
 				break;
+#endif
 
 	case PERM_SUDOERS:
 				if (setegid(SUDOERS_GID))
@@ -452,6 +458,7 @@ set_perms(perm)
 				}
 			      	break;
 				
+#if 0
 	case PERM_FULL_RUNAS:
 				runas_setup();
 				if (setuid(runas_pw->pw_uid)) {
@@ -459,6 +466,7 @@ set_perms(perm)
 				    goto bad;
 				}
 				break;
+#endif
 
 	case PERM_USER:
 	case PERM_SUDOERS:
@@ -537,6 +545,7 @@ restore_groups()
 
 #endif /* HAVE_INITGROUPS */
 
+#if 0
 static void
 runas_setup()
 {
@@ -581,3 +590,4 @@ runas_setup()
 	    warning("cannot set gid to runas gid");
     }
 }
+#endif
