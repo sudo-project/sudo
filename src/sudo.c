@@ -162,22 +162,11 @@ main(int argc, char *argv[], char *envp[])
     /* Read sudo.conf and load plugins. */
     sudo_load_plugins(_PATH_SUDO_CONF, &policy_plugin, &io_plugins);
 
-    /* Open each plugin. */
+    /* Open policy plugin. */
     ok = policy_plugin.u.policy->open(SUDO_API_VERSION, sudo_conversation,
 	settings, user_info, envp);
     if (ok != TRUE)
 	errorx(1, "unable to initialize policy plugin");
-    for (plugin = io_plugins.first; plugin != NULL; plugin = next) {
-	next = plugin->next;
-	ok = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation, settings,
-	    user_info, envp);
-	if (ok == -1)
-	    errorx(1, "error initializing I/O plugin %s", plugin->name);
-	if (!ok) {
-	    /* Disable I/O plugin by removing it from the list. */
-	    tq_remove(&io_plugins, plugin);
-	}
-    }
 
     sudo_debug(9, "sudo_mode %d", sudo_mode);
     switch (sudo_mode & MODE_MASK) {
@@ -229,12 +218,24 @@ main(int argc, char *argv[], char *envp[])
 		    usage(1);
 		exit(1); /* plugin printed error message */
 	    }
+	    /* Open I/O plugins once policy plugin succeeds. */
+	    for (plugin = io_plugins.first; plugin != NULL; plugin = next) {
+		next = plugin->next;
+		ok = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation, settings,
+		    user_info, envp);
+		if (ok == -1)
+		    errorx(1, "error initializing I/O plugin %s", plugin->name);
+		if (!ok) {
+		    /* I/O plugin asked to be disabled, remove from list. */
+		    tq_remove(&io_plugins, plugin);
+		}
+	    }
 	    command_info_to_details(command_info, &command_details);
 	    /* Restore coredumpsize resource limit before running. */
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 	    (void) setrlimit(RLIMIT_CORE, &corelimit);
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
-	    /* run_command will call close for us */
+	    /* run_command will call the close method for us */
 	    run_command(&command_details, argv_out, user_env_out);
 	    break;
 	case MODE_EDIT:

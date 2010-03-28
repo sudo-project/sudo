@@ -401,7 +401,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     /*
      * Format setting_pairs into settings array.
      */
-    settings = emalloc2(NUM_SETTINGS + 1, sizeof (char *));
+    settings = emalloc2(NUM_SETTINGS + 1, sizeof(char *));
     for (i = 0, j = 0; i < NUM_SETTINGS; i++) {
 	if (sudo_settings[i].value) {
 	    sudo_debug(9, "settings: %s=%s", sudo_settings[i].name,
