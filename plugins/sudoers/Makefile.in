@@ -44,8 +44,8 @@ INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 # Libraries
 LIBS = $(top_srcdir)/@ac_config_libobj_dir@/libreplace.la
 NET_LIBS = @NET_LIBS@
-SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS)
-REPLAY_LIBS = @REPLAY_LIBS@
+SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZLIB@
+REPLAY_LIBS = @REPLAY_LIBS@ @ZLIB@
 
 # C preprocessor flags
 CPPFLAGS = -I$(incdir) -I$(top_builddir) -I$(srcdir) @CPPFLAGS@
@@ -101,9 +101,10 @@ LIBSUDOERS_OBJS = alias.lo alloc.lo atobool.lo defaults.lo gram.lo list.lo \
 		  zero_bytes.lo @NONUNIX_GROUPS_IMPL@
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo fmt_string.lo \
-	       plugin_error.lo env.lo getspwuid.lo gettime.lo goodpath.lo \
-	       fileops.lo find_path.lo interfaces.lo lbuf.lo logging.lo \
-	       parse.lo set_perms.lo sudoers.lo sudo_nss.lo @SUDOERS_OBJS@
+	       plugin_error.lo env.lo getspwuid.lo gettime.lo \
+	       goodpath.lo fileops.lo find_path.lo interfaces.lo lbuf.lo \
+	       logging.lo parse.lo set_perms.lo sudoers.lo sudo_nss.lo \
+	       iolog.lo @SUDOERS_OBJS@
 
 # XXX - need top level error.o; perhaps make #ifdef PIC?
 VISUDO_OBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o error.o
@@ -145,7 +146,7 @@ visudo: libsudoers.la $(VISUDO_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
 
 sudoreplay: libsudoers.la $(REPLAY_OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) $(REPLAY_LIBS) libsudoers.la $(LIBS) @ZLIB@
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) $(REPLAY_LIBS) libsudoers.la $(LIBS)
 
 testsudoers: $(TEST_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
@@ -205,6 +206,8 @@ gram.lo: $(devdir)/gram.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(devdir)/gram.c
 interfaces.lo: $(srcdir)/interfaces.c $(SUDODEP) $(srcdir)/interfaces.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/interfaces.c
+iolog.lo: $(srcdir)/iolog.c $(SUDODEP)
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/iolog.c
 ldap.lo: $(srcdir)/ldap.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ldap.c
 logging.lo: $(srcdir)/logging.c $(SUDODEP)

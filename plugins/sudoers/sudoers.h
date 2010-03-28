@@ -297,6 +297,13 @@ YY_DECL;
 /* atobool.c */
 int atobool(const char *str);
 
+/* iolog.c */
+int sudoers_io_open(unsigned int version, sudo_conv_t conversation,
+    char * const settings[], char * const user_info[], char * const user_env[]);
+void sudoers_io_close(int exit_status, int error);
+int sudoers_io_version(int verbose);
+int sudoers_io_log_output(const char *buf, unsigned int len);
+
 /* Only provide extern declarations outside of sudo.c. */
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;

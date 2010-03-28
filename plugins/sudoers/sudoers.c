@@ -1300,14 +1300,12 @@ struct policy_plugin sudoers_policy = {
     sudoers_policy_invalidate
 };
 
-#ifdef notyet
 struct io_plugin sudoers_io = {
     SUDO_IO_PLUGIN,
     SUDO_API_VERSION,
-    io_open,
-    io_close,
-    io_version,
-    io_log_input,
-    io_log_output
+    sudoers_io_open,
+    sudoers_io_close,
+    sudoers_io_version,
+    NULL,
+    sudoers_io_log_output
 };
-#endif

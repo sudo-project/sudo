@@ -60,7 +60,9 @@
 /*
  * Prototypes
  */
+#if 0
 static void runas_setup(void);
+#endif
 static void runas_setgroups(void);
 static void restore_groups(void);
 
