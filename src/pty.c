@@ -131,7 +131,7 @@ get_pty(int *master, int *slave, char *name, size_t namesz, uid_t uid)
 	close(*master);
 	return(0);
     }
-# ifdef I_PUSH
+# if defined(I_PUSH) && !defined(_AIX)
     ioctl(*slave, I_PUSH, "ptem");	/* pseudo tty emulation module */
     ioctl(*slave, I_PUSH, "ldterm");	/* line discipline module */
 # endif
