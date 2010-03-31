@@ -20,7 +20,7 @@
 #include <config.h>
 #include <compat.h>
 
-static char *progname = "sudo";
+static const char *progname = "sudo";
 
 void
 setprogname(const char *name)
