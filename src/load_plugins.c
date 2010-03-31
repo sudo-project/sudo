@@ -58,14 +58,22 @@ sudo_read_conf(const char *conf_file)
     static struct plugin_info_list pil; /* XXX */
 
     if ((fp = fopen(conf_file, "r")) == NULL) {
-	/* Default values */
+	/* Default policy plugin */
 	info = emalloc(sizeof(*info));
 	info->symbol_name = "sudoers_policy";
 	info->path = SUDOERS_PLUGIN;
 	info->prev = info;
 	info->next = NULL;
 	tq_append(&pil, info);
-	/* XXX - io plugin too */
+
+	/* Default I/O plugin */
+	info = emalloc(sizeof(*info));
+	info->symbol_name = "sudoers_io";
+	info->path = SUDOERS_PLUGIN;
+	info->prev = info;
+	info->next = NULL;
+	tq_append(&pil, info);
+
 	goto done;
     }
 
