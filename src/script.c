@@ -339,10 +339,6 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
 
-    /* XXX - now get command status via sv (still need to detect child death) */
-    sa.sa_handler = sigchild;
-    sigaction(SIGCHLD, &sa, NULL);
-
     /* Catch SIGALRM for command timeout */
     sa.sa_handler = handler;
     sigaction(SIGALRM, &sa, NULL);
@@ -350,6 +346,11 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     /* Ignore SIGPIPE from other end of socketpair. */
     sa.sa_handler = SIG_IGN;
     sigaction(SIGPIPE, &sa, NULL);
+
+    /* Note: HP-UX select() will not be interrupted if SA_RESTART set */
+    sa.sa_flags = 0;
+    sa.sa_handler = sigchild;
+    sigaction(SIGCHLD, &sa, NULL);
 
     if (log_io) {
 	sa.sa_handler = sigwinch;
@@ -724,7 +725,8 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
     sigaction(SIGTTIN, &sa, NULL);
     sigaction(SIGTTOU, &sa, NULL);
 
-    /* SIGCHLD will interrupt select. */
+    /* Note: HP-UX select() will not be interrupted if SA_RESTART set */
+    sa.sa_flags = 0;
     sa.sa_handler = handler;
     sigaction(SIGCHLD, &sa, NULL);
 
@@ -782,6 +784,7 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	sigaction(SIGTTOU, &sa, NULL);
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);
+	sigaction(SIGCHLD, &sa, NULL);
 
 	/* setup tty and exec command */
 	script_run(path, argv, envp, rbac);
