@@ -140,7 +140,7 @@ libsudoers.la: $(LIBSUDOERS_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LIBSUDOERS_OBJS) -no-install
 
 sudoers.la: $(SUDOERS_OBJS) libsudoers.la
-	$(LIBTOOL) --mode=link $(CC) $(SUDOERS_LDFLAGS) -o $@ $(SUDOERS_OBJS) libsudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
+	$(LIBTOOL) --tag=disable-static --mode=link $(CC) $(SUDOERS_LDFLAGS) -o $@ $(SUDOERS_OBJS) libsudoers.la $(SUDOERS_LIBS) -module -avoid-version -rpath $(plugindir)
 
 visudo: libsudoers.la $(VISUDO_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
@@ -301,7 +301,7 @@ install-binaries: visudo sudoreplay install-dirs
 	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 -s visudo $(DESTDIR)$(visudodir)/visudo
 
 install-plugin: sudoers.la install-dirs
-	$(LIBTOOL) --tag=disable-static --mode=install $(INSTALL) sudoers.la $(DESTDIR)$(plugindir)
+	$(LIBTOOL) --mode=install $(INSTALL) sudoers.la $(DESTDIR)$(plugindir)
 
 install-man:
 
