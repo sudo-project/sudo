@@ -194,7 +194,6 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 	return -1;
     }
 
-/* XXX - signal setup duplicated in sudo.c */
     /*
      * Signal setup:
      *	Ignore keyboard-generated signals so the user cannot interrupt

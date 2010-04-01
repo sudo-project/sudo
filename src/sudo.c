@@ -105,12 +105,10 @@ struct user_details user_details;
 #if defined(RLIMIT_CORE) && !defined(SUDO_DEVEL)
 static struct rlimit corelimit;
 #endif /* RLIMIT_CORE && !SUDO_DEVEL */
-sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
 
 int
 main(int argc, char *argv[], char *envp[])
 {
-    sigaction_t sa;
     int nargc, sudo_mode;
     char **nargv, **settings, **env_add;
     char **user_info, **command_info, **argv_out, **user_env_out;
@@ -133,20 +131,6 @@ main(int argc, char *argv[], char *envp[])
 
     if (geteuid() != 0)
 	errorx(1, "must be setuid root");
-
-    /*
-     * Signal setup:
-     *	Ignore keyboard-generated signals so the user cannot interrupt
-     *  us at some point and avoid the logging.
-     * XXX - leave this to the plugin?
-     */
-    zero_bytes(&sa, sizeof(sa));
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    sa.sa_handler = SIG_IGN;
-    (void) sigaction(SIGINT, &sa, &saved_sa_int);
-    (void) sigaction(SIGQUIT, &sa, &saved_sa_quit);
-    (void) sigaction(SIGTSTP, &sa, &saved_sa_tstp);
 
     /* Turn off core dumps and make sure fds 0-2 are open. */
     disable_coredumps();

@@ -55,7 +55,6 @@
 
 #include "sudo.h"
 
-extern sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
 extern char **environ;
 
 static char *find_editor();
@@ -211,9 +210,6 @@ sudo_edit(int argc, char **argv, char **envp)
 	nargv[ac++] = tf[i++].tfile;
     nargv[ac] = NULL;
 
-    /* Allow the editor to be suspended. */
-    (void) sigaction(SIGTSTP, &saved_sa_tstp, NULL);
-
     /*
      * Fork and exec the editor with the invoking user's creds,
      * keeping track of the time spent in the editor.
@@ -225,8 +221,6 @@ sudo_edit(int argc, char **argv, char **envp)
 	goto cleanup;
     } else if (kidpid == 0) {
 	/* child */
-	(void) sigaction(SIGINT, &saved_sa_int, NULL);
-	(void) sigaction(SIGQUIT, &saved_sa_quit, NULL);
 	set_perms(PERM_FULL_USER);
 	closefrom(def_closefrom);
 	execvp(nargv[0], nargv);
