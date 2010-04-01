@@ -557,7 +557,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    do {
 		n = send(sv[0], cstat, sizeof(*cstat), 0);
 	    } while (n == -1 && errno == EINTR);
-	    if (n != sizeof(cstat)) {
+	    if (n != sizeof(*cstat)) {
 		break; /* should not happen */
 	    }
 	}
