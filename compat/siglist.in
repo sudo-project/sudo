@@ -1,5 +1,6 @@
 #
 # List of signals used to build sys_siglist (see mksiglist.c)
+# Adapted from pdksh; public domain
 #
 # Note that if a system has multiple defines for the same signal
 # (eg, SIGABRT vs SIGIOT, SIGCHLD vs SIGCLD), only the first one

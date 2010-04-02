@@ -67,7 +67,7 @@ mksiglist: $(srcdir)/mksiglist.c $(srcdir)/mksiglist.h $(incdir)/compat.h $(top_
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(srcdir)/mksiglist.c -o $@
 
 @DEV@$(srcdir)/mksiglist.h: $(srcdir)/siglist.in
-@DEV@	awk '/^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $1, $1, $1, substr($0, 13))}' < $(srcdir)/siglist.in > $@
+@DEV@	awk 'BEGIN {print "/* public domain */\n"} /^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $1, $1, $1, substr($0, 13))}' < $(srcdir)/siglist.in > $@
 
 $(LIBOBJDIR)siglist.lo: siglist.c $(incdir)/compat.h $(top_builddir)/config.h
 

@@ -1,3 +1,5 @@
+/* public domain */
+
 #ifdef SIGHUP
     if (my_sys_siglist[SIGHUP] == NULL)
 	my_sys_siglist[SIGHUP] = "Hangup";
