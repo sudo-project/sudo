@@ -61,26 +61,26 @@ libreplace.la: $(LTLIBOBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTLIBOBJS) -no-install
 
 # Dependencies
-$(LIBOBJDIR)$(LIBOBJDIR)closefrom.lo: $(compat)/closefrom.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)fnmatch.lo: $(compat)/fnmatch.c $(compat)/fnmatch.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)getcwd.lo: $(compat)/getcwd.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)getline.lo: $(compat)/getline.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)getprogname.lo: $(compat)/getprogname.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)glob.lo: $(compat)/glob.c $(compat)/glob.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)isblank.lo: $(compat)/isblank.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)memrchr.lo: $(compat)/memrchr.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)mkstemp.lo: $(compat)/mkstemp.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)nanosleep.lo: $(compat)/nanosleep.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)sigaction.lo: $(compat)/sigaction.c $(incdir)/compat.h $(incdir)/compat.h
-$(LIBOBJDIR)$(LIBOBJDIR)snprintf.lo: $(compat)/snprintf.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strcasecmp.lo: $(compat)/strcasecmp.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strdup.lo: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strndup.lo: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strerror.lo: $(compat)/strerror.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strlcat.lo: $(compat)/strlcat.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strlcpy.lo: $(compat)/strlcpy.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)strsignal.lo: $(compat)/strsignal.c $(incdir)/compat.h $(top_builddir)/config.h
-$(LIBOBJDIR)$(LIBOBJDIR)utimes.lo: $(compat)/utimes.c $(incdir)/compat.h $(compat)/utime.h $(top_builddir)/config.h
+$(LIBOBJDIR)closefrom.lo: $(compat)/closefrom.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)fnmatch.lo: $(compat)/fnmatch.c $(compat)/fnmatch.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)getcwd.lo: $(compat)/getcwd.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)getline.lo: $(compat)/getline.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)getprogname.lo: $(compat)/getprogname.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)glob.lo: $(compat)/glob.c $(compat)/glob.h $(compat)/charclass.h $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)isblank.lo: $(compat)/isblank.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)memrchr.lo: $(compat)/memrchr.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)mkstemp.lo: $(compat)/mkstemp.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)nanosleep.lo: $(compat)/nanosleep.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)sigaction.lo: $(compat)/sigaction.c $(incdir)/compat.h $(incdir)/compat.h
+$(LIBOBJDIR)snprintf.lo: $(compat)/snprintf.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)strcasecmp.lo: $(compat)/strcasecmp.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)strdup.lo: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)strndup.lo: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)strerror.lo: $(compat)/strerror.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)strlcat.lo: $(compat)/strlcat.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)strlcpy.lo: $(compat)/strlcpy.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)strsignal.lo: $(compat)/strsignal.c $(incdir)/compat.h $(top_builddir)/config.h
+$(LIBOBJDIR)utimes.lo: $(compat)/utimes.c $(incdir)/compat.h $(compat)/utime.h $(top_builddir)/config.h
 
 install:
 
