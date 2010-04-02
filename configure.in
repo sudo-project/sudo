@@ -2020,14 +2020,19 @@ dnl
 dnl Check for strsignal() or sys_siglist
 dnl
 AC_CHECK_FUNCS(strsignal, [], [
+    AC_LIBOBJ(strsignal)
+    HAVE_SIGLIST="false"
     AC_CHECK_DECLS([sys_siglist, _sys_siglist, __sys_siglist], [
-	AC_LIBOBJ(strsignal)
-	AC_DEFINE(HAVE_STRSIGNAL)
+	HAVE_SIGLIST="true"
 	break
-    ], [], [
+    ], [ ], [
 AC_INCLUDES_DEFAULT
 #include <signal.h>
-])])
+    ])
+    if test "$HAVE_SIGLIST" != "true"; then
+	AC_LIBOBJ(siglist)
+    fi
+])
 
 dnl
 dnl nsswitch.conf and its equivalents

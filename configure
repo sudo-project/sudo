@@ -21874,6 +21874,13 @@ _ACEOF
 
 else
 
+    case " $LIBOBJS " in
+  *" strsignal.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS strsignal.$ac_objext"
+ ;;
+esac
+
+    HAVE_SIGLIST="false"
     { echo "$as_me:$LINENO: checking whether sys_siglist is declared" >&5
 echo $ECHO_N "checking whether sys_siglist is declared... $ECHO_C" >&6; }
 if test "${ac_cv_have_decl_sys_siglist+set}" = set; then
@@ -21937,16 +21944,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-	case " $LIBOBJS " in
-  *" strsignal.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS strsignal.$ac_objext"
- ;;
-esac
-
-	cat >>confdefs.h <<\_ACEOF
-#define HAVE_STRSIGNAL 1
-_ACEOF
-
+	HAVE_SIGLIST="true"
 	break
 
 else
@@ -22019,16 +22017,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-	case " $LIBOBJS " in
-  *" strsignal.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS strsignal.$ac_objext"
- ;;
-esac
-
-	cat >>confdefs.h <<\_ACEOF
-#define HAVE_STRSIGNAL 1
-_ACEOF
-
+	HAVE_SIGLIST="true"
 	break
 
 else
@@ -22101,16 +22090,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-	case " $LIBOBJS " in
-  *" strsignal.$ac_objext "* ) ;;
-  *) LIBOBJS="$LIBOBJS strsignal.$ac_objext"
- ;;
-esac
-
-	cat >>confdefs.h <<\_ACEOF
-#define HAVE_STRSIGNAL 1
-_ACEOF
-
+	HAVE_SIGLIST="true"
 	break
 
 else
@@ -22121,6 +22101,15 @@ _ACEOF
 
 fi
 
+
+    if test "$HAVE_SIGLIST" != "true"; then
+	case " $LIBOBJS " in
+  *" siglist.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS siglist.$ac_objext"
+ ;;
+esac
+
+    fi
 
 fi
 done

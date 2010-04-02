@@ -75,7 +75,7 @@ int setenv(const char *, const char *, int);
 #ifndef HAVE_UNSETENV
 int unsetenv(const char *);
 #endif
-#if defined(HAVE_DECL_SYS_SIGLIST) || defined(HAVE_DECL__SYS_SIGLIST) || defined(HAVE_DECL___SYS_SIGLIST)
+#ifndef HAVE_STRSIGNAL
 char *strsignal(int);
 #endif
 #ifndef HAVE_STRDUP

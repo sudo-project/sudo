@@ -55,10 +55,21 @@ all: libreplace.la
 .SUFFIXES: .o .c .h .lo
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
 libreplace.la: $(LTLIBOBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(LTLIBOBJS) -no-install
+
+$(LIBOBJDIR)siglist.c: $(LIBOBJDIR)mksiglist
+	$(LIBOBJDIR)mksiglist > $@
+
+$(LIBOBJDIR)mksiglist: $(LIBOBJDIR)mksiglist.c $(LIBOBJDIR)mksiglist.h $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEFS) $(LIBOBJDIR)mksiglist.c -o $@
+
+@DEV@$(LIBOBJDIR)mksiglist.h: $(LIBOBJDIR)siglist.in
+@DEV@	awk '/^    [A-Z]/ {printf("#ifdef SIG%s\n    if (my_sys_siglist[SIG%s] == NULL)\n\tmy_sys_siglist[SIG%s] = \"%s\";\n#endif\n", $1, $1, $1, substr($0, 13))}' < $(LIBOBJDIR)siglist.in > $@
+
+$(LIBOBJDIR)siglist.lo: $(LIBOBJDIR)siglist.c $(incdir)/compat.h $(top_builddir)/config.h
 
 # Dependencies
 $(LIBOBJDIR)closefrom.lo: $(compat)/closefrom.c $(incdir)/compat.h $(top_builddir)/config.h
