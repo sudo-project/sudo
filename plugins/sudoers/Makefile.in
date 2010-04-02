@@ -314,7 +314,7 @@ check:
 	@echo nothing to check
 
 clean:
-	-rm -f *.a *.o *.lo *.la stamp-* core *.core core.*
+	-rm -f sudoreplay testsudoers visudo *.a *.o *.lo *.la stamp-* core *.core core.*
 
 mostlyclean: clean
 
