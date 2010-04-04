@@ -26,6 +26,7 @@
     ALRM    Alarm clock
     TERM    Terminated
     STKFLT  Stack fault
+# before POLL (POLL is sometimes the same as IO)
     IO      I/O possible
     XCPU    CPU time limit exceeded
     XFSZ    File size limit exceeded
