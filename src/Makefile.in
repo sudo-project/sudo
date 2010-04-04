@@ -24,7 +24,6 @@ devdir = @devdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
-compat = $(top_srcdir)/compat
 
 # Compiler & tools to use
 CC = @CC@
@@ -77,7 +76,7 @@ OBJS =	sudo.o parse_args.o lbuf.o alloc.o error.o zero_bytes.o \
 	load_plugins.o conversation.o list.o fmt_string.o tgetpass.o \
 	fileops.o term.o ttysize.o atobool.o script.o pty.o @SUDO_OBJS@
 
-LIBOBJDIR = $(top_srcdir)/@ac_config_libobj_dir@/
+LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
 VERSION = @PACKAGE_VERSION@
 

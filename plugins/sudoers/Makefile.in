@@ -30,7 +30,6 @@ authdir = $(srcdir)/auth
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
-compat = $(top_srcdir)/compat
 
 # Compiler & tools to use
 CC = @CC@
@@ -42,7 +41,7 @@ YACC = @YACC@
 INSTALL = $(SHELL) $(top_srcdir)/install-sh -c
 
 # Libraries
-LIBS = $(top_srcdir)/@ac_config_libobj_dir@/libreplace.la
+LIBS = $(top_builddir)/@ac_config_libobj_dir@/libreplace.la
 NET_LIBS = @NET_LIBS@
 SUDOERS_LIBS = @SUDOERS_LIBS@ @AFS_LIBS@ @GETGROUPS_LIB@ $(LIBS) $(NET_LIBS) @ZLIB@
 REPLAY_LIBS = @REPLAY_LIBS@ @ZLIB@
@@ -106,7 +105,6 @@ SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo fmt_string.lo \
 	       logging.lo parse.lo set_perms.lo sudoers.lo sudo_nss.lo \
 	       iolog.lo @SUDOERS_OBJS@
 
-# XXX - need top level error.o; perhaps make #ifdef PIC?
 VISUDO_OBJS = visudo.o fileops.o gettime.o goodpath.o find_path.o error.o
 
 REPLAY_OBJS = getdate.o sudoreplay.o term.o error.o
@@ -194,8 +192,6 @@ env.lo: $(srcdir)/env.c $(SUDODEP)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/env.c
 find_path.lo: $(srcdir)/find_path.c $(SUDODEP)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/find_path.c
-getdate.lo: $(srcdir)/getdate.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getdate.c
 getspwuid.lo: $(srcdir)/getspwuid.c $(SUDODEP)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getspwuid.c
 gettime.lo: $(srcdir)/gettime.c $(SUDODEP)
@@ -250,9 +246,6 @@ lbuf.lo: $(top_srcdir)/src/lbuf.c $(SUDODEP)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/src/lbuf.c
 zero_bytes.lo: $(top_srcdir)/src/zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/src/zero_bytes.c
-# XXX - for sudoreplay
-term.o: $(top_srcdir)/src/term.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/src/term.c
 
 # Auth dependencies
 sudo_auth.lo: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
@@ -286,8 +279,26 @@ securid5.lo: $(authdir)/securid5.c $(AUTHDEP)
 sia.lo: $(authdir)/sia.c $(AUTHDEP)
 	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(authdir)/sia.c
 
+# Command dependencies (sudoreplay, testsudoers, visudo)
 error.o: $(top_srcdir)/src/error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/src/error.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/src/error.c
+fileops.o: fileops.lo
+find_path.o: find_path.lo
+getdate.o: $(srcdir)/getdate.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/getdate.c
+gettime.o: gettime.lo
+goodpath.o: goodpath.lo
+interfaces.o: interfaces.lo
+sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/alloc.h $(incdir)/compat.h $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudoreplay.c
+term.o: $(top_srcdir)/src/term.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(top_srcdir)/src/term.c
+testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/testsudoers.c
+tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tsgetgrpw.c
+visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/visudo.c
 
 install: install-dirs install-plugin install-binaries install-sudoers
 

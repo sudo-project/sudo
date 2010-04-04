@@ -24,7 +24,6 @@ devdir = @devdir@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
-compat = $(top_srcdir)/compat
 
 # Compiler & tools to use
 CC = @CC@
@@ -64,7 +63,7 @@ SHELL = /bin/sh
 
 OBJS =	sample_plugin.lo
 
-LIBOBJDIR = $(top_srcdir)/@ac_config_libobj_dir@/
+LIBOBJDIR = $(top_builddir)/@ac_config_libobj_dir@/
 
 VERSION = @PACKAGE_VERSION@
 
