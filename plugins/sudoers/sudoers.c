@@ -1110,6 +1110,7 @@ sudoers_policy_version(int verbose)
     msg.msg = str;
     memset(&repl, 0, sizeof(repl));
     sudo_conv(1, &msg, &repl);
+    free(str);
 
 #ifdef notyet
     if (verbose) {

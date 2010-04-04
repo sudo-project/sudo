@@ -290,7 +290,8 @@ sudoers_io_version(int verbose)
     msg.msg_type = SUDO_CONV_INFO_MSG;
     msg.msg = str;
     memset(&repl, 0, sizeof(repl));
-    io_conv(1, &msg, &repl);
+    sudo_conv(1, &msg, &repl);
+    free(str);
 
     return TRUE;
 }
