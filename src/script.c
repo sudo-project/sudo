@@ -369,36 +369,36 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 
 	/* If stdout is not a tty we handle post-processing differently. */
 	ttyout = isatty(STDOUT_FILENO);
-    }
 
-    /* Signals to relay from parent to child. */
-    sa.sa_flags = 0; /* do not restart syscalls for these */
-    sa.sa_handler = handler;
-    sigaction(SIGHUP, &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
-    sigaction(SIGQUIT, &sa, NULL);
-    sigaction(SIGTSTP, &sa, NULL);
+	/* Signals to relay from parent to child. */
+	sa.sa_flags = 0; /* do not restart syscalls for these */
+	sa.sa_handler = handler;
+	sigaction(SIGHUP, &sa, NULL);
+	sigaction(SIGTERM, &sa, NULL);
+	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGQUIT, &sa, NULL);
+	sigaction(SIGTSTP, &sa, NULL);
 #if 0 /* XXX - keep these? */
-    sigaction(SIGTTIN, &sa, NULL);
-    sigaction(SIGTTOU, &sa, NULL);
+	sigaction(SIGTTIN, &sa, NULL);
+	sigaction(SIGTTOU, &sa, NULL);
 #endif
 
-    if (log_io && foreground) {
-	/* Copy terminal attrs from user tty -> pty slave. */
-	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], ttyout)) {
-	    tty_initialized = 1;
-	    sync_ttysize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
-	}
+	if (foreground) {
+	    /* Copy terminal attrs from user tty -> pty slave. */
+	    if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], ttyout)) {
+		tty_initialized = 1;
+		sync_ttysize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
+	    }
 
-	/* Start out in raw mode is stdout is a tty. */
-	ttymode = ttyout ? TERM_RAW : TERM_CBREAK;
-	do {
-	    n = term_raw(script_fds[SFD_USERTTY], !ttyout,
-		ttymode == TERM_CBREAK);
-	} while (!n && errno == EINTR);
-	if (!n)
-	    error(1, "Can't set terminal to raw mode");
+	    /* Start out in raw mode is stdout is a tty. */
+	    ttymode = ttyout ? TERM_RAW : TERM_CBREAK;
+	    do {
+		n = term_raw(script_fds[SFD_USERTTY], !ttyout,
+		    ttymode == TERM_CBREAK);
+	    } while (!n && errno == EINTR);
+	    if (!n)
+		error(1, "Can't set terminal to raw mode");
+	}
     }
 
     /* Set command timeout if specified. */
@@ -956,13 +956,13 @@ sigchild(int s)
 
     if (!tq_empty(&io_plugins))
     	flags |= WUNTRACED;
-    else
-	recvsig = SIGCHLD;
     do {
 	pid = waitpid(child, &child_status, flags);
     } while (pid == -1 && errno == EINTR);
     if (pid == child) {
-	if (WIFSTOPPED(child_status))
+	if (tq_empty(&io_plugins))
+	    recvsig = SIGCHLD;
+	else if (WIFSTOPPED(child_status))
 	    recvsig = WSTOPSIG(child_status);
     }
 
