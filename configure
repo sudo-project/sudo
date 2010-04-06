@@ -22368,9 +22368,8 @@ echo "${ECHO_T}yes" >&6; }
 			;;
 		no)		{ echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
-
-cat >>confdefs.h <<\_ACEOF
-#define NO_PAM_SESSION
+			    cat >>confdefs.h <<\_ACEOF
+#define NO_PAM_SESSION 1
 _ACEOF
 
 			    ;;
@@ -27767,6 +27766,10 @@ echo "$as_me: You will need to customize sample.pam and install it as /etc/pam.d
 	    ;;
     esac
 fi
+
+
+
+
 
 
 

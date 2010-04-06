@@ -3,10 +3,6 @@
 #ifndef _SUDO_CONFIG_H
 #define _SUDO_CONFIG_H
 
-/* Define to `signed' or nothing if compiler does not support a signed
-   type qualifier. */
-#undef __signed
-
 /* Define to 1 if the `syslog' function returns a non-zero int to denote
    failure. */
 #undef BROKEN_SYSLOG
@@ -14,19 +10,8 @@
 /* Define to 1 if you want the insults from the "classic" version sudo. */
 #undef CLASSIC_INSULTS
 
-/* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
-   systems. This function is required for `alloca.c' support on those systems.
-   */
-#undef CRAY_STACKSEG_END
-
 /* Define to 1 if you want insults culled from the twisted minds of CSOps. */
 #undef CSOPS_INSULTS
-
-/* Define to 1 if using `alloca.c'. */
-#undef C_ALLOCA
-
-/* The name of the sudoers plugin, including extension. */
-#undef SUDOERS_PLUGIN
 
 /* Define to 1 if you want sudo to display "command not allowed" instead of
    "command not found" when a command cannot be found. */
@@ -35,7 +20,7 @@
 /* A colon-separated list of pathnames to be used as the editor for visudo. */
 #undef EDITOR
 
-/* Define to enable environment debugging. */
+/* Define to 1 to enable environment function debugging. */
 #undef ENV_DEBUG
 
 /* Define to 1 if you want visudo to honor the EDITOR and VISUAL env
@@ -47,6 +32,10 @@
 
 /* Define to 1 if you want to require fully qualified hosts in sudoers. */
 #undef FQDN
+
+/* Define to the type of elements in the array set by `getgroups'. Usually
+   this is either `int' or `gid_t'. */
+#undef GETGROUPS_T
 
 /* Define to 1 if you want insults from the "Goon Show". */
 #undef GOONS_INSULTS
@@ -60,15 +49,14 @@
 /* Define to 1 if you use AIX general authentication. */
 #undef HAVE_AIXAUTH
 
-/* Define to 1 if you have `alloca', as a function or macro. */
-#undef HAVE_ALLOCA
-
-/* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
-   */
-#undef HAVE_ALLOCA_H
-
 /* Define to 1 if you have the `asprintf' function. */
 #undef HAVE_ASPRINTF
+
+/* Define to 1 if you have the `authenticate' function. */
+#undef HAVE_AUTHENTICATE
+
+/* Define to 1 if you have the `auth_challenge' function. */
+#undef HAVE_AUTH_CHALLENGE
 
 /* Define to 1 if you have the `bigcrypt' function. */
 #undef HAVE_BIGCRYPT
@@ -88,13 +76,16 @@
 /* Define to 1 if your `DIR' contains dd_fd. */
 #undef HAVE_DD_FD
 
-/* Define to 1 if you have the 'sys_siglist' declaration. */
+/* Define to 1 if you have the declaration of `sys_siglist', and to 0 if you
+   don't. */
 #undef HAVE_DECL_SYS_SIGLIST
 
-/* Define to 1 if you have the '_sys_siglist' declaration. */
+/* Define to 1 if you have the declaration of `_sys_siglist', and to 0 if you
+   don't. */
 #undef HAVE_DECL__SYS_SIGLIST
 
-/* Define to 1 if you have the '__sys_siglist' declaration. */
+/* Define to 1 if you have the declaration of `__sys_siglist', and to 0 if you
+   don't. */
 #undef HAVE_DECL___SYS_SIGLIST
 
 /* Define to 1 if you have the `dgettext' function. */
@@ -162,14 +153,14 @@
 /* Define to 1 if you have the `getdomainname' function. */
 #undef HAVE_GETDOMAINNAME
 
-/* Define to 1 if you have the `getgroups' function. */
+/* Define to 1 if you have the `getgrouplist' function. */
+#undef HAVE_GETGROUPLIST
+
+/* Define to 1 if your system has a working `getgroups' function. */
 #undef HAVE_GETGROUPS
 
 /* Define to 1 if you have the `getgrset' function. */
 #undef HAVE_GETGRSET
-
-/* Define to 1 if you have the `getgrouplist' function. */
-#undef HAVE_GETGROUPLIST
 
 /* Define to 1 if you have the `getifaddrs' function. */
 #undef HAVE_GETIFADDRS
@@ -211,6 +202,9 @@
 /* Define to 1 if you have the `glob' function. */
 #undef HAVE_GLOB
 
+/* Define to 1 if you have the `grantpt' function. */
+#undef HAVE_GRANTPT
+
 /* Define to 1 if you have the <gssapi/gssapi_krb5.h> header file. */
 #undef HAVE_GSSAPI_GSSAPI_KRB5_H
 
@@ -249,16 +243,17 @@
 /* Define to 1 if you use Kerberos IV. */
 #undef HAVE_KERB4
 
-/* Define to 1 if you have the `killpg' function. */
-#undef HAVE_KILLPG
-
 /* Define to 1 if you use Kerberos V. */
 #undef HAVE_KERB5
+
+/* Define to 1 if you have the `killpg' function. */
+#undef HAVE_KILLPG
 
 /* Define to 1 if you have the `krb5_get_init_creds_opt_alloc' function. */
 #undef HAVE_KRB5_GET_INIT_CREDS_OPT_ALLOC
 
-/* Define to 1 if your `krb5_get_init_creds_opt_alloc' function takes two arguments. */
+/* Define to 1 if your `krb5_get_init_creds_opt_free' function takes two
+   arguments. */
 #undef HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_TWO_ARGS
 
 /* Define to 1 if you have the `krb5_init_secure_context' function. */
@@ -272,6 +267,12 @@
 
 /* Define to 1 if you use LDAP for sudoers. */
 #undef HAVE_LDAP
+
+/* Define to 1 if you have the `ldapssl_init' function. */
+#undef HAVE_LDAPSSL_INIT
+
+/* Define to 1 if you have the `ldapssl_set_strength' function. */
+#undef HAVE_LDAPSSL_SET_STRENGTH
 
 /* Define to 1 if you have the `ldap_create' function. */
 #undef HAVE_LDAP_CREATE
@@ -305,12 +306,6 @@
 
 /* Define to 1 if you have the `ldap_unbind_ext_s' function. */
 #undef HAVE_LDAP_UNBIND_EXT_S
-
-/* Define to 1 if you have the `ldapssl_init' function. */
-#undef HAVE_LDAPSSL_INIT
-
-/* Define to 1 if you have the `ldapssl_set_strength' function. */
-#undef HAVE_LDAPSSL_SET_STRENGTH
 
 /* Define to 1 if you have the `lockf' function. */
 #undef HAVE_LOCKF
@@ -378,9 +373,6 @@
 /* Define to 1 if you have the `posix_openpt' function. */
 #undef HAVE_POSIX_OPENPT
 
-/* Define to 1 if you have the `grantpt' function. */
-#undef HAVE_GRANTPT
-
 /* Define to 1 if you have the <project.h> header file. */
 #undef HAVE_PROJECT_H
 
@@ -396,6 +388,9 @@
 /* Define to 1 if you have the `revoke' function. */
 #undef HAVE_REVOKE
 
+/* Define to 1 if you have the <sasl.h> header file. */
+#undef HAVE_SASL_H
+
 /* Define to 1 if you have the <sasl/sasl.h> header file. */
 #undef HAVE_SASL_SASL_H
 
@@ -404,6 +399,9 @@
 
 /* Define to 1 if you use SecurID for authentication. */
 #undef HAVE_SECURID
+
+/* Define to 1 if you have the <security/pam_appl.h> header file. */
+#undef HAVE_SECURITY_PAM_APPL_H
 
 /* Define to 1 to enable SELinux RBAC support. */
 #undef HAVE_SELINUX
@@ -465,12 +463,6 @@
 /* Define to 1 if you have the `strchr' function. */
 #undef HAVE_STRCHR
 
-/* Define to 1 if you have the `strdup' function. */
-#undef HAVE_STRDUP
-
-/* Define to 1 if you have the `strndup' function. */
-#undef HAVE_STRNDUP
-
 /* Define to 1 if you have the `strerror' function. */
 #undef HAVE_STRERROR
 
@@ -495,14 +487,17 @@
 /* Define to 1 if you have the `strsignal' function. */
 #undef HAVE_STRSIGNAL
 
+/* Define to 1 if the system has the type `struct in6_addr'. */
+#undef HAVE_STRUCT_IN6_ADDR
+
 /* Define to 1 if your struct stat has an st_mtim member */
 #undef HAVE_ST_MTIM
 
-/* Define to 1 if your struct stat uses an st__tim union */
-#undef HAVE_ST__TIM
-
 /* Define to 1 if your struct stat has an st_mtimespec member */
 #undef HAVE_ST_MTIMESPEC
+
+/* Define to 1 if your struct stat uses an st__tim union */
+#undef HAVE_ST__TIM
 
 /* Define to 1 if you have the `sysconf' function. */
 #undef HAVE_SYSCONF
@@ -535,9 +530,6 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
-
-/* Define to 1 if you have the `tcsetpgrp' function. */
-#undef HAVE_TCSETPGRP
 
 /* Define to 1 if you have the <termios.h> header file and the `tcgetattr'
    function. */
@@ -642,7 +634,7 @@
    sudo. */
 #undef NO_LECTURE
 
-/* Define to 1 if you don't want to use sudo's PAM session support. */
+/* Define to 1 if you don't want to use sudo's PAM session support */
 #undef NO_PAM_SESSION
 
 /* Define to avoid runing the mailer as root. */
@@ -682,7 +674,7 @@
 /* The syslog priority sudo will use for successful attempts. */
 #undef PRI_SUCCESS
 
-/* Define to 1 if the `putenv' has a const argument.  */
+/* Define to 1 if the `putenv' has a const argument. */
 #undef PUTENV_CONST
 
 /* Define as the return type of signal handlers (`int' or `void'). */
@@ -710,19 +702,14 @@
 /* Define to 1 if you want sudo to set $HOME in shell mode. */
 #undef SHELL_SETS_HOME
 
-/* If using the C implementation of alloca, define if you know the
-   direction of stack growth for your system; otherwise it will be
-   automatically deduced at run-time.
-	STACK_DIRECTION > 0 => grows toward higher addresses
-	STACK_DIRECTION < 0 => grows toward lower addresses
-	STACK_DIRECTION = 0 => direction of growth unknown */
-#undef STACK_DIRECTION
-
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
 /* Define to 1 if the code in interfaces.c does not compile for you. */
 #undef STUB_LOAD_INTERFACES
+
+/* The name of the sudoers plugin, including extension. */
+#undef SUDOERS_PLUGIN
 
 /* The umask that the root-run prog should use. */
 #undef SUDO_UMASK
@@ -749,11 +736,15 @@
 /* Define to 1 if you want a different ticket file for each tty. */
 #undef USE_TTY_TICKETS
 
-/* Define to 1 if using a non-unix group lookup implementation. */
+/* Define to 1 if using a non-Unix group lookup implementation. */
 #undef USING_NONUNIX_GROUPS
 
 /* Define to avoid using the passwd/shadow file for authentication. */
 #undef WITHOUT_PASSWD
+
+/* Define to `signed' or nothing if compiler does not support a signed type
+   qualifier. */
+#undef __signed
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
@@ -773,7 +764,7 @@
 /* Define to `int' if <signal.h> does not define. */
 #undef sig_atomic_t
 
-/* Define if your system lacks the size_t type. */
+/* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef size_t
 
 /* Define if your system lacks the ssize_t type. */
@@ -781,10 +772,6 @@
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef uid_t
-
-/* Define to the type of elements in the array set by `getgroups'.
-   Usually this is either `int' or `gid_t'. */
-#undef GETGROUPS_T
 
 /* Define to empty if the keyword `volatile' does not work. Warning: valid
    code using `volatile' can become incorrect without. Disable with care. */
