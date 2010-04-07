@@ -1,0 +1,100 @@
+#
+# Copyright (c) 1996, 1998-2002 Todd C. Miller <Todd.Miller@courtesan.com>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# $Sudo$
+#
+
+srcdir = .
+
+# Which install program?
+INSTALL = $(srcdir)/install-sh -c
+
+# Where to install things...
+prefix = /usr/local
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+sbindir = $(exec_prefix)/sbin
+sysconfdir = /etc
+mandir = $(prefix)/man
+
+# Directory in which to install sudo.
+sudodir = $(bindir)
+
+# Directory in which to install visudo
+visudodir = $(sbindir)
+
+# Directory in which to install the sudoers file
+sudoersdir = $(sysconfdir)
+
+# Directory in which to install the man page
+mantype = @_MANTYPE@
+mansectsu = @_mansectsu@
+mansectform = @_mansectform@
+mandirsu = $(mandir)/$(mantype)$(mansectsu)
+mandirform = $(mandir)/$(mantype)$(mansectform)
+
+# User and group ids the installed files should be "owned" by
+install_uid = 0
+install_gid = 0
+
+# User, group, and mode the sudoers file should be "owned" by
+sudoers_uid = 0
+sudoers_gid = 0
+sudoers_mode = 0440
+
+SHELL = /bin/sh
+
+PROGS = sudo visudo
+
+all: $(PROGS)
+	@echo run 'make install' to install sudo
+
+install: install-dirs install-binaries install-sudoers install-man
+
+install-dirs:
+	$(SHELL) $(srcdir)/mkinstalldirs $(DESTDIR)$(sudodir) \
+	    $(DESTDIR)$(visudodir) $(DESTDIR)$(sudoersdir) \
+	    $(DESTDIR)$(mandirsu) $(DESTDIR)$(mandirform)
+
+install-binaries: $(PROGS)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 4111 sudo $(DESTDIR)$(sudodir)/sudo
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0111 visudo $(DESTDIR)$(visudodir)/visudo
+
+install-sudoers:
+	test -f $(DESTDIR)$(sudoersdir)/sudoers || \
+	    $(INSTALL) -O $(sudoers_uid) -G $(sudoers_gid) -M $(sudoers_mode) \
+		$(srcdir)/sudoers $(DESTDIR)$(sudoersdir)/sudoers
+
+install-man:
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/sudo.$(mantype) $(DESTDIR)$(mandirsu)/sudo.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/visudo.$(mantype) $(DESTDIR)$(mandirsu)/visudo.$(mansectsu)
+	$(INSTALL) -O $(install_uid) -G $(install_gid) -M 0444 $(srcdir)/sudoers.$(mantype) $(DESTDIR)$(mandirform)/sudoers.$(mansectform)
+
+check:
+	@echo nothing to check
+
+clean:
+	@echo nothing to clean
+
+mostlyclean: clean
+
+distclean: clean
+
+clobber: clean
+
+realclean: clean
+
+cleandir: clean
