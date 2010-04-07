@@ -69,10 +69,6 @@
 
 #include "sudo.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 #ifndef TCSASOFT
 # define TCSASOFT	0
 #endif

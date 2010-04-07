@@ -38,10 +38,6 @@
 
 #include "sudo.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /*
  * Verify that path is a normal file and executable by root.
  */

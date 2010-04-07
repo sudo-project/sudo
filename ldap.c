@@ -70,10 +70,6 @@
 #include "sudo.h"
 #include "parse.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 #ifndef LINE_MAX
 # define LINE_MAX 2048
 #endif

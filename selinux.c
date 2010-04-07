@@ -49,10 +49,6 @@
 #include "sudo.h"
 #include "pathnames.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /*
  * This function attempts to revert the relabeling done to the tty.
  * fd		   - referencing the opened ttyn

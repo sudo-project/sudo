@@ -44,9 +44,6 @@
 #if defined(LIBC_SCCS) && !defined(lint)
 static const char sccsid[] = "@(#)lsearch.c	8.1 (Berkeley) 6/4/93";
 #endif /* LIBC_SCCS and not lint */
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
 
 typedef int (*cmp_fn_t) __P((const VOID *, const VOID *));
 static VOID *linear_base __P((const VOID *, const VOID *, size_t *, size_t,

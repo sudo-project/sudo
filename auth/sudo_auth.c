@@ -52,10 +52,6 @@
 #include "sudo_auth.h"
 #include "insults.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 sudo_auth auth_switch[] = {
 #ifdef AUTH_STANDALONE
     AUTH_STANDALONE

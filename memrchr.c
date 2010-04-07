@@ -18,13 +18,6 @@
 #include <config.h>
 #include <compat.h>
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
-#include <sys/types.h>
-#include <config.h>
-
 /*
  * Reverse memchr()
  * Find the last occurrence of 'c' in the buffer 's' of size 'n'.

@@ -61,10 +61,6 @@
 
 #include "sudo.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 static void do_syslog		__P((int, char *));
 static void do_logfile		__P((char *));
 static void send_mail		__P((char *));

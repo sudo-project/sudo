@@ -42,10 +42,6 @@
 #include <compat.h>
 #include "emul/err.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 void
 #ifdef __STDC__
 err(int eval, const char *fmt, ...)

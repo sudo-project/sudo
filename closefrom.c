@@ -48,10 +48,6 @@
 
 #include "sudo.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 #ifndef HAVE_FCNTL_CLOSEM
 # ifndef HAVE_DIRFD
 #   define closefrom_fallback	closefrom

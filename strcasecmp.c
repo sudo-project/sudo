@@ -18,10 +18,6 @@
 #include <config.h>
 #include <compat.h>
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /*
  * Case insensitive string compare routines, same semantics as str[n]cmp()
  * (assumes ASCII..).

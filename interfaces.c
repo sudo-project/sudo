@@ -88,11 +88,6 @@ struct rtentry;
 #include "sudo.h"
 #include "interfaces.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
-
 #ifdef HAVE_GETIFADDRS
 
 /*

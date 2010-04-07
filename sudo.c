@@ -104,10 +104,6 @@
 #include "interfaces.h"
 #include "version.h"
 
-#ifndef lint
-__unused __unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /*
  * Prototypes
  */

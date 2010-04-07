@@ -69,10 +69,6 @@
 #include "emul/search.h"
 #endif /* HAVE_LSEARCH */
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /*
  * We must define SIZE_MAX for yacc's skeleton.c.
  * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t

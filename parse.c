@@ -89,10 +89,6 @@
 # include "emul/glob.h"
 #endif /* HAVE_EXTENDED_GLOB */
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 static int command_matches_dir __P((char *, size_t));
 static int command_matches_glob __P((char *, char *));
 static int command_matches_fnmatch __P((char *, char *));

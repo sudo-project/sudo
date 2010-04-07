@@ -28,10 +28,6 @@
 
 #include <compat.h>
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /*
  * Dummy versions of the execve() family of syscalls.  We don't need
  * to stub out all of them, just the ones that correspond to actual

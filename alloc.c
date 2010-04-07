@@ -52,10 +52,6 @@
 
 #include "sudo.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 /*
  * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t
  * could be signed (as it is on SunOS 4.x).  This just means that

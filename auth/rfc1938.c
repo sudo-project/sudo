@@ -68,10 +68,6 @@
 #include "sudo.h"
 #include "sudo_auth.h"
 
-#ifndef lint
-__unused static const char rcsid[] = "$Sudo$";
-#endif /* lint */
-
 int
 rfc1938_setup(pw, promptp, auth)
     struct passwd *pw;
