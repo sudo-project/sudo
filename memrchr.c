@@ -18,9 +18,6 @@
 #include <config.h>
 #include <compat.h>
 
-#include <sys/types.h>
-#include <config.h>
-
 /*
  * Reverse memchr()
  * Find the last occurrence of 'c' in the buffer 's' of size 'n'.
