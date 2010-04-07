@@ -1,4 +1,4 @@
-.\" Copyright (c) 1994-1996, 1998-2005, 2007-2009
+.\" Copyright (c) 1994-1996, 1998-2005, 2007-2010
 .\" 	Todd C. Miller <Todd.Miller@courtesan.com>
 .\" 
 .\" Permission to use, copy, modify, and distribute this software for any
@@ -144,7 +144,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDOERS @mansectform@"
-.TH SUDOERS @mansectform@ "December 19, 2009" "1.7.3b2" "MAINTENANCE COMMANDS"
+.TH SUDOERS @mansectform@ "April  7, 2010" "1.7.3b2" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -755,7 +755,12 @@ system that is mounted on demand (automounted).  The \fIfast_glob\fR
 option causes \fBsudo\fR to use the \fIfnmatch\fR\|(3) function, which does
 not access the file system to do its matching.  The disadvantage
 of \fIfast_glob\fR is that it is unable to match relative path names
-such as \fI./ls\fR or \fI../bin/ls\fR.  This flag is \fIoff\fR by default.
+such as \fI./ls\fR or \fI../bin/ls\fR.  This has security implications
+when path names that include globbing characters are used with the
+negation operator, \f(CW\*(Aq!\*(Aq\fR, as such rules can be trivially bypassed.
+As such, this option should not be used when \fIsudoers\fR contains rules 
+that contain negated path names which include globbing characters.
+This flag is \fIoff\fR by default.
 .IP "fqdn" 16
 .IX Item "fqdn"
 Set this flag if you want to put fully qualified host names in the
@@ -1568,6 +1573,24 @@ Doesn't really prevent \fBbill\fR from running the commands listed in
 different name, or use a shell escape from an editor or other
 program.  Therefore, these kind of restrictions should be considered
 advisory at best (and reinforced by policy).
+.PP
+Furthermore, if the \fIfast_glob\fR option is in use, it is not possible
+to reliably negate commands where the path name includes globbing
+(aka wildcard) characters.  This is because the C library's
+\&\fIfnmatch\fR\|(3) function cannot resolve relative paths.  While this
+is typically only an inconvenience for rules that grant privileges,
+it can result in a security issue for rules that subtract or revoke
+privileges.
+.PP
+For example, given the following \fIsudoers\fR entry:
+.PP
+.Vb 2
+\& john   ALL = /usr/bin/passwd [a\-zA\-Z0\-9]*, /usr/bin/chsh [a\-zA\-Z0\-9]*,
+\&      /usr/bin/chfn [a\-zA\-Z0\-9]*, !/usr/bin/* root
+.Ve
+.PP
+User \fBjohn\fR can still run \f(CW\*(C`/usr/bin/passwd root\*(C'\fR if \fIfast_glob\fR is
+enabled by changing to \fI/usr/bin\fR and running \f(CW\*(C`./passwd root\*(C'\fR instead.
 .SH "PREVENTING SHELL ESCAPES"
 .IX Header "PREVENTING SHELL ESCAPES"
 Once \fBsudo\fR executes a program, that program is free to do whatever
