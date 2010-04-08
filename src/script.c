@@ -111,7 +111,6 @@ static void flush_output(struct script_buf *output);
 static void handler(int s);
 static int script_child(const char *path, char *argv[], char *envp[], int, int);
 static void script_run(const char *path, char *argv[], char *envp[], int);
-static void sigchild(int s);
 static void sigwinch(int s);
 static void sync_ttysize(int src, int dst);
 static void deliver_signal(pid_t pid, int signo);
@@ -349,7 +348,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 
     /* Note: HP-UX select() will not be interrupted if SA_RESTART set */
     sa.sa_flags = 0;
-    sa.sa_handler = sigchild;
+    sa.sa_handler = handler;
     sigaction(SIGCHLD, &sa, NULL);
 
     if (log_io) {
@@ -473,10 +472,25 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     zero_bytes(&input, sizeof(input));
     zero_bytes(&output, sizeof(output));
     for (;;) {
-	/* XXX - racey */
-	if (!relaysig && recvsig != SIGCHLD) {
-	    relaysig = recvsig;
+	/* Wait for children as needed. */
+	if (recvsig == SIGCHLD) {
+	    pid_t pid;
+	    int flags = WNOHANG;
+
 	    recvsig = 0;
+	    if (log_io)
+		flags |= WUNTRACED;
+	    do {
+		do {
+		    pid = waitpid(child, &child_status, flags);
+		} while (pid == -1 && errno == EINTR);
+		if (pid == child) {
+		    if (!log_io)
+			recvsig = SIGCHLD; /* XXX - hacky, see below */
+		    else if (WIFSTOPPED(child_status))
+			relaysig = WSTOPSIG(child_status);
+		}
+	    } while (pid > 0);
 	}
 
 	/* If not logging I/O and child has exited we are done. */
@@ -940,33 +954,6 @@ sync_ttysize(int src, int dst)
 #endif
     }
 #endif
-}
-
-/*
- * Handler for SIGCHLD in parent
- * Note that this will detect when the child monitoring the command exits,
- * not the command itself.
- */
-static void
-sigchild(int s)
-{
-    pid_t pid;
-    int flags = WNOHANG;
-    int serrno = errno;
-
-    if (!tq_empty(&io_plugins))
-    	flags |= WUNTRACED;
-    do {
-	pid = waitpid(child, &child_status, flags);
-    } while (pid == -1 && errno == EINTR);
-    if (pid == child) {
-	if (tq_empty(&io_plugins))
-	    recvsig = SIGCHLD;
-	else if (WIFSTOPPED(child_status))
-	    recvsig = WSTOPSIG(child_status);
-    }
-
-    errno = serrno;
 }
 
 /*
