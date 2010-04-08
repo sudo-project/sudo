@@ -65,6 +65,16 @@
 # include <selinux/selinux.h>
 #endif
 
+#if !defined(NSIG)
+# if defined(_NSIG)
+#  define NSIG _NSIG
+# elif defined(__NSIG)
+#  define NSIG __NSIG
+# else
+#  define NSIG 64
+# endif
+#endif
+
 #include "sudo.h" /* XXX? */
 #include "sudo_plugin.h"
 #include "sudo_plugin_int.h"
@@ -93,8 +103,7 @@ struct script_buf {
 static int script_fds[3] = { -1, -1, -1 };
 static int ttyout;
 
-/* XXX - use an array of signals instead of just a single variable */
-static sig_atomic_t recvsig = 0;
+static sig_atomic_t recvsig[NSIG];
 static sig_atomic_t ttymode = TERM_COOKED;
 static sig_atomic_t tty_initialized = 0;
 
@@ -281,6 +290,26 @@ my_execve(const char *path, char *const argv[], char *const envp[])
     return -1;
 }
 
+static void
+terminate_child(pid_t pid, int use_pgrp)
+{
+    /*
+     * Kill child with increasing urgency.
+     * Note that SIGCHLD will interrupt the sleep()
+     */
+    if (use_pgrp) {
+	killpg(pid, SIGHUP);
+	killpg(pid, SIGTERM);
+	sleep(2);
+	killpg(pid, SIGKILL);
+    } else {
+	kill(pid, SIGHUP);
+	kill(pid, SIGTERM);
+	sleep(2);
+	kill(pid, SIGKILL);
+    }
+}
+
 /*
  * This is a little bit tricky due to how POSIX job control works and
  * we fact that we have two different controlling terminals to deal with.
@@ -302,7 +331,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     sigaction_t sa;
     struct script_buf input, output;
     int n, nready;
-    int relaysig = 0, sv[2];
+    int sv[2];
     fd_set *fdsr, *fdsw;
     int rbac_enabled = 0;
     int log_io, maxfd;
@@ -369,13 +398,9 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	/* If stdout is not a tty we handle post-processing differently. */
 	ttyout = isatty(STDOUT_FILENO);
 
-	/* Signals to relay from parent to child. */
-	sa.sa_flags = 0; /* do not restart syscalls for these */
+	/* Job control signals to relay from parent to child. */
+	sa.sa_flags = 0; /* do not restart syscalls */
 	sa.sa_handler = handler;
-	sigaction(SIGHUP, &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
-	sigaction(SIGINT, &sa, NULL);
-	sigaction(SIGQUIT, &sa, NULL);
 	sigaction(SIGTSTP, &sa, NULL);
 #if 0 /* XXX - keep these? */
 	sigaction(SIGTTIN, &sa, NULL);
@@ -399,6 +424,14 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		error(1, "Can't set terminal to raw mode");
 	}
     }
+
+    /* Non-job control signals to relay from parent to child. */
+    sa.sa_flags = 0; /* do not restart syscalls */
+    sa.sa_handler = handler;
+    sigaction(SIGHUP, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGQUIT, &sa, NULL);
 
     /* Set command timeout if specified. */
     if (ISSET(details->flags, CD_SET_TIMEOUT))
@@ -473,28 +506,30 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     zero_bytes(&output, sizeof(output));
     for (;;) {
 	/* Wait for children as needed. */
-	if (recvsig == SIGCHLD) {
+	if (recvsig[SIGCHLD]) {
 	    pid_t pid;
 	    int flags = WNOHANG;
 
-	    recvsig = 0;
+	    recvsig[SIGCHLD] = FALSE;
 	    if (log_io)
 		flags |= WUNTRACED;
 	    do {
-		do {
-		    pid = waitpid(child, &child_status, flags);
-		} while (pid == -1 && errno == EINTR);
-		if (pid == child) {
-		    if (!log_io)
-			recvsig = SIGCHLD; /* XXX - hacky, see below */
-		    else if (WIFSTOPPED(child_status))
-			relaysig = WSTOPSIG(child_status);
-		}
-	    } while (pid > 0);
+		pid = waitpid(child, &child_status, flags);
+	    } while (pid == -1 && errno == EINTR);
+	    if (pid == child) {
+		/*
+		 * If there is no I/O logger we are done.  Otherwise,
+		 * we wait for ECONNRESET or EPIPE from the socketpair.
+		 */
+		if (!log_io)
+		    recvsig[SIGCHLD] = TRUE; /* XXX - hacky, see below */
+		else if (WIFSTOPPED(child_status))
+		    recvsig[WSTOPSIG(child_status)] = TRUE;
+	    }
 	}
 
 	/* If not logging I/O and child has exited we are done. */
-	if (!log_io && recvsig == SIGCHLD) {
+	if (!log_io && recvsig[SIGCHLD]) {
 	    cstat->type = CMD_WSTATUS;
 	    cstat->val = child_status;
 	    break;
@@ -519,12 +554,19 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		FD_SET(script_fds[SFD_MASTER], fdsw);
 	}
 	FD_SET(sv[0], fdsr);
-	if (relaysig) {
-	    if (log_io) {
-		FD_SET(sv[0], fdsw);
-	    } else {
-		/* nothing listening on sv[0], send directly */
-		deliver_signal(child, relaysig);
+	for (n = 0; n < NSIG; n++) {
+	    if (recvsig[n] && n != SIGCHLD) {
+		if (log_io) {
+		    FD_SET(sv[0], fdsw);
+		    break;
+		} else {
+		    /* nothing listening on sv[0], send directly */
+		    if (n == SIGALRM) {
+			terminate_child(child, FALSE);
+		    } else {
+			kill(child, n);
+		    }
+		}
 	    }
 	}
 
@@ -550,8 +592,9 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		if (WIFSTOPPED(cstat->val)) {
 		    /* Suspend parent and tell child how to resume on return. */
 		    sudo_debug(8, "child stopped, suspending parent");
-		    relaysig = suspend_parent(WSTOPSIG(cstat->val), &output);
-		    /* XXX - write relaysig immediately? */
+		    n = suspend_parent(WSTOPSIG(cstat->val), &output);
+		    recvsig[n] = TRUE;
+		    /* XXX - write sig immediately? */
 		    continue;
 		} else {
 		    /* Child exited or was killed, either way we are done. */
@@ -563,16 +606,21 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    }
 	}
 	if (FD_ISSET(sv[0], fdsw)) {
-	    /* XXX - we rely on child to be suspended before we suspend us */
-	    sudo_debug(9, "sending signal %d to child over backchannel", relaysig);
-	    cstat->type = CMD_SIGNO;
-	    cstat->val = relaysig;
-	    relaysig = 0;
-	    do {
-		n = send(sv[0], cstat, sizeof(*cstat), 0);
-	    } while (n == -1 && errno == EINTR);
-	    if (n != sizeof(*cstat)) {
-		break; /* should not happen */
+	    /* XXX - we rely on child to be suspended before we suspend ourselves */
+	    for (n = 0; n < NSIG; n++) {
+		if (!recvsig[n])
+		    continue;
+		recvsig[n] = FALSE;
+		sudo_debug(9, "sending signal %d to child over backchannel", n);
+		cstat->type = CMD_SIGNO;
+		cstat->val = n;
+		do {
+		    n = send(sv[0], cstat, sizeof(*cstat), 0);
+		} while (n == -1 && errno == EINTR);
+		if (n != sizeof(*cstat)) {
+		    recvsig[n] = TRUE;
+		    break;
+		}
 	    }
 	}
 	if (!log_io)
@@ -681,12 +729,7 @@ deliver_signal(pid_t pid, int signo)
 	killpg(pid, signo);
 	break;
     case SIGALRM:
-	/* command time out, kill child with increasing urgency */
-	killpg(pid, SIGHUP);
-	sleep(1);
-	killpg(pid, SIGTERM);
-	sleep(1);
-	killpg(pid, SIGKILL);
+	terminate_child(child, TRUE);
 	break;
     case SIGUSR1:
 	/* foreground process, grant it controlling tty. */
@@ -716,8 +759,6 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
     sigaction_t sa;
     pid_t pid;
     int n, status;
-
-    recvsig = 0;
 
     /* Close unused fds. */
     close(script_fds[SFD_MASTER]);
@@ -820,9 +861,9 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
     zero_bytes(fdsr, howmany(backchannel + 1, NFDBITS) * sizeof(fd_mask));
     FD_SET(backchannel, fdsr);
     for (;;) {
-	/* Read child status, assumes recvsig can only be SIGCHLD */
-	while (recvsig) {
-	    recvsig = 0;
+	/* Read child status */
+	while (recvsig[SIGCHLD]) {
+	    recvsig[SIGCHLD] = FALSE;
 	    /* read child status and relay to parent */
 	    do {
 		pid = waitpid(child, &status, WUNTRACED|WNOHANG);
@@ -962,7 +1003,7 @@ sync_ttysize(int src, int dst)
 static void
 handler(int s)
 {
-    recvsig = s;
+    recvsig[s] = TRUE;
 }
 
 /*
