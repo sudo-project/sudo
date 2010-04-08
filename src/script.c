@@ -140,39 +140,49 @@ script_setup(uid_t uid)
 }
 
 /* Call I/O plugin input method. */
-static void
+static int
 log_input(char *buf, unsigned int n)
 {
     struct plugin_container *plugin;
     sigset_t omask;
+    int rval = TRUE;
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
 
     tq_foreach_fwd(&io_plugins, plugin) {
-	/* XXX - die if return != TRUE */
-	if (plugin->u.io->log_input)
-	    plugin->u.io->log_input(buf, n);
+	if (plugin->u.io->log_input) {
+	    if (!plugin->u.io->log_input(buf, n)) {
+	    	rval = FALSE;
+		break;
+	    }
+	}
     }
 
     sigprocmask(SIG_SETMASK, &omask, NULL);
+    return rval;
 }
 
 /* Call I/O plugin output method. */
-static void
+static int
 log_output(char *buf, unsigned int n)
 {
     struct plugin_container *plugin;
     sigset_t omask;
+    int rval = TRUE;
 
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
 
     tq_foreach_fwd(&io_plugins, plugin) {
-	/* XXX - die if return != TRUE */
-	if (plugin->u.io->log_output)
-	    plugin->u.io->log_output(buf, n);
+	if (plugin->u.io->log_output) {
+	    if (!plugin->u.io->log_output(buf, n)) {
+	    	rval = FALSE;
+		break;
+	    }
+	}
     }
 
     sigprocmask(SIG_SETMASK, &omask, NULL);
+    return rval;
 }
 
 static void
@@ -637,7 +647,8 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    } else {
 		if (n == 0)
 		    break; /* got EOF */
-		log_input(input.buf + input.len, n);
+		if (!log_input(input.buf + input.len, n))
+		    terminate_child(child, TRUE);
 		input.len += n;
 	    }
 	}
@@ -664,7 +675,8 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    } else {
 		if (n == 0)
 		    break; /* got EOF */
-		log_output(output.buf + output.len, n);
+		if (!log_output(output.buf + output.len, n))
+		    terminate_child(child, TRUE);
 		output.len += n;
 	    }
 	}
