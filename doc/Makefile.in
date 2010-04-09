@@ -54,7 +54,6 @@ DOCS =	sudo.man visudo.man sudoers.man sudoers.ldap.man sudoers.man \
 
 VERSION = @PACKAGE_VERSION@
 
-# XXX - add DEV dependencies to avoid always building .man.in and .cat files
 all: $(DOCS)
 
 .SUFFIXES: .man .cat
@@ -63,6 +62,8 @@ all: $(DOCS)
 	@rm -f $@
 	sed '1s/^/.if n .ll 78n/' $< | $(NROFF) -man > $@
 
+@DEV@sudo.man.in: $(srcdir)/sudo.man.in
+
 @DEV@$(srcdir)/sudo.man.in: $(srcdir)/sudo.pod
 @DEV@	@rm -f $(srcdir)/$@
 @DEV@	( cd $(srcdir); mansectsu=`echo @MANSECTSU@|tr A-Z a-z`; mansectform=`echo @MANSECTFORM@|tr A-Z a-z`; sed -n -e '/^=pod/q' -e 's/^/.\\" /p' sudo.pod > $@; pod2man --quotes=none --date="`date '+%B %e, %Y'`" --section=$$mansectsu --release=$(VERSION) --center="MAINTENANCE COMMANDS" sudo.pod | sed -e "s/(5)/($$mansectform)/" -e "s/(8)/($$mansectsu)/" | perl -p sudo.man.pl >> $@ )
@@ -70,7 +71,11 @@ all: $(DOCS)
 sudo.man: $(srcdir)/sudo.man.in
 	(cd $(top_builddir) && CONFIG_FILES=doc/$@ CONFIG_HEADERS= sh config.status)
 
+@DEV@sudo.cat: $(srcdir)/sudo.cat
+
 @DEV@$(srcdir)/sudo.cat: sudo.man
+
+@DEV@visudo.man.in: $(srcdir)/visudo.man.in
 
 @DEV@$(srcdir)/visudo.man.in: $(srcdir)/visudo.pod
 @DEV@	@rm -f $(srcdir)/$@
@@ -79,7 +84,11 @@ sudo.man: $(srcdir)/sudo.man.in
 visudo.man: $(srcdir)/visudo.man.in
 	(cd $(top_builddir) && CONFIG_FILES=doc/$@ CONFIG_HEADERS= sh config.status)
 
+@DEV@visudo.cat: $(srcdir)/visudo.cat
+
 @DEV@$(srcdir)/visudo.cat: visudo.man
+
+@DEV@sudoers.man.in: $(srcdir)/sudoers.man.in
 
 @DEV@$(srcdir)/sudoers.man.in: $(srcdir)/sudoers.pod
 @DEV@	@rm -f $(srcdir)/$@
@@ -88,7 +97,11 @@ visudo.man: $(srcdir)/visudo.man.in
 sudoers.man:: $(srcdir)/sudoers.man.in
 	(cd $(top_builddir) && CONFIG_FILES=doc/$@ CONFIG_HEADERS= sh config.status)
 
+@DEV@sudoers.cat: $(srcdir)/sudoers.cat
+
 @DEV@$(srcdir)/sudoers.cat: sudoers.man
+
+@DEV@sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.man.in
 
 @DEV@$(srcdir)/sudoers.ldap.man.in: $(srcdir)/sudoers.ldap.pod
 @DEV@	@rm -f $(srcdir)/$@
@@ -97,7 +110,11 @@ sudoers.man:: $(srcdir)/sudoers.man.in
 sudoers.ldap.man:: $(srcdir)/sudoers.ldap.man.in
 	(cd $(top_builddir) && CONFIG_FILES=doc/$@ CONFIG_HEADERS= sh config.status)
 
+@DEV@sudoers.ldap.cat: $(srcdir)/sudoers.ldap.cat
+
 @DEV@$(srcdir)/sudoers.ldap.cat: sudoers.ldap.man
+
+@DEV@sudoreplay.man.in: $(srcdir)/sudoreplay.man.in
 
 @DEV@$(srcdir)/sudoreplay.man.in: $(srcdir)/sudoreplay.pod
 @DEV@	@rm -f $(srcdir)/$@
@@ -106,7 +123,11 @@ sudoers.ldap.man:: $(srcdir)/sudoers.ldap.man.in
 sudoreplay.man:: $(srcdir)/sudoreplay.man.in
 	(cd $(top_builddir) && CONFIG_FILES=doc/$@ CONFIG_HEADERS= sh config.status)
 
+@DEV@sudoreplay.cat: $(srcdir)/sudoreplay.cat
+
 @DEV@$(srcdir)/sudoreplay.cat: sudoreplay.man
+
+@DEV@sudo_plugin.man.in: $(srcdir)/sudo_plugin.man.in
 
 @DEV@$(srcdir)/sudo_plugin.man.in: $(srcdir)/sudo_plugin.pod
 @DEV@	@rm -f $(srcdir)/$@
@@ -114,6 +135,8 @@ sudoreplay.man:: $(srcdir)/sudoreplay.man.in
 
 sudo_plugin.man:: $(srcdir)/sudo_plugin.man.in
 	(cd $(top_builddir) && CONFIG_FILES=doc/$@ CONFIG_HEADERS= sh config.status)
+
+@DEV@sudo_plugin.cat: $(srcdir)/sudo_plugin.cat
 
 @DEV@$(srcdir)/sudo_plugin.cat: sudo_plugin.man
 
