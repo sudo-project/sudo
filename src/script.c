@@ -375,22 +375,24 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 
     zero_bytes(&sa, sizeof(sa));
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-
-    /* Catch SIGALRM for command timeout */
-    sa.sa_handler = handler;
-    sigaction(SIGALRM, &sa, NULL);
 
     /* Ignore SIGPIPE from other end of socketpair. */
+    sa.sa_flags = SA_RESTART;
     sa.sa_handler = SIG_IGN;
     sigaction(SIGPIPE, &sa, NULL);
 
     /* Note: HP-UX select() will not be interrupted if SA_RESTART set */
-    sa.sa_flags = 0;
+    sa.sa_flags = 0; /* do not restart syscalls */
     sa.sa_handler = handler;
+    sigaction(SIGALRM, &sa, NULL);
     sigaction(SIGCHLD, &sa, NULL);
+    sigaction(SIGHUP, &sa, NULL);
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGQUIT, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
 
     if (log_io) {
+	sa.sa_flags = SA_RESTART;
 	sa.sa_handler = sigwinch;
 	sigaction(SIGWINCH, &sa, NULL);
 
@@ -412,7 +414,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	sa.sa_flags = 0; /* do not restart syscalls */
 	sa.sa_handler = handler;
 	sigaction(SIGTSTP, &sa, NULL);
-#if 0 /* XXX - keep these? */
+#if 0 /* XXX - add these? */
 	sigaction(SIGTTIN, &sa, NULL);
 	sigaction(SIGTTOU, &sa, NULL);
 #endif
@@ -434,14 +436,6 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		error(1, "Can't set terminal to raw mode");
 	}
     }
-
-    /* Non-job control signals to relay from parent to child. */
-    sa.sa_flags = 0; /* do not restart syscalls */
-    sa.sa_handler = handler;
-    sigaction(SIGHUP, &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
-    sigaction(SIGQUIT, &sa, NULL);
 
     /* Set command timeout if specified. */
     if (ISSET(details->flags, CD_SET_TIMEOUT))
@@ -604,7 +598,6 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		    sudo_debug(8, "child stopped, suspending parent");
 		    n = suspend_parent(WSTOPSIG(cstat->val), &output);
 		    recvsig[n] = TRUE;
-		    /* XXX - write sig immediately? */
 		    continue;
 		} else {
 		    /* Child exited or was killed, either way we are done. */
@@ -616,7 +609,6 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    }
 	}
 	if (FD_ISSET(sv[0], fdsw)) {
-	    /* XXX - we rely on child to be suspended before we suspend ourselves */
 	    for (n = 0; n < NSIG; n++) {
 		if (!recvsig[n])
 		    continue;
@@ -830,7 +822,6 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	foreground = 0;
 
     /* Start command and wait for it to stop or exit */
-    /* XXX - use details->timeout */
     child = fork();
     if (child == -1) {
 	warning("Can't fork");
