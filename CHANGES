@@ -2174,3 +2174,14 @@ Sudo 1.6.9p20 released.
 685) Users with permission to run sudoedit could run arbitrary commands.
 
 Sudo 1.6.9p21 released.
+
+686) When doing a glob match, short circuit if gl.gl_pathc is 0.
+     From Mark Kettenis
+
+687) Documented the security implications of the fast_glob sudoers option.
+
+688) Sudo will now add the path component to the command even if it simply
+     "./". This removes an ambiguity between real commands and
+     possible pseudo-commands in command matching
+
+Sudo 1.6.9p22 released.
