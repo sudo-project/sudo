@@ -509,34 +509,25 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     zero_bytes(&input, sizeof(input));
     zero_bytes(&output, sizeof(output));
     for (;;) {
-	/* Wait for children as needed. */
 	if (recvsig[SIGCHLD]) {
 	    pid_t pid;
-	    int flags = WNOHANG;
 
+	    /*
+	     * If logging I/O, child is the intermediate process,
+	     * otherwise it is the command itself.
+	     */
 	    recvsig[SIGCHLD] = FALSE;
-	    if (log_io)
-		flags |= WUNTRACED;
 	    do {
-		pid = waitpid(child, &child_status, flags);
+		pid = waitpid(child, &child_status, WNOHANG);
 	    } while (pid == -1 && errno == EINTR);
 	    if (pid == child) {
-		/*
-		 * If there is no I/O logger we are done.  Otherwise,
-		 * we wait for ECONNRESET or EPIPE from the socketpair.
-		 */
-		if (!log_io)
-		    recvsig[SIGCHLD] = TRUE; /* XXX - hacky, see below */
-		else if (WIFSTOPPED(child_status))
-		    recvsig[WSTOPSIG(child_status)] = TRUE;
+		/* If not logging I/O and child has exited we are done. */
+		if (!log_io) {
+		    cstat->type = CMD_WSTATUS;
+		    cstat->val = child_status;
+		    return 0;
+		}
 	    }
-	}
-
-	/* If not logging I/O and child has exited we are done. */
-	if (!log_io && recvsig[SIGCHLD]) {
-	    cstat->type = CMD_WSTATUS;
-	    cstat->val = child_status;
-	    break;
 	}
 
 	zero_bytes(fdsw, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
