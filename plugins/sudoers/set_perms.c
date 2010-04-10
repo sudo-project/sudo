@@ -66,7 +66,38 @@ static void runas_setup(void);
 static void runas_setgroups(void);
 static void restore_groups(void);
 
-static int current_perm = -1;
+/*
+ * We keep track of the current permisstions and use a stack to restore
+ * the old permissions.  A depth of 16 is overkill.
+ */
+#define PERM_STACK_MAX	16
+static int perm_stack[PERM_STACK_MAX];
+static int perm_stack_depth = 0;
+static int perm_current = PERM_INITIAL;
+
+/*
+ * XXX - better to push what we've changed:
+ *	ruid, euid, suid, gids group vector.
+ */
+
+int
+restore_perms(void)
+{
+    int old_perm;
+
+    if (!perm_stack_depth) {
+	/* nothing to do */
+	return TRUE;
+    }
+    old_perm = perm_stack[--perm_stack_depth];
+    return set_perms2(old_perm, FALSE);
+}
+
+int
+set_perms(int perm)
+{
+    return set_perms2(perm, TRUE);
+}
 
 #ifdef HAVE_SETRESUID
 /*
@@ -76,8 +107,7 @@ static int current_perm = -1;
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
 int
-set_perms(perm)
-    int perm;
+set_perms2(int perm, int push_it)
 {
     const char *errstr;
     int noexit;
@@ -85,17 +115,32 @@ set_perms(perm)
     noexit = ISSET(perm, PERM_NOEXIT);
     CLR(perm, PERM_MASK);
 
-    if (perm == current_perm)
-	return(1);
+    if (perm_stack_depth == PERM_STACK_MAX) {
+	errno = EINVAL;
+	goto bad;
+    }
+    if (perm == perm_current)
+    	goto done;
 
     switch (perm) {
+	case PERM_INITIAL:
+				/* Setuid root */
+				if (setuid(ROOT_UID)) {
+				    errstr = "setuid(ROOT_UID)";
+				    goto bad;
+				}
+				(void) setresgid(-1, user_gid, -1);
+				if (perm_current == PERM_RUNAS)
+				    restore_groups();
+				(void) setresuid(user_uid, -1, -1);
+				break;
 	case PERM_ROOT:
 				if (setresuid(ROOT_UID, ROOT_UID, ROOT_UID)) {
 				    errstr = "setresuid(ROOT_UID, ROOT_UID, ROOT_UID)";
 				    goto bad;
 				}
 				(void) setresgid(-1, user_gid, -1);
-				if (current_perm == PERM_RUNAS)
+				if (perm_current == PERM_RUNAS)
 				    restore_groups();
 			      	break;
 
@@ -172,7 +217,10 @@ set_perms(perm)
 			      	break;
     }
 
-    current_perm = perm;
+done:
+    if (push_it)
+	perm_stack[perm_stack_depth++] = perm_current;
+    perm_current = perm;
     return(1);
 bad:
     warningx("%s: %s", errstr,
@@ -201,7 +249,7 @@ set_perms(perm)
     noexit = ISSET(perm, PERM_NOEXIT);
     CLR(perm, PERM_MASK);
 
-    if (perm == current_perm)
+    if (perm == perm_current)
 	return(1);
 
     switch (perm) {
@@ -215,7 +263,7 @@ set_perms(perm)
 				    goto bad;
 				}
 				(void) setregid(-1, user_gid);
-				if (current_perm == PERM_RUNAS)
+				if (perm_current == PERM_RUNAS)
 				    restore_groups();
 			      	break;
 
@@ -291,7 +339,7 @@ set_perms(perm)
 			      	break;
     }
 
-    current_perm = perm;
+    perm_current = perm;
     return(1);
 bad:
     warningx("%s: %s", errstr,
@@ -318,7 +366,7 @@ set_perms(perm)
     noexit = ISSET(perm, PERM_NOEXIT);
     CLR(perm, PERM_MASK);
 
-    if (perm == current_perm)
+    if (perm == perm_current)
 	return(1);
 
     /*
@@ -339,7 +387,7 @@ set_perms(perm)
 	case PERM_ROOT:
 				/* uid set above */
 				(void) setegid(user_gid);
-				if (current_perm == PERM_RUNAS)
+				if (perm_current == PERM_RUNAS)
 				    restore_groups();
 			      	break;
 
@@ -412,7 +460,7 @@ set_perms(perm)
 			      	break;
     }
 
-    current_perm = perm;
+    perm_current = perm;
     return(1);
 bad:
     warningx("%s: %s", errstr,
@@ -439,7 +487,7 @@ set_perms(perm)
     noexit = ISSET(perm, PERM_NOEXIT);
     CLR(perm, PERM_MASK);
 
-    if (perm == current_perm)
+    if (perm == perm_current)
 	return(1);
 
     switch (perm) {
@@ -448,7 +496,7 @@ set_perms(perm)
 				    errstr = "setuid(ROOT_UID)";
 				    goto bad;
 				}
-				if (current_perm == PERM_RUNAS)
+				if (perm_current == PERM_RUNAS)
 				    restore_groups();
 				break;
 
@@ -478,7 +526,7 @@ set_perms(perm)
 				break;
     }
 
-    current_perm = perm;
+    perm_current = perm;
     return(1);
 bad:
     warningx("%s: %s", errstr,

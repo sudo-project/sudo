@@ -257,7 +257,7 @@ sudo_file_lookup(nss, validated, pwflag)
 	SET(validated, VALIDATE_NOT_OK);
 	CLR(validated, VALIDATE_OK);
     }
-    set_perms(PERM_ROOT);
+    restore_perms();
     return(validated);
 }
 

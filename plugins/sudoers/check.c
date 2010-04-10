@@ -215,7 +215,7 @@ update_timestamp(timestampdir, timestampfile)
 	}
     }
     if (timestamp_uid != 0)
-	set_perms(PERM_ROOT);
+	restore_perms();
 }
 
 /*
@@ -464,11 +464,8 @@ timestamp_status(timestampdir, timestampfile, user, flags)
 		status = TS_MISSING;
 	}
     }
-    if (status == TS_ERROR) {
-	if (timestamp_uid != 0)
-	    set_perms(PERM_ROOT);
-	return(status);
-    }
+    if (status == TS_ERROR)
+	goto done;
 
     /*
      * Sanity check the user's ticket dir.  We start by downgrading
@@ -592,7 +589,7 @@ timestamp_status(timestampdir, timestampfile, user, flags)
 
 done:
     if (timestamp_uid != 0)
-	set_perms(PERM_ROOT);
+	restore_perms();
     return(status);
 }
 

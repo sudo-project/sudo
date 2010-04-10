@@ -737,12 +737,12 @@ set_cmnd(sudo_mode)
 	if (ISSET(sudo_mode, MODE_RUN | MODE_CHECK)) {
 	    set_perms(PERM_RUNAS);
 	    rval = find_path(NewArgv[0], &user_cmnd, user_stat, user_path);
-	    set_perms(PERM_ROOT);
+	    restore_perms();
 	    if (rval != FOUND) {
 		/* Failed as root, try as invoking user. */
 		set_perms(PERM_USER);
 		rval = find_path(NewArgv[0], &user_cmnd, user_stat, user_path);
-		set_perms(PERM_ROOT);
+		restore_perms();
 	    }
 	}
 
@@ -855,7 +855,7 @@ open_sudoers(sudoers, doedit, keepopen)
 	(void) fcntl(fileno(fp), F_SETFD, 1);
     }
 
-    set_perms(PERM_ROOT);		/* change back to root */
+    restore_perms();		/* change back to root */
     return(fp);
 }
 

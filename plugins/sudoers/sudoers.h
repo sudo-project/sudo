@@ -136,13 +136,14 @@ struct sudo_user {
 /*
  * Used with set_perms()
  */
-#define PERM_ROOT                0x00
-#define PERM_USER                0x01
-#define PERM_FULL_USER           0x02
-#define PERM_SUDOERS             0x03
-#define PERM_RUNAS               0x04
-#define PERM_FULL_RUNAS          0x05
-#define PERM_TIMESTAMP           0x06
+#define PERM_INITIAL             0x00
+#define PERM_ROOT                0x01
+#define PERM_USER                0x02
+#define PERM_FULL_USER           0x03
+#define PERM_SUDOERS             0x04
+#define PERM_RUNAS               0x05
+#define PERM_FULL_RUNAS          0x06
+#define PERM_TIMESTAMP           0x07
 #define PERM_NOEXIT              0x10 /* flag */
 #define PERM_MASK                0xf0
 
@@ -236,6 +237,7 @@ int sudo_file_display_defaults(struct sudo_nss *, struct passwd *, struct lbuf *
 int sudo_file_display_bound_defaults(struct sudo_nss *, struct passwd *, struct lbuf *);
 int sudo_file_display_privs(struct sudo_nss *, struct passwd *, struct lbuf *);
 int set_perms(int);
+int restore_perms(void);
 void remove_timestamp(int);
 int check_secureware(char *);
 void sia_attempt_auth(void);

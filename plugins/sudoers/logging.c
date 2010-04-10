@@ -406,7 +406,7 @@ log_error(flags, fmt, va_alist)
 
     efree(logline);
 
-    set_perms(PERM_USER);
+    restore_perms();
 
     if (!ISSET(flags, NO_EXIT)) {
 	cleanup(0);
