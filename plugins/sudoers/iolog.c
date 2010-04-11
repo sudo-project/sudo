@@ -67,6 +67,10 @@ struct script_buf {
     char buf[16 * 1024];
 };
 
+static sigset_t ttyblock;
+static struct timeval last_time;
+static union script_fd io_outfile, io_timfile;
+
 static void
 io_nextid()
 {
@@ -171,13 +175,6 @@ build_idpath(char *pathbuf, size_t pathsize)
     return(len);
 }
 
-/* XXX */
-static sudo_conv_t io_conv;
-static sigset_t ttyblock;
-static struct timeval last_time;
-static union script_fd io_outfile, io_timfile;
-
-/* XXX - need to defer this until after the policy check succeeds */
 int
 sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     char * const settings[], char * const user_info[], char * const user_env[])
@@ -186,9 +183,9 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
     FILE *io_logfile;
     int fd, len;
 
-    io_conv = conversation;
+    if (!sudo_conv)
+	sudo_conv = conversation;
 
-    /* XXX - def_transcript may not be set yet */
     if (!def_transcript)
 	return FALSE;
 
@@ -249,7 +246,6 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     gettimeofday(&last_time, NULL);
 
-    /* XXX - too early, don't even have user_cmnd yet */
     /* XXX - log more stuff?  window size? environment? */
     fprintf(io_logfile, "%ld:%s:%s:%s:%s\n", last_time.tv_sec, user_name,
         runas_pw->pw_name, runas_gr ? runas_gr->gr_name : "", user_tty);
