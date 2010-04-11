@@ -157,7 +157,10 @@ main(int argc, char *argv[], char *envp[])
 	case MODE_VERSION:
 	    policy_plugin.u.policy->show_version(!user_details.uid);
 	    tq_foreach_fwd(&io_plugins, plugin) {
-		plugin->u.io->show_version(!user_details.uid);
+		ok = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
+		    settings, user_info, envp);
+		if (ok)
+		    plugin->u.io->show_version(user_details.uid == ROOT_UID);
 	    }
 	    break;
 	case MODE_VALIDATE:
