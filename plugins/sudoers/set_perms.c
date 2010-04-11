@@ -240,8 +240,7 @@ bad:
  * This version of set_perms() works fine with the "stay_setuid" option.
  */
 int
-set_perms(perm)
-    int perm;
+set_perms2(int perm, int push_it)
 {
     const char *errstr;
     int noexit;
@@ -249,8 +248,12 @@ set_perms(perm)
     noexit = ISSET(perm, PERM_NOEXIT);
     CLR(perm, PERM_MASK);
 
+    if (perm_stack_depth == PERM_STACK_MAX) {
+	errno = EINVAL;
+	goto bad;
+    }
     if (perm == perm_current)
-	return(1);
+	goto done;
 
     switch (perm) {
 	case PERM_ROOT:
@@ -339,6 +342,9 @@ set_perms(perm)
 			      	break;
     }
 
+done:
+    if (push_it)
+	perm_stack[perm_stack_depth++] = perm_current;
     perm_current = perm;
     return(1);
 bad:
@@ -357,8 +363,7 @@ bad:
  * NOTE: does not support the "stay_setuid" option.
  */
 int
-set_perms(perm)
-    int perm;
+set_perms2(int perm, int push_it)
 {
     const char *errstr;
     int noexit;
@@ -366,8 +371,12 @@ set_perms(perm)
     noexit = ISSET(perm, PERM_NOEXIT);
     CLR(perm, PERM_MASK);
 
+    if (perm_stack_depth == PERM_STACK_MAX) {
+	errno = EINVAL;
+	goto bad;
+    }
     if (perm == perm_current)
-	return(1);
+	goto done;
 
     /*
      * Since we only have setuid() and seteuid() and semantics
@@ -460,6 +469,9 @@ set_perms(perm)
 			      	break;
     }
 
+done:
+    if (push_it)
+	perm_stack[perm_stack_depth++] = perm_current;
     perm_current = perm;
     return(1);
 bad:
@@ -478,8 +490,7 @@ bad:
  *       Also, SUDOERS_UID and SUDOERS_GID are not used.
  */
 int
-set_perms(perm)
-    int perm;
+set_perms2(int perm, int push_it)
 {
     const char *errstr;
     int noexit;
@@ -487,8 +498,12 @@ set_perms(perm)
     noexit = ISSET(perm, PERM_NOEXIT);
     CLR(perm, PERM_MASK);
 
+    if (perm_stack_depth == PERM_STACK_MAX) {
+	errno = EINVAL;
+	goto bad;
+    }
     if (perm == perm_current)
-	return(1);
+	goto done;
 
     switch (perm) {
 	case PERM_ROOT:
@@ -526,6 +541,9 @@ set_perms(perm)
 				break;
     }
 
+done:
+    if (push_it)
+	perm_stack[perm_stack_depth++] = perm_current;
     perm_current = perm;
     return(1);
 bad:
