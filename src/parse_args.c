@@ -128,7 +128,6 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
     int env_size = 32;
 
     env_add = emalloc2(env_size, sizeof(char *));
-    env_add[0] = NULL;
 
     /* Pass progname to plugin so it can call setprogname() */
     sudo_settings[ARG_PROGNAME].value = getprogname();
@@ -296,6 +295,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 	    break;
 	}
     }
+    env_add[nenv] = NULL;
 
     argc -= optind;
     argv += optind;
