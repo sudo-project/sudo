@@ -191,3 +191,7 @@ TODO list (most will be addressed in sudo 2.0)
 66) Add a session mode where sudo allocates a pty and logs everything
     that occurs ala script(1).  Logs should be replayable via
     scriptreplay.pl.  See linux script's -t option for timing info.
+
+67) Update Active Directory instructions based on Alain Roy's info
+
+68) Add support for multiple LDAP trees; from Joachim Henke

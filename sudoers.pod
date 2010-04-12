@@ -740,7 +740,7 @@ by default.
 =item passprompt_override
 
 The password prompt specified by I<passprompt> will normally only
-be used if the passwod prompt provided by systems such as PAM matches
+be used if the password prompt provided by systems such as PAM matches
 the string "Password:".  If I<passprompt_override> is set, I<passprompt>
 will always be used.  This flag is I<off> by default.
 

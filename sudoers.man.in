@@ -852,7 +852,7 @@ by default.
 .IP "passprompt_override" 16
 .IX Item "passprompt_override"
 The password prompt specified by \fIpassprompt\fR will normally only
-be used if the passwod prompt provided by systems such as \s-1PAM\s0 matches
+be used if the password prompt provided by systems such as \s-1PAM\s0 matches
 the string \*(L"Password:\*(R".  If \fIpassprompt_override\fR is set, \fIpassprompt\fR
 will always be used.  This flag is \fIoff\fR by default.
 .IP "preserve_groups" 16
