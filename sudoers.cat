@@ -677,7 +677,7 @@ SUDOERS(4)             MAINTENANCE COMMANDS            SUDOERS(4)
        passprompt_override
                        The password prompt specified by
                        _p_a_s_s_p_r_o_m_p_t will normally only be used if
-                       the passwod prompt provided by systems
+                       the password prompt provided by systems
                        such as PAM matches the string
                        "Password:".  If _p_a_s_s_p_r_o_m_p_t___o_v_e_r_r_i_d_e is
                        set, _p_a_s_s_p_r_o_m_p_t will always be used.  This
