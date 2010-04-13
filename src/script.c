@@ -746,6 +746,22 @@ deliver_signal(pid_t pid, int signo)
     }
 }
 
+static int
+send_status(int fd, struct command_status *cstat)
+{
+    int n;
+
+    do {
+	n = send(fd, cstat, sizeof(*cstat), 0);
+    } while (n == -1 && errno == EINTR);
+    if (n != sizeof(*cstat)) {
+	sudo_debug(8, "unable to send status to parent: %s", strerror(errno));
+    } else {
+	sudo_debug(8, "sent status to parent");
+    }
+    return n;
+}
+
 int
 script_child(const char *path, char *argv[], char *envp[], int backchannel, int rbac)
 {
@@ -753,7 +769,8 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
     fd_set *fdsr;
     sigaction_t sa;
     pid_t pid;
-    int n, status;
+    int errpipe[2], maxfd, n, status;
+    int alive = TRUE;
 
     /* Close unused fds. */
     close(script_fds[SFD_MASTER]);
@@ -813,6 +830,8 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	foreground = 0;
 
     /* Start command and wait for it to stop or exit */
+    if (pipe(errpipe) == -1)
+	error(1, "unable to create pipe");
     child = fork();
     if (child == -1) {
 	warning("Can't fork");
@@ -833,13 +852,19 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	sigaction(SIGUSR2, &sa, NULL);
 	sigaction(SIGCHLD, &sa, NULL);
 
+	/* We pass errno back to our parent via pipe on exec failure. */
+	close(backchannel);
+	close(errpipe[0]);
+	fcntl(errpipe[1], F_SETFD, FD_CLOEXEC);
+
 	/* setup tty and exec command */
 	script_run(path, argv, envp, rbac);
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
-	send(backchannel, &cstat, sizeof(cstat), 0);
+	write(errpipe[1], &cstat, sizeof(cstat));
 	_exit(1);
     }
+    close(errpipe[1]);
 
     /*
      * Put child in its own process group.  If we are starting the command
@@ -852,10 +877,11 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	} while (status == -1 && errno == EINTR);
     }
 
-    /* Wait for signal on backchannel or for SIGCHLD */
-    fdsr = (fd_set *)emalloc2(howmany(backchannel + 1, NFDBITS), sizeof(fd_mask));
-    zero_bytes(fdsr, howmany(backchannel + 1, NFDBITS) * sizeof(fd_mask));
-    FD_SET(backchannel, fdsr);
+    /* Wait for errno on pipe, signal on backchannel or for SIGCHLD */
+    maxfd = MAX(errpipe[0], backchannel);
+    fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
+    zero_bytes(&cstat, sizeof(cstat));
     for (;;) {
 	/* Read child status */
 	while (recvsig[SIGCHLD]) {
@@ -865,57 +891,85 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 		pid = waitpid(child, &status, WUNTRACED|WNOHANG);
 	    } while (pid == -1 && errno == EINTR);
 	    if (pid == child) {
-		if (WIFSTOPPED(status))
-		    sudo_debug(8, "command stopped, signal %d", WSTOPSIG(status));
-		else if (WIFSIGNALED(status))
-		    sudo_debug(8, "command killed, signal %d", WTERMSIG(status));
-		else
-		    sudo_debug(8, "command exited: %d", WEXITSTATUS(status));
-		cstat.type = CMD_WSTATUS;
-		cstat.val = status;
-		do {
-		    n = send(backchannel, &cstat, sizeof(cstat), 0);
-		} while (n == -1 && errno == EINTR);
-		if (n != sizeof(cstat)) {
-		    /*
-		     * If child failed to exec it sends its own status
-		     * which will result in ECONNRERFUSED here.
-		     * XXX - treat other errno as fatal
-		     */
-		    sudo_debug(8, "unable to send wait status: %s",
-			strerror(errno));
+		if (WIFSTOPPED(status)) {
+		    sudo_debug(8, "command stopped, signal %d",
+			WSTOPSIG(status));
+		} else if (WIFSIGNALED(status)) {
+		    sudo_debug(8, "command killed, signal %d",
+			WTERMSIG(status));
 		} else {
-		    sudo_debug(8, "sent wait status to parent");
+		    sudo_debug(8, "command exited: %d", WEXITSTATUS(status));
+		    alive = FALSE;
 		}
-		if (!WIFSTOPPED(status)) {
-		    /* XXX */
-		    _exit(1); /* child dead */
+		/* Send wait status unless we previously sent errno. */
+		if (cstat.type != CMD_ERRNO) {
+		    cstat.type = CMD_WSTATUS;
+		    cstat.val = status;
+		    n = send_status(backchannel, &cstat);
+		    if (n == -1)
+			goto done;
 		}
+		if (!alive)
+		    goto done;
 	    }
 	}
-	n = select(backchannel + 1, fdsr, NULL, NULL, NULL);
+
+	/* Check for signal on backchannel or errno on errpipe. */
+	FD_SET(backchannel, fdsr);
+	if (errpipe[0] != -1)
+	    FD_SET(errpipe[0], fdsr);
+	maxfd = MAX(errpipe[0], backchannel);
+	n = select(maxfd + 1, fdsr, NULL, NULL, NULL);
 	if (n == -1) {
 	    if (errno == EINTR)
 		continue;
 	    error(1, "select failed");
 	}
 
-	/* read command from backchannel, should be a signal */
-	n = recv(backchannel, &cstat, sizeof(cstat), 0);
-	if (n == -1) {
-	    if (errno == EINTR)
+	if (FD_ISSET(errpipe[0], fdsr)) {
+	    /* read errno or EOF from command pipe */
+	    n = read(errpipe[0], &cstat, sizeof(cstat));
+	    if (n == -1) {
+		if (errno == EINTR)
+		    continue;
+		warning("error reading from pipe");
+		goto done;
+	    }
+	    if (n == sizeof(cstat)) {
+		/* execve() failed, relay errno back to parent */
+		if (cstat.type == CMD_ERRNO) {
+		    n = send_status(backchannel, &cstat);
+		    if (n == -1)
+			goto done;
+		} else
+		    warningx("unexpected reply type on pipe: %d", cstat.type);
+	    }
+	    /* Got errno or EOF, either way we are done with errpipe. */
+	    FD_CLR(errpipe[0], fdsr);
+	    close(errpipe[0]);
+	    errpipe[0] = -1;
+	}
+	if (FD_ISSET(backchannel, fdsr)) {
+	    /* read command from backchannel, should be a signal */
+	    n = recv(backchannel, &cstat, sizeof(cstat), 0);
+	    if (n == -1) {
+		if (errno == EINTR)
+		    continue;
+		warning("error reading from socketpair");
+		goto done;
+	    }
+	    if (cstat.type != CMD_SIGNO) {
+		warningx("unexpected reply type on backchannel: %d", cstat.type);
 		continue;
-	    warning("error reading command status");
-	    break;
+	    }
+	    deliver_signal(child, cstat.val);
 	}
-	if (cstat.type != CMD_SIGNO) {
-	    warningx("unexpected reply type on backchannel: %d", cstat.type);
-	    continue;
-	}
-	deliver_signal(child, cstat.val);
     }
 
-    _exit(1); /* XXX */
+done:
+    if (alive)
+	kill(child, SIGKILL);
+    _exit(1);
 
 bad:
     return errno;
