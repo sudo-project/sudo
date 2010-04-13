@@ -465,6 +465,7 @@ usage(int exit_val)
 	lbuf_print(&lbuf);
     }
     lbuf_destroy(&lbuf);
+    cleanup(0);
     exit(exit_val);
 }
 

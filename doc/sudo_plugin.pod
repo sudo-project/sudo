@@ -112,10 +112,12 @@ built against.
              char * const settings[], char * const user_info[],
              char * const user_env[]);
 
-Returns 1 on success, 0 on failure and -1 on error.
-On error, the plugin may optionally call the conversation function with
-C<SUDO_CONF_ERROR_MSG> to present additional error information to the
-user.
+Returns 1 on success, 0 on failure, -1 if a general error ocurred,
+or -2 if there was a usage error.  In the latter case, B<sudo> will
+print a usage message before it exits.  If an error occurs, the
+plugin may optionally call the conversation function with
+C<SUDO_CONF_ERROR_MSG> to present additional error information to
+the user.
 
 The function arguments are as follows:
 
@@ -629,10 +631,15 @@ built against.
              char * const settings[], char * const user_info[],
              char * const user_env[]);
 
-Returns 1 on success, 0 if the command should not be logged and -1 on error.
-On error, the plugin may optionally call the conversation function with
-C<SUDO_CONF_ERROR_MSG> to present additional error information to the
-user.
+The I<open> function is run before the I<log_input>, I<log_output>
+or I<show_version> functions are called.  It is only called if the
+version is being requested or the I<check_policy> function has
+returned successfully.  It returns 1 on success, 0 on failure, -1
+if a general error ocurred, or -2 if there was a usage error.  In
+the latter case, B<sudo> will print a usage message before it exits.
+If an error occurs, the plugin may optionally call the conversation
+function with C<SUDO_CONF_ERROR_MSG> to present additional error
+information to the user.
 
 The function arguments are as follows:
 

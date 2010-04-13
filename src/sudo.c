@@ -149,8 +149,12 @@ main(int argc, char *argv[], char *envp[])
     /* Open policy plugin. */
     ok = policy_plugin.u.policy->open(SUDO_API_VERSION, sudo_conversation,
 	settings, user_info, envp);
-    if (ok != TRUE)
-	errorx(1, "unable to initialize policy plugin");
+    if (ok != TRUE) {
+	if (ok == -2)
+	    usage(1);
+	else
+	    errorx(1, "unable to initialize policy plugin");
+    }
 
     sudo_debug(9, "sudo_mode %d", sudo_mode);
     switch (sudo_mode & MODE_MASK) {
@@ -159,7 +163,7 @@ main(int argc, char *argv[], char *envp[])
 	    tq_foreach_fwd(&io_plugins, plugin) {
 		ok = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation,
 		    settings, user_info, envp);
-		if (ok)
+		if (ok == TRUE)
 		    plugin->u.io->show_version(user_details.uid == ROOT_UID);
 	    }
 	    break;
@@ -210,11 +214,18 @@ main(int argc, char *argv[], char *envp[])
 		next = plugin->next;
 		ok = plugin->u.io->open(SUDO_API_VERSION, sudo_conversation, settings,
 		    user_info, envp);
-		if (ok == -1)
-		    errorx(1, "error initializing I/O plugin %s", plugin->name);
-		if (!ok) {
+		switch (ok) {
+		case TRUE:
+		    break;
+		case FALSE:
 		    /* I/O plugin asked to be disabled, remove from list. */
 		    tq_remove(&io_plugins, plugin);
+		    break;
+		case -2:
+		    usage(1);
+		    break;
+		default:
+		    errorx(1, "error initializing I/O plugin %s", plugin->name);
 		}
 	    }
 	    command_info_to_details(command_info, &command_details);
