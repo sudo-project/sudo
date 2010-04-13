@@ -281,7 +281,7 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
     static char *command_info[32]; /* XXX */
     struct sudo_nss *nss;
     char **old_environ = environ;
-    int cmnd_status = -1, fd, validated, pwflag = 0;
+    int cmnd_status = -1, validated, pwflag = 0;
     int info_len = 0;
     int rval = FALSE;
 
@@ -337,6 +337,7 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
      */
     validated = FLAG_NO_USER | FLAG_NO_HOST;
     tq_foreach_fwd(snl, nss) {
+	/* XXX - pwflag always 0 */
 	validated = nss->lookup(nss, validated, pwflag);
 
 	if (ISSET(validated, VALIDATE_OK)) {
@@ -394,7 +395,8 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 
     /* Bail if a tty is required and we don't have one.  */
     if (def_requiretty) {
-	if ((fd = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1) {
+	int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY);
+	if (fd == -1) {
 	    //audit_failure(NewArgv, "no tty");
 	    warningx("sorry, you must have a tty to run sudo");
 	    goto done;
@@ -414,9 +416,11 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 
     /* Require a password if sudoers says so.  */
     if (def_authenticate) {
-	rval = check_user(validated, sudo_mode);
-	if (rval != TRUE)
+	int rc = check_user(validated, sudo_mode);
+	if (rc != TRUE) {
+	    rval = rc;
 	    goto done;
+	}
     }
 
     /* If run as root with SUDO_USER set, set sudo_user.pw to that user. */
