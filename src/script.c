@@ -599,6 +599,9 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		break;
 	    }
 	}
+	if (!log_io)
+	    continue;
+
 	if (FD_ISSET(sv[0], fdsw)) {
 	    for (n = 0; n < NSIG; n++) {
 		if (!recvsig[n])
@@ -616,9 +619,6 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		}
 	    }
 	}
-	if (!log_io)
-	    continue;
-
 	if (FD_ISSET(script_fds[SFD_USERTTY], fdsr)) {
 	    n = read(script_fds[SFD_USERTTY], input.buf + input.len,
 		sizeof(input.buf) - input.len);
@@ -836,7 +836,10 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	/* setup tty and exec command */
 	script_run(path, argv, envp, rbac);
 	warning("unable to execute %s", path); /* XXX - leave this to plugin? */
-	goto bad;
+	cstat.type = CMD_ERRNO;
+	cstat.val = errno;
+	send(backchannel, &cstat, sizeof(cstat), 0);
+	_exit(1);
     }
 
     /*
@@ -874,9 +877,17 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 		do {
 		    n = send(backchannel, &cstat, sizeof(cstat), 0);
 		} while (n == -1 && errno == EINTR);
-		if (n != sizeof(cstat))
-		    break; /* XXX - error, kill child and exit */
-		sudo_debug(8, "sent wait status to parent");
+		if (n != sizeof(cstat)) {
+		    /*
+		     * If child failed to exec it sends its own status
+		     * which will result in ECONNRERFUSED here.
+		     * XXX - treat other errno as fatal
+		     */
+		    sudo_debug(8, "unable to send wait status: %s",
+			strerror(errno));
+		} else {
+		    sudo_debug(8, "sent wait status to parent");
+		}
 		if (!WIFSTOPPED(status)) {
 		    /* XXX */
 		    _exit(1); /* child dead */
