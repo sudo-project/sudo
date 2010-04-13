@@ -835,7 +835,6 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 
 	/* setup tty and exec command */
 	script_run(path, argv, envp, rbac);
-	warning("unable to execute %s", path); /* XXX - leave this to plugin? */
 	cstat.type = CMD_ERRNO;
 	cstat.val = errno;
 	send(backchannel, &cstat, sizeof(cstat), 0);
