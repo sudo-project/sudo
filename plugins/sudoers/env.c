@@ -43,6 +43,9 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE__NSGETENVIRON
+#include <crt_externs.h>
+#endif
 #include <ctype.h>
 #include <errno.h>
 #include <pwd.h>
@@ -101,7 +104,12 @@ struct environment {
 static void sudo_setenv(const char *, const char *, int);
 static void sudo_putenv(char *, int, int);
 
+/* XXX - should not need to muck with environ, use envp from env_init */
+#ifdef HAVE__NSGETENVIRON
+char **environ;			/* global environment */
+#else
 extern char **environ;		/* global environment */
+#endif
 
 /*
  * Copy of the sudo-managed environment.
@@ -217,6 +225,10 @@ env_init(char * const envp[])
     char * const *ep;
     size_t len;
     int rval = -1;
+
+#ifdef HAVE__NSGETENVIRON
+    environ = _NSGetEnviron();
+#endif
 
     for (ep = envp; *ep != NULL; ep++)
 	continue;

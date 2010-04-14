@@ -1741,6 +1741,7 @@ case "$host" in
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
+		AC_CHECK_FUNCS(_NSGetEnviron)
 		;;
     *-*-nextstep*)
 		# lockf() on is broken on the NeXT -- use flock instead
