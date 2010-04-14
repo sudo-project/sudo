@@ -427,14 +427,17 @@ reparse_sudoers(editor, args, strict, quiet)
 
 	/* Parse the sudoers temp file */
 	yyrestart(fp);
-	if (yyparse() && parse_error != TRUE) {
+	if (yyparse() && !parse_error) {
 	    warningx("unabled to parse temporary file (%s), unknown error",
 		sp->tpath);
 	    parse_error = TRUE;
+	    errorfile = sp->path;
 	}
 	fclose(yyin);
-	if (check_aliases(strict, quiet) != 0)
+	if (!parse_error && check_aliases(strict, quiet) != 0) {
 	    parse_error = TRUE;
+	    errorfile = sp->path;
+	}
 
 	/*
 	 * Got an error, prompt the user for what to do now
@@ -698,22 +701,27 @@ check_syntax(sudoers_path, quiet, strict)
 	exit(1);
     }
     init_parser(sudoers_path, quiet);
-    if (yyparse() && parse_error != TRUE) {
+    if (yyparse() && !parse_error) {
 	if (!quiet)
 	    warningx("failed to parse %s file, unknown error", sudoers_path);
 	parse_error = TRUE;
+	errorfile = sudoers_path;
     }
-    if (!parse_error) {
-	if (check_aliases(strict, quiet) != 0)
-	    parse_error = TRUE;
+    if (!parse_error && check_aliases(strict, quiet) != 0) {
+	parse_error = TRUE;
+	errorfile = sudoers_path;
     }
     error = parse_error;
     if (!quiet) {
-	if (parse_error)
-	    (void) printf("parse error in %s near line %d\n", errorfile,
-		errorlineno);
-	else
+	if (parse_error) {
+	    if (errorlineno != -1)
+		(void) printf("parse error in %s near line %d\n", errorfile,
+		    errorlineno);
+	    else
+		(void) printf("parse error in %s\n", errorfile);
+	} else {
 	    (void) printf("%s: parsed OK\n", sudoers_path);
+	}
     }
     /* Check mode and owner in strict mode. */
 #ifdef HAVE_FSTAT
