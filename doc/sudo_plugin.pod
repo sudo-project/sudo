@@ -204,6 +204,13 @@ Set to true if the user specified the C<-k> flag along with a
 command, indicating that the user wishes to ignore any cached
 authentication credentials.
 
+=item noninteractive=bool
+
+Set to true if the user specified the C<-n> flag, indicating that
+B<sudo> should operate in non-interactive mode.  The plugin may
+reject a command run in non-interactive mode if user interaction
+is required.
+
 =item login_class=string
 
 BSD login class to use when setting resource limits and nice value,

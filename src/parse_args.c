@@ -105,7 +105,9 @@ static struct sudo_settings {
     { "implied_shell" },
 #define ARG_PRESERVE_GROUPS 14
     { "preserve_groups" },
-#define NUM_SETTINGS 15
+#define ARG_NONINTERACTIVE 15
+    { "noninteractive" },
+#define NUM_SETTINGS 16
     { NULL }
 };
 
@@ -235,6 +237,7 @@ parse_args(int argc, char **argv, int *nargc, char ***nargv, char ***settingsp,
 		    break;
 		case 'n':
 		    SET(flags, MODE_NONINTERACTIVE);
+		    sudo_settings[ARG_NONINTERACTIVE].value = "true";
 		    break;
 		case 'P':
 		    sudo_settings[ARG_PRESERVE_GROUPS].value = "true";

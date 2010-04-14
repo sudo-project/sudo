@@ -61,7 +61,7 @@ SSuuddoo PPlluuggiinn AAPPII
 
 
 
-1.8.0a1                   April 13, 2010                        1
+1.8.0a1                   April 14, 2010                        1
 
 
 
@@ -127,7 +127,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                   April 13, 2010                        2
+1.8.0a1                   April 14, 2010                        2
 
 
 
@@ -193,7 +193,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                   April 13, 2010                        3
+1.8.0a1                   April 14, 2010                        3
 
 
 
@@ -204,6 +204,12 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
                    command, indicating that the user wishes to ignore any
                    cached authentication credentials.
+
+               noninteractive=bool
+                   Set to true if the user specified the -n flag, indicating
+                   that ssuuddoo should operate in non-interactive mode.  The
+                   plugin may reject a command run in non-interactive mode if
+                   user interaction is required.
 
                login_class=string
                    BSD login class to use when setting resource limits and
@@ -250,16 +256,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                    The user's supplementary group list formatted as a string
                    of comma-separated group IDs.
 
-               cwd=string
-                   The user's current working directory.
-
-               tty=string
-                   The path to the user's terminal device.  If the user has no
-                   terminal device associated with the session, the value will
 
 
 
-1.8.0a1                   April 13, 2010                        4
+1.8.0a1                   April 14, 2010                        4
 
 
 
@@ -268,6 +268,12 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
+               cwd=string
+                   The user's current working directory.
+
+               tty=string
+                   The path to the user's terminal device.  If the user has no
+                   terminal device associated with the session, the value will
                    be empty, as in tty=.
 
                host=string
@@ -316,16 +322,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
             int (*show_version)(int verbose);
 
            The show_version function is called by ssuuddoo when the user specifies
-           the -V option.  The plugin may display its version information to
-           the user via the conversation function using SUDO_CONV_INFO_MSG.
-           If the user requests detailed version information, the verbose flag
-           will be set.
 
 
 
-
-
-1.8.0a1                   April 13, 2010                        5
+1.8.0a1                   April 14, 2010                        5
 
 
 
@@ -333,6 +333,11 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+           the -V option.  The plugin may display its version information to
+           the user via the conversation function using SUDO_CONV_INFO_MSG.
+           If the user requests detailed version information, the verbose flag
+           will be set.
 
        check_policy
             int (*check_policy)(int argc, char * const argv[]
@@ -383,15 +388,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
                runas_uid=uid
                    User ID to run the command as.
 
-               runas_euid=uid
-                   Effective user ID to run the command as.  If not specified,
-                   the value of _r_u_n_a_s___u_i_d is used.
 
 
 
-
-
-1.8.0a1                   April 13, 2010                        6
+1.8.0a1                   April 14, 2010                        6
 
 
 
@@ -399,6 +399,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+               runas_euid=uid
+                   Effective user ID to run the command as.  If not specified,
+                   the value of _r_u_n_a_s___u_i_d is used.
 
                runas_gid=gid
                    Group ID to run the command as.
@@ -451,13 +455,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
                Unsupported values will be ignored.
 
-           argv_out
-               The NULL-terminated argument vector to pass to the _e_x_e_c_v_e_(_)
-               system call when executing the command.  The plugin is
 
 
-
-1.8.0a1                   April 13, 2010                        7
+1.8.0a1                   April 14, 2010                        7
 
 
 
@@ -466,6 +466,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
+           argv_out
+               The NULL-terminated argument vector to pass to the _e_x_e_c_v_e_(_)
+               system call when executing the command.  The plugin is
                responsible for allocating and populating the vector.
 
            user_env_out
@@ -517,13 +520,10 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
            Returns 1 on success, 0 on failure and -1 on error.  On error, the
            plugin may optionally call the conversation function with
-           SUDO_CONF_ERROR_MSG to present additional error information to the
-           user.
 
 
 
-
-1.8.0a1                   April 13, 2010                        8
+1.8.0a1                   April 14, 2010                        8
 
 
 
@@ -531,6 +531,9 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
+
+           SUDO_CONF_ERROR_MSG to present additional error information to the
+           user.
 
        invalidate
             void (*invalidate)(int remove);
@@ -586,10 +589,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-
-
-
-1.8.0a1                   April 13, 2010                        9
+1.8.0a1                   April 14, 2010                        9
 
 
 
@@ -655,7 +655,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                   April 13, 2010                       10
+1.8.0a1                   April 14, 2010                       10
 
 
 
@@ -721,7 +721,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                   April 13, 2010                       11
+1.8.0a1                   April 14, 2010                       11
 
 
 
@@ -787,7 +787,7 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                   April 13, 2010                       12
+1.8.0a1                   April 14, 2010                       12
 
 
 
@@ -853,6 +853,6 @@ SUDO_PLUGIN(1m)        MAINTENANCE COMMANDS       SUDO_PLUGIN(1m)
 
 
 
-1.8.0a1                   April 13, 2010                       13
+1.8.0a1                   April 14, 2010                       13
 
 
