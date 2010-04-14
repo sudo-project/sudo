@@ -268,10 +268,10 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 }
 
 static void
-sudoers_policy_close(int exit_status, int error)
+sudoers_policy_close(int exit_status, int error_code)
 {
-    /* XXX - fill in */
-    return;
+    if (error)
+	warningx("unable to execute %s: %s", safe_cmnd, strerror(error_code));
 }
 
 static int
