@@ -270,7 +270,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 static void
 sudoers_policy_close(int exit_status, int error_code)
 {
-    if (error)
+    if (error_code)
 	warningx("unable to execute %s: %s", safe_cmnd, strerror(error_code));
 }
 
