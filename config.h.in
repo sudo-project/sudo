@@ -587,9 +587,6 @@
 /* Define to 1 if you have the `_innetgr' function. */
 #undef HAVE__INNETGR
 
-/* Define to 1 if you have the `_NSGetEnviron' function. */
-#undef HAVE__NSGETENVIRON
-
 /* Define to 1 if your crt0.o defines the __progname symbol for you. */
 #undef HAVE___PROGNAME
 
