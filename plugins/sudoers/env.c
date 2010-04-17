@@ -234,6 +234,12 @@ env_init(char * const envp[])
     return rval;
 }
 
+char **
+env_get(void)
+{
+    return env.envp;
+}
+
 /*
  * Similar to setenv(3) but operates on sudo's private copy of the environment
  * (not environ) and it always overwrites.  The dupcheck param determines
@@ -263,7 +269,6 @@ sudo_setenv(var, val, dupcheck)
 
 /*
  * Version of setenv(3) that uses our own environ pointer.
- * Will sync with environ as needed.
  */
 int
 setenv(var, val, overwrite)
@@ -312,7 +317,6 @@ setenv(var, val, overwrite)
 
 /*
  * Version of unsetenv(3) that uses our own environ pointer.
- * Will sync with environ as needed.
  */
 #ifdef UNSETENV_VOID
 void
@@ -356,7 +360,6 @@ unsetenv(var)
 
 /*
  * Version of putenv(3) that uses our own environ pointer.
- * Will sync with environ as needed.
  */
 int
 #ifdef PUTENV_CONST

@@ -306,6 +306,14 @@ void sudoers_io_close(int exit_status, int error);
 int sudoers_io_version(int verbose);
 int sudoers_io_log_output(const char *buf, unsigned int len);
 
+/* env.c */
+char **env_get(void);
+int env_init(char * const envp[]);
+void rebuild_env(int, int);
+
+/* fmt_string.c */
+char *fmt_string(const char *, const char *);
+
 /* Only provide extern declarations outside of sudo.c. */
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;

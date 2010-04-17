@@ -123,13 +123,8 @@ static struct passwd *get_authpw(void);
 static int deserialize_info(char * const settings[], char * const user_info[]);
 
 extern int sudo_edit(int, char **, char **);
-extern int rebuild_env(int, int);
-extern int env_init(char * const envp[]);
 void validate_env_vars(struct list_member *);
 void insert_env_vars(struct list_member *);
-
-/* XXX */
-char *fmt_string(const char *, const char *);
 
 /*
  * Globals
@@ -161,14 +156,10 @@ static struct sudo_nss_list *snl;
 static int NewArgc;
 static char **NewArgv;
 
-/* XXX */
-extern char **environ;
-
 /* error.c */
 extern sigjmp_buf error_jmp;
 
 static int sudo_mode;
-static char * const * user_env;
 
 static int
 sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
@@ -261,8 +252,8 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     /* Set login class if applicable. */
     set_loginclass(sudo_user.pw);
 
-    /* XXX */
-    user_env = envp; /* stash for later */
+    /* Initialize environment functions (including replacements). */
+    env_init(envp);
 
     return TRUE;
 }
@@ -270,6 +261,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 static void
 sudoers_policy_close(int exit_status, int error_code)
 {
+    /* We do not currently log the exit status. */
     if (error_code)
 	warningx("unable to execute %s: %s", safe_cmnd, strerror(error_code));
 }
@@ -280,7 +272,6 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 {
     static char *command_info[32]; /* XXX */
     struct sudo_nss *nss;
-    char **old_environ = environ;
     int cmnd_status = -1, validated, pwflag = 0;
     int info_len = 0;
     int rval = FALSE;
@@ -309,9 +300,6 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
     NewArgc = argc;
     if (ISSET(sudo_mode, MODE_LOGIN_SHELL))
 	NewArgv[0] = runas_pw->pw_shell;
-
-    /* Set environ to contents of user_env. */
-    env_init(user_env);
 
 #ifdef USING_NONUNIX_GROUPS
     sudo_nonunix_groupcheck_init();     /* initialise nonunix groups impl */
@@ -576,13 +564,11 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
     *command_infop = command_info;
 
     *argv_out = NewArgv;
-    *user_env_out = environ; /* actually our local copy */
+    *user_env_out = env_get(); /* our private copy */
 
     rval = TRUE;
 
 done:
-    environ = old_environ;
-
     return rval;
 }
 
