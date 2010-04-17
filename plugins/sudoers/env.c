@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000-2005, 2007-2009
+ * Copyright (c) 2000-2005, 2007-2010
  *	Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -246,10 +246,7 @@ env_get(void)
  * whether we need to verify that the variable is not already set.
  */
 static void
-sudo_setenv(var, val, dupcheck)
-    const char *var;
-    const char *val;
-    int dupcheck;
+sudo_setenv(const char *var, const char *val, int dupcheck)
 {
     char *estring;
     size_t esize;
@@ -271,10 +268,7 @@ sudo_setenv(var, val, dupcheck)
  * Version of setenv(3) that uses our own environ pointer.
  */
 int
-setenv(var, val, overwrite)
-    const char *var;
-    const char *val;
-    int overwrite;
+setenv(const char *var, const char *val, int overwrite)
 {
     char *estring, *ep;
     const char *cp;
@@ -323,8 +317,7 @@ void
 #else
 int
 #endif
-unsetenv(var)
-    const char *var;
+unsetenv(const char *var)
 {
     char **ep;
     size_t len;
@@ -365,8 +358,7 @@ int
 #ifdef PUTENV_CONST
 putenv(const char *string)
 #else
-putenv(string)
-    char *string;
+putenv(char *string)
 #endif
 {
     if (strchr(string, '=') == NULL) {
@@ -388,10 +380,7 @@ putenv(string)
  * Will only overwrite an existing variable if overwrite is set.
  */
 static void
-sudo_putenv(str, dupcheck, overwrite)
-    char *str;
-    int dupcheck;
-    int overwrite;
+sudo_putenv(char *str, int dupcheck, int overwrite)
 {
     char **ep;
     size_t len;
@@ -433,8 +422,7 @@ sudo_putenv(str, dupcheck, overwrite)
  * Returns TRUE if the variable was found, else false.
  */
 static int
-matches_env_delete(var)
-    const char *var;
+matches_env_delete(const char *var)
 {
     struct list_member *cur;
     size_t len;
@@ -464,8 +452,7 @@ matches_env_delete(var)
  * or -1 if no match.
  */
 static int
-matches_env_check(var)
-    const char *var;
+matches_env_check(const char *var)
 {
     struct list_member *cur;
     size_t len;
@@ -493,8 +480,7 @@ matches_env_check(var)
  * Returns TRUE if the variable is allowed else FALSE.
  */
 static int
-matches_env_keep(var)
-    const char *var;
+matches_env_keep(const char *var)
 {
     struct list_member *cur;
     size_t len;
@@ -523,9 +509,7 @@ matches_env_keep(var)
  * Also adds sudo-specific variables (SUDO_*).
  */
 void
-rebuild_env(sudo_mode, noexec)
-    int sudo_mode;
-    int noexec;
+rebuild_env(int sudo_mode, int noexec)
 {
     char **old_envp, **ep, *cp, *ps1;
     char idbuf[MAX_UID_T_LEN];
@@ -741,8 +725,7 @@ rebuild_env(sudo_mode, noexec)
 }
 
 void
-insert_env_vars(env_vars)
-    struct list_member *env_vars;
+insert_env_vars(struct list_member *env_vars)
 {
     struct list_member *cur;
 
@@ -760,8 +743,7 @@ insert_env_vars(env_vars)
  * Calls log_error() if any specified variables are not allowed.
  */
 void
-validate_env_vars(env_vars)
-    struct list_member *env_vars;
+validate_env_vars(struct list_member *env_vars)
 {
     struct list_member *var;
     char *eq, *bad = NULL;
@@ -820,9 +802,7 @@ validate_env_vars(env_vars)
  * character are skipped.
  */
 void
-read_env_file(path, overwrite)
-    const char *path;
-    int overwrite;
+read_env_file(const char *path, int overwrite)
 {
     FILE *fp;
     char *cp, *var, *val;
@@ -869,7 +849,7 @@ read_env_file(path, overwrite)
 }
 
 void
-init_envtables()
+init_envtables(void)
 {
     struct list_member *cur;
     const char **p;

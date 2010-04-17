@@ -246,8 +246,6 @@ int yyparse(void);
 void pass_warn(void);
 void dump_defaults(void);
 void dump_auth_methods(void);
-void init_envtables(void);
-void read_env_file(const char *, int);
 int lock_file(int, int);
 int touch(int, char *, struct timespec *);
 int user_is_exempt(void);
@@ -309,6 +307,8 @@ int sudoers_io_log_output(const char *buf, unsigned int len);
 /* env.c */
 char **env_get(void);
 int env_init(char * const envp[]);
+void init_envtables(void);
+void read_env_file(const char *, int);
 void rebuild_env(int, int);
 
 /* fmt_string.c */
