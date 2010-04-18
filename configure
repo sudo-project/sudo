@@ -13085,7 +13085,10 @@ done
 		CHECKSHADOW="false"
 		;;
     *-*-darwin*)
-		SKIP_SETREUID=yes
+		# Darwin has a real setreuid(2) starting with 9.0
+		if test $OSMAJOR -lt 9; then
+		    SKIP_SETREUID=yes
+		fi
 		CHECKSHADOW="false"
 		test -z "$with_pam" && AUTH_EXCL_DEF="PAM"
 		: ${with_logincap='yes'}
