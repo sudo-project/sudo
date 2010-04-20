@@ -2829,16 +2829,16 @@ AH_BOTTOM([/*
  */
 #ifdef HAVE_ST_MTIM
 # ifdef HAVE_ST__TIM
-#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctim.st__tim.tv_sec; (_y)->tv_usec = (_x)->st_ctim.st__tim.tv_usec / 1000; } while (0)
-#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtim.st__tim.tv_sec; (_y)->tv_usec = (_x)->st_mtim.st__tim.tv_usec / 1000; } while (0)
+#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctim.st__tim.tv_sec; (_y)->tv_usec = (_x)->st_ctim.st__tim.tv_nsec / 1000; } while (0)
+#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtim.st__tim.tv_sec; (_y)->tv_usec = (_x)->st_mtim.st__tim.tv_nsec / 1000; } while (0)
 # else
-#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctim.tv_sec; (_y)->tv_usec = (_x)->st_ctim.tv_usec / 1000; } while (0)
-#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtim.tv_sec; (_y)->tv_usec = (_x)->st_mtim.tv_usec / 1000; } while (0)
+#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctim.tv_sec; (_y)->tv_usec = (_x)->st_ctim.tv_nsec / 1000; } while (0)
+#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtim.tv_sec; (_y)->tv_usec = (_x)->st_mtim.tv_nsec / 1000; } while (0)
 # endif
 #else
 # ifdef HAVE_ST_MTIMESPEC
-#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctimespec.tv_sec; (_y)->tv_usec = (_x)->st_ctimespec.tv_usec / 1000; } while (0)
-#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtimespec.tv_sec; (_y)->tv_usec = (_x)->st_mtimespec.tv_usec / 1000; } while (0)
+#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctimespec.tv_sec; (_y)->tv_usec = (_x)->st_ctimespec.tv_nsec / 1000; } while (0)
+#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtimespec.tv_sec; (_y)->tv_usec = (_x)->st_mtimespec.tv_nsec / 1000; } while (0)
 # else
 #  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctime; (_y)->tv_usec = 0; } while (0)
 #  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtime; (_y)->tv_usec = 0; } while (0)
