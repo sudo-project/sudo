@@ -144,7 +144,7 @@ visudo: libsudoers.la $(VISUDO_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(VISUDO_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
 
 sudoreplay: libsudoers.la $(REPLAY_OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) $(REPLAY_LIBS) libsudoers.la $(LIBS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(REPLAY_OBJS) $(LDFLAGS) alloc.lo timestr.lo zero_bytes.lo $(REPLAY_LIBS) $(LIBS)
 
 testsudoers: $(TEST_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(TEST_OBJS) $(LDFLAGS) libsudoers.la $(LIBS) $(NET_LIBS)
