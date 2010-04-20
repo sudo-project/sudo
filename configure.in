@@ -1964,14 +1964,14 @@ if test X"$ac_cv_type_struct_timespec" != X"no"; then
     AC_CHECK_MEMBER([struct stat.st_mtim], [AC_DEFINE(HAVE_ST_MTIM)]
 	[AC_CHECK_MEMBER([struct stat.st_mtim.st__tim], AC_DEFINE(HAVE_ST__TIM))],
 	[AC_CHECK_MEMBER([struct stat.st_mtimespec], AC_DEFINE([HAVE_ST_MTIMESPEC]))])
-    AC_MSG_CHECKING([for two-parameter timespecsub])
+    AC_MSG_CHECKING([for two-parameter timersub])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <sys/time.h>]], [[struct timespec ts1, ts2;
-ts1.tv_sec = 1; ts1.tv_nsec = 0; ts2.tv_sec = 0; ts2.tv_nsec = 0;
-#ifndef timespecsub
-#error missing timespecsub
+#include <sys/time.h>]], [[struct timeval ts1, ts2;
+ts1.tv_sec = 1; ts1.tv_usec = 0; ts2.tv_sec = 0; ts2.tv_usec = 0;
+#ifndef timersub
+#error missing timersub
 #endif
-timespecsub(&ts1, &ts2);]])], [AC_DEFINE(HAVE_TIMESPECSUB2)
+timersub(&ts1, &ts2);]])], [AC_DEFINE(HAVE_TIMERSUB2)
     AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)])
 fi
 dnl
@@ -2825,25 +2825,23 @@ AH_TOP([#ifndef _SUDO_CONFIG_H
 #define _SUDO_CONFIG_H])
 
 AH_BOTTOM([/*
- * Macros to pull sec and nsec parts of mtime from struct stat.
- * We need to be able to convert between timeval and timespec
- * so the last 3 digits of tv_nsec are not significant.
+ * Macros to convert ctime and mtime into timevals.
  */
 #ifdef HAVE_ST_MTIM
 # ifdef HAVE_ST__TIM
-#  define mtim_getsec(_x)	((_x).st_mtim.st__tim.tv_sec)
-#  define mtim_getnsec(_x)	(((_x).st_mtim.st__tim.tv_nsec / 1000) * 1000)
+#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctim.st__tim.tv_sec; (_y)->tv_usec = (_x)->st_ctim.st__tim.tv_usec / 1000; } while (0)
+#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtim.st__tim.tv_sec; (_y)->tv_usec = (_x)->st_mtim.st__tim.tv_usec / 1000; } while (0)
 # else
-#  define mtim_getsec(_x)	((_x).st_mtim.tv_sec)
-#  define mtim_getnsec(_x)	(((_x).st_mtim.tv_nsec / 1000) * 1000)
+#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctim.tv_sec; (_y)->tv_usec = (_x)->st_ctim.tv_usec / 1000; } while (0)
+#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtim.tv_sec; (_y)->tv_usec = (_x)->st_mtim.tv_usec / 1000; } while (0)
 # endif
 #else
 # ifdef HAVE_ST_MTIMESPEC
-#  define mtim_getsec(_x)	((_x).st_mtimespec.tv_sec)
-#  define mtim_getnsec(_x)	(((_x).st_mtimespec.tv_nsec / 1000) * 1000)
+#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctimespec.tv_sec; (_y)->tv_usec = (_x)->st_ctimespec.tv_usec / 1000; } while (0)
+#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtimespec.tv_sec; (_y)->tv_usec = (_x)->st_mtimespec.tv_usec / 1000; } while (0)
 # else
-#  define mtim_getsec(_x)	((_x).st_mtime)
-#  define mtim_getnsec(_x)	(0)
+#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctime; (_y)->tv_usec = 0; } while (0)
+#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtime; (_y)->tv_usec = 0; } while (0)
 # endif /* HAVE_ST_MTIMESPEC */
 #endif /* HAVE_ST_MTIM */
 

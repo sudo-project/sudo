@@ -57,22 +57,22 @@
  * Update the access and modify times on an fd or file.
  */
 int
-touch(int fd, char *path, struct timespec *tsp)
+touch(int fd, char *path, struct timeval *tvp)
 {
     struct timeval times[2];
 
-    if (tsp != NULL) {
-	times[0].tv_sec = times[1].tv_sec = tsp->tv_sec;
-	times[0].tv_usec = times[1].tv_usec = tsp->tv_nsec / 1000;
+    if (tvp != NULL) {
+	times[0].tv_sec = times[1].tv_sec = tvp->tv_sec;
+	times[0].tv_usec = times[1].tv_usec = tvp->tv_usec;
     }
 
 #if defined(HAVE_FUTIME) || defined(HAVE_FUTIMES)
     if (fd != -1)
-	return(futimes(fd, tsp ? times : NULL));
+	return(futimes(fd, tvp ? times : NULL));
     else
 #endif
     if (path != NULL)
-	return(utimes(path, tsp ? times : NULL));
+	return(utimes(path, tvp ? times : NULL));
     else
 	return(-1);
 }

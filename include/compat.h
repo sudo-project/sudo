@@ -252,24 +252,12 @@ void setprogname(const char *);
 #endif /* HAVE___PROGNAME */
 #endif /* !HAVE_GETPROGNAME */
 
-#ifndef timespecclear
-# define timespecclear(ts)	(ts)->tv_sec = (ts)->tv_nsec = 0
+#ifndef timerclear
+# define timerclear(ts)	(ts)->tv_sec = (ts)->tv_nsec = 0
 #endif
-#ifndef timespecisset
-# define timespecisset(ts)	((ts)->tv_sec || (ts)->tv_nsec)
+#ifndef timerisset
+# define timerisset(ts)	((ts)->tv_sec || (ts)->tv_nsec)
 #endif
-#ifndef timespecsub
-# define timespecsub(minuend, subrahend, difference)			       \
-    do {								       \
-	    (difference)->tv_sec = (minuend)->tv_sec - (subrahend)->tv_sec;    \
-	    (difference)->tv_nsec = (minuend)->tv_nsec - (subrahend)->tv_nsec; \
-	    if ((difference)->tv_nsec < 0) {				       \
-		    (difference)->tv_nsec += 1000000000L;		       \
-		    (difference)->tv_sec--;				       \
-	    }								       \
-    } while (0)
-#endif
-
 #ifndef timeradd
 # define timeradd(tv1, tv2, total)					       \
     do {								       \
@@ -281,7 +269,6 @@ void setprogname(const char *);
 	}								       \
     } while (0)
 #endif
-
 #ifndef timersub
 # define timersub(minuend, subrahend, difference)			       \
     do {								       \
