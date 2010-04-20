@@ -136,7 +136,7 @@ verify_user(struct passwd *pw, char *prompt)
 	    }
 
 	    if (NEEDS_USER(auth))
-		set_perms(PERM_ROOT);
+		restore_perms();
 	}
     }
 
@@ -158,7 +158,7 @@ verify_user(struct passwd *pw, char *prompt)
 		}
 
 		if (NEEDS_USER(auth))
-		    set_perms(PERM_ROOT);
+		    restore_perms();
 	    }
 	}
 
@@ -180,7 +180,7 @@ verify_user(struct passwd *pw, char *prompt)
 	    success = auth->status = (auth->verify)(pw, (char *)p, auth);
 
 	    if (NEEDS_USER(auth))
-		set_perms(PERM_ROOT);
+		restore_perms();
 
 	    if (auth->status != AUTH_FAILURE)
 		goto cleanup;
@@ -210,7 +210,7 @@ cleanup:
 	    }
 
 	    if (NEEDS_USER(auth))
-		set_perms(PERM_ROOT);
+		restore_perms();
 	}
     }
 

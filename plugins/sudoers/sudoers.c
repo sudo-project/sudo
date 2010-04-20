@@ -126,6 +126,10 @@ extern int sudo_edit(int, char **, char **);
 void validate_env_vars(struct list_member *);
 void insert_env_vars(struct list_member *);
 
+/* XXX */
+extern int runas_ngroups;
+extern GETGROUPS_T *runas_groups;
+
 /*
  * Globals
  */
@@ -182,6 +186,7 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */
+	rewind_perms();
 	return -1;
     }
 
@@ -220,6 +225,8 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     /* Parse nsswitch.conf for sudoers order. */
     snl = sudo_read_nss();
 
+    set_perms(PERM_INITIAL);
+
     /* Open and parse sudoers, set global defaults */
     tq_foreach_fwd(snl, nss) {
 	if (nss->open(nss) == 0 && nss->parse(nss) == 0) {
@@ -255,6 +262,8 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
     /* Initialize environment functions (including replacements). */
     env_init(envp);
 
+    restore_perms();
+
     return TRUE;
 }
 
@@ -286,8 +295,11 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* error recovery via error(), errorx() or log_error() */
+	rewind_perms();
 	return -1;
     }
+
+    set_perms(PERM_INITIAL);
 
     /*
      * Make a local copy of argc/argv, with special handling
@@ -530,32 +542,22 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
     }
     if (def_preserve_groups) {
 	command_info[info_len++] = "preserve_groups=true";
-    } else {
-	/* XXX - what about when runas user has no passwd entry? */
-#ifdef HAVE_GETGRSET
-	char *gid_list = getgrset(runas_pw->pw_name);
-	easprintf(&command_info[info_len++], "runas_groups=%s", gid_list);
-	efree(gid_list);
-#else
-	gid_t groups[NGROUPS_MAX * 2]; /* should use sysconf */
-	int i, len, ngroups = NGROUPS_MAX * 2;
+    } else if (runas_ngroups != -1) {
+	int i, len;
 	size_t glsize;
 	char *cp, *gid_list;
 
-	/* XXX - rval */
-	getgrouplist(runas_pw->pw_name, runas_pw->pw_gid, groups, &ngroups);
-	glsize = sizeof("runas_groups=") - 1 + (user_ngroups * (MAX_UID_T_LEN + 1));
+	glsize = sizeof("runas_groups=") - 1 + (runas_ngroups * (MAX_UID_T_LEN + 1));
 	gid_list = emalloc(glsize);
 	memcpy(gid_list, "runas_groups=", sizeof("runas_groups=") - 1);
 	cp = gid_list + sizeof("runas_groups=") - 1;
-	for (i = 0; i < ngroups; i++) {
+	for (i = 0; i < runas_ngroups; i++) {
 	    /* XXX - check rval */
 	    len = snprintf(cp, glsize - (cp - gid_list), "%s%lu",
-		 i ? "," : "", (unsigned long)groups[i]);
+		 i ? "," : "", (unsigned long)runas_groups[i]);
 	    cp += len;
 	}
 	command_info[info_len++] = gid_list;
-#endif
     }
 
     /* Must audit before uid change. */
@@ -567,6 +569,8 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
     *user_env_out = env_get(); /* our private copy */
 
     rval = TRUE;
+
+    restore_perms();
 
 done:
     return rval;

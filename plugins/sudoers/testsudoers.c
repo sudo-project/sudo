@@ -363,10 +363,14 @@ init_envtables()
 }
 
 int
-set_perms(perm)
-    int perm;
+set_perms(int perm)
 {
-    return(1);
+    return 1;
+}
+
+void
+restore_perms(void)
+{
 }
 
 void
