@@ -69,6 +69,16 @@
 #define TS_MAKE_DIRS		1
 #define TS_REMOVE		2
 
+/*
+ * Info stored in tty ticket from stat(2) to help with tty matching.
+ */
+static struct tty_info {
+    dev_t dev;			/* ID of device tty resides on */
+    dev_t rdev;			/* tty device ID */
+    ino_t ino;			/* tty inode number */
+    struct timeval ctime;	/* tty inode change time */
+} tty_info;
+
 static int   build_timestamp(char **, char **);
 static int   timestamp_status(char *, char *, char *, int);
 static char *expand_prompt(char *, char *, char *);
@@ -88,7 +98,27 @@ check_user(validated, mode)
     char *timestampdir = NULL;
     char *timestampfile = NULL;
     char *prompt;
+    struct stat sb;
     int status, rval = TRUE;
+
+    /* Stash the tty's ctime for tty ticket comparison. */
+    if (def_tty_tickets && user_ttypath && stat(user_ttypath, &sb) == 0) {
+	tty_info.dev = sb.st_dev;
+	tty_info.ino = sb.st_ino;
+	tty_info.rdev = sb.st_rdev;
+    	ctim_get(&sb, &tty_info.ctime);
+	if (stat("/", &sb) == 0) {
+	    /*
+	     * If tty does not reside on root partition, we assume it lives
+	     * on a devfs without real ctime values (FreeBSD, Mac OS X).
+	     * XXX - would like a smarter way to check this.
+	     */
+	    if (sb.st_dev != tty_info.dev) {
+		tty_info.ctime.tv_sec = 0;
+		tty_info.ctime.tv_usec = 0;
+	    }
+	}
+    }
 
     /* Always prompt for a password when -k was specified with the command. */
     if (ISSET(mode, MODE_IGNORE_TICKET)) {
@@ -201,15 +231,19 @@ update_timestamp(timestampdir, timestampfile)
 {
     if (timestamp_uid != 0)
 	set_perms(PERM_TIMESTAMP);
-    if (touch(-1, timestampfile ? timestampfile : timestampdir, NULL) == -1) {
-	if (timestampfile) {
-	    int fd = open(timestampfile, O_WRONLY|O_CREAT|O_TRUNC, 0600);
-
-	    if (fd == -1)
-		log_error(NO_EXIT|USE_ERRNO, "Can't open %s", timestampfile);
-	    else
-		close(fd);
-	} else {
+    if (timestampfile) {
+	/*
+	 * Store tty info in timestamp file
+	 */
+	int fd = open(timestampfile, O_WRONLY|O_CREAT|O_TRUNC, 0600);
+	if (fd == -1)
+	    log_error(NO_EXIT|USE_ERRNO, "Can't open %s", timestampfile);
+	else {
+	    write(fd, &tty_info, sizeof(tty_info));
+	    close(fd);
+	}
+    } else {
+	if (touch(-1, timestampdir, NULL) == -1) {
 	    if (mkdir(timestampdir, 0700) == -1)
 		log_error(NO_EXIT|USE_ERRNO, "Can't mkdir %s", timestampdir);
 	}
@@ -543,7 +577,22 @@ timestamp_status(timestampdir, timestampfile, user, flags)
 		    if ((sb.st_mode & 0000777) != 0600)
 			(void) chmod(timestampfile, 0600);
 
-		    status = TS_OLD;	/* actually check mtime below */
+		    /*
+		     * Check for stored tty info.  If the file is zero-sized
+		     * it is an old-style timestamp with no tty info in it.
+		     * The actual mtime check is done later.
+		     */
+		    if (sb.st_size != 0) {
+			struct tty_info info;
+			int fd = open(timestampfile, O_RDONLY, 0644);
+			if (fd != -1) {
+			    if (read(fd, &info, sizeof(info)) == sizeof(info) &&
+				memcmp(&info, &tty_info, sizeof(info)) == 0) {
+				status = TS_OLD;
+			    }
+			    close(fd);
+			}
+		    }
 		}
 	    }
 	} else if (errno != ENOENT) {
