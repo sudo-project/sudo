@@ -291,12 +291,14 @@ int term_noecho(int);
 int term_raw(int, int, int);
 int term_restore(int, int);
 char *get_timestr(time_t, int);
-time_t get_boottime(void);
 int user_in_group(struct passwd *, const char *);
 YY_DECL;
 
 /* atobool.c */
 int atobool(const char *str);
+
+/* boottime.c */
+int get_boottime(struct timeval *);
 
 /* iolog.c */
 int sudoers_io_open(unsigned int version, sudo_conv_t conversation,

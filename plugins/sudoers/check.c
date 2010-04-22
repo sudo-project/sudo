@@ -455,7 +455,8 @@ timestamp_status(timestampdir, timestampfile, user, flags)
     int flags;
 {
     struct stat sb;
-    time_t boottime, now;
+    struct timeval boottime, mtime;
+    time_t now;
     char *dirparent = def_timestampdir;
     int status = TS_ERROR;		/* assume the worst */
 
@@ -605,29 +606,28 @@ timestamp_status(timestampdir, timestampfile, user, flags)
      * If the file/dir exists and we are not removing it, check its mtime.
      */
     if (status == TS_OLD && !ISSET(flags, TS_REMOVE)) {
+	mtim_get(&sb, &mtime);
 	/* Negative timeouts only expire manually (sudo -k). */
-	if (def_timestamp_timeout < 0 && sb.st_mtime != 0)
+	if (def_timestamp_timeout < 0 && mtime.tv_sec != 0)
 	    status = TS_CURRENT;
 	else {
-	    /* XXX - should use timeval here */
 	    now = time(NULL);
-	    boottime = get_boottime();
 	    if (def_timestamp_timeout &&
-		now - sb.st_mtime < 60 * def_timestamp_timeout) {
+		now - mtime.tv_sec < 60 * def_timestamp_timeout) {
 		/*
 		 * Check for bogus time on the stampfile.  The clock may
 		 * have been set back or someone could be trying to spoof us.
 		 */
-		if (sb.st_mtime > now + 60 * def_timestamp_timeout * 2) {
+		if (mtime.tv_sec > now + 60 * def_timestamp_timeout * 2) {
 		    log_error(NO_EXIT,
 			"timestamp too far in the future: %20.20s",
-			4 + ctime(&sb.st_mtime));
+			4 + ctime(&mtime.tv_sec));
 		    if (timestampfile)
 			(void) unlink(timestampfile);
 		    else
 			(void) rmdir(timestampdir);
 		    status = TS_MISSING;
-		} else if (sb.st_mtime < boottime) {
+		} else if (get_boottime(&boottime) && timercmp(&mtime, &boottime, <)) {
 		    status = TS_OLD;
 		} else {
 		    status = TS_CURRENT;
