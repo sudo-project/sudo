@@ -280,6 +280,12 @@ void setprogname(const char *);
 	}								       \
     } while (0)
 #endif
+#ifndef timercmp
+#define timercmp(tv1, tv2, cmp)						       \
+    (((tv1)->tv_sec == (tv2)->tv_sec) ?					       \
+	((tv1)->tv_usec cmp (tv2)->tv_usec) :				       \
+	((tv1)->tv_sec cmp (tv2)->tv_sec))
+#endif
 
 #ifndef WCOREDUMP
 # define WCOREDUMP(x)	((x) & 0x80)
