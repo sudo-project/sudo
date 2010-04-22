@@ -711,8 +711,7 @@ init_vars(char * const envp[])
  * and apply any command-specific defaults entries.
  */
 static int
-set_cmnd(sudo_mode)
-    int sudo_mode;
+set_cmnd(int sudo_mode)
 {
     int rval;
 
@@ -778,10 +777,7 @@ set_cmnd(sudo_mode)
  * Returns a handle to the sudoers file or NULL on error.
  */
 FILE *
-open_sudoers(sudoers, doedit, keepopen)
-    const char *sudoers;
-    int doedit;
-    int *keepopen;
+open_sudoers(const char *sudoers, int doedit, int *keepopen)
 {
     struct stat statbuf;
     FILE *fp = NULL;
@@ -855,8 +851,7 @@ open_sudoers(sudoers, doedit, keepopen)
 
 #ifdef HAVE_LOGIN_CAP_H
 static void
-set_loginclass(pw)
-    struct passwd *pw;
+set_loginclass(struct passwd *pw)
 {
     int errflags;
 
@@ -890,16 +885,14 @@ set_loginclass(pw)
 }
 #else
 static void
-set_loginclass(pw)
-    struct passwd *pw;
+set_loginclass(struct passwd *pw)
 {
 }
 #endif /* HAVE_LOGIN_CAP_H */
 
 #ifdef HAVE_PROJECT_H
 static void
-set_project(pw)
-    struct passwd *pw;
+set_project(struct passwd *pw)
 {
     int errflags = NO_MAIL|MSG_ONLY|NO_EXIT;
     int errval;
@@ -956,8 +949,7 @@ set_project(pw)
 }
 #else
 static void
-set_project(pw)
-    struct passwd *pw;
+set_project(struct passwd *pw)
 {
 }
 #endif /* HAVE_PROJECT_H */
@@ -1007,8 +999,7 @@ set_fqdn(void)
  * By default, this is "root".  Updates runas_pw as a side effect.
  */
 static void
-set_runaspw(user)
-    char *user;
+set_runaspw(char *user)
 {
     if (*user == '#') {
 	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
@@ -1026,8 +1017,7 @@ set_runaspw(user)
  * Updates runas_pw as a side effect.
  */
 static void
-set_runasgr(group)
-    char *group;
+set_runasgr(char *group)
 {
     if (*group == '#') {
 	if ((runas_gr = sudo_getgrgid(atoi(group + 1))) == NULL)
@@ -1044,7 +1034,7 @@ set_runasgr(group)
  * case, this matches sudo_user.pw or runas_pw.
  */
 static struct passwd *
-get_authpw()
+get_authpw(void)
 {
     struct passwd *pw;
 
@@ -1069,8 +1059,7 @@ get_authpw()
  * Cleanup hook for error()/errorx()
  */
 void
-cleanup(gotsignal)
-    int gotsignal;
+cleanup(int gotsignal)
 {
     struct sudo_nss *nss;
 

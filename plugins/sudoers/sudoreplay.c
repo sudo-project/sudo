@@ -171,9 +171,7 @@ static void usage(void);
     isalnum((s)[3]) && isalnum((s)[4]) && isalnum((s)[5]) && (s)[6] == '\0')
 
 int
-main(argc, argv)
-    int argc;
-    char **argv;
+main(int argc, char *argv[])
 {
     int ch, plen, nready, interactive = 0, listonly = 0;
     const char *id, *user = NULL, *pattern = NULL, *tty = NULL;
@@ -369,8 +367,7 @@ main(argc, argv)
 }
 
 static void
-delay(secs)
-    double secs;
+delay(double secs)
 {
     struct timespec ts, rts;
     int rval;
@@ -396,9 +393,7 @@ delay(secs)
  * Build expression list from search args
  */
 static int
-parse_expr(headp, argv)
-    struct search_node **headp;
-    char **argv;
+parse_expr(struct search_node **headp, char *argv[])
 {
     struct search_node *sn, *newsn;
     char or = 0, not = 0, type, **av;
@@ -528,9 +523,7 @@ parse_expr(headp, argv)
 }
 
 static int
-match_expr(head, log)
-    struct search_node *head;
-    struct log_info *log;
+match_expr(struct search_node *head, struct log_info *log)
 {
     struct search_node *sn;
     int matched = 1, rc;
@@ -586,11 +579,7 @@ match_expr(head, log)
 }
 
 static int
-list_session_dir(pathbuf, re, user, tty)
-    char *pathbuf;
-    REGEX_T *re;
-    const char *user;
-    const char *tty;
+list_session_dir(char *pathbuf, REGEX_T *re, const char *user, const char *tty)
 {
     FILE *fp;
     DIR *d;
@@ -688,12 +677,8 @@ list_session_dir(pathbuf, re, user, tty)
 }
 
 static int
-list_sessions(argc, argv, pattern, user, tty)
-    int argc;
-    char **argv;
-    const char *pattern;
-    const char *user;
-    const char *tty;
+list_sessions(int argc, char **argv, const char *pattern, const char *user,
+    const char *tty)
 {
     DIR *d1, *d2;
     struct dirent *dp1, *dp2;
@@ -760,9 +745,7 @@ list_sessions(argc, argv, pattern, user, tty)
  * pause, slow, fast
  */
 static void
-check_input(ttyfd, speed)
-    int ttyfd;
-    double *speed;
+check_input(int ttyfd, double *speed)
 {
     fd_set *fdsr;
     int nready, paused = 0;
@@ -803,7 +786,7 @@ check_input(ttyfd, speed)
 }
 
 static void
-usage()
+usage(void)
 {
     fprintf(stderr,
 	"usage: %s [-d directory] [-m max_wait] [-s speed_factor] ID\n",
@@ -818,8 +801,7 @@ usage()
  * Cleanup hook for error()/errorx()
   */
 void
-cleanup(signo)
-    int signo;
+cleanup(int signo)
 {
     term_restore(STDOUT_FILENO, 0);
     if (signo)

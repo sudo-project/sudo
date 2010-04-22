@@ -72,7 +72,7 @@ static struct timeval last_time;
 static union script_fd io_outfile, io_timfile;
 
 static void
-io_nextid()
+io_nextid(void)
 {
     struct stat sb;
     char buf[32], *ep;

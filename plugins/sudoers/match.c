@@ -110,9 +110,7 @@ static int command_matches_normal(char *, char *);
  * Returns ALLOW, DENY or UNSPEC.
  */
 static int
-_userlist_matches(pw, list)
-    struct passwd *pw;
-    struct member_list *list;
+_userlist_matches(struct passwd *pw, struct member_list *list)
 {
     struct member *m;
     struct alias *a;
@@ -151,9 +149,7 @@ _userlist_matches(pw, list)
 }
 
 int
-userlist_matches(pw, list)
-    struct passwd *pw;
-    struct member_list *list;
+userlist_matches(struct passwd *pw, struct member_list *list)
 {
     alias_seqno++;
     return(_userlist_matches(pw, list));
@@ -165,9 +161,7 @@ userlist_matches(pw, list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 static int
-_runaslist_matches(user_list, group_list)
-    struct member_list *user_list;
-    struct member_list *group_list;
+_runaslist_matches(struct member_list *user_list, struct member_list *group_list)
 {
     struct member *m;
     struct alias *a;
@@ -244,9 +238,7 @@ _runaslist_matches(user_list, group_list)
 }
 
 int
-runaslist_matches(user_list, group_list)
-    struct member_list *user_list;
-    struct member_list *group_list;
+runaslist_matches(struct member_list *user_list, struct member_list *group_list)
 {
     alias_seqno++;
     return(_runaslist_matches(user_list ? user_list : &empty,
@@ -258,8 +250,7 @@ runaslist_matches(user_list, group_list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 static int
-_hostlist_matches(list)
-    struct member_list *list;
+_hostlist_matches(struct member_list *list)
 {
     struct member *m;
     struct alias *a;
@@ -298,8 +289,7 @@ _hostlist_matches(list)
 }
 
 int
-hostlist_matches(list)
-    struct member_list *list;
+hostlist_matches(struct member_list *list)
 {
     alias_seqno++;
     return(_hostlist_matches(list));
@@ -310,8 +300,7 @@ hostlist_matches(list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 static int
-_cmndlist_matches(list)
-    struct member_list *list;
+_cmndlist_matches(struct member_list *list)
 {
     struct member *m;
     int matched = UNSPEC;
@@ -325,8 +314,7 @@ _cmndlist_matches(list)
 }
 
 int
-cmndlist_matches(list)
-    struct member_list *list;
+cmndlist_matches(struct member_list *list)
 {
     alias_seqno++;
     return(_cmndlist_matches(list));
@@ -337,8 +325,7 @@ cmndlist_matches(list)
  * Returns ALLOW, DENY or UNSPEC.
  */
 int
-cmnd_matches(m)
-    struct member *m;
+cmnd_matches(struct member *m)
 {
     struct alias *a;
     struct sudo_command *c;
@@ -370,9 +357,7 @@ cmnd_matches(m)
  * otherwise, return TRUE if user_cmnd names one of the inodes in path.
  */
 int
-command_matches(sudoers_cmnd, sudoers_args)
-    char *sudoers_cmnd;
-    char *sudoers_args;
+command_matches(char *sudoers_cmnd, char *sudoers_args)
 {
     /* Check for pseudo-commands */
     if (sudoers_cmnd[0] != '/') {
@@ -409,9 +394,7 @@ command_matches(sudoers_cmnd, sudoers_args)
 }
 
 static int
-command_matches_fnmatch(sudoers_cmnd, sudoers_args)
-    char *sudoers_cmnd;
-    char *sudoers_args;
+command_matches_fnmatch(char *sudoers_cmnd, char *sudoers_args)
 {
     /*
      * Return true if fnmatch(3) succeeds AND
@@ -435,9 +418,7 @@ command_matches_fnmatch(sudoers_cmnd, sudoers_args)
 }
 
 static int
-command_matches_glob(sudoers_cmnd, sudoers_args)
-    char *sudoers_cmnd;
-    char *sudoers_args;
+command_matches_glob(char *sudoers_cmnd, char *sudoers_args)
 {
     struct stat sudoers_stat;
     size_t dlen;
@@ -511,9 +492,7 @@ command_matches_glob(sudoers_cmnd, sudoers_args)
 }
 
 static int
-command_matches_normal(sudoers_cmnd, sudoers_args)
-    char *sudoers_cmnd;
-    char *sudoers_args;
+command_matches_normal(char *sudoers_cmnd, char *sudoers_args)
 {
     struct stat sudoers_stat;
     char *base;
@@ -558,9 +537,7 @@ command_matches_normal(sudoers_cmnd, sudoers_args)
  * Return TRUE if user_cmnd names one of the inodes in dir, else FALSE.
  */
 static int
-command_matches_dir(sudoers_dir, dlen)
-    char *sudoers_dir;
-    size_t dlen;
+command_matches_dir(char *sudoers_dir, size_t dlen)
 {
     struct stat sudoers_stat;
     struct dirent *dent;
@@ -601,8 +578,7 @@ command_matches_dir(sudoers_dir, dlen)
 }
 
 static int
-addr_matches_if(n)
-    char *n;
+addr_matches_if(char *n)
 {
     int i;
     struct in_addr addr;
@@ -653,9 +629,7 @@ addr_matches_if(n)
 }
 
 static int
-addr_matches_if_netmask(n, m)
-    char *n;
-    char *m;
+addr_matches_if_netmask(char *n, char *m)
 {
     int i;
     struct in_addr addr, mask;
@@ -731,8 +705,7 @@ addr_matches_if_netmask(n, m)
  * "n" is a network that we are on, else returns FALSE.
  */
 int
-addr_matches(n)
-    char *n;
+addr_matches(char *n)
 {
     char *m;
     int retval;
@@ -752,10 +725,7 @@ addr_matches(n)
  * Returns TRUE if the hostname matches the pattern, else FALSE
  */
 int
-hostname_matches(shost, lhost, pattern)
-    char *shost;
-    char *lhost;
-    char *pattern;
+hostname_matches(char *shost, char *lhost, char *pattern)
 {
     if (has_meta(pattern)) {
 	if (strchr(pattern, '.'))
@@ -775,10 +745,7 @@ hostname_matches(shost, lhost, pattern)
  *  else returns FALSE.
  */
 int
-userpw_matches(sudoers_user, user, pw)
-    char *sudoers_user;
-    char *user;
-    struct passwd *pw;
+userpw_matches(char *sudoers_user, char *user, struct passwd *pw)
 {
     if (pw != NULL && *sudoers_user == '#') {
 	uid_t uid = (uid_t) atoi(sudoers_user + 1);
@@ -793,9 +760,7 @@ userpw_matches(sudoers_user, user, pw)
  *  else returns FALSE.
  */
 int
-group_matches(sudoers_group, gr)
-    char *sudoers_group;
-    struct group *gr;
+group_matches(char *sudoers_group, struct group *gr)
 {
     if (*sudoers_group == '#') {
 	gid_t gid = (gid_t) atoi(sudoers_group + 1);
@@ -810,10 +775,7 @@ group_matches(sudoers_group, gr)
  *  else returns FALSE.
  */
 int
-usergr_matches(group, user, pw)
-    char *group;
-    char *user;
-    struct passwd *pw;
+usergr_matches(char *group, char *user, struct passwd *pw)
 {
     /* make sure we have a valid usergroup, sudo style */
     if (*group++ != '%')
@@ -849,11 +811,7 @@ usergr_matches(group, user, pw)
  * XXX - swap order of host & shost
  */
 int
-netgr_matches(netgr, lhost, shost, user)
-    char *netgr;
-    char *lhost;
-    char *shost;
-    char *user;
+netgr_matches(char *netgr, char *lhost, char *shost, char *user)
 {
     static char *domain;
 #ifdef HAVE_GETDOMAINNAME

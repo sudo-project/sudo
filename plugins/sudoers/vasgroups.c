@@ -262,7 +262,7 @@ sudo_nonunix_groupcheck_init(void)
  * Clean up nonunix_groupcheck state.
  */
 void
-sudo_nonunix_groupcheck_cleanup()
+sudo_nonunix_groupcheck_cleanup(void)
 {
     if (err_msg) {
 	free(err_msg);

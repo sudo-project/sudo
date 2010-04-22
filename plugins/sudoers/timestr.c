@@ -37,9 +37,7 @@ char *get_timestr(time_t, int);
  * Uses strftime() if available, else falls back to ctime().
  */
 char *
-get_timestr(tstamp, log_year)
-    time_t tstamp;
-    int log_year;
+get_timestr(time_t tstamp, int log_year)
 {
     char *s;
 #ifdef HAVE_STRFTIME

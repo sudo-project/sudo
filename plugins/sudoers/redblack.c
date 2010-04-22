@@ -85,8 +85,7 @@ static void _rbdestroy(struct rbtree *, struct rbnode *, void (*)(void *));
  * Allocates and returns the initialized (empty) tree.
  */
 struct rbtree *
-rbcreate(compar)
-    int (*compar)(const void *, const void*);
+rbcreate(int (*compar)(const void *, const void*))
 {
     struct rbtree *tree;
 
@@ -116,9 +115,7 @@ rbcreate(compar)
  * Perform a left rotation starting at node.
  */
 static void
-rotate_left(tree, node)
-    struct rbtree *tree;
-    struct rbnode *node;
+rotate_left(struct rbtree *tree, struct rbnode *node)
 {
     struct rbnode *child;
 
@@ -141,9 +138,7 @@ rotate_left(tree, node)
  * Perform a right rotation starting at node.
  */
 static void
-rotate_right(tree, node)
-    struct rbtree *tree;
-    struct rbnode *node;
+rotate_right(struct rbtree *tree, struct rbnode *node)
 {
     struct rbnode *child;
 
@@ -168,9 +163,7 @@ rotate_right(tree, node)
  * already exists, a pointer to the existant node is returned.
  */
 struct rbnode *
-rbinsert(tree, data)
-    struct rbtree *tree;
-    void *data;
+rbinsert(struct rbtree *tree, void *data)
 {
     struct rbnode *node = rbfirst(tree);
     struct rbnode *parent = rbroot(tree);
@@ -262,9 +255,7 @@ rbinsert(tree, data)
  * Returns a pointer to the node if found, else NULL.
  */
 struct rbnode *
-rbfind(tree, key)
-    struct rbtree *tree;
-    void *key;
+rbfind(struct rbtree *tree, void *key)
 {
     struct rbnode *node = rbfirst(tree);
     int res;
@@ -283,12 +274,8 @@ rbfind(tree, key)
  * error value is returned.  Returns 0 on successful traversal.
  */
 int
-rbapply_node(tree, node, func, cookie, order)
-    struct rbtree *tree;
-    struct rbnode *node;
-    int (*func)(void *, void *);
-    void *cookie;
-    enum rbtraversal order;
+rbapply_node(struct rbtree *tree, struct rbnode *node,
+    int (*func)(void *, void *), void *cookie, enum rbtraversal order)
 {
     int error;
 
@@ -314,9 +301,7 @@ rbapply_node(tree, node, func, cookie, order)
  * Returns the successor of node, or nil if there is none.
  */
 static struct rbnode *
-rbsuccessor(tree, node)
-    struct rbtree *tree;
-    struct rbnode *node;
+rbsuccessor(struct rbtree *tree, struct rbnode *node)
 {
     struct rbnode *succ;
 
@@ -337,10 +322,7 @@ rbsuccessor(tree, node)
  * Recursive portion of rbdestroy().
  */
 static void
-_rbdestroy(tree, node, destroy)
-    struct rbtree *tree;
-    struct rbnode *node;
-    void (*destroy)(void *);
+_rbdestroy(struct rbtree *tree, struct rbnode *node, void (*destroy)(void *))
 {
     if (node != rbnil(tree)) {
 	_rbdestroy(tree, node->left, destroy);
@@ -356,9 +338,7 @@ _rbdestroy(tree, node, destroy)
  * for each node and then freeing the tree itself.
  */
 void
-rbdestroy(tree, destroy)
-    struct rbtree *tree;
-    void (*destroy)(void *);
+rbdestroy(struct rbtree *tree, void (*destroy)(void *))
 {
     _rbdestroy(tree, rbfirst(tree), destroy);
     efree(tree);
@@ -367,9 +347,7 @@ rbdestroy(tree, destroy)
 /*
  * Delete node 'z' from the tree and return its data pointer.
  */
-void *rbdelete(tree, z)
-    struct rbtree *tree;
-    struct rbnode *z;
+void *rbdelete(struct rbtree *tree, struct rbnode *z)
 {
     struct rbnode *x, *y;
     void *data = z->data;
@@ -411,9 +389,7 @@ void *rbdelete(tree, z)
  * colors to restore the 4 properties inherent in red-black trees.
  */
 static void
-rbrepair(tree, node)
-    struct rbtree *tree;
-    struct rbnode *node;
+rbrepair(struct rbtree *tree, struct rbnode *node)
 {
     struct rbnode *sibling;
 

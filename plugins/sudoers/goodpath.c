@@ -42,9 +42,7 @@
  * Verify that path is a normal file and executable by root.
  */
 char *
-sudo_goodpath(path, sbp)
-    const char *path;
-    struct stat *sbp;
+sudo_goodpath(const char *path, struct stat *sbp)
 {
     struct stat sb;
 

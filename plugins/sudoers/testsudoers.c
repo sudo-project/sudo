@@ -115,9 +115,7 @@ extern struct passwd *getpwnam(const char *);
 extern struct passwd *getpwuid(uid_t);
 
 int
-main(argc, argv)
-    int argc;
-    char **argv;
+main(int argc, char *argv[])
 {
     struct cmndspec *cs;
     struct privilege *priv;
@@ -297,8 +295,7 @@ main(argc, argv)
 }
 
 void
-set_runaspw(user)
-    char *user;
+set_runaspw(char *user)
 {
     if (*user == '#') {
 	if ((runas_pw = sudo_getpwuid(atoi(user + 1))) == NULL)
@@ -310,8 +307,7 @@ set_runaspw(user)
 }
 
 void
-set_runasgr(group)
-    char *group;
+set_runasgr(char *group)
 {
     if (*group == '#') {
 	if ((runas_gr = sudo_getgrgid(atoi(group + 1))) == NULL)
@@ -323,41 +319,37 @@ set_runasgr(group)
 }
 
 void
-sudo_setspent()
+sudo_setspent(void)
 {
     return;
 }
 
 void
-sudo_endspent()
+sudo_endspent(void)
 {
     return;
 }
 
 char *
-sudo_getepw(pw)
-    const struct passwd *pw;
+sudo_getepw(const struct passwd *pw)
 {
     return (pw->pw_passwd);
 }
 
 void
-set_fqdn()
+set_fqdn(void)
 {
     return;
 }
 
 FILE *
-open_sudoers(path, isdir, keepopen)
-    const char *path;
-    int isdir;
-    int *keepopen;
+open_sudoers(const char *path, int isdir, int *keepopen)
 {
     return(fopen(path, "r"));
 }
 
 void
-init_envtables()
+init_envtables(void)
 {
     return;
 }
@@ -374,8 +366,7 @@ restore_perms(void)
 }
 
 void
-cleanup(gotsignal)
-    int gotsignal;
+cleanup(int gotsignal)
 {
     if (!gotsignal) {
 	sudo_endpwent();
@@ -384,8 +375,7 @@ cleanup(gotsignal)
 }
 
 void
-print_member(m)    
-    struct member *m;
+print_member(struct member *m)
 {
     struct sudo_command *c;
 
@@ -403,7 +393,7 @@ print_member(m)
 }
 
 void
-print_defaults()
+print_defaults(void)
 {
     struct defaults *d;
     struct member *m;
@@ -438,8 +428,7 @@ print_defaults()
 }
 
 int
-print_alias(v1, v2)
-    void *v1, *v2;
+print_alias(void *v1, void *v2)
 {
     struct alias *a = (struct alias *)v1;
     struct member *m;
@@ -474,8 +463,7 @@ print_alias(v1, v2)
 }
 
 void
-print_privilege(priv)
-    struct privilege *priv;
+print_privilege(struct privilege *priv)
 {
     struct cmndspec *cs;
     struct member *m;
@@ -522,7 +510,7 @@ print_privilege(priv)
 }
 
 void
-print_userspecs()
+print_userspecs(void)
 {
     struct member *m;
     struct userspec *us;
@@ -540,7 +528,7 @@ print_userspecs()
 }
 
 void
-dump_sudoers()
+dump_sudoers(void)
 {
     print_defaults();
 
@@ -552,7 +540,7 @@ dump_sudoers()
 }
 
 void
-usage()
+usage(void)
 {
     (void) fprintf(stderr, "usage: %s [-d] [-G grfile] [-g group] [-h host] [-p pwfile] [-u user] <user> <command> [args]\n", getprogname());
     exit(1);

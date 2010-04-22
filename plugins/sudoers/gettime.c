@@ -30,8 +30,7 @@
  * timespecs in struct stat or, otherwise, using time().
  */
 int
-gettime(tv)
-    struct timeval *tv;
+gettime(struct timeval *tv)
 {
     int rval;
 #if defined(HAVE_GETTIMEOFDAY) && (defined(HAVE_ST_MTIM) || defined(HAVE_ST_MTIMESPEC))

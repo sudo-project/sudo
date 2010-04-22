@@ -55,7 +55,7 @@ extern struct sudo_nss sudo_nss_ldap;
  * Returns a tail queue of matches.
  */
 struct sudo_nss_list *
-sudo_read_nss()
+sudo_read_nss(void)
 {
     FILE *fp;
     char *cp;
@@ -113,7 +113,7 @@ nomatch:
  * Returns a tail queue of matches.
  */
 struct sudo_nss_list *
-sudo_read_nss()
+sudo_read_nss(void)
 {
     FILE *fp;
     char *cp, *ep;
@@ -189,7 +189,7 @@ nomatch:
  * Non-nsswitch.conf version with hard-coded order.
  */
 struct sudo_nss_list *
-sudo_read_nss()
+sudo_read_nss(void)
 {
     static struct sudo_nss_list snl;
 
@@ -207,8 +207,7 @@ sudo_read_nss()
 
 /* Reset user_groups based on passwd entry. */
 static void
-reset_groups(pw)
-    struct passwd *pw;
+reset_groups(struct passwd *pw)
 {
 #if defined(HAVE_INITGROUPS) && defined(HAVE_GETGROUPS)
     if (pw != sudo_user.pw) {
@@ -245,9 +244,7 @@ output(const char *buf)
  * We only get here if the user is allowed to run something on this host.
  */
 void
-display_privs(snl, pw)
-    struct sudo_nss_list *snl;
-    struct passwd *pw;
+display_privs(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
     struct lbuf lbuf;
@@ -303,9 +300,7 @@ display_privs(snl, pw)
  * command is allowed.
  */
 int
-display_cmnd(snl, pw)
-    struct sudo_nss_list *snl;
-    struct passwd *pw;
+display_cmnd(struct sudo_nss_list *snl, struct passwd *pw)
 {
     struct sudo_nss *nss;
 

@@ -79,8 +79,7 @@ struct passwd *getpwnam(const char *);
 struct passwd *getpwuid(uid_t);
 
 void
-setpwfile(file)
-    const char *file;
+setpwfile(const char *file)
 {
     pwfile = file;
     if (pwf != NULL)
@@ -88,7 +87,7 @@ setpwfile(file)
 }
 
 void
-setpwent()
+setpwent(void)
 {
     if (pwf == NULL)
 	pwf = fopen(pwfile, "r");
@@ -98,7 +97,7 @@ setpwent()
 }
 
 void
-endpwent()
+endpwent(void)
 {
     if (pwf != NULL) {
 	fclose(pwf);
@@ -108,7 +107,7 @@ endpwent()
 }
 
 struct passwd *
-getpwent()
+getpwent(void)
 {
     static struct passwd pw;
     static char pwbuf[LINE_MAX];
@@ -151,8 +150,7 @@ getpwent()
 }
 
 struct passwd *
-getpwnam(name)
-    const char *name;
+getpwnam(const char *name)
 {
     struct passwd *pw;
 
@@ -172,8 +170,7 @@ getpwnam(name)
 }
 
 struct passwd *
-getpwuid(uid)
-    uid_t uid;
+getpwuid(uid_t uid)
 {
     struct passwd *pw;
 
@@ -193,8 +190,7 @@ getpwuid(uid)
 }
 
 void
-setgrfile(file)
-    const char *file;
+setgrfile(const char *file)
 {
     grfile = file;
     if (grf != NULL)
@@ -202,7 +198,7 @@ setgrfile(file)
 }
 
 void
-setgrent()
+setgrent(void)
 {
     if (grf == NULL)
 	grf = fopen(grfile, "r");
@@ -212,7 +208,7 @@ setgrent()
 }
 
 void
-endgrent()
+endgrent(void)
 {
     if (grf != NULL) {
 	fclose(grf);
@@ -222,7 +218,7 @@ endgrent()
 }
 
 struct group *
-getgrent()
+getgrent(void)
 {
     static struct group gr;
     static char grbuf[LINE_MAX], *gr_mem[GRMEM_MAX+1];
@@ -263,8 +259,7 @@ getgrent()
 }
 
 struct group *
-getgrnam(name)
-    const char *name;
+getgrnam(const char *name)
 {
     struct group *gr;
 
@@ -284,8 +279,7 @@ getgrnam(name)
 }
 
 struct group *
-getgrgid(gid)
-    gid_t gid;
+getgrgid(gid_t gid)
 {
     struct group *gr;
 

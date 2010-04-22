@@ -114,7 +114,7 @@ static const char *logpri2str(int);
  * Print version and configure info.
  */
 void
-dump_defaults()
+dump_defaults(void)
 {
     struct sudo_defs_types *cur;
     struct list_member *item;
@@ -183,7 +183,7 @@ dump_defaults()
  * List each option along with its description.
  */
 void
-list_options()
+list_options(void)
 {
     struct sudo_defs_types *cur;
     char *p;
@@ -216,10 +216,7 @@ list_options()
  * This is only meaningful for variables that are *optional*.
  */
 int
-set_default(var, val, op)
-    char *var;
-    char *val;
-    int op;     /* TRUE or FALSE */
+set_default(char *var, char *val, int op)
 {
     struct sudo_defs_types *cur;
     int num;
@@ -365,7 +362,7 @@ set_default(var, val, op)
  * Any of these may be overridden at runtime by a "Defaults" file.
  */
 void
-init_defaults()
+init_defaults(void)
 {
     static int firsttime = 1;
     struct sudo_defs_types *def;
@@ -509,8 +506,7 @@ init_defaults()
  * Pass in a an OR'd list of which default types to update.
  */
 int
-update_defaults(what)
-    int what;
+update_defaults(int what)
 {
     struct defaults *def;
 
@@ -551,10 +547,7 @@ update_defaults(what)
 }
 
 static int
-store_int(val, def, op)
-    char *val;
-    struct sudo_defs_types *def;
-    int op;
+store_int(char *val, struct sudo_defs_types *def, int op)
 {
     char *endp;
     long l;
@@ -574,10 +567,7 @@ store_int(val, def, op)
 }
 
 static int
-store_uint(val, def, op)
-    char *val;
-    struct sudo_defs_types *def;
-    int op;
+store_uint(char *val, struct sudo_defs_types *def, int op)
 {
     char *endp;
     long l;
@@ -597,10 +587,7 @@ store_uint(val, def, op)
 }
 
 static int
-store_float(val, def, op)
-    char *val;
-    struct sudo_defs_types *def;
-    int op;
+store_float(char *val, struct sudo_defs_types *def, int op)
 {
     char *endp;
     double d;
@@ -620,10 +607,7 @@ store_float(val, def, op)
 }
 
 static int
-store_tuple(val, def, op)
-    char *val;
-    struct sudo_defs_types *def;
-    int op;
+store_tuple(char *val, struct sudo_defs_types *def, int op)
 {
     struct def_values *v;
 
@@ -652,10 +636,7 @@ store_tuple(val, def, op)
 }
 
 static int
-store_str(val, def, op)
-    char *val;
-    struct sudo_defs_types *def;
-    int op;
+store_str(char *val, struct sudo_defs_types *def, int op)
 {
 
     efree(def->sd_un.str);
@@ -669,10 +650,7 @@ store_str(val, def, op)
 }
 
 static int
-store_list(str, def, op)
-    char *str;
-    struct sudo_defs_types *def;
-    int op;
+store_list(char *str, struct sudo_defs_types *def, int op)
 {
     char *start, *end;
 
@@ -700,10 +678,7 @@ store_list(str, def, op)
 }
 
 static int
-store_syslogfac(val, def, op)
-    char *val;
-    struct sudo_defs_types *def;
-    int op;
+store_syslogfac(char *val, struct sudo_defs_types *def, int op)
 {
     struct strmap *fac;
 
@@ -727,8 +702,7 @@ store_syslogfac(val, def, op)
 }
 
 static const char *
-logfac2str(n)
-    int n;
+logfac2str(int n)
 {
 #ifdef LOG_NFACILITIES
     struct strmap *fac;
@@ -742,10 +716,7 @@ logfac2str(n)
 }
 
 static int
-store_syslogpri(val, def, op)
-    char *val;
-    struct sudo_defs_types *def;
-    int op;
+store_syslogpri(char *val, struct sudo_defs_types *def, int op)
 {
     struct strmap *pri;
 
@@ -762,8 +733,7 @@ store_syslogpri(val, def, op)
 }
 
 static const char *
-logpri2str(n)
-    int n;
+logpri2str(int n)
 {
     struct strmap *pri;
 
@@ -773,10 +743,7 @@ logpri2str(n)
 }
 
 static int
-store_mode(val, def, op)
-    char *val;
-    struct sudo_defs_types *def;
-    int op;
+store_mode(char *val, struct sudo_defs_types *def, int op)
 {
     char *endp;
     long l;
@@ -795,11 +762,7 @@ store_mode(val, def, op)
 }
 
 static void
-list_op(val, len, def, op)
-    char *val;
-    size_t len;
-    struct sudo_defs_types *def;
-    enum list_ops op;
+list_op(char *val, size_t len, struct sudo_defs_types *def, enum list_ops op)
 {
     struct list_member *cur, *prev, *tmp;
 

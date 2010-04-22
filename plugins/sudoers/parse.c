@@ -80,8 +80,7 @@ static void print_member(struct lbuf *, char *, int, int, int);
 static int display_bound_defaults(int, struct lbuf *);
 
 int
-sudo_file_open(nss)
-    struct sudo_nss *nss;
+sudo_file_open(struct sudo_nss *nss)
 {
     if (def_ignore_local_sudoers)
 	return(-1);
@@ -90,8 +89,7 @@ sudo_file_open(nss)
 }
 
 int
-sudo_file_close(nss)
-    struct sudo_nss *nss;
+sudo_file_close(struct sudo_nss *nss)
 {
     /* Free parser data structures and close sudoers file. */
     init_parser(NULL, 0);
@@ -107,8 +105,7 @@ sudo_file_close(nss)
  * Parse the specified sudoers file.
  */
 int
-sudo_file_parse(nss)
-    struct sudo_nss *nss;
+sudo_file_parse(struct sudo_nss *nss)
 {
     if (nss->handle == NULL)
 	return(-1);
@@ -127,8 +124,7 @@ sudo_file_parse(nss)
  * Wrapper around update_defaults() for nsswitch code.
  */
 int
-sudo_file_setdefs(nss)
-    struct sudo_nss *nss;
+sudo_file_setdefs(struct sudo_nss *nss)
 {
     if (nss->handle == NULL)
 	return(-1);
@@ -143,10 +139,7 @@ sudo_file_setdefs(nss)
  * allowed to run the specified command on this host as the target user.
  */
 int
-sudo_file_lookup(nss, validated, pwflag)
-    struct sudo_nss *nss;
-    int validated;
-    int pwflag;
+sudo_file_lookup(struct sudo_nss *nss, int validated, int pwflag)
 {
     int match, host_match, runas_match, cmnd_match;
     struct cmndspec *cs;
@@ -265,10 +258,8 @@ sudo_file_lookup(nss, validated, pwflag)
 	(cs->tags.t != UNSPEC && cs->tags.t != IMPLIED && cs->tags.t != tags->t)
 
 static void
-sudo_file_append_cmnd(cs, tags, lbuf)
-    struct cmndspec *cs;
-    struct cmndtag *tags;
-    struct lbuf *lbuf;
+sudo_file_append_cmnd(struct cmndspec *cs, struct cmndtag *tags,
+    struct lbuf *lbuf)
 {
     struct member *m;
 
@@ -304,10 +295,8 @@ sudo_file_append_cmnd(cs, tags, lbuf)
 }
 
 static int
-sudo_file_display_priv_short(pw, us, lbuf)
-    struct passwd *pw;
-    struct userspec *us;
-    struct lbuf *lbuf;
+sudo_file_display_priv_short(struct passwd *pw, struct userspec *us,
+    struct lbuf *lbuf)
 {
     struct cmndspec *cs;
     struct member *m;
@@ -358,10 +347,8 @@ sudo_file_display_priv_short(pw, us, lbuf)
 }
 
 static int
-sudo_file_display_priv_long(pw, us, lbuf)
-    struct passwd *pw;
-    struct userspec *us;
-    struct lbuf *lbuf;
+sudo_file_display_priv_long(struct passwd *pw, struct userspec *us,
+    struct lbuf *lbuf)
 {
     struct cmndspec *cs;
     struct member *m;
@@ -412,10 +399,8 @@ sudo_file_display_priv_long(pw, us, lbuf)
 }
 
 int
-sudo_file_display_privs(nss, pw, lbuf)
-    struct sudo_nss *nss;
-    struct passwd *pw;
-    struct lbuf *lbuf;
+sudo_file_display_privs(struct sudo_nss *nss, struct passwd *pw,
+    struct lbuf *lbuf)
 {
     struct userspec *us;
     int nfound = 0;
@@ -439,10 +424,8 @@ sudo_file_display_privs(nss, pw, lbuf)
  * Display matching Defaults entries for the given user on this host.
  */
 int
-sudo_file_display_defaults(nss, pw, lbuf)
-    struct sudo_nss *nss;
-    struct passwd *pw;
-    struct lbuf *lbuf;
+sudo_file_display_defaults(struct sudo_nss *nss, struct passwd *pw,
+    struct lbuf *lbuf)
 {
     struct defaults *d;
     char *prefix;
@@ -493,10 +476,8 @@ sudo_file_display_defaults(nss, pw, lbuf)
  * Display Defaults entries that are per-runas or per-command
  */
 int
-sudo_file_display_bound_defaults(nss, pw, lbuf)
-    struct sudo_nss *nss;
-    struct passwd *pw;
-    struct lbuf *lbuf;
+sudo_file_display_bound_defaults(struct sudo_nss *nss, struct passwd *pw,
+    struct lbuf *lbuf)
 {
     int nfound = 0;
 
@@ -511,9 +492,7 @@ sudo_file_display_bound_defaults(nss, pw, lbuf)
  * Display Defaults entries of the given type.
  */
 static int
-display_bound_defaults(dtype, lbuf)
-    int dtype;
-    struct lbuf *lbuf;
+display_bound_defaults(int dtype, struct lbuf *lbuf)
 {
     struct defaults *d;
     struct member *m, *binding = NULL;
@@ -574,9 +553,7 @@ display_bound_defaults(dtype, lbuf)
 }
 
 int
-sudo_file_display_cmnd(nss, pw)
-    struct sudo_nss *nss;
-    struct passwd *pw;
+sudo_file_display_cmnd(struct sudo_nss *nss, struct passwd *pw)
 {
     struct cmndspec *cs;
     struct member *match;
@@ -624,10 +601,8 @@ sudo_file_display_cmnd(nss, pw)
  * Print the contents of a struct member to stdout
  */
 static void
-_print_member(lbuf, name, type, negated, alias_type)
-    struct lbuf *lbuf;
-    char *name;
-    int type, negated, alias_type;
+_print_member(struct lbuf *lbuf, char *name, int type, int negated,
+    int alias_type)
 {
     struct alias *a;
     struct member *m;
@@ -665,10 +640,8 @@ _print_member(lbuf, name, type, negated, alias_type)
 }
 
 static void
-print_member(lbuf, name, type, negated, alias_type)
-    struct lbuf *lbuf;
-    char *name;
-    int type, negated, alias_type;
+print_member(struct lbuf *lbuf, char *name, int type, int negated,
+    int alias_type)
 {
     alias_seqno++;
     _print_member(lbuf, name, type, negated, alias_type);

@@ -53,11 +53,7 @@
  * but it is in '.' and IGNORE_DOT is set.
  */
 int
-find_path(infile, outfile, sbp, path)
-    char *infile;		/* file to find */
-    char **outfile;		/* result parameter */
-    struct stat *sbp;		/* stat result parameter */
-    char *path;			/* path to search */
+find_path(char *infile, char **outfile, struct stat *sbp, char *path)
 {
     static char command[PATH_MAX]; /* qualified filename */
     char *n;			/* for traversing path */

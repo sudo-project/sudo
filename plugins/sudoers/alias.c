@@ -57,8 +57,7 @@ unsigned int alias_seqno;
  * Aliases are sorted by name with the type used as a tie-breaker.
  */
 int
-alias_compare(v1, v2)
-    const void *v1, *v2;
+alias_compare(const void *v1, const void *v2)
 {
     const struct alias *a1 = (const struct alias *)v1;
     const struct alias *a2 = (const struct alias *)v2;
@@ -78,9 +77,7 @@ alias_compare(v1, v2)
  * Returns a pointer to the alias structure or NULL if not found.
  */
 struct alias *
-alias_find(name, type)
-    char *name;
-    int type;
+alias_find(char *name, int type)
 {
     struct alias key;
     struct rbnode *node;
@@ -107,10 +104,7 @@ alias_find(name, type)
  * Returns NULL on success and an error string on failure.
  */
 char *
-alias_add(name, type, members)
-    char *name;
-    int type;
-    struct member *members;
+alias_add(char *name, int type, struct member *members)
 {
     static char errbuf[512];
     struct alias *a;
@@ -132,9 +126,7 @@ alias_add(name, type, members)
  * Apply a function to each alias entry and pass in a cookie.
  */
 void
-alias_apply(func, cookie)
-    int (*func)(void *, void *);
-    void *cookie;
+alias_apply(int (*func)(void *, void *), void *cookie)
 {
     rbapply(aliases, func, cookie, inorder);
 }
@@ -143,7 +135,7 @@ alias_apply(func, cookie)
  * Returns TRUE if there are no aliases, else FALSE.
  */
 int
-no_aliases()
+no_aliases(void)
 {
     return(rbisempty(aliases));
 }
@@ -152,8 +144,7 @@ no_aliases()
  * Free memory used by an alias struct and its members.
  */
 void
-alias_free(v)
-    void *v;
+alias_free(void *v)
 {
     struct alias *a = (struct alias *)v;
     struct member *m;
@@ -178,9 +169,7 @@ alias_free(v)
  * Find the named alias, remove it from the tree and return it.
  */
 struct alias *
-alias_remove(name, type)
-    char *name;
-    int type;
+alias_remove(char *name, int type)
 {
     struct rbnode *node;
     struct alias key, *a;
@@ -194,7 +183,7 @@ alias_remove(name, type)
 }
 
 void
-init_aliases()
+init_aliases(void)
 {
     if (aliases != NULL)
 	rbdestroy(aliases, alias_free);

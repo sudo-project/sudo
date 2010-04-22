@@ -96,7 +96,7 @@ struct rtentry;
  * machine's ip addresses and netmasks.
  */
 void
-load_interfaces()
+load_interfaces(void)
 {
     struct ifaddrs *ifa, *ifaddrs;
     struct sockaddr_in *sin;
@@ -183,7 +183,7 @@ load_interfaces()
  * machine's ip addresses and netmasks.
  */
 void
-load_interfaces()
+load_interfaces(void)
 {
     struct ifconf *ifconf;
     struct ifreq *ifr, ifr_tmp;
@@ -318,7 +318,7 @@ load_interfaces()
  * Stub function for those without SIOCGIFCONF
  */
 void
-load_interfaces()
+load_interfaces(void)
 {
     return;
 }
@@ -326,7 +326,7 @@ load_interfaces()
 #endif /* SIOCGIFCONF && !STUB_LOAD_INTERFACES */
 
 void
-dump_interfaces()
+dump_interfaces(void)
 {
     int i;
 #ifdef HAVE_IN6_ADDR

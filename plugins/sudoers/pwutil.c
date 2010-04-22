@@ -67,9 +67,7 @@ static int  cmp_grnam(const void *, const void *);
  * Compare by uid.
  */
 static int
-cmp_pwuid(v1, v2)
-    const void *v1;
-    const void *v2;
+cmp_pwuid(const void *v1, const void *v2)
 {
     const struct passwd *pw1 = (const struct passwd *) v1;
     const struct passwd *pw2 = (const struct passwd *) v2;
@@ -80,9 +78,7 @@ cmp_pwuid(v1, v2)
  * Compare by user name.
  */
 static int
-cmp_pwnam(v1, v2)
-    const void *v1;
-    const void *v2;
+cmp_pwnam(const void *v1, const void *v2)
 {
     const struct passwd *pw1 = (const struct passwd *) v1;
     const struct passwd *pw2 = (const struct passwd *) v2;
@@ -111,8 +107,7 @@ do {							\
  * that we care about.  Fills in pw_passwd from shadow file.
  */
 static struct passwd *
-sudo_pwdup(pw)
-    const struct passwd *pw;
+sudo_pwdup(const struct passwd *pw)
 {
     char *cp;
     const char *pw_shell;
@@ -162,8 +157,7 @@ sudo_pwdup(pw)
  * Fills in pw_passwd from shadow file if necessary.
  */
 struct passwd *
-sudo_getpwuid(uid)
-    uid_t uid;
+sudo_getpwuid(uid_t uid)
 {
     struct passwd key, *pw;
     struct rbnode *node;
@@ -202,8 +196,7 @@ sudo_getpwuid(uid)
  * Fills in pw_passwd from shadow file if necessary.
  */
 struct passwd *
-sudo_getpwnam(name)
-    const char *name;
+sudo_getpwnam(const char *name)
 {
     struct passwd key, *pw;
     struct rbnode *node;
@@ -246,9 +239,7 @@ sudo_getpwnam(name)
  * Take a uid in string form "#123" and return a faked up passwd struct.
  */
 struct passwd *
-sudo_fakepwnam(user, gid)
-    const char *user;
-    gid_t gid;
+sudo_fakepwnam(const char *user, gid_t gid)
 {
     struct passwd *pw;
     struct rbnode *node;
@@ -288,8 +279,7 @@ sudo_fakepwnam(user, gid)
  * Take a gid in string form "#123" and return a faked up group struct.
  */
 struct group *
-sudo_fakegrnam(group)
-    const char *group;
+sudo_fakegrnam(const char *group)
 {
     struct group *gr;
     struct rbnode *node;
@@ -342,8 +332,7 @@ sudo_freepwcache(void)
 }
 
 static void
-pw_free(v)
-    void *v;
+pw_free(void *v)
 {
     struct passwd *pw = (struct passwd *) v;
 
@@ -369,9 +358,7 @@ sudo_endpwent(void)
  * Compare by gid.
  */
 static int
-cmp_grgid(v1, v2)
-    const void *v1;
-    const void *v2;
+cmp_grgid(const void *v1, const void *v2)
 {
     const struct group *grp1 = (const struct group *) v1;
     const struct group *grp2 = (const struct group *) v2;
@@ -382,9 +369,7 @@ cmp_grgid(v1, v2)
  * Compare by group name.
  */
 static int
-cmp_grnam(v1, v2)
-    const void *v1;
-    const void *v2;
+cmp_grnam(const void *v1, const void *v2)
 {
     const struct group *grp1 = (const struct group *) v1;
     const struct group *grp2 = (const struct group *) v2;
@@ -392,8 +377,7 @@ cmp_grnam(v1, v2)
 }
 
 struct group *
-sudo_grdup(gr)
-    const struct group *gr;
+sudo_grdup(const struct group *gr)
 {
     char *cp;
     size_t nsize, psize, nmem, total, len;
@@ -442,8 +426,7 @@ sudo_grdup(gr)
  * Get a group entry by gid and allocate space for it.
  */
 struct group *
-sudo_getgrgid(gid)
-    gid_t gid;
+sudo_getgrgid(gid_t gid)
 {
     struct group key, *gr;
     struct rbnode *node;
@@ -476,8 +459,7 @@ sudo_getgrgid(gid)
  * Get a group entry by name and allocate space for it.
  */
 struct group *
-sudo_getgrnam(name)
-    const char *name;
+sudo_getgrnam(const char *name)
 {
     struct group key, *gr;
     struct rbnode *node;
@@ -547,9 +529,7 @@ sudo_endgrent(void)
 }
 
 int
-user_in_group(pw, group)
-    struct passwd *pw;
-    const char *group;
+user_in_group(struct passwd *pw, const char *group)
 {
 #ifdef HAVE_MBR_CHECK_MEMBERSHIP
     uuid_t gu, uu;

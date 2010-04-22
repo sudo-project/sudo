@@ -82,8 +82,7 @@ int crypt_type = INT_MAX;
  * If shadow passwords are in use, look in the shadow file.
  */
 char *
-sudo_getepw(pw)
-    const struct passwd *pw;
+sudo_getepw(const struct passwd *pw)
 {
     char *epw = NULL;
 
@@ -150,7 +149,7 @@ done:
 }
 
 void
-sudo_setspent()
+sudo_setspent(void)
 {
 #ifdef HAVE_GETPRPWNAM
     setprpwent();
@@ -170,7 +169,7 @@ sudo_setspent()
 }
 
 void
-sudo_endspent()
+sudo_endspent(void)
 {
 #ifdef HAVE_GETPRPWNAM
     endprpwent();

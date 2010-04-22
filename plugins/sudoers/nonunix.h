@@ -31,16 +31,10 @@
 #ifndef _NONUNIX_H
 #define _NONUNIX_H
 
-void
-sudo_nonunix_groupcheck_init(void);
-
-void
-sudo_nonunix_groupcheck_cleanup(void);
-
-int
-sudo_nonunix_groupcheck( const char* group, const char* user, const struct passwd* pwd );
-
-int
-sudo_nonunix_groupcheck_available(void);
+void sudo_nonunix_groupcheck_init(void);
+void sudo_nonunix_groupcheck_cleanup(void);
+int sudo_nonunix_groupcheck(const char *group, const char *user,
+    const struct passwd *pwd);
+int sudo_nonunix_groupcheck_available(void);
 
 #endif /* _NONUNIX_H */

@@ -78,14 +78,7 @@ extern sigjmp_buf error_jmp;
  * Sadly this is a maze of #ifdefs.
  */
 static void
-#ifdef __STDC__
 mysyslog(int pri, const char *fmt, ...)
-#else
-mysyslog(pri, fmt, va_alist)
-    int pri;
-    const char *fmt;
-    va_dcl
-#endif
 {
 #ifdef BROKEN_SYSLOG
     int i;
@@ -93,11 +86,7 @@ mysyslog(pri, fmt, va_alist)
     char buf[MAXSYSLOGLEN+1];
     va_list ap;
 
-#ifdef __STDC__
     va_start(ap, fmt);
-#else
-    va_start(ap);
-#endif
 #ifdef LOG_NFACILITIES
     openlog("sudo", 0, def_syslog);
 #else
@@ -128,9 +117,7 @@ mysyslog(pri, fmt, va_alist)
  * message into parts if it is longer than MAXSYSLOGLEN.
  */
 static void
-do_syslog(pri, msg)
-    int pri;
-    char *msg;
+do_syslog(int pri, char *msg)
 {
     size_t len, maxlen;
     char *p, *tmp, save;
@@ -173,8 +160,7 @@ do_syslog(pri, msg)
 }
 
 static void
-do_logfile(msg)
-    char *msg;
+do_logfile(char *msg)
 {
     char *full_line;
     char *beg, *oldend, *end;
@@ -269,9 +255,7 @@ do_logfile(msg)
  * Log and mail the denial message, optionally informing the user.
  */
 void
-log_denial(status, inform_user)
-    int status;
-    int inform_user;
+log_denial(int status, int inform_user)
 {
     char *message;
     char *logline;
@@ -325,8 +309,7 @@ log_denial(status, inform_user)
  * Log and potentially mail the allowed command.
  */
 void
-log_allowed(status)
-    int status;
+log_allowed(int status)
 {
     char *logline;
 
@@ -347,26 +330,15 @@ log_allowed(status)
 }
 
 void
-#ifdef __STDC__
 log_error(int flags, const char *fmt, ...)
-#else
-log_error(flags, fmt, va_alist)
-    int flags;
-    const char *fmt;
-    va_dcl
-#endif
 {
     int serrno = errno;
     char *message;
     char *logline;
     va_list ap;
-#ifdef __STDC__
-    va_start(ap, fmt);
-#else
-    va_start(ap);
-#endif
 
     /* Expand printf-style format + args. */
+    va_start(ap, fmt);
     evasprintf(&message, fmt, ap);
     va_end(ap);
 
@@ -611,8 +583,7 @@ send_mail(const char *fmt, ...)
  * Determine whether we should send mail based on "status" and defaults options.
  */
 static int
-should_mail(status)
-    int status;
+should_mail(int status)
 {
 
     return(def_mail_always || ISSET(status, VALIDATE_ERROR) ||
@@ -633,9 +604,7 @@ should_mail(status)
  * Allocate and fill in a new logline.
  */
 static char *
-new_logline(message, serrno)
-    const char *message;
-    int serrno;
+new_logline(const char *message, int serrno)
 {
     size_t len = 0;
     char *evstr = NULL;

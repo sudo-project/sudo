@@ -141,9 +141,7 @@ static struct sudoerslist {
 static struct rbtree *alias_freelist;
 
 int
-main(argc, argv)
-    int argc;
-    char **argv;
+main(int argc, char *argv[])
 {
     struct sudoersfile *sp;
     char *args, *editor, *sudoers_path;
@@ -251,10 +249,7 @@ main(argc, argv)
  * Returns TRUE on success, else FALSE.
  */
 static int
-edit_sudoers(sp, editor, args, lineno)
-    struct sudoersfile *sp;
-    char *editor, *args;
-    int lineno;
+edit_sudoers(struct sudoersfile *sp, char *editor, char *args, int lineno)
 {
     int tfd;				/* sudoers temp file descriptor */
     int modified;			/* was the file modified? */
@@ -399,9 +394,7 @@ edit_sudoers(sp, editor, args, lineno)
  * Returns TRUE on success, else FALSE.
  */
 static int
-reparse_sudoers(editor, args, strict, quiet)
-    char *editor, *args;
-    int strict, quiet;
+reparse_sudoers(char *editor, char *args, int strict, int quiet)
 {
     struct sudoersfile *sp, *last;
     FILE *fp;
@@ -477,9 +470,7 @@ reparse_sudoers(editor, args, strict, quiet)
  * move it into place.  Returns TRUE on success, else FALSE.
  */
 static int
-install_sudoers(sp, oldperms)
-    struct sudoersfile *sp;
-    int oldperms;
+install_sudoers(struct sudoersfile *sp, int oldperms)
 {
     struct stat sb;
 
@@ -555,42 +546,41 @@ install_sudoers(sp, oldperms)
 
 /* STUB */
 void
-set_fqdn()
+set_fqdn(void)
 {
     return;
 }
 
 /* STUB */
 void
-init_envtables()
+init_envtables(void)
 {
     return;
 }
 
 /* STUB */
 int
-user_is_exempt()
+user_is_exempt(void)
 {
     return(FALSE);
 }
 
 /* STUB */
 void
-sudo_setspent()
+sudo_setspent(void)
 {
     return;
 }
 
 /* STUB */
 void
-sudo_endspent()
+sudo_endspent(void)
 {
     return;
 }
 
 char *
-sudo_getepw(pw)
-    const struct passwd *pw;
+sudo_getepw(const struct passwd *pw)
 {
     return (pw->pw_passwd);
 }
@@ -600,7 +590,7 @@ sudo_getepw(pw)
  * to do now.  Returns the first letter of their choice.
  */
 static char
-whatnow()
+whatnow(void)
 {
     int choice, c;
 
@@ -631,7 +621,7 @@ whatnow()
  * Install signal handlers for visudo.
  */
 static void
-setup_signals()
+setup_signals(void)
 {
 	sigaction_t sa;
 
@@ -649,9 +639,7 @@ setup_signals()
 }
 
 static int
-run_command(path, argv)
-    char *path;
-    char **argv;
+run_command(char *path, char **argv)
 {
     int status;
     pid_t pid, rv;
@@ -684,10 +672,7 @@ run_command(path, argv)
 }
 
 static int
-check_syntax(sudoers_path, quiet, strict)
-    char *sudoers_path;
-    int quiet;
-    int strict;
+check_syntax(char *sudoers_path, int quiet, int strict)
 {
     struct stat sb;
     int error;
@@ -751,10 +736,7 @@ check_syntax(sudoers_path, quiet, strict)
  * any subsequent files #included via a callback from the parser.
  */
 FILE *
-open_sudoers(path, doedit, keepopen)
-    const char *path;
-    int doedit;
-    int *keepopen;
+open_sudoers(const char *path, int doedit, int *keepopen)
 {
     struct sudoersfile *entry;
     FILE *fp;
@@ -806,8 +788,7 @@ open_sudoers(path, doedit, keepopen)
 }
 
 static char *
-get_editor(args)
-    char **args;
+get_editor(char **args)
 {
     char *Editor, *EditorArgs, *EditorPath, *UserEditor, *UserEditorArgs;
 
@@ -910,8 +891,7 @@ get_editor(args)
  * Split out any command line arguments and return them.
  */
 static char *
-get_args(cmnd)
-    char *cmnd;
+get_args(char *cmnd)
 {
     char *args;
 
@@ -930,7 +910,7 @@ get_args(cmnd)
  * Look up the hostname and set user_host and user_shost.
  */
 static void
-get_hostname()
+get_hostname(void)
 {
     char *p, thost[MAXHOSTNAMELEN + 1];
 
@@ -951,9 +931,7 @@ get_hostname()
 }
 
 static void
-alias_remove_recursive(name, type)
-    char *name;
-    int type;
+alias_remove_recursive(char *name, int type)
 {
     struct member *m;
     struct alias *a;
@@ -976,9 +954,7 @@ alias_remove_recursive(name, type)
  * aliases or unused aliases.
  */
 static int
-check_aliases(strict, quiet)
-    int strict;
-    int quiet;
+check_aliases(int strict, int quiet)
 {
     struct cmndspec *cs;
     struct member *m, *binding;
@@ -1089,11 +1065,7 @@ check_aliases(strict, quiet)
 }
 
 static void
-print_undefined(name, type, strict, quiet)
-    char *name;
-    int type;
-    int strict;
-    int quiet;
+print_undefined(char *name, int type, int strict, int quiet)
 {
     if (!quiet) {
 	warningx("%s: %s_Alias `%s' referenced but not defined",
@@ -1105,9 +1077,7 @@ print_undefined(name, type, strict, quiet)
 }
 
 static int
-print_unused(v1, v2)
-    void *v1;
-    void *v2;
+print_unused(void *v1, void *v2)
 {
     struct alias *a = (struct alias *)v1;
     char *prefix = (char *)v2;
@@ -1123,8 +1093,7 @@ print_unused(v1, v2)
  * Unlink any sudoers temp files that remain.
  */
 void
-cleanup(gotsignal)
-    int gotsignal;
+cleanup(int gotsignal)
 {
     struct sudoersfile *sp;
 
@@ -1142,8 +1111,7 @@ cleanup(gotsignal)
  * Unlink sudoers temp files (if any) and exit.
  */
 static RETSIGTYPE
-quit(signo)
-    int signo;
+quit(int signo)
 {
     cleanup(signo);
 #define	emsg	 " exiting due to signal.\n"
@@ -1153,7 +1121,7 @@ quit(signo)
 }
 
 static void
-usage()
+usage(void)
 {
     (void) fprintf(stderr, "usage: %s [-c] [-q] [-s] [-V] [-f sudoers]\n",
 	getprogname());

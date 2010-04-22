@@ -91,9 +91,7 @@ static void  update_timestamp(char *, char *);
  * XXX - check return values
  */
 int
-check_user(validated, mode)
-    int validated;
-    int mode;
+check_user(int validated, int mode)
 {
     char *timestampdir = NULL;
     char *timestampfile = NULL;
@@ -190,8 +188,7 @@ static const char lecture_text[] = "\n"
  * Standard sudo lecture.
  */
 static void
-lecture(status)
-    int status;
+lecture(int status)
 {
     FILE *fp;
     char buf[BUFSIZ];
@@ -225,9 +222,7 @@ lecture(status)
  * Update the time on the timestamp file/dir or create it if necessary.
  */
 static void
-update_timestamp(timestampdir, timestampfile)
-    char *timestampdir;
-    char *timestampfile;
+update_timestamp(char *timestampdir, char *timestampfile)
 {
     if (timestamp_uid != 0)
 	set_perms(PERM_TIMESTAMP);
@@ -257,10 +252,7 @@ update_timestamp(timestampdir, timestampfile)
  * allocated result.  Returns the same string if there are no escapes.
  */
 static char *
-expand_prompt(old_prompt, user, host)
-    char *old_prompt;
-    char *user;
-    char *host;
+expand_prompt(char *old_prompt, char *user, char *host)
 {
     size_t len, n;
     int subst;
@@ -386,7 +378,7 @@ oflow:
  * Checks if the user is exempt from supplying a password.
  */
 int
-user_is_exempt()
+user_is_exempt(void)
 {
     if (!def_exempt_group)
 	return(FALSE);
@@ -397,9 +389,7 @@ user_is_exempt()
  * Fills in timestampdir as well as timestampfile if using tty tickets.
  */
 static int
-build_timestamp(timestampdir, timestampfile)
-    char **timestampdir;
-    char **timestampfile;
+build_timestamp(char **timestampdir, char **timestampfile)
 {
     char *dirparent;
     int len;
@@ -448,11 +438,7 @@ build_timestamp(timestampdir, timestampfile)
  * Check the timestamp file and directory and return their status.
  */
 static int
-timestamp_status(timestampdir, timestampfile, user, flags)
-    char *timestampdir;
-    char *timestampfile;
-    char *user;
-    int flags;
+timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 {
     struct stat sb;
     struct timeval boottime, mtime;
@@ -646,8 +632,7 @@ done:
  * Remove the timestamp ticket file/dir.
  */
 void
-remove_timestamp(remove)
-    int remove;
+remove_timestamp(int remove)
 {
     struct timeval tv;
     char *timestampdir, *timestampfile, *path;
