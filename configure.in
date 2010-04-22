@@ -2790,7 +2790,7 @@ AH_TEMPLATE(HAVE_ST_MTIM, [Define to 1 if your struct stat has an st_mtim member
 AH_TEMPLATE(HAVE_ST_MTIMESPEC, [Define to 1 if your struct stat has an st_mtimespec member])
 AH_TEMPLATE(HAVE_TERMIOS_H, [Define to 1 if you have the <termios.h> header file and the `tcgetattr' function.])
 AH_TEMPLATE(HAVE_TIMESPEC, [Define to 1 if you have struct timespec in sys/time.h])
-AH_TEMPLATE(HAVE_TIMESPECSUB2, [Define to 1 if you have a timespecsub macro or function that takes two arguments (not three)])
+AH_TEMPLATE(HAVE_TIMERSUB2, [Define to 1 if you have a timersub macro or function that takes two arguments (not three)])
 AH_TEMPLATE(HAVE___PROGNAME, [Define to 1 if your crt0.o defines the __progname symbol for you.])
 AH_TEMPLATE(HOST_IN_LOG, [Define to 1 if you want the hostname to be entered into the log file.])
 AH_TEMPLATE(IGNORE_DOT_PATH, [Define to 1 if you want to ignore '.' and empty PATH elements])
@@ -2827,18 +2827,23 @@ AH_TOP([#ifndef _SUDO_CONFIG_H
 AH_BOTTOM([/*
  * Macros to convert ctime and mtime into timevals.
  */
+#define timespec2timeval(_ts, _tv) do {					\
+    (_tv)->tv_sec = (_ts)->tv_sec;					\
+    (_tv)->tv_usec = (_ts)->tv_nsec / 1000;				\
+} while (0)
+
 #ifdef HAVE_ST_MTIM
 # ifdef HAVE_ST__TIM
-#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctim.st__tim.tv_sec; (_y)->tv_usec = (_x)->st_ctim.st__tim.tv_nsec / 1000; } while (0)
-#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtim.st__tim.tv_sec; (_y)->tv_usec = (_x)->st_mtim.st__tim.tv_nsec / 1000; } while (0)
+#  define ctim_get(_x, _y)	timespec2timeval(&(_x)->st_ctim.st__tim, (_y))
+#  define mtim_get(_x, _y)	timespec2timeval(&(_x)->st_mtim.st__tim, (_y))
 # else
-#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctim.tv_sec; (_y)->tv_usec = (_x)->st_ctim.tv_nsec / 1000; } while (0)
-#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtim.tv_sec; (_y)->tv_usec = (_x)->st_mtim.tv_nsec / 1000; } while (0)
+#  define ctim_get(_x, _y)	timespec2timeval(&(_x)->st_ctim, (_y))
+#  define mtim_get(_x, _y)	timespec2timeval(&(_x)->st_mtim, (_y))
 # endif
 #else
 # ifdef HAVE_ST_MTIMESPEC
-#  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctimespec.tv_sec; (_y)->tv_usec = (_x)->st_ctimespec.tv_nsec / 1000; } while (0)
-#  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtimespec.tv_sec; (_y)->tv_usec = (_x)->st_mtimespec.tv_nsec / 1000; } while (0)
+#  define ctim_get(_x, _y)	timespec2timeval(&(_x)->st_ctimespec, (_y))
+#  define mtim_get(_x, _y)	timespec2timeval(&(_x)->st_mtimespec, (_y))
 # else
 #  define ctim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_ctime; (_y)->tv_usec = 0; } while (0)
 #  define mtim_get(_x, _y)	do { (_y)->tv_sec = (_x)->st_mtime; (_y)->tv_usec = 0; } while (0)
