@@ -24,13 +24,13 @@
 
 #include <pathnames.h>
 #include <limits.h>
-#include "compat.h"
+#include <compat.h>
+#include <error.h>
+#include <alloc.h>
+#include <list.h>
+#include <missing.h>
 #include "defaults.h"
-#include "error.h" /* XXX */
-#include "alloc.h" /* XXX */
-#include "list.h"
 #include "logging.h"
-#include "missing.h"
 #include "sudo_nss.h"
 #include "sudo_plugin.h"
 
@@ -142,8 +142,7 @@ struct sudo_user {
 #define PERM_FULL_USER           0x03
 #define PERM_SUDOERS             0x04
 #define PERM_RUNAS               0x05
-#define PERM_FULL_RUNAS          0x06
-#define PERM_TIMESTAMP           0x07
+#define PERM_TIMESTAMP           0x06
 #define PERM_NOEXIT              0x10 /* flag */
 #define PERM_MASK                0xf0
 
@@ -194,15 +193,6 @@ struct sudo_user {
 #define SUDO_TLOCK	2		/* test & lock a file (non-blocking) */
 #define SUDO_UNLOCK	4		/* unlock a file */
 
-#if 0 /* XXX */
-/*
- * Flags for tgetpass()
- */
-#define TGP_ECHO	0x01		/* leave echo on when reading passwd */
-#define TGP_STDIN	0x02		/* read from stdin, not /dev/tty */
-#define TGP_ASKPASS	0x04		/* read from askpass helper program */
-#endif
-
 struct lbuf;
 struct passwd;
 
@@ -211,12 +201,23 @@ struct passwd;
  */
 #define YY_DECL int yylex(void)
 
+/* goodpath.c */
 char *sudo_goodpath(const char *, struct stat *);
+
+/* findpath.c */
 int find_path(char *, char **, struct stat *, char *);
-int tty_present(void);
+
+/* check.c */
 int check_user(int, int);
+void remove_timestamp(int);
+int user_is_exempt(void);
+
+/* sudo_auth.c */
 int verify_user(struct passwd *, char *);
+void pass_warn(void);
+
 #ifdef HAVE_LDAP
+/* ldap.c */
 int sudo_ldap_open(struct sudo_nss *);
 int sudo_ldap_close(struct sudo_nss *);
 int sudo_ldap_setdefs(struct sudo_nss *);
@@ -227,6 +228,8 @@ int sudo_ldap_display_defaults(struct sudo_nss *, struct passwd *, struct lbuf *
 int sudo_ldap_display_bound_defaults(struct sudo_nss *, struct passwd *, struct lbuf *);
 int sudo_ldap_display_privs(struct sudo_nss *, struct passwd *, struct lbuf *);
 #endif
+
+/* parse.c */
 int sudo_file_open(struct sudo_nss *);
 int sudo_file_close(struct sudo_nss *);
 int sudo_file_setdefs(struct sudo_nss *);
@@ -236,63 +239,58 @@ int sudo_file_display_cmnd(struct sudo_nss *, struct passwd *);
 int sudo_file_display_defaults(struct sudo_nss *, struct passwd *, struct lbuf *);
 int sudo_file_display_bound_defaults(struct sudo_nss *, struct passwd *, struct lbuf *);
 int sudo_file_display_privs(struct sudo_nss *, struct passwd *, struct lbuf *);
+
+/* set_perms.c */
 void rewind_perms(void);
 int set_perms(int);
 void restore_perms(void);
-void remove_timestamp(int);
-int check_secureware(char *);
-void sia_attempt_auth(void);
-void pam_attempt_auth(void);
+int pam_prep_user(struct passwd *);
+
+/* gram.y */
 int yyparse(void);
-void pass_warn(void);
+
+/* toke.l */
+YY_DECL;
+
+/* defaults.c */
 void dump_defaults(void);
 void dump_auth_methods(void);
+
+/* fileops.c */
 int lock_file(int, int);
 int touch(int, char *, struct timeval *);
-int user_is_exempt(void);
-void set_fqdn(void);
+char *sudo_parseln(FILE *);
+
+/* getspwuid.c */
 char *sudo_getepw(const struct passwd *);
-int pam_prep_user(struct passwd *);
+
+/* zero_bytes.c */
 void zero_bytes(volatile void *, size_t);
+
+/* gettime.c */
 int gettime(struct timeval *);
-FILE *open_sudoers(const char *, int, int *);
+
+/* sudo_nss.c */
 void display_privs(struct sudo_nss_list *, struct passwd *);
 int display_cmnd(struct sudo_nss_list *, struct passwd *);
-int get_ttycols(void);
-char *sudo_parseln(FILE *);
+
+/* pwutil.c */
 void sudo_setgrent(void);
 void sudo_endgrent(void);
 void sudo_setpwent(void);
 void sudo_endpwent(void);
 void sudo_setspent(void);
 void sudo_endspent(void);
-void cleanup(int);
 struct passwd *sudo_getpwnam(const char *);
 struct passwd *sudo_fakepwnam(const char *, gid_t);
 struct passwd *sudo_getpwuid(uid_t);
 struct group *sudo_getgrnam(const char *);
 struct group *sudo_fakegrnam(const char *);
 struct group *sudo_getgrgid(gid_t);
-#ifdef HAVE_SELINUX
-void selinux_exec(char *, char *, char **);
-void selinux_execv(char *, char **);
-void selinux_prefork(char *, char *, int);
-#endif
-#ifdef HAVE_GETUSERATTR
-void aix_setlimits(char *);
-#endif
-int script_duplow(int);
-int script_execv(char *, char **);
-void script_nextid(void);
-void script_setup(void);
-int term_cbreak(int);
-int term_copy(int, int, int);
-int term_noecho(int);
-int term_raw(int, int, int);
-int term_restore(int, int);
-char *get_timestr(time_t, int);
 int user_in_group(struct passwd *, const char *);
-YY_DECL;
+
+/* timestr.c */
+char *get_timestr(time_t, int);
 
 /* atobool.c */
 int atobool(const char *str);
@@ -317,16 +315,20 @@ void rebuild_env(int, int);
 /* fmt_string.c */
 char *fmt_string(const char *, const char *);
 
-/* Only provide extern declarations outside of sudo.c. */
+/* sudoers.c */
+void cleanup(int);
+void set_fqdn(void);
+FILE *open_sudoers(const char *, int, int *);
+
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
 extern struct passwd *auth_pw, *list_pw;
-
-extern int tgetpass_flags; /* XXX */
 extern int long_list;
 extern uid_t timestamp_uid;
 extern sudo_conv_t sudo_conv;
 #endif
+
+/* Some systems don't declare errno in errno.h */
 #ifndef errno
 extern int errno;
 #endif
