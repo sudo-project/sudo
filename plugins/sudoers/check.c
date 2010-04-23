@@ -230,10 +230,11 @@ update_timestamp(char *timestampdir, char *timestampfile)
 	/*
 	 * Store tty info in timestamp file
 	 */
-	int fd = open(timestampfile, O_WRONLY|O_CREAT|O_TRUNC, 0600);
+	int fd = open(timestampfile, O_WRONLY|O_CREAT, 0600);
 	if (fd == -1)
 	    log_error(NO_EXIT|USE_ERRNO, "Can't open %s", timestampfile);
 	else {
+	    lock_file(fd, SUDO_LOCK);
 	    write(fd, &tty_info, sizeof(tty_info));
 	    close(fd);
 	}
