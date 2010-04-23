@@ -47,7 +47,7 @@
 # include <emul/timespec.h>
 #endif
 
-#include "sudo.h" /* XXX - for SUDO_LOCK and friends */
+#include <fileops.h>
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048

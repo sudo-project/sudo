@@ -26,11 +26,13 @@
 
 #include <pathnames.h>
 #include <limits.h>
-#include "compat.h"
-#include "alloc.h"
-#include "error.h"
-#include "list.h"
-#include "missing.h"
+
+#include <compat.h>
+#include <alloc.h>
+#include <error.h>
+#include <fileops.h>
+#include <list.h>
+#include <missing.h>
 
 #ifdef __TANDEM
 # define ROOT_UID       65535
@@ -92,13 +94,6 @@
  * system max.
  */
 #define SUDO_PASS_MAX	256
-
-/*
- * Flags for lock_file()
- */
-#define SUDO_LOCK	1		/* lock a file */
-#define SUDO_TLOCK	2		/* test & lock a file (non-blocking) */
-#define SUDO_UNLOCK	4		/* unlock a file */
 
 /*
  * Flags for tgetpass()
@@ -172,10 +167,6 @@ int tty_present(void);
 
 /* zero_bytes.c */
 void zero_bytes(volatile void *, size_t);
-
-/* fileops.c */
-int lock_file(int, int);
-char *sudo_parseln(FILE *);
 
 /* script.c */
 int script_duplow(int);

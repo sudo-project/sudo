@@ -28,6 +28,7 @@
 #include <error.h>
 #include <alloc.h>
 #include <list.h>
+#include <fileops.h>
 #include <missing.h>
 #include "defaults.h"
 #include "logging.h"
@@ -186,13 +187,6 @@ struct sudo_user {
  */
 #define SUDO_PASS_MAX	256
 
-/*
- * Flags for lock_file()
- */
-#define SUDO_LOCK	1		/* lock a file */
-#define SUDO_TLOCK	2		/* test & lock a file (non-blocking) */
-#define SUDO_UNLOCK	4		/* unlock a file */
-
 struct lbuf;
 struct passwd;
 
@@ -255,11 +249,6 @@ YY_DECL;
 /* defaults.c */
 void dump_defaults(void);
 void dump_auth_methods(void);
-
-/* fileops.c */
-int lock_file(int, int);
-int touch(int, char *, struct timeval *);
-char *sudo_parseln(FILE *);
 
 /* getspwuid.c */
 char *sudo_getepw(const struct passwd *);
