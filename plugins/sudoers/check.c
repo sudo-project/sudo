@@ -104,6 +104,7 @@ check_user(int validated, int mode)
 	tty_info.dev = sb.st_dev;
 	tty_info.ino = sb.st_ino;
 	tty_info.rdev = sb.st_rdev;
+#ifndef notyet
     	ctim_get(&sb, &tty_info.ctime);
 	if (stat("/", &sb) == 0) {
 	    /*
@@ -116,6 +117,7 @@ check_user(int validated, int mode)
 		tty_info.ctime.tv_usec = 0;
 	    }
 	}
+#endif
     }
 
     /* Always prompt for a password when -k was specified with the command. */
