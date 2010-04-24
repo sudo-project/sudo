@@ -104,7 +104,7 @@ check_user(int validated, int mode)
 	tty_info.dev = sb.st_dev;
 	tty_info.ino = sb.st_ino;
 	tty_info.rdev = sb.st_rdev;
-#ifndef notyet
+#ifdef notyet
     	ctim_get(&sb, &tty_info.ctime);
 	if (stat("/", &sb) == 0) {
 	    /*
@@ -608,9 +608,10 @@ timestamp_status(char *timestampdir, char *timestampfile, char *user, int flags)
 		 * have been set back or someone could be trying to spoof us.
 		 */
 		if (mtime.tv_sec > now + 60 * def_timestamp_timeout * 2) {
+		    time_t tv_sec = (time_t)mtime.tv_sec;
 		    log_error(NO_EXIT,
 			"timestamp too far in the future: %20.20s",
-			4 + ctime(&mtime.tv_sec));
+			4 + ctime(&tv_sec));
 		    if (timestampfile)
 			(void) unlink(timestampfile);
 		    else
