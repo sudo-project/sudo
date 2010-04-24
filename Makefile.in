@@ -30,14 +30,13 @@ config.status:
 	fi
 
 clean: config.status
-	-rm -f compat/*.o
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
 
 mostlyclean: clean
 
 distclean: config.status
 	-rm -rf compat/*.o pathnames.h config.h config.status config.cache \
-		config.log libtool stamp-h* autom4te.cache ChangeLog
+		config.log libtool stamp-* autom4te.cache ChangeLog
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
 
 cleandir: distclean

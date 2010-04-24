@@ -172,15 +172,12 @@ check:
 	@echo nothing to check
 
 clean:
-	-rm -f *.a *.o *.lo stamp-* $(PROGS) core *.core core.*
+	-rm -f *.a *.o *.lo *.la $(PROGS) core *.core core.*
 
 mostlyclean: clean
 
-# XXX - remove some
 distclean: clean
-	-rm -rf Makefile pathnames.h config.h config.status config.cache \
-		config.log libtool sudo_noexec.lo .libs $(GENERATED) \
-		sudo_usage.h
+	-rm -rf Makefile .libs sudo_usage.h $(GENERATED)
 
 clobber: distclean
 
