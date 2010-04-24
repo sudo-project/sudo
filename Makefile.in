@@ -15,7 +15,14 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+srcdir = @srcdir@
+devdir = @devdir@
+top_builddir = @top_builddir@
+top_srcdir = @top_srcdir@
+
 SUBDIRS = compat src plugins/sample plugins/sudoers doc
+
+VERSION = @PACKAGE_VERSION@
 
 all install: config.status
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
@@ -28,6 +35,12 @@ config.status:
 		echo "Please run configure first"; \
 		exit 1; \
 	fi
+
+dist: ChangeLog $(srcdir)/MANIFEST
+	pax -w -x ustar -s '/^/sudo-$(VERSION)\//' -f ../sudo-$(VERSION).tar \
+	    `sed 's/[ 	].*//' $(srcdir)/MANIFEST`
+	gzip -9f ../sudo-$(VERSION).tar
+	ls -l ../sudo-$(VERSION).tar.gz
 
 clean: config.status
 	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
