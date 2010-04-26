@@ -122,10 +122,6 @@ static int sudoers_policy_version(int verbose);
 static struct passwd *get_authpw(void);
 static int deserialize_info(char * const settings[], char * const user_info[]);
 
-extern int sudo_edit(int, char **, char **);
-void validate_env_vars(struct list_member *);
-void insert_env_vars(struct list_member *);
-
 /* XXX */
 extern int runas_ngroups;
 extern GETGROUPS_T *runas_groups;
@@ -460,7 +456,7 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 	    warningx("sorry, you are not allowed to preserve the environment");
 	    goto done;
 	} else
-	    validate_env_vars(sudo_user.env_vars);
+	    validate_env_vars(env_add);
     }
 
     log_allowed(validated);
@@ -506,20 +502,16 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 
 #if defined(__linux__) || defined(_AIX)
 	/* Insert system-wide environment variables. */
-	/* XXX */
 	read_env_file(_PATH_ENVIRONMENT, TRUE);
 #endif
     }
 
     /* Insert system-wide environment variables. */
-#if 0 /* XXX - add back */
-    if (def_env_file) {
+    if (def_env_file)
 	read_env_file(def_env_file, FALSE);
-    }
 
     /* Insert user-specified environment variables. */
-    insert_env_vars(sudo_user.env_vars);
-#endif
+    insert_env_vars(env_add);
 
     /* Restore signal handlers before we exec. */
     (void) sigaction(SIGINT, &saved_sa_int, NULL);

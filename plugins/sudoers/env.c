@@ -725,16 +725,16 @@ rebuild_env(int sudo_mode, int noexec)
 }
 
 void
-insert_env_vars(struct list_member *env_vars)
+insert_env_vars(char * const envp[])
 {
-    struct list_member *cur;
+    char * const *ep;
 
-    if (env_vars == NULL)
+    if (envp == NULL)
 	return;
 
     /* Add user-specified environment variables. */
-    for (cur = env_vars; cur != NULL; cur = cur->next)
-	putenv(cur->value);
+    for (ep = envp; *ep != NULL; ep++)
+	sudo_putenv(*ep, TRUE, TRUE);
 }
 
 /*
@@ -743,31 +743,32 @@ insert_env_vars(struct list_member *env_vars)
  * Calls log_error() if any specified variables are not allowed.
  */
 void
-validate_env_vars(struct list_member *env_vars)
+validate_env_vars(char * const env_vars[])
 {
-    struct list_member *var;
+    char * const *ep;
     char *eq, *bad = NULL;
     size_t len, blen = 0, bsize = 0;
     int okvar;
 
-    for (var = env_vars; var != NULL; var = var->next) {
+    /* Add user-specified environment variables. */
+    for (ep = env_vars; *ep != NULL; ep++) {
 	if (def_secure_path && !user_is_exempt() &&
-	    strncmp(var->value, "PATH=", 5) == 0) {
+	    strncmp(*ep, "PATH=", 5) == 0) {
 	    okvar = FALSE;
 	} else if (def_env_reset) {
-	    okvar = matches_env_check(var->value);
+	    okvar = matches_env_check(*ep);
 	    if (okvar == -1)
-		okvar = matches_env_keep(var->value);
+		okvar = matches_env_keep(*ep);
 	} else {
-	    okvar = matches_env_delete(var->value) == FALSE;
+	    okvar = matches_env_delete(*ep) == FALSE;
 	    if (okvar == FALSE)
-		okvar = matches_env_check(var->value) != FALSE;
+		okvar = matches_env_check(*ep) != FALSE;
 	}
 	if (okvar == FALSE) {
 	    /* Not allowed, add to error string, allocating as needed. */
-	    if ((eq = strchr(var->value, '=')) != NULL)
+	    if ((eq = strchr(*ep, '=')) != NULL)
 		*eq = '\0';
-	    len = strlen(var->value) + 2;
+	    len = strlen(*ep) + 2;
 	    if (blen + len >= bsize) {
 		do {
 		    bsize += 1024;
@@ -775,7 +776,7 @@ validate_env_vars(struct list_member *env_vars)
 		bad = erealloc(bad, bsize);
 		bad[blen] = '\0';
 	    }
-	    strlcat(bad, var->value, bsize);
+	    strlcat(bad, *ep, bsize);
 	    strlcat(bad, ", ", bsize);
 	    blen += len;
 	    if (eq != NULL)

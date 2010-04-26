@@ -68,7 +68,7 @@ struct sudo_user {
     int   lines;
     int   cols;
     GETGROUPS_T *groups;
-    struct list_member *env_vars;
+    char * const * env_vars;
 #ifdef HAVE_SELINUX
     char *role;
     char *type;
@@ -298,8 +298,10 @@ int sudoers_io_log_output(const char *buf, unsigned int len);
 char **env_get(void);
 int env_init(char * const envp[]);
 void init_envtables(void);
+void insert_env_vars(char * const envp[]);
 void read_env_file(const char *, int);
 void rebuild_env(int, int);
+void validate_env_vars(char * const envp[]);
 
 /* fmt_string.c */
 char *fmt_string(const char *, const char *);

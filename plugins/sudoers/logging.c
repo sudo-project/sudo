@@ -630,13 +630,14 @@ new_logline(const char *message, int serrno)
 	len += sizeof(LL_TSID_STR) + 2 + strlen(sudo_user.sessid);
     if (sudo_user.env_vars != NULL) {
 	size_t evlen = 0;
-	struct list_member *cur;
-	for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next)
-	    evlen += strlen(cur->value) + 1;
+	char * const *ep;
+
+	for (ep = sudo_user.env_vars; *ep != NULL; ep++)
+	    evlen += strlen(*ep) + 1;
 	evstr = emalloc(evlen);
 	evstr[0] = '\0';
-	for (cur = sudo_user.env_vars; cur != NULL; cur = cur->next) {
-	    strlcat(evstr, cur->value, evlen);
+	for (ep = sudo_user.env_vars; *ep != NULL; ep++) {
+	    strlcat(evstr, *ep, evlen);
 	    strlcat(evstr, " ", evlen);	/* NOTE: last one will fail */
 	}
 	len += sizeof(LL_ENV_STR) + 2 + evlen;
