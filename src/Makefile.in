@@ -85,7 +85,7 @@ SUDODEP = $(srcdir)/sudo.h $(incdir)/sudo_plugin.h $(incdir)/alloc.h \
 	  $(incdir)/missing.h $(top_builddir)/pathnames.h \
 	  $(top_builddir)/config.h
 
-all: $(PROGS)
+all: $(PROGS) sudo_noexec.la
 
 .SUFFIXES: .o .c .h .l .y .man .cat .lo
 
