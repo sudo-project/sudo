@@ -750,6 +750,9 @@ validate_env_vars(char * const env_vars[])
     size_t len, blen = 0, bsize = 0;
     int okvar;
 
+    if (env_vars == NULL)
+	return;
+
     /* Add user-specified environment variables. */
     for (ep = env_vars; *ep != NULL; ep++) {
 	if (def_secure_path && !user_is_exempt() &&
