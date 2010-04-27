@@ -297,6 +297,10 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 
     set_perms(PERM_INITIAL);
 
+    /* Environment variables specified on the command line. */
+    if (env_add)
+	sudo_user.env_vars = env_add;
+
     /*
      * Make a local copy of argc/argv, with special handling
      * for the '-e', '-i' or '-s' options.
@@ -456,7 +460,7 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 	    warningx("sorry, you are not allowed to preserve the environment");
 	    goto done;
 	} else
-	    validate_env_vars(env_add);
+	    validate_env_vars(sudo_user.env_vars);
     }
 
     log_allowed(validated);
@@ -511,7 +515,7 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
 	read_env_file(def_env_file, FALSE);
 
     /* Insert user-specified environment variables. */
-    insert_env_vars(env_add);
+    insert_env_vars(sudo_user.env_vars);
 
     /* Restore signal handlers before we exec. */
     (void) sigaction(SIGINT, &saved_sa_int, NULL);
