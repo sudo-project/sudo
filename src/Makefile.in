@@ -86,19 +86,16 @@ SUDODEP = $(srcdir)/sudo.h $(incdir)/sudo_plugin.h $(incdir)/alloc.h \
 
 all: $(PROGS)
 
-.SUFFIXES: .o .c .h .l .y .man .cat .lo
+.SUFFIXES: .c .h .lo .o
 
 .c.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/$<
 
 .c.lo:
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $<
+	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/$<
 
 sudo: $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJS) $(LDFLAGS) $(LIBS) -static-libtool-libs
-
-sudo_noexec.lo: $(srcdir)/sudo_noexec.c
-	$(LIBTOOL) --mode=compile $(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_noexec.c
 
 sudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
@@ -108,55 +105,30 @@ sesh: sesh.o
 
 # Dependencies
 # XXX - SUDODEP is overkill for some of these
-# XXX - just use the .c.o rule instead of explicit $(CC) ...
 aix.o: $(srcdir)/aix.c $(top_builddir)/config.h $(incdir)/compat.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/aix.c
 alloc.o: $(srcdir)/alloc.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/alloc.c
 atobool.o: $(srcdir)/atobool.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/atobool.c
 audit.o: $(srcdir)/audit.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/audit.c
 bsm_audit.o: $(srcdir)/bsm_audit.c $(SUDODEP) bsm_audit.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/bsm_audit.c
 conversation.o: $(srcdir)/conversation.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/conversation.c
 error.o: $(srcdir)/error.c $(incdir)/compat.h $(incdir)/error.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/error.c
 fileops.o: $(srcdir)/fileops.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fileops.c
 fmt_string.o: $(srcdir)/fmt_string.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/fmt_string.c
 lbuf.o: $(srcdir)/lbuf.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/lbuf.c
 list.o: $(srcdir)/list.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/list.c
 load_plugins.o: $(srcdir)/load_plugins.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/load_plugins.c
 parse_args.o: $(srcdir)/parse_args.c sudo_usage.h $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/parse_args.c
 pty.o: $(srcdir)/pty.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/pty.c
 script.o: $(srcdir)/script.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/script.c
 selinux.o: $(srcdir)/selinux.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/selinux.c
 sesh.o: $(srcdir)/sesh.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sesh.c
 sudo.o: $(srcdir)/sudo.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_edit.c
-sudo_noexec.o: $(srcdir)/sudo_noexec.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo_noexec.c
+sudo_noexec.lo: $(srcdir)/sudo_noexec.c $(incdir)/compat.h $(top_builddir)/config.h
 term.o: $(srcdir)/term.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/term.c
 tgetpass.o: $(srcdir)/tgetpass.c $(SUDODEP)
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/tgetpass.c
 ttysize.o: $(srcdir)/ttysize.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/ttysize.c
 zero_bytes.o: $(srcdir)/zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/zero_bytes.c
 
 install: install-dirs install-binaries @INSTALL_NOEXEC@
 
