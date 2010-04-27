@@ -2166,7 +2166,7 @@ path_info=on
 secure_path="not set"
 INSTALL_NOEXEC=
 devdir='$(srcdir)'
-PROGS="sudo visudo"
+PROGS="sudo"
 : ${MANTYPE='man'}
 : ${mansrcdir='.'}
 : ${SUDOERS_MODE='0440'}
@@ -2356,7 +2356,6 @@ if test "${with_devel+set}" = set; then
   withval=$with_devel; case $with_devel in
     yes)	{ echo "$as_me:$LINENO: Setting up for development: -Wall, flex, yacc" >&5
 echo "$as_me: Setting up for development: -Wall, flex, yacc" >&6;}
-		PROGS="${PROGS} testsudoers"
 		OSDEFS="${OSDEFS} -DSUDO_DEVEL"
 		DEV=""
 		devdir=.

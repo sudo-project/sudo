@@ -125,7 +125,7 @@ dnl
 dnl Initial values for Makefile variables listed above
 dnl May be overridden by environment variables..
 dnl
-PROGS="sudo visudo"
+PROGS="sudo"
 : ${MANTYPE='man'}
 : ${mansrcdir='.'}
 : ${SUDOERS_MODE='0440'}
@@ -265,7 +265,6 @@ esac])
 AC_ARG_WITH(devel, [AS_HELP_STRING([--with-devel], [add development options])],
 [case $with_devel in
     yes)	AC_MSG_NOTICE([Setting up for development: -Wall, flex, yacc])
-		PROGS="${PROGS} testsudoers"
 		OSDEFS="${OSDEFS} -DSUDO_DEVEL"
 		DEV=""
 		devdir=.

@@ -67,8 +67,7 @@ DEFS = @OSDEFS@
 
 SHELL = /bin/sh
 
-# XXX - add sesh for selinux
-PROGS = sudo
+PROGS = @PROGS@
 
 # XXX - add back missing ones:
 #	sudo_edit.o
@@ -85,7 +84,7 @@ SUDODEP = $(srcdir)/sudo.h $(incdir)/sudo_plugin.h $(incdir)/alloc.h \
 	  $(incdir)/missing.h $(top_builddir)/pathnames.h \
 	  $(top_builddir)/config.h
 
-all: $(PROGS) sudo_noexec.la
+all: $(PROGS)
 
 .SUFFIXES: .o .c .h .l .y .man .cat .lo
 
@@ -104,8 +103,12 @@ sudo_noexec.lo: $(srcdir)/sudo_noexec.c
 sudo_noexec.la: sudo_noexec.lo
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $@ sudo_noexec.lo -avoid-version -rpath $(noexecdir)
 
+sesh: sesh.o
+	$(CC) -o $@ sesh.o
+
 # Dependencies
 # XXX - SUDODEP is overkill for some of these
+# XXX - just use the .c.o rule instead of explicit $(CC) ...
 aix.o: $(srcdir)/aix.c $(top_builddir)/config.h $(incdir)/compat.h
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/aix.c
 alloc.o: $(srcdir)/alloc.c $(SUDODEP)
@@ -138,6 +141,8 @@ script.o: $(srcdir)/script.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/script.c
 selinux.o: $(srcdir)/selinux.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/selinux.c
+sesh.o: $(srcdir)/sesh.c $(incdir)/compat.h $(top_builddir)/config.h
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sesh.c
 sudo.o: $(srcdir)/sudo.c $(SUDODEP)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $(DEFS) $(OPTIONS) $(srcdir)/sudo.c
 sudo_edit.o: $(srcdir)/sudo_edit.c $(SUDODEP)
