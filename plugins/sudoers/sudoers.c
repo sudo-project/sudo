@@ -437,9 +437,32 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 	}
     }
 
+    /* If the user was not allowed to run the command we are done. */
     if (!ISSET(validated, VALIDATE_OK)) {
-	/* XXX - real error message */
-	warningx("unexpected error, not validated"); /* XXX */
+	if (ISSET(validated, FLAG_NO_USER | FLAG_NO_HOST)) {
+	    //audit_failure(NewArgv, "No user or host");
+	    log_denial(validated, 1);
+	} else {
+	    if (def_path_info) {
+		/*
+		 * We'd like to not leak path info at all here, but that can
+		 * *really* confuse the users.  To really close the leak we'd
+		 * have to say "not allowed to run foo" even when the problem
+		 * is just "no foo in path" since the user can trivially set
+		 * their path to just contain a single dir.
+		 */
+		log_denial(validated,
+		    !(cmnd_status == NOT_FOUND_DOT || cmnd_status == NOT_FOUND));
+		if (cmnd_status == NOT_FOUND)
+		    warningx("%s: command not found", user_cmnd);
+		else if (cmnd_status == NOT_FOUND_DOT)
+		    warningx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
+	    } else {
+		/* Just tell the user they are not allowed to run foo. */
+		log_denial(validated, 1);
+	    }
+	    //audit_failure(NewArgv, "validation failure");
+	}
 	goto done;
     }
 
