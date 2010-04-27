@@ -272,12 +272,12 @@ sudoers_policy_close(int exit_status, int error_code)
 }
 
 static int
-sudoers_policy_main(int argc, char * const argv[], char *env_add[],
+sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     char **command_infop[], char **argv_out[], char **user_env_out[])
 {
     static char *command_info[32]; /* XXX */
     struct sudo_nss *nss;
-    int cmnd_status = -1, validated, pwflag = 0;
+    int cmnd_status = -1, validated;
     int info_len = 0;
     int rval = FALSE;
 
@@ -337,7 +337,6 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
      */
     validated = FLAG_NO_USER | FLAG_NO_HOST;
     tq_foreach_fwd(snl, nss) {
-	/* XXX - pwflag always 0 */
 	validated = nss->lookup(nss, validated, pwflag);
 
 	if (ISSET(validated, VALIDATE_OK)) {
@@ -439,7 +438,8 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
     }
 
     if (!ISSET(validated, VALIDATE_OK)) {
-	/* XXX - error message */
+	/* XXX - real error message */
+	warningx("unexpected error, not validated"); /* XXX */
 	goto done;
     }
 
@@ -578,7 +578,7 @@ sudoers_policy_check(int argc, char * const argv[], char *env_add[],
 {
     SET(sudo_mode, MODE_RUN);
 
-    return sudoers_policy_main(argc, argv, env_add, command_infop,
+    return sudoers_policy_main(argc, argv, 0, env_add, command_infop,
 	argv_out, user_env_out);
 }
 
@@ -588,7 +588,7 @@ sudoers_policy_validate(void)
     user_cmnd = "validate";
     SET(sudo_mode, MODE_VALIDATE);
 
-    return sudoers_policy_main(0, NULL, NULL, NULL, NULL, NULL);
+    return sudoers_policy_main(0, NULL, I_VERIFYPW, NULL, NULL, NULL, NULL);
 }
 
 static void
@@ -618,7 +618,7 @@ sudoers_policy_list(int argc, char * const argv[], int verbose,
 	return -1;
     }
 
-    return sudoers_policy_main(argc, argv, NULL, NULL, NULL, NULL);
+    return sudoers_policy_main(argc, argv, I_LISTPW, NULL, NULL, NULL, NULL);
 }
 
 /*
