@@ -298,7 +298,7 @@ sudoers_policy_main(int argc, char * const argv[], char *env_add[],
     set_perms(PERM_INITIAL);
 
     /* Environment variables specified on the command line. */
-    if (env_add)
+    if (env_add != NULL && env_add[0] != NULL)
 	sudo_user.env_vars = env_add;
 
     /*
