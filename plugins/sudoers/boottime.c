@@ -46,7 +46,7 @@
 
 /*
  * Fill in a struct timeval with the time the system booted.
- * Returns TRUE on success and FALSE on failure.
+ * Returns 1 on success and 0 on failure.
  */
 
 #if defined(__linux__)
@@ -65,14 +65,14 @@ get_boottime(struct timeval *tv)
 	    if (strncmp(line, "btime ", 6) == 0) {
 		tv->tv_sec = atoi(line + 6);
 		tv->tv_usec = 0;
-		return TRUE;
+		return 1;
 	    }
 	}
 	fclose(fp);
 	free(line);
     }
 
-    return FALSE;
+    return 0;
 }
 
 #elif defined(HAVE_SYSCTL) && defined(KERN_BOOTTIME)
@@ -87,9 +87,9 @@ get_boottime(struct timeval *tv)
     mib[1] = KERN_BOOTTIME;
     size = sizeof(*tv);
     if (sysctl(mib, 2, tv, &size, NULL, 0) != -1)
-	return TRUE;
+	return 1;
 
-    return FALSE;
+    return 0;
 }
 
 #elif defined(HAVE_GETUTXID)
@@ -133,6 +133,6 @@ get_boottime(struct timeval *tv)
 time_t
 get_boottime()
 {
-    return FALSE;
+    return 0;
 }
 #endif
