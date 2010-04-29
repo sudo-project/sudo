@@ -686,6 +686,10 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	}
 	flush_output(&output);
 
+	do {
+	    n = term_restore(script_fds[SFD_USERTTY], 0);
+	} while (!n && errno == EINTR);
+
 	if (cstat->type == CMD_WSTATUS && WIFSIGNALED(cstat->val)) {
 	    int signo = WTERMSIG(cstat->val);
 	    if (signo && signo != SIGINT && signo != SIGPIPE) {
@@ -696,9 +700,6 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		write(STDOUT_FILENO, "\n", 1);
 	    }
 	}
-	do {
-	    n = term_restore(script_fds[SFD_USERTTY], 0);
-	} while (!n && errno == EINTR);
     }
 
     return cstat->type == CMD_ERRNO ? -1 : 0;
