@@ -111,7 +111,8 @@ static int install_sudoers	__P((struct sudoersfile *, int));
 static int print_unused		__P((void *, void *));
 static int reparse_sudoers	__P((char *, char *, int, int));
 static int run_command		__P((char *, char **));
-static void print_undefined	__P((char *name, int, int, int));
+static void print_selfref	__P((char *, int, int, int));
+static void print_undefined	__P((char *, int, int, int));
 static void setup_signals	__P((void));
 static void usage		__P((void)) __attribute__((__noreturn__));
 
@@ -953,18 +954,27 @@ get_hostname()
     }
 }
 
-static void
-alias_remove_recursive(name, type)
+static int
+alias_remove_recursive(name, type, strict, quiet)
     char *name;
     int type;
+    int strict;
+    int quiet;
 {
     struct member *m;
     struct alias *a;
+    int error = 0;
 
     if ((a = alias_find(name, type)) != NULL) {
 	tq_foreach_fwd(&a->members, m) {
 	    if (m->type == ALIAS) {
-		alias_remove_recursive(m->name, type);
+		if (strcmp(name, m->name) == 0) {
+		    print_selfref(m->name, type, strict, quiet);
+		    error = 1;
+		} else {
+		    if (!alias_remove_recursive(m->name, type, strict, quiet))
+			error = 1;
+		}
 	    }
 	}
     }
@@ -972,6 +982,7 @@ alias_remove_recursive(name, type)
     a = alias_remove(name, type);
     if (a)
 	rbinsert(alias_freelist, a);
+    return(error);
 }
 
 /*
@@ -1038,21 +1049,28 @@ check_aliases(strict, quiet)
     tq_foreach_fwd(&userspecs, us) {
 	tq_foreach_fwd(&us->users, m) {
 	    if (m->type == ALIAS) {
-		(void) alias_remove_recursive(m->name, USERALIAS);
+		if (!alias_remove_recursive(m->name, USERALIAS, strict, quiet))
+		    error++;
 	    }
 	}
 	tq_foreach_fwd(&us->privileges, priv) {
 	    tq_foreach_fwd(&priv->hostlist, m) {
 		if (m->type == ALIAS)
-		    (void) alias_remove_recursive(m->name, HOSTALIAS);
+		    if (!alias_remove_recursive(m->name, HOSTALIAS, strict, 
+			quiet))
+			error++;
 	    }
 	    tq_foreach_fwd(&priv->cmndlist, cs) {
 		tq_foreach_fwd(&cs->runasuserlist, m) {
 		    if (m->type == ALIAS)
-			(void) alias_remove_recursive(m->name, RUNASALIAS);
+			if (!alias_remove_recursive(m->name, RUNASALIAS,
+			    strict, quiet))
+			    error++;
 		}
 		if ((m = cs->cmnd)->type == ALIAS)
-		    (void) alias_remove_recursive(m->name, CMNDALIAS);
+		    if (!alias_remove_recursive(m->name, CMNDALIAS, strict,
+			quiet))
+			error++;
 	    }
 	}
     }
@@ -1076,19 +1094,18 @@ check_aliases(strict, quiet)
 	tq_foreach_fwd(&d->binding, binding) {
 	    for (m = binding; m != NULL; m = m->next) {
 		if (m->type == ALIAS)
-		    (void) alias_remove_recursive(m->name, atype);
+		    if (!alias_remove_recursive(m->name, atype, strict, quiet))
+			error++;
 	    }
 	}
     }
     rbdestroy(alias_freelist, alias_free);
 
     /* If all aliases were referenced we will have an empty tree. */
-    if (no_aliases())
-	return(0);
-    if (!quiet) {
+    if (!no_aliases() && !quiet)
 	alias_apply(print_unused, strict ? "Error" : "Warning");
-    }
-    return (strict ? 1 : 0);
+
+    return (strict ? error : 0);
 }
 
 static void
@@ -1100,6 +1117,22 @@ print_undefined(name, type, strict, quiet)
 {
     if (!quiet) {
 	warningx("%s: %s_Alias `%s' referenced but not defined",
+	    strict ? "Error" : "Warning",
+	    type == HOSTALIAS ? "Host" : type == CMNDALIAS ? "Cmnd" :
+	    type == USERALIAS ? "User" : type == RUNASALIAS ? "Runas" :
+	    "Unknown", name);
+    }
+}
+
+static void
+print_selfref(name, type, strict, quiet)
+    char *name;
+    int type;
+    int strict;
+    int quiet;
+{
+    if (!quiet) {
+	warningx("%s: %s_Alias `%s' references self",
 	    strict ? "Error" : "Warning",
 	    type == HOSTALIAS ? "Host" : type == CMNDALIAS ? "Cmnd" :
 	    type == USERALIAS ? "User" : type == RUNASALIAS ? "Runas" :
