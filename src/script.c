@@ -437,10 +437,6 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	}
     }
 
-    /* Set command timeout if specified. */
-    if (ISSET(details->flags, CD_SET_TIMEOUT))
-	    alarm(details->timeout);
-
     /*
      * Child will run the command in the pty, parent will pass data
      * to and from pty.
@@ -473,6 +469,10 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	_exit(1);
     }
     close(sv[1]);
+
+    /* Set command timeout if specified. */
+    if (ISSET(details->flags, CD_SET_TIMEOUT))
+	alarm(details->timeout);
 
     /* Max fd we will be selecting on. */
     maxfd = sv[0];
@@ -724,7 +724,7 @@ deliver_signal(pid_t pid, int signo)
 	killpg(pid, signo);
 	break;
     case SIGALRM:
-	terminate_child(child, TRUE);
+	terminate_child(pid, TRUE);
 	break;
     case SIGUSR1:
 	/* foreground process, grant it controlling tty. */
@@ -894,11 +894,13 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 		if (WIFSTOPPED(status)) {
 		    sudo_debug(8, "command stopped, signal %d",
 			WSTOPSIG(status));
-		} else if (WIFSIGNALED(status)) {
-		    sudo_debug(8, "command killed, signal %d",
-			WTERMSIG(status));
 		} else {
-		    sudo_debug(8, "command exited: %d", WEXITSTATUS(status));
+		    if (WIFSIGNALED(status))
+			sudo_debug(8, "command killed, signal %d",
+			    WTERMSIG(status));
+		    else
+			sudo_debug(8, "command exited: %d",
+			    WEXITSTATUS(status));
 		    alive = FALSE;
 		}
 		/* Send wait status unless we previously sent errno. */
@@ -926,7 +928,7 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	    error(1, "select failed");
 	}
 
-	if (FD_ISSET(errpipe[0], fdsr)) {
+	if (errpipe[0] != -1 && FD_ISSET(errpipe[0], fdsr)) {
 	    /* read errno or EOF from command pipe */
 	    n = read(errpipe[0], &cstat, sizeof(cstat));
 	    if (n == -1) {
