@@ -95,8 +95,8 @@ SHELL = /bin/sh
 
 AUTH_OBJS = sudo_auth.lo @AUTH_OBJS@
 
-LIBSUDOERS_OBJS = alias.lo alloc.lo atobool.lo defaults.lo gram.lo list.lo \
-		  match.lo pwutil.lo timestr.lo toke.lo redblack.lo \
+LIBSUDOERS_OBJS = alias.lo alloc.lo atobool.lo audit.lo defaults.lo gram.lo \
+		  list.lo match.lo pwutil.lo timestr.lo toke.lo redblack.lo \
 		  zero_bytes.lo @NONUNIX_GROUPS_IMPL@
 
 SUDOERS_OBJS = $(AUTH_OBJS) boottime.lo check.lo fmt_string.lo \
@@ -211,6 +211,10 @@ fmt_string.lo: $(top_srcdir)/src/fmt_string.c $(SUDODEP)
 list.lo: $(top_srcdir)/src/list.c $(SUDODEP)
 lbuf.lo: $(top_srcdir)/src/lbuf.c $(SUDODEP)
 zero_bytes.lo: $(top_srcdir)/src/zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
+
+# Upper level audit dependencies (XXX - move into sudoers?)
+audit.lo: $(top_srcdir)/src/audit.c $(SUDODEP)
+bsm_audit.lo: $(top_srcdir)/src/bsm_audit.c $(SUDODEP) $(top_srcdir)/src/bsm_audit.h
 
 # Auth dependencies
 sudo_auth.lo: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)

@@ -221,8 +221,8 @@ dnl
 AC_ARG_WITH(bsm-audit, [AS_HELP_STRING([--with-bsm-audit], [enable BSM audit support])],
 [case $with_bsm_audit in
     yes)	AC_DEFINE(HAVE_BSM_AUDIT)
-		SUDO_LIBS="${SUDO_LIBS} -lbsm"
-		SUDO_OBJS="${SUDO_OBJS} bsm_audit.o"
+		SUDOERS_LIBS="${SUDOERS_LIBS} -lbsm"
+		SUDOERS_OBJS="${SUDOERS_OBJS} bsm_audit.o"
 		;;
     no)		;;
     *)		AC_MSG_ERROR(["--with-bsm-audit does not take an argument."])

@@ -153,8 +153,9 @@ static char *runas_user;
 static char *runas_group;
 static struct sudo_nss_list *snl;
 
-static int NewArgc;
-static char **NewArgv;
+/* XXX - must be extern for audit bits of sudo_auth.c */
+int NewArgc;
+char **NewArgv;
 
 /* error.c */
 extern sigjmp_buf error_jmp;
@@ -396,7 +397,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     if (def_requiretty) {
 	int fd = open(_PATH_TTY, O_RDWR|O_NOCTTY);
 	if (fd == -1) {
-	    //audit_failure(NewArgv, "no tty");
+	    audit_failure(NewArgv, "no tty");
 	    warningx("sorry, you must have a tty to run sudo");
 	    goto done;
 	} else
@@ -440,7 +441,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     /* If the user was not allowed to run the command we are done. */
     if (!ISSET(validated, VALIDATE_OK)) {
 	if (ISSET(validated, FLAG_NO_USER | FLAG_NO_HOST)) {
-	    //audit_failure(NewArgv, "No user or host");
+	    audit_failure(NewArgv, "No user or host");
 	    log_denial(validated, 1);
 	} else {
 	    if (def_path_info) {
@@ -461,18 +462,18 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
 		/* Just tell the user they are not allowed to run foo. */
 		log_denial(validated, 1);
 	    }
-	    //audit_failure(NewArgv, "validation failure");
+	    audit_failure(NewArgv, "validation failure");
 	}
 	goto done;
     }
 
     /* Finally tell the user if the command did not exist. */
     if (cmnd_status == NOT_FOUND_DOT) {
-	//audit_failure(NewArgv, "command in current directory");
+	audit_failure(NewArgv, "command in current directory");
 	warningx("ignoring `%s' found in '.'\nUse `sudo ./%s' if this is the `%s' you wish to run.", user_cmnd, user_cmnd, user_cmnd);
 	goto done;
     } else if (cmnd_status == NOT_FOUND) {
-	//audit_failure(NewArgv, "%s: command not found", user_cmnd);
+	audit_failure(NewArgv, "%s: command not found", user_cmnd);
 	warningx("%s: command not found", user_cmnd);
 	goto done;
     }
@@ -580,7 +581,7 @@ sudoers_policy_main(int argc, char * const argv[], int pwflag, char *env_add[],
     }
 
     /* Must audit before uid change. */
-    //audit_success(NewArgv); /* XXX */
+    audit_success(NewArgv);
 
     *command_infop = command_info;
 
@@ -1025,7 +1026,7 @@ set_runaspw(char *user)
 	    runas_pw = sudo_fakepwnam(user, runas_gr ? runas_gr->gr_gid : 0);
     } else {
 	if ((runas_pw = sudo_getpwnam(user)) == NULL) {
-	    //audit_failure(NewArgv, "unknown user: %s", user);
+	    audit_failure(NewArgv, "unknown user: %s", user);
 	    log_error(NO_MAIL|MSG_ONLY, "unknown user: %s", user);
 	}
     }

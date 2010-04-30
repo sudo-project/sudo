@@ -2278,8 +2278,8 @@ if test "${with_bsm_audit+set}" = set; then
 #define HAVE_BSM_AUDIT 1
 _ACEOF
 
-		SUDO_LIBS="${SUDO_LIBS} -lbsm"
-		SUDO_OBJS="${SUDO_OBJS} bsm_audit.o"
+		SUDOERS_LIBS="${SUDOERS_LIBS} -lbsm"
+		SUDOERS_OBJS="${SUDOERS_OBJS} bsm_audit.lo"
 		;;
     no)		;;
     *)		{ { echo "$as_me:$LINENO: error: \"--with-bsm-audit does not take an argument.\"" >&5

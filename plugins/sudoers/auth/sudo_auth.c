@@ -93,9 +93,7 @@ verify_user(struct passwd *pw, char *prompt)
     char *p;
     sudo_auth *auth;
     sigaction_t sa, osa;
-#ifdef HAVE_BSM_AUDIT
-    extern char **NewArgv;
-#endif
+    extern char **NewArgv; /* XXX */
 
     /* Enable suspend during password entry. */
     sigemptyset(&sa.sa_mask);
@@ -105,9 +103,7 @@ verify_user(struct passwd *pw, char *prompt)
 
     /* Make sure we have at least one auth method. */
     if (auth_switch[0].name == NULL) {
-#ifdef HAVE_BSM_AUDIT
 	audit_failure(NewArgv, "no authentication methods");
-#endif
     	log_error(0, "%s  %s %s",
 	    "There are no authentication methods compiled into sudo!",
 	    "If you want to turn off authentication, use the",
@@ -129,9 +125,7 @@ verify_user(struct passwd *pw, char *prompt)
 	    if (status == AUTH_FAILURE)
 		CLR(auth->flags, FLAG_CONFIGURED);
 	    else if (status == AUTH_FATAL) {	/* XXX log */
-#ifdef HAVE_BSM_AUDIT
 		audit_failure(NewArgv, "authentication failure");
-#endif
 		return -1;		/* assume error msg already printed */
 	    }
 
@@ -151,9 +145,7 @@ verify_user(struct passwd *pw, char *prompt)
 		if (status == AUTH_FAILURE)
 		    CLR(auth->flags, FLAG_CONFIGURED);
 		else if (status == AUTH_FATAL) {/* XXX log */
-#ifdef HAVE_BSM_AUDIT
 		    audit_failure(NewArgv, "authentication failure");
-#endif
 		    return -1;		/* assume error msg already printed */
 		}
 
@@ -203,9 +195,7 @@ cleanup:
 
 	    status = (auth->cleanup)(pw, auth);
 	    if (status == AUTH_FATAL) {	/* XXX log */
-#ifdef HAVE_BSM_AUDIT
 		audit_failure(NewArgv, "authentication failure");
-#endif
 		return -1;		/* assume error msg already printed */
 	    }
 
@@ -230,16 +220,12 @@ cleanup:
 		    def_passwd_tries - counter,
 		    (def_passwd_tries - counter == 1) ? "" : "s");
 	    }
-#ifdef HAVE_BSM_AUDIT
 	    audit_failure(NewArgv, "authentication failure");
-#endif
 	    rval = FALSE;
 	    break;
 	case AUTH_FATAL:
 	default:
-#ifdef HAVE_BSM_AUDIT
 	    audit_failure(NewArgv, "authentication failure");
-#endif
 	    rval = -1;
 	    break;
     }

@@ -108,8 +108,6 @@ sesh: sesh.o
 aix.o: $(srcdir)/aix.c $(top_builddir)/config.h $(incdir)/compat.h
 alloc.o: $(srcdir)/alloc.c $(SUDODEP)
 atobool.o: $(srcdir)/atobool.c $(SUDODEP)
-audit.o: $(srcdir)/audit.c $(SUDODEP)
-bsm_audit.o: $(srcdir)/bsm_audit.c $(SUDODEP) bsm_audit.h
 conversation.o: $(srcdir)/conversation.c $(SUDODEP)
 error.o: $(srcdir)/error.c $(incdir)/compat.h $(incdir)/error.h $(top_builddir)/config.h
 fileops.o: $(srcdir)/fileops.c $(SUDODEP)
