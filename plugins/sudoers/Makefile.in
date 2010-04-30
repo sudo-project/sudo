@@ -31,6 +31,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
 
+# For out of tree builds
+VPATH = $(srcdir):$(srcdir)/auth:$(top_srcdir)/src
+
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@

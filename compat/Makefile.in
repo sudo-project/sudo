@@ -26,6 +26,9 @@ top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
 compat = $(top_srcdir)/compat
 
+# For out of tree builds
+VPATH = $(srcdir)
+
 # Compiler & tools to use
 CC = @CC@
 LIBTOOL = @LIBTOOL@
