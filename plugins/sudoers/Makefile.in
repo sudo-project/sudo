@@ -115,6 +115,9 @@ REPLAY_OBJS = getdate.o sudoreplay.o term.o error.o
 
 TEST_OBJS = interfaces.o testsudoers.o tsgetgrpw.o error.o
 
+LINKS = alloc.c atobool.c audit.c error.c fileops.c fmt_string.c lbuf.c \
+	list.c term.c zero_bytes.c
+
 VERSION = @PACKAGE_VERSION@
 
 SUDODEP = $(srcdir)/sudoers.h $(incdir)/compat.h \
@@ -304,7 +307,7 @@ clean:
 mostlyclean: clean
 
 distclean: clean
-	-rm -rf Makefile sudoers.lo .libs
+	-rm -rf Makefile sudoers.lo .libs $(LINKS)
 
 clobber: distclean
 
