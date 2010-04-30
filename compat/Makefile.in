@@ -54,6 +54,9 @@ all: libreplace.la
 
 .SUFFIXES: .o .c .h .lo
 
+.c.o:
+	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
+
 .c.lo:
 	$(LIBTOOL) --mode=compile $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(DEFS) $<
 
