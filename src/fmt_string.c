@@ -39,7 +39,7 @@
 # endif
 #endif /* HAVE_STRING_H */
 
-#include "sudo.h"
+#include <compat.h>
 
 /*
  * Allocate storage for a name=value string and return it.

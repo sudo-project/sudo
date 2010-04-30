@@ -210,7 +210,7 @@ plugin_error.lo: $(srcdir)/plugin_error.c $(incdir)/error.h $(incdir)/compat.h $
 alloc.lo: $(top_srcdir)/src/alloc.c $(SUDODEP)
 atobool.lo: $(top_srcdir)/src/atobool.c $(SUDODEP)
 fileops.lo: $(top_srcdir)/src/fileops.c $(SUDODEP)
-fmt_string.lo: $(top_srcdir)/src/fmt_string.c $(SUDODEP)
+fmt_string.lo: $(top_srcdir)/src/fmt_string.c $(incdir)/compat.h $(top_builddir)/config.h
 list.lo: $(top_srcdir)/src/list.c $(SUDODEP)
 lbuf.lo: $(top_srcdir)/src/lbuf.c $(SUDODEP)
 zero_bytes.lo: $(top_srcdir)/src/zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h

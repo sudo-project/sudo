@@ -114,7 +114,7 @@ atobool.o: $(srcdir)/atobool.c $(SUDODEP)
 conversation.o: $(srcdir)/conversation.c $(SUDODEP)
 error.o: $(srcdir)/error.c $(incdir)/compat.h $(incdir)/error.h $(top_builddir)/config.h
 fileops.o: $(srcdir)/fileops.c $(SUDODEP)
-fmt_string.o: $(srcdir)/fmt_string.c $(SUDODEP)
+fmt_string.o: $(srcdir)/fmt_string.c $(incdir)/compat.h $(top_builddir)/config.h
 lbuf.o: $(srcdir)/lbuf.c $(SUDODEP)
 list.o: $(srcdir)/list.c $(SUDODEP)
 load_plugins.o: $(srcdir)/load_plugins.c $(SUDODEP)
