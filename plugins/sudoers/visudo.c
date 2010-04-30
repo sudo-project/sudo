@@ -931,7 +931,7 @@ get_hostname(void)
     }
 }
 
-static void
+static int
 alias_remove_recursive(char *name, int type, int strict, int quiet)
 {
     struct member *m;
