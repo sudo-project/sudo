@@ -32,7 +32,8 @@ top_srcdir = @top_srcdir@
 incdir = $(top_srcdir)/include
 
 # For out of tree builds
-VPATH = $(srcdir):$(srcdir)/auth:$(top_srcdir)/src
+VPATH = $(srcdir):$(srcdir)/auth
+LN_S = @LN_S@
 
 # Compiler & tools to use
 CC = @CC@
@@ -207,17 +208,36 @@ vasgroups.lo: $(srcdir)/vasgroups.c $(srcdir)/nonunix.h $(SUDODEP)
 plugin_error.lo: $(srcdir)/plugin_error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
 
 # Upper level sudo dependencies
-alloc.lo: $(top_srcdir)/src/alloc.c $(SUDODEP)
-atobool.lo: $(top_srcdir)/src/atobool.c $(SUDODEP)
-fileops.lo: $(top_srcdir)/src/fileops.c $(SUDODEP)
-fmt_string.lo: $(top_srcdir)/src/fmt_string.c $(incdir)/compat.h $(top_builddir)/config.h
-list.lo: $(top_srcdir)/src/list.c $(SUDODEP)
-lbuf.lo: $(top_srcdir)/src/lbuf.c $(SUDODEP)
-zero_bytes.lo: $(top_srcdir)/src/zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
+# We need to use links because of differences in VPATH semantics
+alloc.c: $(top_srcdir)/src/alloc.c
+	@$(LN_S) -f $(top_srcdir)/src/$@ $@
+alloc.lo: alloc.c $(SUDODEP)
+atobool.c: $(top_srcdir)/src/atobool.c
+	@$(LN_S) -f $(top_srcdir)/src/$@ $@
+atobool.lo: atobool.c $(SUDODEP)
+fileops.c: $(top_srcdir)/src/fileops.c
+	@$(LN_S) -f $(top_srcdir)/src/$@ $@
+fileops.lo: fileops.c $(SUDODEP)
+fmt_string.c: $(top_srcdir)/src/fmt_string.c
+	@$(LN_S) -f $(top_srcdir)/src/$@ $@
+fmt_string.lo: fmt_string.c $(incdir)/compat.h $(top_builddir)/config.h
+list.c: $(top_srcdir)/src/list.c
+	@$(LN_S) -f $(top_srcdir)/src/$@ $@
+list.lo: list.c $(SUDODEP)
+lbuf.c: $(top_srcdir)/src/lbuf.c
+	@$(LN_S) -f $(top_srcdir)/src/$@ $@
+lbuf.lo: lbuf.c $(SUDODEP)
+zero_bytes.c: $(top_srcdir)/src/zero_bytes.c
+	@$(LN_S) -f $(top_srcdir)/src/$@ $@
+zero_bytes.lo: zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
 
-# Upper level audit dependencies (XXX - move into sudoers?)
-audit.lo: $(top_srcdir)/src/audit.c $(SUDODEP)
-bsm_audit.lo: $(top_srcdir)/src/bsm_audit.c $(SUDODEP) $(top_srcdir)/src/bsm_audit.h
+# Upper level audit dependencies (XXX - move into sudoers plugin dir?)
+audit.c: $(top_srcdir)/src/audit.c
+	@$(LN_S) -f $(top_srcdir)/src/$@ $@
+audit.lo: audit.c $(SUDODEP)
+bsm_audit.c: $(top_srcdir)/src/bsm_audit.c
+	@$(LN_S) -f $(top_srcdir)/src/$@ $@
+bsm_audit.lo: bsm_audit.c $(SUDODEP) $(top_srcdir)/src/bsm_audit.h
 
 # Auth dependencies
 sudo_auth.lo: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
@@ -237,7 +257,9 @@ securid5.lo: $(authdir)/securid5.c $(AUTHDEP)
 sia.lo: $(authdir)/sia.c $(AUTHDEP)
 
 # Command dependencies (sudoreplay, testsudoers, visudo)
-error.o: $(top_srcdir)/src/error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
+error.c: $(top_srcdir)/src/error.c
+	@$(LN_S) -f $(top_srcdir)/src/$@ $@
+error.o: error.c $(incdir)/error.h $(incdir)/compat.h $(top_builddir)/config.h
 fileops.o: fileops.lo
 find_path.o: find_path.lo
 getdate.o: $(srcdir)/getdate.c $(incdir)/compat.h $(top_builddir)/config.h
@@ -245,7 +267,9 @@ gettime.o: gettime.lo
 goodpath.o: goodpath.lo
 interfaces.o: interfaces.lo
 sudoreplay.o: $(srcdir)/sudoreplay.c $(incdir)/alloc.h $(incdir)/compat.h $(incdir)/error.h $(incdir)/missing.h $(top_builddir)/config.h
-term.o: $(top_srcdir)/src/term.c $(incdir)/compat.h $(top_builddir)/config.h
+term.c: $(top_srcdir)/src/term.c
+	@$(LN_S) -f $(top_srcdir)/src/$@ $@
+term.o: term.c $(incdir)/compat.h $(top_builddir)/config.h
 testsudoers.o: $(srcdir)/testsudoers.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/interfaces.h $(devdir)/gram.h
 tsgetgrpw.o: $(srcdir)/tsgetgrpw.c $(SUDODEP)
 visudo.o: $(srcdir)/visudo.c $(SUDODEP) $(devdir)/gram.h
