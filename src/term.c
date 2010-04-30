@@ -43,7 +43,7 @@
 # include <termio.h>
 #endif /* HAVE_TERMIOS_H */
 
-#include "compat.h"
+#include <compat.h>
 
 #ifndef TCSASOFT
 # define TCSASOFT	0

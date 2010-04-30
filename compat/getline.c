@@ -36,7 +36,7 @@
 #endif /* HAVE_STRING_H */
 #include <limits.h>
 
-#include "compat.h"
+#include <compat.h>
 
 #ifndef LINE_MAX
 # define LINE_MAX 2048

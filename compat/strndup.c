@@ -36,7 +36,7 @@
 # include <malloc.h>
 #endif /* HAVE_MALLOC_H && !STDC_HEADERS */
 
-#include "compat.h"
+#include <compat.h>
 
 char *
 strndup(const char *src, size_t maxlen)

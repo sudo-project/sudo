@@ -41,8 +41,8 @@
 # include <sys/sysctl.h>
 #endif
 
-#include "compat.h"
-#include "missing.h"
+#include <compat.h>
+#include <missing.h>
 
 /*
  * Fill in a struct timeval with the time the system booted.

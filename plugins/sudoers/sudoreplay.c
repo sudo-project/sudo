@@ -83,10 +83,10 @@
 
 #include <pathnames.h>
 
-#include "compat.h"
-#include "alloc.h"
-#include "error.h"
-#include "missing.h"
+#include <compat.h>
+#include <alloc.h>
+#include <error.h>
+#include <missing.h>
 
 /* For getopt(3) */
 extern char *optarg;

@@ -38,7 +38,7 @@
 # include <termio.h>
 #endif
 
-#include "compat.h"
+#include <compat.h>
 
 #if !defined(TIOCGSIZE) && defined(TIOCGWINSZ)
 # define TIOCGSIZE	TIOCGWINSZ

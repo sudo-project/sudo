@@ -40,7 +40,6 @@
 
 #include <vas.h>
 
-#include "compat.h"
 #include "logging.h"
 #include "nonunix.h"
 #include "parse.h"

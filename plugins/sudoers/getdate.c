@@ -51,7 +51,7 @@
 #endif
 #include <ctype.h>
 
-#include "compat.h"
+#include <compat.h>
 
 
 #define EPOCH		1970

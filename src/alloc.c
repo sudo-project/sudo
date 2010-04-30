@@ -46,9 +46,9 @@
 # include <inttypes.h>
 #endif
 
-#include "compat.h"
-#include "alloc.h"
-#include "error.h"
+#include <compat.h>
+#include <alloc.h>
+#include <error.h>
 
 /*
  * If there is no SIZE_MAX or SIZE_T_MAX we have to assume that size_t

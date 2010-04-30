@@ -49,8 +49,8 @@
 #include <stdarg.h>
 
 #include <sudo_plugin.h>
-#include "compat.h"
-#include "missing.h"
+#include <compat.h>
+#include <missing.h>
 
 /*
  * Sample plugin module that allows any user who knows the password

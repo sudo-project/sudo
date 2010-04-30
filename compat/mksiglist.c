@@ -28,7 +28,7 @@
 #endif /* STDC_HEADERS */
 #include <signal.h>
 
-#include "compat.h"
+#include <compat.h>
 
 #if !defined(NSIG)
 # if defined(_NSIG)

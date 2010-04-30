@@ -28,7 +28,7 @@
 #endif /* STDC_HEADERS */
 #include <time.h>
 
-#include "compat.h"
+#include <compat.h>
 
 char *get_timestr(time_t, int);
 

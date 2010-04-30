@@ -29,7 +29,7 @@
 #endif
 #include <errno.h>
 
-#include "compat.h"
+#include <compat.h>
 
 int
 nanosleep(const struct timespec *ts, struct timespec *rts)

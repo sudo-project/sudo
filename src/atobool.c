@@ -39,8 +39,8 @@
 # endif
 #endif /* HAVE_STRING_H */
 
-#include "compat.h"
-#include "missing.h"
+#include <compat.h>
+#include <missing.h>
 
 int
 atobool(const char *str)

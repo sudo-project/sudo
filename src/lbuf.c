@@ -47,11 +47,11 @@
 # include <termio.h>
 #endif
 
-#include "compat.h"
-#include "alloc.h"
-#include "error.h"
-#include "missing.h"
-#include "lbuf.h"
+#include <compat.h>
+#include <alloc.h>
+#include <error.h>
+#include <missing.h>
+#include <lbuf.h>
 
 void
 lbuf_init(struct lbuf *lbuf, int (*output)(const char *),
