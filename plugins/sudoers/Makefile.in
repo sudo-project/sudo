@@ -183,8 +183,9 @@ $(devdir)/getdate.c: $(srcdir)/getdate.y
 @DEV@	perl $(srcdir)/mkdefaults -o def_data $(srcdir)/def_data.in
 
 # Sudoers dependencies
-sudoers.lo: $(srcdir)/sudoers.c $(SUDODEP) $(srcdir)/interfaces.h
 alias.lo: $(srcdir)/alias.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(srcdir)/redblack.h
+audit.lo: audit.c $(SUDODEP)
+bsm_audit.lo: bsm_audit.c $(SUDODEP) $(srcdir)/bsm_audit.h
 boottime.lo: $(srcdir)/boottime.c $(top_builddir)/config.h
 check.lo: $(srcdir)/check.c $(SUDODEP)
 defaults.lo: $(srcdir)/defaults.c $(SUDODEP) $(srcdir)/def_data.c $(authdir)/sudo_auth.h $(devdir)/gram.h
@@ -204,6 +205,7 @@ pwutil.lo: $(srcdir)/pwutil.c $(SUDODEP)
 redblack.lo: $(srcdir)/redblack.c $(SUDODEP) $(srcdir)/redblack.h
 set_perms.lo: $(srcdir)/set_perms.c $(SUDODEP)
 sudo_nss.lo: $(srcdir)/sudo_nss.c $(SUDODEP)
+sudoers.lo: $(srcdir)/sudoers.c $(SUDODEP) $(srcdir)/interfaces.h
 timestr.lo: $(srcdir)/timestr.c $(incdir)/compat.h $(top_builddir)/config.h
 toke.lo: $(devdir)/toke.c $(SUDODEP) $(srcdir)/parse.h $(incdir)/list.h $(devdir)/gram.h
 tsgetgrpw.lo: $(srcdir)/tsgetgrpw.c $(SUDODEP)
@@ -233,14 +235,6 @@ lbuf.lo: lbuf.c $(SUDODEP)
 zero_bytes.c: $(top_srcdir)/src/zero_bytes.c
 	@$(LN_S) -f $(top_srcdir)/src/$@ $@
 zero_bytes.lo: zero_bytes.c $(incdir)/compat.h $(top_builddir)/config.h
-
-# Upper level audit dependencies (XXX - move into sudoers plugin dir?)
-audit.c: $(top_srcdir)/src/audit.c
-	@$(LN_S) -f $(top_srcdir)/src/$@ $@
-audit.lo: audit.c $(SUDODEP)
-bsm_audit.c: $(top_srcdir)/src/bsm_audit.c
-	@$(LN_S) -f $(top_srcdir)/src/$@ $@
-bsm_audit.lo: bsm_audit.c $(SUDODEP) $(top_srcdir)/src/bsm_audit.h
 
 # Auth dependencies
 sudo_auth.lo: $(authdir)/sudo_auth.c $(AUTHDEP) $(INSDEP)
