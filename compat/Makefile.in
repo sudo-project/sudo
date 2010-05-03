@@ -91,8 +91,6 @@ nanosleep.lo: $(compat)/nanosleep.c $(incdir)/compat.h $(top_builddir)/config.h
 sigaction.lo: $(compat)/sigaction.c $(incdir)/compat.h $(incdir)/compat.h
 snprintf.lo: $(compat)/snprintf.c $(incdir)/compat.h $(top_builddir)/config.h
 strcasecmp.lo: $(compat)/strcasecmp.c $(incdir)/compat.h $(top_builddir)/config.h
-strdup.lo: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
-strndup.lo: $(compat)/strdup.c $(incdir)/compat.h $(top_builddir)/config.h
 strerror.lo: $(compat)/strerror.c $(incdir)/compat.h $(top_builddir)/config.h
 strlcat.lo: $(compat)/strlcat.c $(incdir)/compat.h $(top_builddir)/config.h
 strlcpy.lo: $(compat)/strlcpy.c $(incdir)/compat.h $(top_builddir)/config.h
