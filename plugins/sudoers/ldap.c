@@ -940,60 +940,70 @@ sudo_ldap_read_config(void)
 	ldap_conf.bind_timelimit *= 1000;	/* convert to ms */
 
     if (ldap_conf.debug > 1) {
-	fprintf(stderr, "LDAP Config Summary\n");
-	fprintf(stderr, "===================\n");
-	if (ldap_conf.uri) {
-	    fprintf(stderr, "uri              %s\n", ldap_conf.uri);
-	} else {
-	    fprintf(stderr, "host             %s\n", ldap_conf.host ?
-		ldap_conf.host : "(NONE)");
-	    fprintf(stderr, "port             %d\n", ldap_conf.port);
-	}
-	fprintf(stderr, "ldap_version     %d\n", ldap_conf.version);
+	char num[12];
 
-	fprintf(stderr, "sudoers_base     %s\n", ldap_conf.base ?
-	    ldap_conf.base : "(NONE) <---Sudo will ignore ldap)");
-	fprintf(stderr, "binddn           %s\n", ldap_conf.binddn ?
-	    ldap_conf.binddn : "(anonymous)");
-	fprintf(stderr, "bindpw           %s\n", ldap_conf.bindpw ?
-	    ldap_conf.bindpw : "(anonymous)");
-	if (ldap_conf.bind_timelimit > 0)
-	    fprintf(stderr, "bind_timelimit   %d\n", ldap_conf.bind_timelimit);
-	if (ldap_conf.timelimit > 0)
-	    fprintf(stderr, "timelimit        %d\n", ldap_conf.timelimit);
-	fprintf(stderr, "ssl              %s\n", ldap_conf.ssl ?
-	    ldap_conf.ssl : "(no)");
+	print_error(1, "LDAP Config Summary\n");
+	print_error(1, "===================\n");
+	if (ldap_conf.uri) {
+	    print_error(3, "uri              ", ldap_conf.uri, "\n");
+	} else {
+	    print_error(3, "host             ", ldap_conf.host ?
+		ldap_conf.host : "(NONE)", "\n");
+	    snprintf(num, sizeof(num), "%d", ldap_conf.port);
+	    print_error(3, "port             ", num, "\n");
+	}
+	snprintf(num, sizeof(num), "%d", ldap_conf.version);
+	print_error(3, "ldap_version     ", num, "\n");
+
+	print_error(3, "sudoers_base     ", ldap_conf.base ?
+	    ldap_conf.base : "(NONE) <---Sudo will ignore ldap)", "\n");
+	print_error(3, "binddn           ", ldap_conf.binddn ?
+	    ldap_conf.binddn : "(anonymous)", "\n");
+	print_error(3, "bindpw           ", ldap_conf.bindpw ?
+	    ldap_conf.bindpw : "(anonymous)", "\n");
+	if (ldap_conf.bind_timelimit > 0) {
+	    snprintf(num, sizeof(num), "%d", ldap_conf.bind_timelimit);
+	    print_error(3, "bind_timelimit   ", num, "\n");
+	}
+	if (ldap_conf.timelimit > 0) {
+	    snprintf(num, sizeof(num), "%d", ldap_conf.timelimit);
+	    print_error(3, "timelimit        ", num, "\n");
+	}
+	print_error(3, "ssl              ", ldap_conf.ssl ?
+	    ldap_conf.ssl : "(no)", "\n");
 	if (ldap_conf.tls_checkpeer != -1)
-	    fprintf(stderr, "tls_checkpeer    %s\n", ldap_conf.tls_checkpeer ?
-		"(yes)" : "(no)");
+	    print_error(3, "tls_checkpeer    ", ldap_conf.tls_checkpeer ?
+		"(yes)" : "(no)", "\n");
 	if (ldap_conf.tls_cacertfile != NULL)
-	    fprintf(stderr, "tls_cacertfile   %s\n", ldap_conf.tls_cacertfile);
+	    print_error(3, "tls_cacertfile   ", ldap_conf.tls_cacertfile, "\n");
 	if (ldap_conf.tls_cacertdir != NULL)
-	    fprintf(stderr, "tls_cacertdir    %s\n", ldap_conf.tls_cacertdir);
+	    print_error(3, "tls_cacertdir    ", ldap_conf.tls_cacertdir, "\n");
 	if (ldap_conf.tls_random_file != NULL)
-	    fprintf(stderr, "tls_random_file  %s\n", ldap_conf.tls_random_file);
+	    print_error(3, "tls_random_file  ", ldap_conf.tls_random_file, "\n");
 	if (ldap_conf.tls_cipher_suite != NULL)
-	    fprintf(stderr, "tls_cipher_suite %s\n", ldap_conf.tls_cipher_suite);
+	    print_error(3, "tls_cipher_suite ", ldap_conf.tls_cipher_suite, "\n");
 	if (ldap_conf.tls_certfile != NULL)
-	    fprintf(stderr, "tls_certfile     %s\n", ldap_conf.tls_certfile);
+	    print_error(3, "tls_certfile     ", ldap_conf.tls_certfile, "\n");
 	if (ldap_conf.tls_keyfile != NULL)
-	    fprintf(stderr, "tls_keyfile      %s\n", ldap_conf.tls_keyfile);
+	    print_error(3, "tls_keyfile      ", ldap_conf.tls_keyfile, "\n");
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
 	if (ldap_conf.use_sasl != -1) {
-	    fprintf(stderr, "use_sasl         %s\n",
-		ldap_conf.use_sasl ? "yes" : "no");
-	    fprintf(stderr, "sasl_auth_id     %s\n", ldap_conf.sasl_auth_id ?
-		ldap_conf.sasl_auth_id : "(NONE)");
-	    fprintf(stderr, "rootuse_sasl     %d\n", ldap_conf.rootuse_sasl);
-	    fprintf(stderr, "rootsasl_auth_id %s\n", ldap_conf.rootsasl_auth_id ?
-		ldap_conf.rootsasl_auth_id : "(NONE)");
-	    fprintf(stderr, "sasl_secprops    %s\n", ldap_conf.sasl_secprops ?
-		ldap_conf.sasl_secprops : "(NONE)");
-	    fprintf(stderr, "krb5_ccname      %s\n", ldap_conf.krb5_ccname ?
-		ldap_conf.krb5_ccname : "(NONE)");
+	    print_error(3, "use_sasl         ",
+		ldap_conf.use_sasl ? "yes" : "no", "\n");
+	    print_error(3, "sasl_auth_id     ", ldap_conf.sasl_auth_id ?
+		ldap_conf.sasl_auth_id : "(NONE)", "\n");
+	    print_error(3, "rootuse_sasl     ",
+		ldap_conf.rootuse_sasl == TRUE ?  "true" :
+		ldap_conf.rootuse_sasl == FALSE ? "false" : "(NONE)", "\n");
+	    print_error(3, "rootsasl_auth_id ", ldap_conf.rootsasl_auth_id ?
+		ldap_conf.rootsasl_auth_id : "(NONE)", "\n");
+	    print_error(3, "sasl_secprops    ", ldap_conf.sasl_secprops ?
+		ldap_conf.sasl_secprops : "(NONE)", "\n");
+	    print_error(3, "krb5_ccname      ", ldap_conf.krb5_ccname ?
+		ldap_conf.krb5_ccname : "(NONE)", "\n");
 	}
 #endif
-	fprintf(stderr, "===================\n");
+	print_error(1, "===================\n");
     }
     if (!ldap_conf.base)
 	return(FALSE);		/* if no base is defined, ignore LDAP */
