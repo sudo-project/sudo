@@ -275,23 +275,24 @@ log_denial(int status, int inform_user)
 
     /* Inform the user if they failed to authenticate.  */
     if (inform_user) {
-	if (ISSET(status, FLAG_NO_USER))
-	    (void) fprintf(stderr, "%s is not in the sudoers file.  %s",
-		user_name, "This incident will be reported.\n");
-	else if (ISSET(status, FLAG_NO_HOST))
-	    (void) fprintf(stderr, "%s is not allowed to run sudo on %s.  %s",
-		user_name, user_shost, "This incident will be reported.\n");
-	else if (ISSET(status, FLAG_NO_CHECK))
-	    (void) fprintf(stderr, "Sorry, user %s may not run sudo on %s.\n",
-		user_name, user_shost);
-	else
-	    (void) fprintf(stderr,
-		"Sorry, user %s is not allowed to execute '%s%s%s' as %s%s%s on %s.\n",
-		user_name, user_cmnd, user_args ? " " : "",
-		user_args ? user_args : "",
-		list_pw ? list_pw->pw_name : runas_pw ?
-		runas_pw->pw_name : user_name, runas_gr ? ":" : "",
-		runas_gr ? runas_gr->gr_name : "", user_host);
+	if (ISSET(status, FLAG_NO_USER)) {
+	    print_error(2, user_name, " is not in the sudoers file.  "
+		"This incident will be reported.\n");
+	} else if (ISSET(status, FLAG_NO_HOST)) {
+	    print_error(4, user_name, " is not allowed to run sudo on ",
+		user_shost, ".  This incident will be reported.\n");
+	} else if (ISSET(status, FLAG_NO_CHECK)) {
+	    print_error(5, "Sorry, user ", user_name, " may not run sudo on ",
+		user_shost, ".\n");
+	} else {
+	    print_error(13, "Sorry, user ", user_name,
+		" is not allowed to execute '", user_cmnd,
+		user_args ? " " : "", user_args ? user_args : "", "' ",
+		list_pw ? list_pw->pw_name :
+		runas_pw ? runas_pw->pw_name : user_name,
+		runas_gr ? ":" : "", runas_gr ? runas_gr->gr_name : "", " on ",
+		user_shost, ".\n");
+	}
     }
 
     /*

@@ -36,41 +36,44 @@ extern sudo_conv_t sudo_conv;
 void
 error(int eval, const char *fmt, ...)
 {
-	va_list ap;
-	va_start(ap, fmt);
-	_warning(1, fmt, ap);
-	va_end(ap);
-	cleanup(0);
-	siglongjmp(error_jmp, eval);
+    va_list ap;
+
+    va_start(ap, fmt);
+    _warning(1, fmt, ap);
+    va_end(ap);
+    cleanup(0);
+    siglongjmp(error_jmp, eval);
 }
 
 void
 errorx(int eval, const char *fmt, ...)
 {
-	va_list ap;
-	va_start(ap, fmt);
-	_warning(0, fmt, ap);
-	va_end(ap);
-	cleanup(0);
-	siglongjmp(error_jmp, eval);
+    va_list ap;
+
+    va_start(ap, fmt);
+    _warning(0, fmt, ap);
+    va_end(ap);
+    cleanup(0);
+    siglongjmp(error_jmp, eval);
 }
 
 void
 warning(const char *fmt, ...)
 {
-	va_list ap;
-	va_start(ap, fmt);
-	_warning(1, fmt, ap);
-	va_end(ap);
+    va_list ap;
+
+    va_start(ap, fmt);
+    _warning(1, fmt, ap);
+    va_end(ap);
 }
 
 void
 warningx(const char *fmt, ...)
 {
-	va_list ap;
-	va_start(ap, fmt);
-	_warning(0, fmt, ap);
-	va_end(ap);
+    va_list ap;
+    va_start(ap, fmt);
+    _warning(0, fmt, ap);
+    va_end(ap);
 }
 
 static void
@@ -101,5 +104,30 @@ _warning(int use_errno, const char *fmt, va_list ap)
     msg[nmsgs - 1].msg_type = SUDO_CONV_ERROR_MSG;
     msg[nmsgs - 1].msg = "\n";
     memset(&repl, 0, sizeof(repl));
+    sudo_conv(nmsgs, msg, repl);
+}
+
+void
+print_error(int nmsgs, ...)
+{
+    struct sudo_conv_message *msg;
+    struct sudo_conv_reply *repl;
+    va_list ap;
+    int i;
+
+    if (nmsgs <= 0)
+	return;
+
+    msg = emalloc2(nmsgs, sizeof(*msg));
+    repl = emalloc2(nmsgs, sizeof(*repl));
+    memset(repl, 0, nmsgs * sizeof(*repl));
+
+    va_start(ap, nmsgs);
+    for (i = 0; i < nmsgs; i++) {
+	msg[i].msg_type = SUDO_CONV_ERROR_MSG;
+	msg[i].msg = va_arg(ap, char *);
+    }
+    va_end(ap);
+
     sudo_conv(nmsgs, msg, repl);
 }
