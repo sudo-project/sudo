@@ -197,7 +197,7 @@ check_foreground(void)
 {
     foreground = tcgetpgrp(script_fds[SFD_USERTTY]) == ppgrp;
     if (foreground && !tty_initialized) {
-	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], ttyout)) {
+	if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE])) {
 	    tty_initialized = 1;
 	    sync_ttysize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
 	}
@@ -476,7 +476,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 
 	if (foreground) {
 	    /* Copy terminal attrs from user tty -> pty slave. */
-	    if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE], ttyout)) {
+	    if (term_copy(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE])) {
 		tty_initialized = 1;
 		sync_ttysize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
 	    }

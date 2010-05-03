@@ -176,7 +176,7 @@ void script_setup(uid_t);
 
 /* term.c */
 int term_cbreak(int);
-int term_copy(int, int, int);
+int term_copy(int, int);
 int term_noecho(int);
 int term_raw(int, int, int);
 int term_restore(int, int);

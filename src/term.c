@@ -164,15 +164,12 @@ term_cbreak(int fd)
 }
 
 int
-term_copy(int src, int dst, int opost)
+term_copy(int src, int dst)
 {
     struct termios tt;
 
     if (tcgetattr(src, &tt) != 0)
 	return(0);
-    /* Do not do post-processing unless opost set. */
-    if (!opost)
-	CLR(tt.c_oflag, OPOST);
     /* XXX - add TCSANOW compat define */
     if (tcsetattr(dst, TCSANOW|TCSASOFT, &tt) != 0)
 	return(0);
