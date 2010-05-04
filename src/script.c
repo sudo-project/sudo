@@ -704,12 +704,10 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 
     if (log_io) {
 	/* Flush any remaining output (the plugin already got it) */
-	for (iob = iobufs; iob; iob = iob->next) {
-	    n = fcntl(iob->wfd, F_GETFL, 0);
-	    if (n != -1 && ISSET(n, O_NONBLOCK)) {
-		CLR(n, O_NONBLOCK);
-		(void) fcntl(iob->wfd, F_SETFL, n);
-	    }
+	n = fcntl(script_fds[SFD_USERTTY], F_GETFL, 0);
+	if (n != -1 && ISSET(n, O_NONBLOCK)) {
+	    CLR(n, O_NONBLOCK);
+	    (void) fcntl(script_fds[SFD_USERTTY], F_SETFL, n);
 	}
 	flush_output(iobufs);
 
@@ -1008,11 +1006,13 @@ bad:
 static void
 flush_output(struct io_buffer *iobufs)
 {
-    struct io_buffer *iob, output;
+    struct io_buffer *iob;
     int n;
 
-    /* XXX - really only want to flush output buffers, does it matter? */
+    /* Drain output buffers. */
     for (iob = iobufs; iob; iob = iob->next) {
+	if (iob->rfd == script_fds[SFD_USERTTY])
+	    continue;
 	while (iob->len > iob->off) {
 	    n = write(iob->wfd, iob->buf + iob->off, iob->len - iob->off);
 	    if (n <= 0)
@@ -1021,23 +1021,33 @@ flush_output(struct io_buffer *iobufs)
 	}
     }
 
-    /* Make sure there is no output remaining on the master pty. */
-    /* XXX - pipes too? */
-    for (;;) {
-	n = read(script_fds[SFD_MASTER], output.buf, sizeof(output.buf));
-	if (n <= 0)
-	    break;
-	/* XXX */
-	log_output(output.buf, n);
-	output.off = 0;
-	output.len = n;
-	do {
-	    n = write(script_fds[SFD_USERTTY], output.buf + output.off,
-		output.len - output.off);
-	    if (n <= 0)
+    /* Make sure there is no output remaining on the master pty or in pipes. */
+    for (iob = iobufs; iob; iob = iob->next) {
+	if (iob->rfd == script_fds[SFD_USERTTY])
+	    continue;
+
+	for (;;) {
+	    n = read(iob->rfd, iob->buf + iob->len,
+		sizeof(iob->buf) - iob->len);
+	    if (n <= 0) {
+		if (n == -1 && errno == EINTR)
+		    continue;
 		break;
-	    output.off += n;
-	} while (output.len > output.off);
+	    } 
+	    if (!iob->action(iob->buf + iob->len, n))
+		break;
+	    iob->len += n;
+
+	    do {
+		n = write(iob->wfd, iob->buf + iob->off, iob->len - iob->off);
+		if (n <= 0) {
+		    if (n == -1 && errno == EINTR)
+			continue;
+		    break;
+		}
+		iob->off += n;
+	    } while (iob->len > iob->off);
+	}
     }
 }
 
