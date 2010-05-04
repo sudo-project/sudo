@@ -25,7 +25,7 @@ SUBDIRS = compat src plugins/sample plugins/sudoers doc
 VERSION = @PACKAGE_VERSION@
 
 all install: config.status
-	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@); done
+	for d in $(SUBDIRS); do (cd $$d && $(MAKE) $@) || break; done
 
 ChangeLog:
 	hg log --style=changelog -b default > $@
