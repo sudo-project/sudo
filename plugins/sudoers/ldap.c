@@ -940,70 +940,81 @@ sudo_ldap_read_config(void)
 	ldap_conf.bind_timelimit *= 1000;	/* convert to ms */
 
     if (ldap_conf.debug > 1) {
-	char num[12];
-
-	print_error(1, "LDAP Config Summary\n");
-	print_error(1, "===================\n");
+	sudo_printf(SUDO_CONV_ERROR_MSG, "LDAP Config Summary\n");
+	sudo_printf(SUDO_CONV_ERROR_MSG, "===================\n");
 	if (ldap_conf.uri) {
-	    print_error(3, "uri              ", ldap_conf.uri, "\n");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "uri              %s\n",
+		ldap_conf.uri);
 	} else {
-	    print_error(3, "host             ", ldap_conf.host ?
-		ldap_conf.host : "(NONE)", "\n");
-	    snprintf(num, sizeof(num), "%d", ldap_conf.port);
-	    print_error(3, "port             ", num, "\n");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "host             %s\n",
+		ldap_conf.host ?  ldap_conf.host : "(NONE)");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "port             %d\n",
+		ldap_conf.port);
 	}
-	snprintf(num, sizeof(num), "%d", ldap_conf.version);
-	print_error(3, "ldap_version     ", num, "\n");
+	sudo_printf(SUDO_CONV_ERROR_MSG, "ldap_version     %d\n",
+	    ldap_conf.version);
 
-	print_error(3, "sudoers_base     ", ldap_conf.base ?
-	    ldap_conf.base : "(NONE) <---Sudo will ignore ldap)", "\n");
-	print_error(3, "binddn           ", ldap_conf.binddn ?
-	    ldap_conf.binddn : "(anonymous)", "\n");
-	print_error(3, "bindpw           ", ldap_conf.bindpw ?
-	    ldap_conf.bindpw : "(anonymous)", "\n");
+	sudo_printf(SUDO_CONV_ERROR_MSG, "sudoers_base     %s\n",
+	    ldap_conf.base ?  ldap_conf.base : "(NONE: LDAP disabled)");
+	sudo_printf(SUDO_CONV_ERROR_MSG, "binddn           %s\n",
+	    ldap_conf.binddn ?  ldap_conf.binddn : "(anonymous)");
+	sudo_printf(SUDO_CONV_ERROR_MSG, "bindpw           %s\n",
+	    ldap_conf.bindpw ?  ldap_conf.bindpw : "(anonymous)");
 	if (ldap_conf.bind_timelimit > 0) {
-	    snprintf(num, sizeof(num), "%d", ldap_conf.bind_timelimit);
-	    print_error(3, "bind_timelimit   ", num, "\n");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "bind_timelimit   %d\n",
+		ldap_conf.bind_timelimit);
 	}
 	if (ldap_conf.timelimit > 0) {
-	    snprintf(num, sizeof(num), "%d", ldap_conf.timelimit);
-	    print_error(3, "timelimit        ", num, "\n");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "timelimit        %d\n",
+	    ldap_conf.timelimit);
 	}
-	print_error(3, "ssl              ", ldap_conf.ssl ?
-	    ldap_conf.ssl : "(no)", "\n");
-	if (ldap_conf.tls_checkpeer != -1)
-	    print_error(3, "tls_checkpeer    ", ldap_conf.tls_checkpeer ?
-		"(yes)" : "(no)", "\n");
-	if (ldap_conf.tls_cacertfile != NULL)
-	    print_error(3, "tls_cacertfile   ", ldap_conf.tls_cacertfile, "\n");
-	if (ldap_conf.tls_cacertdir != NULL)
-	    print_error(3, "tls_cacertdir    ", ldap_conf.tls_cacertdir, "\n");
-	if (ldap_conf.tls_random_file != NULL)
-	    print_error(3, "tls_random_file  ", ldap_conf.tls_random_file, "\n");
-	if (ldap_conf.tls_cipher_suite != NULL)
-	    print_error(3, "tls_cipher_suite ", ldap_conf.tls_cipher_suite, "\n");
-	if (ldap_conf.tls_certfile != NULL)
-	    print_error(3, "tls_certfile     ", ldap_conf.tls_certfile, "\n");
-	if (ldap_conf.tls_keyfile != NULL)
-	    print_error(3, "tls_keyfile      ", ldap_conf.tls_keyfile, "\n");
+	sudo_printf(SUDO_CONV_ERROR_MSG, "ssl              %s\n",
+	    ldap_conf.ssl ?  ldap_conf.ssl : "(no)");
+	if (ldap_conf.tls_checkpeer != -1) {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_checkpeer    %s\n",
+		ldap_conf.tls_checkpeer ?  "(yes)" : "(no)");
+	}
+	if (ldap_conf.tls_cacertfile != NULL) {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_cacertfile   %s\n",
+		ldap_conf.tls_cacertfile);
+	}
+	if (ldap_conf.tls_cacertdir != NULL) {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_cacertdir    %s\n",
+		ldap_conf.tls_cacertdir);
+	}
+	if (ldap_conf.tls_random_file != NULL) {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_random_file  %s\n",
+		ldap_conf.tls_random_file);
+	}
+	if (ldap_conf.tls_cipher_suite != NULL) {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_cipher_suite %s\n",
+		ldap_conf.tls_cipher_suite);
+	}
+	if (ldap_conf.tls_certfile != NULL) {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_certfile     %s\n",
+		ldap_conf.tls_certfile);
+	}
+	if (ldap_conf.tls_keyfile != NULL) {
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "tls_keyfile      %s\n",
+		ldap_conf.tls_keyfile);
+	}
 #ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
 	if (ldap_conf.use_sasl != -1) {
-	    print_error(3, "use_sasl         ",
-		ldap_conf.use_sasl ? "yes" : "no", "\n");
-	    print_error(3, "sasl_auth_id     ", ldap_conf.sasl_auth_id ?
-		ldap_conf.sasl_auth_id : "(NONE)", "\n");
-	    print_error(3, "rootuse_sasl     ",
-		ldap_conf.rootuse_sasl == TRUE ?  "true" :
-		ldap_conf.rootuse_sasl == FALSE ? "false" : "(NONE)", "\n");
-	    print_error(3, "rootsasl_auth_id ", ldap_conf.rootsasl_auth_id ?
-		ldap_conf.rootsasl_auth_id : "(NONE)", "\n");
-	    print_error(3, "sasl_secprops    ", ldap_conf.sasl_secprops ?
-		ldap_conf.sasl_secprops : "(NONE)", "\n");
-	    print_error(3, "krb5_ccname      ", ldap_conf.krb5_ccname ?
-		ldap_conf.krb5_ccname : "(NONE)", "\n");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "use_sasl         %s\n",
+		ldap_conf.use_sasl ? "yes" : "no");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "sasl_auth_id     %s\n",
+		ldap_conf.sasl_auth_id ?  ldap_conf.sasl_auth_id : "(NONE)");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "rootuse_sasl     %d\n",
+		ldap_conf.rootuse_sasl);
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "rootsasl_auth_id %s\n",
+		ldap_conf.rootsasl_auth_id ?  ldap_conf.rootsasl_auth_id : "(NONE)");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "sasl_secprops    %s\n",
+		ldap_conf.sasl_secprops ?  ldap_conf.sasl_secprops : "(NONE)");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "krb5_ccname      %s\n",
+		ldap_conf.krb5_ccname ?  ldap_conf.krb5_ccname : "(NONE)");
 	}
 #endif
-	print_error(1, "===================\n");
+	sudo_printf(SUDO_CONV_ERROR_MSG, "===================\n");
     }
     if (!ldap_conf.base)
 	return(FALSE);		/* if no base is defined, ignore LDAP */

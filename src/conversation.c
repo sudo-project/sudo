@@ -44,6 +44,7 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#include <errno.h>
 
 #include "sudo.h"
 #include "sudo_plugin.h"
@@ -89,7 +90,7 @@ sudo_conversation(int num_msgs, const struct sudo_conv_message msgs[],
 	}
     }
 
-    return(0);
+    return 0;
 
 err:
     /* Zero and free allocated memory and return an error. */
@@ -102,5 +103,30 @@ err:
 	}
     } while (n--);
 
-    return(-1);
+    return -1;
+}
+
+int
+sudo_printf(int msg_type, const char *fmt, ...)
+{
+    va_list ap;
+    FILE *fp;
+
+    switch (msg_type) {
+    case SUDO_CONV_INFO_MSG:
+	fp = stdout;
+	break;
+    case SUDO_CONV_ERROR_MSG:
+	fp = stderr;
+	break;
+    default:
+	errno = EINVAL;
+	return -1;
+    }
+
+    va_start(ap, fmt);
+    vfprintf(fp, fmt, ap);
+    va_end(ap);
+
+    return 0;
 }

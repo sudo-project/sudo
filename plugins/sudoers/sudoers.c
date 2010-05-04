@@ -148,6 +148,7 @@ char *login_style;
 #endif /* HAVE_BSD_AUTH_H */
 sigaction_t saved_sa_int, saved_sa_quit, saved_sa_tstp;
 sudo_conv_t sudo_conv;
+sudo_printf_t sudo_printf;
 
 static char *runas_user;
 static char *runas_group;
@@ -164,8 +165,8 @@ static int sudo_mode;
 
 static int
 sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
-    char * const settings[], char * const user_info[],
-    char * const envp[])
+    sudo_printf_t plugin_printf, char * const settings[],
+    char * const user_info[], char * const envp[])
 {
     int sources = 0;
     sigaction_t sa;
@@ -179,7 +180,10 @@ sudoers_policy_open(unsigned int version, sudo_conv_t conversation,
 # endif
 #endif /* HAVE_GETPRPWNAM && HAVE_SET_AUTH_PARAMETERS */
 
-    sudo_conv = conversation; /* XXX, stash elsewhere? */
+    if (!sudo_conv)
+	sudo_conv = conversation;
+    if (!sudo_printf)
+	sudo_printf = plugin_printf;
 
     if (sigsetjmp(error_jmp, 1)) {
 	/* called via error(), errorx() or log_error() */

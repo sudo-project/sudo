@@ -289,7 +289,8 @@ int get_boottime(struct timeval *);
 
 /* iolog.c */
 int sudoers_io_open(unsigned int version, sudo_conv_t conversation,
-    char * const settings[], char * const user_info[], char * const user_env[]);
+    sudo_printf_t sudo_printf, char * const settings[],
+    char * const user_info[], char * const user_env[]);
 void sudoers_io_close(int exit_status, int error);
 int sudoers_io_version(int verbose);
 int sudoers_io_log_output(const char *buf, unsigned int len);
@@ -311,15 +312,13 @@ void cleanup(int);
 void set_fqdn(void);
 FILE *open_sudoers(const char *, int, int *);
 
-/* plugin_error.c */
-void print_error(int nmsgs, ...);
-
 #ifndef _SUDO_MAIN
 extern struct sudo_user sudo_user;
 extern struct passwd *auth_pw, *list_pw;
 extern int long_list;
 extern uid_t timestamp_uid;
 extern sudo_conv_t sudo_conv;
+extern sudo_printf_t sudo_printf;
 #endif
 
 /* Some systems don't declare errno in errno.h */

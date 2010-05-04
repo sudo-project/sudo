@@ -106,28 +106,3 @@ _warning(int use_errno, const char *fmt, va_list ap)
     memset(&repl, 0, sizeof(repl));
     sudo_conv(nmsgs, msg, repl);
 }
-
-void
-print_error(int nmsgs, ...)
-{
-    struct sudo_conv_message *msg;
-    struct sudo_conv_reply *repl;
-    va_list ap;
-    int i;
-
-    if (nmsgs <= 0)
-	return;
-
-    msg = emalloc2(nmsgs, sizeof(*msg));
-    repl = emalloc2(nmsgs, sizeof(*repl));
-    memset(repl, 0, nmsgs * sizeof(*repl));
-
-    va_start(ap, nmsgs);
-    for (i = 0; i < nmsgs; i++) {
-	msg[i].msg_type = SUDO_CONV_ERROR_MSG;
-	msg[i].msg = va_arg(ap, char *);
-    }
-    va_end(ap);
-
-    sudo_conv(nmsgs, msg, repl);
-}

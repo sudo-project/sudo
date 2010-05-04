@@ -276,22 +276,23 @@ log_denial(int status, int inform_user)
     /* Inform the user if they failed to authenticate.  */
     if (inform_user) {
 	if (ISSET(status, FLAG_NO_USER)) {
-	    print_error(2, user_name, " is not in the sudoers file.  "
-		"This incident will be reported.\n");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "%s is not in the sudoers file.  "
+		"This incident will be reported.\n", user_name);
 	} else if (ISSET(status, FLAG_NO_HOST)) {
-	    print_error(4, user_name, " is not allowed to run sudo on ",
-		user_shost, ".  This incident will be reported.\n");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "%s is not allowed to run sudo "
+		"on %s.  This incident will be reported.\n",
+		user_name, user_shost);
 	} else if (ISSET(status, FLAG_NO_CHECK)) {
-	    print_error(5, "Sorry, user ", user_name, " may not run sudo on ",
-		user_shost, ".\n");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "Sorry, user %s may not run "
+		"sudo on %s.\n", user_name, user_shost);
 	} else {
-	    print_error(13, "Sorry, user ", user_name,
-		" is not allowed to execute '", user_cmnd,
-		user_args ? " " : "", user_args ? user_args : "", "' ",
-		list_pw ? list_pw->pw_name :
-		runas_pw ? runas_pw->pw_name : user_name,
-		runas_gr ? ":" : "", runas_gr ? runas_gr->gr_name : "", " on ",
-		user_shost, ".\n");
+	    sudo_printf(SUDO_CONV_ERROR_MSG, "Sorry, user %s is not allowed "
+		"to execute '%s%s%s' as %s%s%s on %s.\n",
+		user_name, user_cmnd, user_args ? " " : "",
+		user_args ? user_args : "",
+		list_pw ? list_pw->pw_name : runas_pw ?
+		runas_pw->pw_name : user_name, runas_gr ? ":" : "",
+		runas_gr ? runas_gr->gr_name : "", user_host);
 	}
     }
 

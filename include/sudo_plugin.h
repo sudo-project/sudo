@@ -49,6 +49,7 @@ struct sudo_conv_reply {
 
 typedef int (*sudo_conv_t)(int num_msgs, const struct sudo_conv_message msgs[],
 	struct sudo_conv_reply replies[]);
+typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
 
 /* Policy plugin type and defines */
 struct policy_plugin {
@@ -56,8 +57,8 @@ struct policy_plugin {
     unsigned int type; /* always SUDO_POLICY_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
-	char * const settings[], char * const user_info[],
-	char * const user_env[]);
+	sudo_printf_t sudo_printf, char * const settings[],
+	char * const user_info[], char * const user_env[]);
     void (*close)(int exit_status, int error); /* wait status or error */
     int (*show_version)(int verbose);
     int (*check_policy)(int argc, char * const argv[],
@@ -75,8 +76,8 @@ struct io_plugin {
     unsigned int type; /* always SUDO_IO_PLUGIN */
     unsigned int version; /* always SUDO_API_VERSION */
     int (*open)(unsigned int version, sudo_conv_t conversation,
-	char * const settings[], char * const user_info[],
-	char * const user_env[]);
+	sudo_printf_t sudo_printf, char * const settings[],
+	char * const user_info[], char * const user_env[]);
     void (*close)(int exit_status, int error); /* wait status or error */
     int (*show_version)(int verbose);
     int (*log_input)(const char *buf, unsigned int len);

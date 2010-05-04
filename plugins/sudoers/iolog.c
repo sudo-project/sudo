@@ -177,7 +177,8 @@ build_idpath(char *pathbuf, size_t pathsize)
 
 int
 sudoers_io_open(unsigned int version, sudo_conv_t conversation,
-    char * const settings[], char * const user_info[], char * const user_env[])
+    sudo_printf_t plugin_printf, char * const settings[],
+    char * const user_info[], char * const user_env[])
 {
     char pathbuf[PATH_MAX];
     FILE *io_logfile;
@@ -185,6 +186,8 @@ sudoers_io_open(unsigned int version, sudo_conv_t conversation,
 
     if (!sudo_conv)
 	sudo_conv = conversation;
+    if (!sudo_printf)
+	sudo_printf = plugin_printf;
 
     if (!def_transcript)
 	return FALSE;

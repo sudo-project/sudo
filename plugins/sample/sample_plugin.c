@@ -77,6 +77,7 @@ static struct plugin_state {
     char * const *user_info;
 } plugin_state;
 static sudo_conv_t sudo_conv;
+static sudo_printf_t sudo_log;
 static FILE *input, *output;
 static uid_t runas_uid = ROOT_UID;
 static gid_t runas_gid = -1;
@@ -105,40 +106,12 @@ fmt_string(const char *var, const char *val)
 }
 
 /*
- * Display warning via conversation function.
- */
-static void
-sudo_log(int type, const char *fmt, ...)
-{
-    struct sudo_conv_message msg[2];
-    struct sudo_conv_reply repl[2];
-    va_list ap;
-    char *str;
-    int rc;
-
-    va_start(ap, fmt);
-    rc = vasprintf(&str, fmt, ap);
-    va_end(ap);
-    if (rc == -1)
-	return;
-
-    /* Call conversation function */
-    memset(&msg, 0, sizeof(msg));
-    msg[0].msg_type = type;
-    msg[0].msg = str;
-    msg[1].msg_type = type;
-    msg[1].msg = "\n";
-    memset(&repl, 0, sizeof(repl));
-    sudo_conv(2, msg, repl);
-}
-
-/*
  * Plugin policy open function.
  */
 static int
 policy_open(unsigned int version, sudo_conv_t conversation,
-    char * const settings[], char * const user_info[],
-    char * const user_env[])
+    sudo_printf_t sudo_printf, char * const settings[],
+    char * const user_info[], char * const user_env[])
 {
     char * const *ui;
     struct passwd *pw;
@@ -146,11 +119,14 @@ policy_open(unsigned int version, sudo_conv_t conversation,
     struct group *gr;
     const char *runas_group = NULL;
 
-    sudo_conv = conversation;
+    if (!sudo_conv)
+	sudo_conv = conversation;
+    if (!sudo_log)
+	sudo_log = sudo_printf;
 
     if (SUDO_API_VERSION_GET_MAJOR(version) != SUDO_API_VERSION_MAJOR) {
 	sudo_log(SUDO_CONV_ERROR_MSG,
-	    "the sample plugin requires API version %d.x",
+	    "the sample plugin requires API version %d.x\n",
 	    SUDO_API_VERSION_MAJOR);
 	return ERROR;
     }
@@ -171,14 +147,14 @@ policy_open(unsigned int version, sudo_conv_t conversation,
     }
     if (runas_user != NULL) {
 	if ((pw = getpwnam(runas_user)) == NULL) {
-	    sudo_log(SUDO_CONV_ERROR_MSG, "unknown user %s", runas_user);
+	    sudo_log(SUDO_CONV_ERROR_MSG, "unknown user %s\n", runas_user);
 	    return 0;
 	}
 	runas_uid = pw->pw_uid;
     }
     if (runas_group != NULL) {
 	if ((gr = getgrnam(runas_group)) == NULL) {
-	    sudo_log(SUDO_CONV_ERROR_MSG, "unknown group %s", runas_group);
+	    sudo_log(SUDO_CONV_ERROR_MSG, "unknown group %s\n", runas_group);
 	    return 0;
 	}
 	runas_gid = gr->gr_gid;
@@ -207,13 +183,13 @@ policy_check(int argc, char * const argv[],
     int i = 0;
 
     if (!argc || argv[0] == NULL) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "no command specified");
+	sudo_log(SUDO_CONV_ERROR_MSG, "no command specified\n");
 	return FALSE;
     }
     /* Only allow fully qualified paths to keep things simple. */
     if (argv[0][0] != '/') {
 	sudo_log(SUDO_CONV_ERROR_MSG,
-	    "only fully qualified pathnames may be specified");
+	    "only fully qualified pathnames may be specified\n");
 	return FALSE;
     }
 
@@ -224,11 +200,11 @@ policy_check(int argc, char * const argv[],
     memset(&repl, 0, sizeof(repl));
     sudo_conv(1, &msg, &repl);
     if (repl.reply == NULL) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "missing password");
+	sudo_log(SUDO_CONV_ERROR_MSG, "missing password\n");
 	return FALSE;
     }
     if (strcmp(repl.reply, "test") != 0) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "incorrect password");
+	sudo_log(SUDO_CONV_ERROR_MSG, "incorrect password\n");
 	return FALSE;
     }
 
@@ -239,19 +215,19 @@ policy_check(int argc, char * const argv[],
     /* Setup command info. */
     command_info = calloc(32, sizeof(char *));
     if (command_info == NULL) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory");
+	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
 	return ERROR;
     }
     if ((command_info[i++] = fmt_string("command", argv[0])) == NULL ||
 	asprintf(&command_info[i++], "runas_euid=%ld", (long)runas_uid) == -1 ||
 	asprintf(&command_info[i++], "runas_uid=%ld", (long)runas_uid) == -1) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory");
+	sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
 	return ERROR;
     }
     if (runas_gid != -1) {
 	if (asprintf(&command_info[i++], "runas_gid=%ld", (long)runas_gid) == -1 ||
 	    asprintf(&command_info[i++], "runas_egid=%ld", (long)runas_gid) == -1) {
-	    sudo_log(SUDO_CONV_ERROR_MSG, "out of memory");
+	    sudo_log(SUDO_CONV_ERROR_MSG, "out of memory\n");
 	    return ERROR;
 	}
     }
@@ -270,14 +246,14 @@ policy_list(int argc, char * const argv[], int verbose, const char *list_user)
     /*
      * List user's capabilities.
      */
-    sudo_log(SUDO_CONV_INFO_MSG, "Validated users may run any command");
+    sudo_log(SUDO_CONV_INFO_MSG, "Validated users may run any command\n");
     return TRUE;
 }
 
 static int
 policy_version(int verbose)
 {
-    sudo_log(SUDO_CONV_INFO_MSG, "Sample policy plugin version %s", PACKAGE_VERSION);
+    sudo_log(SUDO_CONV_INFO_MSG, "Sample policy plugin version %s\n", PACKAGE_VERSION);
     return TRUE;
 }
 
@@ -289,13 +265,13 @@ policy_close(int exit_status, int error)
      * In this example, we just print a message.
      */
     if (error) {
-	sudo_log(SUDO_CONV_ERROR_MSG, "Command error: %s", strerror(error));
+	sudo_log(SUDO_CONV_ERROR_MSG, "Command error: %s\n", strerror(error));
     } else {
         if (WIFEXITED(exit_status)) {
-	    sudo_log(SUDO_CONV_INFO_MSG, "Command exited with status %d",
+	    sudo_log(SUDO_CONV_INFO_MSG, "Command exited with status %d\n",
 		WEXITSTATUS(exit_status));
         } else if (WIFSIGNALED(exit_status)) {
-	    sudo_log(SUDO_CONV_INFO_MSG, "Command killed by signal %d",
+	    sudo_log(SUDO_CONV_INFO_MSG, "Command killed by signal %d\n",
 		WTERMSIG(exit_status));
 	}
     }
@@ -303,11 +279,16 @@ policy_close(int exit_status, int error)
 
 static int
 io_open(unsigned int version, sudo_conv_t conversation,
-    char * const settings[], char * const user_info[],
-    char * const user_env[])
+    sudo_printf_t sudo_printf, char * const settings[],
+    char * const user_info[], char * const user_env[])
 {
     int fd;
     char path[PATH_MAX];
+
+    if (!sudo_conv)
+	sudo_conv = conversation;
+    if (!sudo_log)
+	sudo_log = sudo_printf;
 
     /* Open input and output files. */
     snprintf(path, sizeof(path), "/var/tmp/sample-%u.output",
@@ -337,7 +318,8 @@ io_close(int exit_status, int error)
 static int
 io_version(int verbose)
 {
-    sudo_log(SUDO_CONV_INFO_MSG, "Sample I/O plugin version %s", PACKAGE_VERSION);
+    sudo_log(SUDO_CONV_INFO_MSG, "Sample I/O plugin version %s\n",
+	PACKAGE_VERSION);
     return TRUE;
 }
 
