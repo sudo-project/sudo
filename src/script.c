@@ -432,7 +432,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     sigaction_t sa;
     struct io_buffer *iob, *iobufs = NULL;
     int n, nready;
-    int pv[2], sv[2];
+    int io_pipe[3][2], sv[2];
     fd_set *fdsr, *fdsw;
     int rbac_enabled = 0;
     int log_io, maxfd;
@@ -501,12 +501,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	/*
 	 * Setup stdin/stdout/stderr for child, to be duped after forking.
 	 */
-#ifdef notyet
 	script_fds[SFD_STDIN] = script_fds[SFD_SLAVE];
-#else
-       script_fds[SFD_STDIN] = isatty(STDIN_FILENO) ?
-	    script_fds[SFD_SLAVE] : STDIN_FILENO;
-#endif
 	script_fds[SFD_STDOUT] = script_fds[SFD_SLAVE];
 	script_fds[SFD_STDERR] = script_fds[SFD_SLAVE];
 
@@ -522,26 +517,28 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	 * If either stdin, stdout or stderr is not a tty we use a pipe
 	 * to interpose ourselves instead of duping the pty fd.
 	 */
-#ifdef notyet
+	memset(io_pipe, 0, sizeof(io_pipe));
 	if (!isatty(STDIN_FILENO)) {
-	    if (pipe(pv) != 0)
+	    if (pipe(io_pipe[STDIN_FILENO]) != 0)
 		error(1, "unable to create pipe");
-	    iobufs = io_buf_new(STDIN_FILENO, pv[1], log_stdin, iobufs);
-	    script_fds[SFD_STDIN] = pv[0];
+	    iobufs = io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
+		log_stdin, iobufs);
+	    script_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
 	}
-#endif
 	if (!isatty(STDOUT_FILENO)) {
 	    ttyout = FALSE;
-	    if (pipe(pv) != 0)
+	    if (pipe(io_pipe[STDOUT_FILENO]) != 0)
 		error(1, "unable to create pipe");
-	    iobufs = io_buf_new(pv[0], STDOUT_FILENO, log_stdout, iobufs);
-	    script_fds[SFD_STDOUT] = pv[1];
+	    iobufs = io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
+		log_stdout, iobufs);
+	    script_fds[SFD_STDOUT] = io_pipe[STDOUT_FILENO][1];
 	}
 	if (!isatty(STDERR_FILENO)) {
-	    if (pipe(pv) != 0)
+	    if (pipe(io_pipe[STDERR_FILENO]) != 0)
 		error(1, "unable to create pipe");
-	    iobufs = io_buf_new(pv[0], STDERR_FILENO, log_stderr, iobufs);
-	    script_fds[SFD_STDERR] = pv[1];
+	    iobufs = io_buf_new(io_pipe[STDERR_FILENO][0], STDERR_FILENO,
+		log_stderr, iobufs);
+	    script_fds[SFD_STDERR] = io_pipe[STDERR_FILENO][1];
 	}
 
 	/* Job control signals to relay from parent to child. */
@@ -586,9 +583,16 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	fcntl(sv[1], F_SETFD, FD_CLOEXEC);
 	if (exec_setup(details) == 0) {
 	    /* headed for execve() */
-	    if (log_io)
+	    if (log_io) {
+		/* Close the other end of the stdin/stdout/stderr pipes. */
+		if (io_pipe[STDIN_FILENO][1])
+		    close(io_pipe[STDIN_FILENO][1]);
+		if (io_pipe[STDOUT_FILENO][0])
+		    close(io_pipe[STDOUT_FILENO][0]);
+		if (io_pipe[STDERR_FILENO][0])
+		    close(io_pipe[STDERR_FILENO][0]);
 		script_child(details->command, argv, envp, sv[1], rbac_enabled);
-	    else {
+	    } else {
 #ifdef HAVE_SELINUX
 		if (rbac_enabled)
 		    selinux_execve(details->command, argv, envp);
@@ -612,11 +616,13 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
     maxfd = sv[0];
 
     if (log_io) {
-	/* Close the writer end of the stdout/stderr pipes. */
-	if (script_fds[SFD_STDOUT] != script_fds[SFD_SLAVE])
-	    close(script_fds[SFD_STDOUT]);
-	if (script_fds[SFD_STDERR] != script_fds[SFD_SLAVE])
-	    close(script_fds[SFD_STDERR]);
+	/* Close the other end of the stdin/stdout/stderr pipes. */
+	if (io_pipe[STDIN_FILENO][0])
+	    close(io_pipe[STDIN_FILENO][0]);
+	if (io_pipe[STDOUT_FILENO][1])
+	    close(io_pipe[STDOUT_FILENO][1]);
+	if (io_pipe[STDERR_FILENO][1])
+	    close(io_pipe[STDERR_FILENO][1]);
 
 	for (iob = iobufs; iob; iob = iob->next) {
 	    /* Determine maxfd */
@@ -668,14 +674,14 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 
 	FD_SET(sv[0], fdsr);
 	for (iob = iobufs; iob; iob = iob->next) {
-	    if (iob->off == iob->len)
-		iob->off = iob->len = 0;
 	    /* Don't read/write /dev/tty if we are not in the foreground. */
-	    if (ttymode == TERM_RAW || iob->rfd != script_fds[SFD_USERTTY]) {
+	    if (iob->rfd != -1 &&
+		(ttymode == TERM_RAW || iob->rfd != script_fds[SFD_USERTTY])) {
 		if (iob->len != sizeof(iob->buf))
 		    FD_SET(iob->rfd, fdsr);
 	    }
-	    if (ttymode == TERM_RAW || iob->wfd != script_fds[SFD_USERTTY]) {
+	    if (iob->wfd != -1 &&
+		(ttymode == TERM_RAW || iob->wfd != script_fds[SFD_USERTTY])) {
 		if (iob->len > iob->off)
 		    FD_SET(iob->wfd, fdsw);
 	    }
@@ -751,7 +757,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	}
 
 	for (iob = iobufs; iob; iob = iob->next) {
-	    if (FD_ISSET(iob->rfd, fdsr)) {
+	    if (iob->rfd != -1 && FD_ISSET(iob->rfd, fdsr)) {
 		n = read(iob->rfd, iob->buf + iob->len,
 		    sizeof(iob->buf) - iob->len);
 		if (n == -1) {
@@ -759,15 +765,17 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 			goto retry;
 		    if (errno != EAGAIN)
 			goto io_error;
+		} else if (n == 0) {
+		    /* got EOF */
+		    close(iob->rfd);
+		    iob->rfd = -1;
 		} else {
-		    if (n == 0)
-			break; /* got EOF */
 		    if (!iob->action(iob->buf + iob->len, n))
 			terminate_child(child, TRUE);
 		    iob->len += n;
 		}
 	    }
-	    if (FD_ISSET(iob->wfd, fdsw)) {
+	    if (iob->wfd != -1 && FD_ISSET(iob->wfd, fdsw)) {
 		n = write(iob->wfd, iob->buf + iob->off,
 		    iob->len - iob->off);
 		if (n == -1) {
@@ -777,6 +785,14 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 			goto io_error;
 		} else {
 		    iob->off += n;
+		}
+		if (iob->off == iob->len) {
+		    iob->off = iob->len = 0;
+		    /* Forward the EOF from reader to writer. */
+		    if (iob->rfd == -1) {
+			close(iob->wfd);
+			iob->wfd = -1;
+		    }
 		}
 	    }
 	}
@@ -973,15 +989,14 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
     }
     close(errpipe[1]);
 
-#ifdef notyet
     /* If any of stdin/stdout/stderr are pipes, close them in parent. */
+    /* XXX - close other end too */
     if (script_fds[SFD_STDIN] != script_fds[SFD_SLAVE])
 	close(script_fds[SFD_STDIN]);
     if (script_fds[SFD_STDOUT] != script_fds[SFD_SLAVE])
 	close(script_fds[SFD_STDOUT]);
     if (script_fds[SFD_STDERR] != script_fds[SFD_SLAVE])
 	close(script_fds[SFD_STDERR]);
-#endif
 
     /*
      * Put child in its own process group.  If we are starting the command
@@ -1094,6 +1109,7 @@ bad:
     return errno;
 }
 
+/* XXX - should use select in poll mode to flush things */
 static void
 flush_output(struct io_buffer *iobufs)
 {
@@ -1102,19 +1118,24 @@ flush_output(struct io_buffer *iobufs)
 
     /* Drain output buffers. */
     for (iob = iobufs; iob; iob = iob->next) {
-	/* XXX - check wfd against slave instead? */
-	if (iob->rfd == script_fds[SFD_USERTTY])
+	if (iob->wfd == -1 && iob->wfd == script_fds[SFD_SLAVE])
 	    continue;
 	while (iob->len > iob->off) {
 	    n = write(iob->wfd, iob->buf + iob->off, iob->len - iob->off);
 	    if (n <= 0)
 		break;
 	    iob->off += n;
+	    if (iob->rfd == -1) {
+		close(iob->wfd);
+		iob->wfd = -1;
+	    }
 	}
     }
 
     /* Make sure there is no output remaining on the master pty or in pipes. */
     for (iob = iobufs; iob; iob = iob->next) {
+	if (iob->rfd == -1 || iob->wfd == -1) /* XXX */
+	    continue;
 	if (iob->rfd == script_fds[SFD_USERTTY])
 	    continue;
 
