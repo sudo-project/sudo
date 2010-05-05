@@ -146,9 +146,9 @@ script_setup(uid_t uid)
 	error(1, "Can't get pty");
 }
 
-/* Call I/O plugin input method. */
+/* Call I/O plugin tty input log method. */
 static int
-log_input(char *buf, unsigned int n)
+log_ttyin(char *buf, unsigned int n)
 {
     struct plugin_container *plugin;
     sigset_t omask;
@@ -157,8 +157,8 @@ log_input(char *buf, unsigned int n)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
 
     tq_foreach_fwd(&io_plugins, plugin) {
-	if (plugin->u.io->log_input) {
-	    if (!plugin->u.io->log_input(buf, n)) {
+	if (plugin->u.io->log_ttyin) {
+	    if (!plugin->u.io->log_ttyin(buf, n)) {
 	    	rval = FALSE;
 		break;
 	    }
@@ -169,9 +169,9 @@ log_input(char *buf, unsigned int n)
     return rval;
 }
 
-/* Call I/O plugin output method. */
+/* Call I/O plugin stdin log method. */
 static int
-log_output(char *buf, unsigned int n)
+log_stdin(char *buf, unsigned int n)
 {
     struct plugin_container *plugin;
     sigset_t omask;
@@ -180,8 +180,77 @@ log_output(char *buf, unsigned int n)
     sigprocmask(SIG_BLOCK, &ttyblock, &omask);
 
     tq_foreach_fwd(&io_plugins, plugin) {
-	if (plugin->u.io->log_output) {
-	    if (!plugin->u.io->log_output(buf, n)) {
+	if (plugin->u.io->log_stdin) {
+	    if (!plugin->u.io->log_stdin(buf, n)) {
+	    	rval = FALSE;
+		break;
+	    }
+	}
+    }
+
+    sigprocmask(SIG_SETMASK, &omask, NULL);
+    return rval;
+}
+
+/* Call I/O plugin tty output log method. */
+static int
+log_ttyout(char *buf, unsigned int n)
+{
+    struct plugin_container *plugin;
+    sigset_t omask;
+    int rval = TRUE;
+
+    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
+
+    tq_foreach_fwd(&io_plugins, plugin) {
+	if (plugin->u.io->log_ttyout) {
+	    if (!plugin->u.io->log_ttyout(buf, n)) {
+	    	rval = FALSE;
+		break;
+	    }
+	}
+    }
+
+    sigprocmask(SIG_SETMASK, &omask, NULL);
+    return rval;
+}
+
+/* Call I/O plugin stdout log method. */
+static int
+log_stdout(char *buf, unsigned int n)
+{
+    struct plugin_container *plugin;
+    sigset_t omask;
+    int rval = TRUE;
+
+    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
+
+    tq_foreach_fwd(&io_plugins, plugin) {
+	if (plugin->u.io->log_stdout) {
+	    if (!plugin->u.io->log_stdout(buf, n)) {
+	    	rval = FALSE;
+		break;
+	    }
+	}
+    }
+
+    sigprocmask(SIG_SETMASK, &omask, NULL);
+    return rval;
+}
+
+/* Call I/O plugin stderr log method. */
+static int
+log_stderr(char *buf, unsigned int n)
+{
+    struct plugin_container *plugin;
+    sigset_t omask;
+    int rval = TRUE;
+
+    sigprocmask(SIG_BLOCK, &ttyblock, &omask);
+
+    tq_foreach_fwd(&io_plugins, plugin) {
+	if (plugin->u.io->log_stderr) {
+	    if (!plugin->u.io->log_stderr(buf, n)) {
 	    	rval = FALSE;
 		break;
 	    }
@@ -432,36 +501,46 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	/*
 	 * Setup stdin/stdout/stderr for child, to be duped after forking.
 	 */
-	/* XXX - use a pipe for stdin if not a tty? */
-	script_fds[SFD_STDIN] = isatty(STDIN_FILENO) ?
+#ifdef notyet
+	script_fds[SFD_STDIN] = script_fds[SFD_SLAVE];
+#else
+       script_fds[SFD_STDIN] = isatty(STDIN_FILENO) ?
 	    script_fds[SFD_SLAVE] : STDIN_FILENO;
+#endif
 	script_fds[SFD_STDOUT] = script_fds[SFD_SLAVE];
 	script_fds[SFD_STDERR] = script_fds[SFD_SLAVE];
 
 	/* Copy /dev/tty -> pty master */
 	iobufs = io_buf_new(script_fds[SFD_USERTTY], script_fds[SFD_MASTER],
-	    log_input, iobufs);
+	    log_ttyin, iobufs);
 
 	/* Copy pty master -> /dev/tty */
 	iobufs = io_buf_new(script_fds[SFD_MASTER], script_fds[SFD_USERTTY],
-	    log_output, iobufs);
+	    log_ttyout, iobufs);
 
 	/*
-	 * If either stdout or stderr is not a tty we use a pipe
+	 * If either stdin, stdout or stderr is not a tty we use a pipe
 	 * to interpose ourselves instead of duping the pty fd.
-	 * NOTE: we don't currently log tty/stdout/stderr separately.
 	 */
+#ifdef notyet
+	if (!isatty(STDIN_FILENO)) {
+	    if (pipe(pv) != 0)
+		error(1, "unable to create pipe");
+	    iobufs = io_buf_new(STDIN_FILENO, pv[1], log_stdin, iobufs);
+	    script_fds[SFD_STDIN] = pv[0];
+	}
+#endif
 	if (!isatty(STDOUT_FILENO)) {
 	    ttyout = FALSE;
 	    if (pipe(pv) != 0)
 		error(1, "unable to create pipe");
-	    iobufs = io_buf_new(pv[0], STDOUT_FILENO, log_output, iobufs);
+	    iobufs = io_buf_new(pv[0], STDOUT_FILENO, log_stdout, iobufs);
 	    script_fds[SFD_STDOUT] = pv[1];
 	}
 	if (!isatty(STDERR_FILENO)) {
 	    if (pipe(pv) != 0)
 		error(1, "unable to create pipe");
-	    iobufs = io_buf_new(pv[0], STDERR_FILENO, log_output, iobufs);
+	    iobufs = io_buf_new(pv[0], STDERR_FILENO, log_stderr, iobufs);
 	    script_fds[SFD_STDERR] = pv[1];
 	}
 
@@ -617,6 +696,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    }
 	}
 
+    retry:
 	nready = select(maxfd + 1, fdsr, fdsw, NULL, NULL);
 	if (nready == -1) {
 	    if (errno == EINTR)
@@ -676,9 +756,9 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		    sizeof(iob->buf) - iob->len);
 		if (n == -1) {
 		    if (errno == EINTR)
-			continue;
+			goto retry;
 		    if (errno != EAGAIN)
-			break;
+			goto io_error;
 		} else {
 		    if (n == 0)
 			break; /* got EOF */
@@ -692,9 +772,9 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		    iob->len - iob->off);
 		if (n == -1) {
 		    if (errno == EINTR)
-			continue;
+			goto retry;
 		    if (errno != EAGAIN)
-			break;
+			goto io_error;
 		} else {
 		    iob->off += n;
 		}
@@ -702,6 +782,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	}
     }
 
+io_error:
     if (log_io) {
 	/* Flush any remaining output (the plugin already got it) */
 	n = fcntl(script_fds[SFD_USERTTY], F_GETFL, 0);
@@ -892,6 +973,16 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
     }
     close(errpipe[1]);
 
+#ifdef notyet
+    /* If any of stdin/stdout/stderr are pipes, close them in parent. */
+    if (script_fds[SFD_STDIN] != script_fds[SFD_SLAVE])
+	close(script_fds[SFD_STDIN]);
+    if (script_fds[SFD_STDOUT] != script_fds[SFD_SLAVE])
+	close(script_fds[SFD_STDOUT]);
+    if (script_fds[SFD_STDERR] != script_fds[SFD_SLAVE])
+	close(script_fds[SFD_STDERR]);
+#endif
+
     /*
      * Put child in its own process group.  If we are starting the command
      * in the foreground, assign its pgrp to the tty.
@@ -1011,6 +1102,7 @@ flush_output(struct io_buffer *iobufs)
 
     /* Drain output buffers. */
     for (iob = iobufs; iob; iob = iob->next) {
+	/* XXX - check wfd against slave instead? */
 	if (iob->rfd == script_fds[SFD_USERTTY])
 	    continue;
 	while (iob->len > iob->off) {

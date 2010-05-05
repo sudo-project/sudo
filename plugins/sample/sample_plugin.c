@@ -349,12 +349,19 @@ struct policy_plugin sample_policy = {
     NULL /* invalidate */
 };
 
+/*
+ * Note: This plugin does not differentiate between tty and pipe I/O.
+ *       It all gets logged to the same file.
+ */
 struct io_plugin sample_io = {
     SUDO_IO_PLUGIN,
     SUDO_API_VERSION,
     io_open,
     io_close,
     io_version,
-    io_log_input,
-    io_log_output
+    io_log_input,	/* tty input */
+    io_log_output,	/* tty output */
+    io_log_input,	/* command stdin if not tty */
+    io_log_output,	/* command stdout if not tty */
+    io_log_output	/* command stderr if not tty */
 };

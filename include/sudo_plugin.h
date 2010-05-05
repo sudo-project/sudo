@@ -80,8 +80,11 @@ struct io_plugin {
 	char * const user_info[], char * const user_env[]);
     void (*close)(int exit_status, int error); /* wait status or error */
     int (*show_version)(int verbose);
-    int (*log_input)(const char *buf, unsigned int len);
-    int (*log_output)(const char *buf, unsigned int len);
+    int (*log_ttyin)(const char *buf, unsigned int len);
+    int (*log_ttyout)(const char *buf, unsigned int len);
+    int (*log_stdin)(const char *buf, unsigned int len);
+    int (*log_stdout)(const char *buf, unsigned int len);
+    int (*log_stderr)(const char *buf, unsigned int len);
 };
 
 /* Internal use only */

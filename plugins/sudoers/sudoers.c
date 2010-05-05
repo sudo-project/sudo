@@ -1313,6 +1313,9 @@ struct io_plugin sudoers_io = {
     sudoers_io_open,
     sudoers_io_close,
     sudoers_io_version,
-    NULL,
-    sudoers_io_log_output
+    NULL,			/* log_ttyin */
+    sudoers_io_log_output,	/* log_ttyout */
+    NULL,			/* log_stdin */
+    sudoers_io_log_output,	/* log_stdout */
+    sudoers_io_log_output	/* log_stderr */
 };
