@@ -91,6 +91,7 @@ plugins/sample/sample_plugin.c
 plugins/sudoers/Makefile.in
 plugins/sudoers/aixcrypt.exp
 plugins/sudoers/alias.c
+plugins/sudoers/audit.c
 plugins/sudoers/auth/API
 plugins/sudoers/auth/afs.c
 plugins/sudoers/auth/aix_auth.c
@@ -109,6 +110,8 @@ plugins/sudoers/auth/sia.c
 plugins/sudoers/auth/sudo_auth.c
 plugins/sudoers/auth/sudo_auth.h
 plugins/sudoers/boottime.c
+plugins/sudoers/bsm_audit.c
+plugins/sudoers/bsm_audit.h
 plugins/sudoers/check.c
 plugins/sudoers/def_data.c
 plugins/sudoers/def_data.h
@@ -164,9 +167,6 @@ src/Makefile.in
 src/aix.c
 src/alloc.c
 src/atobool.c
-src/audit.c
-src/bsm_audit.c
-src/bsm_audit.h
 src/conversation.c
 src/error.c
 src/fileops.c
