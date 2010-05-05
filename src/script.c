@@ -674,6 +674,16 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 
 	FD_SET(sv[0], fdsr);
 	for (iob = iobufs; iob; iob = iob->next) {
+	    if (iob->rfd == -1 && iob->wfd == -1)
+	    	continue;
+	    if (iob->off == iob->len) {
+		iob->off = iob->len = 0;
+		/* Forward the EOF from reader to writer. */
+		if (iob->rfd == -1) {
+		    close(iob->wfd);
+		    iob->wfd = -1;
+		}
+	    }
 	    /* Don't read/write /dev/tty if we are not in the foreground. */
 	    if (iob->rfd != -1 &&
 		(ttymode == TERM_RAW || iob->rfd != script_fds[SFD_USERTTY])) {
@@ -785,14 +795,6 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 			goto io_error;
 		} else {
 		    iob->off += n;
-		}
-		if (iob->off == iob->len) {
-		    iob->off = iob->len = 0;
-		    /* Forward the EOF from reader to writer. */
-		    if (iob->rfd == -1) {
-			close(iob->wfd);
-			iob->wfd = -1;
-		    }
 		}
 	    }
 	}
