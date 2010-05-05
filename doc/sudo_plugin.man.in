@@ -139,7 +139,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SUDO_PLUGIN @mansectsu@"
-.TH SUDO_PLUGIN @mansectsu@ "April 14, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
+.TH SUDO_PLUGIN @mansectsu@ "May  5, 2010" "1.8.0a1" "MAINTENANCE COMMANDS"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -208,11 +208,11 @@ so that \fBsudo\fR can load it.
 \&     unsigned int type; /* always SUDO_POLICY_PLUGIN */
 \&     unsigned int version; /* always SUDO_API_VERSION */
 \&     int (*open)(unsigned int version, sudo_conv_t conversation,
-\&                 char * const settings[], char * const user_info[],
-\&                 char * const user_env[]);
+\&                 sudo_printf_t plugin_printf, char * const settings[],
+\&                 char * const user_info[], char * const user_env[]);
 \&     void (*close)(int exit_status, int error);
 \&     int (*show_version)(int verbose);
-\&     int (*check_policy)(int agrc, char * const argv[],
+\&     int (*check_policy)(int argc, char * const argv[],
 \&                         char *env_add[], char **command_info[],
 \&                         char **argv_out[], char **user_env_out[]);
 \&     int (*list)(int argc, char * const argv[], int verbose,
@@ -236,16 +236,16 @@ built against.
 .IX Item "open"
 .Vb 3
 \& int (*open)(unsigned int version, sudo_conv_t conversation,
-\&             char * const settings[], char * const user_info[],
-\&             char * const user_env[]);
+\&             sudo_printf_t plugin_printf, char * const settings[],
+\&             char * const user_info[], char * const user_env[]);
 .Ve
 .Sp
-Returns 1 on success, 0 on failure, \-1 if a general error ocurred,
+Returns 1 on success, 0 on failure, \-1 if a general error occurred,
 or \-2 if there was a usage error.  In the latter case, \fBsudo\fR will
 print a usage message before it exits.  If an error occurs, the
-plugin may optionally call the conversation function with
-\&\f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error information to
-the user.
+plugin may optionally call the conversation or plugin_printf function
+with \f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error information
+to the user.
 .Sp
 The function arguments are as follows:
 .RS 4
@@ -258,6 +258,10 @@ major and minor version number of the plugin \s-1API\s0 supported by
 .IX Item "conversation"
 A pointer to the conversation function that can be used by the
 plugin to interact with the user (see below).
+.IP "plugin_printf" 4
+.IX Item "plugin_printf"
+A pointer to a printf-style function that may be used to display
+informational or error messages (see below).
 .IP "settings" 4
 .IX Item "settings"
 A vector of user-supplied \fBsudo\fR settings in the form of \*(L"name=value\*(R"
@@ -422,8 +426,9 @@ The value of \f(CW\*(C`exit_status\*(C'\fR is undefined if \f(CW\*(C`error\*(C'\
 .IX Item "error"
 If the command could not be executed, this is set to the value of
 \&\f(CW\*(C`errno\*(C'\fR set by the \fIexecve\fR\|(2) system call.  The plugin is responsible
-for displaying error information via the conversation function.  If
-the command was successfully executed, the value of \f(CW\*(C`error\*(C'\fR is 0.
+for displaying error information via the conversation or plugin_printf
+function.  If the command was successfully executed, the value of
+\&\f(CW\*(C`error\*(C'\fR is 0.
 .RE
 .RS 4
 .RE
@@ -435,9 +440,9 @@ the command was successfully executed, the value of \f(CW\*(C`error\*(C'\fR is 0
 .Sp
 The \f(CW\*(C`show_version\*(C'\fR function is called by \fBsudo\fR when the user specifies
 the \f(CW\*(C`\-V\*(C'\fR option.  The plugin may display its version information
-to the user via the conversation function using \f(CW\*(C`SUDO_CONV_INFO_MSG\*(C'\fR.
-If the user requests detailed version information, the verbose flag
-will be set.
+to the user via the conversation or plugin_printf function using
+\&\f(CW\*(C`SUDO_CONV_INFO_MSG\*(C'\fR.  If the user requests detailed version
+information, the verbose flag will be set.
 .IP "check_policy" 4
 .IX Item "check_policy"
 .Vb 3
@@ -451,9 +456,9 @@ whether the user is allowed to run the specified commands.  Returns
 1 if the command is allowed, 0 if not allowed, \-1 for a general
 error, or \-2 for a usage error.  In the latter case, \fBsudo\fR will
 print a usage message before it exits.  If an error occurs, the
-plugin may optionally call the conversation function with
-\&\f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error information to
-the user.
+plugin may optionally call the conversation or plugin_printf function
+with \f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error information
+to the user.
 .Sp
 The function arguments are as follows:
 .RS 4
@@ -568,13 +573,13 @@ the vector.
 .Ve
 .Sp
 List available privileges for the invoking user.  Returns 1 on
-success, 0 on failure and \-1 on error.
-On error, the plugin may optionally call the conversation function with
-\&\f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error information to the
-user.
+success, 0 on failure and \-1 on error.  On error, the plugin may
+optionally call the conversation or plugin_printf function with
+\&\f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error information to
+the user.
 .Sp
-Privileges should be output via the conversation function using
-\&\f(CW\*(C`SUDO_CONV_INFO_MSG\*(C'\fR.
+Privileges should be output via the conversation or plugin_printf
+function using \f(CW\*(C`SUDO_CONV_INFO_MSG\*(C'\fR.
 .RS 4
 .IP "verbose" 4
 .IX Item "verbose"
@@ -613,9 +618,9 @@ The \f(CW\*(C`validate\*(C'\fR function should be \f(CW\*(C`NULL\*(C'\fR if the 
 support credential caching.
 .Sp
 Returns 1 on success, 0 on failure and \-1 on error.
-On error, the plugin may optionally call the conversation function with
-\&\f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error information to the
-user.
+On error, the plugin may optionally call the conversation or plugin_printf
+function with \f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional
+error information to the user.
 .IP "invalidate" 4
 .IX Item "invalidate"
 .Vb 1
@@ -634,12 +639,15 @@ support credential caching.
 \fIConversation \s-1API\s0\fR
 .IX Subsection "Conversation API"
 .PP
-If the plugin needs to interact with the user or display informational
-or error messages, it may do so via the conversation function.  A
-plugin should not attempt to read directly from the standard input
-or the user's tty (neither of which are guaranteed to exist).  The
-caller must include a trailing newline in \f(CW\*(C`msg\*(C'\fR if they want one
-to be printed.
+If the plugin needs to interact with the user, it may do so via the
+conversation function.  A plugin should not attempt to read directly
+from the standard input or the user's tty (neither of which are
+guaranteed to exist).  The caller must include a trailing newline
+in \f(CW\*(C`msg\*(C'\fR if one is to be printed.
+.PP
+A printf-style function is also available that can be used to display
+informational or error messages to the user, which is usually more
+convenient for simple messages where no use input is required.
 .PP
 .Vb 9
 \& struct sudo_conv_message {
@@ -659,41 +667,65 @@ to be printed.
 \& typedef int (*sudo_conv_t)(int num_msgs,
 \&              const struct sudo_conv_message msgs[],
 \&              struct sudo_conv_reply replies[]);
+\&
+\& typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
 .Ve
 .PP
-A conversation function is passed in to the plugin's \f(CW\*(C`open\*(C'\fR function
-when the plugin is initialized.  The plugin passes in a \f(CW\*(C`struct
-sudo_conv_message\*(C'\fR and \f(CW\*(C`struct sudo_conv_reply\*(C'\fR for each message
-in the conversation.  The plugin is responsible for freeing the
-actual reply buffer in \f(CW\*(C`struct sudo_conv_reply\*(C'\fR.
+Pointers to the conversation and printf-style functions are passed
+in to the plugin's \f(CW\*(C`open\*(C'\fR function when the plugin is initialized.
+.PP
+To use the conversation function, the plugin must pass an array of
+\&\f(CW\*(C`sudo_conv_message\*(C'\fR and \f(CW\*(C`sudo_conv_reply\*(C'\fR structures.  There must
+be a \f(CW\*(C`struct sudo_conv_message\*(C'\fR and \f(CW\*(C`struct sudo_conv_reply\*(C'\fR for
+each message in the conversation.  The plugin is responsible for
+freeing the reply buffer filled in to the \f(CW\*(C`struct sudo_conv_reply\*(C'\fR,
+if any.
+.PP
+The printf-style function uses the same underlying mechanism as the
+conversation function but only supports \f(CW\*(C`SUDO_CONV_INFO_MSG\*(C'\fR and
+\&\f(CW\*(C`SUDO_CONV_ERROR_MSG\*(C'\fR for the \fImsg_type\fR parameter.  It can be
+more convenient than using the conversation function if no user
+reply is needed and supports standard \fIprintf()\fR escape sequences.
 .PP
 See the sample plugin for an example of the conversation function usage.
 .SS "I/O Plugin \s-1API\s0"
 .IX Subsection "I/O Plugin API"
-.Vb 12
+.Vb 10
 \& struct io_plugin {
 \& #define SUDO_IO_PLUGIN         2
 \&     unsigned int type; /* always SUDO_IO_PLUGIN */
 \&     unsigned int version; /* always SUDO_API_VERSION */
 \&     int (*open)(unsigned int version, sudo_conv_t conversation
-\&                 char * const settings[], char * const user_info[],
-\&                 char * const user_env[]);
+\&                 sudo_printf_t plugin_printf, char * const settings[],
+\&                 char * const user_info[], char * const user_env[]);
 \&     void (*close)(int exit_status, int error); /* wait status or error */
 \&     int (*show_version)(int verbose);
-\&     int (*log_input)(const char *buf, unsigned int len);
-\&     int (*log_output)(const char *buf, unsigned int len);
+\&     int (*log_ttyin)(const char *buf, unsigned int len);
+\&     int (*log_ttyout)(const char *buf, unsigned int len);
+\&     int (*log_stdin)(const char *buf, unsigned int len);
+\&     int (*log_stdout)(const char *buf, unsigned int len);
+\&     int (*log_stderr)(const char *buf, unsigned int len);
 \& };
 .Ve
 .PP
 When an I/O plugin is loaded, \fBsudo\fR runs the command in a pseudo-tty.
 This makes it possible to log the input and output from the user's
-session.  If the log_input function is defined, it will receive the
-raw user input (note that this will include input even when echo
-is disabled, such as passwords).  The log_output function receives
+session.  If any of the standard input, standard output or standard
+error do not correspond to a tty, \fBsudo\fR will open a pipe to capture
+the I/O for logging before passing it on.
+.PP
+The log_ttyin function receives the raw user input from the terminal
+device (note that this will include input even when echo is disabled,
+such as when a password is read). The log_ttyout function receives
 output from the pseudo-tty that is suitable for replaying the user's
-session at a later time.  Either log_input or log_output may be
-\&\s-1NULL\s0.  If the open function returns \f(CW0\fR, no I/O will be sent to
-the plugin.
+session at a later time.  The log_stdin, log_stdout and log_stderr
+functions are only called if the standard input, standard output
+or standard error respectively correspond to something other than
+a tty.
+.PP
+Any of the logging functions may be set to the \s-1NULL\s0
+pointer if no logging is to be performed.  If the open function
+returns \f(CW0\fR, no I/O will be sent to the plugin.
 .PP
 The io_plugin struct has the following fields:
 .IP "type" 4
@@ -709,19 +741,19 @@ built against.
 .IX Item "open"
 .Vb 3
 \& int (*open)(unsigned int version, sudo_conv_t conversation
-\&             char * const settings[], char * const user_info[],
-\&             char * const user_env[]);
+\&             sudo_printf_t plugin_printf, char * const settings[],
+\&             char * const user_info[], char * const user_env[]);
 .Ve
 .Sp
 The \fIopen\fR function is run before the \fIlog_input\fR, \fIlog_output\fR
 or \fIshow_version\fR functions are called.  It is only called if the
 version is being requested or the \fIcheck_policy\fR function has
 returned successfully.  It returns 1 on success, 0 on failure, \-1
-if a general error ocurred, or \-2 if there was a usage error.  In
+if a general error occurred, or \-2 if there was a usage error.  In
 the latter case, \fBsudo\fR will print a usage message before it exits.
 If an error occurs, the plugin may optionally call the conversation
-function with \f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present additional error
-information to the user.
+or plugin_printf function with \f(CW\*(C`SUDO_CONF_ERROR_MSG\*(C'\fR to present
+additional error information to the user.
 .Sp
 The function arguments are as follows:
 .RS 4
@@ -735,6 +767,12 @@ major and minor version number of the plugin \s-1API\s0 supported by
 A pointer to the conversation function that may be used by the
 \&\fIshow_version\fR function to display version information (see
 show_version below).  The conversation function may also be used
+to display additional error message to the user.
+.IP "plugin_printf" 4
+.IX Item "plugin_printf"
+A pointer to a printf-style function that may be used by the
+\&\fIshow_version\fR function to display version information (see
+show_version below).  The plugin_printf function may also be used
 to display additional error message to the user.
 .IP "settings" 4
 .IX Item "settings"
@@ -801,16 +839,16 @@ successfully executed, the value of \f(CW\*(C`error\*(C'\fR is 0.
 .Sp
 The \f(CW\*(C`show_version\*(C'\fR function is called by \fBsudo\fR when the user specifies
 the \f(CW\*(C`\-V\*(C'\fR option.  The plugin may display its version information
-to the user via the conversation function using \f(CW\*(C`SUDO_CONV_INFO_MSG\*(C'\fR.
-If the user requests detailed version information, the verbose flag
-will be set.
-.IP "log_input" 4
-.IX Item "log_input"
+to the user via the conversation or plugin_printf function using
+\&\f(CW\*(C`SUDO_CONV_INFO_MSG\*(C'\fR.  If the user requests detailed version
+information, the verbose flag will be set.
+.IP "log_ttyin" 4
+.IX Item "log_ttyin"
 .Vb 1
-\& int (*log_input)(const char *buf, unsigned int len);
+\& int (*log_ttyin)(const char *buf, unsigned int len);
 .Ve
 .Sp
-The \fIlog_input\fR function is called whenever data can be read from
+The \fIlog_ttyin\fR function is called whenever data can be read from
 the user but before it is passed to the running command.  This
 allows the plugin to reject data if it chooses to (for instance
 if the input contains banned content).  Returns \f(CW1\fR if the data
@@ -828,16 +866,16 @@ The length of \fIbuf\fR in bytes.
 .RE
 .RS 4
 .RE
-.IP "log_output" 4
-.IX Item "log_output"
+.IP "log_ttyout" 4
+.IX Item "log_ttyout"
 .Vb 1
-\& int (*log_output)(const char *buf, unsigned int len);
+\& int (*log_ttyout)(const char *buf, unsigned int len);
 .Ve
 .Sp
-The \fIlog_output\fR function is called whenever data can be read from
+The \fIlog_ttyout\fR function is called whenever data can be read from
 the command but before it is written to the user's terminal.  This
 allows the plugin to reject data if it chooses to (for instance
-if the input contains banned content).  Returns \f(CW1\fR if the data
+if the output contains banned content).  Returns \f(CW1\fR if the data
 should be passed to the user, \f(CW0\fR if the data is rejected
 (which will terminate the command) or \f(CW\*(C`\-1\*(C'\fR if an error occurred.
 .Sp
@@ -852,8 +890,86 @@ The length of \fIbuf\fR in bytes.
 .RE
 .RS 4
 .RE
-.SS "Unhandled command line options"
-.IX Subsection "Unhandled command line options"
+.IP "log_stdin" 4
+.IX Item "log_stdin"
+.Vb 1
+\& int (*log_stdin)(const char *buf, unsigned int len);
+.Ve
+.Sp
+The \fIlog_stdin\fR function is only used if the standard input does
+not correspond to a tty device.  It is called whenever data can be
+read from the standard input but before it is passed to the running
+command.  This allows the plugin to reject data if it chooses to
+(for instance if the input contains banned content).  Returns \f(CW1\fR
+if the data should be passed to the command, \f(CW0\fR if the data is
+rejected (which will terminate the command) or \f(CW\*(C`\-1\*(C'\fR if an error
+occurred.
+.Sp
+The function arguments are as follows:
+.RS 4
+.IP "buf" 4
+.IX Item "buf"
+The buffer containing user input.
+.IP "len" 4
+.IX Item "len"
+The length of \fIbuf\fR in bytes.
+.RE
+.RS 4
+.RE
+.IP "log_stdout" 4
+.IX Item "log_stdout"
+.Vb 1
+\& int (*log_stdout)(const char *buf, unsigned int len);
+.Ve
+.Sp
+The \fIlog_stdout\fR function is only used if the standard output does
+not correspond to a tty device.  It is called whenever data can be
+read from the command but before it is written to the standard
+output.  This allows the plugin to reject data if it chooses to
+(for instance if the output contains banned content).  Returns \f(CW1\fR
+if the data should be passed to the user, \f(CW0\fR if the data is
+rejected (which will terminate the command) or \f(CW\*(C`\-1\*(C'\fR if an error
+occurred.
+.Sp
+The function arguments are as follows:
+.RS 4
+.IP "buf" 4
+.IX Item "buf"
+The buffer containing command output.
+.IP "len" 4
+.IX Item "len"
+The length of \fIbuf\fR in bytes.
+.RE
+.RS 4
+.RE
+.IP "log_stderr" 4
+.IX Item "log_stderr"
+.Vb 1
+\& int (*log_stderr)(const char *buf, unsigned int len);
+.Ve
+.Sp
+The \fIlog_stderr\fR function is only used if the standard error does
+not correspond to a tty device.  It is called whenever data can be
+read from the command but before it is written to the standard
+error.  This allows the plugin to reject data if it chooses to
+(for instance if the output contains banned content).  Returns \f(CW1\fR
+if the data should be passed to the user, \f(CW0\fR if the data is
+rejected (which will terminate the command) or \f(CW\*(C`\-1\*(C'\fR if an error
+occurred.
+.Sp
+The function arguments are as follows:
+.RS 4
+.IP "buf" 4
+.IX Item "buf"
+The buffer containing command output.
+.IP "len" 4
+.IX Item "len"
+The length of \fIbuf\fR in bytes.
+.RE
+.RS 4
+.RE
+.SS "Unsupported command line options"
+.IX Subsection "Unsupported command line options"
 The \f(CW\*(C`\-L\*(C'\fR command line option has been deprecated as its output is
 covered by the \fIsudoers\fR manual page.
 .SS "Sudo implementation details"

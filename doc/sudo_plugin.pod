@@ -78,11 +78,11 @@ so that B<sudo> can load it.
      unsigned int type; /* always SUDO_POLICY_PLUGIN */
      unsigned int version; /* always SUDO_API_VERSION */
      int (*open)(unsigned int version, sudo_conv_t conversation,
-                 char * const settings[], char * const user_info[],
-                 char * const user_env[]);
+		 sudo_printf_t plugin_printf, char * const settings[],
+		 char * const user_info[], char * const user_env[]);
      void (*close)(int exit_status, int error);
      int (*show_version)(int verbose);
-     int (*check_policy)(int agrc, char * const argv[],
+     int (*check_policy)(int argc, char * const argv[],
                          char *env_add[], char **command_info[],
                          char **argv_out[], char **user_env_out[]);
      int (*list)(int argc, char * const argv[], int verbose,
@@ -109,15 +109,15 @@ built against.
 =item open
 
  int (*open)(unsigned int version, sudo_conv_t conversation,
-             char * const settings[], char * const user_info[],
-             char * const user_env[]);
+             sudo_printf_t plugin_printf, char * const settings[],
+             char * const user_info[], char * const user_env[]);
 
-Returns 1 on success, 0 on failure, -1 if a general error ocurred,
+Returns 1 on success, 0 on failure, -1 if a general error occurred,
 or -2 if there was a usage error.  In the latter case, B<sudo> will
 print a usage message before it exits.  If an error occurs, the
-plugin may optionally call the conversation function with
-C<SUDO_CONF_ERROR_MSG> to present additional error information to
-the user.
+plugin may optionally call the conversation or plugin_printf function
+with C<SUDO_CONF_ERROR_MSG> to present additional error information
+to the user.
 
 The function arguments are as follows:
 
@@ -133,6 +133,11 @@ B<sudo>.
 
 A pointer to the conversation function that can be used by the
 plugin to interact with the user (see below).
+
+=item plugin_printf
+
+A pointer to a printf-style function that may be used to display
+informational or error messages (see below).
 
 =item settings
 
@@ -326,8 +331,9 @@ The value of C<exit_status> is undefined if C<error> is non-zero.
 
 If the command could not be executed, this is set to the value of
 C<errno> set by the execve(2) system call.  The plugin is responsible
-for displaying error information via the conversation function.  If
-the command was successfully executed, the value of C<error> is 0.
+for displaying error information via the conversation or plugin_printf
+function.  If the command was successfully executed, the value of
+C<error> is 0.
 
 =back
 
@@ -337,9 +343,9 @@ the command was successfully executed, the value of C<error> is 0.
 
 The C<show_version> function is called by B<sudo> when the user specifies
 the C<-V> option.  The plugin may display its version information
-to the user via the conversation function using C<SUDO_CONV_INFO_MSG>.
-If the user requests detailed version information, the verbose flag
-will be set.
+to the user via the conversation or plugin_printf function using
+C<SUDO_CONV_INFO_MSG>.  If the user requests detailed version
+information, the verbose flag will be set.
 
 =item check_policy
 
@@ -352,9 +358,9 @@ whether the user is allowed to run the specified commands.  Returns
 1 if the command is allowed, 0 if not allowed, -1 for a general
 error, or -2 for a usage error.  In the latter case, B<sudo> will
 print a usage message before it exits.  If an error occurs, the
-plugin may optionally call the conversation function with
-C<SUDO_CONF_ERROR_MSG> to present additional error information to
-the user.
+plugin may optionally call the conversation or plugin_printf function
+with C<SUDO_CONF_ERROR_MSG> to present additional error information
+to the user.
 
 The function arguments are as follows:
 
@@ -490,13 +496,13 @@ the vector.
              int argc, char * const argv[]);
 
 List available privileges for the invoking user.  Returns 1 on
-success, 0 on failure and -1 on error.
-On error, the plugin may optionally call the conversation function with
-C<SUDO_CONF_ERROR_MSG> to present additional error information to the
-user.
+success, 0 on failure and -1 on error.  On error, the plugin may
+optionally call the conversation or plugin_printf function with
+C<SUDO_CONF_ERROR_MSG> to present additional error information to
+the user.
 
-Privileges should be output via the conversation function using
-C<SUDO_CONV_INFO_MSG>.
+Privileges should be output via the conversation or plugin_printf
+function using C<SUDO_CONV_INFO_MSG>.
 
 =over 4
 
@@ -538,9 +544,9 @@ The C<validate> function should be C<NULL> if the plugin does not
 support credential caching.
 
 Returns 1 on success, 0 on failure and -1 on error.
-On error, the plugin may optionally call the conversation function with
-C<SUDO_CONF_ERROR_MSG> to present additional error information to the
-user.
+On error, the plugin may optionally call the conversation or plugin_printf
+function with C<SUDO_CONF_ERROR_MSG> to present additional
+error information to the user.
 
 =item invalidate
 
@@ -559,12 +565,15 @@ support credential caching.
 
 =head3 Conversation API
 
-If the plugin needs to interact with the user or display informational
-or error messages, it may do so via the conversation function.  A
-plugin should not attempt to read directly from the standard input
-or the user's tty (neither of which are guaranteed to exist).  The
-caller must include a trailing newline in C<msg> if they want one
-to be printed.
+If the plugin needs to interact with the user, it may do so via the
+conversation function.  A plugin should not attempt to read directly
+from the standard input or the user's tty (neither of which are
+guaranteed to exist).  The caller must include a trailing newline
+in C<msg> if one is to be printed.
+
+A printf-style function is also available that can be used to display
+informational or error messages to the user, which is usually more
+convenient for simple messages where no use input is required.
 
  struct sudo_conv_message {
  #define SUDO_CONV_PROMPT_ECHO_OFF	1
@@ -584,11 +593,23 @@ to be printed.
 	      const struct sudo_conv_message msgs[],
               struct sudo_conv_reply replies[]);
 
-A conversation function is passed in to the plugin's C<open> function
-when the plugin is initialized.  The plugin passes in a C<struct
-sudo_conv_message> and C<struct sudo_conv_reply> for each message
-in the conversation.  The plugin is responsible for freeing the
-actual reply buffer in C<struct sudo_conv_reply>.
+ typedef int (*sudo_printf_t)(int msg_type, const char *fmt, ...);
+
+Pointers to the conversation and printf-style functions are passed
+in to the plugin's C<open> function when the plugin is initialized.
+
+To use the conversation function, the plugin must pass an array of
+C<sudo_conv_message> and C<sudo_conv_reply> structures.  There must
+be a C<struct sudo_conv_message> and C<struct sudo_conv_reply> for
+each message in the conversation.  The plugin is responsible for
+freeing the reply buffer filled in to the C<struct sudo_conv_reply>,
+if any.
+
+The printf-style function uses the same underlying mechanism as the
+conversation function but only supports C<SUDO_CONV_INFO_MSG> and
+C<SUDO_CONV_ERROR_MSG> for the I<msg_type> parameter.  It can be
+more convenient than using the conversation function if no user
+reply is needed and supports standard printf() escape sequences.
 
 See the sample plugin for an example of the conversation function usage.
 
@@ -599,23 +620,35 @@ See the sample plugin for an example of the conversation function usage.
      unsigned int type; /* always SUDO_IO_PLUGIN */
      unsigned int version; /* always SUDO_API_VERSION */
      int (*open)(unsigned int version, sudo_conv_t conversation
-                 char * const settings[], char * const user_info[],
-                 char * const user_env[]);
+                 sudo_printf_t plugin_printf, char * const settings[],
+                 char * const user_info[], char * const user_env[]);
      void (*close)(int exit_status, int error); /* wait status or error */
      int (*show_version)(int verbose);
-     int (*log_input)(const char *buf, unsigned int len);
-     int (*log_output)(const char *buf, unsigned int len);
+     int (*log_ttyin)(const char *buf, unsigned int len);
+     int (*log_ttyout)(const char *buf, unsigned int len);
+     int (*log_stdin)(const char *buf, unsigned int len);
+     int (*log_stdout)(const char *buf, unsigned int len);
+     int (*log_stderr)(const char *buf, unsigned int len);
  };
 
 When an I/O plugin is loaded, B<sudo> runs the command in a pseudo-tty.
 This makes it possible to log the input and output from the user's
-session.  If the log_input function is defined, it will receive the
-raw user input (note that this will include input even when echo
-is disabled, such as passwords).  The log_output function receives
+session.  If any of the standard input, standard output or standard
+error do not correspond to a tty, B<sudo> will open a pipe to capture
+the I/O for logging before passing it on.
+
+The log_ttyin function receives the raw user input from the terminal
+device (note that this will include input even when echo is disabled,
+such as when a password is read). The log_ttyout function receives
 output from the pseudo-tty that is suitable for replaying the user's
-session at a later time.  Either log_input or log_output may be
-NULL.  If the open function returns C<0>, no I/O will be sent to
-the plugin.
+session at a later time.  The log_stdin, log_stdout and log_stderr
+functions are only called if the standard input, standard output
+or standard error respectively correspond to something other than
+a tty.
+
+Any of the logging functions may be set to the NULL
+pointer if no logging is to be performed.  If the open function
+returns C<0>, no I/O will be sent to the plugin.
 
 The io_plugin struct has the following fields:
 
@@ -635,18 +668,18 @@ built against.
 =item open
 
  int (*open)(unsigned int version, sudo_conv_t conversation
-             char * const settings[], char * const user_info[],
-             char * const user_env[]);
+             sudo_printf_t plugin_printf, char * const settings[],
+             char * const user_info[], char * const user_env[]);
 
 The I<open> function is run before the I<log_input>, I<log_output>
 or I<show_version> functions are called.  It is only called if the
 version is being requested or the I<check_policy> function has
 returned successfully.  It returns 1 on success, 0 on failure, -1
-if a general error ocurred, or -2 if there was a usage error.  In
+if a general error occurred, or -2 if there was a usage error.  In
 the latter case, B<sudo> will print a usage message before it exits.
 If an error occurs, the plugin may optionally call the conversation
-function with C<SUDO_CONF_ERROR_MSG> to present additional error
-information to the user.
+or plugin_printf function with C<SUDO_CONF_ERROR_MSG> to present
+additional error information to the user.
 
 The function arguments are as follows:
 
@@ -663,6 +696,13 @@ B<sudo>.
 A pointer to the conversation function that may be used by the
 I<show_version> function to display version information (see
 show_version below).  The conversation function may also be used
+to display additional error message to the user.
+
+=item plugin_printf
+
+A pointer to a printf-style function that may be used by the
+I<show_version> function to display version information (see
+show_version below).  The plugin_printf function may also be used
 to display additional error message to the user.
 
 =item settings
@@ -731,15 +771,15 @@ successfully executed, the value of C<error> is 0.
 
 The C<show_version> function is called by B<sudo> when the user specifies
 the C<-V> option.  The plugin may display its version information
-to the user via the conversation function using C<SUDO_CONV_INFO_MSG>.
-If the user requests detailed version information, the verbose flag
-will be set.
+to the user via the conversation or plugin_printf function using
+C<SUDO_CONV_INFO_MSG>.  If the user requests detailed version
+information, the verbose flag will be set.
 
-=item log_input
+=item log_ttyin
 
- int (*log_input)(const char *buf, unsigned int len);
+ int (*log_ttyin)(const char *buf, unsigned int len);
 
-The I<log_input> function is called whenever data can be read from
+The I<log_ttyin> function is called whenever data can be read from
 the user but before it is passed to the running command.  This
 allows the plugin to reject data if it chooses to (for instance
 if the input contains banned content).  Returns C<1> if the data
@@ -760,14 +800,14 @@ The length of I<buf> in bytes.
 
 =back
 
-=item log_output
+=item log_ttyout
 
- int (*log_output)(const char *buf, unsigned int len);
+ int (*log_ttyout)(const char *buf, unsigned int len);
 
-The I<log_output> function is called whenever data can be read from
+The I<log_ttyout> function is called whenever data can be read from
 the command but before it is written to the user's terminal.  This
 allows the plugin to reject data if it chooses to (for instance
-if the input contains banned content).  Returns C<1> if the data
+if the output contains banned content).  Returns C<1> if the data
 should be passed to the user, C<0> if the data is rejected
 (which will terminate the command) or C<-1> if an error occurred.
 
@@ -785,9 +825,90 @@ The length of I<buf> in bytes.
 
 =back
 
+=item log_stdin
+
+ int (*log_stdin)(const char *buf, unsigned int len);
+
+The I<log_stdin> function is only used if the standard input does
+not correspond to a tty device.  It is called whenever data can be
+read from the standard input but before it is passed to the running
+command.  This allows the plugin to reject data if it chooses to
+(for instance if the input contains banned content).  Returns C<1>
+if the data should be passed to the command, C<0> if the data is
+rejected (which will terminate the command) or C<-1> if an error
+occurred.
+
+The function arguments are as follows:
+
+=over 4
+
+=item buf
+
+The buffer containing user input.
+
+=item len
+
+The length of I<buf> in bytes.
+
 =back
 
-=head2 Unhandled command line options
+=item log_stdout
+
+ int (*log_stdout)(const char *buf, unsigned int len);
+
+The I<log_stdout> function is only used if the standard output does
+not correspond to a tty device.  It is called whenever data can be
+read from the command but before it is written to the standard
+output.  This allows the plugin to reject data if it chooses to
+(for instance if the output contains banned content).  Returns C<1>
+if the data should be passed to the user, C<0> if the data is
+rejected (which will terminate the command) or C<-1> if an error
+occurred.
+
+The function arguments are as follows:
+
+=over 4
+
+=item buf
+
+The buffer containing command output.
+
+=item len
+
+The length of I<buf> in bytes.
+
+=back
+
+=item log_stderr
+
+ int (*log_stderr)(const char *buf, unsigned int len);
+
+The I<log_stderr> function is only used if the standard error does
+not correspond to a tty device.  It is called whenever data can be
+read from the command but before it is written to the standard
+error.  This allows the plugin to reject data if it chooses to
+(for instance if the output contains banned content).  Returns C<1>
+if the data should be passed to the user, C<0> if the data is
+rejected (which will terminate the command) or C<-1> if an error
+occurred.
+
+The function arguments are as follows:
+
+=over 4
+
+=item buf
+
+The buffer containing command output.
+
+=item len
+
+The length of I<buf> in bytes.
+
+=back
+
+=back
+
+=head2 Unsupported command line options
 
 The C<-L> command line option has been deprecated as its output is
 covered by the I<sudoers> manual page.
