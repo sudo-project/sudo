@@ -124,6 +124,7 @@ static char slavename[PATH_MAX];
 
 static int suspend_parent(int signo, int fd, struct io_buffer *output);
 static void flush_output(struct io_buffer *iobufs);
+static int perform_io(struct io_buffer *iobufs, fd_set *fdsr, fd_set *fdsw);
 static void handler(int s);
 static int script_child(const char *path, char *argv[], char *envp[], int, int);
 static void script_run(const char *path, char *argv[], char *envp[], int);
@@ -413,6 +414,50 @@ io_buf_new(int rfd, int wfd, int (*action)(char *, unsigned int),
 }
 
 /*
+ * Read/write iobufs depending on fdsr and fdsw.
+ */
+static int
+perform_io(struct io_buffer *iobufs, fd_set *fdsr, fd_set *fdsw)
+{
+    struct io_buffer *iob;
+    int n = 0;
+
+    for (iob = iobufs; iob; iob = iob->next) {
+	if (iob->rfd != -1 && FD_ISSET(iob->rfd, fdsr)) {
+	    do {
+		n = read(iob->rfd, iob->buf + iob->len,
+		    sizeof(iob->buf) - iob->len);
+	    } while (n == -1 && errno == EINTR);
+	    if (n == -1) {
+		if (errno != EAGAIN)
+		    break;
+	    } else if (n == 0) {
+		/* got EOF */
+		close(iob->rfd);
+		iob->rfd = -1;
+	    } else {
+		if (!iob->action(iob->buf + iob->len, n))
+		    terminate_child(child, TRUE);
+		iob->len += n;
+	    }
+	}
+	if (iob->wfd != -1 && FD_ISSET(iob->wfd, fdsw)) {
+	    do {
+		n = write(iob->wfd, iob->buf + iob->off,
+		    iob->len - iob->off);
+	    } while (n == -1 && errno == EINTR);
+	    if (n == -1) {
+		if (errno != EAGAIN)
+		    break;
+	    } else {
+		iob->off += n;
+	    }
+	}
+    }
+    return n == -1 ? -1 : 0;
+}
+
+/*
  * This is a little bit tricky due to how POSIX job control works and
  * we fact that we have two different controlling terminals to deal with.
  * There are three processes:
@@ -681,7 +726,8 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		iob->off = iob->len = 0;
 		/* Forward the EOF from reader to writer. */
 		if (iob->rfd == -1) {
-		    close(iob->wfd);
+		    if (iob->wfd != script_fds[SFD_USERTTY])
+			close(iob->wfd);
 		    iob->wfd = -1;
 		}
 	    }
@@ -713,7 +759,6 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    }
 	}
 
-    retry:
 	nready = select(maxfd + 1, fdsr, fdsw, NULL, NULL);
 	if (nready == -1) {
 	    if (errno == EINTR)
@@ -766,42 +811,10 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		}
 	    }
 	}
-
-	for (iob = iobufs; iob; iob = iob->next) {
-	    if (iob->rfd != -1 && FD_ISSET(iob->rfd, fdsr)) {
-		n = read(iob->rfd, iob->buf + iob->len,
-		    sizeof(iob->buf) - iob->len);
-		if (n == -1) {
-		    if (errno == EINTR)
-			goto retry;
-		    if (errno != EAGAIN)
-			goto io_error;
-		} else if (n == 0) {
-		    /* got EOF */
-		    close(iob->rfd);
-		    iob->rfd = -1;
-		} else {
-		    if (!iob->action(iob->buf + iob->len, n))
-			terminate_child(child, TRUE);
-		    iob->len += n;
-		}
-	    }
-	    if (iob->wfd != -1 && FD_ISSET(iob->wfd, fdsw)) {
-		n = write(iob->wfd, iob->buf + iob->off,
-		    iob->len - iob->off);
-		if (n == -1) {
-		    if (errno == EINTR)
-			goto retry;
-		    if (errno != EAGAIN)
-			goto io_error;
-		} else {
-		    iob->off += n;
-		}
-	    }
-	}
+	if (perform_io(iobufs, fdsr, fdsw) == -1)
+	    break;
     }
 
-io_error:
     if (log_io) {
 	/* Flush any remaining output (the plugin already got it) */
 	n = fcntl(script_fds[SFD_USERTTY], F_GETFL, 0);
@@ -1118,59 +1131,73 @@ bad:
     return errno;
 }
 
-/* XXX - should use select in poll mode to flush things */
+/*
+ * Flush any output buffered in iobufs or readable from the fds.
+ * Does not read from /dev/tty.
+ */
 static void
 flush_output(struct io_buffer *iobufs)
 {
     struct io_buffer *iob;
-    int n;
+    struct timeval tv;
+    fd_set *fdsr, *fdsw;
+    int nready, maxfd = -1;
 
-    /* Drain output buffers. */
+    /* Determine maxfd */
     for (iob = iobufs; iob; iob = iob->next) {
-	if (iob->wfd == -1 && iob->wfd == script_fds[SFD_SLAVE])
-	    continue;
-	while (iob->len > iob->off) {
-	    n = write(iob->wfd, iob->buf + iob->off, iob->len - iob->off);
-	    if (n <= 0)
-		break;
-	    iob->off += n;
-	    if (iob->rfd == -1) {
-		close(iob->wfd);
-		iob->wfd = -1;
+	if (iob->rfd > maxfd)
+	    maxfd = iob->rfd;
+	if (iob->wfd > maxfd)
+	    maxfd = iob->wfd;
+    }
+
+    fdsr = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    fdsw = (fd_set *)emalloc2(howmany(maxfd + 1, NFDBITS), sizeof(fd_mask));
+    for (;;) {
+	zero_bytes(fdsw, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
+	zero_bytes(fdsr, howmany(maxfd + 1, NFDBITS) * sizeof(fd_mask));
+
+	for (iob = iobufs; iob; iob = iob->next) {
+	    /* Don't read from /dev/tty while flushing. */
+	    if (iob->rfd == script_fds[SFD_USERTTY])
+		continue;
+	    if (iob->rfd == -1 && iob->wfd == -1)
+	    	continue;
+	    if (iob->off == iob->len) {
+		iob->off = iob->len = 0;
+		/* Forward the EOF from reader to writer. */
+		if (iob->rfd == -1) {
+		    if (iob->wfd != script_fds[SFD_USERTTY])
+			close(iob->wfd);
+		    iob->wfd = -1;
+		}
+	    }
+	    if (iob->rfd != -1) {
+		if (iob->len != sizeof(iob->buf))
+		    FD_SET(iob->rfd, fdsr);
+	    }
+	    if (iob->wfd != -1) {
+		if (iob->len > iob->off)
+		    FD_SET(iob->wfd, fdsw);
 	    }
 	}
-    }
 
-    /* Make sure there is no output remaining on the master pty or in pipes. */
-    for (iob = iobufs; iob; iob = iob->next) {
-	if (iob->rfd == -1 || iob->wfd == -1) /* XXX */
-	    continue;
-	if (iob->rfd == script_fds[SFD_USERTTY])
-	    continue;
-
-	for (;;) {
-	    n = read(iob->rfd, iob->buf + iob->len,
-		sizeof(iob->buf) - iob->len);
-	    if (n <= 0) {
-		if (n == -1 && errno == EINTR)
-		    continue;
-		break;
-	    } 
-	    if (!iob->action(iob->buf + iob->len, n))
-		break;
-	    iob->len += n;
-
-	    do {
-		n = write(iob->wfd, iob->buf + iob->off, iob->len - iob->off);
-		if (n <= 0) {
-		    if (n == -1 && errno == EINTR)
-			continue;
-		    break;
-		}
-		iob->off += n;
-	    } while (iob->len > iob->off);
+	/* Effect a poll (no sleeping in select) */
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
+	nready = select(maxfd + 1, fdsr, fdsw, NULL, &tv);
+	if (nready <= 0) {
+	    if (nready == 0)
+		break; /* all I/O flushed */
+	    if (errno == EINTR)
+		continue;
+	    error(1, "select failed");
 	}
+	if (perform_io(iobufs, fdsr, fdsw) == -1)
+	    break;
     }
+    efree(fdsr);
+    efree(fdsw);
 }
 
 static void
