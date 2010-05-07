@@ -372,6 +372,7 @@ my_execve(const char *path, char *const argv[], char *const envp[])
 	nargv[1] = (char *)path;
 	memcpy(nargv + 2, argv + 1, argc * sizeof(char *));
 	execve(_PATH_BSHELL, nargv, envp);
+	efree(nargv);
     }
     return -1;
 }
@@ -824,6 +825,12 @@ io_error:
 		write(script_fds[SFD_USERTTY], "\n", 1);
 	    }
 	}
+    }
+    efree(fdsr);
+    efree(fdsw);
+    while ((iob = iobufs) != NULL) {
+	iobufs = iobufs->next;
+	efree(iob);
     }
 
     return cstat->type == CMD_ERRNO ? -1 : 0;
