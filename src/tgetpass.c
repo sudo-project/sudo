@@ -56,7 +56,17 @@
 
 #include "sudo.h"
 
-static volatile sig_atomic_t signo;
+#if !defined(NSIG)
+# if defined(_NSIG)
+#  define NSIG _NSIG
+# elif defined(__NSIG)
+#  define NSIG __NSIG
+# else
+#  define NSIG 64
+# endif
+#endif
+
+static volatile sig_atomic_t signo[NSIG];
 
 static void handler(int);
 static char *getln(int, char *, size_t, int);
@@ -75,7 +85,7 @@ tgetpass(const char *prompt, int timeout, int flags)
     char *pass;
     static char *askpass;
     static char buf[SUDO_PASS_MAX + 1];
-    int input, output, save_errno, neednl;;
+    int i, input, output, save_errno, neednl, need_restart;
 
     (void) fflush(stdout);
 
@@ -94,9 +104,11 @@ tgetpass(const char *prompt, int timeout, int flags)
     }
 
 restart:
-    signo = 0;
+    for (i = 0; i < _NSIG; i++)
+	signo[i] = 0;
     pass = NULL;
     save_errno = 0;
+    need_restart = 0;
     /* Open /dev/tty for reading/writing if possible else use stdin/stderr. */
     if (ISSET(flags, TGP_STDIN) ||
 	(input = output = open(_PATH_TTY, O_RDWR|O_NOCTTY)) == -1) {
@@ -159,15 +171,20 @@ restart:
      * If we were interrupted by a signal, resend it to ourselves
      * now that we have restored the signal handlers.
      */
-    if (signo) {
-	kill(getpid(), signo);
-	switch (signo) {
-	    case SIGTSTP:
-	    case SIGTTIN:
-	    case SIGTTOU:
-		goto restart;
+    for (i = 0; i < _NSIG; i++) {
+	if (signo[i]) {
+	    kill(getpid(), signo[i]);
+	    switch (signo[i]) {
+		case SIGTSTP:
+		case SIGTTIN:
+		case SIGTTOU:
+		    need_restart = 1;
+		    break;
+	    }
 	}
     }
+    if (need_restart)
+	goto restart;
 
     if (save_errno)
 	errno = save_errno;
@@ -280,7 +297,7 @@ static void
 handler(int s)
 {
     if (s != SIGALRM)
-	signo = s;
+	signo[s] = 1;
 }
 
 int
