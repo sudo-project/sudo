@@ -150,7 +150,7 @@ static int stack_top;
 
 extern time_t get_date(char *);
 extern char *get_timestr(time_t, int);
-extern int term_raw(int, int, int);
+extern int term_raw(int, int);
 extern int term_restore(int, int);
 extern void zero_bytes(volatile void *, size_t);
 void cleanup(int);
@@ -297,7 +297,7 @@ main(int argc, char *argv[])
 	ch = fcntl(STDIN_FILENO, F_GETFL, 0);
 	if (ch != -1)
 	    (void) fcntl(STDIN_FILENO, F_SETFL, ch | O_NONBLOCK);
-	if (!term_raw(STDIN_FILENO, 0, 1))
+	if (!term_raw(STDIN_FILENO, 1))
 	    error(1, "cannot set tty to raw mode");
     }
     fdsr = (fd_set *)emalloc2(howmany(STDOUT_FILENO + 1, NFDBITS),

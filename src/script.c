@@ -87,8 +87,7 @@
 #define SFD_USERTTY	5
 
 #define TERM_COOKED	0
-#define TERM_CBREAK	1
-#define TERM_RAW	2
+#define TERM_RAW	1
 
 #if !defined(TIOCGSIZE) && defined(TIOCGWINSZ)
 # define TIOCGSIZE	TIOCGWINSZ
@@ -108,7 +107,7 @@ struct io_buffer {
 };
 
 static int script_fds[6] = { -1, -1, -1, -1, -1, -1};
-static int ttyout = TRUE;
+static int ttyin = TRUE;
 
 static sig_atomic_t recvsig[NSIG];
 static sig_atomic_t ttymode = TERM_COOKED;
@@ -296,7 +295,7 @@ suspend_parent(int signo, int fd, struct io_buffer *iobufs)
 	if (foreground) {
 	    if (ttymode != TERM_RAW) {
 		do {
-		    n = term_raw(script_fds[SFD_USERTTY], !ttyout, 0);
+		    n = term_raw(script_fds[SFD_USERTTY], 0);
 		} while (!n && errno == EINTR);
 		ttymode = TERM_RAW;
 	    }
@@ -335,10 +334,9 @@ suspend_parent(int signo, int fd, struct io_buffer *iobufs)
 
 	if (ttymode != TERM_COOKED) {
 	    if (foreground) {
-		/* Set raw/cbreak mode. */
+		/* Set raw mode. */
 		do {
-		    n = term_raw(script_fds[SFD_USERTTY], !ttyout,
-			ttymode == TERM_CBREAK);
+		    n = term_raw(script_fds[SFD_USERTTY], 0);
 		} while (!n && errno == EINTR);
 	    } else {
 		/* Background process, no access to tty. */
@@ -565,6 +563,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	 */
 	memset(io_pipe, 0, sizeof(io_pipe));
 	if (!isatty(STDIN_FILENO)) {
+	    ttyin = FALSE;
 	    if (pipe(io_pipe[STDIN_FILENO]) != 0)
 		error(1, "unable to create pipe");
 	    iobufs = io_buf_new(STDIN_FILENO, io_pipe[STDIN_FILENO][1],
@@ -572,7 +571,6 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 	    script_fds[SFD_STDIN] = io_pipe[STDIN_FILENO][0];
 	}
 	if (!isatty(STDOUT_FILENO)) {
-	    ttyout = FALSE;
 	    if (pipe(io_pipe[STDOUT_FILENO]) != 0)
 		error(1, "unable to create pipe");
 	    iobufs = io_buf_new(io_pipe[STDOUT_FILENO][0], STDOUT_FILENO,
@@ -603,14 +601,15 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		sync_ttysize(script_fds[SFD_USERTTY], script_fds[SFD_SLAVE]);
 	    }
 
-	    /* Start out in raw mode is stdout is a tty. */
-	    ttymode = ttyout ? TERM_RAW : TERM_CBREAK;
-	    do {
-		n = term_raw(script_fds[SFD_USERTTY], !ttyout,
-		    ttymode == TERM_CBREAK);
-	    } while (!n && errno == EINTR);
-	    if (!n)
-		error(1, "Can't set terminal to raw mode");
+	    /* Start out in raw mode is stdin is a tty. */
+	    if (ttyin) {
+		ttymode = TERM_RAW;
+		do {
+		    n = term_raw(script_fds[SFD_USERTTY], 0);
+		} while (!n && errno == EINTR);
+		if (!n)
+		    error(1, "Can't set terminal to raw mode");
+	    }
 	}
     }
 
@@ -738,7 +737,7 @@ script_execve(struct command_details *details, char *argv[], char *envp[],
 		    FD_SET(iob->rfd, fdsr);
 	    }
 	    if (iob->wfd != -1 &&
-		(ttymode == TERM_RAW || iob->wfd != script_fds[SFD_USERTTY])) {
+		(foreground || iob->wfd != script_fds[SFD_USERTTY])) {
 		if (iob->len > iob->off)
 		    FD_SET(iob->wfd, fdsw);
 	    }
@@ -971,7 +970,13 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
 	close(n);
 #endif
 
-    if (foreground && !ttyout)
+    /*
+     * If stdin is not a tty, start command in the background since
+     * it might be part of a pipeline that reads from /dev/tty.
+     * In this case, we rely on the command receiving SIGTTOU or SIGTTIN
+     * when it needs access to the controlling tty.
+     */
+    if (foreground && !ttyin)
 	foreground = 0;
 
     /* Start command and wait for it to stop or exit */
@@ -1012,7 +1017,6 @@ script_child(const char *path, char *argv[], char *envp[], int backchannel, int 
     close(errpipe[1]);
 
     /* If any of stdin/stdout/stderr are pipes, close them in parent. */
-    /* XXX - close other end too */
     if (script_fds[SFD_STDIN] != script_fds[SFD_SLAVE])
 	close(script_fds[SFD_STDIN]);
     if (script_fds[SFD_STDOUT] != script_fds[SFD_SLAVE])

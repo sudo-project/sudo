@@ -116,7 +116,7 @@ term_noecho(int fd)
 }
 
 int
-term_raw(int fd, int opost, int isig)
+term_raw(int fd, int isig)
 {
     struct termios term;
 
@@ -130,9 +130,6 @@ term_raw(int fd, int opost, int isig)
     if (isig)
 	SET(term.c_lflag, ISIG);
     CLR(term.c_iflag, ICRNL | IGNCR | INLCR | IUCLC | IXON);
-    /* Only retain output post-processing opost flag set. */
-    if (!opost)
-	CLR(term.c_oflag, OPOST);
     if (tcsetattr(fd, TCSADRAIN|TCSASOFT, &term) == 0) {
 	changed = 1;
     	return(1);
