@@ -105,6 +105,15 @@ restart:
     }
 
     /*
+     * If we are using a tty but are not the foreground pgrp this will
+     * generate SIGTTOU, so do it *before* installing the signal handlers.
+     */
+    if (ISSET(flags, TGP_FEEDBACK))
+	neednl = term_cbreak(input);
+    else
+	neednl = term_noecho(input);
+
+    /*
      * Catch signals that would otherwise cause the user to end
      * up with echo turned off in the shell.
      */
@@ -121,25 +130,17 @@ restart:
     (void) sigaction(SIGTTIN, &sa, &savettin);
     (void) sigaction(SIGTTOU, &sa, &savettou);
 
-    if (ISSET(flags, TGP_FEEDBACK))
-	neednl = term_cbreak(input);
-    else
-	neednl = term_noecho(input);
+    if (prompt)
+	(void) write(output, prompt, strlen(prompt));
 
-    /* No output if we are already backgrounded. */
-    if (signo != SIGTTOU && signo != SIGTTIN) {
-	if (prompt)
-	    (void) write(output, prompt, strlen(prompt));
+    if (timeout > 0)
+	alarm(timeout);
+    pass = getln(input, buf, sizeof(buf), ISSET(flags, TGP_FEEDBACK));
+    alarm(0);
+    save_errno = errno;
 
-	if (timeout > 0)
-	    alarm(timeout);
-	pass = getln(input, buf, sizeof(buf), ISSET(flags, TGP_FEEDBACK));
-	alarm(0);
-	save_errno = errno;
-
-	if (neednl)
-	    (void) write(output, "\n", 1);
-    }
+    if (neednl)
+	(void) write(output, "\n", 1);
 
     /* Restore old tty settings and signals. */
     term_restore(input, 1);
