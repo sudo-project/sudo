@@ -2618,6 +2618,17 @@ if test ${with_ldap-'no'} != "no"; then
     LDFLAGS="$_LDFLAGS"
 fi
 
+# On HP-UX, you cannot dlopen() a shared object that uses pthreads
+# unless the main program is linked against -lpthread.  Since we
+# have no knowledge what libraries a plugin may depend on, we always
+# link against -lpthread on HP-UX if it is available.
+# This check should go after all other libraries tests.
+case "$host" in
+    *-*-hpux*)
+	AC_CHECK_LIB(pthread, main, [SUDO_LIBS="${SUDO_LIBS} -lpthread"])
+	;;
+esac
+
 dnl
 dnl Add LIBVAS_RPATH to LDFLAGS
 dnl GNU ld accepts -R/path/ as an alias for -rpath /path/
